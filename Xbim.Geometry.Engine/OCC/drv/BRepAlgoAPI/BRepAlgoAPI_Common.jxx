@@ -1,0 +1,9 @@
+#ifndef _TopoDS_Shape_HeaderFile
+#include <TopoDS_Shape.hxx>
+#endif
+#ifndef _BOPAlgo_PaveFiller_HeaderFile
+#include <BOPAlgo_PaveFiller.hxx>
+#endif
+#ifndef _BRepAlgoAPI_Common_HeaderFile
+#include <BRepAlgoAPI_Common.hxx>
+#endif
