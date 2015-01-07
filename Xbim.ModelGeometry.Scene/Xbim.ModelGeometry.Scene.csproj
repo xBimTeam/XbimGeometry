@@ -62,16 +62,20 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="Xbim.Common">
-      <HintPath>..\packages\Xbim.Essentials.3.0.0-Prerelease\lib\net45\Xbim.Common.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.3.0.1-Alpha\lib\net45\Xbim.Common.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Xbim.Ifc.Extensions">
-      <HintPath>..\packages\Xbim.Essentials.3.0.0-Prerelease\lib\net45\Xbim.Ifc.Extensions.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.3.0.1-Alpha\lib\net45\Xbim.Ifc.Extensions.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Xbim.Ifc2x3">
-      <HintPath>..\packages\Xbim.Essentials.3.0.0-Prerelease\lib\net45\Xbim.Ifc2x3.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.3.0.1-Alpha\lib\net45\Xbim.Ifc2x3.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Xbim.IO">
-      <HintPath>..\packages\Xbim.Essentials.3.0.0-Prerelease\lib\net45\Xbim.IO.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.3.0.1-Alpha\lib\net45\Xbim.IO.dll</HintPath>
+      <Private>True</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -128,6 +132,13 @@
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

@@ -123,19 +123,19 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Xbim.Geometry.Engine\bin\Release\Xbim.Geometry.Engine32.dll" Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <None Include="..\Output\Xbim.Geometry.Engine32.dll" Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
       <Link>SolidTestFiles\Xbim.Geometry.Engine32.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\Xbim.Geometry.Engine\bin\Release\Xbim.Geometry.Engine64.dll" Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <None Include="..\Output\Xbim.Geometry.Engine64.dll" Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
       <Link>SolidTestFiles\Xbim.Geometry.Engine64.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\Xbim.Geometry.Engine\bin\Debug\Xbim.Geometry.Engine32.dll" Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <None Include="..\Output\Xbim.Geometry.Engine32.dll" Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
       <Link>SolidTestFiles\Xbim.Geometry.Engine32.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\Xbim.Geometry.Engine\bin\Debug\Xbim.Geometry.Engine64.dll" Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <None Include="..\Output\Xbim.Geometry.Engine64.dll" Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
       <Link>SolidTestFiles\Xbim.Geometry.Engine64.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -153,16 +153,16 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="Xbim.Common">
-      <HintPath>..\packages\Xbim.Essentials.3.0.0-Prerelease\lib\net45\Xbim.Common.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.3.0.1-Alpha\lib\net45\Xbim.Common.dll</HintPath>
     </Reference>
     <Reference Include="Xbim.Ifc.Extensions">
-      <HintPath>..\packages\Xbim.Essentials.3.0.0-Prerelease\lib\net45\Xbim.Ifc.Extensions.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.3.0.1-Alpha\lib\net45\Xbim.Ifc.Extensions.dll</HintPath>
     </Reference>
     <Reference Include="Xbim.Ifc2x3">
-      <HintPath>..\packages\Xbim.Essentials.3.0.0-Prerelease\lib\net45\Xbim.Ifc2x3.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.3.0.1-Alpha\lib\net45\Xbim.Ifc2x3.dll</HintPath>
     </Reference>
     <Reference Include="Xbim.IO">
-      <HintPath>..\packages\Xbim.Essentials.3.0.0-Prerelease\lib\net45\Xbim.IO.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.3.0.1-Alpha\lib\net45\Xbim.IO.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -200,6 +200,13 @@
     <PreBuildEvent>
     </PreBuildEvent>
   </PropertyGroup>
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
