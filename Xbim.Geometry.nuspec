@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
     <metadata>
         <id>Xbim.Geometry</id>
-        <version>3.0.0-Prerelease</version>
+        <version>3.0.2-Prerelease</version>
         <title>xBIM Geometry</title>
         <authors>xBIM team</authors>
         <owners>Steve Lockley</owners>
@@ -17,7 +17,7 @@ xBIM reads and writes Ifc, IfcXMl and IfcZip formats.
 The xBIM project provides packages to convert IFC models to COBie spreadsheets in both UK and US cultures as well as a range of 3D viewing controls for use with Windows forms, WPF, WEBGL and OpenGL platforms.
 IOS and Android versions are under development.</description>
         <summary>The .Net toolkit for developing BIM applications based on the IFC standard. Essential support for the Ifc data model</summary>
-        <releaseNotes>3.0 contains a new geometry engine that has a full API to allow geometry constructions, boolean operations and meshing. All Ifc2x3 class are now supported.</releaseNotes>
+        <releaseNotes>Geometry Dlls written to separate directories for web based deployment. 3.0 contains a new geometry engine that has a full API to allow geometry constructions, boolean operations and meshing. All Ifc2x3 class are now supported.</releaseNotes>
         <language>en-GB</language>
         <tags>BIM, IFC, IfcXml, IfcZip, COBie, .Net, C#, BuildingSmart</tags>
 	<dependencies> 
@@ -31,9 +31,9 @@ IOS and Android versions are under development.</description>
     <files>
         <file src="Output\Xbim.Geometry.Engine.Interop.dll" target="lib\net45\Xbim.Geometry.Engine.Interop.dll" />
         <file src="Output\Xbim.ModelGeometry.Scene.dll" target="lib\net45\Xbim.ModelGeometry.Scene.dll" />
-        <file src="Output\Xbim.Geometry.Engine32.dll" target="content\x86\Xbim.Geometry.Engine32.dll" />
-        <file src="Output\Xbim.Geometry.Engine64.dll" target="content\x64\Xbim.Geometry.Engine64.dll" />
-        <file src="install.ps1" target="tools\net45\install.ps1" />
+        <file src="Output\x86\Xbim.Geometry.Engine32.dll" target="content\x86\Xbim.Geometry.Engine32.dll" />
+        <file src="Output\x64\Xbim.Geometry.Engine64.dll" target="content\x64\Xbim.Geometry.Engine64.dll" />
+        <file src="install.ps1" target="tools\install.ps1" />
     </files>
 	
 </package>

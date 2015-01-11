@@ -2,7 +2,7 @@ param($installPath, $toolsPath, $package, $project)
 
 $propertyName = "CopyToOutputDirectory"
 
-$item32 = $project.ProjectItems.Item("Xbim.Geometry.Engine32.dll")
+$item32 = $project.ProjectItems.Item("x86\Xbim.Geometry.Engine32.dll")
 if ($item32  -ne $null) 
 { 
 	$property = $item32.Properties.Item($propertyName)
@@ -12,7 +12,7 @@ if ($item32  -ne $null)
 	}
 }
 
-$item64 = $project.ProjectItems.Item("Xbim.Geometry.Engine64.dll")
+$item64 = $project.ProjectItems.Item("x64\Xbim.Geometry.Engine64.dll")
 if ($item64  -ne $null) 
 { 
 	$property = $item64.Properties.Item($propertyName)

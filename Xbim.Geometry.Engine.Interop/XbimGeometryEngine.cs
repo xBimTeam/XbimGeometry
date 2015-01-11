@@ -29,8 +29,18 @@ namespace Xbim.Geometry.Engine.Interop
         
         private static Assembly ResolverHandler(object sender, ResolveEventArgs args)
         {
-            
-            var appDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+            Assembly assembly = Assembly.GetExecutingAssembly(); // in the Interop asm
+            var codepath = new Uri(assembly.CodeBase);             // code path always points to the deployed DLL
+
+            // Unlike Location codepath is a URI [file:\\c:\wwwroot\etc\WebApp\bin\Xbim.Geometry.Engine.Interop.dll]
+            // presumably because it could be Clickonce, Silverlight or run off UNC path
+            var appDir = Path.GetDirectoryName(codepath.LocalPath);
+
+
+
+
+            var app2Dir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             if (appDir == null)
                 return null;
 
