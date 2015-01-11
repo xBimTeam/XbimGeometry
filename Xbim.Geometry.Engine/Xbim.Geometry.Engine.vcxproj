@@ -134,50 +134,50 @@
   </PropertyGroup>-->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\Output\</OutDir>
+    <OutDir>..\Output\x86</OutDir>
     <TargetName>$(ProjectName)32</TargetName>
     <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
     <EnableManagedIncrementalBuild>true</EnableManagedIncrementalBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\Output\</OutDir>
+    <OutDir>..\Output\x86</OutDir>
     <TargetName>$(ProjectName)32</TargetName>
     <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\Output\</OutDir>
+    <OutDir>..\Output\x64</OutDir>
     <TargetName>$(ProjectName)64</TargetName>
     <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\Output\</OutDir>
+    <OutDir>..\Output\x64</OutDir>
     <TargetName>$(ProjectName)64</TargetName>
     <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\Output\</OutDir>
+    <OutDir>..\Output\x86</OutDir>
     <TargetName>$(ProjectName)32</TargetName>
     <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\Output\</OutDir>
+    <OutDir>..\Output\x86</OutDir>
     <TargetName>$(ProjectName)32</TargetName>
     <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\Output\</OutDir>
+    <OutDir>..\Output\x64</OutDir>
     <TargetName>$(ProjectName)64</TargetName>
     <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\Output\</OutDir>
+    <OutDir>..\Output\x64</OutDir>
     <TargetName>$(ProjectName)64</TargetName>
     <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
@@ -336,15 +336,27 @@
     <Reference Include="System.Xml" />
     <Reference Include="Xbim.Common">
       <HintPath>..\packages\Xbim.Essentials.3.0.1-Alpha\lib\net45\Xbim.Common.dll</HintPath>
+      <Private>false</Private>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
     </Reference>
     <Reference Include="Xbim.Ifc.Extensions">
       <HintPath>..\packages\Xbim.Essentials.3.0.1-Alpha\lib\net45\Xbim.Ifc.Extensions.dll</HintPath>
+      <Private>false</Private>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
     </Reference>
     <Reference Include="Xbim.Ifc2x3">
       <HintPath>..\packages\Xbim.Essentials.3.0.1-Alpha\lib\net45\Xbim.Ifc2x3.dll</HintPath>
+      <Private>false</Private>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
     </Reference>
     <Reference Include="Xbim.IO">
       <HintPath>..\packages\Xbim.Essentials.3.0.1-Alpha\lib\net45\Xbim.IO.dll</HintPath>
+      <Private>false</Private>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -17635,7 +17647,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  
   <!--<Target Name="BeforeBuildWin32" BeforeTargets="Build" Condition="'$(Platform)' == 'Win32' AND '$(NestedBuild)' == 'false'" Outputs="@(Outputs32)">
     <Message Text="Build started: Project: '$(ProjectName)', Configuration: '$(Configuration)' '$(Platform)'" />
     <MSBuild Projects="$(MSBuildProjectFile)" Targets="Build" Properties="Configuration=$(Configuration);Platform=x64;NestedBuild=true">

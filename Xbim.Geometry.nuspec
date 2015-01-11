@@ -31,8 +31,8 @@ IOS and Android versions are under development.</description>
     <files>
         <file src="Output\Xbim.Geometry.Engine.Interop.dll" target="lib\net45\Xbim.Geometry.Engine.Interop.dll" />
         <file src="Output\Xbim.ModelGeometry.Scene.dll" target="lib\net45\Xbim.ModelGeometry.Scene.dll" />
-        <file src="Output\Xbim.Geometry.Engine32.dll" target="content\Xbim.Geometry.Engine32.dll" />
-        <file src="Output\Xbim.Geometry.Engine64.dll" target="content\Xbim.Geometry.Engine64.dll" />
+        <file src="Output\Xbim.Geometry.Engine32.dll" target="content\x86\Xbim.Geometry.Engine32.dll" />
+        <file src="Output\Xbim.Geometry.Engine64.dll" target="content\x64\Xbim.Geometry.Engine64.dll" />
         <file src="install.ps1" target="tools\net45\install.ps1" />
     </files>
 	

@@ -49,7 +49,7 @@ namespace Xbim.Geometry.Engine.Interop
                 var relativeDir = String.Format("{0}{1}.dll",
                      GeomModuleName, (IntPtr.Size == 8) ? "64" : "32");
 
-                libraryPath = Path.Combine(appDir, relativeDir);
+                libraryPath = Path.Combine(appDir, (IntPtr.Size == 8) ? "x64" : "x86", relativeDir);
             }
             else if (args.Name.StartsWith(XbimModulePrefix))
             {

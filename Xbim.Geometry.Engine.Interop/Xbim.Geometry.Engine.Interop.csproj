@@ -106,12 +106,12 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Output\Xbim.Geometry.Engine32.dll">
-      <Link>Xbim.Geometry.Engine32.dll</Link>
+    <None Include="..\Output\x86\Xbim.Geometry.Engine32.dll">
+      <Link>x86\Xbim.Geometry.Engine32.dll</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="..\Output\Xbim.Geometry.Engine64.dll">
-      <Link>Xbim.Geometry.Engine64.dll</Link>
+    <None Include="..\Output\x64\Xbim.Geometry.Engine64.dll">
+      <Link>x64\Xbim.Geometry.Engine64.dll</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
