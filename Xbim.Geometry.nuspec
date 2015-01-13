@@ -24,7 +24,7 @@ IOS and Android versions are under development.</description>
 		<dependency id="Newtonsoft.Json" version="6.0.3" />
     <dependency id="log4net" version="2.0.3" />
     <dependency id="SharpZipLib" version="0.86.0" />
-    <dependency id="Xbim.Essentials" version="3.0.0-Alpha" />
+    <dependency id="Xbim.Essentials" version="3.0.2-Prerelease" />
     <dependency id="ManagedEsent" version="1.9.2" />
 	</dependencies> 
     </metadata>
