@@ -514,59 +514,54 @@ namespace Xbim.ModelGeometry.Scene
 
             using (var geomTable = _model.GetShapeGeometryTable())
             {
-                try
-                {
-                    using (var transaction = geomTable.BeginLazyTransaction())
-                    {
-                        var geomCount = 0;
-                        const int transactionBatchSize = 100;
 
-                        while (!shapeGeometries.IsCompleted)
+                using (var transaction = geomTable.BeginLazyTransaction())
+                {
+                    var geomCount = 0;
+                    const int transactionBatchSize = 100;
+
+                    while (!shapeGeometries.IsCompleted)
+                    {
+                        try
                         {
-                            try
+                            if (shapeGeometries.TryTake(out shapeGeom))
                             {
-                                if(shapeGeometries.TryTake(out shapeGeom))
+                                var refCounter = new GeometryReference
                                 {
-                                    var refCounter = new GeometryReference
-                                    {
-                                        BoundingBox = ((XbimShapeGeometry) shapeGeom).BoundingBox,
-                                        GeometryId = geomTable.AddGeometry(shapeGeom)
-                                    };
-                                    int styleLabel;
-                                    contextHelper.SurfaceStyles.TryGetValue(shapeGeom.IfcShapeLabel, out styleLabel);
-                                    refCounter.StyleLabel = styleLabel;
-                                    contextHelper.ShapeLookup.TryAdd(shapeGeom.IfcShapeLabel, refCounter);
-                                    if (contextHelper.CachedGeometries.ContainsKey(shapeGeom.IfcShapeLabel))
-                                        //keep a record of the IFC label and database record mapping
-                                        contextHelper.GeometryShapeLookup.TryAdd(shapeGeom.ShapeLabel,
-                                            shapeGeom.IfcShapeLabel);
-                                    geomCount++;
-                                }
-                            }
-                            catch (InvalidOperationException)
-                            {
-                                break;
-                            }
-                            catch (Exception e)
-                            {
-                                if (shapeGeom != null)
-                                    Logger.ErrorFormat("Failed to write entity #{0} to database, error = {1}",
-                                        shapeGeom.IfcShapeLabel, e.Message);
-                            }
-                            long remainder = geomCount % transactionBatchSize; //pulse transactions
-                            if (remainder == transactionBatchSize - 1)
-                            {
-                                transaction.Commit();
-                                transaction.Begin();
+                                    BoundingBox = ((XbimShapeGeometry)shapeGeom).BoundingBox,
+                                    GeometryId = geomTable.AddGeometry(shapeGeom)
+                                };
+                                int styleLabel;
+                                contextHelper.SurfaceStyles.TryGetValue(shapeGeom.IfcShapeLabel, out styleLabel);
+                                refCounter.StyleLabel = styleLabel;
+                                contextHelper.ShapeLookup.TryAdd(shapeGeom.IfcShapeLabel, refCounter);
+                                if (contextHelper.CachedGeometries.ContainsKey(shapeGeom.IfcShapeLabel))
+                                    //keep a record of the IFC label and database record mapping
+                                    contextHelper.GeometryShapeLookup.TryAdd(shapeGeom.ShapeLabel,
+                                        shapeGeom.IfcShapeLabel);
+                                geomCount++;
                             }
                         }
-                        transaction.Commit();
+                        catch (InvalidOperationException)
+                        {
+                            break;
+                        }
+                        catch (Exception e)
+                        {
+                            if (shapeGeom != null)
+                                Logger.ErrorFormat("Failed to write entity #{0} to database, error = {1}",
+                                    shapeGeom.IfcShapeLabel, e.Message);
+                        }
+                        long remainder = geomCount % transactionBatchSize; //pulse transactions
+                        if (remainder == transactionBatchSize - 1)
+                        {
+                            transaction.Commit();
+                            transaction.Begin();
+                        }
                     }
+                    transaction.Commit();
                 }
-                finally
-                {
-                    //_model.FreeTable(geomTable);
-                } 
+
             }
         }
 
@@ -579,52 +574,46 @@ namespace Xbim.ModelGeometry.Scene
             {
                 using (var geomTable = _model.GetShapeGeometryTable())
                 {
-                    try
-                    {
-                        using (var instanceTransaction = instanceTable.BeginLazyTransaction())
-                        {
-                            using (var geomTransaction = geomTable.BeginLazyTransaction())
-                            {
-                                var instanceCount = 0;
-                                const int transactionBatchSize = 100;
 
-                                while (!shapeFeatures.IsCompleted)
+                    using (var instanceTransaction = instanceTable.BeginLazyTransaction())
+                    {
+                        using (var geomTransaction = geomTable.BeginLazyTransaction())
+                        {
+                            var instanceCount = 0;
+                            const int transactionBatchSize = 100;
+
+                            while (!shapeFeatures.IsCompleted)
+                            {
+                                try
                                 {
-                                    try
+                                    if (shapeFeatures.TryTake(out shapeFeature))
                                     {
-                                        if (shapeFeatures.TryTake(out shapeFeature))
-                                        {
-                                            var shapeInstance = shapeFeature.Item1;
-                                            var shapeGeometry = shapeFeature.Item2;
-                                            shapeInstance.ShapeGeometryLabel = geomTable.AddGeometry(shapeGeometry);
-                                            instanceTable.AddInstance(shapeInstance);
-                                        }
-                                    }
-                                    catch (InvalidOperationException)
-                                    {
-                                        break;
-                                    }
-                                    instanceCount++;
-                                    long remainder = instanceCount % transactionBatchSize; //pulse transactions
-                                    if (remainder == transactionBatchSize - 1)
-                                    {
-                                        instanceTransaction.Commit();
-                                        instanceTransaction.Begin();
-                                        geomTransaction.Commit();
-                                        geomTransaction.Begin();
+                                        var shapeInstance = shapeFeature.Item1;
+                                        var shapeGeometry = shapeFeature.Item2;
+                                        shapeInstance.ShapeGeometryLabel = geomTable.AddGeometry(shapeGeometry);
+                                        instanceTable.AddInstance(shapeInstance);
                                     }
                                 }
-                                geomTransaction.Commit();
+                                catch (InvalidOperationException)
+                                {
+                                    break;
+                                }
+                                instanceCount++;
+                                long remainder = instanceCount % transactionBatchSize; //pulse transactions
+                                if (remainder == transactionBatchSize - 1)
+                                {
+                                    instanceTransaction.Commit();
+                                    instanceTransaction.Begin();
+                                    geomTransaction.Commit();
+                                    geomTransaction.Begin();
+                                }
                             }
-                            instanceTransaction.Commit();
+                            geomTransaction.Commit();
                         }
+                        instanceTransaction.Commit();
                     }
-                    finally
-                    {
-                        //_model.FreeTable(instanceTable);
-                        //_model.FreeTable(geomTable);
-                    }
-                } 
+
+                }
             }
         }
 
@@ -1081,17 +1070,12 @@ namespace Xbim.ModelGeometry.Scene
                     regions.Add(new XbimRegion("Region " + i++, item.Bound, item.GeometryIds.Count));
                 }
 
-                try
-                {
-                    var transaction = geomTable.BeginLazyTransaction();
-                    geomTable.AddGeometry(context.EntityLabel, XbimGeometryType.Region,
-                        IfcMetaData.IfcTypeId(context.GetType()), wcsMatrix3D.ToArray(), regions.ToArray());
-                    transaction.Commit();
-                }
-                finally
-                {
-                    // Model.FreeTable(geomTable);
-                }
+
+                var transaction = geomTable.BeginLazyTransaction();
+                geomTable.AddGeometry(context.EntityLabel, XbimGeometryType.Region,
+                    IfcMetaData.IfcTypeId(context.GetType()), wcsMatrix3D.ToArray(), regions.ToArray());
+                transaction.Commit();
+
             }
         }
 
@@ -1119,10 +1103,6 @@ namespace Xbim.ModelGeometry.Scene
                 catch (Exception)
                 {
                     Logger.ErrorFormat("Failed to update reference count on geometry");
-                }
-                finally
-                {
-                    // _model.FreeTable(geomTable);
                 }
             }
         }
@@ -1162,10 +1142,7 @@ namespace Xbim.ModelGeometry.Scene
                     Logger.ErrorFormat("Failed to add product geometry for entity #{0}, reason {1}", product.EntityLabel,
                         e.Message);
                 }
-                finally
-                {
-                    //  Model.FreeTable(geomTable);
-                } 
+                
             }
             return shapeInstance;
         }
@@ -1181,28 +1158,23 @@ namespace Xbim.ModelGeometry.Scene
 
             using (var shapeInstanceTable = _model.GetShapeInstanceTable())
             {
-                try
-                {
-                    using (var transaction = shapeInstanceTable.BeginReadOnlyTransaction())
-                    {
-                        foreach (var context in _contexts)
-                        {
-                            IXbimShapeInstanceData shapeInstance = new XbimShapeInstance();
-                            if (shapeInstanceTable.TrySeekShapeInstance(context.EntityLabel, ref shapeInstance))
-                            {
-                                do
-                                {
-                                    yield return (XbimShapeInstance)shapeInstance;
-                                } while (shapeInstanceTable.TryMoveNextShapeInstance(ref shapeInstance));
-                            }
-                        }
 
-                    }
-                }
-                finally
+                using (var transaction = shapeInstanceTable.BeginReadOnlyTransaction())
                 {
-                    // _model.FreeTable(shapeInstanceTable);
-                } 
+                    foreach (var context in _contexts)
+                    {
+                        IXbimShapeInstanceData shapeInstance = new XbimShapeInstance();
+                        if (shapeInstanceTable.TrySeekShapeInstance(context.EntityLabel, ref shapeInstance))
+                        {
+                            do
+                            {
+                                yield return (XbimShapeInstance)shapeInstance;
+                            } while (shapeInstanceTable.TryMoveNextShapeInstance(ref shapeInstance));
+                        }
+                    }
+
+                }
+
             }
         }
 
@@ -1258,28 +1230,23 @@ namespace Xbim.ModelGeometry.Scene
 
         public IEnumerable<XbimShapeGeometry> ShapeGeometries()
         {
-          
+
             using (var shapeGeometryTable = Model.GetShapeGeometryTable())
             {
-                try
-                {
-                    using (var transaction = shapeGeometryTable.BeginReadOnlyTransaction())
-                    {
-                        IXbimShapeGeometryData shapeGeometry = new XbimShapeGeometry();
-                        if (shapeGeometryTable.TryMoveFirstShapeGeometry(ref shapeGeometry))
-                        {
-                            do
-                            {
-                                yield return (XbimShapeGeometry)shapeGeometry;
-                            } while (shapeGeometryTable.TryMoveNextShapeGeometry(ref shapeGeometry));
-                        }
 
-                    }
-                }
-                finally
+                using (var transaction = shapeGeometryTable.BeginReadOnlyTransaction())
                 {
-                    // Model.FreeTable(shapeGeometryTable);
-                } 
+                    IXbimShapeGeometryData shapeGeometry = new XbimShapeGeometry();
+                    if (shapeGeometryTable.TryMoveFirstShapeGeometry(ref shapeGeometry))
+                    {
+                        do
+                        {
+                            yield return (XbimShapeGeometry)shapeGeometry;
+                        } while (shapeGeometryTable.TryMoveNextShapeGeometry(ref shapeGeometry));
+                    }
+
+                }
+
             }
         }
 
@@ -1289,20 +1256,15 @@ namespace Xbim.ModelGeometry.Scene
 
             using (var shapeGeometryTable = Model.GetShapeGeometryTable())
             {
-                try
-                {
-                    using (var transaction = shapeGeometryTable.BeginReadOnlyTransaction())
-                    {
-                        IXbimShapeGeometryData shapeGeometry = new XbimShapeGeometry();
-                        shapeGeometryTable.TryGetShapeGeometry(shapeGeometryLabel, ref shapeGeometry);
 
-                        return (XbimShapeGeometry)shapeGeometry;
-                    }
-                }
-                finally
+                using (var transaction = shapeGeometryTable.BeginReadOnlyTransaction())
                 {
-                    // Model.FreeTable(shapeGeometryTable);
-                } 
+                    IXbimShapeGeometryData shapeGeometry = new XbimShapeGeometry();
+                    shapeGeometryTable.TryGetShapeGeometry(shapeGeometryLabel, ref shapeGeometry);
+
+                    return (XbimShapeGeometry)shapeGeometry;
+                }
+
             }
         }
 
@@ -1323,53 +1285,48 @@ namespace Xbim.ModelGeometry.Scene
             
             using (var shapeInstanceTable = _model.GetShapeInstanceTable())
             {
-                try
-                {
-                    using (var transaction = shapeInstanceTable.BeginReadOnlyTransaction())
-                    {
-                        foreach (var context in _contexts)
-                        {
-                            int surfaceStyle;
-                            short productType;
-                            if (shapeInstanceTable.TryMoveFirstSurfaceStyle(context.EntityLabel, out surfaceStyle,
-                                out productType))
-                            {
-                                do
-                                {
-                                    if (surfaceStyle > 0) //we have a surface style
-                                    {
-                                        var ss = (IfcSurfaceStyle)_model.Instances[surfaceStyle];
-                                        yield return new XbimTexture().CreateTexture(ss);
-                                        surfaceStyle = shapeInstanceTable.SkipSurfaceStyes(surfaceStyle);
-                                    }
-                                    else //then we use the product type for the surface style
-                                    {
-                                        //read all shape instance of style 0 and get their product texture
-                                        do
-                                        {
-                                            if (productTypes.Add(productType)) //if we have not seen this yet then add it
-                                            {
-                                                var theType = IfcMetaData.GetType(productType);
-                                                var texture = new XbimTexture().CreateTexture(colourMap[theType.Name]);
-                                                //get the colour to use
-                                                texture.DefinedObjectId = productType * -1;
-                                                yield return texture;
-                                            }
-                                        } while (
-                                            shapeInstanceTable.TryMoveNextSurfaceStyle(out surfaceStyle, out productType) &&
-                                            surfaceStyle == 0); //skip over all the zero entriesand get theeir style
-                                    }
-                                } while (surfaceStyle != -1);
-                                //now get all the undefined styles and use their product type to create the texture
-                            }
-                        }
 
-                    }
-                }
-                finally
+                using (var transaction = shapeInstanceTable.BeginReadOnlyTransaction())
                 {
-                    // _model.FreeTable(shapeInstanceTable);
-                } 
+                    foreach (var context in _contexts)
+                    {
+                        int surfaceStyle;
+                        short productType;
+                        if (shapeInstanceTable.TryMoveFirstSurfaceStyle(context.EntityLabel, out surfaceStyle,
+                            out productType))
+                        {
+                            do
+                            {
+                                if (surfaceStyle > 0) //we have a surface style
+                                {
+                                    var ss = (IfcSurfaceStyle)_model.Instances[surfaceStyle];
+                                    yield return new XbimTexture().CreateTexture(ss);
+                                    surfaceStyle = shapeInstanceTable.SkipSurfaceStyes(surfaceStyle);
+                                }
+                                else //then we use the product type for the surface style
+                                {
+                                    //read all shape instance of style 0 and get their product texture
+                                    do
+                                    {
+                                        if (productTypes.Add(productType)) //if we have not seen this yet then add it
+                                        {
+                                            var theType = IfcMetaData.GetType(productType);
+                                            var texture = new XbimTexture().CreateTexture(colourMap[theType.Name]);
+                                            //get the colour to use
+                                            texture.DefinedObjectId = productType * -1;
+                                            yield return texture;
+                                        }
+                                    } while (
+                                        shapeInstanceTable.TryMoveNextSurfaceStyle(out surfaceStyle, out productType) &&
+                                        surfaceStyle == 0); //skip over all the zero entriesand get theeir style
+                                }
+                            } while (surfaceStyle != -1);
+                            //now get all the undefined styles and use their product type to create the texture
+                        }
+                    }
+
+                }
+
             }
         }
 
@@ -1430,31 +1387,26 @@ namespace Xbim.ModelGeometry.Scene
          
             using (var shapeInstanceTable = _model.GetShapeInstanceTable())
             {
-                try
-                {
-                    using (var transaction = shapeInstanceTable.BeginReadOnlyTransaction())
-                    {
-                        foreach (var context in _contexts)
-                        {
-                            IXbimShapeInstanceData shapeInstance = new XbimShapeInstance();
-                            if (shapeInstanceTable.TrySeekShapeInstanceOfGeometry(geometry.ShapeLabel, ref shapeInstance))
-                            {
-                                do
-                                {
-                                    if (context.EntityLabel == shapeInstance.RepresentationContext && 
-                                        shapeInstance.RepresentationType!=(byte)XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded &&
-                                        !(ignoreFeatures && typeof(IfcFeatureElement).IsAssignableFrom(IfcMetaData.GetType(shapeInstance.IfcTypeId)) ))
-                                        yield return (XbimShapeInstance)shapeInstance;
-                                } while (shapeInstanceTable.TryMoveNextShapeInstance(ref shapeInstance));
-                            }
-                        }
 
-                    }
-                }
-                finally
+                using (var transaction = shapeInstanceTable.BeginReadOnlyTransaction())
                 {
-                    //  _model.FreeTable(shapeInstanceTable);
-                } 
+                    foreach (var context in _contexts)
+                    {
+                        IXbimShapeInstanceData shapeInstance = new XbimShapeInstance();
+                        if (shapeInstanceTable.TrySeekShapeInstanceOfGeometry(geometry.ShapeLabel, ref shapeInstance))
+                        {
+                            do
+                            {
+                                if (context.EntityLabel == shapeInstance.RepresentationContext &&
+                                    shapeInstance.RepresentationType != (byte)XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded &&
+                                    !(ignoreFeatures && typeof(IfcFeatureElement).IsAssignableFrom(IfcMetaData.GetType(shapeInstance.IfcTypeId))))
+                                    yield return (XbimShapeInstance)shapeInstance;
+                            } while (shapeInstanceTable.TryMoveNextShapeInstance(ref shapeInstance));
+                        }
+                    }
+
+                }
+
             }
         }
 
@@ -1463,33 +1415,28 @@ namespace Xbim.ModelGeometry.Scene
 
             using (var shapeInstanceTable = _model.GetShapeInstanceTable())
             {
-                try
-                {
-                    using (var transaction = shapeInstanceTable.BeginReadOnlyTransaction())
-                    {
-                        foreach (var context in _contexts)
-                        {
-                           IXbimShapeInstanceData shapeInstance = new XbimShapeInstance();
-                            if (shapeInstanceTable.TrySeekShapeInstanceOfGeometry(geometryLabel, ref shapeInstance))
-                            {
-                                do
-                                { 
-                                    
-                                    if (context.EntityLabel == shapeInstance.RepresentationContext &&
-                                         shapeInstance.RepresentationType != (byte)XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded &&
-                                        !(ignoreFeatures && typeof(IfcFeatureElement).IsAssignableFrom(IfcMetaData.GetType(shapeInstance.IfcTypeId))))
-                                        yield return (XbimShapeInstance)shapeInstance;
-                                    shapeInstance = new XbimShapeInstance();
-                                } while (shapeInstanceTable.TryMoveNextShapeInstance(ref shapeInstance));
-                            }
-                        }
 
-                    }
-                }
-                finally
+                using (var transaction = shapeInstanceTable.BeginReadOnlyTransaction())
                 {
-                    //  _model.FreeTable(shapeInstanceTable);
+                    foreach (var context in _contexts)
+                    {
+                        IXbimShapeInstanceData shapeInstance = new XbimShapeInstance();
+                        if (shapeInstanceTable.TrySeekShapeInstanceOfGeometry(geometryLabel, ref shapeInstance))
+                        {
+                            do
+                            {
+
+                                if (context.EntityLabel == shapeInstance.RepresentationContext &&
+                                     shapeInstance.RepresentationType != (byte)XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded &&
+                                    !(ignoreFeatures && typeof(IfcFeatureElement).IsAssignableFrom(IfcMetaData.GetType(shapeInstance.IfcTypeId))))
+                                    yield return (XbimShapeInstance)shapeInstance;
+                                shapeInstance = new XbimShapeInstance();
+                            } while (shapeInstanceTable.TryMoveNextShapeInstance(ref shapeInstance));
+                        }
+                    }
+
                 }
+
             }
         }
 
@@ -1500,32 +1447,27 @@ namespace Xbim.ModelGeometry.Scene
         /// <returns></returns>
         public IEnumerable<XbimShapeInstance> ShapeInstancesOf(IfcProduct product)
         {
-            
+
             using (var shapeInstanceTable = _model.GetShapeInstanceTable())
             {
-                try
-                {
-                    using (var transaction = shapeInstanceTable.BeginReadOnlyTransaction())
-                    {
-                        foreach (var context in _contexts)
-                        {
-                            IXbimShapeInstanceData shapeInstance = new XbimShapeInstance();
-                            if (shapeInstanceTable.TrySeekShapeInstanceOfProduct(product.EntityLabel, ref shapeInstance))
-                            {
-                                do
-                                {
-                                    if (context.EntityLabel == shapeInstance.RepresentationContext)
-                                        yield return (XbimShapeInstance)shapeInstance;
-                                } while (shapeInstanceTable.TryMoveNextShapeInstance(ref shapeInstance));
-                            }
-                        }
 
-                    }
-                }
-                finally
+                using (var transaction = shapeInstanceTable.BeginReadOnlyTransaction())
                 {
-                    // _model.FreeTable(shapeInstanceTable);
-                } 
+                    foreach (var context in _contexts)
+                    {
+                        IXbimShapeInstanceData shapeInstance = new XbimShapeInstance();
+                        if (shapeInstanceTable.TrySeekShapeInstanceOfProduct(product.EntityLabel, ref shapeInstance))
+                        {
+                            do
+                            {
+                                if (context.EntityLabel == shapeInstance.RepresentationContext)
+                                    yield return (XbimShapeInstance)shapeInstance;
+                            } while (shapeInstanceTable.TryMoveNextShapeInstance(ref shapeInstance));
+                        }
+                    }
+
+                }
+
             }
         }
 
@@ -1538,48 +1480,43 @@ namespace Xbim.ModelGeometry.Scene
             
             using (var shapeInstanceTable = _model.GetShapeInstanceTable())
             {
-                try
-                {
-                    using (var transaction = shapeInstanceTable.BeginReadOnlyTransaction())
-                    {
-                        foreach (var context in _contexts)
-                        {
-                            IXbimShapeInstanceData shapeInstance = new XbimShapeInstance();
 
-                            if (texture.DefinedObjectId > 0)
+                using (var transaction = shapeInstanceTable.BeginReadOnlyTransaction())
+                {
+                    foreach (var context in _contexts)
+                    {
+                        IXbimShapeInstanceData shapeInstance = new XbimShapeInstance();
+
+                        if (texture.DefinedObjectId > 0)
+                        {
+                            if (shapeInstanceTable.TrySeekSurfaceStyle(context.EntityLabel, texture.DefinedObjectId,
+                                ref shapeInstance))
                             {
-                                if (shapeInstanceTable.TrySeekSurfaceStyle(context.EntityLabel, texture.DefinedObjectId,
-                                    ref shapeInstance))
+                                do
                                 {
-                                    do
-                                    {
-                                        yield return (XbimShapeInstance)shapeInstance;
-                                    } while (shapeInstanceTable.TryMoveNextShapeInstance(ref shapeInstance) &&
-                                             shapeInstance.StyleLabel == texture.DefinedObjectId);
-                                }
-                            }
-                            else if (texture.DefinedObjectId < 0)
-                            //if the texture is for a type then get all instances of the type
-                            {
-                                var typeId = (short)Math.Abs(texture.DefinedObjectId);
-                                if (shapeInstanceTable.TrySeekProductType(typeId, ref shapeInstance))
-                                {
-                                    do
-                                    {
-                                        if (context.EntityLabel == shapeInstance.RepresentationContext)
-                                            yield return (XbimShapeInstance)shapeInstance;
-                                    } while (shapeInstanceTable.TryMoveNextShapeInstance(ref shapeInstance) &&
-                                             shapeInstance.IfcTypeId == typeId);
-                                }
+                                    yield return (XbimShapeInstance)shapeInstance;
+                                } while (shapeInstanceTable.TryMoveNextShapeInstance(ref shapeInstance) &&
+                                         shapeInstance.StyleLabel == texture.DefinedObjectId);
                             }
                         }
-
+                        else if (texture.DefinedObjectId < 0)
+                        //if the texture is for a type then get all instances of the type
+                        {
+                            var typeId = (short)Math.Abs(texture.DefinedObjectId);
+                            if (shapeInstanceTable.TrySeekProductType(typeId, ref shapeInstance))
+                            {
+                                do
+                                {
+                                    if (context.EntityLabel == shapeInstance.RepresentationContext)
+                                        yield return (XbimShapeInstance)shapeInstance;
+                                } while (shapeInstanceTable.TryMoveNextShapeInstance(ref shapeInstance) &&
+                                         shapeInstance.IfcTypeId == typeId);
+                            }
+                        }
                     }
+
                 }
-                finally
-                {
-                    // _model.FreeTable(shapeInstanceTable);
-                } 
+
             }
         }
 
@@ -1589,29 +1526,24 @@ namespace Xbim.ModelGeometry.Scene
         /// <returns></returns>
         public IDictionary<int, int> ShapeGeometryReferenceData()
         {
-            
+
             var lookup = new Dictionary<int, int>();
             using (var shapeGeometryTable = Model.GetShapeGeometryTable())
             {
-                try
-                {
-                    using (var transaction = shapeGeometryTable.BeginReadOnlyTransaction())
-                    {
-                        if (shapeGeometryTable.TryMoveFirstReferenceCounter())
-                        {
-                            do
-                            {
-                                lookup.Add(shapeGeometryTable.GetShapeGeometryLabel(),
-                                    shapeGeometryTable.GetReferenceCount());
-                            } while (shapeGeometryTable.TryMoveNextReferenceCounter());
-                        }
 
-                    }
-                }
-                finally
+                using (var transaction = shapeGeometryTable.BeginReadOnlyTransaction())
                 {
-                    //Model.FreeTable(shapeGeometryTable);
-                } 
+                    if (shapeGeometryTable.TryMoveFirstReferenceCounter())
+                    {
+                        do
+                        {
+                            lookup.Add(shapeGeometryTable.GetShapeGeometryLabel(),
+                                shapeGeometryTable.GetReferenceCount());
+                        } while (shapeGeometryTable.TryMoveNextReferenceCounter());
+                    }
+
+                }
+
             }
             return lookup;
         }
@@ -1623,27 +1555,22 @@ namespace Xbim.ModelGeometry.Scene
         /// <returns></returns>
         public bool ProductHasGeometry(Int32 productId)
         {
-            
+
             using (var shapeInstanceTable = _model.GetShapeInstanceTable())
             {
-                try
-                {
-                    using (var transaction = shapeInstanceTable.BeginReadOnlyTransaction())
-                    {
-                        foreach (var context in _contexts)
-                        {
-                            if (shapeInstanceTable.TrySeekShapeInstanceOfProduct(productId))
-                            {
-                                return true;
-                            }
-                        }
 
-                    }
-                }
-                finally
+                using (var transaction = shapeInstanceTable.BeginReadOnlyTransaction())
                 {
-                    // _model.FreeTable(shapeInstanceTable);
-                } 
+                    foreach (var context in _contexts)
+                    {
+                        if (shapeInstanceTable.TrySeekShapeInstanceOfProduct(productId))
+                        {
+                            return true;
+                        }
+                    }
+
+                }
+
             }
             return false;
         }
@@ -1841,7 +1768,7 @@ namespace Xbim.ModelGeometry.Scene
                     //Read all vertices and normals in the geometry stream and transform
                     var ms = new MemoryStream(geometry.ShapeData);
                     var br = new BinaryReader(ms);
-                    var tr = ReadShapeTriangulation(br);
+                    var tr = br.ReadShapeTriangulation();
                     var trTransformed = tr.Transform(((XbimShapeInstance) xbimShapeInstance).Transformation);
                     trTransformed.Write(binaryStream);
                     numberOfTriangles += XbimShapeTriangulation.TriangleCount(geometry.ShapeData);
@@ -1856,21 +1783,6 @@ namespace Xbim.ModelGeometry.Scene
             binaryStream.Write((Int32)numberOfProducts);
             binaryStream.Seek(0, SeekOrigin.End); //go back to end
         }
-        public static XbimShapeTriangulation ReadShapeTriangulation(BinaryReader br)
-        {
-            var version = br.ReadByte(); //stream format version
-            var numVertices = br.ReadInt32();
-            var numTriangles = br.ReadInt32();
-            var vertices = new List<XbimPoint3D>(10);
-            //for (var i = 0; i < numVertices; i++)
-            //{
-            //    vertices.Add(br.ReadPointFloat3D());
-            //}
-            var numFaces = br.ReadInt32();
-            var faces = new List<XbimFaceTriangulation>(numFaces);
-            
-            
-            return new XbimShapeTriangulation(vertices, faces, version);
-        }
+        
     }
 }

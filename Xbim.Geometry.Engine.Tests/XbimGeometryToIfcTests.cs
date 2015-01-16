@@ -68,8 +68,8 @@ namespace GeometryTests
         }
 
         [TestMethod]
-        [DeploymentItem("Xbim.Geometry.Engine32.dll")]
-        [DeploymentItem("Xbim.Geometry.Engine64.dll")]
+        [DeploymentItem(@"x86\Xbim.Geometry.Engine32.dll", "x86")]
+        [DeploymentItem(@"x64\Xbim.Geometry.Engine64.dll", "x64")]
         public void ConvertIfcBlockToBRepTest()
         { 
             using (var m = XbimModel.CreateTemporaryModel())

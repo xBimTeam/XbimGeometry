@@ -14,8 +14,8 @@ namespace GeometryTests
 #if USE_CARVE_CSG
 
     [TestClass]
-    [DeploymentItem("Xbim.Geometry.Engine32.dll")]
-    [DeploymentItem("Xbim.Geometry.Engine64.dll")]
+    [DeploymentItem(@"x86\Xbim.Geometry.Engine32.dll","x86")]
+    [DeploymentItem(@"x64\Xbim.Geometry.Engine64.dll","x64")]
     [DeploymentItem(@"SolidTestFiles\")]
     public class XbimFacetedMeshTests
     {

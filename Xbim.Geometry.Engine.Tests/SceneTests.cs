@@ -12,8 +12,8 @@ namespace GeometryTests
 {
     [TestClass]
     [DeploymentItem(@"SolidTestFiles\")]
-    [DeploymentItem("Xbim.Geometry.Engine32.dll")]
-    [DeploymentItem("Xbim.Geometry.Engine64.dll")]
+    [DeploymentItem(@"x86\Xbim.Geometry.Engine32.dll", "x86")]
+    [DeploymentItem(@"x64\Xbim.Geometry.Engine64.dll", "x64")]
     public class SceneTests
     {
         /// <summary>
@@ -94,7 +94,7 @@ namespace GeometryTests
                         }
                     } 
                 }
-                Assert.IsTrue(false);
+                
             }
         }
     }

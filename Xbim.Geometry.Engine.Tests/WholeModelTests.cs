@@ -57,7 +57,7 @@ namespace GeometryTests
                         {
                             model.CreateFrom(ifcFileFullName, xbimFile, null, true, false);
                             var geomContext = new Xbim3DModelContext(model);
-                            geomContext.CreateContext();
+                            geomContext.CreateContext(XbimGeometryType.PolyhedronBinary);
                             geomContext.Write(binaryWriter);
 
                         }
