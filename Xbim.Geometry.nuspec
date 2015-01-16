@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
     <metadata>
         <id>Xbim.Geometry</id>
-        <version>3.0.2-Prerelease</version>
+        <version>3.0.3-Prerelease</version>
         <title>xBIM Geometry</title>
         <authors>xBIM team</authors>
         <owners>Steve Lockley</owners>
@@ -20,20 +20,19 @@ IOS and Android versions are under development.</description>
         <releaseNotes>Geometry Dlls written to separate directories for web based deployment. 3.0 contains a new geometry engine that has a full API to allow geometry constructions, boolean operations and meshing. All Ifc2x3 class are now supported.</releaseNotes>
         <language>en-GB</language>
         <tags>BIM, IFC, IfcXml, IfcZip, COBie, .Net, C#, BuildingSmart</tags>
-	<dependencies> 
-		<dependency id="Newtonsoft.Json" version="6.0.3" />
-    <dependency id="log4net" version="2.0.3" />
-    <dependency id="SharpZipLib" version="0.86.0" />
-    <dependency id="Xbim.Essentials" version="3.0.2-Prerelease" />
-    <dependency id="ManagedEsent" version="1.9.2" />
-	</dependencies> 
+      <dependencies>
+        <dependency id="Newtonsoft.Json" version="6.0.3" />
+        <dependency id="Xbim.Essentials" version="3.0.3-Prerelease" />
+      </dependencies>
     </metadata>
     <files>
-        <file src="Output\Xbim.Geometry.Engine.Interop.dll" target="lib\net45\Xbim.Geometry.Engine.Interop.dll" />
-        <file src="Output\Xbim.ModelGeometry.Scene.dll" target="lib\net45\Xbim.ModelGeometry.Scene.dll" />
-        <file src="Output\x86\Xbim.Geometry.Engine32.dll" target="content\x86\Xbim.Geometry.Engine32.dll" />
-        <file src="Output\x64\Xbim.Geometry.Engine64.dll" target="content\x64\Xbim.Geometry.Engine64.dll" />
-        <file src="install.ps1" target="tools\install.ps1" /> 
+      <file src="Output\Release\Xbim.Geometry.Engine.Interop.dll" target="lib\net45\Xbim.Geometry.Engine.Interop.dll" />
+      <file src="Output\Release\Xbim.Geometry.Engine.Interop.xml" target="lib\net45\Xbim.Geometry.Engine.Interop.xml" />
+      <file src="Output\Release\Xbim.ModelGeometry.Scene.dll" target="lib\net45\Xbim.ModelGeometry.Scene.dll" />
+      <file src="Output\Release\Xbim.ModelGeometry.Scene.xml" target="lib\net45\Xbim.ModelGeometry.Scene.xml" />
+      <file src="Output\Release\x86\Xbim.Geometry.Engine32.dll" target="build\net45\x86\Xbim.Geometry.Engine32.dll" />
+      <file src="Output\Release\x64\Xbim.Geometry.Engine64.dll" target="build\net45\x64\Xbim.Geometry.Engine64.dll" />
+      <file src="Output\Release\Xbim.Geometry.targets" target="build\net45\Xbim.Geometry.targets" />
     </files>
-	
-</package>
+
+  </package>

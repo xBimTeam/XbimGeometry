@@ -14,7 +14,7 @@ namespace Xbim.ModelGeometry.Scene
     /// A class to cluster spatial items in iteratively narrower space boundaries.
     /// Formerly used in XbimMesher to split large models like this:
     /// 
-    /// XbimOctree<int> octree = new XbimOctree<int>(bounds.Length(), MaxWorldSize * metre, 1f, bounds.Centroid());
+    /// XbimOctree octree = new XbimOctree(bounds.Length(), MaxWorldSize * metre, 1f, bounds.Centroid());
     /// octree.Add(geomData.GeometryLabel, bound);
     /// then iterating over octree.Populated to retrieve the clusters.
     /// 

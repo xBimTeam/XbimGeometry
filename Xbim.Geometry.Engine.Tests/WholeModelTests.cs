@@ -15,6 +15,7 @@ using Xbim.Ifc2x3.PresentationResource;
 using Xbim.Ifc2x3.ProductExtension;
 using Xbim.IO;
 using Xbim.Geometry;
+using Xbim.ModelGeometry.Scene;
 using Xbim.XbimExtensions.SelectTypes;
 using XbimGeometry.Interfaces;
 
@@ -23,13 +24,52 @@ namespace GeometryTests
     /// <summary>
     /// Excutes tests on every geometry item found in every file in the specified directory, passes if no files are found
     /// </summary>
-    [TestClass]
+    /// 
 
+    [DeploymentItem(@"SolidTestFiles\")]
+    [DeploymentItem(@"x86\Xbim.Geometry.Engine32.dll","x86")]
+    [DeploymentItem(@"x64\Xbim.Geometry.Engine64.dll","x64")]
+    [TestClass]
     public class WholeModelTests
     {
         private readonly XbimGeometryEngine _xbimGeometryCreator = new XbimGeometryEngine();
 
+        [TestMethod]
+        public void WriteDPoWOutputFiles()
+        {
 
+            const string ifcFileFullName = "Duplex_MEP_20110907.ifc";
+            var fileName = Path.GetFileName(ifcFileFullName);
+            var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
+            var workingDir = Directory.GetCurrentDirectory();
+            var coreFileName = Path.Combine(workingDir, fileNameWithoutExtension);
+            var wexBimFileName = Path.ChangeExtension(coreFileName, "wexbim");
+            var xbimFile = Path.ChangeExtension(coreFileName, "xbim");
+            try
+            {
+
+                using (var wexBimFile = new FileStream(wexBimFileName, FileMode.Create))
+                {
+                    using (var binaryWriter = new BinaryWriter(wexBimFile))
+                    {
+
+                        using (var model = new XbimModel())
+                        {
+                            model.CreateFrom(ifcFileFullName, xbimFile, null, true, false);
+                            var geomContext = new Xbim3DModelContext(model);
+                            geomContext.CreateContext();
+                            geomContext.Write(binaryWriter);
+
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Assert.Fail("Failed to process " + ifcFileFullName + " - " + e.Message);
+            }
+        }
+    
 
 
 

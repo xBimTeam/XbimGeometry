@@ -55,7 +55,7 @@ namespace Xbim.ModelGeometry.Scene
         IXbimGeometryModel Union(IXbimGeometryModel toUnion, XbimModelFactors modelFactors);
         IXbimGeometryModel Intersection(IXbimGeometryModel toIntersect, XbimModelFactors modelFactors);
         IXbimGeometryModel Combine(IXbimGeometryModel toCombine, XbimModelFactors modelFactors);
-        /// <summary>
+       
         /// <summary>
         /// Writes the geometry in the XBIM mesh format in a text file
         /// </summary>

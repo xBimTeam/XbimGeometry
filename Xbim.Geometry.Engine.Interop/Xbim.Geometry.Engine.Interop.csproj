@@ -26,7 +26,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\Output\</OutputPath>
+    <OutputPath>..\Output\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -35,15 +35,17 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\Output\</OutputPath>
+    <OutputPath>..\Output\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <DocumentationFile>..\Output\Release\Xbim.Geometry.Engine.Interop.XML</DocumentationFile>
+    <NoWarn>1591;1572;1573;1574</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug CarveCSG|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>..\Output\</OutputPath>
+    <OutputPath>..\Output\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -52,7 +54,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release CarveCSG|AnyCPU'">
-    <OutputPath>..\Output\</OutputPath>
+    <OutputPath>..\Output\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
@@ -74,13 +76,15 @@
   <ItemGroup>
     <Reference Include="Esent.Interop">
       <HintPath>..\packages\ManagedEsent.1.9.2.0\lib\net40\Esent.Interop.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="ICSharpCode.SharpZipLib, Version=0.86.0.518, Culture=neutral, PublicKeyToken=1b03e6acf1164f73, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="ICSharpCode.SharpZipLib">
       <HintPath>..\packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="log4net">
       <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -89,28 +93,37 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Xbim.Common">
-      <HintPath>..\packages\Xbim.Essentials.3.0.1-Alpha\lib\net45\Xbim.Common.dll</HintPath>
+    <Reference Include="Xbim.Common, Version=3.0.5492.31081, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Xbim.Essentials.3.0.3-Prerelease\lib\net45\Xbim.Common.dll</HintPath>
     </Reference>
-    <Reference Include="Xbim.Ifc.Extensions">
-      <HintPath>..\packages\Xbim.Essentials.3.0.1-Alpha\lib\net45\Xbim.Ifc.Extensions.dll</HintPath>
+    <Reference Include="Xbim.Ifc.Extensions, Version=3.0.5491.27222, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Xbim.Essentials.3.0.3-Prerelease\lib\net45\Xbim.Ifc.Extensions.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Xbim.Ifc2x3">
-      <HintPath>..\packages\Xbim.Essentials.3.0.1-Alpha\lib\net45\Xbim.Ifc2x3.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.3.0.3-Prerelease\lib\net45\Xbim.Ifc2x3.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Xbim.IO">
-      <HintPath>..\packages\Xbim.Essentials.3.0.1-Alpha\lib\net45\Xbim.IO.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.3.0.3-Prerelease\lib\net45\Xbim.IO.dll</HintPath>
+      <Private>True</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="..\Xbim.Geometry.targets">
+      <Link>Xbim.Geometry.targets</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Output\x86\Xbim.Geometry.Engine32.dll">
+    <None Include="..\Output\$(Configuration)\x86\Xbim.Geometry.Engine32.dll">
       <Link>x86\Xbim.Geometry.Engine32.dll</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="..\Output\x64\Xbim.Geometry.Engine64.dll">
+    <None Include="..\Output\$(Configuration)\x64\Xbim.Geometry.Engine64.dll">
       <Link>x64\Xbim.Geometry.Engine64.dll</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

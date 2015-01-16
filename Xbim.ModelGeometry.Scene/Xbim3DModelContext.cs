@@ -1841,7 +1841,7 @@ namespace Xbim.ModelGeometry.Scene
                     //Read all vertices and normals in the geometry stream and transform
                     var ms = new MemoryStream(geometry.ShapeData);
                     var br = new BinaryReader(ms);
-                    var tr = br.ReadShapeTriangulation();
+                    var tr = ReadShapeTriangulation(br);
                     var trTransformed = tr.Transform(((XbimShapeInstance) xbimShapeInstance).Transformation);
                     trTransformed.Write(binaryStream);
                     numberOfTriangles += XbimShapeTriangulation.TriangleCount(geometry.ShapeData);
@@ -1855,6 +1855,22 @@ namespace Xbim.ModelGeometry.Scene
             binaryStream.Write((Int32)numberOfMatrices);
             binaryStream.Write((Int32)numberOfProducts);
             binaryStream.Seek(0, SeekOrigin.End); //go back to end
+        }
+        public static XbimShapeTriangulation ReadShapeTriangulation(BinaryReader br)
+        {
+            var version = br.ReadByte(); //stream format version
+            var numVertices = br.ReadInt32();
+            var numTriangles = br.ReadInt32();
+            var vertices = new List<XbimPoint3D>(10);
+            //for (var i = 0; i < numVertices; i++)
+            //{
+            //    vertices.Add(br.ReadPointFloat3D());
+            //}
+            var numFaces = br.ReadInt32();
+            var faces = new List<XbimFaceTriangulation>(numFaces);
+            
+            
+            return new XbimShapeTriangulation(vertices, faces, version);
         }
     }
 }

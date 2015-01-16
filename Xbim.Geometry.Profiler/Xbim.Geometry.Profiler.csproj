@@ -11,13 +11,14 @@
     <AssemblyName>Xbim.Geometry.Profiler</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <NuGetPackageImportStamp>30b17245</NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\Output\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -26,24 +27,24 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>..\Output\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Esent.Interop, Version=1.9.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Esent.Interop">
       <HintPath>..\packages\ManagedEsent.1.9.2.0\lib\net40\Esent.Interop.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="ICSharpCode.SharpZipLib, Version=0.86.0.518, Culture=neutral, PublicKeyToken=1b03e6acf1164f73, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="ICSharpCode.SharpZipLib">
       <HintPath>..\packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="log4net, Version=1.2.13.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="log4net">
       <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -52,21 +53,21 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Xbim.Common, Version=3.0.5484.31949, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Xbim.Essentials.3.0.1-Alpha\lib\net45\Xbim.Common.dll</HintPath>
+    <Reference Include="Xbim.Common">
+      <HintPath>..\packages\Xbim.Essentials.3.0.3-Prerelease\lib\net45\Xbim.Common.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="Xbim.Ifc.Extensions, Version=3.0.5484.32682, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Xbim.Essentials.3.0.1-Alpha\lib\net45\Xbim.Ifc.Extensions.dll</HintPath>
+    <Reference Include="Xbim.Ifc.Extensions">
+      <HintPath>..\packages\Xbim.Essentials.3.0.3-Prerelease\lib\net45\Xbim.Ifc.Extensions.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="Xbim.Ifc2x3, Version=3.0.5484.31950, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Xbim.Essentials.3.0.1-Alpha\lib\net45\Xbim.Ifc2x3.dll</HintPath>
+    <Reference Include="Xbim.Ifc2x3">
+      <HintPath>..\packages\Xbim.Essentials.3.0.3-Prerelease\lib\net45\Xbim.Ifc2x3.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="Xbim.IO, Version=3.0.5484.32682, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Xbim.Essentials.3.0.1-Alpha\lib\net45\Xbim.IO.dll</HintPath>
+    <Reference Include="Xbim.IO">
+      <HintPath>..\packages\Xbim.Essentials.3.0.3-Prerelease\lib\net45\Xbim.IO.dll</HintPath>
+      <Private>True</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
