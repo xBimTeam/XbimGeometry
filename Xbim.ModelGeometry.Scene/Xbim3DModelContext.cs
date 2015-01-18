@@ -434,10 +434,10 @@ namespace Xbim.ModelGeometry.Scene
 
 
             var contextHelper = new XbimCreateContextHelper(_model, _contexts);
-            if (progDelegate != null) progDelegate(0, "Initialise");
+            if (progDelegate != null) progDelegate(-1, "Initialise");
             if (!contextHelper.Initialise())
                 throw new Exception("Failed to initialise geometric context, " + contextHelper.InitialiseError);
-            if (progDelegate != null) progDelegate(100, "Initialise");
+            if (progDelegate != null) progDelegate(101, "Initialise");
 
             using (var shapeGeometries = new BlockingCollection<IXbimShapeGeometryData>())
             {
@@ -484,21 +484,21 @@ namespace Xbim.ModelGeometry.Scene
                 var productsRemaining = _model.Instances.OfType<IfcProduct>()
                     .Where(p => p.Representation != null && !processed.Contains(p.EntityLabel)).ToList();
 
-                if (progDelegate != null) progDelegate(0, "WriteProductShapes");
+                if (progDelegate != null) progDelegate(-1, "WriteProductShapes");
                 WriteProductShapes(contextHelper, productsRemaining);
-                if (progDelegate != null) progDelegate(100, "WriteProductShapes");
+                if (progDelegate != null) progDelegate(101, "WriteProductShapes");
                 //Write out the actual representation item reference count
-                if (progDelegate != null) progDelegate(0, "WriteShapeGeometryReferenceCountToDb");
+                if (progDelegate != null) progDelegate(-1, "WriteShapeGeometryReferenceCountToDb");
                 WriteShapeGeometryReferenceCountToDb();
-                if (progDelegate != null) progDelegate(100, "WriteShapeGeometryReferenceCountToDb");
+                if (progDelegate != null) progDelegate(101, "WriteShapeGeometryReferenceCountToDb");
                 //Write out the regions of the model
-                if (progDelegate != null) progDelegate(0, "WriteRegionsToDb");
+                if (progDelegate != null) progDelegate(-1, "WriteRegionsToDb");
                 foreach (var cluster in contextHelper.Clusters)
                 {
                     WriteRegionsToDb(context: cluster.Key, elementsToCluster: cluster.Value,
                         wcsMatrix3D: contextHelper.PlacementTree.WorldCoordinateSystem);
                 }
-                if (progDelegate != null) progDelegate(100, "WriteRegionsToDb");
+                if (progDelegate != null) progDelegate(101, "WriteRegionsToDb");
                 _contextIsPersisted = true;
                
                 return true;
@@ -627,7 +627,7 @@ namespace Xbim.ModelGeometry.Scene
             var localPercentageParsed = contextHelper.PercentageParsed;
             var localTally = contextHelper.Tally;
 
-            if (progDelegate != null) progDelegate(0, "WriteFeatureElements (" + contextHelper.OpeningsAndProjections.Count + " elements)");
+            if (progDelegate != null) progDelegate(-1, "WriteFeatureElements (" + contextHelper.OpeningsAndProjections.Count + " elements)");
             
             Parallel.ForEach(contextHelper.OpeningsAndProjections,contextHelper.ParallelOptions, pair =>
                 //    foreach (IGrouping<IfcElement, IfcFeatureElement> pair in contextHelper.OpeningsAndProjections)
@@ -775,7 +775,7 @@ namespace Xbim.ModelGeometry.Scene
                         if (newPercentage > localPercentageParsed)
                         {
                             Interlocked.Exchange(ref localPercentageParsed, newPercentage);
-                            // progDelegate(localPercentageParsed, "Building Elements");
+                            progDelegate(localPercentageParsed, "Building Elements");
                         }
                     }
                 }
@@ -788,7 +788,7 @@ namespace Xbim.ModelGeometry.Scene
                 );
             contextHelper.PercentageParsed = localPercentageParsed;
             contextHelper.Tally = localTally;
-            if (progDelegate != null) progDelegate(100, "WriteFeatureElements, (" + localTally + " written)");
+            if (progDelegate != null) progDelegate(101, "WriteFeatureElements, (" + localTally + " written)");
             return processed;
         }
 
@@ -894,7 +894,7 @@ namespace Xbim.ModelGeometry.Scene
 
         private void WriteMappedItems(XbimCreateContextHelper contextHelper, ReportProgressDelegate progDelegate)
         {
-            if (progDelegate != null) progDelegate(0, "WriteMappedItems (" + contextHelper.MappedShapeIds.Count + " items)");
+            if (progDelegate != null) progDelegate(-1, "WriteMappedItems (" + contextHelper.MappedShapeIds.Count + " items)");
             Parallel.ForEach(contextHelper.MappedShapeIds, contextHelper.ParallelOptions, mapId =>
                 //   foreach (var map in allMaps)
             {
@@ -934,7 +934,7 @@ namespace Xbim.ModelGeometry.Scene
                         entity.GetType().Name);
             }
                 );
-            if (progDelegate != null) progDelegate(100, "WriteMappedItems, (" + contextHelper.MappedShapeIds.Count + " written)");
+            if (progDelegate != null) progDelegate(101, "WriteMappedItems, (" + contextHelper.MappedShapeIds.Count + " written)");
         }
  
 
@@ -950,7 +950,7 @@ namespace Xbim.ModelGeometry.Scene
 
             var mapLookup =
                 new ConcurrentDictionary<int, int>();
-            if (progDelegate != null) progDelegate(0, "WriteShapeGeometries (" + contextHelper.ProductShapeIds.Count + " shapes)");
+            if (progDelegate != null) progDelegate(-1, "WriteShapeGeometries (" + contextHelper.ProductShapeIds.Count + " shapes)");
            Parallel.ForEach(contextHelper.ProductShapeIds, contextHelper.ParallelOptions, shapeId =>
           //foreach (var shapeId in contextHelper.ProductShapeIds)
             {
@@ -1019,15 +1019,15 @@ namespace Xbim.ModelGeometry.Scene
                     }
                 }
 
-                //if (progDelegate != null)
-                //{
-                //    var newPercentage = Convert.ToInt32((double) localTally/contextHelper.Total*100.0);
-                //    if (newPercentage > localPercentageParsed)
-                //    {
-                //        Interlocked.Exchange(ref localPercentageParsed, newPercentage);
-                //        progDelegate(localPercentageParsed, "Creating Geometry");
-                //    }
-                //}
+                if (progDelegate != null)
+                {
+                    var newPercentage = Convert.ToInt32((double)localTally / contextHelper.Total * 100.0);
+                    if (newPercentage > localPercentageParsed)
+                    {
+                        Interlocked.Exchange(ref localPercentageParsed, newPercentage);
+                        progDelegate(localPercentageParsed, "Creating Geometry");
+                    }
+                }
             }
             );
 
@@ -1049,7 +1049,7 @@ namespace Xbim.ModelGeometry.Scene
                
             }
             );
-            if (progDelegate != null) progDelegate(100, "WriteShapeGeometries, (" + localTally + " written)");
+            if (progDelegate != null) progDelegate(101, "WriteShapeGeometries, (" + localTally + " written)");
         }
 
 

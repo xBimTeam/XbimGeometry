@@ -36,13 +36,13 @@ namespace Xbim.Geometry.Profiler
                     var functionStack = new ConcurrentStack<Tuple<string,double>>();
                     ReportProgressDelegate progDelegate = delegate(int percentProgress, object userState)
                     {
-                        if (percentProgress == 0)
+                        if (percentProgress == -1)
                         {
                             functionStack.Push(new Tuple<string,double>(userState.ToString(), DateTime.Now.TimeOfDay.TotalMilliseconds));
                             Logger.InfoFormat("Entering - {0}", userState.ToString());
                         }
                     
-                        else if (percentProgress == 100)
+                        else if (percentProgress == 101)
                         {
                             Tuple<string,double> func; 
                             if(functionStack.TryPop(out func))
