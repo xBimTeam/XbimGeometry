@@ -35,8 +35,6 @@ IOS and Android versions are under development.</description>
       <file src="Output\Release\Xbim.Geometry.targets" target="build\net45\Xbim.Geometry.targets" />  
       <file src="Output\Release\Xbim.Geometry.Engine.Interop.pdb" target="lib\net45\Xbim.Geometry.Engine.Interop.pdb" />
       <file src="Output\Release\Xbim.ModelGeometry.Scene.pdb" target="lib\net45\Xbim.ModelGeometry.Scene.pdb" />
-      <file src="Output\Release\x86\Xbim.Geometry.Engine32.pdb" target="build\net45\x86\Xbim.Geometry.Engine32.pdb" />
-      <file src="Output\Release\x64\Xbim.Geometry.Engine64.pdb" target="build\net45\x64\Xbim.Geometry.Engine64.pdb" />
     </files>
 
   </package>
