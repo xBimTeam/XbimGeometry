@@ -75,6 +75,7 @@ namespace Xbim.Geometry.Engine.Interop
 
             if (libraryPath != null)
             {
+                LoggerFactory.GetLogger().Debug("Resolved assembly to: " + libraryPath);
                 return Assembly.LoadFile(libraryPath);
             }
             return null;
