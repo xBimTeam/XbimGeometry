@@ -60,7 +60,7 @@ namespace Xbim.Geometry.Engine.Interop
 
                 libraryPath = Path.Combine(appDir, (IntPtr.Size == 8) ? "x64" : "x86", relativeDir);
             }
-            else if (args.Name.StartsWith(XbimModulePrefix))
+            else if (args.Name.StartsWith(XbimModulePrefix) && !args.Name.Contains("resources"))
             {
                 // If the *32.dll or *64.dll is loaded from a
                 // subdirectory (e.g. plugins folder), .net can
@@ -75,6 +75,7 @@ namespace Xbim.Geometry.Engine.Interop
 
             if (libraryPath != null)
             {
+                LoggerFactory.GetLogger().Debug("Resolved assembly to: " + libraryPath);
                 return Assembly.LoadFile(libraryPath);
             }
             return null;

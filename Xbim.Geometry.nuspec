@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
     <metadata>
         <id>Xbim.Geometry</id>
-        <version>3.0.3</version>
+        <version>3.0.5-Prerelease</version>
         <title>xBIM Geometry</title>
         <authors>xBIM team</authors>
         <owners>Steve Lockley</owners>
@@ -33,6 +33,8 @@ IOS and Android versions are under development.</description>
       <file src="Output\Release\x86\Xbim.Geometry.Engine32.dll" target="build\net45\x86\Xbim.Geometry.Engine32.dll" />
       <file src="Output\Release\x64\Xbim.Geometry.Engine64.dll" target="build\net45\x64\Xbim.Geometry.Engine64.dll" />
       <file src="Output\Release\Xbim.Geometry.targets" target="build\net45\Xbim.Geometry.targets" />
+      <file src="Output\Release\Xbim.Geometry.Engine.Interop.pdb" target="lib\net45\Xbim.Geometry.Engine.Interop.pdb" />
+      <file src="Output\Release\Xbim.ModelGeometry.Scene.pdb" target="lib\net45\Xbim.ModelGeometry.Scene.pdb" />
     </files>
 
   </package>
