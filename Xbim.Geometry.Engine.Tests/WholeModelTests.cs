@@ -33,7 +33,7 @@ namespace GeometryTests
         public void WriteDpoWOutputFiles()
         {
 
-            const string ifcFileFullName = "SolidTestFiles\\Duplex_MEP_20110907.ifc";
+            const string ifcFileFullName = "SolidTestFiles\\Duplex_A_20110907.ifc";
             var fileName = Path.GetFileName(ifcFileFullName);
             var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
             var workingDir = Path.Combine(Directory.GetCurrentDirectory(), "SolidTestFiles\\");
@@ -50,11 +50,19 @@ namespace GeometryTests
 
                         using (var model = new XbimModel())
                         {
-                            model.CreateFrom(ifcFileFullName, xbimFile, null, true);
-                            var geomContext = new Xbim3DModelContext(model);
-                            geomContext.CreateContext(XbimGeometryType.PolyhedronBinary);
-                            geomContext.Write(binaryWriter);
-
+                            try
+                            {
+                                model.CreateFrom(ifcFileFullName, xbimFile, null, true);
+                                var geomContext = new Xbim3DModelContext(model);
+                                geomContext.CreateContext(XbimGeometryType.PolyhedronBinary);
+                                geomContext.Write(binaryWriter);
+                            }
+                            finally
+                            {
+                                model.Close();
+                                binaryWriter.Close();
+                            }
+                           
                         }
                     }
                 }
