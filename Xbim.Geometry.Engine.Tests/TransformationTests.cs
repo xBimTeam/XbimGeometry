@@ -11,7 +11,7 @@ using XbimGeometry.Interfaces;
 namespace GeometryTests
 {
     [TestClass]
-    [DeploymentItem(@"SolidTestFiles\")]
+   
     public class TransformationTests
     {
         private readonly XbimGeometryEngine _xbimGeometryCreator = new XbimGeometryEngine();

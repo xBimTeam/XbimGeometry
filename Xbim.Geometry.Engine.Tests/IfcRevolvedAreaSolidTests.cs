@@ -5,13 +5,10 @@ using Xbim.Geometry.Engine.Interop;
 using Xbim.IO;
 using Xbim.Ifc2x3.GeometricModelResource;
 using Xbim.Ifc2x3.ProfileResource;
-using Xbim.Geometry;
 
 namespace GeometryTests
 {
     [TestClass]
-    [DeploymentItem(@"SolidTestFiles\")]
-
     public class IfcRevolvedAreaSolidTests
     {
         private readonly XbimGeometryEngine _xbimGeometryCreator = new XbimGeometryEngine();
@@ -22,7 +19,7 @@ namespace GeometryTests
             {
                 using (var m = new XbimModel())
                 {
-                    m.CreateFrom("5- IfcRevolvedAreaSolid-IfcCircularHollowProfileDef.ifc", null, null, true, true);
+                    m.CreateFrom("SolidTestFiles\\5- IfcRevolvedAreaSolid-IfcCircularHollowProfileDef.ifc", null, null, true, true);
                     var ss = m.Instances.OfType<IfcRevolvedAreaSolid>().FirstOrDefault(e => e.SweptArea is IfcCircleHollowProfileDef);
                     Assert.IsTrue(ss != null, "No Extruded Solid found");
                     Assert.IsTrue(ss.SweptArea is IfcCircleHollowProfileDef, "Incorrect profiledef found");

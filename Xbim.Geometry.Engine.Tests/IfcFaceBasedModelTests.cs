@@ -4,14 +4,11 @@ using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc2x3.TopologyResource;
 using Xbim.IO;
 using Xbim.Ifc2x3.GeometricModelResource;
-using Xbim.Geometry;
 using Xbim.Common.Logging;
 
 namespace GeometryTests
 {
     [TestClass]
-    [DeploymentItem(@"SolidTestFiles\")]
-
     public class IfcFaceBasedModelTests
     {
         private readonly XbimGeometryEngine _xbimGeometryCreator = new XbimGeometryEngine();
@@ -25,7 +22,7 @@ namespace GeometryTests
             {
                 using (var m = new XbimModel())
                 {
-                    m.CreateFrom("12 - Multiple FacetedBrep.ifc", null, null, true, true);
+                    m.CreateFrom("SolidTestFiles\\12 - Multiple FacetedBrep.ifc", null, null, true, true);
                     var fbr = m.Instances[25] as IfcFacetedBrep;
                     Assert.IsTrue(fbr != null, "No IfcFacetedBRep found");
                     int faceCount = fbr.Outer.CfsFaces.Count;
@@ -48,7 +45,7 @@ namespace GeometryTests
             {
                 using (var m = new XbimModel())
                 {
-                    m.CreateFrom("12 - Multiple FacetedBrep.ifc", null, null, true, true);
+                    m.CreateFrom("SolidTestFiles\\12 - Multiple FacetedBrep.ifc", null, null, true, true);
                     var fbr = m.Instances[780] as IfcFacetedBrep;
                     Assert.IsTrue(fbr != null, "No IfcFacetedBRep found");
                     int faceCount = fbr.Outer.CfsFaces.Count;
@@ -72,7 +69,7 @@ namespace GeometryTests
             {
                 using (var m = new XbimModel())
                 {
-                    m.CreateFrom("16 - IfcShellBasedSurfaceModel.ifc", null, null, true, true);
+                    m.CreateFrom("SolidTestFiles\\16 - IfcShellBasedSurfaceModel.ifc", null, null, true, true);
                     var sbsm = m.Instances[38] as IfcShellBasedSurfaceModel;
                     Assert.IsTrue(sbsm != null, "No IfcShellBasedSurfaceModel found");
                     Assert.IsTrue(sbsm.SbsmBoundary.First is IfcOpenShell, "ifc OpenShell not found");
@@ -92,7 +89,7 @@ namespace GeometryTests
             {
                 using (var m = new XbimModel())
                 {
-                    m.CreateFrom("17 - IfcFaceBasedSurfaceModel.ifc", null, null, true, true);
+                    m.CreateFrom("SolidTestFiles\\17 - IfcFaceBasedSurfaceModel.ifc", null, null, true, true);
                     var fbsm = m.Instances[29] as IfcFaceBasedSurfaceModel;
                     Assert.IsTrue(fbsm != null, "No IfcFaceBasedSurfaceModel found");
 

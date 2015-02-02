@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Xbim.Common.Geometry;
@@ -14,9 +15,6 @@ using XbimGeometry.Interfaces;
 namespace GeometryTests
 {
     [TestClass]
-    [DeploymentItem(@"SolidTestFiles\")]
-    [DeploymentItem(@"x86\Xbim.Geometry.Engine32.dll", "x86")]
-    [DeploymentItem(@"x64\Xbim.Geometry.Engine64.dll", "x64")]
     public class IfcBooleanTests
     {
         private readonly XbimGeometryEngine _xbimGeometryCreator = new XbimGeometryEngine();
@@ -25,22 +23,34 @@ namespace GeometryTests
         {
             using (var m = new XbimModel())
             {
-                m.CreateFrom("7- Boolean_IfcHalfspace_With_IfcExtrudedAreaSolid.ifc", null, null, true, true);
-                var fbsm = m.Instances[57] as IfcConnectedFaceSet;
-                Assert.IsFalse(fbsm == null, "IfcConnectedFaceSet is invalid");
-                
-                var shell = _xbimGeometryCreator.CreateShell(fbsm);
-
-                using (var txn = m.BeginTransaction())
+                try
                 {
-                    var ifcCylinder = IfcModelBuilder.MakeRightCircularCylinder(m, 500, 1500);
-                    ifcCylinder.Position.Location.SetXYZ(-23000, 12000, 2000);
-                    var cylinder = _xbimGeometryCreator.CreateSolid(ifcCylinder);
-                    var shellSet = (IXbimShellSet)shell.Cut(cylinder, m.ModelFactors.PrecisionBoolean);
-                    Assert.IsTrue(shellSet.Count == 1, "Cutting this shell should return a single shell");
-                    var resultShell = shellSet.First;
-                    Assert.IsTrue(shell.SurfaceArea>resultShell.SurfaceArea, "The surface area of the result should be less than the original");                 
+                    m.CreateFrom("SolidTestFiles\\7- Boolean_IfcHalfspace_With_IfcExtrudedAreaSolid.ifc", null, null,
+                        true, true);
+                    var fbsm = m.Instances[57] as IfcConnectedFaceSet;
+                    Assert.IsFalse(fbsm == null, "IfcConnectedFaceSet is invalid");
+
+                    var shell = _xbimGeometryCreator.CreateShell(fbsm);
+                    
+                    using (var txn = m.BeginTransaction())
+                    {
+                        var ifcCylinder = IfcModelBuilder.MakeRightCircularCylinder(m, 500, 1500);
+                        ifcCylinder.Position.Location.SetXYZ(-23000, 12000, 2000);
+                        var cylinder = _xbimGeometryCreator.CreateSolid(ifcCylinder);
+                        var shellSet = (IXbimShellSet) shell.Cut(cylinder, m.ModelFactors.PrecisionBoolean);
+                        Assert.IsTrue(shellSet.Count == 1, "Cutting this shell should return a single shell");
+                        var resultShell = shellSet.First;
+                        Assert.IsTrue(shell.SurfaceArea > resultShell.SurfaceArea,
+                            "The surface area of the result should be less than the original");
+                    }
                 }
+                finally
+                {
+                    var path = m.DatabaseName;
+                    m.Close();
+                    File.Delete(path);
+                }
+
             }
         }
 
@@ -49,25 +59,36 @@ namespace GeometryTests
         {
             using (var m = new XbimModel())
             {
-                m.CreateFrom("7- Boolean_IfcHalfspace_With_IfcExtrudedAreaSolid.ifc", null, null, true, true);
-                var fbsm1 = m.Instances[57] as IfcConnectedFaceSet;
-                Assert.IsNotNull(fbsm1, "IfcConnectedFaceSet is invalid");
-                using (var txn = m.BeginTransaction())
+                try
                 {
-                    
-                    
-                    var ifcCylinder = IfcModelBuilder.MakeRightCircularCylinder(m, 500, 1500);
-                    ifcCylinder.Position.Location.SetXYZ(-23000, 12000, 2000);
-                    var cylinder = _xbimGeometryCreator.CreateSolid(ifcCylinder);
-                    var shell1 = _xbimGeometryCreator.CreateShell(fbsm1);
-                    var shell2 = ((IXbimShellSet) shell1.Cut(cylinder, m.ModelFactors.PrecisionBoolean)).First;
-                    var shellSet = (IXbimShellSet) shell1.Intersection(shell2, m.ModelFactors.PrecisionBoolean);
-                    Assert.IsTrue(shellSet.Count == 1,
-                        string.Format("Cutting this shell should return a single shell, it returned {0}", shellSet.Count));
-                    var resultShell = shellSet.First;
-                    Assert.IsTrue(Math.Abs(shell2.SurfaceArea - resultShell.SurfaceArea) < m.ModelFactors.Precision,
-                        "The surface area of the result should be the same as the second shell");
 
+
+                    m.CreateFrom("SolidTestFiles\\7- Boolean_IfcHalfspace_With_IfcExtrudedAreaSolid.ifc", null, null, true, true);
+                    var fbsm1 = m.Instances[57] as IfcConnectedFaceSet;
+                    Assert.IsNotNull(fbsm1, "IfcConnectedFaceSet is invalid");
+                    using (var txn = m.BeginTransaction())
+                    {
+
+
+                        var ifcCylinder = IfcModelBuilder.MakeRightCircularCylinder(m, 500, 1500);
+                        ifcCylinder.Position.Location.SetXYZ(-23000, 12000, 2000);
+                        var cylinder = _xbimGeometryCreator.CreateSolid(ifcCylinder);
+                        var shell1 = _xbimGeometryCreator.CreateShell(fbsm1);
+                        var shell2 = ((IXbimShellSet)shell1.Cut(cylinder, m.ModelFactors.PrecisionBoolean)).First;
+                        var shellSet = (IXbimShellSet)shell1.Intersection(shell2, m.ModelFactors.PrecisionBoolean);
+                        Assert.IsTrue(shellSet.Count == 1,
+                            string.Format("Cutting this shell should return a single shell, it returned {0}", shellSet.Count));
+                        var resultShell = shellSet.First;
+                        Assert.IsTrue(Math.Abs(shell2.SurfaceArea - resultShell.SurfaceArea) < m.ModelFactors.Precision,
+                            "The surface area of the result should be the same as the second shell");
+
+                    }
+                }
+                finally
+                {
+                    var path = m.DatabaseName;
+                    m.Close();
+                    File.Delete(path);
                 }
             }
         }
@@ -77,20 +98,30 @@ namespace GeometryTests
         {
             using (var m = new XbimModel())
             {
-                m.CreateFrom("7- Boolean_IfcHalfspace_With_IfcExtrudedAreaSolid.ifc", null, null, true, true);
-                var fbsm1 = m.Instances[57] as IfcConnectedFaceSet;
-                Assert.IsNotNull(fbsm1, "IfcConnectedFaceSet is invalid");
-                var fbsm2 = m.Instances[305] as IfcConnectedFaceSet;
-                Assert.IsNotNull(fbsm2, "IfcConnectedFaceSet is invalid");
-                
-                var shell1 = _xbimGeometryCreator.CreateShell(fbsm1);
-                var shell2 = _xbimGeometryCreator.CreateShell(fbsm2);
-                var shellSet = (IXbimShellSet)shell1.Union(shell2, m.ModelFactors.PrecisionBoolean);
-                Assert.IsTrue(shellSet.Count == 1,
-                    string.Format("Cutting this shell should return a single shell, it returned {0}", shellSet.Count));
-                var resultShell = shellSet.First;
-                Assert.IsTrue(shell1.SurfaceArea < resultShell.SurfaceArea,
-                    "The surface area of the result should be less than the original");
+                try
+                {
+
+                    m.CreateFrom("SolidTestFiles\\7- Boolean_IfcHalfspace_With_IfcExtrudedAreaSolid.ifc", null, null, true, true);
+                    var fbsm1 = m.Instances[57] as IfcConnectedFaceSet;
+                    Assert.IsNotNull(fbsm1, "IfcConnectedFaceSet is invalid");
+                    var fbsm2 = m.Instances[305] as IfcConnectedFaceSet;
+                    Assert.IsNotNull(fbsm2, "IfcConnectedFaceSet is invalid");
+
+                    var shell1 = _xbimGeometryCreator.CreateShell(fbsm1);
+                    var shell2 = _xbimGeometryCreator.CreateShell(fbsm2);
+                    var shellSet = (IXbimShellSet)shell1.Union(shell2, m.ModelFactors.PrecisionBoolean);
+                    Assert.IsTrue(shellSet.Count == 1,
+                        string.Format("Cutting this shell should return a single shell, it returned {0}", shellSet.Count));
+                    var resultShell = shellSet.First;
+                    Assert.IsTrue(shell1.SurfaceArea < resultShell.SurfaceArea,
+                        "The surface area of the result should be less than the original");
+                }
+                finally
+                {
+                    var path = m.DatabaseName;
+                    m.Close();
+                    File.Delete(path);
+                }
             }
         }
         [TestMethod]
@@ -327,7 +358,7 @@ namespace GeometryTests
             {
                 using (var m = new XbimModel())
                 {
-                    m.CreateFrom("7- Boolean_IfcHalfspace_With_IfcExtrudedAreaSolid.ifc", null, null, true, true);
+                    m.CreateFrom("SolidTestFiles\\7- Boolean_IfcHalfspace_With_IfcExtrudedAreaSolid.ifc", null, null, true, true);
                     var eas = m.Instances.OfType<IfcBooleanClippingResult>().FirstOrDefault(hs => hs.FirstOperand is IfcExtrudedAreaSolid && hs.SecondOperand is IfcHalfSpaceSolid);
                     Assert.IsTrue(eas != null, "No IfcBooleanClippingResult found");
                     Assert.IsTrue(eas.FirstOperand is IfcExtrudedAreaSolid , "Incorrect first operand found");
@@ -351,7 +382,7 @@ namespace GeometryTests
             {
                 using (var m = new XbimModel())
                 {
-                    m.CreateFrom("8- Boolean_IfcPolygonalBoundedHalfspace_With_IfcExtrudedAreaSolid.ifc", null, null, true, true);
+                    m.CreateFrom("SolidTestFiles\\8- Boolean_IfcPolygonalBoundedHalfspace_With_IfcExtrudedAreaSolid.ifc", null, null, true, true);
                     var eas = m.Instances.OfType<IfcBooleanClippingResult>().FirstOrDefault(hs => hs.FirstOperand is IfcExtrudedAreaSolid && hs.SecondOperand.GetType() == typeof(IfcPolygonalBoundedHalfSpace));
                     Assert.IsTrue(eas != null, "No IfcBooleanClippingResult found");
                     Assert.IsTrue(eas.FirstOperand is IfcExtrudedAreaSolid , "Incorrect first operand found");
@@ -375,7 +406,7 @@ namespace GeometryTests
             {
                 using (var m = new XbimModel())
                 {
-                    m.CreateFrom("9- Boolean_With_Nested_Booleans.ifc", null, null, true, true);
+                    m.CreateFrom("SolidTestFiles\\9- Boolean_With_Nested_Booleans.ifc", null, null, true, true);
                     var eas = m.Instances[32] as IfcBooleanClippingResult;
                     Assert.IsTrue(eas != null, "No IfcBooleanClippingResult found");
                     Assert.IsTrue(eas.FirstOperand is IfcBooleanClippingResult, "Incorrect first operand found");
@@ -397,7 +428,7 @@ namespace GeometryTests
             {
                 using (var m = new XbimModel())
                 {
-                    m.CreateFrom("10- Boxed Half Space.ifc", null, null, true, true);
+                    m.CreateFrom("SolidTestFiles\\10- Boxed Half Space.ifc", null, null, true, true);
                     var eas = m.Instances[28] as IfcBooleanClippingResult;
                     Assert.IsTrue(eas != null, "No IfcBooleanClippingResult found");
                     Assert.IsTrue(eas.SecondOperand is IfcBoxedHalfSpace, "Incorrect second operand found");

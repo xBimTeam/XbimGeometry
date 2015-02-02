@@ -10,9 +10,7 @@ using XbimGeometry.Interfaces;
 namespace GeometryTests
 {
     [TestClass]
-    [DeploymentItem(@"SolidTestFiles\")]
-    [DeploymentItem(@"x86\Xbim.Geometry.Engine32.dll", "x86")]
-    [DeploymentItem(@"x64\Xbim.Geometry.Engine64.dll", "x64")]
+    
     public class IfcCsgTests
     { 
 

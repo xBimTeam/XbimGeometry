@@ -10,8 +10,7 @@ using Xbim.Geometry;
 namespace GeometryTests
 {
     [TestClass]
-    [DeploymentItem(@"SolidTestFiles\")]
-
+   
     public class IfcSweptSolidTests
     {
         private readonly XbimGeometryEngine _xbimGeometryCreator = new XbimGeometryEngine();
@@ -22,7 +21,7 @@ namespace GeometryTests
             {
                 using (var m = new XbimModel())
                 {
-                    m.CreateFrom("6- IfcSweptDiskSolid_With_BooleanResult.ifc", null, null, true, true);
+                    m.CreateFrom("SolidTestFiles\\6- IfcSweptDiskSolid_With_BooleanResult.ifc", null, null, true, true);
                     var ss = m.Instances.OfType<IfcSweptDiskSolid>().FirstOrDefault(e => e.Directrix is IfcPolyline);
                     Assert.IsTrue(ss != null, "No Swept Disk found");
                     Assert.IsTrue(ss.Directrix is IfcPolyline, "Incorrect sweep found");
@@ -45,7 +44,7 @@ namespace GeometryTests
             {
                 using (var m = new XbimModel())
                 {
-                    m.CreateFrom("6- IfcSweptDiskSolid_With_BooleanResult.ifc", null, null, true, true);
+                    m.CreateFrom("SolidTestFiles\\6- IfcSweptDiskSolid_With_BooleanResult.ifc", null, null, true, true);
                     var ss = m.Instances.OfType<IfcSweptDiskSolid>().FirstOrDefault(e => e.Directrix is IfcCompositeCurve);
                     Assert.IsTrue(ss != null, "No Swept Disk found");
                     Assert.IsTrue(ss.Directrix is IfcCompositeCurve, "Incorrect sweep found");
@@ -68,7 +67,7 @@ namespace GeometryTests
             {
                 using (var m = new XbimModel())
                 {
-                    m.CreateFrom("11- IfcSurfaceCurveSweptAreaSolid.ifc", null, null, true, true);
+                    m.CreateFrom("SolidTestFiles\\11- IfcSurfaceCurveSweptAreaSolid.ifc", null, null, true, true);
                     var ss = m.Instances.OfType<IfcSurfaceCurveSweptAreaSolid>().FirstOrDefault();
                     Assert.IsTrue(ss != null, "No Swept Disk found");
                    

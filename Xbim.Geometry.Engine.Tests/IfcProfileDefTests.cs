@@ -1,16 +1,13 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc2x3.ProfileResource;
 using Xbim.IO;
-using Xbim.Geometry;
 
 namespace GeometryTests
 {
     
     [TestClass]
-    [DeploymentItem(@"SolidTestFiles\")]
-
+   
     public class IfcProfileDefTests
     {
         private readonly XbimGeometryEngine _xbimGeometryCreator = new XbimGeometryEngine();
@@ -140,7 +137,7 @@ namespace GeometryTests
         {
             using (var m = XbimModel.CreateTemporaryModel())
             {
-                using (var txn = m.BeginTransaction())
+                using (m.BeginTransaction())
                 {
                     var prof = IfcModelBuilder.MakeCShapeProfileDef(m, 150, 90, 3, 10 , 3,  -30);
                     var face = _xbimGeometryCreator.CreateFace(prof);

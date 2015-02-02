@@ -11,7 +11,7 @@ using System.Linq;
 namespace GeometryTests
 {
     [TestClass]
-    [DeploymentItem(@"SolidTestFiles\")]
+  
     public class XbimGeometryToIfcTests
     {
         private readonly XbimGeometryEngine _xbimGeometryCreator = new XbimGeometryEngine();
@@ -68,8 +68,7 @@ namespace GeometryTests
         }
 
         [TestMethod]
-        [DeploymentItem(@"x86\Xbim.Geometry.Engine32.dll", "x86")]
-        [DeploymentItem(@"x64\Xbim.Geometry.Engine64.dll", "x64")]
+       
         public void ConvertIfcBlockToBRepTest()
         { 
             using (var m = XbimModel.CreateTemporaryModel())

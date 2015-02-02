@@ -10,6 +10,7 @@ namespace GeometryTests
 {
 
     [TestClass]
+   
     public class SurfaceSweepTests
     {
         private readonly XbimGeometryEngine _xbimGeometryCreator = new XbimGeometryEngine();

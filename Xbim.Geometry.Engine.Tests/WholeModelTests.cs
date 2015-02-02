@@ -14,7 +14,6 @@ using Xbim.Ifc2x3.PresentationDefinitionResource;
 using Xbim.Ifc2x3.PresentationResource;
 using Xbim.Ifc2x3.ProductExtension;
 using Xbim.IO;
-using Xbim.Geometry;
 using Xbim.ModelGeometry.Scene;
 using Xbim.XbimExtensions.SelectTypes;
 using XbimGeometry.Interfaces;
@@ -25,23 +24,19 @@ namespace GeometryTests
     /// Excutes tests on every geometry item found in every file in the specified directory, passes if no files are found
     /// </summary>
     /// 
-
-    [DeploymentItem(@"SolidTestFiles\")]
-    [DeploymentItem(@"x86\Xbim.Geometry.Engine32.dll","x86")]
-    [DeploymentItem(@"x64\Xbim.Geometry.Engine64.dll","x64")]
     [TestClass]
     public class WholeModelTests
     {
         private readonly XbimGeometryEngine _xbimGeometryCreator = new XbimGeometryEngine();
 
         [TestMethod]
-        public void WriteDPoWOutputFiles()
+        public void WriteDpoWOutputFiles()
         {
 
-            const string ifcFileFullName = "Duplex_MEP_20110907.ifc";
+            const string ifcFileFullName = "SolidTestFiles\\Duplex_MEP_20110907.ifc";
             var fileName = Path.GetFileName(ifcFileFullName);
             var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
-            var workingDir = Directory.GetCurrentDirectory();
+            var workingDir = Path.Combine(Directory.GetCurrentDirectory(), "SolidTestFiles\\");
             var coreFileName = Path.Combine(workingDir, fileNameWithoutExtension);
             var wexBimFileName = Path.ChangeExtension(coreFileName, "wexbim");
             var xbimFile = Path.ChangeExtension(coreFileName, "xbim");
@@ -55,7 +50,7 @@ namespace GeometryTests
 
                         using (var model = new XbimModel())
                         {
-                            model.CreateFrom(ifcFileFullName, xbimFile, null, true, false);
+                            model.CreateFrom(ifcFileFullName, xbimFile, null, true);
                             var geomContext = new Xbim3DModelContext(model);
                             geomContext.CreateContext(XbimGeometryType.PolyhedronBinary);
                             geomContext.Write(binaryWriter);
@@ -76,9 +71,12 @@ namespace GeometryTests
         [TestMethod]
         public void TestAllModels()
         {
-            ILogger logger = _xbimGeometryCreator.Logger;
-
-            const string modelDirectory = @"D:\Users\steve\xBIM\Test Models\Use Cases\Live";
+            const string modelDirectory = ""; // enter your model directoy here "@"D:\Users\steve\xBIM\Test Models\Use Cases\Live";#
+            if (string.IsNullOrWhiteSpace(modelDirectory))
+            {
+                Trace.WriteLine("TestAllModels tests skipped. Enter a directory where the test models can be found");
+                return;
+            }
             var di = new DirectoryInfo(modelDirectory);
             FileInfo[] toProcess = di.GetFiles("*.IFC", SearchOption.TopDirectoryOnly);
             foreach (var file in toProcess)
@@ -146,9 +144,13 @@ namespace GeometryTests
         [TestMethod]
         public void TestCuttingOpenings()
         {
-            ILogger logger = _xbimGeometryCreator.Logger;
-          //   var w = new XbimOccWriter();
-            const string modelDirectory = @"D:\Users\steve\xBIM\Test Models\Use Cases\Live";
+            //   var w = new XbimOccWriter();
+            const string modelDirectory = "";//define where your files to test are @"D:\Users\steve\xBIM\Test Models\Use Cases\Live";
+            if (string.IsNullOrWhiteSpace(modelDirectory))
+            {
+                Trace.WriteLine("TestCuttingOpenings tests skipped. Enter a directory where the test models can be found");
+                return;
+            }
             var di = new DirectoryInfo(modelDirectory);
             FileInfo[] toProcess = di.GetFiles("*.IFC", SearchOption.TopDirectoryOnly);
             foreach (var file in toProcess)
@@ -170,7 +172,7 @@ namespace GeometryTests
                                     new
                                     {
                                         element = f.RelatingBuildingElement,
-                                        feature = (IfcFeatureElementSubtraction) f.RelatedOpeningElement
+                                        feature = f.RelatedOpeningElement
                                     });
 
                         var toCut = openings.GroupBy(x => x.element, y => y.feature).ToList();
@@ -219,7 +221,7 @@ namespace GeometryTests
                                                     IfcCsgTests.GeneralTest((IXbimSolid) subShape, true,
                                                         item is IfcHalfSpaceSolid,
                                                         rep.EntityLabel);
-                                                elemSolids.Add(((IXbimSolid) subShape).Transform(elemTransform));
+                                                elemSolids.Add(subShape.Transform(elemTransform));
                                             }
                                         }
                                         else
@@ -279,7 +281,7 @@ namespace GeometryTests
                                                         IfcCsgTests.GeneralTest((IXbimSolid) subShape, true,
                                                             openingitem is IfcHalfSpaceSolid,
                                                             openingrep.EntityLabel);
-                                                    openingSolids.Add(((IXbimSolid) subShape).Transform(openingTransform));
+                                                    openingSolids.Add(subShape.Transform(openingTransform));
                                                 }
                                             }
                                             else
@@ -292,17 +294,15 @@ namespace GeometryTests
                                 }
                             }
 
+                            // ReSharper disable once AccessToDisposedClosure
+
                             var solidResult = elemSolids.Cut(openingSolids, m.ModelFactors.PrecisionBoolean);
-                             int i = 1;
                             foreach (var result in solidResult)
                             {
                                 IfcCsgTests.GeneralTest(result, true, false,
                                     elem.EntityLabel);
-                                // w.Write(result, "d:\\xbim\\r" + elem.EntityLabel + "_" + i.ToString());
-                                  i++;
                                 theElements.Add(result);
                             }
-
 
                         }
                         );

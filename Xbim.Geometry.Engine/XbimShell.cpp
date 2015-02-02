@@ -277,6 +277,8 @@ namespace Xbim
 			try
 			{
 				BRepAlgoAPI_Cut boolOp(this, solidCut);
+				GC::KeepAlive(solidCut);
+				GC::KeepAlive(this);
 				if (boolOp.ErrorStatus() == 0)
 					return gcnew XbimShellSet(boolOp.Shape());
 			}

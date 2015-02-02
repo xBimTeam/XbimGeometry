@@ -93,22 +93,22 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Xbim.Common, Version=3.0.5492.31081, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Xbim.Common, Version=3.0.5498.16898, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Xbim.Essentials.3.0.3-Prerelease\lib\net45\Xbim.Common.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.3.0.3\lib\net45\Xbim.Common.dll</HintPath>
     </Reference>
-    <Reference Include="Xbim.Ifc.Extensions, Version=3.0.5491.27222, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Xbim.Ifc.Extensions, Version=3.0.5498.16901, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Xbim.Essentials.3.0.3-Prerelease\lib\net45\Xbim.Ifc.Extensions.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.3.0.3\lib\net45\Xbim.Ifc.Extensions.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Xbim.Ifc2x3">
-      <HintPath>..\packages\Xbim.Essentials.3.0.3-Prerelease\lib\net45\Xbim.Ifc2x3.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Xbim.Ifc2x3, Version=3.0.5498.16899, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Xbim.Essentials.3.0.3\lib\net45\Xbim.Ifc2x3.dll</HintPath>
     </Reference>
-    <Reference Include="Xbim.IO">
-      <HintPath>..\packages\Xbim.Essentials.3.0.3-Prerelease\lib\net45\Xbim.IO.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Xbim.IO, Version=3.0.5498.16901, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Xbim.Essentials.3.0.3\lib\net45\Xbim.IO.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

@@ -11,9 +11,7 @@ using XbimGeometry.Interfaces;
 namespace GeometryTests
 {
     [TestClass]
-    [DeploymentItem(@"SolidTestFiles\")]
-    [DeploymentItem(@"x86\Xbim.Geometry.Engine32.dll", "x86")]
-    [DeploymentItem(@"x64\Xbim.Geometry.Engine64.dll", "x64")]
+   
     public class SceneTests
     {
         /// <summary>
@@ -24,7 +22,7 @@ namespace GeometryTests
         {
             using (var m = new XbimModel())
             {
-                m.CreateFrom("19 - TwoProxy.ifc", null, null, true, true);
+                m.CreateFrom("SolidTestFiles\\19 - TwoProxy.ifc", null, null, true, true);
                 var m3D = new Xbim3DModelContext(m);
                 m3D.CreateContext(XbimGeometryType.PolyhedronBinary);
                 using (var bw = new BinaryWriter(new FileStream("test.wexBIM", FileMode.Create)))
