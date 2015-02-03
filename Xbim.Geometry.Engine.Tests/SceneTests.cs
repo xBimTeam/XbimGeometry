@@ -28,11 +28,13 @@ namespace GeometryTests
                 using (var bw = new BinaryWriter(new FileStream("test.wexBIM", FileMode.Create)))
                 {
                     m3D.Write(bw);
+                    bw.Close();
                 }
                 using (var fs = new FileStream("test.wexBIM", FileMode.Open,FileAccess.Read))
                 {
                     using (var br = new BinaryReader(fs))
                     {
+                        var magicNumber = br.ReadInt32();
                         var version = br.ReadByte();
                         var shapeCount = br.ReadInt32();
                         var vertexCount = br.ReadInt32();

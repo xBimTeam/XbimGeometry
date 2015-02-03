@@ -33,7 +33,7 @@ namespace GeometryTests
         public void WriteDpoWOutputFiles()
         {
 
-            const string ifcFileFullName = "SolidTestFiles\\Duplex_A_20110907.ifc";
+            const string ifcFileFullName = @"D:\Users\steve\My Documents\DPoW\001 NBS Lakeside Restaurant 2014.ifc";
             var fileName = Path.GetFileName(ifcFileFullName);
             var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
             var workingDir = Path.Combine(Directory.GetCurrentDirectory(), "SolidTestFiles\\");
@@ -60,7 +60,8 @@ namespace GeometryTests
                             finally
                             {
                                 model.Close();
-                                binaryWriter.Close();
+                                binaryWriter.Flush();
+                                wexBimFile.Close();
                             }
                            
                         }

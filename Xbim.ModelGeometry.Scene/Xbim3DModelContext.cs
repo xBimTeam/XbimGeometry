@@ -1644,7 +1644,7 @@ namespace Xbim.ModelGeometry.Scene
 
         public void Write(BinaryWriter binaryStream)
         {
-            int start = (int) binaryStream.Seek(0, SeekOrigin.Current);
+            
             float metre = Convert.ToSingle(_model.ModelFactors.OneMetre);
             var lookup = ShapeGeometryReferenceData();
             var styles = this.SurfaceStyles().ToList();
@@ -1656,7 +1656,9 @@ namespace Xbim.ModelGeometry.Scene
             int numberOfMatrices = 0;
             int numberOfProducts = 0;
             //start writing out
+            binaryStream.Write((Int32)94132117); //magic number
             binaryStream.Write((byte)1); //version of stream
+            int start = (int)binaryStream.Seek(0, SeekOrigin.Current);
             binaryStream.Write((Int32)0); //number of shapes
             binaryStream.Write((Int32)0); //number of vertices
             binaryStream.Write((Int32)0); //number of triangles
@@ -1708,6 +1710,7 @@ namespace Xbim.ModelGeometry.Scene
                     if (!bb.IsEmpty) //do not write out anything with no geometry
                     {
                         binaryStream.Write((Int32) product.EntityLabel);
+                        binaryStream.Write((short)IfcMetaData.IfcTypeId(product));
                         binaryStream.Write(bb.ToFloatArray());
                         numberOfProducts++;
                     }
@@ -1728,6 +1731,7 @@ namespace Xbim.ModelGeometry.Scene
                         //write out each of the ids style and transforms
                     {
                         binaryStream.Write(xbimShapeInstance.IfcProductLabel);
+                        binaryStream.Write((UInt16)xbimShapeInstance.IfcTypeId);
                         binaryStream.Write(xbimShapeInstance.InstanceLabel);
                         binaryStream.Write(xbimShapeInstance.StyleLabel > 0
                             ? xbimShapeInstance.StyleLabel
@@ -1755,6 +1759,7 @@ namespace Xbim.ModelGeometry.Scene
                     if (xbimShapeInstance != null)
                     {
                         binaryStream.Write(xbimShapeInstance.IfcProductLabel);
+                        binaryStream.Write((UInt16)xbimShapeInstance.IfcTypeId);
                         binaryStream.Write(xbimShapeInstance.InstanceLabel);
                         binaryStream.Write(xbimShapeInstance.StyleLabel > 0
                             ? xbimShapeInstance.StyleLabel
@@ -1775,7 +1780,7 @@ namespace Xbim.ModelGeometry.Scene
                     numberOfVertices += XbimShapeTriangulation.VerticesCount(geometry.ShapeData);
                 }
             }
-            binaryStream.Seek(start + sizeof(byte), SeekOrigin.Begin);
+            binaryStream.Seek(start, SeekOrigin.Begin);
             binaryStream.Write((Int32)numberOfGeometries);
             binaryStream.Write((Int32)numberOfVertices);
             binaryStream.Write((Int32)numberOfTriangles);
