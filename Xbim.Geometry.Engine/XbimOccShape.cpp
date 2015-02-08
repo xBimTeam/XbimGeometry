@@ -32,7 +32,7 @@ namespace Xbim
 			Monitor::Enter(this);
 			try
 			{
-				BRepMesh_IncrementalMesh incrementalMesh(this, deflection, Standard_True, angle); //triangulate the first time				
+				BRepMesh_IncrementalMesh incrementalMesh(this, deflection, Standard_False, angle); //triangulate the first time				
 			}
 			finally
 			{
@@ -182,7 +182,7 @@ namespace Xbim
 			Monitor::Enter(this);
 			try
 			{
-				BRepMesh_IncrementalMesh incrementalMesh(this, deflection, Standard_True, angle); //triangulate the first time				
+				BRepMesh_IncrementalMesh incrementalMesh(this, deflection, Standard_False, angle); //triangulate the first time				
 			}
 			finally
 			{
@@ -258,7 +258,7 @@ namespace Xbim
 					XbimPoint3DWithTolerance^ pt = gcnew XbimPoint3DWithTolerance(p.X(), p.Y(), p.Z(), tolerance);
 					if (!pointMap->TryGetValue(pt, index))
 					{
-						index = pointMap->Count;
+						index = points->Count;
 						pointMap->Add(pt, index);
 						points->Add(pt->VertexGeometry);
 					}
@@ -341,7 +341,7 @@ namespace Xbim
 		//	//	Monitor::Enter(this);
 		//	try
 		//	{
-		//		BRepMesh_IncrementalMesh incrementalMesh(this, deflection, Standard_True, angle); //triangulate the first time				
+		//		BRepMesh_IncrementalMesh incrementalMesh(this, deflection, Standard_False, angle); //triangulate the first time				
 		//	}
 		//	finally
 		//	{

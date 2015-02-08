@@ -450,7 +450,7 @@ namespace Xbim
 			Monitor::Enter(xSolid);
 			try
 			{
-				BRepMesh_IncrementalMesh incrementalMesh(xSolid, model->ModelFactors->DeflectionTolerance, Standard_True); //triangulate the first time				
+				BRepMesh_IncrementalMesh incrementalMesh(xSolid, model->ModelFactors->DeflectionTolerance, Standard_False); //triangulate the first time				
 			}
 			finally
 			{
@@ -531,9 +531,9 @@ namespace Xbim
 					for (Standard_Integer i = 1; i <= nbTriangles; i++) //add each triangle as a face
 					{
 						if (faceReversed) //get normals in the correct order of triangulation
-							triangles(i).Get(t[2], t[1], t[0]); 
+							triangles.Value(i).Get(t[2], t[1], t[0]); 
 						else
-							triangles(i).Get(t[0], t[1], t[2]);
+							triangles.Value(i).Get(t[0], t[1], t[2]);
 						IfcFace^ fc = model->Instances->New<IfcFace^>();
 						IfcFaceOuterBound^ fo = model->Instances->New<IfcFaceOuterBound^>();
 						fc->Bounds->Add(fo);
