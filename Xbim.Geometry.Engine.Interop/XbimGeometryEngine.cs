@@ -59,6 +59,11 @@ namespace Xbim.Geometry.Engine.Interop
                      GeomModuleName, (IntPtr.Size == 8) ? "64" : "32");
 
                 libraryPath = Path.Combine(appDir, (IntPtr.Size == 8) ? "x64" : "x86", relativeDir);
+
+                //if the engine file doesn't exist it is quite possible that the path is virtual
+                //but physical subdirectory might still exist.
+                if (!File.Exists(libraryPath))
+                    libraryPath = Path.Combine(IntPtr.Size == 8 ? "x64" : "x86", relativeDir);
             }
             else if (args.Name.StartsWith(XbimModulePrefix) && !args.Name.Contains("resources"))
             {
