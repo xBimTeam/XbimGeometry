@@ -193,7 +193,7 @@ namespace Xbim
 			List<List<int>^>^ pointLookup = gcnew List<List<int>^>(faces->Count);
 			List<XbimPoint3D>^ points = gcnew List<XbimPoint3D>(faces->Count * 5);;
 
-			Dictionary<XbimPoint3DWithTolerance^, int>^ normalMap = gcnew Dictionary<XbimPoint3DWithTolerance^, int>();
+			Dictionary<int, int>^ normalMap = gcnew Dictionary<int, int>();
 			List<List<int>^>^ normalLookup = gcnew List<List<int>^>(faces->Count);
 			List<XbimPackedNormal>^ normals = gcnew List<XbimPackedNormal>(faces->Count * 4);
 			List<XbimFace^>^ writtenFaces = gcnew List<XbimFace^>(faces->Count);
@@ -226,12 +226,13 @@ namespace Xbim
 							x *= -1; y *= -1; z *= -1;
 						}
 						int index;
-						XbimPoint3DWithTolerance^ n = gcnew XbimPoint3DWithTolerance(x, y, z, tolerance);
-						if (!normalMap->TryGetValue(n, index))
+						XbimPackedNormal packedNormal = XbimPackedNormal(x, y, z);
+						int packedVal = packedNormal.U << 8 | packedNormal.V;
+						if (!normalMap->TryGetValue(packedVal, index))
 						{
 							index = normalMap->Count;
-							normalMap->Add(n, index);
-							normals->Add(XbimPackedNormal(n->X, n->Y, n->Z));
+							normalMap->Add(packedVal, index);
+							normals->Add(packedNormal);
 						}
 						norms->Add(index);
 					}
@@ -240,12 +241,15 @@ namespace Xbim
 				{
 					norms = gcnew List<int>(1);
 					int index;
-					XbimPoint3DWithTolerance^ n = gcnew XbimPoint3DWithTolerance(face->Normal.X, face->Normal.Y, face->Normal.Z, tolerance);
-					if (!normalMap->TryGetValue(n, index))
+					XbimVector3D fn = face->Normal;
+					XbimPackedNormal packedNormal = XbimPackedNormal(fn);
+					int packedVal = packedNormal.U << 8 | packedNormal.V;
+	
+					if (!normalMap->TryGetValue(packedVal, index))
 					{
 						index = normalMap->Count;
-						normalMap->Add(n, index);
-						normals->Add(XbimPackedNormal(n->X, n->Y, n->Z));
+						normalMap->Add(packedVal, index);
+						normals->Add(packedNormal);
 					}
 					norms->Add(index);
 				}
