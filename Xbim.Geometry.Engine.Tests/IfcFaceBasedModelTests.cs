@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.IO;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc2x3.TopologyResource;
@@ -58,6 +59,31 @@ namespace GeometryTests
                     IfcCsgTests.GeneralTest(solids.First);
                     
                     Assert.IsTrue(solids.First.Faces.Count() == faceCount, "Failed to convert all faces");
+                }
+            }
+        }
+
+        [TestMethod]
+        public void IfcFacetedBRepTubeModelTest()
+        {
+            using (var eventTrace = LoggerFactory.CreateEventTrace())
+            {
+                using (var m = new XbimModel())
+                {
+                    m.CreateFrom("SolidTestFiles\\IfcFacetedBRepWithIncorrectlyOrientedFaces.ifc", null, null, true, true);
+                    var fbr = m.Instances[98711] as IfcFacetedBrep;
+                    Assert.IsTrue(fbr != null, "No IfcFacetedBRep found");
+                    int faceCount = fbr.Outer.CfsFaces.Count;
+
+                    var compound = _xbimGeometryCreator.Create(fbr);
+                    Assert.IsTrue(eventTrace.Events.Count == 0, "Warning or Error events were raised"); //we should have no warnings
+                    var bw = new BinaryWriter(new MemoryStream());
+                    _xbimGeometryCreator.WriteTriangulation(bw,compound, m.ModelFactors.Precision,m.ModelFactors.DeflectionTolerance);
+                    //Assert.IsTrue(solids.Count == 1, "Expected 1 solid");
+
+                    //IfcCsgTests.GeneralTest(solids.First);
+
+                    //Assert.IsTrue(solids.First.Faces.Count() == faceCount, "Failed to convert all faces");
                 }
             }
         }
