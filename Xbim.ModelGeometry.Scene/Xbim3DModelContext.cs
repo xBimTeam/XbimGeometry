@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -20,7 +19,6 @@ using Xbim.Ifc2x3.Extensions;
 using Xbim.Ifc2x3.GeometricModelResource;
 using Xbim.Ifc2x3.GeometryResource;
 using Xbim.Ifc2x3.Kernel;
-using Xbim.Ifc2x3.MeasureResource;
 using Xbim.Ifc2x3.PresentationAppearanceResource;
 using Xbim.Ifc2x3.ProductExtension;
 using Xbim.Ifc2x3.RepresentationResource;
@@ -118,27 +116,28 @@ namespace Xbim.ModelGeometry.Scene
             /// <summary>
             /// The key is the Ifc label of the geometry the value is the database record number
             /// </summary>
-            internal ConcurrentDictionary<int,int> GeometryShapeLookup { get; set; }
-            internal XbimModel Model { get; private set; }
-            internal IfcRepresentationContextCollection Contexts { get; private set; }
-            internal ParallelOptions ParallelOptions { get; set; }
-            internal XbimPlacementTree PlacementTree { get; set; }
-            internal HashSet<int> MappedShapeIds { get; set; }
-            internal HashSet<int> FeatureElementShapeIds { get; set; }
-            internal List<IGrouping<IfcElement, IfcFeatureElement>> OpeningsAndProjections { get; set; }
-            internal HashSet<int> VoidedShapeIds { get; set; }
-            internal HashSet<int> ProductShapeIds { get; set; }
+            internal ConcurrentDictionary<int,int> GeometryShapeLookup { get; private set; }
+
+            private XbimModel Model { get; set; }
+            private IfcRepresentationContextCollection Contexts { get; set; }
+            internal ParallelOptions ParallelOptions { get; private set; }
+            internal XbimPlacementTree PlacementTree { get; private set; }
+            internal HashSet<int> MappedShapeIds { get; private set; }
+            internal HashSet<int> FeatureElementShapeIds { get; private set; }
+            internal List<IGrouping<IfcElement, IfcFeatureElement>> OpeningsAndProjections { get; private set; }
+            private HashSet<int> VoidedShapeIds { get; set; }
+            internal HashSet<int> ProductShapeIds { get; private set; }
             internal ConcurrentDictionary<int, IXbimGeometryObject> CachedGeometries { get; private set; }
-            internal int Total { get; set; }
+            internal int Total { get; private set; }
             internal int PercentageParsed { get; set; }
             internal int Tally { get; set; }
-            internal Dictionary<int, int> SurfaceStyles { get; set; }
+            internal Dictionary<int, int> SurfaceStyles { get; private set; }
 
             internal Dictionary<IfcRepresentationContext, ConcurrentQueue<XbimBBoxClusterElement>> Clusters { get; private set;
             }
 
-            internal ConcurrentDictionary<int, List<GeometryReference>> MapsWritten { get; set; }
-            internal ConcurrentDictionary<int, XbimMatrix3D> MapTransforms { get; set; }
+            internal ConcurrentDictionary<int, List<GeometryReference>> MapsWritten { get; private set; }
+            internal ConcurrentDictionary<int, XbimMatrix3D> MapTransforms { get; private set; }
 
             internal IXbimGeometryObject GetGeometryFromCache(XbimShapeInstance instance)
             {
@@ -368,11 +367,7 @@ namespace Xbim.ModelGeometry.Scene
                     contexts = model.Instances.OfType<IfcGeometricRepresentationContext>().ToList();
                     if (contexts.Any())
                     {
-                        var ctxtString = "";
-                        foreach (var ctxt in contexts)
-                        {
-                            ctxtString += ctxt.ContextType + " ";
-                        }
+                        var ctxtString = contexts.Aggregate("", (current, ctxt) => current + (ctxt.ContextType + " "));
                         if (string.IsNullOrWhiteSpace(ctxtString)) ctxtString = "$";
                         Logger.InfoFormat(
                             "Unable to find any Geometric Representation contexts with Context Type = {0} and Context Identifier = {1}, using  available Context Types '{2}'. NB This does not comply with IFC 2x2 or greater",
@@ -394,10 +389,10 @@ namespace Xbim.ModelGeometry.Scene
                 foreach (var context in contexts)
                 {
                     _contexts.Add(context);
-                    if (context.DefaultPrecision == 0)
-                        roundingPrecisions.Add(context, 0);
-                    else
-                        roundingPrecisions.Add(context, Math.Abs((int) Math.Log10(context.DefaultPrecision)));
+                    roundingPrecisions.Add(context,
+                        Math.Abs(context.DefaultPrecision) < 1e-9
+                            ? 0
+                            : Math.Abs((int) Math.Log10(context.DefaultPrecision)));
                     contextLookup.Add(GetContextId(context), context);
                 }
                 _contextIsPersisted = false;
@@ -445,6 +440,7 @@ namespace Xbim.ModelGeometry.Scene
                 using (
                     var writeToDb =
                         Task.Factory.StartNew(
+// ReSharper disable once AccessToDisposedClosure
                             () => WriteShapeGeometriesToDatabase(contextHelper, shapeGeometries)))
                 {
                     try
@@ -468,6 +464,7 @@ namespace Xbim.ModelGeometry.Scene
             {
                 //start a new task to process features
                 HashSet<int> processed;
+// ReSharper disable once AccessToDisposedClosure
                 using (var writeToDb = Task.Factory.StartNew(() => WriteFeatureElementsToDatabase(features)))
                 {
                     try
@@ -495,8 +492,7 @@ namespace Xbim.ModelGeometry.Scene
                 if (progDelegate != null) progDelegate(-1, "WriteRegionsToDb");
                 foreach (var cluster in contextHelper.Clusters)
                 {
-                    WriteRegionsToDb(context: cluster.Key, elementsToCluster: cluster.Value,
-                        wcsMatrix3D: contextHelper.PlacementTree.WorldCoordinateSystem);
+                    WriteRegionsToDb(cluster.Key, cluster.Value, contextHelper.PlacementTree.WorldCoordinateSystem);
                 }
                 if (progDelegate != null) progDelegate(101, "WriteRegionsToDb");
                 _contextIsPersisted = true;
@@ -568,8 +564,6 @@ namespace Xbim.ModelGeometry.Scene
         private void WriteFeatureElementsToDatabase(
             BlockingCollection<Tuple<XbimShapeInstance, IXbimShapeGeometryData>> shapeFeatures)
         {
-            Tuple<XbimShapeInstance, IXbimShapeGeometryData> shapeFeature;
-
             using (var instanceTable = _model.GetShapeInstanceTable())
             {
                 using (var geomTable = _model.GetShapeGeometryTable())
@@ -586,6 +580,7 @@ namespace Xbim.ModelGeometry.Scene
                             {
                                 try
                                 {
+                                    Tuple<XbimShapeInstance, IXbimShapeGeometryData> shapeFeature;
                                     if (shapeFeatures.TryTake(out shapeFeature))
                                     {
                                         var shapeInstance = shapeFeature.Item1;
@@ -1065,10 +1060,7 @@ namespace Xbim.ModelGeometry.Scene
                 //
                 var v = XbimDBSCAN.GetClusters(elementsToCluster, 5 * metre); // .OrderByDescending(x => x.GeometryIds.Count);
                 var i = 1;
-                foreach (var item in v)
-                {
-                    regions.Add(new XbimRegion("Region " + i++, item.Bound, item.GeometryIds.Count));
-                }
+                regions.AddRange(v.Select(item => new XbimRegion("Region " + i++, item.Bound, item.GeometryIds.Count)));
 
 
                 var transaction = geomTable.BeginLazyTransaction();
@@ -1159,7 +1151,7 @@ namespace Xbim.ModelGeometry.Scene
             using (var shapeInstanceTable = _model.GetShapeInstanceTable())
             {
 
-                using (var transaction = shapeInstanceTable.BeginReadOnlyTransaction())
+                using (shapeInstanceTable.BeginReadOnlyTransaction())
                 {
                     foreach (var context in _contexts)
                     {
@@ -1234,7 +1226,7 @@ namespace Xbim.ModelGeometry.Scene
             using (var shapeGeometryTable = Model.GetShapeGeometryTable())
             {
 
-                using (var transaction = shapeGeometryTable.BeginReadOnlyTransaction())
+                using (shapeGeometryTable.BeginReadOnlyTransaction())
                 {
                     IXbimShapeGeometryData shapeGeometry = new XbimShapeGeometry();
                     if (shapeGeometryTable.TryMoveFirstShapeGeometry(ref shapeGeometry))
@@ -1257,7 +1249,7 @@ namespace Xbim.ModelGeometry.Scene
             using (var shapeGeometryTable = Model.GetShapeGeometryTable())
             {
 
-                using (var transaction = shapeGeometryTable.BeginReadOnlyTransaction())
+                using (shapeGeometryTable.BeginReadOnlyTransaction())
                 {
                     IXbimShapeGeometryData shapeGeometry = new XbimShapeGeometry();
                     shapeGeometryTable.TryGetShapeGeometry(shapeGeometryLabel, ref shapeGeometry);
@@ -1286,7 +1278,7 @@ namespace Xbim.ModelGeometry.Scene
             using (var shapeInstanceTable = _model.GetShapeInstanceTable())
             {
 
-                using (var transaction = shapeInstanceTable.BeginReadOnlyTransaction())
+                using (shapeInstanceTable.BeginReadOnlyTransaction())
                 {
                     foreach (var context in _contexts)
                     {
@@ -1388,7 +1380,7 @@ namespace Xbim.ModelGeometry.Scene
             using (var shapeInstanceTable = _model.GetShapeInstanceTable())
             {
 
-                using (var transaction = shapeInstanceTable.BeginReadOnlyTransaction())
+                using (shapeInstanceTable.BeginReadOnlyTransaction())
                 {
                     foreach (var context in _contexts)
                     {
@@ -1416,7 +1408,7 @@ namespace Xbim.ModelGeometry.Scene
             using (var shapeInstanceTable = _model.GetShapeInstanceTable())
             {
 
-                using (var transaction = shapeInstanceTable.BeginReadOnlyTransaction())
+                using (shapeInstanceTable.BeginReadOnlyTransaction())
                 {
                     foreach (var context in _contexts)
                     {
@@ -1427,7 +1419,7 @@ namespace Xbim.ModelGeometry.Scene
                             {
 
                                 if (context.EntityLabel == shapeInstance.RepresentationContext &&
-                                     shapeInstance.RepresentationType != (byte)XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded &&
+                                    shapeInstance.RepresentationType != (byte)XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded &&
                                     !(ignoreFeatures && typeof(IfcFeatureElement).IsAssignableFrom(IfcMetaData.GetType(shapeInstance.IfcTypeId))))
                                     yield return (XbimShapeInstance)shapeInstance;
                                 shapeInstance = new XbimShapeInstance();
@@ -1451,7 +1443,7 @@ namespace Xbim.ModelGeometry.Scene
             using (var shapeInstanceTable = _model.GetShapeInstanceTable())
             {
 
-                using (var transaction = shapeInstanceTable.BeginReadOnlyTransaction())
+                using (shapeInstanceTable.BeginReadOnlyTransaction())
                 {
                     foreach (var context in _contexts)
                     {
@@ -1481,7 +1473,7 @@ namespace Xbim.ModelGeometry.Scene
             using (var shapeInstanceTable = _model.GetShapeInstanceTable())
             {
 
-                using (var transaction = shapeInstanceTable.BeginReadOnlyTransaction())
+                using (shapeInstanceTable.BeginReadOnlyTransaction())
                 {
                     foreach (var context in _contexts)
                     {
@@ -1500,7 +1492,7 @@ namespace Xbim.ModelGeometry.Scene
                             }
                         }
                         else if (texture.DefinedObjectId < 0)
-                        //if the texture is for a type then get all instances of the type
+                            //if the texture is for a type then get all instances of the type
                         {
                             var typeId = (short)Math.Abs(texture.DefinedObjectId);
                             if (shapeInstanceTable.TrySeekProductType(typeId, ref shapeInstance))
@@ -1531,7 +1523,7 @@ namespace Xbim.ModelGeometry.Scene
             using (var shapeGeometryTable = Model.GetShapeGeometryTable())
             {
 
-                using (var transaction = shapeGeometryTable.BeginReadOnlyTransaction())
+                using (shapeGeometryTable.BeginReadOnlyTransaction())
                 {
                     if (shapeGeometryTable.TryMoveFirstReferenceCounter())
                     {
@@ -1555,24 +1547,9 @@ namespace Xbim.ModelGeometry.Scene
         /// <returns></returns>
         public bool ProductHasGeometry(Int32 productId)
         {
-
             using (var shapeInstanceTable = _model.GetShapeInstanceTable())
-            {
-
-                using (var transaction = shapeInstanceTable.BeginReadOnlyTransaction())
-                {
-                    foreach (var context in _contexts)
-                    {
-                        if (shapeInstanceTable.TrySeekShapeInstanceOfProduct(productId))
-                        {
-                            return true;
-                        }
-                    }
-
-                }
-
-            }
-            return false;
+            using (shapeInstanceTable.BeginReadOnlyTransaction())
+                return _contexts.Any(context => shapeInstanceTable.TrySeekShapeInstanceOfProduct(productId));
         }
 
         /// <summary>
@@ -1644,10 +1621,9 @@ namespace Xbim.ModelGeometry.Scene
 
         public void Write(BinaryWriter binaryStream)
         {
-            
-            float metre = Convert.ToSingle(_model.ModelFactors.OneMetre);
+        // ReSharper disable RedundantCast
             var lookup = ShapeGeometryReferenceData();
-            var styles = this.SurfaceStyles().ToList();
+            var styles = SurfaceStyles().ToList();
             var regions = GetRegions().ToList();
 
             int numberOfGeometries = 0;
@@ -1655,17 +1631,20 @@ namespace Xbim.ModelGeometry.Scene
             int numberOfTriangles = 0;
             int numberOfMatrices = 0;
             int numberOfProducts = 0;
+            int numberOfStyles = styles.Count;
             //start writing out
+
             binaryStream.Write((Int32)94132117); //magic number
+
             binaryStream.Write((byte)1); //version of stream
-            int start = (int)binaryStream.Seek(0, SeekOrigin.Current);
+            var start = (int)binaryStream.Seek(0, SeekOrigin.Current);
             binaryStream.Write((Int32)0); //number of shapes
             binaryStream.Write((Int32)0); //number of vertices
             binaryStream.Write((Int32)0); //number of triangles
             binaryStream.Write((Int32)0); //number of matrices
             binaryStream.Write((Int32)0); //number of products
-            binaryStream.Write((Int32)styles.Count); //number of styles
-            binaryStream.Write(metre); //write out conversion to meter factor
+            binaryStream.Write((Int32)numberOfStyles); //number of styles
+            binaryStream.Write(Convert.ToSingle(_model.ModelFactors.OneMetre)); //write out conversion to meter factor
     
             binaryStream.Write(Convert.ToInt16(regions.Count)); //write out the population data
             foreach (var r in regions)
@@ -1687,10 +1666,10 @@ namespace Xbim.ModelGeometry.Scene
                 {
                     binaryStream.Write((Int32)texture.DefinedObjectId); //style ID
                     XbimColour colour = texture.ColourMap[0];
-                    binaryStream.Write(colour.Red);
-                    binaryStream.Write(colour.Green);
-                    binaryStream.Write(colour.Blue);
-                    binaryStream.Write(colour.Alpha);
+                    binaryStream.Write((Single)colour.Red);
+                    binaryStream.Write((Single)colour.Green);
+                    binaryStream.Write((Single)colour.Blue);
+                    binaryStream.Write((Single)colour.Alpha);
                 }
             }
 
@@ -1710,7 +1689,7 @@ namespace Xbim.ModelGeometry.Scene
                     if (!bb.IsEmpty) //do not write out anything with no geometry
                     {
                         binaryStream.Write((Int32) product.EntityLabel);
-                        binaryStream.Write((short)IfcMetaData.IfcTypeId(product));
+                        binaryStream.Write((UInt16)IfcMetaData.IfcTypeId(product));
                         binaryStream.Write(bb.ToFloatArray());
                         numberOfProducts++;
                     }
@@ -1732,8 +1711,8 @@ namespace Xbim.ModelGeometry.Scene
                     {
                         binaryStream.Write(xbimShapeInstance.IfcProductLabel);
                         binaryStream.Write((UInt16)xbimShapeInstance.IfcTypeId);
-                        binaryStream.Write(xbimShapeInstance.InstanceLabel);
-                        binaryStream.Write(xbimShapeInstance.StyleLabel > 0
+                        binaryStream.Write((UInt32)xbimShapeInstance.InstanceLabel);
+                        binaryStream.Write((Int32)xbimShapeInstance.StyleLabel > 0
                             ? xbimShapeInstance.StyleLabel
                             : xbimShapeInstance.IfcTypeId*-1);
                         binaryStream.Write(xbimShapeInstance.Transformation);
@@ -1758,10 +1737,10 @@ namespace Xbim.ModelGeometry.Scene
 
                     if (xbimShapeInstance != null)
                     {
-                        binaryStream.Write(xbimShapeInstance.IfcProductLabel);
+                        binaryStream.Write((Int32)xbimShapeInstance.IfcProductLabel);
                         binaryStream.Write((UInt16)xbimShapeInstance.IfcTypeId);
-                        binaryStream.Write(xbimShapeInstance.InstanceLabel);
-                        binaryStream.Write(xbimShapeInstance.StyleLabel > 0
+                        binaryStream.Write((Int32)xbimShapeInstance.InstanceLabel);
+                        binaryStream.Write((Int32)xbimShapeInstance.StyleLabel > 0
                             ? xbimShapeInstance.StyleLabel
                             : xbimShapeInstance.IfcTypeId*-1);
                     }
@@ -1787,6 +1766,7 @@ namespace Xbim.ModelGeometry.Scene
             binaryStream.Write((Int32)numberOfMatrices);
             binaryStream.Write((Int32)numberOfProducts);
             binaryStream.Seek(0, SeekOrigin.End); //go back to end
+        // ReSharper restore RedundantCast
         }
         
     }
