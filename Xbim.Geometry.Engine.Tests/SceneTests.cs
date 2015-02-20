@@ -30,7 +30,7 @@ namespace GeometryTests
                     m3D.Write(bw);
                     bw.Close();
                 }
-                using (var fs = new FileStream("test.wexBIM", FileMode.Open,FileAccess.Read))
+                using (var fs = new FileStream(@"test.wexBIM", FileMode.Open, FileAccess.Read))
                 {
                     using (var br = new BinaryReader(fs))
                     {
@@ -66,6 +66,7 @@ namespace GeometryTests
                         for (int i = 0; i < productCount ; i++)
                         {
                             var productLabel = br.ReadInt32();
+                            var productType = br.ReadInt16();
                             var boxBytes = br.ReadBytes(6 * sizeof(float));
                             XbimRect3D bb = XbimRect3D.FromArray(boxBytes);
                         }
@@ -78,6 +79,7 @@ namespace GeometryTests
                                 for (int j = 0; j < shapeRepetition; j++)
                                 {
                                     var ifcProductLabel = br.ReadInt32();
+                                    var instanceTypeId = br.ReadInt16();
                                     var instanceLabel = br.ReadInt32();
                                     var styleId = br.ReadInt32();
                                     var transform = XbimMatrix3D.FromArray(br.ReadBytes(sizeof(float) * 16));
@@ -87,6 +89,7 @@ namespace GeometryTests
                             else if (shapeRepetition == 1)
                             {
                                 var ifcProductLabel = br.ReadInt32();
+                                var instanceTypeId = br.ReadInt16();
                                 var instanceLabel = br.ReadInt32();
                                 var styleId = br.ReadInt32();
                                 var triangulation = br.ReadShapeTriangulation();

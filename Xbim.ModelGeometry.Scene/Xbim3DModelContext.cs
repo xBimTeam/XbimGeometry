@@ -1697,7 +1697,7 @@ namespace Xbim.ModelGeometry.Scene
             }
 
             //write out the multiple instances
-            
+            int i = 0;
             foreach (var kv in lookup.Where(v=>v.Value>1))
             {
                 IXbimShapeGeometryData geometry = ShapeGeometry(kv.Key);
@@ -1720,8 +1720,14 @@ namespace Xbim.ModelGeometry.Scene
                         numberOfMatrices++;
                     }
                     numberOfVertices += XbimShapeTriangulation.VerticesCount(geometry.ShapeData);
-                    binaryStream.Write(geometry.ShapeData);
+                   // binaryStream.Write(geometry.ShapeData);
+                    var ms = new MemoryStream(geometry.ShapeData);
+                    var br = new BinaryReader(ms);
+                    var tr = br.ReadShapeTriangulation();
+                   
+                    tr.Write(binaryStream);
                 }
+                i++;
             }
             //now do the single instances
             foreach (var kv in lookup.Where(v => v.Value == 1))
