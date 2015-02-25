@@ -10,6 +10,17 @@ namespace Xbim
 {
 	namespace Geometry
 	{
+		private ref class VolumeComparer : IComparer<Tuple<double, XbimSolid^>^>
+		{
+		public:
+			virtual int Compare(Tuple<double, XbimSolid^>^ x, Tuple<double, XbimSolid^>^ y)
+			{
+				// Compare y and x in reverse order. 
+				return y->Item1.CompareTo(x->Item1);
+			}
+		};
+
+
 		ref class XbimSolidSet : IXbimSolidSet
 		{
 		private:
@@ -17,6 +28,10 @@ namespace Xbim
 			static XbimSolidSet^ empty = gcnew XbimSolidSet();
 			void Init(IfcBooleanResult^ boolOp);
 			void Init(XbimCompound^ comp, int label);
+			static VolumeComparer^ _volumeComparer = gcnew VolumeComparer();
+			static int _maxOpeningsToCut = 20;
+			static double _maxOpeningVolumePercentage = 2.5;
+			bool _isSimplified = false;
 		public:
 			static property XbimSolidSet^ Empty{XbimSolidSet^ get(){ return empty; }};
 			XbimSolidSet();
@@ -32,6 +47,7 @@ namespace Xbim
 
 
 			virtual property bool IsValid{bool get(){ return Count>0; }; }
+			virtual property bool IsSimplified{bool get(){ return _isSimplified; }; void set(bool val){ _isSimplified = val; } }
 			virtual property bool IsSet{bool get()  { return true; }; }
 			virtual property IXbimSolid^ First{IXbimSolid^ get(); }
 			virtual property int Count{int get(); }
@@ -48,6 +64,8 @@ namespace Xbim
 			virtual IXbimSolidSet^ Intersection(IXbimSolid^ solid, double tolerance);
 			virtual property bool IsPolyhedron{ bool get(); }
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) ;
+			virtual property double Volume{double get(); }
+			
 		};
 
 	}

@@ -146,6 +146,7 @@ namespace Xbim
 			*pCompound = compound;
 			_isSewn = sewn;
 			_sewingTolerance = tolerance;
+			
 		}
 
 
@@ -268,8 +269,15 @@ namespace Xbim
 
 		void XbimCompound::Sew()
 		{
-			if(!IsValid || IsSewn) 
+			if (!IsValid || IsSewn )
 				return;
+			TopTools_IndexedMapOfShape map;
+			TopExp::MapShapes(*pCompound, TopAbs_FACE, map);
+			if (map.Extent() > MaxFacesToSew) //give up if too many
+			{
+				_isSewn = true;
+				return;
+			}
 			BRep_Builder builder;
 			TopoDS_Compound newCompound;
 			builder.MakeCompound(newCompound);
@@ -341,6 +349,7 @@ namespace Xbim
 				if (face->IsValid)
 				{
 					builder.Add(shell, face);
+					
 				}
 				else
 					XbimGeometryCreator::logger->WarnFormat("WC002: Incorrectly defined IfcFace #{0}", fc->EntityLabel);
@@ -470,7 +479,11 @@ namespace Xbim
 
 		XbimCompound^ XbimCompound::Merge(IXbimSolidSet^ solids, double tolerance)
 		{
-			//first remove any that intersect as simple merging leads to illegal geometries.
+			
+			TopoDS_Compound compound;
+			BRep_Builder b;
+			
+			////first remove any that intersect as simple merging leads to illegal geometries.
 			Dictionary<XbimSolid^, HashSet<XbimSolid^>^>^ clusters = gcnew Dictionary<XbimSolid^, HashSet<XbimSolid^>^>();
 			for each (IXbimSolid^ solid in solids) //init all the clusters
 			{
@@ -480,8 +493,7 @@ namespace Xbim
 			}
 			if (clusters->Count == 0) return nullptr; //nothing to do
 
-			TopoDS_Compound compound;
-			BRep_Builder b;
+			
 			b.MakeCompound(compound);
 			if (clusters->Count == 1 ) //just one so return it
 			{
@@ -576,6 +588,39 @@ namespace Xbim
 			
 			return gcnew XbimCompound(compound, true, tolerance);
 
+		}
+
+		List<XbimSolid^>^ XbimCompound::GetDiscrete(List<XbimSolid^>^% toProcess)
+		{
+			List<XbimSolid^>^ discrete = gcnew List<XbimSolid^>(toProcess->Count);
+			if (toProcess->Count > 0)
+			{
+				
+				List<XbimSolid^>^ connected = gcnew List<XbimSolid^>(toProcess->Count);
+
+				for each (XbimSolid^ solid in toProcess)
+				{
+					if (discrete->Count == 0)
+						discrete->Add(solid);
+					else
+					{
+						XbimRect3D solidBB = solid->BoundingBox;
+						bool isConnected = false;
+						for each (XbimSolid^ discreteSolid in discrete)
+						{
+							if (discreteSolid->BoundingBox.Intersects(solidBB))
+							{
+								connected->Add(solid);
+								isConnected = true;
+								break;
+							}	
+						}
+						if (!isConnected) discrete->Add(solid);
+					}
+				}
+				toProcess = connected;
+			}
+			return discrete;
 		}
 
 		void  XbimCompound::GetConnected(HashSet<XbimSolid^>^ connected, Dictionary<XbimSolid^, HashSet<XbimSolid^>^>^ clusters, XbimSolid^ clusterAround)

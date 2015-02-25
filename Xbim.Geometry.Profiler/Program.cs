@@ -50,7 +50,7 @@ namespace Xbim.Geometry.Profiler
                         }
                     };
                     var context = new Xbim3DModelContext(model);
-                    context.CreateContext(progDelegate: progDelegate);
+                    context.CreateContext(geomStorageType: XbimGeometryType.PolyhedronBinary, progDelegate: progDelegate);
                     model.Close();
                 }
             }

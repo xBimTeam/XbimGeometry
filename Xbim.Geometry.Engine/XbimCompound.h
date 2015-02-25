@@ -19,6 +19,7 @@ namespace Xbim
 		ref class XbimCompound : IXbimGeometryObjectSet, XbimOccShape
 		{
 		private:
+			
 			IntPtr ptrContainer;
 			virtual property TopoDS_Compound* pCompound
 			{
@@ -42,7 +43,8 @@ namespace Xbim
 			//Helpers
 			XbimFace^ BuildFace(List<XbimWire^>^ wires, int label);
 			static void  GetConnected(HashSet<XbimSolid^>^ connected, Dictionary<XbimSolid^, HashSet<XbimSolid^>^>^ clusters, XbimSolid^ clusterAround);
-
+			
+			
 		public:
 			~XbimCompound(){ InstanceCleanup(); }
 			!XbimCompound(){ InstanceCleanup(); }
@@ -63,7 +65,8 @@ namespace Xbim
 			virtual property int Count{int get(); }
 			virtual property IXbimGeometryObject^ First{IXbimGeometryObject^ get(); }
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) override;
-
+			static List<XbimSolid^>^  GetDiscrete(List<XbimSolid^>^%);
+			static int MaxFacesToSew = 500;
 #pragma endregion
 			//operators
 			operator const TopoDS_Compound& () { return *pCompound; }

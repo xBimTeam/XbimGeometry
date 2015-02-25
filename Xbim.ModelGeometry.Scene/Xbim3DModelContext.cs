@@ -625,7 +625,7 @@ namespace Xbim.ModelGeometry.Scene
             if (progDelegate != null) progDelegate(-1, "WriteFeatureElements (" + contextHelper.OpeningsAndProjections.Count + " elements)");
             
             Parallel.ForEach(contextHelper.OpeningsAndProjections,contextHelper.ParallelOptions, pair =>
-                //    foreach (IGrouping<IfcElement, IfcFeatureElement> pair in contextHelper.OpeningsAndProjections)
+           //         foreach (IGrouping<IfcElement, IfcFeatureElement> pair in contextHelper.OpeningsAndProjections)
             {
 
                 var element = pair.Key;
@@ -712,7 +712,8 @@ namespace Xbim.ModelGeometry.Scene
 
                         if (allOpenings.Any())
                             elementGeom = elementGeom.Cut(allOpenings, _model.ModelFactors.PrecisionBoolean);
-
+                        if(elementGeom.IsSimplified)
+                            Logger.WarnFormat("WM008: Geometry of object #{0} '{1}' [{2}] is too complex and it will make interoperability difficult for you. It has been simplified but you should consider re-authoring it in your BIM tool", element.EntityLabel, element.Name, element.GetType().Name);
                         ////now add to the DB               
                         XbimModelFactors mf = _model.ModelFactors;
                         foreach (var geom in elementGeom)
@@ -780,7 +781,7 @@ namespace Xbim.ModelGeometry.Scene
                                                 element.GetType().Name, element.EntityLabel, e.Message);
                 }
             }
-                );
+               );
             contextHelper.PercentageParsed = localPercentageParsed;
             contextHelper.Tally = localTally;
             if (progDelegate != null) progDelegate(101, "WriteFeatureElements, (" + localTally + " written)");

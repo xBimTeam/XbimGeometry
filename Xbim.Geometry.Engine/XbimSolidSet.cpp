@@ -5,6 +5,7 @@
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <TopExp.hxx>
 #include <BRepTools.hxx>
+#include <BRep_Builder.hxx>
 using namespace System;
 using namespace Xbim::Common;
 namespace Xbim
@@ -119,6 +120,16 @@ namespace Xbim
 		int XbimSolidSet::Count::get()
 		{
 			return solids==nullptr?0:solids->Count;
+		}
+
+		double XbimSolidSet::Volume::get()
+		{
+			double vol = 0;
+			for each (XbimSolid^ solid in solids)
+			{
+				vol += solid->Volume;
+			}
+			return vol;
 		}
 
 		IXbimGeometryObject^ XbimSolidSet::Transform(XbimMatrix3D matrix3D)
@@ -248,14 +259,52 @@ namespace Xbim
 
 #endif // USE_CARVE_CSG
 
+			if (thisSolidSet->Count >_maxOpeningsToCut) //if the base shape is really complicate just give up trying
+			{
+				IsSimplified = true;
+				return this;
+			}
 			XbimCompound^ thisSolid = XbimCompound::Merge(thisSolidSet, tolerance);
-			XbimCompound^ toCutSolid = XbimCompound::Merge(toCutSolidSet, tolerance);
-
+			XbimCompound^ toCutSolid;
 			if (thisSolid == nullptr) return XbimSolidSet::Empty;
+			bool isSimplified = false;
+			if (toCutSolidSet->Count > _maxOpeningsToCut)
+			{
+				isSimplified = true;
+				List<Tuple<double, XbimSolid^>^>^ solidsList = gcnew List<Tuple<double, XbimSolid^>^>(toCutSolidSet->Count);
+				for each (XbimSolid^ solid in toCutSolidSet)
+				{
+					solidsList->Add(gcnew Tuple<double, XbimSolid^>(solid->Volume, solid));
+				}
+				solidsList->Sort(_volumeComparer);
+				TopoDS_Compound subsetToCut;
+				BRep_Builder b;
+				b.MakeCompound(subsetToCut);
+				int i = 0;
+				double totalVolume = this->Volume;
+				double minVolume = totalVolume * _maxOpeningVolumePercentage / 100;
+				for each( Tuple<double, XbimSolid^>^ solid in solidsList)
+				{
+					if (solid->Item1 > minVolume)
+						b.Add(subsetToCut, solid->Item2);
+					else
+						break;
+					if (++i > _maxOpeningsToCut) 
+						break;
+				}
+				toCutSolid = gcnew XbimCompound(subsetToCut,true, tolerance);
+				
+			}
+			else
+			{
+				toCutSolid = XbimCompound::Merge(toCutSolidSet, tolerance);
+			}
+
 			if (toCutSolid == nullptr) return this;
 			XbimCompound^ result = thisSolid->Cut(toCutSolid, tolerance);
 			XbimSolidSet^ ss = gcnew XbimSolidSet(result);
 			GC::KeepAlive(result);
+			ss->IsSimplified = isSimplified;
 			return ss;
 		}
 
@@ -357,6 +406,8 @@ namespace Xbim
 			if (toUnionSolid != nullptr) return solids;
 			return this;
 		}
+
+		
 
 		IXbimSolidSet^ XbimSolidSet::Intersection(IXbimSolidSet^ solids, double tolerance)
 		{
