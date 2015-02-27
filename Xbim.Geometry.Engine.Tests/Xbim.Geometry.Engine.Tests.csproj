@@ -169,21 +169,21 @@
       <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="Xbim.Common, Version=3.0.5534.25322, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Xbim.Common, Version=3.0.5536.17974, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Xbim.Essentials.3.0.9\lib\net45\Xbim.Common.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.3.0.10\lib\net45\Xbim.Common.dll</HintPath>
     </Reference>
-    <Reference Include="Xbim.Ifc.Extensions, Version=3.0.5534.25323, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Xbim.Ifc.Extensions, Version=3.0.5536.17976, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Xbim.Essentials.3.0.9\lib\net45\Xbim.Ifc.Extensions.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.3.0.10\lib\net45\Xbim.Ifc.Extensions.dll</HintPath>
     </Reference>
-    <Reference Include="Xbim.Ifc2x3, Version=3.0.5534.25322, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Xbim.Ifc2x3, Version=3.0.5536.17975, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Xbim.Essentials.3.0.9\lib\net45\Xbim.Ifc2x3.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.3.0.10\lib\net45\Xbim.Ifc2x3.dll</HintPath>
     </Reference>
-    <Reference Include="Xbim.IO, Version=3.0.5534.25323, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Xbim.IO, Version=3.0.5536.17976, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Xbim.Essentials.3.0.9\lib\net45\Xbim.IO.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.3.0.10\lib\net45\Xbim.IO.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

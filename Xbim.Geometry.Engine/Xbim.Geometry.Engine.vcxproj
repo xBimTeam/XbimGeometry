@@ -17661,7 +17661,6 @@
     <None Include="OCC\inc\Units_Unit.lxx" />
     <None Include="OCC\inc\Units_UnitsDictionary.lxx" />
     <None Include="OCC\inc\Units_UnitsLexicon.lxx" />
-    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

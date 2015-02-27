@@ -33737,6 +33737,5 @@
     <None Include="OCC\drv\Quantity\Quantity_Period.jxx">
       <Filter>Source files\Includes</Filter>
     </None>
-    <None Include="packages.config" />
   </ItemGroup>
 </Project>
