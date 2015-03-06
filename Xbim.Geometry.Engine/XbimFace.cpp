@@ -142,6 +142,11 @@ namespace Xbim
 			Init(wire);
 		}
 
+		XbimFace::XbimFace(IXbimWire^ wire, XbimPoint3D pointOnFace, XbimVector3D faceNormal)
+		{
+			Init(wire, pointOnFace, faceNormal);
+		}
+
 		XbimFace::XbimFace(IXbimFace^ face)
 		{
 			Init(face);
@@ -185,6 +190,21 @@ namespace Xbim
 			}
 		}
 
+		void XbimFace::Init(IXbimWire^ xbimWire, XbimPoint3D pointOnFace,  XbimVector3D faceNormal)
+		{
+			if (!dynamic_cast<XbimWire^>(xbimWire))
+				throw gcnew ArgumentException("Only IXbimWires created by Xbim.OCC modules are supported", "xbimWire");
+			XbimWire^ wire = (XbimWire^)xbimWire;
+			if (wire->IsValid && !faceNormal.IsInvalid())
+			{			
+				gp_Pln plane(gp_Pnt(pointOnFace.X, pointOnFace.Y, pointOnFace.Z), gp_Dir(faceNormal.X, faceNormal.Y, faceNormal.Z));
+				BRepBuilderAPI_MakeFace faceMaker(plane, wire, Standard_False);
+				pFace = new TopoDS_Face();
+				*pFace = faceMaker.Face();
+			}
+			GC::KeepAlive(xbimWire);
+		}
+
 		void XbimFace::Init(IXbimWire^ xbimWire)
 		{
 			if (!dynamic_cast<XbimWire^>(xbimWire))
@@ -202,6 +222,8 @@ namespace Xbim
 			}
 			GC::KeepAlive(xbimWire);
 		}
+
+		
 
 		void XbimFace::Init(IXbimFace^ face)
 		{

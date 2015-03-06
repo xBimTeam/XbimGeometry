@@ -41,6 +41,7 @@ namespace Xbim
 			void Init(IfcPolyline ^ pline);
 			void Init(IfcPolyLoop ^ loop);
 			void Init(IXbimWire^ wire);
+			void Init(IXbimWire^ wire, XbimPoint3D pointOnFace, XbimVector3D faceNormal);
 			void Init(IXbimFace^ face);
 			void Init(double x, double y, double tolerance); 
 		public:
@@ -102,6 +103,7 @@ namespace Xbim
 			XbimFace(IfcPolyline ^ pline);
 			XbimFace(IfcPolyLoop ^ loop);
 			XbimFace(IXbimWire^ wire);
+			XbimFace(IXbimWire^ wire, XbimPoint3D pointOnface,  XbimVector3D faceNormal);
 			XbimFace(IXbimFace^ face);
 			XbimFace(double x, double y, double tolerance);
 #pragma endregion

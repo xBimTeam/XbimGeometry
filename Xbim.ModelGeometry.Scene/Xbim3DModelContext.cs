@@ -59,14 +59,16 @@ namespace Xbim.ModelGeometry.Scene
         private struct RepresentationItemGeometricHashKey
         {
             private readonly int _hash;
-            private readonly IfcRepresentationItem _item;
+            private readonly int _item;
+            private readonly IModel _model;
 
             public RepresentationItemGeometricHashKey(IfcRepresentationItem item)
             {
-                _item = item;
+                _item = item.EntityLabel;
+                _model = item.ModelOf;
                 try
                 {
-                    _hash = _item.GetGeometryHashCode();
+                    _hash = item.GetGeometryHashCode();
                 }
                 catch (XbimGeometryException eg)
                 {
@@ -76,17 +78,24 @@ namespace Xbim.ModelGeometry.Scene
                 }
             }
 
+            public IfcRepresentationItem RepresentationItem 
+            {
+                get { return _model.Instances[_item] as IfcRepresentationItem; }
+            }
+
             public override int GetHashCode()
             {
                 return _hash;
             }
 
+            private static int i;
             public override bool Equals(object obj)
             {
                 if (!(obj is RepresentationItemGeometricHashKey)) return false;
                 try
                 {
-                    return _item.GeometricEquals(((RepresentationItemGeometricHashKey) obj)._item);
+                    Console.WriteLine(i++);
+                    return RepresentationItem.GeometricEquals(((RepresentationItemGeometricHashKey)obj).RepresentationItem);
                 }
                 catch (XbimGeometryException eg)
                 {
@@ -478,10 +487,11 @@ namespace Xbim.ModelGeometry.Scene
                         writeToDb.Wait();
                     }
                 }
+                if (progDelegate != null) progDelegate(-1, "WriteProductShapes");
                 var productsRemaining = _model.Instances.OfType<IfcProduct>()
                     .Where(p => p.Representation != null && !processed.Contains(p.EntityLabel)).ToList();
 
-                if (progDelegate != null) progDelegate(-1, "WriteProductShapes");
+                
                 WriteProductShapes(contextHelper, productsRemaining);
                 if (progDelegate != null) progDelegate(101, "WriteProductShapes");
                 //Write out the actual representation item reference count
@@ -501,7 +511,7 @@ namespace Xbim.ModelGeometry.Scene
             }
         }
 
-        public string TempResult { get; set; }
+       
 
         private void WriteShapeGeometriesToDatabase(XbimCreateContextHelper contextHelper,
             BlockingCollection<IXbimShapeGeometryData> shapeGeometries)
@@ -624,8 +634,8 @@ namespace Xbim.ModelGeometry.Scene
 
             if (progDelegate != null) progDelegate(-1, "WriteFeatureElements (" + contextHelper.OpeningsAndProjections.Count + " elements)");
             
-            Parallel.ForEach(contextHelper.OpeningsAndProjections,contextHelper.ParallelOptions, pair =>
-           //         foreach (IGrouping<IfcElement, IfcFeatureElement> pair in contextHelper.OpeningsAndProjections)
+          //  Parallel.ForEach(contextHelper.OpeningsAndProjections,contextHelper.ParallelOptions, pair =>
+                    foreach (IGrouping<IfcElement, IfcFeatureElement> pair in contextHelper.OpeningsAndProjections)
             {
 
                 var element = pair.Key;
@@ -781,7 +791,7 @@ namespace Xbim.ModelGeometry.Scene
                                                 element.GetType().Name, element.EntityLabel, e.Message);
                 }
             }
-               );
+           //    );
             contextHelper.PercentageParsed = localPercentageParsed;
             contextHelper.Tally = localTally;
             if (progDelegate != null) progDelegate(101, "WriteFeatureElements, (" + localTally + " written)");
@@ -953,20 +963,23 @@ namespace Xbim.ModelGeometry.Scene
                 Interlocked.Increment(ref localTally);
                 var shape = (IfcGeometricRepresentationItem)Model.Instances[shapeId];
                 var key = new RepresentationItemGeometricHashKey(shape);
-                var mappedEntityLabel = geomHash.GetOrAdd(key, shapeId);
                 var isFeatureElementShape = contextHelper.FeatureElementShapeIds.Contains(shapeId);
-                if (!isFeatureElementShape && mappedEntityLabel != shapeId) //it already exists
-                {
-                    mapLookup.TryAdd(shapeId, mappedEntityLabel);
-                    Interlocked.Increment(ref dedupCount);
-                }
-                else //we have added a new shape geometry
+                //this can be used to remove duplicate shapes but has a memory overhead as large nimber so objects need to be cached
+                
+                //var mappedEntityLabel = geomHash.GetOrAdd(key, shapeId);
+                //
+                //if (!isFeatureElementShape && mappedEntityLabel != shapeId) //it already exists
+                //{
+                //    mapLookup.TryAdd(shapeId, mappedEntityLabel);
+                //    Interlocked.Increment(ref dedupCount);
+                //}
+                //else //we have added a new shape geometry
+                if( shape is IfcFaceBasedSurfaceModel)
                 {
 
                     try
                     {
-                       
-                        //  IXbimGeometryModel geomModel = shape.Geometry3D();
+                                          
                         var geomModel = _engine.Create(shape);
                         //this should be a solid, a shell, or a set of either
 
@@ -985,15 +998,14 @@ namespace Xbim.ModelGeometry.Scene
                                     Logger.ErrorFormat("Failed to merge coplanar faces, ", e.Message);
                                 }
                             }
-#endif                       
-                           
+#endif
                             
                             IXbimShapeGeometryData shapeGeom = _engine.CreateShapeGeometry(geomModel,
                                 _model.ModelFactors.Precision,
                                 _model.ModelFactors.DeflectionTolerance,
                                 _model.ModelFactors.DeflectionAngle, geomStorageType);
 
-                            if (shapeGeom.ShapeData.Length == 0) 
+                            if (shapeGeom.ShapeData.Length == 0)
                                 throw new Exception("No shape geometry created");
                             shapeGeom.IfcShapeLabel = shapeId;
                             shapeGeom.GeometryHash = key.GetHashCode();
@@ -1001,6 +1013,7 @@ namespace Xbim.ModelGeometry.Scene
                             if (isFeatureElementShape)
                             //we need for boolean operations later, add the polyhedron if the face is planar
                             {
+                                Console.WriteLine("Cached");
                                 contextHelper.CachedGeometries.TryAdd(shapeId, geomModel);
                             }
                         }

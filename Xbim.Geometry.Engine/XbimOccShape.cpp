@@ -9,6 +9,7 @@
 #include <BRep_Tool.hxx>
 #include <Poly.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
+#include <BRepTools.hxx>
 using namespace System::Threading;
 using namespace System::Collections::Generic;
 namespace Xbim
@@ -331,6 +332,15 @@ namespace Xbim
 					}
 				}
 				faceIndex++;
+			}
+			Monitor::Enter(this);
+			try
+			{
+				BRepTools::Clean(this); //remove triangulation				
+			}
+			finally
+			{
+				Monitor::Exit(this);
 			}
 		}
 		

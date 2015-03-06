@@ -20,7 +20,8 @@
 #include <BRepBndLib.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
 using namespace System;
-
+using namespace Xbim::Ifc2x3::Extensions;
+using namespace Xbim::XbimExtensions;
 namespace Xbim
 {
 	namespace Geometry
@@ -102,25 +103,25 @@ namespace Xbim
 		XbimCompound::XbimCompound(IfcConnectedFaceSet^ faceSet)
 		{
 			_sewingTolerance = faceSet->ModelOf->ModelFactors->PrecisionBoolean;
-			Init(faceSet);
+			Init(faceSet); 
 		}
 
 		XbimCompound::XbimCompound(IfcShellBasedSurfaceModel^ sbsm)
 		{
 			_sewingTolerance = sbsm->ModelOf->ModelFactors->PrecisionBoolean;
-			Init(sbsm);
+			Init(sbsm); 
 		}
 
 		XbimCompound::XbimCompound(IfcFaceBasedSurfaceModel^ fbsm)
 		{
 			_sewingTolerance = fbsm->ModelOf->ModelFactors->PrecisionBoolean;
-			Init(fbsm);
+			Init(fbsm); 
 		}
 
 		XbimCompound::XbimCompound(IfcManifoldSolidBrep^ solid)
 		{
 			_sewingTolerance = solid->ModelOf->ModelFactors->PrecisionBoolean;
-			Init(solid);
+			Init(solid); 
 		}
 		XbimCompound::XbimCompound(IfcFacetedBrep^ solid)
 		{
@@ -214,11 +215,15 @@ namespace Xbim
 				return;
 			}
 			Init(faceSet->CfsFaces);
-			for each (IXbimGeometryObject^ geomObj in this)
+			/*if (faceSet->CfsFaces->Count < 50)
 			{
-				XbimShell^ shell = dynamic_cast<XbimShell^>(geomObj);
-				if (shell != nullptr) shell->Orientate();
-			}
+
+				for each (IXbimGeometryObject^ geomObj in this)
+				{
+					XbimShell^ shell = dynamic_cast<XbimShell^>(geomObj);
+					if (shell != nullptr) shell->Orientate();
+				}
+			}*/
 		}
 
 
@@ -290,6 +295,14 @@ namespace Xbim
 				builder.Add(newCompound, result);
 			}		
 			*pCompound = newCompound;
+			//only correct orientation if we are sewing and making a solid or a shape for boolean operation
+			for each (IXbimGeometryObject^ geomObj in this)
+			{
+				XbimShell^ shell = dynamic_cast<XbimShell^>(geomObj);
+				if (shell != nullptr) shell->Orientate();
+			}
+				
+
 			_isSewn = true;
 		}
 
@@ -312,14 +325,14 @@ namespace Xbim
 			for each (IfcFace^ fc in  faces)
 			{
 
-				List<XbimWire^>^ loops = gcnew List<XbimWire^>();
-
+				List<Tuple<XbimWire^, IfcPolyLoop^>^>^ loops = gcnew List<Tuple<XbimWire^, IfcPolyLoop^>^>();
 				for each (IfcFaceBound^ bound in fc->Bounds) //build all the loops
 				{
 					if (!dynamic_cast<IfcPolyLoop^>(bound->Bound) || ((IfcPolyLoop^)bound->Bound)->Polygon->Count < 3) continue;//skip non-polygonal faces
 					IfcPolyLoop^polyLoop = (IfcPolyLoop^)bound->Bound;
 					bool is3D = (polyLoop->Polygon[0]->Dim == 3);
 					BRepBuilderAPI_MakePolygon polyMaker;
+					
 					for each (IfcCartesianPoint^ p in polyLoop->Polygon) //add all the points into unique collection
 					{
 						TopoDS_Vertex v;
@@ -339,18 +352,16 @@ namespace Xbim
 						XbimWire^ loop = gcnew XbimWire(polyMaker.Wire());
 						if (loop->IsValid)
 						{
-							if (!bound->Orientation) loop->Reverse();
-							loops->Add(loop);
+							if (!bound->Orientation)
+								loop->Reverse(); 
+							loops->Add(gcnew Tuple<XbimWire^, IfcPolyLoop^>(loop, polyLoop));
 						}
 					}
 				
 				}
 				XbimFace^ face = BuildFace(loops, fc->EntityLabel);
 				if (face->IsValid)
-				{
 					builder.Add(shell, face);
-					
-				}
 				else
 					XbimGeometryCreator::logger->WarnFormat("WC002: Incorrectly defined IfcFace #{0}", fc->EntityLabel);
 			}
@@ -369,21 +380,36 @@ namespace Xbim
 
 
 		
-		XbimFace^ XbimCompound::BuildFace(List<XbimWire^>^ wires, int label)
+		XbimFace^ XbimCompound::BuildFace(List<Tuple<XbimWire^, IfcPolyLoop^>^>^ wires, int label)
 		{
-			if (wires->Count == 0) return gcnew XbimFace();
-			XbimFace^ face = gcnew XbimFace(wires[0]); //take the first one
-			if (wires->Count == 1) return face;
-			for (int i = 1; i < wires->Count; i++) face->Add(wires[i]);
-			IXbimWire^ outerBound = face->OuterBound;
-			face = gcnew XbimFace(outerBound); //create  a face with the right bound and direction
-			XbimVector3D faceNormal = outerBound->Normal;
 
-			for each (XbimWire^ wire in wires)
+			if (wires->Count == 0) return gcnew XbimFace();
+
+			XbimPoint3D p = wires[0]->Item2->Polygon[0]->XbimPoint3D();
+			XbimVector3D n = PolyLoopExtensions::NewellsNormal(wires[0]->Item2);
+			XbimFace^ face = gcnew XbimFace(wires[0]->Item1, p, n);
+			if (wires->Count == 1) return face; //take the first one
+
+			for (int i = 1; i < wires->Count; i++) face->Add(wires[i]->Item1);
+			IXbimWire^ outerBound = face->OuterBound;
+			XbimVector3D faceNormal;// = outerBound->Normal;
+			for each (Tuple<XbimWire^, IfcPolyLoop^>^ wire in wires)
 			{
+				if (wire->Item1->Equals(outerBound))
+				{
+					faceNormal = PolyLoopExtensions::NewellsNormal(wire->Item2);
+					break;
+				}
+			}
+		
+			face = gcnew XbimFace(outerBound, p, faceNormal); //create  a face with the right bound and direction
+
+			for (int i = 1; i < wires->Count; i++)
+			{
+				XbimWire^ wire = wires[i]->Item1;
 				if (!wire->Equals(outerBound))
 				{
-					XbimVector3D loopNormal = wire->Normal;
+					XbimVector3D loopNormal = PolyLoopExtensions::NewellsNormal(wires[i]->Item2);
 					if (faceNormal.DotProduct(loopNormal) > 0) //they should be in opposite directions, so reverse
 						wire->Reverse();
 					if (!face->Add(wire))
