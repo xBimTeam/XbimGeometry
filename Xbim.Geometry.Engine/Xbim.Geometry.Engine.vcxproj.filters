@@ -508,9 +508,6 @@
     <Filter Include="Source files\TKBO\BOPDS">
       <UniqueIdentifier>{6B196B75-122F-0C86-0551-28FB979D8806}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source files\TKBO\BOPInt">
-      <UniqueIdentifier>{7532AD55-03B7-16E2-15BD-018AF148E003}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source files\TKBO\BOPTools">
       <UniqueIdentifier>{7400F93E-1438-0BB0-08C6-4A9D6DA57BFA}</UniqueIdentifier>
     </Filter>
@@ -3752,6 +3749,15 @@
     </ClCompile>
     <ClCompile Include="AssemblyInfo.cpp">
       <Filter>Source files\Includes</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\NCollection\NCollection_AccAllocator.cxx">
+      <Filter>Source files\TKernel\NCollection</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\NCollection\NCollection_AlignedAllocator.cxx">
+      <Filter>Source files\TKernel\NCollection</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\NCollection\NCollection_WinHeapAllocator.cxx">
+      <Filter>Source files\TKernel\NCollection</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -11288,15 +11294,6 @@
       <Filter>Source files\Includes</Filter>
     </None>
     <None Include="OCC\inc\BOPDS_Tools.lxx">
-      <Filter>Source files\Includes</Filter>
-    </None>
-    <None Include="OCC\drv\BOPInt\BOPInt_Context.ixx">
-      <Filter>Source files\Includes</Filter>
-    </None>
-    <None Include="OCC\drv\BOPInt\BOPInt_ShrunkRange.ixx">
-      <Filter>Source files\Includes</Filter>
-    </None>
-    <None Include="OCC\drv\BOPInt\BOPInt_Tools.ixx">
       <Filter>Source files\Includes</Filter>
     </None>
     <None Include="OCC\drv\BOPTools\BOPTools.ixx">

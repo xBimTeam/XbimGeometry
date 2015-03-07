@@ -2227,6 +2227,9 @@
     <ClCompile Include="OCC\src\math\math_PSOParticlesPool.cxx">
       <CompileAsManaged>false</CompileAsManaged>
     </ClCompile>
+    <ClCompile Include="OCC\src\NCollection\NCollection_AccAllocator.cxx" />
+    <ClCompile Include="OCC\src\NCollection\NCollection_AlignedAllocator.cxx" />
+    <ClCompile Include="OCC\src\NCollection\NCollection_WinHeapAllocator.cxx" />
     <ClCompile Include="OCC\src\OSD\OSD_OpenFile.cxx">
       <CompileAsManaged>false</CompileAsManaged>
     </ClCompile>
@@ -9940,9 +9943,6 @@
     <None Include="OCC\drv\BOPDS\BOPDS_SubIterator.jxx" />
     <None Include="OCC\drv\BOPDS\BOPDS_Tools.ixx" />
     <None Include="OCC\drv\BOPDS\BOPDS_Tools.jxx" />
-    <None Include="OCC\drv\BOPInt\BOPInt_Context.ixx" />
-    <None Include="OCC\drv\BOPInt\BOPInt_ShrunkRange.ixx" />
-    <None Include="OCC\drv\BOPInt\BOPInt_Tools.ixx" />
     <None Include="OCC\drv\BOPTools\BOPTools.ixx" />
     <None Include="OCC\drv\BOPTools\BOPTools.jxx" />
     <None Include="OCC\drv\BOPTools\BOPTools_AlgoTools.ixx" />
