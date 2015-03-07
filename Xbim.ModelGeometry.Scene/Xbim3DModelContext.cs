@@ -948,11 +948,9 @@ namespace Xbim.ModelGeometry.Scene
         {
             var localPercentageParsed = contextHelper.PercentageParsed;
             var localTally = contextHelper.Tally;
-            var dedupCount = 0;
+           // var dedupCount = 0;
 
-
-            var geomHash =
-                new ConcurrentDictionary<RepresentationItemGeometricHashKey, int>();
+            //var geomHash = new ConcurrentDictionary<RepresentationItemGeometricHashKey, int>();
 
             var mapLookup =
                 new ConcurrentDictionary<int, int>();
@@ -971,10 +969,10 @@ namespace Xbim.ModelGeometry.Scene
                 //if (!isFeatureElementShape && mappedEntityLabel != shapeId) //it already exists
                 //{
                 //    mapLookup.TryAdd(shapeId, mappedEntityLabel);
-                //    Interlocked.Increment(ref dedupCount);
+                //    //Interlocked.Increment(ref dedupCount);
                 //}
                 //else //we have added a new shape geometry
-                if( shape is IfcFaceBasedSurfaceModel)
+                
                 {
 
                     try
@@ -1711,7 +1709,7 @@ namespace Xbim.ModelGeometry.Scene
             }
 
             //write out the multiple instances
-            int i = 0;
+            
             foreach (var kv in lookup.Where(v=>v.Value>1))
             {
                 IXbimShapeGeometryData geometry = ShapeGeometry(kv.Key);
@@ -1741,7 +1739,7 @@ namespace Xbim.ModelGeometry.Scene
                    
                     tr.Write(binaryStream);
                 }
-                i++;
+               
             }
             //now do the single instances
             foreach (var kv in lookup.Where(v => v.Value == 1))
