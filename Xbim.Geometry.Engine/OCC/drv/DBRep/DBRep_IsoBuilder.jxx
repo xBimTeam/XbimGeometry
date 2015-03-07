@@ -1,0 +1,3 @@
+#include <TopoDS_Face.hxx>
+#include <DBRep_Face.hxx>
+#include <DBRep_IsoBuilder.hxx>
