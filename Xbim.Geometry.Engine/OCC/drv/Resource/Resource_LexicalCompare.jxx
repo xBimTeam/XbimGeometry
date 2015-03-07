@@ -1,0 +1,2 @@
+#include <TCollection_AsciiString.hxx>
+#include <Resource_LexicalCompare.hxx>

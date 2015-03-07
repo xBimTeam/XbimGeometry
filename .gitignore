@@ -182,3 +182,15 @@ UpgradeLog*.htm
 FakesAssemblies/
 
 /Output/*
+*.files
+/*.adm/*
+*.In
+*.Out
+*.Dep
+*.cdl
+FILES
+EXTERNLIB
+PACKAGES
+*.edl
+/Xbim.Geometry.Engine/OCC/src/OSD/EXTERNLIB
+/Xbim.Geometry.Engine/OCC/src/Standard/EXTERNLIB

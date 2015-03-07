@@ -1,0 +1,3 @@
+#include <gp_Vec.hxx>
+#include <gp_Mat.hxx>
+#include <gp_Quaternion.hxx>

@@ -212,8 +212,7 @@ namespace Xbim
 			gp_Trsf trsf;
 			trsf.SetValues(U1.X, U1.Y, U1.Z, 0,
 				U2.X, U2.Y, U2.Z, 0,
-				U3.X, U3.Y, U3.Z, 0,
-				Precision::Angular(), Precision::Approximation());
+				U3.X, U3.Y, U3.Z, 0);
 
 			trsf.SetTranslationPart(gp_Vec(LO.X, LO.Y, LO.Z));
 			trsf.SetScaleFactor(ct3D->Scl);
@@ -288,8 +287,7 @@ namespace Xbim
 			gp_Trsf trsf;
 			trsf.SetValues(m3D.M11, m3D.M21, m3D.M31, m3D.OffsetX,
 				m3D.M12, m3D.M22, m3D.M32, m3D.OffsetY,
-				m3D.M13, m3D.M23, m3D.M33, m3D.OffsetZ,
-				Precision::Angular(), Precision::Approximation());
+				m3D.M13, m3D.M23, m3D.M33, m3D.OffsetZ);
 			//trsf.SetTranslationPart(gp_Vec(m3D.OffsetX, m3D.OffsetY, m3D.OffsetZ));
 			return trsf;
 		}

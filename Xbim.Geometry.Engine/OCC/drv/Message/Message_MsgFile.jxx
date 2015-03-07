@@ -1,0 +1,3 @@
+#include <TCollection_AsciiString.hxx>
+#include <TCollection_ExtendedString.hxx>
+#include <Message_MsgFile.hxx>

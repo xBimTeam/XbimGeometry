@@ -1,0 +1,2 @@
+#include <TopTools_ListOfShape.hxx>
+#include <TopOpeBRepBuild_FuseFace.hxx>

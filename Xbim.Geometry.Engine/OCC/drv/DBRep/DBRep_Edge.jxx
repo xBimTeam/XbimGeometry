@@ -1,0 +1,3 @@
+#include <TopoDS_Edge.hxx>
+#include <Draw_Color.hxx>
+#include <DBRep_Edge.hxx>

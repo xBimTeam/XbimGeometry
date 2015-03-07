@@ -5,6 +5,7 @@ VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{CFAD1D1D-D584-4FB9-B795-64F25B888F26}"
 	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
 		Xbim.Geometry.nuspec = Xbim.Geometry.nuspec
 	EndProjectSection
 EndProject
@@ -29,7 +30,7 @@ Global
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{737762E6-7784-41E8-8602-528DCB6F6DC5}.Debug CarveCSG|Any CPU.ActiveCfg = Debug CarveCSG|Win32
-		{737762E6-7784-41E8-8602-528DCB6F6DC5}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{737762E6-7784-41E8-8602-528DCB6F6DC5}.Debug|Any CPU.ActiveCfg = Debug|Win32
 		{737762E6-7784-41E8-8602-528DCB6F6DC5}.Release CarveCSG|Any CPU.ActiveCfg = Release CarveCSG|Win32
 		{737762E6-7784-41E8-8602-528DCB6F6DC5}.Release|Any CPU.ActiveCfg = Release|Win32
 		{F94A98EA-AB29-4818-A51F-6B33BEB7561A}.Debug CarveCSG|Any CPU.ActiveCfg = Debug CarveCSG|Any CPU

@@ -88,13 +88,13 @@ namespace Xbim.ModelGeometry.Scene
                 return _hash;
             }
 
-            private static int i;
+           
             public override bool Equals(object obj)
             {
                 if (!(obj is RepresentationItemGeometricHashKey)) return false;
                 try
                 {
-                    Console.WriteLine(i++);
+                   
                     return RepresentationItem.GeometricEquals(((RepresentationItemGeometricHashKey)obj).RepresentationItem);
                 }
                 catch (XbimGeometryException eg)
