@@ -14,6 +14,10 @@ namespace Xbim
 			List<IXbimShell^>^ shells;
 			static XbimShellSet^ empty = gcnew XbimShellSet();
 			XbimShellSet::XbimShellSet(){ shells = gcnew List<IXbimShell^>(1); }
+			void InstanceCleanup()
+			{
+				shells = nullptr;
+			};
 		public:
 			static property XbimShellSet^ Empty{XbimShellSet^ get(){ return empty; }};
 
@@ -23,7 +27,12 @@ namespace Xbim
 			XbimShellSet(List<IXbimShell^>^ shells);
 
 #pragma endregion
+#pragma region destructors
 
+			~XbimShellSet(){ InstanceCleanup(); }
+			!XbimShellSet(){ InstanceCleanup(); }
+
+#pragma endregion
 #pragma region IXbimShellSet interface
 
 			virtual property bool IsValid{bool get(){ return Count>0; }; }

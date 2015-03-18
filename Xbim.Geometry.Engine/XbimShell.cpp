@@ -231,6 +231,7 @@ namespace Xbim
 			Standard_Real srXmin, srYmin, srZmin, srXmax, srYmax, srZmax;
 			if (pBox.IsVoid()) return XbimRect3D::Empty;
 			pBox.Get(srXmin, srYmin, srZmin, srXmax, srYmax, srZmax);
+			GC::KeepAlive(this);
 			return XbimRect3D(srXmin, srYmin, srZmin, (srXmax - srXmin), (srYmax - srYmin), (srZmax - srZmin));
 		}
 	
@@ -239,6 +240,7 @@ namespace Xbim
 			if (!IsValid) return 0;
 			GProp_GProps gProps;
 			BRepGProp::SurfaceProperties(*pShell, gProps);
+			GC::KeepAlive(this);
 			return gProps.Mass();	
 		}
 
@@ -249,6 +251,7 @@ namespace Xbim
 			if (!IsValid) return false;
 			BRepCheck_Shell checker(*pShell);
 			BRepCheck_Status result = checker.Closed();	
+			GC::KeepAlive(this);
 			return result == BRepCheck_NoError;
 			
 		}

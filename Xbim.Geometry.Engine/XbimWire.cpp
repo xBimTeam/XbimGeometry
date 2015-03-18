@@ -56,6 +56,7 @@
 
 using namespace Xbim::Common;
 using namespace Xbim::Ifc2x3::MeasureResource;
+
 namespace Xbim
 {
 	namespace Geometry
@@ -439,14 +440,18 @@ namespace Xbim
 			double maxTolerance = mf->PrecisionBooleanMax;
 			for each(IfcCompositeCurveSegment^ seg in cCurve->Segments)
 			{
-				XbimWire^ wireSeg = gcnew XbimWire(seg->ParentCurve);
-				if (wireSeg->IsValid)
+				XbimWire^ wireSegManaged = gcnew XbimWire(seg->ParentCurve);
+				
+				if (wireSegManaged->IsValid)
 				{
-					if (!seg->SameSense) wireSeg->Reverse();
+					
+					TopoDS_Wire wireSeg = wireSegManaged;
+					if (!seg->SameSense) wireSeg.Reverse();
 				retryAddWire:
 					
 					FTol.SetTolerance(wireSeg, currentPrecision, TopAbs_WIRE);
 					wire.Add(wireSeg);
+
 					if (!wire.IsDone())
 					{
 						currentPrecision *= 10;
@@ -459,6 +464,7 @@ namespace Xbim
 						}
 					}
 				}
+				
 			}
 
 			if (wire.IsDone())
@@ -509,7 +515,6 @@ namespace Xbim
 		void XbimWire::Init(IfcTrimmedCurve^ tCurve)
 		{
 			ShapeFix_ShapeTolerance FTol;
-
 			bool isConic = (dynamic_cast<IfcConic^>(tCurve->BasisCurve) != nullptr);
 
 			XbimModelFactors^ mf = tCurve->ModelOf->ModelFactors;
@@ -517,7 +522,7 @@ namespace Xbim
 			double toleranceMax = mf->PrecisionMax;
 			double parameterFactor = isConic ? mf->AngleToRadiansConversionFactor : 1;
 			Handle(Geom_Curve) curve;
-			bool rotateElipse;
+			bool rotateElipse = false;
 			IfcAxis2Placement2D^ ax2;
 			//it could be based on a circle, ellipse or line
 			if (dynamic_cast<IfcCircle^>(tCurve->BasisCurve))
@@ -1040,6 +1045,28 @@ namespace Xbim
 			intervals->Add(cc.LastParameter());
 			return intervals;
 		}
+
+		array<ContourVertex>^ XbimWire::Contour()
+		{
+			if (!IsValid) return gcnew array<ContourVertex>(0);
+			TopoDS_Wire ccWire = *pWire;
+			int i = 0;
+			TopTools_IndexedMapOfShape map;
+			TopExp::MapShapes(ccWire, TopAbs_VERTEX, map);
+			if (map.Extent() == 0) return gcnew array<ContourVertex>(0);
+			array<ContourVertex>^ contour = gcnew array<ContourVertex>(map.Extent());
+			i = 0;
+			for (BRepTools_WireExplorer exp(ccWire); exp.More(); exp.Next())
+			{
+				gp_Pnt p = BRep_Tool::Pnt(exp.CurrentVertex());
+				contour[i].Position.X = (float)p.X();
+				contour[i].Position.Y = (float)p.Y();
+				contour[i].Position.Z = (float)p.Z();
+				i++;
+			}	
+			return contour;
+		}
+
 
 		List<XbimPoint3D>^ XbimWire::IntervalPoints::get()
 		{

@@ -74,13 +74,16 @@ namespace Xbim
 			virtual property  XbimGeometryObjectType GeometryType{XbimGeometryObjectType  get() override { return XbimGeometryObjectType::XbimFaceType; }; }
 			virtual property IXbimWire^ OuterBound{ IXbimWire^ get(); }
 			virtual property IXbimWireSet^ InnerBounds{IXbimWireSet^ get(); }
+			virtual property IXbimWireSet^ Bounds{IXbimWireSet^ get(); }
 			virtual property double Area { double get(); }
 			virtual property double Perimeter { double get(); }
 			virtual property bool IsPlanar{bool get(); }
+			virtual property bool IsPolygonal{bool get(); }
 			///The topological normal of the face
 			virtual property XbimVector3D Normal{ XbimVector3D get(); }
 			virtual property XbimRect3D BoundingBox{XbimRect3D get() override; }
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) override;
+			virtual property bool IsQuadOrTriangle{bool get(); }
 #pragma endregion
 
 			property bool IsReversed{bool get(){ return IsValid && pFace->Orientation() == TopAbs_REVERSED; }; }

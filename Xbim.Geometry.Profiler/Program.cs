@@ -29,6 +29,8 @@ namespace Xbim.Geometry.Profiler
                 return;
             }
             var fileName = args[0];
+            var mainStopWatch = new Stopwatch();
+            mainStopWatch.Start();
             using (var model = GetModel(fileName))
             {
                 if (model != null)
@@ -46,11 +48,14 @@ namespace Xbim.Geometry.Profiler
                         {
                             Tuple<string,double> func; 
                             if(functionStack.TryPop(out func))
-                                Logger.InfoFormat("Complete in \t\t{1:0.0} ms", func.Item1, DateTime.Now.TimeOfDay.TotalMilliseconds - func.Item2);
+                                Logger.InfoFormat("Complete in \t\t{0:0.0} ms", DateTime.Now.TimeOfDay.TotalMilliseconds - func.Item2);
                         }
                     };
                     var context = new Xbim3DModelContext(model);
                     context.CreateContext(geomStorageType: XbimGeometryType.PolyhedronBinary, progDelegate: progDelegate);
+
+                    mainStopWatch.Stop();
+                    Logger.InfoFormat("Xbim total Compile Time \t\t{0:0.0} ms", mainStopWatch.ElapsedMilliseconds);
                     var wexBimFilename = Path.ChangeExtension(fileName, "wexBIM");
                     using (var wexBiMfile = new FileStream(wexBimFilename, FileMode.Create, FileAccess.Write))
                     {

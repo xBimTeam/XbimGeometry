@@ -73,6 +73,7 @@ namespace Xbim
 		IXbimShapeGeometryData^ XbimGeometryCreator::CreateShapeGeometry(IXbimGeometryObject^ geometryObject, double precision, double deflection, double angle, XbimGeometryType storageType)
 		{
 			IXbimShapeGeometryData^ shapeGeom = gcnew XbimShapeGeometry();
+			
 			if (geometryObject->IsSet)
 			{
 				IEnumerable<IXbimGeometryObject^>^ set = dynamic_cast<IEnumerable<IXbimGeometryObject^>^>(geometryObject);
@@ -87,6 +88,7 @@ namespace Xbim
 							WriteTriangulation(bw, geom, precision, deflection, angle);
 						}
 						bw->Close();
+						delete bw;
 					}
 					else //default to text
 					{
@@ -96,9 +98,12 @@ namespace Xbim
 							WriteTriangulation(tw, geom, precision, deflection, angle);
 						}
 						tw->Close();
+						delete tw;
 					}
-
+					memStream->Flush();
 					shapeGeom->ShapeData = memStream->ToArray();
+					delete memStream;
+
 					if (shapeGeom->ShapeData->Length > 0)
 					{
 						((XbimShapeGeometry^)shapeGeom)->BoundingBox = geometryObject->BoundingBox;
@@ -116,14 +121,18 @@ namespace Xbim
 					BinaryWriter^ bw = gcnew BinaryWriter(memStream);
 					WriteTriangulation(bw, geometryObject, precision, deflection, angle);
 					bw->Close();
+					delete bw;
 				}
 				else //default to text
 				{
 					TextWriter^ tw = gcnew StreamWriter(memStream);
 					WriteTriangulation(tw, geometryObject, precision, deflection, angle);
 					tw->Close();
+					delete tw;
 				}
+				memStream->Flush();
 				shapeGeom->ShapeData = memStream->ToArray();
+				delete memStream;
 				if (shapeGeom->ShapeData->Length > 0)
 				{					
 					((XbimShapeGeometry^)shapeGeom)->BoundingBox = geometryObject->BoundingBox;

@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
     <metadata>
         <id>Xbim.Geometry</id>
-        <version>3.0.10</version>
+        <version>3.0.11</version>
         <title>xBIM Geometry</title>
         <authors>xBIM team</authors>
         <owners>Steve Lockley</owners>
@@ -22,7 +22,7 @@ IOS and Android versions are under development.</description>
         <tags>BIM, IFC, IfcXml, IfcZip, COBie, .Net, C#, BuildingSmart</tags>
       <dependencies>
         <dependency id="Newtonsoft.Json" version="6.0.3" />
-        <dependency id="Xbim.Essentials" version="3.0.10" />
+        <dependency id="Xbim.Essentials" version="3.0.14" />
       </dependencies>
     </metadata>
     <files>
@@ -35,6 +35,9 @@ IOS and Android versions are under development.</description>
       <file src="Output\Release\Xbim.Geometry.targets" target="build\net45\Xbim.Geometry.targets" />
       <file src="Output\Release\Xbim.Geometry.Engine.Interop.pdb" target="lib\net45\Xbim.Geometry.Engine.Interop.pdb" />
       <file src="Output\Release\Xbim.ModelGeometry.Scene.pdb" target="lib\net45\Xbim.ModelGeometry.Scene.pdb" />
+      <file src="Output\Release\Xbim.Tessellator.dll" target="lib\net45\Xbim.Tessellator.dll" />
+      <file src="Output\Release\Xbim.Tessellator.xml" target="lib\net45\Xbim.Tessellator.xml" />
+      
     </files>
 
   </package>

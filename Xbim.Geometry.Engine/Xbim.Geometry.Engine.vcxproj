@@ -195,9 +195,10 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;kernel32.lib;ws2_32.lib;vfw32.lib</AdditionalDependencies>
-      <AdditionalOptions>/ignore:4248</AdditionalOptions>
+      <AdditionalDependencies>msvcrtd.lib;advapi32.lib;gdi32.lib;user32.lib;kernel32.lib;ws2_32.lib;vfw32.lib</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4248 /NOENTRY</AdditionalOptions>
       <Profile>false</Profile>
+      <ForceSymbolReferences>__DllMainCRTStartup@12 </ForceSymbolReferences>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|Win32'">
@@ -217,8 +218,9 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;kernel32.lib;ws2_32.lib;vfw32.lib</AdditionalDependencies>
-      <AdditionalOptions>/ignore:4248</AdditionalOptions>
+      <AdditionalDependencies>msvcrtd.lib;advapi32.lib;gdi32.lib;user32.lib;kernel32.lib;ws2_32.lib;vfw32.lib</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4248 /NOENTRY</AdditionalOptions>
+      <ForceSymbolReferences>__DllMainCRTStartup@12 </ForceSymbolReferences>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -234,12 +236,14 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
       <CompileAsManaged>true</CompileAsManaged>
+      <StringPooling>true</StringPooling>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;kernel32.lib;ws2_32.lib;vfw32.lib</AdditionalDependencies>
-      <AdditionalOptions>/ignore:4248</AdditionalOptions>
+      <AdditionalDependencies>msvcrtd.lib;advapi32.lib;gdi32.lib;user32.lib;kernel32.lib;ws2_32.lib;vfw32.lib</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4248 /NOENTRY</AdditionalOptions>
       <Profile>false</Profile>
+      <ForceSymbolReferences>_DllMainCRTStartup</ForceSymbolReferences>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|x64'">
@@ -255,11 +259,13 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
       <CompileAsManaged>true</CompileAsManaged>
+      <StringPooling>true</StringPooling>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;kernel32.lib;ws2_32.lib;vfw32.lib</AdditionalDependencies>
-      <AdditionalOptions>/ignore:4248</AdditionalOptions>
+      <AdditionalDependencies>msvcrtd.lib;advapi32.lib;gdi32.lib;user32.lib;kernel32.lib;ws2_32.lib;vfw32.lib</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4248 /NOENTRY</AdditionalOptions>
+      <ForceSymbolReferences>_DllMainCRTStartup</ForceSymbolReferences>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -277,9 +283,10 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;kernel32.lib;ws2_32.lib;vfw32.lib</AdditionalDependencies>
-      <AdditionalOptions>/ignore:4248</AdditionalOptions>
+      <AdditionalDependencies>msvcrt.lib;advapi32.lib;gdi32.lib;user32.lib;kernel32.lib;ws2_32.lib;vfw32.lib</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4248 /NOENTRY</AdditionalOptions>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <ForceSymbolReferences>__DllMainCRTStartup@12 </ForceSymbolReferences>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|Win32'">
@@ -297,8 +304,9 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;kernel32.lib;ws2_32.lib;vfw32.lib</AdditionalDependencies>
-      <AdditionalOptions>/ignore:4248</AdditionalOptions>
+      <AdditionalDependencies>msvcrt.lib;advapi32.lib;gdi32.lib;user32.lib;kernel32.lib;ws2_32.lib;vfw32.lib</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4248 /NOENTRY</AdditionalOptions>
+      <ForceSymbolReferences>__DllMainCRTStartup@12 </ForceSymbolReferences>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -314,12 +322,14 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
       <CompileAsManaged>true</CompileAsManaged>
+      <StringPooling>true</StringPooling>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;kernel32.lib;ws2_32.lib;vfw32.lib</AdditionalDependencies>
-      <AdditionalOptions>/ignore:4248</AdditionalOptions>
+      <AdditionalDependencies>msvcrt.lib;advapi32.lib;gdi32.lib;user32.lib;kernel32.lib;ws2_32.lib;vfw32.lib</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4248 /NOENTRY</AdditionalOptions>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <ForceSymbolReferences>_DllMainCRTStartup</ForceSymbolReferences>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|x64'">
@@ -336,11 +346,13 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
       <CompileAsManaged>true</CompileAsManaged>
+      <StringPooling>true</StringPooling>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;kernel32.lib;ws2_32.lib;vfw32.lib</AdditionalDependencies>
-      <AdditionalOptions>/ignore:4248</AdditionalOptions>
+      <AdditionalDependencies>msvcrt.lib;advapi32.lib;gdi32.lib;user32.lib;kernel32.lib;ws2_32.lib;vfw32.lib</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4248 /NOENTRY</AdditionalOptions>
+      <ForceSymbolReferences>_DllMainCRTStartup</ForceSymbolReferences>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -362,19 +374,19 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="Xbim.Common">
-      <HintPath>..\packages\Xbim.Essentials.3.0.10\lib\net45\Xbim.Common.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.3.0.14\lib\net45\Xbim.Common.dll</HintPath>
       <Private>true</Private>
     </Reference>
     <Reference Include="Xbim.Ifc.Extensions">
-      <HintPath>..\packages\Xbim.Essentials.3.0.10\lib\net45\Xbim.Ifc.Extensions.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.3.0.14\lib\net45\Xbim.Ifc.Extensions.dll</HintPath>
       <Private>true</Private>
     </Reference>
     <Reference Include="Xbim.Ifc2x3">
-      <HintPath>..\packages\Xbim.Essentials.3.0.10\lib\net45\Xbim.Ifc2x3.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.3.0.14\lib\net45\Xbim.Ifc2x3.dll</HintPath>
       <Private>true</Private>
     </Reference>
     <Reference Include="Xbim.IO">
-      <HintPath>..\packages\Xbim.Essentials.3.0.10\lib\net45\Xbim.IO.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.3.0.14\lib\net45\Xbim.IO.dll</HintPath>
       <Private>true</Private>
     </Reference>
   </ItemGroup>
@@ -2227,9 +2239,15 @@
     <ClCompile Include="OCC\src\math\math_PSOParticlesPool.cxx">
       <CompileAsManaged>false</CompileAsManaged>
     </ClCompile>
-    <ClCompile Include="OCC\src\NCollection\NCollection_AccAllocator.cxx" />
-    <ClCompile Include="OCC\src\NCollection\NCollection_AlignedAllocator.cxx" />
-    <ClCompile Include="OCC\src\NCollection\NCollection_WinHeapAllocator.cxx" />
+    <ClCompile Include="OCC\src\NCollection\NCollection_AccAllocator.cxx">
+      <CompileAsManaged>false</CompileAsManaged>
+    </ClCompile>
+    <ClCompile Include="OCC\src\NCollection\NCollection_AlignedAllocator.cxx">
+      <CompileAsManaged>false</CompileAsManaged>
+    </ClCompile>
+    <ClCompile Include="OCC\src\NCollection\NCollection_WinHeapAllocator.cxx">
+      <CompileAsManaged>false</CompileAsManaged>
+    </ClCompile>
     <ClCompile Include="OCC\src\OSD\OSD_OpenFile.cxx">
       <CompileAsManaged>false</CompileAsManaged>
     </ClCompile>
@@ -2243,154 +2261,79 @@
       <CompileAsManaged>false</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="XbimCompound.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|x64'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|x64'">true</CompileAsManaged>
+      <CompileAsManaged>true</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="XbimCurve.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|x64'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|x64'">true</CompileAsManaged>
+      <CompileAsManaged>true</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="XbimEdge.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|x64'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|x64'">true</CompileAsManaged>
+      <CompileAsManaged>true</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="XbimEdgeSet.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|x64'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|x64'">true</CompileAsManaged>
+      <CompileAsManaged>true</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="XbimFace.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|x64'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|x64'">true</CompileAsManaged>
+      <CompileAsManaged>true</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="XbimFaceSet.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|x64'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|x64'">true</CompileAsManaged>
+      <CompileAsManaged>true</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="XbimFacetedShell.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|x64'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|x64'">true</CompileAsManaged>
+      <CompileAsManaged>true</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="XbimFacetedSolid.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|x64'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|x64'">true</CompileAsManaged>
+      <CompileAsManaged>true</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="XbimGeometryCreator.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|x64'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|x64'">true</CompileAsManaged>
+      <CompileAsManaged>true</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="XbimGeometryObject.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|x64'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|x64'">true</CompileAsManaged>
+      <CompileAsManaged>true</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="XbimGeometryObjectSet.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|x64'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|x64'">true</CompileAsManaged>
+      <CompileAsManaged>true</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="XbimGeomPrim.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|x64'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|x64'">true</CompileAsManaged>
+      <CompileAsManaged>true</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="XbimLinearEdge.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|x64'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|x64'">true</CompileAsManaged>
+      <CompileAsManaged>true</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="XbimOccShape.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|x64'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|x64'">true</CompileAsManaged>
+      <CompileAsManaged>true</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="XbimOccWriter.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|x64'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|x64'">true</CompileAsManaged>
+      <CompileAsManaged>true</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="XbimPoint3DWithTolerance.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|x64'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|x64'">true</CompileAsManaged>
+      <CompileAsManaged>true</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="XbimPolygonalFace.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|x64'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|x64'">true</CompileAsManaged>
+      <CompileAsManaged>true</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="XbimShell.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|x64'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|x64'">true</CompileAsManaged>
+      <CompileAsManaged>true</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="XbimShellSet.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|x64'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|x64'">true</CompileAsManaged>
+      <CompileAsManaged>true</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="XbimSolid.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|x64'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|x64'">true</CompileAsManaged>
+      <CompileAsManaged>true</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="XbimSolidSet.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|x64'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|x64'">true</CompileAsManaged>
+      <CompileAsManaged>true</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="XbimVertex.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|x64'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|x64'">true</CompileAsManaged>
+      <CompileAsManaged>true</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="XbimVertexSet.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|x64'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|x64'">true</CompileAsManaged>
+      <CompileAsManaged>true</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="XbimWire.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|x64'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|x64'">true</CompileAsManaged>
+      <CompileAsManaged>true</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="XbimWireSet.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug CarveCSG|x64'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|x64'">true</CompileAsManaged>
+      <CompileAsManaged>true</CompileAsManaged>
     </ClCompile>
   </ItemGroup>
   <ItemGroup Label="TKernel">
@@ -17135,6 +17078,11 @@
     <None Include="OCC\inc\Units_UnitsSystem.hxx" />
     <None Include="OCC\inc\Units_UtsSequence.hxx" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Xbim.Tessellator\Xbim.Tessellator.csproj">
+      <Project>{5ee39029-873a-45a0-9259-2198bf8729f4}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

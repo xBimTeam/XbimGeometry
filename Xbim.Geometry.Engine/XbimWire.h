@@ -11,6 +11,7 @@ using namespace Xbim::Ifc2x3::GeometryResource;
 using namespace Xbim::Ifc2x3::ProfileResource;
 using namespace Xbim::Ifc2x3::TopologyResource;
 using namespace Xbim::Common::Geometry;
+using namespace Xbim::Tessellator;
 namespace Xbim
 {
 	namespace Geometry
@@ -165,7 +166,7 @@ property bool IsReversed{bool get(){ return IsValid && pWire->Orientation() == T
 			void Translate(XbimVector3D translation);
 			//change the direction of the loop
 			void Reverse();
-			
+			array<ContourVertex>^ Contour();
 		
 		};
 	}

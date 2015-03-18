@@ -11,13 +11,19 @@ namespace Xbim
 		private:
 			XbimPoint3DWithTolerance^ start;
 			XbimPoint3DWithTolerance^ end;
+			
 		public:
 
 #pragma region Constructors
 			//XbimLinearEdge();
 			XbimLinearEdge(XbimPoint3DWithTolerance^ start, XbimPoint3DWithTolerance^ end);
 #pragma endregion
+#pragma region destructors
 
+			~XbimLinearEdge(){ }
+			!XbimLinearEdge(){ }
+
+#pragma endregion
 #pragma region Equality Overrides
 			virtual bool Equals(Object^ v) override;
 			virtual int GetHashCode() override;

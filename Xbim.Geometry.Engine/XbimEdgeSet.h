@@ -15,17 +15,27 @@ namespace Xbim
 			List<IXbimEdge^>^ edges;
 			static XbimEdgeSet^ empty = gcnew XbimEdgeSet();
 			XbimEdgeSet::XbimEdgeSet(){ edges = gcnew List<IXbimEdge^>(1); }
-
+			void InstanceCleanup()
+			{
+				edges = nullptr;
+			};
 		public:
 			static property XbimEdgeSet^ Empty{XbimEdgeSet^ get(){ return empty; }};
 
 #pragma region Constructors
+
 			XbimEdgeSet(const TopoDS_Shape& shape);
 			XbimEdgeSet(IEnumerable<IXbimEdge^>^ edges);
 			XbimEdgeSet(XbimWire^ wire);
 			
 #pragma endregion
 
+#pragma region destructors
+			
+			~XbimEdgeSet(){ InstanceCleanup(); }
+			!XbimEdgeSet(){ InstanceCleanup(); }
+
+#pragma endregion
 
 #pragma region IXbimEdgeSet Interface
 			virtual property bool IsValid{bool get(){ return Count>0; }; }

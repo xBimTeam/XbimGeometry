@@ -52,6 +52,7 @@ namespace Xbim
 			if (!IsValid) return nullptr;
 			Standard_Real p1, p2;
 			Handle(Geom_Curve) curve = BRep_Tool::Curve(*pEdge, p1, p2);
+			GC::KeepAlive(this);
 			return gcnew XbimCurve(curve, p1, p2);
 		}
 
@@ -61,6 +62,7 @@ namespace Xbim
 			{
 				GProp_GProps gProps;
 				BRepGProp::LinearProperties(*pEdge, gProps);
+				GC::KeepAlive(this);
 				return gProps.Mass();
 			}
 			else
@@ -222,6 +224,7 @@ namespace Xbim
 			Standard_Real srXmin, srYmin, srZmin, srXmax, srYmax, srZmax;
 			if (pBox.IsVoid()) return XbimRect3D::Empty;
 			pBox.Get(srXmin, srYmin, srZmin, srXmax, srYmax, srZmax);
+			GC::KeepAlive(this);
 			return XbimRect3D(srXmin, srYmin, srZmin, (srXmax - srXmin), (srYmax - srYmin), (srZmax - srZmin));
 		}
 

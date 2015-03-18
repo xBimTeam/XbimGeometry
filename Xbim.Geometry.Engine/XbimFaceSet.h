@@ -16,6 +16,10 @@ namespace Xbim
 			List<IXbimFace^>^ faces;
 			static XbimFaceSet^ empty = gcnew XbimFaceSet();
 			XbimFaceSet::XbimFaceSet(){ faces = gcnew List<IXbimFace^>(1); }
+			void InstanceCleanup()
+			{
+				faces = nullptr;
+			};
 		public:
 			static property XbimFaceSet^ Empty{XbimFaceSet^ get(){ return empty; }};
 
@@ -23,6 +27,13 @@ namespace Xbim
 			XbimFaceSet(const TopoDS_Shape& shape);
 			XbimFaceSet(const TopTools_ListOfShape & shapes);
 			XbimFaceSet(List<IXbimFace^>^ faces);
+#pragma endregion
+
+#pragma region destructors
+
+			~XbimFaceSet(){ InstanceCleanup(); }
+			!XbimFaceSet(){ InstanceCleanup(); }
+
 #pragma endregion
 
 #pragma region IXbimFaceSet Interface

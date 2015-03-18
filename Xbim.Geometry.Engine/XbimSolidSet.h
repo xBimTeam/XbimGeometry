@@ -29,10 +29,22 @@ namespace Xbim
 			void Init(IfcBooleanResult^ boolOp);
 			void Init(XbimCompound^ comp, int label);
 			static VolumeComparer^ _volumeComparer = gcnew VolumeComparer();
-			static int _maxOpeningsToCut = 20;
+			static int _maxOpeningsToCut = 100;
 			static double _maxOpeningVolumePercentage = 2.5;
 			bool _isSimplified = false;
+			void InstanceCleanup()
+			{
+				solids = nullptr;
+			};
 		public:
+
+#pragma region destructors
+
+			~XbimSolidSet(){ InstanceCleanup(); }
+			!XbimSolidSet(){ InstanceCleanup(); }
+
+#pragma endregion
+
 			static property XbimSolidSet^ Empty{XbimSolidSet^ get(){ return empty; }};
 			XbimSolidSet();
 			XbimSolidSet(const TopoDS_Shape& shape);

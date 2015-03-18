@@ -37,6 +37,7 @@ namespace GeometryTests
 
                 var project = model.Instances.New<IfcProject>();
                 project.Initialize(ProjectUnits.SIUnitsUK);
+                model.ReloadModelFactors();
                 project.Name = "testProject";
                 project.OwnerHistory.OwningUser = model.DefaultOwningUser;
                 project.OwnerHistory.OwningApplication = model.DefaultOwningApplication;

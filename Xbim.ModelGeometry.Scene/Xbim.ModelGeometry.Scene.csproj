@@ -66,21 +66,21 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="Xbim.Common, Version=3.0.5536.17974, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Xbim.Common, Version=3.0.5554.17977, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Xbim.Essentials.3.0.10\lib\net45\Xbim.Common.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.3.0.14\lib\net45\Xbim.Common.dll</HintPath>
     </Reference>
-    <Reference Include="Xbim.Ifc.Extensions, Version=3.0.5536.17976, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Xbim.Ifc.Extensions, Version=3.0.5554.17981, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Xbim.Essentials.3.0.10\lib\net45\Xbim.Ifc.Extensions.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.3.0.14\lib\net45\Xbim.Ifc.Extensions.dll</HintPath>
     </Reference>
-    <Reference Include="Xbim.Ifc2x3, Version=3.0.5536.17975, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Xbim.Ifc2x3, Version=3.0.5554.17979, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Xbim.Essentials.3.0.10\lib\net45\Xbim.Ifc2x3.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.3.0.14\lib\net45\Xbim.Ifc2x3.dll</HintPath>
     </Reference>
-    <Reference Include="Xbim.IO, Version=3.0.5536.17976, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Xbim.IO, Version=3.0.5554.17982, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Xbim.Essentials.3.0.10\lib\net45\Xbim.IO.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.3.0.14\lib\net45\Xbim.IO.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -107,6 +107,7 @@
     <Compile Include="XbimColour.cs" />
     <Compile Include="XbimColourMap.cs" />
     <Compile Include="Clustering\XbimDBSCAN.cs" />
+    <Compile Include="XbimTriangulatedMesh.cs" />
     <Compile Include="XbimEmptyGeometryGroup.cs" />
     <Compile Include="XbimPlacementTree.cs" />
     <Compile Include="XbimRegion.cs" />
@@ -121,6 +122,7 @@
     <Compile Include="XbimScene.cs" />
     <Compile Include="XbimSceneDefinition.cs" />
     <Compile Include="XbimSceneJS.cs" />
+    <Compile Include="XbimTessellator.cs" />
     <Compile Include="XbimTexture.cs" />
     <Compile Include="XbimTriangulatedModel.cs" />
     <Compile Include="XbimTriangulatedModelCollection.cs" />
@@ -131,6 +133,10 @@
     <ProjectReference Include="..\Xbim.Geometry.Engine.Interop\Xbim.Geometry.Engine.Interop.csproj">
       <Project>{f94a98ea-ab29-4818-a51f-6b33beb7561a}</Project>
       <Name>Xbim.Geometry.Engine.Interop</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Xbim.Tessellator\Xbim.Tessellator.csproj">
+      <Project>{5ee39029-873a-45a0-9259-2198bf8729f4}</Project>
+      <Name>Xbim.Tessellator</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

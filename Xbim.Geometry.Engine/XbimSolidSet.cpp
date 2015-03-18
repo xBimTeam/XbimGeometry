@@ -91,7 +91,12 @@ namespace Xbim
 				//make sure any sewing has been performed
 				XbimCompound^ compound = dynamic_cast<XbimCompound^>(geomSet);
 				
-				if (compound != nullptr) compound->Sew();
+				if (compound != nullptr)
+					if (!compound->Sew())
+					{
+						_isSimplified = true; //set flag true to say the solid set has been simplified and the user should be warned
+						return; //don't add it we cannot really make it into a solid and will cause boolean operation errors,
+					}
 	
 				for each (IXbimGeometryObject^ geom in geomSet)
 				{

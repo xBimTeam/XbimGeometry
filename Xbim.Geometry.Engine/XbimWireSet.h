@@ -15,6 +15,10 @@ namespace Xbim
 			List<IXbimWire^>^ wires;
 			static XbimWireSet^ empty = gcnew XbimWireSet();
 			XbimWireSet::XbimWireSet(){ wires = gcnew List<IXbimWire^>(1); }
+			void InstanceCleanup()
+			{
+				wires = nullptr;
+			};
 		public:
 			static property XbimWireSet^ Empty{XbimWireSet^ get(){ return empty; }};
 #pragma region Constructors
@@ -23,6 +27,12 @@ namespace Xbim
 			XbimWireSet(IEnumerable<IXbimWire^>^ wires){ this->wires = gcnew List<IXbimWire^>(wires); };
 #pragma endregion
 
+#pragma region destructors
+
+			~XbimWireSet(){ InstanceCleanup(); }
+			!XbimWireSet(){ InstanceCleanup(); }
+
+#pragma endregion
 			virtual property bool IsValid{bool get(){ return Count>0; }; }
 			virtual property bool IsSet{bool get()  { return true; }; }
 			virtual property IXbimWire^ First{IXbimWire^ get(); }

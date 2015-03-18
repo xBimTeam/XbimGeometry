@@ -77,7 +77,7 @@ namespace GeometryTests
                     Assert.IsTrue(eventTrace.Events.Count == 0); //no events should have been raised from this call
 
                     IfcCsgTests.GeneralTest(solid);
-                    Assert.IsTrue(solid.Faces.Count() == 8, "This IfcSurfaceCurveSweptAreaSolid with hollow circular profile def should have 8 faces");
+                    Assert.IsTrue(solid.Faces.Count() == 6, "This IfcSurfaceCurveSweptAreaSolid with hollow circular profile def should have 6 faces");
                 }
             }
         }

@@ -61,6 +61,12 @@ namespace Xbim
 		{
 		public:
 			XbimGeometryObject();
+#pragma region destructors
+
+			~XbimGeometryObject() {};
+			!XbimGeometryObject() {};
+
+#pragma endregion
 			virtual property  bool IsValid{bool  get() abstract; }
 			virtual property bool IsSet{bool get() abstract; }
 			virtual property  XbimGeometryObjectType GeometryType{XbimGeometryObjectType  get() abstract;}

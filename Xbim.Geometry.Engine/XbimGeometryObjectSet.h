@@ -16,10 +16,22 @@ namespace Xbim
 			List<IXbimGeometryObject^>^ geometryObjects;
 			static XbimGeometryObjectSet^ empty = gcnew XbimGeometryObjectSet();
 			XbimGeometryObjectSet::XbimGeometryObjectSet(){ geometryObjects = gcnew List<IXbimGeometryObject^>(1); }
+			void InstanceCleanup()
+			{
+				geometryObjects = nullptr;
+			};
 		public:
 			static property IXbimGeometryObjectSet^ Empty{IXbimGeometryObjectSet^ get(){ return empty; }};		
 			XbimGeometryObjectSet(IEnumerable<IXbimGeometryObject^>^ objects);
 			XbimGeometryObjectSet(int size){geometryObjects = gcnew List<IXbimGeometryObject^>(size);}
+
+#pragma region destructors
+
+			~XbimGeometryObjectSet(){ InstanceCleanup(); }
+			!XbimGeometryObjectSet(){ InstanceCleanup(); }
+
+#pragma endregion
+
 #pragma region IXbimGeometryObjectSet Interface
 			virtual property bool IsValid{bool get(){ return Count>0; }; }
 			virtual property bool IsSet{bool get(){ return true; }; }

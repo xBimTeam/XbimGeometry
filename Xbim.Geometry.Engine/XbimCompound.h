@@ -66,7 +66,7 @@ namespace Xbim
 			virtual property IXbimGeometryObject^ First{IXbimGeometryObject^ get(); }
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) override;
 			static List<XbimSolid^>^  GetDiscrete(List<XbimSolid^>^%);
-			static int MaxFacesToSew = 500;
+			static int MaxFacesToSew = 1000;
 #pragma endregion
 			//operators
 			operator const TopoDS_Compound& () { return *pCompound; }
@@ -83,7 +83,7 @@ namespace Xbim
 			XbimCompound^ Intersection(XbimCompound^ solids, double tolerance);
 			virtual property XbimRect3D BoundingBox {XbimRect3D get()override ; }
 
-			void Sew();
+			bool Sew();
 		};
 
 	}

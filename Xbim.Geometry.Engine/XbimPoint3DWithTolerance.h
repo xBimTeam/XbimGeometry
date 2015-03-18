@@ -14,6 +14,12 @@ namespace Xbim
 			double tolerance;
 			
 		public:
+#pragma region destructors
+
+			~XbimPoint3DWithTolerance(){ }
+			!XbimPoint3DWithTolerance(){ }
+
+#pragma endregion
 			XbimPoint3DWithTolerance(double x, double y, double z, double tolerance);
 			XbimPoint3DWithTolerance(XbimPoint3D point, double t);
 			XbimPoint3DWithTolerance(IXbimPoint^ point);

@@ -24,7 +24,7 @@ namespace Xbim.ModelGeometry.Scene
         public XbimPlacementTree(XbimModel model, bool adjustWcs = true)
         {
             var rootNodes = new List<XbimPlacementNode>();
-            var localPlacements = model.Instances.OfType<IfcLocalPlacement>().ToList();
+            var localPlacements = model.Instances.OfType<IfcLocalPlacement>(true).ToList();
             Nodes = new Dictionary<int, XbimPlacementNode>();
             foreach (var placement in localPlacements)
                 Nodes.Add(placement.EntityLabel, new XbimPlacementNode(placement));

@@ -14,6 +14,10 @@ namespace Xbim
 			List<IXbimVertex^>^ vertices;
 			static XbimVertexSet^ empty = gcnew XbimVertexSet();
 			XbimVertexSet::XbimVertexSet(){ vertices = gcnew List<IXbimVertex^>(1); }
+			void InstanceCleanup()
+			{
+				vertices = nullptr;
+			};
 		public:
 			static property XbimVertexSet^ Empty{XbimVertexSet^ get(){ return empty; }};
 
@@ -22,6 +26,12 @@ namespace Xbim
 			XbimVertexSet(IEnumerable<IXbimVertex^>^ vertices);
 #pragma endregion
 
+#pragma region destructors
+
+			~XbimVertexSet(){ InstanceCleanup(); }
+			!XbimVertexSet(){ InstanceCleanup(); }
+
+#pragma endregion
 
 #pragma region IXbimVertexSet Interface definition
 			virtual property bool IsValid{bool get(){ return Count>0; }; }

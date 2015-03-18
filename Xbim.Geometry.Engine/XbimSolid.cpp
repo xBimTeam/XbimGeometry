@@ -319,7 +319,7 @@ namespace Xbim
 				pipeMaker1.Add(p, Standard_False, Standard_False);
 				pipeMaker1.Build();
 				if (pipeMaker1.IsDone() && pipeMaker1.MakeSolid())
-				{					
+				{		
 					//do any inner loops					
 					BRepPrim_Builder b;
 					TopoDS_Shell shell;
@@ -330,7 +330,8 @@ namespace Xbim
 					for (TopExp_Explorer explr(pipeOuter, TopAbs_FACE); explr.More(); explr.Next())
 					{
 						const TopoDS_Face& face = TopoDS::Face(explr.Current());
-						if (!face.IsEqual(pipeMaker1.FirstShape()) && !face.IsEqual(pipeMaker1.LastShape()))
+						//Opencascade 6.8 changed first and lastshape so that isEqual failed, there is an issue with orientation so use isSame 
+						if (!face.IsSame(pipeMaker1.FirstShape()) && !face.IsSame(pipeMaker1.LastShape()))
 							b.AddShellFace(shell, face);
 					}
 
@@ -347,7 +348,6 @@ namespace Xbim
 						pipeMaker2.Build();
 						if (pipeMaker2.IsDone() && pipeMaker2.MakeSolid())
 						{
-
 							XbimFace^ bottomInner = gcnew XbimFace(TopoDS::Face(pipeMaker2.FirstShape()));
 							XbimFace^ topInner = gcnew XbimFace(TopoDS::Face(pipeMaker2.LastShape()));
 							//add the inner loops to the end faces
@@ -357,10 +357,12 @@ namespace Xbim
 							for (TopExp_Explorer explr(pipeMaker2.Shape(), TopAbs_FACE); explr.More(); explr.Next())
 							{
 								const TopoDS_Face& face = TopoDS::Face(explr.Current());
-								if (!face.IsEqual(pipeMaker2.FirstShape()) && !face.IsEqual(pipeMaker2.LastShape()))
+								//Opencascade 6.8 changed first and lastshape so that isEqual failed, there is an issue with orientation so use isSame 
+								if (!face.IsSame(pipeMaker2.FirstShape()) && !face.IsSame(pipeMaker2.LastShape()))
 									b.AddShellFace(shell, face);
 							}
 						}
+						break; //only do one
 					}
 					//add top and bottom faces with their hole loops
 					b.AddShellFace(shell, bottomOuter);
@@ -370,9 +372,7 @@ namespace Xbim
 					pSolid = new TopoDS_Solid();
 					bs.MakeSolid(*pSolid);
 					bs.Add(*pSolid, shell);
-
 					Move(repItem->Position);
-					
 					return;
 
 				}
@@ -938,6 +938,7 @@ namespace Xbim
 			Standard_Real srXmin, srYmin, srZmin, srXmax, srYmax, srZmax;
 			if (pBox.IsVoid()) return XbimRect3D::Empty;
 			pBox.Get(srXmin, srYmin, srZmin, srXmax, srYmax, srZmax);
+			GC::KeepAlive(this);
 			return XbimRect3D(srXmin, srYmin, srZmin, (srXmax - srXmin), (srYmax - srYmin), (srZmax - srZmin));
 		}
 
@@ -955,6 +956,7 @@ namespace Xbim
 			{
 				GProp_GProps gProps;
 				BRepGProp::VolumeProperties(*pSolid, gProps, Standard_True);
+				GC::KeepAlive(this);
 				return gProps.Mass();
 			}
 			else
@@ -990,6 +992,7 @@ namespace Xbim
 			{
 				GProp_GProps gProps;
 				BRepGProp::SurfaceProperties(*pSolid, gProps);
+				GC::KeepAlive(this);
 				return gProps.Mass();
 			}
 			else
@@ -1001,6 +1004,7 @@ namespace Xbim
 		{
 			if (!IsValid) return false;
 			BRepCheck_Analyzer analyser(*pSolid, Standard_True);
+			GC::KeepAlive(this);
 			return analyser.IsValid() == Standard_True;
 		}
 

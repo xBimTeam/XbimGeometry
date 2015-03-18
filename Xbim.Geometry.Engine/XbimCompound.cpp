@@ -22,6 +22,7 @@
 using namespace System;
 using namespace Xbim::Ifc2x3::Extensions;
 using namespace Xbim::XbimExtensions;
+using namespace Xbim::XbimExtensions::Interfaces;
 namespace Xbim
 {
 	namespace Geometry
@@ -73,6 +74,7 @@ namespace Xbim
 			BRepBuilderAPI_Copy copier(this);
 			BRepBuilderAPI_Transform gTran(copier.Shape(), XbimGeomPrim::ToTransform(matrix3D));
 			TopoDS_Compound temp = TopoDS::Compound(gTran.Shape());
+			GC::KeepAlive(this);
 			return gcnew XbimCompound(temp, IsSewn, _sewingTolerance);
 		}
 
@@ -202,9 +204,9 @@ namespace Xbim
 			for each (IXbimGeometryObject^ geomObj in this)
 			{
 				XbimShell^ shell = dynamic_cast<XbimShell^>(geomObj);
-				if (shell!=nullptr) shell->Orientate();
+				if (shell != nullptr) shell->Orientate();
 			}
-				
+
 		}
 
 		void XbimCompound::Init(IfcConnectedFaceSet^ faceSet)
@@ -218,11 +220,11 @@ namespace Xbim
 			/*if (faceSet->CfsFaces->Count < 50)
 			{
 
-				for each (IXbimGeometryObject^ geomObj in this)
-				{
-					XbimShell^ shell = dynamic_cast<XbimShell^>(geomObj);
-					if (shell != nullptr) shell->Orientate();
-				}
+			for each (IXbimGeometryObject^ geomObj in this)
+			{
+			XbimShell^ shell = dynamic_cast<XbimShell^>(geomObj);
+			if (shell != nullptr) shell->Orientate();
+			}
 			}*/
 		}
 
@@ -258,7 +260,7 @@ namespace Xbim
 			}
 			if (builder.IsDone())
 			{
-				pCompound= new TopoDS_Compound();
+				pCompound = new TopoDS_Compound();
 				BRep_Builder b;
 				b.MakeCompound(*pCompound);
 				b.Add(*pCompound, builder.Solid());
@@ -272,16 +274,15 @@ namespace Xbim
 			Init((IfcConnectedFaceSet^)closedShell);
 		}
 
-		void XbimCompound::Sew()
+		bool XbimCompound::Sew()
 		{
-			if (!IsValid || IsSewn )
-				return;
+			if (!IsValid || IsSewn)
+				return true;
 			TopTools_IndexedMapOfShape map;
 			TopExp::MapShapes(*pCompound, TopAbs_FACE, map);
 			if (map.Extent() > MaxFacesToSew) //give up if too many
-			{
-				_isSewn = true;
-				return;
+			{				
+				return false;
 			}
 			BRep_Builder builder;
 			TopoDS_Compound newCompound;
@@ -289,6 +290,7 @@ namespace Xbim
 			for (TopExp_Explorer expl(*pCompound, TopAbs_SHELL); expl.More(); expl.Next())
 			{
 				BRepBuilderAPI_Sewing seamstress(_sewingTolerance);
+				
 				seamstress.Add(expl.Current());
 				seamstress.Perform();
 				TopoDS_Shape result = seamstress.SewedShape();
@@ -304,16 +306,19 @@ namespace Xbim
 				
 
 			_isSewn = true;
+			GC::KeepAlive(this);
+			return true;
 		}
 
 		void XbimCompound::Init(IEnumerable<IfcFace^>^ faces)
 		{
 			double tolerance;
-			
+			IModel^ model;
 			for each (IfcFace^ face in faces)
-			{ 
-				tolerance = face->ModelOf->ModelFactors->Precision;
-				_sewingTolerance = face->ModelOf->ModelFactors->PrecisionBoolean;
+			{
+				model = face->ModelOf;
+				tolerance = model->ModelFactors->Precision;
+				_sewingTolerance = model->ModelFactors->PrecisionBoolean;			
 				break;
 			}
 			
@@ -322,9 +327,9 @@ namespace Xbim
 			TopoDS_Shell shell;
 			builder.MakeShell(shell);
 			TopTools_DataMapOfIntegerShape vertexStore;
-			for each (IfcFace^ fc in  faces)
+			for each (IfcFace^ unloadedFace in  faces)
 			{
-
+				IfcFace^ fc = (IfcFace^) model->Instances[unloadedFace->EntityLabel]; //improves performance and reduces memory load
 				List<Tuple<XbimWire^, IfcPolyLoop^>^>^ loops = gcnew List<Tuple<XbimWire^, IfcPolyLoop^>^>();
 				for each (IfcFaceBound^ bound in fc->Bounds) //build all the loops
 				{
@@ -360,10 +365,12 @@ namespace Xbim
 				
 				}
 				XbimFace^ face = BuildFace(loops, fc->EntityLabel);
+				for each (Tuple<XbimWire^, IfcPolyLoop^>^ loop in loops) delete loop->Item1; //force removal of wires
 				if (face->IsValid)
 					builder.Add(shell, face);
 				else
 					XbimGeometryCreator::logger->WarnFormat("WC002: Incorrectly defined IfcFace #{0}", fc->EntityLabel);
+				//delete face;
 			}
 		
 			pCompound = new TopoDS_Compound();
