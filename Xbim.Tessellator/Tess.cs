@@ -31,6 +31,7 @@
 ** LibTessDotNet: Remi Gillig, https://github.com/speps/LibTessDotNet
 */
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -63,10 +64,21 @@ namespace Xbim.Tessellator
     public struct ContourVertex
     {
         public Vec3 Position;
-        public object Data;
+        private int? _data;
+
+        public int Data
+        {
+            get
+            {
+                if (_data.HasValue) 
+                    return _data.Value;
+                return -1;
+            }
+            set { _data = value; }
+        }
     }
 
-    public delegate object CombineCallback(Vec3 position, object[] data, float[] weights);
+    public delegate int CombineCallback(Vec3 position, int[] data, float[] weights);
 
     public partial class Tess
     {
@@ -176,6 +188,40 @@ namespace Xbim.Tessellator
             }
         }
 
+        public static void ComputeNewellsNormal(ContourVertex[] vertices, ref Vec3 normal)
+        {
+            float x = 0, y = 0, z = 0;
+            ContourVertex current;
+            var previous = new ContourVertex();
+            int count = 0;
+            int total = vertices.Length;
+            for (var i = 0; i <= total; i++)
+            {
+                if (i < total)
+                    current = vertices[i];
+                else
+                    current = vertices[0];
+                if (count > 0)
+                {
+                    float xn = previous.Position.X;
+                    float yn = previous.Position.Y;
+                    float zn = previous.Position.Z;
+                    float xn1 = current.Position.X;
+                    float yn1 = current.Position.Y;
+                    float zn1 = current.Position.Z;
+                    x += (yn - yn1) * (zn + zn1);
+                    y += (xn + xn1) * (zn - zn1);
+                    z += (xn - xn1) * (yn + yn1);
+                }    
+                previous = current;
+                count++;
+            }
+            normal.X = x;
+            normal.Y = y;
+            normal.Z = z;
+            Vec3.Normalize(ref normal);
+           
+        }
         private void CheckOrientation()
         {
             // When we compute the normal automatically, we choose the orientation
@@ -610,30 +656,33 @@ namespace Xbim.Tessellator
         /// Adds all the contours and determines the outer loop and the corrects the windings
         /// </summary>
         /// <param name="contours"></param>
-        public void AddContours(List<ContourVertex[]> contours)
+        /// <param name="computeNormal">Calculates the normal property based on the outer face</param>
+        public void AddContours(List<ContourVertex[]> contours, bool computeNormal = false)
         {
-            ContourVertex[] outer = contours.FirstOrDefault();
+            if (contours.Any())
+            {
+            
+            ContourVertex[] outer = contours[0];
             if (contours.Count > 1)
             {
-                double largestArea = 0;
-                foreach (var contour in contours)
+                float largestArea = Math.Abs(SignedArea(contours[0]));
+                for (int i = 1; i < contours.Count; i++)
                 {
-                    double area = SignedArea(contour);
+                    float area = Math.Abs(SignedArea(contours[i]));
                     if (area > largestArea)
                     {
                         largestArea = area;
-                        outer = contour;
+                        AddContour(outer, ContourOrientation.Clockwise); //outer is now an inner
+                        outer = contours[i];
                     }
-                }
-                foreach (var contour in contours)
-                {
-                    if (contour != outer) AddContour(outer, ContourOrientation.Clockwise);
+                    else
+                        AddContour(contours[i], ContourOrientation.Clockwise);
                 }
             }
-            
-           AddContour(outer,ContourOrientation.CounterClockwise);
-           // ComputeNormal(ref _normal);       
+            AddContour(outer, ContourOrientation.CounterClockwise);
+            if (computeNormal) ComputeNewellsNormal(outer, ref _normal);
         }
+    }
 
         public void AddContour(ContourVertex[] vertices)
         {

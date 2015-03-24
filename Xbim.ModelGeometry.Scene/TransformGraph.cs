@@ -104,10 +104,10 @@ namespace Xbim.ModelGeometry.Scene
         public void AddAllProducts()
         {
 
-           List<XbimInstanceHandle> productHandles = ((XbimInstanceCollection)_model.Instances).Handles<IfcProduct>().ToList();
+            List<XbimInstanceHandle> productHandles = ((XbimInstanceCollection)_model.InstancesLocal).Handles<IfcProduct>().ToList();
            foreach (var handle in productHandles)
             {
-                IfcProduct product = _model.Instances[handle.EntityLabel] as IfcProduct;
+                IfcProduct product = _model.InstancesLocal[handle.EntityLabel] as IfcProduct;
                 if(!(product is IfcFeatureElement)) //don't store openings and additions
                     AddNode(product.ObjectPlacement, product);
             }

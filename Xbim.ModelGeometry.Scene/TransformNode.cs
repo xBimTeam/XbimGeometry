@@ -73,7 +73,7 @@ namespace Xbim.ModelGeometry.Scene
             if (!_productLabel.HasValue && _parent != null)
                 return _parent.NearestProduct(model);
             else if (_productLabel.HasValue)
-                return model.Instances[_productLabel.Value] as IfcProduct;
+                return model.InstancesLocal[_productLabel.Value] as IfcProduct;
             else
                 return null;
         }
@@ -81,7 +81,7 @@ namespace Xbim.ModelGeometry.Scene
         public IfcProduct Product(XbimModel model)
         {
             if (_productLabel.HasValue)
-                return model.Instances[_productLabel.Value] as IfcProduct;
+                return model.InstancesLocal[_productLabel.Value] as IfcProduct;
             else
                 return null;
         }

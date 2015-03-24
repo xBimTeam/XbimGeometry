@@ -1,59 +1,19 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using Xbim.IO.DynamicGrouping;
 using Xbim.Tessellator;
 using Xbim.Common.Geometry;
 using Xbim.Ifc2x3.GeometricModelResource;
 using Xbim.Ifc2x3.GeometryResource;
 using Xbim.Ifc2x3.TopologyResource;
 using Xbim.IO;
+using Xbim.XbimExtensions.SelectTypes;
 using XbimGeometry.Interfaces;
 
 namespace Xbim.ModelGeometry.Scene
 {
-    struct VertexIndexPairComparer : IEqualityComparer<VertexIndexPair>
-    {
-        public bool Equals(VertexIndexPair x, VertexIndexPair y)
-        {
-            return (x.VertexIdxA == y.VertexIdxA && x.VertexIdxB == y.VertexIdxB) ||
-            (x.VertexIdxA == y.VertexIdxB && x.VertexIdxB == y.VertexIdxA);
-        }
-
-        public int GetHashCode(VertexIndexPair v)
-        {          
-            long total = v.VertexIdxA + v.VertexIdxB;
-            return total.GetHashCode();
-        }
-    }
-
-    struct VertexIndexPair
-    {
-        public int VertexIdxA;
-        public int VertexIdxB;
-        public int FaceIdx;
-       
-        public VertexIndexPair(int p1, int p2, int f)
-        {
-            VertexIdxA = p1;
-            VertexIdxB = p2;
-            FaceIdx = f;
-        }
-
-        public bool IsOppositeDirection(VertexIndexPair other)
-        {
-            return VertexIdxA == other.VertexIdxB && VertexIdxB == other.VertexIdxA;
-        }
-
-        public bool IsSameDirection(VertexIndexPair other)
-        {
-            return VertexIdxA == other.VertexIdxA && VertexIdxA == other.VertexIdxA;
-        }
-    }
-
+    
     public class XbimTessellator
     {
         private readonly XbimModel _model;
@@ -77,7 +37,7 @@ namespace Xbim.ModelGeometry.Scene
         /// <returns></returns>
         public bool CanMesh(object shape)
         {
-            return shape is IXbimGeometryObject ||
+            return 
                 shape is IfcFaceBasedSurfaceModel ||
                 shape is IfcShellBasedSurfaceModel ||
                 shape is IfcConnectedFaceSet ||
@@ -100,28 +60,41 @@ namespace Xbim.ModelGeometry.Scene
 
         public IXbimShapeGeometryData Mesh(IfcFaceBasedSurfaceModel faceBasedModel)
         {
-            IEnumerable<IfcFace> allFaces = null;
-            foreach (var connectFaces in faceBasedModel.FbsmFaces)
+            var faceSets = new List<IEnumerable<IfcFace>>();
+            foreach (var faceSet in faceBasedModel.FbsmFaces)
             {
-                allFaces = allFaces == null ? connectFaces.CfsFaces : allFaces.Concat(connectFaces.CfsFaces);
+                faceSets.Add(faceSet.CfsFaces);
             }
-            return Mesh(allFaces);
+            return Mesh(faceSets);  
         }
+
+        
 
         public IXbimShapeGeometryData Mesh(IfcShellBasedSurfaceModel shellBasedModel)
         {
-            IEnumerable<IfcFace> allFaces = null;
-            foreach (var shell in shellBasedModel.SbsmBoundary)
-            {
-                var cfs = (IfcConnectedFaceSet)shell;
-                allFaces = allFaces == null ? cfs.CfsFaces : allFaces.Concat(cfs.CfsFaces);
-            }
-            return Mesh(allFaces);
+            return Mesh(shellBasedModel.SbsmBoundary);
         }
+
+        public IXbimShapeGeometryData Mesh(IEnumerable<IfcShell> shellSet)
+        {
+            var shells = new List<IEnumerable<IfcFace>>();
+            foreach (var shell in shellSet)
+            {
+                var closedShell = shell as IfcClosedShell;
+                var openShell = shell as IfcOpenShell;
+                if(closedShell!=null) shells.Add(closedShell.CfsFaces);
+                else if(openShell!=null) shells.Add(openShell.CfsFaces);
+            }
+            return Mesh(shells);
+        }
+
+        
 
         public IXbimShapeGeometryData Mesh(IfcConnectedFaceSet connectedFaceSet)
         {
-            return Mesh(connectedFaceSet.CfsFaces);
+            var faces = new List<IEnumerable<IfcFace>>();
+            faces.Add(connectedFaceSet.CfsFaces);
+            return Mesh(faces);
         }
 
         public IXbimShapeGeometryData Mesh(IfcFacetedBrep fBRepModel)
@@ -129,12 +102,12 @@ namespace Xbim.ModelGeometry.Scene
             return Mesh(fBRepModel.Outer);
         }
 
-        public IXbimShapeGeometryData Mesh(IEnumerable<IfcFace> faces)
+        public IXbimShapeGeometryData Mesh(IEnumerable<IEnumerable<IfcFace>> facesList)
         {
             if (_geometryType == XbimGeometryType.PolyhedronBinary)
-                return MeshPolyhedronBinary(faces);
-            if (_geometryType == XbimGeometryType.Polyhedron)
-                return MeshPolyhedronText(faces);
+                return MeshPolyhedronBinary(facesList);
+            //if (_geometryType == XbimGeometryType.Polyhedron)
+            //    return MeshPolyhedronText(facesList);
             throw new Exception("Illegal Geometry type, " + _geometryType);
         }
 
@@ -156,7 +129,7 @@ namespace Xbim.ModelGeometry.Scene
 
                 foreach (var unloadedFace in unloadedFaces)
                 {
-                    var fc = (IfcFace) _model.Instances[unloadedFace.EntityLabel];
+                    var fc = (IfcFace)_model.InstancesLocal[unloadedFace.EntityLabel];
                     //improves performance and reduces memory load
                     var tess = new Tess();
                     var contours = new List<ContourVertex[]>(fc.Bounds.Count);
@@ -198,13 +171,13 @@ namespace Xbim.ModelGeometry.Scene
                         for (var j = 0; j < tess.ElementCount*3; j++)
                         {
                             var idx = contourVerts[elements[j]].Data;
-                            if (idx == null) //WE HAVE INSERTED A POINT
+                            if (idx == -1) //WE HAVE INSERTED A POINT
                             {
                                 faceIndices.Add(cachedVertices.Count);
                                 cachedVertices.Add(contourVerts[elements[j]].Position);
                             }
                             else
-                                faceIndices.Add((int) idx);
+                                faceIndices.Add(idx);
                         }
                         if (faceIndices.Count > 0)
                         {
@@ -271,162 +244,167 @@ namespace Xbim.ModelGeometry.Scene
             return shapeGeometry;
         }
 
-        private IXbimShapeGeometryData MeshPolyhedronBinary(IEnumerable<IfcFace> faces)
+        private IXbimShapeGeometryData MeshPolyhedronBinary(IEnumerable<IEnumerable<IfcFace>> facesList)
         {
             IXbimShapeGeometryData shapeGeometry = new XbimShapeGeometry();
             shapeGeometry.Format = (byte)XbimGeometryType.PolyhedronBinary;
-            var numberOfTriangles = 0;
-            var unloadedFaces = faces as IList<IfcFace> ?? faces.ToList();
-            var faceCount = unloadedFaces.Count;
+          
+            
+            
             using (var ms = new MemoryStream(0x4000))
             using (var binaryWriter = new BinaryWriter(ms))
-            {               
-                var verticesIndexLookup = new Dictionary<Vec3, int>(new Vec3EqualityComparer());
-                var cachedVertices = new List<Vec3>(faceCount * 5);
-                var triangulatedMesh = new XbimTriangulatedMesh<int>(cachedVertices, faceCount*2);
-                var faceId = 0;
-                foreach (var unloadedFace in unloadedFaces)
+            {
+                var faceLists = facesList as IList<IEnumerable<IfcFace>> ?? facesList.ToList();
+                var triangulations = new List<XbimTriangulatedMesh>(faceLists.Count);
+                foreach (var faceList in faceLists)
+                    triangulations.Add(TriangulateFaces(faceList)); 
+                
+
+                // Write out header
+                uint verticesCount = 0;
+                uint triangleCount = 0;
+                uint facesCount = 0;
+                var boundingBox = XbimRect3D.Empty;
+                foreach (var triangulatedMesh in triangulations)
                 {
-                    var fc = (IfcFace)_model.Instances[unloadedFace.EntityLabel];
-                    //improves performance and reduces memory load
-                    var tess = new Tess();
-                    var contours = new List<ContourVertex[]>(fc.Bounds.Count);
-                    foreach (var bound in fc.Bounds) //build all the loops
-                    {
-                        var polyLoop = bound.Bound as IfcPolyLoop;
-                       
-                        if (polyLoop == null || polyLoop.Polygon.Count < 3) continue; //skip non-polygonal faces
+                    verticesCount += triangulatedMesh.VertexCount;
+                    triangleCount += triangulatedMesh.TriangleCount;
+                    facesCount += (uint)triangulatedMesh.Faces.Count;
+                    if (boundingBox.IsEmpty) boundingBox = triangulatedMesh.BoundingBox;
+                    else boundingBox.Union(triangulatedMesh.BoundingBox);
+                }
+                
+                binaryWriter.Write((byte)1); //stream format version			
+// ReSharper disable once RedundantCast
+                binaryWriter.Write((UInt32)verticesCount); //number of vertices
+                binaryWriter.Write((UInt32)triangleCount); //number of triangles
+               
+                foreach (var v in triangulations.SelectMany(t=>t.Vertices))
+                {    
+                    binaryWriter.Write(v.X);
+                    binaryWriter.Write(v.Y);
+                    binaryWriter.Write(v.Z);
+                }
+                shapeGeometry.BoundingBox = boundingBox.ToFloatArray();
+                //now write out the faces
 
-                        var is3D = (polyLoop.Polygon[0].Dim == 3);
-                        var contour = new ContourVertex[polyLoop.Polygon.Count];
-                        var i = 0;
-                        
-                        foreach (var p in bound.Orientation?polyLoop.Polygon:polyLoop.Polygon.Reverse()) //add all the points into unique collection
+                binaryWriter.Write(facesCount);
+                uint verticesOffset = 0;
+                foreach (var triangulatedMesh in triangulations)
+                {
+                    foreach (var faceGroup in triangulatedMesh.Faces)
+                    {
+                        var numTrianglesInFace = faceGroup.Value.Count;
+                        binaryWriter.Write(-numTrianglesInFace);
+                       // triangulatedMesh.Normals[faceGroup.Key].Write(binaryWriter); //write the normal for the face
+                        foreach (var triangle in faceGroup.Value)
                         {
-                            int index;
-                            var v = new Vec3(p.X, p.Y, is3D ? p.Z : 0);
-                            if (!verticesIndexLookup.TryGetValue(v, out index))
-                            {
-                                index = cachedVertices.Count;
-                                verticesIndexLookup.Add(v, index);
-                                contour[i].Position = v;
-                                cachedVertices.Add(v);
-                            }
-                            else
-                                contour[i].Position = cachedVertices[index];
-                            contour[i].Data = index;
-                            i++;
+                            WriteIndex(binaryWriter, (uint)triangle[0].StartVertexIndex + verticesOffset, verticesCount);
+                            triangle[0].PackedNormal.Write(binaryWriter);
+                            WriteIndex(binaryWriter, (uint)triangle[0].NextEdge.StartVertexIndex + verticesOffset, verticesCount);
+                            triangle[0].NextEdge.PackedNormal.Write(binaryWriter);
+                            WriteIndex(binaryWriter, (uint)triangle[0].NextEdge.NextEdge.StartVertexIndex + verticesOffset,
+                                verticesCount);
+                            triangle[0].NextEdge.NextEdge.PackedNormal.Write(binaryWriter);
                         }
-                        contours.Add(contour);
                     }
+                    verticesOffset += triangulatedMesh.VertexCount;
+                }
+                binaryWriter.Flush();
+                shapeGeometry.ShapeData = ms.ToArray();
+            }
+            return shapeGeometry;
+        }
 
-                    if (contours.Any())
+        private XbimTriangulatedMesh TriangulateFaces(IEnumerable<IfcFace> ifcFaces)
+        {
+            var faceId = 0;
+            var enumerable = ifcFaces as IList<IfcFace> ?? ifcFaces.ToList();
+            var faceCount = enumerable.Count;
+            var triangulatedMesh = new XbimTriangulatedMesh(faceCount);
+            foreach (var ifcFace in enumerable)
+            {
+                var fc = (IfcFace)_model.InstancesLocal[ifcFace.EntityLabel];
+                //improves performance and reduces memory load
+                var tess = new Tess();
+                var contours = new List<ContourVertex[]>(fc.Bounds.Count);
+                foreach (var bound in fc.Bounds) //build all the loops
+                {
+                    var polyLoop = bound.Bound as IfcPolyLoop;
+
+                    if (polyLoop == null || polyLoop.Polygon.Count < 3) continue; //skip non-polygonal faces
+
+                    var is3D = (polyLoop.Polygon[0].Dim == 3);
+
+                    var contour = new ContourVertex[polyLoop.Polygon.Count];
+                    var i = 0;
+
+                    foreach (var p in bound.Orientation ? polyLoop.Polygon : polyLoop.Polygon.Reverse())
+                        //add all the points into unique collection
                     {
-                        tess.AddContours(contours);
+                        var v = new Vec3(p.X, p.Y, is3D ? p.Z : 0);
+                        triangulatedMesh.AddVertex(v, ref contour[i]);
+                        i++;
+                    }
+                    contours.Add(contour);
+                }
+
+                if (contours.Any())
+                {
+                    if (contours.Count == 1 && contours[0].Length == 3) //its a triangle just grab it
+                    {
+                        triangulatedMesh.AddTriangle(contours[0][0].Data, contours[0][1].Data, contours[0][2].Data, faceId);
+                        var normal = new Vec3();
+                       // Tess.ComputeNewellsNormal(contours[0], ref normal);
+                        triangulatedMesh.Normals[faceId] = new XbimPackedNormal(normal.X, normal.Y, normal.Z);
+                        faceId++;
+                    }
+                    else if (contours.Count == 1 && contours[0].Length == 4) //its a quad just grab it
+                    {
+                        triangulatedMesh.AddTriangle(contours[0][0].Data, contours[0][1].Data, contours[0][3].Data, faceId);
+                        triangulatedMesh.AddTriangle(contours[0][3].Data, contours[0][1].Data, contours[0][2].Data, faceId);
+                        var normal = new Vec3();
+                       // Tess.ComputeNewellsNormal(contours[0], ref normal);
+                        triangulatedMesh.Normals[faceId] = new XbimPackedNormal(normal.X, normal.Y, normal.Z);
+                        faceId++;
+                    }
+                    else //it is multi-sided and may have holes
+                    {
+                        tess.AddContours(contours,false);
+
                         tess.Tessellate(WindingRule.EvenOdd, ElementType.Polygons, 3);
-                        numberOfTriangles += tess.ElementCount;
-                        var faceIndices = new List<int>(tess.ElementCount * 3);
+                        triangulatedMesh.Normals[faceId] = new XbimPackedNormal(tess.Normal.X, tess.Normal.Y, tess.Normal.Z);
+
+                        var faceIndices = new List<int>(tess.ElementCount*3);
                         var elements = tess.Elements;
                         var contourVerts = tess.Vertices;
-                        for (var j = 0; j < tess.ElementCount * 3; j++)
+                        for (var j = 0; j < tess.ElementCount*3; j++)
                         {
                             var idx = contourVerts[elements[j]].Data;
-                            if (idx == null) //WE HAVE INSERTED A POINT
+                            if (idx < 0) //WE HAVE INSERTED A POINT
                             {
-                                idx = cachedVertices.Count;
-                                cachedVertices.Add(contourVerts[elements[j]].Position);
-                                contourVerts[elements[j]].Data = idx;
+                                //add it to the mesh
+                                triangulatedMesh.AddVertex(contourVerts[elements[j]].Position, ref contourVerts[elements[j]]);
                             }
-                            faceIndices.Add((int)idx);
+                            faceIndices.Add(contourVerts[elements[j]].Data);
                         }
                         if (faceIndices.Count > 0)
                         {
                             for (var j = 0; j < tess.ElementCount; j++)
                             {
-                                var p1 = faceIndices[j * 3];
-                                var p2 = faceIndices[j * 3 + 1];
-                                var p3 = faceIndices[j * 3 + 2];
+                                var p1 = faceIndices[j*3];
+                                var p2 = faceIndices[j*3 + 1];
+                                var p3 = faceIndices[j*3 + 2];
                                 triangulatedMesh.AddTriangle(p1, p2, p3, faceId);
                             }
                             faceId++;
                         }
                     }
                 }
-
-                triangulatedMesh.UnifyFaceOrientation();
-               
-                // Write out header
-                var verticesCount = (uint)cachedVertices.Count;
-                binaryWriter.Write((byte)1); //stream format version			
-// ReSharper disable once RedundantCast
-                binaryWriter.Write((UInt32)verticesCount); //number of vertices
-                binaryWriter.Write((UInt32)numberOfTriangles); //number of triangles
-                var minX = double.PositiveInfinity;
-                var minY = minX;
-                var minZ = minX;
-                var maxX = double.NegativeInfinity;
-                var maxY = maxX;
-                var maxZ = maxX;
-                foreach (var cachedVertex in cachedVertices)
-                {
-                    binaryWriter.Write(cachedVertex.X);
-                    binaryWriter.Write(cachedVertex.Y);
-                    binaryWriter.Write(cachedVertex.Z);
-                    minX = Math.Min(minX, cachedVertex.X);
-                    minY = Math.Min(minY, cachedVertex.Y);
-                    minZ = Math.Min(minZ, cachedVertex.Z);
-                    maxX = Math.Max(maxX, cachedVertex.X);
-                    maxY = Math.Max(maxY, cachedVertex.Y);
-                    maxZ = Math.Max(maxZ, cachedVertex.Z);
-                }
-                shapeGeometry.BoundingBox =
-                    new XbimRect3D(minX, minY, minZ, maxX - minX, maxY - minY, maxZ - minZ).ToFloatArray();
-                //now write out the faces
-                var faceIndex = 0;
-
-                binaryWriter.Write((Int32)triangulatedMesh.TriangleGrouping.Count);
-                foreach (var faceGroup in triangulatedMesh.TriangleGrouping)
-                {
-                    var numTrianglesInFace = faceGroup.Value.Count;
-                    if (numTrianglesInFace > 0)
-                    {
-                        var norm = triangulatedMesh.TriangleNormal(faceGroup.Value[0][0]);
-                        //XbimPackedNormal norm;//default(XbimPackedNormal);
-                        //if (!float.IsNaN(n.X))
-                        //    //if it is a line use any valid normal, the default will do, added when the array was created
-                        //    norm = new XbimPackedNormal(n.X, n.Y, n.Z);
-                        //else
-                        //    norm = new XbimPackedNormal(0, 1, 0);
-                        binaryWriter.Write((Int32)numTrianglesInFace);
-                        norm.Write(binaryWriter); //write the normal for the face
-                        foreach (var triangle in faceGroup.Value)
-                        {
-                            WriteIndex(binaryWriter, (uint)triangle[0].StartVertexIndex, verticesCount);
-                            WriteIndex(binaryWriter, (uint)triangle[1].StartVertexIndex, verticesCount);
-                            WriteIndex(binaryWriter, (uint)triangle[2].StartVertexIndex, verticesCount);
-                        }
-                    }
-                }
-
-
-                //// ReSharper disable once RedundantCast
-                //binaryWriter.Write((Int32)faceIndicesList.Count);
-
-                //foreach (var faceIndices in faceIndicesList)
-                //{
-                //    var numTrianglesInFace = faceIndices.Count / 3;
-                //    var norm = normals[faceIndex];
-                //    faceIndex++;
-                //    // ReSharper disable once RedundantCast
-                //    binaryWriter.Write((Int32)numTrianglesInFace);
-                //    norm.Write(binaryWriter); //write the normal for the face
-                //    foreach (var fi in faceIndices)
-                //        WriteIndex(binaryWriter, (uint)fi, verticesCount);
-                //}
-                binaryWriter.Flush();
-                shapeGeometry.ShapeData = ms.ToArray();
             }
-            return shapeGeometry;
+
+            triangulatedMesh.UnifyFaceOrientation();
+            return triangulatedMesh;
         }
 
 

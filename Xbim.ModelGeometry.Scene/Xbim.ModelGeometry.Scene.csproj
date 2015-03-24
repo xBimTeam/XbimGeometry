@@ -128,6 +128,7 @@
     <Compile Include="XbimTriangulatedModelCollection.cs" />
     <Compile Include="XbimTriangulatedModelStream.cs" />
     <Compile Include="XbimFloatEncodedBitmap.cs" />
+    <Compile Include="XbimContourVertexCollection.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Xbim.Geometry.Engine.Interop\Xbim.Geometry.Engine.Interop.csproj">

@@ -1052,7 +1052,7 @@ namespace Xbim.Tessellator
 
         private void DoneEdgeDict()
         {
-            int fixedEdges;
+            int fixedEdges = 0;
 
             ActiveRegion reg;
             while ((reg = _dict.Min().Key) != null)

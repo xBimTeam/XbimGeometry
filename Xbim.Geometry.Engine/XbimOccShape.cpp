@@ -287,7 +287,7 @@ namespace Xbim
 					}
 					if (contours->Count > 0)
 					{
-						tess->AddContours(contours);
+						tess->AddContours(contours, true);
 						tess->Tessellate(Xbim::Tessellator::WindingRule::EvenOdd, Xbim::Tessellator::ElementType::Polygons, 3);
 						int numTriangles = tess->ElementCount;
 						triangleCount += numTriangles;

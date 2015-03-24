@@ -55,63 +55,63 @@ namespace Xbim.ModelGeometry.Scene
             }
         }
 
-/*
-        private struct RepresentationItemGeometricHashKey
-        {
-            private readonly int _hash;
-            private readonly int _item;
-            private readonly IModel _model;
-
-            public RepresentationItemGeometricHashKey(IfcRepresentationItem item)
-            {
-                _item = item.EntityLabel;
-                _model = item.ModelOf;
-                try
+        /*
+                private struct RepresentationItemGeometricHashKey
                 {
-                    _hash = item.GetGeometryHashCode();
-                }
-                catch (XbimGeometryException eg)
-                {
-                    Logger.WarnFormat("HashCode error in representation of type {0}, err = {1}", item.GetType().Name,
-                        eg.Message);
-                    _hash = 0;
-                }
-            }
+                    private readonly int _hash;
+                    private readonly int _item;
+                    private readonly IModel _model;
 
-            public IfcRepresentationItem RepresentationItem 
-            {
-                get { return _model.Instances[_item] as IfcRepresentationItem; }
-            }
+                    public RepresentationItemGeometricHashKey(IfcRepresentationItem item)
+                    {
+                        _item = item.EntityLabel;
+                        _model = item.ModelOf;
+                        try
+                        {
+                            _hash = item.GetGeometryHashCode();
+                        }
+                        catch (XbimGeometryException eg)
+                        {
+                            Logger.WarnFormat("HashCode error in representation of type {0}, err = {1}", item.GetType().Name,
+                                eg.Message);
+                            _hash = 0;
+                        }
+                    }
 
-            public override int GetHashCode()
-            {
-                return _hash;
-            }
+                    public IfcRepresentationItem RepresentationItem 
+                    {
+                        get { return _model.InstancesLocal[_item] as IfcRepresentationItem; }
+                    }
+
+                    public override int GetHashCode()
+                    {
+                        return _hash;
+                    }
 
            
-            public override bool Equals(object obj)
-            {
-                if (!(obj is RepresentationItemGeometricHashKey)) return false;
-                try
-                {
+                    public override bool Equals(object obj)
+                    {
+                        if (!(obj is RepresentationItemGeometricHashKey)) return false;
+                        try
+                        {
                    
-                    return RepresentationItem.GeometricEquals(((RepresentationItemGeometricHashKey)obj).RepresentationItem);
-                }
-                catch (XbimGeometryException eg)
-                {
-                    Logger.WarnFormat("Equality error in representation of type {0}, err = {1}",
-                        _item.GetType().Name,
-                        eg.Message);
-                    return false;
-                }
-            }
+                            return RepresentationItem.GeometricEquals(((RepresentationItemGeometricHashKey)obj).RepresentationItem);
+                        }
+                        catch (XbimGeometryException eg)
+                        {
+                            Logger.WarnFormat("Equality error in representation of type {0}, err = {1}",
+                                _item.GetType().Name,
+                                eg.Message);
+                            return false;
+                        }
+                    }
 
-            public override string ToString()
-            {
-                return string.Format("{0} Hash[{1}]", _item, _hash);
-            }
-        }
-*/
+                    public override string ToString()
+                    {
+                        return string.Format("{0} Hash[{1}]", _item, _hash);
+                    }
+                }
+        */
 
         private class XbimCreateContextHelper : IDisposable
         {
@@ -214,7 +214,7 @@ namespace Xbim.ModelGeometry.Scene
 
             private void GetOpeningsAndProjections()
             {
-                var openings = Model.Instances.OfType<IfcRelVoidsElement>()
+                var openings = Model.InstancesLocal.OfType<IfcRelVoidsElement>()
                     .Where(
                         r =>
                             r.RelatingBuildingElement.Representation != null &&
@@ -227,7 +227,7 @@ namespace Xbim.ModelGeometry.Scene
                                 feature = (IfcFeatureElement) f.RelatedOpeningElement
                             });
 
-                var projections = Model.Instances.OfType<IfcRelProjectsElement>()
+                var projections = Model.InstancesLocal.OfType<IfcRelProjectsElement>()
                     .Where(
                         r => r.RelatingElement.Representation != null && r.RelatedFeatureElement.Representation != null)
                     .Select(
@@ -244,7 +244,7 @@ namespace Xbim.ModelGeometry.Scene
             {
                 //get all the surface styles
 
-                var styledItemsGroup = Model.Instances
+                var styledItemsGroup = Model.InstancesLocal
                     .OfType<IfcStyledItem>()
                     .Where(s => s.Item != null)
                     .GroupBy(s => s.Item.EntityLabel);
@@ -270,7 +270,7 @@ namespace Xbim.ModelGeometry.Scene
                 MappedShapeIds = new HashSet<int>();
                 FeatureElementShapeIds = new HashSet<int>();
                 ProductShapeIds = new HashSet<int>();
-                foreach (var product in Model.Instances.OfType<IfcProduct>(true).Where(p => p.Representation != null))
+                foreach (var product in Model.InstancesLocal.OfType<IfcProduct>(true).Where(p => p.Representation != null))
                 {
                     var isFeatureElementShape = product is IfcFeatureElement ||
                                                 VoidedShapeIds.Contains(product.EntityLabel);
@@ -350,7 +350,7 @@ namespace Xbim.ModelGeometry.Scene
             //Get the required context
             //check for old versions
             var contexts =
-                model.Instances.OfType<IfcGeometricRepresentationContext>()
+                model.InstancesLocal.OfType<IfcGeometricRepresentationContext>()
                     .Where(
                         c =>
                             String.Compare(c.ContextType, contextType, true) == 0 ||
@@ -372,7 +372,7 @@ namespace Xbim.ModelGeometry.Scene
             {
                 //have a look for older standards
                 contexts =
-                    model.Instances.OfType<IfcGeometricRepresentationContext>()
+                    model.InstancesLocal.OfType<IfcGeometricRepresentationContext>()
                         .Where(
                             c =>
                                 String.Compare(c.ContextType, "design", true) == 0 ||
@@ -385,7 +385,7 @@ namespace Xbim.ModelGeometry.Scene
                 }
                 else
                 {
-                    contexts = model.Instances.OfType<IfcGeometricRepresentationContext>().ToList();
+                    contexts = model.InstancesLocal.OfType<IfcGeometricRepresentationContext>().ToList();
                     if (contexts.Any())
                     {
                         var ctxtString = contexts.Aggregate("", (current, ctxt) => current + (ctxt.ContextType + " "));
@@ -505,7 +505,7 @@ namespace Xbim.ModelGeometry.Scene
                         }
                     }
                     if (progDelegate != null) progDelegate(-1, "WriteProductShapes");
-                    var productsRemaining = _model.Instances.OfType<IfcProduct>()
+                    var productsRemaining = _model.InstancesLocal.OfType<IfcProduct>()
                         .Where(p => p.Representation != null && !processed.Contains(p.EntityLabel)).ToList();
 
 
@@ -935,7 +935,7 @@ namespace Xbim.ModelGeometry.Scene
             Parallel.ForEach(contextHelper.MappedShapeIds, contextHelper.ParallelOptions, mapId =>
                 //   foreach (var map in allMaps)
             {
-                var entity = _model.Instances[mapId];
+                var entity = _model.InstancesLocal[mapId];
                 var map = entity as IfcMappedItem;
                 var mapShapes = new List<GeometryReference>();
                 if (map != null)
@@ -993,7 +993,7 @@ namespace Xbim.ModelGeometry.Scene
          // foreach (var shapeId in contextHelper.ProductShapeIds)
             {
                 Interlocked.Increment(ref localTally);
-                var shape = (IfcGeometricRepresentationItem)Model.Instances[shapeId];
+                var shape = (IfcGeometricRepresentationItem)Model.InstancesLocal[shapeId];
               //  var key = new RepresentationItemGeometricHashKey(shape);
                 var isFeatureElementShape = contextHelper.FeatureElementShapeIds.Contains(shapeId);
                 //this can be used to remove duplicate shapes but has a memory overhead as large nimber so objects need to be cached
@@ -1335,7 +1335,7 @@ namespace Xbim.ModelGeometry.Scene
                             {
                                 if (surfaceStyle > 0) //we have a surface style
                                 {
-                                    var ss = (IfcSurfaceStyle)_model.Instances[surfaceStyle];
+                                    var ss = (IfcSurfaceStyle)_model.InstancesLocal[surfaceStyle];
                                     yield return new XbimTexture().CreateTexture(ss);
                                     surfaceStyle = shapeInstanceTable.SkipSurfaceStyes(surfaceStyle);
                                 }
@@ -1718,7 +1718,7 @@ namespace Xbim.ModelGeometry.Scene
             }
 
             //write out all the product bounding boxes
-            foreach (var product in _model.Instances.OfType<IfcProduct>())
+            foreach (var product in _model.InstancesLocal.OfType<IfcProduct>())
             {
                 if (!(product is IfcFeatureElement))
                 {

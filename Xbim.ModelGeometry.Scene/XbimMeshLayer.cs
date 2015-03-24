@@ -245,7 +245,7 @@ namespace Xbim.ModelGeometry.Scene
                 string layerName = geomData.StyleLabel.ToString();
                 if (!subLayerMap.Contains(layerName))
                 {
-                    IfcSurfaceStyle style = model.Instances[geomData.StyleLabel] as IfcSurfaceStyle;
+                    IfcSurfaceStyle style = model.InstancesLocal[geomData.StyleLabel] as IfcSurfaceStyle;
                     //create a sub layer
                     subLayer = new XbimMeshLayer<TVISIBLE, TMATERIAL>(model,style);
                     subLayer.Name = layerName;

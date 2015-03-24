@@ -117,6 +117,25 @@ namespace Xbim.Tessellator
             result.Z = lhs.Z - rhs.Z;
         }
 
+        public static void AddTo(ref Vec3 lhs, ref Vec3 rhs)
+        {
+            lhs.X += rhs.X;
+            lhs.Y += rhs.Y;
+            lhs.Z += rhs.Z;
+        }
+
+        public static double Angle(ref Vec3 v1, ref Vec3 v2)
+        {
+            float cosinus;
+            Vec3.Dot(ref v1, ref v2, out cosinus);
+            if (cosinus > -0.70710678118655 && cosinus < 0.70710678118655)
+                return Math.Acos(cosinus);
+            Vec3 v3;
+            Vec3.Cross(ref v1, ref v2, out v3);
+            var sinus = v3.Length;
+            if (cosinus < 0.0) return Math.PI - Math.Asin(sinus);
+            return Math.Asin(sinus);
+        }
         public static void Neg(ref Vec3 v)
         {
             v.X = -v.X;
@@ -124,6 +143,13 @@ namespace Xbim.Tessellator
             v.Z = -v.Z;
         }
 
+        public float Length
+        {
+            get
+            {
+                return (float) Math.Sqrt(X * X + Y * Y + Z * Z);
+            }
+        }
         public static void Dot(ref Vec3 u, ref Vec3 v, out float dot)
         {
             dot = u.X * v.X + u.Y * v.Y + u.Z * v.Z;
@@ -167,7 +193,7 @@ namespace Xbim.Tessellator
             internal float _s, _t;
             internal PqHandle _pqHandle;
             internal int _n;
-            internal object _data;
+            internal int _data;
 // ReSharper restore InconsistentNaming
         }
 
