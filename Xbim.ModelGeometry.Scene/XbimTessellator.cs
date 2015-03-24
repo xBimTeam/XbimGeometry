@@ -354,18 +354,12 @@ namespace Xbim.ModelGeometry.Scene
                     if (contours.Count == 1 && contours[0].Length == 3) //its a triangle just grab it
                     {
                         triangulatedMesh.AddTriangle(contours[0][0].Data, contours[0][1].Data, contours[0][2].Data, faceId);
-                        var normal = new Vec3();
-                       // Tess.ComputeNewellsNormal(contours[0], ref normal);
-                        triangulatedMesh.Normals[faceId] = new XbimPackedNormal(normal.X, normal.Y, normal.Z);
                         faceId++;
                     }
                     else if (contours.Count == 1 && contours[0].Length == 4) //its a quad just grab it
                     {
                         triangulatedMesh.AddTriangle(contours[0][0].Data, contours[0][1].Data, contours[0][3].Data, faceId);
                         triangulatedMesh.AddTriangle(contours[0][3].Data, contours[0][1].Data, contours[0][2].Data, faceId);
-                        var normal = new Vec3();
-                       // Tess.ComputeNewellsNormal(contours[0], ref normal);
-                        triangulatedMesh.Normals[faceId] = new XbimPackedNormal(normal.X, normal.Y, normal.Z);
                         faceId++;
                     }
                     else //it is multi-sided and may have holes
@@ -373,8 +367,6 @@ namespace Xbim.ModelGeometry.Scene
                         tess.AddContours(contours,false);
 
                         tess.Tessellate(WindingRule.EvenOdd, ElementType.Polygons, 3);
-                        triangulatedMesh.Normals[faceId] = new XbimPackedNormal(tess.Normal.X, tess.Normal.Y, tess.Normal.Z);
-
                         var faceIndices = new List<int>(tess.ElementCount*3);
                         var elements = tess.Elements;
                         var contourVerts = tess.Vertices;
