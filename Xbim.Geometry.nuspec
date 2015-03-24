@@ -36,6 +36,7 @@ IOS and Android versions are under development.</description>
       <file src="Output\Release\Xbim.Geometry.Engine.Interop.pdb" target="lib\net45\Xbim.Geometry.Engine.Interop.pdb" />
       <file src="Output\Release\Xbim.ModelGeometry.Scene.pdb" target="lib\net45\Xbim.ModelGeometry.Scene.pdb" />
       <file src="Output\Release\Xbim.Tessellator.dll" target="lib\net45\Xbim.Tessellator.dll" />
+      <file src="Output\Release\Xbim.Tessellator.pdb" target="lib\net45\Xbim.Tessellator.pdb" />
       <file src="Output\Release\Xbim.Tessellator.xml" target="lib\net45\Xbim.Tessellator.xml" />
       
     </files>
