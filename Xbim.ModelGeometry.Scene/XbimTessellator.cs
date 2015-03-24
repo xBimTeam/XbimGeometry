@@ -106,139 +106,88 @@ namespace Xbim.ModelGeometry.Scene
         {
             if (_geometryType == XbimGeometryType.PolyhedronBinary)
                 return MeshPolyhedronBinary(facesList);
-            //if (_geometryType == XbimGeometryType.Polyhedron)
-            //    return MeshPolyhedronText(facesList);
+            if (_geometryType == XbimGeometryType.Polyhedron)
+                return MeshPolyhedronText(facesList);
             throw new Exception("Illegal Geometry type, " + _geometryType);
         }
 
-        private IXbimShapeGeometryData MeshPolyhedronText(IEnumerable<IfcFace> faces)
+        private IXbimShapeGeometryData MeshPolyhedronText(IEnumerable<IEnumerable<IfcFace>> facesList)
         {
             IXbimShapeGeometryData shapeGeometry = new XbimShapeGeometry();
             shapeGeometry.Format = (byte)XbimGeometryType.Polyhedron;
-            var numberOfTriangles = 0;
-            var unloadedFaces = faces as IList<IfcFace> ?? faces.ToList();
-            var faceCount = unloadedFaces.Count;
-            
             using (var ms = new MemoryStream(0x4000))
             using (TextWriter textWriter = new StreamWriter(ms))
             {
-                var normals = new List<XbimPackedNormal>(faceCount);
-                var faceIndicesList = new List<List<int>>(faceCount);
-                var verticesIndexLookup = new Dictionary<int, int>();
-                var cachedVertices = new List<Vec3>(faceCount*5);
-
-                foreach (var unloadedFace in unloadedFaces)
+                var faceLists = facesList as IList<IEnumerable<IfcFace>> ?? facesList.ToList();
+                var triangulations = new List<XbimTriangulatedMesh>(faceLists.Count);
+                foreach (var faceList in faceLists)
+                    triangulations.Add(TriangulateFaces(faceList)); 
+               
+                // Write out header
+                uint verticesCount = 0;
+                uint triangleCount = 0;
+                uint facesCount = 0;
+                var boundingBox = XbimRect3D.Empty;
+                foreach (var triangulatedMesh in triangulations)
                 {
-                    var fc = (IfcFace)_model.InstancesLocal[unloadedFace.EntityLabel];
-                    //improves performance and reduces memory load
-                    var tess = new Tess();
-                    var contours = new List<ContourVertex[]>(fc.Bounds.Count);
-                    foreach (var bound in fc.Bounds) //build all the loops
-                    {
-                        var polyLoop = bound.Bound as IfcPolyLoop;
-                        if (polyLoop == null || polyLoop.Polygon.Count < 3) continue; //skip non-polygonal faces
-                        var is3D = (polyLoop.Polygon[0].Dim == 3);
-                        var contour = new ContourVertex[polyLoop.Polygon.Count];
-                        var i = 0;
-                        foreach (var p in polyLoop.Polygon) //add all the points into unique collection
-                        {
-                            int index;
-                            if (!verticesIndexLookup.TryGetValue(p.EntityLabel, out index))
-                            {
-                                index = cachedVertices.Count;
-                                verticesIndexLookup.Add(p.EntityLabel, index);
-
-                                contour[i].Position.X = (float) p.X;
-                                contour[i].Position.Y = (float) p.Y;
-                                contour[i].Position.Z = is3D ? (float) p.Z : 0;
-                                cachedVertices.Add(contour[i].Position);
-                            }
-                            else
-                                contour[i].Position = cachedVertices[index];
-                            contour[i].Data = index;
-                            i++;
-                        }
-                        contours.Add(contour);
-                    }
-                    if (contours.Any())
-                    {
-                        tess.AddContours(contours);
-                        tess.Tessellate(WindingRule.EvenOdd, ElementType.Polygons, 3);
-                        numberOfTriangles += tess.ElementCount;
-                        var faceIndices = new List<int>(tess.ElementCount*3);
-                        var elements = tess.Elements;
-                        var contourVerts = tess.Vertices;
-                        for (var j = 0; j < tess.ElementCount*3; j++)
-                        {
-                            var idx = contourVerts[elements[j]].Data;
-                            if (idx == -1) //WE HAVE INSERTED A POINT
-                            {
-                                faceIndices.Add(cachedVertices.Count);
-                                cachedVertices.Add(contourVerts[elements[j]].Position);
-                            }
-                            else
-                                faceIndices.Add(idx);
-                        }
-                        if (faceIndices.Count > 0)
-                        {
-                            faceIndicesList.Add(faceIndices);
-                            var n = new XbimVector3D(tess.Normal.X, tess.Normal.Y, tess.Normal.Z);
-                            n.Normalize();
-                            normals.Add(new XbimPackedNormal(n));
-                        }
-                    }
+                    verticesCount += triangulatedMesh.VertexCount;
+                    triangleCount += triangulatedMesh.TriangleCount;
+                    facesCount += (uint)triangulatedMesh.Faces.Count;
+                    if (boundingBox.IsEmpty) boundingBox = triangulatedMesh.BoundingBox;
+                    else boundingBox.Union(triangulatedMesh.BoundingBox);
                 }
 
-                // Write out header
-                var verticesCount = (uint) cachedVertices.Count;
-                textWriter.WriteLine("P {0} {1} {2} {3} {4}", 1, verticesCount, faceIndicesList.Count, numberOfTriangles,
-                    normals.Count);
+                textWriter.WriteLine("P {0} {1} {2} {3} {4}", 2, verticesCount, facesCount, triangleCount, 0);
                 //write out vertices and normals  
                 textWriter.Write("V");
-                var minX = double.PositiveInfinity;
-                var minY = minX;
-                var minZ = minX;
-                var maxX = double.NegativeInfinity;
-                var maxY = maxX;
-                var maxZ = maxX;
-                foreach (var p in cachedVertices)
-                {
-                    textWriter.Write(" {0},{1},{2}", p.X, p.Y, p.Z);
-                    minX = Math.Min(minX, p.X);
-                    minY = Math.Min(minY, p.Y);
-                    minZ = Math.Min(minZ, p.Z);
-                    maxX = Math.Max(maxX, p.X);
-                    maxY = Math.Max(maxY, p.Y);
-                    maxZ = Math.Max(maxZ, p.Z);
-                }
-                textWriter.WriteLine();
-                textWriter.Write("N");
-                foreach (var packedNormal in normals)
-                {
-                    var n = packedNormal.Normal;
-                    textWriter.Write(" {0},{1},{2}", n.X, n.Y, n.Z);
-                }
+        
+                foreach (var p in triangulations.SelectMany(t => t.Vertices))
+                    textWriter.Write(" {0},{1},{2}", p.X, p.Y, p.Z);  
+
                 textWriter.WriteLine();
 
                 //now write out the faces
-                var faceIndex = 0;
-                foreach (var faceIndices in faceIndicesList)
+                uint verticesOffset = 0;
+                foreach (var triangulatedMesh in triangulations)
                 {
-                    textWriter.Write("T");
-                    for (int j = 0; j < faceIndices.Count/3; j++)
-                    {
-                        if (j == 0)
-                            textWriter.Write(" {0}/{3},{1},{2}", faceIndices[j*3], faceIndices[j*3 + 1], faceIndices[j*3 + 2], faceIndex);
-                        else
-                            textWriter.Write(" {0},{1},{2}", faceIndices[j*3], faceIndices[j*3 + 1], faceIndices[j*3 + 2]);
+                    foreach (var faceGroup in triangulatedMesh.Faces)
+                    {  
+                        textWriter.Write("T");
+                        int currentNormal = -1;
+                        foreach (var triangle in faceGroup.Value)
+                        {
+                            var pn1 = triangle[0].PackedNormal.ToUnit16();
+                            var pn2 = triangle[0].NextEdge.PackedNormal.ToUnit16();
+                            var pn3 = triangle[0].NextEdge.NextEdge.PackedNormal.ToUnit16();
+                            if (pn1 != currentNormal)
+                            {
+                                textWriter.Write(" {0}/{1},", triangle[0].StartVertexIndex + verticesOffset, pn1);
+                                currentNormal = pn1;
+                            }
+                            else
+                                textWriter.Write(" {0},", triangle[0].StartVertexIndex + verticesOffset);
+
+                            if (pn1 != pn2)
+                            {
+                                textWriter.Write("{0}/{1},", triangle[0].NextEdge.StartVertexIndex + verticesOffset, pn2);
+                                currentNormal = pn2;
+                            }
+                            else
+                                textWriter.Write("{0},", triangle[0].NextEdge.StartVertexIndex + verticesOffset);
+                            if (pn2 != pn3)
+                            {
+                                textWriter.Write("{0}/{1},", triangle[0].NextEdge.NextEdge.StartVertexIndex + verticesOffset, pn3);
+                                currentNormal = pn3;
+                            }
+                            else
+                                textWriter.Write("{0}", triangle[0].NextEdge.NextEdge.StartVertexIndex + verticesOffset);
+                        }
+                        textWriter.WriteLine();
                     }
-                    faceIndex++;
-                    textWriter.WriteLine();
-                    shapeGeometry.BoundingBox =
-                        new XbimRect3D(minX, minY, minZ, maxX - minX, maxY - minY, maxZ - minZ).ToFloatArray();
-                   
-                } 
+                    verticesOffset += triangulatedMesh.VertexCount;
+                }
                 textWriter.Flush();
+                shapeGeometry.BoundingBox = boundingBox.ToFloatArray();
                 shapeGeometry.ShapeData = ms.ToArray();
             }
             return shapeGeometry;
@@ -248,9 +197,7 @@ namespace Xbim.ModelGeometry.Scene
         {
             IXbimShapeGeometryData shapeGeometry = new XbimShapeGeometry();
             shapeGeometry.Format = (byte)XbimGeometryType.PolyhedronBinary;
-          
-            
-            
+
             using (var ms = new MemoryStream(0x4000))
             using (var binaryWriter = new BinaryWriter(ms))
             {

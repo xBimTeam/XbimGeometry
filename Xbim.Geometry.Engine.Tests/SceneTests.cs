@@ -22,7 +22,7 @@ namespace GeometryTests
         {
             using (var m = new XbimModel())
             {
-                m.CreateFrom(@"D:\Users\steve\xBIM\Test Models\DPoW\Curved Roof.ifc", null, null, true, true);
+                m.CreateFrom("SolidTestFiles\\19 - TwoProxy.ifc", null, null, true, true);
                 var m3D = new Xbim3DModelContext(m);
                 m3D.CreateContext(XbimGeometryType.PolyhedronBinary);
                 using (var bw = new BinaryWriter(new FileStream("test.wexBIM", FileMode.Create)))
