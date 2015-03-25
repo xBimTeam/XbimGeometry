@@ -285,18 +285,16 @@ namespace Xbim
 				TopoDS_Compound subsetToCut;
 				BRep_Builder b;
 				b.MakeCompound(subsetToCut);
-				int i = 0;
+				//int i = 0;
 				double totalVolume = this->Volume;
-				double minVolume = totalVolume * _maxOpeningVolumePercentage / 100;
-				for each( Tuple<double, XbimSolid^>^ solid in solidsList)
+				double minVolume = totalVolume * _maxOpeningVolumePercentage;
+
+				for (size_t i = 0; i < _maxOpeningsToCut; i++)
 				{
-					if (solid->Item1 > minVolume)
-						b.Add(subsetToCut, solid->Item2);
-					else
-						break;
-					if (++i > _maxOpeningsToCut) 
-						break;
+					if (solidsList[i]->Item1 < minVolume) break; //give up for small things
+					b.Add(subsetToCut, solidsList[i]->Item2);
 				}
+				
 				toCutSolid = gcnew XbimCompound(subsetToCut,true, tolerance);
 				
 			}

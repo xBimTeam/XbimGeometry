@@ -30,7 +30,7 @@ namespace Xbim
 			void Init(XbimCompound^ comp, int label);
 			static VolumeComparer^ _volumeComparer = gcnew VolumeComparer();
 			static int _maxOpeningsToCut = 100;
-			static double _maxOpeningVolumePercentage = 2.5;
+			static double _maxOpeningVolumePercentage = 0.0002;
 			bool _isSimplified = false;
 			void InstanceCleanup()
 			{

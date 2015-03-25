@@ -62,20 +62,18 @@ namespace Xbim.ModelGeometry.Scene
         {
             var faceSets = new List<IEnumerable<IfcFace>>();
             foreach (var faceSet in faceBasedModel.FbsmFaces)
-            {
                 faceSets.Add(faceSet.CfsFaces);
-            }
-            return Mesh(faceSets);  
+            return Mesh(faceSets,faceBasedModel.EntityLabel);  
         }
 
         
 
         public IXbimShapeGeometryData Mesh(IfcShellBasedSurfaceModel shellBasedModel)
         {
-            return Mesh(shellBasedModel.SbsmBoundary);
+            return Mesh(shellBasedModel.SbsmBoundary,shellBasedModel.EntityLabel);
         }
 
-        public IXbimShapeGeometryData Mesh(IEnumerable<IfcShell> shellSet)
+        public IXbimShapeGeometryData Mesh(IEnumerable<IfcShell> shellSet,int entityLabel)
         {
             var shells = new List<IEnumerable<IfcFace>>();
             foreach (var shell in shellSet)
@@ -85,7 +83,7 @@ namespace Xbim.ModelGeometry.Scene
                 if(closedShell!=null) shells.Add(closedShell.CfsFaces);
                 else if(openShell!=null) shells.Add(openShell.CfsFaces);
             }
-            return Mesh(shells);
+            return Mesh(shells,entityLabel);
         }
 
         
@@ -94,7 +92,7 @@ namespace Xbim.ModelGeometry.Scene
         {
             var faces = new List<IEnumerable<IfcFace>>();
             faces.Add(connectedFaceSet.CfsFaces);
-            return Mesh(faces);
+            return Mesh(faces,connectedFaceSet.EntityLabel);
         }
 
         public IXbimShapeGeometryData Mesh(IfcFacetedBrep fBRepModel)
@@ -102,16 +100,16 @@ namespace Xbim.ModelGeometry.Scene
             return Mesh(fBRepModel.Outer);
         }
 
-        public IXbimShapeGeometryData Mesh(IEnumerable<IEnumerable<IfcFace>> facesList)
+        public IXbimShapeGeometryData Mesh(IEnumerable<IEnumerable<IfcFace>> facesList, int entityLabel)
         {
             if (_geometryType == XbimGeometryType.PolyhedronBinary)
-                return MeshPolyhedronBinary(facesList);
+                return MeshPolyhedronBinary(facesList,entityLabel);
             if (_geometryType == XbimGeometryType.Polyhedron)
-                return MeshPolyhedronText(facesList);
+                return MeshPolyhedronText(facesList,entityLabel);
             throw new Exception("Illegal Geometry type, " + _geometryType);
         }
 
-        private IXbimShapeGeometryData MeshPolyhedronText(IEnumerable<IEnumerable<IfcFace>> facesList)
+        private IXbimShapeGeometryData MeshPolyhedronText(IEnumerable<IEnumerable<IfcFace>> facesList, int entityLabel)
         {
             IXbimShapeGeometryData shapeGeometry = new XbimShapeGeometry();
             shapeGeometry.Format = (byte)XbimGeometryType.Polyhedron;
@@ -121,7 +119,7 @@ namespace Xbim.ModelGeometry.Scene
                 var faceLists = facesList as IList<IEnumerable<IfcFace>> ?? facesList.ToList();
                 var triangulations = new List<XbimTriangulatedMesh>(faceLists.Count);
                 foreach (var faceList in faceLists)
-                    triangulations.Add(TriangulateFaces(faceList)); 
+                    triangulations.Add(TriangulateFaces(faceList, entityLabel)); 
                
                 // Write out header
                 uint verticesCount = 0;
@@ -193,7 +191,7 @@ namespace Xbim.ModelGeometry.Scene
             return shapeGeometry;
         }
 
-        private IXbimShapeGeometryData MeshPolyhedronBinary(IEnumerable<IEnumerable<IfcFace>> facesList)
+        private IXbimShapeGeometryData MeshPolyhedronBinary(IEnumerable<IEnumerable<IfcFace>> facesList, int entityLabel)
         {
             IXbimShapeGeometryData shapeGeometry = new XbimShapeGeometry();
             shapeGeometry.Format = (byte)XbimGeometryType.PolyhedronBinary;
@@ -204,7 +202,7 @@ namespace Xbim.ModelGeometry.Scene
                 var faceLists = facesList as IList<IEnumerable<IfcFace>> ?? facesList.ToList();
                 var triangulations = new List<XbimTriangulatedMesh>(faceLists.Count);
                 foreach (var faceList in faceLists)
-                    triangulations.Add(TriangulateFaces(faceList)); 
+                    triangulations.Add(TriangulateFaces(faceList, entityLabel)); 
                 
 
                 // Write out header
@@ -224,7 +222,7 @@ namespace Xbim.ModelGeometry.Scene
                 binaryWriter.Write((byte)1); //stream format version			
 // ReSharper disable once RedundantCast
                 binaryWriter.Write((UInt32)verticesCount); //number of vertices
-                binaryWriter.Write((UInt32)triangleCount); //number of triangles
+                binaryWriter.Write(triangleCount); //number of triangles
                
                 foreach (var v in triangulations.SelectMany(t=>t.Vertices))
                 {    
@@ -263,7 +261,7 @@ namespace Xbim.ModelGeometry.Scene
             return shapeGeometry;
         }
 
-        private XbimTriangulatedMesh TriangulateFaces(IEnumerable<IfcFace> ifcFaces)
+        private XbimTriangulatedMesh TriangulateFaces(IEnumerable<IfcFace> ifcFaces, int entityLabel)
         {
             var faceId = 0;
             var enumerable = ifcFaces as IList<IfcFace> ?? ifcFaces.ToList();
@@ -311,7 +309,7 @@ namespace Xbim.ModelGeometry.Scene
                     }
                     else //it is multi-sided and may have holes
                     {
-                        tess.AddContours(contours,false);
+                        tess.AddContours(contours);
 
                         tess.Tessellate(WindingRule.EvenOdd, ElementType.Polygons, 3);
                         var faceIndices = new List<int>(tess.ElementCount*3);
@@ -342,7 +340,7 @@ namespace Xbim.ModelGeometry.Scene
                 }
             }
 
-            triangulatedMesh.UnifyFaceOrientation();
+            triangulatedMesh.UnifyFaceOrientation(entityLabel);
             return triangulatedMesh;
         }
 

@@ -124,6 +124,10 @@ namespace Xbim.Tessellator
             lhs.Z += rhs.Z;
         }
 
+        public bool IsValid
+        {
+            get { return !float.IsNaN(X) && !float.IsNaN(Y) && !float.IsNaN(Z); }
+        }
         public static double Angle(ref Vec3 v1, ref Vec3 v2)
         {
             float cosinus;

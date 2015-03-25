@@ -328,7 +328,7 @@ namespace Xbim.ModelGeometry.Scene
 
         #endregion
 
-        private static readonly ILogger Logger = LoggerFactory.GetLogger();
+        public static readonly ILogger Logger = LoggerFactory.GetLogger();
         private readonly IfcRepresentationContextCollection _contexts;
         private readonly IXbimGeometryCreator _engine;
         private readonly XbimModel _model;

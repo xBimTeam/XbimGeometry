@@ -149,19 +149,27 @@ namespace Xbim.ModelGeometry.Scene
         /// Orientates edges to orientate in a uniform direction
         /// </summary>
         /// <returns></returns>
-        public void UnifyFaceOrientation()
+        public void UnifyFaceOrientation(int entityLabel)
         {
             if (!IsFacingOutward(_extremeEdge)) _extremeEdge.Reverse();
-            UnifyConnectedTriangles(new[] { _extremeEdge, _extremeEdge.NextEdge, _extremeEdge.NextEdge.NextEdge });
+            IList<XbimTriangleEdge> triangle = new[] {_extremeEdge, _extremeEdge.NextEdge, _extremeEdge.NextEdge.NextEdge};
+            do
+            {
+                 triangle = UnifyConnectedTriangles(triangle, entityLabel);
+            } while (triangle.Any());
+           
             //doing the exterem edge first should do all connected
 
-            foreach (var xbimEdges in _lookupList.Values) //check any rogue elements
+            foreach (var xbimEdges in _faces.Values.SelectMany(el=>el)) //check any rogue elements
             {
                 if (!xbimEdges[0].Frozen)
                 {
                     if (!IsFacingOutward(xbimEdges[0])) xbimEdges[0].Reverse();
-                    UnifyConnectedTriangles(new[] { xbimEdges[0], xbimEdges[0].NextEdge, xbimEdges[0].NextEdge.NextEdge });
-                    //doing the first will do all connected
+                    triangle = new[] { xbimEdges[0], xbimEdges[0].NextEdge, xbimEdges[0].NextEdge.NextEdge };
+                    do
+                    {
+                        triangle = UnifyConnectedTriangles(triangle, entityLabel);
+                    } while (triangle.Any());
                 }
             }
             BalanceNormals();
@@ -170,7 +178,7 @@ namespace Xbim.ModelGeometry.Scene
         public void BalanceNormals()
         {
             const double minAngle = Math.PI / 6;
-            var smoothedEdges = _lookupList.Values.SelectMany(e => e).Where(e => e != null).GroupBy(k => k.StartVertexIndex);
+            var smoothedEdges = _faces.Values.SelectMany(el => el).SelectMany(e=>e).Where(e => e != null).GroupBy(k => k.StartVertexIndex);
 
             foreach (var edges in smoothedEdges)
             {
@@ -190,10 +198,13 @@ namespace Xbim.ModelGeometry.Scene
                     faceSet.Add(face);
                     XbimTriangleEdge nextConnectedEdge = edge;
                     //now look for any connected edges 
+                    var visited = new HashSet<long>();
                     do
                     {
+                        visited.Add(nextConnectedEdge.EdgeId);
                         nextConnectedEdge = nextConnectedEdge.NextEdge.NextEdge.AdjacentEdge;
-                        if (nextConnectedEdge != null)
+                        if (nextConnectedEdge != null && visited.Contains(nextConnectedEdge.EdgeId)) break; //we are looping or at the start
+                        if (nextConnectedEdge != null )
                         {
                             //if the edge is sharp start a new face
                             if (nextConnectedEdge.Angle > minAngle)
@@ -203,7 +214,7 @@ namespace Xbim.ModelGeometry.Scene
                             }
                             face.Add(nextConnectedEdge);
                         }
-                    } while (nextConnectedEdge != null && nextConnectedEdge != edge);
+                    } while (nextConnectedEdge != null );
                     //move on to next face
                   
                 }
@@ -212,7 +223,7 @@ namespace Xbim.ModelGeometry.Scene
                 {
                     var vertexNormal = new Vec3();
                     foreach (var edge in smoothFace)
-                        Vec3.AddTo(ref vertexNormal, ref edge.Normal);
+                     if(edge.Normal.IsValid) Vec3.AddTo(ref vertexNormal, ref edge.Normal);
                     Vec3.Normalize(ref vertexNormal);
                     foreach (var edge in smoothFace)
                         edge.Normal = vertexNormal;
@@ -223,15 +234,14 @@ namespace Xbim.ModelGeometry.Scene
         
 
 
-        private void UnifyConnectedTriangles(IEnumerable<XbimTriangleEdge> startEdges)
+        private IList<XbimTriangleEdge> UnifyConnectedTriangles(IList<XbimTriangleEdge> startEdges, int entityLabel)
         {
+            var nextCandidates = new List<XbimTriangleEdge>();
             foreach (var edge in startEdges)
             {
                 edge.Freeze(); //freeze all the edges in this triangle so we don't switch them twice
-                var edgePair = _lookupList[edge.Key];
-                XbimTriangleEdge adjacentEdge=null;
-                if (edge == edgePair[0]) adjacentEdge = edgePair[1];
-                else if(edge == edgePair[1]) adjacentEdge = edgePair[0];
+
+                var adjacentEdge = edge.AdjacentEdge;
 
                 if (adjacentEdge != null) //if we just have one it is a boundary
                 {
@@ -242,19 +252,19 @@ namespace Xbim.ModelGeometry.Scene
                             adjacentEdge.Reverse();
                             
                         }
-                        else
-                            throw new Exception("Invalid triangle orientation");
+                        //else
+                        //    Xbim3DModelContext.Logger.WarnFormat("Invalid triangle orientation has been ignored in entity #{0}", entityLabel);
                     }
                     
                     if (!adjacentEdge.Frozen)
-                    {                       
-                        UnifyConnectedTriangles(
-                            new[] {adjacentEdge.NextEdge, adjacentEdge.NextEdge.NextEdge});
+                    {   
+                        nextCandidates.Add(adjacentEdge);
                     }
                    
                 }
                 
-            } 
+            }
+            return nextCandidates;
         }
 
         /// <summary>
