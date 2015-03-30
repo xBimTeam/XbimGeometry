@@ -40,13 +40,32 @@ namespace Xbim.Tessellator
 {
     public struct Vec3EqualityComparer : IEqualityComparer<Vec3>
     {
+        private readonly float precision2;
+
+        public Vec3EqualityComparer(float precision)
+        {
+            this.precision2 = precision * precision;
+        }
         public bool Equals(Vec3 a, Vec3 b)
         {
-            const double epsilon = 1e-9;
-            return Math.Abs(a.X - b.X) < epsilon && Math.Abs(a.Y - b.Y) < epsilon && Math.Abs(a.Z - b.Z) < epsilon;
+            Vec3 c;
+            Vec3.Sub(ref a,ref b, out c);
+            bool same = c.Length2 <= precision2;
+            return same;
         }
 
-
+        public static bool Colinear(ref Vec3 a, ref Vec3 b, ref Vec3 c)
+        {
+            Vec3 ab;
+            Vec3 bc;
+            Vec3.Sub(ref a, ref b, out ab);
+            Vec3.Sub(ref b, ref b, out bc);
+// ReSharper disable CompareOfFloatsByEqualityOperator
+            return ab.X*bc.Y == bc.X*ab.Y &&
+                   ab.Y*bc.Z == bc.Y*ab.Z &&
+                   ab.Z*bc.X == bc.Z*ab.X;
+// ReSharper restore CompareOfFloatsByEqualityOperator
+        }
         public int GetHashCode(Vec3 v)
         {
             unchecked // Overflow is fine, just wrap
@@ -152,6 +171,14 @@ namespace Xbim.Tessellator
             get
             {
                 return (float) Math.Sqrt(X * X + Y * Y + Z * Z);
+            }
+        }
+
+        public float Length2
+        {
+            get
+            {
+                return X * X + Y * Y + Z * Z;
             }
         }
         public static void Dot(ref Vec3 u, ref Vec3 v, out float dot)
