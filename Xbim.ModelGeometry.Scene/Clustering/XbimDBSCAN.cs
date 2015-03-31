@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Xbim.Common.Geometry;
 
 namespace Xbim.ModelGeometry.Scene.Clustering
@@ -11,29 +10,31 @@ namespace Xbim.ModelGeometry.Scene.Clustering
     /// http://en.wikipedia.org/wiki/DBSCAN
     /// Except the Noise portion has bot been implemented.
     /// </summary>
-    public static class XbimDBSCAN
+    public static class XbimDbscan
     {
-        public static List<XbimBBoxClusterElement> GetClusters(IEnumerable<XbimBBoxClusterElement> ItemsToCluster, double eps)
+        public static List<XbimBBoxClusterElement> GetClusters(IEnumerable<XbimBBoxClusterElement> itemsToCluster, double eps)
         {
-            if (ItemsToCluster == null) 
+            if (itemsToCluster == null) 
                 return null;
-            List<XbimBBoxClusterElement> clusters = ItemsToCluster.ToList();
+            var clusters = itemsToCluster.ToList();
             // eps *= eps; // square eps
 
-            int LastCount = 0;
-            while (clusters.Count != LastCount)
+            int lastCount = 0;
+            while (clusters.Count != lastCount)
             {
-                LastCount = clusters.Count;
+                lastCount = clusters.Count;
                 for (int i = 0; i < clusters.Count; i++)
                 {
-                    XbimBBoxClusterElement BaseItem = clusters[i];
+                    var baseItem = clusters[i];
                     for (int j = i+1; j < clusters.Count; j++)
                     {
-                        if (ValidDistance(BaseItem.Bound, clusters[j].Bound, eps))
+                        
+                        if (ValidDistance(baseItem.Bound, clusters[j].Bound, eps))
                         {
-                            BaseItem.Add(clusters[j]);
+                            baseItem.Add(clusters[j]);
                             clusters.RemoveAt(j);
-                        }   
+                        }  
+                       
                     }
                 }
             }
@@ -43,15 +44,17 @@ namespace Xbim.ModelGeometry.Scene.Clustering
         /// <summary>
         /// Looks at the maximum distance (between all axis) between two boxes and compares it with a specified threshold.
         /// </summary>
-        /// <param name="R1">Bounding box 1</param>
-        /// <param name="R2">Bounding box 2</param>
+        /// <param name="r1">Bounding box 1</param>
+        /// <param name="r2">Bounding box 2</param>
         /// <param name="eps">the threshold distance</param>
         /// <returns>True if the maximum distance is under the threshold.</returns>
-        private static bool ValidDistance(Common.Geometry.XbimRect3D R1, Common.Geometry.XbimRect3D R2, double eps)
+        private static bool ValidDistance(XbimRect3D r1, XbimRect3D r2, double eps)
         {
-            double dx = AxisDistance(R1.X, R1.SizeX, R2.X, R2.SizeX);
-            double dy = AxisDistance(R1.Y, R1.SizeY, R2.Y, R2.SizeY);
-            double dz = AxisDistance(R1.Z, R1.SizeZ, R2.Z, R2.SizeZ);
+            if (r2.SizeZ > 2000000)
+                Console.WriteLine("v big");
+            double dx = AxisDistance(r1.X, r1.SizeX, r2.X, r2.SizeX);
+            double dy = AxisDistance(r1.Y, r1.SizeY, r2.Y, r2.SizeY);
+            double dz = AxisDistance(r1.Z, r1.SizeZ, r2.Z, r2.SizeZ);
             double max = Math.Max(Math.Max(dx, dy), dz);
             return (max < eps);
         }
@@ -68,9 +71,7 @@ namespace Xbim.ModelGeometry.Scene.Clustering
         {
             if (c1 < c2)
                 return c2 - (c1 + s1);
-            else
-                return c1 - (c2 + s2);
+            return c1 - (c2 + s2);
         }
-
     }
 }

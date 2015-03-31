@@ -334,6 +334,8 @@ namespace Xbim.ModelGeometry.Scene
         private readonly XbimModel _model;
 
         private bool _contextIsPersisted;
+        //The maximum extent for any dimension of any products bouding box 
+        private double _maxXyz;
        
 
 
@@ -347,6 +349,9 @@ namespace Xbim.ModelGeometry.Scene
         {
             _model = model;
             _engine = new XbimGeometryEngine();
+            
+           
+            
             //Get the required context
             //check for old versions
             var contexts =
@@ -554,6 +559,7 @@ namespace Xbim.ModelGeometry.Scene
                                 {
                                     BoundingBox = ((XbimShapeGeometry)shapeGeom).BoundingBox,
                                     GeometryId = geomTable.AddGeometry(shapeGeom)
+                                    
                                 };
                                 int styleLabel;
                                 contextHelper.SurfaceStyles.TryGetValue(shapeGeom.IfcShapeLabel, out styleLabel);
@@ -863,6 +869,7 @@ namespace Xbim.ModelGeometry.Scene
         private IEnumerable<XbimShapeInstance> WriteProductShape(XbimCreateContextHelper contextHelper,
             IfcProduct element, bool includesOpenings)
         {
+            _maxXyz = _model.ModelFactors.OneMetre * 100; //elements bigger than 100 metres should not be considered in region
             var shapesInstances = new List<XbimShapeInstance>();
             var rep = element.Representation.Representations
                 .FirstOrDefault(r => _contexts.Contains(r.ContextOfItems)
@@ -898,9 +905,11 @@ namespace Xbim.ModelGeometry.Scene
                                 );
                             var transproductBounds = instance.BoundingBox /*productBounds*/.Transform(placementTransform);
                             //transform the bounds
+
+                            //if (transproductBounds.SizeX < _maxXyz && transproductBounds.SizeY < _maxXyz && transproductBounds.SizeZ < _maxXyz)
                             contextHelper.Clusters[rep.ContextOfItems].Enqueue(
-                                new XbimBBoxClusterElement(instance.GeometryId,
-                                    transproductBounds));
+                            new XbimBBoxClusterElement(instance.GeometryId,
+                                transproductBounds));
                         }
                     }
                 }
@@ -1018,10 +1027,8 @@ namespace Xbim.ModelGeometry.Scene
                         {
                             IXbimShapeGeometryData shapeGeom = null;
                             IXbimGeometryObject geomModel = null;
-                            if (xbimTessellator.CanMesh(shape)) //if we can mesh the shape directly just do it
+                            if (!isFeatureElementShape && xbimTessellator.CanMesh(shape)) //if we can mesh the shape directly just do it
                             {
-                                if (isFeatureElementShape)
-                                    geomModel = _engine.Create(shape);
                                 shapeGeom = xbimTessellator.Mesh(shape);
                             }
                             else //we need to create a geometry object
@@ -1102,7 +1109,7 @@ namespace Xbim.ModelGeometry.Scene
                 // the XbimDBSCAN method adopted for clustering produces clusters of contiguous elements.
                 // if the maximum size is a problem they could then be split using other algorithms that divide spaces equally
                 //
-                var v = XbimDBSCAN.GetClusters(elementsToCluster, 5 * metre); // .OrderByDescending(x => x.GeometryIds.Count);
+                var v = XbimDbscan.GetClusters(elementsToCluster, 5 * metre); // .OrderByDescending(x => x.GeometryIds.Count);
                 var i = 1;
                 regions.AddRange(v.Select(item => new XbimRegion("Region " + i++, item.Bound, item.GeometryIds.Count)));
 

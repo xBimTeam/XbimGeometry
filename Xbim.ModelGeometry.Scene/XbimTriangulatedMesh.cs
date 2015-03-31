@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Xbim.Common.Geometry;
 using Xbim.Tessellator;
@@ -52,7 +53,7 @@ namespace Xbim.ModelGeometry.Scene
 
         private readonly Dictionary<long, XbimTriangleEdge[]> _lookupList;
         private readonly List<XbimTriangleEdge[]> _faultyTriangles = new List<XbimTriangleEdge[]>();
-        private readonly Dictionary<int, List<XbimTriangleEdge[]>> _faces;
+        private Dictionary<int, List<XbimTriangleEdge[]>> _faces;
         private readonly XbimContourVertexCollection _vertices;
         
         double _minX = double.PositiveInfinity;
@@ -62,12 +63,12 @@ namespace Xbim.ModelGeometry.Scene
         double _maxY = double.NegativeInfinity;
         double _maxZ = double.NegativeInfinity;
         private XbimTriangleEdge _extremeEdge;
-        public XbimTriangulatedMesh(int faceCount)
+        public XbimTriangulatedMesh(int faceCount, float precision)
         {
             var edgeCount = (int)(faceCount * 1.5);
             _lookupList = new Dictionary<long, XbimTriangleEdge[]>(edgeCount);
             _faces = new Dictionary<int, List<XbimTriangleEdge[]>>(faceCount);
-            _vertices = new XbimContourVertexCollection();
+            _vertices = new XbimContourVertexCollection(precision);
            
         }
 
@@ -124,6 +125,7 @@ namespace Xbim.ModelGeometry.Scene
        
         private bool AddEdge(XbimTriangleEdge edge)
         {
+            if (_extremeEdge == null) _extremeEdge = edge;
             var key = edge.Key;
             if (!_lookupList.ContainsKey(key))
             {
@@ -140,7 +142,7 @@ namespace Xbim.ModelGeometry.Scene
                 edges[0].AdjacentEdge = edge;
                 edge.AdjacentEdge = edges[0];
             }
-            if (Math.Abs(_vertices[edge.StartVertexIndex].Position.Z - _maxZ) < 1e-5)
+            if (_vertices[edge.StartVertexIndex].Position.Z > _vertices[_extremeEdge.StartVertexIndex].Position.Z && Vec3.Colinear(_vertices[edge.StartVertexIndex].Position, _vertices[edge.NextEdge.StartVertexIndex].Position, _vertices[edge.NextEdge.StartVertexIndex].Position))
                 _extremeEdge = edge;
             return true;
         }
@@ -152,25 +154,28 @@ namespace Xbim.ModelGeometry.Scene
         public void UnifyFaceOrientation(int entityLabel)
         {
             if (!IsFacingOutward(_extremeEdge)) _extremeEdge.Reverse();
-            IList<XbimTriangleEdge> triangle = new[] {_extremeEdge, _extremeEdge.NextEdge, _extremeEdge.NextEdge.NextEdge};
+            var triangle = new List<XbimTriangleEdge[]>
+            {
+                new[] {_extremeEdge, _extremeEdge.NextEdge, _extremeEdge.NextEdge.NextEdge}
+            };
+            _extremeEdge.Freeze();
             do
             {
-                 triangle = UnifyConnectedTriangles(triangle, entityLabel);
+                 triangle = UnifyConnectedTriangles(triangle);
             } while (triangle.Any());
            
-            //doing the exterem edge first should do all connected
+            //doing the extreme edge first should do all connected
 
-            foreach (var xbimEdges in _faces.Values.SelectMany(el=>el)) //check any rogue elements
+            foreach (var xbimEdges in _faces.Values.SelectMany(el => el).Where(e => !e[0].Frozen)) //check any rogue elements
             {
-                if (!xbimEdges[0].Frozen)
+                if (!IsFacingOutward(xbimEdges[0])) xbimEdges[0].Reverse();
+                triangle = new List<XbimTriangleEdge[]> { new[] { xbimEdges[0], xbimEdges[0].NextEdge, xbimEdges[0].NextEdge.NextEdge } };
+                xbimEdges[0].Freeze();
+                do
                 {
-                    if (!IsFacingOutward(xbimEdges[0])) xbimEdges[0].Reverse();
-                    triangle = new[] { xbimEdges[0], xbimEdges[0].NextEdge, xbimEdges[0].NextEdge.NextEdge };
-                    do
-                    {
-                        triangle = UnifyConnectedTriangles(triangle, entityLabel);
-                    } while (triangle.Any());
-                }
+                    triangle = UnifyConnectedTriangles(triangle);
+                } while (triangle.Any());
+
             }
             BalanceNormals();
         }
@@ -178,23 +183,32 @@ namespace Xbim.ModelGeometry.Scene
         public void BalanceNormals()
         {
             const double minAngle = Math.PI / 6;
-            var smoothedEdges = _faces.Values.SelectMany(el => el).SelectMany(e=>e).Where(e => e != null).GroupBy(k => k.StartVertexIndex);
 
-            foreach (var edges in smoothedEdges)
+            //set up the base normals
+            foreach (var faceGroup in Faces)
+            {
+                foreach (var triangle in faceGroup.Value)
+                {
+                    ComputeTriangleNormal(triangle);
+                }
+            }
+
+            var edgesAtVertex = _faces.Values.SelectMany(el => el).SelectMany(e => e).Where(e => e != null).GroupBy(k => k.StartVertexIndex);
+            foreach (var edges in edgesAtVertex)
             {
                 //create a set of faces to divide the point into a set of connected faces               
-                var faceSet = new List<List<XbimTriangleEdge>>() ;//the first face set at this point
-               
-                //find an unconected edge if one exists
+                var faceSet = new List<List<XbimTriangleEdge>>();//the first face set at this point
+
+                //find an unconnected edge if one exists
                 var unconnectedEdges = edges.Where(e => e.AdjacentEdge == null);
                 var freeEdges = unconnectedEdges as IList<XbimTriangleEdge> ?? unconnectedEdges.ToList();
 
                 if (!freeEdges.Any()) //they are all connected to each other so just pick one
                     freeEdges = new List<XbimTriangleEdge>(1) { edges.First() };
-                
+
                 foreach (var edge in freeEdges)
                 {
-                    var face = new List<XbimTriangleEdge> {edge};
+                    var face = new List<XbimTriangleEdge> { edge };
                     faceSet.Add(face);
                     XbimTriangleEdge nextConnectedEdge = edge;
                     //now look for any connected edges 
@@ -204,7 +218,7 @@ namespace Xbim.ModelGeometry.Scene
                         visited.Add(nextConnectedEdge.EdgeId);
                         nextConnectedEdge = nextConnectedEdge.NextEdge.NextEdge.AdjacentEdge;
                         if (nextConnectedEdge != null && visited.Contains(nextConnectedEdge.EdgeId)) break; //we are looping or at the start
-                        if (nextConnectedEdge != null )
+                        if (nextConnectedEdge != null)
                         {
                             //if the edge is sharp start a new face
                             if (nextConnectedEdge.Angle > minAngle)
@@ -214,55 +228,65 @@ namespace Xbim.ModelGeometry.Scene
                             }
                             face.Add(nextConnectedEdge);
                         }
-                    } while (nextConnectedEdge != null );
+                    } while (nextConnectedEdge != null);
                     //move on to next face
-                  
+
                 }
+
                 //we have our smoothing groups
-                foreach (var smoothFace in faceSet.Where(f => f.Count > 1))
+                foreach (var vertexEdges in faceSet.Where(f => f.Count > 1))
                 {
-                    var vertexNormal = new Vec3();
-                    foreach (var edge in smoothFace)
-                     if(edge.Normal.IsValid) Vec3.AddTo(ref vertexNormal, ref edge.Normal);
+                    var vertexNormal = Vec3.Zero;
+                    foreach (var edge in vertexEdges)
+                        if (edge.Normal.IsValid) Vec3.AddTo(ref vertexNormal, ref edge.Normal);
                     Vec3.Normalize(ref vertexNormal);
-                    foreach (var edge in smoothFace)
+                    foreach (var edge in vertexEdges)
                         edge.Normal = vertexNormal;
                 }
-            }
+
+
+            }//now convert faces
+            _faces = _faces.Values.SelectMany(v => v).GroupBy(t=>(int)ComputeTrianglePackedNormal(t).ToUnit16()).ToDictionary(k=>k.Key,v=>v.ToList());
         }
 
-        
 
 
-        private IList<XbimTriangleEdge> UnifyConnectedTriangles(IList<XbimTriangleEdge> startEdges, int entityLabel)
+
+        private List<XbimTriangleEdge[]> UnifyConnectedTriangles(List<XbimTriangleEdge[]> triangles)
         {
-            var nextCandidates = new List<XbimTriangleEdge>();
-            foreach (var edge in startEdges)
+            var nextCandidates = new List<XbimTriangleEdge[]>();
+            foreach (var triangle in triangles)
             {
-                edge.Freeze(); //freeze all the edges in this triangle so we don't switch them twice
-
-                var adjacentEdge = edge.AdjacentEdge;
-
-                if (adjacentEdge != null) //if we just have one it is a boundary
+                foreach (var edge in triangle)
                 {
-                    if (adjacentEdge.EdgeId == edge.EdgeId) //they both face the same way
+                    var adjacentEdge = edge.AdjacentEdge;
+                    
+                    if (adjacentEdge != null) //if we just have one it is a boundary
                     {
+                        var adjacentTriangle = new[] {adjacentEdge, adjacentEdge.NextEdge, adjacentEdge.NextEdge.NextEdge};
+                        if (adjacentEdge.EdgeId == edge.EdgeId) //they both face the same way
+                        {
+                            if (!adjacentEdge.Frozen)
+                            {
+                                adjacentEdge.Reverse(); //will reverse the entire triangle
+                            }
+                            else //we cannot align the edges correctly so break the connection
+                            {
+                                edge.AdjacentEdge = null;
+                                adjacentEdge.AdjacentEdge = null; 
+                                //Xbim3DModelContext.Logger.WarnFormat("Invalid triangle orientation has been ignored in entity #{0}", entityLabel);
+                            }
+                          
+                        }
+                        
                         if (!adjacentEdge.Frozen)
                         {
-                            adjacentEdge.Reverse();
-                            
-                        }
-                        //else
-                        //    Xbim3DModelContext.Logger.WarnFormat("Invalid triangle orientation has been ignored in entity #{0}", entityLabel);
-                    }
-                    
-                    if (!adjacentEdge.Frozen)
-                    {   
-                        nextCandidates.Add(adjacentEdge);
+                            adjacentEdge.Freeze();
+                            nextCandidates.Add(adjacentTriangle);
+                        } 
                     }
                    
                 }
-                
             }
             return nextCandidates;
         }
@@ -274,7 +298,7 @@ namespace Xbim.ModelGeometry.Scene
         /// <param name="p2"></param>
         /// <param name="p3"></param>
         /// <param name="faceId"></param>
-        public XbimTriangle AddTriangle(int p1, int p2, int p3, int faceId)
+        public void AddTriangle(int p1, int p2, int p3, int faceId)
         {
             var e1 = new XbimTriangleEdge(p1);
             var e2 = new XbimTriangleEdge(p2);
@@ -282,6 +306,9 @@ namespace Xbim.ModelGeometry.Scene
             e1.NextEdge = e2;
             e2.NextEdge = e3;
             e3.NextEdge = e1;
+            //if(!ComputeTriangleNormal(new []{e1,e2,e3}) ) 
+            //    return; //don't add lines
+           
             var edgeList = new[] { e1, e2, e3 };
             bool faulty = !AddEdge(e1);
             if (!faulty && !AddEdge(e2))
@@ -304,40 +331,52 @@ namespace Xbim.ModelGeometry.Scene
                 _faces.Add(faceId, triangleList);
             }
             triangleList.Add(edgeList);
-            ComputeTriangleNormal(e1,ref e1.Normal);
+            
             e2.Normal = e1.Normal;
             e3.Normal = e1.Normal;
-            return new XbimTriangle(edgeList,_vertices);
+            
         }
 
         /// <summary>
-        /// Calculates the normal for a connected triangle edge, assumes the edge is part of a complete triangle
+        /// Computes the packed normal for the triangle, if all the normals at each vertex are the same it is returned, if any are different XbimPackedNormal.Invalid is returned. Assumes the normals have been calculated and balanced
+        /// </summary>
+        /// <param name="edges"></param>
+        private XbimPackedNormal ComputeTrianglePackedNormal(XbimTriangleEdge[] edges)
+        {
+            var pn = edges[0].PackedNormal;
+            var pn0 = pn.ToUnit16();
+            var pn1 = edges[1].PackedNormal.ToUnit16();
+            var pn2 = edges[2].PackedNormal.ToUnit16();
+            if (pn0 == pn1 && pn1 == pn2) return pn;
+            return new XbimPackedNormal(255,255);
+        }
+
+        /// <summary>
+        /// Calculates the normal for a connected triangle edge, assumes the edge is part of a complete triangle and there are 3 triangle edges
         /// </summary>
         /// <param name="edge"></param>
-        private void ComputeTriangleNormal(XbimTriangleEdge edge, ref Vec3 normal)
+        public bool ComputeTriangleNormal(XbimTriangleEdge[] edges)
         {
-            
-            var p1 = _vertices[edge.StartVertexIndex].Position;
-            var p2 = _vertices[edge.NextEdge.StartVertexIndex].Position;
-            var p3 = _vertices[edge.NextEdge.NextEdge.StartVertexIndex].Position;
-            normal.X = 0;
-            normal.Y = 0;
-            normal.Z = 0;
+            var p1 = _vertices[edges[0].StartVertexIndex].Position;
+            var p2 = _vertices[edges[0].NextEdge.StartVertexIndex].Position;
+            var p3 = _vertices[edges[0].NextEdge.NextEdge.StartVertexIndex].Position;
 
-            normal.X += (p1.Y - p2.Y) * (p1.Z + p2.Z);
-            normal.Y += (p1.X + p2.X) * (p1.Z - p2.Z);
-            normal.Z += (p1.X - p2.X) * (p1.Y + p2.Y);
+            var ax = p1.X; var bx = p2.X; var cx = p3.X;
+            var ay = p1.Y; var by = p2.Y; var cy = p3.Y;
+            var az = p1.Z; var bz = p2.Z; var cz = p3.Z;
 
-            normal.X += (p2.Y - p3.Y) * (p2.Z + p3.Z);
-            normal.Y += (p2.X + p3.X) * (p2.Z - p3.Z);
-            normal.Z += (p2.X - p3.X) * (p2.Y + p3.Y);
+            // calculate normal of a triangle
+            edges[0].Normal.X = (by - ay) * (cz - az) - (bz - az) * (cy - ay);
+            edges[0].Normal.Y = (bz - az) * (cx - ax) - (bx - ax) * (cz - az);
+            edges[0].Normal.Z = (bx - ax) * (cy - ay) - (by - ay) * (cx - ax);
 
-            normal.X += (p3.Y - p1.Y) * (p3.Z + p1.Z);
-            normal.Y += (p3.X + p1.X) * (p3.Z - p1.Z);
-            normal.Z += (p3.X - p1.X) * (p3.Y + p1.Y);
-
-            Vec3.Normalize(ref normal);
-
+            if (Vec3.Normalize(ref edges[0].Normal))
+            {
+                edges[1].Normal = edges[0].Normal;
+                edges[2].Normal = edges[0].Normal;
+                return true;
+            }
+            return false;
         }
 
         /// <summary>
@@ -360,7 +399,8 @@ namespace Xbim.ModelGeometry.Scene
 
         public void AddVertex(Vec3 v, ref ContourVertex contourVertex)
         {
-            if (_vertices.Contains(v)) contourVertex = _vertices[v];
+            if (_vertices.Contains(v)) 
+                contourVertex = _vertices[v];
             else
             {
                 _vertices.Add(v, ref contourVertex);
@@ -443,15 +483,15 @@ public class XbimTriangleEdge
     }
 
     /// <summary>
-    /// Returns the angle of this edge, -1 if the edge has no adjacent edge
+    /// Returns the angle of this edge, 0 if the edge has no adjacent edge or the the normals are invalid
     /// </summary>
     public double Angle
     {
         get
         {
-            if(AdjacentEdge!=null)
+            if (AdjacentEdge != null && Normal.IsValid && AdjacentEdge.NextEdge.Normal.IsValid)
                 return Vec3.Angle(ref Normal, ref AdjacentEdge.NextEdge.Normal);
-            return -1;
+            return 0;
         }    
         
     }
@@ -477,10 +517,12 @@ public class XbimTriangleEdge
             prevEdge.NextEdge = NextEdge;
             NextEdge.NextEdge = this;
             NextEdge = prevEdge;
-            Vec3.Neg(ref Normal);
-            Vec3.Neg(ref NextEdge.Normal);
-            Vec3.Neg(ref NextEdge.NextEdge.Normal);
+            //Vec3.Neg(ref Normal);
+            //Vec3.Neg(ref NextEdge.Normal);
+            //Vec3.Neg(ref NextEdge.NextEdge.Normal);
         }
+        else 
+            Console.Write("");
     }
 
     /// <summary>

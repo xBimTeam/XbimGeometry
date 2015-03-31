@@ -18,7 +18,10 @@
 #include <BRepBuilderAPI_MakeSolid.hxx>
 #include <Bnd_Box.hxx>
 #include <BRepBndLib.hxx>
+#include <BRepTools.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
+#include <BRepAlgoAPI_Check.hxx>
+#include <ShapeFix_Shape.hxx>
 using namespace System;
 using namespace Xbim::Ifc2x3::Extensions;
 using namespace Xbim::XbimExtensions;
@@ -686,8 +689,15 @@ namespace Xbim
 				BRepAlgoAPI_Cut boolOp(this, solids);
 				GC::KeepAlive(this);
 				GC::KeepAlive(solids);
+				
 				if (boolOp.ErrorStatus() == 0)
-					return gcnew XbimCompound(TopoDS::Compound(boolOp.Shape()),true,tolerance);
+				{
+					XbimCompound^ result = gcnew XbimCompound(TopoDS::Compound(boolOp.Shape()), true, tolerance);
+					if (result->BoundingBox.Length() - this->BoundingBox.Length() > tolerance) //nonsense result forget it
+						return this;
+					else
+						return result;
+				}
 			}
 			catch (Standard_Failure e)
 			{

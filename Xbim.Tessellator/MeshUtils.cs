@@ -40,40 +40,35 @@ namespace Xbim.Tessellator
 {
     public struct Vec3EqualityComparer : IEqualityComparer<Vec3>
     {
-        private readonly float precision2;
-
+        private readonly float _precision2;
+        private readonly float _gridDim;
         public Vec3EqualityComparer(float precision)
         {
-            this.precision2 = precision * precision;
+            _precision2 = precision * precision;
+            _gridDim = precision*10;//coursen  up
         }
         public bool Equals(Vec3 a, Vec3 b)
         {
             Vec3 c;
             Vec3.Sub(ref a,ref b, out c);
-            bool same = c.Length2 <= precision2;
+            bool same = c.Length2 <= _precision2;
+            
             return same;
         }
 
-        public static bool Colinear(ref Vec3 a, ref Vec3 b, ref Vec3 c)
+        public int GetHashCode(Vec3 point)
         {
-            Vec3 ab;
-            Vec3 bc;
-            Vec3.Sub(ref a, ref b, out ab);
-            Vec3.Sub(ref b, ref b, out bc);
-// ReSharper disable CompareOfFloatsByEqualityOperator
-            return ab.X*bc.Y == bc.X*ab.Y &&
-                   ab.Y*bc.Z == bc.Y*ab.Z &&
-                   ab.Z*bc.X == bc.Z*ab.X;
-// ReSharper restore CompareOfFloatsByEqualityOperator
-        }
-        public int GetHashCode(Vec3 v)
-        {
+            
+			//This hashcode snaps points to a grid of 10 * tolerance to ensure similar points fall into the same hash cell
+            double xs = point.X - point.X % _gridDim;
+            double ys = point.Y - point.Y % _gridDim;
+            double zs = point.Z - point.Z % _gridDim;
             unchecked // Overflow is fine, just wrap
             {
-                int hash = 17;
-                hash = hash * 23 + v.X.GetHashCode();
-                hash = hash * 23 + v.Y.GetHashCode();
-                hash = hash * 23 + v.Z.GetHashCode();
+                var hash = (int)2166136261;
+                hash = hash * 16777619 ^ xs.GetHashCode();
+                hash = hash * 16777619 ^ ys.GetHashCode();
+                hash = hash * 16777619 ^ zs.GetHashCode();
                 return hash;
             }
         }
@@ -96,6 +91,20 @@ namespace Xbim.Tessellator
         public readonly static Vec3 Zero = new Vec3();
 
         public float X, Y, Z;
+
+
+        public static bool Colinear( Vec3 a,  Vec3 b,  Vec3 c)
+        {
+            Vec3 ab;
+            Vec3 bc;
+            Sub(ref a, ref b, out ab);
+            Sub(ref b, ref c, out bc);
+            // ReSharper disable CompareOfFloatsByEqualityOperator
+            return ab.X * bc.Y == bc.X * ab.Y &&
+                   ab.Y * bc.Z == bc.Y * ab.Z &&
+                   ab.Z * bc.X == bc.Z * ab.X;
+            // ReSharper restore CompareOfFloatsByEqualityOperator
+        }
 
         public Vec3(float x, float y, float z)
         {
@@ -145,16 +154,16 @@ namespace Xbim.Tessellator
 
         public bool IsValid
         {
-            get { return !float.IsNaN(X) && !float.IsNaN(Y) && !float.IsNaN(Z); }
+            get { return Length2 > 0; }
         }
         public static double Angle(ref Vec3 v1, ref Vec3 v2)
         {
             float cosinus;
-            Vec3.Dot(ref v1, ref v2, out cosinus);
+            Dot(ref v1, ref v2, out cosinus);
             if (cosinus > -0.70710678118655 && cosinus < 0.70710678118655)
                 return Math.Acos(cosinus);
             Vec3 v3;
-            Vec3.Cross(ref v1, ref v2, out v3);
+            Cross(ref v1, ref v2, out v3);
             var sinus = v3.Length;
             if (cosinus < 0.0) return Math.PI - Math.Asin(sinus);
             return Math.Asin(sinus);
@@ -193,14 +202,15 @@ namespace Xbim.Tessellator
             cross.Z = u.X * v.Y - u.Y * v.X;
         }
 
-        public static void Normalize(ref Vec3 v)
+        public static bool Normalize(ref Vec3 v)
         {
             float len = v.X * v.X + v.Y * v.Y + v.Z * v.Z;
-            Debug.Assert(len >= 0.0f);
+            if(len <= 0.0f) return false;
             len = 1.0f / (float)Math.Sqrt(len);
             v.X *= len;
             v.Y *= len;
             v.Z *= len;
+            return true;
         }
         public static int LongAxis(ref Vec3 v)
         {

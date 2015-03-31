@@ -12,8 +12,8 @@ namespace Xbim.ModelGeometry.Scene
     class XbimContourVertexCollection : KeyedCollection<Vec3, ContourVertex>
     {
      
-        public XbimContourVertexCollection()
-            : base(new Vec3EqualityComparer())
+        public XbimContourVertexCollection(float precision)
+            : base(new Vec3EqualityComparer(precision))
         {
           
         }
