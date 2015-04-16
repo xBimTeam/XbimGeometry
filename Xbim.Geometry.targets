@@ -18,7 +18,13 @@
   <ItemGroup>
     <XbimInteropFiles Condition="'$(MSBuildThisFileDirectory)' != '' And
                                    HasTrailingSlash('$(MSBuildThisFileDirectory)')"
-                        Include="$(MSBuildThisFileDirectory)**\Xbim.Geometry.Engine*.*" />
+        Include="$(MSBuildThisFileDirectory)**\Xbim.Geometry.Engine*.*" >
+      <Visible>False</Visible>
+      <Group></Group>
+      <PublishState>Include</PublishState>
+      <TargetPath></TargetPath>
+      <FileType>Assembly</FileType>
+    </XbimInteropFiles>
   </ItemGroup>
 
   <!--
@@ -58,6 +64,15 @@
     <Delete Files="@(XbimInteropFiles -> '$(OutputPath)%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 
+
+  <Target Name="ExtendedPublishChecks">
+    <Touch Files="@(IntermediateAssembly)" />
+    <Error Condition=" '$(Configuration)' != 'Release' "
+           Text="Ensure that the release is done through the Release configuration" />
+    <CreateItem Include="@(XbimInteropFiles)" AdditionalMetadata="TargetPath=%(RecursiveDir)%(Filename)%(Extension);IsDataFile=false">
+      <Output TaskParameter="Include" ItemName="_DeploymentManifestFiles" />
+    </CreateItem>
+  </Target>
   <!--
   ******************************************************************************
   **                 Xbim Geometry Interop Library Build Properties                  **
@@ -69,6 +84,10 @@
       $(BuildDependsOn);
       CopyXbimInteropFiles;
     </BuildDependsOn>
+    <PublishOnlyDependsOn>
+      ExtendedPublishChecks;
+      $(PublishOnlyDependsOn);
+    </PublishOnlyDependsOn>
     <CleanDependsOn>
       $(CleanDependsOn);
       CleanXbimInteropFiles;
