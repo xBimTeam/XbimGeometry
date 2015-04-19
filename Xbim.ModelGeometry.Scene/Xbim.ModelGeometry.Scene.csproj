@@ -66,21 +66,21 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="Xbim.Common, Version=3.0.5567.28396, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Xbim.Common, Version=3.0.5577.15074, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Xbim.Essentials.3.0.18\lib\net45\Xbim.Common.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.3.0.19\lib\net45\Xbim.Common.dll</HintPath>
     </Reference>
-    <Reference Include="Xbim.Ifc.Extensions, Version=3.0.5567.28397, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Xbim.Ifc.Extensions, Version=3.0.5577.15076, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Xbim.Essentials.3.0.18\lib\net45\Xbim.Ifc.Extensions.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.3.0.19\lib\net45\Xbim.Ifc.Extensions.dll</HintPath>
     </Reference>
-    <Reference Include="Xbim.Ifc2x3, Version=3.0.5567.28396, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Xbim.Ifc2x3, Version=3.0.5577.15075, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Xbim.Essentials.3.0.18\lib\net45\Xbim.Ifc2x3.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.3.0.19\lib\net45\Xbim.Ifc2x3.dll</HintPath>
     </Reference>
-    <Reference Include="Xbim.IO, Version=3.0.5567.28397, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Xbim.IO, Version=3.0.5536.18920, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Xbim.Essentials.3.0.18\lib\net45\Xbim.IO.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.3.0.19\lib\net45\Xbim.IO.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
