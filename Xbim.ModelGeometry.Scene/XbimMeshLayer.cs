@@ -42,7 +42,7 @@ namespace Xbim.ModelGeometry.Scene
             if (forceRecalculation || boundingBoxVisible.IsEmpty)
             {
                 bool first = true;
-                foreach (var pos in Hidden.Positions)
+                foreach (var pos in Visible.Positions)
                 {
                     if (first)
                     {
