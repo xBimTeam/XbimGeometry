@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using Xbim.Common.Geometry;
 using Xbim.Ifc2x3.Kernel;
 using Xbim.Ifc2x3.PresentationAppearanceResource;
-using Xbim.Ifc2x3.PresentationResource;
 using Xbim.IO;
 using Xbim.XbimExtensions;
 
@@ -16,22 +14,32 @@ namespace Xbim.ModelGeometry.Scene
     /// <summary>
     /// Provides support for a layer of meshes of the same material, TVISIBLE is the type of the mesh geometry required by the graphics adaptor
     /// </summary>
-    public class XbimMeshLayer<TVISIBLE, TMATERIAL>
-        where TVISIBLE : IXbimMeshGeometry3D, new()
-        where TMATERIAL : IXbimRenderMaterial, new()
+    public class XbimMeshLayer<TMesh, TMaterial>
+        where TMesh : IXbimMeshGeometry3D, new()
+        where TMaterial : IXbimRenderMaterial, new()
     {
-        string name;
-        XbimMeshLayerCollection<TVISIBLE, TMATERIAL> subLayerMap = new XbimMeshLayerCollection<TVISIBLE, TMATERIAL>();
-        XbimColourMap layerColourMap;
-        XbimRect3D boundingBoxVisible = XbimRect3D.Empty;
-        XbimRect3D boundingBoxHidden = XbimRect3D.Empty;
-        private XbimModel model;
+        string _name;
+        readonly XbimMeshLayerCollection<TMesh, TMaterial> _subLayerMap = new XbimMeshLayerCollection<TMesh, TMaterial>();
+        readonly XbimColourMap _layerColourMap;
+        XbimRect3D _boundingBoxVisible = XbimRect3D.Empty;
+        XbimRect3D _boundingBoxHidden = XbimRect3D.Empty;
 
-        public XbimModel Model
+        public XbimModel Model { get; set; }
+
+
+        /// <summary>
+        /// Bounding box of visible and invisible elements, aligned to the XYZ axis, containing all points in this mesh
+        /// </summary>
+        /// <param name="forceRecalculation">if true the bounding box is recalculated, if false and previusly calculated the cached version is returned</param>
+        /// <returns></returns>
+        public XbimRect3D BoundingBoxTotal(bool forceRecalculation = false)
         {
-            get { return model; }
-            set { model = value; }
+            var ret = BoundingBoxHidden(forceRecalculation);
+            ret.Union(BoundingBoxVisible(forceRecalculation));
+            return ret;
         }
+
+
         /// <summary>
         /// Bounding box of all visible elements, aligned to the XYZ axis, containing all points in this mesh
         /// </summary>
@@ -39,28 +47,27 @@ namespace Xbim.ModelGeometry.Scene
         /// <returns></returns>
         public XbimRect3D BoundingBoxVisible(bool forceRecalculation = false)
         {
-            if (forceRecalculation || boundingBoxVisible.IsEmpty)
+            if (!forceRecalculation && !_boundingBoxVisible.IsEmpty) 
+                return _boundingBoxVisible;
+            var first = true;
+            foreach (var pos in Visible.Positions)
             {
-                bool first = true;
-                foreach (var pos in Visible.Positions)
+                if (first)
                 {
-                    if (first)
-                    {
-                        boundingBoxVisible = new XbimRect3D(pos);
-                        first = false;
-                    }
-                    else
-                        boundingBoxVisible.Union(pos);
+                    _boundingBoxVisible = new XbimRect3D(pos);
+                    first = false;
+                }
+                else
+                    _boundingBoxVisible.Union(pos);
 
-                }
-                foreach (var sublayer in subLayerMap)
-                {
-                    XbimRect3D subBox = sublayer.BoundingBoxVisible(forceRecalculation);
-                    if (!subBox.IsEmpty)
-                        boundingBoxVisible.Union(subBox);
-                }
             }
-            return boundingBoxVisible; 
+            foreach (var sublayer in _subLayerMap)
+            {
+                XbimRect3D subBox = sublayer.BoundingBoxVisible(forceRecalculation);
+                if (!subBox.IsEmpty)
+                    _boundingBoxVisible.Union(subBox);
+            }
+            return _boundingBoxVisible;
         }
 
         /// <summary>
@@ -70,28 +77,27 @@ namespace Xbim.ModelGeometry.Scene
         /// <returns></returns>
         public XbimRect3D BoundingBoxHidden(bool forceRecalculation = false)
         {
-            if (forceRecalculation || boundingBoxHidden.IsEmpty)
+            if (!forceRecalculation && !_boundingBoxHidden.IsEmpty) 
+                return _boundingBoxHidden;
+            var first = true;
+            foreach (var pos in Hidden.Positions)
             {
-                bool first = true;
-                foreach (var pos in Hidden.Positions)
+                if (first)
                 {
-                    if (first)
-                    {
-                        boundingBoxHidden = new XbimRect3D(pos);
-                        first = false;
-                    }
-                    else
-                        boundingBoxHidden.Union(pos);
+                    _boundingBoxHidden = new XbimRect3D(pos);
+                    first = false;
+                }
+                else
+                    _boundingBoxHidden.Union(pos);
 
-                }
-                foreach (var sublayer in subLayerMap)
-                {
-                    XbimRect3D subBox = sublayer.BoundingBoxHidden(forceRecalculation);
-                    if (!subBox.IsEmpty)
-                        boundingBoxHidden.Union(subBox);
-                }
             }
-            return boundingBoxHidden; 
+            foreach (var sublayer in _subLayerMap)
+            {
+                XbimRect3D subBox = sublayer.BoundingBoxHidden(forceRecalculation);
+                if (!subBox.IsEmpty)
+                    _boundingBoxHidden.Union(subBox);
+            }
+            return _boundingBoxHidden; 
         }
 
         /// <summary>
@@ -99,7 +105,7 @@ namespace Xbim.ModelGeometry.Scene
         /// </summary>
         public XbimColourMap LayerColourMap
         {
-            get { return layerColourMap; }
+            get { return _layerColourMap; }
         }
 
         public XbimTexture Style { get; set; }
@@ -108,13 +114,13 @@ namespace Xbim.ModelGeometry.Scene
         /// A mesh that are currently rendered typically on the graphics adaptor
         /// </summary>
         
-        public IXbimMeshGeometry3D Visible = new TVISIBLE();
+        public IXbimMeshGeometry3D Visible = new TMesh();
 
         /// <summary>
         /// The native graphic engine render material
         /// </summary>
         
-        public IXbimRenderMaterial Material = new TMATERIAL();
+        public IXbimRenderMaterial Material = new TMaterial();
         /// <summary>
         /// A mesh that is loaded but not visible on the graphics display
         /// </summary>
@@ -123,8 +129,8 @@ namespace Xbim.ModelGeometry.Scene
       
         public string Name
         {
-            get { return name; }
-            set { name = value; }
+            get { return _name; }
+            set { _name = value; }
         }
 
         /// <summary>
@@ -143,19 +149,19 @@ namespace Xbim.ModelGeometry.Scene
         /// <param name="colour"></param>
         public XbimMeshLayer(XbimModel m, XbimColour colour)
         {
-            model = m;
+            Model = m;
             Style = new XbimTexture().CreateTexture(colour);
         }
 
         public XbimMeshLayer(XbimModel m, XbimColour colour, XbimColourMap subCategoryColourMap)
             :this(m, colour)
         {
-            layerColourMap = subCategoryColourMap;
+            _layerColourMap = subCategoryColourMap;
         }
 
         public XbimMeshLayer(XbimModel m, IfcSurfaceStyle style)
         {
-            model = m;
+            Model = m;
             Style = new XbimTexture().CreateTexture(style);
            
         }
@@ -166,7 +172,7 @@ namespace Xbim.ModelGeometry.Scene
 
         public XbimMeshLayer(XbimModel m, XbimTexture xbimTexture)
         {
-            model = m;
+            Model = m;
             Style = xbimTexture;
         }
 
@@ -175,9 +181,9 @@ namespace Xbim.ModelGeometry.Scene
             Style = new XbimTexture().CreateTexture(colour);
         }
 
-        public static implicit operator TVISIBLE(XbimMeshLayer<TVISIBLE, TMATERIAL> layer)
+        public static implicit operator TMesh(XbimMeshLayer<TMesh, TMaterial> layer)
         {
-            return (TVISIBLE)layer.Visible;
+            return (TMesh)layer.Visible;
         }
         
 
@@ -199,7 +205,7 @@ namespace Xbim.ModelGeometry.Scene
         public void ShowAll()
         {
             Hidden.MoveTo(Visible);
-            foreach (var subLayer in subLayerMap)
+            foreach (var subLayer in _subLayerMap)
             {
                 subLayer.ShowAll();
             }
@@ -211,7 +217,7 @@ namespace Xbim.ModelGeometry.Scene
         public void HideAll()
         {
             Visible.MoveTo(Hidden);
-            foreach (var subLayer in subLayerMap)
+            foreach (var subLayer in _subLayerMap)
             {
                 subLayer.HideAll();
             }
@@ -241,51 +247,51 @@ namespace Xbim.ModelGeometry.Scene
         {
             if (model != null && geomData.StyleLabel > 0) //check if we need to put this item on a sub layer
             {
-                XbimMeshLayer<TVISIBLE, TMATERIAL> subLayer;
-                string layerName = geomData.StyleLabel.ToString();
-                if (!subLayerMap.Contains(layerName))
+                XbimMeshLayer<TMesh, TMaterial> subLayer;
+                var layerName = geomData.StyleLabel.ToString();
+                if (!_subLayerMap.Contains(layerName))
                 {
-                    IfcSurfaceStyle style = model.InstancesLocal[geomData.StyleLabel] as IfcSurfaceStyle;
+                    var style = model.InstancesLocal[geomData.StyleLabel] as IfcSurfaceStyle;
                     //create a sub layer
-                    subLayer = new XbimMeshLayer<TVISIBLE, TMATERIAL>(model,style);
-                    subLayer.Name = layerName;
-                    subLayerMap.Add(subLayer);
+                    subLayer = new XbimMeshLayer<TMesh, TMaterial>(model, style) {Name = layerName};
+                    _subLayerMap.Add(subLayer);
                 }
                 else
-                    subLayer = subLayerMap[layerName];
+                    subLayer = _subLayerMap[layerName];
                 
                 subLayer.AddToHidden(geomData);
             }
             else
             {
-                bool AddingSuccessfull = Hidden.Add(geomData); // this is where the geometry is added to the main layer.
-                if (!AddingSuccessfull) 
+                var addingSuccessfull = Hidden.Add(geomData); // this is where the geometry is added to the main layer.
+                if (!addingSuccessfull) 
                 {
                     //if the main layer is too big split it.
                     //try and find a sublayer that is a split of this, i.e. has the same texture
-                    foreach (var sublayer in subLayerMap.Reverse())
+                    foreach (var sublayer in _subLayerMap.Reverse())
                     {
-                        if (sublayer.Style == this.Style) //FOUND THE LAST ONE WITH THE SAME STYLE
-                        {
-                            sublayer.AddToHidden(geomData);//try and add the data to this mesh
-                            return; //succeeded so return
-                        }
+                        if (!Equals(sublayer.Style, Style)) 
+                            continue;
+                        sublayer.AddToHidden(geomData);//try and add the data to this mesh
+                        return; //succeeded so return
                     }
                     //didn't find a layer to add it to so create a new one
-                    XbimMeshLayer<TVISIBLE, TMATERIAL> subLayer = new XbimMeshLayer<TVISIBLE, TMATERIAL>(model, this.Style);
-                    subLayer.Name = this.Name + "-" + subLayerMap.Count;
-                    subLayerMap.Add(subLayer);
+                    var subLayer = new XbimMeshLayer<TMesh, TMaterial>(model, Style)
+                    {
+                        Name = Name + "-" + _subLayerMap.Count
+                    };
+                    _subLayerMap.Add(subLayer);
                     subLayer.Hidden.Add(geomData); //this should always pass as it is a new mesh and ifc geom rarely exceeds max mesh size, graphics cards will truncate anyway
                 }
             }
         }
 
        
-        public XbimMeshLayerCollection<TVISIBLE, TMATERIAL> SubLayers 
+        public XbimMeshLayerCollection<TMesh, TMaterial> SubLayers 
         {
             get
             {
-                return subLayerMap;
+                return _subLayerMap;
             }
         }
 
@@ -298,19 +304,18 @@ namespace Xbim.ModelGeometry.Scene
 
         public class MeshInfo
         {
-            private XbimMeshFragment mf;
-            private XbimMeshLayer<TVISIBLE, TMATERIAL> xbimMeshLayer;
+            private XbimMeshFragment _mf;
+            private readonly XbimMeshLayer<TMesh, TMaterial> _xbimMeshLayer;
             
-            public MeshInfo(XbimMeshFragment mf, XbimMeshLayer<TVISIBLE, TMATERIAL> xbimMeshLayer)
+            public MeshInfo(XbimMeshFragment mf, XbimMeshLayer<TMesh, TMaterial> xbimMeshLayer)
             {
-                // TODO: Complete member initialization
-                this.mf = mf;
-                this.xbimMeshLayer = xbimMeshLayer;
+                _mf = mf;
+                _xbimMeshLayer = xbimMeshLayer;
             }
 
             public override string ToString()
             {
-                return string.Format("Layer: {0} ({3}) fragment position: {1} lenght: {2}", xbimMeshLayer.name, mf.StartPosition, mf.PositionCount, xbimMeshLayer.Material.Description);
+                return string.Format("Layer: {0} ({3}) fragment position: {1} lenght: {2}", _xbimMeshLayer._name, _mf.StartPosition, _mf.PositionCount, _xbimMeshLayer.Material.Description);
             }
         }
 
@@ -343,7 +348,7 @@ namespace Xbim.ModelGeometry.Scene
                     yield return mf;
             if (includSublayers)
                 foreach (var layer in SubLayers)
-                    foreach (var mf in layer.GetMeshFragments(entityLabel, includeHidden, includSublayers))
+                    foreach (var mf in layer.GetMeshFragments(entityLabel, includeHidden, true))
                         yield return mf;
         }
 
@@ -351,21 +356,17 @@ namespace Xbim.ModelGeometry.Scene
 
         public bool HasEntity(int entityLabel, bool includeHidden = false, bool includSublayers = false)
         {
-            foreach (var item in  this.GetMeshFragments(entityLabel, includeHidden, includSublayers))
-	        {
-                return true;
-	        }
-            return false;          
+            return GetMeshFragments(entityLabel, includeHidden, includSublayers).Any();
         }
 
         public IXbimMeshGeometry3D GetVisibleMeshGeometry3D(int entityLabel, short modelId)
         {
-            IEnumerable<XbimMeshFragment> fragments = GetMeshFragments(entityLabel); //get all the fragments for this entity in the visible layer
-            int maxSize = fragments.Sum(f => f.PositionCount);
-            XbimMeshGeometry3D geometry = new XbimMeshGeometry3D(maxSize);
+            var fragments = GetMeshFragments(entityLabel).ToArray(); //get all the fragments for this entity in the visible layer
+            var maxSize = fragments.Sum(f => f.PositionCount);
+            var geometry = new XbimMeshGeometry3D(maxSize);
             foreach (var fragment in fragments)
             {
-                IXbimMeshGeometry3D geom = Visible.GetMeshGeometry3D(fragment);
+                var geom = Visible.GetMeshGeometry3D(fragment);
                 geometry.Add(geom, fragment.EntityLabel, fragment.EntityType, modelId);
             } 
             return geometry;
@@ -373,7 +374,7 @@ namespace Xbim.ModelGeometry.Scene
         /// <summary>
         /// Returns all the layers including sub layers of this layer
         /// </summary>
-        public IEnumerable<XbimMeshLayer<TVISIBLE, TMATERIAL>> Layers
+        public IEnumerable<XbimMeshLayer<TMesh, TMaterial>> Layers
         {
             get
             {
@@ -396,7 +397,7 @@ namespace Xbim.ModelGeometry.Scene
             if (Hidden.TriangleIndices.Count >= ushort.MaxValue) //split the layer
             {
                 // todo: needs implementation
-                System.Diagnostics.Debug.WriteLine("Too big");
+                Debug.WriteLine("Too big");
             }
             foreach (var layer in SubLayers)
             {
@@ -407,23 +408,22 @@ namespace Xbim.ModelGeometry.Scene
         /// <summary>
         /// Useful for analysis and debugging purposes (invoked by Querying interface)
         /// </summary>
-        /// <param name="Indentation">the number of indentation spaces at this tree level</param>
+        /// <param name="indentation">the number of indentation spaces at this tree level</param>
         /// <returns>Enumerable strings of indented elements</returns>
-        public IEnumerable<string> LayersTree(int Indentation)
+        public IEnumerable<string> LayersTree(int indentation)
         {
-            string s = new string(' ', Indentation);
-            yield return s + this.name;
+            var s = new string(' ', indentation);
+            yield return s + _name;
             foreach (var layer in SubLayers)
             {
-                foreach (var item in layer.LayersTree(Indentation + 1))
+                foreach (var item in layer.LayersTree(indentation + 1))
                 {
                     yield return item;
                 } 
-                // yield return layer.LayersTree(p + 1); 
             }
         }
 
-        public void Add(String mesh, Type productType, int productLabel, int geometryLabel, XbimMatrix3D? transform = null, short modelId=0)
+        public void Add(string mesh, Type productType, int productLabel, int geometryLabel, XbimMatrix3D? transform = null, short modelId=0)
         {
             Hidden.Add(mesh, productType, productLabel, geometryLabel, transform, modelId);
         }
