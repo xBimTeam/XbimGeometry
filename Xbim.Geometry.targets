@@ -19,14 +19,13 @@
     <XbimInteropFiles Condition="'$(MSBuildThisFileDirectory)' != '' And
                                    HasTrailingSlash('$(MSBuildThisFileDirectory)')"
         Include="$(MSBuildThisFileDirectory)**\Xbim.Geometry.Engine*.*" >
-      <Visible>False</Visible>
+      <Visible>True</Visible>
       <Group></Group>
       <PublishState>Include</PublishState>
       <TargetPath></TargetPath>
       <FileType>Assembly</FileType>
     </XbimInteropFiles>
   </ItemGroup>
-
   <!--
   ******************************************************************************
   **                   Xbim Interop Library Build Targets                   **

@@ -324,7 +324,7 @@ namespace Xbim
 								pointLookup[faceIndex]->Add(index);
 							}
 							List<int>^ elems = gcnew List<int>(numTriangles * 3);
-							for (size_t j = 0; j < numTriangles; j++)
+							for (int j = 0; j < numTriangles; j++)
 							{
 								elems->Add(elements[j * 3]);
 								elems->Add(elements[j * 3 + 1]);

@@ -534,7 +534,7 @@ public class XbimTriangleEdge
         {
             long a = StartVertexIndex;
             a <<= 32;
-            return (a | EndVertexIndex);
+            return (a | (uint)EndVertexIndex);
         }
     }
 

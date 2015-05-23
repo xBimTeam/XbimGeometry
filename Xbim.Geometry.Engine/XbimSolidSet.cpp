@@ -289,7 +289,7 @@ namespace Xbim
 				double totalVolume = this->Volume;
 				double minVolume = totalVolume * _maxOpeningVolumePercentage;
 
-				for (size_t i = 0; i < _maxOpeningsToCut; i++)
+				for (int i = 0; i < _maxOpeningsToCut; i++)
 				{
 					if (solidsList[i]->Item1 < minVolume) break; //give up for small things
 					b.Add(subsetToCut, solidsList[i]->Item2);

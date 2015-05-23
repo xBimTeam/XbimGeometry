@@ -753,7 +753,7 @@ namespace Xbim
 			if (!IsValid) return false;
 			TopTools_IndexedMapOfShape map;
 			TopExp::MapShapes(*pFace, TopAbs_EDGE, map);
-			for (size_t i = 1; i <= map.Extent(); i++)
+			for (Standard_Integer i = 1; i <= map.Extent(); i++)
 			{
 				Standard_Real start, end;
 				Handle(Geom_Curve) c3d = BRep_Tool::Curve(TopoDS::Edge(map(i)), start, end);
