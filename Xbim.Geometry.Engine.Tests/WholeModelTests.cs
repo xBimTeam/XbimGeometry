@@ -33,7 +33,7 @@ namespace GeometryTests
         public void WriteDpoWOutputFiles()
         {
 
-            const string ifcFileFullName = "SolidTestFiles\\Duplex_A_20110907.ifc";
+            const string ifcFileFullName = @"SolidTestFiles\Chimney Faceted Mesh with curves and gaps.ifc";
             var fileName = Path.GetFileName(ifcFileFullName);
             var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
             var workingDir = Path.Combine(Directory.GetCurrentDirectory(), "SolidTestFiles\\");
