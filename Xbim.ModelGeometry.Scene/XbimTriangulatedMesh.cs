@@ -203,8 +203,30 @@ namespace Xbim.ModelGeometry.Scene
                 var unconnectedEdges = edges.Where(e => e.AdjacentEdge == null);
                 var freeEdges = unconnectedEdges as IList<XbimTriangleEdge> ?? unconnectedEdges.ToList();
 
-                if (!freeEdges.Any()) //they are all connected to each other so just pick one
-                    freeEdges = new List<XbimTriangleEdge>(1) { edges.First() };
+                if (!freeEdges.Any())
+                //they are all connected to each other so find the first sharp edge or the any one if none sharp, this stops a face being split
+                {
+                    XbimTriangleEdge nextConnectedEdge = edges.First();
+                    freeEdges = new List<XbimTriangleEdge>(1) { edges.First() }; //take the first if we don't find a sharp edge
+                    //now look for any connected edges 
+                    var visited = new HashSet<long>();
+                    do
+                    {
+                        visited.Add(nextConnectedEdge.EdgeId);
+                        nextConnectedEdge = nextConnectedEdge.NextEdge.NextEdge.AdjacentEdge;
+                        if (nextConnectedEdge != null && visited.Contains(nextConnectedEdge.EdgeId)) break; //we are looping or at the start
+                        if (nextConnectedEdge != null)
+                        {
+                            //if the edge is sharp start here
+                            if (nextConnectedEdge.Angle > minAngle)
+                            {
+                                freeEdges = new List<XbimTriangleEdge>(1) { nextConnectedEdge };
+                                break;
+                            }
+
+                        }
+                    } while (nextConnectedEdge != null);
+                }
 
                 foreach (var edge in freeEdges)
                 {
@@ -331,9 +353,6 @@ namespace Xbim.ModelGeometry.Scene
                 _faces.Add(faceId, triangleList);
             }
             triangleList.Add(edgeList);
-            
-            e2.Normal = e1.Normal;
-            e3.Normal = e1.Normal;
             
         }
 
@@ -506,7 +525,7 @@ public class XbimTriangleEdge
     public void Reverse()
     {
         if (!_frozen)
-        {
+        { 
             var p1 = StartVertexIndex;
             var p2 = NextEdge.StartVertexIndex;
             var p3 = NextEdge.NextEdge.StartVertexIndex;
@@ -517,12 +536,8 @@ public class XbimTriangleEdge
             prevEdge.NextEdge = NextEdge;
             NextEdge.NextEdge = this;
             NextEdge = prevEdge;
-            //Vec3.Neg(ref Normal);
-            //Vec3.Neg(ref NextEdge.Normal);
-            //Vec3.Neg(ref NextEdge.NextEdge.Normal);
         }
-        else 
-            Console.Write("");
+       
     }
 
     /// <summary>
