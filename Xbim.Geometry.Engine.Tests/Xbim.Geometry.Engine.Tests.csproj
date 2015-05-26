@@ -123,6 +123,9 @@
     <None Include="SolidTestFiles\BIM Logo-Coordination View 2 - No M.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="SolidTestFiles\Chimney Faceted Mesh with curves and gaps.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="SolidTestFiles\Duplex_A_20110907.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
