@@ -82,6 +82,7 @@ namespace Xbim
 			XbimCompound^ Union(XbimCompound^ solids, double tolerance);
 			XbimCompound^ Intersection(XbimCompound^ solids, double tolerance);
 			virtual property XbimRect3D BoundingBox {XbimRect3D get()override ; }
+			virtual property double Volume{double get(); }
 
 			bool Sew();
 		};

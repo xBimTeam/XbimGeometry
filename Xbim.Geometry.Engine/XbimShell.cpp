@@ -39,6 +39,8 @@
 #include <Geom_TrimmedCurve.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
 #include <BRepPrimAPI_MakePrism.hxx>
+#include <ShapeFix_Shell.hxx>
+#include <BRepCheck_Analyzer.hxx>
 using namespace System;
 using namespace Xbim::Common::Exceptions;
 namespace Xbim
@@ -404,6 +406,23 @@ namespace Xbim
 				if (class3d.State() == TopAbs_IN)
 					this->Reverse();
 			}
+		}
+
+		bool XbimShell::HasValidTopology::get()
+		{
+			if (!IsValid) return false;
+			BRepCheck_Analyzer analyser(*pShell, Standard_True);
+			GC::KeepAlive(this);
+			return analyser.IsValid() == Standard_True;
+		}
+
+		void XbimShell::FixTopology()
+		{
+			ShapeFix_Shell fixer(this);
+			fixer.Perform();
+			const TopoDS_Shape& fixed = fixer.Shape();
+			if (fixed.ShapeType() == TopAbs_SHELL)
+				*pShell = TopoDS::Shell(fixed);			
 		}
 
 		//makes the shell a solid, note does not check if the shell IsClosed, so can make solids that are not closed or manifold

@@ -107,13 +107,17 @@ namespace Xbim
 					{
 						XbimShell^ shell = dynamic_cast<XbimShell^>(geom);
 						if (shell != nullptr)
-							/*if (shell->IsClosed) */solids->Add(shell->MakeSolid());
+						{							
+							XbimSolid^ s = (XbimSolid^)shell->MakeSolid();								
+							solids->Add(s);
+						}
 					}
 				}
 				return;
 			}
 			XbimShell^ shell = dynamic_cast<XbimShell^>(shape);
-			if (shell != nullptr && shell->IsClosed) return solids->Add(shell->MakeSolid());
+			if (shell != nullptr/* && shell->IsClosed*/)
+				return solids->Add(shell->MakeSolid());			
 		}
 		
 		IXbimSolid^ XbimSolidSet::First::get()
@@ -270,6 +274,11 @@ namespace Xbim
 				return this;
 			}
 			XbimCompound^ thisSolid = XbimCompound::Merge(thisSolidSet, tolerance);
+			if (thisSolid->Volume <=0) //this is not a valid solid
+			{
+				IsSimplified = true;
+				return this;
+			}
 			XbimCompound^ toCutSolid;
 			if (thisSolid == nullptr) return XbimSolidSet::Empty;
 			bool isSimplified = false;

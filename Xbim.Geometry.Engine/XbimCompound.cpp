@@ -22,6 +22,10 @@
 #include <BRepBuilderAPI_Transform.hxx>
 #include <BRepAlgoAPI_Check.hxx>
 #include <ShapeFix_Shape.hxx>
+#include <GProp_GProps.hxx>
+#include <BRepGProp.hxx>
+
+
 using namespace System;
 using namespace Xbim::Ifc2x3::Extensions;
 using namespace Xbim::XbimExtensions;
@@ -107,42 +111,42 @@ namespace Xbim
 
 		XbimCompound::XbimCompound(IfcConnectedFaceSet^ faceSet)
 		{
-			_sewingTolerance = faceSet->ModelOf->ModelFactors->PrecisionBoolean;
+			_sewingTolerance = faceSet->ModelOf->ModelFactors->Precision;
 			Init(faceSet); 
 		}
 
 		XbimCompound::XbimCompound(IfcShellBasedSurfaceModel^ sbsm)
 		{
-			_sewingTolerance = sbsm->ModelOf->ModelFactors->PrecisionBoolean;
+			_sewingTolerance = sbsm->ModelOf->ModelFactors->Precision;
 			Init(sbsm); 
 		}
 
 		XbimCompound::XbimCompound(IfcFaceBasedSurfaceModel^ fbsm)
 		{
-			_sewingTolerance = fbsm->ModelOf->ModelFactors->PrecisionBoolean;
+			_sewingTolerance = fbsm->ModelOf->ModelFactors->Precision;
 			Init(fbsm); 
 		}
 
 		XbimCompound::XbimCompound(IfcManifoldSolidBrep^ solid)
 		{
-			_sewingTolerance = solid->ModelOf->ModelFactors->PrecisionBoolean;
+			_sewingTolerance = solid->ModelOf->ModelFactors->Precision;
 			Init(solid); 
 		}
 		XbimCompound::XbimCompound(IfcFacetedBrep^ solid)
 		{
-			_sewingTolerance = solid->ModelOf->ModelFactors->PrecisionBoolean;
+			_sewingTolerance = solid->ModelOf->ModelFactors->Precision;
 			Init(solid);
 		}
 
 		XbimCompound::XbimCompound(IfcFacetedBrepWithVoids^ solid)
 		{
-			_sewingTolerance = solid->ModelOf->ModelFactors->PrecisionBoolean;
+			_sewingTolerance = solid->ModelOf->ModelFactors->Precision;
 			Init(solid);
 		}
 
 		XbimCompound::XbimCompound(IfcClosedShell^ solid)
 		{
-			_sewingTolerance = solid->ModelOf->ModelFactors->PrecisionBoolean;
+			_sewingTolerance = solid->ModelOf->ModelFactors->Precision;
 			Init(solid);
 		}
 
@@ -313,6 +317,18 @@ namespace Xbim
 			return true;
 		}
 
+		double XbimCompound::Volume::get()
+		{
+			if (IsValid)
+			{
+				GProp_GProps gProps;
+				BRepGProp::VolumeProperties(*pCompound, gProps, Standard_True);
+				GC::KeepAlive(this);
+				return gProps.Mass();
+			}
+			else
+				return 0;
+		}
 		void XbimCompound::Init(IEnumerable<IfcFace^>^ faces)
 		{
 			double tolerance;
@@ -321,7 +337,7 @@ namespace Xbim
 			{
 				model = face->ModelOf;
 				tolerance = model->ModelFactors->Precision;
-				_sewingTolerance = model->ModelFactors->PrecisionBoolean;			
+				_sewingTolerance = model->ModelFactors->Precision;			
 				break;
 			}
 			
