@@ -22,7 +22,13 @@ namespace GeometryTests
             m.Open("Monolith_v20.xBIM");
             var w1 = m.Instances.OfType<IfcWall>().FirstOrDefault();
             var msh = m.GetMesh(new[] {w1}, XbimMatrix3D.Identity);
+            Assert.AreEqual(24, msh.PositionCount, "Unexpected value");
+            m.Close();
 
+            m.Open("Monolith_v10.xBIM");
+            w1 = m.Instances.OfType<IfcWall>().FirstOrDefault();
+            msh = m.GetMesh(new[] { w1 }, XbimMatrix3D.Identity);
+            Assert.AreEqual(24, msh.PositionCount, "Unexpected value");
             m.Close();
         }
     }
