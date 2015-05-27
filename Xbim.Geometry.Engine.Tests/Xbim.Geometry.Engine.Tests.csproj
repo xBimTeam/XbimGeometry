@@ -68,6 +68,7 @@
     <Compile Include="XbimFacetedMeshTests.cs" />
     <Compile Include="XbimGeometryToIfcTests.cs" />
     <Compile Include="IfcCSGTests.cs" />
+    <Compile Include="XbimModelExtensionsTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

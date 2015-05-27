@@ -143,9 +143,9 @@ namespace Xbim.ModelGeometry.Scene.Extensions
                     var geomDataSet = fromModel.GetGeometryData(item.EntityLabel, XbimGeometryType.TriangulatedMesh);
                     foreach (var geomData in geomDataSet)
                     {
-                        // todo: uncomment
-                        //geomData.TransformBy(wcsTransform);
-                        //m.Add(geomData);
+                        // todo: add guidance to the TransformBy method so that users can understand how to stop using it (it's marked absolete)
+                        geomData.TransformBy(wcsTransform);
+                        m.Add(geomData); // todo: what is the modelid value to be passed?
                     }
                 }
             }
