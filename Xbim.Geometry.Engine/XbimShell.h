@@ -63,9 +63,10 @@ namespace Xbim
 			virtual IXbimGeometryObject^ Union(IXbimGeometryObject^ toUnion, double tolerance);
 			virtual IXbimGeometryObject^ Intersection(IXbimGeometryObject^ toIntersect, double tolerance);
 			virtual IXbimFaceSet^ Section(IXbimFace^ face, double tolerance);
-			///throw shell not a solid exception if the shell is not Closed
+			
 			virtual IXbimSolid^ MakeSolid();
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) override;
+			virtual property bool HasValidTopology{bool get(); }
 #pragma endregion
 			
 #pragma region operators
@@ -77,6 +78,7 @@ namespace Xbim
 			void Reverse(); 
 			//if the shell is closed make sure it is facing the correct way
 			void Orientate();
+			void FixTopology();
 		};
 	}
 }

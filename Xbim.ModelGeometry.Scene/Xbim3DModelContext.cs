@@ -671,6 +671,7 @@ namespace Xbim.ModelGeometry.Scene
                         var elementShapes = WriteProductShape(contextHelper, element, false).ToList();
                         var context = 0;
                         var styleId = 0; //take the style of any part of the main shape
+                        bool containsOpenShells = false;
                         if (elementShapes.Any())
                         {
 
@@ -678,8 +679,7 @@ namespace Xbim.ModelGeometry.Scene
                             var elementGeom = _engine.CreateSolidSet();
                             foreach (var elemShape in elementShapes)
                             {
-                                var geom = contextHelper.GetGeometryFromCache(elemShape);
-
+                                var geom = contextHelper.GetGeometryFromCache(elemShape);                              
                                 elementGeom.Add(geom);
                                 context = elemShape.RepresentationContext;
                                 if (elemShape.StyleLabel > 0) styleId = elemShape.StyleLabel;
@@ -695,7 +695,7 @@ namespace Xbim.ModelGeometry.Scene
                                     element.EntityLabel);
 
                             }
-                            if (elementGeom.Count > 0 && !elementGeom.IsSimplified)
+                            if (elementGeom.Count > 0 && !elementGeom.IsSimplified && !containsOpenShells)
                             {
                                 //now build the openings
                                 var allOpenings = _engine.CreateSolidSet();
@@ -749,10 +749,10 @@ namespace Xbim.ModelGeometry.Scene
 
                                 //make the finished shape
                                 if (allProjections.Any())
-                                    elementGeom = elementGeom.Union(allProjections, _model.ModelFactors.PrecisionBoolean);
+                                    elementGeom = elementGeom.Union(allProjections, _model.ModelFactors.Precision);
 
                                 if (allOpenings.Any())
-                                    elementGeom = elementGeom.Cut(allOpenings, _model.ModelFactors.PrecisionBoolean);
+                                    elementGeom = elementGeom.Cut(allOpenings, _model.ModelFactors.Precision);
                                 if (elementGeom.IsSimplified)
                                     Logger.WarnFormat(
                                         "WM008: Geometry of object #{0} '{1}' [{2}] is too complex and it will make interoperability difficult for you. It has been simplified, small openings have not been cut. You should consider re-authoring it in your BIM tool",
