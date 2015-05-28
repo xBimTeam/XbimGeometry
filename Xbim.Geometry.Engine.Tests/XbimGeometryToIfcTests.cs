@@ -164,7 +164,7 @@ namespace GeometryTests
 
                     
 
-                    var block = IfcModelBuilder.MakeExtrudedAreaSolid(m, IfcModelBuilder.MakeRectangleHollowProfileDef(m,10000,20000, 500),30000);
+                    var block = IfcModelBuilder.MakeExtrudedAreaSolid(m, IfcModelBuilder.MakeRectangleHollowProfileDef(m,10,20, 1),30);
                     var solid = _xbimGeometryCreator.CreateSolid(block);
                    
                     var brep = _xbimGeometryCreator.CreateFacetedBrep(m, solid);
