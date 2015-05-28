@@ -1425,9 +1425,6 @@
     <ClCompile Include=".\OCC\src\BOPTools\BOPTools_ShapeSet.cxx">
       <Filter>Source files\TKBO\BOPTools</Filter>
     </ClCompile>
-    <ClCompile Include=".\OCC\src\BRepAlgoAPI\BRepAlgoAPI.cxx">
-      <Filter>Source files\TKBO\BRepAlgoAPI</Filter>
-    </ClCompile>
     <ClCompile Include=".\OCC\src\BRepAlgoAPI\BRepAlgoAPI_BooleanOperation.cxx">
       <Filter>Source files\TKBO\BRepAlgoAPI</Filter>
     </ClCompile>
@@ -3123,12 +3120,6 @@
     <ClCompile Include="OCC\drv\Extrema\Extrema_ECC2d_0.cxx">
       <Filter>Source files\TKGeomBase\Extrema</Filter>
     </ClCompile>
-    <ClCompile Include="OCC\drv\Extrema\Extrema_ELCC_0.cxx">
-      <Filter>Source files\TKGeomBase\Extrema</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\drv\Extrema\Extrema_ELCC2d_0.cxx">
-      <Filter>Source files\TKGeomBase\Extrema</Filter>
-    </ClCompile>
     <ClCompile Include="OCC\drv\Extrema\Extrema_LocECC_0.cxx">
       <Filter>Source files\TKGeomBase\Extrema</Filter>
     </ClCompile>
@@ -3759,6 +3750,48 @@
     <ClCompile Include="OCC\src\NCollection\NCollection_WinHeapAllocator.cxx">
       <Filter>Source files\TKernel\NCollection</Filter>
     </ClCompile>
+    <ClCompile Include="OCC\src\BRepAlgoAPI\BRepAlgoAPI_Algo.cxx">
+      <Filter>Source files\TKBO\BRepAlgoAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepAlgoAPI\BRepAlgoAPI_BuilderAlgo.cxx">
+      <Filter>Source files\TKBO\BRepAlgoAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\AppCont\AppCont_LeastSquare.cxx">
+      <Filter>Source files\TKGeomBase\AppCont</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepFill\BRepFill.cxx">
+      <Filter>Source files\TKBool\BRepFill</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepGProp\BRepGProp_Gauss.cxx">
+      <Filter>Source files\TKTopAlgo\BRepGProp</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\OSD\OSD_Parallel.cxx">
+      <Filter>Source files\TKernel\OSD</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepCheck\BRepCheck_Solid.cxx">
+      <Filter>Source files\TKTopAlgo\BRepCheck</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\IntPatch\IntPatch_PointLine.cxx">
+      <Filter>Source files\TKGeomAlgo\IntPatch</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\ShapeCustom\ShapeCustom_Modification.cxx">
+      <Filter>Source files\THShHealing\ShapeCustom</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\ShapeFix\ShapeFix_FixSmallSolid.cxx">
+      <Filter>Source files\THShHealing\ShapeFix</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepLib\BRepLib_CheckCurveOnSurface.cxx">
+      <Filter>Source files\TKTopAlgo\BRepLib</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BOPTools\BOPTools_AlgoTools2D_1.cxx">
+      <Filter>Source files\TKBO\BOPTools</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\drv\TColgp\TColgp_SequenceOfAx1_0.cxx">
+      <Filter>Source files\TKMath\TColgp</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\drv\TColgp\TColgp_SequenceNodeOfSequenceOfAx1_0.cxx">
+      <Filter>Source files\TKMath\TColgp</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source files">
@@ -3862,9 +3895,6 @@
     <ClCompile Include=".\OCC\src\math\math_Householder.cxx">
       <Filter>Source files\TKMath\math</Filter>
     </ClCompile>
-    <ClCompile Include=".\OCC\src\math\math_IntegerRandom.cxx">
-      <Filter>Source files\TKMath\math</Filter>
-    </ClCompile>
     <ClCompile Include=".\OCC\src\math\math_IntegerVector.cxx">
       <Filter>Source files\TKMath\math</Filter>
     </ClCompile>
@@ -3902,9 +3932,6 @@
       <Filter>Source files\TKMath\math</Filter>
     </ClCompile>
     <ClCompile Include=".\OCC\src\math\math_Powell.cxx">
-      <Filter>Source files\TKMath\math</Filter>
-    </ClCompile>
-    <ClCompile Include=".\OCC\src\math\math_RealRandom.cxx">
       <Filter>Source files\TKMath\math</Filter>
     </ClCompile>
     <ClCompile Include=".\OCC\src\math\math_Recipes.cxx">
@@ -4788,12 +4815,6 @@
     <ClCompile Include=".\OCC\drv\Approx\Approx_HArray1OfGTrsf2d_0.cxx">
       <Filter>Source files\TKGeomBase\Approx</Filter>
     </ClCompile>
-    <ClCompile Include=".\OCC\drv\Approx\Approx_MyLeastSquareOfFitAndDivide2d_0.cxx">
-      <Filter>Source files\TKGeomBase\Approx</Filter>
-    </ClCompile>
-    <ClCompile Include=".\OCC\drv\Approx\Approx_MyLeastSquareOfFitAndDivide_0.cxx">
-      <Filter>Source files\TKGeomBase\Approx</Filter>
-    </ClCompile>
     <ClCompile Include=".\OCC\drv\Approx\Approx_SequenceNodeOfSequenceOfHArray1OfReal_0.cxx">
       <Filter>Source files\TKGeomBase\Approx</Filter>
     </ClCompile>
@@ -4926,12 +4947,6 @@
     <ClCompile Include=".\OCC\src\FEmTool\FEmTool_SparseMatrix.cxx">
       <Filter>Source files\TKGeomBase\FEmTool</Filter>
     </ClCompile>
-    <ClCompile Include=".\OCC\drv\AppCont\AppCont_FitFunction2d_0.cxx">
-      <Filter>Source files\TKGeomBase\AppCont</Filter>
-    </ClCompile>
-    <ClCompile Include=".\OCC\drv\AppCont\AppCont_FitFunction_0.cxx">
-      <Filter>Source files\TKGeomBase\AppCont</Filter>
-    </ClCompile>
     <ClCompile Include=".\OCC\src\AppCont\AppCont_ContMatrices.cxx">
       <Filter>Source files\TKGeomBase\AppCont</Filter>
     </ClCompile>
@@ -4945,18 +4960,6 @@
       <Filter>Source files\TKGeomBase\AppCont</Filter>
     </ClCompile>
     <ClCompile Include=".\OCC\src\AppCont\AppCont_ContMatrices_4.cxx">
-      <Filter>Source files\TKGeomBase\AppCont</Filter>
-    </ClCompile>
-    <ClCompile Include=".\OCC\src\AppCont\AppCont_Function.cxx">
-      <Filter>Source files\TKGeomBase\AppCont</Filter>
-    </ClCompile>
-    <ClCompile Include=".\OCC\src\AppCont\AppCont_Function2d.cxx">
-      <Filter>Source files\TKGeomBase\AppCont</Filter>
-    </ClCompile>
-    <ClCompile Include=".\OCC\src\AppCont\AppCont_FunctionTool.cxx">
-      <Filter>Source files\TKGeomBase\AppCont</Filter>
-    </ClCompile>
-    <ClCompile Include=".\OCC\src\AppCont\AppCont_FunctionTool2d.cxx">
       <Filter>Source files\TKGeomBase\AppCont</Filter>
     </ClCompile>
     <ClCompile Include=".\OCC\drv\Extrema\Extrema_Array1OfPOnCurv2d_0.cxx">
@@ -7468,9 +7471,6 @@
     <ClCompile Include=".\OCC\drv\BRepFill\BRepFill_ListOfOffsetWire_0.cxx">
       <Filter>Source files\TKBool\BRepFill</Filter>
     </ClCompile>
-    <ClCompile Include=".\OCC\drv\BRepFill\BRepFill_MyLeastSquareOfComputeCLine_0.cxx">
-      <Filter>Source files\TKBool\BRepFill</Filter>
-    </ClCompile>
     <ClCompile Include=".\OCC\drv\BRepFill\BRepFill_SequenceNodeOfSequenceOfEdgeFaceAndOrder_0.cxx">
       <Filter>Source files\TKBool\BRepFill</Filter>
     </ClCompile>
@@ -7487,9 +7487,6 @@
       <Filter>Source files\TKBool\BRepFill</Filter>
     </ClCompile>
     <ClCompile Include=".\OCC\drv\BRepFill\BRepFill_SequenceOfSection_0.cxx">
-      <Filter>Source files\TKBool\BRepFill</Filter>
-    </ClCompile>
-    <ClCompile Include=".\OCC\src\BRepFill\BRepFill.cxx">
       <Filter>Source files\TKBool\BRepFill</Filter>
     </ClCompile>
     <ClCompile Include=".\OCC\src\BRepFill\BRepFill_ACRLaw.cxx">
@@ -7535,9 +7532,6 @@
       <Filter>Source files\TKBool\BRepFill</Filter>
     </ClCompile>
     <ClCompile Include=".\OCC\src\BRepFill\BRepFill_MultiLine.cxx">
-      <Filter>Source files\TKBool\BRepFill</Filter>
-    </ClCompile>
-    <ClCompile Include=".\OCC\src\BRepFill\BRepFill_MultiLineTool.cxx">
       <Filter>Source files\TKBool\BRepFill</Filter>
     </ClCompile>
     <ClCompile Include=".\OCC\src\BRepFill\BRepFill_NSections.cxx">
@@ -9716,9 +9710,6 @@
     <ClCompile Include=".\OCC\src\IntTools\IntTools_TopolTool.cxx">
       <Filter>Source files\IntTools</Filter>
     </ClCompile>
-    <ClCompile Include=".\OCC\src\BRepAlgoAPI\BRepAlgoAPI.cxx">
-      <Filter>Source files\BRepAlgoAPI</Filter>
-    </ClCompile>
     <ClCompile Include=".\OCC\src\BRepAlgoAPI\BRepAlgoAPI_BooleanOperation.cxx">
       <Filter>Source files\BRepAlgoAPI</Filter>
     </ClCompile>
@@ -10241,6 +10232,30 @@
     <ClInclude Include="XbimWireSet.h">
       <Filter>Source files\XbimGeometry</Filter>
     </ClInclude>
+    <ClInclude Include="OCC\inc\BOPCol_DataMapOfShapeReal.hxx" />
+    <ClInclude Include="OCC\inc\BOPCol_Parallel.hxx" />
+    <ClInclude Include="OCC\inc\BRepAlgoAPI_Algo.hxx" />
+    <ClInclude Include="OCC\inc\BRepAlgoAPI_BuilderAlgo.hxx" />
+    <ClInclude Include="OCC\inc\BRepCheck_Solid.hxx" />
+    <ClInclude Include="OCC\inc\BRepGProp_Gauss.hxx" />
+    <ClInclude Include="OCC\inc\BRepLib_CheckCurveOnSurface.hxx" />
+    <ClInclude Include="OCC\inc\AppCont_LeastSquare.hxx" />
+    <ClInclude Include="OCC\inc\GeomInt_VectorOfReal.hxx" />
+    <ClInclude Include="OCC\inc\Handle_BRepCheck_Solid.hxx" />
+    <ClInclude Include="OCC\inc\Handle_IntPatch_PointLine.hxx" />
+    <ClInclude Include="OCC\inc\Handle_ShapeCustom_Modification.hxx" />
+    <ClInclude Include="OCC\inc\Handle_ShapeFix_FixSmallSolid.hxx" />
+    <ClInclude Include="OCC\inc\Handle_TColgp_SequenceNodeOfSequenceOfAx1.hxx" />
+    <ClInclude Include="OCC\inc\IntPatch_PointLine.hxx" />
+    <ClInclude Include="OCC\inc\NCollection_AccAllocator.hxx" />
+    <ClInclude Include="OCC\inc\NCollection_AlignedAllocator.hxx" />
+    <ClInclude Include="OCC\inc\NCollection_Buffer.hxx" />
+    <ClInclude Include="OCC\inc\NCollection_WinHeapAllocator.hxx" />
+    <ClInclude Include="OCC\inc\OSD_Parallel.hxx" />
+    <ClInclude Include="OCC\inc\ShapeCustom_Modification.hxx" />
+    <ClInclude Include="OCC\inc\ShapeFix_FixSmallSolid.hxx" />
+    <ClInclude Include="OCC\inc\TColgp_SequenceNodeOfSequenceOfAx1.hxx" />
+    <ClInclude Include="OCC\inc\TColgp_SequenceOfAx1.hxx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="OCC\drv\AdvApprox\AdvApprox_SimpleApprox.jxx">
@@ -10507,28 +10522,13 @@
     <None Include="OCC\drv\AppCont\AppCont_Function.ixx">
       <Filter>Source files\Includes</Filter>
     </None>
-    <None Include="OCC\drv\AppCont\AppCont_Function.jxx">
-      <Filter>Source files\Includes</Filter>
-    </None>
     <None Include="OCC\drv\AppCont\AppCont_Function2d.ixx">
-      <Filter>Source files\Includes</Filter>
-    </None>
-    <None Include="OCC\drv\AppCont\AppCont_Function2d.jxx">
       <Filter>Source files\Includes</Filter>
     </None>
     <None Include="OCC\drv\AppCont\AppCont_FunctionTool.ixx">
       <Filter>Source files\Includes</Filter>
     </None>
-    <None Include="OCC\drv\AppCont\AppCont_FunctionTool.jxx">
-      <Filter>Source files\Includes</Filter>
-    </None>
     <None Include="OCC\drv\AppCont\AppCont_FunctionTool2d.ixx">
-      <Filter>Source files\Includes</Filter>
-    </None>
-    <None Include="OCC\drv\AppCont\AppCont_FunctionTool2d.jxx">
-      <Filter>Source files\Includes</Filter>
-    </None>
-    <None Include="OCC\inc\AppCont_LeastSquare.gxx">
       <Filter>Source files\Includes</Filter>
     </None>
     <None Include="OCC\drv\AppDef\AppDef_MultiLine.ixx">
@@ -19171,22 +19171,10 @@
     <None Include="OCC\inc\AppCont_ContMatrices.hxx">
       <Filter>Source files\Includes</Filter>
     </None>
-    <None Include="OCC\inc\AppCont_FitFunction.hxx">
-      <Filter>Source files\Includes</Filter>
-    </None>
-    <None Include="OCC\inc\AppCont_FitFunction2d.hxx">
-      <Filter>Source files\Includes</Filter>
-    </None>
     <None Include="OCC\inc\AppCont_Function.hxx">
       <Filter>Source files\Includes</Filter>
     </None>
     <None Include="OCC\inc\AppCont_Function2d.hxx">
-      <Filter>Source files\Includes</Filter>
-    </None>
-    <None Include="OCC\inc\AppCont_FunctionTool.hxx">
-      <Filter>Source files\Includes</Filter>
-    </None>
-    <None Include="OCC\inc\AppCont_FunctionTool2d.hxx">
       <Filter>Source files\Includes</Filter>
     </None>
     <None Include="OCC\inc\AppDef_Array1OfMultiPointConstraint.hxx">
@@ -19394,12 +19382,6 @@
       <Filter>Source files\Includes</Filter>
     </None>
     <None Include="OCC\inc\Approx_MCurvesToBSpCurve.hxx">
-      <Filter>Source files\Includes</Filter>
-    </None>
-    <None Include="OCC\inc\Approx_MyLeastSquareOfFitAndDivide.hxx">
-      <Filter>Source files\Includes</Filter>
-    </None>
-    <None Include="OCC\inc\Approx_MyLeastSquareOfFitAndDivide2d.hxx">
       <Filter>Source files\Includes</Filter>
     </None>
     <None Include="OCC\inc\Approx_ParametrizationType.hxx">
@@ -19732,9 +19714,6 @@
     <None Include="OCC\inc\BOPAlgo_WireSplitter.hxx">
       <Filter>Source files\Includes</Filter>
     </None>
-    <None Include="OCC\inc\BOPCol_Array1.hxx">
-      <Filter>Source files\Includes</Filter>
-    </None>
     <None Include="OCC\inc\BOPCol_BaseAllocator.hxx">
       <Filter>Source files\Includes</Filter>
     </None>
@@ -19826,9 +19805,6 @@
       <Filter>Source files\Includes</Filter>
     </None>
     <None Include="OCC\inc\BOPCol_SequenceOfShape.hxx">
-      <Filter>Source files\Includes</Filter>
-    </None>
-    <None Include="OCC\inc\BOPCol_TBB.hxx">
       <Filter>Source files\Includes</Filter>
     </None>
     <None Include="OCC\inc\BOPDS_CommonBlock.hxx">
@@ -21127,9 +21103,6 @@
     <None Include="OCC\inc\BRepMesh_Edge.hxx">
       <Filter>Source files\Includes</Filter>
     </None>
-    <None Include="OCC\inc\BRepMesh_EdgeChecker.hxx">
-      <Filter>Source files\Includes</Filter>
-    </None>
     <None Include="OCC\inc\BRepMesh_EdgeParameterProvider.hxx">
       <Filter>Source files\Includes</Filter>
     </None>
@@ -22013,12 +21986,6 @@
       <Filter>Source files\Includes</Filter>
     </None>
     <None Include="OCC\inc\Extrema_ECC2d.hxx">
-      <Filter>Source files\Includes</Filter>
-    </None>
-    <None Include="OCC\inc\Extrema_ELCC.hxx">
-      <Filter>Source files\Includes</Filter>
-    </None>
-    <None Include="OCC\inc\Extrema_ELCC2d.hxx">
       <Filter>Source files\Includes</Filter>
     </None>
     <None Include="OCC\inc\Extrema_ElementType.hxx">
@@ -32636,6 +32603,21 @@
       <Filter>Source files\Includes</Filter>
     </None>
     <None Include="packages.config" />
+    <None Include="OCC\inc\BRepLib_CheckCurveOnSurface.lxx" />
+    <None Include="OCC\drv\BRepAlgoAPI\BRepAlgoAPI_Algo.ixx" />
+    <None Include="OCC\drv\BRepAlgoAPI\BRepAlgoAPI_Algo.jxx" />
+    <None Include="OCC\drv\BRepAlgoAPI\BRepAlgoAPI_BuilderAlgo.ixx" />
+    <None Include="OCC\drv\BRepAlgoAPI\BRepAlgoAPI_BuilderAlgo.jxx" />
+    <None Include="OCC\drv\BRepCheck\BRepCheck_Solid.ixx" />
+    <None Include="OCC\drv\BRepCheck\BRepCheck_Solid.jxx" />
+    <None Include="OCC\drv\BRepLib\BRepLib_CheckCurveOnSurface.ixx" />
+    <None Include="OCC\drv\BRepLib\BRepLib_CheckCurveOnSurface.jxx" />
+    <None Include="OCC\drv\IntPatch\IntPatch_PointLine.ixx" />
+    <None Include="OCC\drv\IntPatch\IntPatch_PointLine.jxx" />
+    <None Include="OCC\drv\ShapeCustom\ShapeCustom_Modification.ixx" />
+    <None Include="OCC\drv\ShapeCustom\ShapeCustom_Modification.jxx" />
+    <None Include="OCC\drv\ShapeFix\ShapeFix_FixSmallSolid.ixx" />
+    <None Include="OCC\drv\ShapeFix\ShapeFix_FixSmallSolid.jxx" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="app.ico">
