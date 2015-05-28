@@ -5,6 +5,7 @@
 
 #include <BRep_Builder.hxx>
 #include <BRepBuilderAPI_Sewing.hxx>
+#include <BRepBuilderAPI_FastSewing.hxx>
 #include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <TopExp.hxx>
 #include <BRepBuilderAPI_MakePolygon.hxx>
@@ -296,12 +297,31 @@ namespace Xbim
 			builder.MakeCompound(newCompound);
 			for (TopExp_Explorer expl(*pCompound, TopAbs_SHELL); expl.More(); expl.Next())
 			{
-				BRepBuilderAPI_Sewing seamstress(_sewingTolerance);
 				
+				
+//#define USE_FAST_SEWING 1
+#ifdef USE_FAST_SEWING
+				BRepBuilderAPI_FastSewing seamstress(_sewingTolerance);		
+				for (TopExp_Explorer faceExpl(*pCompound, TopAbs_FACE); faceExpl.More(); faceExpl.Next())
+				{
+					TopoDS_Face face = TopoDS::Face(faceExpl.Current());
+					XbimFace^ xFace = gcnew XbimFace(face);
+					
+					BRepTools::UpdateFaceUVPoints(xFace);
+					Standard_Boolean addedOK = seamstress.Add(xFace);
+				}
+				seamstress.Perform();
+
+				unsigned int  status = seamstress.GetStatuses();
+				TopoDS_Shape result = seamstress.GetResult();
+				builder.Add(newCompound, result);
+#else
+				BRepBuilderAPI_Sewing seamstress(_sewingTolerance);
 				seamstress.Add(expl.Current());
 				seamstress.Perform();
 				TopoDS_Shape result = seamstress.SewedShape();
 				builder.Add(newCompound, result);
+#endif
 			}		
 			*pCompound = newCompound;
 			//only correct orientation if we are sewing and making a solid or a shape for boolean operation

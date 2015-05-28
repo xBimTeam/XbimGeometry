@@ -484,6 +484,7 @@
     <ClInclude Include="OCC\inc\BOPCol_Parallel.hxx" />
     <ClInclude Include="OCC\inc\BRepAlgoAPI_Algo.hxx" />
     <ClInclude Include="OCC\inc\BRepAlgoAPI_BuilderAlgo.hxx" />
+    <ClInclude Include="OCC\inc\BRepBuilderAPI_FastSewing.hxx" />
     <ClInclude Include="OCC\inc\BRepCheck_Solid.hxx" />
     <ClInclude Include="OCC\inc\BRepGProp_Gauss.hxx" />
     <ClInclude Include="OCC\inc\BRepLib_CheckCurveOnSurface.hxx" />
@@ -2110,6 +2111,7 @@
     <ClCompile Include="OCC\src\BRepBlend\BRepBlend_PointOnRst.cxx">
       <CompileAsManaged>false</CompileAsManaged>
     </ClCompile>
+    <ClCompile Include="OCC\src\BRepBuilderAPI\BRepBuilderAPI_FastSewing.cxx" />
     <ClCompile Include="OCC\src\BRepCheck\BRepCheck_Solid.cxx">
       <CompileAsManaged>false</CompileAsManaged>
     </ClCompile>

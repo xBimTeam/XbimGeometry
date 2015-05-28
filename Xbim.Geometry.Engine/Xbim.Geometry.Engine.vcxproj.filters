@@ -3792,6 +3792,9 @@
     <ClCompile Include="OCC\drv\TColgp\TColgp_SequenceNodeOfSequenceOfAx1_0.cxx">
       <Filter>Source files\TKMath\TColgp</Filter>
     </ClCompile>
+    <ClCompile Include="OCC\src\BRepBuilderAPI\BRepBuilderAPI_FastSewing.cxx">
+      <Filter>Source files\TKTopAlgo\BRepBuilderAPI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source files">
@@ -10232,30 +10235,73 @@
     <ClInclude Include="XbimWireSet.h">
       <Filter>Source files\XbimGeometry</Filter>
     </ClInclude>
-    <ClInclude Include="OCC\inc\BOPCol_DataMapOfShapeReal.hxx" />
-    <ClInclude Include="OCC\inc\BOPCol_Parallel.hxx" />
-    <ClInclude Include="OCC\inc\BRepAlgoAPI_Algo.hxx" />
-    <ClInclude Include="OCC\inc\BRepAlgoAPI_BuilderAlgo.hxx" />
-    <ClInclude Include="OCC\inc\BRepCheck_Solid.hxx" />
-    <ClInclude Include="OCC\inc\BRepGProp_Gauss.hxx" />
-    <ClInclude Include="OCC\inc\BRepLib_CheckCurveOnSurface.hxx" />
-    <ClInclude Include="OCC\inc\AppCont_LeastSquare.hxx" />
-    <ClInclude Include="OCC\inc\GeomInt_VectorOfReal.hxx" />
-    <ClInclude Include="OCC\inc\Handle_BRepCheck_Solid.hxx" />
-    <ClInclude Include="OCC\inc\Handle_IntPatch_PointLine.hxx" />
-    <ClInclude Include="OCC\inc\Handle_ShapeCustom_Modification.hxx" />
-    <ClInclude Include="OCC\inc\Handle_ShapeFix_FixSmallSolid.hxx" />
-    <ClInclude Include="OCC\inc\Handle_TColgp_SequenceNodeOfSequenceOfAx1.hxx" />
-    <ClInclude Include="OCC\inc\IntPatch_PointLine.hxx" />
-    <ClInclude Include="OCC\inc\NCollection_AccAllocator.hxx" />
-    <ClInclude Include="OCC\inc\NCollection_AlignedAllocator.hxx" />
-    <ClInclude Include="OCC\inc\NCollection_Buffer.hxx" />
-    <ClInclude Include="OCC\inc\NCollection_WinHeapAllocator.hxx" />
-    <ClInclude Include="OCC\inc\OSD_Parallel.hxx" />
     <ClInclude Include="OCC\inc\ShapeCustom_Modification.hxx" />
     <ClInclude Include="OCC\inc\ShapeFix_FixSmallSolid.hxx" />
     <ClInclude Include="OCC\inc\TColgp_SequenceNodeOfSequenceOfAx1.hxx" />
     <ClInclude Include="OCC\inc\TColgp_SequenceOfAx1.hxx" />
+    <ClInclude Include="OCC\inc\BRepBuilderAPI_FastSewing.hxx">
+      <Filter>Source files\Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\inc\AppCont_LeastSquare.hxx">
+      <Filter>Source files\Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\inc\BOPCol_DataMapOfShapeReal.hxx">
+      <Filter>Source files\Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\inc\BOPCol_Parallel.hxx">
+      <Filter>Source files\Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\inc\BRepAlgoAPI_Algo.hxx">
+      <Filter>Source files\Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\inc\BRepAlgoAPI_BuilderAlgo.hxx">
+      <Filter>Source files\Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\inc\BRepCheck_Solid.hxx">
+      <Filter>Source files\Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\inc\BRepGProp_Gauss.hxx">
+      <Filter>Source files\Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\inc\BRepLib_CheckCurveOnSurface.hxx">
+      <Filter>Source files\Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\inc\GeomInt_VectorOfReal.hxx">
+      <Filter>Source files\Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\inc\Handle_BRepCheck_Solid.hxx">
+      <Filter>Source files\Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\inc\Handle_IntPatch_PointLine.hxx">
+      <Filter>Source files\Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\inc\Handle_ShapeCustom_Modification.hxx">
+      <Filter>Source files\Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\inc\Handle_ShapeFix_FixSmallSolid.hxx">
+      <Filter>Source files\Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\inc\Handle_TColgp_SequenceNodeOfSequenceOfAx1.hxx">
+      <Filter>Source files\Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\inc\IntPatch_PointLine.hxx">
+      <Filter>Source files\Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\inc\NCollection_AccAllocator.hxx">
+      <Filter>Source files\Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\inc\NCollection_AlignedAllocator.hxx">
+      <Filter>Source files\Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\inc\NCollection_Buffer.hxx">
+      <Filter>Source files\Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\inc\NCollection_WinHeapAllocator.hxx">
+      <Filter>Source files\Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\inc\OSD_Parallel.hxx">
+      <Filter>Source files\Includes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="OCC\drv\AdvApprox\AdvApprox_SimpleApprox.jxx">
@@ -32603,21 +32649,43 @@
       <Filter>Source files\Includes</Filter>
     </None>
     <None Include="packages.config" />
-    <None Include="OCC\inc\BRepLib_CheckCurveOnSurface.lxx" />
-    <None Include="OCC\drv\BRepAlgoAPI\BRepAlgoAPI_Algo.ixx" />
-    <None Include="OCC\drv\BRepAlgoAPI\BRepAlgoAPI_Algo.jxx" />
-    <None Include="OCC\drv\BRepAlgoAPI\BRepAlgoAPI_BuilderAlgo.ixx" />
-    <None Include="OCC\drv\BRepAlgoAPI\BRepAlgoAPI_BuilderAlgo.jxx" />
-    <None Include="OCC\drv\BRepCheck\BRepCheck_Solid.ixx" />
-    <None Include="OCC\drv\BRepCheck\BRepCheck_Solid.jxx" />
-    <None Include="OCC\drv\BRepLib\BRepLib_CheckCurveOnSurface.ixx" />
-    <None Include="OCC\drv\BRepLib\BRepLib_CheckCurveOnSurface.jxx" />
-    <None Include="OCC\drv\IntPatch\IntPatch_PointLine.ixx" />
-    <None Include="OCC\drv\IntPatch\IntPatch_PointLine.jxx" />
     <None Include="OCC\drv\ShapeCustom\ShapeCustom_Modification.ixx" />
     <None Include="OCC\drv\ShapeCustom\ShapeCustom_Modification.jxx" />
     <None Include="OCC\drv\ShapeFix\ShapeFix_FixSmallSolid.ixx" />
     <None Include="OCC\drv\ShapeFix\ShapeFix_FixSmallSolid.jxx" />
+    <None Include="OCC\drv\BRepAlgoAPI\BRepAlgoAPI_Algo.ixx">
+      <Filter>Source files\Includes</Filter>
+    </None>
+    <None Include="OCC\drv\BRepAlgoAPI\BRepAlgoAPI_Algo.jxx">
+      <Filter>Source files\Includes</Filter>
+    </None>
+    <None Include="OCC\drv\BRepAlgoAPI\BRepAlgoAPI_BuilderAlgo.ixx">
+      <Filter>Source files\Includes</Filter>
+    </None>
+    <None Include="OCC\drv\BRepAlgoAPI\BRepAlgoAPI_BuilderAlgo.jxx">
+      <Filter>Source files\Includes</Filter>
+    </None>
+    <None Include="OCC\drv\BRepCheck\BRepCheck_Solid.ixx">
+      <Filter>Source files\Includes</Filter>
+    </None>
+    <None Include="OCC\drv\BRepCheck\BRepCheck_Solid.jxx">
+      <Filter>Source files\Includes</Filter>
+    </None>
+    <None Include="OCC\drv\BRepLib\BRepLib_CheckCurveOnSurface.ixx">
+      <Filter>Source files\Includes</Filter>
+    </None>
+    <None Include="OCC\drv\BRepLib\BRepLib_CheckCurveOnSurface.jxx">
+      <Filter>Source files\Includes</Filter>
+    </None>
+    <None Include="OCC\inc\BRepLib_CheckCurveOnSurface.lxx">
+      <Filter>Source files\Includes</Filter>
+    </None>
+    <None Include="OCC\drv\IntPatch\IntPatch_PointLine.ixx">
+      <Filter>Source files\Includes</Filter>
+    </None>
+    <None Include="OCC\drv\IntPatch\IntPatch_PointLine.jxx">
+      <Filter>Source files\Includes</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="app.ico">
