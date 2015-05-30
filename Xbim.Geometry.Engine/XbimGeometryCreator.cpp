@@ -58,6 +58,8 @@ namespace Xbim
 					return CreateSolid((IfcBoundingBox^)geomRep);
 				else if (dynamic_cast<IfcSurface^>(geomRep))
 					return CreateFace((IfcSurface^)geomRep);
+				else if (dynamic_cast<IfcCsgSolid^>(geomRep))
+					return CreateSolid((IfcCsgSolid^)geomRep);
 				else if (dynamic_cast<IfcGeometricSet^>(geomRep))
 					return CreateGeometricSet((IfcGeometricSet^)geomRep);
 			}

@@ -48,7 +48,7 @@ void Resource_Unicode::ConvertSJISToUnicode(const Standard_CString fromstr,TColl
       pl =  ((unsigned int) *currentstr);
       currentstr++;
       
-      ::Resource_sjis_to_unicode(&ph,&pl);
+      Resource_sjis_to_unicode(&ph,&pl);
       Standard_ExtCharacter curcar = ((Standard_ExtCharacter) ((ph << 8) | pl));
       TCollection_ExtendedString curext(curcar);
       tostr.AssignCat(curext);
@@ -80,7 +80,7 @@ void Resource_Unicode::ConvertEUCToUnicode(const Standard_CString fromstr,TColle
       pl =  ((unsigned int) *currentstr);
       currentstr++;
       
-      ::Resource_euc_to_unicode(&ph,&pl);
+      Resource_euc_to_unicode(&ph,&pl);
       Standard_ExtCharacter curcar = ((Standard_ExtCharacter) ((ph << 8) | pl));
       TCollection_ExtendedString curext(curcar);
       tostr.AssignCat(curext);
@@ -111,7 +111,7 @@ void Resource_Unicode::ConvertGBToUnicode(const Standard_CString fromstr,TCollec
       pl =  ((unsigned int) *currentstr);
       currentstr++;
       
-      ::Resource_gb_to_unicode(&ph,&pl);
+      Resource_gb_to_unicode(&ph,&pl);
       Standard_ExtCharacter curcar = ((Standard_ExtCharacter) ((ph << 8) | pl));
       TCollection_ExtendedString curext(curcar);
       tostr.AssignCat(curext);
@@ -153,7 +153,7 @@ Standard_Boolean Resource_Unicode::ConvertUnicodeToSJIS(const TCollection_Extend
       nbext++;
       ph = (((unsigned int) curcar) >> 8) & 0xFF;
       pl = ((unsigned int) curcar) & 0xFF;
-      ::Resource_unicode_to_sjis(&ph,&pl);
+      Resource_unicode_to_sjis(&ph,&pl);
       if (issjis1(ph)) {
 	if (nbtrans < (maxsize-3)) {
 	  tostr[nbtrans] = ((char) ph);
@@ -202,7 +202,7 @@ Standard_Boolean Resource_Unicode::ConvertUnicodeToEUC(const TCollection_Extende
       nbext++;
       ph = (((unsigned int) curcar) >> 8) & 0xFF;
       pl = ((unsigned int) curcar) & 0xFF;
-      ::Resource_unicode_to_euc(&ph,&pl);
+      Resource_unicode_to_euc(&ph,&pl);
       if (iseuc(ph)) {
 	if (nbtrans < (maxsize-3)) {
 	  tostr[nbtrans] = ((char) ph);
@@ -251,7 +251,7 @@ Standard_Boolean Resource_Unicode::ConvertUnicodeToGB(const TCollection_Extended
       nbext++;
       ph = (((unsigned int) curcar) >> 8) & 0xFF;
       pl = ((unsigned int) curcar) & 0xFF;
-      ::Resource_unicode_to_gb(&ph,&pl);
+      Resource_unicode_to_gb(&ph,&pl);
       if (isshift(ph)) {
 	if (nbtrans < (maxsize-3)) {
 	  tostr[nbtrans] = ((char) ph);

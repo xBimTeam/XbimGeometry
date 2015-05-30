@@ -7,6 +7,8 @@ using Xbim.Ifc2x3.GeometricModelResource;
 using Xbim.Ifc2x3.ProfileResource;
 using Xbim.Common.Logging;
 using Xbim.Ifc2x3.GeometryResource;
+using Xbim.ModelGeometry.Scene;
+using XbimGeometry.Interfaces;
 
 
 namespace GeometryTests
@@ -47,6 +49,33 @@ namespace GeometryTests
             }
         }
 
+        [TestMethod]
+        public void BIM_Logo_LetterB_Test()
+        {
+            var xbimGeometryCreator = new XbimGeometryEngine();
+            using (var eventTrace = LoggerFactory.CreateEventTrace())
+            {
+                using (var m = new XbimModel())
+                {
+                    m.CreateFrom("SolidTestFiles\\BIM Logo-LetterB.ifc", null, null, true, true);
+                    var eas = m.Instances[88] as IfcCsgSolid;
+                    Assert.IsTrue(eas != null, "No CSG Solid found");
+
+                    var solid = (IXbimSolid)xbimGeometryCreator.Create(eas);
+                    Assert.IsTrue(eventTrace.Events.Count == 0); //no events should have been raised from this call
+
+                    IfcCsgTests.GeneralTest(solid);
+                    Assert.IsTrue(solid.Faces.Count() == 15, "Letter B should have 15 faces");
+                    var xbimTessellator = new XbimTessellator(m,XbimGeometryType.PolyhedronBinary);
+                   // Assert.IsTrue(xbimTessellator.CanMesh(solid));//if we can mesh the shape directly just do it
+                   // var shapeGeom = xbimTessellator.Mesh(solid);
+                    var shapeGeom =  xbimGeometryCreator.CreateShapeGeometry(solid, m.ModelFactors.Precision, m.ModelFactors.DeflectionTolerance, m.ModelFactors.DeflectionAngle, XbimGeometryType.PolyhedronBinary);
+
+                }
+            }
+        }
+        
+       
         [TestMethod]
         public void TestDerivedProfileDefWithTShapedParent()
         {

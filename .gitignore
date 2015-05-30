@@ -183,4 +183,10 @@ FakesAssemblies/
 
 [Oo]utput/
 
-
+#Opencascade files
+*.rgb
+*.cdl
+*.In
+*.files
+*.Dep
+*.Out

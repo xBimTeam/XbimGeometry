@@ -466,12 +466,29 @@ namespace Xbim
 			else //it is a simple Half space
 			{
 				IfcSurface^ surface = (IfcSurface^)hs->BaseSurface;
-				if (!dynamic_cast<IfcPlane^>(surface))
+				IfcPlane^ ifcPlane = dynamic_cast<IfcPlane^>(surface);
+				if (ifcPlane == nullptr)
 				{
 					XbimGeometryCreator::logger->WarnFormat("WS011: Non-Planar half spaces are not supported in Entity #{0}, it has been ignored", hs->EntityLabel);
 					return;
 				}
-				IfcPlane^ ifcPlane = (IfcPlane^)surface;
+#ifdef OCC_6_9_SUPPORTED
+
+
+				gp_Ax3 ax3 = XbimGeomPrim::ToAx3(ifcPlane->Position);
+				gp_Pln pln(ax3);
+				gp_Vec zVec = hs->AgreementFlag ? -pln.Axis().Direction() : pln.Axis().Direction();
+				XbimFace^ face = gcnew XbimFace(ifcPlane);
+				gp_Pnt pnt = ax3.Location();
+				pnt.Translate(zVec);
+
+				BRepPrimAPI_MakeHalfSpace halfSpaceBulder(face, pnt);
+				pSolid = new TopoDS_Solid();
+				*pSolid = TopoDS::Solid(halfSpaceBulder.Solid());
+
+#else
+
+
 				double z = hs->AgreementFlag ? -2e8 : 0;
 				XbimPoint3D corner(-1e8, -1e8, z);
 				 
@@ -479,6 +496,7 @@ namespace Xbim
 				XbimRect3D rect3D(corner, size);
 				Init(rect3D, hs->ModelOf->ModelFactors->Precision);
 				Move(ifcPlane->Position);
+#endif
 			}
 		}
 
@@ -667,10 +685,46 @@ namespace Xbim
 			FTol.SetTolerance(*pSolid, box->ModelOf->ModelFactors->Precision, TopAbs_VERTEX);
 		}
 
+
+		XbimSolid^ XbimSolid::BuildClippingList(IfcBooleanClippingResult^ solid, IXbimSolidSet^ clipList)
+		{
+			IfcBooleanOperand^ fOp = solid->FirstOperand;
+			IfcBooleanOperand^ sOp = solid->SecondOperand;
+			IfcBooleanClippingResult^ boolClip = dynamic_cast<IfcBooleanClippingResult^>(fOp);
+			if (boolClip!=nullptr)
+			{
+				clipList->Add(gcnew XbimSolid(sOp));
+				return XbimSolid::BuildClippingList(boolClip, clipList);
+			}
+			else //we need to build the solid
+			{
+				clipList->Add(gcnew XbimSolid(sOp));
+				return gcnew XbimSolid(fOp);
+			}
+		}
+
 		//Booleans
 		void XbimSolid::Init(IfcBooleanClippingResult^ solid)
 		{
+			XbimModelFactors^ mf = solid->ModelOf->ModelFactors;
 			IfcBooleanOperand^ fOp = solid->FirstOperand;
+#ifdef OCC_6_9_SUPPORTED			
+			IfcBooleanClippingResult^ boolClip = dynamic_cast<IfcBooleanClippingResult^>(fOp);
+			if (boolClip != nullptr)
+			{
+				IXbimSolidSet^ solidSet = gcnew XbimSolidSet();
+				XbimSolid^ body = XbimSolid::BuildClippingList(boolClip, solidSet);
+				IXbimSolidSet^ xbimSolidSet = body->Cut(solidSet, mf->PrecisionBoolean);
+				if (xbimSolidSet != nullptr && xbimSolidSet->First != nullptr)
+				{
+					pSolid = new TopoDS_Solid(); 
+					*pSolid = (XbimSolid^)(xbimSolidSet->First); //just take the first as that is what is intended by IFC schema
+				}
+				return;
+			}
+
+#endif
+			
 			IfcBooleanOperand^ sOp = solid->SecondOperand;
 			XbimSolid^ left = gcnew XbimSolid(fOp);
 			XbimSolid^ right = gcnew XbimSolid(sOp);
@@ -691,7 +745,7 @@ namespace Xbim
 				return;
 			}
 
-			XbimModelFactors^ mf = solid->ModelOf->ModelFactors;
+			
 			IXbimGeometryObject^ result;
 			try
 			{
@@ -717,6 +771,12 @@ namespace Xbim
 			}
 
 			XbimSolidSet^ xbimSolidSet = dynamic_cast<XbimSolidSet^>(result);
+#ifdef OCC_6_9_SUPPORTED //Later versions of OCC has fuzzy boolean which gives better results
+			if (xbimSolidSet != nullptr && xbimSolidSet->First != nullptr)
+			{
+				*pSolid = (XbimSolid^)(xbimSolidSet->First); //just take the first as that is what is intended by IFC schema
+			}
+#else // otherwise we have to make sure we get a solid when an error occurs
 			if (xbimSolidSet == nullptr || xbimSolidSet->First==nullptr)
 			{
 				XbimGeometryCreator::logger->ErrorFormat("ES002: Error performing boolean operation for entity #{0}={1}. The operation has been ignored", solid->EntityLabel, solid->GetType()->Name);
@@ -726,6 +786,7 @@ namespace Xbim
 			{
 				*pSolid = (XbimSolid^)(xbimSolidSet->First);
 			}
+#endif
 		}
 
 		void XbimSolid::Init(IfcBooleanOperand^ solid)
@@ -1058,15 +1119,27 @@ namespace Xbim
 					return gcnew XbimSolidSet(this); // the result would be no change so return this		
 				}
 			}
-			
-			ShapeFix_ShapeTolerance fixTol;
-			fixTol.SetTolerance(solidCut, tolerance);
-			fixTol.SetTolerance(this, tolerance);
+
 			
 			String^ err="";
 			try
 			{
+#ifdef OCC_6_9_SUPPORTED
+				TopTools_ListOfShape shapeTools;
+				shapeTools.Append(solidCut);
+				TopTools_ListOfShape shapeObjects;
+				shapeObjects.Append(this);
+				BRepAlgoAPI_Cut boolOp;
+				boolOp.SetArguments(shapeObjects);
+				boolOp.SetTools(shapeTools);
+				boolOp.SetFuzzyValue(tolerance);
+				boolOp.Build();
+#else
+				ShapeFix_ShapeTolerance fixTol;
+				fixTol.SetTolerance(solidCut, tolerance);
+				fixTol.SetTolerance(this, tolerance);
 				BRepAlgoAPI_Cut boolOp(this, solidCut);
+#endif
 				if (boolOp.ErrorStatus() == 0)
 					return gcnew XbimSolidSet(boolOp.Shape());
 			}

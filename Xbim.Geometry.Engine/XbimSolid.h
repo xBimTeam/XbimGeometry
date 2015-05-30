@@ -28,6 +28,7 @@ namespace Xbim
 				void set(TopoDS_Solid* val)sealed { ptrContainer = IntPtr(val); }
 			}
 			void InstanceCleanup();
+			static XbimSolid^ BuildClippingList(IfcBooleanClippingResult^ solid, IXbimSolidSet^ clipList);
 #pragma region Initialisers
 
 			void Init(IfcSolidModel^ solid);
