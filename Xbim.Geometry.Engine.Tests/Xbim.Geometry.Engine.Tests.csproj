@@ -123,6 +123,12 @@
     <None Include="SolidTestFiles\BIM Logo-Coordination View 2 - No M.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="SolidTestFiles\BIM Logo-LetterB.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="SolidTestFiles\BIM Logo-LetterM.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="SolidTestFiles\Chimney Faceted Mesh with curves and gaps.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -133,6 +139,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="SolidTestFiles\IfcFacetedBRepWithIncorrectlyOrientedFaces.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="SolidTestFiles\EmptyBooleanClippingResult.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="SolidTestFiles\NestedBooleanClippingResults.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="test.runsettings" />

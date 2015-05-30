@@ -268,9 +268,9 @@ namespace Xbim
 		}
 
 #endif // USE_CARVE_CSG
-#define USE_MULTIPLE_BOOLEAN_OPS 1
-#ifdef USE_MULTIPLE_BOOLEAN_OPS
-			if (this->Volume <= 0) //this is not a valid solid
+
+#ifdef OCC_6_9_SUPPORTED
+			if (Math::Abs(this->Volume) <= tolerance) //this is not a valid solid
 			{
 				IsSimplified = true;
 				return this;

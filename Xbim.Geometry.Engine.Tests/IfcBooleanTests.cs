@@ -421,6 +421,48 @@ namespace GeometryTests
             }
         }
 
+
+        [TestMethod]
+        public void Multiple_BooleanClipping_Operations()
+        {
+            using (var eventTrace = LoggerFactory.CreateEventTrace())
+            {
+                using (var m = new XbimModel())
+                {
+                    m.CreateFrom("SolidTestFiles\\NestedBooleanClippingResults.ifc", null, null, true, true);
+                    var eas = m.Instances[30] as IfcBooleanClippingResult;
+                    Assert.IsTrue(eas != null, "No IfcBooleanClippingResult found");
+                    Assert.IsTrue(eas.FirstOperand is IfcBooleanClippingResult, "Incorrect first operand found");
+
+                    var solid = _xbimGeometryCreator.CreateSolid(eas);
+
+                    Assert.IsTrue(eventTrace.Events.Count == 0); //no events should have been raised from this call
+                    IfcCsgTests.GeneralTest(solid);
+                    Assert.IsTrue(solid.Faces.Count() == 6, "This solid should have 6 faces");
+
+                }
+            }
+        }
+        [TestMethod]
+        public void Empty_BooleanClippingResult()
+        {
+            using (var eventTrace = LoggerFactory.CreateEventTrace())
+            {
+                using (var m = new XbimModel())
+                {
+                    m.CreateFrom("SolidTestFiles\\EmptyBooleanClippingResult.ifc", null, null, true, true);
+                    var eas = m.Instances[35] as IfcBooleanClippingResult;
+                    Assert.IsTrue(eas != null, "No IfcBooleanClippingResult found");
+                    Assert.IsTrue(eas.SecondOperand is IfcHalfSpaceSolid, "Incorrect second operand found");
+
+                    var solid = _xbimGeometryCreator.CreateSolid(eas);
+                    if (eventTrace.Events.Count>0) //older versions of OCC can throw an error on this
+                        Assert.IsTrue(eventTrace.Events.First().Message.StartsWith("ES002:"));
+                    Assert.IsFalse(solid.Faces.Any(), "This solid should have 0 faces");
+                }
+            }
+        }
+
         [TestMethod]
         public void Boolean_With_BoxedHalfSpace()
         {
