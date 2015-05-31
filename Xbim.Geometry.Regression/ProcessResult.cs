@@ -34,24 +34,24 @@ namespace XbimRegression
         public long IfcMappedGeometries { get; set; }
         public String Application { get; set; }
         public long BooleanGeometries { get; set; }
-        public const String CsvHeader = @"IFC File, Errors, Warnings, Parse Duration (ms), Geometry Conversion (ms), Scene Generation (ms), Total Duration (ms), IFC Size, Xbim Size, Scene Size, IFC Entities, Geometry Nodes, " +
+        public const String CsvHeader = @"IFC File, Errors, Warnings, Parse Duration (ms), Geometry Conversion (ms), Total Duration (ms), IFC Size, Xbim Size, Scene Size, IFC Entities, Geometry Nodes, " +
            
             "FILE_SCHEMA, FILE_NAME, FILE_DESCRIPTION, "+
              "Products, Solid Models, Maps, Booleans Application";
 
         public String ToCsv()
         {
-            return String.Format("\"{0}\",{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},\"{12}\",\"{13}\",\"{14}\",{15},{16},{17},{18},\"{19}\"",
+            return String.Format("\"{0}\",{1},{2},{3},{4},{5},{6},{7},{8},{9},\"{10}\",\"{11}\",\"{12}\",{13},{14},{15},{16},\"{17}\"",
                 FileName,           // 0
                 Errors,             // 1
                 Warnings,           // 2
                 ParseDuration,      // 3
                 GeometryDuration,   // 4
-                SceneDuration,      // 5
+               // SceneDuration,      // 5
                 TotalTime,          // 6
                 IfcLength,          // 7
                 XbimLength,         // 8
-                SceneLength,        // 9
+               // SceneLength,        // 9
                 Entities,           // 10
                 GeometryEntries,    // 11
                 IfcSchema,          // 12

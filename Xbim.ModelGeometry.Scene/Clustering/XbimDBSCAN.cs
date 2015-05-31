@@ -50,8 +50,8 @@ namespace Xbim.ModelGeometry.Scene.Clustering
         /// <returns>True if the maximum distance is under the threshold.</returns>
         private static bool ValidDistance(XbimRect3D r1, XbimRect3D r2, double eps)
         {
-            if (r2.SizeZ > 2000000)
-                Console.WriteLine("v big");
+            //if (r2.SizeZ > 2000000)
+            //    Console.WriteLine("v big");
             double dx = AxisDistance(r1.X, r1.SizeX, r2.X, r2.SizeX);
             double dy = AxisDistance(r1.Y, r1.SizeY, r2.Y, r2.SizeY);
             double dz = AxisDistance(r1.Z, r1.SizeZ, r2.Z, r2.SizeZ);

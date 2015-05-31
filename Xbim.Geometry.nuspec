@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
     <metadata>
         <id>Xbim.Geometry</id>
-        <version>3.0.22</version>
+        <version>3.0.23</version>
         <title>xBIM Geometry</title>
         <authors>xBIM team</authors>
         <owners>Steve Lockley</owners>
@@ -17,7 +17,11 @@ xBIM reads and writes Ifc, IfcXMl and IfcZip formats.
 The xBIM project provides packages to convert IFC models to COBie spreadsheets in both UK and US cultures as well as a range of 3D viewing controls for use with Windows forms, WPF, WEBGL and OpenGL platforms.
 IOS and Android versions are under development.</description>
         <summary>The .Net toolkit for developing BIM applications based on the IFC standard. Essential support for the Ifc data model</summary>
-        <releaseNotes>Geometry Dlls written to separate directories for web based deployment. 3.0 contains a new geometry engine that has a full API to allow geometry constructions, boolean operations and meshing. All Ifc2x3 class are now supported.</releaseNotes>
+        <releaseNotes>
+          3.0.23 Has improved performance and accuracy for boolean and other geometric operations and is updated to use OCC 6.9.0
+          3.0 contains a new geometry engine that has a full API to allow geometry constructions, boolean operations and meshing.
+          All Ifc2x3 geometry classes are now supported.
+      </releaseNotes>
         <language>en-GB</language>
         <tags>BIM, IFC, IfcXml, IfcZip, COBie, .Net, C#, BuildingSmart</tags>
       <dependencies>

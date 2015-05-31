@@ -153,6 +153,8 @@ namespace Xbim.ModelGeometry.Scene
         /// <returns></returns>
         public void UnifyFaceOrientation(int entityLabel)
         {
+            if (_extremeEdge==null || _extremeEdge.IsEmpty) 
+                return;
             if (!IsFacingOutward(_extremeEdge)) _extremeEdge.Reverse();
             var triangle = new List<XbimTriangleEdge[]>
             {
