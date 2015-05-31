@@ -12,6 +12,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Xbim.Geometry.Engine", "Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj", "{737762E6-7784-41E8-8602-528DCB6F6DC5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xbim.Geometry.Engine.Interop", "Xbim.Geometry.Engine.Interop\Xbim.Geometry.Engine.Interop.csproj", "{F94A98EA-AB29-4818-A51F-6B33BEB7561A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{737762E6-7784-41E8-8602-528DCB6F6DC5} = {737762E6-7784-41E8-8602-528DCB6F6DC5}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xbim.Geometry.Engine.Tests", "Xbim.Geometry.Engine.Tests\Xbim.Geometry.Engine.Tests.csproj", "{2D2B7265-3A5E-4C50-BAB5-05F38322DB55}"
 EndProject
@@ -41,6 +44,7 @@ Global
 		{737762E6-7784-41E8-8602-528DCB6F6DC5}.Release (inc CarveCSG)|Any CPU.ActiveCfg = Release CarveCSG|Win32
 		{737762E6-7784-41E8-8602-528DCB6F6DC5}.Release CarveCSG|Any CPU.ActiveCfg = Release CarveCSG|Win32
 		{737762E6-7784-41E8-8602-528DCB6F6DC5}.Release|Any CPU.ActiveCfg = Release|Win32
+		{737762E6-7784-41E8-8602-528DCB6F6DC5}.Release|Any CPU.Build.0 = Release|Win32
 		{F94A98EA-AB29-4818-A51F-6B33BEB7561A}.Debug (inc CarveCSG)|Any CPU.ActiveCfg = Debug CarveCSG|Any CPU
 		{F94A98EA-AB29-4818-A51F-6B33BEB7561A}.Debug (inc CarveCSG)|Any CPU.Build.0 = Debug CarveCSG|Any CPU
 		{F94A98EA-AB29-4818-A51F-6B33BEB7561A}.Debug CarveCSG|Any CPU.ActiveCfg = Debug CarveCSG|Any CPU
