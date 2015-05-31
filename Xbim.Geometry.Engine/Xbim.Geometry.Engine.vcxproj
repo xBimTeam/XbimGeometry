@@ -2328,6 +2328,7 @@
     <ClCompile Include="OCC\src\TopLoc\TopLoc_SListOfItemLocation.cxx">
       <CompileAsManaged>false</CompileAsManaged>
     </ClCompile>
+    <ClCompile Include="OCC\src\TopOpeBRepTool\TopOpeBRepTool_PROJECT.cxx" />
     <ClCompile Include="XbimCompound.cpp">
       <CompileAsManaged>true</CompileAsManaged>
     </ClCompile>
@@ -7787,9 +7788,6 @@
       <CompileAsManaged>false</CompileAsManaged>
     </ClCompile>
     <ClCompile Include=".\OCC\src\TopOpeBRepTool\TopOpeBRepTool_HBoxTool.cxx">
-      <CompileAsManaged>false</CompileAsManaged>
-    </ClCompile>
-    <ClCompile Include=".\OCC\src\TopOpeBRepTool\TopOpeBRepTool_PROJECT.cxx">
       <CompileAsManaged>false</CompileAsManaged>
     </ClCompile>
     <ClCompile Include=".\OCC\src\TopOpeBRepTool\TopOpeBRepTool_PURGE.cxx">

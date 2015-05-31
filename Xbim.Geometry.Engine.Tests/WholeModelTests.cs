@@ -24,6 +24,9 @@ namespace GeometryTests
     /// Excutes tests on every geometry item found in every file in the specified directory, passes if no files are found
     /// </summary>
     /// 
+    [DeploymentItem(@"x64\", "x64")]
+    [DeploymentItem(@"x86\", "x86")]
+    [DeploymentItem(@"SolidTestFiles\", "SolidTestFiles")]
     [TestClass]
     public class WholeModelTests
     {

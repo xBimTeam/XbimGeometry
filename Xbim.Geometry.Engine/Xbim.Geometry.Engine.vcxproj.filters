@@ -3795,6 +3795,9 @@
     <ClCompile Include="OCC\src\BRepBuilderAPI\BRepBuilderAPI_FastSewing.cxx">
       <Filter>Source files\TKTopAlgo\BRepBuilderAPI</Filter>
     </ClCompile>
+    <ClCompile Include="OCC\src\TopOpeBRepTool\TopOpeBRepTool_PROJECT.cxx">
+      <Filter>Source files\TKBool\TopOpeBRepTool</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source files">
@@ -7243,9 +7246,6 @@
     <ClCompile Include=".\OCC\src\TopOpeBRepTool\TopOpeBRepTool_HBoxTool.cxx">
       <Filter>Source files\TKBool\TopOpeBRepTool</Filter>
     </ClCompile>
-    <ClCompile Include=".\OCC\src\TopOpeBRepTool\TopOpeBRepTool_PROJECT.cxx">
-      <Filter>Source files\TKBool\TopOpeBRepTool</Filter>
-    </ClCompile>
     <ClCompile Include=".\OCC\src\TopOpeBRepTool\TopOpeBRepTool_PURGE.cxx">
       <Filter>Source files\TKBool\TopOpeBRepTool</Filter>
     </ClCompile>
@@ -10235,10 +10235,6 @@
     <ClInclude Include="XbimWireSet.h">
       <Filter>Source files\XbimGeometry</Filter>
     </ClInclude>
-    <ClInclude Include="OCC\inc\ShapeCustom_Modification.hxx" />
-    <ClInclude Include="OCC\inc\ShapeFix_FixSmallSolid.hxx" />
-    <ClInclude Include="OCC\inc\TColgp_SequenceNodeOfSequenceOfAx1.hxx" />
-    <ClInclude Include="OCC\inc\TColgp_SequenceOfAx1.hxx" />
     <ClInclude Include="OCC\inc\BRepBuilderAPI_FastSewing.hxx">
       <Filter>Source files\Includes</Filter>
     </ClInclude>
@@ -10300,6 +10296,18 @@
       <Filter>Source files\Includes</Filter>
     </ClInclude>
     <ClInclude Include="OCC\inc\OSD_Parallel.hxx">
+      <Filter>Source files\Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\inc\ShapeCustom_Modification.hxx">
+      <Filter>Source files\Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\inc\ShapeFix_FixSmallSolid.hxx">
+      <Filter>Source files\Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\inc\TColgp_SequenceNodeOfSequenceOfAx1.hxx">
+      <Filter>Source files\Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\inc\TColgp_SequenceOfAx1.hxx">
       <Filter>Source files\Includes</Filter>
     </ClInclude>
   </ItemGroup>
@@ -32649,10 +32657,6 @@
       <Filter>Source files\Includes</Filter>
     </None>
     <None Include="packages.config" />
-    <None Include="OCC\drv\ShapeCustom\ShapeCustom_Modification.ixx" />
-    <None Include="OCC\drv\ShapeCustom\ShapeCustom_Modification.jxx" />
-    <None Include="OCC\drv\ShapeFix\ShapeFix_FixSmallSolid.ixx" />
-    <None Include="OCC\drv\ShapeFix\ShapeFix_FixSmallSolid.jxx" />
     <None Include="OCC\drv\BRepAlgoAPI\BRepAlgoAPI_Algo.ixx">
       <Filter>Source files\Includes</Filter>
     </None>
@@ -32684,6 +32688,18 @@
       <Filter>Source files\Includes</Filter>
     </None>
     <None Include="OCC\drv\IntPatch\IntPatch_PointLine.jxx">
+      <Filter>Source files\Includes</Filter>
+    </None>
+    <None Include="OCC\drv\ShapeCustom\ShapeCustom_Modification.ixx">
+      <Filter>Source files\Includes</Filter>
+    </None>
+    <None Include="OCC\drv\ShapeCustom\ShapeCustom_Modification.jxx">
+      <Filter>Source files\Includes</Filter>
+    </None>
+    <None Include="OCC\drv\ShapeFix\ShapeFix_FixSmallSolid.ixx">
+      <Filter>Source files\Includes</Filter>
+    </None>
+    <None Include="OCC\drv\ShapeFix\ShapeFix_FixSmallSolid.jxx">
       <Filter>Source files\Includes</Filter>
     </None>
   </ItemGroup>

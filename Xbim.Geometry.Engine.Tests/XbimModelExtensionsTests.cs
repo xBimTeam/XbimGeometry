@@ -13,6 +13,9 @@ namespace GeometryTests
 {
     [TestClass]
     [DeploymentItem(@"EsentTestFiles\")]
+    [DeploymentItem(@"x64\", "x64")]
+    [DeploymentItem(@"x86\", "x86")]
+    [DeploymentItem(@"SolidTestFiles\", "SolidTestFiles")]
     public class XbimModelExtensionsTests
     {
         [TestMethod]

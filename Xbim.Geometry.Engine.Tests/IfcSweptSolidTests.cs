@@ -11,8 +11,10 @@ using XbimGeometry.Interfaces;
 
 namespace GeometryTests
 {
+    [DeploymentItem(@"x64\", "x64")]
+    [DeploymentItem(@"x86\", "x86")]
+    [DeploymentItem(@"SolidTestFiles\", "SolidTestFiles")]
     [TestClass]
-   
     public class IfcSweptSolidTests
     {
         private readonly XbimGeometryEngine _xbimGeometryCreator = new XbimGeometryEngine();

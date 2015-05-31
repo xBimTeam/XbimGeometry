@@ -10,8 +10,10 @@ using Xbim.Ifc2x3.Extensions;
 using System.Linq;
 namespace GeometryTests
 {
-    [TestClass]
-  
+    [DeploymentItem(@"x64\", "x64")]
+    [DeploymentItem(@"x86\", "x86")]
+    [DeploymentItem(@"SolidTestFiles\", "SolidTestFiles")]
+    [TestClass]  
     public class XbimGeometryToIfcTests
     {
         private readonly XbimGeometryEngine _xbimGeometryCreator = new XbimGeometryEngine();

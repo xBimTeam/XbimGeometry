@@ -14,6 +14,9 @@ using XbimGeometry.Interfaces;
 
 namespace GeometryTests
 {
+    [DeploymentItem(@"x64\", "x64")]
+    [DeploymentItem(@"x86\", "x86")]
+    [DeploymentItem(@"SolidTestFiles\", "SolidTestFiles")]
     [TestClass]
     public class IfcBooleanTests
     {
@@ -23,34 +26,25 @@ namespace GeometryTests
         {
             using (var m = new XbimModel())
             {
-                try
-                {
-                    m.CreateFrom("SolidTestFiles\\7- Boolean_IfcHalfspace_With_IfcExtrudedAreaSolid.ifc", null, null,
-                        true, true);
-                    var fbsm = m.Instances[57] as IfcConnectedFaceSet;
-                    Assert.IsFalse(fbsm == null, "IfcConnectedFaceSet is invalid");
 
-                    var shell = _xbimGeometryCreator.CreateShell(fbsm);
-                    
-                    using (var txn = m.BeginTransaction())
-                    {
-                        var ifcCylinder = IfcModelBuilder.MakeRightCircularCylinder(m, 500, 1500);
-                        ifcCylinder.Position.Location.SetXYZ(-23000, 12000, 2000);
-                        var cylinder = _xbimGeometryCreator.CreateSolid(ifcCylinder);
-                        var shellSet = (IXbimShellSet) shell.Cut(cylinder, m.ModelFactors.PrecisionBoolean);
-                        Assert.IsTrue(shellSet.Count == 1, "Cutting this shell should return a single shell");
-                        var resultShell = shellSet.First;
-                        Assert.IsTrue(shell.SurfaceArea > resultShell.SurfaceArea,
-                            "The surface area of the result should be less than the original");
-                    }
-                }
-                finally
-                {
-                    var path = m.DatabaseName;
-                    m.Close();
-                    File.Delete(path);
-                }
+                m.CreateFrom("SolidTestFiles\\7- Boolean_IfcHalfspace_With_IfcExtrudedAreaSolid.ifc", null, null,
+                    true, true);
+                var fbsm = m.Instances[57] as IfcConnectedFaceSet;
+                Assert.IsFalse(fbsm == null, "IfcConnectedFaceSet is invalid");
 
+                var shell = _xbimGeometryCreator.CreateShell(fbsm);
+
+                using (var txn = m.BeginTransaction())
+                {
+                    var ifcCylinder = IfcModelBuilder.MakeRightCircularCylinder(m, 500, 1500);
+                    ifcCylinder.Position.Location.SetXYZ(-23000, 12000, 2000);
+                    var cylinder = _xbimGeometryCreator.CreateSolid(ifcCylinder);
+                    var shellSet = (IXbimShellSet)shell.Cut(cylinder, m.ModelFactors.PrecisionBoolean);
+                    Assert.IsTrue(shellSet.Count == 1, "Cutting this shell should return a single shell");
+                    var resultShell = shellSet.First;
+                    Assert.IsTrue(shell.SurfaceArea > resultShell.SurfaceArea,
+                        "The surface area of the result should be less than the original");
+                }
             }
         }
 
@@ -59,37 +53,30 @@ namespace GeometryTests
         {
             using (var m = new XbimModel())
             {
-                try
+
+
+
+                m.CreateFrom("SolidTestFiles\\7- Boolean_IfcHalfspace_With_IfcExtrudedAreaSolid.ifc", null, null, true, true);
+                var fbsm1 = m.Instances[57] as IfcConnectedFaceSet;
+                Assert.IsNotNull(fbsm1, "IfcConnectedFaceSet is invalid");
+                using (var txn = m.BeginTransaction())
                 {
 
 
-                    m.CreateFrom("SolidTestFiles\\7- Boolean_IfcHalfspace_With_IfcExtrudedAreaSolid.ifc", null, null, true, true);
-                    var fbsm1 = m.Instances[57] as IfcConnectedFaceSet;
-                    Assert.IsNotNull(fbsm1, "IfcConnectedFaceSet is invalid");
-                    using (var txn = m.BeginTransaction())
-                    {
+                    var ifcCylinder = IfcModelBuilder.MakeRightCircularCylinder(m, 500, 1500);
+                    ifcCylinder.Position.Location.SetXYZ(-23000, 12000, 2000);
+                    var cylinder = _xbimGeometryCreator.CreateSolid(ifcCylinder);
+                    var shell1 = _xbimGeometryCreator.CreateShell(fbsm1);
+                    var shell2 = ((IXbimShellSet)shell1.Cut(cylinder, m.ModelFactors.PrecisionBoolean)).First;
+                    var shellSet = (IXbimShellSet)shell1.Intersection(shell2, m.ModelFactors.PrecisionBoolean);
+                    Assert.IsTrue(shellSet.Count == 1,
+                        string.Format("Cutting this shell should return a single shell, it returned {0}", shellSet.Count));
+                    var resultShell = shellSet.First;
+                    Assert.IsTrue(Math.Abs(shell2.SurfaceArea - resultShell.SurfaceArea) < m.ModelFactors.Precision,
+                        "The surface area of the result should be the same as the second shell");
 
-
-                        var ifcCylinder = IfcModelBuilder.MakeRightCircularCylinder(m, 500, 1500);
-                        ifcCylinder.Position.Location.SetXYZ(-23000, 12000, 2000);
-                        var cylinder = _xbimGeometryCreator.CreateSolid(ifcCylinder);
-                        var shell1 = _xbimGeometryCreator.CreateShell(fbsm1);
-                        var shell2 = ((IXbimShellSet)shell1.Cut(cylinder, m.ModelFactors.PrecisionBoolean)).First;
-                        var shellSet = (IXbimShellSet)shell1.Intersection(shell2, m.ModelFactors.PrecisionBoolean);
-                        Assert.IsTrue(shellSet.Count == 1,
-                            string.Format("Cutting this shell should return a single shell, it returned {0}", shellSet.Count));
-                        var resultShell = shellSet.First;
-                        Assert.IsTrue(Math.Abs(shell2.SurfaceArea - resultShell.SurfaceArea) < m.ModelFactors.Precision,
-                            "The surface area of the result should be the same as the second shell");
-
-                    }
                 }
-                finally
-                {
-                    var path = m.DatabaseName;
-                    m.Close();
-                    File.Delete(path);
-                }
+
             }
         }
 
@@ -98,30 +85,23 @@ namespace GeometryTests
         {
             using (var m = new XbimModel())
             {
-                try
-                {
 
-                    m.CreateFrom("SolidTestFiles\\7- Boolean_IfcHalfspace_With_IfcExtrudedAreaSolid.ifc", null, null, true, true);
-                    var fbsm1 = m.Instances[57] as IfcConnectedFaceSet;
-                    Assert.IsNotNull(fbsm1, "IfcConnectedFaceSet is invalid");
-                    var fbsm2 = m.Instances[305] as IfcConnectedFaceSet;
-                    Assert.IsNotNull(fbsm2, "IfcConnectedFaceSet is invalid");
 
-                    var shell1 = _xbimGeometryCreator.CreateShell(fbsm1);
-                    var shell2 = _xbimGeometryCreator.CreateShell(fbsm2);
-                    var shellSet = (IXbimShellSet)shell1.Union(shell2, m.ModelFactors.PrecisionBoolean);
-                    Assert.IsTrue(shellSet.Count == 1,
-                        string.Format("Cutting this shell should return a single shell, it returned {0}", shellSet.Count));
-                    var resultShell = shellSet.First;
-                    Assert.IsTrue(shell1.SurfaceArea < resultShell.SurfaceArea,
-                        "The surface area of the result should be less than the original");
-                }
-                finally
-                {
-                    var path = m.DatabaseName;
-                    m.Close();
-                    File.Delete(path);
-                }
+                m.CreateFrom("SolidTestFiles\\7- Boolean_IfcHalfspace_With_IfcExtrudedAreaSolid.ifc", null, null, true, true);
+                var fbsm1 = m.Instances[57] as IfcConnectedFaceSet;
+                Assert.IsNotNull(fbsm1, "IfcConnectedFaceSet is invalid");
+                var fbsm2 = m.Instances[305] as IfcConnectedFaceSet;
+                Assert.IsNotNull(fbsm2, "IfcConnectedFaceSet is invalid");
+
+                var shell1 = _xbimGeometryCreator.CreateShell(fbsm1);
+                var shell2 = _xbimGeometryCreator.CreateShell(fbsm2);
+                var shellSet = (IXbimShellSet)shell1.Union(shell2, m.ModelFactors.PrecisionBoolean);
+                Assert.IsTrue(shellSet.Count == 1,
+                    string.Format("Cutting this shell should return a single shell, it returned {0}", shellSet.Count));
+                var resultShell = shellSet.First;
+                Assert.IsTrue(shell1.SurfaceArea < resultShell.SurfaceArea,
+                    "The surface area of the result should be less than the original");
+
             }
         }
         [TestMethod]
