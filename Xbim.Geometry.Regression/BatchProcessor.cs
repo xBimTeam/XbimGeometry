@@ -77,7 +77,7 @@ namespace XbimRegression
         private ProcessResult ProcessFile(string ifcFile, StreamWriter writer)
         {
             RemoveFiles(ifcFile);
-            long geomTime = -1; long sceneTime = -1; long parseTime = -1;
+            long geomTime = -1;  long parseTime = -1;
             using (EventTrace eventTrace = LoggerFactory.CreateEventTrace())
             {
                 ProcessResult result = new ProcessResult() { Errors = -1 };
@@ -100,9 +100,9 @@ namespace XbimRegression
                         //}
                         geomTime = watch.ElapsedMilliseconds - parseTime;
                         //XbimSceneBuilder sb = new XbimSceneBuilder();
-                        string xbimSceneName = BuildFileName(ifcFile, ".xbimScene");
+                        //string xbimSceneName = BuildFileName(ifcFile, ".xbimScene");
                         //sb.BuildGlobalScene(model, xbimSceneName);
-                        sceneTime = watch.ElapsedMilliseconds - geomTime;
+                       // sceneTime = watch.ElapsedMilliseconds - geomTime;
                         IIfcFileHeader header = model.Header;
                         watch.Stop();
                         IfcOwnerHistory ohs = model.Instances.OfType<IfcOwnerHistory>().FirstOrDefault();
@@ -110,15 +110,15 @@ namespace XbimRegression
                         {
                             ParseDuration = parseTime,
                             GeometryDuration = geomTime,
-                            SceneDuration = sceneTime,
-                            FileName = ifcFile,
+                           // SceneDuration = sceneTime,
+                            FileName = ifcFile.Remove(0,Params.TestFileRoot.Length).TrimStart('\\'),
                             Entities = model.Instances.Count,
                             IfcSchema = header.FileSchema.Schemas.FirstOrDefault(),
                             IfcDescription = String.Format("{0}, {1}", header.FileDescription.Description.FirstOrDefault(), header.FileDescription.ImplementationLevel),
                             GeometryEntries = model.GeometriesCount,
                             IfcLength = ReadFileLength(ifcFile),
                             XbimLength = ReadFileLength(xbimFilename),
-                            SceneLength = ReadFileLength(xbimSceneName),
+                           // SceneLength = ReadFileLength(xbimSceneName),
                             IfcProductEntries = model.Instances.CountOf<IfcProduct>(),
                             IfcSolidGeometries = model.Instances.CountOf<IfcSolidModel>(),
                             IfcMappedGeometries = model.Instances.CountOf<IfcMappedItem>(),
@@ -142,7 +142,7 @@ namespace XbimRegression
                     result.Warnings = (from e in eventTrace.Events
                                        where (e.EventLevel == EventLevel.WARN)
                                        select e).Count();
-                    result.FileName = ifcFile;
+                    result.FileName = ifcFile.Remove(0, Params.TestFileRoot.Length).TrimStart('\\');
                     if (eventTrace.Events.Count > 0)
                     {
                         CreateLogFile(ifcFile, eventTrace.Events);

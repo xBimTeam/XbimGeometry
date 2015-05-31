@@ -478,13 +478,16 @@ namespace Xbim
 				gp_Ax3 ax3 = XbimGeomPrim::ToAx3(ifcPlane->Position);
 				gp_Pln pln(ax3);
 				gp_Vec zVec = hs->AgreementFlag ? -pln.Axis().Direction() : pln.Axis().Direction();
-				XbimFace^ face = gcnew XbimFace(ifcPlane);
+
 				gp_Pnt pnt = ax3.Location();
 				pnt.Translate(zVec);
-
-				BRepPrimAPI_MakeHalfSpace halfSpaceBulder(face, pnt);
-				pSolid = new TopoDS_Solid();
-				*pSolid = TopoDS::Solid(halfSpaceBulder.Solid());
+				BRepBuilderAPI_MakeFace  faceMaker(pln);
+				if (faceMaker.IsDone())
+				{
+					BRepPrimAPI_MakeHalfSpace halfSpaceBulder(faceMaker.Face(), pnt);
+					pSolid = new TopoDS_Solid();
+					*pSolid = TopoDS::Solid(halfSpaceBulder.Solid());
+				}
 
 #else
 
@@ -1142,6 +1145,7 @@ namespace Xbim
 #endif
 				if (boolOp.ErrorStatus() == 0)
 					return gcnew XbimSolidSet(boolOp.Shape());
+				err = "Error = " + boolOp.ErrorStatus();
 			}
 			catch (Standard_Failure e)
 			{
@@ -1286,7 +1290,7 @@ namespace Xbim
 			BRepAlgoAPI_Section boolOp(this, faceSection, false);
 			boolOp.ComputePCurveOn2(Standard_True);
 			boolOp.Build();
-			GC::KeepAlive(faceSection);
+			
 			if (boolOp.IsDone())
 			{
 				Handle(TopTools_HSequenceOfShape) edges = new TopTools_HSequenceOfShape();
@@ -1337,9 +1341,12 @@ namespace Xbim
 					}
 					
 					return gcnew XbimFaceSet(result);
-				}								
+				}						
+				GC::KeepAlive(faceSection);		
+				GC::KeepAlive(toSection);
 			}
 			XbimGeometryCreator::logger->WarnFormat("WS008:Boolean Section operation has failed to create a section");
+			
 			return XbimFaceSet::Empty;
 		}
 

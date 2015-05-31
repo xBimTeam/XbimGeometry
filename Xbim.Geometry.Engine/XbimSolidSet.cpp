@@ -96,7 +96,9 @@ namespace Xbim
 					if (!compound->Sew())
 					{
 						_isSimplified = true; //set flag true to say the solid set has been simplified and the user should be warned
+#ifndef OCC_6_9_SUPPORTED						
 						return; //don't add it we cannot really make it into a solid and will cause boolean operation errors,
+#endif
 					}
 	
 				for each (IXbimGeometryObject^ geom in geomSet)
@@ -270,11 +272,7 @@ namespace Xbim
 #endif // USE_CARVE_CSG
 
 #ifdef OCC_6_9_SUPPORTED
-			if (Math::Abs(this->Volume) <= tolerance) //this is not a valid solid
-			{
-				IsSimplified = true;
-				return this;
-			}
+			
 			String^ err = "";
 			try
 			{
@@ -301,14 +299,16 @@ namespace Xbim
 				boolOp.SetTools(shapeTools);
 				boolOp.SetFuzzyValue(tolerance);
 				boolOp.Build();
+				//BRepTools::Write(boolOp.Shape(), "d:\\s");
 				if (boolOp.ErrorStatus() == 0)
 					return gcnew XbimSolidSet(boolOp.Shape());
+				err = "Error = " + boolOp.ErrorStatus();
 			}
 			catch (Standard_Failure e)
 			{
 				err = gcnew String(Standard_Failure::Caught()->GetMessageString());
 			}
-			XbimGeometryCreator::logger->WarnFormat("WS029: Boolean Cut operation failed. " + err);
+			XbimGeometryCreator::logger->WarnFormat("WS032: Boolean Cut operation failed. " + err);
 			return XbimSolidSet::Empty;
 #else
 
@@ -318,11 +318,7 @@ namespace Xbim
 				return this;
 			}
 			XbimCompound^ thisSolid = XbimCompound::Merge(thisSolidSet, tolerance);
-			if (thisSolid->Volume <=0) //this is not a valid solid
-			{
-				IsSimplified = true;
-				return this;
-			}
+			
 			XbimCompound^ toCutSolid;
 			if (thisSolid == nullptr) return XbimSolidSet::Empty;
 			bool isSimplified = false;
@@ -359,6 +355,7 @@ namespace Xbim
 			if (toCutSolid == nullptr) return this;
 			XbimCompound^ result = thisSolid->Cut(toCutSolid, tolerance);
 			XbimSolidSet^ ss = gcnew XbimSolidSet(result);
+			//BRepTools::Write(result, "d:\\c");
 			GC::KeepAlive(result);
 			ss->IsSimplified = isSimplified;
 			return ss;

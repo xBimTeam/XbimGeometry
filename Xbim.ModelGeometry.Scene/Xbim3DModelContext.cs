@@ -657,183 +657,211 @@ namespace Xbim.ModelGeometry.Scene
             )
         {
             var processed = new HashSet<int>();
-            var localPercentageParsed = contextHelper.PercentageParsed;
-            var localTally = contextHelper.Tally;
-
+            var localPercentageParsed = 0;
+            var localTally = 0;
+            var featureCount = contextHelper.OpeningsAndProjections.Count;
             if (progDelegate != null) progDelegate(-1, "WriteFeatureElements (" + contextHelper.OpeningsAndProjections.Count + " elements)");
-            
-            Parallel.ForEach(contextHelper.OpeningsAndProjections,contextHelper.ParallelOptions, pair =>
+
+            Parallel.ForEach(contextHelper.OpeningsAndProjections, contextHelper.ParallelOptions, pair =>
             //        foreach (IGrouping<IfcElement, IfcFeatureElement> pair in contextHelper.OpeningsAndProjections)
             {
 
                 var element = pair.Key;
-               // if (element.EntityLabel == 5761624)
+
+
+                Interlocked.Increment(ref localTally);
+
+                try
                 {
-                    Interlocked.Increment(ref localTally);
-                   
-                    try
+                    var elementShapes = WriteProductShape(contextHelper, element, false).ToList();
+                    var context = 0;
+                    var styleId = 0; //take the style of any part of the main shape
+                    if (elementShapes.Any())
                     {
-                        var elementShapes = WriteProductShape(contextHelper, element, false).ToList();
-                        var context = 0;
-                        var styleId = 0; //take the style of any part of the main shape
-                        bool containsOpenShells = false;
-                        if (elementShapes.Any())
+
+                        //Get all the parts of this element into a set of solid geometries
+                        var elementGeom = Engine.CreateSolidSet();
+                        foreach (var elemShape in elementShapes)
                         {
+                            var geom = contextHelper.GetGeometryFromCache(elemShape);
 
-                            //Get all the parts of this element into a set of solid geometries
-                            var elementGeom = Engine.CreateSolidSet();
-                            foreach (var elemShape in elementShapes)
-                            {
-                                var geom = contextHelper.GetGeometryFromCache(elemShape);                              
-                                elementGeom.Add(geom);
-                                context = elemShape.RepresentationContext;
-                                if (elemShape.StyleLabel > 0) styleId = elemShape.StyleLabel;
-                            }
-                            if (elementGeom.IsSimplified)
-                                Logger.WarnFormat(
-                                    "WM009: Geometry of object #{0} '{1}' [{2}] is too complex and it will make interoperability difficult for you. It has been simplified, no openings have been cut. You should consider re-authoring it in your BIM tool",
-                                    element.EntityLabel, element.Name, element.GetType().Name);
-                            if (elementGeom.Count == 0)
-                            {
-                                Logger.WarnFormat(
-                                    "WM003: An element #{0} does not have a valid solid representation, openings cannot be formed",
-                                    element.EntityLabel);
+                            elementGeom.Add(geom);
 
-                            }
-                            if (elementGeom.Count > 0 && !elementGeom.IsSimplified && !containsOpenShells)
-                            {
-                                //now build the openings
-                                var allOpenings = Engine.CreateSolidSet();
-                                var allProjections = Engine.CreateSolidSet();
+                            context = elemShape.RepresentationContext;
+                            if (elemShape.StyleLabel > 0) styleId = elemShape.StyleLabel;
+                        }
 
-                                foreach (var feature in pair)
+                        if (elementGeom.Count == 0)
+                        {
+                            Logger.WarnFormat(
+                                "WM003: {2}[#{0}]-{1} does not have a solid representation, openings cannot be formed",
+                                element.EntityLabel, element.Name, element.GetType().Name);
+                        }
+
+                        if (elementGeom.Any() && elementGeom.IsSimplified)
+                            Logger.WarnFormat(
+                                "WM009: {2}[#{0}]-{1} is too complex, it will make interoperability difficult. It has been simplified, no openings have been cut. You should consider re-authoring it in your BIM tool",
+                                element.EntityLabel, element.Name, element.GetType().Name);
+                        
+                        if (elementGeom.Count > 0 && !elementGeom.IsSimplified)
+                        {
+                            //now build the openings
+                            var allOpenings = Engine.CreateSolidSet();
+                            var allProjections = Engine.CreateSolidSet();
+
+                            foreach (var feature in pair)
+                            {
+                                var opening = feature as IfcFeatureElementSubtraction;
+                                if (opening != null)
                                 {
-                                    var opening = feature as IfcFeatureElementSubtraction;
-                                    if (opening != null)
+                                    var openingShapes = WriteProductShape(contextHelper, opening, false).ToList();
+
+                                    foreach (var openingShape in openingShapes)
                                     {
-                                        var openingShapes = WriteProductShape(contextHelper, opening, false).ToList();
-
-                                        foreach (var openingShape in openingShapes)
-                                        {
-                                            var openingGeom = contextHelper.GetGeometryFromCache(openingShape);
-                                            if (openingGeom != null)
-                                                allOpenings.Add(openingGeom);
-                                        }
-
-                                        if (allOpenings.Count == 0)
-                                        {
-                                            Logger.WarnFormat(
-                                                "WM004: {0} - #{1} is an opening that has been no 3D geometric form definition",
-                                                opening.GetType().Name, opening.EntityLabel);
-                                        }
-                                        processed.Add(opening.EntityLabel);
+                                        var openingGeom = contextHelper.GetGeometryFromCache(openingShape);
+                                        if (openingGeom != null)
+                                            allOpenings.Add(openingGeom);
                                     }
-                                    else
+
+                                    if (allOpenings.Count == 0)
                                     {
-                                        var addition = feature as IfcFeatureElementAddition;
-                                        if (addition != null)
-                                        {
-                                            var projectionShapes =
-                                                WriteProductShape(contextHelper, addition, false).ToList();
-                                            foreach (var projectionShape in projectionShapes)
-                                            {
-                                                var projGeom = contextHelper.GetGeometryFromCache(projectionShape);
-                                                if (projGeom != null)
-                                                    allProjections.Add(projGeom);
-                                            }
-                                            if (allProjections.Count == 0)
-                                            {
-                                                Logger.WarnFormat(
-                                                    "WM005: {0} - #{1} is an projection that has been no 3D geometric form definition",
-                                                    addition.GetType().Name, addition.EntityLabel);
-                                            }
-                                            processed.Add(addition.EntityLabel);
-                                        }
+                                        Logger.WarnFormat(
+                                            "WM004: {0}[#{1}] is an opening that has been no 3D geometric form definition",
+                                            opening.GetType().Name, opening.EntityLabel);
                                     }
-                                }
-
-                                //make the finished shape
-                                if (allProjections.Any())
-                                    elementGeom = elementGeom.Union(allProjections, _model.ModelFactors.Precision);
-
-                                if (allOpenings.Any())
-                                    elementGeom = elementGeom.Cut(allOpenings, _model.ModelFactors.Precision);
-                                if (elementGeom.IsSimplified)
-                                    Logger.WarnFormat(
-                                        "WM008: Geometry of object #{0} '{1}' [{2}] is too complex and it will make interoperability difficult for you. It has been simplified, small openings have not been cut. You should consider re-authoring it in your BIM tool",
-                                        element.EntityLabel, element.Name, element.GetType().Name);
-
-                            }
-                            ////now add to the DB               
-                            XbimModelFactors mf = _model.ModelFactors;
-                            foreach (var geom in elementGeom)
-                            {
-                                IXbimShapeGeometryData shapeGeometry = new XbimShapeGeometry
-                                {
-                                    IfcShapeLabel = element.EntityLabel,
-                                    GeometryHash = 0,
-                                    LOD = XbimLOD.LOD_Unspecified,
-                                    Format = geomType,
-                                    BoundingBox = elementGeom.BoundingBox
-                                };
-                                var memStream = new MemoryStream(0x4000);
-                                if (geomType == XbimGeometryType.PolyhedronBinary)
-                                {
-                                    using (var bw = new BinaryWriter(memStream))
-                                    {
-                                        Engine.WriteTriangulation(bw, geom, mf.Precision, mf.DeflectionTolerance,
-                                            mf.DeflectionAngle);
-                                    }
+                                    processed.Add(opening.EntityLabel);
                                 }
                                 else
                                 {
-                                    using (var tw = new StreamWriter(memStream))
+                                    var addition = feature as IfcFeatureElementAddition;
+                                    if (addition != null)
                                     {
-                                        Engine.WriteTriangulation(tw, geom, mf.Precision, mf.DeflectionTolerance,
-                                            mf.DeflectionAngle);
+                                        var projectionShapes =
+                                            WriteProductShape(contextHelper, addition, false).ToList();
+                                        foreach (var projectionShape in projectionShapes)
+                                        {
+                                            var projGeom = contextHelper.GetGeometryFromCache(projectionShape);
+                                            if (projGeom != null)
+                                                allProjections.Add(projGeom);
+                                        }
+                                        if (allProjections.Count == 0)
+                                        {
+                                            Logger.WarnFormat(
+                                                "WM005: {0}[#{1}] is an projection that has been no 3D geometric form definition",
+                                                addition.GetType().Name, addition.EntityLabel);
+                                        }
+                                        processed.Add(addition.EntityLabel);
                                     }
                                 }
-                                shapeGeometry.ShapeData = memStream.ToArray();
-                                var shapeInstance = new XbimShapeInstance
-                                {
-                                    IfcProductLabel = element.EntityLabel,
-                                    ShapeGeometryLabel = 0,
-                                    /*Set when geometry written*/
-                                    StyleLabel = styleId,
-                                    RepresentationType = XbimGeometryRepresentationType.OpeningsAndAdditionsIncluded,
-                                    RepresentationContext = context,
-                                    IfcTypeId = IfcMetaData.IfcTypeId(element),
-                                    Transformation = XbimMatrix3D.Identity,
-                                    BoundingBox = elementGeom.BoundingBox
-                                };
-                                features.Add(new Tuple<XbimShapeInstance, IXbimShapeGeometryData>(shapeInstance,
-                                    shapeGeometry));
                             }
+
+                            //make the finished shape
+                            if (allProjections.Any())
+                                elementGeom = elementGeom.Union(allProjections, _model.ModelFactors.Precision);
+
+                            if (allOpenings.Any())
+                                elementGeom = elementGeom.Cut(allOpenings, _model.ModelFactors.Precision);
+                            if (elementGeom.IsSimplified)
+                                Logger.WarnFormat(
+                                    "WM008: {2}[#{0}]-{1} is too complex, it will make interoperability difficult. It has been simplified, no openings have been cut. You should consider re-authoring it in your BIM tool",
+                                    element.EntityLabel, element.Name, element.GetType().Name);
+
                         }
-                        else
-                            Logger.ErrorFormat(
-                                "WM006: #{1} - {0} is an element that contains openings and has an invalid 3D geometric form definition",
-                                element.GetType().Name, element.EntityLabel);
-                        processed.Add(element.EntityLabel);
-                        if (progDelegate != null)
+                        //var correctGeom = Engine.CreateSolidSet();
+                        //foreach (var solidGeom in elementGeom)
+                        //{
+                        //    if (Math.Abs(solidGeom.Volume) > _model.ModelFactors.Precision) //we have a good solid
+                        //        correctGeom.Add(solidGeom);                                           
+                        //}
+                        //if (correctGeom.Count != elementGeom.Count) //some bad gemetries have been removed
+                        //{
+                        //    Logger.WarnFormat("WM010: {2}[#{0}]-{1} has bad geometry.",
+                        //  element.EntityLabel, element.Name, element.GetType().Name);
+                        //    elementGeom = correctGeom;
+                        //}
+                        //if (!correctGeom.Any()) //nothing left so go to original form
+                        //{
+
+                        //    //reset it to the original
+                        //    elementGeom = Engine.CreateSolidSet();
+                        //    foreach (var elemShape in elementShapes)
+                        //    {
+                        //        var geom = contextHelper.GetGeometryFromCache(elemShape);
+                        //        elementGeom.Add(geom);
+                        //    }
+                        //}
+
+
+                        ////now add to the DB               
+                        XbimModelFactors mf = _model.ModelFactors;
+                        foreach (var geom in elementGeom)
                         {
-                            var newPercentage = Convert.ToInt32((double) localTally/contextHelper.Total*100.0);
-                            if (newPercentage > localPercentageParsed)
+                            IXbimShapeGeometryData shapeGeometry = new XbimShapeGeometry
                             {
-                                Interlocked.Exchange(ref localPercentageParsed, newPercentage);
-                                progDelegate(localPercentageParsed, "Building Elements");
+                                IfcShapeLabel = element.EntityLabel,
+                                GeometryHash = 0,
+                                LOD = XbimLOD.LOD_Unspecified,
+                                Format = geomType,
+                                BoundingBox = elementGeom.BoundingBox
+                            };
+                            var memStream = new MemoryStream(0x4000);
+                            if (geomType == XbimGeometryType.PolyhedronBinary)
+                            {
+                                using (var bw = new BinaryWriter(memStream))
+                                {
+                                    Engine.WriteTriangulation(bw, geom, mf.Precision, mf.DeflectionTolerance,
+                                        mf.DeflectionAngle);
+                                }
                             }
+                            else
+                            {
+                                using (var tw = new StreamWriter(memStream))
+                                {
+                                    Engine.WriteTriangulation(tw, geom, mf.Precision, mf.DeflectionTolerance,
+                                        mf.DeflectionAngle);
+                                }
+                            }
+                            shapeGeometry.ShapeData = memStream.ToArray();
+                            var shapeInstance = new XbimShapeInstance
+                            {
+                                IfcProductLabel = element.EntityLabel,
+                                ShapeGeometryLabel = 0,
+                                /*Set when geometry written*/
+                                StyleLabel = styleId,
+                                RepresentationType = XbimGeometryRepresentationType.OpeningsAndAdditionsIncluded,
+                                RepresentationContext = context,
+                                IfcTypeId = IfcMetaData.IfcTypeId(element),
+                                Transformation = XbimMatrix3D.Identity,
+                                BoundingBox = elementGeom.BoundingBox
+                            };
+                            features.Add(new Tuple<XbimShapeInstance, IXbimShapeGeometryData>(shapeInstance,
+                                shapeGeometry));
                         }
                     }
-                    catch (Exception e)
-                    {
+                    else
                         Logger.WarnFormat(
-                            "WM007: {1} - {0} is an element that contains openings but it has a bad 3D geometric form definition, {2}",
-                            element.GetType().Name, element.EntityLabel, e.Message);
+                            "WM006: {0}[#{1}] contains openings but has no 3D geometry definition",
+                            element.GetType().Name, element.EntityLabel);
+                    processed.Add(element.EntityLabel);
+                    if (progDelegate != null)
+                    {
+                        var newPercentage = Convert.ToInt32((double)localTally / featureCount * 100.0);
+                        if (newPercentage > localPercentageParsed)
+                        {
+                            Interlocked.Exchange(ref localPercentageParsed, newPercentage);
+                            progDelegate(localPercentageParsed, "Building Elements");
+                        }
                     }
                 }
+                catch (Exception e)
+                {
+                    Logger.WarnFormat(
+                        "WM007: {0}[#{1}] - icontains openings but has its geometry can not be built, {2}",
+                        element.GetType().Name, element.EntityLabel, e.Message);
+                }
+
             }
-               );
+            );
             contextHelper.PercentageParsed = localPercentageParsed;
             contextHelper.Tally = localTally;
             if (progDelegate != null) progDelegate(101, "WriteFeatureElements, (" + localTally + " written)");
@@ -1044,7 +1072,7 @@ namespace Xbim.ModelGeometry.Scene
                             }
 
                             if (shapeGeom == null || shapeGeom.ShapeData==null || shapeGeom.ShapeData.Length == 0)
-                                Logger.WarnFormat("WM001: Entity #{0} of type {1} is an empty shape", shapeId,
+                                Logger.InfoFormat("WM001: {1}[#{0}] is an empty shape", shapeId,
                                     shape.GetType().Name);
                             else
                             {

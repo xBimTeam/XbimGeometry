@@ -66,7 +66,11 @@ namespace Xbim
 			virtual property IXbimGeometryObject^ First{IXbimGeometryObject^ get(); }
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) override;
 			static List<XbimSolid^>^  GetDiscrete(List<XbimSolid^>^%);
+#ifdef OCC_6_9_SUPPORTED //OCC 6.9.0. is better with complex booleans
+			static int MaxFacesToSew = 3000;
+#else
 			static int MaxFacesToSew = 1000;
+#endif
 #pragma endregion
 			//operators
 			operator const TopoDS_Compound& () { return *pCompound; }
