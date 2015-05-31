@@ -5,6 +5,7 @@
 
 #include <BRep_Builder.hxx>
 #include <BRepBuilderAPI_Sewing.hxx>
+#include <BRepBuilderAPI_FastSewing.hxx>
 #include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <TopExp.hxx>
 #include <BRepBuilderAPI_MakePolygon.hxx>
@@ -297,7 +298,6 @@ namespace Xbim
 			for (TopExp_Explorer expl(*pCompound, TopAbs_SHELL); expl.More(); expl.Next())
 			{
 				BRepBuilderAPI_Sewing seamstress(_sewingTolerance);
-				
 				seamstress.Add(expl.Current());
 				seamstress.Perform();
 				TopoDS_Shape result = seamstress.SewedShape();

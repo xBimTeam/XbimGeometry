@@ -10,8 +10,10 @@ using Xbim.Ifc2x3.Extensions;
 using System.Linq;
 namespace GeometryTests
 {
-    [TestClass]
-  
+    [DeploymentItem(@"x64\", "x64")]
+    [DeploymentItem(@"x86\", "x86")]
+    [DeploymentItem(@"SolidTestFiles\", "SolidTestFiles")]
+    [TestClass]  
     public class XbimGeometryToIfcTests
     {
         private readonly XbimGeometryEngine _xbimGeometryCreator = new XbimGeometryEngine();
@@ -164,7 +166,7 @@ namespace GeometryTests
 
                     
 
-                    var block = IfcModelBuilder.MakeExtrudedAreaSolid(m, IfcModelBuilder.MakeRectangleHollowProfileDef(m,10000,20000, 500),30000);
+                    var block = IfcModelBuilder.MakeExtrudedAreaSolid(m, IfcModelBuilder.MakeRectangleHollowProfileDef(m,10,20, 1),30);
                     var solid = _xbimGeometryCreator.CreateSolid(block);
                    
                     var brep = _xbimGeometryCreator.CreateFacetedBrep(m, solid);

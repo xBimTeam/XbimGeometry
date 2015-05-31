@@ -6,6 +6,7 @@
 #include <TopExp.hxx>
 #include <BRepTools.hxx>
 #include <BRep_Builder.hxx>
+#include <BRepAlgoAPI_Cut.hxx>
 using namespace System;
 using namespace Xbim::Common;
 namespace Xbim
@@ -268,6 +269,49 @@ namespace Xbim
 
 #endif // USE_CARVE_CSG
 
+#ifdef OCC_6_9_SUPPORTED
+			if (Math::Abs(this->Volume) <= tolerance) //this is not a valid solid
+			{
+				IsSimplified = true;
+				return this;
+			}
+			String^ err = "";
+			try
+			{
+				TopTools_ListOfShape shapeTools;
+				for each (IXbimSolid^ iSolid in solids)
+				{
+					XbimSolid^ solid = dynamic_cast<XbimSolid^>(iSolid);
+					if (solid!=nullptr)
+					{
+						shapeTools.Append(solid);
+					}
+				}
+				TopTools_ListOfShape shapeObjects;
+				for each (IXbimSolid^ iSolid in this)
+				{
+					XbimSolid^ solid = dynamic_cast<XbimSolid^>(iSolid);
+					if (solid != nullptr)
+					{
+						shapeObjects.Append(solid);
+					}
+				}
+				BRepAlgoAPI_Cut boolOp;
+				boolOp.SetArguments(shapeObjects);
+				boolOp.SetTools(shapeTools);
+				boolOp.SetFuzzyValue(tolerance);
+				boolOp.Build();
+				if (boolOp.ErrorStatus() == 0)
+					return gcnew XbimSolidSet(boolOp.Shape());
+			}
+			catch (Standard_Failure e)
+			{
+				err = gcnew String(Standard_Failure::Caught()->GetMessageString());
+			}
+			XbimGeometryCreator::logger->WarnFormat("WS029: Boolean Cut operation failed. " + err);
+			return XbimSolidSet::Empty;
+#else
+
 			if (thisSolidSet->Count >_maxOpeningsToCut) //if the base shape is really complicate just give up trying
 			{
 				IsSimplified = true;
@@ -318,6 +362,7 @@ namespace Xbim
 			GC::KeepAlive(result);
 			ss->IsSimplified = isSimplified;
 			return ss;
+#endif
 		}
 
 		IXbimSolidSet^ XbimSolidSet::Union(IXbimSolidSet^ solids, double tolerance)

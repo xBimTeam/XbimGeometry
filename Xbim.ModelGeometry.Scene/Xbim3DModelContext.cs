@@ -330,15 +330,23 @@ namespace Xbim.ModelGeometry.Scene
 
         public static readonly ILogger Logger = LoggerFactory.GetLogger();
         private readonly IfcRepresentationContextCollection _contexts;
-        private readonly IXbimGeometryCreator _engine;
+        private IXbimGeometryCreator _Engine;
+
+        private IXbimGeometryCreator Engine
+        {
+            get
+            {
+                if (_Engine == null)
+                    _Engine = new XbimGeometryEngine();
+                return _Engine;
+            }
+        }
         private readonly XbimModel _model;
 
         private bool _contextIsPersisted;
         //The maximum extent for any dimension of any products bouding box 
         private double _maxXyz;
        
-
-
         /// <summary>
         ///     Initialises a model context from the model
         /// </summary>
@@ -348,9 +356,6 @@ namespace Xbim.ModelGeometry.Scene
         public Xbim3DModelContext(XbimModel model, string contextType = "model", string contextIdentifier = "body")
         {
             _model = model;
-            _engine = new XbimGeometryEngine();
-            
-           
             
             //Get the required context
             //check for old versions
@@ -451,7 +456,7 @@ namespace Xbim.ModelGeometry.Scene
         /// <returns></returns>
         public bool CreateContext(XbimGeometryType geomStorageType = XbimGeometryType.Polyhedron, ReportProgressDelegate progDelegate = null)
         {
-            if (_contexts == null || _engine == null) return false;
+            if (_contexts == null || Engine == null) return false;
             if (_contextIsPersisted) return false; //already created it
 
 
@@ -676,7 +681,7 @@ namespace Xbim.ModelGeometry.Scene
                         {
 
                             //Get all the parts of this element into a set of solid geometries
-                            var elementGeom = _engine.CreateSolidSet();
+                            var elementGeom = Engine.CreateSolidSet();
                             foreach (var elemShape in elementShapes)
                             {
                                 var geom = contextHelper.GetGeometryFromCache(elemShape);                              
@@ -698,8 +703,8 @@ namespace Xbim.ModelGeometry.Scene
                             if (elementGeom.Count > 0 && !elementGeom.IsSimplified && !containsOpenShells)
                             {
                                 //now build the openings
-                                var allOpenings = _engine.CreateSolidSet();
-                                var allProjections = _engine.CreateSolidSet();
+                                var allOpenings = Engine.CreateSolidSet();
+                                var allProjections = Engine.CreateSolidSet();
 
                                 foreach (var feature in pair)
                                 {
@@ -776,7 +781,7 @@ namespace Xbim.ModelGeometry.Scene
                                 {
                                     using (var bw = new BinaryWriter(memStream))
                                     {
-                                        _engine.WriteTriangulation(bw, geom, mf.Precision, mf.DeflectionTolerance,
+                                        Engine.WriteTriangulation(bw, geom, mf.Precision, mf.DeflectionTolerance,
                                             mf.DeflectionAngle);
                                     }
                                 }
@@ -784,7 +789,7 @@ namespace Xbim.ModelGeometry.Scene
                                 {
                                     using (var tw = new StreamWriter(memStream))
                                     {
-                                        _engine.WriteTriangulation(tw, geom, mf.Precision, mf.DeflectionTolerance,
+                                        Engine.WriteTriangulation(tw, geom, mf.Precision, mf.DeflectionTolerance,
                                             mf.DeflectionAngle);
                                     }
                                 }
@@ -1033,9 +1038,9 @@ namespace Xbim.ModelGeometry.Scene
                             }
                             else //we need to create a geometry object
                             {
-                                geomModel = _engine.Create(shape);
+                                geomModel = Engine.Create(shape);
                                 if (geomModel != null && geomModel.IsValid)
-                                    shapeGeom = _engine.CreateShapeGeometry(geomModel,precision,deflection,deflectionAngle,geomStorageType);
+                                    shapeGeom = Engine.CreateShapeGeometry(geomModel,precision,deflection,deflectionAngle,geomStorageType);
                             }
 
                             if (shapeGeom == null || shapeGeom.ShapeData==null || shapeGeom.ShapeData.Length == 0)

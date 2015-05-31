@@ -37,7 +37,7 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{737762E6-7784-41E8-8602-528DCB6F6DC5}.Debug (inc CarveCSG)|Any CPU.ActiveCfg = Debug CarveCSG|Win32
 		{737762E6-7784-41E8-8602-528DCB6F6DC5}.Debug CarveCSG|Any CPU.ActiveCfg = Debug CarveCSG|Win32
-		{737762E6-7784-41E8-8602-528DCB6F6DC5}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{737762E6-7784-41E8-8602-528DCB6F6DC5}.Debug|Any CPU.ActiveCfg = Debug|Win32
 		{737762E6-7784-41E8-8602-528DCB6F6DC5}.Release (inc CarveCSG)|Any CPU.ActiveCfg = Release CarveCSG|Win32
 		{737762E6-7784-41E8-8602-528DCB6F6DC5}.Release CarveCSG|Any CPU.ActiveCfg = Release CarveCSG|Win32
 		{737762E6-7784-41E8-8602-528DCB6F6DC5}.Release|Any CPU.ActiveCfg = Release|Win32

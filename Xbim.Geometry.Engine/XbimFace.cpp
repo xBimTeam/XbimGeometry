@@ -384,7 +384,9 @@ namespace Xbim
 				Handle(Geom_Circle) hInner = GC_MakeCircle(inner);
 				TopoDS_Edge innerEdge = BRepBuilderAPI_MakeEdge(hInner);
 				BRepBuilderAPI_MakeWire innerWire;
+				innerEdge.Reverse();
 				innerWire.Add(innerEdge);
+				
 				faceBlder.Add(innerWire);
 			}
 			pFace = new TopoDS_Face();
@@ -445,6 +447,7 @@ namespace Xbim
 					builder.Add(innerWire, BRepBuilderAPI_MakeEdge(vibr, vitr));
 					builder.Add(innerWire, BRepBuilderAPI_MakeEdge(vitr, vitl));
 					builder.Add(innerWire, BRepBuilderAPI_MakeEdge(vitl, vibl));
+					innerWire.Reverse();
 					faceBlder.Add(innerWire);
 				}				
 				pFace = new TopoDS_Face();

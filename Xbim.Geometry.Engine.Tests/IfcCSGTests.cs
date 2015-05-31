@@ -9,6 +9,8 @@ using XbimGeometry.Interfaces;
 
 namespace GeometryTests
 {
+    [DeploymentItem(@"x64\", "x64")]
+    [DeploymentItem(@"x86\", "x86")]
     [TestClass]
     
     public class IfcCsgTests

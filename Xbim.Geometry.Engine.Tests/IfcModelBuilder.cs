@@ -13,6 +13,9 @@ using Xbim.IO;
 
 namespace GeometryTests
 {
+    [DeploymentItem(@"x64\", "x64")]
+    [DeploymentItem(@"x86\", "x86")]
+    [DeploymentItem(@"SolidTestFiles\", "SolidTestFiles")]
     public class IfcModelBuilder
     {
         

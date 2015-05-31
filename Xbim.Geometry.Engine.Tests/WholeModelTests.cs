@@ -24,6 +24,9 @@ namespace GeometryTests
     /// Excutes tests on every geometry item found in every file in the specified directory, passes if no files are found
     /// </summary>
     /// 
+    [DeploymentItem(@"x64\", "x64")]
+    [DeploymentItem(@"x86\", "x86")]
+    [DeploymentItem(@"SolidTestFiles\", "SolidTestFiles")]
     [TestClass]
     public class WholeModelTests
     {
@@ -33,7 +36,7 @@ namespace GeometryTests
         public void WriteDpoWOutputFiles()
         {
 
-            const string ifcFileFullName = @"SolidTestFiles\Chimney Faceted Mesh with curves and gaps.ifc";
+            const string ifcFileFullName = @"SolidTestFiles\BIM Logo-LetterM.ifc";
             var fileName = Path.GetFileName(ifcFileFullName);
             var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
             var workingDir = Path.Combine(Directory.GetCurrentDirectory(), "SolidTestFiles\\");

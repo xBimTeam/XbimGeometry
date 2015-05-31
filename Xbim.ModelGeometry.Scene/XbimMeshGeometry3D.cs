@@ -583,7 +583,7 @@ namespace Xbim.ModelGeometry.Scene
         /// Appends a geometry data object to the Mesh, returns false if the mesh would become too big and needs splitting
         /// </summary>
         /// <param name="geometryMeshData"></param>
-        public bool Add(XbimGeometryData geometryMeshData, short modelId)
+        public bool Add(XbimGeometryData geometryMeshData, short modelId = 0)
         {
             var transform = XbimMatrix3D.FromArray(geometryMeshData.DataArray2);
             if (geometryMeshData.GeometryType == XbimGeometryType.TriangulatedMesh)

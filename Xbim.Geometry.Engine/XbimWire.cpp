@@ -1969,13 +1969,13 @@ namespace Xbim
 				cc.Intervals(res, GeomAbs_C0);
 				for (Standard_Integer i = 2; i <= numIntervals+1; i++)
 				{
-					Standard_Real f = res.Value(i - 1);
-					Standard_Real l = res.Value(i );
-					if (l>first  && f<last)
+					Standard_Real fp = res.Value(i - 1);
+					Standard_Real lp = res.Value(i );
+					if (lp>first  && fp<last)
 					{
 						TopoDS_Edge edge;
 						Standard_Real uoe;
-						cc.Edge(last, edge, uoe);
+						cc.Edge(fp, edge, uoe);
 						Standard_Real l, f;
 						Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, f, l);
 						Standard_Real a = Math::Max(f, first);
