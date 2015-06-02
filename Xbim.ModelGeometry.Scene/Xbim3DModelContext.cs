@@ -1031,8 +1031,8 @@ namespace Xbim.ModelGeometry.Scene
             var precision = Model.ModelFactors.Precision;
             var deflection = Model.ModelFactors.DeflectionTolerance;
             var deflectionAngle = Model.ModelFactors.DeflectionAngle;
-          // Parallel.ForEach(contextHelper.ProductShapeIds, contextHelper.ParallelOptions, shapeId =>
-          foreach (var shapeId in contextHelper.ProductShapeIds)
+           Parallel.ForEach(contextHelper.ProductShapeIds, contextHelper.ParallelOptions, shapeId =>
+         // foreach (var shapeId in contextHelper.ProductShapeIds)
             {
                 Interlocked.Increment(ref localTally);
                 var shape = (IfcGeometricRepresentationItem)Model.InstancesLocal[shapeId];
@@ -1107,7 +1107,7 @@ namespace Xbim.ModelGeometry.Scene
                     }
                 }
             }
-          //  );
+            );
 
             contextHelper.PercentageParsed = localPercentageParsed;
             contextHelper.Tally = localTally;
