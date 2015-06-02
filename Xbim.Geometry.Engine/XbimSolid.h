@@ -28,7 +28,7 @@ namespace Xbim
 				void set(TopoDS_Solid* val)sealed { ptrContainer = IntPtr(val); }
 			}
 			void InstanceCleanup();
-			static XbimSolid^ BuildClippingList(IfcBooleanClippingResult^ solid, IXbimSolidSet^ clipList);
+			
 #pragma region Initialisers
 
 			void Init(IfcSolidModel^ solid);
@@ -57,7 +57,7 @@ namespace Xbim
 #pragma endregion
 
 		public:
-
+			static XbimSolid^ BuildClippingList(IfcBooleanClippingResult^ solid, IXbimSolidSet^ clipList);
 #pragma region Equality Overrides
 			virtual bool Equals(Object^ v) override;
 			virtual int GetHashCode() override;

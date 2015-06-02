@@ -738,6 +738,14 @@ namespace Xbim
 		IXbimSolidSet^ XbimGeometryCreator::CreateBooleanClippingResult(IfcBooleanClippingResult^ clip)
 		{
 			XbimModelFactors^ mf = clip->ModelOf->ModelFactors;
+			
+#ifdef OCC_6_9_SUPPORTED			
+			
+			IXbimSolidSet^ solidSet = gcnew XbimSolidSet();
+			XbimSolid^ body = XbimSolid::BuildClippingList(clip, solidSet);
+			return body->Cut(solidSet, mf->PrecisionBoolean);
+			
+#endif
 			IfcBooleanOperand^ fOp = clip->FirstOperand;
 			IfcBooleanOperand^ sOp = clip->SecondOperand;
 			IXbimSolidSet^ left;

@@ -577,21 +577,34 @@ namespace Xbim
 			gp_Ax3 polyAx3 = XbimGeomPrim::ToAx3(pbhs->Position);
 			gp_Pln polyPln(polyAx3);
 			gp_Dir polyDir = polyPln.Axis().Direction();
-			XbimVector3D v3d(polyDir.X(),polyDir.Y(),polyDir.Z());
-			if (planeDir.Angle(polyDir) > Math::PI / 2) polyDir.Reverse();
 			
+			if (planeDir.Angle(polyDir) > Math::PI / 2) polyDir.Reverse();
+						
+#ifdef OCC_6_9_SUPPORTED //use a half space, as it works now
+			gp_Vec v(polyDir);
+			double metre = pbhs->ModelOf->ModelFactors->OneMetre;
+			v *= metre*20; // should be good enough for most buildings
+			BRepPrimAPI_MakePrism halfSpaceBulder(f, v);
+			if (halfSpaceBulder.IsDone())
+			{
+				pSolid = new TopoDS_Solid();
+				*pSolid = TopoDS::Solid(halfSpaceBulder.Shape());
+			}
+			else
+				XbimGeometryCreator::logger->WarnFormat("WS010: Failed to create IfcPolygonalBoundedHalfSpace #{0}", pbhs->EntityLabel);
+#else
 			gp_Vec v(polyDir);
 			v *= 2e8;
-
 			BRepPrimAPI_MakePrism bhs(f, v);
 			if (bhs.IsDone())
 			{
 				pSolid = new  TopoDS_Solid();
 				*pSolid = TopoDS::Solid(bhs.Shape());
-				
 			}
 			else
 				XbimGeometryCreator::logger->WarnFormat("WS010: Failed to create IfcPolygonalBoundedHalfSpace #{0}", pbhs->EntityLabel);
+#endif
+			
 			GC::KeepAlive(f);
 		}
 
@@ -693,15 +706,20 @@ namespace Xbim
 		{
 			IfcBooleanOperand^ fOp = solid->FirstOperand;
 			IfcBooleanOperand^ sOp = solid->SecondOperand;
+			
 			IfcBooleanClippingResult^ boolClip = dynamic_cast<IfcBooleanClippingResult^>(fOp);
 			if (boolClip!=nullptr)
 			{
-				clipList->Add(gcnew XbimSolid(sOp));
+				XbimSolid^ s = gcnew XbimSolid(sOp);
+				if (s->IsValid) clipList->Add(s);
 				return XbimSolid::BuildClippingList(boolClip, clipList);
 			}
 			else //we need to build the solid
 			{
-				clipList->Add(gcnew XbimSolid(sOp));
+				XbimSolid^ s = gcnew XbimSolid(sOp);
+				if(s->IsValid) clipList->Add(s);
+				XbimSolidSet^ solidSet = dynamic_cast<XbimSolidSet^>(clipList);
+				if (solidSet!=nullptr) solidSet->Reverse();
 				return gcnew XbimSolid(fOp);
 			}
 		}

@@ -79,6 +79,12 @@ namespace Xbim
 			this->solids =  gcnew  List<IXbimSolid^>(solids);;
 		}
 
+		void XbimSolidSet::Reverse()
+		{
+			this->solids->Reverse();
+		}
+
+
 		///If the shape contains one or more solids these are added to the collection
 		void XbimSolidSet::Add(IXbimGeometryObject^ shape)
 		{
@@ -276,13 +282,14 @@ namespace Xbim
 			String^ err = "";
 			try
 			{
+				
 				TopTools_ListOfShape shapeTools;
 				for each (IXbimSolid^ iSolid in solids)
 				{
 					XbimSolid^ solid = dynamic_cast<XbimSolid^>(iSolid);
 					if (solid!=nullptr)
 					{
-						shapeTools.Append(solid);
+						shapeTools.Append(solid);	
 					}
 				}
 				TopTools_ListOfShape shapeObjects;
@@ -299,7 +306,7 @@ namespace Xbim
 				boolOp.SetTools(shapeTools);
 				boolOp.SetFuzzyValue(tolerance);
 				boolOp.Build();
-				//BRepTools::Write(boolOp.Shape(), "d:\\s");
+				
 				if (boolOp.ErrorStatus() == 0)
 					return gcnew XbimSolidSet(boolOp.Shape());
 				err = "Error = " + boolOp.ErrorStatus();

@@ -68,6 +68,7 @@ namespace Xbim
 			virtual IEnumerator<IXbimSolid^>^ GetEnumerator();
 			virtual System::Collections::IEnumerator^ GetEnumerator2() = System::Collections::IEnumerable::GetEnumerator{ return GetEnumerator(); };
 			virtual void Add(IXbimGeometryObject^ solid);
+			virtual void Reverse();
 			virtual IXbimSolidSet^ Cut(IXbimSolidSet^ solids, double tolerance);
 			virtual IXbimSolidSet^ Cut(IXbimSolid^ solid, double tolerance);
 			virtual IXbimSolidSet^ Union(IXbimSolidSet^ solids, double tolerance);
