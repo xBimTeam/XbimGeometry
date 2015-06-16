@@ -65,9 +65,11 @@
   </PropertyGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
+    <Compile Include="XbimArchitectureConventions.cs" />
     <Compile Include="XbimCustomAssemblyResolver.cs" />
     <Compile Include="XbimGeometryEngine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="XbimPrerequisitesValidator.cs" />
   </ItemGroup>
   <Target Name="TouchFiles">
     <Touch ForceTouch="True" Files="XbimGeometryEngine.cs">
@@ -91,6 +93,7 @@
       <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />

@@ -16,20 +16,26 @@ namespace Xbim.Geometry.Engine.Interop
 {  
     public class XbimGeometryEngine : IXbimGeometryCreator
     {
-        
+
         private readonly IXbimGeometryCreator _engine;
-        
+
         static XbimGeometryEngine()
         {
             // We need to wire in a custom assembly resolver since Xbim.Geometry.Engine is 
             // not located using standard probing rules (due to way we deploy processor specific binaries)
             AppDomain.CurrentDomain.AssemblyResolve += XbimCustomAssemblyResolver.ResolverHandler;
         }
-       
+
         public XbimGeometryEngine()
         {
-           
-            ObjectHandle oh = Activator.CreateInstance("Xbim.Geometry.Engine","Xbim.Geometry.XbimGeometryCreator");
+
+            // Warn if runtime for Engine is not present
+            XbimPrerequisitesValidator.Validate();
+
+            var conventions = new XbimArchitectureConventions();    // understands the process we run under
+            string assemblyName = "Xbim.Geometry.Engine" + conventions.Suffix;
+
+            ObjectHandle oh = Activator.CreateInstance(assemblyName, "Xbim.Geometry.XbimGeometryCreator");
             _engine = oh.Unwrap() as IXbimGeometryCreator;   
         }
         public IXbimGeometryObject Create(IfcGeometricRepresentationItem ifcRepresentation)
