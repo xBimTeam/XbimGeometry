@@ -28,8 +28,14 @@ namespace Xbim.Geometry.Engine.Interop
        
         public XbimGeometryEngine()
         {
-           
-            ObjectHandle oh = Activator.CreateInstance("Xbim.Geometry.Engine","Xbim.Geometry.XbimGeometryCreator");
+            // The Engine is platform-specific (32bit vs 64bit) and we have different versions of the DLL for different platforms, named per platform.
+            // We know what architecture we're running under so load the correct engine up front which gives the custom assembly resolver 
+            // less to do if it can't be located by standard probing rules
+
+            var conventions = new XbimArchitectureConventions();    // understands the process we run under
+            string assemblyName = "Xbim.Geometry.Engine" + conventions.Suffix;
+
+            ObjectHandle oh = Activator.CreateInstance(assemblyName, "Xbim.Geometry.XbimGeometryCreator");
             _engine = oh.Unwrap() as IXbimGeometryCreator;   
         }
         public IXbimGeometryObject Create(IfcGeometricRepresentationItem ifcRepresentation)

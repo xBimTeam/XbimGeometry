@@ -78,7 +78,7 @@ namespace Xbim.Geometry.Engine.Interop
             if (moduleName.StartsWith(GeometryModuleName))
             {
                 // Get conventions used by this process architecture
-                var conventions = new ArchitectureConventions();                
+                var conventions = new XbimArchitectureConventions();                
                 
                 // Append the relevant suffix
                 var filename = String.Format("{0}{1}.dll", GeometryModuleName, conventions.Suffix);
@@ -145,32 +145,6 @@ namespace Xbim.Geometry.Engine.Interop
             return isSuppressed;
         }
 
-        /// <summary>
-        /// A class representing the conventions we use for processor specific Geometry Engine library
-        /// </summary>
-        private class ArchitectureConventions
-        {
-            public ArchitectureConventions()
-            {
-                if (Is64BitProcess())
-                {
-                    Suffix = "64";
-                    SubFolder = "x64";
-                }
-                else
-                {
-                    Suffix = "32";
-                    SubFolder = "x86";
-                }
-            }
-            
-            public string Suffix { get; set; }
-            public string SubFolder { get; set; }
-
-            private static bool Is64BitProcess()
-            {
-                return (IntPtr.Size == 8);
-            }
-        }
+        
     }
 }
