@@ -14,8 +14,9 @@ namespace Xbim.Geometry.Engine.Interop
     {
         static readonly ILogger Logger = LoggerFactory.GetLogger();
 
-        internal const string GeometryModuleName = "Xbim.Geometry.Engine";
-        internal const string XbimModulePrefix = "Xbim.";
+        const string GeometryModuleName = "Xbim.Geometry.Engine";
+        const string XbimModulePrefix = "Xbim.";
+        const string PrequisitesKey = "SuppressVCRuntimeWarning";
 
         // Key under HKLM that indicates that VC12 runtime has been installed
         const string vc12RuntimeRegistryKey = @"SOFTWARE\Microsoft\DevDiv\VC\Servicing\12.0";
@@ -34,8 +35,17 @@ namespace Xbim.Geometry.Engine.Interop
             var key = Registry.LocalMachine.OpenSubKey(vc12RuntimeRegistryKey);
             if(key == null)
             {
-                Logger.WarnFormat("The Visual C++ runtime 'VC12' (VS2013) could not be located. This is required for Geometry generation. Please install this from {0}",
-                    vc12Download);
+                string message = String.Format("The Visual C++ runtime 'VC12' (VS2013) could not be located. This is required for XBim Geometry generation. Please install this from {0} ",
+                        vc12Download);
+                if (SuppressPrequisiteErrors())
+                {
+                    Logger.Warn(message);
+                }
+                else
+                {
+                    message += String.Format("\n\nTo suppress this exception define an AppSetting with key of '{0}' and value of 'true' in app.config", PrequisitesKey);
+                    throw new InvalidOperationException(message);
+                }
             }
 
         }
@@ -120,6 +130,19 @@ namespace Xbim.Geometry.Engine.Interop
                 Assembly geomLoaded = Assembly.LoadFile(assemblyPath);
                 return geomLoaded;
             }
+        }
+
+        private static bool SuppressPrequisiteErrors()
+        {
+            bool isSuppressed = false;
+            var keyValue = System.Configuration.ConfigurationManager.AppSettings[PrequisitesKey];
+
+            if (keyValue != null)
+            {
+                bool.TryParse(keyValue, out isSuppressed);
+            }
+
+            return isSuppressed;
         }
 
         /// <summary>
