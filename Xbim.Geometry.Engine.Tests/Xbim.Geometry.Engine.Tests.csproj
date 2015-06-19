@@ -78,6 +78,9 @@
     <None Include="EsentTestFiles\Monolith_v20.xBIM">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="EsentTestFiles\TwoWalls.xbim">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
     <None Include="SolidTestFiles\1- IfcExtrudedAreaSolid-IfcProfileDef-Parameterised.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
