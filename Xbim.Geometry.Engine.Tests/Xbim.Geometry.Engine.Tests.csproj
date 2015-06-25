@@ -64,6 +64,7 @@
     <Compile Include="IfcProfileDefTests.cs" />
     <Compile Include="SurfaceSweepTests.cs" />
     <Compile Include="SceneTests.cs" />
+    <Compile Include="XbimAssemblyResolving.cs" />
     <Compile Include="WholeModelTests.cs" />
     <Compile Include="XbimFacetedMeshTests.cs" />
     <Compile Include="XbimGeometryToIfcTests.cs" />
@@ -193,18 +194,22 @@
     <Reference Include="System" />
     <Reference Include="Xbim.Common, Version=3.0.5625.38218, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Xbim.Essentials.3.0.23\lib\net45\Xbim.Common.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
     </Reference>
     <Reference Include="Xbim.Ifc.Extensions, Version=3.0.5625.38220, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Xbim.Essentials.3.0.23\lib\net45\Xbim.Ifc.Extensions.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
     </Reference>
     <Reference Include="Xbim.Ifc2x3, Version=3.0.5625.38218, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Xbim.Essentials.3.0.23\lib\net45\Xbim.Ifc2x3.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
     </Reference>
     <Reference Include="Xbim.IO, Version=3.0.5625.38221, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Xbim.Essentials.3.0.23\lib\net45\Xbim.IO.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
     </Reference>
   </ItemGroup>
