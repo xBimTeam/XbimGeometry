@@ -32656,7 +32656,6 @@
     <None Include="OCC\inc\UnitsAPI_SystemUnits.hxx">
       <Filter>Source files\Includes</Filter>
     </None>
-    <None Include="packages.config" />
     <None Include="OCC\drv\BRepAlgoAPI\BRepAlgoAPI_Algo.ixx">
       <Filter>Source files\Includes</Filter>
     </None>

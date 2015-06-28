@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
     <metadata>
         <id>Xbim.Geometry</id>
-        <version>3.0.23</version>
+        <version>3.0.24</version>
         <title>xBIM Geometry</title>
         <authors>xBIM team</authors>
         <owners>Steve Lockley</owners>
@@ -18,6 +18,7 @@ The xBIM project provides packages to convert IFC models to COBie spreadsheets i
 IOS and Android versions are under development.</description>
         <summary>The .Net toolkit for developing BIM applications based on the IFC standard. Essential support for the Ifc data model</summary>
         <releaseNotes>
+          3.0.24 uses version 4 of the .Net framework for greater compatibility with installed clients. 
           3.0.23 Has improved performance and accuracy for boolean and other geometric operations and is updated to use OCC 6.9.0
           3.0 contains a new geometry engine that has a full API to allow geometry constructions, boolean operations and meshing.
           All Ifc2x3 geometry classes are now supported.
@@ -26,22 +27,22 @@ IOS and Android versions are under development.</description>
         <tags>BIM, IFC, IfcXml, IfcZip, COBie, .Net, C#, BuildingSmart</tags>
       <dependencies>
         <dependency id="Newtonsoft.Json" version="6.0.8" />
-        <dependency id="Xbim.Essentials" version="3.0.23" />
+        <dependency id="Xbim.Essentials" version="3.0.24" />
       </dependencies>
     </metadata>
     <files>
-      <file src="Output\Release\Xbim.Geometry.Engine.Interop.dll" target="lib\net45\Xbim.Geometry.Engine.Interop.dll" />
-      <file src="Output\Release\Xbim.Geometry.Engine.Interop.xml" target="lib\net45\Xbim.Geometry.Engine.Interop.xml" />
-      <file src="Output\Release\Xbim.ModelGeometry.Scene.dll" target="lib\net45\Xbim.ModelGeometry.Scene.dll" />
-      <file src="Output\Release\Xbim.ModelGeometry.Scene.xml" target="lib\net45\Xbim.ModelGeometry.Scene.xml" />
-      <file src="Output\Release\x86\Xbim.Geometry.Engine32.dll" target="build\net45\x86\Xbim.Geometry.Engine32.dll" />
-      <file src="Output\Release\x64\Xbim.Geometry.Engine64.dll" target="build\net45\x64\Xbim.Geometry.Engine64.dll" />
-      <file src="Output\Release\Xbim.Geometry.targets" target="build\net45\Xbim.Geometry.targets" />
-      <file src="Output\Release\Xbim.Geometry.Engine.Interop.pdb" target="lib\net45\Xbim.Geometry.Engine.Interop.pdb" />
-      <file src="Output\Release\Xbim.ModelGeometry.Scene.pdb" target="lib\net45\Xbim.ModelGeometry.Scene.pdb" />
-      <file src="Output\Release\Xbim.Tessellator.dll" target="lib\net45\Xbim.Tessellator.dll" />
-      <file src="Output\Release\Xbim.Tessellator.pdb" target="lib\net45\Xbim.Tessellator.pdb" />
-      <file src="Output\Release\Xbim.Tessellator.xml" target="lib\net45\Xbim.Tessellator.xml" />
+      <file src="Output\Release\Xbim.Geometry.Engine.Interop.dll" target="lib\net40\Xbim.Geometry.Engine.Interop.dll" />
+      <file src="Output\Release\Xbim.Geometry.Engine.Interop.xml" target="lib\net40\Xbim.Geometry.Engine.Interop.xml" />
+      <file src="Output\Release\Xbim.ModelGeometry.Scene.dll" target="lib\net40\Xbim.ModelGeometry.Scene.dll" />
+      <file src="Output\Release\Xbim.ModelGeometry.Scene.xml" target="lib\net40\Xbim.ModelGeometry.Scene.xml" />
+      <file src="Output\Release\x86\Xbim.Geometry.Engine32.dll" target="build\net40\x86\Xbim.Geometry.Engine32.dll" />
+      <file src="Output\Release\x64\Xbim.Geometry.Engine64.dll" target="build\net40\x64\Xbim.Geometry.Engine64.dll" />
+      <file src="Output\Release\Xbim.Geometry.targets" target="build\net40\Xbim.Geometry.targets" />
+      <file src="Output\Release\Xbim.Geometry.Engine.Interop.pdb" target="lib\net40\Xbim.Geometry.Engine.Interop.pdb" />
+      <file src="Output\Release\Xbim.ModelGeometry.Scene.pdb" target="lib\net40\Xbim.ModelGeometry.Scene.pdb" />
+      <file src="Output\Release\Xbim.Tessellator.dll" target="lib\net40\Xbim.Tessellator.dll" />
+      <file src="Output\Release\Xbim.Tessellator.pdb" target="lib\net40\Xbim.Tessellator.pdb" />
+      <file src="Output\Release\Xbim.Tessellator.xml" target="lib\net40\Xbim.Tessellator.xml" />
       
     </files>
 
