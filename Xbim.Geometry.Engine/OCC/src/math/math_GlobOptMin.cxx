@@ -1,6 +1,6 @@
 // Created on: 2014-01-20
 // Created by: Alexaner Malyshev
-// Copyright (c) 2014-2014 OPEN CASCADE SAS
+// Copyright (c) 2014-2015 OPEN CASCADE SAS
 //
 // This file is part of Open CASCADE Technology software library.
 //
@@ -45,12 +45,15 @@ math_GlobOptMin::math_GlobOptMin(math_MultipleVarFunction* theFunc,
   myTmp(1, myN),
   myV(1, myN),
   myMaxV(1, myN),
-  myExpandCoeff(1, myN)
+  myExpandCoeff(1, myN),
+  myCellSize(0, myN - 1),
+  myFilter(theFunc->NbVariables())
 {
   Standard_Integer i;
 
   myFunc = theFunc;
   myC = theC;
+  myIsFindSingleSolution = Standard_False;
   myZ = -1;
   mySolCount = 0;
 
@@ -76,6 +79,11 @@ math_GlobOptMin::math_GlobOptMin(math_MultipleVarFunction* theFunc,
 
   myTol = theDiscretizationTol;
   mySameTol = theSameTol;
+
+  const Standard_Integer aMaxSquareSearchSol = 200;
+  Standard_Integer aSolNb = Standard_Integer(Pow(3.0, Standard_Real(myN)));
+  myMinCellFilterSol = Max(2 * aSolNb, aMaxSquareSearchSol);
+  initCellSize();
 
   myDone = Standard_False;
 }
@@ -120,6 +128,8 @@ void math_GlobOptMin::SetGlobalParams(math_MultipleVarFunction* theFunc,
 
   myTol = theDiscretizationTol;
   mySameTol = theSameTol;
+
+  initCellSize();
 
   myDone = Standard_False;
 }
@@ -191,7 +201,7 @@ math_GlobOptMin::~math_GlobOptMin()
 //purpose  : Compute Global extremum point
 //=======================================================================
 // In this algo indexes started from 1, not from 0.
-void math_GlobOptMin::Perform()
+void math_GlobOptMin::Perform(const Standard_Boolean isFindSingleSolution)
 {
   Standard_Integer i;
 
@@ -221,11 +231,23 @@ void math_GlobOptMin::Perform()
 
   myE1 = minLength * myTol;
   myE2 = maxLength * myTol;
-  if (myC > 1.0)
-    myE3 = - maxLength * myTol / 4.0;
-  else
-    myE3 = - maxLength * myTol * myC / 4.0;
 
+  myIsFindSingleSolution = isFindSingleSolution;
+  if (isFindSingleSolution)
+  {
+    // Run local optimization 
+    // if current value better than optimal.
+    myE3 = 0.0;
+  }
+  else
+  {
+    if (myC > 1.0)
+      myE3 = - maxLength * myTol / 4.0;
+    else
+      myE3 = - maxLength * myTol * myC / 4.0;
+  }
+
+  isFirstCellFilterInvoke = Standard_True;
   computeGlobalExtremum(myN);
 
   myDone = Standard_True;
@@ -246,8 +268,8 @@ Standard_Boolean math_GlobOptMin::computeLocalExtremum(const math_Vector& thePnt
   {
     math_MultipleVarFunctionWithHessian* myTmp = 
       dynamic_cast<math_MultipleVarFunctionWithHessian*> (myFunc);
-    
     math_NewtonMinimum newtonMinimum(*myTmp);
+    newtonMinimum.SetBoundary(myGlobA, myGlobB);
     newtonMinimum.Perform(*myTmp, thePnt);
 
     if (newtonMinimum.IsDone())
@@ -386,7 +408,6 @@ void math_GlobOptMin::computeGlobalExtremum(Standard_Integer j)
   Standard_Boolean isInside = Standard_False;
   Standard_Real r;
 
-
   for(myX(j) = myA(j) + myE1; myX(j) < myB(j) + myE1; myX(j) += myV(j))
   {
     if (myX(j) > myB(j))
@@ -404,8 +425,10 @@ void math_GlobOptMin::computeGlobalExtremum(Standard_Integer j)
       aStepBestValue = (isInside && (val < d))? val : d;
       aStepBestPoint = (isInside && (val < d))? myTmp : myX;
 
-      // Solutions are close to each other.
-      if (Abs(aStepBestValue - myF) < mySameTol * 0.01)
+      // Solutions are close to each other 
+      // and it is allowed to have more than one solution.
+      if (Abs(aStepBestValue - myF) < mySameTol * 0.01 &&
+          !myIsFindSingleSolution)
       {
         if (!isStored(aStepBestPoint))
         {
@@ -417,8 +440,12 @@ void math_GlobOptMin::computeGlobalExtremum(Standard_Integer j)
         }
       }
 
-      // New best solution.
-      if ((aStepBestValue - myF) * myZ > mySameTol * 0.01)
+      // New best solution:
+      // new point is out of (mySameTol * 0.01) surrounding or
+      // new point is better than old + single point search.
+      Standard_Real aFunctionalDelta = (aStepBestValue - myF) * myZ;
+      if (aFunctionalDelta > mySameTol * 0.01 ||
+         (aFunctionalDelta > 0.0 && myIsFindSingleSolution))
       {
         mySolCount = 0;
         myF = aStepBestValue;
@@ -426,6 +453,8 @@ void math_GlobOptMin::computeGlobalExtremum(Standard_Integer j)
         for(i = 1; i <= myN; i++)
           myY.Append(aStepBestPoint(i));
         mySolCount++;
+
+        isFirstCellFilterInvoke = Standard_True;
       }
 
       aRealStep = myE2 + Abs(myF - d) / myC;
@@ -479,21 +508,58 @@ Standard_Boolean math_GlobOptMin::isStored(const math_Vector& thePnt)
 {
   Standard_Integer i,j;
   Standard_Boolean isSame = Standard_True;
+  math_Vector aTol(1, myN);
+  aTol = (myB -  myA) * mySameTol;
 
-  for(i = 0; i < mySolCount; i++)
+  // C1 * n^2 = C2 * 3^dim * n
+  if (mySolCount < myMinCellFilterSol)
   {
-    isSame = Standard_True;
-    for(j = 1; j <= myN; j++)
+    for(i = 0; i < mySolCount; i++)
     {
-      if ((Abs(thePnt(j) - myY(i * myN + j))) > (myB(j) -  myA(j)) * mySameTol)
+      isSame = Standard_True;
+      for(j = 1; j <= myN; j++)
       {
-        isSame = Standard_False;
-        break;
+        if ((Abs(thePnt(j) - myY(i * myN + j))) > aTol(j))
+        {
+          isSame = Standard_False;
+          break;
+        }
+      }
+      if (isSame == Standard_True)
+        return Standard_True;
+    }
+  }
+  else
+  {
+    NCollection_CellFilter_NDimInspector anInspector(myN, Precision::PConfusion());
+    if (isFirstCellFilterInvoke)
+    {
+      myFilter.Reset(myCellSize);
+
+      // Copy initial data into cell filter.
+      for(Standard_Integer aSolIdx = 0; aSolIdx < mySolCount; aSolIdx++)
+      {
+        math_Vector aVec(1, myN);
+        for(Standard_Integer aSolDim = 1; aSolDim <= myN; aSolDim++)
+          aVec(aSolDim) = myY(aSolIdx * myN + aSolDim);
+
+        myFilter.Add(aVec, aVec);
       }
     }
-    if (isSame == Standard_True)
-      return Standard_True;
 
+    isFirstCellFilterInvoke = Standard_False;
+
+    math_Vector aLow(1, myN), anUp(1, myN);
+    anInspector.Shift(thePnt, myCellSize, aLow, anUp);
+
+    anInspector.ClearFind();
+    anInspector.SetCurrent(thePnt);
+    myFilter.Inspect(aLow, anUp, anInspector);
+    if (!anInspector.isFind())
+    {
+      // Point is out of close cells, add new one.
+      myFilter.Add(thePnt, thePnt);
+    }
   }
   return Standard_False;
 }
@@ -535,4 +601,17 @@ void math_GlobOptMin::Points(const Standard_Integer theIndex, math_Vector& theSo
 
   for(j = 1; j <= myN; j++)
     theSol(j) = myY((theIndex - 1) * myN + j);
+}
+
+//=======================================================================
+//function : initCellSize
+//purpose  :
+//=======================================================================
+void math_GlobOptMin::initCellSize()
+{
+  for(Standard_Integer anIdx = 1; anIdx <= myN; anIdx++)
+  {
+    myCellSize(anIdx - 1) = (myGlobB(anIdx) - myGlobA(anIdx))
+      * Precision::PConfusion() / (2.0 * Sqrt(2.0));
+  }
 }

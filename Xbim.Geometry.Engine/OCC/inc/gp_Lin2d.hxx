@@ -11,10 +11,8 @@
 #include <Standard_Macro.hxx>
 
 #include <gp_Ax2d.hxx>
-#include <Standard_Storable.hxx>
 #include <Standard_Real.hxx>
 #include <Standard_Boolean.hxx>
-#include <Standard_PrimitiveTypes.hxx>
 class Standard_ConstructionError;
 class gp_Ax2d;
 class gp_Pnt2d;
@@ -22,8 +20,6 @@ class gp_Dir2d;
 class gp_Trsf2d;
 class gp_Vec2d;
 
-
-Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_Lin2d);
 
 //! Describes a line in 2D space.
 //! A line is positioned in the plane with an axis (a gp_Ax2d
@@ -45,7 +41,6 @@ Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_Lin2d);
 //! parametric equations of lines
 class gp_Lin2d 
 {
-
 public:
 
   DEFINE_STANDARD_ALLOC
@@ -181,7 +176,7 @@ public:
 
   //! Translates a line from the point P1 to the point P2.
       gp_Lin2d Translated (const gp_Pnt2d& P1, const gp_Pnt2d& P2)  const;
-    const gp_Ax2d& _CSFDB_Getgp_Lin2dpos() const { return pos; }
+
 
 
 
@@ -190,7 +185,9 @@ protected:
 
 
 
-private: 
+
+private:
+
 
 
   gp_Ax2d pos;

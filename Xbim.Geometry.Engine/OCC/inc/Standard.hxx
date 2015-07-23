@@ -16,9 +16,8 @@
 class Standard_ErrorHandlerCallback;
 class Standard_ErrorHandler;
 class Standard_AncestorIterator;
-class Standard_Storable;
-class Standard_Persistent;
 class Standard_GUID;
+class Standard_Persistent;
 class Standard_Transient;
 class Standard_Type;
 class Standard_Failure;
@@ -80,9 +79,8 @@ private:
 friend class Standard_ErrorHandlerCallback;
 friend class Standard_ErrorHandler;
 friend class Standard_AncestorIterator;
-friend class Standard_Storable;
-friend class Standard_Persistent;
 friend class Standard_GUID;
+friend class Standard_Persistent;
 friend class Standard_Transient;
 friend class Standard_Type;
 friend class Standard_Failure;

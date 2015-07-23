@@ -12,10 +12,8 @@
 
 #include <gp_Ax1.hxx>
 #include <gp_Dir.hxx>
-#include <Standard_Storable.hxx>
 #include <Standard_Real.hxx>
 #include <Standard_Boolean.hxx>
-#include <Standard_PrimitiveTypes.hxx>
 class Standard_ConstructionError;
 class gp_Ax2;
 class gp_Pnt;
@@ -24,8 +22,6 @@ class gp_Ax1;
 class gp_Trsf;
 class gp_Vec;
 
-
-Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_Ax3);
 
 //! Describes a coordinate system in 3D space. Unlike a
 //! gp_Ax2 coordinate system, a gp_Ax3 can be
@@ -63,7 +59,6 @@ Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_Ax3);
 //! -   gp_Ax2 is used to define a coordinate system that must be always right-handed.
 class gp_Ax3 
 {
-
 public:
 
   DEFINE_STANDARD_ALLOC
@@ -282,9 +277,7 @@ public:
   //! Translates an axis placement from the point <P1> to the
   //! point <P2>.
   Standard_EXPORT   gp_Ax3 Translated (const gp_Pnt& P1, const gp_Pnt& P2)  const;
-    const gp_Ax1& _CSFDB_Getgp_Ax3axis() const { return axis; }
-    const gp_Dir& _CSFDB_Getgp_Ax3vydir() const { return vydir; }
-    const gp_Dir& _CSFDB_Getgp_Ax3vxdir() const { return vxdir; }
+
 
 
 
@@ -293,7 +286,9 @@ protected:
 
 
 
-private: 
+
+private:
+
 
 
   gp_Ax1 axis;

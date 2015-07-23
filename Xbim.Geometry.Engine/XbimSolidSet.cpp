@@ -301,6 +301,7 @@ namespace Xbim
 						shapeObjects.Append(solid);
 					}
 				}
+				
 				BRepAlgoAPI_Cut boolOp;
 				boolOp.SetArguments(shapeObjects);
 				boolOp.SetTools(shapeTools);
@@ -310,6 +311,8 @@ namespace Xbim
 				if (boolOp.ErrorStatus() == 0)
 					return gcnew XbimSolidSet(boolOp.Shape());
 				err = "Error = " + boolOp.ErrorStatus();
+				GC::KeepAlive(solids);
+				GC::KeepAlive(this);
 			}
 			catch (Standard_Failure e)
 			{

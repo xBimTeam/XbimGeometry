@@ -28,13 +28,22 @@ namespace Xbim
 #pragma region Point Creation
 
 
-
 		IXbimGeometryObject^ XbimGeometryCreator::Create(IfcGeometricRepresentationItem^ geomRep)
+		{
+			return Create(geomRep, nullptr);
+		}
+
+
+		IXbimGeometryObject^ XbimGeometryCreator::Create(IfcGeometricRepresentationItem^ geomRep, IfcAxis2Placement3D^ objectLocation)
 		{
 			try
 			{
 				if (dynamic_cast<IfcSweptAreaSolid^>(geomRep))
-					return CreateSolid((IfcSweptAreaSolid^)geomRep);
+				{
+					XbimSolid^ solid = (XbimSolid^)CreateSolid((IfcSweptAreaSolid^)geomRep);
+					if (objectLocation != nullptr) solid->Move(objectLocation);
+					return solid;
+				}
 				else if (dynamic_cast<IfcManifoldSolidBrep^>(geomRep))
 					//return CreateSolidSet((IfcManifoldSolidBrep^)geomRep);
 					return gcnew XbimCompound((IfcManifoldSolidBrep^)geomRep);

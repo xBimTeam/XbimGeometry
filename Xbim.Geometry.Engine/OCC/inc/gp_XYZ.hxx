@@ -11,16 +11,12 @@
 #include <Standard_Macro.hxx>
 
 #include <Standard_Real.hxx>
-#include <Standard_Storable.hxx>
 #include <Standard_Integer.hxx>
 #include <Standard_Boolean.hxx>
-#include <Standard_PrimitiveTypes.hxx>
 class Standard_ConstructionError;
 class Standard_OutOfRange;
 class gp_Mat;
 
-
-Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_XYZ);
 
 
 //! This class describes a cartesian coordinate entity in
@@ -31,7 +27,6 @@ Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_XYZ);
 //! of information in data structures.
 class gp_XYZ 
 {
-
 public:
 
   DEFINE_STANDARD_ALLOC
@@ -308,12 +303,7 @@ public:
   //! <me> is set to the following linear form :
   //! XYZ1 + XYZ2
       void SetLinearForm (const gp_XYZ& XYZ1, const gp_XYZ& XYZ2) ;
-    Standard_Real _CSFDB_Getgp_XYZx() const { return x; }
-    void _CSFDB_Setgp_XYZx(const Standard_Real p) { x = p; }
-    Standard_Real _CSFDB_Getgp_XYZy() const { return y; }
-    void _CSFDB_Setgp_XYZy(const Standard_Real p) { y = p; }
-    Standard_Real _CSFDB_Getgp_XYZz() const { return z; }
-    void _CSFDB_Setgp_XYZz(const Standard_Real p) { z = p; }
+
 
 
 
@@ -322,7 +312,9 @@ protected:
 
 
 
-private: 
+
+private:
+
 
 
   Standard_Real x;

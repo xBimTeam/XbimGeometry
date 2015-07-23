@@ -12,17 +12,13 @@
 
 #include <gp_Pnt2d.hxx>
 #include <gp_Dir2d.hxx>
-#include <Standard_Storable.hxx>
 #include <Standard_Boolean.hxx>
 #include <Standard_Real.hxx>
-#include <Standard_PrimitiveTypes.hxx>
 class gp_Pnt2d;
 class gp_Dir2d;
 class gp_Trsf2d;
 class gp_Vec2d;
 
-
-Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_Ax2d);
 
 
 //! Describes an axis in the plane (2D space).
@@ -45,7 +41,6 @@ Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_Ax2d);
 //! Note: to define a left-handed 2D coordinate system, use gp_Ax22d.
 class gp_Ax2d 
 {
-
 public:
 
   DEFINE_STANDARD_ALLOC
@@ -163,8 +158,7 @@ public:
   //! Translates an axis placement from the point <P1> to the
   //! point <P2>.
       gp_Ax2d Translated (const gp_Pnt2d& P1, const gp_Pnt2d& P2)  const;
-    const gp_Pnt2d& _CSFDB_Getgp_Ax2dloc() const { return loc; }
-    const gp_Dir2d& _CSFDB_Getgp_Ax2dvdir() const { return vdir; }
+
 
 
 
@@ -173,7 +167,9 @@ protected:
 
 
 
-private: 
+
+private:
+
 
 
   gp_Pnt2d loc;

@@ -12,10 +12,8 @@
 
 #include <gp_Ax2.hxx>
 #include <Standard_Real.hxx>
-#include <Standard_Storable.hxx>
 #include <gp_Ax1.hxx>
 #include <gp_Pnt.hxx>
-#include <Standard_PrimitiveTypes.hxx>
 class Standard_ConstructionError;
 class gp_Ax2;
 class gp_Ax1;
@@ -23,8 +21,6 @@ class gp_Pnt;
 class gp_Trsf;
 class gp_Vec;
 
-
-Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_Elips);
 
 
 //! Describes an ellipse in 3D space.
@@ -52,7 +48,6 @@ Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_Elips);
 //! parametric equations of ellipses
 class gp_Elips 
 {
-
 public:
 
   DEFINE_STANDARD_ALLOC
@@ -242,11 +237,7 @@ public:
 
   //! Translates an ellipse from the point P1 to the point P2.
       gp_Elips Translated (const gp_Pnt& P1, const gp_Pnt& P2)  const;
-    const gp_Ax2& _CSFDB_Getgp_Elipspos() const { return pos; }
-    Standard_Real _CSFDB_Getgp_ElipsmajorRadius() const { return majorRadius; }
-    void _CSFDB_Setgp_ElipsmajorRadius(const Standard_Real p) { majorRadius = p; }
-    Standard_Real _CSFDB_Getgp_ElipsminorRadius() const { return minorRadius; }
-    void _CSFDB_Setgp_ElipsminorRadius(const Standard_Real p) { minorRadius = p; }
+
 
 
 
@@ -255,7 +246,9 @@ protected:
 
 
 
-private: 
+
+private:
+
 
 
   gp_Ax2 pos;

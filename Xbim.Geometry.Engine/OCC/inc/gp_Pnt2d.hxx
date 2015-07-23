@@ -11,11 +11,9 @@
 #include <Standard_Macro.hxx>
 
 #include <gp_XY.hxx>
-#include <Standard_Storable.hxx>
 #include <Standard_Real.hxx>
 #include <Standard_Integer.hxx>
 #include <Standard_Boolean.hxx>
-#include <Standard_PrimitiveTypes.hxx>
 class Standard_OutOfRange;
 class gp_XY;
 class gp_Ax2d;
@@ -23,12 +21,9 @@ class gp_Trsf2d;
 class gp_Vec2d;
 
 
-Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_Pnt2d);
-
 //! Defines  a non-persistent 2D cartesian point.
 class gp_Pnt2d 
 {
-
 public:
 
   DEFINE_STANDARD_ALLOC
@@ -145,7 +140,7 @@ public:
       void Translate (const gp_Pnt2d& P1, const gp_Pnt2d& P2) ;
   
       gp_Pnt2d Translated (const gp_Pnt2d& P1, const gp_Pnt2d& P2)  const;
-    const gp_XY& _CSFDB_Getgp_Pnt2dcoord() const { return coord; }
+
 
 
 
@@ -154,7 +149,9 @@ protected:
 
 
 
-private: 
+
+private:
+
 
 
   gp_XY coord;

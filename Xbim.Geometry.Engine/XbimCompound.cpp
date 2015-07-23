@@ -225,6 +225,7 @@ namespace Xbim
 				return;
 			}
 			Init(faceSet->CfsFaces);
+			BRepTools::Write(*pCompound, "d:\\tmp\\c");
 			/*if (faceSet->CfsFaces->Count < 50)
 			{
 
@@ -286,6 +287,7 @@ namespace Xbim
 		{
 			if (!IsValid || IsSewn)
 				return true;
+			BRepTools::Write(*pCompound, "d:\\tmp\\c0");
 			TopTools_IndexedMapOfShape map;
 			TopExp::MapShapes(*pCompound, TopAbs_FACE, map);
 			if (map.Extent() > MaxFacesToSew) //give up if too many
@@ -302,8 +304,10 @@ namespace Xbim
 				seamstress.Perform();
 				TopoDS_Shape result = seamstress.SewedShape();
 				builder.Add(newCompound, result);
-			}		
+			}	
+			
 			*pCompound = newCompound;
+			BRepTools::Write(*pCompound, "d:\\tmp\\c1");
 			//only correct orientation if we are sewing and making a solid or a shape for boolean operation
 			for each (IXbimGeometryObject^ geomObj in this)
 			{

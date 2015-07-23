@@ -12,10 +12,8 @@
 
 #include <gp_Ax2.hxx>
 #include <Standard_Real.hxx>
-#include <Standard_Storable.hxx>
 #include <gp_Ax1.hxx>
 #include <gp_Pnt.hxx>
-#include <Standard_PrimitiveTypes.hxx>
 class Standard_ConstructionError;
 class Standard_DomainError;
 class gp_Ax2;
@@ -24,8 +22,6 @@ class gp_Pnt;
 class gp_Trsf;
 class gp_Vec;
 
-
-Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_Hypr);
 
 //! Describes a branch of a hyperbola in 3D space.
 //! A hyperbola is defined by its major and minor radii and
@@ -74,7 +70,6 @@ Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_Hypr);
 //! parametric equations of hyperbolas
 class gp_Hypr 
 {
-
 public:
 
   DEFINE_STANDARD_ALLOC
@@ -296,11 +291,7 @@ public:
 
   //! Translates an hyperbola from the point P1 to the point P2.
       gp_Hypr Translated (const gp_Pnt& P1, const gp_Pnt& P2)  const;
-    const gp_Ax2& _CSFDB_Getgp_Hyprpos() const { return pos; }
-    Standard_Real _CSFDB_Getgp_HyprmajorRadius() const { return majorRadius; }
-    void _CSFDB_Setgp_HyprmajorRadius(const Standard_Real p) { majorRadius = p; }
-    Standard_Real _CSFDB_Getgp_HyprminorRadius() const { return minorRadius; }
-    void _CSFDB_Setgp_HyprminorRadius(const Standard_Real p) { minorRadius = p; }
+
 
 
 
@@ -309,7 +300,9 @@ protected:
 
 
 
-private: 
+
+private:
+
 
 
   gp_Ax2 pos;

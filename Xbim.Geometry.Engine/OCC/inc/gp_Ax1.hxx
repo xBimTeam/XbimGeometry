@@ -12,18 +12,14 @@
 
 #include <gp_Pnt.hxx>
 #include <gp_Dir.hxx>
-#include <Standard_Storable.hxx>
 #include <Standard_Boolean.hxx>
 #include <Standard_Real.hxx>
-#include <Standard_PrimitiveTypes.hxx>
 class gp_Pnt;
 class gp_Dir;
 class gp_Ax2;
 class gp_Trsf;
 class gp_Vec;
 
-
-Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_Ax1);
 
 //! Describes an axis in 3D space.
 //! An axis is defined by:
@@ -39,7 +35,6 @@ Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_Ax1);
 //! or to define a symmetry axis.
 class gp_Ax1 
 {
-
 public:
 
   DEFINE_STANDARD_ALLOC
@@ -199,8 +194,7 @@ public:
   //! the vector (P1, P2) defined from point P1 to point P2.
   //! and creates a new one.
       gp_Ax1 Translated (const gp_Pnt& P1, const gp_Pnt& P2)  const;
-    const gp_Pnt& _CSFDB_Getgp_Ax1loc() const { return loc; }
-    const gp_Dir& _CSFDB_Getgp_Ax1vdir() const { return vdir; }
+
 
 
 
@@ -209,7 +203,9 @@ protected:
 
 
 
-private: 
+
+private:
+
 
 
   gp_Pnt loc;

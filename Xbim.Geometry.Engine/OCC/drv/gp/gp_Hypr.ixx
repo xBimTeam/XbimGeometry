@@ -5,15 +5,6 @@
 
 #include <gp_Hypr.jxx>
 
-#include <Standard_Type.hxx>
-
-
-IMPLEMENT_STANDARD_TYPE(gp_Hypr)
-IMPLEMENT_STANDARD_SUPERTYPE_ARRAY()
-  STANDARD_TYPE(Standard_Storable),
-
-IMPLEMENT_STANDARD_SUPERTYPE_ARRAY_END()
-IMPLEMENT_STANDARD_TYPE_END(gp_Hypr)
  
 
 

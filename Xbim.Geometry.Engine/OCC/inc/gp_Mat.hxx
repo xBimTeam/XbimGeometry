@@ -11,10 +11,8 @@
 #include <Standard_Macro.hxx>
 
 #include <Standard_Real.hxx>
-#include <Standard_Storable.hxx>
 #include <Standard_Integer.hxx>
 #include <Standard_Boolean.hxx>
-#include <Standard_PrimitiveTypes.hxx>
 class Standard_ConstructionError;
 class Standard_OutOfRange;
 class gp_XYZ;
@@ -22,14 +20,11 @@ class gp_Trsf;
 class gp_GTrsf;
 
 
-Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_Mat);
-
 
 //! Describes a three column, three row matrix. This sort of
 //! object is used in various vectorial or matrix computations.
 class gp_Mat 
 {
-
 public:
 
   DEFINE_STANDARD_ALLOC
@@ -250,7 +245,7 @@ public:
 
   //! Transposes the matrix. A(j, i) -> A (i, j)
       gp_Mat Transposed()  const;
-    Standard_Real& _CSFDB_Getgp_Matmatrix(const Standard_Integer i1,const Standard_Integer i2) { return matrix[i1][i2]; }
+
 
 friend class gp_XYZ;
 friend class gp_Trsf;
@@ -262,7 +257,9 @@ protected:
 
 
 
-private: 
+
+private:
+
 
 
   Standard_Real matrix[3][3];

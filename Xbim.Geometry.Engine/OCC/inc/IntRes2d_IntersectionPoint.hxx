@@ -13,20 +13,15 @@
 #include <gp_Pnt2d.hxx>
 #include <Standard_Real.hxx>
 #include <IntRes2d_Transition.hxx>
-#include <Standard_Storable.hxx>
 #include <Standard_Boolean.hxx>
-#include <Standard_PrimitiveTypes.hxx>
 class gp_Pnt2d;
 class IntRes2d_Transition;
 
-
-Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(IntRes2d_IntersectionPoint);
 
 //! Definition of an intersection point between two
 //! 2D curves.
 class IntRes2d_IntersectionPoint 
 {
-
 public:
 
   DEFINE_STANDARD_ALLOC
@@ -65,13 +60,7 @@ public:
   //! returns the transition of the 2nd curve compared to
   //! the 1st one.
      const  IntRes2d_Transition& TransitionOfSecond()  const;
-    const gp_Pnt2d& _CSFDB_GetIntRes2d_IntersectionPointpt() const { return pt; }
-    Standard_Real _CSFDB_GetIntRes2d_IntersectionPointp1() const { return p1; }
-    void _CSFDB_SetIntRes2d_IntersectionPointp1(const Standard_Real p) { p1 = p; }
-    Standard_Real _CSFDB_GetIntRes2d_IntersectionPointp2() const { return p2; }
-    void _CSFDB_SetIntRes2d_IntersectionPointp2(const Standard_Real p) { p2 = p; }
-    const IntRes2d_Transition& _CSFDB_GetIntRes2d_IntersectionPointtrans1() const { return trans1; }
-    const IntRes2d_Transition& _CSFDB_GetIntRes2d_IntersectionPointtrans2() const { return trans2; }
+
 
 
 
@@ -80,7 +69,9 @@ protected:
 
 
 
-private: 
+
+private:
+
 
 
   gp_Pnt2d pt;

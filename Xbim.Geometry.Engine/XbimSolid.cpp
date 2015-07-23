@@ -112,6 +112,7 @@ namespace Xbim
 		XbimSolid::XbimSolid(IfcExtrudedAreaSolid^ repItem)
 		{
 			Init(repItem);
+			BRepTools::Write(*pSolid, "d:\\tmp\\h");
 		}
 		
 		XbimSolid::XbimSolid(IfcSweptDiskSolid^ repItem)
@@ -414,6 +415,7 @@ namespace Xbim
 					pSolid = new TopoDS_Solid();
 					*pSolid = TopoDS::Solid(prism.Shape());
 					pSolid->Move(XbimGeomPrim::ToLocation(repItem->Position));
+					//BRepTools::Write(*pSolid, "d:\\tmp\\b");
 				}
 				else
 					XbimGeometryCreator::logger->WarnFormat("WS002: Invalid Solid Extrusion, could not create solid, found in Entity #{0}=IfcExtrudedAreaSolid.",
@@ -541,9 +543,10 @@ namespace Xbim
 			}
 			IfcPlane^ ifcPlane = (IfcPlane^)surface;
 			gp_Ax3 ax3 = XbimGeomPrim::ToAx3(ifcPlane->Position);
-			gp_Pln pln(ax3);
-			gp_Dir planeDir = pbhs->AgreementFlag ? -pln.Axis().Direction() : pln.Axis().Direction();
-		
+			gp_Pln pln(ax3);			
+			const gp_Pnt pnt = pln.Location().Translated(pbhs->AgreementFlag ? -pln.Axis().Direction() : pln.Axis().Direction());
+			TopoDS_Shape halfspace = BRepPrimAPI_MakeHalfSpace(BRepBuilderAPI_MakeFace(pln), pnt).Solid();
+
 			XbimWire^ polyBoundary = gcnew XbimWire(pbhs->PolygonalBoundary);
 			
 			if (!polyBoundary->IsValid)
@@ -558,54 +561,25 @@ namespace Xbim
 				XbimGeometryCreator::logger->WarnFormat("WS009: The IfcPolygonalBoundedHalfSpace #{0} has an incorrectly defined Face with PolygonalBoundary #{1}, it has been ignored", pbhs->EntityLabel, pbhs->PolygonalBoundary->EntityLabel);
 				return;
 			}
-			polyFace->Translate(XbimVector3D(0, 0, -1e10)); //move it down to allow a solid prism to be built with its centroid  on the 0 Z position
-			BRepPrimAPI_MakePrism boundedHalfSpace(polyFace, gp_Vec(0, 0, 2e10));
-			GC::KeepAlive(polyFace);
-			XbimSolid^ s = gcnew XbimSolid(TopoDS::Solid(boundedHalfSpace.Shape()));	
-			s->Move(pbhs->Position); //move the boundind solid to the right place
-			XbimFace^ plane = gcnew XbimFace(ifcPlane);
-			IXbimFaceSet^ faces = s->Section(plane, pbhs->ModelOf->ModelFactors->PrecisionBoolean);
-			if (faces->Count==0)
-			{
-				XbimGeometryCreator::logger->WarnFormat("WS012: The IfcPolygonalBoundedHalfSpace #{0} has an incorrectly defined PolygonalBoundary #{1}, it has been ignored", pbhs->EntityLabel, pbhs->PolygonalBoundary->EntityLabel);
-				return;
-			}
+			TopoDS_Shape boundedHalfSpace = BRepPrimAPI_MakePrism(polyFace, gp_Vec(0, 0, 2e8));
+			gp_Trsf trsf = XbimGeomPrim::ToTransform(pbhs->Position);
+			gp_Trsf offset; 
+			offset.SetTranslation(gp_Vec(0, 0, -1e8));
+			boundedHalfSpace.Move(trsf*offset);
+
 			
-			XbimFace^ f = (XbimFace^)faces->First; //take the first face, there should only be one
-			if (!pbhs->AgreementFlag) f->Reverse();; //need to reverse the face in accordance with the agreement
-			//check we have the right half space
-			gp_Ax3 polyAx3 = XbimGeomPrim::ToAx3(pbhs->Position);
-			gp_Pln polyPln(polyAx3);
-			gp_Dir polyDir = polyPln.Axis().Direction();
+			TopoDS_Shape result = BRepAlgoAPI_Common(halfspace, boundedHalfSpace );
 			
-			if (planeDir.Angle(polyDir) > Math::PI / 2) polyDir.Reverse();
-						
-#ifdef OCC_6_9_SUPPORTED //use a half space, as it works now
-			gp_Vec v(polyDir);
-			double metre = pbhs->ModelOf->ModelFactors->OneMetre;
-			v *= metre*20; // should be good enough for most buildings
-			BRepPrimAPI_MakePrism halfSpaceBulder(f, v);
-			if (halfSpaceBulder.IsDone())
+			for (TopExp_Explorer explr(result, TopAbs_SOLID); explr.More(); explr.Next())
 			{
 				pSolid = new TopoDS_Solid();
-				*pSolid = TopoDS::Solid(halfSpaceBulder.Shape());
+				*pSolid = TopoDS::Solid(explr.Current()); //just take the first solid
+				//BRepTools::Write(*pSolid, "d:\\tmp\\r");
+				return;
 			}
-			else
-				XbimGeometryCreator::logger->WarnFormat("WS010: Failed to create IfcPolygonalBoundedHalfSpace #{0}", pbhs->EntityLabel);
-#else
-			gp_Vec v(polyDir);
-			v *= 2e8;
-			BRepPrimAPI_MakePrism bhs(f, v);
-			if (bhs.IsDone())
-			{
-				pSolid = new  TopoDS_Solid();
-				*pSolid = TopoDS::Solid(bhs.Shape());
-			}
-			else
-				XbimGeometryCreator::logger->WarnFormat("WS010: Failed to create IfcPolygonalBoundedHalfSpace #{0}", pbhs->EntityLabel);
-#endif
-			
-			GC::KeepAlive(f);
+			GC::KeepAlive(polyFace);
+			XbimGeometryCreator::logger->WarnFormat("WS010: Failed to create IfcPolygonalBoundedHalfSpace #{0}", pbhs->EntityLabel);
+
 		}
 
 
@@ -735,11 +709,12 @@ namespace Xbim
 			{
 				IXbimSolidSet^ solidSet = gcnew XbimSolidSet();
 				XbimSolid^ body = XbimSolid::BuildClippingList(boolClip, solidSet);
-				IXbimSolidSet^ xbimSolidSet = body->Cut(solidSet, mf->PrecisionBoolean);
+				//use a fuzzy tolerance of 1mm, less than this should be ignored			
+				IXbimSolidSet^ xbimSolidSet = body->Cut(solidSet, mf->OneMilliMetre);
 				if (xbimSolidSet != nullptr && xbimSolidSet->First != nullptr)
 				{
 					pSolid = new TopoDS_Solid(); 
-					*pSolid = (XbimSolid^)(xbimSolidSet->First); //just take the first as that is what is intended by IFC schema
+					*pSolid = (XbimSolid^)(xbimSolidSet->First); //just take the first as that is what is intended by IFC schema				
 				}
 				return;
 			}
@@ -1164,12 +1139,15 @@ namespace Xbim
 				if (boolOp.ErrorStatus() == 0)
 					return gcnew XbimSolidSet(boolOp.Shape());
 				err = "Error = " + boolOp.ErrorStatus();
+				
 			}
 			catch (Standard_Failure e)
 			{
 				 err = gcnew String(Standard_Failure::Caught()->GetMessageString());			
 			}
 			XbimGeometryCreator::logger->WarnFormat("WS029: Boolean Cut operation failed. " + err);
+			GC::KeepAlive(solidCut);
+			GC::KeepAlive(this);
 			return XbimSolidSet::Empty;
 		}
 
@@ -1362,6 +1340,7 @@ namespace Xbim
 				}						
 				GC::KeepAlive(faceSection);		
 				GC::KeepAlive(toSection);
+				GC::KeepAlive(this);
 			}
 			XbimGeometryCreator::logger->WarnFormat("WS008:Boolean Section operation has failed to create a section");
 			

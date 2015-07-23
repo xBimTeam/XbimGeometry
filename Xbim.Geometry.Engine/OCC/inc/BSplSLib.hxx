@@ -258,6 +258,11 @@ public:
   //! for the numerator and stores it in CachePoles
   Standard_EXPORT static   void BuildCache (const Standard_Real U, const Standard_Real V, const Standard_Real USpanDomain, const Standard_Real VSpanDomain, const Standard_Boolean UPeriodicFlag, const Standard_Boolean VPeriodicFlag, const Standard_Integer UDegree, const Standard_Integer VDegree, const Standard_Integer UIndex, const Standard_Integer VIndex, const TColStd_Array1OfReal& UFlatKnots, const TColStd_Array1OfReal& VFlatKnots, const TColgp_Array2OfPnt& Poles, const TColStd_Array2OfReal& Weights, TColgp_Array2OfPnt& CachePoles, TColStd_Array2OfReal& CacheWeights) ;
   
+  //! Perform the evaluation of the Taylor expansion
+  //! of the Bspline normalized between 0 and 1.
+  //! Structure of result optimized for BSplSLib_Cache.
+  Standard_EXPORT static   void BuildCache (const Standard_Real theU, const Standard_Real theV, const Standard_Real theUSpanDomain, const Standard_Real theVSpanDomain, const Standard_Boolean theUPeriodic, const Standard_Boolean theVPeriodic, const Standard_Integer theUDegree, const Standard_Integer theVDegree, const Standard_Integer theUIndex, const Standard_Integer theVIndex, const TColStd_Array1OfReal& theUFlatKnots, const TColStd_Array1OfReal& theVFlatKnots, const TColgp_Array2OfPnt& thePoles, const TColStd_Array2OfReal& theWeights, TColStd_Array2OfReal& theCacheArray) ;
+  
   //! Perform the evaluation of the of the cache
   //! the parameter must be normalized between
   //! the 0 and 1 for the span.

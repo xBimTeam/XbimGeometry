@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Runtime;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Xbim.Common.Geometry;
 using Xbim.Geometry.Engine.Interop;
@@ -329,7 +331,116 @@ namespace GeometryTests
             }
         }
 
+        [TestMethod]
+        public void IfcHalfspace_Test()
+        {
+            using (var m = XbimModel.CreateTemporaryModel())
+            {
+                using (var txn = m.BeginTransaction())
+                {
+                    var halfSpace = m.Instances.New<IfcHalfSpaceSolid>();
+                    halfSpace.AgreementFlag = false;
+                    var baseSurface = m.Instances.New<IfcPlane>();
+                    baseSurface.Position = m.Instances.New<IfcAxis2Placement3D>();
+                    baseSurface.Position.Location = m.Instances.New<IfcCartesianPoint>();
+                    baseSurface.Position.Location.X = 0; 
+                    baseSurface.Position.Location.Y = 0;
+                    baseSurface.Position.Location.Z = 10;
+                    halfSpace.BaseSurface = baseSurface;
+                    //make an extrusion
+                    var profile = IfcModelBuilder.MakeRectangleHollowProfileDef(m, 20, 10, 1);
+                    var extrude = IfcModelBuilder.MakeExtrudedAreaSolid(m, profile, 40);
+                    var solid = _xbimGeometryCreator.CreateSolid(extrude);
+                    var halfSpaceSolid = _xbimGeometryCreator.CreateSolid(halfSpace);
+                    var cut = solid.Cut(halfSpaceSolid, 1e-5);
+                    Assert.IsTrue(cut.Count>0);
+                    Assert.IsTrue(Math.Abs((solid.Volume * .25) - cut.First.Volume) < 1e-5);
+                    //move the halfspace plane up
+                    baseSurface.Position.Location.Z = 30;
+                    halfSpaceSolid = _xbimGeometryCreator.CreateSolid(halfSpace);
+                    cut = solid.Cut(halfSpaceSolid, 1e-5);
+                    Assert.IsTrue(Math.Abs((solid.Volume * .75) - cut.First.Volume) < 1e-5);
+                    //reverse halfspace agreement
+                    halfSpace.AgreementFlag = true;
+                    halfSpaceSolid = _xbimGeometryCreator.CreateSolid(halfSpace);
+                    cut = solid.Cut(halfSpaceSolid, 1e-5);
+                    Assert.IsTrue(Math.Abs((solid.Volume * .25) - cut.First.Volume) < 1e-5);
+                }
+            }
+        }
 
+        [TestMethod]
+        public void IfcPolygonalBoundedHalfspace_Test()
+        {
+            using (var m = XbimModel.CreateTemporaryModel())
+            {
+                using (var txn = m.BeginTransaction())
+                {
+                    var polygonalBoundedHalfspace = m.Instances.New<IfcPolygonalBoundedHalfSpace>();
+                    polygonalBoundedHalfspace.AgreementFlag = false;
+                    var plane = m.Instances.New<IfcPlane>();
+                    plane.Position = m.Instances.New<IfcAxis2Placement3D>();
+                    plane.Position.Location = m.Instances.New<IfcCartesianPoint>(c => c.SetXYZ(0, 0, 0));
+
+                    polygonalBoundedHalfspace.BaseSurface = plane;
+                    //create the polygonal bound
+                    var polyLine = m.Instances.New<IfcPolyline>();
+                    polyLine.Points.Add( m.Instances.New<IfcCartesianPoint>(c=>c.SetXY(0,2.5)));
+                    polyLine.Points.Add(m.Instances.New<IfcCartesianPoint>(c => c.SetXY(5, 2.5)));
+                    polyLine.Points.Add(m.Instances.New<IfcCartesianPoint>(c => c.SetXY(5, -2.5)));
+                    polyLine.Points.Add(m.Instances.New<IfcCartesianPoint>(c => c.SetXY(0, -2.5)));
+                    polyLine.Points.Add(m.Instances.New<IfcCartesianPoint>(c => c.SetXY(0, 2.5)));
+                    polygonalBoundedHalfspace.PolygonalBoundary = polyLine;
+                    
+                    var basePos = m.Instances.New<IfcAxis2Placement3D>();
+                    basePos.Location = m.Instances.New<IfcCartesianPoint>(c => c.SetXYZ(0, 0, 0));
+                    polygonalBoundedHalfspace.Position = basePos;
+                    //make an extrusion
+                    var profile = IfcModelBuilder.MakeRectangleProfileDef(m, 20, 10);
+                    var extrude = IfcModelBuilder.MakeExtrudedAreaSolid(m, profile, 40);
+                    var solid = _xbimGeometryCreator.CreateSolid(extrude);
+                    var halfSpaceSolid = _xbimGeometryCreator.CreateSolid(polygonalBoundedHalfspace);
+                    var cut = solid.Cut(halfSpaceSolid, 1e-5);
+                    
+                    Assert.IsTrue(cut.Count > 0);
+                    Assert.IsTrue(Math.Abs((solid.Volume ) - cut.First.Volume -1000) < 1e-5);
+                                      
+                    //reverse halfspace agreement
+                    polygonalBoundedHalfspace.AgreementFlag = true;
+                    halfSpaceSolid = _xbimGeometryCreator.CreateSolid(polygonalBoundedHalfspace);
+                    cut = solid.Cut(halfSpaceSolid, 1e-5);
+                    Assert.IsTrue(Math.Abs(solid.Volume - cut.First.Volume) < 1e-5);
+
+                    //move the plane up
+                    plane.Position.Location.Z = 20;
+                    halfSpaceSolid = _xbimGeometryCreator.CreateSolid(polygonalBoundedHalfspace);
+                    cut = solid.Cut(halfSpaceSolid, 1e-5);
+                    Assert.IsTrue(Math.Abs(solid.Volume - cut.First.Volume -500) < 1e-5);
+                    //some realistic data
+                    polyLine.Points[0].SetXY(0,0);
+                    polyLine.Points[1].SetXY(0, 2850);
+                    polyLine.Points[2].SetXY(-350, 2850);
+                    polyLine.Points[3].SetXY(-350, 0);
+                    polyLine.Points[4].SetXY(0, 0);
+                    plane.Position.Location.SetXYZ(-5240.7742616303667, -33052.9790707385, 0.0);
+                    plane.Position.Axis = m.Instances.New<IfcDirection>(d => d.SetXYZ(0, -1, 0));
+                    plane.Position.RefDirection = m.Instances.New<IfcDirection>(d => d.SetXYZ(1,0,0));
+                    basePos.Location.SetXYZ(-5240.7742616303667,-33052.9790707385,0);
+                    basePos.Axis = plane.Position.Axis;
+                    basePos.RefDirection = plane.Position.RefDirection;
+                    halfSpaceSolid = _xbimGeometryCreator.CreateSolid(polygonalBoundedHalfspace);
+
+                    profile.XDim = 350;
+                    profile.YDim = 125;
+                    profile.Position.Location.SetXY(-5415.7742616303676, -32932.529070738507);
+                    extrude.Depth = 2850;
+                    solid = _xbimGeometryCreator.CreateSolid(extrude);
+
+                    cut = solid.Cut(halfSpaceSolid, 1e-5); //everything should be cut
+                    Assert.IsTrue(cut.Count == 0);
+                }
+            }
+        }
 
         [TestMethod]
         public void IfcHalfspace_With_IfcExtrudedAreaSolid()
@@ -354,6 +465,8 @@ namespace GeometryTests
                 }
             }
         }
+
+
         
         [TestMethod]
         public void IfcPolygonalBoundedHalfspace_With_IfcExtrudedAreaSolid()
@@ -415,7 +528,7 @@ namespace GeometryTests
                     Assert.IsTrue(eas.FirstOperand is IfcBooleanClippingResult, "Incorrect first operand found");
 
                     var solid = _xbimGeometryCreator.CreateSolid(eas);
-
+                   
                     Assert.IsTrue(eventTrace.Events.Count == 0); //no events should have been raised from this call
                     IfcCsgTests.GeneralTest(solid);
                     Assert.IsTrue(solid.Faces.Count() == 6, "This solid should have 6 faces");
@@ -442,7 +555,36 @@ namespace GeometryTests
                 }
             }
         }
+ [TestMethod]
+        public void Faceted_BRep_With_Void()
+        {
+            using (var eventTrace = LoggerFactory.CreateEventTrace())
+            {
+                using (var m = new XbimModel())
+                {
+                    m.CreateFrom("SolidTestFiles\\Faceted BRep with void.ifc", null, null, true, true);
+                    var wall = m.Instances[34] as IfcClosedShell;
+                    Assert.IsTrue(wall != null, "No IfcClosedShell found");
+                    var window = m.Instances[334] as IfcExtrudedAreaSolid;
+                    Assert.IsTrue(window != null, "No IfcExtrudedAreaSolid found");
 
+                    var solid = _xbimGeometryCreator.CreateSolidSet(wall);
+                    var hole = _xbimGeometryCreator.CreateSolid(window);
+
+                    var result = solid.Cut(hole, m.ModelFactors.OneMilliMetre);
+
+
+
+                    Assert.IsTrue(eventTrace.Events.Count == 0); //no events should have been raised from this call
+
+
+                  //  IfcCsgTests.GeneralTest(solid);
+                  ////  var w = new XbimOccWriter();
+                  ////  w.Write(solid, "d:\\xbim\\s");
+                  //  Assert.IsTrue(solid.Faces.Count() == 8, "This solid should have 8 faces");
+                }
+            }
+        }
         [TestMethod]
         public void Boolean_With_BoxedHalfSpace()
         {

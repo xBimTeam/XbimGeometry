@@ -11,10 +11,8 @@
 #include <Standard_Macro.hxx>
 
 #include <gp_Ax1.hxx>
-#include <Standard_Storable.hxx>
 #include <Standard_Real.hxx>
 #include <Standard_Boolean.hxx>
-#include <Standard_PrimitiveTypes.hxx>
 class Standard_ConstructionError;
 class gp_Ax1;
 class gp_Pnt;
@@ -23,8 +21,6 @@ class gp_Ax2;
 class gp_Trsf;
 class gp_Vec;
 
-
-Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_Lin);
 
 
 //! Describes a line in 3D space.
@@ -43,7 +39,6 @@ Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_Lin);
 //! parametric equations of lines
 class gp_Lin 
 {
-
 public:
 
   DEFINE_STANDARD_ALLOC
@@ -180,7 +175,7 @@ public:
 
   //! Translates a line from the point P1 to the point P2.
       gp_Lin Translated (const gp_Pnt& P1, const gp_Pnt& P2)  const;
-    const gp_Ax1& _CSFDB_Getgp_Linpos() const { return pos; }
+
 
 
 
@@ -189,7 +184,9 @@ protected:
 
 
 
-private: 
+
+private:
+
 
 
   gp_Ax1 pos;

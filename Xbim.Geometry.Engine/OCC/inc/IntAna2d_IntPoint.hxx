@@ -13,18 +13,13 @@
 #include <Standard_Real.hxx>
 #include <gp_Pnt2d.hxx>
 #include <Standard_Boolean.hxx>
-#include <Standard_Storable.hxx>
-#include <Standard_PrimitiveTypes.hxx>
 class Standard_DomainError;
 class gp_Pnt2d;
 
 
-Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(IntAna2d_IntPoint);
-
 //! Geometrical intersection between two 2d elements.
 class IntAna2d_IntPoint 
 {
-
 public:
 
   DEFINE_STANDARD_ALLOC
@@ -64,13 +59,7 @@ public:
   //! If the second element is an implicit curve, an exception
   //! is raised.
       Standard_Real ParamOnSecond()  const;
-    Standard_Real _CSFDB_GetIntAna2d_IntPointmyu1() const { return myu1; }
-    void _CSFDB_SetIntAna2d_IntPointmyu1(const Standard_Real p) { myu1 = p; }
-    Standard_Real _CSFDB_GetIntAna2d_IntPointmyu2() const { return myu2; }
-    void _CSFDB_SetIntAna2d_IntPointmyu2(const Standard_Real p) { myu2 = p; }
-    const gp_Pnt2d& _CSFDB_GetIntAna2d_IntPointmyp() const { return myp; }
-    Standard_Boolean _CSFDB_GetIntAna2d_IntPointmyimplicit() const { return myimplicit; }
-    void _CSFDB_SetIntAna2d_IntPointmyimplicit(const Standard_Boolean p) { myimplicit = p; }
+
 
 
 
@@ -79,7 +68,9 @@ protected:
 
 
 
-private: 
+
+private:
+
 
 
   Standard_Real myu1;

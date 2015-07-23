@@ -25,16 +25,16 @@
 #include <Standard_Boolean.hxx>
 #include <BOPCol_MapOfInteger.hxx>
 #include <BOPCol_DataMapOfIntegerReal.hxx>
-#include <BOPDS_IndexedMapOfPaveBlock.hxx>
 #include <BOPCol_ListOfInteger.hxx>
+#include <BOPDS_IndexedMapOfPaveBlock.hxx>
 #include <BOPCol_DataMapOfShapeInteger.hxx>
 #include <BOPDS_DataMapOfPaveBlockListOfPaveBlock.hxx>
 #include <BOPCol_DataMapOfIntegerInteger.hxx>
 #include <BOPDS_ListOfPaveBlock.hxx>
+#include <BOPCol_DataMapOfIntegerListOfInteger.hxx>
 #include <BOPDS_MapOfPaveBlock.hxx>
 #include <BOPCol_IndexedDataMapOfShapeInteger.hxx>
 #include <BOPCol_IndexedDataMapOfShapeListOfShape.hxx>
-#include <BOPDS_VectorOfCurve.hxx>
 class IntTools_Context;
 class BOPDS_DS;
 class TopTools_ListOfShape;
@@ -157,7 +157,7 @@ protected:
   //! other - checks both types of intersections.
   Standard_EXPORT   Standard_Boolean ExtendedTolerance (const Standard_Integer nV, const BOPCol_MapOfInteger& aMI, Standard_Real& aTolVExt, const Standard_Integer aType = 0) ;
   
-  Standard_EXPORT   void PutBoundPaveOnCurve (const TopoDS_Face& theF1, const TopoDS_Face& theF2, const Standard_Real theTolR3D, BOPDS_Curve& theNC, BOPCol_MapOfInteger& theMVB) ;
+  Standard_EXPORT   void PutBoundPaveOnCurve (const TopoDS_Face& theF1, const TopoDS_Face& theF2, const Standard_Real theTolR3D, BOPDS_Curve& theNC, BOPCol_ListOfInteger& theLBV) ;
   
   Standard_EXPORT   Standard_Boolean IsExistingPaveBlock (const Handle(BOPDS_PaveBlock)& thePB, const BOPDS_Curve& theNC, const Standard_Real theTolR3D, const BOPDS_IndexedMapOfPaveBlock& theMPB, Handle(BOPDS_PaveBlock)& thePBOut) ;
   
@@ -212,7 +212,7 @@ protected:
 
   //! Adds the existing edges from the map <theMPBOnIn> which interfere
   //! with the vertices from <theMVB> map to the post treatment of section edges.
-  Standard_EXPORT   void ProcessExistingPaveBlocks (const Standard_Integer theInt, const BOPDS_IndexedMapOfPaveBlock& theMPBOnIn, BOPDS_IndexedDataMapOfShapeCoupleOfPaveBlocks& theMSCPB, BOPCol_DataMapOfShapeInteger& theMVI, const BOPCol_MapOfInteger& theMVB, BOPDS_MapOfPaveBlock& theMPB) ;
+  Standard_EXPORT   void ProcessExistingPaveBlocks (const Standard_Integer theInt, const BOPDS_IndexedMapOfPaveBlock& theMPBOnIn, const BOPCol_DataMapOfIntegerListOfInteger& theDMBV, BOPDS_IndexedDataMapOfShapeCoupleOfPaveBlocks& theMSCPB, BOPCol_DataMapOfShapeInteger& theMVI, BOPDS_MapOfPaveBlock& theMPB) ;
   
 
   //! Replaces existing pave block <thePB> with new pave blocks <theLPB>.
@@ -231,7 +231,7 @@ protected:
   
 
   //! Keeps data for post treatment
-  Standard_EXPORT   void PreparePostTreatFF (const Standard_Integer aInt, const Handle(BOPDS_PaveBlock)& aPB, BOPDS_IndexedDataMapOfShapeCoupleOfPaveBlocks& aMSCPB, BOPCol_DataMapOfShapeInteger& aMVI, BOPDS_VectorOfCurve& aVC) ;
+  Standard_EXPORT   void PreparePostTreatFF (const Standard_Integer aInt, const Standard_Integer aCur, const Handle(BOPDS_PaveBlock)& aPB, BOPDS_IndexedDataMapOfShapeCoupleOfPaveBlocks& aMSCPB, BOPCol_DataMapOfShapeInteger& aMVI, BOPDS_ListOfPaveBlock& aLPB) ;
   
 
   //! Refines the state On for the all faces having

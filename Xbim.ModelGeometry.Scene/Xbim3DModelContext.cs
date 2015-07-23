@@ -757,10 +757,10 @@ namespace Xbim.ModelGeometry.Scene
 
                             //make the finished shape
                             if (allProjections.Any())
-                                elementGeom = elementGeom.Union(allProjections, _model.ModelFactors.Precision);
+                                elementGeom = elementGeom.Union(allProjections, _model.ModelFactors.OneMilliMetre);
 
                             if (allOpenings.Any())
-                                elementGeom = elementGeom.Cut(allOpenings, _model.ModelFactors.Precision);
+                                elementGeom = elementGeom.Cut(allOpenings, _model.ModelFactors.OneMilliMetre);
                             if (elementGeom.IsSimplified)
                                 Logger.WarnFormat(
                                     "WM008: {2}[#{0}]-{1} is too complex, it will make interoperability difficult. It has been simplified, no openings have been cut. You should consider re-authoring it in your BIM tool",
@@ -856,7 +856,7 @@ namespace Xbim.ModelGeometry.Scene
                 catch (Exception e)
                 {
                     Logger.WarnFormat(
-                        "WM007: {0}[#{1}] - icontains openings but has its geometry can not be built, {2}",
+                        "WM007: {0}[#{1}] - contains openings but has its geometry can not be built, {2}",
                         element.GetType().Name, element.EntityLabel, e.Message);
                 }
 

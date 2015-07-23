@@ -11,11 +11,9 @@
 #include <Standard_Macro.hxx>
 
 #include <gp_XYZ.hxx>
-#include <Standard_Storable.hxx>
 #include <Standard_Real.hxx>
 #include <Standard_Integer.hxx>
 #include <Standard_Boolean.hxx>
-#include <Standard_PrimitiveTypes.hxx>
 class Standard_ConstructionError;
 class Standard_DomainError;
 class Standard_OutOfRange;
@@ -28,13 +26,10 @@ class gp_Ax2;
 class gp_Trsf;
 
 
-Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_Vec);
-
 
 //! Defines a non-persistent vector in 3D space.
 class gp_Vec 
 {
-
 public:
 
   DEFINE_STANDARD_ALLOC
@@ -159,9 +154,9 @@ public:
       Standard_Real Magnitude()  const;
   
   //! Computes the square magnitude of this vector.
-  //! Adds two vectors
       Standard_Real SquareMagnitude()  const;
   
+  //! Adds two vectors
       void Add (const gp_Vec& Other) ;
     void operator += (const gp_Vec& Other) 
 {
@@ -169,13 +164,13 @@ public:
 }
   
   //! Adds two vectors
-  //! Subtracts two vectors
       gp_Vec Added (const gp_Vec& Other)  const;
     gp_Vec operator + (const gp_Vec& Other)  const
 {
   return Added(Other);
 }
   
+  //! Subtracts two vectors
       void Subtract (const gp_Vec& Right) ;
     void operator -= (const gp_Vec& Right) 
 {
@@ -183,13 +178,13 @@ public:
 }
   
   //! Subtracts two vectors
-  //! Multiplies a vector by a scalar
       gp_Vec Subtracted (const gp_Vec& Right)  const;
     gp_Vec operator - (const gp_Vec& Right)  const
 {
   return Subtracted(Right);
 }
   
+  //! Multiplies a vector by a scalar
       void Multiply (const Standard_Real Scalar) ;
     void operator *= (const Standard_Real Scalar) 
 {
@@ -197,13 +192,13 @@ public:
 }
   
   //! Multiplies a vector by a scalar
-  //! Divides a vector by a scalar
       gp_Vec Multiplied (const Standard_Real Scalar)  const;
     gp_Vec operator * (const Standard_Real Scalar)  const
 {
   return Multiplied(Scalar);
 }
   
+  //! Divides a vector by a scalar
       void Divide (const Standard_Real Scalar) ;
     void operator /= (const Standard_Real Scalar) 
 {
@@ -211,13 +206,13 @@ public:
 }
   
   //! Divides a vector by a scalar
-  //! computes the cross product between two vectors
       gp_Vec Divided (const Standard_Real Scalar)  const;
     gp_Vec operator / (const Standard_Real Scalar)  const
 {
   return Divided(Scalar);
 }
   
+  //! computes the cross product between two vectors
       void Cross (const gp_Vec& Right) ;
     void operator ^= (const gp_Vec& Right) 
 {
@@ -241,10 +236,10 @@ public:
   //! Computes the square magnitude of
   //! the cross product between <me> and Right.
   //! Returns || <me> ^ Right ||**2
-  //! Computes the triple vector product.
-  //! <me> ^ (V1 ^ V2)
       Standard_Real CrossSquareMagnitude (const gp_Vec& Right)  const;
   
+  //! Computes the triple vector product.
+  //! <me> ^= (V1 ^ V2)
       void CrossCross (const gp_Vec& V1, const gp_Vec& V2) ;
   
   //! Computes the triple vector product.
@@ -259,19 +254,19 @@ public:
 }
   
   //! Computes the triple scalar product <me> * (V1 ^ V2).
+      Standard_Real DotCross (const gp_Vec& V1, const gp_Vec& V2)  const;
+  
   //! normalizes a vector
   //! Raises an exception if the magnitude of the vector is
   //! lower or equal to Resolution from gp.
-      Standard_Real DotCross (const gp_Vec& V1, const gp_Vec& V2)  const;
-  
       void Normalize() ;
   
   //! normalizes a vector
   //! Raises an exception if the magnitude of the vector is
   //! lower or equal to Resolution from gp.
-  //! Reverses the direction of a vector
       gp_Vec Normalized()  const;
   
+  //! Reverses the direction of a vector
       void Reverse() ;
   
   //! Reverses the direction of a vector
@@ -282,31 +277,31 @@ public:
 }
   
 
-  //! <me> is setted to the following linear form :
+  //! <me> is set to the following linear form :
   //! A1 * V1 + A2 * V2 + A3 * V3 + V4
       void SetLinearForm (const Standard_Real A1, const gp_Vec& V1, const Standard_Real A2, const gp_Vec& V2, const Standard_Real A3, const gp_Vec& V3, const gp_Vec& V4) ;
   
 
-  //! <me> is setted to the following linear form :
+  //! <me> is set to the following linear form :
   //! A1 * V1 + A2 * V2 + A3 * V3
       void SetLinearForm (const Standard_Real A1, const gp_Vec& V1, const Standard_Real A2, const gp_Vec& V2, const Standard_Real A3, const gp_Vec& V3) ;
   
 
-  //! <me> is setted to the following linear form :
+  //! <me> is set to the following linear form :
   //! A1 * V1 + A2 * V2 + V3
       void SetLinearForm (const Standard_Real A1, const gp_Vec& V1, const Standard_Real A2, const gp_Vec& V2, const gp_Vec& V3) ;
   
 
-  //! <me> is setted to the following linear form :
+  //! <me> is set to the following linear form :
   //! A1 * V1 + A2 * V2
       void SetLinearForm (const Standard_Real A1, const gp_Vec& V1, const Standard_Real A2, const gp_Vec& V2) ;
   
 
-  //! <me> is setted to the following linear form : A1 * V1 + V2
+  //! <me> is set to the following linear form : A1 * V1 + V2
       void SetLinearForm (const Standard_Real A1, const gp_Vec& V1, const gp_Vec& V2) ;
   
 
-  //! <me> is setted to the following linear form : V1 + V2
+  //! <me> is set to the following linear form : V1 + V2
       void SetLinearForm (const gp_Vec& V1, const gp_Vec& V2) ;
   
   Standard_EXPORT   void Mirror (const gp_Vec& V) ;
@@ -343,14 +338,14 @@ public:
       void Scale (const Standard_Real S) ;
   
   //! Scales a vector. S is the scaling value.
-  //! Transforms a vector with the transformation T.
       gp_Vec Scaled (const Standard_Real S)  const;
   
+  //! Transforms a vector with the transformation T.
   Standard_EXPORT   void Transform (const gp_Trsf& T) ;
   
   //! Transforms a vector with the transformation T.
       gp_Vec Transformed (const gp_Trsf& T)  const;
-    const gp_XYZ& _CSFDB_Getgp_Veccoord() const { return coord; }
+
 
 
 
@@ -359,7 +354,9 @@ protected:
 
 
 
-private: 
+
+private:
+
 
 
   gp_XYZ coord;

@@ -900,6 +900,9 @@ void BRepFill_OffsetWire::PerformWithBiLo
       //				   MapNodeVertex,VE);
     }
 
+    if (myJoinType == GeomAbs_Intersection)
+      StartOnEdge = EndOnEdge = 0;
+
     //---------------------------------------------
     // Construction of geometries.
     //---------------------------------------------
@@ -912,7 +915,7 @@ void BRepFill_OffsetWire::PerformWithBiLo
     // Construction of vertices on edges parallel to the spine.
     //-----------------------------------------------------------
 
-    Trim.IntersectWith(E [0], E [1], Params);
+    Trim.IntersectWith(E [0], E [1], myJoinType, Params);
 
     for (Standard_Integer s = 1; s <= Params.Length(); s++) {
       TopoDS_Vertex VC;
@@ -1131,7 +1134,8 @@ void BRepFill_OffsetWire::PerformWithBiLo
       TV2->UpdateTolerance( 1.5*dist2 );
   }
 
-  FixHoles();
+  if (!myIsOpenResult)
+    FixHoles();
 
   myIsDone = Standard_True;
 }
@@ -1396,7 +1400,19 @@ void BRepFill_OffsetWire::MakeWires()
     CV  = VF = TopoDS::Vertex(MVE.FindKey(i));
     CE  = TopoDS::Edge(MVE(i).First());
     End = Standard_False;
-    MVE.ChangeFromKey(CV).RemoveFirst(); 
+    MVE.ChangeFromKey(CV).RemoveFirst();
+
+    if (myIsOpenResult && MVE.FindFromKey(CV).IsEmpty())
+    {
+      //MVE.UnBind(CV);
+      TopoDS_Shape LastShape = MVE.FindKey(MVE.Extent());
+      TopTools_ListOfShape LastList;
+      LastList.Append(MVE(MVE.Extent()));
+      MVE.RemoveLast();
+      if (MVE.FindIndex(CV) != 0)
+        MVE.Substitute(MVE.FindIndex(CV), LastShape, LastList);
+    }
+      
 
     //  Modified by Sergey KHROMOV - Thu Mar 14 11:29:59 2002 Begin
     Standard_Boolean isClosed = Standard_False;
@@ -1440,6 +1456,9 @@ void BRepFill_OffsetWire::MakeWires()
           CE = TopoDS::Edge(MVE.FindFromKey(CV).First());
           MVE.ChangeFromKey(CV).RemoveFirst();
         }
+        else if (myIsOpenResult)//CV was a vertex with one edge
+          End = Standard_True;
+        
         if (MVE.FindFromKey(CV).IsEmpty())
         {
           //MVE.UnBind(CV);
@@ -2232,10 +2251,10 @@ void TrimEdge (const TopoDS_Edge&              E,
   // otherwise preserve only one of its representations.
   //----------------------------------------------------------
   if (!BRep_Tool::Degenerated(E)) {
+    Standard_Real aParTol = 2.0 * Precision::PConfusion();
     for (Standard_Integer k = 1; k < TheVer.Length(); k ++) {
       if (TheVer.Value(k).IsSame(TheVer.Value(k+1)) || 
-
-        Abs(ThePar.Value(k)-ThePar.Value(k+1)) <= Precision::PConfusion()) {
+          Abs(ThePar.Value(k)-ThePar.Value(k+1)) <= aParTol) {
 
           if(k+1 == TheVer.Length()) {
             StoreInMap(TheVer(k), TheVer(k+1), MapVV);

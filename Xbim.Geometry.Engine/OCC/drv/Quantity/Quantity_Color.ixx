@@ -5,15 +5,6 @@
 
 #include <Quantity_Color.jxx>
 
-#include <Standard_Type.hxx>
-
-
-IMPLEMENT_STANDARD_TYPE(Quantity_Color)
-IMPLEMENT_STANDARD_SUPERTYPE_ARRAY()
-  STANDARD_TYPE(Standard_Storable),
-
-IMPLEMENT_STANDARD_SUPERTYPE_ARRAY_END()
-IMPLEMENT_STANDARD_TYPE_END(Quantity_Color)
  
 
 

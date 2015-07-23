@@ -11,20 +11,15 @@
 #include <Standard_Macro.hxx>
 
 #include <Standard_Integer.hxx>
-#include <Standard_Storable.hxx>
 #include <Standard_Boolean.hxx>
-#include <Standard_PrimitiveTypes.hxx>
 class Quantity_PeriodDefinitionError;
 
-
-Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(Quantity_Period);
 
 //! Manages date intervals. For example, a Period object
 //! gives the interval between two dates.
 //! A period is expressed in seconds and microseconds.
 class Quantity_Period 
 {
-
 public:
 
   DEFINE_STANDARD_ALLOC
@@ -132,14 +127,7 @@ public:
   //! With:      0 <= ss
   //! 0 <= mics
   Standard_EXPORT static   Standard_Boolean IsValid (const Standard_Integer ss, const Standard_Integer mics = 0) ;
-Quantity_Period( )
-{
-  
-}
-    Standard_Integer _CSFDB_GetQuantity_PeriodmySec() const { return mySec; }
-    void _CSFDB_SetQuantity_PeriodmySec(const Standard_Integer p) { mySec = p; }
-    Standard_Integer _CSFDB_GetQuantity_PeriodmyUSec() const { return myUSec; }
-    void _CSFDB_SetQuantity_PeriodmyUSec(const Standard_Integer p) { myUSec = p; }
+
 
 
 
@@ -148,7 +136,9 @@ protected:
 
 
 
-private: 
+
+private:
+
 
 
   Standard_Integer mySec;

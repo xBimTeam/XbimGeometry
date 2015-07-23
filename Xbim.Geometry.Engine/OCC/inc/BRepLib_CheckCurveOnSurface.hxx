@@ -80,7 +80,9 @@ public:
   
 
   //! Performs the calculation
-  Standard_EXPORT   void Perform() ;
+  //! If isTheMultyTheadDisabled == TRUE then computation will be made
+  //! without any parallelization.
+  Standard_EXPORT   void Perform (const Standard_Boolean isTheMultyTheradDisabled = Standard_False) ;
   
 
   //! Returns true if the max distance has been found
@@ -116,7 +118,9 @@ protected:
 
   //! Computes the max distance for the 3d curve <myCurve>
   //! and 2d curve <thePCurve>
-  Standard_EXPORT   void Compute (const Handle(Geom2d_Curve)& thePCurve) ;
+  //! If isTheMultyTheadDisabled == TRUE then computation will be made
+  //! without any parallelization.
+  Standard_EXPORT   void Compute (const Handle(Geom2d_Curve)& thePCurve, const Standard_Boolean isTheMultyTheradDisabled) ;
 
 
 

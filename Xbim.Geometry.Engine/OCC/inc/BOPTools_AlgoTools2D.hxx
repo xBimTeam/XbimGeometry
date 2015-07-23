@@ -40,6 +40,7 @@ public:
   
 
   //! Compute P-Curve for the edge <aE> on the face <aF>
+  //! Raises exception Standard_ConstructionError if projection algorithm fails
   Standard_EXPORT static   void BuildPCurveForEdgeOnFace (const TopoDS_Edge& aE, const TopoDS_Face& aF) ;
   
 
@@ -49,12 +50,16 @@ public:
 
   //! Compute surface parameters <U,V> of the face <aF>
   //! for  the point from the edge <aE> at parameter <aT>.
+  //! If <aE> has't pcurve on surface, algorithm tries to get it by
+  //! projection and can
+  //! raise exception Standard_ConstructionError if projection algorithm fails
   Standard_EXPORT static   void PointOnSurface (const TopoDS_Edge& aE, const TopoDS_Face& aF, const Standard_Real aT, Standard_Real& U, Standard_Real& V) ;
   
 
   //! Get P-Curve <aC>  for the edge <aE> on surface <aF> .
   //! If the P-Curve does not exist, build  it using Make2D().
   //! [aToler] - reached tolerance
+  //! Raises exception Standard_ConstructionError if algorithm Make2D() fails
   Standard_EXPORT static   void CurveOnSurface (const TopoDS_Edge& aE, const TopoDS_Face& aF, Handle(Geom2d_Curve)& aC, Standard_Real& aToler) ;
   
 
@@ -62,6 +67,7 @@ public:
   //! If the P-Curve does not exist, build  it using Make2D().
   //! [aFirst, aLast] - range of the P-Curve
   //! [aToler] - reached tolerance
+  //! Raises exception Standard_ConstructionError if algorithm Make2D() fails
   Standard_EXPORT static   void CurveOnSurface (const TopoDS_Edge& aE, const TopoDS_Face& aF, Handle(Geom2d_Curve)& aC, Standard_Real& aFirst, Standard_Real& aLast, Standard_Real& aToler) ;
   
 
@@ -108,21 +114,20 @@ public:
   //! Make P-Curve <aC> for the edge <aE> on surface <aF> .
   //! [aFirst, aLast] - range of the P-Curve
   //! [aToler] - reached tolerance
+  //! Raises exception Standard_ConstructionError if algorithm fails
   Standard_EXPORT static   void Make2D (const TopoDS_Edge& aE, const TopoDS_Face& aF, Handle(Geom2d_Curve)& aC, Standard_Real& aFirst, Standard_Real& aLast, Standard_Real& aToler) ;
-  
-
-  //! Same  as   Make2D()
-  Standard_EXPORT static   void MakeCurveOnSurface (const TopoDS_Edge& aE, const TopoDS_Face& aF, Handle(Geom2d_Curve)& aC, Standard_Real& aFirst, Standard_Real& aLast, Standard_Real& aToler) ;
   
 
   //! Make P-Curve <aC> for the 3D-curve <C3D> on surface <aF> .
   //! [aToler] - reached tolerance
+  //! Raises exception Standard_ConstructionError if projection algorithm fails
   Standard_EXPORT static   void MakePCurveOnFace (const TopoDS_Face& aF, const Handle(Geom_Curve)& C3D, Handle(Geom2d_Curve)& aC, Standard_Real& aToler) ;
   
 
   //! Make P-Curve <aC> for the 3D-curve <C3D> on surface <aF> .
   //! [aT1,  aT2] - range to build
   //! [aToler] - reached tolerance
+  //! Raises exception Standard_ConstructionError if projection algorithm fails
   Standard_EXPORT static   void MakePCurveOnFace (const TopoDS_Face& aF, const Handle(Geom_Curve)& C3D, const Standard_Real aT1, const Standard_Real aT2, Handle(Geom2d_Curve)& aC, Standard_Real& aToler) ;
   
 

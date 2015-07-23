@@ -42,6 +42,9 @@ namespace Xbim
 			{
 				return CreateShapeGeometry(geometryObject, precision, deflection, 0.5, XbimGeometryType::Polyhedron);
 			};
+
+			virtual IXbimGeometryObject^ Create(IfcGeometricRepresentationItem^ geomRep, IfcAxis2Placement3D^ objectLocation);
+
 			virtual IXbimGeometryObject^ Create(IfcGeometricRepresentationItem^ geomRep);
 			virtual IXbimGeometryObjectSet^ CreateGeometricSet(IfcGeometricSet^ geomSet);
 			//Point Creation

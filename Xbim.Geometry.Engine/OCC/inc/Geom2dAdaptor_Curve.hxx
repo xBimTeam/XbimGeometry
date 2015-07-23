@@ -13,20 +13,21 @@
 #include <Handle_Geom2d_Curve.hxx>
 #include <GeomAbs_CurveType.hxx>
 #include <Standard_Real.hxx>
+#include <BSplCLib_Cache.hxx>
+#include <Handle_Adaptor2d_HCurve2d.hxx>
 #include <Adaptor2d_Curve2d.hxx>
 #include <GeomAbs_Shape.hxx>
 #include <Standard_Integer.hxx>
-#include <Handle_Adaptor2d_HCurve2d.hxx>
 #include <Standard_Boolean.hxx>
 #include <Handle_Geom2d_BezierCurve.hxx>
 #include <Handle_Geom2d_BSplineCurve.hxx>
 class Geom2d_Curve;
+class Adaptor2d_HCurve2d;
 class Standard_NoSuchObject;
 class Standard_ConstructionError;
 class Standard_OutOfRange;
 class Standard_DomainError;
 class TColStd_Array1OfReal;
-class Adaptor2d_HCurve2d;
 class gp_Pnt2d;
 class gp_Vec2d;
 class gp_Lin2d;
@@ -167,15 +168,67 @@ protected:
 private:
 
   
+  //! Computes the point of parameter U on the B-spline curve
+  Standard_EXPORT   gp_Pnt2d ValueBSpline (const Standard_Real U)  const;
+  
+  //! Computes the point of parameter U on the offset curve
+  Standard_EXPORT   gp_Pnt2d ValueOffset (const Standard_Real U)  const;
+  
+  //! Computes the point of parameter U on the B-spline curve
+  Standard_EXPORT   void D0BSpline (const Standard_Real theU, gp_Pnt2d& theP)  const;
+  
+  //! Computes the point of parameter U on the offset curve
+  Standard_EXPORT   void D0Offset (const Standard_Real theU, gp_Pnt2d& theP)  const;
+  
+  //! Computes the point of parameter U on the B-spline curve
+  //! and its derivative
+  Standard_EXPORT   void D1BSpline (const Standard_Real theU, gp_Pnt2d& theP, gp_Vec2d& theV)  const;
+  
+  //! Computes the point of parameter U on the offset curve
+  //! and its derivative
+  Standard_EXPORT   void D1Offset (const Standard_Real theU, gp_Pnt2d& theP, gp_Vec2d& theV)  const;
+  
+  //! Computes the point of parameter U on the B-spline curve
+  //! and its first and second derivatives
+  Standard_EXPORT   void D2BSpline (const Standard_Real theU, gp_Pnt2d& theP, gp_Vec2d& theV1, gp_Vec2d& theV2)  const;
+  
+  //! Computes the point of parameter U on the offset curve
+  //! and its first and second derivatives
+  Standard_EXPORT   void D2Offset (const Standard_Real theU, gp_Pnt2d& theP, gp_Vec2d& theV1, gp_Vec2d& theV2)  const;
+  
+  //! Computes the point of parameter U on the B-spline curve
+  //! and its first, second and third derivatives
+  Standard_EXPORT   void D3BSpline (const Standard_Real theU, gp_Pnt2d& theP, gp_Vec2d& theV1, gp_Vec2d& theV2, gp_Vec2d& theV3)  const;
+  
+  //! Computes the point of parameter U on the offset curve
+  //! and its first, second and third derivatives
+  Standard_EXPORT   void D3Offset (const Standard_Real theU, gp_Pnt2d& theP, gp_Vec2d& theV1, gp_Vec2d& theV2, gp_Vec2d& theV3)  const;
+  
+
+  //! The returned vector gives the value of the derivative for the
+  //! order of derivation N.
+  Standard_EXPORT   gp_Vec2d DNBSpline (const Standard_Real theU, const Standard_Integer N)  const;
+  
+
+  //! The returned vector gives the value of the derivative for the
+  //! order of derivation N.
+  Standard_EXPORT   gp_Vec2d DNOffset (const Standard_Real theU, const Standard_Integer N)  const;
+  
   Standard_EXPORT   GeomAbs_Shape LocalContinuity (const Standard_Real U1, const Standard_Real U2)  const;
   
   Standard_EXPORT   void load (const Handle(Geom2d_Curve)& C, const Standard_Real UFirst, const Standard_Real ULast) ;
+  
+  //! Rebuilds B-spline cache
+  //! \param theParameter the value on the knot axis which identifies the caching span
+  Standard_EXPORT   void RebuildCache (const Standard_Real theParameter)  const;
 
 
   Handle(Geom2d_Curve) myCurve;
   GeomAbs_CurveType myTypeCurve;
   Standard_Real myFirst;
   Standard_Real myLast;
+  Handle(BSplCLib_Cache) myCurveCache;
+  Handle(Adaptor2d_HCurve2d) myOffsetBaseCurveAdaptor;
 
 
 };

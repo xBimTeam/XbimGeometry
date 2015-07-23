@@ -18,7 +18,6 @@
 #include <Handle_TColStd_HArray1OfReal.hxx>
 #include <Handle_TColStd_HArray1OfInteger.hxx>
 #include <Standard_Real.hxx>
-#include <Standard_Mutex.hxx>
 #include <Geom2d_BoundedCurve.hxx>
 #include <Handle_Geom2d_Geometry.hxx>
 class TColgp_HArray1OfPnt2d;
@@ -679,6 +678,9 @@ public:
   //! Raised if the length of K is not equal to the number of knots.
   Standard_EXPORT   void Knots (TColStd_Array1OfReal& K)  const;
   
+  //! returns the knot values of the B-spline curve;
+  Standard_EXPORT  const  TColStd_Array1OfReal& Knots()  const;
+  
   //! Returns the knots sequence.
   //! In this sequence the knots with a multiplicity greater than 1
   //! are repeated.
@@ -687,6 +689,13 @@ public:
   //!
   //! Raised if the length of K is not equal to NbPoles + Degree + 1
   Standard_EXPORT   void KnotSequence (TColStd_Array1OfReal& K)  const;
+  
+  //! Returns the knots sequence.
+  //! In this sequence the knots with a multiplicity greater than 1
+  //! are repeated.
+  //! Example :
+  //! K = {k1, k1, k1, k2, k3, k3, k4, k4, k4}
+  Standard_EXPORT  const  TColStd_Array1OfReal& KnotSequence()  const;
   
 
   //! Returns NonUniform or Uniform or QuasiUniform or PiecewiseBezier.
@@ -740,6 +749,9 @@ public:
   //! Raised if the length of M is not equal to NbKnots.
   Standard_EXPORT   void Multiplicities (TColStd_Array1OfInteger& M)  const;
   
+  //! returns the multiplicity of the knots of the curve.
+  Standard_EXPORT  const  TColStd_Array1OfInteger& Multiplicities()  const;
+  
 
   //! Returns the number of knots. This method returns the number of
   //! knot without repetition of multiple knots.
@@ -757,6 +769,9 @@ public:
   //! Raised if the length of P is not equal to the number of poles.
   Standard_EXPORT   void Poles (TColgp_Array1OfPnt2d& P)  const;
   
+  //! Returns the poles of the B-spline curve;
+  Standard_EXPORT  const  TColgp_Array1OfPnt2d& Poles()  const;
+  
 
   //! Returns the start point of the curve.
   //! Warnings :
@@ -772,6 +787,9 @@ public:
   //!
   //! Raised if the length of W is not equal to NbPoles.
   Standard_EXPORT   void Weights (TColStd_Array1OfReal& W)  const;
+  
+  //! Returns the weights of the B-spline curve;
+  Standard_EXPORT  const  TColStd_Array1OfReal& Weights()  const;
   
   //! Applies the transformation T to this BSpline curve.
   Standard_EXPORT   void Transform (const gp_Trsf2d& T) ;
@@ -806,22 +824,8 @@ protected:
 private: 
 
   
-
-  //! Tells whether the Cache is valid for the
-  //! given parameter
-  //! Warnings : the parameter must be normalized within
-  //! the period if the curve is periodic. Otherwise
-  //! the answer will be false
-  Standard_EXPORT   Standard_Boolean IsCacheValid (const Standard_Real Parameter)  const;
-  
   //! Recompute  the  flatknots,  the knotsdistribution, the continuity.
   Standard_EXPORT   void UpdateKnots() ;
-  
-  //! Invalidates the cache. This has to be private this has to be private
-  Standard_EXPORT   void InvalidateCache() ;
-  
-  //! updates the cache and validates it
-  Standard_EXPORT   void ValidateCache (const Standard_Real Parameter) ;
 
   Standard_Boolean rational;
   Standard_Boolean periodic;
@@ -833,15 +837,8 @@ private:
   Handle(TColStd_HArray1OfReal) flatknots;
   Handle(TColStd_HArray1OfReal) knots;
   Handle(TColStd_HArray1OfInteger) mults;
-  Handle(TColgp_HArray1OfPnt2d) cachepoles;
-  Handle(TColStd_HArray1OfReal) cacheweights;
-  Standard_Integer validcache;
-  Standard_Real parametercache;
-  Standard_Real spanlenghtcache;
-  Standard_Integer spanindexcache;
   Standard_Real maxderivinv;
   Standard_Boolean maxderivinvok;
-  Standard_Mutex myMutex;
 
 
 };

@@ -14,12 +14,8 @@
 #include <IntRes2d_Position.hxx>
 #include <IntRes2d_TypeTrans.hxx>
 #include <IntRes2d_Situation.hxx>
-#include <Standard_Storable.hxx>
-#include <Standard_PrimitiveTypes.hxx>
 class Standard_DomainError;
 
-
-Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(IntRes2d_Transition);
 
 //! Definition of    the  type  of   transition    near an
 //! intersection point between  two curves. The transition
@@ -31,7 +27,6 @@ Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(IntRes2d_Transition);
 //! which means that the curves are superposed.
 class IntRes2d_Transition 
 {
-
 public:
 
   DEFINE_STANDARD_ALLOC
@@ -95,16 +90,7 @@ public:
   //! returns  IN or   OUT or UNDECIDED,  the  exception
   //! DomainError is raised.
       Standard_Boolean IsOpposite()  const;
-    Standard_Boolean _CSFDB_GetIntRes2d_Transitiontangent() const { return tangent; }
-    void _CSFDB_SetIntRes2d_Transitiontangent(const Standard_Boolean p) { tangent = p; }
-    IntRes2d_Position _CSFDB_GetIntRes2d_Transitionposit() const { return posit; }
-    void _CSFDB_SetIntRes2d_Transitionposit(const IntRes2d_Position p) { posit = p; }
-    IntRes2d_TypeTrans _CSFDB_GetIntRes2d_Transitiontypetra() const { return typetra; }
-    void _CSFDB_SetIntRes2d_Transitiontypetra(const IntRes2d_TypeTrans p) { typetra = p; }
-    IntRes2d_Situation _CSFDB_GetIntRes2d_Transitionsituat() const { return situat; }
-    void _CSFDB_SetIntRes2d_Transitionsituat(const IntRes2d_Situation p) { situat = p; }
-    Standard_Boolean _CSFDB_GetIntRes2d_Transitionoppos() const { return oppos; }
-    void _CSFDB_SetIntRes2d_Transitionoppos(const Standard_Boolean p) { oppos = p; }
+
 
 
 
@@ -113,7 +99,9 @@ protected:
 
 
 
-private: 
+
+private:
+
 
 
   Standard_Boolean tangent;

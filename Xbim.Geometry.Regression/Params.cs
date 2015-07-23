@@ -12,20 +12,15 @@ namespace XbimRegression
     public class Params
     {
 
-        private static readonly ILogger Logger = LoggerFactory.GetLogger();
+       
 
         private const int DefaultTimeout = 1000 * 60 * 20; // 20 mins
         public bool Caching;
         public bool GeometryV1;
 
-        public static Params ParseParams(string[] args)
-        {
-            Params result = new Params(args);
+       
 
-            return result;
-        }
-
-        private Params(string[] args)
+        public Params(string[] args)
         {
             if (args.Length < 1)
             {
@@ -35,7 +30,7 @@ namespace XbimRegression
             }
 
             TestFileRoot = args[0];
-           
+
             if (!Directory.Exists(TestFileRoot))
             {
                 Console.WriteLine("Invalid model folder {0}", TestFileRoot);

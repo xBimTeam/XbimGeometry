@@ -3798,6 +3798,15 @@
     <ClCompile Include="OCC\src\TopOpeBRepTool\TopOpeBRepTool_PROJECT.cxx">
       <Filter>Source files\TKBool\TopOpeBRepTool</Filter>
     </ClCompile>
+    <ClCompile Include="OCC\src\BSplCLib\BSplCLib_Cache.cxx">
+      <Filter>Source files\TKMath\BSplCLib</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\CSLib\CSLib_Offset.cxx">
+      <Filter>Source files\TKMath\CSLib</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BSplSLib\BSplSLib_Cache.cxx">
+      <Filter>Source files\TKMath\BSplSLib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source files">
@@ -10308,6 +10317,18 @@
       <Filter>Source files\Includes</Filter>
     </ClInclude>
     <ClInclude Include="OCC\inc\TColgp_SequenceOfAx1.hxx">
+      <Filter>Source files\Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BSplCLib\BSplCLib_Cache.hxx">
+      <Filter>Source files\Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BSplSLib\BSplSLib_Cache.hxx">
+      <Filter>Source files\Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\CSLib\CSLib_Offset.hxx">
+      <Filter>Source files\Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\NCollection\NCollection_CellFilterNDim.hxx">
       <Filter>Source files\Includes</Filter>
     </ClInclude>
   </ItemGroup>

@@ -504,6 +504,10 @@
     <ClInclude Include="OCC\inc\ShapeFix_FixSmallSolid.hxx" />
     <ClInclude Include="OCC\inc\TColgp_SequenceNodeOfSequenceOfAx1.hxx" />
     <ClInclude Include="OCC\inc\TColgp_SequenceOfAx1.hxx" />
+    <ClInclude Include="OCC\src\BSplCLib\BSplCLib_Cache.hxx" />
+    <ClInclude Include="OCC\src\BSplSLib\BSplSLib_Cache.hxx" />
+    <ClInclude Include="OCC\src\CSLib\CSLib_Offset.hxx" />
+    <ClInclude Include="OCC\src\NCollection\NCollection_CellFilterNDim.hxx" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="XbimCompound.h" />
     <ClInclude Include="XbimCurve.h" />
@@ -2171,6 +2175,15 @@
     </ClCompile>
     <ClCompile Include="OCC\src\BRepSweep\BRepSweep_NumLinearRegularSweep.cxx">
       <CompileAsManaged>false</CompileAsManaged>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BSplCLib\BSplCLib_Cache.cxx">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|x64'">false</CompileAsManaged>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BSplSLib\BSplSLib_Cache.cxx">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|x64'">false</CompileAsManaged>
+    </ClCompile>
+    <ClCompile Include="OCC\src\CSLib\CSLib_Offset.cxx">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release CarveCSG|x64'">false</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="OCC\src\Extrema\Extrema_ExtCC.cxx">
       <CompileAsManaged>false</CompileAsManaged>

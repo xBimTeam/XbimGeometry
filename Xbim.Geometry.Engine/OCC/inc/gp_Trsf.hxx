@@ -14,10 +14,8 @@
 #include <gp_TrsfForm.hxx>
 #include <gp_Mat.hxx>
 #include <gp_XYZ.hxx>
-#include <Standard_Storable.hxx>
 #include <Standard_Boolean.hxx>
 #include <Standard_Integer.hxx>
-#include <Standard_PrimitiveTypes.hxx>
 class Standard_ConstructionError;
 class Standard_OutOfRange;
 class gp_GTrsf;
@@ -31,8 +29,6 @@ class gp_Vec;
 class gp_XYZ;
 class gp_Mat;
 
-
-Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_Trsf);
 
 //! Defines a non-persistent transformation in 3D space.
 //! The following transformations are implemented :
@@ -55,7 +51,6 @@ Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_Trsf);
 //! This transformation never change the nature of the objects.
 class gp_Trsf 
 {
-
 public:
 
   DEFINE_STANDARD_ALLOC
@@ -193,6 +188,8 @@ public:
   //! Raises ConstructionError  If S is null.
   Standard_EXPORT   void SetScaleFactor (const Standard_Real S) ;
   
+  Standard_EXPORT   void SetForm (const gp_TrsfForm P) ;
+  
   //! Sets the coefficients  of the transformation.  The
   //! transformation  of the  point  x,y,z is  the point
   //! x',y',z' with :
@@ -313,12 +310,7 @@ public:
   
   //! Transformation of a triplet XYZ with a Trsf
       void Transforms (gp_XYZ& Coord)  const;
-    Standard_Real _CSFDB_Getgp_Trsfscale() const { return scale; }
-    void _CSFDB_Setgp_Trsfscale(const Standard_Real p) { scale = p; }
-    gp_TrsfForm _CSFDB_Getgp_Trsfshape() const { return shape; }
-    void _CSFDB_Setgp_Trsfshape(const gp_TrsfForm p) { shape = p; }
-    const gp_Mat& _CSFDB_Getgp_Trsfmatrix() const { return matrix; }
-    const gp_XYZ& _CSFDB_Getgp_Trsfloc() const { return loc; }
+
 
 friend class gp_GTrsf;
 
@@ -331,7 +323,9 @@ protected:
 
 
 
-private: 
+
+private:
+
 
 
   Standard_Real scale;

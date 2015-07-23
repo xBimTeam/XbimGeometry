@@ -14,11 +14,9 @@
 #include <gp_XYZ.hxx>
 #include <gp_TrsfForm.hxx>
 #include <Standard_Real.hxx>
-#include <Standard_Storable.hxx>
 #include <Standard_Integer.hxx>
 #include <Standard_Boolean.hxx>
 #include <gp_Trsf.hxx>
-#include <Standard_PrimitiveTypes.hxx>
 class Standard_ConstructionError;
 class Standard_OutOfRange;
 class gp_Trsf;
@@ -27,8 +25,6 @@ class gp_XYZ;
 class gp_Ax1;
 class gp_Ax2;
 
-
-Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_GTrsf);
 
 
 //! Defines a non-persistent transformation in 3D space.
@@ -63,7 +59,6 @@ Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_GTrsf);
 //! objects of this class respect the nature of geometric objects.
 class gp_GTrsf 
 {
-
 public:
 
   DEFINE_STANDARD_ALLOC
@@ -229,12 +224,7 @@ public:
       void Transforms (Standard_Real& X, Standard_Real& Y, Standard_Real& Z)  const;
   
       gp_Trsf Trsf()  const;
-    const gp_Mat& _CSFDB_Getgp_GTrsfmatrix() const { return matrix; }
-    const gp_XYZ& _CSFDB_Getgp_GTrsfloc() const { return loc; }
-    gp_TrsfForm _CSFDB_Getgp_GTrsfshape() const { return shape; }
-    void _CSFDB_Setgp_GTrsfshape(const gp_TrsfForm p) { shape = p; }
-    Standard_Real _CSFDB_Getgp_GTrsfscale() const { return scale; }
-    void _CSFDB_Setgp_GTrsfscale(const Standard_Real p) { scale = p; }
+
 
 
 
@@ -243,7 +233,9 @@ protected:
 
 
 
-private: 
+
+private:
+
 
 
   gp_Mat matrix;

@@ -11,11 +11,9 @@
 #include <Standard_Macro.hxx>
 
 #include <gp_XYZ.hxx>
-#include <Standard_Storable.hxx>
 #include <Standard_Real.hxx>
 #include <Standard_Integer.hxx>
 #include <Standard_Boolean.hxx>
-#include <Standard_PrimitiveTypes.hxx>
 class Standard_OutOfRange;
 class gp_XYZ;
 class gp_Ax1;
@@ -24,12 +22,9 @@ class gp_Trsf;
 class gp_Vec;
 
 
-Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_Pnt);
-
 //! Defines a 3D cartesian point.
 class gp_Pnt 
 {
-
 public:
 
   DEFINE_STANDARD_ALLOC
@@ -168,7 +163,7 @@ public:
       void Translate (const gp_Pnt& P1, const gp_Pnt& P2) ;
   
       gp_Pnt Translated (const gp_Pnt& P1, const gp_Pnt& P2)  const;
-    const gp_XYZ& _CSFDB_Getgp_Pntcoord() const { return coord; }
+
 
 
 
@@ -177,7 +172,9 @@ protected:
 
 
 
-private: 
+
+private:
+
 
 
   gp_XYZ coord;

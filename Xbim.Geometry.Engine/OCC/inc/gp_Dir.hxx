@@ -11,11 +11,9 @@
 #include <Standard_Macro.hxx>
 
 #include <gp_XYZ.hxx>
-#include <Standard_Storable.hxx>
 #include <Standard_Real.hxx>
 #include <Standard_Integer.hxx>
 #include <Standard_Boolean.hxx>
-#include <Standard_PrimitiveTypes.hxx>
 class Standard_ConstructionError;
 class Standard_DomainError;
 class Standard_OutOfRange;
@@ -25,8 +23,6 @@ class gp_Ax1;
 class gp_Ax2;
 class gp_Trsf;
 
-
-Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_Dir);
 
 
 //! Describes a unit vector in 3D space. This unit vector is also called "Direction".
@@ -38,7 +34,6 @@ Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_Dir);
 //! parametric equations of unit vectors.
 class gp_Dir 
 {
-
 public:
 
   DEFINE_STANDARD_ALLOC
@@ -257,7 +252,7 @@ public:
   //! If the scale factor of the "Trsf" T is negative then the
   //! direction <me> is reversed.
       gp_Dir Transformed (const gp_Trsf& T)  const;
-    const gp_XYZ& _CSFDB_Getgp_Dircoord() const { return coord; }
+
 
 
 
@@ -266,7 +261,9 @@ protected:
 
 
 
-private: 
+
+private:
+
 
 
   gp_XYZ coord;

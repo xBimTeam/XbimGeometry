@@ -11,7 +11,6 @@
 #include <Standard_Macro.hxx>
 
 #include <Standard_ShortReal.hxx>
-#include <Standard_Storable.hxx>
 #include <Quantity_NameOfColor.hxx>
 #include <Quantity_Parameter.hxx>
 #include <Quantity_TypeOfColor.hxx>
@@ -20,11 +19,8 @@
 #include <Standard_Boolean.hxx>
 #include <Standard_CString.hxx>
 #include <Standard_Integer.hxx>
-#include <Standard_PrimitiveTypes.hxx>
 class Quantity_ColorDefinitionError;
 
-
-Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(Quantity_Color);
 
 //! This class allows the definition of a colour.
 //! The names of the colours are from the X11 specification.
@@ -41,7 +37,6 @@ Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(Quantity_Color);
 //! identifies them by their name.
 class Quantity_Color 
 {
-
 public:
 
   DEFINE_STANDARD_ALLOC
@@ -226,12 +221,7 @@ public:
   
   //! Internal test
   Standard_EXPORT static   void Test() ;
-    Standard_ShortReal _CSFDB_GetQuantity_ColorMyRed() const { return MyRed; }
-    void _CSFDB_SetQuantity_ColorMyRed(const Standard_ShortReal p) { MyRed = p; }
-    Standard_ShortReal _CSFDB_GetQuantity_ColorMyGreen() const { return MyGreen; }
-    void _CSFDB_SetQuantity_ColorMyGreen(const Standard_ShortReal p) { MyGreen = p; }
-    Standard_ShortReal _CSFDB_GetQuantity_ColorMyBlue() const { return MyBlue; }
-    void _CSFDB_SetQuantity_ColorMyBlue(const Standard_ShortReal p) { MyBlue = p; }
+
 
 
 
@@ -240,7 +230,8 @@ protected:
 
 
 
-private: 
+
+private:
 
   
   //! Converts HLS components into RGB ones.
@@ -259,6 +250,7 @@ private:
   //! <R2> is the lightness between 0. and 1.
   //! <R3> is the saturation between 0. and 1.
   Standard_EXPORT static   void ValuesOf (const Quantity_NameOfColor AName, const Quantity_TypeOfColor AType, Standard_ShortReal& R1, Standard_ShortReal& R2, Standard_ShortReal& R3) ;
+
 
   Standard_ShortReal MyRed;
   Standard_ShortReal MyGreen;

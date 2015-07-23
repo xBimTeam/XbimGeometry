@@ -12,19 +12,14 @@
 
 #include <Standard_Boolean.hxx>
 #include <IntRes2d_IntersectionPoint.hxx>
-#include <Standard_Storable.hxx>
-#include <Standard_PrimitiveTypes.hxx>
 class Standard_DomainError;
 class IntRes2d_IntersectionPoint;
 
-
-Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(IntRes2d_IntersectionSegment);
 
 //! Definition of an intersection curve between
 //! two 2D curves.
 class IntRes2d_IntersectionSegment 
 {
-
 public:
 
   DEFINE_STANDARD_ALLOC
@@ -71,14 +66,7 @@ public:
   //! exception        DomainError     is   raised    if
   //! HasLastExtremity returns False.
      const  IntRes2d_IntersectionPoint& LastPoint()  const;
-    Standard_Boolean _CSFDB_GetIntRes2d_IntersectionSegmentoppos() const { return oppos; }
-    void _CSFDB_SetIntRes2d_IntersectionSegmentoppos(const Standard_Boolean p) { oppos = p; }
-    Standard_Boolean _CSFDB_GetIntRes2d_IntersectionSegmentfirst() const { return first; }
-    void _CSFDB_SetIntRes2d_IntersectionSegmentfirst(const Standard_Boolean p) { first = p; }
-    Standard_Boolean _CSFDB_GetIntRes2d_IntersectionSegmentlast() const { return last; }
-    void _CSFDB_SetIntRes2d_IntersectionSegmentlast(const Standard_Boolean p) { last = p; }
-    const IntRes2d_IntersectionPoint& _CSFDB_GetIntRes2d_IntersectionSegmentptfirst() const { return ptfirst; }
-    const IntRes2d_IntersectionPoint& _CSFDB_GetIntRes2d_IntersectionSegmentptlast() const { return ptlast; }
+
 
 
 
@@ -87,7 +75,9 @@ protected:
 
 
 
-private: 
+
+private:
+
 
 
   Standard_Boolean oppos;

@@ -67,6 +67,9 @@ public:
   //! equal to the range of the StartingPoint.
       void Location (math_Vector& Loc)  const;
   
+  //! Set boundaries.
+  Standard_EXPORT   void SetBoundary (const math_Vector& theLeftBorder, const math_Vector& theRightBorder) ;
+  
   //! returns the value of the minimum.
   //! Exception NotDone is raised if the minimum was not found.
       Standard_Real Minimum()  const;
@@ -111,6 +114,9 @@ protected:
   Standard_Integer nbiter;
   Standard_Boolean NoConvexTreatement;
   Standard_Boolean Convex;
+  Standard_Boolean myIsBoundsDefined;
+  math_Vector myLeft;
+  math_Vector myRight;
 
 
 private:

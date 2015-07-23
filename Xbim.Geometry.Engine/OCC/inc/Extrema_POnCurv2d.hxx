@@ -12,17 +12,12 @@
 
 #include <Standard_Real.hxx>
 #include <gp_Pnt2d.hxx>
-#include <Standard_Storable.hxx>
-#include <Standard_PrimitiveTypes.hxx>
 class gp_Pnt2d;
 
-
-Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(Extrema_POnCurv2d);
 
 
 class Extrema_POnCurv2d 
 {
-
 public:
 
   DEFINE_STANDARD_ALLOC
@@ -37,9 +32,7 @@ public:
      const  gp_Pnt2d& Value()  const;
   
       Standard_Real Parameter()  const;
-    Standard_Real _CSFDB_GetExtrema_POnCurv2dmyU() const { return myU; }
-    void _CSFDB_SetExtrema_POnCurv2dmyU(const Standard_Real p) { myU = p; }
-    const gp_Pnt2d& _CSFDB_GetExtrema_POnCurv2dmyP() const { return myP; }
+
 
 
 
@@ -48,7 +41,9 @@ protected:
 
 
 
-private: 
+
+private:
+
 
 
   Standard_Real myU;

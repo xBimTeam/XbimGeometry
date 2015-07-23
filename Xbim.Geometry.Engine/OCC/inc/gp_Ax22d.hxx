@@ -12,11 +12,9 @@
 
 #include <gp_Pnt2d.hxx>
 #include <gp_Dir2d.hxx>
-#include <Standard_Storable.hxx>
 #include <Standard_Boolean.hxx>
 #include <gp_Ax2d.hxx>
 #include <Standard_Real.hxx>
-#include <Standard_PrimitiveTypes.hxx>
 class Standard_ConstructionError;
 class gp_Pnt2d;
 class gp_Dir2d;
@@ -24,8 +22,6 @@ class gp_Ax2d;
 class gp_Trsf2d;
 class gp_Vec2d;
 
-
-Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_Ax22d);
 
 
 //! Describes a coordinate system in a plane (2D space).
@@ -47,7 +43,6 @@ Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_Ax22d);
 //! respectively, as their unit vectors.
 class gp_Ax22d 
 {
-
 public:
 
   DEFINE_STANDARD_ALLOC
@@ -205,9 +200,7 @@ public:
   //! Translates an axis placement from the point <P1> to the
   //! point <P2>.
       gp_Ax22d Translated (const gp_Pnt2d& P1, const gp_Pnt2d& P2)  const;
-    const gp_Pnt2d& _CSFDB_Getgp_Ax22dpoint() const { return point; }
-    const gp_Dir2d& _CSFDB_Getgp_Ax22dvydir() const { return vydir; }
-    const gp_Dir2d& _CSFDB_Getgp_Ax22dvxdir() const { return vxdir; }
+
 
 
 
@@ -216,7 +209,9 @@ protected:
 
 
 
-private: 
+
+private:
+
 
 
   gp_Pnt2d point;

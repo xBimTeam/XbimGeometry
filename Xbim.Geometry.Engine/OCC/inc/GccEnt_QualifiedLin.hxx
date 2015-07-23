@@ -12,13 +12,9 @@
 
 #include <GccEnt_Position.hxx>
 #include <gp_Lin2d.hxx>
-#include <Standard_Storable.hxx>
 #include <Standard_Boolean.hxx>
-#include <Standard_PrimitiveTypes.hxx>
 class gp_Lin2d;
 
-
-Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(GccEnt_QualifiedLin);
 
 //! Describes a qualified 2D line.
 //! A qualified 2D line is a line (gp_Lin2d line) with a
@@ -32,7 +28,6 @@ Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(GccEnt_QualifiedLin);
 //! moving from the start to the end of the curve).
 class GccEnt_QualifiedLin 
 {
-
 public:
 
   DEFINE_STANDARD_ALLOC
@@ -69,13 +64,7 @@ public:
   //! Returns true if the solution is Outside the Lin2d and false in
   //! the other cases.
   Standard_EXPORT   Standard_Boolean IsOutside()  const;
-GccEnt_QualifiedLin( )
-{
-  
-}
-    GccEnt_Position _CSFDB_GetGccEnt_QualifiedLinTheQualifier() const { return TheQualifier; }
-    void _CSFDB_SetGccEnt_QualifiedLinTheQualifier(const GccEnt_Position p) { TheQualifier = p; }
-    const gp_Lin2d& _CSFDB_GetGccEnt_QualifiedLinTheQualified() const { return TheQualified; }
+
 
 
 
@@ -84,7 +73,9 @@ protected:
 
 
 
-private: 
+
+private:
+
 
 
   GccEnt_Position TheQualifier;

@@ -19,7 +19,6 @@
 #include <Handle_TColStd_HArray1OfReal.hxx>
 #include <Handle_TColStd_HArray1OfInteger.hxx>
 #include <Standard_Real.hxx>
-#include <Standard_Mutex.hxx>
 #include <Geom_BoundedSurface.hxx>
 #include <Handle_Geom_Curve.hxx>
 #include <Handle_Geom_Geometry.hxx>
@@ -759,14 +758,6 @@ public:
   Standard_EXPORT   Standard_Boolean IsVRational()  const;
   
 
-  //! Tells whether the Cache is valid for the
-  //! given parameter
-  //! Warnings : the parameter must be normalized within
-  //! the period if the curve is periodic. Otherwise
-  //! the answer will be false
-  Standard_EXPORT   Standard_Boolean IsCacheValid (const Standard_Real UParameter, const Standard_Real VParameter)  const;
-  
-
   //! Returns the parametric bounds of the surface.
   //! Warnings :
   //! These parametric values are the bounds of the array of
@@ -844,6 +835,9 @@ public:
   //! is not equal to NbUpoles and NbVPoles.
   Standard_EXPORT   void Poles (TColgp_Array2OfPnt& P)  const;
   
+  //! Returns the poles of the B-spline surface.
+  Standard_EXPORT  const  TColgp_Array2OfPnt& Poles()  const;
+  
 
   //! Returns the degree of the normalized B-splines Ni,n in the U
   //! direction.
@@ -876,6 +870,9 @@ public:
   //! in the U direction.
   Standard_EXPORT   void UKnots (TColStd_Array1OfReal& Ku)  const;
   
+  //! Returns the knots in the U direction.
+  Standard_EXPORT  const  TColStd_Array1OfReal& UKnots()  const;
+  
   //! Returns the uknots sequence.
   //! In this sequence the knots with a multiplicity greater than 1
   //! are repeated.
@@ -884,6 +881,13 @@ public:
   //!
   //! Raised if the length of Ku is not equal to NbUPoles + UDegree + 1
   Standard_EXPORT   void UKnotSequence (TColStd_Array1OfReal& Ku)  const;
+  
+  //! Returns the uknots sequence.
+  //! In this sequence the knots with a multiplicity greater than 1
+  //! are repeated.
+  //! Example :
+  //! Ku = {k1, k1, k1, k2, k3, k3, k4, k4, k4}
+  Standard_EXPORT  const  TColStd_Array1OfReal& UKnotSequence()  const;
   
 
   //! Returns the multiplicity value of knot of range UIndex in
@@ -897,6 +901,9 @@ public:
   //! Raised if the length of Mu is not equal to the number of
   //! knots in the U direction.
   Standard_EXPORT   void UMultiplicities (TColStd_Array1OfInteger& Mu)  const;
+  
+  //! Returns the multiplicities of the knots in the U direction.
+  Standard_EXPORT  const  TColStd_Array1OfInteger& UMultiplicities()  const;
   
 
   //! Returns the degree of the normalized B-splines Ni,d in the
@@ -928,6 +935,9 @@ public:
   //! knots in the V direction.
   Standard_EXPORT   void VKnots (TColStd_Array1OfReal& Kv)  const;
   
+  //! Returns the knots in the V direction.
+  Standard_EXPORT  const  TColStd_Array1OfReal& VKnots()  const;
+  
   //! Returns the vknots sequence.
   //! In this sequence the knots with a multiplicity greater than 1
   //! are repeated.
@@ -936,6 +946,13 @@ public:
   //!
   //! Raised if the length of Kv is not equal to NbVPoles + VDegree + 1
   Standard_EXPORT   void VKnotSequence (TColStd_Array1OfReal& Kv)  const;
+  
+  //! Returns the vknots sequence.
+  //! In this sequence the knots with a multiplicity greater than 1
+  //! are repeated.
+  //! Example :
+  //! Ku = {k1, k1, k1, k2, k3, k3, k4, k4, k4}
+  Standard_EXPORT  const  TColStd_Array1OfReal& VKnotSequence()  const;
   
 
   //! Returns the multiplicity value of knot of range VIndex in
@@ -950,6 +967,9 @@ public:
   //! knots in the V direction.
   Standard_EXPORT   void VMultiplicities (TColStd_Array1OfInteger& Mv)  const;
   
+  //! Returns the multiplicities of the knots in the V direction.
+  Standard_EXPORT  const  TColStd_Array1OfInteger& VMultiplicities()  const;
+  
   //! Returns the weight value of range UIndex, VIndex.
   //!
   //! Raised if UIndex < 1 or UIndex > NbUPoles or VIndex < 1
@@ -960,8 +980,11 @@ public:
   //!
   //! Raised if the length of W in the U and V direction is
   //! not equal to NbUPoles and NbVPoles.
-  //! value and derivatives computation
   Standard_EXPORT   void Weights (TColStd_Array2OfReal& W)  const;
+  
+  //! Returns the weights of the B-spline surface.
+  //! value and derivatives computation
+  Standard_EXPORT  const  TColStd_Array2OfReal& Weights()  const;
   
   Standard_EXPORT   void D0 (const Standard_Real U, const Standard_Real V, gp_Pnt& P)  const;
   
@@ -1125,12 +1148,6 @@ private:
   //! Recompute  the  flatknots,  the knotsdistribution, the
   //! continuity for V.
   Standard_EXPORT   void UpdateVKnots() ;
-  
-  //! Invalidates the cache. This has to be private this has to be private
-  Standard_EXPORT   void InvalidateCache() ;
-  
-  //! updates the cache and validates it
-  Standard_EXPORT   void ValidateCache (const Standard_Real UParameter, const Standard_Real VParameter) ;
 
   Standard_Boolean urational;
   Standard_Boolean vrational;
@@ -1150,19 +1167,9 @@ private:
   Handle(TColStd_HArray1OfReal) vknots;
   Handle(TColStd_HArray1OfInteger) umults;
   Handle(TColStd_HArray1OfInteger) vmults;
-  Handle(TColgp_HArray2OfPnt) cachepoles;
-  Handle(TColStd_HArray2OfReal) cacheweights;
-  Standard_Real ucacheparameter;
-  Standard_Real vcacheparameter;
-  Standard_Real ucachespanlenght;
-  Standard_Real vcachespanlenght;
-  Standard_Integer ucachespanindex;
-  Standard_Integer vcachespanindex;
-  Standard_Integer validcache;
   Standard_Real umaxderivinv;
   Standard_Real vmaxderivinv;
   Standard_Boolean maxderivinvok;
-  Standard_Mutex myMutex;
 
 
 };

@@ -5,16 +5,7 @@
 
 #include <Extrema_POnCurv2d.hxx>
 
-#include <Standard_Type.hxx>
-
 #include <gp_Pnt2d.hxx>
-
-IMPLEMENT_STANDARD_TYPE(Extrema_POnCurv2d)
-IMPLEMENT_STANDARD_SUPERTYPE_ARRAY()
-  STANDARD_TYPE(Standard_Storable),
-
-IMPLEMENT_STANDARD_SUPERTYPE_ARRAY_END()
-IMPLEMENT_STANDARD_TYPE_END(Extrema_POnCurv2d)
  
 
 #define Pnt gp_Pnt2d

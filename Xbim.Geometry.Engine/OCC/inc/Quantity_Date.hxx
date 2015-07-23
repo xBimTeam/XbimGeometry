@@ -11,15 +11,11 @@
 #include <Standard_Macro.hxx>
 
 #include <Standard_Integer.hxx>
-#include <Standard_Storable.hxx>
 #include <Standard_Boolean.hxx>
-#include <Standard_PrimitiveTypes.hxx>
 class Quantity_DateDefinitionError;
 class Standard_OutOfRange;
 class Quantity_Period;
 
-
-Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(Quantity_Date);
 
 //! This class provides services to manage date information.
 //! A date represents the following time intervals:
@@ -32,7 +28,6 @@ Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(Quantity_Date);
 //! Note: a Period object gives the interval between two dates.
 class Quantity_Date 
 {
-
 public:
 
   DEFINE_STANDARD_ALLOC
@@ -171,10 +166,7 @@ public:
   //! The leap years are divisable by 4 and not by 100 except
   //! the years divisable by 400.
     static   Standard_Boolean IsLeap (const Standard_Integer yy) ;
-    Standard_Integer _CSFDB_GetQuantity_DatemySec() const { return mySec; }
-    void _CSFDB_SetQuantity_DatemySec(const Standard_Integer p) { mySec = p; }
-    Standard_Integer _CSFDB_GetQuantity_DatemyUSec() const { return myUSec; }
-    void _CSFDB_SetQuantity_DatemyUSec(const Standard_Integer p) { myUSec = p; }
+
 
 
 
@@ -183,7 +175,9 @@ protected:
 
 
 
-private: 
+
+private:
+
 
 
   Standard_Integer mySec;

@@ -11,11 +11,9 @@
 #include <Standard_Macro.hxx>
 
 #include <gp_XY.hxx>
-#include <Standard_Storable.hxx>
 #include <Standard_Real.hxx>
 #include <Standard_Integer.hxx>
 #include <Standard_Boolean.hxx>
-#include <Standard_PrimitiveTypes.hxx>
 class Standard_ConstructionError;
 class Standard_OutOfRange;
 class gp_VectorWithNullMagnitude;
@@ -26,13 +24,10 @@ class gp_Ax2d;
 class gp_Trsf2d;
 
 
-Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_Vec2d);
-
 
 //! Defines a non-persistent vector in 2D space.
 class gp_Vec2d 
 {
-
 public:
 
   DEFINE_STANDARD_ALLOC
@@ -47,7 +42,7 @@ public:
   //! Creates a vector with a doublet of coordinates.
     gp_Vec2d(const gp_XY& Coord);
   
-  //! Creates a point with its two cartesian coordinates.
+  //! Creates a point with its two Cartesian coordinates.
     gp_Vec2d(const Standard_Real Xv, const Standard_Real Yv);
   
 
@@ -214,13 +209,13 @@ public:
       void Reverse() ;
   
   //! Reverses the direction of a vector
-  //! Subtracts two vectors
       gp_Vec2d Reversed()  const;
     gp_Vec2d operator -()  const
 {
   return Reversed();
 }
   
+  //! Subtracts two vectors
       void Subtract (const gp_Vec2d& Right) ;
     void operator -= (const gp_Vec2d& Right) 
 {
@@ -235,38 +230,38 @@ public:
 }
   
 
-  //! <me> is setted to the following linear form :
+  //! <me> is set to the following linear form :
   //! A1 * V1 + A2 * V2 + V3
       void SetLinearForm (const Standard_Real A1, const gp_Vec2d& V1, const Standard_Real A2, const gp_Vec2d& V2, const gp_Vec2d& V3) ;
   
 
-  //! <me> is setted to the following linear form : A1 * V1 + A2 * V2
+  //! <me> is set to the following linear form : A1 * V1 + A2 * V2
       void SetLinearForm (const Standard_Real A1, const gp_Vec2d& V1, const Standard_Real A2, const gp_Vec2d& V2) ;
   
 
-  //! <me> is setted to the following linear form : A1 * V1 + V2
+  //! <me> is set to the following linear form : A1 * V1 + V2
       void SetLinearForm (const Standard_Real A1, const gp_Vec2d& V1, const gp_Vec2d& V2) ;
   
 
-  //! <me> is setted to the following linear form : Left + Right
-  //!
+  //! <me> is set to the following linear form : Left + Right
+      void SetLinearForm (const gp_Vec2d& Left, const gp_Vec2d& Right) ;
+  
+
   //! Performs the symmetrical transformation of a vector
   //! with respect to the vector V which is the center of
   //! the  symmetry.
-      void SetLinearForm (const gp_Vec2d& Left, const gp_Vec2d& Right) ;
-  
   Standard_EXPORT   void Mirror (const gp_Vec2d& V) ;
   
 
   //! Performs the symmetrical transformation of a vector
   //! with respect to the vector V which is the center of
   //! the  symmetry.
-  //!
+  Standard_EXPORT   gp_Vec2d Mirrored (const gp_Vec2d& V)  const;
+  
+
   //! Performs the symmetrical transformation of a vector
   //! with respect to an axis placement which is the axis
   //! of the symmetry.
-  Standard_EXPORT   gp_Vec2d Mirrored (const gp_Vec2d& V)  const;
-  
   Standard_EXPORT   void Mirror (const gp_Ax2d& A1) ;
   
 
@@ -291,7 +286,7 @@ public:
   
   //! Transforms a vector with a Trsf from gp.
       gp_Vec2d Transformed (const gp_Trsf2d& T)  const;
-    const gp_XY& _CSFDB_Getgp_Vec2dcoord() const { return coord; }
+
 
 
 
@@ -300,7 +295,9 @@ protected:
 
 
 
-private: 
+
+private:
+
 
 
   gp_XY coord;

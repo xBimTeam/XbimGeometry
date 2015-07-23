@@ -5,15 +5,6 @@
 
 #include <gp_Pnt2d.jxx>
 
-#include <Standard_Type.hxx>
-
-
-IMPLEMENT_STANDARD_TYPE(gp_Pnt2d)
-IMPLEMENT_STANDARD_SUPERTYPE_ARRAY()
-  STANDARD_TYPE(Standard_Storable),
-
-IMPLEMENT_STANDARD_SUPERTYPE_ARRAY_END()
-IMPLEMENT_STANDARD_TYPE_END(gp_Pnt2d)
  
 
 

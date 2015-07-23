@@ -14,9 +14,9 @@
 #include <BOPCol_DataMapOfShapeAddress.hxx>
 #include <BOPCol_DataMapOfTransientAddress.hxx>
 #include <Standard_Integer.hxx>
+#include <Standard_Real.hxx>
 #include <MMgt_TShared.hxx>
 #include <Handle_Geom_Curve.hxx>
-#include <Standard_Real.hxx>
 #include <TopAbs_State.hxx>
 #include <Standard_Boolean.hxx>
 class IntTools_FClass2d;
@@ -198,6 +198,11 @@ Standard_EXPORT virtual  ~IntTools_Context();
   //! Returns true if the solid <theFace> has
   //! infinite bounds
   Standard_EXPORT   Standard_Boolean IsInfiniteFace (const TopoDS_Face& theFace) ;
+  
+  //! Sets tolerance to be used for projection of point on surface.
+  //! Clears map of already cached projectors in order to maintain
+  //! correct value for all projectors
+  Standard_EXPORT   void SetPOnSProjectionTolerance (const Standard_Real theValue) ;
 
 
 
@@ -217,10 +222,14 @@ protected:
   BOPCol_DataMapOfShapeAddress myProjSDataMap;
   BOPCol_DataMapOfShapeAddress myBndBoxDataMap;
   Standard_Integer myCreateFlag;
+  Standard_Real myPOnSTolerance;
 
 
 private: 
 
+  
+  //! Clears map of already cached projectors.
+  Standard_EXPORT   void clearCachedPOnSProjectors() ;
 
 
 

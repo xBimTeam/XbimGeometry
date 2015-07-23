@@ -12,10 +12,8 @@
 
 #include <gp_Ax3.hxx>
 #include <Standard_Real.hxx>
-#include <Standard_Storable.hxx>
 #include <Standard_Boolean.hxx>
 #include <gp_Ax1.hxx>
-#include <Standard_PrimitiveTypes.hxx>
 class Standard_ConstructionError;
 class Standard_DimensionError;
 class gp_Ax3;
@@ -26,8 +24,6 @@ class gp_Ax2;
 class gp_Trsf;
 class gp_Vec;
 
-
-Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_Torus);
 
 
 //! Describes a torus.
@@ -64,7 +60,6 @@ Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_Torus);
 //! with the parametric equations of tori.
 class gp_Torus 
 {
-
 public:
 
   DEFINE_STANDARD_ALLOC
@@ -218,11 +213,7 @@ public:
 
   //! Translates a torus from the point P1 to the point P2.
       gp_Torus Translated (const gp_Pnt& P1, const gp_Pnt& P2)  const;
-    const gp_Ax3& _CSFDB_Getgp_Toruspos() const { return pos; }
-    Standard_Real _CSFDB_Getgp_TorusmajorRadius() const { return majorRadius; }
-    void _CSFDB_Setgp_TorusmajorRadius(const Standard_Real p) { majorRadius = p; }
-    Standard_Real _CSFDB_Getgp_TorusminorRadius() const { return minorRadius; }
-    void _CSFDB_Setgp_TorusminorRadius(const Standard_Real p) { minorRadius = p; }
+
 
 
 
@@ -231,7 +222,9 @@ protected:
 
 
 
-private: 
+
+private:
+
 
 
   gp_Ax3 pos;

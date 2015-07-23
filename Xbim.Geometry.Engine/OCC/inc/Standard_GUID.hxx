@@ -13,7 +13,6 @@
 #include <Standard_Integer.hxx>
 #include <Standard_ExtCharacter.hxx>
 #include <Standard_Byte.hxx>
-#include <Standard_Storable.hxx>
 #include <Standard_CString.hxx>
 #include <Standard_ExtString.hxx>
 #include <Standard_UUID.hxx>
@@ -21,15 +20,11 @@
 #include <Standard_PExtCharacter.hxx>
 #include <Standard_Boolean.hxx>
 #include <Standard_OStream.hxx>
-#include <Standard_PrimitiveTypes.hxx>
 
-
-Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(Standard_GUID);
 
 
 class Standard_GUID 
 {
-
 public:
 
   DEFINE_STANDARD_ALLOC
@@ -112,26 +107,7 @@ public:
   
   //! Returns True  when the two GUID are the same.
   Standard_EXPORT static   Standard_Boolean IsEqual (const Standard_GUID& string1, const Standard_GUID& string2) ;
-    Standard_Integer _CSFDB_GetStandard_GUIDmy32b() const { return my32b; }
-    void _CSFDB_SetStandard_GUIDmy32b(const Standard_Integer p) { my32b = p; }
-    Standard_ExtCharacter _CSFDB_GetStandard_GUIDmy16b1() const { return my16b1; }
-    void _CSFDB_SetStandard_GUIDmy16b1(const Standard_ExtCharacter p) { my16b1 = p; }
-    Standard_ExtCharacter _CSFDB_GetStandard_GUIDmy16b2() const { return my16b2; }
-    void _CSFDB_SetStandard_GUIDmy16b2(const Standard_ExtCharacter p) { my16b2 = p; }
-    Standard_ExtCharacter _CSFDB_GetStandard_GUIDmy16b3() const { return my16b3; }
-    void _CSFDB_SetStandard_GUIDmy16b3(const Standard_ExtCharacter p) { my16b3 = p; }
-    Standard_Byte _CSFDB_GetStandard_GUIDmy8b1() const { return my8b1; }
-    void _CSFDB_SetStandard_GUIDmy8b1(const Standard_Byte p) { my8b1 = p; }
-    Standard_Byte _CSFDB_GetStandard_GUIDmy8b2() const { return my8b2; }
-    void _CSFDB_SetStandard_GUIDmy8b2(const Standard_Byte p) { my8b2 = p; }
-    Standard_Byte _CSFDB_GetStandard_GUIDmy8b3() const { return my8b3; }
-    void _CSFDB_SetStandard_GUIDmy8b3(const Standard_Byte p) { my8b3 = p; }
-    Standard_Byte _CSFDB_GetStandard_GUIDmy8b4() const { return my8b4; }
-    void _CSFDB_SetStandard_GUIDmy8b4(const Standard_Byte p) { my8b4 = p; }
-    Standard_Byte _CSFDB_GetStandard_GUIDmy8b5() const { return my8b5; }
-    void _CSFDB_SetStandard_GUIDmy8b5(const Standard_Byte p) { my8b5 = p; }
-    Standard_Byte _CSFDB_GetStandard_GUIDmy8b6() const { return my8b6; }
-    void _CSFDB_SetStandard_GUIDmy8b6(const Standard_Byte p) { my8b6 = p; }
+
 
 
 
@@ -140,7 +116,9 @@ protected:
 
 
 
-private: 
+
+private:
+
 
 
   Standard_Integer my32b;

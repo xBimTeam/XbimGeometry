@@ -11,16 +11,11 @@
 #include <Standard_Macro.hxx>
 
 #include <Draw_ColorKind.hxx>
-#include <Standard_Storable.hxx>
-#include <Standard_PrimitiveTypes.hxx>
 
-
-Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(Draw_Color);
 
 
 class Draw_Color 
 {
-
 public:
 
   DEFINE_STANDARD_ALLOC
@@ -31,8 +26,7 @@ public:
   Standard_EXPORT Draw_Color(const Draw_ColorKind c);
   
   Standard_EXPORT   Draw_ColorKind ID()  const;
-    Draw_ColorKind _CSFDB_GetDraw_ColormyKind() const { return myKind; }
-    void _CSFDB_SetDraw_ColormyKind(const Draw_ColorKind p) { myKind = p; }
+
 
 
 
@@ -41,7 +35,9 @@ protected:
 
 
 
-private: 
+
+private:
+
 
 
   Draw_ColorKind myKind;

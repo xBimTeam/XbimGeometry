@@ -14,10 +14,8 @@
 #include <gp_XY.hxx>
 #include <gp_TrsfForm.hxx>
 #include <Standard_Real.hxx>
-#include <Standard_Storable.hxx>
 #include <Standard_Integer.hxx>
 #include <Standard_Boolean.hxx>
-#include <Standard_PrimitiveTypes.hxx>
 class Standard_ConstructionError;
 class Standard_OutOfRange;
 class gp_Trsf2d;
@@ -25,8 +23,6 @@ class gp_Mat2d;
 class gp_XY;
 class gp_Ax2d;
 
-
-Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_GTrsf2d);
 
 
 //! Defines a non persistent transformation in 2D space.
@@ -61,7 +57,6 @@ Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_GTrsf2d);
 //! objects of this class respect the nature of geometric objects.
 class gp_GTrsf2d 
 {
-
 public:
 
   DEFINE_STANDARD_ALLOC
@@ -218,12 +213,7 @@ public:
   //! Standard_ConstructionError if this transformation
   //! cannot be converted, i.e. if its form is gp_Other.
   Standard_EXPORT   gp_Trsf2d Trsf2d()  const;
-    const gp_Mat2d& _CSFDB_Getgp_GTrsf2dmatrix() const { return matrix; }
-    const gp_XY& _CSFDB_Getgp_GTrsf2dloc() const { return loc; }
-    gp_TrsfForm _CSFDB_Getgp_GTrsf2dshape() const { return shape; }
-    void _CSFDB_Setgp_GTrsf2dshape(const gp_TrsfForm p) { shape = p; }
-    Standard_Real _CSFDB_Getgp_GTrsf2dscale() const { return scale; }
-    void _CSFDB_Setgp_GTrsf2dscale(const Standard_Real p) { scale = p; }
+
 
 
 
@@ -232,7 +222,9 @@ protected:
 
 
 
-private: 
+
+private:
+
 
 
   gp_Mat2d matrix;

@@ -12,11 +12,9 @@
 
 #include <gp_Ax22d.hxx>
 #include <Standard_Real.hxx>
-#include <Standard_Storable.hxx>
 #include <Standard_Boolean.hxx>
 #include <gp_Ax2d.hxx>
 #include <gp_Pnt2d.hxx>
-#include <Standard_PrimitiveTypes.hxx>
 class Standard_ConstructionError;
 class gp_Ax2d;
 class gp_Ax22d;
@@ -24,8 +22,6 @@ class gp_Pnt2d;
 class gp_Trsf2d;
 class gp_Vec2d;
 
-
-Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_Elips2d);
 
 
 //! Describes an ellipse in the plane (2D space).
@@ -48,7 +44,6 @@ Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_Elips2d);
 //! parametric equations of ellipses
 class gp_Elips2d 
 {
-
 public:
 
   DEFINE_STANDARD_ALLOC
@@ -241,11 +236,7 @@ public:
 
   //! Translates a ellipse from the point P1 to the point P2.
   Standard_EXPORT   gp_Elips2d Translated (const gp_Pnt2d& P1, const gp_Pnt2d& P2)  const;
-    const gp_Ax22d& _CSFDB_Getgp_Elips2dpos() const { return pos; }
-    Standard_Real _CSFDB_Getgp_Elips2dmajorRadius() const { return majorRadius; }
-    void _CSFDB_Setgp_Elips2dmajorRadius(const Standard_Real p) { majorRadius = p; }
-    Standard_Real _CSFDB_Getgp_Elips2dminorRadius() const { return minorRadius; }
-    void _CSFDB_Setgp_Elips2dminorRadius(const Standard_Real p) { minorRadius = p; }
+
 
 
 
@@ -254,7 +245,9 @@ protected:
 
 
 
-private: 
+
+private:
+
 
 
   gp_Ax22d pos;

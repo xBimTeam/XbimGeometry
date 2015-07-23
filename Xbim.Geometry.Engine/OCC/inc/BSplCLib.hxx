@@ -30,6 +30,7 @@ class gp_Vec2d;
 class math_Matrix;
 class TColStd_HArray1OfReal;
 class TColStd_HArray1OfInteger;
+class TColStd_Array2OfReal;
 
 
 //! BSplCLib   B-spline curve Library.
@@ -215,7 +216,7 @@ public:
   //! + 2 * Degree
   Standard_EXPORT static   Standard_Integer KnotSequenceLength (const TColStd_Array1OfInteger& Mults, const Standard_Integer Degree, const Standard_Boolean Periodic) ;
   
-  Standard_EXPORT static   void KnotSequence (const TColStd_Array1OfReal& Knots, const TColStd_Array1OfInteger& Mults, TColStd_Array1OfReal& KnotSeq) ;
+  Standard_EXPORT static   void KnotSequence (const TColStd_Array1OfReal& Knots, const TColStd_Array1OfInteger& Mults, TColStd_Array1OfReal& KnotSeq, const Standard_Boolean Periodic = Standard_False) ;
   
   //! Computes  the  sequence   of knots KnotSeq  with
   //! repetition  of the  knots  of multiplicity  greater
@@ -691,7 +692,7 @@ public:
   //! value of Nth derivative of first non vanishing
   //! Bspline function which has Index FirstNonZeroBsplineIndex
   //! if N <= DerivativeOrder + 1
-  Standard_EXPORT static   Standard_Integer EvalBsplineBasis (const Standard_Integer Side, const Standard_Integer DerivativeOrder, const Standard_Integer Order, const TColStd_Array1OfReal& FlatKnots, const Standard_Real Parameter, Standard_Integer& FirstNonZeroBsplineIndex, math_Matrix& BsplineBasis) ;
+  Standard_EXPORT static   Standard_Integer EvalBsplineBasis (const Standard_Integer Side, const Standard_Integer DerivativeOrder, const Standard_Integer Order, const TColStd_Array1OfReal& FlatKnots, const Standard_Real Parameter, Standard_Integer& FirstNonZeroBsplineIndex, math_Matrix& BsplineBasis, const Standard_Boolean isPeriodic = Standard_False) ;
   
   //! This Builds   a fully  blown   Matrix of
   //! (ni)
@@ -1174,6 +1175,16 @@ public:
   //! If rational computes the homogeneous Taylor expension
   //! for the numerator and stores it in CachePoles
   Standard_EXPORT static   void BuildCache (const Standard_Real U, const Standard_Real InverseOfSpanDomain, const Standard_Boolean PeriodicFlag, const Standard_Integer Degree, const TColStd_Array1OfReal& FlatKnots, const TColgp_Array1OfPnt2d& Poles, const TColStd_Array1OfReal& Weights, TColgp_Array1OfPnt2d& CachePoles, TColStd_Array1OfReal& CacheWeights) ;
+  
+  //! Perform the evaluation of the Taylor expansion
+  //! of the Bspline normalized between 0 and 1.
+  //! Structure of result optimized for BSplCLib_Cache.
+  Standard_EXPORT static   void BuildCache (const Standard_Real theParameter, const Standard_Real theSpanDomain, const Standard_Boolean thePeriodicFlag, const Standard_Integer theDegree, const TColStd_Array1OfReal& theFlatKnots, const TColgp_Array1OfPnt& thePoles, const TColStd_Array1OfReal& theWeights, TColStd_Array2OfReal& theCacheArray) ;
+  
+  //! Perform the evaluation of the Taylor expansion
+  //! of the Bspline normalized between 0 and 1.
+  //! Structure of result optimized for BSplCLib_Cache.
+  Standard_EXPORT static   void BuildCache (const Standard_Real theParameter, const Standard_Real theSpanDomain, const Standard_Boolean thePeriodicFlag, const Standard_Integer theDegree, const TColStd_Array1OfReal& theFlatKnots, const TColgp_Array1OfPnt2d& thePoles, const TColStd_Array1OfReal& theWeights, TColStd_Array2OfReal& theCacheArray) ;
   
     static   void PolesCoefficients (const TColgp_Array1OfPnt2d& Poles, TColgp_Array1OfPnt2d& CachePoles) ;
   

@@ -5,15 +5,6 @@
 
 #include <IntRes2d_Transition.jxx>
 
-#include <Standard_Type.hxx>
-
-
-IMPLEMENT_STANDARD_TYPE(IntRes2d_Transition)
-IMPLEMENT_STANDARD_SUPERTYPE_ARRAY()
-  STANDARD_TYPE(Standard_Storable),
-
-IMPLEMENT_STANDARD_SUPERTYPE_ARRAY_END()
-IMPLEMENT_STANDARD_TYPE_END(IntRes2d_Transition)
  
 
 

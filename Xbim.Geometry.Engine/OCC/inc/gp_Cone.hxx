@@ -12,11 +12,9 @@
 
 #include <gp_Ax3.hxx>
 #include <Standard_Real.hxx>
-#include <Standard_Storable.hxx>
 #include <gp_Pnt.hxx>
 #include <Standard_Boolean.hxx>
 #include <gp_Ax1.hxx>
-#include <Standard_PrimitiveTypes.hxx>
 class Standard_ConstructionError;
 class gp_Ax3;
 class gp_Ax1;
@@ -25,8 +23,6 @@ class gp_Ax2;
 class gp_Trsf;
 class gp_Vec;
 
-
-Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_Cone);
 
 
 //! Defines an infinite conical surface.
@@ -60,7 +56,6 @@ Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_Cone);
 //! with the parametric equations of cones gp_Ax3
 class gp_Cone 
 {
-
 public:
 
   DEFINE_STANDARD_ALLOC
@@ -206,11 +201,7 @@ public:
 
   //! Translates a cone from the point P1 to the point P2.
       gp_Cone Translated (const gp_Pnt& P1, const gp_Pnt& P2)  const;
-    const gp_Ax3& _CSFDB_Getgp_Conepos() const { return pos; }
-    Standard_Real _CSFDB_Getgp_Coneradius() const { return radius; }
-    void _CSFDB_Setgp_Coneradius(const Standard_Real p) { radius = p; }
-    Standard_Real _CSFDB_Getgp_ConesemiAngle() const { return semiAngle; }
-    void _CSFDB_Setgp_ConesemiAngle(const Standard_Real p) { semiAngle = p; }
+
 
 
 
@@ -219,7 +210,9 @@ protected:
 
 
 
-private: 
+
+private:
+
 
 
   gp_Ax3 pos;

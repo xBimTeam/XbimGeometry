@@ -12,13 +12,9 @@
 
 #include <gp_Circ2d.hxx>
 #include <GccEnt_Position.hxx>
-#include <Standard_Storable.hxx>
 #include <Standard_Boolean.hxx>
-#include <Standard_PrimitiveTypes.hxx>
 class gp_Circ2d;
 
-
-Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(GccEnt_QualifiedCirc);
 
 //! Creates a qualified 2d Circle.
 //! A qualified 2D circle is a circle (gp_Circ2d circle) with a
@@ -30,7 +26,6 @@ Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(GccEnt_QualifiedCirc)
 //! -   is undefined (all solutions apply).
 class GccEnt_QualifiedCirc 
 {
-
 public:
 
   DEFINE_STANDARD_ALLOC
@@ -72,13 +67,7 @@ public:
   //! construction algorithm using this qualified circle and the
   //! circle are external to one another.
   Standard_EXPORT   Standard_Boolean IsOutside()  const;
-GccEnt_QualifiedCirc( )
-{
-  
-}
-    const gp_Circ2d& _CSFDB_GetGccEnt_QualifiedCircTheQualified() const { return TheQualified; }
-    GccEnt_Position _CSFDB_GetGccEnt_QualifiedCircTheQualifier() const { return TheQualifier; }
-    void _CSFDB_SetGccEnt_QualifiedCircTheQualifier(const GccEnt_Position p) { TheQualifier = p; }
+
 
 
 
@@ -87,7 +76,9 @@ protected:
 
 
 
-private: 
+
+private:
+
 
 
   gp_Circ2d TheQualified;

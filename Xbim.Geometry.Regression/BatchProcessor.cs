@@ -7,6 +7,7 @@ using Xbim.IO;
 using Xbim.ModelGeometry.Scene;
 using Xbim.XbimExtensions.Interfaces;
 using System.Collections.Generic;
+using log4net;
 using Xbim.Ifc2x3.Kernel;
 using Xbim.Ifc2x3.GeometricModelResource;
 using Xbim.Ifc2x3.GeometryResource;
@@ -20,8 +21,8 @@ namespace XbimRegression
     /// </summary>
     public class BatchProcessor
     {
-        private static readonly ILogger Logger = LoggerFactory.GetLogger();
-        private static Object thisLock = new Object();
+        private ILogger Logger;
+        
         Params _params;
 
         public BatchProcessor(Params arguments)
@@ -40,6 +41,7 @@ namespace XbimRegression
 
         public void Run()
         {
+            Logger = LoggerFactory.GetLogger();
             DirectoryInfo di = new DirectoryInfo(Params.TestFileRoot);
 
             String resultsFile = Path.Combine(Params.TestFileRoot, String.Format("XbimRegression_{0:yyyyMMdd-hhmmss}.csv", DateTime.Now));
@@ -70,7 +72,10 @@ namespace XbimRegression
                 //);
                 writer.Close();
             }
+            
             Console.WriteLine("Finished. Press Enter to continue...");
+            LogManager.Shutdown();
+            Logger = null;
             Console.ReadLine();
         }
 
@@ -95,8 +100,8 @@ namespace XbimRegression
                         //    XbimMesher.GenerateGeometry(model, Logger, null);
                         //else
                         //{
-                            Xbim3DModelContext context = new Xbim3DModelContext(model);
-                            context.CreateContext(XbimGeometryType.PolyhedronBinary);
+                        Xbim3DModelContext context = new Xbim3DModelContext(model);
+                        context.CreateContext(XbimGeometryType.PolyhedronBinary);
                         //}
                         geomTime = watch.ElapsedMilliseconds - parseTime;
                         //XbimSceneBuilder sb = new XbimSceneBuilder();
@@ -148,11 +153,10 @@ namespace XbimRegression
                         CreateLogFile(ifcFile, eventTrace.Events);
                     }
 
-                    lock (thisLock)
-                    {
+                  
                         writer.WriteLine(result.ToCsv());
                         writer.Flush();
-                    }
+                   
                 }
                 return result;
             }
@@ -212,7 +216,7 @@ namespace XbimRegression
             }
             return length;
         }
-        private static void CreateLogFile(string ifcFile, IList<Event> events)
+        private void CreateLogFile(string ifcFile, IList<Event> events)
         {
             try
             {
@@ -240,7 +244,7 @@ namespace XbimRegression
             }
         }
 
-        private static string SanitiseMessage(string message, string ifcFileName)
+        private  string SanitiseMessage(string message, string ifcFileName)
         {
             string modelPath = Path.GetDirectoryName(ifcFileName);
             string currentPath = Environment.CurrentDirectory;

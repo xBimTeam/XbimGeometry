@@ -11,11 +11,9 @@
 #include <Standard_Macro.hxx>
 
 #include <gp_Ax3.hxx>
-#include <Standard_Storable.hxx>
 #include <Standard_Real.hxx>
 #include <Standard_Boolean.hxx>
 #include <gp_Ax1.hxx>
-#include <Standard_PrimitiveTypes.hxx>
 class Standard_ConstructionError;
 class gp_Ax3;
 class gp_Pnt;
@@ -26,8 +24,6 @@ class gp_Ax2;
 class gp_Trsf;
 class gp_Vec;
 
-
-Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_Pln);
 
 //! Describes a plane.
 //! A plane is positioned in space with a coordinate system
@@ -52,7 +48,6 @@ Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_Pln);
 //! parametric equations of planes
 class gp_Pln 
 {
-
 public:
 
   DEFINE_STANDARD_ALLOC
@@ -235,7 +230,7 @@ public:
 
   //! Translates a plane from the point P1 to the point P2.
       gp_Pln Translated (const gp_Pnt& P1, const gp_Pnt& P2)  const;
-    const gp_Ax3& _CSFDB_Getgp_Plnpos() const { return pos; }
+
 
 
 
@@ -244,7 +239,9 @@ protected:
 
 
 
-private: 
+
+private:
+
 
 
   gp_Ax3 pos;

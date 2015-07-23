@@ -73,6 +73,7 @@ void BSplCLib::Hunt (const Array1OfReal& XX,
 {
   // replaced by simple dichotomy (RLE)
   Ilc = XX.Lower();
+  if (XX.Length() <= 1) return;
   const Standard_Real *px = &XX(Ilc);
   px -= Ilc;
 
@@ -274,6 +275,10 @@ void BSplCLib::LocateParameter
 
     while (val <= Eps) {
       KnotIndex++;
+
+      if(KnotIndex >= Knots.Upper())
+        break;
+
       K1 = K2;
       K2 = knots[KnotIndex + 1];
       val = K2 - K1;
@@ -430,9 +435,10 @@ Standard_Integer BSplCLib::KnotSequenceLength
 void BSplCLib::KnotSequence 
 (const TColStd_Array1OfReal&    Knots,
  const TColStd_Array1OfInteger& Mults,
- TColStd_Array1OfReal&          KnotSeq)
+ TColStd_Array1OfReal&          KnotSeq,
+ const Standard_Boolean         Periodic)
 {
-  BSplCLib::KnotSequence(Knots,Mults,0,Standard_False,KnotSeq);
+  BSplCLib::KnotSequence(Knots,Mults,0,Periodic,KnotSeq);
 }
 
 //=======================================================================

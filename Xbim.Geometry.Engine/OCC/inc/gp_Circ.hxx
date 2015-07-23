@@ -12,10 +12,8 @@
 
 #include <gp_Ax2.hxx>
 #include <Standard_Real.hxx>
-#include <Standard_Storable.hxx>
 #include <gp_Ax1.hxx>
 #include <Standard_Boolean.hxx>
-#include <Standard_PrimitiveTypes.hxx>
 class Standard_ConstructionError;
 class gp_Ax2;
 class gp_Ax1;
@@ -23,8 +21,6 @@ class gp_Pnt;
 class gp_Trsf;
 class gp_Vec;
 
-
-Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_Circ);
 
 
 //! Describes a circle in 3D space.
@@ -55,7 +51,6 @@ Standard_EXPORT const Handle(Standard_Type)& STANDARD_TYPE(gp_Circ);
 //! parametric equations of circles
 class gp_Circ 
 {
-
 public:
 
   DEFINE_STANDARD_ALLOC
@@ -202,9 +197,7 @@ public:
 
   //! Translates a circle from the point P1 to the point P2.
       gp_Circ Translated (const gp_Pnt& P1, const gp_Pnt& P2)  const;
-    const gp_Ax2& _CSFDB_Getgp_Circpos() const { return pos; }
-    Standard_Real _CSFDB_Getgp_Circradius() const { return radius; }
-    void _CSFDB_Setgp_Circradius(const Standard_Real p) { radius = p; }
+
 
 
 
@@ -213,7 +206,9 @@ protected:
 
 
 
-private: 
+
+private:
+
 
 
   gp_Ax2 pos;
