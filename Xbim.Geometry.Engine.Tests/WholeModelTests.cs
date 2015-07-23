@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Xbim.Common.Logging;
@@ -15,6 +17,7 @@ using Xbim.Ifc2x3.PresentationResource;
 using Xbim.Ifc2x3.ProductExtension;
 using Xbim.IO;
 using Xbim.ModelGeometry.Scene;
+using Xbim.XbimExtensions;
 using Xbim.XbimExtensions.SelectTypes;
 using XbimGeometry.Interfaces;
 
@@ -26,11 +29,40 @@ namespace GeometryTests
     /// 
     [DeploymentItem(@"x64\", "x64")]
     [DeploymentItem(@"x86\", "x86")]
+    [DeploymentItem(@"EsentTestFiles\", "EsentTestFiles")]
     [DeploymentItem(@"SolidTestFiles\", "SolidTestFiles")]
     [TestClass]
     public class WholeModelTests
     {
         private readonly XbimGeometryEngine _xbimGeometryCreator = new XbimGeometryEngine();
+
+
+        [TestMethod]
+        public void TestShapeGeometriesEnumerability()
+        {
+            using (var model = new XbimModel())
+            {
+                model.Open(@"EsentTestFiles\TwoWalls.xbim");
+                var geomContext = new Xbim3DModelContext(model);
+                
+                var lst = new Dictionary<int, int>();
+
+                // ShapeGeometries does not have duplicates...
+                lst.Clear();
+                foreach (var g1 in geomContext.ShapeGeometries())
+                {
+                    lst.Add(g1.ShapeLabel, g1.IfcShapeLabel);
+                }
+
+                // ... so it shouldn't even through the ToArray() function.
+                lst.Clear();
+                foreach (var g1 in geomContext.ShapeGeometries().ToArray())
+                {
+                    lst.Add(g1.ShapeLabel, g1.IfcShapeLabel);
+                }    
+            }
+        }
+
 
         [TestMethod]
         public void WriteDpoWOutputFiles()

@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>XbimRegression</RootNamespace>
     <AssemblyName>XbimRegression</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
@@ -53,33 +53,41 @@
     <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>XbimOpenSourceKeyFile.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Esent.Interop">
+    <Reference Include="Esent.Interop, Version=1.9.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\ManagedEsent.1.9.2.0\lib\net40\Esent.Interop.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="ICSharpCode.SharpZipLib, Version=0.86.0.518, Culture=neutral, PublicKeyToken=1b03e6acf1164f73, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="log4net">
+    <Reference Include="log4net, Version=1.2.13.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="Xbim.Common, Version=3.0.5625.38218, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xbim.Essentials.3.0.23\lib\net45\Xbim.Common.dll</HintPath>
+    <Reference Include="Xbim.Common, Version=3.0.5672.25656, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
+      <HintPath>..\packages\Xbim.Essentials.3.1.0\lib\net40\Xbim.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Xbim.Ifc.Extensions, Version=3.0.5625.38220, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xbim.Essentials.3.0.23\lib\net45\Xbim.Ifc.Extensions.dll</HintPath>
+    <Reference Include="Xbim.Ifc.Extensions, Version=3.0.5672.25686, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
+      <HintPath>..\packages\Xbim.Essentials.3.1.0\lib\net40\Xbim.Ifc.Extensions.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Xbim.Ifc2x3, Version=3.0.5625.38218, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xbim.Essentials.3.0.23\lib\net45\Xbim.Ifc2x3.dll</HintPath>
+    <Reference Include="Xbim.Ifc2x3, Version=3.0.5672.25673, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
+      <HintPath>..\packages\Xbim.Essentials.3.1.0\lib\net40\Xbim.Ifc2x3.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Xbim.IO, Version=3.0.5625.38221, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xbim.Essentials.3.0.23\lib\net45\Xbim.IO.dll</HintPath>
+    <Reference Include="Xbim.IO, Version=3.0.5672.25691, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
+      <HintPath>..\packages\Xbim.Essentials.3.1.0\lib\net40\Xbim.IO.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>
@@ -104,6 +112,7 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="packages.config" />
+    <None Include="XbimOpenSourceKeyFile.snk" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

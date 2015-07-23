@@ -1245,6 +1245,7 @@ namespace Xbim.ModelGeometry.Scene
                             do
                             {
                                 yield return (XbimShapeInstance)shapeInstance;
+                                shapeInstance = new XbimShapeInstance();
                             } while (shapeInstanceTable.TryMoveNextShapeInstance(ref shapeInstance));
                         }
                     }
@@ -1318,6 +1319,7 @@ namespace Xbim.ModelGeometry.Scene
                         do
                         {
                             yield return (XbimShapeGeometry)shapeGeometry;
+                            shapeGeometry = new XbimShapeGeometry();
                         } while (shapeGeometryTable.TryMoveNextShapeGeometry(ref shapeGeometry));
                     }
 
@@ -1474,9 +1476,15 @@ namespace Xbim.ModelGeometry.Scene
                             do
                             {
                                 if (context.EntityLabel == shapeInstance.RepresentationContext &&
-                                    shapeInstance.RepresentationType != (byte)XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded &&
-                                    !(ignoreFeatures && typeof(IfcFeatureElement).IsAssignableFrom(IfcMetaData.GetType(shapeInstance.IfcTypeId))))
-                                    yield return (XbimShapeInstance)shapeInstance;
+                                    shapeInstance.RepresentationType !=
+                                    (byte) XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded &&
+                                    !(ignoreFeatures &&
+                                      typeof (IfcFeatureElement).IsAssignableFrom(
+                                          IfcMetaData.GetType(shapeInstance.IfcTypeId))))
+                                {
+                                    yield return (XbimShapeInstance) shapeInstance;
+                                    shapeInstance = new XbimShapeInstance();
+                                }
                             } while (shapeInstanceTable.TryMoveNextShapeInstance(ref shapeInstance));
                         }
                     }
@@ -1503,10 +1511,15 @@ namespace Xbim.ModelGeometry.Scene
                             {
 
                                 if (context.EntityLabel == shapeInstance.RepresentationContext &&
-                                    shapeInstance.RepresentationType != (byte)XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded &&
-                                    !(ignoreFeatures && typeof(IfcFeatureElement).IsAssignableFrom(IfcMetaData.GetType(shapeInstance.IfcTypeId))))
-                                    yield return (XbimShapeInstance)shapeInstance;
-                                shapeInstance = new XbimShapeInstance();
+                                    shapeInstance.RepresentationType !=
+                                    (byte) XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded &&
+                                    !(ignoreFeatures &&
+                                      typeof (IfcFeatureElement).IsAssignableFrom(
+                                          IfcMetaData.GetType(shapeInstance.IfcTypeId))))
+                                {
+                                    yield return (XbimShapeInstance) shapeInstance;
+                                    shapeInstance = new XbimShapeInstance();
+                                }
                             } while (shapeInstanceTable.TryMoveNextShapeInstance(ref shapeInstance));
                         }
                     }
@@ -1537,7 +1550,10 @@ namespace Xbim.ModelGeometry.Scene
                             do
                             {
                                 if (context.EntityLabel == shapeInstance.RepresentationContext)
-                                    yield return (XbimShapeInstance)shapeInstance;
+                                {
+                                    yield return (XbimShapeInstance) shapeInstance;
+                                    shapeInstance = new XbimShapeInstance();
+                                }
                             } while (shapeInstanceTable.TryMoveNextShapeInstance(ref shapeInstance));
                         }
                     }
@@ -1571,6 +1587,7 @@ namespace Xbim.ModelGeometry.Scene
                                 do
                                 {
                                     yield return (XbimShapeInstance)shapeInstance;
+                                    shapeInstance = new XbimShapeInstance();
                                 } while (shapeInstanceTable.TryMoveNextShapeInstance(ref shapeInstance) &&
                                          shapeInstance.StyleLabel == texture.DefinedObjectId);
                             }
@@ -1584,7 +1601,10 @@ namespace Xbim.ModelGeometry.Scene
                                 do
                                 {
                                     if (context.EntityLabel == shapeInstance.RepresentationContext)
-                                        yield return (XbimShapeInstance)shapeInstance;
+                                    {
+                                        yield return (XbimShapeInstance) shapeInstance;
+                                        shapeInstance = new XbimShapeInstance();
+                                    }
                                 } while (shapeInstanceTable.TryMoveNextShapeInstance(ref shapeInstance) &&
                                          shapeInstance.IfcTypeId == typeId);
                             }
