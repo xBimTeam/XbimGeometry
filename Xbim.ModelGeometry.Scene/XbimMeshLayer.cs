@@ -223,7 +223,6 @@ namespace Xbim.ModelGeometry.Scene
             }
         }
 
-
         /// <summary>
         /// Adds the geometry to the mesh for the given product, returns the mesh fragment details
         /// </summary>
@@ -243,9 +242,42 @@ namespace Xbim.ModelGeometry.Scene
         /// </summary>
         /// <param name="geomData"></param>
         /// <param name="model"></param>
+        public void AddToHidden(XbimGeometryData geomData, XbimModel model, short modelId)
+        {
+            var addingSuccessfull = Hidden.Add(geomData, modelId); // this is where the geometry is added to the main layer.
+            if (addingSuccessfull)
+                return;
+            //if the main layer is too big split it.
+            //try and find a sublayer that is a split of this, i.e. has the same texture
+            foreach (var sublayer in _subLayerMap.Reverse())
+            {
+                if (!Equals(sublayer.Style, Style))
+                    continue;
+                sublayer.AddToHidden(geomData, model, modelId);//try and add the data to this mesh
+                return; //succeeded so return
+            }
+            //didn't find a layer to add it to so create a new one
+            var subLayer = new XbimMeshLayer<TMesh, TMaterial>(model, Style)
+            {
+                Name = Name + "-" + _subLayerMap.Count
+            };
+            _subLayerMap.Add(subLayer);
+            subLayer.Hidden.Add(geomData, modelId); //this should always pass as it is a new mesh and ifc geom rarely exceeds max mesh size, graphics cards will truncate anyway
+        }
+
+        /// <summary>
+        /// Adds the geometry fragment to the hidden mesh, if the model is not null 
+        /// the fragment is placed on a sub layer of the correct style
+        /// the sub layer is automaticaly created if it does not exist.
+        /// </summary>
+        /// <param name="geomData"></param>
+        /// <param name="model"></param>
         public void AddToHidden(XbimGeometryData geomData, XbimModel model = null)
         {
-            if (model != null && geomData.StyleLabel > 0) //check if we need to put this item on a sub layer
+            short modelId = 0;
+            if (model != null)
+                modelId = model.UserDefinedId;
+            if (model != null && geomData.StyleLabel > 0) // check if we need to put this item on a sub layer
             {
                 XbimMeshLayer<TMesh, TMaterial> subLayer;
                 var layerName = geomData.StyleLabel.ToString();
@@ -259,40 +291,17 @@ namespace Xbim.ModelGeometry.Scene
                 else
                     subLayer = _subLayerMap[layerName];
                 
-                subLayer.AddToHidden(geomData);
+                subLayer.AddToHidden(geomData, null, modelId);
             }
             else
             {
-                var addingSuccessfull = Hidden.Add(geomData); // this is where the geometry is added to the main layer.
-                if (!addingSuccessfull) 
-                {
-                    //if the main layer is too big split it.
-                    //try and find a sublayer that is a split of this, i.e. has the same texture
-                    foreach (var sublayer in _subLayerMap.Reverse())
-                    {
-                        if (!Equals(sublayer.Style, Style)) 
-                            continue;
-                        sublayer.AddToHidden(geomData);//try and add the data to this mesh
-                        return; //succeeded so return
-                    }
-                    //didn't find a layer to add it to so create a new one
-                    var subLayer = new XbimMeshLayer<TMesh, TMaterial>(model, Style)
-                    {
-                        Name = Name + "-" + _subLayerMap.Count
-                    };
-                    _subLayerMap.Add(subLayer);
-                    subLayer.Hidden.Add(geomData); //this should always pass as it is a new mesh and ifc geom rarely exceeds max mesh size, graphics cards will truncate anyway
-                }
+                AddToHidden(geomData, model, modelId);
             }
         }
 
-       
         public XbimMeshLayerCollection<TMesh, TMaterial> SubLayers 
         {
-            get
-            {
-                return _subLayerMap;
-            }
+            get { return _subLayerMap; }
         }
 
         public void Show()

@@ -589,7 +589,7 @@ namespace Xbim.ModelGeometry.Scene
             if (geometryMeshData.GeometryType == XbimGeometryType.TriangulatedMesh)
             {
                 var strm = new XbimTriangulatedModelStream(geometryMeshData.ShapeData);
-                var fragment = strm.BuildWithNormals(this, transform);
+                var fragment = strm.BuildWithNormals(this, transform, modelId);
                 if (fragment.EntityLabel == -1) //nothing was added due to size being exceeded
                     return false;
                 fragment.EntityLabel = geometryMeshData.IfcProductLabel;
