@@ -145,7 +145,7 @@ namespace Xbim.ModelGeometry.Scene.Extensions
                     {
                         // todo: add guidance to the TransformBy method so that users can understand how to stop using it (it's marked absolete)
                         geomData.TransformBy(wcsTransform);
-                        m.Add(geomData); // todo: what is the modelid value to be passed?
+                        m.Add(geomData, xbimModel.UserDefinedId); 
                     }
                 }
             }
@@ -162,9 +162,8 @@ namespace Xbim.ModelGeometry.Scene.Extensions
 
                     var productShape =
                         context.ShapeInstancesOf((IfcProduct) item)
-                            .Where(
-                                s => s.RepresentationType != XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
-                            .ToList();
+                            .Where(s => s.RepresentationType != XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
+                            .ToList(); // this also returns shapes of voids
                     foreach (var shapeInstance in productShape)
                     {
                         IXbimShapeGeometryData shapeGeom = context.ShapeGeometry(shapeInstance.ShapeGeometryLabel);
