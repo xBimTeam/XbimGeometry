@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xbim.Common.Geometry;
 using Xbim.Common.Logging;
 using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc2x3.Extensions;
@@ -17,7 +17,6 @@ using Xbim.Ifc2x3.PresentationResource;
 using Xbim.Ifc2x3.ProductExtension;
 using Xbim.IO;
 using Xbim.ModelGeometry.Scene;
-using Xbim.XbimExtensions;
 using Xbim.XbimExtensions.SelectTypes;
 using XbimGeometry.Interfaces;
 
@@ -108,8 +107,55 @@ namespace GeometryTests
                 Assert.Fail("Failed to process " + ifcFileFullName + " - " + e.Message);
             }
         }
-    
 
+        [TestMethod]
+        public void IfcFeaturesClassificationIsCorrect()
+        {
+            const string ifcFileFullName = @"SolidTestFiles\Duplex_A_20110907.ifc.stripped.ifc";
+            IfcFeaturesClassificationIsCorrect(ifcFileFullName);
+        }
+
+        [TestMethod]
+        public void AllIfcFeaturesClassificationIsCorrect()
+        {
+            var di = new DirectoryInfo( @"SolidTestFiles\");
+            var toProcess = di.GetFiles("*.IFC", SearchOption.TopDirectoryOnly);
+            foreach (var fileInfo in toProcess)
+            {
+                IfcFeaturesClassificationIsCorrect(fileInfo.FullName);    
+            }            
+        }
+
+        private static void IfcFeaturesClassificationIsCorrect(string ifcFileFullName)
+        {
+            var xbimFileFullName = Path.ChangeExtension(ifcFileFullName, ".xbim");
+            using (var m = new XbimModel())
+            {
+                m.CreateFrom(ifcFileFullName, xbimFileFullName, null, true, true);
+                var context = new Xbim3DModelContext(m);
+                context.CreateContext(XbimGeometryType.PolyhedronBinary);
+                TestForClassificationOfIfcFeatureElements(context);
+                m.Close();
+            }
+        }
+
+        private static void TestForClassificationOfIfcFeatureElements(Xbim3DModelContext context)
+        {
+            var excludedTypes = new HashSet<short>
+            {
+                IfcMetaData.IfcType(typeof (IfcFeatureElement)).TypeId,
+                IfcMetaData.IfcType(typeof (IfcOpeningElement)).TypeId,
+                IfcMetaData.IfcType(typeof (IfcProjectionElement)).TypeId
+            };
+
+            var shapeInstances = context.ShapeInstances().Where(s =>
+                excludedTypes.Contains(s.IfcTypeId) && // ifcfeatures
+                s.RepresentationType != XbimGeometryRepresentationType.OpeningsAndAdditionsOnly);
+                // that are not classified as OpeningsAndAdditionsOnly
+
+            Assert.IsFalse(shapeInstances.Any(),
+                "Should not find any shapes of with this classification of typeid and representationType.");
+        }
 
 
         [TestMethod]
@@ -175,10 +221,8 @@ namespace GeometryTests
 
                             // Assert.IsTrue(assertNow == false, "Error events were raised");
                         }
-
                     }
-                }
-
+                }    
             }
         }
 
@@ -368,7 +412,6 @@ namespace GeometryTests
                     }
                 }
             }
-
         }
     }
 }

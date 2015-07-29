@@ -516,7 +516,10 @@ namespace Xbim.ModelGeometry.Scene
                     }
                     if (progDelegate != null) progDelegate(-1, "WriteProductShapes");
                     var productsRemaining = _model.InstancesLocal.OfType<IfcProduct>()
-                        .Where(p => p.Representation != null && !processed.Contains(p.EntityLabel)).ToList();
+                        .Where(p => 
+                            p.Representation != null 
+                            && !processed.Contains(p.EntityLabel)
+                            ).ToList();
 
 
                     WriteProductShapes(contextHelper, productsRemaining);
@@ -875,18 +878,19 @@ namespace Xbim.ModelGeometry.Scene
 
             Parallel.ForEach(products, contextHelper.ParallelOptions, product =>
                 //    foreach (var product in products)
-            {
-                //select representations that are in the required context
-                //only want solid representations for this context, but rep type is optional so just filter identified 2d elements
-                //we can only handle one representation in a context and this is in an implementers agreement
-                var rep = product.Representation.Representations.FirstOrDefault(r => _contexts.Contains(r.ContextOfItems) &&
-                                                                                     r.IsBodyRepresentation());
-                //write out the representation if it has one
-                if (rep != null)
                 {
-                    WriteProductShape(contextHelper, product, true);
+                    //select representations that are in the required context
+                    //only want solid representations for this context, but rep type is optional so just filter identified 2d elements
+                    //we can only handle one representation in a context and this is in an implementers agreement
+                    var rep =
+                        product.Representation.Representations.FirstOrDefault(r => _contexts.Contains(r.ContextOfItems) &&
+                                                                                   r.IsBodyRepresentation());
+                    //write out the representation if it has one
+                    if (rep != null)
+                    {
+                        WriteProductShape(contextHelper, product, true);
+                    }
                 }
-            }
                 );
             contextHelper.Tally = localTally;
             contextHelper.PercentageParsed = localPercentageParsed;
@@ -914,8 +918,9 @@ namespace Xbim.ModelGeometry.Scene
             var repType = includesOpenings
                 ? XbimGeometryRepresentationType.OpeningsAndAdditionsIncluded
                 : XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded;
-            if (repType == XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded && element is IfcFeatureElement)
+            if (element is IfcFeatureElement)
             {
+                //  might come in here from direct meshing or from meshing of remaining objects; either way mark as appropriate
                 repType = XbimGeometryRepresentationType.OpeningsAndAdditionsOnly;
             }
 
@@ -1408,12 +1413,9 @@ namespace Xbim.ModelGeometry.Scene
                             //now get all the undefined styles and use their product type to create the texture
                         }
                     }
-
-                }
-
+                }    
             }
         }
-
 
         public IEnumerable<XbimRegion> GetRegions()
         {
