@@ -76,6 +76,11 @@ namespace Xbim
 			return left;
 		}
 
+		IXbimGeometryObject^ XbimLinearEdge::TransformShallow(XbimMatrix3D matrix3D)
+		{
+			return Transform(matrix3D);
+		}
+
 		IXbimGeometryObject^ XbimLinearEdge::Transform(XbimMatrix3D matrix3D)
 		{
 			XbimPoint3DWithTolerance^ p1 = (XbimPoint3DWithTolerance^)start->Transform(matrix3D);

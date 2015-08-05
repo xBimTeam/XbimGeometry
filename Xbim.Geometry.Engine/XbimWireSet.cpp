@@ -44,6 +44,16 @@ namespace Xbim
 			return gcnew XbimWireSet(result);
 		}
 
+		IXbimGeometryObject^ XbimWireSet::TransformShallow(XbimMatrix3D matrix3D)
+		{
+			List<IXbimWire^>^ result = gcnew List<IXbimWire^>(wires->Count);
+			for each (IXbimGeometryObject^ wire in wires)
+			{
+				result->Add((IXbimWire^)((XbimWire^)wire)->TransformShallow(matrix3D));
+			}
+			return gcnew XbimWireSet(result);
+		}
+
 		XbimRect3D XbimWireSet::BoundingBox::get()
 		{
 			XbimRect3D result = XbimRect3D::Empty;

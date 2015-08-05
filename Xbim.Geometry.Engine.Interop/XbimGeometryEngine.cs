@@ -100,17 +100,7 @@ namespace Xbim.Geometry.Engine.Interop
         }
         public IXbimGeometryObject Create(IfcGeometricRepresentationItem ifcRepresentation)
         {
-            try
-            {
-                return _engine.Create(ifcRepresentation);
-            }
-            catch (AccessViolationException e)
-            {
-
-                Logger.ErrorFormat("EE001: Failed to create geometry #{0} of type {1}, {2]", ifcRepresentation.EntityLabel, ifcRepresentation.GetType().Name, e.Message);
-                return null;
-            }
-            
+            return Create(ifcRepresentation, null);
         }
 
         public IXbimShapeGeometryData CreateShapeGeometry(IXbimGeometryObject geometryObject, double precision, double deflection,
@@ -386,5 +376,24 @@ namespace Xbim.Geometry.Engine.Interop
         }
 
 
+
+        public IXbimGeometryObject Create(IfcGeometricRepresentationItem ifcRepresentation, IfcAxis2Placement3D objectLocation)
+        {
+            try
+            {
+                return _engine.Create(ifcRepresentation, objectLocation);
+            }
+            catch (AccessViolationException e)
+            {
+
+                Logger.ErrorFormat("EE001: Failed to create geometry #{0} of type {1}, {2]", ifcRepresentation.EntityLabel, ifcRepresentation.GetType().Name, e.Message);
+                return null;
+            }
+        }
+
+        public IXbimGeometryObjectSet CreateGeometryObjectSet()
+        {
+            return _engine.CreateGeometryObjectSet();
+        }
     }
 }

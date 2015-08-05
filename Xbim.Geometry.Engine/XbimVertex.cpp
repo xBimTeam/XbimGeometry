@@ -66,6 +66,13 @@ namespace Xbim
 			return gcnew XbimVertex(temp);
 		}
 		
+		IXbimGeometryObject^ XbimVertex::TransformShallow(XbimMatrix3D matrix3D)
+		{
+			TopoDS_Vertex vertex = TopoDS::Vertex(pVertex->Moved(XbimGeomPrim::ToTransform(matrix3D)));
+			GC::KeepAlive(this);			
+			return gcnew XbimVertex(vertex);
+		}
+
 #ifdef USE_CARVE_CSG
 		XbimVertex::XbimVertex(vertex_t* v, double precision)
 		{

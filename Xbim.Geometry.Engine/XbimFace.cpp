@@ -669,6 +669,13 @@ namespace Xbim
 			return gcnew XbimFace(temp);
 		}
 
+		IXbimGeometryObject^ XbimFace::TransformShallow(XbimMatrix3D matrix3D)
+		{
+			TopoDS_Face face = TopoDS::Face(pFace->Moved(XbimGeomPrim::ToTransform(matrix3D)));
+			GC::KeepAlive(this);
+			return gcnew XbimFace(face);
+		}
+
 		bool XbimFace::IsQuadOrTriangle::get()
 		{
 			if (!IsValid) return false;

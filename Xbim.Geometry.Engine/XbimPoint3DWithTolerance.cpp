@@ -116,6 +116,12 @@ namespace Xbim
 			return XbimRect3D(point.X, point.Y, point.Z, 0, 0, 0);
 		}
 
+		IXbimGeometryObject^ XbimPoint3DWithTolerance::TransformShallow(XbimMatrix3D matrix3D)
+		{
+			XbimPoint3D temp = matrix3D.Transform(point);
+			return gcnew XbimPoint3DWithTolerance(temp, tolerance);
+		}
+
 		IXbimGeometryObject^ XbimPoint3DWithTolerance::Transform(XbimMatrix3D matrix3D)
 		{
 			XbimPoint3D temp = matrix3D.Transform(point);

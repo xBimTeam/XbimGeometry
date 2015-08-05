@@ -1,8 +1,13 @@
 #include "XbimCompound.h"
 #include "XbimGeometryCreator.h"
+#include "XbimGeometryObjectSet.h"
 #include "XbimSolidSet.h"
+#include "XbimShellSet.h"
+#include "XbimFaceSet.h"
+#include "XbimEdgeSet.h"
+#include "XbimVertexSet.h"
 #include "XbimGeomPrim.h"
-
+#include "XbimGeometryObjectSet.h"
 #include <BRep_Builder.hxx>
 #include <BRepBuilderAPI_Sewing.hxx>
 #include <BRepBuilderAPI_FastSewing.hxx>
@@ -85,6 +90,13 @@ namespace Xbim
 			GC::KeepAlive(this);
 			return gcnew XbimCompound(temp, IsSewn, _sewingTolerance);
 		}
+		
+		IXbimGeometryObject^ XbimCompound::TransformShallow(XbimMatrix3D matrix3D)
+		{
+			TopoDS_Compound shallowCopy = TopoDS::Compound(pCompound->Moved(XbimGeomPrim::ToTransform(matrix3D)));
+			GC::KeepAlive(this);
+			return gcnew XbimCompound(shallowCopy, IsSewn, _sewingTolerance);
+		}
 
 		XbimRect3D XbimCompound::BoundingBox::get()
 		{
@@ -131,7 +143,7 @@ namespace Xbim
 		XbimCompound::XbimCompound(IfcManifoldSolidBrep^ solid)
 		{
 			_sewingTolerance = solid->ModelOf->ModelFactors->Precision;
-			Init(solid); 
+			Init(solid);
 		}
 		XbimCompound::XbimCompound(IfcFacetedBrep^ solid)
 		{
@@ -160,7 +172,12 @@ namespace Xbim
 			
 		}
 
-
+		void XbimCompound::Move(IfcAxis2Placement3D^ position)
+		{
+			if (!IsValid) return;
+			gp_Trsf toPos = XbimGeomPrim::ToTransform(position);
+			pCompound->Move(toPos);
+		}
 
 
 
@@ -225,7 +242,7 @@ namespace Xbim
 				return;
 			}
 			Init(faceSet->CfsFaces);
-			BRepTools::Write(*pCompound, "d:\\tmp\\c");
+			
 			/*if (faceSet->CfsFaces->Count < 50)
 			{
 
@@ -242,12 +259,12 @@ namespace Xbim
 		{
 			IfcFacetedBrep^ facetedBrep = dynamic_cast<IfcFacetedBrep^>(solid);
 			if (facetedBrep != nullptr) return Init(facetedBrep);
+			IfcFacetedBrepWithVoids^ facetedBrepWithVoids = dynamic_cast<IfcFacetedBrepWithVoids^>(solid);
+			if (facetedBrepWithVoids != nullptr) return Init(facetedBrepWithVoids);
 			throw gcnew NotImplementedException("Sub-Type of IfcManifoldSolidBrep is not implemented");
 		}
 		void XbimCompound::Init(IfcFacetedBrep^ solid)
-		{
-			IfcFacetedBrepWithVoids^ facetedBrepWithVoids = dynamic_cast<IfcFacetedBrepWithVoids^>(solid);
-			if (facetedBrepWithVoids != nullptr) return Init(facetedBrepWithVoids);
+		{			
 			Init(solid->Outer);
 		}
 
@@ -285,15 +302,17 @@ namespace Xbim
 
 		bool XbimCompound::Sew()
 		{
+			
 			if (!IsValid || IsSewn)
 				return true;
-			BRepTools::Write(*pCompound, "d:\\tmp\\c0");
-			TopTools_IndexedMapOfShape map;
-			TopExp::MapShapes(*pCompound, TopAbs_FACE, map);
-			if (map.Extent() > MaxFacesToSew) //give up if too many
-			{				
-				return false;
+			long tally = 0;
+			for (TopExp_Explorer expl(*pCompound, TopAbs_FACE); expl.More(); expl.Next())
+			{
+				tally++;
+				if (tally > MaxFacesToSew) //give up if too many
+					return false;
 			}
+			
 			BRep_Builder builder;
 			TopoDS_Compound newCompound;
 			builder.MakeCompound(newCompound);
@@ -307,14 +326,8 @@ namespace Xbim
 			}	
 			
 			*pCompound = newCompound;
-			BRepTools::Write(*pCompound, "d:\\tmp\\c1");
-			//only correct orientation if we are sewing and making a solid or a shape for boolean operation
-			for each (IXbimGeometryObject^ geomObj in this)
-			{
-				XbimShell^ shell = dynamic_cast<XbimShell^>(geomObj);
-				if (shell != nullptr) shell->Orientate();
-			}
-				
+			
+			
 
 			_isSewn = true;
 			GC::KeepAlive(this);
@@ -750,6 +763,7 @@ namespace Xbim
 			return XbimCompound::Empty;
 		}
 
+		
 		XbimCompound^ XbimCompound::Intersection(XbimCompound^ solids, double tolerance)
 		{
 			if (!IsSewn) Sew();
@@ -771,6 +785,110 @@ namespace Xbim
 			}
 			XbimGeometryCreator::logger->WarnFormat("WC003: Boolean Intersection operation failed. " + err);
 			return XbimCompound::Empty;
+		}
+
+		IXbimSolidSet^ XbimCompound::Solids::get()
+		{
+			XbimSolidSet^ solids = gcnew XbimSolidSet();
+			TopTools_IndexedMapOfShape map;
+			TopExp::MapShapes(*pCompound, TopAbs_SOLID, map);
+			for (int i = 1; i <= map.Extent(); i++)
+				solids->Add(gcnew XbimSolid(TopoDS::Solid(map(i))));
+			return solids;
+		}
+
+		IXbimShellSet^ XbimCompound::Shells::get()
+		{
+			List<IXbimShell^>^ shells = gcnew List<IXbimShell^>();
+			TopTools_IndexedMapOfShape map;
+			TopExp::MapShapes(*pCompound, TopAbs_SHELL, map);
+			for (int i = 1; i <= map.Extent(); i++)
+				shells->Add(gcnew XbimShell(TopoDS::Shell(map(i))));
+			return gcnew XbimShellSet(shells);
+		}
+
+		IXbimFaceSet^ XbimCompound::Faces::get()
+		{
+			List<IXbimFace^>^ faces = gcnew List<IXbimFace^>();
+			TopTools_IndexedMapOfShape map;
+			TopExp::MapShapes(*pCompound, TopAbs_FACE, map);
+			for (int i = 1; i <= map.Extent(); i++)
+				faces->Add(gcnew XbimFace(TopoDS::Face(map(i))));
+			return gcnew XbimFaceSet(faces);
+		}
+
+		IXbimEdgeSet^ XbimCompound::Edges::get()
+		{
+			List<IXbimEdge^>^ edges = gcnew List<IXbimEdge^>();
+			TopTools_IndexedMapOfShape map;
+			TopExp::MapShapes(*pCompound, TopAbs_EDGE, map);
+			for (int i = 1; i <= map.Extent(); i++)
+				edges->Add(gcnew XbimEdge(TopoDS::Edge(map(i))));
+			return gcnew XbimEdgeSet(edges);
+		}
+
+		IXbimVertexSet^ XbimCompound::Vertices::get()
+		{
+			List<IXbimVertex^>^ vertices = gcnew List<IXbimVertex^>();
+			TopTools_IndexedMapOfShape map;
+			TopExp::MapShapes(*pCompound, TopAbs_VERTEX, map);
+			for (int i = 1; i <= map.Extent(); i++)
+				vertices->Add(gcnew XbimVertex(TopoDS::Vertex(map(i))));
+			return gcnew XbimVertexSet(vertices);
+		}
+
+		void XbimCompound::Add(IXbimGeometryObject^ geomObj)
+		{
+			XbimOccShape^ occ = dynamic_cast<XbimOccShape^>(geomObj);
+			if (occ != nullptr)
+			{
+				BRep_Builder builder;
+				if (ptrContainer == IntPtr::Zero)
+				{
+					pCompound = new TopoDS_Compound();
+					builder.MakeCompound(*pCompound);
+				}			
+				builder.Add(*pCompound,occ);
+			}
+		}
+
+		IXbimGeometryObjectSet^ XbimCompound::Cut(IXbimSolidSet^ solids, double tolerance)
+		{
+
+			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_CUT, (IEnumerable<IXbimGeometryObject^>^)this, solids, tolerance);
+		}
+
+
+		IXbimGeometryObjectSet^ XbimCompound::Cut(IXbimSolid^ solid, double tolerance)
+		{
+			if (Count == 0) return XbimGeometryObjectSet::Empty;
+			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_CUT, (IEnumerable<IXbimGeometryObject^>^)this, gcnew XbimSolidSet(solid), tolerance);
+		}
+
+
+		IXbimGeometryObjectSet^ XbimCompound::Union(IXbimSolidSet^ solids, double tolerance)
+		{
+
+			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_FUSE, (IEnumerable<IXbimGeometryObject^>^)this, solids, tolerance);
+		}
+
+		IXbimGeometryObjectSet^ XbimCompound::Union(IXbimSolid^ solid, double tolerance)
+		{
+			if (Count == 0) return XbimGeometryObjectSet::Empty;
+			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_FUSE, (IEnumerable<IXbimGeometryObject^>^)this, gcnew XbimSolidSet(solid), tolerance);
+		}
+
+		IXbimGeometryObjectSet^ XbimCompound::Intersection(IXbimSolidSet^ solids, double tolerance)
+		{
+
+			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_COMMON, (IEnumerable<IXbimGeometryObject^>^)this, solids, tolerance);
+		}
+
+
+		IXbimGeometryObjectSet^ XbimCompound::Intersection(IXbimSolid^ solid, double tolerance)
+		{
+			if (Count == 0) return XbimGeometryObjectSet::Empty;
+			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_COMMON, (IEnumerable<IXbimGeometryObject^>^)this, gcnew XbimSolidSet(solid), tolerance);
 		}
 #pragma endregion
 

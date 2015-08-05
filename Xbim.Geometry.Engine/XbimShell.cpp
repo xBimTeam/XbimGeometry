@@ -3,6 +3,8 @@
 #include "XbimShell.h"
 #include "XbimFace.h"
 #include "XbimGeometryCreator.h"
+#include "XbimGeometryObjectSet.h"
+#include "XbimSolidSet.h"
 #include "XbimVertexSet.h"
 #include "XbimFaceSet.h"
 #include "XbimEdgeSet.h"
@@ -41,6 +43,8 @@
 #include <BRepPrimAPI_MakePrism.hxx>
 #include <ShapeFix_Shell.hxx>
 #include <BRepCheck_Analyzer.hxx>
+#include <BRepTools.hxx>
+#include <BRepBuilderAPI_Sewing.hxx>
 using namespace System;
 using namespace Xbim::Common::Exceptions;
 namespace Xbim
@@ -266,85 +270,50 @@ namespace Xbim
 			return gcnew XbimShell(temp);
 		}
 
-		IXbimGeometryObject^ XbimShell::Cut(IXbimGeometryObject^ toCut, double tolerance)
+		IXbimGeometryObject^ XbimShell::TransformShallow(XbimMatrix3D matrix3D)
 		{
-			if (!IsValid || !toCut->IsValid) return XbimShellSet::Empty;
-			XbimSolid^ solidCut = dynamic_cast<XbimSolid^>(toCut);
-			if (solidCut == nullptr)
-			{
-				XbimGeometryCreator::logger->WarnFormat("WH004:  Invalid operation. Only solid shapes can be cut from a shell");
-				return this;
-			}
-			ShapeFix_ShapeTolerance fixTol;
-			fixTol.SetTolerance(solidCut, tolerance);
-			fixTol.SetTolerance(this, tolerance);
-			String^ err = "";
-			try
-			{
-				BRepAlgoAPI_Cut boolOp(this, solidCut);
-				GC::KeepAlive(solidCut);
-				GC::KeepAlive(this);
-				if (boolOp.ErrorStatus() == 0)
-					return gcnew XbimShellSet(boolOp.Shape());
-			}
-			catch (Standard_Failure e)
-			{
-				err = gcnew String(Standard_Failure::Caught()->GetMessageString());
-			}
-			XbimGeometryCreator::logger->WarnFormat("WH001: Boolean Cut operation failed. " + err);
-			return XbimShellSet::Empty;
+			TopoDS_Shell shell = TopoDS::Shell(pShell->Moved(XbimGeomPrim::ToTransform(matrix3D)));
+			GC::KeepAlive(this);
+			return gcnew XbimShell(shell);
 		}
 
-		IXbimGeometryObject^ XbimShell::Intersection(IXbimGeometryObject^ toIntersect, double tolerance)
+		IXbimGeometryObjectSet^ XbimShell::Cut(IXbimSolidSet^ solids, double tolerance)
 		{
-			if (!IsValid || !toIntersect->IsValid) return XbimShellSet::Empty;
-			XbimOccShape^ solidIntersect = dynamic_cast<XbimOccShape^>(toIntersect);
-			if (solidIntersect == nullptr)  throw gcnew ArgumentException("Only shapes created by Xbim.OCC modules are supported", "toIntersect");
-			ShapeFix_ShapeTolerance fixTol;
-			fixTol.SetTolerance(solidIntersect, tolerance);
-			fixTol.SetTolerance(this, tolerance);
-			String^ err = "";
-			try
-			{
-				BRepAlgoAPI_Common boolOp(this, solidIntersect);
-				if (boolOp.ErrorStatus() == 0)
-					return gcnew XbimShellSet(boolOp.Shape());
-			}
-			catch (Standard_Failure e)
-			{
-				err = gcnew String(Standard_Failure::Caught()->GetMessageString());
-			}
-			XbimGeometryCreator::logger->WarnFormat("WH002: Boolean Intersect operation failed. " + err);
-			return XbimShellSet::Empty;
+
+			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_CUT, this, solids, tolerance);
 		}
 
-		IXbimGeometryObject^ XbimShell::Union(IXbimGeometryObject^ toUnion, double tolerance)
+
+		IXbimGeometryObjectSet^ XbimShell::Cut(IXbimSolid^ solid, double tolerance)
 		{
-			if (!IsValid || !toUnion->IsValid) return XbimShellSet::Empty;
-			XbimShell^ shellUnion = dynamic_cast<XbimShell^>(toUnion);
-			if (shellUnion == nullptr)
-			{
-				XbimGeometryCreator::logger->WarnFormat("WH005:  Invalid operation. Only solid shells can be unioned with a shell");
-				return this;
-			}
-			ShapeFix_ShapeTolerance fixTol;
-			fixTol.SetTolerance(shellUnion, tolerance);
-			fixTol.SetTolerance(this, tolerance);
-			String^ err = "";
-			try
-			{
-				BRepAlgoAPI_Fuse boolOp(this, shellUnion);
-				if (boolOp.ErrorStatus() == 0)
-					return gcnew XbimShellSet(boolOp.Shape());
-			}
-			catch (Standard_Failure e)
-			{
-				err = gcnew String(Standard_Failure::Caught()->GetMessageString());
-			}
-			XbimGeometryCreator::logger->WarnFormat("WH003: Boolean Union operation failed. " + err);
-			return XbimShellSet::Empty;
+			
+			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_CUT,this, gcnew XbimSolidSet(solid), tolerance);
 		}
 
+		IXbimGeometryObjectSet^ XbimShell::Union(IXbimSolidSet^ solids, double tolerance)
+		{
+
+			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_FUSE,this, solids, tolerance);
+		}
+
+		IXbimGeometryObjectSet^ XbimShell::Union(IXbimSolid^ solid, double tolerance)
+		{
+			
+			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_FUSE, this, gcnew XbimSolidSet(solid), tolerance);
+		}
+
+		IXbimGeometryObjectSet^ XbimShell::Intersection(IXbimSolidSet^ solids, double tolerance)
+		{
+
+			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_COMMON,this, solids, tolerance);
+		}
+
+
+		IXbimGeometryObjectSet^ XbimShell::Intersection(IXbimSolid^ solid, double tolerance)
+		{
+		
+			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_COMMON, this, gcnew XbimSolidSet(solid), tolerance);
+		}
 
 		IXbimFaceSet^ XbimShell::Section(IXbimFace^ toSection, double tolerance)
 		{

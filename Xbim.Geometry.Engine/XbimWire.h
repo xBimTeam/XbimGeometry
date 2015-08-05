@@ -3,6 +3,7 @@
 #include "XbimVertex.h"
 #include <TopoDS_Wire.hxx>
 #include <gp_Pnt.hxx>
+#include <TopoDS_Edge.hxx>
 #include <vector>
 using namespace System;
 using namespace System::Collections::Generic;
@@ -64,6 +65,7 @@ namespace Xbim
 
 			//helpers
 			void AddNewellPoint(const gp_Pnt& previous, const gp_Pnt& current, double & x, double & y, double & z);
+			bool AreEdgesC1(const TopoDS_Edge& e1, const TopoDS_Edge& e2, double precision, double angularTolerance);
 		public:
 			
 #pragma region destructors
@@ -133,7 +135,9 @@ namespace Xbim
 			virtual property double Length{double get(); }
 			virtual property XbimRect3D BoundingBox {XbimRect3D get() override; }
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) override;
-
+			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D)override;
+			void FuseColinearSegments(double tolerance, double angleTolerance);
+			
 #pragma endregion
 	
 #pragma region Equality Overrides

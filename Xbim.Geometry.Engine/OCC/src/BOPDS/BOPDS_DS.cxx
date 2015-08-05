@@ -1542,7 +1542,7 @@ void BOPDS_DS::SharedEdges(const Standard_Integer nF1,
   Standard_Integer nE, nSp;
   BOPCol_ListIteratorOfListOfInteger aItLI;
   BOPDS_ListIteratorOfListOfPaveBlock aItLPB;
-  BOPCol_MapOfInteger aMI(100, aAllocator);
+  BOPCol_MapOfInteger aMI(100/*, aAllocator*/); //commented out due to excessive memory usage
   //
   const BOPDS_ShapeInfo& aSI1=ShapeInfo(nF1);
   const BOPCol_ListOfInteger& aLI1=aSI1.SubShapes();

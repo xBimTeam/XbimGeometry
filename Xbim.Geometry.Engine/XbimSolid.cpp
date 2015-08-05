@@ -33,7 +33,7 @@
 #include <BRepOffsetAPI_MakePipeShell.hxx>
 #include <ShapeFix_Shape.hxx>
 #include <ShapeFix_Wire.hxx>
-
+#include <ShapeFix_Wireframe.hxx>
 #include <BRepAlgoAPI_Cut.hxx>
 #include <BRepAlgoAPI_Common.hxx>
 #include <BRepAlgoAPI_Fuse.hxx>
@@ -70,6 +70,7 @@
 #include <BRepBuilderAPI_Transform.hxx>
 #include <ShapeFix_Solid.hxx>
 #include <ShapeFix_Wireframe.hxx>
+
 using namespace System;
 using namespace System::Threading;
 using namespace Xbim::Common;
@@ -112,7 +113,7 @@ namespace Xbim
 		XbimSolid::XbimSolid(IfcExtrudedAreaSolid^ repItem)
 		{
 			Init(repItem);
-			BRepTools::Write(*pSolid, "d:\\tmp\\h");
+			
 		}
 		
 		XbimSolid::XbimSolid(IfcSweptDiskSolid^ repItem)
@@ -130,9 +131,9 @@ namespace Xbim
 			Init(repItem);
 		}
 
-		XbimSolid::XbimSolid(IfcHalfSpaceSolid^ repItem)
+		XbimSolid::XbimSolid(IfcHalfSpaceSolid^ repItem, double maxExtrusion)
 		{
-			Init(repItem, false);
+			Init(repItem, maxExtrusion);
 		}
 
 		XbimSolid::XbimSolid(IfcBoxedHalfSpace^ repItem)
@@ -145,9 +146,9 @@ namespace Xbim
 			Init(rect3D, tolerance);
 		}
 
-		XbimSolid::XbimSolid(IfcPolygonalBoundedHalfSpace^ repItem)
+		XbimSolid::XbimSolid(IfcPolygonalBoundedHalfSpace^ repItem, double maxExtrusion)
 		{
-			Init(repItem);
+			Init(repItem, maxExtrusion);
 		}
 
 		XbimSolid::XbimSolid(IfcBooleanClippingResult^ solid)
@@ -459,10 +460,10 @@ namespace Xbim
 			}
 		}
 
-		void XbimSolid::Init(IfcHalfSpaceSolid^ hs, bool shift)
+		void XbimSolid::Init(IfcHalfSpaceSolid^ hs, double maxExtrusion)
 		{
 			if (dynamic_cast<IfcPolygonalBoundedHalfSpace^>(hs))
-				return Init((IfcPolygonalBoundedHalfSpace^)hs);
+				return Init((IfcPolygonalBoundedHalfSpace^)hs, maxExtrusion);
 			else if (dynamic_cast<IfcBoxedHalfSpace^>(hs))
 				return Init((IfcBoxedHalfSpace^)hs);
 			else //it is a simple Half space
@@ -532,7 +533,7 @@ namespace Xbim
 			Move(ifcPlane->Position);
 		}
 
-		void XbimSolid::Init(IfcPolygonalBoundedHalfSpace^ pbhs)
+		void XbimSolid::Init(IfcPolygonalBoundedHalfSpace^ pbhs, double extrusionMax)
 		{
 
 			IfcSurface^ surface = (IfcSurface^)pbhs->BaseSurface;
@@ -554,27 +555,30 @@ namespace Xbim
 				XbimGeometryCreator::logger->WarnFormat("WS005: The IfcPolygonalBoundedHalfSpace #{0} has an incorrectly defined PolygonalBoundary #{1}, it has been ignored", pbhs->EntityLabel, pbhs->PolygonalBoundary->EntityLabel);
 				return;
 			}
+			if (polyBoundary->Edges->Count>4) //may sure we remove an colinear edges
+				polyBoundary->FuseColinearSegments(pbhs->ModelOf->ModelFactors->Precision, 0.1);
 			
 			XbimFace^ polyFace = gcnew XbimFace(polyBoundary);
+
 			if (!polyFace->IsValid)
 			{
 				XbimGeometryCreator::logger->WarnFormat("WS009: The IfcPolygonalBoundedHalfSpace #{0} has an incorrectly defined Face with PolygonalBoundary #{1}, it has been ignored", pbhs->EntityLabel, pbhs->PolygonalBoundary->EntityLabel);
 				return;
 			}
-			TopoDS_Shape boundedHalfSpace = BRepPrimAPI_MakePrism(polyFace, gp_Vec(0, 0, 2e8));
+			TopoDS_Shape boundedHalfSpace = BRepPrimAPI_MakePrism(polyFace, gp_Vec(0, 0, extrusionMax));
 			gp_Trsf trsf = XbimGeomPrim::ToTransform(pbhs->Position);
 			gp_Trsf offset; 
-			offset.SetTranslation(gp_Vec(0, 0, -1e8));
+			offset.SetTranslation(gp_Vec(0, 0, -(extrusionMax / 2)));
 			boundedHalfSpace.Move(trsf*offset);
-
-			
-			TopoDS_Shape result = BRepAlgoAPI_Common(halfspace, boundedHalfSpace );
+		//	BRepTools::Write(boundedHalfSpace, "d:\\tmp\\bh");
+		//	BRepTools::Write(halfspace, "d:\\tmp\\hs");
+			TopoDS_Shape result = BRepAlgoAPI_Common(boundedHalfSpace,halfspace);
 			
 			for (TopExp_Explorer explr(result, TopAbs_SOLID); explr.More(); explr.Next())
 			{
 				pSolid = new TopoDS_Solid();
 				*pSolid = TopoDS::Solid(explr.Current()); //just take the first solid
-				//BRepTools::Write(*pSolid, "d:\\tmp\\r");
+			//	BRepTools::Write(*pSolid, "d:\\tmp\\r");
 				return;
 			}
 			GC::KeepAlive(polyFace);
@@ -676,22 +680,20 @@ namespace Xbim
 		}
 
 
-		XbimSolid^ XbimSolid::BuildClippingList(IfcBooleanClippingResult^ solid, IXbimSolidSet^ clipList)
+		XbimSolid^ XbimSolid::BuildClippingList(IfcBooleanClippingResult^ solid, List<IfcBooleanOperand^>^ clipList)
 		{
 			IfcBooleanOperand^ fOp = solid->FirstOperand;
 			IfcBooleanOperand^ sOp = solid->SecondOperand;
 			
 			IfcBooleanClippingResult^ boolClip = dynamic_cast<IfcBooleanClippingResult^>(fOp);
 			if (boolClip!=nullptr)
-			{
-				XbimSolid^ s = gcnew XbimSolid(sOp);
-				if (s->IsValid) clipList->Add(s);
+			{				
+				clipList->Add(sOp);
 				return XbimSolid::BuildClippingList(boolClip, clipList);
 			}
 			else //we need to build the solid
-			{
-				XbimSolid^ s = gcnew XbimSolid(sOp);
-				if(s->IsValid) clipList->Add(s);
+			{				
+				clipList->Add(sOp);
 				XbimSolidSet^ solidSet = dynamic_cast<XbimSolidSet^>(clipList);
 				if (solidSet!=nullptr) solidSet->Reverse();
 				return gcnew XbimSolid(fOp);
@@ -707,8 +709,26 @@ namespace Xbim
 			IfcBooleanClippingResult^ boolClip = dynamic_cast<IfcBooleanClippingResult^>(fOp);
 			if (boolClip != nullptr)
 			{
-				IXbimSolidSet^ solidSet = gcnew XbimSolidSet();
-				XbimSolid^ body = XbimSolid::BuildClippingList(boolClip, solidSet);
+				List<IfcBooleanOperand^>^ clips = gcnew List<IfcBooleanOperand^>();
+
+				IXbimSolidSet^ solidSet = gcnew XbimSolidSet();			
+				XbimSolid^ body = XbimSolid::BuildClippingList(boolClip, clips);
+
+				double maxLen = body->BoundingBox.Length();
+				for each (IfcBooleanOperand^ bOp in clips)
+				{
+					IfcPolygonalBoundedHalfSpace^ pbhs = dynamic_cast<IfcPolygonalBoundedHalfSpace^>(bOp);
+					if (pbhs != nullptr) //special case for IfcPolygonalBoundedHalfSpace to keep extrusion to the minimum
+					{
+						XbimSolid^ s = gcnew XbimSolid(pbhs, maxLen);
+						if (s->IsValid) solidSet->Add(s);
+					}
+					else
+					{
+						XbimSolid^ s = gcnew XbimSolid(bOp);
+						if (s->IsValid) solidSet->Add(s);
+					}
+				}
 				//use a fuzzy tolerance of 1mm, less than this should be ignored			
 				IXbimSolidSet^ xbimSolidSet = body->Cut(solidSet, mf->OneMilliMetre);
 				if (xbimSolidSet != nullptr && xbimSolidSet->First != nullptr)
@@ -790,7 +810,7 @@ namespace Xbim
 			IfcSolidModel^ sol = dynamic_cast<IfcSolidModel^>(solid);
 			if (sol != nullptr) return Init(sol);
 			IfcHalfSpaceSolid^ hs = dynamic_cast<IfcHalfSpaceSolid^>(solid);
-			if (hs != nullptr) return Init(hs,false);
+			if (hs != nullptr) return Init(hs,solid->ModelOf->ModelFactors->OneMetre*100); //take 100 metres as the largest extrusion
 			IfcBooleanClippingResult^ bcr = dynamic_cast<IfcBooleanClippingResult^>(solid);
 			if (bcr != nullptr) return Init(bcr);
 			IfcBooleanResult^ br = dynamic_cast<IfcBooleanResult^>(solid);
@@ -1071,6 +1091,13 @@ namespace Xbim
 			BRepBuilderAPI_Transform gTran(copier.Shape(), XbimGeomPrim::ToTransform(matrix3D));
 			TopoDS_Solid temp = TopoDS::Solid(gTran.Shape());
 			return gcnew XbimSolid(temp);
+		}
+
+		IXbimGeometryObject^ XbimSolid::TransformShallow(XbimMatrix3D matrix3D)
+		{
+			TopoDS_Solid solid = TopoDS::Solid(pSolid->Moved(XbimGeomPrim::ToTransform(matrix3D)));
+			GC::KeepAlive(this);
+			return gcnew XbimSolid(solid);
 		}
 
 		IXbimSolidSet^ XbimSolid::Cut(IXbimSolidSet^ toCut, double tolerance)

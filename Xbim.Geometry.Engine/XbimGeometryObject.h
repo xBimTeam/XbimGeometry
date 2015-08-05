@@ -74,7 +74,7 @@ namespace Xbim
 			virtual bool Intersects(IXbimGeometryObject^ geom, double tolerance){ throw gcnew NotImplementedException("Function not implemented"); }
 			virtual property XbimRect3D BoundingBox{XbimRect3D get(); }
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) abstract;
-			
+			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D) abstract;
 		};
 	}
 }

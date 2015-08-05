@@ -14,6 +14,7 @@ namespace Xbim
 		ref class XbimOccShape abstract : XbimGeometryObject
 		{
 		
+		
 			
 		public:
 			static void WriteIndex(BinaryWriter^ bw, UInt32 index, UInt32 maxInt);

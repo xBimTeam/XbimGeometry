@@ -59,14 +59,20 @@ namespace Xbim
 			virtual property bool IsClosed{bool get(); }
 			virtual property double SurfaceArea { double get(); }
 			virtual property bool IsPolyhedron { bool get(); }
-			virtual IXbimGeometryObject^ Cut(IXbimGeometryObject^ toCut, double tolerance);
-			virtual IXbimGeometryObject^ Union(IXbimGeometryObject^ toUnion, double tolerance);
-			virtual IXbimGeometryObject^ Intersection(IXbimGeometryObject^ toIntersect, double tolerance);
+			virtual IXbimGeometryObjectSet^ Cut(IXbimSolidSet^ solids, double tolerance);
+			virtual IXbimGeometryObjectSet^ Cut(IXbimSolid^ solid, double tolerance);
+			virtual IXbimGeometryObjectSet^ Union(IXbimSolidSet^ solids, double tolerance);
+			virtual IXbimGeometryObjectSet^ Union(IXbimSolid^ solid, double tolerance);
+			virtual IXbimGeometryObjectSet^ Intersection(IXbimSolidSet^ solids, double tolerance);
+			virtual IXbimGeometryObjectSet^ Intersection(IXbimSolid^ solid, double tolerance);
 			virtual IXbimFaceSet^ Section(IXbimFace^ face, double tolerance);
 			
 			virtual IXbimSolid^ MakeSolid();
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) override;
+			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D)override;
 			virtual property bool HasValidTopology{bool get(); }
+			virtual bool CanCreateSolid(){ return IsClosed; };
+			virtual IXbimSolid^ CreateSolid(){ return MakeSolid(); };
 #pragma endregion
 			
 #pragma region operators

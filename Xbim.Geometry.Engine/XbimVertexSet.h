@@ -43,6 +43,7 @@ namespace Xbim
 			virtual IEnumerator<IXbimVertex^>^ GetEnumerator();
 			virtual System::Collections::IEnumerator^ GetEnumerator2() = System::Collections::IEnumerable::GetEnumerator{ return GetEnumerator(); }
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) ;
+			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D);
 #pragma endregion
 
 		};

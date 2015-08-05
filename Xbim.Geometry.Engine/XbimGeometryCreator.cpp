@@ -42,39 +42,92 @@ namespace Xbim
 				{
 					XbimSolid^ solid = (XbimSolid^)CreateSolid((IfcSweptAreaSolid^)geomRep);
 					if (objectLocation != nullptr) solid->Move(objectLocation);
+					
 					return solid;
 				}
 				else if (dynamic_cast<IfcManifoldSolidBrep^>(geomRep))
-					//return CreateSolidSet((IfcManifoldSolidBrep^)geomRep);
-					return gcnew XbimCompound((IfcManifoldSolidBrep^)geomRep);
+				{
+					XbimCompound^ comp = gcnew XbimCompound((IfcManifoldSolidBrep^)geomRep);
+					if (objectLocation != nullptr) comp->Move(objectLocation);
+					
+					return comp;
+				}				
 				else if (dynamic_cast<IfcSweptDiskSolid^>(geomRep))
-					return CreateSolid((IfcSweptDiskSolid^)geomRep);
+				{
+					XbimSolid^ solid = (XbimSolid^)CreateSolid((IfcSweptDiskSolid^)geomRep);
+					if (objectLocation != nullptr) solid->Move(objectLocation);
+					return solid;
+				}
 				else if (dynamic_cast<IfcBooleanClippingResult^>(geomRep))
-					return CreateBooleanClippingResult((IfcBooleanClippingResult^)geomRep);
+				{
+					XbimSolidSet^ solidSet = (XbimSolidSet^) CreateBooleanClippingResult((IfcBooleanClippingResult^)geomRep);
+					//BRepTools::Write((XbimSolid^)(solidSet->First), "d:\\tmp\\s");
+					if (objectLocation != nullptr) solidSet->Move(objectLocation);
+					return solidSet;
+				}				
 				else if (dynamic_cast<IfcBooleanResult^>(geomRep))
-					return CreateSolidSet((IfcBooleanResult^)geomRep);
+				{
+					XbimSolidSet^ solidSet = (XbimSolidSet^)CreateSolidSet((IfcBooleanResult^)geomRep);
+					if (objectLocation != nullptr) solidSet->Move(objectLocation);
+					return solidSet;
+				}
 				else if (dynamic_cast<IfcFaceBasedSurfaceModel^>(geomRep))
-					return CreateSurfaceModel((IfcFaceBasedSurfaceModel^)geomRep);
+				{
+					XbimCompound^ comp = (XbimCompound^)CreateSurfaceModel((IfcFaceBasedSurfaceModel^)geomRep);
+					if (objectLocation != nullptr) comp->Move(objectLocation);
+					return comp;
+				} 
 				else if (dynamic_cast<IfcShellBasedSurfaceModel^>(geomRep))
-					return CreateSurfaceModel((IfcShellBasedSurfaceModel^)geomRep);
+				{
+					XbimCompound^ comp = (XbimCompound^)CreateSurfaceModel((IfcShellBasedSurfaceModel^)geomRep);
+					if (objectLocation != nullptr) comp->Move(objectLocation);
+					return comp;
+				}
 				else if (dynamic_cast<IfcHalfSpaceSolid ^>(geomRep))
-					return CreateSolid((IfcHalfSpaceSolid^)geomRep);
+				{
+					XbimSolid^ solid = (XbimSolid^)CreateSolid((IfcHalfSpaceSolid^)geomRep);
+					if (objectLocation != nullptr) solid->Move(objectLocation);
+					return solid;
+				}
 				else if (dynamic_cast<IfcCurve^>(geomRep))
-					return CreateWire((IfcCurve^)geomRep);
+				{
+					XbimWire^ wire = (XbimWire^)CreateWire((IfcCurve^)geomRep);
+					if (objectLocation != nullptr) wire->Move(objectLocation);
+					return wire;
+				}	
 				else if (dynamic_cast<IfcCompositeCurveSegment ^>(geomRep))
-					return CreateWire((IfcCompositeCurveSegment ^)geomRep);
+				{
+					XbimWire^ wire = (XbimWire^)CreateWire((IfcCompositeCurveSegment^)geomRep);
+					if (objectLocation != nullptr) wire->Move(objectLocation);
+					return wire;
+				}					
 				else if (dynamic_cast<IfcBoundingBox^>(geomRep))
-					return CreateSolid((IfcBoundingBox^)geomRep);
+				{
+					XbimSolid^ solid = (XbimSolid^)CreateSolid((IfcBoundingBox^)geomRep);
+					if (objectLocation != nullptr) solid->Move(objectLocation);
+					return solid;
+				}
 				else if (dynamic_cast<IfcSurface^>(geomRep))
-					return CreateFace((IfcSurface^)geomRep);
+				{
+					XbimFace^ face = (XbimFace^)CreateFace((IfcSurface^)geomRep);
+					if (objectLocation != nullptr) face->Move(objectLocation);
+					return face;
+				}				
 				else if (dynamic_cast<IfcCsgSolid^>(geomRep))
-					return CreateSolid((IfcCsgSolid^)geomRep);
+				{
+					XbimSolid^ solid = (XbimSolid^)CreateSolid((IfcCsgSolid^)geomRep);
+					if (objectLocation != nullptr) solid->Move(objectLocation);
+					return solid;
+				}
 				else if (dynamic_cast<IfcGeometricSet^>(geomRep))
+				{
+					if (objectLocation != nullptr) Logger->Error("Move is not implemented for IfcGeometricSet");
 					return CreateGeometricSet((IfcGeometricSet^)geomRep);
+				}
 			}
 			catch (...)
 			{
-				Logger->ErrorFormat("EG001: Uknown error creating geometry representation of type {0} in entity #{1}", geomRep->GetType()->Name, geomRep->EntityLabel);
+				Logger->ErrorFormat("EG001: Unknown error creating geometry representation of type {0} in entity #{1}", geomRep->GetType()->Name, geomRep->EntityLabel);
 				return XbimGeometryObjectSet::Empty;
 			}
 			Logger->ErrorFormat("EG002: Geometry Representation of Type {0} in entity #{1} is not implemented", geomRep->GetType()->Name, geomRep->EntityLabel);
@@ -618,6 +671,10 @@ namespace Xbim
 			return gcnew XbimSolidSet();
 		};
 
+		IXbimGeometryObjectSet^ XbimGeometryCreator::CreateGeometryObjectSet() {
+			return gcnew XbimGeometryObjectSet();
+		};
+
 #pragma region Write Functions
 
 		void XbimGeometryCreator::WriteTriangulation(TextWriter^ tw, IXbimGeometryObject^ shape, double tolerance, double deflection, double angle)
@@ -750,9 +807,27 @@ namespace Xbim
 			
 #ifdef OCC_6_9_SUPPORTED			
 			
+			List<IfcBooleanOperand^>^ clips = gcnew List<IfcBooleanOperand^>();
+			
 			IXbimSolidSet^ solidSet = gcnew XbimSolidSet();
-			XbimSolid^ body = XbimSolid::BuildClippingList(clip, solidSet);
-			return body->Cut(solidSet, mf->PrecisionBoolean);
+			XbimSolid^ body = XbimSolid::BuildClippingList(clip, clips);
+			double maxLen = body->BoundingBox.Length();
+			for each (IfcBooleanOperand^ bOp in clips)
+			{
+				IfcPolygonalBoundedHalfSpace^ pbhs = dynamic_cast<IfcPolygonalBoundedHalfSpace^>(bOp);
+				if (pbhs!=nullptr) //special case for IfcPolygonalBoundedHalfSpace to keep extrusion to the minimum
+				{
+					XbimSolid^ s = gcnew XbimSolid(pbhs, maxLen);
+				    if (s->IsValid) solidSet->Add(s); 
+				}
+				else
+				{
+					XbimSolid^ s = gcnew XbimSolid(bOp);
+					if (s->IsValid) solidSet->Add(s);
+				}
+			}
+			//BRepTools::Write(body, "d:\\tmp\\b");
+			return body->Cut(solidSet, mf->OneMilliMeter);
 			
 #endif
 			IfcBooleanOperand^ fOp = clip->FirstOperand;

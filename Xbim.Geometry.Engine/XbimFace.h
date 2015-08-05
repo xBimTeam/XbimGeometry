@@ -83,6 +83,7 @@ namespace Xbim
 			virtual property XbimVector3D Normal{ XbimVector3D get(); }
 			virtual property XbimRect3D BoundingBox{XbimRect3D get() override; }
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) override;
+			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D)override;
 			virtual property bool IsQuadOrTriangle{bool get(); }
 #pragma endregion
 

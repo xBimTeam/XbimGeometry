@@ -33,6 +33,7 @@ namespace Xbim
 			virtual property bool IsSet{bool get() override { return false; }; }
 			virtual property  XbimGeometryObjectType GeometryType{XbimGeometryObjectType  get() override { return XbimGeometryObjectType::XbimCurveType; }; }
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) override;
+			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D)override;
 		};
 	}
 }

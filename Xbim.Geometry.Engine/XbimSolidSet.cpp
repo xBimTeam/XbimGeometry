@@ -89,7 +89,10 @@ namespace Xbim
 		void XbimSolidSet::Add(IXbimGeometryObject^ shape)
 		{
 			IXbimSolid^ solid = dynamic_cast<IXbimSolid^>(shape);
-			if (solid != nullptr) return solids->Add(solid);
+			if (solid != nullptr)
+			{
+				return solids->Add(solid);
+			}
 			IXbimSolidSet^ solidSet = dynamic_cast<IXbimSolidSet^>(shape);
 			if (solidSet != nullptr) return solids->AddRange(solidSet);
 			IXbimGeometryObjectSet^ geomSet = dynamic_cast<IXbimGeometryObjectSet^>(shape);
@@ -102,13 +105,15 @@ namespace Xbim
 					if (!compound->Sew())
 					{
 						_isSimplified = true; //set flag true to say the solid set has been simplified and the user should be warned
-#ifndef OCC_6_9_SUPPORTED						
+#ifndef OCC_6_9_SUPPORTED		
+						
 						return; //don't add it we cannot really make it into a solid and will cause boolean operation errors,
 #endif
 					}
 	
 				for each (IXbimGeometryObject^ geom in geomSet)
 				{
+					
 					IXbimSolid^ compSolid = dynamic_cast<IXbimSolid^>(geom);
 					if (compSolid != nullptr) 
 						solids->Add(compSolid);
@@ -119,14 +124,16 @@ namespace Xbim
 						{							
 							XbimSolid^ s = (XbimSolid^)shell->MakeSolid();								
 							solids->Add(s);
-						}
+						}					
 					}
 				}
+				
 				return;
 			}
 			XbimShell^ shell = dynamic_cast<XbimShell^>(shape);
 			if (shell != nullptr/* && shell->IsClosed*/)
-				return solids->Add(shell->MakeSolid());			
+				return solids->Add(shell->MakeSolid());	
+			
 		}
 		
 		IXbimSolid^ XbimSolidSet::First::get()
@@ -159,6 +166,26 @@ namespace Xbim
 			}
 			return gcnew XbimSolidSet(result);
 		}
+
+		IXbimGeometryObject^ XbimSolidSet::TransformShallow(XbimMatrix3D matrix3D)
+		{
+			List<IXbimSolid^>^ result = gcnew List<IXbimSolid^>(solids->Count);
+			for each (IXbimGeometryObject^ solid in solids)
+			{
+				result->Add((IXbimSolid^)((XbimSolid^)solid)->TransformShallow(matrix3D));
+			}
+			return gcnew XbimSolidSet(result);
+		}
+		void XbimSolidSet::Move(IfcAxis2Placement3D^ position)
+		{
+			if (!IsValid) return;			
+			for each (IXbimSolid^ solid in solids)
+			{
+				((XbimSolid^)solid)->Move(position);
+			}
+		}
+
+
 
 		XbimRect3D XbimSolidSet::BoundingBox::get()
 		{
@@ -571,6 +598,9 @@ namespace Xbim
 			if (Count == 1) return First->Union(solid, tolerance);
 			return Union(gcnew XbimSolidSet(solid), tolerance);
 		}
+
+
+		
 
 		IXbimSolidSet^ XbimSolidSet::Intersection(IXbimSolid^ solid, double tolerance)
 		{

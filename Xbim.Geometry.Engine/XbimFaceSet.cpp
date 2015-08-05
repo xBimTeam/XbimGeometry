@@ -53,6 +53,17 @@ namespace Xbim
 			return gcnew XbimFaceSet(result);
 		}
 
+		IXbimGeometryObject^ XbimFaceSet::TransformShallow(XbimMatrix3D matrix3D)
+		{
+			List<IXbimFace^>^ result = gcnew List<IXbimFace^>(faces->Count);
+			for each (IXbimGeometryObject^ face in faces)
+			{
+				result->Add((IXbimFace^)((XbimFace^)face)->TransformShallow(matrix3D));
+			}
+			return gcnew XbimFaceSet(result);
+		}
+
+
 		XbimRect3D XbimFaceSet::BoundingBox::get()
 		{
 			XbimRect3D result = XbimRect3D::Empty;

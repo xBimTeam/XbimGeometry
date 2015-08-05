@@ -1,6 +1,7 @@
 #pragma once
 #include "XbimOccShape.h"
 #include <TopoDS_Edge.hxx>
+#include <TopoDS_Wire.hxx>
 #include <BRepBuilderAPI_MakeEdge.hxx>
 
 using namespace System;
@@ -52,6 +53,7 @@ namespace Xbim
 			XbimEdge(IfcBSplineCurve^ bez);
 			XbimEdge(IfcBezierCurve^ bez);
 			XbimEdge(IfcRationalBezierCurve^ bez);
+			XbimEdge(const TopoDS_Wire& wire, double tolerance, double angleTolerance);
 #pragma endregion
 
 
@@ -80,6 +82,7 @@ namespace Xbim
 			virtual property IXbimCurve^ EdgeGeometry{IXbimCurve^ get(); }
 			virtual property XbimRect3D BoundingBox {XbimRect3D get() override; }
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) override;
+			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D)override;
 #pragma endregion	
 
 #pragma region Properties

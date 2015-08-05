@@ -37,6 +37,7 @@ namespace Xbim
 			virtual property XbimPoint3D VertexGeometry {XbimPoint3D get() { return point; }; }
 			virtual property XbimRect3D BoundingBox {XbimRect3D get(); }
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D);
+			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D);
 #pragma endregion
 
 #pragma region Equality Overrides

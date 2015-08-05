@@ -52,6 +52,17 @@ namespace Xbim
 			return gcnew XbimVertexSet(result);
 		}
 
+		IXbimGeometryObject^ XbimVertexSet::TransformShallow(XbimMatrix3D matrix3D)
+		{
+			List<IXbimVertex^>^ result = gcnew List<IXbimVertex^>(vertices->Count);
+			for each (IXbimGeometryObject^ vertex in vertices)
+			{
+				result->Add((IXbimVertex^)((XbimVertex^)vertex)->TransformShallow(matrix3D));
+			}
+			return gcnew XbimVertexSet(result);
+		}
+
+
 		XbimRect3D XbimVertexSet::BoundingBox::get()
 		{
 			XbimRect3D result = XbimRect3D::Empty;

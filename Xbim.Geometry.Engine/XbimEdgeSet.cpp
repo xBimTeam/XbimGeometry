@@ -81,6 +81,15 @@ namespace Xbim
 			return gcnew XbimEdgeSet(result);
 		}
 
+		IXbimGeometryObject^ XbimEdgeSet::TransformShallow(XbimMatrix3D matrix3D)
+		{
+			List<IXbimEdge^>^ result = gcnew List<IXbimEdge^>(edges->Count);
+			for each (IXbimGeometryObject^ edge in edges)
+			{
+				result->Add((IXbimEdge^)((XbimEdge^)edge)->TransformShallow(matrix3D));
+			}
+			return gcnew XbimEdgeSet(result);
+		}
 
 		IEnumerator<IXbimEdge^>^ XbimEdgeSet::GetEnumerator()
 		{

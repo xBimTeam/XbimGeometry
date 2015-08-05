@@ -6,6 +6,10 @@ using Xbim.Ifc2x3.TopologyResource;
 using Xbim.IO;
 using Xbim.Ifc2x3.GeometricModelResource;
 using Xbim.Common.Logging;
+using Xbim.Ifc2x3.GeometricConstraintResource;
+using Xbim.Ifc2x3.GeometryResource;
+using Xbim.Ifc2x3.ProductExtension;
+using XbimGeometry.Interfaces;
 
 namespace GeometryTests
 {
@@ -16,6 +20,33 @@ namespace GeometryTests
     public class IfcFaceBasedModelTests
     {
         private readonly XbimGeometryEngine _xbimGeometryCreator = new XbimGeometryEngine();
+
+        /// <summary>
+        /// Cut a set of brep faces without forming a solid
+        /// </summary>
+        [TestMethod]
+        public void CutNonSolidBrep()
+        {
+            using (var eventTrace = LoggerFactory.CreateEventTrace())
+            {
+                using (var m = new XbimModel())
+                {
+                    m.CreateFrom("SolidTestFiles\\Complex_BRep_Boolean.ifc", null, null, true, true);
+                    var fbr = m.Instances[35] as IfcFacetedBrep;
+                    Assert.IsTrue(fbr != null, "No IfcFacetedBRep found");
+                    var bodyShape = (IXbimShell)((IXbimGeometryObjectSet)_xbimGeometryCreator.Create(fbr)).First();
+                    Assert.IsTrue(bodyShape.IsValid, "Invalid IfcFacetedBRep");
+                    var opening = m.Instances[133218] as IfcExtrudedAreaSolid;
+                    Assert.IsTrue(opening != null, "No IfcExtrudedAreaSolid found");
+                    var window = m.Instances[133212] as IfcOpeningElement;
+                    var cutShape = (IXbimSolid)_xbimGeometryCreator.Create(opening, (IfcAxis2Placement3D)((IfcLocalPlacement)window.ObjectPlacement).RelativePlacement);
+                    var result =  bodyShape.Cut(cutShape, m.ModelFactors.OneMilliMetre);
+                }
+            }
+        }
+
+
+
         /// <summary>
         /// This is a bad Brep that does not correctly define the faceset
         /// </summary>

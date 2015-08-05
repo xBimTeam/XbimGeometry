@@ -28,5 +28,10 @@ namespace Xbim
 		{
 			throw gcnew Exception("Tranformation of curves is not currently supported");
 		}
+		
+		IXbimGeometryObject^ XbimCurve::TransformShallow(XbimMatrix3D matrix3D)
+		{
+			throw gcnew Exception("TransformShallow of curves is not currently supported");
+		}
 	}
 }

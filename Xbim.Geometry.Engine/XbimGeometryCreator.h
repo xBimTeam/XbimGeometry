@@ -148,7 +148,7 @@ namespace Xbim
 
 			virtual IXbimSolidSet^ CreateBooleanClippingResult(IfcBooleanClippingResult^ clip);
 			
-
+			virtual IXbimGeometryObjectSet^ CreateGeometryObjectSet();
 		};
 	}
 }

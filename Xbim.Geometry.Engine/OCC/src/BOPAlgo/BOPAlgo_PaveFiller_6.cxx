@@ -372,21 +372,21 @@ void BOPAlgo_PaveFiller::MakeBlocks()
   Handle(BOPDS_PaveBlock) aPBOut;
   //
   //-----------------------------------------------------scope f
-  aAllocator=new NCollection_IncAllocator();
+  aAllocator =  new NCollection_IncAllocator();
   //
-  BOPCol_ListOfInteger aLSE(aAllocator), aLBV(aAllocator);
-  BOPCol_MapOfInteger aMVOnIn(100, aAllocator), aMF(100, aAllocator),
-                      aMVStick(100,aAllocator), aMVEF(100, aAllocator),
-                      aMI(100, aAllocator);
-  BOPDS_IndexedMapOfPaveBlock aMPBOnIn(100, aAllocator);
-  BOPDS_MapOfPaveBlock aMPBAdd(100, aAllocator);
-  BOPDS_ListOfPaveBlock aLPB(aAllocator);
-  BOPDS_IndexedDataMapOfShapeCoupleOfPaveBlocks aMSCPB(100, aAllocator); 
-  BOPCol_DataMapOfShapeInteger aMVI(100, aAllocator);
-  BOPDS_DataMapOfPaveBlockListOfPaveBlock aDMExEdges(100, aAllocator);
-  BOPCol_DataMapOfIntegerReal aMVTol(100, aAllocator);
-  BOPCol_DataMapOfIntegerInteger aDMI(100, aAllocator);
-  BOPCol_DataMapOfIntegerListOfInteger aDMBV(100, aAllocator);
+  BOPCol_ListOfInteger aLSE/*(aAllocator)*/, aLBV/*(aAllocator)*/;
+  BOPCol_MapOfInteger aMVOnIn(100), aMF(100),
+                      aMVStick(100), aMVEF(100),
+                      aMI(100);
+  BOPDS_IndexedMapOfPaveBlock aMPBOnIn(100/*, aAllocator*/); //commented out due to excessive memory use srl.
+  BOPDS_MapOfPaveBlock aMPBAdd(100/*, , aAllocator*/);
+  BOPDS_ListOfPaveBlock aLPB/*(, aAllocator)*/;
+  BOPDS_IndexedDataMapOfShapeCoupleOfPaveBlocks aMSCPB(100 /*, aAllocator*/);
+  BOPCol_DataMapOfShapeInteger aMVI(100/*, , aAllocator*/);
+  BOPDS_DataMapOfPaveBlockListOfPaveBlock aDMExEdges(100/*,  aAllocator*/);
+  BOPCol_DataMapOfIntegerReal aMVTol(100/*,  aAllocator*/);
+  BOPCol_DataMapOfIntegerInteger aDMI(100/*,  aAllocator*/);
+  BOPCol_DataMapOfIntegerListOfInteger aDMBV(100/*,  aAllocator*/);
   BOPCol_DataMapIteratorOfDataMapOfIntegerReal aItMV;
   //
   for (i=0; i<aNbFF; ++i) {
@@ -594,6 +594,28 @@ void BOPAlgo_PaveFiller::MakeBlocks()
   // 
   // post treatment
   myErrorStatus=PostTreatFF(aMSCPB, aMVI, aDMExEdges, aDMI, aAllocator);
+ /* size_t size = aAllocator->GetMemSize();
+  cout << size << endl;
+
+  cout << "aLSE="<<aLSE.Size() << endl;
+  cout << "aLBV=" << aLBV.Size() << endl;
+  cout << "aMVOnIn=" << aMVOnIn.Size() << endl;
+  cout << "aMF=" << aMF.Size() << endl;
+  cout << "aMVStick=" << aMVStick.Size() << endl;
+  cout << "aMVEF=" << aMVEF.Size() << endl;
+
+  cout << "aMI=" << aMI.Size() << endl;
+  cout << "aMPBOnIn=" << aMPBOnIn.Size() << endl;
+  cout << "aMPBAdd=" << aMPBAdd.Size() << endl;
+  cout << "aLPB=" << aLPB.Size() << endl;
+  cout << "aMSCPB=" << aMSCPB.Size() << endl;
+
+  cout << "aMVI=" << aMVI.Size() << endl;
+  cout << "aDMExEdges=" << aDMExEdges.Size() << endl;
+  cout << "aMVTol=" << aMVTol.Size() << endl;
+  cout << "aDMI=" << aDMI.Size() << endl;
+  cout << "aDMBV=" << aDMBV.Size() << endl;
+*/
   if (myErrorStatus) {
     return;
   }
@@ -645,8 +667,8 @@ Standard_Integer BOPAlgo_PaveFiller::PostTreatFF
   BOPDS_Pave aPave[2], aPave1[2];
   BOPDS_ShapeInfo aSI;
   //
-  BOPCol_ListOfShape aLS(theAllocator);
-  BOPAlgo_PaveFiller aPF(theAllocator);
+  BOPCol_ListOfShape aLS/*(theAllocator)*/; //commented out due to excessive memory usage
+  BOPAlgo_PaveFiller aPF/*(theAllocator)*/;
   //
   BOPDS_VectorOfInterfFF& aFFs=myDS->InterfFF();
   //

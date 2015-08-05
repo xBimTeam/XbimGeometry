@@ -53,7 +53,8 @@
 #include <gp_Lin2d.hxx>
 #include <IntAna2d_AnaIntersection.hxx>
 #include <BRepOffsetAPI_MakeOffset.hxx>
-
+#include <TColStd_IndexedDataMapOfTransientTransient.hxx>
+#include <TopTools_ListIteratorOfListOfShape.hxx>
 using namespace Xbim::Common;
 using namespace Xbim::Ifc2x3::MeasureResource;
 
@@ -892,6 +893,13 @@ namespace Xbim
 			BRepBuilderAPI_Transform gTran(copier.Shape(), XbimGeomPrim::ToTransform(matrix3D));
 			TopoDS_Wire temp = TopoDS::Wire(gTran.Shape());
 			return gcnew XbimWire(temp);
+		}
+
+		IXbimGeometryObject^ XbimWire::TransformShallow(XbimMatrix3D matrix3D)
+		{
+			TopoDS_Wire wire = TopoDS::Wire(pWire->Moved(XbimGeomPrim::ToTransform(matrix3D)));
+			GC::KeepAlive(this);
+			return gcnew XbimWire(wire);
 		}
 
 		XbimRect3D XbimWire::BoundingBox::get()
@@ -2009,6 +2017,182 @@ namespace Xbim
 			if (!IsValid) return;
 			pWire->Reverse();
 		}
+
+		void  XbimWire::FuseColinearSegments(double tolerance, double angleTolerance)
+		{
+			if (!IsValid) return;
+			// Tolerances			
+			
+			/*Standard_Real tol;
+			for (TopExp_Explorer ExV(*pWire, TopAbs_VERTEX); ExV.More(); ExV.Next()) {
+				TopoDS_Vertex Vertex = TopoDS::Vertex(ExV.Current());
+				tol = BRep_Tool::Tolerance(Vertex);
+				if (tol > LinTol)
+					LinTol = tol;
+			}*/
+
+			//// 1. Make a copy to prevent the original shape changes.
+			//TopoDS_Shape aWire;
+			//TColStd_IndexedDataMapOfTransientTransient aMapTShapes;
+			//TNaming_CopyShape::CopyTool(*pWire, aMapTShapes, aWire);
+			TopoDS_Wire theWire = TopoDS::Wire(*pWire);
+			
+			TopoDS_Edge prevEdge;
+			TopTools_ListOfShape finalList, currChain;
+
+			BRepTools_WireExplorer wexp(theWire);
+			if (wexp.More()) {
+				prevEdge = wexp.Current();
+				currChain.Append(prevEdge);
+				wexp.Next();
+			}
+			else 
+			{
+				XbimGeometryCreator::logger->WarnFormat("WW028: Empty wire given in FuseColinearSegments");
+			}
+
+			for (; wexp.More(); wexp.Next()) {
+				TopoDS_Edge anEdge = wexp.Current();
+				TopoDS_Vertex CurVertex = wexp.CurrentVertex();
+
+			
+
+			
+				if (!AreEdgesC1(prevEdge, anEdge, tolerance, angleTolerance)) 
+				{
+					if (currChain.Extent() == 1) 
+					{
+						// add one edge to the final list
+						finalList.Append(currChain.First());
+					}
+					else 
+					{
+						// make wire from the list of edges
+						BRep_Builder B;
+						TopoDS_Wire aCurrWire;
+						B.MakeWire(aCurrWire);
+						TopTools_ListIteratorOfListOfShape itEdges(currChain);
+						for (; itEdges.More(); itEdges.Next()) {
+							TopoDS_Shape aValue = itEdges.Value();
+							B.Add(aCurrWire, TopoDS::Edge(aValue));
+						}
+						// make edge from the wire
+						XbimEdge^ anEdge = gcnew XbimEdge(aCurrWire, tolerance, angleTolerance);
+						// add this new edge to the final list
+						finalList.Append(anEdge);
+					}
+					currChain.Clear();
+				}
+				// add one edge to the chain
+				currChain.Append(anEdge);
+				prevEdge = anEdge;
+			}
+
+			if (currChain.Extent() == 1) {
+				// add one edge to the final list
+				finalList.Append(currChain.First());
+			}
+			else 
+			{
+				// make wire from the list of edges
+				BRep_Builder B;
+				TopoDS_Wire aCurrWire;
+				B.MakeWire(aCurrWire);
+				TopTools_ListIteratorOfListOfShape itEdges(currChain);
+				for (; itEdges.More(); itEdges.Next()) {
+					TopoDS_Shape aValue = itEdges.Value();
+					B.Add(aCurrWire, TopoDS::Edge(aValue));
+				}
+
+				// make edge from the wire
+				XbimEdge^ anEdge = gcnew XbimEdge(aCurrWire, tolerance, angleTolerance);
+
+				// add this new edge to the final list
+				finalList.Append(anEdge);
+			}
+
+			BRep_Builder B;
+			TopoDS_Wire aFinalWire;
+			B.MakeWire(aFinalWire);
+			TopTools_ListIteratorOfListOfShape itEdges(finalList);
+			for (; itEdges.More(); itEdges.Next()) {
+				TopoDS_Shape aValue = itEdges.Value();
+				B.Add(aFinalWire, TopoDS::Edge(aValue));
+			}
+			*pWire = aFinalWire;
+		}
+
+		bool XbimWire::AreEdgesC1(const TopoDS_Edge& E1, const TopoDS_Edge& E2, double precision, double angularTolerance)
+		{
+			BRepAdaptor_Curve aCurve1(E1);
+			BRepAdaptor_Curve aCurve2(E2);
+
+			if (aCurve1.Continuity() == GeomAbs_C0 || aCurve2.Continuity() == GeomAbs_C0)
+				return Standard_False;
+
+			Standard_Real tol, tolMax = precision;
+			for (TopExp_Explorer ExV1(E1, TopAbs_VERTEX); ExV1.More(); ExV1.Next()) {
+				TopoDS_Vertex Vertex = TopoDS::Vertex(ExV1.Current());
+				tol = BRep_Tool::Tolerance(Vertex);
+				if (tol > tolMax)
+					tolMax = tol;
+			}
+			for (TopExp_Explorer ExV2(E2, TopAbs_VERTEX); ExV2.More(); ExV2.Next()) {
+				TopoDS_Vertex Vertex = TopoDS::Vertex(ExV2.Current());
+				tol = BRep_Tool::Tolerance(Vertex);
+				if (tol > tolMax)
+					tolMax = tol;
+			}
+
+			Standard_Real f1, l1, f2, l2;
+			f1 = aCurve1.FirstParameter();
+			l1 = aCurve1.LastParameter();
+			f2 = aCurve2.FirstParameter();
+			l2 = aCurve2.LastParameter();
+
+			if (f1 > l1) {
+				Standard_Real tmp = f1;
+				f1 = l1;
+				l1 = tmp;
+			}
+
+			if (f2 > l2) {
+				Standard_Real tmp = f2;
+				f2 = l2;
+				l2 = tmp;
+			}
+
+			gp_Pnt pf1, pl1, pf2, pl2;
+			gp_Vec vf1, vl1, vf2, vl2;
+			aCurve1.D1(f1, pf1, vf1);
+			aCurve1.D1(l1, pl1, vl1);
+			aCurve2.D1(f2, pf2, vf2);
+			aCurve2.D1(l2, pl2, vl2);
+
+			// pf1--->---pl1.pf2--->---pl2
+			if (pl1.SquareDistance(pf2) < tolMax*tolMax) {
+				if (vl1.Angle(vf2) < angularTolerance)
+					return Standard_True;
+			}
+			// pl1---<---pf1.pf2--->---pl2
+			else if (pf1.SquareDistance(pf2) < tolMax*tolMax) {
+				if (vf1.Angle(-vf2) < angularTolerance)
+					return Standard_True;
+			}
+			// pf1--->---pl1.pl2---<---pf2
+			else if (pl1.SquareDistance(pl2) < tolMax*tolMax) {
+				if (vl1.Angle(-vl2) < angularTolerance)
+					return Standard_True;
+			}
+			// pl1---<---pf1.pl2---<---pf2
+			else {
+				if (vf1.Angle(vl2) < angularTolerance)
+					return Standard_True;
+			}
+
+			return Standard_False;
+		}
+
 
 #pragma endregion
 

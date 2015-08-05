@@ -75,9 +75,13 @@ namespace Xbim
 			virtual IXbimSolidSet^ Union(IXbimSolid^ solid, double tolerance);
 			virtual IXbimSolidSet^ Intersection(IXbimSolidSet^ solids, double tolerance);
 			virtual IXbimSolidSet^ Intersection(IXbimSolid^ solid, double tolerance);
+			
 			virtual property bool IsPolyhedron{ bool get(); }
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) ;
+			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D);
 			virtual property double Volume{double get(); }
+			//moves the solid set to the new position
+			void Move(IfcAxis2Placement3D^ position);
 			
 		};
 

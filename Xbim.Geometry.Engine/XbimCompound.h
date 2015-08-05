@@ -59,13 +59,27 @@ namespace Xbim
 			XbimCompound(IfcClosedShell^ solid);
 			static property XbimCompound^ Empty{XbimCompound^ get(){ return empty; }};
 #pragma region IXbimCompound Interface
-			virtual property bool IsValid {bool get()override{ return ptrContainer != IntPtr::Zero && Count>0; }; }
+			virtual property bool IsValid {bool get()override{ return ptrContainer != IntPtr::Zero && Count > 0; }; }
 			virtual property bool IsSet{bool get() override { return true; }; }
 			virtual property  XbimGeometryObjectType GeometryType  {XbimGeometryObjectType  get()override { return XbimGeometryObjectType::XbimGeometryObjectSetType; }}
 			virtual property int Count{int get(); }
 			virtual property IXbimGeometryObject^ First{IXbimGeometryObject^ get(); }
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) override;
+			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D) override;
 			static List<XbimSolid^>^  GetDiscrete(List<XbimSolid^>^%);
+			virtual property IXbimSolidSet^ Solids {IXbimSolidSet^ get() override; }
+			virtual property IXbimShellSet^ Shells{IXbimShellSet^ get()override; }
+			virtual property IXbimFaceSet^ Faces{IXbimFaceSet^ get()override; }
+			virtual property IXbimEdgeSet^ Edges{IXbimEdgeSet^ get()override; }
+			virtual property IXbimVertexSet^ Vertices{IXbimVertexSet^ get()override; }
+			virtual void Add(IXbimGeometryObject^ geomObj);
+			virtual IXbimGeometryObjectSet^ Cut(IXbimSolidSet^ solids, double tolerance);
+			virtual IXbimGeometryObjectSet^ Cut(IXbimSolid^ solid, double tolerance);
+			virtual IXbimGeometryObjectSet^ Union(IXbimSolidSet^ solids, double tolerance);
+			virtual IXbimGeometryObjectSet^ Union(IXbimSolid^ solid, double tolerance);
+			virtual IXbimGeometryObjectSet^ Intersection(IXbimSolidSet^ solids, double tolerance);
+			virtual IXbimGeometryObjectSet^ Intersection(IXbimSolid^ solid, double tolerance);
+			
 #ifdef OCC_6_9_SUPPORTED //OCC 6.9.0. is better with complex booleans
 			static int MaxFacesToSew = 3000;
 #else
@@ -87,8 +101,10 @@ namespace Xbim
 			XbimCompound^ Intersection(XbimCompound^ solids, double tolerance);
 			virtual property XbimRect3D BoundingBox {XbimRect3D get()override ; }
 			virtual property double Volume{double get(); }
-
+			
 			bool Sew();
+			//moves the compound to the new position
+			void Move(IfcAxis2Placement3D^ position);
 		};
 
 	}
