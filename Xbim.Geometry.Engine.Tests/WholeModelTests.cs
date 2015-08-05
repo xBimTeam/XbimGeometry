@@ -17,6 +17,7 @@ using Xbim.Ifc2x3.PresentationResource;
 using Xbim.Ifc2x3.ProductExtension;
 using Xbim.IO;
 using Xbim.ModelGeometry.Scene;
+using Xbim.XbimExtensions;
 using Xbim.XbimExtensions.SelectTypes;
 using XbimGeometry.Interfaces;
 
@@ -30,11 +31,37 @@ namespace GeometryTests
     [DeploymentItem(@"x86\", "x86")]
     [DeploymentItem(@"EsentTestFiles\", "EsentTestFiles")]
     [DeploymentItem(@"SolidTestFiles\", "SolidTestFiles")]
+    
     [TestClass]
     public class WholeModelTests
     {
         private readonly XbimGeometryEngine _xbimGeometryCreator = new XbimGeometryEngine();
 
+        [DeploymentItem(@"EsentTestFiles\Monolith_v10.xBIM", @"GConv\")]
+        [TestMethod]
+        public void GeometryVersionUpgradeTest()
+        {
+            using (var model = new XbimModel())
+            {
+                // start afresh
+                model.Open(@"GConv\Monolith_v10.xBIM", XbimDBAccess.Exclusive);
+                Assert.AreEqual(1, model.GeometrySupportLevel);
+
+                // now remove the existing geometry
+                model.DeleteGeometryCache();
+                Assert.AreEqual(0, model.GeometrySupportLevel);
+
+                // now create the geometry back
+                model.EnsureGeometryTables(); // update the database structure first
+                var context = new Xbim3DModelContext(model);
+                context.CreateContext(XbimGeometryType.PolyhedronBinary); // then populate it
+
+                // final tests
+                Assert.AreEqual(2, model.GeometrySupportLevel);
+                // and tidy up
+                model.Close();
+            }
+        }
 
         [TestMethod]
         public void TestShapeGeometriesEnumerability()

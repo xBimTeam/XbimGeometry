@@ -1723,6 +1723,10 @@ namespace Xbim.ModelGeometry.Scene
             return sw.ToString();
         }
 
+        /// <summary>
+        /// This function is used to generate the .wexbim model files.
+        /// </summary>
+        /// <param name="binaryStream">An open writable streamer.</param>
         public void Write(BinaryWriter binaryStream)
         {
         // ReSharper disable RedundantCast
