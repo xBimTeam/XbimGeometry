@@ -4,7 +4,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -331,22 +330,22 @@ namespace Xbim.ModelGeometry.Scene
 
         public static readonly ILogger Logger = LoggerFactory.GetLogger();
         private readonly IfcRepresentationContextCollection _contexts;
-        private IXbimGeometryCreator _Engine;
+        private IXbimGeometryCreator _engine;
 
         private IXbimGeometryCreator Engine
         {
             get
             {
-                if (_Engine == null)
-                    _Engine = new XbimGeometryEngine();
-                return _Engine;
+                if (_engine == null)
+                    _engine = new XbimGeometryEngine();
+                return _engine;
             }
         }
         private readonly XbimModel _model;
 
         private bool _contextIsPersisted;
         //The maximum extent for any dimension of any products bouding box 
-        private double _maxXyz;
+        //private double _maxXyz;
        
         /// <summary>
         ///     Initialises a model context from the model
@@ -416,16 +415,16 @@ namespace Xbim.ModelGeometry.Scene
             if (contexts.Any())
             {
                 _contexts = new IfcRepresentationContextCollection();
-                var roundingPrecisions = new Dictionary<IfcRepresentationContext, int>();
-                var contextLookup = new Dictionary<short, IfcRepresentationContext>();
+                //var roundingPrecisions = new Dictionary<IfcRepresentationContext, int>();
+                //var contextLookup = new Dictionary<short, IfcRepresentationContext>();
                 foreach (var context in contexts)
                 {
                     _contexts.Add(context);
-                    roundingPrecisions.Add(context,
-                        Math.Abs(context.DefaultPrecision) < 1e-9
-                            ? 0
-                            : Math.Abs((int) Math.Log10(context.DefaultPrecision)));
-                    contextLookup.Add(GetContextId(context), context);
+                    //roundingPrecisions.Add(context,
+                    //    Math.Abs(context.DefaultPrecision) < 1e-9
+                    //        ? 0
+                    //        : Math.Abs((int) Math.Log10(context.DefaultPrecision)));
+                    //contextLookup.Add(GetContextId(context), context);
                 }
                 _contextIsPersisted = false;
             }
@@ -445,10 +444,10 @@ namespace Xbim.ModelGeometry.Scene
             get { return _model; }
         }
 
-        private static short GetContextId(IfcRepresentationContext context)
-        {
-            return (short) ((context.EntityLabel >> 16) ^ context.EntityLabel);
-        }
+        //private static short GetContextId(IfcRepresentationContext context)
+        //{
+        //    return (short) ((context.EntityLabel >> 16) ^ context.EntityLabel);
+        //}
 
         /// <summary>
         /// </summary>
@@ -673,7 +672,7 @@ namespace Xbim.ModelGeometry.Scene
 
                 try
                 {
-                    if (progDelegate != null) progDelegate(-1, "FeatureElement, (#" + element.EntityLabel + " started)");
+                    //if (progDelegate != null) progDelegate(-1, "FeatureElement, (#" + element.EntityLabel + " started)");
                     var elementShapes = WriteProductShape(contextHelper, element, false).ToList();
                     var context = 0;
                     var styleId = 0; //take the style of any part of the main shape
@@ -765,7 +764,15 @@ namespace Xbim.ModelGeometry.Scene
                             if (allOpenings.Any())
                             {
 
-                                elementGeom = elementGeom.Cut(allOpenings, _model.ModelFactors.Precision*2);
+                                var nextGeom = elementGeom.Cut(allOpenings, _model.ModelFactors.Precision * 2);
+                                if(!nextGeom.IsValid) //try another precision
+                                    nextGeom = elementGeom.Cut(allOpenings, _model.ModelFactors.OneMilliMetre);
+                                if (nextGeom.IsValid)
+                                    elementGeom = nextGeom;
+                                else
+                                     Logger.WarnFormat(
+                                    "WM008: Cutting of openings in {2}[#{0}]-{1} has failed, openings have ben ignored",
+                                    element.EntityLabel, element.Name, element.GetType().Name);
                             }
                               
 
@@ -850,7 +857,7 @@ namespace Xbim.ModelGeometry.Scene
             );
             contextHelper.PercentageParsed = localPercentageParsed;
             contextHelper.Tally = localTally;
-            if (progDelegate != null) progDelegate(101, "WriteFeatureElements, (" + localTally + " written)");
+            //if (progDelegate != null) progDelegate(101, "WriteFeatureElements, (" + localTally + " written)");
             return processed;
         }
 
@@ -888,7 +895,7 @@ namespace Xbim.ModelGeometry.Scene
         private IEnumerable<XbimShapeInstance> WriteProductShape(XbimCreateContextHelper contextHelper,
             IfcProduct element, bool includesOpenings)
         {
-            _maxXyz = _model.ModelFactors.OneMetre * 100; //elements bigger than 100 metres should not be considered in region
+            //_maxXyz = _model.ModelFactors.OneMetre * 100; //elements bigger than 100 metres should not be considered in region
             var shapesInstances = new List<XbimShapeInstance>();
             var rep = element.Representation.Representations
                 .FirstOrDefault(r => _contexts.Contains(r.ContextOfItems)
@@ -1011,8 +1018,7 @@ namespace Xbim.ModelGeometry.Scene
             var xbimTessellator = new XbimTessellator(Model,geomStorageType);
             //var geomHash = new ConcurrentDictionary<RepresentationItemGeometricHashKey, int>();
             
-            var mapLookup =
-                new ConcurrentDictionary<int, int>();
+            //var mapLookup = new ConcurrentDictionary<int, int>();
             if (progDelegate != null) progDelegate(-1, "WriteShapeGeometries (" + contextHelper.ProductShapeIds.Count + " shapes)");
             var precision = Model.ModelFactors.Precision;
             var deflection = Model.ModelFactors.DeflectionTolerance;
@@ -1105,20 +1111,20 @@ namespace Xbim.ModelGeometry.Scene
             
 
             //Now tidy up the maps
-            Parallel.ForEach(mapLookup, contextHelper.ParallelOptions, mapKv =>
-                // foreach (var mapKV in mapLookup)
-            {
-                int surfaceStyle;
-                if (!contextHelper.SurfaceStyles.TryGetValue(mapKv.Key, out surfaceStyle))
-                    //it doesn't have a surface style assigned to itself, so use the base one of the main shape
-                    contextHelper.SurfaceStyles.TryGetValue(mapKv.Value, out surfaceStyle);
-                GeometryReference geometryReference;
-                contextHelper.ShapeLookup.TryGetValue(mapKv.Value, out geometryReference);
-                geometryReference.StyleLabel = surfaceStyle;
-                contextHelper.ShapeLookup.TryAdd(mapKv.Key, geometryReference);
+            //Parallel.ForEach(mapLookup, contextHelper.ParallelOptions, mapKv =>
+            //    // foreach (var mapKV in mapLookup)
+            //{
+            //    int surfaceStyle;
+            //    if (!contextHelper.SurfaceStyles.TryGetValue(mapKv.Key, out surfaceStyle))
+            //        //it doesn't have a surface style assigned to itself, so use the base one of the main shape
+            //        contextHelper.SurfaceStyles.TryGetValue(mapKv.Value, out surfaceStyle);
+            //    GeometryReference geometryReference;
+            //    contextHelper.ShapeLookup.TryGetValue(mapKv.Value, out geometryReference);
+            //    geometryReference.StyleLabel = surfaceStyle;
+            //    contextHelper.ShapeLookup.TryAdd(mapKv.Key, geometryReference);
                
-            }
-            );
+            //}
+            //);
             if (progDelegate != null) progDelegate(101, "WriteShapeGeometries, (" + localTally + " written)");
         }
 
@@ -1851,13 +1857,16 @@ namespace Xbim.ModelGeometry.Scene
                             kv.Key));
                     }
                     //Read all vertices and normals in the geometry stream and transform
-                    var ms = new MemoryStream(geometry.ShapeData);
-                    var br = new BinaryReader(ms);
-                    var tr = br.ReadShapeTriangulation();
-                    var trTransformed = tr.Transform(((XbimShapeInstance) xbimShapeInstance).Transformation);
-                    trTransformed.Write(binaryStream);
-                    numberOfTriangles += XbimShapeTriangulation.TriangleCount(geometry.ShapeData);
-                    numberOfVertices += XbimShapeTriangulation.VerticesCount(geometry.ShapeData);
+                    if (geometry.ShapeData.Length > 0)
+                    {
+                        var ms = new MemoryStream(geometry.ShapeData);
+                        var br = new BinaryReader(ms);
+                        var tr = br.ReadShapeTriangulation();
+                        var trTransformed = tr.Transform(((XbimShapeInstance) xbimShapeInstance).Transformation);
+                        trTransformed.Write(binaryStream);
+                        numberOfTriangles += XbimShapeTriangulation.TriangleCount(geometry.ShapeData);
+                        numberOfVertices += XbimShapeTriangulation.VerticesCount(geometry.ShapeData);
+                    }
                 }
             }
             binaryStream.Seek(start, SeekOrigin.Begin);

@@ -228,6 +228,9 @@ namespace Xbim
 				{
 					toBeProcessed.Append(solid);
 					hasObjectsToProcess = true;
+					
+					//BRepTools::Write((XbimOccShape^)solid, "d:\\tmp\\b");
+					
 				}
 				else if (shell != nullptr)
 				{
@@ -235,7 +238,7 @@ namespace Xbim
 					{
 						Bnd_Box bbFace;
 						BRepBndLib::Add(expl.Current(), bbFace);
-						for (size_t i = 1; i <= aBoxes.Length(); i++)
+						for (int i = 1; i <= aBoxes.Length(); i++)
 						{
 							if (!bbFace.IsOut(aBoxes(i)))
 							{
@@ -259,7 +262,7 @@ namespace Xbim
 				{
 					Bnd_Box bbFace;
 					BRepBndLib::Add(face, bbFace);
-					for (size_t i = 1; i <= aBoxes.Length(); i++)
+					for (int i = 1; i <= aBoxes.Length(); i++)
 					{
 						if (!bbFace.IsOut(aBoxes(i)))
 						{
@@ -314,15 +317,21 @@ namespace Xbim
 				Bnd_Array1OfBox allBoxes(1, solids->Count);
 
 				int i = 1;
-
+				
+				
 				for each (XbimSolid^ solid in solids)
 				{
-					cuttingObjects.Append(solid);
-
-					Bnd_Box box;
-					BRepBndLib::Add(solid, box);
-					allBoxes(i).SetGap(-tolerance * 2); //reduce to only catch faces that are inside tolerance and not sitting on the opening
-
+					if (solid->IsValid)
+					{
+						/*char buff[128];
+						sprintf(buff, "d:\\tmp\\o%d", i);
+						BRepTools::Write(solid, buff);*/
+						cuttingObjects.Append(solid);
+						Bnd_Box box;
+						BRepBndLib::Add(solid, box);
+						allBoxes(i++).SetGap(-tolerance * 2); //reduce to only catch faces that are inside tolerance and not sitting on the opening
+					}
+					
 				}
 
 				if (!ParseGeometry(geomObjects, toBeProcessed, allBoxes, toBePassedThrough, tolerance)) //nothing to do so just return what we had
@@ -376,7 +385,7 @@ namespace Xbim
 			{
 				err = gcnew String(Standard_Failure::Caught()->GetMessageString());				
 			}
-			XbimGeometryCreator::logger->WarnFormat("WS032: Boolean Cut operation failed. " + err);
+		//	XbimGeometryCreator::logger->WarnFormat("WS032: Boolean Cut operation failed. " + err);
 			if (pBuilder != nullptr) delete pBuilder;
 			return XbimGeometryObjectSet::Empty;
 		}

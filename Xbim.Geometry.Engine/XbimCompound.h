@@ -67,11 +67,11 @@ namespace Xbim
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) override;
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D) override;
 			static List<XbimSolid^>^  GetDiscrete(List<XbimSolid^>^%);
-			virtual property IXbimSolidSet^ Solids {IXbimSolidSet^ get() override; }
-			virtual property IXbimShellSet^ Shells{IXbimShellSet^ get()override; }
-			virtual property IXbimFaceSet^ Faces{IXbimFaceSet^ get()override; }
-			virtual property IXbimEdgeSet^ Edges{IXbimEdgeSet^ get()override; }
-			virtual property IXbimVertexSet^ Vertices{IXbimVertexSet^ get()override; }
+			virtual property IXbimSolidSet^ Solids {IXbimSolidSet^ get(); }
+			virtual property IXbimShellSet^ Shells{IXbimShellSet^ get(); }
+			virtual property IXbimFaceSet^ Faces{IXbimFaceSet^ get(); }
+			virtual property IXbimEdgeSet^ Edges{IXbimEdgeSet^ get(); }
+			virtual property IXbimVertexSet^ Vertices{IXbimVertexSet^ get(); }
 			virtual void Add(IXbimGeometryObject^ geomObj);
 			virtual IXbimGeometryObjectSet^ Cut(IXbimSolidSet^ solids, double tolerance);
 			virtual IXbimGeometryObjectSet^ Cut(IXbimSolid^ solid, double tolerance);

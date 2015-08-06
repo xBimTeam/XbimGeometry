@@ -1058,19 +1058,18 @@ namespace Xbim
 		{
 			if (!IsValid) return gcnew array<ContourVertex>(0);
 			TopoDS_Wire ccWire = *pWire;
+			size_t t = 0;
+			for (BRepTools_WireExplorer exp(ccWire); exp.More(); exp.Next()) t++;			
+			if (t <= 2) return gcnew array<ContourVertex>(0);
+			array<ContourVertex>^ contour = gcnew array<ContourVertex>(t);
 			int i = 0;
-			TopTools_IndexedMapOfShape map;
-			TopExp::MapShapes(ccWire, TopAbs_VERTEX, map);
-			if (map.Extent() == 0) return gcnew array<ContourVertex>(0);
-			array<ContourVertex>^ contour = gcnew array<ContourVertex>(map.Extent());
-			i = 0;
 			for (BRepTools_WireExplorer exp(ccWire); exp.More(); exp.Next())
 			{
 				gp_Pnt p = BRep_Tool::Pnt(exp.CurrentVertex());
 				contour[i].Position.X = (float)p.X();
 				contour[i].Position.Y = (float)p.Y();
 				contour[i].Position.Z = (float)p.Z();
-				i++;
+				i++;				
 			}	
 			return contour;
 		}
@@ -2054,10 +2053,7 @@ namespace Xbim
 			for (; wexp.More(); wexp.Next()) {
 				TopoDS_Edge anEdge = wexp.Current();
 				TopoDS_Vertex CurVertex = wexp.CurrentVertex();
-
-			
-
-			
+	
 				if (!AreEdgesC1(prevEdge, anEdge, tolerance, angleTolerance)) 
 				{
 					if (currChain.Extent() == 1) 
@@ -2078,8 +2074,17 @@ namespace Xbim
 						}
 						// make edge from the wire
 						XbimEdge^ anEdge = gcnew XbimEdge(aCurrWire, tolerance, angleTolerance);
-						// add this new edge to the final list
-						finalList.Append(anEdge);
+						if (!anEdge->IsValid) //probably could not get C1 continuity just add all edges
+						{
+							for (itEdges.Initialize(currChain); itEdges.More(); itEdges.Next()) {
+								TopoDS_Shape aValue = itEdges.Value();
+								anEdge = gcnew XbimEdge(TopoDS::Edge(aValue));
+								finalList.Append(anEdge);
+							}
+						}
+						else
+							// add this new edge to the final list
+							finalList.Append(anEdge);
 					}
 					currChain.Clear();
 				}
@@ -2099,16 +2104,24 @@ namespace Xbim
 				TopoDS_Wire aCurrWire;
 				B.MakeWire(aCurrWire);
 				TopTools_ListIteratorOfListOfShape itEdges(currChain);
-				for (; itEdges.More(); itEdges.Next()) {
+				for (itEdges.Initialize(currChain); itEdges.More(); itEdges.Next()) {
 					TopoDS_Shape aValue = itEdges.Value();
 					B.Add(aCurrWire, TopoDS::Edge(aValue));
 				}
 
 				// make edge from the wire
 				XbimEdge^ anEdge = gcnew XbimEdge(aCurrWire, tolerance, angleTolerance);
-
-				// add this new edge to the final list
-				finalList.Append(anEdge);
+				if (!anEdge->IsValid) //probably could not get C1 continuity just add all edges
+				{
+					for (; itEdges.More(); itEdges.Next()) {
+						TopoDS_Shape aValue = itEdges.Value();
+						anEdge = gcnew XbimEdge(TopoDS::Edge(aValue));
+						finalList.Append(anEdge);
+					}
+				}
+				else
+					// add this new edge to the final list
+					finalList.Append(anEdge);
 			}
 
 			BRep_Builder B;

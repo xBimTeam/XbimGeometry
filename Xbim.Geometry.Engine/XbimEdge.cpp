@@ -538,8 +538,10 @@ namespace Xbim
 						concatcurve->SetValue(concatcurve->Lower(), Concat.BSplineCurve());
 					}
 					// rnc : prevents the driver from building an edge without C1 continuity
-					if (concatcurve->Value(concatcurve->Lower())->Continuity() == GeomAbs_C0){
-						Standard_ConstructionError::Raise("Construction aborted : The given Wire has sharp bends between some Edges, no valid Edge can be built");
+					if (concatcurve->Value(concatcurve->Lower())->Continuity() == GeomAbs_C0)
+					{
+						XbimGeometryCreator::logger->Info("Edge from Wire construction aborted : The given Wire has sharp bends between some Edges, no valid Edge can be built");
+						return;
 					}
 
 					Standard_Boolean isValidEndVtx = Standard_True;

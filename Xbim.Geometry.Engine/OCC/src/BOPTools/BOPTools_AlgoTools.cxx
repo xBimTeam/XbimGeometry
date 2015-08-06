@@ -66,7 +66,7 @@
 //
 #include <IntTools_ShrunkRange.hxx>
 #include <Precision.hxx>
-//
+#include <Standard_ErrorHandler.hxx>
 
 static
   Standard_Real AngleWithRef(const gp_Dir& theD1,
@@ -1147,19 +1147,32 @@ Standard_Boolean BOPTools_AlgoTools::IsSplitToReverse
                                                       theContext);
   }
   //
+
+  
   // Parts of theContext->ComputeVS(..) 
-  GeomAPI_ProjectPointOnSurf& aProjector=theContext->ProjPS(theFSr);
-  aProjector.Perform(aPFSp);
-  if (!aProjector.IsDone()) {
-    return bRet;
-  }
+ /* try
+  {*/
+	//  OCC_CATCH_SIGNALS
+	  GeomAPI_ProjectPointOnSurf& aProjector = theContext->ProjPS(theFSr);
+	  aProjector.Perform(aPFSp);
+	  if (!aProjector.IsDone()) {
+		  return bRet;
+	  }
+	  aProjector.LowerDistanceParameters(aU, aV);
+	  gp_Pnt2d aP2D(aU, aV);
+	  bInFace = theContext->IsPointInOnFace(theFSr, aP2D);
+	  if (!bInFace) {
+		  return bRet; 
+	  }
+ /* }
+  catch (Standard_ConstructionError)
+  {
+	  return bRet;
+  }*/
+
   //
-  aProjector.LowerDistanceParameters(aU, aV);
-  gp_Pnt2d aP2D(aU, aV);
-  bInFace=theContext->IsPointInOnFace (theFSr, aP2D);
-  if (!bInFace) {
-    return bRet;
-  }
+  
+ 
   //
   aSr->D1(aU, aV, aPFSr, aD1U, aD1V);
   gp_Dir aDD1U(aD1U); 

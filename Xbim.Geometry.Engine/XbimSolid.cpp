@@ -565,13 +565,13 @@ namespace Xbim
 				XbimGeometryCreator::logger->WarnFormat("WS009: The IfcPolygonalBoundedHalfSpace #{0} has an incorrectly defined Face with PolygonalBoundary #{1}, it has been ignored", pbhs->EntityLabel, pbhs->PolygonalBoundary->EntityLabel);
 				return;
 			}
-			TopoDS_Shape boundedHalfSpace = BRepPrimAPI_MakePrism(polyFace, gp_Vec(0, 0, extrusionMax));
+			TopoDS_Shape boundedHalfSpace = BRepPrimAPI_MakePrism(polyFace, gp_Vec(0, 0, extrusionMax*4));
 			gp_Trsf trsf = XbimGeomPrim::ToTransform(pbhs->Position);
 			gp_Trsf offset; 
-			offset.SetTranslation(gp_Vec(0, 0, -(extrusionMax / 2)));
+			offset.SetTranslation(gp_Vec(0, 0, -(extrusionMax/2 )));
 			boundedHalfSpace.Move(trsf*offset);
-		//	BRepTools::Write(boundedHalfSpace, "d:\\tmp\\bh");
-		//	BRepTools::Write(halfspace, "d:\\tmp\\hs");
+			/*BRepTools::Write(boundedHalfSpace, "d:\\tmp\\bh");
+			BRepTools::Write(halfspace, "d:\\tmp\\hs");*/
 			TopoDS_Shape result = BRepAlgoAPI_Common(boundedHalfSpace,halfspace);
 			
 			for (TopExp_Explorer explr(result, TopAbs_SOLID); explr.More(); explr.Next())

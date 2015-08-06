@@ -767,8 +767,20 @@ Standard_Integer NbWaysOut(const BOPAlgo_ListOfEdgeInfo& aLEInfo)
   //
   aV2D = bIsIN ? gp_Vec2d(aPV1, aPV) : gp_Vec2d(aPV, aPV1);
   //
-  gp_Dir2d aDir2D(aV2D);
+  
+
+  //srl change to prevent a zero angle in gp_Dir2d aDir2D(aV2D); from throwing an exception
+ // 
+  //starts here
+  const gp_XY& XY = aV2D.XY();
+  Standard_Real X = XY.X();
+  Standard_Real Y = XY.Y();
+  Standard_Real D = sqrt(X * X + Y * Y);
+  if (D <= gp::Resolution()) return 0.;
+  //gp_Dir2d aDir2D(aV2D); don't do this
+  gp_Dir2d aDir2D(X / D, Y / D);
   anAngle=Angle(aDir2D);
+  //ends here
   //
   return anAngle;
 }

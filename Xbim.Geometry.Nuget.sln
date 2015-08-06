@@ -6,7 +6,6 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{CFAD1D1D-D584-4FB9-B795-64F25B888F26}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
-		Performance3.psess = Performance3.psess
 		Xbim.Geometry.nuspec = Xbim.Geometry.nuspec
 	EndProjectSection
 EndProject
