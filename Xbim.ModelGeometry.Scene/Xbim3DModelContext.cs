@@ -765,27 +765,17 @@ namespace Xbim.ModelGeometry.Scene
                             {
 
                                 var nextGeom = elementGeom.Cut(allOpenings, _model.ModelFactors.Precision * 2);
-                                if(!nextGeom.IsValid) //try another precision
+                                if (!nextGeom.IsValid) //try another precision
                                     nextGeom = elementGeom.Cut(allOpenings, _model.ModelFactors.OneMilliMetre);
                                 if (nextGeom.IsValid)
                                     elementGeom = nextGeom;
                                 else
-                                     Logger.WarnFormat(
-                                    "WM008: Cutting of openings in {2}[#{0}]-{1} has failed, openings have ben ignored",
-                                    element.EntityLabel, element.Name, element.GetType().Name);
+                                    Logger.WarnFormat(
+                                   "WM008: Cutting of openings in {2}[#{0}]-{1} has failed, openings have ben ignored",
+                                   element.EntityLabel, element.Name, element.GetType().Name);
                             }
-                              
-
-                            //if (elementGeom.IsSimplified)
-                            //    Logger.WarnFormat(
-                            //        "WM008: {2}[#{0}]-{1} is too complex, it will make interoperability difficult. It has been simplified, no openings have been cut. You should consider re-authoring it in your BIM tool",
-                            //        element.EntityLabel, element.Name, element.GetType().Name);
-
                         }
-                        
-
-
-                        ////now add to the DB               
+                         ////now add to the DB               
                         XbimModelFactors mf = _model.ModelFactors;
                         foreach (var geom in elementGeom)
                         {
@@ -857,7 +847,7 @@ namespace Xbim.ModelGeometry.Scene
             );
             contextHelper.PercentageParsed = localPercentageParsed;
             contextHelper.Tally = localTally;
-            //if (progDelegate != null) progDelegate(101, "WriteFeatureElements, (" + localTally + " written)");
+            if (progDelegate != null) progDelegate(101, "WriteFeatureElements, (" + localTally + " written)");
             return processed;
         }
 

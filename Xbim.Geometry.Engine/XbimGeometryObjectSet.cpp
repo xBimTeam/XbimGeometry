@@ -17,6 +17,7 @@
 #include <BRepAlgoAPI_Fuse.hxx>
 #include <BRepTools.hxx>
 using namespace System;
+using namespace System::ComponentModel;
 namespace Xbim
 {
 	namespace Geometry
@@ -298,34 +299,26 @@ namespace Xbim
 		IXbimGeometryObjectSet^ XbimGeometryObjectSet::PerformBoolean(BOPAlgo_Operation bop, IEnumerable<IXbimGeometryObject^>^ geomObjects, IXbimSolidSet^ solids, double tolerance)
 		{
 			String^ err = "";
+			
 			BRepAlgoAPI_BooleanOperation* pBuilder = nullptr;
 			try
 			{
 				//get the subset of faces that intersect the openings
 				//we are going to treat shells different from solids by only cutting those faces that intersect the cut
-
 				TopoDS_Shell toBePassedThrough;
 				TopoDS_Shell facesToCut;
 				BRep_Builder builder;
 				builder.MakeShell(facesToCut);
 				builder.MakeShell(toBePassedThrough);
 				TopTools_ListOfShape toBeProcessed;
-
 				TopTools_ListOfShape cuttingObjects;
-
 				int allBoxCount = 0;
 				Bnd_Array1OfBox allBoxes(1, solids->Count);
-
 				int i = 1;
-				
-				
 				for each (XbimSolid^ solid in solids)
 				{
 					if (solid->IsValid)
 					{
-						/*char buff[128];
-						sprintf(buff, "d:\\tmp\\o%d", i);
-						BRepTools::Write(solid, buff);*/
 						cuttingObjects.Append(solid);
 						Bnd_Box box;
 						BRepBndLib::Add(solid, box);
@@ -333,9 +326,10 @@ namespace Xbim
 					}
 					
 				}
-
+				
 				if (!ParseGeometry(geomObjects, toBeProcessed, allBoxes, toBePassedThrough, tolerance)) //nothing to do so just return what we had
 					return gcnew XbimGeometryObjectSet(geomObjects);
+				
 				switch (bop) {
 				case BOPAlgo_COMMON:
 					pBuilder = new BRepAlgoAPI_Common();
@@ -351,14 +345,11 @@ namespace Xbim
 					break;
 				default:
 					break;
-				}
-				
+				}			
 				pBuilder->SetArguments(toBeProcessed);
-
 				pBuilder->SetTools(cuttingObjects);
 				pBuilder->SetFuzzyValue(tolerance);
 				pBuilder->Build();
-
 				if (pBuilder->ErrorStatus() == 0)
 				{
 					//BRepTools::Write(pBuilder->Shape(), "d:\\tmp\\r");
@@ -373,19 +364,19 @@ namespace Xbim
 					XbimGeometryObjectSet^ geomObjs = gcnew XbimGeometryObjectSet();
 					geomObjs->Add(compound);
 					if (pBuilder != nullptr) delete pBuilder;
-					
+
 					//BRepTools::Write(toBePassedThrough, "d:\\tmp\\s");
 					return geomObjs;
-					
-				}
+
+				} 
 				GC::KeepAlive(solids);
 				GC::KeepAlive(geomObjects);
 			}
 			catch (Standard_Failure e)
 			{
-				err = gcnew String(Standard_Failure::Caught()->GetMessageString());				
+				err = gcnew String(Standard_Failure::Caught()->GetMessageString());
 			}
-		//	XbimGeometryCreator::logger->WarnFormat("WS032: Boolean Cut operation failed. " + err);
+			//	XbimGeometryCreator::logger->WarnFormat("WS032: Boolean Cut operation failed. " + err);
 			if (pBuilder != nullptr) delete pBuilder;
 			return XbimGeometryObjectSet::Empty;
 		}

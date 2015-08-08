@@ -439,6 +439,17 @@ namespace Xbim
 			double precision = mf->PrecisionBoolean; //use a courser precision for trimmed curves
 			double currentPrecision = precision;
 			double maxTolerance = mf->PrecisionBooleanMax;
+			BRep_Builder b;
+			TopoDS_Compound c;
+			b.MakeCompound(c);
+			for each(IfcCompositeCurveSegment^ seg in cCurve->Segments)
+			{
+				XbimWire^ wireSegManaged = gcnew XbimWire(seg->ParentCurve);
+				TopoDS_Wire wireSeg = wireSegManaged;
+				if (!seg->SameSense) wireSeg.Reverse();
+				b.Add(c, wireSeg);
+			}
+			BRepTools::Write(c, "d:\\tmp\\c");
 			for each(IfcCompositeCurveSegment^ seg in cCurve->Segments)
 			{
 				XbimWire^ wireSegManaged = gcnew XbimWire(seg->ParentCurve);
@@ -650,7 +661,7 @@ namespace Xbim
 					if (!pnt1.IsEqual(pnt2, tolerance))
 					{
 
-						if (rotateElipse) //if we have had to roate the elipse, then rotate the trims
+						if (rotateElipse) //if we have had to rotate the elipse, then rotate the trims
 						{
 							gp_Ax1 centre(gp_Pnt(ax2->Location->X, ax2->Location->Y, 0), gp_Dir(0, 0, 1));
 							pnt1.Rotate(centre, 90.0);
@@ -714,8 +725,8 @@ namespace Xbim
 					{
 						if (rotateElipse) //if we have had to roate the elipse, then rotate the trims
 						{
-							flt1 += (90 * parameterFactor);
-							flt2 += (90 * parameterFactor);
+							flt1 -= (90 * parameterFactor);
+							flt2 -= (90 * parameterFactor);
 						}
 						BRepBuilderAPI_MakeEdge edgeMaker(curve, sense_agreement ? flt1 : flt2, sense_agreement ? flt2 : flt1);
 						BRepBuilderAPI_EdgeError edgeErr = edgeMaker.Error();

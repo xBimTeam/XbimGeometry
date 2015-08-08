@@ -570,15 +570,15 @@ namespace Xbim
 			gp_Trsf offset; 
 			offset.SetTranslation(gp_Vec(0, 0, -(extrusionMax/2 )));
 			boundedHalfSpace.Move(trsf*offset);
-			/*BRepTools::Write(boundedHalfSpace, "d:\\tmp\\bh");
-			BRepTools::Write(halfspace, "d:\\tmp\\hs");*/
+			//BRepTools::Write(boundedHalfSpace, "d:\\tmp\\bh");
+			//BRepTools::Write(halfspace, "d:\\tmp\\hs");
 			TopoDS_Shape result = BRepAlgoAPI_Common(boundedHalfSpace,halfspace);
 			
 			for (TopExp_Explorer explr(result, TopAbs_SOLID); explr.More(); explr.Next())
 			{
 				pSolid = new TopoDS_Solid();
 				*pSolid = TopoDS::Solid(explr.Current()); //just take the first solid
-			//	BRepTools::Write(*pSolid, "d:\\tmp\\r");
+				//BRepTools::Write(*pSolid, "d:\\tmp\\r");
 				return;
 			}
 			GC::KeepAlive(polyFace);
