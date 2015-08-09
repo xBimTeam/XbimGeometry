@@ -555,9 +555,11 @@ namespace Xbim
 				XbimGeometryCreator::logger->WarnFormat("WS005: The IfcPolygonalBoundedHalfSpace #{0} has an incorrectly defined PolygonalBoundary #{1}, it has been ignored", pbhs->EntityLabel, pbhs->PolygonalBoundary->EntityLabel);
 				return;
 			}
+			//BRepTools::Write(polyBoundary, "d:\\tmp\\w1");
+			//removes any colinear edges that might generate unnecessary detail and confusion for boolean operations
 			if (polyBoundary->Edges->Count>4) //may sure we remove an colinear edges
-				polyBoundary->FuseColinearSegments(pbhs->ModelOf->ModelFactors->Precision, 0.1);
-			
+				polyBoundary->FuseColinearSegments(pbhs->ModelOf->ModelFactors->Precision, 0.05);
+			//BRepTools::Write(polyBoundary, "d:\\tmp\\w2");
 			XbimFace^ polyFace = gcnew XbimFace(polyBoundary);
 
 			if (!polyFace->IsValid)
@@ -578,7 +580,7 @@ namespace Xbim
 			{
 				pSolid = new TopoDS_Solid();
 				*pSolid = TopoDS::Solid(explr.Current()); //just take the first solid
-				//BRepTools::Write(*pSolid, "d:\\tmp\\r");
+				BRepTools::Write(*pSolid, "d:\\tmp\\r");
 				return;
 			}
 			GC::KeepAlive(polyFace);

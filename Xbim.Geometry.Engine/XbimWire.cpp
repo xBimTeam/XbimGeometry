@@ -2124,6 +2124,7 @@ namespace Xbim
 				XbimEdge^ anEdge = gcnew XbimEdge(aCurrWire, tolerance, angleTolerance);
 				if (!anEdge->IsValid) //probably could not get C1 continuity just add all edges
 				{
+					itEdges.Initialize(currChain);
 					for (; itEdges.More(); itEdges.Next()) {
 						TopoDS_Shape aValue = itEdges.Value();
 						anEdge = gcnew XbimEdge(TopoDS::Edge(aValue));
