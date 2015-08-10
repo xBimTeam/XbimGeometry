@@ -610,8 +610,12 @@
     <ClCompile Include="OCC\drv\Geom2dHatch\Geom2dHatch_MapOfElements_0.cxx">
       <CompileAsManaged>false</CompileAsManaged>
     </ClCompile>
-    <ClCompile Include="OCC\drv\IntWalk\IntWalk_TheFunctionOfTheInt2S_0.cxx" />
-    <ClCompile Include="OCC\drv\IntWalk\IntWalk_TheInt2S_0.cxx" />
+    <ClCompile Include="OCC\drv\IntWalk\IntWalk_TheFunctionOfTheInt2S_0.cxx" >
+      <CompileAsManaged>false</CompileAsManaged>
+    </ClCompile>
+    <ClCompile Include="OCC\drv\IntWalk\IntWalk_TheInt2S_0.cxx" >
+      <CompileAsManaged>false</CompileAsManaged>
+    </ClCompile>
     <ClCompile Include="OCC\drv\NLPlate\NLPlate_ListIteratorOfStackOfPlate_0.cxx">
       <CompileAsManaged>false</CompileAsManaged>
     </ClCompile>
@@ -1905,8 +1909,12 @@
     <ClCompile Include="OCC\src\BOPTools\BOPTools_AlgoTools2D_1.cxx">
       <CompileAsManaged>false</CompileAsManaged>
     </ClCompile>
-    <ClCompile Include="OCC\src\BRepAlgoAPI\BRepAlgoAPI_Algo.cxx" />
-    <ClCompile Include="OCC\src\BRepAlgoAPI\BRepAlgoAPI_BuilderAlgo.cxx" />
+    <ClCompile Include="OCC\src\BRepAlgoAPI\BRepAlgoAPI_Algo.cxx" >
+      <CompileAsManaged>false</CompileAsManaged>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepAlgoAPI\BRepAlgoAPI_BuilderAlgo.cxx" >
+      <CompileAsManaged>false</CompileAsManaged>
+    </ClCompile>
     <ClCompile Include="OCC\src\BRepApprox\BRepApprox_ApproxLine.cxx">
       <CompileAsManaged>false</CompileAsManaged>
     </ClCompile>
@@ -1928,7 +1936,9 @@
     <ClCompile Include="OCC\src\BRepBlend\BRepBlend_PointOnRst.cxx">
       <CompileAsManaged>false</CompileAsManaged>
     </ClCompile>
-    <ClCompile Include="OCC\src\BRepBuilderAPI\BRepBuilderAPI_FastSewing.cxx" />
+    <ClCompile Include="OCC\src\BRepBuilderAPI\BRepBuilderAPI_FastSewing.cxx" >
+      <CompileAsManaged>false</CompileAsManaged>
+    </ClCompile>
     <ClCompile Include="OCC\src\BRepCheck\BRepCheck_Solid.cxx">
       <CompileAsManaged>false</CompileAsManaged>
     </ClCompile>
@@ -1989,9 +1999,15 @@
     <ClCompile Include="OCC\src\BRepSweep\BRepSweep_NumLinearRegularSweep.cxx">
       <CompileAsManaged>false</CompileAsManaged>
     </ClCompile>
-    <ClCompile Include="OCC\src\BSplCLib\BSplCLib_Cache.cxx" />
-    <ClCompile Include="OCC\src\BSplSLib\BSplSLib_Cache.cxx" />
-    <ClCompile Include="OCC\src\CSLib\CSLib_Offset.cxx" />
+    <ClCompile Include="OCC\src\BSplCLib\BSplCLib_Cache.cxx" >
+      <CompileAsManaged>false</CompileAsManaged>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BSplSLib\BSplSLib_Cache.cxx" >
+      <CompileAsManaged>false</CompileAsManaged>
+    </ClCompile>
+    <ClCompile Include="OCC\src\CSLib\CSLib_Offset.cxx" >
+      <CompileAsManaged>false</CompileAsManaged>
+    </ClCompile>
     <ClCompile Include="OCC\src\Extrema\Extrema_ExtCC.cxx">
       <CompileAsManaged>false</CompileAsManaged>
     </ClCompile>

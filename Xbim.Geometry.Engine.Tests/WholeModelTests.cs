@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xbim.Common.Geometry;
 using Xbim.Common.Logging;
 using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc2x3.Extensions;
@@ -31,11 +31,37 @@ namespace GeometryTests
     [DeploymentItem(@"x86\", "x86")]
     [DeploymentItem(@"EsentTestFiles\", "EsentTestFiles")]
     [DeploymentItem(@"SolidTestFiles\", "SolidTestFiles")]
+    
     [TestClass]
     public class WholeModelTests
     {
         private readonly XbimGeometryEngine _xbimGeometryCreator = new XbimGeometryEngine();
 
+        [DeploymentItem(@"EsentTestFiles\Monolith_v10.xBIM", @"GConv\")]
+        [TestMethod]
+        public void GeometryVersionUpgradeTest()
+        {
+            using (var model = new XbimModel())
+            {
+                // start afresh
+                model.Open(@"GConv\Monolith_v10.xBIM", XbimDBAccess.Exclusive);
+                Assert.AreEqual(1, model.GeometrySupportLevel);
+
+                // now remove the existing geometry
+                model.DeleteGeometryCache();
+                Assert.AreEqual(0, model.GeometrySupportLevel);
+
+                // now create the geometry back
+                model.EnsureGeometryTables(); // update the database structure first
+                var context = new Xbim3DModelContext(model);
+                context.CreateContext(XbimGeometryType.PolyhedronBinary); // then populate it
+
+                // final tests
+                Assert.AreEqual(2, model.GeometrySupportLevel);
+                // and tidy up
+                model.Close();
+            }
+        }
 
         [TestMethod]
         public void TestShapeGeometriesEnumerability()
@@ -108,8 +134,55 @@ namespace GeometryTests
                 Assert.Fail("Failed to process " + ifcFileFullName + " - " + e.Message);
             }
         }
-    
 
+        [TestMethod]
+        public void IfcFeaturesClassificationIsCorrect()
+        {
+            const string ifcFileFullName = @"SolidTestFiles\Duplex_A_20110907.ifc.stripped.ifc";
+            IfcFeaturesClassificationIsCorrect(ifcFileFullName);
+        }
+
+        [TestMethod]
+        public void AllIfcFeaturesClassificationIsCorrect()
+        {
+            var di = new DirectoryInfo( @"SolidTestFiles\");
+            var toProcess = di.GetFiles("*.IFC", SearchOption.TopDirectoryOnly);
+            foreach (var fileInfo in toProcess)
+            {
+                IfcFeaturesClassificationIsCorrect(fileInfo.FullName);    
+            }            
+        }
+
+        private static void IfcFeaturesClassificationIsCorrect(string ifcFileFullName)
+        {
+            var xbimFileFullName = Path.ChangeExtension(ifcFileFullName, ".xbim");
+            using (var m = new XbimModel())
+            {
+                m.CreateFrom(ifcFileFullName, xbimFileFullName, null, true, true);
+                var context = new Xbim3DModelContext(m);
+                context.CreateContext(XbimGeometryType.PolyhedronBinary);
+                TestForClassificationOfIfcFeatureElements(context);
+                m.Close();
+            }
+        }
+
+        private static void TestForClassificationOfIfcFeatureElements(Xbim3DModelContext context)
+        {
+            var excludedTypes = new HashSet<short>
+            {
+                IfcMetaData.IfcType(typeof (IfcFeatureElement)).TypeId,
+                IfcMetaData.IfcType(typeof (IfcOpeningElement)).TypeId,
+                IfcMetaData.IfcType(typeof (IfcProjectionElement)).TypeId
+            };
+
+            var shapeInstances = context.ShapeInstances().Where(s =>
+                excludedTypes.Contains(s.IfcTypeId) && // ifcfeatures
+                s.RepresentationType != XbimGeometryRepresentationType.OpeningsAndAdditionsOnly);
+                // that are not classified as OpeningsAndAdditionsOnly
+
+            Assert.IsFalse(shapeInstances.Any(),
+                "Should not find any shapes of with this classification of typeid and representationType.");
+        }
 
 
         [TestMethod]
@@ -175,10 +248,8 @@ namespace GeometryTests
 
                             // Assert.IsTrue(assertNow == false, "Error events were raised");
                         }
-
                     }
-                }
-
+                }    
             }
         }
 
@@ -368,7 +439,6 @@ namespace GeometryTests
                     }
                 }
             }
-
         }
     }
 }

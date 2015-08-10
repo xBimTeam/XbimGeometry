@@ -515,7 +515,10 @@ namespace Xbim.ModelGeometry.Scene
                     }
                     if (progDelegate != null) progDelegate(-1, "WriteProductShapes");
                     var productsRemaining = _model.InstancesLocal.OfType<IfcProduct>()
-                        .Where(p => p.Representation != null && !processed.Contains(p.EntityLabel)).ToList();
+                        .Where(p => 
+                            p.Representation != null 
+                            && !processed.Contains(p.EntityLabel)
+                            ).ToList();
 
 
                     WriteProductShapes(contextHelper, productsRemaining);
@@ -858,18 +861,19 @@ namespace Xbim.ModelGeometry.Scene
 
             Parallel.ForEach(products, contextHelper.ParallelOptions, product =>
                 //    foreach (var product in products)
-            {
-                //select representations that are in the required context
-                //only want solid representations for this context, but rep type is optional so just filter identified 2d elements
-                //we can only handle one representation in a context and this is in an implementers agreement
-                var rep = product.Representation.Representations.FirstOrDefault(r => _contexts.Contains(r.ContextOfItems) &&
-                                                                                     r.IsBodyRepresentation());
-                //write out the representation if it has one
-                if (rep != null)
                 {
-                    WriteProductShape(contextHelper, product, true);
+                    //select representations that are in the required context
+                    //only want solid representations for this context, but rep type is optional so just filter identified 2d elements
+                    //we can only handle one representation in a context and this is in an implementers agreement
+                    var rep =
+                        product.Representation.Representations.FirstOrDefault(r => _contexts.Contains(r.ContextOfItems) &&
+                                                                                   r.IsBodyRepresentation());
+                    //write out the representation if it has one
+                    if (rep != null)
+                    {
+                        WriteProductShape(contextHelper, product, true);
+                    }
                 }
-            }
                 );
             contextHelper.Tally = localTally;
             contextHelper.PercentageParsed = localPercentageParsed;
@@ -890,8 +894,20 @@ namespace Xbim.ModelGeometry.Scene
             var rep = element.Representation.Representations
                 .FirstOrDefault(r => _contexts.Contains(r.ContextOfItems)
                                      && r.IsBodyRepresentation());
-            if (rep == null) return Enumerable.Empty<XbimShapeInstance>();
+            if (rep == null) 
+                return Enumerable.Empty<XbimShapeInstance>();
 
+            // logic to classify feature tagging
+            var repType = includesOpenings
+                ? XbimGeometryRepresentationType.OpeningsAndAdditionsIncluded
+                : XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded;
+            if (element is IfcFeatureElement)
+            {
+                //  might come in here from direct meshing or from meshing of remaining objects; either way mark as appropriate
+                repType = XbimGeometryRepresentationType.OpeningsAndAdditionsOnly;
+            }
+
+            // other setup
             var placementTransform = contextHelper.PlacementTree[element.ObjectPlacement.EntityLabel];
             var contextId = rep.ContextOfItems.EntityLabel;
 
@@ -915,9 +931,7 @@ namespace Xbim.ModelGeometry.Scene
                                 WriteShapeInstanceToDb(instance.GeometryId, instance.StyleLabel, contextId,
                                     element,
                                     trans, instance.BoundingBox /*productBounds*/,
-                                    includesOpenings
-                                        ? XbimGeometryRepresentationType.OpeningsAndAdditionsIncluded
-                                        : XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
+                                    repType)
                                 );
                             var transproductBounds = instance.BoundingBox /*productBounds*/.Transform(placementTransform);
                             //transform the bounds
@@ -937,9 +951,7 @@ namespace Xbim.ModelGeometry.Scene
                         shapesInstances.Add(
                             WriteShapeInstanceToDb(instance.GeometryId, instance.StyleLabel, contextId, element,
                                 placementTransform, instance.BoundingBox /*productBounds*/,
-                                includesOpenings
-                                    ? XbimGeometryRepresentationType.OpeningsAndAdditionsIncluded
-                                    : XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
+                                repType)
                             );
                         var transproductBounds = instance.BoundingBox /*productBounds*/.Transform(placementTransform);
                         //transform the bounds
@@ -1277,12 +1289,11 @@ namespace Xbim.ModelGeometry.Scene
                     currentStyle = nextStyle;
                 }
 
-                if (incorporateFeatures && instance.IfcTypeId != openingLabel &&
-                    instance.RepresentationType == XbimGeometryRepresentationType.OpeningsAndAdditionsIncluded &&
-                    instance.IfcTypeId != projectionLabel)
-                    groupedInstances.Add(instance);
-                else if (!incorporateFeatures &&
-                         instance.RepresentationType != XbimGeometryRepresentationType.OpeningsAndAdditionsIncluded)
+                if (
+                    (incorporateFeatures && instance.RepresentationType == XbimGeometryRepresentationType.OpeningsAndAdditionsIncluded)
+                    ||
+                    (!incorporateFeatures && instance.RepresentationType == XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
+                   )
                     groupedInstances.Add(instance);
             }
             //finally return the current group if not null
@@ -1389,12 +1400,9 @@ namespace Xbim.ModelGeometry.Scene
                             //now get all the undefined styles and use their product type to create the texture
                         }
                     }
-
-                }
-
+                }    
             }
         }
-
 
         public IEnumerable<XbimRegion> GetRegions()
         {
@@ -1449,10 +1457,8 @@ namespace Xbim.ModelGeometry.Scene
         /// <returns></returns>
         public IEnumerable<XbimShapeInstance> ShapeInstancesOf(XbimShapeGeometry geometry, bool ignoreFeatures = false)
         {
-         
             using (var shapeInstanceTable = _model.GetShapeInstanceTable())
             {
-
                 using (shapeInstanceTable.BeginReadOnlyTransaction())
                 {
                     foreach (var context in _contexts)
@@ -1462,31 +1468,37 @@ namespace Xbim.ModelGeometry.Scene
                         {
                             do
                             {
-                                if (context.EntityLabel == shapeInstance.RepresentationContext &&
-                                    shapeInstance.RepresentationType !=
-                                    (byte) XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded &&
-                                    !(ignoreFeatures &&
-                                      typeof (IfcFeatureElement).IsAssignableFrom(
-                                          IfcMetaData.GetType(shapeInstance.IfcTypeId))))
-                                {
-                                    yield return (XbimShapeInstance) shapeInstance;
-                                    shapeInstance = new XbimShapeInstance();
-                                }
+                                if (!MatchesShapeRequirements(shapeInstance, context, ignoreFeatures)) 
+                                    continue;
+                                yield return (XbimShapeInstance) shapeInstance;
+                                shapeInstance = new XbimShapeInstance();
                             } while (shapeInstanceTable.TryMoveNextShapeInstance(ref shapeInstance));
                         }
                     }
-
-                }
-
+                }    
             }
+        }
+
+        private static bool MatchesShapeRequirements(IXbimShapeInstanceData shapeInstance, IfcRepresentationContext context, bool ignoreFeatures)
+        {
+            return context.EntityLabel == shapeInstance.RepresentationContext && // all must belong to relevant RepresentationContext
+                (
+                    (typeof(IfcFeatureElement).IsAssignableFrom(IfcMetaData.GetType(shapeInstance.IfcTypeId)) && // is feature
+                        shapeInstance.RepresentationType == (byte) XbimGeometryRepresentationType.OpeningsAndAdditionsOnly) // then look for feature shape
+                    ||
+                    // normal items
+                    (
+                        (ignoreFeatures && shapeInstance.RepresentationType == (byte) XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
+                        ||
+                        shapeInstance.RepresentationType == (byte) XbimGeometryRepresentationType.OpeningsAndAdditionsIncluded
+                    )
+                );
         }
 
         public IEnumerable<XbimShapeInstance> ShapeInstancesOf(int geometryLabel, bool ignoreFeatures = false)
         {
-
             using (var shapeInstanceTable = _model.GetShapeInstanceTable())
             {
-
                 using (shapeInstanceTable.BeginReadOnlyTransaction())
                 {
                     foreach (var context in _contexts)
@@ -1496,23 +1508,14 @@ namespace Xbim.ModelGeometry.Scene
                         {
                             do
                             {
-
-                                if (context.EntityLabel == shapeInstance.RepresentationContext &&
-                                    shapeInstance.RepresentationType !=
-                                    (byte) XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded &&
-                                    !(ignoreFeatures &&
-                                      typeof (IfcFeatureElement).IsAssignableFrom(
-                                          IfcMetaData.GetType(shapeInstance.IfcTypeId))))
-                                {
-                                    yield return (XbimShapeInstance) shapeInstance;
-                                    shapeInstance = new XbimShapeInstance();
-                                }
+                                if (!MatchesShapeRequirements(shapeInstance, context, ignoreFeatures))
+                                    continue;
+                                yield return (XbimShapeInstance) shapeInstance;
+                                shapeInstance = new XbimShapeInstance();
                             } while (shapeInstanceTable.TryMoveNextShapeInstance(ref shapeInstance));
                         }
                     }
-
                 }
-
             }
         }
 
@@ -1523,7 +1526,6 @@ namespace Xbim.ModelGeometry.Scene
         /// <returns></returns>
         public IEnumerable<XbimShapeInstance> ShapeInstancesOf(IfcProduct product)
         {
-
             using (var shapeInstanceTable = _model.GetShapeInstanceTable())
             {
 
@@ -1544,9 +1546,7 @@ namespace Xbim.ModelGeometry.Scene
                             } while (shapeInstanceTable.TryMoveNextShapeInstance(ref shapeInstance));
                         }
                     }
-
                 }
-
             }
         }
 
@@ -1710,6 +1710,10 @@ namespace Xbim.ModelGeometry.Scene
             return sw.ToString();
         }
 
+        /// <summary>
+        /// This function is used to generate the .wexbim model files.
+        /// </summary>
+        /// <param name="binaryStream">An open writable streamer.</param>
         public void Write(BinaryWriter binaryStream)
         {
         // ReSharper disable RedundantCast
