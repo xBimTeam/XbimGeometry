@@ -207,20 +207,20 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="Xbim.Common">
-      <HintPath>..\packages\Xbim.Essentials.3.1.6\lib\net40\Xbim.Common.dll</HintPath>
-      <Private>true</Private>
+      <HintPath>..\packages\Xbim.Essentials.3.1.7\lib\net40\Xbim.Common.dll</HintPath>
+      <Private>false</Private>
     </Reference>
     <Reference Include="Xbim.Ifc.Extensions">
-      <HintPath>..\packages\Xbim.Essentials.3.1.6\lib\net40\Xbim.Ifc.Extensions.dll</HintPath>
-      <Private>true</Private>
+      <HintPath>..\packages\Xbim.Essentials.3.1.7\lib\net40\Xbim.Ifc.Extensions.dll</HintPath>
+      <Private>false</Private>
     </Reference>
     <Reference Include="Xbim.Ifc2x3">
-      <HintPath>..\packages\Xbim.Essentials.3.1.6\lib\net40\Xbim.Ifc2x3.dll</HintPath>
-      <Private>true</Private>
+      <HintPath>..\packages\Xbim.Essentials.3.1.7\lib\net40\Xbim.Ifc2x3.dll</HintPath>
+      <Private>false</Private>
     </Reference>
     <Reference Include="Xbim.IO">
-      <HintPath>..\packages\Xbim.Essentials.3.1.6\lib\net40\Xbim.IO.dll</HintPath>
-      <Private>true</Private>
+      <HintPath>..\packages\Xbim.Essentials.3.1.7\lib\net40\Xbim.IO.dll</HintPath>
+      <Private>false</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
