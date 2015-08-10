@@ -439,17 +439,17 @@ namespace Xbim
 			double precision = mf->PrecisionBoolean; //use a courser precision for trimmed curves
 			double currentPrecision = precision;
 			double maxTolerance = mf->PrecisionBooleanMax;
-			BRep_Builder b;
-			TopoDS_Compound c;
-			b.MakeCompound(c);
-			for each(IfcCompositeCurveSegment^ seg in cCurve->Segments)
-			{
-				XbimWire^ wireSegManaged = gcnew XbimWire(seg->ParentCurve);
-				TopoDS_Wire wireSeg = wireSegManaged;
-				if (!seg->SameSense) wireSeg.Reverse();
-				b.Add(c, wireSeg);
-			}
-			BRepTools::Write(c, "d:\\tmp\\c");
+			//BRep_Builder b;
+			//TopoDS_Compound c;
+			//b.MakeCompound(c);
+			//for each(IfcCompositeCurveSegment^ seg in cCurve->Segments)
+			//{
+			//	XbimWire^ wireSegManaged = gcnew XbimWire(seg->ParentCurve);
+			//	TopoDS_Wire wireSeg = wireSegManaged;
+			//	if (!seg->SameSense) wireSeg.Reverse();
+			//	b.Add(c, wireSeg);
+			//}
+			//BRepTools::Write(c, "d:\\tmp\\c");
 			for each(IfcCompositeCurveSegment^ seg in cCurve->Segments)
 			{
 				XbimWire^ wireSegManaged = gcnew XbimWire(seg->ParentCurve);

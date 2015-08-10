@@ -580,7 +580,7 @@ namespace Xbim
 			{
 				pSolid = new TopoDS_Solid();
 				*pSolid = TopoDS::Solid(explr.Current()); //just take the first solid
-				BRepTools::Write(*pSolid, "d:\\tmp\\r");
+				//BRepTools::Write(*pSolid, "d:\\tmp\\r");
 				return;
 			}
 			GC::KeepAlive(polyFace);
