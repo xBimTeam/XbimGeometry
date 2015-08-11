@@ -440,11 +440,13 @@ namespace Xbim
 				gp_Pnt origin(revolaxis->Location->X, revolaxis->Location->Y, revolaxis->Location->Z);
 				gp_Dir vx(revolaxis->Axis->X, revolaxis->Axis->Y, revolaxis->Axis->Z);
 				gp_Ax1 ax1(origin, vx);
-
-				BRepPrimAPI_MakeRevol revol(face, ax1, repItem->Angle);
+				double radianConvert = repItem->ModelOf->ModelFactors->AngleToRadiansConversionFactor;
+				BRepPrimAPI_MakeRevol revol(face, ax1, repItem->Angle*radianConvert);
+				
 				GC::KeepAlive(face);
 				if (revol.IsDone())
 				{
+					//BRepTools::Write(revol.Shape(), "d:\\tmp\\rev");
 					pSolid = new TopoDS_Solid();
 					*pSolid = TopoDS::Solid(revol.Shape());
 					pSolid->Move(XbimGeomPrim::ToLocation(repItem->Position));
