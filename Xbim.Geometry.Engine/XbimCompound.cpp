@@ -405,7 +405,7 @@ namespace Xbim
 				if (face->IsValid)
 					builder.Add(shell, face);
 				else
-					XbimGeometryCreator::logger->WarnFormat("WC002: Incorrectly defined IfcFace #{0}", fc->EntityLabel);
+					XbimGeometryCreator::logger->InfoFormat("WC002: Incorrectly defined IfcFace #{0}, it has been ignored", fc->EntityLabel);
 				//delete face;
 			}
 		

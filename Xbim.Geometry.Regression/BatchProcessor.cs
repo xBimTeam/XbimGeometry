@@ -13,6 +13,7 @@ using Xbim.Ifc2x3.GeometricModelResource;
 using Xbim.Ifc2x3.GeometryResource;
 using Xbim.Ifc2x3.UtilityResource;
 using XbimGeometry.Interfaces;
+using Xbim.Ifc2x3.TopologyResource;
 
 namespace XbimRegression
 {
@@ -123,11 +124,12 @@ namespace XbimRegression
                             GeometryEntries = model.GeometriesCount,
                             IfcLength = ReadFileLength(ifcFile),
                             XbimLength = ReadFileLength(xbimFilename),
-                           // SceneLength = ReadFileLength(xbimSceneName),
+                            SceneLength = 0,
                             IfcProductEntries = model.Instances.CountOf<IfcProduct>(),
                             IfcSolidGeometries = model.Instances.CountOf<IfcSolidModel>(),
                             IfcMappedGeometries = model.Instances.CountOf<IfcMappedItem>(),
                             BooleanGeometries = model.Instances.CountOf<IfcBooleanResult>(),
+                            BReps =  model.Instances.CountOf<IfcFaceBasedSurfaceModel>() + model.Instances.CountOf<IfcShellBasedSurfaceModel>() + model.Instances.CountOf<IfcManifoldSolidBrep>(),
                             Application = ohs == null ? "Unknown" : ohs.OwningApplication.ToString(),
                         };
                         model.Close();                       

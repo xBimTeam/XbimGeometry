@@ -814,10 +814,11 @@ namespace Xbim
 			double maxLen = body->BoundingBox.Length();
 			for each (IfcBooleanOperand^ bOp in clips)
 			{
-				IfcPolygonalBoundedHalfSpace^ pbhs = dynamic_cast<IfcPolygonalBoundedHalfSpace^>(bOp);
-				if (pbhs!=nullptr) //special case for IfcPolygonalBoundedHalfSpace to keep extrusion to the minimum
+				IfcHalfSpaceSolid^ hs = dynamic_cast<IfcHalfSpaceSolid^>(bOp);
+				
+				if (hs!=nullptr) //special case for IfcHalfSpaceSolid to keep extrusion to the minimum
 				{
-					XbimSolid^ s = gcnew XbimSolid(pbhs, maxLen);
+					XbimSolid^ s = gcnew XbimSolid(hs, maxLen);
 				    if (s->IsValid) solidSet->Add(s); 
 				}
 				else
@@ -828,7 +829,7 @@ namespace Xbim
 			}
 			//BRepTools::Write(body, "d:\\tmp\\b");
 			IXbimSolidSet^ r = body->Cut(solidSet, mf->Precision*2);
-			//BRepTools::Write((XbimSolid^)(r->First), "d:\\tmp\\r2e9");			
+			//BRepTools::Write((XbimSolid^)(r->First), "d:\\tmp\\r");			
 			return r;
 			
 #endif

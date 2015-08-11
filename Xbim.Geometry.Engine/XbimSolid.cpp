@@ -416,7 +416,7 @@ namespace Xbim
 					pSolid = new TopoDS_Solid();
 					*pSolid = TopoDS::Solid(prism.Shape());
 					pSolid->Move(XbimGeomPrim::ToLocation(repItem->Position));
-					//BRepTools::Write(*pSolid, "d:\\tmp\\b");
+					BRepTools::Write(*pSolid, "d:\\tmp\\b");
 				}
 				else
 					XbimGeometryCreator::logger->WarnFormat("WS002: Invalid Solid Extrusion, could not create solid, found in Entity #{0}=IfcExtrudedAreaSolid.",
@@ -477,34 +477,40 @@ namespace Xbim
 					XbimGeometryCreator::logger->WarnFormat("WS011: Non-Planar half spaces are not supported in Entity #{0}, it has been ignored", hs->EntityLabel);
 					return;
 				}
-#ifdef OCC_6_9_SUPPORTED
+//#ifdef OCC_6_9_SUPPORTED
+//
+//
+//				gp_Ax3 ax3 = XbimGeomPrim::ToAx3(ifcPlane->Position);
+//				gp_Pln pln(ax3);
+//				gp_Vec zVec = hs->AgreementFlag ? -pln.Axis().Direction() : pln.Axis().Direction();
+//
+//				gp_Pnt pnt = ax3.Location();
+//				pnt.Translate(zVec);
+//				BRepBuilderAPI_MakeFace  faceMaker(pln);
+//				if (faceMaker.IsDone())
+//				{
+//					BRepPrimAPI_MakeHalfSpace halfSpaceBulder(faceMaker.Face(), pnt);
+//					if (halfSpaceBulder.IsDone())
+//					{
+//						pSolid = new TopoDS_Solid();
+//						*pSolid = TopoDS::Solid(halfSpaceBulder.Solid());
+//						BRepTools::Write(halfSpaceBulder.Solid(), "d:\\tmp\\hs");
+//					}
+//					else
+//						XbimGeometryCreator::logger->WarnFormat("WS012: Half space solid could not be formed in Entity #{0}, it has been ignored", hs->EntityLabel);
+//				}
+//
+//#else
 
-
-				gp_Ax3 ax3 = XbimGeomPrim::ToAx3(ifcPlane->Position);
-				gp_Pln pln(ax3);
-				gp_Vec zVec = hs->AgreementFlag ? -pln.Axis().Direction() : pln.Axis().Direction();
-
-				gp_Pnt pnt = ax3.Location();
-				pnt.Translate(zVec);
-				BRepBuilderAPI_MakeFace  faceMaker(pln);
-				if (faceMaker.IsDone())
-				{
-					BRepPrimAPI_MakeHalfSpace halfSpaceBulder(faceMaker.Face(), pnt);
-					pSolid = new TopoDS_Solid();
-					*pSolid = TopoDS::Solid(halfSpaceBulder.Solid());
-				}
-
-#else
-
-
-				double z = hs->AgreementFlag ? -2e8 : 0;
-				XbimPoint3D corner(-1e8, -1e8, z);
-				 
-				XbimVector3D size(2e8, 2e8, 2e8);
+				double bounds = 2 * maxExtrusion;
+				double z = hs->AgreementFlag ? -bounds : 0;
+				XbimPoint3D corner(-maxExtrusion, -maxExtrusion, z);
+				
+				XbimVector3D size(bounds, bounds, bounds);
 				XbimRect3D rect3D(corner, size);
 				Init(rect3D, hs->ModelOf->ModelFactors->Precision);
 				Move(ifcPlane->Position);
-#endif
+//#endif
 			}
 		}
 
@@ -699,7 +705,7 @@ namespace Xbim
 			{				
 				clipList->Add(sOp);
 				XbimSolidSet^ solidSet = dynamic_cast<XbimSolidSet^>(clipList);
-				if (solidSet!=nullptr) solidSet->Reverse();
+			//	if (solidSet!=nullptr) solidSet->Reverse();
 				return gcnew XbimSolid(fOp);
 			}
 		}
