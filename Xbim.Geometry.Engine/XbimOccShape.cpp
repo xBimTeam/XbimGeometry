@@ -12,6 +12,7 @@
 #include <BRepTools.hxx>
 #include <Bnd_Box.hxx>
 #include <BRepBndLib.hxx>
+#include <gp_Quaternion.hxx>
 #include "XbimWire.h"
 using namespace System::Threading;
 using namespace System::Collections::Generic;
@@ -62,6 +63,8 @@ namespace Xbim
 				const Handle_Poly_Triangulation& mesh = BRep_Tool::Triangulation(face, loc);
 				if (mesh.IsNull())
 					continue;
+				gp_Trsf transform = loc.Transformation();
+				gp_Quaternion quaternion = transform.GetRotation();
 				const TColgp_Array1OfPnt & nodes = mesh->Nodes();
 				triangleCount += mesh->NbTriangles();
 				bool faceReversed = face->IsReversed;
@@ -74,20 +77,16 @@ namespace Xbim
 					norms = gcnew List<size_t>(mesh->NbNodes());
 					for (Standard_Integer i = 1; i <= mesh->NbNodes() * 3; i += 3) //visit each node
 					{
-						Standard_Real x = mesh->Normals().Value(i);
-						Standard_Real y = mesh->Normals().Value(i + 1);
-						Standard_Real z = mesh->Normals().Value(i + 2);
-						if (faceReversed)
-						{
-							x *= -1; y *= -1; z *= -1;
-						}
+						gp_Dir dir(mesh->Normals().Value(i), mesh->Normals().Value(i + 1), mesh->Normals().Value(i + 2));
+						if (faceReversed) dir.Reverse();
 						size_t index;
-						XbimPoint3DWithTolerance^ n = gcnew XbimPoint3DWithTolerance(x, y, z, tolerance);
+						dir = quaternion.Multiply(dir);
+						XbimPoint3DWithTolerance^ n = gcnew XbimPoint3DWithTolerance(dir.X(), dir.Y(), dir.Z(), tolerance);
 						if (!normalMap->TryGetValue(n, index))
 						{
 							index = normalMap->Count;
 							normalMap->Add(n, index);
-							normals->Add(XbimVector3D(x, y, z));
+							normals->Add(XbimVector3D(dir.X(), dir.Y(), dir.Z()));
 						}
 						norms->Add(index);
 					}
@@ -109,7 +108,7 @@ namespace Xbim
 				for (Standard_Integer i = 1; i <= mesh->NbNodes(); i++) //visit each node for vertices
 				{
 					gp_XYZ p = nodes.Value(i).XYZ();
-					loc.Transformation().Transforms(p);
+					transform.Transforms(p);
 					size_t index;
 					XbimPoint3DWithTolerance^ pt = gcnew XbimPoint3DWithTolerance(p.X(), p.Y(), p.Z(), tolerance);
 					if (!pointMap->TryGetValue(pt, index))
@@ -217,6 +216,8 @@ namespace Xbim
 					const Handle_Poly_Triangulation& mesh = BRep_Tool::Triangulation(face, loc);
 					if (mesh.IsNull())
 						continue;
+					gp_Trsf transform = loc.Transformation();
+					gp_Quaternion quaternion =  transform.GetRotation();
 					const TColgp_Array1OfPnt & nodes = mesh->Nodes();
 					triangleCount += mesh->NbTriangles();
 					pointLookup->Add(gcnew List<int>(mesh->NbNodes()));
@@ -224,16 +225,12 @@ namespace Xbim
 					norms = gcnew List<int>(mesh->NbNodes());
 					for (Standard_Integer i = 1; i <= mesh->NbNodes() * 3; i += 3) //visit each node
 					{
-						Standard_Real x = mesh->Normals().Value(i);
-						Standard_Real y = mesh->Normals().Value(i + 1);
-						Standard_Real z = mesh->Normals().Value(i + 2);
-						if (faceReversed)
-						{
-							x *= -1; y *= -1; z *= -1;
-						}
+						gp_Dir dir(mesh->Normals().Value(i), mesh->Normals().Value(i + 1), mesh->Normals().Value(i + 2));					
+						if (faceReversed) dir.Reverse();
 						int index;
-						XbimPackedNormal packedNormal = XbimPackedNormal(x, y, z);
-						int packedVal = packedNormal.U << 8 | packedNormal.V;
+						dir = quaternion.Multiply(dir);
+						XbimPackedNormal packedNormal = XbimPackedNormal(dir.X(), dir.Y(), dir.Z()); 
+						int packedVal = packedNormal.ToUnit16();
 						if (!normalMap->TryGetValue(packedVal, index))
 						{
 							index = normalMap->Count;
@@ -246,7 +243,7 @@ namespace Xbim
 					for (Standard_Integer i = 1; i <= mesh->NbNodes(); i++) //visit each node for vertices
 					{
 						gp_XYZ p = nodes.Value(i).XYZ();
-						loc.Transformation().Transforms(p);
+						transform.Transforms(p);
 						int index;
 						XbimPoint3DWithTolerance^ pt = gcnew XbimPoint3DWithTolerance(p.X(), p.Y(), p.Z(), tolerance);
 						if (!pointMap->TryGetValue(pt, index))
