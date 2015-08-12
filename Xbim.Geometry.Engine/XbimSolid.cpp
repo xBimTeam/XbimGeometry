@@ -416,7 +416,7 @@ namespace Xbim
 					pSolid = new TopoDS_Solid();
 					*pSolid = TopoDS::Solid(prism.Shape());
 					pSolid->Move(XbimGeomPrim::ToLocation(repItem->Position));
-					BRepTools::Write(*pSolid, "d:\\tmp\\b");
+					//BRepTools::Write(*pSolid, "d:\\tmp\\b");
 				}
 				else
 					XbimGeometryCreator::logger->WarnFormat("WS002: Invalid Solid Extrusion, could not create solid, found in Entity #{0}=IfcExtrudedAreaSolid.",

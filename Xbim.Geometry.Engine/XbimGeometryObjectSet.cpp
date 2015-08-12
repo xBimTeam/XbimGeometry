@@ -376,6 +376,10 @@ namespace Xbim
 			{
 				err = gcnew String(Standard_Failure::Caught()->GetMessageString());
 			}
+			catch (Exception^ e)
+			{
+				err = e->Message;
+			}
 			//	XbimGeometryCreator::logger->WarnFormat("WS032: Boolean Cut operation failed. " + err);
 			if (pBuilder != nullptr) delete pBuilder;
 			return XbimGeometryObjectSet::Empty;
