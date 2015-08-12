@@ -51,8 +51,11 @@
   </PropertyGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
+    <Compile Include="XbimArchitectureConventions.cs" />
+    <Compile Include="XbimCustomAssemblyResolver.cs" />
     <Compile Include="XbimGeometryEngine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="XbimPrerequisitesValidator.cs" />
   </ItemGroup>
   <Target Name="TouchFiles">
     <Touch ForceTouch="True" Files="XbimGeometryEngine.cs">
@@ -77,6 +80,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -85,19 +89,23 @@
     <Reference Include="System.Xml" />
     <Reference Include="Xbim.Common, Version=3.0.5701.20724, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
       <HintPath>..\packages\Xbim.Essentials.3.1.7\lib\net40\Xbim.Common.dll</HintPath>
-      <Private>True</Private>
+      <SpecificVersion>False</SpecificVersion>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Xbim.Ifc.Extensions, Version=3.0.5701.20728, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
       <HintPath>..\packages\Xbim.Essentials.3.1.7\lib\net40\Xbim.Ifc.Extensions.dll</HintPath>
-      <Private>True</Private>
+      <SpecificVersion>False</SpecificVersion>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Xbim.Ifc2x3, Version=3.0.5701.20726, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
       <HintPath>..\packages\Xbim.Essentials.3.1.7\lib\net40\Xbim.Ifc2x3.dll</HintPath>
-      <Private>True</Private>
+      <SpecificVersion>False</SpecificVersion>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Xbim.IO, Version=3.0.5701.20730, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
       <HintPath>..\packages\Xbim.Essentials.3.1.7\lib\net40\Xbim.IO.dll</HintPath>
-      <Private>True</Private>
+      <SpecificVersion>False</SpecificVersion>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>

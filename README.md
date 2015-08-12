@@ -1,7 +1,10 @@
-Please note that this repository is a git mirror of the original [Codeplex project](https://xbim.codeplex.com/). Please use the Codeplex site for communications.
+Subproject of https://github.com/xBimTeam/xBimToolkit
 
-Current Build Status (Master)
-[![Build status](https://ci.appveyor.com/api/projects/status/8avnatacab8wih2m/branch/master)](https://ci.appveyor.com/project/XbimCI/xbim-toolkit/branch/master)
+Relates to Nuget Package Xbim.Geometry
+
+Build Status (master branch): [ ![Build Status](http://xbimbuilds.cloudapp.net/app/rest/builds/buildType:(id:Xbim_XbimGeometry_XbimGeometry),branch:(name:master)/statusIcon "Build Status") ](http://xbimbuilds.cloudapp.net/project.html?projectId=Xbim_XbimGeometry&tab=projectOverview "Build Status")
+
+Build Status (develop branch): [ ![Build Status](http://xbimbuilds.cloudapp.net/app/rest/builds/buildType:(id:Xbim_XbimGeometry_XbimGeometry),branch:(name:develop)/statusIcon "Build Status") ](http://xbimbuilds.cloudapp.net/project.html?projectId=Xbim_XbimGeometry&tab=projectOverview "Build Status")
 
 # XBIM - the eXtensible Building Information Modelling (BIM) Toolkit
 
