@@ -235,6 +235,7 @@ namespace Xbim
 				}
 				else if (shell != nullptr)
 				{
+					//BRepTools::Write((XbimOccShape^)solid, "d:\\tmp\\s");
 					for (TopExp_Explorer expl(shell, TopAbs_FACE); expl.More(); expl.Next())
 					{
 						Bnd_Box bbFace;
@@ -319,6 +320,9 @@ namespace Xbim
 				{
 					if (solid->IsValid)
 					{
+						/*char buff[256];
+						sprintf(buff, "d:\\tmp\\O%d", i);
+						BRepTools::Write(solid, buff);*/
 						cuttingObjects.Append(solid);
 						Bnd_Box box;
 						BRepBndLib::Add(solid, box);

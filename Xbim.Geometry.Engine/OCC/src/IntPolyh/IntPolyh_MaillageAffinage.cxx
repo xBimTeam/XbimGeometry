@@ -42,7 +42,7 @@
 #include <IntPolyh_ArrayOfCouples.hxx>
 #include <IntPolyh_Edge.hxx>
 #include <IntPolyh_Couple.hxx>
-
+#include <TColStd_DataMapOfIntegerInteger.hxx>
 static Standard_Real MyTolerance=10.0e-7;
 static Standard_Real MyConfusionPrecision=10.0e-12;
 static Standard_Real SquareMyConfusionPrecision=10.0e-24;
@@ -782,27 +782,74 @@ void IntPolyh_MaillageAffinage::FillArrayOfTriangles
 //purpose  : fill the  edge fields in  Triangle object  for the
 //           two array of triangles.
 //=======================================================================
-void IntPolyh_MaillageAffinage::LinkEdges2Triangles() 
+void IntPolyh_MaillageAffinage::LinkEdges2Triangles()
 {
-  const Standard_Integer FinTT1 = TTriangles1.NbItems();
-  const Standard_Integer FinTT2 = TTriangles2.NbItems();
+	const Standard_Integer FinTT1 = TTriangles1.NbItems();
+	const Standard_Integer FinTT2 = TTriangles2.NbItems();
+	int totalSize1 = TEdges1.NbItems();
+	int totalSize2 = TEdges2.NbItems();
+	///Create a map to speed up with larger models
+	if ((totalSize1 < _UI16_MAX) && (totalSize2 < _UI16_MAX)) //only do it if we don't exceed the size of the short integer
+	{
+		TColStd_DataMapOfIntegerInteger maps1(totalSize1);
+		for (size_t i = 0; i < TEdges1.NbItems(); i++) {
+			IntPolyh_Edge & edge = TEdges1[i];
+			unsigned short fp = (unsigned short)edge.FirstPoint();
+			unsigned short sp = (unsigned short)edge.SecondPoint();
+			if (fp != sp) //ignore if the two points are the same, we do not need to reverse
+			{
+				Standard_Integer hashpoint = fp << sizeof(unsigned short) | sp;
+				if (!maps1.IsBound(hashpoint)) maps1.Bind(hashpoint, i); //don't override, keeps the logic the ame order as the original code, taking the first
+			}
+		}
+		TColStd_DataMapOfIntegerInteger maps2(totalSize2);
+		for (size_t i = 0; i < TEdges2.NbItems(); i++) {
+			IntPolyh_Edge & edge = TEdges2[i];
+			unsigned short fp = edge.FirstPoint();
+			unsigned short sp = edge.SecondPoint();
+			if (fp != sp) //ignore if the two points are the same, we do not need to reverse
+			{
+				Standard_Integer hashpoint = fp << sizeof(unsigned short) | sp;
+				if (!maps2.IsBound(hashpoint)) maps2.Bind(hashpoint, i);
+			}
+		}
 
-  for(Standard_Integer uiui1=0; uiui1<FinTT1; uiui1++) {
-    IntPolyh_Triangle & MyTriangle1=TTriangles1[uiui1];
-    if ( (MyTriangle1.FirstEdge()) == -1 ) {
-      MyTriangle1.SetEdgeandOrientation(1,TEdges1);
-      MyTriangle1.SetEdgeandOrientation(2,TEdges1);
-      MyTriangle1.SetEdgeandOrientation(3,TEdges1);
-    }
-  }
-  for(Standard_Integer uiui2=0; uiui2<FinTT2; uiui2++) {
-    IntPolyh_Triangle & MyTriangle2=TTriangles2[uiui2];
-    if ( (MyTriangle2.FirstEdge()) == -1 ) {
-      MyTriangle2.SetEdgeandOrientation(1,TEdges2);
-      MyTriangle2.SetEdgeandOrientation(2,TEdges2);
-      MyTriangle2.SetEdgeandOrientation(3,TEdges2);
-    }
-  }
+		for (Standard_Integer uiui1 = 0; uiui1 < FinTT1; uiui1++) {
+			IntPolyh_Triangle & MyTriangle1 = TTriangles1[uiui1];
+			if ((MyTriangle1.FirstEdge()) == -1) {
+				MyTriangle1.SetEdgeandOrientation(1, maps1);
+				MyTriangle1.SetEdgeandOrientation(2, maps1);
+				MyTriangle1.SetEdgeandOrientation(3, maps1);
+			}
+		}
+		for (Standard_Integer uiui2 = 0; uiui2 < FinTT2; uiui2++) {
+			IntPolyh_Triangle & MyTriangle2 = TTriangles2[uiui2];
+			if ((MyTriangle2.FirstEdge()) == -1) {
+				MyTriangle2.SetEdgeandOrientation(1, maps2);
+				MyTriangle2.SetEdgeandOrientation(2, maps2);
+				MyTriangle2.SetEdgeandOrientation(3, maps2);
+			}
+		}
+	}
+	else //use old method, but we are in stuck anyway due to size of arrays
+	{
+		for (Standard_Integer uiui1 = 0; uiui1 < FinTT1; uiui1++) {
+			IntPolyh_Triangle & MyTriangle1 = TTriangles1[uiui1];
+			if ((MyTriangle1.FirstEdge()) == -1) {
+				MyTriangle1.SetEdgeandOrientation(1, TEdges1);
+				MyTriangle1.SetEdgeandOrientation(2, TEdges1);
+				MyTriangle1.SetEdgeandOrientation(3, TEdges1);
+			}
+		}
+		for (Standard_Integer uiui2 = 0; uiui2 < FinTT2; uiui2++) {
+			IntPolyh_Triangle & MyTriangle2 = TTriangles2[uiui2];
+			if ((MyTriangle2.FirstEdge()) == -1) {
+				MyTriangle2.SetEdgeandOrientation(1, TEdges2);
+				MyTriangle2.SetEdgeandOrientation(2, TEdges2);
+				MyTriangle2.SetEdgeandOrientation(3, TEdges2);
+			}
+		}
+	}
 }
 //=======================================================================
 //function : CommonPartRefinement

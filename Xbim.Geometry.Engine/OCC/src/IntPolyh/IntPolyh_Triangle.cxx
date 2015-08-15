@@ -990,56 +990,109 @@ void IntPolyh_Triangle::MultipleMiddleRefinement2(const Standard_Real CritereAff
       iii = FinTT;
   }
 }
+//=======================================================================
+//function : SetEdgeandOrientation
+//purpose  : 
+//=======================================================================
+void IntPolyh_Triangle::SetEdgeandOrientation(const Standard_Integer EdgeIndex, const TColStd_DataMapOfIntegerInteger& maps) {
 
+	Standard_Integer PE1 = 0, PE2 = 0;
+	Standard_Integer Test = 1;
+	if (EdgeIndex == 1) { PE1 = p1; PE2 = p2; }
+	else if (EdgeIndex == 2) { PE1 = p2; PE2 = p3; }
+	else if (EdgeIndex == 3) { PE1 = p3; PE2 = p1; }
+	else
+	{
+		Test = 0;
+	}
+
+
+	if (Test != 0)
+	{
+		Standard_Integer hashPoint = (PE1 << sizeof(unsigned short)) | (short)PE2;
+		if (maps.IsBound(hashPoint))
+		{
+			Standard_Integer item = maps(hashPoint);
+			//take the first one
+			SetEdgeOrientation(EdgeIndex, 1);
+			SetEdge(EdgeIndex, item);
+		}
+		else
+		{
+			hashPoint = (PE2 << sizeof(unsigned short)) | (short)PE1;
+			if (maps.IsBound(hashPoint))
+			{
+				Standard_Integer item = maps(hashPoint);
+				//take the first one
+				SetEdgeOrientation(EdgeIndex, -1);
+				SetEdge(EdgeIndex, item);
+			}
+		}
+	}
+}
 //=======================================================================
 //function : SetEdgeandOrientation
 //purpose  : 
 //=======================================================================
 void IntPolyh_Triangle::SetEdgeandOrientation(const Standard_Integer EdgeIndex,
-					      const IntPolyh_ArrayOfEdges &TEdges) {
+	const IntPolyh_ArrayOfEdges &TEdges) {
   const Standard_Integer FinTE = TEdges.NbItems();
 
   Standard_Integer PE1 =0,PE2 =0;
 
   Standard_Integer Test=1;
 
-  if (EdgeIndex==1) { PE1=p1; PE2=p2; }
-  else if (EdgeIndex==2) { PE1=p2; PE2=p3; }
-  else if (EdgeIndex==3) { PE1=p3; PE2=p1; }
-  else { 
-    Test=0;
+  if (EdgeIndex == 1) { PE1 = p1; PE2 = p2; }
+  else if (EdgeIndex == 2) { PE1 = p2; PE2 = p3; }
+  else if (EdgeIndex == 3) { PE1 = p3; PE2 = p1; }
+  else
+  {
+	  Test = 0;
   }
-  if (Test!=0) {
-    for(Standard_Integer iioo=0; iioo<FinTE; iioo++) {
-      Standard_Integer EFP=TEdges[iioo].FirstPoint();
-      if (EFP==PE1) {
-	Standard_Integer ESP=TEdges[iioo].SecondPoint();
-	if (ESP!=EFP) {
-	  if (ESP==PE2) {
-	    SetEdgeOrientation(EdgeIndex,1);
-	    SetEdge(EdgeIndex,iioo);
-	    iioo=FinTE;
-	  }
-	}
-	else {
 
-	  Test=0;
-	}
-      }
-      else if (EFP==PE2) {
-	Standard_Integer ESP=TEdges[iioo].SecondPoint();
-	if (ESP!=EFP) {
-	  if (ESP==PE1) {
-	    SetEdgeOrientation(EdgeIndex,-1);
-	    SetEdge(EdgeIndex,iioo);
-	    iioo=FinTE;
-	  }
-	}
-	else {
 
-	}   
-      }
-    }
+  if (Test != 0)
+  {
+	  for (Standard_Integer iioo = 0; iioo < FinTE; iioo++)
+	  {
+		  Standard_Integer EFP = TEdges[iioo].FirstPoint();
+		  if (EFP == PE1) 
+		  {
+			  Standard_Integer ESP = TEdges[iioo].SecondPoint();
+			  if (ESP != EFP) 
+			  {
+				  if (ESP == PE2) 
+				  {
+					  SetEdgeOrientation(EdgeIndex, 1);
+					  SetEdge(EdgeIndex, iioo);
+					  //iioo = FinTE;
+					  return;
+				  }
+			  }
+			  else 
+			  {
+				  Test = 0;
+			  }
+		  }
+		  else if (EFP == PE2) 
+		  {
+			  Standard_Integer ESP = TEdges[iioo].SecondPoint();
+			  if (ESP != EFP) 
+			  {
+				  if (ESP == PE1) 
+				  {
+					  SetEdgeOrientation(EdgeIndex, -1);
+					  SetEdge(EdgeIndex, iioo);
+					  //iioo = FinTE;
+					  return;
+				  }
+			  }
+			  else 
+			  {
+
+			  }
+		  }
+	  }
   }
 }
 

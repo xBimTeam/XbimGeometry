@@ -17,6 +17,7 @@
 #include <IntPolyh_ArrayOfTriangles.hxx>
 #include <IntPolyh_ArrayOfEdges.hxx>
 #include <IntPolyh_ArrayOfCouples.hxx>
+#include <TColStd_DataMapOfIntegerInteger.hxx>
 class Adaptor3d_HSurface;
 class Bnd_Box;
 class IntPolyh_StartPoint;
@@ -102,8 +103,10 @@ public:
   
   Standard_EXPORT   void LinkEdges2Triangle (const IntPolyh_ArrayOfEdges& TEdges, const Standard_Integer ed1, const Standard_Integer ed2, const Standard_Integer ed3) ;
   
-  Standard_EXPORT   void SetEdgeandOrientation (const Standard_Integer Edge, const IntPolyh_ArrayOfEdges& TEdges) ;
+  Standard_EXPORT   void SetEdgeandOrientation(const Standard_Integer Edge, const IntPolyh_ArrayOfEdges& TEdges);
   
+  Standard_EXPORT   void SetEdgeandOrientation(const Standard_Integer Edge, const TColStd_DataMapOfIntegerInteger& maps);
+ 
   Standard_EXPORT   void Dump (const Standard_Integer v)  const;
   
   Standard_EXPORT   void DumpFleche (const Standard_Integer v)  const;

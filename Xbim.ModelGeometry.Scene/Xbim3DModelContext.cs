@@ -845,7 +845,7 @@ namespace Xbim.ModelGeometry.Scene
                         "WM007: {0}[#{1}] - contains openings but has its geometry can not be built, {2}",
                         element.GetType().Name, element.EntityLabel, e.Message);
                 }
-                if (progDelegate != null) progDelegate(101, "FeatureElement, (#" + element.EntityLabel + " ended)");
+                //if (progDelegate != null) progDelegate(101, "FeatureElement, (#" + element.EntityLabel + " ended)");
             }
             );
             contextHelper.PercentageParsed = localPercentageParsed;
