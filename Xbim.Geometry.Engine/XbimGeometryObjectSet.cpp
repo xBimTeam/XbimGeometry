@@ -230,7 +230,7 @@ namespace Xbim
 					toBeProcessed.Append(solid);
 					hasObjectsToProcess = true;
 					
-					//BRepTools::Write((XbimOccShape^)solid, "d:\\tmp\\b");
+				//BRepTools::Write((XbimOccShape^)solid, "d:\\tmp\\b");
 					
 				}
 				else if (shell != nullptr)
@@ -356,14 +356,17 @@ namespace Xbim
 				pBuilder->Build();
 				if (pBuilder->ErrorStatus() == 0)
 				{
-					//BRepTools::Write(pBuilder->Shape(), "d:\\tmp\\r");
+				//BRepTools::Write(pBuilder->Shape(), "d:\\tmp\\r");
 					TopoDS_Compound occCompound;
 					builder.MakeCompound(occCompound);
 					builder.Add(occCompound, pBuilder->Shape());
 					XbimCompound^ compound = gcnew XbimCompound(occCompound, false, tolerance);
 					if (bop != BOPAlgo_COMMON) //do not need to add these as they by definition do not intersect
 					{
-						compound->Add(gcnew XbimShell(toBePassedThrough));
+						TopExp_Explorer expl(toBePassedThrough, TopAbs_FACE);
+
+						if (expl.More()) //only add if there are faces to consider
+							compound->Add(gcnew XbimShell(toBePassedThrough));
 					}
 					XbimGeometryObjectSet^ geomObjs = gcnew XbimGeometryObjectSet();
 					geomObjs->Add(compound);
@@ -379,12 +382,8 @@ namespace Xbim
 			catch (Standard_Failure e)
 			{
 				err = gcnew String(Standard_Failure::Caught()->GetMessageString());
-			}
-			catch (Exception^ e)
-			{
-				err = e->Message;
-			}
-			//	XbimGeometryCreator::logger->WarnFormat("WS032: Boolean Cut operation failed. " + err);
+			}		
+			XbimGeometryCreator::logger->WarnFormat("WS032: Boolean Cut operation failed. " + err);
 			if (pBuilder != nullptr) delete pBuilder;
 			return XbimGeometryObjectSet::Empty;
 		}

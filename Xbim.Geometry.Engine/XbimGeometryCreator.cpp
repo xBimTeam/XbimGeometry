@@ -828,7 +828,7 @@ namespace Xbim
 				}
 			}
 			//BRepTools::Write(body, "d:\\tmp\\b");
-			IXbimSolidSet^ r = body->Cut(solidSet, mf->Precision*2);
+			IXbimSolidSet^ r = body->Cut(solidSet, 0);
 			//BRepTools::Write((XbimSolid^)(r->First), "d:\\tmp\\r");			
 			return r;
 			

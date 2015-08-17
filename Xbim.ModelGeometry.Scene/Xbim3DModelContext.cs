@@ -731,7 +731,7 @@ namespace Xbim.ModelGeometry.Scene
                                     if (openingShapes.Count == 0)
                                     {
                                         Logger.WarnFormat(
-                                            "WM004: {0}[#{1}] is an opening that has been no 3D geometric form definition",
+                                            "WM004: {0}[#{1}] is an opening that has no 3D geometric form definition",
                                             opening.GetType().Name, opening.EntityLabel);
                                     }
                                     processed.Add(opening.EntityLabel);
@@ -752,7 +752,7 @@ namespace Xbim.ModelGeometry.Scene
                                         if (projectionShapes.Count == 0)
                                         {
                                             Logger.WarnFormat(
-                                                "WM005: {0}[#{1}] is an projection that has been no 3D geometric form definition",
+                                                "WM005: {0}[#{1}] is an projection that has no 3D geometric form definition",
                                                 addition.GetType().Name, addition.EntityLabel);
                                         }
                                         processed.Add(addition.EntityLabel);
@@ -767,7 +767,7 @@ namespace Xbim.ModelGeometry.Scene
                             if (allOpenings.Any())
                             {
 
-                                var nextGeom = elementGeom.Cut(allOpenings, _model.ModelFactors.Precision * 2);
+                                var nextGeom = elementGeom.Cut(allOpenings, 0);
                                 if (!nextGeom.IsValid) //try another precision
                                     nextGeom = elementGeom.Cut(allOpenings, _model.ModelFactors.OneMilliMetre);
                                 if (nextGeom.IsValid)
@@ -992,7 +992,7 @@ namespace Xbim.ModelGeometry.Scene
                             mapShapes.Add(counter);
                         }
                         else if (!(mapShape is IfcGeometricSet)) //ignore non solid geometry sets
-                            Logger.ErrorFormat("Failed to find shape #{0}", mapShape.EntityLabel);
+                            Logger.WarnFormat("Failed to find shape #{0}", mapShape.EntityLabel);
                     }
                     if (mapShapes.Any()) //if we have something to write
                     {

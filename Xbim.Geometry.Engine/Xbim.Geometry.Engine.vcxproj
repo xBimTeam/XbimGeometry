@@ -181,7 +181,7 @@
       <StringPooling>true</StringPooling>
     </ClCompile>
     <Link>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
       <AdditionalDependencies>msvcrt.lib;advapi32.lib;gdi32.lib;user32.lib;kernel32.lib;ws2_32.lib;vfw32.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4248 /NOENTRY</AdditionalOptions>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>

@@ -1009,7 +1009,7 @@ void IntPolyh_Triangle::SetEdgeandOrientation(const Standard_Integer EdgeIndex, 
 
 	if (Test != 0)
 	{
-		Standard_Integer hashPoint = (PE1 << sizeof(unsigned short)) | (short)PE2;
+		Standard_Integer hashPoint = (PE1 << sizeof(unsigned short)) | (unsigned short)PE2;
 		if (maps.IsBound(hashPoint))
 		{
 			Standard_Integer item = maps(hashPoint);
@@ -1019,7 +1019,7 @@ void IntPolyh_Triangle::SetEdgeandOrientation(const Standard_Integer EdgeIndex, 
 		}
 		else
 		{
-			hashPoint = (PE2 << sizeof(unsigned short)) | (short)PE1;
+			hashPoint = (PE2 << sizeof(unsigned short)) | (unsigned short)PE1;
 			if (maps.IsBound(hashPoint))
 			{
 				Standard_Integer item = maps(hashPoint);

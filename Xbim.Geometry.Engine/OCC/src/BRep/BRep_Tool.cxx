@@ -120,10 +120,14 @@ BRep_Tool::Triangulation(const TopoDS_Face& F,
 
 Standard_Real  BRep_Tool::Tolerance(const TopoDS_Face& F)
 {
-  Standard_Real p = (*((Handle(BRep_TFace)*)&F.TShape()))->Tolerance();
-  Standard_Real pMin = Precision::Confusion();
-  if (p > pMin) return p;
-  else          return pMin;
+	Standard_Real pMin = Precision::Confusion();
+	Standard_Real p = pMin;
+	if ((*((Handle(BRep_TFace)*)&F.TShape())) != nullptr)
+		p = (*((Handle(BRep_TFace)*)&F.TShape()))->Tolerance();
+	else
+		Standard_ConstructionError::Raise("TopoDS_Face::TShape is null");
+	if (p > pMin) return p;
+	else          return pMin;
 }
 
 //=======================================================================
