@@ -146,7 +146,7 @@ namespace Xbim
 			virtual IXbimSolidSet^ CreateSolidSet();
 			virtual IXbimSolidSet^ CreateSolidSet(IfcBooleanResult^ boolOp);
 
-			virtual IXbimSolidSet^ CreateBooleanClippingResult(IfcBooleanClippingResult^ clip);
+			virtual IXbimSolidSet^ CreateBooleanResult(IfcBooleanResult^ clip);
 			
 			virtual IXbimGeometryObjectSet^ CreateGeometryObjectSet();
 		};
