@@ -32,6 +32,7 @@ namespace Xbim
 #pragma region Initialisers
 
 			void Init(IfcSolidModel^ solid);
+			void Init(IfcManifoldSolidBrep^ solid);
 			void Init(IfcSweptAreaSolid^ solid);
 			void Init(IfcExtrudedAreaSolid^ solid);
 			void Init(IfcSurfaceCurveSweptAreaSolid^ ifcSolid);
@@ -42,7 +43,7 @@ namespace Xbim
 			void Init(IfcHalfSpaceSolid^ solid, double maxExtrusion);
 			void Init(IfcBoxedHalfSpace^ solid);
 			void Init(IfcPolygonalBoundedHalfSpace^ solid, double maxExtrusion);
-			void Init(IfcBooleanClippingResult^ solid);
+			void Init(IfcBooleanResult^ solid);
 			void Init(IfcBooleanOperand^ solid);
 			void Init(XbimRect3D rect3D, double tolerance);
 
@@ -57,7 +58,7 @@ namespace Xbim
 #pragma endregion
 
 		public:
-			static XbimSolid^ BuildClippingList(IfcBooleanClippingResult^ solid, List<IfcBooleanOperand^>^ clipList);
+			static XbimSolid^ BuildClippingList(IfcBooleanResult^ solid, List<IfcBooleanOperand^>^ clipList);
 #pragma region Equality Overrides
 			virtual bool Equals(Object^ v) override;
 			virtual int GetHashCode() override;
@@ -101,6 +102,7 @@ namespace Xbim
 			XbimSolid(){};
 			XbimSolid(const TopoDS_Solid& solid);
 			XbimSolid(IfcSolidModel^ solid);
+			XbimSolid(IfcManifoldSolidBrep^ solid);
 			XbimSolid(IfcSweptAreaSolid^ solid);
 			XbimSolid(IfcSurfaceCurveSweptAreaSolid^ ifcSolid);
 			XbimSolid(IfcHalfSpaceSolid^ solid, double maxExtrusion);
@@ -110,7 +112,7 @@ namespace Xbim
 			XbimSolid(IfcRevolvedAreaSolid^ solid);
 			XbimSolid(IfcSweptDiskSolid^ solid);
 			XbimSolid(IfcBoundingBox^ solid);
-			XbimSolid(IfcBooleanClippingResult^ solid);
+			XbimSolid(IfcBooleanResult^ solid);
 			XbimSolid(IfcBooleanOperand^ solid);
 
 			XbimSolid(IfcCsgPrimitive3D^ ifcSolid);

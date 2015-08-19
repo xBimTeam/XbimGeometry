@@ -58,19 +58,19 @@ namespace Xbim
 					if (objectLocation != nullptr) solid->Move(objectLocation);
 					return solid;
 				}
-				else if (dynamic_cast<IfcBooleanClippingResult^>(geomRep))
+				else if (dynamic_cast<IfcBooleanResult^>(geomRep))
 				{
-					XbimSolidSet^ solidSet = (XbimSolidSet^) CreateBooleanClippingResult((IfcBooleanClippingResult^)geomRep);
+					XbimSolidSet^ solidSet = (XbimSolidSet^) CreateBooleanResult((IfcBooleanResult^)geomRep);
 					//BRepTools::Write((XbimSolid^)(solidSet->First), "d:\\tmp\\s");
 					if (objectLocation != nullptr) solidSet->Move(objectLocation);
 					return solidSet;
 				}				
-				else if (dynamic_cast<IfcBooleanResult^>(geomRep))
+				/*else if (dynamic_cast<IfcBooleanResult^>(geomRep))
 				{
 					XbimSolidSet^ solidSet = (XbimSolidSet^)CreateSolidSet((IfcBooleanResult^)geomRep);
 					if (objectLocation != nullptr) solidSet->Move(objectLocation);
 					return solidSet;
-				}
+				}*/
 				else if (dynamic_cast<IfcFaceBasedSurfaceModel^>(geomRep))
 				{
 					XbimCompound^ comp = (XbimCompound^)CreateSurfaceModel((IfcFaceBasedSurfaceModel^)geomRep);
@@ -801,7 +801,7 @@ namespace Xbim
 		}
 #endif // USE_CARVE_CSG
 
-		IXbimSolidSet^ XbimGeometryCreator::CreateBooleanClippingResult(IfcBooleanClippingResult^ clip)
+		IXbimSolidSet^ XbimGeometryCreator::CreateBooleanResult(IfcBooleanResult^ clip)
 		{
 			XbimModelFactors^ mf = clip->ModelOf->ModelFactors;
 			
@@ -837,16 +837,16 @@ namespace Xbim
 			IfcBooleanOperand^ sOp = clip->SecondOperand;
 			IXbimSolidSet^ left;
 			IXbimSolidSet^ right;
-			if (dynamic_cast<IfcBooleanClippingResult^>(fOp))
-				left = CreateBooleanClippingResult((IfcBooleanClippingResult^)fOp);
+			if (dynamic_cast<IfcBooleanResult^>(fOp))
+				left = CreateBooleanResult((IfcBooleanResult^)fOp);
 			else
 			{
 				left = gcnew XbimSolidSet(); 
 				XbimSolid^ l = gcnew XbimSolid(fOp);
 				if (l->IsValid)	left->Add(l);
 			}
-			if (dynamic_cast<IfcBooleanClippingResult^>(sOp))
-				right = CreateBooleanClippingResult((IfcBooleanClippingResult^)sOp);
+			if (dynamic_cast<IfcBooleanResult^>(sOp))
+				right = CreateBooleanResult((IfcBooleanResult^)sOp);
 			else
 			{
 				right = gcnew XbimSolidSet();

@@ -101,6 +101,11 @@ namespace Xbim
 			Init(solid);
 		}
 
+		XbimSolid::XbimSolid(IfcManifoldSolidBrep^ solid)
+		{
+			Init(solid);
+		}
+
 		XbimSolid::XbimSolid(IfcSweptAreaSolid^ repItem)
 		{
 			Init(repItem);
@@ -151,7 +156,7 @@ namespace Xbim
 			Init(repItem, maxExtrusion);
 		}
 
-		XbimSolid::XbimSolid(IfcBooleanClippingResult^ solid)
+		XbimSolid::XbimSolid(IfcBooleanResult^ solid)
 		{
 			Init(solid);
 		}
@@ -259,10 +264,26 @@ namespace Xbim
 			IfcSweptDiskSolid^ sd = dynamic_cast<IfcSweptDiskSolid^>(solid);
 			if (sd != nullptr) return Init(sd);
 			IfcManifoldSolidBrep^ ms = dynamic_cast<IfcManifoldSolidBrep^>(solid);
-			if (ms != nullptr) return Init(ms);
+			if (ms != nullptr) 
+				return Init(ms);
 			IfcCsgSolid^ csg = dynamic_cast<IfcCsgSolid^>(solid);
 			if (csg != nullptr) return Init(csg);
 			throw gcnew NotImplementedException(String::Format("Swept Solid of Type {0} in entity #{1} is not implemented", solid->GetType()->Name, solid->EntityLabel));
+		}
+
+		void XbimSolid::Init(IfcManifoldSolidBrep^ bRep)
+		{
+			XbimCompound^ comp = gcnew XbimCompound(bRep);
+			if (comp->IsValid)
+			{
+				comp->Sew();
+				XbimSolidSet^ ss = gcnew XbimSolidSet(comp);
+				if (ss->Count > 0)
+				{
+					pSolid = new TopoDS_Solid();
+					*pSolid = (XbimSolid^)ss->First;
+				}
+			}
 		}
 
 		void XbimSolid::Init(IfcSweptAreaSolid^ solid)
@@ -690,12 +711,12 @@ namespace Xbim
 		}
 
 
-		XbimSolid^ XbimSolid::BuildClippingList(IfcBooleanClippingResult^ solid, List<IfcBooleanOperand^>^ clipList)
+		XbimSolid^ XbimSolid::BuildClippingList(IfcBooleanResult^ solid, List<IfcBooleanOperand^>^ clipList)
 		{
 			IfcBooleanOperand^ fOp = solid->FirstOperand;
 			IfcBooleanOperand^ sOp = solid->SecondOperand;
 			
-			IfcBooleanClippingResult^ boolClip = dynamic_cast<IfcBooleanClippingResult^>(fOp);
+			IfcBooleanResult^ boolClip = dynamic_cast<IfcBooleanResult^>(fOp);
 			if (boolClip!=nullptr)
 			{				
 				clipList->Add(sOp);
@@ -705,18 +726,18 @@ namespace Xbim
 			{				
 				clipList->Add(sOp);
 				XbimSolidSet^ solidSet = dynamic_cast<XbimSolidSet^>(clipList);
-			//	if (solidSet!=nullptr) solidSet->Reverse();
+				if (solidSet!=nullptr) solidSet->Reverse();
 				return gcnew XbimSolid(fOp);
 			}
 		}
 
 		//Booleans
-		void XbimSolid::Init(IfcBooleanClippingResult^ solid)
+		void XbimSolid::Init(IfcBooleanResult^ solid)
 		{
 			XbimModelFactors^ mf = solid->ModelOf->ModelFactors;
 			IfcBooleanOperand^ fOp = solid->FirstOperand;
 #ifdef OCC_6_9_SUPPORTED			
-			IfcBooleanClippingResult^ boolClip = dynamic_cast<IfcBooleanClippingResult^>(fOp);
+			IfcBooleanResult^ boolClip = dynamic_cast<IfcBooleanResult^>(fOp);
 			if (boolClip != nullptr)
 			{
 				List<IfcBooleanOperand^>^ clips = gcnew List<IfcBooleanOperand^>();
@@ -821,18 +842,18 @@ namespace Xbim
 			if (sol != nullptr) return Init(sol);
 			IfcHalfSpaceSolid^ hs = dynamic_cast<IfcHalfSpaceSolid^>(solid);
 			if (hs != nullptr) return Init(hs,solid->ModelOf->ModelFactors->OneMetre*100); //take 100 metres as the largest extrusion
-			IfcBooleanClippingResult^ bcr = dynamic_cast<IfcBooleanClippingResult^>(solid);
-			if (bcr != nullptr) return Init(bcr);
 			IfcBooleanResult^ br = dynamic_cast<IfcBooleanResult^>(solid);
-			if (br != nullptr) //this should only return one solid
-			{
-				XbimSolidSet^ solids = gcnew XbimSolidSet(br);
-				if (solids->First!=nullptr)
-				pSolid = new TopoDS_Solid();
-				XbimSolid^ solid  = (XbimSolid^)solids->First;
-				*pSolid = solid;
-				return;
-			}
+			if (br != nullptr) return Init(br); //treat IfcBooleanResult and IfcBooleanClippingResult the same
+			//IfcBooleanResult^ br = dynamic_cast<IfcBooleanResult^>(solid);
+			//if (br != nullptr) //this should only return one solid
+			//{
+			//	XbimSolidSet^ solids = gcnew XbimSolidSet(br);
+			//	if (solids->First!=nullptr)
+			//	pSolid = new TopoDS_Solid();
+			//	XbimSolid^ solid  = (XbimSolid^)solids->First;
+			//	*pSolid = solid;
+			//	return;
+			//}
 			IfcCsgPrimitive3D^ csg = dynamic_cast<IfcCsgPrimitive3D^>(solid);
 			if (csg != nullptr) return Init(csg);
 			throw gcnew NotImplementedException("Sub-Type of IfcBooleanOperand is not implemented");
