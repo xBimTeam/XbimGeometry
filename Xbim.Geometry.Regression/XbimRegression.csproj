@@ -74,20 +74,20 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="Xbim.Common, Version=3.0.5709.18566, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xbim.Essentials.3.1.10-Prerelease\lib\net40\Xbim.Common.dll</HintPath>
+    <Reference Include="Xbim.Common, Version=3.0.5709.25621, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
+      <HintPath>..\packages\Xbim.Essentials.3.1.10-V0001\lib\net40\Xbim.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Xbim.Ifc.Extensions, Version=3.0.5709.18570, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xbim.Essentials.3.1.10-Prerelease\lib\net40\Xbim.Ifc.Extensions.dll</HintPath>
+    <Reference Include="Xbim.Ifc.Extensions, Version=3.0.5709.25624, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
+      <HintPath>..\packages\Xbim.Essentials.3.1.10-V0001\lib\net40\Xbim.Ifc.Extensions.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Xbim.Ifc2x3, Version=3.0.5709.18567, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xbim.Essentials.3.1.10-Prerelease\lib\net40\Xbim.Ifc2x3.dll</HintPath>
+    <Reference Include="Xbim.Ifc2x3, Version=3.0.5709.25621, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
+      <HintPath>..\packages\Xbim.Essentials.3.1.10-V0001\lib\net40\Xbim.Ifc2x3.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Xbim.IO, Version=3.0.5709.18571, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xbim.Essentials.3.1.10-Prerelease\lib\net40\Xbim.IO.dll</HintPath>
+    <Reference Include="Xbim.IO, Version=3.0.5709.25625, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
+      <HintPath>..\packages\Xbim.Essentials.3.1.10-V0001\lib\net40\Xbim.IO.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>
