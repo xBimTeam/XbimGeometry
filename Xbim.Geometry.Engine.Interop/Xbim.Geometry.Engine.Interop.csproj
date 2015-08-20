@@ -51,6 +51,12 @@
   </PropertyGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
+    <Compile Include="..\SharedAssemblyInfo.cs">
+      <Link>Properties\SharedAssemblyInfo.cs</Link>
+    </Compile>
+	<Compile Include="..\SharedFileVersionInfo.cs">
+		<Link>Properties\SharedFileVersionInfo.cs</Link>
+    </Compile>  
     <Compile Include="XbimArchitectureConventions.cs" />
     <Compile Include="XbimCustomAssemblyResolver.cs" />
     <Compile Include="XbimGeometryEngine.cs" />

@@ -3741,6 +3741,9 @@
     <ClCompile Include="AssemblyInfo.cpp">
       <Filter>Source files\Includes</Filter>
     </ClCompile>
+    <ClCompile Include="SharedFileVersionInfo.cpp">
+		<Filter>Source files\Includes</Filter>
+	</ClCompile>
     <ClCompile Include="OCC\src\NCollection\NCollection_AccAllocator.cxx">
       <Filter>Source files\TKernel\NCollection</Filter>
     </ClCompile>

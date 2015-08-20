@@ -54,6 +54,12 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+	<Compile Include="..\SharedAssemblyInfo.cs">
+      <Link>Properties\SharedAssemblyInfo.cs</Link>
+    </Compile>
+	<Compile Include="..\SharedFileVersionInfo.cs">
+      <Link>Properties\SharedFileVersionInfo.cs</Link>
+    </Compile>
     <Compile Include="Dict.cs" />
     <Compile Include="Geom.cs" />
     <Compile Include="Mesh.cs" />
@@ -68,11 +74,24 @@
     <None Include="XbimOpenSourceKeyFile.snk" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
+  <PropertyGroup>
+    <Year>$([System.DateTime]::Now.ToString("yy"))</Year>
+    <Month>$([System.DateTime]::Now.ToString("MM"))</Month>
+    <Date>$([System.DateTime]::Now.ToString("dd"))</Date>
+    <Time>$([System.DateTime]::Now.ToString("HH"))</Time>
+    <AssemblyFileVersionAttribute>[assembly:System.Reflection.AssemblyFileVersion("3.1.$(Year)$(Month).$(Date)$(Time)")]</AssemblyFileVersionAttribute>
+	<CPPAssemblyFileVersionAttribute>[assembly:System::Reflection::AssemblyFileVersionAttribute("3.1.$(Year)$(Month).$(Date)$(Time)")]%3b</CPPAssemblyFileVersionAttribute>
+  </PropertyGroup>
   <Target Name="BeforeBuild">
+    <WriteLinesToFile
+        File="..\SharedFileVersionInfo.cs"
+        Lines="$(AssemblyFileVersionAttribute)"
+        Overwrite="true"
+        Encoding="Unicode"/>
+	<WriteLinesToFile
+        File="..\Xbim.Geometry.Engine\SharedFileVersionInfo.cpp"
+        Lines="$(CPPAssemblyFileVersionAttribute)"
+        Overwrite="true"
+        Encoding="Unicode"/>
   </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>

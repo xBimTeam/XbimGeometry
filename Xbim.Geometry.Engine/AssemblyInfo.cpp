@@ -14,13 +14,12 @@ using namespace System::Security::Permissions;
 [assembly:AssemblyTitleAttribute(L"Xbim.Geometry.Engine")];
 [assembly:AssemblyDescriptionAttribute(L"Xbim Core Geometry Engine")];
 [assembly:AssemblyConfigurationAttribute(L"")];
-[assembly:AssemblyCompanyAttribute(L"Steve Lockley")];
-[assembly:AssemblyProductAttribute(L"Xbim.Geometry.Engine")];
-[assembly:AssemblyCopyrightAttribute(L"Copyright (c)  2014")];
-[assembly:AssemblyTrademarkAttribute(L"")];
+[assembly:AssemblyCompanyAttribute(L"Lockley Consulting")];
+[assembly:AssemblyProductAttribute(L"Xbim")];
+[assembly:AssemblyCopyrightAttribute(L"Copyright © Lockley Consulting 2007-2015")];
+[assembly:AssemblyTrademarkAttribute(L"Xbim")];
 [assembly:AssemblyCultureAttribute(L"")];
 
-//
 // Version information for an assembly consists of the following four values:
 //
 //      Major Version
@@ -31,8 +30,8 @@ using namespace System::Security::Permissions;
 // You can specify all the value or you can default the Revision and Build Numbers
 // by using the '*' as shown below:
 
-[assembly:AssemblyVersionAttribute("3.0.0.1")];
-
+[assembly:AssemblyVersionAttribute("3.1")];
+[assembly:AssemblyInformationalVersionAttribute("3.1.develop")]
 [assembly:ComVisible(false)];
  
 [assembly:CLSCompliantAttribute(true)];

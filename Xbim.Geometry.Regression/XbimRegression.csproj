@@ -93,7 +93,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\SharedAssemblyInfo.cs">
-      <Link>Properties\SharedAssemblyInfo.cs</Link>
+		<Link>Properties\SharedAssemblyInfo.cs</Link>
+    </Compile>
+	<Compile Include="..\SharedFileVersionInfo.cs">
+		<Link>Properties\SharedFileVersionInfo.cs</Link>
     </Compile>
     <Compile Include="BatchProcessor.cs" />
     <Compile Include="Params.cs" />
