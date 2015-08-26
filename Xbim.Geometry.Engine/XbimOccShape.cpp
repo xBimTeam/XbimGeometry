@@ -163,9 +163,9 @@ namespace Xbim
 				}
 				faceIndex++;
 				textWriter->WriteLine();
-				textWriter->Flush();
-				GC::KeepAlive(this);
-			}
+			}			
+			textWriter->Flush();
+			GC::KeepAlive(this);
 		}
 
 
