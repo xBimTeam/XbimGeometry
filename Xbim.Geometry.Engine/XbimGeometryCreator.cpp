@@ -16,7 +16,7 @@
 #include <BRep_Tool.hxx>
 #include <TColgp_Array1OfPnt.hxx>
 #include <BRepTools.hxx>
-
+#include <ShapeFix_ShapeTolerance.hxx>
 using namespace  System::Threading;
 using namespace Xbim::Common;
 namespace Xbim
@@ -828,7 +828,12 @@ namespace Xbim
 				}
 			}
 			//BRepTools::Write(body, "d:\\tmp\\b");
-			IXbimSolidSet^ r = body->Cut(solidSet, 0);
+			ShapeFix_ShapeTolerance FTol;
+			double precision = Math::Max(mf->OneMilliMeter/100, mf->Precision); //set the precision to 100th mm but never less than precision
+			FTol.SetTolerance(body,precision);			
+			IXbimSolidSet^ r = gcnew XbimSolidSet(body);			
+			for each (XbimSolid^ s in solidSet)	r = r->Cut(s, 0);
+							
 			//BRepTools::Write((XbimSolid^)(r->First), "d:\\tmp\\r");			
 			return r;
 			

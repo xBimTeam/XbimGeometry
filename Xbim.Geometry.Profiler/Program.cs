@@ -52,25 +52,25 @@ namespace Xbim.Geometry.Profiler
                         }
                     };
                     var context = new Xbim3DModelContext(model);
-                    context.CreateContext(geomStorageType: XbimGeometryType.Polyhedron, progDelegate: progDelegate);
+                    context.CreateContext(geomStorageType: XbimGeometryType.PolyhedronBinary, progDelegate: progDelegate);
 
                     mainStopWatch.Stop();
                     Logger.InfoFormat("Xbim total Compile Time \t\t{0:0.0} ms", mainStopWatch.ElapsedMilliseconds);
-                    //var wexBimFilename = Path.ChangeExtension(fileName, "wexBIM");
-                    //using (var wexBiMfile = new FileStream(wexBimFilename, FileMode.Create, FileAccess.Write))
-                    //{
-                    //    using (var wexBimBinaryWriter = new BinaryWriter(wexBiMfile))
-                    //    {
-                    //        var stopWatch = new Stopwatch();
-                    //        Logger.InfoFormat("Entering -  Create wexBIM");
-                    //        stopWatch.Start();
-                    //        context.Write(wexBimBinaryWriter);
-                    //        stopWatch.Stop();
-                    //        Logger.InfoFormat("Complete - in \t\t{0:0.0} ms", stopWatch.ElapsedMilliseconds);
-                    //        wexBimBinaryWriter.Close();
-                    //    }
-                    //    wexBiMfile.Close();
-                    //}
+                    var wexBimFilename = Path.ChangeExtension(fileName, "wexBIM");
+                    using (var wexBiMfile = new FileStream(wexBimFilename, FileMode.Create, FileAccess.Write))
+                    {
+                        using (var wexBimBinaryWriter = new BinaryWriter(wexBiMfile))
+                        {
+                            var stopWatch = new Stopwatch();
+                            Logger.InfoFormat("Entering -  Create wexBIM");
+                            stopWatch.Start();
+                            context.Write(wexBimBinaryWriter);
+                            stopWatch.Stop();
+                            Logger.InfoFormat("Complete - in \t\t{0:0.0} ms", stopWatch.ElapsedMilliseconds);
+                            wexBimBinaryWriter.Close();
+                        }
+                        wexBiMfile.Close();
+                    }
 
                     model.Close();
                 }
