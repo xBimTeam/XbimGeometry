@@ -1773,7 +1773,7 @@ namespace Xbim.ModelGeometry.Scene
             {
                 if (!(product is IfcFeatureElement))
                 {
-                    XbimRect3D bb = XbimRect3D.Empty;
+                    var bb = XbimRect3D.Empty;
                     foreach (var si in ShapeInstancesOf(product))
                     {
                         var bbPart = XbimRect3D.TransformBy(si.BoundingBox, si.Transformation); //make sure we put the box in the right place and then convert to axis aligned
@@ -1797,71 +1797,67 @@ namespace Xbim.ModelGeometry.Scene
             {
                 IXbimShapeGeometryData geometry = ShapeGeometry(kv.Key);
                 var instances = ShapeInstancesOf(kv.Key, true).ToList();
-                if (instances.Count > 0)
+                if (instances.Count <= 0) 
+                    continue;
+                numberOfGeometries++;
+                binaryStream.Write(kv.Value); //the number of repetitions of the geometry
+                foreach (IXbimShapeInstanceData xbimShapeInstance in instances)
+                    //write out each of the ids style and transforms
                 {
-                    numberOfGeometries++;
-                    binaryStream.Write(kv.Value); //the number of repetitions of the geometry
-                    foreach (IXbimShapeInstanceData xbimShapeInstance in instances)
-                        //write out each of the ids style and transforms
-                    {
-                        binaryStream.Write(xbimShapeInstance.IfcProductLabel);
-                        binaryStream.Write((UInt16)xbimShapeInstance.IfcTypeId);
-                        binaryStream.Write((UInt32)xbimShapeInstance.InstanceLabel);
-                        binaryStream.Write((Int32)xbimShapeInstance.StyleLabel > 0
-                            ? xbimShapeInstance.StyleLabel
-                            : xbimShapeInstance.IfcTypeId*-1);
-                        binaryStream.Write(xbimShapeInstance.Transformation);
-                        numberOfTriangles += XbimShapeTriangulation.TriangleCount(geometry.ShapeData);
-                        numberOfMatrices++;
-                    }
-                    numberOfVertices += XbimShapeTriangulation.VerticesCount(geometry.ShapeData);
-                   // binaryStream.Write(geometry.ShapeData);
-                    var ms = new MemoryStream(geometry.ShapeData);
-                    var br = new BinaryReader(ms);
-                    var tr = br.ReadShapeTriangulation();
-                   
-                    tr.Write(binaryStream);
+                    binaryStream.Write(xbimShapeInstance.IfcProductLabel);
+                    binaryStream.Write((UInt16)xbimShapeInstance.IfcTypeId);
+                    binaryStream.Write((UInt32)xbimShapeInstance.InstanceLabel);
+                    binaryStream.Write((Int32)xbimShapeInstance.StyleLabel > 0
+                        ? xbimShapeInstance.StyleLabel
+                        : xbimShapeInstance.IfcTypeId*-1);
+                    binaryStream.Write(xbimShapeInstance.Transformation);
+                    numberOfTriangles += XbimShapeTriangulation.TriangleCount(geometry.ShapeData);
+                    numberOfMatrices++;
                 }
-               
+                numberOfVertices += XbimShapeTriangulation.VerticesCount(geometry.ShapeData);
+                // binaryStream.Write(geometry.ShapeData);
+                var ms = new MemoryStream(geometry.ShapeData);
+                var br = new BinaryReader(ms);
+                var tr = br.ReadShapeTriangulation();
+                   
+                tr.Write(binaryStream);
             }
             //now do the single instances
             foreach (var kv in lookup.Where(v => v.Value == 1))
             {
                 var instances = ShapeInstancesOf(kv.Key, true).ToList();
-                if (instances.Count > 0)
+                if (instances.Count <= 0 || instances[0].IfcTypeId == 498 || instances[0].RepresentationType  != XbimGeometryRepresentationType.OpeningsAndAdditionsIncluded) // 498 are IfcOpeningElements
+                    continue;
+                numberOfGeometries++;
+                IXbimShapeInstanceData xbimShapeInstance = instances[0];
+
+                IXbimShapeGeometryData geometry = ShapeGeometry(kv.Key);
+                binaryStream.Write(kv.Value); //the number of repetitions of the geometry (1)
+
+                if (xbimShapeInstance != null)
                 {
-                    numberOfGeometries++;
-                    IXbimShapeInstanceData xbimShapeInstance = instances[0];
-
-                    IXbimShapeGeometryData geometry = ShapeGeometry(kv.Key);
-                    binaryStream.Write(kv.Value); //the number of repetitions of the geometry (1)
-
-                    if (xbimShapeInstance != null)
-                    {
-                        binaryStream.Write((Int32)xbimShapeInstance.IfcProductLabel);
-                        binaryStream.Write((UInt16)xbimShapeInstance.IfcTypeId);
-                        binaryStream.Write((Int32)xbimShapeInstance.InstanceLabel);
-                        binaryStream.Write((Int32)xbimShapeInstance.StyleLabel > 0
-                            ? xbimShapeInstance.StyleLabel
-                            : xbimShapeInstance.IfcTypeId*-1);
-                    }
-                    else
-                    {
-                        throw new Exception(string.Format("Invalid Shape Instance ID #{0}, did not return any data",
-                            kv.Key));
-                    }
-                    //Read all vertices and normals in the geometry stream and transform
-                    if (geometry.ShapeData.Length > 0)
-                    {
-                        var ms = new MemoryStream(geometry.ShapeData);
-                        var br = new BinaryReader(ms);
-                        var tr = br.ReadShapeTriangulation();
-                        var trTransformed = tr.Transform(((XbimShapeInstance) xbimShapeInstance).Transformation);
-                        trTransformed.Write(binaryStream);
-                        numberOfTriangles += XbimShapeTriangulation.TriangleCount(geometry.ShapeData);
-                        numberOfVertices += XbimShapeTriangulation.VerticesCount(geometry.ShapeData);
-                    }
+                    binaryStream.Write((Int32)xbimShapeInstance.IfcProductLabel);
+                    binaryStream.Write((UInt16)xbimShapeInstance.IfcTypeId);
+                    binaryStream.Write((Int32)xbimShapeInstance.InstanceLabel);
+                    binaryStream.Write((Int32)xbimShapeInstance.StyleLabel > 0
+                        ? xbimShapeInstance.StyleLabel
+                        : xbimShapeInstance.IfcTypeId*-1);
                 }
+                else
+                {
+                    throw new Exception(string.Format("Invalid Shape Instance ID #{0}, did not return any data",
+                        kv.Key));
+                }
+                //Read all vertices and normals in the geometry stream and transform
+                if (geometry.ShapeData.Length <= 0) 
+                    continue;
+                var ms = new MemoryStream(geometry.ShapeData);
+                var br = new BinaryReader(ms);
+                var tr = br.ReadShapeTriangulation();
+                var trTransformed = tr.Transform(((XbimShapeInstance) xbimShapeInstance).Transformation);
+                trTransformed.Write(binaryStream);
+                numberOfTriangles += XbimShapeTriangulation.TriangleCount(geometry.ShapeData);
+                numberOfVertices += XbimShapeTriangulation.VerticesCount(geometry.ShapeData);
             }
             binaryStream.Seek(start, SeekOrigin.Begin);
             binaryStream.Write((Int32)numberOfGeometries);

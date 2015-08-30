@@ -16,6 +16,34 @@ namespace GeometryTests
     [TestClass]
     public class SceneTests
     {
+        // [TestMethod] // used for local file generation
+        public void WriteWexBimFile()
+        {
+            // var fnameIn = @"C:\Data\dev\XbimTeam\XbimWebUI\Xbim.WeXplorer\tests\data\LakesideRestaurant.ifc";
+            var files = Directory.GetFiles(@"C:\Data\dev\XbimTeam\XbimWebUI\Xbim.WeXplorer\tests\data\",
+                @"OneWallTwoWindows.ifc");
+            foreach (var file in files)
+            {
+                WriteWexBim(file);
+            }
+        }
+
+        private static void WriteWexBim(string fnameIn)
+        {
+            var fNameOut = Path.ChangeExtension(fnameIn, "wexbim");
+            using (var m = new XbimModel())
+            {
+                m.CreateFrom(fnameIn, null, null, true, true);
+                var m3D = new Xbim3DModelContext(m);
+                m3D.CreateContext(XbimGeometryType.PolyhedronBinary);
+                using (var bw = new BinaryWriter(new FileStream(fNameOut, FileMode.Create)))
+                {
+                    m3D.Write(bw);
+                    bw.Close();
+                }
+            }
+        }
+
         /// <summary>
         /// Reads and writes the geometry of an Ifc file to WexBIM format
         /// </summary>
@@ -99,7 +127,6 @@ namespace GeometryTests
                         }
                     } 
                 }
-                
             }
         }
     }

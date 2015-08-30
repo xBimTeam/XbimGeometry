@@ -190,3 +190,5 @@ FakesAssemblies/
 *.files
 *.Dep
 *.Out
+SharedFileVersionInfo.cs
+Xbim.Geometry.Engine/SharedFileVersionInfo.cpp
