@@ -7,6 +7,7 @@
 #include <BRepTools.hxx>
 #include <BRep_Builder.hxx>
 #include <BRepAlgoAPI_Cut.hxx>
+#include <ShapeFix_ShapeTolerance.hxx>
 using namespace System;
 using namespace Xbim::Common;
 namespace Xbim
@@ -309,14 +310,15 @@ namespace Xbim
 			String^ err = "";
 			try
 			{
-				
+				ShapeFix_ShapeTolerance FTol;				
 				TopTools_ListOfShape shapeTools;
 				for each (IXbimSolid^ iSolid in solids)
 				{
 					XbimSolid^ solid = dynamic_cast<XbimSolid^>(iSolid);
 					if (solid!=nullptr)
 					{
-						shapeTools.Append(solid);	
+						FTol.SetTolerance(solid, tolerance);
+						shapeTools.Append(solid);							
 					}
 				}
 				TopTools_ListOfShape shapeObjects;
@@ -325,14 +327,15 @@ namespace Xbim
 					XbimSolid^ solid = dynamic_cast<XbimSolid^>(iSolid);
 					if (solid != nullptr)
 					{
+						FTol.SetTolerance(solid, tolerance);
 						shapeObjects.Append(solid);
 					}
 				}
 				
 				BRepAlgoAPI_Cut boolOp;
 				boolOp.SetArguments(shapeObjects);
-				boolOp.SetTools(shapeTools);
-				boolOp.SetFuzzyValue(tolerance);
+				boolOp.SetTools(shapeTools);				
+				boolOp.SetFuzzyValue(0);
 				boolOp.Build();
 				
 				if (boolOp.ErrorStatus() == 0)

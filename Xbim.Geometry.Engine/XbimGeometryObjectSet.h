@@ -1,5 +1,6 @@
 #pragma once
 #include "XbimGeometryObject.h"
+#include <TopoDS_Compound.hxx>
 #include <TopoDS_Shell.hxx>
 #include <Bnd_Box.hxx>
 #include <BRepBndLib.hxx>
@@ -29,6 +30,7 @@ namespace Xbim
 			{
 				geometryObjects = nullptr;
 			};
+			static TopoDS_Compound CreateCompound(IEnumerable<IXbimGeometryObject^>^ geomObjects);
 		public:
 			static property IXbimGeometryObjectSet^ Empty{IXbimGeometryObjectSet^ get(){ return empty; }};	
 			static IXbimGeometryObjectSet^ PerformBoolean(BOPAlgo_Operation bop, IEnumerable<IXbimGeometryObject^>^ geomObjects, IXbimSolidSet^ solids, double tolerance);

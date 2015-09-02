@@ -662,15 +662,14 @@ namespace Xbim.ModelGeometry.Scene
             var localPercentageParsed = 0;
             var localTally = 0;
             var featureCount = contextHelper.OpeningsAndProjections.Count;
-            if (progDelegate != null) progDelegate(-1, "WriteFeatureElements (" + contextHelper.OpeningsAndProjections.Count + " elements)");
-
+            if (progDelegate != null) progDelegate(-1, "WriteFeatureElements (" + contextHelper.OpeningsAndProjections.Count + " elements)");          
+             
             Parallel.ForEach(contextHelper.OpeningsAndProjections, contextHelper.ParallelOptions, pair =>
            //         foreach (IGrouping<IfcElement, IfcFeatureElement> pair in contextHelper.OpeningsAndProjections)
             {
-
-                var element = pair.Key;
-
-
+                
+               var element = pair.Key;
+               double precision = Math.Max(element.ModelOf.ModelFactors.OneMilliMeter / 100, element.ModelOf.ModelFactors.Precision); //set the precision to 100th mm but never less than precision
                 Interlocked.Increment(ref localTally);
 
                 try
@@ -713,20 +712,19 @@ namespace Xbim.ModelGeometry.Scene
                                 {
                                     var openingShapes = WriteProductShape(contextHelper, opening, false).ToList();
 
-                                   // if (openingShapes.Count == 2)
+
+                                    foreach (var openingShape in openingShapes)
                                     {
-                                        foreach (var openingShape in openingShapes)
-                                        {
-                                            var openingGeom = contextHelper.GetGeometryFromCache(openingShape);
-                                            
-                                            if (openingGeom != null)
-                                                allOpenings.Add(openingGeom);
-                                            else
-                                                Logger.WarnFormat(
-                                               "WM014: {0}[#{1}] is an opening that has some 3D geometric form definition missing",
-                                               opening.GetType().Name, opening.EntityLabel);
-                                        }
+                                        var openingGeom = contextHelper.GetGeometryFromCache(openingShape);
+
+                                        if (openingGeom != null)
+                                            allOpenings.Add(openingGeom);
+                                        else
+                                            Logger.WarnFormat(
+                                           "WM014: {0}[#{1}] is an opening that has some 3D geometric form definition missing",
+                                           opening.GetType().Name, opening.EntityLabel);
                                     }
+
 
                                     if (openingShapes.Count == 0)
                                     {
@@ -762,16 +760,21 @@ namespace Xbim.ModelGeometry.Scene
 
                             //make the finished shape
                             if (allProjections.Any())
-                                elementGeom = elementGeom.Union(allProjections, _model.ModelFactors.Precision * 2);
+                                elementGeom = elementGeom.Union(allProjections, precision);
 
                             if (allOpenings.Any())
                             {
 
-                                var nextGeom = elementGeom.Cut(allOpenings, 0);
-                                if (!nextGeom.IsValid) //try another precision
-                                    nextGeom = elementGeom.Cut(allOpenings, _model.ModelFactors.OneMilliMetre);
+                                var nextGeom = elementGeom.Cut(allOpenings, precision);
                                 if (nextGeom.IsValid)
-                                    elementGeom = nextGeom;
+                                {
+                                    if (nextGeom.First !=null && nextGeom.First.IsValid)                                    
+                                        elementGeom = nextGeom;
+                                    else
+                                        Logger.WarnFormat(
+                                   "WM009: Cutting of openings in {2}[#{0}]-{1} has resulted in an empty shape",
+                                   element.EntityLabel, element.Name, element.GetType().Name);
+                                }
                                 else
                                     Logger.WarnFormat(
                                    "WM008: Cutting of openings in {2}[#{0}]-{1} has failed, openings have ben ignored",
@@ -808,20 +811,23 @@ namespace Xbim.ModelGeometry.Scene
                                 }
                             }
                             shapeGeometry.ShapeData = memStream.ToArray();
-                            var shapeInstance = new XbimShapeInstance
+                            if (shapeGeometry.ShapeData.Length > 0)
                             {
-                                IfcProductLabel = element.EntityLabel,
-                                ShapeGeometryLabel = 0,
-                                /*Set when geometry written*/
-                                StyleLabel = styleId,
-                                RepresentationType = XbimGeometryRepresentationType.OpeningsAndAdditionsIncluded,
-                                RepresentationContext = context,
-                                IfcTypeId = IfcMetaData.IfcTypeId(element),
-                                Transformation = XbimMatrix3D.Identity,
-                                BoundingBox = elementGeom.BoundingBox
-                            };
-                            features.Add(new Tuple<XbimShapeInstance, IXbimShapeGeometryData>(shapeInstance,
-                                shapeGeometry));
+                                var shapeInstance = new XbimShapeInstance
+                                {
+                                    IfcProductLabel = element.EntityLabel,
+                                    ShapeGeometryLabel = 0,
+                                    /*Set when geometry written*/
+                                    StyleLabel = styleId,
+                                    RepresentationType = XbimGeometryRepresentationType.OpeningsAndAdditionsIncluded,
+                                    RepresentationContext = context,
+                                    IfcTypeId = IfcMetaData.IfcTypeId(element),
+                                    Transformation = XbimMatrix3D.Identity,
+                                    BoundingBox = elementGeom.BoundingBox
+                                };
+                                features.Add(new Tuple<XbimShapeInstance, IXbimShapeGeometryData>(shapeInstance,
+                                    shapeGeometry));
+                            }
                         }
                     }
                     else
@@ -842,7 +848,7 @@ namespace Xbim.ModelGeometry.Scene
                 catch (Exception e)
                 {
                     Logger.WarnFormat(
-                        "WM007: {0}[#{1}] - contains openings but has its geometry can not be built, {2}",
+                        "WM007: {0}[#{1}] - contains openings but  its geometry can not be built, {2}",
                         element.GetType().Name, element.EntityLabel, e.Message);
                 }
                 //if (progDelegate != null) progDelegate(101, "FeatureElement, (#" + element.EntityLabel + " ended)");

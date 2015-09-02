@@ -108,7 +108,7 @@ namespace Xbim.Tessellator
         /// </summary>
         public static float EdgeSign(MeshUtils.Vertex u, MeshUtils.Vertex v, MeshUtils.Vertex w)
         {
-            Debug.Assert(VertLeq(u, v) && VertLeq(v, w));
+          //  Debug.Assert(VertLeq(u, v) && VertLeq(v, w));
 
             float gapL = v._s - u._s;
             float gapR = w._s - v._s;

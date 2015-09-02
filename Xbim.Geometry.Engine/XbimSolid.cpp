@@ -1179,14 +1179,17 @@ namespace Xbim
 			try
 			{
 #ifdef OCC_6_9_SUPPORTED
+				ShapeFix_ShapeTolerance FTol;
 				TopTools_ListOfShape shapeTools;
+				FTol.SetTolerance(solidCut, tolerance);
 				shapeTools.Append(solidCut);
 				TopTools_ListOfShape shapeObjects;
+				FTol.SetTolerance(this, tolerance);
 				shapeObjects.Append(this);
 				BRepAlgoAPI_Cut boolOp;
 				boolOp.SetArguments(shapeObjects);
 				boolOp.SetTools(shapeTools);
-				boolOp.SetFuzzyValue(tolerance);
+				boolOp.SetFuzzyValue(0);
 				boolOp.Build();
 #else
 				ShapeFix_ShapeTolerance fixTol;

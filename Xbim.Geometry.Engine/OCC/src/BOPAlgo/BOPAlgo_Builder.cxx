@@ -304,6 +304,10 @@ void BOPAlgo_Builder::PerformInternal(const BOPAlgo_PaveFiller& theFiller)
   catch (Standard_Failure) {
     myErrorStatus=191;
   }  
+  catch (...)
+  {
+	  myErrorStatus = 191;
+  }
 }
 //=======================================================================
 //function : PerformInternal1

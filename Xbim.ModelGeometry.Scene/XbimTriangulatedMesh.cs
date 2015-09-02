@@ -281,12 +281,13 @@ namespace Xbim.ModelGeometry.Scene
                     {
                         visited.Add(nextConnectedEdge.EdgeId);
                         var nextConnectedEdgeCandidate = nextConnectedEdge.NextEdge.NextEdge.AdjacentEdge;
-                        while (nextConnectedEdgeCandidate != null && !nextConnectedEdgeCandidate.Normal.IsValid) //skip colinear triangles
+                        while (nextConnectedEdgeCandidate != null && !visited.Contains(nextConnectedEdgeCandidate.EdgeId) && !nextConnectedEdgeCandidate.Normal.IsValid) //skip colinear triangles
                         {
                             //set the colinear triangle to have the same normals as the current edge
                             nextConnectedEdgeCandidate.Normal = nextConnectedEdge.Normal;
                             nextConnectedEdgeCandidate.NextEdge.Normal = nextConnectedEdge.Normal;
                             nextConnectedEdgeCandidate.NextEdge.NextEdge.Normal = nextConnectedEdge.Normal;
+                            visited.Add(nextConnectedEdgeCandidate.EdgeId);
                             nextConnectedEdgeCandidate = nextConnectedEdgeCandidate.NextEdge.NextEdge.AdjacentEdge;
                         }
 

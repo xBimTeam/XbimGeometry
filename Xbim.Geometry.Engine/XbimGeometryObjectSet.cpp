@@ -16,6 +16,8 @@
 #include <BRepAlgoAPI_Common.hxx>
 #include <BRepAlgoAPI_Fuse.hxx>
 #include <BRepTools.hxx>
+#include <ShapeFix_ShapeTolerance.hxx>
+#include <Message_ProgressIndicator.hxx>
 using namespace System;
 using namespace System::ComponentModel;
 namespace Xbim
@@ -212,7 +214,7 @@ namespace Xbim
 		bool XbimGeometryObjectSet::ParseGeometry(IEnumerable<IXbimGeometryObject^>^ geomObjects, TopTools_ListOfShape& toBeProcessed, Bnd_Array1OfBox& aBoxes,
 			TopoDS_Shell& passThrough, double tolerance)
 		{
-
+			ShapeFix_ShapeTolerance FTol;
 			BRep_Builder builder;
 			TopoDS_Shell facesToBeCut;
 			builder.MakeShell(facesToBeCut);
@@ -227,15 +229,16 @@ namespace Xbim
 				
 				if (solid != nullptr)
 				{
+					FTol.SetTolerance(solid, tolerance);
 					toBeProcessed.Append(solid);
 					hasObjectsToProcess = true;
 					
-				//BRepTools::Write((XbimOccShape^)solid, "d:\\tmp\\b");
+			//	BRepTools::Write((XbimOccShape^)solid, "c:\\tmp\\b");
 					
 				}
 				else if (shell != nullptr)
 				{
-					//BRepTools::Write((XbimOccShape^)solid, "d:\\tmp\\s");
+				//	BRepTools::Write((XbimOccShape^)solid, "c:\\tmp\\s");
 					for (TopExp_Explorer expl(shell, TopAbs_FACE); expl.More(); expl.Next())
 					{
 						Bnd_Box bbFace;
@@ -284,7 +287,9 @@ namespace Xbim
 				BRepBuilderAPI_Sewing seamstress(tolerance);
 				seamstress.Add(facesToBeCut);
 				seamstress.Perform();
-				toBeProcessed.Append(seamstress.SewedShape());
+				TopoDS_Shape shape = seamstress.SewedShape();
+				FTol.SetTolerance(shape, tolerance);
+				toBeProcessed.Append(shape);
 			}
 			return hasObjectsToProcess;
 		}
@@ -297,6 +302,26 @@ namespace Xbim
 			return PerformBoolean(bop, geomObjects, solids, tolerance);
 		}
 
+		TopoDS_Compound XbimGeometryObjectSet::CreateCompound(IEnumerable<IXbimGeometryObject^>^ geomObjects)
+		{
+			BRep_Builder builder;
+			TopoDS_Compound bodyCompound;
+			builder.MakeCompound(bodyCompound);
+			for each (IXbimGeometryObject^ gObj in geomObjects)
+			{
+				XbimOccShape^ shape = dynamic_cast<XbimOccShape^>(gObj);
+				IEnumerable<IXbimGeometryObject^>^ geomSet = dynamic_cast<IEnumerable<IXbimGeometryObject^>^>(gObj);
+				if (shape != nullptr)
+				{
+					builder.Add(bodyCompound, (XbimOccShape^)gObj);
+				}
+				else if(geomSet!=nullptr)
+					builder.Add(bodyCompound, CreateCompound(geomSet));
+			}
+			return bodyCompound;
+		}
+
+
 		IXbimGeometryObjectSet^ XbimGeometryObjectSet::PerformBoolean(BOPAlgo_Operation bop, IEnumerable<IXbimGeometryObject^>^ geomObjects, IXbimSolidSet^ solids, double tolerance)
 		{
 			String^ err = "";
@@ -304,11 +329,16 @@ namespace Xbim
 			BRepAlgoAPI_BooleanOperation* pBuilder = nullptr;
 			try
 			{
+				BRep_Builder builder;
+				ShapeFix_ShapeTolerance FTol;
+				TopoDS_Compound comp = CreateCompound(geomObjects);
+				Bnd_Box bodyBox;
+				BRepBndLib::Add(comp, bodyBox);
 				//get the subset of faces that intersect the openings
 				//we are going to treat shells different from solids by only cutting those faces that intersect the cut
 				TopoDS_Shell toBePassedThrough;
 				TopoDS_Shell facesToCut;
-				BRep_Builder builder;
+				
 				builder.MakeShell(facesToCut);
 				builder.MakeShell(toBePassedThrough);
 				TopTools_ListOfShape toBeProcessed;
@@ -321,16 +351,26 @@ namespace Xbim
 					if (solid->IsValid)
 					{
 						/*char buff[256];
-						sprintf(buff, "d:\\tmp\\O%d", i);
+						sprintf(buff, "c:\\tmp\\O%d", i);
 						BRepTools::Write(solid, buff);*/
-						cuttingObjects.Append(solid);
+											
 						Bnd_Box box;
 						BRepBndLib::Add(solid, box);
-						allBoxes(i++).SetGap(-tolerance * 2); //reduce to only catch faces that are inside tolerance and not sitting on the opening
-					}
-					
+						allBoxes(i).SetGap(-tolerance * 2); //reduce to only catch faces that are inside tolerance and not sitting on the opening
+						if (!bodyBox.IsOut(box)) //only try and cut it if it might intersect the body
+						{
+							FTol.SetTolerance(solid, tolerance);
+							cuttingObjects.Append(solid);
+						}
+						i++;
+					}					
 				}
-				
+
+				if (cuttingObjects.Extent() == 0)
+				{
+					XbimGeometryCreator::logger->InfoFormat("WS033: No openings intersect with the body shape" );					
+					return gcnew XbimGeometryObjectSet(geomObjects);
+				}
 				if (!ParseGeometry(geomObjects, toBeProcessed, allBoxes, toBePassedThrough, tolerance)) //nothing to do so just return what we had
 					return gcnew XbimGeometryObjectSet(geomObjects);
 				
@@ -349,18 +389,28 @@ namespace Xbim
 					break;
 				default:
 					break;
-				}			
+				}		
+								
 				pBuilder->SetArguments(toBeProcessed);
 				pBuilder->SetTools(cuttingObjects);
-				pBuilder->SetFuzzyValue(tolerance);
+				pBuilder->SetFuzzyValue(0);
+				Handle(XbimProgressIndicator) aPI = new XbimProgressIndicator(60);				
+				pBuilder->SetProgressIndicator(aPI);
 				pBuilder->Build();
+				aPI->StopTimer();
+				//XbimGeometryCreator::logger->FatalFormat("{0}", aPI->ElapsedTime());
+				if (aPI->TimedOut())
+				{
+					XbimGeometryCreator::logger->ErrorFormat("E001: Boolean operation timed out after {0} seconds. Operation ignored",aPI->ElapsedTime());
+				}
 				if (pBuilder->ErrorStatus() == 0)
 				{
-				//BRepTools::Write(pBuilder->Shape(), "d:\\tmp\\r");
+			   //	BRepTools::Write(pBuilder->Shape(), "c:\\tmp\\r");
 					TopoDS_Compound occCompound;
 					builder.MakeCompound(occCompound);
 					builder.Add(occCompound, pBuilder->Shape());
 					XbimCompound^ compound = gcnew XbimCompound(occCompound, false, tolerance);
+
 					if (bop != BOPAlgo_COMMON) //do not need to add these as they by definition do not intersect
 					{
 						TopExp_Explorer expl(toBePassedThrough, TopAbs_FACE);
@@ -368,6 +418,7 @@ namespace Xbim
 						if (expl.More()) //only add if there are faces to consider
 							compound->Add(gcnew XbimShell(toBePassedThrough));
 					}
+					
 					XbimGeometryObjectSet^ geomObjs = gcnew XbimGeometryObjectSet();
 					geomObjs->Add(compound);
 					if (pBuilder != nullptr) delete pBuilder;
@@ -383,7 +434,7 @@ namespace Xbim
 			{
 				err = gcnew String(Standard_Failure::Caught()->GetMessageString());
 			}		
-			XbimGeometryCreator::logger->WarnFormat("WS032: Boolean Cut operation failed. " + err);
+			XbimGeometryCreator::logger->InfoFormat("WS032: Boolean Cut failed. " + err);
 			if (pBuilder != nullptr) delete pBuilder;
 			return XbimGeometryObjectSet::Empty;
 		}
