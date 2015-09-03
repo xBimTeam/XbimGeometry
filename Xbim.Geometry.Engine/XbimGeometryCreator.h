@@ -13,6 +13,7 @@ using namespace Xbim::Ifc2x3::TopologyResource;
 using namespace Xbim::Ifc2x3::ProfileResource;
 using namespace Xbim::Ifc2x3::GeometryResource;
 using namespace Xbim::XbimExtensions::SelectTypes;
+using namespace System::Configuration;
 namespace Xbim
 {
 	namespace Geometry
@@ -31,11 +32,15 @@ namespace Xbim
 #endif // USE_CARVE_CSG
 				}
 			}
-
-			
-
+			static XbimGeometryCreator()
+			{
+				String^ timeOut = ConfigurationManager::AppSettings["BooleanTimeOut"];
+				if (!double::TryParse(timeOut, BooleanTimeOut))
+					BooleanTimeOut = 60;
+			}
 			//Central point for logging all errors
 			static ILogger^ logger = LoggerFactory::GetLogger();
+			static double BooleanTimeOut;
 			virtual property ILogger^ Logger{ILogger^ get(){ return XbimGeometryCreator::logger; }};
 			virtual IXbimShapeGeometryData^ CreateShapeGeometry(IXbimGeometryObject^ geometryObject, double precision, double deflection, double angle, XbimGeometryType storageType);
 			virtual IXbimShapeGeometryData^ CreateShapeGeometry(IXbimGeometryObject^ geometryObject, double precision, double deflection/*, double angle = 0.5, XbimGeometryType storageType = XbimGeometryType::Polyhedron*/)

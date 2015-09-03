@@ -394,7 +394,8 @@ namespace Xbim
 				pBuilder->SetArguments(toBeProcessed);
 				pBuilder->SetTools(cuttingObjects);
 				pBuilder->SetFuzzyValue(0);
-				Handle(XbimProgressIndicator) aPI = new XbimProgressIndicator(60);				
+				Console::WriteLine(XbimGeometryCreator::BooleanTimeOut);
+				Handle(XbimProgressIndicator) aPI = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);				
 				pBuilder->SetProgressIndicator(aPI);
 				pBuilder->Build();
 				aPI->StopTimer();
