@@ -220,7 +220,7 @@ namespace Xbim.ModelGeometry.Scene
         public void BalanceNormals()
         {
             const double minAngle = Math.PI / 5;
-
+           
             //set up the base normals
             foreach (var faceGroup in Faces)
             {
@@ -229,7 +229,7 @@ namespace Xbim.ModelGeometry.Scene
                     ComputeTriangleNormal(triangle);
                 }
             }
-           
+
 
             var edgesAtVertex = _faces.Values.SelectMany(el => el).SelectMany(e => e).Where(e => e != null).GroupBy(k => k.StartVertexIndex);
             foreach (var edges in edgesAtVertex)
@@ -297,7 +297,7 @@ namespace Xbim.ModelGeometry.Scene
                             if (visited.Contains(nextConnectedEdge.EdgeId))
                                 break; //we are looping or at the start                       
                             //if the edge is sharp start a new face
-                            var angle = nextConnectedEdge.Angle;
+                            var angle = nextConnectedEdge.Angle;                      
                             if ( angle > minAngle && nextConnectedEdge.Normal.IsValid)
                             {
                                 face = new List<XbimTriangleEdge>();
@@ -308,7 +308,7 @@ namespace Xbim.ModelGeometry.Scene
                     } while (nextConnectedEdge != null);
                     //move on to next face
 
-                }
+                }        
 
                 //we have our smoothing groups
                 foreach (var vertexEdges in faceSet.Where(f => f.Count > 1))
@@ -318,21 +318,22 @@ namespace Xbim.ModelGeometry.Scene
                     {
                         if (edge.Normal.IsValid)
                         {
-                            Vec3.AddTo(ref vertexNormal, ref edge.Normal);                           
-                        }
+                            Vec3.AddTo(ref vertexNormal, ref edge.Normal);
+                        }                      
                     }
 
                     Vec3.Normalize(ref vertexNormal);
                     foreach (var edge in vertexEdges)
-                        edge.Normal = vertexNormal;
+                         edge.Normal = vertexNormal;                   
                 }
 
 
             }
-            
 
-            //now convert faces
-            _faces = _faces.Values.SelectMany(v => v).GroupBy(t=>(int)ComputeTrianglePackedNormal(t).ToUnit16()).ToDictionary(k=>k.Key,v=>v.ToList());
+            var groupedFaces = new Dictionary<int, List<XbimTriangleEdge[]>>(_faces.Count);
+            //now regroup faces
+            _faces = _faces.Values.SelectMany(v => v).GroupBy(t=>ComputeTrianglePackedNormalInt(t)).ToDictionary(k=>k.Key,v=>v.ToList());
+           
         }
 
 
@@ -424,14 +425,14 @@ namespace Xbim.ModelGeometry.Scene
         /// Computes the packed normal for the triangle, if all the normals at each vertex are the same it is returned, if any are different XbimPackedNormal.Invalid is returned. Assumes the normals have been calculated and balanced
         /// </summary>
         /// <param name="edges"></param>
-        private XbimPackedNormal ComputeTrianglePackedNormal(XbimTriangleEdge[] edges)
+        private int ComputeTrianglePackedNormalInt(XbimTriangleEdge[] edges)
         {
             var pn = edges[0].PackedNormal;
             var pn0 = pn.ToUnit16();
             var pn1 = edges[1].PackedNormal.ToUnit16();
             var pn2 = edges[2].PackedNormal.ToUnit16();
-            if (pn0 == pn1 && pn1 == pn2) return pn;
-            return new XbimPackedNormal(255,255);
+            if (pn0 == pn1 && pn1 == pn2) return pn.ToUnit16();
+            return ushort.MaxValue;
         }
 
         /// <summary>
@@ -447,16 +448,17 @@ namespace Xbim.ModelGeometry.Scene
             var ax = p1.X; var bx = p2.X; var cx = p3.X;
             var ay = p1.Y; var by = p2.Y; var cy = p3.Y;
             var az = p1.Z; var bz = p2.Z; var cz = p3.Z;
-
             // calculate normal of a triangle
-            edges[0].Normal.X = (by - ay) * (cz - az) - (bz - az) * (cy - ay);
-            edges[0].Normal.Y = (bz - az) * (cx - ax) - (bx - ax) * (cz - az);
-            edges[0].Normal.Z = (bx - ax) * (cy - ay) - (by - ay) * (cx - ax);
-
-            if (Vec3.Normalize(ref edges[0].Normal))
+            var v = new Vec3(
+                            (by - ay) * (cz - az) - (bz - az) * (cy - ay),
+                            (bz - az) * (cx - ax) - (bx - ax) * (cz - az),
+                            (bx - ax) * (cy - ay) - (by - ay) * (cx - ax)
+                );            
+            if (Vec3.Normalize(ref v))
             {
-                edges[1].Normal = edges[0].Normal;
-                edges[2].Normal = edges[0].Normal;
+                edges[0].Normal = v;
+                edges[1].Normal = v;
+                edges[2].Normal = v;
                 return true;
             }
             return false;

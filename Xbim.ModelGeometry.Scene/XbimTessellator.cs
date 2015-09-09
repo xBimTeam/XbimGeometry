@@ -175,7 +175,7 @@ namespace Xbim.ModelGeometry.Scene
                                 textWriter.Write("{0},", triangle[0].NextEdge.StartVertexIndex + verticesOffset);
                             if (pn2 != pn3)
                             {
-                                textWriter.Write("{0}/{1},", triangle[0].NextEdge.NextEdge.StartVertexIndex + verticesOffset, pn3);
+                                textWriter.Write("{0}/{1}", triangle[0].NextEdge.NextEdge.StartVertexIndex + verticesOffset, pn3);
                                 currentNormal = pn3;
                             }
                             else
@@ -236,7 +236,7 @@ namespace Xbim.ModelGeometry.Scene
 
                 binaryWriter.Write(facesCount);
                 uint verticesOffset = 0;
-                int invalidNormal = new XbimPackedNormal(255, 255).ToUnit16();
+                int invalidNormal = ushort.MaxValue; ;
                 foreach (var triangulatedMesh in triangulations)
                 {
                     foreach (var faceGroup in triangulatedMesh.Faces)
