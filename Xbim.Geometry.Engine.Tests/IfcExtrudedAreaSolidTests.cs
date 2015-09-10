@@ -19,6 +19,29 @@ namespace GeometryTests
     [TestClass]
     public class IfcExtrudedAreaSolidTests
     {
+        [TestMethod]
+        public void CompositeProfileDefTest()
+        {
+            var xbimGeometryCreator = new XbimGeometryEngine();
+            using (var eventTrace = LoggerFactory.CreateEventTrace())
+            {
+                using (var m = new XbimModel())
+                {
+                    m.CreateFrom("SolidTestFiles\\IfcCompositeProfileDefTest.ifc", null, null, true, true);
+                    var eas = m.Instances.OfType<IfcExtrudedAreaSolid>().FirstOrDefault(e => e.SweptArea.GetType() == typeof(IfcCompositeProfileDef));
+                    Assert.IsTrue(eas != null, "No Extruded Solid found");
+                    Assert.IsTrue(eas.SweptArea is IfcCompositeProfileDef, "Incorrect profiledef found");
+
+                    var solid = xbimGeometryCreator.CreateSolid(eas);
+                    Assert.IsTrue(eventTrace.Events.Count == 0); //no events should have been raised from this call
+
+                    IfcCsgTests.GeneralTest(solid);
+                    Assert.IsTrue(solid.Faces.Count() == 40, "IfcCompositeProfileDef profile should have six faces");     
+
+                }
+            }
+
+        }
 
         [TestMethod]
         public void RectangleProfileDefTest()

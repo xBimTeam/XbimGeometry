@@ -159,6 +159,9 @@
     <None Include="SolidTestFiles\Faceted BRep with void.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="SolidTestFiles\IfcCompositeProfileDefTest.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="SolidTestFiles\IfcFacetedBRepWithIncorrectlyOrientedFaces.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

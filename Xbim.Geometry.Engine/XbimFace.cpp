@@ -259,7 +259,9 @@ namespace Xbim
 			IfcRectangleHollowProfileDef^ rectHollow = dynamic_cast<IfcRectangleHollowProfileDef^>(profile);
 			if (rectHollow != nullptr) //this is a compound wire so we need to build it at face level
 				return Init(rectHollow);
-			else if (dynamic_cast<IfcArbitraryOpenProfileDef^>(profile) && !dynamic_cast<IfcCenterLineProfileDef^>(profile))
+		    if (dynamic_cast<IfcCompositeProfileDef^>(profile))
+				return Init((IfcCompositeProfileDef^)profile);
+			if (dynamic_cast<IfcArbitraryOpenProfileDef^>(profile) && !dynamic_cast<IfcCenterLineProfileDef^>(profile))
 				throw gcnew Exception("Faces cannot be built with IfcArbitraryOpenProfileDef, a face requires a closed loop");
 			else //it is a standard profile that can be built as a single wire
 			{
@@ -293,6 +295,7 @@ namespace Xbim
 				}
 			}
 		}
+		
 
 		void XbimFace::Init(IfcArbitraryProfileDefWithVoids^ profile)
 		{
@@ -357,6 +360,46 @@ namespace Xbim
 				}
 			}
 		}
+		void XbimFace::Init(IfcCompositeProfileDef ^ compProfile)
+		{
+			if (compProfile->Profiles->Count == 0)
+			{
+				XbimGeometryCreator::logger->InfoFormat("WF0015: Invalid number of profiles in IfcCompositeProfileDef #{0}. It must be 2 or more. Profile discarded", compProfile->EntityLabel);
+				return;
+			}
+			if (compProfile->Profiles->Count == 1)
+			{
+				XbimGeometryCreator::logger->InfoFormat("WF0016: Invalid number of profiles in IfcCompositeProfileDef #{0}. It must be 2 or more. A single Profile has been used", compProfile->EntityLabel);
+				Init(compProfile->Profiles->First);
+				return;
+			}
+			XbimFace^ firstFace = gcnew XbimFace(compProfile->Profiles->First);
+			BRepBuilderAPI_MakeFace faceBlder(firstFace);
+			bool first = true;
+			for each (IfcProfileDef^ profile in compProfile->Profiles)
+			{
+				if (!first)
+				{					
+					XbimFace^ face = gcnew XbimFace(profile);
+					faceBlder.Add((XbimWire^)face->OuterBound);
+					for each (IXbimWire^ inner in face->InnerBounds)
+					{
+						faceBlder.Add((XbimWire^)inner);
+					}
+				}
+				else 
+					first = false;
+			}
+			if(faceBlder.IsDone())
+			{
+				pFace = new TopoDS_Face();
+				*pFace = faceBlder.Face();
+			}
+			else
+				XbimGeometryCreator::logger->InfoFormat("WF0016: IfcCompositeProfileDef #{0} could not be built . It has been omitted", compProfile->EntityLabel);
+
+		}
+
 
 		//Builds a face from a CircleProfileDef
 		void XbimFace::Init(IfcCircleHollowProfileDef ^ circProfile)
