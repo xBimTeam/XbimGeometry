@@ -29,7 +29,7 @@ IOS and Android versions are under development.</description>
         <tags>BIM, IFC, IfcXml, IfcZip, COBie, .Net, C#, BuildingSmart</tags>
       <dependencies>
         <dependency id="Newtonsoft.Json" version="6.0.8" />
-        <dependency id="Xbim.Essentials" version="3.1.10-V0003" />
+        <dependency id="Xbim.Essentials" version="3.1.10-V0005" />
       </dependencies>
     </metadata>
     <files>
