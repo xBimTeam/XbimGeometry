@@ -17,6 +17,7 @@
 #include <TColgp_Array1OfPnt.hxx>
 #include <BRepTools.hxx>
 #include <ShapeFix_ShapeTolerance.hxx>
+#include <BRep_Builder.hxx>
 using namespace  System::Threading;
 using namespace Xbim::Common;
 namespace Xbim
@@ -38,12 +39,21 @@ namespace Xbim
 		{
 			try
 			{
-				if (dynamic_cast<IfcSweptAreaSolid^>(geomRep))
+				IfcSweptAreaSolid^ sweptAreaSolid = dynamic_cast<IfcSweptAreaSolid^>(geomRep);
+				if (sweptAreaSolid != nullptr)
 				{
-					XbimSolid^ solid = (XbimSolid^)CreateSolid((IfcSweptAreaSolid^)geomRep);
-					if (objectLocation != nullptr) solid->Move(objectLocation);
-					
-					return solid;
+					if (dynamic_cast<IfcCompositeProfileDef^>(sweptAreaSolid->SweptArea)) //handle these as composite solids
+					{
+						XbimSolidSet^ solidset = (XbimSolidSet^)CreateSolidSet(sweptAreaSolid);
+						if (objectLocation != nullptr) solidset->Move(objectLocation);
+						return solidset;
+					}
+					else
+					{
+						XbimSolid^ solid = (XbimSolid^)CreateSolid((IfcSweptAreaSolid^)geomRep);
+						if (objectLocation != nullptr) solid->Move(objectLocation);
+						return solid;
+					}
 				}
 				else if (dynamic_cast<IfcManifoldSolidBrep^>(geomRep))
 				{
@@ -146,11 +156,20 @@ namespace Xbim
 					MemoryStream^ memStream = gcnew MemoryStream(0x4000);
 					if (storageType == XbimGeometryType::PolyhedronBinary)
 					{
+						BRep_Builder builder;
 						BinaryWriter^ bw = gcnew BinaryWriter(memStream);
+						TopoDS_Compound occCompound;
+						builder.MakeCompound(occCompound);
 						for each (IXbimGeometryObject^ geom in set)
 						{
-							WriteTriangulation(bw, geom, precision, deflection, angle);
+							XbimOccShape^ xShape = dynamic_cast<XbimOccShape^>(geom);
+							if (xShape != nullptr)
+							{
+								builder.Add(occCompound, xShape);								
+							}							
 						}
+						XbimCompound^ compound = gcnew XbimCompound(occCompound, false, precision);
+						WriteTriangulation(bw, compound, precision, deflection, angle);
 						bw->Close();
 						delete bw;
 					}
@@ -346,6 +365,31 @@ namespace Xbim
 	
 		};
 
+		IXbimSolidSet^ XbimGeometryCreator::CreateSolidSet(IfcSweptAreaSolid^ ifcSolid)
+		{
+			IfcExtrudedAreaSolid^ eas = dynamic_cast<IfcExtrudedAreaSolid^>(ifcSolid);
+			if (eas != nullptr) return CreateSolidSet(eas);
+			IfcRevolvedAreaSolid^ ras = dynamic_cast<IfcRevolvedAreaSolid^>(ifcSolid);
+			if (ras != nullptr) return CreateSolidSet(ras);
+			IfcSurfaceCurveSweptAreaSolid^ scas = dynamic_cast<IfcSurfaceCurveSweptAreaSolid^>(ifcSolid);
+			if (scas != nullptr) return CreateSolidSet(scas);
+			throw gcnew NotImplementedException(String::Format("Swept Solid of Type {0} in entity #{1} is not implemented", ifcSolid->GetType()->Name, ifcSolid->EntityLabel));
+
+		};
+		IXbimSolidSet^ XbimGeometryCreator::CreateSolidSet(IfcExtrudedAreaSolid^ ifcSolid)
+		{
+			return gcnew XbimSolidSet(ifcSolid);
+		};
+
+		IXbimSolidSet^ XbimGeometryCreator::CreateSolidSet(IfcRevolvedAreaSolid^ ifcSolid)
+		{
+			return gcnew XbimSolidSet(ifcSolid);
+		};
+
+		IXbimSolidSet^ XbimGeometryCreator::CreateSolidSet(IfcSurfaceCurveSweptAreaSolid^ ifcSolid)
+		{
+			return gcnew XbimSolidSet(ifcSolid);
+		};
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IfcExtrudedAreaSolid^ ifcSolid)
 		{
 			return gcnew XbimSolid(ifcSolid);

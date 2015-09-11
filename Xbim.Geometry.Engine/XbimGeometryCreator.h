@@ -109,7 +109,10 @@ namespace Xbim
 			virtual IXbimSolidSet^ CreateSolidSet(IfcFacetedBrep^ ifcSolid);
 			virtual IXbimSolidSet^ CreateSolidSet(IfcFacetedBrepWithVoids^ ifcSolid);
 			virtual IXbimSolidSet^ CreateSolidSet(IfcClosedShell^ ifcSolid);
-
+			virtual IXbimSolidSet^ CreateSolidSet(IfcSweptAreaSolid^ ifcSolid);
+			virtual IXbimSolidSet^ CreateSolidSet(IfcExtrudedAreaSolid^ ifcSolid);
+			virtual IXbimSolidSet^ CreateSolidSet(IfcRevolvedAreaSolid^ ifcSolid);
+			virtual IXbimSolidSet^ CreateSolidSet(IfcSurfaceCurveSweptAreaSolid^ ifcSolid);
 			virtual IXbimSolid^ CreateSolid(IfcCsgPrimitive3D^ ifcSolid);
 			virtual IXbimSolid^ CreateSolid(IfcCsgSolid^ ifcSolid);
 			virtual IXbimSolid^ CreateSolid(IfcSphere^ ifcSolid);

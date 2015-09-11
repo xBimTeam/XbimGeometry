@@ -28,6 +28,12 @@ namespace Xbim
 			static XbimSolidSet^ empty = gcnew XbimSolidSet();
 			void Init(IfcBooleanResult^ boolOp);
 			void Init(XbimCompound^ comp, int label);
+			void Init(IfcSweptAreaSolid^ solid);
+			void Init(IfcExtrudedAreaSolid^ solid);
+			void Init(IfcSurfaceCurveSweptAreaSolid^ ifcSolid);
+			void Init(IfcRevolvedAreaSolid^ solid);
+			
+
 			static VolumeComparer^ _volumeComparer = gcnew VolumeComparer();
 			static int _maxOpeningsToCut = 100;
 			static double _maxOpeningVolumePercentage = 0.0002;
@@ -57,6 +63,11 @@ namespace Xbim
 			XbimSolidSet(IfcFacetedBrepWithVoids^ solid);
 			XbimSolidSet(IfcClosedShell^ solid);
 
+			XbimSolidSet(IfcSweptAreaSolid^ solid);
+			XbimSolidSet(IfcSurfaceCurveSweptAreaSolid^ ifcSolid);
+			XbimSolidSet(IfcExtrudedAreaSolid^ solid);
+			XbimSolidSet(IfcRevolvedAreaSolid^ solid);
+			
 
 			virtual property bool IsValid{bool get(){ return Count>0; }; }
 			virtual property bool IsSimplified{bool get(){ return _isSimplified; }; void set(bool val){ _isSimplified = val; } }

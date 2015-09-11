@@ -110,17 +110,33 @@ namespace Xbim
 		{
 			Init(repItem);
 		}
+
+		XbimSolid::XbimSolid(IfcSweptAreaSolid^ repItem, IfcProfileDef^ overrideProfileDef)
+		{
+			Init(repItem, overrideProfileDef);
+		}
+
 		XbimSolid::XbimSolid(IfcRevolvedAreaSolid^ solid)
 		{
 			Init(solid);
 		}
 
+		XbimSolid::XbimSolid(IfcRevolvedAreaSolid^ repItem, IfcProfileDef^ overrideProfileDef)
+		{
+			Init(repItem, overrideProfileDef);
+
+		}
+
 		XbimSolid::XbimSolid(IfcExtrudedAreaSolid^ repItem)
 		{
-			Init(repItem);
+			Init(repItem, nullptr);
 			
 		}
-		
+		XbimSolid::XbimSolid(IfcExtrudedAreaSolid^ repItem, IfcProfileDef^ overrideProfileDef)
+		{
+			Init(repItem, overrideProfileDef);
+
+		}
 		XbimSolid::XbimSolid(IfcSweptDiskSolid^ repItem)
 		{
 			Init(repItem);
@@ -133,7 +149,12 @@ namespace Xbim
 		
 		XbimSolid::XbimSolid(IfcSurfaceCurveSweptAreaSolid^ repItem)
 		{
-			Init(repItem);
+			Init(repItem, nullptr);
+		}
+
+		XbimSolid::XbimSolid(IfcSurfaceCurveSweptAreaSolid^ repItem, IfcProfileDef^ overrideProfileDef)
+		{
+			Init(repItem, overrideProfileDef);
 		}
 
 		XbimSolid::XbimSolid(IfcHalfSpaceSolid^ repItem, double maxExtrusion)
@@ -260,7 +281,7 @@ namespace Xbim
 		void XbimSolid::Init(IfcSolidModel^ solid)
 		{
 			IfcSweptAreaSolid^ extrudeArea = dynamic_cast<IfcSweptAreaSolid^>(solid);
-			if (extrudeArea) return Init(extrudeArea);
+			if (extrudeArea) return Init(extrudeArea,nullptr);
 			IfcSweptDiskSolid^ sd = dynamic_cast<IfcSweptDiskSolid^>(solid);
 			if (sd != nullptr) return Init(sd);
 			IfcManifoldSolidBrep^ ms = dynamic_cast<IfcManifoldSolidBrep^>(solid);
@@ -286,19 +307,23 @@ namespace Xbim
 			}
 		}
 
-		void XbimSolid::Init(IfcSweptAreaSolid^ solid)
+		void XbimSolid::Init(IfcSweptAreaSolid^ solid, IfcProfileDef^ overrideProfileDef)
 		{
 			IfcExtrudedAreaSolid^ extrudeArea = dynamic_cast<IfcExtrudedAreaSolid^>(solid);
-			if (extrudeArea) return Init(extrudeArea);
+			if (extrudeArea) return Init(extrudeArea, overrideProfileDef);
 			IfcRevolvedAreaSolid^ ras = dynamic_cast<IfcRevolvedAreaSolid^>(solid);
-			if (ras != nullptr) return Init(ras);
+			if (ras != nullptr) return Init(ras, overrideProfileDef);
 			
 			XbimGeometryCreator::logger->WarnFormat("WS017: Swept Solid of Type {0} in entity #{1} is not implemented", solid->GetType()->Name, solid->EntityLabel);
 		}
 
-		void XbimSolid::Init(IfcSurfaceCurveSweptAreaSolid^ repItem)
+		void XbimSolid::Init(IfcSurfaceCurveSweptAreaSolid^ repItem, IfcProfileDef^ overrideProfileDef)
 		{
-			XbimFace^ profile = gcnew XbimFace(repItem->SweptArea);
+			XbimFace^ profile;
+			if(overrideProfileDef==nullptr)
+				profile= gcnew XbimFace(repItem->SweptArea);
+			else
+				profile = gcnew XbimFace(overrideProfileDef);
 			if (!profile->IsValid)
 			{
 				XbimGeometryCreator::logger->WarnFormat("WS018: Could not build Swept Area of IfcSurfaceCurveSweptAreaSolid #{0}", repItem->EntityLabel);
@@ -422,9 +447,14 @@ namespace Xbim
 			}	
 		}
 
-		void XbimSolid::Init(IfcExtrudedAreaSolid^ repItem)
+		void XbimSolid::Init(IfcExtrudedAreaSolid^ repItem, IfcProfileDef^ overrideProfileDef)
 		{
-			XbimFace^ face = gcnew XbimFace(repItem->SweptArea);
+			XbimFace^ face;
+			if (overrideProfileDef == nullptr)
+				face = gcnew XbimFace(repItem->SweptArea);
+			else
+				face = gcnew XbimFace(overrideProfileDef);
+			
 			if (face->IsValid && repItem->Depth > 0) //we have a valid face and extrusion
 			{
 				IfcDirection^ dir = repItem->ExtrudedDirection;
@@ -451,9 +481,13 @@ namespace Xbim
 			//if it has failed we will have a null solid
 		}
 
-		void XbimSolid::Init(IfcRevolvedAreaSolid^ repItem)
+		void XbimSolid::Init(IfcRevolvedAreaSolid^ repItem, IfcProfileDef^ overrideProfileDef)
 		{
-			XbimFace^ face = gcnew XbimFace(repItem->SweptArea);
+			XbimFace^ face;
+			if (overrideProfileDef == nullptr)
+				face = gcnew XbimFace(repItem->SweptArea);
+			else
+				face = gcnew XbimFace(overrideProfileDef);
 
 			if (face->IsValid && repItem->Angle > 0) //we have a valid face and angle
 			{
