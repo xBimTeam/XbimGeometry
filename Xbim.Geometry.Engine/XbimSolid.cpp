@@ -904,6 +904,8 @@ namespace Xbim
 			if (cylinder != nullptr) return Init(cylinder);
 			IfcRightCircularCone^ cone = dynamic_cast<IfcRightCircularCone^>(ifcSolid);
 			if (cone != nullptr) return Init(cone);
+			IfcRectangularPyramid^ pyramid = dynamic_cast<IfcRectangularPyramid^>(ifcSolid);
+			if (pyramid != nullptr) return Init(pyramid);
 			throw gcnew NotImplementedException(String::Format("IfcCsgPrimitive3D of Type {0} in entity #{1} is not implemented", ifcSolid->GetType()->Name, ifcSolid->EntityLabel));
 		}
 
