@@ -293,6 +293,7 @@ namespace Xbim
 						*pFace = faceMaker.Face();
 					}
 				}
+				GC::KeepAlive(wire);
 			}
 		}
 		
