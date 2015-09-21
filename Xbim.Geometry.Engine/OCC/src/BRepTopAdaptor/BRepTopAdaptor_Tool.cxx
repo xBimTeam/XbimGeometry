@@ -14,12 +14,12 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <BRepTopAdaptor_Tool.ixx>
 
-#include <BRepTopAdaptor_TopolTool.hxx>
-#include <BRepAdaptor_HSurface.hxx>
 #include <Adaptor3d_HSurface.hxx>
-
+#include <BRepAdaptor_HSurface.hxx>
+#include <BRepTopAdaptor_Tool.hxx>
+#include <BRepTopAdaptor_TopolTool.hxx>
+#include <TopoDS_Face.hxx>
 
 BRepTopAdaptor_Tool::BRepTopAdaptor_Tool() { 
   myTopolTool = new BRepTopAdaptor_TopolTool();
@@ -33,7 +33,8 @@ BRepTopAdaptor_Tool::BRepTopAdaptor_Tool(const TopoDS_Face& F,
 
   Handle(BRepAdaptor_HSurface) surface = new BRepAdaptor_HSurface();
   surface->ChangeSurface().Initialize(F,Standard_True);
-  myTopolTool->Initialize(surface);
+  const Handle(Adaptor3d_HSurface)& aSurf = surface; // to avoid ambiguity
+  myTopolTool->Initialize(aSurf);
   myHSurface = surface;
   myloaded=Standard_True;
 }
@@ -52,7 +53,8 @@ void BRepTopAdaptor_Tool::Init(const TopoDS_Face& F,
 { 
   Handle(BRepAdaptor_HSurface) surface = new BRepAdaptor_HSurface();
   surface->ChangeSurface().Initialize(F);
-  myTopolTool->Initialize(surface);
+  const Handle(Adaptor3d_HSurface)& aSurf = surface; // to avoid ambiguity
+  myTopolTool->Initialize(aSurf);
   myHSurface = surface;
   myloaded=Standard_True;
 }

@@ -14,23 +14,18 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <AppDef_MultiPointConstraint.ixx>
 
-#include <Standard_OutOfRange.hxx>
+#include <AppDef_MultiPointConstraint.hxx>
+#include <gp_Vec.hxx>
+#include <gp_Vec2d.hxx>
+#include <MMgt_TShared.hxx>
 #include <Standard_ConstructionError.hxx>
+#include <Standard_DimensionError.hxx>
+#include <Standard_OutOfRange.hxx>
 #include <TColgp_HArray1OfPnt.hxx>
 #include <TColgp_HArray1OfPnt2d.hxx>
 #include <TColgp_HArray1OfVec.hxx>
 #include <TColgp_HArray1OfVec2d.hxx>
-
-
-#define tabTang (*(Handle(TColgp_HArray1OfVec)*)&ttabTang)
-#define tabCurv (*(Handle(TColgp_HArray1OfVec)*)&ttabCurv)
-#define tabTang2d (*(Handle(TColgp_HArray1OfVec2d)*)&ttabTang2d)
-#define tabCurv2d (*(Handle(TColgp_HArray1OfVec2d)*)&ttabCurv2d)
-
-
-
 
 AppDef_MultiPointConstraint::AppDef_MultiPointConstraint() {}
 
@@ -81,14 +76,9 @@ AppDef_MultiPointConstraint::AppDef_MultiPointConstraint
       (tabCur2d.Length() != tabP2d.Length())) {
     Standard_ConstructionError::Raise();
   }
-  Handle(TColgp_HArray1OfVec) T3d = 
-    new TColgp_HArray1OfVec(1, tabVec.Length());
-  ttabTang = T3d;
 
-
-  Handle(TColgp_HArray1OfVec2d) T2d = 
-    new TColgp_HArray1OfVec2d(1, tabVec2d.Length());
-  ttabTang2d = T2d;
+  tabTang = new TColgp_HArray1OfVec(1, tabVec.Length());
+  tabTang2d = new TColgp_HArray1OfVec2d(1, tabVec2d.Length());
 
   Standard_Integer i, Lower = tabVec.Lower();
   for (i = 1; i <= tabVec.Length(); i++) {
@@ -99,13 +89,8 @@ AppDef_MultiPointConstraint::AppDef_MultiPointConstraint
     tabTang2d->SetValue(i, tabVec2d.Value(Lower+i-1));
   }
 
-  Handle(TColgp_HArray1OfVec) C3d = 
-    new TColgp_HArray1OfVec(1, tabCur.Length());
-  ttabCurv = C3d;
-
-  Handle(TColgp_HArray1OfVec2d) C2d = 
-    new TColgp_HArray1OfVec2d(1, tabCur2d.Length());
-  ttabCurv2d = C2d;
+  tabCurv = new TColgp_HArray1OfVec(1, tabCur.Length());
+  tabCurv2d = new TColgp_HArray1OfVec2d(1, tabCur2d.Length());
 
   Lower = tabCur.Lower();
   for (i = 1; i <= tabVec.Length(); i++) {
@@ -118,27 +103,21 @@ AppDef_MultiPointConstraint::AppDef_MultiPointConstraint
 
 }
 
-
 AppDef_MultiPointConstraint::AppDef_MultiPointConstraint
 			     (const TColgp_Array1OfPnt& tabP, 
 			      const TColgp_Array1OfPnt2d& tabP2d, 
 			      const TColgp_Array1OfVec& tabVec, 
 			      const TColgp_Array1OfVec2d& tabVec2d):
-                              AppParCurves_MultiPoint(tabP, tabP2d) {
+                              AppParCurves_MultiPoint(tabP, tabP2d)
+{
 
   if ((tabP.Length() != tabVec.Length()) ||
       (tabP2d.Length() != tabVec2d.Length())) {
     Standard_ConstructionError::Raise();
   }
 
-  
-  Handle(TColgp_HArray1OfVec) T3d = 
-    new TColgp_HArray1OfVec(1, tabVec.Length());
-  ttabTang = T3d;
-
-  Handle(TColgp_HArray1OfVec2d) T2d = 
-    new TColgp_HArray1OfVec2d(1, tabVec2d.Length());
-  ttabTang2d = T2d;
+  tabTang = new TColgp_HArray1OfVec(1, tabVec.Length());
+  tabTang2d = new TColgp_HArray1OfVec2d(1, tabVec2d.Length());
 
   Standard_Integer i, Lower = tabVec.Lower();
   for (i = 1; i <= tabVec.Length(); i++) {
@@ -160,9 +139,8 @@ AppDef_MultiPointConstraint::AppDef_MultiPointConstraint (
   if (tabP.Length() != tabVec.Length()) {
     Standard_ConstructionError::Raise();
   }
-  Handle(TColgp_HArray1OfVec) T3d = 
-    new TColgp_HArray1OfVec(1, tabVec.Length());
-  ttabTang = T3d;
+
+  tabTang = new TColgp_HArray1OfVec(1, tabVec.Length());
 
   Standard_Integer i, Lower = tabVec.Lower();
   for (i = 1; i <= tabVec.Length(); i++) {
@@ -181,19 +159,14 @@ AppDef_MultiPointConstraint::AppDef_MultiPointConstraint
       (tabP.Length() != tabCur.Length())) {
     Standard_ConstructionError::Raise();
   }
-  Handle(TColgp_HArray1OfVec) T3d = 
-    new TColgp_HArray1OfVec(1, tabVec.Length());
-  ttabTang = T3d;
 
+  tabTang = new TColgp_HArray1OfVec(1, tabVec.Length());
   Standard_Integer i, Lower = tabVec.Lower();
   for (i = 1; i <= tabVec.Length(); i++) {
     tabTang->SetValue(i, tabVec.Value(Lower+i-1));
   }
 
-  Handle(TColgp_HArray1OfVec) C3d = 
-    new TColgp_HArray1OfVec(1, tabCur.Length());
-  ttabCurv = C3d;
-
+  tabCurv = new TColgp_HArray1OfVec(1, tabCur.Length());
   Lower = tabCur.Lower();
   for (i = 1; i <= tabCur.Length(); i++) {
     tabCurv->SetValue(i, tabCur.Value(Lower+i-1));
@@ -212,10 +185,7 @@ AppDef_MultiPointConstraint::AppDef_MultiPointConstraint
     Standard_ConstructionError::Raise();
   }
 
-  Handle(TColgp_HArray1OfVec2d) T2d = 
-    new TColgp_HArray1OfVec2d(1, tabVec2d.Length());
-  ttabTang2d = T2d;
-
+  tabTang2d = new TColgp_HArray1OfVec2d(1, tabVec2d.Length());
   Standard_Integer i, Lower = tabVec2d.Lower();
   for (i = 1; i <= tabVec2d.Length(); i++) {
     tabTang2d->SetValue(i, tabVec2d.Value(Lower+i-1));
@@ -235,19 +205,14 @@ AppDef_MultiPointConstraint::AppDef_MultiPointConstraint
       (tabCur2d.Length() != tabP2d.Length()))  {
     Standard_ConstructionError::Raise();
   }
-  Handle(TColgp_HArray1OfVec2d) T2d = 
-    new TColgp_HArray1OfVec2d(1, tabVec2d.Length());
-  ttabTang2d = T2d;
-
+  
+  tabTang2d = new TColgp_HArray1OfVec2d(1, tabVec2d.Length());
   Standard_Integer i, Lower = tabVec2d.Lower();
   for (i = 1; i <= tabVec2d.Length(); i++) {
     tabTang2d->SetValue(i, tabVec2d.Value(Lower+i-1));
   }
 
-  Handle(TColgp_HArray1OfVec2d) C2d = 
-    new TColgp_HArray1OfVec2d(1, tabCur2d.Length());
-  ttabCurv2d = C2d;
-
+  tabCurv2d = new TColgp_HArray1OfVec2d(1, tabCur2d.Length());
   Lower = tabCur2d.Lower();
   for (i = 1; i <= tabCur2d.Length(); i++) {
     tabCurv2d->SetValue(i, tabCur2d.Value(Lower+i-1));

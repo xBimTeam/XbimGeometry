@@ -15,13 +15,12 @@
 #define _BRepMesh_IncrementalMesh_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_DefineHandle.hxx>
+#include <Standard_Type.hxx>
 
 #include <BRepMesh_FastDiscret.hxx>
 #include <TopTools_MapOfShape.hxx>
 #include <TopTools_DataMapOfShapeReal.hxx>
 #include <BRepMesh_DiscretRoot.hxx>
-#include <Handle_Poly_Triangulation.hxx>
 #include <BRepMesh.hxx>
 
 #include <vector>
@@ -162,7 +161,7 @@ public: //! @name plugin API
   //! Discret() static method (thus applied only to Mesh Factories).
   Standard_EXPORT static void SetParallelDefault(const Standard_Boolean isInParallel);
 
-  DEFINE_STANDARD_RTTI(BRepMesh_IncrementalMesh)
+  DEFINE_STANDARD_RTTI(BRepMesh_IncrementalMesh, BRepMesh_DiscretRoot)
 
 protected:
 

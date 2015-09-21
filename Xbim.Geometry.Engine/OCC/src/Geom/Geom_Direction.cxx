@@ -14,14 +14,18 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <Geom_Direction.ixx>
+
+#include <Geom_Direction.hxx>
+#include <Geom_Geometry.hxx>
+#include <Geom_Vector.hxx>
 #include <gp.hxx>
+#include <gp_Dir.hxx>
+#include <gp_Trsf.hxx>
 #include <Standard_ConstructionError.hxx>
+#include <Standard_Type.hxx>
 
 typedef Geom_Direction         Direction;
-typedef Handle(Geom_Direction) Handle(Direction);
 typedef Geom_Vector            Vector;
-typedef Handle(Geom_Vector)    Handle(Vector);
 typedef gp_Ax1  Ax1;
 typedef gp_Ax2  Ax2;
 typedef gp_Pnt  Pnt;
@@ -36,7 +40,7 @@ typedef gp_Trsf Trsf;
 
 Handle(Geom_Geometry) Geom_Direction::Copy() const {
 
-  Handle(Direction) D;
+  Handle(Geom_Direction) D;
   D = new Direction (gpVec);
   return D; 
 }
@@ -95,7 +99,7 @@ void Geom_Direction::SetZ (const Standard_Real Z) {
 }
 
 
-void Geom_Direction::Cross (const Handle(Vector)& Other) {
+void Geom_Direction::Cross (const Handle(Geom_Vector)& Other) {
 
   gp_Dir V (gpVec.Crossed(Other->Vec()));
   gpVec = V;
@@ -103,14 +107,14 @@ void Geom_Direction::Cross (const Handle(Vector)& Other) {
 
 
 void Geom_Direction::CrossCross (
-const Handle(Vector)& V1, const Handle(Vector)& V2) {
+const Handle(Geom_Vector)& V1, const Handle(Geom_Vector)& V2) {
 
   gp_Dir V (gpVec.CrossCrossed (V1->Vec(), V2->Vec()));
   gpVec = V;
 }
 
 
-Handle(Vector) Geom_Direction::Crossed (const Handle(Vector)& Other)
+Handle(Geom_Vector) Geom_Direction::Crossed (const Handle(Geom_Vector)& Other)
 const {
 
    gp_Dir V (gpVec.Crossed (Other->Vec()));
@@ -118,8 +122,8 @@ const {
 }
 
 
-Handle(Vector) Geom_Direction::CrossCrossed (
-const Handle(Vector)& V1, const Handle(Vector)& V2) const {
+Handle(Geom_Vector) Geom_Direction::CrossCrossed (
+const Handle(Geom_Vector)& V1, const Handle(Geom_Vector)& V2) const {
 
   gp_Dir V (gpVec.CrossCrossed (V1->Vec(), V2->Vec()));
   return new Direction (V);

@@ -15,59 +15,66 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <BOPTools_AlgoTools.ixx>
-//
-#include <Precision.hxx>
-//
-#include <gp_Pnt.hxx>
-#include <gp_XYZ.hxx>
-#include <gp_Pnt2d.hxx>
-#include <gp_Cylinder.hxx>
-#include <gp_Cone.hxx>
-#include <gp_Sphere.hxx>
-#include <gp_Torus.hxx>
-#include <gp_Lin.hxx>
-//
-#include <Geom2d_Curve.hxx>
-#include <Geom_Surface.hxx>
-#include <Geom_Plane.hxx>
-#include <Geom_TrimmedCurve.hxx>
-#include <Geom_Curve.hxx>
-#include <GeomAPI_ProjectPointOnSurf.hxx>
-#include <Geom2dInt_Geom2dCurveTool.hxx>
-//
-#include <TopAbs_Orientation.hxx>
-//
-#include <TopoDS_Compound.hxx>
-#include <TopoDS_CompSolid.hxx>
-#include <TopoDS_Solid.hxx>
-#include <TopoDS_Shell.hxx>
-#include <TopoDS_Wire.hxx>
-//
+
+#include <BOPCol_IndexedMapOfShape.hxx>
+#include <BOPCol_MapOfShape.hxx>
+#include <BOPTools.hxx>
+#include <BOPTools_AlgoTools.hxx>
+#include <BOPTools_AlgoTools2D.hxx>
+#include <BOPTools_AlgoTools3D.hxx>
+#include <BOPTools_CoupleOfShape.hxx>
+#include <BOPTools_ListOfCoupleOfShape.hxx>
 #include <BRep_Builder.hxx>
 #include <BRep_Tool.hxx>
-#include <BRepLib.hxx>
 #include <BRepAdaptor_Curve2d.hxx>
 #include <BRepAdaptor_Surface.hxx>
 #include <BRepClass3d_SolidClassifier.hxx>
+#include <BRepLib.hxx>
+#include <Geom2d_Curve.hxx>
+#include <Geom2dInt_Geom2dCurveTool.hxx>
+#include <Geom_Curve.hxx>
+#include <Geom_Plane.hxx>
+#include <Geom_Surface.hxx>
+#include <Geom_TrimmedCurve.hxx>
+#include <GeomAPI_ProjectPointOnSurf.hxx>
+#include <gp_Cone.hxx>
+#include <gp_Cylinder.hxx>
+#include <gp_Lin.hxx>
+#include <gp_Pnt.hxx>
+#include <gp_Pnt2d.hxx>
+#include <gp_Sphere.hxx>
+#include <gp_Torus.hxx>
+#include <gp_XYZ.hxx>
+#include <IntTools_Context.hxx>
+#include <IntTools_Curve.hxx>
+#include <IntTools_Range.hxx>
+#include <IntTools_ShrunkRange.hxx>
+#include <IntTools_Tools.hxx>
+#include <Precision.hxx>
+#include <TopAbs_Orientation.hxx>
 #include <TopExp.hxx>
 #include <TopExp_Explorer.hxx>
-//
-#include <IntTools_Tools.hxx>
-//
-#include <BOPTools.hxx>
-#include <BOPTools_CoupleOfShape.hxx>
-#include <BOPTools_ListOfCoupleOfShape.hxx>
-#include <BOPTools_AlgoTools2D.hxx>
-#include <BOPTools_AlgoTools3D.hxx>
-//
-#include <BOPCol_IndexedMapOfShape.hxx>
-#include <BOPCol_MapOfShape.hxx>
-//
-#include <IntTools_ShrunkRange.hxx>
-#include <Precision.hxx>
-#include <Standard_ErrorHandler.hxx>
+#include <TopoDS_Compound.hxx>
+#include <TopoDS_CompSolid.hxx>
+#include <TopoDS_Edge.hxx>
+#include <TopoDS_Face.hxx>
+#include <TopoDS_Shape.hxx>
+#include <TopoDS_Shell.hxx>
+#include <TopoDS_Solid.hxx>
+#include <TopoDS_Vertex.hxx>
+#include <TopoDS_Wire.hxx>
 
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 static
   Standard_Real AngleWithRef(const gp_Dir& theD1,
                              const gp_Dir& theD2,
@@ -1147,32 +1154,19 @@ Standard_Boolean BOPTools_AlgoTools::IsSplitToReverse
                                                       theContext);
   }
   //
-
-  
   // Parts of theContext->ComputeVS(..) 
- /* try
-  {*/
-	//  OCC_CATCH_SIGNALS
-	  GeomAPI_ProjectPointOnSurf& aProjector = theContext->ProjPS(theFSr);
-	  aProjector.Perform(aPFSp);
-	  if (!aProjector.IsDone()) {
-		  return bRet;
-	  }
-	  aProjector.LowerDistanceParameters(aU, aV);
-	  gp_Pnt2d aP2D(aU, aV);
-	  bInFace = theContext->IsPointInOnFace(theFSr, aP2D);
-	  if (!bInFace) {
-		  return bRet; 
-	  }
- /* }
-  catch (Standard_ConstructionError)
-  {
-	  return bRet;
-  }*/
-
+  GeomAPI_ProjectPointOnSurf& aProjector=theContext->ProjPS(theFSr);
+  aProjector.Perform(aPFSp);
+  if (!aProjector.IsDone()) {
+    return bRet;
+  }
   //
-  
- 
+  aProjector.LowerDistanceParameters(aU, aV);
+  gp_Pnt2d aP2D(aU, aV);
+  bInFace=theContext->IsPointInOnFace (theFSr, aP2D);
+  if (!bInFace) {
+    return bRet;
+  }
   //
   aSr->D1(aU, aV, aPFSr, aD1U, aD1V);
   gp_Dir aDD1U(aD1U); 

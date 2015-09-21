@@ -14,9 +14,13 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <GCE2d_MakeArcOfEllipse.ixx>
-#include <Geom2d_Ellipse.hxx>
+
 #include <ElCLib.hxx>
+#include <GCE2d_MakeArcOfEllipse.hxx>
+#include <Geom2d_Ellipse.hxx>
+#include <Geom2d_TrimmedCurve.hxx>
+#include <gp_Elips2d.hxx>
+#include <gp_Pnt2d.hxx>
 #include <StdFail_NotDone.hxx>
 
 GCE2d_MakeArcOfEllipse::GCE2d_MakeArcOfEllipse(const gp_Elips2d&      Elips ,
@@ -57,17 +61,3 @@ const Handle(Geom2d_TrimmedCurve)& GCE2d_MakeArcOfEllipse::Value() const
   StdFail_NotDone_Raise_if(TheError != gce_Done,"");
   return TheArc;
 }
-
-const Handle(Geom2d_TrimmedCurve)& GCE2d_MakeArcOfEllipse::Operator() const 
-{
-  return Value();
-}
-
-GCE2d_MakeArcOfEllipse::operator Handle(Geom2d_TrimmedCurve) () const
-{
-  return Value();
-}
-
-
-
-

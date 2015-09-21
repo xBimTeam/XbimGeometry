@@ -16,72 +16,61 @@
 // Passage sur C1 Aout 1992 et ajout transformation Bezier->BSpline + Debug
 // Modif JCV correction bug le 2/08/1993
 
-#include <GeomConvert.ixx>
-
 #include <BSplCLib.hxx>
-#include <Convert_ConicToBSplineCurve.hxx>
 #include <Convert_CircleToBSplineCurve.hxx>
+#include <Convert_ConicToBSplineCurve.hxx>
 #include <Convert_EllipseToBSplineCurve.hxx>
 #include <Convert_HyperbolaToBSplineCurve.hxx>
 #include <Convert_ParabolaToBSplineCurve.hxx>
-
-
+#include <ElCLib.hxx>
+#include <Geom2d_BSplineCurve.hxx>
+#include <Geom_BezierCurve.hxx>
+#include <Geom_BSplineCurve.hxx>
+#include <Geom_BSplineSurface.hxx>
+#include <Geom_Circle.hxx>
+#include <Geom_Conic.hxx>
+#include <Geom_Curve.hxx>
+#include <Geom_Ellipse.hxx>
+#include <Geom_Geometry.hxx>
+#include <Geom_Hyperbola.hxx>
+#include <Geom_Line.hxx>
+#include <Geom_OffsetCurve.hxx>
+#include <Geom_Parabola.hxx>
+#include <Geom_Surface.hxx>
+#include <Geom_TrimmedCurve.hxx>
+#include <GeomConvert.hxx>
+#include <GeomConvert_ApproxCurve.hxx>
+#include <GeomConvert_CompCurveToBSplineCurve.hxx>
+#include <GeomLProp.hxx>
 #include <gp.hxx>
-
+#include <gp_Ax3.hxx>
 #include <gp_Circ2d.hxx>
 #include <gp_Elips2d.hxx>
-#include <gp_Parab2d.hxx>
 #include <gp_Hypr2d.hxx>
-#include <gp_Pnt2d.hxx>
 #include <gp_Lin.hxx>
-#include <gp_Ax3.hxx>
+#include <gp_Parab2d.hxx>
+#include <gp_Pnt.hxx>
+#include <gp_Pnt2d.hxx>
 #include <gp_Trsf.hxx>
 #include <gp_Vec.hxx>
-#include <gp_Pnt.hxx>
-
-#include <Geom2d_BSplineCurve.hxx>
-
-#include <Geom_Curve.hxx>
-#include <Geom_Line.hxx>
-#include <GeomLProp.hxx>
-#include <Geom_Circle.hxx>
-#include <Geom_Ellipse.hxx>
-#include <Geom_Hyperbola.hxx>
-#include <Geom_Parabola.hxx>
-#include <Geom_Geometry.hxx>
-#include <Geom_BSplineCurve.hxx>
-#include <Geom_BezierCurve.hxx>
-#include <Geom_TrimmedCurve.hxx>
-#include <Geom_Conic.hxx>
-#include <GeomConvert_CompCurveToBSplineCurve.hxx>
-
-#include <TColStd_Array1OfReal.hxx>
-#include <TColStd_Array1OfInteger.hxx>
-#include <TColStd_HArray1OfReal.hxx>
-#include <TColStd_HArray1OfInteger.hxx>
-#include <TColStd_Array1OfBoolean.hxx>
+#include <Hermit.hxx>
+#include <PLib.hxx>
+#include <Precision.hxx>
+#include <Standard_ConstructionError.hxx>
+#include <Standard_DomainError.hxx>
+#include <TColGeom_Array1OfCurve.hxx>
 #include <TColgp_Array1OfPnt.hxx>
 #include <TColgp_Array1OfPnt2d.hxx>
-#include <TColGeom_Array1OfCurve.hxx>
-
-#include <Hermit.hxx>
-
-#include <PLib.hxx>
-
-#include <Precision.hxx>
-
-#include <Standard_DomainError.hxx>
-#include <Standard_ConstructionError.hxx>
-#include <Geom_OffsetCurve.hxx>
-#include <GeomConvert_ApproxCurve.hxx>
-
-#include <ElCLib.hxx>
+#include <TColStd_Array1OfBoolean.hxx>
+#include <TColStd_Array1OfInteger.hxx>
+#include <TColStd_Array1OfReal.hxx>
+#include <TColStd_HArray1OfInteger.hxx>
+#include <TColStd_HArray1OfReal.hxx>
 
 //=======================================================================
 //function : BSplineCurveBuilder
 //purpose  : 
 //=======================================================================
-
 static Handle(Geom_BSplineCurve) BSplineCurveBuilder 
        (const Handle(Geom_Conic)&          TheConic,
 	const Convert_ConicToBSplineCurve& Convert) 
@@ -1226,13 +1215,14 @@ void  GeomConvert::ConcatC1(TColGeom_Array1OfBSplineCurve&           ArrayOfCurv
        
        if (index==j)                                      //initialisation at the begining of the loop
 	 ArrayOfConcatenated->SetValue(i,Curve1);
-       else{
-	 GeomConvert_CompCurveToBSplineCurve   C(Handle(Geom_BSplineCurve)::DownCast(ArrayOfConcatenated->Value(i)));
-	 fusion=C.Add(Curve1,
-		      local_tolerance(j-1));          //merge of two consecutive curves               
-	 if (fusion==Standard_False)
-	   Standard_ConstructionError::Raise("GeomConvert Concatenation Error") ;
-	 ArrayOfConcatenated->SetValue(i,C.BSplineCurve());
+       else
+       {
+         // Merge of two consecutive curves.
+         GeomConvert_CompCurveToBSplineCurve   C(Handle(Geom_BSplineCurve)::DownCast(ArrayOfConcatenated->Value(i)));
+         fusion=C.Add(Curve1, local_tolerance(j-1), Standard_True);
+         if (fusion==Standard_False)
+           Standard_ConstructionError::Raise("GeomConvert Concatenation Error");
+         ArrayOfConcatenated->SetValue(i,C.BSplineCurve());
        }
      }
      index=index+1+nb_vertexG1;
@@ -1331,7 +1321,7 @@ void GeomConvert::C0BSplineToArrayOfC1BSplineCurve(
      U2=BSKnots(j);
      j++;
      Handle(Geom_BSplineCurve) 
-       BSbis=Handle(Geom_BSplineCurve::DownCast(BS->Copy()));
+       BSbis=Handle(Geom_BSplineCurve)::DownCast(BS->Copy());
      BSbis->Segment(U1,U2);
      ArrayOfCurves(i)=BSbis;
    }

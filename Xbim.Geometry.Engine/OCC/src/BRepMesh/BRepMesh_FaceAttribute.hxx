@@ -16,12 +16,11 @@
 
 #include <Standard.hxx>
 #include <Standard_Transient.hxx>
-#include <Standard_DefineHandle.hxx>
+#include <Standard_Type.hxx>
 
 #include <BRepMesh_Status.hxx>
 #include <BRepMesh.hxx>
 #include <BRepMesh_DataStructureOfDelaun.hxx>
-#include <Handle_BRepAdaptor_HSurface.hxx>
 
 class BRepAdaptor_HSurface;
 
@@ -323,7 +322,7 @@ public: //! @name Auxiliary methods
   Standard_EXPORT gp_XY Scale(const gp_XY&           thePoint2d, 
                               const Standard_Boolean isToFaceBasis);
 
-  DEFINE_STANDARD_RTTI(BRepMesh_FaceAttribute)
+  DEFINE_STANDARD_RTTI(BRepMesh_FaceAttribute, Standard_Transient)
 
 private:
 

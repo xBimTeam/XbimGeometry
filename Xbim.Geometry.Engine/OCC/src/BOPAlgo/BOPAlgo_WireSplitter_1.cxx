@@ -12,51 +12,42 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <BOPAlgo_WireSplitter.ixx>
-
-#include <Precision.hxx>
-
-#include <gp_Pnt2d.hxx>
-#include <gp_Vec2d.hxx>
-#include <gp_Dir2d.hxx>
-
-#include <Geom_Surface.hxx>
-#include <Geom_Plane.hxx>
-#include <Geom_RectangularTrimmedSurface.hxx>
+#include <BOPAlgo_WireEdgeSet.hxx>
+#include <BOPAlgo_WireSplitter.hxx>
+#include <BOPCol_IndexedDataMapOfShapeInteger.hxx>
+#include <BOPCol_IndexedDataMapOfShapeListOfShape.hxx>
+#include <BOPCol_ListOfShape.hxx>
+#include <BOPCol_MapOfShape.hxx>
+#include <BOPCol_SequenceOfPnt2d.hxx>
+#include <BOPCol_SequenceOfReal.hxx>
+#include <BOPCol_SequenceOfShape.hxx>
+#include <BOPTools_AlgoTools2D.hxx>
+#include <BRep_Builder.hxx>
+#include <BRep_Tool.hxx>
+#include <BRepAdaptor_Surface.hxx>
 #include <Geom2d_Curve.hxx>
 #include <Geom2d_Line.hxx>
-#include <GeomAdaptor_Surface.hxx>
 #include <Geom2dAdaptor_Curve.hxx>
-
 #include <Geom2dInt_GInter.hxx>
+#include <Geom_Plane.hxx>
+#include <Geom_RectangularTrimmedSurface.hxx>
+#include <Geom_Surface.hxx>
+#include <GeomAdaptor_Surface.hxx>
+#include <gp_Dir2d.hxx>
+#include <gp_Pnt2d.hxx>
+#include <gp_Vec2d.hxx>
 #include <IntRes2d_Domain.hxx>
 #include <IntRes2d_IntersectionPoint.hxx>
-
-#include <TopLoc_Location.hxx>
-
-#include <TopoDS_Edge.hxx>
-#include <TopoDS_Vertex.hxx>
-#include <TopoDS_Wire.hxx>
-#include <TopoDS_Iterator.hxx>
-#include <BRep_Tool.hxx>
-#include <BRep_Builder.hxx>
-
-#include <TopTools_ShapeMapHasher.hxx>
+#include <Precision.hxx>
 #include <TopExp.hxx>
 #include <TopExp_Explorer.hxx>
-
-#include <BRepAdaptor_Surface.hxx>
-
-#include <BOPCol_ListOfShape.hxx>
-#include <BOPCol_SequenceOfShape.hxx>
-#include <BOPCol_SequenceOfPnt2d.hxx>
-#include <BOPCol_IndexedDataMapOfShapeListOfShape.hxx>
-#include <BOPCol_SequenceOfReal.hxx>
-#include <BOPCol_DataMapOfShapeInteger.hxx>
-#include <BOPCol_MapOfShape.hxx>
-
-#include <BOPTools_AlgoTools2D.hxx>
-
+#include <TopLoc_Location.hxx>
+#include <TopoDS_Edge.hxx>
+#include <TopoDS_Face.hxx>
+#include <TopoDS_Iterator.hxx>
+#include <TopoDS_Vertex.hxx>
+#include <TopoDS_Wire.hxx>
+#include <TopTools_ShapeMapHasher.hxx>
 typedef NCollection_DataMap \
   <TopoDS_Shape, Standard_Boolean, TopTools_ShapeMapHasher> \
   BOPCol_DataMapOfShapeBoolean; 
@@ -752,7 +743,8 @@ Standard_Integer NbWaysOut(const BOPAlgo_ListOfEdgeInfo& aLEInfo)
   GeomAbs_CurveType aType;
   Geom2dAdaptor_Curve aGAC2D(aC2D);
   aType=aGAC2D.GetType();
-  if (aType==GeomAbs_BSplineCurve || aType==GeomAbs_BezierCurve) {
+  if (aType==GeomAbs_BSplineCurve || 
+      aType==GeomAbs_BezierCurve) {
     dt=1.1*dt;
   }
   if (fabs (aTV-aFirst) < fabs(aTV - aLast)) {
@@ -762,25 +754,28 @@ Standard_Integer NbWaysOut(const BOPAlgo_ListOfEdgeInfo& aLEInfo)
     aTV1=aTV - dt;
   }
   //
-  aGAC2D.D0 (aTV1, aPV1);
-  aGAC2D.D0 (aTV, aPV);
+  if (aType==GeomAbs_Circle) {
+    Standard_Real aTM;
+    TopAbs_Orientation aOrE;
+    gp_Pnt2d aPM;
+    //
+    aTM=0.5*(aTV1+aTV);
+    //
+    aGAC2D.D1(aTM, aPM, aV2D);
+    aOrE=anEdge.Orientation();
+    if (aOrE==TopAbs_REVERSED) {
+      aV2D.Reverse();
+    }
+  }
+  else {
+    aGAC2D.D0 (aTV1, aPV1);
+    aGAC2D.D0 (aTV, aPV);
+    //
+    aV2D = bIsIN ? gp_Vec2d(aPV1, aPV) : gp_Vec2d(aPV, aPV1);
+  }
   //
-  aV2D = bIsIN ? gp_Vec2d(aPV1, aPV) : gp_Vec2d(aPV, aPV1);
-  //
-  
-
-  //srl change to prevent a zero angle in gp_Dir2d aDir2D(aV2D); from throwing an exception
- // 
-  //starts here
-  const gp_XY& XY = aV2D.XY();
-  Standard_Real X = XY.X();
-  Standard_Real Y = XY.Y();
-  Standard_Real D = sqrt(X * X + Y * Y);
-  if (D <= gp::Resolution()) return 0.;
-  //gp_Dir2d aDir2D(aV2D); don't do this
-  gp_Dir2d aDir2D(X / D, Y / D);
+  gp_Dir2d aDir2D(aV2D);
   anAngle=Angle(aDir2D);
-  //ends here
   //
   return anAngle;
 }
@@ -860,8 +855,7 @@ void RefineAngles(const TopoDS_Face& myFace,
                   BOPAlgo_IndexedDataMapOfShapeListOfEdgeInfo& mySmartMap)
 {
   Standard_Integer aNb, i;
-  BOPCol_DataMapOfShapeInteger aMSI;
-  BOPCol_DataMapIteratorOfDataMapOfShapeInteger aItMSI;
+  BOPCol_IndexedDataMapOfShapeInteger aMSI;
   BOPCol_MapOfShape aMBE;
   BOPCol_ListIteratorOfListOfShape aIt;
   //
@@ -869,32 +863,29 @@ void RefineAngles(const TopoDS_Face& myFace,
   aIt.Initialize(myEdges);
   for(; aIt.More(); aIt.Next()) {
     const TopoDS_Shape& aE=aIt.Value();
-    if(aMSI.IsBound(aE)) {
-      Standard_Integer& iCnt=aMSI.ChangeFind(aE);
+    if(aMSI.Contains(aE)) {
+      Standard_Integer& iCnt = aMSI.ChangeFromKey(aE);
       ++iCnt;
     }
     else {
-      Standard_Integer iCnt=1;
-      aMSI.Bind(aE, iCnt);
+      Standard_Integer iCnt = 1;
+      aMSI.Add(aE, iCnt);
     }
   }
   //
-  aItMSI.Initialize(aMSI);
-  for(; aItMSI.More(); aItMSI.Next()) {
-    Standard_Integer iCnt;
-    //
-    const TopoDS_Shape& aE=aItMSI.Key();
-    iCnt=aItMSI.Value();
-    if (iCnt==1) {
+  aNb = aMSI.Extent();
+  for (i = 1; i <= aNb; ++i) {
+    Standard_Integer iCnt = aMSI(i);
+    if (iCnt == 1) {
+      const TopoDS_Shape& aE = aMSI.FindKey(i);
       aMBE.Add(aE);
     }
-    
   }
   //
   aMSI.Clear();
   //
-  aNb=mySmartMap.Extent();
-  for (i=1; i<=aNb; ++i) {
+  aNb = mySmartMap.Extent();
+  for (i = 1; i <= aNb; ++i) {
     const TopoDS_Vertex& aV=*((TopoDS_Vertex*)&mySmartMap.FindKey(i)); 
     BOPAlgo_ListOfEdgeInfo& aLEI=mySmartMap(i);
     //

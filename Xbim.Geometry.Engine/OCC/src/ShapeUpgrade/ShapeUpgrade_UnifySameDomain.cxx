@@ -13,71 +13,85 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <ShapeUpgrade_UnifySameDomain.ixx>
-#include <ShapeUpgrade_UnifySameDomain.hxx>
-#include <TopTools_SequenceOfShape.hxx>
-#include <TopTools_IndexedMapOfShape.hxx>
-#include <TopExp_Explorer.hxx>
-#include <Geom_Surface.hxx>
-#include <Geom_Line.hxx>
-#include <gp_Dir.hxx>
-#include <Geom_CylindricalSurface.hxx>
-#include <gp_Cylinder.hxx>
-#include <Geom_SurfaceOfRevolution.hxx>
-#include <Geom_SurfaceOfLinearExtrusion.hxx>
-#include <gp_Lin.hxx>
-#include <Geom_Circle.hxx>
-#include <Geom_RectangularTrimmedSurface.hxx>
-#include <TopoDS_Face.hxx>
-#include <BRep_Tool.hxx>
-#include <GeomAdaptor_HSurface.hxx>
-#include <BRepTopAdaptor_TopolTool.hxx>
-#include <IntPatch_ImpImpIntersection.hxx>
-#include <GeomLib_IsPlanarSurface.hxx>
+
 #include <BRep_Builder.hxx>
-#include <ShapeFix_Wire.hxx>
-#include <TopoDS.hxx>
-#include <ShapeAnalysis_Edge.hxx>
-#include <TopoDS_Edge.hxx>
-#include <TColGeom_SequenceOfSurface.hxx>
+#include <BRep_CurveRepresentation.hxx>
 #include <BRep_ListIteratorOfListOfCurveRepresentation.hxx>
 #include <BRep_TEdge.hxx>
-#include <BRep_CurveRepresentation.hxx>
-#include <TColGeom_Array1OfBSplineCurve.hxx>
-#include <TColGeom_HArray1OfBSplineCurve.hxx>
-#include <TColGeom2d_Array1OfBSplineCurve.hxx>
-#include <TColGeom2d_HArray1OfBSplineCurve.hxx>
-#include <TColStd_Array1OfReal.hxx>
-#include <TopExp.hxx>
-#include <Geom_TrimmedCurve.hxx>
-#include <Geom2d_TrimmedCurve.hxx>
-#include <GeomConvert.hxx>
-#include <Geom2dConvert.hxx>
-#include <GeomConvert_CompCurveToBSplineCurve.hxx>
-#include <Geom2dConvert_CompCurveToBSplineCurve.hxx>
-#include <TColGeom2d_SequenceOfBoundedCurve.hxx>
-#include <BRepLib_MakeEdge.hxx>
-#include <TColStd_MapOfInteger.hxx>
+#include <BRep_Tool.hxx>
 #include <BRepLib.hxx>
+#include <BRepLib_MakeEdge.hxx>
+#include <BRepTopAdaptor_TopolTool.hxx>
 #include <GC_MakeCircle.hxx>
+#include <Geom2d_Line.hxx>
+#include <Geom2d_TrimmedCurve.hxx>
+#include <Geom2dConvert.hxx>
+#include <Geom2dConvert_CompCurveToBSplineCurve.hxx>
 #include <Geom_BezierCurve.hxx>
-#include <ShapeBuild_ReShape.hxx>
-#include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
-#include <TopTools_MapOfShape.hxx>
-#include <TopTools_ListIteratorOfListOfShape.hxx>
+#include <Geom_BSplineCurve.hxx>
+#include <Geom_Circle.hxx>
+#include <Geom_CylindricalSurface.hxx>
+#include <Geom_ElementarySurface.hxx>
+#include <Geom_Line.hxx>
+#include <Geom_OffsetSurface.hxx>
+#include <Geom_RectangularTrimmedSurface.hxx>
+#include <Geom_Surface.hxx>
+#include <Geom_SurfaceOfLinearExtrusion.hxx>
+#include <Geom_SurfaceOfRevolution.hxx>
+#include <Geom_SweptSurface.hxx>
+#include <Geom_TrimmedCurve.hxx>
+#include <GeomAdaptor_HSurface.hxx>
+#include <GeomConvert.hxx>
+#include <GeomConvert_CompCurveToBSplineCurve.hxx>
+#include <GeomLib_IsPlanarSurface.hxx>
+#include <gp_Cylinder.hxx>
+#include <gp_Dir.hxx>
+#include <gp_Lin.hxx>
+#include <IntPatch_ImpImpIntersection.hxx>
+#include <ShapeAnalysis_Edge.hxx>
 #include <ShapeAnalysis_WireOrder.hxx>
 #include <ShapeBuild_Edge.hxx>
-#include <Geom2d_Line.hxx>
-#include <ShapeFix_Face.hxx>
-#include <TColGeom_HArray2OfSurface.hxx>
+#include <ShapeBuild_ReShape.hxx>
 #include <ShapeExtend_CompositeSurface.hxx>
 #include <ShapeFix_ComposeShell.hxx>
-#include <ShapeFix_SequenceOfWireSegment.hxx>
-#include <ShapeFix_WireSegment.hxx>
 #include <ShapeFix_Edge.hxx>
+#include <ShapeFix_Face.hxx>
+#include <ShapeFix_SequenceOfWireSegment.hxx>
 #include <ShapeFix_Shell.hxx>
+#include <ShapeFix_Wire.hxx>
+#include <ShapeFix_WireSegment.hxx>
 #include <ShapeUpgrade_RemoveLocations.hxx>
+#include <ShapeUpgrade_UnifySameDomain.hxx>
+#include <Standard_Type.hxx>
+#include <TColGeom2d_Array1OfBSplineCurve.hxx>
+#include <TColGeom2d_HArray1OfBSplineCurve.hxx>
+#include <TColGeom2d_SequenceOfBoundedCurve.hxx>
+#include <TColGeom_Array1OfBSplineCurve.hxx>
+#include <TColGeom_HArray1OfBSplineCurve.hxx>
+#include <TColGeom_HArray2OfSurface.hxx>
+#include <TColGeom_SequenceOfSurface.hxx>
+#include <TColStd_Array1OfReal.hxx>
+#include <TColStd_MapOfInteger.hxx>
+#include <TopExp.hxx>
+#include <TopExp_Explorer.hxx>
+#include <TopoDS.hxx>
+#include <TopoDS_Edge.hxx>
+#include <TopoDS_Face.hxx>
+#include <TopoDS_Shape.hxx>
+#include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
+#include <TopTools_IndexedMapOfShape.hxx>
+#include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <TopTools_MapOfShape.hxx>
+#include <TopTools_SequenceOfShape.hxx>
+#include <gp_Circ.hxx>
+#include <BRepAdaptor_Curve.hxx>
+#include <BRepClass_FaceClassifier.hxx>
+
+struct SubSequenceOfEdges
+{
+  TopTools_SequenceOfShape SeqsEdges;
+  TopoDS_Edge UnionEdges;
+};
 
 
 //=======================================================================
@@ -513,184 +527,180 @@ static TopoDS_Edge GlueEdgesWithPCurves(const TopTools_SequenceOfShape& aChain,
 }
 
 //=======================================================================
-//function : MergeEdges
-//purpose  : auxilary
+//function : MergeSubSeq
+//purpose  : Merges a sequence of edges into one edge if possible
 //=======================================================================
-static Standard_Boolean MergeEdges(const TopTools_SequenceOfShape& SeqEdges,
-                                   const TopoDS_Face& /*aFace*/,
-                                   const Standard_Real Tol,
-                                   const Standard_Boolean ConcatBSplines,
-                                   TopoDS_Edge& anEdge)
-{
-  // make chain for union
-  BRep_Builder B;
-  ShapeAnalysis_Edge sae;
-  TopoDS_Edge FirstE = TopoDS::Edge(SeqEdges.Value(1));
-  TopoDS_Edge LastE = FirstE;
-  TopoDS_Vertex VF = sae.FirstVertex(FirstE);
-  TopoDS_Vertex VL = sae.LastVertex(LastE);
-  TopTools_SequenceOfShape aChain;
-  aChain.Append(FirstE);
-  TColStd_MapOfInteger IndUsedEdges;
-  IndUsedEdges.Add(1);
-  Standard_Integer j;
-  for (j = 1; j <= SeqEdges.Length(); j++)
-  {
-    TopoDS_Edge anEdge = TopoDS::Edge(SeqEdges(j));
-    if (BRep_Tool::Degenerated(anEdge))
-      return Standard_False;
-  }
-  
-  for(j=2; j<=SeqEdges.Length(); j++) {
-    for(Standard_Integer k=2; k<=SeqEdges.Length(); k++) {
-      if(IndUsedEdges.Contains(k)) continue;
-      TopoDS_Edge edge = TopoDS::Edge(SeqEdges.Value(k));
-      TopoDS_Vertex VF2 = sae.FirstVertex(edge);
-      TopoDS_Vertex VL2 = sae.LastVertex(edge);
-      if(sae.FirstVertex(edge).IsSame(VL)) {
-        aChain.Append(edge);
-        LastE = edge;
-        VL = sae.LastVertex(LastE);
-        IndUsedEdges.Add(k);
-      }
-      else if(sae.LastVertex(edge).IsSame(VF)) {
-        aChain.Prepend(edge);
-        FirstE = edge;
-        VF = sae.FirstVertex(FirstE);
-        IndUsedEdges.Add(k);
-      }
-    }
-  }
-  if(aChain.Length()<SeqEdges.Length()) {
-#ifdef OCCT_DEBUG
-    cout<<"can not create correct chain..."<<endl;
-#endif
-    return Standard_False;
-  }
-  // union edges in chain
-  // first step: union lines and circles
-  Standard_Real fp1,lp1,fp2,lp2;
-  for(j=1; j<aChain.Length(); j++) {
-    TopoDS_Edge edge1 = TopoDS::Edge(aChain.Value(j));
-    Handle(Geom_Curve) c3d1 = BRep_Tool::Curve(edge1,fp1,lp1);
 
-    if(c3d1.IsNull()) break;
+static Standard_Boolean MergeSubSeq(const TopTools_SequenceOfShape& aChain, TopoDS_Edge& OutEdge, double Tol, Standard_Boolean ConcatBSplines) 
+{
+  ShapeAnalysis_Edge sae;
+  BRep_Builder B;
+  // union edges in chain
+  int j;
+  Standard_Real fp1,lp1,fp2,lp2;
+  Standard_Boolean IsUnionOfLinesPossible = Standard_True;
+  Standard_Boolean IsUnionOfCirclesPossible = Standard_True;
+  Handle(Geom_Curve) c3d1, c3d2;
+  for(j=1; j<aChain.Length(); j++) 
+  {
+    TopoDS_Edge edge1 = TopoDS::Edge(aChain.Value(j));
+    c3d1 = BRep_Tool::Curve(edge1,fp1,lp1);
+
+    TopoDS_Edge edge2 = TopoDS::Edge(aChain.Value(j+1));
+    c3d2 = BRep_Tool::Curve(edge2,fp2,lp2);
+
+    if(c3d1.IsNull() || c3d2.IsNull()) 
+      return Standard_False;
+
     while(c3d1->IsKind(STANDARD_TYPE(Geom_TrimmedCurve))) {
       Handle(Geom_TrimmedCurve) tc =
         Handle(Geom_TrimmedCurve)::DownCast(c3d1);
       c3d1 = tc->BasisCurve();
     }
-    TopoDS_Edge edge2 = TopoDS::Edge(aChain.Value(j+1));
-    Handle(Geom_Curve) c3d2 = BRep_Tool::Curve(edge2,fp2,lp2);
-    if(c3d2.IsNull()) break;
     while(c3d2->IsKind(STANDARD_TYPE(Geom_TrimmedCurve))) {
       Handle(Geom_TrimmedCurve) tc =
         Handle(Geom_TrimmedCurve)::DownCast(c3d2);
       c3d2 = tc->BasisCurve();
     }
     if( c3d1->IsKind(STANDARD_TYPE(Geom_Line)) && c3d2->IsKind(STANDARD_TYPE(Geom_Line)) ) {
-      // union lines
       Handle(Geom_Line) L1 = Handle(Geom_Line)::DownCast(c3d1);
       Handle(Geom_Line) L2 = Handle(Geom_Line)::DownCast(c3d2);
       gp_Dir Dir1 = L1->Position().Direction();
       gp_Dir Dir2 = L2->Position().Direction();
-      //if(!Dir1.IsEqual(Dir2,Precision::Angular())) { 
-      //if(!Dir1.IsParallel(Dir2,Precision::Angular())) { 
-      if(!Dir1.IsParallel(Dir2,Tol)) { 
-        return Standard_False;
-      }
-      // can union lines => create new edge
-      TopoDS_Vertex V1 = sae.FirstVertex(edge1);
-      gp_Pnt PV1 = BRep_Tool::Pnt(V1);
-      TopoDS_Vertex V2 = sae.LastVertex(edge2);
-      gp_Pnt PV2 = BRep_Tool::Pnt(V2);
-      gp_Vec Vec(PV1,PV2);
-      Handle(Geom_Line) L = new Geom_Line(gp_Ax1(PV1,Vec));
-      Standard_Real dist = PV1.Distance(PV2);
-      Handle(Geom_TrimmedCurve) tc = new Geom_TrimmedCurve(L,0.0,dist);
-      TopoDS_Edge E;
-      B.MakeEdge (E,tc,Precision::Confusion());
-      B.Add (E,V1);  B.Add (E,V2);
-      B.UpdateVertex(V1, 0., E, 0.);
-      B.UpdateVertex(V2, dist, E, 0.);
-      //ShapeFix_Edge sfe;
-      //sfe.FixAddPCurve(E,aFace,Standard_False);
-      //sfe.FixSameParameter(E);
-      aChain.Remove(j);
-      aChain.SetValue(j,E);
-      j--;
+      if(!Dir1.IsParallel(Dir2,Tol))  
+        IsUnionOfLinesPossible = Standard_False;
     }
+    else
+      IsUnionOfLinesPossible = Standard_False;
     if( c3d1->IsKind(STANDARD_TYPE(Geom_Circle)) && c3d2->IsKind(STANDARD_TYPE(Geom_Circle)) ) {
-      // union circles
       Handle(Geom_Circle) C1 = Handle(Geom_Circle)::DownCast(c3d1);
       Handle(Geom_Circle) C2 = Handle(Geom_Circle)::DownCast(c3d2);
       gp_Pnt P01 = C1->Location();
       gp_Pnt P02 = C2->Location();
       if (P01.Distance(P02) > Precision::Confusion())
-        return Standard_False;
-      // can union circles => create new edge
-      TopoDS_Vertex V1 = sae.FirstVertex(edge1);
+        IsUnionOfCirclesPossible = Standard_False;
+    }
+    else
+      IsUnionOfCirclesPossible = Standard_False;
+  }
+  if (IsUnionOfLinesPossible && IsUnionOfCirclesPossible)
+    return Standard_False;
+
+  //union of lines is possible
+  if (IsUnionOfLinesPossible)
+  {
+    TopoDS_Vertex V1 = sae.FirstVertex(TopoDS::Edge(aChain.First()));
+    gp_Pnt PV1 = BRep_Tool::Pnt(V1);
+    TopoDS_Vertex V2 = sae.LastVertex(TopoDS::Edge(aChain.Last()));
+    gp_Pnt PV2 = BRep_Tool::Pnt(V2);
+    gp_Vec Vec(PV1, PV2);
+    Handle(Geom_Line) L = new Geom_Line(gp_Ax1(PV1,Vec));
+    Standard_Real dist = PV1.Distance(PV2);
+    Handle(Geom_TrimmedCurve) tc = new Geom_TrimmedCurve(L,0.0,dist);
+    TopoDS_Edge E;
+    B.MakeEdge (E, tc ,Precision::Confusion());
+    B.Add (E,V1);  B.Add (E,V2);
+    B.UpdateVertex(V1, 0., E, 0.);
+    B.UpdateVertex(V2, dist, E, 0.);
+    OutEdge = E;
+    return Standard_True;
+  }
+
+  if (IsUnionOfCirclesPossible)
+  {
+    double f,l;
+    TopoDS_Edge FE = TopoDS::Edge(aChain.First());
+    Handle(Geom_Curve) c3d = BRep_Tool::Curve(FE,f,l);
+
+    while(c3d->IsKind(STANDARD_TYPE(Geom_TrimmedCurve))) {
+      Handle(Geom_TrimmedCurve) tc =
+        Handle(Geom_TrimmedCurve)::DownCast(c3d);
+      c3d = tc->BasisCurve();
+    }
+    Handle(Geom_Circle) Cir = Handle(Geom_Circle)::DownCast(c3d);
+
+    TopoDS_Vertex V1 = sae.FirstVertex(FE);
+    TopoDS_Vertex V2 = sae.LastVertex(TopoDS::Edge(aChain.Last()));
+    TopoDS_Edge E;
+    if (V1.IsSame(V2)) {
+      // closed chain
+      BRepAdaptor_Curve adef(FE);
+      Handle(Geom_Circle) Cir1;
+      double FP, LP;
+      if ( FE.Orientation() == TopAbs_FORWARD)
+      {
+        FP = adef.FirstParameter();
+        LP = adef.LastParameter();
+      }
+      else
+      {
+        FP = adef.LastParameter();
+        LP = adef.FirstParameter();
+      }
+      if (Abs(FP) < Precision::PConfusion())
+      {
+        B.MakeEdge (E,Cir, Precision::Confusion());
+        B.Add(E,V1);
+        B.Add(E,V2);
+        E.Orientation(FE.Orientation());
+      }
+      else
+      {
+        GC_MakeCircle MC1 (adef.Value(FP), adef.Value((FP + LP) * 0.5), adef.Value(LP));
+        if (MC1.IsDone())
+          Cir1 = MC1.Value();
+        else
+          return Standard_False;
+        B.MakeEdge (E, Cir1, Precision::Confusion());
+        B.Add(E,V1);
+        B.Add(E,V2);
+      }
+    }
+    else {
       gp_Pnt PV1 = BRep_Tool::Pnt(V1);
-      TopoDS_Vertex V2 = sae.LastVertex(edge2);
       gp_Pnt PV2 = BRep_Tool::Pnt(V2);
-      TopoDS_Vertex VM = sae.LastVertex(edge1);
+      TopoDS_Vertex VM = sae.LastVertex(FE);
       gp_Pnt PVM = BRep_Tool::Pnt(VM);
       GC_MakeCircle MC (PV1,PVM,PV2);
-      TopoDS_Edge E;
-      if (!MC.IsDone() || MC.Value().IsNull()) {
-        // jfa for Mantis issue 0020228
-        if (PV1.Distance(PV2) > Precision::Confusion())
-          return Standard_False;
-        // closed chain
-        B.MakeEdge (E,C1,Precision::Confusion());
-        B.Add(E,V1);
-        B.Add(E,V2);
-      }
-      else {
-        Handle(Geom_Circle) C = MC.Value();
-        gp_Pnt P0 = C->Location();
-        gp_Dir D1(gp_Vec(P0,PV1));
-        gp_Dir D2(gp_Vec(P0,PV2));
-        Standard_Real fpar = C->XAxis().Direction().Angle(D1);
-        if(fabs(fpar)>Precision::Confusion()) {
-          // check orientation
-          gp_Dir ND =  C->XAxis().Direction().Crossed(D1);
-          if(ND.IsOpposite(C->Axis().Direction(),Precision::Confusion())) {
-            fpar = -fpar;
-          }
+      Handle(Geom_Circle) C = MC.Value();
+      gp_Pnt P0 = C->Location();
+      gp_Dir D1(gp_Vec(P0,PV1));
+      gp_Dir D2(gp_Vec(P0,PV2));
+      Standard_Real fpar = C->XAxis().Direction().Angle(D1);
+      if(fabs(fpar)>Precision::Confusion()) {
+        // check orientation
+        gp_Dir ND =  C->XAxis().Direction().Crossed(D1);
+        if(ND.IsOpposite(C->Axis().Direction(),Precision::Confusion())) {
+          fpar = -fpar;
         }
-        Standard_Real lpar = C->XAxis().Direction().Angle(D2);
-        if(fabs(lpar)>Precision::Confusion()) {
-          // check orientation
-          gp_Dir ND =  C->XAxis().Direction().Crossed(D2);
-          if(ND.IsOpposite(C->Axis().Direction(),Precision::Confusion())) {
-            lpar = -lpar;
-          }
-        }
-        if (lpar < fpar) lpar += 2*M_PI;
-        Handle(Geom_TrimmedCurve) tc = new Geom_TrimmedCurve(C,fpar,lpar);
-        B.MakeEdge (E,tc,Precision::Confusion());
-        B.Add(E,V1);
-        B.Add(E,V2);
-        B.UpdateVertex(V1, fpar, E, 0.);
-        B.UpdateVertex(V2, lpar, E, 0.);
       }
-      aChain.Remove(j);
-      aChain.SetValue(j,E);
-      j--;
+      Standard_Real lpar = C->XAxis().Direction().Angle(D2);
+      if(fabs(lpar)>Precision::Confusion()) {
+        // check orientation
+        gp_Dir ND =  C->XAxis().Direction().Crossed(D2);
+        if(ND.IsOpposite(C->Axis().Direction(),Precision::Confusion())) {
+          lpar = -lpar;
+        }
+      }
+      if (lpar < fpar) lpar += 2*M_PI;
+      Handle(Geom_TrimmedCurve) tc = new Geom_TrimmedCurve(C,fpar,lpar);
+      B.MakeEdge (E,tc,Precision::Confusion());
+      B.Add(E,V1);
+      B.Add(E,V2);
+      B.UpdateVertex(V1, fpar, E, 0.);
+      B.UpdateVertex(V2, lpar, E, 0.);
     }
-  }
-  if (j < aChain.Length()) {
-#ifdef OCCT_DEBUG
-    cout<<"null curve3d in edge..."<<endl;
-#endif
-    return Standard_False;
+    OutEdge = E;
+    return Standard_True;
   }
   if (aChain.Length() > 1 && ConcatBSplines) {
     // second step: union edges with various curves
     // skl for bug 0020052 from Mantis: perform such unions
     // only if curves are bspline or bezier
-    bool NeedUnion = true;
+
+    TopoDS_Vertex VF = sae.FirstVertex(TopoDS::Edge(aChain.First()));
+    TopoDS_Vertex VL = sae.LastVertex(TopoDS::Edge(aChain.Last()));
+    Standard_Boolean NeedUnion = Standard_True;
     for(j=1; j<=aChain.Length(); j++) {
       TopoDS_Edge edge = TopoDS::Edge(aChain.Value(j));
       TopLoc_Location Loc;
@@ -703,7 +713,7 @@ static Standard_Boolean MergeEdges(const TopTools_SequenceOfShape& SeqEdges,
       }
       if( ( c3d->IsKind(STANDARD_TYPE(Geom_BSplineCurve)) ||
             c3d->IsKind(STANDARD_TYPE(Geom_BezierCurve)) ) ) continue;
-      NeedUnion = false;
+      NeedUnion = Standard_False;
       break;
     }
     if(NeedUnion) {
@@ -711,7 +721,8 @@ static Standard_Boolean MergeEdges(const TopTools_SequenceOfShape& SeqEdges,
       cout<<"can not make analitical union => make approximation"<<endl;
 #endif
       TopoDS_Edge E = GlueEdgesWithPCurves(aChain, VF, VL);
-      aChain.SetValue(1,E);
+      OutEdge = E;
+      return Standard_True;
     }
     else {
 #ifdef OCCT_DEBUG
@@ -720,9 +731,253 @@ static Standard_Boolean MergeEdges(const TopTools_SequenceOfShape& SeqEdges,
       return Standard_False;
     }
   }
+  return Standard_False;
+}
 
-  anEdge = TopoDS::Edge(aChain.Value(1));
+//=======================================================================
+//function : IsMergingPossible
+//purpose  : Checks if merging of two edges is possible
+//=======================================================================
+
+static Standard_Boolean IsMergingPossible(const TopoDS_Edge& edge1, const TopoDS_Edge& edge2, 
+                                          double Tol, const TopTools_MapOfShape& DegEdgeVrt)
+{
+  TopoDS_Vertex CV = TopExp::LastVertex(edge1, Standard_True);
+  if (CV.IsNull() || DegEdgeVrt.Contains(CV))
+    return Standard_False;
+
+  BRepAdaptor_Curve ade1(edge1);
+  BRepAdaptor_Curve ade2(edge2);
+
+  GeomAbs_CurveType t1 = ade1.GetType();
+  GeomAbs_CurveType t2 = ade2.GetType();
+
+  if( t1 == GeomAbs_Circle && t2 == GeomAbs_Circle)
+  {
+    if (ade1.Circle().Location().Distance(ade2.Circle().Location()) > Precision::Confusion())
+      return Standard_False;
+  }
+
+  if( ( (t1 != GeomAbs_BezierCurve && t1 != GeomAbs_BSplineCurve) ||
+      (t2 != GeomAbs_BezierCurve && t2 != GeomAbs_BSplineCurve)) && t1 != t2)
+    return Standard_False;
+
+  gp_Vec Diff1, Diff2;
+  gp_Pnt P1, P2;
+  if (edge1.Orientation() == TopAbs_FORWARD)
+    ade1.D1(ade1.LastParameter(), P1, Diff1);
+  else
+  {
+    ade1.D1(ade1.FirstParameter(), P1, Diff1);
+    Diff1 = -Diff1;
+  }
+
+  if (edge2.Orientation() == TopAbs_FORWARD)
+    ade2.D1(ade2.FirstParameter(), P2, Diff2);
+  else
+  {
+    ade2.D1(ade2.LastParameter(), P2, Diff2);
+    Diff2 = -Diff2;
+  }
+
+  if (Diff1.Angle(Diff2) > Tol)
+    return Standard_False;
+
   return Standard_True;
+}
+
+//=======================================================================
+//function : GenerateSubSeq
+//purpose  : Generates sub-sequences of edges from sequence of edges
+//Edges from each subsequences can be merged into the one edge  
+//=======================================================================
+
+static void GenerateSubSeq (const TopTools_SequenceOfShape& anInpEdgeSeq,
+                            NCollection_Sequence<SubSequenceOfEdges>& SeqOfSubSeqOfEdges,
+                            Standard_Boolean IsClosed, double Tol, const TopTools_MapOfShape& DegEdgeVrt )
+{
+  Standard_Boolean isOk = Standard_False;
+  TopoDS_Edge edge1, edge2;
+
+  SubSequenceOfEdges SubSeq;
+  SubSeq.SeqsEdges.Append(TopoDS::Edge(anInpEdgeSeq(1)));
+  SeqOfSubSeqOfEdges.Append(SubSeq);
+
+  for (int i = 1; i < anInpEdgeSeq.Length(); i++)
+  {
+    edge1 = TopoDS::Edge(anInpEdgeSeq(i));
+    edge2 = TopoDS::Edge(anInpEdgeSeq(i+1));
+    isOk = IsMergingPossible(edge1, edge2, Tol, DegEdgeVrt);
+    if (!isOk)
+    {
+      SubSequenceOfEdges SubSeq;
+      SubSeq.SeqsEdges.Append(edge2);
+      SeqOfSubSeqOfEdges.Append(SubSeq);
+    }
+    else
+      SeqOfSubSeqOfEdges.ChangeLast().SeqsEdges.Append(edge2);
+  }
+  /// check first and last chain segments
+  if (IsClosed && SeqOfSubSeqOfEdges.Length() > 1)
+  {
+    edge1 = TopoDS::Edge(anInpEdgeSeq.Last());
+    edge2 = TopoDS::Edge(anInpEdgeSeq.First());
+    if (IsMergingPossible(edge1, edge2, Tol, DegEdgeVrt))
+    {
+      SeqOfSubSeqOfEdges.ChangeLast().SeqsEdges.Append(SeqOfSubSeqOfEdges.ChangeFirst().SeqsEdges);
+      SeqOfSubSeqOfEdges.Remove(1);
+    }
+  }
+}
+
+
+//=======================================================================
+//function : MergeEdges
+//purpose  : auxilary
+//=======================================================================
+static Standard_Boolean MergeEdges(const TopTools_SequenceOfShape& SeqEdges,
+                                   const Standard_Real Tol,
+                                   const Standard_Boolean ConcatBSplines,
+                                   NCollection_Sequence<SubSequenceOfEdges>& SeqOfSubSeqOfEdges,
+                                   const TopTools_MapOfShape& NonMergVrt )
+{
+  // make chain for union
+  //BRep_Builder B;
+  ShapeAnalysis_Edge sae;
+  TopoDS_Edge FirstE = TopoDS::Edge(SeqEdges.Value(1));
+  TopoDS_Edge LastE = FirstE;
+  TopoDS_Vertex VF = sae.FirstVertex(FirstE);
+  TopoDS_Vertex VL = sae.LastVertex(LastE);
+  TopTools_SequenceOfShape aChain;
+  aChain.Append(FirstE);
+  TColStd_MapOfInteger IndUsedEdges;
+  IndUsedEdges.Add(1);
+  Standard_Integer j;
+  TopTools_MapOfShape VerticesToAvoid;
+  TopTools_SequenceOfShape SeqEdges1;
+  for (j = 1; j <= SeqEdges.Length(); j++)
+  {
+    TopoDS_Edge anEdge = TopoDS::Edge(SeqEdges(j));
+    if (BRep_Tool::Degenerated(anEdge))
+    {
+      TopoDS_Vertex V1, V2;
+      TopExp::Vertices(anEdge, V1, V2);
+      VerticesToAvoid.Add(V1);
+      VerticesToAvoid.Add(V2);
+      continue;
+    }
+    SeqEdges1.Append(anEdge);
+  }
+
+  for(j=2; j<=SeqEdges1.Length(); j++) {
+    for(Standard_Integer k=2; k<=SeqEdges1.Length(); k++) {
+      if(IndUsedEdges.Contains(k)) continue;
+      TopoDS_Edge edge = TopoDS::Edge(SeqEdges1.Value(k));
+      TopoDS_Vertex VF2 = sae.FirstVertex(edge);
+      TopoDS_Vertex VL2 = sae.LastVertex(edge);
+      if(VF2.IsSame(VL)) {
+        aChain.Append(edge);
+        LastE = edge;
+        VL = sae.LastVertex(LastE);
+        IndUsedEdges.Add(k);
+      }
+      else if(VL2.IsSame(VF)) {
+        aChain.Prepend(edge);
+        FirstE = edge;
+        VF = sae.FirstVertex(FirstE);
+        IndUsedEdges.Add(k);
+      }
+    }
+  }
+
+  Standard_Boolean IsClosed = Standard_False;
+  if (VF.IsSame ( VL ))
+    IsClosed = Standard_True;
+
+  VerticesToAvoid.Unite(NonMergVrt);
+  GenerateSubSeq(aChain, SeqOfSubSeqOfEdges, IsClosed, Tol, VerticesToAvoid);
+
+  for (int i = 1; i <= SeqOfSubSeqOfEdges.Length(); i++)
+  {
+    TopoDS_Edge UE;
+    if (SeqOfSubSeqOfEdges(i).SeqsEdges.Length() < 2)
+      continue;
+    if (MergeSubSeq(SeqOfSubSeqOfEdges(i).SeqsEdges, UE, Tol, ConcatBSplines))
+      SeqOfSubSeqOfEdges(i).UnionEdges = UE;
+  }
+  return Standard_True;
+}
+
+//=======================================================================
+//function : MergeSeq
+//purpose  : Tries to unify the sequence of edges with the set of another edges 
+//which lies on the same geometry
+//=======================================================================
+
+static Standard_Boolean MergeSeq (const TopTools_SequenceOfShape& SeqEdges,
+                                  const Standard_Real Tol,
+                                  const Standard_Boolean ConcatBSplines,
+                                  Handle(ShapeBuild_ReShape)& theContext,
+                                  TopTools_DataMapOfShapeShape& theOldShapes,
+                                  const TopTools_MapOfShape& nonMergVert,
+                                  const TopTools_DataMapOfShapeShape& NewEdges2OldEdges)
+{ 
+  NCollection_Sequence<SubSequenceOfEdges> SeqOfSubsSeqOfEdges;
+  int k = 1;
+  if ( MergeEdges(SeqEdges, Tol, ConcatBSplines, SeqOfSubsSeqOfEdges, nonMergVert) )
+  {
+    for (Standard_Integer i = 1; i <= SeqOfSubsSeqOfEdges.Length(); i++ )
+    {
+      if (SeqOfSubsSeqOfEdges(i).UnionEdges.IsNull())
+        continue;
+      theContext->Replace(SeqOfSubsSeqOfEdges(i).SeqsEdges(1), SeqOfSubsSeqOfEdges(i).UnionEdges);
+      k++;
+      for (Standard_Integer j = 2; j <= SeqOfSubsSeqOfEdges(i).SeqsEdges.Length(); j++)
+      {
+        TopoDS_Shape OldEdge = NewEdges2OldEdges(SeqOfSubsSeqOfEdges(i).SeqsEdges(j));
+        theOldShapes.Bind(OldEdge, SeqOfSubsSeqOfEdges(i).UnionEdges);
+        theContext->Remove(SeqOfSubsSeqOfEdges(i).SeqsEdges(j));
+      }
+    }
+    return Standard_True;
+  }
+  else
+    return Standard_False;
+}
+
+//=======================================================================
+//function : CheckSharedVertices
+//purpose  : Checks the sequence of edges on the presence of shared vertex 
+//=======================================================================
+
+static void CheckSharedVertices(const TopTools_SequenceOfShape& theSeqEdges, 
+                                const TopTools_IndexedDataMapOfShapeListOfShape& theMapEdgesVertex,
+                                TopTools_MapOfShape& theShareVertMap)
+{
+  ShapeAnalysis_Edge sae;
+  TopTools_SequenceOfShape SeqVertexes;
+  TopTools_MapOfShape MapVertexes;
+  for (Standard_Integer k = 1; k <= theSeqEdges.Length(); k++ )
+  {
+    TopoDS_Vertex aV1 = sae.FirstVertex(TopoDS::Edge(theSeqEdges(k)));
+    TopoDS_Vertex aV2 = sae.LastVertex(TopoDS::Edge(theSeqEdges(k)));
+    if (!MapVertexes.Add(aV1))
+      SeqVertexes.Append(aV1);
+    if (!MapVertexes.Add(aV2))
+      SeqVertexes.Append(aV2);
+  }
+
+  for (Standard_Integer k = 1; k <= SeqVertexes.Length()/* && !IsSharedVertexPresent*/; k++ )
+  {
+    const TopTools_ListOfShape& ListEdgesV1 = theMapEdgesVertex.FindFromKey(SeqVertexes(k));
+    TopTools_MapOfShape aMapOfEdges;
+    TopTools_ListIteratorOfListOfShape iter(ListEdgesV1);
+    for (; iter.More(); iter.Next())
+      aMapOfEdges.Add(iter.Value());
+    if (aMapOfEdges.Extent() > 2)
+      theShareVertMap.Add(SeqVertexes(k));
+  }
+  //return theShareVertMap.IsEmpty() ? false : true;
 }
 
 //=======================================================================
@@ -775,8 +1030,39 @@ void ShapeUpgrade_UnifySameDomain::Initialize(const TopoDS_Shape& aShape,
   myConcatBSplines = ConcatBSplines;
 
   myContext->Clear();
-  //myOldNewMap.Clear();
+  myOldShapes.Clear();
   //myGenerated.Clear();
+}
+
+//=======================================================================
+//function : putIntWires
+//purpose  : Add internal wires that are classified inside the face as a subshape,
+//           and remove them from the sequence
+//=======================================================================
+static void putIntWires(TopoDS_Shape& theFace, TopTools_SequenceOfShape& theWires)
+{
+  TopoDS_Face& aFace = TopoDS::Face(theFace);
+  for (Standard_Integer i=1; i <= theWires.Length(); i++)
+  {
+    TopoDS_Shape aWire = theWires(i);
+    gp_Pnt2d aP2d;
+    Standard_Boolean isP2d = Standard_False;
+    for (TopoDS_Iterator it(aWire); it.More() && !isP2d; it.Next())
+    {
+      const TopoDS_Edge& anEdge = TopoDS::Edge(it.Value());
+      Standard_Real aFirst, aLast;
+      Handle(Geom2d_Curve) aC2d = BRep_Tool::CurveOnSurface(anEdge, aFace, aFirst, aLast);
+      aC2d->D0((aFirst + aLast) * 0.5, aP2d);
+      isP2d = Standard_True;
+    }
+    BRepClass_FaceClassifier aClass(aFace, aP2d, Precision::PConfusion());
+    if (aClass.State() == TopAbs_IN)
+    {
+      BRep_Builder().Add(aFace, aWire);
+      theWires.Remove(i);
+      i--;
+    }
+  }
 }
 
 //=======================================================================
@@ -786,22 +1072,16 @@ void ShapeUpgrade_UnifySameDomain::Initialize(const TopoDS_Shape& aShape,
 
 void ShapeUpgrade_UnifySameDomain::UnifyFaces()
 {
-  //Handle(ShapeBuild_ReShape) myContext = new ShapeBuild_ReShape;
-  TopoDS_Shape aResShape = myContext->Apply(myShape);
-
+  // creating map of edge faces
+  TopTools_IndexedDataMapOfShapeListOfShape aMapEdgeFaces;
+  TopExp::MapShapesAndAncestors(myShape, TopAbs_EDGE, TopAbs_FACE, aMapEdgeFaces);
   // processing each shell
   TopExp_Explorer exps;
   for (exps.Init(myShape, TopAbs_SHELL); exps.More(); exps.Next()) {
     TopoDS_Shell aShell = TopoDS::Shell(exps.Current());
-
-    // creating map of edge faces
-    TopTools_IndexedDataMapOfShapeListOfShape aMapEdgeFaces;
-    TopExp::MapShapesAndAncestors(aShell, TopAbs_EDGE, TopAbs_FACE, aMapEdgeFaces);
-
+    
     // map of processed shapes
     TopTools_MapOfShape aProcessed;
-
-    //Handle(ShapeBuild_ReShape) aContext = new ShapeBuild_ReShape;
 
     Standard_Integer NbModif = 0;
     Standard_Boolean hasFailed = Standard_False;
@@ -897,6 +1177,8 @@ void ShapeUpgrade_UnifySameDomain::UnifyFaces()
 
           TopoDS_Edge anEdge = TopoDS::Edge(edges(1));
           edges.Remove(1);
+          // collect internal edges in separate wires
+          Standard_Boolean isInternal = (anEdge.Orientation() == TopAbs_INTERNAL);
 
           isEdge3d |= !BRep_Tool::Degenerated(anEdge);
           B.Add(aWire,anEdge);
@@ -910,6 +1192,10 @@ void ShapeUpgrade_UnifySameDomain::UnifyFaces()
             isNewFound = Standard_False;
             for(Standard_Integer j = 1; j <= edges.Length(); j++) {
               anEdge = TopoDS::Edge(edges(j));
+              // check if the current edge orientation corresponds to the first one
+              Standard_Boolean isCurrInternal = (anEdge.Orientation() == TopAbs_INTERNAL);
+              if (isCurrInternal != isInternal)
+                continue;
               TopExp::Vertices(anEdge,V1,V2);
               if(aVertices.Contains(V1) || aVertices.Contains(V2)) {
                 isEdge3d |= !BRep_Tool::Degenerated(anEdge);
@@ -1056,13 +1342,26 @@ void ShapeUpgrade_UnifySameDomain::UnifyFaces()
           //CompShell.SetContext( aContext );
           CompShell.SetContext( myContext );
 
-          TopTools_SequenceOfShape parts;
+          TopTools_SequenceOfShape parts, anIntWires;
           ShapeFix_SequenceOfWireSegment wires;
           for(TopExp_Explorer W_Exp(aCurrent,TopAbs_WIRE);W_Exp.More();W_Exp.Next()) {
-            Handle(ShapeExtend_WireData) sbwd =
-              new ShapeExtend_WireData ( TopoDS::Wire(W_Exp.Current() ));
-            ShapeFix_WireSegment seg ( sbwd, TopAbs_REVERSED );
-            wires.Append(seg);
+            const TopoDS_Wire& aWire = TopoDS::Wire(W_Exp.Current());
+            // check if the wire is ordinary (contains non-internal edges)
+            Standard_Boolean isInternal = Standard_True;
+            for (TopoDS_Iterator it(aWire); it.More() && isInternal; it.Next())
+              isInternal = (it.Value().Orientation() == TopAbs_INTERNAL);
+            if (isInternal)
+            {
+              // place internal wire separately
+              anIntWires.Append(aWire);
+            }
+            else
+            {
+              Handle(ShapeExtend_WireData) sbwd =
+                new ShapeExtend_WireData (aWire);
+              ShapeFix_WireSegment seg ( sbwd, TopAbs_REVERSED );
+              wires.Append(seg);
+            }
           }
 
           CompShell.DispatchWires ( parts,wires );
@@ -1071,10 +1370,12 @@ void ShapeUpgrade_UnifySameDomain::UnifyFaces()
             //aFixOrient.SetContext(aContext);
             aFixOrient.SetContext(myContext);
             aFixOrient.FixOrientation();
+            // put internal wires to faces
+            putIntWires(parts(j), anIntWires);
           }
 
           TopoDS_Shape CompRes;
-          if ( faces.Length() !=1 ) {
+          if ( parts.Length() !=1 ) {
             TopoDS_Shell S;
             B.MakeShell ( S );
             for ( i=1; i <= parts.Length(); i++ )
@@ -1101,8 +1402,10 @@ void ShapeUpgrade_UnifySameDomain::UnifyFaces()
 
         // remove the remaining faces
         for(i = 2; i <= faces.Length(); i++)
-          //aContext->Remove(faces(i));
+        { 
+          myOldShapes.Bind(faces(i), theResult);
           myContext->Remove(faces(i));
+        }
       }
     } // end processing each face
 
@@ -1159,7 +1462,6 @@ void ShapeUpgrade_UnifySameDomain::UnifyFaces()
 //function : UnifyEdges
 //purpose  : 
 //=======================================================================
-
 void ShapeUpgrade_UnifySameDomain::UnifyEdges()
 {
   Standard_Real Tol = Precision::Confusion();
@@ -1168,201 +1470,203 @@ void ShapeUpgrade_UnifySameDomain::UnifyEdges()
   Standard_Real myTolerance = Precision::Confusion();
   TopoDS_Shape aResult = myContext->Apply(myShape);
 
-  // processing each solid
-  TopAbs_ShapeEnum aType = TopAbs_SOLID;
-  TopExp_Explorer exps (myShape, aType);
-  if (!exps.More()) {
-    aType = TopAbs_SHELL;
-    exps.Init(myShape, aType);
+  TopTools_IndexedMapOfShape ChangedFaces;
+
+  // creating map of edge faces
+  TopTools_IndexedDataMapOfShapeListOfShape aMapEdgeFaces;
+  TopExp::MapShapesAndAncestors(myShape, TopAbs_EDGE, TopAbs_FACE, aMapEdgeFaces);
+  
+  // creating map of vertex edges
+  TopTools_IndexedDataMapOfShapeListOfShape aMapEdgesVertex;
+  TopExp::MapShapesAndAncestors(myShape, TopAbs_VERTEX, TopAbs_EDGE, aMapEdgesVertex);
+
+  //Handle(ShapeBuild_ReShape) aContext = new ShapeBuild_ReShape;
+  TopoDS_Shape aRes = myShape;
+  //aRes = aContext->Apply(aSolid);
+  aRes = myContext->Apply(myShape);
+  
+  TopTools_MapOfShape SharedVert;
+
+  
+  TopTools_IndexedMapOfShape anOldEdges;
+  TopExp::MapShapes(myInitShape, TopAbs_EDGE, anOldEdges);
+
+  TopTools_DataMapOfShapeShape NewEdges2OldEdges;
+  for (int i = 1; i <= anOldEdges.Extent(); i++)
+  {
+    TopoDS_Shape NewEdge = myContext->Apply(anOldEdges(i));
+    if (!NewEdge.IsNull())
+      NewEdges2OldEdges.Bind(NewEdge, anOldEdges(i));
   }
-  for (; exps.More(); exps.Next()) {
-    //TopoDS_Solid aSolid = TopoDS::Solid(exps.Current());
-    TopoDS_Shape aSolid = exps.Current();
 
-    TopTools_IndexedMapOfShape ChangedFaces;
+  TopExp_Explorer exp;
+  // processing separate wires
+  for (exp.Init(aRes, TopAbs_WIRE, TopAbs_FACE); exp.More(); exp.Next()) 
+  {
+    TopTools_SequenceOfShape SeqEdges;
+    TopExp_Explorer expE(exp.Current(), TopAbs_EDGE);
+    for (; expE.More(); expE.Next())
+      SeqEdges.Append(expE.Current());
+    SharedVert.Clear();
+    CheckSharedVertices(SeqEdges, aMapEdgesVertex, SharedVert); 
+    MergeSeq(SeqEdges, Tol, myConcatBSplines, myContext, myOldShapes, SharedVert, NewEdges2OldEdges);
+  }
 
-    // creating map of edge faces
-    TopTools_IndexedDataMapOfShapeListOfShape aMapEdgeFaces;
-    TopExp::MapShapesAndAncestors(aSolid, TopAbs_EDGE, TopAbs_FACE, aMapEdgeFaces);
-   
-    // creating map of vertex edges
-    TopTools_IndexedDataMapOfShapeListOfShape aMapEdgesVertex;
-    TopExp::MapShapesAndAncestors(aSolid, TopAbs_VERTEX, TopAbs_EDGE, aMapEdgesVertex);
-
-    //Handle(ShapeBuild_ReShape) aContext = new ShapeBuild_ReShape;
-    TopoDS_Shape aRes = aSolid;
-    //aRes = aContext->Apply(aSolid);
-    aRes = myContext->Apply(aSolid);
-
-    // processing each face
-    TopExp_Explorer exp;
-    for (exp.Init(aRes, TopAbs_FACE); exp.More(); exp.Next()) {
-      //TopoDS_Face aFace = TopoDS::Face(aContext->Apply(exp.Current().Oriented(TopAbs_FORWARD)));
-      TopoDS_Face aFace = TopoDS::Face(myContext->Apply(exp.Current().Oriented(TopAbs_FORWARD)));
-      TopTools_IndexedDataMapOfShapeListOfShape aMapFacesEdges;
-
-      for (TopExp_Explorer expe(aFace,TopAbs_EDGE); expe.More(); expe.Next()) {
-        TopoDS_Edge edge = TopoDS::Edge(expe.Current());
-        if (!aMapEdgeFaces.Contains(edge)) continue;
-        const TopTools_ListOfShape& aList = aMapEdgeFaces.FindFromKey(edge);
-        TopTools_ListIteratorOfListOfShape anIter(aList);
-        for ( ; anIter.More(); anIter.Next()) {
-          TopoDS_Face face = TopoDS::Face(anIter.Value());
-          //TopoDS_Face face1 = TopoDS::Face(aContext->Apply(anIter.Value()));
-          TopoDS_Face face1 = TopoDS::Face(myContext->Apply(anIter.Value()));
-          if (face1.IsSame(aFace)) continue;
-          if (aMapFacesEdges.Contains(face)) {
+  // processing each face
+  for (exp.Init(aRes, TopAbs_FACE); exp.More(); exp.Next()) {
+    //TopoDS_Face aFace = TopoDS::Face(aContext->Apply(exp.Current().Oriented(TopAbs_FORWARD)));
+    TopoDS_Face aFace = TopoDS::Face(myContext->Apply(exp.Current().Oriented(TopAbs_FORWARD)));
+    TopTools_IndexedDataMapOfShapeListOfShape aMapFacesEdges;
+    TopTools_SequenceOfShape aNonSharedEdges;
+    for (TopExp_Explorer expe(aFace,TopAbs_EDGE); expe.More(); expe.Next()) {
+      TopoDS_Edge edge = TopoDS::Edge(expe.Current());
+      if (!aMapEdgeFaces.Contains(edge)) continue;
+      const TopTools_ListOfShape& aList = aMapEdgeFaces.FindFromKey(edge);
+      TopTools_ListIteratorOfListOfShape anIter(aList);
+      Standard_Integer NbFacesPerEdge = aList.Extent();
+      for ( ; anIter.More(); anIter.Next()) {
+        TopoDS_Face face = TopoDS::Face(anIter.Value());
+        TopoDS_Face face1 = TopoDS::Face(myContext->Apply(anIter.Value()));
+        if (face1.IsSame(aFace) && NbFacesPerEdge != 1)
+          continue;
+        if (NbFacesPerEdge == 1)
+          //store non-shared edges separately 
+          aNonSharedEdges.Append(edge);
+        else 
+        {
+          if (aMapFacesEdges.Contains(face))
             aMapFacesEdges.ChangeFromKey(face).Append(edge);
-          }
-          else {
+          else 
+          {
             TopTools_ListOfShape ListEdges;
             ListEdges.Append(edge);
             aMapFacesEdges.Add(face,ListEdges);
           }
         }
       }
-
-      for (Standard_Integer i=1; i<=aMapFacesEdges.Extent(); i++) {
-        const TopTools_ListOfShape& ListEdges = aMapFacesEdges.FindFromIndex(i);
-        TopTools_SequenceOfShape SeqEdges;
-        ShapeAnalysis_Edge sae;
-        TopTools_ListIteratorOfListOfShape anIter(ListEdges);
-        Standard_Boolean IsSharedVertexPresent = Standard_False;
-        for ( ; anIter.More(); anIter.Next())
-          SeqEdges.Append(anIter.Value());
-        if (SeqEdges.Length()==1) 
-          continue;  
-        TopTools_SequenceOfShape SeqVertexes;
-        TopTools_MapOfShape  MapVertexes;
-        for (int k = 1; k <= SeqEdges.Length(); k++ )
-        {
-          TopoDS_Vertex aV1 = sae.FirstVertex(TopoDS::Edge(SeqEdges(k)));
-          TopoDS_Vertex aV2 = sae.LastVertex(TopoDS::Edge(SeqEdges(k)));
-          if (!MapVertexes.Add(aV1))
-            SeqVertexes.Append(aV1);
-          if (!MapVertexes.Add(aV2))
-            SeqVertexes.Append(aV2);
-        }
-
-        for (Standard_Integer k = 1; k <= SeqVertexes.Length() && !IsSharedVertexPresent; k++ )
-        {
-          const TopTools_ListOfShape& ListEdgesV1 = aMapEdgesVertex.FindFromKey(SeqVertexes(k));
-          TopTools_MapOfShape aMapOfEdges;
-          TopTools_ListIteratorOfListOfShape iter(ListEdgesV1);
-          for (; iter.More(); iter.Next())
-            aMapOfEdges.Add(iter.Value());
-          if (aMapOfEdges.Extent() > 2)
-            IsSharedVertexPresent = Standard_True;
-        }
-
-        if (IsSharedVertexPresent)
-          continue;
-        TopoDS_Edge E;
-        if ( MergeEdges(SeqEdges,aFace,Tol,myConcatBSplines,E) ) {
-          // now we have only one edge - aChain.Value(1)
-          // we have to replace old ListEdges with this new edge
-          //aContext->Replace(SeqEdges(1),E);
-          myContext->Replace(SeqEdges(1),E);
-          Standard_Integer j;
-          for (j = 2; j <= SeqEdges.Length(); j++) {
-            //aContext->Remove(SeqEdges(j));
-            myContext->Remove(SeqEdges(j));
-            //myOldNewMap.Bind(SeqEdges(j), E);
-          }
-          //for history
-          /*
-          for (j = 1; j <= SeqEdges.Length(); j++)
-          {
-            if (!myOldNewMap.IsBound(SeqEdges(j)))
-            {
-              TopTools_ListOfShape EmptyList;
-              myOldNewMap.Bind(SeqEdges(j), EmptyList);
-            }
-            myOldNewMap(SeqEdges(j)).Clear();
-            myOldNewMap(SeqEdges(j)).Append(E);
-          }
-          */
-          /////////////
-          
-          TopoDS_Face tmpF = TopoDS::Face(exp.Current());
-          if ( !ChangedFaces.Contains(tmpF) )
-            ChangedFaces.Add(tmpF);
-          tmpF = TopoDS::Face(aMapFacesEdges.FindKey(i));
-          if ( !ChangedFaces.Contains(tmpF) )
-            ChangedFaces.Add(tmpF);
-        }
-      }
-
-    } // end processing each face
-
-    // fix changed faces and replace them in the local context
-    for (Standard_Integer i=1; i<=ChangedFaces.Extent(); i++) {
-      //TopoDS_Face aFace = TopoDS::Face(aContext->Apply(ChangedFaces.FindKey(i)));
-      TopoDS_Face aFace = TopoDS::Face(myContext->Apply(ChangedFaces.FindKey(i)));
-      Handle(ShapeFix_Face) sff = new ShapeFix_Face(aFace);
-      sff->SetContext(myContext);
-      sff->SetPrecision(myTolerance);
-      sff->SetMinTolerance(myTolerance);
-      sff->SetMaxTolerance(Max(1.,myTolerance*1000.));
-      sff->Perform();
-      TopoDS_Shape aNewFace = sff->Face();
-      //aContext->Replace(aFace,aNewFace);
-      myContext->Replace(aFace,aNewFace);
-      //for history
-      /*
-      if (!myOldNewMap.IsBound(aFace))
-      {
-        TopTools_ListOfShape EmptyList;
-        myOldNewMap.Bind(aFace, EmptyList);
-      }
-      myOldNewMap(aFace).Clear();
-      myOldNewMap(aFace).Append(aNewFace);
-      */
-      /////////////
     }
+      
+    for (Standard_Integer i=1; i<=aMapFacesEdges.Extent(); i++)
+    {
+      const TopTools_ListOfShape& ListEdges = aMapFacesEdges.FindFromIndex(i);
+      TopTools_SequenceOfShape SeqEdges;
+      TopTools_ListIteratorOfListOfShape anIter(ListEdges);
+      for ( ; anIter.More(); anIter.Next())
+        SeqEdges.Append(anIter.Value());
+      if (SeqEdges.Length()==1) 
+        continue;  
 
-    if (ChangedFaces.Extent() > 0) {
-      // fix changed shell and replace it in the local context
-      //TopoDS_Shape aRes1 = aContext->Apply(aRes);
-      TopoDS_Shape aRes1 = myContext->Apply(aRes);
-      TopExp_Explorer expsh;
-      for (expsh.Init(aRes1, TopAbs_SHELL); expsh.More(); expsh.Next()) {
-        TopoDS_Shell aShell = TopoDS::Shell(expsh.Current());
-        Handle(ShapeFix_Shell) sfsh = new ShapeFix_Shell;
-        sfsh->FixFaceOrientation(aShell);
-        TopoDS_Shape aNewShell = sfsh->Shell();
-        //aContext->Replace(aShell,aNewShell);
-        myContext->Replace(aShell,aNewShell);
+      SharedVert.Clear();
+      CheckSharedVertices(SeqEdges, aMapEdgesVertex, SharedVert);
+      //if (!SharedVert.IsEmpty()) 
+      //  continue;
+      if ( MergeSeq(SeqEdges,Tol,myConcatBSplines, myContext, myOldShapes, SharedVert, NewEdges2OldEdges) )
+      {
         //for history
         /*
-        if (!myOldNewMap.IsBound(aShell))
+        for (j = 1; j <= SeqEdges.Length(); j++)
         {
-          TopTools_ListOfShape EmptyList;
-          myOldNewMap.Bind(aShell, EmptyList);
+          if (!myOldNewMap.IsBound(SeqEdges(j)))
+          {
+            TopTools_ListOfShape EmptyList;
+            myOldNewMap.Bind(SeqEdges(j), EmptyList);
+          }
+          myOldNewMap(SeqEdges(j)).Clear();
+          myOldNewMap(SeqEdges(j)).Append(E);
         }
-        myOldNewMap(aShell).Clear();
-        myOldNewMap(aShell).Append(aNewShell);
         */
         /////////////
+        
+        TopoDS_Face tmpF = TopoDS::Face(exp.Current());
+        if ( !ChangedFaces.Contains(tmpF) )
+          ChangedFaces.Add(tmpF);
+        tmpF = TopoDS::Face(aMapFacesEdges.FindKey(i));
+        if ( !ChangedFaces.Contains(tmpF) )
+          ChangedFaces.Add(tmpF);
       }
-      //TopoDS_Shape aRes2 = aContext->Apply(aRes1);
-      TopoDS_Shape aRes2 = myContext->Apply(aRes1);
-      // put new solid into global context
-      myContext->Replace(aSolid,aRes2);
+    }
+    
+    if ( aNonSharedEdges.Length() > 1 )
+    {
+      SharedVert.Clear();
+      CheckSharedVertices(aNonSharedEdges, aMapEdgesVertex, SharedVert); 
+      if ( MergeSeq(aNonSharedEdges, Tol, myConcatBSplines, myContext, myOldShapes, SharedVert, NewEdges2OldEdges) )
+      {
+        TopoDS_Face tmpF = TopoDS::Face(exp.Current());
+        if ( !ChangedFaces.Contains(tmpF) )
+          ChangedFaces.Add(tmpF);
+      }
+    }
+
+  } // end processing each face
+
+  // fix changed faces and replace them in the local context
+  for (Standard_Integer i=1; i<=ChangedFaces.Extent(); i++) {
+    //TopoDS_Face aFace = TopoDS::Face(aContext->Apply(ChangedFaces.FindKey(i)));
+    TopoDS_Face aFace = TopoDS::Face(myContext->Apply(ChangedFaces.FindKey(i)));
+    if (aFace.IsNull())
+      continue;
+    Handle(ShapeFix_Face) sff = new ShapeFix_Face(aFace);
+    sff->SetContext(myContext);
+    sff->SetPrecision(myTolerance);
+    sff->SetMinTolerance(myTolerance);
+    sff->SetMaxTolerance(Max(1.,myTolerance*1000.));
+    sff->Perform();
+    TopoDS_Shape aNewFace = sff->Face();
+    //aContext->Replace(aFace,aNewFace);
+    myContext->Replace(aFace,aNewFace);
+    //for history
+    /*
+    if (!myOldNewMap.IsBound(aFace))
+    {
+      TopTools_ListOfShape EmptyList;
+      myOldNewMap.Bind(aFace, EmptyList);
+    }
+    myOldNewMap(aFace).Clear();
+    myOldNewMap(aFace).Append(aNewFace);
+    */
+    /////////////
+  }
+
+  if (ChangedFaces.Extent() > 0) {
+    // fix changed shell and replace it in the local context
+    //TopoDS_Shape aRes1 = aContext->Apply(aRes);
+    TopoDS_Shape aRes1 = myContext->Apply(aRes);
+    TopExp_Explorer expsh;
+    for (expsh.Init(aRes1, TopAbs_SHELL); expsh.More(); expsh.Next()) {
+      TopoDS_Shell aShell = TopoDS::Shell(expsh.Current());
+      Handle(ShapeFix_Shell) sfsh = new ShapeFix_Shell;
+      sfsh->FixFaceOrientation(aShell);
+      TopoDS_Shape aNewShell = sfsh->Shell();
+      //aContext->Replace(aShell,aNewShell);
+      myContext->Replace(aShell,aNewShell);
       //for history
       /*
-      if (!myOldNewMap.IsBound(aSolid))
+      if (!myOldNewMap.IsBound(aShell))
       {
         TopTools_ListOfShape EmptyList;
-        myOldNewMap.Bind(aSolid, EmptyList);
+        myOldNewMap.Bind(aShell, EmptyList);
       }
-      myOldNewMap(aSolid).Clear();
-      myOldNewMap(aSolid).Append(aRes2);
+      myOldNewMap(aShell).Clear();
+      myOldNewMap(aShell).Append(aNewShell);
       */
       /////////////
     }
-
-  } // end processing each solid
+    //TopoDS_Shape aRes2 = aContext->Apply(aRes1);
+    TopoDS_Shape aRes2 = myContext->Apply(aRes1);
+    myContext->Replace(myShape,aRes2);
+    //for history
+    /*
+    if (!myOldNewMap.IsBound(aSolid))
+    {
+      TopTools_ListOfShape EmptyList;
+      myOldNewMap.Bind(aSolid, EmptyList);
+    }
+    myOldNewMap(aSolid).Clear();
+    myOldNewMap(aSolid).Append(aRes2);
+    */
+    /////////////
+  }
 
   myShape = myContext->Apply(myShape);
 }
@@ -1418,10 +1722,9 @@ const TopoDS_Shape& ShapeUpgrade_UnifySameDomain::Shape() const
 TopoDS_Shape ShapeUpgrade_UnifySameDomain::Generated(const TopoDS_Shape& aShape) const
 {
   TopoDS_Shape aNewShape = myContext->Apply(aShape);
-  /*
+
   if (aNewShape.IsNull())
-    aNewShape = myOldNewMap(aShape);
-  */
+    aNewShape = myContext->Apply(myOldShapes(aShape));
   
   return aNewShape;
 }

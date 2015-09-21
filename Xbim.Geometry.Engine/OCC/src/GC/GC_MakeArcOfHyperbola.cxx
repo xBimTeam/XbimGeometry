@@ -14,10 +14,14 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <GC_MakeArcOfHyperbola.ixx>
-#include <Geom_Hyperbola.hxx>
-#include <StdFail_NotDone.hxx>
+
 #include <ElCLib.hxx>
+#include <GC_MakeArcOfHyperbola.hxx>
+#include <Geom_Hyperbola.hxx>
+#include <Geom_TrimmedCurve.hxx>
+#include <gp_Hypr.hxx>
+#include <gp_Pnt.hxx>
+#include <StdFail_NotDone.hxx>
 
 GC_MakeArcOfHyperbola::
   GC_MakeArcOfHyperbola(const gp_Hypr& Hypr   ,
@@ -58,14 +62,3 @@ const Handle(Geom_TrimmedCurve)& GC_MakeArcOfHyperbola::Value() const
   StdFail_NotDone_Raise_if(TheError != gce_Done,"");
   return TheArc;
 }
-
-const Handle(Geom_TrimmedCurve)& GC_MakeArcOfHyperbola::Operator() const 
-{
-  return Value();
-}
-
-GC_MakeArcOfHyperbola::operator Handle(Geom_TrimmedCurve) () const
-{
-  return Value();
-}
-

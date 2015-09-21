@@ -14,16 +14,18 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <Geom_CartesianPoint.ixx>
+
+#include <Geom_CartesianPoint.hxx>
+#include <Geom_Geometry.hxx>
+#include <gp_Pnt.hxx>
+#include <gp_Trsf.hxx>
+#include <Standard_Type.hxx>
 
 typedef Geom_CartesianPoint         CartesianPoint;
-typedef Handle(Geom_CartesianPoint) Handle(CartesianPoint);
 typedef gp_Ax1  Ax1;
 typedef gp_Ax2  Ax2;
 typedef gp_Vec  Vec;
 typedef gp_Trsf Trsf;
-
-
 
 //=======================================================================
 //function : Geom_CartesianPoint
@@ -49,7 +51,7 @@ const Standard_Real X, const Standard_Real Y, const Standard_Real Z) : gpPnt (X,
 
 Handle(Geom_Geometry) Geom_CartesianPoint::Copy() const {
 
-  Handle(CartesianPoint) P;
+  Handle(Geom_CartesianPoint) P;
   P = new CartesianPoint (gpPnt);
   return P; 
 }

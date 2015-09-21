@@ -14,20 +14,24 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <BRepLib_MakeSolid.ixx>
 
-#include <TopoDS.hxx>
 #include <BRep_Builder.hxx>
+#include <BRepLib_MakeSolid.hxx>
+#include <StdFail_NotDone.hxx>
 #include <TopExp_Explorer.hxx>
-#include <TopTools_MapOfShape.hxx>
-#include <TopTools_MapIteratorOfMapOfShape.hxx>
+#include <TopoDS.hxx>
+#include <TopoDS_CompSolid.hxx>
+#include <TopoDS_Face.hxx>
+#include <TopoDS_Shell.hxx>
+#include <TopoDS_Solid.hxx>
 #include <TopTools_ListIteratorOfListOfShape.hxx>
+#include <TopTools_MapIteratorOfMapOfShape.hxx>
+#include <TopTools_MapOfShape.hxx>
 
 //=======================================================================
 //function : BRepLib_MakeSolid
 //purpose  : 
 //=======================================================================
-
 BRepLib_MakeSolid::BRepLib_MakeSolid()
 {
   BRep_Builder B;
@@ -166,7 +170,7 @@ void  BRepLib_MakeSolid::Add(const TopoDS_Shell& S)
 //purpose  : 
 //=======================================================================
 
-const TopoDS_Solid&  BRepLib_MakeSolid::Solid()const 
+const TopoDS_Solid&  BRepLib_MakeSolid::Solid()
 {
   return TopoDS::Solid(Shape());
 }
@@ -178,7 +182,7 @@ const TopoDS_Solid&  BRepLib_MakeSolid::Solid()const
 //purpose  : 
 //=======================================================================
 
-BRepLib_MakeSolid::operator TopoDS_Solid() const
+BRepLib_MakeSolid::operator TopoDS_Solid()
 {
   return TopoDS::Solid(Shape());
 }

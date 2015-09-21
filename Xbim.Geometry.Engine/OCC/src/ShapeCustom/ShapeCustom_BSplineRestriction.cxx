@@ -14,63 +14,72 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <ShapeAnalysis_Curve.hxx>
-#include <ShapeCustom_BSplineRestriction.ixx>
-#include <Geom_BSplineSurface.hxx>
-#include <GeomConvert_ApproxSurface.hxx>
-#include <Geom2dConvert_ApproxCurve.hxx>
-#include <GeomConvert_ApproxCurve.hxx>
-#include <BRepTools_Modifier.hxx>
-#include <BRep_Tool.hxx>
-#include <Geom_TrimmedCurve.hxx>
-#include <Geom_OffsetCurve.hxx>
-#include <Geom2d_OffsetCurve.hxx>
-#include <Geom2d_TrimmedCurve.hxx>
-#include <Geom_SurfaceOfRevolution.hxx>
-#include <Geom_SurfaceOfLinearExtrusion.hxx>
-#include <Geom_RectangularTrimmedSurface.hxx>
-#include <Geom_OffsetSurface.hxx>
+
 #include <BRep_Builder.hxx>
-#include <gp_Ax1.hxx>
-#include <TopoDS.hxx>
-#include <Standard_Failure.hxx>
-#include <Standard_ErrorHandler.hxx>
-#include <Geom_BezierSurface.hxx>
-#include <Geom_BezierCurve.hxx>
+#include <BRep_GCurve.hxx>
+#include <BRep_ListIteratorOfListOfCurveRepresentation.hxx>
+#include <BRep_TEdge.hxx>
+#include <BRep_Tool.hxx>
+#include <BRepTools.hxx>
+#include <BRepTools_Modifier.hxx>
 #include <Geom2d_BezierCurve.hxx>
 #include <Geom2d_BSplineCurve.hxx>
+#include <Geom2d_Conic.hxx>
+#include <Geom2d_Curve.hxx>
+#include <Geom2d_Line.hxx>
+#include <Geom2d_OffsetCurve.hxx>
+#include <Geom2d_TrimmedCurve.hxx>
+#include <Geom2dConvert.hxx>
+#include <Geom2dConvert_ApproxCurve.hxx>
+#include <Geom_BezierCurve.hxx>
+#include <Geom_BezierSurface.hxx>
 #include <Geom_BSplineCurve.hxx>
-#include <BRep_TEdge.hxx>
-#include <BRep_ListIteratorOfListOfCurveRepresentation.hxx>
-#include <BRep_ListIteratorOfListOfCurveRepresentation.hxx>
-#include <BRep_ListIteratorOfListOfCurveRepresentation.hxx>
-#include <BRep_GCurve.hxx>
-#include <TColgp_Array1OfPnt.hxx>
-#include <TColgp_Array1OfPnt.hxx>
+#include <Geom_BSplineSurface.hxx>
+#include <Geom_Conic.hxx>
+#include <Geom_ConicalSurface.hxx>
+#include <Geom_Curve.hxx>
+#include <Geom_CylindricalSurface.hxx>
+#include <Geom_ElementarySurface.hxx>
+#include <Geom_Line.hxx>
+#include <Geom_OffsetCurve.hxx>
+#include <Geom_OffsetSurface.hxx>
+#include <Geom_Plane.hxx>
+#include <Geom_RectangularTrimmedSurface.hxx>
+#include <Geom_SphericalSurface.hxx>
+#include <Geom_Surface.hxx>
+#include <Geom_SurfaceOfLinearExtrusion.hxx>
+#include <Geom_SurfaceOfRevolution.hxx>
+#include <Geom_SweptSurface.hxx>
+#include <Geom_ToroidalSurface.hxx>
+#include <Geom_TrimmedCurve.hxx>
+#include <GeomAdaptor_Surface.hxx>
+#include <GeomConvert.hxx>
+#include <GeomConvert_ApproxCurve.hxx>
+#include <GeomConvert_ApproxSurface.hxx>
+#include <gp_Ax1.hxx>
+#include <gp_Pnt.hxx>
+#include <Message_Msg.hxx>
 #include <Precision.hxx>
+#include <ShapeAnalysis.hxx>
+#include <ShapeAnalysis_Curve.hxx>
+#include <ShapeConstruct.hxx>
+#include <ShapeCustom_BSplineRestriction.hxx>
+#include <ShapeCustom_RestrictionParameters.hxx>
+#include <Standard_ErrorHandler.hxx>
+#include <Standard_Failure.hxx>
+#include <Standard_Type.hxx>
+#include <TColgp_Array1OfPnt.hxx>
+#include <TColgp_Array2OfPnt.hxx>
 #include <TColgp_HArray1OfPnt.hxx>
 #include <TColgp_HArray1OfPnt2d.hxx>
-#include <GeomAdaptor_Surface.hxx>
-#include <BRepTools.hxx>
-#include <TColgp_Array1OfPnt.hxx>
-#include <TColStd_Array1OfReal.hxx>
 #include <TColStd_Array1OfInteger.hxx>
-#include <TColgp_Array2OfPnt.hxx>
+#include <TColStd_Array1OfReal.hxx>
 #include <TColStd_Array2OfReal.hxx>
-#include <ShapeConstruct.hxx>
-#include <Geom_Plane.hxx>
-#include <Geom2d_Line.hxx>
-#include <Geom2d_Conic.hxx>
-#include <Geom2dConvert.hxx>
-#include <Geom_Line.hxx>
-#include <Geom_Conic.hxx>
-#include <GeomConvert.hxx>
-#include <Geom_ConicalSurface.hxx>
-#include <Geom_SphericalSurface.hxx>
-#include <Geom_CylindricalSurface.hxx>
-#include <Geom_ToroidalSurface.hxx>
-#include <ShapeAnalysis.hxx>
-#include <Message_Msg.hxx>
+#include <TopLoc_Location.hxx>
+#include <TopoDS.hxx>
+#include <TopoDS_Edge.hxx>
+#include <TopoDS_Face.hxx>
+#include <TopoDS_Vertex.hxx>
 
 static GeomAbs_Shape IntegerToGeomAbsShape(const Standard_Integer i)
 {
@@ -832,7 +841,7 @@ Standard_Boolean ShapeCustom_BSplineRestriction::NewCurve(const TopoDS_Edge& E,
 //purpose  : 
 //=======================================================================
 
-Standard_Boolean ShapeCustom_BSplineRestriction::ConvertCurve(Handle(Geom_Curve)& aCurve,
+Standard_Boolean ShapeCustom_BSplineRestriction::ConvertCurve(const Handle(Geom_Curve)& aCurve,
                                                               Handle(Geom_Curve)& C,
                                                               const Standard_Boolean IsConvert,
                                                               const Standard_Real First,
@@ -881,7 +890,7 @@ Standard_Boolean ShapeCustom_BSplineRestriction::ConvertCurve(Handle(Geom_Curve)
 
   if (aCurve->IsKind(STANDARD_TYPE(Geom_Conic)) && myParameters->ConvertCurve3d()) {
     Handle(Geom_BSplineCurve) aBSpline;
-    Handle(Geom_TrimmedCurve) tcurve = new Geom_TrimmedCurve(aCurve,First,Last); //protection agains parabols ets
+    Handle(Geom_Curve) tcurve = new Geom_TrimmedCurve(aCurve,First,Last); //protection agains parabols ets
     GeomConvert_ApproxCurve approx (tcurve, myTol3d/*Precision::Approximation()*/, myContinuity2d, myNbMaxSeg, 6 );
     if ( approx.HasResult() )
       aBSpline = Handle(Geom_BSplineCurve)::DownCast(approx.Curve());
@@ -910,7 +919,7 @@ Standard_Boolean ShapeCustom_BSplineRestriction::ConvertCurve(Handle(Geom_Curve)
   }
 
   if (aCurve->IsKind(STANDARD_TYPE(Geom_BezierCurve)) && myParameters->ConvertCurve3d()) {
-    Handle(Geom_BSplineCurve) aBSpline 
+    Handle(Geom_Curve) aBSpline 
       = GeomConvert::CurveToBSplineCurve(aCurve,Convert_QuasiAngular);
     Handle(Geom_Curve) ResCurve;
     if(ConvertCurve(aBSpline,ResCurve,IsConvert,First,Last,TolCur,Standard_False)) {
@@ -1140,7 +1149,7 @@ Standard_Boolean ShapeCustom_BSplineRestriction::NewCurve2d(const TopoDS_Edge& E
 //purpose  : 
 //=======================================================================
 
-Standard_Boolean ShapeCustom_BSplineRestriction::ConvertCurve2d(Handle(Geom2d_Curve)& aCurve,
+Standard_Boolean ShapeCustom_BSplineRestriction::ConvertCurve2d(const Handle(Geom2d_Curve)& aCurve,
                                                                 Handle(Geom2d_Curve)& C, 
                                                                 const Standard_Boolean IsConvert,
                                                                 const Standard_Real First, 
@@ -1188,7 +1197,7 @@ Standard_Boolean ShapeCustom_BSplineRestriction::ConvertCurve2d(Handle(Geom2d_Cu
 
   if (aCurve->IsKind(STANDARD_TYPE(Geom2d_Conic)) && myParameters->ConvertCurve2d()) {
     Handle(Geom2d_BSplineCurve) aBSpline2d;
-    Handle(Geom2d_TrimmedCurve) tcurve = new Geom2d_TrimmedCurve(aCurve,First,Last); //protection agains parabols ets
+    Handle(Geom2d_Curve) tcurve = new Geom2d_TrimmedCurve(aCurve,First,Last); //protection agains parabols ets
     Geom2dConvert_ApproxCurve approx (tcurve, myTol2d,myContinuity2d,myNbMaxSeg , 6 );
     if ( approx.HasResult() )
       aBSpline2d = Handle(Geom2d_BSplineCurve)::DownCast(approx.Curve());
@@ -1217,7 +1226,7 @@ Standard_Boolean ShapeCustom_BSplineRestriction::ConvertCurve2d(Handle(Geom2d_Cu
   }
 
   if (aCurve->IsKind(STANDARD_TYPE(Geom2d_BezierCurve)) && myParameters->ConvertCurve2d()) {
-    Handle(Geom2d_BSplineCurve) aBSpline2d 
+    Handle(Geom2d_Curve) aBSpline2d 
       = Geom2dConvert::CurveToBSplineCurve(aCurve,Convert_QuasiAngular);
     Handle(Geom2d_Curve) ResCurve;
     if(ConvertCurve2d(aBSpline2d,ResCurve,IsConvert,First,Last,TolCur,Standard_False)) {

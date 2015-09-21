@@ -14,18 +14,24 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <GeomFill_BoundWithSurf.ixx>
+
+#include <Adaptor2d_HCurve2d.hxx>
+#include <Adaptor3d_CurveOnSurface.hxx>
+#include <Adaptor3d_HSurface.hxx>
+#include <GeomFill_BoundWithSurf.hxx>
+#include <gp_Pnt.hxx>
+#include <gp_Pnt2d.hxx>
+#include <gp_Vec.hxx>
+#include <gp_Vec2d.hxx>
 #include <Law.hxx>
 #include <Law_BSpFunc.hxx>
-#include <Adaptor3d_HSurface.hxx>
-#include <Adaptor2d_HCurve2d.hxx>
-#include <gp_Pnt2d.hxx>
-#include <gp_Vec2d.hxx>
+#include <Law_Function.hxx>
+#include <Standard_Type.hxx>
+
 //=======================================================================
 //function : GeomFill_BoundWithSurf
 //purpose  : 
 //=======================================================================
-
 GeomFill_BoundWithSurf::GeomFill_BoundWithSurf
 (const Adaptor3d_CurveOnSurface& CurveOnSurf,
  const Standard_Real           Tol3d,
@@ -175,7 +181,7 @@ void GeomFill_BoundWithSurf::Reparametrize(const Standard_Real First,
 						 HasDF,HasDL,DF,DL,
 						 Rev,30);
   myPar = new Law_BSpFunc();
-  (*((Handle(Law_BSpFunc)*) &myPar))->SetCurve(curve);
+  Handle(Law_BSpFunc)::DownCast (myPar)->SetCurve(curve);
 }
 
 //=======================================================================

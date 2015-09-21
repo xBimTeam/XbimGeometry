@@ -14,46 +14,55 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <ShapeConstruct.ixx>
-#include <Standard_Failure.hxx>
-#include <Standard_ErrorHandler.hxx>
-#include <Geom_Conic.hxx>
-#include <Geom_TrimmedCurve.hxx>
-#include <GeomConvert_ApproxCurve.hxx>
-#include <GeomConvert.hxx>
+
+#include <BRep_Builder.hxx>
+#include <BRep_Tool.hxx>
+#include <Geom2d_BSplineCurve.hxx>
 #include <Geom2d_Conic.hxx>
+#include <Geom2d_Curve.hxx>
 #include <Geom2d_TrimmedCurve.hxx>
-#include <Geom2dConvert_ApproxCurve.hxx>
 #include <Geom2dConvert.hxx>
-#include <Geom_RectangularTrimmedSurface.hxx>
-#include <Geom_SurfaceOfLinearExtrusion.hxx>
-#include <TColgp_Array1OfPnt.hxx>
-#include <TColStd_Array1OfReal.hxx>
-#include <TColStd_Array1OfInteger.hxx>
-#include <TColgp_Array2OfPnt.hxx>
-#include <TColStd_Array2OfReal.hxx>
-#include <GeomConvert_ApproxSurface.hxx>
-#include <Geom_SurfaceOfRevolution.hxx>
+#include <Geom2dConvert_ApproxCurve.hxx>
+#include <Geom_BSplineCurve.hxx>
+#include <Geom_BSplineSurface.hxx>
+#include <Geom_Conic.hxx>
+#include <Geom_Curve.hxx>
+#include <Geom_ElementarySurface.hxx>
 #include <Geom_OffsetCurve.hxx>
-#include <ShapeConstruct_Curve.hxx>
-#include <Precision.hxx>
+#include <Geom_Plane.hxx>
+#include <Geom_RectangularTrimmedSurface.hxx>
+#include <Geom_Surface.hxx>
+#include <Geom_SurfaceOfLinearExtrusion.hxx>
+#include <Geom_SurfaceOfRevolution.hxx>
+#include <Geom_TrimmedCurve.hxx>
+#include <GeomAPI.hxx>
+#include <GeomConvert.hxx>
+#include <GeomConvert_ApproxCurve.hxx>
+#include <GeomConvert_ApproxSurface.hxx>
 #include <GeomConvert_CompCurveToBSplineCurve.hxx>
 #include <gp_Pln.hxx>
 #include <gp_Vec.hxx>
-#include <GeomAPI.hxx>
-#include <TopTools_HSequenceOfShape.hxx>
+#include <Precision.hxx>
 #include <ShapeAnalysis_Edge.hxx>
-#include <BRep_Builder.hxx>
-#include <BRep_Tool.hxx>
-#include <Geom_Plane.hxx>
+#include <ShapeConstruct.hxx>
+#include <ShapeConstruct_Curve.hxx>
+#include <Standard_ErrorHandler.hxx>
+#include <Standard_Failure.hxx>
+#include <TColgp_Array1OfPnt.hxx>
+#include <TColgp_Array2OfPnt.hxx>
+#include <TColStd_Array1OfInteger.hxx>
+#include <TColStd_Array1OfReal.hxx>
+#include <TColStd_Array2OfReal.hxx>
 #include <TopAbs_Orientation.hxx>
 #include <TopoDS.hxx>
+#include <TopoDS_Edge.hxx>
+#include <TopoDS_Face.hxx>
+#include <TopTools_HSequenceOfShape.hxx>
 
 //=======================================================================
 //function : ConvertCurveToBSpline
 //purpose  : 
 //=======================================================================
-
 Handle(Geom_BSplineCurve) ShapeConstruct::ConvertCurveToBSpline(const Handle(Geom_Curve)& C3D,
 								const Standard_Real First,
 								const Standard_Real Last,
@@ -70,7 +79,7 @@ Handle(Geom_BSplineCurve) ShapeConstruct::ConvertCurveToBSpline(const Handle(Geo
     if(C3D->IsKind(STANDARD_TYPE(Geom_Conic))) 
       MaxDeg = Min(MaxDeg,6);
  
-    Handle(Geom_TrimmedCurve) tcurve = new Geom_TrimmedCurve(C3D,First,Last); //protection agains parabols ets
+    Handle(Geom_Curve) tcurve = new Geom_TrimmedCurve(C3D,First,Last); //protection agains parabols ets
     try {
       OCC_CATCH_SIGNALS
       GeomConvert_ApproxCurve approx (tcurve, Tol3d, Continuity, MaxSegments, MaxDeg);
@@ -105,7 +114,7 @@ Handle(Geom2d_BSplineCurve) ShapeConstruct::ConvertCurveToBSpline(const Handle(G
 {
   Handle(Geom2d_BSplineCurve) aBSpline2d;
   if(C2D->IsKind(STANDARD_TYPE(Geom2d_Conic))) {
-    Handle(Geom2d_TrimmedCurve) tcurve = new Geom2d_TrimmedCurve(C2D,First,Last); //protection agains parabols ets
+    Handle(Geom2d_Curve) tcurve = new Geom2d_TrimmedCurve(C2D,First,Last); //protection agains parabols ets
     Geom2dConvert_ApproxCurve approx (tcurve, Tol2d, Continuity, MaxSegments, MaxDegree);
     if ( approx.HasResult() )
       aBSpline2d = Handle(Geom2d_BSplineCurve)::DownCast(approx.Curve());
@@ -218,7 +227,7 @@ Handle(Geom_BSplineSurface) ShapeConstruct::ConvertSurfaceToBSpline(const Handle
     }
   }
     
-  Handle(Geom_RectangularTrimmedSurface) aSurface = new Geom_RectangularTrimmedSurface(S,UF,UL,VF,VL);
+  Handle(Geom_Surface) aSurface = new Geom_RectangularTrimmedSurface(S,UF,UL,VF,VL);
   Handle(Geom_BSplineSurface) errSpl;
   for(Standard_Integer cnt = (Continuity > GeomAbs_C3 ? GeomAbs_C3: Continuity); cnt >= 0 ; ) {
     try {

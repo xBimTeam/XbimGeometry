@@ -29,7 +29,7 @@ public:
 	void StopTimer() { aTimer.Stop(); }
 	Standard_Real ElapsedTime() { return aTimer.ElapsedTime(); }
 	bool TimedOut() { return timedOut; }
-	DEFINE_STANDARD_RTTI(XbimProgressIndicator)
+	DEFINE_STANDARD_RTTI(XbimProgressIndicator, Message_ProgressIndicator)
 };
 #endif
 

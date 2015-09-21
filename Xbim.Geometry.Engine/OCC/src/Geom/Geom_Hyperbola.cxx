@@ -14,27 +14,30 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <Geom_Hyperbola.ixx>
 
-#include <Precision.hxx>
-#include <gp_XYZ.hxx>
 #include <ElCLib.hxx>
-#include <Standard_RangeError.hxx>
+#include <Geom_Geometry.hxx>
+#include <Geom_Hyperbola.hxx>
+#include <gp_Ax1.hxx>
+#include <gp_Ax2.hxx>
+#include <gp_Hypr.hxx>
+#include <gp_Pnt.hxx>
+#include <gp_Trsf.hxx>
+#include <gp_Vec.hxx>
+#include <gp_XYZ.hxx>
+#include <Precision.hxx>
 #include <Standard_ConstructionError.hxx>
-
+#include <Standard_DomainError.hxx>
+#include <Standard_RangeError.hxx>
+#include <Standard_Type.hxx>
 
 typedef Geom_Hyperbola         Hyperbola;
-typedef Handle(Geom_Hyperbola) Handle(Hyperbola);
 typedef gp_Ax1  Ax1;
 typedef gp_Ax2  Ax2;
 typedef gp_Pnt  Pnt;
 typedef gp_Vec  Vec;
 typedef gp_Trsf Trsf;
 typedef gp_XYZ  XYZ;
-
-
-
-
 
 //=======================================================================
 //function : Copy
@@ -43,7 +46,7 @@ typedef gp_XYZ  XYZ;
 
 Handle(Geom_Geometry) Geom_Hyperbola::Copy() const {
 
-  Handle(Hyperbola) H;
+  Handle(Geom_Hyperbola) H;
   H = new Hyperbola (pos, majorRadius, minorRadius);
   return H;
 }

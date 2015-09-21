@@ -17,32 +17,30 @@
 //  modified by Edward AGAPOV (eap) Tue Jan 22 2002 (bug occ53)
 //  - improve SectionLine table management (avoid memory reallocation)
 //  - some protection against arrays overflow
-
 //  modified by Edward AGAPOV (eap) Thu Feb 14 2002 (occ139)
 //  - make Section Line parts rightly connected (prepend 2nd part to the 1st)
 //  - TriangleShape() for debugging purpose
-
 //  Modified by skv - Thu Sep 25 17:42:42 2003 OCC567
 //  modified by ofv Thu Apr  8 14:58:13 2004 fip
 
-
-#include <IntPolyh_MaillageAffinage.ixx>
-
-#include <Precision.hxx>
-#include <gp_Pnt.hxx>
+#include <Adaptor3d_HSurface.hxx>
+#include <Bnd_BoundSortBox.hxx>
+#include <Bnd_Box.hxx>
+#include <Bnd_HArray1OfBox.hxx>
 #include <gp.hxx>
-
+#include <gp_Pnt.hxx>
+#include <IntCurveSurface_ThePolyhedronOfHInter.hxx>
+#include <IntPolyh_ArrayOfCouples.hxx>
+#include <IntPolyh_Couple.hxx>
+#include <IntPolyh_Edge.hxx>
+#include <IntPolyh_MaillageAffinage.hxx>
+#include <IntPolyh_Point.hxx>
+#include <IntPolyh_SectionLine.hxx>
+#include <IntPolyh_StartPoint.hxx>
+#include <IntPolyh_Triangle.hxx>
+#include <Precision.hxx>
 #include <TColStd_ListIteratorOfListOfInteger.hxx>
 
-#include <Bnd_BoundSortBox.hxx>
-#include <Bnd_HArray1OfBox.hxx> 
-
-#include <IntCurveSurface_ThePolyhedronOfHInter.hxx>
-
-#include <IntPolyh_ArrayOfCouples.hxx>
-#include <IntPolyh_Edge.hxx>
-#include <IntPolyh_Couple.hxx>
-#include <TColStd_DataMapOfIntegerInteger.hxx>
 static Standard_Real MyTolerance=10.0e-7;
 static Standard_Real MyConfusionPrecision=10.0e-12;
 static Standard_Real SquareMyConfusionPrecision=10.0e-24;
@@ -202,7 +200,7 @@ void IntPolyh_MaillageAffinage::FillArrayOfPnt
   Standard_Integer NbSamplesU, NbSamplesV, i, aNbSamplesU1, aNbSamplesV1;
   Standard_Real u0, u1, v0, v1, aU, aV, dU, dV;
   //
-  const Handle(Adaptor3d_HSurface&) MaSurface=(SurfID==1)? MaSurface1 : MaSurface2;
+  const Handle(Adaptor3d_HSurface)& MaSurface=(SurfID==1)? MaSurface1 : MaSurface2;
   NbSamplesU=(SurfID==1)? NbSamplesU1:NbSamplesU2;
   NbSamplesV=(SurfID==1)? NbSamplesV1:NbSamplesV2;
   //
@@ -782,8 +780,28 @@ void IntPolyh_MaillageAffinage::FillArrayOfTriangles
 //purpose  : fill the  edge fields in  Triangle object  for the
 //           two array of triangles.
 //=======================================================================
-void IntPolyh_MaillageAffinage::LinkEdges2Triangles()
+void IntPolyh_MaillageAffinage::LinkEdges2Triangles() 
 {
+	//SRL code below has bee optimised needs to go in to OCC
+  /*const Standard_Integer FinTT1 = TTriangles1.NbItems();
+  const Standard_Integer FinTT2 = TTriangles2.NbItems();
+
+  for(Standard_Integer uiui1=0; uiui1<FinTT1; uiui1++) {
+    IntPolyh_Triangle & MyTriangle1=TTriangles1[uiui1];
+    if ( (MyTriangle1.FirstEdge()) == -1 ) {
+      MyTriangle1.SetEdgeandOrientation(1,TEdges1);
+      MyTriangle1.SetEdgeandOrientation(2,TEdges1);
+      MyTriangle1.SetEdgeandOrientation(3,TEdges1);
+    }
+  }
+  for(Standard_Integer uiui2=0; uiui2<FinTT2; uiui2++) {
+    IntPolyh_Triangle & MyTriangle2=TTriangles2[uiui2];
+    if ( (MyTriangle2.FirstEdge()) == -1 ) {
+      MyTriangle2.SetEdgeandOrientation(1,TEdges2);
+      MyTriangle2.SetEdgeandOrientation(2,TEdges2);
+      MyTriangle2.SetEdgeandOrientation(3,TEdges2);
+    }
+  }*/
 	const Standard_Integer FinTT1 = TTriangles1.NbItems();
 	const Standard_Integer FinTT2 = TTriangles2.NbItems();
 	int totalSize1 = TEdges1.NbItems();
@@ -792,7 +810,7 @@ void IntPolyh_MaillageAffinage::LinkEdges2Triangles()
 	if ((totalSize1 < _UI16_MAX) && (totalSize2 < _UI16_MAX)) //only do it if we don't exceed the size of the short integer
 	{
 		TColStd_DataMapOfIntegerInteger maps1(totalSize1);
-		for (size_t i = 0; i < TEdges1.NbItems(); i++) {
+		for (Standard_Integer i = 0; i < TEdges1.NbItems(); i++) {
 			IntPolyh_Edge & edge = TEdges1[i];
 			unsigned short fp = (unsigned short)edge.FirstPoint();
 			unsigned short sp = (unsigned short)edge.SecondPoint();
@@ -803,7 +821,7 @@ void IntPolyh_MaillageAffinage::LinkEdges2Triangles()
 			}
 		}
 		TColStd_DataMapOfIntegerInteger maps2(totalSize2);
-		for (size_t i = 0; i < TEdges2.NbItems(); i++) {
+		for (Standard_Integer i = 0; i < TEdges2.NbItems(); i++) {
 			IntPolyh_Edge & edge = TEdges2[i];
 			unsigned short fp = edge.FirstPoint();
 			unsigned short sp = edge.SecondPoint();
@@ -850,6 +868,7 @@ void IntPolyh_MaillageAffinage::LinkEdges2Triangles()
 			}
 		}
 	}
+
 }
 //=======================================================================
 //function : CommonPartRefinement

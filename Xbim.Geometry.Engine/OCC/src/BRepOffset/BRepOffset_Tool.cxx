@@ -14,136 +14,124 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <stdio.h>
-
-#include <BRepOffset_Tool.ixx>
-
-#include <BRepAlgo_Tool.hxx>
-
-#include <BRepAdaptor_Curve.hxx>
-#include <BRepAdaptor_Surface.hxx>
-#include <BRepAdaptor_HCurve.hxx>
-#include <BRepAdaptor_HSurface.hxx>
-
-#include <BRepBndLib.hxx>
 
 #include <Bnd_Box2d.hxx>
 #include <BndLib_Add3dCurve.hxx>
+#include <BOPAlgo_PaveFiller.hxx>
+#include <BOPDS_DS.hxx>
+#include <BOPTools_AlgoTools2D.hxx>
+#include <BRep_CurveRepresentation.hxx>
+#include <BRep_ListIteratorOfListOfCurveRepresentation.hxx>
+#include <BRep_TEdge.hxx>
 #include <BRep_Tool.hxx>
-#include <BRepLib.hxx>
-#include <BRepLib_MakeEdge.hxx>
-#include <BRepLib_MakeVertex.hxx>
-#include <BRepLib_MakePolygon.hxx>
-#include <BRepLib_MakeFace.hxx>
-#include <BRepLib_MakeWire.hxx>
-#include <BRepTools.hxx>
-#include <BRepTools_WireExplorer.hxx>
-
-#include <BRepTools_Modifier.hxx>
-#include <BRepTools_TrsfModification.hxx>
-#include <BRepTopAdaptor_FClass2d.hxx>
 #include <BRepAdaptor_Curve.hxx>
 #include <BRepAdaptor_Curve2d.hxx>
-
-#include <IntRes2d_IntersectionPoint.hxx>
-#include <IntRes2d_IntersectionSegment.hxx>
+#include <BRepAdaptor_HCurve.hxx>
+#include <BRepAdaptor_HSurface.hxx>
+#include <BRepAdaptor_Surface.hxx>
+#include <BRepAlgo_AsDes.hxx>
+#include <BRepAlgo_Image.hxx>
+#include <BRepAlgo_Tool.hxx>
+#include <BRepBndLib.hxx>
+#include <BRepLib.hxx>
+#include <BRepLib_MakeEdge.hxx>
+#include <BRepLib_MakeFace.hxx>
+#include <BRepLib_MakePolygon.hxx>
+#include <BRepLib_MakeVertex.hxx>
+#include <BRepLib_MakeWire.hxx>
+#include <BRepOffset_Analyse.hxx>
+#include <BRepOffset_Interval.hxx>
+#include <BRepOffset_ListOfInterval.hxx>
+#include <BRepOffset_Tool.hxx>
+#include <BRepTools.hxx>
+#include <BRepTools_Modifier.hxx>
+#include <BRepTools_TrsfModification.hxx>
+#include <BRepTools_WireExplorer.hxx>
+#include <BRepTopAdaptor_FClass2d.hxx>
+#include <ElCLib.hxx>
+#include <ElSLib.hxx>
 #include <Extrema_ExtPC.hxx>
-
-#include <TopExp.hxx>
-#include <TopExp_Explorer.hxx>
-#include <TopAbs.hxx>
-#include <Standard_ConstructionError.hxx>
-
-#include <TopOpeBRepBuild_Builder.hxx>
-#include <TopOpeBRepDS_HDataStructure.hxx>
-#include <TopOpeBRepDS_CurveExplorer.hxx>
-#include <TopOpeBRep_DSFiller.hxx>
-#include <TopOpeBRepTool_GeomTool.hxx>
-#include <TopOpeBRep_ShapeIntersector.hxx>
-#include <TopOpeBRep_FacesFiller.hxx>
-#include <TopOpeBRep_GeomTool.hxx>
-#include <TopoDS.hxx>
-#include <TopoDS_Iterator.hxx>
-#include <TopTools_ListIteratorOfListOfShape.hxx>
-#include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
-
-#include <Geom_Surface.hxx>
-#include <Geom_RectangularTrimmedSurface.hxx>
-#include <Geom_OffsetSurface.hxx>
+#include <Extrema_ExtPC2d.hxx>
+#include <GCPnts_AbscissaPoint.hxx>
+#include <GCPnts_QuasiUniformDeflection.hxx>
+#include <GCPnts_UniformAbscissa.hxx>
+#include <Geom2d_BezierCurve.hxx>
+#include <Geom2d_BSplineCurve.hxx>
+#include <Geom2d_Circle.hxx>
+#include <Geom2d_Curve.hxx>
+#include <Geom2d_Ellipse.hxx>
+#include <Geom2d_Hyperbola.hxx>
+#include <Geom2d_Line.hxx>
+#include <Geom2d_Parabola.hxx>
+#include <Geom2d_TrimmedCurve.hxx>
+#include <Geom2dAdaptor_Curve.hxx>
+#include <Geom2dConvert_ApproxCurve.hxx>
+#include <Geom2dConvert_CompCurveToBSplineCurve.hxx>
+#include <Geom2dInt_GInter.hxx>
 #include <Geom_BezierSurface.hxx>
+#include <Geom_BSplineCurve.hxx>
 #include <Geom_BSplineSurface.hxx>
+#include <Geom_Conic.hxx>
 #include <Geom_ConicalSurface.hxx>
 #include <Geom_Curve.hxx>
 #include <Geom_Line.hxx>
+#include <Geom_OffsetSurface.hxx>
 #include <Geom_Plane.hxx>
-#include <Geom_Conic.hxx>
+#include <Geom_RectangularTrimmedSurface.hxx>
+#include <Geom_Surface.hxx>
+#include <Geom_SurfaceOfLinearExtrusion.hxx>
+#include <Geom_SurfaceOfRevolution.hxx>
 #include <Geom_TrimmedCurve.hxx>
-#include <GCPnts_QuasiUniformDeflection.hxx>
-
-#include <GeomLib.hxx>
-#include <GeomAPI.hxx>
-#include <GeomAPI_ProjectPointOnCurve.hxx>
-#include <Geom2d_TrimmedCurve.hxx>
-#include <Geom2d_Line.hxx>
-#include <Geom2d_Curve.hxx>
-#include <Geom2d_Circle.hxx>
-#include <Geom2d_Ellipse.hxx>
-#include <Geom2d_Parabola.hxx>
-#include <Geom2d_Hyperbola.hxx>
-#include <Geom2d_BezierCurve.hxx>
-#include <Geom2d_BSplineCurve.hxx>
-
-#include <Geom2dAdaptor_Curve.hxx>
-#include <Geom2dInt_GInter.hxx>
-
 #include <GeomAdaptor_Surface.hxx>
-#include <GeomProjLib.hxx>
+#include <GeomAPI.hxx>
+#include <GeomAPI_ExtremaCurveCurve.hxx>
+#include <GeomAPI_ProjectPointOnCurve.hxx>
+#include <GeomConvert_ApproxCurve.hxx>
+#include <GeomConvert_CompCurveToBSplineCurve.hxx>
 #include <GeomInt_IntSS.hxx>
-#include <ProjLib_ProjectedCurve.hxx>
-#include <ProjLib_HProjectedCurve.hxx>
-
-#include <ElSLib.hxx>
-#include <ElCLib.hxx>
-
+#include <GeomLib.hxx>
+#include <GeomProjLib.hxx>
 #include <gp.hxx>
 #include <gp_Pnt.hxx>
 #include <gp_Vec.hxx>
-
-
+#include <IntRes2d_IntersectionPoint.hxx>
+#include <IntRes2d_IntersectionSegment.hxx>
 #include <Precision.hxx>
-#include <Standard_ConstructionError.hxx>
-
-#include <BRep_TEdge.hxx>
-#include <Extrema_ExtPC2d.hxx>
-
-#include <Geom_SurfaceOfLinearExtrusion.hxx>
-#include <Geom_SurfaceOfRevolution.hxx>
-#include <GCPnts_AbscissaPoint.hxx>
-
-//tma: for new boolean operation
-#include <TopTools_SequenceOfShape.hxx>
-#include <Geom_BSplineCurve.hxx>
-#include <GeomConvert_CompCurveToBSplineCurve.hxx>
-#include <Geom2dConvert_CompCurveToBSplineCurve.hxx>
-#include <GeomConvert_ApproxCurve.hxx>
-#include <Geom2dConvert_ApproxCurve.hxx>
-#include <TopoDS_Compound.hxx>
-#include <GCPnts_UniformAbscissa.hxx>
-#include <BRep_ListIteratorOfListOfCurveRepresentation.hxx>
-#include <BRep_CurveRepresentation.hxx>
-
-#include <BRepOffset_ListOfInterval.hxx>
-#include <BRepOffset_Interval.hxx>
-#include <TColgp_Array1OfPnt2d.hxx>
+#include <ProjLib_HProjectedCurve.hxx>
+#include <ProjLib_ProjectedCurve.hxx>
 #include <ShapeCustom_Curve2d.hxx>
-#include <GeomAPI_ExtremaCurveCurve.hxx>
+#include <Standard_ConstructionError.hxx>
+#include <TColgp_Array1OfPnt2d.hxx>
+#include <TopAbs.hxx>
+#include <TopExp.hxx>
+#include <TopExp_Explorer.hxx>
+#include <TopoDS.hxx>
+#include <TopoDS_Compound.hxx>
+#include <TopoDS_Edge.hxx>
+#include <TopoDS_Face.hxx>
+#include <TopoDS_Iterator.hxx>
+#include <TopoDS_Shape.hxx>
+#include <TopoDS_Vertex.hxx>
+#include <TopoDS_Wire.hxx>
+#include <TopOpeBRep_DSFiller.hxx>
+#include <TopOpeBRep_FacesFiller.hxx>
+#include <TopOpeBRep_GeomTool.hxx>
+#include <TopOpeBRep_ShapeIntersector.hxx>
+#include <TopOpeBRepBuild_Builder.hxx>
+#include <TopOpeBRepDS_CurveExplorer.hxx>
+#include <TopOpeBRepDS_HDataStructure.hxx>
+#include <TopOpeBRepTool_GeomTool.hxx>
+#include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
+#include <TopTools_ListIteratorOfListOfShape.hxx>
+#include <TopTools_SequenceOfShape.hxx>
 
-#include <BOPDS_DS.hxx>
-#include <BOPAlgo_PaveFiller.hxx>
-#include <BOPTools_AlgoTools2D.hxx>
-
+#include <stdio.h>
+//tma: for new boolean operation
 #ifdef DRAW
 #include <DBRep.hxx>
+#include <Geom2d_Conic.hxx>
+#include <Geom_ElementarySurface.hxx>
+#include <Geom_BoundedCurve.hxx>
 Standard_Boolean AffichInter  = Standard_False;
 static Standard_Integer NbNewEdges  = 1;
 static Standard_Integer NbFaces     = 1;
@@ -250,7 +238,7 @@ static void PutInBounds (const TopoDS_Face&          F,
   Handle (Geom_Surface) S   = BRep_Tool::Surface(F,L);
 
   if (S->IsInstance(STANDARD_TYPE(Geom_RectangularTrimmedSurface))) {
-    S = (*(Handle(Geom_RectangularTrimmedSurface)*)&S)->BasisSurface();
+    S = Handle(Geom_RectangularTrimmedSurface)::DownCast (S)->BasisSurface();
   }
   //---------------
   // Recadre en U.
@@ -365,7 +353,7 @@ static void BuildPCurves (const TopoDS_Edge&  E,
   Handle( Geom_Surface ) theSurf = BRep_Tool::Surface( F );
   Handle( Standard_Type ) typS = theSurf->DynamicType();
   if (typS == STANDARD_TYPE(Geom_OffsetSurface))
-    typS = (*((Handle(Geom_OffsetSurface)*)&theSurf))->BasisSurface()->DynamicType();
+    typS = Handle(Geom_OffsetSurface)::DownCast (theSurf)->BasisSurface()->DynamicType();
   if (typS == STANDARD_TYPE(Geom_BezierSurface) || typS == STANDARD_TYPE(Geom_BSplineSurface))
     {
       gp_Pnt fpoint = AC.Value( AC.FirstParameter() );
@@ -899,18 +887,18 @@ static Standard_Boolean AreConnex(const TopoDS_Wire& W1,
       Standard_Real f, l;
       Handle(Geom_Curve) C1 = BRep_Tool::Curve( E1, f, l ); 
       if (C1->IsInstance(STANDARD_TYPE(Geom_TrimmedCurve)))
-	C1 = (*((Handle(Geom_TrimmedCurve)*)&C1))->BasisCurve();
+	C1 = Handle(Geom_TrimmedCurve)::DownCast (C1)->BasisCurve();
       
       Handle(Geom_Curve) C2 = BRep_Tool::Curve( E2, f, l );
       if (C2->IsInstance(STANDARD_TYPE(Geom_TrimmedCurve)))
-	C2 = (*((Handle(Geom_TrimmedCurve)*)&C2))->BasisCurve();
+	C2 = Handle(Geom_TrimmedCurve)::DownCast (C2)->BasisCurve();
 
       if (C1->IsInstance(STANDARD_TYPE(Geom_Line)) &&
 	  C2->IsInstance(STANDARD_TYPE(Geom_Line)))
 	{
-	  Handle(Geom_Line) L1 = *((Handle(Geom_Line)*) &C1);
+	  Handle(Geom_Line) L1 = Handle(Geom_Line)::DownCast (C1);
 	  gp_Ax1 Axis1 = L1->Position();
-	  Handle(Geom_Line) L2 = *((Handle(Geom_Line)*) &C2);
+	  Handle(Geom_Line) L2 = Handle(Geom_Line)::DownCast (C2);
 	  gp_Ax1 Axis2 = L2->Position();
 	  if (! Axis1.IsParallel( Axis2, Precision::Angular() ))
 	    return Standard_False;
@@ -956,11 +944,11 @@ static Standard_Boolean BSplineEdges(const TopoDS_Edge& E1,
 
   Handle(Geom_Curve) C1 = BRep_Tool::Curve( E1, first1, last1 ); 
   if (C1->IsInstance(STANDARD_TYPE(Geom_TrimmedCurve)))
-    C1 = (*((Handle(Geom_TrimmedCurve)*)&C1))->BasisCurve();
+    C1 = Handle(Geom_TrimmedCurve)::DownCast (C1)->BasisCurve();
 
   Handle(Geom_Curve) C2 = BRep_Tool::Curve( E2, first2, last2 );
   if (C2->IsInstance(STANDARD_TYPE(Geom_TrimmedCurve)))
-    C2 = (*((Handle(Geom_TrimmedCurve)*)&C2))->BasisCurve();
+    C2 = Handle(Geom_TrimmedCurve)::DownCast (C2)->BasisCurve();
 
   if (!C1->IsInstance(STANDARD_TYPE(Geom_BSplineCurve)) ||
       !C2->IsInstance(STANDARD_TYPE(Geom_BSplineCurve)))
@@ -1079,11 +1067,11 @@ static Handle(Geom2d_Curve) ConcatPCurves(const TopoDS_Edge& E1,
 
   PCurve1 = BRep_Tool::CurveOnSurface( E1, F, first1, last1 );
   if (PCurve1->IsInstance(STANDARD_TYPE(Geom2d_TrimmedCurve)))
-    PCurve1 = (*((Handle(Geom2d_TrimmedCurve)*)&PCurve1))->BasisCurve();
+    PCurve1 = Handle(Geom2d_TrimmedCurve)::DownCast (PCurve1)->BasisCurve();
 
   PCurve2 = BRep_Tool::CurveOnSurface( E2, F, first2, last2 );
   if (PCurve2->IsInstance(STANDARD_TYPE(Geom2d_TrimmedCurve)))
-    PCurve2 = (*((Handle(Geom2d_TrimmedCurve)*)&PCurve2))->BasisCurve();
+    PCurve2 = Handle(Geom2d_TrimmedCurve)::DownCast (PCurve2)->BasisCurve();
       
   if (PCurve1 == PCurve2)
     {
@@ -1101,35 +1089,35 @@ static Handle(Geom2d_Curve) ConcatPCurves(const TopoDS_Edge& E1,
       P2 = PCurve2->Value( last2 );
       if (PCurve1->IsInstance(STANDARD_TYPE(Geom2d_Line)))
 	{
-	  Handle(Geom2d_Line) Lin1 = *((Handle(Geom2d_Line)*) &PCurve1);
+	  Handle(Geom2d_Line) Lin1 = Handle(Geom2d_Line)::DownCast (PCurve1);
 	  gp_Lin2d theLin = Lin1->Lin2d();
 	  first2 = ElCLib::Parameter( theLin, P1 );
 	  last2  = ElCLib::Parameter( theLin, P2 );
 	}
       else if (PCurve1->IsInstance(STANDARD_TYPE(Geom2d_Circle)))
 	{
-	  Handle(Geom2d_Circle) Circ1 = *((Handle(Geom2d_Circle)*) &PCurve1);
+	  Handle(Geom2d_Circle) Circ1 = Handle(Geom2d_Circle)::DownCast (PCurve1);
 	  gp_Circ2d theCirc = Circ1->Circ2d();
 	  first2 = ElCLib::Parameter( theCirc, P1 );
 	  last2  = ElCLib::Parameter( theCirc, P2 );
 	}
       else if (PCurve1->IsInstance(STANDARD_TYPE(Geom2d_Ellipse)))
 	{
-	  Handle(Geom2d_Ellipse) Ell1 = *((Handle(Geom2d_Ellipse)*) &PCurve1);
+	  Handle(Geom2d_Ellipse) Ell1 = Handle(Geom2d_Ellipse)::DownCast (PCurve1);
 	  gp_Elips2d theElips = Ell1->Elips2d();
 	  first2 = ElCLib::Parameter( theElips, P1 );
 	  last2  = ElCLib::Parameter( theElips, P2 );
 	}
       else if (PCurve1->IsInstance(STANDARD_TYPE(Geom2d_Parabola)))
 	{
-	  Handle(Geom2d_Parabola) Parab1 = *((Handle(Geom2d_Parabola)*) &PCurve1);
+	  Handle(Geom2d_Parabola) Parab1 = Handle(Geom2d_Parabola)::DownCast (PCurve1);
 	  gp_Parab2d theParab = Parab1->Parab2d();
 	  first2 = ElCLib::Parameter( theParab, P1 );
 	  last2  = ElCLib::Parameter( theParab, P2 );
 	}
       else if (PCurve1->IsInstance(STANDARD_TYPE(Geom2d_Hyperbola)))
 	{
-	  Handle(Geom2d_Hyperbola) Hypr1 = *((Handle(Geom2d_Hyperbola)*) &PCurve1);
+	  Handle(Geom2d_Hyperbola) Hypr1 = Handle(Geom2d_Hyperbola)::DownCast (PCurve1);
 	  gp_Hypr2d theHypr = Hypr1->Hypr2d();
 	  first2 = ElCLib::Parameter( theHypr, P1 );
 	  last2  = ElCLib::Parameter( theHypr, P2 );
@@ -1163,14 +1151,15 @@ static Handle(Geom2d_Curve) ConcatPCurves(const TopoDS_Edge& E1,
 //=======================================================================
 
 static TopoDS_Edge Glue(const TopoDS_Edge& E1,
-			const TopoDS_Edge& E2,
-			const TopoDS_Vertex& Vfirst,
-			const TopoDS_Vertex& Vlast,
-			const Standard_Boolean After,
-			const TopoDS_Face& F1,
-			const Standard_Boolean addPCurve1,
-			const TopoDS_Face& F2,
-			const Standard_Boolean addPCurve2)
+                        const TopoDS_Edge& E2,
+                        const TopoDS_Vertex& Vfirst,
+                        const TopoDS_Vertex& Vlast,
+                        const Standard_Boolean After,
+                        const TopoDS_Face& F1,
+                        const Standard_Boolean addPCurve1,
+                        const TopoDS_Face& F2,
+                        const Standard_Boolean addPCurve2,
+                        const Standard_Real theGlueTol)
 {
   Standard_Real Tol = 1.e-7;
   GeomAbs_Shape Continuity = GeomAbs_C1;
@@ -1184,11 +1173,11 @@ static TopoDS_Edge Glue(const TopoDS_Edge& E1,
 
   C1 = BRep_Tool::Curve( E1, first1, last1 ); 
   if (C1->IsInstance(STANDARD_TYPE(Geom_TrimmedCurve)))
-    C1 = (*((Handle(Geom_TrimmedCurve)*)&C1))->BasisCurve();
+    C1 = Handle(Geom_TrimmedCurve)::DownCast (C1)->BasisCurve();
 
   C2 = BRep_Tool::Curve( E2, first2, last2 );
   if (C2->IsInstance(STANDARD_TYPE(Geom_TrimmedCurve)))
-    C2 = (*((Handle(Geom_TrimmedCurve)*)&C2))->BasisCurve();
+    C2 = Handle(Geom_TrimmedCurve)::DownCast (C2)->BasisCurve();
 
   if (C1 == C2)
     {
@@ -1208,7 +1197,7 @@ static TopoDS_Edge Glue(const TopoDS_Edge& E1,
       Handle(Geom_TrimmedCurve) TC1 = new Geom_TrimmedCurve( C1, first1, last1 );
       Handle(Geom_TrimmedCurve) TC2 = new Geom_TrimmedCurve( C2, first2, last2 );
       GeomConvert_CompCurveToBSplineCurve Concat( TC1 );
-      Concat.Add( TC2, Precision::Confusion(), After );
+      Concat.Add( TC2, theGlueTol, After );
       newCurve = Concat.BSplineCurve();
       if (newCurve->Continuity() < GeomAbs_C1)
 	{
@@ -1299,7 +1288,7 @@ static Standard_Boolean CheckIntersFF(const BOPDS_PDS& pDS,
 
   Handle(Geom_Surface) aSurf = BRep_Tool::Surface(F1);
   if (aSurf->IsInstance(STANDARD_TYPE(Geom_RectangularTrimmedSurface)))
-    aSurf = (*((Handle(Geom_RectangularTrimmedSurface)*)&aSurf))->BasisSurface();
+    aSurf = Handle(Geom_RectangularTrimmedSurface)::DownCast (aSurf)->BasisSurface();
   if (aSurf->IsInstance(STANDARD_TYPE(Geom_Plane)))
     isPlane1 = Standard_True;
   else if (aSurf->IsKind(STANDARD_TYPE(Geom_ElementarySurface)))
@@ -1307,7 +1296,7 @@ static Standard_Boolean CheckIntersFF(const BOPDS_PDS& pDS,
 
   aSurf = BRep_Tool::Surface(F2);
   if (aSurf->IsInstance(STANDARD_TYPE(Geom_RectangularTrimmedSurface)))
-    aSurf = (*((Handle(Geom_RectangularTrimmedSurface)*)&aSurf))->BasisSurface();
+    aSurf = Handle(Geom_RectangularTrimmedSurface)::DownCast (aSurf)->BasisSurface();
   if (aSurf->IsInstance(STANDARD_TYPE(Geom_Plane)))
     isPlane2 = Standard_True;
   else if (aSurf->IsKind(STANDARD_TYPE(Geom_ElementarySurface)))
@@ -1496,6 +1485,7 @@ static TopoDS_Edge AssembleEdge(const BOPDS_PDS& pDS,
 				const TopTools_SequenceOfShape& EdgesForConcat)
 {
   TopoDS_Edge CurEdge = TopoDS::Edge( EdgesForConcat(1) );
+  Standard_Real aGlueTol = Precision::Confusion();
   for (Standard_Integer j = 2; j <= EdgesForConcat.Length(); j++)
     {
       TopoDS_Edge anEdge = TopoDS::Edge( EdgesForConcat(j) );
@@ -1520,6 +1510,7 @@ static TopoDS_Edge AssembleEdge(const BOPDS_PDS& pDS,
 	{
 	  TopoDS_Vertex CV, V11, V12, V21, V22;
 	  TopExp::CommonVertex( CurEdge, anEdge, CV );
+          aGlueTol = BRep_Tool::Tolerance(CV);
 	  TopExp::Vertices( CurEdge, V11, V12 );
 	  TopExp::Vertices( anEdge,  V21, V22 );
 	  if (V11.IsSame(CV) && V21.IsSame(CV))
@@ -1544,9 +1535,8 @@ static TopoDS_Edge AssembleEdge(const BOPDS_PDS& pDS,
 	    }
 	} //end of else (open wire)
       
-      TopoDS_Edge NewEdge = Glue(CurEdge, anEdge,
-				 Vfirst, Vlast, After,
-				 F1, addPCurve1, F2, addPCurve2);
+      TopoDS_Edge NewEdge = Glue(CurEdge, anEdge, Vfirst, Vlast, After,
+                                 F1, addPCurve1, F2, addPCurve2, aGlueTol);
       CurEdge = NewEdge;
     } //end of for (Standard_Integer j = 2; j <= EdgesForConcat.Length(); j++)
   
@@ -1705,7 +1695,7 @@ void BRepOffset_Tool::Inter3D(const TopoDS_Face& F1,
 
   Handle(Geom_Surface) aSurf = BRep_Tool::Surface(cpF1);
   if (aSurf->IsInstance(STANDARD_TYPE(Geom_RectangularTrimmedSurface)))
-    aSurf = (*((Handle(Geom_RectangularTrimmedSurface)*)&aSurf))->BasisSurface();
+    aSurf = Handle(Geom_RectangularTrimmedSurface)::DownCast (aSurf)->BasisSurface();
   if (aSurf->IsInstance(STANDARD_TYPE(Geom_Plane)))
     addPCurve1 = Standard_False;
   else if (aSurf->IsKind(STANDARD_TYPE(Geom_ElementarySurface)))
@@ -1713,7 +1703,7 @@ void BRepOffset_Tool::Inter3D(const TopoDS_Face& F1,
 
   aSurf = BRep_Tool::Surface(cpF2);
   if (aSurf->IsInstance(STANDARD_TYPE(Geom_RectangularTrimmedSurface)))
-    aSurf = (*((Handle(Geom_RectangularTrimmedSurface)*)&aSurf))->BasisSurface();
+    aSurf = Handle(Geom_RectangularTrimmedSurface)::DownCast (aSurf)->BasisSurface();
   if (aSurf->IsInstance(STANDARD_TYPE(Geom_Plane)))
     addPCurve2 = Standard_False;
   else if (aSurf->IsKind(STANDARD_TYPE(Geom_ElementarySurface)))
@@ -2024,14 +2014,14 @@ void BRepOffset_Tool::InterOrExtent(const TopoDS_Face& F1,
 
   if (S1->DynamicType() == STANDARD_TYPE(Geom_RectangularTrimmedSurface)) {
     Handle(Geom_RectangularTrimmedSurface) RTS ;
-    RTS = *((Handle(Geom_RectangularTrimmedSurface)*) &S1);
+    RTS = Handle(Geom_RectangularTrimmedSurface)::DownCast (S1);
     if (RTS->BasisSurface()->DynamicType() == STANDARD_TYPE(Geom_Plane)) {
       S1 = RTS->BasisSurface();
     }
   }
   if (S2->DynamicType() == STANDARD_TYPE(Geom_RectangularTrimmedSurface)) {
     Handle(Geom_RectangularTrimmedSurface) RTS ;
-    RTS = *((Handle(Geom_RectangularTrimmedSurface)*) &S2);
+    RTS = Handle(Geom_RectangularTrimmedSurface)::DownCast (S2);
     if (RTS->BasisSurface()->DynamicType() == STANDARD_TYPE(Geom_Plane)) {
       S2 = RTS->BasisSurface();
     }
@@ -2579,7 +2569,7 @@ static void MakeFace(const Handle(Geom_Surface)& S,
   Standard_Boolean IsSuclosed = S->IsUClosed(), IsSvclosed = S->IsVClosed();
   if (S->DynamicType() == STANDARD_TYPE(Geom_OffsetSurface))
     {
-      Handle(Geom_Surface) BasisSurf = (*((Handle(Geom_OffsetSurface)*)&S))->BasisSurface();
+      Handle(Geom_Surface) BasisSurf = Handle(Geom_OffsetSurface)::DownCast (S)->BasisSurface();
       IsSuclosed = BasisSurf->IsUClosed();
       IsSvclosed = BasisSurf->IsVClosed();
     }
@@ -2598,10 +2588,10 @@ static void MakeFace(const Handle(Geom_Surface)& S,
   Standard_Boolean vmindegen = isVminDegen, vmaxdegen = isVmaxDegen;
   Handle(Geom_Surface) theSurf = S;
   if (S->DynamicType() == STANDARD_TYPE(Geom_RectangularTrimmedSurface))
-    theSurf = (*(Handle(Geom_RectangularTrimmedSurface)*)&S)->BasisSurface();
+    theSurf = Handle(Geom_RectangularTrimmedSurface)::DownCast (S)->BasisSurface();
   if (theSurf->DynamicType() == STANDARD_TYPE(Geom_ConicalSurface))
     {
-      Handle(Geom_ConicalSurface) ConicalS = *((Handle(Geom_ConicalSurface)*) &theSurf);
+      Handle(Geom_ConicalSurface) ConicalS = Handle(Geom_ConicalSurface)::DownCast (theSurf);
       gp_Cone theCone = ConicalS->Cone();
       gp_Pnt theApex = theCone.Apex();
       Standard_Real Uapex, Vapex;
@@ -2834,7 +2824,7 @@ static Standard_Boolean EnlargeGeometry(Handle(Geom_Surface)& S,
 
   Standard_Boolean SurfaceChange = Standard_False;
   if ( S->DynamicType() == STANDARD_TYPE(Geom_RectangularTrimmedSurface)) {
-    Handle(Geom_Surface) BS = (*((Handle(Geom_RectangularTrimmedSurface)*)&S))->BasisSurface();
+    Handle(Geom_Surface) BS = Handle(Geom_RectangularTrimmedSurface)::DownCast (S)->BasisSurface();
     EnlargeGeometry(BS,U1,U2,V1,V2,IsV1degen,IsV2degen,
 		    uf1,uf2,vf1,vf2,GlobalEnlargeU,GlobalEnlargeVfirst,GlobalEnlargeVlast);
     if (!GlobalEnlargeVfirst)
@@ -2842,14 +2832,14 @@ static Standard_Boolean EnlargeGeometry(Handle(Geom_Surface)& S,
     if (!GlobalEnlargeVlast)
       V2 = vf2;
     if (!GlobalEnlargeVfirst || !GlobalEnlargeVlast)
-      //(*((Handle(Geom_RectangularTrimmedSurface)*)&S))->SetTrim( U1, U2, V1, V2 );
+      //Handle(Geom_RectangularTrimmedSurface)::DownCast (S)->SetTrim( U1, U2, V1, V2 );
       S = new Geom_RectangularTrimmedSurface( BS, U1, U2, V1, V2 );
     else
       S = BS;
     SurfaceChange = Standard_True;
   }
   else if (S->DynamicType() == STANDARD_TYPE(Geom_OffsetSurface)) {
-    Handle(Geom_Surface) Surf = (*((Handle(Geom_OffsetSurface)*)&S))->BasisSurface();
+    Handle(Geom_Surface) Surf = Handle(Geom_OffsetSurface)::DownCast (S)->BasisSurface();
     SurfaceChange = EnlargeGeometry(Surf,U1,U2,V1,V2,IsV1degen,IsV2degen,
 				    uf1,uf2,vf1,vf2,GlobalEnlargeU,GlobalEnlargeVfirst,GlobalEnlargeVlast);
     Handle(Geom_OffsetSurface)::DownCast(S)->SetBasisSurface(Surf);
@@ -2912,21 +2902,22 @@ static Standard_Boolean EnlargeGeometry(Handle(Geom_Surface)& S,
 	      IsV2degen = Standard_True;
 	    }
 	}
-      S = new Geom_RectangularTrimmedSurface( S, u1, u2, v1, v2 );
+      Handle(Geom_BoundedSurface) aSurf = new Geom_RectangularTrimmedSurface( S, u1, u2, v1, v2 );
       if (enlargeU)
 	{
 	  if (enlargeUfirst)
-	    GeomLib::ExtendSurfByLength( *((Handle(Geom_BoundedSurface)*)&S), du, 1, Standard_True, Standard_False );
+	    GeomLib::ExtendSurfByLength (aSurf, du, 1, Standard_True, Standard_False);
 	  if (enlargeUlast)
-	    GeomLib::ExtendSurfByLength( *((Handle(Geom_BoundedSurface)*)&S), du, 1, Standard_True, Standard_True );
+	    GeomLib::ExtendSurfByLength (aSurf, du, 1, Standard_True, Standard_True);
 	}
       if (enlargeV)
 	{
 	  if (enlargeVfirst)
-	    GeomLib::ExtendSurfByLength( *((Handle(Geom_BoundedSurface)*)&S), dv, 1, Standard_False, Standard_False );
+	    GeomLib::ExtendSurfByLength (aSurf, dv, 1, Standard_False, Standard_False);
 	  if (enlargeVlast)
-	    GeomLib::ExtendSurfByLength( *((Handle(Geom_BoundedSurface)*)&S), dv, 1, Standard_False, Standard_True );
+	    GeomLib::ExtendSurfByLength (aSurf, dv, 1, Standard_False, Standard_True);
 	}
+      S = aSurf;
       S->Bounds( U1, U2, V1, V2 );
       SurfaceChange = Standard_True;
     }
@@ -2979,20 +2970,22 @@ static Standard_Boolean EnlargeGeometry(Handle(Geom_Surface)& S,
 	    }
 	}
 
+      Handle(Geom_BoundedSurface) aSurf = Handle(Geom_BoundedSurface)::DownCast (S);
       if (enlargeU)
 	{
 	  if (enlargeUfirst && uf1-u1 < duf)
-	    GeomLib::ExtendSurfByLength( *((Handle(Geom_BoundedSurface)*)&S), du, 1, Standard_True, Standard_False );
+	    GeomLib::ExtendSurfByLength (aSurf, du, 1, Standard_True, Standard_False);
 	  if (enlargeUlast && u2-uf2 < duf)
-	    GeomLib::ExtendSurfByLength( *((Handle(Geom_BoundedSurface)*)&S), du, 1, Standard_True, Standard_True );
+	    GeomLib::ExtendSurfByLength (aSurf, du, 1, Standard_True, Standard_True);
 	}
       if (enlargeV)
 	{
 	  if (enlargeVfirst && vf1-v1 < dvf)
-	    GeomLib::ExtendSurfByLength( *((Handle(Geom_BoundedSurface)*)&S), dv, 1, Standard_False, Standard_False );
+	    GeomLib::ExtendSurfByLength (aSurf, dv, 1, Standard_False, Standard_False);
 	  if (enlargeVlast && v2-vf2 < dvf)
-	    GeomLib::ExtendSurfByLength( *((Handle(Geom_BoundedSurface)*)&S), dv, 1, Standard_False, Standard_True );
+	    GeomLib::ExtendSurfByLength (aSurf, dv, 1, Standard_False, Standard_True);
 	}
+      S = aSurf;
 
       S->Bounds( U1, U2, V1, V2 );
       SurfaceChange = Standard_True;
@@ -3113,7 +3106,7 @@ void BRepOffset_Tool::CheckBounds(const TopoDS_Face& F,
 
   Handle(Geom_Surface) theSurf = BRep_Tool::Surface(F);
   if (theSurf->DynamicType() == STANDARD_TYPE(Geom_RectangularTrimmedSurface))
-    theSurf = (*((Handle(Geom_RectangularTrimmedSurface)*)&theSurf))->BasisSurface();
+    theSurf = Handle(Geom_RectangularTrimmedSurface)::DownCast (theSurf)->BasisSurface();
 
   if (theSurf->DynamicType() == STANDARD_TYPE(Geom_SurfaceOfLinearExtrusion) ||
       theSurf->DynamicType() == STANDARD_TYPE(Geom_SurfaceOfRevolution) ||
@@ -3133,11 +3126,11 @@ void BRepOffset_Tool::CheckBounds(const TopoDS_Face& F,
 		  Standard_Real fpar, lpar;
 		  Handle(Geom2d_Curve) aCurve = BRep_Tool::CurveOnSurface(anEdge, F, fpar, lpar);
 		  if (aCurve->DynamicType() == STANDARD_TYPE(Geom2d_TrimmedCurve))
-		    aCurve = (*((Handle(Geom2d_TrimmedCurve)*)&aCurve))->BasisCurve();
+		    aCurve = Handle(Geom2d_TrimmedCurve)::DownCast (aCurve)->BasisCurve();
 		  
 		  Handle(Geom2d_Line) theLine;
 		  if (aCurve->DynamicType() == STANDARD_TYPE(Geom2d_Line))
-		    theLine = *((Handle(Geom2d_Line)*)&aCurve);
+		    theLine = Handle(Geom2d_Line)::DownCast (aCurve);
 		  else if (aCurve->DynamicType() == STANDARD_TYPE(Geom2d_BezierCurve) ||
 			   aCurve->DynamicType() == STANDARD_TYPE(Geom2d_BSplineCurve))
 		    {
@@ -3266,10 +3259,10 @@ Standard_Boolean BRepOffset_Tool::EnLargeFace
   //Special treatment for conical surfaces
   Handle(Geom_Surface) theSurf = S;
   if (S->DynamicType() == STANDARD_TYPE(Geom_RectangularTrimmedSurface))
-    theSurf = (*(Handle(Geom_RectangularTrimmedSurface)*)&S)->BasisSurface();
+    theSurf = Handle(Geom_RectangularTrimmedSurface)::DownCast (S)->BasisSurface();
   if (theSurf->DynamicType() == STANDARD_TYPE(Geom_ConicalSurface))
     {
-      Handle(Geom_ConicalSurface) ConicalS = *((Handle(Geom_ConicalSurface)*) &theSurf);
+      Handle(Geom_ConicalSurface) ConicalS = Handle(Geom_ConicalSurface)::DownCast (theSurf);
       gp_Cone theCone = ConicalS->Cone();
       gp_Pnt theApex = theCone.Apex();
       Standard_Real Uapex, Vapex;

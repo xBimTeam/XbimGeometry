@@ -14,20 +14,29 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <Geom_Surface.ixx>
+
+#include <Geom_Curve.hxx>
+#include <Geom_Surface.hxx>
+#include <Geom_UndefinedDerivative.hxx>
+#include <Geom_UndefinedValue.hxx>
+#include <gp_GTrsf2d.hxx>
+#include <gp_Pnt.hxx>
+#include <gp_Trsf.hxx>
+#include <gp_Vec.hxx>
+#include <Standard_NoSuchObject.hxx>
+#include <Standard_RangeError.hxx>
+#include <Standard_Type.hxx>
 
 typedef Geom_Surface         Surface;
-typedef Handle(Geom_Surface) Handle(Surface);
-
 
 //=======================================================================
 //function : UReversed
 //purpose  : 
 //=======================================================================
 
-Handle(Surface) Geom_Surface::UReversed () const
+Handle(Geom_Surface) Geom_Surface::UReversed () const
 {
-  Handle(Surface) S = Handle(Surface)::DownCast(Copy());
+  Handle(Geom_Surface) S = Handle(Geom_Surface)::DownCast(Copy());
   S->UReverse();
   return S;
 }
@@ -38,9 +47,9 @@ Handle(Surface) Geom_Surface::UReversed () const
 //purpose  : 
 //=======================================================================
 
-Handle(Surface) Geom_Surface::VReversed () const
+Handle(Geom_Surface) Geom_Surface::VReversed () const
 {
-  Handle(Surface) S = Handle(Surface)::DownCast(Copy());
+  Handle(Geom_Surface) S = Handle(Geom_Surface)::DownCast(Copy());
   S->VReverse();
   return S;
 }

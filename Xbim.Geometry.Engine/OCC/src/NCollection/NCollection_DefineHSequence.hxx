@@ -18,14 +18,13 @@
 #ifndef NCollection_DefineHSequence_HeaderFile
 #define NCollection_DefineHSequence_HeaderFile
 
-#include <Standard_DefineHandle.hxx>
+#include <Standard_Type.hxx>
 #include <NCollection_DefineSequence.hxx>
 #include <MMgt_TShared.hxx>
 
 //      Declaration of Sequence class managed by Handle
 
 #define DEFINE_HSEQUENCE(HClassName, _SequenceType_)                           \
-DEFINE_STANDARD_HANDLE (HClassName, MMgt_TShared)                              \
 class HClassName : public _SequenceType_, public MMgt_TShared {                \
  public:                                                                       \
    DEFINE_STANDARD_ALLOC                                                       \
@@ -40,14 +39,17 @@ class HClassName : public _SequenceType_, public MMgt_TShared {                \
      _SequenceType_::Append (theSequence);                                     \
    }                                                                           \
    _SequenceType_& ChangeSequence ()       { return *this; }                   \
-   void Append (const Handle(HClassName)& theOther) {                          \
+   template <class T>                                                          \
+   void Append (const Handle(T)& theOther,                                     \
+                typename std::enable_if<std::is_base_of<HClassName, T>::value>::type * = 0) { \
      _SequenceType_::Append (theOther->ChangeSequence());                      \
    }                                                                           \
-   DEFINE_STANDARD_RTTI (HClassName)                              \
-};
+   DEFINE_STANDARD_RTTI (HClassName, MMgt_TShared)                             \
+}; \
+DEFINE_STANDARD_HANDLE (HClassName, MMgt_TShared) 
 
-#define IMPLEMENT_HSEQUENCE(HClassName)                                        \
-IMPLEMENT_STANDARD_HANDLE  (HClassName, MMgt_TShared)                          \
-IMPLEMENT_STANDARD_RTTIEXT (HClassName, MMgt_TShared)
+#define IMPLEMENT_HSEQUENCE(HClassName)                                        
+
+
 
 #endif

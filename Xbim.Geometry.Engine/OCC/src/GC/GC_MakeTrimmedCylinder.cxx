@@ -14,17 +14,23 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <GC_MakeTrimmedCylinder.ixx>
+
 #include <GC_MakeCylindricalSurface.hxx>
-#include <StdFail_NotDone.hxx>
+#include <GC_MakeTrimmedCylinder.hxx>
+#include <Geom_CylindricalSurface.hxx>
+#include <Geom_RectangularTrimmedSurface.hxx>
+#include <gp_Ax1.hxx>
+#include <gp_Circ.hxx>
+#include <gp_Cylinder.hxx>
+#include <gp_Pnt.hxx>
 #include <Standard_NotImplemented.hxx>
+#include <StdFail_NotDone.hxx>
 
 //=========================================================================
 //   Creation of a cylinder limited by three points <P1>, <P2> and <P3>.         +
 //   the height og the resulting cylinder is the distance from <P1> to <P2>.     +
 //   The radius is the distance from <P3> to axis <P1P2>.                 +
 //=========================================================================
-
 GC_MakeTrimmedCylinder::GC_MakeTrimmedCylinder(const gp_Pnt& P1 ,
 						 const gp_Pnt& P2 ,
 						 const gp_Pnt& P3 ) 
@@ -85,16 +91,3 @@ const Handle(Geom_RectangularTrimmedSurface)& GC_MakeTrimmedCylinder::
   StdFail_NotDone_Raise_if(TheError != gce_Done,"");
   return TheCyl;
 }
-
-const Handle(Geom_RectangularTrimmedSurface)& GC_MakeTrimmedCylinder::
-       Operator() const 
-{
-  return Value();
-}
-
-GC_MakeTrimmedCylinder::
-  operator Handle(Geom_RectangularTrimmedSurface) () const
-{
-  return Value();
-}
-

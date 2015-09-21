@@ -14,30 +14,29 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <Hermit.ixx>
-#include <Geom_BSplineCurve.hxx>
-#include <Geom2d_BSplineCurve.hxx>
+
 #include <BSplCLib.hxx>
-#include <TColStd_Array1OfReal.hxx>
-#include <TColStd_HArray1OfReal.hxx>
-#include <TColStd_Array1OfInteger.hxx>
-#include <TColStd_HArray1OfInteger.hxx>
-#include <PLib.hxx>
-#include <Standard_Boolean.hxx>
+#include <Geom2d_BSplineCurve.hxx>
+#include <Geom_BSplineCurve.hxx>
 #include <gp_Pnt2d.hxx>
-#include <TColgp_Array1OfPnt2d.hxx>
+#include <Hermit.hxx>
+#include <PLib.hxx>
+#include <Precision.hxx>
+#include <Standard_Boolean.hxx>
 #include <Standard_DimensionError.hxx>
 #include <Standard_Real.hxx>
-#include <TCollection_CompareOfReal.hxx>
-#include <SortTools_QuickSortOfReal.hxx>
-#include <Precision.hxx>
+#include <TColgp_Array1OfPnt2d.hxx>
+#include <TColStd_Array1OfInteger.hxx>
+#include <TColStd_Array1OfReal.hxx>
+#include <TColStd_HArray1OfInteger.hxx>
+#include <TColStd_HArray1OfReal.hxx>
 
+#include <algorithm>
 //=======================================================================
 //function : HermiteCoeff
 //purpose  : calculate  the Hermite coefficients of degree 3 from BS and
 //    	     store them in TAB(4 coefficients)
 //=======================================================================
-
 static void HermiteCoeff(const Handle(Geom_BSplineCurve)& BS,
 			 TColStd_Array1OfReal&            TAB)
      
@@ -175,8 +174,6 @@ static void PolyTest(const TColStd_Array1OfReal&         Herm,
   Standard_Integer               cas=0,mark=0,dercas=0,  //loop marks
                                  min,max;                //Pole min and max indices
   Standard_Real                  Us1,Us2,a;              //bounderies value of the knots to be inserted
-//  gp_Pnt2d                       P ;
-  TCollection_CompareOfReal      Comp;
   
   U4=0.0;U5=1.0;                                         //default value
   if (Ux!=1.0){
@@ -215,7 +212,9 @@ static void PolyTest(const TColStd_Array1OfReal&         Herm,
 
   TColStd_Array1OfReal knots(1,Knots->Length());
   knots=Knots->ChangeArray1();
-  SortTools_QuickSortOfReal::Sort(knots,Comp);        //sort of the array of knots
+
+  //sort of the array of knots
+  std::sort (knots.begin(), knots.end());
 
   Polesinit(0).SetCoord(0.0,Herm(0));                 //poles of the Hermite polynome in the BSpline form
   Polesinit(1).SetCoord(0.0,Herm(0)+Herm(1)/3.0);
@@ -396,8 +395,6 @@ static void PolyTest(const TColStd_Array1OfReal&        Herm,
   Standard_Integer               cas=0,mark=0,dercas=0,  //loop marks
                                  min,max;                //Pole min and max indices
   Standard_Real                  Us1,Us2,a;              //bounderies value of the knots to be inserted
-//  gp_Pnt2d                       P ;
-  TCollection_CompareOfReal      Comp;
   
   U4=0.0;U5=1.0;                                         //default value
   if (Ux!=1.0){
@@ -439,7 +436,9 @@ static void PolyTest(const TColStd_Array1OfReal&        Herm,
 
   TColStd_Array1OfReal knots(1,Knots->Length());
   knots=Knots->ChangeArray1();
-  SortTools_QuickSortOfReal::Sort(knots,Comp);     //sort of the array of knots
+
+  //sort of the array of knots
+  std::sort (knots.begin(), knots.end());
 
   Polesinit(0).SetCoord(0.0,Herm(0));              //poles of the Hermite polynome in the BSpline form
   Polesinit(1).SetCoord(0.0,Herm(0)+Herm(1)/3.0);

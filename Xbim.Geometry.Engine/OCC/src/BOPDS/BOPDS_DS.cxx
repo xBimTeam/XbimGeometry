@@ -12,52 +12,51 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <BOPDS_DS.ixx>
-//
-#include <Standard_Assert.hxx>
-//
-#include <NCollection_IncAllocator.hxx>
-#include <NCollection_BaseAllocator.hxx>
 
-#include <gp_Pnt.hxx>
 #include <Bnd_Box.hxx>
-//
-#include <TopoDS_Shape.hxx>
-#include <TopoDS_Iterator.hxx>
-#include <TopoDS_Vertex.hxx>
-#include <TopoDS_Edge.hxx>
-#include <TopoDS_Face.hxx>
-//
-#include <BRep_TVertex.hxx>
+#include <BOPCol_DataMapOfIntegerMapOfInteger.hxx>
+#include <BOPCol_DataMapOfShapeInteger.hxx>
+#include <BOPCol_ListOfInteger.hxx>
+#include <BOPCol_MapOfInteger.hxx>
+#include <BOPDS_CommonBlock.hxx>
+#include <BOPDS_DataMapOfPassKeyListOfPaveBlock.hxx>
+#include <BOPDS_DS.hxx>
+#include <BOPDS_FaceInfo.hxx>
+#include <BOPDS_IndexRange.hxx>
+#include <BOPDS_MapOfPave.hxx>
+#include <BOPDS_MapOfPaveBlock.hxx>
+#include <BOPDS_PassKey.hxx>
+#include <BOPDS_PaveBlock.hxx>
+#include <BOPDS_ShapeInfo.hxx>
+#include <BOPDS_VectorOfPave.hxx>
+#include <BOPTools_AlgoTools.hxx>
+#include <BRep_Builder.hxx>
 #include <BRep_TEdge.hxx>
 #include <BRep_TFace.hxx>
 #include <BRep_Tool.hxx>
-//
+#include <BRep_TVertex.hxx>
 #include <BRepBndLib.hxx>
-//
-#include <BOPCol_MapOfInteger.hxx>
-#include <BOPCol_ListOfInteger.hxx>
-#include <BOPCol_DataMapOfShapeInteger.hxx>
-#include <BOPCol_DataMapOfIntegerMapOfInteger.hxx>
-//
-#include <BOPDS_IndexRange.hxx>
-#include <BOPDS_ShapeInfo.hxx>
-#include <BOPDS_PassKey.hxx>
-#include <BOPDS_DataMapOfPassKeyListOfPaveBlock.hxx>
-#include <BOPDS_PassKey.hxx>
-#include <BOPDS_MapOfPave.hxx>
-#include <BOPDS_MapOfPaveBlock.hxx>
-#include <BOPDS_VectorOfPave.hxx>
-
 #include <Geom_Curve.hxx>
-#include <BRep_Builder.hxx>
-#include <Precision.hxx>
-#include <IntTools_Tools.hxx>
-#include <BOPTools_AlgoTools.hxx>
 #include <GeomAPI_ProjectPointOnCurve.hxx>
+#include <gp_Pnt.hxx>
+#include <IntTools_Tools.hxx>
+#include <NCollection_BaseAllocator.hxx>
+#include <Precision.hxx>
+#include <Standard_Assert.hxx>
+#include <TopoDS_Edge.hxx>
+#include <TopoDS_Face.hxx>
+#include <TopoDS_Iterator.hxx>
+#include <TopoDS_Shape.hxx>
+#include <TopoDS_Vertex.hxx>
 
 #include <algorithm>
-
+//
+//
+//
+//
+//
+//
+//
 //
 static
   inline void ResetShape(const TopoDS_Shape& aS);
@@ -354,7 +353,7 @@ void BOPDS_DS::Init()
   BOPCol_ListIteratorOfListOfInteger aIt1, aIt2, aIt3;
   BOPCol_ListIteratorOfListOfShape aIt;
   BOPDS_IndexRange aR;
-  Handle(NCollection_IncAllocator) aAllocator;
+  Handle(NCollection_BaseAllocator) aAllocator;
   //
   // 1 Append Source Shapes
   aNb=myArguments.Extent();
@@ -382,7 +381,8 @@ void BOPDS_DS::Init()
   //
   myLines.SetIncrement(2*aNbS);
   //-----------------------------------------------------scope_1 f
-  aAllocator=new NCollection_IncAllocator();
+  aAllocator=
+    NCollection_BaseAllocator::CommonBaseAllocator();
   //
   BOPCol_DataMapOfShapeInteger& aMSI=myMapShapeIndex;
   //
@@ -647,7 +647,6 @@ void BOPDS_DS::Init()
   }//for (j=0; j<myNbSourceShapes; ++j) {
   //
   aMI.Clear();
-  aAllocator.Nullify();
   //-----------------------------------------------------scope_1 t
   // 3 myPaveBlocksPool
   // 4. myFaceInfoPool
@@ -661,7 +660,7 @@ void BOPDS_DS::Init()
 void BOPDS_DS::InitShape
   (const Standard_Integer aI,
    const TopoDS_Shape& aS,
-   Handle(NCollection_BaseAllocator)& theAllocator,
+   const Handle(NCollection_BaseAllocator)& theAllocator,
    BOPCol_DataMapOfShapeInteger& aMSI)
 {
   Standard_Integer aIx;
@@ -1363,7 +1362,7 @@ void BOPDS_DS::FaceInfoIn(const Standard_Integer theF,
     if (aSx.ShapeType()==TopAbs_VERTEX){
       nV=Index(aSx);
       if (HasShapeSD(nV, nVSD)) {
- nV=nVSD;
+        nV=nVSD;
       }
       theMI.Add(nV);
     }
@@ -1446,20 +1445,19 @@ void BOPDS_DS::AloneVertices(const Standard_Integer theI,
 {
   if (HasFaceInfo(theI)) {
     //
-    Standard_Integer i, nV1, nV2, nV;
-    BOPDS_MapIteratorOfMapOfPaveBlock aItMPB;
+    Standard_Integer i, j, nV1, nV2, nV, aNbPB;
     BOPCol_MapIteratorOfMapOfInteger aItMI;
     //
     BOPCol_MapOfInteger aMI(100, myAllocator);
     //
     const BOPDS_FaceInfo& aFI=FaceInfo(theI);
     //
-    for (i=0; i<2; ++i) {
+    for (i = 0; i < 2; ++i) {
       const BOPDS_IndexedMapOfPaveBlock& aMPB=
         (!i) ? aFI.PaveBlocksIn() : aFI.PaveBlocksSc();
-      aItMPB.Initialize(aMPB);
-      for (; aItMPB.More(); aItMPB.Next()) {
-        const Handle(BOPDS_PaveBlock)& aPB=aItMPB.Value();
+      aNbPB = aMPB.Extent();
+      for (j = 1; j <= aNbPB; ++j) {
+        const Handle(BOPDS_PaveBlock)& aPB = aMPB(j);
         aPB->Indices(nV1, nV2);
         aMI.Add(nV1);
         aMI.Add(nV2);
@@ -1542,7 +1540,7 @@ void BOPDS_DS::SharedEdges(const Standard_Integer nF1,
   Standard_Integer nE, nSp;
   BOPCol_ListIteratorOfListOfInteger aItLI;
   BOPDS_ListIteratorOfListOfPaveBlock aItLPB;
-  BOPCol_MapOfInteger aMI(100/*, aAllocator*/); //commented out due to excessive memory usage
+  BOPCol_MapOfInteger aMI(100, aAllocator);
   //
   const BOPDS_ShapeInfo& aSI1=ShapeInfo(nF1);
   const BOPCol_ListOfInteger& aLI1=aSI1.SubShapes();

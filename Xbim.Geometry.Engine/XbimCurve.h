@@ -2,7 +2,6 @@
 #include "XbimGeometryObject.h"
 #include <Geom_Curve.hxx>
 
-#include <Handle_Geom_Curve.hxx>
 
 using namespace XbimGeometry::Interfaces;
 namespace Xbim

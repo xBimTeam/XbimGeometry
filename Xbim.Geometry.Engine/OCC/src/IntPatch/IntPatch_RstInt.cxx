@@ -25,26 +25,27 @@
 //--      - Pour rester coherent avec cette facon de faire, 
 //--      Chercher(Nbvtx++). 
 
-#include <IntPatch_RstInt.ixx>
-
-#include <IntSurf.hxx>
-
-#include <TColgp_SequenceOfPnt.hxx>
-#include <TColgp_SequenceOfPnt2d.hxx>
+#include <Adaptor2d_HCurve2d.hxx>
+#include <Adaptor3d_HSurface.hxx>
+#include <Adaptor3d_TopolTool.hxx>
+#include <gp_Pnt2d.hxx>
 #include <Intf_SectionPoint.hxx>
 #include <Intf_TangentZone.hxx>
-#include <gp_Pnt2d.hxx>
-#include <Precision.hxx>
-
-#include <Adaptor2d_HCurve2d.hxx>
-#include <IntPatch_WLine.hxx>
-#include <IntPatch_RLine.hxx>
-#include <IntPatch_HInterTool.hxx>
-#include <IntPatch_SearchPnt.hxx>
-#include <IntPatch_PolyLine.hxx>
-#include <IntPatch_PolyArc.hxx>
 #include <IntPatch_CSFunction.hxx>
 #include <IntPatch_CurvIntSurf.hxx>
+#include <IntPatch_HInterTool.hxx>
+#include <IntPatch_Line.hxx>
+#include <IntPatch_PolyArc.hxx>
+#include <IntPatch_PolyLine.hxx>
+#include <IntPatch_RLine.hxx>
+#include <IntPatch_RstInt.hxx>
+#include <IntPatch_SearchPnt.hxx>
+#include <IntPatch_WLine.hxx>
+#include <IntSurf.hxx>
+#include <Precision.hxx>
+#include <Standard_DomainError.hxx>
+#include <TColgp_SequenceOfPnt.hxx>
+#include <TColgp_SequenceOfPnt2d.hxx>
 
 #define myInfinite 1.e15 // the same as was in Adaptor3d_TopolTool
 
@@ -189,9 +190,9 @@ static void GetLinePoint2d (const Handle(IntPatch_Line)& L,
 			    const Standard_Boolean OnFirst,
 			    Standard_Real& U, Standard_Real& V)
 {
+  Handle(IntPatch_WLine) wlin = Handle(IntPatch_WLine)::DownCast(L);
+  Handle(IntPatch_RLine) rlin = Handle(IntPatch_RLine)::DownCast(L);
   IntPatch_IType typL = L->ArcType();
-  const Handle(IntPatch_WLine)& wlin = (const Handle(IntPatch_WLine)&)L;
-  const Handle(IntPatch_RLine)& rlin = (const Handle(IntPatch_RLine)&)L;
   Standard_Integer Nbptlin = (typL == IntPatch_Walking
 			      ? wlin->NbPnts()
 			      : rlin->NbPnts());
@@ -286,8 +287,8 @@ static Standard_Boolean FindParameter(const Handle(IntPatch_Line)& L,
   // Dans le cas d une ligne de cheminement, il faudrait voir la projection
   // et le calcul de la tangente.
 
-  const Handle(IntPatch_RLine)&  rlin = (*((Handle(IntPatch_RLine)*)&L)); //-- aucune verification n est 
-  const Handle(IntPatch_WLine)&  wlin = (*((Handle(IntPatch_WLine)*)&L)); //-- faite au cast. 
+  Handle(IntPatch_RLine) rlin (Handle(IntPatch_RLine)::DownCast (L)); //-- aucune verification n est 
+  Handle(IntPatch_WLine) wlin (Handle(IntPatch_WLine)::DownCast (L)); //-- faite au cast. 
   gp_Pnt ptbid;
   gp_Vec d1u,d1v;
   gp_Pnt2d p2d;
@@ -440,13 +441,13 @@ static Standard_Boolean IsSegment2dSmall(const IntPatch_Polygo& Pol,
 //purpose  : 
 //=======================================================================
 
-void IntPatch_RstInt::PutVertexOnLine (Handle(IntPatch_Line)& L,
+void IntPatch_RstInt::PutVertexOnLine (const Handle(IntPatch_Line)& L,
 				       const Handle(Adaptor3d_HSurface)& Surf,
 				       const Handle(Adaptor3d_TopolTool)& Domain,
 				       const Handle(Adaptor3d_HSurface)& OtherSurf,
 				       const Standard_Boolean OnFirst,
 				       const Standard_Real Tol,
-               const Standard_Boolean hasBeenAdded)
+                                       const Standard_Boolean hasBeenAdded)
  {
 
 // Domain est le domaine de restriction de la surface Surf.
@@ -462,8 +463,8 @@ void IntPatch_RstInt::PutVertexOnLine (Handle(IntPatch_Line)& L,
   Standard_Integer i,j,k;
   TColgp_SequenceOfPnt locpt;
   TColgp_SequenceOfPnt2d locpt2;
-  const Handle(IntPatch_RLine)&  rlin = (*((Handle(IntPatch_RLine)*)&L)); //-- aucune verification n est 
-  const Handle(IntPatch_WLine)&  wlin = (*((Handle(IntPatch_WLine)*)&L)); //-- faite au cast. 
+  Handle(IntPatch_RLine) rlin (Handle(IntPatch_RLine)::DownCast (L)); //-- aucune verification n est 
+  Handle(IntPatch_WLine) wlin (Handle(IntPatch_WLine)::DownCast (L)); //-- faite au cast. 
   Standard_Integer Nbvtx =0; 
   Standard_Integer Nbptlin =0;
   Standard_Real tolPLin = Surf->UResolution(Precision::Confusion());
@@ -767,26 +768,38 @@ void IntPatch_RstInt::PutVertexOnLine (Handle(IntPatch_Line)& L,
 	    }
 
 	    Standard_Boolean refined = Standard_False;
-	    if (refine[ip]) {
-	      //------------------------------------------------------------------------
-	      //-- On a trouve un point 2d approche Ua,Va  intersection de la ligne
-	      //-- de cheminement et de la restriction. 
-	      //--
-	      //-- On injecte ce point ds les intersections Courbe-Surface
-	      //-- 
-	      IntPatch_CSFunction thefunc(OtherSurf,arc,Surf);
-	      // MSV: extend UV bounds to not miss solution near the boundary
-	      Standard_Real margCoef = 0.004;
-	      IntPatch_CurvIntSurf IntCS(U,V,W,thefunc,edgeTol,margCoef);
-	      if (IntCS.IsDone()) {
-		if (!IntCS.IsEmpty()) {
-		  ptsommet = IntCS.Point();
-		  IntCS.ParameterOnSurface(U2,V2);
-		  paramarc = IntCS.ParameterOnCurve();
-		  refined = Standard_True;
-		}
-	      }
-	    }
+            if (refine[ip])
+            {
+              //------------------------------------------------------------------------
+              //-- On a trouve un point 2d approche Ua,Va  intersection de la ligne
+              //-- de cheminement et de la restriction. 
+              //--
+              //-- On injecte ce point ds les intersections Courbe-Surface
+              //-- 
+              IntPatch_CSFunction thefunc(OtherSurf,arc,Surf);
+              // MSV: extend UV bounds to not miss solution near the boundary
+              Standard_Real margCoef = 0.004;
+              IntPatch_CurvIntSurf IntCS(U,V,W,thefunc,edgeTol,margCoef);
+              if (IntCS.IsDone())
+              {
+                if (!IntCS.IsEmpty())
+                {
+                  ptsommet = IntCS.Point();
+                  IntCS.ParameterOnSurface(U2,V2);
+                  gp_Pnt anOldPnt, aNewPnt;
+                  OtherSurf->D0(U,V, anOldPnt);
+                  OtherSurf->D0(U2,V2, aNewPnt);
+                  if (anOldPnt.SquareDistance(aNewPnt) < Precision::Confusion()
+                    * Precision::Confusion())
+                  {
+                    U2 = U;
+                    V2 = V;
+                  }
+                  paramarc = IntCS.ParameterOnCurve();
+                  refined = Standard_True;
+                }
+              }
+            }
 	    else {
 	      U2 = U; V2 = V;
 	      paramarc = W;

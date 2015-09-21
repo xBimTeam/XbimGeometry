@@ -16,99 +16,70 @@
 //Passage sur C1 Aout 1992 et ajout transformation Bezier->BSpline
 //Modif JCV correction bug le 02/08/1993
 
-
-#include <GeomConvert.ixx>
-
-
 #include <BSplCLib.hxx>
-
-#include <Standard_DomainError.hxx>
-#include <Standard_NotImplemented.hxx>
-
-#include <Convert_ElementarySurfaceToBSplineSurface.hxx>
 #include <Convert_ConeToBSplineSurface.hxx>
 #include <Convert_CylinderToBSplineSurface.hxx>
+#include <Convert_ElementarySurfaceToBSplineSurface.hxx>
 #include <Convert_SphereToBSplineSurface.hxx>
 #include <Convert_TorusToBSplineSurface.hxx>
-#include <GeomConvert_ApproxSurface.hxx>
-
-#include <Geom_OffsetSurface.hxx>
-#include <Geom_Surface.hxx>
-#include <Geom_Plane.hxx>
-#include <Geom_CylindricalSurface.hxx>
-#include <Geom_ConicalSurface.hxx>
-#include <Geom_SphericalSurface.hxx>
-#include <Geom_ToroidalSurface.hxx>
-#include <Geom_RectangularTrimmedSurface.hxx>
-#include <Geom_SurfaceOfRevolution.hxx>
-#include <Geom_SurfaceOfLinearExtrusion.hxx>
-#include <Geom_BSplineSurface.hxx>
 #include <Geom_BezierSurface.hxx>
+#include <Geom_BSplineCurve.hxx>
+#include <Geom_BSplineSurface.hxx>
+#include <Geom_ConicalSurface.hxx>
+#include <Geom_Curve.hxx>
+#include <Geom_CylindricalSurface.hxx>
 #include <Geom_Geometry.hxx>
+#include <Geom_OffsetSurface.hxx>
+#include <Geom_Plane.hxx>
+#include <Geom_RectangularTrimmedSurface.hxx>
+#include <Geom_SphericalSurface.hxx>
+#include <Geom_Surface.hxx>
+#include <Geom_SurfaceOfLinearExtrusion.hxx>
+#include <Geom_SurfaceOfRevolution.hxx>
+#include <Geom_ToroidalSurface.hxx>
 #include <Geom_TrimmedCurve.hxx>
-
 #include <GeomAdaptor_Surface.hxx>
-
-#include <TColgp_Array2OfPnt.hxx>
-#include <TColgp_Array1OfPnt.hxx>
-#include <TColStd_Array1OfReal.hxx>
-#include <TColStd_Array2OfReal.hxx>
-#include <TColStd_Array1OfInteger.hxx>
-#include <TColStd_Array2OfInteger.hxx>
-#include <TColStd_HArray1OfReal.hxx>
-#include <TColStd_HArray1OfInteger.hxx>
-
-#include <Precision.hxx>
-#include <gp_Vec.hxx>
-#include <gp_Sphere.hxx>
-#include <gp_Cylinder.hxx>
+#include <GeomConvert.hxx>
+#include <GeomConvert_ApproxSurface.hxx>
 #include <gp_Cone.hxx>
-#include <gp_Torus.hxx>
-#include <gp_Pln.hxx>
-#include <gp_Trsf.hxx>
+#include <gp_Cylinder.hxx>
 #include <gp_GTrsf.hxx>
-
-
+#include <gp_Pln.hxx>
+#include <gp_Sphere.hxx>
+#include <gp_Torus.hxx>
+#include <gp_Trsf.hxx>
+#include <gp_Vec.hxx>
+#include <Precision.hxx>
+#include <Standard_DomainError.hxx>
+#include <Standard_NotImplemented.hxx>
+#include <TColgp_Array1OfPnt.hxx>
+#include <TColgp_Array2OfPnt.hxx>
+#include <TColStd_Array1OfInteger.hxx>
+#include <TColStd_Array1OfReal.hxx>
+#include <TColStd_Array2OfInteger.hxx>
+#include <TColStd_Array2OfReal.hxx>
+#include <TColStd_HArray1OfInteger.hxx>
+#include <TColStd_HArray1OfReal.hxx>
 
 typedef Geom_Surface                          Surface;
 typedef Geom_BSplineSurface                   BSplineSurface;
-typedef Handle(Geom_Curve)                    Handle(Curve);
-typedef Handle(Geom_BSplineCurve)             Handle(BSplineCurve);
-typedef Handle(Geom_BezierSurface)            Handle(BezierSurface);
-typedef Handle(Geom_Geometry)                 Handle(Geometry);
-typedef Handle(Geom_Surface)                  Handle(Surface);
-typedef Handle(Geom_Plane)                    Handle(Plane);
-typedef Handle(Geom_CylindricalSurface)       Handle(CylindricalSurface);
-typedef Handle(Geom_ConicalSurface)           Handle(ConicalSurface);
-typedef Handle(Geom_SphericalSurface)         Handle(SphericalSurface);
-typedef Handle(Geom_ToroidalSurface)          Handle(ToroidalSurface);
-typedef Handle(Geom_BSplineSurface)           Handle(BSplineSurface);
-typedef Handle(Geom_SurfaceOfRevolution)      Handle(SurfaceOfRevolution);
-typedef Handle(Geom_SurfaceOfLinearExtrusion) Handle(SurfaceOfLinearExtrusion);
-typedef Handle(Geom_RectangularTrimmedSurface) 
-  Handle(RectangularTrimmedSurface);
-
-
 typedef TColStd_Array1OfReal                 Array1OfReal;
 typedef TColStd_Array2OfReal                 Array2OfReal;
 typedef TColStd_Array1OfInteger              Array1OfInteger;
 typedef TColStd_Array2OfInteger              Array2OfInteger;
 typedef TColgp_Array2OfPnt                          Array2OfPnt;
 typedef TColgp_Array1OfPnt                          Array1OfPnt;
-
-
 typedef gp_Pnt Pnt;
-
 
 //=======================================================================
 //function : BSplineSurfaceBuilder
 //purpose  : 
 //=======================================================================
 
-Handle(BSplineSurface) BSplineSurfaceBuilder 
+Handle(Geom_BSplineSurface) BSplineSurfaceBuilder 
   (const Convert_ElementarySurfaceToBSplineSurface& Convert) 
 {
-  Handle(BSplineSurface) TheSurface;
+  Handle(Geom_BSplineSurface) TheSurface;
   Standard_Integer UDegree  = Convert.UDegree ();
   Standard_Integer VDegree  = Convert.VDegree ();
   Standard_Integer NbUPoles = Convert.NbUPoles();
@@ -148,8 +119,8 @@ Handle(BSplineSurface) BSplineSurfaceBuilder
 //purpose  : 
 //=======================================================================
 
-Handle(BSplineSurface) GeomConvert::SplitBSplineSurface 
-  (const Handle(BSplineSurface)& S,
+Handle(Geom_BSplineSurface) GeomConvert::SplitBSplineSurface 
+  (const Handle(Geom_BSplineSurface)& S,
   const Standard_Integer FromUK1, 
   const Standard_Integer ToUK2,
   const Standard_Integer FromVK1, 
@@ -169,7 +140,7 @@ Handle(BSplineSurface) GeomConvert::SplitBSplineSurface
   if (FirstUK < FirstU || LastUK > LastU || 
     FirstVK < FirstV || LastVK > LastV) { Standard_DomainError::Raise(); }
 
-  Handle(BSplineSurface) S1= Handle(BSplineSurface)::DownCast(S->Copy());
+  Handle(Geom_BSplineSurface) S1= Handle(Geom_BSplineSurface)::DownCast(S->Copy());
 
   S1->Segment(S1->UKnot(FirstUK),S1->UKnot(LastUK),
     S1->VKnot(FirstVK),S1->VKnot(LastVK));
@@ -195,8 +166,8 @@ Handle(BSplineSurface) GeomConvert::SplitBSplineSurface
 //purpose  : 
 //=======================================================================
 
-Handle(BSplineSurface) GeomConvert::SplitBSplineSurface 
-  (const Handle(BSplineSurface)& S,
+Handle(Geom_BSplineSurface) GeomConvert::SplitBSplineSurface 
+  (const Handle(Geom_BSplineSurface)& S,
   const Standard_Integer FromK1,
   const Standard_Integer ToK2,
   const Standard_Boolean USplit, 
@@ -205,7 +176,7 @@ Handle(BSplineSurface) GeomConvert::SplitBSplineSurface
   if (FromK1 == ToK2)   Standard_DomainError::Raise();
 
 
-  Handle(BSplineSurface) S1 = Handle(BSplineSurface)::DownCast(S->Copy());
+  Handle(Geom_BSplineSurface) S1 = Handle(Geom_BSplineSurface)::DownCast(S->Copy());
 
   if (USplit) {
 
@@ -258,8 +229,8 @@ Handle(BSplineSurface) GeomConvert::SplitBSplineSurface
 //purpose  : 
 //=======================================================================
 
-Handle(BSplineSurface) GeomConvert::SplitBSplineSurface 
-  (const Handle(BSplineSurface)& S, 
+Handle(Geom_BSplineSurface) GeomConvert::SplitBSplineSurface 
+  (const Handle(Geom_BSplineSurface)& S, 
   const Standard_Real FromU1, 
   const Standard_Real ToU2,
   const Standard_Real FromV1, 
@@ -300,8 +271,8 @@ Handle(BSplineSurface) GeomConvert::SplitBSplineSurface
 //purpose  : 
 //=======================================================================
 
-Handle(BSplineSurface) GeomConvert::SplitBSplineSurface 
-  (const Handle(BSplineSurface)& S, 
+Handle(Geom_BSplineSurface) GeomConvert::SplitBSplineSurface 
+  (const Handle(Geom_BSplineSurface)& S, 
   const Standard_Real                    FromParam1, 
   const Standard_Real                    ToParam2,
   const Standard_Boolean                 USplit, 
@@ -311,7 +282,7 @@ Handle(BSplineSurface) GeomConvert::SplitBSplineSurface
   if (Abs (FromParam1 - ToParam2) <= Abs(ParametricTolerance)) {
     Standard_DomainError::Raise();
   }
-  Handle(BSplineSurface) NewSurface
+  Handle(Geom_BSplineSurface) NewSurface
     = Handle(Geom_BSplineSurface)::DownCast(S->Copy());
 
   if (USplit) {
@@ -356,7 +327,7 @@ Handle(BSplineSurface) GeomConvert::SplitBSplineSurface
 //=======================================================================
 
 Handle(Geom_BSplineSurface) GeomConvert::SurfaceToBSplineSurface
-  (const Handle(Surface)& Sr) 
+  (const Handle(Geom_Surface)& Sr) 
 {
   Standard_Real U1, U2, V1, V2;
   Sr->Bounds (U1, U2, V1, V2);
@@ -374,10 +345,10 @@ Handle(Geom_BSplineSurface) GeomConvert::SurfaceToBSplineSurface
   }
 
   Handle(Geom_BSplineSurface) TheSurface;
-  Handle(Surface) S; 
+  Handle(Geom_Surface) S; 
   Handle(Geom_OffsetSurface) OffsetSur;
   if (Sr->IsKind(STANDARD_TYPE(Geom_OffsetSurface))) {
-    OffsetSur = *((Handle(Geom_OffsetSurface)*)& Sr);
+    OffsetSur = Handle(Geom_OffsetSurface)::DownCast (Sr);
     S = OffsetSur->Surface();
     if (!S.IsNull()) { // Convert the equivalent surface.
       return SurfaceToBSplineSurface(S);

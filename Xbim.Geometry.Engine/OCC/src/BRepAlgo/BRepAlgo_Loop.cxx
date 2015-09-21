@@ -14,35 +14,34 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <stdio.h>
-
-#include <BRepAlgo_Loop.ixx>
 
 #include <BRep_Builder.hxx>
-#include <BRepAlgo_FaceRestrictor.hxx>
+#include <BRep_TEdge.hxx>
 #include <BRep_Tool.hxx>
-
+#include <BRep_TVertex.hxx>
+#include <BRepAlgo_FaceRestrictor.hxx>
+#include <BRepAlgo_Loop.hxx>
 #include <Geom2d_Curve.hxx>
 #include <Geom_Surface.hxx>
-#include <TopExp.hxx>
-#include <TopTools_SequenceOfShape.hxx>
-#include <TopTools_MapOfShape.hxx>
-#include <TopTools_ListIteratorOfListOfShape.hxx>
-#include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
-#include <TopTools_DataMapIteratorOfDataMapOfShapeListOfShape.hxx>
-
-#include <TopoDS.hxx>
-#include <TopoDS_Vertex.hxx>
-#include <TopoDS_Wire.hxx>
 #include <gp_Pnt.hxx>
 #include <gp_Pnt2d.hxx>
 #include <Precision.hxx>
-#include <BRep_TVertex.hxx>
-#include <BRep_TEdge.hxx>
+#include <TopExp.hxx>
 #include <TopExp_Explorer.hxx>
+#include <TopoDS.hxx>
+#include <TopoDS_Edge.hxx>
+#include <TopoDS_Face.hxx>
 #include <TopoDS_Iterator.hxx>
+#include <TopoDS_Vertex.hxx>
+#include <TopoDS_Wire.hxx>
+#include <TopTools_DataMapIteratorOfDataMapOfShapeListOfShape.hxx>
 #include <TopTools_DataMapIteratorOfDataMapOfShapeShape.hxx>
+#include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
+#include <TopTools_ListIteratorOfListOfShape.hxx>
+#include <TopTools_MapOfShape.hxx>
+#include <TopTools_SequenceOfShape.hxx>
 
+#include <stdio.h>
 #ifdef DRAW
 #include <DBRep.hxx>
 #pragma comment(lib,"TKDraw")
@@ -559,8 +558,7 @@ void BRepAlgo_Loop::Perform()
   {
     const TopoDS_Edge& anEdge = TopoDS::Edge(itl.Value());
     TopTools_ListOfShape LCE;
-    const TopTools_ListOfShape* pVertices = 
-      static_cast<TopTools_ListOfShape*>(myVerOnEdges.Find1(anEdge));
+    const TopTools_ListOfShape* pVertices = myVerOnEdges.Seek (anEdge);
     if (pVertices)
     {
       CutEdge (anEdge, *pVertices, LCE);
@@ -575,8 +573,7 @@ void BRepAlgo_Loop::Perform()
   // add cut edges.
   for (itl.Initialize(myEdges); itl.More(); itl.Next())
   {
-    const TopTools_ListOfShape* pLCE = 
-      static_cast<TopTools_ListOfShape*>(myCutEdges.Find1(itl.Value()));
+    const TopTools_ListOfShape* pLCE = myCutEdges.Seek (itl.Value());
     if (pLCE)
     {
       for (itl1.Initialize(*pLCE); itl1.More(); itl1.Next()) {

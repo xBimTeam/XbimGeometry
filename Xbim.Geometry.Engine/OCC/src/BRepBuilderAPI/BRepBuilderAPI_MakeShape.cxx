@@ -14,19 +14,19 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <BRepBuilderAPI_MakeShape.ixx>
-#include <TopoDS.hxx>
-#include <TopoDS_Shape.hxx>
-#include <TopoDS_Face.hxx>
-#include <TopoDS_Edge.hxx>
-#include <TopoDS_Vertex.hxx>
 
+#include <BRepBuilderAPI_MakeShape.hxx>
+#include <StdFail_NotDone.hxx>
+#include <TopoDS.hxx>
+#include <TopoDS_Edge.hxx>
+#include <TopoDS_Face.hxx>
+#include <TopoDS_Shape.hxx>
+#include <TopoDS_Vertex.hxx>
 
 //=======================================================================
 //function : BRepBuilderAPI_MakeShape
 //purpose  : 
 //=======================================================================
-
 BRepBuilderAPI_MakeShape::BRepBuilderAPI_MakeShape()
 {
 }
@@ -49,7 +49,7 @@ void BRepBuilderAPI_MakeShape::Build()
 //purpose  : 
 //=======================================================================
 
-const TopoDS_Shape&  BRepBuilderAPI_MakeShape::Shape() const
+const TopoDS_Shape&  BRepBuilderAPI_MakeShape::Shape()
 {
   if (!IsDone()) {
     // the following is const cast away
@@ -65,7 +65,7 @@ const TopoDS_Shape&  BRepBuilderAPI_MakeShape::Shape() const
 //purpose  : 
 //=======================================================================
 
-BRepBuilderAPI_MakeShape::operator TopoDS_Shape() const
+BRepBuilderAPI_MakeShape::operator TopoDS_Shape()
 {
   return Shape();
 }

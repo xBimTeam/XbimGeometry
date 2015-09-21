@@ -16,21 +16,20 @@
 
 #include <Standard.hxx>
 #include <Standard_Macro.hxx>
-#include <Standard_DefineHandle.hxx>
+#include <Standard_Type.hxx>
 #include <Standard_Transient.hxx>
 
-#include <Handle_TColStd_HArray1OfReal.hxx>
-#include <Handle_TColStd_HArray2OfReal.hxx>
 
 #include <gp_Pnt2d.hxx>
 #include <gp_Pnt.hxx>
 #include <gp_Vec2d.hxx>
 #include <gp_Vec.hxx>
 
-class Handle(BSplCLib_Cache);
-class TColStd_Array1OfReal;
-class TColgp_Array1OfPnt;
-class TColgp_Array1OfPnt2d;
+#include <TColStd_HArray2OfReal.hxx>
+#include <TColStd_HArray1OfReal.hxx>
+#include <TColStd_Array1OfReal.hxx>
+#include <TColgp_Array1OfPnt.hxx>
+#include <TColgp_Array1OfPnt2d.hxx>
 
 #ifndef NOWEIGHTS_CURVE
 #define NOWEIGHTS_CURVE (*((TColStd_Array1OfReal*) NULL))
@@ -144,7 +143,7 @@ public:
                                 gp_Vec&        theTorsion) const;
 
 
-  DEFINE_STANDARD_RTTI(BSplCLib_Cache)
+  DEFINE_STANDARD_RTTI(BSplCLib_Cache, Standard_Transient)
 
 protected:
   //! Normalizes the parameter for periodical B-splines

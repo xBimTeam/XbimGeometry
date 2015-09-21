@@ -266,11 +266,11 @@ Standard_Boolean math_GlobOptMin::computeLocalExtremum(const math_Vector& thePnt
   //Newton method
   if (dynamic_cast<math_MultipleVarFunctionWithHessian*>(myFunc))
   {
-    math_MultipleVarFunctionWithHessian* myTmp = 
+    math_MultipleVarFunctionWithHessian* aTmp = 
       dynamic_cast<math_MultipleVarFunctionWithHessian*> (myFunc);
-    math_NewtonMinimum newtonMinimum(*myTmp);
+    math_NewtonMinimum newtonMinimum(*aTmp);
     newtonMinimum.SetBoundary(myGlobA, myGlobB);
-    newtonMinimum.Perform(*myTmp, thePnt);
+    newtonMinimum.Perform(*aTmp, thePnt);
 
     if (newtonMinimum.IsDone())
     {
@@ -283,10 +283,10 @@ Standard_Boolean math_GlobOptMin::computeLocalExtremum(const math_Vector& thePnt
   // BFGS method used.
   if (dynamic_cast<math_MultipleVarFunctionWithGradient*>(myFunc))
   {
-    math_MultipleVarFunctionWithGradient* myTmp = 
+    math_MultipleVarFunctionWithGradient* aTmp =
       dynamic_cast<math_MultipleVarFunctionWithGradient*> (myFunc);
-    math_BFGS bfgs(myTmp->NbVariables());
-    bfgs.Perform(*myTmp, thePnt);
+    math_BFGS bfgs(aTmp->NbVariables());
+    bfgs.Perform(*aTmp, thePnt);
     if (bfgs.IsDone())
     {
       bfgs.Location(theOutPnt);
@@ -407,11 +407,17 @@ void math_GlobOptMin::computeGlobalExtremum(Standard_Integer j)
   math_Vector aStepBestPoint(1, myN);
   Standard_Boolean isInside = Standard_False;
   Standard_Real r;
+  Standard_Boolean isReached = Standard_False;
 
-  for(myX(j) = myA(j) + myE1; myX(j) < myB(j) + myE1; myX(j) += myV(j))
+  for(myX(j) = myA(j) + myE1; 
+     (myX(j) < myB(j) + myE1) && (!isReached);
+      myX(j) += myV(j))
   {
     if (myX(j) > myB(j))
+    {
       myX(j) = myB(j);
+      isReached = Standard_True;
+    }
 
     if (j == 1)
     {
@@ -531,7 +537,7 @@ Standard_Boolean math_GlobOptMin::isStored(const math_Vector& thePnt)
   }
   else
   {
-    NCollection_CellFilter_NDimInspector anInspector(myN, Precision::PConfusion());
+    NCollection_CellFilter_Inspector anInspector(myN, Precision::PConfusion());
     if (isFirstCellFilterInvoke)
     {
       myFilter.Reset(myCellSize);

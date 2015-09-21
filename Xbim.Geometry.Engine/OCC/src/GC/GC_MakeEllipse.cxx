@@ -14,8 +14,13 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <GC_MakeEllipse.ixx>
+
+#include <GC_MakeEllipse.hxx>
 #include <gce_MakeElips.hxx>
+#include <Geom_Ellipse.hxx>
+#include <gp_Ax2.hxx>
+#include <gp_Elips.hxx>
+#include <gp_Pnt.hxx>
 #include <StdFail_NotDone.hxx>
 
 GC_MakeEllipse::GC_MakeEllipse(const gp_Elips& E)
@@ -51,14 +56,3 @@ const Handle(Geom_Ellipse)& GC_MakeEllipse::Value() const
   StdFail_NotDone_Raise_if(TheError != gce_Done,"");
   return TheEllipse;
 }
-
-const Handle(Geom_Ellipse)& GC_MakeEllipse::Operator() const 
-{
-  return Value();
-}
-
-GC_MakeEllipse::operator Handle(Geom_Ellipse) () const
-{
-  return Value();
-}
-

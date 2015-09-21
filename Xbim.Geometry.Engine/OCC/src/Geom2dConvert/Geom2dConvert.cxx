@@ -15,62 +15,49 @@
 //Jean-Claude Vauthier Novembre 1991
 //Passage sur C1 Aout 1992 et ajout transformation Bezier->BSpline
 
-
-#include <Geom2dConvert.ixx>
-
-#include <Convert_ConicToBSplineCurve.hxx>
+#include <BSplCLib.hxx>
 #include <Convert_CircleToBSplineCurve.hxx>
+#include <Convert_ConicToBSplineCurve.hxx>
 #include <Convert_EllipseToBSplineCurve.hxx>
 #include <Convert_HyperbolaToBSplineCurve.hxx>
 #include <Convert_ParabolaToBSplineCurve.hxx>
-
-
+#include <Geom2d_BezierCurve.hxx>
+#include <Geom2d_BSplineCurve.hxx>
+#include <Geom2d_Circle.hxx>
+#include <Geom2d_Conic.hxx>
+#include <Geom2d_Curve.hxx>
+#include <Geom2d_Ellipse.hxx>
+#include <Geom2d_Geometry.hxx>
+#include <Geom2d_Hyperbola.hxx>
+#include <Geom2d_Line.hxx>
+#include <Geom2d_OffsetCurve.hxx>
+#include <Geom2d_Parabola.hxx>
+#include <Geom2d_TrimmedCurve.hxx>
+#include <Geom2dConvert.hxx>
+#include <Geom2dConvert_ApproxCurve.hxx>
+#include <Geom2dConvert_CompCurveToBSplineCurve.hxx>
+#include <GeomAbs_Shape.hxx>
 #include <gp.hxx>
-
 #include <gp_Circ2d.hxx>
+#include <gp_Dir2d.hxx>
 #include <gp_Elips2d.hxx>
-#include <gp_Parab2d.hxx>
 #include <gp_Hypr2d.hxx>
-#include <gp_Pnt2d.hxx>
 #include <gp_Lin.hxx>
+#include <gp_Parab2d.hxx>
+#include <gp_Pnt2d.hxx>
 #include <gp_Trsf2d.hxx>
 #include <gp_Vec2d.hxx>
-#include <gp_Dir2d.hxx>
-
-#include <BSplCLib.hxx>
-
-#include <Geom2d_Curve.hxx>
-#include <Geom2d_Line.hxx>
-#include <Geom2d_Circle.hxx>
-#include <Geom2d_Ellipse.hxx>
-#include <Geom2d_Hyperbola.hxx>
-#include <Geom2d_Parabola.hxx>
-#include <Geom2d_Geometry.hxx>
-#include <Geom2d_BSplineCurve.hxx>
-#include <Geom2d_BezierCurve.hxx>
-#include <Geom2d_TrimmedCurve.hxx>
-#include <Geom2d_Conic.hxx>
-#include <Geom2dConvert_CompCurveToBSplineCurve.hxx>            
-#include <Geom2dConvert_ApproxCurve.hxx>
-#include <Geom2d_OffsetCurve.hxx>
-#include <GeomAbs_Shape.hxx>
-
 #include <Hermit.hxx>
-
-#include <Precision.hxx>
-
 #include <PLib.hxx>
-
-#include <TColStd_Array1OfReal.hxx>
-#include <TColStd_Array1OfBoolean.hxx>
-#include <TColStd_HArray1OfReal.hxx>
-#include <TColStd_Array1OfInteger.hxx>
-#include <TColgp_Array1OfPnt2d.hxx>
-
-#include <Standard_OutOfRange.hxx>
-#include <Standard_DomainError.hxx>
-
+#include <Precision.hxx>
 #include <Standard_ConstructionError.hxx>
+#include <Standard_DomainError.hxx>
+#include <Standard_OutOfRange.hxx>
+#include <TColgp_Array1OfPnt2d.hxx>
+#include <TColStd_Array1OfBoolean.hxx>
+#include <TColStd_Array1OfInteger.hxx>
+#include <TColStd_Array1OfReal.hxx>
+#include <TColStd_HArray1OfReal.hxx>
 
 typedef gp_Circ2d  Circ2d;
 typedef gp_Elips2d Elips2d;
@@ -78,39 +65,24 @@ typedef gp_Hypr2d  Hypr2d;
 typedef gp_Parab2d Parab2d;
 typedef gp_Pnt2d   Pnt2d;
 typedef gp_Trsf2d  Trsf2d;
-
 typedef Geom2d_Curve                Curve;
 typedef Geom2d_BSplineCurve         BSplineCurve;
-typedef Handle(Geom2d_Curve)        Handle(Curve);
-typedef Handle(Geom2d_Conic)        Handle(Conic);
-typedef Handle(Geom2d_Circle)       Handle(Circle);
-typedef Handle(Geom2d_Ellipse)      Handle(Ellipse);
-typedef Handle(Geom2d_Hyperbola)    Handle(Hyperbola);
-typedef Handle(Geom2d_Parabola)     Handle(Parabola);
-typedef Handle(Geom2d_Geometry)     Handle(Geometry);
-typedef Handle(Geom2d_BezierCurve)  Handle(BezierCurve);
-typedef Handle(Geom2d_TrimmedCurve) Handle(TrimmedCurve);
-typedef Handle(Geom2d_BSplineCurve) Handle(BSplineCurve);
-
-
 typedef TColStd_Array1OfReal                 Array1OfReal;
 typedef TColStd_Array1OfInteger              Array1OfInteger;
 typedef TColgp_Array1OfPnt2d                 Array1OfPnt2d;
-
-
 
 //=======================================================================
 //function : BSplineCurveBuilder
 //purpose  : 
 //=======================================================================
 
-static Handle(BSplineCurve) BSplineCurveBuilder (
+static Handle(Geom2d_BSplineCurve) BSplineCurveBuilder (
 
-const Handle(Conic)&                TheConic,
+const Handle(Geom2d_Conic)&                TheConic,
 const Convert_ConicToBSplineCurve&  Convert
 ) {
 
-   Handle(BSplineCurve) TheCurve;
+   Handle(Geom2d_BSplineCurve) TheCurve;
    Standard_Integer NbPoles = Convert.NbPoles();
    Standard_Integer NbKnots = Convert.NbKnots();
    Array1OfPnt2d   Poles   (1, NbPoles);
@@ -140,8 +112,8 @@ const Convert_ConicToBSplineCurve&  Convert
 
    Trsf2d T;
    T.SetTransformation (TheConic->XAxis(), gp::OX2d());
-   Handle(BSplineCurve) Cres = 
-     Handle(BSplineCurve)::DownCast(TheCurve->Transformed (T));
+   Handle(Geom2d_BSplineCurve) Cres = 
+     Handle(Geom2d_BSplineCurve)::DownCast(TheCurve->Transformed (T));
    return Cres;
 }
 
@@ -151,9 +123,9 @@ const Convert_ConicToBSplineCurve&  Convert
 //purpose  : 
 //=======================================================================
 
-Handle(BSplineCurve) Geom2dConvert::SplitBSplineCurve (
+Handle(Geom2d_BSplineCurve) Geom2dConvert::SplitBSplineCurve (
 
-const Handle(BSplineCurve)& C,
+const Handle(Geom2d_BSplineCurve)& C,
 const Standard_Integer               FromK1, 
 const Standard_Integer               ToK2,
 const Standard_Boolean               SameOrientation
@@ -166,7 +138,7 @@ const Standard_Boolean               SameOrientation
   Standard_Integer LastK  = Max (FromK1, ToK2);
   if (FirstK < TheFirst || LastK > TheLast) Standard_OutOfRange::Raise();
 
-  Handle(BSplineCurve) NewCurve = Handle(BSplineCurve)::DownCast(C->Copy());
+  Handle(Geom2d_BSplineCurve) NewCurve = Handle(Geom2d_BSplineCurve)::DownCast(C->Copy());
 
   NewCurve->Segment(C->Knot(FirstK),C->Knot(LastK));
 
@@ -185,9 +157,9 @@ const Standard_Boolean               SameOrientation
 //purpose  : 
 //=======================================================================
 
-Handle(BSplineCurve) Geom2dConvert::SplitBSplineCurve (
+Handle(Geom2d_BSplineCurve) Geom2dConvert::SplitBSplineCurve (
 
-const Handle(BSplineCurve)& C, 
+const Handle(Geom2d_BSplineCurve)& C, 
 const Standard_Real                  FromU1, 
 const Standard_Real                  ToU2,
 const Standard_Real, // ParametricTolerance,
@@ -218,9 +190,9 @@ const Standard_Boolean               SameOrientation
 //purpose  : 
 //=======================================================================
 
-Handle(BSplineCurve)  Geom2dConvert::CurveToBSplineCurve (
+Handle(Geom2d_BSplineCurve)  Geom2dConvert::CurveToBSplineCurve (
 
-const Handle(Curve)& C,
+const Handle(Geom2d_Curve)& C,
 const Convert_ParameterisationType  Parameterisation) 
 {
     
@@ -228,7 +200,7 @@ const Convert_ParameterisationType  Parameterisation)
     
   if (C->IsKind(STANDARD_TYPE(Geom2d_TrimmedCurve))) {
     Handle (Curve) Curv;
-    Handle(TrimmedCurve) Ctrim = Handle(TrimmedCurve)::DownCast(C);
+    Handle(Geom2d_TrimmedCurve) Ctrim = Handle(Geom2d_TrimmedCurve)::DownCast(C);
     Curv = Ctrim->BasisCurve();
     Standard_Real U1 = Ctrim->FirstParameter();
     Standard_Real U2 = Ctrim->LastParameter();
@@ -259,7 +231,7 @@ const Convert_ParameterisationType  Parameterisation)
     }
     
     else if (Curv->IsKind(STANDARD_TYPE(Geom2d_Circle))) {
-      Handle(Circle) TheConic= Handle(Circle)::DownCast(Curv);
+      Handle(Geom2d_Circle) TheConic= Handle(Geom2d_Circle)::DownCast(Curv);
       Circ2d C2d (gp::OX2d(), TheConic->Radius());
       if(Parameterisation != Convert_RationalC1) {
 	Convert_CircleToBSplineCurve Convert (C2d,
@@ -306,7 +278,7 @@ const Convert_ParameterisationType  Parameterisation)
     }
     
     else if (Curv->IsKind(STANDARD_TYPE(Geom2d_Ellipse))) {
-      Handle(Ellipse) TheConic = Handle(Ellipse)::DownCast(Curv);
+      Handle(Geom2d_Ellipse) TheConic = Handle(Geom2d_Ellipse)::DownCast(Curv);
       
       Elips2d E2d (gp::OX2d(),
                    TheConic->MajorRadius(),
@@ -356,7 +328,7 @@ const Convert_ParameterisationType  Parameterisation)
     }
     
     else if (Curv->IsKind(STANDARD_TYPE(Geom2d_Hyperbola))) {
-      Handle(Hyperbola) TheConic = Handle(Hyperbola)::DownCast(Curv);
+      Handle(Geom2d_Hyperbola) TheConic = Handle(Geom2d_Hyperbola)::DownCast(Curv);
       
       Hypr2d H2d (gp::OX2d(),
 		  TheConic->MajorRadius(), TheConic->MinorRadius());
@@ -365,7 +337,7 @@ const Convert_ParameterisationType  Parameterisation)
     }
     
     else if (Curv->IsKind(STANDARD_TYPE(Geom2d_Parabola))) {
-      Handle(Parabola) TheConic = Handle(Parabola)::DownCast(Curv);
+      Handle(Geom2d_Parabola) TheConic = Handle(Geom2d_Parabola)::DownCast(Curv);
       
       Parab2d Prb2d (gp::OX2d(), TheConic->Focal());
       Convert_ParabolaToBSplineCurve Convert (Prb2d, U1, U2);
@@ -374,7 +346,7 @@ const Convert_ParameterisationType  Parameterisation)
     
     else if (Curv->IsKind (STANDARD_TYPE(Geom2d_BezierCurve))) {
       
-      Handle(BezierCurve) CBez = Handle(BezierCurve)::DownCast(Curv->Copy());
+      Handle(Geom2d_BezierCurve) CBez = Handle(Geom2d_BezierCurve)::DownCast(Curv->Copy());
       
       CBez->Segment (U1, U2);
       Standard_Integer NbPoles = CBez->NbPoles();
@@ -422,7 +394,7 @@ const Convert_ParameterisationType  Parameterisation)
   else { 
     
     if (C->IsKind(STANDARD_TYPE(Geom2d_Ellipse))) {
-      Handle(Ellipse) TheConic = Handle(Ellipse)::DownCast(C);
+      Handle(Geom2d_Ellipse) TheConic = Handle(Geom2d_Ellipse)::DownCast(C);
       
       Elips2d E2d (gp::OX2d(),
 		   TheConic->MajorRadius(), TheConic->MinorRadius());
@@ -433,7 +405,7 @@ const Convert_ParameterisationType  Parameterisation)
     }
     
     else if (C->IsKind(STANDARD_TYPE(Geom2d_Circle))) {
-      Handle(Circle) TheConic = Handle(Circle)::DownCast(C);
+      Handle(Geom2d_Circle) TheConic = Handle(Geom2d_Circle)::DownCast(C);
       
       Circ2d C2d (gp::OX2d(), TheConic->Radius());
       Convert_CircleToBSplineCurve Convert (C2d,
@@ -443,7 +415,7 @@ const Convert_ParameterisationType  Parameterisation)
     }
     
     else if (C->IsKind (STANDARD_TYPE(Geom2d_BezierCurve))) {
-      Handle(BezierCurve) CBez = Handle(BezierCurve)::DownCast(C);
+      Handle(Geom2d_BezierCurve) CBez = Handle(Geom2d_BezierCurve)::DownCast(C);
       
       Standard_Integer NbPoles = CBez->NbPoles();
       Standard_Integer Degree  = CBez->Degree();
@@ -1477,7 +1449,7 @@ void Geom2dConvert::C0BSplineToC1BSplineCurve(Handle(Geom2d_BSplineCurve)& BS,
      
      U2=BSKnots(j);
      j++;
-     Handle(Geom2d_BSplineCurve) BSbis=Handle(Geom2d_BSplineCurve::DownCast(BS->Copy()));
+     Handle(Geom2d_BSplineCurve) BSbis=Handle(Geom2d_BSplineCurve)::DownCast(BS->Copy());
      BSbis->Segment(U1,U2);
      ArrayOfCurves(i)=BSbis;
    }
@@ -1566,7 +1538,7 @@ void Geom2dConvert::C0BSplineToArrayOfC1BSplineCurve(const Handle(Geom2d_BSpline
 	j++;
       U2=BSKnots(j);
       j++;
-      Handle(Geom2d_BSplineCurve) BSbis=Handle(Geom2d_BSplineCurve::DownCast(BS->Copy()));
+      Handle(Geom2d_BSplineCurve) BSbis=Handle(Geom2d_BSplineCurve)::DownCast(BS->Copy());
       BSbis->Segment(U1,U2);
       ArrayOfCurves(i)=BSbis;
     }

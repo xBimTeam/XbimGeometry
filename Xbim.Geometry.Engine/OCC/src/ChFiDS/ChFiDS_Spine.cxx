@@ -16,22 +16,28 @@
 
 // Modified by isg, Thu Mar 17 09:21:31 1994
 
-
-#include <ChFiDS_Spine.ixx>
-#include <ChFiDS_HElSpine.hxx>
-#include <ChFiDS_ErrorStatus.hxx> 
-#include <ChFiDS_ListIteratorOfListOfHElSpine.hxx>
-#include <GCPnts_AbscissaPoint.hxx>
-#include <TopExp.hxx>
 #include <BRep_Tool.hxx>
+#include <BRepAdaptor_Curve.hxx>
+#include <ChFiDS_ErrorStatus.hxx>
+#include <ChFiDS_HElSpine.hxx>
+#include <ChFiDS_ListIteratorOfListOfHElSpine.hxx>
+#include <ChFiDS_Spine.hxx>
 #include <ElCLib.hxx>
+#include <GCPnts_AbscissaPoint.hxx>
+#include <gp_Circ.hxx>
+#include <gp_Lin.hxx>
+#include <gp_Pnt.hxx>
+#include <gp_Vec.hxx>
 #include <Precision.hxx>
+#include <Standard_Type.hxx>
+#include <TopExp.hxx>
+#include <TopoDS_Edge.hxx>
+#include <TopoDS_Vertex.hxx>
 
 //=======================================================================
 //function : ChFiDS_Spine
 //purpose  : 
 //=======================================================================
-
 ChFiDS_Spine::ChFiDS_Spine():
        splitdone(Standard_False),
        tolesp(Precision::Confusion()),
@@ -87,14 +93,19 @@ Handle(ChFiDS_HElSpine) ChFiDS_Spine::ElSpine(const Standard_Integer IE) const
 
 Handle(ChFiDS_HElSpine) ChFiDS_Spine::ElSpine(const Standard_Real W) const 
 {
-  ChFiDS_ListIteratorOfListOfHElSpine It(elspines);
-  for (; It.More(); It.Next()) {
-    Handle(ChFiDS_HElSpine) cur = It.Value();
-    Standard_Real uf = cur->FirstParameter();
-    Standard_Real ul = cur->LastParameter();
-    if(uf <= W && W <= ul) return cur;
-  }  
-  return Handle(ChFiDS_HElSpine)();
+  if (elspines.Extent() == 1)
+    return elspines.First();
+  else
+  {
+    ChFiDS_ListIteratorOfListOfHElSpine It(elspines);
+    for (; It.More(); It.Next()) {
+      Handle(ChFiDS_HElSpine) cur = It.Value();
+      Standard_Real uf = cur->FirstParameter();
+      Standard_Real ul = cur->LastParameter();
+      if(uf <= W && W <= ul) return cur;
+    }  
+    return Handle(ChFiDS_HElSpine)();
+  }
 }
 
 //=======================================================================

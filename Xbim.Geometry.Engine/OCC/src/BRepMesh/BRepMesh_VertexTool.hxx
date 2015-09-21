@@ -14,6 +14,7 @@
 #ifndef _BRepMesh_VertexTool_HeaderFile
 #define _BRepMesh_VertexTool_HeaderFile
 
+#include <NCollection_Array1.hxx>
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Macro.hxx>
@@ -54,7 +55,8 @@ public:
   Standard_EXPORT void SetCellSize(const Standard_Real theSizeX,
                                    const Standard_Real theSizeY)
   {
-    Standard_Real aCellSize[2] = { theSizeX, theSizeY };
+    Standard_Real aCellSizeC[2] = { theSizeX, theSizeY };
+    NCollection_Array1<Standard_Real> aCellSize(aCellSizeC[0], 1, 2);
     myCellFilter.Reset(aCellSize, myAllocator);
     mySelector.Clear();
   }
@@ -78,6 +80,17 @@ public:
     mySelector.SetTolerance( theToleranceX, theToleranceY );
     myTolerance[0] = theToleranceX;
     myTolerance[1] = theToleranceY;
+  }
+
+  //! Gets the tolerance to be used for identification of 
+  //! coincident vertices.
+  //! @param theToleranceX tolerance for X dimension.
+  //! @param theToleranceY tolerance for Y dimension.
+  Standard_EXPORT void GetTolerance(Standard_Real& theToleranceX,
+                                    Standard_Real& theToleranceY)
+  {
+    theToleranceX = myTolerance[0];
+    theToleranceY = myTolerance[1];
   }
 
   //! Adds vertex with empty data to the tool.

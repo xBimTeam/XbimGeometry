@@ -13,61 +13,47 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <IntTools_EdgeFace.ixx>
-
-
-
-#include <IntTools_CArray1OfReal.hxx>
-#include <IntTools.hxx>
-#include <IntTools_CArray1OfInteger.hxx>
-#include <IntTools_Range.hxx>
-#include <IntTools_Tools.hxx>
-#include <IntTools_Array1OfRange.hxx>
-#include <IntTools_QuickSortRange.hxx>
-#include <IntTools_CompareRange.hxx>
-#include <IntTools_CommonPrt.hxx>
-#include <IntTools_Root.hxx>
-#include <IntTools_BeanFaceIntersector.hxx>
-#include <IntTools_Context.hxx>
-
-#include <BRep_Tool.hxx>
-
-#include <GeomAdaptor_Surface.hxx>
-#include <GeomAdaptor_Curve.hxx>
-
-#include <Geom_Surface.hxx>
-#include <Geom_Curve.hxx>
-
-#include <GeomAPI_ProjectPointOnSurf.hxx>
-
-#include <Precision.hxx>
 
 #include <Bnd_Box.hxx>
 #include <BndLib_AddSurface.hxx>
-
-#include <gp_Cylinder.hxx>
-#include <gp_Ax1.hxx>
-#include <gp_Lin.hxx>
-#include <gp_Cone.hxx>
-#include <gp_Torus.hxx>
-#include <gp_Circ.hxx>
-#include <gp_Pln.hxx>
-
-
+#include <BRep_Tool.hxx>
+#include <BRepAdaptor_Surface.hxx>
 #include <Extrema_ExtCS.hxx>
 #include <Extrema_POnCurv.hxx>
 #include <Extrema_POnSurf.hxx>
-
-
-#include <IntCurveSurface_HInter.hxx>
+#include <Geom_Curve.hxx>
+#include <Geom_Surface.hxx>
+#include <GeomAdaptor_Curve.hxx>
 #include <GeomAdaptor_HCurve.hxx>
 #include <GeomAdaptor_HSurface.hxx>
+#include <GeomAdaptor_Surface.hxx>
+#include <GeomAPI_ProjectPointOnSurf.hxx>
+#include <gp_Ax1.hxx>
+#include <gp_Circ.hxx>
+#include <gp_Cone.hxx>
+#include <gp_Cylinder.hxx>
+#include <gp_Lin.hxx>
+#include <gp_Pln.hxx>
+#include <gp_Pnt.hxx>
+#include <gp_Torus.hxx>
+#include <IntCurveSurface_HInter.hxx>
 #include <IntCurveSurface_IntersectionPoint.hxx>
+#include <IntTools.hxx>
+#include <IntTools_Array1OfRange.hxx>
+#include <IntTools_BeanFaceIntersector.hxx>
+#include <IntTools_CArray1OfInteger.hxx>
+#include <IntTools_CArray1OfReal.hxx>
+#include <IntTools_CommonPrt.hxx>
+#include <IntTools_Context.hxx>
+#include <IntTools_EdgeFace.hxx>
+#include <IntTools_Range.hxx>
+#include <IntTools_Root.hxx>
+#include <IntTools_Tools.hxx>
+#include <Precision.hxx>
+#include <TopoDS_Edge.hxx>
+#include <TopoDS_Face.hxx>
 
-#ifdef WNT
-#pragma warning ( disable : 4101 )
-#endif
-
+#include <algorithm>
 static
   Standard_Boolean IsCoplanar (const BRepAdaptor_Curve&  ,
                                const BRepAdaptor_Surface& );
@@ -604,6 +590,17 @@ void IntTools_EdgeFace::PrepareArgsFuncArrays(const Standard_Real ta,
   AddDerivativePoints(anArgs, aFunc);
 
 }
+
+//=======================================================================
+
+namespace {
+  // Auxiliary: comparator function for sorting ranges
+  bool IntTools_RangeComparator (const IntTools_Range& theLeft, const IntTools_Range& theRight)
+  {
+    return theLeft.First() < theRight.First();
+  }
+}
+
 //=======================================================================
 //function : AddDerivativePoints
 //purpose  : 
@@ -719,9 +716,7 @@ void IntTools_EdgeFace::AddDerivativePoints
       anArray1OfRange(n+i).SetLast (aFSeq(i));
     }
     
-    IntTools_QuickSortRange aQuickSortRange;
-    IntTools_CompareRange aComparator;
-    aQuickSortRange.Sort (anArray1OfRange, aComparator);
+    std::sort (anArray1OfRange.begin(), anArray1OfRange.end(), IntTools_RangeComparator);
     
     // filling the  output arrays
     myArgsArray.Resize(k);

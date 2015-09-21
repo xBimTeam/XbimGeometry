@@ -14,53 +14,60 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <BRepSweep_Rotation.ixx>
-#include <BRepTools_Quilt.hxx>
+
+#include <Adaptor3d_SurfaceOfRevolution.hxx>
+#include <BRep_Tool.hxx>
 #include <BRepAdaptor_Curve.hxx>
 #include <BRepAdaptor_Surface.hxx>
-#include <BRep_Tool.hxx>
+#include <BRepSweep_Rotation.hxx>
 #include <BRepTools.hxx>
-#include <TopoDS.hxx>
-#include <TopoDS_Shape.hxx>
-#include <TopoDS_Vertex.hxx>
-#include <TopExp.hxx>
-#include <ElSLib.hxx>
+#include <BRepTools_Quilt.hxx>
 #include <ElCLib.hxx>
-#include <GeomAdaptor_Curve.hxx>
-#include <GeomAdaptor_Surface.hxx>
-#include <Adaptor3d_SurfaceOfRevolution.hxx>
-#include <Geom_SurfaceOfRevolution.hxx>
-#include <Geom_CylindricalSurface.hxx>
-#include <Geom_ConicalSurface.hxx>
-#include <Geom_SphericalSurface.hxx>
-#include <Geom_ToroidalSurface.hxx>
-#include <Geom_Plane.hxx>
-#include <Geom_Circle.hxx>
-#include <Geom_Line.hxx>
+#include <ElSLib.hxx>
 #include <Geom2d_Circle.hxx>
 #include <Geom2d_Line.hxx>
+#include <Geom_Circle.hxx>
+#include <Geom_ConicalSurface.hxx>
+#include <Geom_Curve.hxx>
+#include <Geom_CylindricalSurface.hxx>
+#include <Geom_Line.hxx>
+#include <Geom_Plane.hxx>
+#include <Geom_SphericalSurface.hxx>
+#include <Geom_Surface.hxx>
+#include <Geom_SurfaceOfRevolution.hxx>
+#include <Geom_ToroidalSurface.hxx>
+#include <Geom_TrimmedCurve.hxx>
+#include <GeomAdaptor_Curve.hxx>
+#include <GeomAdaptor_HCurve.hxx>
+#include <GeomAdaptor_Surface.hxx>
 #include <gp.hxx>
-#include <gp_Trsf.hxx>
+#include <gp_Ax1.hxx>
+#include <gp_Ax3.hxx>
+#include <gp_Ax22d.hxx>
 #include <gp_Circ2d.hxx>
+#include <gp_Cone.hxx>
+#include <gp_Cylinder.hxx>
 #include <gp_Dir.hxx>
 #include <gp_Dir2d.hxx>
 #include <gp_Lin.hxx>
 #include <gp_Lin2d.hxx>
+#include <gp_Pln.hxx>
 #include <gp_Pnt.hxx>
 #include <gp_Pnt2d.hxx>
-#include <gp_Ax22d.hxx>
-#include <gp_Cylinder.hxx>
-#include <gp_Pln.hxx>
-#include <gp_Cone.hxx>
 #include <gp_Sphere.hxx>
 #include <gp_Torus.hxx>
-#include <gp_Ax3.hxx>
+#include <gp_Trsf.hxx>
 #include <Precision.hxx>
 #include <Standard_ConstructionError.hxx>
+#include <Sweep_NumShape.hxx>
+#include <TopExp.hxx>
+#include <TopLoc_Location.hxx>
+#include <TopoDS.hxx>
+#include <TopoDS_Shape.hxx>
+#include <TopoDS_Vertex.hxx>
 
-#include <GeomAdaptor_HCurve.hxx>
-#include <Geom_TrimmedCurve.hxx>
 
+#include <TopExp_Explorer.hxx>
 static Standard_Real ComputeTolerance(TopoDS_Edge& E,
 				      const TopoDS_Face& F,
 				      const Handle(Geom2d_Curve)& C)
@@ -216,14 +223,26 @@ TopoDS_Shape  BRepSweep_Rotation::MakeEmptyGeneratingEdge
    const Sweep_NumShape& aDirV)
 {
   //call in case of construction with copy, or only when meridian touches myaxe.
-  Standard_Real First,Last;
-  TopLoc_Location Loc;
-  Handle(Geom_Curve) C = Handle(Geom_Curve)::DownCast
-    (BRep_Tool::Curve(TopoDS::Edge(aGenE),Loc,First,Last)->Copy());
-  C->Transform(Loc.Transformation());
-  TopoDS_Edge E;
-  if(aDirV.Index() == 2) C->Transform(myLocation.Transformation()); 
-  myBuilder.Builder().MakeEdge(E,C,BRep_Tool::Tolerance(TopoDS::Edge(aGenE)));
+  TopoDS_Edge E; 
+  if(BRep_Tool::Degenerated(TopoDS::Edge(aGenE)))
+  {
+    myBuilder.Builder().MakeEdge(E);
+    myBuilder.Builder().UpdateEdge(E, BRep_Tool::Tolerance(TopoDS::Edge(aGenE)));
+    myBuilder.Builder().Degenerated(E, Standard_True);
+  }
+  else
+  {
+    Standard_Real First,Last;
+    TopLoc_Location Loc;
+    Handle(Geom_Curve) C = Handle(Geom_Curve)::DownCast
+      (BRep_Tool::Curve(TopoDS::Edge(aGenE),Loc,First,Last)->Copy());
+    if(!C.IsNull())
+    {
+      C->Transform(Loc.Transformation());
+      if(aDirV.Index() == 2) C->Transform(myLocation.Transformation()); 
+    }
+    myBuilder.Builder().MakeEdge(E,C,BRep_Tool::Tolerance(TopoDS::Edge(aGenE)));
+  }
   if (aDirV.Index() == 1 && 
       IsInvariant(aGenE) && 
       myDirShapeTool.NbShapes() == 3) {
@@ -718,6 +737,7 @@ Standard_Boolean BRepSweep_Rotation::GGDShapeIsToAdd
    const TopoDS_Shape& aSubGenS,
    const Sweep_NumShape& aDirS )const
 {
+  Standard_Boolean aRes = Standard_True;
   if (aNewShape.ShapeType()==TopAbs_FACE &&
       aNewSubShape.ShapeType()==TopAbs_EDGE &&
       aGenS.ShapeType()==TopAbs_EDGE &&
@@ -729,11 +749,11 @@ Standard_Boolean BRepSweep_Rotation::GGDShapeIsToAdd
       return (!IsInvariant(aSubGenS));
     }
     else{
-      return Standard_True;
+      return aRes;
     }
   }
   else{
-    return Standard_True;
+    return aRes;
   }
 }
 
@@ -830,20 +850,33 @@ Standard_Boolean  BRepSweep_Rotation::HasShape
    const Sweep_NumShape& aDirS)const 
 {
   if(aDirS.Type()==TopAbs_EDGE&&
-     aGenS.ShapeType()==TopAbs_EDGE){
+     aGenS.ShapeType()==TopAbs_EDGE)
+  {
     // Verify that the edge has entrails
     const TopoDS_Edge& anEdge = TopoDS::Edge(aGenS);
-    Standard_Boolean hasGeom = !BRep_Tool::Degenerated(anEdge);
-    if (hasGeom)
-    { // The edge is not degenerated. Check if it has no curve
-      Standard_Real aPFirst, aPLast;
-      TopLoc_Location aLoc;
-      Handle(Geom_Curve) aCurve = BRep_Tool::Curve(anEdge, aLoc, aPFirst, aPLast);
-      hasGeom = !aCurve.IsNull();
+    //
+    if(BRep_Tool::Degenerated(anEdge)) return Standard_False;
+
+    Standard_Real aPFirst, aPLast;
+    TopLoc_Location aLoc;
+    Handle(Geom_Curve) aCurve = BRep_Tool::Curve(anEdge, aLoc, aPFirst, aPLast);
+    if(aCurve.IsNull()) return Standard_False;
+
+    if(IsInvariant(aGenS)) return Standard_False;
+
+    //Check seem edge
+    TopExp_Explorer FaceExp(myGenShape, TopAbs_FACE);
+    for (;FaceExp.More(); FaceExp.Next()) {
+      TopoDS_Face F = TopoDS::Face(FaceExp.Current());
+      if (BRepTools::IsReallyClosed(anEdge, F))
+          return Standard_False;
     }
-    return hasGeom && !IsInvariant(aGenS);
+
+    return Standard_True;
+      
   }
-  else{
+  else
+  {
     return Standard_True;
   }
 }

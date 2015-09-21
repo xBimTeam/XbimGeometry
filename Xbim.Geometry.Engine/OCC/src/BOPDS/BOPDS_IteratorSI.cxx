@@ -12,36 +12,29 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <BOPDS_IteratorSI.ixx>
-
-#include <TopAbs_ShapeEnum.hxx>
-#include <gp_Pnt.hxx>
 #include <Bnd_Box.hxx>
-//
-#include <TopoDS_Shape.hxx>
-#include <TopoDS_Vertex.hxx>
-#include <TopoDS.hxx>
-#include <BRep_Tool.hxx>
-
-#include <NCollection_UBTreeFiller.hxx>
-#include <NCollection_IncAllocator.hxx>
-
 #include <BOPCol_BoxBndTree.hxx>
-#include <BOPDS_IndexRange.hxx>
-#include <BOPDS_PassKeyBoolean.hxx>
-#include <BOPDS_MapOfPassKeyBoolean.hxx>
-#include <BOPDS_DS.hxx>
-
-#include <BOPCol_IndexedDataMapOfShapeBox.hxx>
-#include <BOPDS_Tools.hxx>
-#include <BOPCol_DataMapOfShapeInteger.hxx>
 #include <BOPCol_DataMapOfIntegerInteger.hxx>
 #include <BOPCol_DataMapOfIntegerListOfInteger.hxx>
-#include <BOPCol_IndexedMapOfInteger.hxx>
-#include <BOPDS_ShapeInfo.hxx>
+#include <BOPCol_DataMapOfShapeInteger.hxx>
+#include <BOPCol_IndexedDataMapOfShapeBox.hxx>
 #include <BOPCol_ListOfInteger.hxx>
-#include <BOPCol_IndexedMapOfInteger.hxx>
+#include <BOPDS_DS.hxx>
+#include <BOPDS_IndexRange.hxx>
+#include <BOPDS_IteratorSI.hxx>
+#include <BOPDS_MapOfPassKeyBoolean.hxx>
+#include <BOPDS_PassKeyBoolean.hxx>
+#include <BOPDS_ShapeInfo.hxx>
+#include <BOPDS_Tools.hxx>
+#include <BRep_Tool.hxx>
+#include <gp_Pnt.hxx>
+#include <NCollection_UBTreeFiller.hxx>
+#include <TopAbs_ShapeEnum.hxx>
+#include <TopoDS.hxx>
+#include <TopoDS_Shape.hxx>
+#include <TopoDS_Vertex.hxx>
 
+//
 //=======================================================================
 //function : 
 //purpose  : 
@@ -91,12 +84,12 @@ void BOPDS_IteratorSI::Intersect()
   Standard_Integer aNbS, i, aNbB;
   Standard_Integer aNbSD, iX, j, iDS, jB;
   TopAbs_ShapeEnum aTi, aTj;
-  Handle(NCollection_IncAllocator) aAllocator;
+  Handle(NCollection_BaseAllocator) aAllocator;
   BOPCol_ListIteratorOfListOfInteger aIt;
-  BOPCol_DataMapIteratorOfDataMapOfIntegerListOfInteger aItVSD;
   //
   //-----------------------------------------------------scope_1 f
-  aAllocator=new NCollection_IncAllocator();
+  aAllocator=
+    NCollection_BaseAllocator::CommonBaseAllocator();
   //
   BOPCol_DataMapOfShapeInteger aMSI(100, aAllocator);
   BOPCol_DataMapOfIntegerInteger aMII(100, aAllocator);
@@ -124,10 +117,10 @@ void BOPDS_IteratorSI::Intersect()
       const BOPCol_ListOfInteger& aLA=aSI.SubShapes();
       aIt.Initialize(aLA);
       for (; aIt.More(); aIt.Next()) {
-	iX=aIt.Value();
-	aPKXB.Clear();
-	aPKXB.SetIds(i, iX);
-	aMPA.Add(aPKXB);
+        iX=aIt.Value();
+        aPKXB.Clear();
+        aPKXB.SetIds(i, iX);
+        aMPA.Add(aPKXB);
       }
     }
     //
@@ -206,6 +199,5 @@ void BOPDS_IteratorSI::Intersect()
   aMPKXB.Clear();
   aMSB.Clear();
   //
-  aAllocator.Nullify();
   //-----------------------------------------------------scope_1 t
 }

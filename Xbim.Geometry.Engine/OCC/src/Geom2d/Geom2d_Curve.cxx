@@ -14,12 +14,18 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <Geom2d_Curve.ixx>
 
-
+#include <Geom2d_Curve.hxx>
+#include <Geom2d_UndefinedDerivative.hxx>
+#include <Geom2d_UndefinedValue.hxx>
+#include <gp_Pnt2d.hxx>
+#include <gp_Trsf2d.hxx>
+#include <gp_Vec2d.hxx>
+#include <Standard_NoSuchObject.hxx>
+#include <Standard_RangeError.hxx>
+#include <Standard_Type.hxx>
 
 typedef Geom2d_Curve         Curve;
-typedef Handle(Geom2d_Curve) Handle(Curve);
 
 
 //=======================================================================
@@ -29,7 +35,7 @@ typedef Handle(Geom2d_Curve) Handle(Curve);
 
 Handle(Geom2d_Curve) Geom2d_Curve::Reversed () const
 {
-  Handle(Curve) C = Handle(Curve)::DownCast(Copy());
+  Handle(Geom2d_Curve) C = Handle(Geom2d_Curve)::DownCast(Copy());
   C->Reverse();
   return C;
 }

@@ -14,25 +14,27 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <Bisector_Bisec.ixx>
+
 #include <Bisector.hxx>
+#include <Bisector_Bisec.hxx>
+#include <Bisector_BisecAna.hxx>
+#include <Bisector_BisecCC.hxx>
+#include <Bisector_BisecPC.hxx>
+#include <Bisector_Curve.hxx>
+#include <GCE2d_MakeSegment.hxx>
+#include <Geom2d_BSplineCurve.hxx>
+#include <Geom2d_CartesianPoint.hxx>
 #include <Geom2d_Circle.hxx>
+#include <Geom2d_Curve.hxx>
 #include <Geom2d_Line.hxx>
 #include <Geom2d_Point.hxx>
-#include <Geom2d_CartesianPoint.hxx>
 #include <Geom2d_TrimmedCurve.hxx>
-#include <Geom2d_BSplineCurve.hxx>
 #include <gp.hxx>
 #include <gp_Pnt2d.hxx>
 #include <gp_Vec2d.hxx>
-#include <StdFail_NotDone.hxx>
-#include <Standard_NotImplemented.hxx>
 #include <Precision.hxx>
-#include <Bisector_Curve.hxx>
-#include <Bisector_BisecAna.hxx>
-#include <Bisector_BisecPC.hxx>
-#include <Bisector_BisecCC.hxx>
-#include <GCE2d_MakeSegment.hxx>
+#include <Standard_NotImplemented.hxx>
+#include <StdFail_NotDone.hxx>
 
 #ifdef OCCT_DEBUG
 //#define DRAW
@@ -50,7 +52,7 @@ static Standard_Boolean IsMaxRC (const Handle(Geom2d_Curve)& C,
   Standard_Real         U,
   Standard_Real&        R);
 
-static void ReplaceByLineIfIsToSmall (Handle(Geom2d_Curve)& Bis,
+static void ReplaceByLineIfIsToSmall (Handle(Bisector_Curve)& Bis,
   Standard_Real&        UFirst,
   Standard_Real&        ULast);					
 //=============================================================================
@@ -115,7 +117,7 @@ void Bisector_Bisec::Perform(const Handle(Geom2d_Curve)& afirstcurve   ,
     {
       if(aBS->Pole(1).Distance(aBS->Pole(2)) < 1.e-4)
       {
-        afirstcurve1 = GCE2d_MakeSegment(aBS->Pole(1), aBS->Pole(2));
+        afirstcurve1 = GCE2d_MakeSegment(aBS->Pole(1), aBS->Pole(2)).Value();
         Type1 = STANDARD_TYPE(Geom2d_Line);
       }
     }
@@ -138,7 +140,7 @@ void Bisector_Bisec::Perform(const Handle(Geom2d_Curve)& afirstcurve   ,
     {
       if(aBS->Pole(1).Distance(aBS->Pole(2)) < 1.e-4)
       {
-        asecondcurve1 = GCE2d_MakeSegment(aBS->Pole(1), aBS->Pole(2));
+        asecondcurve1 = GCE2d_MakeSegment(aBS->Pole(1), aBS->Pole(2)).Value();
         Type2 = STANDARD_TYPE(Geom2d_Line);
       }
     }
@@ -633,7 +635,7 @@ const Handle(Geom2d_TrimmedCurve)&  Bisector_Bisec::ChangeValue()
 //purpose  : If the size of an algorithmic bissectrice is negligeable it is
 //           replaced by a half-straight.
 //=============================================================================
-static void ReplaceByLineIfIsToSmall (Handle(Geom2d_Curve)& Bis,
+static void ReplaceByLineIfIsToSmall (Handle(Bisector_Curve)& Bis,
   Standard_Real&        UFirst,
   Standard_Real&        ULast )
 

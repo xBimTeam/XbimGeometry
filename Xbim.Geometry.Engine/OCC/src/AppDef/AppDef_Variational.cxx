@@ -17,7 +17,20 @@
 // Approximation d une MultiLine de points decrite par le tool MLineTool.
 // avec criteres variationnels
 
-#include <AppDef_Variational.ixx>
+#include <AppDef_MultiLine.hxx>
+#include <AppDef_SmoothCriterion.hxx>
+#include <AppDef_Variational.hxx>
+#include <AppParCurves_MultiBSpCurve.hxx>
+#include <FEmTool_Assembly.hxx>
+#include <FEmTool_Curve.hxx>
+#include <gp_VectorWithNullMagnitude.hxx>
+#include <math_Matrix.hxx>
+#include <PLib_Base.hxx>
+#include <Standard_ConstructionError.hxx>
+#include <Standard_DimensionError.hxx>
+#include <Standard_DomainError.hxx>
+#include <Standard_OutOfRange.hxx>
+#include <StdFail_NotDone.hxx>
 
 #define No_Standard_RangeError
 #define No_Standard_OutOfRange
@@ -53,9 +66,6 @@
 #include <Precision.hxx>
 #include <AppDef_MyLineTool.hxx>
 
-#include <SortTools_StraightInsertionSortOfReal.hxx>
-#include <SortTools_ShellSortOfReal.hxx>
-#include <TCollection_CompareOfReal.hxx>
 #include <TColStd_HArray2OfInteger.hxx>
 #include <TColStd_Array2OfInteger.hxx>
 #include <TColStd_Array2OfReal.hxx>
@@ -68,6 +78,9 @@
 #include <PLib_JacobiPolynomial.hxx>
 #include <PLib_HermitJacobi.hxx>
 #include <FEmTool_HAssemblyTable.hxx>
+
+// Add this line:
+#include <algorithm>
 
 #if defined(WNT)
 # include <stdio.h>
@@ -1152,8 +1165,6 @@ void AppDef_Variational::TheMotor(
 
   const Standard_Real BigValue = 1.e37, SmallValue = 1.e-6, SmallestValue = 1.e-9;
 
-  //  SortTools_StraightInsertionSortOfReal Sort;
-  TCollection_CompareOfReal CompReal;
   Handle(TColStd_HArray1OfReal) CurrentTi, NewTi, OldTi;  
   Handle(TColStd_HArray2OfInteger) Dependence;
   Standard_Boolean lestim, lconst, ToOptim, iscut;
@@ -1294,8 +1305,9 @@ void AppDef_Variational::TheMotor(
 
       if (lestim && isnear)  {
         //           (1.7) Optimization of ti by ACR.
-        //	Sort.Sort(CurrentTi->ChangeArray1(), CompReal);
-        SortTools_StraightInsertionSortOfReal::Sort(CurrentTi->ChangeArray1(), CompReal);
+
+        std::stable_sort (CurrentTi->begin(), CurrentTi->end());
+
         Standard_Integer Decima = 4;
 
         CCurrent->Length(0., 1., CBLONG);
@@ -1325,8 +1337,9 @@ void AppDef_Variational::TheMotor(
       OldTi->ChangeArray1() = CurrentTi->Array1();
 
       //     (2.2) Optimization des ti by ACR.
-      //      Sort.Sort(CurrentTi->ChangeArray1(), CompReal);
-      SortTools_StraightInsertionSortOfReal::Sort(CurrentTi->ChangeArray1(), CompReal);
+
+      std::stable_sort (CurrentTi->begin(), CurrentTi->end());
+
       Standard_Integer Decima = 4;
 
       CCurrent->Length(0., 1., CBLONG);
@@ -1412,8 +1425,8 @@ void AppDef_Variational::TheMotor(
 
       //       (3.2) On arrange les ti : Trie + recadrage sur (0,1)
       //         ---> On trie, afin d'assurer l'ordre par la suite.
-      //      Sort.Sort(CurrentTi->ChangeArray1(), CompReal);
-      SortTools_StraightInsertionSortOfReal::Sort(CurrentTi->ChangeArray1(), CompReal);
+
+      std::stable_sort (CurrentTi->begin(), CurrentTi->end());
 
       if ((CurrentTi->Value(1)!= 0.) || 
         (CurrentTi->Value(NbrPnt)!= 1.)) {
@@ -1912,11 +1925,7 @@ void AppDef_Variational::SplitCurve(const Handle(FEmTool_Curve)& InCurve,
     for(i = InKnots.Lower(); i <= InKnots.Upper(); i++) OutKnots(i) = InKnots(i);
     for(i = NbElmOld + 1; i <= NbElm; i++) OutKnots(i + i0) = NewKnots(i);
 
-    //    SortTools_ShellSortOfReal Sort;
-    TCollection_CompareOfReal CompReal;
-
-    //    Sort.Sort(OutKnots, CompReal);
-    SortTools_ShellSortOfReal::Sort(OutKnots, CompReal);
+    std::sort (OutKnots.begin(), OutKnots.end());
   }
   else
     iscut = Standard_False;
@@ -2726,7 +2735,7 @@ void AppDef_Variational::AssemblingConstraints(const Handle(FEmTool_Curve)& Curv
   Standard_Real t, R1, R2;
 
   Handle(PLib_Base) myBase = Curve->Base();
-  Handle(PLib_HermitJacobi) myHermitJacobi = (*((Handle(PLib_HermitJacobi)*)&myBase));
+  Handle(PLib_HermitJacobi) myHermitJacobi = Handle(PLib_HermitJacobi)::DownCast (myBase);
   Standard_Integer Order = myHermitJacobi->NivConstr() + 1;
 
   Standard_Real UFirst, ULast, coeff, c0, mfact, mfact1;

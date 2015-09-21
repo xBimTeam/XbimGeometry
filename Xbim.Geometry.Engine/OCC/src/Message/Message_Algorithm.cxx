@@ -15,24 +15,26 @@
 
 // The original implementation copyright (c) RINA S.p.A.
 
-#include <Message_Algorithm.ixx>
-
 #include <Message.hxx>
+#include <Message_Algorithm.hxx>
+#include <Message_Messenger.hxx>
 #include <Message_Msg.hxx>
 #include <Message_MsgFile.hxx>
-#include <Message_Messenger.hxx>
-#include <Standard_AncestorIterator.hxx>
+#include <Standard_Type.hxx>
 #include <TCollection_AsciiString.hxx>
-#include <TColStd_SequenceOfInteger.hxx>
-#include <TColStd_HSequenceOfInteger.hxx>
+#include <TCollection_ExtendedString.hxx>
+#include <TCollection_HAsciiString.hxx>
+#include <TCollection_HExtendedString.hxx>
+#include <TColStd_HPackedMapOfInteger.hxx>
 #include <TColStd_HSequenceOfHExtendedString.hxx>
+#include <TColStd_HSequenceOfInteger.hxx>
 #include <TColStd_MapIteratorOfPackedMapOfInteger.hxx>
+#include <TColStd_SequenceOfInteger.hxx>
 
 //=======================================================================
 //function : SetMessenger
 //purpose  :
 //=======================================================================
-
 Message_Algorithm::Message_Algorithm ()
 {
   myMessenger = Message::DefaultMessenger();
@@ -187,8 +189,6 @@ void Message_Algorithm::SendStatusMessages (const Message_ExecStatus& theStatus,
     return;
   }
 
-  const TCollection_AsciiString aClassName (DynamicType()->Name());
-
   // Iterate on all set flags in the specified range
   for ( Standard_Integer i  = Message_ExecStatus::FirstStatus; 
                          i <= Message_ExecStatus::LastStatus; i++ )
@@ -199,9 +199,9 @@ void Message_Algorithm::SendStatusMessages (const Message_ExecStatus& theStatus,
       continue;
     }
 
-    Handle(Message_Msg) aMsgCustom = !myReportMessages.IsNull()
-                                    ? myReportMessages->Value (i)
-                                    : Handle(Message_Msg)();
+    NCollection_Handle<Message_Msg> aMsgCustom;
+    if (! myReportMessages.IsNull())
+      aMsgCustom = myReportMessages->Value (i);
     if (!aMsgCustom.IsNull())
     {
       // print custom message
@@ -221,24 +221,14 @@ void Message_Algorithm::SendStatusMessages (const Message_ExecStatus& theStatus,
     }
     aSuffix.AssignCat( Message_ExecStatus::LocalStatusIndex( stat ) );
 
-    // find message, iterating by base classes if necessary
-    TCollection_AsciiString aMsgName = aClassName + aSuffix;
-    Handle(Standard_Type) aType = DynamicType();
-    while (! Message_MsgFile::HasMsg(aMsgName) && !aType.IsNull())
+    // find message, prefixed by class type name, iterating by base classes if necessary
+    TCollection_AsciiString aMsgName;
+    for (Handle(Standard_Type) aType = DynamicType(); ! aType.IsNull(); aType = aType->Parent())
     {
-      Standard_AncestorIterator it(aType);
-      aType.Nullify();
-      for (; it.More(); it.Next())
-      {
-        aType = it.Value();
-        TCollection_AsciiString aClassName1 (aType->Name());
-        TCollection_AsciiString aMsgName1 = aClassName1 + aSuffix;
-        if (Message_MsgFile::HasMsg(aMsgName1))
-        {
-          aMsgName = aMsgName1;
-          break;
-        }
-      }
+      aMsgName = aType->Name();
+      aMsgName += aSuffix;
+      if (Message_MsgFile::HasMsg(aMsgName))
+        break;
     }
 
     // create a message

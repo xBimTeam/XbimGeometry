@@ -14,10 +14,16 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <TopOpeBRepDS_GapTool.ixx>
-#include <TopOpeBRepDS_ListIteratorOfListOfInterference.hxx>
+
 #include <Standard_OutOfRange.hxx>
+#include <Standard_Type.hxx>
+#include <TopoDS_Shape.hxx>
+#include <TopOpeBRepDS_Curve.hxx>
 #include <TopOpeBRepDS_CurvePointInterference.hxx>
+#include <TopOpeBRepDS_GapTool.hxx>
+#include <TopOpeBRepDS_HDataStructure.hxx>
+#include <TopOpeBRepDS_Interference.hxx>
+#include <TopOpeBRepDS_ListIteratorOfListOfInterference.hxx>
 
 #ifdef OCCT_DEBUG
 extern Standard_Boolean TopOpeBRepDS_GettraceGAP();
@@ -219,7 +225,7 @@ Standard_Boolean TopOpeBRepDS_GapTool::ParameterOnEdge(const Handle(TopOpeBRepDS
     if (myInterToShape.IsBound(I)) {
       const TopoDS_Shape& S = myInterToShape(I);
       if (S.IsSame(E)) {
-	U = (*((Handle(TopOpeBRepDS_CurvePointInterference)*)&I))->Parameter();
+	U = Handle(TopOpeBRepDS_CurvePointInterference)::DownCast (I)->Parameter();
 	return 1;
       }
     }
@@ -229,7 +235,7 @@ Standard_Boolean TopOpeBRepDS_GapTool::ParameterOnEdge(const Handle(TopOpeBRepDS
       if (myInterToShape.IsBound(II)) {
 	const TopoDS_Shape& S = myInterToShape(II);
 	if (S.IsSame(E)) {
-	  U = (*((Handle(TopOpeBRepDS_CurvePointInterference)*)&II))->Parameter();
+	  U = Handle(TopOpeBRepDS_CurvePointInterference)::DownCast (II)->Parameter();
 	  return 1;
 	}	
       }
@@ -251,7 +257,7 @@ void TopOpeBRepDS_GapTool::SetParameterOnEdge(const Handle(TopOpeBRepDS_Interfer
     if (myInterToShape.IsBound(I)) {
       const TopoDS_Shape& S = myInterToShape(I);
       if (S.IsSame(E)) {
-	(*((Handle(TopOpeBRepDS_CurvePointInterference)*)&I))->Parameter(U);
+	Handle(TopOpeBRepDS_CurvePointInterference)::DownCast (I)->Parameter(U);
       }
     }
     const TopOpeBRepDS_ListOfInterference& LI = myGToI(I->Geometry());
@@ -260,7 +266,7 @@ void TopOpeBRepDS_GapTool::SetParameterOnEdge(const Handle(TopOpeBRepDS_Interfer
       if (myInterToShape.IsBound(II)) {
 	const TopoDS_Shape& S = myInterToShape(II);
 	if (S.IsSame(E)) {
-	  (*((Handle(TopOpeBRepDS_CurvePointInterference)*)&II))->Parameter(U);
+	  Handle(TopOpeBRepDS_CurvePointInterference)::DownCast (II)->Parameter(U);
 	}	
       }
     }

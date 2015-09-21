@@ -11,65 +11,59 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <ShapeFix_Solid.ixx>
 
+#include <Bnd_Box2d.hxx>
+#include <BRep_Builder.hxx>
+#include <BRep_Tool.hxx>
+#include <BRepClass3d_SolidClassifier.hxx>
+#include <Geom_Curve.hxx>
+#include <Geom_Surface.hxx>
+#include <gp_Pnt.hxx>
+#include <Message_Msg.hxx>
+#include <Message_ProgressIndicator.hxx>
+#include <Message_ProgressSentry.hxx>
+#include <Precision.hxx>
+#include <ShapeAnalysis.hxx>
+#include <ShapeAnalysis_Curve.hxx>
+#include <ShapeAnalysis_Edge.hxx>
+#include <ShapeAnalysis_FreeBounds.hxx>
+#include <ShapeBuild_ReShape.hxx>
+#include <ShapeExtend.hxx>
+#include <ShapeExtend_BasicMsgRegistrator.hxx>
+#include <ShapeExtend_WireData.hxx>
+#include <ShapeFix_Shell.hxx>
+#include <ShapeFix_Solid.hxx>
 #include <Standard_ErrorHandler.hxx>
 #include <Standard_Failure.hxx>
-
-#include <BRep_Builder.hxx>
-#include <BRepClass3d_SolidClassifier.hxx>
-#include <Precision.hxx>
-#include <TopoDS_Shape.hxx>
-#include <ShapeBuild_ReShape.hxx> 
-#include <TopoDS_Iterator.hxx>
-#include <TopoDS.hxx>
-#include <ShapeExtend.hxx>
-#include <ShapeAnalysis_Edge.hxx>
-#include <ShapeAnalysis_Curve.hxx>
-#include <TopoDS_Wire.hxx>
-#include <ShapeExtend_WireData.hxx>
-#include <TopTools_MapIteratorOfMapOfShape.hxx>
-#include <TopoDS_Iterator.hxx>
-#include <TopTools_MapOfShape.hxx>
-#include <TopTools_DataMapOfShapeListOfShape.hxx>
-#include <TopTools_SequenceOfShape.hxx>
-#include <TopTools_DataMapIteratorOfDataMapOfShapeListOfShape.hxx>
+#include <Standard_Type.hxx>
+#include <TopAbs.hxx>
 #include <TopExp.hxx>
-#include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
-#include <gp_Pnt.hxx>
-#include <Bnd_Box2d.hxx>
-#include <ShapeAnalysis.hxx>
-#include <TopoDS_Edge.hxx>
-#include <BRep_Tool.hxx>
-#include <Geom_Surface.hxx>
-#include <TopTools_ListOfShape.hxx>
-#include <Precision.hxx>
-#include <TopAbs.hxx>
-#include <TopTools_ListIteratorOfListOfShape.hxx>
-#include <TopTools_DataMapIteratorOfDataMapOfShapeListOfShape.hxx>
-#include <TopTools_ListIteratorOfListOfShape.hxx>
-#include <TopoDS_Solid.hxx>
-#include <BRep_Builder.hxx>
+#include <TopoDS.hxx>
 #include <TopoDS_CompSolid.hxx>
-#include <TopTools_DataMapIteratorOfDataMapOfShapeShape.hxx>
-#include <TopAbs.hxx>
-#include <BRep_Tool.hxx>
-#include <TopTools_IndexedMapOfShape.hxx>
-#include <TopTools_IndexedDataMapOfShapeShape.hxx>
-#include <Message_Msg.hxx>
-#include <Message_ProgressSentry.hxx>
+#include <TopoDS_Edge.hxx>
+#include <TopoDS_Iterator.hxx>
+#include <TopoDS_Shape.hxx>
+#include <TopoDS_Shell.hxx>
+#include <TopoDS_Solid.hxx>
 #include <TopoDS_Vertex.hxx>
-#include <TopTools_IndexedMapOfShape.hxx>
-
+#include <TopoDS_Wire.hxx>
+#include <TopTools_DataMapIteratorOfDataMapOfShapeListOfShape.hxx>
+#include <TopTools_DataMapIteratorOfDataMapOfShapeShape.hxx>
 #include <TopTools_DataMapOfShapeInteger.hxx>
-#include <Geom_Curve.hxx>
-#include <ShapeAnalysis_FreeBounds.hxx>
+#include <TopTools_DataMapOfShapeListOfShape.hxx>
+#include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
+#include <TopTools_IndexedDataMapOfShapeShape.hxx>
+#include <TopTools_IndexedMapOfShape.hxx>
+#include <TopTools_ListIteratorOfListOfShape.hxx>
+#include <TopTools_ListOfShape.hxx>
+#include <TopTools_MapIteratorOfMapOfShape.hxx>
+#include <TopTools_MapOfShape.hxx>
+#include <TopTools_SequenceOfShape.hxx>
 
 //======================================================
 //function : ShapeFix_Solid
 //purpose  : 
 //=======================================================================
-
 ShapeFix_Solid::ShapeFix_Solid()
 {
   myStatus = ShapeExtend::EncodeStatus (ShapeExtend_OK);
@@ -260,12 +254,12 @@ static void CollectSolids(const TopTools_SequenceOfShape& aSeqShells ,
 //purpose  : 
 //=======================================================================
 
-static Standard_Boolean CreateSolids(const TopoDS_Shape aShape,TopTools_IndexedMapOfShape& aMapSolids)
+static Standard_Boolean CreateSolids(const TopoDS_Shape theShape,TopTools_IndexedMapOfShape& aMapSolids)
 {
   TopTools_SequenceOfShape aSeqShells;
   Standard_Boolean isDone = Standard_False;
 
-  for(TopExp_Explorer aExpShell(aShape,TopAbs_SHELL); aExpShell.More(); aExpShell.Next()) {
+  for(TopExp_Explorer aExpShell(theShape,TopAbs_SHELL); aExpShell.More(); aExpShell.Next()) {
     aSeqShells.Append(aExpShell.Current());
   }
   TopTools_IndexedDataMapOfShapeListOfShape aMapShellHoles;
@@ -342,21 +336,38 @@ static Standard_Boolean CreateSolids(const TopoDS_Shape aShape,TopTools_IndexedM
   }
   //Creation of compsolid from shells containing shared faces. 
   TopTools_IndexedDataMapOfShapeListOfShape aMapFaceShells;
-  TopExp::MapShapesAndAncestors(aShape,TopAbs_FACE,TopAbs_SHELL,aMapFaceShells); 
+  TopExp::MapShapesAndAncestors(theShape,TopAbs_FACE,TopAbs_SHELL,aMapFaceShells);
   for(Standard_Integer i =1; i <= aMapFaceShells.Extent(); i++) {
     const TopTools_ListOfShape& lshells = aMapFaceShells.FindFromIndex(i);
     if(lshells.Extent() <2) continue;
     TopoDS_CompSolid aCompSolid;
     BRep_Builder aB;
     aB.MakeCompSolid(aCompSolid);
-    isDone = (aShape.ShapeType() != TopAbs_COMPSOLID || isDone);
+    isDone = (theShape.ShapeType() != TopAbs_COMPSOLID || isDone);
+    Standard_Integer nbSol = 0;
+
     for(TopTools_ListIteratorOfListOfShape lItSh(lshells);lItSh.More(); lItSh.Next()) {
       if(ShellSolid.Contains(lItSh.Value())) {
-        for(TopExp_Explorer aExpSol(ShellSolid.FindFromKey(lItSh.Value()),TopAbs_SOLID);aExpSol.More(); aExpSol.Next())
+        const TopoDS_Shape& aShape = ShellSolid.FindFromKey(lItSh.Value());
+        TopExp_Explorer aExpSol(aShape, TopAbs_SOLID);
+       
+        for(;aExpSol.More(); aExpSol.Next())
+        {
           aB.Add(aCompSolid,aExpSol.Current());
-        ShellSolid.ChangeFromKey(lItSh.Value()) = aCompSolid;
+          nbSol++;
+        }
+      
       }
     }
+    if(nbSol >1)
+    {
+      for(TopTools_ListIteratorOfListOfShape lItSh1(lshells);lItSh1.More(); lItSh1.Next()) 
+      {
+        if(ShellSolid.Contains(lItSh1.Value())) 
+          ShellSolid.ChangeFromKey(lItSh1.Value()) = aCompSolid;
+      }
+    }
+    
   }
   for(Standard_Integer kk =1 ; kk <= ShellSolid.Extent();kk++)
     if(!aMapSolids.Contains(ShellSolid.FindFromIndex(kk)))
@@ -454,6 +465,8 @@ Standard_Boolean ShapeFix_Solid::Perform(const Handle(Message_ProgressIndicator)
       mySolid  = TopoDS::Solid(tmpShape);
     }
     else {
+      status = Standard_True;
+      myStatus |= ShapeExtend::EncodeStatus ( ShapeExtend_DONE3 );
       TopoDS_Iterator aIt(tmpShape,Standard_False);
       Context()->Replace(tmpShape,aIt.Value());
       SendFail (Message_Msg ("FixAdvSolid.FixShell.MSG10")); // Solid can not be created from open shell. 

@@ -14,19 +14,19 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <BRepAlgo_Image.ixx>
 
+#include <BRepAlgo_Image.hxx>
 #include <Standard_ConstructionError.hxx>
+#include <TopExp_Explorer.hxx>
+#include <TopoDS_Shape.hxx>
+#include <TopTools_DataMapIteratorOfDataMapOfShapeShape.hxx>
 #include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <TopTools_MapOfShape.hxx>
-#include <TopTools_DataMapIteratorOfDataMapOfShapeShape.hxx>
-#include <TopExp_Explorer.hxx>
 
 //=======================================================================
 //function : BRepAlgo_Image
 //purpose  : 
 //=======================================================================
-
 BRepAlgo_Image::BRepAlgo_Image()
 {
 }
@@ -298,9 +298,9 @@ void BRepAlgo_Image::Filter(const TopoDS_Shape&     S,
     Change = Standard_False;
     TopTools_DataMapIteratorOfDataMapOfShapeShape mit(up);
     for (; mit.More(); mit.Next()) {
-      const TopoDS_Shape& S = mit.Key();
-      if (S.ShapeType() == T && !M.Contains(S)) {
-	Remove(S);
+      const TopoDS_Shape& aS = mit.Key();
+      if (aS.ShapeType() == T && !M.Contains(aS)) {
+	Remove(aS);
 	Change = Standard_True;
 	break;
       }

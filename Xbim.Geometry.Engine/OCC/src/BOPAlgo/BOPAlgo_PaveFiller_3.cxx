@@ -15,56 +15,58 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <BOPAlgo_PaveFiller.ixx>
-
-#include <Precision.hxx>
-#include <NCollection_IncAllocator.hxx>
-#include <NCollection_UBTreeFiller.hxx>
 
 #include <Bnd_Box.hxx>
-
-#include <GeomAPI_ProjectPointOnCurve.hxx>
-
-#include <TopoDS_Edge.hxx>
-#include <TopoDS_Vertex.hxx>
-#include <TopoDS_Compound.hxx>
-#include <BRep_Tool.hxx>
+#include <BOPAlgo_PaveFiller.hxx>
+#include <BOPAlgo_SectionAttribute.hxx>
+#include <BOPAlgo_Tools.hxx>
+#include <BOPCol_BoxBndTree.hxx>
+#include <BOPCol_DataMapOfIntegerShape.hxx>
+#include <BOPCol_DataMapOfShapeInteger.hxx>
+#include <BOPCol_DataMapOfShapeListOfShape.hxx>
+#include <BOPCol_IndexedDataMapOfShapeBox.hxx>
+#include <BOPCol_NCVector.hxx>
+#include <BOPCol_Parallel.hxx>
+#include <BOPDS_CommonBlock.hxx>
+#include <BOPDS_CoupleOfPaveBlocks.hxx>
+#include <BOPDS_Curve.hxx>
+#include <BOPDS_DataMapOfPaveBlockListOfInteger.hxx>
+#include <BOPDS_DataMapOfPaveBlockListOfPaveBlock.hxx>
+#include <BOPDS_DS.hxx>
+#include <BOPDS_Interf.hxx>
+#include <BOPDS_Iterator.hxx>
+#include <BOPDS_MapOfPaveBlock.hxx>
+#include <BOPDS_Pave.hxx>
+#include <BOPDS_PaveBlock.hxx>
+#include <BOPDS_VectorOfInterfEE.hxx>
+#include <BOPTools_AlgoTools.hxx>
 #include <BRep_Builder.hxx>
-#include <BRepTools.hxx>
+#include <BRep_Tool.hxx>
 #include <BRepBndLib.hxx>
-//
+#include <BRepTools.hxx>
+#include <GeomAPI_ProjectPointOnCurve.hxx>
+#include <gp_Pnt.hxx>
+#include <IntTools_CommonPrt.hxx>
+#include <IntTools_Context.hxx>
 #include <IntTools_EdgeEdge.hxx>
 #include <IntTools_Range.hxx>
 #include <IntTools_SequenceOfCommonPrts.hxx>
-#include <IntTools_CommonPrt.hxx>
 #include <IntTools_SequenceOfRanges.hxx>
-//
-#include <BOPTools_AlgoTools.hxx>
-//
-#include <BOPCol_DataMapOfShapeInteger.hxx>
-#include <BOPCol_DataMapOfShapeListOfShape.hxx>
-#include <BOPCol_DataMapOfIntegerShape.hxx>
-#include <BOPCol_IndexedDataMapOfShapeBox.hxx>
-#include <BOPCol_BoxBndTree.hxx>
-#include <BOPCol_NCVector.hxx>
-#include <BOPCol_Parallel.hxx>
-//
-#include <IntTools_Context.hxx>
 #include <IntTools_ShrunkRange.hxx>
 #include <IntTools_Tools.hxx>
-//
-#include <BOPDS_DataMapOfPaveBlockListOfPaveBlock.hxx>
-#include <BOPDS_MapOfPaveBlock.hxx>
-#include <BOPDS_CommonBlock.hxx>
-#include <BOPDS_CoupleOfPaveBlocks.hxx>
-#include <BOPDS_DataMapOfPaveBlockListOfInteger.hxx>
-#include <BOPDS_Iterator.hxx>
-#include <BOPDS_VectorOfInterfEE.hxx>
-#include <BOPDS_Interf.hxx>
-#include <BOPDS_Pave.hxx>
-//
-#include <BOPAlgo_Tools.hxx>
+#include <NCollection_UBTreeFiller.hxx>
+#include <Precision.hxx>
+#include <TopoDS_Compound.hxx>
+#include <TopoDS_Edge.hxx>
+#include <TopoDS_Face.hxx>
+#include <TopoDS_Vertex.hxx>
 
+//
+//
+//
+//
+//
+//
 /////////////////////////////////////////////////////////////////////////
 //=======================================================================
 //class    : BOPAlgo_EdgeEdge
@@ -288,11 +290,12 @@ void BOPAlgo_PaveFiller::PerformEE()
   Standard_Real aTS11, aTS12, aTS21, aTS22, aT11, aT12, aT21, aT22;
   TopAbs_ShapeEnum aType;
   BOPDS_ListIteratorOfListOfPaveBlock aIt1, aIt2;
-  Handle(NCollection_IncAllocator) aAllocator;
+  Handle(NCollection_BaseAllocator) aAllocator;
   BOPDS_MapOfPaveBlock aMPBToUpdate;
   BOPAlgo_VectorOfEdgeEdge aVEdgeEdge;
   BOPDS_MapIteratorOfMapOfPaveBlock aItPB; 
   //
+  aAllocator=NCollection_BaseAllocator::CommonBaseAllocator();
   //-----------------------------------------------------scope f
   BOPDS_IndexedDataMapOfPaveBlockListOfPaveBlock aMPBLPB(100, aAllocator);
   BOPDS_IndexedDataMapOfShapeCoupleOfPaveBlocks aMVCPB(100, aAllocator);
@@ -573,7 +576,7 @@ void BOPAlgo_PaveFiller::PerformEE()
 //=======================================================================
 Standard_Integer BOPAlgo_PaveFiller::PerformVerticesEE
   (BOPDS_IndexedDataMapOfShapeCoupleOfPaveBlocks& theMVCPB,
-   Handle(NCollection_BaseAllocator)& theAllocator)
+   const Handle(NCollection_BaseAllocator)& theAllocator)
 {
   Standard_Integer aNbV, iRet;
   //
@@ -737,8 +740,7 @@ void BOPAlgo_PaveFiller::TreatNewVertices
   BOPCol_IndexedMapOfShape aMVProcessed;
   BOPCol_MapOfInteger aMFence;
   BOPCol_ListIteratorOfListOfInteger aIt;
-  BOPCol_DataMapOfShapeListOfShape aDMVLV;
-  BOPCol_DataMapIteratorOfDataMapOfShapeListOfShape aItDMVLV;
+  BOPCol_IndexedDataMapOfShapeListOfShape aDMVLV;
   //
   BOPCol_BoxBndTreeSelector aSelector;
   BOPCol_BoxBndTree aBBTree;
@@ -778,7 +780,6 @@ void BOPAlgo_PaveFiller::TreatNewVertices
     //
     Standard_Integer aIP, aNbIP1, aIP1;
     BOPCol_ListOfShape aLVSD;
-    BOPCol_MapIteratorOfMapOfInteger aItMI;
     BOPCol_ListOfInteger aLIP, aLIP1, aLIPC;
     BOPCol_ListIteratorOfListOfInteger aItLIP;
     //
@@ -823,14 +824,14 @@ void BOPAlgo_PaveFiller::TreatNewVertices
       aLVSD.Append(aVP);
     }
     aVF=aLVSD.First();
-    aDMVLV.Bind(aVF, aLVSD);
+    aDMVLV.Add(aVF, aLVSD);
   }// for (i=1; i<=aNbV; ++i) {
 
   // Make new vertices
-  aItDMVLV.Initialize(aDMVLV);
-  for(; aItDMVLV.More(); aItDMVLV.Next()) {
-    const TopoDS_Shape& aV=aItDMVLV.Key();
-    const BOPCol_ListOfShape& aLVSD=aItDMVLV.Value();
+  aNbV = aDMVLV.Extent();
+  for (i = 1; i <= aNbV; ++i) {
+    const TopoDS_Shape& aV = aDMVLV.FindKey(i);
+    const BOPCol_ListOfShape& aLVSD = aDMVLV(i);
     if (aLVSD.IsEmpty()) {
       myImages.Add(aV, aLVSD);
     }

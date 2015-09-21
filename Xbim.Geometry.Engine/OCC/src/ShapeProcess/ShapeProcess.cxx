@@ -13,18 +13,17 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <ShapeProcess.ixx>
 
+#include <Message_Messenger.hxx>
+#include <Message_Msg.hxx>
+#include <ShapeProcess.hxx>
+#include <ShapeProcess_Context.hxx>
+#include <ShapeProcess_DictionaryOfOperator.hxx>
+#include <ShapeProcess_Operator.hxx>
 #include <Standard_ErrorHandler.hxx>
 #include <Standard_Failure.hxx>
 #include <TCollection_AsciiString.hxx>
 #include <TColStd_SequenceOfAsciiString.hxx>
-
-#include <Message_Msg.hxx>
-#include <Message_Messenger.hxx>
-
-#include <ShapeProcess_Operator.hxx>
-#include <ShapeProcess_DictionaryOfOperator.hxx>
 
 static Handle(ShapeProcess_DictionaryOfOperator) dic;
 
@@ -82,6 +81,10 @@ Standard_Boolean ShapeProcess::Perform (const Handle(ShapeProcess_Context)& cont
 #ifdef OCCT_DEBUG
     cout << "Error: ShapeProcess_Performer::Perform: sequence not defined for " << seq << endl;
 #endif
+    if ( context->TraceLevel() >0 ) {
+      Message_Msg SMSG3 ("SP.Sequence.Warn.NoSeq"); // Sequence %s not found
+      context->Messenger()->Send (SMSG3 << seq, Message_Warning);
+    }
     context->UnSetScope();
     return Standard_False;
   }
@@ -96,7 +99,7 @@ Standard_Boolean ShapeProcess::Perform (const Handle(ShapeProcess_Context)& cont
   
   // put a message
   if ( context->TraceLevel() >=2 ) {
-    Message_Msg SMSG0 ("Sequence.MSG0"); //Sequence of operators: %s
+    Message_Msg SMSG0 ("SP.Sequence.Info.Seq"); //Sequence of operators: %s
     TCollection_AsciiString Seq;
     for ( Standard_Integer i1=1; i1 <= sequenceOfOperators.Length(); i1++ ) {
       if (i1 > 1) Seq += ",";
@@ -107,11 +110,12 @@ Standard_Boolean ShapeProcess::Perform (const Handle(ShapeProcess_Context)& cont
   }
 
   // iterate on operators in the sequence
+  Standard_Boolean isDone = Standard_False;
   for (i=1; i<=sequenceOfOperators.Length(); i++) {
     oper = sequenceOfOperators.Value(i);
     
     if ( context->TraceLevel() >=2 ) {
-      Message_Msg SMSG5 ("Sequence.MSG5"); //Operator %d/%d: %s
+      Message_Msg SMSG5 ("SP.Sequence.Info.Operator"); //Operator %d/%d: %s
       SMSG5 << i << sequenceOfOperators.Length() << oper.ToCString();
       context->Messenger()->Send (SMSG5, Message_Alarm);
     }
@@ -119,7 +123,7 @@ Standard_Boolean ShapeProcess::Perform (const Handle(ShapeProcess_Context)& cont
     Handle(ShapeProcess_Operator) op;
     if ( ! ShapeProcess::FindOperator ( oper.ToCString(), op ) ) {
       if ( context->TraceLevel() >0 ) {
-        Message_Msg SMSG1 ("Sequence.MSG1"); //Operator %s not found
+        Message_Msg SMSG1 ("SP.Sequence.Error.NoOp"); //Operator %s not found
         context->Messenger()->Send (SMSG1 << oper, Message_Alarm);
       }
       continue;
@@ -128,11 +132,11 @@ Standard_Boolean ShapeProcess::Perform (const Handle(ShapeProcess_Context)& cont
     context->SetScope ( oper.ToCString() );
     try {
       OCC_CATCH_SIGNALS
-      if ( !op->Perform(context) )
-        return Standard_False;
+      if ( op->Perform(context) )
+        isDone = Standard_True;
     }
     catch (Standard_Failure) {
-      Message_Msg SMSG2 ("Sequence.MSG2"); //Operator %s failed with exception %s
+      Message_Msg SMSG2 ("SP.Sequence.Error.Except"); //Operator %s failed with exception %s
       SMSG2 << oper << Standard_Failure::Caught()->GetMessageString();
       context->Messenger()->Send (SMSG2, Message_Alarm);
     }
@@ -140,5 +144,5 @@ Standard_Boolean ShapeProcess::Perform (const Handle(ShapeProcess_Context)& cont
   }
   
   context->UnSetScope();
-  return Standard_True;
+  return isDone;
 }

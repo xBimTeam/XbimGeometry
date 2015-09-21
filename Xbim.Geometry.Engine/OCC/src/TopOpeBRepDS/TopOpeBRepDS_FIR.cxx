@@ -14,24 +14,24 @@
 
 // Robert Boehne 30 May 2000 : Dec Osf
 
-#include <TopOpeBRepDS_FIR.ixx>
-#include <TopOpeBRepDS_define.hxx>
-#include <TopOpeBRepTool_EXPORT.hxx>
-#include <TopOpeBRepTool_SC.hxx>
-
-#include <TopOpeBRepDS_ProcessInterferencesTool.hxx>
-#include <TopoDS.hxx>
-#include <TopExp_Explorer.hxx>
-#include <TopOpeBRepDS_FaceInterferenceTool.hxx>
-#include <TopOpeBRepDS_CurvePointInterference.hxx>
-#include <TopOpeBRepDS_ShapeShapeInterference.hxx>
-#include <TopOpeBRepDS_ShapeData.hxx>
-#include <TopOpeBRepDS_MapOfShapeData.hxx>
-#include <BRepAdaptor_Curve.hxx>
 #include <BRep_Builder.hxx>
 #include <BRep_Tool.hxx>
-#include <TopOpeBRepDS_ListOfShapeOn1State.hxx>
+#include <BRepAdaptor_Curve.hxx>
+#include <TopExp_Explorer.hxx>
+#include <TopoDS.hxx>
+#include <TopOpeBRepDS_CurvePointInterference.hxx>
 #include <TopOpeBRepDS_DataMapOfShapeListOfShapeOn1State.hxx>
+#include <TopOpeBRepDS_define.hxx>
+#include <TopOpeBRepDS_FaceInterferenceTool.hxx>
+#include <TopOpeBRepDS_FIR.hxx>
+#include <TopOpeBRepDS_HDataStructure.hxx>
+#include <TopOpeBRepDS_ListOfShapeOn1State.hxx>
+#include <TopOpeBRepDS_MapOfShapeData.hxx>
+#include <TopOpeBRepDS_ProcessInterferencesTool.hxx>
+#include <TopOpeBRepDS_ShapeData.hxx>
+#include <TopOpeBRepDS_ShapeShapeInterference.hxx>
+#include <TopOpeBRepTool_EXPORT.hxx>
+#include <TopOpeBRepTool_SC.hxx>
 
 #define MDSke TopOpeBRepDS_EDGE
 #define MDSkf TopOpeBRepDS_FACE
@@ -118,8 +118,8 @@ Standard_Boolean FUN_findPonF(const TopoDS_Edge& E,const TopOpeBRepDS_DataStruct
     Standard_Boolean pardef = Standard_False;
     
     Handle(TopOpeBRepDS_Interference)& I = itI.Value(); FDS_data(I,GT1,G1,ST1,S1);        
-    const Handle(TopOpeBRepDS_CurvePointInterference)& CPI = Handle(TopOpeBRepDS_CurvePointInterference)::DownCast(I);
-    const Handle(TopOpeBRepDS_ShapeShapeInterference)& SSI = Handle(TopOpeBRepDS_ShapeShapeInterference)::DownCast(I);
+    Handle(TopOpeBRepDS_CurvePointInterference) CPI (Handle(TopOpeBRepDS_CurvePointInterference)::DownCast(I));
+    Handle(TopOpeBRepDS_ShapeShapeInterference) SSI (Handle(TopOpeBRepDS_ShapeShapeInterference)::DownCast(I));
     if      (!CPI.IsNull()) {
       par = CPI->Parameter(); pardef = Standard_True;
     }

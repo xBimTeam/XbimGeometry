@@ -12,10 +12,11 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <TCollection_BaseSequence.ixx>
+
+#include <Standard_DomainError.hxx>
 #include <Standard_NoSuchObject.hxx>
 #include <Standard_OutOfRange.hxx>
-#include <Standard_DomainError.hxx>
+#include <TCollection_BaseSequence.hxx>
 #include <TCollection_SeqNode.hxx>
 
 typedef void (*DelNode) (TCollection_SeqNode*);
@@ -66,6 +67,8 @@ void TCollection_BaseSequence::PAppend(const Standard_Address newnode)
 // ---------------------------------------------------
 void TCollection_BaseSequence::PAppend(TCollection_BaseSequence& Other)
 {
+  if (Other.Size == 0)
+    return;
   if (Size == 0) {
     Size         = Other.Size;
     FirstItem    = Other.FirstItem;
@@ -103,6 +106,8 @@ void TCollection_BaseSequence::PPrepend(const Standard_Address newnode)
 
 void TCollection_BaseSequence::PPrepend(TCollection_BaseSequence& Other)
 {
+  if (Other.Size == 0)
+    return;
   if (Size == 0) {
     Size         = Other.Size;
     FirstItem    = Other.FirstItem;

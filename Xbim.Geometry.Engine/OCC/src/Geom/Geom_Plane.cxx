@@ -14,23 +14,30 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <Geom_Plane.ixx>
 
-#include <Precision.hxx>
-#include <Standard_RangeError.hxx>
-
-#include <gp_XYZ.hxx>
-#include <gp.hxx>
-#include <gp_Lin.hxx>
-#include <gp_Trsf2d.hxx>
 #include <ElSLib.hxx>
+#include <Geom_Curve.hxx>
+#include <Geom_Geometry.hxx>
 #include <Geom_Line.hxx>
+#include <Geom_Plane.hxx>
 #include <GeomAbs_UVSense.hxx>
+#include <gp.hxx>
+#include <gp_Ax3.hxx>
+#include <gp_Dir.hxx>
+#include <gp_GTrsf2d.hxx>
+#include <gp_Lin.hxx>
+#include <gp_Pln.hxx>
+#include <gp_Pnt.hxx>
+#include <gp_Trsf.hxx>
+#include <gp_Trsf2d.hxx>
+#include <gp_Vec.hxx>
+#include <gp_XYZ.hxx>
+#include <Precision.hxx>
+#include <Standard_ConstructionError.hxx>
+#include <Standard_RangeError.hxx>
+#include <Standard_Type.hxx>
 
 typedef Geom_Plane         Plane;
-typedef Handle(Geom_Plane) Handle(Plane);
-typedef Handle(Geom_Line)  Handle(Line);
-
 typedef gp_Ax1  Ax1;
 typedef gp_Ax2  Ax2;
 typedef gp_Ax3  Ax3;
@@ -42,8 +49,6 @@ typedef gp_Trsf Trsf;
 typedef gp_Vec  Vec;
 typedef gp_XYZ  XYZ;
 
-
-
 //=======================================================================
 //function : Copy
 //purpose  : 
@@ -51,7 +56,7 @@ typedef gp_XYZ  XYZ;
 
 Handle(Geom_Geometry) Geom_Plane::Copy () const {
  
-  Handle(Plane) Pl = new Plane ( pos);
+  Handle(Geom_Plane) Pl = new Plane ( pos);
   return Pl;
 }
 

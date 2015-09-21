@@ -14,26 +14,28 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <Geom2d_Line.ixx>
 
-#include <Precision.hxx>
 #include <ElCLib.hxx>
+#include <Geom2d_Geometry.hxx>
+#include <Geom2d_Line.hxx>
+#include <gp_Ax2d.hxx>
+#include <gp_Dir2d.hxx>
+#include <gp_Lin2d.hxx>
+#include <gp_Pnt2d.hxx>
+#include <gp_Trsf2d.hxx>
+#include <gp_Vec2d.hxx>
 #include <gp_XY.hxx>
+#include <Precision.hxx>
 #include <Standard_RangeError.hxx>
-
+#include <Standard_Type.hxx>
 
 typedef Geom2d_Line         Line;
-typedef Handle(Geom2d_Line) Handle(Line);
 typedef gp_Ax2d   Ax2d;
 typedef gp_Dir2d  Dir2d;
 typedef gp_Pnt2d  Pnt2d;
 typedef gp_Vec2d  Vec2d;
 typedef gp_Trsf2d Trsf2d;
 typedef gp_XY     XY;
-
-
-
-
 
 //=======================================================================
 //function : Copy
@@ -42,7 +44,7 @@ typedef gp_XY     XY;
 
 Handle(Geom2d_Geometry) Geom2d_Line::Copy() const 
 {
-  Handle(Line) L;
+  Handle(Geom2d_Line) L;
   L = new Line (pos);
   return L;
 }

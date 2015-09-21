@@ -22,7 +22,6 @@
 #include <Poly_CoherentLink.hxx>
 #include <NCollection_Vector.hxx>
 
-class Handle(Poly_CoherentTriangulation);
 class Poly_CoherentTriangulation;
 template <class A> class NCollection_List;
 
@@ -34,7 +33,7 @@ typedef NCollection_Vector<Poly_CoherentLink>::Iterator
                                 Poly_BaseIteratorOfCoherentLink;
 
 //! Definition of HANDLE object using Standard_DefineHandle.hxx
-#include <Standard_DefineHandle.hxx>
+#include <Standard_Type.hxx>
 class Poly_CoherentTriangulation;
 DEFINE_STANDARD_HANDLE (Poly_CoherentTriangulation, Standard_Transient)
 
@@ -381,7 +380,7 @@ class Poly_CoherentTriangulation : public Standard_Transient
 
  public:
 // Declaration of CASCADE RTTI
-DEFINE_STANDARD_RTTI (Poly_CoherentTriangulation)
+DEFINE_STANDARD_RTTI (Poly_CoherentTriangulation, Standard_Transient)
 
   friend class IteratorOfTriangle;
   friend class IteratorOfNode;

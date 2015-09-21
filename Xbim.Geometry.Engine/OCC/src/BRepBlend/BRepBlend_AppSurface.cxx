@@ -14,19 +14,20 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <BRepBlend_AppSurface.ixx>
 
+#include <Approx_SweepFunction.hxx>
+#include <BRepBlend_AppSurface.hxx>
+#include <Standard_DomainError.hxx>
+#include <Standard_OutOfRange.hxx>
+#include <StdFail_NotDone.hxx>
 #include <TColgp_Array1OfPnt.hxx>
 #include <TColgp_Array1OfPnt2d.hxx>
 #include <TColgp_Array1OfVec.hxx>
 #include <TColgp_Array1OfVec2d.hxx>
 #include <TColStd_Array1OfReal.hxx>
 
-#include <StdFail_NotDone.hxx>
-
-
 BRepBlend_AppSurface::BRepBlend_AppSurface(
-			       Handle(Approx_SweepFunction)& Func,
+			       const Handle(Approx_SweepFunction)& Func,
 			       const Standard_Real First, 
 			       const Standard_Real Last,
 			       const Standard_Real Tol3d, 

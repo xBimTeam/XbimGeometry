@@ -15,18 +15,21 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <BOPAlgo_PaveFiller.ixx>
 
-#include <Standard_ErrorHandler.hxx>
-#include <Standard_Failure.hxx>
-
-#include <NCollection_BaseAllocator.hxx>
-
-#include <IntTools_Context.hxx>
+#include <BOPAlgo_PaveFiller.hxx>
+#include <BOPAlgo_SectionAttribute.hxx>
+#include <BOPDS_Curve.hxx>
 #include <BOPDS_DS.hxx>
 #include <BOPDS_Iterator.hxx>
+#include <BOPDS_PaveBlock.hxx>
+#include <gp_Pnt.hxx>
+#include <IntTools_Context.hxx>
+#include <NCollection_BaseAllocator.hxx>
+#include <Standard_ErrorHandler.hxx>
+#include <Standard_Failure.hxx>
+#include <TopoDS_Face.hxx>
+#include <TopoDS_Vertex.hxx>
 #include <TopTools_ListIteratorOfListOfShape.hxx>
-
 
 //=======================================================================
 //function : 
@@ -108,21 +111,6 @@ void BOPAlgo_PaveFiller::SetSectionAttribute
   (const BOPAlgo_SectionAttribute& theSecAttr)
 {
   mySectionAttribute = theSecAttr;
-}
-//=======================================================================
-//function : SetArguments
-//purpose  : 
-//=======================================================================
-void BOPAlgo_PaveFiller::SetArguments(const TopTools_ListOfShape& theLS)
-{
-  TopTools_ListIteratorOfListOfShape aItLS;
-  //
-  myArguments.Clear();
-  aItLS.Initialize(theLS);
-  for (; aItLS.More(); aItLS.Next()) {
-    const TopoDS_Shape& aS=aItLS.Value();
-    myArguments.Append(aS);
-  }
 }
 //=======================================================================
 //function : SetArguments

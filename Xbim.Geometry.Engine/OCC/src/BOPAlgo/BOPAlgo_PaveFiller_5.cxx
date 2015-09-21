@@ -15,47 +15,50 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <BOPAlgo_PaveFiller.ixx>
 
-#include <NCollection_IncAllocator.hxx>
-//
-#include <GeomAPI_ProjectPointOnSurf.hxx>
-//
 #include <Bnd_Box.hxx>
-//
-#include <TopoDS_Vertex.hxx>
-#include <TopoDS_Edge.hxx>
-#include <TopoDS_Face.hxx>
-#include <BRep_Tool.hxx>
-#include <BRepBndLib.hxx>
-#include <BRepAdaptor_Curve.hxx>
-#include <BRep_Builder.hxx>
-//
-#include <IntTools_EdgeFace.hxx>
-#include <IntTools_Range.hxx>
-#include <IntTools_SequenceOfCommonPrts.hxx>
-#include <IntTools_CommonPrt.hxx>
-//
+#include <BOPAlgo_PaveFiller.hxx>
+#include <BOPAlgo_SectionAttribute.hxx>
+#include <BOPAlgo_Tools.hxx>
 #include <BOPCol_MapOfInteger.hxx>
 #include <BOPCol_NCVector.hxx>
 #include <BOPCol_Parallel.hxx>
-//
-#include <IntTools_Context.hxx>
-#include <IntTools_Tools.hxx>
-//
+#include <BOPDS_CommonBlock.hxx>
+#include <BOPDS_CoupleOfPaveBlocks.hxx>
+#include <BOPDS_Curve.hxx>
+#include <BOPDS_DataMapOfPaveBlockListOfInteger.hxx>
+#include <BOPDS_DS.hxx>
 #include <BOPDS_Interf.hxx>
 #include <BOPDS_Iterator.hxx>
-#include <BOPDS_PaveBlock.hxx>
 #include <BOPDS_MapOfPaveBlock.hxx>
-#include <BOPDS_DataMapOfPaveBlockListOfInteger.hxx>
-#include <BOPDS_CommonBlock.hxx>
 #include <BOPDS_Pave.hxx>
-#include <BOPDS_CoupleOfPaveBlocks.hxx>
-//
+#include <BOPDS_PaveBlock.hxx>
 #include <BOPTools_AlgoTools.hxx>
-//
-#include <BOPAlgo_Tools.hxx>
+#include <BRep_Builder.hxx>
+#include <BRep_Tool.hxx>
+#include <BRepAdaptor_Curve.hxx>
+#include <BRepBndLib.hxx>
+#include <GeomAPI_ProjectPointOnSurf.hxx>
+#include <gp_Pnt.hxx>
+#include <IntTools_CommonPrt.hxx>
+#include <IntTools_Context.hxx>
+#include <IntTools_EdgeFace.hxx>
+#include <IntTools_Range.hxx>
+#include <IntTools_SequenceOfCommonPrts.hxx>
+#include <IntTools_Tools.hxx>
+#include <TopoDS_Edge.hxx>
+#include <TopoDS_Face.hxx>
+#include <TopoDS_Vertex.hxx>
 
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //=======================================================================
 //class    : BOPAlgo_EdgeFace
 //purpose  : 
@@ -152,15 +155,15 @@ void BOPAlgo_PaveFiller::PerformEF()
   Standard_Integer nE, nF, aDiscretize, i, aNbCPrts, iX, nV[2];
   Standard_Integer aNbEdgeFace, k;
   Standard_Real aTolE, aTolF, aTS1, aTS2, aT1, aT2, aDeflection;
-  Handle(NCollection_IncAllocator) aAllocator;
+  Handle(NCollection_BaseAllocator) aAllocator;
   TopAbs_ShapeEnum aType;
   BOPDS_ListIteratorOfListOfPaveBlock aIt;
   BOPAlgo_VectorOfEdgeFace aVEdgeFace; 
   BRep_Builder aBB;
   //-----------------------------------------------------scope f
   //
-  ////aAllocator=new NCollection_IncAllocator();
-  
+  aAllocator=NCollection_BaseAllocator::CommonBaseAllocator();
+  //
   BOPCol_MapOfInteger aMIEFC(100, aAllocator);
   BOPDS_IndexedDataMapOfShapeCoupleOfPaveBlocks aMVCPB(100, aAllocator);
   BOPDS_IndexedDataMapOfPaveBlockListOfInteger aMPBLI(100, aAllocator);
@@ -419,7 +422,7 @@ void BOPAlgo_PaveFiller::PerformEF()
 //=======================================================================
 Standard_Integer BOPAlgo_PaveFiller::PerformVerticesEF
   (BOPDS_IndexedDataMapOfShapeCoupleOfPaveBlocks& theMVCPB,
-   Handle(NCollection_BaseAllocator)& theAllocator)
+   const Handle(NCollection_BaseAllocator)& theAllocator)
 {
   Standard_Integer aNbV, iRet;
   //

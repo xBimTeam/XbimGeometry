@@ -16,20 +16,23 @@
 
 // IFV 04.06.99 - PRO18974 - processing of INTERNAL shapes.
 
-#include <BRepTools_Modifier.ixx>
-
-#include <TopoDS_Iterator.hxx>
-#include <TopoDS_Vertex.hxx>
+#include <BRepTools_Modification.hxx>
+#include <BRepTools_Modifier.hxx>
+#include <Message_ProgressIndicator.hxx>
+#include <Standard_NoSuchObject.hxx>
+#include <Standard_NullObject.hxx>
+#include <TColStd_ListIteratorOfListOfTransient.hxx>
+#include <TColStd_ListOfTransient.hxx>
+#include <TopExp_Explorer.hxx>
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Face.hxx>
+#include <TopoDS_Iterator.hxx>
 #include <TopoDS_Shape.hxx>
-#include <TopExp_Explorer.hxx>
+#include <TopoDS_Vertex.hxx>
 #include <TopTools_DataMapIteratorOfDataMapOfShapeShape.hxx>
 #include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
-#include <TopTools_ListOfShape.hxx>
 #include <TopTools_ListIteratorOfListOfShape.hxx>
-#include <TColStd_ListOfTransient.hxx>
-#include <TColStd_ListIteratorOfListOfTransient.hxx>
+#include <TopTools_ListOfShape.hxx>
 
 #if 0
 #include <Poly_Triangulation.hxx>
@@ -52,7 +55,7 @@
 #include <gp_Trsf.hxx>
 #include <BRepTools_TrsfModification.hxx>
 #include <Message_ProgressSentry.hxx>
-
+#include <Geom_Surface.hxx>
 
 
 //=======================================================================
@@ -282,6 +285,20 @@ Standard_Boolean BRepTools_Modifier::Rebuild
 	// set specifics flags of a Face
 	B.NaturalRestriction(TopoDS::Face(result),
 			     BRep_Tool::NaturalRestriction(TopoDS::Face(S)));
+      }
+
+      // update triangulation on the copied face
+      Handle(Poly_Triangulation) aTriangulation;
+      if (M->NewTriangulation(TopoDS::Face(S), aTriangulation))
+      {
+        if (rebuild) // the copied face already exists => update it
+          B.UpdateFace(TopoDS::Face(result), aTriangulation);
+        else
+        { // create new face with bare triangulation
+          B.MakeFace(TopoDS::Face(result), aTriangulation);
+          result.Location(S.Location());
+        }
+        rebuild = Standard_True;
       }
     }
     break;

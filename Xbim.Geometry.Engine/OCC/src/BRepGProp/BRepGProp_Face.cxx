@@ -12,31 +12,32 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <BRepGProp_Face.ixx>
-
-#include <TopoDS.hxx>
-
-#include <Geom2d_Line.hxx>
-#include <Geom2d_BezierCurve.hxx>
-#include <Geom2d_BSplineCurve.hxx>
-#include <Geom_BSplineCurve.hxx>
-#include <Geom_BezierSurface.hxx>
-#include <Geom_BSplineSurface.hxx>
-#include <Geom_SurfaceOfLinearExtrusion.hxx>
-
-#include <math.hxx>
 
 #include <Bnd_Box2d.hxx>
 #include <BndLib_Add2dCurve.hxx>
+#include <BRepGProp_Face.hxx>
+#include <Geom2d_BezierCurve.hxx>
+#include <Geom2d_BSplineCurve.hxx>
+#include <Geom2d_Line.hxx>
+#include <Geom_BezierSurface.hxx>
+#include <Geom_BSplineCurve.hxx>
+#include <Geom_BSplineSurface.hxx>
+#include <Geom_SurfaceOfLinearExtrusion.hxx>
 #include <GeomAdaptor_Curve.hxx>
-
+#include <gp_Pnt.hxx>
+#include <gp_Pnt2d.hxx>
+#include <gp_Vec.hxx>
+#include <gp_Vec2d.hxx>
+#include <math.hxx>
 #include <Precision.hxx>
+#include <TopoDS.hxx>
+#include <TopoDS_Edge.hxx>
+#include <TopoDS_Face.hxx>
 
 //=======================================================================
 //function : UIntegrationOrder
 //purpose  : 
 //=======================================================================
-
 Standard_Integer BRepGProp_Face::UIntegrationOrder() const {
 
   Standard_Integer Nu;
@@ -617,7 +618,7 @@ void BRepGProp_Face::GetUKnots
       GeomAdaptor_Curve    aCurve;
       Handle(Geom_Surface) aSurf = mySurface.Surface().Surface();
 
-      aCurve.Load((*((Handle(Geom_SurfaceOfLinearExtrusion)*)&aSurf))->BasisCurve());
+      aCurve.Load(Handle(Geom_SurfaceOfLinearExtrusion)::DownCast (aSurf)->BasisCurve());
       isCBSpline = aCurve.GetType() == GeomAbs_BSplineCurve;
     }
   }
@@ -643,7 +644,7 @@ void BRepGProp_Face::GetUKnots
       Handle(Geom_Surface)      aSurf = mySurface.Surface().Surface();
       Handle(Geom_BSplineCurve) aBSplCurve;
 
-      aCurve.Load((*((Handle(Geom_SurfaceOfLinearExtrusion)*)&aSurf))->BasisCurve());
+      aCurve.Load(Handle(Geom_SurfaceOfLinearExtrusion)::DownCast (aSurf)->BasisCurve());
       aBSplCurve = aCurve.BSpline();
       aNbKnots   = aBSplCurve->NbKnots();
       aKnots     = new TColStd_HArray1OfReal(1, aNbKnots);

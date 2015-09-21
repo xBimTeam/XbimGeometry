@@ -12,30 +12,26 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <BndLib_Add2dCurve.ixx>
 
-
-#include <Precision.hxx>
-
-#include <gp.hxx>
-
-#include <Geom2d_Curve.hxx>
-#include <Geom2d_TrimmedCurve.hxx>
-#include <Geom2d_OffsetCurve.hxx>
-#include <Geom2d_Conic.hxx>
-#include <Geom2d_Circle.hxx>
-#include <Geom2d_Ellipse.hxx>
-#include <Geom2d_Hyperbola.hxx>
-#include <Geom2d_Parabola.hxx>
-#include <Standard_Type.hxx>
-#include <Geom2d_Line.hxx>
+#include <Adaptor2d_Curve2d.hxx>
+#include <Bnd_Box2d.hxx>
+#include <BndLib_Add2dCurve.hxx>
 #include <Geom2d_BezierCurve.hxx>
 #include <Geom2d_BSplineCurve.hxx>
+#include <Geom2d_Circle.hxx>
+#include <Geom2d_Conic.hxx>
+#include <Geom2d_Curve.hxx>
+#include <Geom2d_Ellipse.hxx>
 #include <Geom2d_Geometry.hxx>
-
+#include <Geom2d_Hyperbola.hxx>
+#include <Geom2d_Line.hxx>
+#include <Geom2d_OffsetCurve.hxx>
+#include <Geom2d_Parabola.hxx>
+#include <Geom2d_TrimmedCurve.hxx>
 #include <Geom2dAdaptor_Curve.hxx>
-
-
+#include <gp.hxx>
+#include <Precision.hxx>
+#include <Standard_Type.hxx>
 
 //=======================================================================
 //function : BndLib_Box2dCurve
@@ -49,7 +45,7 @@ class BndLib_Box2dCurve  {
 
   void SetCurve(const Handle(Geom2d_Curve)& aC);
 
-  const Handle_Geom2d_Curve& Curve() const;
+  const Handle(Geom2d_Curve)& Curve() const;
 
   void SetRange(const Standard_Real aT1,
 		const Standard_Real aT2);
@@ -95,10 +91,10 @@ class BndLib_Box2dCurve  {
   void PerformOnePoint();
   //-----------------------------
  protected:
-  Handle_Geom2d_Curve myCurve;
+  Handle(Geom2d_Curve) myCurve;
   Bnd_Box2d myBox;
   Standard_Integer myErrorStatus;
-  Handle_Geom2d_Curve myCurveBase;
+  Handle(Geom2d_Curve) myCurveBase;
   Standard_Real myOffsetBase;
   Standard_Boolean myOffsetFlag;
   Standard_Real myT1;
@@ -584,7 +580,7 @@ void BndLib_Box2dCurve::Compute(const Handle(Geom2d_Conic)& aConic2D,
 				Bnd_Box2d& aBox2D)
 {
   Standard_Integer i, aNbT;
-  Standard_Real pT[10], aT, aTwoPI, aT1x, aT2x, dT, aT1z, aT2z, aEps;
+  Standard_Real pT[10], aT, aTwoPI, dT, aEps;
   gp_Pnt2d aP2D;
   //
   aNbT=Compute(aConic2D, aType, pT);
@@ -605,53 +601,28 @@ void BndLib_Box2dCurve::Compute(const Handle(Geom2d_Conic)& aConic2D,
   aTwoPI=2.*M_PI;
   dT=aT2-aT1;
   //
-  aT1z=aT1;
-  aT2z=aT2;
-  if (aT1z>=aTwoPI) {
-    aT1z=AdjustToPeriod(aT1z, aTwoPI);
-    aT2z=aT1z+dT;
-  }
+  Standard_Real aT1z = AdjustToPeriod (aT1, aTwoPI);
   if (fabs(aT1z)<aEps) {
     aT1z=0.;
   }
   //
+  Standard_Real aT2z = aT1z + dT;
   if (fabs(aT2z-aTwoPI)<aEps) {
     aT2z=aTwoPI;
   }
-    //
+  //
   for (i=0; i<aNbT; ++i) {
-    aT=pT[i];
-    if (aT>=aT1z && aT<=aT2z) {
+    aT = pT[i];
+    // adjust aT to range [aT1z, aT1z + 2*PI]; note that pT[i] and aT1z
+    // are adjusted to range [0, 2*PI], but aT2z can be greater than 2*PI
+    aT = (aT < aT1z ? aT + aTwoPI : aT);
+    if (aT <= aT2z) {
       D0(aT, aP2D);
       aBox2D.Add(aP2D);
     }
   }
-  //
-  aT1x=AdjustToPeriod(aT1, aTwoPI);
-  aT2x=aT1x+dT;
-  //
-  if (aT1x < aTwoPI && aT2x > aTwoPI) {
-    aT1z=aT1x;
-    aT2z=aTwoPI;
-    for (i=0; i<aNbT; ++i) {
-      aT=pT[i];
-      if (aT>=aT1z && aT<=aT2z) {
-	D0(aT, aP2D);
-	aBox2D.Add(aP2D);
-      }
-    }
-    //
-    aT1z=0.;
-    aT2z=aT2x-aTwoPI;
-    for (i=0; i<aNbT; ++i) {
-      aT=pT[i];
-      if (aT>=aT1z && aT<=aT2z) {
-	D0(aT, aP2D);
-	aBox2D.Add(aP2D);
-      }
-    }
-  }
 }
+
 //=======================================================================
 //function : Compute
 //purpose  : 

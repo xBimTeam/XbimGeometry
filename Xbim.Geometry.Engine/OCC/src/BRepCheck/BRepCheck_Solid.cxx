@@ -12,36 +12,38 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <BRepCheck_Solid.ixx>
-//
-#include <Standard_DefineHandle.hxx>
-#include <MMgt_TShared.hxx>
-//
-#include <NCollection_Vector.hxx>
-#include <NCollection_Map.hxx>
-//
-#include <gp_Pnt.hxx>
-//
-#include <Geom_Curve.hxx>
-//
-#include <TopoDS_Iterator.hxx>
-#include <TopoDS_Solid.hxx>
-#include <TopoDS_Shell.hxx>
-#include <TopoDS_Edge.hxx>
-#include <TopoDS_Builder.hxx>
+
 #include <BRep_Tool.hxx>
-//
-#include <TopExp_Explorer.hxx>
-//
-#include <TopTools_MapOfShape.hxx>
-#include <TopTools_ShapeMapHasher.hxx>
-//
-#include <BRepClass3d_SolidClassifier.hxx>
-//
 #include <BRepCheck.hxx>
 #include <BRepCheck_ListOfStatus.hxx>
+#include <BRepCheck_Solid.hxx>
+#include <BRepClass3d_SolidClassifier.hxx>
+#include <Geom_Curve.hxx>
+#include <gp_Pnt.hxx>
+#include <MMgt_TShared.hxx>
+#include <NCollection_Map.hxx>
+#include <NCollection_Vector.hxx>
+#include <Standard_Type.hxx>
+#include <TopExp_Explorer.hxx>
+#include <TopoDS_Builder.hxx>
+#include <TopoDS_Edge.hxx>
+#include <TopoDS_Iterator.hxx>
+#include <TopoDS_Shape.hxx>
+#include <TopoDS_Shell.hxx>
+#include <TopoDS_Solid.hxx>
+#include <TopTools_MapOfShape.hxx>
+#include <TopTools_ShapeMapHasher.hxx>
 
-
+//
+//
+//
+//
+//
+//
+//
+//
+//
+class BRepCheck_HSC;
 DEFINE_STANDARD_HANDLE(BRepCheck_HSC, MMgt_TShared);
 //=======================================================================
 //class    : BRepCheck_HSC
@@ -63,13 +65,14 @@ class BRepCheck_HSC : public MMgt_TShared {
       return mySC;
     };
   //
-  DEFINE_STANDARD_RTTI(BRepCheck_HSC);
+  DEFINE_STANDARD_RTTI(BRepCheck_HSC, MMgt_TShared);
 
  protected:
   BRepClass3d_SolidClassifier mySC;
 };
-IMPLEMENT_STANDARD_HANDLE(BRepCheck_HSC, MMgt_TShared);
-IMPLEMENT_STANDARD_RTTIEXT(BRepCheck_HSC, MMgt_TShared);
+
+
+
 //
 //=======================================================================
 //class    : BRepCheck_ToolSolid

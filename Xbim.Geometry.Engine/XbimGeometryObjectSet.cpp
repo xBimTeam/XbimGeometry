@@ -404,7 +404,7 @@ namespace Xbim
 				{
 					XbimGeometryCreator::logger->ErrorFormat("E001: Boolean operation timed out after {0} seconds. Operation ignored",aPI->ElapsedTime());
 				}
-				if (pBuilder->ErrorStatus() == 0)
+				if (pBuilder->ErrorStatus() == 0 && !pBuilder->Shape().IsNull())
 				{
 			   //	BRepTools::Write(pBuilder->Shape(), "c:\\tmp\\r");
 					TopoDS_Compound occCompound;
@@ -432,9 +432,13 @@ namespace Xbim
 				GC::KeepAlive(geomObjects);
 			}
 			catch (Standard_Failure e)
+			{				
+				err = "Standard Failure in Xbim.Geometry.Engine::PerformBoolean";
+			}	
+			catch (...) //catch all violations
 			{
-				err = gcnew String(Standard_Failure::Caught()->GetMessageString());
-			}		
+				err = "General Exception thrown in Xbim.Geometry.Engine::PerformBoolean";
+			}
 			XbimGeometryCreator::logger->InfoFormat("WS032: Boolean Cut failed. " + err);
 			if (pBuilder != nullptr) delete pBuilder;
 			return XbimGeometryObjectSet::Empty;

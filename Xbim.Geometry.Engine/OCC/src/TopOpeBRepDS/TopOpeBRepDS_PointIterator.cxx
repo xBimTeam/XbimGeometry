@@ -14,17 +14,17 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <TopOpeBRepDS_PointIterator.ixx>
-#include <TopOpeBRepDS_Interference.hxx>
+
+#include <Standard_ProgramError.hxx>
 #include <TopOpeBRepDS_CurvePointInterference.hxx>
 #include <TopOpeBRepDS_EdgeVertexInterference.hxx>
-#include <Standard_ProgramError.hxx>
+#include <TopOpeBRepDS_Interference.hxx>
+#include <TopOpeBRepDS_PointIterator.hxx>
 
 //=======================================================================
 //function : TopOpeBRepDS_PointIterator
 //purpose  : 
 //=======================================================================
-
 TopOpeBRepDS_PointIterator::TopOpeBRepDS_PointIterator
   (const TopOpeBRepDS_ListOfInterference& L) :
   TopOpeBRepDS_InterferenceIterator(L)
@@ -86,10 +86,10 @@ Standard_Real  TopOpeBRepDS_PointIterator::Parameter()const
   const Handle(TopOpeBRepDS_Interference)& I = Value();
   Handle(Standard_Type) T = I->DynamicType(); 
   if      ( T == STANDARD_TYPE(TopOpeBRepDS_CurvePointInterference) ) { 
-    return (*((Handle(TopOpeBRepDS_CurvePointInterference)*)&I))->Parameter();
+    return Handle(TopOpeBRepDS_CurvePointInterference)::DownCast (I)->Parameter();
   }
   else if ( T == STANDARD_TYPE(TopOpeBRepDS_EdgeVertexInterference) ) {
-    return (*((Handle(TopOpeBRepDS_EdgeVertexInterference)*)&I))->Parameter();
+    return Handle(TopOpeBRepDS_EdgeVertexInterference)::DownCast (I)->Parameter();
   }
   else {
     Standard_ProgramError::Raise("TopOpeBRepDS_PointIterator::Parameter()");
@@ -127,7 +127,7 @@ Standard_Boolean TopOpeBRepDS_PointIterator::DiffOriented() const
 {
   const Handle(TopOpeBRepDS_Interference)& I = Value();
   if ( I->DynamicType() == STANDARD_TYPE(TopOpeBRepDS_EdgeVertexInterference) ) {
-    return (*((Handle(TopOpeBRepDS_EdgeVertexInterference)*)&I))
+    return Handle(TopOpeBRepDS_EdgeVertexInterference)::DownCast (I)
       ->Config() == TopOpeBRepDS_DIFFORIENTED;
   }
   else {
@@ -146,7 +146,7 @@ Standard_Boolean TopOpeBRepDS_PointIterator::SameOriented() const
 {
   const Handle(TopOpeBRepDS_Interference)& I = Value();
   if ( I->DynamicType() == STANDARD_TYPE(TopOpeBRepDS_EdgeVertexInterference) ) {
-    return (*((Handle(TopOpeBRepDS_EdgeVertexInterference)*)&I))
+    return Handle(TopOpeBRepDS_EdgeVertexInterference)::DownCast (I)
       ->Config() == TopOpeBRepDS_SAMEORIENTED;
   }
   else {

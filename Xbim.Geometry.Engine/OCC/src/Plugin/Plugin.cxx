@@ -14,12 +14,14 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <Plugin.ixx>
-#include <Plugin_MapOfFunctions.hxx>
-#include <OSD_SharedLibrary.hxx>
-#include <Resource_Manager.hxx>
-#include <Plugin_Failure.hxx>
 
+#include <OSD_SharedLibrary.hxx>
+#include <Plugin.hxx>
+#include <Plugin_Failure.hxx>
+#include <Plugin_MapOfFunctions.hxx>
+#include <Resource_Manager.hxx>
+#include <Standard_GUID.hxx>
+#include <Standard_Transient.hxx>
 #include <TCollection_AsciiString.hxx>
 
 static Standard_Character tc[1000];
@@ -94,8 +96,8 @@ Handle(Standard_Transient) Plugin::Load (const Standard_GUID& aGUID,
   else
     f = theMapOfFunctions(pid);
   
-  Handle(Standard_Transient) (*fp) (const Standard_GUID&) = NULL;
-  fp = (Handle(Standard_Transient) (*)(const Standard_GUID&)) f;
+  Standard_Transient* (*fp) (const Standard_GUID&) = NULL;
+  fp = (Standard_Transient* (*)(const Standard_GUID&)) f;
   Handle(Standard_Transient) theServiceFactory = (*fp) (aGUID);
   return theServiceFactory;
   

@@ -14,36 +14,38 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <TCollection_AsciiString.hxx>
-#include <TopOpeBRepDS_Check.ixx>
-#include <TopOpeBRepDS_Kind.hxx>
-#include <TopOpeBRepDS_CheckStatus.hxx>
-#include <TopOpeBRepDS_PointExplorer.hxx>
-#include <TopOpeBRepDS.hxx>
-#include <TopOpeBRepDS_Interference.hxx>
-#include <TopOpeBRepDS_EdgeVertexInterference.hxx>
-#include <TopOpeBRepDS_CurvePointInterference.hxx>
-#include <TopOpeBRepDS_ListOfInterference.hxx>
-#include <TopOpeBRepDS_ListIteratorOfListOfInterference.hxx>
-#include <TopOpeBRepDS_InterferenceTool.hxx>
-#include <TopTools_ListIteratorOfListOfShape.hxx>
-#include <TopTools_ListOfShape.hxx>
-#include <TopOpeBRepTool_ShapeTool.hxx>
-#include <TColStd_IndexedMapOfInteger.hxx>
+
 #include <BRep_Tool.hxx>
+#include <gp_Pnt.hxx>
+#include <Standard_Type.hxx>
+#include <TCollection_AsciiString.hxx>
+#include <TColStd_IndexedMapOfInteger.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Vertex.hxx>
-#include <gp_Pnt.hxx>
-#include <string.h>
-#include <TopOpeBRepDS_DataMapOfCheckStatus.hxx>
+#include <TopOpeBRepDS.hxx>
+#include <TopOpeBRepDS_Check.hxx>
+#include <TopOpeBRepDS_CheckStatus.hxx>
+#include <TopOpeBRepDS_CurvePointInterference.hxx>
 #include <TopOpeBRepDS_DataMapIteratorOfDataMapOfCheckStatus.hxx>
+#include <TopOpeBRepDS_DataMapOfCheckStatus.hxx>
+#include <TopOpeBRepDS_EdgeVertexInterference.hxx>
+#include <TopOpeBRepDS_HDataStructure.hxx>
+#include <TopOpeBRepDS_Interference.hxx>
+#include <TopOpeBRepDS_InterferenceTool.hxx>
+#include <TopOpeBRepDS_Kind.hxx>
+#include <TopOpeBRepDS_ListIteratorOfListOfInterference.hxx>
+#include <TopOpeBRepDS_ListOfInterference.hxx>
+#include <TopOpeBRepDS_PointExplorer.hxx>
+#include <TopOpeBRepTool_ShapeTool.hxx>
+#include <TopTools_ListIteratorOfListOfShape.hxx>
+#include <TopTools_ListOfShape.hxx>
 
+#include <string.h>
 //=======================================================================
 //function : Create
 //purpose  : 
 //=======================================================================
-
 TopOpeBRepDS_Check::TopOpeBRepDS_Check(const Handle(TopOpeBRepDS_HDataStructure)& HDS)
 {
   myHDS = HDS;
@@ -478,8 +480,7 @@ Standard_Boolean CheckEdgeParameter(const Handle(TopOpeBRepDS_HDataStructure)& m
     it1.Initialize(LI);
     while (it1.More() ) {
       const Handle(TopOpeBRepDS_Interference)& I1 = it1.Value();
-      const Handle(TopOpeBRepDS_CurvePointInterference)& CPI =
-	Handle(TopOpeBRepDS_CurvePointInterference)::DownCast(I1);
+      Handle(TopOpeBRepDS_CurvePointInterference) CPI (Handle(TopOpeBRepDS_CurvePointInterference)::DownCast(I1));
       if(!CPI.IsNull()) {
 	Standard_Integer Param = 
 //#ifdef OCCT_DEBUG

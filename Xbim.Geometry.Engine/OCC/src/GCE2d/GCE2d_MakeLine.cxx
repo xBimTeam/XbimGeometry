@@ -14,14 +14,19 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <GCE2d_MakeLine.ixx>
+
+#include <GCE2d_MakeLine.hxx>
 #include <gce_MakeLin2d.hxx>
+#include <Geom2d_Line.hxx>
+#include <gp_Ax2d.hxx>
+#include <gp_Dir2d.hxx>
+#include <gp_Lin2d.hxx>
+#include <gp_Pnt2d.hxx>
 #include <StdFail_NotDone.hxx>
 
 //=========================================================================
 //   Constructions of 2d geometrical elements from Geom2d.
 //=========================================================================
-
 GCE2d_MakeLine::GCE2d_MakeLine(const gp_Ax2d& A)
 {
   TheError = gce_Done;
@@ -76,14 +81,3 @@ const Handle(Geom2d_Line)& GCE2d_MakeLine::Value() const
   StdFail_NotDone_Raise_if(TheError != gce_Done,"");
   return TheLine;
 }
-
-const Handle(Geom2d_Line) & GCE2d_MakeLine::Operator() const 
-{
-  return Value();
-}
-
-GCE2d_MakeLine::operator Handle(Geom2d_Line) () const
-{
-  return Value();
-}
-

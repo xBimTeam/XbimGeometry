@@ -14,71 +14,74 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <BRepOffset_Offset.ixx>
 
-#include <Adaptor3d_HCurveOnSurface.hxx>
 #include <Adaptor3d_CurveOnSurface.hxx>
-#include <BRepOffset.hxx>
+#include <Adaptor3d_HCurveOnSurface.hxx>
+#include <BRep_Builder.hxx>
+#include <BRep_GCurve.hxx>
+#include <BRep_ListIteratorOfListOfCurveRepresentation.hxx>
+#include <BRep_ListOfCurveRepresentation.hxx>
+#include <BRep_TEdge.hxx>
+#include <BRep_Tool.hxx>
+#include <BRepGProp.hxx>
 #include <BRepLib.hxx>
 #include <BRepLib_MakeFace.hxx>
+#include <BRepLib_MakeWire.hxx>
+#include <BRepOffset.hxx>
+#include <BRepOffset_Offset.hxx>
+#include <BRepOffset_Tool.hxx>
 #include <BRepTools.hxx>
-#include <BRep_Tool.hxx>
-#include <BRep_Builder.hxx>
 #include <ElSLib.hxx>
-#include <GeomAPI.hxx>
+#include <gce_MakePln.hxx>
 #include <Geom2d_Curve.hxx>
 #include <Geom2d_Line.hxx>
 #include <Geom2d_TrimmedCurve.hxx>
-#include <Geom_Line.hxx>
+#include <Geom2dAdaptor_Curve.hxx>
+#include <Geom2dAdaptor_HCurve.hxx>
 #include <Geom_Circle.hxx>
-#include <Geom_Curve.hxx>
-#include <Geom_TrimmedCurve.hxx>
-#include <Geom_RectangularTrimmedSurface.hxx>
-#include <Geom_Surface.hxx>
-#include <Geom_OffsetSurface.hxx>
-#include <Geom_SphericalSurface.hxx>
 #include <Geom_ConicalSurface.hxx>
+#include <Geom_Curve.hxx>
+#include <Geom_Line.hxx>
+#include <Geom_OffsetSurface.hxx>
+#include <Geom_RectangularTrimmedSurface.hxx>
+#include <Geom_SphericalSurface.hxx>
+#include <Geom_SurfaceOfLinearExtrusion.hxx>
+#include <Geom_SurfaceOfRevolution.hxx>
+#include <Geom_Surface.hxx>
+#include <Geom_TrimmedCurve.hxx>
+#include <GeomAdaptor_Curve.hxx>
+#include <GeomAdaptor_HCurve.hxx>
 #include <GeomAdaptor_HSurface.hxx>
 #include <GeomAdaptor_Surface.hxx>
-#include <GeomAdaptor_HCurve.hxx>
-#include <GeomAdaptor_Curve.hxx>
-#include <Geom2dAdaptor_HCurve.hxx>
-#include <Geom2dAdaptor_Curve.hxx>
-#include <GeomFill_Pipe.hxx>
-#include <GeomProjLib.hxx>
+#include <GeomAPI.hxx>
+#include <GeomAPI_ExtremaCurveCurve.hxx>
+#include <GeomAPI_ProjectPointOnCurve.hxx>
 #include <GeomConvert_ApproxSurface.hxx>
-#include <Precision.hxx>
-#include <Standard_ConstructionError.hxx>
-#include <TopoDS.hxx>
-#include <TopoDS_Wire.hxx>
-#include <TopExp.hxx>
-#include <TopExp_Explorer.hxx>
-#include <TopTools_ListIteratorOfListOfShape.hxx> 
+#include <GeomFill_Pipe.hxx>
+#include <GeomLib.hxx>
+#include <GeomProjLib.hxx>
 #include <gp.hxx>
 #include <gp_Ax3.hxx>
 #include <gp_Cylinder.hxx>
-#include <gp_Torus.hxx>
 #include <gp_Lin.hxx>
 #include <gp_Pnt2d.hxx>
-
-#include <BRep_GCurve.hxx>
-#include <BRep_TEdge.hxx>
-#include <BRep_ListOfCurveRepresentation.hxx>
-#include <BRep_ListIteratorOfListOfCurveRepresentation.hxx>
-
-#include <TopTools_SequenceOfShape.hxx>
-#include <TopTools_MapOfShape.hxx>
-#include <BRepOffset_Tool.hxx>
-#include <GeomAPI_ExtremaCurveCurve.hxx>
-#include <GeomAPI_ProjectPointOnCurve.hxx>
-#include <GeomLib.hxx>
-
-#include <TopTools_IndexedMapOfShape.hxx>
-#include <BRepLib_MakeWire.hxx>
-#include <gce_MakePln.hxx>
-#include <ShapeFix_Shape.hxx>
+#include <gp_Torus.hxx>
 #include <GProp_GProps.hxx>
-#include <BRepGProp.hxx>
+#include <Precision.hxx>
+#include <ShapeFix_Shape.hxx>
+#include <Standard_ConstructionError.hxx>
+#include <TopExp.hxx>
+#include <TopExp_Explorer.hxx>
+#include <TopoDS.hxx>
+#include <TopoDS_Edge.hxx>
+#include <TopoDS_Face.hxx>
+#include <TopoDS_Shape.hxx>
+#include <TopoDS_Vertex.hxx>
+#include <TopoDS_Wire.hxx>
+#include <TopTools_IndexedMapOfShape.hxx>
+#include <TopTools_ListIteratorOfListOfShape.hxx>
+#include <TopTools_MapOfShape.hxx>
+#include <TopTools_SequenceOfShape.hxx>
 
 #ifdef OCCT_DEBUG
 static Standard_Boolean Affich = Standard_False;
@@ -186,8 +189,8 @@ static void UpdateEdge (const TopoDS_Edge& E,
 //=======================================================================
 
 static void ComputeCurve3d(TopoDS_Edge           Edge,
-			   Handle(Geom2d_Curve)  Curve,
-			   Handle(Geom_Surface)  Surf,
+			   const Handle(Geom2d_Curve)& Curve,
+			   const Handle(Geom_Surface)& Surf,
 			   const TopLoc_Location Loc,
 			   Standard_Real         Tol)
 {
@@ -494,12 +497,20 @@ void BRepOffset_Offset::Init(const TopoDS_Face&                  Face,
 
   TopLoc_Location L;
   Handle(Geom_Surface) S = BRep_Tool::Surface(Face,L);
-
   // On detrime les surfaces, evite des recopies dans les extensions.
   Handle(Geom_RectangularTrimmedSurface) RT = 
     Handle(Geom_RectangularTrimmedSurface)::DownCast(S);
   if (!RT.IsNull()) S = RT->BasisSurface();
-
+  Standard_Boolean IsTransformed = Standard_False;
+  if ((S->IsKind(STANDARD_TYPE(Geom_BSplineSurface)) || 
+      S->IsKind(STANDARD_TYPE(Geom_SurfaceOfLinearExtrusion)) ||
+      S->IsKind(STANDARD_TYPE(Geom_SurfaceOfRevolution)) ||
+      S->IsKind(STANDARD_TYPE(Geom_OffsetSurface))) && !L.IsIdentity())
+  {
+    S = Handle(Geom_Surface)::DownCast(S->Copy());
+    S->Transform(L.Transformation());
+    IsTransformed = Standard_True;
+  }
   // particular case of cone
   Handle(Geom_ConicalSurface) Co;
   Co = Handle(Geom_ConicalSurface)::DownCast(S);
@@ -536,11 +547,29 @@ void BRepOffset_Offset::Init(const TopoDS_Face&                  Face,
       TopTools_SequenceOfShape DegEdges;
       TopExp_Explorer Explo(Face, TopAbs_EDGE);
       for (; Explo.More(); Explo.Next())
-	{
-	  const TopoDS_Edge& anEdge = TopoDS::Edge(Explo.Current());
-	  if (BRep_Tool::Degenerated(anEdge))
-	    DegEdges.Append(anEdge);
-	}
+      {
+        const TopoDS_Edge& anEdge = TopoDS::Edge(Explo.Current());
+
+        if (BRep_Tool::Degenerated(anEdge))
+        {
+          Standard_Real aF, aL;
+          Handle(Geom2d_Curve) c2d =  BRep_Tool::CurveOnSurface(anEdge, Face, aF, aL);
+
+          gp_Pnt2d aFPnt2d = c2d->Value(aF),
+                   aLPnt2d = c2d->Value(aL);
+
+          gp_Pnt aFPnt = S->Value(aFPnt2d.X(), aFPnt2d.Y()),
+                 aLPnt = S->Value(aLPnt2d.X(), aLPnt2d.Y());
+
+          //  aFPnt.SquareDistance(aLPnt) > Precision::SquareConfusion() -
+          // is a sufficient condition of troubles: non-singular case, but edge is degenerated.
+          // So, normal handling of degenerated edges is not applicable in case of non-singular point.
+          if (aFPnt.SquareDistance(aLPnt) < Precision::SquareConfusion())
+          {
+            DegEdges.Append(anEdge);
+          }
+        }
+      }
       if (!DegEdges.IsEmpty())
 	{
 	  const Standard_Real TolApex = 1.e-5;
@@ -580,7 +609,7 @@ void BRepOffset_Offset::Init(const TopoDS_Face&                  Face,
 	    }
 	  if (TheSurf->DynamicType() == STANDARD_TYPE(Geom_ConicalSurface))
 	    {
-	      gp_Cone theCone = (*((Handle(Geom_ConicalSurface)*)&TheSurf))->Cone();
+	      gp_Cone theCone = Handle(Geom_ConicalSurface)::DownCast (TheSurf)->Cone();
 	      gp_Pnt apex = theCone.Apex();
 	      Standard_Real Uapex, Vapex;
 	      ElSLib::Parameters( theCone, apex, Uapex, Vapex );
@@ -604,7 +633,7 @@ void BRepOffset_Offset::Init(const TopoDS_Face&                  Face,
                 Handle(Geom_Curve) uiso = TheSurf->UIso( uf1 );
                 if (BRepOffset_Tool::Gabarit( uiso ) > TolApex)
                 {
-                  Handle(Geom_Surface) BasisSurf = (*((Handle(Geom_OffsetSurface)*)&TheSurf))->BasisSurface();
+                  Handle(Geom_Surface) BasisSurf = Handle(Geom_OffsetSurface)::DownCast (TheSurf)->BasisSurface();
                   gp_Pnt Papex, Pfirst, Pquart, Pmid;
                   Papex = BasisSurf->Value( uf1, vf1 );
                   Pfirst = TheSurf->Value( uf1, vf1 );
@@ -620,9 +649,9 @@ void BRepOffset_Offset::Init(const TopoDS_Face&                  Face,
                   Standard_Real length = Pfirst.Distance(Pint1);
                   if (OffsetOutside)
                   {
-                    TheSurf = new Geom_RectangularTrimmedSurface(TheSurf, uf1, uf2, vf1, vf2);
-                    GeomLib::ExtendSurfByLength(*((Handle(Geom_BoundedSurface)*)&TheSurf), length, 1,
-                                                Standard_True, Standard_False);
+                    Handle(Geom_BoundedSurface) aSurf = new Geom_RectangularTrimmedSurface(TheSurf, uf1, uf2, vf1, vf2);
+                    GeomLib::ExtendSurfByLength (aSurf, length, 1, Standard_True, Standard_False);
+                    TheSurf = aSurf;
                     Standard_Real u1, u2, v1, v2;
                     TheSurf->Bounds( u1, u2, v1, v2 );
                     MinApex = TheSurf->Value( u1, vf1 );
@@ -643,7 +672,7 @@ void BRepOffset_Offset::Init(const TopoDS_Face&                  Face,
                 Handle(Geom_Curve) uiso = TheSurf->UIso( uf2 );
                 if (BRepOffset_Tool::Gabarit( uiso ) > TolApex)
                 {
-                  Handle(Geom_Surface) BasisSurf = (*((Handle(Geom_OffsetSurface)*)&TheSurf))->BasisSurface();
+                  Handle(Geom_Surface) BasisSurf = Handle(Geom_OffsetSurface)::DownCast (TheSurf)->BasisSurface();
                   gp_Pnt Papex, Pfirst, Pquart, Pmid;
                   Papex  = BasisSurf->Value( uf2, vf1 );
                   Pfirst = TheSurf->Value( uf2, vf1 );
@@ -659,9 +688,9 @@ void BRepOffset_Offset::Init(const TopoDS_Face&                  Face,
                   Standard_Real length = Pfirst.Distance(Pint1);
                   if (OffsetOutside)
                   {
-                    TheSurf = new Geom_RectangularTrimmedSurface(TheSurf, uf1, uf2, vf1, vf2);
-                    GeomLib::ExtendSurfByLength(*((Handle(Geom_BoundedSurface)*)&TheSurf), length, 1,
-                                                Standard_True, Standard_True);
+                    Handle(Geom_BoundedSurface) aSurf = new Geom_RectangularTrimmedSurface(TheSurf, uf1, uf2, vf1, vf2);
+                    GeomLib::ExtendSurfByLength(aSurf, length, 1, Standard_True, Standard_True);
+                    TheSurf = aSurf;
                     Standard_Real u1, u2, v1, v2;
                     TheSurf->Bounds( u1, u2, v1, v2 );
                     MaxApex = TheSurf->Value( u2, vf1 );
@@ -682,7 +711,7 @@ void BRepOffset_Offset::Init(const TopoDS_Face&                  Face,
                 Handle(Geom_Curve) viso = TheSurf->VIso( vf1 );
                 if (BRepOffset_Tool::Gabarit( viso ) > TolApex)
                 {
-                  Handle(Geom_Surface) BasisSurf = (*((Handle(Geom_OffsetSurface)*)&TheSurf))->BasisSurface();
+                  Handle(Geom_Surface) BasisSurf = Handle(Geom_OffsetSurface)::DownCast (TheSurf)->BasisSurface();
                   gp_Pnt Papex, Pfirst, Pquart, Pmid;
                   Papex = BasisSurf->Value( uf1, vf1 );
                   Pfirst = TheSurf->Value( uf1, vf1 );
@@ -698,9 +727,9 @@ void BRepOffset_Offset::Init(const TopoDS_Face&                  Face,
                   Standard_Real length = Pfirst.Distance(Pint1);
                   if (OffsetOutside)
                   {
-                    TheSurf = new Geom_RectangularTrimmedSurface(TheSurf, uf1, uf2, vf1, vf2);
-                    GeomLib::ExtendSurfByLength(*((Handle(Geom_BoundedSurface)*)&TheSurf), length, 1,
-                                                Standard_False, Standard_False);
+                    Handle(Geom_BoundedSurface) aSurf = new Geom_RectangularTrimmedSurface(TheSurf, uf1, uf2, vf1, vf2);
+                    GeomLib::ExtendSurfByLength(aSurf, length, 1, Standard_False, Standard_False);
+                    TheSurf = aSurf;
                     Standard_Real u1, u2, v1, v2;
                     TheSurf->Bounds( u1, u2, v1, v2 );
                     MinApex = TheSurf->Value( uf1, v1 );
@@ -723,7 +752,7 @@ void BRepOffset_Offset::Init(const TopoDS_Face&                  Face,
                 Handle(Geom_Curve) viso = TheSurf->VIso( vf2 );
                 if (BRepOffset_Tool::Gabarit( viso ) > TolApex)
                 {
-                  Handle(Geom_Surface) BasisSurf = (*((Handle(Geom_OffsetSurface)*)&TheSurf))->BasisSurface();
+                  Handle(Geom_Surface) BasisSurf = Handle(Geom_OffsetSurface)::DownCast (TheSurf)->BasisSurface();
                   gp_Pnt Papex, Pfirst, Pquart, Pmid;
                   Papex = BasisSurf->Value( uf1, vf2 );
                   Pfirst = TheSurf->Value( uf1, vf2 );
@@ -739,9 +768,9 @@ void BRepOffset_Offset::Init(const TopoDS_Face&                  Face,
                   Standard_Real length = Pfirst.Distance(Pint1);
                   if (OffsetOutside)
                   {
-                    TheSurf = new Geom_RectangularTrimmedSurface(TheSurf, uf1, uf2, vf1, vf2);
-                    GeomLib::ExtendSurfByLength(*((Handle(Geom_BoundedSurface)*)&TheSurf), length, 1,
-                                                Standard_False, Standard_True);
+                    Handle(Geom_BoundedSurface) aSurf = new Geom_RectangularTrimmedSurface(TheSurf, uf1, uf2, vf1, vf2);
+                    GeomLib::ExtendSurfByLength(aSurf, length, 1, Standard_False, Standard_True);
+                    TheSurf = aSurf;
                     Standard_Real u1, u2, v1, v2;
                     TheSurf->Bounds( u1, u2, v1, v2 );
                     MaxApex = TheSurf->Value( uf1, v2 );
@@ -767,7 +796,10 @@ void BRepOffset_Offset::Init(const TopoDS_Face&                  Face,
 
   BRep_Builder myBuilder;
   myBuilder.MakeFace(myFace);
-  myBuilder.UpdateFace(myFace,TheSurf,L,BRep_Tool::Tolerance(Face));
+  if  (!IsTransformed)
+    myBuilder.UpdateFace(myFace,TheSurf, L, BRep_Tool::Tolerance(Face));
+  else
+    myBuilder.UpdateFace(myFace,TheSurf, TopLoc_Location(), BRep_Tool::Tolerance(Face));
 
   TopTools_DataMapOfShapeShape MapSS;
 
@@ -851,7 +883,8 @@ void BRepOffset_Offset::Init(const TopoDS_Face&                  Face,
 	else
 	  {
 	    TheSurf->D0(P2d1.X(),P2d1.Y(),P1);
-	    P1.Transform(L.Transformation());
+	    if (!L.IsIdentity() && !IsTransformed)
+	      P1.Transform(L.Transformation());
 	    vstart = P2d1.Y();
 	  }
 	if (VonDegen.Contains(V2))
@@ -868,7 +901,8 @@ void BRepOffset_Offset::Init(const TopoDS_Face&                  Face,
 	else
 	  {
 	    TheSurf->D0(P2d2.X(),P2d2.Y(),P2);
-	    P2.Transform(L.Transformation());
+	    if (!L.IsIdentity() && !IsTransformed)
+	      P2.Transform(L.Transformation());
 	    vend = P2d2.Y();
 	  }
 	// E a-t-il ume image dans la Map des Created ?
@@ -1639,6 +1673,3 @@ BRepOffset_Status BRepOffset_Offset::Status() const
 {
   return myStatus;
 }
-
-
-

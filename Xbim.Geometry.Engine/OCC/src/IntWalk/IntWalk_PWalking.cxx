@@ -12,27 +12,26 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <IntWalk_PWalking.ixx>
-
-#include <IntWalk_StatusDeflection.hxx>
-
-#include <TColgp_Array1OfPnt.hxx>
-#include <TColStd_Array1OfReal.hxx>
-
-#include <IntImp_ComputeTangence.hxx>
 
 #include <Adaptor3d_HSurface.hxx>
 #include <Adaptor3d_HSurfaceTool.hxx>
-
-#include <Precision.hxx>
-
-#include <math_FunctionSetRoot.hxx>
-#include <Geom_Surface.hxx>
-
-#include <Standard_Failure.hxx>
-#include <gp_Pnt2d.hxx>
-
 #include <Extrema_GenLocateExtPS.hxx>
+#include <Geom_Surface.hxx>
+#include <gp_Dir.hxx>
+#include <gp_Pnt.hxx>
+#include <gp_Pnt2d.hxx>
+#include <IntImp_ComputeTangence.hxx>
+#include <IntSurf_LineOn2S.hxx>
+#include <IntSurf_PntOn2S.hxx>
+#include <IntWalk_PWalking.hxx>
+#include <IntWalk_StatusDeflection.hxx>
+#include <math_FunctionSetRoot.hxx>
+#include <Precision.hxx>
+#include <Standard_Failure.hxx>
+#include <Standard_OutOfRange.hxx>
+#include <StdFail_NotDone.hxx>
+#include <TColgp_Array1OfPnt.hxx>
+#include <TColStd_Array1OfReal.hxx>
 
 //==================================================================================
 // function : IntWalk_PWalking::IntWalk_PWalking
@@ -49,9 +48,10 @@ void ComputePasInit(Standard_Real *pasuv,
                     Standard_Real _Vm1,Standard_Real _VM1,
                     Standard_Real _Um2,Standard_Real _UM2,
                     Standard_Real _Vm2,Standard_Real _VM2,
-                    const Handle(Adaptor3d_HSurface)& ,
-                    const Handle(Adaptor3d_HSurface)& ,
-                    const Standard_Real Increment) 
+                    const Handle(Adaptor3d_HSurface)& Caro1,
+                    const Handle(Adaptor3d_HSurface)& Caro2,
+                    const Standard_Real Increment,
+                    const Standard_Real tolconf)
 { 
   Standard_Real du1=Abs(UM1-Um1);
   Standard_Real dv1=Abs(VM1-Vm1);
@@ -75,6 +75,20 @@ void ComputePasInit(Standard_Real *pasuv,
   pasuv[1]=Increment*dv1;
   pasuv[2]=Increment*du2;
   pasuv[3]=Increment*dv2;
+
+  Standard_Real ResoU1tol = Adaptor3d_HSurfaceTool::UResolution(Caro1, tolconf);
+  Standard_Real ResoV1tol = Adaptor3d_HSurfaceTool::VResolution(Caro1, tolconf);
+  Standard_Real ResoU2tol = Adaptor3d_HSurfaceTool::UResolution(Caro2, tolconf);
+  Standard_Real ResoV2tol = Adaptor3d_HSurfaceTool::VResolution(Caro2, tolconf);
+
+  if (pasuv[0] < 2*ResoU1tol)
+    pasuv[0] = 2*ResoU1tol;
+  if (pasuv[1] < 2*ResoV1tol)
+    pasuv[1] = 2*ResoV1tol;
+  if (pasuv[2] < 2*ResoU2tol)
+    pasuv[2] = 2*ResoU2tol;
+  if (pasuv[3] < 2*ResoV2tol)
+    pasuv[3] = 2*ResoV2tol;
 }
 
 //=======================================================================
@@ -704,7 +718,7 @@ void IntWalk_PWalking::Perform(const TColStd_Array1OfReal& ParDep,
   const Standard_Real VLast2  = Adaptor3d_HSurfaceTool::LastVParameter (Caro2);
   //
   ComputePasInit(pasuv,u1min,u1max,v1min,v1max,u2min,u2max,v2min,v2max,
-    Um1,UM1,Vm1,VM1,Um2,UM2,Vm2,VM2,Caro1,Caro2,pasMax+pasMax);
+                 Um1,UM1,Vm1,VM1,Um2,UM2,Vm2,VM2,Caro1,Caro2,pasMax+pasMax,tolconf);
   //
   if(pasuv[0]<100.0*ResoU1) {
     pasuv[0]=100.0*ResoU1; 

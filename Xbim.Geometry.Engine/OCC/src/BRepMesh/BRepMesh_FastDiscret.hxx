@@ -15,7 +15,7 @@
 #define _BRepMesh_FastDiscret_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_DefineHandle.hxx>
+#include <Standard_Type.hxx>
 #include <BRepMesh_FastDiscret.hxx>
 #include <BRepMesh_DataStructureOfDelaun.hxx>
 #include <TColStd_IndexedMapOfInteger.hxx>
@@ -24,8 +24,6 @@
 #include <TopTools_ListOfShape.hxx>
 #include <TopTools_MutexForShapeProvider.hxx>
 #include <Standard_Transient.hxx>
-#include <Handle_BRepAdaptor_HSurface.hxx>
-#include <Handle_Geom2d_Curve.hxx>
 #include <BRepMesh_Delaun.hxx>
 #include <TopAbs_ShapeEnum.hxx>
 #include <BRepMesh_Triangle.hxx>
@@ -48,8 +46,6 @@ class BRepMesh_Edge;
 class BRepMesh_Vertex;
 class gp_Pnt;
 class BRepMesh_FaceAttribute;
-class TopTools_DataMapOfShapeReal;
-
 
 //! Algorithm to mesh a shape with respect of the <br>
 //! frontier the deflection and by option the shared <br>
@@ -175,7 +171,7 @@ public:
     return myBoundaryPoints->Extent();
   }
 
-  DEFINE_STANDARD_RTTI(BRepMesh_FastDiscret)
+  DEFINE_STANDARD_RTTI(BRepMesh_FastDiscret, Standard_Transient)
 
 private:
 

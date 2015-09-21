@@ -14,14 +14,14 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <TopOpeBRepDS_InterferenceIterator.ixx>
 
+#include <TopOpeBRepDS_Interference.hxx>
+#include <TopOpeBRepDS_InterferenceIterator.hxx>
 
 //=======================================================================
 //function : TopOpeBRepDS_InterferenceIterator
 //purpose  : 
 //=======================================================================
-
 TopOpeBRepDS_InterferenceIterator::TopOpeBRepDS_InterferenceIterator() :
   myGKDef(Standard_False),
   myGDef(Standard_False),
@@ -171,7 +171,7 @@ void TopOpeBRepDS_InterferenceIterator::Next()
 //purpose  : 
 //=======================================================================
 
-Handle(TopOpeBRepDS_Interference)& TopOpeBRepDS_InterferenceIterator::Value() const 
+const Handle(TopOpeBRepDS_Interference)& TopOpeBRepDS_InterferenceIterator::Value() const 
 {
   return myIterator.Value();
 }

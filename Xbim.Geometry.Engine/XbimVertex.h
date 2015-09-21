@@ -1,7 +1,6 @@
 #pragma once
 #include "XbimOccShape.h"
 #include <TopoDS_Vertex.hxx>
-#include "CarveDeclarations.h"
 
 using namespace XbimGeometry::Interfaces;
 using namespace Xbim::Common::Geometry;

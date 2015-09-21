@@ -16,90 +16,92 @@
 
 //  Modified by skv - Fri Jul  8 11:21:38 2005 OCC9145
 
-#include <stdio.h>
-
-#include <BRepFill_OffsetWire.ixx>
-
-#include <BRepAdaptor_Curve.hxx>
-#include <BRepAdaptor_Surface.hxx>
-
-#include <BRepFill_DataMapOfNodeShape.hxx>
-#include <BRepFill_DataMapOfShapeSequenceOfPnt.hxx>
-#include <BRepFill_DataMapOfShapeSequenceOfReal.hxx> 
-#include <BRepFill_DataMapOfOrientedShapeListOfShape.hxx> 
-#include <BRepFill_TrimEdgeTool.hxx>
-#include <BRepLib.hxx>
-#include <BRepLib_MakeVertex.hxx>
-#include <BRepLib_MakeFace.hxx>
-#include <BRepLib_MakeWire.hxx>
-#include <BRepLib_MakeEdge.hxx>
-#include <BRepTools.hxx>
+#include <Adaptor3d_Curve.hxx>
+#include <Adaptor3d_OffsetCurve.hxx>
+#include <Bisector_Bisec.hxx>
 #include <BRep_Builder.hxx>
-#include <BRep_Tool.hxx>
-#include <BRep_TEdge.hxx>
 #include <BRep_CurveRepresentation.hxx>
 #include <BRep_GCurve.hxx>
-#include <BRepTools_WireExplorer.hxx>
+#include <BRep_TEdge.hxx>
+#include <BRep_Tool.hxx>
+#include <BRep_TVertex.hxx>
+#include <BRepAdaptor_Curve.hxx>
+#include <BRepAdaptor_Surface.hxx>
+#include <BRepFill_DataMapOfNodeShape.hxx>
+#include <BRepFill_DataMapOfOrientedShapeListOfShape.hxx>
+#include <BRepFill_DataMapOfShapeSequenceOfPnt.hxx>
+#include <BRepFill_DataMapOfShapeSequenceOfReal.hxx>
+#include <BRepFill_OffsetWire.hxx>
+#include <BRepFill_TrimEdgeTool.hxx>
+#include <BRepLib.hxx>
+#include <BRepLib_MakeEdge.hxx>
+#include <BRepLib_MakeFace.hxx>
+#include <BRepLib_MakeVertex.hxx>
+#include <BRepLib_MakeWire.hxx>
+#include <BRepMAT2d_BisectingLocus.hxx>
 #include <BRepMAT2d_Explorer.hxx>
+#include <BRepMAT2d_LinkTopoBilo.hxx>
+#include <BRepTools.hxx>
+#include <BRepTools_Substitution.hxx>
+#include <BRepTools_WireExplorer.hxx>
+#include <Geom2d_BSplineCurve.hxx>
+#include <Geom2d_Circle.hxx>
+#include <Geom2d_Curve.hxx>
+#include <Geom2d_Line.hxx>
+#include <Geom2d_OffsetCurve.hxx>
+#include <Geom2d_TrimmedCurve.hxx>
 #include <Geom2dAdaptor_Curve.hxx>
 #include <Geom2dAdaptor_HCurve.hxx>
-#include <Adaptor3d_OffsetCurve.hxx>
-#include <Adaptor3d_Curve.hxx>
-#include <Geom_Surface.hxx>
-#include <Geom_Plane.hxx>
-#include <Geom2d_Curve.hxx>
-#include <Geom2d_Circle.hxx>
-#include <Geom2d_Line.hxx>
-#include <Geom2d_TrimmedCurve.hxx>
-#include <Geom2d_OffsetCurve.hxx>
-#include <GeomAPI.hxx>
-#include <Geom_TrimmedCurve.hxx>
+#include <Geom2dConvert_CompCurveToBSplineCurve.hxx>
+#include <Geom2dLProp_CLProps2d.hxx>
 #include <Geom_Circle.hxx>
 #include <Geom_Line.hxx>
 #include <Geom_OffsetCurve.hxx>
-#include <MAT_Arc.hxx>
-#include <MAT_Node.hxx>
-#include <MAT_Graph.hxx>
+#include <Geom_Plane.hxx>
+#include <Geom_Surface.hxx>
+#include <Geom_TrimmedCurve.hxx>
+#include <GeomAPI.hxx>
+#include <gp.hxx>
+#include <gp_Ax2.hxx>
+#include <gp_Dir2d.hxx>
+#include <gp_Pln.hxx>
+#include <gp_Vec.hxx>
 #include <MAT2d_CutCurve.hxx>
+#include <MAT_Arc.hxx>
+#include <MAT_Graph.hxx>
+#include <MAT_Node.hxx>
 #include <Precision.hxx>
+#include <Standard_ConstructionError.hxx>
+#include <Standard_ErrorHandler.hxx>
+#include <Standard_NoSuchObject.hxx>
 #include <Standard_NotImplemented.hxx>
+#include <TColgp_Array1OfPnt2d.hxx>
 #include <TColgp_SequenceOfPnt.hxx>
-#include <TColStd_SequenceOfReal.hxx> 
-#include <TopAbs.hxx> 
+#include <TColStd_Array1OfInteger.hxx>
+#include <TColStd_Array1OfReal.hxx>
+#include <TColStd_SequenceOfReal.hxx>
+#include <TopAbs.hxx>
 #include <TopExp.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
-#include <TopoDS_Wire.hxx>
 #include <TopoDS_Compound.hxx>
+#include <TopoDS_Face.hxx>
 #include <TopoDS_Iterator.hxx>
-#include <TopTools_MapOfShape.hxx>
-#include <TopTools_MapIteratorOfMapOfShape.hxx>
-#include <TopTools_ListIteratorOfListOfShape.hxx>
-#include <TopTools_DataMapOfShapeListOfShape.hxx>
+#include <TopoDS_Shape.hxx>
+#include <TopoDS_Wire.hxx>
 #include <TopTools_DataMapIteratorOfDataMapOfShapeListOfShape.hxx>
 #include <TopTools_DataMapIteratorOfDataMapOfShapeShape.hxx>
-#include <TopTools_SequenceOfShape.hxx>
-#include <TopTools_ListOfShape.hxx>    
-#include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>    
+#include <TopTools_DataMapOfShapeListOfShape.hxx>
 #include <TopTools_DataMapOfShapeSequenceOfShape.hxx>
-
-#include <gp.hxx>
-#include <gp_Vec.hxx>
-#include <gp_Ax2.hxx>
-#include <gp_Pln.hxx>
-#include <gp_Dir2d.hxx>
-
-#include <BRep_TVertex.hxx>
+#include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
-#include <Geom2d_BSplineCurve.hxx>
-#include <TColgp_Array1OfPnt2d.hxx>
-#include <TColStd_Array1OfReal.hxx>
-#include <TColStd_Array1OfInteger.hxx>
-#include <BRepTools_Substitution.hxx>
-#include <BRepLib_MakeVertex.hxx>
-#include <Geom2dLProp_CLProps2d.hxx>
-#include <Geom2dConvert_CompCurveToBSplineCurve.hxx>
-#include <Standard_ErrorHandler.hxx>
+#include <TopTools_ListIteratorOfListOfShape.hxx>
+#include <TopTools_ListOfShape.hxx>
+#include <TopTools_MapIteratorOfMapOfShape.hxx>
+#include <TopTools_MapOfShape.hxx>
+#include <TopTools_SequenceOfShape.hxx>
+
+#include <stdio.h>
 #ifdef OCCT_DEBUG
 //#define DRAW
 #ifdef DRAW
@@ -107,6 +109,7 @@
 #include <DrawTrSurf.hxx>
 #include <DrawTrSurf_Curve2d.hxx>
 #include <DBRep.hxx>
+#include <Geom_Curve.hxx>
 static Standard_Boolean AffichGeom  = Standard_False;
 static Standard_Boolean Affich2d    = Standard_False;
 static Standard_Boolean AffichEdge  = Standard_False;
@@ -218,6 +221,8 @@ static void MakeOffset
   const Standard_Boolean                      IsOpenResult,
  const GeomAbs_JoinType                      theJoinType,
   const TopoDS_Vertex *                       Ends);
+
+Standard_Boolean CheckSmallParamOnEdge(const TopoDS_Edge& anEdge);
 
 //=======================================================================
 //function : KPartCircle
@@ -808,6 +813,24 @@ void BRepFill_OffsetWire::PerformWithBiLo
     }
   }
 
+  //Remove possible hanging arcs on vertices
+  if (myIsOpenResult && myJoinType == GeomAbs_Arc)
+  {
+    if (!myMap.IsEmpty() &&
+        myMap.FindKey(1).ShapeType() == TopAbs_VERTEX)
+    {
+      //myMap.RemoveFirst();
+      TopoDS_Shape LastShape = myMap.FindKey(myMap.Extent());
+      TopTools_ListOfShape LastList;
+      LastList.Append(myMap(myMap.Extent()));
+      myMap.RemoveLast();
+      if (!myMap.IsEmpty())
+        myMap.Substitute(1, LastShape, LastList);
+    }
+    if (!myMap.IsEmpty() &&
+        myMap.FindKey(myMap.Extent()).ShapeType() == TopAbs_VERTEX)
+      myMap.RemoveLast();
+  }
 
 #ifdef OCCT_DEBUG
 #ifdef DRAW
@@ -1271,7 +1294,7 @@ void BRepFill_OffsetWire::UpdateDetromp (BRepFill_DataMapOfOrientedShapeListOfSh
   Standard_Real    U1,U2;
   TopoDS_Vertex    V1,V2;
 
-  Handle(Geom2d_Curve) Bis = Bisec.Value();
+  Handle(Geom2d_Curve) Bis (Bisec.Value());
 
   U1 = Bis->FirstParameter();
   
@@ -1358,6 +1381,8 @@ void BRepFill_OffsetWire::MakeWires()
       TopExp::Vertices (E,V1,V2);
       if (V1.IsSame(V2) && IsSmallClosedEdge(E, V1))
         continue; //remove small closed edges
+      if (!CheckSmallParamOnEdge(E))
+        continue;
       if (!MVE.Contains(V1)) {
         TopTools_ListOfShape empty;
         MVE.Add(V1,empty);
@@ -1569,7 +1594,7 @@ void BRepFill_OffsetWire::FixHoles()
     Pf = BRep_Tool::Pnt(Vf);
     Pl = BRep_Tool::Pnt(Vl);
     Standard_Real DistF = RealLast(), DistL = RealLast();
-    Standard_Integer IndexF = 1, IndexL = 1;
+    Standard_Integer IndexF = 0, IndexL = 0;
     Standard_Boolean IsFirstF = Standard_False, IsFirstL = Standard_False;
     for (Standard_Integer i = 2; i <= UnclosedWires.Length(); i++)
     {
@@ -1620,6 +1645,10 @@ void BRepFill_OffsetWire::FixHoles()
         IsFirstL = Standard_False;
       }
     }
+    if (DistF > MaxTol)
+      IndexF = 0;
+    if (DistL > MaxTol)
+      IndexL = 0;
     TopoDS_Wire theWire;
     TopoDS_Edge theEdge;
     TopoDS_Vertex theVertex;
@@ -2730,4 +2759,19 @@ static void QuasiFleche(const Adaptor3d_Curve& C,
       Parameters,Points);
   }
 }
+
+Standard_Boolean CheckSmallParamOnEdge(const TopoDS_Edge& anEdge)
+{  
+  const BRep_ListOfCurveRepresentation& aList = ((Handle(BRep_TEdge)::DownCast(anEdge.TShape()))->Curves());
+  if (!aList.IsEmpty())
+  {
+    Handle( BRep_CurveRepresentation ) CRep = ((Handle(BRep_TEdge)::DownCast(anEdge.TShape()))->Curves()).First();
+    Standard_Real f = (Handle(BRep_GCurve)::DownCast(CRep))->First();
+    Standard_Real l = (Handle(BRep_GCurve)::DownCast(CRep))->Last();
+    if (Abs (l - f) < Precision::PConfusion())
+      return Standard_False;
+  }
+  return Standard_True;
+}
+
 

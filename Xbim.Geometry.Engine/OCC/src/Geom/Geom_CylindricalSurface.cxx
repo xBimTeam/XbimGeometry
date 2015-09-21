@@ -14,24 +14,31 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <Geom_CylindricalSurface.ixx>
 
-#include <Precision.hxx>
-#include <GeomAbs_UVSense.hxx>
-#include <Geom_Line.hxx>
+#include <ElSLib.hxx>
 #include <Geom_Circle.hxx>
+#include <Geom_Curve.hxx>
+#include <Geom_CylindricalSurface.hxx>
+#include <Geom_Geometry.hxx>
+#include <Geom_Line.hxx>
+#include <GeomAbs_UVSense.hxx>
+#include <gp.hxx>
+#include <gp_Ax2d.hxx>
+#include <gp_Ax3.hxx>
+#include <gp_Circ.hxx>
+#include <gp_Cylinder.hxx>
+#include <gp_GTrsf2d.hxx>
+#include <gp_Lin.hxx>
+#include <gp_Pnt.hxx>
+#include <gp_Trsf.hxx>
+#include <gp_Vec.hxx>
+#include <gp_XYZ.hxx>
+#include <Precision.hxx>
 #include <Standard_ConstructionError.hxx>
 #include <Standard_RangeError.hxx>
-
-#include <gp_Lin.hxx>
-#include <gp_Circ.hxx>
-#include <gp_XYZ.hxx>
-#include <gp_Ax2d.hxx>
-#include <gp.hxx>
-#include <ElSLib.hxx>
+#include <Standard_Type.hxx>
 
 typedef Geom_CylindricalSurface         CylindricalSurface;
-typedef Handle(Geom_CylindricalSurface) Handle(CylindricalSurface);
 
 typedef gp_Ax1  Ax1;
 typedef gp_Ax2  Ax2;
@@ -53,7 +60,7 @@ typedef gp_XYZ  XYZ;
 
 Handle(Geom_Geometry) Geom_CylindricalSurface::Copy () const {
 
-   Handle(CylindricalSurface) Cs;
+   Handle(Geom_CylindricalSurface) Cs;
    Cs = new CylindricalSurface (pos, radius);
    return Cs;
 }

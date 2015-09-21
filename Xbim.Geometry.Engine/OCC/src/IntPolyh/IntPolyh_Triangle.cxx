@@ -14,13 +14,16 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <IntPolyh_Triangle.ixx>
-#include <IntPolyh_Point.ixx>
-#include <IntPolyh_Edge.ixx>
-#include <IntPolyh_StartPoint.ixx>
-#include <IntPolyh_Couple.ixx>
-#include <stdio.h>
 
+#include <Adaptor3d_HSurface.hxx>
+#include <Bnd_Box.hxx>
+#include <IntPolyh_Couple.hxx>
+#include <IntPolyh_Edge.hxx>
+#include <IntPolyh_Point.hxx>
+#include <IntPolyh_StartPoint.hxx>
+#include <IntPolyh_Triangle.hxx>
+
+#include <stdio.h>
 #define MyTolerance 10.0e-7
 #define MyConfusionPrecision 10.0e-12
 #define SquareMyConfusionPrecision 10.0e-24
@@ -990,6 +993,127 @@ void IntPolyh_Triangle::MultipleMiddleRefinement2(const Standard_Real CritereAff
       iii = FinTT;
   }
 }
+
+//=======================================================================
+//function : SetEdgeandOrientation
+//purpose  : 
+//=======================================================================
+void IntPolyh_Triangle::SetEdgeandOrientation(const Standard_Integer EdgeIndex,
+					      const IntPolyh_ArrayOfEdges &TEdges) {
+  const Standard_Integer FinTE = TEdges.NbItems();
+
+  Standard_Integer PE1 =0,PE2 =0;
+
+  Standard_Integer Test=1;
+
+  if (EdgeIndex==1) { PE1=p1; PE2=p2; }
+  else if (EdgeIndex==2) { PE1=p2; PE2=p3; }
+  else if (EdgeIndex==3) { PE1=p3; PE2=p1; }
+  else { 
+    Test=0;
+  }
+
+
+  //SRL optimised code needs to go int OCC
+  /*if (Test!=0) {
+    for(Standard_Integer iioo=0; iioo<FinTE; iioo++) {
+      Standard_Integer EFP=TEdges[iioo].FirstPoint();
+      if (EFP==PE1) {
+	Standard_Integer ESP=TEdges[iioo].SecondPoint();
+	if (ESP!=EFP) {
+	  if (ESP==PE2) {
+	    SetEdgeOrientation(EdgeIndex,1);
+	    SetEdge(EdgeIndex,iioo);
+	    iioo=FinTE;
+	  }
+	}
+	else {
+
+	  Test=0;
+	}
+      }
+      else if (EFP==PE2) {
+	Standard_Integer ESP=TEdges[iioo].SecondPoint();
+	if (ESP!=EFP) {
+	  if (ESP==PE1) {
+	    SetEdgeOrientation(EdgeIndex,-1);
+	    SetEdge(EdgeIndex,iioo);
+	    iioo=FinTE;
+	  }
+	}
+	else {
+
+	}   
+      }
+    }
+  }*/
+
+  if (Test != 0)
+  {
+	  for (Standard_Integer iioo = 0; iioo < FinTE; iioo++)
+	  {
+		  Standard_Integer EFP = TEdges[iioo].FirstPoint();
+		  if (EFP == PE1)
+		  {
+			  Standard_Integer ESP = TEdges[iioo].SecondPoint();
+			  if (ESP != EFP)
+			  {
+				  if (ESP == PE2)
+				  {
+					  SetEdgeOrientation(EdgeIndex, 1);
+					  SetEdge(EdgeIndex, iioo);
+					  //iioo = FinTE;
+					  return;
+				  }
+			  }
+			  else
+			  {
+				  Test = 0;
+			  }
+		  }
+		  else if (EFP == PE2)
+		  {
+			  Standard_Integer ESP = TEdges[iioo].SecondPoint();
+			  if (ESP != EFP)
+			  {
+				  if (ESP == PE1)
+				  {
+					  SetEdgeOrientation(EdgeIndex, -1);
+					  SetEdge(EdgeIndex, iioo);
+					  //iioo = FinTE;
+					  return;
+				  }
+			  }
+			  else
+			  {
+
+			  }
+		  }
+	  }
+  }
+}
+
+
+//=======================================================================
+//function : Dump
+//purpose  : 
+//=======================================================================
+void IntPolyh_Triangle::Dump (const Standard_Integer i) const
+{ 
+  printf("\nTriangle(%3d) : Points %5d %5d %5d Edges %5d %5d %5d fleche: %8f  intersection possible %8d  intersection: %5d\n"
+	 ,i,p1,p2,p3,e1,e2,e3,Fleche,IP,II);
+}
+
+
+//=======================================================================
+//function : DumpFleche
+//purpose  : 
+//=======================================================================
+void IntPolyh_Triangle::DumpFleche (const Standard_Integer i) const { 
+  printf("\nTriangle(%3d) fleche: %5f\n",i,Fleche);
+}
+
+//SRL Code to improve perfromance this needs to be added to OCC source
 //=======================================================================
 //function : SetEdgeandOrientation
 //purpose  : 
@@ -1030,89 +1154,3 @@ void IntPolyh_Triangle::SetEdgeandOrientation(const Standard_Integer EdgeIndex, 
 		}
 	}
 }
-//=======================================================================
-//function : SetEdgeandOrientation
-//purpose  : 
-//=======================================================================
-void IntPolyh_Triangle::SetEdgeandOrientation(const Standard_Integer EdgeIndex,
-	const IntPolyh_ArrayOfEdges &TEdges) {
-  const Standard_Integer FinTE = TEdges.NbItems();
-
-  Standard_Integer PE1 =0,PE2 =0;
-
-  Standard_Integer Test=1;
-
-  if (EdgeIndex == 1) { PE1 = p1; PE2 = p2; }
-  else if (EdgeIndex == 2) { PE1 = p2; PE2 = p3; }
-  else if (EdgeIndex == 3) { PE1 = p3; PE2 = p1; }
-  else
-  {
-	  Test = 0;
-  }
-
-
-  if (Test != 0)
-  {
-	  for (Standard_Integer iioo = 0; iioo < FinTE; iioo++)
-	  {
-		  Standard_Integer EFP = TEdges[iioo].FirstPoint();
-		  if (EFP == PE1) 
-		  {
-			  Standard_Integer ESP = TEdges[iioo].SecondPoint();
-			  if (ESP != EFP) 
-			  {
-				  if (ESP == PE2) 
-				  {
-					  SetEdgeOrientation(EdgeIndex, 1);
-					  SetEdge(EdgeIndex, iioo);
-					  //iioo = FinTE;
-					  return;
-				  }
-			  }
-			  else 
-			  {
-				  Test = 0;
-			  }
-		  }
-		  else if (EFP == PE2) 
-		  {
-			  Standard_Integer ESP = TEdges[iioo].SecondPoint();
-			  if (ESP != EFP) 
-			  {
-				  if (ESP == PE1) 
-				  {
-					  SetEdgeOrientation(EdgeIndex, -1);
-					  SetEdge(EdgeIndex, iioo);
-					  //iioo = FinTE;
-					  return;
-				  }
-			  }
-			  else 
-			  {
-
-			  }
-		  }
-	  }
-  }
-}
-
-
-//=======================================================================
-//function : Dump
-//purpose  : 
-//=======================================================================
-void IntPolyh_Triangle::Dump (const Standard_Integer i) const
-{ 
-  printf("\nTriangle(%3d) : Points %5d %5d %5d Edges %5d %5d %5d fleche: %8f  intersection possible %8d  intersection: %5d\n"
-	 ,i,p1,p2,p3,e1,e2,e3,Fleche,IP,II);
-}
-
-
-//=======================================================================
-//function : DumpFleche
-//purpose  : 
-//=======================================================================
-void IntPolyh_Triangle::DumpFleche (const Standard_Integer i) const { 
-  printf("\nTriangle(%3d) fleche: %5f\n",i,Fleche);
-}
-

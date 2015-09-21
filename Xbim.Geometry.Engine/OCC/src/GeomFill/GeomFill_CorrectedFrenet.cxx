@@ -14,32 +14,38 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <stdio.h>
 
-#include <GeomFill_CorrectedFrenet.ixx>
-#include <GeomAbs_CurveType.hxx>
 #include <Adaptor3d_HCurve.hxx>
-#include <gp_Trsf.hxx>
-#include <Precision.hxx>
-#include <TColStd_HArray1OfReal.hxx>
-#include <Law_Interpolate.hxx>
-#include <TColStd_SequenceOfReal.hxx>
-#include <gp_Vec2d.hxx>
-#include <BndLib_Add3dCurve.hxx>
 #include <Bnd_Box.hxx>
-#include <GeomLib.hxx>
-#include <Law_Composite.hxx>
-#include <Law_Constant.hxx>
-#include <Law_BSpFunc.hxx>
-#include <Law_BSpline.hxx>
-#include <GeomFill_SnglrFunc.hxx>
-//Patch
-#include <Geom_Plane.hxx>
+#include <BndLib_Add3dCurve.hxx>
 #include <Geom_BezierCurve.hxx>
 #include <Geom_BSplineCurve.hxx>
+#include <Geom_Plane.hxx>
+#include <GeomAbs_CurveType.hxx>
+#include <GeomFill_CorrectedFrenet.hxx>
+#include <GeomFill_Frenet.hxx>
+#include <GeomFill_SnglrFunc.hxx>
+#include <GeomFill_TrihedronLaw.hxx>
+#include <GeomLib.hxx>
+#include <gp_Trsf.hxx>
+#include <gp_Vec.hxx>
+#include <gp_Vec2d.hxx>
+#include <Law_BSpFunc.hxx>
+#include <Law_BSpline.hxx>
+#include <Law_Composite.hxx>
+#include <Law_Constant.hxx>
+#include <Law_Function.hxx>
+#include <Law_Interpolate.hxx>
+#include <Precision.hxx>
+#include <Standard_ConstructionError.hxx>
+#include <Standard_OutOfRange.hxx>
+#include <Standard_Type.hxx>
 #include <TColgp_HArray1OfPnt.hxx>
+#include <TColStd_HArray1OfReal.hxx>
+#include <TColStd_SequenceOfReal.hxx>
 
-
+#include <stdio.h>
+//Patch
 #ifdef OCCT_DEBUG
 static Standard_Boolean Affich=0;
 #endif
@@ -192,13 +198,13 @@ static void smoothlaw(Handle(Law_BSpline)& Law,
 // Function : FindPlane
 // Purpose : 
 //===============================================================
-static Standard_Boolean FindPlane ( const Handle(Adaptor3d_HCurve)& c,
-				    Handle( Geom_Plane )& P )
+static Standard_Boolean FindPlane ( const Handle(Adaptor3d_HCurve)& theC,
+				    Handle( Geom_Plane )& theP )
 {
   Standard_Boolean found = Standard_True;
   Handle(TColgp_HArray1OfPnt) TabP;
 
-  switch (c->GetType()) {
+  switch (theC->GetType()) {
     
   case GeomAbs_Line:
     {
@@ -207,24 +213,24 @@ static Standard_Boolean FindPlane ( const Handle(Adaptor3d_HCurve)& c,
     break;
     
   case GeomAbs_Circle:
-    P = new Geom_Plane(gp_Ax3(c->Circle().Position()));
+    theP = new Geom_Plane(gp_Ax3(theC->Circle().Position()));
     break;
     
   case GeomAbs_Ellipse:
-    P = new Geom_Plane(gp_Ax3(c->Ellipse().Position()));
+    theP = new Geom_Plane(gp_Ax3(theC->Ellipse().Position()));
     break;
     
   case GeomAbs_Hyperbola:
-    P = new Geom_Plane(gp_Ax3(c->Hyperbola().Position()));
+    theP = new Geom_Plane(gp_Ax3(theC->Hyperbola().Position()));
     break;
     
   case GeomAbs_Parabola:
-    P = new Geom_Plane(gp_Ax3(c->Parabola().Position()));
+    theP = new Geom_Plane(gp_Ax3(theC->Parabola().Position()));
     break;
     
   case GeomAbs_BezierCurve:
     {
-      Handle(Geom_BezierCurve) GC = c->Bezier();
+      Handle(Geom_BezierCurve) GC = theC->Bezier();
       Standard_Integer nbp = GC->NbPoles();
       if ( nbp < 2) 
 	found = Standard_False;
@@ -240,7 +246,7 @@ static Standard_Boolean FindPlane ( const Handle(Adaptor3d_HCurve)& c,
     
   case GeomAbs_BSplineCurve:
     {
-      Handle(Geom_BSplineCurve) GC = c->BSpline();
+      Handle(Geom_BSplineCurve) GC = theC->BSpline();
       Standard_Integer nbp = GC->NbPoles();
       if ( nbp < 2) 
 	found = Standard_False;
@@ -256,16 +262,16 @@ static Standard_Boolean FindPlane ( const Handle(Adaptor3d_HCurve)& c,
     
   default:
     { // On utilise un echantillonage
-      Standard_Integer nbp = 15 + c->NbIntervals(GeomAbs_C3);
+      Standard_Integer nbp = 15 + theC->NbIntervals(GeomAbs_C3);
       Standard_Real f, l, t, inv;
       Standard_Integer ii;
-      f = c->FirstParameter();
-      l = c->LastParameter();
+      f = theC->FirstParameter();
+      l = theC->LastParameter();
       inv = 1./(nbp-1);
       for (ii=1; ii<=nbp; ii++) {
 	t = ( f*(nbp-ii) + l*(ii-1));
 	t *= inv;
-	TabP->SetValue(ii, c->Value(t));
+	TabP->SetValue(ii, theC->Value(t));
       }
     }
   }
@@ -278,7 +284,7 @@ static Standard_Boolean FindPlane ( const Handle(Adaptor3d_HCurve)& c,
       found = Standard_False;
     }
     else {
-      P = new Geom_Plane(inertia);
+      theP = new Geom_Plane(inertia);
     }
     if (found)
       {
@@ -286,7 +292,7 @@ static Standard_Boolean FindPlane ( const Handle(Adaptor3d_HCurve)& c,
 //	Standard_Boolean isOnPlane;
 	Standard_Real a,b,c,d, dist;
 	Standard_Integer ii;
-	P->Coefficients(a,b,c,d);
+  theP->Coefficients(a,b,c,d);
 	for (ii=1; ii<=TabP->Length() && found; ii++) {
 	  const gp_XYZ& xyz = TabP->Value(ii).XYZ();
 	  dist = a*xyz.X() + b*xyz.Y() + c*xyz.Z() + d;

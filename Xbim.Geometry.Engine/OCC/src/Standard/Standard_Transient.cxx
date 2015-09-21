@@ -12,31 +12,22 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
+#include <Standard_Type.hxx>
 #include <Standard_Transient.hxx>
+#include <Standard_Atomic.hxx>
+#include <Standard_CString.hxx>
+#include <Standard_ProgramError.hxx>
 
-// The Initialization of the Standard_Transient variables
-IMPLEMENT_STANDARD_TYPE(Standard_Transient)
-IMPLEMENT_STANDARD_SUPERTYPE_ARRAY()
-IMPLEMENT_STANDARD_SUPERTYPE_ARRAY_END()
-IMPLEMENT_STANDARD_TYPE_END(Standard_Transient)
-
-IMPLEMENT_STANDARD_RTTI(Standard_Transient)
-
-//
-// The Standard_Transient Methods
-//
-
-// The Method This 
-//
-Handle(Standard_Transient) Standard_Transient::This() const
-{
-  return Handle(Standard_Transient)(this);
+void Standard_Transient::Delete() const
+{ 
+  delete this;
 }
 
-// Empty Destructor
 //
-Standard_Transient::~Standard_Transient()
+//
+const Handle(Standard_Type)& Standard_Transient::DynamicType() const
 {
+  return opencascade::type_instance<Standard_Transient>::get();
 }
 
 //
@@ -67,7 +58,23 @@ Standard_Boolean Standard_Transient::IsKind (const Standard_CString theTypeName)
   return DynamicType()->SubType ( theTypeName );
 }
 
-void Standard_Transient::Delete() const
-{ 
-  delete((Standard_Transient *)this); 
+//
+//
+Standard_Transient* Standard_Transient::This() const
+{
+  if (GetRefCount() == 0)
+    Standard_ProgramError::Raise ("Attempt to create handle to object created in stack, not yet constructed, or destroyed");
+  return const_cast<Standard_Transient*> (this);
+}
+
+// Increment reference counter
+void Standard_Transient::IncrementRefCounter() const
+{
+  Standard_Atomic_Increment (&count);
+}
+
+// Decrement reference counter
+Standard_Integer Standard_Transient::DecrementRefCounter() const
+{
+  return Standard_Atomic_Decrement (&count);
 }

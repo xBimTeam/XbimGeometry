@@ -16,73 +16,75 @@
 
 //  Modified by skv - Wed Dec 24 18:08:39 2003 OCC4455
 
-#include <stdio.h>
-
-#include <BRepOffset_Inter2d.ixx>
-#include <BRepAlgo_AsDes.hxx>
-#include <BRepOffset_Offset.hxx>
-#include <BRepOffset_Tool.hxx>
-
+#include <Adaptor2d_HCurve2d.hxx>
+#include <Adaptor3d_CurveOnSurface.hxx>
+#include <Adaptor3d_HSurface.hxx>
+#include <Bnd_Box.hxx>
+#include <BndLib_Add3dCurve.hxx>
 #include <BRep_Builder.hxx>
-#include <BRep_Tool.hxx>
-#include <BRepLib_MakeVertex.hxx>
-#include <BRepAdaptor_Curve.hxx>
-#include <BRepAdaptor_Surface.hxx>
-#include <BRepTools_WireExplorer.hxx>
-#include <TopExp.hxx>
-#include <TopExp_Explorer.hxx>
-#include <TopoDS_Iterator.hxx>
-
-#include <TopoDS.hxx>
-#include <TopoDS_Edge.hxx>
-#include <TopoDS_Vertex.hxx>
-#include <TopoDS_Wire.hxx>
-#include <TopTools_ListOfShape.hxx>
-#include <TopTools_ListIteratorOfListOfShape.hxx>
-#include <TopTools_DataMapIteratorOfDataMapOfShapeListOfShape.hxx>
-#include <gp_Pnt.hxx>
-#include <BRep_TEdge.hxx>
-#include <BRep_ListIteratorOfListOfCurveRepresentation.hxx>
 #include <BRep_CurveRepresentation.hxx>
 #include <BRep_GCurve.hxx>
-
-#include <Geom_Line.hxx>
-#include <Geom_Plane.hxx>
-#include <Geom_TrimmedCurve.hxx>
-#include <GeomConvert_CompCurveToBSplineCurve.hxx>
-#include <Precision.hxx>
-#include <Geom2d_TrimmedCurve.hxx>
+#include <BRep_ListIteratorOfListOfCurveRepresentation.hxx>
+#include <BRep_TEdge.hxx>
+#include <BRep_Tool.hxx>
+#include <BRepAdaptor_Curve.hxx>
+#include <BRepAdaptor_Curve2d.hxx>
+#include <BRepAdaptor_Surface.hxx>
+#include <BRepAlgo_AsDes.hxx>
+#include <BRepLib.hxx>
+#include <BRepLib_MakeVertex.hxx>
+#include <BRepOffset_Inter2d.hxx>
+#include <BRepOffset_Offset.hxx>
+#include <BRepOffset_Tool.hxx>
+#include <BRepTools.hxx>
+#include <BRepTools_WireExplorer.hxx>
 #include <Geom2d_BezierCurve.hxx>
 #include <Geom2d_BSplineCurve.hxx>
 #include <Geom2d_Line.hxx>
-#include <Geom2dConvert_CompCurveToBSplineCurve.hxx>
-
-#include <BRepLib.hxx>
-#include <BRepAdaptor_Curve2d.hxx>
-#include <Adaptor3d_HSurface.hxx>
-#include <Adaptor3d_CurveOnSurface.hxx>
-#include <Geom_BSplineSurface.hxx>
-#include <Geom_CylindricalSurface.hxx>
-#include <Geom_ConicalSurface.hxx>
-#include <Adaptor2d_HCurve2d.hxx>
-#include <TColGeom2d_SequenceOfCurve.hxx>
-#include <Geom2dInt_GInter.hxx>
-#include <IntRes2d_IntersectionPoint.hxx>
-#include <IntRes2d_IntersectionSegment.hxx>
-#include <GeomAPI_ProjectPointOnCurve.hxx>
-#include <GeomAdaptor_Surface.hxx>
+#include <Geom2d_TrimmedCurve.hxx>
 #include <Geom2dAdaptor_HCurve.hxx>
+#include <Geom2dConvert_CompCurveToBSplineCurve.hxx>
+#include <Geom2dInt_GInter.hxx>
+#include <Geom_BSplineCurve.hxx>
+#include <Geom_BSplineSurface.hxx>
+#include <Geom_ConicalSurface.hxx>
+#include <Geom_CylindricalSurface.hxx>
+#include <Geom_Line.hxx>
+#include <Geom_Plane.hxx>
+#include <Geom_TrimmedCurve.hxx>
 #include <GeomAdaptor_HSurface.hxx>
+#include <GeomAdaptor_Surface.hxx>
+#include <GeomAPI_ProjectPointOnCurve.hxx>
+#include <GeomConvert_CompCurveToBSplineCurve.hxx>
 #include <GeomLib.hxx>
 #include <GeomProjLib.hxx>
-#include <TColgp_SequenceOfPnt.hxx>
+#include <gp_Pnt.hxx>
+#include <IntRes2d_IntersectionPoint.hxx>
+#include <IntRes2d_IntersectionSegment.hxx>
+#include <Precision.hxx>
+#include <TColGeom2d_SequenceOfCurve.hxx>
 #include <TColgp_Array1OfPnt2d.hxx>
-#include <Bnd_Box.hxx>
-#include <BndLib_Add3dCurve.hxx>
-#include <BRepTools.hxx>
+#include <TColgp_SequenceOfPnt.hxx>
+#include <TopExp.hxx>
+#include <TopExp_Explorer.hxx>
+#include <TopoDS.hxx>
+#include <TopoDS_Edge.hxx>
+#include <TopoDS_Face.hxx>
+#include <TopoDS_Iterator.hxx>
+#include <TopoDS_Vertex.hxx>
+#include <TopoDS_Wire.hxx>
+#include <TopTools_DataMapIteratorOfDataMapOfShapeListOfShape.hxx>
+#include <TopTools_ListIteratorOfListOfShape.hxx>
+#include <TopTools_ListOfShape.hxx>
 
+#include <stdio.h>
 #ifdef DRAW 
 #include <DBRep.hxx>
+#include <Geom2d_BoundedCurve.hxx>
+#include <Geom_BoundedSurface.hxx>
+#include <Geom_BoundedCurve.hxx>
+#include <BRep_CurveOnSurface.hxx>
+#include <Geom_Surface.hxx>
 Standard_Boolean Inter2dAffichInt2d;
 static Standard_Integer NbF2d = 0;
 static Standard_Integer NbE2d = 0;
@@ -841,7 +843,7 @@ static Standard_Boolean ExtendPCurve(const Handle(Geom2d_Curve)& aPCurve,
 {
   NewPCurve = aPCurve;
   if (NewPCurve->IsInstance(STANDARD_TYPE(Geom2d_TrimmedCurve)))
-    NewPCurve = (*((Handle(Geom2d_TrimmedCurve)*)&NewPCurve))->BasisCurve();
+    NewPCurve = Handle(Geom2d_TrimmedCurve)::DownCast (NewPCurve)->BasisCurve();
   
   Standard_Real FirstPar = NewPCurve->FirstParameter();
   Standard_Real LastPar  = NewPCurve->LastParameter();
@@ -851,7 +853,7 @@ static Standard_Boolean ExtendPCurve(const Handle(Geom2d_Curve)& aPCurve,
     {
       if (NewPCurve->IsInstance(STANDARD_TYPE(Geom2d_BezierCurve)))
 	{
-	  Handle(Geom2d_BezierCurve) aBezier = *((Handle(Geom2d_BezierCurve)*)&NewPCurve);
+	  Handle(Geom2d_BezierCurve) aBezier = Handle(Geom2d_BezierCurve)::DownCast (NewPCurve);
 	  if (aBezier->NbPoles() == 2)
 	    {
 	      TColgp_Array1OfPnt2d thePoles(1,2);
@@ -863,7 +865,7 @@ static Standard_Boolean ExtendPCurve(const Handle(Geom2d_Curve)& aPCurve,
 	}
       else if (NewPCurve->IsInstance(STANDARD_TYPE(Geom2d_BSplineCurve)))
 	{
-	  Handle(Geom2d_BSplineCurve) aBSpline = *((Handle(Geom2d_BSplineCurve)*)&NewPCurve);
+	  Handle(Geom2d_BSplineCurve) aBSpline = Handle(Geom2d_BSplineCurve)::DownCast (NewPCurve);
 	  if (aBSpline->NbKnots() == 2 && aBSpline->NbPoles() == 2)
 	    {
 	      TColgp_Array1OfPnt2d thePoles(1,2);
@@ -1184,7 +1186,7 @@ static void ExtentEdge(const TopoDS_Edge& E,TopoDS_Edge& NE, const Standard_Real
 		  else if (MinSurf->IsInstance(STANDARD_TYPE(Geom_CylindricalSurface)) ||
 			   MinSurf->IsInstance(STANDARD_TYPE(Geom_ConicalSurface)))
 		    {
-		      Handle(Geom2d_Line) theLine = *((Handle(Geom2d_Line)*)&MinPC);
+		      Handle(Geom2d_Line) theLine = Handle(Geom2d_Line)::DownCast (MinPC);
 		      gp_Dir2d LineDir = theLine->Direction();
 		      if (LineDir.IsParallel( gp::DY2d(), Precision::Angular() ))
 			IsLine = Standard_True;
@@ -1245,13 +1247,13 @@ static void ExtentEdge(const TopoDS_Edge& E,TopoDS_Edge& NE, const Standard_Real
 			if (theCurve->IsInstance(STANDARD_TYPE(Geom2d_Line)) &&
 			    theSurf->IsKind(STANDARD_TYPE(Geom_BoundedSurface)))
 			  {
-			    gp_Dir2d theDir = (*((Handle(Geom2d_Line)*)&theCurve))->Direction();
+			    gp_Dir2d theDir = Handle(Geom2d_Line)::DownCast (theCurve)->Direction();
 			    if (theDir.IsParallel(gp::DX2d(), Precision::Angular()) ||
 				theDir.IsParallel(gp::DY2d(), Precision::Angular()))
 			      {
 				Standard_Real U1, U2, V1, V2;
 				theSurf->Bounds(U1, U2, V1, V2);
-				gp_Pnt2d Origin = (*((Handle(Geom2d_Line)*)&theCurve))->Location();
+				gp_Pnt2d Origin = Handle(Geom2d_Line)::DownCast (theCurve)->Location();
 				if (Abs(Origin.X()-U1) <= Precision::Confusion() ||
 				    Abs(Origin.X()-U2) <= Precision::Confusion() ||
 				    Abs(Origin.Y()-V1) <= Precision::Confusion() ||

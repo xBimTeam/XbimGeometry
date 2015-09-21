@@ -14,55 +14,56 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <BRepFill_Pipe.ixx>
 
-#include <Standard_ErrorHandler.hxx>
-
-#include <BRep_Tool.hxx>
+#include <Adaptor3d_CurveOnSurface.hxx>
 #include <BRep_Builder.hxx>
+#include <BRep_Tool.hxx>
+#include <BRepBuilderAPI_Copy.hxx>
+#include <BRepBuilderAPI_Transform.hxx>
 #include <BRepClass3d_SolidClassifier.hxx>
-#include <BRepLib_MakeVertex.hxx>
-#include <BRepTools_Substitution.hxx>
-
-#include <GeomFill_CorrectedFrenet.hxx>
-#include <GeomFill_Frenet.hxx>
-#include <GeomFill_DiscreteTrihedron.hxx>
-#include <GeomFill_CurveAndTrihedron.hxx>
-
+#include <BRepFill_Edge3DLaw.hxx>
+#include <BRepFill_LocationLaw.hxx>
+#include <BRepFill_Pipe.hxx>
 #include <BRepFill_SectionPlacement.hxx>
 #include <BRepFill_ShapeLaw.hxx>
-#include <BRepFill_Edge3DLaw.hxx>
 #include <BRepFill_Sweep.hxx>
-
+#include <BRepLib.hxx>
+#include <BRepLib_MakeVertex.hxx>
+#include <BRepTools_Substitution.hxx>
+#include <Geom2dAdaptor_HCurve.hxx>
+#include <Geom_BSplineCurve.hxx>
+#include <Geom_OffsetCurve.hxx>
+#include <Geom_TrimmedCurve.hxx>
 #include <GeomAbs_Shape.hxx>
-#include <TopExp.hxx>
+#include <GeomAdaptor_HSurface.hxx>
+#include <GeomFill_CorrectedFrenet.hxx>
+#include <GeomFill_CurveAndTrihedron.hxx>
+#include <GeomFill_DiscreteTrihedron.hxx>
+#include <GeomFill_Frenet.hxx>
+#include <gp_Pnt.hxx>
+#include <Precision.hxx>
+#include <ShapeUpgrade_RemoveLocations.hxx>
+#include <Standard_DomainError.hxx>
+#include <Standard_ErrorHandler.hxx>
+#include <Standard_NotImplemented.hxx>
+#include <StdFail_NotDone.hxx>
+#include <TColStd_DataMapIteratorOfDataMapOfIntegerInteger.hxx>
+#include <TColStd_DataMapOfIntegerInteger.hxx>
 #include <TopAbs_ShapeEnum.hxx>
+#include <TopExp.hxx>
 #include <TopoDS.hxx>
+#include <TopoDS_Compound.hxx>
+#include <TopoDS_Edge.hxx>
+#include <TopoDS_Face.hxx>
+#include <TopoDS_Iterator.hxx>
+#include <TopoDS_Shape.hxx>
 #include <TopoDS_Shell.hxx>
 #include <TopoDS_Solid.hxx>
-#include <TopoDS_Compound.hxx>
-#include <TopoDS_Iterator.hxx>
+#include <TopoDS_Vertex.hxx>
+#include <TopoDS_Wire.hxx>
 #include <TopTools_DataMapOfShapeInteger.hxx>
-#include <TColStd_DataMapOfIntegerInteger.hxx>
-#include <TColStd_DataMapIteratorOfDataMapOfIntegerInteger.hxx>
-
-#include <Precision.hxx>
-#include <Standard_NotImplemented.hxx>
-
-#include <Geom_TrimmedCurve.hxx>
-#include <Geom_OffsetCurve.hxx>
-#include <Geom_BSplineCurve.hxx>
-#include <BRepBuilderAPI_Transform.hxx>
-#include <BRepBuilderAPI_Copy.hxx>
-#include <TopTools_SequenceOfShape.hxx>
 #include <TopTools_ListIteratorOfListOfShape.hxx>
-#include <BRepLib.hxx>
-
-#include <Geom2dAdaptor_HCurve.hxx>
-#include <GeomAdaptor_HSurface.hxx>
-#include <Adaptor3d_CurveOnSurface.hxx>
-
-#include <ShapeUpgrade_RemoveLocations.hxx>
+#include <TopTools_SequenceOfShape.hxx>
 
 #ifdef DRAW
 #include <DBRep.hxx>
@@ -798,14 +799,14 @@ Standard_Integer BRepFill_Pipe::FindEdge(const TopoDS_Shape& S,
 	  
   case TopAbs_WIRE :
     {
-      Standard_Integer ii = InitialLength+1;
       Handle(BRepFill_ShapeLaw) Section = 
-	new (BRepFill_ShapeLaw) (TopoDS::Wire(S), Standard_False);
-      InitialLength += Section->NbLaw();
-     
-      for (; (ii<=InitialLength) && (!result); ii++) {
-	if (E.IsSame(Section->Edge(ii)) ) result = ii;
+        new (BRepFill_ShapeLaw) (TopoDS::Wire(S), Standard_False);
+      Standard_Integer NbLaw = Section->NbLaw();
+
+      for (Standard_Integer ii = 1; (ii<=NbLaw) && (!result); ii++) {
+        if (E.IsSame(Section->Edge(ii)) ) result = InitialLength + ii;
       }
+      InitialLength += NbLaw;
       break;
     }
 
@@ -917,13 +918,13 @@ void BRepFill_Pipe::DefineRealSegmax()
 	     C->DynamicType() == STANDARD_TYPE(Geom_OffsetCurve))
 	{
 	  if (C->DynamicType() == STANDARD_TYPE(Geom_TrimmedCurve))
-	    C = (*((Handle(Geom_TrimmedCurve)*)&C))->BasisCurve();
+	    C = Handle(Geom_TrimmedCurve)::DownCast (C)->BasisCurve();
 	  if (C->DynamicType() == STANDARD_TYPE(Geom_OffsetCurve))
-	    C = (*((Handle(Geom_OffsetCurve)*)&C))->BasisCurve();
+	    C = Handle(Geom_OffsetCurve)::DownCast (C)->BasisCurve();
 	}
       if (C->DynamicType() == STANDARD_TYPE(Geom_BSplineCurve))
 	{
-	  const Handle(Geom_BSplineCurve)& BC = *((Handle(Geom_BSplineCurve)*)&C);
+	  Handle(Geom_BSplineCurve) BC (Handle(Geom_BSplineCurve)::DownCast (C));
 	  Standard_Integer NbKnots = BC->NbKnots();
 	  Standard_Integer RealNbKnots = NbKnots;
 	  if (first > BC->FirstParameter())

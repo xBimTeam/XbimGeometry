@@ -12,15 +12,17 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <BOPDS_PaveBlock.ixx>
-#include <BOPDS_ListOfPave.hxx>
-#include <BOPDS_VectorOfPave.hxx>
 
-#include <Standard.hxx>
+#include <Bnd_Box.hxx>
+#include <BOPDS_ListOfPave.hxx>
+#include <BOPDS_Pave.hxx>
+#include <BOPDS_PaveBlock.hxx>
+#include <BOPDS_VectorOfPave.hxx>
 #include <NCollection_BaseAllocator.hxx>
+#include <Standard.hxx>
+#include <Standard_Type.hxx>
 
 #include <algorithm>
-
 #ifdef WNT
 #pragma warning ( disable : 4291 )
 #endif
@@ -234,21 +236,19 @@
 //purpose  : 
 //=======================================================================
   Standard_Boolean BOPDS_PaveBlock::ContainsParameter(const Standard_Real theT,
-                                                      const Standard_Real theTol)const
+                                                      const Standard_Real theTol,
+                                                      Standard_Integer& theInd) const
 {
   Standard_Boolean bRet;
-  Standard_Real dT;
   BOPDS_ListIteratorOfListOfPave aIt;
   //
-  bRet=Standard_False;
+  bRet = Standard_False;
   aIt.Initialize(myExtPaves);
   for (; aIt.More(); aIt.Next()) {
-    dT=aIt.Value().Parameter()-theT;
-    if (dT<0.) {
-      dT=-dT;
-    }
-    if (dT<theTol) {
-      bRet=!bRet;
+    const BOPDS_Pave& aPave = aIt.Value();
+    bRet = (Abs(aPave.Parameter() - theT) < theTol);
+    if (bRet) {
+      theInd = aPave.Index();
       break;
     }
   }

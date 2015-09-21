@@ -14,7 +14,13 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <TopOpeBRep_FacesIntersector.ixx>
+
+#include <Bnd_Box.hxx>
+#include <BRepAdaptor_HSurface.hxx>
+#include <BRepTopAdaptor_TopolTool.hxx>
+#include <TopoDS_Shape.hxx>
+#include <TopOpeBRep_FacesIntersector.hxx>
+#include <TopOpeBRep_LineInter.hxx>
 
 #ifdef DRAW
 #include <TopOpeBRep_DRAW.hxx>
@@ -180,8 +186,10 @@ void TopOpeBRep_FacesIntersector::Perform(const TopoDS_Shape& F1,const TopoDS_Sh
   BRepAdaptor_Surface& S2 = mySurface2->ChangeSurface(); S2.Initialize(myFace2);
   mySurfaceType1 = S1.GetType();
   mySurfaceType2 = S2.GetType();
-  myDomain1->Initialize(mySurface1);
-  myDomain2->Initialize(mySurface2);
+  const Handle(Adaptor3d_HSurface)& aSurf1 = mySurface1; // to avoid ambiguity
+  myDomain1->Initialize(aSurf1);
+  const Handle(Adaptor3d_HSurface)& aSurf2 = mySurface2; // to avoid ambiguity
+  myDomain2->Initialize(aSurf2);
 
 #ifdef OCCT_DEBUG
   if (TopOpeBRepTool_GettraceKRO()) KRO_DSFILLER_INTFF.Start();

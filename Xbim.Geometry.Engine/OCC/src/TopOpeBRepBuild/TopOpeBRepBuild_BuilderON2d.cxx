@@ -14,20 +14,22 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <TopOpeBRepBuild_BuilderON.jxx>
 
+#include <BRep_Tool.hxx>
+#include <Precision.hxx>
+#include <TopExp.hxx>
+#include <TopoDS.hxx>
+#include <TopoDS_Shape.hxx>
+#include <TopOpeBRepBuild_BuilderON.hxx>
+#include <TopOpeBRepBuild_define.hxx>
+#include <TopOpeBRepDS.hxx>
+#include <TopOpeBRepDS_connex.hxx>
+#include <TopOpeBRepDS_EXPORT.hxx>
+#include <TopOpeBRepDS_Interference.hxx>
+#include <TopOpeBRepDS_InterferenceTool.hxx>
+#include <TopOpeBRepDS_ShapeShapeInterference.hxx>
 #include <TopOpeBRepTool_EXPORT.hxx>
 #include <TopOpeBRepTool_SC.hxx>
-#include <TopOpeBRepDS_InterferenceTool.hxx>
-#include <TopOpeBRepDS_EXPORT.hxx>
-#include <TopOpeBRepDS_connex.hxx>
-#include <TopOpeBRepDS.hxx>
-#include <TopOpeBRepBuild_define.hxx>
-#include <BRep_Tool.hxx>
-#include <TopoDS.hxx>
-#include <TopExp.hxx>
-#include <Precision.hxx>
-
 
 #define M_OUT(st) (st == TopAbs_OUT)
 #define M_IN( st) (st == TopAbs_IN)
@@ -105,7 +107,7 @@ void TopOpeBRepBuild_BuilderON::GFillONParts2dWES2(const Handle(TopOpeBRepDS_Int
 {
   const Handle(TopOpeBRepDS_HDataStructure)& HDS=myPB->DataStructure();
   const TopOpeBRepDS_DataStructure& BDS= HDS->DS();
-  const Handle(TopOpeBRepDS_ShapeShapeInterference)& SSI=Handle(TopOpeBRepDS_ShapeShapeInterference)::DownCast(I);
+  Handle(TopOpeBRepDS_ShapeShapeInterference) SSI (Handle(TopOpeBRepDS_ShapeShapeInterference)::DownCast(I));
   TopAbs_State TB1,TB2;myPG->StatesON(TB1,TB2);
   TopOpeBRepDS_Kind GT,ST;Standard_Integer GI,SI;FDS_data(SSI,GT,GI,ST,SI);
 //  const TopOpeBRepDS_Transition& TFE=SSI->Transition(); 

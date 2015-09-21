@@ -14,28 +14,35 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <IntPatch_ImpPrmIntersection.ixx>
-
-#include <Standard_ConstructionError.hxx>
-#include <IntPatch_SequenceOfLine.hxx>
-#include <TColStd_Array1OfInteger.hxx>
-#include <IntSurf_PntOn2S.hxx>
-#include <IntSurf_LineOn2S.hxx>
-#include <IntSurf.hxx>
-#include <IntSurf_InteriorPoint.hxx>
 
 #include <Adaptor2d_HCurve2d.hxx>
-#include <IntSurf_PathPoint.hxx>
-#include <IntSurf_SequenceOfPathPoint.hxx>
+#include <Adaptor3d_HSurface.hxx>
+#include <Adaptor3d_TopolTool.hxx>
+#include <IntPatch_ArcFunction.hxx>
+#include <IntPatch_ImpPrmIntersection.hxx>
+#include <IntPatch_Line.hxx>
+#include <IntPatch_Point.hxx>
+#include <IntPatch_RLine.hxx>
+#include <IntPatch_RstInt.hxx>
+#include <IntPatch_SequenceOfLine.hxx>
 #include <IntPatch_TheIWalking.hxx>
 #include <IntPatch_TheIWLineOfTheIWalking.hxx>
 #include <IntPatch_ThePathPointOfTheSOnBounds.hxx>
 #include <IntPatch_TheSegmentOfTheSOnBounds.hxx>
 #include <IntPatch_TheSurfFunction.hxx>
-#include <IntPatch_RLine.hxx>
 #include <IntPatch_WLine.hxx>
-#include <IntPatch_ArcFunction.hxx>
-#include <IntPatch_RstInt.hxx>
+#include <IntSurf.hxx>
+#include <IntSurf_InteriorPoint.hxx>
+#include <IntSurf_LineOn2S.hxx>
+#include <IntSurf_PathPoint.hxx>
+#include <IntSurf_PntOn2S.hxx>
+#include <IntSurf_SequenceOfPathPoint.hxx>
+#include <Standard_ConstructionError.hxx>
+#include <Standard_DomainError.hxx>
+#include <Standard_OutOfRange.hxx>
+#include <StdFail_NotDone.hxx>
+#include <TColStd_Array1OfInteger.hxx>
+
 #ifndef OCCT_DEBUG
 #define No_Standard_RangeError
 #define No_Standard_OutOfRange
@@ -57,6 +64,7 @@
 #include <ElCLib.hxx>
 
 #include <Bnd_Box2d.hxx>
+#include <IntPatch_PointLine.hxx>
 
 static Standard_Boolean DecomposeResult(const Handle(IntPatch_Line)&   Line,
   const Standard_Boolean         IsReversed,
@@ -965,7 +973,7 @@ void IntPatch_ImpPrmIntersection::Perform (const Handle(Adaptor3d_HSurface)& Sur
     for (Standard_Integer j=1; j<=Nblines-1; j++) {
       dofirst = dolast = Standard_False;
       const  Handle(IntPatch_Line)& slinj = slin(j);
-      const Handle(IntPatch_WLine)& wlin1 = *((Handle(IntPatch_WLine)*)&slinj);
+      Handle(IntPatch_WLine) wlin1 (Handle(IntPatch_WLine)::DownCast (slinj));
       if (wlin1->HasFirstPoint()) {
         ptdeb = wlin1->FirstPoint(indfirst);
         if (ptdeb.IsTangencyPoint()) {
@@ -982,7 +990,7 @@ void IntPatch_ImpPrmIntersection::Perform (const Handle(Adaptor3d_HSurface)& Sur
       if (dofirst || dolast) {
         for (Standard_Integer k=j+1; k<=Nblines;k++) {
           const  Handle(IntPatch_Line)& slink = slin(k);
-          const  Handle(IntPatch_WLine)& wlin2 = *((Handle(IntPatch_WLine)*)&slink);
+          Handle(IntPatch_WLine) wlin2 (Handle(IntPatch_WLine)::DownCast (slink));
           if (wlin2->HasFirstPoint()) {
             ptbis = wlin2->FirstPoint(ind2);
             if (ptbis.IsTangencyPoint()) {
@@ -1280,27 +1288,27 @@ void IntPatch_ImpPrmIntersection::Perform (const Handle(Adaptor3d_HSurface)& Sur
           const Handle(IntPatch_Line)& slinj = slin(j);
           typ = slinj->ArcType();
           if (typ == IntPatch_Walking) {
-            Nbpts = (*((Handle(IntPatch_WLine)*)&slinj))->NbVertex();
+            Nbpts = Handle(IntPatch_WLine)::DownCast (slinj)->NbVertex();
           }
           else {
-            Nbpts = (*((Handle(IntPatch_RLine)*)&slinj))->NbVertex();
+            Nbpts = Handle(IntPatch_RLine)::DownCast (slinj)->NbVertex();
           }
           for (Standard_Integer k=1; k<=Nbpts;k++) {
             if (typ == IntPatch_Walking) {
-              ptdeb = (*((Handle(IntPatch_WLine)*)&slinj))->Vertex(k);
+              ptdeb = Handle(IntPatch_WLine)::DownCast (slinj)->Vertex(k);
             }
             else {
-              ptdeb = (*((Handle(IntPatch_RLine)*)&slinj))->Vertex(k);
+              ptdeb = Handle(IntPatch_RLine)::DownCast (slinj)->Vertex(k);
             }
             if (dofirst) {
 
               if (ptdeb.Value().Distance(PStartf.Value()) <=TolArc) {
                 ptdeb.SetMultiple(Standard_True);
                 if (typ == IntPatch_Walking) {
-                  (*((Handle(IntPatch_WLine)*)&slinj))->Replace(k,ptdeb);
+                  Handle(IntPatch_WLine)::DownCast (slinj)->Replace(k,ptdeb);
                 }
                 else {
-                  (*((Handle(IntPatch_RLine)*)&slinj))->Replace(k,ptdeb);
+                  Handle(IntPatch_RLine)::DownCast (slinj)->Replace(k,ptdeb);
                 }
                 ptdeb.SetParameter(paramf);
                 rline->AddVertex(ptdeb);
@@ -1313,19 +1321,19 @@ void IntPatch_ImpPrmIntersection::Perform (const Handle(Adaptor3d_HSurface)& Sur
             if (dolast) {
               if(dofirst) { //-- on recharge le ptdeb
                 if (typ == IntPatch_Walking) {
-                  ptdeb = (*((Handle(IntPatch_WLine)*)&slinj))->Vertex(k);
+                  ptdeb = Handle(IntPatch_WLine)::DownCast (slinj)->Vertex(k);
                 }
                 else {
-                  ptdeb = (*((Handle(IntPatch_RLine)*)&slinj))->Vertex(k);
+                  ptdeb = Handle(IntPatch_RLine)::DownCast (slinj)->Vertex(k);
                 }
               }
               if (ptdeb.Value().Distance(PStartl.Value()) <=TolArc) {
                 ptdeb.SetMultiple(Standard_True);
                 if (typ == IntPatch_Walking) {
-                  (*((Handle(IntPatch_WLine)*)&slinj))->Replace(k,ptdeb);
+                  Handle(IntPatch_WLine)::DownCast (slinj)->Replace(k,ptdeb);
                 }
                 else {
-                  (*((Handle(IntPatch_RLine)*)&slinj))->Replace(k,ptdeb);
+                  Handle(IntPatch_RLine)::DownCast (slinj)->Replace(k,ptdeb);
                 }
                 ptdeb.SetParameter(paraml);
                 rline->AddVertex(ptdeb);
@@ -2232,7 +2240,7 @@ static Standard_Boolean AddVertices(Handle(IntSurf_LineOn2S)& Line,
 }
 
 
-static void PutIntVertices(Handle(IntPatch_Line)&    Line,
+static void PutIntVertices(const Handle(IntPatch_Line)&    Line,
   Handle(IntSurf_LineOn2S)& Result,
   Standard_Boolean          ,//IsReversed,
   Handle(IntSurf_LineOn2S)& Vertices,
@@ -2243,7 +2251,7 @@ static void PutIntVertices(Handle(IntPatch_Line)&    Line,
   if(nbp < 3)
     return;
 
-  Handle(IntPatch_WLine)& WLine = (*((Handle(IntPatch_WLine)*)&Line));
+  Handle(IntPatch_WLine) WLine (Handle(IntPatch_WLine)::DownCast (Line));
   Standard_Integer ip = 0, iv = 0;
   gp_Pnt aPnt;
   IntPatch_Point thePnt;
@@ -2387,7 +2395,7 @@ static Standard_Boolean DecomposeResult(const Handle(IntPatch_Line)& theLine,
     return Standard_False;
   }
 
-  const Handle(IntPatch_WLine)& aWLine = (*((Handle(IntPatch_WLine)*)&theLine));
+  Handle(IntPatch_WLine) aWLine (Handle(IntPatch_WLine)::DownCast (theLine));
   const Handle(IntSurf_LineOn2S)& aSLine = aWLine->Curve();
 
   if(aSLine->NbPoints() <= 2)

@@ -14,9 +14,16 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <Geom_Axis2Placement.ixx>
 
-typedef Handle(Geom_Axis2Placement) Handle(Axis2Placement);
+#include <Geom_Axis2Placement.hxx>
+#include <Geom_Geometry.hxx>
+#include <gp_Ax2.hxx>
+#include <gp_Dir.hxx>
+#include <gp_Pnt.hxx>
+#include <gp_Trsf.hxx>
+#include <Standard_ConstructionError.hxx>
+#include <Standard_Type.hxx>
+
 typedef Geom_Axis2Placement Axis2Placement;
 typedef gp_Ax1  Ax1;
 typedef gp_Dir  Dir;
@@ -32,7 +39,7 @@ typedef gp_Vec  Vec;
 
 Handle(Geom_Geometry) Geom_Axis2Placement::Copy() const {
 
-  Handle(Axis2Placement) A2;
+  Handle(Geom_Axis2Placement) A2;
   A2 = new Axis2Placement (axis.Location(), axis.Direction(), vxdir, vydir);
   return A2;
 }

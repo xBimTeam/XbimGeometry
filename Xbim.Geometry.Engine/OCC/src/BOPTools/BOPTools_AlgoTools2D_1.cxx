@@ -70,7 +70,7 @@ Standard_Integer BOPTools_AlgoTools2D::AttachExistingPCurve
   Standard_Integer iRet;
   Standard_Real aTol, aT11, aT12, aT21, aT22, aTolPPC;
   Handle(Geom2d_Curve) aC2Dold, aC2DoldC;
-  Handle(Geom2d_TrimmedCurve) aC2DT;
+  Handle(Geom2d_Curve) aC2DT;
   BRep_Builder aBB;
   //
   iRet=0;
@@ -250,7 +250,7 @@ Standard_Boolean IsToReverse(const TopoDS_Edge& aEold,
                              const TopoDS_Edge& aEnew,
                              const Handle(IntTools_Context)& aCtx)
 {
-  Standard_Boolean bRet, bFlag, bIsDegenerated;
+  Standard_Boolean bRet, bIsDegenerated;
   Standard_Real aTnew, aTold, aScPr, aTa, aTb, aT1, aT2;
   gp_Vec aVold, aVnew, aVE, aVS;
   gp_Pnt aP;
@@ -275,7 +275,7 @@ Standard_Boolean IsToReverse(const TopoDS_Edge& aEold,
   aCnew->D1(aTnew, aP, aVnew);
   aVnew.Normalize(); 
   //
-  bFlag=aCtx->ProjectPointOnEdge(aP, aEold, aTold);
+  aCtx->ProjectPointOnEdge(aP, aEold, aTold);
   aCold->D1(aTold, aP, aVold);
   aVold.Normalize(); 
   //

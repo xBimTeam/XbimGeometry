@@ -14,40 +14,45 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <BRepMAT2d_Explorer.ixx>
-#include <MAT2d_SequenceOfSequenceOfCurve.hxx>
-#include <TColGeom2d_SequenceOfCurve.hxx>
-#include <TopoDS_Wire.hxx>
-#include <BRepTools_WireExplorer.hxx>
-#include <TopLoc_Location.hxx>
-#include <Geom_Curve.hxx>
-#include <Geom_TrimmedCurve.hxx>  
-#include <Geom2d_TrimmedCurve.hxx>
-#include <GeomAPI.hxx>
+
+#include <BRep_Builder.hxx>
 #include <BRep_Tool.hxx>
+#include <BRepBuilderAPI_MakeFace.hxx>
+#include <BRepLib.hxx>
+#include <BRepMAT2d_Explorer.hxx>
+#include <BRepTools_WireExplorer.hxx>
+#include <GCE2d_MakeArcOfCircle.hxx>
+#include <GCE2d_MakeSegment.hxx>
+#include <Geom2d_BezierCurve.hxx>
+#include <Geom2d_BoundedCurve.hxx>
+#include <Geom2d_BSplineCurve.hxx>
+#include <Geom2d_Circle.hxx>
+#include <Geom2d_Curve.hxx>
+#include <Geom2d_Ellipse.hxx>
+#include <Geom2d_Hyperbola.hxx>
+#include <Geom2d_Line.hxx>
+#include <Geom2d_Parabola.hxx>
+#include <Geom2d_TrimmedCurve.hxx>
+#include <Geom2dConvert.hxx>
+#include <Geom_Curve.hxx>
+#include <Geom_TrimmedCurve.hxx>
+#include <GeomAbs_CurveType.hxx>
+#include <GeomAPI.hxx>
 #include <gp.hxx>
 #include <gp_Pln.hxx>
-#include <TopExp_Explorer.hxx>
-#include <TopAbs.hxx>
-#include <TopoDS.hxx>
-
+#include <MAT2d_SequenceOfSequenceOfCurve.hxx>
 #include <Precision.hxx>
-#include <Geom2d_BSplineCurve.hxx>
-#include <Geom2dConvert.hxx>
-#include <BRepBuilderAPI_MakeFace.hxx>
+#include <TColGeom2d_SequenceOfCurve.hxx>
+#include <TopAbs.hxx>
 #include <TopExp.hxx>
-#include <BRep_Builder.hxx>
-#include <BRepLib.hxx>
+#include <TopExp_Explorer.hxx>
+#include <TopLoc_Location.hxx>
+#include <TopoDS.hxx>
+#include <TopoDS_Face.hxx>
+#include <TopoDS_Shape.hxx>
+#include <TopoDS_Wire.hxx>
 #include <TopTools_IndexedDataMapOfShapeShape.hxx>
-#include <GeomAbs_CurveType.hxx>
-#include <Geom2d_Circle.hxx>
-#include <Geom2d_Line.hxx>
-#include <Geom2d_Ellipse.hxx>
-#include <Geom2d_Parabola.hxx>
-#include <Geom2d_Hyperbola.hxx>
-#include <Geom2d_BezierCurve.hxx>
-#include <GCE2d_MakeArcOfCircle.hxx>
-#include <GCE2d_MakeSegment.hxx> 
+
 //
 //  Modified by Sergey KHROMOV - Thu Dec  5 10:38:14 2002 Begin
 static TopoDS_Edge MakeEdge(const Handle(Geom2d_Curve) &theCurve,
@@ -57,8 +62,8 @@ static TopoDS_Edge MakeEdge(const Handle(Geom2d_Curve) &theCurve,
 //  Modified by Sergey KHROMOV - Thu Dec  5 10:38:16 2002 End
 //
 static GeomAbs_CurveType GetCurveType(const Handle(Geom2d_Curve)& theC2d);
-static void AdjustCurveEnd(Handle(Geom2d_BoundedCurve)& theC2d, const gp_Pnt2d theP,
-                           const Standard_Boolean isFirst);
+static Handle(Geom2d_TrimmedCurve) AdjustCurveEnd (const Handle(Geom2d_BoundedCurve)& theC2d, 
+                                                   const gp_Pnt2d theP, const Standard_Boolean isFirst);
 //
 //=======================================================================
 //function : BRepMAT2d_Explorer
@@ -197,7 +202,7 @@ void BRepMAT2d_Explorer::Add(const TopoDS_Wire& Spine,
       //
       if(TCCurr <= TCPrev)
       {
-        AdjustCurveEnd(CT2d, aPLast, Standard_True);
+        CT2d = AdjustCurveEnd (CT2d, aPLast, Standard_True);
         // Creation of new edge.
         TopoDS_Edge aNewEdge;
         TopoDS_Vertex aVf = TopExp::FirstVertex(anEdge);
@@ -215,7 +220,7 @@ void BRepMAT2d_Explorer::Add(const TopoDS_Wire& Spine,
       else
       {
         gp_Pnt2d aP = CT2d->Value(CT2d->FirstParameter());
-        AdjustCurveEnd(CPrev, aP, Standard_False);
+        CPrev = AdjustCurveEnd(CPrev, aP, Standard_False);
         theCurves.ChangeValue(currentContour).ChangeValue(aNbC) = CPrev;
         //Change previous edge
         TopoDS_Edge aNewEdge;
@@ -255,7 +260,7 @@ void BRepMAT2d_Explorer::Add(const TopoDS_Wire& Spine,
     //
     if(TCCurr <= TCPrev)
     {
-      AdjustCurveEnd(aFirstCurve, aPLast, Standard_True);
+      aFirstCurve = AdjustCurveEnd(aFirstCurve, aPLast, Standard_True);
       theCurves.ChangeValue(currentContour).ChangeValue(1) = aFirstCurve;
       // Creation of new edge.
       TopoDS_Edge aNewEdge;
@@ -274,7 +279,7 @@ void BRepMAT2d_Explorer::Add(const TopoDS_Wire& Spine,
     else
     {
       gp_Pnt2d aP = aFirstCurve->Value(aFirstCurve->FirstParameter());
-      AdjustCurveEnd(CPrev, aP, Standard_False);
+      CPrev = AdjustCurveEnd(CPrev, aP, Standard_False);
       theCurves.ChangeValue(currentContour).ChangeValue(aNbC) = CPrev;
       //Change previous edge
       TopoDS_Edge aNewEdge;
@@ -569,7 +574,7 @@ GeomAbs_CurveType GetCurveType(const Handle(Geom2d_Curve)& theC2d)
   GeomAbs_CurveType aTypeCurve = GeomAbs_OtherCurve;
   Handle(Standard_Type) TheType = theC2d->DynamicType();
   if ( TheType == STANDARD_TYPE(Geom2d_TrimmedCurve)) {
-    TheType = (*((Handle(Geom2d_TrimmedCurve)*)&theC2d))->BasisCurve()->DynamicType();
+    TheType = Handle(Geom2d_TrimmedCurve)::DownCast (theC2d)->BasisCurve()->DynamicType();
   }
 
   if ( TheType ==  STANDARD_TYPE(Geom2d_Circle)) {
@@ -602,8 +607,8 @@ GeomAbs_CurveType GetCurveType(const Handle(Geom2d_Curve)& theC2d)
 //function : AdjustCurveEnd
 //purpose  : 
 //=======================================================================
-void AdjustCurveEnd(Handle(Geom2d_BoundedCurve)& theC2d, const gp_Pnt2d theP,
-                           const Standard_Boolean isFirst)
+Handle(Geom2d_TrimmedCurve) AdjustCurveEnd (const Handle(Geom2d_BoundedCurve)& theC2d,
+                                            const gp_Pnt2d theP, const Standard_Boolean isFirst)
 {
   GeomAbs_CurveType aType = GetCurveType(theC2d);
   if(aType == GeomAbs_Line)
@@ -612,12 +617,12 @@ void AdjustCurveEnd(Handle(Geom2d_BoundedCurve)& theC2d, const gp_Pnt2d theP,
     if(isFirst)
     {
       gp_Pnt2d aP = theC2d->Value(theC2d->LastParameter());
-      theC2d = GCE2d_MakeSegment(theP, aP);
+      return GCE2d_MakeSegment(theP, aP);
     }
     else
     {
       gp_Pnt2d aP = theC2d->Value(theC2d->FirstParameter());
-      theC2d = GCE2d_MakeSegment(aP, theP);
+      return GCE2d_MakeSegment(aP, theP);
     }
   }
   else
@@ -628,13 +633,13 @@ void AdjustCurveEnd(Handle(Geom2d_BoundedCurve)& theC2d, const gp_Pnt2d theP,
     if(isFirst)
     {
       BCurve->SetPole(1, theP);
-      theC2d = new Geom2d_TrimmedCurve(BCurve, BCurve->FirstParameter(),
+      return new Geom2d_TrimmedCurve(BCurve, BCurve->FirstParameter(),
                                                BCurve->LastParameter());
     }
     else
     {
       BCurve->SetPole(BCurve->NbPoles(), theP);
-      theC2d = new Geom2d_TrimmedCurve(BCurve, BCurve->FirstParameter(),
+      return new Geom2d_TrimmedCurve(BCurve, BCurve->FirstParameter(),
                                                BCurve->LastParameter());
     }
   }

@@ -13,55 +13,48 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <TopOpeBRepBuild_Tools.ixx>
 
-
-#include <TopTools_IndexedMapOfShape.hxx>
-#include <TopExp.hxx>
-#include <TopExp_Explorer.hxx>
-
-#include <TopoDS.hxx>
-#include <TopoDS_Edge.hxx>
-#include <TopoDS_Vertex.hxx>
-#include <TopoDS_Face.hxx>
-
-#include <TopLoc_Location.hxx>
-
-#include <BRep_TVertex.hxx>
+#include <Adaptor3d_CurveOnSurface.hxx>
+#include <Adaptor3d_HCurve.hxx>
+#include <Adaptor3d_HCurveOnSurface.hxx>
+#include <BRep_CurveRepresentation.hxx>
+#include <BRep_GCurve.hxx>
+#include <BRep_ListIteratorOfListOfCurveRepresentation.hxx>
+#include <BRep_ListIteratorOfListOfPointRepresentation.hxx>
+#include <BRep_PointRepresentation.hxx>
 #include <BRep_TEdge.hxx>
 #include <BRep_TFace.hxx>
 #include <BRep_Tool.hxx>
-#include <BRep_GCurve.hxx>
-#include <BRep_ListIteratorOfListOfPointRepresentation.hxx>
-#include <BRep_ListIteratorOfListOfCurveRepresentation.hxx>
-#include <BRep_CurveRepresentation.hxx>
-#include <BRep_PointRepresentation.hxx>
-
+#include <BRep_TVertex.hxx>
+#include <BRepCheck_Wire.hxx>
+#include <Extrema_LocateExtPC.hxx>
+#include <Geom2d_Curve.hxx>
+#include <Geom2dAdaptor.hxx>
+#include <Geom2dAdaptor_HCurve.hxx>
 #include <Geom_Curve.hxx>
-#include <Geom_Surface.hxx>
 #include <Geom_Plane.hxx>
+#include <Geom_RectangularTrimmedSurface.hxx>
+#include <Geom_Surface.hxx>
 #include <Geom_TrimmedCurve.hxx>
-
 #include <GeomAdaptor_Curve.hxx>
 #include <GeomAdaptor_HCurve.hxx>
 #include <GeomAdaptor_HSurface.hxx>
-
-#include <Geom2d_Curve.hxx>
-
-#include <Geom2dAdaptor_HCurve.hxx>
-#include <Geom_RectangularTrimmedSurface.hxx>
-#include <Geom2dAdaptor.hxx>
 #include <GeomProjLib.hxx>
-
 #include <gp_Pnt.hxx>
-
-#include <Adaptor3d_HCurve.hxx>
-#include <Adaptor3d_CurveOnSurface.hxx>
-#include <Adaptor3d_HCurveOnSurface.hxx>
-
+#include <gp_Vec.hxx>
 #include <ProjLib_ProjectedCurve.hxx>
-#include <Extrema_LocateExtPC.hxx>
-#include <BRepCheck_Wire.hxx>
+#include <TopExp.hxx>
+#include <TopExp_Explorer.hxx>
+#include <TopLoc_Location.hxx>
+#include <TopoDS.hxx>
+#include <TopoDS_Edge.hxx>
+#include <TopoDS_Face.hxx>
+#include <TopoDS_Shape.hxx>
+#include <TopoDS_Vertex.hxx>
+#include <TopoDS_Wire.hxx>
+#include <TopOpeBRepBuild_Tools.hxx>
+#include <TopOpeBRepTool_ShapeClassifier.hxx>
+#include <TopTools_IndexedMapOfShape.hxx>
 
 static 
   void CheckEdge (const TopoDS_Edge& E,
@@ -193,7 +186,7 @@ void CorrectEdgeTolerance (const TopoDS_Edge& myShape,
   }
   
   if (!myCref.IsNull()) {
-    const Handle(BRep_GCurve)& GCref = *((Handle(BRep_GCurve)*)&myCref);
+    Handle(BRep_GCurve) GCref (Handle(BRep_GCurve)::DownCast (myCref));
     Standard_Real First,Last;
     GCref->Range(First,Last);
     if (Last<=First) {
@@ -245,7 +238,7 @@ void CorrectEdgeTolerance (const TopoDS_Edge& myShape,
       const Handle(BRep_CurveRepresentation)& cr = itcr.Value();
       if (cr != myCref && cr->IsCurveOnSurface(Su,L)) {
         pcurvefound = Standard_True;
-        const Handle(BRep_GCurve)& GC = *((Handle(BRep_GCurve)*)&cr);
+        Handle(BRep_GCurve) GC (Handle(BRep_GCurve)::DownCast (cr));
         Standard_Real f,l;
         GC->Range(f,l);
         if (SameRange && (f != First || l != Last)) {
@@ -267,8 +260,7 @@ void CorrectEdgeTolerance (const TopoDS_Edge& myShape,
         if (cr->IsCurveOnClosedSurface()) {
           // checkclosed = Standard_True;
           GHPC->ChangeCurve2d().Load(cr->PCurve2(),f,l); // same bounds
-          ACS.Load(GAHS); // sans doute inutile
-          ACS.Load(GHPC); // meme remarque...
+          ACS.Load(GHPC, GAHS); // sans doute inutile
           ok = Validate(myHCurve->Curve(),ACS,Tol,SameParameter, aNewTol);
           if (ok) {
             if (aNewTol<aMaxTol)
@@ -492,7 +484,7 @@ void CheckEdge (const TopoDS_Edge& Ed, const Standard_Real aMaxTol)
           
           TopAbs_Orientation orv = aVertex.Orientation();
           if (orv == TopAbs_FORWARD || orv == TopAbs_REVERSED) {
-            const Handle(BRep_GCurve)& GC = *((Handle(BRep_GCurve)*)&cr);
+            Handle(BRep_GCurve) GC (Handle(BRep_GCurve)::DownCast (cr));
             
             if (orv==TopAbs_FORWARD)
               Controlp = C->Value(GC->First());

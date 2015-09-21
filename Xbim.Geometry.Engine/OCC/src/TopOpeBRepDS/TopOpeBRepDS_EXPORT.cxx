@@ -52,6 +52,9 @@
 
 #ifdef OCCT_DEBUG
 #include <TopOpeBRepDS_reDEB.hxx>
+#include <TopOpeBRepDS_EdgeVertexInterference.hxx>
+#include <TopOpeBRepDS_CurvePointInterference.hxx>
+#include <TopOpeBRepDS_FaceEdgeInterference.hxx>
 extern Standard_Boolean TopOpeBRepDS_GettraceSPSX(const Standard_Integer);
 Standard_EXPORT void debse1(const Standard_Integer i) {cout<<"+ debse1 se"<<i<<endl;}
 Standard_EXPORT void debse2(const Standard_Integer i) {cout<<"+ debse2 se"<<i<<endl;}
@@ -2131,7 +2134,7 @@ Standard_EXPORT void FUN_ds_PointToVertex(const Handle(TopOpeBRepDS_HDataStructu
   
       for (TopOpeBRepDS_ListIteratorOfListOfInterference itl(loi); itl.More(); itl.Next()){
 	const Handle(TopOpeBRepDS_Interference)& I = itl.Value();
-	const Handle(TopOpeBRepDS_CurvePointInterference)& CPI = Handle(TopOpeBRepDS_CurvePointInterference)::DownCast(I);
+	Handle(TopOpeBRepDS_CurvePointInterference) CPI (Handle(TopOpeBRepDS_CurvePointInterference)::DownCast(I));
 	if (CPI.IsNull()) continue;
 
 	Standard_Real par = CPI->Parameter(); 
@@ -2478,8 +2481,8 @@ Standard_EXPORT Standard_Boolean FDS_LOIinfsup(
       FDS_Idata(I,tsb1,isb1,tsa1,isa1,GT1,G1,ST1,S1);
       if (tsb1 != TopAbs_FACE) continue;
       if (tsa1 != TopAbs_FACE) continue;
-      const Handle(TopOpeBRepDS_CurvePointInterference)& cpi = Handle(TopOpeBRepDS_CurvePointInterference)::DownCast(I);
-      const Handle(TopOpeBRepDS_EdgeVertexInterference)& evi = Handle(TopOpeBRepDS_EdgeVertexInterference)::DownCast(I);
+      Handle(TopOpeBRepDS_CurvePointInterference) cpi (Handle(TopOpeBRepDS_CurvePointInterference)::DownCast(I));
+      Handle(TopOpeBRepDS_EdgeVertexInterference) evi (Handle(TopOpeBRepDS_EdgeVertexInterference)::DownCast(I));
       if (cpi.IsNull() && evi.IsNull()) continue;
       LOIsansGDS.Append(I);
       break;

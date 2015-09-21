@@ -14,8 +14,14 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <GCE2d_MakeEllipse.ixx>
+
+#include <GCE2d_MakeEllipse.hxx>
 #include <gce_MakeElips2d.hxx>
+#include <Geom2d_Ellipse.hxx>
+#include <gp_Ax2d.hxx>
+#include <gp_Ax22d.hxx>
+#include <gp_Elips2d.hxx>
+#include <gp_Pnt2d.hxx>
 #include <StdFail_NotDone.hxx>
 
 GCE2d_MakeEllipse::GCE2d_MakeEllipse(const gp_Elips2d& E)
@@ -62,14 +68,3 @@ const Handle(Geom2d_Ellipse)& GCE2d_MakeEllipse::Value() const
   StdFail_NotDone_Raise_if(TheError != gce_Done,"");
   return TheEllipse;
 }
-
-const Handle(Geom2d_Ellipse)& GCE2d_MakeEllipse::Operator() const 
-{
-  return Value();
-}
-
-GCE2d_MakeEllipse::operator Handle(Geom2d_Ellipse) () const
-{
-  return Value();
-}
-

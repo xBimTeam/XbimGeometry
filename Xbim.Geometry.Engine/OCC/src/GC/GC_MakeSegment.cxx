@@ -14,11 +14,15 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <GC_MakeSegment.ixx>
-#include <GC_MakeLine.hxx>
-#include <Geom_Line.hxx>
-#include <StdFail_NotDone.hxx>
+
 #include <ElCLib.hxx>
+#include <GC_MakeLine.hxx>
+#include <GC_MakeSegment.hxx>
+#include <Geom_Line.hxx>
+#include <Geom_TrimmedCurve.hxx>
+#include <gp_Lin.hxx>
+#include <gp_Pnt.hxx>
+#include <StdFail_NotDone.hxx>
 
 GC_MakeSegment::GC_MakeSegment(const gp_Pnt& P1 ,
 				 const gp_Pnt& P2 ) 
@@ -64,14 +68,3 @@ const Handle(Geom_TrimmedCurve)& GC_MakeSegment::Value() const
   StdFail_NotDone_Raise_if(TheError != gce_Done,"");
   return TheSegment;
 }
-
-const Handle(Geom_TrimmedCurve)& GC_MakeSegment::Operator() const 
-{
-  return Value();
-}
-
-GC_MakeSegment::operator Handle(Geom_TrimmedCurve) () const
-{
-  return Value();
-}
-

@@ -14,33 +14,32 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <GeomInt_LineConstructor.ixx>
 
-#include <GeomInt_LineTool.hxx>
-#include <GeomInt_SequenceOfParameterAndOrientation.hxx>
-#include <GeomInt_ParameterAndOrientation.hxx>
-
-#include <IntPatch_Point.hxx>
-#include <IntPatch_GLine.hxx>
-#include <IntPatch_WLine.hxx>
-#include <IntPatch_ALine.hxx>
-#include <IntSurf_Transition.hxx>
-#include <TopAbs_Orientation.hxx>
-
-#include <Precision.hxx>
-#include <gp_Pnt2d.hxx>
 #include <Adaptor2d_HCurve2d.hxx>
-
-#include <GeomAdaptor_HSurface.hxx>
-#include <Standard_ConstructionError.hxx>
-#include <IntSurf_Quadric.hxx>
-#include <IntSurf_PntOn2S.hxx>
+#include <Adaptor3d_TopolTool.hxx>
 #include <ElCLib.hxx>
 #include <GeomAbs_SurfaceType.hxx>
-
-#include <TColStd_IndexedMapOfInteger.hxx>
+#include <GeomAdaptor_HSurface.hxx>
 #include <GeomInt.hxx>
-
+#include <GeomInt_LineConstructor.hxx>
+#include <GeomInt_LineTool.hxx>
+#include <GeomInt_ParameterAndOrientation.hxx>
+#include <GeomInt_SequenceOfParameterAndOrientation.hxx>
+#include <gp_Pnt2d.hxx>
+#include <IntPatch_ALine.hxx>
+#include <IntPatch_GLine.hxx>
+#include <IntPatch_Line.hxx>
+#include <IntPatch_Point.hxx>
+#include <IntPatch_WLine.hxx>
+#include <IntSurf_PntOn2S.hxx>
+#include <IntSurf_Quadric.hxx>
+#include <IntSurf_Transition.hxx>
+#include <Precision.hxx>
+#include <Standard_ConstructionError.hxx>
+#include <Standard_OutOfRange.hxx>
+#include <StdFail_NotDone.hxx>
+#include <TColStd_IndexedMapOfInteger.hxx>
+#include <TopAbs_Orientation.hxx>
 
 static
   void Parameters(const Handle(GeomAdaptor_HSurface)& myHS1,
@@ -145,7 +144,7 @@ void GeomInt_LineConstructor::Perform(const Handle(IntPatch_Line)& L)
   const IntPatch_IType typl = L->ArcType();
   if(typl == IntPatch_Analytic)  {
     Standard_Real u1,v1,u2,v2;
-    Handle(IntPatch_ALine)& ALine =  *((Handle(IntPatch_ALine) *)&L);
+    Handle(IntPatch_ALine) ALine (Handle(IntPatch_ALine)::DownCast (L));
     seqp.Clear();
     nbvtx = GeomInt_LineTool::NbVertex(L);
     for(i=1;i<nbvtx;i++)   {
@@ -171,7 +170,7 @@ void GeomInt_LineConstructor::Perform(const Handle(IntPatch_Line)& L)
   } // if(typl == IntPatch_Analytic)  {
   else if(typl == IntPatch_Walking)  {
     Standard_Real u1,v1,u2,v2;
-    Handle(IntPatch_WLine)& WLine =  *((Handle(IntPatch_WLine) *)&L);
+    Handle(IntPatch_WLine) WLine (Handle(IntPatch_WLine)::DownCast (L));
     seqp.Clear();
     nbvtx = GeomInt_LineTool::NbVertex(L);
     for(i=1;i<nbvtx;i++)    { 
@@ -287,7 +286,7 @@ void GeomInt_LineConstructor::Perform(const Handle(IntPatch_Line)& L)
   else if (typl != IntPatch_Restriction)  {
     seqp.Clear();
     //
-    Handle(IntPatch_GLine)& GLine =  *((Handle(IntPatch_GLine) *)&L);
+    Handle(IntPatch_GLine) GLine (Handle(IntPatch_GLine)::DownCast (L));
     //
     if(typl == IntPatch_Circle || typl == IntPatch_Ellipse) { 
       TreatCircle(L, Tol);
@@ -726,7 +725,7 @@ void GeomInt_LineConstructor::TreatCircle(const Handle(IntPatch_Line)& aLine,
   IntPatch_IType aType;
   //
   aType=aLine->ArcType();
-  Handle(IntPatch_GLine)& aGLine=*((Handle(IntPatch_GLine) *)&aLine);
+  Handle(IntPatch_GLine) aGLine (Handle(IntPatch_GLine)::DownCast (aLine));
   //
   bRejected=RejectMicroCircle(aGLine, aType, aTol);
   if (bRejected) {

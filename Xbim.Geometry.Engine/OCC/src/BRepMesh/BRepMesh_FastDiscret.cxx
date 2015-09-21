@@ -50,8 +50,6 @@
 #include <TColStd_HArray1OfReal.hxx>
 #include <TColgp_Array1OfPnt2d.hxx>
 #include <TColGeom2d_SequenceOfCurve.hxx>
-#include <SortTools_ShellSortOfReal.hxx>
-#include <TCollection_CompareOfReal.hxx>
 
 #include <TopTools_SequenceOfShape.hxx>
 #include <TopTools_ListIteratorOfListOfShape.hxx>
@@ -75,8 +73,6 @@
 
 #define UVDEFLECTION 1.e-05
 
-IMPLEMENT_STANDARD_HANDLE (BRepMesh_FastDiscret, Standard_Transient)
-IMPLEMENT_STANDARD_RTTIEXT(BRepMesh_FastDiscret, Standard_Transient)
 
 //=======================================================================
 //function : BRepMesh_FastDiscret
@@ -448,9 +444,13 @@ Standard_Integer BRepMesh_FastDiscret::Add(const TopoDS_Face& theFace)
       Standard_Real deltaY = 1.0;
 
       {
+        Standard_Real aTolU, aTolV;
+        myAttribute->ChangeStructure()->Data()->GetTolerance(aTolU, aTolV);
+        const Standard_Real aTol = Sqrt(aTolU * aTolU + aTolV * aTolV);
+
         BRepMesh::HClassifier& aClassifier = myAttribute->ChangeClassifier();
-        BRepMesh_WireChecker aDFaceChecker(aFace, Precision::PConfusion(),
-          aInternalEdges, aVertexEdgeMap, myAttribute->ChangeStructure(),
+        BRepMesh_WireChecker aDFaceChecker(aFace, aTol, aInternalEdges, 
+          aVertexEdgeMap, myAttribute->ChangeStructure(),
           myumin, myumax, myvmin, myvmax, myInParallel );
 
         aDFaceChecker.ReCompute(aClassifier);

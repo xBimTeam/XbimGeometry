@@ -13,7 +13,7 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <IntTools_FaceFace.ixx>
+#include <IntTools_FaceFace.hxx>
 
 #include <Precision.hxx>
 
@@ -162,7 +162,9 @@ static
            const Standard_Integer ilprm);
 
 static 
-  Handle(IntPatch_WLine) ComputePurgedWLine(const Handle(IntPatch_WLine)& theWLine);
+  Handle(IntPatch_WLine) ComputePurgedWLine(const Handle(IntPatch_WLine)       &theWLine,
+                                            const Handle(GeomAdaptor_HSurface) &theS1,
+                                            const Handle(GeomAdaptor_HSurface) &theS2);
 
 static 
   Handle(Geom2d_BSplineCurve) MakeBSpline2d(const Handle(IntPatch_WLine)& theWLine,
@@ -284,6 +286,25 @@ static
 static
   Standard_Boolean CheckPCurve(const Handle(Geom2d_Curve)& aPC, 
                                const TopoDS_Face& aFace);
+
+static
+  Standard_Real MaxDistance(const Handle(Geom_Curve)& theC,
+                            const Standard_Real aT,
+                            GeomAPI_ProjectPointOnSurf& theProjPS);
+
+static
+  Standard_Real FindMaxDistance(const Handle(Geom_Curve)& theC,
+                                const Standard_Real theFirst,
+                                const Standard_Real theLast,
+                                GeomAPI_ProjectPointOnSurf& theProjPS,
+                                const Standard_Real theEps);
+
+static
+  Standard_Real FindMaxDistance(const Handle(Geom_Curve)& theCurve,
+                                const Standard_Real theFirst,
+                                const Standard_Real theLast,
+                                const TopoDS_Face& theFace,
+                                const Handle(IntTools_Context)& theContext);
 
 static
   void CorrectPlaneBoundaries(Standard_Real& aUmin,
@@ -838,6 +859,15 @@ Standard_Real IntTools_FaceFace::ComputeTolerance()
           }
         }
       }
+      else
+      {
+        const TopoDS_Face& aF = !j ? myFace1 : myFace2;
+        aD = FindMaxDistance(aC3D, aFirst, aLast, aF, myContext);
+        if (aD > aDMax)
+        {
+          aDMax = aD;
+        }
+      }
     }
   }
   //
@@ -850,7 +880,7 @@ Standard_Real IntTools_FaceFace::ComputeTolerance()
 //=======================================================================
   void IntTools_FaceFace::ComputeTolReached3d()
 {
-  Standard_Integer aNbLin, i;
+  Standard_Integer aNbLin;
   GeomAbs_SurfaceType aType1, aType2;
   //
   aNbLin=myIntersector.NbLines();
@@ -861,8 +891,10 @@ Standard_Real IntTools_FaceFace::ComputeTolerance()
   aType1=myHS1->Surface().GetType();
   aType2=myHS2->Surface().GetType();
   //
-  if (aType1==GeomAbs_Cylinder && aType2==GeomAbs_Cylinder) {
-    if (aNbLin==2){ 
+  if (aType1==GeomAbs_Cylinder && aType2==GeomAbs_Cylinder)
+  {
+    if (aNbLin==2)
+    { 
       Handle(IntPatch_Line) aIL1, aIL2;
       IntPatch_IType aTL1, aTL2;
       //
@@ -881,150 +913,21 @@ Standard_Real IntTools_FaceFace::ComputeTolerance()
         aL2=Handle(IntPatch_GLine)::DownCast(aIL2)->Line();
         aD=aL1.Distance(aL2);
         aD=0.5*aD;
-        if (aD<aDTresh) {
+        if (aD<aDTresh)
+        {//In order to avoid creation too thin face
           myTolReached3d=aD+dTol;
         }
-        return;
       }
     }
-    //ZZ
-    if (aNbLin) {// Check the distances
-      Standard_Real aDMax;
-      //
-      aDMax = ComputeTolerance();
-      if (aDMax > 0.) {
-        myTolReached3d = aDMax;
-      }
-    }// if (aNbLin) 
   }// if (aType1==GeomAbs_Cylinder && aType2==GeomAbs_Cylinder) {
   //
-  //904/G3 f
-  else if (aType1==GeomAbs_Plane && aType2==GeomAbs_Plane) {
-    Standard_Real aTolF1, aTolF2, aTolFMax, aTolTresh;
-    //
-    aTolTresh=1.e-7;
-    //
-    aTolF1 = BRep_Tool::Tolerance(myFace1);
-    aTolF2 = BRep_Tool::Tolerance(myFace2);
-    aTolFMax=Max(aTolF1, aTolF2);
-    //
-    if (aTolFMax>aTolTresh) {
-      myTolReached3d=aTolFMax;
-    }
-  }//if (aType1==GeomAbs_Plane && aType2==GeomAbs_Plane) {
-  //t
-  //IFV Bug OCC20297 
-  else if((aType1 == GeomAbs_Cylinder && aType2 == GeomAbs_Plane) ||
-          (aType2 == GeomAbs_Cylinder && aType1 == GeomAbs_Plane)) {
-    if(aNbLin == 1) {
-      const Handle(IntPatch_Line)& aIL1 = myIntersector.Line(1);
-      if(aIL1->ArcType() == IntPatch_Circle) {
-        gp_Circ aCir = Handle(IntPatch_GLine)::DownCast(aIL1)->Circle();
-        gp_XYZ aCirDir = aCir.Axis().Direction().XYZ();
-        gp_XYZ aPlDir;
-        gp_Pln aPln;
-        if(aType1 == GeomAbs_Plane) {
-          aPln = myHS1->Surface().Plane();
-        }
-        else {
-          aPln = myHS2->Surface().Plane();
-        }
-        aPlDir = aPln.Axis().Direction().XYZ();
-        Standard_Real cs = aCirDir*aPlDir;
-        if(cs < 0.) aPlDir.Reverse();
-        Standard_Real eps = 1.e-14;
-        if(!aPlDir.IsEqual(aCirDir, eps)) {
-          Standard_Integer aNbP = 11;
-          Standard_Real dt = 2.*M_PI / (aNbP - 1), t;
-          for(t = 0.; t < 2.*M_PI; t += dt) {
-            Standard_Real d = aPln.Distance(ElCLib::Value(t, aCir)); 
-            if(myTolReached3d < d) myTolReached3d = d;
-          }
-          myTolReached3d *= 1.1;
-        }
-      } //aIL1->ArcType() == IntPatch_Circle
-    } //aNbLin == 1
-  } // aType1 == GeomAbs_Cylinder && aType2 == GeomAbs_Plane) 
-  //End IFV Bug OCC20297
-  //
-  else if ((aType1==GeomAbs_Plane && aType2==GeomAbs_Torus) ||
-           (aType2==GeomAbs_Plane && aType1==GeomAbs_Torus)) {
-    aNbLin=mySeqOfCurve.Length();
-    if (aNbLin!=1) {
-      return;
-    }
-    //
-    Standard_Integer aNbP;
-    Standard_Real aT, aT1, aT2, dT, aUT, aVT, aUP, aVP;
-    Standard_Real aDP, aDT, aDmax;
-    gp_Pln aPln;
-    gp_Torus aTorus;
-    gp_Pnt aP, aPP, aPT;
-    //
-    const IntTools_Curve& aIC=mySeqOfCurve(1);
-    const Handle(Geom_Curve)& aC3D=aIC.Curve();
-    const Handle(Geom_BSplineCurve)& aBS=
-      Handle(Geom_BSplineCurve)::DownCast(aC3D);
-    if (aBS.IsNull()) {
-      return;
-    }
-    //
-    aT1=aBS->FirstParameter();
-    aT2=aBS->LastParameter();
-    //
-    aPln  =(aType1==GeomAbs_Plane) ? myHS1->Plane() : myHS2->Plane();
-    aTorus=(aType1==GeomAbs_Plane) ? myHS2->Torus() : myHS1->Torus();
-    //
-    aDmax=-1.;
-    aNbP=11;
-    dT=(aT2-aT1)/(aNbP-1);
-    for (i=0; i<aNbP; ++i) {
-      aT=aT1+i*dT;
-      if (i==aNbP-1) {
-        aT=aT2;
-      }
-      //
-      aC3D->D0(aT, aP);
-      //
-      ElSLib::Parameters(aPln, aP, aUP, aVP);
-      aPP=ElSLib::Value(aUP, aVP, aPln);
-      aDP=aP.SquareDistance(aPP);
-      if (aDP>aDmax) {
-        aDmax=aDP;
-      }
-      //
-      ElSLib::Parameters(aTorus, aP, aUT, aVT);
-      aPT=ElSLib::Value(aUT, aVT, aTorus);
-      aDT=aP.SquareDistance(aPT);
-      if (aDT>aDmax) {
-        aDmax=aDT;
-      }
-    }
-    //
-    if (aDmax > myTolReached3d*myTolReached3d) {
-      myTolReached3d=sqrt(aDmax);
-      myTolReached3d=1.1*myTolReached3d;
-    }
-  }// if ((aType1==GeomAbs_Plane && aType2==GeomAbs_Torus) ||
-  //
-  else if ((aType1==GeomAbs_SurfaceOfRevolution && aType2==GeomAbs_Cylinder) ||
-           (aType2==GeomAbs_SurfaceOfRevolution && aType1==GeomAbs_Cylinder) ||
-           (aType1==GeomAbs_Plane && aType2==GeomAbs_Sphere) ||
-           (aType2==GeomAbs_Plane && aType1==GeomAbs_Sphere) ||
-           (aType1==GeomAbs_Plane && aType2==GeomAbs_SurfaceOfExtrusion) ||
-           (aType2==GeomAbs_Plane && aType1==GeomAbs_SurfaceOfExtrusion) ||
-           (aType1==GeomAbs_Plane && aType2==GeomAbs_BSplineSurface) ||
-           (aType2==GeomAbs_Plane && aType1==GeomAbs_BSplineSurface) ||
-           !myApprox) {
-    //
-    Standard_Real aDMax;
-    //
-    aDMax = ComputeTolerance();
-    if (aDMax > myTolReached3d) {
+
+  Standard_Real aDMax = ComputeTolerance();
+  if (aDMax > myTolReached3d)
+  {
       myTolReached3d = aDMax;
     }
   }
-}
 
 //=======================================================================
 //function : MakeCurve
@@ -1061,17 +964,14 @@ Standard_Real IntTools_FaceFace::ComputeTolerance()
   if(typl==IntPatch_Walking) {
     Handle(IntPatch_Line) anewL;
     //
-    const Handle(IntPatch_WLine)& aWLine=
-      Handle(IntPatch_WLine)::DownCast(L);
-    //DumpWLine(aWLine);
-
-    anewL = ComputePurgedWLine(aWLine);
+    Handle(IntPatch_WLine) aWLine (Handle(IntPatch_WLine)::DownCast(L));
+    anewL = ComputePurgedWLine(aWLine, myHS1, myHS2);
     if(anewL.IsNull()) {
       return;
     }
     L = anewL;
-    
-    //const Handle(IntPatch_WLine)& aWLineX = Handle(IntPatch_WLine)::DownCast(L);
+
+    //Handle(IntPatch_WLine) aWLineX (Handle(IntPatch_WLine)::DownCast(L));
     //DumpWLine(aWLineX);
 
     //
@@ -1693,7 +1593,7 @@ Standard_Real IntTools_FaceFace::ComputeTolerance()
       Handle(IntPatch_WLine)::DownCast(L);
 
 #ifdef OCCT_DEBUG
-    //WL->Dump();
+    //WL->Dump(0);
 #endif
 
     //
@@ -1984,9 +1884,11 @@ Standard_Real IntTools_FaceFace::ComputeTolerance()
               }
               //
               mySeqOfCurve.Append(aCurve);
+
             }//if(typs1 == GeomAbs_Plane) {
             
-            else if(typs2 == GeomAbs_Plane) { 
+            else if(typs2 == GeomAbs_Plane)
+            {
               const AppParCurves_MultiBSpCurve& mbspc = theapp3d.Value(j);
               nbpoles = mbspc.NbPoles();
               
@@ -2095,6 +1997,7 @@ Standard_Real IntTools_FaceFace::ComputeTolerance()
               } else {
                 mySeqOfCurve.Append(aCurve);
               }
+
             }// else if(typs2 == GeomAbs_Plane)
             //
             else { //typs2 != GeomAbs_Plane && typs1 != GeomAbs_Plane
@@ -2202,30 +2105,6 @@ Standard_Real IntTools_FaceFace::ComputeTolerance()
     
   case IntPatch_Restriction: 
     {
-      GeomAbs_SurfaceType typS1 = myHS1->Surface().GetType();
-      GeomAbs_SurfaceType typS2 = myHS2->Surface().GetType();
-      Standard_Boolean isAnalS1 = Standard_False;
-      switch (typS1)
-      {
-      case GeomAbs_Plane:
-      case GeomAbs_Cylinder:
-      case GeomAbs_Sphere:
-      case GeomAbs_Cone: 
-      case GeomAbs_Torus: isAnalS1 = Standard_True; break;
-      default: break;
-      }
-
-      Standard_Integer isAnalS2 = Standard_False;
-      switch (typS2)
-      {
-      case GeomAbs_Plane:
-      case GeomAbs_Cylinder:
-      case GeomAbs_Sphere:
-      case GeomAbs_Cone: 
-      case GeomAbs_Torus: isAnalS2 = Standard_True; break;
-      default: break;
-      }
-
       Handle(IntPatch_RLine) RL = 
         Handle(IntPatch_RLine)::DownCast(L);
       Handle(Geom_Curve) aC3d;
@@ -2912,15 +2791,53 @@ Standard_Boolean IsDegeneratedZone(const gp_Pnt2d& aP2d,
   return !bFlag;
 }
 
+// Check if aNextPnt lies inside of tube build on aBasePnt and aBaseVec.
+// In 2d space.
+static Standard_Boolean IsInsideIn2d(const gp_Pnt2d& aBasePnt,
+                                     const gp_Vec2d& aBaseVec,
+                                     const gp_Pnt2d& aNextPnt,
+                                     const Standard_Real aSquareMaxDist)
+{
+  gp_Vec2d aVec2d(aBasePnt, aNextPnt);
+
+  //d*d = (basevec^(nextpnt-basepnt))**2 / basevec**2
+  Standard_Real aCross = aVec2d.Crossed(aBaseVec);
+  Standard_Real aSquareDist = aCross * aCross
+                            / aBaseVec.SquareMagnitude();
+
+  return (aSquareDist <= aSquareMaxDist);
+}
+
+// Check if aNextPnt lies inside of tube build on aBasePnt and aBaseVec.
+// In 3d space.
+static Standard_Boolean IsInsideIn3d(const gp_Pnt& aBasePnt,
+                                     const gp_Vec& aBaseVec,
+                                     const gp_Pnt& aNextPnt,
+                                     const Standard_Real aSquareMaxDist)
+{
+  gp_Vec aVec(aBasePnt, aNextPnt);
+
+  //d*d = (basevec^(nextpnt-basepnt))**2 / basevec**2
+  Standard_Real aSquareDist = aVec.CrossSquareMagnitude(aBaseVec)
+                            / aBaseVec.SquareMagnitude();
+
+  return (aSquareDist <= aSquareMaxDist);
+}
+
 //=========================================================================
 // static function : ComputePurgedWLine
 // purpose : Removes equal points (leave one of equal points) from theWLine
 //           and recompute vertex parameters.
+//           Removes exceed points using tube criteria:
+//           delete 7D point if it lies near to expected lines in 2d and 3d.
+//           Each task (2d, 2d, 3d) have its own tolerance and checked separately.
 //           Returns new WLine or null WLine if the number
 //           of the points is less than 2.
 //=========================================================================
-Handle(IntPatch_WLine) ComputePurgedWLine(const Handle(IntPatch_WLine)& theWLine) {
- 
+Handle(IntPatch_WLine) ComputePurgedWLine(const Handle(IntPatch_WLine)       &theWLine,
+                                          const Handle(GeomAdaptor_HSurface) &theS1,
+                                          const Handle(GeomAdaptor_HSurface) &theS2)
+{
   Standard_Integer i, k, v, nb, nbvtx;
   Handle(IntPatch_WLine) aResult;
   nbvtx = theWLine->NbVertex();
@@ -2944,7 +2861,6 @@ Handle(IntPatch_WLine) ComputePurgedWLine(const Handle(IntPatch_WLine)& theWLine
   for(v = 1; v <= nbvtx; v++) {
     aLocalWLine->AddVertex(theWLine->Vertex(v));
   }
-  
   for(i = 1; i <= aLineOn2S->NbPoints(); i++) {
     Standard_Integer aStartIndex = i + 1;
     Standard_Integer anEndIndex = i + 5;
@@ -2962,10 +2878,24 @@ Handle(IntPatch_WLine) ComputePurgedWLine(const Handle(IntPatch_WLine)& theWLine
         IntSurf_PntOn2S p1 = aLineOn2S->Value(i);
         IntSurf_PntOn2S p2 = aLineOn2S->Value(k);
         
-        if(p1.Value().IsEqual(p2.Value(), gp::Resolution())) {
+        Standard_Real UV[8];
+        p1.Parameters(UV[0], UV[1], UV[2], UV[3]);
+        p2.Parameters(UV[4], UV[5], UV[6], UV[7]);
+
+        Standard_Real aMax = Abs(UV[0]);
+        for(Standard_Integer anIdx = 1; anIdx < 8; anIdx++)
+        {
+          if (aMax < Abs(UV[anIdx]))
+            aMax = Abs(UV[anIdx]);
+        }
+
+        if(p1.Value().IsEqual(p2.Value(), gp::Resolution()) ||
+           Abs(UV[0] - UV[4]) + Abs(UV[1] - UV[5]) < 1.0e-16 * aMax ||
+           Abs(UV[2] - UV[6]) + Abs(UV[3] - UV[7]) < 1.0e-16 * aMax )
+        {
           aTmpWLine = aLocalWLine;
           aLocalWLine = new IntPatch_WLine(aLineOn2S, Standard_False);
-
+          
           for(v = 1; v <= aTmpWLine->NbVertex(); v++) {
             IntPatch_Point aVertex = aTmpWLine->Vertex(v);
             Standard_Integer avertexindex = (Standard_Integer)aVertex.ParameterOnLine();
@@ -2984,7 +2914,211 @@ Handle(IntPatch_WLine) ComputePurgedWLine(const Handle(IntPatch_WLine)& theWLine
     }
   }
 
-  if(aLineOn2S->NbPoints() > 1) {
+  if (aLineOn2S->NbPoints() <= 2)
+  {
+    if (aLineOn2S->NbPoints() == 2)
+      return aLocalWLine;
+    else
+      return aResult;
+  }
+
+  const Standard_Integer aMinNbBadDistr = 15;
+  const Standard_Integer aNbSingleBezier = 30;
+  // Avoid purge in case of C0 continuity:
+  // Intersection approximator may produce invalid curve after purge, example:
+  // bugs modalg_5 bug24731,
+  // Do not run purger when base number of points is too small.
+  if (theS1->UContinuity() == GeomAbs_C0 ||
+      theS1->VContinuity() == GeomAbs_C0 ||
+      theS2->UContinuity() == GeomAbs_C0 ||
+      theS2->VContinuity() == GeomAbs_C0 ||
+      nb < aNbSingleBezier)
+  {
+    return aLocalWLine;
+  }
+
+  // 1 - Delete point.
+  // 0 - Store point.
+  // -1 - Vertex point (not delete).
+  NCollection_Array1<Standard_Integer> aNewPointsHash(1, aLineOn2S->NbPoints());
+  for(i = 1; i <= aLineOn2S->NbPoints(); i++)
+    aNewPointsHash.SetValue(i, 0);
+
+  for(v = 1; v <= aLocalWLine->NbVertex(); v++) 
+  {
+    IntPatch_Point aVertex = aLocalWLine->Vertex(v);
+    Standard_Integer avertexindex = (Standard_Integer)aVertex.ParameterOnLine();
+    aNewPointsHash.SetValue(avertexindex, -1);
+  }
+
+  // Workaround to handle case of small amount points after purge.
+  // Test "boolean boptuc_complex B5" and similar.
+  Standard_Integer aNbPnt = 0;
+
+  // Inital computations.
+  Standard_Real UonS1[3], VonS1[3], UonS2[3], VonS2[3];
+  aLineOn2S->Value(1).ParametersOnS1(UonS1[0], VonS1[0]);
+  aLineOn2S->Value(2).ParametersOnS1(UonS1[1], VonS1[1]);
+  aLineOn2S->Value(1).ParametersOnS2(UonS2[0], VonS2[0]);
+  aLineOn2S->Value(2).ParametersOnS2(UonS2[1], VonS2[1]);
+
+  gp_Pnt2d aBase2dPnt1(UonS1[0], VonS1[0]);
+  gp_Pnt2d aBase2dPnt2(UonS2[0], VonS2[0]);
+  gp_Vec2d aBase2dVec1(UonS1[1] - UonS1[0], VonS1[1] - VonS1[0]);
+  gp_Vec2d aBase2dVec2(UonS2[1] - UonS2[0], VonS2[1] - VonS2[0]);
+  gp_Pnt   aBase3dPnt = aLineOn2S->Value(1).Value();
+  gp_Vec   aBase3dVec(aLineOn2S->Value(1).Value(), aLineOn2S->Value(2).Value());
+
+  // Choose base tolerance and scale it to pipe algorithm.
+  const Standard_Real aBaseTolerance = Precision::Approximation();
+  Standard_Real aResS1Tol = Min(theS1->UResolution(aBaseTolerance),
+                                theS1->VResolution(aBaseTolerance));
+  Standard_Real aResS2Tol = Min(theS2->UResolution(aBaseTolerance),
+                                theS2->VResolution(aBaseTolerance));
+  Standard_Real aTol1 = aResS1Tol * aResS1Tol;
+  Standard_Real aTol2 = aResS2Tol * aResS2Tol;
+  Standard_Real aTol3d = aBaseTolerance * aBaseTolerance;
+
+  const Standard_Real aLimitCoeff = 0.99 * 0.99;
+  for(i = 3; i <= aLineOn2S->NbPoints(); i++)
+  {
+    Standard_Boolean isDeleteState = Standard_False;
+
+    aLineOn2S->Value(i).ParametersOnS1(UonS1[2], VonS1[2]);
+    aLineOn2S->Value(i).ParametersOnS2(UonS2[2], VonS2[2]);
+    gp_Pnt2d aPnt2dOnS1(UonS1[2], VonS1[2]);
+    gp_Pnt2d aPnt2dOnS2(UonS2[2], VonS2[2]);
+    const gp_Pnt& aPnt3d = aLineOn2S->Value(i).Value();
+
+    if (aNewPointsHash(i - 1) != - 1 &&
+        IsInsideIn2d(aBase2dPnt1, aBase2dVec1, aPnt2dOnS1, aTol1) &&
+        IsInsideIn2d(aBase2dPnt2, aBase2dVec2, aPnt2dOnS2, aTol2) &&
+        IsInsideIn3d(aBase3dPnt, aBase3dVec, aPnt3d, aTol3d) )
+    {
+      // Handle possible uneven parametrization on one of 2d subspaces.
+      // Delete point only when expected lengths are close to each other (aLimitCoeff).
+      // Example:
+      // c2d1 - line
+      // c3d - line
+      // c2d2 - geometrically line, but have uneven parametrization -> c2d2 is bspline.
+      gp_XY aPntOnS1[2]= { gp_XY(UonS1[1] - UonS1[0], VonS1[1] - VonS1[0])
+                         , gp_XY(UonS1[2] - UonS1[1], VonS1[2] - VonS1[1])};
+      gp_XY aPntOnS2[2]= { gp_XY(UonS2[1] - UonS2[0], VonS2[1] - VonS2[0])
+                         , gp_XY(UonS2[2] - UonS2[1], VonS2[2] - VonS2[1])};
+
+      Standard_Real aStepOnS1 = aPntOnS1[0].SquareModulus() / aPntOnS1[1].SquareModulus();
+      Standard_Real aStepOnS2 = aPntOnS2[0].SquareModulus() / aPntOnS2[1].SquareModulus();
+
+      Standard_Real aStepCoeff = Min(aStepOnS1, aStepOnS2) / Max(aStepOnS1, aStepOnS2);
+
+      if (aStepCoeff > aLimitCoeff)
+      {
+        // Set hash flag to "Delete" state.
+        isDeleteState = Standard_True;
+        aNewPointsHash.SetValue(i - 1, 1);
+
+        // Change middle point.
+        UonS1[1] = UonS1[2];
+        UonS2[1] = UonS2[2];
+        VonS1[1] = VonS1[2];
+        VonS2[1] = VonS2[2];
+      }
+    }
+
+    if (!isDeleteState)
+    {
+      // Compute new pipe parameters.
+      UonS1[0] = UonS1[1];
+      VonS1[0] = VonS1[1];
+      UonS2[0] = UonS2[1];
+      VonS2[0] = VonS2[1];
+
+      UonS1[1] = UonS1[2];
+      VonS1[1] = VonS1[2];
+      UonS2[1] = UonS2[2];
+      VonS2[1] = VonS2[2];
+
+      aBase2dPnt1.SetCoord(UonS1[0], VonS1[0]);
+      aBase2dPnt2.SetCoord(UonS2[0], VonS2[0]);
+      aBase2dVec1.SetCoord(UonS1[1] - UonS1[0], VonS1[1] - VonS1[0]);
+      aBase2dVec2.SetCoord(UonS2[1] - UonS2[0], VonS2[1] - VonS2[0]);
+      aBase3dPnt = aLineOn2S->Value(i - 1).Value();
+      aBase3dVec = gp_Vec(aLineOn2S->Value(i - 1).Value(), aLineOn2S->Value(i).Value());
+
+      aNbPnt++;
+    }
+  }
+
+  // Workaround to handle case of small amount of points after purge.
+  // Test "boolean boptuc_complex B5" and similar.
+  // This is possible since there are at least two points.
+  if (aNewPointsHash(1) == -1 &&
+      aNewPointsHash(2) == -1 &&
+      aNbPnt <= 3)
+  {
+    // Delete first.
+    aNewPointsHash(1) = 1;
+  }
+  if (aNewPointsHash(aLineOn2S->NbPoints() - 1) == -1 &&
+      aNewPointsHash(aLineOn2S->NbPoints()    ) == -1 &&
+      aNbPnt <= 3)
+  {
+    // Delete last.
+    aNewPointsHash(aLineOn2S->NbPoints() ) = 1;
+  }
+
+  // Purgre when too small amount of points left.
+  if (aNbPnt <= 2)
+  {
+    for(i = aNewPointsHash.Lower(); i <= aNewPointsHash.Upper(); i++)
+    {
+      if (aNewPointsHash(i) != -1)
+      {
+        aNewPointsHash(i) = 1;
+      }
+    }
+  }
+
+  // Handle possible bad distribution of points, 
+  // which are will converted into one single bezier curve (less than 30 points).
+  // Make distribution more even:
+  // max step will be nearly to 0.1 of param distance.
+  if (aNbPnt + 2 > aMinNbBadDistr &&
+      aNbPnt + 2 < aNbSingleBezier )
+  {
+    for(Standard_Integer anIdx = 1; anIdx <= 8; anIdx++)
+    {
+      Standard_Integer aHashIdx = 
+        Standard_Integer(anIdx * aLineOn2S->NbPoints() / 9);
+
+      //Store this point.
+      aNewPointsHash(aHashIdx) = 0;
+    }
+  }
+
+  aTmpWLine = aLocalWLine;
+  Handle(IntSurf_LineOn2S) aPurgedLineOn2S = new IntSurf_LineOn2S();
+  aLocalWLine = new IntPatch_WLine(aPurgedLineOn2S, Standard_False);
+  Standard_Integer anOldLineIdx = 1, aVertexIdx = 1;
+  for(i = 1; i <= aNewPointsHash.Upper(); i++)
+  {
+    if (aNewPointsHash(i) == 0)
+    {
+      // Store this point.
+      aPurgedLineOn2S->Add(aLineOn2S->Value(i));
+      anOldLineIdx++;
+    }
+    else if (aNewPointsHash(i) == -1)
+    {
+      // Add vertex.
+      IntPatch_Point aVertex = aTmpWLine->Vertex(aVertexIdx++);
+      aVertex.SetParameter(anOldLineIdx++);
+      aLocalWLine->AddVertex(aVertex);
+      aPurgedLineOn2S->Add(aLineOn2S->Value(i));
+    }
+  }
+
+  if(aPurgedLineOn2S->NbPoints() > 1) {
     aResult = aLocalWLine;
   }
   return aResult;
@@ -4822,6 +4956,99 @@ void RefineVector(gp_Vec2d& aV2D)
     }
   }
   aV2D.SetCoord(aC[0], aC[1]);
+}
+
+//=======================================================================
+// Function : FindMaxDistance
+// purpose : 
+//=======================================================================
+Standard_Real FindMaxDistance(const Handle(Geom_Curve)& theCurve,
+                              const Standard_Real theFirst,
+                              const Standard_Real theLast,
+                              const TopoDS_Face& theFace,
+                              const Handle(IntTools_Context)& theContext)
+{
+  Standard_Integer aNbS;
+  Standard_Real aT1, aT2, aDt, aD, aDMax, anEps;
+  //
+  aNbS = 11;
+  aDt = (theLast - theFirst) / aNbS;
+  aDMax = 0.;
+  anEps = 1.e-4 * aDt;
+  //
+  GeomAPI_ProjectPointOnSurf& aProjPS = theContext->ProjPS(theFace);
+  aT2 = theFirst;
+  for (;;) {
+    aT1 = aT2;
+    aT2 += aDt;
+    //
+    if (aT2 > theLast) {
+      break;
+    }
+    //
+    aD = FindMaxDistance(theCurve, aT1, aT2, aProjPS, anEps);
+    if (aD > aDMax) {
+      aDMax = aD;
+    }
+  }
+  //
+  return aDMax;
+}
+
+//=======================================================================
+// Function : FindMaxDistance
+// purpose : 
+//=======================================================================
+Standard_Real FindMaxDistance(const Handle(Geom_Curve)& theC,
+                              const Standard_Real theFirst,
+                              const Standard_Real theLast,
+                              GeomAPI_ProjectPointOnSurf& theProjPS,
+                              const Standard_Real theEps)
+{
+  Standard_Real aA, aB, aCf, aX, aX1, aX2, aF1, aF2, aF;
+  //
+  aCf = 0.61803398874989484820458683436564;//(sqrt(5.)-1)/2.;
+  aA = theFirst;
+  aB = theLast;
+  //
+  aX1 = aB - aCf * (aB - aA);
+  aF1 = MaxDistance(theC, aX1, theProjPS);
+  aX2 = aA + aCf * (aB - aA);
+  aF2 = MaxDistance(theC, aX2, theProjPS);
+  //
+  for (;;) {
+    if ((aB - aA) < theEps) {
+      break;
+    }
+    //
+    if (aF1 > aF2) {
+      aB = aX2;
+      aX2 = aX1;
+      aF2 = aF1;
+      aX1 = aB - aCf * (aB - aA); 
+      aF1 = MaxDistance(theC, aX1, theProjPS);
+    }
+    else {
+      aA = aX1;
+      aX1 = aX2;
+      aF1 = aF2;
+      aX2 = aA + aCf * (aB - aA);
+      aF2 = MaxDistance(theC, aX2, theProjPS);
+    }
+  }
+  //
+  aX = 0.5 * (aA + aB);
+  aF = MaxDistance(theC, aX, theProjPS);
+  //
+  if (aF1 > aF) {
+    aF = aF1;
+  }
+  //
+  if (aF2 > aF) {
+    aF = aF2;
+  }
+  //
+  return aF;
 }
 
 //=======================================================================

@@ -12,13 +12,15 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <BOPAlgo_Tools.ixx>
-#include <BOPDS_DS.hxx>
-#include <BOPDS_MapOfPaveBlock.hxx>
-#include <BOPDS_IndexedMapOfPaveBlock.hxx>
+
+#include <BOPAlgo_Tools.hxx>
+#include <BOPCol_IndexedMapOfInteger.hxx>
 #include <BOPDS_CommonBlock.hxx>
 #include <BOPDS_DataMapOfPaveBlockListOfPaveBlock.hxx>
-#include <BOPCol_IndexedMapOfInteger.hxx>
+#include <BOPDS_DS.hxx>
+#include <BOPDS_IndexedMapOfPaveBlock.hxx>
+#include <BOPDS_MapOfPaveBlock.hxx>
+#include <BOPDS_PaveBlock.hxx>
 
 //=======================================================================
 //function : MakeBlocksCnx
@@ -26,7 +28,7 @@
 //=======================================================================
   void BOPAlgo_Tools::MakeBlocksCnx(const BOPCol_IndexedDataMapOfIntegerListOfInteger& aMILI,
                                     BOPCol_DataMapOfIntegerListOfInteger& aMBlocks,
-                                    Handle(NCollection_BaseAllocator)& aAllocator)
+                                    const Handle(NCollection_BaseAllocator)& aAllocator)
 {
   Standard_Integer aNbV, nV, aNbVS, nVP, nVx, aNbVP, aNbEC, k, i, j;
   BOPCol_ListIteratorOfListOfInteger aItLI;
@@ -108,7 +110,7 @@
   void BOPAlgo_Tools::FillMap(const Standard_Integer n1,
                               const Standard_Integer n2,
                               BOPCol_IndexedDataMapOfIntegerListOfInteger& aMILI,
-                              Handle(NCollection_BaseAllocator)& aAllocator)
+                              const Handle(NCollection_BaseAllocator)& aAllocator)
 {
   if (aMILI.Contains(n1)) {
     BOPCol_ListOfInteger& aLI=aMILI.ChangeFromKey(n1);
@@ -136,7 +138,7 @@
   void BOPAlgo_Tools::FillMap(const Handle(BOPDS_PaveBlock)& aPB1,
                               const Handle(BOPDS_PaveBlock)& aPB2,
                               BOPDS_IndexedDataMapOfPaveBlockListOfPaveBlock& aMPBLPB,
-                              Handle(NCollection_BaseAllocator)& aAllocator)
+                              const Handle(NCollection_BaseAllocator)& aAllocator)
 {
   if (aMPBLPB.Contains(aPB1)) {
     BOPDS_ListOfPaveBlock& aLPB=aMPBLPB.ChangeFromKey(aPB1);
@@ -164,7 +166,7 @@
   void BOPAlgo_Tools::FillMap(const Handle(BOPDS_PaveBlock)& aPB,
                               const Standard_Integer nF,
                               BOPDS_IndexedDataMapOfPaveBlockListOfInteger& aMPBLI,
-                              Handle(NCollection_BaseAllocator)& aAllocator)
+                              const Handle(NCollection_BaseAllocator)& aAllocator)
 {
   if (aMPBLI.Contains(aPB)) {
     BOPCol_ListOfInteger& aLI=aMPBLI.ChangeFromKey(aPB);
@@ -182,7 +184,7 @@
 //=======================================================================
   void BOPAlgo_Tools::MakeBlocks(const BOPDS_IndexedDataMapOfPaveBlockListOfPaveBlock& aMILI,
                                  BOPDS_DataMapOfIntegerListOfPaveBlock& aMBlocks,
-                                 Handle(NCollection_BaseAllocator)& aAllocator)
+                                 const Handle(NCollection_BaseAllocator)& aAllocator)
 {
   Standard_Integer aNbV,  aNbVS, aNbVP, aNbEC, k, i, j;
   BOPDS_ListIteratorOfListOfPaveBlock aItLI;
@@ -262,7 +264,7 @@
 //purpose  : 
 //=======================================================================
   void BOPAlgo_Tools::PerformCommonBlocks(BOPDS_IndexedDataMapOfPaveBlockListOfPaveBlock& aMPBLPB,
-                                          Handle(NCollection_BaseAllocator)& aAllocator,
+                                          const Handle(NCollection_BaseAllocator)& aAllocator,
                                           BOPDS_PDS& pDS)
 {
   Standard_Integer aNbCB;
@@ -305,7 +307,7 @@
 //purpose  : 
 //=======================================================================
   void BOPAlgo_Tools::PerformCommonBlocks(const BOPDS_IndexedDataMapOfPaveBlockListOfInteger& aMPBLI,
-                                          Handle(NCollection_BaseAllocator)& ,//aAllocator
+                                          const Handle(NCollection_BaseAllocator)& ,//aAllocator
                                           BOPDS_PDS& pDS)
 {
   Standard_Integer nF, i, aNb;

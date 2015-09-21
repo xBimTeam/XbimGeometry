@@ -12,32 +12,31 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <BndLib_Add3dCurve.ixx>
-#include <GeomAbs_CurveType.hxx>
+
+#include <Adaptor3d_Curve.hxx>
+#include <Bnd_Box.hxx>
 #include <BndLib.hxx>
-#include <TColgp_Array1OfPnt.hxx>
-#include <gp_Pnt.hxx>
+#include <BndLib_Add3dCurve.hxx>
+#include <ElCLib.hxx>
 #include <Geom_BezierCurve.hxx>
 #include <Geom_BSplineCurve.hxx>
-#include <gp_Lin.hxx>
+#include <GeomAbs_CurveType.hxx>
+#include <GeomAdaptor_Curve.hxx>
 #include <gp_Circ.hxx>
 #include <gp_Elips.hxx>
-#include <gp_Parab.hxx>
 #include <gp_Hypr.hxx>
-#include <Precision.hxx>
-#include <TColStd_Array1OfReal.hxx>
-#include <TColStd_Array1OfInteger.hxx>
-
-#include <ElCLib.hxx>
-
+#include <gp_Lin.hxx>
+#include <gp_Parab.hxx>
 #include <gp_Pnt.hxx>
-#include <GeomAdaptor_Curve.hxx>
+#include <Precision.hxx>
+#include <TColgp_Array1OfPnt.hxx>
+#include <TColStd_Array1OfInteger.hxx>
+#include <TColStd_Array1OfReal.hxx>
 
 //=======================================================================
 //function : Add
 //purpose  : 
 //=======================================================================
-
 void BndLib_Add3dCurve::Add( const Adaptor3d_Curve& C,
 			   const Standard_Real Tol,
 			         Bnd_Box&      B )
@@ -137,7 +136,7 @@ void BndLib_Add3dCurve::Add( const Adaptor3d_Curve& C,
 	 Abs(Bs->LastParameter()  - U2) > Precision::Parametric(Tol)) {
 
 	Handle(Geom_Geometry) G = Bs->Copy();
-	Handle(Geom_BSplineCurve)& Bsaux = (*((Handle(Geom_BSplineCurve)*)&G));
+	Handle(Geom_BSplineCurve) Bsaux (Handle(Geom_BSplineCurve)::DownCast (G));
 	Standard_Real u1 = U1, u2 = U2;
 	//// modified by jgv, 24.10.01 for BUC61031 ////
 	if (Bsaux->IsPeriodic())

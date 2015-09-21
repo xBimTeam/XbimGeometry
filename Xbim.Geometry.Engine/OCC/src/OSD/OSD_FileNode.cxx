@@ -18,22 +18,22 @@
 //------------------- Linux Sources of OSD_FileNode --------------------------
 //----------------------------------------------------------------------------
 
-#include <errno.h>
-
-#include <Standard_ProgramError.hxx>
+#include <OSD_FileNode.hxx>
 #include <OSD_OSDError.hxx>
-#include <Standard_NullObject.hxx>
+#include <OSD_Path.hxx>
+#include <OSD_Protection.hxx>
 #include <OSD_WhoAmI.hxx>
-#include <OSD_FileNode.ixx>
+#include <Quantity_Date.hxx>
+#include <Standard_NullObject.hxx>
+#include <Standard_ProgramError.hxx>
 
-#include <stdlib.h>    // For "system"
 #include <errno.h>
 #include <fcntl.h>
-
 #include <stdio.h>
-#include <unistd.h>
+#include <stdlib.h>
 #include <sys/stat.h>
-
+#include <unistd.h>
+// For "system"
 const OSD_WhoAmI Iam = OSD_WFileNode;
 
 
@@ -931,7 +931,7 @@ void _osd_wnt_set_error ( OSD_Error& err, OSD_WhoAmI who, ... ) {
  Standard_Character buffer[ 2048 ];
  va_list            arg_ptr;
 
- va_start ( arg_ptr, err );
+ va_start ( arg_ptr, who);
 
  errCode = GetLastError ();
 

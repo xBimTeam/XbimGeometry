@@ -18,11 +18,11 @@
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Macro.hxx>
-#include <Handle_BRepAdaptor_HSurface.hxx>
+#include <BRepAdaptor_HSurface.hxx>
 #include <BRepMesh_FaceAttribute.hxx>
 #include <BRepMesh.hxx>
-#include <Handle_Poly_Triangulation.hxx>
 
+class Poly_Triangulation;
 class TopoDS_Face;
 class TopoDS_Edge;
 class Bnd_Box;

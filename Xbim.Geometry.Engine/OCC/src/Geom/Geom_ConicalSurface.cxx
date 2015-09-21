@@ -14,25 +14,32 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <Geom_ConicalSurface.ixx>
 
+#include <ElSLib.hxx>
+#include <Geom_Circle.hxx>
+#include <Geom_ConicalSurface.hxx>
+#include <Geom_Curve.hxx>
+#include <Geom_Geometry.hxx>
+#include <Geom_Line.hxx>
+#include <GeomAbs_UVSense.hxx>
+#include <gp.hxx>
+#include <gp_Ax2d.hxx>
+#include <gp_Ax3.hxx>
+#include <gp_Circ.hxx>
+#include <gp_Cone.hxx>
+#include <gp_Dir.hxx>
+#include <gp_GTrsf2d.hxx>
+#include <gp_Lin.hxx>
+#include <gp_Pnt.hxx>
+#include <gp_Trsf.hxx>
+#include <gp_Vec.hxx>
+#include <gp_XYZ.hxx>
+#include <Precision.hxx>
 #include <Standard_ConstructionError.hxx>
 #include <Standard_RangeError.hxx>
-
-#include <Precision.hxx>
-#include <gp.hxx>
-#include <gp_Lin.hxx>
-#include <gp_Circ.hxx>
-#include <gp_Ax2d.hxx>
-#include <gp_XYZ.hxx>
-#include <gp_Dir.hxx>
-#include <ElSLib.hxx>
-#include <GeomAbs_UVSense.hxx>
-#include <Geom_Line.hxx>
-#include <Geom_Circle.hxx>
+#include <Standard_Type.hxx>
 
 typedef Geom_ConicalSurface         ConicalSurface;
-typedef Handle(Geom_ConicalSurface) Handle(ConicalSurface);
 typedef gp_Ax1  Ax1;
 typedef gp_Ax2  Ax2;
 typedef gp_Ax3  Ax3;
@@ -44,9 +51,6 @@ typedef gp_Trsf Trsf;
 typedef gp_Vec  Vec;
 typedef gp_XYZ  XYZ;
 
-
-
-
 //=======================================================================
 //function : Copy
 //purpose  : 
@@ -54,7 +58,7 @@ typedef gp_XYZ  XYZ;
 
 Handle(Geom_Geometry) Geom_ConicalSurface::Copy () const {
  
-   Handle(ConicalSurface) Cs;
+   Handle(Geom_ConicalSurface) Cs;
    Cs = new ConicalSurface (pos, semiAngle, radius);
    return Cs;
 }

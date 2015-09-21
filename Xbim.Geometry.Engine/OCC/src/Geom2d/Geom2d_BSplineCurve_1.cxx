@@ -21,16 +21,22 @@
 #define No_Standard_OutOfRange
 #define No_Standard_DimensionError
 
-#include <Geom2d_BSplineCurve.jxx>
-#include <BSplCLib.hxx>
-#include <gp.hxx>
 
+#include <BSplCLib.hxx>
+#include <Geom2d_BSplineCurve.hxx>
+#include <Geom2d_Geometry.hxx>
 #include <Geom2d_UndefinedDerivative.hxx>
-#include <Standard_DimensionError.hxx>
-#include <Standard_OutOfRange.hxx>
-#include <Standard_DomainError.hxx>
-#include <Standard_RangeError.hxx>
+#include <gp.hxx>
+#include <gp_Pnt2d.hxx>
+#include <gp_Trsf2d.hxx>
+#include <gp_Vec2d.hxx>
 #include <Precision.hxx>
+#include <Standard_ConstructionError.hxx>
+#include <Standard_DimensionError.hxx>
+#include <Standard_DomainError.hxx>
+#include <Standard_NoSuchObject.hxx>
+#include <Standard_OutOfRange.hxx>
+#include <Standard_RangeError.hxx>
 
 #define  POLES    (poles->Array1())
 #define  KNOTS    (knots->Array1())
@@ -391,9 +397,11 @@ GeomAbs_BSplKnotDistribution Geom2d_BSplineCurve::KnotDistribution () const
 
 void Geom2d_BSplineCurve::Knots (TColStd_Array1OfReal& K) const
 {
-  Standard_DimensionError_Raise_if
-    (K.Length() != knots->Length(), "Geom2d_BSplineCurve::Knots");
-  K = knots->Array1();
+  Standard_DomainError_Raise_if (K.Lower() < knots->Lower() ||
+                                 K.Upper() > knots->Upper(),
+                                 "Geom2d_BSplineCurve::Knots");
+  for(Standard_Integer anIdx = K.Lower(); anIdx <= K.Upper(); anIdx++)
+    K(anIdx) = knots->Value(anIdx);
 }
 
 const TColStd_Array1OfReal& Geom2d_BSplineCurve::Knots() const
@@ -408,9 +416,11 @@ const TColStd_Array1OfReal& Geom2d_BSplineCurve::Knots() const
 
 void Geom2d_BSplineCurve::KnotSequence (TColStd_Array1OfReal& K) const
 {
-  Standard_DimensionError_Raise_if
-    (K.Length() != flatknots->Length(), "Geom2d_BSplineCurve::KnotSequence");
-  K = flatknots->Array1();
+  Standard_DomainError_Raise_if (K.Lower() < flatknots->Lower() ||
+                                 K.Upper() > flatknots->Upper(),
+                                 "Geom2d_BSplineCurve::KnotSequence");
+  for(Standard_Integer anIdx = K.Lower(); anIdx <= K.Upper(); anIdx++)
+    K(anIdx) = flatknots->Value(anIdx);
 }
 
 const TColStd_Array1OfReal& Geom2d_BSplineCurve::KnotSequence() const

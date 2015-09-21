@@ -17,75 +17,76 @@
 //pmn 26/09/97 Add parameters of approximation in BuildCurve3d
 //  Modified by skv - Thu Jun  3 12:39:19 2004 OCC5898
 
-#include <BRepLib.ixx>
-#include <BRepAdaptor_Surface.hxx>
-#include <BRepAdaptor_HSurface.hxx>
-#include <BRepAdaptor_HCurve2d.hxx>
-#include <BRep_Tool.hxx>
+#include <Adaptor3d_CurveOnSurface.hxx>
+#include <AdvApprox_ApproxAFunction.hxx>
+#include <AppParCurves_MultiBSpCurve.hxx>
+#include <AppParCurves_MultiCurve.hxx>
+#include <Approx_CurvilinearParameter.hxx>
+#include <Approx_SameParameter.hxx>
+#include <Bnd_Box.hxx>
 #include <BRep_Builder.hxx>
-#include <Geom_Surface.hxx>
-#include <Geom_RectangularTrimmedSurface.hxx>
-#include <Geom_Plane.hxx>
-#include <Geom_Curve.hxx>
-#include <Geom_BSplineCurve.hxx>
-#include <Geom_TrimmedCurve.hxx>
+#include <BRep_CurveRepresentation.hxx>
+#include <BRep_GCurve.hxx>
+#include <BRep_ListIteratorOfListOfCurveRepresentation.hxx>
+#include <BRep_ListOfCurveRepresentation.hxx>
+#include <BRep_TEdge.hxx>
+#include <BRep_TFace.hxx>
+#include <BRep_Tool.hxx>
+#include <BRep_TVertex.hxx>
+#include <BRepAdaptor_HCurve2d.hxx>
+#include <BRepAdaptor_HSurface.hxx>
+#include <BRepAdaptor_Surface.hxx>
+#include <BRepBndLib.hxx>
+#include <BRepClass3d_SolidClassifier.hxx>
+#include <BRepLib.hxx>
+#include <BSplCLib.hxx>
+#include <ElSLib.hxx>
+#include <Extrema_LocateExtPC.hxx>
+#include <GCPnts_QuasiUniformDeflection.hxx>
+#include <Geom2d_BSplineCurve.hxx>
 #include <Geom2d_Curve.hxx>
 #include <Geom2d_TrimmedCurve.hxx>
-#include <Geom2d_BSplineCurve.hxx>
+#include <Geom2dAdaptor.hxx>
+#include <Geom2dAdaptor_Curve.hxx>
+#include <Geom2dAdaptor_HCurve.hxx>
+#include <Geom2dConvert.hxx>
+#include <Geom_BSplineCurve.hxx>
+#include <Geom_BSplineSurface.hxx>
+#include <Geom_Curve.hxx>
+#include <Geom_Plane.hxx>
+#include <Geom_RectangularTrimmedSurface.hxx>
+#include <Geom_Surface.hxx>
+#include <Geom_TrimmedCurve.hxx>
+#include <GeomAdaptor_Curve.hxx>
+#include <GeomAdaptor_HCurve.hxx>
+#include <GeomAdaptor_HSurface.hxx>
+#include <GeomAdaptor_Surface.hxx>
 #include <GeomLib.hxx>
-#include <TopExp_Explorer.hxx>
-#include <TopoDS.hxx>
-#include <TopoDS_Edge.hxx>
-#include <TopoDS_Face.hxx>
-#include <TopoDS_Vertex.hxx>
-#include <TopTools_MapOfShape.hxx>
-#include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
-#include <TopTools_ListIteratorOfListOfShape.hxx>
-#include <TopExp.hxx>
+#include <GeomLProp_SLProps.hxx>
 #include <gp.hxx>
 #include <gp_Ax2.hxx>
 #include <gp_Pln.hxx>
-#include <Standard_Real.hxx>
+#include <Poly_PolygonOnTriangulation.hxx>
+#include <Poly_Triangulation.hxx>
 #include <Precision.hxx>
-#include <BRep_GCurve.hxx>
-#include <BRep_TEdge.hxx>
-#include <BRep_TFace.hxx>
-#include <AppParCurves_MultiCurve.hxx>
-#include <AppParCurves_MultiBSpCurve.hxx>
-#include <BRep_ListOfCurveRepresentation.hxx>
-#include <BRep_CurveRepresentation.hxx>
-#include <BRep_ListIteratorOfListOfCurveRepresentation.hxx>
-#include <BRep_TVertex.hxx>
-#include <AdvApprox_ApproxAFunction.hxx>
-#include <Approx_SameParameter.hxx>
+#include <ProjLib_ProjectedCurve.hxx>
+#include <Standard_Real.hxx>
 #include <TColgp_Array1OfPnt.hxx>
 #include <TColgp_Array1OfPnt2d.hxx>
 #include <TColStd_Array1OfReal.hxx>
 #include <TColStd_MapOfTransient.hxx>
-#include <GeomAdaptor_Curve.hxx>
-#include <GeomAdaptor_HCurve.hxx>
-#include <GeomAdaptor_Surface.hxx>
-#include <GeomAdaptor_HSurface.hxx>
-#include <Geom2dAdaptor_Curve.hxx>
-#include <Geom2dAdaptor_HCurve.hxx>
-#include <Geom2dAdaptor.hxx>
-#include <Geom2dConvert.hxx>
-#include <GCPnts_QuasiUniformDeflection.hxx>
-#include <BSplCLib.hxx>
-#include <ElSLib.hxx>
-#include <Adaptor3d_CurveOnSurface.hxx>
-#include <Extrema_LocateExtPC.hxx>
-#include <ProjLib_ProjectedCurve.hxx>
-#include <BRepClass3d_SolidClassifier.hxx>
-#include <Bnd_Box.hxx>
-#include <BRepBndLib.hxx>
-#include <Approx_CurvilinearParameter.hxx>
-#include <Geom_BSplineSurface.hxx>
-
-#include <Poly_Triangulation.hxx>
+#include <TopExp.hxx>
+#include <TopExp_Explorer.hxx>
+#include <TopoDS.hxx>
+#include <TopoDS_Edge.hxx>
+#include <TopoDS_Face.hxx>
+#include <TopoDS_Shape.hxx>
+#include <TopoDS_Solid.hxx>
+#include <TopoDS_Vertex.hxx>
+#include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
+#include <TopTools_ListIteratorOfListOfShape.hxx>
+#include <TopTools_MapOfShape.hxx>
 #include <TShort_HArray1OfShortReal.hxx>
-#include <GeomLProp_SLProps.hxx>
-#include <Poly_PolygonOnTriangulation.hxx>
 
 // TODO - not thread-safe static variables
 static Standard_Real thePrecision = Precision::Confusion();     
@@ -586,8 +587,7 @@ Standard_Boolean  BRepLib::UpdateEdgeTol(const TopoDS_Edge& AnEdge,
       new Geom2dAdaptor_HCurve(AnAdaptor3dCurve2d) ;
     Handle(GeomAdaptor_HSurface) AnAdaptor3dSurfacePtr =
       new GeomAdaptor_HSurface (AnAdaptor3dSurface) ;
-    curve_on_surface_reference.Load( AnAdaptor3dCurve2dPtr) ;
-    curve_on_surface_reference.Load( AnAdaptor3dSurfacePtr) ;
+    curve_on_surface_reference.Load (AnAdaptor3dCurve2dPtr, AnAdaptor3dSurfacePtr);
     a_sampler.Initialize(curve_on_surface_reference,
       MinToleranceRequested * factor,
       current_first,
@@ -976,7 +976,7 @@ void BRepLib::SameParameter(const TopoDS_Edge&  AnEdge,
   Handle(Standard_Type) TheType = C3d->DynamicType();
   if( TheType == STANDARD_TYPE(Geom_TrimmedCurve))
   {
-    const Handle(Geom_Curve)& gtC = (*((Handle(Geom_TrimmedCurve)*)&C3d))->BasisCurve();
+    Handle(Geom_Curve) gtC (Handle(Geom_TrimmedCurve)::DownCast (C3d)->BasisCurve());
     m_TrimmedPeriodical = gtC->IsPeriodic();
   }
   // modified by NIZHNY-OCC486  Tue Aug 27 17:15:17 2002 .
@@ -1232,7 +1232,9 @@ void BRepLib::SameParameter(const TopoDS_Edge&  AnEdge,
         if(goodpc){
           //	  Approx_SameParameter SameP(HC,HC2d,HS,Tolerance);
           Standard_Real aTol = (isANA && isBSP) ? 1.e-7 : Tolerance;
-          Approx_SameParameter SameP(HC,HC2d,HS,aTol);
+          const Handle(Adaptor3d_HCurve)& aHCurv = HC; // to avoid ambiguity
+          const Handle(Adaptor2d_HCurve2d)& aHCurv2d = HC2d; // to avoid ambiguity
+          Approx_SameParameter SameP(aHCurv,aHCurv2d,HS,aTol);
 
           if (SameP.IsSameParameter()) {
             maxdist = Max(maxdist,SameP.TolReached());
@@ -1323,7 +1325,7 @@ void  BRepLib::UpdateTolerances(const TopoDS_Shape& aShape,
         aB.SetVoid();
         BRepBndLib::Add(curf,aB);
         if (S->DynamicType() == STANDARD_TYPE(Geom_RectangularTrimmedSurface)) {
-          S = (*((Handle(Geom_RectangularTrimmedSurface)*)&S))->BasisSurface();
+          S = Handle(Geom_RectangularTrimmedSurface)::DownCast (S)->BasisSurface();
         }
         GeomAdaptor_Surface AS(S);
         switch (AS.GetType()) {
@@ -1820,7 +1822,7 @@ void  BRepLib::SortFaces (const TopoDS_Shape& Sh,
     S = BRep_Tool::Surface(F, l);
     if (!S.IsNull()) {
       if (S->DynamicType() == STANDARD_TYPE(Geom_RectangularTrimmedSurface)) {
-        S = (*((Handle(Geom_RectangularTrimmedSurface)*)&S))->BasisSurface();
+        S = Handle(Geom_RectangularTrimmedSurface)::DownCast (S)->BasisSurface();
       }
       GeomAdaptor_Surface AS(S);
       switch (AS.GetType()) {
@@ -1878,7 +1880,7 @@ void  BRepLib::ReverseSortFaces (const TopoDS_Shape& Sh,
     S = BRep_Tool::Surface(F, l);
     if (!S.IsNull()) {
       if (S->DynamicType() == STANDARD_TYPE(Geom_RectangularTrimmedSurface)) {
-        S = (*((Handle(Geom_RectangularTrimmedSurface)*)&S))->BasisSurface();
+        S = Handle(Geom_RectangularTrimmedSurface)::DownCast (S)->BasisSurface();
       }
       GeomAdaptor_Surface AS(S);
       switch (AS.GetType()) {

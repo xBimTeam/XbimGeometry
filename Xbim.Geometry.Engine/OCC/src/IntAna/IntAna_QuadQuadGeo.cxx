@@ -24,26 +24,33 @@
 #define No_Standard_OutOfRange
 #endif
 
-#include <IntAna_QuadQuadGeo.ixx>
 
+#include <ElCLib.hxx>
+#include <ElSLib.hxx>
+#include <gp.hxx>
+#include <gp_Circ.hxx>
+#include <gp_Cone.hxx>
+#include <gp_Cylinder.hxx>
+#include <gp_Dir.hxx>
+#include <gp_Dir2d.hxx>
+#include <gp_Elips.hxx>
+#include <gp_Hypr.hxx>
+#include <gp_Lin.hxx>
+#include <gp_Parab.hxx>
+#include <gp_Pln.hxx>
+#include <gp_Pnt.hxx>
+#include <gp_Pnt2d.hxx>
+#include <gp_Sphere.hxx>
+#include <gp_Torus.hxx>
+#include <gp_Vec.hxx>
+#include <gp_Vec2d.hxx>
+#include <gp_XYZ.hxx>
 #include <IntAna_IntConicQuad.hxx>
-#include <StdFail_NotDone.hxx>
+#include <IntAna_QuadQuadGeo.hxx>
+#include <math_DirectPolynomialRoots.hxx>
 #include <Standard_DomainError.hxx>
 #include <Standard_OutOfRange.hxx>
-#include <math_DirectPolynomialRoots.hxx>
-
-#include <gp.hxx>
-#include <gp_Pln.hxx>
-#include <gp_Vec.hxx>
-#include <ElSLib.hxx>
-#include <ElCLib.hxx>
-
-#include <gp_Dir.hxx>
-#include <gp_XYZ.hxx>
-#include <gp_Pnt2d.hxx>
-#include <gp_Vec2d.hxx>
-#include <gp_Dir2d.hxx>
-
+#include <StdFail_NotDone.hxx>
 
 static
   gp_Ax2 DirToAx2(const gp_Pnt& P,const gp_Dir& D);
@@ -2055,15 +2062,22 @@ void IntAna_QuadQuadGeo::Perform(const gp_Pln& Pln,
   //
   gp_Pnt aTorLoc = aTorAx.Location();
   if (bParallel) {
-    Standard_Real aDt, X, Y, Z, A, B, C, D;
+    Standard_Real aDt, X, Y, Z, A, B, C, D, aDR, aTolNum;
+    //
+    aTolNum=myEPSILON_CYLINDER_DELTA_RADIUS;
     //
     Pln.Coefficients(A,B,C,D);
     aTorLoc.Coord(X,Y,Z);
     aDist = A*X + B*Y + C*Z + D;
     //
-    if ((Abs(aDist) - aRMin) > Tol) {
+    aDR=Abs(aDist) - aRMin;
+    if (aDR > aTolNum) {
       typeres=IntAna_Empty;
       return;
+    }
+    //
+    if (Abs(aDR) < aTolNum) {
+      aDist=aRMin;
     }
     //
     typeres = IntAna_Circle;
@@ -2073,7 +2087,7 @@ void IntAna_QuadQuadGeo::Perform(const gp_Pln& Pln,
     param1 = aRMaj + aDt;
     dir1 = aTorAx.Direction();
     nbint = 1;
-    if ((Abs(aDist) < aRMin) && (aDt > Tol)) {
+    if ((aDR < -aTolNum) && (aDt > Tol)) {
       pt2 = pt1;
       param2 = aRMaj - aDt;
       dir2 = dir1;

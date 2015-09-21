@@ -15,23 +15,19 @@
 //Jean-Claude Vauthier 28 Novembre 1991
 //Passage sur C1 Aout 1992
 
-
-#include <GeomConvert_BSplineSurfaceKnotSplitting.ixx>
-
+#include <BSplCLib.hxx>
+#include <Geom_BSplineSurface.hxx>
+#include <GeomConvert_BSplineSurfaceKnotSplitting.hxx>
+#include <Standard_DimensionError.hxx>
 #include <Standard_RangeError.hxx>
 
-#include <BSplCLib.hxx>
-typedef Handle(Geom_BSplineSurface)     Handle(BSplineSurface);
 typedef TColStd_Array1OfInteger      Array1OfInteger;
 typedef TColStd_HArray1OfInteger HArray1OfInteger;
-
-
-
 
 GeomConvert_BSplineSurfaceKnotSplitting::
 GeomConvert_BSplineSurfaceKnotSplitting (
 
-const Handle(BSplineSurface)& BasisSurface, 
+const Handle(Geom_BSplineSurface)& BasisSurface, 
 const Standard_Integer        UContinuityRange,
 const Standard_Integer        VContinuityRange
 

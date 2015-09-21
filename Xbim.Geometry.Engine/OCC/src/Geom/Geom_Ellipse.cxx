@@ -14,24 +14,28 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <Geom_Ellipse.ixx>
-#include <gp_XYZ.hxx>
+
 #include <ElCLib.hxx>
+#include <Geom_Ellipse.hxx>
+#include <Geom_Geometry.hxx>
+#include <gp_Ax1.hxx>
+#include <gp_Ax2.hxx>
+#include <gp_Elips.hxx>
+#include <gp_Pnt.hxx>
+#include <gp_Trsf.hxx>
+#include <gp_Vec.hxx>
+#include <gp_XYZ.hxx>
 #include <Standard_ConstructionError.hxx>
 #include <Standard_RangeError.hxx>
+#include <Standard_Type.hxx>
 
 typedef Geom_Ellipse         Ellipse;
-typedef Handle(Geom_Ellipse) Handle(Ellipse);
 typedef gp_Ax1  Ax1;
 typedef gp_Ax2  Ax2;
 typedef gp_Pnt  Pnt;
 typedef gp_Vec  Vec;
 typedef gp_Trsf Trsf;
 typedef gp_XYZ  XYZ;
-
-
-
-
 
 //=======================================================================
 //function : Copy
@@ -40,7 +44,7 @@ typedef gp_XYZ  XYZ;
 
 Handle(Geom_Geometry) Geom_Ellipse::Copy() const
 {
-  Handle(Ellipse) E;
+  Handle(Geom_Ellipse) E;
   E = new Ellipse (pos, majorRadius, minorRadius);
   return E;
 }

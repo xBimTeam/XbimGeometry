@@ -15,15 +15,14 @@
 #define _BRepMesh_FastDiscretFace_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_DefineHandle.hxx>
+#include <Standard_Type.hxx>
 #include <BRepMesh_FastDiscretFace.hxx>
 #include <BRepMesh_DataStructureOfDelaun.hxx>
 #include <BRepMesh.hxx>
 #include <BRepMesh_FaceAttribute.hxx>
 #include <Standard_Transient.hxx>
 #include <TopTools_MutexForShapeProvider.hxx>
-#include <Handle_BRepAdaptor_HSurface.hxx>
-#include <Handle_Poly_Triangulation.hxx>
+#include <TopTools_DataMapOfShapeReal.hxx>
 #include <BRepMesh_Delaun.hxx>
 #include <BRepMesh_Triangle.hxx>
 #include <BRepMesh_Classifier.hxx>
@@ -32,7 +31,6 @@
 class BRepMesh_DataStructureOfDelaun;
 class BRepMesh_FaceAttribute;
 class TopoDS_Face;
-class TopTools_DataMapOfShapeReal;
 class TopoDS_Vertex;
 class BRepAdaptor_HSurface;
 class TopoDS_Edge;
@@ -64,7 +62,7 @@ public:
 
   Standard_EXPORT void Perform(const Handle(BRepMesh_FaceAttribute)& theAttribute);
 
-  DEFINE_STANDARD_RTTI(BRepMesh_FastDiscretFace)
+  DEFINE_STANDARD_RTTI(BRepMesh_FastDiscretFace, Standard_Transient)
 
 private:
 

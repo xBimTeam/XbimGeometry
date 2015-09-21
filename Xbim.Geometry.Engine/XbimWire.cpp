@@ -29,6 +29,7 @@
 #include <Geom_Curve.hxx>
 #include <BRepAdaptor_Curve.hxx>
 #include <Adaptor3d_HCurve.hxx>
+#include <Geom_BSplineCurve.hxx>
 #include <Geom_BezierCurve.hxx>
 #include <Geom_Parabola.hxx>
 #include <Geom_Hyperbola.hxx>
@@ -1069,7 +1070,7 @@ namespace Xbim
 		{
 			if (!IsValid) return gcnew array<ContourVertex>(0);
 			TopoDS_Wire ccWire = *pWire;
-			size_t t = 0;
+			int t = 0;
 			for (BRepTools_WireExplorer exp(ccWire); exp.More(); exp.Next()) t++;			
 			if (t <= 2) return gcnew array<ContourVertex>(0);
 			array<ContourVertex>^ contour = gcnew array<ContourVertex>(t);

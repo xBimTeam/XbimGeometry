@@ -21,37 +21,46 @@
 #define No_Standard_RangeError
 #define No_Standard_OutOfRange
 
-#include <GeomAdaptor_Curve.ixx>
 
-#include <GeomAdaptor_HCurve.hxx>
 #include <Adaptor3d_HCurve.hxx>
 #include <BSplCLib.hxx>
 #include <BSplCLib_Cache.hxx>
-#include <GeomAbs_Shape.hxx>
-#include <TColgp_Array1OfPnt.hxx>
-#include <TColStd_Array1OfReal.hxx>
-#include <TColStd_Array1OfInteger.hxx>
-#include <TColStd_HArray1OfInteger.hxx>
-#include <Precision.hxx>
-#include <Geom_TrimmedCurve.hxx>
-#include <Geom_Circle.hxx>
-#include <Geom_Line.hxx>
-#include <Geom_TrimmedCurve.hxx>
+#include <CSLib_Offset.hxx>
 #include <Geom_BezierCurve.hxx>
 #include <Geom_BSplineCurve.hxx>
+#include <Geom_Circle.hxx>
+#include <Geom_Curve.hxx>
 #include <Geom_Ellipse.hxx>
-#include <Geom_Parabola.hxx>
 #include <Geom_Hyperbola.hxx>
-//#include <GeomConvert_BSplineCurveKnotSplitting.hxx>
-
-#include <Standard_OutOfRange.hxx>
-#include <Standard_NoSuchObject.hxx>
-#include <Standard_NullObject.hxx>
-#include <Standard_NotImplemented.hxx>
+#include <Geom_Line.hxx>
 #include <Geom_OffsetCurve.hxx>
-#include <CSLib_Offset.hxx>
+#include <Geom_Parabola.hxx>
+#include <Geom_TrimmedCurve.hxx>
+#include <GeomAbs_Shape.hxx>
+#include <GeomAdaptor_Curve.hxx>
+#include <GeomAdaptor_HCurve.hxx>
+#include <GeomAdaptor_Surface.hxx>
+#include <gp_Circ.hxx>
+#include <gp_Elips.hxx>
+#include <gp_Hypr.hxx>
+#include <gp_Lin.hxx>
+#include <gp_Parab.hxx>
+#include <gp_Pnt.hxx>
+#include <gp_Vec.hxx>
+#include <Precision.hxx>
+#include <Standard_ConstructionError.hxx>
+#include <Standard_DomainError.hxx>
+#include <Standard_NoSuchObject.hxx>
+#include <Standard_NotImplemented.hxx>
+#include <Standard_NullObject.hxx>
+#include <Standard_OutOfRange.hxx>
+#include <TColgp_Array1OfPnt.hxx>
+#include <TColStd_Array1OfInteger.hxx>
+#include <TColStd_Array1OfReal.hxx>
+#include <TColStd_HArray1OfInteger.hxx>
 
-#define myBspl (*((Handle(Geom_BSplineCurve)*)&myCurve))
+//#include <GeomConvert_BSplineCurveKnotSplitting.hxx>
+#define myBspl Handle(Geom_BSplineCurve)::DownCast (myCurve)
 #define PosTol Precision::PConfusion()/2
 
 static const int maxDerivOrder = 3;
@@ -146,7 +155,7 @@ void GeomAdaptor_Curve::load(const Handle(Geom_Curve)& C,
     
     const Handle(Standard_Type)& TheType = C->DynamicType();
     if ( TheType == STANDARD_TYPE(Geom_TrimmedCurve)) {
-      Load((*((Handle(Geom_TrimmedCurve)*)&C))->BasisCurve(),UFirst,ULast);
+      Load(Handle(Geom_TrimmedCurve)::DownCast (C)->BasisCurve(),UFirst,ULast);
     }
     else if ( TheType ==  STANDARD_TYPE(Geom_Circle)) {
       myTypeCurve = GeomAbs_Circle;
@@ -201,7 +210,7 @@ GeomAbs_Shape GeomAdaptor_Curve::Continuity() const
   if (myCurve->IsKind(STANDARD_TYPE(Geom_OffsetCurve)))
   {
     const GeomAbs_Shape S =
-      (*((Handle(Geom_OffsetCurve)*)&myCurve))->GetBasisCurveContinuity();
+      Handle(Geom_OffsetCurve)::DownCast (myCurve)->GetBasisCurveContinuity();
     switch(S)
     {
       case GeomAbs_CN: return GeomAbs_CN;
@@ -322,7 +331,7 @@ Standard_Integer GeomAdaptor_Curve::NbIntervals(const GeomAbs_Shape S) const
     default: BaseS = GeomAbs_CN;
     }
     GeomAdaptor_Curve C
-      ((*((Handle(Geom_OffsetCurve)*)&myCurve))->BasisCurve());
+      (Handle(Geom_OffsetCurve)::DownCast (myCurve)->BasisCurve());
     // akm 05/04/02 (OCC278)  If our curve is trimmed we must recalculate 
     //                    the number of intervals obtained from the basis to
     //              vvv   reflect parameter bounds
@@ -460,7 +469,7 @@ void GeomAdaptor_Curve::Intervals(TColStd_Array1OfReal& T,
     default: BaseS = GeomAbs_CN;
     }
     GeomAdaptor_Curve C
-      ((*((Handle(Geom_OffsetCurve)*)&myCurve))->BasisCurve());
+      (Handle(Geom_OffsetCurve)::DownCast (myCurve)->BasisCurve());
     // akm 05/04/02 (OCC278)  If our curve is trimmed we must recalculate 
     //                    the array of intervals obtained from the basis to
     //              vvv   reflect parameter bounds
@@ -946,23 +955,23 @@ Standard_Real GeomAdaptor_Curve::Resolution(const Standard_Real R3D) const
   case GeomAbs_Line :
     return R3D;
   case GeomAbs_Circle: {
-    Standard_Real R = (*((Handle(Geom_Circle)*)&myCurve))->Circ().Radius();
+    Standard_Real R = Handle(Geom_Circle)::DownCast (myCurve)->Circ().Radius();
     if ( R > R3D/2. )
       return 2*ASin(R3D/(2*R));
     else
       return 2*M_PI;
   }
   case GeomAbs_Ellipse: {
-    return R3D / (*((Handle(Geom_Ellipse)*)&myCurve))->MajorRadius();
+    return R3D / Handle(Geom_Ellipse)::DownCast (myCurve)->MajorRadius();
   }
   case GeomAbs_BezierCurve: {
     Standard_Real res;
-    (*((Handle(Geom_BezierCurve)*)&myCurve))->Resolution(R3D,res);
+    Handle(Geom_BezierCurve)::DownCast (myCurve)->Resolution(R3D,res);
     return res;
   }
   case GeomAbs_BSplineCurve: {
     Standard_Real res;
-    (*((Handle(Geom_BSplineCurve)*)&myCurve))->Resolution(R3D,res);
+    Handle(Geom_BSplineCurve)::DownCast (myCurve)->Resolution(R3D,res);
     return res;
   }
   default:
@@ -984,7 +993,7 @@ Standard_Real GeomAdaptor_Curve::Resolution(const Standard_Real R3D) const
 gp_Lin GeomAdaptor_Curve::Line() const 
 {
   Standard_NoSuchObject_Raise_if(myTypeCurve != GeomAbs_Line, "");
-  return (*((Handle(Geom_Line)*)&myCurve))->Lin();  
+  return Handle(Geom_Line)::DownCast (myCurve)->Lin();  
 }
 
 //=======================================================================
@@ -995,7 +1004,7 @@ gp_Lin GeomAdaptor_Curve::Line() const
 gp_Circ  GeomAdaptor_Curve::Circle() const 
 {
   Standard_NoSuchObject_Raise_if(myTypeCurve != GeomAbs_Circle, "");
-  return (*((Handle(Geom_Circle)*)&myCurve))->Circ();
+  return Handle(Geom_Circle)::DownCast (myCurve)->Circ();
 }
 
 //=======================================================================
@@ -1006,7 +1015,7 @@ gp_Circ  GeomAdaptor_Curve::Circle() const
 gp_Elips GeomAdaptor_Curve::Ellipse() const 
 {
   Standard_NoSuchObject_Raise_if(myTypeCurve != GeomAbs_Ellipse, "");
-  return (*((Handle(Geom_Ellipse)*)&myCurve))->Elips();
+  return Handle(Geom_Ellipse)::DownCast (myCurve)->Elips();
 }
 
 //=======================================================================
@@ -1017,7 +1026,7 @@ gp_Elips GeomAdaptor_Curve::Ellipse() const
 gp_Hypr GeomAdaptor_Curve::Hyperbola() const 
 {
   Standard_NoSuchObject_Raise_if(myTypeCurve != GeomAbs_Hyperbola, "");
-  return (*((Handle(Geom_Hyperbola)*)&myCurve))->Hypr();  
+  return Handle(Geom_Hyperbola)::DownCast (myCurve)->Hypr();  
 }
 
 //=======================================================================
@@ -1028,7 +1037,7 @@ gp_Hypr GeomAdaptor_Curve::Hyperbola() const
 gp_Parab GeomAdaptor_Curve::Parabola() const 
 {
   Standard_NoSuchObject_Raise_if(myTypeCurve != GeomAbs_Parabola, "");
-  return (*((Handle(Geom_Parabola)*)&myCurve))->Parab();
+  return Handle(Geom_Parabola)::DownCast (myCurve)->Parab();
 }
 
 //=======================================================================
@@ -1039,9 +1048,9 @@ gp_Parab GeomAdaptor_Curve::Parabola() const
 Standard_Integer GeomAdaptor_Curve::Degree() const
 {
   if (myTypeCurve == GeomAbs_BezierCurve)
-    return (*((Handle(Geom_BezierCurve)*)&myCurve))->Degree();
+    return Handle(Geom_BezierCurve)::DownCast (myCurve)->Degree();
   else if (myTypeCurve == GeomAbs_BSplineCurve)
-    return (*((Handle(Geom_BSplineCurve)*)&myCurve))->Degree();
+    return Handle(Geom_BSplineCurve)::DownCast (myCurve)->Degree();
   else
     Standard_NoSuchObject::Raise();
   // portage WNT 
@@ -1056,9 +1065,9 @@ Standard_Integer GeomAdaptor_Curve::Degree() const
 Standard_Boolean GeomAdaptor_Curve::IsRational() const {
   switch( myTypeCurve) {
   case GeomAbs_BSplineCurve:
-    return (*((Handle(Geom_BSplineCurve)*)&myCurve))->IsRational();
+    return Handle(Geom_BSplineCurve)::DownCast (myCurve)->IsRational();
   case GeomAbs_BezierCurve:
-    return (*((Handle(Geom_BezierCurve)*)&myCurve))->IsRational();
+    return Handle(Geom_BezierCurve)::DownCast (myCurve)->IsRational();
   default:
     return Standard_False;
   }
@@ -1072,9 +1081,9 @@ Standard_Boolean GeomAdaptor_Curve::IsRational() const {
 Standard_Integer GeomAdaptor_Curve::NbPoles() const
 {
   if (myTypeCurve == GeomAbs_BezierCurve)
-    return (*((Handle(Geom_BezierCurve)*)&myCurve))->NbPoles();
+    return Handle(Geom_BezierCurve)::DownCast (myCurve)->NbPoles();
   else if (myTypeCurve == GeomAbs_BSplineCurve)
-    return (*((Handle(Geom_BSplineCurve)*)&myCurve))->NbPoles();
+    return Handle(Geom_BSplineCurve)::DownCast (myCurve)->NbPoles();
   else
     Standard_NoSuchObject::Raise();
   // portage WNT
@@ -1090,7 +1099,7 @@ Standard_Integer GeomAdaptor_Curve::NbKnots() const
 {
   if ( myTypeCurve != GeomAbs_BSplineCurve)
     Standard_NoSuchObject::Raise("GeomAdaptor_Curve::NbKnots");
-  return (*((Handle(Geom_BSplineCurve)*)&myCurve))->NbKnots();
+  return Handle(Geom_BSplineCurve)::DownCast (myCurve)->NbKnots();
 }
 
 //=======================================================================
@@ -1102,7 +1111,7 @@ Handle(Geom_BezierCurve) GeomAdaptor_Curve::Bezier() const
 {
  if ( myTypeCurve != GeomAbs_BezierCurve)
     Standard_NoSuchObject::Raise("GeomAdaptor_Curve::Bezier");
-  return *((Handle(Geom_BezierCurve)*)&myCurve);
+  return Handle(Geom_BezierCurve)::DownCast (myCurve);
 }
 
 //=======================================================================
@@ -1115,7 +1124,7 @@ Handle(Geom_BSplineCurve) GeomAdaptor_Curve::BSpline() const
  if ( myTypeCurve != GeomAbs_BSplineCurve)
     Standard_NoSuchObject::Raise("GeomAdaptor_Curve::BSpline");
 
-  return *((Handle(Geom_BSplineCurve)*)&myCurve);
+  return Handle(Geom_BSplineCurve)::DownCast (myCurve);
 }
 
 

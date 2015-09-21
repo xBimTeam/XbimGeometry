@@ -14,21 +14,24 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <ShapeUpgrade_ConvertCurve3dToBezier.ixx>
-#include <Precision.hxx>
-#include <Geom_TrimmedCurve.hxx>
+
 #include <Geom_BezierCurve.hxx>
-#include <ShapeExtend.hxx>
-#include <Geom_Line.hxx>
-#include <TColgp_Array1OfPnt.hxx>
 #include <Geom_BSplineCurve.hxx>
-#include <Geom_Conic.hxx>
-#include <GeomConvert_ApproxCurve.hxx>
-#include <GeomConvert.hxx>
-#include <GeomConvert_BSplineCurveToBezierCurve.hxx>
-#include <TColStd_Array1OfReal.hxx>
-#include <TColGeom_HArray1OfCurve.hxx>
 #include <Geom_Circle.hxx>
+#include <Geom_Conic.hxx>
+#include <Geom_Curve.hxx>
+#include <Geom_Line.hxx>
+#include <Geom_TrimmedCurve.hxx>
+#include <GeomConvert.hxx>
+#include <GeomConvert_ApproxCurve.hxx>
+#include <GeomConvert_BSplineCurveToBezierCurve.hxx>
+#include <Precision.hxx>
+#include <ShapeExtend.hxx>
+#include <ShapeUpgrade_ConvertCurve3dToBezier.hxx>
+#include <Standard_Type.hxx>
+#include <TColGeom_HArray1OfCurve.hxx>
+#include <TColgp_Array1OfPnt.hxx>
+#include <TColStd_Array1OfReal.hxx>
 
 ShapeUpgrade_ConvertCurve3dToBezier::ShapeUpgrade_ConvertCurve3dToBezier()
 {
@@ -112,7 +115,7 @@ void ShapeUpgrade_ConvertCurve3dToBezier::Compute()
     Handle(Geom_BSplineCurve) aBSpline;
     Standard_Real Shift = 0.;
     if(myCurve->IsKind(STANDARD_TYPE(Geom_Conic))) {
-      Handle(Geom_TrimmedCurve) tcurve = new Geom_TrimmedCurve(myCurve,First,Last); //protection agains parabols ets
+      Handle(Geom_Curve) tcurve = new Geom_TrimmedCurve(myCurve,First,Last); //protection agains parabols ets
       GeomConvert_ApproxCurve approx (tcurve, Precision::Approximation(), 
 				      GeomAbs_C1, 100, 6 );
       if ( approx.HasResult() )

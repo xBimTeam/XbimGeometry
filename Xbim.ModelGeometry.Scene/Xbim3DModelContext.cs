@@ -39,6 +39,71 @@ namespace Xbim.ModelGeometry.Scene
     {
         #region Helper classes
 
+        private class XbimBooleanDefinition
+        {
+            private int contextId;
+            private int styleId;
+            private List<XbimShapeInstance> _argumentIds;
+            private List<XbimShapeInstance> _cutToolIds;
+            private List<XbimShapeInstance> _projectToolIds;
+
+            public XbimBooleanDefinition(IEnumerable<XbimShapeInstance> argumentIds, IEnumerable<XbimShapeInstance> cutToolIds, IEnumerable<XbimShapeInstance> projectToolIds, int context, int styleId)
+            {
+                if (argumentIds.Any()) _argumentIds = new List<XbimShapeInstance>(argumentIds);
+                if (cutToolIds.Any()) _cutToolIds = new List<XbimShapeInstance>(cutToolIds);
+                if (projectToolIds.Any()) _projectToolIds = new List<XbimShapeInstance>(projectToolIds);
+                this.contextId = context;
+                this.styleId = styleId;
+            }
+            /// <summary>
+            /// The ids of the geometry arguments the tools will be applied to 
+            /// </summary>
+            public IEnumerable<XbimShapeInstance> ArgumentIds
+            {
+                get
+                {
+                    return _argumentIds==null ? Enumerable.Empty<XbimShapeInstance>(): _argumentIds;
+                }              
+            }
+
+            public int ContextId
+            {
+                get
+                {
+                    return contextId;
+                }
+            }
+
+            /// <summary>
+            /// The ids of geometry tools to be used in the boolean cut operation
+            /// </summary>
+            public IEnumerable<XbimShapeInstance> CutToolIds
+            {
+                get
+                {
+                    return _cutToolIds == null ? Enumerable.Empty<XbimShapeInstance>() : _cutToolIds;
+                }
+            }
+            /// <summary>
+            /// The ids of geometry tools to be used in the boolean project operation
+            /// </summary>
+            public IEnumerable<XbimShapeInstance> ProjectToolIds
+            {
+                get
+                {
+                    return _projectToolIds == null ? Enumerable.Empty<XbimShapeInstance>() : _projectToolIds;
+                }
+            }
+
+            public int StyleId
+            {
+                get
+                {
+                    return styleId;
+                }          
+            }
+        }
+
         //private struct to hold details of references to geometries
         private struct GeometryReference
         {
@@ -117,6 +182,8 @@ namespace Xbim.ModelGeometry.Scene
         {
             internal String InitialiseError;
             internal ConcurrentDictionary<int, GeometryReference> ShapeLookup;
+            private bool _disposed = false;
+           
 
             public XbimCreateContextHelper(XbimModel model, IfcRepresentationContextCollection contexts)
             {
@@ -150,24 +217,24 @@ namespace Xbim.ModelGeometry.Scene
             internal ConcurrentDictionary<int, List<GeometryReference>> MapsWritten { get; private set; }
             internal ConcurrentDictionary<int, XbimMatrix3D> MapTransforms { get; private set; }
 
-            internal IXbimGeometryObject GetGeometryFromCache(XbimShapeInstance instance)
+            internal IXbimGeometryObject GetGeometryFromCache(XbimShapeInstance shapeInstance, bool makeCopy)
             {
 
                 int ifcShapeId;
-                if (GeometryShapeLookup.TryGetValue(instance.ShapeGeometryLabel, out ifcShapeId))
+                if (GeometryShapeLookup.TryGetValue(shapeInstance.ShapeGeometryLabel, out ifcShapeId))
                 {
                     IXbimGeometryObject obj;
                     if (CachedGeometries.TryGetValue(ifcShapeId, out obj))
-                        return obj.TransformShallow(instance.Transformation);
+                        return makeCopy ? obj.Transform(shapeInstance.Transformation) : obj.TransformShallow(shapeInstance.Transformation);
                 } //it might be a map
                 else
                 {
                     GeometryReference geomRef;
-                    if (ShapeLookup.TryGetValue(instance.InstanceLabel, out geomRef))
+                    if (ShapeLookup.TryGetValue(shapeInstance.InstanceLabel, out geomRef))
                     {
                         IXbimGeometryObject obj;
                         if (CachedGeometries.TryGetValue(geomRef.GeometryId, out obj))
-                            return obj.TransformShallow(instance.Transformation);
+                            return makeCopy ? obj.Transform(shapeInstance.Transformation) : obj.TransformShallow(shapeInstance.Transformation);
                     }
                 }
                 return null;
@@ -317,12 +384,16 @@ namespace Xbim.ModelGeometry.Scene
                 }
             }
 
+
             public void Dispose()
             {
+                if (_disposed) return;
+                _disposed = true;
                 foreach (var cachedGeom in CachedGeometries)
                 {
                     cachedGeom.Value.Dispose();
                 }
+                GC.SuppressFinalize(this);
             }
         }
 
@@ -662,132 +733,167 @@ namespace Xbim.ModelGeometry.Scene
             var localPercentageParsed = 0;
             var localTally = 0;
             var featureCount = contextHelper.OpeningsAndProjections.Count;
-            if (progDelegate != null) progDelegate(-1, "WriteFeatureElements (" + contextHelper.OpeningsAndProjections.Count + " elements)");          
-             
-            Parallel.ForEach(contextHelper.OpeningsAndProjections, contextHelper.ParallelOptions, pair =>
-           //         foreach (IGrouping<IfcElement, IfcFeatureElement> pair in contextHelper.OpeningsAndProjections)
-            {
-                
-               var element = pair.Key;
-               double precision = Math.Max(element.ModelOf.ModelFactors.OneMilliMeter / 100, element.ModelOf.ModelFactors.Precision); //set the precision to 100th mm but never less than precision
-                Interlocked.Increment(ref localTally);
+            if (progDelegate != null) progDelegate(-1, "WriteFeatureElements (" + contextHelper.OpeningsAndProjections.Count + " elements)");
 
+            var dupIds = new HashSet<int>();
+            var allIds = new HashSet<int>();
+            var booleanOps = new List<XbimBooleanDefinition>();
+            double? precision = null;
+
+            //   Parallel.ForEach(contextHelper.OpeningsAndProjections, contextHelper.ParallelOptions, pair =>
+            //         foreach (IGrouping<IfcElement, IfcFeatureElement> pair in contextHelper.OpeningsAndProjections)
+            foreach (IGrouping<IfcElement, IfcFeatureElement> pair in contextHelper.OpeningsAndProjections)
+            {
+                int context = 0;
+                int styleId = 0;//take the style of any part of the main shape
+                var element = pair.Key;
+
+                if (!precision.HasValue) precision = Math.Max(element.ModelOf.ModelFactors.OneMilliMeter / 100, element.ModelOf.ModelFactors.Precision); //set the precision to 100th mm but never less than precision
+                var elementShapes = WriteProductShape(contextHelper, element, false);
+                var arguments = new List<XbimShapeInstance>();
+                foreach (var elemShape in elementShapes)
+                {
+                    if (!allIds.Add(elemShape.ShapeGeometryLabel))
+                        dupIds.Add(elemShape.ShapeGeometryLabel);
+                    arguments.Add(elemShape);
+                    context = elemShape.RepresentationContext;
+                    if (elemShape.StyleLabel > 0) styleId = elemShape.StyleLabel;
+                }
+
+                if (arguments.Count == 0)
+                {
+                    Logger.WarnFormat(
+                        "WM003: {2}[#{0}]-{1} does not have a solid representation, openings cannot be formed",
+                        element.EntityLabel, element.Name, element.GetType().Name);
+                    processed.Add(element.EntityLabel);
+                    continue;
+                }
+                var cutTools = new List<XbimShapeInstance>();
+                var projectTools = new List<XbimShapeInstance>();
+
+
+                foreach (var feature in pair)
+                {
+                    var isCut = feature is IfcFeatureElementSubtraction;
+
+                    var featureShapes = WriteProductShape(contextHelper, feature, false);
+                    foreach (var featureShape in featureShapes)
+                    {
+                        if (!allIds.Add(featureShape.ShapeGeometryLabel))
+                            dupIds.Add(featureShape.ShapeGeometryLabel);
+                        if (isCut)
+                            cutTools.Add(featureShape);
+                        else
+                            projectTools.Add(featureShape);
+                    }
+                    processed.Add(feature.EntityLabel);
+
+                }
+                var boolOp = new XbimBooleanDefinition(arguments, cutTools, projectTools, context, styleId);
+                booleanOps.Add(boolOp);
+            }
+
+            Parallel.ForEach(booleanOps, contextHelper.ParallelOptions, bop =>
+            //         foreach (IGrouping<IfcElement, IfcFeatureElement> pair in contextHelper.OpeningsAndProjections)
+            {
+                Interlocked.Increment(ref localTally);
+                int elementLabel = 0;
+                short typeId = 0;
                 try
                 {
-                    //if (progDelegate != null) progDelegate(-1, "FeatureElement, (#" + element.EntityLabel + " started)");
-                    var elementShapes = WriteProductShape(contextHelper, element, false).ToList();
-                    var context = 0;
-                    var styleId = 0; //take the style of any part of the main shape
-                    if (elementShapes.Any())
+                    if (bop.ArgumentIds.Any())
                     {
-
+                        elementLabel = bop.ArgumentIds.First().IfcProductLabel;
+                        typeId = bop.ArgumentIds.First().IfcTypeId;
                         //Get all the parts of this element into a set of solid geometries
                         var elementGeom = Engine.CreateGeometryObjectSet();
-                       
-                        foreach (var elemShape in elementShapes)
-                        {
-                            var geom = contextHelper.GetGeometryFromCache(elemShape);
 
-                            elementGeom.Add(geom);                          
-                            context = elemShape.RepresentationContext;
-                            if (elemShape.StyleLabel > 0) styleId = elemShape.StyleLabel;
+                        foreach (var argument in bop.ArgumentIds)
+                        {
+                            var geom = contextHelper.GetGeometryFromCache(argument, dupIds.Contains(argument.ShapeGeometryLabel));
+                            if (geom != null)
+                                elementGeom.Add(geom);
+                            else
+                                Logger.WarnFormat(
+                               "WM013: {0}[#{1}] is an element that has some 3D geometric form definition missing",
+                               IfcMetaData.IfcType(argument.IfcTypeId).Name, argument.IfcProductLabel);
+
                         }
 
-                        if (elementGeom.Count==0)
+                        //now build the openings
+                        var allOpenings = Engine.CreateSolidSet();
+                        foreach (var openingShape in bop.CutToolIds)
                         {
-                            Logger.WarnFormat(
-                                "WM003: {2}[#{0}]-{1} does not have a solid representation, openings cannot be formed",
-                                element.EntityLabel, element.Name, element.GetType().Name);
+                            var openingGeom = contextHelper.GetGeometryFromCache(openingShape, dupIds.Contains(openingShape.ShapeGeometryLabel));
+                            if (openingGeom != null)
+                                allOpenings.Add(openingGeom);
+                            else
+                                Logger.WarnFormat(
+                               "WM014: {0}[#{1}] is an opening that has some 3D geometric form definition missing",
+                               IfcMetaData.IfcType(openingShape.IfcTypeId).Name, openingShape.IfcProductLabel);
                         }
-                        else
+
+                        //now all the projections
+                        var allProjections = Engine.CreateSolidSet();
+
+
+                        foreach (var projectionShape in bop.ProjectToolIds)
                         {
-                            //now build the openings
-                            var allOpenings = Engine.CreateSolidSet();
-                            var allProjections = Engine.CreateSolidSet();
+                            var projGeom = contextHelper.GetGeometryFromCache(projectionShape, dupIds.Contains(projectionShape.ShapeGeometryLabel));
+                            if (projGeom != null)
+                                allProjections.Add(projGeom);
+                            else
+                                Logger.WarnFormat(
+                              "WM005: {0}[#{1}] is an projection that has no 3D geometric form definition",
+                              IfcMetaData.IfcType(projectionShape.IfcTypeId).Name, projectionShape.IfcProductLabel);
+                        }
 
-                            foreach (var feature in pair)
+                        //make the finished shape
+                        if (allProjections.Any())
+                        {
+                            var nextGeom = elementGeom.Union(allProjections, precision.Value);
+                            if (nextGeom.IsValid)
                             {
-                                var opening = feature as IfcFeatureElementSubtraction;
-                                if (opening != null)
-                                {
-                                    var openingShapes = WriteProductShape(contextHelper, opening, false).ToList();
-
-
-                                    foreach (var openingShape in openingShapes)
-                                    {
-                                        var openingGeom = contextHelper.GetGeometryFromCache(openingShape);
-
-                                        if (openingGeom != null)
-                                            allOpenings.Add(openingGeom);
-                                        else
-                                            Logger.WarnFormat(
-                                           "WM014: {0}[#{1}] is an opening that has some 3D geometric form definition missing",
-                                           opening.GetType().Name, opening.EntityLabel);
-                                    }
-
-
-                                    if (openingShapes.Count == 0)
-                                    {
-                                        Logger.WarnFormat(
-                                            "WM004: {0}[#{1}] is an opening that has no 3D geometric form definition",
-                                            opening.GetType().Name, opening.EntityLabel);
-                                    }
-                                    processed.Add(opening.EntityLabel);
-                                }
-                                else
-                                {
-                                    var addition = feature as IfcFeatureElementAddition;
-                                    if (addition != null)
-                                    {
-                                        var projectionShapes =
-                                            WriteProductShape(contextHelper, addition, false).ToList();
-                                        foreach (var projectionShape in projectionShapes)
-                                        {
-                                            var projGeom = contextHelper.GetGeometryFromCache(projectionShape);
-                                            if (projGeom != null)
-                                                allProjections.Add(projGeom);
-                                        }
-                                        if (projectionShapes.Count == 0)
-                                        {
-                                            Logger.WarnFormat(
-                                                "WM005: {0}[#{1}] is an projection that has no 3D geometric form definition",
-                                                addition.GetType().Name, addition.EntityLabel);
-                                        }
-                                        processed.Add(addition.EntityLabel);
-                                    }
-                                }
-                            }
-
-                            //make the finished shape
-                            if (allProjections.Any())
-                                elementGeom = elementGeom.Union(allProjections, precision);
-
-                            if (allOpenings.Any())
-                            {
-
-                                var nextGeom = elementGeom.Cut(allOpenings, precision);
-                                if (nextGeom.IsValid)
-                                {
-                                    if (nextGeom.First !=null && nextGeom.First.IsValid)                                    
-                                        elementGeom = nextGeom;
-                                    else
-                                        Logger.WarnFormat(
-                                   "WM009: Cutting of openings in {2}[#{0}]-{1} has resulted in an empty shape",
-                                   element.EntityLabel, element.Name, element.GetType().Name);
-                                }
+                                if (nextGeom.First != null && nextGeom.First.IsValid)
+                                    elementGeom = nextGeom;
                                 else
                                     Logger.WarnFormat(
-                                   "WM008: Cutting of openings in {2}[#{0}]-{1} has failed, openings have ben ignored",
-                                   element.EntityLabel, element.Name, element.GetType().Name);
+                               "WM015: Joining of projections in {1}[#{0}] has resulted in an empty shape",
+                               elementLabel, IfcMetaData.IfcType(typeId).Name);
                             }
+                            else
+                                Logger.WarnFormat(
+                               "WM016: Joining of projections in {1}[#{0}] has failed, projections have been ignored",
+                               elementLabel, IfcMetaData.IfcType(typeId).Name);
                         }
-                         ////now add to the DB               
+
+
+                        if (allOpenings.Any())
+                        {
+
+                            var nextGeom = elementGeom.Cut(allOpenings, precision.Value);
+                            if (nextGeom.IsValid)
+                            {
+                                if (nextGeom.First != null && nextGeom.First.IsValid)
+                                    elementGeom = nextGeom;
+                                else
+                                    Logger.WarnFormat(
+                               "WM009: Cutting of openings in {1}[#{0}] has resulted in an empty shape",
+                               elementLabel, IfcMetaData.IfcType(typeId).Name);
+                            }
+                            else
+                                Logger.WarnFormat(
+                               "WM008: Cutting of openings in {1}[#{0}] has failed, openings have been ignored",
+                               elementLabel, IfcMetaData.IfcType(typeId).Name);
+                        }
+
+                        ////now add to the DB               
                         XbimModelFactors mf = _model.ModelFactors;
                         foreach (var geom in elementGeom)
                         {
                             IXbimShapeGeometryData shapeGeometry = new XbimShapeGeometry
                             {
-                                IfcShapeLabel = element.EntityLabel,
+                                IfcShapeLabel = elementLabel,
                                 GeometryHash = 0,
                                 LOD = XbimLOD.LOD_Unspecified,
                                 Format = geomType,
@@ -815,13 +921,13 @@ namespace Xbim.ModelGeometry.Scene
                             {
                                 var shapeInstance = new XbimShapeInstance
                                 {
-                                    IfcProductLabel = element.EntityLabel,
+                                    IfcProductLabel = elementLabel,
                                     ShapeGeometryLabel = 0,
                                     /*Set when geometry written*/
-                                    StyleLabel = styleId,
+                                    StyleLabel = bop.StyleId,
                                     RepresentationType = XbimGeometryRepresentationType.OpeningsAndAdditionsIncluded,
-                                    RepresentationContext = context,
-                                    IfcTypeId = IfcMetaData.IfcTypeId(element),
+                                    RepresentationContext = bop.ContextId,
+                                    IfcTypeId = typeId,
                                     Transformation = XbimMatrix3D.Identity,
                                     BoundingBox = elementGeom.BoundingBox
                                 };
@@ -829,12 +935,9 @@ namespace Xbim.ModelGeometry.Scene
                                     shapeGeometry));
                             }
                         }
+                        processed.Add(elementLabel);
                     }
-                    else
-                        Logger.WarnFormat(
-                            "WM006: {0}[#{1}] contains openings but has no 3D geometry definition",
-                            element.GetType().Name, element.EntityLabel);
-                    processed.Add(element.EntityLabel);
+
                     if (progDelegate != null)
                     {
                         var newPercentage = Convert.ToInt32((double)localTally / featureCount * 100.0);
@@ -849,7 +952,7 @@ namespace Xbim.ModelGeometry.Scene
                 {
                     Logger.WarnFormat(
                         "WM007: {0}[#{1}] - contains openings but  its geometry can not be built, {2}",
-                        element.GetType().Name, element.EntityLabel, e.Message);
+                        IfcMetaData.IfcType(typeId).Name, elementLabel, e.Message);
                 }
                 //if (progDelegate != null) progDelegate(101, "FeatureElement, (#" + element.EntityLabel + " ended)");
             }
@@ -883,6 +986,49 @@ namespace Xbim.ModelGeometry.Scene
                 );
             contextHelper.Tally = localTally;
             contextHelper.PercentageParsed = localPercentageParsed;
+        }
+        /// <summary>
+        ///     Process the products shape and gets the shape ids, does not write to the databaseto the Database
+        /// </summary>
+        /// <param name="contextHelper"></param>
+        /// <param name="element">Element to write</param>
+        /// <param name="includesOpenings"></param>
+        /// <returns>IEnumerable of XbimShapeInstance that have been written</returns>
+        private IEnumerable<int> GetProductShapeIds(XbimCreateContextHelper contextHelper, IfcProduct element)
+        {
+
+            var shapesIds = new List<int>();
+            var rep = element.Representation.Representations
+                .FirstOrDefault(r => _contexts.Contains(r.ContextOfItems)
+                                     && r.IsBodyRepresentation());
+            //get shape ids                   
+            foreach (var shape in rep.Items)
+            {
+                if (shape is IfcMappedItem)
+                {
+                    List<GeometryReference> mapGeomIds;
+                    var mapId = shape.EntityLabel;
+
+                    if (contextHelper.MapsWritten.TryGetValue(mapId, out mapGeomIds))
+                    //if we have something to write                           
+                    {
+                        var mapTransform = contextHelper.MapTransforms[mapId];
+                        foreach (var instance in mapGeomIds)
+                        {
+                            shapesIds.Add(instance.GeometryId);
+                        }
+                    }
+                }
+                else //it is a direct reference to geometry shape
+                {
+                    GeometryReference instance;
+                    if (contextHelper.ShapeLookup.TryGetValue(shape.EntityLabel, out instance))
+                    {
+                        shapesIds.Add(instance.GeometryId);
+                    }
+                }
+            }
+            return shapesIds;
         }
 
         /// <summary>

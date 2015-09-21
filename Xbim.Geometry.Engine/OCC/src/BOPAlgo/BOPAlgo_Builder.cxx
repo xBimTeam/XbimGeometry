@@ -15,17 +15,16 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <BOPAlgo_Builder.ixx>
 
+#include <BOPAlgo_Builder.hxx>
+#include <BOPAlgo_PaveFiller.hxx>
+#include <BOPTools_AlgoTools.hxx>
+#include <BRep_Builder.hxx>
+#include <IntTools_Context.hxx>
 #include <Standard_ErrorHandler.hxx>
 #include <Standard_Failure.hxx>
-
-#include <NCollection_IncAllocator.hxx>
-
 #include <TopoDS_Compound.hxx>
-#include <BRep_Builder.hxx>
-
-#include <BOPTools_AlgoTools.hxx>
+#include <TopoDS_Shape.hxx>
 #include <TopTools_ListIteratorOfListOfShape.hxx>
 
 //=======================================================================
@@ -101,22 +100,6 @@ void BOPAlgo_Builder::AddArgument(const TopoDS_Shape& theShape)
 {
   if (myMapFence.Add(theShape)) {
     myArguments.Append(theShape);
-  }
-}
-//=======================================================================
-//function : SetArguments
-//purpose  : 
-//=======================================================================
-void BOPAlgo_Builder::SetArguments(const TopTools_ListOfShape& theShapes)
-{
-  TopTools_ListIteratorOfListOfShape aIt;
-  //
-  myArguments.Clear();
-  //
-  aIt.Initialize(theShapes);
-  for (; aIt.More(); aIt.Next()) {
-    const TopoDS_Shape& aS = aIt.Value();
-    AddArgument(aS);
   }
 }
 //=======================================================================
@@ -267,7 +250,8 @@ void BOPAlgo_Builder::Perform()
     }
   }
   //
-  Handle(NCollection_BaseAllocator) aAllocator=new NCollection_IncAllocator;
+  Handle(NCollection_BaseAllocator) aAllocator=
+    NCollection_BaseAllocator::CommonBaseAllocator();
   //
   BOPAlgo_PaveFiller* pPF=new BOPAlgo_PaveFiller(aAllocator);
   //
@@ -304,10 +288,6 @@ void BOPAlgo_Builder::PerformInternal(const BOPAlgo_PaveFiller& theFiller)
   catch (Standard_Failure) {
     myErrorStatus=191;
   }  
-  catch (...)
-  {
-	  myErrorStatus = 191;
-  }
 }
 //=======================================================================
 //function : PerformInternal1

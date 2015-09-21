@@ -2728,7 +2728,7 @@ Standard_Boolean IntCyCyTrim( const IntSurf_Quadric& theQuad1,
           Standard_Boolean isFound1 = Standard_False, isFound2 = Standard_False;
           Standard_Boolean isForce = Standard_False;
 
-          if((aWLFindStatus[i] == WLFStatus_Absent))
+          if (aWLFindStatus[i] == WLFStatus_Absent)
           {
             if(((aUSurf2l - aUSurf2f) >= aPeriod) && (Abs(anU1-aUSurf1l) < theTol2D))
             {
@@ -3069,8 +3069,7 @@ Standard_Boolean IntCyCyTrim( const IntSurf_Quadric& theQuad1,
   {
     for(Standard_Integer aNbLin = 1; aNbLin <= theSlin.Length(); aNbLin++)
     {
-      const Handle(IntPatch_WLine)& aWLine1 = 
-                Handle(IntPatch_WLine)::DownCast(theSlin.Value(aNbLin));
+      Handle(IntPatch_WLine) aWLine1 (Handle(IntPatch_WLine)::DownCast(theSlin.Value(aNbLin)));
 
       const IntSurf_PntOn2S& aPntFWL1 = aWLine1->Point(1);
       const IntSurf_PntOn2S& aPntLWL1 = aWLine1->Point(aWLine1->NbPnts());

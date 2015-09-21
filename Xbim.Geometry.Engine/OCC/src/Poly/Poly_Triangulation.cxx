@@ -14,16 +14,18 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <Poly_Triangulation.ixx>
+
 #include <gp_Pnt.hxx>
 #include <Poly_Triangle.hxx>
-
+#include <Poly_Triangulation.hxx>
+#include <Standard_DomainError.hxx>
+#include <Standard_NullObject.hxx>
+#include <Standard_Type.hxx>
 
 //=======================================================================
 //function : Poly_Triangulation
 //purpose  : 
 //=======================================================================
-
 Poly_Triangulation::Poly_Triangulation(const Standard_Integer NbNodes, 
                                        const Standard_Integer NbTriangles,
                                        const Standard_Boolean UVNodes) :
@@ -73,6 +75,25 @@ Poly_Triangulation::Poly_Triangulation(const TColgp_Array1OfPnt&    Nodes,
   myTriangles = Triangles;
   myUVNodes = new TColgp_HArray1OfPnt2d(1, myNbNodes);
   myUVNodes->ChangeArray1() = UVNodes;
+}
+
+//=======================================================================
+//function : Copy
+//purpose  : 
+//=======================================================================
+
+Handle(Poly_Triangulation) Poly_Triangulation::Copy()
+{
+  Handle(Poly_Triangulation) aCopy;
+  if (HasUVNodes())
+    aCopy = new Poly_Triangulation(Nodes(), UVNodes(), Triangles());
+  else
+    aCopy = new Poly_Triangulation(Nodes(), Triangles());
+  aCopy->Deflection(myDeflection);
+  if (HasNormals())
+    aCopy->myNormals = new TShort_HArray1OfShortReal(myNormals->Array1());
+
+  return aCopy;
 }
 
 //=======================================================================

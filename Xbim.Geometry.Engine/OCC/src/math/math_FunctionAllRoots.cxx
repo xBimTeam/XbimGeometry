@@ -16,15 +16,16 @@
 #define No_Standard_RangeError
 #define No_Standard_OutOfRange
 #define No_Standard_DimensionError
+
 //#endif
 
-#include <math_FunctionAllRoots.ixx>
-
+#include <math_FunctionAllRoots.hxx>
+#include <math_FunctionRoots.hxx>
+#include <math_FunctionSample.hxx>
+#include <math_FunctionWithDerivative.hxx>
 #include <Standard_NumericError.hxx>
 #include <Standard_OutOfRange.hxx>
-#include <math_FunctionRoots.hxx>
-#include <math_FunctionWithDerivative.hxx>
-#include <math_FunctionSample.hxx>
+#include <StdFail_NotDone.hxx>
 
 math_FunctionAllRoots::math_FunctionAllRoots (
                            math_FunctionWithDerivative& F,
@@ -37,8 +38,8 @@ math_FunctionAllRoots::math_FunctionAllRoots (
 
 
     Standard_Boolean Nul, PNul, InterNul, Nuld, Nulf;
-    Standard_Real DebNul,FinNul;
-    Standard_Integer Indd,Indf;
+    Standard_Real DebNul = 0., FinNul = 0.;
+    Standard_Integer Indd = 0, Indf = 0;
     Standard_Real cst,val,valsav=0,valbid;
     Standard_Boolean fini;
     Standard_Integer Nbp,i;

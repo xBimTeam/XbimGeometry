@@ -14,15 +14,18 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <GCE2d_MakeArcOfCircle.ixx>
-#include <gp_Vec2d.hxx>
-#include <Geom2d_Circle.hxx>
+
+#include <ElCLib.hxx>
+#include <GCE2d_MakeArcOfCircle.hxx>
 #include <gce_MakeCirc2d.hxx>
 #include <gce_MakeLin2d.hxx>
-#include <ElCLib.hxx>
-#include <StdFail_NotDone.hxx>
+#include <Geom2d_Circle.hxx>
+#include <Geom2d_TrimmedCurve.hxx>
+#include <gp_Circ2d.hxx>
+#include <gp_Pnt2d.hxx>
+#include <gp_Vec2d.hxx>
 #include <IntAna2d_AnaIntersection.hxx>
-
+#include <StdFail_NotDone.hxx>
 
 GCE2d_MakeArcOfCircle::GCE2d_MakeArcOfCircle(const gp_Pnt2d&        P1     ,
 					     const gp_Pnt2d&        P2     ,
@@ -114,14 +117,3 @@ const Handle(Geom2d_TrimmedCurve)& GCE2d_MakeArcOfCircle::Value() const
   StdFail_NotDone_Raise_if(TheError != gce_Done,"");
   return TheArc;
 }
-
-const Handle(Geom2d_TrimmedCurve)& GCE2d_MakeArcOfCircle::Operator() const 
-{
-  return Value();
-}
-
-GCE2d_MakeArcOfCircle::operator Handle(Geom2d_TrimmedCurve) () const
-{
-  return Value();
-}
-

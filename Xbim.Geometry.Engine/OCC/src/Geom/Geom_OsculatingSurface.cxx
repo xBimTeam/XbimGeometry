@@ -11,27 +11,29 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <Geom_OsculatingSurface.ixx>
-#include <Geom_BezierSurface.hxx>
-#include <TColgp_Array2OfPnt.hxx>
-#include <TColgp_HArray2OfPnt.hxx>
-#include <TColStd_Array1OfReal.hxx>
-#include <TColStd_Array1OfInteger.hxx>
-#include <TColStd_HArray2OfInteger.hxx>
-#include <TColStd_HArray1OfReal.hxx>
-#include <TColStd_HArray1OfInteger.hxx>
-#include <TColgp_Array1OfPnt.hxx>
-#include <TColgp_Array2OfVec.hxx>
+
 #include <BSplSLib.hxx>
 #include <Convert_GridPolynomialToPoles.hxx>
-#include <Precision.hxx>
+#include <Geom_BezierSurface.hxx>
+#include <Geom_BSplineSurface.hxx>
+#include <Geom_OsculatingSurface.hxx>
+#include <Geom_Surface.hxx>
 #include <PLib.hxx>
+#include <Precision.hxx>
+#include <TColgp_Array1OfPnt.hxx>
+#include <TColgp_Array2OfPnt.hxx>
+#include <TColgp_Array2OfVec.hxx>
+#include <TColgp_HArray2OfPnt.hxx>
+#include <TColStd_Array1OfInteger.hxx>
+#include <TColStd_Array1OfReal.hxx>
+#include <TColStd_HArray1OfInteger.hxx>
+#include <TColStd_HArray1OfReal.hxx>
+#include <TColStd_HArray2OfInteger.hxx>
 
 //=======================================================================
 //function : Geom_OffsetOsculatingSurface
 //purpose  : 
 //=======================================================================
-
 Geom_OsculatingSurface::Geom_OsculatingSurface()
   : myAlong(1,4)
 {
@@ -337,7 +339,7 @@ Standard_Boolean Geom_OsculatingSurface::UOscSurf
     if (myBasisSurf->IsKind(STANDARD_TYPE(Geom_BSplineSurface))) 
     {
       Handle(Geom_BSplineSurface) BSur = 
-        *((Handle(Geom_BSplineSurface)*)& myBasisSurf);
+        Handle(Geom_BSplineSurface)::DownCast (myBasisSurf);
       NbUK = BSur->NbUKnots();
       NbVK = BSur->NbVKnots();
       TColStd_Array1OfReal UKnots(1,NbUK);
@@ -396,7 +398,7 @@ Standard_Boolean Geom_OsculatingSurface::VOscSurf
     if (myBasisSurf->IsKind(STANDARD_TYPE(Geom_BSplineSurface))) 
     {
       Handle(Geom_BSplineSurface) BSur = 
-        *((Handle(Geom_BSplineSurface)*)& myBasisSurf);
+        Handle(Geom_BSplineSurface)::DownCast (myBasisSurf);
       NbUK = BSur->NbUKnots();
       NbVK = BSur->NbVKnots();
       TColStd_Array1OfReal UKnots(1,NbUK);

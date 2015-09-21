@@ -18,43 +18,39 @@
 //             avec discernement !
 // 19-09-97  : JPI correction derivee seconde
 
-
-#include <Geom_OffsetCurve.ixx>
-
-
-#include <gp.hxx>
-#include <gp_XYZ.hxx>
-#include <Geom_Line.hxx>
-#include <Geom_Circle.hxx>
-#include <Geom_Ellipse.hxx>
-#include <Geom_Hyperbola.hxx>
-#include <Geom_Parabola.hxx>
+#include <CSLib_Offset.hxx>
 #include <Geom_BezierCurve.hxx>
-#include <Geom_TrimmedCurve.hxx>
 #include <Geom_BSplineCurve.hxx>
+#include <Geom_Circle.hxx>
+#include <Geom_Curve.hxx>
+#include <Geom_Ellipse.hxx>
 #include <Geom_Geometry.hxx>
-
+#include <Geom_Hyperbola.hxx>
+#include <Geom_Line.hxx>
+#include <Geom_OffsetCurve.hxx>
+#include <Geom_Parabola.hxx>
+#include <Geom_TrimmedCurve.hxx>
 #include <Geom_UndefinedDerivative.hxx>
 #include <Geom_UndefinedValue.hxx>
+#include <gp.hxx>
+#include <gp_Dir.hxx>
+#include <gp_Pnt.hxx>
+#include <gp_Trsf.hxx>
+#include <gp_Vec.hxx>
+#include <gp_XYZ.hxx>
 #include <Standard_ConstructionError.hxx>
-#include <Standard_RangeError.hxx>
+#include <Standard_NoSuchObject.hxx>
 #include <Standard_NotImplemented.hxx>
-#include <CSLib_Offset.hxx>
+#include <Standard_RangeError.hxx>
+#include <Standard_Type.hxx>
 
 typedef Geom_OffsetCurve         OffsetCurve;
-typedef Handle(Geom_OffsetCurve) Handle(OffsetCurve);
 typedef Geom_Curve               Curve;
-typedef Handle(Geom_Curve)       Handle(Curve);
-typedef Handle(Geom_Geometry)    Handle(Geometry);
-
 typedef gp_Dir  Dir;
 typedef gp_Pnt  Pnt;
 typedef gp_Trsf Trsf;
 typedef gp_Vec  Vec;
 typedef gp_XYZ  XYZ;
-
-
-
 
 //ordre de derivation maximum pour la recherche de la premiere 
 //derivee non nulle
@@ -79,7 +75,7 @@ static Standard_Boolean AdjustDerivative(
 
 Handle(Geom_Geometry) Geom_OffsetCurve::Copy () const {
 
- Handle(OffsetCurve) C;
+ Handle(Geom_OffsetCurve) C;
  C = new OffsetCurve (basisCurve, offsetValue, direction);
  return C;
 }
@@ -174,12 +170,12 @@ Standard_Real Geom_OffsetCurve::Period () const
 //purpose  : 
 //=======================================================================
 
-void Geom_OffsetCurve::SetBasisCurve (const Handle(Curve)& C,
+void Geom_OffsetCurve::SetBasisCurve (const Handle(Geom_Curve)& C,
                                       const Standard_Boolean isNotCheckC0)
 {
   const Standard_Real aUf = C->FirstParameter(),
                       aUl = C->LastParameter();
-  Handle(Curve) aCheckingCurve =  Handle(Curve)::DownCast(C->Copy());
+  Handle(Geom_Curve) aCheckingCurve =  Handle(Geom_Curve)::DownCast(C->Copy());
   Standard_Boolean isTrimmed = Standard_False;
 
   while(aCheckingCurve->IsKind(STANDARD_TYPE(Geom_TrimmedCurve)) ||
@@ -255,7 +251,7 @@ void Geom_OffsetCurve::SetBasisCurve (const Handle(Curve)& C,
 //purpose  : 
 //=======================================================================
 
-Handle(Curve) Geom_OffsetCurve::BasisCurve () const 
+Handle(Geom_Curve) Geom_OffsetCurve::BasisCurve () const 
 { 
   return basisCurve;
 }

@@ -16,31 +16,33 @@
 
 //  modified by Edward AGAPOV (eap) Jan 28 2002 --- DN(), occ143(BUC60654)
 
-
-
-#include <Geom2d_OffsetCurve.ixx>
-#include <gp.hxx>
-#include <Standard_ConstructionError.hxx>
-#include <Standard_RangeError.hxx>
-#include <Standard_NotImplemented.hxx>
 #include <CSLib_Offset.hxx>
-#include <Geom2d_UndefinedDerivative.hxx>
-#include <Geom2d_UndefinedValue.hxx>
-#include <Geom2d_Line.hxx>
-#include <Geom2d_Circle.hxx>
-#include <Geom2d_Ellipse.hxx>
-#include <Geom2d_Hyperbola.hxx>
-#include <Geom2d_Parabola.hxx>
 #include <Geom2d_BezierCurve.hxx>
 #include <Geom2d_BSplineCurve.hxx>
+#include <Geom2d_Circle.hxx>
+#include <Geom2d_Curve.hxx>
+#include <Geom2d_Ellipse.hxx>
+#include <Geom2d_Geometry.hxx>
+#include <Geom2d_Hyperbola.hxx>
+#include <Geom2d_Line.hxx>
+#include <Geom2d_OffsetCurve.hxx>
+#include <Geom2d_Parabola.hxx>
 #include <Geom2d_TrimmedCurve.hxx>
+#include <Geom2d_UndefinedDerivative.hxx>
+#include <Geom2d_UndefinedValue.hxx>
+#include <gp.hxx>
+#include <gp_Pnt2d.hxx>
+#include <gp_Trsf2d.hxx>
+#include <gp_Vec2d.hxx>
 #include <gp_XY.hxx>
 #include <Precision.hxx>
+#include <Standard_ConstructionError.hxx>
+#include <Standard_NoSuchObject.hxx>
+#include <Standard_NotImplemented.hxx>
+#include <Standard_RangeError.hxx>
+#include <Standard_Type.hxx>
 
-typedef Handle(Geom2d_OffsetCurve) Handle(OffsetCurve);
 typedef Geom2d_OffsetCurve         OffsetCurve;
-typedef Handle(Geom2d_Geometry)    Handle(Geometry);
-typedef Handle(Geom2d_Curve)       Handle(Curve);
 typedef Geom2d_Curve               Curve;
 typedef gp_Dir2d  Dir2d;
 typedef gp_Pnt2d  Pnt2d;
@@ -70,7 +72,7 @@ static Standard_Boolean AdjustDerivative(const Handle(Geom2d_Curve)& theCurve, S
 
 Handle(Geom2d_Geometry) Geom2d_OffsetCurve::Copy () const 
 {
-  Handle(OffsetCurve) C;
+  Handle(Geom2d_OffsetCurve) C;
   C = new OffsetCurve (basisCurve, offsetValue);
   return C;
 }
@@ -116,7 +118,7 @@ Standard_Real Geom2d_OffsetCurve::ReversedParameter( const Standard_Real U) cons
 //purpose  : 
 //=======================================================================
 
-void Geom2d_OffsetCurve::SetBasisCurve (const Handle(Curve)& C,
+void Geom2d_OffsetCurve::SetBasisCurve (const Handle(Geom2d_Curve)& C,
                                         const Standard_Boolean isNotCheckC0) 
 {
   const Standard_Real aUf = C->FirstParameter(),
@@ -189,7 +191,7 @@ void Geom2d_OffsetCurve::SetOffsetValue (const Standard_Real D) { offsetValue = 
 //purpose  : 
 //=======================================================================
 
-Handle(Curve) Geom2d_OffsetCurve::BasisCurve () const 
+Handle(Geom2d_Curve) Geom2d_OffsetCurve::BasisCurve () const 
 { 
   return basisCurve;
 }

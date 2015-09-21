@@ -14,27 +14,29 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <Geom_Parabola.ixx>
 
-#include <Precision.hxx>
 #include <ElCLib.hxx>
+#include <Geom_Geometry.hxx>
+#include <Geom_Parabola.hxx>
+#include <gp_Ax1.hxx>
+#include <gp_Ax2.hxx>
+#include <gp_Parab.hxx>
+#include <gp_Pnt.hxx>
+#include <gp_Trsf.hxx>
+#include <gp_Vec.hxx>
 #include <gp_XYZ.hxx>
+#include <Precision.hxx>
 #include <Standard_ConstructionError.hxx>
 #include <Standard_RangeError.hxx>
+#include <Standard_Type.hxx>
 
 typedef Geom_Parabola         Parabola;
-typedef Handle(Geom_Parabola) Handle(Parabola);
 typedef gp_Ax1  Ax1;
 typedef gp_Ax2  Ax2;
 typedef gp_Pnt  Pnt;
 typedef gp_Trsf Trsf;
 typedef gp_Vec  Vec;
 typedef gp_XYZ  XYZ;
-
-
-
-
-
 
 //=======================================================================
 //function : Copy
@@ -43,7 +45,7 @@ typedef gp_XYZ  XYZ;
 
 Handle(Geom_Geometry) Geom_Parabola::Copy() const {
 
-   Handle(Parabola) Prb;
+   Handle(Geom_Parabola) Prb;
    Prb = new Parabola (pos, focalLength);
    return Prb;
 }

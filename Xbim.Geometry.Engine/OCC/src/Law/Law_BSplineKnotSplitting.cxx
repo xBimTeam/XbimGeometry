@@ -14,30 +14,20 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <Law_BSplineKnotSplitting.ixx>
-
-
-#include <Law_BSplineKnotSplitting.ixx>
-#include <Standard_RangeError.hxx>
 
 #include <BSplCLib.hxx>
+#include <Law_BSpline.hxx>
+#include <Law_BSplineKnotSplitting.hxx>
+#include <Standard_DimensionError.hxx>
+#include <Standard_RangeError.hxx>
 
-typedef Handle(Law_BSpline)             Handle(BSplineCurve);
 typedef TColStd_Array1OfInteger         Array1OfInteger;
 typedef TColStd_HArray1OfInteger        HArray1OfInteger;
 
-
-
-
 Law_BSplineKnotSplitting::
-Law_BSplineKnotSplitting (
-
-const Handle(BSplineCurve)& BasisCurve, 
-const Standard_Integer               ContinuityRange
-
-) {
-
-
+Law_BSplineKnotSplitting (const Handle(Law_BSpline)& BasisCurve, 
+                          const Standard_Integer ContinuityRange)
+{
   if (ContinuityRange < 0)  Standard_RangeError::Raise();
 
   Standard_Integer FirstIndex = BasisCurve->FirstUKnotIndex();

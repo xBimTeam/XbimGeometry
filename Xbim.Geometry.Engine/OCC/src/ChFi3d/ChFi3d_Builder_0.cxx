@@ -82,6 +82,8 @@
 #include <BRepAdaptor_HCurve2d.hxx>
 #include <BRepAdaptor_Surface.hxx>
 #include <BRepTopAdaptor_HVertex.hxx>
+#include <BRepTopAdaptor_TopolTool.hxx>
+#include <LocalAnalysis_SurfaceContinuity.hxx>
 
 #include <BRep_Tool.hxx>
 #include <BRep_Builder.hxx>
@@ -139,6 +141,7 @@
 #include <TopOpeBRepDS_CurvePointInterference.hxx>
 #include <TopOpeBRepDS_ListOfInterference.hxx>
 #include <TopOpeBRepDS_InterferenceIterator.hxx>
+#include <TopOpeBRepTool_TOOL.hxx>
 #include <ProjLib_ProjectedCurve.hxx>
 
 #include <BRepBlend_PointOnRst.hxx>
@@ -174,6 +177,7 @@ extern void ChFi3d_ResultChron(OSD_Chronometer & ch,Standard_Real& time);
 
 #include <GeomAdaptor_HCurve.hxx>
 #include <BRepAdaptor_HSurface.hxx>
+#include <TopOpeBRepDS_SurfaceCurveInterference.hxx>
 
 //=======================================================================
 //function : ChFi3d_InPeriod
@@ -409,11 +413,13 @@ ChFiDS_State ChFi3d_EdgeState(TopoDS_Edge* E,
 {
   ChFiDS_State sst;
   Standard_Integer i,j;
-  TopoDS_Face F[3];
+  //TopoDS_Face F[3];
   TopoDS_Face F1,F2,F3,F4,F5,F6;
   ChFi3d_conexfaces(E[0],F1,F2,EFMap);
   ChFi3d_conexfaces(E[1],F3,F4,EFMap);
   ChFi3d_conexfaces(E[2],F5,F6,EFMap);
+
+  /*
   if(F1.IsSame(F2)) {
     F[0] = F[1] = F1;
     if(F1.IsSame(F3)) F[2] = F4;
@@ -438,13 +444,22 @@ ChFiDS_State ChFi3d_EdgeState(TopoDS_Edge* E,
     else F[1] = F5;
 
   }
-
-  if(F[0].IsNull() || F[1].IsNull() || F[2].IsNull()) sst = ChFiDS_FreeBoundary;
+  */
+  
+  //if(F[0].IsNull() || F[1].IsNull() || F[2].IsNull()) sst = ChFiDS_FreeBoundary;
+  if (F2.IsNull() || F4.IsNull() || F6.IsNull())
+    sst = ChFiDS_FreeBoundary;
   else{
     TopAbs_Orientation o01,o02,o11,o12,o21,o22;
+    /*
     i=ChFi3d::ConcaveSide(F[0],F[1],E[0],o01,o02);
     i=ChFi3d::ConcaveSide(F[0],F[2],E[1],o11,o12);
     j=ChFi3d::ConcaveSide(F[1],F[2],E[2],o21,o22);
+    */
+    i=ChFi3d::ConcaveSide(F1, F2, E[0], o01, o02);
+    i=ChFi3d::ConcaveSide(F3, F4, E[1], o11, o12);
+    j=ChFi3d::ConcaveSide(F5, F6, E[2], o21, o22);
+    
     if(o01==o11 && o02==o21 && o12==o22) sst = ChFiDS_AllSame;
     else if(o12==o22 || i ==10 || j ==10) sst = ChFiDS_OnDiff;
     else sst = ChFiDS_OnSame;
@@ -617,8 +632,8 @@ void ChFi3d_BoundSrf(GeomAdaptor_Surface& S,
 //function : ChFi3d_InterPlaneEdge
 //purpose  : 
 //=======================================================================
-Standard_Boolean  ChFi3d_InterPlaneEdge (Handle(Adaptor3d_HSurface)& Plan,
-  Handle(Adaptor3d_HCurve)&  C,
+Standard_Boolean  ChFi3d_InterPlaneEdge (const Handle(Adaptor3d_HSurface)& Plan,
+  const Handle(Adaptor3d_HCurve)&  C,
   Standard_Real& W,
   const Standard_Boolean Sens,
   const Standard_Real tolc)
@@ -1319,8 +1334,8 @@ void ChFi3d_ComputePCurv(const Handle(Geom_Curve)&   C3d,
   Standard_Real&              tolreached,
   const Standard_Boolean      reverse)
 {
-  /*szv:static*/ Handle(GeomAdaptor_HSurface) hs(new GeomAdaptor_HSurface(S));
-  /*szv:static*/ Handle(GeomAdaptor_HCurve) hc(new GeomAdaptor_HCurve(C3d,Pardeb,Parfin));
+  Handle(Adaptor3d_HSurface) hs(new GeomAdaptor_HSurface(S));
+  Handle(Adaptor3d_HCurve) hc(new GeomAdaptor_HCurve(C3d,Pardeb,Parfin));
   ChFi3d_ComputePCurv(hc,UV1,UV2,Pcurv,hs,Pardeb,Parfin,tol3d,tolreached,reverse);
 }
 //=======================================================================
@@ -1432,7 +1447,7 @@ Handle(GeomFill_Boundary) ChFi3d_mkbound(const Handle(Geom_Surface)& s,
   const Standard_Real ta,
   const Standard_Boolean isfreeboundary)
 {
-  Handle(GeomAdaptor_HSurface) HS = new GeomAdaptor_HSurface(s);
+  Handle(Adaptor3d_HSurface) HS = new GeomAdaptor_HSurface(s);
   return ChFi3d_mkbound(HS,p1,p2,t3d,ta,isfreeboundary);
 }
 //=======================================================================
@@ -1635,7 +1650,8 @@ void  ChFi3d_ComputeArete(const ChFiDS_CommonPoint&   P1,
     if(IFlag != 1) {
       hs->ChangeSurface().Load(Surf);
       hc->ChangeCurve().Load(C3d,Pardeb,Parfin);
-      ChFi3d_ComputePCurv(hc,UV1,UV2,Pcurv,hs,Pardeb,Parfin,tol3d,tolreached,Standard_False);
+      const Handle(Adaptor3d_HCurve)& aHCurve = hc; // to avoid ambiguity
+      ChFi3d_ComputePCurv(aHCurve,UV1,UV2,Pcurv,hs,Pardeb,Parfin,tol3d,tolreached,Standard_False);
     }
     else{
       Pcurv = new Geom2d_Line(UV1,gp_Vec2d(UV1,UV2));
@@ -1664,7 +1680,8 @@ void  ChFi3d_ComputeArete(const ChFiDS_CommonPoint&   P1,
     if(IFlag != 1) {
       hs->ChangeSurface().Load(Surf);
       hc->ChangeCurve().Load(C3d,Pardeb,Parfin);
-      ChFi3d_ComputePCurv(hc,UV1,UV2,Pcurv,hs,Pardeb,Parfin,tol3d,tolreached,Standard_False);
+      const Handle(Adaptor3d_HCurve)& aHCurve = hc; // to avoid ambiguity
+      ChFi3d_ComputePCurv(aHCurve,UV1,UV2,Pcurv,hs,Pardeb,Parfin,tol3d,tolreached,Standard_False);
     }
     else{
       Pcurv = new Geom2d_Line(UV1,gp_Vec2d(UV1,UV2));
@@ -1701,7 +1718,7 @@ void  ChFi3d_ComputeArete(const ChFiDS_CommonPoint&   P1,
       bs.Update(umin,vmin,umax,vmax);
       Standard_Boolean aIN = Standard_True;
       for(Standard_Integer ii = 1; ii <= 4 && aIN; ii++) {
-	if(bs.IsOut((*((Handle(Geom2d_BezierCurve)*) &Pcurv))->Pole(ii))) {
+	if(bs.IsOut(Handle(Geom2d_BezierCurve)::DownCast (Pcurv)->Pole(ii))) {
           aIN = Standard_False;
           TColgp_Array1OfPnt2d qoles(1,2);
           qoles(1)=UV1;
@@ -2008,8 +2025,7 @@ static void QueryAddVertexInEdge(TopOpeBRepDS_ListOfInterference& LI,
   TopOpeBRepDS_ListIteratorOfListOfInterference it(LI);
   for (; it.More(); it.Next() ) {
     const Handle(TopOpeBRepDS_Interference)& cur = it.Value();
-    const Handle(TopOpeBRepDS_CurvePointInterference)& cpi = 
-      Handle(TopOpeBRepDS_CurvePointInterference)::DownCast(cur);
+    Handle(TopOpeBRepDS_CurvePointInterference) cpi (Handle(TopOpeBRepDS_CurvePointInterference)::DownCast(cur));
     if(!cpi.IsNull()) {
       Standard_Integer newIV = cpi->Geometry();
       TopOpeBRepDS_Kind kv = cpi->GeometryType();
@@ -3011,8 +3027,8 @@ static void CurveCleaner(Handle(Geom_BSplineCurve)& BS,
 //           <wholeCurv> means that the resulting curve is restricted by
 //           boundaries of input surfaces (eap 30 May occ354)
 //=======================================================================
-Standard_Boolean ChFi3d_ComputeCurves(Handle(Adaptor3d_HSurface)&   S1,
-  Handle(Adaptor3d_HSurface)&   S2,
+Standard_Boolean ChFi3d_ComputeCurves(const Handle(Adaptor3d_HSurface)&   S1,
+  const Handle(Adaptor3d_HSurface)&   S2,
   const TColStd_Array1OfReal& Pardeb,
   const TColStd_Array1OfReal& Parfin,
   Handle(Geom_Curve)&         C3d,
@@ -3488,10 +3504,10 @@ Standard_Boolean ChFi3d_ComputeCurves(Handle(Adaptor3d_HSurface)&   S1,
 //
 //=======================================================================
 
-Standard_Boolean ChFi3d_IntCS(Handle(Adaptor3d_HSurface)& S,
-  Handle(Adaptor3d_HCurve)& C,
-  gp_Pnt2d& p2dS,
-  Standard_Real& wc)
+Standard_Boolean ChFi3d_IntCS(const Handle(Adaptor3d_HSurface)& S,
+                              const Handle(Adaptor3d_HCurve)& C,
+                              gp_Pnt2d& p2dS,
+                              Standard_Real& wc)
 {
   IntCurveSurface_HInter Intersection;
 
@@ -4183,8 +4199,9 @@ Standard_EXPORT
     Bout = PDeb.Translated(-20*rabdist * VrefDeb);
     Standard_Boolean goodext = 0;
     for(Standard_Integer icont = 3; icont>=1 && !goodext; icont--) {
-      newc = BSpline;
-      GeomLib::ExtendCurveToPoint( newc, Bout, icont, Standard_False);
+      Handle(Geom_BoundedCurve) anExtCurve = BSpline;
+      GeomLib::ExtendCurveToPoint (anExtCurve, Bout, icont, Standard_False);
+      newc = Handle(Geom_BSplineCurve)::DownCast (anExtCurve);
       gacurve.Load(newc);
       GCPnts_AbscissaPoint GCP(gacurve,-rabdist,Wrefdeb,WF);
       if(GCP.IsDone()) {
@@ -4208,8 +4225,9 @@ Standard_EXPORT
     Bout = PFin.Translated(20*rabdist * VrefFin);
     Standard_Boolean goodext = 0;
     for(Standard_Integer icont = 3; icont>=1 && !goodext; icont--) {
-      newc = BSpline;
-      GeomLib::ExtendCurveToPoint( newc, Bout, icont, Standard_True);
+      Handle(Geom_BoundedCurve) anExtCurve = BSpline;
+      GeomLib::ExtendCurveToPoint (anExtCurve, Bout, icont, Standard_True);
+      newc = Handle(Geom_BSplineCurve)::DownCast (anExtCurve);
       gacurve.Load(newc);
       GCPnts_AbscissaPoint GCP(gacurve,rabdist,Wreffin,WL);
       if(GCP.IsDone()) {
@@ -4336,7 +4354,9 @@ Standard_EXPORT
         adjust = Standard_True;
     }
     if(adjust) {
-      GeomLib::AdjustExtremity(BSpline, PDeb, PFin, VrefDeb, VrefFin);
+      Handle(Geom_BoundedCurve) anExtCurve = BSpline;
+      GeomLib::AdjustExtremity(anExtCurve, PDeb, PFin, VrefDeb, VrefFin);
+      BSpline = Handle(Geom_BSplineCurve)::DownCast (anExtCurve);
     }
   }
 
@@ -4561,6 +4581,89 @@ void ChFi3d_ChercheBordsLibres(const  ChFiDS_Map & myVEMap,
   }
 }
 
+Standard_Boolean ChFi3d_isTangentFaces(const TopoDS_Edge &theEdge,
+                                       const TopoDS_Face &theFace1,
+                                       const TopoDS_Face &theFace2,
+                                       const GeomAbs_Shape Order)
+{
+  if (Order == GeomAbs_G1 &&
+      BRep_Tool::Continuity( theEdge, theFace1, theFace2 ) != GeomAbs_C0)
+    return Standard_True;
+
+  Standard_Real TolC0 = Max(0.001, 1.5*BRep_Tool::Tolerance(theEdge));
+
+  Standard_Real aFirst;
+  Standard_Real aLast;
+    
+// Obtaining of pcurves of edge on two faces.
+  const Handle(Geom2d_Curve) aC2d1 = BRep_Tool::CurveOnSurface
+                                                (theEdge, theFace1, aFirst, aLast);
+  const Handle(Geom2d_Curve) aC2d2 = BRep_Tool::CurveOnSurface
+                                                (theEdge, theFace2, aFirst, aLast);
+  if (aC2d1.IsNull() || aC2d2.IsNull())
+    return Standard_False;
+
+// Obtaining of two surfaces from adjacent faces.
+  Handle(Geom_Surface) aSurf1 = BRep_Tool::Surface(theFace1);
+  Handle(Geom_Surface) aSurf2 = BRep_Tool::Surface(theFace2);
+
+  if (aSurf1.IsNull() || aSurf2.IsNull())
+    return Standard_False;
+
+// Computation of the number of samples on the edge.
+  BRepAdaptor_Surface              aBAS1(theFace1);
+  BRepAdaptor_Surface              aBAS2(theFace2);
+  Handle(BRepAdaptor_HSurface)     aBAHS1      = new BRepAdaptor_HSurface(aBAS1);
+  Handle(BRepAdaptor_HSurface)     aBAHS2      = new BRepAdaptor_HSurface(aBAS2);
+  Handle(BRepTopAdaptor_TopolTool) aTool1      = new BRepTopAdaptor_TopolTool(aBAHS1);
+  Handle(BRepTopAdaptor_TopolTool) aTool2      = new BRepTopAdaptor_TopolTool(aBAHS2);
+  Standard_Integer                 aNbSamples1 =     aTool1->NbSamples();
+  Standard_Integer                 aNbSamples2 =     aTool2->NbSamples();
+  Standard_Integer                 aNbSamples  =     Max(aNbSamples1, aNbSamples2);
+
+
+// Computation of the continuity.
+  Standard_Real    aPar;
+  Standard_Real    aDelta = (aLast - aFirst)/(aNbSamples - 1);
+  Standard_Integer i, nbNotDone = 0;
+
+  for (i = 1, aPar = aFirst; i <= aNbSamples; i++, aPar += aDelta) {
+    if (i == aNbSamples) aPar = aLast;
+
+    LocalAnalysis_SurfaceContinuity aCont(aC2d1,  aC2d2,  aPar,
+					  aSurf1, aSurf2, Order,
+					  0.001, TolC0, 0.1, 0.1, 0.1);
+    if (!aCont.IsDone())
+      {
+	nbNotDone++;
+	continue;
+      }
+    
+    if (Order == GeomAbs_G1)
+    {
+      if (!aCont.IsG1())
+        return Standard_False;
+    }
+    else if (!aCont.IsG2())
+      return Standard_False;
+  }
+  
+  if (nbNotDone == aNbSamples)
+    return Standard_False;
+
+  //Compare normals of tangent faces in the middle point
+  Standard_Real MidPar = (aFirst + aLast)/2.;
+  gp_Pnt2d uv1 = aC2d1->Value(MidPar);
+  gp_Pnt2d uv2 = aC2d2->Value(MidPar);
+  gp_Dir normal1, normal2;
+  TopOpeBRepTool_TOOL::Nt( uv1, theFace1, normal1 );
+  TopOpeBRepTool_TOOL::Nt( uv2, theFace2, normal2 );
+  Standard_Real dot = normal1.Dot(normal2);
+  if (dot < 0.)
+    return Standard_False;
+  return Standard_True;
+}
+
 //=======================================================================
 //function : NbNotDegeneratedEdges
 //purpose  : calculate the number of non-degenerated edges of Map VEMap(Vtx)
@@ -4574,6 +4677,31 @@ Standard_Integer ChFi3d_NbNotDegeneratedEdges (const TopoDS_Vertex& Vtx,
   for (ItE.Initialize(VEMap(Vtx)); ItE.More(); ItE.Next()) {
     const TopoDS_Edge& cur = TopoDS::Edge(ItE.Value());
     if (BRep_Tool::Degenerated(cur)) nba--;
+  }
+  return nba;
+}
+
+//=======================================================================
+//function : NbSharpEdges
+//purpose  : calculate the number of sharp edges of Map VEMap(Vtx)
+// Attention the edges of junctions are taken into account twice
+//=======================================================================
+Standard_Integer ChFi3d_NbSharpEdges (const TopoDS_Vertex& Vtx,
+                                      const ChFiDS_Map& VEMap,
+                                      const ChFiDS_Map& EFMap)
+{
+  TopTools_ListIteratorOfListOfShape ItE;
+  Standard_Integer nba=VEMap(Vtx).Extent();
+  for (ItE.Initialize(VEMap(Vtx)); ItE.More(); ItE.Next()) {
+    const TopoDS_Edge& cur = TopoDS::Edge(ItE.Value());
+    if (BRep_Tool::Degenerated(cur)) nba--;
+    else
+    {
+      TopoDS_Face F1, F2;
+      ChFi3d_conexfaces(cur, F1, F2, EFMap);
+      if (!F2.IsNull() && ChFi3d_isTangentFaces(cur, F1, F2, GeomAbs_G2))
+        nba--;
+    }
   }
   return nba;
 }
@@ -4595,6 +4723,26 @@ Standard_Integer ChFi3d_NumberOfEdges(const TopoDS_Vertex& Vtx,
   else  nba=nba/2;
   return nba;
 }
+
+//=======================================================================
+//function : NumberOfSharpEdges
+//purpose  : calculate the number of edges arriving to the top Vtx
+// degenerated edges are not taken into account. 
+//=======================================================================
+Standard_Integer ChFi3d_NumberOfSharpEdges(const TopoDS_Vertex& Vtx,
+                                           const ChFiDS_Map& VEMap,
+                                           const ChFiDS_Map& EFmap)
+{
+  Standard_Integer nba;
+  Standard_Boolean bordlibre;
+  TopoDS_Edge edgelibre1,edgelibre2;
+  nba=ChFi3d_NbSharpEdges(Vtx, VEMap, EFmap);
+  ChFi3d_ChercheBordsLibres(VEMap,Vtx,bordlibre,edgelibre1,edgelibre2);
+  if (bordlibre) nba=(nba-2)/2 +2;
+  else  nba=nba/2;
+  return nba;
+}
+
 //=====================================================
 // function cherche_vertex
 // finds common vertex between two edges 

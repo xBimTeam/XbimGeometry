@@ -14,15 +14,19 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <BRepBuilderAPI_MakeSolid.ixx>
-#include <TopoDS.hxx>
 
+#include <BRepBuilderAPI_MakeSolid.hxx>
+#include <StdFail_NotDone.hxx>
+#include <TopoDS.hxx>
+#include <TopoDS_CompSolid.hxx>
+#include <TopoDS_Shape.hxx>
+#include <TopoDS_Shell.hxx>
+#include <TopoDS_Solid.hxx>
 
 //=======================================================================
 //function : BRepBuilderAPI_MakeSolid
 //purpose  : 
 //=======================================================================
-
 BRepBuilderAPI_MakeSolid::BRepBuilderAPI_MakeSolid()
 {
 }
@@ -151,7 +155,7 @@ Standard_Boolean BRepBuilderAPI_MakeSolid::IsDone() const
 //purpose  : 
 //=======================================================================
 
-const TopoDS_Solid&  BRepBuilderAPI_MakeSolid::Solid()const 
+const TopoDS_Solid&  BRepBuilderAPI_MakeSolid::Solid()
 {
   return myMakeSolid.Solid();
 }
@@ -163,7 +167,7 @@ const TopoDS_Solid&  BRepBuilderAPI_MakeSolid::Solid()const
 //purpose  : 
 //=======================================================================
 
-BRepBuilderAPI_MakeSolid::operator TopoDS_Solid() const
+BRepBuilderAPI_MakeSolid::operator TopoDS_Solid()
 {
   return Solid();
 }

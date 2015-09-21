@@ -22,16 +22,13 @@
 #include <BRepMesh_IEdgeTool.hxx>
 #include <BRepMesh_GeomTool.hxx>
 #include <BRepMesh_FaceAttribute.hxx>
-#include <Handle_Geom_Surface.hxx>
-#include <Handle_Geom2d_Curve.hxx>
-#include <Handle_BRepAdaptor_HSurface.hxx>
 #include <BRepAdaptor_Curve.hxx>
+#include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
 
 class Geom_Surface;
 class Geom2d_Curve;
 class TopoDS_Edge;
 class BRepAdaptor_HSurface;
-class TopTools_IndexedDataMapOfShapeListOfShape;
 
 //! Auxiliary class implements functionality producing tessellated
 //! representation of an edge based on edge geometry.
@@ -66,7 +63,7 @@ public:
                      gp_Pnt&                thePoint,
                      gp_Pnt2d&              theUV);
 
-  DEFINE_STANDARD_RTTI(BRepMesh_EdgeTessellator)
+  DEFINE_STANDARD_RTTI(BRepMesh_EdgeTessellator, BRepMesh_IEdgeTool)
 
 private:
 

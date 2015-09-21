@@ -14,47 +14,53 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <BRepOffsetAPI_DraftAngle.ixx>
 
-#include <Draft_Modification.hxx>
-#include <TopoDS.hxx>
-#include <Geom_Surface.hxx>
-#include <TopLoc_Location.hxx>
-
-#include <TopTools_ListIteratorOfListOfShape.hxx>
-
-#include <BRepLib.hxx>
-#include <BRepFill_DataMapOfShapeSequenceOfReal.hxx>
-#include <TopTools_DataMapOfShapeSequenceOfShape.hxx>
-#include <TopTools_SequenceOfShape.hxx>
-#include <TopoDS_Iterator.hxx>
-#include <TopExp_Explorer.hxx>
-#include <BRepTools.hxx>
-#include <TColgp_SequenceOfPnt.hxx>
-#include <TColStd_SequenceOfReal.hxx>
-#include <TopOpeBRep_EdgesIntersector.hxx>
-#include <TopOpeBRep_Point2d.hxx>
-#include <Precision.hxx>
-#include <BRepFill_DataMapIteratorOfDataMapOfShapeSequenceOfReal.hxx>
-#include <BRepOffsetAPI_SequenceOfSequenceOfReal.hxx>
-#include <BRepOffsetAPI_SequenceOfSequenceOfShape.hxx>
-#include <BRepTools_Substitution.hxx>
 #include <BRep_Builder.hxx>
-#include <TopExp.hxx>
+#include <BRep_GCurve.hxx>
+#include <BRep_ListIteratorOfListOfCurveRepresentation.hxx>
+#include <BRep_TEdge.hxx>
 #include <BRep_Tool.hxx>
 #include <BRepAdaptor_Curve.hxx>
-#include <BRepLib_MakeVertex.hxx>
-#include <BRep_TEdge.hxx>
-#include <BRep_ListIteratorOfListOfCurveRepresentation.hxx>
-#include <BRep_GCurve.hxx>
-#include <TopoDS_Wire.hxx>
 #include <BRepAdaptor_Curve2d.hxx>
+#include <BRepFill_DataMapIteratorOfDataMapOfShapeSequenceOfReal.hxx>
+#include <BRepFill_DataMapOfShapeSequenceOfReal.hxx>
+#include <BRepLib.hxx>
+#include <BRepLib_MakeVertex.hxx>
+#include <BRepOffsetAPI_DraftAngle.hxx>
+#include <BRepOffsetAPI_SequenceOfSequenceOfReal.hxx>
+#include <BRepOffsetAPI_SequenceOfSequenceOfShape.hxx>
+#include <BRepTools.hxx>
+#include <BRepTools_Substitution.hxx>
+#include <Draft_Modification.hxx>
+#include <Geom2d_Curve.hxx>
+#include <Geom_Surface.hxx>
+#include <gp_Dir.hxx>
+#include <gp_Pln.hxx>
+#include <Precision.hxx>
+#include <Standard_ConstructionError.hxx>
+#include <Standard_NoSuchObject.hxx>
+#include <Standard_NullObject.hxx>
+#include <StdFail_NotDone.hxx>
+#include <TColgp_SequenceOfPnt.hxx>
+#include <TColStd_SequenceOfReal.hxx>
+#include <TopExp.hxx>
+#include <TopExp_Explorer.hxx>
+#include <TopLoc_Location.hxx>
+#include <TopoDS.hxx>
+#include <TopoDS_Face.hxx>
+#include <TopoDS_Iterator.hxx>
+#include <TopoDS_Shape.hxx>
+#include <TopoDS_Wire.hxx>
+#include <TopOpeBRep_EdgesIntersector.hxx>
+#include <TopOpeBRep_Point2d.hxx>
+#include <TopTools_DataMapOfShapeSequenceOfShape.hxx>
+#include <TopTools_ListIteratorOfListOfShape.hxx>
+#include <TopTools_SequenceOfShape.hxx>
 
 //=======================================================================
 //function : BRepOffsetAPI_DraftAngle
 //purpose  : 
 //=======================================================================
-
 BRepOffsetAPI_DraftAngle::BRepOffsetAPI_DraftAngle () {}
 
 
@@ -78,7 +84,7 @@ BRepOffsetAPI_DraftAngle::BRepOffsetAPI_DraftAngle (const TopoDS_Shape& S)
 void BRepOffsetAPI_DraftAngle::Clear ()
 {
   if (!myModification.IsNull()) {
-    (*((Handle(Draft_Modification)*)&myModification))->Clear();
+    Handle(Draft_Modification)::DownCast (myModification)->Clear();
   }
 }
 
@@ -93,7 +99,7 @@ void BRepOffsetAPI_DraftAngle::Init (const TopoDS_Shape& S)
   myInitialShape = S;
   NotDone();
   if (!myModification.IsNull()) {
-    (*((Handle(Draft_Modification)*)&myModification))->Init(S);   
+    Handle(Draft_Modification)::DownCast (myModification)->Init(S);   
   }
   else {
     myModification = new Draft_Modification(S);
@@ -116,7 +122,7 @@ void BRepOffsetAPI_DraftAngle::Add(const TopoDS_Face& F,
   if ( Abs(Angle) <= 1.e-04 ) 
     return;
   Standard_NullObject_Raise_if(myInitialShape.IsNull(),"");
-  (*((Handle(Draft_Modification)*)&myModification))->Add(F,D,Angle,Plane, Flag);
+  Handle(Draft_Modification)::DownCast (myModification)->Add(F,D,Angle,Plane, Flag);
 }
 
 
@@ -128,7 +134,7 @@ void BRepOffsetAPI_DraftAngle::Add(const TopoDS_Face& F,
 Standard_Boolean BRepOffsetAPI_DraftAngle::AddDone () const
 {
   Standard_NullObject_Raise_if(myInitialShape.IsNull(),"");
-  return (*((Handle(Draft_Modification)*)&myModification))
+  return Handle(Draft_Modification)::DownCast (myModification)
     ->ProblematicShape().IsNull();
 }
 
@@ -141,7 +147,7 @@ Standard_Boolean BRepOffsetAPI_DraftAngle::AddDone () const
 void BRepOffsetAPI_DraftAngle::Remove(const TopoDS_Face& F)
 {
   Standard_NullObject_Raise_if(myInitialShape.IsNull(),"");
-  (*((Handle(Draft_Modification)*)&myModification))->Remove(F);
+  Handle(Draft_Modification)::DownCast (myModification)->Remove(F);
 }
 
 
@@ -153,7 +159,7 @@ void BRepOffsetAPI_DraftAngle::Remove(const TopoDS_Face& F)
 const TopoDS_Shape& BRepOffsetAPI_DraftAngle::ProblematicShape () const
 {
   Standard_NullObject_Raise_if(myInitialShape.IsNull(),"");
-  return (*((Handle(Draft_Modification)*)&myModification))->ProblematicShape();
+  return Handle(Draft_Modification)::DownCast (myModification)->ProblematicShape();
 }
 
 
@@ -165,7 +171,7 @@ const TopoDS_Shape& BRepOffsetAPI_DraftAngle::ProblematicShape () const
 Draft_ErrorStatus BRepOffsetAPI_DraftAngle::Status () const
 {
   Standard_NullObject_Raise_if(myInitialShape.IsNull(),"");
-  return (*((Handle(Draft_Modification)*)&myModification))->Error();
+  return Handle(Draft_Modification)::DownCast (myModification)->Error();
 }
 
 
@@ -178,7 +184,7 @@ const TopTools_ListOfShape& BRepOffsetAPI_DraftAngle::ConnectedFaces
    (const TopoDS_Face& F) const
 {
   Standard_NullObject_Raise_if(myInitialShape.IsNull(),"");
-  return (*((Handle(Draft_Modification)*)&myModification))->ConnectedFaces(F);
+  return Handle(Draft_Modification)::DownCast (myModification)->ConnectedFaces(F);
 }
 
 
@@ -190,7 +196,7 @@ const TopTools_ListOfShape& BRepOffsetAPI_DraftAngle::ConnectedFaces
 const TopTools_ListOfShape& BRepOffsetAPI_DraftAngle::ModifiedFaces() const
 {
   Standard_NullObject_Raise_if(myInitialShape.IsNull(),"");
-  return (*((Handle(Draft_Modification)*)&myModification))->ModifiedFaces();
+  return Handle(Draft_Modification)::DownCast (myModification)->ModifiedFaces();
 }
 
 //=======================================================================
@@ -202,7 +208,7 @@ const TopTools_ListOfShape& BRepOffsetAPI_DraftAngle::Generated(const TopoDS_Sha
 {
   myGenerated.Clear();
   Standard_NullObject_Raise_if(myInitialShape.IsNull(),"");
-  Handle(Draft_Modification) DMod = (*((Handle(Draft_Modification)*)&myModification));
+  Handle(Draft_Modification) DMod = Handle(Draft_Modification)::DownCast (myModification);
 
   if (S.ShapeType() == TopAbs_FACE) {
     Handle(Geom_Surface) Surf;
@@ -226,7 +232,7 @@ const TopTools_ListOfShape& BRepOffsetAPI_DraftAngle::Modified(const TopoDS_Shap
 {
   myGenerated.Clear();
   Standard_NullObject_Raise_if(myInitialShape.IsNull(),"");
-  Handle(Draft_Modification) DMod = (*((Handle(Draft_Modification)*)&myModification));
+  Handle(Draft_Modification) DMod = Handle(Draft_Modification)::DownCast (myModification);
 
   if (S.ShapeType() == TopAbs_FACE) {
     Handle(Geom_Surface) Surf;
@@ -253,8 +259,8 @@ const TopTools_ListOfShape& BRepOffsetAPI_DraftAngle::Modified(const TopoDS_Shap
 
 void BRepOffsetAPI_DraftAngle::Build()
 {
-  (*((Handle(Draft_Modification)*)&myModification))->Perform();
-  if (!(*((Handle(Draft_Modification)*)&myModification))->IsDone()) {
+  Handle(Draft_Modification)::DownCast (myModification)->Perform();
+  if (!Handle(Draft_Modification)::DownCast (myModification)->IsDone()) {
     NotDone();
   }
   else {

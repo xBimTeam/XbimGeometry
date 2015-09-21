@@ -17,118 +17,129 @@
 //  Modified by skv - Mon Jun  7 18:38:57 2004 OCC5898
 //  Modified by skv - Thu Aug 21 11:55:58 2008 OCC20222
 
-#include <ChFi3d_Builder.jxx>
-#include <ChFi3d.hxx>
-#include <ChFi3d_Builder_0.hxx>
-
-#include <Precision.hxx>
-
-#include <Standard_Failure.hxx>
-#include <Standard_NotImplemented.hxx>
-#include <StdFail_NotDone.hxx>
-
-
-#include <gp_Pnt.hxx>
-#include <gp_Dir.hxx>
-#include <gp_Vec.hxx>
-#include <gp_Ax3.hxx>
-#include <gp_Pnt2d.hxx>
-#include <gp_Vec2d.hxx>
-#include <gp_Dir2d.hxx>
-#include <gp_Elips.hxx>
-#include <gp_Circ.hxx>
-
-#include <ElCLib.hxx>
-#include <ElSLib.hxx>
-
-#include <Geom_Line.hxx>
-#include <Geom_Circle.hxx>
-#include <Geom_Ellipse.hxx>
-#include <Geom_RectangularTrimmedSurface.hxx>
-#include <Geom_Curve.hxx>
-#include <Geom2d_Line.hxx>
-#include <Geom2d_Curve.hxx>
-#include <Geom_BSplineCurve.hxx>
-#include <Geom_BSplineSurface.hxx>
-#include <Geom_BezierSurface.hxx>
-#include <Geom2d_BSplineCurve.hxx>
-#include <Geom2dAdaptor_HCurve.hxx>
-#include <Geom2d_TrimmedCurve.hxx>
-#include <Geom2dInt_GInter.hxx>
-#include <Geom_TrimmedCurve.hxx>
-#include <GeomAPI_ExtremaCurveCurve.hxx>
-#include <GeomAbs_Shape.hxx>
-#include <GeomAdaptor_HCurve.hxx>
-#include <GeomAdaptor_Surface.hxx>
-#include <GeomAdaptor_HSurface.hxx>
-#include <Geom_BoundedCurve.hxx>
-#include <GeomLib.hxx>
-#include <GeomInt_IntSS.hxx>
-#include <GeomProjLib.hxx>
-
-#include <Adaptor3d_HCurveOnSurface.hxx>
+#include <Adaptor2d_HCurve2d.hxx>
 #include <Adaptor3d_CurveOnSurface.hxx>
-#include <BRepAdaptor_HSurface.hxx>
+#include <Adaptor3d_HCurveOnSurface.hxx>
+#include <Adaptor3d_HSurface.hxx>
+#include <Adaptor3d_TopolTool.hxx>
+#include <AppBlend_Approx.hxx>
+#include <Blend_CurvPointFuncInv.hxx>
+#include <Blend_FuncInv.hxx>
+#include <Blend_Function.hxx>
+#include <Blend_RstRstFunction.hxx>
+#include <Blend_SurfCurvFuncInv.hxx>
+#include <Blend_SurfPointFuncInv.hxx>
+#include <Blend_SurfRstFunction.hxx>
+#include <BRep_Builder.hxx>
+#include <BRep_Tool.hxx>
 #include <BRepAdaptor_Curve.hxx>
 #include <BRepAdaptor_Curve2d.hxx>
-#include <BRepAdaptor_HCurve2d.hxx>
 #include <BRepAdaptor_HCurve.hxx>
+#include <BRepAdaptor_HCurve2d.hxx>
+#include <BRepAdaptor_HSurface.hxx>
 #include <BRepAdaptor_Surface.hxx>
-#include <BRepLib_MakeEdge.hxx>
 #include <BRepAlgo_NormalProjection.hxx>
+#include <BRepBlend_Line.hxx>
 #include <BRepExtrema_ExtCC.hxx>
-#include <BRep_Tool.hxx>
+#include <BRepLib_MakeEdge.hxx>
 #include <BRepTools.hxx>
-#include <BRep_Builder.hxx>
+#include <BRepTopAdaptor_TopolTool.hxx>
+#include <ChFi3d.hxx>
+#include <ChFi3d_Builder.hxx>
+#include <ChFi3d_Builder_0.hxx>
+#include <ChFiDS_CommonPoint.hxx>
+#include <ChFiDS_FaceInterference.hxx>
+#include <ChFiDS_HData.hxx>
+#include <ChFiDS_HElSpine.hxx>
+#include <ChFiDS_ListIteratorOfListOfStripe.hxx>
+#include <ChFiDS_Map.hxx>
+#include <ChFiDS_SequenceOfSurfData.hxx>
+#include <ChFiDS_Spine.hxx>
+#include <ChFiDS_Stripe.hxx>
+#include <ChFiDS_SurfData.hxx>
+#include <ElCLib.hxx>
+#include <ElSLib.hxx>
+#include <Extrema_ExtCC.hxx>
+#include <Extrema_ExtPC.hxx>
+#include <Extrema_ExtPC2d.hxx>
+#include <Extrema_ExtPS.hxx>
+#include <Extrema_LocateExtCC.hxx>
+#include <Extrema_POnCurv.hxx>
+#include <Geom2d_BSplineCurve.hxx>
+#include <Geom2d_Curve.hxx>
+#include <Geom2d_Line.hxx>
+#include <Geom2d_TrimmedCurve.hxx>
+#include <Geom2dAdaptor_HCurve.hxx>
+#include <Geom2dInt_GInter.hxx>
+#include <Geom_BezierSurface.hxx>
+#include <Geom_BoundedCurve.hxx>
+#include <Geom_BSplineCurve.hxx>
+#include <Geom_BSplineSurface.hxx>
+#include <Geom_Circle.hxx>
+#include <Geom_Curve.hxx>
+#include <Geom_Ellipse.hxx>
+#include <Geom_Line.hxx>
+#include <Geom_RectangularTrimmedSurface.hxx>
+#include <Geom_Surface.hxx>
+#include <Geom_TrimmedCurve.hxx>
+#include <GeomAbs_Shape.hxx>
+#include <GeomAdaptor_HCurve.hxx>
+#include <GeomAdaptor_HSurface.hxx>
+#include <GeomAdaptor_Surface.hxx>
+#include <GeomAPI_ExtremaCurveCurve.hxx>
+#include <GeomInt_IntSS.hxx>
+#include <GeomLib.hxx>
+#include <GeomProjLib.hxx>
+#include <gp_Ax3.hxx>
+#include <gp_Circ.hxx>
+#include <gp_Dir.hxx>
+#include <gp_Dir2d.hxx>
+#include <gp_Elips.hxx>
+#include <gp_Pnt.hxx>
+#include <gp_Pnt2d.hxx>
+#include <gp_Vec.hxx>
+#include <gp_Vec2d.hxx>
 #include <IntCurveSurface_HInter.hxx>
 #include <IntCurveSurface_IntersectionPoint.hxx>
 #include <IntRes2d_IntersectionPoint.hxx>
 #include <IntRes2d_Transition.hxx>
-#include <Extrema_LocateExtCC.hxx>
-#include <Extrema_POnCurv.hxx>
-#include <Extrema_ExtPC2d.hxx>
-#include <Extrema_ExtPC.hxx>
-#include <Extrema_ExtPS.hxx>
-#include <Extrema_ExtCC.hxx>
-
-#include <TopoDS.hxx>
-#include <TopoDS_Shape.hxx>
-#include <TopoDS_Face.hxx>
-#include <TopoDS_Edge.hxx>
-#include <TopoDS_Vertex.hxx>
-
+#include <Precision.hxx>
+#include <Standard_ConstructionError.hxx>
+#include <Standard_Failure.hxx>
+#include <Standard_NoSuchObject.hxx>
+#include <Standard_NotImplemented.hxx>
+#include <Standard_OutOfRange.hxx>
+#include <StdFail_NotDone.hxx>
+#include <TColgp_Array1OfPnt.hxx>
+#include <TColgp_Array1OfPnt2d.hxx>
+#include <TColStd_Array1OfInteger.hxx>
+#include <TColStd_Array1OfReal.hxx>
 #include <TopAbs.hxx>
-#include <TopAbs_ShapeEnum.hxx>
 #include <TopAbs_Orientation.hxx>
+#include <TopAbs_ShapeEnum.hxx>
 #include <TopExp.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopLoc_Location.hxx>
-#include <TopTools_ListIteratorOfListOfShape.hxx>
-
-#include <TopOpeBRepDS_Point.hxx>
+#include <TopoDS.hxx>
+#include <TopoDS_Edge.hxx>
+#include <TopoDS_Face.hxx>
+#include <TopoDS_Shape.hxx>
+#include <TopoDS_Vertex.hxx>
+#include <TopOpeBRepBuild_HBuilder.hxx>
 #include <TopOpeBRepDS_Curve.hxx>
-#include <TopOpeBRepDS_Surface.hxx>
-#include <TopOpeBRepDS_SurfaceCurveInterference.hxx>
 #include <TopOpeBRepDS_CurvePointInterference.hxx>
 #include <TopOpeBRepDS_DataStructure.hxx>
-#include <TopOpeBRepDS_ListOfInterference.hxx>
-#include <TopOpeBRepDS_ListIteratorOfListOfInterference.hxx>
-#include <TopOpeBRepDS_SolidSurfaceInterference.hxx>
+#include <TopOpeBRepDS_HDataStructure.hxx>
 #include <TopOpeBRepDS_Kind.hxx>
+#include <TopOpeBRepDS_ListIteratorOfListOfInterference.hxx>
+#include <TopOpeBRepDS_ListOfInterference.hxx>
+#include <TopOpeBRepDS_Point.hxx>
+#include <TopOpeBRepDS_SolidSurfaceInterference.hxx>
+#include <TopOpeBRepDS_Surface.hxx>
+#include <TopOpeBRepDS_SurfaceCurveInterference.hxx>
 #include <TopOpeBRepDS_Transition.hxx>
 #include <TopTools_Array1OfShape.hxx>
-#include <ChFiDS_HData.hxx>
-#include <ChFiDS_SurfData.hxx>
-#include <ChFiDS_CommonPoint.hxx>
-#include <ChFiDS_FaceInterference.hxx>
-#include <ChFiDS_SequenceOfSurfData.hxx>
-#include <ChFiDS_Stripe.hxx>
-#include <ChFiDS_ListIteratorOfListOfStripe.hxx>
-#include <ChFiDS_Map.hxx>
-#include <TColgp_Array1OfPnt.hxx>
-#include <TColgp_Array1OfPnt2d.hxx>
-#include <TColStd_Array1OfReal.hxx>
-#include <TColStd_Array1OfInteger.hxx>
+#include <TopTools_ListIteratorOfListOfShape.hxx>
 
 #ifdef OCCT_DEBUG
 # ifdef DRAW
@@ -149,11 +160,7 @@ extern void ChFi3d_ResultChron(OSD_Chronometer & ch,Standard_Real& time);
 #include <math_FunctionSample.hxx>
 #include <Geom2dAdaptor_Curve.hxx>
 #include <IntRes2d_IntersectionSegment.hxx>
-//  Modified by Sergey KHROMOV - Fri Dec 21 17:08:19 2001 Begin
-Standard_Boolean isTangentFaces(const TopoDS_Edge &theEdge,
-				const TopoDS_Face &theFace1,
-				const TopoDS_Face &theFace2);
-//  Modified by Sergey KHROMOV - Fri Dec 21 17:08:19 2001 End
+#include <Geom_BezierCurve.hxx>
 
 static Standard_Real recadre(const Standard_Real p,
 			     const Standard_Real ref,
@@ -175,9 +182,9 @@ static Standard_Real recadre(const Standard_Real p,
 //           parameter in FaceInterference.
 //=======================================================================
 
-static Standard_Boolean Update(Handle(Adaptor3d_HSurface)& fb,
-			       Handle(Adaptor2d_HCurve2d)& pcfb,
-			       Handle(Adaptor3d_HSurface)& surf,
+static Standard_Boolean Update(const Handle(Adaptor3d_HSurface)& fb,
+			       const Handle(Adaptor2d_HCurve2d)& pcfb,
+			       const Handle(Adaptor3d_HSurface)& surf,
 			       ChFiDS_FaceInterference&  fi,
 			       ChFiDS_CommonPoint&       cp,
 			       gp_Pnt2d&                 p2dbout,
@@ -217,8 +224,8 @@ static Standard_Boolean Update(Handle(Adaptor3d_HSurface)& fb,
 //           and <p2dbout>
 //=======================================================================
 
-static Standard_Boolean Update(Handle(Adaptor3d_HSurface)& fb,
-			       Handle(Adaptor3d_HCurve)&   ct,
+static Standard_Boolean Update(const Handle(Adaptor3d_HSurface)& fb,
+			       const Handle(Adaptor3d_HCurve)&   ct,
 			       ChFiDS_FaceInterference&  fi,
 			       ChFiDS_CommonPoint&       cp,
 			       gp_Pnt2d&                 p2dbout,
@@ -326,7 +333,7 @@ static Standard_Boolean IntersUpdateOnSame(Handle(GeomAdaptor_HSurface)& HGs,
   if ( Update(HBs,Hc3df,FIop,CPop,FprolUV,isFirst,c3dU) )
     return Standard_True;
 
-  if (!isTangentFaces(Eprol,Fprol,Fop))
+  if (!ChFi3d_isTangentFaces(Eprol,Fprol,Fop))
     return Standard_False;
 
   Handle(Geom2d_Curve) gpcprol = BRep_Tool::CurveOnSurface(Eprol,Fprol,uf,ul);
@@ -344,9 +351,9 @@ static Standard_Boolean IntersUpdateOnSame(Handle(GeomAdaptor_HSurface)& HGs,
 //           face at end.
 //=======================================================================
 
-static Standard_Boolean Update(Handle(Adaptor3d_HSurface)& face,
-			       Handle(Adaptor2d_HCurve2d)& edonface,
-			       Handle(Adaptor3d_HSurface)& surf,
+static Standard_Boolean Update(const Handle(Adaptor3d_HSurface)& face,
+			       const Handle(Adaptor2d_HCurve2d)& edonface,
+			       const Handle(Adaptor3d_HSurface)& surf,
 			       ChFiDS_FaceInterference&  fi,
 			       ChFiDS_CommonPoint&       cp,
 			       const Standard_Boolean    isfirst)
@@ -412,42 +419,25 @@ static void ChFi3d_ExtendSurface (Handle(Geom_Surface) & S ,
                                   Standard_Integer & prol )
 {
   if (prol) return;
-  Handle(Geom_BSplineSurface) S1;
-  Handle(Geom_BezierSurface) S2;
+
+  prol = (S->IsKind (STANDARD_TYPE(Geom_BSplineSurface)) ? 1 :
+          S->IsKind (STANDARD_TYPE(Geom_BezierSurface))  ? 2 : 0);
+  if ( ! prol )
+    return;
+
   Standard_Real length,umin,umax,vmin,vmax;
   gp_Pnt P1,P2;
   S->Bounds(umin,umax,vmin,vmax);
   S->D0(umin,vmin,P1);
   S->D0(umax,vmax,P2);
   length=P1.Distance(P2);
-  prol=0;
-  S1=Handle(Geom_BSplineSurface)::DownCast(S);
-  S2=Handle(Geom_BezierSurface)::DownCast(S);
-  if (!S1.IsNull()) {
-                  GeomLib::ExtendSurfByLength(S1,length,1,Standard_False,
-                  Standard_True);
-                  GeomLib::ExtendSurfByLength(S1,length,1,Standard_True,
-                  Standard_True);
-                  GeomLib::ExtendSurfByLength(S1,length,1,Standard_False,
-                  Standard_False);
-                  GeomLib::ExtendSurfByLength(S1,length,1,Standard_True,
-                  Standard_False);
-                  S=S1;
-                  prol=1;
-   }
-   if (!S2.IsNull()) {
-                 GeomLib::ExtendSurfByLength(S2,length,1,Standard_False,
-                 Standard_True);
-                 GeomLib::ExtendSurfByLength(S2,length,1,Standard_True,
-                 Standard_True);
-                 GeomLib::ExtendSurfByLength(S2,length,1,Standard_False,
-                 Standard_False);
-                 GeomLib::ExtendSurfByLength(S2,length,1,Standard_True,
-                 Standard_False);
-                 S=S2;
-                 prol=2;
 
-  }
+  Handle(Geom_BoundedSurface) aBS = Handle(Geom_BoundedSurface)::DownCast(S);
+  GeomLib::ExtendSurfByLength (aBS, length, 1, Standard_False, Standard_True);
+  GeomLib::ExtendSurfByLength (aBS, length, 1, Standard_True,  Standard_True);
+  GeomLib::ExtendSurfByLength (aBS, length, 1, Standard_False, Standard_False);
+  GeomLib::ExtendSurfByLength (aBS, length, 1, Standard_True,  Standard_False);
+  S = aBS;
 }
 
 //=======================================================================
@@ -455,7 +445,7 @@ static void ChFi3d_ExtendSurface (Handle(Geom_Surface) & S ,
 //purpose  : calculate the 2d of the curve Ct on face Face
 //=======================================================================
 
-static void  ComputeCurve2d (Handle(Geom_Curve )& Ct,
+static void  ComputeCurve2d (const Handle(Geom_Curve )& Ct,
                        TopoDS_Face & Face,
                        Handle(Geom2d_Curve) & C2d)
 {
@@ -1650,14 +1640,14 @@ void ChFi3d_Builder::PerformIntersectionAtEnd(const Standard_Integer Index)
     ChFi3d_edge_common_faces(myEFMap(Eadj1),Fga,Fdr);
 //  Modified by Sergey KHROMOV - Fri Dec 21 17:57:32 2001 Begin
 //  reg1=BRep_Tool::Continuity(Eadj1,Fga,Fdr)!=GeomAbs_C0;
-    reg1=isTangentFaces(Eadj1,Fga,Fdr);
+    reg1 = ChFi3d_isTangentFaces(Eadj1,Fga,Fdr);
 //  Modified by Sergey KHROMOV - Fri Dec 21 17:57:33 2001 End
     if (F2.IsSame(facecouture)) Eadj2=edgecouture;
     else ChFi3d_cherche_element(Vtx,EdgeSpine,F2,Eadj2,Vbid1);
     ChFi3d_edge_common_faces(myEFMap(Eadj2),Fga,Fdr);
 //  Modified by Sergey KHROMOV - Fri Dec 21 17:58:22 2001 Begin
 //  reg2=BRep_Tool::Continuity(Eadj2,Fga,Fdr)!=GeomAbs_C0;
-    reg2=isTangentFaces(Eadj2,Fga,Fdr);
+    reg2 = ChFi3d_isTangentFaces(Eadj2,Fga,Fdr);
 //  Modified by Sergey KHROMOV - Fri Dec 21 17:58:24 2001 End
 
 // two faces common to the edge are found
@@ -2080,9 +2070,9 @@ void ChFi3d_Builder::PerformIntersectionAtEnd(const Standard_Integer Index)
       else if (nbarete==5) {
 	//pro15368
 //  Modified by Sergey KHROMOV - Fri Dec 21 18:07:43 2001 End
-	Standard_Boolean isTangent0 = isTangentFaces(Edge[0],F1,Face[0]);
-	Standard_Boolean isTangent1 = isTangentFaces(Edge[1],Face[0],Face[1]);
-	Standard_Boolean isTangent2 = isTangentFaces(Edge[2],Face[1],Face[2]);
+	Standard_Boolean isTangent0 = ChFi3d_isTangentFaces(Edge[0],F1,Face[0]);
+	Standard_Boolean isTangent1 = ChFi3d_isTangentFaces(Edge[1],Face[0],Face[1]);
+	Standard_Boolean isTangent2 = ChFi3d_isTangentFaces(Edge[2],Face[1],Face[2]);
 	if ((isTangent0 || isTangent2) && isTangent1) {
 //         GeomAbs_Shape cont0,cont1,cont2;
 //         cont0=BRep_Tool::Continuity(Edge[0],F1,Face[0]);
@@ -2255,8 +2245,8 @@ void ChFi3d_Builder::PerformIntersectionAtEnd(const Standard_Integer Index)
       inters.Perform(HC, HGs);
       if ( !prolface[nn] && ( !inters.IsDone() || (inters.NbPoints()==0) )) {
 	// extend surface of conge
-        Handle(Geom_BSplineSurface) S1=
-          Handle(Geom_BSplineSurface)::DownCast(DStr.Surface(Fd->Surf()).Surface());
+        Handle(Geom_BoundedSurface) S1=
+          Handle(Geom_BoundedSurface)::DownCast(DStr.Surface(Fd->Surf()).Surface());
         if (!S1.IsNull()) {
           Standard_Real length = 0.5 * Max(Fi1Length,Fi2Length);
           GeomLib::ExtendSurfByLength(S1,length,1,Standard_False,!isfirst);
@@ -3966,7 +3956,7 @@ void ChFi3d_Builder::IntersectMoreCorner(const Standard_Integer Index)
     inters = Update(HBs,Hc3df,FiopArc,CPopArc,p2dbout,isfirst,wop);
 //  Modified by Sergey KHROMOV - Fri Dec 21 18:08:27 2001 Begin
 //  if(!inters && BRep_Tool::Continuity(Arcprol,Fv,Fop) != GeomAbs_C0){
-    if(!inters && isTangentFaces(Arcprol,Fv,Fop)){
+    if(!inters && ChFi3d_isTangentFaces(Arcprol,Fv,Fop)){
 //  Modified by Sergey KHROMOV - Fri Dec 21 18:08:29 2001 End
       // Arcprol is an edge of tangency, ultimate adjustment by an extrema curve/curve is attempted.
       Standard_Real ff,ll;

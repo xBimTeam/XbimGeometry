@@ -12,44 +12,48 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <IntTools_Context.ixx>
 
-#include <Precision.hxx>
-
-#include <Geom_Curve.hxx>
-#include <Geom_BoundedCurve.hxx>
-#include <GeomAPI_ProjectPointOnCurve.hxx>
-#include <GeomAPI_ProjectPointOnSurf.hxx>
-#include <GeomAdaptor_Curve.hxx>
-
-#include <Geom2dHatch_Intersector.hxx>
-#include <Geom2d_TrimmedCurve.hxx>
-
-#include <TopAbs_State.hxx>
-#include <TopoDS.hxx>
-#include <TopExp_Explorer.hxx>
-
+#include <Bnd_Box.hxx>
 #include <BRep_Tool.hxx>
 #include <BRepAdaptor_Surface.hxx>
 #include <BRepBndLib.hxx>
-
-#include <IntTools_Tools.hxx>
-#include <IntTools_FClass2d.hxx>
-// 
+#include <BRepClass3d_SolidClassifier.hxx>
 #include <Extrema_LocateExtPC.hxx>
-
 #include <Geom2d_Curve.hxx>
-#include <NCollection_IncAllocator.hxx>
+#include <Geom2d_TrimmedCurve.hxx>
+#include <Geom2dHatch_Hatcher.hxx>
+#include <Geom2dHatch_Intersector.hxx>
+#include <Geom_BoundedCurve.hxx>
+#include <Geom_Curve.hxx>
+#include <GeomAdaptor_Curve.hxx>
+#include <GeomAPI_ProjectPointOnCurve.hxx>
+#include <GeomAPI_ProjectPointOnSurf.hxx>
+#include <gp_Pnt.hxx>
+#include <gp_Pnt2d.hxx>
+#include <IntTools_Context.hxx>
+#include <IntTools_Curve.hxx>
+#include <IntTools_FClass2d.hxx>
 #include <IntTools_SurfaceRangeLocalizeData.hxx>
+#include <IntTools_Tools.hxx>
+#include <Precision.hxx>
+#include <Standard_Type.hxx>
+#include <TopAbs_State.hxx>
+#include <TopExp_Explorer.hxx>
+#include <TopoDS.hxx>
+#include <TopoDS_Edge.hxx>
+#include <TopoDS_Face.hxx>
+#include <TopoDS_Shape.hxx>
+#include <TopoDS_Solid.hxx>
+#include <TopoDS_Vertex.hxx>
 
-
+// 
 //=======================================================================
 //function : 
 //purpose  : 
 //=======================================================================
 IntTools_Context::IntTools_Context()
 :
-  myAllocator(new NCollection_IncAllocator()),
+  myAllocator(NCollection_BaseAllocator::CommonBaseAllocator()),
   myFClass2dMap(100, myAllocator),
   myProjPSMap(100, myAllocator),
   myProjPCMap(100, myAllocator),
@@ -419,7 +423,8 @@ Geom2dHatch_Hatcher& IntTools_Context::Hatcher(const TopoDS_Face& aF)
       }
       //
       aCT2D=new Geom2d_TrimmedCurve(aC2D, aU1, aU2);
-      pHatcher->AddElement(aCT2D, aOrE);
+      Geom2dAdaptor_Curve aGAC (aCT2D);
+      pHatcher->AddElement(aGAC, aOrE);
     }// for (; aExp.More() ; aExp.Next()) {
     //
     anAdr=(Standard_Address)pHatcher;

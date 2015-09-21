@@ -15,83 +15,67 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <BOPAlgo_PaveFiller.ixx>
-//
-#include <Precision.hxx>
-#include <NCollection_IncAllocator.hxx>
 #include <Bnd_Box.hxx>
-
-#include <Geom_Curve.hxx>
+#include <BOPAlgo_PaveFiller.hxx>
+#include <BOPAlgo_SectionAttribute.hxx>
+#include <BOPAlgo_Tools.hxx>
+#include <BOPCol_DataMapOfIntegerReal.hxx>
+#include <BOPCol_DataMapOfShapeInteger.hxx>
+#include <BOPCol_ListOfInteger.hxx>
+#include <BOPCol_ListOfShape.hxx>
+#include <BOPCol_MapOfInteger.hxx>
+#include <BOPCol_NCVector.hxx>
+#include <BOPCol_Parallel.hxx>
+#include <BOPDS_CommonBlock.hxx>
+#include <BOPDS_CoupleOfPaveBlocks.hxx>
+#include <BOPDS_Curve.hxx>
+#include <BOPDS_DataMapOfPaveBlockListOfPaveBlock.hxx>
+#include <BOPDS_DS.hxx>
+#include <BOPDS_FaceInfo.hxx>
+#include <BOPDS_Interf.hxx>
+#include <BOPDS_Iterator.hxx>
+#include <BOPDS_ListOfPave.hxx>
+#include <BOPDS_ListOfPaveBlock.hxx>
+#include <BOPDS_MapOfPaveBlock.hxx>
+#include <BOPDS_PaveBlock.hxx>
+#include <BOPDS_Point.hxx>
+#include <BOPDS_ShapeInfo.hxx>
+#include <BOPDS_VectorOfCurve.hxx>
+#include <BOPDS_VectorOfPoint.hxx>
+#include <BOPTools_AlgoTools.hxx>
+#include <BOPTools_AlgoTools3D.hxx>
+#include <BRep_Builder.hxx>
+#include <BRep_Tool.hxx>
+#include <BRepAdaptor_Curve.hxx>
+#include <BRepAdaptor_Surface.hxx>
+#include <BRepBndLib.hxx>
+#include <BRepBuilderAPI_MakeVertex.hxx>
+#include <BRepTools.hxx>
 #include <Geom2d_Curve.hxx>
-
+#include <Geom_Curve.hxx>
 #include <GeomAPI_ProjectPointOnCurve.hxx>
 #include <GeomAPI_ProjectPointOnSurf.hxx>
-
+#include <gp_Pnt.hxx>
+#include <IntSurf_ListOfPntOn2S.hxx>
+#include <IntSurf_PntOn2S.hxx>
+#include <IntTools_Context.hxx>
+#include <IntTools_Curve.hxx>
+#include <IntTools_EdgeFace.hxx>
+#include <IntTools_FaceFace.hxx>
+#include <IntTools_PntOn2Faces.hxx>
+#include <IntTools_SequenceOfCurves.hxx>
+#include <IntTools_SequenceOfPntOn2Faces.hxx>
+#include <IntTools_ShrunkRange.hxx>
+#include <IntTools_Tools.hxx>
+#include <Precision.hxx>
+#include <TopExp.hxx>
+#include <TopExp_Explorer.hxx>
+#include <TopoDS_Compound.hxx>
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Face.hxx>
 #include <TopoDS_Vertex.hxx>
-#include <TopoDS_Compound.hxx>
 
-#include <TopExp.hxx>
-#include <TopExp_Explorer.hxx>
-
-#include <BRep_Builder.hxx>
-#include <BRep_Tool.hxx>
-
-#include <BRepBuilderAPI_MakeVertex.hxx>
-
-#include <BRepBndLib.hxx>
-#include <BRepTools.hxx>
-
-#include <BRepAdaptor_Curve.hxx>
-#include <BRepAdaptor_Surface.hxx>
-
-#include <IntTools_FaceFace.hxx>
-#include <IntTools_SequenceOfCurves.hxx>
-#include <IntTools_SequenceOfPntOn2Faces.hxx>
-#include <IntTools_Curve.hxx>
-#include <IntTools_PntOn2Faces.hxx>
-#include <IntTools_ShrunkRange.hxx>
-#include <IntTools_Context.hxx>
-#include <IntTools_Tools.hxx>
-#include <IntTools_EdgeFace.hxx>
-
-#include <IntSurf_ListOfPntOn2S.hxx>
-#include <IntSurf_PntOn2S.hxx>
-
-#include <BOPTools_AlgoTools.hxx>
-#include <BOPTools_AlgoTools3D.hxx>
-
-#include <BOPCol_MapOfInteger.hxx>
-#include <BOPCol_ListOfShape.hxx>
-#include <BOPCol_DataMapOfShapeInteger.hxx>
-#include <BOPCol_ListOfInteger.hxx>
-#include <BOPCol_IndexedMapOfInteger.hxx>
-#include <BOPCol_DataMapOfIntegerReal.hxx>
-#include <BOPCol_NCVector.hxx>
-#include <BOPCol_Parallel.hxx>
-
-#include <BOPDS_Interf.hxx>
-#include <BOPDS_Iterator.hxx>
-#include <BOPDS_Curve.hxx>
-#include <BOPDS_Point.hxx>
-#include <BOPDS_FaceInfo.hxx>
-#include <BOPDS_Curve.hxx>
-#include <BOPDS_MapOfPaveBlock.hxx>
-#include <BOPDS_PaveBlock.hxx>
-#include <BOPDS_VectorOfCurve.hxx>
-#include <BOPDS_VectorOfPoint.hxx>
-#include <BOPDS_ShapeInfo.hxx>
-#include <BOPDS_PaveBlock.hxx>
-#include <BOPDS_ListOfPave.hxx>
-#include <BOPDS_ListOfPaveBlock.hxx>
-#include <BOPDS_CoupleOfPaveBlocks.hxx>
-#include <BOPDS_FaceInfo.hxx>
-#include <BOPDS_CommonBlock.hxx>
-#include <BOPDS_DataMapOfPaveBlockListOfPaveBlock.hxx>
-
-#include <BOPAlgo_Tools.hxx>
-
+//
 static void ToleranceFF(const BRepAdaptor_Surface& aBAS1,
                         const BRepAdaptor_Surface& aBAS2,
                         Standard_Real& aTolFF);
@@ -366,27 +350,28 @@ void BOPAlgo_PaveFiller::MakeBlocks()
   Standard_Integer i, nF1, nF2, aNbC, aNbP, j;
   Standard_Integer nV1, nV2;
   Standard_Real aTolR3D, aT1, aT2, aTol;
-  Handle(NCollection_IncAllocator) aAllocator;
+  Handle(NCollection_BaseAllocator) aAllocator;
   BOPDS_ListIteratorOfListOfPaveBlock aItLPB;
   TopoDS_Edge aES;
   Handle(BOPDS_PaveBlock) aPBOut;
   //
   //-----------------------------------------------------scope f
-  aAllocator =  new NCollection_IncAllocator();
+  aAllocator=
+    NCollection_BaseAllocator::CommonBaseAllocator();
   //
-  BOPCol_ListOfInteger aLSE/*(aAllocator)*/, aLBV/*(aAllocator)*/;
-  BOPCol_MapOfInteger aMVOnIn(100), aMF(100),
-                      aMVStick(100), aMVEF(100),
-                      aMI(100);
-  BOPDS_IndexedMapOfPaveBlock aMPBOnIn(100/*, aAllocator*/); //commented out due to excessive memory use srl.
-  BOPDS_MapOfPaveBlock aMPBAdd(100/*, , aAllocator*/);
-  BOPDS_ListOfPaveBlock aLPB/*(, aAllocator)*/;
-  BOPDS_IndexedDataMapOfShapeCoupleOfPaveBlocks aMSCPB(100 /*, aAllocator*/);
-  BOPCol_DataMapOfShapeInteger aMVI(100/*, , aAllocator*/);
-  BOPDS_DataMapOfPaveBlockListOfPaveBlock aDMExEdges(100/*,  aAllocator*/);
-  BOPCol_DataMapOfIntegerReal aMVTol(100/*,  aAllocator*/);
-  BOPCol_DataMapOfIntegerInteger aDMI(100/*,  aAllocator*/);
-  BOPCol_DataMapOfIntegerListOfInteger aDMBV(100/*,  aAllocator*/);
+  BOPCol_ListOfInteger aLSE(aAllocator), aLBV(aAllocator);
+  BOPCol_MapOfInteger aMVOnIn(100, aAllocator), aMF(100, aAllocator),
+                      aMVStick(100,aAllocator), aMVEF(100, aAllocator),
+                      aMI(100, aAllocator);
+  BOPDS_IndexedMapOfPaveBlock aMPBOnIn(100, aAllocator);
+  BOPDS_MapOfPaveBlock aMPBAdd(100, aAllocator);
+  BOPDS_ListOfPaveBlock aLPB(aAllocator);
+  BOPDS_IndexedDataMapOfShapeCoupleOfPaveBlocks aMSCPB(100, aAllocator); 
+  BOPCol_DataMapOfShapeInteger aMVI(100, aAllocator);
+  BOPDS_DataMapOfPaveBlockListOfPaveBlock aDMExEdges(100, aAllocator);
+  BOPCol_DataMapOfIntegerReal aMVTol(100, aAllocator);
+  BOPCol_DataMapOfIntegerInteger aDMI(100, aAllocator);
+  BOPCol_DataMapOfIntegerListOfInteger aDMBV(100, aAllocator);
   BOPCol_DataMapIteratorOfDataMapOfIntegerReal aItMV;
   //
   for (i=0; i<aNbFF; ++i) {
@@ -594,28 +579,6 @@ void BOPAlgo_PaveFiller::MakeBlocks()
   // 
   // post treatment
   myErrorStatus=PostTreatFF(aMSCPB, aMVI, aDMExEdges, aDMI, aAllocator);
- /* size_t size = aAllocator->GetMemSize();
-  cout << size << endl;
-
-  cout << "aLSE="<<aLSE.Size() << endl;
-  cout << "aLBV=" << aLBV.Size() << endl;
-  cout << "aMVOnIn=" << aMVOnIn.Size() << endl;
-  cout << "aMF=" << aMF.Size() << endl;
-  cout << "aMVStick=" << aMVStick.Size() << endl;
-  cout << "aMVEF=" << aMVEF.Size() << endl;
-
-  cout << "aMI=" << aMI.Size() << endl;
-  cout << "aMPBOnIn=" << aMPBOnIn.Size() << endl;
-  cout << "aMPBAdd=" << aMPBAdd.Size() << endl;
-  cout << "aLPB=" << aLPB.Size() << endl;
-  cout << "aMSCPB=" << aMSCPB.Size() << endl;
-
-  cout << "aMVI=" << aMVI.Size() << endl;
-  cout << "aDMExEdges=" << aDMExEdges.Size() << endl;
-  cout << "aMVTol=" << aMVTol.Size() << endl;
-  cout << "aDMI=" << aDMI.Size() << endl;
-  cout << "aDMBV=" << aDMBV.Size() << endl;
-*/
   if (myErrorStatus) {
     return;
   }
@@ -632,7 +595,6 @@ void BOPAlgo_PaveFiller::MakeBlocks()
   aDMExEdges.Clear();
   aMI.Clear();
   aDMI.Clear();
-  aAllocator.Nullify();
 }
 
 //=======================================================================
@@ -644,7 +606,7 @@ Standard_Integer BOPAlgo_PaveFiller::PostTreatFF
      BOPCol_DataMapOfShapeInteger& aMVI,
      BOPDS_DataMapOfPaveBlockListOfPaveBlock& aDMExEdges,
      BOPCol_DataMapOfIntegerInteger& aDMI,
-     Handle(NCollection_BaseAllocator)& theAllocator)
+     const Handle(NCollection_BaseAllocator)& theAllocator)
 {
   Standard_Integer iRet, aNbS;
   //
@@ -667,8 +629,8 @@ Standard_Integer BOPAlgo_PaveFiller::PostTreatFF
   BOPDS_Pave aPave[2], aPave1[2];
   BOPDS_ShapeInfo aSI;
   //
-  BOPCol_ListOfShape aLS/*(theAllocator)*/; //commented out due to excessive memory usage
-  BOPAlgo_PaveFiller aPF/*(theAllocator)*/;
+  BOPCol_ListOfShape aLS(theAllocator);
+  BOPAlgo_PaveFiller aPF(theAllocator);
   //
   BOPDS_VectorOfInterfFF& aFFs=myDS->InterfFF();
   //
@@ -1153,7 +1115,7 @@ void BOPAlgo_PaveFiller::UpdateFaceInfo
      const BOPDS_Curve& theNC,
      const Standard_Real theTolR3D,
      const BOPDS_IndexedMapOfPaveBlock& theMPBOnIn,
-     Handle(BOPDS_PaveBlock&) aPBOut)
+     Handle(BOPDS_PaveBlock)& aPBOut)
 {
   Standard_Boolean bRet;
   Standard_Real aT1, aT2, aTm, aTx;
@@ -1762,41 +1724,70 @@ void BOPAlgo_PaveFiller::RemoveUsedVertices(BOPDS_Curve& aNC,
    const Standard_Integer iCheckExtend)
 {
   Standard_Boolean bIsVertexOnLine;
-  Standard_Real aT, aTol, aTolNew;
-  BOPDS_Pave aPave;
+  Standard_Real aT, aTolV;
   //
-  const TopoDS_Vertex aV = (*(TopoDS_Vertex *)(&myDS->Shape(nV)));
+  const TopoDS_Vertex& aV = (*(TopoDS_Vertex *)(&myDS->Shape(nV)));
   Handle(BOPDS_PaveBlock)& aPB=aNC.ChangePaveBlock1();
   const IntTools_Curve& aIC = aNC.Curve();
   //
   bIsVertexOnLine=myContext->IsVertexOnLine(aV, aIC, aTolR3D, aT);
   if (!bIsVertexOnLine && iCheckExtend) {
-    aTol = BRep_Tool::Tolerance(aV);
+    aTolV = BRep_Tool::Tolerance(aV);
     //
-    ExtendedTolerance(nV, aMI, aTol, iCheckExtend);
-    bIsVertexOnLine=myContext->IsVertexOnLine(aV, aTol, aIC, aTolR3D, aT);
+    ExtendedTolerance(nV, aMI, aTolV, iCheckExtend);
+    bIsVertexOnLine=myContext->IsVertexOnLine(aV, aTolV, aIC, aTolR3D, aT);
   }
   //
   if (bIsVertexOnLine) {
-    aPave.SetIndex(nV);
-    aPave.SetParameter(aT);
+    // check if aPB contains the parameter aT
+    Standard_Boolean bExist;
+    Standard_Integer nVToUpdate;
+    Standard_Real aPTol, aDist, aTolVNew, aTolV2, aDTol;
+    TopoDS_Vertex aVToUpdate;
+    gp_Pnt aP1, aP2;
     //
-    aPB->AppendExtPave(aPave);
+    aTolV2 = 0.;
+    aDTol = 1.e-12;
     //
-    aTol = BRep_Tool::Tolerance(aV);
+    GeomAdaptor_Curve aGAC(aIC.Curve());
+    aPTol = aGAC.Resolution(aTolR3D);
     //
-    BOPTools_AlgoTools::UpdateVertex (aIC, aT, aV);
-    //
-    if (!aMVTol.IsBound(nV)) {
-      aTolNew = BRep_Tool::Tolerance(aV);
-      if (aTolNew > aTol) {
-        aMVTol.Bind(nV, aTol);
-      }
+    bExist = aPB->ContainsParameter(aT, aPTol, nVToUpdate);
+    if (bExist) {
+      // use existing pave
+      aP1 = BRep_Tool::Pnt(aV);
+      aTolV2 = BRep_Tool::Tolerance(aV);
+      aVToUpdate = (*(TopoDS_Vertex *)(&myDS->Shape(nVToUpdate)));
     }
-    // 
-    BOPDS_ShapeInfo& aSIDS=myDS->ChangeShapeInfo(nV);
-    Bnd_Box& aBoxDS=aSIDS.ChangeBox();
-    BRepBndLib::Add(aV, aBoxDS);
+    else {
+      // add new pave
+      BOPDS_Pave aPave;
+      aPave.SetIndex(nV);
+      aPave.SetParameter(aT);
+      aPB->AppendExtPave(aPave);
+      //
+      aP1 = aGAC.Value(aT);
+      nVToUpdate = nV;
+      aVToUpdate = aV;
+    }
+    //
+    aTolV = BRep_Tool::Tolerance(aVToUpdate);
+    aP2 = BRep_Tool::Pnt(aVToUpdate);
+    aDist = aP1.Distance(aP2);
+    aTolVNew = aDist - aTolV2;
+    //
+    if (aTolVNew > aTolV) {
+      BRep_Builder aBB;
+      aBB.UpdateVertex(aVToUpdate, aTolVNew+aDTol);
+      //
+      if (!aMVTol.IsBound(nVToUpdate)) {
+        aMVTol.Bind(nVToUpdate, aTolV);
+      }
+      // 
+      BOPDS_ShapeInfo& aSIDS=myDS->ChangeShapeInfo(nVToUpdate);
+      Bnd_Box& aBoxDS=aSIDS.ChangeBox();
+      BRepBndLib::Add(aVToUpdate, aBoxDS);
+    }
   }
 }
 
@@ -2216,7 +2207,7 @@ void BOPAlgo_PaveFiller::UpdatePaveBlocks
         }
         //
         if (bRebuild) {
-          nSp = SplitEdge(aPB->Edge(), nV[0], aT[0], nV[1], aT[1]);
+          nSp = SplitEdge(aPB->OriginalEdge(), nV[0], aT[0], nV[1], aT[1]);
           if (bCB) {
             aCB->SetEdge(nSp);
           }

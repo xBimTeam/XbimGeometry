@@ -14,14 +14,23 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <BRepBuilderAPI_MakeEdge2d.ixx>
 
+#include <BRepBuilderAPI_MakeEdge2d.hxx>
+#include <Geom2d_Curve.hxx>
+#include <gp_Circ2d.hxx>
+#include <gp_Elips2d.hxx>
+#include <gp_Hypr2d.hxx>
+#include <gp_Lin2d.hxx>
+#include <gp_Parab2d.hxx>
+#include <gp_Pnt2d.hxx>
+#include <StdFail_NotDone.hxx>
+#include <TopoDS_Edge.hxx>
+#include <TopoDS_Vertex.hxx>
 
 //=======================================================================
 //function : BRepBuilderAPI_MakeEdge2d
 //purpose  : 
 //=======================================================================
-
 BRepBuilderAPI_MakeEdge2d::BRepBuilderAPI_MakeEdge2d(const TopoDS_Vertex& V1, 
 				       const TopoDS_Vertex& V2)
 : myMakeEdge2d(V1,V2)
@@ -608,7 +617,7 @@ BRepBuilderAPI_EdgeError BRepBuilderAPI_MakeEdge2d::Error() const
 //purpose  : 
 //=======================================================================
 
-const TopoDS_Edge&  BRepBuilderAPI_MakeEdge2d::Edge()const 
+const TopoDS_Edge&  BRepBuilderAPI_MakeEdge2d::Edge()
 {
   return myMakeEdge2d.Edge();
 }
@@ -642,7 +651,7 @@ const TopoDS_Vertex&  BRepBuilderAPI_MakeEdge2d::Vertex2()const
 //purpose  : 
 //=======================================================================
 
-BRepBuilderAPI_MakeEdge2d::operator TopoDS_Edge() const
+BRepBuilderAPI_MakeEdge2d::operator TopoDS_Edge()
 {
   return Edge();
 }

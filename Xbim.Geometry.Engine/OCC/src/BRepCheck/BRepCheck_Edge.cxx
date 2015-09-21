@@ -14,57 +14,51 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <BRepCheck_Edge.ixx>
-#include <TColStd_Array1OfTransient.hxx>
-#include <TColStd_HArray1OfReal.hxx>
 
-#include <BRepAdaptor_Curve.hxx>
+#include <Adaptor3d_CurveOnSurface.hxx>
+#include <Adaptor3d_HCurve.hxx>
+#include <Adaptor3d_HCurveOnSurface.hxx>
 #include <Bnd_Box.hxx>
-
-#include <BRepCheck_ListOfStatus.hxx>
-#include <BRepCheck_ListIteratorOfListOfStatus.hxx>
-
+#include <BRep_CurveOnSurface.hxx>
+#include <BRep_CurveRepresentation.hxx>
+#include <BRep_GCurve.hxx>
+#include <BRep_ListIteratorOfListOfCurveRepresentation.hxx>
+#include <BRep_ListOfCurveRepresentation.hxx>
+#include <BRep_PolygonOnTriangulation.hxx>
 #include <BRep_TEdge.hxx>
 #include <BRep_TFace.hxx>
-
-#include <BRep_CurveRepresentation.hxx>
-#include <BRep_ListOfCurveRepresentation.hxx>
-#include <BRep_ListIteratorOfListOfCurveRepresentation.hxx>
-#include <BRep_GCurve.hxx>
-#include <BRep_CurveOnSurface.hxx>
-
-#include <BRep_PolygonOnTriangulation.hxx>
-
 #include <BRep_Tool.hxx>
-
-#include <TopExp_Explorer.hxx>
-
-#include <Geom_Surface.hxx>
-#include <Geom_RectangularTrimmedSurface.hxx>
-#include <Geom_Plane.hxx>
-#include <Geom_TrimmedCurve.hxx>
+#include <BRepAdaptor_Curve.hxx>
+#include <BRepCheck.hxx>
+#include <BRepCheck_Edge.hxx>
+#include <BRepCheck_ListIteratorOfListOfStatus.hxx>
+#include <BRepCheck_ListOfStatus.hxx>
+#include <Extrema_LocateExtPC.hxx>
 #include <Geom2d_Curve.hxx>
-
+#include <Geom2dAdaptor.hxx>
 #include <Geom2dAdaptor_HCurve.hxx>
+#include <Geom_Curve.hxx>
+#include <Geom_Plane.hxx>
+#include <Geom_RectangularTrimmedSurface.hxx>
+#include <Geom_Surface.hxx>
+#include <Geom_TrimmedCurve.hxx>
 #include <GeomAdaptor_Curve.hxx>
 #include <GeomAdaptor_HCurve.hxx>
 #include <GeomAdaptor_HSurface.hxx>
-#include <Adaptor3d_CurveOnSurface.hxx>
-#include <Adaptor3d_HCurveOnSurface.hxx>
-
-#include <ProjLib_ProjectedCurve.hxx>
 #include <GeomProjLib.hxx>
-#include <Extrema_LocateExtPC.hxx>
-
-#include <BRepCheck.hxx>
-#include <Geom2dAdaptor.hxx>
-#include <TopoDS.hxx>
-#include <TopAbs_ShapeEnum.hxx>
-#include <TopoDS_Face.hxx>
-#include <Precision.hxx>
-
 #include <Poly_PolygonOnTriangulation.hxx>
 #include <Poly_Triangulation.hxx>
+#include <Precision.hxx>
+#include <ProjLib_ProjectedCurve.hxx>
+#include <Standard_Type.hxx>
+#include <TColStd_Array1OfTransient.hxx>
+#include <TColStd_HArray1OfReal.hxx>
+#include <TopAbs_ShapeEnum.hxx>
+#include <TopExp_Explorer.hxx>
+#include <TopoDS.hxx>
+#include <TopoDS_Edge.hxx>
+#include <TopoDS_Face.hxx>
+#include <TopoDS_Shape.hxx>
 
 //modified by NIZNHY-PKV Thu May 05 09:01:57 2011f
 static 
@@ -174,7 +168,7 @@ void BRepCheck_Edge::Minimum()
     }
 
     if (!myCref.IsNull()) {
-      const Handle(BRep_GCurve)& GCref = *((Handle(BRep_GCurve)*)&myCref);
+      Handle(BRep_GCurve) GCref (Handle(BRep_GCurve)::DownCast (myCref));
       Standard_Real First,Last;
       GCref->Range(First,Last);
       if (Last<=First) {
@@ -284,7 +278,7 @@ void BRepCheck_Edge::InContext(const TopoDS_Shape& S)
         const Handle(BRep_CurveRepresentation)& cr = itcr.Value();
         if (cr != myCref && cr->IsCurveOnSurface(Su,L)) {
           pcurvefound = Standard_True;
-          const Handle(BRep_GCurve)& GC = *((Handle(BRep_GCurve)*)&cr);
+          Handle(BRep_GCurve) GC (Handle(BRep_GCurve)::DownCast (cr));
           Standard_Real f,l;
           GC->Range(f,l);
           Standard_Real ff = f, ll = l;
@@ -328,8 +322,7 @@ void BRepCheck_Edge::InContext(const TopoDS_Shape& S)
             }
             if (cr->IsCurveOnClosedSurface()) {
               GHPC->ChangeCurve2d().Load(cr->PCurve2(),f,l); // same bounds
-              ACS.Load(GAHS); // sans doute inutile
-              ACS.Load(GHPC); // meme remarque...
+              ACS.Load(GHPC, GAHS); // sans doute inutile
               ok = Validate(myHCurve->Curve(),ACS,Tol,SameParameter);
               if (!ok) {
                 BRepCheck::Add(lst,BRepCheck_InvalidCurveOnClosedSurface);
@@ -600,8 +593,7 @@ BRepCheck_Status BRepCheck_Edge::
     }
 
     const Handle(BRep_CurveRepresentation) aCR = anITCR.Value();
-    const Handle(BRep_PolygonOnTriangulation)& aPT = 
-      Handle(BRep_PolygonOnTriangulation)::DownCast(aCR);
+    Handle(BRep_PolygonOnTriangulation) aPT (Handle(BRep_PolygonOnTriangulation)::DownCast(aCR));
 
     const TopLoc_Location aLL = theEdge.Location() * aPT->Location();
 

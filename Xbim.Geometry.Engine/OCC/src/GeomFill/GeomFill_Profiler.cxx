@@ -14,13 +14,17 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <GeomFill_Profiler.ixx>
-#include <GeomConvert.hxx>
+
 #include <BSplCLib.hxx>
 #include <Geom_BSplineCurve.hxx>
-#include <Geom_TrimmedCurve.hxx>
 #include <Geom_Conic.hxx>
+#include <Geom_Curve.hxx>
+#include <Geom_TrimmedCurve.hxx>
+#include <GeomConvert.hxx>
 #include <GeomConvert_ApproxCurve.hxx>
+#include <GeomFill_Profiler.hxx>
+#include <Standard_DomainError.hxx>
+#include <StdFail_NotDone.hxx>
 
 //=======================================================================
 //function : UnifyByInsertingAllKnots
@@ -141,7 +145,7 @@ void GeomFill_Profiler::AddCurve(const Handle(Geom_Curve)& Curve)
   //// modified by jgv, 19.01.05 for OCC7354 ////
   Handle(Geom_Curve) theCurve = Curve;
   if (theCurve->IsInstance(STANDARD_TYPE(Geom_TrimmedCurve)))
-    theCurve = (*((Handle(Geom_TrimmedCurve)*)&theCurve))->BasisCurve();
+    theCurve = Handle(Geom_TrimmedCurve)::DownCast (theCurve)->BasisCurve();
   if (theCurve->IsKind(STANDARD_TYPE(Geom_Conic)))
     {
       GeomConvert_ApproxCurve appr(Curve, Precision::Confusion(), GeomAbs_C1, 16, 14);

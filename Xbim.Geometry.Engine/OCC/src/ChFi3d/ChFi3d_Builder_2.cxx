@@ -14,83 +14,94 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <ChFi3d_Builder.jxx>
 
-#include <Precision.hxx>
-
-#include <Standard_NotImplemented.hxx>
-#include <TColStd_Array1OfReal.hxx>
-#include <TColStd_Array1OfInteger.hxx>
-#include <TColStd_ListOfInteger.hxx>
-
-#include <math_Vector.hxx>
-#include <gp_Pnt.hxx>
-#include <gp_XYZ.hxx>
-#include <gp_Vec.hxx>
-#include <gp_Pnt2d.hxx>
-#include <gp_Pln.hxx>
-#include <TColgp_Array1OfPnt.hxx>
-#include <TColgp_Array1OfVec.hxx>
-#include <ElCLib.hxx>
-
-#include <Geom_BSplineCurve.hxx>
-#include <Geom_Line.hxx>
-#include <Geom_Plane.hxx>
-#include <Geom2d_Curve.hxx>
-#include <GeomAPI_ProjectPointOnCurve.hxx>
-
-#include <TopoDS.hxx>
-#include <TopoDS_Shape.hxx>
-#include <TopoDS_Face.hxx>
-#include <TopoDS_Wire.hxx>
-#include <TopoDS_Edge.hxx>
-#include <TopoDS_Vertex.hxx>
-
-#include <GeomAdaptor_Surface.hxx>
-#include <GeomAdaptor_HSurface.hxx>
-#include <GeomAdaptor_HCurve.hxx>
-
+#include <Adaptor2d_HCurve2d.hxx>
+#include <Adaptor3d_HSurface.hxx>
+#include <Adaptor3d_TopolTool.hxx>
+#include <AppBlend_Approx.hxx>
+#include <Blend_CurvPointFuncInv.hxx>
+#include <Blend_FuncInv.hxx>
+#include <Blend_Function.hxx>
+#include <Blend_RstRstFunction.hxx>
+#include <Blend_SurfCurvFuncInv.hxx>
+#include <Blend_SurfPointFuncInv.hxx>
+#include <Blend_SurfRstFunction.hxx>
+#include <BRep_Tool.hxx>
 #include <BRepAdaptor_Curve.hxx>
 #include <BRepAdaptor_HCurve.hxx>
-#include <BRepAdaptor_Surface.hxx>
+#include <BRepAdaptor_HCurve2d.hxx>
 #include <BRepAdaptor_HSurface.hxx>
-#include <BRepTopAdaptor_TopolTool.hxx>
+#include <BRepAdaptor_Surface.hxx>
+#include <BRepBlend_Line.hxx>
+#include <BRepLib_MakeFace.hxx>
 #include <BRepLProp_SLProps.hxx>
-#include <Adaptor3d_TopolTool.hxx>
-
-#include <TopAbs.hxx>
-#include <TopAbs_ShapeEnum.hxx>
-#include <TopAbs_Orientation.hxx>
-#include <BRep_Tool.hxx>
 #include <BRepTools.hxx>
 #include <BRepTools_WireExplorer.hxx>
-#include <BRepLib_MakeFace.hxx>
-#include <TopExp.hxx>
-#include <TopExp_Explorer.hxx>
-#include <TopTools_ListIteratorOfListOfShape.hxx>
-
+#include <BRepTopAdaptor_TopolTool.hxx>
+#include <ChFi3d.hxx>
+#include <ChFi3d_Builder.hxx>
+#include <ChFi3d_Builder_0.hxx>
+#include <ChFiDS_ChamfSpine.hxx>
+#include <ChFiDS_CommonPoint.hxx>
+#include <ChFiDS_ElSpine.hxx>
+#include <ChFiDS_ErrorStatus.hxx>
+#include <ChFiDS_FaceInterference.hxx>
+#include <ChFiDS_FilSpine.hxx>
+#include <ChFiDS_HData.hxx>
+#include <ChFiDS_HElSpine.hxx>
+#include <ChFiDS_ListIteratorOfListOfHElSpine.hxx>
+#include <ChFiDS_ListOfHElSpine.hxx>
+#include <ChFiDS_SequenceOfSurfData.hxx>
+#include <ChFiDS_Spine.hxx>
+#include <ChFiDS_State.hxx>
+#include <ChFiDS_Stripe.hxx>
+#include <ChFiDS_SurfData.hxx>
+#include <ChFiKPart_ComputeData.hxx>
+#include <ElCLib.hxx>
 #include <Extrema_ExtPC.hxx>
+#include <Extrema_ExtPS.hxx>
 #include <Extrema_LocateExtPC.hxx>
 #include <Extrema_POnCurv.hxx>
-
-#include <ChFiDS_ErrorStatus.hxx>
-#include <ChFiDS_State.hxx>
-#include <ChFiDS_SurfData.hxx>
-#include <ChFiDS_CommonPoint.hxx>
-#include <ChFiDS_FaceInterference.hxx>
-#include <ChFiDS_Spine.hxx>
-#include <ChFiDS_FilSpine.hxx>
-#include <ChFiDS_ChamfSpine.hxx>
-#include <ChFiDS_SequenceOfSurfData.hxx>
-#include <ChFiDS_Stripe.hxx>
-#include <ChFiDS_HData.hxx>
-#include <ChFiDS_ElSpine.hxx>
-#include <ChFiDS_ListOfHElSpine.hxx>
-#include <ChFiDS_ListIteratorOfListOfHElSpine.hxx>
-#include <Extrema_ExtPS.hxx>
-#include <ChFiKPart_ComputeData.hxx>
-#include <ChFi3d.hxx>
-#include <ChFi3d_Builder_0.hxx>
+#include <Geom2d_Curve.hxx>
+#include <Geom_BSplineCurve.hxx>
+#include <Geom_BSplineSurface.hxx>
+#include <Geom_Line.hxx>
+#include <Geom_Plane.hxx>
+#include <Geom_Surface.hxx>
+#include <GeomAdaptor_HCurve.hxx>
+#include <GeomAdaptor_HSurface.hxx>
+#include <GeomAdaptor_Surface.hxx>
+#include <GeomAPI_ProjectPointOnCurve.hxx>
+#include <gp_Pln.hxx>
+#include <gp_Pnt.hxx>
+#include <gp_Pnt2d.hxx>
+#include <gp_Vec.hxx>
+#include <gp_XYZ.hxx>
+#include <math_Vector.hxx>
+#include <Precision.hxx>
+#include <Standard_ConstructionError.hxx>
+#include <Standard_NoSuchObject.hxx>
+#include <Standard_NotImplemented.hxx>
+#include <Standard_OutOfRange.hxx>
+#include <TColgp_Array1OfPnt.hxx>
+#include <TColgp_Array1OfVec.hxx>
+#include <TColStd_Array1OfInteger.hxx>
+#include <TColStd_Array1OfReal.hxx>
+#include <TColStd_ListOfInteger.hxx>
+#include <TopAbs.hxx>
+#include <TopAbs_Orientation.hxx>
+#include <TopAbs_ShapeEnum.hxx>
+#include <TopExp.hxx>
+#include <TopExp_Explorer.hxx>
+#include <TopoDS.hxx>
+#include <TopoDS_Edge.hxx>
+#include <TopoDS_Face.hxx>
+#include <TopoDS_Shape.hxx>
+#include <TopoDS_Vertex.hxx>
+#include <TopoDS_Wire.hxx>
+#include <TopOpeBRepBuild_HBuilder.hxx>
+#include <TopOpeBRepDS_HDataStructure.hxx>
+#include <TopTools_ListIteratorOfListOfShape.hxx>
 
 #ifdef OCCT_DEBUG
 #ifdef DRAW
@@ -103,11 +114,6 @@ extern void ChFi3d_InitChron(OSD_Chronometer& ch);
 extern void ChFi3d_ResultChron(OSD_Chronometer & ch, Standard_Real& time);
 #endif
 
-//  Modified by Sergey KHROMOV - Fri Dec 21 17:08:19 2001 Begin
-Standard_Boolean isTangentFaces(const TopoDS_Edge &theEdge,
-				const TopoDS_Face &theFace1,
-				const TopoDS_Face &theFace2);
-//  Modified by Sergey KHROMOV - Fri Dec 21 17:08:19 2001 End
 
 //===================================================================
 //   Definition by a plane   
@@ -244,7 +250,7 @@ static Standard_Boolean BonVoisin(const gp_Pnt& Point,
 //  Modified by Sergey KHROMOV - Fri Dec 21 17:12:48 2001 Begin
 // 	    Standard_Boolean istg = 
 // 	      BRep_Tool::Continuity(ecur,ff,F) != GeomAbs_C0;
- 	    Standard_Boolean istg = isTangentFaces(ecur,ff,F);
+ 	    Standard_Boolean istg = ChFi3d_isTangentFaces(ecur,ff,F);
 //  Modified by Sergey KHROMOV - Fri Dec 21 17:12:51 2001 End
 	    if((!issame || (issame && isreallyclosed)) && istg) {
 	      found = 1;
@@ -450,7 +456,7 @@ Standard_Boolean IsG1(const ChFiDS_Map&         TheMap,
       FVoi = TopoDS::Face(It.Value());
 //  Modified by Sergey KHROMOV - Fri Dec 21 17:09:32 2001 Begin
 //    if (BRep_Tool::Continuity(E,FRef,FVoi) != GeomAbs_C0) {
-      if (isTangentFaces(E,FRef,FVoi)) {
+      if (ChFi3d_isTangentFaces(E,FRef,FVoi)) {
 //  Modified by Sergey KHROMOV - Fri Dec 21 17:09:33 2001 End
 	return Standard_True;
       }
@@ -470,7 +476,7 @@ Standard_Boolean IsG1(const ChFiDS_Map&         TheMap,
 	FVoi = FRef;
 //  Modified by Sergey KHROMOV - Fri Dec 21 17:15:12 2001 Begin
 // 	if (BRep_Tool::Continuity(E,FRef,FRef) >= GeomAbs_G1) {	  
-	if (isTangentFaces(E,FRef,FRef)) {
+	if (ChFi3d_isTangentFaces(E,FRef,FRef)) {
 //  Modified by Sergey KHROMOV - Fri Dec 21 17:15:16 2001 End
 	  return Standard_True;
 	}
@@ -586,12 +592,12 @@ CallPerformSurf(Handle(ChFiDS_Stripe)&              Stripe,
 		const Handle(BRepAdaptor_HSurface)& HS3,
 		const gp_Pnt2d&                     pp1,
 		const gp_Pnt2d&                     pp3,
-		Handle(Adaptor3d_TopolTool)&          It1,
+		const Handle(Adaptor3d_TopolTool)&          It1,
 		const Handle(BRepAdaptor_HSurface)& HS2,
 		const Handle(BRepAdaptor_HSurface)& HS4,
 		const gp_Pnt2d&                     pp2,
 		const gp_Pnt2d&                     pp4,
-		Handle(Adaptor3d_TopolTool)&          It2,
+		const Handle(Adaptor3d_TopolTool)&          It2,
 		const Standard_Real                 MaxStep,
 		const Standard_Real                 Fleche,
 		const Standard_Real                 /*TolGuide*/,
@@ -615,8 +621,8 @@ CallPerformSurf(Handle(ChFiDS_Stripe)&              Stripe,
   HSon1 = HS1;
   HSon2 = HS2;
   // Definition of the domain of path It1, It2
-  It1->Initialize(HS1);
-  It2->Initialize(HS2);
+  It1->Initialize((const Handle(Adaptor3d_HSurface)&)HSon1);
+  It2->Initialize((const Handle(Adaptor3d_HSurface)&)HSon2);
 
 
   TopAbs_Orientation Or1 = HS1->ChangeSurface().Face().Orientation();
@@ -658,14 +664,14 @@ CallPerformSurf(Handle(ChFiDS_Stripe)&              Stripe,
    Standard_Boolean reprise = Standard_False;
    if (! HS3.IsNull()) {
      HSon1 = HS3;
-     It1->Initialize(HS3); 
+     It1->Initialize((const Handle(Adaptor3d_HSurface)&)HS3); 
      Or1 = HS3->ChangeSurface().Face().Orientation();
      Soldep(1) = pp3.X(); Soldep(2) = pp3.Y();
      reprise = Standard_True;
    }
    else if (! HS4.IsNull()) {
      HSon2 = HS4;
-     It2->Initialize(HS4); 
+     It2->Initialize((const Handle(Adaptor3d_HSurface)&)HS4); 
      Or2 = HS4->ChangeSurface().Face().Orientation();
      Soldep(3) = pp4.X(); Soldep(4) = pp4.Y();
      reprise = Standard_True;
@@ -841,7 +847,7 @@ void ChFi3d_Builder::StartSol(const Handle(ChFiDS_Stripe)&      Stripe,
     f1forward.Orientation(TopAbs_FORWARD);
     f2forward.Orientation(TopAbs_FORWARD);
     PC = BRep_Tool::CurveOnSurface(cured,f1forward,Uf,Ul);
-    I1->Initialize(HS1);
+    I1->Initialize((const Handle(Adaptor3d_HSurface)&)HS1);
     PC->D1(woned, P1, derive);
     // There are ponts on the border, and internal points are found
     if (derive.Magnitude() > Precision::PConfusion()) {
@@ -865,7 +871,8 @@ void ChFi3d_Builder::StartSol(const Handle(ChFiDS_Stripe)&      Stripe,
     if(f1.IsSame(f2)) cured.Orientation(TopAbs_REVERSED);
     PC = BRep_Tool::CurveOnSurface(cured,f2forward,Uf,Ul);
     P2 = PC->Value(woned);
-    I2->Initialize(HS2);
+    const Handle(Adaptor3d_HSurface)& HSon2 = HS2; // to avoid ambiguity
+    I2->Initialize(HSon2);
 
     SolDep(1) = P1.X(); SolDep(2) = P1.Y();
     SolDep(3) = P2.X(); SolDep(4) = P2.Y();
@@ -907,8 +914,10 @@ void ChFi3d_Builder::StartSol(const Handle(ChFiDS_Stripe)&      Stripe,
     P1 = PC->Value(woned);
     PC = BRep_Tool::CurveOnSurface(cured,f2forward,Uf,Ul);
     P2 = PC->Value(woned);
-    I1->Initialize(HS1);
-    I2->Initialize(HS2);
+    const Handle(Adaptor3d_HSurface)& HSon1 = HS1; // to avoid ambiguity
+    const Handle(Adaptor3d_HSurface)& HSon2 = HS2; // to avoid ambiguity
+    I1->Initialize(HSon1);
+    I2->Initialize(HSon2);
     SolDep(1) = P1.X(); SolDep(2) = P1.Y();
     SolDep(3) = P2.X(); SolDep(4) = P2.Y();
     const BRepAdaptor_Curve& Ced = Spine->CurrentElementarySpine(iedge);
@@ -946,8 +955,10 @@ void ChFi3d_Builder::StartSol(const Handle(ChFiDS_Stripe)&      Stripe,
 				   Stripe->OrientationOnFace1(),
 				   Stripe->OrientationOnFace2(),
 				   RC);
-	  I1->Initialize(HS1);
-	  I2->Initialize(HS2);
+          const Handle(Adaptor3d_HSurface)& HSon1 = HS1; // to avoid ambiguity
+          const Handle(Adaptor3d_HSurface)& HSon2 = HS2; // to avoid ambiguity
+	  I1->Initialize(HSon1);
+	  I2->Initialize(HSon2);
 	  if(PerformFirstSection(Spine,HGuide,Choix,HS1,HS2,
 				 I1,I2,w,SolDep,Pos1,Pos2)){
 	    P1.SetCoord(SolDep(1),SolDep(2));
@@ -2046,9 +2057,11 @@ void ChFi3d_Builder::PerformSetOfSurfOnElSpine
       else Standard_Failure::Raise("PerformSetOfSurfOnElSpine : Chaining is impossible.");
     }
     
-    // Definition of the domain of path It1, It2
-    It1->Initialize(HS1);
-    It2->Initialize(HS2);
+    // Definition of the domain of patch It1, It2
+    const Handle(Adaptor3d_HSurface)& HSon1 = HS1; // to avoid ambiguity
+    const Handle(Adaptor3d_HSurface)& HSon2 = HS2; // to avoid ambiguity
+    It1->Initialize(HSon1);
+    It2->Initialize(HSon2);
     
     // Calculate one (several if singularity) SurfaData
     SD = new ChFiDS_SurfData();
@@ -2150,11 +2163,13 @@ void ChFi3d_Builder::PerformSetOfSurfOnElSpine
       SD->ChangeIndexOfS2(DStr.AddShape(HS2->ChangeSurface().Face()));
       decroch1 = 0;
     }
-    else{            
+    else{ 
+      const Handle(Adaptor3d_TopolTool)& aTT1 = It1; // to avoid ambiguity
+      const Handle(Adaptor3d_TopolTool)& aTT2 = It2; // to avoid ambiguity
       CallPerformSurf(Stripe, Simul, SeqSD, SD,
 		      HGuide,Spine,
-		      HS1, HS3, pp1, pp3, It1,
-		      HS2, HS4, pp2, pp4, It2, 
+		      HS1, HS3, pp1, pp3, aTT1,
+		      HS2, HS4, pp2, pp4, aTT2, 
 		      MaxStep,locfleche,tolesp,
 		      First,Last,Inside,Inside,forward,
 		      RecS1,RecS2,Soldep,intf,intl, 
@@ -2333,8 +2348,10 @@ void ChFi3d_Builder::PerformSetOfKPart(Handle(ChFiDS_Stripe)& Stripe,
       Or1   = HS1->ChangeSurface().Face().Orientation();
       Or2   = HS2->ChangeSurface().Face().Orientation();
       ChFi3d::NextSide(Or1,Or2,RefOr1,RefOr2,RefChoix);      
-      It1->Initialize(HS1);
-      It2->Initialize(HS2);
+      const Handle(Adaptor3d_HSurface)& HSon1 = HS1; // to avoid ambiguity
+      const Handle(Adaptor3d_HSurface)& HSon2 = HS2; // to avoid ambiguity
+      It1->Initialize(HSon1);
+      It2->Initialize(HSon2);
       
       Handle(ChFiDS_SurfData)   SD = new ChFiDS_SurfData();
       ChFiDS_SequenceOfSurfData LSD;

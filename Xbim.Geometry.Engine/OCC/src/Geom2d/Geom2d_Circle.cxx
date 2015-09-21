@@ -14,28 +14,28 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <Geom2d_Circle.ixx>
-#include <ElCLib.hxx>
-#include <gp_XY.hxx>
-#include <Standard_RangeError.hxx>
-#include <Standard_ConstructionError.hxx> 
 
+#include <ElCLib.hxx>
+#include <Geom2d_Circle.hxx>
+#include <Geom2d_Geometry.hxx>
+#include <gp_Ax2d.hxx>
+#include <gp_Ax22d.hxx>
+#include <gp_Circ2d.hxx>
+#include <gp_Pnt2d.hxx>
+#include <gp_Trsf2d.hxx>
+#include <gp_Vec2d.hxx>
+#include <gp_XY.hxx>
+#include <Standard_ConstructionError.hxx>
+#include <Standard_RangeError.hxx>
+#include <Standard_Type.hxx>
 
 typedef Geom2d_Circle         Circle;
-typedef Handle(Geom2d_Circle) Handle(Circle);
 typedef gp_Ax2d   Ax2d;
 typedef gp_Dir2d  Dir2d;
 typedef gp_Pnt2d  Pnt2d;
 typedef gp_Trsf2d Trsf2d;
 typedef gp_Vec2d  Vec2d;
 typedef gp_XY     XY;
-
-
-
-
-
-
-
 
 //=======================================================================
 //function : Copy
@@ -44,7 +44,7 @@ typedef gp_XY     XY;
 
 Handle(Geom2d_Geometry) Geom2d_Circle::Copy() const 
 {
-  Handle(Circle) C;
+  Handle(Geom2d_Circle) C;
   C = new Circle (pos, radius);
   return C;
 }

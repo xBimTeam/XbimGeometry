@@ -14,13 +14,18 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <BRepBuilderAPI_MakePolygon.ixx>
+
+#include <BRepBuilderAPI_MakePolygon.hxx>
+#include <gp_Pnt.hxx>
+#include <StdFail_NotDone.hxx>
+#include <TopoDS_Edge.hxx>
+#include <TopoDS_Vertex.hxx>
+#include <TopoDS_Wire.hxx>
 
 //=======================================================================
 //function : BRepBuilderAPI_MakePolygon
 //purpose  : 
 //=======================================================================
-
 BRepBuilderAPI_MakePolygon::BRepBuilderAPI_MakePolygon()
 {
 }
@@ -231,7 +236,7 @@ const TopoDS_Edge&  BRepBuilderAPI_MakePolygon::Edge()const
 //purpose  : 
 //=======================================================================
 
-const TopoDS_Wire&  BRepBuilderAPI_MakePolygon::Wire()const 
+const TopoDS_Wire&  BRepBuilderAPI_MakePolygon::Wire()
 {
   return myMakePolygon.Wire();
 }
@@ -251,7 +256,7 @@ BRepBuilderAPI_MakePolygon::operator TopoDS_Edge() const
 //purpose  : 
 //=======================================================================
 
-BRepBuilderAPI_MakePolygon::operator TopoDS_Wire() const
+BRepBuilderAPI_MakePolygon::operator TopoDS_Wire()
 {
   return Wire();
 }

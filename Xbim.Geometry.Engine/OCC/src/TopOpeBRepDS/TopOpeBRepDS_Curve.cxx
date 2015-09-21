@@ -14,17 +14,20 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <TopOpeBRepDS_Curve.ixx>
-#include <TopOpeBRepDS_SurfaceCurveInterference.hxx>
-#include <TopOpeBRepDS_Dumper.hxx>
-#include <Precision.hxx>
 
+#include <Geom2d_Curve.hxx>
+#include <Geom_Curve.hxx>
+#include <Precision.hxx>
+#include <TopoDS_Shape.hxx>
+#include <TopOpeBRepDS_Curve.hxx>
+#include <TopOpeBRepDS_Dumper.hxx>
+#include <TopOpeBRepDS_Interference.hxx>
+#include <TopOpeBRepDS_SurfaceCurveInterference.hxx>
 
 //=======================================================================
 //function : TopOpeBRepDS_Curve
 //purpose  : 
 //=======================================================================
-
 TopOpeBRepDS_Curve::TopOpeBRepDS_Curve() :
 myFirst(0.0), myLast(0.0),
 myRangeDefined(Standard_False),
@@ -269,7 +272,7 @@ const Handle(Geom2d_Curve)&  TopOpeBRepDS_Curve::Curve1()const
 {
   if ( ! mySCI1.IsNull() ) {
     return 
-      (*((Handle(TopOpeBRepDS_SurfaceCurveInterference)*)&mySCI1))->PCurve();
+      Handle(TopOpeBRepDS_SurfaceCurveInterference)::DownCast (mySCI1)->PCurve();
   }
   else {
     static Handle(Geom2d_Curve) STALOC_Geom2dCurveNull1;
@@ -285,7 +288,7 @@ const Handle(Geom2d_Curve)&  TopOpeBRepDS_Curve::Curve1()const
 void TopOpeBRepDS_Curve::Curve1(const Handle(Geom2d_Curve)& PC1)
 {
   if ( ! mySCI1.IsNull() ) {
-    (*((Handle(TopOpeBRepDS_SurfaceCurveInterference)*)&mySCI1))->PCurve(PC1);
+    Handle(TopOpeBRepDS_SurfaceCurveInterference)::DownCast (mySCI1)->PCurve(PC1);
   }
 }
 
@@ -299,7 +302,7 @@ const Handle(Geom2d_Curve)&  TopOpeBRepDS_Curve::Curve2()const
 {
   if ( ! mySCI2.IsNull() ) {
     return 
-      (*((Handle(TopOpeBRepDS_SurfaceCurveInterference)*)&mySCI2))->PCurve();
+      Handle(TopOpeBRepDS_SurfaceCurveInterference)::DownCast (mySCI2)->PCurve();
   }
   else {
     static Handle(Geom2d_Curve) STALOC_Geom2dCurveNull2;
@@ -315,7 +318,7 @@ const Handle(Geom2d_Curve)&  TopOpeBRepDS_Curve::Curve2()const
 void TopOpeBRepDS_Curve::Curve2(const Handle(Geom2d_Curve)& PC2)
 {
   if ( ! mySCI2.IsNull() ) {
-    (*((Handle(TopOpeBRepDS_SurfaceCurveInterference)*)&mySCI2))->PCurve(PC2);
+    Handle(TopOpeBRepDS_SurfaceCurveInterference)::DownCast (mySCI2)->PCurve(PC2);
   }
 }
 

@@ -17,10 +17,14 @@
 #define No_Standard_RangeError
 #define No_Standard_OutOfRange
 
-#include <FEmTool_Curve.ixx>
+
+#include <FEmTool_Curve.hxx>
 #include <PLib.hxx>
-#include <PLib_JacobiPolynomial.hxx>
+#include <PLib_Base.hxx>
 #include <PLib_HermitJacobi.hxx>
+#include <PLib_JacobiPolynomial.hxx>
+#include <Standard_DimensionError.hxx>
+#include <Standard_Type.hxx>
 
 //=======================================================================
 //function : FEmTool_Curve
@@ -77,7 +81,7 @@ FEmTool_Curve::FEmTool_Curve(const Standard_Integer Dimension,
 
   Standard_Real stenor = (myKnots->Value(IndexOfElement + 1) - myKnots->Value(IndexOfElement)) / 2.,
                 mfact;
-  Handle(PLib_HermitJacobi) myHermitJacobi = (*((Handle(PLib_HermitJacobi)*)&myBase));
+  Handle(PLib_HermitJacobi) myHermitJacobi = Handle(PLib_HermitJacobi)::DownCast (myBase);
 
   i1 = iBase;
   i2 = iBase + (myHermitJacobi->NivConstr() + 1) * myDimension;
@@ -117,7 +121,7 @@ FEmTool_Curve::FEmTool_Curve(const Standard_Integer Dimension,
   Standard_Real stenor = 2. / (myKnots->Value(IndexOfElement + 1) - myKnots->Value(IndexOfElement)),
                 mfact;
 
-  Handle(PLib_HermitJacobi) myHermitJacobi = (*((Handle(PLib_HermitJacobi)*)&myBase));
+  Handle(PLib_HermitJacobi) myHermitJacobi = Handle(PLib_HermitJacobi)::DownCast (myBase);
 
   i2 = Coeffs.LowerRow();
   Standard_Integer i3 = i2 + myHermitJacobi->NivConstr() + 1;
@@ -417,7 +421,7 @@ FEmTool_Curve::FEmTool_Curve(const Standard_Integer Dimension,
     (myBase->WorkDegree() + 1)*myDimension + 1;
   
   myBase->ReduceDegree(myDimension, deg, Tol, myCoeff.ChangeValue(Ptr), NewDegree, MaxError);
-  Handle(PLib_HermitJacobi) myHermitJacobi = (*((Handle(PLib_HermitJacobi)*)&myBase));
+  Handle(PLib_HermitJacobi) myHermitJacobi = Handle(PLib_HermitJacobi)::DownCast (myBase);
   
   NewDegree = Max(NewDegree, 2 * myHermitJacobi->NivConstr() + 1);
   

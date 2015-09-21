@@ -14,9 +14,16 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <GC_MakeCylindricalSurface.ixx>
+
+#include <GC_MakeCylindricalSurface.hxx>
 #include <gce_MakeCylinder.hxx>
+#include <Geom_CylindricalSurface.hxx>
+#include <gp_Ax1.hxx>
+#include <gp_Ax2.hxx>
+#include <gp_Circ.hxx>
+#include <gp_Cylinder.hxx>
 #include <gp_Lin.hxx>
+#include <gp_Pnt.hxx>
 #include <StdFail_NotDone.hxx>
 
 GC_MakeCylindricalSurface::GC_MakeCylindricalSurface(const gp_Cylinder& C)
@@ -100,14 +107,4 @@ const Handle(Geom_CylindricalSurface)&
 { 
   StdFail_NotDone_Raise_if(TheError != gce_Done,"");
   return TheCylinder;
-}
-
-const Handle(Geom_CylindricalSurface)& GC_MakeCylindricalSurface::Operator() const 
-{
-  return Value();
-}
-
-GC_MakeCylindricalSurface::operator Handle(Geom_CylindricalSurface) () const
-{
-  return Value();
 }

@@ -12,24 +12,27 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <TopOpeBRepDS_EIR.ixx>
+
 #include <BRep_Tool.hxx>
 #include <TopExp.hxx>
+#include <TopoDS.hxx>
+#include <TopOpeBRepDS_connex.hxx>
 #include <TopOpeBRepDS_CurvePointInterference.hxx>
+#include <TopOpeBRepDS_define.hxx>
 #include <TopOpeBRepDS_Dumper.hxx>
 #include <TopOpeBRepDS_Edge3dInterferenceTool.hxx>
 #include <TopOpeBRepDS_EdgeInterferenceTool.hxx>
 #include <TopOpeBRepDS_EdgeVertexInterference.hxx>
-#include <TopOpeBRepDS_Interference.hxx>
-#include <TopOpeBRepDS_TKI.hxx>
-#include <TopoDS.hxx>
-#include <TopOpeBRepDS_ProcessInterferencesTool.hxx>
-#include <TopOpeBRepTool_EXPORT.hxx>
+#include <TopOpeBRepDS_EIR.hxx>
 #include <TopOpeBRepDS_EXPORT.hxx>
-#include <TopOpeBRepDS_define.hxx>
+#include <TopOpeBRepDS_HDataStructure.hxx>
+#include <TopOpeBRepDS_Interference.hxx>
+#include <TopOpeBRepDS_ProcessInterferencesTool.hxx>
 #include <TopOpeBRepDS_repvg.hxx>
-#include <TopOpeBRepDS_connex.hxx>
+#include <TopOpeBRepDS_TKI.hxx>
+#include <TopOpeBRepTool_EXPORT.hxx>
 #include <TopOpeBRepTool_TOOL.hxx>
+
 #ifdef OCCT_DEBUG
 #include <TopOpeBRepDS_reDEB.hxx>
 Standard_EXPORT void debredpnc(const Standard_Integer ie){cout<<"+++ debredpnc e"<<ie<<endl;}
@@ -282,12 +285,12 @@ static void FUN_ReducerEdge3d(const Standard_Integer SIX, TopOpeBRepDS_DataStruc
       Standard_Boolean isevi = I1->IsKind(STANDARD_TYPE(TopOpeBRepDS_EdgeVertexInterference));
       Standard_Boolean iscpi = I1->IsKind(STANDARD_TYPE(TopOpeBRepDS_CurvePointInterference));
       if (isevi) {
-	const Handle(TopOpeBRepDS_EdgeVertexInterference)& EVI = Handle(TopOpeBRepDS_EdgeVertexInterference)::DownCast(I1);
+	Handle(TopOpeBRepDS_EdgeVertexInterference) EVI (Handle(TopOpeBRepDS_EdgeVertexInterference)::DownCast(I1));
 	newI = new TopOpeBRepDS_EdgeVertexInterference(T,TopOpeBRepDS_FACE,IB1,G1,EVI->GBound(),
 			  TopOpeBRepDS_UNSHGEOMETRY,EVI->Parameter());	  
       }
       if (iscpi) {
-	const Handle(TopOpeBRepDS_CurvePointInterference)& CPI = Handle(TopOpeBRepDS_CurvePointInterference)::DownCast(I1);
+	Handle(TopOpeBRepDS_CurvePointInterference) CPI (Handle(TopOpeBRepDS_CurvePointInterference)::DownCast(I1));
 	newI = new TopOpeBRepDS_CurvePointInterference(T,TopOpeBRepDS_FACE,IB1,TopOpeBRepDS_POINT,G1,CPI->Parameter());		
       }
 
@@ -384,7 +387,7 @@ static void FUN_ReducerSDEdge(const Standard_Integer SIX,const TopOpeBRepDS_Data
       } // it2
 
       if (complex1d) {
-	const Handle(TopOpeBRepDS_EdgeVertexInterference)& EVI = Handle(TopOpeBRepDS_EdgeVertexInterference)::DownCast(I1);
+	Handle(TopOpeBRepDS_EdgeVertexInterference) EVI (Handle(TopOpeBRepDS_EdgeVertexInterference)::DownCast(I1));
 	TopOpeBRepDS_Config cEIX=BDS.SameDomainOri(SIX), c1=BDS.SameDomainOri(IB1); 
 	TopOpeBRepDS_Config Conf = (cEIX == c1) ? TopOpeBRepDS_SAMEORIENTED : TopOpeBRepDS_DIFFORIENTED;
 	Handle(TopOpeBRepDS_Interference) newI = new TopOpeBRepDS_EdgeVertexInterference(T,TopOpeBRepDS_EDGE,IB1,G,EVI->GBound(),Conf,EVI->Parameter());	

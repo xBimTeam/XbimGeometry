@@ -14,52 +14,55 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <TopOpeBRepTool_CurveTool.ixx>
 
-#include <ProjLib_ProjectedCurve.hxx>
+#include <BRep_Tool.hxx>
+#include <BRepAdaptor_HSurface.hxx>
+#include <BRepAdaptor_Surface.hxx>
 #include <BRepApprox_Approx.hxx>
 #include <BRepApprox_ApproxLine.hxx>
-#include <TopoDS.hxx>
-#include <TopoDS_Face.hxx>
-#include <Geom_BSplineCurve.hxx>
-#include <Geom2d_Line.hxx>
-#include <Geom2d_Circle.hxx>
-#include <Geom2d_Ellipse.hxx>
-#include <Geom2d_Parabola.hxx>
-#include <Geom2d_Hyperbola.hxx>
+#include <BRepTools.hxx>
+#include <ElSLib.hxx>
+#include <gce_MakeCirc.hxx>
+#include <gce_MakeLin.hxx>
+#include <gce_MakeLin2d.hxx>
 #include <Geom2d_BSplineCurve.hxx>
-#include <TColStd_Array1OfReal.hxx>
-#include <GeomLib_CheckBSplineCurve.hxx>
-#include <GeomLib_Check2dBSplineCurve.hxx>
-#include <TColStd_Array1OfInteger.hxx>
-#include <BRepAdaptor_Surface.hxx>
-#include <GeomAdaptor_Curve.hxx>
-#include <BRepAdaptor_HSurface.hxx>
-#include <GeomAdaptor_HCurve.hxx>
+#include <Geom2d_Circle.hxx>
+#include <Geom2d_Curve.hxx>
+#include <Geom2d_Ellipse.hxx>
+#include <Geom2d_Hyperbola.hxx>
+#include <Geom2d_Line.hxx>
+#include <Geom2d_Parabola.hxx>
+#include <Geom_BSplineCurve.hxx>
+#include <Geom_Curve.hxx>
+#include <Geom_RectangularTrimmedSurface.hxx>
+#include <Geom_Surface.hxx>
 #include <GeomAbs_SurfaceType.hxx>
+#include <GeomAdaptor_Curve.hxx>
+#include <GeomAdaptor_HCurve.hxx>
+#include <GeomLib_Check2dBSplineCurve.hxx>
+#include <GeomLib_CheckBSplineCurve.hxx>
+#include <GeomTools_Curve2dSet.hxx>
+#include <gp_Lin.hxx>
+#include <gp_Lin2d.hxx>
 #include <gp_Pln.hxx>
 #include <gp_Pnt2d.hxx>
-#include <ElSLib.hxx>
+#include <gp_Vec.hxx>
+#include <OSD_Chronometer.hxx>
+#include <Precision.hxx>
+#include <ProjLib_ProjectedCurve.hxx>
 #include <Standard_NotImplemented.hxx>
 #include <Standard_ProgramError.hxx>
-#include <OSD_Chronometer.hxx>
-
-#include <GeomTools_Curve2dSet.hxx>
 #include <TColStd_Array1OfBoolean.hxx>
-#include <gp_Lin.hxx>
-#include <gce_MakeLin.hxx>
-#include <gp_Lin2d.hxx>
-#include <gce_MakeLin2d.hxx>
-#include <BRepTools.hxx>
-#include <Precision.hxx>
-#include <gce_MakeCirc.hxx>
-#include <gp_Vec.hxx>
-//#include <Approx.hxx>
-#include <Geom_Surface.hxx>
+#include <TColStd_Array1OfInteger.hxx>
+#include <TColStd_Array1OfReal.hxx>
 #include <TopLoc_Location.hxx>
-#include <Geom_RectangularTrimmedSurface.hxx>
-#include <BRep_Tool.hxx>
+#include <TopoDS.hxx>
+#include <TopoDS_Face.hxx>
+#include <TopoDS_Shape.hxx>
+#include <TopOpeBRepTool_CurveTool.hxx>
+#include <TopOpeBRepTool_GeomTool.hxx>
 
+//#include <Approx.hxx>
 #ifdef OCCT_DEBUG
 #include <TopOpeBRepTool_KRO.hxx>
 TOPKRO KRO_CURVETOOL_APPRO("approximation");
@@ -72,6 +75,7 @@ extern Standard_Boolean TopOpeBRepTool_GettraceCHKBSPL();
 #define CurveImprovement
 #ifdef DRAW
 #include <DrawTrSurf.hxx>
+#include <Geom2d_Curve.hxx>
 static Standard_Integer NbCalls = 0;
 #endif
 //=======================================================================
@@ -340,9 +344,9 @@ Standard_Boolean  TopOpeBRepTool_CurveTool::MakeCurves
   Standard_Integer iparmin = (Standard_Integer)parmin;
   Standard_Integer iparmax = (Standard_Integer)parmax;
 
-  Handle(Geom_BSplineCurve)&   HC3D = *((Handle(Geom_BSplineCurve)*)&C3D);
-  Handle(Geom2d_BSplineCurve)& HPC1 = *((Handle(Geom2d_BSplineCurve)*)&PC1);
-  Handle(Geom2d_BSplineCurve)& HPC2 = *((Handle(Geom2d_BSplineCurve)*)&PC2);
+  Handle(Geom_BSplineCurve) HC3D (Handle(Geom_BSplineCurve)::DownCast (C3D));
+  Handle(Geom2d_BSplineCurve) HPC1 (Handle(Geom2d_BSplineCurve)::DownCast (PC1));
+  Handle(Geom2d_BSplineCurve) HPC2 (Handle(Geom2d_BSplineCurve)::DownCast (PC2));
 
 //--------------------- IFV - "improving" initial curves
 #ifdef CurveImprovement
@@ -451,21 +455,21 @@ Standard_Boolean  TopOpeBRepTool_CurveTool::MakeCurves
       if(CompPC1) Polpc1(NbPol) = PolPC1(nbpol);
       if(CompPC2) Polpc2(NbPol) = PolPC2(nbpol);
       
-      HC3D = new Geom_BSplineCurve(Polc3d, knots, mults, 1);
-      if(CompPC1) HPC1 = new Geom2d_BSplineCurve(Polpc1, knots, mults, 1);
-      if(CompPC2) HPC2 = new Geom2d_BSplineCurve(Polpc2, knots, mults, 1);
+      const_cast<Handle(Geom_Curve)&>(C3D) = new Geom_BSplineCurve(Polc3d, knots, mults, 1);
+      if(CompPC1) const_cast<Handle(Geom2d_Curve)&>(PC1) = new Geom2d_BSplineCurve(Polpc1, knots, mults, 1);
+      if(CompPC2) const_cast<Handle(Geom2d_Curve)&>(PC2) = new Geom2d_BSplineCurve(Polpc2, knots, mults, 1);
       iparmax = NbPol;
 
 #ifdef IFV
       sprintf(name,"C3Dmod_%d",NbCalls);
       nm = &name[0];
-      DrawTrSurf::Set(nm, HC3D);
+      DrawTrSurf::Set(nm, C3D);
       sprintf(name,"PC1mod_%d",NbCalls);
       nm = &name[0];
-      DrawTrSurf::Set(nm, HPC1);
+      DrawTrSurf::Set(nm, PC1);
       sprintf(name,"PC2mod_%d",NbCalls);
       nm = &name[0];
-      DrawTrSurf::Set(nm, HPC2);
+      DrawTrSurf::Set(nm, PC2);
 #endif
 
     }
@@ -677,7 +681,7 @@ Standard_Boolean  TopOpeBRepTool_CurveTool::MakeCurves
 
   Standard_Boolean bf, bl;
 
-  const Handle(Geom_BSplineCurve)& Curve = Handle(Geom_BSplineCurve)::DownCast(C3Dnew);
+  Handle(Geom_BSplineCurve) Curve (Handle(Geom_BSplineCurve)::DownCast(C3Dnew));
   if(!Curve.IsNull()) {
     GeomLib_CheckBSplineCurve cbsc(Curve, 1.e-7, 0.1);
     cbsc.NeedTangentFix(bf, bl);
@@ -693,7 +697,7 @@ Standard_Boolean  TopOpeBRepTool_CurveTool::MakeCurves
     cbsc.FixTangent(bf, bl);
   }
   
-  const Handle(Geom2d_BSplineCurve)& Curve2df = Handle(Geom2d_BSplineCurve)::DownCast(PC1new);
+  Handle(Geom2d_BSplineCurve) Curve2df (Handle(Geom2d_BSplineCurve)::DownCast(PC1new));
   if(!Curve2df.IsNull()) {
     GeomLib_Check2dBSplineCurve cbsc2df(Curve2df, 1.e-7, 0.1);
     cbsc2df.NeedTangentFix(bf, bl);
@@ -708,7 +712,7 @@ Standard_Boolean  TopOpeBRepTool_CurveTool::MakeCurves
     cbsc2df.FixTangent(bf, bl);
   }
   
-  const Handle(Geom2d_BSplineCurve)& Curve2ds = Handle(Geom2d_BSplineCurve)::DownCast(PC2new);
+  Handle(Geom2d_BSplineCurve) Curve2ds (Handle(Geom2d_BSplineCurve)::DownCast(PC2new));
   if(!Curve2ds.IsNull()) {
     GeomLib_Check2dBSplineCurve cbsc2ds(Curve2ds, 1.e-7, 0.1);
     cbsc2ds.NeedTangentFix(bf, bl);

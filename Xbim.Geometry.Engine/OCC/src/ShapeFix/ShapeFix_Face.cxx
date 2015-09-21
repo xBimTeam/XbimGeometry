@@ -28,84 +28,78 @@
 // abv 19.10.2001  FixAddNaturalBound improved and extracted as separate fix
 // skl,pdn 14.05.2002  OCC55 (correction precision for small faces)
 
-#include <ShapeFix_Face.ixx>
-
-#include <Standard_Failure.hxx>
-#include <Standard_ErrorHandler.hxx>
-
-#include <Precision.hxx>
-
-#include <Geom2d_Curve.hxx>
-#include <Geom2d_Line.hxx>
-#include <Geom2dAdaptor_Curve.hxx>
-#include <Geom_Curve.hxx>
-#include <Geom_BSplineSurface.hxx>
-#include <GeomAdaptor_HSurface.hxx>
-#include <GProp_GProps.hxx>
-
-#include <TopoDS.hxx>
-#include <TopoDS_Edge.hxx>
-#include <TopoDS_Vertex.hxx>
-#include <TopoDS_Shell.hxx>
-#include <TopoDS_Compound.hxx>
-#include <TopoDS_Iterator.hxx>
-#include <TopExp_Explorer.hxx>
-#include <TopTools_SequenceOfShape.hxx>
-
-#include <BRepGProp.hxx>
-#include <BRep_Tool.hxx>
+#include <Bnd_Box.hxx>
+#include <Bnd_Box2d.hxx>
+#include <BndLib_Add2dCurve.hxx>
 #include <BRep_Builder.hxx>
-#include <BRepTopAdaptor_FClass2d.hxx>
-#include <BRepTools.hxx>
+#include <BRep_Tool.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
 #include <BRepBuilderAPI_MakeVertex.hxx>
 #include <BRepBuilderAPI_MakeWire.hxx>
-
-#include <Message_Msg.hxx>  
-#include <ShapeBuild_ReShape.hxx>
-#include <ShapeExtend_WireData.hxx>
-#include <ShapeAnalysis.hxx>
-#include <ShapeFix_Wire.hxx>
-#include <ShapeFix_Edge.hxx>
-#include <ShapeAnalysis_Edge.hxx>
-#include <Bnd_Box2d.hxx>
-#include <Geom_Circle.hxx>
-#include <Geom_SphericalSurface.hxx>
-#include <Geom_RectangularTrimmedSurface.hxx>
-#include <Geom_ConicalSurface.hxx>
-#include <ShapeAnalysis_Wire.hxx>
-#include <ShapeAnalysis_Surface.hxx>
-
-#include <ShapeExtend_CompositeSurface.hxx>
-#include <ShapeFix_ComposeShell.hxx>
-#include <TColGeom_HArray2OfSurface.hxx>
-#include <ShapeBuild_Edge.hxx>
-#include <TColgp_SequenceOfPnt2d.hxx>
-#include <Bnd_Box.hxx>
-#include <TopTools_IndexedMapOfShape.hxx>
-#include <TopTools_DataMapOfShapeListOfShape.hxx>
-#include <TopTools_ListIteratorOfListOfShape.hxx>
-#include <TopTools_MapOfShape.hxx>
-#include <TopoDS.hxx>
-#include <TopExp.hxx>
-
-#include <ShapeFix.hxx>
-#include <ShapeFix_DataMapOfShapeBox2d.hxx>
-#include <BndLib_Add2dCurve.hxx>
+#include <BRepGProp.hxx>
+#include <BRepTools.hxx>
+#include <BRepTopAdaptor_FClass2d.hxx>
+#include <Geom2d_BSplineCurve.hxx>
+#include <Geom2d_Curve.hxx>
+#include <Geom2d_Line.hxx>
 #include <Geom2dAdaptor_Curve.hxx>
-#include <IntRes2d_Domain.hxx>
 #include <Geom2dInt_GInter.hxx>
+#include <Geom_BSplineSurface.hxx>
+#include <Geom_Circle.hxx>
+#include <Geom_ConicalSurface.hxx>
+#include <Geom_Curve.hxx>
+#include <Geom_RectangularTrimmedSurface.hxx>
+#include <Geom_SphericalSurface.hxx>
+#include <Geom_Surface.hxx>
+#include <GeomAdaptor_HSurface.hxx>
+#include <GProp_GProps.hxx>
+#include <IntRes2d_Domain.hxx>
 #include <IntRes2d_IntersectionPoint.hxx>
-#include <IntRes2d_Transition.hxx>
-#include <TopTools_SequenceOfShape.hxx>
 #include <IntRes2d_IntersectionSegment.hxx>
-#include <TopTools_DataMapOfShapeInteger.hxx>
-
+#include <IntRes2d_Transition.hxx>
+#include <Message_Msg.hxx>
+#include <NCollection_Array1.hxx>
+#include <Precision.hxx>
+#include <ShapeAnalysis.hxx>
+#include <ShapeAnalysis_Edge.hxx>
+#include <ShapeAnalysis_Surface.hxx>
+#include <ShapeAnalysis_Wire.hxx>
+#include <ShapeBuild_Edge.hxx>
+#include <ShapeBuild_ReShape.hxx>
+#include <ShapeExtend_BasicMsgRegistrator.hxx>
+#include <ShapeExtend_CompositeSurface.hxx>
+#include <ShapeExtend_WireData.hxx>
+#include <ShapeFix.hxx>
+#include <ShapeFix_ComposeShell.hxx>
+#include <ShapeFix_DataMapOfShapeBox2d.hxx>
+#include <ShapeFix_Edge.hxx>
+#include <ShapeFix_Face.hxx>
 #include <ShapeFix_IntersectionTool.hxx>
 #include <ShapeFix_SplitTool.hxx>
+#include <ShapeFix_Wire.hxx>
+#include <Standard_ErrorHandler.hxx>
+#include <Standard_Failure.hxx>
+#include <Standard_Type.hxx>
+#include <TColGeom_HArray2OfSurface.hxx>
+#include <TColgp_SequenceOfPnt2d.hxx>
 #include <TColStd_MapOfInteger.hxx>
+#include <TopExp.hxx>
+#include <TopExp_Explorer.hxx>
+#include <TopoDS.hxx>
+#include <TopoDS_Compound.hxx>
+#include <TopoDS_Edge.hxx>
+#include <TopoDS_Face.hxx>
+#include <TopoDS_Iterator.hxx>
+#include <TopoDS_Shell.hxx>
+#include <TopoDS_Vertex.hxx>
+#include <TopoDS_Wire.hxx>
+#include <TopTools_DataMapOfShapeInteger.hxx>
+#include <TopTools_DataMapOfShapeListOfShape.hxx>
 #include <TopTools_DataMapOfShapeShape.hxx>
-#include <NCollection_Array1.hxx>
+#include <TopTools_IndexedMapOfShape.hxx>
+#include <TopTools_ListIteratorOfListOfShape.hxx>
+#include <TopTools_MapOfShape.hxx>
+#include <TopTools_SequenceOfShape.hxx>
 
 #ifdef OCCT_DEBUG
 #define DEBUG
@@ -1660,52 +1654,73 @@ Standard_Boolean ShapeFix_Face::FixMissingSeam()
     ws.Append ( w2 );
   }
   
+  // Check consistency of orientations of the two wires that need to be connected by a seam
+  Standard_Real uf=SUF, vf=SVF;  
+  Standard_Integer coord = ( ismodeu ? 1 : 0 );
+  Standard_Integer isneg = ( ismodeu ? ismodeu : -ismodev );
+  Standard_Real period = ( ismodeu ? URange : VRange );
+  TopoDS_Shape S;
+  Standard_Real m1[2][2], m2[2][2];
+  S = myFace.EmptyCopied();
+  B.Add ( S, w1 );
+  ShapeAnalysis::GetFaceUVBounds (TopoDS::Face(S), m1[0][0], m1[0][1], m1[1][0], m1[1][1]);
+  S = myFace.EmptyCopied();
+  B.Add ( S, w2 );
+  ShapeAnalysis::GetFaceUVBounds (TopoDS::Face(S), m2[0][0], m2[0][1], m2[1][0], m2[1][1]);
+   
+  // For the case when surface is closed only in one direction it is necesary to check
+  // validity of orientation of the open wires in parametric space. 
+  // In case of U closed surface wire with minimal V coordinate should be directed in positive direction by U
+  // In case of V closed surface wire with minimal U coordinate should be directed in negative direction by V
+  if (!vclosed || !uclosed)
+  {
+    Standard_Real deltaOther = 0.5 * (m2[coord][0] + m2[coord][1]) - 0.5 * (m1[coord][0] + m1[coord][1]);
+    if (deltaOther  * isneg < 0)
+    {
+      w1.Reverse();
+      w2.Reverse();
+    }
+  }
+
   // sort original wires
   Handle(ShapeFix_Wire) sfw = new ShapeFix_Wire;
   sfw->SetFace ( myFace );
   sfw->SetPrecision ( Precision() );
-
   Handle(ShapeExtend_WireData) wd1 = new ShapeExtend_WireData ( w1 );
   Handle(ShapeExtend_WireData) wd2 = new ShapeExtend_WireData ( w2 );
-
-  // sorting
-//  Standard_Boolean degenerated = ( secondDeg != firstDeg );
-//  if ( ! degenerated ) {
-    sfw->Load ( wd1 );
-    sfw->FixReorder();
-//  }
+  sfw->Load ( wd1 );
+  sfw->FixReorder();
   sfw->Load ( wd2 );
   sfw->FixReorder();
-
+  TopoDS_Wire w11 = wd1->Wire();
+  TopoDS_Wire w21 = wd2->Wire();
+ 
   //:abv 29.08.01: reconstruct face taking into account reversing
   TopoDS_Shape dummy = myFace.EmptyCopied();
   TopoDS_Face tmpF = TopoDS::Face ( dummy );
   tmpF.Orientation ( TopAbs_FORWARD );
   for ( i=1; i <= ws.Length(); i++ ) {
     TopoDS_Wire wire = TopoDS::Wire ( ws.Value(i) );
-    if ( wire.IsSame ( w1 ) ) wire = w1;
-    else if ( wire.IsSame ( w2 ) ) wire = w2;
+    if ( wire.IsSame ( w1 ) ) wire = w11;
+    else if ( wire.IsSame ( w2 ) ) wire = w21;
+    else
+    {
+      // other wires (not boundary) are considered as holes; make sure to have them oriented accordingly
+      TopoDS_Shape curface = tmpF.EmptyCopied();
+      B.Add(curface,wire);
+      curface.Orientation ( myFace.Orientation() );
+      if( ShapeAnalysis::IsOuterBound(TopoDS::Face(curface)))
+        wire.Reverse();
+    }
     B.Add ( tmpF, wire );
   }
+ 
   tmpF.Orientation ( myFace.Orientation() );
-  
-  Standard_Real uf=SUF, vf=SVF;
-  
+
   // A special kind of FixShifted is necessary for torus-like
   // surfaces to adjust wires by period ALONG the missing SEAM direction
   // tr9_r0501-ug.stp #187640
   if ( uclosed && vclosed ) {
-    Standard_Integer coord = ( ismodeu ? 1 : 0 );
-    Standard_Integer isneg = ( ismodeu ? ismodeu : -ismodev );
-    Standard_Real period = ( ismodeu ? URange : VRange );
-    TopoDS_Shape S;
-    Standard_Real m1[2][2], m2[2][2];
-    S = tmpF.EmptyCopied();
-    B.Add ( S, w1 );
-    ShapeAnalysis::GetFaceUVBounds (TopoDS::Face(S), m1[0][0], m1[0][1], m1[1][0], m1[1][1]);
-    S = tmpF.EmptyCopied();
-    B.Add ( S, w2 );
-    ShapeAnalysis::GetFaceUVBounds (TopoDS::Face(S), m2[0][0], m2[0][1], m2[1][0], m2[1][1]);
     Standard_Real shiftw2 = 
       ShapeAnalysis::AdjustByPeriod ( 0.5 * ( m2[coord][0] + m2[coord][1] ),
                                       0.5 * ( m1[coord][0] + m1[coord][1]  +
@@ -1717,9 +1732,10 @@ Standard_Boolean ShapeFix_Face::FixMissingSeam()
       if(it.Value().ShapeType() != TopAbs_WIRE)
         continue;
       TopoDS_Wire w = TopoDS::Wire ( it.Value() );
-      if ( w == w1 ) continue;
+      if ( w == w11 ) continue;
       Standard_Real shift;
-      if ( w == w2 ) shift = shiftw2;
+      if ( w == w21 ) shift = shiftw2;
+
       else {
 	S = tmpF.EmptyCopied();
 	B.Add ( S, w );

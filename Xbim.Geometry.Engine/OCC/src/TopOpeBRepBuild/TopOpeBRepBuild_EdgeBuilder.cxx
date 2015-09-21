@@ -14,14 +14,19 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <TopOpeBRepBuild_EdgeBuilder.ixx>
+
+#include <TopoDS_Shape.hxx>
+#include <TopOpeBRepBuild_EdgeBuilder.hxx>
+#include <TopOpeBRepBuild_LoopClassifier.hxx>
+#include <TopOpeBRepBuild_LoopSet.hxx>
 #include <TopOpeBRepBuild_Pave.hxx>
+#include <TopOpeBRepBuild_PaveClassifier.hxx>
+#include <TopOpeBRepBuild_PaveSet.hxx>
 
 //=======================================================================
 //function : TopOpeBRepBuild_EdgeBuilder
 //purpose  : 
 //=======================================================================
-
 TopOpeBRepBuild_EdgeBuilder::TopOpeBRepBuild_EdgeBuilder()
 {
 }
@@ -120,7 +125,7 @@ void TopOpeBRepBuild_EdgeBuilder::NextVertex()
 const TopoDS_Shape& TopOpeBRepBuild_EdgeBuilder::Vertex() const
 {
   const Handle(TopOpeBRepBuild_Loop)& L = Loop();
-  const Handle(TopOpeBRepBuild_Pave)& PV = *((Handle(TopOpeBRepBuild_Pave)*)&L);
+  Handle(TopOpeBRepBuild_Pave) PV (Handle(TopOpeBRepBuild_Pave)::DownCast (L));
   const TopoDS_Shape& V = PV->Vertex();
   return V;
 }
@@ -133,7 +138,7 @@ const TopoDS_Shape& TopOpeBRepBuild_EdgeBuilder::Vertex() const
 Standard_Real TopOpeBRepBuild_EdgeBuilder::Parameter() const
 {
   const Handle(TopOpeBRepBuild_Loop)& L = Loop();
-  const Handle(TopOpeBRepBuild_Pave)& PV = *((Handle(TopOpeBRepBuild_Pave)*)&L);
+  Handle(TopOpeBRepBuild_Pave) PV (Handle(TopOpeBRepBuild_Pave)::DownCast (L));
   Standard_Real parV = PV->Parameter();
   return parV;
 }
