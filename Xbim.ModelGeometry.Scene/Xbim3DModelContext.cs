@@ -183,12 +183,13 @@ namespace Xbim.ModelGeometry.Scene
             internal String InitialiseError;
             internal ConcurrentDictionary<int, GeometryReference> ShapeLookup;
             private bool _disposed = false;
-           
+            bool _adjustWCS;
 
-            public XbimCreateContextHelper(XbimModel model, IfcRepresentationContextCollection contexts)
+            public XbimCreateContextHelper(XbimModel model, IfcRepresentationContextCollection contexts, bool adjustWCS = true)
             {
                 Model = model;
                 Contexts = contexts;
+                _adjustWCS = adjustWCS;
             }
           
             /// <summary>
@@ -244,7 +245,7 @@ namespace Xbim.ModelGeometry.Scene
             {
                 try
                 {
-                    PlacementTree = new XbimPlacementTree(Model);
+                    PlacementTree = new XbimPlacementTree(Model, _adjustWCS);
                     GeometryShapeLookup = new ConcurrentDictionary<int, int>();
                     MapsWritten = new ConcurrentDictionary<int, List<GeometryReference>>();
                     MapTransforms = new ConcurrentDictionary<int, XbimMatrix3D>();
@@ -525,13 +526,13 @@ namespace Xbim.ModelGeometry.Scene
         /// <param name="progDelegate"></param>
         /// <param name="geomStorageType">The type of geometry storage type to use, typically Polyhedron or  PolyhedronBinary</param>
         /// <returns></returns>
-        public bool CreateContext(XbimGeometryType geomStorageType = XbimGeometryType.Polyhedron, ReportProgressDelegate progDelegate = null)
+        public bool CreateContext(XbimGeometryType geomStorageType = XbimGeometryType.Polyhedron, ReportProgressDelegate progDelegate = null, bool adjustWCS = true)
         {
             if (_contexts == null || Engine == null) return false;
             if (_contextIsPersisted) return false; //already created it
 
 
-            using (var contextHelper = new XbimCreateContextHelper(_model, _contexts))
+            using (var contextHelper = new XbimCreateContextHelper(_model, _contexts, adjustWCS))
             {
                 
             
@@ -748,7 +749,7 @@ namespace Xbim.ModelGeometry.Scene
                 int styleId = 0;//take the style of any part of the main shape
                 var element = pair.Key;
 
-                if (!precision.HasValue) precision = Math.Max(element.ModelOf.ModelFactors.OneMilliMeter / 100, element.ModelOf.ModelFactors.Precision); //set the precision to 100th mm but never less than precision
+                if (!precision.HasValue) precision = Math.Max(element.ModelOf.ModelFactors.OneMilliMeter / 50, element.ModelOf.ModelFactors.Precision); //set the precision to 100th mm but never less than precision
                 var elementShapes = WriteProductShape(contextHelper, element, false);
                 var arguments = new List<XbimShapeInstance>();
                 foreach (var elemShape in elementShapes)
