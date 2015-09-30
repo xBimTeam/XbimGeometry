@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Xbim.Common;
 using Xbim.Common.Geometry;
 using Xbim.Ifc2x3.Kernel;
 using Xbim.XbimExtensions;
@@ -15,8 +16,8 @@ namespace Xbim.ModelGeometry.Scene
         IList<Int32> TriangleIndices { get; set; }
         XbimMeshFragmentCollection Meshes { get; set; }
         
-        bool Add(XbimGeometryData geometryMeshData, short modelId=0);
-        XbimMeshFragment Add(IXbimGeometryModel geometryModel, IfcProduct product, XbimMatrix3D transform, double? deflection, short modelId = 0);
+        bool Add(XbimGeometryData geometryMeshData, IModel model=null);
+        XbimMeshFragment Add(IXbimGeometryModel geometryModel, IfcProduct product, XbimMatrix3D transform, double? deflection, IModel model = null);
 
         void MoveTo(IXbimMeshGeometry3D toMesh);
         void BeginUpdate();
@@ -30,7 +31,7 @@ namespace Xbim.ModelGeometry.Scene
         IXbimMeshGeometry3D GetMeshGeometry3D(XbimMeshFragment frag);
         XbimRect3D GetBounds();
 
-        void Add(string mesh, Type productType, int productLabel, int geometryLabel, XbimMatrix3D? transform = null, short modelId=0);
-        void Add(string mesh, short productTypeId, int productLabel, int geometryLabel, XbimMatrix3D? transform = null, short modelId = 0);
+        void Add(string mesh, Type productType, int productLabel, int geometryLabel, XbimMatrix3D? transform = null, IModel model=null);
+        void Add(string mesh, short productTypeId, int productLabel, int geometryLabel, XbimMatrix3D? transform = null, IModel model = null);
     }
 }

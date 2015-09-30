@@ -233,6 +233,9 @@
     <Reference Include="Xbim.Ifc2x3">
       <HintPath>..\packages\Xbim.Essentials.3.1.10-V0008\lib\net40\Xbim.Ifc2x3.dll</HintPath>
     </Reference>
+    <Reference Include="Xbim.Ifc2x3.IO">
+      <HintPath>..\packages\Xbim.Essentials.3.1.10-V0008\lib\net40\Xbim.Ifc2x3.IO.dll</HintPath>
+    </Reference>
     <Reference Include="Xbim.IO">
       <HintPath>..\packages\Xbim.Essentials.3.1.10-V0008\lib\net40\Xbim.IO.dll</HintPath>
     </Reference>

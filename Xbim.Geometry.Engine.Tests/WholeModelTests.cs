@@ -15,11 +15,11 @@ using Xbim.Ifc2x3.PresentationAppearanceResource;
 using Xbim.Ifc2x3.PresentationDefinitionResource;
 using Xbim.Ifc2x3.PresentationResource;
 using Xbim.Ifc2x3.ProductExtension;
-using Xbim.IO;
+using Xbim.IO.Esent;
 using Xbim.ModelGeometry.Scene;
 using Xbim.XbimExtensions;
-using Xbim.XbimExtensions.SelectTypes;
 using XbimGeometry.Interfaces;
+using Xbim.Common;
 
 namespace GeometryTests
 {
@@ -41,7 +41,7 @@ namespace GeometryTests
         [TestMethod]
         public void GeometryVersionUpgradeTest()
         {
-            using (var model = new XbimModel())
+            using (var model = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
             {
                 // start afresh
                 model.Open(@"GConv\Monolith_v10.xBIM", XbimDBAccess.Exclusive);
@@ -66,7 +66,7 @@ namespace GeometryTests
         [TestMethod]
         public void TestShapeGeometriesEnumerability()
         {
-            using (var model = new XbimModel())
+            using (var model = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
             {
                 model.Open(@"EsentTestFiles\TwoWalls.xbim");
                 var geomContext = new Xbim3DModelContext(model);
@@ -109,7 +109,7 @@ namespace GeometryTests
                     using (var binaryWriter = new BinaryWriter(wexBimFile))
                     {
 
-                        using (var model = new XbimModel())
+                        using (var model = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
                         {
                             try
                             {
@@ -156,7 +156,7 @@ namespace GeometryTests
         private static void IfcFeaturesClassificationIsCorrect(string ifcFileFullName)
         {
             var xbimFileFullName = Path.ChangeExtension(ifcFileFullName, ".xbim");
-            using (var m = new XbimModel())
+            using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
             {
                 m.CreateFrom(ifcFileFullName, xbimFileFullName, null, true, true);
                 var context = new Xbim3DModelContext(m);
@@ -170,9 +170,9 @@ namespace GeometryTests
         {
             var excludedTypes = new HashSet<short>
             {
-                IfcMetaData.IfcType(typeof (IfcFeatureElement)).TypeId,
-                IfcMetaData.IfcType(typeof (IfcOpeningElement)).TypeId,
-                IfcMetaData.IfcType(typeof (IfcProjectionElement)).TypeId
+                ExpressMetaData.ExpressType(typeof (IfcFeatureElement)).TypeId,
+                ExpressMetaData.ExpressType(typeof (IfcOpeningElement)).TypeId,
+                ExpressMetaData.ExpressType(typeof (IfcProjectionElement)).TypeId
             };
 
             var shapeInstances = context.ShapeInstances().Where(s =>
@@ -198,7 +198,7 @@ namespace GeometryTests
             FileInfo[] toProcess = di.GetFiles("*.IFC", SearchOption.TopDirectoryOnly);
             foreach (var file in toProcess)
             {
-                using (var m = new XbimModel())
+                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
                 {
                     m.CreateFrom(file.FullName, null, null, true, true);
 
@@ -270,7 +270,7 @@ namespace GeometryTests
             FileInfo[] toProcess = di.GetFiles("*.IFC", SearchOption.TopDirectoryOnly);
             foreach (var file in toProcess)
             {
-                using (var m = new XbimModel())
+                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
                 {
                     m.CreateFrom(file.FullName, null, null, true, true);
 

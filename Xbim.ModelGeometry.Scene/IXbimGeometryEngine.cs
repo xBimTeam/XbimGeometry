@@ -1,4 +1,5 @@
 ﻿using System;
+using Xbim.Common;
 using Xbim.Common.Geometry;
 using Xbim.Ifc2x3.GeometricModelResource;
 using Xbim.Ifc2x3.GeometryResource;
@@ -32,7 +33,7 @@ namespace Xbim.ModelGeometry.Scene
         /// Initialises the geometry engine and resets any cached data
         /// </summary>
         /// <param name="model"></param>
-        void Init(XbimModel model);
+        void Init(IModel model);
 
         /// <summary>
         /// Returns the 3D geometry for the representation item

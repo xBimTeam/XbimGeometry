@@ -9,7 +9,8 @@ using Xbim.Ifc2x3.Kernel;
 using Xbim.Ifc2x3.MeasureResource;
 using Xbim.Ifc2x3.ProductExtension;
 using Xbim.Ifc2x3.ProfileResource;
-using Xbim.IO;
+using Xbim.IO.Esent;
+using Xbim.Ifc2x3.IO;
 
 namespace GeometryTests
 {
@@ -19,10 +20,10 @@ namespace GeometryTests
     public class IfcModelBuilder
     {
         
-        public static XbimModel CreateandInitModel()
+        public static EsentModel CreateandInitModel()
         {
 
-            var model = XbimModel.CreateTemporaryModel(); ; //create an empty model
+            var model = XbimModel.CreateTemporaryModel() ; //create an empty model
 
             //Begin a transaction as all changes to a model are transacted
             using (XbimReadWriteTransaction txn = model.BeginTransaction("Initialise Model"))
@@ -73,7 +74,7 @@ namespace GeometryTests
             return model;
         }
 
-        public static IfcExtrudedAreaSolid MakeExtrudedAreaSolid(XbimModel m, IfcProfileDef profile, double extrude)
+        public static IfcExtrudedAreaSolid MakeExtrudedAreaSolid(EsentModel m, IfcProfileDef profile, double extrude)
         {
             var extrusion = m.Instances.New<IfcExtrudedAreaSolid>();
             extrusion.Depth = extrude;
@@ -83,7 +84,7 @@ namespace GeometryTests
             return extrusion;
         }
 
-        public static IfcRectangleProfileDef MakeRectangleHollowProfileDef(XbimModel m, double x, double y, double wallThickness)
+        public static IfcRectangleProfileDef MakeRectangleHollowProfileDef(EsentModel m, double x, double y, double wallThickness)
         {
             var rectProfile = m.Instances.New<IfcRectangleHollowProfileDef>();
             rectProfile.Position = MakeAxis2Placement2D(m);
@@ -93,7 +94,7 @@ namespace GeometryTests
             return rectProfile;
         }
 
-        public static IfcCircleHollowProfileDef MakeCircleHollowProfileDef(XbimModel m, double r, double wallThickness)
+        public static IfcCircleHollowProfileDef MakeCircleHollowProfileDef(EsentModel m, double r, double wallThickness)
         {
             var circleProfile = m.Instances.New<IfcCircleHollowProfileDef>();
             circleProfile.Position = MakeAxis2Placement2D(m);
@@ -102,7 +103,7 @@ namespace GeometryTests
             return circleProfile;
         }
 
-        public static IfcCircleProfileDef MakeCircleProfileDef(XbimModel m, double r)
+        public static IfcCircleProfileDef MakeCircleProfileDef(EsentModel m, double r)
         {
             var circleProfile = m.Instances.New<IfcCircleProfileDef>();
             circleProfile.Position = MakeAxis2Placement2D(m);
@@ -110,7 +111,7 @@ namespace GeometryTests
             return circleProfile;
         }
 
-        public static IfcRectangleProfileDef MakeRectangleProfileDef(XbimModel m, double x, double y)
+        public static IfcRectangleProfileDef MakeRectangleProfileDef(EsentModel m, double x, double y)
         {
             var rectProfile = m.Instances.New<IfcRectangleProfileDef>();
             rectProfile.Position = MakeAxis2Placement2D(m);
@@ -119,7 +120,7 @@ namespace GeometryTests
             return rectProfile;
         }
 
-        public static IfcIShapeProfileDef MakeIShapeProfileDef(XbimModel m, double depth, double width, double flangeThickness, double webThickness, double? filletRadius = null)
+        public static IfcIShapeProfileDef MakeIShapeProfileDef(EsentModel m, double depth, double width, double flangeThickness, double webThickness, double? filletRadius = null)
         {
             var iProfile = m.Instances.New<IfcIShapeProfileDef>();
             iProfile.Position = MakeAxis2Placement2D(m);
@@ -131,7 +132,7 @@ namespace GeometryTests
             return iProfile;
         }
 
-        public static IfcBlock MakeBlock(XbimModel m, double x, double y, double z)
+        public static IfcBlock MakeBlock(EsentModel m, double x, double y, double z)
         {
             var block = m.Instances.New<IfcBlock>();
             block.Position = MakeAxis2Placement3D(m);
@@ -141,7 +142,7 @@ namespace GeometryTests
             return block;
         }
 
-        public static IfcRightCircularCylinder MakeRightCircularCylinder(XbimModel m, double r, double h)
+        public static IfcRightCircularCylinder MakeRightCircularCylinder(EsentModel m, double r, double h)
         {
             var cylinder = m.Instances.New<IfcRightCircularCylinder>();
             cylinder.Position = MakeAxis2Placement3D(m);
@@ -150,7 +151,7 @@ namespace GeometryTests
             return cylinder;
         }
 
-        public static IfcSphere MakeSphere(XbimModel m, double r)
+        public static IfcSphere MakeSphere(EsentModel m, double r)
         {
             var sphere = m.Instances.New<IfcSphere>();
             sphere.Position = MakeAxis2Placement3D(m);
@@ -158,7 +159,7 @@ namespace GeometryTests
             return sphere;
         }
 
-        public static IfcPlane MakePlane(XbimModel m, XbimPoint3D loc, XbimVector3D zdir, XbimVector3D xdir)
+        public static IfcPlane MakePlane(EsentModel m, XbimPoint3D loc, XbimVector3D zdir, XbimVector3D xdir)
         {
             var plane = m.Instances.New<IfcPlane>();
             var p = m.Instances.New<IfcAxis2Placement3D>();
@@ -169,14 +170,14 @@ namespace GeometryTests
             return plane;
         }
 
-        public static IfcAxis1Placement MakeAxis1Placement(XbimModel m)
+        public static IfcAxis1Placement MakeAxis1Placement(EsentModel m)
         {
             var p = m.Instances.New<IfcAxis1Placement>();
             p.Axis = m.Instances.New<IfcDirection>(d => d.SetXYZ(1, 0, 0));
             p.Location = m.Instances.New<IfcCartesianPoint>(c => c.SetXYZ(0, 0, 0));
             return p;
         }
-        public static IfcAxis2Placement3D MakeAxis2Placement3D(XbimModel m)
+        public static IfcAxis2Placement3D MakeAxis2Placement3D(EsentModel m)
         {
             var p = m.Instances.New<IfcAxis2Placement3D>();
             p.Axis = m.Instances.New<IfcDirection>(d => d.SetXYZ(1, 0, 0));
@@ -184,7 +185,7 @@ namespace GeometryTests
             return p;
         }
 
-        public static IfcAxis2Placement2D MakeAxis2Placement2D(XbimModel m)
+        public static IfcAxis2Placement2D MakeAxis2Placement2D(EsentModel m)
         {
             var p = m.Instances.New<IfcAxis2Placement2D>();
             p.RefDirection = m.Instances.New<IfcDirection>(d => d.SetXYZ(1, 0, 0));
@@ -192,7 +193,7 @@ namespace GeometryTests
             return p;
         }
 
-        public static IfcLShapeProfileDef MakeLShapeProfileDef(XbimModel m, double depth, double width, double thickness,  double? filletRadius = null, double? edgeRadius = null, double? legSlope = null, double? centreOfGravityX = null, double? centreOfGravityY = null)
+        public static IfcLShapeProfileDef MakeLShapeProfileDef(EsentModel m, double depth, double width, double thickness,  double? filletRadius = null, double? edgeRadius = null, double? legSlope = null, double? centreOfGravityX = null, double? centreOfGravityY = null)
         {
             var lProfile = m.Instances.New<IfcLShapeProfileDef>();
             lProfile.Position = MakeAxis2Placement2D(m);
@@ -207,7 +208,7 @@ namespace GeometryTests
             return lProfile;
         }
 
-        public static IfcUShapeProfileDef MakeUShapeProfileDef(XbimModel m, double depth, double flangeWidth, double flangeThickness, double webThickness, double? filletRadius = null, double? edgeRadius = null, double? flangeSlope = null, double? centreOfGravityX = null)
+        public static IfcUShapeProfileDef MakeUShapeProfileDef(EsentModel m, double depth, double flangeWidth, double flangeThickness, double webThickness, double? filletRadius = null, double? edgeRadius = null, double? flangeSlope = null, double? centreOfGravityX = null)
         {
             var uProfile = m.Instances.New<IfcUShapeProfileDef>();
             uProfile.Position = MakeAxis2Placement2D(m);
@@ -221,7 +222,7 @@ namespace GeometryTests
             uProfile.CentreOfGravityInX = centreOfGravityX;
             return uProfile;
         }
-        public static IfcCShapeProfileDef MakeCShapeProfileDef(XbimModel m, double depth, double width, double wallThickness, double girth, double? internalFilletRadius = null, double? centreOfGravityX = null)
+        public static IfcCShapeProfileDef MakeCShapeProfileDef(EsentModel m, double depth, double width, double wallThickness, double girth, double? internalFilletRadius = null, double? centreOfGravityX = null)
         {
             var cProfile = m.Instances.New<IfcCShapeProfileDef>();
             cProfile.Position = MakeAxis2Placement2D(m);
@@ -234,7 +235,7 @@ namespace GeometryTests
             return cProfile;
         }
 
-        public static IfcTShapeProfileDef MakeTShapeProfileDef(XbimModel m, double depth, double flangeWidth, double flangeThickness, double webThickness, double? filletRadius = null, double? flangeEdgeRadius = null, double? webEdgeRadius = null, double? webSlope = null, double? flangeSlope = null, double? centreOfGravityY = null)
+        public static IfcTShapeProfileDef MakeTShapeProfileDef(EsentModel m, double depth, double flangeWidth, double flangeThickness, double webThickness, double? filletRadius = null, double? flangeEdgeRadius = null, double? webEdgeRadius = null, double? webSlope = null, double? flangeSlope = null, double? centreOfGravityY = null)
         {
             var tProfile = m.Instances.New<IfcTShapeProfileDef>();
             tProfile.Position = MakeAxis2Placement2D(m);
@@ -251,7 +252,7 @@ namespace GeometryTests
             return tProfile;
         }
 
-        public static IfcZShapeProfileDef MakeZShapeProfileDef(XbimModel m, double depth, double flangeWidth, double flangeThickness, double webThickness, double? filletRadius = null, double? edgeRadius = null)
+        public static IfcZShapeProfileDef MakeZShapeProfileDef(EsentModel m, double depth, double flangeWidth, double flangeThickness, double webThickness, double? filletRadius = null, double? edgeRadius = null)
         {
             var zProfile = m.Instances.New<IfcZShapeProfileDef>();
             zProfile.Position = MakeAxis2Placement2D(m);
@@ -264,7 +265,7 @@ namespace GeometryTests
             return zProfile;
         }
 
-        public static IfcCenterLineProfileDef MakeCenterLineProfileDef(XbimModel m, IfcBoundedCurve curve, int thickness)
+        public static IfcCenterLineProfileDef MakeCenterLineProfileDef(EsentModel m, IfcBoundedCurve curve, int thickness)
         {
             var cl = m.Instances.New<IfcCenterLineProfileDef>();
             cl.Thickness = thickness;
@@ -272,7 +273,7 @@ namespace GeometryTests
             return cl;
         }
 
-        public static IfcTrimmedCurve MakeSemiCircle(XbimModel m, int radius)
+        public static IfcTrimmedCurve MakeSemiCircle(EsentModel m, int radius)
         {
             var circle = m.Instances.New<IfcCircle>();
             circle.Position = MakeAxis2Placement2D(m);
@@ -287,7 +288,7 @@ namespace GeometryTests
             return semiCircle;
         }
 
-        public static IfcArbitraryOpenProfileDef MakeArbitraryOpenProfileDef(XbimModel m, IfcBoundedCurve curve)
+        public static IfcArbitraryOpenProfileDef MakeArbitraryOpenProfileDef(EsentModel m, IfcBoundedCurve curve)
         {
             var def = m.Instances.New<IfcArbitraryOpenProfileDef>();
             def.Curve = curve;
@@ -295,7 +296,7 @@ namespace GeometryTests
             return def;
         }
 
-        public static IfcSurfaceOfLinearExtrusion MakeSurfaceOfLinearExtrusion(XbimModel m, IfcProfileDef profile, double depth, XbimVector3D dir)
+        public static IfcSurfaceOfLinearExtrusion MakeSurfaceOfLinearExtrusion(EsentModel m, IfcProfileDef profile, double depth, XbimVector3D dir)
         {
             var surf = m.Instances.New<IfcSurfaceOfLinearExtrusion>();
             surf.SweptCurve = profile;
@@ -304,7 +305,7 @@ namespace GeometryTests
             return surf;
         }
 
-        public static IfcSurfaceOfRevolution MakeSurfaceOfRevolution(XbimModel m, IfcProfileDef profile)
+        public static IfcSurfaceOfRevolution MakeSurfaceOfRevolution(EsentModel m, IfcProfileDef profile)
         {
             var surf = m.Instances.New<IfcSurfaceOfRevolution>();
             surf.SweptCurve = profile;
@@ -312,7 +313,7 @@ namespace GeometryTests
             return surf;
         }
 
-        public static IfcLine MakeLine(XbimModel m, XbimPoint3D loc, XbimVector3D dir, double len)
+        public static IfcLine MakeLine(EsentModel m, XbimPoint3D loc, XbimVector3D dir, double len)
         {
             var l = m.Instances.New<IfcLine>();
             l.Dir = m.Instances.New<IfcVector>();
@@ -322,7 +323,7 @@ namespace GeometryTests
             return l;
         }
 
-        public static IfcCompositeCurve MakeCompositeCurve(XbimModel m)
+        public static IfcCompositeCurve MakeCompositeCurve(EsentModel m)
         {
             var c = m.Instances.New<IfcCompositeCurve>();
             var sc = MakeSemiCircle(m, 10);
@@ -341,7 +342,7 @@ namespace GeometryTests
             return c;
         }
 
-        public static IfcBezierCurve MakeBezierCurve(XbimModel m)
+        public static IfcBezierCurve MakeBezierCurve(EsentModel m)
         {
             var c = m.Instances.New<IfcBezierCurve>();
             c.ClosedCurve = false;
@@ -354,7 +355,7 @@ namespace GeometryTests
             return c;
         }
 
-        public static IfcRationalBezierCurve MakeRationalBezierCurve(XbimModel m)
+        public static IfcRationalBezierCurve MakeRationalBezierCurve(EsentModel m)
         {
             var c = m.Instances.New<IfcRationalBezierCurve>();
             c.ClosedCurve = false;

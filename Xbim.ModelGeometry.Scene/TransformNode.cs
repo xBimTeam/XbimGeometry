@@ -14,17 +14,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using Xbim.Common.Geometry;
 using Xbim.Ifc2x3.Kernel;
-using Xbim.Ifc2x3.SharedBldgElements;
-using Xbim.IO;
-using Xbim.XbimExtensions;
-using Xbim.XbimExtensions.Interfaces;
-
+using Xbim.IO.Esent;
 #endregion
 
 namespace Xbim.ModelGeometry.Scene
@@ -68,7 +61,7 @@ namespace Xbim.ModelGeometry.Scene
             set { _productLabel = value; }
         }
 
-        public IfcProduct NearestProduct(XbimModel model)
+        public IfcProduct NearestProduct(EsentModel model)
         {
             if (!_productLabel.HasValue && _parent != null)
                 return _parent.NearestProduct(model);
@@ -78,7 +71,7 @@ namespace Xbim.ModelGeometry.Scene
                 return null;
         }
 
-        public IfcProduct Product(XbimModel model)
+        public IfcProduct Product(EsentModel model)
         {
             if (_productLabel.HasValue)
                 return model.InstancesLocal[_productLabel.Value] as IfcProduct;

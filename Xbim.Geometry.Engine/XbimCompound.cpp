@@ -33,6 +33,7 @@
 
 
 using namespace System;
+using namespace Xbim::Common;
 using namespace Xbim::Ifc2x3::Extensions;
 using namespace Xbim::XbimExtensions;
 using namespace Xbim::XbimExtensions::Interfaces;
@@ -124,42 +125,42 @@ namespace Xbim
 
 		XbimCompound::XbimCompound(IfcConnectedFaceSet^ faceSet)
 		{
-			_sewingTolerance = faceSet->ModelOf->ModelFactors->Precision;
+			_sewingTolerance = faceSet->Model->ModelFactors->Precision;
 			Init(faceSet); 
 		}
 
 		XbimCompound::XbimCompound(IfcShellBasedSurfaceModel^ sbsm)
 		{
-			_sewingTolerance = sbsm->ModelOf->ModelFactors->Precision;
+			_sewingTolerance = sbsm->Model->ModelFactors->Precision;
 			Init(sbsm); 
 		}
 
 		XbimCompound::XbimCompound(IfcFaceBasedSurfaceModel^ fbsm)
 		{
-			_sewingTolerance = fbsm->ModelOf->ModelFactors->Precision;
+			_sewingTolerance = fbsm->Model->ModelFactors->Precision;
 			Init(fbsm); 
 		}
 
 		XbimCompound::XbimCompound(IfcManifoldSolidBrep^ solid)
 		{
-			_sewingTolerance = solid->ModelOf->ModelFactors->Precision;
+			_sewingTolerance = solid->Model->ModelFactors->Precision;
 			Init(solid);
 		}
 		XbimCompound::XbimCompound(IfcFacetedBrep^ solid)
 		{
-			_sewingTolerance = solid->ModelOf->ModelFactors->Precision;
+			_sewingTolerance = solid->Model->ModelFactors->Precision;
 			Init(solid);
 		}
 
 		XbimCompound::XbimCompound(IfcFacetedBrepWithVoids^ solid)
 		{
-			_sewingTolerance = solid->ModelOf->ModelFactors->Precision;
+			_sewingTolerance = solid->Model->ModelFactors->Precision;
 			Init(solid);
 		}
 
 		XbimCompound::XbimCompound(IfcClosedShell^ solid)
 		{
-			_sewingTolerance = solid->ModelOf->ModelFactors->Precision;
+			_sewingTolerance = solid->Model->ModelFactors->Precision;
 			Init(solid);
 		}
 
@@ -352,7 +353,7 @@ namespace Xbim
 			IModel^ model;
 			for each (IfcFace^ face in faces)
 			{
-				model = face->ModelOf;
+				model = face->Model;
 				tolerance = model->ModelFactors->Precision;
 				_sewingTolerance = model->ModelFactors->Precision;			
 				break;

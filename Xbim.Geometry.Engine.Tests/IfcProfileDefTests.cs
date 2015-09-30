@@ -2,6 +2,7 @@
 using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc2x3.ProfileResource;
 using Xbim.IO;
+using Xbim.IO.Esent;
 
 namespace GeometryTests
 {
@@ -16,7 +17,7 @@ namespace GeometryTests
         [TestMethod]
         public void CircleProfileDefTest()
         {
-            using (var m = XbimModel.CreateTemporaryModel())
+            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -30,7 +31,7 @@ namespace GeometryTests
         [TestMethod]
         public void CircleHollowProfileDefTest()
         {
-            using (var m = XbimModel.CreateTemporaryModel())
+            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -44,7 +45,7 @@ namespace GeometryTests
         [TestMethod]
         public void RectangleProfileDefTest()
         {
-            using (var m = XbimModel.CreateTemporaryModel())
+            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -58,7 +59,7 @@ namespace GeometryTests
         [TestMethod]
         public void RectangleHollowProfileDefTest()
         {
-            using (var m = XbimModel.CreateTemporaryModel())
+            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
             {
                 using (var txn = m.BeginTransaction())
                 {                   
@@ -72,7 +73,7 @@ namespace GeometryTests
         [TestMethod]
         public void IShapeProfileDefTest()
         {
-            using (var m = XbimModel.CreateTemporaryModel())
+            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -94,7 +95,7 @@ namespace GeometryTests
         [TestMethod]
         public void LShapeProfileDefTest()
         {
-            using (var m = XbimModel.CreateTemporaryModel())
+            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -115,7 +116,7 @@ namespace GeometryTests
         [TestMethod]
         public void UShapeProfileDefTest()
         {
-            using (var m = XbimModel.CreateTemporaryModel())
+            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -136,7 +137,7 @@ namespace GeometryTests
         [TestMethod]
         public void CShapeProfileDefTest()
         {
-            using (var m = XbimModel.CreateTemporaryModel())
+            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
             {
                 using (m.BeginTransaction())
                 {
@@ -157,7 +158,7 @@ namespace GeometryTests
         [TestMethod]
         public void TShapeProfileDefTest()
         {
-            using (var m = XbimModel.CreateTemporaryModel())
+            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -178,7 +179,7 @@ namespace GeometryTests
         [TestMethod]
         public void ZShapeProfileDefTest()
         {
-            using (var m = XbimModel.CreateTemporaryModel())
+            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
             {
                 using (var txn = m.BeginTransaction())
                 {

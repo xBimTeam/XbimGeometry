@@ -5,7 +5,9 @@ using System.Linq;
 using Xbim.Common.Geometry;
 using Xbim.Ifc2x3.Extensions;
 using Xbim.Ifc2x3.GeometricConstraintResource;
+using Xbim.Ifc2x3.GeometryResource;
 using Xbim.IO;
+using Xbim.IO.Esent;
 
 #endregion
 
@@ -21,7 +23,7 @@ namespace Xbim.ModelGeometry.Scene
         ///     If there is a single root displacement, this is removed from the tree and added to the World
         ///     Coordinate System. Useful for models where the site has been located into a geographical context
         /// </param>
-        public XbimPlacementTree(XbimModel model, bool adjustWcs = true)
+        public XbimPlacementTree(EsentModel model, bool adjustWcs = true)
         {
             var rootNodes = new List<XbimPlacementNode>();
             var localPlacements = model.InstancesLocal.OfType<IfcLocalPlacement>(true).ToList();

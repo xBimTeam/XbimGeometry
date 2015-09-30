@@ -3,7 +3,7 @@ using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc2x3.TopologyResource;
-using Xbim.IO;
+using Xbim.IO.Esent;
 using Xbim.Ifc2x3.GeometricModelResource;
 using Xbim.Common.Logging;
 using Xbim.Ifc2x3.GeometricConstraintResource;
@@ -29,7 +29,7 @@ namespace GeometryTests
         {
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new XbimModel())
+                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
                 {
                     m.CreateFrom("SolidTestFiles\\Complex_BRep_Boolean.ifc", null, null, true, true);
                     var fbr = m.Instances[35] as IfcFacetedBrep;
@@ -55,7 +55,7 @@ namespace GeometryTests
         {
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new XbimModel())
+                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
                 {
                     m.CreateFrom("SolidTestFiles\\12 - Multiple FacetedBrep.ifc", null, null, true, true);
                     var fbr = m.Instances[25] as IfcFacetedBrep;
@@ -78,7 +78,7 @@ namespace GeometryTests
         {
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new XbimModel())
+                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
                 {
                     m.CreateFrom("SolidTestFiles\\12 - Multiple FacetedBrep.ifc", null, null, true, true);
                     var fbr = m.Instances[780] as IfcFacetedBrep;
@@ -102,7 +102,7 @@ namespace GeometryTests
         {
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new XbimModel())
+                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
                 {
                     m.CreateFrom("SolidTestFiles\\IfcFacetedBRepWithIncorrectlyOrientedFaces.ifc", null, null, true, true);
                     var fbr = m.Instances[98711] as IfcFacetedBrep;
@@ -127,7 +127,7 @@ namespace GeometryTests
         {
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new XbimModel())
+                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
                 {
                     m.CreateFrom("SolidTestFiles\\16 - IfcShellBasedSurfaceModel.ifc", null, null, true, true);
                     var sbsm = m.Instances[38] as IfcShellBasedSurfaceModel;
@@ -147,7 +147,7 @@ namespace GeometryTests
         {
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new XbimModel())
+                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
                 {
                     m.CreateFrom("SolidTestFiles\\17 - IfcFaceBasedSurfaceModel.ifc", null, null, true, true);
                     var fbsm = m.Instances[29] as IfcFaceBasedSurfaceModel;

@@ -14,6 +14,7 @@ using Xbim.Ifc2x3.GeometryResource;
 using Xbim.Ifc2x3.UtilityResource;
 using XbimGeometry.Interfaces;
 using Xbim.Ifc2x3.TopologyResource;
+using Xbim.IO.Esent;
 
 namespace XbimRegression
 {
@@ -92,7 +93,7 @@ namespace XbimRegression
 
                     Stopwatch watch = new Stopwatch();
                     watch.Start();
-                    using (XbimModel model = ParseModelFile(ifcFile,Params.Caching))
+                    using (EsentModel model = ParseModelFile(ifcFile,Params.Caching))
                     {
                         parseTime = watch.ElapsedMilliseconds;
                         string xbimFilename = BuildFileName(ifcFile, ".xbim");
@@ -164,9 +165,9 @@ namespace XbimRegression
             }
         }
 
-        private static XbimModel ParseModelFile(string ifcFileName,bool caching)
+        private static EsentModel ParseModelFile(string ifcFileName,bool caching)
         {
-            XbimModel model = new XbimModel();
+            EsentModel model = new EsentModel(new Xbim.Ifc2x3.EntityFactory());
             //create a callback for progress
             switch (Path.GetExtension(ifcFileName).ToLowerInvariant())
             {

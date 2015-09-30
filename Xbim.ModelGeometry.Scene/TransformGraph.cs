@@ -15,12 +15,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Xbim.Common;
 using Xbim.Ifc2x3.Extensions;
 using Xbim.Ifc2x3.GeometricConstraintResource;
 using Xbim.Ifc2x3.GeometryResource;
 using Xbim.Ifc2x3.Kernel;
 using Xbim.Ifc2x3.ProductExtension;
 using Xbim.IO;
+using Xbim.IO.Esent;
 
 #endregion
 
@@ -37,9 +39,9 @@ namespace Xbim.ModelGeometry.Scene
 
 
         [NonSerialized]
-        private XbimModel _model;
+        private EsentModel _model;
 
-        public XbimModel Model
+        public EsentModel Model
         {
             get { return _model; }
         }
@@ -50,7 +52,7 @@ namespace Xbim.ModelGeometry.Scene
             internal set { _productNodes = value; }
         }
 
-        public TransformGraph(XbimModel model)
+        public TransformGraph(EsentModel model)
         {
             _model = model;
             _root = new TransformNode();

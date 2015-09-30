@@ -7,7 +7,7 @@
  
 using namespace Xbim::Ifc2x3::GeometryResource;
 using namespace Xbim::Ifc2x3::GeometricConstraintResource;
-using namespace Xbim::XbimExtensions::SelectTypes;
+using namespace Xbim::Ifc2x3::IO;
 using namespace Xbim::Common::Exceptions;
 using namespace Xbim::Common::Geometry;
 namespace Xbim

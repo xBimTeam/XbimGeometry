@@ -53,7 +53,7 @@ namespace Xbim.ModelGeometry.Scene
         /// <returns></returns>
         public XbimMeshFragment Find(int vertexIndex)
         {
-            int found = this.BinarySearch(new XbimMeshFragment(vertexIndex,0, 0), new XbimMeshComparer());
+            int found = this.BinarySearch(new XbimMeshFragment(vertexIndex,0, null), new XbimMeshComparer());
             if(found >=0)
                 return this[found];
             else

@@ -9,6 +9,8 @@ using Xbim.ModelGeometry.Scene;
 using Xbim.XbimExtensions;
 using Xbim.XbimExtensions.Interfaces;
 using XbimGeometry.Interfaces;
+using Xbim.IO.Esent;
+using Xbim.Common;
 
 namespace Xbim.Geometry.Profiler
 {
@@ -79,9 +81,9 @@ namespace Xbim.Geometry.Profiler
             Console.Read();
         }
 
-        private static XbimModel GetModel(string fileName)
+        private static EsentModel GetModel(string fileName)
         {
-            XbimModel openModel = null;
+            EsentModel openModel = null;
             var extension = Path.GetExtension(fileName);
             if (string.IsNullOrWhiteSpace(extension))
             {
@@ -103,7 +105,7 @@ namespace Xbim.Geometry.Profiler
 
                     try
                     {
-                        var model = new XbimModel();
+                        var model = new EsentModel(new Xbim.Ifc2x3.EntityFactory());
                         model.Open(fileName, XbimDBAccess.ReadWrite);
                         //delete any geometry
                         openModel = model;
@@ -117,7 +119,7 @@ namespace Xbim.Geometry.Profiler
                 }
                 else //we need to create the xBIM file
                 {
-                    var model = new XbimModel();
+                    var model = new EsentModel(new Xbim.Ifc2x3.EntityFactory());
                     try
                     {
                         model.CreateFrom(fileName, null, null, true);

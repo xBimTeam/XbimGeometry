@@ -24,7 +24,7 @@ using Xbim.Ifc2x3.RepresentationResource;
 using Xbim.IO;
 using Xbim.ModelGeometry.Scene.Clustering;
 using Xbim.XbimExtensions;
-using Xbim.XbimExtensions.Interfaces;
+using Xbim.IO.Esent;
 using XbimGeometry.Interfaces;
 
 #endregion
@@ -185,7 +185,7 @@ namespace Xbim.ModelGeometry.Scene
             private bool _disposed = false;
             bool _adjustWCS;
 
-            public XbimCreateContextHelper(XbimModel model, IfcRepresentationContextCollection contexts, bool adjustWCS = true)
+            public XbimCreateContextHelper(EsentModel model, IfcRepresentationContextCollection contexts, bool adjustWCS = true)
             {
                 Model = model;
                 Contexts = contexts;
@@ -197,7 +197,7 @@ namespace Xbim.ModelGeometry.Scene
             /// </summary>
             internal ConcurrentDictionary<int,int> GeometryShapeLookup { get; private set; }
 
-            private XbimModel Model { get; set; }
+            private EsentModel Model { get; set; }
             private IfcRepresentationContextCollection Contexts { get; set; }
             internal ParallelOptions ParallelOptions { get; private set; }
             internal XbimPlacementTree PlacementTree { get; private set; }
@@ -413,7 +413,7 @@ namespace Xbim.ModelGeometry.Scene
                 return _engine;
             }
         }
-        private readonly XbimModel _model;
+        private readonly EsentModel _model;
 
         private bool _contextIsPersisted;
         //The maximum extent for any dimension of any products bouding box 
@@ -425,7 +425,7 @@ namespace Xbim.ModelGeometry.Scene
         /// <param name="model"></param>
         /// <param name="contextType"></param>
         /// <param name="contextIdentifier"></param>
-        public Xbim3DModelContext(XbimModel model, string contextType = "model", string contextIdentifier = "body")
+        public Xbim3DModelContext(EsentModel model, string contextType = "model", string contextIdentifier = "body")
         {
             _model = model;
             
@@ -511,7 +511,7 @@ namespace Xbim.ModelGeometry.Scene
             get { return _contextIsPersisted; }
         }
 
-        public XbimModel Model
+        public EsentModel Model
         {
             get { return _model; }
         }
@@ -749,7 +749,7 @@ namespace Xbim.ModelGeometry.Scene
                 int styleId = 0;//take the style of any part of the main shape
                 var element = pair.Key;
 
-                if (!precision.HasValue) precision = Math.Max(element.ModelOf.ModelFactors.OneMilliMeter / 50, element.ModelOf.ModelFactors.Precision); //set the precision to 100th mm but never less than precision
+                if (!precision.HasValue) precision = Math.Max(element.Model.ModelFactors.OneMilliMeter / 50, element.Model.ModelFactors.Precision); //set the precision to 100th mm but never less than precision
                 var elementShapes = WriteProductShape(contextHelper, element, false);
                 var arguments = new List<XbimShapeInstance>();
                 foreach (var elemShape in elementShapes)
@@ -817,7 +817,7 @@ namespace Xbim.ModelGeometry.Scene
                             else
                                 Logger.WarnFormat(
                                "WM013: {0}[#{1}] is an element that has some 3D geometric form definition missing",
-                               IfcMetaData.IfcType(argument.IfcTypeId).Name, argument.IfcProductLabel);
+                               ExpressMetaData.ExpressType(argument.IfcTypeId, Model.SchemaModule).Name, argument.IfcProductLabel);
 
                         }
 
@@ -831,7 +831,7 @@ namespace Xbim.ModelGeometry.Scene
                             else
                                 Logger.WarnFormat(
                                "WM014: {0}[#{1}] is an opening that has some 3D geometric form definition missing",
-                               IfcMetaData.IfcType(openingShape.IfcTypeId).Name, openingShape.IfcProductLabel);
+                               ExpressMetaData.ExpressType(openingShape.IfcTypeId, Model.SchemaModule).Name, openingShape.IfcProductLabel);
                         }
 
                         //now all the projections
@@ -846,7 +846,7 @@ namespace Xbim.ModelGeometry.Scene
                             else
                                 Logger.WarnFormat(
                               "WM005: {0}[#{1}] is an projection that has no 3D geometric form definition",
-                              IfcMetaData.IfcType(projectionShape.IfcTypeId).Name, projectionShape.IfcProductLabel);
+                              ExpressMetaData.ExpressType(projectionShape.IfcTypeId, Model.SchemaModule).Name, projectionShape.IfcProductLabel);
                         }
 
                         //make the finished shape
@@ -860,12 +860,12 @@ namespace Xbim.ModelGeometry.Scene
                                 else
                                     Logger.WarnFormat(
                                "WM015: Joining of projections in {1}[#{0}] has resulted in an empty shape",
-                               elementLabel, IfcMetaData.IfcType(typeId).Name);
+                               elementLabel, ExpressMetaData.ExpressType(typeId,Model.SchemaModule).Name);
                             }
                             else
                                 Logger.WarnFormat(
                                "WM016: Joining of projections in {1}[#{0}] has failed, projections have been ignored",
-                               elementLabel, IfcMetaData.IfcType(typeId).Name);
+                               elementLabel, ExpressMetaData.ExpressType(typeId, Model.SchemaModule).Name);
                         }
 
 
@@ -880,16 +880,16 @@ namespace Xbim.ModelGeometry.Scene
                                 else
                                     Logger.WarnFormat(
                                "WM009: Cutting of openings in {1}[#{0}] has resulted in an empty shape",
-                               elementLabel, IfcMetaData.IfcType(typeId).Name);
+                               elementLabel, ExpressMetaData.ExpressType(typeId, Model.SchemaModule).Name);
                             }
                             else
                                 Logger.WarnFormat(
                                "WM008: Cutting of openings in {1}[#{0}] has failed, openings have been ignored",
-                               elementLabel, IfcMetaData.IfcType(typeId).Name);
+                               elementLabel, ExpressMetaData.ExpressType(typeId, Model.SchemaModule).Name);
                         }
 
                         ////now add to the DB               
-                        XbimModelFactors mf = _model.ModelFactors;
+                        IModelFactors mf = _model.ModelFactors;
                         foreach (var geom in elementGeom)
                         {
                             IXbimShapeGeometryData shapeGeometry = new XbimShapeGeometry
@@ -953,7 +953,7 @@ namespace Xbim.ModelGeometry.Scene
                 {
                     Logger.WarnFormat(
                         "WM007: {0}[#{1}] - contains openings but  its geometry can not be built, {2}",
-                        IfcMetaData.IfcType(typeId).Name, elementLabel, e.Message);
+                        ExpressMetaData.ExpressType(typeId, Model.SchemaModule).Name, elementLabel, e.Message);
                 }
                 //if (progDelegate != null) progDelegate(101, "FeatureElement, (#" + element.EntityLabel + " ended)");
             }
@@ -1301,7 +1301,7 @@ namespace Xbim.ModelGeometry.Scene
 
                 var transaction = geomTable.BeginLazyTransaction();
                 geomTable.AddGeometry(context.EntityLabel, XbimGeometryType.Region,
-                    IfcMetaData.IfcTypeId(context.GetType()), wcsMatrix3D.ToArray(), regions.ToArray());
+                    ExpressMetaData.ExpressTypeId(context.GetType()), wcsMatrix3D.ToArray(), regions.ToArray());
                 transaction.Commit();
 
             }
@@ -1351,7 +1351,7 @@ namespace Xbim.ModelGeometry.Scene
                 StyleLabel = styleLabel,
                 RepresentationType = repType,
                 RepresentationContext = ctxtId,
-                IfcTypeId = IfcMetaData.IfcTypeId(product),
+                IfcTypeId = ExpressMetaData.ExpressTypeId(product),
                 Transformation = placementTransform,
                 BoundingBox = bounds
             };
@@ -1422,8 +1422,8 @@ namespace Xbim.ModelGeometry.Scene
             //note the storage of the instances in the DB is ordered by context and then style and type Id so the natural order will group correctly
             long currentStyle = 0;
             XbimShapeInstanceStyleGrouping grp = null;
-            int openingLabel = IfcMetaData.IfcTypeId(typeof (IfcOpeningElement));
-            int projectionLabel = IfcMetaData.IfcTypeId(typeof (IfcProjectionElement));
+            int openingLabel = ExpressMetaData.ExpressTypeId(typeof (IfcOpeningElement));
+            int projectionLabel = ExpressMetaData.ExpressTypeId(typeof (IfcProjectionElement));
 
             var groupedInstances = new List<XbimShapeInstance>();
             foreach (var instance in ShapeInstances())
@@ -1539,7 +1539,7 @@ namespace Xbim.ModelGeometry.Scene
                                     {
                                         if (productTypes.Add(productType)) //if we have not seen this yet then add it
                                         {
-                                            var theType = IfcMetaData.GetType(productType);
+                                            var theType = ExpressMetaData.GetType(productType,Model.SchemaModule);
                                             var texture = new XbimTexture().CreateTexture(colourMap[theType.Name]);
                                             //get the colour to use
                                             texture.DefinedObjectId = productType * -1;
@@ -1632,11 +1632,11 @@ namespace Xbim.ModelGeometry.Scene
             }
         }
 
-        private static bool MatchesShapeRequirements(IXbimShapeInstanceData shapeInstance, IfcRepresentationContext context, bool ignoreFeatures)
+        private  bool MatchesShapeRequirements(IXbimShapeInstanceData shapeInstance, IfcRepresentationContext context, bool ignoreFeatures)
         {
             return context.EntityLabel == shapeInstance.RepresentationContext && // all must belong to relevant RepresentationContext
                 (
-                    (typeof(IfcFeatureElement).IsAssignableFrom(IfcMetaData.GetType(shapeInstance.IfcTypeId)) && // is feature
+                    (typeof(IfcFeatureElement).IsAssignableFrom(ExpressMetaData.GetType(shapeInstance.IfcTypeId, Model.SchemaModule)) && // is feature
                         shapeInstance.RepresentationType == (byte) XbimGeometryRepresentationType.OpeningsAndAdditionsOnly) // then look for feature shape
                     ||
                     // normal items
@@ -1806,62 +1806,7 @@ namespace Xbim.ModelGeometry.Scene
             return ProductHasGeometry(product.EntityLabel);
         }
 
-        /// <summary>
-        ///     Returns a triangulated mesh geometry fopr the specified shape
-        /// </summary>
-        /// <returns></returns>
-        public IXbimMeshGeometry3D ShapeGeometryMeshOf(int shapeGeometryLabel)
-        {
-            var sg = ShapeGeometry(shapeGeometryLabel);
-            var mg = new XbimMeshGeometry3D();
-            mg.Read(sg.ShapeData);
-            return mg;
-        }
 
-        /// <summary>
-        ///     Returns a triangulated mesh geometry fopr the specified shape geometry
-        /// </summary>
-        /// <returns></returns>
-        public IXbimMeshGeometry3D ShapeGeometryMeshOf(XbimShapeGeometry shapeGeometry)
-        {
-            var mg = new XbimMeshGeometry3D();
-            mg.Read(shapeGeometry.ShapeData);
-            return mg;
-        }
-
-        /// <summary>
-        ///     Returns a triangulated mesh geometry fopr the specified shape instance, all transformations are applied
-        /// </summary>
-        /// <returns></returns>
-        public IXbimMeshGeometry3D ShapeGeometryMeshOf(XbimShapeInstance shapeInstance)
-        {
-            var sg = ShapeGeometry(shapeInstance.ShapeGeometryLabel);
-            var mg = new XbimMeshGeometry3D();
-            mg.Add(sg.ShapeData, shapeInstance.IfcTypeId, shapeInstance.IfcProductLabel,
-                shapeInstance.InstanceLabel, shapeInstance.Transformation, _model.UserDefinedId);
-            return mg;
-        }
-
-        /// <summary>
-        ///     Creates a SceneJS scene on the textwriter for the model context
-        /// </summary>
-        /// <param name="textWriter"></param>
-        public void CreateSceneJs(TextWriter textWriter)
-        {
-           
-            using (JsonWriter writer = new JsonTextWriter(textWriter))
-            {
-                var sceneJs = new XbimSceneJS(this);
-                sceneJs.WriteScene(writer);
-            }
-        }
-
-        public string CreateSceneJs()
-        {
-            var sw = new StringWriter();
-            CreateSceneJs(sw);
-            return sw.ToString();
-        }
 
         /// <summary>
         /// This function is used to generate the .wexbim model files.
@@ -1937,7 +1882,7 @@ namespace Xbim.ModelGeometry.Scene
                     if (!bb.IsEmpty) //do not write out anything with no geometry
                     {
                         binaryStream.Write((Int32) product.EntityLabel);
-                        binaryStream.Write((UInt16)IfcMetaData.IfcTypeId(product));
+                        binaryStream.Write((UInt16)ExpressMetaData.ExpressTypeId(product));
                         binaryStream.Write(bb.ToFloatArray());
                         numberOfProducts++;
                     }

@@ -2,7 +2,7 @@
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Xbim.Geometry.Engine.Interop;
-using Xbim.IO;
+using Xbim.IO.Esent;
 using Xbim.Ifc2x3.GeometricModelResource;
 using Xbim.Ifc2x3.ProfileResource;
 using Xbim.Common.Logging;
@@ -25,7 +25,7 @@ namespace GeometryTests
             var xbimGeometryCreator = new XbimGeometryEngine();
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new XbimModel())
+                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
                 {
                     m.CreateFrom("SolidTestFiles\\IfcCompositeProfileDefTest.ifc", null, null, true, true);
                     var eas = m.Instances.OfType<IfcExtrudedAreaSolid>().FirstOrDefault(e => e.SweptArea.GetType() == typeof(IfcCompositeProfileDef));
@@ -49,7 +49,7 @@ namespace GeometryTests
             var xbimGeometryCreator = new XbimGeometryEngine();
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new XbimModel())
+                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
                 {
                     m.CreateFrom("SolidTestFiles\\1- IfcExtrudedAreaSolid-IfcProfileDef-Parameterised.ifc", null, null, true, true);
                     var eas = m.Instances.OfType<IfcExtrudedAreaSolid>().FirstOrDefault(e => e.SweptArea.GetType() == typeof(IfcRectangleProfileDef));
@@ -80,7 +80,7 @@ namespace GeometryTests
             var xbimGeometryCreator = new XbimGeometryEngine();
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new XbimModel())
+                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
                 {
                     m.CreateFrom("SolidTestFiles\\BIM Logo-LetterB.ifc", null, null, true, true);
                     var eas = m.Instances[88] as IfcCsgSolid;
@@ -107,7 +107,7 @@ namespace GeometryTests
             var xbimGeometryCreator = new XbimGeometryEngine();
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new XbimModel())
+                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
                 {
                     m.CreateFrom("SolidTestFiles\\1- IfcExtrudedAreaSolid-IfcProfileDef-Parameterised.ifc", null, null, true, true);
                     var eas = m.Instances.OfType<IfcExtrudedAreaSolid>().FirstOrDefault(e => e.SweptArea is IfcDerivedProfileDef && ((IfcDerivedProfileDef)e.SweptArea).ParentProfile is IfcTShapeProfileDef);
@@ -130,7 +130,7 @@ namespace GeometryTests
             var xbimGeometryCreator = new XbimGeometryEngine();
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new XbimModel())
+                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
                 {
                     m.CreateFrom("SolidTestFiles\\15 - Swept pipes.ifc", null, null, true, true);
                     foreach (
@@ -159,7 +159,7 @@ namespace GeometryTests
             var xbimGeometryCreator = new XbimGeometryEngine();
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new XbimModel())
+                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
                 {
                     m.CreateFrom("SolidTestFiles\\1- IfcExtrudedAreaSolid-IfcProfileDef-Parameterised.ifc", null, null, true, true);
                     var eas = m.Instances.OfType<IfcExtrudedAreaSolid>().FirstOrDefault(e => e.SweptArea is IfcDerivedProfileDef && ((IfcDerivedProfileDef)e.SweptArea).ParentProfile is IfcLShapeProfileDef);
@@ -182,7 +182,7 @@ namespace GeometryTests
             var xbimGeometryCreator = new XbimGeometryEngine();
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new XbimModel())
+                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
                 {
                     m.CreateFrom("SolidTestFiles\\1- IfcExtrudedAreaSolid-IfcProfileDef-Parameterised.ifc", null, null, true, true);
                     var eas = m.Instances.OfType<IfcExtrudedAreaSolid>().FirstOrDefault(e => e.SweptArea is IfcIShapeProfileDef);
@@ -205,7 +205,7 @@ namespace GeometryTests
             var xbimGeometryCreator = new XbimGeometryEngine();
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new XbimModel())
+                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
                 {
                     m.CreateFrom("SolidTestFiles\\1- IfcExtrudedAreaSolid-IfcProfileDef-Parameterised.ifc", null, null, true, true);
                     var eas = m.Instances.OfType<IfcExtrudedAreaSolid>().FirstOrDefault(e => e.SweptArea is IfcRectangleHollowProfileDef);
@@ -229,7 +229,7 @@ namespace GeometryTests
             var xbimGeometryCreator = new XbimGeometryEngine();
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new XbimModel())
+                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
                 {
                     m.CreateFrom("SolidTestFiles\\3- IfcExtrudedAreaSolid-IfcCircularProfileDef.ifc", null, null, true, true);
                     var eas = m.Instances.OfType<IfcExtrudedAreaSolid>().FirstOrDefault(e => e.SweptArea is IfcCircleProfileDef);
@@ -251,7 +251,7 @@ namespace GeometryTests
             var xbimGeometryCreator = new XbimGeometryEngine();
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new XbimModel())
+                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
                 {
                     m.CreateFrom("SolidTestFiles\\2- IfcExtrudedAreaSolid-IfcArbitraryClosedProfileDef-IfcCompositeCurve.ifc", null, null, true, true);
                     var eas = m.Instances.OfType<IfcExtrudedAreaSolid>().FirstOrDefault();
@@ -282,7 +282,7 @@ namespace GeometryTests
             var xbimGeometryCreator = new XbimGeometryEngine();
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new XbimModel())
+                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
                 {
                     m.CreateFrom("SolidTestFiles\\1- IfcExtrudedAreaSolid-IfcProfileDef-Parameterised.ifc", null, null, true, true);
                     var eas = m.Instances.OfType<IfcExtrudedAreaSolid>().FirstOrDefault(e => e.SweptArea is IfcArbitraryClosedProfileDef && ((IfcArbitraryClosedProfileDef)e.SweptArea).OuterCurve is IfcPolyline);
@@ -306,7 +306,7 @@ namespace GeometryTests
             var xbimGeometryCreator = new XbimGeometryEngine();
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new XbimModel())
+                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
                 {
                     m.CreateFrom("SolidTestFiles\\18 - IfcArbritaryClosedProfileDefWithVoids.ifc", null, null, true, true);
                     var eas = m.Instances.OfType<IfcExtrudedAreaSolid>().FirstOrDefault(e => e.SweptArea is IfcArbitraryProfileDefWithVoids);

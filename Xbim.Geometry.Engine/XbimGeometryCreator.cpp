@@ -246,7 +246,7 @@ namespace Xbim
 
 		IXbimPoint^ XbimGeometryCreator::CreatePoint(IfcCartesianPoint^ p)
 		{
-			return gcnew XbimPoint3DWithTolerance(p->XbimPoint3D(), p->ModelOf->ModelFactors->Precision);
+			return gcnew XbimPoint3DWithTolerance(p->XbimPoint3D(), p->Model->ModelFactors->Precision);
 		}
 		
 		IXbimPoint^ XbimGeometryCreator::CreatePoint(IfcPointOnCurve^ p)
@@ -554,7 +554,7 @@ namespace Xbim
 
 #pragma region IfcFacetedBrep Conversions
 
-		IfcFacetedBrep^ XbimGeometryCreator::CreateFacetedBrep(XbimModel^ model, IXbimSolid^ solid)
+		IfcFacetedBrep^ XbimGeometryCreator::CreateFacetedBrep(EsentModel^ model, IXbimSolid^ solid)
 		{	
 			XbimSolid^ xSolid = dynamic_cast<XbimSolid^>(solid);
 			XbimReadWriteTransaction^ txn = nullptr;
@@ -847,7 +847,7 @@ namespace Xbim
 
 		IXbimSolidSet^ XbimGeometryCreator::CreateBooleanResult(IfcBooleanResult^ clip)
 		{
-			XbimModelFactors^ mf = clip->ModelOf->ModelFactors;
+			IModelFactors^ mf = clip->Model->ModelFactors;
 			
 #ifdef OCC_6_9_SUPPORTED			
 			
@@ -927,13 +927,13 @@ namespace Xbim
 			{
 				switch (clip->Operator)
 				{
-				case IfcBooleanOperator::Union:
+				case IfcBooleanOperator::UNION:
 					result = left->Union(right, mf->PrecisionBoolean);
 					break;
-				case IfcBooleanOperator::Intersection:
+				case IfcBooleanOperator::INTERSECTION:
 					result = left->Intersection(right, mf->PrecisionBoolean);
 					break;
-				case IfcBooleanOperator::Difference:
+				case IfcBooleanOperator::DIFFERENCE:
 					result = left->Cut(right, mf->PrecisionBoolean);
 					break;
 				}

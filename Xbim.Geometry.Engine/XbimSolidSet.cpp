@@ -849,19 +849,19 @@ namespace Xbim
 				return;
 			}
 
-			XbimModelFactors^ mf = boolOp->ModelOf->ModelFactors;
+			IModelFactors^ mf = boolOp->Model->ModelFactors;
 			IXbimSolidSet^ result;
 			try
 			{
 				switch (boolOp->Operator)
 				{
-				case IfcBooleanOperator::Union:
+				case IfcBooleanOperator::UNION:
 					result = left->Union(right, mf->PrecisionBoolean);
 					break;
-				case IfcBooleanOperator::Intersection:
+				case IfcBooleanOperator::INTERSECTION:
 					result = left->Intersection(right, mf->PrecisionBoolean);
 					break;
-				case IfcBooleanOperator::Difference:
+				case IfcBooleanOperator::DIFFERENCE:
 					result = left->Cut(right, mf->PrecisionBoolean);
 					break;
 				}

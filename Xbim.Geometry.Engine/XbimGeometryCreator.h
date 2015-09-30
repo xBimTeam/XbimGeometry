@@ -6,13 +6,15 @@
 using namespace System;
 using namespace System::IO;
 using namespace Xbim::IO;
+using namespace Xbim::Ifc2x3::IO;
+using namespace Xbim::IO::Esent;
 using namespace Xbim::Common::Logging;
 using namespace Xbim::Common::Geometry;
 using namespace Xbim::Ifc2x3::GeometricModelResource;
 using namespace Xbim::Ifc2x3::TopologyResource;
 using namespace Xbim::Ifc2x3::ProfileResource;
 using namespace Xbim::Ifc2x3::GeometryResource;
-using namespace Xbim::XbimExtensions::SelectTypes;
+
 using namespace System::Configuration;
 namespace Xbim
 {
@@ -149,7 +151,7 @@ namespace Xbim
 
 #endif // USE_CARVE_CSG
 
-			virtual IfcFacetedBrep^ CreateFacetedBrep(XbimModel^ model, IXbimSolid^ solid);
+			virtual IfcFacetedBrep^ CreateFacetedBrep(EsentModel^ model, IXbimSolid^ solid);
 			//Creates collections of objects
 			virtual IXbimSolidSet^ CreateSolidSet();
 			virtual IXbimSolidSet^ CreateSolidSet(IfcBooleanResult^ boolOp);

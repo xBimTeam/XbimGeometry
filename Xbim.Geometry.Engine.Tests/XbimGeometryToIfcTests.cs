@@ -8,6 +8,9 @@ using Xbim.IO;
 using XbimGeometry.Interfaces;
 using Xbim.Ifc2x3.Extensions;
 using System.Linq;
+using Xbim.Ifc2x3.Kernel;
+using Xbim.IO.Esent;
+
 namespace GeometryTests
 {
     [DeploymentItem(@"x64\", "x64")]
@@ -40,7 +43,7 @@ namespace GeometryTests
         [TestMethod]
         public void ConvertIfcCylinderToBRepTest()
         {
-            using (var m = XbimModel.CreateTemporaryModel())
+            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -73,7 +76,7 @@ namespace GeometryTests
        
         public void ConvertIfcBlockToBRepTest()
         { 
-            using (var m = XbimModel.CreateTemporaryModel())
+            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -102,7 +105,7 @@ namespace GeometryTests
                     //add a shape
                     //Create a Definition shape to hold the geometry
                     var shape = m.Instances.New<IfcShapeRepresentation>();
-                    shape.ContextOfItems = m.IfcProject.ModelContext();
+                    shape.ContextOfItems = m.Instances.OfType<IfcProject>().FirstOrDefault().ModelContext;
                     shape.RepresentationType = "Brep";
                     shape.RepresentationIdentifier = "Body";
 
@@ -210,7 +213,7 @@ namespace GeometryTests
                     //add a shape
                     //Create a Definition shape to hold the geometry
                     var shape = m.Instances.New<IfcShapeRepresentation>();
-                    shape.ContextOfItems = m.IfcProject.ModelContext();
+                    shape.ContextOfItems = m.Instances.OfType<IfcProject>().FirstOrDefault().ModelContext;
                     shape.RepresentationType = "Brep";
                     shape.RepresentationIdentifier = "Body";
 

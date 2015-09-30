@@ -86,6 +86,7 @@ using System.Text;
 using System.IO;
 using System.Diagnostics;
 using Xbim.Common.Geometry;
+using Xbim.Common;
 
 namespace Xbim.ModelGeometry.Scene
 {
@@ -437,7 +438,7 @@ namespace Xbim.ModelGeometry.Scene
         /// If there is no data an empty fragment is returned, if the mesh is goinng to excees the size of a an unsigned short
         /// then the data is not added and a fragement with zero number of points is returned and 
         /// a start position that is equal to the length of the mesh. The Entity Label is also sent to int.MinValue</returns>
-		public XbimMeshFragment BuildWithNormals<TGeomType>(TGeomType builder, XbimMatrix3D transform, short modelId=0) where TGeomType : IXbimTriangulatesToPositionsNormalsIndices
+		public XbimMeshFragment BuildWithNormals<TGeomType>(TGeomType builder, XbimMatrix3D transform, IModel model=null) where TGeomType : IXbimTriangulatesToPositionsNormalsIndices
         {
             _dataStream.Seek(0, SeekOrigin.Begin);
             BinaryReader br = new BinaryReader(_dataStream);
@@ -445,7 +446,7 @@ namespace Xbim.ModelGeometry.Scene
             if (!IsEmpty) // has data 
             {
                 builder.BeginBuild();
-                XbimMeshFragment fragment = new XbimMeshFragment(builder.PositionCount,builder.TriangleIndexCount, modelId);
+                XbimMeshFragment fragment = new XbimMeshFragment(builder.PositionCount,builder.TriangleIndexCount, model);
                 if (!BuildWithNormals(builder, br, transform))
                     fragment.EntityLabel = -1; //set the entity label to indicate failure
                 fragment.EndPosition = builder.PositionCount-1;

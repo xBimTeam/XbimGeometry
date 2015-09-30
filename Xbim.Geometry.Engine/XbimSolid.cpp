@@ -330,7 +330,7 @@ namespace Xbim
 				return;
 			}
 			
-			XbimModelFactors^ mf = repItem->ModelOf->ModelFactors;
+			IModelFactors^ mf = repItem->Model->ModelFactors;
 			XbimWire^ sweep = gcnew XbimWire(repItem->Directrix);
 			sweep = (XbimWire^)sweep->Trim(repItem->StartParam, repItem->EndParam, mf->Precision);
 			if (!sweep->IsValid)
@@ -495,7 +495,7 @@ namespace Xbim
 				gp_Pnt origin(revolaxis->Location->X, revolaxis->Location->Y, revolaxis->Location->Z);
 				gp_Dir vx(revolaxis->Axis->X, revolaxis->Axis->Y, revolaxis->Axis->Z);
 				gp_Ax1 ax1(origin, vx);
-				double radianConvert = repItem->ModelOf->ModelFactors->AngleToRadiansConversionFactor;
+				double radianConvert = repItem->Model->ModelFactors->AngleToRadiansConversionFactor;
 				BRepPrimAPI_MakeRevol revol(face, ax1, repItem->Angle*radianConvert);
 				
 				GC::KeepAlive(face);
@@ -563,7 +563,7 @@ namespace Xbim
 				
 				XbimVector3D size(bounds, bounds, bounds);
 				XbimRect3D rect3D(corner, size);
-				Init(rect3D, hs->ModelOf->ModelFactors->Precision);
+				Init(rect3D, hs->Model->ModelFactors->Precision);
 				Move(ifcPlane->Position);
 //#endif
 			}
@@ -621,7 +621,7 @@ namespace Xbim
 			//BRepTools::Write(polyBoundary, "d:\\tmp\\w1");
 			//removes any colinear edges that might generate unnecessary detail and confusion for boolean operations
 			if (polyBoundary->Edges->Count>4) //may sure we remove an colinear edges
-				polyBoundary->FuseColinearSegments(pbhs->ModelOf->ModelFactors->Precision, 0.05);
+				polyBoundary->FuseColinearSegments(pbhs->Model->ModelFactors->Precision, 0.05);
 			//BRepTools::Write(polyBoundary, "d:\\tmp\\w2");
 			XbimFace^ polyFace = gcnew XbimFace(polyBoundary);
 
@@ -656,7 +656,7 @@ namespace Xbim
 		{
 
 			//Build the directrix
-			XbimModelFactors^ mf = swdSolid->ModelOf->ModelFactors;
+			IModelFactors^ mf = swdSolid->Model->ModelFactors;
 			XbimWire^ sweep = gcnew XbimWire(swdSolid->Directrix);
 			sweep = (XbimWire^)sweep->Trim(swdSolid->StartParam, swdSolid->EndParam, mf->Precision);
 			
@@ -741,7 +741,7 @@ namespace Xbim
 			pSolid = new TopoDS_Solid();
 			*pSolid = TopoDS::Solid(boxMaker.Shape());
 			ShapeFix_ShapeTolerance FTol;
-			FTol.SetTolerance(*pSolid, box->ModelOf->ModelFactors->Precision, TopAbs_VERTEX);
+			FTol.SetTolerance(*pSolid, box->Model->ModelFactors->Precision, TopAbs_VERTEX);
 		}
 
 
@@ -768,7 +768,7 @@ namespace Xbim
 		//Booleans
 		void XbimSolid::Init(IfcBooleanResult^ solid)
 		{
-			XbimModelFactors^ mf = solid->ModelOf->ModelFactors;
+			IModelFactors^ mf = solid->Model->ModelFactors;
 			IfcBooleanOperand^ fOp = solid->FirstOperand;
 #ifdef OCC_6_9_SUPPORTED			
 			IfcBooleanResult^ boolClip = dynamic_cast<IfcBooleanResult^>(fOp);
@@ -833,13 +833,13 @@ namespace Xbim
 				
 				switch (solid->Operator)
 				{
-				case IfcBooleanOperator::Union:
+				case IfcBooleanOperator::UNION:
 					result = left->Union(right, mf->PrecisionBoolean);
 					break;
-				case IfcBooleanOperator::Intersection:
+				case IfcBooleanOperator::INTERSECTION:
 					result = left->Intersection(right, mf->PrecisionBoolean);
 					break;
-				case IfcBooleanOperator::Difference:
+				case IfcBooleanOperator::DIFFERENCE:
 					result = left->Cut(right, mf->PrecisionBoolean);
 					break;
 				}
@@ -875,7 +875,7 @@ namespace Xbim
 			IfcSolidModel^ sol = dynamic_cast<IfcSolidModel^>(solid);
 			if (sol != nullptr) return Init(sol);
 			IfcHalfSpaceSolid^ hs = dynamic_cast<IfcHalfSpaceSolid^>(solid);
-			if (hs != nullptr) return Init(hs,solid->ModelOf->ModelFactors->OneMetre*100); //take 100 metres as the largest extrusion
+			if (hs != nullptr) return Init(hs,solid->Model->ModelFactors->OneMetre*100); //take 100 metres as the largest extrusion
 			IfcBooleanResult^ br = dynamic_cast<IfcBooleanResult^>(solid);
 			if (br != nullptr) return Init(br); //treat IfcBooleanResult and IfcBooleanClippingResult the same
 			//IfcBooleanResult^ br = dynamic_cast<IfcBooleanResult^>(solid);
@@ -955,7 +955,7 @@ namespace Xbim
 			
 			double xOff = ifcSolid->XLength / 2;
 			double yOff = ifcSolid->YLength / 2;
-			double precision = ifcSolid->ModelOf->ModelFactors->Precision;
+			double precision = ifcSolid->Model->ModelFactors->Precision;
 			
 			gp_Pnt bl(0, 0, 0);
 			gp_Pnt br(ifcSolid->XLength, 0, 0);

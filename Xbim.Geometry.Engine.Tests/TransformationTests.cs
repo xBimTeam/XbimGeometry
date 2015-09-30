@@ -7,6 +7,7 @@ using Xbim.Geometry.Engine.Interop;
 using Xbim.IO;
 using Xbim.Geometry;
 using XbimGeometry.Interfaces;
+using Xbim.IO.Esent;
 
 namespace GeometryTests
 {
@@ -23,7 +24,7 @@ namespace GeometryTests
         [TestMethod]
         public void TransformSolidRectangularProfileDef()
         {
-            using (var m = XbimModel.CreateTemporaryModel())
+            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -65,7 +66,7 @@ namespace GeometryTests
         [TestMethod]
         public void TransformFacetedSolidRectangularProfileDef()
         {
-            using (var m = XbimModel.CreateTemporaryModel())
+            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
             {
                 using (var txn = m.BeginTransaction())
                 {

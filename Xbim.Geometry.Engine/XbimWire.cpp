@@ -237,7 +237,7 @@ namespace Xbim
 			Standard_Real offset = profile->Thickness / 2;
 			offseter.Perform(offset);
 			
-			double precision = profile->ModelOf->ModelFactors->Precision;
+			double precision = profile->Model->ModelFactors->Precision;
 			if (offseter.IsDone() && offseter.Shape().ShapeType() == TopAbs_WIRE)
 			{
 				//need to change radiused ends to straight lines
@@ -290,7 +290,7 @@ namespace Xbim
 				return;
 			}
 
-			double tolerance = pLine->ModelOf->ModelFactors->Precision;
+			double tolerance = pLine->Model->ModelFactors->Precision;
 			//Make all the vertices
 			Standard_Boolean closed = Standard_False;
 
@@ -304,7 +304,7 @@ namespace Xbim
 			BRep_Builder builder;
 			TopoDS_Wire wire;
 			builder.MakeWire(wire);
-			bool is3D = pLine->Dim == 3;
+			bool is3D = (pLine->Dim == IfcDimensionCount(3));
 
 			gp_Pnt first;
 			gp_Pnt previous;
@@ -368,7 +368,7 @@ namespace Xbim
 			else
 			{
 
-				double toleranceMax = pLine->ModelOf->ModelFactors->PrecisionMax;
+				double toleranceMax = pLine->Model->ModelFactors->PrecisionMax;
 				ShapeFix_Shape sfs(wire);
 				sfs.SetPrecision(tolerance);
 				sfs.SetMinTolerance(tolerance);
@@ -435,7 +435,7 @@ namespace Xbim
 		{
 			bool haveWarned = false;
 			BRepBuilderAPI_MakeWire wire;
-			XbimModelFactors^ mf = cCurve->ModelOf->ModelFactors;
+			IModelFactors^ mf = cCurve->Model->ModelFactors;
 			ShapeFix_ShapeTolerance FTol;
 			double precision = mf->PrecisionBoolean; //use a courser precision for trimmed curves
 			double currentPrecision = precision;
@@ -490,7 +490,7 @@ namespace Xbim
 				}
 				else
 				{
-					double toleranceMax = cCurve->ModelOf->ModelFactors->PrecisionMax;
+					double toleranceMax = cCurve->Model->ModelFactors->PrecisionMax;
 					ShapeFix_Shape sfs(w);
 					sfs.SetMinTolerance(mf->Precision);
 					sfs.SetMaxTolerance(mf->OneMilliMetre * 50);
@@ -530,7 +530,7 @@ namespace Xbim
 			ShapeFix_ShapeTolerance FTol;
 			bool isConic = (dynamic_cast<IfcConic^>(tCurve->BasisCurve) != nullptr);
 
-			XbimModelFactors^ mf = tCurve->ModelOf->ModelFactors;
+			IModelFactors^ mf = tCurve->Model->ModelFactors;
 			double tolerance = mf->Precision;
 			double toleranceMax = mf->PrecisionMax;
 			double parameterFactor = isConic ? mf->AngleToRadiansConversionFactor : 1;
@@ -609,7 +609,7 @@ namespace Xbim
 				IfcVector^ dir = line->Dir;
 				gp_Pnt pnt(cp->X, cp->Y, cp->Dim == 3 ? cp->Z : 0);
 
-				gp_Vec vec(dir->Orientation->X, dir->Orientation->Y, dir->Dim == 3 ? dir->Orientation->Z : 0);
+				gp_Vec vec(dir->Orientation->X, dir->Orientation->Y, dir->Orientation->Dim == 3 ? dir->Orientation->Z : 0);
 				parameterFactor = dir->Magnitude;
 				vec *= dir->Magnitude;
 				curve = GC_MakeLine(pnt, vec);
@@ -804,7 +804,7 @@ namespace Xbim
 				XbimGeometryCreator::logger->WarnFormat("WW015: Invalid loop in IfcPolyloop #{0}, it has less than three points. Loop discarded", loop->EntityLabel);
 				return;
 			}
-			double tolerance = loop->ModelOf->ModelFactors->Precision;
+			double tolerance = loop->Model->ModelFactors->Precision;
 			//check we haven't got duplicate start and end points
 			IfcCartesianPoint^ first = loop->Polygon[0];
 			IfcCartesianPoint^ last = loop->Polygon[lastPt - 1];
@@ -866,7 +866,7 @@ namespace Xbim
 			}
 			wire.Closed(Standard_True);
 			ShapeFix_ShapeTolerance FTol;
-			FTol.SetTolerance(wire, loop->ModelOf->ModelFactors->Precision, TopAbs_VERTEX);
+			FTol.SetTolerance(wire, loop->Model->ModelFactors->Precision, TopAbs_VERTEX);
 			pWire = new TopoDS_Wire();
 			*pWire = wire;
 		}
@@ -1186,7 +1186,7 @@ namespace Xbim
 			b.MakeWire(wire);
 			b.Add(wire, edge);
 			ShapeFix_ShapeTolerance FTol;
-			FTol.SetTolerance(wire, circProfile->ModelOf->ModelFactors->Precision, TopAbs_VERTEX);
+			FTol.SetTolerance(wire, circProfile->Model->ModelFactors->Precision, TopAbs_VERTEX);
 			pWire = new TopoDS_Wire();
 			*pWire = wire;
 		}
@@ -1209,7 +1209,7 @@ namespace Xbim
 				{
 					double xOff = rectProfile->XDim / 2;
 					double yOff = rectProfile->YDim / 2;
-					double precision = rectProfile->ModelOf->ModelFactors->Precision;
+					double precision = rectProfile->Model->ModelFactors->Precision;
 					gp_Pnt bl(-xOff, -yOff, 0);
 					gp_Pnt br(xOff, -yOff, 0);
 					gp_Pnt tr(xOff, yOff, 0);
@@ -1271,7 +1271,7 @@ namespace Xbim
 
 		void XbimWire::Init(IfcLShapeProfileDef ^ profile)
 		{
-			bool detailed = profile->ModelOf->ModelFactors->ProfileDefLevelOfDetail == 1;
+			bool detailed = profile->Model->ModelFactors->ProfileDefLevelOfDetail == 1;
 			double dY = profile->Depth / 2;
 			double dX;
 			if (profile->Width.HasValue)
@@ -1284,7 +1284,7 @@ namespace Xbim
 			gp_Pnt p3(-dX + tF, -dY + tF, 0);
 			if (detailed && profile->LegSlope.HasValue)
 			{
-				double radConv = profile->ModelOf->ModelFactors->AngleToRadiansConversionFactor;
+				double radConv = profile->Model->ModelFactors->AngleToRadiansConversionFactor;
 				p3.SetX(p3.X() + (((dY * 2) - tF)* Math::Tan(profile->LegSlope.Value*radConv)));
 				p3.SetY(p3.Y() + (((dX * 2) - tF)* Math::Tan(profile->LegSlope.Value*radConv)));
 			}
@@ -1340,7 +1340,7 @@ namespace Xbim
 				wire.Move(t);
 			}
 			ShapeFix_ShapeTolerance FTol;
-			FTol.SetTolerance(wire, profile->ModelOf->ModelFactors->Precision, TopAbs_VERTEX);
+			FTol.SetTolerance(wire, profile->Model->ModelFactors->Precision, TopAbs_VERTEX);
 			pWire = new TopoDS_Wire();
 			*pWire = wire;
 		}
@@ -1348,7 +1348,7 @@ namespace Xbim
 		
 		void XbimWire::Init(IfcUShapeProfileDef ^ profile)
 		{
-			bool detailed = profile->ModelOf->ModelFactors->ProfileDefLevelOfDetail == 1;
+			bool detailed = profile->Model->ModelFactors->ProfileDefLevelOfDetail == 1;
 			double dX = profile->FlangeWidth / 2;
 			double dY = profile->Depth / 2;
 			double tF = profile->FlangeThickness;
@@ -1366,7 +1366,7 @@ namespace Xbim
 
 			if (detailed && profile->FlangeSlope.HasValue)
 			{
-				double radConv = profile->ModelOf->ModelFactors->AngleToRadiansConversionFactor;
+				double radConv = profile->Model->ModelFactors->AngleToRadiansConversionFactor;
 				p4.SetY(p4.Y() - (((dX * 2) - tW)* Math::Tan(profile->FlangeSlope.Value*radConv)));
 				p5.SetY(p5.Y() + (((dX * 2) - tW)* Math::Tan(profile->FlangeSlope.Value*radConv)));
 
@@ -1418,7 +1418,7 @@ namespace Xbim
 				wire.Move(t);
 			}
 			ShapeFix_ShapeTolerance FTol;
-			FTol.SetTolerance(wire, profile->ModelOf->ModelFactors->Precision, TopAbs_VERTEX);
+			FTol.SetTolerance(wire, profile->Model->ModelFactors->Precision, TopAbs_VERTEX);
 			pWire = new TopoDS_Wire();
 			*pWire = wire;
 		}
@@ -1467,7 +1467,7 @@ namespace Xbim
 			TopoDS_Wire wire = wireMaker.Wire();
 			wire.Move(XbimGeomPrim::ToLocation(profile->Position));
 			ShapeFix_ShapeTolerance FTol;
-			FTol.SetTolerance(wire, profile->ModelOf->ModelFactors->Precision, TopAbs_VERTEX);
+			FTol.SetTolerance(wire, profile->Model->ModelFactors->Precision, TopAbs_VERTEX);
 			pWire = new TopoDS_Wire();
 			*pWire = wire;
 		}
@@ -1523,7 +1523,7 @@ namespace Xbim
 			TopoDS_Wire wire = wireMaker.Wire();
 			wire.Move(XbimGeomPrim::ToLocation(profile->Position));
 			ShapeFix_ShapeTolerance FTol;
-			FTol.SetTolerance(wire, profile->ModelOf->ModelFactors->Precision, TopAbs_VERTEX);
+			FTol.SetTolerance(wire, profile->Model->ModelFactors->Precision, TopAbs_VERTEX);
 			pWire = new TopoDS_Wire();
 			*pWire = wire;
 		}
@@ -1541,13 +1541,13 @@ namespace Xbim
 			double semiAx2 = profile->SemiAxis2;
 			if (semiAx1 <= 0)
 			{
-				XbimModelFactors^ mf = profile->ModelOf->ModelFactors;
+				IModelFactors^ mf = profile->Model->ModelFactors;
 				semiAx1 = mf->OneMilliMetre;
 				//	throw gcnew XbimGeometryException("Illegal Ellipse Semi Axix, for IfcEllipseProfileDef, must be greater than 0, in entity #" + profile->EntityLabel);
 			}
 			if (semiAx2 <= 0)
 			{
-				XbimModelFactors^ mf = profile->ModelOf->ModelFactors;
+				IModelFactors^ mf = profile->Model->ModelFactors;
 				semiAx2 = mf->OneMilliMetre;
 				//	throw gcnew XbimGeometryException("Illegal Ellipse Semi Axix, for IfcEllipseProfileDef, must be greater than 0, in entity #" + profile->EntityLabel);
 			}
@@ -1559,7 +1559,7 @@ namespace Xbim
 			b.MakeWire(wire);
 			b.Add(wire, edge);
 			ShapeFix_ShapeTolerance FTol;
-			FTol.SetTolerance(wire, profile->ModelOf->ModelFactors->Precision, TopAbs_VERTEX);
+			FTol.SetTolerance(wire, profile->Model->ModelFactors->Precision, TopAbs_VERTEX);
 			pWire = new TopoDS_Wire();
 			*pWire = wire;
 		}
@@ -1569,7 +1569,7 @@ namespace Xbim
 		// and note too that this will decrease performance due to use of OCC for triangulation
 		void XbimWire::Init(IfcIShapeProfileDef ^ profile)
 		{
-			bool detailed = profile->ModelOf->ModelFactors->ProfileDefLevelOfDetail == 1;
+			bool detailed = profile->Model->ModelFactors->ProfileDefLevelOfDetail == 1;
 			double dX = profile->OverallWidth / 2;
 			double dY = profile->OverallDepth / 2;
 			double tF = profile->FlangeThickness;
@@ -1591,7 +1591,7 @@ namespace Xbim
 
 			TopoDS_Vertex v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12;
 			BRep_Builder b;
-			double t = profile->ModelOf->ModelFactors->Precision;
+			double t = profile->Model->ModelFactors->Precision;
 			b.MakeVertex(v1, p1, t);
 			b.MakeVertex(v2, p2, t);
 			b.MakeVertex(v3, p3, t);
@@ -1654,7 +1654,7 @@ namespace Xbim
 	
 		void XbimWire::Init(IfcZShapeProfileDef ^ profile)
 		{
-			bool detailed = profile->ModelOf->ModelFactors->ProfileDefLevelOfDetail == 1;
+			bool detailed = profile->Model->ModelFactors->ProfileDefLevelOfDetail == 1;
 			double dX = profile->FlangeWidth;
 			double dY = profile->Depth / 2;
 			double tF = profile->FlangeThickness;
@@ -1710,7 +1710,7 @@ namespace Xbim
 			}
 			wire.Move(XbimGeomPrim::ToLocation(profile->Position));
 			ShapeFix_ShapeTolerance FTol;
-			FTol.SetTolerance(wire, profile->ModelOf->ModelFactors->Precision, TopAbs_VERTEX);
+			FTol.SetTolerance(wire, profile->Model->ModelFactors->Precision, TopAbs_VERTEX);
 			pWire = new TopoDS_Wire();
 			*pWire = wire;
 		}
@@ -1720,7 +1720,7 @@ namespace Xbim
 		// and note too that this will decrease performance due to use of OCC for triangulation
 		void XbimWire::Init(IfcCShapeProfileDef ^ profile)
 		{
-			bool detailed = profile->ModelOf->ModelFactors->ProfileDefLevelOfDetail == 1;
+			bool detailed = profile->Model->ModelFactors->ProfileDefLevelOfDetail == 1;
 			double dX = profile->Width / 2;
 			double dY = profile->Depth / 2;
 			double dG = profile->Girth;
@@ -1728,7 +1728,7 @@ namespace Xbim
 
 			if (tW <= 0)
 			{
-				XbimModelFactors^ mf = profile->ModelOf->ModelFactors;
+				IModelFactors^ mf = profile->Model->ModelFactors;
 				tW = mf->OneMilliMetre * 3;
 				XbimGeometryCreator::logger->WarnFormat("WW023: Illegal wall thickness for IfcCShapeProfileDef, it must be greater than 0, in entity #{0}. Adjusted to be 3mm thick", profile->EntityLabel);
 			}
@@ -1820,7 +1820,7 @@ namespace Xbim
 				wire.Move(t);
 			}
 			ShapeFix_ShapeTolerance FTol;
-			FTol.SetTolerance(wire, profile->ModelOf->ModelFactors->Precision, TopAbs_VERTEX);
+			FTol.SetTolerance(wire, profile->Model->ModelFactors->Precision, TopAbs_VERTEX);
 			pWire = new TopoDS_Wire();
 			*pWire = wire;
 		}
@@ -1830,7 +1830,7 @@ namespace Xbim
 		// and note too that this will decrease performance due to use of OCC for triangulation
 		void XbimWire::Init(IfcTShapeProfileDef ^ profile)
 		{
-			bool detailed = profile->ModelOf->ModelFactors->ProfileDefLevelOfDetail == 1;
+			bool detailed = profile->Model->ModelFactors->ProfileDefLevelOfDetail == 1;
 			double dX = profile->FlangeWidth / 2;
 			double dY = profile->Depth / 2;
 			double tF = profile->FlangeThickness;
@@ -1844,7 +1844,7 @@ namespace Xbim
 			gp_Pnt p6(-tW / 2, -dY, 0);
 			gp_Pnt p7(-tW / 2, dY - tF, 0);
 			gp_Pnt p8(-dX, dY - tF, 0);
-			double radConv = profile->ModelOf->ModelFactors->AngleToRadiansConversionFactor;
+			double radConv = profile->Model->ModelFactors->AngleToRadiansConversionFactor;
 			if (detailed && (profile->FlangeSlope.HasValue || profile->WebSlope.HasValue))
 			{
 				double fSlope = 0;
@@ -1919,7 +1919,7 @@ namespace Xbim
 				wire.Move(t);
 			}
 			ShapeFix_ShapeTolerance FTol;
-			FTol.SetTolerance(wire, profile->ModelOf->ModelFactors->Precision, TopAbs_VERTEX);
+			FTol.SetTolerance(wire, profile->Model->ModelFactors->Precision, TopAbs_VERTEX);
 			pWire = new TopoDS_Wire();
 			*pWire = wire;
 		}

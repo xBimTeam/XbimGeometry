@@ -2,24 +2,24 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Xbim.Tessellator;
 using Xbim.Common.Geometry;
 using Xbim.Ifc2x3.GeometricModelResource;
 using Xbim.Ifc2x3.GeometryResource;
 using Xbim.Ifc2x3.TopologyResource;
 using Xbim.IO;
-using Xbim.XbimExtensions.SelectTypes;
+
 using XbimGeometry.Interfaces;
+using Xbim.IO.Esent;
 
 namespace Xbim.ModelGeometry.Scene
 {
-    
+
     public class XbimTessellator
     {
-        private readonly XbimModel _model;
+        private readonly EsentModel _model;
         private readonly XbimGeometryType _geometryType;
-        public XbimTessellator(XbimModel model, XbimGeometryType geometryType)
+        public XbimTessellator(EsentModel model, XbimGeometryType geometryType)
         {
             _model = model;
             _geometryType = geometryType;
@@ -64,14 +64,14 @@ namespace Xbim.ModelGeometry.Scene
             var faceSets = new List<IEnumerable<IfcFace>>();
             foreach (var faceSet in faceBasedModel.FbsmFaces)
                 faceSets.Add(faceSet.CfsFaces);
-            return Mesh(faceSets, faceBasedModel.EntityLabel, (float)faceBasedModel.ModelOf.ModelFactors.Precision);  
+            return Mesh(faceSets, faceBasedModel.EntityLabel, (float)faceBasedModel.Model.ModelFactors.Precision);  
         }
 
         
 
         public IXbimShapeGeometryData Mesh(IfcShellBasedSurfaceModel shellBasedModel)
         {
-            return Mesh(shellBasedModel.SbsmBoundary, shellBasedModel.EntityLabel, (float)shellBasedModel.ModelOf.ModelFactors.Precision);
+            return Mesh(shellBasedModel.SbsmBoundary, shellBasedModel.EntityLabel, (float)shellBasedModel.Model.ModelFactors.Precision);
         }
 
         public IXbimShapeGeometryData Mesh(IEnumerable<IfcShell> shellSet,int entityLabel, float precision)
@@ -93,7 +93,7 @@ namespace Xbim.ModelGeometry.Scene
         {
             var faces = new List<IEnumerable<IfcFace>>();
             faces.Add(connectedFaceSet.CfsFaces);
-            return Mesh(faces, connectedFaceSet.EntityLabel, (float)connectedFaceSet.ModelOf.ModelFactors.Precision);
+            return Mesh(faces, connectedFaceSet.EntityLabel, (float)connectedFaceSet.Model.ModelFactors.Precision);
         }
 
         public IXbimShapeGeometryData Mesh(IfcFacetedBrep fBRepModel)

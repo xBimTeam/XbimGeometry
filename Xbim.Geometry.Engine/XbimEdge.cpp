@@ -46,7 +46,7 @@
 #include <GeomConvert_CompCurveToBSplineCurve.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
 using namespace Xbim::Common;
-
+using namespace Xbim::Ifc2x3::Extensions;
 namespace Xbim
 {
 	namespace Geometry
@@ -814,7 +814,7 @@ namespace Xbim
 				*pEdge = edgeMaker.Edge();
 				// set the tolerance for this shape.
 				ShapeFix_ShapeTolerance FTol;
-				FTol.SetTolerance(*pEdge, circle->ModelOf->ModelFactors->Precision, TopAbs_VERTEX);
+				FTol.SetTolerance(*pEdge, circle->Model->ModelFactors->Precision, TopAbs_VERTEX);
 			}
 		}
 
@@ -823,7 +823,7 @@ namespace Xbim
 			IfcCartesianPoint^ cp = line->Pnt;
 			IfcVector^ dir = line->Dir;
 			gp_Pnt pnt(cp->X, cp->Y, cp->Z);
-			XbimVector3D v3d = dir->XbimVector3D();
+			XbimVector3D v3d = IfcVectorExtensions::XbimVector3D(dir);
 			gp_Vec vec(v3d.X, v3d.Y, v3d.Z);
 			BRepBuilderAPI_MakeEdge edgeMaker(GC_MakeLine(pnt, vec), 0, dir->Magnitude);
 			BRepBuilderAPI_EdgeError edgeErr = edgeMaker.Error();
@@ -838,7 +838,7 @@ namespace Xbim
 				*pEdge = edgeMaker.Edge();
 				// set the tolerance for this shape.
 				ShapeFix_ShapeTolerance FTol;
-				FTol.SetTolerance(*pEdge, line->ModelOf->ModelFactors->Precision, TopAbs_VERTEX);
+				FTol.SetTolerance(*pEdge, line->Model->ModelFactors->Precision, TopAbs_VERTEX);
 			}
 		}
 
@@ -850,13 +850,13 @@ namespace Xbim
 			double semiAx2 = ellipse->SemiAxis2;
 			if (semiAx1 <= 0)
 			{
-				XbimModelFactors^ mf = ellipse->ModelOf->ModelFactors;
+				IModelFactors^ mf = ellipse->Model->ModelFactors;
 				semiAx1 = mf->OneMilliMetre;
 				XbimGeometryCreator::logger->WarnFormat("WE004: Illegal Ellipse Semi Axis 1, must be greater than 0, in entity #{0}, it has been set to 1mm.", ellipse->EntityLabel);
 			}
 			if (semiAx2 <= 0)
 			{
-				XbimModelFactors^ mf = ellipse->ModelOf->ModelFactors;
+				IModelFactors^ mf = ellipse->Model->ModelFactors;
 				semiAx2 = mf->OneMilliMetre;
 				XbimGeometryCreator::logger->WarnFormat("WE005: Illegal Ellipse Semi Axis 2, must be greater than 0, in entity #{0}, it has been set to 1mm.", ellipse->EntityLabel);
 			}
@@ -866,7 +866,7 @@ namespace Xbim
 			pEdge = new TopoDS_Edge();
 			*pEdge = edgeMaker.Edge();
 			ShapeFix_ShapeTolerance FTol;
-			FTol.SetTolerance(*pEdge, ellipse->ModelOf->ModelFactors->Precision, TopAbs_VERTEX);
+			FTol.SetTolerance(*pEdge, ellipse->Model->ModelFactors->Precision, TopAbs_VERTEX);
 		}
 
 		void XbimEdge::Init(IfcBSplineCurve^ bspline)
@@ -898,7 +898,7 @@ namespace Xbim
 				pEdge = new TopoDS_Edge();
 				*pEdge = edgeMaker.Edge();
 				ShapeFix_ShapeTolerance FTol;
-				FTol.SetTolerance(*pEdge, bez->ModelOf->ModelFactors->Precision, TopAbs_VERTEX);
+				FTol.SetTolerance(*pEdge, bez->Model->ModelFactors->Precision, TopAbs_VERTEX);
 			}
 		}
 
@@ -924,7 +924,7 @@ namespace Xbim
 			pEdge = new TopoDS_Edge();
 			*pEdge = edgeMaker.Edge();
 			ShapeFix_ShapeTolerance FTol;
-			FTol.SetTolerance(*pEdge, bez->ModelOf->ModelFactors->Precision, TopAbs_VERTEX);
+			FTol.SetTolerance(*pEdge, bez->Model->ModelFactors->Precision, TopAbs_VERTEX);
 		}
 #pragma endregion
 

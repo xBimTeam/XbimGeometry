@@ -11,7 +11,7 @@ using namespace XbimGeometry::Interfaces;
 using namespace Xbim::Ifc2x3::GeometricModelResource;
 using namespace Xbim::Ifc2x3::GeometryResource;
 using namespace Xbim::Common::Geometry;
-using namespace Xbim::XbimExtensions::SelectTypes;
+
 namespace Xbim
 {
 	namespace Geometry

@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Xbim.Common;
 using Xbim.IO;
 
 namespace Xbim.ModelGeometry.Scene
@@ -29,45 +30,45 @@ namespace Xbim.ModelGeometry.Scene
         public int StartTriangleIndex;
         public int EndTriangleIndex;
         public int GeometryId;
-        public short ModelId;
+        public IModel Model;
 
         public Type EntityType
         {
             get
             {
-                return IfcMetaData.GetType(_entityTypeId);
+                return ExpressMetaData.GetType(_entityTypeId,Model.SchemaModule);
             }
         }
 
-        public XbimMeshFragment(int pStart, int tStart, short modelId)
+        public XbimMeshFragment(int pStart, int tStart, IModel modelId)
         {
             StartPosition = EndPosition = pStart;
             StartTriangleIndex = EndTriangleIndex = tStart;
             EntityLabel = 0;
             _entityTypeId = 0;
             GeometryId = 0;
-            ModelId = modelId;
+            Model = modelId;
         }
 
-        public XbimMeshFragment(int pStart, int tStart, short productTypeId, int productLabel, int geometryLabel, short modelId)
+        public XbimMeshFragment(int pStart, int tStart, short productTypeId, int productLabel, int geometryLabel, IModel model)
         {
             this.StartPosition = EndPosition = pStart;
             this.StartTriangleIndex = EndTriangleIndex = tStart;
             this._entityTypeId = productTypeId;
             this.EntityLabel = productLabel;
             this.GeometryId = geometryLabel;
-            this.ModelId = modelId;
+            this.Model = model;
         }
 
-        public XbimMeshFragment(int pStart, int tStart, Type productType, int productLabel, int geometryLabel, short modelId)
+        public XbimMeshFragment(int pStart, int tStart, Type productType, int productLabel, int geometryLabel, IModel model)
         {
 
             this.StartPosition = EndPosition = pStart;
             this.StartTriangleIndex = EndTriangleIndex = tStart;
-            this._entityTypeId = IfcMetaData.IfcTypeId(productType);
+            this._entityTypeId = ExpressMetaData.ExpressTypeId(productType);
             this.EntityLabel = productLabel;
             this.GeometryId = geometryLabel;
-            this.ModelId = modelId;
+            this.Model = model;
         }
 
         public bool IsEmpty

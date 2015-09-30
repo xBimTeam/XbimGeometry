@@ -7,6 +7,7 @@ using Xbim.Common.XbimExtensions;
 using Xbim.IO;
 using Xbim.ModelGeometry.Scene;
 using XbimGeometry.Interfaces;
+using Xbim.IO.Esent;
 
 namespace GeometryTests
 {
@@ -31,7 +32,7 @@ namespace GeometryTests
         private static void WriteWexBim(string fnameIn)
         {
             var fNameOut = Path.ChangeExtension(fnameIn, "wexbim");
-            using (var m = new XbimModel())
+            using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
             {
                 m.CreateFrom(fnameIn, null, null, true, true);
                 var m3D = new Xbim3DModelContext(m);
@@ -50,7 +51,7 @@ namespace GeometryTests
         [TestMethod]
         public void ReadAndWriteWexBimFile()
         {
-            using (var m = new XbimModel())
+            using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
             {
                 m.CreateFrom("SolidTestFiles\\19 - TwoProxy.ifc", null, null, true, true);
                 var m3D = new Xbim3DModelContext(m);

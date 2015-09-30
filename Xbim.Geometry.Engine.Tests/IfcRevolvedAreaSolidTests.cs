@@ -3,7 +3,7 @@ using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Xbim.Common.Logging;
 using Xbim.Geometry.Engine.Interop;
-using Xbim.IO;
+using Xbim.IO.Esent;
 using Xbim.Ifc2x3.GeometricModelResource;
 using Xbim.Ifc2x3.ProfileResource;
 
@@ -21,7 +21,7 @@ namespace GeometryTests
         {
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new XbimModel())
+                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
                 {
                     m.CreateFrom("SolidTestFiles\\5- IfcRevolvedAreaSolid-IfcCircularHollowProfileDef.ifc", null, null, true, true);
                     var ss = m.Instances.OfType<IfcRevolvedAreaSolid>().FirstOrDefault(e => e.SweptArea is IfcCircleHollowProfileDef);
@@ -44,7 +44,7 @@ namespace GeometryTests
 
              using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new XbimModel())
+                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
                 {
                     m.CreateFrom(@"SolidTestFiles\BIM Logo-Coordination View 2 - No M.ifc", null, null, true, true);
                     var ss = m.Instances.OfType<IfcRevolvedAreaSolid>().FirstOrDefault(e => e.EntityLabel==290);

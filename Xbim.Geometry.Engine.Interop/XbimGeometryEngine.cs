@@ -9,7 +9,7 @@ using Xbim.Ifc2x3.GeometryResource;
 using Xbim.Ifc2x3.ProfileResource;
 using Xbim.Ifc2x3.TopologyResource;
 using Xbim.IO; 
-using Xbim.XbimExtensions.SelectTypes;
+using Xbim.IO.Esent; 
 using XbimGeometry.Interfaces;
 
 namespace Xbim.Geometry.Engine.Interop
@@ -278,7 +278,7 @@ namespace Xbim.Geometry.Engine.Interop
             return _engine.CreateVertexPoint(point, precision);
         }
 
-        public IfcFacetedBrep CreateFacetedBrep(XbimModel model, IXbimSolid solid)
+        public IfcFacetedBrep CreateFacetedBrep(EsentModel model, IXbimSolid solid)
         {
             return _engine.CreateFacetedBrep(model, solid);
         }
