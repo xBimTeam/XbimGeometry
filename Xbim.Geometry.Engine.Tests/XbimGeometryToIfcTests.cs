@@ -43,7 +43,7 @@ namespace GeometryTests
         [TestMethod]
         public void ConvertIfcCylinderToBRepTest()
         {
-            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
+            using (var m = Xbim.Ifc2x3.IO.XbimModel.CreateTemporaryModel())
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -76,7 +76,7 @@ namespace GeometryTests
        
         public void ConvertIfcBlockToBRepTest()
         { 
-            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
+            using (var m = Xbim.Ifc2x3.IO.XbimModel.CreateTemporaryModel())
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -156,7 +156,7 @@ namespace GeometryTests
                     //add a shape
                     //Create a Definition shape to hold the geometry
                     var shape = m.Instances.New<IfcShapeRepresentation>();
-                    shape.ContextOfItems = m.IfcProject.ModelContext();
+                    shape.ContextOfItems = m.Instances.OfType<IfcProject>().FirstOrDefault().ModelContext;
                     shape.RepresentationType = "Brep";
                     shape.RepresentationIdentifier = "Body";
 

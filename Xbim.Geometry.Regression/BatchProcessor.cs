@@ -3,9 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Xbim.Common.Logging;
-using Xbim.IO;
 using Xbim.ModelGeometry.Scene;
-using Xbim.XbimExtensions.Interfaces;
 using System.Collections.Generic;
 using log4net;
 using Xbim.Ifc2x3.Kernel;
@@ -13,8 +11,8 @@ using Xbim.Ifc2x3.GeometricModelResource;
 using Xbim.Ifc2x3.GeometryResource;
 using Xbim.Ifc2x3.UtilityResource;
 using XbimGeometry.Interfaces;
-using Xbim.Ifc2x3.TopologyResource;
 using Xbim.IO.Esent;
+using Xbim.Common.Step21;
 
 namespace XbimRegression
 {
@@ -109,8 +107,8 @@ namespace XbimRegression
                         //XbimSceneBuilder sb = new XbimSceneBuilder();
                         //string xbimSceneName = BuildFileName(ifcFile, ".xbimScene");
                         //sb.BuildGlobalScene(model, xbimSceneName);
-                       // sceneTime = watch.ElapsedMilliseconds - geomTime;
-                        IIfcFileHeader header = model.Header;
+                        // sceneTime = watch.ElapsedMilliseconds - geomTime;
+                        IStepFileHeader header = model.Header;
                         watch.Stop();
                         IfcOwnerHistory ohs = model.Instances.OfType<IfcOwnerHistory>().FirstOrDefault();
                         result = new ProcessResult
@@ -165,9 +163,9 @@ namespace XbimRegression
             }
         }
 
-        private static EsentModel ParseModelFile(string ifcFileName,bool caching)
+        private static Xbim.Ifc2x3.IO.XbimModel ParseModelFile(string ifcFileName,bool caching)
         {
-            EsentModel model = new EsentModel(new Xbim.Ifc2x3.EntityFactory());
+            var model = new Xbim.Ifc2x3.IO.XbimModel();
             //create a callback for progress
             switch (Path.GetExtension(ifcFileName).ToLowerInvariant())
             {

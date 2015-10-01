@@ -2,12 +2,8 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
-using ICSharpCode.SharpZipLib.Core;
 using Xbim.Common.Logging;
-using Xbim.IO;
 using Xbim.ModelGeometry.Scene;
-using Xbim.XbimExtensions;
-using Xbim.XbimExtensions.Interfaces;
 using XbimGeometry.Interfaces;
 using Xbim.IO.Esent;
 using Xbim.Common;

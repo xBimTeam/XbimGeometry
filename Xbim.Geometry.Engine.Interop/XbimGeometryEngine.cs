@@ -6,15 +6,15 @@ using Xbim.Common.Geometry;
 using Xbim.Common.Logging;
 using Xbim.Ifc2x3.GeometricModelResource;
 using Xbim.Ifc2x3.GeometryResource;
+using Xbim.Ifc2x3.IO;
 using Xbim.Ifc2x3.ProfileResource;
 using Xbim.Ifc2x3.TopologyResource;
-using Xbim.IO; 
-using Xbim.IO.Esent; 
+using Xbim.IO;
 using XbimGeometry.Interfaces;
 
 namespace Xbim.Geometry.Engine.Interop
-{  
-    public class XbimGeometryEngine : IXbimGeometryCreator
+{
+    public class XbimGeometryEngine : Xbim.Ifc2x3.IO.IXbimGeometryCreator
     {
 
         private readonly IXbimGeometryCreator _engine;
@@ -278,7 +278,7 @@ namespace Xbim.Geometry.Engine.Interop
             return _engine.CreateVertexPoint(point, precision);
         }
 
-        public IfcFacetedBrep CreateFacetedBrep(EsentModel model, IXbimSolid solid)
+        public IfcFacetedBrep CreateFacetedBrep(Ifc2x3.IO.XbimModel model, IXbimSolid solid)
         {
             return _engine.CreateFacetedBrep(model, solid);
         }
@@ -335,5 +335,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             return _engine.CreateGeometryObjectSet();
         }
+
+       
     }
 }

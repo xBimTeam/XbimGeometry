@@ -26,6 +26,7 @@ using Xbim.ModelGeometry.Scene.Clustering;
 using Xbim.XbimExtensions;
 using Xbim.IO.Esent;
 using XbimGeometry.Interfaces;
+using Xbim.Common.Metadata;
 
 #endregion
 
@@ -347,7 +348,7 @@ namespace Xbim.ModelGeometry.Scene
                     //we can only handle one representation in a context and this is in an implementers agreement
                     if (product.Representation != null)
                     {
-                        if (product.Representation.Representations == null) continue;
+                        if (product.Representation.Representations == null) continue;                  
                         var rep =
                             product.Representation.Representations.FirstOrDefault(
                                 r => Contexts.Contains(r.ContextOfItems) &&
@@ -402,9 +403,9 @@ namespace Xbim.ModelGeometry.Scene
 
         public static readonly ILogger Logger = LoggerFactory.GetLogger();
         private readonly IfcRepresentationContextCollection _contexts;
-        private IXbimGeometryCreator _engine;
+        private Ifc2x3.IO.IXbimGeometryCreator _engine;
 
-        private IXbimGeometryCreator Engine
+        private Ifc2x3.IO.IXbimGeometryCreator Engine
         {
             get
             {

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Xbim.Common;
+using Xbim.Common.Metadata;
 using Xbim.IO;
 
 namespace Xbim.ModelGeometry.Scene

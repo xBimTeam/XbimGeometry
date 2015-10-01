@@ -20,6 +20,7 @@ using Xbim.ModelGeometry.Scene;
 using Xbim.XbimExtensions;
 using XbimGeometry.Interfaces;
 using Xbim.Common;
+using Xbim.Common.Metadata;
 
 namespace GeometryTests
 {

@@ -20,7 +20,7 @@ namespace GeometryTests
     public class IfcModelBuilder
     {
         
-        public static EsentModel CreateandInitModel()
+        public static Xbim.Ifc2x3.IO.XbimModel CreateandInitModel()
         {
 
             var model = XbimModel.CreateTemporaryModel() ; //create an empty model

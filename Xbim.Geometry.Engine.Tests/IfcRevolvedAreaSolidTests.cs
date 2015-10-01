@@ -6,6 +6,7 @@ using Xbim.Geometry.Engine.Interop;
 using Xbim.IO.Esent;
 using Xbim.Ifc2x3.GeometricModelResource;
 using Xbim.Ifc2x3.ProfileResource;
+using Xbim.Ifc2x3.IO;
 
 namespace GeometryTests
 {
@@ -44,7 +45,7 @@ namespace GeometryTests
 
              using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
+                using (var m = new XbimModel())
                 {
                     m.CreateFrom(@"SolidTestFiles\BIM Logo-Coordination View 2 - No M.ifc", null, null, true, true);
                     var ss = m.Instances.OfType<IfcRevolvedAreaSolid>().FirstOrDefault(e => e.EntityLabel==290);

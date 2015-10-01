@@ -36,7 +36,7 @@ using namespace System;
 using namespace Xbim::Common;
 using namespace Xbim::Ifc2x3::Extensions;
 using namespace Xbim::XbimExtensions;
-using namespace Xbim::XbimExtensions::Interfaces;
+
 namespace Xbim
 {
 	namespace Geometry

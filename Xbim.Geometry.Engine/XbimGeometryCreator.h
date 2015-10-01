@@ -21,7 +21,7 @@ namespace Xbim
 	namespace Geometry
 	{
 
-		public ref class XbimGeometryCreator : IXbimGeometryCreator
+		public ref class XbimGeometryCreator : Xbim::Ifc2x3::IO::IXbimGeometryCreator
 		{
 		public:
 			
@@ -151,7 +151,7 @@ namespace Xbim
 
 #endif // USE_CARVE_CSG
 
-			virtual IfcFacetedBrep^ CreateFacetedBrep(EsentModel^ model, IXbimSolid^ solid);
+			virtual IfcFacetedBrep^ CreateFacetedBrep(Xbim::Ifc2x3::IO::XbimModel^ model, IXbimSolid^ solid);
 			//Creates collections of objects
 			virtual IXbimSolidSet^ CreateSolidSet();
 			virtual IXbimSolidSet^ CreateSolidSet(IfcBooleanResult^ boolOp);
@@ -159,6 +159,7 @@ namespace Xbim
 			virtual IXbimSolidSet^ CreateBooleanResult(IfcBooleanResult^ clip);
 			
 			virtual IXbimGeometryObjectSet^ CreateGeometryObjectSet();
-		};
+			
+};
 	}
 }

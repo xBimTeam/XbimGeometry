@@ -554,7 +554,7 @@ namespace Xbim
 
 #pragma region IfcFacetedBrep Conversions
 
-		IfcFacetedBrep^ XbimGeometryCreator::CreateFacetedBrep(EsentModel^ model, IXbimSolid^ solid)
+		IfcFacetedBrep^ XbimGeometryCreator::CreateFacetedBrep(Xbim::Ifc2x3::IO::XbimModel^ model, IXbimSolid^ solid)
 		{	
 			XbimSolid^ xSolid = dynamic_cast<XbimSolid^>(solid);
 			XbimReadWriteTransaction^ txn = nullptr;
@@ -717,7 +717,8 @@ namespace Xbim
 
 		IXbimGeometryObjectSet^ XbimGeometryCreator::CreateGeometryObjectSet() {
 			return gcnew XbimGeometryObjectSet();
-		};
+		}
+		
 
 #pragma region Write Functions
 
