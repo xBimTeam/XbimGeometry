@@ -20,7 +20,7 @@ namespace GeometryTests
         public void IfcCenterLineProfileDefTest()
         {
 
-            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
+            using (var m = XbimModel.CreateTemporaryModel())
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -36,7 +36,7 @@ namespace GeometryTests
         [TestMethod]
         public void IfcSurfaceOfLinearExtrusionTest()
         {
-            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
+            using (var m = XbimModel.CreateTemporaryModel())
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -53,7 +53,7 @@ namespace GeometryTests
         [TestMethod]
         public void IfcSurfaceOfRevolutionTest()
         {
-            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
+            using (var m = XbimModel.CreateTemporaryModel())
             {
                 using (var txn = m.BeginTransaction())
                 {

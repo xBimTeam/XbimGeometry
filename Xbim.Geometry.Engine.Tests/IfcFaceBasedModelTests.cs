@@ -10,6 +10,7 @@ using Xbim.Ifc2x3.GeometricConstraintResource;
 using Xbim.Ifc2x3.GeometryResource;
 using Xbim.Ifc2x3.ProductExtension;
 using XbimGeometry.Interfaces;
+using Xbim.Ifc2x3.IO;
 
 namespace GeometryTests
 {
@@ -29,7 +30,7 @@ namespace GeometryTests
         {
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
+                using (var m = new XbimModel())
                 {
                     m.CreateFrom("SolidTestFiles\\Complex_BRep_Boolean.ifc", null, null, true, true);
                     var fbr = m.Instances[35] as IfcFacetedBrep;
@@ -55,7 +56,7 @@ namespace GeometryTests
         {
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
+                using (var m = new XbimModel())
                 {
                     m.CreateFrom("SolidTestFiles\\12 - Multiple FacetedBrep.ifc", null, null, true, true);
                     var fbr = m.Instances[25] as IfcFacetedBrep;
@@ -78,7 +79,7 @@ namespace GeometryTests
         {
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
+                using (var m = new XbimModel())
                 {
                     m.CreateFrom("SolidTestFiles\\12 - Multiple FacetedBrep.ifc", null, null, true, true);
                     var fbr = m.Instances[780] as IfcFacetedBrep;
@@ -102,7 +103,7 @@ namespace GeometryTests
         {
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
+                using (var m = new XbimModel())
                 {
                     m.CreateFrom("SolidTestFiles\\IfcFacetedBRepWithIncorrectlyOrientedFaces.ifc", null, null, true, true);
                     var fbr = m.Instances[98711] as IfcFacetedBrep;
@@ -127,7 +128,7 @@ namespace GeometryTests
         {
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
+                using (var m = new XbimModel())
                 {
                     m.CreateFrom("SolidTestFiles\\16 - IfcShellBasedSurfaceModel.ifc", null, null, true, true);
                     var sbsm = m.Instances[38] as IfcShellBasedSurfaceModel;
@@ -147,7 +148,7 @@ namespace GeometryTests
         {
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
+                using (var m = new XbimModel())
                 {
                     m.CreateFrom("SolidTestFiles\\17 - IfcFaceBasedSurfaceModel.ifc", null, null, true, true);
                     var fbsm = m.Instances[29] as IfcFaceBasedSurfaceModel;

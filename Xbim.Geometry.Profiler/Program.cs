@@ -7,6 +7,7 @@ using Xbim.ModelGeometry.Scene;
 using XbimGeometry.Interfaces;
 using Xbim.IO.Esent;
 using Xbim.Common;
+using Xbim.Ifc2x3.IO;
 
 namespace Xbim.Geometry.Profiler
 {
@@ -101,7 +102,7 @@ namespace Xbim.Geometry.Profiler
 
                     try
                     {
-                        var model = new EsentModel(new Xbim.Ifc2x3.EntityFactory());
+                        var model = new XbimModel();
                         model.Open(fileName, XbimDBAccess.ReadWrite);
                         //delete any geometry
                         openModel = model;
@@ -115,7 +116,7 @@ namespace Xbim.Geometry.Profiler
                 }
                 else //we need to create the xBIM file
                 {
-                    var model = new EsentModel(new Xbim.Ifc2x3.EntityFactory());
+                    var model = new XbimModel();
                     try
                     {
                         model.CreateFrom(fileName, null, null, true);

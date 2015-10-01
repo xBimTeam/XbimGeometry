@@ -21,6 +21,7 @@ using Xbim.XbimExtensions;
 using XbimGeometry.Interfaces;
 using Xbim.Common;
 using Xbim.Common.Metadata;
+using Xbim.Ifc2x3.IO;
 
 namespace GeometryTests
 {
@@ -42,7 +43,7 @@ namespace GeometryTests
         [TestMethod]
         public void GeometryVersionUpgradeTest()
         {
-            using (var model = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
+            using (var model = new XbimModel())
             {
                 // start afresh
                 model.Open(@"GConv\Monolith_v10.xBIM", XbimDBAccess.Exclusive);
@@ -67,7 +68,7 @@ namespace GeometryTests
         [TestMethod]
         public void TestShapeGeometriesEnumerability()
         {
-            using (var model = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
+            using (var model = new XbimModel())
             {
                 model.Open(@"EsentTestFiles\TwoWalls.xbim");
                 var geomContext = new Xbim3DModelContext(model);
@@ -110,7 +111,7 @@ namespace GeometryTests
                     using (var binaryWriter = new BinaryWriter(wexBimFile))
                     {
 
-                        using (var model = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
+                        using (var model = new XbimModel())
                         {
                             try
                             {
@@ -157,7 +158,7 @@ namespace GeometryTests
         private static void IfcFeaturesClassificationIsCorrect(string ifcFileFullName)
         {
             var xbimFileFullName = Path.ChangeExtension(ifcFileFullName, ".xbim");
-            using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
+            using (var m = new XbimModel())
             {
                 m.CreateFrom(ifcFileFullName, xbimFileFullName, null, true, true);
                 var context = new Xbim3DModelContext(m);
@@ -199,7 +200,7 @@ namespace GeometryTests
             FileInfo[] toProcess = di.GetFiles("*.IFC", SearchOption.TopDirectoryOnly);
             foreach (var file in toProcess)
             {
-                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
+                using (var m = new XbimModel())
                 {
                     m.CreateFrom(file.FullName, null, null, true, true);
 
@@ -271,7 +272,7 @@ namespace GeometryTests
             FileInfo[] toProcess = di.GetFiles("*.IFC", SearchOption.TopDirectoryOnly);
             foreach (var file in toProcess)
             {
-                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
+                using (var m = new XbimModel())
                 {
                     m.CreateFrom(file.FullName, null, null, true, true);
 

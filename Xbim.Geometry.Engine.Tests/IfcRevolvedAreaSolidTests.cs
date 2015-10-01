@@ -22,7 +22,7 @@ namespace GeometryTests
         {
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
+                using (var m = new XbimModel())
                 {
                     m.CreateFrom("SolidTestFiles\\5- IfcRevolvedAreaSolid-IfcCircularHollowProfileDef.ifc", null, null, true, true);
                     var ss = m.Instances.OfType<IfcRevolvedAreaSolid>().FirstOrDefault(e => e.SweptArea is IfcCircleHollowProfileDef);

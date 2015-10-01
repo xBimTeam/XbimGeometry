@@ -12,6 +12,7 @@ using Xbim.Ifc2x3.GeometricConstraintResource;
 using Xbim.Ifc2x3.ProductExtension;
 using Xbim.Ifc2x3.SharedBldgElements;
 using XbimGeometry.Interfaces;
+using Xbim.Ifc2x3.IO;
 
 namespace GeometryTests
 {
@@ -111,7 +112,7 @@ namespace GeometryTests
         [TestMethod]
         public void BooleanCutSolidTest()
         {
-            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
+            using (var m = XbimModel.CreateTemporaryModel())
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -133,7 +134,7 @@ namespace GeometryTests
         [TestMethod]
         public void BooleanUnionSolidTest()
         {
-            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
+            using (var m = XbimModel.CreateTemporaryModel())
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -155,7 +156,7 @@ namespace GeometryTests
         [TestMethod]
         public void BooleanIntersectSolidTest()
         {
-            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
+            using (var m = XbimModel.CreateTemporaryModel())
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -179,7 +180,7 @@ namespace GeometryTests
         [TestMethod]
         public void SectionOfCylinderTest()
         {
-            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
+            using (var m = XbimModel.CreateTemporaryModel())
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -208,7 +209,7 @@ namespace GeometryTests
         [TestMethod]
         public void SectionWithInnerWireTest()
         {
-            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
+            using (var m = XbimModel.CreateTemporaryModel())
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -237,7 +238,7 @@ namespace GeometryTests
         [TestMethod]
         public void SectionOfBlockTest()
         {
-            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
+            using (var m = XbimModel.CreateTemporaryModel())
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -263,7 +264,7 @@ namespace GeometryTests
         [TestMethod]
         public void IfcCsgDifferenceTest()
         {
-            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
+            using (var m = XbimModel.CreateTemporaryModel())
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -287,7 +288,7 @@ namespace GeometryTests
         [TestMethod]
         public void IfcCsgUnionTest()
         {
-            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
+            using (var m = XbimModel.CreateTemporaryModel())
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -312,7 +313,7 @@ namespace GeometryTests
         [TestMethod]
         public void IfcCsgIntersectionTest()
         {
-            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
+            using (var m = XbimModel.CreateTemporaryModel())
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -336,7 +337,7 @@ namespace GeometryTests
         [TestMethod]
         public void IfcHalfspace_Test()
         {
-            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
+            using (var m = XbimModel.CreateTemporaryModel())
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -450,7 +451,7 @@ namespace GeometryTests
         {
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
+                using (var m = new XbimModel())
                 {
                     m.CreateFrom("SolidTestFiles\\7- Boolean_IfcHalfspace_With_IfcExtrudedAreaSolid.ifc", null, null, true, true);
                     var eas = m.Instances.OfType<IfcBooleanClippingResult>().FirstOrDefault(hs => hs.FirstOperand is IfcExtrudedAreaSolid && hs.SecondOperand is IfcHalfSpaceSolid);
@@ -476,7 +477,7 @@ namespace GeometryTests
         {
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
+                using (var m = new XbimModel())
                 {
                     m.CreateFrom("SolidTestFiles\\8- Boolean_IfcPolygonalBoundedHalfspace_With_IfcExtrudedAreaSolid.ifc", null, null, true, true);
                     var eas = m.Instances.OfType<IfcBooleanClippingResult>().FirstOrDefault(hs => hs.FirstOperand is IfcExtrudedAreaSolid && hs.SecondOperand.GetType() == typeof(IfcPolygonalBoundedHalfSpace));
@@ -500,7 +501,7 @@ namespace GeometryTests
         {
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
+                using (var m = new XbimModel())
                 {
                     m.CreateFrom("SolidTestFiles\\9- Boolean_With_Nested_Booleans.ifc", null, null, true, true);
                     var eas = m.Instances[32] as IfcBooleanClippingResult;
@@ -523,7 +524,7 @@ namespace GeometryTests
         {
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
+                using (var m = new XbimModel())
                 {
                     m.CreateFrom("SolidTestFiles\\NestedBooleanClippingResults.ifc", null, null, true, true);
                     var eas = m.Instances[30] as IfcBooleanClippingResult;
@@ -544,7 +545,7 @@ namespace GeometryTests
         {
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
+                using (var m = new XbimModel())
                 {
                     m.CreateFrom("SolidTestFiles\\EmptyBooleanClippingResult.ifc", null, null, true, true);
                     var eas = m.Instances[35] as IfcBooleanClippingResult;
@@ -563,7 +564,7 @@ namespace GeometryTests
         {
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
+                using (var m = new XbimModel())
                 {
                     m.CreateFrom("SolidTestFiles\\Faceted BRep with void.ifc", null, null, true, true);
                     var wall = m.Instances[9] as IfcWall;
@@ -590,7 +591,7 @@ namespace GeometryTests
         {
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
+                using (var m = new XbimModel())
                 {
                     m.CreateFrom("SolidTestFiles\\10- Boxed Half Space.ifc", null, null, true, true);
                     var eas = m.Instances[28] as IfcBooleanClippingResult;
@@ -1074,7 +1075,7 @@ namespace GeometryTests
         [TestMethod]
         public void BooleanCutMultipleSolidsFromASinglePlanarSolidTest()
         {
-            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
+            using (var m = XbimModel.CreateTemporaryModel())
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -1133,7 +1134,7 @@ namespace GeometryTests
         [TestMethod]
         public void BooleanCutMultipleSolidsFromASingleNonPlanarSolidTest()
         {
-            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
+            using (var m = XbimModel.CreateTemporaryModel())
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -1200,7 +1201,7 @@ namespace GeometryTests
         [TestMethod]
         public void BooleanCutSingleSolidsFromAMultipleNonPlanarSolidTest()
         {
-            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
+            using (var m = XbimModel.CreateTemporaryModel())
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -1262,7 +1263,7 @@ namespace GeometryTests
          [TestMethod]
         public void BooleanCutSolidWithVoidPlanarTest()
         {
-           using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
+           using (var m = XbimModel.CreateTemporaryModel())
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -1287,7 +1288,7 @@ namespace GeometryTests
          [TestMethod]
          public void BooleanCutSolidWithVoidNonPlanarTest()
          {
-             using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
+             using (var m = XbimModel.CreateTemporaryModel())
              {
                  using (var txn = m.BeginTransaction())
                  {

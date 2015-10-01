@@ -7,6 +7,7 @@ using Xbim.IO.Esent;
 using Xbim.Ifc2x3.GeometryResource;
 using Xbim.ModelGeometry.Scene;
 using XbimGeometry.Interfaces;
+using Xbim.Ifc2x3.IO;
 
 namespace GeometryTests
 {
@@ -22,7 +23,7 @@ namespace GeometryTests
         {
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
+                using (var m = new XbimModel())
                 {
                     m.CreateFrom("SolidTestFiles\\6- IfcSweptDiskSolid_With_BooleanResult.ifc", null, null, true, true);
                     var ss = m.Instances.OfType<IfcSweptDiskSolid>().FirstOrDefault(e => e.Directrix is IfcPolyline);
@@ -45,7 +46,7 @@ namespace GeometryTests
         {
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
+                using (var m = new XbimModel())
                 {
                     m.CreateFrom("SolidTestFiles\\6- IfcSweptDiskSolid_With_BooleanResult.ifc", null, null, true, true);
                     var ss = m.Instances.OfType<IfcSweptDiskSolid>().FirstOrDefault(e => e.Directrix is IfcCompositeCurve);
@@ -68,7 +69,7 @@ namespace GeometryTests
             var xbimGeometryCreator = new XbimGeometryEngine();
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
+                using (var m = new XbimModel())
                 {
                     m.CreateFrom("SolidTestFiles\\BIM Logo-LetterM.ifc", null, null, true, true);
                     var eas = m.Instances[57] as IfcSurfaceCurveSweptAreaSolid;
@@ -93,7 +94,7 @@ namespace GeometryTests
         {
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new EsentModel(new Xbim.Ifc2x3.EntityFactory()))
+                using (var m = new XbimModel())
                 {
                     m.CreateFrom("SolidTestFiles\\11- IfcSurfaceCurveSweptAreaSolid.ifc", null, null, true, true);
                     var ss = m.Instances.OfType<IfcSurfaceCurveSweptAreaSolid>().FirstOrDefault();

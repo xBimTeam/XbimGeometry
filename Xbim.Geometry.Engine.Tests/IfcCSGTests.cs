@@ -21,7 +21,7 @@ namespace GeometryTests
         [TestMethod]
         public void IfcRectangularPyramidTest()
         {
-            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
+            using (var m = XbimModel.CreateTemporaryModel())
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -45,7 +45,7 @@ namespace GeometryTests
         [TestMethod]
         public void IfcRightCircularCylinderTest()
         {
-            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory())) 
+            using (var m = XbimModel.CreateTemporaryModel()) 
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -66,7 +66,7 @@ namespace GeometryTests
         [TestMethod]
         public void IfcRightCircularConeTest()
         {
-            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
+            using (var m = XbimModel.CreateTemporaryModel())
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -90,7 +90,7 @@ namespace GeometryTests
         [TestMethod]
         public void IfcBlockTest()
         {
-            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
+            using (var m = XbimModel.CreateTemporaryModel())
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -113,7 +113,7 @@ namespace GeometryTests
         [TestMethod]
         public void IfcSphereTest()
         {
-            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
+            using (var m = XbimModel.CreateTemporaryModel())
             {
                 using (var txn = m.BeginTransaction())
                 {

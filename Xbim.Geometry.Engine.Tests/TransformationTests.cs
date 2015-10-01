@@ -24,7 +24,7 @@ namespace GeometryTests
         [TestMethod]
         public void TransformSolidRectangularProfileDef()
         {
-            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
+            using (var m = XbimModel.CreateTemporaryModel())
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -66,7 +66,7 @@ namespace GeometryTests
         [TestMethod]
         public void TransformFacetedSolidRectangularProfileDef()
         {
-            using (var m = EsentModel.CreateTemporaryModel(new Xbim.Ifc2x3.EntityFactory()))
+            using (var m = XbimModel.CreateTemporaryModel())
             {
                 using (var txn = m.BeginTransaction())
                 {
