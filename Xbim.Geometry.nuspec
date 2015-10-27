@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
     <metadata>
         <id>Xbim.Geometry</id>
-        <version>3.1.12-V0001</version>
+        <version>3.1.13-V0001</version>
         <title>xBIM Geometry</title>
         <authors>xBIM team</authors>
         <owners>Steve Lockley</owners>
@@ -18,6 +18,7 @@ The xBIM project provides packages to convert IFC models to COBie spreadsheets i
 IOS and Android versions are under development.</description>
         <summary>The .Net toolkit for developing BIM applications based on the IFC standard. Essential support for the Ifc data model</summary>
         <releaseNotes>
+          3.1.12 Minor change to update version of WexBIM files to 2
           3.1.11 geometry engine syncronised with latest OCC build 
           3.1.4 performance significantly improved, support for complex geometries added, specifically large complex booleans
           3.1.0 deploys net40 signed assemblies as opposed to net45 unsigned.

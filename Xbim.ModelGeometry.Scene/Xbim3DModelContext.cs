@@ -1937,7 +1937,7 @@ namespace Xbim.ModelGeometry.Scene
 
             binaryStream.Write((Int32)94132117); //magic number
 
-            binaryStream.Write((byte)1); //version of stream
+            binaryStream.Write((byte)2); //version of stream, arrays now packed as doubles
             var start = (int)binaryStream.Seek(0, SeekOrigin.Current);
             binaryStream.Write((Int32)0); //number of shapes
             binaryStream.Write((Int32)0); //number of vertices
