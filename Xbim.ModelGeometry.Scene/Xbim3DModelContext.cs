@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -21,6 +22,7 @@ using Xbim.Ifc2x3.Kernel;
 using Xbim.Ifc2x3.PresentationAppearanceResource;
 using Xbim.Ifc2x3.ProductExtension;
 using Xbim.Ifc2x3.RepresentationResource;
+using Xbim.Ifc2x3.StructuralElementsDomain;
 using Xbim.IO;
 using Xbim.ModelGeometry.Scene.Clustering;
 using Xbim.XbimExtensions;
@@ -280,31 +282,81 @@ namespace Xbim.ModelGeometry.Scene
                 foreach (var context in Contexts) Clusters.Add(context, new ConcurrentQueue<XbimBBoxClusterElement>());
             }
 
+            private struct ElementWithFeature
+            {
+                internal IfcElement Element;
+                internal IfcFeatureElement Feature;
+            }
+
             private void GetOpeningsAndProjections()
             {
-                var openings = Model.InstancesLocal.OfType<IfcRelVoidsElement>()
+                var compoundElementsDictionary =
+                    Model.InstancesLocal.OfType<IfcRelDecomposes>()
+                        .Where(x => x.RelatingObject is IfcElement)
+                        .ToDictionary(x => x.RelatingObject, y => y.RelatedObjects);
+
+
+                // openings
+                var elementsWithFeatures = new List<ElementWithFeature>();
+                var openingRelations = Model.InstancesLocal.OfType<IfcRelVoidsElement>()
                     .Where(
                         r =>
                             r.RelatingBuildingElement.Representation != null &&
-                            r.RelatedOpeningElement.Representation != null)
-                    .Select(
-                        f =>
-                            new
+                            r.RelatedOpeningElement.Representation != null).ToList();
+                foreach (var openingRelation in openingRelations)
+                {
+                    // process parts
+                    ObjectDefinitionSet childrenElements;
+                    if (compoundElementsDictionary.TryGetValue(openingRelation.RelatingBuildingElement,
+                        out childrenElements))
+                    {
+                        elementsWithFeatures.AddRange(
+                            childrenElements.OfType<IfcElement>().Select(childElement => new ElementWithFeature()
                             {
-                                element = f.RelatingBuildingElement,
-                                feature = (IfcFeatureElement) f.RelatedOpeningElement
-                            });
+                                Element = childElement,
+                                Feature = openingRelation.RelatedOpeningElement
+                            }));
+                    }
 
-                var projections = Model.InstancesLocal.OfType<IfcRelProjectsElement>()
+                    // process parent
+                    elementsWithFeatures.Add(new ElementWithFeature()
+                    {
+                        Element = openingRelation.RelatingBuildingElement,
+                        Feature = openingRelation.RelatedOpeningElement
+                    });
+                }
+
+
+                // projections
+                var projectingRelations = Model.InstancesLocal.OfType<IfcRelVoidsElement>()
                     .Where(
-                        r => r.RelatingElement.Representation != null && r.RelatedFeatureElement.Representation != null)
-                    .Select(
-                        f => new {element = f.RelatingElement, feature = (IfcFeatureElement) f.RelatedFeatureElement});
+                        r =>
+                            r.RelatingBuildingElement.Representation != null &&
+                            r.RelatedOpeningElement.Representation != null).ToList();
+                foreach (var projectionRelation in projectingRelations)
+                {
+                    // process parts
+                    ObjectDefinitionSet childrenElements;
+                    if (compoundElementsDictionary.TryGetValue(projectionRelation.RelatingBuildingElement,
+                        out childrenElements))
+                    {
+                        elementsWithFeatures.AddRange(
+                            childrenElements.OfType<IfcElement>().Select(childElement => new ElementWithFeature()
+                            {
+                                Element = childElement,
+                                Feature = projectionRelation.RelatedOpeningElement
+                            }));
+                    }
 
-                var allOps = openings.Concat(projections);
+                    // process parent
+                    elementsWithFeatures.Add(new ElementWithFeature()
+                    {
+                        Element = projectionRelation.RelatingBuildingElement,
+                        Feature = projectionRelation.RelatedOpeningElement
+                    });
+                }
 
-                OpeningsAndProjections = allOps
-                    .GroupBy(x => x.element, y => y.feature).ToList();
+                OpeningsAndProjections = elementsWithFeatures.GroupBy(x => x.Element, y => y.Feature).ToList();
             }
 
 
@@ -763,9 +815,10 @@ namespace Xbim.ModelGeometry.Scene
 
                 if (arguments.Count == 0)
                 {
-                    Logger.WarnFormat(
-                        "WM003: {2}[#{0}]-{1} does not have a solid representation, openings cannot be formed",
-                        element.EntityLabel, element.Name, element.GetType().Name);
+                    //Logger.WarnFormat(
+                    //    "WM003: {2}[#{0}]-{1} does not have a solid representation, openings cannot be formed",
+                    //    element.EntityLabel, element.Name, element.GetType().Name);
+                    // the warning is obsolete because it's been handled int the original geometry creation
                     processed.Add(element.EntityLabel);
                     continue;
                 }
