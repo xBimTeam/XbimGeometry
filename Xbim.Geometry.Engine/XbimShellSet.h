@@ -2,8 +2,9 @@
 #include "XbimShell.h"
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
-using namespace XbimGeometry::Interfaces;
+
 using namespace System::Collections::Generic;
+using namespace Xbim::Common::Geometry;
 namespace Xbim
 {
 	namespace Geometry

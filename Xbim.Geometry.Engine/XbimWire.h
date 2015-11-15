@@ -7,10 +7,7 @@
 #include <vector>
 using namespace System;
 using namespace System::Collections::Generic;
-using namespace XbimGeometry::Interfaces;
-using namespace Xbim::Ifc2x3::GeometryResource;
-using namespace Xbim::Ifc2x3::ProfileResource;
-using namespace Xbim::Ifc2x3::TopologyResource;
+using namespace Xbim::Ifc4::Interfaces;
 using namespace Xbim::Common::Geometry;
 using namespace Xbim::Tessellator;
 namespace Xbim
@@ -31,34 +28,30 @@ namespace Xbim
 #pragma region initialisation functions
 
 			void Init(double precision);	
-			void Init(IfcPolyline^ loop);
-			void Init(IfcCompositeCurve^ loop);
-			void Init(IfcTrimmedCurve^ loop);
-			void Init(IfcCurve^ loop);
-			void Init(IfcBSplineCurve^ bspline);
-			void Init(IfcBezierCurve^ bez);
-			void Init(IfcRationalBezierCurve^ bez);
-			void Init(IfcCompositeCurveSegment^ compCurveSeg);
-			void Init(IfcBoundedCurve^ loop);
-			void Init(IfcPolyLoop ^ loop);
-			void Init(IfcArbitraryClosedProfileDef^ profile);
-			void Init(IfcArbitraryOpenProfileDef^ profile);
-			void Init(IfcCenterLineProfileDef^ profile);
+			void Init(IIfcPolyline^ loop);
+			void Init(IIfcCompositeCurve^ loop);
+			void Init(IIfcTrimmedCurve^ loop);
+			void Init(IIfcCurve^ loop);
+			void Init(IIfcBSplineCurve^ bspline);
+			void Init(IIfcCompositeCurveSegment^ compCurveSeg);
+			void Init(IIfcBoundedCurve^ loop);
+			void Init(IIfcPolyLoop ^ loop);
+			void Init(IIfcArbitraryClosedProfileDef^ profile);
+			void Init(IIfcArbitraryOpenProfileDef^ profile);
+			void Init(IIfcCenterLineProfileDef^ profile);
 			//parametrised profiles
-			void Init(IfcProfileDef ^ profile);
-			void Init(IfcDerivedProfileDef ^ profile);
-			void Init(IfcParameterizedProfileDef ^ profile);
-			void Init(IfcCircleProfileDef ^ circProfile);
-			void Init(IfcRectangleProfileDef^ rectProfile);
-			void Init(IfcLShapeProfileDef ^ profile);
-			void Init(IfcUShapeProfileDef ^ profile);
-			void Init(IfcCraneRailFShapeProfileDef ^ profile);
-			void Init(IfcCraneRailAShapeProfileDef ^ profile);
-			void Init(IfcEllipseProfileDef ^ profile);
-			void Init(IfcIShapeProfileDef ^ profile);
-			void Init(IfcZShapeProfileDef ^ profile);
-			void Init(IfcCShapeProfileDef ^ profile);
-			void Init(IfcTShapeProfileDef ^ profile);
+			void Init(IIfcProfileDef ^ profile);
+			void Init(IIfcDerivedProfileDef ^ profile);
+			void Init(IIfcParameterizedProfileDef ^ profile);
+			void Init(IIfcCircleProfileDef ^ circProfile);
+			void Init(IIfcRectangleProfileDef^ rectProfile);
+			void Init(IIfcLShapeProfileDef ^ profile);
+			void Init(IIfcUShapeProfileDef ^ profile);
+			void Init(IIfcEllipseProfileDef ^ profile);
+			void Init(IIfcIShapeProfileDef ^ profile);
+			void Init(IIfcZShapeProfileDef ^ profile);
+			void Init(IIfcCShapeProfileDef ^ profile);
+			void Init(IIfcTShapeProfileDef ^ profile);
 			//constructs a rectangle wire with the bottom left corner at 0,0,0, top right at x,y,0
 			void Init(double x, double y, double tolerance);
 #pragma endregion
@@ -80,34 +73,30 @@ namespace Xbim
 			XbimWire(double precision);
 			XbimWire(const std::vector<gp_Pnt>& points, double tolerance);
 			XbimWire(const TopoDS_Wire& wire);
-			XbimWire(IfcPolyline^ loop);
-			XbimWire(IfcBSplineCurve^ bspline);
-			XbimWire(IfcBezierCurve^ bez);
-			XbimWire(IfcRationalBezierCurve^ bez);
-			XbimWire(IfcCompositeCurve^ loop);
-			XbimWire(IfcTrimmedCurve^ loop);
-			XbimWire(IfcCurve^ loop);
-			XbimWire(IfcCompositeCurveSegment^ compCurveSeg);
-			XbimWire(IfcBoundedCurve^ loop);
-			XbimWire(IfcPolyLoop ^ loop);
-			XbimWire(IfcArbitraryClosedProfileDef^ profile);
-			XbimWire(IfcArbitraryOpenProfileDef^ profile);
-			XbimWire(IfcCenterLineProfileDef^ profile);
+			XbimWire(IIfcPolyline^ loop);
+			XbimWire(IIfcBSplineCurve^ bspline);
+			XbimWire(IIfcCompositeCurve^ loop);
+			XbimWire(IIfcTrimmedCurve^ loop);
+			XbimWire(IIfcCurve^ loop);
+			XbimWire(IIfcCompositeCurveSegment^ compCurveSeg);
+			XbimWire(IIfcBoundedCurve^ loop);
+			XbimWire(IIfcPolyLoop ^ loop);
+			XbimWire(IIfcArbitraryClosedProfileDef^ profile);
+			XbimWire(IIfcArbitraryOpenProfileDef^ profile);
+			XbimWire(IIfcCenterLineProfileDef^ profile);
 			//parametrised profiles
-			XbimWire(IfcProfileDef ^ profile);
-			XbimWire(IfcDerivedProfileDef ^ profile);
-			XbimWire(IfcParameterizedProfileDef ^ profile);
-			XbimWire(IfcCircleProfileDef ^ circProfile);
-			XbimWire(IfcRectangleProfileDef^ rectProfile);
-			XbimWire(IfcLShapeProfileDef ^ profile);
-			XbimWire(IfcUShapeProfileDef ^ profile);
-			XbimWire(IfcCraneRailFShapeProfileDef ^ profile);
-			XbimWire(IfcCraneRailAShapeProfileDef ^ profile);
-			XbimWire(IfcEllipseProfileDef ^ profile);
-			XbimWire(IfcIShapeProfileDef ^ profile);
-			XbimWire(IfcZShapeProfileDef ^ profile);
-			XbimWire(IfcCShapeProfileDef ^ profile);
-			XbimWire(IfcTShapeProfileDef ^ profile);
+			XbimWire(IIfcProfileDef ^ profile);
+			XbimWire(IIfcDerivedProfileDef ^ profile);
+			XbimWire(IIfcParameterizedProfileDef ^ profile);
+			XbimWire(IIfcCircleProfileDef ^ circProfile);
+			XbimWire(IIfcRectangleProfileDef^ rectProfile);
+			XbimWire(IIfcLShapeProfileDef ^ profile);
+			XbimWire(IIfcUShapeProfileDef ^ profile);
+			XbimWire(IIfcEllipseProfileDef ^ profile);
+			XbimWire(IIfcIShapeProfileDef ^ profile);
+			XbimWire(IIfcZShapeProfileDef ^ profile);
+			XbimWire(IIfcCShapeProfileDef ^ profile);
+			XbimWire(IIfcTShapeProfileDef ^ profile);
 			XbimWire(double x, double y, double tolerance);
 
 #pragma endregion
@@ -165,7 +154,7 @@ property bool IsReversed{bool get(){ return IsValid && pWire->Orientation() == T
 			//Methods
 
 			//moves the face to the new position
-			void Move(IfcAxis2Placement3D^ position);
+			void Move(IIfcAxis2Placement3D^ position);
 			//Translates the object by the translation vector
 			void Translate(XbimVector3D translation);
 			//change the direction of the loop

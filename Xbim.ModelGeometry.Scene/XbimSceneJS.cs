@@ -86,20 +86,20 @@ namespace Xbim.ModelGeometry.Scene
             
             XbimRect3D bb = XbimRect3D.Empty;
             if (largest != null) bb = new XbimRect3D(largest.Centre, largest.Centre);
-
-            foreach (var refModel in _context.Model.ReferencedModels)
-            {
-                XbimRegion r;
-                Xbim3DModelContext refContext = new Xbim3DModelContext(refModel.Model);
-                r = refContext.GetLargestRegion();
-                if (r != null)
-                {
-                    if (bb.IsEmpty)
-                        bb = new XbimRect3D(r.Centre, r.Centre);
-                    else
-                        bb.Union(r.Centre);
-                }
-            }
+            throw new NotImplementedException();//need to fix this
+            //foreach (var refModel in _context.Model.ReferencedModels)
+            //{
+            //    XbimRegion r;
+            //    Xbim3DModelContext refContext = new Xbim3DModelContext(refModel.Model);
+            //    r = refContext.GetLargestRegion();
+            //    if (r != null)
+            //    {
+            //        if (bb.IsEmpty)
+            //            bb = new XbimRect3D(r.Centre, r.Centre);
+            //        else
+            //            bb.Union(r.Centre);
+            //    }
+            //}
             XbimPoint3D p = bb.Centroid();
             var modelTranslation = new XbimVector3D(-p.X, -p.Y, -p.Z);
             double metreFactor = 1.0 / _context.Model.ModelFactors.OneMetre;

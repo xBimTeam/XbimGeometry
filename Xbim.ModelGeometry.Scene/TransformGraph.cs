@@ -11,16 +11,11 @@
 #endregion
 
 #region Directives
-
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using Xbim.Ifc2x3.Extensions;
-using Xbim.Ifc2x3.GeometricConstraintResource;
-using Xbim.Ifc2x3.GeometryResource;
-using Xbim.Ifc2x3.Kernel;
-using Xbim.Ifc2x3.ProductExtension;
-using Xbim.IO;
+using Xbim.Common;
+using Xbim.Ifc4.Interfaces;
+using Xbim.ModelGeometry.Scene.Extensions;
 
 #endregion
 
@@ -32,14 +27,14 @@ namespace Xbim.ModelGeometry.Scene
     {
         private TransformNode _root;
         private Dictionary<long, TransformNode> _productNodes = new Dictionary<long, TransformNode>(); 
-        private Dictionary<IfcObjectPlacement, TransformNode> _placementNodes =
-            new Dictionary<IfcObjectPlacement, TransformNode>();
+        private readonly Dictionary<IIfcObjectPlacement, TransformNode> _placementNodes =
+            new Dictionary<IIfcObjectPlacement, TransformNode>();
 
 
         [NonSerialized]
-        private XbimModel _model;
+        private readonly IModel _model;
 
-        public XbimModel Model
+        public IModel Model
         {
             get { return _model; }
         }
@@ -50,7 +45,7 @@ namespace Xbim.ModelGeometry.Scene
             internal set { _productNodes = value; }
         }
 
-        public TransformGraph(XbimModel model)
+        public TransformGraph(IModel model)
         {
             _model = model;
             _root = new TransformNode();
@@ -61,7 +56,7 @@ namespace Xbim.ModelGeometry.Scene
             get { return _root; }
         }
 
-        public TransformNode this[IfcProduct product]
+        public TransformNode this[IIfcProduct product]
         {
             get
             {
@@ -80,7 +75,7 @@ namespace Xbim.ModelGeometry.Scene
         /// </summary>
         /// <typeparam name="TProduct"></typeparam>
         /// <param name="products"></param>
-        public void AddProducts<TProduct>(IEnumerable<TProduct> products) where TProduct : IfcProduct
+        public void AddProducts<TProduct>(IEnumerable<TProduct> products) where TProduct : IIfcProduct
         {
             foreach (var product in products)
             {
@@ -90,28 +85,24 @@ namespace Xbim.ModelGeometry.Scene
 
         public void AddAllProducts()
         {
-            var productHandles =
-                ((XbimInstanceCollection) _model.InstancesLocal).Handles<IfcProduct>().ToList();
-            foreach (var handle in productHandles)
-            {
-                var product = _model.InstancesLocal[handle.EntityLabel] as IfcProduct;
-                if (product == null)
-                    continue;
-                if (!(product is IfcFeatureElement)) //don't store openings and additions
+            var productHandles = _model.Instances.OfType<IIfcProduct>();
+            foreach (var product in productHandles)
+            {              
+                if (!(product is IIfcFeatureElement)) //don't store openings and additions
                     AddNode(product.ObjectPlacement, product);
             }
         }
 
 
-        public TransformNode AddProduct(IfcProduct product)
+        public TransformNode AddProduct(IIfcProduct product)
         {
             return AddNode(product.ObjectPlacement, product);
         }
 
-        private TransformNode AddNode(IfcObjectPlacement placement, IfcProduct product)
+        private TransformNode AddNode(IIfcObjectPlacement placement, IIfcProduct product)
         {
-            var lp = placement as IfcLocalPlacement;
-            var gp = placement as IfcGridPlacement;
+            var lp = placement as IIfcLocalPlacement;
+            var gp = placement as IIfcGridPlacement;
             if (gp != null) 
                 throw new NotImplementedException("GridPlacement is not implemented");
             if (lp == null) 
@@ -121,12 +112,12 @@ namespace Xbim.ModelGeometry.Scene
             {                 
                 node = new TransformNode(product);
                 if (product != null) _productNodes.Add(product.EntityLabel, node);
-                var ax3 = lp.RelativePlacement as IfcAxis2Placement3D;
+                var ax3 = lp.RelativePlacement as IIfcAxis2Placement3D;
                 if (ax3 != null) 
                     node.LocalMatrix = ax3.ToMatrix3D();
                 else
                 {
-                    var ax2 = lp.RelativePlacement as IfcAxis2Placement2D;
+                    var ax2 = lp.RelativePlacement as IIfcAxis2Placement2D;
                     if (ax2 != null) node.LocalMatrix = ax2.ToMatrix3D();
                 }
 

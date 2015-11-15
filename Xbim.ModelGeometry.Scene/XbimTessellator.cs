@@ -2,24 +2,21 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using Xbim.Tessellator;
+using Xbim.Common;
 using Xbim.Common.Geometry;
-using Xbim.Ifc2x3.GeometricModelResource;
-using Xbim.Ifc2x3.GeometryResource;
-using Xbim.Ifc2x3.TopologyResource;
+using Xbim.Ifc4.Interfaces;
 using Xbim.IO;
-using Xbim.XbimExtensions.SelectTypes;
-using XbimGeometry.Interfaces;
+using Xbim.Tessellator;
+
 
 namespace Xbim.ModelGeometry.Scene
 {
     
     public class XbimTessellator
     {
-        private readonly XbimModel _model;
+        private readonly IModel _model;
         private readonly XbimGeometryType _geometryType;
-        public XbimTessellator(XbimModel model, XbimGeometryType geometryType)
+        public XbimTessellator(IModel model, XbimGeometryType geometryType)
         {
             _model = model;
             _geometryType = geometryType;
@@ -39,48 +36,48 @@ namespace Xbim.ModelGeometry.Scene
         public bool CanMesh(object shape)
         {
             return 
-                shape is IfcFaceBasedSurfaceModel ||
-                shape is IfcShellBasedSurfaceModel ||
-                shape is IfcConnectedFaceSet ||
-                shape is IfcFacetedBrep;
+                shape is IIfcFaceBasedSurfaceModel ||
+                shape is IIfcShellBasedSurfaceModel ||
+                shape is IIfcConnectedFaceSet ||
+                shape is IIfcFacetedBrep;
         }
 
-        public IXbimShapeGeometryData Mesh(IfcRepresentationItem shape)
+        public IXbimShapeGeometryData Mesh(IIfcRepresentationItem shape)
         {
-            var fbm = shape as IfcFaceBasedSurfaceModel;
+            var fbm = shape as IIfcFaceBasedSurfaceModel;
             if (fbm != null) return Mesh(fbm);
-            var sbm = shape as IfcShellBasedSurfaceModel;
+            var sbm = shape as IIfcShellBasedSurfaceModel;
             if (sbm != null) return Mesh(sbm);
-            var cfs = shape as IfcConnectedFaceSet;
+            var cfs = shape as IIfcConnectedFaceSet;
             if (cfs != null) return Mesh(cfs);
-            var fbr = shape as IfcFacetedBrep;
+            var fbr = shape as IIfcFacetedBrep;
             if (fbr != null) return Mesh(fbr);
             throw new ArgumentException("Unsupported representation type for tessellation, " + shape.GetType().Name);
         }
 
 
-        public IXbimShapeGeometryData Mesh(IfcFaceBasedSurfaceModel faceBasedModel)
+        public IXbimShapeGeometryData Mesh(IIfcFaceBasedSurfaceModel faceBasedModel)
         {
-            var faceSets = new List<IEnumerable<IfcFace>>();
+            var faceSets = new List<IEnumerable<IIfcFace>>();
             foreach (var faceSet in faceBasedModel.FbsmFaces)
                 faceSets.Add(faceSet.CfsFaces);
-            return Mesh(faceSets, faceBasedModel.EntityLabel, (float)faceBasedModel.ModelOf.ModelFactors.Precision);  
+            return Mesh(faceSets, faceBasedModel.EntityLabel, (float)faceBasedModel.Model.ModelFactors.Precision);  
         }
 
         
 
-        public IXbimShapeGeometryData Mesh(IfcShellBasedSurfaceModel shellBasedModel)
+        public IXbimShapeGeometryData Mesh(IIfcShellBasedSurfaceModel shellBasedModel)
         {
-            return Mesh(shellBasedModel.SbsmBoundary, shellBasedModel.EntityLabel, (float)shellBasedModel.ModelOf.ModelFactors.Precision);
+            return Mesh(shellBasedModel.SbsmBoundary, shellBasedModel.EntityLabel, (float)shellBasedModel.Model.ModelFactors.Precision);
         }
 
-        public IXbimShapeGeometryData Mesh(IEnumerable<IfcShell> shellSet,int entityLabel, float precision)
+        public IXbimShapeGeometryData Mesh(IEnumerable<IIfcShell> shellSet,int entityLabel, float precision)
         {
-            var shells = new List<IEnumerable<IfcFace>>();
+            var shells = new List<IEnumerable<IIfcFace>>();
             foreach (var shell in shellSet)
             {
-                var closedShell = shell as IfcClosedShell;
-                var openShell = shell as IfcOpenShell;
+                var closedShell = shell as IIfcClosedShell;
+                var openShell = shell as IIfcOpenShell;
                 if(closedShell!=null) shells.Add(closedShell.CfsFaces);
                 else if(openShell!=null) shells.Add(openShell.CfsFaces);
             }
@@ -89,19 +86,19 @@ namespace Xbim.ModelGeometry.Scene
 
         
 
-        public IXbimShapeGeometryData Mesh(IfcConnectedFaceSet connectedFaceSet)
+        public IXbimShapeGeometryData Mesh(IIfcConnectedFaceSet connectedFaceSet)
         {
-            var faces = new List<IEnumerable<IfcFace>>();
+            var faces = new List<IEnumerable<IIfcFace>>();
             faces.Add(connectedFaceSet.CfsFaces);
-            return Mesh(faces, connectedFaceSet.EntityLabel, (float)connectedFaceSet.ModelOf.ModelFactors.Precision);
+            return Mesh(faces, connectedFaceSet.EntityLabel, (float)connectedFaceSet.Model.ModelFactors.Precision);
         }
 
-        public IXbimShapeGeometryData Mesh(IfcFacetedBrep fBRepModel)
+        public IXbimShapeGeometryData Mesh(IIfcFacetedBrep fBRepModel)
         {
             return Mesh(fBRepModel.Outer);
         }
 
-        public IXbimShapeGeometryData Mesh(IEnumerable<IEnumerable<IfcFace>> facesList, int entityLabel, float precision)
+        public IXbimShapeGeometryData Mesh(IEnumerable<IEnumerable<IIfcFace>> facesList, int entityLabel, float precision)
         {
             if (_geometryType == XbimGeometryType.PolyhedronBinary)
                 return MeshPolyhedronBinary(facesList, entityLabel, precision);
@@ -110,14 +107,14 @@ namespace Xbim.ModelGeometry.Scene
             throw new Exception("Illegal Geometry type, " + _geometryType);
         }
 
-        private IXbimShapeGeometryData MeshPolyhedronText(IEnumerable<IEnumerable<IfcFace>> facesList, int entityLabel,float precision)
+        private IXbimShapeGeometryData MeshPolyhedronText(IEnumerable<IEnumerable<IIfcFace>> facesList, int entityLabel,float precision)
         {
             IXbimShapeGeometryData shapeGeometry = new XbimShapeGeometry();
             shapeGeometry.Format = (byte)XbimGeometryType.Polyhedron;
             using (var ms = new MemoryStream(0x4000))
             using (TextWriter textWriter = new StreamWriter(ms))
             {
-                var faceLists = facesList as IList<IEnumerable<IfcFace>> ?? facesList.ToList();
+                var faceLists = facesList as IList<IEnumerable<IIfcFace>> ?? facesList.ToList();
                 var triangulations = new List<XbimTriangulatedMesh>(faceLists.Count);
                 foreach (var faceList in faceLists)
                     triangulations.Add(TriangulateFaces(faceList, entityLabel, precision)); 
@@ -192,7 +189,7 @@ namespace Xbim.ModelGeometry.Scene
             return shapeGeometry;
         }
 
-        private IXbimShapeGeometryData MeshPolyhedronBinary(IEnumerable<IEnumerable<IfcFace>> facesList, int entityLabel, float precision)
+        private IXbimShapeGeometryData MeshPolyhedronBinary(IEnumerable<IEnumerable<IIfcFace>> facesList, int entityLabel, float precision)
         {
             IXbimShapeGeometryData shapeGeometry = new XbimShapeGeometry();
             shapeGeometry.Format = (byte)XbimGeometryType.PolyhedronBinary;
@@ -200,7 +197,7 @@ namespace Xbim.ModelGeometry.Scene
             using (var ms = new MemoryStream(0x4000))
             using (var binaryWriter = new BinaryWriter(ms))
             {
-                var faceLists = facesList as IList<IEnumerable<IfcFace>> ?? facesList.ToList();
+                var faceLists = facesList as IList<IEnumerable<IIfcFace>> ?? facesList.ToList();
                 var triangulations = new List<XbimTriangulatedMesh>(faceLists.Count);
                 foreach (var faceList in faceLists)
                     triangulations.Add(TriangulateFaces(faceList, entityLabel, precision)); 
@@ -236,7 +233,7 @@ namespace Xbim.ModelGeometry.Scene
 
                 binaryWriter.Write(facesCount);
                 uint verticesOffset = 0;
-                int invalidNormal = ushort.MaxValue; ;
+                int invalidNormal = ushort.MaxValue;
                 foreach (var triangulatedMesh in triangulations)
                 {
                     foreach (var faceGroup in triangulatedMesh.Faces)
@@ -274,31 +271,32 @@ namespace Xbim.ModelGeometry.Scene
             return shapeGeometry;
         }
 
-        private XbimTriangulatedMesh TriangulateFaces(IEnumerable<IfcFace> ifcFaces, int entityLabel, float precision)
+        private XbimTriangulatedMesh TriangulateFaces(IEnumerable<IIfcFace> ifcFaces, int entityLabel, float precision)
         {
             var faceId = 0;
-            var enumerable = ifcFaces as IList<IfcFace> ?? ifcFaces.ToList();
+            var enumerable = ifcFaces as IList<IIfcFace> ?? ifcFaces.ToList();
             
             var faceCount = enumerable.Count;
             var triangulatedMesh = new XbimTriangulatedMesh(faceCount, precision);
             foreach (var ifcFace in enumerable)
             {
-                var fc = (IfcFace)_model.InstancesLocal[ifcFace.EntityLabel];
+                var fc = (IIfcFace)_model.Instances[ifcFace.EntityLabel];
                 //improves performance and reduces memory load
                 var tess = new Tess();
-                var contours = new List<ContourVertex[]>(fc.Bounds.Count);
+                var contours = new List<ContourVertex[]>(((IList<IIfcFaceBound>)fc.Bounds).Count);
                 foreach (var bound in fc.Bounds) //build all the loops
                 {
-                    var polyLoop = bound.Bound as IfcPolyLoop;
+                    var polyLoop = bound.Bound as IIfcPolyLoop;
+                   
+                    if (polyLoop == null ) continue; //skip empty faces
+                    var polygon = (IList<IIfcCartesianPoint>) polyLoop.Polygon;
+                    if (polygon.Count < 3) continue; //skip non-polygonal faces
+                    var is3D = (polygon[0].Dim == 3);
 
-                    if (polyLoop == null || polyLoop.Polygon.Count < 3) continue; //skip non-polygonal faces
-
-                    var is3D = (polyLoop.Polygon[0].Dim == 3);
-
-                    var contour = new ContourVertex[polyLoop.Polygon.Count];
+                    var contour = new ContourVertex[polygon.Count];
                     var i = 0;
 
-                    foreach (var p in bound.Orientation ? polyLoop.Polygon : polyLoop.Polygon.Reverse())
+                    foreach (var p in bound.Orientation ? polygon : polygon.Reverse())
                         //add all the points into unique collection
                     {
                         var v = new Vec3(p.X, p.Y, is3D ? p.Z : 0);

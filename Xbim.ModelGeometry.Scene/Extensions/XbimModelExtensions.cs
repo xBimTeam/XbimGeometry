@@ -4,10 +4,6 @@ using System.IO;
 using System.Linq;
 using Xbim.Common.Geometry;
 using Xbim.Common.XbimExtensions;
-using Xbim.Ifc2x3.Kernel;
-using Xbim.IO;
-using Xbim.XbimExtensions.Interfaces;
-using XbimGeometry.Interfaces;
 
 namespace Xbim.ModelGeometry.Scene.Extensions
 {
@@ -127,61 +123,61 @@ namespace Xbim.ModelGeometry.Scene.Extensions
             }
         }
 
-        public static XbimMeshGeometry3D GetMesh(this XbimModel xbimModel, IEnumerable<IPersistIfcEntity> items, XbimMatrix3D wcsTransform)
-        {
-            var m = new XbimMeshGeometry3D();
+        //public static XbimMeshGeometry3D GetMesh(this XbimModel xbimModel, IEnumerable<IPersistEntity> items, XbimMatrix3D wcsTransform)
+        //{
+        //    var m = new XbimMeshGeometry3D();
 
-            if (xbimModel.GeometrySupportLevel == 1)
-            {
-                // this is what happens for version 1 of the engine
-                //
-                foreach (var item in items)
-                {
-                    var fromModel = item.ModelOf as XbimModel;
-                    if (fromModel == null) 
-                        continue;
-                    var geomDataSet = fromModel.GetGeometryData(item.EntityLabel, XbimGeometryType.TriangulatedMesh);
-                    foreach (var geomData in geomDataSet)
-                    {
-                        // todo: add guidance to the TransformBy method so that users can understand how to stop using it (it's marked absolete)
-                        geomData.TransformBy(wcsTransform);
-                        m.Add(geomData, xbimModel.UserDefinedId); 
-                    }
-                }
-            }
-            else
-            {
-                // this is what happens for version 2 of the engine
-                //
-                foreach (var item in items)
-                {
-                    var fromModel = item.ModelOf as XbimModel;
-                    if (fromModel == null || !(item is IfcProduct))
-                        continue;
-                    var context = new Xbim3DModelContext(fromModel);
+        //    if (xbimModel.GeometrySupportLevel == 1)
+        //    {
+        //        // this is what happens for version 1 of the engine
+        //        //
+        //        foreach (var item in items)
+        //        {
+        //            var fromModel = item.ModelOf as XbimModel;
+        //            if (fromModel == null) 
+        //                continue;
+        //            var geomDataSet = fromModel.GetGeometryData(item.EntityLabel, XbimGeometryType.TriangulatedMesh);
+        //            foreach (var geomData in geomDataSet)
+        //            {
+        //                // todo: add guidance to the TransformBy method so that users can understand how to stop using it (it's marked absolete)
+        //                geomData.TransformBy(wcsTransform);
+        //                m.Add(geomData, xbimModel.UserDefinedId); 
+        //            }
+        //        }
+        //    }
+        //    else
+        //    {
+        //        // this is what happens for version 2 of the engine
+        //        //
+        //        foreach (var item in items)
+        //        {
+        //            var fromModel = item.ModelOf as XbimModel;
+        //            if (fromModel == null || !(item is IfcProduct))
+        //                continue;
+        //            var context = new Xbim3DModelContext(fromModel);
 
-                    var productShape =
-                        context.ShapeInstancesOf((IfcProduct) item)
-                            .Where(s => s.RepresentationType != XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
-                            .ToList(); // this also returns shapes of voids
-                    foreach (var shapeInstance in productShape)
-                    {
-                        IXbimShapeGeometryData shapeGeom = context.ShapeGeometry(shapeInstance.ShapeGeometryLabel);
-                        switch ((XbimGeometryType) shapeGeom.Format)
-                        {
-                            case XbimGeometryType.PolyhedronBinary:
-                                m.Read(shapeGeom.ShapeData,
-                                    XbimMatrix3D.Multiply(shapeInstance.Transformation, wcsTransform));
-                                break;
-                            case XbimGeometryType.Polyhedron:
-                                m.Read(((XbimShapeGeometry) shapeGeom).ShapeData,
-                                    XbimMatrix3D.Multiply(shapeInstance.Transformation, wcsTransform));
-                                break;
-                        }
-                    }
-                }
-            }
-            return m;
-        }
+        //            var productShape =
+        //                context.ShapeInstancesOf((IfcProduct) item)
+        //                    .Where(s => s.RepresentationType != XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
+        //                    .ToList(); // this also returns shapes of voids
+        //            foreach (var shapeInstance in productShape)
+        //            {
+        //                IXbimShapeGeometryData shapeGeom = context.ShapeGeometry(shapeInstance.ShapeGeometryLabel);
+        //                switch ((XbimGeometryType) shapeGeom.Format)
+        //                {
+        //                    case XbimGeometryType.PolyhedronBinary:
+        //                        m.Read(shapeGeom.ShapeData,
+        //                            XbimMatrix3D.Multiply(shapeInstance.Transformation, wcsTransform));
+        //                        break;
+        //                    case XbimGeometryType.Polyhedron:
+        //                        m.Read(((XbimShapeGeometry) shapeGeom).ShapeData,
+        //                            XbimMatrix3D.Multiply(shapeInstance.Transformation, wcsTransform));
+        //                        break;
+        //                }
+        //            }
+        //        }
+        //    }
+        //    return m;
+        //}
     }
 }

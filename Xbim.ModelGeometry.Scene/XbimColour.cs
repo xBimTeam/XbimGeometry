@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Serialization;
-using System.Text;
-using Xbim.Ifc2x3.PresentationAppearanceResource;
-using Xbim.Ifc2x3.PresentationResource;
+using Xbim.Ifc4.Interfaces;
 
 namespace Xbim.ModelGeometry.Scene
 {
@@ -15,7 +11,7 @@ namespace Xbim.ModelGeometry.Scene
     [DataContract]
     public class XbimColour
     {
-        public static XbimColour LightGrey = new XbimColour("LightGrey", 0.47, 0.53, 0.60, 1);
+        public static XbimColour LightGrey = new XbimColour("LightGrey", 0.47, 0.53, 0.60);
         /// <summary>
         /// Gets or sets Colour Name, defaults to its parts
         /// </summary>
@@ -30,16 +26,17 @@ namespace Xbim.ModelGeometry.Scene
         {
            
             XbimColour col = obj as XbimColour;
+            float tolerance = (float) 1e-5;
             if (col == null) return false;
-            return  col.Red == Red && 
-                    col.Green == Green && 
-                    col.Blue == Blue && 
-                    col.Alpha == Alpha && 
-                    col.DiffuseFactor == DiffuseFactor && 
-                    col.TransmissionFactor == TransmissionFactor &&
-                    col.DiffuseTransmissionFactor == DiffuseTransmissionFactor && 
-                    col.ReflectionFactor == ReflectionFactor && 
-                    col.SpecularFactor == SpecularFactor;    
+            return Math.Abs(col.Red - Red) < tolerance &&
+                    Math.Abs(col.Green - Green) < tolerance &&
+                    Math.Abs(col.Blue - Blue) < tolerance &&
+                    Math.Abs(col.Alpha - Alpha) < tolerance &&
+                    Math.Abs(col.DiffuseFactor - DiffuseFactor) < tolerance &&
+                    Math.Abs(col.TransmissionFactor - TransmissionFactor) < tolerance &&
+                    Math.Abs(col.DiffuseTransmissionFactor - DiffuseTransmissionFactor) < tolerance &&
+                    Math.Abs(col.ReflectionFactor - ReflectionFactor) < tolerance &&
+                    Math.Abs(col.SpecularFactor - SpecularFactor) < tolerance;    
         }
 
         public override int GetHashCode()
@@ -74,13 +71,13 @@ namespace Xbim.ModelGeometry.Scene
         /// <param name="green">Green Value (range 0 to 1.0 inclusive)</param>
         /// <param name="blue">Blue Value (range 0 to 1.0 inclusive)</param>
         /// <param name="alpha">Alpha Value (range 0 to 1.0 inclusive)</param>
-        public XbimColour(String name, float red, float green, float blue, float alpha = 1.0f)
+        public XbimColour(string name, float red, float green, float blue, float alpha = 1.0f)
         {
-            this.Name = name;
-            this.Red = red;
-            this.Green = green;
-            this.Blue = blue;
-            this.Alpha = alpha;
+            Name = name;
+            Red = red;
+            Green = green;
+            Blue = blue;
+            Alpha = alpha;
         }
 
         /// <summary>
@@ -104,7 +101,8 @@ namespace Xbim.ModelGeometry.Scene
         /// <param name="saturation">range 0..1</param>
         /// <param name="value">range 0..1</param>
         /// <returns></returns>
-        public static XbimColour FromHSV(String name, double hue, double saturation, double value)
+        // ReSharper disable once InconsistentNaming
+        public static XbimColour FromHSV(string name, double hue, double saturation, double value)
         {
             int hi = Convert.ToInt32(Math.Floor(hue / 60)) % 6;
             double f = hue / 60 - Math.Floor(hue / 60);
@@ -173,15 +171,15 @@ namespace Xbim.ModelGeometry.Scene
 
         private String _name;
         [DataMember(Name="DF")]
-        public float DiffuseFactor;
+        public readonly float DiffuseFactor;
         [DataMember(Name = "TF")]
-        public float TransmissionFactor;
+        public readonly float TransmissionFactor;
         [DataMember(Name = "DTF")]
-        public float DiffuseTransmissionFactor;
+        public readonly float DiffuseTransmissionFactor;
         [DataMember(Name = "RF")]
-        public float ReflectionFactor;
+        public readonly float ReflectionFactor;
         [DataMember(Name = "SF")]
-        public float SpecularFactor;
+        public readonly float SpecularFactor;
 
         
 
@@ -205,29 +203,29 @@ namespace Xbim.ModelGeometry.Scene
             _default = new XbimColour("Default", 1, 1, 1);
         }
 
-        public XbimColour(IfcSurfaceStyle style)
+        public XbimColour(IIfcSurfaceStyle style)
         {
-           
+          
         }
-        internal XbimColour(IfcColourRgb rgbColour)
+        internal XbimColour(IIfcColourRgb rgbColour)
         {
            
-            this.Red = (float)(double)rgbColour.Red;
-            this.Green = (float)(double)rgbColour.Green;
-            this.Blue = (float)(double)rgbColour.Blue;
-            this.Alpha = 1;
+            Red = (float)rgbColour.Red;
+            Green = (float)rgbColour.Green;
+            Blue = (float)rgbColour.Blue;
+            Alpha = 1;
            // this.Name = string.Format("{0},A={1},D={2},S={3},T={4},R={5},RGB={6}", rgbColour.Name, Alpha, DiffuseFactor, SpecularFactor, TransmissionFactor, ReflectionFactor, rgbColour.EntityLabel);
             
         }
 
-        public XbimColour(IfcColourRgb ifcColourRgb, double opacity = 1.0, double diffuseFactor = 1.0 , double specularFactor = 0.0, double transmissionFactor = 1.0, double reflectanceFactor = 0.0)
+        public XbimColour(IIfcColourRgb ifcColourRgb, double opacity = 1.0, double diffuseFactor = 1.0 , double specularFactor = 0.0, double transmissionFactor = 1.0, double reflectanceFactor = 0.0)
             :this(ifcColourRgb)
         {
-            this.Alpha = (float)opacity;
-            this.DiffuseFactor = (float)diffuseFactor;
-            this.SpecularFactor = (float)specularFactor;
-            this.TransmissionFactor = (float)transmissionFactor;
-            this.ReflectionFactor = (float)reflectanceFactor;
+            Alpha = (float)opacity;
+            DiffuseFactor = (float)diffuseFactor;
+            SpecularFactor = (float)specularFactor;
+            TransmissionFactor = (float)transmissionFactor;
+            ReflectionFactor = (float)reflectanceFactor;
         }
 
         [IgnoreDataMember]

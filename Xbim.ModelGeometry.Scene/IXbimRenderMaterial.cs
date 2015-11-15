@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Xbim.Ifc2x3.PresentationAppearanceResource;
-using Xbim.Ifc2x3.PresentationResource;
-
-namespace Xbim.ModelGeometry.Scene
+﻿namespace Xbim.ModelGeometry.Scene
 {
     /// <summary>
     /// Interface for grpahic card specific render materials or shaders

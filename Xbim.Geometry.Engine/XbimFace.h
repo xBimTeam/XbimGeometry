@@ -5,10 +5,7 @@
 
 using namespace System;
 using namespace System::Collections::Generic;
-using namespace XbimGeometry::Interfaces;
-using namespace Xbim::Ifc2x3::ProfileResource;
-using namespace Xbim::Ifc2x3::GeometryResource;
-using namespace Xbim::Ifc2x3::TopologyResource;
+using namespace Xbim::Ifc4::Interfaces;
 using namespace Xbim::Common::Geometry;
 namespace Xbim
 {
@@ -27,20 +24,20 @@ namespace Xbim
 			void InstanceCleanup();
 
 			//initialisers
-			void Init(IfcProfileDef^ profile);
-			void Init(IfcArbitraryProfileDefWithVoids^ profile);
-			void Init(IfcCircleHollowProfileDef ^ circProfile);
-			void Init(IfcCompositeProfileDef ^ profile);
-			void Init(IfcRectangleHollowProfileDef^ rectProfile);
-			void Init(IfcSurface^ surface);
-			void Init(IfcPlane^ plane);
-			void Init(IfcSurfaceOfLinearExtrusion^ sLin);
-			void Init(IfcSurfaceOfRevolution^ sRev);
-			void Init(IfcRectangularTrimmedSurface^ def);
-			void Init(IfcCurveBoundedPlane^ def);
-			void Init(IfcCompositeCurve ^ cCurve);
-			void Init(IfcPolyline ^ pline);
-			void Init(IfcPolyLoop ^ loop);
+			void Init(IIfcProfileDef^ profile);
+			void Init(IIfcArbitraryProfileDefWithVoids^ profile);
+			void Init(IIfcCircleHollowProfileDef ^ circProfile);
+			void Init(IIfcCompositeProfileDef ^ profile);
+			void Init(IIfcRectangleHollowProfileDef^ rectProfile);
+			void Init(IIfcSurface^ surface);
+			void Init(IIfcPlane^ plane);
+			void Init(IIfcSurfaceOfLinearExtrusion^ sLin);
+			void Init(IIfcSurfaceOfRevolution^ sRev);
+			void Init(IIfcRectangularTrimmedSurface^ def);
+			void Init(IIfcCurveBoundedPlane^ def);
+			void Init(IIfcCompositeCurve ^ cCurve);
+			void Init(IIfcPolyline ^ pline);
+			void Init(IIfcPolyLoop ^ loop);
 			void Init(IXbimWire^ wire);
 			void Init(IXbimWire^ wire, XbimPoint3D pointOnFace, XbimVector3D faceNormal);
 			void Init(IXbimFace^ face);
@@ -95,18 +92,18 @@ namespace Xbim
 			XbimFace(){}; //an invalid empty face
 			XbimFace(XbimVector3D normal);
 			XbimFace(XbimPoint3D location, XbimVector3D normal);
-			XbimFace(IfcProfileDef^ profile);
+			XbimFace(IIfcProfileDef^ profile);
 			//Builds a face from a Surface
-			XbimFace(IfcSurface ^ surface);
+			XbimFace(IIfcSurface ^ surface);
 			//Builds a face from a Plane
-			XbimFace(IfcPlane ^ plane);
-			XbimFace(IfcSurfaceOfLinearExtrusion ^ sLin);
-			XbimFace(IfcSurfaceOfRevolution ^ sRev);
-			XbimFace(IfcCurveBoundedPlane ^ def);
-			XbimFace(IfcRectangularTrimmedSurface ^ def);
-			XbimFace(IfcCompositeCurve ^ cCurve);
-			XbimFace(IfcPolyline ^ pline);
-			XbimFace(IfcPolyLoop ^ loop);
+			XbimFace(IIfcPlane ^ plane);
+			XbimFace(IIfcSurfaceOfLinearExtrusion ^ sLin);
+			XbimFace(IIfcSurfaceOfRevolution ^ sRev);
+			XbimFace(IIfcCurveBoundedPlane ^ def);
+			XbimFace(IIfcRectangularTrimmedSurface ^ def);
+			XbimFace(IIfcCompositeCurve ^ cCurve);
+			XbimFace(IIfcPolyline ^ pline);
+			XbimFace(IIfcPolyLoop ^ loop);
 			XbimFace(IXbimWire^ wire);
 			XbimFace(IXbimWire^ wire, XbimPoint3D pointOnface,  XbimVector3D faceNormal);
 			XbimFace(IXbimFace^ face);
@@ -116,7 +113,7 @@ namespace Xbim
 			
 #pragma region Methods
 			//moves the face to the new position
-			void Move(IfcAxis2Placement3D^ position);
+			void Move(IIfcAxis2Placement3D^ position);
 			void Translate(XbimVector3D translation);
 			void Reverse();
 			bool Add(IXbimWire^ innerWire);

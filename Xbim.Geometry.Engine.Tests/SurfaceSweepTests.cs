@@ -1,10 +1,7 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Xbim.Common.Geometry;
-using Xbim.Geometry;
 using Xbim.Geometry.Engine.Interop;
 using Xbim.IO;
-using XbimGeometry.Interfaces;
 
 namespace GeometryTests
 {

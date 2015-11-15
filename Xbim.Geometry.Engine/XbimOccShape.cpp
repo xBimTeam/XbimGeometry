@@ -1,7 +1,7 @@
 #include "XbimOccShape.h"
 #include "XbimFaceSet.h"
 #include "XbimPoint3DWithTolerance.h"
-#include "XbimGeomPrim.h"
+#include "XbimConvert.h"
 #include <BRepCheck_Analyzer.hxx>
 #include <BRepMesh_IncrementalMesh.hxx>
 #include <Poly_Triangulation.hxx>

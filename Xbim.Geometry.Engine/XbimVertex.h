@@ -1,8 +1,6 @@
 #pragma once
 #include "XbimOccShape.h"
 #include <TopoDS_Vertex.hxx>
-
-using namespace XbimGeometry::Interfaces;
 using namespace Xbim::Common::Geometry;
 namespace Xbim
 {

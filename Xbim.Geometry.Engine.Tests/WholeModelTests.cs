@@ -17,9 +17,6 @@ using Xbim.Ifc2x3.PresentationResource;
 using Xbim.Ifc2x3.ProductExtension;
 using Xbim.IO;
 using Xbim.ModelGeometry.Scene;
-using Xbim.XbimExtensions;
-using Xbim.XbimExtensions.SelectTypes;
-using XbimGeometry.Interfaces;
 
 namespace GeometryTests
 {

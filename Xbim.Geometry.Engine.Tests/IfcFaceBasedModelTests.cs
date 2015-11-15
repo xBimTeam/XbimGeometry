@@ -9,7 +9,7 @@ using Xbim.Common.Logging;
 using Xbim.Ifc2x3.GeometricConstraintResource;
 using Xbim.Ifc2x3.GeometryResource;
 using Xbim.Ifc2x3.ProductExtension;
-using XbimGeometry.Interfaces;
+
 
 namespace GeometryTests
 {

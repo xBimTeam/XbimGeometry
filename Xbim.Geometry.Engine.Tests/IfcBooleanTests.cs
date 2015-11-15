@@ -16,7 +16,7 @@ using Xbim.Common.Logging;
 using Xbim.Ifc2x3.GeometricConstraintResource;
 using Xbim.Ifc2x3.ProductExtension;
 using Xbim.Ifc2x3.SharedBldgElements;
-using XbimGeometry.Interfaces;
+
 
 namespace GeometryTests
 {

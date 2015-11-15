@@ -3,9 +3,9 @@
 #include "XbimCompound.h"
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
-using namespace XbimGeometry::Interfaces;
+
 using namespace System::Collections::Generic;
-using namespace Xbim::Ifc2x3::TopologyResource;
+
 namespace Xbim
 {
 	namespace Geometry
@@ -26,12 +26,12 @@ namespace Xbim
 		private:
 			List<IXbimSolid^>^ solids;
 			static XbimSolidSet^ empty = gcnew XbimSolidSet();
-			void Init(IfcBooleanResult^ boolOp);
+			void Init(IIfcBooleanResult^ boolOp);
 			void Init(XbimCompound^ comp, int label);
-			void Init(IfcSweptAreaSolid^ solid);
-			void Init(IfcExtrudedAreaSolid^ solid);
-			void Init(IfcSurfaceCurveSweptAreaSolid^ ifcSolid);
-			void Init(IfcRevolvedAreaSolid^ solid);
+			void Init(IIfcSweptAreaSolid^ solid);
+			void Init(IIfcExtrudedAreaSolid^ solid);
+			void Init(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid);
+			void Init(IIfcRevolvedAreaSolid^ solid);
 			
 
 			static VolumeComparer^ _volumeComparer = gcnew VolumeComparer();
@@ -57,16 +57,16 @@ namespace Xbim
 			XbimSolidSet(XbimCompound^ shape);
 			XbimSolidSet(IXbimSolid^ solid);
 			XbimSolidSet(IEnumerable<IXbimSolid^>^ solids);
-			XbimSolidSet(IfcBooleanResult^ boolOp);
-			XbimSolidSet(IfcManifoldSolidBrep^ solid);
-			XbimSolidSet(IfcFacetedBrep^ solid);
-			XbimSolidSet(IfcFacetedBrepWithVoids^ solid);
-			XbimSolidSet(IfcClosedShell^ solid);
+			XbimSolidSet(IIfcBooleanResult^ boolOp);
+			XbimSolidSet(IIfcManifoldSolidBrep^ solid);
+			XbimSolidSet(IIfcFacetedBrep^ solid);
+			XbimSolidSet(IIfcFacetedBrepWithVoids^ solid);
+			XbimSolidSet(IIfcClosedShell^ solid);
 
-			XbimSolidSet(IfcSweptAreaSolid^ solid);
-			XbimSolidSet(IfcSurfaceCurveSweptAreaSolid^ ifcSolid);
-			XbimSolidSet(IfcExtrudedAreaSolid^ solid);
-			XbimSolidSet(IfcRevolvedAreaSolid^ solid);
+			XbimSolidSet(IIfcSweptAreaSolid^ solid);
+			XbimSolidSet(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid);
+			XbimSolidSet(IIfcExtrudedAreaSolid^ solid);
+			XbimSolidSet(IIfcRevolvedAreaSolid^ solid);
 			
 
 			virtual property bool IsValid{bool get(){ return Count>0; }; }
@@ -92,7 +92,7 @@ namespace Xbim
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D);
 			virtual property double Volume{double get(); }
 			//moves the solid set to the new position
-			void Move(IfcAxis2Placement3D^ position);
+			void Move(IIfcAxis2Placement3D^ position);
 			
 		};
 

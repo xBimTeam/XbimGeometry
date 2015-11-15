@@ -3,7 +3,6 @@
 #include <TopExp_Explorer.hxx>
 #include <TopTools_ListOfShape.hxx>
 #include <TopoDS.hxx>
-using namespace XbimGeometry::Interfaces;
 using namespace System::Collections::Generic;
 namespace Xbim
 {

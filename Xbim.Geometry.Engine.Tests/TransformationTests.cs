@@ -5,8 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Xbim.Common.Geometry;
 using Xbim.Geometry.Engine.Interop;
 using Xbim.IO;
-using Xbim.Geometry;
-using XbimGeometry.Interfaces;
+
 
 namespace GeometryTests
 {

@@ -1,15 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Text;
-using Xbim.Ifc2x3.ActorResource;
-using Xbim.Ifc2x3.Kernel;
-using Xbim.Ifc2x3.PresentationAppearanceResource;
-using Xbim.Ifc2x3.ProductExtension;
-using Xbim.Ifc2x3.SharedBldgElements;
-using Xbim.Ifc2x3.SharedBldgServiceElements;
+using Xbim.Ifc4.Interfaces;
 
 namespace Xbim.ModelGeometry.Scene
 {
@@ -18,7 +10,7 @@ namespace Xbim.ModelGeometry.Scene
         /// <summary>
         /// Creates a colour map based on the IFC product types
         /// </summary>
-        IfcProductTypeMap,
+        IIfcProductTypeMap,
         Federation,
         /// <summary>
         /// Creates an empty colour map
@@ -50,7 +42,7 @@ namespace Xbim.ModelGeometry.Scene
             if(map.Count!=Count) return false;
             foreach (var colour in map)
             {
-                if (!this.Contains(colour)) return false;
+                if (!Contains(colour)) return false;
                 if (!colour.Equals( this[colour.Name])) return false;
             }
             return true;
@@ -71,17 +63,15 @@ namespace Xbim.ModelGeometry.Scene
             }
         }
 
-        public XbimColourMap(StandardColourMaps initMap= StandardColourMaps.IfcProductTypeMap)
+        public XbimColourMap(StandardColourMaps initMap= StandardColourMaps.IIfcProductTypeMap)
         {
             switch (initMap)
             {
-                case StandardColourMaps.IfcProductTypeMap:
+                case StandardColourMaps.IIfcProductTypeMap:
                     SetProductTypeColourMap();
                     break;
                 case StandardColourMaps.Federation:
                     SetFederationRoleColourMap();
-                    break;
-                default:
                     break;
             }
         }
@@ -92,32 +82,32 @@ namespace Xbim.ModelGeometry.Scene
             Add(new XbimColour("Default", 0.98, 0.92, 0.74, 1)); //grey
 
             // previously assigned colors
-            Add(new XbimColour(IfcRole.Architect.ToString(), 1.0 , 1.0 , 1.0 , .5)); //white
-            Add(new XbimColour(IfcRole.MechanicalEngineer.ToString(), 1.0, 0.5, 0.25, 1));
-            Add(new XbimColour(IfcRole.ElectricalEngineer.ToString(), 0.0, 0, 1.0, 1)); //blue
-            Add(new XbimColour(IfcRole.StructuralEngineer.ToString(), 0.2, 0.2, 0.2, 1.0)); //dark
+            Add(new XbimColour(Xbim.Ifc4.ActorResource.IfcRoleEnum.ARCHITECT.ToString(), 1.0 , 1.0 , 1.0 , .5)); //white
+            Add(new XbimColour(Xbim.Ifc4.ActorResource.IfcRoleEnum.MECHANICALENGINEER.ToString(), 1.0, 0.5, 0.25, 1));
+            Add(new XbimColour(Xbim.Ifc4.ActorResource.IfcRoleEnum.ELECTRICALENGINEER.ToString(), 0.0, 0, 1.0, 1)); //blue
+            Add(new XbimColour(Xbim.Ifc4.ActorResource.IfcRoleEnum.STRUCTURALENGINEER.ToString(), 0.2, 0.2, 0.2, 1.0)); //dark
 
             // new colours assigned from wheel
             double WheelAngle = 0;
-            Add(XbimColour.FromHSV(IfcRole.BuildingOperator.ToString(), WheelAngle += 15, 1, 1));
-            Add(XbimColour.FromHSV(IfcRole.BuildingOwner.ToString(), WheelAngle += 15, 1, 1));
-            Add(XbimColour.FromHSV(IfcRole.CivilEngineer.ToString(), WheelAngle += 15, 1, 1));
-            Add(XbimColour.FromHSV(IfcRole.Client.ToString(), WheelAngle += 15, 1, 1));
-            Add(XbimColour.FromHSV(IfcRole.ComissioningEngineer.ToString(), WheelAngle += 15, 1, 1));
-            Add(XbimColour.FromHSV(IfcRole.ConstructionManager.ToString(), WheelAngle += 15, 1, 1)); 
-            Add(XbimColour.FromHSV(IfcRole.Consultant.ToString(), WheelAngle += 15, 1, 1));
-            Add(XbimColour.FromHSV(IfcRole.Contractor.ToString(), WheelAngle += 15, 1, 1));
-            Add(XbimColour.FromHSV(IfcRole.CostEngineer.ToString(), WheelAngle += 15, 1, 1));
-            Add(XbimColour.FromHSV(IfcRole.Engineer.ToString(), WheelAngle += 15, 1, 1)); 
-            Add(XbimColour.FromHSV(IfcRole.FacilitiesManager.ToString(), WheelAngle += 15, 1, 1));
-            Add(XbimColour.FromHSV(IfcRole.FieldConstructionManager.ToString(), WheelAngle += 15, 1, 1));
-            Add(XbimColour.FromHSV(IfcRole.Manufacturer.ToString(), WheelAngle += 15, 1, 1));
-            Add(XbimColour.FromHSV(IfcRole.Owner.ToString(), WheelAngle += 15, 1, 1)); 
-            Add(XbimColour.FromHSV(IfcRole.ProjectManager.ToString(), WheelAngle += 15, 1, 1));
-            Add(XbimColour.FromHSV(IfcRole.Reseller.ToString(), WheelAngle += 15, 1, 1));
-            Add(XbimColour.FromHSV(IfcRole.Subcontractor.ToString(), WheelAngle += 15, 1, 1));
-            Add(XbimColour.FromHSV(IfcRole.Supplier.ToString(), WheelAngle += 15, 1, 1));
-            Add(XbimColour.FromHSV(IfcRole.UserDefined.ToString(), WheelAngle += 15, 1, 1));
+            Add(XbimColour.FromHSV(Xbim.Ifc4.ActorResource.IfcRoleEnum.BUILDINGOPERATOR.ToString(), WheelAngle += 15, 1, 1));
+            Add(XbimColour.FromHSV(Xbim.Ifc4.ActorResource.IfcRoleEnum.BUILDINGOWNER.ToString(), WheelAngle += 15, 1, 1));
+            Add(XbimColour.FromHSV(Xbim.Ifc4.ActorResource.IfcRoleEnum.CIVILENGINEER.ToString(), WheelAngle += 15, 1, 1));
+            Add(XbimColour.FromHSV(Xbim.Ifc4.ActorResource.IfcRoleEnum.CLIENT.ToString(), WheelAngle += 15, 1, 1));
+            Add(XbimColour.FromHSV(Xbim.Ifc4.ActorResource.IfcRoleEnum.COMMISSIONINGENGINEER.ToString(), WheelAngle += 15, 1, 1));
+            Add(XbimColour.FromHSV(Xbim.Ifc4.ActorResource.IfcRoleEnum.CONSTRUCTIONMANAGER.ToString(), WheelAngle += 15, 1, 1)); 
+            Add(XbimColour.FromHSV(Xbim.Ifc4.ActorResource.IfcRoleEnum.CONSULTANT.ToString(), WheelAngle += 15, 1, 1));
+            Add(XbimColour.FromHSV(Xbim.Ifc4.ActorResource.IfcRoleEnum.CONTRACTOR.ToString(), WheelAngle += 15, 1, 1));
+            Add(XbimColour.FromHSV(Xbim.Ifc4.ActorResource.IfcRoleEnum.COSTENGINEER.ToString(), WheelAngle += 15, 1, 1));
+            Add(XbimColour.FromHSV(Xbim.Ifc4.ActorResource.IfcRoleEnum.ENGINEER.ToString(), WheelAngle += 15, 1, 1)); 
+            Add(XbimColour.FromHSV(Xbim.Ifc4.ActorResource.IfcRoleEnum.FACILITIESMANAGER.ToString(), WheelAngle += 15, 1, 1));
+            Add(XbimColour.FromHSV(Xbim.Ifc4.ActorResource.IfcRoleEnum.FIELDCONSTRUCTIONMANAGER.ToString(), WheelAngle += 15, 1, 1));
+            Add(XbimColour.FromHSV(Xbim.Ifc4.ActorResource.IfcRoleEnum.MANUFACTURER.ToString(), WheelAngle += 15, 1, 1));
+            Add(XbimColour.FromHSV(Xbim.Ifc4.ActorResource.IfcRoleEnum.OWNER.ToString(), WheelAngle += 15, 1, 1)); 
+            Add(XbimColour.FromHSV(Xbim.Ifc4.ActorResource.IfcRoleEnum.PROJECTMANAGER.ToString(), WheelAngle += 15, 1, 1));
+            Add(XbimColour.FromHSV(Xbim.Ifc4.ActorResource.IfcRoleEnum.RESELLER.ToString(), WheelAngle += 15, 1, 1));
+            Add(XbimColour.FromHSV(Xbim.Ifc4.ActorResource.IfcRoleEnum.SUBCONTRACTOR.ToString(), WheelAngle += 15, 1, 1));
+            Add(XbimColour.FromHSV(Xbim.Ifc4.ActorResource.IfcRoleEnum.SUPPLIER.ToString(), WheelAngle += 15, 1, 1));
+            Add(XbimColour.FromHSV(Xbim.Ifc4.ActorResource.IfcRoleEnum.USERDEFINED.ToString(), WheelAngle += 15, 1, 1));
         }
        
         new public XbimColour this[string key]
@@ -136,29 +126,28 @@ namespace Xbim.ModelGeometry.Scene
         {
             Clear();
             Add(new XbimColour("Default", 0.98, 0.92, 0.74, 1));
-            Add(new XbimColour(typeof(IfcWall).Name, 0.98, 0.92, 0.74, 1));
-            Add(new XbimColour(typeof(IfcWallStandardCase).Name, 0.98, 0.92, 0.74, 1));
-            Add(new XbimColour(typeof(IfcRoof).Name, 0.28, 0.24, 0.55, 1));
-            Add(new XbimColour(typeof(IfcBeam).Name, 0.0, 0.0, 0.55, 1));
-            Add(new XbimColour(typeof(IfcBuildingElementProxy).Name, 0.95, 0.94, 0.74, 1));
-            Add(new XbimColour(typeof(IfcColumn).Name, 0.0, 0.0, 0.55, 1));
-            Add(new XbimColour(typeof(IfcSlab).Name, 0.47, 0.53, 0.60, 1));
-            Add(new XbimColour(typeof(IfcWindow).Name, 0.68, 0.85, 0.90, 0.5));
-            Add(new XbimColour(typeof(IfcCurtainWall).Name, 0.68, 0.85, 0.90, 0.4));
-            Add(new XbimColour(typeof(IfcPlate).Name, 0.68, 0.85, 0.90, 0.4));
-            Add(new XbimColour(typeof(IfcDoor).Name, 0.97, 0.19, 0, 1));
-            Add(new XbimColour(typeof(IfcSpace).Name, 0.68, 0.85, 0.90, 0.4));
-            Add(new XbimColour(typeof(IfcMember).Name, 0.34, 0.34, 0.34, 1));
-            Add(new XbimColour(typeof(IfcDistributionElement).Name, 0.0, 0.0, 0.55, 1));
-            Add(new XbimColour(typeof(IfcElectricalElement).Name, 0.0, 0.9, 0.1, 1));
-            Add(new XbimColour(typeof(IfcFurnishingElement).Name, 1, 0, 0, 1));
-            Add(new XbimColour(typeof(IfcOpeningElement).Name, 0.200000003, 0.200000003, 0.800000012, 0.2));
-            Add(new XbimColour(typeof(IfcFeatureElementSubtraction).Name, 1.0, 1.0, 1.0, 0.0));
-            Add(new XbimColour(typeof(IfcFlowTerminal).Name, 0.95, 0.94, 0.74, 1));
-            Add(new XbimColour(typeof(IfcFlowSegment).Name, 0.95, 0.94, 0.74, 1));
-            Add(new XbimColour(typeof(IfcDistributionFlowElement).Name, 0.95, 0.94, 0.74, 1));
-            Add(new XbimColour(typeof(IfcFlowFitting).Name, 0.95, 0.94, 0.74, 1));
-            Add(new XbimColour(typeof(IfcRailing).Name, 0.95, 0.94, 0.74, 1));
+            Add(new XbimColour(typeof(IIfcWall).Name, 0.98, 0.92, 0.74, 1));
+            Add(new XbimColour(typeof(IIfcWallStandardCase).Name, 0.98, 0.92, 0.74, 1));
+            Add(new XbimColour(typeof(IIfcRoof).Name, 0.28, 0.24, 0.55, 1));
+            Add(new XbimColour(typeof(IIfcBeam).Name, 0.0, 0.0, 0.55, 1));
+            Add(new XbimColour(typeof(IIfcBuildingElementProxy).Name, 0.95, 0.94, 0.74, 1));
+            Add(new XbimColour(typeof(IIfcColumn).Name, 0.0, 0.0, 0.55, 1));
+            Add(new XbimColour(typeof(IIfcSlab).Name, 0.47, 0.53, 0.60, 1));
+            Add(new XbimColour(typeof(IIfcWindow).Name, 0.68, 0.85, 0.90, 0.5));
+            Add(new XbimColour(typeof(IIfcCurtainWall).Name, 0.68, 0.85, 0.90, 0.4));
+            Add(new XbimColour(typeof(IIfcPlate).Name, 0.68, 0.85, 0.90, 0.4));
+            Add(new XbimColour(typeof(IIfcDoor).Name, 0.97, 0.19, 0, 1));
+            Add(new XbimColour(typeof(IIfcSpace).Name, 0.68, 0.85, 0.90, 0.4));
+            Add(new XbimColour(typeof(IIfcMember).Name, 0.34, 0.34, 0.34, 1));
+            Add(new XbimColour(typeof(IIfcDistributionElement).Name, 0.0, 0.0, 0.55, 1));
+            Add(new XbimColour(typeof(IIfcFurnishingElement).Name, 1, 0, 0, 1));
+            Add(new XbimColour(typeof(IIfcOpeningElement).Name, 0.200000003, 0.200000003, 0.800000012, 0.2));
+            Add(new XbimColour(typeof(IIfcFeatureElementSubtraction).Name, 1.0, 1.0, 1.0, 0.0));
+            Add(new XbimColour(typeof(IIfcFlowTerminal).Name, 0.95, 0.94, 0.74, 1));
+            Add(new XbimColour(typeof(IIfcFlowSegment).Name, 0.95, 0.94, 0.74, 1));
+            Add(new XbimColour(typeof(IIfcDistributionFlowElement).Name, 0.95, 0.94, 0.74, 1));
+            Add(new XbimColour(typeof(IIfcFlowFitting).Name, 0.95, 0.94, 0.74, 1));
+            Add(new XbimColour(typeof(IIfcRailing).Name, 0.95, 0.94, 0.74, 1));
         }
     }
 }

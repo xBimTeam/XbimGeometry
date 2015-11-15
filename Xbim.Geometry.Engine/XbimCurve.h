@@ -2,8 +2,6 @@
 #include "XbimGeometryObject.h"
 #include <Geom_Curve.hxx>
 
-
-using namespace XbimGeometry::Interfaces;
 namespace Xbim
 {
 	namespace Geometry

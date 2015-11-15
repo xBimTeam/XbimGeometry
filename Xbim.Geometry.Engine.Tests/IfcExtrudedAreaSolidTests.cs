@@ -8,7 +8,7 @@ using Xbim.Ifc2x3.ProfileResource;
 using Xbim.Common.Logging;
 using Xbim.Ifc2x3.GeometryResource;
 using Xbim.ModelGeometry.Scene;
-using XbimGeometry.Interfaces;
+
 
 
 namespace GeometryTests

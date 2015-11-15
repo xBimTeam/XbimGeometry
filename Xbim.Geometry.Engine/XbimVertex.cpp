@@ -1,5 +1,5 @@
 #include "XbimVertex.h"
-#include "XbimGeomPrim.h"
+#include "XbimConvert.h"
 #include <BRep_Builder.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
 #include <TopoDS.hxx>
@@ -61,14 +61,14 @@ namespace Xbim
 		IXbimGeometryObject^ XbimVertex::Transform(XbimMatrix3D matrix3D)
 		{
 			BRepBuilderAPI_Copy copier(this);
-			BRepBuilderAPI_Transform gTran(copier.Shape(), XbimGeomPrim::ToTransform(matrix3D));
+			BRepBuilderAPI_Transform gTran(copier.Shape(), XbimConvert::ToTransform(matrix3D));
 			TopoDS_Vertex temp = TopoDS::Vertex(gTran.Shape());
 			return gcnew XbimVertex(temp);
 		}
 		
 		IXbimGeometryObject^ XbimVertex::TransformShallow(XbimMatrix3D matrix3D)
 		{
-			TopoDS_Vertex vertex = TopoDS::Vertex(pVertex->Moved(XbimGeomPrim::ToTransform(matrix3D)));
+			TopoDS_Vertex vertex = TopoDS::Vertex(pVertex->Moved(XbimConvert::ToTransform(matrix3D)));
 			GC::KeepAlive(this);			
 			return gcnew XbimVertex(vertex);
 		}

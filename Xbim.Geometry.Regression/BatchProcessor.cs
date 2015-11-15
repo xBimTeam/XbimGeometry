@@ -1,19 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using Xbim.Common.Logging;
-using Xbim.IO;
-using Xbim.ModelGeometry.Scene;
-using Xbim.XbimExtensions.Interfaces;
-using System.Collections.Generic;
 using log4net;
-using Xbim.Ifc2x3.Kernel;
+using Xbim.Common.Logging;
 using Xbim.Ifc2x3.GeometricModelResource;
 using Xbim.Ifc2x3.GeometryResource;
+using Xbim.Ifc2x3.Kernel;
 using Xbim.Ifc2x3.UtilityResource;
-using XbimGeometry.Interfaces;
-using Xbim.Ifc2x3.TopologyResource;
+using Xbim.IO;
+using Xbim.ModelGeometry.Scene;
 
 namespace XbimRegression
 {

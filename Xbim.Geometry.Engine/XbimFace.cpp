@@ -8,7 +8,7 @@
 #include <ShapeFix_ShapeTolerance.hxx>
 #include <BRepCheck_Analyzer.hxx>
 #include "XbimGeometryCreator.h"
-#include "XbimGeomPrim.h"
+#include "XbimConvert.h"
 #include <TopExp_Explorer.hxx>
 #include <BRep_Builder.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
@@ -92,51 +92,51 @@ namespace Xbim
 
 
 
-		XbimFace::XbimFace(IfcProfileDef^ profile)
+		XbimFace::XbimFace(IIfcProfileDef^ profile)
 		{
 			Init(profile);
 		}
 
-		XbimFace::XbimFace(IfcSurface^ surface)
+		XbimFace::XbimFace(IIfcSurface^ surface)
 		{
 			Init(surface);
 		}
 
-		XbimFace::XbimFace(IfcCurveBoundedPlane^ def)
+		XbimFace::XbimFace(IIfcCurveBoundedPlane^ def)
 		{
 			Init(def);
 		}
 		
-		XbimFace::XbimFace(IfcRectangularTrimmedSurface^ def)
+		XbimFace::XbimFace(IIfcRectangularTrimmedSurface^ def)
 		{
 			Init(def);
 		}
 
-		XbimFace::XbimFace(IfcPlane^ plane)
+		XbimFace::XbimFace(IIfcPlane^ plane)
 		{
 			Init(plane);
 		}
 
-		XbimFace::XbimFace(IfcSurfaceOfLinearExtrusion^ sLin)
+		XbimFace::XbimFace(IIfcSurfaceOfLinearExtrusion^ sLin)
 		{
 			Init(sLin);
 		}
 		
-		XbimFace::XbimFace(IfcSurfaceOfRevolution^ sRev)
+		XbimFace::XbimFace(IIfcSurfaceOfRevolution^ sRev)
 		{
 			Init(sRev);
 		}
-		XbimFace::XbimFace(IfcCompositeCurve ^ cCurve)
+		XbimFace::XbimFace(IIfcCompositeCurve ^ cCurve)
 		{
 			Init(cCurve);
 		}
 
-		XbimFace::XbimFace(IfcPolyline ^ pline)
+		XbimFace::XbimFace(IIfcPolyline ^ pline)
 		{
 			Init(pline);
 		}
 
-		XbimFace::XbimFace(IfcPolyLoop ^ loop)
+		XbimFace::XbimFace(IIfcPolyLoop ^ loop)
 		{
 			Init(loop);
 		}
@@ -161,7 +161,7 @@ namespace Xbim
 			Init(x,y,tolerance);
 		}
 
-		void XbimFace::Init(IfcCompositeCurve ^ cCurve)
+		void XbimFace::Init(IIfcCompositeCurve ^ cCurve)
 		{
 			XbimWire^ wire = gcnew XbimWire(cCurve);
 			if (wire->IsValid)
@@ -172,7 +172,7 @@ namespace Xbim
 			}
 		}
 
-		void XbimFace::Init(IfcPolyline ^ pline)
+		void XbimFace::Init(IIfcPolyline ^ pline)
 		{
 			XbimWire^ wire = gcnew XbimWire(pline);
 			if (wire->IsValid)
@@ -183,7 +183,7 @@ namespace Xbim
 			}
 		}
 
-		void XbimFace::Init(IfcPolyLoop ^ loop)
+		void XbimFace::Init(IIfcPolyLoop ^ loop)
 		{
 			XbimWire^ wire = gcnew XbimWire(loop);
 			if (wire->IsValid)
@@ -248,21 +248,21 @@ namespace Xbim
 			*pFace = faceMaker.Face();
 		}
 
-		void XbimFace::Init(IfcProfileDef^ profile)
+		void XbimFace::Init(IIfcProfileDef^ profile)
 		{
-			IfcArbitraryProfileDefWithVoids^ arbProfDefVoids = dynamic_cast<IfcArbitraryProfileDefWithVoids^>(profile);
+			IIfcArbitraryProfileDefWithVoids^ arbProfDefVoids = dynamic_cast<IIfcArbitraryProfileDefWithVoids^>(profile);
 			if (arbProfDefVoids != nullptr) //this is a compound wire so we need to build it at face level
 				return Init(arbProfDefVoids);
-			IfcCircleHollowProfileDef^ circHollow = dynamic_cast<IfcCircleHollowProfileDef^>(profile);
+			IIfcCircleHollowProfileDef^ circHollow = dynamic_cast<IIfcCircleHollowProfileDef^>(profile);
 			if (circHollow != nullptr) //this is a compound wire so we need to build it at face level
 				return Init(circHollow);
-			IfcRectangleHollowProfileDef^ rectHollow = dynamic_cast<IfcRectangleHollowProfileDef^>(profile);
+			IIfcRectangleHollowProfileDef^ rectHollow = dynamic_cast<IIfcRectangleHollowProfileDef^>(profile);
 			if (rectHollow != nullptr) //this is a compound wire so we need to build it at face level
 				return Init(rectHollow);
-		    if (dynamic_cast<IfcCompositeProfileDef^>(profile))
-				return Init((IfcCompositeProfileDef^)profile);
-			if (dynamic_cast<IfcArbitraryOpenProfileDef^>(profile) && !dynamic_cast<IfcCenterLineProfileDef^>(profile))
-				throw gcnew Exception("Faces cannot be built with IfcArbitraryOpenProfileDef, a face requires a closed loop");
+		    if (dynamic_cast<IIfcCompositeProfileDef^>(profile))
+				return Init((IIfcCompositeProfileDef^)profile);
+			if (dynamic_cast<IIfcArbitraryOpenProfileDef^>(profile) && !dynamic_cast<IIfcCenterLineProfileDef^>(profile))
+				throw gcnew Exception("Faces cannot be built with IIfcArbitraryOpenProfileDef, a face requires a closed loop");
 			else //it is a standard profile that can be built as a single wire
 			{
 				XbimWire^ wire = gcnew XbimWire(profile);
@@ -298,7 +298,7 @@ namespace Xbim
 		}
 		
 
-		void XbimFace::Init(IfcArbitraryProfileDefWithVoids^ profile)
+		void XbimFace::Init(IIfcArbitraryProfileDefWithVoids^ profile)
 		{
 			double tolerance = profile->ModelOf->ModelFactors->Precision;
 			double toleranceMax = profile->ModelOf->ModelFactors->PrecisionMax;
@@ -320,14 +320,14 @@ namespace Xbim
 						goto TryBuildFace;
 					}
 					String^ errMsg = XbimFace::GetBuildFaceErrorMessage(err);
-					XbimGeometryCreator::logger->WarnFormat("WF005: Invalid bound, {0}. Found in IfcArbitraryClosedProfileDefWithVoids = #{1}, face discarded", errMsg, profile->EntityLabel);
+					XbimGeometryCreator::logger->WarnFormat("WF005: Invalid bound, {0}. Found in IIfcArbitraryClosedProfileDefWithVoids = #{1}, face discarded", errMsg, profile->EntityLabel);
 					return;
 				}
 				pFace = new TopoDS_Face();
 				*pFace = faceMaker.Face();
 				XbimVector3D tn = Normal;
 
-				for each(IfcCurve^ curve in profile->InnerCurves)
+				for each(IIfcCurve^ curve in profile->InnerCurves)
 				{
 
 					XbimWire^ innerWire = gcnew XbimWire(curve);
@@ -350,34 +350,35 @@ namespace Xbim
 							}
 
 							String^ errMsg = XbimFace::GetBuildFaceErrorMessage(loopErr);
-							XbimGeometryCreator::logger->WarnFormat("WF006: Invalid void, {0}. IfcCurve #(1) could not be added to IfcArbitraryClosedProfileDefWithVoids = #{2}. Inner Bound ignored", errMsg, curve->EntityLabel, profile->EntityLabel);
+							XbimGeometryCreator::logger->WarnFormat("WF006: Invalid void, {0}. IIfcCurve #(1) could not be added to IIfcArbitraryClosedProfileDefWithVoids = #{2}. Inner Bound ignored", errMsg, curve->EntityLabel, profile->EntityLabel);
 						}
 						*pFace = faceMaker.Face();
 					}
 					else
 					{
-						XbimGeometryCreator::logger->InfoFormat("WF007: Invalid void in IfcArbitraryClosedProfileDefWithVoids #{0}. It is not a hole. Void discarded", curve->EntityLabel);
+						XbimGeometryCreator::logger->InfoFormat("WF007: Invalid void in IIfcArbitraryClosedProfileDefWithVoids #{0}. It is not a hole. Void discarded", curve->EntityLabel);
 					}
 				}
 			}
 		}
-		void XbimFace::Init(IfcCompositeProfileDef ^ compProfile)
+		void XbimFace::Init(IIfcCompositeProfileDef ^ compProfile)
 		{
-			if (compProfile->Profiles->Count == 0)
+			int profileCount = ((IList<IIfcProfileDef^>^)compProfile->Profiles)->Count;
+			if (profileCount == 0)
 			{
-				XbimGeometryCreator::logger->InfoFormat("WF0015: Invalid number of profiles in IfcCompositeProfileDef #{0}. It must be 2 or more. Profile discarded", compProfile->EntityLabel);
+				XbimGeometryCreator::logger->InfoFormat("WF0015: Invalid number of profiles in IIfcCompositeProfileDef #{0}. It must be 2 or more. Profile discarded", compProfile->EntityLabel);
 				return;
 			}
-			if (compProfile->Profiles->Count == 1)
+			if (profileCount == 1)
 			{
-				XbimGeometryCreator::logger->InfoFormat("WF0016: Invalid number of profiles in IfcCompositeProfileDef #{0}. It must be 2 or more. A single Profile has been used", compProfile->EntityLabel);
-				Init(compProfile->Profiles->First);
+				XbimGeometryCreator::logger->InfoFormat("WF0016: Invalid number of profiles in IIfcCompositeProfileDef #{0}. It must be 2 or more. A single Profile has been used", compProfile->EntityLabel);
+				Init(((IList<IIfcProfileDef^>^)compProfile->Profiles)[0]);
 				return;
 			}
-			XbimFace^ firstFace = gcnew XbimFace(compProfile->Profiles->First);
+			XbimFace^ firstFace = gcnew XbimFace(((IList<IIfcProfileDef^>^)compProfile->Profiles)[0]);
 			BRepBuilderAPI_MakeFace faceBlder(firstFace);
 			bool first = true;
-			for each (IfcProfileDef^ profile in compProfile->Profiles)
+			for each (IIfcProfileDef^ profile in compProfile->Profiles)
 			{
 				if (!first)
 				{					
@@ -397,20 +398,20 @@ namespace Xbim
 				*pFace = faceBlder.Face();
 			}
 			else
-				XbimGeometryCreator::logger->InfoFormat("WF0016: IfcCompositeProfileDef #{0} could not be built . It has been omitted", compProfile->EntityLabel);
+				XbimGeometryCreator::logger->InfoFormat("WF0016: IIfcCompositeProfileDef #{0} could not be built . It has been omitted", compProfile->EntityLabel);
 
 		}
 
 
 		//Builds a face from a CircleProfileDef
-		void XbimFace::Init(IfcCircleHollowProfileDef ^ circProfile)
+		void XbimFace::Init(IIfcCircleHollowProfileDef ^ circProfile)
 		{
 			if (circProfile->Radius <= 0)
 			{
-				XbimGeometryCreator::logger->WarnFormat("WW014:Invalid IfcCircleHollowProfileDef #{0}: Has a radius <= 0. Face discarded", circProfile->EntityLabel);
+				XbimGeometryCreator::logger->WarnFormat("WW014:Invalid IIfcCircleHollowProfileDef #{0}: Has a radius <= 0. Face discarded", circProfile->EntityLabel);
 				return;
 			}
-			IfcAxis2Placement2D^ ax2 = (IfcAxis2Placement2D^)circProfile->Position;
+			IIfcAxis2Placement2D^ ax2 = (IIfcAxis2Placement2D^)circProfile->Position;
 			gp_Ax2 gpax2(gp_Pnt(ax2->Location->X, ax2->Location->Y, 0), gp_Dir(0, 0, 1), gp_Dir(ax2->P[0].X, ax2->P[0].Y, 0.));
 
 			//make the outer wire
@@ -438,11 +439,11 @@ namespace Xbim
 		}
 
 
-		void XbimFace::Init(IfcRectangleHollowProfileDef^ rectProfile)
+		void XbimFace::Init(IIfcRectangleHollowProfileDef^ rectProfile)
 		{
 			if (rectProfile->XDim <= 0 || rectProfile->YDim <= 0)
 			{
-				XbimGeometryCreator::logger->WarnFormat("WW014:Invalid IfcRectangleProfileDef: #{0}, XDim = {1}, YDim = {2}. Face discarded", rectProfile->EntityLabel, rectProfile->XDim, rectProfile->YDim);
+				XbimGeometryCreator::logger->WarnFormat("WW014:Invalid IIfcRectangleProfileDef: #{0}, XDim = {1}, YDim = {2}. Face discarded", rectProfile->EntityLabel, rectProfile->XDim, rectProfile->YDim);
 			}
 			else
 			{
@@ -497,26 +498,26 @@ namespace Xbim
 				pFace = new TopoDS_Face();
 				*pFace = faceBlder.Face();
 				//apply the position transformation
-				pFace->Move(XbimGeomPrim::ToLocation(rectProfile->Position));
+				pFace->Move(XbimConvert::ToLocation(rectProfile->Position));
 
 			}
 
 		}
 
 		//Builds a face from a Surface
-		void XbimFace::Init(IfcSurface ^ surface)
+		void XbimFace::Init(IIfcSurface ^ surface)
 		{
-			if (dynamic_cast<IfcPlane^>(surface))
-				return Init((IfcPlane^)surface);
-			else if (dynamic_cast<IfcSurfaceOfRevolution^>(surface))
-				return Init((IfcSurfaceOfRevolution^)surface);
-			else if (dynamic_cast<IfcSurfaceOfLinearExtrusion^>(surface))
-				return Init((IfcSurfaceOfLinearExtrusion^)surface);
-			else if (dynamic_cast<IfcCurveBoundedPlane^>(surface))
-				return Init((IfcCurveBoundedPlane^)surface);
-			else if (dynamic_cast<IfcRectangularTrimmedSurface^>(surface))
-				return Init((IfcRectangularTrimmedSurface^)surface);
-			else if (dynamic_cast<IfcBoundedSurface^>(surface))
+			if (dynamic_cast<IIfcPlane^>(surface))
+				return Init((IIfcPlane^)surface);
+			else if (dynamic_cast<IIfcSurfaceOfRevolution^>(surface))
+				return Init((IIfcSurfaceOfRevolution^)surface);
+			else if (dynamic_cast<IIfcSurfaceOfLinearExtrusion^>(surface))
+				return Init((IIfcSurfaceOfLinearExtrusion^)surface);
+			else if (dynamic_cast<IIfcCurveBoundedPlane^>(surface))
+				return Init((IIfcCurveBoundedPlane^)surface);
+			else if (dynamic_cast<IIfcRectangularTrimmedSurface^>(surface))
+				return Init((IIfcRectangularTrimmedSurface^)surface);
+			else if (dynamic_cast<IIfcBoundedSurface^>(surface))
 				throw(gcnew NotImplementedException("XbimFace. Support for BoundedSurface is not implemented,it should be abstract"));
 			else
 			{
@@ -527,20 +528,20 @@ namespace Xbim
 		}
 
 		//Builds a face from a Plane
-		void XbimFace::Init(IfcPlane ^ plane)
+		void XbimFace::Init(IIfcPlane ^ plane)
 		{
-			gp_Ax3 ax3 = XbimGeomPrim::ToAx3(plane->Position);
+			gp_Ax3 ax3 = XbimConvert::ToAx3(plane->Position);
 			gp_Pln pln(ax3);
 			BRepBuilderAPI_MakeFace  builder(pln);
 			pFace = new TopoDS_Face();
 			*pFace =  builder.Face();
 		}
-		void XbimFace::Init(IfcSurfaceOfRevolution ^ sRev)
+		void XbimFace::Init(IIfcSurfaceOfRevolution ^ sRev)
 		{
 			XbimWire^ curve = gcnew XbimWire(sRev->SweptCurve);
 			if (!curve->IsValid || curve->Edges->Count > 1)
 			{
-				XbimGeometryCreator::logger->ErrorFormat("WF010: Invalid swept curve = #{0}. Found in IfcSurfaceOfRevolution = #{1}, face discarded", sRev->SweptCurve->EntityLabel, sRev->EntityLabel);
+				XbimGeometryCreator::logger->ErrorFormat("WF010: Invalid swept curve = #{0}. Found in IIfcSurfaceOfRevolution = #{1}, face discarded", sRev->SweptCurve->EntityLabel, sRev->EntityLabel);
 				return;
 			}
 			XbimEdge^ edge = (XbimEdge^)curve->Edges->First;
@@ -563,11 +564,11 @@ namespace Xbim
 				*pFace = faceMaker.Face();
 			}
 			else
-				XbimGeometryCreator::logger->ErrorFormat("WF011: Invalid swept curve = #{0}. Found in IfcSurfaceOfRevolution = #{1}, face discarded", sRev->SweptCurve->EntityLabel, sRev->EntityLabel);
+				XbimGeometryCreator::logger->ErrorFormat("WF011: Invalid swept curve = #{0}. Found in IIfcSurfaceOfRevolution = #{1}, face discarded", sRev->SweptCurve->EntityLabel, sRev->EntityLabel);
 
 		}
 
-		void XbimFace::Init(IfcRectangularTrimmedSurface^ def)
+		void XbimFace::Init(IIfcRectangularTrimmedSurface^ def)
 		{
 			Init(def->BasisSurface); //initialise the plane
 			if (IsValid)
@@ -583,11 +584,11 @@ namespace Xbim
 					*pFace = faceMaker.Face();
 				}
 				else
-					XbimGeometryCreator::logger->ErrorFormat("WF015: Invalid trimed surface = #{0}. Found in IfcRectangularTrimmedSurface = #{1}, face discarded", def->BasisSurface->EntityLabel, def->EntityLabel);
+					XbimGeometryCreator::logger->ErrorFormat("WF015: Invalid trimed surface = #{0}. Found in IIfcRectangularTrimmedSurface = #{1}, face discarded", def->BasisSurface->EntityLabel, def->EntityLabel);
 			}
 		}
 
-		void XbimFace::Init(IfcCurveBoundedPlane^ def)
+		void XbimFace::Init(IIfcCurveBoundedPlane^ def)
 		{
 			Init(def->BasisSurface); //initialise the plane
 			if (IsValid)
@@ -595,13 +596,13 @@ namespace Xbim
 				XbimWire^ outerBound = gcnew XbimWire(def->OuterBoundary);
 				BRepBuilderAPI_MakeFace  builder(this);
 				builder.Add(outerBound);
-				for each (IfcCurve^ innerCurve in def->InnerBoundaries)
+				for each (IIfcCurve^ innerCurve in def->InnerBoundaries)
 				{
 					XbimWire^ innerBound = gcnew XbimWire(innerCurve);
 					if (innerBound->IsValid)
 						builder.Add(innerBound);
 					else
-						XbimGeometryCreator::logger->ErrorFormat("WF014: Invalid inner bound = #{0}. Found in IfcCurveBoundedPlane = #{1}, face discarded", innerCurve->EntityLabel, def->EntityLabel);
+						XbimGeometryCreator::logger->ErrorFormat("WF014: Invalid inner bound = #{0}. Found in IIfcCurveBoundedPlane = #{1}, face discarded", innerCurve->EntityLabel, def->EntityLabel);
 
 				}
 				if (builder.IsDone())
@@ -610,16 +611,16 @@ namespace Xbim
 					*pFace = builder.Face();
 				}
 				else
-					XbimGeometryCreator::logger->ErrorFormat("WF013: Invalid outer bound = #{0}. Found in IfcCurveBoundedPlane = #{1}, face discarded", def->OuterBoundary->EntityLabel, def->EntityLabel);
+					XbimGeometryCreator::logger->ErrorFormat("WF013: Invalid outer bound = #{0}. Found in IIfcCurveBoundedPlane = #{1}, face discarded", def->OuterBoundary->EntityLabel, def->EntityLabel);
 			}
 		}
 
-		void XbimFace::Init(IfcSurfaceOfLinearExtrusion ^ sLin)
+		void XbimFace::Init(IIfcSurfaceOfLinearExtrusion ^ sLin)
 		{
 			XbimWire^ curve = gcnew XbimWire(sLin->SweptCurve);
 			if (!curve->IsValid || curve->Edges->Count > 1)
 			{
-				XbimGeometryCreator::logger->ErrorFormat("WF001: Invalid swept curve = #{0}. Found in IfcSurfaceOfLinearExtrusion = #{1}, face discarded", sLin->SweptCurve->EntityLabel, sLin->EntityLabel);
+				XbimGeometryCreator::logger->ErrorFormat("WF001: Invalid swept curve = #{0}. Found in IIfcSurfaceOfLinearExtrusion = #{1}, face discarded", sLin->SweptCurve->EntityLabel, sLin->EntityLabel);
 				return;
 			}
 			XbimEdge^ edge = (XbimEdge^)curve->Edges->First;
@@ -637,7 +638,7 @@ namespace Xbim
 				*pFace = faceMaker.Face();
 			}
 			else
-				XbimGeometryCreator::logger->ErrorFormat("WF002: Invalid swept curve = #{0}. Found in IfcSurfaceOfLinearExtrusion = #{1}, face discarded", sLin->SweptCurve->EntityLabel, sLin->EntityLabel);
+				XbimGeometryCreator::logger->ErrorFormat("WF002: Invalid swept curve = #{0}. Found in IIfcSurfaceOfLinearExtrusion = #{1}, face discarded", sLin->SweptCurve->EntityLabel, sLin->EntityLabel);
 
 
 		}
@@ -708,14 +709,14 @@ namespace Xbim
 		IXbimGeometryObject^ XbimFace::Transform(XbimMatrix3D matrix3D)
 		{
 			BRepBuilderAPI_Copy copier(this);
-			BRepBuilderAPI_Transform gTran(copier.Shape(), XbimGeomPrim::ToTransform(matrix3D));
+			BRepBuilderAPI_Transform gTran(copier.Shape(), XbimConvert::ToTransform(matrix3D));
 			TopoDS_Face temp = TopoDS::Face(gTran.Shape());
 			return gcnew XbimFace(temp);
 		}
 
 		IXbimGeometryObject^ XbimFace::TransformShallow(XbimMatrix3D matrix3D)
 		{
-			TopoDS_Face face = TopoDS::Face(pFace->Moved(XbimGeomPrim::ToTransform(matrix3D)));
+			TopoDS_Face face = TopoDS::Face(pFace->Moved(XbimConvert::ToTransform(matrix3D)));
 			GC::KeepAlive(this);
 			return gcnew XbimFace(face);
 		}
@@ -874,10 +875,10 @@ namespace Xbim
 
 #pragma region Methods
 
-		void XbimFace::Move(IfcAxis2Placement3D^ position)
+		void XbimFace::Move(IIfcAxis2Placement3D^ position)
 		{
 			if (!IsValid) return;
-			gp_Trsf toPos = XbimGeomPrim::ToTransform(position);
+			gp_Trsf toPos = XbimConvert::ToTransform(position);
 			pFace->Move(toPos);
 		}
 

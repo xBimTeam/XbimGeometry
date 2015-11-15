@@ -1,7 +1,6 @@
 #pragma once
 #include "XbimPoint3DWithTolerance.h"
 
-using namespace XbimGeometry::Interfaces;
 namespace Xbim
 {
 	namespace Geometry

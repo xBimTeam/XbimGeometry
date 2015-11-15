@@ -6,7 +6,7 @@
 #include "XbimFaceSet.h"
 #include "XbimEdgeSet.h"
 #include "XbimVertexSet.h"
-#include "XbimGeomPrim.h"
+#include "XbimConvert.h"
 #include "XbimGeometryObjectSet.h"
 #include <BRep_Builder.hxx>
 #include <BRepBuilderAPI_Sewing.hxx>
@@ -33,9 +33,8 @@
 
 
 using namespace System;
-using namespace Xbim::Ifc2x3::Extensions;
 using namespace Xbim::XbimExtensions;
-using namespace Xbim::XbimExtensions::Interfaces;
+
 namespace Xbim
 {
 	namespace Geometry
@@ -85,7 +84,7 @@ namespace Xbim
 		IXbimGeometryObject^ XbimCompound::Transform(XbimMatrix3D matrix3D)
 		{
 			BRepBuilderAPI_Copy copier(this);
-			BRepBuilderAPI_Transform gTran(copier.Shape(), XbimGeomPrim::ToTransform(matrix3D));
+			BRepBuilderAPI_Transform gTran(copier.Shape(), XbimConvert::ToTransform(matrix3D));
 			TopoDS_Compound temp = TopoDS::Compound(gTran.Shape());
 			GC::KeepAlive(this);
 			return gcnew XbimCompound(temp, IsSewn, _sewingTolerance);
@@ -93,7 +92,7 @@ namespace Xbim
 		
 		IXbimGeometryObject^ XbimCompound::TransformShallow(XbimMatrix3D matrix3D)
 		{
-			TopoDS_Compound shallowCopy = TopoDS::Compound(pCompound->Moved(XbimGeomPrim::ToTransform(matrix3D)));
+			TopoDS_Compound shallowCopy = TopoDS::Compound(pCompound->Moved(XbimConvert::ToTransform(matrix3D)));
 			GC::KeepAlive(this);
 			return gcnew XbimCompound(shallowCopy, IsSewn, _sewingTolerance);
 		}
@@ -122,42 +121,42 @@ namespace Xbim
 		}
 
 
-		XbimCompound::XbimCompound(IfcConnectedFaceSet^ faceSet)
+		XbimCompound::XbimCompound(IIfcConnectedFaceSet^ faceSet)
 		{
 			_sewingTolerance = faceSet->ModelOf->ModelFactors->Precision;
 			Init(faceSet); 
 		}
 
-		XbimCompound::XbimCompound(IfcShellBasedSurfaceModel^ sbsm)
+		XbimCompound::XbimCompound(IIfcShellBasedSurfaceModel^ sbsm)
 		{
 			_sewingTolerance = sbsm->ModelOf->ModelFactors->Precision;
 			Init(sbsm); 
 		}
 
-		XbimCompound::XbimCompound(IfcFaceBasedSurfaceModel^ fbsm)
+		XbimCompound::XbimCompound(IIfcFaceBasedSurfaceModel^ fbsm)
 		{
 			_sewingTolerance = fbsm->ModelOf->ModelFactors->Precision;
 			Init(fbsm); 
 		}
 
-		XbimCompound::XbimCompound(IfcManifoldSolidBrep^ solid)
+		XbimCompound::XbimCompound(IIfcManifoldSolidBrep^ solid)
 		{
 			_sewingTolerance = solid->ModelOf->ModelFactors->Precision;
 			Init(solid);
 		}
-		XbimCompound::XbimCompound(IfcFacetedBrep^ solid)
-		{
-			_sewingTolerance = solid->ModelOf->ModelFactors->Precision;
-			Init(solid);
-		}
-
-		XbimCompound::XbimCompound(IfcFacetedBrepWithVoids^ solid)
+		XbimCompound::XbimCompound(IIfcFacetedBrep^ solid)
 		{
 			_sewingTolerance = solid->ModelOf->ModelFactors->Precision;
 			Init(solid);
 		}
 
-		XbimCompound::XbimCompound(IfcClosedShell^ solid)
+		XbimCompound::XbimCompound(IIfcFacetedBrepWithVoids^ solid)
+		{
+			_sewingTolerance = solid->ModelOf->ModelFactors->Precision;
+			Init(solid);
+		}
+
+		XbimCompound::XbimCompound(IIfcClosedShell^ solid)
 		{
 			_sewingTolerance = solid->ModelOf->ModelFactors->Precision;
 			Init(solid);
@@ -172,10 +171,10 @@ namespace Xbim
 			
 		}
 
-		void XbimCompound::Move(IfcAxis2Placement3D^ position)
+		void XbimCompound::Move(IIfcAxis2Placement3D^ position)
 		{
 			if (!IsValid) return;
-			gp_Trsf toPos = XbimGeomPrim::ToTransform(position);
+			gp_Trsf toPos = XbimConvert::ToTransform(position);
 			pCompound->Move(toPos);
 		}
 
@@ -183,12 +182,12 @@ namespace Xbim
 
 #pragma region Initialisers
 
-		void XbimCompound::Init(IfcFaceBasedSurfaceModel^ fbsm)
+		void XbimCompound::Init(IIfcFaceBasedSurfaceModel^ fbsm)
 		{
 			pCompound = new TopoDS_Compound();
 			BRep_Builder builder;
 			builder.MakeCompound(*pCompound);
-			for each (IfcConnectedFaceSet^ faceSet in fbsm->FbsmFaces)
+			for each (IIfcConnectedFaceSet^ faceSet in fbsm->FbsmFaces)
 			{
 				XbimCompound^ compound = gcnew XbimCompound(faceSet);
 				for each (IXbimGeometryObject^ geom in compound)
@@ -215,13 +214,13 @@ namespace Xbim
 			}
 		}
 
-		void XbimCompound::Init(IfcShellBasedSurfaceModel^ sbsm)
+		void XbimCompound::Init(IIfcShellBasedSurfaceModel^ sbsm)
 		{
-			List<IfcFace^>^ faces = gcnew List<IfcFace^>();
-			for each (IfcShell^ shell in sbsm->SbsmBoundary)
+			List<IIfcFace^>^ faces = gcnew List<IIfcFace^>();
+			for each (IIfcShell^ shell in sbsm->SbsmBoundary)
 			{
 				//get the faces
-				IfcConnectedFaceSet^ faceSet = dynamic_cast<IfcConnectedFaceSet^>(shell);
+				IIfcConnectedFaceSet^ faceSet = dynamic_cast<IIfcConnectedFaceSet^>(shell);
 				if (faceSet != nullptr) //this should never fail
 					faces->AddRange(faceSet->CfsFaces);
 			}
@@ -234,11 +233,12 @@ namespace Xbim
 
 		}
 
-		void XbimCompound::Init(IfcConnectedFaceSet^ faceSet)
+		void XbimCompound::Init(IIfcConnectedFaceSet^ faceSet)
 		{
-			if (faceSet->CfsFaces->Count == 0)
+			int faceCount = ((IList<IIfcFace^>^)faceSet->CfsFaces)->Count;
+			if (faceCount == 0)
 			{
-				XbimGeometryCreator::logger->WarnFormat("WC001: IfcConnectedFaceSet #{0}, is empty", faceSet->EntityLabel);
+				XbimGeometryCreator::logger->WarnFormat("WC001: IIfcConnectedFaceSet #{0}, is empty", faceSet->EntityLabel);
 				return;
 			}
 			Init(faceSet->CfsFaces);
@@ -255,33 +255,33 @@ namespace Xbim
 		}
 
 
-		void XbimCompound::Init(IfcManifoldSolidBrep^ solid)
+		void XbimCompound::Init(IIfcManifoldSolidBrep^ solid)
 		{
-			IfcFacetedBrep^ facetedBrep = dynamic_cast<IfcFacetedBrep^>(solid);
+			IIfcFacetedBrep^ facetedBrep = dynamic_cast<IIfcFacetedBrep^>(solid);
 			if (facetedBrep != nullptr) return Init(facetedBrep);
-			IfcFacetedBrepWithVoids^ facetedBrepWithVoids = dynamic_cast<IfcFacetedBrepWithVoids^>(solid);
+			IIfcFacetedBrepWithVoids^ facetedBrepWithVoids = dynamic_cast<IIfcFacetedBrepWithVoids^>(solid);
 			if (facetedBrepWithVoids != nullptr) return Init(facetedBrepWithVoids);
-			throw gcnew NotImplementedException("Sub-Type of IfcManifoldSolidBrep is not implemented");
+			throw gcnew NotImplementedException("Sub-Type of IIfcManifoldSolidBrep is not implemented");
 		}
-		void XbimCompound::Init(IfcFacetedBrep^ solid)
+		void XbimCompound::Init(IIfcFacetedBrep^ solid)
 		{			
 			Init(solid->Outer);
 		}
 
 
-		void XbimCompound::Init(IfcFacetedBrepWithVoids^ brepWithVoids)
+		void XbimCompound::Init(IIfcFacetedBrepWithVoids^ brepWithVoids)
 		{
 			XbimCompound^ shapes = gcnew XbimCompound(brepWithVoids->Outer);
 			XbimShell^ outerShell = (XbimShell^)shapes->MakeShell();
 			if (!outerShell->IsClosed) //we have a shell that is not able to be made in to a solid
-				XbimGeometryCreator::logger->ErrorFormat("ES004: An IfcClosedShell #{0} has been found that is not topologically correct. ", brepWithVoids->Outer->EntityLabel);
+				XbimGeometryCreator::logger->ErrorFormat("ES004: An IIfcClosedShell #{0} has been found that is not topologically correct. ", brepWithVoids->Outer->EntityLabel);
 			BRepBuilderAPI_MakeSolid builder(outerShell);
-			for each (IfcClosedShell^ ifcVoidShell in brepWithVoids->Voids)
+			for each (IIfcClosedShell^ IIfcVoidShell in brepWithVoids->Voids)
 			{
-				XbimCompound^ voidShapes = gcnew XbimCompound(ifcVoidShell);
+				XbimCompound^ voidShapes = gcnew XbimCompound(IIfcVoidShell);
 				XbimShell^ voidShell = (XbimShell^)voidShapes->MakeShell();
 				if (!voidShell->IsClosed) //we have a shell that is not able to be made in to a solid
-					XbimGeometryCreator::logger->ErrorFormat("ES004: An IfcClosedShell #{0} has been found that is not topologically correct. ", ifcVoidShell->EntityLabel);
+					XbimGeometryCreator::logger->ErrorFormat("ES004: An IIfcClosedShell #{0} has been found that is not topologically correct. ", IIfcVoidShell->EntityLabel);
 				builder.Add(voidShell);
 			}
 			if (builder.IsDone())
@@ -292,12 +292,12 @@ namespace Xbim
 				b.Add(*pCompound, builder.Solid());
 			}
 			else
-				XbimGeometryCreator::logger->ErrorFormat("ES003: An incorrectly defined IfcFacetedBrepWithVoids #{0} has been found, a correct shape could not be built and it has been ignored", brepWithVoids->EntityLabel);
+				XbimGeometryCreator::logger->ErrorFormat("ES003: An incorrectly defined IIfcFacetedBrepWithVoids #{0} has been found, a correct shape could not be built and it has been ignored", brepWithVoids->EntityLabel);
 		}
 
-		void XbimCompound::Init(IfcClosedShell^ closedShell)
+		void XbimCompound::Init(IIfcClosedShell^ closedShell)
 		{
-			Init((IfcConnectedFaceSet^)closedShell);
+			Init((IIfcConnectedFaceSet^)closedShell);
 		}
 
 		bool XbimCompound::Sew()
@@ -346,11 +346,11 @@ namespace Xbim
 			else
 				return 0;
 		}
-		void XbimCompound::Init(IEnumerable<IfcFace^>^ faces)
+		void XbimCompound::Init(IEnumerable<IIfcFace^>^ faces)
 		{
 			double tolerance;
-			IModel^ model;
-			for each (IfcFace^ face in faces)
+			Xbim::Common::IModel^ model;
+			for each (IIfcFace^ face in faces)
 			{
 				model = face->ModelOf;
 				tolerance = model->ModelFactors->Precision;
@@ -363,18 +363,18 @@ namespace Xbim
 			TopoDS_Shell shell;
 			builder.MakeShell(shell);
 			TopTools_DataMapOfIntegerShape vertexStore;
-			for each (IfcFace^ unloadedFace in  faces)
+			for each (IIfcFace^ unloadedFace in  faces)
 			{
-				IfcFace^ fc = (IfcFace^) model->Instances[unloadedFace->EntityLabel]; //improves performance and reduces memory load
-				List<Tuple<XbimWire^, IfcPolyLoop^>^>^ loops = gcnew List<Tuple<XbimWire^, IfcPolyLoop^>^>();
-				for each (IfcFaceBound^ bound in fc->Bounds) //build all the loops
+				IIfcFace^ fc = (IIfcFace^) model->Instances[unloadedFace->EntityLabel]; //improves performance and reduces memory load
+				List<Tuple<XbimWire^, IIfcPolyLoop^>^>^ loops = gcnew List<Tuple<XbimWire^, IIfcPolyLoop^>^>();
+				for each (IIfcFaceBound^ bound in fc->Bounds) //build all the loops
 				{
-					if (!dynamic_cast<IfcPolyLoop^>(bound->Bound) || ((IfcPolyLoop^)bound->Bound)->Polygon->Count < 3) continue;//skip non-polygonal faces
-					IfcPolyLoop^polyLoop = (IfcPolyLoop^)bound->Bound;
-					bool is3D = (polyLoop->Polygon[0]->Dim == 3);
+					if (!dynamic_cast<IIfcPolyLoop^>(bound->Bound) || !XbimConvert::IsPolygon((IIfcPolyLoop^)bound->Bound)) continue;//skip non-polygonal faces
+					IIfcPolyLoop^polyLoop = (IIfcPolyLoop^)bound->Bound;
+					bool is3D = XbimConvert::Is3D(polyLoop);
 					BRepBuilderAPI_MakePolygon polyMaker;
 					
-					for each (IfcCartesianPoint^ p in polyLoop->Polygon) //add all the points into unique collection
+					for each (IIfcCartesianPoint^ p in polyLoop->Polygon) //add all the points into unique collection
 					{
 						TopoDS_Vertex v;
 						if (!vertexStore.IsBound(p->EntityLabel))
@@ -395,17 +395,17 @@ namespace Xbim
 						{
 							if (!bound->Orientation)
 								loop->Reverse(); 
-							loops->Add(gcnew Tuple<XbimWire^, IfcPolyLoop^>(loop, polyLoop));
+							loops->Add(gcnew Tuple<XbimWire^, IIfcPolyLoop^>(loop, polyLoop));
 						}
 					}
 				
 				}
 				XbimFace^ face = BuildFace(loops, fc->EntityLabel);
-				for each (Tuple<XbimWire^, IfcPolyLoop^>^ loop in loops) delete loop->Item1; //force removal of wires
+				for each (Tuple<XbimWire^, IIfcPolyLoop^>^ loop in loops) delete loop->Item1; //force removal of wires
 				if (face->IsValid)
 					builder.Add(shell, face);
 				else
-					XbimGeometryCreator::logger->InfoFormat("WC002: Incorrectly defined IfcFace #{0}, it has been ignored", fc->EntityLabel);
+					XbimGeometryCreator::logger->InfoFormat("WC002: Incorrectly defined IIfcFace #{0}, it has been ignored", fc->EntityLabel);
 				//delete face;
 			}
 		
@@ -423,24 +423,24 @@ namespace Xbim
 
 
 		
-		XbimFace^ XbimCompound::BuildFace(List<Tuple<XbimWire^, IfcPolyLoop^>^>^ wires, int label)
+		XbimFace^ XbimCompound::BuildFace(List<Tuple<XbimWire^, IIfcPolyLoop^>^>^ wires, int label)
 		{
 
 			if (wires->Count == 0) return gcnew XbimFace();
-
-			XbimPoint3D p = wires[0]->Item2->Polygon[0]->XbimPoint3D();
-			XbimVector3D n = PolyLoopExtensions::NewellsNormal(wires[0]->Item2);
+			IIfcCartesianPoint^ first = ((IList<IIfcCartesianPoint^>^)(wires[0]->Item2->Polygon))[0];
+			XbimPoint3D p(first->X, first->Y, first->Z);
+			XbimVector3D n = XbimConvert::NewellsNormal(wires[0]->Item2);
 			XbimFace^ face = gcnew XbimFace(wires[0]->Item1, p, n);
 			if (wires->Count == 1) return face; //take the first one
 
 			for (int i = 1; i < wires->Count; i++) face->Add(wires[i]->Item1);
 			IXbimWire^ outerBound = face->OuterBound;
 			XbimVector3D faceNormal;// = outerBound->Normal;
-			for each (Tuple<XbimWire^, IfcPolyLoop^>^ wire in wires)
+			for each (Tuple<XbimWire^, IIfcPolyLoop^>^ wire in wires)
 			{
 				if (wire->Item1->Equals(outerBound))
 				{
-					faceNormal = PolyLoopExtensions::NewellsNormal(wire->Item2);
+					faceNormal = XbimConvert::NewellsNormal(wire->Item2);
 					break;
 				}
 			}
@@ -452,11 +452,11 @@ namespace Xbim
 				XbimWire^ wire = wires[i]->Item1;
 				if (!wire->Equals(outerBound))
 				{
-					XbimVector3D loopNormal = PolyLoopExtensions::NewellsNormal(wires[i]->Item2);
+					XbimVector3D loopNormal = XbimConvert::NewellsNormal(wires[i]->Item2);
 					if (faceNormal.DotProduct(loopNormal) > 0) //they should be in opposite directions, so reverse
 						wire->Reverse();
 					if (!face->Add(wire))
-						XbimGeometryCreator::logger->WarnFormat("WC003: Failed to add an inner bound to IfcFace #{0}", label);
+						XbimGeometryCreator::logger->WarnFormat("WC003: Failed to add an inner bound to IIfcFace #{0}", label);
 				}
 			}
 			return face;

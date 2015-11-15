@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using Xbim.Common.Geometry;
-using Xbim.Ifc2x3.Kernel;
-using Xbim.XbimExtensions;
+using Xbim.Ifc4.Interfaces;
 
 namespace Xbim.ModelGeometry.Scene
 {
@@ -16,7 +14,7 @@ namespace Xbim.ModelGeometry.Scene
         XbimMeshFragmentCollection Meshes { get; set; }
         
         bool Add(XbimGeometryData geometryMeshData, short modelId=0);
-        XbimMeshFragment Add(IXbimGeometryModel geometryModel, IfcProduct product, XbimMatrix3D transform, double? deflection, short modelId = 0);
+        XbimMeshFragment Add(IXbimGeometryModel geometryModel, IIfcProduct product, XbimMatrix3D transform, double? deflection, short modelId = 0);
 
         void MoveTo(IXbimMeshGeometry3D toMesh);
         void BeginUpdate();

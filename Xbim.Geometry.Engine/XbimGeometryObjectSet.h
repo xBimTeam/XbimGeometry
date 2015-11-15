@@ -7,7 +7,7 @@
 #include <Bnd_Array1OfBox.hxx>
 #include <TopTools_ListOfShape.hxx>
 #include <BOPAlgo_Operation.hxx>
-using namespace XbimGeometry::Interfaces;
+
 using namespace System::Collections::Generic;
 using namespace Xbim::Common::Geometry;
 namespace Xbim

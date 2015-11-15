@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Xbim.Common.Geometry;
-using Xbim.Ifc2x3.Kernel;
+﻿using Xbim.Common.Geometry;
 
 namespace Xbim.ModelGeometry.Scene
 {

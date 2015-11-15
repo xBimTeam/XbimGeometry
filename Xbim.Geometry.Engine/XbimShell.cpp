@@ -9,7 +9,7 @@
 #include "XbimFaceSet.h"
 #include "XbimEdgeSet.h"
 #include "XbimShellSet.h"
-#include "XbimGeomPrim.h"
+#include "XbimConvert.h"
 
 
 #include <GProp_GProps.hxx>
@@ -66,12 +66,12 @@ namespace Xbim
 		{
 		}
 
-		XbimShell::XbimShell(IfcOpenShell^ openShell)
+		XbimShell::XbimShell(IIfcOpenShell^ openShell)
 		{
 			Init(openShell);
 		}
 
-		XbimShell::XbimShell(IfcConnectedFaceSet^ fset)
+		XbimShell::XbimShell(IIfcConnectedFaceSet^ fset)
 		{
 			Init(fset);
 		}
@@ -82,7 +82,7 @@ namespace Xbim
 			*pShell = shell;
 		}
 
-		XbimShell::XbimShell(IfcSurfaceOfLinearExtrusion^ linExt)
+		XbimShell::XbimShell(IIfcSurfaceOfLinearExtrusion^ linExt)
 		{
 			Init(linExt);
 		}
@@ -91,7 +91,7 @@ namespace Xbim
 #pragma endregion
 
 		//initialisers
-		void XbimShell::Init(IfcOpenShell^ openShell)
+		void XbimShell::Init(IIfcOpenShell^ openShell)
 		{
 			XbimCompound^ shapes = gcnew XbimCompound(openShell);
 			shapes->Sew();
@@ -99,7 +99,7 @@ namespace Xbim
 			*pShell = (XbimShell^)shapes->MakeShell();
 		}
 
-		void XbimShell::Init(IfcConnectedFaceSet^ connectedFaceSet)
+		void XbimShell::Init(IIfcConnectedFaceSet^ connectedFaceSet)
 		{
 			XbimCompound^ shapes = gcnew XbimCompound(connectedFaceSet);
 			shapes->Sew();
@@ -107,12 +107,12 @@ namespace Xbim
 			*pShell = (XbimShell^)shapes->MakeShell();
 		}
 
-		void XbimShell::Init(IfcSurfaceOfLinearExtrusion ^ linExt)
+		void XbimShell::Init(IIfcSurfaceOfLinearExtrusion ^ linExt)
 		{
 			XbimWire^ prof = gcnew XbimWire(linExt->SweptCurve);
 			if (prof->IsValid && linExt->Depth > 0) //we have a valid wire and extrusion
 			{
-				IfcDirection^ dir = linExt->ExtrudedDirection;
+				IIfcDirection^ dir = linExt->ExtrudedDirection;
 				gp_Vec vec(dir->X, dir->Y, dir->Z);
 				vec *= linExt->Depth;
 				BRepPrimAPI_MakePrism shellMaker(prof, vec);
@@ -120,15 +120,15 @@ namespace Xbim
 				{
 					pShell = new TopoDS_Shell();
 					*pShell = TopoDS::Shell(shellMaker.Shape());
-					pShell->Move(XbimGeomPrim::ToLocation(linExt->Position));
+					pShell->Move(XbimConvert::ToLocation(linExt->Position));
 				}
 				else
-					XbimGeometryCreator::logger->WarnFormat("WH006: Invalid Surface Extrusion, could not create shell, found in Entity #{0}=IfcSurfaceOfLinearExtrusion.",
+					XbimGeometryCreator::logger->WarnFormat("WH006: Invalid Surface Extrusion, could not create shell, found in Entity #{0}=IIfcSurfaceOfLinearExtrusion.",
 					linExt->EntityLabel);
 			}
 			else if (linExt->Depth <= 0)
 			{
-				XbimGeometryCreator::logger->WarnFormat("WS007: Invalid Solid Surface, Extrusion Depth must be >0, found in Entity #{0}=IfcSurfaceOfLinearExtrusion.",
+				XbimGeometryCreator::logger->WarnFormat("WS007: Invalid Solid Surface, Extrusion Depth must be >0, found in Entity #{0}=IIfcSurfaceOfLinearExtrusion.",
 					linExt->EntityLabel);
 			}
 			
@@ -265,14 +265,14 @@ namespace Xbim
 		IXbimGeometryObject^ XbimShell::Transform(XbimMatrix3D matrix3D)
 		{
 			BRepBuilderAPI_Copy copier(this);
-			BRepBuilderAPI_Transform gTran(copier.Shape(), XbimGeomPrim::ToTransform(matrix3D));
+			BRepBuilderAPI_Transform gTran(copier.Shape(), XbimConvert::ToTransform(matrix3D));
 			TopoDS_Shell temp = TopoDS::Shell(gTran.Shape());
 			return gcnew XbimShell(temp);
 		}
 
 		IXbimGeometryObject^ XbimShell::TransformShallow(XbimMatrix3D matrix3D)
 		{
-			TopoDS_Shell shell = TopoDS::Shell(pShell->Moved(XbimGeomPrim::ToTransform(matrix3D)));
+			TopoDS_Shell shell = TopoDS::Shell(pShell->Moved(XbimConvert::ToTransform(matrix3D)));
 			GC::KeepAlive(this);
 			return gcnew XbimShell(shell);
 		}

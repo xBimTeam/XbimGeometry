@@ -8,7 +8,6 @@
 #include <TopTools_DataMapOfIntegerShape.hxx>
 
 using namespace System::Collections::Generic;
-using namespace XbimGeometry::Interfaces;
 using namespace Xbim::Common::Geometry;
 
 namespace Xbim
@@ -27,16 +26,16 @@ namespace Xbim
 				void set(TopoDS_Shell* val)sealed { ptrContainer = IntPtr(val); }
 			}
 			void InstanceCleanup();
-			void Init(IfcOpenShell^ openShell);
-			void Init(IfcConnectedFaceSet^ faceset);
-			void Init(IfcSurfaceOfLinearExtrusion^ linExt);
+			void Init(IIfcOpenShell^ openShell);
+			void Init(IIfcConnectedFaceSet^ faceset);
+			void Init(IIfcSurfaceOfLinearExtrusion^ linExt);
 		public:
 			//Constructors
 			XbimShell();
 			XbimShell(const TopoDS_Shell& shell);
-			XbimShell(IfcOpenShell^ openShell);
-			XbimShell(IfcConnectedFaceSet^ faceset);
-			XbimShell(IfcSurfaceOfLinearExtrusion^ linExt);
+			XbimShell(IIfcOpenShell^ openShell);
+			XbimShell(IIfcConnectedFaceSet^ faceset);
+			XbimShell(IIfcSurfaceOfLinearExtrusion^ linExt);
 			//destructors
 			~XbimShell(){ InstanceCleanup(); }
 			!XbimShell(){ InstanceCleanup(); }

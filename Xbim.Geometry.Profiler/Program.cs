@@ -2,13 +2,12 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
-using ICSharpCode.SharpZipLib.Core;
+using Xbim.Common;
+using Xbim.Common.Geometry;
 using Xbim.Common.Logging;
 using Xbim.IO;
+using Xbim.IO.Esent;
 using Xbim.ModelGeometry.Scene;
-using Xbim.XbimExtensions;
-using Xbim.XbimExtensions.Interfaces;
-using XbimGeometry.Interfaces;
 
 namespace Xbim.Geometry.Profiler
 {
@@ -64,7 +63,7 @@ namespace Xbim.Geometry.Profiler
                             var stopWatch = new Stopwatch();
                             Logger.InfoFormat("Entering -  Create wexBIM");
                             stopWatch.Start();
-                            context.Write(wexBimBinaryWriter);
+                            //context.Write(wexBimBinaryWriter);
                             stopWatch.Stop();
                             Logger.InfoFormat("Complete - in \t\t{0:0.0} ms", stopWatch.ElapsedMilliseconds);
                             wexBimBinaryWriter.Close();

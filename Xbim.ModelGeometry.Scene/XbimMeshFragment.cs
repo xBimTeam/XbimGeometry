@@ -35,7 +35,8 @@ namespace Xbim.ModelGeometry.Scene
         {
             get
             {
-                return IfcMetaData.GetType(_entityTypeId);
+                throw new NotImplementedException();//need to fix this
+               // return IfcMetaData.GetType(_entityTypeId);
             }
         }
 
@@ -64,7 +65,8 @@ namespace Xbim.ModelGeometry.Scene
 
             this.StartPosition = EndPosition = pStart;
             this.StartTriangleIndex = EndTriangleIndex = tStart;
-            this._entityTypeId = IfcMetaData.IfcTypeId(productType);
+            throw new NotImplementedException();//need to fix this
+           // this._entityTypeId = IfcMetaData.IfcTypeId(productType);
             this.EntityLabel = productLabel;
             this.GeometryId = geometryLabel;
             this.ModelId = modelId;

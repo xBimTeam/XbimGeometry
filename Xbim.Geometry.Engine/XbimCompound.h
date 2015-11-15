@@ -9,8 +9,8 @@
 #include <Precision.hxx>
 
 using namespace System::Collections::Generic;
-using namespace XbimGeometry::Interfaces;
-using namespace Xbim::Ifc2x3::TopologyResource;
+
+
 namespace Xbim
 {
 	namespace Geometry
@@ -32,16 +32,16 @@ namespace Xbim
 			double _sewingTolerance;
 			void InstanceCleanup();
 			//Initialisers
-			void Init(IfcConnectedFaceSet^ faceSet);
-			void Init(IEnumerable<IfcFace^>^ faces);
-			void Init(IfcShellBasedSurfaceModel^ sbsm);
-			void Init(IfcFaceBasedSurfaceModel^ fbsm);
-			void Init(IfcManifoldSolidBrep^ solid);
-			void Init(IfcFacetedBrep^ solid);
-			void Init(IfcFacetedBrepWithVoids^ solid);
-			void Init(IfcClosedShell^ solid);
+			void Init(IIfcConnectedFaceSet^ faceSet);
+			void Init(IEnumerable<IIfcFace^>^ faces);
+			void Init(IIfcShellBasedSurfaceModel^ sbsm);
+			void Init(IIfcFaceBasedSurfaceModel^ fbsm);
+			void Init(IIfcManifoldSolidBrep^ solid);
+			void Init(IIfcFacetedBrep^ solid);
+			void Init(IIfcFacetedBrepWithVoids^ solid);
+			void Init(IIfcClosedShell^ solid);
 			//Helpers
-			XbimFace^ BuildFace(List<Tuple<XbimWire^, IfcPolyLoop^>^>^ wires, int label);
+			XbimFace^ BuildFace(List<Tuple<XbimWire^, IIfcPolyLoop^>^>^ wires, int label);
 			static void  GetConnected(HashSet<XbimSolid^>^ connected, Dictionary<XbimSolid^, HashSet<XbimSolid^>^>^ clusters, XbimSolid^ clusterAround);
 			
 			
@@ -50,13 +50,13 @@ namespace Xbim
 			!XbimCompound(){ InstanceCleanup(); }
 			XbimCompound(double sewingTolerance);
 			XbimCompound(const TopoDS_Compound& compound, bool sewn, double tolerance);
-			XbimCompound(IfcConnectedFaceSet^ faceSet);
-			XbimCompound(IfcShellBasedSurfaceModel^ sbsm);
-			XbimCompound(IfcFaceBasedSurfaceModel^ fbsm);
-			XbimCompound(IfcManifoldSolidBrep^ solid);
-			XbimCompound(IfcFacetedBrep^ solid);
-			XbimCompound(IfcFacetedBrepWithVoids^ solid);
-			XbimCompound(IfcClosedShell^ solid);
+			XbimCompound(IIfcConnectedFaceSet^ faceSet);
+			XbimCompound(IIfcShellBasedSurfaceModel^ sbsm);
+			XbimCompound(IIfcFaceBasedSurfaceModel^ fbsm);
+			XbimCompound(IIfcManifoldSolidBrep^ solid);
+			XbimCompound(IIfcFacetedBrep^ solid);
+			XbimCompound(IIfcFacetedBrepWithVoids^ solid);
+			XbimCompound(IIfcClosedShell^ solid);
 			static property XbimCompound^ Empty{XbimCompound^ get(){ return empty; }};
 #pragma region IXbimCompound Interface
 			virtual property bool IsValid {bool get()override{ return ptrContainer != IntPtr::Zero && Count > 0; }; }
@@ -104,7 +104,7 @@ namespace Xbim
 			
 			bool Sew();
 			//moves the compound to the new position
-			void Move(IfcAxis2Placement3D^ position);
+			void Move(IIfcAxis2Placement3D^ position);
 		};
 
 	}

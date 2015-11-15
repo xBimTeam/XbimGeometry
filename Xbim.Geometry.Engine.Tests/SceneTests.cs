@@ -1,12 +1,9 @@
-﻿using System;
-using System.IO;
-using System.Runtime.InteropServices;
+﻿using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Xbim.Common.Geometry;
 using Xbim.Common.XbimExtensions;
 using Xbim.IO;
 using Xbim.ModelGeometry.Scene;
-using XbimGeometry.Interfaces;
 
 namespace GeometryTests
 {

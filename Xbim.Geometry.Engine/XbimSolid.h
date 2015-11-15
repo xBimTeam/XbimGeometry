@@ -7,11 +7,9 @@
 
 using namespace System::Collections::Generic;
 using namespace System::IO;
-using namespace XbimGeometry::Interfaces;
-using namespace Xbim::Ifc2x3::GeometricModelResource;
-using namespace Xbim::Ifc2x3::GeometryResource;
+using namespace Xbim::Ifc4;
 using namespace Xbim::Common::Geometry;
-using namespace Xbim::XbimExtensions::SelectTypes;
+
 namespace Xbim
 {
 	namespace Geometry
@@ -31,34 +29,34 @@ namespace Xbim
 			
 #pragma region Initialisers
 
-			void Init(IfcSolidModel^ solid);
-			void Init(IfcManifoldSolidBrep^ solid);
-			void Init(IfcSweptAreaSolid^ solid, IfcProfileDef^ overrideProfileDef);
-			void Init(IfcExtrudedAreaSolid^ solid, IfcProfileDef^ overrideProfileDef);
-			void Init(IfcSurfaceCurveSweptAreaSolid^ ifcSolid, IfcProfileDef^ overrideProfileDef);
-			void Init(IfcRevolvedAreaSolid^ solid, IfcProfileDef^ overrideProfileDef);
+			void Init(IIfcSolidModel^ solid);
+			void Init(IIfcManifoldSolidBrep^ solid);
+			void Init(IIfcSweptAreaSolid^ solid, IIfcProfileDef^ overrideProfileDef);
+			void Init(IIfcExtrudedAreaSolid^ solid, IIfcProfileDef^ overrideProfileDef);
+			void Init(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid, IIfcProfileDef^ overrideProfileDef);
+			void Init(IIfcRevolvedAreaSolid^ solid, IIfcProfileDef^ overrideProfileDef);
 
-			void Init(IfcSweptDiskSolid^ solid);
-			void Init(IfcBoundingBox^ solid);
-			void Init(IfcHalfSpaceSolid^ solid, double maxExtrusion);
-			void Init(IfcBoxedHalfSpace^ solid);
-			void Init(IfcPolygonalBoundedHalfSpace^ solid, double maxExtrusion);
-			void Init(IfcBooleanResult^ solid);
-			void Init(IfcBooleanOperand^ solid);
+			void Init(IIfcSweptDiskSolid^ solid);
+			void Init(IIfcBoundingBox^ solid);
+			void Init(IIfcHalfSpaceSolid^ solid, double maxExtrusion);
+			void Init(IIfcBoxedHalfSpace^ solid);
+			void Init(IIfcPolygonalBoundedHalfSpace^ solid, double maxExtrusion);
+			void Init(IIfcBooleanResult^ solid);
+			void Init(IIfcBooleanOperand^ solid);
 			void Init(XbimRect3D rect3D, double tolerance);
 
 
-			void Init(IfcCsgPrimitive3D^ ifcSolid);
-			void Init(IfcCsgSolid^ ifcSolid);
-			void Init(IfcSphere^ ifcSolid);
-			void Init(IfcBlock^ ifcSolid);
-			void Init(IfcRightCircularCylinder^ ifcSolid);
-			void Init(IfcRightCircularCone^ ifcSolid);
-			void Init(IfcRectangularPyramid^ ifcSolid);
+			void Init(IIfcCsgPrimitive3D^ IIfcSolid);
+			void Init(IIfcCsgSolid^ IIfcSolid);
+			void Init(IIfcSphere^ IIfcSolid);
+			void Init(IIfcBlock^ IIfcSolid);
+			void Init(IIfcRightCircularCylinder^ IIfcSolid);
+			void Init(IIfcRightCircularCone^ IIfcSolid);
+			void Init(IIfcRectangularPyramid^ IIfcSolid);
 #pragma endregion
 
 		public:
-			static XbimSolid^ BuildClippingList(IfcBooleanResult^ solid, List<IfcBooleanOperand^>^ clipList);
+			static XbimSolid^ BuildClippingList(IIfcBooleanResult^ solid, List<IIfcBooleanOperand^>^ clipList);
 #pragma region Equality Overrides
 			virtual bool Equals(Object^ v) override;
 			virtual int GetHashCode() override;
@@ -101,32 +99,32 @@ namespace Xbim
 #pragma region constructors
 			XbimSolid(){};
 			XbimSolid(const TopoDS_Solid& solid);
-			XbimSolid(IfcSolidModel^ solid);
-			XbimSolid(IfcManifoldSolidBrep^ solid);
-			XbimSolid(IfcSweptAreaSolid^ solid);
-			XbimSolid(IfcSweptAreaSolid^ solid, IfcProfileDef^ overrideProfileDef);
-			XbimSolid(IfcSurfaceCurveSweptAreaSolid^ ifcSolid, IfcProfileDef^ overrideProfileDef); //support for composite profiles
-			XbimSolid(IfcSurfaceCurveSweptAreaSolid^ ifcSolid);
-			XbimSolid(IfcHalfSpaceSolid^ solid, double maxExtrusion);
-			XbimSolid(IfcBoxedHalfSpace^ solid);
-			XbimSolid(IfcPolygonalBoundedHalfSpace^ solid, double maxExtrusion);
-			XbimSolid(IfcExtrudedAreaSolid^ solid);
-			XbimSolid(IfcExtrudedAreaSolid^ ifcSolid, IfcProfileDef^ overrideProfileDef); //support for composite profiles
-			XbimSolid(IfcRevolvedAreaSolid^ solid);
-			XbimSolid(IfcRevolvedAreaSolid^ ifcSolid, IfcProfileDef^ overrideProfileDef); //support for composite profiles
-			XbimSolid(IfcSweptDiskSolid^ solid);
+			XbimSolid(IIfcSolidModel^ solid);
+			XbimSolid(IIfcManifoldSolidBrep^ solid);
+			XbimSolid(IIfcSweptAreaSolid^ solid);
+			XbimSolid(IIfcSweptAreaSolid^ solid, IIfcProfileDef^ overrideProfileDef);
+			XbimSolid(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid, IIfcProfileDef^ overrideProfileDef); //support for composite profiles
+			XbimSolid(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid);
+			XbimSolid(IIfcHalfSpaceSolid^ solid, double maxExtrusion);
+			XbimSolid(IIfcBoxedHalfSpace^ solid);
+			XbimSolid(IIfcPolygonalBoundedHalfSpace^ solid, double maxExtrusion);
+			XbimSolid(IIfcExtrudedAreaSolid^ solid);
+			XbimSolid(IIfcExtrudedAreaSolid^ IIfcSolid, IIfcProfileDef^ overrideProfileDef); //support for composite profiles
+			XbimSolid(IIfcRevolvedAreaSolid^ solid);
+			XbimSolid(IIfcRevolvedAreaSolid^ IIfcSolid, IIfcProfileDef^ overrideProfileDef); //support for composite profiles
+			XbimSolid(IIfcSweptDiskSolid^ solid);
 			
-			XbimSolid(IfcBoundingBox^ solid);
-			XbimSolid(IfcBooleanResult^ solid);
-			XbimSolid(IfcBooleanOperand^ solid);
+			XbimSolid(IIfcBoundingBox^ solid);
+			XbimSolid(IIfcBooleanResult^ solid);
+			XbimSolid(IIfcBooleanOperand^ solid);
 
-			XbimSolid(IfcCsgPrimitive3D^ ifcSolid);
-			XbimSolid(IfcCsgSolid^ ifcSolid);
-			XbimSolid(IfcSphere^ ifcSolid);
-			XbimSolid(IfcBlock^ ifcSolid);
-			XbimSolid(IfcRightCircularCylinder^ ifcSolid);
-			XbimSolid(IfcRightCircularCone^ ifcSolid);
-			XbimSolid(IfcRectangularPyramid^ ifcSolid);
+			XbimSolid(IIfcCsgPrimitive3D^ IIfcSolid);
+			XbimSolid(IIfcCsgSolid^ IIfcSolid);
+			XbimSolid(IIfcSphere^ IIfcSolid);
+			XbimSolid(IIfcBlock^ IIfcSolid);
+			XbimSolid(IIfcRightCircularCylinder^ IIfcSolid);
+			XbimSolid(IIfcRightCircularCone^ IIfcSolid);
+			XbimSolid(IIfcRectangularPyramid^ IIfcSolid);
 			XbimSolid(XbimRect3D rect3D, double tolerance);
 #pragma endregion
 
@@ -140,7 +138,7 @@ namespace Xbim
 		
 #pragma region Methods
 			//moves the solid to the new position
-			void Move(IfcAxis2Placement3D^ position);
+			void Move(IIfcAxis2Placement3D^ position);
 			void Translate(XbimVector3D translation);
 			void Reverse();
 			

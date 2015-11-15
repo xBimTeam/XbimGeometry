@@ -1023,9 +1023,6 @@
     <ClCompile Include="XbimGeometryObjectSet.cpp">
       <Filter>Source files\XbimGeometry</Filter>
     </ClCompile>
-    <ClCompile Include="XbimGeomPrim.cpp">
-      <Filter>Source files\XbimGeometry</Filter>
-    </ClCompile>
     <ClCompile Include="XbimLinearEdge.cpp">
       <Filter>Source files\XbimGeometry</Filter>
     </ClCompile>
@@ -5184,6 +5181,9 @@
     <ClCompile Include="OCC\src\Adaptor2d\Adaptor2d_HLine2d_0.cxx">
       <Filter>Source files\TKG2d\Adaptor2d</Filter>
     </ClCompile>
+    <ClCompile Include="XbimConvert.cpp">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source files">
@@ -6916,9 +6916,6 @@
       <Filter>Source files\XbimGeometry</Filter>
     </ClInclude>
     <ClInclude Include="XbimGeometryObjectSet.h">
-      <Filter>Source files\XbimGeometry</Filter>
-    </ClInclude>
-    <ClInclude Include="XbimGeomPrim.h">
       <Filter>Source files\XbimGeometry</Filter>
     </ClInclude>
     <ClInclude Include="XbimLinearEdge.h">
@@ -15974,6 +15971,9 @@
     </ClInclude>
     <ClInclude Include="OCC\src\CSLib\CSLib_Offset.hxx">
       <Filter>Source files\TKMath\CSLib</Filter>
+    </ClInclude>
+    <ClInclude Include="XbimConvert.h">
+      <Filter>Source files\XbimGeometry</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -9,7 +9,7 @@
 #include <BRepAlgoAPI_Cut.hxx>
 #include <ShapeFix_ShapeTolerance.hxx>
 #include <BRepPrimAPI_MakePrism.hxx>
-#include "XbimGeomPrim.h"
+#include "XbimConvert.h"
 using namespace System;
 using namespace Xbim::Common;
 namespace Xbim
@@ -48,30 +48,30 @@ namespace Xbim
 			solids = gcnew  List<IXbimSolid^>(1);
 			solids->Add(solid);
 		}
-		XbimSolidSet::XbimSolidSet(IfcBooleanResult^ boolOp)
+		XbimSolidSet::XbimSolidSet(IIfcBooleanResult^ boolOp)
 		{
 			Init(boolOp);
 		}
 
-		XbimSolidSet::XbimSolidSet(IfcManifoldSolidBrep^ solid)
+		XbimSolidSet::XbimSolidSet(IIfcManifoldSolidBrep^ solid)
 		{
 			XbimCompound^ comp = gcnew XbimCompound(solid);
 			Init(comp, solid->EntityLabel);
 			
 		}
-		XbimSolidSet::XbimSolidSet(IfcFacetedBrep^ solid)
+		XbimSolidSet::XbimSolidSet(IIfcFacetedBrep^ solid)
 		{
 			XbimCompound^ comp = gcnew XbimCompound(solid);
 			Init(comp, solid->EntityLabel);
 		}
 
-		XbimSolidSet::XbimSolidSet(IfcFacetedBrepWithVoids^ solid)
+		XbimSolidSet::XbimSolidSet(IIfcFacetedBrepWithVoids^ solid)
 		{
 			XbimCompound^ comp = gcnew XbimCompound(solid);
 			Init(comp, solid->EntityLabel);
 		}
 
-		XbimSolidSet::XbimSolidSet(IfcClosedShell^ solid)
+		XbimSolidSet::XbimSolidSet(IIfcClosedShell^ solid)
 		{
 			XbimCompound^ comp = gcnew XbimCompound(solid);
 			Init(comp, solid->EntityLabel);
@@ -83,22 +83,22 @@ namespace Xbim
 		}
 		
 
-		XbimSolidSet::XbimSolidSet(IfcSweptAreaSolid^ repItem)
+		XbimSolidSet::XbimSolidSet(IIfcSweptAreaSolid^ repItem)
 		{
 			Init(repItem);
 		}
-		XbimSolidSet::XbimSolidSet(IfcRevolvedAreaSolid^ solid)
+		XbimSolidSet::XbimSolidSet(IIfcRevolvedAreaSolid^ solid)
 		{
 			Init(solid);
 		}
 
-		XbimSolidSet::XbimSolidSet(IfcExtrudedAreaSolid^ repItem)
+		XbimSolidSet::XbimSolidSet(IIfcExtrudedAreaSolid^ repItem)
 		{
 			Init(repItem);
 
 		}
 
-		XbimSolidSet::XbimSolidSet(IfcSurfaceCurveSweptAreaSolid^ repItem)
+		XbimSolidSet::XbimSolidSet(IIfcSurfaceCurveSweptAreaSolid^ repItem)
 		{
 			Init(repItem);
 		}
@@ -200,7 +200,7 @@ namespace Xbim
 			}
 			return gcnew XbimSolidSet(result);
 		}
-		void XbimSolidSet::Move(IfcAxis2Placement3D^ position)
+		void XbimSolidSet::Move(IIfcAxis2Placement3D^ position)
 		{
 			if (!IsValid) return;			
 			for each (IXbimSolid^ solid in solids)
@@ -641,7 +641,7 @@ namespace Xbim
 			if (!comp->IsValid || comp->Count == 0)
 			{
 				solids = gcnew  List<IXbimSolid^>();
-				XbimGeometryCreator::logger->WarnFormat("WSS13: Invalid IfcManifoldSolidBrep #{0}", label);
+				XbimGeometryCreator::logger->WarnFormat("WSS13: Invalid IIfcManifoldSolidBrep #{0}", label);
 			}
 			else
 			{
@@ -664,23 +664,24 @@ namespace Xbim
 						solids->Add((XbimSolid^)geom);
 				}
 				if (solids->Count == 0)
-					XbimGeometryCreator::logger->WarnFormat("WSS14: Invalid IfcManifoldSolidBrep #{0}", label);
+					XbimGeometryCreator::logger->WarnFormat("WSS14: Invalid IIfcManifoldSolidBrep #{0}", label);
 			}
 		}
 
-		void XbimSolidSet::Init(IfcSweptAreaSolid^ repItem)
+		void XbimSolidSet::Init(IIfcSweptAreaSolid^ repItem)
 		{
-			IfcCompositeProfileDef^ compProfile = dynamic_cast<IfcCompositeProfileDef^>(repItem->SweptArea);
+			IIfcCompositeProfileDef^ compProfile = dynamic_cast<IIfcCompositeProfileDef^>(repItem->SweptArea);
+			int profileCount = ((IList<IIfcProfileDef^>^)compProfile->Profiles)->Count;
 			if (compProfile != nullptr) //handle these as composite solids
 			{
-				if (compProfile->Profiles->Count == 0)
+				if (profileCount == 0)
 				{
-					XbimGeometryCreator::logger->WarnFormat("WS0015: Invalid number of profiles in IfcCompositeProfileDef #{0}. It must be 2 or more. Profile discarded", compProfile->EntityLabel);
+					XbimGeometryCreator::logger->WarnFormat("WS0015: Invalid number of profiles in IIfcCompositeProfileDef #{0}. It must be 2 or more. Profile discarded", compProfile->EntityLabel);
 					return;
 				}
-				if (compProfile->Profiles->Count == 1)
+				if (profileCount == 1)
 				{
-					XbimGeometryCreator::logger->InfoFormat("IS0016: Invalid number of profiles in IfcCompositeProfileDef #{0}. It must be 2 or more. A single Profile has been used", compProfile->EntityLabel);
+					XbimGeometryCreator::logger->InfoFormat("IS0016: Invalid number of profiles in IIfcCompositeProfileDef #{0}. It must be 2 or more. A single Profile has been used", compProfile->EntityLabel);
 					XbimSolid^ s = gcnew XbimSolid(repItem);
 					if (s->IsValid)
 					{
@@ -690,7 +691,7 @@ namespace Xbim
 					return;
 				}
 				solids = gcnew List<IXbimSolid^>();
-				for each (IfcProfileDef^ profile in compProfile->Profiles)
+				for each (IIfcProfileDef^ profile in compProfile->Profiles)
 				{
 					XbimSolid^ aSolid = gcnew XbimSolid(repItem, profile);
 					if (aSolid->IsValid)
@@ -707,19 +708,20 @@ namespace Xbim
 				}
 			}
 		}
-		void XbimSolidSet::Init(IfcRevolvedAreaSolid^ repItem)
+		void XbimSolidSet::Init(IIfcRevolvedAreaSolid^ repItem)
 		{
-			IfcCompositeProfileDef^ compProfile = dynamic_cast<IfcCompositeProfileDef^>(repItem->SweptArea);
+			IIfcCompositeProfileDef^ compProfile = dynamic_cast<IIfcCompositeProfileDef^>(repItem->SweptArea);
+			int profileCount = ((IList<IIfcProfileDef^>^)compProfile->Profiles)->Count;
 			if (compProfile != nullptr) //handle these as composite solids
 			{
-				if (compProfile->Profiles->Count == 0)
+				if (profileCount == 0)
 				{
-					XbimGeometryCreator::logger->WarnFormat("WS0015: Invalid number of profiles in IfcCompositeProfileDef #{0}. It must be 2 or more. Profile discarded", compProfile->EntityLabel);
+					XbimGeometryCreator::logger->WarnFormat("WS0015: Invalid number of profiles in IIfcCompositeProfileDef #{0}. It must be 2 or more. Profile discarded", compProfile->EntityLabel);
 					return;
 				}
-				if (compProfile->Profiles->Count == 1)
+				if (profileCount == 1)
 				{
-					XbimGeometryCreator::logger->InfoFormat("IS0016: Invalid number of profiles in IfcCompositeProfileDef #{0}. It must be 2 or more. A single Profile has been used", compProfile->EntityLabel);
+					XbimGeometryCreator::logger->InfoFormat("IS0016: Invalid number of profiles in IIfcCompositeProfileDef #{0}. It must be 2 or more. A single Profile has been used", compProfile->EntityLabel);
 					XbimSolid^ s = gcnew XbimSolid(repItem);
 					if (s->IsValid)
 					{
@@ -729,7 +731,7 @@ namespace Xbim
 					return;
 				}
 				solids = gcnew List<IXbimSolid^>();
-				for each (IfcProfileDef^ profile in compProfile->Profiles)
+				for each (IIfcProfileDef^ profile in compProfile->Profiles)
 				{
 					XbimSolid^ aSolid = gcnew XbimSolid(repItem, profile);
 					if (aSolid->IsValid)
@@ -747,19 +749,20 @@ namespace Xbim
 			}
 		}
 
-		void XbimSolidSet::Init(IfcExtrudedAreaSolid^ repItem)
+		void XbimSolidSet::Init(IIfcExtrudedAreaSolid^ repItem)
 		{
-			IfcCompositeProfileDef^ compProfile = dynamic_cast<IfcCompositeProfileDef^>(repItem->SweptArea);
+			IIfcCompositeProfileDef^ compProfile = dynamic_cast<IIfcCompositeProfileDef^>(repItem->SweptArea);
+			int profileCount = ((IList<IIfcProfileDef^>^)compProfile->Profiles)->Count;
 			if (compProfile!=nullptr) //handle these as composite solids
 			{
-				if (compProfile->Profiles->Count == 0)
+				if (profileCount == 0)
 				{
-					XbimGeometryCreator::logger->WarnFormat("WS0015: Invalid number of profiles in IfcCompositeProfileDef #{0}. It must be 2 or more. Profile discarded", compProfile->EntityLabel);
+					XbimGeometryCreator::logger->WarnFormat("WS0015: Invalid number of profiles in IIfcCompositeProfileDef #{0}. It must be 2 or more. Profile discarded", compProfile->EntityLabel);
 					return;
 				}
-				if (compProfile->Profiles->Count == 1)
+				if (profileCount == 1)
 				{
-					XbimGeometryCreator::logger->InfoFormat("IS0016: Invalid number of profiles in IfcCompositeProfileDef #{0}. It must be 2 or more. A single Profile has been used", compProfile->EntityLabel);
+					XbimGeometryCreator::logger->InfoFormat("IS0016: Invalid number of profiles in IIfcCompositeProfileDef #{0}. It must be 2 or more. A single Profile has been used", compProfile->EntityLabel);
 					XbimSolid^ s = gcnew XbimSolid(repItem);
 					if (s->IsValid)
 					{
@@ -769,7 +772,7 @@ namespace Xbim
 					return;
 				}				
 				solids = gcnew List<IXbimSolid^>();
-				for each (IfcProfileDef^ profile in compProfile->Profiles)
+				for each (IIfcProfileDef^ profile in compProfile->Profiles)
 				{
 					XbimSolid^ aSolid = gcnew XbimSolid(repItem, profile);
 					if (aSolid->IsValid)
@@ -787,19 +790,20 @@ namespace Xbim
 			}
 		}
 
-		void XbimSolidSet::Init(IfcSurfaceCurveSweptAreaSolid^ repItem)
+		void XbimSolidSet::Init(IIfcSurfaceCurveSweptAreaSolid^ repItem)
 		{
-			IfcCompositeProfileDef^ compProfile = dynamic_cast<IfcCompositeProfileDef^>(repItem->SweptArea);
+			IIfcCompositeProfileDef^ compProfile = dynamic_cast<IIfcCompositeProfileDef^>(repItem->SweptArea);
+			int profileCount = ((IList<IIfcProfileDef^>^)compProfile->Profiles)->Count;
 			if (compProfile != nullptr) //handle these as composite solids
 			{
-				if (compProfile->Profiles->Count == 0)
+				if (profileCount == 0)
 				{
-					XbimGeometryCreator::logger->WarnFormat("WS0015: Invalid number of profiles in IfcCompositeProfileDef #{0}. It must be 2 or more. Profile discarded", compProfile->EntityLabel);
+					XbimGeometryCreator::logger->WarnFormat("WS0015: Invalid number of profiles in IIfcCompositeProfileDef #{0}. It must be 2 or more. Profile discarded", compProfile->EntityLabel);
 					return;
 				}
-				if (compProfile->Profiles->Count == 1)
+				if (profileCount == 1)
 				{
-					XbimGeometryCreator::logger->InfoFormat("IS0016: Invalid number of profiles in IfcCompositeProfileDef #{0}. It must be 2 or more. A single Profile has been used", compProfile->EntityLabel);
+					XbimGeometryCreator::logger->InfoFormat("IS0016: Invalid number of profiles in IIfcCompositeProfileDef #{0}. It must be 2 or more. A single Profile has been used", compProfile->EntityLabel);
 					XbimSolid^ s = gcnew XbimSolid(repItem);
 					if (s->IsValid)
 					{
@@ -809,7 +813,7 @@ namespace Xbim
 					return;
 				}
 				solids = gcnew List<IXbimSolid^>();
-				for each (IfcProfileDef^ profile in compProfile->Profiles)
+				for each (IIfcProfileDef^ profile in compProfile->Profiles)
 				{
 					XbimSolid^ aSolid = gcnew XbimSolid(repItem, profile);
 					if (aSolid->IsValid)
@@ -829,39 +833,39 @@ namespace Xbim
 
 
 
-		void XbimSolidSet::Init(IfcBooleanResult^ boolOp)
+		void XbimSolidSet::Init(IIfcBooleanResult^ boolOp)
 		{
 			solids = gcnew List<IXbimSolid^>();
-			IfcBooleanOperand^ fOp = boolOp->FirstOperand; //thse must be solids according to the schema
-			IfcBooleanOperand^ sOp = boolOp->SecondOperand;
+			IIfcBooleanOperand^ fOp = boolOp->FirstOperand; //thse must be solids according to the schema
+			IIfcBooleanOperand^ sOp = boolOp->SecondOperand;
 			XbimSolid^ left = gcnew XbimSolid(fOp);
 			XbimSolid^ right = gcnew XbimSolid(sOp);
 			if (!left->IsValid)
 			{
-				XbimGeometryCreator::logger->WarnFormat("WS006: IfcBooleanResult #{0} with invalid first operand", boolOp->EntityLabel);
+				XbimGeometryCreator::logger->WarnFormat("WS006: IIfcBooleanResult #{0} with invalid first operand", boolOp->EntityLabel);
 				return;
 			}
 
 			if (!right->IsValid)
 			{
-				XbimGeometryCreator::logger->WarnFormat("WS007: IfcBooleanResult #{0} with invalid second operand", boolOp->EntityLabel);
+				XbimGeometryCreator::logger->WarnFormat("WS007: IIfcBooleanResult #{0} with invalid second operand", boolOp->EntityLabel);
 				solids->Add(left); //return the left operand
 				return;
 			}
 
-			XbimModelFactors^ mf = boolOp->ModelOf->ModelFactors;
+			IModelFactors^ mf = boolOp->ModelOf->ModelFactors;
 			IXbimSolidSet^ result;
 			try
 			{
 				switch (boolOp->Operator)
 				{
-				case IfcBooleanOperator::Union:
+				case Ifc4::GeometricModelResource::IfcBooleanOperator::UNION:
 					result = left->Union(right, mf->PrecisionBoolean);
 					break;
-				case IfcBooleanOperator::Intersection:
+				case Xbim::Ifc4::GeometricModelResource::IfcBooleanOperator::INTERSECTION:
 					result = left->Intersection(right, mf->PrecisionBoolean);
 					break;
-				case IfcBooleanOperator::Difference:
+				case Xbim::Ifc4::GeometricModelResource::IfcBooleanOperator::DIFFERENCE:
 					result = left->Cut(right, mf->PrecisionBoolean);
 					break;
 				}

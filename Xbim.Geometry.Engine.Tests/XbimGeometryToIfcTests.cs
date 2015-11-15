@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Xbim.Geometry.Engine.Interop;
+using Xbim.Ifc2x3.Extensions;
 using Xbim.Ifc2x3.ProductExtension;
 using Xbim.Ifc2x3.RepresentationResource;
 using Xbim.IO;
-using XbimGeometry.Interfaces;
-using Xbim.Ifc2x3.Extensions;
-using System.Linq;
+
 namespace GeometryTests
 {
     [DeploymentItem(@"x64\", "x64")]

@@ -4,7 +4,6 @@
 #include <TopoDS.hxx>
 #include <TopTools_ListOfShape.hxx>
 
-using namespace XbimGeometry::Interfaces;
 using namespace System::Collections::Generic;
 namespace Xbim
 {

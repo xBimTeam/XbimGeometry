@@ -1,6 +1,5 @@
 #pragma once
 using namespace System;
-using namespace XbimGeometry::Interfaces;
 using namespace Xbim::Common::Geometry;
 using namespace System::Collections::Generic;
 namespace Xbim

@@ -5,9 +5,8 @@ using Xbim.Ifc2x3.GeometricModelResource;
 using Xbim.Common.Logging;
 using Xbim.IO;
 using Xbim.Ifc2x3.GeometryResource;
-using Xbim.Geometry;
 using Xbim.ModelGeometry.Scene;
-using XbimGeometry.Interfaces;
+
 
 namespace GeometryTests
 {

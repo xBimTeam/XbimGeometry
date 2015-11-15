@@ -1,30 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Text;
-using Xbim.Ifc2x3.MeasureResource;
-using Xbim.Ifc2x3.PresentationAppearanceResource;
-using Xbim.Ifc2x3.PresentationResource;
+﻿using System.Runtime.Serialization;
+using Xbim.Ifc4.Interfaces;
+using Xbim.Ifc4.MeasureResource;
+using Xbim.Ifc4.PresentationAppearanceResource;
 
 namespace Xbim.ModelGeometry.Scene
 {
     /// <summary>
-    /// Class to hold the surface style or texture of an object, corresponds to IfcSurfaceStyle and OpenGL Texture
+    /// Class to hold the surface style or texture of an object, corresponds to IIfcSurfaceStyle and OpenGL Texture
     /// Does not handle bitmap textured surfaces etc at present
     /// </summary>
     [DataContract]
     public class XbimTexture 
     {
         [DataMember(Name = "Style")]
-        public XbimColourMap ColourMap = new XbimColourMap();
+        public readonly XbimColourMap ColourMap = new XbimColourMap();
         /// <summary>
         /// The object that this style defines
         /// </summary>
         [DataMember(Name="Id")]
         public int DefinedObjectId{get;set;}
-        bool renderBothFaces = true;
-        bool switchFrontAndRearFaces = false;
+
+        bool _renderBothFaces = true;
+        bool _switchFrontAndRearFaces = false;
         [DataMember(Name="DTC")]
         public XbimColour DiffuseTransmissionColour;
         [DataMember(Name = "TC")]
@@ -34,19 +31,19 @@ namespace Xbim.ModelGeometry.Scene
         [DataMember(Name = "RC")]
         public XbimColour ReflectanceColour;
 
-        public XbimTexture CreateTexture(IfcSurfaceStyle surfaceStyle)
+        public XbimTexture CreateTexture(IIfcSurfaceStyle surfaceStyle)
         {
-            DefinedObjectId = (int)surfaceStyle.EntityLabel;
+            DefinedObjectId = surfaceStyle.EntityLabel;
             //set render one or both faces
-            renderBothFaces = (surfaceStyle.Side == IfcSurfaceSide.BOTH);
+            _renderBothFaces = (surfaceStyle.Side == IfcSurfaceSide.BOTH);
             //switch if required
-            switchFrontAndRearFaces = (surfaceStyle.Side == IfcSurfaceSide.NEGATIVE);
+            _switchFrontAndRearFaces = (surfaceStyle.Side == IfcSurfaceSide.NEGATIVE);
             ColourMap.Clear();
             foreach (var style in surfaceStyle.Styles)
             {
-                if (style is IfcSurfaceStyleRendering) AddColour((IfcSurfaceStyleRendering)style);
-                else if (style is IfcSurfaceStyleShading) AddColour((IfcSurfaceStyleShading)style);
-                else if (style is IfcSurfaceStyleLighting) AddLighting((IfcSurfaceStyleLighting)style);
+                if (style is IIfcSurfaceStyleRendering) AddColour((IIfcSurfaceStyleRendering)style);
+                else if (style is IIfcSurfaceStyleShading) AddColour((IIfcSurfaceStyleShading)style);
+                else if (style is IIfcSurfaceStyleLighting) AddLighting((IIfcSurfaceStyleLighting)style);
             }
             return this;
         }
@@ -54,7 +51,7 @@ namespace Xbim.ModelGeometry.Scene
         public override int GetHashCode()
         {
 
-            int hash = ColourMap.GetHashCode() ^ (renderBothFaces ? 1 : 0) ^ (switchFrontAndRearFaces ? 1 : 0);
+            int hash = ColourMap.GetHashCode() ^ (_renderBothFaces ? 1 : 0) ^ (_switchFrontAndRearFaces ? 1 : 0);
             if(DiffuseTransmissionColour!=null) hash^=DiffuseTransmissionColour.GetHashCode();
             if(TransmissionColour!=null) hash^=TransmissionColour.GetHashCode();
             if (DiffuseReflectionColour != null) hash ^= DiffuseReflectionColour.GetHashCode();
@@ -73,12 +70,12 @@ namespace Xbim.ModelGeometry.Scene
             return isSame;
         }
 
-        private void AddColour(IfcSurfaceStyleShading shading)
+        private void AddColour(IIfcSurfaceStyleShading shading)
         {
             ColourMap.Add(new XbimColour(shading.SurfaceColour));
         }
 
-        private void AddColour(IfcSurfaceStyleRendering rendering)
+        private void AddColour(IIfcSurfaceStyleRendering rendering)
         {
             if (rendering.DiffuseColour is IfcNormalisedRatioMeasure)
             {
@@ -89,10 +86,10 @@ namespace Xbim.ModelGeometry.Scene
                     ));
 
             }
-            else if (rendering.DiffuseColour is IfcColourRgb)
+            else if (rendering.DiffuseColour is IIfcColourRgb)
             {
                 ColourMap.Add(new XbimColour(
-                    (IfcColourRgb)rendering.DiffuseColour,
+                    (IIfcColourRgb)rendering.DiffuseColour,
                     rendering.Transparency.HasValue ? 1.0 - rendering.Transparency.Value : 1.0
                     ));
 
@@ -113,17 +110,17 @@ namespace Xbim.ModelGeometry.Scene
                     (IfcNormalisedRatioMeasure)(rendering.SpecularColour)
                     ));
             }
-            else if (rendering.SpecularColour is IfcColourRgb)
+            else if (rendering.SpecularColour is IIfcColourRgb)
             {
                 ColourMap.Add(new XbimColour(
-                    (IfcColourRgb)rendering.SpecularColour,
+                    (IIfcColourRgb)rendering.SpecularColour,
                     rendering.Transparency.HasValue ? 1.0 - rendering.Transparency.Value : 1.0
                     ));
 
             }
         }
 
-        private void AddLighting(IfcSurfaceStyleLighting lighting)
+        private void AddLighting(IIfcSurfaceStyleLighting lighting)
         {
             DiffuseReflectionColour = new XbimColour(lighting.DiffuseReflectionColour);
             DiffuseTransmissionColour = new XbimColour(lighting.DiffuseTransmissionColour);
@@ -132,29 +129,29 @@ namespace Xbim.ModelGeometry.Scene
         }
 
 
-        public XbimTexture CreateTexture(IfcColourRgb colour)
+        public XbimTexture CreateTexture(IIfcColourRgb colour)
         {
-            DefinedObjectId = (int)colour.EntityLabel;
+            DefinedObjectId = colour.EntityLabel;
             ColourMap.Clear();
             ColourMap.Add(new XbimColour(colour));
             return this;
         }
 
-        public XbimTexture CreateTexture(IfcSurfaceStyleRendering rendering)
+        public XbimTexture CreateTexture(IIfcSurfaceStyleRendering rendering)
         {
-            DefinedObjectId = (int)rendering.EntityLabel; 
+            DefinedObjectId = rendering.EntityLabel; 
             ColourMap.Clear();
             AddColour(rendering);
             return this;
             
         }
 
-        public XbimTexture CreateTexture(IfcSurfaceStyleShading shading)
+        public XbimTexture CreateTexture(IIfcSurfaceStyleShading shading)
         {
-            DefinedObjectId = (int)shading.EntityLabel; 
+            DefinedObjectId = shading.EntityLabel; 
             ColourMap.Clear();
-            if (shading is IfcSurfaceStyleRendering)
-                AddColour((IfcSurfaceStyleRendering)shading);
+            if (shading is IIfcSurfaceStyleRendering)
+                AddColour((IIfcSurfaceStyleRendering)shading);
             else
                 AddColour(shading);
             return this;
@@ -204,12 +201,12 @@ namespace Xbim.ModelGeometry.Scene
         [DataMember]
         public bool RenderBothFaces
         {
-            get { return renderBothFaces; }
+            get { return _renderBothFaces; }
         }
         [DataMember]
         public bool SwitchFrontAndRearFaces
         {
-            get { return switchFrontAndRearFaces; }
+            get { return _switchFrontAndRearFaces; }
         }
 
         public XbimTexture CreateTexture(XbimColour colour)

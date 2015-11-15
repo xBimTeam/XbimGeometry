@@ -1,23 +1,17 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.Remoting;
-
 using Xbim.Common.Geometry;
 using Xbim.Common.Logging;
-using Xbim.Ifc2x3.GeometricModelResource;
-using Xbim.Ifc2x3.GeometryResource;
-using Xbim.Ifc2x3.ProfileResource;
-using Xbim.Ifc2x3.TopologyResource;
-using Xbim.IO; 
-using Xbim.XbimExtensions.SelectTypes;
-using XbimGeometry.Interfaces;
+using Xbim.Ifc4.Interfaces;
+
 
 namespace Xbim.Geometry.Engine.Interop
 {  
-    public class XbimGeometryEngine : IXbimGeometryCreator
+    public class XbimGeometryEngine : IXbimGeometryEngine
     {
 
-        private readonly IXbimGeometryCreator _engine;
+        private readonly IXbimGeometryEngine _engine;
 
         static XbimGeometryEngine()
         {
@@ -36,9 +30,9 @@ namespace Xbim.Geometry.Engine.Interop
             string assemblyName = "Xbim.Geometry.Engine" + conventions.Suffix;
 
             ObjectHandle oh = Activator.CreateInstance(assemblyName, "Xbim.Geometry.XbimGeometryCreator");
-            _engine = oh.Unwrap() as IXbimGeometryCreator;   
+            _engine = oh.Unwrap() as IXbimGeometryEngine;   
         }
-        public IXbimGeometryObject Create(IfcGeometricRepresentationItem ifcRepresentation)
+        public IXbimGeometryObject Create(IIfcGeometricRepresentationItem ifcRepresentation)
         {
             return Create(ifcRepresentation, null);
         }
@@ -58,171 +52,206 @@ namespace Xbim.Geometry.Engine.Interop
             return _engine.CreateShapeGeometry(geometryObject, precision, deflection, 0.5, XbimGeometryType.Polyhedron);
         }
 
-        public IXbimSolid CreateSolid(IfcSweptAreaSolid ifcSolid)
+        public IXbimSolid CreateSolid(IIfcSweptAreaSolid ifcSolid)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IfcExtrudedAreaSolid ifcSolid)
+        public IXbimSolid CreateSolid(IIfcExtrudedAreaSolid ifcSolid)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IfcRevolvedAreaSolid ifcSolid)
+        public IXbimSolid CreateSolid(IIfcRevolvedAreaSolid ifcSolid)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IfcSweptDiskSolid ifcSolid)
+        public IXbimSolid CreateSolid(IIfcSweptDiskSolid ifcSolid)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IfcBoundingBox ifcSolid)
+        public IXbimSolid CreateSolid(IIfcBoundingBox ifcSolid)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IfcSurfaceCurveSweptAreaSolid ifcSolid)
+        public IXbimSolid CreateSolid(IIfcSurfaceCurveSweptAreaSolid ifcSolid)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IfcBooleanClippingResult ifcSolid)
+        public IXbimSolid CreateSolid(IIfcBooleanClippingResult ifcSolid)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IfcBooleanOperand ifcSolid)
+        public IXbimSolid CreateSolid(IIfcBooleanOperand ifcSolid)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IfcHalfSpaceSolid ifcSolid)
+        public IXbimSolid CreateSolid(IIfcHalfSpaceSolid ifcSolid)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IfcPolygonalBoundedHalfSpace ifcSolid)
+        public IXbimSolid CreateSolid(IIfcPolygonalBoundedHalfSpace ifcSolid)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IfcBoxedHalfSpace ifcSolid)
+        public IXbimSolid CreateSolid(IIfcBoxedHalfSpace ifcSolid)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolidSet CreateSolidSet(IfcManifoldSolidBrep ifcSolid)
+        public IXbimSolidSet CreateSolidSet(IIfcManifoldSolidBrep ifcSolid)
         {
             return _engine.CreateSolidSet(ifcSolid);
         }
 
-        public IXbimSolidSet CreateSolidSet(IfcFacetedBrep ifcSolid)
+        public IXbimSolidSet CreateSolidSet(IIfcFacetedBrep ifcSolid)
         {
             return _engine.CreateSolidSet(ifcSolid);
         }
 
-        public IXbimSolidSet CreateSolidSet(IfcFacetedBrepWithVoids ifcSolid)
+        public IXbimSolidSet CreateSolidSet(IIfcFacetedBrepWithVoids ifcSolid)
         {
             return _engine.CreateSolidSet(ifcSolid);
         }
 
-        public IXbimSolidSet CreateSolidSet(IfcClosedShell ifcSolid)
+        public IXbimSolidSet CreateSolidSet(IIfcClosedShell ifcSolid)
         {
             return _engine.CreateSolidSet(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IfcCsgPrimitive3D ifcSolid)
+        public IXbimSolid CreateSolid(IIfcCsgPrimitive3D ifcSolid)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IfcCsgSolid ifcSolid)
+        public IXbimSolid CreateSolid(IIfcCsgSolid ifcSolid)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IfcSphere ifcSolid)
+        public IXbimSolid CreateSolid(IIfcSphere ifcSolid)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IfcBlock ifcSolid)
+        public IXbimSolid CreateSolid(IIfcBlock ifcSolid)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IfcRightCircularCylinder ifcSolid)
+        public IXbimSolid CreateSolid(IIfcRightCircularCylinder ifcSolid)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IfcRightCircularCone ifcSolid)
+        public IXbimSolid CreateSolid(IIfcRightCircularCone ifcSolid)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IfcRectangularPyramid ifcSolid)
+        public IXbimSolid CreateSolid(IIfcRectangularPyramid ifcSolid)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimShell CreateShell(IfcOpenShell shell)
+        public IXbimSolid CreateSolid(IIfcSweptDiskSolidPolygonal ifcSolid)
+        {
+            return _engine.CreateSolid(ifcSolid);
+        }
+
+        public IXbimSolid CreateSolid(IIfcRevolvedAreaSolidTapered ifcSolid)
+        {
+            return _engine.CreateSolid(ifcSolid);
+        }
+
+        public IXbimSolid CreateSolid(IIfcFixedReferenceSweptAreaSolid ifcSolid)
+        {
+            return _engine.CreateSolid(ifcSolid);
+        }
+
+        public IXbimSolid CreateSolid(IIfcAdvancedBrep ifcSolid)
+        {
+            return _engine.CreateSolid(ifcSolid);
+        }
+
+        public IXbimSolid CreateSolid(IIfcAdvancedBrepWithVoids ifcSolid)
+        {
+            return _engine.CreateSolid(ifcSolid);
+        }
+
+        public IXbimSolid CreateSolid(IIfcSectionedSpine ifcSolid)
+        {
+            return _engine.CreateSolid(ifcSolid);
+        }
+
+        public IXbimShell CreateShell(IIfcOpenShell shell)
         {
             return _engine.CreateShell(shell);
         }
 
-        public IXbimShell CreateShell(IfcConnectedFaceSet shell)
+        public IXbimShell CreateShell(IIfcConnectedFaceSet shell)
         {
             return _engine.CreateShell(shell);
         }
 
-        public IXbimShell CreateShell(IfcSurfaceOfLinearExtrusion linExt)
+        public IXbimShell CreateShell(IIfcSurfaceOfLinearExtrusion linExt)
         {
             return _engine.CreateShell(linExt);
         }
 
-        public IXbimGeometryObjectSet CreateSurfaceModel(IfcShellBasedSurfaceModel ifcSurface)
+        public IXbimShell CreateShell(IIfcTriangulatedFaceSet shell)
+        {
+            return _engine.CreateShell(shell);
+        }
+
+        public IXbimGeometryObjectSet CreateSurfaceModel(IIfcShellBasedSurfaceModel ifcSurface)
         {
             return _engine.CreateSurfaceModel(ifcSurface);
         }
 
-        public IXbimGeometryObjectSet CreateSurfaceModel(IfcFaceBasedSurfaceModel ifcSurface)
+        public IXbimGeometryObjectSet CreateSurfaceModel(IIfcFaceBasedSurfaceModel ifcSurface)
         {
             return _engine.CreateSurfaceModel(ifcSurface);
         }
 
-        public IXbimFace CreateFace(IfcProfileDef profileDef)
+        public IXbimFace CreateFace(IIfcProfileDef profileDef)
         {
             return _engine.CreateFace(profileDef);
         }
 
        
-        public IXbimFace CreateFace(IfcCompositeCurve cCurve)
+        public IXbimFace CreateFace(IIfcCompositeCurve cCurve)
         {
             return _engine.CreateFace(cCurve);
 
         }
-        public IXbimFace CreateFace(IfcPolyline pline)
+        public IXbimFace CreateFace(IIfcPolyline pline)
         {
             return _engine.CreateFace(pline);
 
         }
 
-        public IXbimFace CreateFace(IfcPolyLoop loop)
+        public IXbimFace CreateFace(IIfcPolyLoop loop)
         {
             return _engine.CreateFace(loop);
         }
 
 
-        public IXbimFace CreateFace(IfcSurface surface)
+        public IXbimFace CreateFace(IIfcSurface surface)
         {
             return _engine.CreateFace(surface);
 
         }
 
-        public IXbimFace CreateFace(IfcPlane plane)
+        public IXbimFace CreateFace(IIfcPlane plane)
         {
             return _engine.CreateFace(plane);
 
@@ -233,12 +262,12 @@ namespace Xbim.Geometry.Engine.Interop
 
         }
 
-        public IXbimWire CreateWire(IfcCurve curve)
+        public IXbimWire CreateWire(IIfcCurve curve)
         {
             return _engine.CreateWire(curve);
         }
 
-        public IXbimWire CreateWire(IfcCompositeCurveSegment compCurveSeg)
+        public IXbimWire CreateWire(IIfcCompositeCurveSegment compCurveSeg)
         {
             return _engine.CreateWire(compCurveSeg);
         }
@@ -248,7 +277,7 @@ namespace Xbim.Geometry.Engine.Interop
             return _engine.CreatePoint(x, y, z, tolerance);
         }
 
-        public IXbimPoint CreatePoint(IfcCartesianPoint p)
+        public IXbimPoint CreatePoint(IIfcCartesianPoint p)
         {
             return _engine.CreatePoint(p);
         }
@@ -258,17 +287,17 @@ namespace Xbim.Geometry.Engine.Interop
             return _engine.CreatePoint(p, tolerance);
         }
 
-        public IXbimPoint CreatePoint(IfcPoint pt)
+        public IXbimPoint CreatePoint(IIfcPoint pt)
         {
             return _engine.CreatePoint(pt);
         }
 
-        public IXbimPoint CreatePoint(IfcPointOnCurve p)
+        public IXbimPoint CreatePoint(IIfcPointOnCurve p)
         {
             return _engine.CreatePoint(p);
         }
 
-        public IXbimPoint CreatePoint(IfcPointOnSurface p)
+        public IXbimPoint CreatePoint(IIfcPointOnSurface p)
         {
             return _engine.CreatePoint(p);
         }
@@ -278,17 +307,13 @@ namespace Xbim.Geometry.Engine.Interop
             return _engine.CreateVertexPoint(point, precision);
         }
 
-        public IfcFacetedBrep CreateFacetedBrep(XbimModel model, IXbimSolid solid)
-        {
-            return _engine.CreateFacetedBrep(model, solid);
-        }
 
         public IXbimSolidSet CreateSolidSet()
         {
             return _engine.CreateSolidSet();
         }
 
-        public IXbimSolidSet CreateSolidSet(IfcBooleanResult boolOp)
+        public IXbimSolidSet CreateSolidSet(IIfcBooleanResult boolOp)
         {
             return _engine.CreateSolidSet(boolOp);
         }
@@ -317,7 +342,7 @@ namespace Xbim.Geometry.Engine.Interop
 
 
 
-        public IXbimGeometryObject Create(IfcGeometricRepresentationItem ifcRepresentation, IfcAxis2Placement3D objectLocation)
+        public IXbimGeometryObject Create(IIfcGeometricRepresentationItem ifcRepresentation, IIfcAxis2Placement3D objectLocation)
         {
             try
             {
@@ -335,5 +360,8 @@ namespace Xbim.Geometry.Engine.Interop
         {
             return _engine.CreateGeometryObjectSet();
         }
+
+        
+
     }
 }

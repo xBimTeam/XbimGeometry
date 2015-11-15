@@ -5,8 +5,7 @@
 #include <BRepBuilderAPI_MakeEdge.hxx>
 
 using namespace System;
-using namespace XbimGeometry::Interfaces;
-using namespace Xbim::Ifc2x3::GeometryResource;
+using namespace Xbim::Ifc4::Interfaces;
 namespace Xbim
 {
 	namespace Geometry
@@ -23,14 +22,12 @@ namespace Xbim
 			}
 			void InstanceCleanup();
 #pragma region Initialisation
-			void Init(IfcCurve^ edge);
-			void Init(IfcConic^ edge);
-			void Init(IfcCircle^ edge);
-			void Init(IfcLine^ edge);
-			void Init(IfcEllipse^ edge);
-			void Init(IfcBSplineCurve^ bez);
-			void Init(IfcBezierCurve^ bez);
-			void Init(IfcRationalBezierCurve^ bez);
+			void Init(IIfcCurve^ edge);
+			void Init(IIfcConic^ edge);
+			void Init(IIfcCircle^ edge);
+			void Init(IIfcLine^ edge);
+			void Init(IIfcEllipse^ edge);
+			void Init(IIfcBSplineCurve^ bez);
 
 #pragma endregion
 
@@ -45,14 +42,12 @@ namespace Xbim
 #pragma region Constructors
 			XbimEdge(IXbimVertex^ edgeStart, IXbimVertex^ edgeEnd);
 			XbimEdge(const TopoDS_Edge& edge);
-			XbimEdge(IfcCurve^ edge);
-			XbimEdge(IfcConic^ edge);
-			XbimEdge(IfcCircle^ edge);
-			XbimEdge(IfcLine^ edge);
-			XbimEdge(IfcEllipse^ edge);
-			XbimEdge(IfcBSplineCurve^ bez);
-			XbimEdge(IfcBezierCurve^ bez);
-			XbimEdge(IfcRationalBezierCurve^ bez);
+			XbimEdge(IIfcCurve^ edge);
+			XbimEdge(IIfcConic^ edge);
+			XbimEdge(IIfcCircle^ edge);
+			XbimEdge(IIfcLine^ edge);
+			XbimEdge(IIfcEllipse^ edge);
+			XbimEdge(IIfcBSplineCurve^ bez);
 			XbimEdge(const TopoDS_Wire& wire, double tolerance, double angleTolerance);
 #pragma endregion
 

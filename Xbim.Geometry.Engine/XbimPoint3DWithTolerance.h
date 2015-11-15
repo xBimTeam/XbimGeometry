@@ -1,8 +1,7 @@
 #pragma once
 #include "XbimGeometryObject.h"
 using namespace Xbim::Common::Geometry;
-using namespace XbimGeometry::Interfaces;
-using namespace Xbim::Ifc2x3::GeometryResource;
+using namespace Xbim::Ifc4::Interfaces;
 namespace Xbim
 {
 	namespace Geometry
@@ -23,8 +22,8 @@ namespace Xbim
 			XbimPoint3DWithTolerance(double x, double y, double z, double tolerance);
 			XbimPoint3DWithTolerance(XbimPoint3D point, double t);
 			XbimPoint3DWithTolerance(IXbimPoint^ point);
-			XbimPoint3DWithTolerance(IfcPointOnCurve^ point);
-			XbimPoint3DWithTolerance(IfcPointOnSurface^ point);
+			XbimPoint3DWithTolerance(IIfcPointOnCurve^ point);
+			XbimPoint3DWithTolerance(IIfcPointOnSurface^ point);
 #pragma region Interface Overrides
 			virtual property bool IsValid{bool get() { return true; }; }
 			virtual property bool IsSet{bool get() { return false; }; }
