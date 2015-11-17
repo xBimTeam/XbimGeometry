@@ -298,12 +298,19 @@ namespace Xbim
 			if (comp->IsValid)
 			{
 				comp->Sew();
-				XbimSolidSet^ ss = gcnew XbimSolidSet(comp);
-				if (ss->Count > 0)
+				XbimShell^ shell = (XbimShell^)comp->MakeShell();
+				IXbimSolid^ solid = shell->MakeSolid();
+				if (solid->IsValid)
 				{
-					pSolid = new TopoDS_Solid();
-					*pSolid = (XbimSolid^)ss->First;
+					XbimSolidSet^ ss = gcnew XbimSolidSet(solid);
+					if (ss->Count > 0)
+					{
+						pSolid = new TopoDS_Solid();
+						*pSolid = (XbimSolid^)ss->First;
+					}
 				}
+				else 
+					XbimGeometryCreator::logger->WarnFormat("WS032: IfcManifoldSolidBrep #{0} could not be built as a solid", bRep->EntityLabel);
 			}
 		}
 
@@ -884,7 +891,7 @@ namespace Xbim
 			//	XbimSolidSet^ solids = gcnew XbimSolidSet(br);
 			//	if (solids->First!=nullptr)
 			//	pSolid = new TopoDS_Solid();
-			//	XbimSolid^ solid  = (XbimSolid^)solids->First;
+			//	XbimSolid^ solid  = (XbimSolid^)solids->First;fz
 			//	*pSolid = solid;
 			//	return;
 			//}
