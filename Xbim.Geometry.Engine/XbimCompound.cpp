@@ -33,8 +33,7 @@
 
 
 using namespace System;
-using namespace Xbim::XbimExtensions;
-
+using namespace System::Linq;
 namespace Xbim
 {
 	namespace Geometry
@@ -123,42 +122,42 @@ namespace Xbim
 
 		XbimCompound::XbimCompound(IIfcConnectedFaceSet^ faceSet)
 		{
-			_sewingTolerance = faceSet->ModelOf->ModelFactors->Precision;
+			_sewingTolerance = faceSet->Model->ModelFactors->Precision;
 			Init(faceSet); 
 		}
 
 		XbimCompound::XbimCompound(IIfcShellBasedSurfaceModel^ sbsm)
 		{
-			_sewingTolerance = sbsm->ModelOf->ModelFactors->Precision;
+			_sewingTolerance = sbsm->Model->ModelFactors->Precision;
 			Init(sbsm); 
 		}
 
 		XbimCompound::XbimCompound(IIfcFaceBasedSurfaceModel^ fbsm)
 		{
-			_sewingTolerance = fbsm->ModelOf->ModelFactors->Precision;
+			_sewingTolerance = fbsm->Model->ModelFactors->Precision;
 			Init(fbsm); 
 		}
 
 		XbimCompound::XbimCompound(IIfcManifoldSolidBrep^ solid)
 		{
-			_sewingTolerance = solid->ModelOf->ModelFactors->Precision;
+			_sewingTolerance = solid->Model->ModelFactors->Precision;
 			Init(solid);
 		}
 		XbimCompound::XbimCompound(IIfcFacetedBrep^ solid)
 		{
-			_sewingTolerance = solid->ModelOf->ModelFactors->Precision;
+			_sewingTolerance = solid->Model->ModelFactors->Precision;
 			Init(solid);
 		}
 
 		XbimCompound::XbimCompound(IIfcFacetedBrepWithVoids^ solid)
 		{
-			_sewingTolerance = solid->ModelOf->ModelFactors->Precision;
+			_sewingTolerance = solid->Model->ModelFactors->Precision;
 			Init(solid);
 		}
 
 		XbimCompound::XbimCompound(IIfcClosedShell^ solid)
 		{
-			_sewingTolerance = solid->ModelOf->ModelFactors->Precision;
+			_sewingTolerance = solid->Model->ModelFactors->Precision;
 			Init(solid);
 		}
 
@@ -235,23 +234,14 @@ namespace Xbim
 
 		void XbimCompound::Init(IIfcConnectedFaceSet^ faceSet)
 		{
-			int faceCount = ((IList<IIfcFace^>^)faceSet->CfsFaces)->Count;
-			if (faceCount == 0)
+			
+			if (!Enumerable::Any(faceSet->CfsFaces))
 			{
 				XbimGeometryCreator::logger->WarnFormat("WC001: IIfcConnectedFaceSet #{0}, is empty", faceSet->EntityLabel);
 				return;
 			}
 			Init(faceSet->CfsFaces);
-			
-			/*if (faceSet->CfsFaces->Count < 50)
-			{
 
-			for each (IXbimGeometryObject^ geomObj in this)
-			{
-			XbimShell^ shell = dynamic_cast<XbimShell^>(geomObj);
-			if (shell != nullptr) shell->Orientate();
-			}
-			}*/
 		}
 
 
@@ -352,7 +342,7 @@ namespace Xbim
 			Xbim::Common::IModel^ model;
 			for each (IIfcFace^ face in faces)
 			{
-				model = face->ModelOf;
+				model = face->Model;
 				tolerance = model->ModelFactors->Precision;
 				_sewingTolerance = model->ModelFactors->Precision;			
 				break;
@@ -370,7 +360,7 @@ namespace Xbim
 				for each (IIfcFaceBound^ bound in fc->Bounds) //build all the loops
 				{
 					if (!dynamic_cast<IIfcPolyLoop^>(bound->Bound) || !XbimConvert::IsPolygon((IIfcPolyLoop^)bound->Bound)) continue;//skip non-polygonal faces
-					IIfcPolyLoop^polyLoop = (IIfcPolyLoop^)bound->Bound;
+					IIfcPolyLoop^ polyLoop = (IIfcPolyLoop^)(bound->Bound);
 					bool is3D = XbimConvert::Is3D(polyLoop);
 					BRepBuilderAPI_MakePolygon polyMaker;
 					
@@ -427,7 +417,7 @@ namespace Xbim
 		{
 
 			if (wires->Count == 0) return gcnew XbimFace();
-			IIfcCartesianPoint^ first = ((IList<IIfcCartesianPoint^>^)(wires[0]->Item2->Polygon))[0];
+			IIfcCartesianPoint^ first = Enumerable::First(wires[0]->Item2->Polygon);
 			XbimPoint3D p(first->X, first->Y, first->Z);
 			XbimVector3D n = XbimConvert::NewellsNormal(wires[0]->Item2);
 			XbimFace^ face = gcnew XbimFace(wires[0]->Item1, p, n);

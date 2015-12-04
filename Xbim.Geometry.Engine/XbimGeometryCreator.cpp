@@ -19,6 +19,7 @@
 #include <ShapeFix_ShapeTolerance.hxx>
 #include <BRep_Builder.hxx>
 using namespace  System::Threading;
+using namespace  System::Linq;
 using namespace Xbim::Common;
 namespace Xbim
 {
@@ -144,9 +145,9 @@ namespace Xbim
 			return XbimGeometryObjectSet::Empty;
 		}
 
-		IXbimShapeGeometryData^ XbimGeometryCreator::CreateShapeGeometry(IXbimGeometryObject^ geometryObject, double precision, double deflection, double angle, XbimGeometryType storageType)
+		XbimShapeGeometry^ XbimGeometryCreator::CreateShapeGeometry(IXbimGeometryObject^ geometryObject, double precision, double deflection, double angle, XbimGeometryType storageType)
 		{
-			IXbimShapeGeometryData^ shapeGeom = gcnew XbimShapeGeometry();
+			XbimShapeGeometry^ shapeGeom = gcnew XbimShapeGeometry();
 			
 			if (geometryObject->IsSet)
 			{
@@ -184,7 +185,7 @@ namespace Xbim
 						delete tw;
 					}
 					memStream->Flush();
-					shapeGeom->ShapeData = memStream->ToArray();
+					((IXbimShapeGeometryData^)shapeGeom)->ShapeData = memStream->ToArray();
 					delete memStream;
 
 					if (shapeGeom->ShapeData->Length > 0)
@@ -214,7 +215,7 @@ namespace Xbim
 					delete tw;
 				}
 				memStream->Flush();
-				shapeGeom->ShapeData = memStream->ToArray();
+				((IXbimShapeGeometryData^)shapeGeom)->ShapeData = memStream->ToArray();
 				delete memStream;
 				if (shapeGeom->ShapeData->Length > 0)
 				{					
@@ -229,7 +230,7 @@ namespace Xbim
 
 		IXbimGeometryObjectSet^ XbimGeometryCreator::CreateGeometricSet(IIfcGeometricSet^ geomSet)
 		{
-			XbimGeometryObjectSet^ result = gcnew XbimGeometryObjectSet(((IList<IIfcGeometricSetSelect^>^)geomSet->Elements)->Count);
+			XbimGeometryObjectSet^ result = gcnew XbimGeometryObjectSet(Enumerable::Count(geomSet->Elements));
 			for each (IIfcGeometricSetSelect^ elem in geomSet->Elements)
 			{	
 				if (dynamic_cast<IIfcPoint^>(elem)) result->Add(CreatePoint((IIfcPoint^)elem));
@@ -246,7 +247,7 @@ namespace Xbim
 
 		IXbimPoint^ XbimGeometryCreator::CreatePoint(IIfcCartesianPoint^ p)
 		{
-			return gcnew XbimPoint3DWithTolerance(XbimPoint3D(p->X,p->Y,p->Z), p->ModelOf->ModelFactors->Precision);
+			return gcnew XbimPoint3DWithTolerance(XbimPoint3D(p->X,p->Y,p->Z), p->Model->ModelFactors->Precision);
 		}
 		
 		IXbimPoint^ XbimGeometryCreator::CreatePoint(IIfcPointOnCurve^ p)
@@ -725,7 +726,7 @@ namespace Xbim
 
 		IXbimSolidSet^ XbimGeometryCreator::CreateBooleanResult(IIfcBooleanResult^ clip)
 		{
-			IModelFactors^ mf = clip->ModelOf->ModelFactors;
+			IModelFactors^ mf = clip->Model->ModelFactors;
 			
 #ifdef OCC_6_9_SUPPORTED			
 			
@@ -805,13 +806,13 @@ namespace Xbim
 			{
 				switch (clip->Operator)
 				{
-				case Xbim::Ifc4::GeometricModelResource::IfcBooleanOperator::UNION:
+				case IfcBooleanOperator::UNION:
 					result = left->Union(right, mf->PrecisionBoolean);
 					break;
-				case  Xbim::Ifc4::GeometricModelResource::IfcBooleanOperator::INTERSECTION:
+				case IfcBooleanOperator::INTERSECTION:
 					result = left->Intersection(right, mf->PrecisionBoolean);
 					break;
-				case Xbim::Ifc4::GeometricModelResource::IfcBooleanOperator::DIFFERENCE:
+				case IfcBooleanOperator::DIFFERENCE:
 					result = left->Cut(right, mf->PrecisionBoolean);
 					break;
 				}

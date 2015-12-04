@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using Xbim.Common;
 using Xbim.Common.Geometry;
+using Xbim.Ifc;
 using Xbim.Ifc4.Kernel;
 using Xbim.Ifc4.PresentationAppearanceResource;
 
@@ -136,7 +137,7 @@ namespace Xbim.ModelGeometry.Scene
         /// Creates a mesh using the default colour (typically white)
         /// </summary>
         public XbimMeshLayer(IModel m)
-            :this(m, XbimColour.Default)
+            :this(m, XbimColour.DefaultColour)
         {
            
         }
@@ -149,7 +150,7 @@ namespace Xbim.ModelGeometry.Scene
         public XbimMeshLayer(IModel m, XbimColour colour)
         {
             Model = m;
-            Style = new XbimTexture().CreateTexture(colour);
+            Style =  XbimTexture.Create(colour);
         }
 
         public XbimMeshLayer(IModel m, XbimColour colour, XbimColourMap subCategoryColourMap)
@@ -161,7 +162,7 @@ namespace Xbim.ModelGeometry.Scene
         public XbimMeshLayer(IModel m, IfcSurfaceStyle style)
         {
             Model = m;
-            Style = new XbimTexture().CreateTexture(style);
+            Style =  XbimTexture.Create(style);
            
         }
         public XbimMeshLayer(XbimTexture xbimTexture)
@@ -177,7 +178,7 @@ namespace Xbim.ModelGeometry.Scene
 
         public XbimMeshLayer(XbimColour colour)
         {
-            Style = new XbimTexture().CreateTexture(colour);
+            Style = XbimTexture.Create(colour);
         }
 
         public static implicit operator TMesh(XbimMeshLayer<TMesh, TMaterial> layer)

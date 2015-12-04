@@ -6,7 +6,7 @@
 #include "XbimCompound.h"
 using namespace System;
 using namespace System::IO;
-using namespace Xbim::IO;
+
 namespace Xbim
 {
 	namespace Geometry

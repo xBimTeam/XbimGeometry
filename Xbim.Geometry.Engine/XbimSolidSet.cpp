@@ -11,6 +11,7 @@
 #include <BRepPrimAPI_MakePrism.hxx>
 #include "XbimConvert.h"
 using namespace System;
+using namespace System::Linq;
 using namespace Xbim::Common;
 namespace Xbim
 {
@@ -671,7 +672,7 @@ namespace Xbim
 		void XbimSolidSet::Init(IIfcSweptAreaSolid^ repItem)
 		{
 			IIfcCompositeProfileDef^ compProfile = dynamic_cast<IIfcCompositeProfileDef^>(repItem->SweptArea);
-			int profileCount = ((IList<IIfcProfileDef^>^)compProfile->Profiles)->Count;
+			int profileCount = Enumerable::Count(compProfile->Profiles);
 			if (compProfile != nullptr) //handle these as composite solids
 			{
 				if (profileCount == 0)
@@ -711,7 +712,7 @@ namespace Xbim
 		void XbimSolidSet::Init(IIfcRevolvedAreaSolid^ repItem)
 		{
 			IIfcCompositeProfileDef^ compProfile = dynamic_cast<IIfcCompositeProfileDef^>(repItem->SweptArea);
-			int profileCount = ((IList<IIfcProfileDef^>^)compProfile->Profiles)->Count;
+			int profileCount = Enumerable::Count(compProfile->Profiles);
 			if (compProfile != nullptr) //handle these as composite solids
 			{
 				if (profileCount == 0)
@@ -752,7 +753,7 @@ namespace Xbim
 		void XbimSolidSet::Init(IIfcExtrudedAreaSolid^ repItem)
 		{
 			IIfcCompositeProfileDef^ compProfile = dynamic_cast<IIfcCompositeProfileDef^>(repItem->SweptArea);
-			int profileCount = ((IList<IIfcProfileDef^>^)compProfile->Profiles)->Count;
+			int profileCount = Enumerable::Count(compProfile->Profiles);
 			if (compProfile!=nullptr) //handle these as composite solids
 			{
 				if (profileCount == 0)
@@ -793,7 +794,7 @@ namespace Xbim
 		void XbimSolidSet::Init(IIfcSurfaceCurveSweptAreaSolid^ repItem)
 		{
 			IIfcCompositeProfileDef^ compProfile = dynamic_cast<IIfcCompositeProfileDef^>(repItem->SweptArea);
-			int profileCount = ((IList<IIfcProfileDef^>^)compProfile->Profiles)->Count;
+			int profileCount = Enumerable::Count(compProfile->Profiles);
 			if (compProfile != nullptr) //handle these as composite solids
 			{
 				if (profileCount == 0)
@@ -853,19 +854,19 @@ namespace Xbim
 				return;
 			}
 
-			IModelFactors^ mf = boolOp->ModelOf->ModelFactors;
+			IModelFactors^ mf = boolOp->Model->ModelFactors;
 			IXbimSolidSet^ result;
 			try
 			{
 				switch (boolOp->Operator)
 				{
-				case Ifc4::GeometricModelResource::IfcBooleanOperator::UNION:
+				case IfcBooleanOperator::UNION:
 					result = left->Union(right, mf->PrecisionBoolean);
 					break;
-				case Xbim::Ifc4::GeometricModelResource::IfcBooleanOperator::INTERSECTION:
+				case IfcBooleanOperator::INTERSECTION:
 					result = left->Intersection(right, mf->PrecisionBoolean);
 					break;
-				case Xbim::Ifc4::GeometricModelResource::IfcBooleanOperator::DIFFERENCE:
+				case IfcBooleanOperator::DIFFERENCE:
 					result = left->Cut(right, mf->PrecisionBoolean);
 					break;
 				}

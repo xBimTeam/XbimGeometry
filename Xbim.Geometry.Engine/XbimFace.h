@@ -83,6 +83,7 @@ namespace Xbim
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) override;
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D)override;
 			virtual property bool IsQuadOrTriangle{bool get(); }
+			virtual void SaveAsBrep(String^ fileName);
 #pragma endregion
 
 			property bool IsReversed{bool get(){ return IsValid && pFace->Orientation() == TopAbs_REVERSED; }; }

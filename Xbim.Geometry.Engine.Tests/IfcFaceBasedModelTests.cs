@@ -1,15 +1,11 @@
 ﻿using System.IO;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Xbim.Geometry.Engine.Interop;
-using Xbim.Ifc2x3.TopologyResource;
-using Xbim.IO;
-using Xbim.Ifc2x3.GeometricModelResource;
+using Xbim.Common.Geometry;
 using Xbim.Common.Logging;
-using Xbim.Ifc2x3.GeometricConstraintResource;
-using Xbim.Ifc2x3.GeometryResource;
-using Xbim.Ifc2x3.ProductExtension;
-
+using Xbim.Geometry.Engine.Interop;
+using Xbim.Ifc;
+using Xbim.Ifc4.Interfaces;
 
 namespace GeometryTests
 {
@@ -27,22 +23,23 @@ namespace GeometryTests
         [TestMethod]
         public void CutNonSolidBrep()
         {
-            using (var eventTrace = LoggerFactory.CreateEventTrace())
+
+            using (var m = IfcStore.Open("SolidTestFiles\\Complex_BRep_Boolean.ifc"))
             {
-                using (var m = new XbimModel())
+                var fbr = m.Instances[35] as IIfcFacetedBrep;
+                Assert.IsTrue(fbr != null, "No IfcFacetedBRep found");
+                var bodyShape = (IXbimShell)((IXbimGeometryObjectSet)_xbimGeometryCreator.Create(fbr)).First();
+                Assert.IsTrue(bodyShape.IsValid, "Invalid IfcFacetedBRep");
+                var opening = m.Instances[133218] as IIfcExtrudedAreaSolid;
+                Assert.IsTrue(opening != null, "No IfcExtrudedAreaSolid found");
+                var window = m.Instances[133212] as IIfcOpeningElement;
+                if (window != null)
                 {
-                    m.CreateFrom("SolidTestFiles\\Complex_BRep_Boolean.ifc", null, null, true, true);
-                    var fbr = m.Instances[35] as IfcFacetedBrep;
-                    Assert.IsTrue(fbr != null, "No IfcFacetedBRep found");
-                    var bodyShape = (IXbimShell)((IXbimGeometryObjectSet)_xbimGeometryCreator.Create(fbr)).First();
-                    Assert.IsTrue(bodyShape.IsValid, "Invalid IfcFacetedBRep");
-                    var opening = m.Instances[133218] as IfcExtrudedAreaSolid;
-                    Assert.IsTrue(opening != null, "No IfcExtrudedAreaSolid found");
-                    var window = m.Instances[133212] as IfcOpeningElement;
-                    var cutShape = (IXbimSolid)_xbimGeometryCreator.Create(opening, (IfcAxis2Placement3D)((IfcLocalPlacement)window.ObjectPlacement).RelativePlacement);
-                    var result =  bodyShape.Cut(cutShape, m.ModelFactors.OneMilliMetre);
+                    var cutShape = (IXbimSolid)_xbimGeometryCreator.Create(opening, (IIfcAxis2Placement3D)((IIfcLocalPlacement)window.ObjectPlacement).RelativePlacement);
+                    bodyShape.Cut(cutShape, m.ModelFactors.OneMilliMetre);
                 }
             }
+
         }
 
 
@@ -53,24 +50,21 @@ namespace GeometryTests
         [TestMethod]
         public void IfcFacetedBRepWithMultipleSolids()
         {
-            using (var eventTrace = LoggerFactory.CreateEventTrace())
-            {
-                using (var m = new XbimModel())
-                {
-                    m.CreateFrom("SolidTestFiles\\12 - Multiple FacetedBrep.ifc", null, null, true, true);
-                    var fbr = m.Instances[25] as IfcFacetedBrep;
-                    Assert.IsTrue(fbr != null, "No IfcFacetedBRep found");
-                    int faceCount = fbr.Outer.CfsFaces.Count;
-                    
-                    var solids = _xbimGeometryCreator.CreateSolidSet(fbr);
 
-                    Assert.IsTrue(solids.Count == 11, "Expected 11 solids");
-                    foreach (var solid in solids)
-                    {
-                        IfcCsgTests.GeneralTest(solid, true);
-                    }
+            using (var m = IfcStore.Open("SolidTestFiles\\12 - Multiple FacetedBrep.ifc"))
+            {
+                var fbr = m.Instances[25] as IIfcFacetedBrep;
+                Assert.IsTrue(fbr != null, "No IfcFacetedBRep found");
+
+                var solids = _xbimGeometryCreator.CreateSolidSet(fbr);
+
+                Assert.IsTrue(solids.Count == 11, "Expected 11 solids");
+                foreach (var solid in solids)
+                {
+                    IfcCsgTests.GeneralTest(solid, true);
                 }
             }
+
         }
 
         [TestMethod]
@@ -78,12 +72,11 @@ namespace GeometryTests
         {
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new XbimModel())
+                using (var m = IfcStore.Open("SolidTestFiles\\12 - Multiple FacetedBrep.ifc"))
                 {
-                    m.CreateFrom("SolidTestFiles\\12 - Multiple FacetedBrep.ifc", null, null, true, true);
-                    var fbr = m.Instances[780] as IfcFacetedBrep;
+                    var fbr = m.Instances[780] as IIfcFacetedBrep;
                     Assert.IsTrue(fbr != null, "No IfcFacetedBRep found");
-                    int faceCount = fbr.Outer.CfsFaces.Count;
+                    int faceCount = fbr.Outer.CfsFaces.Count();
                     
                     var solids = _xbimGeometryCreator.CreateSolidSet(fbr);
                     Assert.IsTrue(eventTrace.Events.Count == 0, "Warning or Error events were raised"); //we should have no warnings
@@ -102,12 +95,10 @@ namespace GeometryTests
         {
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new XbimModel())
+                using (var m = IfcStore.Open("SolidTestFiles\\IfcFacetedBRepWithIncorrectlyOrientedFaces.ifc"))
                 {
-                    m.CreateFrom("SolidTestFiles\\IfcFacetedBRepWithIncorrectlyOrientedFaces.ifc", null, null, true, true);
-                    var fbr = m.Instances[98711] as IfcFacetedBrep;
+                    var fbr = m.Instances[98711] as IIfcFacetedBrep;
                     Assert.IsTrue(fbr != null, "No IfcFacetedBRep found");
-                    int faceCount = fbr.Outer.CfsFaces.Count;
 
                     var compound = _xbimGeometryCreator.Create(fbr);
                     Assert.IsTrue(eventTrace.Events.Count == 0, "Warning or Error events were raised"); //we should have no warnings
@@ -127,12 +118,11 @@ namespace GeometryTests
         {
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new XbimModel())
+                using (var m = IfcStore.Open("SolidTestFiles\\16 - IfcShellBasedSurfaceModel.ifc"))
                 {
-                    m.CreateFrom("SolidTestFiles\\16 - IfcShellBasedSurfaceModel.ifc", null, null, true, true);
-                    var sbsm = m.Instances[38] as IfcShellBasedSurfaceModel;
+                    var sbsm = m.Instances[38] as IIfcShellBasedSurfaceModel;
                     Assert.IsTrue(sbsm != null, "No IfcShellBasedSurfaceModel found");
-                    Assert.IsTrue(sbsm.SbsmBoundary.First is IfcOpenShell, "ifc OpenShell not found");
+                    Assert.IsTrue(sbsm.SbsmBoundary.First() is IIfcOpenShell, "ifc OpenShell not found");
                     
                     _xbimGeometryCreator.CreateSurfaceModel(sbsm);
                     Assert.IsTrue(eventTrace.Events.Count == 0, "Warning or Error events were raised");
@@ -147,10 +137,9 @@ namespace GeometryTests
         {
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new XbimModel())
+                using (var m = IfcStore.Open("SolidTestFiles\\17 - IfcFaceBasedSurfaceModel.ifc"))
                 {
-                    m.CreateFrom("SolidTestFiles\\17 - IfcFaceBasedSurfaceModel.ifc", null, null, true, true);
-                    var fbsm = m.Instances[29] as IfcFaceBasedSurfaceModel;
+                    var fbsm = m.Instances[29] as IIfcFaceBasedSurfaceModel;
                     Assert.IsTrue(fbsm != null, "No IfcFaceBasedSurfaceModel found");
 
                     

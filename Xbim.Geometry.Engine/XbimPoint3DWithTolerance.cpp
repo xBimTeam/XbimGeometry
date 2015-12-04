@@ -29,14 +29,14 @@ namespace Xbim
 		{
 			XbimWire^ w = gcnew XbimWire(point->BasisCurve);
 			this->point = w->PointAtParameter(point->PointParameter);
-			this->tolerance = point->ModelOf->ModelFactors->Precision;
+			this->tolerance = point->Model->ModelFactors->Precision;
 		}
 
 		XbimPoint3DWithTolerance::XbimPoint3DWithTolerance(IIfcPointOnSurface^ point)
 		{
 			XbimFace^ f = gcnew XbimFace(point->BasisSurface);
 			this->point = f->PointAtParameters(point->PointParameterU, point->PointParameterV);
-			this->tolerance = point->ModelOf->ModelFactors->Precision;
+			this->tolerance = point->Model->ModelFactors->Precision;
 		}
 
 

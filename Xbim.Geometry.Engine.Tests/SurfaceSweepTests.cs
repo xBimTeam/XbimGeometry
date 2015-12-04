@@ -1,6 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Xbim.Common.Geometry;
+using Xbim.Common.Step21;
 using Xbim.Geometry.Engine.Interop;
+using Xbim.Ifc;
 using Xbim.IO;
 
 namespace GeometryTests
@@ -16,7 +18,7 @@ namespace GeometryTests
         public void IfcCenterLineProfileDefTest()
         {
 
-            using (var m = XbimModel.CreateTemporaryModel())
+            using (var m = IfcStore.Create(new XbimEditorCredentials(), IfcSchemaVersion.Ifc4, XbimStoreType.InMemoryModel))
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -32,7 +34,7 @@ namespace GeometryTests
         [TestMethod]
         public void IfcSurfaceOfLinearExtrusionTest()
         {
-            using (var m = XbimModel.CreateTemporaryModel())
+            using (var m = IfcStore.Create(new XbimEditorCredentials(), IfcSchemaVersion.Ifc4, XbimStoreType.InMemoryModel))
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -49,11 +51,11 @@ namespace GeometryTests
         [TestMethod]
         public void IfcSurfaceOfRevolutionTest()
         {
-            using (var m = XbimModel.CreateTemporaryModel())
+            using (var m = IfcStore.Create(new XbimEditorCredentials(), IfcSchemaVersion.Ifc4, XbimStoreType.InMemoryModel))
             {
                 using (var txn = m.BeginTransaction())
                 {
-                    var cc = IfcModelBuilder.MakeRationalBezierCurve(m);
+                    var cc = IfcModelBuilder.MakeRationalBSplineCurveWithKnots(m);
                     var def = IfcModelBuilder.MakeArbitraryOpenProfileDef(m, cc);
                     var rev = IfcModelBuilder.MakeSurfaceOfRevolution(m, def);
                     var face = _xbimGeometryCreator.CreateFace(rev);

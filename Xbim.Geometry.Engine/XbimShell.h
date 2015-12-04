@@ -72,6 +72,7 @@ namespace Xbim
 			virtual property bool HasValidTopology{bool get(); }
 			virtual bool CanCreateSolid(){ return IsClosed; };
 			virtual IXbimSolid^ CreateSolid(){ return MakeSolid(); };
+			virtual void SaveAsBrep(String^ fileName);
 #pragma endregion
 			
 #pragma region operators

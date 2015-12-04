@@ -10,7 +10,7 @@
 #include "XbimEdgeSet.h"
 #include "XbimShellSet.h"
 #include "XbimConvert.h"
-
+#include "XbimOccWriter.h"
 
 #include <GProp_GProps.hxx>
 #include <BRepGProp.hxx>
@@ -408,6 +408,15 @@ namespace Xbim
 					return gcnew XbimSolid(solidMaker.Solid());
 			}
 			return gcnew XbimSolid(); //return an invalid solid if the shell is not valid
+		}
+
+		void XbimShell::SaveAsBrep(String^ fileName)
+		{
+			if (IsValid)
+			{
+				XbimOccWriter^ occWriter = gcnew XbimOccWriter();
+				occWriter->Write(this, fileName);
+			}
 		}
 
 #pragma endregion

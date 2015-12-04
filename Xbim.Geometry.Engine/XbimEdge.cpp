@@ -46,7 +46,7 @@
 #include <GeomConvert_CompCurveToBSplineCurve.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
 using namespace Xbim::Common;
-
+using namespace System::Linq;
 namespace Xbim
 {
 	namespace Geometry
@@ -138,7 +138,14 @@ namespace Xbim
 			Init(edge);
 		}
 
-		
+		XbimEdge::XbimEdge(IIfcBSplineCurveWithKnots^ edge)
+		{
+			Init(edge);
+		}
+		XbimEdge::XbimEdge(IIfcRationalBSplineCurveWithKnots^ edge)
+		{
+			Init(edge);
+		}
 
 
 		XbimEdge::XbimEdge(const TopoDS_Wire& aWire, double tolerance, double angleTolerance)
@@ -806,7 +813,7 @@ namespace Xbim
 				*pEdge = edgeMaker.Edge();
 				// set the tolerance for this shape.
 				ShapeFix_ShapeTolerance FTol;
-				FTol.SetTolerance(*pEdge, circle->ModelOf->ModelFactors->Precision, TopAbs_VERTEX);
+				FTol.SetTolerance(*pEdge, circle->Model->ModelFactors->Precision, TopAbs_VERTEX);
 			}
 		}
 
@@ -831,7 +838,7 @@ namespace Xbim
 				*pEdge = edgeMaker.Edge();
 				// set the tolerance for this shape.
 				ShapeFix_ShapeTolerance FTol;
-				FTol.SetTolerance(*pEdge, line->ModelOf->ModelFactors->Precision, TopAbs_VERTEX);
+				FTol.SetTolerance(*pEdge, line->Model->ModelFactors->Precision, TopAbs_VERTEX);
 			}
 		}
 
@@ -843,13 +850,13 @@ namespace Xbim
 			double semiAx2 = ellipse->SemiAxis2;
 			if (semiAx1 <= 0)
 			{
-				IModelFactors^ mf = ellipse->ModelOf->ModelFactors;
+				IModelFactors^ mf = ellipse->Model->ModelFactors;
 				semiAx1 = mf->OneMilliMetre;
 				XbimGeometryCreator::logger->WarnFormat("WE004: Illegal Ellipse Semi Axis 1, must be greater than 0, in entity #{0}, it has been set to 1mm.", ellipse->EntityLabel);
 			}
 			if (semiAx2 <= 0)
 			{
-				IModelFactors^ mf = ellipse->ModelOf->ModelFactors;
+				IModelFactors^ mf = ellipse->Model->ModelFactors;
 				semiAx2 = mf->OneMilliMetre;
 				XbimGeometryCreator::logger->WarnFormat("WE005: Illegal Ellipse Semi Axis 2, must be greater than 0, in entity #{0}, it has been set to 1mm.", ellipse->EntityLabel);
 			}
@@ -859,14 +866,90 @@ namespace Xbim
 			pEdge = new TopoDS_Edge();
 			*pEdge = edgeMaker.Edge();
 			ShapeFix_ShapeTolerance FTol;
-			FTol.SetTolerance(*pEdge, ellipse->ModelOf->ModelFactors->Precision, TopAbs_VERTEX);
+			FTol.SetTolerance(*pEdge, ellipse->Model->ModelFactors->Precision, TopAbs_VERTEX);
 		}
 
 		void XbimEdge::Init(IIfcBSplineCurve^ bspline)
 		{
 			XbimGeometryCreator::logger->WarnFormat("WE006: Unsupported IfcBSplineCurve type #{0} found. Ignored", bspline->EntityLabel);
 		}
+		void XbimEdge::Init(IIfcBSplineCurveWithKnots^ bspline)
+		{
+			IIfcRationalBSplineCurveWithKnots^ ratBez = dynamic_cast<IIfcRationalBSplineCurveWithKnots^>(bspline);
+			if (ratBez != nullptr)
+				Init(ratBez);
+			else
+			{
 
+				TColgp_Array1OfPnt poles(1, Enumerable::Count(bspline->ControlPointsList));
+				int i = 1;
+				for each (IIfcCartesianPoint^ cp in bspline->ControlPointsList)
+				{
+					poles.SetValue(i, gp_Pnt(cp->X, cp->Y, cp->Z));
+					i++;
+				}
+				TColStd_Array1OfReal knots(1, Enumerable::Count(bspline->Knots));
+				TColStd_Array1OfInteger knotMultiplicities(1, Enumerable::Count(bspline->Knots));
+				i = 1;
+				for each (double knot in bspline->Knots)
+				{
+					knots.SetValue(i,knot);					
+					i++;
+				}
+				i = 1;
+				for each (int multiplicity in bspline->KnotMultiplicities)
+				{
+					knotMultiplicities.SetValue(i, multiplicity);					
+					i++;
+				}				
+				Handle(Geom_BSplineCurve) hBez(new Geom_BSplineCurve(poles, knots, knotMultiplicities, (Standard_Integer)bspline->Degree));
+				BRepBuilderAPI_MakeEdge edgeMaker(hBez);
+				pEdge = new TopoDS_Edge();
+				*pEdge = edgeMaker.Edge();
+				ShapeFix_ShapeTolerance FTol;
+				FTol.SetTolerance(*pEdge, bspline->Model->ModelFactors->Precision, TopAbs_VERTEX);
+			}
+		}
+
+
+		void XbimEdge::Init(IIfcRationalBSplineCurveWithKnots^ bspline)
+		{
+			TColgp_Array1OfPnt poles(1, Enumerable::Count(bspline->ControlPointsList));
+			int i = 1;
+			for each (IIfcCartesianPoint^ cp in bspline->ControlPointsList)
+			{
+				poles.SetValue(i, gp_Pnt(cp->X, cp->Y, XbimConvert::GetZValueOrZero(cp)));
+				i++;
+			}
+			TColStd_Array1OfReal weights(1, Enumerable::Count(bspline->Weights));
+		    i = 1;
+			for each (double weight in bspline->WeightsData)
+			{
+				weights.SetValue(i, weight);
+				i++;
+			}
+
+			TColStd_Array1OfReal knots(1, Enumerable::Count(bspline->Knots));
+			TColStd_Array1OfInteger knotMultiplicities(1, Enumerable::Count(bspline->Knots));
+			i = 1;
+			for each (double knot in bspline->Knots)
+			{
+				knots.SetValue(i, knot);
+				i++;
+			}
+			i = 1;
+			for each (int multiplicity in bspline->KnotMultiplicities)
+			{
+				knotMultiplicities.SetValue(i, multiplicity);
+				i++;
+			}
+			Handle(Geom_BSplineCurve) hBez(new Geom_BSplineCurve(poles, weights, knots, knotMultiplicities, (Standard_Integer)bspline->Degree));
+			BRepBuilderAPI_MakeEdge edgeMaker(hBez);
+			pEdge = new TopoDS_Edge();
+			*pEdge = edgeMaker.Edge();
+			ShapeFix_ShapeTolerance FTol;
+			FTol.SetTolerance(*pEdge, bspline->Model->ModelFactors->Precision, TopAbs_VERTEX);
+		}
 		
 #pragma endregion
 

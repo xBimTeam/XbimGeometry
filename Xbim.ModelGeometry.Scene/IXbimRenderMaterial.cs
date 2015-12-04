@@ -1,4 +1,6 @@
-﻿namespace Xbim.ModelGeometry.Scene
+﻿using Xbim.Ifc;
+
+namespace Xbim.ModelGeometry.Scene
 {
     /// <summary>
     /// Interface for grpahic card specific render materials or shaders

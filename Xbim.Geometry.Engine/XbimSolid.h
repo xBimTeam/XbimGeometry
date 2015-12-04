@@ -87,6 +87,7 @@ namespace Xbim
 			virtual IXbimFaceSet^ Section(IXbimFace^ face, double tolerance);
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) override;
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D)override;
+			virtual void SaveAsBrep(String^ fileName);
 #pragma endregion
 
 #pragma region destructors

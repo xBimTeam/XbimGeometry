@@ -2,10 +2,11 @@
 using System.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Xbim.Common.Geometry;
+using Xbim.Common.Step21;
 using Xbim.Geometry.Engine.Interop;
-using Xbim.Ifc2x3.GeometricModelResource;
-using Xbim.Ifc2x3.GeometryResource;
-using Xbim.IO;
+using Xbim.Ifc;
+using Xbim.Ifc4.GeometricModelResource;
+using Xbim.Ifc4.GeometryResource;
 
 namespace GeometryTests
 {
@@ -20,7 +21,7 @@ namespace GeometryTests
         [TestMethod]
         public void IfcRectangularPyramidTest()
         {
-            using (var m = XbimModel.CreateTemporaryModel())
+            using (var m = IfcStore.Create(new XbimEditorCredentials(), IfcSchemaVersion.Ifc4, XbimStoreType.InMemoryModel))
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -37,6 +38,7 @@ namespace GeometryTests
                
                     Assert.IsTrue(solid.Faces.Count == 5, "5 faces are required of a pyramid");
                     Assert.IsTrue(solid.Vertices.Count == 5, "5 vertices are required of a pyramid");
+                    txn.Commit();
                 }
             }
         }
@@ -44,7 +46,7 @@ namespace GeometryTests
         [TestMethod]
         public void IfcRightCircularCylinderTest()
         {
-            using (var m = XbimModel.CreateTemporaryModel()) 
+            using (var m = IfcStore.Create(new XbimEditorCredentials(), IfcSchemaVersion.Ifc4, XbimStoreType.InMemoryModel))
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -55,7 +57,7 @@ namespace GeometryTests
                    
                     Assert.IsTrue(solid.Faces.Count == 3, "3 faces are required of a cylinder");
                     Assert.IsTrue(solid.Vertices.Count == 2, "2 vertices are required of a cylinder");
-
+                    txn.Commit();
                 }
             }
         }
@@ -65,7 +67,7 @@ namespace GeometryTests
         [TestMethod]
         public void IfcRightCircularConeTest()
         {
-            using (var m = XbimModel.CreateTemporaryModel())
+            using (var m = IfcStore.Create(new XbimEditorCredentials(), IfcSchemaVersion.Ifc4, XbimStoreType.InMemoryModel))
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -81,7 +83,7 @@ namespace GeometryTests
                     
                     Assert.IsTrue(solid.Faces.Count == 2, "2 faces are required of a cone");
                     Assert.IsTrue(solid.Vertices.Count == 2, "2 vertices are required of a cone");
-                   
+                   txn.Commit();
                 }
             }
         }
@@ -89,7 +91,7 @@ namespace GeometryTests
         [TestMethod]
         public void IfcBlockTest()
         {
-            using (var m = XbimModel.CreateTemporaryModel())
+            using (var m = IfcStore.Create(new XbimEditorCredentials(), IfcSchemaVersion.Ifc4, XbimStoreType.InMemoryModel))
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -100,7 +102,7 @@ namespace GeometryTests
                     
                     Assert.IsTrue(solid.Faces.Count == 6, "6 faces are required of a block");
                     Assert.IsTrue(solid.Vertices.Count == 8, "8 vertices are required of a block");
-                   
+                   txn.Commit();
                 }
             }
         }
@@ -112,7 +114,7 @@ namespace GeometryTests
         [TestMethod]
         public void IfcSphereTest()
         {
-            using (var m = XbimModel.CreateTemporaryModel())
+            using (var m = IfcStore.Create(new XbimEditorCredentials(), IfcSchemaVersion.Ifc4, XbimStoreType.InMemoryModel))
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -123,6 +125,7 @@ namespace GeometryTests
                     var solid = _xbimGeometryCreator.CreateSolid(sphere);
                     Assert.IsTrue(solid.Faces.Count == 1, "1 face is required of a sphere");
                     Assert.IsTrue(solid.Vertices.Count == 2, "2 vertices are required of a sphere");
+                    txn.Commit();
                 }
             }
         }
@@ -131,6 +134,7 @@ namespace GeometryTests
 
         public static void GeneralTest(IXbimSolid solid, bool ignoreVolume = false, bool isHalfSpace= false, int entityLabel = 0)
         {
+            // ReSharper disable once CompareOfFloatsByEqualityOperator
             if (ignoreVolume && !isHalfSpace && solid.Volume == 0)
             {
                 Trace.WriteLine(String.Format("Entity  #{0} has zero volume>", entityLabel));

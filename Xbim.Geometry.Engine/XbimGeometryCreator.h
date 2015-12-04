@@ -5,7 +5,6 @@
 
 using namespace System;
 using namespace System::IO;
-using namespace Xbim::IO;
 using namespace Xbim::Common::Logging;
 using namespace Xbim::Common::Geometry;
 
@@ -45,8 +44,8 @@ namespace Xbim
 			static ILogger^ logger = LoggerFactory::GetLogger();
 			static double BooleanTimeOut;
 			virtual property ILogger^ Logger{ILogger^ get(){ return XbimGeometryCreator::logger; }};
-			virtual IXbimShapeGeometryData^ CreateShapeGeometry(IXbimGeometryObject^ geometryObject, double precision, double deflection, double angle, XbimGeometryType storageType);
-			virtual IXbimShapeGeometryData^ CreateShapeGeometry(IXbimGeometryObject^ geometryObject, double precision, double deflection/*, double angle = 0.5, XbimGeometryType storageType = XbimGeometryType::Polyhedron*/)
+			virtual XbimShapeGeometry^ CreateShapeGeometry(IXbimGeometryObject^ geometryObject, double precision, double deflection, double angle, XbimGeometryType storageType);
+			virtual XbimShapeGeometry^ CreateShapeGeometry(IXbimGeometryObject^ geometryObject, double precision, double deflection/*, double angle = 0.5, XbimGeometryType storageType = XbimGeometryType::Polyhedron*/)
 			{
 				return CreateShapeGeometry(geometryObject, precision, deflection, 0.5, XbimGeometryType::Polyhedron);
 			};

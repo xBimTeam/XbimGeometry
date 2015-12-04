@@ -37,17 +37,17 @@ namespace Xbim.Geometry.Engine.Interop
             return Create(ifcRepresentation, null);
         }
 
-        public IXbimShapeGeometryData CreateShapeGeometry(IXbimGeometryObject geometryObject, double precision, double deflection,
+        public XbimShapeGeometry CreateShapeGeometry(IXbimGeometryObject geometryObject, double precision, double deflection,
             double angle, XbimGeometryType storageType)
         {
             return _engine.CreateShapeGeometry(geometryObject, precision, deflection, angle, storageType);
         }
 
-        public IXbimShapeGeometryData CreateShapeGeometry(IXbimGeometryObject geometryObject, double precision, double deflection, double angle)
+        public XbimShapeGeometry CreateShapeGeometry(IXbimGeometryObject geometryObject, double precision, double deflection, double angle)
         {
             return _engine.CreateShapeGeometry(geometryObject,  precision,  deflection,  angle, XbimGeometryType.Polyhedron);
         }
-        public IXbimShapeGeometryData CreateShapeGeometry(IXbimGeometryObject geometryObject, double precision, double deflection /*, angle = 0.5*/)
+        public XbimShapeGeometry CreateShapeGeometry(IXbimGeometryObject geometryObject, double precision, double deflection /*, angle = 0.5*/)
         {
             return _engine.CreateShapeGeometry(geometryObject, precision, deflection, 0.5, XbimGeometryType.Polyhedron);
         }

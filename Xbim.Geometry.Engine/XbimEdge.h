@@ -27,8 +27,9 @@ namespace Xbim
 			void Init(IIfcCircle^ edge);
 			void Init(IIfcLine^ edge);
 			void Init(IIfcEllipse^ edge);
-			void Init(IIfcBSplineCurve^ bez);
-
+			void Init(IIfcBSplineCurve^ bSpline);
+			void Init(IIfcBSplineCurveWithKnots^ bSpline);
+			void Init(IIfcRationalBSplineCurveWithKnots^ bSpline);
 #pragma endregion
 
 			XbimEdge(){};
@@ -47,7 +48,9 @@ namespace Xbim
 			XbimEdge(IIfcCircle^ edge);
 			XbimEdge(IIfcLine^ edge);
 			XbimEdge(IIfcEllipse^ edge);
-			XbimEdge(IIfcBSplineCurve^ bez);
+			XbimEdge(IIfcBSplineCurve^ bSpline);
+			XbimEdge(IIfcBSplineCurveWithKnots^ bSpline);
+			XbimEdge(IIfcRationalBSplineCurveWithKnots^ bSpline);
 			XbimEdge(const TopoDS_Wire& wire, double tolerance, double angleTolerance);
 #pragma endregion
 

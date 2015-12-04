@@ -33,6 +33,8 @@ namespace Xbim
 			void Init(IIfcTrimmedCurve^ loop);
 			void Init(IIfcCurve^ loop);
 			void Init(IIfcBSplineCurve^ bspline);
+			void Init(IIfcBSplineCurveWithKnots^ bSpline);
+			void Init(IIfcRationalBSplineCurveWithKnots^ bSpline);
 			void Init(IIfcCompositeCurveSegment^ compCurveSeg);
 			void Init(IIfcBoundedCurve^ loop);
 			void Init(IIfcPolyLoop ^ loop);
@@ -75,6 +77,8 @@ namespace Xbim
 			XbimWire(const TopoDS_Wire& wire);
 			XbimWire(IIfcPolyline^ loop);
 			XbimWire(IIfcBSplineCurve^ bspline);
+			XbimWire(IIfcBSplineCurveWithKnots^ bSpline);
+			XbimWire(IIfcRationalBSplineCurveWithKnots^ bSpline);
 			XbimWire(IIfcCompositeCurve^ loop);
 			XbimWire(IIfcTrimmedCurve^ loop);
 			XbimWire(IIfcCurve^ loop);

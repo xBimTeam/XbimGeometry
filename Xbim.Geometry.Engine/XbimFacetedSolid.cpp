@@ -140,7 +140,7 @@ namespace Xbim
 
 		void XbimFacetedSolid::Init(IfcBooleanClippingResult^ clip)
 		{
-			XbimModelFactors^ mf = clip->ModelOf->ModelFactors;
+			XbimModelFactors^ mf = clip->Model->ModelFactors;
 			IfcBooleanOperand^ fOp = clip->FirstOperand;
 			IfcBooleanOperand^ sOp = clip->SecondOperand;
 			IXbimSolid^ left ;

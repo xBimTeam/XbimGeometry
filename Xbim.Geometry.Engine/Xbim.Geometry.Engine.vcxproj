@@ -206,18 +206,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Reference Include="Esent.Interop">
-      <HintPath>..\packages\ManagedEsent.1.9.2.0\lib\net40\Esent.Interop.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="ICSharpCode.SharpZipLib">
-      <HintPath>..\packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="log4net">
-      <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
     <Reference Include="System">
     </Reference>
     <Reference Include="System.Configuration" />
@@ -225,16 +213,22 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="Xbim.Common">
-      <HintPath>..\packages\Xbim.Essentials.4.0.0-V022\lib\net40\Xbim.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="Xbim.Ifc.Extensions">
-      <HintPath>..\packages\Xbim.Essentials.4.0.0-V022\lib\net40\Xbim.Ifc.Extensions.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.4.0.0-V049\lib\net40\Xbim.Common.dll</HintPath>
+      <Private>false</Private>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
     </Reference>
     <Reference Include="Xbim.Ifc4">
-      <HintPath>..\packages\Xbim.Essentials.4.0.0-V022\lib\net40\Xbim.Ifc4.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.4.0.0-V049\lib\net40\Xbim.Ifc4.dll</HintPath>
+      <Private>false</Private>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
     </Reference>
-    <Reference Include="Xbim.IO">
-      <HintPath>..\packages\Xbim.Essentials.4.0.0-V022\lib\net40\Xbim.IO.dll</HintPath>
+    <Reference Include="Xbim.Tessellator">
+      <HintPath>..\packages\Xbim.Essentials.4.0.0-V049\lib\net40\Xbim.Tessellator.dll</HintPath>
+      <Private>false</Private>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -5359,11 +5353,6 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="app.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Xbim.Tessellator\Xbim.Tessellator.csproj">
-      <Project>{5ee39029-873a-45a0-9259-2198bf8729f4}</Project>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="OCC\src\Adaptor2d\Adaptor2d_GenHCurve2d.gxx" />

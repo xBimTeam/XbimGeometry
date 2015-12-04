@@ -5,8 +5,7 @@ using System.IO;
 using Xbim.Common;
 using Xbim.Common.Geometry;
 using Xbim.Common.Logging;
-using Xbim.IO;
-using Xbim.IO.Esent;
+using Xbim.Ifc;
 using Xbim.ModelGeometry.Scene;
 
 namespace Xbim.Geometry.Profiler
@@ -78,9 +77,9 @@ namespace Xbim.Geometry.Profiler
             Console.Read();
         }
 
-        private static XbimModel GetModel(string fileName)
+        private static IfcStore GetModel(string fileName)
         {
-            XbimModel openModel = null;
+          
             var extension = Path.GetExtension(fileName);
             if (string.IsNullOrWhiteSpace(extension))
             {
@@ -102,35 +101,33 @@ namespace Xbim.Geometry.Profiler
 
                     try
                     {
-                        var model = new XbimModel();
-                        model.Open(fileName, XbimDBAccess.ReadWrite);
-                        //delete any geometry
-                        openModel = model;
+                        return IfcStore.Open(fileName);                      
                     }
                     catch (Exception e)
                     {
                         Logger.ErrorFormat("Unable to open model {0}, {1}", fileName, e.Message);
-                        Console.WriteLine(String.Format("Unable to open model {0}, {1}", fileName, e.Message));
+                        Console.WriteLine("Unable to open model {0}, {1}", fileName, e.Message);
                     }
 
                 }
                 else //we need to create the xBIM file
                 {
-                    var model = new XbimModel();
+                            
                     try
                     {
-                        model.CreateFrom(fileName, null, null, true);
-                        openModel = model;
+                        return IfcStore.Open(fileName,null,0); 
+                      
+
                     }
                     catch (Exception e)
                     {
                         Logger.ErrorFormat("Unable to open model {0}, {1}", fileName, e.Message);
-                        Console.WriteLine(String.Format("Unable to open model {0}, {1}", fileName, e.Message));
+                        Console.WriteLine("Unable to open model {0}, {1}", fileName, e.Message);
                     }
 
                 }
             }
-            return openModel;
+            return null;
         }
     }
 }

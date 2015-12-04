@@ -69,16 +69,8 @@
     </Touch>
   </Target>
   <ItemGroup>
-    <Reference Include="Esent.Interop, Version=1.9.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\ManagedEsent.1.9.2.0\lib\net40\Esent.Interop.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="ICSharpCode.SharpZipLib, Version=0.86.0.518, Culture=neutral, PublicKeyToken=1b03e6acf1164f73, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="log4net, Version=1.2.13.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
-      <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
+    <Reference Include="log4net, Version=1.2.14.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\packages\log4net.2.0.4\lib\net40-full\log4net.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -93,32 +85,40 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Xbim.CobieExpress, Version=3.1.0.0, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xbim.Essentials.4.0.0-V022\lib\net40\Xbim.CobieExpress.dll</HintPath>
+    <Reference Include="Xbim.CobieExpress, Version=3.2.0.0, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
+      <HintPath>..\packages\Xbim.Essentials.4.0.0-V049\lib\net40\Xbim.CobieExpress.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Xbim.Common, Version=3.1.0.0, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xbim.Essentials.4.0.0-V022\lib\net40\Xbim.Common.dll</HintPath>
+    <Reference Include="Xbim.Common, Version=3.2.0.0, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
+      <HintPath>..\packages\Xbim.Essentials.4.0.0-V049\lib\net40\Xbim.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Xbim.Ifc.Extensions, Version=3.1.0.0, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xbim.Essentials.4.0.0-V022\lib\net40\Xbim.Ifc.Extensions.dll</HintPath>
+    <Reference Include="Xbim.Ifc, Version=3.2.0.0, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
+      <HintPath>..\packages\Xbim.Essentials.4.0.0-V049\lib\net40\Xbim.Ifc.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Xbim.Ifc2x3, Version=3.1.0.0, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xbim.Essentials.4.0.0-V022\lib\net40\Xbim.Ifc2x3.dll</HintPath>
+    <Reference Include="Xbim.Ifc.Extensions, Version=3.2.0.0, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
+      <HintPath>..\packages\Xbim.Essentials.4.0.0-V049\lib\net40\Xbim.Ifc.Extensions.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Xbim.Ifc2x3.IO, Version=3.1.0.0, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xbim.Essentials.4.0.0-V022\lib\net40\Xbim.Ifc2x3.IO.dll</HintPath>
+    <Reference Include="Xbim.Ifc2x3, Version=3.2.0.0, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
+      <HintPath>..\packages\Xbim.Essentials.4.0.0-V049\lib\net40\Xbim.Ifc2x3.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Xbim.Ifc4, Version=3.1.0.0, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xbim.Essentials.4.0.0-V022\lib\net40\Xbim.Ifc4.dll</HintPath>
+    <Reference Include="Xbim.Ifc2x3.IO, Version=3.2.0.0, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
+      <HintPath>..\packages\Xbim.Essentials.4.0.0-V049\lib\net40\Xbim.Ifc2x3.IO.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Xbim.IO, Version=0.0.0.0, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xbim.Essentials.4.0.0-V022\lib\net40\Xbim.IO.dll</HintPath>
+    <Reference Include="Xbim.Ifc4, Version=3.2.0.0, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
+      <HintPath>..\packages\Xbim.Essentials.4.0.0-V049\lib\net40\Xbim.Ifc4.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Xbim.IO, Version=3.2.0.0, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
+      <HintPath>..\packages\Xbim.Essentials.4.0.0-V049\lib\net40\Xbim.IO.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Xbim.Tessellator, Version=3.2.0.0, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
+      <HintPath>..\packages\Xbim.Essentials.4.0.0-V049\lib\net40\Xbim.Tessellator.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>
@@ -127,6 +127,7 @@
       <Link>Xbim.Geometry.targets</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="app.config" />
     <None Include="packages.config" />
     <None Include="XbimOpenSourceKeyFile.snk" />
   </ItemGroup>
@@ -139,12 +140,6 @@
       <Link>x64\Xbim.Geometry.Engine64.dll</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Xbim.Tessellator\Xbim.Tessellator.csproj">
-      <Project>{5ee39029-873a-45a0-9259-2198bf8729f4}</Project>
-      <Name>Xbim.Tessellator</Name>
-    </ProjectReference>
   </ItemGroup>
   <Target Name="BeforeBuild">
     <MSBuild Projects="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj" Properties="Configuration=$(Configuration);Platform=Win32" Targets="Build">

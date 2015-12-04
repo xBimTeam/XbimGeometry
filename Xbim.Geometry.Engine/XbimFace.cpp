@@ -1,6 +1,7 @@
 #include "XbimFace.h"
 #include "XbimWire.h"
 #include "XbimWireSet.h"
+#include "XbimOccWriter.h"
 
 #include <BRepBuilderAPI_Transform.hxx>
 #include <BRepTools_WireExplorer.hxx>
@@ -36,6 +37,8 @@
 #include <Geom_Curve.hxx>
 #include <Geom_Line.hxx>
 #include <Geom_TrimmedCurve.hxx>
+
+using namespace System::Linq;
 namespace Xbim
 {
 	namespace Geometry
@@ -268,8 +271,8 @@ namespace Xbim
 				XbimWire^ wire = gcnew XbimWire(profile);
 				if (wire->IsValid)
 				{
-					double tolerance = profile->ModelOf->ModelFactors->Precision;
-					double toleranceMax = profile->ModelOf->ModelFactors->PrecisionMax;
+					double tolerance = profile->Model->ModelFactors->Precision;
+					double toleranceMax = profile->Model->ModelFactors->PrecisionMax;
 					ShapeFix_ShapeTolerance FTol;
 					double currentFaceTolerance = tolerance;
 				TryBuildFace:
@@ -300,8 +303,8 @@ namespace Xbim
 
 		void XbimFace::Init(IIfcArbitraryProfileDefWithVoids^ profile)
 		{
-			double tolerance = profile->ModelOf->ModelFactors->Precision;
-			double toleranceMax = profile->ModelOf->ModelFactors->PrecisionMax;
+			double tolerance = profile->Model->ModelFactors->Precision;
+			double toleranceMax = profile->Model->ModelFactors->PrecisionMax;
 			ShapeFix_ShapeTolerance FTol;
 			TopoDS_Face face;
 			XbimWire^ loop = gcnew XbimWire(profile->OuterCurve);
@@ -363,7 +366,7 @@ namespace Xbim
 		}
 		void XbimFace::Init(IIfcCompositeProfileDef ^ compProfile)
 		{
-			int profileCount = ((IList<IIfcProfileDef^>^)compProfile->Profiles)->Count;
+			int profileCount = Enumerable::Count(compProfile->Profiles);
 			if (profileCount == 0)
 			{
 				XbimGeometryCreator::logger->InfoFormat("WF0015: Invalid number of profiles in IIfcCompositeProfileDef #{0}. It must be 2 or more. Profile discarded", compProfile->EntityLabel);
@@ -372,10 +375,10 @@ namespace Xbim
 			if (profileCount == 1)
 			{
 				XbimGeometryCreator::logger->InfoFormat("WF0016: Invalid number of profiles in IIfcCompositeProfileDef #{0}. It must be 2 or more. A single Profile has been used", compProfile->EntityLabel);
-				Init(((IList<IIfcProfileDef^>^)compProfile->Profiles)[0]);
+				Init(Enumerable::First(compProfile->Profiles));
 				return;
 			}
-			XbimFace^ firstFace = gcnew XbimFace(((IList<IIfcProfileDef^>^)compProfile->Profiles)[0]);
+			XbimFace^ firstFace = gcnew XbimFace(Enumerable::First(compProfile->Profiles));
 			BRepBuilderAPI_MakeFace faceBlder(firstFace);
 			bool first = true;
 			for each (IIfcProfileDef^ profile in compProfile->Profiles)
@@ -449,7 +452,7 @@ namespace Xbim
 			{
 				double xOff = rectProfile->XDim / 2;
 				double yOff = rectProfile->YDim / 2;
-				double precision = rectProfile->ModelOf->ModelFactors->Precision;
+				double precision = rectProfile->Model->ModelFactors->Precision;
 				gp_Pnt bl(-xOff, -yOff, 0);
 				gp_Pnt br(xOff, -yOff, 0);
 				gp_Pnt tr(xOff, yOff, 0);
@@ -557,7 +560,7 @@ namespace Xbim
 
 			Handle(Geom_SurfaceOfRevolution) geomLin(new  Geom_SurfaceOfRevolution(c3d, axis));
 
-			BRepBuilderAPI_MakeFace faceMaker(geomLin, 0, 2* Math::PI, start, end, sRev->ModelOf->ModelFactors->Precision);
+			BRepBuilderAPI_MakeFace faceMaker(geomLin, 0, 2* Math::PI, start, end, sRev->Model->ModelFactors->Precision);
 			if (faceMaker.IsDone())
 			{
 				pFace = new TopoDS_Face();
@@ -577,7 +580,7 @@ namespace Xbim
 				Handle(Geom_Surface) surface = BRep_Tool::Surface(this, loc);
 				Handle(Geom_RectangularTrimmedSurface) geomTrim(new  Geom_RectangularTrimmedSurface(surface,def->U1,def->U2,def->V1,def->V2));
 
-				BRepBuilderAPI_MakeFace faceMaker(geomTrim,def->ModelOf->ModelFactors->Precision);
+				BRepBuilderAPI_MakeFace faceMaker(geomTrim,def->Model->ModelFactors->Precision);
 				if (faceMaker.IsDone())
 				{
 					pFace = new TopoDS_Face();
@@ -631,7 +634,7 @@ namespace Xbim
 			
 			Handle(Geom_SurfaceOfLinearExtrusion) geomLin(new  Geom_SurfaceOfLinearExtrusion(c3d, extrude));
 			
-			BRepBuilderAPI_MakeFace faceMaker(geomLin, start, end, 0, sLin->Depth,sLin->ModelOf->ModelFactors->Precision);
+			BRepBuilderAPI_MakeFace faceMaker(geomLin, start, end, 0, sLin->Depth,sLin->Model->ModelFactors->Precision);
 			if (faceMaker.IsDone())
 			{
 				pFace = new TopoDS_Face();
@@ -869,6 +872,14 @@ namespace Xbim
 			return !(left == right);
 		}
 
+		void XbimFace::SaveAsBrep(String^ fileName)
+		{
+			if (IsValid)
+			{
+				XbimOccWriter^ occWriter = gcnew XbimOccWriter();
+				occWriter->Write(this, fileName);
+			}
+		}
 
 #pragma endregion
 

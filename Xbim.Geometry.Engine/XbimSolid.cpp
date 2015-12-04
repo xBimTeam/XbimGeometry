@@ -501,7 +501,7 @@ namespace Xbim
 				gp_Pnt origin(revolaxis->Location->X, revolaxis->Location->Y, revolaxis->Location->Z);
 				gp_Dir vx(revolaxis->Axis->X, revolaxis->Axis->Y, revolaxis->Axis->Z);
 				gp_Ax1 ax1(origin, vx);
-				double radianConvert = repItem->ModelOf->ModelFactors->AngleToRadiansConversionFactor;
+				double radianConvert = repItem->Model->ModelFactors->AngleToRadiansConversionFactor;
 				BRepPrimAPI_MakeRevol revol(face, ax1, repItem->Angle*radianConvert);
 				
 				GC::KeepAlive(face);
@@ -569,7 +569,7 @@ namespace Xbim
 				
 				XbimVector3D size(bounds, bounds, bounds);
 				XbimRect3D rect3D(corner, size);
-				Init(rect3D, hs->ModelOf->ModelFactors->Precision);
+				Init(rect3D, hs->Model->ModelFactors->Precision);
 				Move(ifcPlane->Position);
 //#endif
 			}
@@ -627,7 +627,7 @@ namespace Xbim
 			//BRepTools::Write(polyBoundary, "d:\\tmp\\w1");
 			//removes any colinear edges that might generate unnecessary detail and confusion for boolean operations
 			if (polyBoundary->Edges->Count>4) //may sure we remove an colinear edges
-				polyBoundary->FuseColinearSegments(pbhs->ModelOf->ModelFactors->Precision, 0.05);
+				polyBoundary->FuseColinearSegments(pbhs->Model->ModelFactors->Precision, 0.05);
 			//BRepTools::Write(polyBoundary, "d:\\tmp\\w2");
 			XbimFace^ polyFace = gcnew XbimFace(polyBoundary);
 
@@ -662,7 +662,7 @@ namespace Xbim
 		{
 
 			//Build the directrix
-			IModelFactors^ mf = swdSolid->ModelOf->ModelFactors;
+			IModelFactors^ mf = swdSolid->Model->ModelFactors;
 			XbimWire^ sweep = gcnew XbimWire(swdSolid->Directrix);
 			if (swdSolid->StartParam.HasValue && swdSolid->EndParam.HasValue)
 				sweep = (XbimWire^)sweep->Trim(swdSolid->StartParam.Value, swdSolid->EndParam.Value, mf->Precision);
@@ -751,7 +751,7 @@ namespace Xbim
 			pSolid = new TopoDS_Solid();
 			*pSolid = TopoDS::Solid(boxMaker.Shape());
 			ShapeFix_ShapeTolerance FTol;
-			FTol.SetTolerance(*pSolid, box->ModelOf->ModelFactors->Precision, TopAbs_VERTEX);
+			FTol.SetTolerance(*pSolid, box->Model->ModelFactors->Precision, TopAbs_VERTEX);
 		}
 
 
@@ -778,7 +778,7 @@ namespace Xbim
 		//Booleans
 		void XbimSolid::Init(IIfcBooleanResult^ solid)
 		{
-			IModelFactors^ mf = solid->ModelOf->ModelFactors;
+			IModelFactors^ mf = solid->Model->ModelFactors;
 			IIfcBooleanOperand^ fOp = solid->FirstOperand;
 #ifdef OCC_6_9_SUPPORTED			
 			IIfcBooleanResult^ boolClip = dynamic_cast<IIfcBooleanResult^>(fOp);
@@ -843,13 +843,13 @@ namespace Xbim
 				
 				switch (solid->Operator)
 				{
-				case Xbim::Ifc4::GeometricModelResource::IfcBooleanOperator::UNION:
+				case IfcBooleanOperator::UNION:
 					result = left->Union(right, mf->PrecisionBoolean);
 					break;
-				case Xbim::Ifc4::GeometricModelResource::IfcBooleanOperator::INTERSECTION:
+				case IfcBooleanOperator::INTERSECTION:
 					result = left->Intersection(right, mf->PrecisionBoolean);
 					break;
-				case Xbim::Ifc4::GeometricModelResource::IfcBooleanOperator::DIFFERENCE:
+				case IfcBooleanOperator::DIFFERENCE:
 					result = left->Cut(right, mf->PrecisionBoolean);
 					break;
 				}
@@ -965,7 +965,7 @@ namespace Xbim
 			
 			double xOff = IIfcSolid->XLength / 2;
 			double yOff = IIfcSolid->YLength / 2;
-			double precision = IIfcSolid->ModelOf->ModelFactors->Precision;
+			double precision = IIfcSolid->Model->ModelFactors->Precision;
 			
 			gp_Pnt bl(0, 0, 0);
 			gp_Pnt br(IIfcSolid->XLength, 0, 0);
@@ -1454,7 +1454,14 @@ namespace Xbim
 			return XbimFaceSet::Empty;
 		}
 
-			
+		void XbimSolid::SaveAsBrep(String^ fileName)
+		{
+			if (IsValid)
+			{
+				XbimOccWriter^ occWriter = gcnew XbimOccWriter();
+				occWriter->Write(this, fileName);
+			}
+		}
 
 #pragma endregion
 

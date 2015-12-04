@@ -15,6 +15,7 @@
 #include <gp_Mat2d.hxx>
 
 using namespace System;
+using namespace System::Linq;
 using namespace Xbim::Common::Geometry;
 using namespace Xbim::Ifc4::Interfaces;
 namespace Xbim
@@ -472,27 +473,42 @@ namespace Xbim
 			double d = 0, dd;
 			double x1 = pt1->X;
 			double y1 = pt1->Y;
-			double z1 = pt1->Z;
+			double z1 = GetZValueOrZero(pt1);
 			double x2 = pt2->X;
 			double y2 = pt2->Y;
-			double z2 = pt2->Z;
+			double z2 = GetZValueOrZero(pt2);
 			dd = x1; dd -= x2; dd *= dd; d += dd;
 			dd = y1; dd -= y2; dd *= dd; d += dd;
 			dd = z1; dd -= z2; dd *= dd; d += dd;
 			return d;
 		}
 
+		double  XbimConvert::GetZValueOrZero(IIfcCartesianPoint^ point)
+		{			
+			if (point->Dim == dimensions3D) return point->Z; else return 0.0;
+		}
+
+		double  XbimConvert::GetZValueOrZero(IIfcDirection^ dir)
+		{
+			if (dir->Dim == dimensions3D) return dir->Z; else return 0.0;
+		}
+
+		double  XbimConvert::GetZValueOrZero(IIfcVector^ vec)
+		{
+			if (vec->Dim == dimensions3D) return vec->Orientation->Z; else return 0.0;
+		}
+
 		bool  XbimConvert::Is3D(IIfcPolyline^ pline)
 		{
 			for each (IIfcCartesianPoint^ pt in pline->Points)
-				return ((IList<double>^)(pt->Coordinates))->Count == 3;
+				return Enumerable::Count(pt->Coordinates) == 3;
 			return false;
 		}
 
 		bool  XbimConvert::Is3D(IIfcPolyLoop^ pLoop)
 		{
 			for each (IIfcCartesianPoint^ pt in pLoop->Polygon)
-				return ((IList<double>^)(pt->Coordinates))->Count == 3;
+				return Enumerable::Count(pt->Coordinates) == 3;
 			return false;
 		}
 		bool  XbimConvert::IsPolygon(IIfcPolyLoop^ pLoop)
@@ -516,7 +532,7 @@ namespace Xbim
 			double x = 0, y = 0, z = 0;
 			IIfcCartesianPoint^ previous = nullptr;
 			int count = 0;
-			IList<IIfcCartesianPoint^>^ polygon = ((IList<IIfcCartesianPoint^>^)(loop->Polygon));
+			List<IIfcCartesianPoint^>^ polygon = Enumerable::ToList(loop->Polygon);
 			int total = polygon->Count;
 			for (int i = 0; i <= total; i++)
 			{

@@ -20,7 +20,7 @@ namespace Xbim
 	    public ref class XbimConvert
 		{
 		private:
-
+			static Ifc4::GeometryResource::IfcDimensionCount dimensions3D = Ifc4::GeometryResource::IfcDimensionCount(3);
 		public:
 			XbimConvert(void);
 			// Converts a Local Placement into a TopLoc_Location
@@ -59,6 +59,9 @@ namespace Xbim
 			static bool Is3D(IIfcPolyline^ pline);
 			static bool Is3D(IIfcPolyLoop^ pLoop);
 			static bool IsPolygon(IIfcPolyLoop^ pLoop);
+			static double GetZValueOrZero(IIfcCartesianPoint^ point);
+			static double GetZValueOrZero(IIfcDirection^ dir);
+			static double GetZValueOrZero(IIfcVector^ vec);
 			static XbimVector3D NewellsNormal(IIfcPolyLoop^ loop);
 		};
 
