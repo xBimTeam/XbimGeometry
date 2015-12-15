@@ -37,7 +37,7 @@
 #include <Geom_Curve.hxx>
 #include <Geom_Line.hxx>
 #include <Geom_TrimmedCurve.hxx>
-
+#include <Geom_BSplineSurface.hxx>
 using namespace System::Linq;
 namespace Xbim
 {
@@ -164,6 +164,20 @@ namespace Xbim
 			Init(x,y,tolerance);
 		}
 
+		XbimFace::XbimFace(IIfcSurface^ surface, XbimWire^ outerBound, IEnumerable<XbimWire^>^ innerBounds)
+		{
+			Init(surface);
+			if (!IsValid) return;
+			BRepBuilderAPI_MakeFace faceMaker(this);
+			faceMaker.Add(outerBound);
+			for each (XbimWire^ inner in innerBounds)
+			{
+				faceMaker.Add(inner);
+			}			
+			*pFace = faceMaker.Face();
+		}
+
+
 		void XbimFace::Init(IIfcCompositeCurve ^ cCurve)
 		{
 			XbimWire^ wire = gcnew XbimWire(cCurve);
@@ -171,7 +185,7 @@ namespace Xbim
 			{
 				BRepBuilderAPI_MakeFace faceMaker(wire);
 				pFace = new TopoDS_Face();
-				*pFace = faceMaker.Face();;
+				*pFace = faceMaker.Face();
 			}
 		}
 
@@ -182,7 +196,7 @@ namespace Xbim
 			{
 				BRepBuilderAPI_MakeFace faceMaker(wire);
 				pFace = new TopoDS_Face();
-				*pFace = faceMaker.Face();;
+				*pFace = faceMaker.Face();
 			}
 		}
 
@@ -193,7 +207,7 @@ namespace Xbim
 			{
 				BRepBuilderAPI_MakeFace faceMaker(wire);
 				pFace = new TopoDS_Face();
-				*pFace = faceMaker.Face();;
+				*pFace = faceMaker.Face();
 			}
 		}
 
@@ -520,6 +534,8 @@ namespace Xbim
 				return Init((IIfcCurveBoundedPlane^)surface);
 			else if (dynamic_cast<IIfcRectangularTrimmedSurface^>(surface))
 				return Init((IIfcRectangularTrimmedSurface^)surface);
+			else if (dynamic_cast<IIfcBSplineSurface^>(surface))
+				return Init((IIfcBSplineSurface^)surface);
 			else if (dynamic_cast<IIfcBoundedSurface^>(surface))
 				throw(gcnew NotImplementedException("XbimFace. Support for BoundedSurface is not implemented,it should be abstract"));
 			else
@@ -527,6 +543,143 @@ namespace Xbim
 				Type ^ type = surface->GetType();
 				throw(gcnew NotImplementedException(String::Format("XbimFace. BuildFace of type {0} is not implemented", type->Name)));
 			}
+
+		}
+		void XbimFace::Init(IIfcBSplineSurface ^ surface)
+		{
+			if (dynamic_cast<IIfcBSplineSurfaceWithKnots^>(surface))
+				return Init((IIfcBSplineSurfaceWithKnots^)surface);
+			Type ^ type = surface->GetType();
+			throw(gcnew NotImplementedException(String::Format("XbimFace. BuildFace of type {0} is not implemented", type->Name)));
+		}
+
+		void XbimFace::Init(IIfcBSplineSurfaceWithKnots ^ surface)
+		{
+			if (dynamic_cast<IIfcRationalBSplineSurfaceWithKnots^>(surface))
+				return Init((IIfcRationalBSplineSurfaceWithKnots^)surface);	
+		
+			List<List<XbimPoint3D>^>^ ifcControlPoints = surface->ControlPoints;
+			if (surface->ControlPoints->Count < 2) throw gcnew XbimException("Incorrect number of poles for Bspline surface, must be at least 2");			
+			TColgp_Array2OfPnt poles(1, surface->UUpper+1,1,surface->VUpper+1);
+			
+			for (int u = 0; u <= surface->UUpper; u++)
+			{
+				List<XbimPoint3D>^ uRow = ifcControlPoints[u];
+				for (int v = 0; v <= surface->VUpper; v++)
+				{
+					XbimPoint3D cp = uRow[v];
+					poles.SetValue(u+1, v+1, gp_Pnt(cp.X, cp.Y, cp.Z));
+				}
+
+			}
+			
+			TColStd_Array1OfReal uknots(1, surface->KnotUUpper);
+			TColStd_Array1OfReal vknots(1, surface->KnotVUpper);
+			TColStd_Array1OfInteger uMultiplicities(1, surface->KnotUUpper);
+			TColStd_Array1OfInteger vMultiplicities(1, surface->KnotVUpper);
+			int i = 1;
+			for each (double knot in surface->UKnots)
+			{
+				uknots.SetValue(i, knot);
+				i++;
+			}
+			i = 1;
+			for each (double knot in surface->VKnots)
+			{
+				vknots.SetValue(i, knot);
+				i++;
+			}
+
+			i = 1;
+			for each (int multiplicity in surface->UMultiplicities)
+			{
+				uMultiplicities.SetValue(i, multiplicity);
+				i++;
+			}
+
+			i = 1;
+			for each (int multiplicity in surface->VMultiplicities)
+			{
+				vMultiplicities.SetValue(i, multiplicity);
+				i++;
+			}
+			
+			Handle(Geom_BSplineSurface) hSurface = new Geom_BSplineSurface(poles, uknots, vknots, uMultiplicities, vMultiplicities, (Standard_Integer)surface->UDegree, (Standard_Integer)surface->VDegree);
+			BRepBuilderAPI_MakeFace faceMaker(hSurface, 0.1/*surface->Model->ModelFactors->Precision*/);
+			pFace = new TopoDS_Face();
+			*pFace = faceMaker.Face();
+			/*ShapeFix_ShapeTolerance FTol;
+			FTol.SetTolerance(*pFace, bspline->Model->ModelFactors->Precision, TopAbs_VERTEX);*/
+		}
+		void XbimFace::Init(IIfcRationalBSplineSurfaceWithKnots ^ surface)
+		{
+			if (dynamic_cast<IIfcRationalBSplineSurfaceWithKnots^>(surface))
+				return Init((IIfcRationalBSplineSurfaceWithKnots^)surface);
+
+
+			List<List<XbimPoint3D>^>^ ifcControlPoints = surface->ControlPoints;
+			if (surface->ControlPoints->Count < 2) throw gcnew XbimException("Incorrect number of poles for Bspline surface, must be at least 2");
+			TColgp_Array2OfPnt poles(1, surface->UUpper + 1, 1, surface->VUpper + 1);
+
+			for (int u = 0; u < surface->UUpper; u++)
+			{
+				List<XbimPoint3D>^ uRow = ifcControlPoints[u];
+				for (int v = 0; v < surface->VUpper; v++)
+				{
+					XbimPoint3D cp = uRow[v];
+					poles.SetValue(u + 1, v + 1, gp_Pnt(cp.X, cp.Y, cp.Z));
+				}
+
+			}
+
+			List<List<Ifc4::MeasureResource::IfcReal>^>^ ifcWeights = surface->Weights;
+			TColStd_Array2OfReal weights(1, surface->UUpper + 1, 1, surface->VUpper + 1);
+			for (int u = 0; u <= surface->UUpper; u++)
+			{
+				List<Ifc4::MeasureResource::IfcReal>^ uRow = ifcWeights[u];
+				for (int v = 0; v <= surface->UUpper; v++)
+				{
+					double r = uRow[v];
+					weights.SetValue(u + 1, v + 1, r);
+				}
+			}
+
+			TColStd_Array1OfReal uknots(1, surface->KnotUUpper);
+			TColStd_Array1OfReal vknots(1, surface->KnotVUpper);
+			TColStd_Array1OfInteger uMultiplicities(1, surface->KnotUUpper);
+			TColStd_Array1OfInteger vMultiplicities(1, surface->KnotVUpper);
+			int i = 1;
+			for each (double knot in surface->UKnots)
+			{
+				uknots.SetValue(i, knot);
+				i++;
+			}
+			i = 1;
+			for each (double knot in surface->VKnots)
+			{
+				vknots.SetValue(i, knot);
+				i++;
+			}
+
+			i = 1;
+			for each (int multiplicity in surface->UMultiplicities)
+			{
+				uMultiplicities.SetValue(i, multiplicity);
+				i++;
+			}
+
+			i = 1;
+			for each (int multiplicity in surface->VMultiplicities)
+			{
+				vMultiplicities.SetValue(i, multiplicity);
+				i++;
+			}
+
+			Handle(Geom_BSplineSurface) hSurface = new Geom_BSplineSurface(poles,weights, uknots, vknots, uMultiplicities, vMultiplicities, (Standard_Integer)surface->UDegree, (Standard_Integer)surface->VDegree);
+			BRepBuilderAPI_MakeFace faceMaker(hSurface, surface->Model->ModelFactors->Precision);
+
+			pFace = new TopoDS_Face();
+			*pFace = faceMaker.Face();
 
 		}
 
@@ -805,6 +958,8 @@ namespace Xbim
 			return ps.IsPlanar() == Standard_True; //see if we have a planar or curved surface, if planar we need only worry about one normal
 
 		}
+
+		
 
 		bool XbimFace::IsPolygonal::get()
 		{

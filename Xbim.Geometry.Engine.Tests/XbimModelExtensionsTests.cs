@@ -1,6 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace GeometryTests
+namespace Ifc4GeometryTests
 {
     [TestClass]
     [DeploymentItem(@"EsentTestFiles\")]

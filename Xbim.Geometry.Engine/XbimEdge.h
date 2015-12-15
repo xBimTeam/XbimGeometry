@@ -1,5 +1,7 @@
 #pragma once
 #include "XbimOccShape.h"
+#include "XbimWire.h"
+#include "XbimVertex.h"
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Wire.hxx>
 #include <BRepBuilderAPI_MakeEdge.hxx>
@@ -25,6 +27,7 @@ namespace Xbim
 			void Init(IIfcCurve^ edge);
 			void Init(IIfcConic^ edge);
 			void Init(IIfcCircle^ edge);
+			void Init(IIfcPolyline^ pline);
 			void Init(IIfcLine^ edge);
 			void Init(IIfcEllipse^ edge);
 			void Init(IIfcBSplineCurve^ bSpline);
@@ -51,6 +54,7 @@ namespace Xbim
 			XbimEdge(IIfcBSplineCurve^ bSpline);
 			XbimEdge(IIfcBSplineCurveWithKnots^ bSpline);
 			XbimEdge(IIfcRationalBSplineCurveWithKnots^ bSpline);
+			XbimEdge(XbimEdge^ edgeCurve, XbimVertex^ start, XbimVertex^ end);
 			XbimEdge(const TopoDS_Wire& wire, double tolerance, double angleTolerance);
 #pragma endregion
 
@@ -81,11 +85,13 @@ namespace Xbim
 			virtual property XbimRect3D BoundingBox {XbimRect3D get() override; }
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) override;
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D)override;
+			virtual property bool IsClosed{bool get(){ return IsValid && pEdge->Closed() == Standard_True; }; }
 #pragma endregion	
 
 #pragma region Properties
 			property bool IsReversed{bool get(){ return IsValid && pEdge->Orientation() == TopAbs_REVERSED; }; }
 #pragma endregion
+			void Reverse();
 
 		};
 	}

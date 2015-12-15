@@ -30,10 +30,11 @@
 #include <ShapeFix_Shape.hxx>
 #include <GProp_GProps.hxx>
 #include <BRepGProp.hxx>
-
-
+#include <BRepBuilderAPI_MakeWire.hxx>
+#include <BRepBuilderAPI_MakeFace.hxx>
 using namespace System;
 using namespace System::Linq;
+using namespace Xbim::Common;
 namespace Xbim
 {
 	namespace Geometry
@@ -154,7 +155,17 @@ namespace Xbim
 			_sewingTolerance = solid->Model->ModelFactors->Precision;
 			Init(solid);
 		}
+		XbimCompound::XbimCompound(IIfcAdvancedBrep^ solid)
+		{
+			_sewingTolerance = solid->Model->ModelFactors->Precision;
+			Init(solid);
+		}
 
+		XbimCompound::XbimCompound(IIfcAdvancedBrepWithVoids^ solid)
+		{
+			_sewingTolerance = solid->Model->ModelFactors->Precision;
+			Init(solid);
+		}
 		XbimCompound::XbimCompound(IIfcClosedShell^ solid)
 		{
 			_sewingTolerance = solid->Model->ModelFactors->Precision;
@@ -249,15 +260,55 @@ namespace Xbim
 		{
 			IIfcFacetedBrep^ facetedBrep = dynamic_cast<IIfcFacetedBrep^>(solid);
 			if (facetedBrep != nullptr) return Init(facetedBrep);
-			IIfcFacetedBrepWithVoids^ facetedBrepWithVoids = dynamic_cast<IIfcFacetedBrepWithVoids^>(solid);
-			if (facetedBrepWithVoids != nullptr) return Init(facetedBrepWithVoids);
+
+			IIfcAdvancedBrep^ advancedBrep = dynamic_cast<IIfcAdvancedBrep^>(solid);
+			if (advancedBrep != nullptr) return Init(advancedBrep);
+
+
+			
 			throw gcnew NotImplementedException("Sub-Type of IIfcManifoldSolidBrep is not implemented");
 		}
+
+		void XbimCompound::Init(IIfcAdvancedBrep^ solid)
+		{
+
+			IIfcAdvancedBrepWithVoids^ advancedBrepWithVoids = dynamic_cast<IIfcAdvancedBrepWithVoids^>(solid);
+			if (advancedBrepWithVoids != nullptr) return Init(advancedBrepWithVoids);
+			InitAdvancedFaces(solid->Outer->CfsFaces);
+		}
+
 		void XbimCompound::Init(IIfcFacetedBrep^ solid)
-		{			
+		{
+			IIfcFacetedBrepWithVoids^ facetedBrepWithVoids = dynamic_cast<IIfcFacetedBrepWithVoids^>(solid);
+			if (facetedBrepWithVoids != nullptr) return Init(facetedBrepWithVoids);
 			Init(solid->Outer);
 		}
 
+		void XbimCompound::Init(IIfcAdvancedBrepWithVoids^ brepWithVoids)
+		{
+			InitAdvancedFaces(brepWithVoids->Outer->CfsFaces);
+			XbimShell^ outerShell = (XbimShell^)MakeShell();
+			if (!outerShell->IsClosed) //we have a shell that is not able to be made in to a solid
+				XbimGeometryCreator::logger->ErrorFormat("ES004: An IIfcClosedShell #{0} has been found that is not topologically correct. ", brepWithVoids->Outer->EntityLabel);
+			BRepBuilderAPI_MakeSolid builder(outerShell);
+			for each (IIfcClosedShell^ IIfcVoidShell in brepWithVoids->Voids)
+			{
+				XbimCompound^ voidShapes = gcnew XbimCompound(IIfcVoidShell);
+				XbimShell^ voidShell = (XbimShell^)voidShapes->MakeShell();
+				if (!voidShell->IsClosed) //we have a shell that is not able to be made in to a solid
+					XbimGeometryCreator::logger->ErrorFormat("ES004: An IIfcClosedShell #{0} has been found that is not topologically correct. ", IIfcVoidShell->EntityLabel);
+				builder.Add(voidShell);
+			}
+			if (builder.IsDone())
+			{
+				//pCompound = new TopoDS_Compound(); no need to do this as it is already completed
+				BRep_Builder b;
+				b.MakeCompound(*pCompound);
+				b.Add(*pCompound, builder.Solid());
+			}//leave the outer shell without the voids
+			else 
+				XbimGeometryCreator::logger->ErrorFormat("ES003: An incorrectly defined IIfcFacetedBrepWithVoids #{0} has been found, a correct shape could not be built and it has been ignored", brepWithVoids->EntityLabel);
+		}
 
 		void XbimCompound::Init(IIfcFacetedBrepWithVoids^ brepWithVoids)
 		{
@@ -336,6 +387,110 @@ namespace Xbim
 			else
 				return 0;
 		}
+		//This method copes with faces that may be advanced as well as ordinary
+		void XbimCompound::InitAdvancedFaces(IEnumerable<IIfcFace^>^ faces)
+		{
+			
+			BRep_Builder builder;
+			TopoDS_Shell shell;
+			builder.MakeShell(shell);
+			IIfcFace^ aFace = Enumerable::FirstOrDefault(faces);
+			if (aFace == nullptr) return;
+			IModel^ model = aFace->Model;
+			BRep_Builder b;
+			_sewingTolerance = model->ModelFactors->Precision;
+			
+			//collect all the geometry components
+			Dictionary<int, XbimEdge^>^ edgeCurves = gcnew Dictionary<int, XbimEdge^>();
+			Dictionary<int, XbimVertex^>^ vertices = gcnew Dictionary<int, XbimVertex^>();
+			for each (IIfcFace^ unloadedFace in  faces)
+			{
+				IIfcAdvancedFace^ advancedFace = dynamic_cast<IIfcAdvancedFace^>(model->Instances[unloadedFace->EntityLabel]); //improves performance and reduces memory load				
+				XbimFace^ xbimAdvancedFace = gcnew XbimFace(advancedFace->FaceSurface);				
+				XbimWire^ outerLoop;
+				List<XbimWire^>^ innerLoops = gcnew List<XbimWire^>();
+				for each (IIfcFaceBound^ ifcBound in advancedFace->Bounds) //build all the loops
+				{
+					TopoDS_Wire occLoop;
+					
+					b.MakeWire(occLoop);
+					BRepBuilderAPI_MakeWire wireMaker;
+					bool isOuter = dynamic_cast<IIfcFaceOuterBound^>(ifcBound) != nullptr;
+					IIfcEdgeLoop^ edgeLoop = dynamic_cast<IIfcEdgeLoop^>(ifcBound->Bound);
+					if (edgeLoop != nullptr) //they always should be
+					{
+
+						for each (IIfcOrientedEdge^ orientedEdge in edgeLoop->EdgeList)
+						{
+							IIfcEdgeCurve^ edgeCurve = dynamic_cast<IIfcEdgeCurve^>(orientedEdge->EdgeElement);
+							if (edgeCurve == nullptr) throw gcnew XbimException("Incorrectly defined Edge, must be an edge curve");
+							XbimEdge^ xbimEdgeCurve;
+							if (!edgeCurves->TryGetValue(edgeCurve->EdgeGeometry->EntityLabel, xbimEdgeCurve))
+							{
+								xbimEdgeCurve = gcnew XbimEdge(edgeCurve->EdgeGeometry);
+								edgeCurves->Add(edgeCurve->EdgeGeometry->EntityLabel, xbimEdgeCurve);
+							}
+							XbimVertex^ edgeStart;
+							if (!vertices->TryGetValue(edgeCurve->EdgeStart->EntityLabel, edgeStart))
+							{
+								IIfcCartesianPoint^ startPoint = ((IIfcCartesianPoint ^)((IIfcVertexPoint^)edgeCurve->EdgeStart)->VertexGeometry);
+								edgeStart = gcnew XbimVertex(startPoint);
+								vertices->Add(edgeCurve->EdgeStart->EntityLabel, edgeStart);
+							}
+							XbimVertex^ edgeEnd;
+							if (!vertices->TryGetValue(edgeCurve->EdgeEnd->EntityLabel, edgeEnd))
+							{
+								IIfcCartesianPoint^ endPoint = ((IIfcCartesianPoint ^)((IIfcVertexPoint^)edgeCurve->EdgeEnd)->VertexGeometry);
+								edgeEnd = gcnew XbimVertex(endPoint);
+								vertices->Add(edgeCurve->EdgeEnd->EntityLabel, edgeEnd);
+							}
+							
+							XbimEdge^ xbimOrientedEdge = gcnew XbimEdge(xbimEdgeCurve, edgeStart, edgeEnd);
+							if (!orientedEdge->Orientation) xbimOrientedEdge->Reverse();
+						    b.Add(occLoop, xbimOrientedEdge);
+							wireMaker.Add(xbimOrientedEdge);
+
+							//BRepTools::Write(xbimOrientedEdge, "C:\\tmp\\e");
+							//BRepTools::Write(occLoop, "C:\\tmp\\l");
+						} // we have a wire
+						
+						XbimWire^ xbimLoop = gcnew XbimWire(wireMaker.Wire());
+						if (outerLoop == nullptr || isOuter) 
+							outerLoop = xbimLoop;
+						else
+							innerLoops->Add(xbimLoop);
+					}
+					
+				}
+				BRepBuilderAPI_MakeFace faceMaker((TopoDS_Face&)xbimAdvancedFace, outerLoop);
+				for each (XbimWire^ innerLoop in innerLoops)
+				{
+					faceMaker.Add(innerLoop);
+				}
+				
+				if (faceMaker.IsDone())
+				{
+					ShapeFix_Face faceFixer(faceMaker.Face());
+					faceFixer.Perform();
+
+					TopoDS_Face fixedFace = faceFixer.Face();
+					//BRepTools::Write(fixedFace, "C:\\tmp\\f");
+					if (!advancedFace->SameSense)fixedFace.Reverse();
+					builder.Add(shell, faceFixer.Face());
+				}
+				else
+					XbimGeometryCreator::logger->InfoFormat("WC002: Incorrectly defined IIfcFace #{0}, it has been ignored", advancedFace->EntityLabel);
+				//BRepTools::Write(shell, "C:\\tmp\\shell");
+			}
+			
+
+			pCompound = new TopoDS_Compound();
+			builder.MakeCompound(*pCompound);
+			builder.Add(*pCompound, shell);
+			//Sew();
+			//BRepTools::Write(this, "C:\\tmp\\sewn");
+		}
+
 		void XbimCompound::Init(IEnumerable<IIfcFace^>^ faces)
 		{
 			double tolerance;
@@ -359,11 +514,11 @@ namespace Xbim
 				List<Tuple<XbimWire^, IIfcPolyLoop^>^>^ loops = gcnew List<Tuple<XbimWire^, IIfcPolyLoop^>^>();
 				for each (IIfcFaceBound^ bound in fc->Bounds) //build all the loops
 				{
+					
 					if (!dynamic_cast<IIfcPolyLoop^>(bound->Bound) || !XbimConvert::IsPolygon((IIfcPolyLoop^)bound->Bound)) continue;//skip non-polygonal faces
 					IIfcPolyLoop^ polyLoop = (IIfcPolyLoop^)(bound->Bound);
 					bool is3D = XbimConvert::Is3D(polyLoop);
 					BRepBuilderAPI_MakePolygon polyMaker;
-					
 					for each (IIfcCartesianPoint^ p in polyLoop->Polygon) //add all the points into unique collection
 					{
 						TopoDS_Vertex v;

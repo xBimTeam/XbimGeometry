@@ -8,7 +8,7 @@ using Xbim.Ifc;
 using Xbim.Ifc4.GeometricModelResource;
 using Xbim.Ifc4.GeometryResource;
 
-namespace GeometryTests
+namespace Ifc4GeometryTests
 {
     [DeploymentItem(@"x64\", "x64")]
     [DeploymentItem(@"x86\", "x86")]

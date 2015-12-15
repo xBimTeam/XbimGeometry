@@ -2,6 +2,7 @@
 #include "XbimOccShape.h"
 #include <TopoDS_Vertex.hxx>
 using namespace Xbim::Common::Geometry;
+using namespace Xbim::Ifc4::Interfaces;
 namespace Xbim
 {
 	namespace Geometry
@@ -45,7 +46,7 @@ namespace Xbim
 			XbimVertex(XbimPoint3D point3D, double precision);
 			XbimVertex(const TopoDS_Vertex& occVertex);
 			XbimVertex(IXbimVertex^ vertex, double precision);
-
+			XbimVertex(IIfcCartesianPoint^ vertex);
 #ifdef USE_CARVE_CSG
 			XbimVertex(vertex_t* v, double precision);
 #endif // USE_CARVE_CSG

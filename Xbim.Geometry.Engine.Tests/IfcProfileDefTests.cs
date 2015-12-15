@@ -4,7 +4,7 @@ using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc;
 using Xbim.Ifc4.ProfileResource;
 
-namespace GeometryTests
+namespace Ifc4GeometryTests
 {
     [DeploymentItem(@"x64\", "x64")]
     [DeploymentItem(@"x86\", "x86")]

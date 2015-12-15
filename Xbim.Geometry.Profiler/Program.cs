@@ -6,6 +6,7 @@ using Xbim.Common;
 using Xbim.Common.Geometry;
 using Xbim.Common.Logging;
 using Xbim.Ifc;
+using Xbim.IO;
 using Xbim.ModelGeometry.Scene;
 
 namespace Xbim.Geometry.Profiler
@@ -62,6 +63,7 @@ namespace Xbim.Geometry.Profiler
                             var stopWatch = new Stopwatch();
                             Logger.InfoFormat("Entering -  Create wexBIM");
                             stopWatch.Start();
+                            model.SaveAsWexBim(wexBimBinaryWriter);
                             //context.Write(wexBimBinaryWriter);
                             stopWatch.Stop();
                             Logger.InfoFormat("Complete - in \t\t{0:0.0} ms", stopWatch.ElapsedMilliseconds);
@@ -69,7 +71,8 @@ namespace Xbim.Geometry.Profiler
                         }
                         wexBiMfile.Close();
                     }
-
+                    var xbimName = Path.ChangeExtension(fileName,"xbim");
+                    model.SaveAs(xbimName, IfcStorageType.Xbim);
                     model.Close();
                 }
             }
@@ -110,12 +113,12 @@ namespace Xbim.Geometry.Profiler
                     }
 
                 }
-                else //we need to create the xBIM file
+                else //we need to create the store
                 {
                             
                     try
                     {
-                        return IfcStore.Open(fileName,null,0); 
+                        return IfcStore.Open(fileName,null,-1); 
                       
 
                     }

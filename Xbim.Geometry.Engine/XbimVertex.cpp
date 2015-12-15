@@ -28,6 +28,13 @@ namespace Xbim
 			b.MakeVertex(*pVertex);
 		};
 
+		XbimVertex::XbimVertex(IIfcCartesianPoint^ vertex)
+		{
+			pVertex = new TopoDS_Vertex();
+			BRep_Builder b;
+			gp_Pnt pnt(vertex->X, vertex->Y, vertex->Z);
+			b.MakeVertex(*pVertex, pnt, vertex->Model->ModelFactors->Precision);
+		}
 
 
 		XbimVertex::XbimVertex(XbimPoint3D point3D, double precision)

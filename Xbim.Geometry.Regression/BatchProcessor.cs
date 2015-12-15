@@ -132,6 +132,7 @@ namespace XbimRegression
                             BReps =  model.Instances.CountOf<IfcFaceBasedSurfaceModel>() + model.Instances.CountOf<IfcShellBasedSurfaceModel>() + model.Instances.CountOf<IfcManifoldSolidBrep>(),
                             Application = ohs == null ? "Unknown" : ohs.OwningApplication.ToString(),
                         };
+                       // model.SaveAsWexBim(;)
                         model.Close();                       
                     }
                 }

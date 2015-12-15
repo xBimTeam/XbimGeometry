@@ -13,7 +13,7 @@ using Xbim.Ifc4.ProductExtension;
 using Xbim.Ifc4.ProfileResource;
 using Xbim.Ifc4.Interfaces;
 
-namespace GeometryTests
+namespace Ifc4GeometryTests
 {
     [DeploymentItem(@"x64\", "x64")]
     [DeploymentItem(@"x86\", "x86")]

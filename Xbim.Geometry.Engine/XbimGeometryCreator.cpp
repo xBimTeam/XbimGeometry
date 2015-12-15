@@ -59,9 +59,11 @@ namespace Xbim
 				else if (dynamic_cast<IIfcManifoldSolidBrep^>(geomRep))
 				{
 					XbimCompound^ comp = gcnew XbimCompound((IIfcManifoldSolidBrep^)geomRep);
+					comp->Sew();
 					if (objectLocation != nullptr) comp->Move(objectLocation);
+					XbimShell^ shell = (XbimShell^)comp->MakeShell();
+					return shell->MakeSolid();
 					
-					return comp;
 				}				
 				else if (dynamic_cast<IIfcSweptDiskSolid^>(geomRep))
 				{
@@ -849,7 +851,11 @@ namespace Xbim
 		}
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcAdvancedBrep^ ifcSolid)
 		{
-			throw gcnew NotImplementedException();
+			XbimCompound^ comp = gcnew XbimCompound((IIfcManifoldSolidBrep^)ifcSolid);
+			comp->Sew();
+			XbimShell^ shell = (XbimShell^)comp->MakeShell();
+			//BRepTools::Write(shell, "C:\\tmp\\sewn");
+			return shell->MakeSolid();
 		}
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcAdvancedBrepWithVoids^ ifcSolid)
 		{

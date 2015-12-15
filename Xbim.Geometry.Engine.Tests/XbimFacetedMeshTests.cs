@@ -1,4 +1,4 @@
-﻿namespace GeometryTests
+﻿namespace Ifc4GeometryTests
 {
 #if USE_CARVE_CSG
 

@@ -45,6 +45,7 @@
 #include <TColStd_HArray1OfInteger.hxx>
 #include <GeomConvert_CompCurveToBSplineCurve.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
+#include <ShapeCustom_BSplineRestriction.hxx>
 using namespace Xbim::Common;
 using namespace System::Linq;
 namespace Xbim
@@ -147,6 +148,36 @@ namespace Xbim
 			Init(edge);
 		}
 
+		XbimEdge::XbimEdge(XbimEdge^ edgeCurve, XbimVertex^ start, XbimVertex^ end)
+		{
+			if (start->Equals(end))
+			{
+				//must be a closed loop or nothing
+
+				
+				pEdge = new TopoDS_Edge();
+				*pEdge = edgeCurve;
+			}
+			else
+			{
+				Standard_Real p1, p2;
+				Handle(Geom_Curve) curve = BRep_Tool::Curve(edgeCurve, p1, p2);
+				
+				BRepBuilderAPI_MakeEdge edgeMaker(curve, start, end);
+				BRepBuilderAPI_EdgeError edgeErr = edgeMaker.Error();
+				if (edgeErr != BRepBuilderAPI_EdgeDone)
+				{
+					String^ errMsg = XbimEdge::GetBuildEdgeErrorMessage(edgeErr);
+					throw gcnew XbimException("WW013: Invalid edge found." + errMsg);
+
+				}
+				else
+				{
+					pEdge = new TopoDS_Edge();
+					*pEdge = edgeMaker.Edge();
+				}
+			}
+		}
 
 		XbimEdge::XbimEdge(const TopoDS_Wire& aWire, double tolerance, double angleTolerance)
 		{
@@ -689,6 +720,12 @@ namespace Xbim
 			return !(left == right);
 		}
 
+		void XbimEdge::Reverse()
+		{
+			if (!IsValid) return;
+			pEdge->Reverse();
+		}
+
 
 #pragma endregion
 
@@ -766,7 +803,20 @@ namespace Xbim
 			if (line != nullptr) return Init(line);
 			IIfcConic^ conic = dynamic_cast<IIfcConic^>(curve);
 			if (conic != nullptr) return Init(conic);
+			IIfcPolyline^ pline = dynamic_cast<IIfcPolyline^>(curve);
+			if (pline != nullptr) return Init(pline);
+			IIfcBSplineCurve^ bspline = dynamic_cast<IIfcBSplineCurve^>(curve);
+			if (bspline != nullptr) return Init(bspline);
 			throw gcnew NotImplementedException(String::Format("Curve of Type {0} in entity #{1} is not implemented", curve->GetType()->Name, curve->EntityLabel));
+		}
+
+		void XbimEdge::Init(IIfcPolyline^ pline)
+		{
+			XbimWire^ wire = gcnew XbimWire(pline);
+			IModelFactors^ mf = pline->Model->ModelFactors;
+			XbimEdge^ edge = gcnew XbimEdge(wire, mf->Precision, 0.05);
+			pEdge = new TopoDS_Edge();
+			*pEdge = edge;
 		}
 
 		void XbimEdge::Init(IIfcConic^ conic)
@@ -871,6 +921,8 @@ namespace Xbim
 
 		void XbimEdge::Init(IIfcBSplineCurve^ bspline)
 		{
+			IIfcBSplineCurveWithKnots^ bsplineWithKnots = dynamic_cast<IIfcBSplineCurveWithKnots^>(bspline);
+			if (bsplineWithKnots != nullptr) return Init(bsplineWithKnots);
 			XbimGeometryCreator::logger->WarnFormat("WE006: Unsupported IfcBSplineCurve type #{0} found. Ignored", bspline->EntityLabel);
 		}
 		void XbimEdge::Init(IIfcBSplineCurveWithKnots^ bspline)
@@ -885,7 +937,7 @@ namespace Xbim
 				int i = 1;
 				for each (IIfcCartesianPoint^ cp in bspline->ControlPointsList)
 				{
-					poles.SetValue(i, gp_Pnt(cp->X, cp->Y, cp->Z));
+					poles.SetValue(i, gp_Pnt(cp->X, cp->Y, XbimConvert::GetZValueOrZero(cp)));
 					i++;
 				}
 				TColStd_Array1OfReal knots(1, Enumerable::Count(bspline->Knots));
@@ -906,8 +958,8 @@ namespace Xbim
 				BRepBuilderAPI_MakeEdge edgeMaker(hBez);
 				pEdge = new TopoDS_Edge();
 				*pEdge = edgeMaker.Edge();
-				ShapeFix_ShapeTolerance FTol;
-				FTol.SetTolerance(*pEdge, bspline->Model->ModelFactors->Precision, TopAbs_VERTEX);
+				/*ShapeFix_ShapeTolerance FTol;
+				FTol.SetTolerance(*pEdge, bspline->Model->ModelFactors->Precision, TopAbs_VERTEX);*/
 			}
 		}
 
@@ -947,8 +999,8 @@ namespace Xbim
 			BRepBuilderAPI_MakeEdge edgeMaker(hBez);
 			pEdge = new TopoDS_Edge();
 			*pEdge = edgeMaker.Edge();
-			ShapeFix_ShapeTolerance FTol;
-			FTol.SetTolerance(*pEdge, bspline->Model->ModelFactors->Precision, TopAbs_VERTEX);
+			/*ShapeFix_ShapeTolerance FTol;
+			FTol.SetTolerance(*pEdge, bspline->Model->ModelFactors->Precision, TopAbs_VERTEX);*/
 		}
 		
 #pragma endregion

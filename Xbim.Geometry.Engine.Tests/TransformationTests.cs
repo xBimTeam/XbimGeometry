@@ -6,7 +6,7 @@ using Xbim.Common.Step21;
 using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc;
 
-namespace GeometryTests
+namespace Ifc4GeometryTests
 {
     [DeploymentItem(@"x64\", "x64")]
     [DeploymentItem(@"x86\", "x86")]

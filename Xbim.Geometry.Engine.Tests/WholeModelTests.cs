@@ -1,6 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace GeometryTests
+namespace Ifc4GeometryTests
 {
     /// <summary>
     /// Excutes tests on every geometry item found in every file in the specified directory, passes if no files are found

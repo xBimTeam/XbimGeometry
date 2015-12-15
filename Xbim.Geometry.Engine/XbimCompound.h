@@ -9,14 +9,15 @@
 #include <Precision.hxx>
 
 using namespace System::Collections::Generic;
-
+using namespace Xbim::Ifc4;
+using namespace Xbim::Common::Geometry;
 
 namespace Xbim
 {
 	namespace Geometry
 	{
 		//a set of Xbim Geometry Objects
-		ref class XbimCompound : IXbimGeometryObjectSet, XbimOccShape
+		ref class XbimCompound : XbimOccShape, IXbimGeometryObjectSet
 		{
 		private:
 			
@@ -34,11 +35,14 @@ namespace Xbim
 			//Initialisers
 			void Init(IIfcConnectedFaceSet^ faceSet);
 			void Init(IEnumerable<IIfcFace^>^ faces);
+			void InitAdvancedFaces(IEnumerable<IIfcFace^>^ faces);
 			void Init(IIfcShellBasedSurfaceModel^ sbsm);
 			void Init(IIfcFaceBasedSurfaceModel^ fbsm);
 			void Init(IIfcManifoldSolidBrep^ solid);
 			void Init(IIfcFacetedBrep^ solid);
 			void Init(IIfcFacetedBrepWithVoids^ solid);
+			void Init(IIfcAdvancedBrep^ solid);
+			void Init(IIfcAdvancedBrepWithVoids^ solid);
 			void Init(IIfcClosedShell^ solid);
 			//Helpers
 			XbimFace^ BuildFace(List<Tuple<XbimWire^, IIfcPolyLoop^>^>^ wires, int label);
@@ -56,6 +60,8 @@ namespace Xbim
 			XbimCompound(IIfcManifoldSolidBrep^ solid);
 			XbimCompound(IIfcFacetedBrep^ solid);
 			XbimCompound(IIfcFacetedBrepWithVoids^ solid);
+			XbimCompound(IIfcAdvancedBrep^ solid);
+			XbimCompound(IIfcAdvancedBrepWithVoids^ solid);
 			XbimCompound(IIfcClosedShell^ solid);
 			static property XbimCompound^ Empty{XbimCompound^ get(){ return empty; }};
 #pragma region IXbimCompound Interface

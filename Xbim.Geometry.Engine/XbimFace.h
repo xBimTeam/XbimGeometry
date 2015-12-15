@@ -1,5 +1,6 @@
 #pragma once
 #include "XbimOccShape.h"
+#include "XbimWire.h"
 #include <TopoDS_Face.hxx>
 #include <BRepBuilderAPI_FaceError.hxx>
 
@@ -41,6 +42,9 @@ namespace Xbim
 			void Init(IXbimWire^ wire);
 			void Init(IXbimWire^ wire, XbimPoint3D pointOnFace, XbimVector3D faceNormal);
 			void Init(IXbimFace^ face);
+			void Init(IIfcBSplineSurface ^ surface);
+			void Init(IIfcBSplineSurfaceWithKnots ^ surface);
+			void Init(IIfcRationalBSplineSurfaceWithKnots ^ surface);
 			void Init(double x, double y, double tolerance); 
 		public:
 			
@@ -95,7 +99,7 @@ namespace Xbim
 			XbimFace(XbimPoint3D location, XbimVector3D normal);
 			XbimFace(IIfcProfileDef^ profile);
 			//Builds a face from a Surface
-			XbimFace(IIfcSurface ^ surface);
+			XbimFace(IIfcSurface^ surface);
 			//Builds a face from a Plane
 			XbimFace(IIfcPlane ^ plane);
 			XbimFace(IIfcSurfaceOfLinearExtrusion ^ sLin);
@@ -108,6 +112,7 @@ namespace Xbim
 			XbimFace(IXbimWire^ wire);
 			XbimFace(IXbimWire^ wire, XbimPoint3D pointOnface,  XbimVector3D faceNormal);
 			XbimFace(IXbimFace^ face);
+			XbimFace(IIfcSurface^ surface, XbimWire^ outerBound, IEnumerable<XbimWire^>^ innerBounds);
 			XbimFace(double x, double y, double tolerance);
 #pragma endregion
 
