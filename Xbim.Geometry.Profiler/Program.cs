@@ -73,6 +73,7 @@ namespace Xbim.Geometry.Profiler
 
                     mainStopWatch.Stop();
                     Logger.InfoFormat("Xbim total Compile Time \t\t{0:0.0} ms", mainStopWatch.ElapsedMilliseconds);
+                   
                     var wexBimFilename = Path.ChangeExtension(fileName, "wexBIM");
                     using (var wexBiMfile = new FileStream(wexBimFilename, FileMode.Create, FileAccess.Write))
                     {
@@ -82,15 +83,14 @@ namespace Xbim.Geometry.Profiler
                             Logger.InfoFormat("Entering -  Create wexBIM");
                             stopWatch.Start();
                             model.SaveAsWexBim(wexBimBinaryWriter);
-                            //context.Write(wexBimBinaryWriter);
+                           
                             stopWatch.Stop();
                             Logger.InfoFormat("Complete - in \t\t{0:0.0} ms", stopWatch.ElapsedMilliseconds);
                             wexBimBinaryWriter.Close();
                         }
                         wexBiMfile.Close();
                     }
-                    var xbimName = Path.ChangeExtension(fileName,"xbim");
-                    model.SaveAs(xbimName, IfcStorageType.Xbim);
+                   
                     model.Close();
                 }
             }
@@ -132,16 +132,11 @@ namespace Xbim.Geometry.Profiler
                 {
                     try
                     {
-                        return IfcStore.Open(fileName,null,-1); 
-                      
-
-                    // ReSharper disable once InvertIf
-                    if (writeXbim && model != null)
-                    {
+                        double? threshhold=null;
+                        if(writeXbim) threshhold = 0; //otherwise let it do what it needs to baed on size
+                        var model = IfcStore.Open(fileName, null, threshhold); 
                         var xbimName =  Path.ChangeExtension(fileName, "xbim");
-                        model.SaveAs(xbimName, IfcStorageType.Xbim);
-                    }
-                    return model;
+                        return model;
                     }
                     catch (Exception e)
                     {
