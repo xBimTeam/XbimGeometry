@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using Xbim.Common;
 using Xbim.Common.Geometry;
 using Xbim.Common.Logging;
@@ -15,39 +16,56 @@ namespace Xbim.Geometry.Profiler
     class Program
     {
         internal static readonly ILogger Logger = LoggerFactory.GetLogger();
+
         /// <summary>
         /// Converts an Ifc File to xBIM if it does not already exists, then converts the geoemtry to Xbim format and profiles the results
         /// </summary>
         /// <param name="args"> file[.ifc, xbim]</param>
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             if (args.Length < 1)
             {
                 Console.WriteLine("No Ifc or xBim file specified");
                 return;
             }
-            var fileName = args[0];
+
+            var writeXbim = args.Any(t => t.ToLowerInvariant() == "/keepxbim");
+
+            // ReSharper disable once LoopCanBePartlyConvertedToQuery
+            foreach (var arg in args)
+            {
+                if (!arg.StartsWith("/"))
+                    Profile(arg, writeXbim);
+            }
+            
+            Console.WriteLine("Press any key to exit");
+            Console.Read();
+        }
+
+        private static void Profile(string fileName, bool writeXbim)
+        {
             var mainStopWatch = new Stopwatch();
             mainStopWatch.Start();
-            using (var model = GetModel(fileName))
+            using (var model = GetModel(fileName, writeXbim))
             {
                 if (model != null)
                 {
-                    var functionStack = new ConcurrentStack<Tuple<string,double>>();
+                    var functionStack = new ConcurrentStack<Tuple<string, double>>();
                     ReportProgressDelegate progDelegate = delegate(int percentProgress, object userState)
                     {
                         if (percentProgress == -1)
                         {
-                            functionStack.Push(new Tuple<string,double>(userState.ToString(), DateTime.Now.TimeOfDay.TotalMilliseconds));
+                            functionStack.Push(new Tuple<string, double>(userState.ToString(),
+                                DateTime.Now.TimeOfDay.TotalMilliseconds));
                             Logger.InfoFormat("Entering - {0}", userState.ToString());
                         }
-                    
                         else if (percentProgress == 101)
                         {
-                            Tuple<string,double> func; 
-                            if(functionStack.TryPop(out func))
-                                Logger.InfoFormat("Complete in \t\t{0:0.0} ms", DateTime.Now.TimeOfDay.TotalMilliseconds - func.Item2);
+                            Tuple<string, double> func;
+                            if (functionStack.TryPop(out func))
+                                Logger.InfoFormat("Complete in \t\t{0:0.0} ms",
+                                    DateTime.Now.TimeOfDay.TotalMilliseconds - func.Item2);
                         }
                     };
                     var context = new Xbim3DModelContext(model);
@@ -76,13 +94,11 @@ namespace Xbim.Geometry.Profiler
                     model.Close();
                 }
             }
-            Console.WriteLine("Press any key to exit");
-            Console.Read();
         }
 
-        private static IfcStore GetModel(string fileName)
+
+        private static IfcStore GetModel(string fileName, bool writeXbim)
         {
-          
             var extension = Path.GetExtension(fileName);
             if (string.IsNullOrWhiteSpace(extension))
             {
@@ -96,38 +112,42 @@ namespace Xbim.Geometry.Profiler
                     fileName = Path.ChangeExtension(fileName, "ifcxml");
             }
 
-            if (File.Exists(fileName))
-            {
+            if (!File.Exists(fileName)) 
+                return null;
                 extension = Path.GetExtension(fileName);
-                if (String.Compare(extension, ".xbim", StringComparison.OrdinalIgnoreCase) == 0) //just open xbim
+            if (string.Compare(extension, ".xbim", StringComparison.OrdinalIgnoreCase) == 0) //just open xbim
                 {
-
                     try
                     {
                         return IfcStore.Open(fileName);                      
                     }
                     catch (Exception e)
                     {
-                        Logger.ErrorFormat("Unable to open model {0}, {1}", fileName, e.Message);
-                        Console.WriteLine("Unable to open model {0}, {1}", fileName, e.Message);
+                    var message = string.Format("Unable to open model {0}, {1}", fileName, e.Message);
+                    Logger.Error(message, e);
+                    Console.WriteLine(message);
                     }
-
                 }
                 else //we need to create the store
                 {
-                            
                     try
                     {
                         return IfcStore.Open(fileName,null,-1); 
                       
 
+                    // ReSharper disable once InvertIf
+                    if (writeXbim && model != null)
+                    {
+                        var xbimName =  Path.ChangeExtension(fileName, "xbim");
+                        model.SaveAs(xbimName, IfcStorageType.Xbim);
+                    }
+                    return model;
                     }
                     catch (Exception e)
                     {
-                        Logger.ErrorFormat("Unable to open model {0}, {1}", fileName, e.Message);
-                        Console.WriteLine("Unable to open model {0}, {1}", fileName, e.Message);
-                    }
-
+                    var message = string.Format("Unable to open model {0}, {1}", fileName, e.Message);
+                    Logger.Error(message, e);
+                    Console.WriteLine(message);
                 }
             }
             return null;
