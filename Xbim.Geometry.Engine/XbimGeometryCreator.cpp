@@ -852,9 +852,7 @@ namespace Xbim
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcAdvancedBrep^ ifcSolid)
 		{
 			XbimCompound^ comp = gcnew XbimCompound((IIfcManifoldSolidBrep^)ifcSolid);
-			comp->Sew();
 			XbimShell^ shell = (XbimShell^)comp->MakeShell();
-			//BRepTools::Write(shell, "C:\\tmp\\sewn");
 			return shell->MakeSolid();
 		}
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcAdvancedBrepWithVoids^ ifcSolid)

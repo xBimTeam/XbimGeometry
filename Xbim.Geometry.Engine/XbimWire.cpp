@@ -56,6 +56,7 @@
 #include <BRepOffsetAPI_MakeOffset.hxx>
 #include <TColStd_IndexedDataMapOfTransientTransient.hxx>
 #include <TopTools_ListIteratorOfListOfShape.hxx>
+#include <ShapeAnalysis.hxx>
 using namespace Xbim::Common;
 using namespace System::Linq;
 namespace Xbim
@@ -974,31 +975,36 @@ namespace Xbim
 						gp_Dir dir = conic->Axis().Direction();
 						return XbimVector3D(dir.X(), dir.Y(), dir.Z());
 					}
-					else if ((cType == STANDARD_TYPE(Geom_Circle)) ||
-						(cType == STANDARD_TYPE(Geom_Ellipse)) ||
-						(cType == STANDARD_TYPE(Geom_Parabola)) ||
-						(cType == STANDARD_TYPE(Geom_Hyperbola)) ||
+					else if (
 						(cType == STANDARD_TYPE(Geom_BezierCurve)) ||
 						(cType == STANDARD_TYPE(Geom_BSplineCurve)))
 					{		
 						BRepAdaptor_Curve curve(wEx.Current());
 						double us = curve.FirstParameter();
 						double ue = curve.LastParameter();
-						double umiddle = (us + ue) / 2;
-						gp_Pnt mid;
-						gp_Vec V;
-						curve.D1(umiddle, mid, V);
+						double u1 = (us + ue) / 4;
+						double u2 = ((us + ue) / 4) * 2;
+						double u3 = ((us + ue) / 4) * 3;
+						gp_Pnt p1;gp_Pnt p2;gp_Pnt p3;
+						gp_Vec v1; gp_Vec v2; gp_Vec v3;
+						curve.D1(u1, p1, v1);
+						curve.D1(u2, p2, v2);
+						curve.D1(u3, p3, v3);
 						if (count > 0)
 						{
 							AddNewellPoint(previousEnd, currentStart, x, y, z);
-							AddNewellPoint(currentStart, mid, x, y, z);
-							previousEnd = mid;
+							AddNewellPoint(currentStart, p1, x, y, z);
+							AddNewellPoint(p1, p2, x, y, z);
+							AddNewellPoint(p2, p3, x, y, z);
+							previousEnd = p3;
 						}
 						else
 						{
 							first = currentStart;
-							AddNewellPoint(first, mid, x, y, z);
-							previousEnd = mid;
+							AddNewellPoint(first, p1, x, y, z);
+							AddNewellPoint(p1, p2, x, y, z);
+							AddNewellPoint(p2, p3, x, y, z);
+							previousEnd = p3;
 						}
 
 					}
@@ -1038,7 +1044,11 @@ namespace Xbim
 			gp_Pnt p = cc.Value(cc.LastParameter());
 			return XbimPoint3D(p.X(), p.Y(), p.Z());
 		}
-		
+		double XbimWire::Area::get()
+		{
+			return ShapeAnalysis::ContourArea(this);
+		}
+
 		double XbimWire::Length::get()
 		{
 			if (!IsValid) return 0.;

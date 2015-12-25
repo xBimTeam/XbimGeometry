@@ -1,6 +1,7 @@
 #include "XbimCompound.h"
 #include "XbimGeometryCreator.h"
 #include "XbimGeometryObjectSet.h"
+#include "XbimOccWriter.h"
 #include "XbimSolidSet.h"
 #include "XbimShellSet.h"
 #include "XbimFaceSet.h"
@@ -32,6 +33,7 @@
 #include <BRepGProp.hxx>
 #include <BRepBuilderAPI_MakeWire.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
+#include <ShapeFix_Shell.hxx>
 using namespace System;
 using namespace System::Linq;
 using namespace Xbim::Common;
@@ -390,30 +392,27 @@ namespace Xbim
 		//This method copes with faces that may be advanced as well as ordinary
 		void XbimCompound::InitAdvancedFaces(IEnumerable<IIfcFace^>^ faces)
 		{
-			
-			BRep_Builder builder;
+			int f = 0;
+			XbimOccWriter^ occWriter = gcnew XbimOccWriter();
+			BRepPrim_Builder builder;
 			TopoDS_Shell shell;
 			builder.MakeShell(shell);
 			IIfcFace^ aFace = Enumerable::FirstOrDefault(faces);
 			if (aFace == nullptr) return;
 			IModel^ model = aFace->Model;
-			BRep_Builder b;
-			_sewingTolerance = model->ModelFactors->Precision;
 			
+			_sewingTolerance = model->ModelFactors->Precision;			
 			//collect all the geometry components
 			Dictionary<int, XbimEdge^>^ edgeCurves = gcnew Dictionary<int, XbimEdge^>();
 			Dictionary<int, XbimVertex^>^ vertices = gcnew Dictionary<int, XbimVertex^>();
 			for each (IIfcFace^ unloadedFace in  faces)
 			{
 				IIfcAdvancedFace^ advancedFace = dynamic_cast<IIfcAdvancedFace^>(model->Instances[unloadedFace->EntityLabel]); //improves performance and reduces memory load				
-				XbimFace^ xbimAdvancedFace = gcnew XbimFace(advancedFace->FaceSurface);				
-				XbimWire^ outerLoop;
+				
+				XbimWire^ outerLoop=nullptr;
 				List<XbimWire^>^ innerLoops = gcnew List<XbimWire^>();
 				for each (IIfcFaceBound^ ifcBound in advancedFace->Bounds) //build all the loops
 				{
-					TopoDS_Wire occLoop;
-					
-					b.MakeWire(occLoop);
 					BRepBuilderAPI_MakeWire wireMaker;
 					bool isOuter = dynamic_cast<IIfcFaceOuterBound^>(ifcBound) != nullptr;
 					IIfcEdgeLoop^ edgeLoop = dynamic_cast<IIfcEdgeLoop^>(ifcBound->Bound);
@@ -424,12 +423,7 @@ namespace Xbim
 						{
 							IIfcEdgeCurve^ edgeCurve = dynamic_cast<IIfcEdgeCurve^>(orientedEdge->EdgeElement);
 							if (edgeCurve == nullptr) throw gcnew XbimException("Incorrectly defined Edge, must be an edge curve");
-							XbimEdge^ xbimEdgeCurve;
-							if (!edgeCurves->TryGetValue(edgeCurve->EdgeGeometry->EntityLabel, xbimEdgeCurve))
-							{
-								xbimEdgeCurve = gcnew XbimEdge(edgeCurve->EdgeGeometry);
-								edgeCurves->Add(edgeCurve->EdgeGeometry->EntityLabel, xbimEdgeCurve);
-							}
+
 							XbimVertex^ edgeStart;
 							if (!vertices->TryGetValue(edgeCurve->EdgeStart->EntityLabel, edgeStart))
 							{
@@ -444,51 +438,72 @@ namespace Xbim
 								edgeEnd = gcnew XbimVertex(endPoint);
 								vertices->Add(edgeCurve->EdgeEnd->EntityLabel, edgeEnd);
 							}
-							
-							XbimEdge^ xbimOrientedEdge = gcnew XbimEdge(xbimEdgeCurve, edgeStart, edgeEnd);
-							if (!orientedEdge->Orientation) xbimOrientedEdge->Reverse();
-						    b.Add(occLoop, xbimOrientedEdge);
-							wireMaker.Add(xbimOrientedEdge);
+							XbimEdge^ xBimEdgeCurve;
+							if (!edgeCurves->TryGetValue(edgeCurve->EntityLabel, xBimEdgeCurve))
+							{
+								xBimEdgeCurve = gcnew XbimEdge(edgeCurve->EdgeGeometry, edgeStart, edgeEnd);
+								if (!edgeCurve->SameSense)
+									xBimEdgeCurve->Reverse();
+								edgeCurves->Add(edgeCurve->EntityLabel, xBimEdgeCurve);
+							}
 
-							//BRepTools::Write(xbimOrientedEdge, "C:\\tmp\\e");
-							//BRepTools::Write(occLoop, "C:\\tmp\\l");
+							if (!orientedEdge->Orientation)
+								xBimEdgeCurve = xBimEdgeCurve->Reversed();
+							wireMaker.Add(xBimEdgeCurve);
+
 						} // we have a wire
-						
-						XbimWire^ xbimLoop = gcnew XbimWire(wireMaker.Wire());
-						if (outerLoop == nullptr || isOuter) 
+						TopoDS_Wire loopWire = wireMaker.Wire();
+						if (!ifcBound->Orientation) loopWire.Reverse();
+						XbimWire^ xbimLoop = gcnew XbimWire(loopWire);
+						if (isOuter && outerLoop == nullptr) //only choose one outer loop
 							outerLoop = xbimLoop;
 						else
 							innerLoops->Add(xbimLoop);
 					}
-					
 				}
-				BRepBuilderAPI_MakeFace faceMaker((TopoDS_Face&)xbimAdvancedFace, outerLoop);
-				for each (XbimWire^ innerLoop in innerLoops)
+				//if we have no outer loop defined, find the longest
+				if (outerLoop == nullptr)
 				{
-					faceMaker.Add(innerLoop);
+					double area = 0;
+					for each (XbimWire^ innerLoop in innerLoops)
+					{
+						double loopArea = innerLoop->Area;
+						if (loopArea > area)
+						{
+							outerLoop = innerLoop;
+							area = loopArea;
+						}
+					}
+					innerLoops->Remove(outerLoop); //remove outer loop from inner loops
 				}
-				
-				if (faceMaker.IsDone())
-				{
-					ShapeFix_Face faceFixer(faceMaker.Face());
-					faceFixer.Perform();
+				XbimFace^ xbimAdvancedFace = gcnew XbimFace(advancedFace, outerLoop, innerLoops);
 
-					TopoDS_Face fixedFace = faceFixer.Face();
-					//BRepTools::Write(fixedFace, "C:\\tmp\\f");
-					if (!advancedFace->SameSense)fixedFace.Reverse();
-					builder.Add(shell, faceFixer.Face());
+				if (xbimAdvancedFace->IsValid)
+				{
+					/*String^ fName = "C:\\tmp\\f" + f;
+					occWriter->Write(xbimAdvancedFace, fName);*/
+					builder.AddShellFace(shell, xbimAdvancedFace);
+					f++;
 				}
 				else
 					XbimGeometryCreator::logger->InfoFormat("WC002: Incorrectly defined IIfcFace #{0}, it has been ignored", advancedFace->EntityLabel);
-				//BRepTools::Write(shell, "C:\\tmp\\shell");
 			}
 			
-
+			builder.CompleteShell(shell);
+			
+			ShapeFix_Shell shellFixer(shell);
+			shellFixer.Perform();
+			shell = shellFixer.Shell();
+			
+			BRepBuilderAPI_Sewing seamstress(_sewingTolerance);
+			seamstress.Add(shell);
+			seamstress.Perform();
+			TopoDS_Shape result = seamstress.SewedShape();
+			
+			BRep_Builder b;
 			pCompound = new TopoDS_Compound();
-			builder.MakeCompound(*pCompound);
-			builder.Add(*pCompound, shell);
-			//Sew();
-			//BRepTools::Write(this, "C:\\tmp\\sewn");
+			b.MakeCompound(*pCompound);
+			b.Add(*pCompound, result);
 		}
 
 		void XbimCompound::Init(IEnumerable<IIfcFace^>^ faces)

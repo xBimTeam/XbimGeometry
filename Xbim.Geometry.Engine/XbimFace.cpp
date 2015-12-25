@@ -100,6 +100,7 @@ namespace Xbim
 			Init(profile);
 		}
 
+
 		XbimFace::XbimFace(IIfcSurface^ surface)
 		{
 			Init(surface);
@@ -177,6 +178,21 @@ namespace Xbim
 			*pFace = faceMaker.Face();
 		}
 
+		//NB the wires defined in the facesurface are ignored
+		XbimFace::XbimFace(IIfcFaceSurface^ surface, XbimWire^ outerBound, IEnumerable<XbimWire^>^ innerBounds)
+		{
+			Init(surface->FaceSurface);
+			if (!IsValid) return;
+			TopLoc_Location loc;
+			Handle(Geom_Surface) geomSurface = BRep_Tool::Surface(this, loc);
+			BRepBuilderAPI_MakeFace faceMaker(geomSurface, outerBound, Standard_True);
+			for each (XbimWire^ inner in innerBounds)
+			{
+				faceMaker.Add(inner);
+			}
+			*pFace = faceMaker.Face();
+			if (!surface->SameSense) Reverse();
+		}
 
 		void XbimFace::Init(IIfcCompositeCurve ^ cCurve)
 		{
@@ -545,6 +561,9 @@ namespace Xbim
 			}
 
 		}
+
+
+
 		void XbimFace::Init(IIfcBSplineSurface ^ surface)
 		{
 			if (dynamic_cast<IIfcBSplineSurfaceWithKnots^>(surface))

@@ -56,6 +56,7 @@ namespace Xbim
 			XbimEdge(IIfcRationalBSplineCurveWithKnots^ bSpline);
 			XbimEdge(XbimEdge^ edgeCurve, XbimVertex^ start, XbimVertex^ end);
 			XbimEdge(const TopoDS_Wire& wire, double tolerance, double angleTolerance);
+			XbimEdge(IIfcCurve^ edgeCurve, XbimVertex^ start, XbimVertex^ end);
 #pragma endregion
 
 
@@ -92,7 +93,7 @@ namespace Xbim
 			property bool IsReversed{bool get(){ return IsValid && pEdge->Orientation() == TopAbs_REVERSED; }; }
 #pragma endregion
 			void Reverse();
-
+			XbimEdge^ Reversed();
 		};
 	}
 

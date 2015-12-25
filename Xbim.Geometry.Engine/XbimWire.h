@@ -130,7 +130,7 @@ namespace Xbim
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) override;
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D)override;
 			void FuseColinearSegments(double tolerance, double angleTolerance);
-			
+			virtual property double Area{double get(); }
 #pragma endregion
 	
 #pragma region Equality Overrides

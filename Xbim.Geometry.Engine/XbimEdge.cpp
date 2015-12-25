@@ -179,6 +179,32 @@ namespace Xbim
 			}
 		}
 
+		XbimEdge::XbimEdge(IIfcCurve^ edgeCurve, XbimVertex^ start, XbimVertex^ end)
+		{
+			Init(edgeCurve);
+			
+
+			if (IsValid &&!start->Equals(end))//must be a closed loop or nothing, no need to trim			
+			{
+				Standard_Real p1, p2;
+				Handle(Geom_Curve)  curve = BRep_Tool::Curve(this, p1, p2);
+				curve = BRep_Tool::Curve(this, p1, p2);
+				BRepBuilderAPI_MakeEdge edgeMaker(curve, start, end);
+				BRepBuilderAPI_EdgeError edgeErr = edgeMaker.Error();
+				if (edgeErr != BRepBuilderAPI_EdgeDone)
+				{
+					String^ errMsg = XbimEdge::GetBuildEdgeErrorMessage(edgeErr);
+					throw gcnew XbimException("WW013: Invalid edge found." + errMsg);
+				}
+				else
+				{
+					*pEdge = edgeMaker.Edge();
+				}
+
+			}
+		}
+
+
 		XbimEdge::XbimEdge(const TopoDS_Wire& aWire, double tolerance, double angleTolerance)
 		{
 			
@@ -726,6 +752,12 @@ namespace Xbim
 			pEdge->Reverse();
 		}
 
+		XbimEdge^ XbimEdge::Reversed()
+		{
+			XbimEdge^ revEdge = gcnew XbimEdge(this);
+			revEdge->Reverse();
+			return revEdge;
+		}
 
 #pragma endregion
 

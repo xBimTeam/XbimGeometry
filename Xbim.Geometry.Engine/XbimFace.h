@@ -100,6 +100,7 @@ namespace Xbim
 			XbimFace(IIfcProfileDef^ profile);
 			//Builds a face from a Surface
 			XbimFace(IIfcSurface^ surface);
+
 			//Builds a face from a Plane
 			XbimFace(IIfcPlane ^ plane);
 			XbimFace(IIfcSurfaceOfLinearExtrusion ^ sLin);
@@ -113,6 +114,7 @@ namespace Xbim
 			XbimFace(IXbimWire^ wire, XbimPoint3D pointOnface,  XbimVector3D faceNormal);
 			XbimFace(IXbimFace^ face);
 			XbimFace(IIfcSurface^ surface, XbimWire^ outerBound, IEnumerable<XbimWire^>^ innerBounds);
+			XbimFace(IIfcFaceSurface^ surface, XbimWire^ outerBound, IEnumerable<XbimWire^>^ innerBounds);
 			XbimFace(double x, double y, double tolerance);
 #pragma endregion
 

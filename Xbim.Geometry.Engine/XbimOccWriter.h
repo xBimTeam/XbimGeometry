@@ -14,11 +14,10 @@ namespace Xbim
 
 		public ref class XbimOccWriter
 		{
-		private:
-			bool Write(const TopoDS_Shape& shape, String^ fileName);
 			
 		public:
 			XbimOccWriter();
+			bool Write(const TopoDS_Shape& shape, String^ fileName);
 			bool Write(IXbimGeometryObject^ obj, String^ filename);
 			bool Write(IXbimGeometryObjectSet^ objects, String^ filename);
 			bool Write(IXbimSolidSet^ solidSet, String^ filename);
