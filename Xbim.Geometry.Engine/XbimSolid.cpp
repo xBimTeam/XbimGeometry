@@ -157,9 +157,9 @@ namespace Xbim
 			Init(repItem, overrideProfileDef);
 		}
 
-		XbimSolid::XbimSolid(IfcHalfSpaceSolid^ repItem, double maxExtrusion)
+		XbimSolid::XbimSolid(IfcHalfSpaceSolid^ repItem, double maxExtrusion, XbimPoint3D^ bboxCentroid)
 		{
-			Init(repItem, maxExtrusion);
+			Init(repItem, maxExtrusion, bboxCentroid);
 		}
 
 		XbimSolid::XbimSolid(IfcBoxedHalfSpace^ repItem)
@@ -524,7 +524,7 @@ namespace Xbim
 			}
 		}
 
-		void XbimSolid::Init(IfcHalfSpaceSolid^ hs, double maxExtrusion)
+		void XbimSolid::Init(IfcHalfSpaceSolid^ hs, double maxExtrusion, XbimPoint3D^ bboxCentroid)
 		{
 			if (dynamic_cast<IfcPolygonalBoundedHalfSpace^>(hs))
 				return Init((IfcPolygonalBoundedHalfSpace^)hs, maxExtrusion);
@@ -571,7 +571,57 @@ namespace Xbim
 				XbimVector3D size(bounds, bounds, bounds);
 				XbimRect3D rect3D(corner, size);
 				Init(rect3D, hs->ModelOf->ModelFactors->Precision);
-				Move(ifcPlane->Position);
+
+				// here we have to shift the halfspace to the center of the main body
+				// geometric guidance from http://stackoverflow.com/questions/9605556/how-to-project-a-3d-point-to-a-3d-plane
+				// 
+				gp_Trsf toPos = XbimGeomPrim::ToTransform(ifcPlane->Position);
+				gp_XYZ posPnt = toPos.TranslationPart();
+				
+				XbimVector3D v = XbimVector3D(
+					bboxCentroid->X - posPnt.X(),
+					bboxCentroid->Y - posPnt.Y(),
+					bboxCentroid->Z - posPnt.Z()
+					);
+
+				// if Axis or refDirectopm are null then use default axis (Ifc Rule)
+				XbimVector3D n;
+				if (ifcPlane->Position->Axis == nullptr || ifcPlane->Position->RefDirection == nullptr) 
+				{
+					n = XbimVector3D(0, 0, 1);
+					// refdirection not needed.
+				}
+				else
+				{
+					n = XbimVector3D(
+						ifcPlane->Position->Axis->X,
+						ifcPlane->Position->Axis->Y,
+						ifcPlane->Position->Axis->Z
+						);
+					n.Normalize();
+				}
+
+				double dist = v.DotProduct(n);
+				XbimVector3D delta = XbimVector3D::Multiply(dist,n);
+
+				XbimPoint3D planar = XbimPoint3D(
+					bboxCentroid->X - delta.X,
+					bboxCentroid->Y - delta.Y,
+					bboxCentroid->Z - delta.Z
+					);
+
+				posPnt.SetX(planar.X);
+				posPnt.SetY(planar.Y);
+				posPnt.SetZ(planar.Z);
+
+				toPos.SetTranslationPart(posPnt);
+				pSolid->Move(toPos);
+				
+				// XbimGeometryCreator::logger->DebugFormat("{0} {1} {2}", posPnt.X(), posPnt.Y(), posPnt.Z());
+				// IfcAxis2Placement3D^ newPlacement = gcnew IfcAxis2Placement3D();
+				// newPlacement->Location = 
+
+				// Move(ifcPlane->Position); // commented becasue move happens just above.
 //#endif
 			}
 		}
@@ -882,7 +932,15 @@ namespace Xbim
 			IfcSolidModel^ sol = dynamic_cast<IfcSolidModel^>(solid);
 			if (sol != nullptr) return Init(sol);
 			IfcHalfSpaceSolid^ hs = dynamic_cast<IfcHalfSpaceSolid^>(solid);
-			if (hs != nullptr) return Init(hs,solid->ModelOf->ModelFactors->OneMetre*100); //take 100 metres as the largest extrusion
+			
+			if (hs != nullptr)
+			{
+				// take 100 metres as the largest extrusion
+				// todo: not sure what to do with the point p
+				// todo: probably needs taking from the model centre
+				XbimPoint3D^ p = gcnew XbimPoint3D(0, 0, 0);
+				return Init(hs, solid->ModelOf->ModelFactors->OneMetre * 100, p); 
+			}
 			IfcBooleanResult^ br = dynamic_cast<IfcBooleanResult^>(solid);
 			if (br != nullptr) return Init(br); //treat IfcBooleanResult and IfcBooleanClippingResult the same
 			//IfcBooleanResult^ br = dynamic_cast<IfcBooleanResult^>(solid);

@@ -856,13 +856,15 @@ namespace Xbim
 			IXbimSolidSet^ solidSet = gcnew XbimSolidSet();
 			XbimSolid^ body = XbimSolid::BuildClippingList(clip, clips);
 			double maxLen = body->BoundingBox.Length();
+			
 			for each (IfcBooleanOperand^ bOp in clips)
 			{
 				IfcHalfSpaceSolid^ hs = dynamic_cast<IfcHalfSpaceSolid^>(bOp);
 				
 				if (hs!=nullptr) //special case for IfcHalfSpaceSolid to keep extrusion to the minimum
 				{
-					XbimSolid^ s = gcnew XbimSolid(hs, maxLen);
+					XbimPoint3D^ ctrd = body->BoundingBox.Centroid();
+					XbimSolid^ s = gcnew XbimSolid(hs, maxLen, ctrd);
 				    if (s->IsValid) solidSet->Add(s); 
 				}
 				else
