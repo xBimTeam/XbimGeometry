@@ -36,6 +36,13 @@ namespace Xbim
 			b.MakeVertex(*pVertex, pnt, vertex->Model->ModelFactors->Precision);
 		}
 
+		XbimVertex::XbimVertex(double x, double y, double z, double precision)
+		{
+			pVertex = new TopoDS_Vertex();
+			BRep_Builder b;
+			gp_Pnt pnt(x, y, z);
+			b.MakeVertex(*pVertex, pnt, precision);
+		}
 
 		XbimVertex::XbimVertex(XbimPoint3D point3D, double precision)
 		{

@@ -36,7 +36,8 @@
 #include <ShapeFix_Shell.hxx>
 using namespace System;
 using namespace System::Linq;
-using namespace Xbim::Common;
+using namespace Xbim::Common; 
+using namespace Xbim::Common::XbimExtensions;
 namespace Xbim
 {
 	namespace Geometry
@@ -168,6 +169,7 @@ namespace Xbim
 			_sewingTolerance = solid->Model->ModelFactors->Precision;
 			Init(solid);
 		}
+
 		XbimCompound::XbimCompound(IIfcClosedShell^ solid)
 		{
 			_sewingTolerance = solid->Model->ModelFactors->Precision;
@@ -190,6 +192,11 @@ namespace Xbim
 			pCompound->Move(toPos);
 		}
 
+		XbimCompound::XbimCompound(IIfcTriangulatedFaceSet^ faceSet)
+		{
+			_sewingTolerance = faceSet->Model->ModelFactors->Precision;
+			Init(faceSet);
+		}
 
 
 #pragma region Initialisers
@@ -505,6 +512,53 @@ namespace Xbim
 			b.MakeCompound(*pCompound);
 			b.Add(*pCompound, result);
 		}
+
+
+		void  XbimCompound::Init(IIfcTriangulatedFaceSet^ faceSet)
+		{
+			BRepPrim_Builder builder;
+			TopoDS_Shell shell;
+			builder.MakeShell(shell);
+			//create a list of all the vertices
+			List<XbimVertex^>^ vertices = gcnew List<XbimVertex^>(Enumerable::Count(faceSet->Coordinates->CoordList));
+			for each (IEnumerable<Ifc4::MeasureResource::IfcLengthMeasure>^ cp in faceSet->Coordinates->CoordList)
+			{
+				XbimTriplet<Ifc4::MeasureResource::IfcLengthMeasure> tpl = IEnumerableExtensions::AsTriplet<Ifc4::MeasureResource::IfcLengthMeasure>(cp);
+				XbimVertex^ v = gcnew XbimVertex(tpl.A,tpl.B, tpl.C,_sewingTolerance);
+				vertices->Add(v);
+			}
+			//ignore the normals as we cannot observe them in an opencascade model, we will recalculate
+			
+
+			//make the triangles
+			for each (IEnumerable<Ifc4::MeasureResource::IfcPositiveInteger>^ indices in faceSet->CoordIndex)
+			{
+				XbimTriplet<Ifc4::MeasureResource::IfcPositiveInteger> tpl = IEnumerableExtensions::AsTriplet<Ifc4::MeasureResource::IfcPositiveInteger>(indices);
+				
+				XbimVertex^ v1; XbimVertex^ v2; XbimVertex^ v3;
+				v1 = vertices[(int)tpl.A - 1]; 
+				v2 = vertices[(int)tpl.B - 1]; 
+				v3 = vertices[(int)tpl.C - 1];
+				BRepBuilderAPI_MakePolygon triangleMaker(v1,v2,v3,Standard_True);
+				if (triangleMaker.IsDone())
+				{
+					BRepBuilderAPI_MakeFace faceMaker(triangleMaker.Wire(),Standard_True);
+					if (faceMaker.IsDone())
+					{
+						builder.AddShellFace(shell, faceMaker.Face());
+					}
+				}
+			}
+			BRep_Builder b;
+			pCompound = new TopoDS_Compound();
+			b.MakeCompound(*pCompound);
+			BRepBuilderAPI_Sewing seamstress(_sewingTolerance);
+			seamstress.Add(shell);
+			seamstress.Perform();
+			TopoDS_Shape result = seamstress.SewedShape();
+			b.Add(*pCompound, result);
+		}
+
 
 		void XbimCompound::Init(IEnumerable<IIfcFace^>^ faces)
 		{

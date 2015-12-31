@@ -44,6 +44,7 @@ namespace Xbim
 			void Init(IIfcAdvancedBrep^ solid);
 			void Init(IIfcAdvancedBrepWithVoids^ solid);
 			void Init(IIfcClosedShell^ solid);
+			void Init(IIfcTriangulatedFaceSet^ faceSet);
 			//Helpers
 			XbimFace^ BuildFace(List<Tuple<XbimWire^, IIfcPolyLoop^>^>^ wires, int label);
 			static void  GetConnected(HashSet<XbimSolid^>^ connected, Dictionary<XbimSolid^, HashSet<XbimSolid^>^>^ clusters, XbimSolid^ clusterAround);
@@ -63,6 +64,7 @@ namespace Xbim
 			XbimCompound(IIfcAdvancedBrep^ solid);
 			XbimCompound(IIfcAdvancedBrepWithVoids^ solid);
 			XbimCompound(IIfcClosedShell^ solid);
+			XbimCompound(IIfcTriangulatedFaceSet^ faceSet);
 			static property XbimCompound^ Empty{XbimCompound^ get(){ return empty; }};
 #pragma region IXbimCompound Interface
 			virtual property bool IsValid {bool get()override{ return ptrContainer != IntPtr::Zero && Count > 0; }; }

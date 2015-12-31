@@ -96,6 +96,12 @@ namespace Xbim
 					if (objectLocation != nullptr) comp->Move(objectLocation);
 					return comp;
 				}
+				else if (dynamic_cast<IIfcTriangulatedFaceSet^>(geomRep))
+				{
+					XbimCompound^ comp = (XbimCompound^)CreateSurfaceModel((IIfcTriangulatedFaceSet^)geomRep);
+					if (objectLocation != nullptr) comp->Move(objectLocation);
+					return comp;
+				}
 				else if (dynamic_cast<IIfcHalfSpaceSolid ^>(geomRep))
 				{
 					XbimSolid^ solid = (XbimSolid^)CreateSolid((IIfcHalfSpaceSolid^)geomRep);
@@ -851,21 +857,24 @@ namespace Xbim
 		}
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcAdvancedBrep^ ifcSolid)
 		{
-			XbimCompound^ comp = gcnew XbimCompound((IIfcManifoldSolidBrep^)ifcSolid);
+			XbimCompound^ comp = gcnew XbimCompound((IIfcAdvancedBrep^)ifcSolid);
 			XbimShell^ shell = (XbimShell^)comp->MakeShell();
 			return shell->MakeSolid();
 		}
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcAdvancedBrepWithVoids^ ifcSolid)
 		{
-			throw gcnew NotImplementedException();
+			XbimCompound^ comp = gcnew XbimCompound((IIfcAdvancedBrep^)ifcSolid);
+			XbimShell^ shell = (XbimShell^)comp->MakeShell();
+			return shell->MakeSolid();
 		}
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcSectionedSpine^ ifcSolid)
 		{
 			throw gcnew NotImplementedException();
 		}
-		IXbimShell^ XbimGeometryCreator::CreateShell(IIfcTriangulatedFaceSet^ shell)
+		IXbimGeometryObjectSet^ XbimGeometryCreator::CreateSurfaceModel(IIfcTriangulatedFaceSet^ faceSet)
 		{
-			throw gcnew NotImplementedException();
+			return gcnew XbimCompound(faceSet);
+			
 		}
 
 	}

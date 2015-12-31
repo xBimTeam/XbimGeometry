@@ -579,7 +579,7 @@ namespace Xbim
 		
 			List<List<XbimPoint3D>^>^ ifcControlPoints = surface->ControlPoints;
 			if (surface->ControlPoints->Count < 2) throw gcnew XbimException("Incorrect number of poles for Bspline surface, must be at least 2");			
-			TColgp_Array2OfPnt poles(1, surface->UUpper+1,1,surface->VUpper+1);
+			TColgp_Array2OfPnt poles(1, (Standard_Integer)surface->UUpper + 1, 1, (Standard_Integer)surface->VUpper + 1);
 			
 			for (int u = 0; u <= surface->UUpper; u++)
 			{
@@ -592,10 +592,10 @@ namespace Xbim
 
 			}
 			
-			TColStd_Array1OfReal uknots(1, surface->KnotUUpper);
-			TColStd_Array1OfReal vknots(1, surface->KnotVUpper);
-			TColStd_Array1OfInteger uMultiplicities(1, surface->KnotUUpper);
-			TColStd_Array1OfInteger vMultiplicities(1, surface->KnotVUpper);
+			TColStd_Array1OfReal uknots(1, (Standard_Integer)surface->KnotUUpper);
+			TColStd_Array1OfReal vknots(1, (Standard_Integer)surface->KnotVUpper);
+			TColStd_Array1OfInteger uMultiplicities(1, (Standard_Integer)surface->KnotUUpper);
+			TColStd_Array1OfInteger vMultiplicities(1, (Standard_Integer)surface->KnotVUpper);
 			int i = 1;
 			for each (double knot in surface->UKnots)
 			{
@@ -638,7 +638,7 @@ namespace Xbim
 
 			List<List<XbimPoint3D>^>^ ifcControlPoints = surface->ControlPoints;
 			if (surface->ControlPoints->Count < 2) throw gcnew XbimException("Incorrect number of poles for Bspline surface, must be at least 2");
-			TColgp_Array2OfPnt poles(1, surface->UUpper + 1, 1, surface->VUpper + 1);
+			TColgp_Array2OfPnt poles(1, (Standard_Integer)surface->UUpper + 1, 1, (Standard_Integer)surface->VUpper + 1);
 
 			for (int u = 0; u < surface->UUpper; u++)
 			{
@@ -652,7 +652,7 @@ namespace Xbim
 			}
 
 			List<List<Ifc4::MeasureResource::IfcReal>^>^ ifcWeights = surface->Weights;
-			TColStd_Array2OfReal weights(1, surface->UUpper + 1, 1, surface->VUpper + 1);
+			TColStd_Array2OfReal weights(1, (Standard_Integer)surface->UUpper + 1, 1, (Standard_Integer)surface->VUpper + 1);
 			for (int u = 0; u <= surface->UUpper; u++)
 			{
 				List<Ifc4::MeasureResource::IfcReal>^ uRow = ifcWeights[u];
@@ -663,10 +663,10 @@ namespace Xbim
 				}
 			}
 
-			TColStd_Array1OfReal uknots(1, surface->KnotUUpper);
-			TColStd_Array1OfReal vknots(1, surface->KnotVUpper);
-			TColStd_Array1OfInteger uMultiplicities(1, surface->KnotUUpper);
-			TColStd_Array1OfInteger vMultiplicities(1, surface->KnotVUpper);
+			TColStd_Array1OfReal uknots(1, (Standard_Integer)surface->KnotUUpper);
+			TColStd_Array1OfReal vknots(1, (Standard_Integer)surface->KnotVUpper);
+			TColStd_Array1OfInteger uMultiplicities(1, (Standard_Integer)surface->KnotUUpper);
+			TColStd_Array1OfInteger vMultiplicities(1, (Standard_Integer)surface->KnotVUpper);
 			int i = 1;
 			for each (double knot in surface->UKnots)
 			{

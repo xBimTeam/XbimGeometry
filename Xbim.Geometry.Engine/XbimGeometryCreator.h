@@ -145,7 +145,7 @@ namespace Xbim
 			virtual IXbimSolid^ CreateSolid(IIfcAdvancedBrep^ ifcSolid);
 			virtual IXbimSolid^ CreateSolid(IIfcAdvancedBrepWithVoids^ ifcSolid);
 			virtual IXbimSolid^ CreateSolid(IIfcSectionedSpine^ ifcSolid);
-			virtual IXbimShell^ CreateShell(IIfcTriangulatedFaceSet^ shell);
+			virtual IXbimGeometryObjectSet^ CreateSurfaceModel(IIfcTriangulatedFaceSet^ shell);
 		};
 	}
 }

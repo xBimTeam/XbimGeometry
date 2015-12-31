@@ -47,6 +47,7 @@ namespace Xbim
 			XbimVertex(const TopoDS_Vertex& occVertex);
 			XbimVertex(IXbimVertex^ vertex, double precision);
 			XbimVertex(IIfcCartesianPoint^ vertex);
+			XbimVertex(double x, double y, double z, double precision);
 #ifdef USE_CARVE_CSG
 			XbimVertex(vertex_t* v, double precision);
 #endif // USE_CARVE_CSG

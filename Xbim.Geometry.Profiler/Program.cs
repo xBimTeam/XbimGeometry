@@ -90,7 +90,12 @@ namespace Xbim.Geometry.Profiler
                         }
                         wexBiMfile.Close();
                     }
-                   
+                    if (writeXbim)
+                    {
+                        var fName = Path.GetFileNameWithoutExtension(fileName);
+                        fName = Path.ChangeExtension(fName, "xbim");
+                        model.SaveAs(fName,IfcStorageType.Xbim);
+                    }
                     model.Close();
                 }
             }

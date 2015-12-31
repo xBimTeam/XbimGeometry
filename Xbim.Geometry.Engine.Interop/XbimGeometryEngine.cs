@@ -207,9 +207,9 @@ namespace Xbim.Geometry.Engine.Interop
             return _engine.CreateShell(linExt);
         }
 
-        public IXbimShell CreateShell(IIfcTriangulatedFaceSet shell)
+        public IXbimGeometryObjectSet CreateSurfaceModel(IIfcTriangulatedFaceSet shell)
         {
-            return _engine.CreateShell(shell);
+            return _engine.CreateSurfaceModel(shell);
         }
 
         public IXbimGeometryObjectSet CreateSurfaceModel(IIfcShellBasedSurfaceModel ifcSurface)
