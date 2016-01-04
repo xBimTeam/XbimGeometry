@@ -5,6 +5,7 @@ using System.Linq;
 using Xbim.Common;
 using Xbim.Common.Geometry;
 using Xbim.Ifc;
+using Xbim.Ifc4.Interfaces;
 using Xbim.Ifc4.Kernel;
 using Xbim.Ifc4.PresentationAppearanceResource;
 
@@ -159,7 +160,7 @@ namespace Xbim.ModelGeometry.Scene
             _layerColourMap = subCategoryColourMap;
         }
 
-        public XbimMeshLayer(IModel m, IfcSurfaceStyle style)
+        public XbimMeshLayer(IModel m, IIfcSurfaceStyle style)
         {
             Model = m;
             Style =  XbimTexture.Create(style);
