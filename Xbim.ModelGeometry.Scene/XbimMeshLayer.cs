@@ -349,7 +349,7 @@ namespace Xbim.ModelGeometry.Scene
        /// <param name="includeHidden">Include fragments in hidden layers</param>
        /// <param name="includSublayers">Recurse into sub layers</param>
        /// <returns></returns>
-        internal IEnumerable<XbimMeshFragment> GetMeshFragments(int entityLabel, bool includeHidden = false, bool includSublayers = false)
+        public IEnumerable<XbimMeshFragment> GetMeshFragments(int entityLabel, bool includeHidden = false, bool includSublayers = false)
         {
             foreach (var mf in Visible.Meshes.Where(m => m.EntityLabel == entityLabel))
                 yield return mf;
