@@ -59,11 +59,8 @@ namespace Xbim
 				else if (dynamic_cast<IIfcManifoldSolidBrep^>(geomRep))
 				{
 					XbimCompound^ comp = gcnew XbimCompound((IIfcManifoldSolidBrep^)geomRep);
-					comp->Sew();
 					if (objectLocation != nullptr) comp->Move(objectLocation);
-					XbimShell^ shell = (XbimShell^)comp->MakeShell();
-					return shell->MakeSolid();
-					
+					return comp;					
 				}				
 				else if (dynamic_cast<IIfcSweptDiskSolid^>(geomRep))
 				{
