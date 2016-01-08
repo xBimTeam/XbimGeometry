@@ -975,10 +975,13 @@ namespace Xbim
 						gp_Dir dir = conic->Axis().Direction();
 						return XbimVector3D(dir.X(), dir.Y(), dir.Z());
 					}
-					else if (
+					else if ((cType == STANDARD_TYPE(Geom_Circle)) ||
+						(cType == STANDARD_TYPE(Geom_Ellipse)) ||
+						(cType == STANDARD_TYPE(Geom_Parabola)) ||
+						(cType == STANDARD_TYPE(Geom_Hyperbola)) ||
 						(cType == STANDARD_TYPE(Geom_BezierCurve)) ||
 						(cType == STANDARD_TYPE(Geom_BSplineCurve)))
-					{		
+					{
 						BRepAdaptor_Curve curve(wEx.Current());
 						double us = curve.FirstParameter();
 						double ue = curve.LastParameter();

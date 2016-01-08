@@ -81,8 +81,8 @@ namespace Ifc4GeometryTests
                     //var xbimTessellator = new XbimTessellator(m, XbimGeometryType.PolyhedronBinary);
                     // Assert.IsTrue(xbimTessellator.CanMesh(solid));//if we can mesh the shape directly just do it
                     // var shapeGeom = xbimTessellator.Mesh(solid);
-                    xbimGeometryCreator.CreateShapeGeometry(solid, m.ModelFactors.Precision, m.ModelFactors.DeflectionTolerance, m.ModelFactors.DeflectionAngle, XbimGeometryType.PolyhedronBinary);
-
+                    var geom = xbimGeometryCreator.CreateShapeGeometry(solid, m.ModelFactors.Precision, m.ModelFactors.DeflectionTolerance, m.ModelFactors.DeflectionAngle, XbimGeometryType.PolyhedronBinary);
+                    Assert.IsTrue(geom.BoundingBox.Volume > 0);
                 }
             }
         }
