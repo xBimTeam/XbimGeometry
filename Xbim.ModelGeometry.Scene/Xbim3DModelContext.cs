@@ -1259,7 +1259,7 @@ namespace Xbim.ModelGeometry.Scene
             var contextIds = _contexts.Select(c => c.EntityLabel).ToList();
             using (var reader = _model.GeometryStore.BeginRead())
             {
-                foreach (var regions in reader.Regions)
+                foreach (var regions in reader.ContextRegions)
                 {
                     if (contextIds.Contains(regions.ContextLabel))
                     {
