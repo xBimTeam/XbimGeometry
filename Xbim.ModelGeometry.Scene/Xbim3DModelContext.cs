@@ -366,7 +366,7 @@ namespace Xbim.ModelGeometry.Scene
                 foreach (var styledItemGrouping in styledItemsGroup)
                 {
                     var val =
-                        styledItemGrouping.SelectMany(st => st.Styles.OfType<IIfcSurfaceStyle>()).FirstOrDefault();
+                        styledItemGrouping.SelectMany(st => st.Styles.SelectMany(s=>s.SurfaceStyles)).FirstOrDefault();
                     if (val != null)
                     {
                         SurfaceStyles.Add(styledItemGrouping.Key, val.EntityLabel);
