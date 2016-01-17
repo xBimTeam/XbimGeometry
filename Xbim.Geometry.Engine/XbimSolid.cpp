@@ -472,7 +472,8 @@ namespace Xbim
 				{
 					pSolid = new TopoDS_Solid();
 					*pSolid = TopoDS::Solid(prism.Shape());
-					pSolid->Move(XbimConvert::ToLocation(repItem->Position));
+					if (repItem->Position!=nullptr) //In Ifc4 this is now optional
+						pSolid->Move(XbimConvert::ToLocation(repItem->Position));
 					//BRepTools::Write(*pSolid, "d:\\tmp\\b");
 				}
 				else

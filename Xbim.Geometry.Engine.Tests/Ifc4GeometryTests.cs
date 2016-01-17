@@ -40,5 +40,18 @@ namespace Ifc4GeometryTests
                 Assert.IsTrue(basin.BoundingBox.Volume < 23913893);
             }
         }
+
+        [TestMethod]
+        public void ExtrudedSolidTest()
+        {
+            using (var model = IfcStore.Open(@"Ifc4TestFiles\Wall.ifc"))
+            {
+                var extSolid = model.Instances.OfType<IfcExtrudedAreaSolid>().FirstOrDefault();
+                Assert.IsNotNull(extSolid);
+                var wall = _xbimGeometryCreator.CreateSolid(extSolid);
+                Assert.IsTrue(wall.BoundingBox.Volume > 23913891);
+                
+            }
+        }
     }
 }
