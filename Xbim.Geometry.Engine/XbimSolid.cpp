@@ -298,12 +298,9 @@ namespace Xbim
 			if (comp->IsValid)
 			{
 				comp->Sew();
-				XbimSolidSet^ ss = gcnew XbimSolidSet(comp);
-				if (ss->Count > 0)
-				{
-					pSolid = new TopoDS_Solid();
-					*pSolid = (XbimSolid^)ss->First;
-				}
+				XbimShell^ shell = (XbimShell^)comp->MakeShell();
+				pSolid = new TopoDS_Solid();
+				*pSolid = (XbimSolid^)(shell->CreateSolid());
 			}
 		}
 
@@ -445,7 +442,8 @@ namespace Xbim
 				if (pipeMaker1.IsDone() && pipeMaker1.MakeSolid())
 				{
 					TopoDS_Shape result = pipeMaker1.Shape();
-					result.Move(XbimConvert::ToLocation(repItem->Position));
+					if (repItem->Position!=nullptr)
+						result.Move(XbimConvert::ToLocation(repItem->Position));
 					pSolid = new TopoDS_Solid();
 					*pSolid = TopoDS::Solid(result);
 					return;
@@ -510,7 +508,8 @@ namespace Xbim
 				{
 					//BRepTools::Write(revol.Shape(), "d:\\tmp\\rev");
 					pSolid = new TopoDS_Solid();
-					*pSolid = TopoDS::Solid(revol.Shape());
+					if (repItem->Position!=nullptr)
+						*pSolid = TopoDS::Solid(revol.Shape());
 					pSolid->Move(XbimConvert::ToLocation(repItem->Position));
 				}
 				else

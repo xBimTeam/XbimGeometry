@@ -42,15 +42,39 @@ namespace Ifc4GeometryTests
         }
 
         [TestMethod]
-        public void ExtrudedSolidTest()
+        public void ExtrudedSolidWithNullPositionTest()
         {
             using (var model = IfcStore.Open(@"Ifc4TestFiles\Wall.ifc"))
             {
                 var extSolid = model.Instances.OfType<IfcExtrudedAreaSolid>().FirstOrDefault();
                 Assert.IsNotNull(extSolid);
                 var wall = _xbimGeometryCreator.CreateSolid(extSolid);
-                Assert.IsTrue(wall.BoundingBox.Volume > 23913891);
+                Assert.IsTrue(wall.Volume > 0);
                 
+            }
+        }
+        [TestMethod]
+        public void BasinBRepTest()
+        {
+            using (var model = IfcStore.Open(@"Ifc4TestFiles\BasinBRep.ifc"))
+            {
+                var brep = model.Instances.OfType<IfcFacetedBrep>().FirstOrDefault();
+                Assert.IsNotNull(brep);
+                var basin = _xbimGeometryCreator.CreateSolid(brep);
+                Assert.IsTrue(basin.Volume > 0);
+
+            }
+        }
+        [TestMethod]
+        public void CsgSolidTest()
+        {
+            using (var model = IfcStore.Open(@"Ifc4TestFiles\Bath.ifc"))
+            {
+                var csgSolid = model.Instances.OfType<IfcCsgSolid>().FirstOrDefault();
+                Assert.IsNotNull(csgSolid);
+                var bath = _xbimGeometryCreator.CreateSolid(csgSolid);
+                Assert.IsTrue(bath.Volume > 0);
+
             }
         }
     }

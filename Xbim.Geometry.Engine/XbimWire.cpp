@@ -116,6 +116,7 @@ namespace Xbim
 		XbimWire::XbimWire(IIfcParameterizedProfileDef ^ profile){ Init(profile); }
 		XbimWire::XbimWire(IIfcCircleProfileDef ^ profile){ Init(profile); }
 		XbimWire::XbimWire(IIfcRectangleProfileDef^ profile){ Init(profile); }
+		XbimWire::XbimWire(IIfcRoundedRectangleProfileDef^ profile){ Init(profile); }
 		XbimWire::XbimWire(IIfcLShapeProfileDef ^ profile){ Init(profile); }
 		XbimWire::XbimWire(IIfcUShapeProfileDef ^ profile){ Init(profile); }
 		XbimWire::XbimWire(IIfcEllipseProfileDef ^ profile){ Init(profile); }
@@ -1199,6 +1200,57 @@ namespace Xbim
 			*pWire = wire;
 		}
 
+		void XbimWire::Init(IIfcRoundedRectangleProfileDef^ rectProfile)
+		{
+			//make the basic shapes
+			double xOff = rectProfile->XDim / 2;
+			double yOff = rectProfile->YDim / 2;
+			double precision = rectProfile->Model->ModelFactors->Precision;
+			gp_Pnt bl(-xOff, -yOff, 0);
+			gp_Pnt br(xOff, -yOff, 0);
+			gp_Pnt tr(xOff, yOff, 0);
+			gp_Pnt tl(-xOff, yOff, 0);
+			//make the vertices
+			BRep_Builder builder;
+			TopoDS_Vertex vbl, vbr, vtr, vtl;
+			builder.MakeVertex(vbl, bl, precision);
+			builder.MakeVertex(vbr, br, precision);
+			builder.MakeVertex(vtr, tr, precision);
+			builder.MakeVertex(vtl, tl, precision);
+			//make the edges
+			TopoDS_Wire wire;
+			builder.MakeWire(wire);
+			builder.Add(wire, BRepBuilderAPI_MakeEdge(vbl, vbr));
+			builder.Add(wire, BRepBuilderAPI_MakeEdge(vbr, vtr));
+			builder.Add(wire, BRepBuilderAPI_MakeEdge(vtr, vtl));
+			builder.Add(wire, BRepBuilderAPI_MakeEdge(vtl, vbl));
+			double fRad = rectProfile->RoundingRadius;
+			if (fRad > 0) //consider fillets
+			{
+				BRepBuilderAPI_MakeFace faceMaker(wire, true);
+				BRepFilletAPI_MakeFillet2d filleter(faceMaker.Face());
+				for (BRepTools_WireExplorer exp(wire); exp.More(); exp.Next())
+				{
+					filleter.AddFillet(exp.CurrentVertex(), fRad);
+				}
+				filleter.Build();
+				if (filleter.IsDone())
+				{
+					TopoDS_Shape shape = filleter.Shape();
+					for (TopExp_Explorer exp(shape, TopAbs_WIRE); exp.More(); exp.Next()) //just take the first wire
+					{
+						wire = TopoDS::Wire(exp.Current());
+						break;
+					}
+				}
+			}
+
+			//apply the position transformation
+			if (rectProfile->Position != nullptr)
+				wire.Move(XbimConvert::ToLocation(rectProfile->Position));
+			pWire = new TopoDS_Wire();
+			*pWire = wire;
+		}
 
 		void XbimWire::Init(IIfcRectangleProfileDef^ rectProfile)
 		{
@@ -1212,6 +1264,10 @@ namespace Xbim
 				{
 					XbimGeometryCreator::logger->ErrorFormat("WW022: IfcRectangleHollowProfileDef #{0} cannot be created as a wire, call the XbimFace method", rectProfile->EntityLabel);
 					return;
+				}
+				else if (dynamic_cast<IIfcRoundedRectangleProfileDef^>(rectProfile))
+				{
+					Init((IIfcRoundedRectangleProfileDef^)rectProfile);
 				}
 				else
 				{
@@ -1238,7 +1294,8 @@ namespace Xbim
 					builder.Add(wire, BRepBuilderAPI_MakeEdge(vtl, vbl));
 
 					//apply the position transformation
-					wire.Move(XbimConvert::ToLocation(rectProfile->Position));
+					if (rectProfile->Position!=nullptr)
+						wire.Move(XbimConvert::ToLocation(rectProfile->Position));
 					pWire = new TopoDS_Wire();
 					*pWire = wire;
 				}
@@ -1334,8 +1391,8 @@ namespace Xbim
 					}
 				}
 			}
-
-			wire.Move(XbimConvert::ToLocation(profile->Position));
+			if (profile->Position!=nullptr)
+				wire.Move(XbimConvert::ToLocation(profile->Position));
 			//removed not in Ifc4
 			/*if (profile->CentreOfGravityInX.HasValue || profile->CentreOfGravityInY.HasValue)
 			{
@@ -1417,8 +1474,8 @@ namespace Xbim
 					}
 				}
 			}
-
-			wire.Move(XbimConvert::ToLocation(profile->Position));
+			if (profile->Position!=nullptr)
+				wire.Move(XbimConvert::ToLocation(profile->Position));
 			//removed in Ifc4
 			/*if (profile->CentreOfGravityInX.HasValue)
 			{
@@ -1630,7 +1687,8 @@ namespace Xbim
 			polyMaker.Add(v12);
 			polyMaker.Close();
 			TopoDS_Wire wire = polyMaker.Wire();
-			wire.Move(XbimConvert::ToLocation(profile->Position));
+			if (profile->Position!=nullptr)
+				wire.Move(XbimConvert::ToLocation(profile->Position));
 			if (detailed && profile->FilletRadius.HasValue)
 			{
 				BRepBuilderAPI_MakeFace faceMaker(wire, true);
@@ -1718,7 +1776,8 @@ namespace Xbim
 					}
 				}
 			}
-			wire.Move(XbimConvert::ToLocation(profile->Position));
+			if (profile->Position!=nullptr)
+				wire.Move(XbimConvert::ToLocation(profile->Position));
 			ShapeFix_ShapeTolerance FTol;
 			FTol.SetTolerance(wire, profile->Model->ModelFactors->Precision, TopAbs_VERTEX);
 			pWire = new TopoDS_Wire();
@@ -1821,7 +1880,8 @@ namespace Xbim
 					}
 				}
 			}
-			wire.Move(XbimConvert::ToLocation(profile->Position));
+			if (profile->Position!=nullptr)
+				wire.Move(XbimConvert::ToLocation(profile->Position));
 			//removed in Ifc4
 			/*if (profile->CentreOfGravityInX.HasValue)
 			{
@@ -1920,8 +1980,8 @@ namespace Xbim
 					}
 				}
 			}
-
-			wire.Move(XbimConvert::ToLocation(profile->Position));
+			if (profile->Position!=nullptr)
+				wire.Move(XbimConvert::ToLocation(profile->Position));
 			//removed in Ifc4
 			/*if (profile->CentreOfGravityInY.HasValue)
 			{

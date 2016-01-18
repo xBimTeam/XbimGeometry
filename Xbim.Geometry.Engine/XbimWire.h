@@ -47,6 +47,7 @@ namespace Xbim
 			void Init(IIfcParameterizedProfileDef ^ profile);
 			void Init(IIfcCircleProfileDef ^ circProfile);
 			void Init(IIfcRectangleProfileDef^ rectProfile);
+			void Init(IIfcRoundedRectangleProfileDef^ rectProfile);
 			void Init(IIfcLShapeProfileDef ^ profile);
 			void Init(IIfcUShapeProfileDef ^ profile);
 			void Init(IIfcEllipseProfileDef ^ profile);
@@ -94,6 +95,7 @@ namespace Xbim
 			XbimWire(IIfcParameterizedProfileDef ^ profile);
 			XbimWire(IIfcCircleProfileDef ^ circProfile);
 			XbimWire(IIfcRectangleProfileDef^ rectProfile);
+			XbimWire(IIfcRoundedRectangleProfileDef^ rectProfile);
 			XbimWire(IIfcLShapeProfileDef ^ profile);
 			XbimWire(IIfcUShapeProfileDef ^ profile);
 			XbimWire(IIfcEllipseProfileDef ^ profile);

@@ -120,7 +120,8 @@ namespace Xbim
 				{
 					pShell = new TopoDS_Shell();
 					*pShell = TopoDS::Shell(shellMaker.Shape());
-					pShell->Move(XbimConvert::ToLocation(linExt->Position));
+					if (linExt->Position!=nullptr)
+						pShell->Move(XbimConvert::ToLocation(linExt->Position));
 				}
 				else
 					XbimGeometryCreator::logger->WarnFormat("WH006: Invalid Surface Extrusion, could not create shell, found in Entity #{0}=IIfcSurfaceOfLinearExtrusion.",
