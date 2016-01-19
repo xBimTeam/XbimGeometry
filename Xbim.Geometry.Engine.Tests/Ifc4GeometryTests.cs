@@ -77,5 +77,18 @@ namespace Ifc4GeometryTests
 
             }
         }
+        [TestMethod]
+        public void IndexedPolyCurveTest()
+        {
+            using (var model = IfcStore.Open(@"Ifc4TestFiles\BeamExtruded.ifc"))
+            {
+                var extSolid = model.Instances.OfType<IfcExtrudedAreaSolid>().FirstOrDefault();
+                Assert.IsNotNull(extSolid);
+                var wall = _xbimGeometryCreator.CreateSolid(extSolid);
+                Assert.IsTrue(wall.Volume > 0);
+
+            }
+        }
+
     }
 }

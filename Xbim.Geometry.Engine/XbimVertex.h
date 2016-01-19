@@ -1,5 +1,6 @@
 #pragma once
 #include "XbimOccShape.h"
+#include "XbimPoint3DWithTolerance.h"
 #include <TopoDS_Vertex.hxx>
 using namespace Xbim::Common::Geometry;
 using namespace Xbim::Ifc4::Interfaces;
@@ -44,6 +45,7 @@ namespace Xbim
 			///Constructs vertex with no geometric location
 			XbimVertex();
 			XbimVertex(XbimPoint3D point3D, double precision);
+			XbimVertex(XbimPoint3DWithTolerance^ point3D);
 			XbimVertex(const TopoDS_Vertex& occVertex);
 			XbimVertex(IXbimVertex^ vertex, double precision);
 			XbimVertex(IIfcCartesianPoint^ vertex);

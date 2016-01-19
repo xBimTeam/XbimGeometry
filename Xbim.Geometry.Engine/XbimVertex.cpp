@@ -43,6 +43,13 @@ namespace Xbim
 			gp_Pnt pnt(x, y, z);
 			b.MakeVertex(*pVertex, pnt, precision);
 		}
+		XbimVertex::XbimVertex(XbimPoint3DWithTolerance^ point3D)
+		{
+			pVertex = new TopoDS_Vertex();
+			BRep_Builder b;
+			gp_Pnt pnt(point3D->X, point3D->Y, point3D->Z);
+			b.MakeVertex(*pVertex, pnt, point3D->Tolerance);
+		}
 
 		XbimVertex::XbimVertex(XbimPoint3D point3D, double precision)
 		{

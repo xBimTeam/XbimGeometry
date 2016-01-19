@@ -32,29 +32,30 @@ namespace Xbim
 			void Init(IIfcCompositeCurve^ loop);
 			void Init(IIfcTrimmedCurve^ loop);
 			void Init(IIfcCurve^ loop);
+			void Init(IIfcIndexedPolyCurve^ pcurve);
 			void Init(IIfcBSplineCurve^ bspline);
 			void Init(IIfcBSplineCurveWithKnots^ bSpline);
 			void Init(IIfcRationalBSplineCurveWithKnots^ bSpline);
 			void Init(IIfcCompositeCurveSegment^ compCurveSeg);
 			void Init(IIfcBoundedCurve^ loop);
-			void Init(IIfcPolyLoop ^ loop);
+			void Init(IIfcPolyLoop^ loop);
 			void Init(IIfcArbitraryClosedProfileDef^ profile);
 			void Init(IIfcArbitraryOpenProfileDef^ profile);
 			void Init(IIfcCenterLineProfileDef^ profile);
 			//parametrised profiles
-			void Init(IIfcProfileDef ^ profile);
-			void Init(IIfcDerivedProfileDef ^ profile);
-			void Init(IIfcParameterizedProfileDef ^ profile);
-			void Init(IIfcCircleProfileDef ^ circProfile);
+			void Init(IIfcProfileDef^ profile);
+			void Init(IIfcDerivedProfileDef^ profile);
+			void Init(IIfcParameterizedProfileDef^ profile);
+			void Init(IIfcCircleProfileDef^ circProfile);
 			void Init(IIfcRectangleProfileDef^ rectProfile);
 			void Init(IIfcRoundedRectangleProfileDef^ rectProfile);
-			void Init(IIfcLShapeProfileDef ^ profile);
-			void Init(IIfcUShapeProfileDef ^ profile);
-			void Init(IIfcEllipseProfileDef ^ profile);
-			void Init(IIfcIShapeProfileDef ^ profile);
-			void Init(IIfcZShapeProfileDef ^ profile);
-			void Init(IIfcCShapeProfileDef ^ profile);
-			void Init(IIfcTShapeProfileDef ^ profile);
+			void Init(IIfcLShapeProfileDef^ profile);
+			void Init(IIfcUShapeProfileDef^ profile);
+			void Init(IIfcEllipseProfileDef^ profile);
+			void Init(IIfcIShapeProfileDef^ profile);
+			void Init(IIfcZShapeProfileDef^ profile);
+			void Init(IIfcCShapeProfileDef^ profile);
+			void Init(IIfcTShapeProfileDef^ profile);
 			//constructs a rectangle wire with the bottom left corner at 0,0,0, top right at x,y,0
 			void Init(double x, double y, double tolerance);
 #pragma endregion
@@ -83,26 +84,27 @@ namespace Xbim
 			XbimWire(IIfcCompositeCurve^ loop);
 			XbimWire(IIfcTrimmedCurve^ loop);
 			XbimWire(IIfcCurve^ loop);
+			XbimWire(IIfcIndexedPolyCurve^ pcurve);
 			XbimWire(IIfcCompositeCurveSegment^ compCurveSeg);
 			XbimWire(IIfcBoundedCurve^ loop);
-			XbimWire(IIfcPolyLoop ^ loop);
+			XbimWire(IIfcPolyLoop^ loop);
 			XbimWire(IIfcArbitraryClosedProfileDef^ profile);
 			XbimWire(IIfcArbitraryOpenProfileDef^ profile);
 			XbimWire(IIfcCenterLineProfileDef^ profile);
 			//parametrised profiles
-			XbimWire(IIfcProfileDef ^ profile);
-			XbimWire(IIfcDerivedProfileDef ^ profile);
-			XbimWire(IIfcParameterizedProfileDef ^ profile);
-			XbimWire(IIfcCircleProfileDef ^ circProfile);
+			XbimWire(IIfcProfileDef^ profile);
+			XbimWire(IIfcDerivedProfileDef^ profile);
+			XbimWire(IIfcParameterizedProfileDef^ profile);
+			XbimWire(IIfcCircleProfileDef^ circProfile);
 			XbimWire(IIfcRectangleProfileDef^ rectProfile);
 			XbimWire(IIfcRoundedRectangleProfileDef^ rectProfile);
-			XbimWire(IIfcLShapeProfileDef ^ profile);
-			XbimWire(IIfcUShapeProfileDef ^ profile);
-			XbimWire(IIfcEllipseProfileDef ^ profile);
-			XbimWire(IIfcIShapeProfileDef ^ profile);
-			XbimWire(IIfcZShapeProfileDef ^ profile);
-			XbimWire(IIfcCShapeProfileDef ^ profile);
-			XbimWire(IIfcTShapeProfileDef ^ profile);
+			XbimWire(IIfcLShapeProfileDef^ profile);
+			XbimWire(IIfcUShapeProfileDef^ profile);
+			XbimWire(IIfcEllipseProfileDef^ profile);
+			XbimWire(IIfcIShapeProfileDef^ profile);
+			XbimWire(IIfcZShapeProfileDef^ profile);
+			XbimWire(IIfcCShapeProfileDef^ profile);
+			XbimWire(IIfcTShapeProfileDef^ profile);
 			XbimWire(double x, double y, double tolerance);
 
 #pragma endregion

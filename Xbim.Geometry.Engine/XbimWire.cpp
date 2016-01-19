@@ -105,6 +105,7 @@ namespace Xbim
 		XbimWire::XbimWire(IIfcBSplineCurveWithKnots^ bSpline){ Init(bSpline); }
 		XbimWire::XbimWire(IIfcRationalBSplineCurveWithKnots^ bSpline){ Init(bSpline); }
 		XbimWire::XbimWire(IIfcCurve^ profile){ Init(profile); }
+		XbimWire::XbimWire(IIfcIndexedPolyCurve^ pcurve){ Init(pcurve); };
 		XbimWire::XbimWire(IIfcBoundedCurve^ profile){ Init(profile); }
 		XbimWire::XbimWire(IIfcPolyLoop ^ profile){ Init(profile); }
 		XbimWire::XbimWire(IIfcArbitraryClosedProfileDef^ profile){ Init(profile); }
@@ -745,7 +746,7 @@ namespace Xbim
 			pWire = new TopoDS_Wire();
 			*pWire = w;
 		}
-
+		
 		void XbimWire::Init(IIfcCurve^ curve)
 		{
 			IIfcBoundedCurve^ bc;
@@ -753,7 +754,8 @@ namespace Xbim
 			IIfcLine^ l;
 			IIfcEllipse^ e;
 			IIfcCircle^ c;
-			if ((bc = dynamic_cast<IIfcBoundedCurve^>(curve)) != nullptr) return Init(bc);	
+			if ((bc = dynamic_cast<IIfcBoundedCurve^>(curve)) != nullptr) 
+				return Init(bc);	
 			else if ((c =  dynamic_cast<IIfcCircle^>(curve)) != nullptr)
 			{
 				XbimEdge^ edge = gcnew XbimEdge(c);
@@ -784,6 +786,7 @@ namespace Xbim
 					*pWire = b.Wire();
 				}
 			}
+			
 			else
 			{
 				Type ^ type = curve->GetType();
@@ -791,6 +794,87 @@ namespace Xbim
 				return;
 			}
 
+		}
+
+		void XbimWire::Init(IIfcIndexedPolyCurve^ polyCurve)
+		{
+			double precision = polyCurve->Model->ModelFactors->Precision;
+			IIfcCartesianPointList3D^ points3D = dynamic_cast<IIfcCartesianPointList3D^>(polyCurve->Points);
+			IIfcCartesianPointList2D^ points2D = dynamic_cast<IIfcCartesianPointList2D^>(polyCurve->Points);
+			List<XbimVertex^>^ vertices;
+			Dictionary<XbimPoint3DWithTolerance^, XbimVertex^>^ uniqueVertices = gcnew	Dictionary<XbimPoint3DWithTolerance^, XbimVertex^>();
+			if (points3D != nullptr)
+			{
+				vertices = gcnew List<XbimVertex^>();
+				for each (IEnumerable<Ifc4::MeasureResource::IfcLengthMeasure>^ coll in points3D->CoordList)
+				{
+					IEnumerator<Ifc4::MeasureResource::IfcLengthMeasure>^ enumer = coll->GetEnumerator();
+					enumer->MoveNext();
+					double x = (double)enumer->Current; 
+					enumer->MoveNext();
+					double y =  (double) enumer->Current;
+					enumer->MoveNext();
+					double z = (double)enumer->Current;
+					XbimPoint3DWithTolerance^ p3d = gcnew XbimPoint3DWithTolerance(x, y, x, precision);
+					XbimVertex^ vertex; 
+					if (!uniqueVertices->TryGetValue(p3d,vertex))
+					{
+						vertex = gcnew XbimVertex(p3d);
+						uniqueVertices->Add(p3d, vertex);
+					}
+					vertices->Add(vertex);
+				}
+			}
+			else if (points2D != nullptr) //it is 2D
+			{
+				vertices = gcnew List<XbimVertex^>();
+				for each (IEnumerable<Ifc4::MeasureResource::IfcLengthMeasure>^ coll in points2D->CoordList)
+				{
+					IEnumerator<Ifc4::MeasureResource::IfcLengthMeasure>^ enumer = coll->GetEnumerator();
+					enumer->MoveNext();
+					double x = (double)enumer->Current;
+					enumer->MoveNext();
+					double y = (double)enumer->Current;
+					XbimPoint3DWithTolerance^ p3d = gcnew XbimPoint3DWithTolerance(x, y, 0, precision);
+					XbimVertex^ vertex;
+					if (!uniqueVertices->TryGetValue(p3d, vertex))
+					{
+						vertex = gcnew XbimVertex(p3d);
+						uniqueVertices->Add(p3d, vertex);
+					}
+					vertices->Add(vertex);
+				}
+			}
+			
+			BRepBuilderAPI_MakeWire wireMaker;
+
+			for each (IIfcSegmentIndexSelect^ segment in  polyCurve->Segments)
+			{
+				Ifc4::GeometryResource::IfcArcIndex^ arcIndex = dynamic_cast<Ifc4::GeometryResource::IfcArcIndex^>(segment);
+				Ifc4::GeometryResource::IfcLineIndex^ lineIndex = dynamic_cast<Ifc4::GeometryResource::IfcLineIndex^>(segment);
+				if (arcIndex != nullptr)
+				{
+				    List<Ifc4::MeasureResource::IfcPositiveInteger>^ indices = (List<Ifc4::MeasureResource::IfcPositiveInteger>^)arcIndex->Value;
+					XbimEdge^ e = gcnew XbimEdge(vertices[indices[0]-1], vertices[indices[1]-1], vertices[indices[2]-1]);
+					wireMaker.Add(e);
+				}
+				else if (lineIndex != nullptr)
+				{
+					List<Ifc4::MeasureResource::IfcPositiveInteger>^ indices = (List<Ifc4::MeasureResource::IfcPositiveInteger>^)lineIndex->Value;
+					for (size_t i = 0; i < indices->Count-1; i++)
+					{
+						XbimEdge^ e = gcnew XbimEdge(vertices[indices[i]-1], vertices[indices[i+1]-1]);
+						wireMaker.Add(e);
+					}
+					
+					
+				}
+
+			}
+			
+			pWire = new TopoDS_Wire();
+			*pWire = wireMaker.Wire();
+			
 		}
 		void XbimWire::Init(IIfcPolyLoop ^ loop)
 		{
@@ -875,6 +959,7 @@ namespace Xbim
 			IIfcTrimmedCurve^ t;
 			IIfcCompositeCurve^ c;
 			IIfcBSplineCurve^ b;
+			IIfcIndexedPolyCurve^ ipc; 
 			if ((p = dynamic_cast<IIfcPolyline^>(bCurve)) != nullptr)
 				return Init(p);
 			else if ((t = dynamic_cast<IIfcTrimmedCurve^>(bCurve)) != nullptr)
@@ -883,6 +968,8 @@ namespace Xbim
 				return Init(c);
 			else if ((b = dynamic_cast<IIfcBSplineCurve^>(bCurve)) != nullptr)
 				return Init(b);
+			else if ((ipc = dynamic_cast<IIfcIndexedPolyCurve^>(bCurve)) != nullptr) 
+				return Init(ipc);
 			else
 			{
 				Type ^ type = bCurve->GetType();

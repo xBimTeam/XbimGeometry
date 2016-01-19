@@ -46,6 +46,8 @@
 #include <GeomConvert_CompCurveToBSplineCurve.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <ShapeCustom_BSplineRestriction.hxx>
+#include <GC_MakeCircle.hxx>
+
 using namespace Xbim::Common;
 using namespace System::Linq;
 namespace Xbim
@@ -147,7 +149,47 @@ namespace Xbim
 		{
 			Init(edge);
 		}
+		XbimEdge::XbimEdge(XbimVertex^ start, XbimVertex^ midPoint, XbimVertex^ end)
+		{
+			
+			gp_Pnt p1 = BRep_Tool::Pnt(start);
+			gp_Pnt p2 = BRep_Tool::Pnt(midPoint);
+			gp_Pnt p3 = BRep_Tool::Pnt(end);
+			GC_MakeCircle circleMaker(p1, p2, p3);
+			if (circleMaker.IsDone())
+			{				 
+				 Handle(Geom_Circle) curve = circleMaker.Value();
+				BRepBuilderAPI_MakeEdge edgeMaker(curve, start, end);
+				BRepBuilderAPI_EdgeError edgeErr = edgeMaker.Error();
+				if (edgeErr != BRepBuilderAPI_EdgeDone)
+				{
+					String^ errMsg = XbimEdge::GetBuildEdgeErrorMessage(edgeErr);
+					throw gcnew XbimException("WW013: Invalid edge found." + errMsg);
+				}
+				else
+				{
+					pEdge = new TopoDS_Edge();
+					*pEdge = edgeMaker.Edge();
+				}
+				
+			}
+			else //IFC4 documentation says make it a linear edge
+			{
+				BRepBuilderAPI_MakeEdge edgeMaker(start, end);
+				BRepBuilderAPI_EdgeError edgeErr = edgeMaker.Error();
+				if (edgeErr != BRepBuilderAPI_EdgeDone)
+				{
+					String^ errMsg = XbimEdge::GetBuildEdgeErrorMessage(edgeErr);
+					throw gcnew XbimException("WW013: Invalid edge found." + errMsg);
+				}
+				else
+				{
+					pEdge = new TopoDS_Edge();
+					*pEdge = edgeMaker.Edge();
+				}
+			}
 
+		}
 		XbimEdge::XbimEdge(XbimEdge^ edgeCurve, XbimVertex^ start, XbimVertex^ end)
 		{
 			if (start->Equals(end))

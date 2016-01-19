@@ -19,7 +19,7 @@ namespace Xbim
 				atStart = true;
 			};
 
-			~XbimGeometryObjectEnumerator()
+			virtual ~XbimGeometryObjectEnumerator()
 			{
 			}
 
@@ -62,7 +62,7 @@ namespace Xbim
 			XbimGeometryObject();
 #pragma region destructors
 
-			~XbimGeometryObject() {};
+			virtual ~XbimGeometryObject() {};
 			!XbimGeometryObject() {};
 
 #pragma endregion

@@ -5,6 +5,7 @@
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Wire.hxx>
 #include <BRepBuilderAPI_MakeEdge.hxx>
+#include "XbimPoint3DWithTolerance.h"
 
 using namespace System;
 using namespace Xbim::Ifc4::Interfaces;
@@ -57,6 +58,7 @@ namespace Xbim
 			XbimEdge(XbimEdge^ edgeCurve, XbimVertex^ start, XbimVertex^ end);
 			XbimEdge(const TopoDS_Wire& wire, double tolerance, double angleTolerance);
 			XbimEdge(IIfcCurve^ edgeCurve, XbimVertex^ start, XbimVertex^ end);
+			XbimEdge(XbimVertex^ start, XbimVertex^ midPoint, XbimVertex^ end);
 #pragma endregion
 
 
