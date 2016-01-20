@@ -555,6 +555,7 @@ namespace Xbim
 			BRepBuilderAPI_Sewing seamstress(_sewingTolerance);
 			seamstress.Add(shell);
 			seamstress.Perform();
+			_isSewn = true;
 			TopoDS_Shape result = seamstress.SewedShape();
 			b.Add(*pCompound, result);
 		}

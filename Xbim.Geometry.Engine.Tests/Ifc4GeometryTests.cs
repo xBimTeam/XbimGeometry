@@ -90,5 +90,18 @@ namespace Ifc4GeometryTests
             }
         }
 
+        [TestMethod]
+        public void TriangulatedFaceSetTest2()
+        {
+            using (var model = IfcStore.Open(@"Ifc4TestFiles\BeamTessellated.ifc"))
+            {
+                var faceSet = model.Instances.OfType<IfcTriangulatedFaceSet>().FirstOrDefault();
+                Assert.IsNotNull(faceSet);
+                var beam = _xbimGeometryCreator.CreateSurfaceModel(faceSet);
+                Assert.IsTrue(beam.BoundingBox.Volume > 0);
+
+            }
+        }
+
     }
 }
