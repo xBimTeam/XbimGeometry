@@ -1272,8 +1272,15 @@ namespace Xbim
 				XbimGeometryCreator::logger->ErrorFormat("WW020: IfcCircleHollowProfileDef #{0} cannot be created as a wire, call the XbimFace method", circProfile->EntityLabel);
 				return;
 			}
-			IIfcAxis2Placement2D^ ax2 = (IIfcAxis2Placement2D^)circProfile->Position;
-			gp_Ax2 gpax2(gp_Pnt(ax2->Location->X, ax2->Location->Y, 0), gp_Dir(0, 0, 1), gp_Dir(ax2->P[0].X, ax2->P[0].Y, 0.));
+			gp_Ax2 gpax2;
+			if (circProfile->Position != nullptr)
+			{
+				IIfcAxis2Placement2D^ ax2 = (IIfcAxis2Placement2D^)circProfile->Position;
+				gpax2.SetLocation(gp_Pnt(ax2->Location->X, ax2->Location->Y, 0));
+				gpax2.SetDirection(gp_Dir(0, 0, 1));
+				gpax2.SetXDirection(gp_Dir(ax2->P[0].X, ax2->P[0].Y, 0.));
+			}
+			
 			gp_Circ gc(gpax2, circProfile->Radius);
 			Handle(Geom_Circle) hCirc = GC_MakeCircle(gc);
 			TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(hCirc);
@@ -1688,9 +1695,14 @@ namespace Xbim
 		//NB. This is untested as we haven't enountered one yet
 		void XbimWire::Init(IIfcEllipseProfileDef ^ profile)
 		{
-
-			IIfcAxis2Placement2D^ ax2 = (IIfcAxis2Placement2D^)profile->Position;
-			gp_Ax2 gpax2(gp_Pnt(ax2->Location->X, ax2->Location->Y, 0), gp_Dir(0, 0, 1), gp_Dir(ax2->P[0].X, ax2->P[0].Y, 0.));
+			gp_Ax2 gpax2;
+			if (profile->Position != nullptr)
+			{
+				IIfcAxis2Placement2D^ ax2 = (IIfcAxis2Placement2D^)profile->Position;
+				gpax2.SetLocation(gp_Pnt(ax2->Location->X, ax2->Location->Y, 0));
+				gpax2.SetDirection(gp_Dir(0, 0, 1));
+				gpax2.SetXDirection(gp_Dir(ax2->P[0].X, ax2->P[0].Y, 0.));
+			}
 			double semiAx1 = profile->SemiAxis1;
 			double semiAx2 = profile->SemiAxis2;
 			if (semiAx1 <= 0)

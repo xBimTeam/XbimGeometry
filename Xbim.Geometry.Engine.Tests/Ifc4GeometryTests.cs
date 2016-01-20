@@ -132,6 +132,24 @@ namespace Ifc4GeometryTests
                 Assert.IsTrue(Math.Abs(geom.Volume - geom.BoundingBox.Volume) < 1e-5);
             }
         }
+
+        [TestMethod]
+        public void MultipleProfileBasicTest()
+        {
+            using (var model = IfcStore.Open(@"Ifc4TestFiles\BeamUnitTestsVaryingProfile.ifc"))
+            {
+                var profiles = model.Instances.OfType<IfcExtrudedAreaSolid>();
+                Assert.IsTrue(profiles.Count()==2);
+                foreach (var profile in profiles)
+                {
+                    var geom = _xbimGeometryCreator.CreateSolid(profile);
+                    Assert.IsTrue(geom.Volume >0);
+                }
+                
+            }
+        }
+
+
         #region IfcAdvancedBrep geometries
 
         
@@ -230,5 +248,7 @@ namespace Ifc4GeometryTests
             }
         }
         #endregion
+
+
     }
 }
