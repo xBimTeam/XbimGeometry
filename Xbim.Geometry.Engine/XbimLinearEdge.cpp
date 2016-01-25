@@ -10,7 +10,10 @@ namespace Xbim
 			this->start = start;
 			this->end = end;
 		}
-
+		String^ XbimLinearEdge::ToBRep::get()
+		{
+			return String::Empty;
+		}
 
 #pragma region Equality Overrides
 

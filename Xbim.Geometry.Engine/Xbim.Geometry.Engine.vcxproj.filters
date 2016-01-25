@@ -5184,6 +5184,9 @@
     <ClCompile Include="XbimConvert.cpp">
       <Filter>Source files\XbimGeometry</Filter>
     </ClCompile>
+    <ClCompile Include="XbimCurve2D.cpp">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source files">
@@ -15973,6 +15976,9 @@
       <Filter>Source files\TKMath\CSLib</Filter>
     </ClInclude>
     <ClInclude Include="XbimConvert.h">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClInclude>
+    <ClInclude Include="XbimCurve2D.h">
       <Filter>Source files\XbimGeometry</Filter>
     </ClInclude>
   </ItemGroup>

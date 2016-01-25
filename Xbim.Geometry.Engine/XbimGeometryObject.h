@@ -59,7 +59,7 @@ namespace Xbim
 		ref class XbimGeometryObject abstract: IXbimGeometryObject 
 		{
 		public:
-			XbimGeometryObject();
+			XbimGeometryObject(){};
 #pragma region destructors
 
 			virtual ~XbimGeometryObject() {};
@@ -74,6 +74,7 @@ namespace Xbim
 			virtual property XbimRect3D BoundingBox{XbimRect3D get(); }
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) abstract;
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D) abstract;
+			virtual property String^  ToBRep{String^ get(); }
 		};
 	}
 }

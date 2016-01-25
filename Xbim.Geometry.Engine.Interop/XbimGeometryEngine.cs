@@ -272,6 +272,8 @@ namespace Xbim.Geometry.Engine.Interop
             return _engine.CreateWire(compCurveSeg);
         }
 
+       
+
         public IXbimPoint CreatePoint(double x, double y, double z, double tolerance)
         {
             return _engine.CreatePoint(x, y, z, tolerance);
@@ -361,7 +363,58 @@ namespace Xbim.Geometry.Engine.Interop
             return _engine.CreateGeometryObjectSet();
         }
 
-        
+        public IXbimCurve CreateCurve(IIfcCurve curve)
+        {
+            return _engine.CreateCurve(curve);
+        }
 
+        public IXbimCurve CreateCurve(IIfcPolyline ifcPolyline)
+        {
+            return _engine.CreateCurve(ifcPolyline);
+        }
+
+        public IXbimCurve CreateCurve(IIfcCircle curve)
+        {
+            return _engine.CreateCurve(curve);
+        }
+
+        public IXbimCurve CreateCurve(IIfcEllipse curve)
+        {
+            return _engine.CreateCurve(curve);
+        }
+
+        public IXbimCurve CreateCurve(IIfcLine curve)
+        {
+            return _engine.CreateCurve(curve);
+        }
+
+        public IXbimCurve CreateCurve(IIfcTrimmedCurve curve)
+        {
+            return _engine.CreateCurve(curve);
+        }
+
+        public IXbimCurve CreateCurve(IIfcBSplineCurveWithKnots curve)
+        {
+            return _engine.CreateCurve(curve);
+        }
+
+        public IXbimCurve CreateCurve(IIfcRationalBSplineCurveWithKnots curve)
+        {
+            return _engine.CreateCurve(curve);
+        }
+
+        public IXbimCurve CreateCurve(IIfcOffsetCurve3D curve)
+        {
+            return _engine.CreateCurve(curve);
+        }
+        public IXbimCurve CreateCurve(IIfcOffsetCurve2D curve)
+        {
+            return _engine.CreateCurve(curve);
+        }
+
+        public XbimMatrix3D ToMatrix3D(IIfcObjectPlacement objPlacement)
+        {
+            return _engine.ToMatrix3D(objPlacement);
+        }
     }
 }

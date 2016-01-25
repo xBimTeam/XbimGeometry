@@ -815,7 +815,7 @@ namespace Xbim
 					double y =  (double) enumer->Current;
 					enumer->MoveNext();
 					double z = (double)enumer->Current;
-					XbimPoint3DWithTolerance^ p3d = gcnew XbimPoint3DWithTolerance(x, y, x, precision);
+					XbimPoint3DWithTolerance^ p3d = gcnew XbimPoint3DWithTolerance(x, y, z, precision);
 					XbimVertex^ vertex; 
 					if (!uniqueVertices->TryGetValue(p3d,vertex))
 					{
@@ -845,7 +845,7 @@ namespace Xbim
 					vertices->Add(vertex);
 				}
 			}
-			
+
 			BRepBuilderAPI_MakeWire wireMaker;
 
 			for each (IIfcSegmentIndexSelect^ segment in  polyCurve->Segments)
@@ -854,24 +854,30 @@ namespace Xbim
 				Ifc4::GeometryResource::IfcLineIndex^ lineIndex = dynamic_cast<Ifc4::GeometryResource::IfcLineIndex^>(segment);
 				if (arcIndex != nullptr)
 				{
-				    List<Ifc4::MeasureResource::IfcPositiveInteger>^ indices = (List<Ifc4::MeasureResource::IfcPositiveInteger>^)arcIndex->Value;
-					XbimEdge^ e = gcnew XbimEdge(vertices[indices[0]-1], vertices[indices[1]-1], vertices[indices[2]-1]);
+					List<Ifc4::MeasureResource::IfcPositiveInteger>^ indices = (List<Ifc4::MeasureResource::IfcPositiveInteger>^)arcIndex->Value;
+					XbimEdge^ e = gcnew XbimEdge(vertices[(int)indices[0] - 1], vertices[(int)indices[1] - 1], vertices[(int)indices[2] - 1]);
 					wireMaker.Add(e);
 				}
 				else if (lineIndex != nullptr)
 				{
 					List<Ifc4::MeasureResource::IfcPositiveInteger>^ indices = (List<Ifc4::MeasureResource::IfcPositiveInteger>^)lineIndex->Value;
-					for (size_t i = 0; i < indices->Count-1; i++)
+					for (size_t i = 0; i < indices->Count - 1; i++)
 					{
-						XbimEdge^ e = gcnew XbimEdge(vertices[indices[i]-1], vertices[indices[i+1]-1]);
-						wireMaker.Add(e);
+						XbimVertex^ start = vertices[(int)indices[i] - 1];
+						XbimVertex^ end = vertices[(int)indices[i + 1] - 1];
+						if (start != end)
+						{
+
+							XbimEdge^ e = gcnew XbimEdge(start,end);
+							wireMaker.Add(e);
+						}
 					}
-					
-					
+
+
 				}
 
 			}
-			
+
 			pWire = new TopoDS_Wire();
 			*pWire = wireMaker.Wire();
 			

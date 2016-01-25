@@ -22,7 +22,7 @@ namespace Xbim
 			~XbimGeometryCreator()
 			{
 			}
-
+			bool Is3D(IIfcCurve^ rep);
 		public:
 			
 			static  property bool SupportsFacetedShapes{bool get()
@@ -146,6 +146,19 @@ namespace Xbim
 			virtual IXbimSolid^ CreateSolid(IIfcAdvancedBrepWithVoids^ ifcSolid);
 			virtual IXbimSolid^ CreateSolid(IIfcSectionedSpine^ ifcSolid);
 			virtual IXbimGeometryObjectSet^ CreateSurfaceModel(IIfcTriangulatedFaceSet^ shell);
+
+			//Curves
+			virtual IXbimCurve^ CreateCurve(IIfcCurve^ curve);
+			virtual IXbimCurve^ CreateCurve(IIfcPolyline^ curve);
+			virtual IXbimCurve^ CreateCurve(IIfcCircle^ curve);
+			virtual IXbimCurve^ CreateCurve(IIfcEllipse^ curve);
+			virtual IXbimCurve^ CreateCurve(IIfcLine^ curve);
+			virtual IXbimCurve^ CreateCurve(IIfcTrimmedCurve^ curve);
+			virtual IXbimCurve^ CreateCurve(IIfcRationalBSplineCurveWithKnots^ curve);
+			virtual IXbimCurve^ CreateCurve(IIfcBSplineCurveWithKnots^ curve);
+			virtual IXbimCurve^ CreateCurve(IIfcOffsetCurve3D^ curve);
+			virtual IXbimCurve^ CreateCurve(IIfcOffsetCurve2D^ curve);
+			virtual XbimMatrix3D ToMatrix3D(IIfcObjectPlacement ^ objPlacement);
 		};
 	}
 }

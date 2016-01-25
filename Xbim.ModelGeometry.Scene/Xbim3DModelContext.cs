@@ -917,9 +917,13 @@ namespace Xbim.ModelGeometry.Scene
                 //  might come in here from direct meshing or from meshing of remaining objects; either way mark as appropriate
                 repType = XbimGeometryRepresentationType.OpeningsAndAdditionsOnly;
             }
-
+            
             // other setup
-            var placementTransform = contextHelper.PlacementTree[element.ObjectPlacement.EntityLabel];
+            XbimMatrix3D placementTransform=XbimMatrix3D.Identity;
+            if(element.ObjectPlacement is IIfcLocalPlacement)
+                placementTransform = contextHelper.PlacementTree[element.ObjectPlacement.EntityLabel];
+            else if (element.ObjectPlacement is IIfcGridPlacement)
+                placementTransform = Engine.ToMatrix3D((IIfcGridPlacement) element.ObjectPlacement);
             var contextId = rep.ContextOfItems.EntityLabel;
 
             //write out any shapes it has                   

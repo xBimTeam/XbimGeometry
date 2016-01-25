@@ -39,6 +39,10 @@ namespace Xbim
 			this->tolerance = point->Model->ModelFactors->Precision;
 		}
 
+		String^ XbimPoint3DWithTolerance::ToBRep::get()
+		{
+			return String::Empty;
+		}
 
 #pragma region Equality Overrides
 

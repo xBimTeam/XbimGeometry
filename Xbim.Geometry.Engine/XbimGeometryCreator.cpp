@@ -7,7 +7,9 @@
 #include "XbimFacetedSolid.h"
 #include "XbimSolidSet.h"
 #include "XbimGeometryObjectSet.h"
-
+#include "XbimCurve.h"
+#include "XbimCurve2D.h"
+#include "XbimConvert.h"
 #include "XbimPoint3DWithTolerance.h"
 #include <BRepMesh_IncrementalMesh.hxx>
 #include <Poly_PolygonOnTriangulation.hxx>
@@ -21,6 +23,7 @@
 using namespace  System::Threading;
 using namespace  System::Linq;
 using namespace Xbim::Common;
+
 namespace Xbim
 {
 	namespace Geometry
@@ -28,13 +31,17 @@ namespace Xbim
 		
  
 #pragma region Point Creation
-
+		
 
 		IXbimGeometryObject^ XbimGeometryCreator::Create(IIfcGeometricRepresentationItem^ geomRep)
 		{
 			return Create(geomRep, nullptr);
 		}
 
+		bool XbimGeometryCreator::Is3D(IIfcCurve^ rep)
+		{
+			return (rep->Dim == Xbim::Ifc4::GeometryResource::IfcDimensionCount(3));
+		}
 
 		IXbimGeometryObject^ XbimGeometryCreator::Create(IIfcGeometricRepresentationItem^ geomRep, IIfcAxis2Placement3D^ objectLocation)
 		{
@@ -837,8 +844,77 @@ namespace Xbim
 			else
 				return xbimSolidSet;
 		}
-	
+
 #pragma endregion
+#pragma region Support for curves
+		IXbimCurve^ XbimGeometryCreator::CreateCurve(IIfcCurve^ curve)
+		{
+			if (Is3D(curve))
+				return gcnew XbimCurve(curve);
+			else
+				return gcnew XbimCurve2D(curve);
+		}
+		IXbimCurve^ XbimGeometryCreator::CreateCurve(IIfcPolyline^ curve)
+		{
+			if (Is3D(curve))
+				return gcnew XbimCurve(curve);
+			else
+				return gcnew XbimCurve2D(curve);
+		}
+		IXbimCurve^ XbimGeometryCreator::CreateCurve(IIfcCircle^ curve)
+		{
+			if (Is3D(curve))
+				return gcnew XbimCurve(curve);
+			else
+				return gcnew XbimCurve2D(curve);
+		}
+		IXbimCurve^ XbimGeometryCreator::CreateCurve(IIfcEllipse^ curve)
+		{
+			if (Is3D(curve))
+				return gcnew XbimCurve(curve);
+			else
+				return gcnew XbimCurve2D(curve);
+		}
+		IXbimCurve^ XbimGeometryCreator::CreateCurve(IIfcLine^ curve)
+		{
+			if (Is3D(curve))
+				return gcnew XbimCurve(curve);
+			else
+				return gcnew XbimCurve2D(curve);
+		}
+		IXbimCurve^ XbimGeometryCreator::CreateCurve(IIfcTrimmedCurve^ curve)
+		{
+			if(Is3D(curve))
+				return gcnew XbimCurve(curve);
+			else
+				return gcnew XbimCurve2D(curve);
+		}
+		IXbimCurve^ XbimGeometryCreator::CreateCurve(IIfcRationalBSplineCurveWithKnots^ curve)
+		{
+			if (Is3D(curve))
+				return gcnew XbimCurve(curve);
+			else
+				return gcnew XbimCurve2D(curve);
+		}
+		IXbimCurve^ XbimGeometryCreator::CreateCurve(IIfcBSplineCurveWithKnots^ curve)
+		{
+			if (Is3D(curve))
+				return gcnew XbimCurve(curve);
+			else
+				return gcnew XbimCurve2D(curve);
+		}
+
+		IXbimCurve^ XbimGeometryCreator::CreateCurve(IIfcOffsetCurve3D^ curve)
+		{			
+			return gcnew XbimCurve(curve);		
+		}
+
+		IXbimCurve^ XbimGeometryCreator::CreateCurve(IIfcOffsetCurve2D^ curve)
+		{		
+			return gcnew XbimCurve2D(curve);
+		}
+#pragma endregion
+
 		//Ifc4 interfaces
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcSweptDiskSolidPolygonal^ ifcSolid)
 		{
@@ -873,6 +949,11 @@ namespace Xbim
 			return gcnew XbimCompound(faceSet);
 			
 		}
+		XbimMatrix3D XbimGeometryCreator::ToMatrix3D(IIfcObjectPlacement ^ objPlacement)
+		{
+			return XbimConvert::ConvertMatrix3D(objPlacement);
+		}
 
+		
 	}
 }

@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xbim.Common.Geometry;
 using Xbim.Ifc;
 using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc4.GeometricModelResource;
-using Xbim.Common.Geometry;
-
+using Xbim.Ifc4.Interfaces;
+using Xbim.Ifc4.ProductExtension;
+using Xbim.ModelGeometry.Scene;
 namespace Ifc4GeometryTests
 {
     [DeploymentItem(@"x64\", "x64")]
@@ -16,9 +18,7 @@ namespace Ifc4GeometryTests
     {
         private readonly XbimGeometryEngine _xbimGeometryCreator = new XbimGeometryEngine();
        
-       
 
-       
 
         [TestMethod]
         public void ExtrudedSolidWithNullPositionTest()
@@ -190,6 +190,19 @@ namespace Ifc4GeometryTests
             }
         }
 
+        [TestMethod]
+        public void AdvancedSweptSolidTest()
+        {
+            using (var model = IfcStore.Open(@"Ifc4TestFiles\ReinforcingBar.ifc"))
+            {
+                var advancedSweep = model.Instances.OfType<IfcSweptDiskSolid>().FirstOrDefault();
+                Assert.IsNotNull(advancedSweep);
+                var bar = _xbimGeometryCreator.CreateSolid(advancedSweep);
+                Assert.IsTrue((int)bar.Volume == 129879);
+            }
+        }
+
+
         #endregion
 
         #region Tessellation tests
@@ -247,6 +260,27 @@ namespace Ifc4GeometryTests
 
             }
         }
+        #endregion
+
+        #region Grid placement
+
+        [TestMethod]
+        public void GridTest()
+        {
+            using (var model = IfcStore.Open(@"Ifc4TestFiles\grid-placement.ifc"))
+            {
+                   
+                var placements = model.Instances.OfType<IIfcGridPlacement>();
+                Assert.IsTrue(placements.Any());
+                foreach (var p in placements)
+                {
+                    XbimMatrix3D m = _xbimGeometryCreator.ToMatrix3D(p);
+                    Assert.IsFalse(m.IsIdentity);
+                }
+            }
+        }
+
+
         #endregion
 
 

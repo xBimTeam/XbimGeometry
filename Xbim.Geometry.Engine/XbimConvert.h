@@ -8,7 +8,7 @@
 using namespace Xbim::Ifc4::Interfaces;
 using namespace Xbim::Common::Exceptions;
 using namespace Xbim::Common::Geometry;
-
+using namespace Xbim::Ifc4::MeasureResource;
 
 
 namespace Xbim
@@ -63,6 +63,13 @@ namespace Xbim
 			static double GetZValueOrZero(IIfcDirection^ dir);
 			static double GetZValueOrZero(IIfcVector^ vec);
 			static XbimVector3D NewellsNormal(IIfcPolyLoop^ loop);
+			static gp_Pnt GetPoint3d(IIfcCartesianPoint^ cartesian);
+			static gp_Pnt2d GetPoint2d(IIfcCartesianPoint^ cartesian);
+			static gp_Dir GetDir3d(IIfcDirection^ dir);
+			static gp_Dir2d GetDir2d(IIfcDirection^ dir);
+			static gp_Vec2d GetDir2d(IEnumerable<IfcLengthMeasure>^ offsets);
+			static gp_Vec GetDir3d(IEnumerable<IfcLengthMeasure>^ offsets);
+			
 		};
 
 	}
