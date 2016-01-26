@@ -493,7 +493,7 @@ namespace Xbim
 				if (grid == nullptr) grid = Enumerable::FirstOrDefault(axises[0]->PartOfW);
 				//we must have one now
 				XbimMatrix3D gridTransform = ConvertMatrix3D(grid->ObjectPlacement);
-				return XbimMatrix3D::Multiply( gridTransform,localTrans);
+				return XbimMatrix3D::Multiply(localTrans, gridTransform);
 
 			}
 
