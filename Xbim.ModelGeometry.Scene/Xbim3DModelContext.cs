@@ -383,6 +383,7 @@ namespace Xbim.ModelGeometry.Scene
                 MappedShapeIds = new HashSet<int>();
                 FeatureElementShapeIds = new HashSet<int>();
                 ProductShapeIds = new HashSet<int>();
+               
                 foreach (var product in Model.Instances.OfType<IIfcProduct>(true).Where(p => p.Representation != null))
                 {
                     var isFeatureElementShape = product is IIfcFeatureElement ||
@@ -862,6 +863,28 @@ namespace Xbim.ModelGeometry.Scene
         {
             var localTally = contextHelper.Tally;
             var localPercentageParsed = contextHelper.PercentageParsed;
+            //write any grids we have converted
+            foreach (var grid in Model.Instances.OfType<IIfcGrid>())
+            {
+                GeometryReference instance;
+                if (contextHelper.ShapeLookup.TryGetValue(grid.EntityLabel, out instance))
+                {
+                    XbimMatrix3D placementTransform = XbimMatrix3D.Identity;
+                    if (grid.ObjectPlacement is IIfcLocalPlacement)
+                        placementTransform = contextHelper.PlacementTree[grid.ObjectPlacement.EntityLabel];
+                    else if (grid.ObjectPlacement is IIfcGridPlacement)
+                        placementTransform = Engine.ToMatrix3D((IIfcGridPlacement)grid.ObjectPlacement);                   
+
+                    WriteShapeInstanceToStore(instance.GeometryId, instance.StyleLabel, 0, grid,
+                        placementTransform, instance.BoundingBox /*productBounds*/,
+                        XbimGeometryRepresentationType.OpeningsAndAdditionsIncluded, txn);
+                    var transproductBounds = instance.BoundingBox /*productBounds*/.Transform(placementTransform);
+                    //transform the bounds
+                    //contextHelper.Clusters.First().Enqueue(
+                    //    new XbimBBoxClusterElement(instance.GeometryId,
+                    //        transproductBounds));
+                }
+            }
 
             Parallel.ForEach(products, contextHelper.ParallelOptions, product =>
              //       foreach (var product in products)
@@ -926,7 +949,8 @@ namespace Xbim.ModelGeometry.Scene
                 placementTransform = Engine.ToMatrix3D((IIfcGridPlacement) element.ObjectPlacement);
             var contextId = rep.ContextOfItems.EntityLabel;
 
-            //write out any shapes it has                   
+            //write out any shapes it has   
+              
             foreach (var shape in rep.Items)
             {
                 if (shape is IIfcMappedItem)
