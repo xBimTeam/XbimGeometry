@@ -35,11 +35,7 @@ namespace Xbim
 			*pCurve = curve;
 		}
 
-		XbimCurve::XbimCurve(const Handle_Geom_Curve& curve, double p1, double p2)
-		{
-			this->pCurve = new Handle_Geom_Curve();
-			*pCurve = new Geom_TrimmedCurve(curve,p1,p2,true);	
-		}
+		
 
 		XbimPoint3D XbimCurve::Start::get()
 		{

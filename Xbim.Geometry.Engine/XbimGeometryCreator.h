@@ -159,6 +159,7 @@ namespace Xbim
 			virtual IXbimCurve^ CreateCurve(IIfcOffsetCurve3D^ curve);
 			virtual IXbimCurve^ CreateCurve(IIfcOffsetCurve2D^ curve);
 			virtual XbimMatrix3D ToMatrix3D(IIfcObjectPlacement ^ objPlacement);
+			virtual IXbimSolidSet^ CreateGrid(IIfcGrid^ grid);
 		};
 	}
 }

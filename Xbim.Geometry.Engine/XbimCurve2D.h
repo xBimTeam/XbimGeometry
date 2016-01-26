@@ -46,6 +46,10 @@ namespace Xbim
 			XbimCurve2D(IIfcBSplineCurveWithKnots^ curve) { Init(curve); }
 			XbimCurve2D(IIfcOffsetCurve2D^ curve){ Init(curve); }
 
+#pragma region operators
+			operator const Handle_Geom2d_Curve& () { return *pCurve2D; }
+			
+#pragma endregion
 			//properties
 			virtual property bool IsValid{ bool get() override { return pCurve2D != nullptr; } }
 			virtual property bool IsSet{bool get() override { return false; }; }
@@ -60,7 +64,7 @@ namespace Xbim
 			virtual XbimPoint3D GetPoint(double parameter);
 			virtual property bool IsClosed{ bool get(); }
 			virtual property bool Is3D{ bool get(){ return true; }; }
-
+			virtual XbimVector3D TangentAt(double parameter);
 			IXbimCurve^ ToCurve3D();
 		};
 	}

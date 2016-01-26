@@ -1,6 +1,7 @@
 #pragma once
 #include "XbimOccShape.h"
-#include "XbimWire.h"
+#include "XbimCurve.h"
+#include "XbimCurve2D.h"
 #include "XbimVertex.h"
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Wire.hxx>
@@ -59,6 +60,8 @@ namespace Xbim
 			XbimEdge(const TopoDS_Wire& wire, double tolerance, double angleTolerance);
 			XbimEdge(IIfcCurve^ edgeCurve, XbimVertex^ start, XbimVertex^ end);
 			XbimEdge(XbimVertex^ start, XbimVertex^ midPoint, XbimVertex^ end);
+			XbimEdge(XbimCurve^ curve3D);
+			XbimEdge(XbimCurve2D^ curve2D);
 #pragma endregion
 
 

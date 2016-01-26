@@ -89,6 +89,14 @@ namespace Xbim
 			return gcnew XbimCurve(GeomLib::To3d(gp_Ax2(), *pCurve2D));
 		}
 
+		XbimVector3D XbimCurve2D::TangentAt(double parameter)
+		{
+			if (!IsValid) return XbimVector3D();
+			gp_Pnt2d p;
+			gp_Vec2d v;
+			(*pCurve2D)->D1(parameter,p,v);
+			return XbimVector3D(v.X(), v.Y(), 0.);
+		}
 
 		IXbimGeometryObject^ XbimCurve2D::Transform(XbimMatrix3D matrix3D)
 		{

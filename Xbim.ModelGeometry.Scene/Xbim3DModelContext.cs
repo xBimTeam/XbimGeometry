@@ -1040,7 +1040,27 @@ namespace Xbim.ModelGeometry.Scene
             var precision = Model.ModelFactors.Precision;
             var deflection = Model.ModelFactors.DeflectionTolerance;
             var deflectionAngle = Model.ModelFactors.DeflectionAngle;
+            //if we have any grids turn them in to geometry
+            foreach (var grid in Model.Instances.OfType<IIfcGrid>())
+            {
+                using (var geomModel = Engine.CreateGrid(grid))
+                {
+                    if (geomModel != null && geomModel.IsValid)
+                    {
+                        var shapeGeom = Engine.CreateShapeGeometry(geomModel, precision, deflection,
+                            deflectionAngle, geomStorageType);
+                        shapeGeom.IfcShapeLabel = grid.EntityLabel;
+                       
+                        var refCounter = new GeometryReference
+                        {
+                            BoundingBox = (shapeGeom).BoundingBox,
+                            GeometryId = geometryStore.AddShapeGeometry(shapeGeom)
 
+                        };
+                        contextHelper.ShapeLookup.TryAdd(shapeGeom.IfcShapeLabel, refCounter);
+                    }
+                }
+            }
             Parallel.ForEach(contextHelper.ProductShapeIds, contextHelper.ParallelOptions, shapeId =>
              //  foreach (var shapeId in contextHelper.ProductShapeIds)
              {

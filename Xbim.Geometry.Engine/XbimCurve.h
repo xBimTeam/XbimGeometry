@@ -35,7 +35,6 @@ namespace Xbim
 			!XbimCurve(){ InstanceCleanup(); }
 			//constructors
 			XbimCurve(const Handle_Geom_Curve& curve);
-			XbimCurve(const Handle_Geom_Curve& curve, double p1, double p2);
 			XbimCurve(IIfcCurve^ curve) { Init(curve); }
 			XbimCurve(IIfcPolyline^ curve) {  Init(curve); }
 			XbimCurve(IIfcCircle^ curve) {  Init(curve); }
@@ -46,6 +45,11 @@ namespace Xbim
 			XbimCurve(IIfcBSplineCurveWithKnots^ curve) {  Init(curve); }		
 			XbimCurve(IIfcOffsetCurve3D^ curve){ Init(curve); }
 
+
+#pragma region operators
+			operator const Handle_Geom_Curve& () { return *pCurve; }
+
+#pragma endregion
 			//properties
 			virtual property bool IsValid{ bool get() override { return pCurve != nullptr; } }
 			virtual property bool IsSet{bool get() override { return false; }; }

@@ -20,6 +20,10 @@
 #include <BRepTools.hxx>
 #include <ShapeFix_ShapeTolerance.hxx>
 #include <BRep_Builder.hxx>
+#include <BRepOffsetAPI_MakePipe.hxx>
+#include <Geom_Circle.hxx>
+#include <BRepBuilderAPI_MakeWire.hxx>
+#include <BRepBuilderAPI_MakeFace.hxx>
 using namespace  System::Threading;
 using namespace  System::Linq;
 using namespace Xbim::Common;
@@ -954,6 +958,71 @@ namespace Xbim
 			return XbimConvert::ConvertMatrix3D(objPlacement);
 		}
 
+		IXbimSolidSet^ XbimGeometryCreator::CreateGrid(IIfcGrid^ grid)
+		{
+			double mm = grid->Model->ModelFactors->OneMilliMeter;
+			double precision = grid->Model->ModelFactors->Precision;
+
+
+
+			
+			XbimSolidSet^ solids = gcnew XbimSolidSet();
+			gp_Pnt origin;
+			gp_Vec normal;
+
+			for each (IIfcGridAxis^ axis in grid->UAxes)
+			{				
+				Handle_Geom_Curve curve = gcnew XbimCurve(axis->AxisCurve); //create the axis				
+				curve->D1(curve->FirstParameter(), origin, normal); //get the start point and normal
+				gp_Dir v1 = gp::DX().IsParallel(normal, Precision::Angular()) ? gp::DY() : gp::DX();
+				gp_Ax2 centre(origin, normal, v1); //create the axis for the rectangular face
+				TopoDS_Wire rect = gcnew XbimWire(10 * mm, mm, precision, true);
+				gp_Trsf trsf;
+				trsf.SetTransformation(centre, gp_Ax3());
+				rect.Move(TopLoc_Location(trsf));								
+				TopoDS_Face profile = BRepBuilderAPI_MakeFace(rect, Standard_True);				
+				TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(curve);
+				TopoDS_Wire spine = BRepBuilderAPI_MakeWire(edge);
+				BRepOffsetAPI_MakePipe axisMaker(spine,profile);			
+				axisMaker.Build();
+				solids->Add(gcnew XbimSolid(TopoDS::Solid(axisMaker.Shape())));
+			}
+			for each (IIfcGridAxis^ axis in grid->VAxes)
+			{
+				Handle_Geom_Curve curve = gcnew XbimCurve(axis->AxisCurve); //create the axis				
+				curve->D1(curve->FirstParameter(), origin, normal); //get the start point and normal
+				gp_Dir v1 = gp::DX().IsParallel(normal, Precision::Angular()) ? gp::DY() : gp::DX();
+				gp_Ax2 centre(origin, normal, v1); //create the axis for the rectangular face
+				TopoDS_Wire rect = gcnew XbimWire(10 * mm, mm, precision, true);
+				gp_Trsf trsf;
+				trsf.SetTransformation(centre, gp_Ax3());
+				rect.Move(TopLoc_Location(trsf));
+				TopoDS_Face profile = BRepBuilderAPI_MakeFace(rect, Standard_True);
+				TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(curve);
+				TopoDS_Wire spine = BRepBuilderAPI_MakeWire(edge);
+				BRepOffsetAPI_MakePipe axisMaker(spine, profile);
+				axisMaker.Build();
+				solids->Add(gcnew XbimSolid(TopoDS::Solid(axisMaker.Shape())));
+			}
+			for each (IIfcGridAxis^ axis in grid->WAxes)
+			{
+				Handle_Geom_Curve curve = gcnew XbimCurve(axis->AxisCurve); //create the axis				
+				curve->D1(curve->FirstParameter(), origin, normal); //get the start point and normal
+				gp_Dir v1 = gp::DX().IsParallel(normal, Precision::Angular()) ? gp::DY() : gp::DX();
+				gp_Ax2 centre(origin, normal, v1); //create the axis for the rectangular face
+				TopoDS_Wire rect = gcnew XbimWire(10 * mm, mm, precision, true);
+				gp_Trsf trsf;
+				trsf.SetTransformation(centre, gp_Ax3());
+				rect.Move(TopLoc_Location(trsf));
+				TopoDS_Face profile = BRepBuilderAPI_MakeFace(rect, Standard_True);
+				TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(curve);
+				TopoDS_Wire spine = BRepBuilderAPI_MakeWire(edge);
+				BRepOffsetAPI_MakePipe axisMaker(spine, profile);
+				axisMaker.Build();
+				solids->Add(gcnew XbimSolid(TopoDS::Solid(axisMaker.Shape())));
+			}
+			return solids;
+		}
 		
 	}
 }

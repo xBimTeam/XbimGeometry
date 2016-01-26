@@ -444,10 +444,11 @@ namespace Xbim
 
 				IIfcVirtualGridIntersection^ vi = gridPlacement->PlacementLocation;
 				List<IIfcGridAxis^>^ axises = Enumerable::ToList(vi->IntersectingAxes);
+				double tolerance = vi->Model->ModelFactors->Precision;
 				//its 2d, it should always be		
-				IXbimCurve^ axis1 = gcnew XbimCurve2D(axises[0]);
-				IXbimCurve^ axis2 = gcnew XbimCurve2D(axises[1]);
-				IEnumerable<XbimPoint3D>^ intersects = axis1->Intersections(axis2, vi->Model->ModelFactors->Precision);
+				XbimCurve2D^ axis1 = gcnew XbimCurve2D(axises[0]);
+				XbimCurve2D^ axis2 = gcnew XbimCurve2D(axises[1]);
+				IEnumerable<XbimPoint3D>^ intersects = axis1->Intersections(axis2, tolerance);
 				if (!Enumerable::Any(intersects)) return XbimMatrix3D::Identity;
 				
 			    XbimPoint3D intersection = Enumerable::First(intersects);
@@ -455,9 +456,8 @@ namespace Xbim
 
 				if (gridPlacement->PlacementRefDirection==nullptr)
 				{
-					XbimPoint3D p1 = axis1->Start;
-					XbimPoint3D p2 = axis1->End;
-					XbimVector3D v =  p2 - p1;
+					double p1 = axis1->GetParameter(intersection, tolerance);					
+					XbimVector3D v = axis1->TangentAt(p1);
 					ax.SetDirection(gp_Dir2d(v.X,v.Y));
 				}
 				else if (dynamic_cast<IIfcDirection^>(gridPlacement->PlacementRefDirection))
@@ -469,9 +469,9 @@ namespace Xbim
 					IIfcVirtualGridIntersection^ v2 = (IIfcVirtualGridIntersection^)gridPlacement->PlacementRefDirection;
 					List<IIfcGridAxis^>^ axisesv2 = Enumerable::ToList(v2->IntersectingAxes);
 					//its 2d, it should always be		
-					IXbimCurve^ axis1v = gcnew XbimCurve2D(axisesv2[0]);
-					IXbimCurve^ axis2v = gcnew XbimCurve2D(axisesv2[1]);
-					IEnumerable<XbimPoint3D>^ intersectsv = axis1v->Intersections(axis2v, v2->Model->ModelFactors->Precision);
+					XbimCurve2D^ axis1v = gcnew XbimCurve2D(axisesv2[0]);
+					XbimCurve2D^ axis2v = gcnew XbimCurve2D(axisesv2[1]);
+					IEnumerable<XbimPoint3D>^ intersectsv = axis1v->Intersections(axis2v, tolerance);
 
 					XbimPoint3D intersectionv = Enumerable::First(intersectsv);
 					XbimVector3D vec2 = intersectionv - intersection;
@@ -493,7 +493,7 @@ namespace Xbim
 				if (grid == nullptr) grid = Enumerable::FirstOrDefault(axises[0]->PartOfW);
 				//we must have one now
 				XbimMatrix3D gridTransform = ConvertMatrix3D(grid->ObjectPlacement);
-				return XbimMatrix3D::Multiply(localTrans, gridTransform);
+				return XbimMatrix3D::Multiply( gridTransform,localTrans);
 
 			}
 

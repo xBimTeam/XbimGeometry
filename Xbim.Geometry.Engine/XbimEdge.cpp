@@ -3,8 +3,9 @@
 #include "XbimVertex.h"
 #include "XbimConvert.h"
 #include "XbimCurve.h"
+#include "XbimCurve2D.h"
 #include "XbimConvert.h"
-
+#include "XbimWire.h"
 #include <BRepBuilderAPI_Transform.hxx>
 
 #include <TopExp_Explorer.hxx>
@@ -47,6 +48,7 @@
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <ShapeCustom_BSplineRestriction.hxx>
 #include <GC_MakeCircle.hxx>
+#include <GeomLib.hxx>
 
 using namespace Xbim::Common;
 using namespace System::Linq;
@@ -72,7 +74,7 @@ namespace Xbim
 			Standard_Real p1, p2;
 			Handle(Geom_Curve) curve = BRep_Tool::Curve(*pEdge, p1, p2);
 			GC::KeepAlive(this);
-			return gcnew XbimCurve(curve, p1, p2);
+			return gcnew XbimCurve(curve);
 		}
 
 		double XbimEdge::Length::get()
@@ -1078,6 +1080,20 @@ namespace Xbim
 		}
 		
 #pragma endregion
+		XbimEdge::XbimEdge(XbimCurve2D^ curve2D)
+		{
+			XbimCurve^ curve = (XbimCurve^)curve2D->ToCurve3D();
+			BRepBuilderAPI_MakeEdge edgeMaker(curve);
+			pEdge = new TopoDS_Edge();
+			*pEdge = edgeMaker.Edge();
+		}
 
+		XbimEdge::XbimEdge(XbimCurve^ curve3D)
+		{
+
+			BRepBuilderAPI_MakeEdge edgeMaker(curve3D);
+			pEdge = new TopoDS_Edge();
+			*pEdge = edgeMaker.Edge();
+		}
 	}
 }

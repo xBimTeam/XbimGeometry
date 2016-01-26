@@ -1,5 +1,6 @@
 #pragma once
 #include "XbimOccShape.h"
+#include "XbimEdge.h"
 #include "XbimVertex.h"
 #include <TopoDS_Wire.hxx>
 #include <gp_Pnt.hxx>
@@ -57,7 +58,7 @@ namespace Xbim
 			void Init(IIfcCShapeProfileDef^ profile);
 			void Init(IIfcTShapeProfileDef^ profile);
 			//constructs a rectangle wire with the bottom left corner at 0,0,0, top right at x,y,0
-			void Init(double x, double y, double tolerance);
+			void Init(double x, double y, double tolerance, bool centre);
 #pragma endregion
 
 			//helpers
@@ -74,6 +75,8 @@ namespace Xbim
 #pragma region constructors
 
 			XbimWire() {}; //an empty invalid wire
+			XbimWire(XbimEdge^ edge);
+			XbimWire(double x, double y, double tolerance, bool centre);
 			XbimWire(double precision);
 			XbimWire(const std::vector<gp_Pnt>& points, double tolerance);
 			XbimWire(const TopoDS_Wire& wire);
@@ -105,8 +108,8 @@ namespace Xbim
 			XbimWire(IIfcZShapeProfileDef^ profile);
 			XbimWire(IIfcCShapeProfileDef^ profile);
 			XbimWire(IIfcTShapeProfileDef^ profile);
-			XbimWire(double x, double y, double tolerance);
-
+			
+			
 #pragma endregion
 
 			

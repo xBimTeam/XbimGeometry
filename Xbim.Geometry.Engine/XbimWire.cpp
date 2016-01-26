@@ -78,6 +78,13 @@ namespace Xbim
 
 #pragma region Constructors
 
+		
+		XbimWire::XbimWire(XbimEdge^ edge)
+		{
+			pWire = new TopoDS_Wire();
+			BRepBuilderAPI_MakeWire wireMaker(edge);
+			*pWire = wireMaker.Wire();
+		}
 		XbimWire::XbimWire(const TopoDS_Wire& wire)
 		{
 			pWire = new TopoDS_Wire();
@@ -125,8 +132,7 @@ namespace Xbim
 		XbimWire::XbimWire(IIfcZShapeProfileDef ^ profile){ Init(profile); }
 		XbimWire::XbimWire(IIfcCShapeProfileDef ^ profile){ Init(profile); }
 		XbimWire::XbimWire(IIfcTShapeProfileDef ^ profile){ Init(profile); }
-		XbimWire::XbimWire(double x, double y, double tolerance){ Init(x,y,tolerance); }
-
+		XbimWire::XbimWire(double x, double y, double tolerance, bool centre){ Init(x,y,tolerance, centre); }
 #pragma endregion
 
 
@@ -1352,6 +1358,7 @@ namespace Xbim
 			*pWire = wire;
 		}
 
+
 		void XbimWire::Init(IIfcRectangleProfileDef^ rectProfile)
 		{
 			if (rectProfile->XDim <= 0 || rectProfile->YDim <= 0)
@@ -2101,19 +2108,33 @@ namespace Xbim
 			*pWire = wire;
 		}
 
-		void XbimWire::Init(double x, double y, double tolerance)
+		void XbimWire::Init(double x, double y, double tolerance, bool centre)
 		{	
-			gp_Pnt bl(0, 0, 0);
-			gp_Pnt br(x, 0, 0);
-			gp_Pnt tr(x, y, 0);
-			gp_Pnt tl(0, y, 0);
+			TopoDS_Vertex vbl, vbr, vtr, vtl;
 			//make the vertices
 			BRep_Builder builder;
-			TopoDS_Vertex vbl, vbr, vtr, vtl;
-			builder.MakeVertex(vbl, bl, tolerance);
-			builder.MakeVertex(vbr, br, tolerance);
-			builder.MakeVertex(vtr, tr, tolerance);
-			builder.MakeVertex(vtl, tl, tolerance);
+			if (centre)
+			{
+				gp_Pnt bl(-x / 2, -y / 2, 0);
+				gp_Pnt br(x / 2, -y / 2, 0);
+				gp_Pnt tr(x / 2, y / 2, 0);
+				gp_Pnt tl(-x / 2, y / 2, 0);
+				builder.MakeVertex(vbl, bl, tolerance);
+				builder.MakeVertex(vbr, br, tolerance);
+				builder.MakeVertex(vtr, tr, tolerance);
+				builder.MakeVertex(vtl, tl, tolerance);				
+			}
+			else
+			{
+				gp_Pnt bl(0, 0, 0);
+				gp_Pnt br(x, 0, 0);
+				gp_Pnt tr(x, y, 0);
+				gp_Pnt tl(0, y, 0);
+				builder.MakeVertex(vbl, bl, tolerance);
+				builder.MakeVertex(vbr, br, tolerance);
+				builder.MakeVertex(vtr, tr, tolerance);
+				builder.MakeVertex(vtl, tl, tolerance);
+			}
 			//make the edges
 			TopoDS_Wire wire;
 			builder.MakeWire(wire);

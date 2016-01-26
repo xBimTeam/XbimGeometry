@@ -29,7 +29,7 @@ namespace Xbim.ModelGeometry.Scene
                 IXbimCurve curve = engine.CreateCurve(gridAxis.AxisCurve);
                 _axis.Add(gridAxis, curve);
             }
-            
+
         }
 
 

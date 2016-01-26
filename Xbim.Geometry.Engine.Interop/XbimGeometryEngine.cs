@@ -320,6 +320,11 @@ namespace Xbim.Geometry.Engine.Interop
             return _engine.CreateSolidSet(boolOp);
         }
 
+        public IXbimSolidSet CreateGrid(IIfcGrid grid)
+        {
+            return _engine.CreateGrid(grid);
+        }
+
         public void WriteTriangulation(TextWriter tw, IXbimGeometryObject shape, double tolerance, double deflection)
         {
             WriteTriangulation(tw, shape, tolerance, deflection: deflection, angle: 0.5);

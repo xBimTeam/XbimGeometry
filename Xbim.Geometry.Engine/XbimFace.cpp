@@ -870,7 +870,7 @@ namespace Xbim
 
 		void  XbimFace::Init(double x, double y, double tolerance)
 		{
-			XbimWire^ bounds = gcnew XbimWire(x, y, tolerance);
+			XbimWire^ bounds = gcnew XbimWire(x, y, tolerance,false);
 			if (bounds->IsValid)
 			{
 				BRepBuilderAPI_MakeFace faceMaker(bounds);

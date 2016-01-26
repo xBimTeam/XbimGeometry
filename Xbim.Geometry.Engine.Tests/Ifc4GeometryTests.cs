@@ -277,6 +277,14 @@ namespace Ifc4GeometryTests
                     XbimMatrix3D m = _xbimGeometryCreator.ToMatrix3D(p);
                     Assert.IsFalse(m.IsIdentity);
                 }
+                //make a graphic of the grid
+                var ifcGrid = model.Instances.OfType<IIfcGrid>().FirstOrDefault();
+                Assert.IsNotNull(ifcGrid);
+                var geom = _xbimGeometryCreator.CreateGrid(ifcGrid);
+                foreach (var solid in geom)
+                {
+                    Assert.IsTrue(solid.Volume>0);
+                }
             }
         }
 
