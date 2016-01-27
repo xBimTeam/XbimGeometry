@@ -976,7 +976,7 @@ namespace Xbim
 				curve->D1(curve->FirstParameter(), origin, normal); //get the start point and normal
 				gp_Dir v1 = gp::DX().IsParallel(normal, Precision::Angular()) ? gp::DY() : gp::DX();
 				gp_Ax2 centre(origin, normal, v1); //create the axis for the rectangular face
-				TopoDS_Wire rect = gcnew XbimWire(20 * mm, mm / 2, precision, true);
+				TopoDS_Wire rect = gcnew XbimWire(50 * mm, mm / 10, precision, true);
 				gp_Trsf trsf;
 				trsf.SetTransformation(centre, gp_Ax3());
 				rect.Move(TopLoc_Location(trsf));								
@@ -993,7 +993,7 @@ namespace Xbim
 				curve->D1(curve->FirstParameter(), origin, normal); //get the start point and normal
 				gp_Dir v1 = gp::DX().IsParallel(normal, Precision::Angular()) ? gp::DY() : gp::DX();
 				gp_Ax2 centre(origin, normal, v1); //create the axis for the rectangular face
-				TopoDS_Wire rect = gcnew XbimWire(20 * mm, mm/2, precision, true);
+				TopoDS_Wire rect = gcnew XbimWire(50 * mm, mm/10, precision, true);
 				gp_Trsf trsf;
 				trsf.SetTransformation(centre, gp_Ax3());
 				rect.Move(TopLoc_Location(trsf));
@@ -1010,7 +1010,7 @@ namespace Xbim
 				curve->D1(curve->FirstParameter(), origin, normal); //get the start point and normal
 				gp_Dir v1 = gp::DX().IsParallel(normal, Precision::Angular()) ? gp::DY() : gp::DX();
 				gp_Ax2 centre(origin, normal, v1); //create the axis for the rectangular face
-				TopoDS_Wire rect = gcnew XbimWire(20 * mm, mm / 2, precision, true);
+				TopoDS_Wire rect = gcnew XbimWire(50 * mm, mm / 10, precision, true);
 				gp_Trsf trsf;
 				trsf.SetTransformation(centre, gp_Ax3());
 				rect.Move(TopLoc_Location(trsf));

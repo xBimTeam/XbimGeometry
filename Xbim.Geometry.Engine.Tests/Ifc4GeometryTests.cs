@@ -291,6 +291,21 @@ namespace Ifc4GeometryTests
 
         #endregion
 
+        #region Tapered extrusions
+
+        [TestMethod]
+        public void ExtrudedAreaSolidTaperedTest()
+        {
+            using (var model = IfcStore.Open(@"Ifc4TestFiles\air-terminal-element.ifc"))
+            {
+                var taperedSolid = model.Instances.OfType<IfcExtrudedAreaSolidTapered>().FirstOrDefault();
+                Assert.IsNotNull(taperedSolid);
+                var bar = _xbimGeometryCreator.CreateSolid(taperedSolid);
+                Assert.IsTrue((int)bar.Volume>0);
+            }
+        }
+
+        #endregion
 
     }
 }

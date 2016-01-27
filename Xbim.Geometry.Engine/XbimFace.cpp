@@ -295,6 +295,8 @@ namespace Xbim
 				return Init(rectHollow);
 		    if (dynamic_cast<IIfcCompositeProfileDef^>(profile))
 				return Init((IIfcCompositeProfileDef^)profile);
+			if (dynamic_cast<IIfcDerivedProfileDef^>(profile))
+				return Init((IIfcDerivedProfileDef^)profile);
 			if (dynamic_cast<IIfcArbitraryOpenProfileDef^>(profile) && !dynamic_cast<IIfcCenterLineProfileDef^>(profile))
 				throw gcnew Exception("Faces cannot be built with IIfcArbitraryOpenProfileDef, a face requires a closed loop");
 			else //it is a standard profile that can be built as a single wire
@@ -330,7 +332,16 @@ namespace Xbim
 				GC::KeepAlive(wire);
 			}
 		}
-		
+
+		void XbimFace::Init(IIfcDerivedProfileDef^ profile)
+		{
+			Init(profile->ParentProfile);
+			if (IsValid)
+			{
+				gp_Trsf trsf = XbimConvert::ToTransform(profile->Operator);
+				pFace->Move(TopLoc_Location(trsf));
+			}
+		}
 
 		void XbimFace::Init(IIfcArbitraryProfileDefWithVoids^ profile)
 		{
@@ -508,7 +519,7 @@ namespace Xbim
 				builder.Add(wire, BRepBuilderAPI_MakeEdge(vbr, vtr));
 				builder.Add(wire, BRepBuilderAPI_MakeEdge(vtr, vtl));
 				builder.Add(wire, BRepBuilderAPI_MakeEdge(vtl, vbl));
-				
+				wire.Closed(Standard_True);
 				double oRad = rectProfile->OuterFilletRadius.HasValue?(double)(rectProfile->OuterFilletRadius.Value):0.0;
 				if (oRad>0) //consider fillets
 				{
@@ -552,14 +563,13 @@ namespace Xbim
 					builder.Add(innerWire, BRepBuilderAPI_MakeEdge(vibr, vitr));
 					builder.Add(innerWire, BRepBuilderAPI_MakeEdge(vitr, vitl));
 					builder.Add(innerWire, BRepBuilderAPI_MakeEdge(vitl, vibl));
-					innerWire.Reverse();
 					
 					double iRad = rectProfile->InnerFilletRadius.HasValue ? (double)(rectProfile->InnerFilletRadius.Value) : 0.0;
 					if (iRad > 0) //consider fillets
 					{
-						BRepBuilderAPI_MakeFace faceMaker(wire, true);
+						BRepBuilderAPI_MakeFace faceMaker(innerWire, true);
 						BRepFilletAPI_MakeFillet2d filleter(faceMaker.Face());
-						for (BRepTools_WireExplorer exp(wire); exp.More(); exp.Next())
+						for (BRepTools_WireExplorer exp(innerWire); exp.More(); exp.Next())
 						{
 							filleter.AddFillet(exp.CurrentVertex(), iRad);
 						}
@@ -574,6 +584,8 @@ namespace Xbim
 							}
 						}
 					}
+					innerWire.Reverse();
+					innerWire.Closed(Standard_True);
 					faceBlder.Add(innerWire);
 				}
 

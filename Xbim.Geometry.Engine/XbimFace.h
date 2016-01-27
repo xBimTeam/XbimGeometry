@@ -29,6 +29,7 @@ namespace Xbim
 			void Init(IIfcArbitraryProfileDefWithVoids^ profile);
 			void Init(IIfcCircleHollowProfileDef ^ circProfile);
 			void Init(IIfcCompositeProfileDef ^ profile);
+			void Init(IIfcDerivedProfileDef ^ profile);
 			void Init(IIfcRectangleHollowProfileDef^ rectProfile);
 			void Init(IIfcSurface^ surface);
 			void Init(IIfcPlane^ plane);

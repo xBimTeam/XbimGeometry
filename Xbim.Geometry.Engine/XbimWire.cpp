@@ -1239,8 +1239,11 @@ namespace Xbim
 		void XbimWire::Init(IIfcDerivedProfileDef ^ profile)
 		{
 			Init(profile->ParentProfile);
-			gp_Trsf trsf = XbimConvert::ToTransform(profile->Operator);
-			pWire->Move(TopLoc_Location(trsf));
+			if (IsValid)
+			{
+				gp_Trsf trsf = XbimConvert::ToTransform(profile->Operator);
+				pWire->Move(TopLoc_Location(trsf));
+			}
 			
 		}
 

@@ -36,6 +36,8 @@ namespace Xbim
 			void Init(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid, IIfcProfileDef^ overrideProfileDef);
 			void Init(IIfcRevolvedAreaSolid^ solid, IIfcProfileDef^ overrideProfileDef);
 
+			void Init(IIfcExtrudedAreaSolidTapered^ solid, IIfcProfileDef^ overrideProfileDef);
+
 			void Init(IIfcSweptDiskSolid^ solid);
 			void Init(IIfcBoundingBox^ solid);
 			void Init(IIfcHalfSpaceSolid^ solid, double maxExtrusion);
@@ -111,10 +113,14 @@ namespace Xbim
 			XbimSolid(IIfcPolygonalBoundedHalfSpace^ solid, double maxExtrusion);
 			XbimSolid(IIfcExtrudedAreaSolid^ solid);
 			XbimSolid(IIfcExtrudedAreaSolid^ IIfcSolid, IIfcProfileDef^ overrideProfileDef); //support for composite profiles
+			XbimSolid(IIfcExtrudedAreaSolidTapered^ solid);
+			XbimSolid(IIfcExtrudedAreaSolidTapered^ IIfcSolid, IIfcProfileDef^ overrideProfileDef); //support for composite profiles
+
 			XbimSolid(IIfcRevolvedAreaSolid^ solid);
 			XbimSolid(IIfcRevolvedAreaSolid^ IIfcSolid, IIfcProfileDef^ overrideProfileDef); //support for composite profiles
 			XbimSolid(IIfcSweptDiskSolid^ solid);
 			
+
 			XbimSolid(IIfcBoundingBox^ solid);
 			XbimSolid(IIfcBooleanResult^ solid);
 			XbimSolid(IIfcBooleanOperand^ solid);

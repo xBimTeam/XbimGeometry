@@ -70,7 +70,8 @@
 #include <BRepBuilderAPI_Transform.hxx>
 #include <ShapeFix_Solid.hxx>
 #include <ShapeFix_Wireframe.hxx>
-
+#include <BRepClass3d_SolidClassifier.hxx>
+#include <BRepBuilderAPI_Sewing.hxx>
 using namespace System;
 using namespace System::Threading;
 using namespace Xbim::Common;
@@ -126,8 +127,18 @@ namespace Xbim
 			Init(repItem, overrideProfileDef);
 
 		}
+		XbimSolid::XbimSolid(IIfcExtrudedAreaSolidTapered^ repItem, IIfcProfileDef^ overrideProfileDef)
+		{
+			Init(repItem, overrideProfileDef);
 
+		}
 		XbimSolid::XbimSolid(IIfcExtrudedAreaSolid^ repItem)
+		{
+			Init(repItem, nullptr);
+			
+		}
+		
+		XbimSolid::XbimSolid(IIfcExtrudedAreaSolidTapered^ repItem)
 		{
 			Init(repItem, nullptr);
 			
@@ -451,8 +462,113 @@ namespace Xbim
 			}	
 		}
 
+		void XbimSolid::Init(IIfcExtrudedAreaSolidTapered^ repItem, IIfcProfileDef^ overrideProfileDef)
+		{
+			BRepPrim_Builder b;
+			TopoDS_Shell shell;
+			b.MakeShell(shell);
+			XbimFace^ faceStart;
+			if (overrideProfileDef == nullptr)
+				faceStart = gcnew XbimFace(repItem->SweptArea);
+			else
+				faceStart = gcnew XbimFace(overrideProfileDef);
+			XbimFace^ faceEnd = gcnew XbimFace(repItem->EndSweptArea);
+			
+			if (faceStart->IsValid && faceEnd->IsValid && repItem->Depth > 0) //we have valid faces and extrusion
+			{
+				
+				double precision = repItem->Model->ModelFactors->Precision;
+				IIfcDirection^ dir = repItem->ExtrudedDirection;
+				XbimVector3D vec(dir->X, dir->Y, dir->Z);
+				vec *= repItem->Depth;
+				faceEnd->Translate(vec);
+				XbimVertex^ start = gcnew XbimVertex(0, 0, 0, precision);
+				XbimVertex^ end = gcnew XbimVertex(vec.X, vec.Y, vec.Z, precision);
+				XbimEdge^ edge = gcnew XbimEdge(start, end);
+				XbimWire^ sweep = gcnew XbimWire(edge);
+				BRepOffsetAPI_MakePipeShell pipeMaker1(sweep);
+				TopoDS_Wire outerBoundStart = (XbimWire^)(faceStart->OuterBound);
+				TopoDS_Wire outerBoundEnd = (XbimWire^)(faceEnd->OuterBound);
+				//pipeMaker1.SetMode(Standard_True);
+				pipeMaker1.SetTransitionMode(BRepBuilderAPI_Transformed);				
+				pipeMaker1.Add(outerBoundStart);
+				pipeMaker1.Add(outerBoundEnd);
+				pipeMaker1.Build();
+				if (pipeMaker1.IsDone() )
+				{
+					TopoDS_Wire firstOuter = TopoDS::Wire(pipeMaker1.FirstShape());
+					TopoDS_Wire lastOuter = TopoDS::Wire(pipeMaker1.LastShape());
+					BRepBuilderAPI_MakeFace firstMaker(firstOuter);
+					BRepBuilderAPI_MakeFace lastMaker(lastOuter);
+					if (faceStart->InnerBounds->Count==1 && faceEnd->InnerBounds->Count==1)
+					{
+						//it is a hollow section so we need to build the inside
+						BRepOffsetAPI_MakePipeShell pipeMaker2(sweep);					
+						TopoDS_Wire innerBoundStart = (XbimWire^)(faceStart->InnerBounds->First);
+						TopoDS_Wire innerBoundEnd = (XbimWire^)(faceEnd->InnerBounds->First);
+						//pipeMaker2.SetMode(Standard_True);
+						pipeMaker2.SetTransitionMode(BRepBuilderAPI_Transformed);
+						pipeMaker2.Add(innerBoundStart);
+						pipeMaker2.Add(innerBoundEnd);
+						pipeMaker2.Build();
+						if (pipeMaker2.IsDone())
+						{						
+							for (TopExp_Explorer explr(pipeMaker2.Shape(), TopAbs_FACE); explr.More(); explr.Next())
+							{							
+								b.AddShellFace(shell, TopoDS::Face(explr.Current()));
+							}
+						}
+						firstMaker.Add(TopoDS::Wire(pipeMaker2.FirstShape()));
+						lastMaker.Add(TopoDS::Wire(pipeMaker2.LastShape()));
+					}
+					b.AddShellFace(shell, firstMaker.Face());
+					b.AddShellFace(shell, lastMaker.Face());
+					for (TopExp_Explorer explr(pipeMaker1.Shape(), TopAbs_FACE); explr.More(); explr.Next())
+					{						
+						b.AddShellFace(shell, TopoDS::Face(explr.Current()));
+					}
+					TopoDS_Solid solid;
+					BRep_Builder bs;
+					bs.MakeSolid(solid);
+					TopoDS_Compound c;
+					bs.MakeCompound(c);
+					bs.Add(c, shell);
+					XbimCompound^ comp = gcnew XbimCompound(c,false, precision);
+					comp->Sew();
+					for (TopExp_Explorer explr(comp, TopAbs_SHELL); explr.More(); explr.Next())
+					{
+						shell = TopoDS::Shell(explr.Current()); //take the first shell
+						break;
+					}
+					
+					bs.Add(solid, shell);
+					
+					BRepClass3d_SolidClassifier sc(solid);
+					sc.PerformInfinitePoint(Precision::Confusion());
+					if (sc.State() == TopAbs_IN) 
+					{
+						bs.MakeSolid(solid);
+						shell.Reverse();						 
+						bs.Add(solid, shell);
+						
+					}
+					pSolid = new TopoDS_Solid();
+					*pSolid = solid;
+					pSolid->Closed(Standard_True);
+					return;
+				}
+				GC::KeepAlive(faceStart);
+				GC::KeepAlive(faceEnd);				
+			}			
+			XbimGeometryCreator::logger->WarnFormat("WS001: Invalid Solid Tapered Extrusion, Extrusion Depth must be >0 and faces must be correctly defined, found in Entity #{0}=IIfcExtrudedAreaSolidTapered.",
+					repItem->EntityLabel);		
+			//if it has failed we will have a null solid
+		}
+
 		void XbimSolid::Init(IIfcExtrudedAreaSolid^ repItem, IIfcProfileDef^ overrideProfileDef)
 		{
+			IIfcExtrudedAreaSolidTapered^ extrudeTaperedArea = dynamic_cast<IIfcExtrudedAreaSolidTapered^>(repItem);
+			if (extrudeTaperedArea != nullptr) return Init(extrudeTaperedArea, overrideProfileDef);
 			XbimFace^ face;
 			if (overrideProfileDef == nullptr)
 				face = gcnew XbimFace(repItem->SweptArea);

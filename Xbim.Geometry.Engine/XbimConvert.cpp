@@ -479,13 +479,12 @@ namespace Xbim
 				}
 
 				gp_Vec v = XbimConvert::GetDir3d(vi->OffsetDistances); //go for 3D
-				ax.SetLocation(gp_Pnt2d(intersection.X, intersection.Y));
 				gp_XY xy(v.X(), v.Y());
 				gp_Trsf2d tr;
 				tr.SetTransformation(ax);
 				tr.Transforms(xy);
 
-				intersection = XbimPoint3D(xy.X(), xy.Y(), v.Z());
+				intersection = XbimPoint3D(xy.X()+intersection.X, xy.Y()+intersection.Y, v.Z());
 				XbimMatrix3D localTrans = XbimMatrix3D::CreateTranslation(intersection.X, intersection.Y, intersection.Z);
 				//now adopt the placement of the grid, this is not performant
 				IIfcGrid^ grid = Enumerable::FirstOrDefault(axises[0]->PartOfU);
