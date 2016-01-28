@@ -515,11 +515,11 @@ namespace Xbim
 						{						
 							for (TopExp_Explorer explr(pipeMaker2.Shape(), TopAbs_FACE); explr.More(); explr.Next())
 							{							
-								b.AddShellFace(shell, TopoDS::Face(explr.Current()));
+								b.AddShellFace(shell, TopoDS::Face(explr.Current().Reversed()));
 							}
 						}
-						firstMaker.Add(TopoDS::Wire(pipeMaker2.FirstShape()));
-						lastMaker.Add(TopoDS::Wire(pipeMaker2.LastShape()));
+						firstMaker.Add(TopoDS::Wire(pipeMaker2.FirstShape().Reversed()));
+						lastMaker.Add(TopoDS::Wire(pipeMaker2.LastShape().Reversed()));
 					}
 					b.AddShellFace(shell, firstMaker.Face());
 					b.AddShellFace(shell, lastMaker.Face());
@@ -529,20 +529,8 @@ namespace Xbim
 					}
 					TopoDS_Solid solid;
 					BRep_Builder bs;
-					bs.MakeSolid(solid);
-					TopoDS_Compound c;
-					bs.MakeCompound(c);
-					bs.Add(c, shell);
-					XbimCompound^ comp = gcnew XbimCompound(c,false, precision);
-					comp->Sew();
-					for (TopExp_Explorer explr(comp, TopAbs_SHELL); explr.More(); explr.Next())
-					{
-						shell = TopoDS::Shell(explr.Current()); //take the first shell
-						break;
-					}
-					
-					bs.Add(solid, shell);
-					
+					bs.MakeSolid(solid);					
+					bs.Add(solid, shell);					
 					BRepClass3d_SolidClassifier sc(solid);
 					sc.PerformInfinitePoint(Precision::Confusion());
 					if (sc.State() == TopAbs_IN) 
@@ -555,6 +543,8 @@ namespace Xbim
 					pSolid = new TopoDS_Solid();
 					*pSolid = solid;
 					pSolid->Closed(Standard_True);
+					if (repItem->Position != nullptr) //In Ifc4 this is now optional
+						pSolid->Move(XbimConvert::ToLocation(repItem->Position));
 					return;
 				}
 				GC::KeepAlive(faceStart);
