@@ -54,6 +54,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Diff.cs" />
     <Compile Include="IfcExtrudedAreaSolidTests.cs" />
     <Compile Include="IfcModelBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -139,6 +140,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Ifc4TestFiles\grid-placement.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Ifc4TestFiles\IfcMirroredProfileDef.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Ifc4TestFiles\IndexedColourMap.ifc">

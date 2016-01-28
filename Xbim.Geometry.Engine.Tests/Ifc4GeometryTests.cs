@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using GeometryTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Xbim.Common.Geometry;
 using Xbim.Ifc;
@@ -305,6 +306,27 @@ namespace Ifc4GeometryTests
             }
         }
 
+        [TestMethod]
+        public void MirroredProfileDefTest()
+        {
+            using (var model = IfcStore.Open(@"Ifc4TestFiles\IfcMirroredProfileDef.ifc"))
+            {
+                var derived = model.Instances[50] as IIfcDerivedProfileDef; //derived profile, mirrored by transform
+                var mirrored = model.Instances[177] as IIfcMirroredProfileDef;//mirrored versio of above
+                Assert.IsNotNull(derived);
+                Assert.IsNotNull(mirrored);
+                
+                var dFace = _xbimGeometryCreator.CreateFace(derived);
+                var mFace = _xbimGeometryCreator.CreateFace(mirrored);
+                var brepD = dFace.ToBRep;
+                var brepM = mFace.ToBRep;
+                var differ = new Diff();
+                var diffs = differ.DiffText(brepM, brepD);
+                Assert.IsTrue(mFace.Normal==dFace.Normal);
+                Assert.IsTrue(diffs.Length==3);
+               
+            }
+        }
         #endregion
 
     }

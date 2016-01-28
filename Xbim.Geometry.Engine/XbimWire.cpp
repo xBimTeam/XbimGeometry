@@ -1239,12 +1239,23 @@ namespace Xbim
 		void XbimWire::Init(IIfcDerivedProfileDef ^ profile)
 		{
 			Init(profile->ParentProfile);
-			if (IsValid)
+			if (IsValid && !dynamic_cast<IIfcMirroredProfileDef^>(profile))
 			{
 				gp_Trsf trsf = XbimConvert::ToTransform(profile->Operator);
 				pWire->Move(TopLoc_Location(trsf));
 			}
-			
+			if (IsValid && dynamic_cast<IIfcMirroredProfileDef^>(profile))
+			{
+				//we need to mirror about the Y axis
+				gp_Pnt origin(0, 0, 0);
+				gp_Dir xDir(0, 1, 0);
+				gp_Ax1 mirrorAxis(origin, xDir);
+				gp_Trsf aTrsf;
+				aTrsf.SetMirror(mirrorAxis);
+				BRepBuilderAPI_Transform aBrepTrsf(*pWire, aTrsf);
+				*pWire = TopoDS::Wire(aBrepTrsf.Shape());
+				Reverse();//correct the normal to be correct
+			}
 		}
 
 		void XbimWire::Init(IIfcParameterizedProfileDef ^ profile)
