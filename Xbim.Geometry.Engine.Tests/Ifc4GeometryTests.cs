@@ -307,6 +307,18 @@ namespace Ifc4GeometryTests
         }
 
         [TestMethod]
+        public void RevolvedAreaSolidTaperedTest()
+        {
+            using (var model = IfcStore.Open(@"Ifc4TestFiles\beam-revolved-solid-tapered.ifc"))
+            {
+                var taperedSolid = model.Instances.OfType<IfcRevolvedAreaSolidTapered>().FirstOrDefault();
+                Assert.IsNotNull(taperedSolid);
+                var bar = _xbimGeometryCreator.CreateSolid(taperedSolid);
+                Assert.IsTrue(bar.Volume>0);
+            }
+        }
+
+        [TestMethod]
         public void MirroredProfileDefTest()
         {
             using (var model = IfcStore.Open(@"Ifc4TestFiles\IfcMirroredProfileDef.ifc"))

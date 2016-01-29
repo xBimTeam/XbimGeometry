@@ -123,6 +123,7 @@ namespace Xbim
 #pragma region Methods
 			//moves the face to the new position
 			void Move(IIfcAxis2Placement3D^ position);
+			void Move(gp_Trsf transform);
 			void Translate(XbimVector3D translation);
 			void Reverse();
 			bool Add(IXbimWire^ innerWire);

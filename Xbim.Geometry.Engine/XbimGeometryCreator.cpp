@@ -751,13 +751,14 @@ namespace Xbim
 			IXbimSolidSet^ solidSet = gcnew XbimSolidSet();
 			XbimSolid^ body = XbimSolid::BuildClippingList(clip, clips);
 			double maxLen = body->BoundingBox.Length();
+			XbimPoint3D centroid = body->BoundingBox.Centroid();
 			for each (IIfcBooleanOperand^ bOp in clips)
 			{
 				IIfcHalfSpaceSolid^ hs = dynamic_cast<IIfcHalfSpaceSolid^>(bOp);
 				
 				if (hs!=nullptr) //special case for IIfcHalfSpaceSolid to keep extrusion to the minimum
 				{
-					XbimSolid^ s = gcnew XbimSolid(hs, maxLen);
+					XbimSolid^ s = gcnew XbimSolid(hs, maxLen, centroid);
 				    if (s->IsValid) solidSet->Add(s); 
 				}
 				else
@@ -926,7 +927,7 @@ namespace Xbim
 		}
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcRevolvedAreaSolidTapered^ ifcSolid)
 		{
-			throw gcnew NotImplementedException();
+			return gcnew XbimSolid(ifcSolid);
 		}
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcFixedReferenceSweptAreaSolid^ ifcSolid)
 		{

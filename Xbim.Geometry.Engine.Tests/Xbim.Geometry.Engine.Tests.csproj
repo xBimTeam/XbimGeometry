@@ -103,6 +103,9 @@
     <None Include="Ifc4TestFiles\beam-curved-i-shape-tessellated.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Ifc4TestFiles\beam-revolved-solid-tapered.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Ifc4TestFiles\beam-straight-i-shape-tessellated.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

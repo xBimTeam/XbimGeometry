@@ -1141,6 +1141,12 @@ namespace Xbim
 			pFace->Move(toPos);
 		}
 
+		void XbimFace::Move(gp_Trsf transform)
+		{
+			if (!IsValid) return;			
+			pFace->Move(transform);
+		}
+
 		void XbimFace::Translate(XbimVector3D translation)
 		{
 			if (!IsValid) return;
