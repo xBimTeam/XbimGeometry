@@ -57,6 +57,9 @@
 #include <TColStd_IndexedDataMapOfTransientTransient.hxx>
 #include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <ShapeAnalysis.hxx>
+#include <BRepFilletAPI_MakeFillet.hxx>
+
+
 using namespace Xbim::Common;
 using namespace System::Linq;
 namespace Xbim
@@ -1170,7 +1173,7 @@ namespace Xbim
 			List<double>^ intervals = gcnew List<double>(numIntervals+1);
 			for (Standard_Integer i = 1; i <= numIntervals; i++)
 				intervals->Add(res.Value(i));
-			intervals->Add(cc.LastParameter());
+			if(!IsClosed) intervals->Add(cc.LastParameter());
 			return intervals;
 		}
 
@@ -2430,7 +2433,86 @@ namespace Xbim
 
 			return Standard_False;
 		}
+		//Fillets all points on a spine, not intended for closed shapes mostly for spines
+		bool XbimWire::FilletAll(double radius)
+		{
+			TopoDS_Wire thisWire = *pWire;
+			
+			//collect the edges
+			BRepTools_WireExplorer edgeExp;
+			Standard_Integer nbEdges = 0;
+			for (edgeExp.Init(thisWire); edgeExp.More(); edgeExp.Next()) nbEdges++;	
 
+			//get an array of all the edges
+			TopTools_Array1OfShape edges(1, nbEdges);
+			TopTools_Array1OfShape vertices(1, nbEdges);
+			TopTools_Array1OfShape filleted(1, nbEdges*2);
+			Standard_Integer nb = 0;
+			for (edgeExp.Init(thisWire); edgeExp.More(); edgeExp.Next()) 
+			{
+				nb++;
+				edges(nb) = TopoDS::Edge(edgeExp.Current());
+				vertices(nb) = TopoDS::Vertex(edgeExp.CurrentVertex());
+			}
+			//need to do each pair to ensure they are on face
+			size_t totalEdges = 1;
+			for (size_t i = 1; i < nbEdges; i++)
+			{
+				BRepBuilderAPI_MakeWire filletWireMaker;
+				filletWireMaker.Add(TopoDS::Edge(edges(i)));
+				filletWireMaker.Add(TopoDS::Edge(edges(i + 1)));
+				BRepBuilderAPI_MakeFace faceMaker(filletWireMaker.Wire());
+				BRepFilletAPI_MakeFillet2d filleter(faceMaker.Face());
+				filleter.AddFillet(TopoDS::Vertex(vertices(i + 1)), radius);
+				filleter.Build();
+				const TopTools_SequenceOfShape& fillets = filleter.FilletEdges();
+				if (filleter.IsDone() && fillets.Length()>0)
+				{					
+					filleted(2*i-1) = filleter.DescendantEdge(TopoDS::Edge(edges(i)));
+					edges(i) = filleted(2 * i - 1);
+					filleted(2*i) = fillets(1);
+					filleted(2 * i + 1) = filleter.DescendantEdge(TopoDS::Edge(edges(i + 1)));
+					edges(i + 1) = filleted(2 * i + 1);
+					totalEdges += 2;
+					
+				}
+				else //no fillet happened just store existing
+				{
+					filleted(2 * i - 1) = edges(i);
+					filleted(2 * i ) = edges(i + 1);
+					totalEdges ++;
+				}
+			}
+			if (IsClosed && nbEdges>1)
+			{
+				BRepBuilderAPI_MakeWire filletWireMaker;
+				filletWireMaker.Add(TopoDS::Edge(edges(1)));
+				filletWireMaker.Add(TopoDS::Edge(edges(nbEdges)));
+				BRepBuilderAPI_MakeFace faceMaker(filletWireMaker.Wire());
+				BRepFilletAPI_MakeFillet2d filleter(faceMaker.Face());
+				filleter.AddFillet(TopoDS::Vertex(vertices(1)), radius);
+				filleter.Build();
+				const TopTools_SequenceOfShape& fillets = filleter.FilletEdges();
+				if (filleter.IsDone() && fillets.Length()>0)
+				{
+					filleted(2 * nbEdges - 1) = filleter.DescendantEdge(TopoDS::Edge(edges(nbEdges)));					
+					filleted(2 * nbEdges) = fillets(1);
+					filleted(1) = filleter.DescendantEdge(TopoDS::Edge(edges(1)));				
+				}				
+			}
+			BRepBuilderAPI_MakeWire wireMaker;
+			for (size_t i = 1; i <= totalEdges; i++)
+			{
+				wireMaker.Add(TopoDS::Edge(filleted(i)));
+			}
+
+			if (wireMaker.IsDone())
+			{
+				*pWire = TopoDS::Wire(wireMaker.Shape());
+				return true;
+			}
+			return false;
+		}
 
 #pragma endregion
 

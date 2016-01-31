@@ -171,6 +171,9 @@ property bool IsReversed{bool get(){ return IsValid && pWire->Orientation() == T
 			//change the direction of the loop
 			void Reverse();
 			array<ContourVertex>^ Contour();
+
+			//Fillets all points with the specified radius
+			bool FilletAll(double radius);
 		
 		};
 	}

@@ -35,6 +35,35 @@ namespace Xbim
 
 #pragma endregion
 
+
+#pragma region operators
+
+			virtual property IXbimFace^ default[int]
+			{
+				IXbimFace^ get(int index)
+				{
+					return faces[index];
+				}
+
+				void set(int index, IXbimFace^ value)
+				{
+					faces[index] = value;
+				}
+			}
+			property XbimFace^ Face[int]
+			{
+				XbimFace^ get(int index)
+				{
+					return (XbimFace^)faces[index];
+				}
+
+				void set(int index, XbimFace^ value)
+				{
+					faces[index] = value;
+				}
+			}
+#pragma endregion
+
 #pragma region IXbimFaceSet Interface
 
 			virtual property bool IsValid{bool get(){ return true; }; }

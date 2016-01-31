@@ -923,7 +923,7 @@ namespace Xbim
 		//Ifc4 interfaces
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcSweptDiskSolidPolygonal^ ifcSolid)
 		{
-			throw gcnew NotImplementedException();
+			return gcnew XbimSolid(ifcSolid);
 		}
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcRevolvedAreaSolidTapered^ ifcSolid)
 		{

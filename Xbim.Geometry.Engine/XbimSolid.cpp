@@ -2,6 +2,7 @@
 #include "XbimShell.h"
 #include "XbimFace.h"
 #include "XbimWire.h"
+#include "XbimWireSet.h"
 #include "XbimCompound.h"
 #include "XbimSolidSet.h"
 #include "XbimEdgeSet.h"
@@ -168,6 +169,10 @@ namespace Xbim
 			Init(repItem);
 		}
 
+		XbimSolid::XbimSolid(IIfcSweptDiskSolidPolygonal^ repItem)
+		{
+			Init(repItem);
+		}
 		XbimSolid::XbimSolid(IIfcBoundingBox^ repItem)
 		{
 			Init(repItem);
@@ -327,6 +332,100 @@ namespace Xbim
 				XbimShell^ shell = (XbimShell^)comp->MakeShell();
 				pSolid = new TopoDS_Solid();
 				*pSolid = (XbimSolid^)(shell->CreateSolid());
+			}
+		}
+		void XbimSolid::Init(IIfcSweptDiskSolidPolygonal^ swdSolid)
+		{
+			//Build the directrix
+			IModelFactors^ mf = swdSolid->Model->ModelFactors;
+			XbimWire^ sweep = gcnew XbimWire(swdSolid->Directrix);
+			if (swdSolid->FilletRadius.HasValue)
+			{
+				if(!sweep->FilletAll((double)swdSolid->FilletRadius.Value));
+					XbimGeometryCreator::logger->WarnFormat("WS040: IfcSweptDiskSolidPolygonal #{0} could not be corectly filleted", swdSolid->EntityLabel);
+			}
+
+			if (swdSolid->StartParam.HasValue && swdSolid->EndParam.HasValue)
+				sweep = (XbimWire^)sweep->Trim(swdSolid->StartParam.Value, swdSolid->EndParam.Value, mf->Precision);
+			else if (swdSolid->StartParam.HasValue && !swdSolid->EndParam.HasValue)
+				sweep = (XbimWire^)sweep->Trim(swdSolid->StartParam.Value, sweep->Length, mf->Precision);
+			else if (!swdSolid->StartParam.HasValue && swdSolid->EndParam.HasValue)
+				sweep = (XbimWire^)sweep->Trim(0, swdSolid->EndParam.Value, mf->Precision);
+			//make the outer wire
+			XbimPoint3D s = sweep->Start;
+			gp_Ax2 axCircle(gp_Pnt(s.X, s.Y, s.Z), gp_Dir(0., 0., 1.));
+			gp_Circ outer(axCircle, swdSolid->Radius);
+			Handle(Geom_Circle) hOuter = GC_MakeCircle(outer);
+			TopoDS_Edge outerEdge = BRepBuilderAPI_MakeEdge(hOuter);
+			BRepBuilderAPI_MakeWire outerWire;
+			outerWire.Add(outerEdge);
+			BRepOffsetAPI_MakePipeShell pipeMaker1(sweep);
+			pipeMaker1.Add(outerWire.Wire(), Standard_False, Standard_True);
+			pipeMaker1.Build();
+			if (pipeMaker1.IsDone())
+			{
+				BRepPrim_Builder b;
+				TopoDS_Shell shell;
+				b.MakeShell(shell);
+				TopoDS_Wire firstOuter = TopoDS::Wire(pipeMaker1.FirstShape().Reversed());
+				TopoDS_Wire lastOuter = TopoDS::Wire(pipeMaker1.LastShape().Reversed());
+				BRepBuilderAPI_MakeFace firstMaker(firstOuter);
+				BRepBuilderAPI_MakeFace lastMaker(lastOuter);								
+				//now add inner wire if it is defined
+				if (swdSolid->InnerRadius.HasValue && swdSolid->InnerRadius.Value > 0)
+				{
+					gp_Circ inner(axCircle, swdSolid->InnerRadius.Value);
+					Handle(Geom_Circle) hInner = GC_MakeCircle(inner);
+					TopoDS_Edge innerEdge = BRepBuilderAPI_MakeEdge(hInner);
+					BRepBuilderAPI_MakeWire innerWire;
+					innerWire.Add(innerEdge);
+					BRepOffsetAPI_MakePipeShell pipeMaker2(sweep);
+					pipeMaker2.Add(innerWire.Wire(), Standard_False, Standard_True);
+					pipeMaker2.Build();
+					if (pipeMaker2.IsDone())
+					{										
+						//add the other faces to the shell
+						for (TopExp_Explorer explr(pipeMaker2.Shape(), TopAbs_FACE); explr.More(); explr.Next())
+						{
+							b.AddShellFace(shell, TopoDS::Face(explr.Current()));
+						}
+						firstMaker.Add(TopoDS::Wire(pipeMaker2.FirstShape()));
+						lastMaker.Add(TopoDS::Wire(pipeMaker2.LastShape()));
+					}
+					else
+					{
+						XbimGeometryCreator::logger->WarnFormat("WS022: IfcSweptDiskSolidPolygonal #{0} inner loop could not be constructed", swdSolid->EntityLabel);
+					}
+				}
+				//add top and bottom faces with their hole loops
+				b.AddShellFace(shell, firstMaker.Face());
+				b.AddShellFace(shell, lastMaker.Face());
+				for (TopExp_Explorer explr(pipeMaker1.Shape(), TopAbs_FACE); explr.More(); explr.Next())
+				{
+					b.AddShellFace(shell, TopoDS::Face(explr.Current()));
+				}
+				b.CompleteShell(shell);
+				TopoDS_Solid solid;
+				BRep_Builder bs;
+				bs.MakeSolid(solid);
+				bs.Add(solid, shell);
+				BRepClass3d_SolidClassifier sc(solid);
+				sc.PerformInfinitePoint(Precision::Confusion());
+				if (sc.State() == TopAbs_IN)
+				{
+					bs.MakeSolid(solid);
+					shell.Reverse();
+					bs.Add(solid, shell);
+				}
+				pSolid = new TopoDS_Solid();
+				*pSolid = solid;
+				pSolid->Closed(Standard_True);				
+				return;
+			}
+			else
+			{
+				XbimGeometryCreator::logger->WarnFormat("WS021: IIfcSweptDiskSolid #{0} could not be constructed", swdSolid->EntityLabel);
+
 			}
 		}
 
@@ -529,13 +628,13 @@ namespace Xbim
 					TopoDS_Wire lastOuter = TopoDS::Wire(pipeMaker1.LastShape().Reversed());
 					BRepBuilderAPI_MakeFace firstMaker(firstOuter);
 					BRepBuilderAPI_MakeFace lastMaker(lastOuter);
-					if (faceStart->InnerBounds->Count == 1 && faceEnd->InnerBounds->Count == 1)
+					for (int i = 0; i < faceStart->InnerBounds->Count; i++)					
 					{
 						//it is a hollow section so we need to build the inside
 						BRepOffsetAPI_MakePipeShell pipeMaker2(sweep);
-						TopoDS_Wire innerBoundStart = (XbimWire^)(faceStart->InnerBounds->First);
-						TopoDS_Wire innerBoundEnd = (XbimWire^)(faceEnd->InnerBounds->First);
-						//pipeMaker2.SetMode(Standard_True);
+						TopoDS_Wire innerBoundStart = faceStart->InnerWires->Wire[i];
+						TopoDS_Wire innerBoundEnd = faceEnd->InnerWires->Wire[i];
+					
 						pipeMaker2.SetTransitionMode(BRepBuilderAPI_Transformed);
 						pipeMaker2.Add(innerBoundStart);
 						pipeMaker2.Add(innerBoundEnd);
@@ -624,33 +723,37 @@ namespace Xbim
 					TopoDS_Wire lastOuter = TopoDS::Wire(pipeMaker1.LastShape().Reversed());
 					BRepBuilderAPI_MakeFace firstMaker(firstOuter);
 					BRepBuilderAPI_MakeFace lastMaker(lastOuter);
-					if (faceStart->InnerBounds->Count==1 && faceEnd->InnerBounds->Count==1)
+					for (int i = 0; i < faceStart->InnerBounds->Count; i++)
 					{
+
 						//it is a hollow section so we need to build the inside
-						BRepOffsetAPI_MakePipeShell pipeMaker2(sweep);					
-						TopoDS_Wire innerBoundStart = (XbimWire^)(faceStart->InnerBounds->First);
-						TopoDS_Wire innerBoundEnd = (XbimWire^)(faceEnd->InnerBounds->First);
+						BRepOffsetAPI_MakePipeShell pipeMaker2(sweep);
+						TopoDS_Wire innerBoundStart =faceStart->InnerWires->Wire[i];
+						TopoDS_Wire innerBoundEnd = faceEnd->InnerWires->Wire[i];
 						//pipeMaker2.SetMode(Standard_True);
 						pipeMaker2.SetTransitionMode(BRepBuilderAPI_Transformed);
 						pipeMaker2.Add(innerBoundStart);
 						pipeMaker2.Add(innerBoundEnd);
 						pipeMaker2.Build();
 						if (pipeMaker2.IsDone())
-						{						
+						{
 							for (TopExp_Explorer explr(pipeMaker2.Shape(), TopAbs_FACE); explr.More(); explr.Next())
-							{							
+							{
 								b.AddShellFace(shell, TopoDS::Face(explr.Current()));
 							}
 						}
 						firstMaker.Add(TopoDS::Wire(pipeMaker2.FirstShape()));
-						lastMaker.Add(TopoDS::Wire(pipeMaker2.LastShape().Reversed()));
+						lastMaker.Add(TopoDS::Wire(pipeMaker2.LastShape()));
+
 					}
 					b.AddShellFace(shell, firstMaker.Face());
 					b.AddShellFace(shell, lastMaker.Face());
+					
 					for (TopExp_Explorer explr(pipeMaker1.Shape(), TopAbs_FACE); explr.More(); explr.Next())
 					{						
 						b.AddShellFace(shell, TopoDS::Face(explr.Current()));
 					}
+					b.CompleteShell(shell);
 					TopoDS_Solid solid;
 					BRep_Builder bs;
 					bs.MakeSolid(solid);					
@@ -875,8 +978,9 @@ namespace Xbim
 
 		void XbimSolid::Init(IIfcSweptDiskSolid^ swdSolid)
 		{
-
-			//Build the directrix
+			if (dynamic_cast<IIfcSweptDiskSolidPolygonal^>(swdSolid))
+				return Init((IIfcSweptDiskSolidPolygonal^)swdSolid);
+			//else Build the directrix
 			IModelFactors^ mf = swdSolid->Model->ModelFactors;
 			XbimWire^ sweep = gcnew XbimWire(swdSolid->Directrix);
 			if (swdSolid->StartParam.HasValue && swdSolid->EndParam.HasValue)
@@ -893,23 +997,19 @@ namespace Xbim
 			TopoDS_Edge outerEdge = BRepBuilderAPI_MakeEdge(hOuter);
 			BRepBuilderAPI_MakeWire outerWire;
 			outerWire.Add(outerEdge);
-			BRepOffsetAPI_MakePipeShell pipeMaker(sweep);
-			pipeMaker.Add(outerWire.Wire(), Standard_False, Standard_True);
-			pipeMaker.Build();
-			if (pipeMaker.IsDone() && pipeMaker.MakeSolid())
+			BRepOffsetAPI_MakePipeShell pipeMaker1(sweep);
+			pipeMaker1.Add(outerWire.Wire(), Standard_False, Standard_True);
+			pipeMaker1.Build();
+			if (pipeMaker1.IsDone())
 			{	
 				BRepPrim_Builder b;
 				TopoDS_Shell shell;
 				b.MakeShell(shell);
-				XbimFace^ bottomOuter = gcnew XbimFace(TopoDS::Face(pipeMaker.FirstShape()));
-				XbimFace^ topOuter = gcnew XbimFace(TopoDS::Face(pipeMaker.LastShape()));
-				const TopoDS_Shape& pipeOuter = pipeMaker.Shape();
-				for (TopExp_Explorer explr(pipeOuter, TopAbs_FACE); explr.More(); explr.Next())
-				{
-					const TopoDS_Face& face = TopoDS::Face(explr.Current());
-					if (!face.IsSame(pipeMaker.FirstShape()) && !face.IsSame(pipeMaker.LastShape()))
-						b.AddShellFace(shell, face);
-				}
+				TopoDS_Wire firstOuter = TopoDS::Wire(pipeMaker1.FirstShape().Reversed());
+				TopoDS_Wire lastOuter = TopoDS::Wire(pipeMaker1.LastShape().Reversed());
+				BRepBuilderAPI_MakeFace firstMaker(firstOuter);
+				BRepBuilderAPI_MakeFace lastMaker(lastOuter);
+				
 				//now add inner wire if it is defined
 				if (swdSolid->InnerRadius.HasValue && swdSolid->InnerRadius.Value > 0)
 				{
@@ -921,21 +1021,15 @@ namespace Xbim
 					BRepOffsetAPI_MakePipeShell pipeMaker2(sweep);
 					pipeMaker2.Add(innerWire.Wire(), Standard_False, Standard_True);
 					pipeMaker2.Build();
-					if (pipeMaker2.IsDone() && pipeMaker2.MakeSolid())
+					if (pipeMaker2.IsDone() )
 					{
-
-						XbimFace^ bottomInner = gcnew XbimFace(TopoDS::Face(pipeMaker2.FirstShape()));
-						XbimFace^ topInner = gcnew XbimFace(TopoDS::Face(pipeMaker2.LastShape()));
-						//add the inner loops to the end faces
-						bottomOuter->Add(bottomInner->OuterBound);
-						topOuter->Add(topInner->OuterBound);
 						//add the other faces to the shell
 						for (TopExp_Explorer explr(pipeMaker2.Shape(), TopAbs_FACE); explr.More(); explr.Next())
 						{
-							const TopoDS_Face& face = TopoDS::Face(explr.Current());
-							if (!face.IsSame(pipeMaker2.FirstShape()) && !face.IsSame(pipeMaker2.LastShape()))
-								b.AddShellFace(shell, face);
+							b.AddShellFace(shell, TopoDS::Face(explr.Current()));
 						}
+						firstMaker.Add(TopoDS::Wire(pipeMaker2.FirstShape()));
+						lastMaker.Add(TopoDS::Wire(pipeMaker2.LastShape()));
 					}
 					else
 					{
@@ -943,13 +1037,28 @@ namespace Xbim
 					}
 				}
 				//add top and bottom faces with their hole loops
-				b.AddShellFace(shell, bottomOuter);
-				b.AddShellFace(shell, topOuter);
+				b.AddShellFace(shell, firstMaker.Face());
+				b.AddShellFace(shell, lastMaker.Face());
+				for (TopExp_Explorer explr(pipeMaker1.Shape(), TopAbs_FACE); explr.More(); explr.Next())
+				{
+					b.AddShellFace(shell, TopoDS::Face(explr.Current()));
+				}
 				b.CompleteShell(shell);
+				TopoDS_Solid solid;
 				BRep_Builder bs;
+				bs.MakeSolid(solid);
+				bs.Add(solid, shell);
+				BRepClass3d_SolidClassifier sc(solid);
+				sc.PerformInfinitePoint(Precision::Confusion());
+				if (sc.State() == TopAbs_IN)
+				{
+					bs.MakeSolid(solid);
+					shell.Reverse();
+					bs.Add(solid, shell);
+				}
 				pSolid = new TopoDS_Solid();
-				bs.MakeSolid(*pSolid);
-				bs.Add(*pSolid, shell);
+				*pSolid = solid;
+				pSolid->Closed(Standard_True);
 				return;
 			}
 			else

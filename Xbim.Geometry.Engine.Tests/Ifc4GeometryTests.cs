@@ -199,7 +199,7 @@ namespace Ifc4GeometryTests
                 var advancedSweep = model.Instances.OfType<IfcSweptDiskSolid>().FirstOrDefault();
                 Assert.IsNotNull(advancedSweep);
                 var bar = _xbimGeometryCreator.CreateSolid(advancedSweep);
-                Assert.IsTrue((int)bar.Volume == 129879);
+                Assert.IsTrue((int)bar.Volume == 131934);
             }
         }
 
@@ -317,7 +317,17 @@ namespace Ifc4GeometryTests
                 Assert.IsTrue(bar.Volume>0);
             }
         }
-
+        [TestMethod]
+        public void SweptDiskSolidPolygonalTest()
+        {
+            using (var model = IfcStore.Open(@"Ifc4TestFiles\swept-disk-solid-polygonal.ifc"))
+            {
+                var sweptPolygonalSolid = model.Instances.OfType<IfcSweptDiskSolidPolygonal>().FirstOrDefault();
+                Assert.IsNotNull(sweptPolygonalSolid);
+                var bar = _xbimGeometryCreator.CreateSolid(sweptPolygonalSolid);
+                Assert.IsTrue(bar.Volume > 0);
+            }
+        }
         [TestMethod]
         public void MirroredProfileDefTest()
         {

@@ -905,7 +905,7 @@ namespace Xbim
 
 #pragma region IXbimFace Interface
 
-		IXbimWire^ XbimFace::OuterBound::get()
+		XbimWire^ XbimFace::OuterWire::get()
 		{
 			if (pFace == nullptr) return nullptr;
 			TopoDS_Wire outerWire = BRepTools::OuterWire(*pFace);//get the outer loop
@@ -921,13 +921,13 @@ namespace Xbim
 			
 		}
 
-		IXbimWireSet^ XbimFace::Bounds::get()
+		XbimWireSet^ XbimFace::Wires::get()
 		{
 			if (!IsValid) return XbimWireSet::Empty; //return an empty list, avoid using Enumberable::Empty to avoid LINQ dependencies			
 			return gcnew XbimWireSet(this);
 		}
 
-		IXbimWireSet^ XbimFace::InnerBounds::get()
+		XbimWireSet^ XbimFace::InnerWires::get()
 		{
 			if (!IsValid) return XbimWireSet::Empty; //return an empty list, avoid using Enumberable::Empty to avoid LINQ dependencies
 			TopoDS_Wire outerWire = BRepTools::OuterWire(*pFace);//get the outer loop

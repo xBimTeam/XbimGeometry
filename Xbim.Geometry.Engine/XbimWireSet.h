@@ -32,6 +32,34 @@ namespace Xbim
 			!XbimWireSet(){ InstanceCleanup(); }
 
 #pragma endregion
+
+#pragma region operators
+			virtual property IXbimWire^ default[int]
+			{
+				IXbimWire^ get(int index)
+				{
+					return wires[index];
+				}
+
+				void set(int index, IXbimWire^ value)
+				{
+					wires[index] = value;
+				}
+			}
+			property XbimWire^ Wire[int]
+			{
+				XbimWire^ get(int index)
+				{
+					return (XbimWire^)wires[index];
+				}
+
+				void set(int index, XbimWire^ value)
+				{
+					wires[index] = value;
+				}
+			}
+#pragma endregion
+
 			virtual property bool IsValid{bool get(){ return Count>0; }; }
 			virtual property bool IsSet{bool get()  { return true; }; }
 			virtual property IXbimWire^ First{IXbimWire^ get(); }

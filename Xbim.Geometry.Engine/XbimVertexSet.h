@@ -33,6 +33,34 @@ namespace Xbim
 
 #pragma endregion
 
+
+#pragma region operators
+			virtual property IXbimVertex^ default[int]
+			{
+				IXbimVertex^ get(int index)
+				{
+					return vertices[index];
+				}
+
+				void set(int index, IXbimVertex^ value)
+				{
+					vertices[index] = value;
+				}
+			}
+			property XbimVertex^ Vertex[int]
+			{
+				XbimVertex^ get(int index)
+				{
+					return (XbimVertex^)vertices[index];
+				}
+
+				void set(int index, XbimVertex^ value)
+				{
+					vertices[index] = value;
+				}
+			}
+#pragma endregion
+
 #pragma region IXbimVertexSet Interface definition
 			virtual property bool IsValid{bool get(){ return Count>0; }; }
 			virtual property bool IsSet{bool get() { return true; }; }

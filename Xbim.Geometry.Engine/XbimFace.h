@@ -1,8 +1,10 @@
 #pragma once
 #include "XbimOccShape.h"
 #include "XbimWire.h"
+#include "XbimWireSet.h"
 #include <TopoDS_Face.hxx>
 #include <BRepBuilderAPI_FaceError.hxx>
+#include "XbimWireSet.h"
 
 using namespace System;
 using namespace System::Collections::Generic;
@@ -75,9 +77,9 @@ namespace Xbim
 #pragma region IXbimFace Interface
 			virtual property bool IsValid{bool get() override { return pFace != nullptr; }; }
 			virtual property  XbimGeometryObjectType GeometryType{XbimGeometryObjectType  get() override { return XbimGeometryObjectType::XbimFaceType; }; }
-			virtual property IXbimWire^ OuterBound{ IXbimWire^ get(); }
-			virtual property IXbimWireSet^ InnerBounds{IXbimWireSet^ get(); }
-			virtual property IXbimWireSet^ Bounds{IXbimWireSet^ get(); }
+			virtual property IXbimWire^ OuterBound{ IXbimWire^ get(){ return OuterWire; } }
+			virtual property IXbimWireSet^ InnerBounds{IXbimWireSet^ get(){ return InnerWires; } }
+			virtual property IXbimWireSet^ Bounds{IXbimWireSet^ get(){ return Wires; } }
 			virtual property double Area { double get(); }
 			virtual property double Perimeter { double get(); }
 			virtual property bool IsPlanar{bool get(); }
@@ -119,7 +121,12 @@ namespace Xbim
 			XbimFace(double x, double y, double tolerance);
 #pragma endregion
 
-			
+#pragma region Internal Properties
+			property XbimWireSet^  Wires{XbimWireSet^ get(); }
+			property XbimWireSet^  InnerWires{XbimWireSet^ get(); }
+			property XbimWire^  OuterWire{XbimWire^ get(); }
+#pragma endregion	
+
 #pragma region Methods
 			//moves the face to the new position
 			void Move(IIfcAxis2Placement3D^ position);
