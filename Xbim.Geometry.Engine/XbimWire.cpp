@@ -2497,7 +2497,8 @@ namespace Xbim
 				{
 					filleted(2 * nbEdges - 1) = filleter.DescendantEdge(TopoDS::Edge(edges(nbEdges)));					
 					filleted(2 * nbEdges) = fillets(1);
-					filleted(1) = filleter.DescendantEdge(TopoDS::Edge(edges(1)));				
+					filleted(1) = filleter.DescendantEdge(TopoDS::Edge(edges(1)));		
+					totalEdges++;
 				}				
 			}
 			BRepBuilderAPI_MakeWire wireMaker;
