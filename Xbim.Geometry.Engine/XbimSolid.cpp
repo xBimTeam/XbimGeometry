@@ -341,7 +341,7 @@ namespace Xbim
 			XbimWire^ sweep = gcnew XbimWire(swdSolid->Directrix);
 			if (swdSolid->FilletRadius.HasValue)
 			{
-				if(!sweep->FilletAll((double)swdSolid->FilletRadius.Value));
+				if(!sweep->FilletAll((double)swdSolid->FilletRadius.Value))
 					XbimGeometryCreator::logger->WarnFormat("WS040: IfcSweptDiskSolidPolygonal #{0} could not be corectly filleted", swdSolid->EntityLabel);
 			}
 
