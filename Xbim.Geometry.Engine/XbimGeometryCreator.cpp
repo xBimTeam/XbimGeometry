@@ -947,7 +947,7 @@ namespace Xbim
 		}
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcSectionedSpine^ ifcSolid)
 		{
-			throw gcnew NotImplementedException();
+			return gcnew XbimSolid(ifcSolid);
 		}
 		IXbimGeometryObjectSet^ XbimGeometryCreator::CreateSurfaceModel(IIfcTriangulatedFaceSet^ faceSet)
 		{

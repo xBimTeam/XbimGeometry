@@ -328,6 +328,18 @@ namespace Ifc4GeometryTests
                 Assert.IsTrue(bar.Volume > 0);
             }
         }
+
+        [TestMethod]
+        public void SectionedSpineTest()
+        {
+            using (var model = IfcStore.Open(@"Ifc4TestFiles\sectioned-spine.ifc"))
+            {
+                var sectionedSpine = model.Instances.OfType<IfcSectionedSpine>().FirstOrDefault();
+                Assert.IsNotNull(sectionedSpine);
+                var bar = _xbimGeometryCreator.CreateSolid(sectionedSpine);
+                Assert.IsTrue(bar.Volume > 0);
+            }
+        }
         [TestMethod]
         public void MirroredProfileDefTest()
         {

@@ -77,6 +77,7 @@
 #include <GeomAPI_ProjectPointOnSurf.hxx>
 #include <GC_MakeArcOfCircle.hxx>
 using namespace System;
+using namespace System::Linq;
 using namespace System::Threading;
 using namespace Xbim::Common;
 
@@ -165,6 +166,11 @@ namespace Xbim
 
 		}
 		XbimSolid::XbimSolid(IIfcSweptDiskSolid^ repItem)
+		{
+			Init(repItem);
+		}
+
+		XbimSolid::XbimSolid(IIfcSectionedSpine^ repItem)
 		{
 			Init(repItem);
 		}
@@ -779,6 +785,97 @@ namespace Xbim
 			}			
 			XbimGeometryCreator::logger->WarnFormat("WS001: Invalid Solid Tapered Extrusion, Extrusion Depth must be >0 and faces must be correctly defined, found in Entity #{0}=IIfcExtrudedAreaSolidTapered.",
 					repItem->EntityLabel);		
+			//if it has failed we will have a null solid
+		}
+
+		void XbimSolid::Init(IIfcSectionedSpine^ repItem)
+		{
+			BRepPrim_Builder b;
+			TopoDS_Shell shell;
+			b.MakeShell(shell);
+
+			//make a list of faces for each cross section (wire is not good enough as there ay be holes to consider
+			List<XbimFace^>^ crossSections = gcnew List<XbimFace^>();
+			for each (IIfcProfileDef^ profile in repItem->CrossSections)
+			{
+				crossSections->Add(gcnew XbimFace(profile));
+			}
+			List<IIfcAxis2Placement3D^>^ positions = Enumerable::ToList<IIfcAxis2Placement3D^>(repItem->CrossSectionPositions);
+			
+			if (crossSections->Count>1) //we have valid faces 
+			{
+				double precision = repItem->Model->ModelFactors->Precision;
+				//build the spine
+				XbimWire^ sweep = gcnew XbimWire(repItem->SpineCurve);
+				BRepOffsetAPI_MakePipeShell pipeMaker1(sweep);
+				pipeMaker1.SetTransitionMode(BRepBuilderAPI_Transformed);
+				//move the sections to the right position
+				for (size_t i = 0; i < crossSections->Count; i++)
+				{					
+					crossSections[i]->Move(positions[i]);
+					TopoDS_Wire outerBound = (XbimWire^)(crossSections[i]->OuterBound);															
+					pipeMaker1.Add(outerBound);
+				}
+
+				pipeMaker1.Build();
+				if (pipeMaker1.IsDone())
+				{
+					TopoDS_Wire firstOuter = TopoDS::Wire(pipeMaker1.FirstShape().Reversed());
+					TopoDS_Wire lastOuter = TopoDS::Wire(pipeMaker1.LastShape().Reversed());
+					BRepBuilderAPI_MakeFace firstMaker(firstOuter);
+					BRepBuilderAPI_MakeFace lastMaker(lastOuter);
+					for (int i = 0; i < crossSections[0]->InnerBounds->Count; i++) //assume all sections have same topology
+					{
+						//it is a hollow section so we need to build the inside
+						BRepOffsetAPI_MakePipeShell pipeMaker2(sweep);
+						pipeMaker2.SetTransitionMode(BRepBuilderAPI_Transformed);
+						for (size_t j = 0; j < crossSections->Count; j++)
+						{							
+							TopoDS_Wire innerBound = (XbimWire^)(crossSections[j]->InnerWires->Wire[i]);
+							pipeMaker2.Add(innerBound);
+						}
+						pipeMaker2.Build();
+						if (pipeMaker2.IsDone())
+						{
+							for (TopExp_Explorer explr(pipeMaker2.Shape(), TopAbs_FACE); explr.More(); explr.Next())
+							{
+								b.AddShellFace(shell, TopoDS::Face(explr.Current()));
+							}
+						}
+						firstMaker.Add(TopoDS::Wire(pipeMaker2.FirstShape()));
+						lastMaker.Add(TopoDS::Wire(pipeMaker2.LastShape()));
+
+					}
+					b.AddShellFace(shell, firstMaker.Face());
+					b.AddShellFace(shell, lastMaker.Face());
+
+					for (TopExp_Explorer explr(pipeMaker1.Shape(), TopAbs_FACE); explr.More(); explr.Next())
+					{
+						b.AddShellFace(shell, TopoDS::Face(explr.Current()));
+					}
+					b.CompleteShell(shell);
+					TopoDS_Solid solid;
+					BRep_Builder bs;
+					bs.MakeSolid(solid);
+					bs.Add(solid, shell);
+					BRepClass3d_SolidClassifier sc(solid);
+					sc.PerformInfinitePoint(Precision::Confusion());
+					if (sc.State() == TopAbs_IN)
+					{
+						bs.MakeSolid(solid);
+						shell.Reverse();
+						bs.Add(solid, shell);
+
+					}
+					pSolid = new TopoDS_Solid();
+					*pSolid = solid;
+					pSolid->Closed(Standard_True);	
+					GC::KeepAlive(crossSections);
+					return;
+				}				
+			}
+			XbimGeometryCreator::logger->WarnFormat("WS001: Invalid Solid Tapered Extrusion, Extrusion Depth must be >0 and faces must be correctly defined, found in Entity #{0}=IIfcExtrudedAreaSolidTapered.",
+				repItem->EntityLabel);
 			//if it has failed we will have a null solid
 		}
 
