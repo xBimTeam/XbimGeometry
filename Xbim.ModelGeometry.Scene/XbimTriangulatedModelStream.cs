@@ -79,12 +79,8 @@ Example for a 1x1x1 box:
 		[...more triangles follow...]
 */
 
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.IO;
-using System.Diagnostics;
 using Xbim.Common.Geometry;
 
 namespace Xbim.ModelGeometry.Scene
@@ -537,7 +533,7 @@ namespace Xbim.ModelGeometry.Scene
                     uint readnormalI = NormalsReader.ReadIndex();
                     var origNormal = new XbimVector3D(nrm[readnormalI, 0], nrm[readnormalI, 1], nrm[readnormalI, 2]);
                     XbimVector3D v = transform.Transform(origNormal);
-                    v.Normalize();
+                    v = v.Normalized();
                     builder.AddNormal(v);
                 }
             }

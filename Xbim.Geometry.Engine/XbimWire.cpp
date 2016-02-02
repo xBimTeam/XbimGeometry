@@ -462,6 +462,7 @@ namespace Xbim
 			//BRepTools::Write(c, "d:\\tmp\\c");
 			for each(IIfcCompositeCurveSegment^ seg in cCurve->Segments)
 			{
+				//XbimCurve^ cv = gcnew XbimCurve(seg->ParentCurve);
 				XbimWire^ wireSegManaged = gcnew XbimWire(seg->ParentCurve);
 				
 				if (wireSegManaged->IsValid)
@@ -1124,8 +1125,8 @@ namespace Xbim
 			//do the last one
 			AddNewellPoint(previousEnd, first, x, y, z);
 			XbimVector3D vec(x, y, z);
-			vec.Normalize();
-			return vec;
+			return vec.Normalized();
+			
 		}
 
 		bool XbimWire::IsPlanar::get()

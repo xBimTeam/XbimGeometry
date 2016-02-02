@@ -250,6 +250,7 @@ namespace Xbim
 					else if (dynamic_cast<Xbim::Ifc4::MeasureResource::IfcParameterValue^>(trim))
 					{					
 						u1 = (Xbim::Ifc4::MeasureResource::IfcParameterValue)trim;
+						if (isConic) u1 *= parameterFactor; //correct to radians
 						u1Found = true;
 					}
 				}
@@ -265,6 +266,7 @@ namespace Xbim
 					else if (dynamic_cast<Xbim::Ifc4::MeasureResource::IfcParameterValue^>(trim))
 					{
 						u2 = (Xbim::Ifc4::MeasureResource::IfcParameterValue)trim;
+						if (isConic) u2 *= parameterFactor; //correct to radians
 						u2Found = true;
 					}
 				}

@@ -5,6 +5,7 @@
 #include <TopoDS_Face.hxx>
 #include <BRepBuilderAPI_FaceError.hxx>
 #include "XbimWireSet.h"
+#include "OCC/src/Geom/Geom_Surface.hxx"
 
 using namespace System;
 using namespace System::Collections::Generic;
@@ -135,6 +136,9 @@ namespace Xbim
 			void Reverse();
 			bool Add(IXbimWire^ innerWire);
 			XbimPoint3D PointAtParameters(double u, double v);
+			Handle_Geom_Surface GetSurface();
+			XbimVector3D NormalAt(double u, double v);
+			void SetLocation(TopLoc_Location loc);
 #pragma endregion
 
 

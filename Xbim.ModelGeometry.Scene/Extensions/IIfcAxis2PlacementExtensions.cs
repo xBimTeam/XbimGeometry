@@ -22,7 +22,7 @@ namespace Xbim.ModelGeometry.Scene.Extensions
             if (axis2.RefDirection != null)
             {
                 var v = new XbimVector3D(axis2.RefDirection.X, axis2.RefDirection.Y, axis2.RefDirection.Z);
-                v.Normalize();
+                v = v.Normalized();
                 return new XbimMatrix3D(v.X, v.Y, 0, 0, v.Y, v.X, 0, 0, 0, 0, 1, 0, axis2.Location.X, axis2.Location.Y, 0, 1);
             }
             return new XbimMatrix3D(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, axis2.Location.X, axis2.Location.Y,
@@ -34,11 +34,11 @@ namespace Xbim.ModelGeometry.Scene.Extensions
             if (axis3.RefDirection != null && axis3.Axis != null)
             {
                 var za = new XbimVector3D(axis3.Axis.X,axis3.Axis.Y,axis3.Axis.Z);
-                za.Normalize();
+                za = za.Normalized();
                 var xa = new XbimVector3D(axis3.RefDirection.X, axis3.RefDirection.Y, axis3.RefDirection.Z); 
-                xa.Normalize();
+                xa = xa.Normalized();
                 XbimVector3D ya = XbimVector3D.CrossProduct(za, xa);
-                ya.Normalize();
+                ya = ya.Normalized();
                 return new XbimMatrix3D(xa.X, xa.Y, xa.Z, 0, ya.X, ya.Y, ya.Z, 0, za.X, za.Y, za.Z, 0, axis3.Location.X,
                                     axis3.Location.Y, axis3.Location.Z, 1);
             }

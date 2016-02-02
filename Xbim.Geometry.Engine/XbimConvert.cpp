@@ -173,7 +173,7 @@ namespace Xbim
 			{
 				IIfcDirection^ dir = ct3D->Axis3;
 				U3 = XbimVector3D(dir->X, dir->Y, dir->Z);
-				U3.Normalize();
+				U3 = U3.Normalized();
 			}
 			else
 				U3 = XbimVector3D(0., 0., 1.);
@@ -181,7 +181,7 @@ namespace Xbim
 			{
 				IIfcDirection^ dir = ct3D->Axis1;
 				U1 = XbimVector3D(dir->X, dir->Y, dir->Z);
-				U1.Normalize();
+				U1 = U1.Normalized();
 			}
 			else
 			{
@@ -193,13 +193,13 @@ namespace Xbim
 			}
 			XbimVector3D xVec = XbimVector3D::Multiply(XbimVector3D::DotProduct(U1, U3), U3);
 			XbimVector3D xAxis = XbimVector3D::Subtract(U1, xVec);
-			xAxis.Normalize();
+			xAxis = xAxis.Normalized();
 
 			if (ct3D->Axis2 != nullptr)
 			{
 				IIfcDirection^ dir = ct3D->Axis2;
 				U2 = XbimVector3D(dir->X, dir->Y, dir->Z);
-				U2.Normalize();
+				U2 = U2.Normalized();
 			}
 			else
 				U2 = XbimVector3D(0., 1., 0.);
@@ -208,7 +208,7 @@ namespace Xbim
 			XbimVector3D yAxis = XbimVector3D::Subtract(U2, tmp);
 			tmp = XbimVector3D::Multiply(XbimVector3D::DotProduct(U2, xAxis), xAxis);
 			yAxis = XbimVector3D::Subtract(yAxis, tmp);
-			yAxis.Normalize();
+			yAxis = yAxis.Normalized();
 			U2 = yAxis;
 			U1 = xAxis;
 
@@ -233,7 +233,7 @@ namespace Xbim
 			{
 				IIfcDirection^ dir = ct3D->Axis3;
 				U3 = XbimVector3D(dir->X, dir->Y, dir->Z);
-				U3.Normalize();
+				U3 = U3.Normalized();
 			}
 			else
 				U3 = XbimVector3D(0., 0., 1.);
@@ -241,7 +241,7 @@ namespace Xbim
 			{
 				IIfcDirection^ dir = ct3D->Axis1;
 				U1 = XbimVector3D(dir->X, dir->Y, dir->Z);
-				U1.Normalize();
+				U1 = U1.Normalized();
 			}
 			else
 			{
@@ -253,13 +253,13 @@ namespace Xbim
 			}
 			XbimVector3D xVec = XbimVector3D::Multiply(XbimVector3D::DotProduct(U1, U3), U3);
 			XbimVector3D xAxis = XbimVector3D::Subtract(U1, xVec);
-			xAxis.Normalize();
+			xAxis = xAxis.Normalized();
 
 			if (ct3D->Axis2 != nullptr)
 			{
 				IIfcDirection^ dir = ct3D->Axis2;
 				U2 = XbimVector3D(dir->X, dir->Y, dir->Z);
-				U2.Normalize();
+				U2 = U2.Normalized();
 			}
 			else
 				U2 = XbimVector3D(0., 1., 0.);
@@ -268,7 +268,7 @@ namespace Xbim
 			XbimVector3D yAxis = XbimVector3D::Subtract(U2, tmp);
 			tmp = XbimVector3D::Multiply(XbimVector3D::DotProduct(U2, xAxis), xAxis);
 			yAxis = XbimVector3D::Subtract(yAxis, tmp);
-			yAxis.Normalize();
+			yAxis = yAxis.Normalized();
 			U2 = yAxis;
 			U1 = xAxis;
 
@@ -319,7 +319,7 @@ namespace Xbim
 			if (axis1 != nullptr)
 			{
 				XbimVector3D d1(axis1->X, axis1->Y, axis1->Z);
-				d1.Normalize();
+				d1 = d1.Normalized();
 				mat.SetValue(1, 1, d1.X);
 				mat.SetValue(1, 2, d1.Y);
 				mat.SetValue(2, 1, -d1.Y);
@@ -341,7 +341,7 @@ namespace Xbim
 				if (axis2 != nullptr)
 				{
 					XbimVector3D d1(axis2->X, axis2->Y, axis2->Z);
-					d1.Normalize();
+					d1 = d1.Normalized();
 					mat.SetValue(1, 1, d1.Y);
 					mat.SetValue(1, 2, -d1.X);
 					mat.SetValue(2, 1, d1.X);
@@ -365,7 +365,7 @@ namespace Xbim
 			{
 				IIfcDirection^ dir = (IIfcDirection^)stepTransform->Axis3;
 				U3 = XbimVector3D(dir->X, dir->Y, dir->Z);
-				U3.Normalize();
+				U3 = U3.Normalized();
 			}
 			else
 				U3 = XbimVector3D(0., 0., 1.);
@@ -373,7 +373,7 @@ namespace Xbim
 			{
 				IIfcDirection^ dir = (IIfcDirection^)stepTransform->Axis1;
 				U1 = XbimVector3D(dir->X, dir->Y, dir->Z);
-				U1.Normalize();
+				U1 = U1.Normalized();
 			}
 			else
 			{
@@ -385,13 +385,13 @@ namespace Xbim
 			}
 			XbimVector3D xVec = XbimVector3D::Multiply(XbimVector3D::DotProduct(U1, U3), U3);
 			XbimVector3D xAxis = XbimVector3D::Subtract(U1, xVec);
-			xAxis.Normalize();
+			xAxis = xAxis.Normalized();
 
 			if (stepTransform->Axis2 != nullptr)
 			{
 				IIfcDirection^ dir = (IIfcDirection^)stepTransform->Axis2;
 				U2 = XbimVector3D(dir->X, dir->Y, dir->Z);
-				U2.Normalize();
+				U2 = U2.Normalized();
 			}
 			else
 				U2 = XbimVector3D(0., 1., 0.);
@@ -400,7 +400,7 @@ namespace Xbim
 			XbimVector3D yAxis = XbimVector3D::Subtract(U2, tmp);
 			tmp = XbimVector3D::Multiply(XbimVector3D::DotProduct(U2, xAxis), xAxis);
 			yAxis = XbimVector3D::Subtract(yAxis, tmp);
-			yAxis.Normalize();
+			yAxis = yAxis.Normalized();
 			U2 = yAxis;
 			U1 = xAxis;
 
@@ -506,11 +506,11 @@ namespace Xbim
 			if (axis3->RefDirection != nullptr && axis3->Axis != nullptr)
 			{
 				XbimVector3D za(axis3->Axis->X, axis3->Axis->Y, axis3->Axis->Z) ;
-				za.Normalize();
+				za = za.Normalized();
 				XbimVector3D xa(axis3->RefDirection->X, axis3->RefDirection->Y, axis3->RefDirection->Z);
-				xa.Normalize();
+				xa = xa.Normalized();
 				XbimVector3D ya = XbimVector3D::CrossProduct(za, xa);
-				ya.Normalize();
+				ya = ya.Normalized();
 				return  XbimMatrix3D(xa.X, xa.Y, xa.Z, 0, ya.X, ya.Y, ya.Z, 0, za.X, za.Y, za.Z, 0, axis3->Location->X,
 					axis3->Location->Y, axis3->Location->Z, 1);
 			}
@@ -620,8 +620,8 @@ namespace Xbim
 				count++;
 			}
 			XbimVector3D v(x, y, z);
-			v.Normalize();
-			return v;
+			return v.Normalized();
+			
 		}
 
 		gp_Dir XbimConvert::GetDir3d(IIfcDirection^ dir)

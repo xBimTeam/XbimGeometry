@@ -49,7 +49,7 @@ namespace Xbim
 			void Init(IIfcBooleanOperand^ solid);
 			void Init(XbimRect3D rect3D, double tolerance);
 
-
+			void Init(IIfcFixedReferenceSweptAreaSolid^ IIfcSolid, IIfcProfileDef^ overrideProfileDef);
 			void Init(IIfcCsgPrimitive3D^ IIfcSolid);
 			void Init(IIfcCsgSolid^ IIfcSolid);
 			void Init(IIfcSphere^ IIfcSolid);
@@ -127,7 +127,8 @@ namespace Xbim
 			XbimSolid(IIfcBoundingBox^ solid);
 			XbimSolid(IIfcBooleanResult^ solid);
 			XbimSolid(IIfcBooleanOperand^ solid);
-
+			XbimSolid(IIfcFixedReferenceSweptAreaSolid^ solid);
+			XbimSolid(IIfcFixedReferenceSweptAreaSolid^ IIfcSolid, IIfcProfileDef^ overrideProfileDef); //support for composite profiles
 			XbimSolid(IIfcCsgPrimitive3D^ IIfcSolid);
 			XbimSolid(IIfcCsgSolid^ IIfcSolid);
 			XbimSolid(IIfcSphere^ IIfcSolid);

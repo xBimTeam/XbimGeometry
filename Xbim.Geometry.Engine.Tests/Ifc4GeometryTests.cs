@@ -340,6 +340,41 @@ namespace Ifc4GeometryTests
                 Assert.IsTrue(bar.Volume > 0);
             }
         }
+
+ //var composite = (IIfcCompositeCurve)model.Instances[75];
+                //foreach (var segment in composite.Segments)
+                //{
+                //    var curve = _xbimGeometryCreator.CreateCurve(segment.ParentCurve);
+                //    var wire = _xbimGeometryCreator.CreateWire(segment.ParentCurve);
+                //    Assert.IsTrue(Math.Abs((curve.Start - wire.Start).Length)<1e-5);
+                //    Assert.IsTrue(Math.Abs((curve.End - wire.End).Length) < 1e-5);
+                //}
+        [TestMethod]
+        public void FixedReferenceSweptSolidTest()
+        {
+            using (var model = IfcStore.Open(@"Ifc4TestFiles\fixed-reference-swept-area.ifc"))
+            {
+                var sectionedSpine = model.Instances.OfType<IfcFixedReferenceSweptAreaSolid>().FirstOrDefault();
+                Assert.IsNotNull(sectionedSpine);
+                var bar = _xbimGeometryCreator.CreateSolid(sectionedSpine);
+                Assert.IsTrue(bar.Volume > 0);
+            }
+        }
+        
+        [TestMethod]
+        public void SurfaceCurveSweptAreaSolidTest()
+        {
+            using (var model = IfcStore.Open(@"Ifc4TestFiles\surface-curve-swept-area.ifc"))
+            {
+                var surfaceSweep = model.Instances.OfType<IfcSurfaceCurveSweptAreaSolid>().FirstOrDefault();
+                Assert.IsNotNull(surfaceSweep);
+                IIfcSurfaceOfLinearExtrusion le = (IIfcSurfaceOfLinearExtrusion)surfaceSweep.ReferenceSurface;
+                XbimVector3D v = le.ExtrusionAxis;
+
+                var bar = _xbimGeometryCreator.CreateSolid(surfaceSweep);
+                Assert.IsTrue(bar.Volume > 0);
+            }
+        }
         [TestMethod]
         public void MirroredProfileDefTest()
         {

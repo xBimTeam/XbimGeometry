@@ -5,6 +5,7 @@ using Xbim.Ifc4.Interfaces;
 
 namespace Xbim.ModelGeometry.Scene.Extensions
 {
+    // ReSharper disable once InconsistentNaming
     public static class IIfcCartesianTransformExtensions
     {
 
@@ -76,7 +77,7 @@ namespace Xbim.ModelGeometry.Scene.Extensions
             {
                 var dir = ct3D.Axis3;
                 u3 = new XbimVector3D(dir.X, dir.Y, dir.Z);
-                u3.Normalize();
+                u3 = u3.Normalized();
             }
             else
                 u3 = new XbimVector3D(0, 0, 1);
@@ -84,7 +85,7 @@ namespace Xbim.ModelGeometry.Scene.Extensions
             {
                 var dir = ct3D.Axis1;
                 u1 = new XbimVector3D(dir.X, dir.Y, dir.Z);
-                u1.Normalize();
+                u1 = u1.Normalized();
             }
             else
             {
@@ -93,13 +94,13 @@ namespace Xbim.ModelGeometry.Scene.Extensions
             }
             var xVec = XbimVector3D.Multiply(XbimVector3D.DotProduct(u1, u3), u3);
             var xAxis = XbimVector3D.Subtract(u1, xVec);
-            xAxis.Normalize();
+            xAxis = xAxis.Normalized();
 
             if (ct3D.Axis2 != null)
             {
                 var dir = ct3D.Axis2;
                 u2 = new XbimVector3D(dir.X, dir.Y, dir.Z);
-                u2.Normalize();
+                u2 = u2.Normalized();
             }
             else
                 u2 = new XbimVector3D(0, 1, 0);
@@ -108,7 +109,7 @@ namespace Xbim.ModelGeometry.Scene.Extensions
             var yAxis = XbimVector3D.Subtract(u2, tmp);
             tmp = XbimVector3D.Multiply(XbimVector3D.DotProduct(u2, xAxis), xAxis);
             yAxis = XbimVector3D.Subtract(yAxis, tmp);
-            yAxis.Normalize();
+            yAxis = yAxis.Normalized();
             u2 = yAxis;
             u1 = xAxis;
 
@@ -132,7 +133,7 @@ namespace Xbim.ModelGeometry.Scene.Extensions
             {
                 var dir = ct3D.Axis3;
                 u3 = new XbimVector3D(dir.X, dir.Y, dir.Z);
-                u3.Normalize();
+                u3 = u3.Normalized();
             }
             else
                 u3 = new XbimVector3D(0, 0, 1);
@@ -140,7 +141,7 @@ namespace Xbim.ModelGeometry.Scene.Extensions
             {
                 var dir = ct3D.Axis1;
                 u1 = new XbimVector3D(dir.X, dir.Y, dir.Z);
-                u1.Normalize();
+                u1 = u1.Normalized();
             }
             else
             {
@@ -149,13 +150,13 @@ namespace Xbim.ModelGeometry.Scene.Extensions
             }
             var xVec = XbimVector3D.Multiply(XbimVector3D.DotProduct(u1, u3), u3);
             var xAxis = XbimVector3D.Subtract(u1, xVec);
-            xAxis.Normalize();
+            xAxis = xAxis.Normalized();
 
             if (ct3D.Axis2 != null)
             {
                 var dir = ct3D.Axis2;
                 u2 = new XbimVector3D(dir.X, dir.Y, dir.Z);
-                u2.Normalize();
+                u2 = u2.Normalized();
             }
             else
                 u2 = new XbimVector3D(0, 1, 0);
@@ -164,7 +165,7 @@ namespace Xbim.ModelGeometry.Scene.Extensions
             var yAxis = XbimVector3D.Subtract(u2, tmp);
             tmp = XbimVector3D.Multiply(XbimVector3D.DotProduct(u2, xAxis), xAxis);
             yAxis = XbimVector3D.Subtract(yAxis, tmp);
-            yAxis.Normalize();
+            yAxis = yAxis.Normalized();
             u2 = yAxis;
             u1 = xAxis;
 

@@ -811,6 +811,9 @@ namespace Xbim
 			{
 				pFace = new TopoDS_Face();
 				*pFace = faceMaker.Face();
+				//apply the position transformation
+				if (sRev->Position != nullptr)
+					pFace->Move(XbimConvert::ToLocation(sRev->Position));
 			}
 			else
 				XbimGeometryCreator::logger->ErrorFormat("WF011: Invalid swept curve = #{0}. Found in IIfcSurfaceOfRevolution = #{1}, face discarded", sRev->SweptCurve->EntityLabel, sRev->EntityLabel);
@@ -872,19 +875,22 @@ namespace Xbim
 				XbimGeometryCreator::logger->ErrorFormat("WF001: Invalid swept curve = #{0}. Found in IIfcSurfaceOfLinearExtrusion = #{1}, face discarded", sLin->SweptCurve->EntityLabel, sLin->EntityLabel);
 				return;
 			}
-			XbimEdge^ edge = (XbimEdge^)curve->Edges->First;
+			TopoDS_Edge edge = (XbimEdge^)curve->Edges->First;
 			TopLoc_Location loc;
 			Standard_Real start, end;
 			Handle(Geom_Curve) c3d = BRep_Tool::Curve(edge, loc, start, end);
-			gp_Vec extrude(sLin->ExtrudedDirection->X, sLin->ExtrudedDirection->Y, sLin->ExtrudedDirection->Z);
-			
-			Handle(Geom_SurfaceOfLinearExtrusion) geomLin(new  Geom_SurfaceOfLinearExtrusion(c3d, extrude));
-			
+			gp_Vec extrude = XbimConvert::GetDir3d(sLin->ExtrudedDirection);
+			extrude.Normalize();
+			extrude *= sLin->Depth;			
+			Handle(Geom_SurfaceOfLinearExtrusion) geomLin(new  Geom_SurfaceOfLinearExtrusion(c3d, extrude));			
 			BRepBuilderAPI_MakeFace faceMaker(geomLin, start, end, 0, sLin->Depth,sLin->Model->ModelFactors->Precision);
 			if (faceMaker.IsDone())
 			{
 				pFace = new TopoDS_Face();
 				*pFace = faceMaker.Face();
+				//apply the position transformation
+				if (sLin->Position != nullptr)
+					pFace->Move(XbimConvert::ToLocation(sLin->Position));
 			}
 			else
 				XbimGeometryCreator::logger->ErrorFormat("WF002: Invalid swept curve = #{0}. Found in IIfcSurfaceOfLinearExtrusion = #{1}, face discarded", sLin->SweptCurve->EntityLabel, sLin->EntityLabel);
@@ -1015,18 +1021,32 @@ namespace Xbim
 		XbimVector3D XbimFace::Normal::get()
 		{
 			if (!IsValid) return XbimVector3D();
-			BRepGProp_Face prop(*pFace);
+			TopoDS_Face face = this;
+			BRepGProp_Face prop(face);
 			gp_Pnt centre;
 			gp_Vec normalDir;
 			double u1, u2, v1, v2;
 			prop.Bounds(u1, u2, v1, v2);
 			prop.Normal((u1 + u2) / 2.0, (v1 + v2) / 2.0, centre, normalDir);
-			XbimVector3D vec(normalDir.X(), normalDir.Y(), normalDir.Z());
-			vec.Normalize();
+			XbimVector3D vec(normalDir.X(), normalDir.Y(), normalDir.Z());		
 			GC::KeepAlive(this);
-			return vec;
+			return vec.Normalized();
 		}
 
+		XbimVector3D XbimFace::NormalAt(double u, double v)
+		{
+			if (!IsValid) return XbimVector3D();
+			TopoDS_Face face = this;
+			BRepGProp_Face prop(face);
+			gp_Pnt pos;
+			gp_Vec normalDir;
+			double u1, u2, v1, v2;
+			prop.Bounds(u1, u2, v1, v2);
+			prop.Normal(u, v, pos, normalDir);
+			XbimVector3D vec(normalDir.X(), normalDir.Y(), normalDir.Z());
+			return vec.Normalized();
+
+		}
 		XbimPoint3D XbimFace::Location::get()
 		{
 			if (!IsValid) return XbimPoint3D();
@@ -1184,6 +1204,17 @@ namespace Xbim
 			surface->D0(u, v, p);
 			GC::KeepAlive(this);
 			return XbimPoint3D(p.X(), p.Y(), p.Z());
+		}
+
+		Handle_Geom_Surface XbimFace::GetSurface()
+		{
+			return BRep_Tool::Surface(this);
+		}
+
+		void XbimFace::SetLocation(TopLoc_Location loc)
+		{
+			if (IsValid)
+				pFace->Move(loc);
 		}
 
 #pragma endregion

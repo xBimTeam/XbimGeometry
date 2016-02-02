@@ -931,7 +931,7 @@ namespace Xbim
 		}
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcFixedReferenceSweptAreaSolid^ ifcSolid)
 		{
-			throw gcnew NotImplementedException();
+			return gcnew XbimSolid(ifcSolid);
 		}
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcAdvancedBrep^ ifcSolid)
 		{
