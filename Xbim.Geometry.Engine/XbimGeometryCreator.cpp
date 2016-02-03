@@ -110,6 +110,12 @@ namespace Xbim
 					if (objectLocation != nullptr) comp->Move(objectLocation);
 					return comp;
 				}
+				else if (dynamic_cast<IIfcSectionedSpine^>(geomRep))
+				{
+					XbimSolid^ solid = (XbimSolid^)CreateSolid((IIfcSectionedSpine^)geomRep);
+					if (objectLocation != nullptr) solid->Move(objectLocation);
+					return solid;
+				}
 				else if (dynamic_cast<IIfcHalfSpaceSolid ^>(geomRep))
 				{
 					XbimSolid^ solid = (XbimSolid^)CreateSolid((IIfcHalfSpaceSolid^)geomRep);
