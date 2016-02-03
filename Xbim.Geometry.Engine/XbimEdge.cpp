@@ -113,6 +113,11 @@ namespace Xbim
 
 #pragma region Constructors
 
+		XbimEdge::XbimEdge(IIfcPcurve^ edge)
+		{
+			Init(edge);
+		}
+
 		XbimEdge::XbimEdge(IIfcConic^ edge)
 		{
 			Init(edge);
@@ -883,7 +888,20 @@ namespace Xbim
 			if (pline != nullptr) return Init(pline);
 			IIfcBSplineCurve^ bspline = dynamic_cast<IIfcBSplineCurve^>(curve);
 			if (bspline != nullptr) return Init(bspline);
+			IIfcPcurve^ pcurve = dynamic_cast<IIfcPcurve^>(curve);
+			if (pcurve != nullptr) return Init(pcurve);
 			throw gcnew NotImplementedException(String::Format("Curve of Type {0} in entity #{1} is not implemented", curve->GetType()->Name, curve->EntityLabel));
+		}
+
+		void XbimEdge::Init(IIfcPcurve^ curve)
+		{
+			XbimCurve^ occCurve = gcnew XbimCurve(curve);
+			if (occCurve->IsValid)
+			{
+				XbimEdge^ edge = gcnew XbimEdge(occCurve);
+				pEdge = new TopoDS_Edge();
+				*pEdge = edge;
+			}
 		}
 
 		void XbimEdge::Init(IIfcPolyline^ pline)

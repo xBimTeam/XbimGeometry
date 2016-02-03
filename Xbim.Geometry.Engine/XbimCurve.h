@@ -28,6 +28,7 @@ namespace Xbim
 			void Init(IIfcRationalBSplineCurveWithKnots^ curve);
 			void Init(IIfcBSplineCurveWithKnots^ curve);
 			void Init(IIfcOffsetCurve3D^ offset);
+			void Init(IIfcPcurve^ curve);
 
 		public:
 			//destructors
@@ -44,7 +45,7 @@ namespace Xbim
 			XbimCurve(IIfcBSplineCurve^ curve) {  Init(curve); }
 			XbimCurve(IIfcBSplineCurveWithKnots^ curve) {  Init(curve); }		
 			XbimCurve(IIfcOffsetCurve3D^ curve){ Init(curve); }
-
+			XbimCurve(IIfcPcurve^ curve){ Init(curve); }
 
 #pragma region operators
 			operator const Handle_Geom_Curve& () { return *pCurve; }

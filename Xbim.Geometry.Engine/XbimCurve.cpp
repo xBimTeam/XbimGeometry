@@ -1,5 +1,6 @@
 #include "XbimCurve.h"
 #include "XbimCurve2D.h"
+#include "XbimFace.h"
 #include "XbimConvert.h"
 #include "XbimGeometryCreator.h"
 #include <gce_MakeLin.hxx>
@@ -14,6 +15,7 @@
 #include <GeomLib_Tool.hxx>
 #include <GeomAPI_ExtremaCurveCurve.hxx>
 #include <Geom_OffsetCurve.hxx>
+#include <ShapeConstruct_ProjectCurveOnSurface.hxx>
 using namespace System;
 using namespace System::Linq;
 namespace Xbim
@@ -121,9 +123,30 @@ namespace Xbim
 			else if (dynamic_cast<IIfcRationalBSplineCurveWithKnots^>(curve)) Init((IIfcRationalBSplineCurveWithKnots^)curve);
 			else if (dynamic_cast<IIfcBSplineCurveWithKnots^>(curve)) Init((IIfcBSplineCurveWithKnots^)curve);
 			else if (dynamic_cast<IIfcOffsetCurve3D^>(curve)) Init((IIfcOffsetCurve3D^)curve);
+			else if (dynamic_cast<IIfcPcurve^>(curve)) Init((IIfcPcurve^)curve);
 			else throw gcnew Exception(String::Format("Unsupported Curve Type {0}", curve->GetType()->Name));
 		}
-				
+			
+		void XbimCurve::Init(IIfcPcurve^ curve)
+		{
+			XbimFace^ face = gcnew XbimFace(curve->BasisSurface);
+			if (face->IsValid)
+			{
+				ShapeConstruct_ProjectCurveOnSurface projector;
+				projector.Init(face->GetSurface(), curve->Model->ModelFactors->Precision);
+				XbimCurve^ baseCurve = gcnew XbimCurve(curve->ReferenceCurve);
+				Standard_Real first;
+				Standard_Real last;
+				Handle_Geom2d_Curve c2d;
+				Handle_Geom_Curve cBase = baseCurve;
+				if(projector.PerformAdvanced(cBase, first, last, c2d))
+				{
+					pCurve = new Handle_Geom_Curve();
+					*pCurve = cBase;
+				}
+			}		
+		}
+
 		void XbimCurve::Init(IIfcOffsetCurve3D^ offset)
 		{
 			Init(offset->BasisCurve);
