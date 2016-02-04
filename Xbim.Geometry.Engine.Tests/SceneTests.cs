@@ -32,7 +32,7 @@ namespace Ifc4GeometryTests
             using (var m = IfcStore.Open(fnameIn))
             {            
                 var m3D = new Xbim3DModelContext(m);
-                m3D.CreateContext(XbimGeometryType.PolyhedronBinary);
+                m3D.CreateContext();
                 using (var bw = new BinaryWriter(new FileStream(fNameOut, FileMode.Create)))
                 {
                     m.SaveAsWexBim(bw);
@@ -51,7 +51,7 @@ namespace Ifc4GeometryTests
             {
                 
                 var m3D = new Xbim3DModelContext(m);
-                m3D.CreateContext(XbimGeometryType.PolyhedronBinary);
+                m3D.CreateContext();
                 using (var bw = new BinaryWriter(new FileStream("test.wexBIM", FileMode.Create)))
                 {
                     m.SaveAsWexBim(bw);

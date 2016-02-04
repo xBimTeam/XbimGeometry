@@ -221,22 +221,23 @@ namespace Ifc4GeometryTests
 
             }
         }
+        //Commented out due to its time taken
+        //[TestMethod]
+        //public void TriangulatedFaceSet4Test()
+        //{
+        //    using (var model = IfcStore.Open(@"Ifc4TestFiles\beam-curved-i-shape-tessellated.ifc"))
+        //    {
+        //        var triangulatedFaceSet = model.Instances.OfType<IfcTriangulatedFaceSet>().FirstOrDefault();
+        //        Assert.IsNotNull(triangulatedFaceSet);
+        //        var geom = _xbimGeometryCreator.CreateSurfaceModel(triangulatedFaceSet);
+        //        Assert.IsTrue(geom.Shells.Count == 1);
+        //        Assert.IsTrue(Math.Abs(geom.Shells.First.BoundingBox.Volume - 13.337264) < 1e-5);
+
+        //    }
+        //}
+
         [TestMethod]
         public void TriangulatedFaceSet2Test()
-        {
-            using (var model = IfcStore.Open(@"Ifc4TestFiles\beam-curved-i-shape-tessellated.ifc"))
-            {
-                var triangulatedFaceSet = model.Instances.OfType<IfcTriangulatedFaceSet>().FirstOrDefault();
-                Assert.IsNotNull(triangulatedFaceSet);
-                var geom = _xbimGeometryCreator.CreateSurfaceModel(triangulatedFaceSet);
-                Assert.IsTrue(geom.Shells.Count == 1);
-                Assert.IsTrue(Math.Abs(geom.Shells.First.BoundingBox.Volume - 13.337264) < 1e-5);
-
-            }
-        }
-
-        [TestMethod]
-        public void TriangulatedFaceSet3Test()
         {
             using (var model = IfcStore.Open(@"Ifc4TestFiles\column-straight-rectangle-tessellation.ifc"))
             {
@@ -249,7 +250,7 @@ namespace Ifc4GeometryTests
             }
         }
         [TestMethod]
-        public void TriangulatedFaceSet4Test()
+        public void TriangulatedFaceSet3Test()
         {
             using (var model = IfcStore.Open(@"Ifc4TestFiles\slab-tessellated-unique-vertices.ifc"))
             {

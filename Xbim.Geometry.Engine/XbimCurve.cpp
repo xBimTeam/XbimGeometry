@@ -16,6 +16,7 @@
 #include <GeomAPI_ExtremaCurveCurve.hxx>
 #include <Geom_OffsetCurve.hxx>
 #include <ShapeConstruct_ProjectCurveOnSurface.hxx>
+#include <ShapeFix_Edge.hxx>
 using namespace System;
 using namespace System::Linq;
 namespace Xbim
@@ -142,7 +143,7 @@ namespace Xbim
 				if(projector.PerformAdvanced(cBase, first, last, c2d))
 				{
 					pCurve = new Handle_Geom_Curve();
-					*pCurve = cBase;
+					*pCurve = cBase;					
 				}
 			}		
 		}

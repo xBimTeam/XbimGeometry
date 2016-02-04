@@ -102,7 +102,7 @@ namespace XbimRegression
                         //else
                         //{
                         Xbim3DModelContext context = new Xbim3DModelContext(model);
-                        context.CreateContext(XbimGeometryType.PolyhedronBinary);
+                        context.CreateContext();
                         //}
                         geomTime = watch.ElapsedMilliseconds - parseTime;
                         //XbimSceneBuilder sb = new XbimSceneBuilder();

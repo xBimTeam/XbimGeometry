@@ -552,18 +552,15 @@ namespace Xbim.ModelGeometry.Scene
             get { return _model; }
         }
 
-        //private static short GetContextId(IIfcRepresentationContext context)
-        //{
-        //    return (short) ((context.EntityLabel >> 16) ^ context.EntityLabel);
-        //}
 
         /// <summary>
         /// </summary>
-        /// <param name="progDelegate"></param>
-        /// <param name="geomStorageType">The type of geometry storage type to use, typically Polyhedron or  PolyhedronBinary</param>
+        /// <param name="progDelegate"></param>       
         /// <returns></returns>
-        public bool CreateContext(XbimGeometryType geomStorageType = XbimGeometryType.Polyhedron, ReportProgressDelegate progDelegate = null, bool adjustWcs = true)
+        public bool CreateContext(ReportProgressDelegate progDelegate = null, bool adjustWcs = true)
         {
+            //NB we no longer support creation of  geometry storage other than binary, other code remains for reading but not writing 
+            var geomStorageType = XbimGeometryType.PolyhedronBinary;
             if (_contexts == null || Engine == null) return false;
             
             var geometryStore = _model.GeometryStore;

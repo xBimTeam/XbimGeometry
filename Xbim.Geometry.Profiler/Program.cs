@@ -69,7 +69,7 @@ namespace Xbim.Geometry.Profiler
                         }
                     };
                     var context = new Xbim3DModelContext(model);
-                    context.CreateContext(geomStorageType: XbimGeometryType.PolyhedronBinary, progDelegate: progDelegate);
+                    context.CreateContext(progDelegate: progDelegate);
 
                     mainStopWatch.Stop();
                     Logger.InfoFormat("Xbim total Compile Time \t\t{0:0.0} ms", mainStopWatch.ElapsedMilliseconds);
