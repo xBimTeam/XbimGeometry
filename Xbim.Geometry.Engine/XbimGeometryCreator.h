@@ -38,7 +38,7 @@ namespace Xbim
 			{
 				String^ timeOut = ConfigurationManager::AppSettings["BooleanTimeOut"];
 				if (!double::TryParse(timeOut, BooleanTimeOut))
-					BooleanTimeOut = 240;
+					BooleanTimeOut = 90;
 			}
 			//Central point for logging all errors
 			static ILogger^ logger = LoggerFactory::GetLogger();

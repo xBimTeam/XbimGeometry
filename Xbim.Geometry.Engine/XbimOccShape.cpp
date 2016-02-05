@@ -361,7 +361,7 @@ namespace Xbim
 					norms = gcnew List<XbimPackedNormal>(1);					
 					//IXbimWireSet^ bounds = gcnew XbimWireSet(face);
 					TopTools_IndexedMapOfShape wireMap;
-					TopExp::MapShapes(shape, TopAbs_WIRE, wireMap);
+					TopExp::MapShapes(face, TopAbs_WIRE, wireMap);
 					List<array<ContourVertex>^>^ contours = gcnew List<array<ContourVertex>^>(wireMap.Extent());
 					for (int i = 1; i <= wireMap.Extent(); i++)
 					{

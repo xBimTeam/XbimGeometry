@@ -562,8 +562,10 @@ namespace Xbim.ModelGeometry.Scene
             //NB we no longer support creation of  geometry storage other than binary, other code remains for reading but not writing 
             var geomStorageType = XbimGeometryType.PolyhedronBinary;
             if (_contexts == null || Engine == null) return false;
-            
+
+
             var geometryStore = _model.GeometryStore;
+
             if (geometryStore == null) return false;
             using (var geometryTransaction = geometryStore.BeginInit())
             {
@@ -604,16 +606,13 @@ namespace Xbim.ModelGeometry.Scene
                         WriteRegionsToStore(cluster.Key, cluster.Value, geometryTransaction);
                     }
                     if (progDelegate != null) progDelegate(101, "WriteRegionsToDb");
-                   
+
                 }
-                geometryTransaction.Commit();
-                return true;
+                geometryTransaction.Commit();            
             }
+            return true;
+
         }
-
-
-        
-
 
         private HashSet<int> WriteFeatureElements(XbimCreateContextHelper contextHelper,           
             ReportProgressDelegate progDelegate, XbimGeometryType geomType, IGeometryStoreInitialiser txn
@@ -1083,7 +1082,7 @@ namespace Xbim.ModelGeometry.Scene
                 }
             }
             Parallel.ForEach(contextHelper.ProductShapeIds, contextHelper.ParallelOptions, shapeId =>
-             //  foreach (var shapeId in contextHelper.ProductShapeIds)
+           //    foreach (var shapeId in contextHelper.ProductShapeIds)
              {
                  Interlocked.Increment(ref localTally);
                  var shape = (IIfcGeometricRepresentationItem)Model.Instances[shapeId];

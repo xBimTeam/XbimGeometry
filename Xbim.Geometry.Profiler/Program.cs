@@ -49,6 +49,7 @@ namespace Xbim.Geometry.Profiler
             mainStopWatch.Start();
             using (var model = GetModel(fileName, writeXbim))
             {
+                Logger.InfoFormat("Parse Time \t{0:0.0} ms", mainStopWatch.ElapsedMilliseconds);
                 if (model != null)
                 {
                     var functionStack = new ConcurrentStack<Tuple<string, double>>();
@@ -64,7 +65,7 @@ namespace Xbim.Geometry.Profiler
                         {
                             Tuple<string, double> func;
                             if (functionStack.TryPop(out func))
-                                Logger.InfoFormat("Complete in \t\t{0:0.0} ms",
+                                Logger.InfoFormat("Complete in \t{0:0.0} ms",
                                     DateTime.Now.TimeOfDay.TotalMilliseconds - func.Item2);
                         }
                     };
@@ -72,7 +73,7 @@ namespace Xbim.Geometry.Profiler
                     context.CreateContext(progDelegate: progDelegate);
 
                     mainStopWatch.Stop();
-                    Logger.InfoFormat("Xbim total Compile Time \t\t{0:0.0} ms", mainStopWatch.ElapsedMilliseconds);
+                    Logger.InfoFormat("Xbim total Compile Time \t{0:0.0} ms", mainStopWatch.ElapsedMilliseconds);
                    
                     var wexBimFilename = Path.ChangeExtension(fileName, "wexBIM");
                     using (var wexBiMfile = new FileStream(wexBimFilename, FileMode.Create, FileAccess.Write))
@@ -85,7 +86,7 @@ namespace Xbim.Geometry.Profiler
                             model.SaveAsWexBim(wexBimBinaryWriter);
                            
                             stopWatch.Stop();
-                            Logger.InfoFormat("Complete - in \t\t{0:0.0} ms", stopWatch.ElapsedMilliseconds);
+                            Logger.InfoFormat("Complete - in \t{0:0.0} ms", stopWatch.ElapsedMilliseconds);
                             wexBimBinaryWriter.Close();
                         }
                         wexBiMfile.Close();
@@ -138,9 +139,9 @@ namespace Xbim.Geometry.Profiler
                     try
                     {
                         double? threshhold=null;
-                        if(writeXbim) threshhold = 0; //otherwise let it do what it needs to baed on size
-                        var model = IfcStore.Open(fileName, null, threshhold); 
-                        var xbimName =  Path.ChangeExtension(fileName, "xbim");
+                        if(writeXbim) threshhold = 0; //otherwise let it do what it needs to based on size
+                       var model = IfcStore.Open(fileName, null, threshhold); 
+                      
                         return model;
                     }
                     catch (Exception e)
