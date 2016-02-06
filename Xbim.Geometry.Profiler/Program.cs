@@ -3,11 +3,13 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.Configuration;
 using Xbim.Common;
 using Xbim.Common.Geometry;
 using Xbim.Common.Logging;
 using Xbim.Ifc;
 using Xbim.IO;
+using Xbim.IO.Esent;
 using Xbim.ModelGeometry.Scene;
 
 namespace Xbim.Geometry.Profiler
@@ -47,11 +49,13 @@ namespace Xbim.Geometry.Profiler
         {
             var mainStopWatch = new Stopwatch();
             mainStopWatch.Start();
+           
             using (var model = GetModel(fileName, writeXbim))
             {
                 Logger.InfoFormat("Parse Time \t{0:0.0} ms", mainStopWatch.ElapsedMilliseconds);
                 if (model != null)
                 {
+                
                     var functionStack = new ConcurrentStack<Tuple<string, double>>();
                     ReportProgressDelegate progDelegate = delegate(int percentProgress, object userState)
                     {
@@ -97,8 +101,12 @@ namespace Xbim.Geometry.Profiler
                         fName = Path.ChangeExtension(fName, "xbim");
                         model.SaveAs(fName,IfcStorageType.Xbim);
                     }
+                   
                     model.Close();
+                    
+                    
                 }
+                Debug.Assert(EsentModel.ModelOpenCount==0); 
             }
         }
 
