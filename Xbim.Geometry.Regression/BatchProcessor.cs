@@ -117,11 +117,11 @@ namespace XbimRegression
                             IfcLength = ReadFileLength(ifcFile),
                             XbimLength = ReadFileLength(xbimFilename),
                             SceneLength = 0,
-                            IfcProductEntries = model.Instances.CountOf<IIfcProduct>(),
-                            IfcSolidGeometries = model.Instances.CountOf<IIfcSolidModel>(),
-                            IfcMappedGeometries = model.Instances.CountOf<IIfcMappedItem>(),
-                            BooleanGeometries = model.Instances.CountOf<IIfcBooleanResult>(),
-                            BReps = model.Instances.CountOf<IIfcFaceBasedSurfaceModel>() + model.Instances.CountOf<IIfcShellBasedSurfaceModel>() + model.Instances.CountOf<IIfcManifoldSolidBrep>(),
+                            IfcProductEntries = model.Instances.OfType<IIfcProduct>().Count(),
+                            IfcSolidGeometries = model.Instances.OfType<IIfcSolidModel>().Count(),
+                            IfcMappedGeometries = model.Instances.OfType<IIfcMappedItem>().Count(),
+                            BooleanGeometries = model.Instances.OfType<IIfcBooleanResult>().Count(),
+                            BReps = model.Instances.OfType<IIfcFaceBasedSurfaceModel>().Count() + model.Instances.OfType<IIfcShellBasedSurfaceModel>().Count() + model.Instances.OfType<IIfcManifoldSolidBrep>().Count(),
                             Application = ohs == null ? "Unknown" : ohs.OwningApplication.ToString(),
                             };
                         }
