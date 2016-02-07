@@ -4,15 +4,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using log4net;
-using Xbim.Common.Geometry;
 using Xbim.Common.Logging;
 using Xbim.Common.Step21;
 using Xbim.Ifc;
-using Xbim.Ifc2x3.GeometricModelResource;
-using Xbim.Ifc2x3.GeometryResource;
-using Xbim.Ifc2x3.Kernel;
-using Xbim.Ifc2x3.UtilityResource;
-using Xbim.IO;
+using Xbim.Ifc4.Interfaces;
 using Xbim.ModelGeometry.Scene;
 
 namespace XbimRegression
@@ -106,7 +101,7 @@ namespace XbimRegression
                         // sceneTime = watch.ElapsedMilliseconds - geomTime;
                         IStepFileHeader header = model.Header;
                         watch.Stop();
-                        IfcOwnerHistory ohs = model.Instances.OfType<IfcOwnerHistory>().FirstOrDefault();
+                        IIfcOwnerHistory ohs = model.Instances.OfType<IIfcOwnerHistory>().FirstOrDefault();
                         using (var geomReader = model.GeometryStore.BeginRead())
                         {
                             result = new ProcessResult
@@ -122,11 +117,11 @@ namespace XbimRegression
                             IfcLength = ReadFileLength(ifcFile),
                             XbimLength = ReadFileLength(xbimFilename),
                             SceneLength = 0,
-                            IfcProductEntries = model.Instances.CountOf<IfcProduct>(),
-                            IfcSolidGeometries = model.Instances.CountOf<IfcSolidModel>(),
-                            IfcMappedGeometries = model.Instances.CountOf<IfcMappedItem>(),
-                            BooleanGeometries = model.Instances.CountOf<IfcBooleanResult>(),
-                            BReps = model.Instances.CountOf<IfcFaceBasedSurfaceModel>() + model.Instances.CountOf<IfcShellBasedSurfaceModel>() + model.Instances.CountOf<IfcManifoldSolidBrep>(),
+                            IfcProductEntries = model.Instances.CountOf<IIfcProduct>(),
+                            IfcSolidGeometries = model.Instances.CountOf<IIfcSolidModel>(),
+                            IfcMappedGeometries = model.Instances.CountOf<IIfcMappedItem>(),
+                            BooleanGeometries = model.Instances.CountOf<IIfcBooleanResult>(),
+                            BReps = model.Instances.CountOf<IIfcFaceBasedSurfaceModel>() + model.Instances.CountOf<IIfcShellBasedSurfaceModel>() + model.Instances.CountOf<IIfcManifoldSolidBrep>(),
                             Application = ohs == null ? "Unknown" : ohs.OwningApplication.ToString(),
                             };
                         }
