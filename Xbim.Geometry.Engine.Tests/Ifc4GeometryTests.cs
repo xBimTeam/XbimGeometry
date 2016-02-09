@@ -375,7 +375,10 @@ namespace Ifc4GeometryTests
                 var bar = _xbimGeometryCreator.CreateSolid(surfaceSweep);
                 Assert.IsTrue(bar.Volume > 0);
             }
-        }
+        }                                     
+        
+        #endregion
+
         [TestMethod]
         public void MirroredProfileDefTest()
         {
@@ -397,7 +400,25 @@ namespace Ifc4GeometryTests
                
             }
         }
-        #endregion
+
+
+
+        [TestMethod]
+        public void CylindricalSurfaceTest()
+        {
+            using (var model = IfcStore.Open(@"Ifc4TestFiles\cylindrical-surface.ifc"))
+            {
+                foreach (var brep in model.Instances.OfType<IIfcAdvancedBrep>())
+                {
+                    var geom = _xbimGeometryCreator.CreateSolid(brep);
+                    foreach (var face in geom.Faces)
+                    {
+                        Assert.IsTrue(face.Area > 0);
+                    }
+                    Assert.IsTrue(geom.Volume > 0);
+                }
+            }
+        }
 
     }
 }

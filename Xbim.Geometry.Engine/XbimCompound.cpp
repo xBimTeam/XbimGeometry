@@ -352,7 +352,7 @@ namespace Xbim
 
 		bool XbimCompound::Sew()
 		{
-			
+
 			if (!IsValid || IsSewn)
 				return true;
 			long tally = 0;
@@ -362,7 +362,7 @@ namespace Xbim
 				if (tally > MaxFacesToSew) //give up if too many
 					return false;
 			}
-			
+
 			BRep_Builder builder;
 			TopoDS_Compound newCompound;
 			builder.MakeCompound(newCompound);
@@ -373,11 +373,11 @@ namespace Xbim
 				seamstress.Perform();
 				TopoDS_Shape result = seamstress.SewedShape();
 				builder.Add(newCompound, result);
-			}	
-			
+			}
+
 			*pCompound = newCompound;
-			
-			
+
+
 
 			_isSewn = true;
 			GC::KeepAlive(this);
@@ -399,118 +399,144 @@ namespace Xbim
 		//This method copes with faces that may be advanced as well as ordinary
 		void XbimCompound::InitAdvancedFaces(IEnumerable<IIfcFace^>^ faces)
 		{
-			int f = 0;
-			XbimOccWriter^ occWriter = gcnew XbimOccWriter();
-			BRepPrim_Builder builder;
-			TopoDS_Shell shell;
-			builder.MakeShell(shell);
-			IIfcFace^ aFace = Enumerable::FirstOrDefault(faces);
-			if (aFace == nullptr) return;
-			IModel^ model = aFace->Model;
-			
-			_sewingTolerance = model->ModelFactors->Precision;			
-			//collect all the geometry components
-			Dictionary<int, XbimEdge^>^ edgeCurves = gcnew Dictionary<int, XbimEdge^>();
-			Dictionary<int, XbimVertex^>^ vertices = gcnew Dictionary<int, XbimVertex^>();
-			for each (IIfcFace^ unloadedFace in  faces)
+			try
 			{
-				IIfcAdvancedFace^ advancedFace = dynamic_cast<IIfcAdvancedFace^>(model->Instances[unloadedFace->EntityLabel]); //improves performance and reduces memory load				
-				
-				XbimWire^ outerLoop=nullptr;
-				List<XbimWire^>^ innerLoops = gcnew List<XbimWire^>();
-				for each (IIfcFaceBound^ ifcBound in advancedFace->Bounds) //build all the loops
+				int f = 0;
+				XbimOccWriter^ occWriter = gcnew XbimOccWriter();
+				BRepPrim_Builder builder;
+				TopoDS_Shell shell;
+				builder.MakeShell(shell);
+				IIfcFace^ aFace = Enumerable::FirstOrDefault(faces);
+				if (aFace == nullptr) return;
+				IModel^ model = aFace->Model;
+
+				_sewingTolerance = model->ModelFactors->Precision;
+				//collect all the geometry components
+				Dictionary<int, XbimEdge^>^ edgeCurves = gcnew Dictionary<int, XbimEdge^>();
+				Dictionary<int, XbimVertex^>^ vertices = gcnew Dictionary<int, XbimVertex^>();
+				for each (IIfcFace^ unloadedFace in  faces)
 				{
-					BRepBuilderAPI_MakeWire wireMaker;
-					bool isOuter = dynamic_cast<IIfcFaceOuterBound^>(ifcBound) != nullptr;
-					IIfcEdgeLoop^ edgeLoop = dynamic_cast<IIfcEdgeLoop^>(ifcBound->Bound);
-					if (edgeLoop != nullptr) //they always should be
+					IIfcAdvancedFace^ advancedFace = dynamic_cast<IIfcAdvancedFace^>(model->Instances[unloadedFace->EntityLabel]); //improves performance and reduces memory load				
+
+					XbimWire^ outerLoop = nullptr;
+					List<XbimWire^>^ innerLoops = gcnew List<XbimWire^>();
+					for each (IIfcFaceBound^ ifcBound in advancedFace->Bounds) //build all the loops
 					{
-
-						for each (IIfcOrientedEdge^ orientedEdge in edgeLoop->EdgeList)
+						BRepBuilderAPI_MakeWire wireMaker;
+						bool isOuter = dynamic_cast<IIfcFaceOuterBound^>(ifcBound) != nullptr;
+						IIfcEdgeLoop^ edgeLoop = dynamic_cast<IIfcEdgeLoop^>(ifcBound->Bound);
+						if (edgeLoop != nullptr) //they always should be
 						{
-							IIfcEdgeCurve^ edgeCurve = dynamic_cast<IIfcEdgeCurve^>(orientedEdge->EdgeElement);
-							if (edgeCurve == nullptr) throw gcnew XbimException("Incorrectly defined Edge, must be an edge curve");
-
-							XbimVertex^ edgeStart;
-							if (!vertices->TryGetValue(edgeCurve->EdgeStart->EntityLabel, edgeStart))
+							XbimWire^ w1;
+							for each (IIfcOrientedEdge^ orientedEdge in edgeLoop->EdgeList)
 							{
-								IIfcCartesianPoint^ startPoint = ((IIfcCartesianPoint ^)((IIfcVertexPoint^)edgeCurve->EdgeStart)->VertexGeometry);
-								edgeStart = gcnew XbimVertex(startPoint);
-								vertices->Add(edgeCurve->EdgeStart->EntityLabel, edgeStart);
-							}
-							XbimVertex^ edgeEnd;
-							if (!vertices->TryGetValue(edgeCurve->EdgeEnd->EntityLabel, edgeEnd))
-							{
-								IIfcCartesianPoint^ endPoint = ((IIfcCartesianPoint ^)((IIfcVertexPoint^)edgeCurve->EdgeEnd)->VertexGeometry);
-								edgeEnd = gcnew XbimVertex(endPoint);
-								vertices->Add(edgeCurve->EdgeEnd->EntityLabel, edgeEnd);
-							}
-							XbimEdge^ xBimEdgeCurve;
-							if (!edgeCurves->TryGetValue(edgeCurve->EntityLabel, xBimEdgeCurve))
-							{
-								xBimEdgeCurve = gcnew XbimEdge(edgeCurve->EdgeGeometry, edgeStart, edgeEnd);
-								if (!edgeCurve->SameSense)
-									xBimEdgeCurve->Reverse();
-								edgeCurves->Add(edgeCurve->EntityLabel, xBimEdgeCurve);
-							}
+								IIfcEdgeCurve^ edgeCurve = dynamic_cast<IIfcEdgeCurve^>(orientedEdge->EdgeElement);
+								if (edgeCurve == nullptr) throw gcnew XbimException("Incorrectly defined Edge, must be an edge curve");
+								XbimVertex^ edgeStart;
+								if (!vertices->TryGetValue(edgeCurve->EdgeStart->EntityLabel, edgeStart))
+								{
+									IIfcCartesianPoint^ startPoint = ((IIfcCartesianPoint ^)((IIfcVertexPoint^)edgeCurve->EdgeStart)->VertexGeometry);
+									edgeStart = gcnew XbimVertex(startPoint);
+									vertices->Add(edgeCurve->EdgeStart->EntityLabel, edgeStart);
+								}
+								XbimVertex^ edgeEnd;
+								if (!vertices->TryGetValue(edgeCurve->EdgeEnd->EntityLabel, edgeEnd))
+								{
+									IIfcCartesianPoint^ endPoint = ((IIfcCartesianPoint ^)((IIfcVertexPoint^)edgeCurve->EdgeEnd)->VertexGeometry);
+									edgeEnd = gcnew XbimVertex(endPoint);
+									vertices->Add(edgeCurve->EdgeEnd->EntityLabel, edgeEnd);
+								}
+								
+								//opencascade does not support edges made of multi-linear segments (polyline)
+								//these can be exapnded to discrete edges to maintain topological correctness
+								IIfcPolyline^ polyline = dynamic_cast<IIfcPolyline^>(edgeCurve->EdgeGeometry);
+								if (polyline!=nullptr && Enumerable::Count(polyline->Points) > 2) //we have multi segments
+								{ 
+									XbimWire^ wire = gcnew XbimWire(polyline);
+									wire = wire->Trim(edgeStart, edgeEnd, _sewingTolerance);
+									
+									if (!orientedEdge->Orientation)
+										wire->Reverse();
+									for each (XbimEdge^ edge in wire->Edges)
+									{
+										wireMaker.Add(edge);
+									}
+								}
+								else
+								{
+									
+									XbimEdge^ xBimEdgeCurve;
+									if (!edgeCurves->TryGetValue(edgeCurve->EntityLabel, xBimEdgeCurve))
+									{
+										xBimEdgeCurve = gcnew XbimEdge(edgeCurve->EdgeGeometry, edgeStart, edgeEnd);
+										if (!edgeCurve->SameSense)
+											xBimEdgeCurve->Reverse();
+										edgeCurves->Add(edgeCurve->EntityLabel, xBimEdgeCurve);
+									}								
+									if (!orientedEdge->Orientation)
+										xBimEdgeCurve = xBimEdgeCurve->Reversed();
+									wireMaker.Add(xBimEdgeCurve);
+								}
 
-							if (!orientedEdge->Orientation)
-								xBimEdgeCurve = xBimEdgeCurve->Reversed();
-							wireMaker.Add(xBimEdgeCurve);
+							} // we have a wire
 
-						} // we have a wire
-						TopoDS_Wire loopWire = wireMaker.Wire();
-						if (!ifcBound->Orientation) loopWire.Reverse();
-						XbimWire^ xbimLoop = gcnew XbimWire(loopWire);
-						if (isOuter && outerLoop == nullptr) //only choose one outer loop
-							outerLoop = xbimLoop;
-						else
-							innerLoops->Add(xbimLoop);
-					}
-				}
-				//if we have no outer loop defined, find the longest
-				if (outerLoop == nullptr)
-				{
-					double area = 0;
-					for each (XbimWire^ innerLoop in innerLoops)
-					{
-						double loopArea = innerLoop->Area;
-						if (loopArea > area)
-						{
-							outerLoop = innerLoop;
-							area = loopArea;
+							
+							TopoDS_Wire loopWire = wireMaker.Wire();
+							if (!ifcBound->Orientation) loopWire.Reverse();
+							XbimWire^ xbimLoop = gcnew XbimWire(loopWire);
+							if (isOuter && outerLoop == nullptr) //only choose one outer loop
+								outerLoop = xbimLoop;
+							else
+								innerLoops->Add(xbimLoop);
 						}
 					}
-					innerLoops->Remove(outerLoop); //remove outer loop from inner loops
-				}
-				XbimFace^ xbimAdvancedFace = gcnew XbimFace(advancedFace, outerLoop, innerLoops);
+					//if we have no outer loop defined, find the longest
+					if (outerLoop == nullptr)
+					{
+						double area = 0;
+						for each (XbimWire^ innerLoop in innerLoops)
+						{
+							double loopArea = innerLoop->Area;
+							if (loopArea > area)
+							{
+								outerLoop = innerLoop;
+								area = loopArea;
+							}
+						}
+						innerLoops->Remove(outerLoop); //remove outer loop from inner loops
+					}
+					
+					XbimFace^ xbimAdvancedFace = gcnew XbimFace(advancedFace, outerLoop, innerLoops);
 
-				if (xbimAdvancedFace->IsValid)
-				{
-					/*String^ fName = "C:\\tmp\\f" + f;
-					occWriter->Write(xbimAdvancedFace, fName);*/
-					builder.AddShellFace(shell, xbimAdvancedFace);
-					f++;
+					if (xbimAdvancedFace->IsValid)
+					{
+						/*String^ fName = "C:\\tmp\\f" + f;
+						occWriter->Write(xbimAdvancedFace, fName);*/
+						builder.AddShellFace(shell, xbimAdvancedFace);
+						f++;
+					}
+					else
+						XbimGeometryCreator::logger->InfoFormat("WC002: Incorrectly defined IIfcFace #{0}, it has been ignored", advancedFace->EntityLabel);
 				}
-				else
-					XbimGeometryCreator::logger->InfoFormat("WC002: Incorrectly defined IIfcFace #{0}, it has been ignored", advancedFace->EntityLabel);
+
+				builder.CompleteShell(shell);
+
+				BRepBuilderAPI_Sewing seamstress(_sewingTolerance);
+				seamstress.Add(shell);
+				seamstress.Perform();
+				TopoDS_Shape result = seamstress.SewedShape();
+				ShapeFix_Shape shapeFixer(result);
+				shapeFixer.Perform();
+				BRep_Builder b;
+				pCompound = new TopoDS_Compound();
+				b.MakeCompound(*pCompound);
+				b.Add(*pCompound, shapeFixer.Shape());
 			}
-			
-			builder.CompleteShell(shell);
-			
-			ShapeFix_Shell shellFixer(shell);
-			shellFixer.Perform();
-			shell = shellFixer.Shell();
-			
-			BRepBuilderAPI_Sewing seamstress(_sewingTolerance);
-			seamstress.Add(shell);
-			seamstress.Perform();
-			TopoDS_Shape result = seamstress.SewedShape();
-			
-			BRep_Builder b;
-			pCompound = new TopoDS_Compound();
-			b.MakeCompound(*pCompound);
-			b.Add(*pCompound, result);
+			catch (Standard_Failure e)
+			{
+				String^ err = gcnew String(Standard_Failure::Caught()->GetMessageString());
+				XbimGeometryCreator::logger->WarnFormat("WC035: IfcAdvanced Face Build failed. " + err);
+			}
 		}
 
 

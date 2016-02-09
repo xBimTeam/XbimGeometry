@@ -49,6 +49,7 @@ namespace Xbim
 			void Init(IIfcBSplineSurface ^ surface);
 			void Init(IIfcBSplineSurfaceWithKnots ^ surface);
 			void Init(IIfcRationalBSplineSurfaceWithKnots ^ surface);
+			void Init(IIfcCylindricalSurface ^ surface);
 			void Init(double x, double y, double tolerance); 
 		public:
 			
@@ -119,6 +120,7 @@ namespace Xbim
 			XbimFace(IXbimFace^ face);
 			XbimFace(IIfcSurface^ surface, XbimWire^ outerBound, IEnumerable<XbimWire^>^ innerBounds);
 			XbimFace(IIfcFaceSurface^ surface, XbimWire^ outerBound, IEnumerable<XbimWire^>^ innerBounds);
+			XbimFace(IIfcCylindricalSurface ^ surface);
 			XbimFace(double x, double y, double tolerance);
 #pragma endregion
 

@@ -38,7 +38,10 @@
 #include <Geom_Line.hxx>
 #include <Geom_TrimmedCurve.hxx>
 #include <Geom_BSplineSurface.hxx>
+#include <gp_Cylinder.hxx>
 #include <BRepFilletAPI_MakeFillet2d.hxx>
+#include <ShapeFix_Face.hxx>
+#include <ShapeFix_Wire.hxx>
 using namespace System::Linq;
 namespace Xbim
 {
@@ -122,6 +125,11 @@ namespace Xbim
 			Init(plane);
 		}
 
+		XbimFace::XbimFace(IIfcCylindricalSurface^ cylinder)
+		{
+			Init(cylinder);
+		}
+
 		XbimFace::XbimFace(IIfcSurfaceOfLinearExtrusion^ sLin)
 		{
 			Init(sLin);
@@ -186,12 +194,20 @@ namespace Xbim
 			if (!IsValid) return;
 			TopLoc_Location loc;
 			Handle(Geom_Surface) geomSurface = BRep_Tool::Surface(this, loc);
-			BRepBuilderAPI_MakeFace faceMaker(geomSurface, outerBound, Standard_True);
+			//make sure the wire is valid
+			ShapeFix_Wire wireFixer(outerBound, this, surface->Model->ModelFactors->Precision);
+			wireFixer.Perform();
+			BRepBuilderAPI_MakeFace faceMaker(geomSurface, wireFixer.Wire(), surface->Model->ModelFactors->Precision);
+			
 			for each (XbimWire^ inner in innerBounds)
 			{
-				faceMaker.Add(inner);
+				ShapeFix_Wire innerWireFixer(inner, this, surface->Model->ModelFactors->Precision);
+				innerWireFixer.Perform();
+				faceMaker.Add(innerWireFixer.Wire());
 			}
-			*pFace = faceMaker.Face();
+			ShapeFix_Face fixer(faceMaker.Face());
+			bool fixed = fixer.Perform();
+			*pFace = fixer.Face();
 			if (!surface->SameSense) Reverse();
 		}
 
@@ -626,6 +642,8 @@ namespace Xbim
 				return Init((IIfcRectangularTrimmedSurface^)surface);
 			else if (dynamic_cast<IIfcBSplineSurface^>(surface))
 				return Init((IIfcBSplineSurface^)surface);
+			else if (dynamic_cast<IIfcCylindricalSurface^>(surface))
+				return Init((IIfcCylindricalSurface^)surface);
 			else if (dynamic_cast<IIfcBoundedSurface^>(surface))
 				throw(gcnew NotImplementedException("XbimFace. Support for BoundedSurface is not implemented,it should be abstract"));
 			else
@@ -636,6 +654,14 @@ namespace Xbim
 
 		}
 
+		void XbimFace::Init(IIfcCylindricalSurface ^ surface)
+		{
+			gp_Ax3 ax3 = XbimConvert::ToAx3(surface->Position);
+			gp_Cylinder cylinder(ax3, surface->Radius);
+			BRepBuilderAPI_MakeFace  builder(cylinder);
+			pFace = new TopoDS_Face();
+			*pFace = builder.Face();
+		}
 
 
 		void XbimFace::Init(IIfcBSplineSurface ^ surface)
@@ -797,26 +823,32 @@ namespace Xbim
 			TopLoc_Location loc;
 			Standard_Real start, end;
 			Handle(Geom_Curve) c3d = BRep_Tool::Curve(edge, loc, start, end);
-
+			Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(c3d, start, end);
 			gp_Pnt origin(sRev->AxisPosition->Location->X, sRev->AxisPosition->Location->Y, sRev->AxisPosition->Location->Z);
 			gp_Dir axisDir(0,0,1);
 			if (sRev->AxisPosition->Axis != nullptr)
 				axisDir = gp_Dir(sRev->AxisPosition->Axis->X, sRev->AxisPosition->Axis->Y, sRev->AxisPosition->Axis->Z);
 			gp_Ax1 axis(origin,axisDir);
 
-			Handle(Geom_SurfaceOfRevolution) geomLin(new  Geom_SurfaceOfRevolution(c3d, axis));
-
-			BRepBuilderAPI_MakeFace faceMaker(geomLin, 0, 2* Math::PI, start, end, sRev->Model->ModelFactors->Precision);
-			if (faceMaker.IsDone())
-			{
-				pFace = new TopoDS_Face();
-				*pFace = faceMaker.Face();
-				//apply the position transformation
-				if (sRev->Position != nullptr)
-					pFace->Move(XbimConvert::ToLocation(sRev->Position));
-			}
-			else
-				XbimGeometryCreator::logger->ErrorFormat("WF011: Invalid swept curve = #{0}. Found in IIfcSurfaceOfRevolution = #{1}, face discarded", sRev->SweptCurve->EntityLabel, sRev->EntityLabel);
+			Handle(Geom_SurfaceOfRevolution) rev = new  Geom_SurfaceOfRevolution(trimmed, axis);
+			BRep_Builder aBuilder;
+			pFace = new TopoDS_Face();
+			Standard_Real precision = sRev->Model->ModelFactors->Precision;
+			aBuilder.MakeFace(*pFace, rev, precision);
+			
+			////BRepBuilderAPI_MakeFace faceMaker(geomLin, 0, 2* Math::PI, start, end, sRev->Model->ModelFactors->Precision);
+			//
+			//
+			//if (faceMaker.IsDone())
+			//{
+			//	pFace = new TopoDS_Face();
+			//	*pFace = faceMaker.Face();
+			//	//apply the position transformation
+			//	if (sRev->Position != nullptr)
+			//		pFace->Move(XbimConvert::ToLocation(sRev->Position));
+			//}
+			//else
+			//	XbimGeometryCreator::logger->ErrorFormat("WF011: Invalid swept curve = #{0}. Found in IIfcSurfaceOfRevolution = #{1}, face discarded", sRev->SweptCurve->EntityLabel, sRev->EntityLabel);
 
 		}
 

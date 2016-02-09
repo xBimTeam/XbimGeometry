@@ -2,6 +2,7 @@
 #include "XbimOccShape.h"
 #include "XbimPoint3DWithTolerance.h"
 #include <TopoDS_Vertex.hxx>
+#include <BRep_Tool.hxx>
 using namespace Xbim::Common::Geometry;
 using namespace Xbim::Ifc4::Interfaces;
 namespace Xbim
@@ -68,7 +69,7 @@ namespace Xbim
 
 			operator const TopoDS_Vertex& () { return *pVertex; }
 			virtual operator const TopoDS_Shape& () override { return *pVertex; }
-
+			property double Tolerance{double get(){ return IsValid ? BRep_Tool::Tolerance(*pVertex) : 0; }}
 #pragma endregion
 
 		};

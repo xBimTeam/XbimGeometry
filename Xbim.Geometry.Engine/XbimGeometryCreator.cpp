@@ -66,7 +66,7 @@ namespace Xbim
 						if (objectLocation != nullptr) solid->Move(objectLocation);
 						return solid;
 					}
-				}
+				}			
 				else if (dynamic_cast<IIfcManifoldSolidBrep^>(geomRep))
 				{
 					XbimCompound^ comp = gcnew XbimCompound((IIfcManifoldSolidBrep^)geomRep);
@@ -158,9 +158,10 @@ namespace Xbim
 					return CreateGeometricSet((IIfcGeometricSet^)geomRep);
 				}
 			}
-			catch (...)
+			catch (Standard_Failure e)
 			{
-				Logger->ErrorFormat("EG001: Unknown error creating geometry representation of type {0} in entity #{1}", geomRep->GetType()->Name, geomRep->EntityLabel);
+				String^ err = gcnew String(Standard_Failure::Caught()->GetMessageString());
+				Logger->ErrorFormat("EG001: Error creating geometry representation of type {0} in entity #{1}, {2}", geomRep->GetType()->Name, geomRep->EntityLabel, err);
 				return XbimGeometryObjectSet::Empty;
 			}
 			Logger->ErrorFormat("EG002: Geometry Representation of Type {0} in entity #{1} is not implemented", geomRep->GetType()->Name, geomRep->EntityLabel);

@@ -132,6 +132,7 @@ namespace Xbim
 			virtual property XbimPoint3D Start{XbimPoint3D get(); }
 			virtual property XbimPoint3D End{XbimPoint3D get(); }
 			virtual IXbimWire^ Trim(double first, double last, double tolerance);
+			 
 			virtual property double Length{double get(); }
 			virtual property XbimRect3D BoundingBox {XbimRect3D get() override; }
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) override;
@@ -149,10 +150,11 @@ namespace Xbim
 #pragma endregion
 
 			//properties
-property bool IsReversed{bool get(){ return IsValid && pWire->Orientation() == TopAbs_REVERSED; }; }
+			property bool IsReversed{bool get(){ return IsValid && pWire->Orientation() == TopAbs_REVERSED; }; }
 			
-			
+			XbimWire^ Trim(XbimVertex^ first, XbimVertex^ last, double tolerance);
 
+			
 
 			//Returns the start parameter of each segment/interval of the wire
 			virtual property List<double>^ IntervalParameters{List<double>^ get(); }
@@ -161,7 +163,7 @@ property bool IsReversed{bool get(){ return IsValid && pWire->Orientation() == T
 			//functions 
 			//Returns the point at the parameter
 			XbimPoint3D PointAtParameter(double param);
-
+			double ParameterAtPoint(XbimPoint3D point, double tolerance);
 			//Methods
 
 			//moves the face to the new position

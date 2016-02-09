@@ -58,8 +58,9 @@
 #include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <ShapeAnalysis.hxx>
 #include <BRepFilletAPI_MakeFillet.hxx>
-
-
+#include <GeomLib_Tool.hxx>
+#include <BRepGProp.hxx>
+#include <GProp_GProps.hxx>
 using namespace Xbim::Common;
 using namespace System::Linq;
 namespace Xbim
@@ -467,14 +468,15 @@ namespace Xbim
 				
 				if (wireSegManaged->IsValid)
 				{
-					
-					TopoDS_Wire wireSeg = wireSegManaged;
-					if (!seg->SameSense) wireSeg.Reverse();
+										
+					if (!seg->SameSense) wireSegManaged->Reverse();
 				retryAddWire:
 					
-					FTol.SetTolerance(wireSeg, currentPrecision, TopAbs_WIRE);
-					wire.Add(wireSeg);
-
+					FTol.SetTolerance(wireSegManaged, currentPrecision, TopAbs_WIRE);
+					for each (XbimEdge^ edge in wireSegManaged->Edges)
+					{
+						wire.Add(edge);
+					}					
 					if (!wire.IsDone())
 					{
 						currentPrecision *= 10;
@@ -1381,7 +1383,7 @@ namespace Xbim
 		{
 			if (rectProfile->XDim <= 0 || rectProfile->YDim <= 0)
 			{
-				XbimGeometryCreator::logger->WarnFormat("WW021:Invalid IfcRectangleProfileDef: #{0}, XDim = {1}, YDim = {2}. Face discarded", rectProfile->EntityLabel, rectProfile->XDim, rectProfile->YDim);
+				XbimGeometryCreator::logger->InfoFormat("WW021:Invalid IfcRectangleProfileDef: #{0}, XDim = {1}, YDim = {2}. Face discarded", rectProfile->EntityLabel, rectProfile->XDim, rectProfile->YDim);
 			}
 			else
 			{
@@ -2178,6 +2180,37 @@ namespace Xbim
 			return XbimPoint3D(p.X(), p.Y(), p.Z());
 		}
 
+		double XbimWire::ParameterAtPoint(XbimPoint3D point, double tolerance)
+		{
+			if (!IsValid) return 0;
+			//find the edge that contains the point
+			TopoDS_Wire thisWire = *pWire;
+			gp_Pnt p(point.X,point.Y,point.Z);
+			double paramOffset = 0;
+			for (BRepTools_WireExplorer exp(thisWire); exp.More(); exp.Next())
+			{				
+				Standard_Real u;
+				Standard_Real fpar, lpar;
+				TopLoc_Location aLoc;				
+				const TopoDS_Edge& edge = TopoDS::Edge(exp.Current());
+				Handle(Geom_Curve) aCurve = BRep_Tool::Curve(edge, aLoc, fpar, lpar);
+				if (GeomLib_Tool::Parameter(aCurve, p, tolerance, u))
+				{
+					return paramOffset + u;
+				}
+				GProp_GProps gProps;
+				BRepGProp::LinearProperties(edge, gProps);
+				paramOffset += gProps.Mass();
+			}
+			return 0;
+		}
+
+		XbimWire^ XbimWire::Trim(XbimVertex^ first, XbimVertex^ last, double tolerance)
+		{
+			double startParam = ParameterAtPoint(first->VertexGeometry,tolerance);
+			double endParam = ParameterAtPoint(last->VertexGeometry,tolerance);
+			return (XbimWire^)Trim(startParam, endParam, tolerance);
+		}
 
 		IXbimWire^ XbimWire::Trim(double first, double last, double tolerance)
 		{
