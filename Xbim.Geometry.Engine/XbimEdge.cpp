@@ -645,7 +645,7 @@ namespace Xbim
 					// rnc : prevents the driver from building an edge without C1 continuity
 					if (concatcurve->Value(concatcurve->Lower())->Continuity() == GeomAbs_C0)
 					{
-						XbimGeometryCreator::logger->Info("Edge from Wire construction aborted : The given Wire has sharp bends between some Edges, no valid Edge can be built");
+						XbimGeometryCreator::LogInfo(this,"Edge from Wire construction aborted : The given Wire has sharp bends between some Edges, no valid Edge can be built");
 						return;
 					}
 
@@ -941,7 +941,7 @@ namespace Xbim
 			else
 			{
 				Type ^ type = circle->Position->GetType();
-				XbimGeometryCreator::logger->ErrorFormat("WE001: Circle #{0} with Placement of type {1} is not implemented", circle->EntityLabel, type->Name);
+				XbimGeometryCreator::LogError(circle,"Circle with placement of type {0} is not implemented", type->Name);
 				return;
 			}
 			BRepBuilderAPI_MakeEdge edgeMaker(curve);
@@ -949,7 +949,7 @@ namespace Xbim
 			if (edgeErr != BRepBuilderAPI_EdgeDone)
 			{
 				String^ errMsg = XbimEdge::GetBuildEdgeErrorMessage(edgeErr);
-				XbimGeometryCreator::logger->WarnFormat("WE002: Invalid edge found in IfcCircle = #{0}, {1}. It has been ignored", circle->EntityLabel, errMsg);
+				XbimGeometryCreator::LogWarning("Invalid edge found in circle, {0}. It has been ignored", errMsg);
 			}
 			else
 			{
@@ -974,7 +974,7 @@ namespace Xbim
 			if (edgeErr != BRepBuilderAPI_EdgeDone)
 			{
 				String^ errMsg = XbimEdge::GetBuildEdgeErrorMessage(edgeErr);
-				XbimGeometryCreator::logger->WarnFormat("WE003: Invalid edge found in IfcLine = #{0}, {1}. It has been ignored", line->EntityLabel, errMsg);
+				XbimGeometryCreator::LogWarning(line,"Invalid edge found, {0}. It has been ignored", errMsg);
 			}
 			else
 			{
@@ -996,13 +996,13 @@ namespace Xbim
 			{
 				IModelFactors^ mf = ellipse->Model->ModelFactors;
 				semiAx1 = mf->OneMilliMetre;
-				XbimGeometryCreator::logger->WarnFormat("WE004: Illegal Ellipse Semi Axis 1, must be greater than 0, in entity #{0}, it has been set to 1mm.", ellipse->EntityLabel);
+				XbimGeometryCreator::LogWarning(ellipse, "Illegal ellipse semi axis 1, it must be greater than 0. Iit has been set to 1mm.");
 			}
 			if (semiAx2 <= 0)
 			{
 				IModelFactors^ mf = ellipse->Model->ModelFactors;
 				semiAx2 = mf->OneMilliMetre;
-				XbimGeometryCreator::logger->WarnFormat("WE005: Illegal Ellipse Semi Axis 2, must be greater than 0, in entity #{0}, it has been set to 1mm.", ellipse->EntityLabel);
+				XbimGeometryCreator::LogWarning(ellipse, "WIllegal ellipse semi axis 2, it must be greater than 0. It has been set to 1mm.");
 			}
 			gp_Elips gc(gpax2, semiAx1, semiAx2);
 			Handle(Geom_Ellipse) hellipse = GC_MakeEllipse(gc);
@@ -1017,7 +1017,7 @@ namespace Xbim
 		{
 			IIfcBSplineCurveWithKnots^ bsplineWithKnots = dynamic_cast<IIfcBSplineCurveWithKnots^>(bspline);
 			if (bsplineWithKnots != nullptr) return Init(bsplineWithKnots);
-			XbimGeometryCreator::logger->WarnFormat("WE006: Unsupported IfcBSplineCurve type #{0} found. Ignored", bspline->EntityLabel);
+			XbimGeometryCreator::LogError(bspline, "Unsupported IfcBSplineCurve type #{0} found. It has been ignored", bspline->GetType()->Name);
 		}
 		void XbimEdge::Init(IIfcBSplineCurveWithKnots^ bspline)
 		{

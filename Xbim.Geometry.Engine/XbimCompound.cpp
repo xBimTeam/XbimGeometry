@@ -257,7 +257,7 @@ namespace Xbim
 			
 			if (!Enumerable::Any(faceSet->CfsFaces))
 			{
-				XbimGeometryCreator::logger->WarnFormat("WC001: IIfcConnectedFaceSet #{0}, is empty", faceSet->EntityLabel);
+				XbimGeometryCreator::LogWarning(faceSet, "Emty face set");
 				return;
 			}
 			Init(faceSet->CfsFaces);
@@ -273,8 +273,6 @@ namespace Xbim
 			IIfcAdvancedBrep^ advancedBrep = dynamic_cast<IIfcAdvancedBrep^>(solid);
 			if (advancedBrep != nullptr) return Init(advancedBrep);
 
-
-			
 			throw gcnew NotImplementedException("Sub-Type of IIfcManifoldSolidBrep is not implemented");
 		}
 
@@ -298,14 +296,14 @@ namespace Xbim
 			InitAdvancedFaces(brepWithVoids->Outer->CfsFaces);
 			XbimShell^ outerShell = (XbimShell^)MakeShell();
 			if (!outerShell->IsClosed) //we have a shell that is not able to be made in to a solid
-				XbimGeometryCreator::logger->ErrorFormat("ES004: An IIfcClosedShell #{0} has been found that is not topologically correct. ", brepWithVoids->Outer->EntityLabel);
+				XbimGeometryCreator::LogWarning(brepWithVoids, "Can cut voids properly as the bounding shell #{0} is not a solid.", brepWithVoids->Outer->EntityLabel);
 			BRepBuilderAPI_MakeSolid builder(outerShell);
 			for each (IIfcClosedShell^ IIfcVoidShell in brepWithVoids->Voids)
 			{
 				XbimCompound^ voidShapes = gcnew XbimCompound(IIfcVoidShell);
 				XbimShell^ voidShell = (XbimShell^)voidShapes->MakeShell();
 				if (!voidShell->IsClosed) //we have a shell that is not able to be made in to a solid
-					XbimGeometryCreator::logger->ErrorFormat("ES004: An IIfcClosedShell #{0} has been found that is not topologically correct. ", IIfcVoidShell->EntityLabel);
+					XbimGeometryCreator::LogWarning(brepWithVoids, "Can cut voids properly as the void #{0} is not a solid.", IIfcVoidShell->EntityLabel);
 				builder.Add(voidShell);
 			}
 			if (builder.IsDone())
@@ -316,7 +314,7 @@ namespace Xbim
 				b.Add(*pCompound, builder.Solid());
 			}//leave the outer shell without the voids
 			else 
-				XbimGeometryCreator::logger->ErrorFormat("ES003: An incorrectly defined IIfcFacetedBrepWithVoids #{0} has been found, a correct shape could not be built and it has been ignored", brepWithVoids->EntityLabel);
+				XbimGeometryCreator::LogWarning(brepWithVoids, "A correct shape could not be built and it has been ignored");
 		}
 
 		void XbimCompound::Init(IIfcFacetedBrepWithVoids^ brepWithVoids)
@@ -324,14 +322,14 @@ namespace Xbim
 			XbimCompound^ shapes = gcnew XbimCompound(brepWithVoids->Outer);
 			XbimShell^ outerShell = (XbimShell^)shapes->MakeShell();
 			if (!outerShell->IsClosed) //we have a shell that is not able to be made in to a solid
-				XbimGeometryCreator::logger->ErrorFormat("ES004: An IIfcClosedShell #{0} has been found that is not topologically correct. ", brepWithVoids->Outer->EntityLabel);
+				XbimGeometryCreator::LogWarning(brepWithVoids, "Can cut voids properly as the bounding shell #{0} is not a solid.", brepWithVoids->Outer->EntityLabel);
 			BRepBuilderAPI_MakeSolid builder(outerShell);
 			for each (IIfcClosedShell^ IIfcVoidShell in brepWithVoids->Voids)
 			{
 				XbimCompound^ voidShapes = gcnew XbimCompound(IIfcVoidShell);
 				XbimShell^ voidShell = (XbimShell^)voidShapes->MakeShell();
 				if (!voidShell->IsClosed) //we have a shell that is not able to be made in to a solid
-					XbimGeometryCreator::logger->ErrorFormat("ES004: An IIfcClosedShell #{0} has been found that is not topologically correct. ", IIfcVoidShell->EntityLabel);
+					XbimGeometryCreator::LogWarning(brepWithVoids, "Can cut voids properly as the void #{0} is not a solid.", IIfcVoidShell->EntityLabel);
 				builder.Add(voidShell);
 			}
 			if (builder.IsDone())
@@ -342,7 +340,7 @@ namespace Xbim
 				b.Add(*pCompound, builder.Solid());
 			}
 			else
-				XbimGeometryCreator::logger->ErrorFormat("ES003: An incorrectly defined IIfcFacetedBrepWithVoids #{0} has been found, a correct shape could not be built and it has been ignored", brepWithVoids->EntityLabel);
+				XbimGeometryCreator::LogWarning(brepWithVoids, "A correct shape could not be built and it has been ignored");
 		}
 
 		void XbimCompound::Init(IIfcClosedShell^ closedShell)
@@ -426,8 +424,7 @@ namespace Xbim
 						bool isOuter = dynamic_cast<IIfcFaceOuterBound^>(ifcBound) != nullptr;
 						IIfcEdgeLoop^ edgeLoop = dynamic_cast<IIfcEdgeLoop^>(ifcBound->Bound);
 						if (edgeLoop != nullptr) //they always should be
-						{
-							XbimWire^ w1;
+						{							
 							for each (IIfcOrientedEdge^ orientedEdge in edgeLoop->EdgeList)
 							{
 								IIfcEdgeCurve^ edgeCurve = dynamic_cast<IIfcEdgeCurve^>(orientedEdge->EdgeElement);
@@ -516,7 +513,7 @@ namespace Xbim
 						f++;
 					}
 					else
-						XbimGeometryCreator::logger->InfoFormat("WC002: Incorrectly defined IIfcFace #{0}, it has been ignored", advancedFace->EntityLabel);
+						XbimGeometryCreator::LogInfo(advancedFace, "Incorrectly defined face #{0}, it has been ignored", advancedFace->EntityLabel);
 				}
 
 				builder.CompleteShell(shell);
@@ -535,7 +532,7 @@ namespace Xbim
 			catch (Standard_Failure e)
 			{
 				String^ err = gcnew String(Standard_Failure::Caught()->GetMessageString());
-				XbimGeometryCreator::logger->WarnFormat("WC035: IfcAdvanced Face Build failed. " + err);
+				throw gcnew Exception("General failure in advanced face building: " + err);
 			}
 		}
 
@@ -641,12 +638,12 @@ namespace Xbim
 					}
 				
 				}
-				XbimFace^ face = BuildFace(loops, fc->EntityLabel);
+				XbimFace^ face = BuildFace(loops, fc);
 				for each (Tuple<XbimWire^, IIfcPolyLoop^>^ loop in loops) delete loop->Item1; //force removal of wires
 				if (face->IsValid)
 					builder.Add(shell, face);
 				else
-					XbimGeometryCreator::logger->InfoFormat("WC002: Incorrectly defined IIfcFace #{0}, it has been ignored", fc->EntityLabel);
+					XbimGeometryCreator::LogInfo(fc, "Incorrectly defined face. It has been ignored");
 				//delete face;
 			}
 		
@@ -664,7 +661,7 @@ namespace Xbim
 
 
 		
-		XbimFace^ XbimCompound::BuildFace(List<Tuple<XbimWire^, IIfcPolyLoop^>^>^ wires, int label)
+		XbimFace^ XbimCompound::BuildFace(List<Tuple<XbimWire^, IIfcPolyLoop^>^>^ wires, IIfcFace^ owningFace)
 		{
 
 			if (wires->Count == 0) return gcnew XbimFace();
@@ -697,7 +694,7 @@ namespace Xbim
 					if (faceNormal.DotProduct(loopNormal) > 0) //they should be in opposite directions, so reverse
 						wire->Reverse();
 					if (!face->Add(wire))
-						XbimGeometryCreator::logger->WarnFormat("WC003: Failed to add an inner bound to IIfcFace #{0}", label);
+						XbimGeometryCreator::LogWarning(owningFace, "Failed to add an inner bound");
 				}
 			}
 			return face;
@@ -865,12 +862,12 @@ namespace Xbim
 							if (boolOp.ErrorStatus() == 0)
 								unionedShape = boolOp.Shape();
 							else
-								XbimGeometryCreator::logger->WarnFormat("WC004: Boolean Union operation failed." );
+								XbimGeometryCreator::LogWarning(toConnect, "Boolean Union operation failed.");
 						}
 						catch (Standard_Failure e)
 						{
 							err = gcnew String(Standard_Failure::Caught()->GetMessageString());
-							XbimGeometryCreator::logger->WarnFormat("WC005: Boolean Union operation failed. " + err);
+							XbimGeometryCreator::LogWarning(toConnect, "Boolean Union operation failed. " + err);
 						}
 						
 					}
@@ -977,7 +974,7 @@ namespace Xbim
 			{
 				err = gcnew String(Standard_Failure::Caught()->GetMessageString());
 			}
-			XbimGeometryCreator::logger->WarnFormat("WC001: Boolean Cut operation failed. " + err);
+			XbimGeometryCreator::LogWarning(solids, "Boolean Cut operation failed. " + err);
 			return XbimCompound::Empty;
 		}
 
@@ -1000,7 +997,7 @@ namespace Xbim
 			{
 				err = gcnew String(Standard_Failure::Caught()->GetMessageString());
 			}
-			XbimGeometryCreator::logger->WarnFormat("WC002: Boolean Union operation failed. " + err);
+			XbimGeometryCreator::LogWarning(solids, "Boolean Union operation failed. " + err);
 			return XbimCompound::Empty;
 		}
 
@@ -1024,7 +1021,7 @@ namespace Xbim
 			{
 				err = gcnew String(Standard_Failure::Caught()->GetMessageString());
 			}
-			XbimGeometryCreator::logger->WarnFormat("WC003: Boolean Intersection operation failed. " + err);
+			XbimGeometryCreator::LogWarning(solids, "Boolean Intersection operation failed. " + err);
 			return XbimCompound::Empty;
 		}
 

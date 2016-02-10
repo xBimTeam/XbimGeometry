@@ -221,7 +221,7 @@ namespace Xbim
 			TopTools_IndexedMapOfShape faceMap;
 			TopoDS_Shape shape = this; //hold on to it
 			TopExp::MapShapes(shape, TopAbs_FACE, faceMap);			
-			size_t faceCount = faceMap.Extent();
+			int faceCount = faceMap.Extent();
 			if (faceCount == 0) return;
 			
 			Dictionary<XbimPoint3DWithTolerance^, int>^ pointMap = gcnew Dictionary<XbimPoint3DWithTolerance^, int>();
@@ -246,7 +246,7 @@ namespace Xbim
 				{
 					Standard_Real start, end;
 					//find any seams					
-					if (!hasSeams[f - 1]) hasSeams[f - 1] = BRep_Tool::IsClosed(edgeMap(i)); //just check a seam once
+					if (!hasSeams[f - 1]) hasSeams[f - 1] = (BRep_Tool::IsClosed(edgeMap(i))==Standard_True); //just check a seam once
 					Handle(Geom_Curve) c3d = BRep_Tool::Curve(TopoDS::Edge(edgeMap(i)), start, end);
 					if (!c3d.IsNull())
 					{
@@ -299,7 +299,7 @@ namespace Xbim
 					{
 						gp_Dir dir(mesh->Normals().Value(i), mesh->Normals().Value(i + 1), mesh->Normals().Value(i + 2));					
 						if (faceReversed) dir.Reverse();
-						int index;
+						
 						dir = quaternion.Multiply(dir);
 						XbimPackedNormal packedNormal = XbimPackedNormal(dir.X(), dir.Y(), dir.Z()); 						
 						norms->Add(packedNormal);
@@ -397,7 +397,6 @@ namespace Xbim
 						if (numTriangles > 0)
 						{
 							pointLookup->Add(gcnew List<int>(tess->VertexCount));
-							int index;
 							XbimVector3D fn(tess->Normal[0], tess->Normal[1], tess->Normal[2]);
 							XbimPackedNormal packedNormal = XbimPackedNormal(fn);							
 							norms->Add(packedNormal);

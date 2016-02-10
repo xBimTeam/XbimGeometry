@@ -12,7 +12,7 @@
 #include "XbimConvert.h"
 using namespace System;
 using namespace System::Linq;
-using namespace Xbim::Common;
+
 namespace Xbim
 {
 	namespace Geometry
@@ -57,25 +57,25 @@ namespace Xbim
 		XbimSolidSet::XbimSolidSet(IIfcManifoldSolidBrep^ solid)
 		{
 			XbimCompound^ comp = gcnew XbimCompound(solid);
-			Init(comp, solid->EntityLabel);
+			Init(comp, solid);
 			
 		}
 		XbimSolidSet::XbimSolidSet(IIfcFacetedBrep^ solid)
 		{
 			XbimCompound^ comp = gcnew XbimCompound(solid);
-			Init(comp, solid->EntityLabel);
+			Init(comp, solid);
 		}
 
 		XbimSolidSet::XbimSolidSet(IIfcFacetedBrepWithVoids^ solid)
 		{
 			XbimCompound^ comp = gcnew XbimCompound(solid);
-			Init(comp, solid->EntityLabel);
+			Init(comp, solid);
 		}
 
 		XbimSolidSet::XbimSolidSet(IIfcClosedShell^ solid)
 		{
 			XbimCompound^ comp = gcnew XbimCompound(solid);
-			Init(comp, solid->EntityLabel);
+			Init(comp, solid);
 		}
 
 		XbimSolidSet::XbimSolidSet(IEnumerable<IXbimSolid^>^ solids)
@@ -372,7 +372,7 @@ namespace Xbim
 			{
 				err = gcnew String(Standard_Failure::Caught()->GetMessageString());
 			}
-			XbimGeometryCreator::logger->WarnFormat("WS032: Boolean Cut operation failed. " + err);
+			XbimGeometryCreator::LogWarning(this,"Boolean Cut operation failed. " + err);
 			return XbimSolidSet::Empty;
 #else
 
@@ -636,13 +636,13 @@ namespace Xbim
 			return Intersection(gcnew XbimSolidSet(solid), tolerance);
 		}
 
-		void XbimSolidSet::Init(XbimCompound^ comp, int label)
+		void XbimSolidSet::Init(XbimCompound^ comp, IPersistEntity^ entity)
 		{
 			
 			if (!comp->IsValid || comp->Count == 0)
 			{
 				solids = gcnew  List<IXbimSolid^>();
-				XbimGeometryCreator::logger->WarnFormat("WSS13: Invalid IIfcManifoldSolidBrep #{0}", label);
+				XbimGeometryCreator::LogWarning(entity, "Empty or invalid solid");
 			}
 			else
 			{
@@ -665,7 +665,7 @@ namespace Xbim
 						solids->Add((XbimSolid^)geom);
 				}
 				if (solids->Count == 0)
-					XbimGeometryCreator::logger->WarnFormat("WSS14: Invalid IIfcManifoldSolidBrep #{0}", label);
+					XbimGeometryCreator::LogWarning(entity, "Empty solid");
 			}
 		}
 
@@ -677,12 +677,12 @@ namespace Xbim
 			{
 				if (profileCount == 0)
 				{
-					XbimGeometryCreator::logger->WarnFormat("WS0015: Invalid number of profiles in IIfcCompositeProfileDef #{0}. It must be 2 or more. Profile discarded", compProfile->EntityLabel);
+					XbimGeometryCreator::LogWarning(repItem, "Invalid number of profiles. It must be 2 or more. Profile discarded");
 					return;
 				}
 				if (profileCount == 1)
 				{
-					XbimGeometryCreator::logger->InfoFormat("IS0016: Invalid number of profiles in IIfcCompositeProfileDef #{0}. It must be 2 or more. A single Profile has been used", compProfile->EntityLabel);
+					XbimGeometryCreator::LogInfo(compProfile, "Invalid number of profiles. It must be 2 or more. A single Profile has been used");
 					XbimSolid^ s = gcnew XbimSolid(repItem);
 					if (s->IsValid)
 					{
@@ -717,12 +717,12 @@ namespace Xbim
 			{
 				if (profileCount == 0)
 				{
-					XbimGeometryCreator::logger->WarnFormat("WS0015: Invalid number of profiles in IIfcCompositeProfileDef #{0}. It must be 2 or more. Profile discarded", compProfile->EntityLabel);
+					XbimGeometryCreator::LogWarning(compProfile,"Invalid number of profiles. It must be 2 or more. Profile discarded");
 					return;
 				}
 				if (profileCount == 1)
 				{
-					XbimGeometryCreator::logger->InfoFormat("IS0016: Invalid number of profiles in IIfcCompositeProfileDef #{0}. It must be 2 or more. A single Profile has been used", compProfile->EntityLabel);
+					XbimGeometryCreator::LogInfo(compProfile,"Invalid number of profiles. It must be 2 or more. A single Profile has been used");
 					XbimSolid^ s = gcnew XbimSolid(repItem);
 					if (s->IsValid)
 					{
@@ -758,12 +758,12 @@ namespace Xbim
 			{
 				if (profileCount == 0)
 				{
-					XbimGeometryCreator::logger->WarnFormat("WS0015: Invalid number of profiles in IIfcCompositeProfileDef #{0}. It must be 2 or more. Profile discarded", compProfile->EntityLabel);
+					XbimGeometryCreator::LogWarning(repItem,"Invalid number of profiles. It must be 2 or more. Profile discarded");
 					return;
 				}
 				if (profileCount == 1)
 				{
-					XbimGeometryCreator::logger->InfoFormat("IS0016: Invalid number of profiles in IIfcCompositeProfileDef #{0}. It must be 2 or more. A single Profile has been used", compProfile->EntityLabel);
+					XbimGeometryCreator::LogInfo(repItem, "Invalid number of profiles in IIfcCompositeProfileDef #{0}. It must be 2 or more. A single Profile has been used");
 					XbimSolid^ s = gcnew XbimSolid(repItem);
 					if (s->IsValid)
 					{
@@ -799,12 +799,12 @@ namespace Xbim
 			{
 				if (profileCount == 0)
 				{
-					XbimGeometryCreator::logger->WarnFormat("WS0015: Invalid number of profiles in IIfcCompositeProfileDef #{0}. It must be 2 or more. Profile discarded", compProfile->EntityLabel);
+					XbimGeometryCreator::LogWarning(compProfile,"Invalid number of profiles. It must be 2 or more. Profile discarded");
 					return;
 				}
 				if (profileCount == 1)
 				{
-					XbimGeometryCreator::logger->InfoFormat("IS0016: Invalid number of profiles in IIfcCompositeProfileDef #{0}. It must be 2 or more. A single Profile has been used", compProfile->EntityLabel);
+					XbimGeometryCreator::LogInfo(compProfile,"Invalid number of profiles. It must be 2 or more. A single Profile has been used");
 					XbimSolid^ s = gcnew XbimSolid(repItem);
 					if (s->IsValid)
 					{
@@ -843,13 +843,13 @@ namespace Xbim
 			XbimSolid^ right = gcnew XbimSolid(sOp);
 			if (!left->IsValid)
 			{
-				XbimGeometryCreator::logger->WarnFormat("WS006: IIfcBooleanResult #{0} with invalid first operand", boolOp->EntityLabel);
+				XbimGeometryCreator::LogWarning(boolOp, "Boolean result has invalid first operand");
 				return;
 			}
 
 			if (!right->IsValid)
 			{
-				XbimGeometryCreator::logger->WarnFormat("WS007: IIfcBooleanResult #{0} with invalid second operand", boolOp->EntityLabel);
+				XbimGeometryCreator::LogWarning(boolOp, "Boolean result has invalid second operand");
 				solids->Add(left); //return the left operand
 				return;
 			}
@@ -873,7 +873,7 @@ namespace Xbim
 			}
 			catch (Exception^ xbimE)
 			{
-				XbimGeometryCreator::logger->ErrorFormat("ES001: Error performing boolean operation for entity #{0}={1}\n{2}. The operation has been ignored", boolOp->EntityLabel, boolOp->GetType()->Name, xbimE->Message);
+				XbimGeometryCreator::LogError(boolOp, "Boolean operation failure, {0}. The operation has been ignored", xbimE->Message);
 				solids->Add(left);; //return the left operand
 				return;
 			}

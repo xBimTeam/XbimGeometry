@@ -446,7 +446,7 @@ namespace Xbim.ModelGeometry.Scene
 
         #endregion
 
-        public static readonly ILogger Logger = LoggerFactory.GetLogger();
+        private static readonly ILogger Logger = LoggerFactory.GetLogger();
         private readonly IfcRepresentationContextCollection _contexts;
         private XbimGeometryEngine _engine;
 
@@ -456,8 +456,33 @@ namespace Xbim.ModelGeometry.Scene
         }
         private readonly IModel _model;
 
-        
-
+        public static  void LogWarning(object entity, string format, params object[] args)
+		{           
+			var msg = String.Format(format, args);
+			var ifcEntity = entity as IPersistEntity;
+			if (ifcEntity != null)
+                Logger.WarnFormat("GeomScene: #{0}={1} [{2}]", ifcEntity.EntityLabel, ifcEntity.GetType().Name, msg);
+			else
+                Logger.WarnFormat("GeomScene: {0} [{1}]", entity.GetType().Name, msg);
+		}
+        public static void LogInfo(object entity, string format, params object[] args)
+        {
+            var msg = String.Format(format, args);
+            var ifcEntity = entity as IPersistEntity;
+            if (ifcEntity != null)
+                Logger.InfoFormat("GeomScene: #{0}={1} [{2}]", ifcEntity.EntityLabel, ifcEntity.GetType().Name, msg);
+            else
+                Logger.InfoFormat("GeomScene: {0} [{1}]", entity.GetType().Name, msg);
+        }
+        public static void LogError(object entity, string format, params object[] args)
+        {
+            var msg = String.Format(format, args);
+            var ifcEntity = entity as IPersistEntity;
+            if (ifcEntity != null)
+                Logger.ErrorFormat("GeomScene: #{0}={1} [{2}]", ifcEntity.EntityLabel, ifcEntity.GetType().Name, msg);
+            else
+                Logger.ErrorFormat("GeomScene: {0} [{1}]", entity.GetType().Name, msg);
+        }
         //The maximum extent for any dimension of any products bouding box 
         //private double _maxXyz;
 
@@ -503,7 +528,7 @@ namespace Xbim.ModelGeometry.Scene
                                 String.Compare(c.ContextType, "model", true) == 0).ToList();
                 if (contexts.Any())
                 {
-                    Logger.InfoFormat(
+                    LogInfo(this,
                         "Unable to find any Geometric Representation contexts with Context Type = {0} and Context Identifier = {1}, using Context Type = 'Design' instead. NB This does not comply with IFC 2x3 or greater, the schema is {2}",
                         contextType, contextIdentifier, string.Join(",", model.Header.FileSchema.Schemas));
                 }
@@ -514,13 +539,13 @@ namespace Xbim.ModelGeometry.Scene
                     {
                         var ctxtString = contexts.Aggregate("", (current, ctxt) => current + (ctxt.ContextType + " "));
                         if (string.IsNullOrWhiteSpace(ctxtString)) ctxtString = "$";
-                        Logger.InfoFormat(
+                        LogInfo(this,
                             "Unable to find any Geometric Representation contexts with Context Type = {0} and Context Identifier = {1}, using  available Context Types '{2}'. NB This does not comply with IFC 2x2 or greater",
                             contextType, contextIdentifier, ctxtString.TrimEnd(' '));
                     }
                     else
                     {
-                        Logger.WarnFormat(
+                        LogWarning(this,
                             "Unable to find any Geometric Representation contexts in this file, it is illegal and does not comply with IFC 2x2 or greater");
                     }
                 }
@@ -651,10 +676,7 @@ namespace Xbim.ModelGeometry.Scene
 
                 if (arguments.Count == 0)
                 {
-                    //Logger.WarnFormat(
-                    //    "WM003: {2}[#{0}]-{1} does not have a solid representation, openings cannot be formed",
-                    //    element.EntityLabel, element.Name, element.GetType().Name);
-                    // the warning is obsolete because it's been handled int the original geometry creation
+
                     processed.Add(element.EntityLabel);
                     continue;
                 }
@@ -687,14 +709,13 @@ namespace Xbim.ModelGeometry.Scene
             //         foreach (IGrouping<IIfcElement, IIfcFeatureElement> pair in contextHelper.OpeningsAndProjections)
             {
                 Interlocked.Increment(ref localTally);
-                int elementLabel = 0;
-                short typeId = 0;
+                var elementLabel = 0;
                 try
                 {
                     if (bop.ArgumentIds.Any())
                     {
                         elementLabel = bop.ArgumentIds.First().IfcProductLabel;
-                        typeId = bop.ArgumentIds.First().IfcTypeId;
+                        var typeId = bop.ArgumentIds.First().IfcTypeId;
                         //Get all the parts of this element into a set of solid geometries
                         var elementGeom = Engine.CreateGeometryObjectSet();
 
@@ -704,9 +725,9 @@ namespace Xbim.ModelGeometry.Scene
                             if (geom != null)
                                 elementGeom.Add(geom);
                             else
-                                Logger.WarnFormat(
-                               "WM013: {0}[#{1}] is an element that has some 3D geometric form definition missing",
-                               _model.Metadata.ExpressType(argument.IfcTypeId).Name, argument.IfcProductLabel);
+                                LogWarning(_model.Instances[argument.IfcProductLabel],
+                               "Some 3D geometric form definition is missing"
+                               );
 
                         }
 
@@ -718,9 +739,8 @@ namespace Xbim.ModelGeometry.Scene
                             if (openingGeom != null)
                                 allOpenings.Add(openingGeom);
                             else
-                                Logger.WarnFormat(
-                               "WM014: {0}[#{1}] is an opening that has some 3D geometric form definition missing",
-                               _model.Metadata.ExpressType(openingShape.IfcTypeId).Name, openingShape.IfcProductLabel);
+                                LogWarning(_model.Instances[openingShape.IfcProductLabel],
+                               "Some 3D geometric form definition is missing");
                         }
 
                         //now all the projections
@@ -733,9 +753,8 @@ namespace Xbim.ModelGeometry.Scene
                             if (projGeom != null)
                                 allProjections.Add(projGeom);
                             else
-                                Logger.WarnFormat(
-                              "WM005: {0}[#{1}] is an projection that has no 3D geometric form definition",
-                              _model.Metadata.ExpressType(projectionShape.IfcTypeId).Name, projectionShape.IfcProductLabel);
+                                LogWarning(_model.Instances[projectionShape.IfcProductLabel],
+                               "Some 3D geometric form definition is missing");
                         }
 
                         //make the finished shape
@@ -747,14 +766,11 @@ namespace Xbim.ModelGeometry.Scene
                                 if (nextGeom.First != null && nextGeom.First.IsValid)
                                     elementGeom = nextGeom;
                                 else
-                                    Logger.WarnFormat(
-                               "WM015: Joining of projections in {1}[#{0}] has resulted in an empty shape",
-                               elementLabel, _model.Metadata.ExpressType(typeId).Name);
+                                    LogWarning(_model.Instances[elementLabel], "Projections are an empty shape");
                             }
                             else
-                                Logger.WarnFormat(
-                               "WM016: Joining of projections in {1}[#{0}] has failed, projections have been ignored",
-                               elementLabel, _model.Metadata.ExpressType(typeId).Name);
+                                LogWarning(_model.Instances[elementLabel],
+                               "Joining of projections has failed. Projections have been ignored");
                         }
 
 
@@ -767,14 +783,12 @@ namespace Xbim.ModelGeometry.Scene
                                 if (nextGeom.First != null && nextGeom.First.IsValid)
                                     elementGeom = nextGeom;
                                 else
-                                    Logger.WarnFormat(
-                               "WM009: Cutting of openings in {1}[#{0}] has resulted in an empty shape",
-                               elementLabel, _model.Metadata.ExpressType(typeId).Name);
+                                    LogWarning(_model.Instances[elementLabel],
+                               "Cutting openings has resulted in an empty shape");
                             }
                             else
-                                Logger.WarnFormat(
-                               "WM008: Cutting of openings in {1}[#{0}] has failed, openings have been ignored",
-                               elementLabel, _model.Metadata.ExpressType(typeId).Name);
+                                LogWarning(_model.Instances[elementLabel],
+                               "Cutting openings has failed. Openings have been ignored");
                         }
 
                         ////now add to the DB               
@@ -842,9 +856,8 @@ namespace Xbim.ModelGeometry.Scene
                 }
                 catch (Exception e)
                 {
-                    Logger.WarnFormat(
-                        "WM007: {0}[#{1}] - contains openings but  its geometry can not be built, {2}",
-                       _model.Metadata.ExpressType(typeId).Name, elementLabel, e.Message);
+                    LogWarning(_model.Instances[elementLabel],
+                        "Contains openings but  its basic geometry can not be built, {0}", e.Message);
                 }
                 //if (progDelegate != null) progDelegate(101, "FeatureElement, (#" + element.EntityLabel + " ended)");
             }
@@ -874,7 +887,7 @@ namespace Xbim.ModelGeometry.Scene
                     WriteShapeInstanceToStore(instance.GeometryId, instance.StyleLabel, 0, grid,
                         placementTransform, instance.BoundingBox /*productBounds*/,
                         XbimGeometryRepresentationType.OpeningsAndAdditionsIncluded, txn);
-                    var transproductBounds = instance.BoundingBox /*productBounds*/.Transform(placementTransform);
+                    instance.BoundingBox /*productBounds*/.Transform(placementTransform);
                     //transform the bounds
                     //contextHelper.Clusters.First().Enqueue(
                     //    new XbimBBoxClusterElement(instance.GeometryId,
@@ -994,8 +1007,7 @@ namespace Xbim.ModelGeometry.Scene
                             new XbimBBoxClusterElement(instance.GeometryId,
                                 transproductBounds));
                     }
-                    //else
-                    //    Logger.ErrorFormat("Failed to find shape #{0}", shape.EntityLabel);
+
                 }
             }
             return shapesInstances;
@@ -1027,7 +1039,7 @@ namespace Xbim.ModelGeometry.Scene
                             mapShapes.Add(counter);
                         }
                         else if (!(mapShape is IIfcGeometricSet)) //ignore non solid geometry sets
-                            Logger.WarnFormat("Failed to find shape #{0}", mapShape.EntityLabel);
+                            LogWarning(_model.Instances[mapShape.EntityLabel], "Failed to find shape in map" );
                     }
                     if (mapShapes.Any()) //if we have something to write
                     {
@@ -1038,9 +1050,8 @@ namespace Xbim.ModelGeometry.Scene
                             XbimMatrix3D.Multiply(cartesianTransform, localTransform));
                     }
                 }
-                else
-                    Logger.ErrorFormat("Illegal entity found in maps collection #{0}, type {1}", entity.EntityLabel,
-                        entity.GetType().Name);
+                else 
+                     LogError(_model.Instances[entity.EntityLabel], "Is an illegal entity in maps collection");
             }
                 );
             if (progDelegate != null) progDelegate(101, "WriteMappedItems, (" + contextHelper.MappedShapeIds.Count + " written)");
@@ -1130,8 +1141,7 @@ namespace Xbim.ModelGeometry.Scene
                              }
 
                              if (shapeGeom == null || shapeGeom.ShapeData == null || shapeGeom.ShapeData.Length == 0)
-                                 Logger.InfoFormat("WM001: {1}[#{0}] is an empty shape", shapeId,
-                                     shape.GetType().Name);
+                                 LogInfo(_model.Instances[shapeId],"Is an empty shape");
                              else
                              {
                                  shapeGeom.IfcShapeLabel = shapeId;
@@ -1163,8 +1173,7 @@ namespace Xbim.ModelGeometry.Scene
                      }
                      catch (Exception e)
                      {
-                         Logger.ErrorFormat("WM002: Failed to add shape geometry for entity #{0}, reason = {1}", shapeId,
-                             e.Message);
+                         LogError(_model.Instances[shapeId], "Failed to create shape geometry, {0}", e.Message);
                      }
                  }
 
@@ -1246,8 +1255,7 @@ namespace Xbim.ModelGeometry.Scene
             }
             catch (Exception e)
             {
-                Logger.ErrorFormat("Failed to add product geometry for entity #{0}, reason {1}", product.EntityLabel,
-                    e.Message);
+                LogError(_model.Instances[product.EntityLabel], "Failed to create geometry, {0}",  e.Message);
             }
 
 

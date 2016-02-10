@@ -3,7 +3,7 @@
 #include "XbimCompound.h"
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
-
+using namespace Xbim::Common;
 using namespace System::Collections::Generic;
 
 namespace Xbim
@@ -27,7 +27,7 @@ namespace Xbim
 			List<IXbimSolid^>^ solids;
 			static XbimSolidSet^ empty = gcnew XbimSolidSet();
 			void Init(IIfcBooleanResult^ boolOp);
-			void Init(XbimCompound^ comp, int label);
+			void Init(XbimCompound^ comp, IPersistEntity^ ent);
 			void Init(IIfcSweptAreaSolid^ solid);
 			void Init(IIfcExtrudedAreaSolid^ solid);
 			void Init(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid);

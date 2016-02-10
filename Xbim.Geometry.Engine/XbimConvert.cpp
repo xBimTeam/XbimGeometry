@@ -495,7 +495,7 @@ namespace Xbim
 				return XbimMatrix3D::Multiply(localTrans, gridTransform);
 
 			}
-
+			else return XbimMatrix3D::Identity;
 		}
 
 

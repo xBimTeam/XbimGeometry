@@ -124,13 +124,11 @@ namespace Xbim
 						pShell->Move(XbimConvert::ToLocation(linExt->Position));
 				}
 				else
-					XbimGeometryCreator::logger->WarnFormat("WH006: Invalid Surface Extrusion, could not create shell, found in Entity #{0}=IIfcSurfaceOfLinearExtrusion.",
-					linExt->EntityLabel);
+					XbimGeometryCreator::LogWarning(linExt, "Invalid Surface Extrusion, could not create shell");
 			}
 			else if (linExt->Depth <= 0)
 			{
-				XbimGeometryCreator::logger->WarnFormat("WS007: Invalid Solid Surface, Extrusion Depth must be >0, found in Entity #{0}=IIfcSurfaceOfLinearExtrusion.",
-					linExt->EntityLabel);
+				XbimGeometryCreator::LogWarning(linExt, "Invalid shell surface, Extrusion Depth must be >0");
 			}
 			
 		}
@@ -361,7 +359,7 @@ namespace Xbim
 					return gcnew XbimFaceSet(result);
 				}
 			}
-			XbimGeometryCreator::logger->WarnFormat("WS008:Boolean Section operation has failed to create a section");
+			XbimGeometryCreator::LogWarning(this, "Boolean Section operation has failed to create a section");
 			return XbimFaceSet::Empty;
 		}
 

@@ -26,16 +26,45 @@
 #include <BRepBuilderAPI_MakeFace.hxx>
 using namespace  System::Threading;
 using namespace  System::Linq;
-using namespace Xbim::Common;
+
 
 namespace Xbim
 {
 	namespace Geometry
 	{
-		
- 
+
+		void XbimGeometryCreator::LogInfo(Object^ entity, String^ format, array<Object^>^ arg)
+		{
+			String^ msg = String::Format(format, arg);
+			IPersistEntity^ ifcEntity = dynamic_cast<IPersistEntity^>(entity);
+			if (ifcEntity!=nullptr)
+				logger->InfoFormat("GeomEngine: #{0}={1} [{2}]", ifcEntity->EntityLabel, ifcEntity->GetType()->Name, msg);
+			else
+				logger->InfoFormat("GeomEngine: {0} [{1}]", entity->GetType()->Name, msg);
+		}
+
+		void XbimGeometryCreator::LogWarning(Object^ entity, String^ format, array<Object^>^ arg)
+		{
+			String^ msg = String::Format(format, arg);
+			IPersistEntity^ ifcEntity = dynamic_cast<IPersistEntity^>(entity);
+			if (ifcEntity != nullptr)
+				logger->WarnFormat("GeomEngine: #{0}={1} [{2}]", ifcEntity->EntityLabel, ifcEntity->GetType()->Name, msg);
+			else
+				logger->WarnFormat("GeomEngine: {0} [{1}]", entity->GetType()->Name, msg);
+		}
+
+		void XbimGeometryCreator::LogError(Object^ entity, String^ format, array<Object^>^ arg)
+		{
+			String^ msg = String::Format(format, arg);
+			IPersistEntity^ ifcEntity = dynamic_cast<IPersistEntity^>(entity);
+			if (ifcEntity != nullptr)
+				logger->ErrorFormat("GeomEngine: #{0}={1} [{2}]", ifcEntity->EntityLabel, ifcEntity->GetType()->Name, msg);
+			else
+				logger->ErrorFormat("GeomEngine: {0} [{1}]", entity->GetType()->Name, msg);
+		}
+
 #pragma region Point Creation
-		
+
 
 		IXbimGeometryObject^ XbimGeometryCreator::Create(IIfcGeometricRepresentationItem^ geomRep)
 		{
@@ -154,17 +183,17 @@ namespace Xbim
 				}
 				else if (dynamic_cast<IIfcGeometricSet^>(geomRep))
 				{
-					if (objectLocation != nullptr) Logger->Error("Move is not implemented for IIfcGeometricSet");
+					if (objectLocation != nullptr) LogError(geomRep, "Move is not implemented for IIfcGeometricSet");
 					return CreateGeometricSet((IIfcGeometricSet^)geomRep);
 				}
 			}
 			catch (Standard_Failure e)
 			{
 				String^ err = gcnew String(Standard_Failure::Caught()->GetMessageString());
-				Logger->ErrorFormat("EG001: Error creating geometry representation of type {0} in entity #{1}, {2}", geomRep->GetType()->Name, geomRep->EntityLabel, err);
+				LogError(geomRep, "Error creating geometry representation of type {0}, {2}", geomRep->GetType()->Name, err);
 				return XbimGeometryObjectSet::Empty;
 			}
-			Logger->ErrorFormat("EG002: Geometry Representation of Type {0} in entity #{1} is not implemented", geomRep->GetType()->Name, geomRep->EntityLabel);
+			LogError(geomRep,"Geometry Representation of Type {0} is not implemented", geomRep->GetType()->Name);
 			return XbimGeometryObjectSet::Empty;
 		}
 
@@ -815,13 +844,13 @@ namespace Xbim
 
 			if (!left->IsValid)
 			{
-				//XbimGeometryCreator::logger->WarnFormat("WS006: IIfcBooleanResult #{0} with invalid first operand", clip->EntityLabel);
+				LogWarning(fOp, "Boolean result has an empty shape in the first operand");
 				return XbimSolidSet::Empty;
 			}
 
 			if (!right->IsValid)
 			{
-				XbimGeometryCreator::logger->WarnFormat("WS007: IIfcBooleanResult #{0} has an empty shape in the second operand", clip->EntityLabel);
+				LogWarning(sOp, "Boolean result has an empty shape in the second operand");
 				return left;
 			}
 
@@ -843,14 +872,14 @@ namespace Xbim
 			}
 			catch (Exception^ xbimE)
 			{
-				XbimGeometryCreator::logger->ErrorFormat("ES001: Error performing boolean operation for entity #{0}={1}\n{2}. The first operand has been used, the operation has been ignored", clip->EntityLabel, clip->GetType()->Name, xbimE->Message);
+				LogWarning(clip,"Error performing boolean operation, {0}. The second operand has been ignored", xbimE->Message);
 				return left;
 			}
 
 			XbimSolidSet^ xbimSolidSet = dynamic_cast<XbimSolidSet^>(result);
 			if (xbimSolidSet == nullptr)
 			{
-				XbimGeometryCreator::logger->ErrorFormat("ES002: Error performing boolean operation for entity #{0}={1}. The first operand has been used, the operation has been ignored", clip->EntityLabel, clip->GetType()->Name);	
+				LogWarning(clip, "Error performing boolean operation. The second operand has been ignored");
 				return left;
 			}
 			else

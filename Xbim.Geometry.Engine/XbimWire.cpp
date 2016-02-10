@@ -190,8 +190,7 @@ namespace Xbim
 		{
 			if (dynamic_cast<IIfcArbitraryProfileDefWithVoids^>(profile))
 			{
-				XbimGeometryCreator::logger->ErrorFormat("WW024: IfcArbitraryProfileDefWithVoids #{0} cannot be created as a wire, call the XbimFace method", profile->EntityLabel);
-				return;
+				throw gcnew Exception("IfcArbitraryProfileDefWithVoids cannot be created as a wire, call the XbimFace method");
 			}
 			else
 			{
@@ -199,7 +198,7 @@ namespace Xbim
 				XbimWire^ loop = gcnew XbimWire(profile->OuterCurve);
 				if (!loop->IsValid)
 				{
-					XbimGeometryCreator::logger->WarnFormat("WW025: IfcArbitraryClosedProfileDef #{0} has an invalid outer bound. Discarded", profile->EntityLabel);
+					XbimGeometryCreator::LogWarning(profile, "Invalid outer bound. Wire discarded");
 					return;
 				}
 				pWire = new TopoDS_Wire();
@@ -219,7 +218,7 @@ namespace Xbim
 				XbimWire^ loop = gcnew XbimWire(profile->Curve);
 				if (!loop->IsValid)
 				{
-					XbimGeometryCreator::logger->WarnFormat("WW026: IfcArbitraryOpenProfileDef #{0} has an invalid curve. Discarded", profile->EntityLabel);
+					XbimGeometryCreator::LogWarning(profile, "Invalid curve. Wire discarded");
 					return;
 				}
 				pWire = new TopoDS_Wire();
@@ -235,7 +234,7 @@ namespace Xbim
 			if (!centreWire->IsValid)
 			{
 				
-				XbimGeometryCreator::logger->WarnFormat("WW027: IfcCenterLineProfileDef #{0} has an invalid curve. Discarded", profile->EntityLabel);
+				XbimGeometryCreator::LogWarning(profile, "Invalid curve. Wire discarded");
 				return;
 			}
 
@@ -297,7 +296,7 @@ namespace Xbim
 			int total = pointList->Count;
 			if (total < 2)
 			{
-				XbimGeometryCreator::logger->WarnFormat("WW001: Line with zero length found in IfcPolyline = #{0}. Ignored", pLine->EntityLabel);
+				XbimGeometryCreator::LogWarning(pLine, "Polyline with less than 2 points found. Wire discarded");
 				return;
 			}
 
@@ -351,8 +350,8 @@ namespace Xbim
 						gp_Pnt p1 = BRep_Tool::Pnt(v1);
 						gp_Pnt p2 = BRep_Tool::Pnt(v2);
 						String^ errMsg = XbimEdge::GetBuildEdgeErrorMessage(edgeErr);
-						XbimGeometryCreator::logger->InfoFormat("WW002: Invalid edge found in IfcPolyline = #{0}, Start = {1}, {2}, {3} End = {4}, {5}, {6}. Ignored",
-							pLine->EntityLabel, p1.X(), p1.Y(), p1.Z(), p2.X(), p2.Y(), p2.Z());
+						XbimGeometryCreator::LogInfo(pLine, "Invalid edge found in polyline, Start = {0}, {1}, {2} End = {3}, {4}, {5}. Edge discarded",
+							 p1.X(), p1.Y(), p1.Z(), p2.X(), p2.Y(), p2.Z());
 
 					}
 					else
@@ -366,8 +365,8 @@ namespace Xbim
 				{
 					gp_Pnt p1 = BRep_Tool::Pnt(v1);
 					gp_Pnt p2 = BRep_Tool::Pnt(v2);
-					XbimGeometryCreator::logger->InfoFormat("WW003: Invalid edge found in IfcPolyline = #{0}, Start = {1}, {2}, {3} End = {4}, {5}, {6}. Ignored",
-						pLine->EntityLabel, p1.X(), p1.Y(), p1.Z(), p2.X(), p2.Y(), p2.Z());
+					XbimGeometryCreator::LogInfo(pLine, "Invalid edge, Start = {0}, {1}, {2} End = {3}, {4}, {5}. Edge discarded",
+						 p1.X(), p1.Y(), p1.Z(), p2.X(), p2.Y(), p2.Z());
 				}
 			}
 			wire.Closed(closed);
@@ -393,7 +392,7 @@ namespace Xbim
 				}
 				else
 				{
-					XbimGeometryCreator::logger->WarnFormat("WW004: Invalid IfcPolyline #{0} found. Discarded", pLine->EntityLabel);
+					XbimGeometryCreator::LogWarning(pLine, "Invalid polyline. Wire discarded");
 					return;
 				}
 			}
@@ -403,7 +402,7 @@ namespace Xbim
 		{
 			IIfcBSplineCurveWithKnots^ bez = dynamic_cast<IIfcBSplineCurveWithKnots^>(bspline);
 			if (bez != nullptr) Init(bez);
-			XbimGeometryCreator::logger->WarnFormat("WW030: Unsupported IfcBSplineCurve type #{0} found. Ignored", bspline->EntityLabel);
+			else throw gcnew NotImplementedException("Unsupported IfcBSplineCurve type found.");
 		}
 		
 		void XbimWire::Init(IIfcBSplineCurveWithKnots^ bSpline)
@@ -485,7 +484,7 @@ namespace Xbim
 						else
 						{
 							haveWarned = true;
-							XbimGeometryCreator::logger->WarnFormat("WW005: IfcCompositeCurveSegment {0} was not contiguous with any edges in IfcCompositeCurve #{1}. It has been ignored", seg->EntityLabel, cCurve->EntityLabel);
+							XbimGeometryCreator::LogWarning(cCurve,"Composite curve segment #{0} was not contiguous with any other segments. It has been ignored", seg->EntityLabel);
 						}
 					}
 				}
@@ -513,7 +512,7 @@ namespace Xbim
 						*pWire = TopoDS::Wire(sfs.Shape());
 					}
 					else
-						XbimGeometryCreator::logger->WarnFormat("WW006: Invalid IfcCompositeCurveSegment #{0} found. It has been ignored", cCurve->EntityLabel);
+						XbimGeometryCreator::LogWarning(cCurve, "Invalid composite curve found. It has been discarded");
 				}
 			}
 			else if (!haveWarned) //don't do it twice
@@ -522,16 +521,16 @@ namespace Xbim
 				switch (err)
 				{
 				case BRepBuilderAPI_EmptyWire:
-					XbimGeometryCreator::logger->WarnFormat("WW007: Illegal bound found in IfcCompositeCurve = #{0}, it has no edges. Ignored", cCurve->EntityLabel);
+					XbimGeometryCreator::LogWarning(cCurve, "Illegal bound found in composite curve, it has no edges. It has been discarded");
 					break;
 				case BRepBuilderAPI_DisconnectedWire:
-					XbimGeometryCreator::logger->WarnFormat("WW008: Illegal bound found in IfcCompositeCurve = #{0}, all edges could not be connected. Ignored", cCurve->EntityLabel);
+					XbimGeometryCreator::LogWarning(cCurve, "Illegal bound found in composite curve, all edges could not be connected. It has been discarded");
 					break;
 				case BRepBuilderAPI_NonManifoldWire:
-					XbimGeometryCreator::logger->WarnFormat("WW009: Illegal found in IfcCompositeCurve = #{0}, it is non-manifold. Ignored", cCurve->EntityLabel);
+					XbimGeometryCreator::LogWarning(cCurve, "Illegal found in composite curve, it is non-manifold. It has been discarded");
 					break;
 				default:
-					XbimGeometryCreator::logger->WarnFormat("WW010: Illegal bound found in IfcCompositeCurve = #{0}, unknown error. Ignored", cCurve->EntityLabel);
+					XbimGeometryCreator::LogWarning(cCurve, "Illegal bound found in composite curve, unknown error. It has been discarded");
 					break;
 				}
 			}
@@ -701,7 +700,7 @@ namespace Xbim
 									goto TryMakeEdge;
 								}
 								String^ errMsg = XbimEdge::GetBuildEdgeErrorMessage(err);
-								XbimGeometryCreator::logger->WarnFormat("WW011: Construction of Trimmed Curve #{0}, failed, {1}. A line segment has been used", tCurve->EntityLabel, errMsg);
+								XbimGeometryCreator::LogWarning(tCurve, "Construction of trimmed curve failed, {0}. A line segment has been used",  errMsg);
 								b.Add(w, BRepBuilderAPI_MakeEdge(sense_agreement ? v1 : v2, sense_agreement ? v2 : v1));
 							}
 							else
@@ -723,7 +722,7 @@ namespace Xbim
 						if (edgeErr != BRepBuilderAPI_EdgeDone)
 						{
 							String^ errMsg = XbimEdge::GetBuildEdgeErrorMessage(edgeErr);
-							XbimGeometryCreator::logger->WarnFormat("WW012: Invalid edge found in IfcTrimmedCurve = #{0}, {1}. It has been ignored", tCurve->EntityLabel, errMsg);
+							XbimGeometryCreator::LogWarning(tCurve, "Invalid edge found in trimmed curve, {0}. It has been ignored", errMsg);
 							return;
 						}
 						else
@@ -743,7 +742,7 @@ namespace Xbim
 						if (edgeErr != BRepBuilderAPI_EdgeDone)
 						{
 							String^ errMsg = XbimEdge::GetBuildEdgeErrorMessage(edgeErr);
-							XbimGeometryCreator::logger->WarnFormat("WW013: Invalid edge found in IfcTrimmedCurve = #{0},{1} .It has been ignored", tCurve->EntityLabel, errMsg);
+							XbimGeometryCreator::LogWarning(tCurve, "Invalid edge found in trimmed curve, {0} .It has been ignored", errMsg);
 							return;
 						}
 						else
@@ -798,11 +797,32 @@ namespace Xbim
 					*pWire = b.Wire();
 				}
 			}
-			
+			else if (3 ==(int)curve->Dim )
+			{
+				XbimCurve^ curve = gcnew XbimCurve(curve);
+				XbimEdge^ edge = gcnew XbimEdge(curve);
+				if (edge->IsValid)
+				{
+					BRepBuilderAPI_MakeWire b(edge);
+					pWire = new TopoDS_Wire();
+					*pWire = b.Wire();
+				}
+			}
+			else if (2 == (int) curve->Dim )
+			{
+				XbimCurve2D^ curve = gcnew XbimCurve2D(curve);
+				XbimEdge^ edge = gcnew XbimEdge(curve);
+				if (edge->IsValid)
+				{
+					BRepBuilderAPI_MakeWire b(edge);
+					pWire = new TopoDS_Wire();
+					*pWire = b.Wire();
+				}
+			}
 			else
 			{
 				Type ^ type = curve->GetType();
-				XbimGeometryCreator::logger->ErrorFormat("EL009: Curve #{0} of type {1} is not implemented", curve->EntityLabel, type->Name);
+				throw gcnew NotImplementedException ("Curve type is not implemented. " + type); 
 				return;
 			}
 
@@ -873,7 +893,7 @@ namespace Xbim
 				else if (lineIndex != nullptr)
 				{
 					List<Ifc4::MeasureResource::IfcPositiveInteger>^ indices = (List<Ifc4::MeasureResource::IfcPositiveInteger>^)lineIndex->Value;
-					for (size_t i = 0; i < indices->Count - 1; i++)
+					for (int i = 0; i < indices->Count - 1; i++)
 					{
 						XbimVertex^ start = vertices[(int)indices[i] - 1];
 						XbimVertex^ end = vertices[(int)indices[i + 1] - 1];
@@ -900,7 +920,7 @@ namespace Xbim
 			int lastPt = polygon->Count;
 			if (lastPt < 3)
 			{
-				XbimGeometryCreator::logger->WarnFormat("WW015: Invalid loop in IfcPolyloop #{0}, it has less than three points. Loop discarded", loop->EntityLabel);
+				XbimGeometryCreator::LogWarning(loop, "Invalid loop, it has less than three points. Wire discarded");
 				return;
 			}
 			double tolerance = loop->Model->ModelFactors->Precision;
@@ -909,11 +929,11 @@ namespace Xbim
 			IIfcCartesianPoint^ last = polygon[lastPt - 1];
 			if (XbimConvert::IsEqual(first, last, tolerance))
 			{
-				XbimGeometryCreator::logger->WarnFormat("WW016: Invalid edge found in IfcPolyloop = #{0}, Start = #{7}({1}, {2}, {3}) End = #{8}({4}, {5}, {6}). Edge discarded", loop->EntityLabel, first->X, first->Y, first->Z, last->X, last->Y, last->Z, first->EntityLabel, last->EntityLabel);
+				XbimGeometryCreator::LogWarning(loop, "Invalid edge found, Start and End are the same point. Start = #{0} End = #{1}. Edge discarded", first->EntityLabel, last->EntityLabel);
 				lastPt--;
 				if (lastPt<3)
 				{
-					XbimGeometryCreator::logger->WarnFormat("WW017: Invalid loop in IfcPolyloop #{0}, it has less than three points. Loop discarded", loop->EntityLabel);
+					XbimGeometryCreator::LogWarning(loop, "Invalid loop, it has less than three points. Wire discarded");
 					return;
 				}
 			}
@@ -948,8 +968,7 @@ namespace Xbim
 				if (edgeErr != BRepBuilderAPI_EdgeDone)
 				{
 					String^ errMsg = XbimEdge::GetBuildEdgeErrorMessage(edgeErr);
-					XbimGeometryCreator::logger->WarnFormat("Invalid edge, {9},  in IfcPolyloop = #{0}. Start = #{7}({1}, {2}, {3}) End = #{8}({4}, {5}, {6}).\nEdge discarded",
-						loop->EntityLabel, pt1.X(), pt1.Y(), pt1.Z(), pt2.X(), pt2.Y(), pt2.Z(), p1, p2, errMsg);
+					XbimGeometryCreator::LogWarning(loop, "Invalid edge, {0}. Start = #{1} End = #{2}. Edge discarded",errMsg, p1, p2);
 				}
 				else
 				{
@@ -960,7 +979,7 @@ namespace Xbim
 			}
 			if (totalEdges<3)
 			{
-				XbimGeometryCreator::logger->WarnFormat("Invalid loop. IfcPolyloop = #{0} only has {1} edge(s), a minimum of 3 is required. Bound discarded", loop->EntityLabel, totalEdges);
+				XbimGeometryCreator::LogWarning(loop, "Invalid loop it only has {0} edge(s), a minimum of 3 is required. Wire discarded", totalEdges);
 				return;
 			}
 			wire.Closed(Standard_True);
@@ -991,7 +1010,7 @@ namespace Xbim
 			else
 			{
 				Type ^ type = bCurve->GetType();
-				XbimGeometryCreator::logger->ErrorFormat("EL010: BoundedCurve #{0} of type {1} is not implemented", bCurve->EntityLabel, type->Name);
+				throw gcnew NotImplementedException("Bounded Curve type is not implemented");
 				return;
 			}
 		}
@@ -1238,7 +1257,7 @@ namespace Xbim
 			else if (dynamic_cast<IIfcArbitraryOpenProfileDef^>(profile))
 				return Init((IIfcArbitraryOpenProfileDef^)profile);
 			else
-				XbimGeometryCreator::logger->ErrorFormat("WW018: Profile definition {0} is not implemented", profile->GetType()->Name);
+				XbimGeometryCreator::LogError(profile, "Profile definition {0} is not implemented", profile->GetType()->Name);
 
 		}
 
@@ -1293,7 +1312,7 @@ namespace Xbim
 			else if (dynamic_cast<IIfcEllipseProfileDef^>(profile))
 				return Init((IIfcEllipseProfileDef^)profile);
 			else 
-				XbimGeometryCreator::logger->ErrorFormat("WW019: Profile definition {0} is not implemented", profile->GetType()->Name);
+				XbimGeometryCreator::LogError(profile, "Profile type {0} is not implemented", profile->GetType()->Name);
 		}
 
 		//Builds a wire from a CircleProfileDef
@@ -1301,7 +1320,7 @@ namespace Xbim
 		{
 			if (dynamic_cast<IIfcCircleHollowProfileDef^>(circProfile))
 			{
-				XbimGeometryCreator::logger->ErrorFormat("WW020: IfcCircleHollowProfileDef #{0} cannot be created as a wire, call the XbimFace method", circProfile->EntityLabel);
+				XbimGeometryCreator::LogError(circProfile, "Circle hollow profile defintions cannot be created as a wire, call the XbimFace method");
 				return;
 			}
 			gp_Ax2 gpax2;
@@ -1383,13 +1402,13 @@ namespace Xbim
 		{
 			if (rectProfile->XDim <= 0 || rectProfile->YDim <= 0)
 			{
-				XbimGeometryCreator::logger->InfoFormat("WW021:Invalid IfcRectangleProfileDef: #{0}, XDim = {1}, YDim = {2}. Face discarded", rectProfile->EntityLabel, rectProfile->XDim, rectProfile->YDim);
+				XbimGeometryCreator::LogInfo(rectProfile, "Invalid rectangle profile with a zero or less dimension, XDim = {0}, YDim = {1}. Face discarded", rectProfile->XDim, rectProfile->YDim);
 			}
 			else
 			{
 				if (dynamic_cast<IIfcRectangleHollowProfileDef^>(rectProfile))
 				{
-					XbimGeometryCreator::logger->ErrorFormat("WW022: IfcRectangleHollowProfileDef #{0} cannot be created as a wire, call the XbimFace method", rectProfile->EntityLabel);
+					XbimGeometryCreator::LogError(rectProfile, "Rectangle hollow profile cannot be created as a wire, call the XbimFace method");
 					return;
 				}
 				else if (dynamic_cast<IIfcRoundedRectangleProfileDef^>(rectProfile))
@@ -1931,7 +1950,7 @@ namespace Xbim
 			{
 				IModelFactors^ mf = profile->Model->ModelFactors;
 				tW = mf->OneMilliMetre * 3;
-				XbimGeometryCreator::logger->WarnFormat("WW023: Illegal wall thickness for IfcCShapeProfileDef, it must be greater than 0, in entity #{0}. Adjusted to be 3mm thick", profile->EntityLabel);
+				XbimGeometryCreator::LogWarning(profile, "Illegal wall thickness for profile, it must be greater than 0. Adjusted to be 3mm thick");
 			}
 			BRepBuilderAPI_MakeWire wireMaker;
 			if (dG>0)
@@ -2306,11 +2325,7 @@ namespace Xbim
 				currChain.Append(prevEdge);
 				wexp.Next();
 			}
-			else 
-			{
-				XbimGeometryCreator::logger->WarnFormat("WW028: Empty wire given in FuseColinearSegments");
-			}
-
+			
 			for (; wexp.More(); wexp.Next()) {
 				TopoDS_Edge anEdge = wexp.Current();
 				TopoDS_Vertex CurVertex = wexp.CurrentVertex();
@@ -2489,8 +2504,8 @@ namespace Xbim
 				vertices(nb) = TopoDS::Vertex(edgeExp.CurrentVertex());
 			}
 			//need to do each pair to ensure they are on face
-			size_t totalEdges = 1;
-			for (size_t i = 1; i < nbEdges; i++)
+			int totalEdges = 1;
+			for (int i = 1; i < nbEdges; i++)
 			{
 				BRepBuilderAPI_MakeWire filletWireMaker;
 				filletWireMaker.Add(TopoDS::Edge(edges(i)));
@@ -2536,7 +2551,7 @@ namespace Xbim
 				}				
 			}
 			BRepBuilderAPI_MakeWire wireMaker;
-			for (size_t i = 1; i <= totalEdges; i++)
+			for (int i = 1; i <= totalEdges; i++)
 			{
 				wireMaker.Add(TopoDS::Edge(filleted(i)));
 			}

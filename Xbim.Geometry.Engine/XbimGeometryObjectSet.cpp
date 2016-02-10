@@ -367,8 +367,8 @@ namespace Xbim
 				}
 
 				if (cuttingObjects.Extent() == 0)
-				{
-					XbimGeometryCreator::logger->InfoFormat("WS033: No openings intersect with the body shape" );					
+				{					
+					XbimGeometryCreator::LogInfo(solids, "Openings cannot be cut, none intersect with the body shape");
 					return gcnew XbimGeometryObjectSet(geomObjects);
 				}
 				if (!ParseGeometry(geomObjects, toBeProcessed, allBoxes, toBePassedThrough, tolerance)) //nothing to do so just return what we had
@@ -402,7 +402,7 @@ namespace Xbim
 				//XbimGeometryCreator::logger->FatalFormat("{0}", aPI->ElapsedTime());
 				if (aPI->TimedOut())
 				{
-					XbimGeometryCreator::logger->ErrorFormat("E001: Boolean operation timed out after {0} seconds. Operation ignored",aPI->ElapsedTime());
+					XbimGeometryCreator::LogError(solids, "Boolean operation timed out after {0} seconds. Operation failed", (int)aPI->ElapsedTime());
 				}
 				if (pBuilder->ErrorStatus() == 0 && !pBuilder->Shape().IsNull())
 				{
@@ -439,7 +439,7 @@ namespace Xbim
 			{
 				err = "General Exception thrown in Xbim.Geometry.Engine::PerformBoolean";
 			}
-			XbimGeometryCreator::logger->InfoFormat("WS032: Boolean Cut failed. " + err);
+			XbimGeometryCreator::LogInfo(solids, "Boolean Cut failed. " + err);
 			if (pBuilder != nullptr) delete pBuilder;
 			return XbimGeometryObjectSet::Empty;
 		}

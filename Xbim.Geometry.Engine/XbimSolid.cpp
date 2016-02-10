@@ -360,7 +360,7 @@ namespace Xbim
 			if (swdSolid->FilletRadius.HasValue)
 			{
 				if(!sweep->FilletAll((double)swdSolid->FilletRadius.Value))
-					XbimGeometryCreator::logger->WarnFormat("WS040: IfcSweptDiskSolidPolygonal #{0} could not be corectly filleted", swdSolid->EntityLabel);
+					XbimGeometryCreator::LogWarning(swdSolid, "Could not be corectly filleted");
 			}
 
 			if (swdSolid->StartParam.HasValue && swdSolid->EndParam.HasValue)
@@ -412,7 +412,7 @@ namespace Xbim
 					}
 					else
 					{
-						XbimGeometryCreator::logger->WarnFormat("WS022: IfcSweptDiskSolidPolygonal #{0} inner loop could not be constructed", swdSolid->EntityLabel);
+						XbimGeometryCreator::LogWarning(swdSolid,"Inner loop could not be constructed");
 					}
 				}
 				//add top and bottom faces with their hole loops
@@ -442,7 +442,7 @@ namespace Xbim
 			}
 			else
 			{
-				XbimGeometryCreator::logger->WarnFormat("WS021: IIfcSweptDiskSolid #{0} could not be constructed", swdSolid->EntityLabel);
+				XbimGeometryCreator::LogWarning(swdSolid, "Could not be constructed");
 
 			}
 		}
@@ -455,7 +455,7 @@ namespace Xbim
 			if (ras != nullptr) return Init(ras, overrideProfileDef);			
 			IIfcFixedReferenceSweptAreaSolid^ fas = dynamic_cast<IIfcFixedReferenceSweptAreaSolid^>(solid);
 			if (fas != nullptr) return Init(fas, overrideProfileDef);	
-			XbimGeometryCreator::logger->WarnFormat("WS017: Swept Solid of Type {0} in entity #{1} is not implemented", solid->GetType()->Name, solid->EntityLabel);
+			XbimGeometryCreator::LogError(solid, "Swept Solid of Type {0} is not implemented", solid->GetType()->Name);
 		}
 
 		void XbimSolid::Init(IIfcSurfaceCurveSweptAreaSolid^ repItem, IIfcProfileDef^ overrideProfileDef)
@@ -467,7 +467,7 @@ namespace Xbim
 				faceStart = gcnew XbimFace(overrideProfileDef);
 			if (!faceStart->IsValid)
 			{
-				XbimGeometryCreator::logger->WarnFormat("WS018: Could not build Swept Area of IIfcSurfaceCurveSweptAreaSolid #{0}", repItem->EntityLabel);
+				XbimGeometryCreator::LogWarning(repItem, "Could not build Swept Area");
 				return;
 			}
 
@@ -482,7 +482,7 @@ namespace Xbim
 				sweep = (XbimWire^)sweep->Trim(0, repItem->EndParam.Value, mf->Precision);
 			if (!sweep->IsValid)
 			{
-				XbimGeometryCreator::logger->WarnFormat("WS019: Could not build Directrix of IIfcSurfaceCurveSweptAreaSolid #{0}", repItem->EntityLabel);
+				XbimGeometryCreator::LogWarning(repItem, "Could not build Directrix");
 				return;
 			}
 			BRepOffsetAPI_MakePipeShell pipeMaker1(sweep);
@@ -681,8 +681,7 @@ namespace Xbim
 				}
 				else if (repItem->Angle <= 0)
 				{
-					XbimGeometryCreator::logger->WarnFormat("WS004: Invalid Solid Extrusion, Extrusion Angle must be >0, found in Entity #{0}=IIfcRevolvedAreaSolid.",
-						repItem->EntityLabel);
+					XbimGeometryCreator::LogWarning(repItem, "Invalid extrusion,  angle must be >0 ");
 				}
 				GC::KeepAlive(faceStart);
 				GC::KeepAlive(faceEnd);
@@ -781,8 +780,7 @@ namespace Xbim
 				GC::KeepAlive(faceStart);
 				GC::KeepAlive(faceEnd);				
 			}			
-			XbimGeometryCreator::logger->WarnFormat("WS001: Invalid Solid Tapered Extrusion, Extrusion Depth must be >0 and faces must be correctly defined, found in Entity #{0}=IIfcExtrudedAreaSolidTapered.",
-					repItem->EntityLabel);		
+			XbimGeometryCreator::LogWarning(repItem,"Invalid tapered extrusion, depth must be >0 and faces must be correctly defined");		
 			//if it has failed we will have a null solid
 		}
 
@@ -798,7 +796,7 @@ namespace Xbim
 				faceStart = gcnew XbimFace(overrideProfileDef);
 			if (!faceStart->IsValid)
 			{
-				XbimGeometryCreator::logger->WarnFormat("WS018: Could not build Swept Area of IIfcFixedReferenceSweptAreaSolid #{0}", repItem->EntityLabel);
+				XbimGeometryCreator::LogWarning(repItem,"Could not build swept area");
 				return;
 			}
 
@@ -813,7 +811,7 @@ namespace Xbim
 				sweep = (XbimWire^)sweep->Trim(0, repItem->EndParam.Value, mf->Precision);
 			if (!sweep->IsValid)
 			{
-				XbimGeometryCreator::logger->WarnFormat("WS019: Could not build Directrix of IIfcFixedReferenceSweptAreaSolid #{0}", repItem->EntityLabel);
+				XbimGeometryCreator::LogWarning(repItem,"Could not build directrix");
 				return;
 			}
 			if (faceStart->IsValid) //we have valid faces and extrusion
@@ -902,8 +900,7 @@ namespace Xbim
 				GC::KeepAlive(faceStart);
 				
 			}
-			XbimGeometryCreator::logger->WarnFormat("WS001: Invalid Solid Tapered Extrusion, Extrusion Depth must be >0 and faces must be correctly defined, found in Entity #{0}=IIfcExtrudedAreaSolidTapered.",
-				repItem->EntityLabel);
+			XbimGeometryCreator::LogWarning(repItem, "Invalid extrusion, depth must be >0 and faces must be correctly defined");
 			//if it has failed we will have a null solid
 
 		}
@@ -930,7 +927,7 @@ namespace Xbim
 				BRepOffsetAPI_MakePipeShell pipeMaker1(sweep);
 				pipeMaker1.SetTransitionMode(BRepBuilderAPI_Transformed);
 				//move the sections to the right position
-				for (size_t i = 0; i < crossSections->Count; i++)
+				for (int i = 0; i < crossSections->Count; i++)
 				{					
 					crossSections[i]->Move(positions[i]);
 					TopoDS_Wire outerBound = (XbimWire^)(crossSections[i]->OuterBound);															
@@ -949,7 +946,7 @@ namespace Xbim
 						//it is a hollow section so we need to build the inside
 						BRepOffsetAPI_MakePipeShell pipeMaker2(sweep);
 						pipeMaker2.SetTransitionMode(BRepBuilderAPI_Transformed);
-						for (size_t j = 0; j < crossSections->Count; j++)
+						for (int j = 0; j < crossSections->Count; j++)
 						{							
 							TopoDS_Wire innerBound = (XbimWire^)(crossSections[j]->InnerWires->Wire[i]);
 							pipeMaker2.Add(innerBound);
@@ -994,8 +991,7 @@ namespace Xbim
 					return;
 				}				
 			}
-			XbimGeometryCreator::logger->WarnFormat("WS001: Invalid Solid Tapered Extrusion, Extrusion Depth must be >0 and faces must be correctly defined, found in Entity #{0}=IIfcExtrudedAreaSolidTapered.",
-				repItem->EntityLabel);
+			XbimGeometryCreator::LogWarning(repItem, "Invalid extrusion, depth must be >0 and faces must be correctly defined");
 			//if it has failed we will have a null solid
 		}
 
@@ -1025,13 +1021,11 @@ namespace Xbim
 					//BRepTools::Write(*pSolid, "d:\\tmp\\b");
 				}
 				else
-					XbimGeometryCreator::logger->WarnFormat("WS002: Invalid Solid Extrusion, could not create solid, found in Entity #{0}=IIfcExtrudedAreaSolid.",
-					repItem->EntityLabel);
+					XbimGeometryCreator::LogWarning(repItem, "Invalid extrusion, could not create solid");
 			}
 			else if (repItem->Depth <= 0)
 			{
-				XbimGeometryCreator::logger->WarnFormat("WS001: Invalid Solid Extrusion, Extrusion Depth must be >0, found in Entity #{0}=IIfcExtrudedAreaSolid.",
-					repItem->EntityLabel);
+				XbimGeometryCreator::LogWarning(repItem, "Invalid extrusion, depth must be >0");
 			}
 			//if it has failed we will have a null solid
 		}
@@ -1066,13 +1060,11 @@ namespace Xbim
 					pSolid->Move(XbimConvert::ToLocation(repItem->Position));
 				}
 				else
-					XbimGeometryCreator::logger->WarnFormat("WS003: Invalid Solid Extrusion, could not create solid, found in Entity #{0}=IIfcRevolvedAreaSolid.",
-					repItem->EntityLabel);
+					XbimGeometryCreator::LogWarning(repItem, "Invalidextrusion, could not create solid");
 			}
 			else if (repItem->Angle <= 0)
 			{
-				XbimGeometryCreator::logger->WarnFormat("WS004: Invalid Solid Extrusion, Extrusion Angle must be >0, found in Entity #{0}=IIfcRevolvedAreaSolid.",
-					repItem->EntityLabel);
+				XbimGeometryCreator::LogWarning(repItem, "Invalidextrusion, angle must be >0");
 			}
 		}
 
@@ -1088,7 +1080,7 @@ namespace Xbim
 				IIfcPlane^ ifcPlane = dynamic_cast<IIfcPlane^>(surface);
 				if (ifcPlane == nullptr)
 				{
-					XbimGeometryCreator::logger->WarnFormat("WS011: Non-Planar half spaces are not supported in Entity #{0}, it has been ignored", hs->EntityLabel);
+					XbimGeometryCreator::LogWarning(hs, "Non-planar half spaces are not supported it has been ignored");
 					return;
 				}
 				gp_Pln plane = XbimConvert::ToPlane(ifcPlane->Position);
@@ -1126,7 +1118,7 @@ namespace Xbim
 			IIfcSurface^ surface = (IIfcSurface^)bhs->BaseSurface;
 			if (!dynamic_cast<IIfcPlane^>(surface))
 			{
-				XbimGeometryCreator::logger->WarnFormat("WS011: Non-Planar half spaces are not supported in Entity #{0}, it has been ignored", bhs->EntityLabel);
+				XbimGeometryCreator::LogWarning(bhs, "Non-Planar half spaces are not supported. It has been ignored");
 				return;
 			}
 			IIfcPlane^ ifcPlane = (IIfcPlane^)surface;
@@ -1143,7 +1135,7 @@ namespace Xbim
 			IIfcSurface^ surface = (IIfcSurface^)pbhs->BaseSurface;
 			if (!dynamic_cast<IIfcPlane^>(surface))
 			{
-				XbimGeometryCreator::logger->WarnFormat("WS011: Non-Planar half spaces are not supported in Entity #{0}, it has been ignored", pbhs->EntityLabel);
+				XbimGeometryCreator::LogWarning(pbhs, "Non-Planar half spaces are not supported. It has been ignored");
 				return;
 			}
 			IIfcPlane^ ifcPlane = (IIfcPlane^)surface;
@@ -1156,7 +1148,7 @@ namespace Xbim
 			
 			if (!polyBoundary->IsValid)
 			{
-				XbimGeometryCreator::logger->WarnFormat("WS005: The IIfcPolygonalBoundedHalfSpace #{0} has an incorrectly defined PolygonalBoundary #{1}, it has been ignored", pbhs->EntityLabel, pbhs->PolygonalBoundary->EntityLabel);
+				XbimGeometryCreator::LogWarning(pbhs, "Incorrectly defined PolygonalBoundary #{0}. It has been ignored", pbhs->PolygonalBoundary->EntityLabel);
 				return;
 			}
 			//BRepTools::Write(polyBoundary, "d:\\tmp\\w1");
@@ -1168,7 +1160,7 @@ namespace Xbim
 
 			if (!polyFace->IsValid)
 			{
-				XbimGeometryCreator::logger->WarnFormat("WS009: The IIfcPolygonalBoundedHalfSpace #{0} has an incorrectly defined Face with PolygonalBoundary #{1}, it has been ignored", pbhs->EntityLabel, pbhs->PolygonalBoundary->EntityLabel);
+				XbimGeometryCreator::LogWarning(pbhs, "Incorrectly defined Face with PolygonalBoundary #{0}. It has been ignored", pbhs->PolygonalBoundary->EntityLabel);
 				return;
 			}
 			TopoDS_Shape boundedHalfSpace = BRepPrimAPI_MakePrism(polyFace, gp_Vec(0, 0, extrusionMax*4));
@@ -1188,7 +1180,7 @@ namespace Xbim
 				return;
 			}
 			GC::KeepAlive(polyFace);
-			XbimGeometryCreator::logger->WarnFormat("WS010: Failed to create IIfcPolygonalBoundedHalfSpace #{0}", pbhs->EntityLabel);
+			XbimGeometryCreator::LogWarning(pbhs, "Failed to create half space");
 
 		}
 
@@ -1250,7 +1242,7 @@ namespace Xbim
 					}
 					else
 					{
-						XbimGeometryCreator::logger->WarnFormat("WS022: IIfcSweptDiskSolid #{0} inner loop could not be constructed", swdSolid->EntityLabel);
+						XbimGeometryCreator::LogWarning(swdSolid, "Inner loop could not be constructed");
 					}
 				}
 				//add top and bottom faces with their hole loops
@@ -1280,7 +1272,7 @@ namespace Xbim
 			}
 			else
 			{
-				XbimGeometryCreator::logger->WarnFormat("WS021: IIfcSweptDiskSolid #{0} could not be constructed", swdSolid->EntityLabel);
+				XbimGeometryCreator::LogWarning(swdSolid, "Could not be constructed. It has been ignored");
 				
 			}
 		}
@@ -1364,7 +1356,7 @@ namespace Xbim
 			BRepTools::Write(right, "d:\\xbim\\r");*/
 			if (!left->IsValid)
 			{
-				XbimGeometryCreator::logger->WarnFormat("WS006: IIfcBooleanResult #{0} with invalid first operand", solid->EntityLabel);
+				XbimGeometryCreator::LogWarning(solid, "Invalid first operand");
 				return;
 			}
 
@@ -1372,7 +1364,7 @@ namespace Xbim
 
 			if (!right->IsValid)
 			{
-				XbimGeometryCreator::logger->WarnFormat("WS007: IIfcBooleanResult #{0} with invalid second operand", solid->EntityLabel);
+				XbimGeometryCreator::LogWarning(solid, "Invalid second operand");
 				*pSolid = left; //return the left operand
 				return;
 			}
@@ -1397,7 +1389,7 @@ namespace Xbim
 			}
 			catch (Exception^ xbimE)
 			{
-				XbimGeometryCreator::logger->ErrorFormat("ES001: Error performing boolean operation for entity #{0}={1}\n{2}. The operation has been ignored", solid->EntityLabel, solid->GetType()->Name, xbimE->Message);
+				XbimGeometryCreator::LogError(solid, "Error performing boolean operation, {0}. The operation has been ignored", xbimE->Message);
 				*pSolid = left; //return the left operand
 				return;
 			}
@@ -1738,7 +1730,7 @@ namespace Xbim
 						solidCut = (XbimSolid^)facetedSolidCut->ConvertToXbimSolid();
 						if (solidCut == nullptr)
 						{
-							XbimGeometryCreator::logger->WarnFormat("WS023: Invalid operation. Only solid shapes can be cut from another solid");
+							XbimGeometryCreator::LogWarning("WS023: Invalid operation. Only solid shapes can be cut from another solid");
 							return gcnew XbimSolidSet(this); // the result would be no change so return this
 						} //else carry on with the boolean
 					}
@@ -1747,7 +1739,7 @@ namespace Xbim
 #endif // USE_CARVE_CSG
 
 				{
-					XbimGeometryCreator::logger->WarnFormat("WS024: Invalid operation. Only solid shapes can be cut from another solid");
+					XbimGeometryCreator::LogWarning(toCut, "Invalid operation. Only solid shapes can be cut from another solid");
 					return gcnew XbimSolidSet(this); // the result would be no change so return this		
 				}
 			}
@@ -1784,7 +1776,7 @@ namespace Xbim
 			{
 				 err = gcnew String(Standard_Failure::Caught()->GetMessageString());			
 			}
-			XbimGeometryCreator::logger->WarnFormat("WS029: Boolean Cut operation failed. " + err);
+			XbimGeometryCreator::LogWarning(toCut, "Boolean Cut operation failed, {0}",err);
 			GC::KeepAlive(solidCut);
 			GC::KeepAlive(this);
 			return XbimSolidSet::Empty;
@@ -1819,7 +1811,7 @@ namespace Xbim
 						solidIntersect = (XbimSolid^)facetedSolidIntersect->ConvertToXbimSolid();
 						if (solidIntersect == nullptr)
 						{
-							XbimGeometryCreator::logger->WarnFormat("WS025: Invalid operation. Only solid shapes can be intersected with another solid");
+							XbimGeometryCreator::LogWarning("WS025: Invalid operation. Only solid shapes can be intersected with another solid");
 							return gcnew XbimSolidSet(this); // the result would be no change so return this
 						} //else carry on with the boolean
 					}
@@ -1829,7 +1821,7 @@ namespace Xbim
 
 				{
 					
-					XbimGeometryCreator::logger->WarnFormat("WS026: Invalid operation. Only solid shapes can be intersected with another solid");
+					XbimGeometryCreator::LogWarning(toIntersect, "Invalid operation. Only solid shapes can be intersected with another solid");
 					return gcnew XbimSolidSet(this); // the result would be no change so return this
 				}
 			}
@@ -1847,7 +1839,7 @@ namespace Xbim
 			{
 				err = gcnew String(Standard_Failure::Caught()->GetMessageString());
 			}
-			XbimGeometryCreator::logger->WarnFormat("WS030: Boolean Intersect operation failed. " + err);
+			XbimGeometryCreator::LogWarning(toIntersect, "Intersect operation failed,{0}", err);
 			return XbimSolidSet::Empty;
 		}
 
@@ -1880,7 +1872,7 @@ namespace Xbim
 						solidUnion = (XbimSolid^)facetedSolidUnion->ConvertToXbimSolid();
 						if (solidUnion == nullptr)
 						{
-							XbimGeometryCreator::logger->WarnFormat("WS027: Invalid operation. Only solid shapes can be unioned with another solid");
+							XbimGeometryCreator::LogWarning("WS027: Invalid operation. Only solid shapes can be unioned with another solid");
 							return gcnew XbimSolidSet(this); // the result would be no change so return this
 						} //else carry on with the boolean
 					}
@@ -1889,7 +1881,7 @@ namespace Xbim
 #endif // USE_CARVE_CSG
 
 				{
-					XbimGeometryCreator::logger->WarnFormat("WS028: Invalid operation. Only solid shapes can be unioned with another solid");
+					XbimGeometryCreator::LogWarning(toUnion, "Invalid operation. Only solid shapes can be unioned with another solid");
 					return gcnew XbimSolidSet(this); // the result would be no change so return this
 				}
 			}
@@ -1908,7 +1900,7 @@ namespace Xbim
 			{
 				err = gcnew String(Standard_Failure::Caught()->GetMessageString());
 			}
-			XbimGeometryCreator::logger->WarnFormat("WS031: Boolean Union operation failed. " + err);
+			XbimGeometryCreator::LogWarning(toUnion, "Boolean Union operation failed, {0}",err);
 			return XbimSolidSet::Empty;
 		}
 
@@ -1981,7 +1973,7 @@ namespace Xbim
 				GC::KeepAlive(toSection);
 				GC::KeepAlive(this);
 			}
-			XbimGeometryCreator::logger->WarnFormat("WS008:Boolean Section operation has failed to create a section");
+			XbimGeometryCreator::LogWarning(toSection, "Boolean Section operation has failed to create a section");
 			
 			return XbimFaceSet::Empty;
 		}

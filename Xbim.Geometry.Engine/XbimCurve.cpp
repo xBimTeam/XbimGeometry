@@ -136,8 +136,8 @@ namespace Xbim
 				ShapeConstruct_ProjectCurveOnSurface projector;
 				projector.Init(face->GetSurface(), curve->Model->ModelFactors->Precision);
 				XbimCurve^ baseCurve = gcnew XbimCurve(curve->ReferenceCurve);
-				Standard_Real first;
-				Standard_Real last;
+				Standard_Real first = baseCurve->FirstParameter;
+				Standard_Real last = baseCurve->LastParameter;
 				Handle_Geom2d_Curve c2d;
 				Handle_Geom_Curve cBase = baseCurve;
 				if(projector.PerformAdvanced(cBase, first, last, c2d))
@@ -196,8 +196,8 @@ namespace Xbim
 			else
 			{
 				delete pCurve; //tidy up
-				Type ^ type = circle->Position->GetType();
-				throw gcnew Exception(String::Format("WC001: Circle #{0} with Placement of type {1} is not implemented", circle->EntityLabel, type->Name));				
+				Type ^ type = circle->Position->GetType();						
+				XbimGeometryCreator::LogError(circle, "Placement of type {0} is not implemented", type->Name);
 				return;
 			}
 			
@@ -209,11 +209,13 @@ namespace Xbim
 			double semiAx2 = ellipse->SemiAxis2;
 			if (semiAx1 <= 0)
 			{
-				throw gcnew Exception(String::Format("WC002: Illegal Ellipse Semi Axis 1, must be greater than 0, in entity #{0}", ellipse->EntityLabel));
+				XbimGeometryCreator::LogError(ellipse,"Illegal Ellipse Semi Axis 1, must be greater than 0");
+				return;
 			}
 			if (semiAx2 <= 0)
 			{
-				throw gcnew Exception(String::Format("WE005: Illegal Ellipse Semi Axis 2, must be greater than 0, in entity #{0}", ellipse->EntityLabel));
+				XbimGeometryCreator::LogError(ellipse, "Illegal Ellipse Semi Axis 2, must be greater than 0");
+				return;
 			}				
 			bool rotateElipse;
 			if (semiAx1 <= semiAx2)//either same or two is larger than 1			 

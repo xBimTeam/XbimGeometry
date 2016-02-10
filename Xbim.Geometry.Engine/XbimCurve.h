@@ -65,6 +65,9 @@ namespace Xbim
 			virtual XbimPoint3D GetPoint(double parameter);
 			virtual property bool IsClosed{ bool get(); }
 			virtual property bool Is3D{ bool get(){ return true; }; }
+			virtual property double FirstParameter{double get(){ return IsValid ? (*pCurve)->FirstParameter() : 0; }; }
+			virtual property double LastParameter{double get(){ return IsValid ? (*pCurve)->LastParameter() : 0; }; }
+		
 		};
 	}
 }
