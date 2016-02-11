@@ -449,17 +449,7 @@ namespace Xbim
 			double precision = mf->PrecisionBoolean; //use a courser precision for trimmed curves
 			double currentPrecision = precision;
 			double maxTolerance = mf->PrecisionBooleanMax;
-			//BRep_Builder b;
-			//TopoDS_Compound c;
-			//b.MakeCompound(c);
-			//for each(IIfcCompositeCurveSegment^ seg in cCurve->Segments)
-			//{
-			//	XbimWire^ wireSegManaged = gcnew XbimWire(seg->ParentCurve);
-			//	TopoDS_Wire wireSeg = wireSegManaged;
-			//	if (!seg->SameSense) wireSeg.Reverse();
-			//	b.Add(c, wireSeg);
-			//}
-			//BRepTools::Write(c, "d:\\tmp\\c");
+			bool first = true;
 			for each(IIfcCompositeCurveSegment^ seg in cCurve->Segments)
 			{
 				//XbimCurve^ cv = gcnew XbimCurve(seg->ParentCurve);
@@ -472,6 +462,26 @@ namespace Xbim
 				retryAddWire:
 					
 					FTol.SetTolerance(wireSegManaged, currentPrecision, TopAbs_WIRE);
+					
+					if (!first) //only do this if we have something
+					{
+						XbimWire^ currentWire = gcnew XbimWire(wire.Wire());
+						//see if start matches current e-nd
+						XbimPoint3DWithTolerance^ currentEnd = gcnew XbimPoint3DWithTolerance(currentWire->End, currentPrecision);
+						XbimPoint3DWithTolerance^ segStart = gcnew XbimPoint3DWithTolerance(wireSegManaged->Start, currentPrecision);
+						if (currentEnd!=segStart)
+						{
+							XbimPoint3DWithTolerance^ segEnd = gcnew XbimPoint3DWithTolerance(wireSegManaged->End, currentPrecision);
+							if (segEnd == currentEnd) //need to reverse the segment
+								wireSegManaged->Reverse();
+							else
+							{
+								XbimPoint3DWithTolerance^ currentStart = gcnew XbimPoint3DWithTolerance(currentWire->End, currentPrecision);
+								if (currentStart==segStart)
+									wireSegManaged->Reverse();
+							}
+						}
+					}
 					for each (XbimEdge^ edge in wireSegManaged->Edges)
 					{
 						wire.Add(edge);
@@ -487,6 +497,7 @@ namespace Xbim
 							XbimGeometryCreator::LogWarning(cCurve,"Composite curve segment #{0} was not contiguous with any other segments. It has been ignored", seg->EntityLabel);
 						}
 					}
+					first = false; //we have added something
 				}
 				
 			}

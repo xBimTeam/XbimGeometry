@@ -425,7 +425,7 @@ namespace Ifc4GeometryTests
         {
             using (var model = IfcStore.Open(@"Ifc4TestFiles\composite-curve.ifc"))
             {
-                var comp = model.Instances[359558] as IIfcCompositeCurve;
+                var comp = model.Instances[3268144] as IIfcCompositeCurve;
                 var geom = _xbimGeometryCreator.CreateWire(comp);
             }
         }
