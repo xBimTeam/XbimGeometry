@@ -290,6 +290,22 @@ namespace Ifc4GeometryTests
             }
         }
 
+        [TestMethod]
+        public void GridWithIfcLineTest()
+        {
+            using (var model = IfcStore.Open(@"Ifc4TestFiles\grid-lines.ifc"))
+            {
+
+                var ifcGrid = model.Instances.OfType<IIfcGrid>().FirstOrDefault();
+                Assert.IsNotNull(ifcGrid);
+                var geom = _xbimGeometryCreator.CreateGrid(ifcGrid);
+                foreach (var solid in geom)
+                {
+                    Assert.IsTrue(solid.Volume > 0);
+                }
+            }
+        }
+
 
         #endregion
 
@@ -420,13 +436,42 @@ namespace Ifc4GeometryTests
             }
         }
 
+        /// <summary>
+        /// This test checks a compsite curve that has incorrect defintions for the sense of its segments
+        /// </summary>
         [TestMethod]
-        public void CompositeCurveTest()
+        public void CompositeCurveBadSenseTest()
         {
             using (var model = IfcStore.Open(@"Ifc4TestFiles\composite-curve.ifc"))
             {
                 var comp = model.Instances[3268144] as IIfcCompositeCurve;
                 var geom = _xbimGeometryCreator.CreateWire(comp);
+            }
+        }
+        /// <summary>
+        /// This test checks for a composite curve that has a trimmed circle that is not within the tolerance of the model at its connections
+        /// </summary>
+        [TestMethod]
+        public void CompositeCurveBadPrecisionTest()
+        {
+            using (var model = IfcStore.Open(@"Ifc4TestFiles\composite-curve2.ifc"))
+            {
+                var eas = model.Instances[3205] as IIfcExtrudedAreaSolid;
+                Assert.IsNotNull(eas);
+                var geom = _xbimGeometryCreator.CreateSolid(eas);
+                Assert.IsTrue((geom.Volume>0));
+            }
+        }
+
+        [TestMethod]
+        public void CompositeCurveEmptySegmentTest()
+        {
+            using (var model = IfcStore.Open(@"Ifc4TestFiles\composite-curve4.ifc"))
+            {
+                var eas = model.Instances[3676127] as IIfcExtrudedAreaSolid;
+                Assert.IsNotNull(eas);
+                var geom = _xbimGeometryCreator.CreateSolid(eas);
+                Assert.IsTrue((geom.Volume > 0));
             }
         }
     }

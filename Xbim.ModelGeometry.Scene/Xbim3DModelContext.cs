@@ -1173,7 +1173,7 @@ namespace Xbim.ModelGeometry.Scene
                      }
                      catch (Exception e)
                      {
-                         LogError(_model.Instances[shapeId], "Failed to create shape geometry, {0}", e.Message);
+                         LogError(shape, "Failed to create shape geometry, {0}", e.Message);
                      }
                  }
 

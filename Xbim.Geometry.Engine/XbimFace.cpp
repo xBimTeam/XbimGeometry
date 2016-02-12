@@ -429,7 +429,7 @@ namespace Xbim
 					}
 					else
 					{
-						XbimGeometryCreator::LogWarning(profile, "Invalid void. IfcCurve #{1} could not be added. Inner bound ignored", curve->EntityLabel);
+						XbimGeometryCreator::LogWarning(profile, "Invalid void. IfcCurve #{0} could not be added. Inner bound ignored", curve->EntityLabel);
 					}
 				}
 			}

@@ -706,6 +706,7 @@ namespace Xbim
 				double precision = repItem->Model->ModelFactors->Precision;
 				IIfcDirection^ dir = repItem->ExtrudedDirection;
 				XbimVector3D vec(dir->X, dir->Y, dir->Z);
+				vec = vec.Normalized();
 				vec *= repItem->Depth;
 				faceEnd->Translate(vec);
 				XbimVertex^ start = gcnew XbimVertex(0, 0, 0, precision);
@@ -819,7 +820,7 @@ namespace Xbim
 				
 				IIfcDirection^ xdir = repItem->FixedReference;
 				gp_Vec xVec(xdir->X,xdir->Y,XbimConvert::GetZValueOrZero(xdir));
-				
+				xVec.Normalize();
 				
 				TopoDS_Edge edge;
 				Standard_Real uoe;
@@ -1009,6 +1010,7 @@ namespace Xbim
 			{
 				IIfcDirection^ dir = repItem->ExtrudedDirection;
 				gp_Vec vec(dir->X, dir->Y, dir->Z);
+				vec.Normalize();
 				vec *= repItem->Depth;
 				BRepPrimAPI_MakePrism prism(face, vec);
 				GC::KeepAlive(face);

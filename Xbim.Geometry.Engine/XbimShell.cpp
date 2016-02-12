@@ -114,6 +114,7 @@ namespace Xbim
 			{
 				IIfcDirection^ dir = linExt->ExtrudedDirection;
 				gp_Vec vec(dir->X, dir->Y, dir->Z);
+				vec.Normalize();
 				vec *= linExt->Depth;
 				BRepPrimAPI_MakePrism shellMaker(prof, vec);
 				if (shellMaker.IsDone())

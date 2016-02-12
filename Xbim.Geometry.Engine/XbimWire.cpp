@@ -459,13 +459,13 @@ namespace Xbim
 				{
 										
 					if (!seg->SameSense) wireSegManaged->Reverse();
-				retryAddWire:
-					
+					XbimWire^ currentWire;
+					if (!first) currentWire = gcnew XbimWire(wire.Wire());
+			retryAddWire:					
 					FTol.SetTolerance(wireSegManaged, currentPrecision, TopAbs_WIRE);
 					
 					if (!first) //only do this if we have something
-					{
-						XbimWire^ currentWire = gcnew XbimWire(wire.Wire());
+					{					
 						//see if start matches current e-nd
 						XbimPoint3DWithTolerance^ currentEnd = gcnew XbimPoint3DWithTolerance(currentWire->End, currentPrecision);
 						XbimPoint3DWithTolerance^ segStart = gcnew XbimPoint3DWithTolerance(wireSegManaged->Start, currentPrecision);
@@ -488,6 +488,7 @@ namespace Xbim
 					}					
 					if (!wire.IsDone())
 					{
+						
 						currentPrecision *= 10;
 						if (currentPrecision <= maxTolerance)
 							goto retryAddWire;
@@ -668,9 +669,8 @@ namespace Xbim
 					trimmed1 = true;
 				}
 			}
+			BRepLib_MakeWire wireMaker;
 			BRep_Builder b;
-			TopoDS_Wire w;
-			b.MakeWire(w);
 			for each (IIfcTrimmingSelect^ trim in tCurve->Trim2)
 			{
 				if (dynamic_cast<IIfcCartesianPoint^>(trim) && trim_cartesian && trimmed1)
@@ -693,7 +693,7 @@ namespace Xbim
 						b.MakeVertex(v2, pnt2, currentTolerance);
 						if (dynamic_cast<IIfcLine^>(tCurve->BasisCurve)) //we have a line and two points, just build it
 						{
-							b.Add(w, BRepBuilderAPI_MakeEdge(sense_agreement ? v1 : v2, sense_agreement ? v2 : v1));
+							wireMaker.Add(BRepBuilderAPI_MakeEdge(sense_agreement ? v1 : v2, sense_agreement ? v2 : v1));
 						}
 						else //we need to trim
 						{
@@ -712,10 +712,10 @@ namespace Xbim
 								}
 								String^ errMsg = XbimEdge::GetBuildEdgeErrorMessage(err);
 								XbimGeometryCreator::LogWarning(tCurve, "Construction of trimmed curve failed, {0}. A line segment has been used",  errMsg);
-								b.Add(w, BRepBuilderAPI_MakeEdge(sense_agreement ? v1 : v2, sense_agreement ? v2 : v1));
+								wireMaker.Add(BRepBuilderAPI_MakeEdge(sense_agreement ? v1 : v2, sense_agreement ? v2 : v1));
 							}
 							else
-								b.Add(w, e.Edge());
+								wireMaker.Add( e.Edge());
 						}
 						trimmed2 = true;
 					}
@@ -738,7 +738,7 @@ namespace Xbim
 						}
 						else
 						{
-							b.Add(w, edgeMaker.Edge());
+							wireMaker.Add(edgeMaker.Edge());
 						}
 					}
 					else
@@ -758,15 +758,18 @@ namespace Xbim
 						}
 						else
 						{
-							b.Add(w, edgeMaker.Edge());
+							wireMaker.Add(edgeMaker.Edge());
 						}
 					}
 					trimmed2 = true;
 					break;
 				}
 			}
-			pWire = new TopoDS_Wire();
-			*pWire = w;
+			if (wireMaker.IsDone())
+			{
+				pWire = new TopoDS_Wire();
+				*pWire = wireMaker.Wire();
+			}
 		}
 		
 		void XbimWire::Init(IIfcCurve^ curve)

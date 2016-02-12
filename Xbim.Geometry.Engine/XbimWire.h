@@ -121,7 +121,7 @@ namespace Xbim
 			
 #pragma region IXbimWire Interface
 			virtual property  XbimGeometryObjectType GeometryType{XbimGeometryObjectType  get() override {return XbimGeometryObjectType::XbimWireType; }; }
-			virtual property bool IsValid{bool get() override { return pWire != nullptr; }; }
+			virtual property bool IsValid{bool get() override { return pWire != nullptr && !pWire->IsNull(); }; }
 			virtual property IXbimEdgeSet^ Edges{IXbimEdgeSet^ get(); }
 			virtual property IXbimVertexSet^ Vertices{IXbimVertexSet^ get(); }
 			virtual property IEnumerable<XbimPoint3D>^ Points{IEnumerable<XbimPoint3D>^ get(); }

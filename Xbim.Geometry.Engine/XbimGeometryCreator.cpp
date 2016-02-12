@@ -24,6 +24,7 @@
 #include <Geom_Circle.hxx>
 #include <BRepBuilderAPI_MakeWire.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
+#include <Geom_TrimmedCurve.hxx>
 using namespace  System::Threading;
 using namespace  System::Linq;
 
@@ -190,7 +191,7 @@ namespace Xbim
 			catch (Standard_Failure e)
 			{
 				String^ err = gcnew String(Standard_Failure::Caught()->GetMessageString());
-				LogError(geomRep, "Error creating geometry representation of type {0}, {2}", geomRep->GetType()->Name, err);
+				LogError(geomRep, "Error creating geometry representation of type {0}, {1}", geomRep->GetType()->Name, err);
 				return XbimGeometryObjectSet::Empty;
 			}
 			LogError(geomRep,"Geometry Representation of Type {0} is not implemented", geomRep->GetType()->Name);
@@ -1000,6 +1001,8 @@ namespace Xbim
 			double mm = grid->Model->ModelFactors->OneMilliMeter;
 			double precision = grid->Model->ModelFactors->Precision;
 
+			//calculate to bounding rect
+
 
 
 			
@@ -1008,17 +1011,26 @@ namespace Xbim
 			gp_Vec normal;
 
 			for each (IIfcGridAxis^ axis in grid->UAxes)
-			{				
-				Handle_Geom_Curve curve = gcnew XbimCurve(axis->AxisCurve); //create the axis				
+			{
+				XbimCurve^ c = gcnew XbimCurve(axis->AxisCurve);
+				
+				Handle_Geom_Curve curve = gcnew XbimCurve(axis->AxisCurve); //create the axis	
+				if (curve->LastParameter() - curve->FirstParameter() > mm*2e5) //it is massive bring in to reasonable space
+				{
+					curve = new Geom_TrimmedCurve(curve, mm*1e-5, mm*1e5);					
+				}
 				curve->D1(curve->FirstParameter(), origin, normal); //get the start point and normal
 				gp_Dir v1 = gp::DX().IsParallel(normal, Precision::Angular()) ? gp::DY() : gp::DX();
 				gp_Ax2 centre(origin, normal, v1); //create the axis for the rectangular face
 				TopoDS_Wire rect = gcnew XbimWire(50 * mm, mm / 10, precision, true);
+
+				
 				gp_Trsf trsf;
 				trsf.SetTransformation(centre, gp_Ax3());
 				rect.Move(TopLoc_Location(trsf));								
 				TopoDS_Face profile = BRepBuilderAPI_MakeFace(rect, Standard_True);				
 				TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(curve);
+				
 				TopoDS_Wire spine = BRepBuilderAPI_MakeWire(edge);
 				BRepOffsetAPI_MakePipe axisMaker(spine,profile);			
 				axisMaker.Build();
@@ -1026,11 +1038,16 @@ namespace Xbim
 			}
 			for each (IIfcGridAxis^ axis in grid->VAxes)
 			{
-				Handle_Geom_Curve curve = gcnew XbimCurve(axis->AxisCurve); //create the axis				
+				Handle_Geom_Curve curve = gcnew XbimCurve(axis->AxisCurve); //create the axis	
+				if (curve->LastParameter() - curve->FirstParameter() > mm*2e5) //it is massive bring in to reasonable space
+				{
+					curve = new Geom_TrimmedCurve(curve, mm*1e-5, mm*1e5);
+				}
 				curve->D1(curve->FirstParameter(), origin, normal); //get the start point and normal
 				gp_Dir v1 = gp::DX().IsParallel(normal, Precision::Angular()) ? gp::DY() : gp::DX();
 				gp_Ax2 centre(origin, normal, v1); //create the axis for the rectangular face
 				TopoDS_Wire rect = gcnew XbimWire(50 * mm, mm/10, precision, true);
+				
 				gp_Trsf trsf;
 				trsf.SetTransformation(centre, gp_Ax3());
 				rect.Move(TopLoc_Location(trsf));
@@ -1043,11 +1060,19 @@ namespace Xbim
 			}
 			for each (IIfcGridAxis^ axis in grid->WAxes)
 			{
-				Handle_Geom_Curve curve = gcnew XbimCurve(axis->AxisCurve); //create the axis				
+				Handle_Geom_Curve curve = gcnew XbimCurve(axis->AxisCurve); //create the axis
+				if (curve->LastParameter() - curve->FirstParameter() > mm*2e5) //it is massive bring in to reasonable space
+				{
+					curve = new Geom_TrimmedCurve(curve, mm*1e-5, mm*1e5);
+				}
 				curve->D1(curve->FirstParameter(), origin, normal); //get the start point and normal
 				gp_Dir v1 = gp::DX().IsParallel(normal, Precision::Angular()) ? gp::DY() : gp::DX();
 				gp_Ax2 centre(origin, normal, v1); //create the axis for the rectangular face
 				TopoDS_Wire rect = gcnew XbimWire(50 * mm, mm / 10, precision, true);
+				if (curve->LastParameter() - curve->FirstParameter() > mm*1e6) //it is massive bring in to reasonable space
+				{
+					curve = new Geom_TrimmedCurve(curve, mm*1e-3, mm*1e3);
+				}
 				gp_Trsf trsf;
 				trsf.SetTransformation(centre, gp_Ax3());
 				rect.Move(TopLoc_Location(trsf));

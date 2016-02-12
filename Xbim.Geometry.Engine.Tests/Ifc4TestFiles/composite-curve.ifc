@@ -2,7 +2,7 @@ ISO-10303-21;
 HEADER;
 FILE_DESCRIPTION (('ViewDefinition [CoordinationView]'), '2;1');
 FILE_NAME ('', '2016-02-11T02:19:04', (''), (''), 'Xbim File Processor version 3.2.0.0', 'Xbim version 3.2.0.0', '');
-FILE_SCHEMA (('IFC2X3'));
+FILE_SCHEMA (('IFC4'));
 ENDSEC;
 DATA;
 #3268169=IFCSLAB('0Q089QjrH0IgQ0bEln5WnI',#3268176,'Floor:Composite Slab - 3":6093587',$,'Floor:Composite Slab - 3"',#3268015,#3268167,'6093587',.FLOOR.);
