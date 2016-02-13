@@ -3,12 +3,15 @@ using System.Linq;
 using GeometryTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Xbim.Common.Geometry;
+using Xbim.Common.Logging;
 using Xbim.Ifc;
 using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc4.GeometricModelResource;
 using Xbim.Ifc4.Interfaces;
 using Xbim.Ifc4.ProductExtension;
 using Xbim.ModelGeometry.Scene;
+
+
 namespace Ifc4GeometryTests
 {
     [DeploymentItem(@"x64\", "x64")]
@@ -472,6 +475,79 @@ namespace Ifc4GeometryTests
                 Assert.IsNotNull(eas);
                 var geom = _xbimGeometryCreator.CreateSolid(eas);
                 Assert.IsTrue((geom.Volume > 0));
+            }
+        }
+
+        [TestMethod]
+        public void CompositeCurveSegmentsDoNotCloseTest()
+        {
+            using (var model = IfcStore.Open(@"Ifc4TestFiles\composite-curve5.ifc"))
+            {
+                using (var eventTrace = LoggerFactory.CreateEventTrace())
+                {
+                    //try building the polygonally bounded half space that has the faulty curve, which is now a seam
+                    var pbhs = model.Instances[3942238] as IIfcBooleanClippingResult;
+                    var solid = _xbimGeometryCreator.CreateSolid(pbhs);
+                    Assert.IsTrue(solid.Volume > 0);
+                    Assert.IsTrue(eventTrace.Events.Count == 3); //3 events should have been raised from this call
+                }
+            }
+        }
+
+        [TestMethod]
+        public void BooleanOpeningsTotalSubractionTest()
+        {
+            using (var model = IfcStore.Open(@"Ifc4TestFiles\boolean-complete-subtraction.ifc"))
+            {
+                var ifcWall = model.Instances.OfType<IIfcWall>().FirstOrDefault();
+                Assert.IsNotNull(ifcWall);
+                var ifcOpening = model.Instances.OfType<IIfcOpeningElement>().FirstOrDefault();
+                Assert.IsNotNull(ifcOpening);
+
+                var opening = model.Instances[1133441] as IIfcExtrudedAreaSolid;
+                Assert.IsNotNull(opening);
+                var wall = model.Instances[1133397] as IIfcExtrudedAreaSolid;
+                Assert.IsNotNull(wall);
+                //create it in the right position
+                var geomOpening = _xbimGeometryCreator.Create(opening, (IIfcAxis2Placement3D)((IIfcLocalPlacement)(ifcOpening.ObjectPlacement)).RelativePlacement) as IXbimSolid;
+                Assert.IsNotNull(geomOpening);
+                Assert.IsTrue((geomOpening.Volume > 0));
+                var geomWall = _xbimGeometryCreator.CreateSolid(wall);
+                Assert.IsTrue((geomWall.Volume > 0));
+                var result = geomWall.Cut(geomOpening, model.ModelFactors.Precision);
+                Assert.IsTrue(result.Count==0);
+            }
+        }
+
+        [TestMethod]
+        public void CloseProfileWithVoidsTest()
+        {
+            using (var model = IfcStore.Open(@"Ifc4TestFiles\closed-profile-with-voids.ifc"))
+            {
+                using (var eventTrace = LoggerFactory.CreateEventTrace())
+                {
+                    var eas = model.Instances[23512] as IIfcExtrudedAreaSolid;
+                    Assert.IsNotNull(eas);
+                    var geom = _xbimGeometryCreator.CreateSolid(eas);
+                    Assert.IsTrue((geom.Volume > 0));
+                    Assert.IsTrue(eventTrace.Events.Count == 0); //no events should have been raised from this call
+                }
+            }
+        }
+
+        [TestMethod]
+        public void CloseProfileWithInvalidBoundTest()
+        {
+            using (var model = IfcStore.Open(@"Ifc4TestFiles\closed-profile-with-invalid-bound.ifc"))
+            {
+                using (var eventTrace = LoggerFactory.CreateEventTrace())
+                {
+                    var eas = model.Instances[272261] as IIfcExtrudedAreaSolid;
+                    Assert.IsNotNull(eas);
+                    var geom = _xbimGeometryCreator.CreateSolid(eas);
+                    Assert.IsTrue((geom.Volume > 0));
+                    Assert.IsTrue(eventTrace.Events.Count == 0); //no events should have been raised from this call
+                }
             }
         }
     }

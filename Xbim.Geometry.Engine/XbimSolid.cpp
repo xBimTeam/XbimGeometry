@@ -681,7 +681,7 @@ namespace Xbim
 				}
 				else if (repItem->Angle <= 0)
 				{
-					XbimGeometryCreator::LogWarning(repItem, "Invalid extrusion,  angle must be >0 ");
+					XbimGeometryCreator::LogInfo(repItem, "Invalid extrusion,  angle must be >0 ");
 				}
 				GC::KeepAlive(faceStart);
 				GC::KeepAlive(faceEnd);
@@ -901,7 +901,7 @@ namespace Xbim
 				GC::KeepAlive(faceStart);
 				
 			}
-			XbimGeometryCreator::LogWarning(repItem, "Invalid extrusion, depth must be >0 and faces must be correctly defined");
+			XbimGeometryCreator::LogInfo(repItem, "Invalid extrusion, depth must be >0 and faces must be correctly defined");
 			//if it has failed we will have a null solid
 
 		}
@@ -992,7 +992,7 @@ namespace Xbim
 					return;
 				}				
 			}
-			XbimGeometryCreator::LogWarning(repItem, "Invalid extrusion, depth must be >0 and faces must be correctly defined");
+			XbimGeometryCreator::LogInfo(repItem, "Invalid extrusion, depth must be >0 and faces must be correctly defined");
 			//if it has failed we will have a null solid
 		}
 
@@ -1027,7 +1027,7 @@ namespace Xbim
 			}
 			else if (repItem->Depth <= 0)
 			{
-				XbimGeometryCreator::LogWarning(repItem, "Invalid extrusion, depth must be >0");
+				XbimGeometryCreator::LogInfo(repItem, "Invalid extrusion, depth must be >0");
 			}
 			//if it has failed we will have a null solid
 		}

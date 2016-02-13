@@ -25,6 +25,12 @@
 #include <BRepBuilderAPI_MakeWire.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
 #include <Geom_TrimmedCurve.hxx>
+#include <Geom_Plane.hxx>
+#include <Geom_RectangularTrimmedSurface.hxx>
+#include <Geom2d_TrimmedCurve.hxx>
+#include <gp_Lin2d.hxx>
+#include <Geom2d_Line.hxx>
+#include <IntAna2d_AnaIntersection.hxx>
 using namespace  System::Threading;
 using namespace  System::Linq;
 
@@ -1000,84 +1006,96 @@ namespace Xbim
 		{
 			double mm = grid->Model->ModelFactors->OneMilliMeter;
 			double precision = grid->Model->ModelFactors->Precision;
-
-			//calculate to bounding rect
-
-
-
-			
 			XbimSolidSet^ solids = gcnew XbimSolidSet();
 			gp_Pnt origin;
 			gp_Vec normal;
+			List<XbimCurve2D^>^ UCurves = gcnew List<XbimCurve2D^>();
+			List<XbimCurve2D^>^ VCurves = gcnew List<XbimCurve2D^>();
+			List<XbimCurve2D^>^ WCurves = gcnew List<XbimCurve2D^>();
+			List<XbimPoint3D>^ intersections = gcnew List<XbimPoint3D>();
 
 			for each (IIfcGridAxis^ axis in grid->UAxes)
 			{
-				XbimCurve^ c = gcnew XbimCurve(axis->AxisCurve);
-				
-				Handle_Geom_Curve curve = gcnew XbimCurve(axis->AxisCurve); //create the axis	
-				if (curve->LastParameter() - curve->FirstParameter() > mm*2e5) //it is massive bring in to reasonable space
-				{
-					curve = new Geom_TrimmedCurve(curve, mm*1e-5, mm*1e5);					
-				}
-				curve->D1(curve->FirstParameter(), origin, normal); //get the start point and normal
-				gp_Dir v1 = gp::DX().IsParallel(normal, Precision::Angular()) ? gp::DY() : gp::DX();
-				gp_Ax2 centre(origin, normal, v1); //create the axis for the rectangular face
-				TopoDS_Wire rect = gcnew XbimWire(50 * mm, mm / 10, precision, true);
-
-				
-				gp_Trsf trsf;
-				trsf.SetTransformation(centre, gp_Ax3());
-				rect.Move(TopLoc_Location(trsf));								
-				TopoDS_Face profile = BRepBuilderAPI_MakeFace(rect, Standard_True);				
-				TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(curve);
-				
-				TopoDS_Wire spine = BRepBuilderAPI_MakeWire(edge);
-				BRepOffsetAPI_MakePipe axisMaker(spine,profile);			
-				axisMaker.Build();
-				solids->Add(gcnew XbimSolid(TopoDS::Solid(axisMaker.Shape())));
-			}
+				XbimCurve2D^ c = gcnew XbimCurve2D(axis->AxisCurve);
+				UCurves->Add(c);					
+			}			
 			for each (IIfcGridAxis^ axis in grid->VAxes)
-			{
-				Handle_Geom_Curve curve = gcnew XbimCurve(axis->AxisCurve); //create the axis	
-				if (curve->LastParameter() - curve->FirstParameter() > mm*2e5) //it is massive bring in to reasonable space
-				{
-					curve = new Geom_TrimmedCurve(curve, mm*1e-5, mm*1e5);
-				}
-				curve->D1(curve->FirstParameter(), origin, normal); //get the start point and normal
-				gp_Dir v1 = gp::DX().IsParallel(normal, Precision::Angular()) ? gp::DY() : gp::DX();
-				gp_Ax2 centre(origin, normal, v1); //create the axis for the rectangular face
-				TopoDS_Wire rect = gcnew XbimWire(50 * mm, mm/10, precision, true);
-				
-				gp_Trsf trsf;
-				trsf.SetTransformation(centre, gp_Ax3());
-				rect.Move(TopLoc_Location(trsf));
-				TopoDS_Face profile = BRepBuilderAPI_MakeFace(rect, Standard_True);
-				TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(curve);
-				TopoDS_Wire spine = BRepBuilderAPI_MakeWire(edge);
-				BRepOffsetAPI_MakePipe axisMaker(spine, profile);
-				axisMaker.Build();
-				solids->Add(gcnew XbimSolid(TopoDS::Solid(axisMaker.Shape())));
+			{				
+				XbimCurve2D^ c = gcnew XbimCurve2D(axis->AxisCurve);
+				for each (XbimCurve2D^ u in UCurves)
+					intersections->AddRange(u->Intersections(c, precision));			
 			}
+			
 			for each (IIfcGridAxis^ axis in grid->WAxes)
 			{
-				Handle_Geom_Curve curve = gcnew XbimCurve(axis->AxisCurve); //create the axis
-				if (curve->LastParameter() - curve->FirstParameter() > mm*2e5) //it is massive bring in to reasonable space
+				XbimCurve2D^ c = gcnew XbimCurve2D(axis->AxisCurve);
+				WCurves->Add(c);
+				for each (XbimCurve2D^ u in UCurves)
+					intersections->AddRange(u->Intersections(c, precision));
+				for each (XbimCurve2D^ v in VCurves)
+					intersections->AddRange(v->Intersections(c, precision));
+			}
+
+			XbimRect3D bb = XbimRect3D::Empty;
+			//calculate all the bounding box
+			for each (XbimPoint3D pt in intersections)
+			{
+				if (bb.IsEmpty) bb = XbimRect3D(pt);
+				else bb.Union(pt);
+			}
+			//the box should have a Z of zero so inflate it a bit
+			bb = XbimRect3D::Inflate(bb, bb.SizeX*0.2, bb.SizeY*0.2, 0);
+
+			//create a bounded planar 
+
+			gp_Lin2d top(gp_Pnt2d(bb.X, bb.Y + bb.SizeY) , gp_Dir2d(1,0));
+			gp_Lin2d bottom(gp_Pnt2d(bb.X, bb.Y), gp_Dir2d(1,0));
+			gp_Lin2d left(gp_Pnt2d(bb.X, bb.Y), gp_Dir2d(0, 1));
+			gp_Lin2d right(gp_Pnt2d(bb.X+bb.SizeX, bb.Y), gp_Dir2d(0, 1));
+			
+			IEnumerable<XbimCurve2D^>^ curves = Enumerable::Concat(Enumerable::Concat(UCurves, VCurves), WCurves);			
+			for each (XbimCurve2D^ curve in curves)
+			{
+			    Handle(Geom2d_Curve) hcurve = curve;
+				IntAna2d_AnaIntersection its;
+				if (hcurve->IsKind(STANDARD_TYPE(Geom2d_Line))) //trim the infinite lines
 				{
-					curve = new Geom_TrimmedCurve(curve, mm*1e-5, mm*1e5);
+					const Handle(Geom2d_Line) axis = Handle(Geom2d_Line)::DownCast(hcurve);
+					gp_Lin2d line2d = axis->Lin2d();
+					List<double>^ params = gcnew List<double>();
+					its.Perform(line2d, top);					
+					if (its.NbPoints() > 0) params->Add(its.Point(1).ParamOnFirst());
+					its.Perform(line2d, bottom);
+					if (its.NbPoints() > 0) params->Add(its.Point(1).ParamOnFirst());
+					
+					if (params->Count < 2)
+					{
+						its.Perform(line2d, left); 
+						if(its.NbPoints() > 0) params->Add(its.Point(1).ParamOnFirst());
+					}
+					if (params->Count < 2)
+					{
+						its.Perform(line2d, right);
+						if (its.NbPoints() > 0) params->Add(its.Point(1).ParamOnFirst());
+					}
+					if (params->Count != 2) continue;//give up
+					hcurve = new Geom2d_TrimmedCurve(hcurve, Math::Min(params[0], params[1]), Math::Max(params[0], params[1]));
 				}
-				curve->D1(curve->FirstParameter(), origin, normal); //get the start point and normal
-				gp_Dir v1 = gp::DX().IsParallel(normal, Precision::Angular()) ? gp::DY() : gp::DX();
-				gp_Ax2 centre(origin, normal, v1); //create the axis for the rectangular face
+				
+				gp_Pnt2d origin;
+				gp_Vec2d curveMainDir;
+				
+				hcurve->D1(hcurve->FirstParameter(), origin, curveMainDir); //get the start point and line direction
+				gp_Vec2d curveTangent = curveMainDir.GetNormal();
+				//gp_Dir v1 = gp::DX2d().IsParallel(normal, Precision::Angular()) ? gp::DY() : gp::DX();
+				gp_Ax2 centre(gp_Pnt(origin.X(), origin.Y(), 0), gp_Vec(curveMainDir.X(), curveMainDir.Y(), 0), gp_Vec(curveTangent.X(), curveTangent.Y(), 0)); //create the axis for the rectangular face
 				TopoDS_Wire rect = gcnew XbimWire(50 * mm, mm / 10, precision, true);
-				if (curve->LastParameter() - curve->FirstParameter() > mm*1e6) //it is massive bring in to reasonable space
-				{
-					curve = new Geom_TrimmedCurve(curve, mm*1e-3, mm*1e3);
-				}
 				gp_Trsf trsf;
 				trsf.SetTransformation(centre, gp_Ax3());
 				rect.Move(TopLoc_Location(trsf));
-				TopoDS_Face profile = BRepBuilderAPI_MakeFace(rect, Standard_True);
-				TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(curve);
+				XbimFace^ profile = gcnew XbimFace(BRepBuilderAPI_MakeFace(rect, Standard_True));
+				XbimCurve2D^ xCurve = gcnew XbimCurve2D(hcurve);
+				XbimEdge^ edge = gcnew XbimEdge(xCurve);			
 				TopoDS_Wire spine = BRepBuilderAPI_MakeWire(edge);
 				BRepOffsetAPI_MakePipe axisMaker(spine, profile);
 				axisMaker.Build();

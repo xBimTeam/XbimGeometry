@@ -307,7 +307,7 @@ namespace Xbim
 			if (XbimConvert::IsEqual(pointList[0], pointList[total - 1], tolerance))
 			{
 				total--; //skip the last point
-				if (total > 2) closed = Standard_True;//closed polyline with two points is not a valid closed shape
+				closed = Standard_True;
 			}
 
 			TopTools_Array1OfShape vertexStore(1, total + 1);
@@ -460,9 +460,9 @@ namespace Xbim
 										
 					if (!seg->SameSense) wireSegManaged->Reverse();
 					XbimWire^ currentWire;
-					if (!first) currentWire = gcnew XbimWire(wire.Wire());
+					if (!first&& wire.IsDone()) currentWire = gcnew XbimWire(wire.Wire());
 			retryAddWire:					
-					FTol.SetTolerance(wireSegManaged, currentPrecision, TopAbs_WIRE);
+					FTol.SetTolerance(wireSegManaged, currentPrecision, TopAbs_VERTEX);
 					
 					if (!first) //only do this if we have something
 					{					
@@ -476,9 +476,21 @@ namespace Xbim
 								wireSegManaged->Reverse();
 							else
 							{
-								XbimPoint3DWithTolerance^ currentStart = gcnew XbimPoint3DWithTolerance(currentWire->End, currentPrecision);
+								XbimPoint3DWithTolerance^ currentStart = gcnew XbimPoint3DWithTolerance(currentWire->Start, currentPrecision);
 								if (currentStart==segStart)
 									wireSegManaged->Reverse();
+								else if (segStart != currentEnd || segEnd != currentStart)
+								{
+									currentPrecision *= 10;
+									if (currentPrecision <= maxTolerance)
+										goto retryAddWire;
+									else
+									{
+										haveWarned = true;
+										XbimGeometryCreator::LogWarning(cCurve, "Composite curve segment #{0} was not contiguous with any other segments. It has been ignored", seg->EntityLabel);
+										continue;
+									}
+								}					
 							}
 						}
 					}
@@ -486,18 +498,7 @@ namespace Xbim
 					{
 						wire.Add(edge);
 					}					
-					if (!wire.IsDone())
-					{
-						
-						currentPrecision *= 10;
-						if (currentPrecision <= maxTolerance)
-							goto retryAddWire;
-						else
-						{
-							haveWarned = true;
-							XbimGeometryCreator::LogWarning(cCurve,"Composite curve segment #{0} was not contiguous with any other segments. It has been ignored", seg->EntityLabel);
-						}
-					}
+					currentPrecision = precision;
 					first = false; //we have added something
 				}
 				
