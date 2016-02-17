@@ -264,17 +264,18 @@ namespace Xbim
 
 		IXbimGeometryObject^ XbimShell::Transform(XbimMatrix3D matrix3D)
 		{
-			BRepBuilderAPI_Copy copier(this);
-			BRepBuilderAPI_Transform gTran(copier.Shape(), XbimConvert::ToTransform(matrix3D));
-			TopoDS_Shell temp = TopoDS::Shell(gTran.Shape());
-			return gcnew XbimShell(temp);
+			if (!IsValid) return nullptr;
+			gp_Trsf trans = XbimConvert::ToTransform(matrix3D);
+			BRepBuilderAPI_Transform gTran(this, trans, Standard_True);
+			return gcnew XbimSolid(TopoDS::Solid(gTran.Shape()));
 		}
 
 		IXbimGeometryObject^ XbimShell::TransformShallow(XbimMatrix3D matrix3D)
 		{
-			TopoDS_Shell shell = TopoDS::Shell(pShell->Moved(XbimConvert::ToTransform(matrix3D)));
-			GC::KeepAlive(this);
-			return gcnew XbimShell(shell);
+			if (!IsValid) return nullptr;
+			gp_Trsf trans = XbimConvert::ToTransform(matrix3D);
+			BRepBuilderAPI_Transform gTran(this, trans, Standard_False);
+			return gcnew XbimSolid(TopoDS::Solid(gTran.Shape()));
 		}
 
 		IXbimGeometryObjectSet^ XbimShell::Cut(IXbimSolidSet^ solids, double tolerance)

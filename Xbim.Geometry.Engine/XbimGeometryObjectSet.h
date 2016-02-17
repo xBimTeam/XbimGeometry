@@ -67,10 +67,10 @@ namespace Xbim
 			virtual IXbimGeometryObjectSet^ Cut(IXbimSolid^ solid, double tolerance);
 			virtual IXbimGeometryObjectSet^ Union(IXbimSolidSet^ solids, double tolerance);
 			virtual IXbimGeometryObjectSet^ Union(IXbimSolid^ solid, double tolerance);
-			
+			virtual property String^  ToBRep{String^ get(); }
 			virtual IXbimGeometryObjectSet^ Intersection(IXbimSolidSet^ solids, double tolerance);
 			virtual IXbimGeometryObjectSet^ Intersection(IXbimSolid^ solid, double tolerance);
-
+			virtual bool Sew();
 #pragma endregion
 			virtual void Add(IXbimGeometryObject^ geomObj){ geometryObjects->Add(geomObj); }
 		};

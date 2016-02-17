@@ -1342,9 +1342,14 @@ namespace Xbim
 				//use a fuzzy tolerance of 1mm, less than this should be ignored			
 				IXbimSolidSet^ xbimSolidSet = body->Cut(solidSet, mf->OneMilliMetre);
 				if (xbimSolidSet != nullptr && xbimSolidSet->First != nullptr)
-				{
-					pSolid = new TopoDS_Solid(); 
-					*pSolid = (XbimSolid^)(xbimSolidSet->First); //just take the first as that is what is intended by IIfc schema				
+				{ 
+					const TopoDS_Shape&  shape = (XbimSolid^) (xbimSolidSet->First);
+					if (!shape.IsNull())
+					{
+						pSolid = new TopoDS_Solid();
+						*pSolid = (XbimSolid^)(xbimSolidSet->First); //just take the first as that is what is intended by IIfc schema	
+					}
+					
 				}
 				return;
 			}
@@ -1362,11 +1367,12 @@ namespace Xbim
 				return;
 			}
 
-			pSolid = new TopoDS_Solid(); //make sure this is deleted if not used
+			
 
 			if (!right->IsValid)
 			{
 				XbimGeometryCreator::LogWarning(solid, "Invalid second operand");
+				pSolid = new TopoDS_Solid(); //make sure this is deleted if not used
 				*pSolid = left; //return the left operand
 				return;
 			}
@@ -1392,6 +1398,7 @@ namespace Xbim
 			catch (Exception^ xbimE)
 			{
 				XbimGeometryCreator::LogError(solid, "Error performing boolean operation, {0}. The operation has been ignored", xbimE->Message);
+				pSolid = new TopoDS_Solid(); //make sure this is deleted if not used
 				*pSolid = left; //return the left operand
 				return;
 			}
@@ -1400,16 +1407,23 @@ namespace Xbim
 #ifdef OCC_6_9_SUPPORTED //Later versions of OCC has fuzzy boolean which gives better results
 			if (xbimSolidSet != nullptr && xbimSolidSet->First != nullptr)
 			{
-				*pSolid = (XbimSolid^)(xbimSolidSet->First); //just take the first as that is what is intended by IIfc schema
+				const TopoDS_Shape&  shape = (XbimSolid^)(xbimSolidSet->First);
+				if (!shape.IsNull())
+				{
+					pSolid = new TopoDS_Solid(); //make sure this is deleted if not used
+					*pSolid = (XbimSolid^)(xbimSolidSet->First); //just take the first as that is what is intended by IIfc schema
+				}				
 			}
 #else // otherwise we have to make sure we get a solid when an error occurs
 			if (xbimSolidSet == nullptr || xbimSolidSet->First==nullptr)
 			{
 				XbimGeometryCreator::logger->ErrorFormat("ES002: Error performing boolean operation for entity #{0}={1}. The operation has been ignored", solid->EntityLabel, solid->GetType()->Name);
+				pSolid = new TopoDS_Solid(); //make sure this is deleted if not used
 				*pSolid = left; //return the left operand
 			}
 			else //IIfc requires just one solid as a result so just take the first
 			{
+				pSolid = new TopoDS_Solid(); //make sure this is deleted if not used
 				*pSolid = (XbimSolid^)(xbimSolidSet->First);
 			}
 #endif
@@ -1690,17 +1704,18 @@ namespace Xbim
 
 		IXbimGeometryObject^ XbimSolid::Transform(XbimMatrix3D matrix3D)
 		{
-			BRepBuilderAPI_Copy copier(this);
-			BRepBuilderAPI_Transform gTran(copier.Shape(), XbimConvert::ToTransform(matrix3D));
-			TopoDS_Solid temp = TopoDS::Solid(gTran.Shape());
-			return gcnew XbimSolid(temp);
+			if (!IsValid) return nullptr;
+			gp_Trsf trans = XbimConvert::ToTransform(matrix3D);
+			BRepBuilderAPI_Transform gTran(this, trans, Standard_True);
+			return gcnew XbimSolid(TopoDS::Solid(gTran.Shape()));
 		}
 
 		IXbimGeometryObject^ XbimSolid::TransformShallow(XbimMatrix3D matrix3D)
 		{
-			TopoDS_Solid solid = TopoDS::Solid(pSolid->Moved(XbimConvert::ToTransform(matrix3D)));
-			GC::KeepAlive(this);
-			return gcnew XbimSolid(solid);
+			if (!IsValid) return nullptr;
+			gp_Trsf trans = XbimConvert::ToTransform(matrix3D);
+			BRepBuilderAPI_Transform gTran(this, trans, Standard_False);		
+			return gcnew XbimSolid(TopoDS::Solid(gTran.Shape()));
 		}
 
 		IXbimSolidSet^ XbimSolid::Cut(IXbimSolidSet^ toCut, double tolerance)

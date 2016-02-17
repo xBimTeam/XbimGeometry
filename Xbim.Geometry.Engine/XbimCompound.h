@@ -87,7 +87,7 @@ namespace Xbim
 			virtual IXbimGeometryObjectSet^ Union(IXbimSolid^ solid, double tolerance);
 			virtual IXbimGeometryObjectSet^ Intersection(IXbimSolidSet^ solids, double tolerance);
 			virtual IXbimGeometryObjectSet^ Intersection(IXbimSolid^ solid, double tolerance);
-			
+			virtual bool Sew();
 #ifdef OCC_6_9_SUPPORTED //OCC 6.9.0. is better with complex booleans
 			static int MaxFacesToSew = 3000;
 #else
@@ -110,7 +110,7 @@ namespace Xbim
 			virtual property XbimRect3D BoundingBox {XbimRect3D get()override ; }
 			virtual property double Volume{double get(); }
 			
-			bool Sew();
+			
 			//moves the compound to the new position
 			void Move(IIfcAxis2Placement3D^ position);
 		};

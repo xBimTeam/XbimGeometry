@@ -4,6 +4,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -23,6 +24,7 @@ using Xbim.Tessellator;
 
 namespace Xbim.ModelGeometry.Scene
 {
+
     /// <summary>
     ///     Represents a gemetric representation context, i.e. a 'Body' and 'Model'Representation
     ///     Note a 3DModelContext may contain multiple IIfcGeometricRepresentationContexts
@@ -37,28 +39,64 @@ namespace Xbim.ModelGeometry.Scene
 
             private readonly int _contextId;
             private readonly int _styleId;
-            private readonly List<XbimShapeInstance> _argumentIds;
-            private readonly List<XbimShapeInstance> _cutToolIds;
-            private readonly List<XbimShapeInstance> _projectToolIds;
-
-            public XbimBooleanDefinition(IList<XbimShapeInstance> argumentIds, IList<XbimShapeInstance> cutToolIds, IList<XbimShapeInstance> projectToolIds, int context, int styleId)
-            {
-                if (argumentIds.Any()) _argumentIds = new List<XbimShapeInstance>(argumentIds);
-                if (cutToolIds.Any()) _cutToolIds = new List<XbimShapeInstance>(cutToolIds);
-                if (projectToolIds.Any()) _projectToolIds = new List<XbimShapeInstance>(projectToolIds);
+            private readonly int _productLabel;
+            private readonly int _productType;
+            private IXbimGeometryObjectSet _argumentGeometries;
+            private IXbimSolidSet _cutGeometries;
+            private IXbimSolidSet _projectGeometries;
+            public XbimBooleanDefinition(XbimCreateContextHelper contextHelper, XbimGeometryEngine engine, IModel model, ConcurrentDictionary<int,bool> dupIds, IList<XbimShapeInstance> argumentIds, IList<XbimShapeInstance> cutToolIds, IList<XbimShapeInstance> projectToolIds, int context, int styleId)
+            {               
                 _contextId = context;
                 _styleId = styleId;
+                XbimShapeInstance shape = argumentIds.FirstOrDefault();
+                _productLabel = shape != null ? shape.IfcProductLabel : 0;
+                _productType=shape!=null?shape.IfcTypeId:0;
+                AddGeometries(contextHelper,engine,model,dupIds,argumentIds,cutToolIds,projectToolIds);
             }
-            /// <summary>
-            /// The ids of the geometry arguments the tools will be applied to 
-            /// </summary>
-            public IList<XbimShapeInstance> ArgumentIds
+
+
+            private void AddGeometries(XbimCreateContextHelper contextHelper, XbimGeometryEngine engine, IModel model, ConcurrentDictionary<int,bool> dupIds,IList<XbimShapeInstance> argumentIds, IList<XbimShapeInstance> cutToolIds, IList<XbimShapeInstance> projectToolIds)
             {
-                get
+                bool placebo;
+                _argumentGeometries = engine.CreateGeometryObjectSet();
+                foreach (var argument in argumentIds)
                 {
-                    return _argumentIds ?? EmptyShapeList;
+                    
+                    var geom = contextHelper.GetGeometryFromCache(argument, dupIds.TryGetValue(argument.ShapeGeometryLabel, out placebo));
+                    if (geom != null)
+                        _argumentGeometries.Add(geom);
+                    else
+                        LogWarning(model.Instances[argument.IfcProductLabel],
+                       "Some 3D geometric form definition is missing"
+                       );
+                }
+
+                //now build the openings
+                _cutGeometries = engine.CreateSolidSet();
+                foreach (var openingShape in cutToolIds)
+                {
+                    var openingGeom = contextHelper.GetGeometryFromCache(openingShape, dupIds.TryGetValue(openingShape.ShapeGeometryLabel, out placebo));
+                    if (openingGeom != null)
+                        _cutGeometries.Add(openingGeom);
+                    else
+                        LogWarning(model.Instances[openingShape.IfcProductLabel],
+                       "Some 3D geometric form definition is missing");
+                }
+
+                //now all the projections
+                _projectGeometries = engine.CreateSolidSet();
+
+                foreach (var projectionShape in projectToolIds)
+                {
+                    var projGeom = contextHelper.GetGeometryFromCache(projectionShape, dupIds.TryGetValue(projectionShape.ShapeGeometryLabel, out placebo));
+                    if (projGeom != null)
+                        _projectGeometries.Add(projGeom);
+                    else
+                        LogWarning(model.Instances[projectionShape.IfcProductLabel],
+                       "Some 3D geometric form definition is missing");
                 }
             }
+           
 
             public int ContextId
             {
@@ -68,26 +106,6 @@ namespace Xbim.ModelGeometry.Scene
                 }
             }
 
-            /// <summary>
-            /// The ids of geometry tools to be used in the boolean cut operation
-            /// </summary>
-            public IEnumerable<XbimShapeInstance> CutToolIds
-            {
-                get
-                {
-                    return _cutToolIds == null ? Enumerable.Empty<XbimShapeInstance>() : _cutToolIds;
-                }
-            }
-            /// <summary>
-            /// The ids of geometry tools to be used in the boolean project operation
-            /// </summary>
-            public IEnumerable<XbimShapeInstance> ProjectToolIds
-            {
-                get
-                {
-                    return _projectToolIds == null ? Enumerable.Empty<XbimShapeInstance>() : _projectToolIds;
-                }
-            }
 
             public int StyleId
             {
@@ -95,6 +113,31 @@ namespace Xbim.ModelGeometry.Scene
                 {
                     return _styleId;
                 }
+            }
+
+            public IXbimSolidSet CutGeometries
+            {
+                get { return _cutGeometries; }
+            }
+
+            public IXbimSolidSet ProjectGeometries
+            {
+                get { return _projectGeometries; }
+            }
+
+            public IXbimGeometryObjectSet ArgumentGeometries
+            {
+                get { return _argumentGeometries; }
+            }
+
+            public int ProductLabel
+            {
+                get { return _productLabel; }
+            }
+
+            public int ProductType
+            {
+                get { return _productType; }
             }
         }
 
@@ -197,7 +240,8 @@ namespace Xbim.ModelGeometry.Scene
             internal HashSet<int> MappedShapeIds { get; private set; }
             internal HashSet<int> FeatureElementShapeIds { get; private set; }
             internal List<IGrouping<IIfcElement, IIfcFeatureElement>> OpeningsAndProjections { get; private set; }
-            private HashSet<int> VoidedShapeIds { get; set; }
+            private HashSet<int> VoidedProductIds { get; set; }
+            internal HashSet<int> VoidedShapeIds { get; set; }
             internal HashSet<int> ProductShapeIds { get; private set; }
             internal ConcurrentDictionary<int, IXbimGeometryObject> CachedGeometries { get; private set; }
             internal int Total { get; private set; }
@@ -246,12 +290,13 @@ namespace Xbim.ModelGeometry.Scene
                     MapsWritten = new ConcurrentDictionary<int, List<GeometryReference>>();
                     MapTransforms = new ConcurrentDictionary<int, XbimMatrix3D>();
                     GetOpeningsAndProjections();
-                    VoidedShapeIds = new HashSet<int>();
+                    VoidedProductIds = new HashSet<int>();
+                    VoidedShapeIds  = new HashSet<int>();
                     ParallelOptions = new ParallelOptions();
                     //ParallelOptions.MaxDegreeOfParallelism = 8;
                     CachedGeometries = new ConcurrentDictionary<int, IXbimGeometryObject>();
                     foreach (var voidedShapeId in OpeningsAndProjections.Select(op => op.Key.EntityLabel))
-                        VoidedShapeIds.Add(voidedShapeId);
+                        VoidedProductIds.Add(voidedShapeId);
                     GetProductShapeIds();
                     ShapeLookup = new ConcurrentDictionary<int, GeometryReference>();
                     //Get the surface styles
@@ -386,8 +431,8 @@ namespace Xbim.ModelGeometry.Scene
                
                 foreach (var product in Model.Instances.OfType<IIfcProduct>(true).Where(p => p.Representation != null))
                 {
-                    var isFeatureElementShape = product is IIfcFeatureElement ||
-                                                VoidedShapeIds.Contains(product.EntityLabel);
+                    var isFeatureElementShape = product is IIfcFeatureElement ;
+                    var isVoidedProductShape = VoidedProductIds.Contains(product.EntityLabel);
                     //select representations that are in the required context
                     //only want solid representations for this context, but rep type is optional so just filter identified 2d elements
                     //we can only handle one representation in a context and this is in an implementers agreement
@@ -416,6 +461,7 @@ namespace Xbim.ModelGeometry.Scene
                                             //if not already processed add it
                                             ProductShapeIds.Add(mappedItemLabel);
                                             if (isFeatureElementShape) FeatureElementShapeIds.Add(mappedItemLabel);
+                                            if (isVoidedProductShape) VoidedShapeIds.Add(mappedItemLabel);
                                         }
                                     }
                                 }
@@ -424,12 +470,15 @@ namespace Xbim.ModelGeometry.Scene
                                     //if not already processed add it
                                     ProductShapeIds.Add(shape.EntityLabel);
                                     if (isFeatureElementShape) FeatureElementShapeIds.Add(shape.EntityLabel);
+                                    if (isVoidedProductShape) VoidedShapeIds.Add(shape.EntityLabel);
                                 }
                             }
                         }
                     }
                 }
             }
+
+            
 
 
             public void Dispose()
@@ -441,6 +490,22 @@ namespace Xbim.ModelGeometry.Scene
                     cachedGeom.Value.Dispose();
                 }
                 GC.SuppressFinalize(this);
+            }
+
+            internal void SewGeometries(XbimGeometryEngine engine)
+            {
+                
+                Parallel.ForEach(CachedGeometries, ParallelOptions, geom =>
+                {                       
+                    var geomSet = geom.Value as IXbimGeometryObjectSet;
+                    if (geomSet != null)
+                    {
+                        var solidSet = engine.CreateSolidSet();
+                        solidSet.Add(geom.Value);
+                        CachedGeometries.TryUpdate(geom.Key, solidSet,geom.Value);
+                    }
+                }
+                    );
             }
         }
 
@@ -649,17 +714,18 @@ namespace Xbim.ModelGeometry.Scene
             var featureCount = contextHelper.OpeningsAndProjections.Count;
             if (progDelegate != null) progDelegate(-1, "WriteFeatureElements (" + contextHelper.OpeningsAndProjections.Count + " elements)");
 
-            var dupIds = new HashSet<int>();
-            var allIds = new HashSet<int>();
-            var booleanOps = new List<XbimBooleanDefinition>();
+            var dupIds = new ConcurrentDictionary<int, bool>();
+            var allIds = new ConcurrentDictionary<int, bool>();
+            var booleanOps = new ConcurrentBag<XbimBooleanDefinition>();
             double precision = Math.Max(_model.ModelFactors.OneMilliMeter / 50, _model.ModelFactors.Precision); //set the precision to 100th mm but never less than precision
-
-            //   Parallel.ForEach(contextHelper.OpeningsAndProjections, contextHelper.ParallelOptions, pair =>
-            //         foreach (IGrouping<IIfcElement, IIfcFeatureElement> pair in contextHelper.OpeningsAndProjections)
-            foreach (IGrouping<IIfcElement, IIfcFeatureElement> pair in contextHelper.OpeningsAndProjections)
+            //make sure all the geometries we have cached are sewn
+         //   contextHelper.SewGeometries(Engine);
+            Parallel.ForEach(contextHelper.OpeningsAndProjections, contextHelper.ParallelOptions, pair =>
+                //         foreach (IGrouping<IIfcElement, IIfcFeatureElement> pair in contextHelper.OpeningsAndProjections)
+                // foreach (IGrouping<IIfcElement, IIfcFeatureElement> pair in contextHelper.OpeningsAndProjections)
             {
                 int context = 0;
-                int styleId = 0;//take the style of any part of the main shape
+                int styleId = 0; //take the style of any part of the main shape
                 var element = pair.Key;
 
 
@@ -667,8 +733,8 @@ namespace Xbim.ModelGeometry.Scene
                 var arguments = new List<XbimShapeInstance>();
                 foreach (var elemShape in elementShapes)
                 {
-                    if (!allIds.Add(elemShape.ShapeGeometryLabel))
-                        dupIds.Add(elemShape.ShapeGeometryLabel);
+                    if (!allIds.TryAdd(elemShape.ShapeGeometryLabel, true))
+                        dupIds.TryAdd(elemShape.ShapeGeometryLabel,true);
                     arguments.Add(elemShape);
                     context = elemShape.RepresentationContext;
                     if (elemShape.StyleLabel > 0) styleId = elemShape.StyleLabel;
@@ -678,89 +744,53 @@ namespace Xbim.ModelGeometry.Scene
                 {
 
                     processed.Add(element.EntityLabel);
-                    continue;
+
                 }
-                var cutTools = new List<XbimShapeInstance>();
-                var projectTools = new List<XbimShapeInstance>();
-
-
-                foreach (var feature in pair)
+                if (arguments.Count > 0)
                 {
-                    var isCut = feature is IIfcFeatureElementSubtraction;
-
-                    var featureShapes = WriteProductShape(contextHelper, feature, false, txn);
-                    foreach (var featureShape in featureShapes)
+                    var cutTools = new List<XbimShapeInstance>();
+                    var projectTools = new List<XbimShapeInstance>();
+                    foreach (var feature in pair)
                     {
-                        if (!allIds.Add(featureShape.ShapeGeometryLabel))
-                            dupIds.Add(featureShape.ShapeGeometryLabel);
-                        if (isCut)
-                            cutTools.Add(featureShape);
-                        else
-                            projectTools.Add(featureShape);
+                        var isCut = feature is IIfcFeatureElementSubtraction;
+
+                        var featureShapes = WriteProductShape(contextHelper, feature, false, txn);
+                        foreach (var featureShape in featureShapes)
+                        {
+                            if (!allIds.TryAdd(featureShape.ShapeGeometryLabel, true))
+                                dupIds.TryAdd(featureShape.ShapeGeometryLabel,true);
+                            if (isCut)
+                                cutTools.Add(featureShape);
+                            else
+                                projectTools.Add(featureShape);
+                        }
+                        processed.Add(feature.EntityLabel);
+
                     }
-                    processed.Add(feature.EntityLabel);
-
+                    var boolOp = new XbimBooleanDefinition(contextHelper, Engine, Model, dupIds, arguments, cutTools, projectTools, context, styleId);                
+                    booleanOps.Add(boolOp);
                 }
-                var boolOp = new XbimBooleanDefinition(arguments, cutTools, projectTools, context, styleId);
-                booleanOps.Add(boolOp);
-            }
 
-            Parallel.ForEach(booleanOps, contextHelper.ParallelOptions, bop =>
-            //         foreach (IGrouping<IIfcElement, IIfcFeatureElement> pair in contextHelper.OpeningsAndProjections)
+            });
+            //process all the large ones first
+            Parallel.ForEach(booleanOps.OrderByDescending(b=>b.CutGeometries.Count+b.ProjectGeometries.Count), contextHelper.ParallelOptions, bop =>
+          //  foreach (var bop in booleanOps.OrderByDescending(b => b.CutGeometries.Count + b.ProjectGeometries.Count))
             {
+              //  Console.WriteLine("{0} - {1}", bop.CutGeometries.Count, bop.ArgumentGeometries.Count);
                 Interlocked.Increment(ref localTally);
                 var elementLabel = 0;
                 try
                 {
-                    if (bop.ArgumentIds.Any())
+                    if (bop.ArgumentGeometries.Any())
                     {
-                        elementLabel = bop.ArgumentIds.First().IfcProductLabel;
-                        var typeId = bop.ArgumentIds.First().IfcTypeId;
+                        elementLabel = bop.ProductLabel;
+                        var typeId = bop.ProductType;
                         //Get all the parts of this element into a set of solid geometries
-                        var elementGeom = Engine.CreateGeometryObjectSet();
-
-                        foreach (var argument in bop.ArgumentIds)
-                        {
-                            var geom = contextHelper.GetGeometryFromCache(argument, dupIds.Contains(argument.ShapeGeometryLabel));
-                            if (geom != null)
-                                elementGeom.Add(geom);
-                            else
-                                LogWarning(_model.Instances[argument.IfcProductLabel],
-                               "Some 3D geometric form definition is missing"
-                               );
-
-                        }
-
-                        //now build the openings
-                        var allOpenings = Engine.CreateSolidSet();
-                        foreach (var openingShape in bop.CutToolIds)
-                        {
-                            var openingGeom = contextHelper.GetGeometryFromCache(openingShape, dupIds.Contains(openingShape.ShapeGeometryLabel));
-                            if (openingGeom != null)
-                                allOpenings.Add(openingGeom);
-                            else
-                                LogWarning(_model.Instances[openingShape.IfcProductLabel],
-                               "Some 3D geometric form definition is missing");
-                        }
-
-                        //now all the projections
-                        var allProjections = Engine.CreateSolidSet();
-
-
-                        foreach (var projectionShape in bop.ProjectToolIds)
-                        {
-                            var projGeom = contextHelper.GetGeometryFromCache(projectionShape, dupIds.Contains(projectionShape.ShapeGeometryLabel));
-                            if (projGeom != null)
-                                allProjections.Add(projGeom);
-                            else
-                                LogWarning(_model.Instances[projectionShape.IfcProductLabel],
-                               "Some 3D geometric form definition is missing");
-                        }
-
+                        var elementGeom = bop.ArgumentGeometries;
                         //make the finished shape
-                        if (allProjections.Any())
+                        if (bop.ProjectGeometries.Any())
                         {
-                            var nextGeom = elementGeom.Union(allProjections, precision);
+                            var nextGeom = elementGeom.Union(bop.ProjectGeometries, precision);
                             if (nextGeom.IsValid)
                             {
                                 if (nextGeom.First != null && nextGeom.First.IsValid)
@@ -774,21 +804,25 @@ namespace Xbim.ModelGeometry.Scene
                         }
 
 
-                        if (allOpenings.Any())
+                        if (bop.CutGeometries.Any())
                         {
+                            //do them in batches of 100
+                            //for (int i = 0; i < bop.CutGeometries.Count; i += 50)
+                            //{
 
-                            var nextGeom = elementGeom.Cut(allOpenings, precision);
-                            if (nextGeom.IsValid)
-                            {
-                                if (nextGeom.First != null && nextGeom.First.IsValid)
-                                    elementGeom = nextGeom;
+                                var nextGeom = elementGeom.Cut(bop.CutGeometries, precision);
+                                if (nextGeom.IsValid)
+                                {
+                                    if (nextGeom.First != null && nextGeom.First.IsValid)
+                                        elementGeom = nextGeom;
+                                    else
+                                        LogWarning(_model.Instances[elementLabel],
+                                            "Cutting openings has resulted in an empty shape");
+                                }
                                 else
                                     LogWarning(_model.Instances[elementLabel],
-                               "Cutting openings has resulted in an empty shape");
-                            }
-                            else
-                                LogWarning(_model.Instances[elementLabel],
-                               "Cutting openings has failed. Openings have been ignored");
+                                        "Cutting openings has failed. Openings have been ignored");
+                           // }
                         }
 
                         ////now add to the DB               
@@ -831,7 +865,7 @@ namespace Xbim.ModelGeometry.Scene
                                     StyleLabel = bop.StyleId,
                                     RepresentationType = XbimGeometryRepresentationType.OpeningsAndAdditionsIncluded,
                                     RepresentationContext = bop.ContextId,
-                                    IfcTypeId = typeId,
+                                    IfcTypeId = (short)typeId,
                                     Transformation = XbimMatrix3D.Identity,
                                     BoundingBox = elementGeom.BoundingBox
                                 };
@@ -867,6 +901,9 @@ namespace Xbim.ModelGeometry.Scene
             if (progDelegate != null) progDelegate(101, "WriteFeatureElements, (" + localTally + " written)");
             return processed;
         }
+
+
+
 
         private void WriteProductShapes(XbimCreateContextHelper contextHelper, IEnumerable<IIfcProduct> products, IGeometryStoreInitialiser txn)
         {
@@ -1093,12 +1130,13 @@ namespace Xbim.ModelGeometry.Scene
                 }
             }
             Parallel.ForEach(contextHelper.ProductShapeIds, contextHelper.ParallelOptions, shapeId =>
-            //   foreach (var shapeId in contextHelper.ProductShapeIds)
+           //    foreach (var shapeId in contextHelper.ProductShapeIds)
              {
                  Interlocked.Increment(ref localTally);
                  var shape = (IIfcGeometricRepresentationItem)Model.Instances[shapeId];
                  //  var key = new RepresentationItemGeometricHashKey(shape);
                  var isFeatureElementShape = contextHelper.FeatureElementShapeIds.Contains(shapeId);
+                 var isVoidedProductShape = contextHelper.VoidedShapeIds.Contains(shapeId);
                  //this can be used to remove duplicate shapes but has a memory overhead as large nimber so objects need to be cached
 
                  //var mappedEntityLabel = geomHash.GetOrAdd(key, shapeId);
@@ -1121,7 +1159,7 @@ namespace Xbim.ModelGeometry.Scene
                          {
                              XbimShapeGeometry shapeGeom = null;
                              IXbimGeometryObject geomModel = null;
-                             if (!isFeatureElementShape && xbimTessellator.CanMesh(shape)) //if we can mesh the shape directly just do it
+                             if (!isFeatureElementShape && !isVoidedProductShape &&  xbimTessellator.CanMesh(shape)) //if we can mesh the shape directly just do it
                              {
                                  shapeGeom = xbimTessellator.Mesh(shape);
                              }
@@ -1134,10 +1172,20 @@ namespace Xbim.ModelGeometry.Scene
                                      shapeGeom = Engine.CreateShapeGeometry(geomModel, precision, deflection,
                                          deflectionAngle, geomStorageType);
                                      if (isFeatureElementShape)
+                                     {
+                                         var geomSet = geomModel as IXbimGeometryObjectSet;
+                                         if (geomSet != null)
+                                         {
+                                             var solidSet = Engine.CreateSolidSet();                                           
+                                             solidSet.Add(geomSet);                                        
+                                             contextHelper.CachedGeometries.TryAdd(shapeId, solidSet);
+                                         }
                                          //we need for boolean operations later, add the polyhedron if the face is planar
+                                         else contextHelper.CachedGeometries.TryAdd(shapeId, geomModel);
+                                     }
+                                     else if(isVoidedProductShape)
                                          contextHelper.CachedGeometries.TryAdd(shapeId, geomModel);
                                  }
-
                              }
 
                              if (shapeGeom == null || shapeGeom.ShapeData == null || shapeGeom.ShapeData.Length == 0)
@@ -1164,7 +1212,7 @@ namespace Xbim.ModelGeometry.Scene
 
                                  //   shapeGeometries.Add(shapeGeom);
                              }
-                             if (geomModel != null && geomModel.IsValid && !isFeatureElementShape)
+                             if (geomModel != null && geomModel.IsValid && !isFeatureElementShape && !isVoidedProductShape)
                              {
                                  geomModel.Dispose();
                              }

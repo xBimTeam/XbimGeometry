@@ -50,6 +50,18 @@ namespace Xbim
 			return geometryObjects->GetEnumerator();
 		}
 
+		bool XbimGeometryObjectSet::Sew()
+		{
+			bool sewn = false;
+			for each (IXbimGeometryObject^ geom in geometryObjects)
+			{
+				XbimCompound^ comp = dynamic_cast<XbimCompound^>(geom);
+				if (comp != nullptr)
+					if (comp->Sew()) sewn = true;
+			}
+			return sewn;
+		}
+
 		IXbimGeometryObject^ XbimGeometryObjectSet::Transform(XbimMatrix3D matrix3D)
 		{
 			List<IXbimGeometryObject^>^ result = gcnew List<IXbimGeometryObject^>(geometryObjects->Count);
@@ -300,6 +312,14 @@ namespace Xbim
 			List<IXbimGeometryObject^>^ geomObjects = gcnew List<IXbimGeometryObject^>();
 			geomObjects->Add(geomObject);
 			return PerformBoolean(bop, geomObjects, solids, tolerance);
+		}
+
+		String^ XbimGeometryObjectSet::ToBRep::get()
+		{
+			std::ostringstream oss;
+			TopoDS_Compound comp = CreateCompound(geometryObjects);					
+			BRepTools::Write(comp, oss);
+			return gcnew String(oss.str().c_str());
 		}
 
 		TopoDS_Compound XbimGeometryObjectSet::CreateCompound(IEnumerable<IXbimGeometryObject^>^ geomObjects)

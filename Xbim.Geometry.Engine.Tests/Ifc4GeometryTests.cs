@@ -550,5 +550,35 @@ namespace Ifc4GeometryTests
                 }
             }
         }
+
+        [TestMethod]
+        public void LongRunningBooleanTest()
+        {
+            using (var model = IfcStore.Open(@"Ifc4TestFiles\long-running-boolean.ifc"))
+            {
+                using (var eventTrace = LoggerFactory.CreateEventTrace())
+                {
+                    var ifcWall = model.Instances[39] as IIfcExtrudedAreaSolid;
+                    Assert.IsNotNull(ifcWall);
+                    var solids = _xbimGeometryCreator.CreateSolidSet();
+                    foreach (var ifcOpening in model.Instances.OfType<IIfcOpeningElement>())
+                    {
+                        var firstOrDefault = ifcOpening.Representation.Representations.FirstOrDefault();
+                        Assert.IsNotNull(firstOrDefault);
+                        {
+                            var opening = firstOrDefault.Items.FirstOrDefault() as IIfcGeometricRepresentationItem;
+                            var geomOpening = _xbimGeometryCreator.Create(opening, (IIfcAxis2Placement3D)((IIfcLocalPlacement)(ifcOpening.ObjectPlacement)).RelativePlacement) as IXbimSolid;
+                            Assert.IsNotNull(geomOpening);
+                            solids.Add(geomOpening);
+                        }
+
+                    }
+                    var wallGeom = _xbimGeometryCreator.CreateSolid(ifcWall);
+
+                    var result = wallGeom.Cut(solids, model.ModelFactors.Precision);
+                    Assert.IsTrue(result.Count >0);
+                }
+            }
+        }
     }
 }

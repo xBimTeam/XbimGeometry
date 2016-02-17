@@ -69,7 +69,7 @@ namespace Xbim
 			XbimSolidSet(IIfcRevolvedAreaSolid^ solid);
 			
 
-			virtual property bool IsValid{bool get(){ return Count>0; }; }
+			virtual property bool IsValid{bool get(){ return solids!=nullptr && Count>0; }; }
 			virtual property bool IsSimplified{bool get(){ return _isSimplified; }; void set(bool val){ _isSimplified = val; } }
 			virtual property bool IsSet{bool get()  { return true; }; }
 			virtual property IXbimSolid^ First{IXbimSolid^ get(); }
@@ -86,11 +86,12 @@ namespace Xbim
 			virtual IXbimSolidSet^ Union(IXbimSolid^ solid, double tolerance);
 			virtual IXbimSolidSet^ Intersection(IXbimSolidSet^ solids, double tolerance);
 			virtual IXbimSolidSet^ Intersection(IXbimSolid^ solid, double tolerance);
-			
+			virtual property String^  ToBRep{String^ get(); }
 			virtual property bool IsPolyhedron{ bool get(); }
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) ;
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D);
 			virtual property double Volume{double get(); }
+			virtual IXbimSolidSet^ Range(int start, int count);
 			//moves the solid set to the new position
 			void Move(IIfcAxis2Placement3D^ position);
 			

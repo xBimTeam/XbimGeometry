@@ -806,14 +806,14 @@ namespace Xbim
 				}
 				else
 				{
-					XbimSolid^ s = gcnew XbimSolid(bOp);
+					XbimSolid^ s = gcnew XbimSolid(bOp);					
 					if (s->IsValid) solidSet->Add(s);
 				}
 			}
 			//BRepTools::Write(body, "d:\\tmp\\b");
 			ShapeFix_ShapeTolerance FTol;
 			double precision = Math::Max(mf->OneMilliMeter/100, mf->Precision); //set the precision to 100th mm but never less than precision
-				
+			
 			if (solidSet->Count > 5) //do large ops all in one go
 			{
 				return body->Cut(solidSet, precision);
