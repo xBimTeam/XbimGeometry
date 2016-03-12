@@ -187,7 +187,7 @@ namespace Xbim
 		IXbimSolidSet^ XbimSolidSet::Range(int start, int count)
 		{
 			XbimSolidSet^ ss = gcnew XbimSolidSet();
-			for (size_t i = start; i < Math::Min(solids->Count, count); i++)
+			for (int i = start; i < Math::Min(solids->Count, count); i++)
 			{
 				ss->Add(solids[i]);
 			}

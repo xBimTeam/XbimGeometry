@@ -1022,8 +1022,10 @@ namespace Xbim
 			for each (IIfcGridAxis^ axis in grid->VAxes)
 			{				
 				XbimCurve2D^ c = gcnew XbimCurve2D(axis->AxisCurve);
+				VCurves->Add(c);
 				for each (XbimCurve2D^ u in UCurves)
-					intersections->AddRange(u->Intersections(c, precision));			
+					intersections->AddRange(u->Intersections(c, precision));	
+				
 			}
 			
 			for each (IIfcGridAxis^ axis in grid->WAxes)
@@ -1089,7 +1091,8 @@ namespace Xbim
 				gp_Vec2d curveTangent = curveMainDir.GetNormal();
 				//gp_Dir v1 = gp::DX2d().IsParallel(normal, Precision::Angular()) ? gp::DY() : gp::DX();
 				gp_Ax2 centre(gp_Pnt(origin.X(), origin.Y(), 0), gp_Vec(curveMainDir.X(), curveMainDir.Y(), 0), gp_Vec(curveTangent.X(), curveTangent.Y(), 0)); //create the axis for the rectangular face
-				TopoDS_Wire rect = gcnew XbimWire(50 * mm, mm / 10, precision, true);
+				XbimWire^ xrect = gcnew XbimWire(75 * mm, mm / 10, precision, true);
+				TopoDS_Wire rect = xrect;
 				gp_Trsf trsf;
 				trsf.SetTransformation(centre, gp_Ax3());
 				rect.Move(TopLoc_Location(trsf));
