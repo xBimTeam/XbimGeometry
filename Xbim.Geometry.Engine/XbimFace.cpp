@@ -1240,7 +1240,7 @@ namespace Xbim
 			return XbimPoint3D(p.X(), p.Y(), p.Z());
 		}
 
-		Handle_Geom_Surface XbimFace::GetSurface()
+		Handle(Geom_Surface) XbimFace::GetSurface()
 		{
 			return BRep_Tool::Surface(this);
 		}

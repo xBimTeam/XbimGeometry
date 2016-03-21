@@ -54,6 +54,12 @@
 #include <TColStd_PackedMapOfInteger.hxx>
 #include <TColStd_SequenceOfInteger.hxx>
 
+#ifdef _WIN32
+  #include <malloc.h> // for alloca()
+#endif
+
+IMPLEMENT_STANDARD_RTTIEXT(MeshVS_MeshPrsBuilder,MeshVS_PrsBuilder)
+
 //================================================================
 // Function : Constructor MeshVS_MeshPrsBuilder
 // Purpose  :

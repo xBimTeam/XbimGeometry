@@ -637,7 +637,7 @@ namespace Xbim
 		//	for each (XbimFace^ face in xSolid->Faces)
 		//	{
 		//		TopLoc_Location loc;
-		//		const Handle_Poly_Triangulation& mesh = BRep_Tool::Triangulation(face, loc);
+		//		const Handle(Poly_Triangulation)& mesh = BRep_Tool::Triangulation(face, loc);
 		//		const TColgp_Array1OfPnt & nodes = mesh->Nodes();
 		//	
 		//		//If the face is planar we only need to write out the bounding edges
@@ -650,7 +650,7 @@ namespace Xbim
 		//			fo->Bound = outerLoop;
 		//			for each (XbimEdge^ edge in face->OuterBound->Edges)
 		//			{
-		//				Handle_Poly_PolygonOnTriangulation edgeMesh = BRep_Tool::PolygonOnTriangulation(edge, mesh, loc);
+		//				Handle(Poly_PolygonOnTriangulation) edgeMesh = BRep_Tool::PolygonOnTriangulation(edge, mesh, loc);
 		//				bool reverse = edge->IsReversed;
 		//				int numNodes = edgeMesh->NbNodes(); //nb we skip the last node
 		//				for (Standard_Integer i = reverse ? numNodes : 1; reverse ? i > 1:i < numNodes; reverse ? i-- : i++)
@@ -678,7 +678,7 @@ namespace Xbim
 		//				fi->Bound = innerLoop;
 		//				for each (XbimEdge^ edge in innerBound->Edges)
 		//				{
-		//					Handle_Poly_PolygonOnTriangulation edgeMesh = BRep_Tool::PolygonOnTriangulation(edge, mesh, loc);
+		//					Handle(Poly_PolygonOnTriangulation) edgeMesh = BRep_Tool::PolygonOnTriangulation(edge, mesh, loc);
 		//					bool reverse = edge->IsReversed;
 		//					int numNodes = edgeMesh->NbNodes(); //nb we skip the last node
 		//					for (Standard_Integer i = reverse ? numNodes : 1; reverse ? i > 1:i < numNodes; reverse ? i-- : i++)

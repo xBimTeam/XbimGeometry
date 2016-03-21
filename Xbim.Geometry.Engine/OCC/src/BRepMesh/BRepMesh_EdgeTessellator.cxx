@@ -32,6 +32,8 @@
 #include <TColStd_Array1OfReal.hxx>
 
 
+IMPLEMENT_STANDARD_RTTIEXT(BRepMesh_EdgeTessellator,BRepMesh_IEdgeTool)
+
 //=======================================================================
 //function : Constructor
 //purpose  : 
@@ -52,6 +54,8 @@ BRepMesh_EdgeTessellator::BRepMesh_EdgeTessellator(
 
   mySquareEdgeDef = aPreciseLinDef * aPreciseLinDef;
   mySquareMinSize = Max(mySquareEdgeDef, theMinSize * theMinSize);
+  myEdgeSqTol     = BRep_Tool::Tolerance (theEdge);
+  myEdgeSqTol    *= myEdgeSqTol;
 
   Standard_Boolean isSameParam = BRep_Tool::SameParameter(theEdge);
   if (isSameParam)
@@ -59,7 +63,6 @@ BRepMesh_EdgeTessellator::BRepMesh_EdgeTessellator(
   else
     myCOnS.Initialize(theEdge, theFaceAttribute->Face());
 
-  TopLoc_Location aLoc;
   const GeomAbs_CurveType aCurveType = myCOnS.GetType();
   Standard_Integer aMinPntNb = (aCurveType == GeomAbs_Circle) ? 4 : 2; //OCC287
 
@@ -149,18 +152,54 @@ BRepMesh_EdgeTessellator::BRepMesh_EdgeTessellator(
         splitSegment(aSurf, aCurve2d, aParamArray(i), aParamArray(i + 1), 1);
     }
   }
+
+   const Standard_Real aTol = Precision::Confusion();
+   const Standard_Real aDu  = mySurface->UResolution (aTol);
+   const Standard_Real aDv  = mySurface->VResolution (aTol);
+
+   myFaceRangeU[0] = mySurface->FirstUParameter() - aDu;
+   myFaceRangeU[1] = mySurface->LastUParameter()  + aDu;
+
+   myFaceRangeV[0] = mySurface->FirstVParameter() - aDv;
+   myFaceRangeV[1] = mySurface->LastVParameter()  + aDv;
 }
 
 //=======================================================================
 //function : Value
 //purpose  : 
 //=======================================================================
-void BRepMesh_EdgeTessellator::Value(const Standard_Integer theIndex,
-                                     Standard_Real&         theParameter,
-                                     gp_Pnt&                thePoint,
-                                     gp_Pnt2d&              theUV)
+Standard_Boolean BRepMesh_EdgeTessellator::Value(
+  const Standard_Integer theIndex,
+  Standard_Real&         theParameter,
+  gp_Pnt&                thePoint,
+  gp_Pnt2d&              theUV)
 {
   myTool->Value(theIndex, mySurface, theParameter, thePoint, theUV);
+
+  // If point coordinates are out of surface range, 
+  // it is necessary to re-project point.
+  if (mySurface->GetType() != GeomAbs_BSplineSurface &&
+      mySurface->GetType() != GeomAbs_BezierSurface  &&
+      mySurface->GetType() != GeomAbs_OtherSurface)
+  {
+    return Standard_True;
+  }
+
+  // Let skip periodic case.
+  if (mySurface->IsUPeriodic() || mySurface->IsVPeriodic())
+    return Standard_True;
+
+  // Point lies within the surface range - nothing to do.
+  if (theUV.X() > myFaceRangeU[0] && theUV.X() < myFaceRangeU[1] &&
+      theUV.Y() > myFaceRangeV[0] && theUV.Y() < myFaceRangeV[1])
+  {
+    return Standard_True;
+  }
+
+  gp_Pnt aPntOnSurf;
+  mySurface->D0 (theUV.X (), theUV.Y (), aPntOnSurf);
+
+  return (thePoint.SquareDistance (aPntOnSurf) < myEdgeSqTol);
 }
 
 //=======================================================================

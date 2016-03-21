@@ -12,7 +12,7 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef WNT
+#ifndef _WIN32
 
 
 #include <OSD_Directory.hxx>
@@ -25,15 +25,22 @@
 #include <dirent.h>
 #include <stdio.h>
 #include <sys/stat.h>
-//const OSD_WhoAmI Iam = OSD_WDirectoryIterator;
-OSD_DirectoryIterator::OSD_DirectoryIterator() {
 
- myDescr = NULL ;
+OSD_DirectoryIterator::OSD_DirectoryIterator() 
+: myFlag(0),
+  myDescr(0),
+  myEntry(0),
+  myInit(0)
+{
 }
 
 OSD_DirectoryIterator::OSD_DirectoryIterator(const OSD_Path& where,
-                                             const TCollection_AsciiString& Mask){
- myDescr = NULL ;
+                                             const TCollection_AsciiString& Mask)
+: myFlag(0),
+  myDescr(0),
+  myEntry(0),
+  myInit(0)
+{
  Initialize(where, Mask) ;
 }
 
@@ -260,9 +267,7 @@ Standard_Boolean OSD_DirectoryIterator :: More () {
 
 void OSD_DirectoryIterator :: Next () {
 
- if (  myFirstCall && !( _FD -> dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY )  ||
-       !myFirstCall
- ) {
+ if ( ! myFirstCall || ! ( _FD -> dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) ) {
  
   do {
   

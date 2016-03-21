@@ -99,10 +99,10 @@ TopOpeBRepBuild_Builder::TopOpeBRepBuild_Builder(const TopOpeBRepDS_BuildTool& B
 
 //modified by NIZHNY-MZV  Sat May  6 10:04:49 2000
 //=======================================================================
-//function : Destroy
+//function : ~TopOpeBRepBuild_Builder
 //purpose  : virtual destructor
 //=======================================================================
-void TopOpeBRepBuild_Builder::Destroy()
+TopOpeBRepBuild_Builder::~TopOpeBRepBuild_Builder()
 {
 } 
 
@@ -316,7 +316,7 @@ Standard_Boolean TopOpeBRepBuild_Builder::ToSplit(const TopoDS_Shape& S,const To
 #ifdef OCCT_DEBUG
   Standard_Integer iS; Standard_Boolean tSPS = GtraceSPS(S,iS);
   if (tSPS) { 
-    cout<<"tosplit "<<tosplit<<" : "<<"!issplit "<<(!issplit);
+    cout<<"tosplit "<<tosplit<<" : !issplit "<<(!issplit);
     cout<<" && (hasgeom || hassame) ("<<hasgeom<<" || "<<hassame<<")"<<endl;
   }
 #endif

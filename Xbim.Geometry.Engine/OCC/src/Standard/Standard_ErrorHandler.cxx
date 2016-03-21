@@ -22,7 +22,7 @@
 #include <Standard_Mutex.hxx>
 #include <Standard.hxx>
 
-#ifndef WNT
+#ifndef _WIN32
 #include <pthread.h>
 #else
 #include <windows.h>
@@ -47,7 +47,7 @@ static Standard_Mutex theMutex;
 
 static inline Standard_ThreadId GetThreadID()
 {
-#ifndef WNT
+#ifndef _WIN32
   return pthread_self();
 #else
   return GetCurrentThreadId();
@@ -63,6 +63,7 @@ Standard_ErrorHandler::Standard_ErrorHandler () :
        myStatus(Standard_HandlerVoid), myCallbackPtr(0)
 {
   myThread   = GetThreadID();
+  memset (&myLabel, 0, sizeof(myLabel));
 
   theMutex.Lock();
   myPrevious = Top;
@@ -139,7 +140,7 @@ void Standard_ErrorHandler::Unlink()
 Standard_Boolean Standard_ErrorHandler::IsInTryBlock()
 {
   Standard_ErrorHandler* anActive = FindHandler(Standard_HandlerVoid, Standard_False);
-  return anActive != NULL && anActive->myLabel != NULL;
+  return anActive != NULL;
 }
 
 
@@ -153,7 +154,7 @@ void Standard_ErrorHandler::Abort (const Handle(Standard_Failure)& theError)
   Standard_ErrorHandler* anActive = FindHandler(Standard_HandlerVoid, Standard_True);
 
   //==== Check if can do the "longjmp" =======================================
-  if(anActive == NULL || anActive->myLabel == NULL) {
+  if(anActive == NULL) {
     cerr << "*** Abort *** an exception was raised, but no catch was found." << endl;
     if (!theError.IsNull())
       cerr << "\t... The exception is:" << theError->GetMessageString() << endl;

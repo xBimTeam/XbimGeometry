@@ -53,12 +53,6 @@ public:
   //! Its value is stored in drawer
   Standard_EXPORT MeshVS_Mesh(const Standard_Boolean theIsAllowOverlapped = Standard_False);
   
-  Standard_EXPORT virtual void Destroy();
-~MeshVS_Mesh()
-{
-  Destroy();
-}
-  
   //! Computes presentation using builders added to sequence. Each builder computes
   //! own part of mesh presentation according to its type.
   Standard_EXPORT virtual void Compute (const Handle(PrsMgr_PresentationManager3d)& PM, const Handle(Prs3d_Presentation)& Prs, const Standard_Integer DisplayMode) Standard_OVERRIDE;
@@ -187,7 +181,17 @@ public:
 friend class MeshVS_PrsBuilder;
 
 
-  DEFINE_STANDARD_RTTI(MeshVS_Mesh,AIS_InteractiveObject)
+  DEFINE_STANDARD_RTTIEXT(MeshVS_Mesh,AIS_InteractiveObject)
+
+protected:
+
+  //! Stores all vertices that belong to one of the faces to the given map
+  //! @param theAllElements [in] the map of all mesh elements
+  //! @param theNbMaxFaceNodes [in] the maximum amount of nodes per face, retrieved from drawer
+  //! @param theSharedNodes [out] the result map of all vertices that belong to one face at least
+  Standard_EXPORT void scanFacesForSharedNodes (const TColStd_PackedMapOfInteger& theAllElements,
+                                                const Standard_Integer theNbMaxFaceNodes,
+                                                TColStd_PackedMapOfInteger& theSharedNodes) const;
 
 protected:
 

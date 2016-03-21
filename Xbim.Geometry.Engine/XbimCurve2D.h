@@ -11,10 +11,10 @@ namespace Xbim
 		{
 		private:
 			IntPtr ptrContainer;
-			virtual property Handle_Geom2d_Curve* pCurve2D
+			virtual property Handle(Geom2d_Curve)* pCurve2D
 			{
-				Handle_Geom2d_Curve* get() sealed { return (Handle_Geom2d_Curve*)ptrContainer.ToPointer(); }
-				void set(Handle_Geom2d_Curve* val)sealed { ptrContainer = IntPtr(val); }
+				Handle(Geom2d_Curve)* get() sealed { return (Handle(Geom2d_Curve)*)ptrContainer.ToPointer(); }
+				void set(Handle(Geom2d_Curve)* val)sealed { ptrContainer = IntPtr(val); }
 			}
 			void InstanceCleanup();
 			void Init(IIfcGridAxis^ axis);
@@ -28,8 +28,8 @@ namespace Xbim
 			void Init(IIfcBSplineCurveWithKnots^ curve);
 			void Init(IIfcOffsetCurve2D^ offset);
 		public:
-			XbimCurve2D(const Handle_Geom2d_Curve& curve2d);
-			XbimCurve2D(const Handle_Geom2d_Curve& curve2d, double p1, double p2);
+			XbimCurve2D(const Handle(Geom2d_Curve)& curve2d);
+			XbimCurve2D(const Handle(Geom2d_Curve)& curve2d, double p1, double p2);
 			
 			//destructors
 			~XbimCurve2D(){ InstanceCleanup(); }
@@ -47,7 +47,7 @@ namespace Xbim
 			XbimCurve2D(IIfcOffsetCurve2D^ curve){ Init(curve); }
 
 #pragma region operators
-			operator const Handle_Geom2d_Curve& () { return *pCurve2D; }
+			operator const Handle(Geom2d_Curve)& () { return *pCurve2D; }
 			
 #pragma endregion
 			//properties

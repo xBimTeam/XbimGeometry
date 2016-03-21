@@ -379,7 +379,7 @@ namespace Xbim
 			for each (XbimFace^ face in solid->Faces)
 			{
 				TopLoc_Location loc;
-				const Handle_Poly_Triangulation& mesh = BRep_Tool::Triangulation(face, loc);
+				const Handle(Poly_Triangulation)& mesh = BRep_Tool::Triangulation(face, loc);
 				if (mesh.IsNull()) //this can happen with half spaces and triangles that are near to a line
 				{
 					continue;
@@ -395,7 +395,7 @@ namespace Xbim
 					
 					for each (XbimEdge^ edge in face->OuterBound->Edges)
 					{
-						Handle_Poly_PolygonOnTriangulation edgeMesh = BRep_Tool::PolygonOnTriangulation(edge, mesh, loc);
+						Handle(Poly_PolygonOnTriangulation) edgeMesh = BRep_Tool::PolygonOnTriangulation(edge, mesh, loc);
 						if (edgeMesh.IsNull())
 							continue;
 						bool reverse = edge->IsReversed;
@@ -456,7 +456,7 @@ namespace Xbim
 								projected_poly[boundIndex + 1].reserve(pointCount);
 								for each (XbimEdge^ edge in innerBound->Edges)
 								{
-									Handle_Poly_PolygonOnTriangulation edgeMesh = BRep_Tool::PolygonOnTriangulation(edge, mesh, loc);
+									Handle(Poly_PolygonOnTriangulation) edgeMesh = BRep_Tool::PolygonOnTriangulation(edge, mesh, loc);
 									if (edgeMesh.IsNull())
 										continue;
 									bool reverse = edge->IsReversed;

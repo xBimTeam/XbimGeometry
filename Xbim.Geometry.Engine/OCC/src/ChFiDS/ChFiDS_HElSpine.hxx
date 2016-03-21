@@ -39,22 +39,30 @@ class ChFiDS_HElSpine : public Adaptor3d_HCurve
 public:
 
   
+  //! Creates an empty GenHCurve.
   Standard_EXPORT ChFiDS_HElSpine();
   
+  //! Creates a GenHCurve from a Curve
   Standard_EXPORT ChFiDS_HElSpine(const ChFiDS_ElSpine& C);
   
+  //! Sets the field of the GenHCurve.
   Standard_EXPORT void Set (const ChFiDS_ElSpine& C);
   
-  Standard_EXPORT const Adaptor3d_Curve& Curve() const;
+  //! Returns the curve used to create the GenHCurve.
+  //! This is redefined from HCurve, cannot be inline.
+  Standard_EXPORT const Adaptor3d_Curve& Curve() const Standard_OVERRIDE;
   
-  Standard_EXPORT Adaptor3d_Curve& GetCurve();
+  //! Returns the curve used to create the GenHCurve.
+  //! This is redefined from HCurve, cannot be inline.
+  Standard_EXPORT Adaptor3d_Curve& GetCurve() Standard_OVERRIDE;
   
+  //! Returns the curve used to create the GenHCurve.
     ChFiDS_ElSpine& ChangeCurve();
 
 
 
 
-  DEFINE_STANDARD_RTTI(ChFiDS_HElSpine,Adaptor3d_HCurve)
+  DEFINE_STANDARD_RTTI_INLINE(ChFiDS_HElSpine,Adaptor3d_HCurve)
 
 protected:
 

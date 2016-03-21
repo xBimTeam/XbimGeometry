@@ -163,7 +163,7 @@ Storage_Error FSD_CmpFile::Close()
 //purpose  : ------------------ PROTECTED
 //=======================================================================
 
-const Standard_CString FSD_CmpFile::MagicNumber()
+Standard_CString FSD_CmpFile::MagicNumber()
 {
   return MAGICNUMBER;
 }
@@ -753,6 +753,16 @@ void FSD_CmpFile::ReadInfo(Standard_Integer& nbObj,
     userInfo.Append(line);
     line.Clear();
   }
+}
+
+//=======================================================================
+//function : ReadCompleteInfo
+//purpose  : 
+//           
+//=======================================================================
+void FSD_CmpFile::ReadCompleteInfo( Standard_IStream& /*theIStream*/, Handle(Storage_Data)& /*theData*/)
+{
+
 }
 
 //=======================================================================

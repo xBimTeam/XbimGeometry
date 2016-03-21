@@ -39,20 +39,26 @@ class BRepAdaptor_HSurface : public Adaptor3d_HSurface
 public:
 
   
+  //! Creates an empty GenHSurface.
   Standard_EXPORT BRepAdaptor_HSurface();
   
+  //! Creates a GenHSurface from a Surface.
   Standard_EXPORT BRepAdaptor_HSurface(const BRepAdaptor_Surface& S);
   
+  //! Sets the field of the GenHSurface.
   Standard_EXPORT void Set (const BRepAdaptor_Surface& S);
   
-  Standard_EXPORT const Adaptor3d_Surface& Surface() const;
+  //! Returns a reference to the Surface inside the HSurface.
+  //! This is redefined from HSurface, cannot be inline.
+  Standard_EXPORT const Adaptor3d_Surface& Surface() const Standard_OVERRIDE;
   
+  //! Returns the surface used to create the GenHSurface.
     BRepAdaptor_Surface& ChangeSurface();
 
 
 
 
-  DEFINE_STANDARD_RTTI(BRepAdaptor_HSurface,Adaptor3d_HSurface)
+  DEFINE_STANDARD_RTTI_INLINE(BRepAdaptor_HSurface,Adaptor3d_HSurface)
 
 protected:
 

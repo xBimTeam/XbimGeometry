@@ -39,7 +39,9 @@
 #include <IntSurf_SequenceOfPathPoint.hxx>
 #include <Standard_ConstructionError.hxx>
 #include <Standard_DomainError.hxx>
+#include <Standard_NumericError.hxx>
 #include <Standard_OutOfRange.hxx>
+#include <Standard_TypeMismatch.hxx>
 #include <StdFail_NotDone.hxx>
 #include <TColStd_Array1OfInteger.hxx>
 
@@ -66,13 +68,16 @@
 #include <Bnd_Box2d.hxx>
 #include <IntPatch_PointLine.hxx>
 
-static Standard_Boolean DecomposeResult(const Handle(IntPatch_Line)&   Line,
-  const Standard_Boolean         IsReversed,
-  const IntSurf_Quadric&         Quad,
-  const Handle(Adaptor3d_TopolTool)&    PDomain,
-  const Handle(Adaptor3d_HSurface)&              QSurf,
-  const Standard_Real            ArcTol,
-  IntPatch_SequenceOfLine& Lines);
+#include <Extrema_GenLocateExtPS.hxx>
+
+static Standard_Boolean DecomposeResult(const Handle(IntPatch_PointLine)& theLine,
+                                        const Standard_Boolean       IsReversed,
+                                        const IntSurf_Quadric&       theQuad,
+                                        const Handle(Adaptor3d_TopolTool)& thePDomain,
+                                        const Handle(Adaptor3d_HSurface)&  theQSurf,
+                                        const Handle(Adaptor3d_HSurface)&  theOtherSurf,
+                                        const Standard_Real                theArcTol,
+                                        IntPatch_SequenceOfLine&           theLines);
 static 
   void ComputeTangency (const IntPatch_TheSOnBounds& solrst,
   IntSurf_SequenceOfPathPoint& seqpdep,
@@ -92,11 +97,14 @@ static
   Standard_Real U2,
   Standard_Real V2);
 
-static Standard_Boolean IsIn2DBox(const Bnd_Box2d& theBox,
-                                  const Handle(IntPatch_PointLine)& theLine,
-                                  const Standard_Real theUPeriod,
-                                  const Standard_Real theVPeriod,
-                                  const Standard_Boolean isTheSurface1Using);
+static 
+  Standard_Boolean IsCoincide(IntPatch_TheSurfFunction& theFunc,
+                              const Handle(IntPatch_PointLine)& theLine,
+                              const Handle(Adaptor2d_HCurve2d)& theArc,
+                              const Standard_Boolean isTheSurface1Using,
+                              const Standard_Real theToler3D,
+                              const Standard_Real theToler2D,
+                              const Standard_Real thePeriod);
 
 //=======================================================================
 //function : IntPatch_ImpPrmIntersection
@@ -783,6 +791,10 @@ void IntPatch_ImpPrmIntersection::Perform (const Handle(Adaptor3d_HSurface)& Sur
         // <-A
         wline = new IntPatch_WLine(thelin,Standard_False,trans1,trans2);
 
+#ifdef INTPATCH_IMPPRMINTERSECTION_DEBUG
+        wline->Dump(0);
+#endif
+
         if (   iwline->HasFirstPoint() 
           && iwline->IsTangentAtBegining() == Standard_False) 
         {
@@ -1351,7 +1363,8 @@ void IntPatch_ImpPrmIntersection::Perform (const Handle(Adaptor3d_HSurface)& Sur
   }// if (NbSegm) 
   //
   // on traite les restrictions de la surface implicite
-  for (Standard_Integer i=1; i<=slin.Length(); i++)
+
+  for (Standard_Integer i=1, aNbLin = slin.Length(); i<=aNbLin; i++)
   {
     Handle(IntPatch_Line)& aL = slin(i);
     
@@ -1359,88 +1372,126 @@ void IntPatch_ImpPrmIntersection::Perform (const Handle(Adaptor3d_HSurface)& Sur
       IntPatch_RstInt::PutVertexOnLine(aL,Surf1,D1,Surf2,Standard_True,TolTang);
     else
       IntPatch_RstInt::PutVertexOnLine(aL,Surf2,D2,Surf1,Standard_False,TolTang);
+
+    if(aL->ArcType() == IntPatch_Walking)
+    {
+      const Handle(IntPatch_WLine) aWL = Handle(IntPatch_WLine)::DownCast(aL);
+      slin.Append(aWL);
+      slin.Remove(i);
+      i--;
+      aNbLin--;
+    }
   }
 
-  const Standard_Real aUPeriodOfSurf1 = Surf1->IsUPeriodic() ? Surf1->UPeriod() : 0.0,
-                      aUPeriodOfSurf2 = Surf2->IsUPeriodic() ? Surf2->UPeriod() : 0.0,
-                      aVPeriodOfSurf1 = Surf1->IsVPeriodic() ? Surf1->VPeriod() : 0.0,
-                      aVPeriodOfSurf2 = Surf2->IsVPeriodic() ? Surf2->VPeriod() : 0.0;
+  // Now slin is filled as follows: lower indices correspond to Restriction line,
+  // after (higher indices) - only Walking-line.
+
+  const Standard_Real aTol3d = Func.Tolerance(); 
+  const Handle(Adaptor3d_HSurface)& aQSurf = (reversed) ? Surf2 : Surf1;
+  const Handle(Adaptor3d_HSurface)& anOtherSurf = (reversed) ? Surf1 : Surf2;
 
   for (Standard_Integer i = 1; i <= slin.Length(); i++)
   {
-    //BndBox of the points in Restriction line
-    Bnd_Box2d aBRL;
+    const Handle(IntPatch_PointLine)& aL1 = Handle(IntPatch_PointLine)::DownCast(slin(i));
+    const Handle(IntPatch_RLine)& aRL1 = Handle(IntPatch_RLine)::DownCast(aL1);
+
+    if(aRL1.IsNull())
+    {
+      //Walking-Walking cases are not supported
+      break;
+    }
+
+    const Handle(Adaptor2d_HCurve2d)& anArc = aRL1->IsArcOnS1() ? 
+                                              aRL1->ArcOnS1() :
+                                              aRL1->ArcOnS2();
+    if(anArc->Curve2d().GetType() != GeomAbs_Line)
+    {
+      //Restriction line must be isoline.
+      //Other cases are not supported by
+      //existing algorithms.
+
+      break;
+    }
+
+    Standard_Boolean isFirstDeleted = Standard_False;
+
     for(Standard_Integer j = i + 1; j <= slin.Length(); j++)
     {
-      Handle(IntPatch_PointLine) aL1 = Handle(IntPatch_PointLine)::DownCast(slin(i));
       Handle(IntPatch_PointLine) aL2 = Handle(IntPatch_PointLine)::DownCast(slin(j));
-
-      Handle(IntPatch_RLine) aRL1 = Handle(IntPatch_RLine)::DownCast(aL1);
       Handle(IntPatch_RLine) aRL2 = Handle(IntPatch_RLine)::DownCast(aL2);
 
-      if(aRL1.IsNull() && aRL2.IsNull())
-      {//If Walking-Walking
-        continue;
-      }
-      else if(aRL1.IsNull())
-      {// i-th line is not restriction,
-       // but j-th is restriction
-        slin.Append(aL1);
-        slin.SetValue(i, aL2);
-        slin.Remove(j);
-        j--;
-        continue;
-      }
+      //Here aL1 (i-th line) is Restriction-line and aL2 (j-th line) is
+      //Restriction or Walking
 
-      //Here aL1 (i-th line) is Restriction-line and aL2 (j-th line) is not Restriction
-
-      if(aBRL.IsVoid())
-      {//Fill aBRL
-        for(Standard_Integer aPRID = 1; aPRID <= aRL1->NbPnts(); aPRID++)
+      if(!aRL2.IsNull())
+      {
+        const Handle(Adaptor2d_HCurve2d)& anArc2 = aRL2->IsArcOnS1() ?
+                                                   aRL2->ArcOnS1() :
+                                                   aRL2->ArcOnS2();
+        if(anArc2->Curve2d().GetType() != GeomAbs_Line)
         {
-          Standard_Real u = 0.0, v = 0.0;
-          if(reversed)
-            aRL1->Point(aPRID).ParametersOnS1(u, v);
-          else
-            aRL1->Point(aPRID).ParametersOnS2(u, v);
+          //Restriction line must be isoline.
+          //Other cases are not supported by
+          //existing algorithms.
 
-          aBRL.Add(gp_Pnt2d(u, v));
+          continue;
         }
-
-        Standard_Real aXmin = 0.0, aYmin = 0.0, aXMax = 0.0, aYMax = 0.0;
-        aBRL.Get(aXmin, aYmin, aXMax, aYMax);
-        const Standard_Real aDX = aXMax - aXmin,
-                            aDY = aYMax - aYmin;
-
-        const Standard_Real aTolU = reversed? Surf1->UResolution(TolArc) : Surf2->UResolution(TolArc);
-        const Standard_Real aTolV = reversed? Surf1->VResolution(TolArc) : Surf2->VResolution(TolArc);
-
-        if((aDX > aTolU) && (aDY > aTolV))
-        {//Delete restriction line because it is not isoline.
-          slin.Remove(i);
-          i--;
-          break;
-        }
-
-        aXmin -= aTolU;
-        aXMax += aTolU;
-        aYmin -= aTolV;
-        aYMax += aTolV;
-        aBRL.SetVoid();
-        aBRL.Update(aXmin, aYmin, aXMax, aYMax);
       }
 
-      const Standard_Boolean isCoincide = IsIn2DBox(aBRL, aL2,
-                        (reversed? aUPeriodOfSurf1 : aUPeriodOfSurf2),
-                        (reversed? aVPeriodOfSurf1 : aVPeriodOfSurf2), reversed);
+      //aDir can be equal to one of following four values only
+      //(because Reastriction line is boundary of rectangular surface):
+      //either {0, 1} or {0, -1} or {1, 0} or {-1, 0}.
+      const gp_Dir2d aDir = anArc->Curve2d().Line().Direction();
+
+      Standard_Real aTol2d = anOtherSurf->UResolution(aTol3d),
+                    aPeriod = anOtherSurf->IsVPeriodic() ? anOtherSurf->VPeriod() : 0.0;
+
+      if(Abs(aDir.X()) < 0.5)
+      {//Restriction directs along V-direction
+        aTol2d = anOtherSurf->VResolution(aTol3d);
+        aPeriod = anOtherSurf->IsUPeriodic() ? anOtherSurf->UPeriod() : 0.0;
+      }
+
+      const Standard_Boolean isCoincide = IsCoincide(Func, aL2, anArc, aRL1->IsArcOnS1(),
+                                                      aTol3d, aTol2d, aPeriod);
 
       if(isCoincide)
-      {//Delete Walking-line
-        slin.Remove(j);
-        j--;
+      {
+        if(aRL2.IsNull())
+        {//Delete Walking-line
+          slin.Remove(j);
+          j--;
+        }
+        else
+        {//Restriction-Restriction
+          const Handle(Adaptor2d_HCurve2d)& anArc2 = aRL2->IsArcOnS1() ?
+                                                     aRL2->ArcOnS1() :
+                                                     aRL2->ArcOnS2();
+
+          const Standard_Real aRange2 = anArc2->LastParameter() - 
+                                        anArc2->FirstParameter();
+          const Standard_Real aRange1 = anArc->LastParameter() -
+                                        anArc->FirstParameter();
+
+          if(aRange2 > aRange1)
+          {
+            isFirstDeleted = Standard_True;
+            break;
+          }
+          else
+          {//Delete j-th line
+            slin.Remove(j);
+            j--;
+          }
+        }
       }
+    } //for(Standard_Integer j = i + 1; j <= slin.Length(); j++)
+
+    if(isFirstDeleted)
+    {//Delete i-th line
+      slin.Remove(i--);
     }
-  }
+  }//for (Standard_Integer i = 1; i <= slin.Length(); i++)
 
   empt = (slin.Length() == 0 && spnt.Length() == 0);
   done = Standard_True;
@@ -1458,13 +1509,14 @@ void IntPatch_ImpPrmIntersection::Perform (const Handle(Adaptor3d_HSurface)& Sur
   // post processing for cones and spheres
 
   const Handle(Adaptor3d_TopolTool)& PDomain = (reversed) ? D1 : D2;
-  const Handle(Adaptor3d_HSurface)& aQSurf = (reversed) ? Surf2 : Surf1;
 
   IntPatch_SequenceOfLine dslin;
   Standard_Boolean isDecompose = Standard_False;
   for(Standard_Integer i = 1; i <= slin.Length(); i++ )
   {
-    if(DecomposeResult(slin(i),reversed,Quad,PDomain,aQSurf,TolArc,dslin))
+    if(DecomposeResult( Handle(IntPatch_PointLine)::DownCast(slin(i)),
+                                        reversed, Quad, PDomain, aQSurf,
+                                        anOtherSurf, TolArc, dslin))
     {
       isDecompose = Standard_True;
     }
@@ -1534,7 +1586,7 @@ static Standard_Real AdjustUFirst(Standard_Real U1,Standard_Real U2)
 }
 
 // collect vertices, reject equals
-static Handle(IntSurf_LineOn2S) GetVertices(const Handle(IntPatch_WLine)& WLine,
+static Handle(IntSurf_LineOn2S) GetVertices(const Handle(IntPatch_PointLine)& thePLine,
                                             const Standard_Real           TOL3D,
                                             const Standard_Real           TOL2D)
 {
@@ -1544,7 +1596,7 @@ static Handle(IntSurf_LineOn2S) GetVertices(const Handle(IntPatch_WLine)& WLine,
 
   Standard_Real U1 = 0., U2 = 0., V1 = 0., V2 = 0.;
   Standard_Integer i = 0, k = 0;
-  Standard_Integer NbVrt = WLine->NbVertex();
+  Standard_Integer NbVrt = thePLine->NbVertex();
 
   TColStd_Array1OfInteger anVrts(1,NbVrt);
   anVrts.Init(0);
@@ -1554,13 +1606,13 @@ static Handle(IntSurf_LineOn2S) GetVertices(const Handle(IntPatch_WLine)& WLine,
 
     if( anVrts(i) == -1 ) continue;
 
-    const IntPatch_Point& Pi = WLine->Vertex(i);
+    const IntPatch_Point& Pi = thePLine->Vertex(i);
 
     for(k = (i+1); k <= NbVrt; k++) {
 
       if( anVrts(k) == -1 ) continue;
 
-      const IntPatch_Point& Pk = WLine->Vertex(k);
+      const IntPatch_Point& Pk = thePLine->Vertex(k);
 
       if(Pi.Value().Distance(Pk.Value()) <= TOL3D) {
         // suggest the points are equal;
@@ -1589,7 +1641,7 @@ static Handle(IntSurf_LineOn2S) GetVertices(const Handle(IntPatch_WLine)& WLine,
   // copy further processed vertices
   for(i = 1; i <= NbVrt; i++) {
     if( anVrts(i) == -1 ) continue;
-    vertices->Add(WLine->Vertex(i).PntOn2S());
+    vertices->Add(thePLine->Vertex(i).PntOn2S());
   }
   return vertices;
 }
@@ -1618,76 +1670,6 @@ static Standard_Boolean AreSamePoints(const IntSurf_PntOn2S& P1,
   }
   return result;
 }
-
-static void ForcedPurgePoints(const Handle(IntSurf_LineOn2S)& Result,
-                              const Standard_Boolean          IsReversed,
-                              const IntSurf_Quadric&          Quad)
-{
-  if(Result->NbPoints() <= 30) return;
-  Standard_Integer Index = 0, IndexLimF = 8, IndexLimL = 8;
-
-  Standard_Real U1 = 0., V1 = 0., U2 = 0., V2 = 0.;
-  if(IsReversed) {
-    Result->Value(1).ParametersOnS2(U1,V1);
-    Result->Value(Result->NbPoints()).ParametersOnS2(U2,V2);
-  }
-  else {
-    Result->Value(1).ParametersOnS1(U1,V1);   
-    Result->Value(Result->NbPoints()).ParametersOnS1(U2,V2);
-  }
-
-  if(Quad.TypeQuadric() == GeomAbs_Cone) {
-    Standard_Real Uapx = 0., Vapx = 0.;
-    Quad.Parameters(Quad.Cone().Apex(),Uapx,Vapx);
-
-    if(fabs(V1-Vapx) <= 1.e-3)
-      IndexLimF = 12;
-    if(fabs(V2-Vapx) <= 1.e-3)
-      IndexLimL = 12;
-  }
-
-  if(Quad.TypeQuadric() == GeomAbs_Sphere) {
-    Standard_Real Vapx1 = M_PI/2., Vapx2 = -M_PI/2.;
-
-    if(fabs(V1-Vapx1) <= 1.e-3 || fabs(V1-Vapx2) <= 1.e-3)
-      IndexLimF = 12;
-    if(fabs(V2-Vapx1) <= 1.e-3 || fabs(V2-Vapx2) <= 1.e-3)
-      IndexLimL = 12;
-  }
-
-  while(Result->NbPoints() > 2 && Index < IndexLimF) {
-    Result->RemovePoint(2);
-    Index++;
-  }
-  Index = 0;
-  while(Result->NbPoints() > 2 && Index < IndexLimL) {
-    Result->RemovePoint(Result->NbPoints()-1);
-    Index++;
-  }
-}
-
-// DEBUG FUNCTION !!!
-#if 0
-static void DumpLine(Handle(IntSurf_LineOn2S)& Line,
-  Standard_Boolean          IsReversed,
-  Standard_Integer          Number)
-{
-  cout << "DUMP LINE" << endl;
-  Standard_Integer i;
-  Standard_Real U,V;
-  for(i = 1; i <= Line->NbPoints(); i++) {
-    if(i <= Number || i >= (Line->NbPoints()-Number)) {
-      if(IsReversed)
-        Line->Value(i).ParametersOnS2(U,V); // S2 - quadric
-      else
-        Line->Value(i).ParametersOnS1(U,V); // S1 - quadric
-      cout << "point p" << i << " " << U << " " << V << endl;
-    }
-  }
-  cout << endl;
-}
-#endif
-// DEBUG FUNCTION !!!
 
 static void SearchVertices(const Handle(IntSurf_LineOn2S)& Line,
   const Handle(IntSurf_LineOn2S)& Vertices,
@@ -2373,30 +2355,47 @@ static Standard_Boolean SplitOnSegments(Handle(IntPatch_WLine)&        WLine,
   return result;
 }
 
-static Standard_Boolean DecomposeResult(const Handle(IntPatch_Line)& theLine,
+//=======================================================================
+//function : DecomposeResult
+//purpose  : Split <theLine> in the places where it passes through seam edge
+//            or singularity (apex of cone or pole of sphere).
+//            This passage is detected by jump of U-parameter
+//            from point to point.
+//=======================================================================
+static Standard_Boolean DecomposeResult(const Handle(IntPatch_PointLine)& theLine,
                                         const Standard_Boolean       IsReversed,
                                         const IntSurf_Quadric&       theQuad,
                                         const Handle(Adaptor3d_TopolTool)& thePDomain,
-                                        const Handle(Adaptor3d_HSurface)&  theQSurf,
+                                        const Handle(Adaptor3d_HSurface)&  theQSurf, //quadric
+                                        const Handle(Adaptor3d_HSurface)&  thePSurf, //parametric
                                         const Standard_Real                theArcTol,
                                         IntPatch_SequenceOfLine&           theLines)
 {
-  // Split <theLine> in the places where it passes through seam edge or singularity
-  // (apex of cone or pole of sphere). This passage is detected by jump of U-parameter
-  // from point to point.
+  if(theLine->ArcType() == IntPatch_Restriction)
+  {
+    const Handle(IntPatch_RLine)& aRL = Handle(IntPatch_RLine)::DownCast(theLine);
+    if(!aRL.IsNull())
+    {
+      const Handle(Adaptor2d_HCurve2d)& anArc = aRL->IsArcOnS1() ?
+                                        aRL->ArcOnS1() :
+                                        aRL->ArcOnS2();
+      if(anArc->Curve2d().GetType() != GeomAbs_Line)
+      {
+        //Restriction line must be isoline.
+        //Other cases are not supported by
+        //existing algorithms.
+
+        return Standard_False;
+      }
+    }
+  }
   
-  const Standard_Real aDeltaUmax = 0.5*M_PI;
+  const Standard_Real aDeltaUmax = M_PI_2;
   const Standard_Real aTOL3D = 1.e-10, 
                       aTOL2D = Precision::PConfusion(),
                       aTOL2DS = Precision::PConfusion();
 
-  if( theLine->ArcType() != IntPatch_Walking )
-  {
-    return Standard_False;
-  }
-
-  Handle(IntPatch_WLine) aWLine (Handle(IntPatch_WLine)::DownCast (theLine));
-  const Handle(IntSurf_LineOn2S)& aSLine = aWLine->Curve();
+  const Handle(IntSurf_LineOn2S)& aSLine = theLine->Curve();
 
   if(aSLine->NbPoints() <= 2)
   {
@@ -2404,7 +2403,7 @@ static Standard_Boolean DecomposeResult(const Handle(IntPatch_Line)& theLine,
   }
   
   //Deletes repeated vertices
-  Handle(IntSurf_LineOn2S) aVLine = GetVertices(aWLine,aTOL3D,aTOL2D);
+  Handle(IntSurf_LineOn2S) aVLine = GetVertices(theLine,aTOL3D,aTOL2D);
   
   Handle(IntSurf_LineOn2S) aSSLine(aSLine);
 
@@ -2413,6 +2412,7 @@ static Standard_Boolean DecomposeResult(const Handle(IntPatch_Line)& theLine,
 
   AdjustLine(aSSLine,IsReversed,theQSurf,aTOL2D);
 
+  if(theLine->ArcType() == IntPatch_Walking)
   {
     Standard_Boolean isInserted = Standard_True;
     while(isInserted)
@@ -2427,12 +2427,16 @@ static Standard_Boolean DecomposeResult(const Handle(IntPatch_Line)& theLine,
   const Standard_Integer aLindex = aSSLine->NbPoints();
   Standard_Integer aFindex = 1, aBindex = 0;
 
-  IntPatch_Point aTPntF, aTPntL;
-
   // build WLine parts (if any)
   Standard_Boolean flNextLine = Standard_True;
   Standard_Boolean hasBeenDecomposed = Standard_False;
-  Standard_Boolean PrePointExist = Standard_False;
+  enum PrePoint_Type
+  {
+    PrePoint_NONE,
+    PrePoint_SEAM,
+    PrePoint_POLE
+  }PrePointExist = PrePoint_NONE;
+
   IntSurf_PntOn2S PrePoint;
   while(flNextLine)
   {
@@ -2444,15 +2448,85 @@ static Standard_Boolean DecomposeResult(const Handle(IntPatch_Line)& theLine,
     Handle(IntSurf_LineOn2S) sline = new IntSurf_LineOn2S();
 
     //if((Lindex-Findex+1) <= 2 )
-    if(aLindex <= aFindex)
-      return hasBeenDecomposed;
+    if((aLindex <= aFindex) && (PrePointExist != PrePoint_POLE))
+    {
+      //break of "while(flNextLine)" cycle
+      break;
+    }
 
-    if (PrePointExist)
+    if (PrePointExist == PrePoint_SEAM)
     {
       sline->Add(PrePoint);
-      PrePointExist = Standard_False;
     }
-    
+    else if(PrePointExist == PrePoint_POLE)
+    {
+      //The last point of the line is the pole of the quadric.
+      //Therefore, Walking-line has been broken in this point.
+      //However, new line must start from this point. Here we must
+      //find its 2D-coordinates.
+
+      //For sphere and cone, some intersection point is satisfied to the system
+      //  \cos(U_{q}) = S_{x}(U_{s},V_{s})/F(V_{q}) 
+      //  \sin(U_{q}) = S_{y}(U_{s},V_{s})/F(V_{q}) 
+
+      //where 
+      //  @S_{x}@, @S_{y}@ are X and Y-coordinates of thePSurf;
+      //  @U_{s}@ and @V_{s}@ are UV-parameters on thePSurf;
+      //  @U_{q}@ and @V_{q}@ are UV-parameters on theQSurf;
+      //  @F(V_{q}) @ is some function, which value independs on @U_{q}@
+      //              (form of this function depends on the type of the quadric).
+
+      //When we go through the pole, the function @F(V_{q}) @ changes sign.
+      //Therefore, some cases are possible, when only @\cos(U_{q}) @ or
+      //only @ \sin(U_{q}) @ change sign.
+
+      //Consequently, when the line goes throug the pole, @U_{q}@ can be
+      //changed on @\pi /2 @ (but not less).
+
+      const Standard_Real aPeriod = M_PI_2, aHalfPeriod = M_PI_4;
+      const IntSurf_PntOn2S& aRefPt = aSSLine->Value(aFindex);
+
+      IntSurf_PntOn2S aFirstPoint = PrePoint;
+
+      if(!aFirstPoint.IsSame(aRefPt, Precision::Confusion()))
+      {
+        Standard_Real aURef = 0.0, aVRef = 0.0;
+        Standard_Real aUquad = 0.0, aVquad = 0.0;
+
+        //Take parameters on quadric
+        if(IsReversed)
+        {
+          aFirstPoint.ParametersOnS2(aUquad, aVquad);
+          aRefPt.ParametersOnS2(aURef, aVRef);
+        }
+        else
+        {
+          aFirstPoint.ParametersOnS1(aUquad, aVquad);
+          aRefPt.ParametersOnS1(aURef, aVRef);
+        }
+
+        {
+          Standard_Real aDeltaPar = aURef-aUquad;
+          const Standard_Real anIncr = Sign(aPeriod, aDeltaPar);
+          while((aDeltaPar > aHalfPeriod) || (aDeltaPar < -aHalfPeriod))
+          {
+            aUquad += anIncr;
+            aDeltaPar = aURef-aUquad;
+          }
+        }
+
+        aFirstPoint.SetValue(!IsReversed, aUquad, aVquad);
+        sline->Add(aFirstPoint);
+      }
+      else
+      {
+        //break of "while(flNextLine)" cycle
+        break;
+      }
+    }
+
+    PrePointExist = PrePoint_NONE;
+
     // analyze other points
     for(Standard_Integer k = aFindex; k <= aLindex; k++)
     {
@@ -2512,7 +2586,7 @@ static Standard_Boolean DecomposeResult(const Handle(IntPatch_Line)& theLine,
                  Abs(AnU1 - 2*M_PI) <= Precision::PConfusion())
         {
           //Modify <PrePoint>
-          PrePointExist = Standard_True;
+          PrePointExist = PrePoint_SEAM;
           Standard_Real theU1, theV1;
           if (!IsReversed)
           {
@@ -2529,13 +2603,323 @@ static Standard_Boolean DecomposeResult(const Handle(IntPatch_Line)& theLine,
                               theU1, theV1);
           }
         }
+        else
+        {//Check if WLine goes through pole
+          const Standard_Real aTol = Precision::Confusion();
+          const Standard_Real aPeriod = M_PI+M_PI, aHalfPeriod = M_PI;
+          const IntSurf_PntOn2S& aRefPt = aSSLine->Value(aBindex-1);
+          
+          //Not quadric point
+          Standard_Real aU0 = 0.0, aV0 = 0.0;
+          //Quadric point
+          Standard_Real aUQuadRef = 0.0, aVQuadRef = 0.0;
+
+          if(IsReversed)
+          {
+            aRefPt.Parameters(aU0, aV0, aUQuadRef, aVQuadRef);
+          }
+          else
+          {
+            aRefPt.Parameters(aUQuadRef, aVQuadRef, aU0, aV0);
+          }
+
+          //Transforms parametric surface in coordinate-system of the quadric
+          gp_Trsf aTr;
+          aTr.SetTransformation(theQuad.Sphere().Position());
+
+          //aPQuad is Pole
+          gp_Pnt aPQuad;
+          Standard_Real aUquad = 0.0;
+          Standard_Real aVquad = 0.0; 
+          
+          if(theQuad.TypeQuadric() == GeomAbs_Sphere)
+          {
+            aVquad = Sign(M_PI_2, aVQuadRef);
+          }
+          else if(theQuad.TypeQuadric() == GeomAbs_Cone)
+          {
+            const Standard_Real aRadius = theQuad.Cone().RefRadius();
+            const Standard_Real aSemiAngle = theQuad.Cone().SemiAngle();
+            aVquad = -aRadius/sin(aSemiAngle);
+          }
+          else
+          {
+            Standard_TypeMismatch::Raise( "IntPatch_ImpPrmIntersection.cxx,"
+                                          " DecomposeResult(...): "
+                                          "Unsupported quadric with Pole");
+          }
+          
+          theQSurf->D0(aUquad, aVquad, aPQuad);
+
+          Extrema_GenLocateExtPS anExtr(aPQuad, thePSurf->Surface(), aU0, aV0,
+                                        Precision::PConfusion(),
+                                        Precision::PConfusion());
+
+          if(!anExtr.IsDone())
+            break;
+
+          if(anExtr.SquareDistance() < aTol*aTol)
+          { //Pole is an intersection point
+            //(lies in the quadric and the parametric surface)
+
+            anExtr.Point().Parameter(aU0, aV0);
+            gp_Pnt aP0(anExtr.Point().Value());
+
+            IntSurf_PntOn2S aNewPoint;
+            aNewPoint.SetValue(0.5*(aP0.XYZ() + aPQuad.XYZ()), IsReversed, aU0, aV0);
+
+            if(!aNewPoint.IsSame(aRefPt, Precision::Confusion()))
+            {
+              //Found pole does not exist in the Walking-line
+              //It must be added there (with correct 2D-parameters)
+              
+              //2D-parameters of theparametric surface have already been found (aU0, aV0).
+              //Let find 2D-parameters on the quadric.
+
+              //The algorithm depends on the type of the quadric. Here we consider a Sphere only.
+              //Analogical result can be made for another types (e.g. cone, but formulas will
+              //be different) in case of need.
+              
+              //First of all, we need in adjusting thePSurf in the coordinate system of the Sphere
+              //(in order to make the equation of the sphere maximal simple). However, as it will be
+              //shown later, thePSurf is used in algorithm in order to get its derivatives. Therefore,
+              //for improving performance, transformation of these vectors is enough (there is no point
+              //in transformation of full surface).
+              
+              gp_Pnt aPtemp;
+              gp_Vec aVecDu, aVecDv;
+              thePSurf->D1(aU0, aV0, aPtemp, aVecDu, aVecDv);
+
+              //Derivatives of transformed thePSurf
+              aVecDu.Transform(aTr);
+              aVecDv.Transform(aTr);
+
+              if(theQuad.TypeQuadric() == GeomAbs_Sphere)
+              {
+                //The intersection point (including the pole)
+                //must be satisfied to the following system:
+
+                //    \left\{\begin{matrix}
+                //    R*\cos (U_{q})*\cos (V_{q})=S_{x}(U_{s},V_{s})
+                //    R*\sin (U_{q})*\cos (V_{q})=S_{y}(U_{s},V_{s})
+                //    R*\sin (V_{q})=S_{z}(U_{s},V_{s})
+                //    \end{matrix}\right,
+                //where 
+                //  R is the radius of the sphere;
+                //  @S_{x}@, @S_{y}@ and @S_{z}@ are X, Y and Z-coordinates of thePSurf;
+                //  @U_{s}@ and @V_{s}@ are equal to aU0 and aV0 corespondingly;
+                //  @U_{q}@ and @V_{q}@ are equal to aUquad and aVquad corespondingly.
+
+                //Consequently (from first two equations), 
+                //  \left\{\begin{matrix}
+                //  \cos (U_{q}) = \frac{S_{x}(U_{s},V_{s})}{R*\cos (V_{q})}
+                //  \sin (U_{q}) = \frac{S_{y}(U_{s},V_{s})}{R*\cos (V_{q})}
+                //  \end{matrix}\right.
+
+                //For pole, 
+                //  V_{q}=\pm \pi /2 \Rightarrow \cos (V_{q}) = 0 (denominator is equal to 0).
+
+                //Therefore, computation U_{q} directly is impossibly.
+                //
+                //Let @V_{q}@ tends to @\pm \pi /2@.
+                //Then (indeterminate form is evaluated in accordance of L'Hospital rule),
+                //  \cos (U_{q}) = \lim_{V_{q} \to (\pi /2-0)} 
+                //  \frac{S_{x}(U_{s},V_{s})}{R*\cos (V_{q})}= 
+                //  -\lim_{V_{q} \to (\pi /2-0)}
+                //  \frac{\frac{\partial S_{x}}
+                //  {\partial U_{s}}*\frac{\mathrm{d} U_{s}} 
+                //  {\mathrm{d} V_{q}}+\frac{\partial S_{x}} 
+                //  {\partial V_{s}}*\frac{\mathrm{d} V_{s}} 
+                //  {\mathrm{d} V_{q}}}{R*\sin (V_{q})} =  
+                //  -\frac{1}{R}*\frac{\mathrm{d} U_{s}}
+                //  {\mathrm{d} V_{q}}*(\frac{\partial S_{x}} 
+                //  {\partial U_{s}}+\frac{\partial S_{x}}
+                //  {\partial V_{s}}*\frac{\mathrm{d} V_{s}}
+                //  {\mathrm{d} U_{s}}) =
+                //  -\frac{1}{R}*\frac{\mathrm{d} V_{s}}
+                //  {\mathrm{d} V_{q}}*(\frac{\partial S_{x}} 
+                //  {\partial U_{s}}*\frac{\mathrm{d} U_{s}}
+                //  {\mathrm{d} V_{s}}+\frac{\partial S_{x}}
+                //  {\partial V_{s}}).
+
+                //Analogicaly for @\sin (U_{q})@ (@S_{x}@ is substituted to @S_{y}@).
+
+                //Let mean, that
+                //  \cos (U_{q}) \left | _{V_{q} \to (-\pi /2+0)} = \cos (U_{q}) \left | _{V_{q} \to (\pi /2-0)}
+                //  \sin (U_{q}) \left | _{V_{q} \to (-\pi /2+0)} = \sin (U_{q}) \left | _{V_{q} \to (\pi /2-0)}
+
+                //From the 3rd equation of the system, we obtain
+                //  \frac{\mathrm{d} (R*\sin (V_{q}))}{\mathrm{d} V_{q}} =
+                //  \frac{\mathrm{d} S_{z}(U_{s},V_{s})}{\mathrm{d} V_{q}}
+                //or
+                //  R*\cos (V_{q}) = \frac{\partial S_{z}}{\partial U_{s}}*
+                //  \frac{\mathrm{d} U_{s}} {\mathrm{d} V_{q}}+\frac{\partial S_{z}}
+                //  {\partial V_{s}}*\frac{\mathrm{d} V_{s}}{\mathrm{d} V_{q}}.
+
+                //If @V_{q}=\pm \pi /2@, then
+                //  \frac{\partial S_{z}}{\partial U_{s}}*
+                //  \frac{\mathrm{d} U_{s}} {\mathrm{d} V_{q}}+\frac{\partial S_{z}}
+                //  {\partial V_{s}}*\frac{\mathrm{d} V_{s}}{\mathrm{d} V_{q}} = 0.
+
+                //Consequently, if @\frac{\partial S_{z}}{\partial U_{s}} \neq 0 @ then
+                //  \frac{\mathrm{d} U_{s}}{\mathrm{d} V_{s}} =
+                //  -\frac{\frac{\partial S_{z}}{\partial V_{s}}}
+                //  {\frac{\partial S_{z}}{\partial U_{s}}}.
+
+                //If @ \frac{\partial S_{z}}{\partial V_{s}} \neq 0 @ then
+                //  \frac{\mathrm{d} V_{s}}{\mathrm{d} U_{s}} =
+                //  -\frac{\frac{\partial S_{z}}{\partial U_{s}}}
+                //  {\frac{\partial S_{z}}{\partial V_{s}}}
+
+                //Cases, when @ \frac{\partial S_{z}}{\partial U_{s}} = 
+                //\frac{\partial S_{z}}{\partial V_{s}} = 0 @ are not consider here.
+                //The reason is written below.
+
+                //Vector with {@ \cos (U_{q}) @, @ \sin (U_{q}) @} coordinates.
+                //Ask to pay attention to the fact that this vector is always normalyzed.
+                gp_Vec2d aV1;
+
+                if( (Abs(aVecDu.Z()) < Precision::PConfusion()) &&
+                  (Abs(aVecDv.Z()) < Precision::PConfusion()))
+                {
+                  //Example of this exception is intersection a plane with a sphere
+                  //when the plane tangents the sphere in some pole (i.e. only one 
+                  //intersection point, not line). In this case, U-coordinate of the
+                  //sphere is undefined (can be realy anything).
+                  //Another reason is that we have tangent zone around the pole
+                  //(see bug #26576).
+                  //Computation correct value of aUquad is impossible. Therefore,
+                  //we should throw an exception in this case.
+                  //Also, any Walking line cannot be created in this case.
+                  //Hovewer, Restriction line is not created by intersection algorithm.
+                  //It is already exists (above we check simply, if this line is
+                  //intersection line).
+                  //Therefore, we can try to find the aUquad-parameter on (existing)
+                  //Restriction line. Here, we will do it with
+                  //extrapolation algorithm.
+                  //Use interpolation algorithm is wrong because aUquad parameter
+                  //jumps while the line going though the pole.
+
+                  if((theLine->ArcType() == IntPatch_Walking) ||
+                    (aBindex < 3))
+                  {
+                    //We must have at least two previous points
+                    //in order to do linear extrapolation.
+                    Standard_NumericError::
+                      Raise("IntPatch_ImpPrmIntersection.cxx, DecomposeResult(...): "
+                      "Cannot find UV-coordinate for quadric in the pole");
+                  }
+                  else
+                  {
+#ifdef INTPATCH_IMPPRMINTERSECTION_DEBUG
+                    cout << "Cannot find UV-coordinate for quadric in the pole."
+                      " See considered comment above. IntPatch_ImpPrmIntersection.cxx,"
+                      " DecomposeResult(...)" << endl;
+#endif
+
+                    //    *----------*------------x
+                    // QuadPrev   QuadRef     Quad (must be found)
+
+                    const IntSurf_PntOn2S& aPt2S = aSSLine->Value(aBindex-2);
+                    //Quadric point
+                    Standard_Real aUQuadPrev = 0.0, aVQuadPrev = 0.0;
+                    if(IsReversed)
+                    {
+                      aPt2S.ParametersOnS2(aUQuadPrev, aVQuadPrev);
+                    }
+                    else
+                    {
+                      aPt2S.ParametersOnS1(aUQuadPrev, aVQuadPrev);
+                    }
+
+                    Standard_NumericError_Raise_if(
+                      Abs(aVQuadPrev - aVQuadRef) < gp::Resolution(),
+                      "Division by zero");
+
+                    aUquad = 
+                      aUQuadPrev + (aUQuadRef - aUQuadPrev)*
+                      (aVquad - aVQuadPrev)/(aVQuadRef - aVQuadPrev);
+                  }
+                }
+                else
+                {
+                  if(Abs(aVecDu.Z()) > Abs(aVecDv.Z()))
+                  {
+                    const Standard_Real aDusDvs = aVecDv.Z()/aVecDu.Z();
+
+                    aV1.SetCoord( aVecDu.X()*aDusDvs - aVecDv.X(),
+                      aVecDu.Y()*aDusDvs - aVecDv.Y());
+                  }
+                  else
+                  {
+                    const Standard_Real aDvsDus = aVecDu.Z()/aVecDv.Z();
+                    aV1.SetCoord( aVecDv.X()*aDvsDus - aVecDu.X(),
+                      aVecDv.Y()*aDvsDus - aVecDu.Y());
+                  }
+
+                  aV1.Normalize();
+
+                  if(Abs(aV1.X()) > Abs(aV1.Y()))
+                    aUquad = Sign(asin(aV1.Y()), aVquad);
+                  else
+                    aUquad = Sign(acos(aV1.X()), aVquad);
+                }
+
+                {
+                  //Adjust found U-paramter to previous point of the Walking-line
+                  Standard_Real aDeltaPar = aUQuadRef-aUquad;
+                  const Standard_Real anIncr = Sign(aPeriod, aDeltaPar);
+                  while((aDeltaPar > aHalfPeriod) || (aDeltaPar < -aHalfPeriod))
+                  {
+                    aUquad += anIncr;
+                    aDeltaPar = aUQuadRef-aUquad;
+                  }
+                }
+              }
+
+              aNewPoint.SetValue(!IsReversed, aUquad, aVquad);
+              
+              sline->Add(aNewPoint);
+              PrePointExist = PrePoint_POLE;
+              PrePoint = aNewPoint;
+            } // if(!aNewPoint.IsSame(aRefPt, Precision::Confusion()))
+            else
+            {
+              if(sline->NbPoints() == 1)
+              {
+                //FIRST point of the sline is the pole of the quadric.
+                //Therefore, there is no point in decomposition.
+
+                PrePoint = aRefPt;
+                AnU1=U1;
+                PrePointExist = PrePoint_POLE;
+              }
+            }
+          } //if(anExtr.SquareDistance() < aTol*aTol)
+        }
+
         ////
         break;
-      }
+      } //if(Abs(U1-AnU1) > aDeltaUmax)
 
       sline->Add(aSSLine->Value(k));
       PrePoint = aSSLine->Value(k);
       AnU1=U1;
+    } //for(Standard_Integer k = aFindex; k <= aLindex; k++)
+
+    //Creation of new line as part of existing theLine.
+    //This part is defined by sline.
+
+    if(sline->NbPoints() == 1)
+    {
+      flNextLine = Standard_True;
+      aFindex = aBindex;
+
+      //Go to the next part of aSSLine
+      //because we cannot create the line
+      //with single point.
+
+      continue;
     }
 
     IntSurf_PntOn2S aVF, aVL;
@@ -2567,52 +2951,136 @@ static Standard_Boolean DecomposeResult(const Handle(IntPatch_Line)& theLine,
       }
     }
 
-    if(!hasInternals)
+    if(theLine->ArcType() == IntPatch_Walking)
     {
-      ForcedPurgePoints(sline,IsReversed,theQuad);
-    }
+      IntPatch_Point aTPntF, aTPntL;
 
-    Handle(IntPatch_WLine) wline = 
-                        new IntPatch_WLine(sline,Standard_False,
-                        theLine->TransitionOnS1(),theLine->TransitionOnS2());
+      Handle(IntPatch_WLine) wline = 
+                          new IntPatch_WLine(sline,Standard_False,
+                          theLine->TransitionOnS1(),theLine->TransitionOnS2());
 
-    gp_Pnt aSPnt(sline->Value(1).Value());
-    sline->Value(1).ParametersOnS1(U1,V1);
-    sline->Value(1).ParametersOnS2(U2,V2);
-    aTPntF.SetValue(aSPnt,theArcTol,Standard_False);
-    aTPntF.SetParameters(U1,V1,U2,V2);
-    aTPntF.SetParameter(1.);
-    wline->AddVertex(aTPntF);
-    wline->SetFirstPoint(1);
+      gp_Pnt aSPnt(sline->Value(1).Value());
+      sline->Value(1).ParametersOnS1(U1,V1);
+      sline->Value(1).ParametersOnS2(U2,V2);
+      aTPntF.SetValue(aSPnt,theArcTol,Standard_False);
+      aTPntF.SetParameters(U1,V1,U2,V2);
+      aTPntF.SetParameter(1.);
+      wline->AddVertex(aTPntF);
+      wline->SetFirstPoint(1);
 
-    if(hasInternals)
-    {
-      PutIntVertices(wline,sline,IsReversed,aVLine,theArcTol);
-    }
+      if(hasInternals)
+      {
+        PutIntVertices(wline,sline,IsReversed,aVLine,theArcTol);
+      }
 
-    aSPnt =  sline->Value(sline->NbPoints()).Value();
-    sline->Value(sline->NbPoints()).ParametersOnS1(U1,V1);
-    sline->Value(sline->NbPoints()).ParametersOnS2(U2,V2);
-    aTPntL.SetValue(aSPnt,theArcTol,Standard_False);
-    aTPntL.SetParameters(U1,V1,U2,V2);
-    aTPntL.SetParameter(sline->NbPoints());
-    wline->AddVertex(aTPntL);
-    wline->SetLastPoint(sline->NbPoints());
+      aSPnt =  sline->Value(sline->NbPoints()).Value();
+      sline->Value(sline->NbPoints()).ParametersOnS1(U1,V1);
+      sline->Value(sline->NbPoints()).ParametersOnS2(U2,V2);
+      aTPntL.SetValue(aSPnt,theArcTol,Standard_False);
+      aTPntL.SetParameters(U1,V1,U2,V2);
+      aTPntL.SetParameter(sline->NbPoints());
+      wline->AddVertex(aTPntL);
+      wline->SetLastPoint(sline->NbPoints());
 
-    IntPatch_SequenceOfLine segm;
-    Standard_Boolean isSplited = SplitOnSegments(wline,Standard_False,
-                    theLine->TransitionOnS1(),theLine->TransitionOnS2(),theArcTol,segm);
+      IntPatch_SequenceOfLine segm;
+      Standard_Boolean isSplited = SplitOnSegments(wline,Standard_False,
+                      theLine->TransitionOnS1(),theLine->TransitionOnS2(),theArcTol,segm);
 
-    if(!isSplited)
-    {
-      theLines.Append(wline);
+      if(!isSplited)
+      {
+        theLines.Append(wline);
+      }
+      else
+      {
+        Standard_Integer nbsegms = segm.Length();
+        Standard_Integer iseg = 0;
+        for(iseg = 1; iseg <= nbsegms; iseg++)
+          theLines.Append(segm(iseg));
+      }
     }
     else
-    {
-      Standard_Integer nbsegms = segm.Length();
-      Standard_Integer iseg = 0;
-      for(iseg = 1; iseg <= nbsegms; iseg++)
-        theLines.Append(segm(iseg));
+    {//theLine->ArcType() == IntPatch_Restriction
+      if(!isDecomposited && !hasBeenDecomposed)
+      {
+        //The line has not been changed
+        theLines.Append(Handle(IntPatch_RLine)::DownCast(theLine));
+        return hasBeenDecomposed;
+      }
+
+      IntPatch_Point aTPnt;
+      gp_Pnt2d aPSurf;
+      gp_Pnt aSPnt;
+
+      Handle(IntPatch_RLine) aRLine = new IntPatch_RLine(*Handle(IntPatch_RLine)::DownCast(theLine));
+      
+      aRLine->ClearVertexes();
+      aRLine->SetCurve(sline);
+
+      if(hasInternals)
+      {
+        PutIntVertices(aRLine,sline,IsReversed,aVLine,theArcTol);
+      }
+
+      const Handle(Adaptor2d_HCurve2d)& anArc = aRLine->IsArcOnS1() ?
+                                                aRLine->ArcOnS1() :
+                                                aRLine->ArcOnS2();
+
+      Standard_Real aFPar = anArc->FirstParameter(),
+                    aLPar = anArc->LastParameter();
+
+      const IntSurf_PntOn2S &aRFirst = sline->Value(1),
+                            &aRLast = sline->Value(sline->NbPoints());
+
+      const gp_Lin2d aLin(anArc->Curve2d().Line());
+      
+      for(Standard_Integer aFLIndex = 0; aFLIndex < 2; aFLIndex++)
+      {
+        if(aFLIndex == 0)
+        {
+          aRFirst.Parameters(U1, V1, U2, V2);
+          aSPnt.SetXYZ(aRFirst.Value().XYZ());
+        }
+        else
+        {
+          aRLast.Parameters(U1, V1, U2, V2);
+          aSPnt.SetXYZ(aRLast.Value().XYZ());
+        }
+
+        if(IsReversed)
+        {
+          aPSurf.SetCoord(U1, V1);
+        }
+        else
+        {
+          aPSurf.SetCoord(U2, V2);
+        }
+
+        Standard_Real aPar = ElCLib::Parameter(aLin, aPSurf);
+
+        if(aFLIndex == 0)
+        {
+          aFPar = Max(aFPar, aPar);
+          aPar = aFPar;
+        }
+        else
+        {
+          aLPar = Min(aLPar, aPar);
+          aPar = aLPar;
+        }
+
+        aTPnt.SetParameter(aPar);
+        aTPnt.SetValue(aSPnt,theArcTol,Standard_False);
+        aTPnt.SetParameters(U1, V1, U2, V2);
+
+        aRLine->AddVertex(aTPnt);
+      }
+
+      aRLine->SetFirstPoint(1);
+      aRLine->SetLastPoint(sline->NbPoints());
+
+      anArc->Trim(aFPar, aLPar, theArcTol);
+
+      theLines.Append(aRLine);
     }
 
     if(isDecomposited)
@@ -2625,57 +3093,157 @@ static Standard_Boolean DecomposeResult(const Handle(IntPatch_Line)& theLine,
   return hasBeenDecomposed;
 }
 
-static Standard_Boolean IsIn2DBox(const Bnd_Box2d& theBox,
-                                  const Handle(IntPatch_PointLine)& theLine,
-                                  const Standard_Real theUPeriod,
-                                  const Standard_Real theVPeriod,
-                                  const Standard_Boolean isTheSurface1Using)
+//=======================================================================
+//function : CheckSegmSegm
+//purpose  : Returns TRUE if the segment [theParF, theParL] is included
+//            in the segment [theRefParF, theRefParL] segment.
+//=======================================================================
+static Standard_Boolean CheckSegmSegm(const Standard_Real theRefParF,
+                                      const Standard_Real theRefParL,
+                                      const Standard_Real theParF,
+                                      const Standard_Real theParL)
 {
+  if((theParF < theRefParF) || (theParF > theRefParL))
+  {
+    return Standard_False;
+  }
+
+  if((theParL < theRefParF) || (theParL > theRefParL))
+  {
+    return Standard_False;
+  }
+
+  return Standard_True;
+}
+
+//=======================================================================
+//function : IsCoincide
+//purpose  : Check, if theLine is coincided with theArc (in 2d-space).
+//
+// Attention!!!
+//            Cases when theArc is not 2d-line adaptor are suppored by
+//          TopOpeBRep classes only (i.e. are archaic).
+//=======================================================================
+Standard_Boolean IsCoincide(IntPatch_TheSurfFunction& theFunc,
+                            const Handle(IntPatch_PointLine)& theLine,
+                            const Handle(Adaptor2d_HCurve2d)& theArc,
+                            const Standard_Boolean isTheSurface1Using, //Surf1 is parametric?
+                            const Standard_Real theToler3D,
+                            const Standard_Real theToler2D,
+                            const Standard_Real thePeriod) // Period of parametric surface in direction which is perpendicular to theArc direction.
+{
+  if(theLine->ArcType() == IntPatch_Restriction)
+  {//Restriction-restriction processing
+    const Handle(IntPatch_RLine)& aRL2 = Handle(IntPatch_RLine)::DownCast(theLine);
+    const Handle(Adaptor2d_HCurve2d)& anArc = aRL2->IsArcOnS1() ? aRL2->ArcOnS1() : aRL2->ArcOnS2();
+    
+    if(anArc->Curve2d().GetType() != GeomAbs_Line)
+    {
+      //Restriction line must be isoline.
+      //Other cases are not supported by
+      //existing algorithms.
+
+      return Standard_False;
+    }
+
+    const gp_Lin2d aLin1(theArc->Curve2d().Line()),
+                   aLin2(anArc->Curve2d().Line());
+
+    if(!aLin1.Direction().IsParallel(aLin2.Direction(), Precision::Angular()))
+    {
+      return Standard_False;
+    }
+
+    const Standard_Real aDist = 
+            theArc->Curve2d().Line().Distance(anArc->Curve2d().Line());
+    if((aDist < theToler2D) || (Abs(aDist - thePeriod) < theToler2D))
+    {
+      const Standard_Real aRf = theArc->FirstParameter(),
+                          aRl = theArc->LastParameter();
+      const Standard_Real aParf = anArc->FirstParameter(),
+                          aParl = anArc->LastParameter();
+      const gp_Pnt2d aP1(ElCLib::Value(aParf, aLin2)),
+                     aP2(ElCLib::Value(aParl, aLin2));
+
+      Standard_Real aParam1 = ElCLib::Parameter(aLin1, aP1),
+                    aParam2 = ElCLib::Parameter(aLin1, aP2);
+
+      if(CheckSegmSegm(aRf, aRl, aParam1, aParam2))
+        return Standard_True;
+
+      //Lines are parallel. Therefore, there is no point in
+      //projecting points to another line in order to check
+      //if segment second line is included in segment of first one.
+
+      return CheckSegmSegm(aParam1, aParam2, aRf, aRl);
+    }
+
+    return Standard_False;
+  }
+
   const Standard_Integer aNbPnts = theLine->NbPnts();
+  const Standard_Real aUAf = theArc->FirstParameter(),
+                      aUAl = theArc->LastParameter();
+  const gp_Lin2d anArcLin(theArc->Curve2d().Line());
 
-  const Standard_Real aDeltaUPeriod[] = {0.0, -theUPeriod, 2.0*theUPeriod};
-  const Standard_Real aDeltaVPeriod[] = {0.0, -theVPeriod, 2.0*theVPeriod};
-
-  const Standard_Integer aSzOfUPArr = sizeof(aDeltaUPeriod)/sizeof(aDeltaUPeriod[0]);
-  const Standard_Integer aSzOfVPArr = sizeof(aDeltaVPeriod)/sizeof(aDeltaVPeriod[0]);
+  math_Vector aX(1, 2), aVal(1, 1);
 
   for(Standard_Integer aPtID = 1; aPtID <= aNbPnts; aPtID++)
   {
-    Standard_Real aU = 0.0, aV = 0.0;
+    Standard_Real aUf = 0.0, aVf = 0.0;
     if(isTheSurface1Using)
-      theLine->Point(aPtID).ParametersOnS1(aU, aV);
+      theLine->Point(aPtID).ParametersOnS1(aUf, aVf);
     else
-      theLine->Point(aPtID).ParametersOnS2(aU, aV);
+      theLine->Point(aPtID).ParametersOnS2(aUf, aVf);
 
-    if(!theBox.IsOut(gp_Pnt2d(aU, aV)))
+    //Take 2d-point in parametric surface (because theArc is
+    //2d-line in parametric surface).
+    const gp_Pnt2d aPloc(aUf, aVf);
+
+    const Standard_Real aRParam = ElCLib::Parameter(anArcLin, aPloc);
+
+    if((aRParam < aUAf) || (aRParam > aUAl))
+      return Standard_False;
+
+    const gp_Pnt2d aPmin(ElCLib::Value(aRParam, anArcLin));
+    
+    const Standard_Real aDist = aPloc.Distance(aPmin);
+    if((aDist < theToler2D) || (Abs(aDist - thePeriod) < theToler2D))
+    {//Considered point is in Restriction line.
+     //Go to the next point.
       continue;
-
-    Standard_Boolean isInscribe = Standard_False;
-
-    for(Standard_Integer aUind = 0; !isInscribe && (aUind < aSzOfUPArr); aUind++)
-    {
-      if((aUind > 0) && (aDeltaUPeriod[aUind] == 0.0))
-      {
-        break;
-      }
-
-      aU += aDeltaUPeriod[aUind];
-
-      for(Standard_Integer aVind = 0; !isInscribe && (aVind < aSzOfVPArr); aVind++)
-      {
-        if((aVind > 0) && (aDeltaVPeriod[aVind] == 0.0))
-        {
-          break;
-        }
-
-        aV += aDeltaVPeriod[aVind];
-
-        isInscribe = !theBox.IsOut(gp_Pnt2d(aU, aV));
-      }
     }
 
-    if(!isInscribe)
-      return Standard_False;
+    //Check if intermediate points between aPloc and theArc are
+    //intersection point (i.e. if aPloc is in tangent zone between
+    //two intersected surfaces).
+
+    const Standard_Real aUl = aPmin.X(), aVl = aPmin.Y();
+
+    const Standard_Integer aNbPoints = 4;
+    const Standard_Real aStepU = (aUl - aUf)/aNbPoints,
+                        aStepV = (aVl - aVf)/aNbPoints;
+
+    Standard_Real aU = aUf+aStepU, aV = aVf+aStepV;
+    for(Standard_Integer i = 1; i < aNbPoints; i++)
+    {
+      aX.Value(1) = aU;
+      aX.Value(2) = aV;
+
+      if(!theFunc.Value(aX, aVal))
+      {
+        return Standard_False;
+      }
+
+      if(Abs(aVal(1)) > theToler3D)
+      {
+        return Standard_False;
+      }
+      
+      aU += aStepU;
+      aV += aStepV;
+    }
   }
+
   return Standard_True;
 }

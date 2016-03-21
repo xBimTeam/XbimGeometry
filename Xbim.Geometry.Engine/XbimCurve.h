@@ -12,10 +12,10 @@ namespace Xbim
 		{
 		private:
 			IntPtr ptrContainer;
-			virtual property Handle_Geom_Curve* pCurve
+			virtual property Handle(Geom_Curve)* pCurve
 			{
-				Handle_Geom_Curve* get() sealed { return (Handle_Geom_Curve*)ptrContainer.ToPointer(); }
-				void set(Handle_Geom_Curve* val)sealed { ptrContainer = IntPtr(val); }
+				Handle(Geom_Curve)* get() sealed { return (Handle(Geom_Curve)*)ptrContainer.ToPointer(); }
+				void set(Handle(Geom_Curve)* val)sealed { ptrContainer = IntPtr(val); }
 			}
 			
 			void InstanceCleanup();
@@ -35,7 +35,7 @@ namespace Xbim
 			~XbimCurve(){ InstanceCleanup(); }
 			!XbimCurve(){ InstanceCleanup(); }
 			//constructors
-			XbimCurve(const Handle_Geom_Curve& curve);
+			XbimCurve(const Handle(Geom_Curve)& curve);
 			XbimCurve(IIfcCurve^ curve) { Init(curve); }
 			XbimCurve(IIfcPolyline^ curve) {  Init(curve); }
 			XbimCurve(IIfcCircle^ curve) {  Init(curve); }
@@ -48,7 +48,7 @@ namespace Xbim
 			XbimCurve(IIfcPcurve^ curve){ Init(curve); }
 
 #pragma region operators
-			operator const Handle_Geom_Curve& () { return *pCurve; }
+			operator const Handle(Geom_Curve)& () { return *pCurve; }
 
 #pragma endregion
 			//properties

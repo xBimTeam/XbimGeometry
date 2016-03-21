@@ -27,7 +27,7 @@
   #include <locale.h>
 #endif
 
-#if defined(_MSC_VER) || defined(__ANDROID__)
+#if defined(_MSC_VER) || defined(__ANDROID__) || defined(__QNX__)
   #include <malloc.h>
 #elif (defined(__GNUC__) && __GNUC__ >= 4 && __GNUC_MINOR__ >= 1)
   #include <mm_malloc.h>
@@ -84,7 +84,7 @@ Standard_MMgrFactory::Standard_MMgrFactory()
   aVar = getenv ("MMGT_OPT");
   Standard_Integer anAllocId   = (aVar ?  atoi (aVar): OCCT_MMGT_OPT_DEFAULT);
 
-#if defined(_WIN32) && !defined(_WIN64)
+#if defined(_WIN32) && !defined(_WIN64) && !defined(__MINGW32__)
   static const DWORD _SSE2_FEATURE_BIT(0x04000000);
   if ( anAllocId == 2 )
   {
@@ -264,7 +264,7 @@ Standard_Address Standard::AllocateAligned (const Standard_Size theSize,
 {
 #if defined(_MSC_VER)
   return _aligned_malloc (theSize, theAlign);
-#elif defined(__ANDROID__)
+#elif defined(__ANDROID__) || defined(__QNX__)
   return memalign (theAlign, theSize);
 #elif (defined(__GNUC__) && __GNUC__ >= 4 && __GNUC_MINOR__ >= 1)
   return _mm_malloc (theSize, theAlign);
@@ -287,7 +287,7 @@ void Standard::FreeAligned (Standard_Address thePtrAligned)
 {
 #if defined(_MSC_VER)
   _aligned_free (thePtrAligned);
-#elif defined(__ANDROID__)
+#elif defined(__ANDROID__) || defined(__QNX__)
   free (thePtrAligned);
 #elif (defined(__GNUC__) && __GNUC__ >= 4 && __GNUC_MINOR__ >= 1)
   _mm_free (thePtrAligned);

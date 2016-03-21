@@ -241,38 +241,35 @@ void  OSD_File::Open(const OSD_OpenMode Mode,
 
 // ---------------------------------------------------------------------
 // ---------------------------------------------------------------------
-OSD_File OSD_File::BuildTemporary(){
+void OSD_File::BuildTemporary(){
+
+ if ( IsOpen() )
+  Close();
 
 #if defined(vax) || defined(__vms) || defined(VAXVMS)
  FILE *fic;
- OSD_File result;
  int dummy;
 
  fic = tmpfile();
  dummy = open("dummy", O_RDWR | O_CREAT);  // Open a dummy file
- result.myFileChannel = dummy - 1;         // This is file channel of "fic" +1
+ myFileChannel = dummy - 1;         // This is file channel of "fic" +1
  close(dummy);                             // Close dummy file
  unlink("dummy");                          // Removes dummy file
 
 #else 
- OSD_File result;
- char *name = tmpnam((char*) 0) ;
-
+ char name[] = "/tmp/CSFXXXXXX";
+ myFileChannel = mkstemp( name );
 
  TCollection_AsciiString aName ( name ) ;
  OSD_Path aPath( aName ) ;
 
- result.SetPath( aPath ) ;
+ SetPath( aPath ) ;
 
- result.myFILE  = fopen( name, "w+" ) ;
-
- result.myFileChannel = fileno( (FILE*)result.myFILE );
+ myFILE = fdopen( myFileChannel, "w+" ) ;
 
 #endif
 
- result.myMode = OSD_ReadWrite;
-
- return (result);
+ myMode = OSD_ReadWrite;
 }
  
 
@@ -387,7 +384,7 @@ return OSD_UNKNOWN   ;
 // -------------------------------------------------------------------------- 
 // Read content of a file
 // -------------------------------------------------------------------------- 
-void  OSD_File::Read(      Standard_Address&  Buffer, 
+void  OSD_File::Read(const Standard_Address   Buffer, 
                      const Standard_Integer   Nbyte,
                            Standard_Integer&  Readbyte)
 {
@@ -700,9 +697,6 @@ int status;
 // Return lock of a file
 
 OSD_LockType  OSD_File::GetLock(){
- if (myFileChannel == -1)
-  Standard_ProgramError::Raise("OSD_File::GetLock : file is not open");
-
  return(myLock);
 }
 
@@ -753,7 +747,8 @@ TCollection_AsciiString PrinterName;
  else
    sprintf(buffer,"lpr -P%s %s",PrinterName.ToCString(),aBuffer.ToCString());
 
- system(buffer);
+ if (system(buffer) != 0)
+   Standard_ProgramError::Raise("OSD_File::Print : No output device was available, or an error occurred");
 }
 
 
@@ -762,19 +757,11 @@ TCollection_AsciiString PrinterName;
 // -------------------------------------------------------------------------- 
 
 Standard_Boolean OSD_File::IsOpen()const{
-
- if (myPath.Name().Length()==0)
-   Standard_ProgramError::Raise("OSD_File::IsOpen : empty file name");
-
  return (myFileChannel != -1);
 }
 
 
 Standard_Boolean OSD_File::IsLocked(){
-
- if (myPath.Name().Length()==0)
-   Standard_ProgramError::Raise("OSD_File::IsLocked : empty file name");
-
  return(myLock != OSD_NoLock); 
 }
 
@@ -814,6 +801,20 @@ Standard_Boolean OSD_File::IsExecutable()
     return Standard_True;
 }
 
+int OSD_File::Capture(int theDescr) {
+  // Duplicate an old file descriptor of the given one to be able to restore output to it later.
+  int oldDescr = dup(theDescr);
+  // Redirect the output to this file
+  dup2(myFileChannel, theDescr);
+
+  // Return the old descriptor
+  return oldDescr;
+}
+
+void OSD_File::Rewind() { 
+    rewind((FILE*)myFILE); 
+}
+
 #else /* _WIN32 */
 
 //------------------------------------------------------------------------
@@ -840,11 +841,12 @@ Standard_Boolean OSD_File::IsExecutable()
 
 #if defined(__CYGWIN32__) || defined(__MINGW32__)
 #define VAC
-#define _int64 int
 #endif
 
-#pragma comment( lib, "WSOCK32.LIB"  )
-#pragma comment( lib, "WINSPOOL.LIB" )
+#if defined(_MSC_VER)
+  #pragma comment( lib, "WSOCK32.LIB"  )
+  #pragma comment( lib, "WINSPOOL.LIB" )
+#endif
 
 #define ACE_HEADER_SIZE (  sizeof ( ACCESS_ALLOWED_ACE ) - sizeof ( DWORD )  )
 
@@ -863,7 +865,7 @@ BOOL                 __fastcall _osd_wnt_sd_to_protection (
 BOOL                 __fastcall _osd_print (const Standard_PCharacter, const wchar_t* );
 
 static void      __fastcall _test_raise ( HANDLE, Standard_CString );
-static DWORDLONG __fastcall _get_line   ( Standard_PCharacter&, DWORD );
+static Standard_Integer __fastcall _get_line (Standard_PCharacter& buffer, DWORD dwBuffSize, LONG& theSeekPos);
 static int       __fastcall _get_buffer ( HANDLE, Standard_PCharacter&, DWORD, BOOL, BOOL );
 static DWORD     __fastcall _get_access_mask ( OSD_SingleProtection );
 static DWORD     __fastcall _get_dir_access_mask ( OSD_SingleProtection prt );
@@ -902,6 +904,46 @@ OSD_File :: OSD_File ( const OSD_Path& Name ) : OSD_FileNode ( Name )
  myFileChannel  = -1;
  myFileHandle   = INVALID_HANDLE_VALUE;
 }  // end constructor ( 2 )
+
+// ---------------------------------------------------------------------
+// Redirect a standard handle (fileno(stdout), fileno(stdin) or 
+// fileno(stderr) to this OSD_File and return the copy of the original
+// standard handle.
+// Example:
+//    OSD_File aTmp;
+//    aTmp.BuildTemporary();
+//    int stdfd = _fileno(stdout);
+//
+//    int oldout = aTmp.Capture(stdfd);
+//    cout << "Some output to the file" << endl;
+//    cout << flush;
+//    fflush(stdout);
+//
+//    _dup2(oldout, stdfd); // Restore standard output
+//    aTmp.Close();
+// ---------------------------------------------------------------------
+int OSD_File::Capture(int theDescr) {
+  // Get POSIX file descriptor from this file handle
+  int dFile = _open_osfhandle(reinterpret_cast<intptr_t>(myFileHandle), myMode);
+
+  if (0 > dFile)
+  {
+    _osd_wnt_set_error (  myError, OSD_WFile, myFileHandle );
+    return -1;
+  }
+
+  // Duplicate an old file descriptor of the given one to be able to restore output to it later.
+  int oldDescr = _dup(theDescr);
+  // Redirect the output to this file
+  _dup2(dFile, theDescr);
+
+  // Return the old descriptor
+  return oldDescr;
+}
+
+void OSD_File::Rewind() { 
+  SetFilePointer( myFileHandle, 0, NULL, FILE_BEGIN ); 
+}
 
 // protect against occasional use of myFileHande in Windows code
 #define myFileChannel myFileChannel_is_only_for_Linux
@@ -1044,19 +1086,18 @@ void OSD_File :: Read (
  }
                                         
  Standard_Integer NbyteRead;
- Standard_Address buff;
 
  TEST_RAISE(  "Read"  );
      
- buff = ( Standard_Address )new Standard_Character[ Nbyte + 1 ];
+ char* buff = new Standard_Character[ Nbyte + 1 ];
 
  Read ( buff, Nbyte, NbyteRead );
 
- (  ( Standard_PCharacter )buff  )[ NbyteRead ] = 0;
+ buff[ NbyteRead ] = 0;
 
  if ( NbyteRead != 0 )
 
-  Buffer = ( Standard_PCharacter )buff;
+  Buffer = buff;
 
  else
 
@@ -1079,14 +1120,12 @@ void OSD_File :: ReadLine (
                   const Standard_Integer NByte, Standard_Integer& NbyteRead
                  ) {
 
- DWORDLONG          status;
  DWORD              dwBytesRead;
  DWORD              dwDummy;
  Standard_Character peekChar;
  Standard_PCharacter ppeekChar;
  Standard_PCharacter cBuffer;
- Standard_CString   eos;
- DWORD              dwSeekPos;
+ LONG               aSeekPos;
 
  if ( OSD_File::KindOfFile ( ) == OSD_DIRECTORY ) { 
    Standard_ProgramError::Raise("OSD_File::Read : it is a directory");
@@ -1107,7 +1146,7 @@ void OSD_File :: ReadLine (
 
  if ( myIO & FLAG_FILE ) {
  
-  if (!ReadFile (myFileHandle, cBuffer, (DWORD)NByte, &dwBytesRead, NULL)) {  // an error occured
+  if (!ReadFile (myFileHandle, cBuffer, NByte, &dwBytesRead, NULL)) {  // an error occured
 
    _osd_wnt_set_error ( myError, OSD_WFile );   
    Buffer.Clear ();
@@ -1121,16 +1160,10 @@ void OSD_File :: ReadLine (
    
   } else {
    myIO &= ~FLAG_EOF ;  // if the file increased since last read (LD)
-   status = _get_line ( cBuffer, dwBytesRead );
+   NbyteRead = _get_line (cBuffer, dwBytesRead, aSeekPos);
 
-   dwSeekPos = LODWORD( status );
-   eos       = ( Standard_CString )HIDWORD( status );
-#ifdef VAC
-   if ( (__int64) status == (__int64) -1 ) {  // last character in the buffer is <CR> -
-#else
-   if ( status == 0xFFFFFFFFFFFFFFFF ) {  // last character in the buffer is <CR> -
-                                          // peek next character to see if it is a <LF>
-#endif
+   if ( NbyteRead == -1 )  // last character in the buffer is <CR> -
+   {                       // peek next character to see if it is a <LF>
     if (!ReadFile (myFileHandle, ppeekChar, 1, &dwDummy, NULL)) {
     
      _osd_wnt_set_error ( myError, OSD_WFile );
@@ -1148,13 +1181,9 @@ void OSD_File :: ReadLine (
 
     NbyteRead = dwBytesRead;
 
-   } else {
-
-    if ( dwSeekPos != 0 )
-     SetFilePointer (myFileHandle, (LONG)dwSeekPos, NULL, FILE_CURRENT);
-
-    NbyteRead = ( Standard_Integer )( eos - cBuffer );
-
+   } else if ( aSeekPos != 0 )
+   {
+     SetFilePointer (myFileHandle, aSeekPos, NULL, FILE_CURRENT);
    }
 
   }  // end else
@@ -1178,18 +1207,10 @@ void OSD_File :: ReadLine (
 
   } else {
 
-   status = _get_line ( cBuffer, dwBytesRead );
+   NbyteRead = _get_line (cBuffer, dwBytesRead, aSeekPos);
 
-   dwSeekPos = LODWORD( status );
-   eos       = ( Standard_CString )HIDWORD( status );
-
-#ifdef VAC
-   if ( (__int64) status == (__int64) -1 ) {  // last character in the buffer is <CR> -
-#else  
-   if ( status == 0xFFFFFFFFFFFFFFFF ) {  // last character in the buffer is <CR> -    
-                                          // peek next character to see if it is a <LF>
-#endif
-
+   if (NbyteRead == -1) // last character in the buffer is <CR> -    
+   {                     // peek next character to see if it is a <LF>
     NbyteRead = dwBytesRead; // (LD) always fits this case.
 
     dwDummy = _get_buffer (myFileHandle, ppeekChar, 1, TRUE, myIO & FLAG_SOCKET);
@@ -1206,13 +1227,9 @@ void OSD_File :: ReadLine (
 
      myIO |= FLAG_EOF;
 
-   } else {
-
-    if ( dwSeekPos != 0 )
-     dwBytesRead = dwBytesRead + dwSeekPos;
-
-    NbyteRead  = ( Standard_Integer )( eos - cBuffer );
-
+   } else if (aSeekPos != 0)
+   {
+     dwBytesRead = dwBytesRead + aSeekPos;
    }
 
    // Don't rewrite datas in cBuffer.
@@ -1242,7 +1259,7 @@ void OSD_File :: ReadLine (
 // -------------------------------------------------------------------------- 
 
 void OSD_File :: Read (
-                  Standard_Address& Buffer,
+                  const Standard_Address Buffer,
                   const Standard_Integer Nbyte, Standard_Integer& Readbyte
                  ) {
 
@@ -1434,39 +1451,19 @@ OSD_KindFile OSD_File :: KindOfFile () const {
 
 }  // end OSD_File :: KindOfFile
 
-#ifdef VAC
- char tmpbuf [MAX_PATH];
- if (GetTempPath (MAX_PATH, tmpbuf) == 0)
- {
-    perror ("ERROR in GetTempPath");
-    exit (10);
- }
- char tmpbuf2 [MAX_PATH];
- if (GetTempFileName (tmpbuf, NULL, 0, tmpbuf2) == 0)
- {
-    perror ("ERROR in GetTempFileName");
-    exit (10);
- }
- TCollection_AsciiString fileName (  tmpbuf2  );
-#else
- TCollection_AsciiString fileName (  _ttmpnam ( NULL )  );
-#endif
-
-
 //-------------------------------------------------debutpri???980424
 
 typedef struct _osd_wnt_key {
 
                 HKEY   hKey;
-                LPTSTR keyPath;
+                const char* keyPath;
 
                } OSD_WNT_KEY;
 
 
-OSD_File OSD_File :: BuildTemporary () {
+ void OSD_File::BuildTemporary () {
 
  OSD_Protection prt;
- OSD_File       retVal;
  HKEY           hKey;
  TCHAR          tmpPath[ MAX_PATH ];
  BOOL           fOK = FALSE;
@@ -1528,11 +1525,11 @@ OSD_File OSD_File :: BuildTemporary () {
  
  GetTempFileName ( tmpPath, "CSF", 0, tmpPath );
 
- retVal.SetPath (  OSD_Path ( tmpPath )  );
- retVal.Build   (  OSD_ReadWrite, prt    );
+ if ( IsOpen() )
+  Close();
 
- return retVal;
-
+ SetPath (  OSD_Path ( tmpPath )  );
+ Build   (  OSD_ReadWrite, prt    );
 }  // end OSD_File :: BuildTemporary
 
 //-------------------------------------------------finpri???980424
@@ -1630,23 +1627,26 @@ Standard_Boolean OSD_File :: IsLocked () {
 // Return size of a file
 // -------------------------------------------------------------------------- 
 
-Standard_Size OSD_File :: Size () {
-
- Standard_Integer retVal;
-
- TEST_RAISE(  "Size"  );
-
- LARGE_INTEGER aSize;
- aSize.QuadPart = 0;
- retVal = GetFileSizeEx (myFileHandle, &aSize);
-
- if (  retVal == 0  )
-
-  _osd_wnt_set_error ( myError, OSD_WFile );
-
- return (Standard_Size)aSize.QuadPart;
-
-}  // end OSD_File :: Size
+Standard_Size OSD_File::Size()
+{
+  TEST_RAISE("Size");
+#if (_WIN32_WINNT >= 0x0500)
+  LARGE_INTEGER aSize;
+  aSize.QuadPart = 0;
+  if (GetFileSizeEx (myFileHandle, &aSize) == 0)
+  {
+    _osd_wnt_set_error (myError, OSD_WFile);
+  }
+  return (Standard_Size)aSize.QuadPart;
+#else
+  DWORD aSize = GetFileSize (myFileHandle, NULL);
+  if (aSize == INVALID_FILE_SIZE)
+  {
+    _osd_wnt_set_error (myError, OSD_WFile);
+  }
+  return aSize;
+#endif
+}
 
 // -------------------------------------------------------------------------- 
 // Print contains of a file
@@ -1704,9 +1704,9 @@ PSECURITY_DESCRIPTOR __fastcall _osd_wnt_protection_to_sd (
  DWORD                dwAccessOwner;
  DWORD                dwAccessWorld;
  DWORD                dwAccessAdminDir;
- DWORD                dwAccessGroupDir;
+// DWORD                dwAccessGroupDir;
  DWORD                dwAccessOwnerDir;
- DWORD                dwAccessWorldDir;
+// DWORD                dwAccessWorldDir;
  DWORD                dwACLsize       = sizeof ( ACL );
  DWORD                dwIndex         = 0;
  PTOKEN_OWNER         pTkOwner        = NULL;
@@ -1772,9 +1772,9 @@ retry:
   dwAccessWorld = _get_access_mask (  prot.World  ()  );
 
   dwAccessAdminDir = _get_dir_access_mask (  prot.System ()  );
-  dwAccessGroupDir = _get_dir_access_mask (  prot.Group  ()  );
+//  dwAccessGroupDir = _get_dir_access_mask (  prot.Group  ()  );
   dwAccessOwnerDir = _get_dir_access_mask (  prot.User   ()  );
-  dwAccessWorldDir = _get_dir_access_mask (  prot.World  ()  );
+//  dwAccessWorldDir = _get_dir_access_mask (  prot.World  ()  );
 
   if (  dwAccessGroup != 0  ) {
                                              
@@ -1968,12 +1968,11 @@ static void __fastcall _test_raise ( HANDLE hFile, Standard_CString str ) {
 
 }  // end _test_raise
 
-// Modified so that we have <nl> at end of line if we have read <nl> or <cr>
-// by LD 17 dec 98 for B4.4
+// Returns number of bytes in the string (including end \n, but excluding \r);
+// 
+static Standard_Integer __fastcall _get_line (Standard_PCharacter& buffer, DWORD dwBuffSize, LONG& theSeekPos)
+{
 
-static DWORDLONG __fastcall _get_line ( Standard_PCharacter& buffer, DWORD dwBuffSize ) {
-
- DWORDLONG        retVal;
  Standard_PCharacter ptr;
 
  buffer[ dwBuffSize ] = 0;
@@ -1981,55 +1980,30 @@ static DWORDLONG __fastcall _get_line ( Standard_PCharacter& buffer, DWORD dwBuf
 
  while ( *ptr != 0 ) {
  
-  if (  *ptr == '\n'  ) {
-  
-   ptr++ ;   // jump newline char.
-   *ptr = 0 ;
-   retVal = ptr - buffer - dwBuffSize;
-   retVal &= 0x0000000FFFFFFFF;// import 32-bit to 64-bit
-#ifdef VAC
-   retVal = (DWORDLONG) ( (unsigned __int64) retVal | (((unsigned __int64) ptr) << 32) );
-#else
-   retVal |= (   (  ( DWORDLONG )( DWORD )ptr  ) << 32   );
-#endif   
-   return retVal;
-  
-  } else if (  *ptr == '\r' && ptr[ 1 ] == '\n'  ) {
-  
-   *(ptr++) = '\n' ; // Substitue carriage return by newline.
-   *ptr = 0 ;
-   retVal = ptr + 1 - buffer - dwBuffSize;
-   retVal &= 0x0000000FFFFFFFF;// import 32-bit to 64-bit
-#ifdef VAC
-   retVal = (DWORDLONG) ( (unsigned __int64) retVal | (((unsigned __int64) ptr) << 32) );
-#else
-   retVal |= (   (  ( DWORDLONG )( DWORD )ptr  ) << 32   );
-#endif
-   return retVal;
-  
-  } else if (  *ptr == '\r' && ptr[ 1 ] == 0  ) {
+  if (  *ptr == '\n'  )
+  {
+    ptr++ ;   // jump newline char.
+    *ptr = 0 ;
+    theSeekPos = (LONG)(ptr - buffer - dwBuffSize);
+    return (Standard_Integer)(ptr - buffer);  
+  }
+  else if (  *ptr == '\r' && ptr[ 1 ] == '\n'  )
+  {
+    *(ptr++) = '\n' ; // Substitue carriage return by newline.
+    *ptr = 0 ;
+    theSeekPos = (LONG)(ptr + 1 - buffer - dwBuffSize);
+    return (Standard_Integer)(ptr - buffer);  
+  } 
+  else if (  *ptr == '\r' && ptr[ 1 ] == 0  ) {
     *ptr = '\n' ; // Substitue carriage return by newline
-
-#ifdef VAC  
-    return (DWORDLONG) (__int64) (-1);
-#else
-    return 0xFFFFFFFFFFFFFFFF;
-#endif
+    return -1;
   }
   ++ptr;
   
  }  // end while
 
-#ifdef VAC
- retVal  = (DWORDLONG) ( ( (unsigned __int64) ((DWORD) buffer + dwBuffSize) ) << 32 );
- retVal = (DWORDLONG) ( (unsigned __int64) retVal & (((unsigned __int64) 0xFFFFFFFF) << 32) );
-#else
- retVal  = (   (  ( DWORDLONG )( ( DWORD )buffer + dwBuffSize )  ) << 32   );
- retVal &= 0xFFFFFFFF00000000;
-#endif
-
- return retVal;
-
+ theSeekPos = 0;
+ return dwBuffSize;
 }  // end _get_line
 
 static int __fastcall _get_buffer (
@@ -2875,6 +2849,19 @@ Standard_Boolean OSD_File::IsExecutable()
 
 #endif /* _WIN32 */
 
+// ---------------------------------------------------------------------
+// Destructs a file object (unlocks and closes file if it is open)
+// ---------------------------------------------------------------------
+
+OSD_File::~OSD_File()
+{
+  if (IsOpen())
+  {
+    if (IsLocked())
+      UnLock();
+    Close();
+  }
+}
 
 // ---------------------------------------------------------------------
 // Read lines in a file while it is increasing.
@@ -2907,7 +2894,6 @@ Standard_Boolean OSD_File::Edit()
   cout << "Function OSD_File::Edit() not yet implemented." << endl;
   return Standard_False ;
 }
-
 
 
 

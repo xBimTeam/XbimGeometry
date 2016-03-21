@@ -61,6 +61,8 @@
 #include <TColStd_MapIteratorOfPackedMapOfInteger.hxx>
 #include <TColStd_SequenceOfInteger.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(MeshVS_NodalColorPrsBuilder,MeshVS_PrsBuilder)
+
 /*
   Class       : MeshVS_ImageTexture2D
   Description : Texture for nodal presentation
@@ -77,7 +79,7 @@ public:
 
 public:
 
-  DEFINE_STANDARD_RTTI(MeshVS_ImageTexture2D, Graphic3d_Texture2D)
+  DEFINE_STANDARD_RTTI_INLINE(MeshVS_ImageTexture2D,Graphic3d_Texture2D)
 };
 
 DEFINE_STANDARD_HANDLE    (MeshVS_ImageTexture2D, Graphic3d_Texture2D)
@@ -297,17 +299,16 @@ void MeshVS_NodalColorPrsBuilder::Build ( const Handle(Prs3d_Presentation)& Prs,
       Quantity_Color aNColor;
 
       Standard_Boolean isValid = Standard_True;
-      Standard_Integer i;
       
       if (myUseTexture)
       {
-        for (i = 1; i <= NbNodes && isValid; ++i)
-          isValid = myTextureCoords.IsBound (aNodes (i));
+        for (Standard_Integer k = 1; k <= NbNodes && isValid; ++k)
+          isValid = myTextureCoords.IsBound (aNodes (k));
       }
       else
       {
-        for (i = 1; i <= NbNodes && isValid; ++i)
-          isValid = GetColor (aNodes (i), aNColor);
+        for (Standard_Integer k = 1; k <= NbNodes && isValid; ++k)
+          isValid = GetColor (aNodes (k), aNColor);
       }
 
       if (!isValid)

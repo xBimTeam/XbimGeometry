@@ -20,6 +20,8 @@
 #include <Standard_NullObject.hxx>
 #include <Standard_Type.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(Poly_Polygon3D,MMgt_TShared)
+
 //=======================================================================
 //function : Poly_Polygon3D
 //purpose  : 
@@ -51,6 +53,22 @@ Poly_Polygon3D::Poly_Polygon3D(const TColgp_Array1OfPnt&   Nodes,
     myParameters->SetValue(j, P(i));
     j++;
   }
+}
+
+//=======================================================================
+//function : Copy
+//purpose  : 
+//=======================================================================
+
+Handle(Poly_Polygon3D) Poly_Polygon3D::Copy() const
+{
+  Handle(Poly_Polygon3D) aCopy;
+  if (myParameters.IsNull())
+    aCopy = new Poly_Polygon3D(myNodes);
+  else
+    aCopy = new Poly_Polygon3D(myNodes, myParameters->Array1());
+  aCopy->Deflection(myDeflection);
+  return aCopy;
 }
 
 

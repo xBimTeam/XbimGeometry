@@ -61,6 +61,7 @@
 #include <GeomLib_Tool.hxx>
 #include <BRepGProp.hxx>
 #include <GProp_GProps.hxx>
+#include <GC_MakeSegment.hxx>
 using namespace Xbim::Common;
 using namespace System::Linq;
 namespace Xbim
@@ -570,14 +571,14 @@ namespace Xbim
 					IIfcAxis2Placement2D^ ax2 = (IIfcAxis2Placement2D^)c->Position;
 					gp_Ax2 gpax2(gp_Pnt(ax2->Location->X, ax2->Location->Y, 0), gp_Dir(0, 0, 1), gp_Dir(ax2->P[0].X, ax2->P[0].Y, 0.));
 					gp_Circ gc(gpax2, c->Radius);
-					curve = GC_MakeCircle(gc);
+					curve = GC_MakeCircle(gc).Value();
 				}
 				else if (dynamic_cast<IIfcAxis2Placement3D^>(c->Position))
 				{
 					IIfcAxis2Placement3D^ ax2 = (IIfcAxis2Placement3D^)c->Position;
 					gp_Ax3 	gpax3 = XbimConvert::ToAx3(ax2);
 					gp_Circ gc(gpax3.Ax2(), c->Radius);
-					curve = GC_MakeCircle(gc);
+					curve = GC_MakeCircle(gc).Value();
 				}
 				else
 				{
@@ -610,7 +611,7 @@ namespace Xbim
 					gp_Ax2 gpax2(gp_Pnt(ax2->Location->X, ax2->Location->Y, 0), gp_Dir(0, 0, 1), gp_Dir(ax2->P[rotateElipse ? 1 : 0].X, ax2->P[rotateElipse ? 1 : 0].Y, 0.));
 
 					gp_Elips gc(gpax2, s1, s2);
-					curve = GC_MakeEllipse(gc);
+					curve = GC_MakeEllipse(gc).Value();
 
 
 				}
@@ -636,7 +637,7 @@ namespace Xbim
 				gp_Vec vec(dir->Orientation->X, dir->Orientation->Y, XbimConvert::GetZValueOrZero(dir->Orientation));
 				parameterFactor = dir->Magnitude;
 				vec *= dir->Magnitude;
-				curve = GC_MakeLine(pnt, vec);
+				curve = GC_MakeLine(pnt, vec).Value();
 			}
 			else
 			{
@@ -1438,22 +1439,19 @@ namespace Xbim
 					gp_Pnt bl(-xOff, -yOff, 0);
 					gp_Pnt br(xOff, -yOff, 0);
 					gp_Pnt tr(xOff, yOff, 0);
-					gp_Pnt tl(-xOff, yOff, 0);
-					//make the vertices
-					BRep_Builder builder;
-					TopoDS_Vertex vbl, vbr, vtr, vtl;
-					builder.MakeVertex(vbl, bl, precision);
-					builder.MakeVertex(vbr, br, precision);
-					builder.MakeVertex(vtr, tr, precision);
-					builder.MakeVertex(vtl, tl, precision);
-					//make the edges
-					TopoDS_Wire wire;
-					builder.MakeWire(wire);
-					builder.Add(wire, BRepBuilderAPI_MakeEdge(vbl, vbr));
-					builder.Add(wire, BRepBuilderAPI_MakeEdge(vbr, vtr));
-					builder.Add(wire, BRepBuilderAPI_MakeEdge(vtr, vtl));
-					builder.Add(wire, BRepBuilderAPI_MakeEdge(vtl, vbl));
-
+					gp_Pnt tl(-xOff, yOff, 0);					
+					Handle(Geom_TrimmedCurve) aSeg1 = GC_MakeSegment(bl, br);
+					Handle(Geom_TrimmedCurve) aSeg2 = GC_MakeSegment(br, tr);
+					Handle(Geom_TrimmedCurve) aSeg3 = GC_MakeSegment(tr, tl);
+					Handle(Geom_TrimmedCurve) aSeg4 = GC_MakeSegment(tl, bl);
+					TopoDS_Edge e1 = BRepBuilderAPI_MakeEdge(aSeg1);
+					TopoDS_Edge e2 = BRepBuilderAPI_MakeEdge(aSeg2);
+					TopoDS_Edge e3 = BRepBuilderAPI_MakeEdge(aSeg3);
+					TopoDS_Edge e4 = BRepBuilderAPI_MakeEdge(aSeg4);
+					TopoDS_Wire wire = BRepBuilderAPI_MakeWire(e1, e2, e3,e4);
+					ShapeFix_ShapeTolerance tol;
+					//set the correct precision
+					tol.SetTolerance(wire, precision, TopAbs_VERTEX);					
 					//apply the position transformation
 					if (rectProfile->Position!=nullptr)
 						wire.Move(XbimConvert::ToLocation(rectProfile->Position));

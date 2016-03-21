@@ -81,13 +81,7 @@ public:
 
   Standard_EXPORT virtual Standard_Boolean HasDepthClipping (const Handle(SelectMgr_EntityOwner)& theOwner) const Standard_OVERRIDE;
 
-  DEFINE_STANDARD_RTTI(StdSelect_ViewerSelector3d, SelectMgr_ViewerSelector)
-
-protected:
-
-  //! Set view clipping for the selector.
-  //! @param thePlanes [in] the view planes.
-  Standard_EXPORT void SetClipping (const Graphic3d_SequenceOfHClipPlane& thePlanes);
+  DEFINE_STANDARD_RTTIEXT(StdSelect_ViewerSelector3d,SelectMgr_ViewerSelector)
 
 private:
 
@@ -97,7 +91,6 @@ private:
                             const Graphic3d_TransformPers& theTransPers);
 
   Graphic3d_SequenceOfStructure myStructs;
-  Graphic3d_SequenceOfHClipPlane myClipPlanes;
 };
 
 DEFINE_STANDARD_HANDLE(StdSelect_ViewerSelector3d, SelectMgr_ViewerSelector)

@@ -20,6 +20,8 @@
 #include <BRepMesh_ShapeTool.hxx>
 
 
+IMPLEMENT_STANDARD_RTTIEXT(BRepMesh_EdgeTessellationExtractor,BRepMesh_IEdgeTool)
+
 //=======================================================================
 //function : Constructor
 //purpose  : 
@@ -43,7 +45,7 @@ BRepMesh_EdgeTessellationExtractor::BRepMesh_EdgeTessellationExtractor(
 //function : Value
 //purpose  : 
 //=======================================================================
-void BRepMesh_EdgeTessellationExtractor::Value(
+Standard_Boolean BRepMesh_EdgeTessellationExtractor::Value(
   const Standard_Integer theIndex,
   Standard_Real&         theParameter,
   gp_Pnt&                thePoint,
@@ -54,4 +56,6 @@ void BRepMesh_EdgeTessellationExtractor::Value(
 
   theParameter = myProvider.Parameter(theIndex, thePoint);
   theUV        = myPCurve->Value(theParameter);
+
+  return Standard_True;
 }

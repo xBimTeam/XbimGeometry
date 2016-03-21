@@ -70,7 +70,7 @@ typedef void (* SIG_PFV) (int);
 
 #include <signal.h>
 
-#if !defined(__ANDROID__)
+#if !defined(__ANDROID__) && !defined(__QNX__)
   #include <sys/signal.h>
 #endif
 
@@ -115,7 +115,11 @@ static sigfpe_handler_type *GetOldFPE()
 //==== SIGSEGV is handled by "SegvHandler()"
 //============================================================================
 #ifdef SA_SIGINFO
+  #if defined(HAVE_PTHREAD_H) && defined(NO_CXX_EXCEPTION)
 static void Handler (const int theSignal, siginfo_t *theSigInfo, const Standard_Address theContext)
+  #else
+static void Handler (const int theSignal, siginfo_t */*theSigInfo*/, const Standard_Address /*theContext*/)
+  #endif
 #else
 static void Handler (const int theSignal)
 #endif
@@ -338,6 +342,9 @@ static void SegvHandler(const int theSignal,
     Handler(theSignal, ip, theContext);
     return;
   }
+#else
+  (void)theSignal; // silence GCC warnings
+  (void)theContext;
 #endif
 #ifdef linux
   if (fFltExceptions)
@@ -513,7 +520,7 @@ void OSD::SetSignal(const Standard_Boolean aFloatingSignal)
 	sigaction(SIGBUS,&oact,&oact);
 #endif
 
-#if (!defined (linux)) && (!defined(LININTEL))
+#if (!defined (linux)) && (!defined(__linux__))
   sigaction(SIGSYS,&act,&oact);   // ...... bad argument to system call
 
 # ifdef OBJS

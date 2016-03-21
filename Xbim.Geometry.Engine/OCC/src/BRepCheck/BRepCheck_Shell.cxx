@@ -37,6 +37,8 @@
 #include <TopTools_MapIteratorOfMapOfShape.hxx>
 #include <TopTools_MapOfShape.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(BRepCheck_Shell,BRepCheck_Result)
+
 //=======================================================================
 //function : Propagate
 //purpose  : 
@@ -598,8 +600,8 @@ BRepCheck_Status BRepCheck_Shell::Orientation(const Standard_Boolean Update)
 	    }
 	    
 	    //JR/Hp :
-	    Standard_Integer iorf = MapOfShapeOrientation.Find(Fcur) ;
-	    orf = (TopAbs_Orientation) iorf ;
+	    Standard_Integer anOriFCur = MapOfShapeOrientation.Find(Fcur) ;
+	    orf = (TopAbs_Orientation)anOriFCur;
 	    //	orf = (TopAbs_Orientation)MapOfShapeOrientation.Find(Fcur);
 	    Fcur.Orientation(orf);
 	    
@@ -757,8 +759,8 @@ BRepCheck_Status BRepCheck_Shell::Orientation(const Standard_Boolean Update)
 	    }
 
 //JR/Hp :
-            Standard_Integer iorf = MapOfShapeOrientation.Find(Fcur) ;
-	    orf = (TopAbs_Orientation) iorf ;
+            Standard_Integer anOriFCur = MapOfShapeOrientation.Find(Fcur) ;
+	    orf = (TopAbs_Orientation)anOriFCur;
 //	    orf = (TopAbs_Orientation)MapOfShapeOrientation.Find(Fcur);
 	    Fcur.Orientation(orf);
 

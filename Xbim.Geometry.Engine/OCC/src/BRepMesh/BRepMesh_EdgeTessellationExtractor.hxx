@@ -47,7 +47,7 @@ public:
     const TopLoc_Location&                      theLocation);
 
   //! Returns number of dicretization points.
-  virtual Standard_Integer NbPoints() const
+  virtual Standard_Integer NbPoints() const Standard_OVERRIDE
   {
     return myIndices.Length();
   }
@@ -57,12 +57,14 @@ public:
   //! @param theParameter parameters on PCurve corresponded to the solution.
   //! @param thePoint tessellation point.
   //! @param theUV coordinates of tessellation point in parametric space of face.
-  virtual void Value(const Standard_Integer theIndex,
-                     Standard_Real&         theParameter,
-                     gp_Pnt&                thePoint,
-                     gp_Pnt2d&              theUV);
+  //! @return True in case of valid result, false elewhere.
+  virtual Standard_Boolean Value(
+    const Standard_Integer theIndex,
+    Standard_Real&         theParameter,
+    gp_Pnt&                thePoint,
+    gp_Pnt2d&              theUV) Standard_OVERRIDE;
 
-  DEFINE_STANDARD_RTTI(BRepMesh_EdgeTessellationExtractor, BRepMesh_IEdgeTool)
+  DEFINE_STANDARD_RTTIEXT(BRepMesh_EdgeTessellationExtractor,BRepMesh_IEdgeTool)
 
 private:
 

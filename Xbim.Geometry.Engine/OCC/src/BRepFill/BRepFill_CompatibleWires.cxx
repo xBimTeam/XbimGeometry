@@ -462,17 +462,20 @@ static Standard_Boolean EdgeIntersectOnWire (const gp_Pnt& P1,
   if (DSS.IsDone()) {
     // choose the solution closest to P2
     Standard_Integer isol = 1;
-    Standard_Real dss = P2.Distance(DSS.PointOnShape2(isol));
+    gp_Pnt Psol = DSS.PointOnShape2(isol);
+    Standard_Real dss = P2.Distance(Psol);
     for (Standard_Integer iss=2; iss<=DSS.NbSolution(); iss++) {
-      if (dss>P2.Distance(DSS.PointOnShape2(iss))) {
-	dss = P2.Distance(DSS.PointOnShape2(iss));
-	isol = iss;
+      gp_Pnt Pss = DSS.PointOnShape2(iss);
+      Standard_Real aDist = P2.Distance(Pss);
+      if (dss > aDist) {
+        dss = aDist;
+        isol = iss;
+#ifdef OCCT_DEBUG
+        Psol = Pss;
+#endif
       }
     }
-#ifdef OCCT_DEBUG
-    gp_Pnt Psol = 
-#endif
-      DSS.PointOnShape2(isol);
+
     // is the solution a new vertex ?
     NewVertex = (DSS.SupportTypeShape2(isol) != BRepExtrema_IsVertex);
     if (NewVertex) {
@@ -852,7 +855,6 @@ void BRepFill_CompatibleWires::
   // initialisation 
   Standard_Integer NbSects=myWork.Length();
   BRepTools_WireExplorer anExp;
-  TopoDS_Vertex V1, V2;
   
   Standard_Boolean allClosed = Standard_True;
   Standard_Integer i,ii,ideb=1,ifin=NbSects;
@@ -945,8 +947,6 @@ void BRepFill_CompatibleWires::
     if (SeqV.Length()>NbMaxV) 
       Standard_NoSuchObject::Raise("BRepFill::SameNumberByPolarMethod failed");
     
-    // extremity of the first wire
-    V1 = TopoDS::Vertex(SeqV.Value(1));	
     // loop on vertices of wire1
     for (ii=1;ii<=SeqV.Length();ii++) {
       
@@ -1022,8 +1022,6 @@ void BRepFill_CompatibleWires::
     if ( SeqV.Length()>NbMaxV || SeqV.Length()>SizeMap ) 
       Standard_NoSuchObject::Raise("BRepFill::SameNumberByPolarMethod failed");
     
-    // extremity of the first wire
-    V1 = TopoDS::Vertex(SeqV.Value(1));
 
     // next wire 
     const TopoDS_Wire& wire2 = TopoDS::Wire(myWork(i+1));
@@ -1110,11 +1108,11 @@ void BRepFill_CompatibleWires::
 	// parse candidate edges
 	Standard_Real scal1,scal2;
 	if ( (V1.IsSame(VVF)&&V2.IsSame(VVL)) || (V2.IsSame(VVF)&&V1.IsSame(VVL)) ) {
-	  Standard_Real U1 = BRep_Tool::Parameter(VVF,E);
-	  Standard_Real U2 = BRep_Tool::Parameter(VVL,E);
-	  BRepAdaptor_Curve Curve(E);
-	  gp_Pnt PP1 = Curve.Value(0.1*(U1+9*U2));
-	  gp_Pnt PP2 = Curve.Value(0.1*(9*U1+U2));
+	  Standard_Real U1param = BRep_Tool::Parameter(VVF,E);
+	  Standard_Real U2param = BRep_Tool::Parameter(VVL,E);
+	  BRepAdaptor_Curve CurveE(E);
+	  gp_Pnt PP1 = CurveE.Value(0.1*(U1param +9* U2param));
+	  gp_Pnt PP2 = CurveE.Value(0.1*(9* U1param + U2param));
   
 	  for (rang=i;rang>ideb;rang--) {
 	    Transform(WithRotation, PP1,
@@ -1518,12 +1516,12 @@ void BRepFill_CompatibleWires::ComputeOrigin(const  Standard_Boolean /*polar*/ )
   gp_Vec NormalOfFirstPlane = FirstPlane.Axis().Direction();
   for (i = ideb+1; i <= ifin; i++)
     {
-      const TopoDS_Wire& wire = TopoDS::Wire(myWork(i));
+      const TopoDS_Wire& aWire = TopoDS::Wire(myWork(i));
 
       //Compute offset vector as current bary center projected on first plane
       //to first bary center
       gp_Pln CurPlane;
-      PlaneOfWire(wire, CurPlane);
+      PlaneOfWire(aWire, CurPlane);
       gp_Pnt CurBary = CurPlane.Location();
       gp_Vec aVec(FirstBary, CurBary);
       gp_Vec anOffsetProj = (aVec * NormalOfFirstPlane) * NormalOfFirstPlane;
@@ -1535,7 +1533,7 @@ void BRepFill_CompatibleWires::ComputeOrigin(const  Standard_Boolean /*polar*/ )
       BB.MakeWire(newwire);
       
       TopTools_SequenceOfShape SeqVertices, SeqEdges;
-      for (anExp.Init(wire); anExp.More(); anExp.Next())
+      for (anExp.Init(aWire); anExp.More(); anExp.Next())
 	{
 	  SeqVertices.Append( anExp.CurrentVertex() );
 	  SeqEdges.Append( anExp.Current() );

@@ -38,6 +38,8 @@
 #include <TColStd_ListIteratorOfListOfReal.hxx>
 #include <TColStd_MapIteratorOfPackedMapOfInteger.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(MeshVS_TextPrsBuilder,MeshVS_PrsBuilder)
+
 //================================================================
 // Function : Constructor MeshVS_TextPrsBuilder
 // Purpose  :
@@ -161,7 +163,7 @@ void MeshVS_TextPrsBuilder::Build ( const Handle(Prs3d_Presentation)& Prs,
   Handle (Graphic3d_Group) aTextGroup = Prs3d_Root::CurrentGroup ( Prs );
 
   Quantity_Color           AColor           = Quantity_NOC_YELLOW;
-#ifdef WNT  
+#ifdef _WIN32  
   Standard_CString         AFont            = "Courier New";
 #else
   Standard_CString         AFont            = "Courier";

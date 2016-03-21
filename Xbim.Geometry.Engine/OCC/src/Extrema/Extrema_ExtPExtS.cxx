@@ -33,8 +33,10 @@
 #include <gp_Vec.hxx>
 #include <math_FunctionSetRoot.hxx>
 #include <math_Vector.hxx>
-#include <Adaptor3d_HSurfaceOfLinearExtrusion.hxx>
+#include <GeomAdaptor_HSurfaceOfLinearExtrusion.hxx>
 
+
+IMPLEMENT_STANDARD_RTTIEXT(Extrema_ExtPExtS,Standard_Transient)
 
 static gp_Ax2 GetPosition (const Handle(Adaptor3d_HCurve)& C);
      
@@ -158,7 +160,7 @@ Extrema_ExtPExtS::Extrema_ExtPExtS()
 //=============================================================================
 
 Extrema_ExtPExtS::Extrema_ExtPExtS (const gp_Pnt&                                       theP,
-                                    const Handle(Adaptor3d_HSurfaceOfLinearExtrusion)&  theS,
+                                    const Handle(GeomAdaptor_HSurfaceOfLinearExtrusion)&  theS,
                                     const Standard_Real                                 theUmin,
                                     const Standard_Real                                 theUsup,
                                     const Standard_Real                                 theVmin,
@@ -189,7 +191,7 @@ Extrema_ExtPExtS::Extrema_ExtPExtS (const gp_Pnt&                               
 //=============================================================================
 
 Extrema_ExtPExtS::Extrema_ExtPExtS (const gp_Pnt&                                       theP,
-                                    const Handle(Adaptor3d_HSurfaceOfLinearExtrusion)&  theS,
+                                    const Handle(GeomAdaptor_HSurfaceOfLinearExtrusion)&  theS,
                                     const Standard_Real                                 theTolU, 
                                     const Standard_Real                                 theTolV)
 : myuinf(theS->FirstUParameter()),
@@ -219,7 +221,7 @@ Extrema_ExtPExtS::Extrema_ExtPExtS (const gp_Pnt&                               
 //purpose  : 
 //=======================================================================
 
-void Extrema_ExtPExtS::Initialize (const Handle(Adaptor3d_HSurfaceOfLinearExtrusion)&  theS,
+void Extrema_ExtPExtS::Initialize (const Handle(GeomAdaptor_HSurfaceOfLinearExtrusion)&  theS,
                                    const Standard_Real                                 theUinf,
                                    const Standard_Real                                 theUsup,
                                    const Standard_Real                                 theVinf,

@@ -28,13 +28,13 @@ namespace Xbim
 		{
 			IntPtr temp = System::Threading::Interlocked::Exchange(ptrContainer, IntPtr::Zero);
 			if (temp != IntPtr::Zero)
-				delete (Handle_Geom_Curve*)(temp.ToPointer());
+				delete (Handle(Geom_Curve)*)(temp.ToPointer());
 			System::GC::SuppressFinalize(this);
 		}
 
-		XbimCurve::XbimCurve(const Handle_Geom_Curve& curve)
+		XbimCurve::XbimCurve(const Handle(Geom_Curve)& curve)
 		{
-			this->pCurve = new Handle_Geom_Curve();
+			this->pCurve = new Handle(Geom_Curve);
 			*pCurve = curve;
 		}
 
@@ -138,11 +138,11 @@ namespace Xbim
 				XbimCurve^ baseCurve = gcnew XbimCurve(curve->ReferenceCurve);
 				Standard_Real first = baseCurve->FirstParameter;
 				Standard_Real last = baseCurve->LastParameter;
-				Handle_Geom2d_Curve c2d;
-				Handle_Geom_Curve cBase = baseCurve;
+				Handle(Geom2d_Curve) c2d;
+				Handle(Geom_Curve) cBase = baseCurve;
 				if(projector.PerformAdvanced(cBase, first, last, c2d))
 				{
-					pCurve = new Handle_Geom_Curve();
+					pCurve = new Handle(Geom_Curve);
 					*pCurve = cBase;					
 				}
 			}		
@@ -173,29 +173,30 @@ namespace Xbim
 				double u1; double u2;
 				GeomLib_Tool::Parameter(lineMaker.Value(), start, Precision::Confusion(), u1);
 				GeomLib_Tool::Parameter(lineMaker.Value(), end, Precision::Confusion(), u2);
-				pCurve = new Handle_Geom_Curve();
+				pCurve = new Handle(Geom_Curve);
 				*pCurve = new Geom_TrimmedCurve(lineMaker.Value(), u1, u2);
 			}
 		}
 		void XbimCurve::Init(IIfcCircle^ circle)
 		{
 			double radius = circle->Radius;
-			pCurve = new Handle_Geom_Curve();
+			
 			if (dynamic_cast<IIfcAxis2Placement2D^>(circle->Position))
 			{
 				IIfcAxis2Placement2D^ ax2 = (IIfcAxis2Placement2D^)circle->Position;
 				gp_Ax2 gpax2(gp_Pnt(ax2->Location->X, ax2->Location->Y, 0), gp_Dir(0, 0, 1), gp_Dir(ax2->P[0].X, ax2->P[0].Y, 0.));				
-				*pCurve = GC_MakeCircle(gpax2,radius);
+				GC_MakeCircle maker(gpax2,radius);
+				pCurve = new Handle(Geom_Curve)(maker.Value());
 			}
 			else if (dynamic_cast<IIfcAxis2Placement3D^>(circle->Position))
 			{
 				IIfcAxis2Placement3D^ ax2 = (IIfcAxis2Placement3D^)circle->Position;
 				gp_Ax3 	gpax3 = XbimConvert::ToAx3(ax2);
-				*pCurve = GC_MakeCircle(gpax3.Ax2(), radius);
+				GC_MakeCircle maker(gpax3.Ax2(), radius);
+				pCurve = new Handle(Geom_Curve)(maker.Value());
 			}
 			else
-			{
-				delete pCurve; //tidy up
+			{				
 				Type ^ type = circle->Position->GetType();						
 				XbimGeometryCreator::LogError(circle, "Placement of type {0} is not implemented", type->Name);
 				return;
@@ -224,9 +225,9 @@ namespace Xbim
 				semiAx2 = ellipse->SemiAxis1;
 				rotateElipse = true;
 			}
-			gp_Ax2 gpax2(gp_Pnt(ax2->Location->X, ax2->Location->Y, 0), gp_Dir(0, 0, 1), gp_Dir(ax2->P[rotateElipse ? 1 : 0].X, ax2->P[rotateElipse ? 1 : 0].Y, 0.));
-			pCurve = new Handle_Geom_Curve();
-			*pCurve = GC_MakeEllipse(gpax2,semiAx1, semiAx2);
+			gp_Ax2 gpax2(gp_Pnt(ax2->Location->X, ax2->Location->Y, 0), gp_Dir(0, 0, 1), gp_Dir(ax2->P[rotateElipse ? 1 : 0].X, ax2->P[rotateElipse ? 1 : 0].Y, 0.));			
+			GC_MakeEllipse maker(gpax2,semiAx1, semiAx2);
+			pCurve = new Handle(Geom_Curve)(maker.Value());
 		}
 		void XbimCurve::Init(IIfcLine^ line)
 		{
@@ -234,9 +235,9 @@ namespace Xbim
 			IIfcVector^ ifcVec = line->Dir;
 			IIfcDirection^ dir = ifcVec->Orientation;
 			gp_Pnt pnt(cp->X, cp->Y, cp->Z);			
-			gp_Dir vec(dir->X, dir->Y, dir->Z);
-			pCurve = new Handle_Geom_Curve();
-			*pCurve = GC_MakeLine(pnt, vec);		
+			gp_Dir vec(dir->X, dir->Y, dir->Z);			
+			GC_MakeLine maker(pnt, vec);
+			pCurve = new Handle(Geom_Curve)(maker.Value());
 		}
 
 		void XbimCurve::Init(IIfcTrimmedCurve^ curve)
@@ -342,7 +343,7 @@ namespace Xbim
 				knotMultiplicities.SetValue(i, multiplicity);
 				i++;
 			}
-			pCurve = new Handle_Geom_Curve();
+			pCurve = new Handle(Geom_Curve);
 			*pCurve = new Geom_BSplineCurve(poles, weights, knots, knotMultiplicities, (Standard_Integer)bspline->Degree);
 
 		}
@@ -370,7 +371,7 @@ namespace Xbim
 				knotMultiplicities.SetValue(i, multiplicity);
 				i++;
 			}
-			pCurve = new Handle_Geom_Curve();
+			pCurve = new Handle(Geom_Curve);
 			*pCurve = new Geom_BSplineCurve(poles, knots, knotMultiplicities, (Standard_Integer)bspline->Degree);		
 		}
 	}

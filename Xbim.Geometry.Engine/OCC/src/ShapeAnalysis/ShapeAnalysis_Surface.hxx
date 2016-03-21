@@ -287,7 +287,7 @@ public:
 
 
 
-  DEFINE_STANDARD_RTTI(ShapeAnalysis_Surface,MMgt_TShared)
+  DEFINE_STANDARD_RTTIEXT(ShapeAnalysis_Surface,MMgt_TShared)
 
 protected:
 
@@ -295,7 +295,6 @@ protected:
   Handle(Geom_Surface) mySurf;
   Handle(GeomAdaptor_HSurface) myAdSur;
   Extrema_ExtPS myExtPS;
-  GeomAdaptor_Surface myExtSrf;
   Standard_Boolean myExtOK;
   Standard_Integer myNbDeg;
   Standard_Real myPreci[4];

@@ -101,6 +101,8 @@
 #include <TopTools_MapOfShape.hxx>
 #include <TopTools_SequenceOfShape.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(ShapeFix_Face,ShapeFix_Root)
+
 #ifdef OCCT_DEBUG
 #define DEBUG
 #endif
@@ -363,7 +365,7 @@ Standard_Boolean ShapeFix_Face::Perform()
 {
   myStatus = ShapeExtend::EncodeStatus ( ShapeExtend_OK );
   myFixWire->SetContext ( Context() );
-  Handle(ShapeFix_Wire) theAdvFixWire = Handle(ShapeFix_Wire)::DownCast(myFixWire);
+  Handle(ShapeFix_Wire) theAdvFixWire = myFixWire;
   if (theAdvFixWire.IsNull()) return Standard_False;
 
   BRep_Builder B;
@@ -842,7 +844,7 @@ Standard_Boolean ShapeFix_Face::FixAddNaturalBound()
     Handle(ShapeFix_Edge) sfe = myFixWire->FixEdgeTool();
     for (TopExp_Explorer Eed (myFace, TopAbs_EDGE); Eed.More(); Eed.Next()) {
       TopoDS_Edge edg = TopoDS::Edge (Eed.Current());
-      sfe->FixVertexTolerance(edg);
+      sfe->FixVertexTolerance(edg, myFace);
     }
 
 //    B.UpdateFace (myFace,myPrecision);
@@ -2434,8 +2436,8 @@ Standard_Boolean ShapeFix_Face::FixSplitFace(const TopTools_DataMapOfShapeListOf
       const TopTools_ListOfShape& IntWires = MapWires.Find(wire);
       TopTools_ListIteratorOfListOfShape liter(IntWires);
       for( ; liter.More(); liter.Next()) {
-        TopoDS_Shape aShape = tmpFace.EmptyCopied();
-        TopoDS_Face aFace = TopoDS::Face ( aShape );
+        TopoDS_Shape aShapeEmptyCopied = tmpFace.EmptyCopied();
+        TopoDS_Face aFace = TopoDS::Face ( aShapeEmptyCopied);
         aFace.Orientation ( TopAbs_FORWARD );
         B.Add (aFace,liter.Value());
         BRepTopAdaptor_FClass2d clas (aFace,::Precision::PConfusion());

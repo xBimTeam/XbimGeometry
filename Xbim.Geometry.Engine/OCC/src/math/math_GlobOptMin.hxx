@@ -141,18 +141,34 @@ public:
   //! Return solution theIndex, 1 <= theIndex <= NbExtrema.
   Standard_EXPORT void Points(const Standard_Integer theIndex, math_Vector& theSol);
 
-  Standard_Boolean isDone();
+  Standard_EXPORT Standard_Boolean isDone();
+
+  //! Set functional minimal value.
+  Standard_EXPORT void SetFunctionalMinimalValue(const Standard_Real theMinimalValue);
+
+  //! Lock/Unlock Lipchitz constant for internal modifications.
+  Standard_EXPORT void SetLipConstState(const Standard_Boolean theFlag);
+
+  //! Get functional minimal value.
+  Standard_EXPORT Standard_Real GetFunctionalMinimalValue();
 
 private:
 
   // Compute cell size.
   void initCellSize();
 
+  // Compute initial solution
+  void ComputeInitSol();
+
   math_GlobOptMin & operator = (const math_GlobOptMin & theOther);
 
   Standard_Boolean computeLocalExtremum(const math_Vector& thePnt, Standard_Real& theVal, math_Vector& theOutPnt);
 
   void computeGlobalExtremum(Standard_Integer theIndex);
+
+  //! Check possibility to stop computations.
+  //! Find single solution + in neighbourhood of best possible solution.
+  Standard_Boolean CheckFunctionalStopCriteria();
 
   //! Computes starting value / approximation:
   //! myF - initial best value.
@@ -178,8 +194,11 @@ private:
   Standard_Real mySameTol; // points with ||p1 - p2|| < mySameTol is equal,
                            // function values |val1 - val2| * 0.01 < mySameTol is equal,
                            // default value is 1.0e-7.
-  Standard_Real myC; //Lipschitz constant, default 9
+  Standard_Real myC; //Lipchitz constant, default 9
+  Standard_Real myInitC; // Lipchitz constant initial value.
   Standard_Boolean myIsFindSingleSolution; // Default value is false.
+  Standard_Real myFunctionalMinimalValue; // Default value is -Precision::Infinite
+  Standard_Boolean myIsConstLocked;  // Is constant locked for modifications.
 
   // Output.
   Standard_Boolean myDone;
@@ -196,6 +215,7 @@ private:
   math_Vector myTmp; // Current modified solution.
   math_Vector myV; // Steps array.
   math_Vector myMaxV; // Max Steps array.
+  Standard_Real myLastStep; // Last step.
   math_Vector myExpandCoeff; // Define expand coefficient between neighboring indiced dimensions.
 
   NCollection_Array1<Standard_Real> myCellSize;

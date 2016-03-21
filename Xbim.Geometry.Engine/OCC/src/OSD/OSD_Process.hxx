@@ -43,16 +43,13 @@ public:
   
   //! Issues a shell command
   //! ShowWindow : flag to allow show/hide of the window ( only used on WNT )
-  Standard_EXPORT void Spawn (const TCollection_AsciiString& cmd, const Standard_Boolean ShowWindow = Standard_True);
+  Standard_EXPORT Standard_Integer Spawn (const TCollection_AsciiString& cmd, const Standard_Boolean ShowWindow = Standard_True);
   
   //! Returns the terminal used (vt100, vt200 ,sun-cmd ...)
   Standard_EXPORT void TerminalType (TCollection_AsciiString& Name);
   
   //! Gets system date.
   Standard_EXPORT Quantity_Date SystemDate();
-  
-  //! Returns the 'User Id'.
-  Standard_EXPORT Standard_Integer UserId();
   
   //! Returns the user name.
   Standard_EXPORT TCollection_AsciiString UserName();

@@ -154,7 +154,7 @@ Standard_EXPORT Handle(Geom2d_Curve) MakePCurve(const ProjLib_ProjectedCurve& PC
   case GeomAbs_Parabola : C2D = new Geom2d_Parabola(PC.Parabola()); break;
   case GeomAbs_Hyperbola : C2D = new Geom2d_Hyperbola(PC.Hyperbola()); break;
   case GeomAbs_BSplineCurve : C2D = PC.BSpline(); break;
-  case GeomAbs_BezierCurve : case GeomAbs_OtherCurve : default :
+  default :
     Standard_NotImplemented::Raise("CurveTool::MakePCurve");
     break;
   }
@@ -318,8 +318,7 @@ Standard_Boolean  TopOpeBRepTool_CurveTool::MakeCurves
   Standard_Boolean CompPC1 = myGeomTool.CompPC1();
   Standard_Boolean CompPC2 = myGeomTool.CompPC2();
   Standard_Real tol3d,tol2d;
-  Standard_Boolean RelativeTol;
-  myGeomTool.GetTolerances(tol3d,tol2d,RelativeTol);
+  myGeomTool.GetTolerances(tol3d,tol2d);
   Standard_Integer NbPntMax = myGeomTool.NbPntMax();
 
 #ifdef OCCT_DEBUG
@@ -599,7 +598,7 @@ Standard_Boolean  TopOpeBRepTool_CurveTool::MakeCurves
   Handle(BRepApprox_ApproxLine) AL;
   AL = new BRepApprox_ApproxLine(HC3D,HPC1,HPC2);
 
-    Approx.SetParameters(tol3d,tol2d,RelativeTol,degmin,degmax,nitmax,NbPntMax,withtangency,
+    Approx.SetParameters(tol3d,tol2d,degmin,degmax,nitmax,NbPntMax,withtangency,
 			 parametrization);
 
     if     (CompC3D && CompPC1 && BAS1.GetType() == GeomAbs_Plane) { 

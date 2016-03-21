@@ -19,6 +19,31 @@
 
 #include <NCollection_DataMap.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(Standard_Type,Standard_Transient)
+
+//============================================================================
+
+namespace {
+static Standard_CString copy_string (const char* theString)
+{
+  size_t aLength = strlen (theString);
+  char* aResult = static_cast<char*> (Standard::Allocate (aLength + 1));
+  strncpy (aResult, theString, aLength + 1); //including null-character
+  return aResult;
+}
+}
+
+Standard_Type::Standard_Type (const char* theSystemName,
+                              const char* theName,
+                              Standard_Size theSize,
+                              const Handle(Standard_Type)& theParent) :
+  mySystemName(copy_string (theSystemName)),
+  myName(copy_string (theName)), 
+  mySize(theSize), 
+  myParent(theParent)
+{
+}
+
 //============================================================================
 
 Standard_Boolean Standard_Type::SubType (const Handle(Standard_Type)& theOther) const
@@ -30,7 +55,7 @@ Standard_Boolean Standard_Type::SubType (const Handle(Standard_Type)& theOther) 
 
 Standard_Boolean Standard_Type::SubType (const Standard_CString theName) const
 {
-  return theName != 0 && (IsSimilar (myName, theName) || (! myParent.IsNull() && myParent->SubType (theName)));
+  return theName != 0 && (IsEqual (myName, theName) || (! myParent.IsNull() && myParent->SubType (theName)));
 }
 
 // ------------------------------------------------------------------
@@ -89,7 +114,7 @@ Standard_Type* Standard_Type::Register (const char* theSystemName, const char* t
   aType = new Standard_Type (theSystemName, theName, theSize, theParent);
 
   // then add it to registry and return (the reference to the handle stored in the registry)
-  aRegistry.Bind (theSystemName, aType);
+  aRegistry.Bind (aType->mySystemName, aType);
 
 //  cout << "Registering " << theSystemName << ": " << aRegistry.Extent() << endl;
 
@@ -103,4 +128,6 @@ Standard_Type::~Standard_Type ()
   Standard_ASSERT(aRegistry.UnBind (mySystemName), "Standard_Type::~Standard_Type() cannot find itself in registry",);
 
 //  cout << "Unregistering " << mySystemName << ": " << aRegistry.Extent() << endl;
+  Standard::Free (mySystemName);
+  Standard::Free (myName);
 }

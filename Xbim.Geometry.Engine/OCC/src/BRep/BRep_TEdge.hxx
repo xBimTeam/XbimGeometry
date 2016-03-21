@@ -79,12 +79,12 @@ public:
     BRep_ListOfCurveRepresentation& ChangeCurves();
   
   //! Returns a copy  of the  TShape  with no sub-shapes.
-  Standard_EXPORT Handle(TopoDS_TShape) EmptyCopy() const;
+  Standard_EXPORT Handle(TopoDS_TShape) EmptyCopy() const Standard_OVERRIDE;
 
 
 
 
-  DEFINE_STANDARD_RTTI(BRep_TEdge,TopoDS_TEdge)
+  DEFINE_STANDARD_RTTIEXT(BRep_TEdge,TopoDS_TEdge)
 
 protected:
 

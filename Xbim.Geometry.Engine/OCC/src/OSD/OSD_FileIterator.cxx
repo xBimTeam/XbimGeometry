@@ -12,7 +12,7 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef WNT
+#ifndef _WIN32
 
 
 #include <OSD_File.hxx>
@@ -50,13 +50,21 @@ extern char *vmsify PARAMS ((char *name, int type));
 //const OSD_WhoAmI Iam = OSD_WFileIterator;
 
 
-OSD_FileIterator::OSD_FileIterator() {
- myDescr = NULL ;
+OSD_FileIterator::OSD_FileIterator()
+: myFlag(0),
+  myDescr(0),
+  myEntry(0),
+  myInit(0)
+{
 }
 
 OSD_FileIterator::OSD_FileIterator(const OSD_Path& where,
-                                   const TCollection_AsciiString& Mask){
- myDescr = NULL ;
+                                   const TCollection_AsciiString& Mask)
+: myFlag(0),
+  myDescr(0),
+  myEntry(0),
+  myInit(0)
+{
  Initialize(where, Mask) ;
 }
 
@@ -337,9 +345,7 @@ Standard_Boolean OSD_FileIterator :: More () {
 
 void OSD_FileIterator :: Next () {
 
- if (  myFirstCall && ( _FD -> dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY )  ||
-       !myFirstCall
- ) {
+ if ( ! myFirstCall || ( _FD -> dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) ) {
  
   do {
   

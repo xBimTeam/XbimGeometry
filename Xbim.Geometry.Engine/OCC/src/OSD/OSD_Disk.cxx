@@ -32,7 +32,6 @@ extern "C" {
   #define fstatvfs fstatfs
 #else
   #include <sys/statvfs.h>
-  int statvfs(const char *, struct statvfs *);
 #endif
 
 #ifdef __cplusplus

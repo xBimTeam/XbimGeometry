@@ -21,9 +21,9 @@
 using namespace System::Threading;
 using namespace System::Collections::Generic;
 using namespace Xbim::Tessellator;
-
-IMPLEMENT_STANDARD_HANDLE(XbimProgressIndicator, Message_ProgressIndicator)
-IMPLEMENT_STANDARD_RTTIEXT(XbimProgressIndicator, Message_ProgressIndicator)
+//
+//IMPLEMENT_STANDARD_HANDLE(XbimProgressIndicator, Message_ProgressIndicator)
+//IMPLEMENT_STANDARD_RTTIEXT(XbimProgressIndicator, Message_ProgressIndicator)
 
 
 XbimProgressIndicator::XbimProgressIndicator(Standard_Real maxDurationSeconds, bool startTimer) :
@@ -46,11 +46,6 @@ Standard_Boolean XbimProgressIndicator::UserBreak()
 		return false;
 }
 
-Standard_Boolean XbimProgressIndicator::Show(const Standard_Boolean force)
-{
-	
-	return true;
-}
 
 
 namespace Xbim
@@ -95,7 +90,7 @@ namespace Xbim
 			for each (XbimFace^ face in faces)
 			{
 				TopLoc_Location loc;
-				const Handle_Poly_Triangulation& mesh = BRep_Tool::Triangulation(face, loc);
+				const Handle(Poly_Triangulation)& mesh = BRep_Tool::Triangulation(face, loc);
 				if (mesh.IsNull())
 					continue;
 				gp_Trsf transform = loc.Transformation();
@@ -176,7 +171,7 @@ namespace Xbim
 				textWriter->Write("T");
 				List<size_t>^ nodeLookup = pointLookup[faceIndex];
 				TopLoc_Location loc;
-				const Handle_Poly_Triangulation& mesh = BRep_Tool::Triangulation(face, loc);
+				const Handle(Poly_Triangulation)& mesh = BRep_Tool::Triangulation(face, loc);
 				const TColgp_Array1OfPnt & nodes = mesh->Nodes();
 				const Poly_Array1OfTriangle& triangles = mesh->Triangles();
 				Standard_Integer nbTriangles = mesh->NbTriangles();
@@ -283,7 +278,7 @@ namespace Xbim
 				if (!isPolyhedron)
 				{								
 					TopLoc_Location loc;
-					const Handle_Poly_Triangulation& mesh = BRep_Tool::Triangulation(face, loc);
+					const Handle(Poly_Triangulation)& mesh = BRep_Tool::Triangulation(face, loc);
 					if (mesh.IsNull())
 						continue;
 					//check if we have a seam

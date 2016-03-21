@@ -12,7 +12,7 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef WNT
+#ifndef _WIN32
 
 
 #include <OSD_Function.hxx>
@@ -42,9 +42,6 @@ extern "C" {void    *dlerror (void);}
 #endif
 
 #include <dlfcn.h>
-
-extern "C" {size_t  strlen  (const  char*  s      );}
-
 
 #define BAD(X)  ((X) == NULL)
 

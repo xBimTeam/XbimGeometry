@@ -37,6 +37,8 @@
 #include <TopOpeBRep_VPointInterIterator.hxx>
 #include <TopOpeBRepTool_ShapeTool.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(TopOpeBRep_FFDumper,MMgt_TShared)
+
 #ifdef OCCT_DEBUG
 extern Standard_Boolean TopOpeBRepDS_GettraceDSNC(); 
 extern Standard_Boolean TopOpeBRepDS_GettraceDSF(); 
@@ -65,6 +67,11 @@ TopOpeBRep_FFDumper::TopOpeBRep_FFDumper(const TopOpeBRep_PFacesFiller& PFF)
 #ifndef OCCT_DEBUG
 void TopOpeBRep_FFDumper::Init(const TopOpeBRep_PFacesFiller& )
 {
+  // just shut up compiler warnings
+  (void)myEn1;
+  (void)myEn2;
+  (void)myLineIndex;
+}
 #else
 void TopOpeBRep_FFDumper::Init(const TopOpeBRep_PFacesFiller& PFF)
 {
@@ -84,8 +91,8 @@ void TopOpeBRep_FFDumper::Init(const TopOpeBRep_PFacesFiller& PFF)
     for (x.Init(myF2,TopAbs_EDGE);x.More();x.Next()) myEM2.Bind(x.Current(),++myEn2);
     myLineIndex = 0;
   }
-#endif
 }
+#endif
 
 //=======================================================================
 //function : DumpLine

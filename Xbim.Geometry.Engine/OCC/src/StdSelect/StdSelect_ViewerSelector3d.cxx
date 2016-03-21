@@ -66,6 +66,8 @@
 #include <OSD_Timer.hxx>
 
 
+IMPLEMENT_STANDARD_RTTIEXT(StdSelect_ViewerSelector3d,SelectMgr_ViewerSelector)
+
 static Standard_Integer StdSel_NumberOfFreeEdges (const Handle(Poly_Triangulation)& Trg)
 {
   Standard_Integer nFree = 0;
@@ -111,8 +113,6 @@ void StdSelect_ViewerSelector3d::Pick (const Standard_Integer theXPix,
                                        const Standard_Integer theYPix,
                                        const Handle(V3d_View)& theView)
 {
-  SetClipping (theView->GetClipPlanes());
-
   if(myToUpdateTolerance)
   {
     mySelectingVolumeMgr.SetPixelTolerance (myTolerances.Tolerance());
@@ -127,6 +127,7 @@ void StdSelect_ViewerSelector3d::Pick (const Standard_Integer theXPix,
   gp_Pnt2d aMousePos (static_cast<Standard_Real> (theXPix),
                       static_cast<Standard_Real> (theYPix));
   mySelectingVolumeMgr.BuildSelectingVolume (aMousePos);
+  mySelectingVolumeMgr.SetViewClipping (theView->GetClipPlanes());
 
   TraverseSensitives();
 }
@@ -183,7 +184,7 @@ void StdSelect_ViewerSelector3d::DisplaySensitive (const Handle(V3d_View)& theVi
   {
     const Handle (SelectMgr_SelectableObject)& anObj = mySelectableObjects.GetObjectById (anObjectIdx);
 
-    Handle(Graphic3d_Structure) aStruct = new Graphic3d_Structure (theView->Viewer()->Viewer());
+    Handle(Graphic3d_Structure) aStruct = new Graphic3d_Structure (theView->Viewer()->StructureManager());
 
     for (anObj->Init(); anObj->More(); anObj->Next())
     {
@@ -200,7 +201,7 @@ void StdSelect_ViewerSelector3d::DisplaySensitive (const Handle(V3d_View)& theVi
   {
     const Handle (SelectMgr_SelectableObject)& anObj = mySelectableObjectsTrsfPers.GetObjectById (anObjectIdx);
 
-    Handle(Graphic3d_Structure) aStruct = new Graphic3d_Structure (theView->Viewer()->Viewer());
+    Handle(Graphic3d_Structure) aStruct = new Graphic3d_Structure (theView->Viewer()->StructureManager());
 
     if (!anObj->TransformPersistence().Flags || (anObj->TransformPersistence().Flags & Graphic3d_TMF_2d))
     {
@@ -261,7 +262,7 @@ void StdSelect_ViewerSelector3d::DisplaySensitive (const Handle(SelectMgr_Select
     ClearSensitive (theView);
   }
 
-  Handle(Graphic3d_Structure) aStruct = new Graphic3d_Structure (theView->Viewer()->Viewer());
+  Handle(Graphic3d_Structure) aStruct = new Graphic3d_Structure (theView->Viewer()->StructureManager());
 
   ComputeSensitivePrs (aStruct, theSel, theTrsf, Graphic3d_TransformPers());
 
@@ -401,7 +402,7 @@ void StdSelect_ViewerSelector3d::ComputeSensitivePrs (const Handle(Graphic3d_Str
 
       for (int i = 0; i < anEntities.Length(); i++)
       {
-        Handle(Select3D_SensitiveEntity) SubEnt = Handle(Select3D_SensitiveEntity)::DownCast(anEntities.Value(i));
+        Handle(Select3D_SensitiveEntity) SubEnt = anEntities.Value(i);
 
         //Segment
         if (SubEnt->DynamicType()==STANDARD_TYPE(Select3D_SensitiveSegment))
@@ -646,15 +647,6 @@ void StdSelect_ViewerSelector3d::ComputeSensitivePrs (const Handle(Graphic3d_Str
     aSensGroup->AddPrimitiveArray(aPrims);
     aSensGroup->SetPrimitivesAspect (new Graphic3d_AspectLine3d (Quantity_NOC_GRAY40, Aspect_TOL_SOLID, 2.0));
   }
-}
-
-//=======================================================================
-//function : SetClipping
-//purpose  :
-//=======================================================================
-void StdSelect_ViewerSelector3d::SetClipping (const Graphic3d_SequenceOfHClipPlane& thePlanes)
-{
-  myClipPlanes = thePlanes;
 }
 
 //=======================================================================

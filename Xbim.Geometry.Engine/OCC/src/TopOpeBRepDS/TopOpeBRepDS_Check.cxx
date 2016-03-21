@@ -42,6 +42,8 @@
 #include <TopTools_ListOfShape.hxx>
 
 #include <string.h>
+IMPLEMENT_STANDARD_RTTIEXT(TopOpeBRepDS_Check,MMgt_TShared)
+
 //=======================================================================
 //function : Create
 //purpose  : 
@@ -557,7 +559,7 @@ Standard_OStream& TopOpeBRepDS_Check::PrintMap(TopOpeBRepDS_DataMapOfCheckStatus
   DMI.Initialize(MapStat);
   if(DMI.More()) {
     Standard_Boolean b = Standard_True;
-    OS<<" "<<eltstr<<"\t"<<"(/"<<MapStat.Extent()<<")\tnumber ";
+    OS<<" "<<eltstr<<"\t(/"<<MapStat.Extent()<<")\tnumber ";
     
     PrintElts(MapStat, TopOpeBRepDS_OK,  b, OS);
     if(!b) OS<<" = OK"<<endl;

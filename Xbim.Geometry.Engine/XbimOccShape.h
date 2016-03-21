@@ -14,7 +14,7 @@ using namespace Xbim::Common::Geometry;
 # include <Standard_Macro.hxx>
 # include <Message_ProgressIndicator.hxx>
 
-DEFINE_STANDARD_HANDLE(XbimProgressIndicator, Message_ProgressIndicator)
+//DEFINE_STANDARD_HANDLE(XbimProgressIndicator, Message_ProgressIndicator)
 class XbimProgressIndicator : public Message_ProgressIndicator
 {
 private:
@@ -23,13 +23,13 @@ private:
 	bool timedOut;
 public:
 	XbimProgressIndicator(Standard_Real maxDurationSeconds, bool startTimer=true);
-	virtual Standard_Boolean Show(const Standard_Boolean force);
+	virtual Standard_Boolean Show(const Standard_Boolean force) { return true; }
 	virtual Standard_Boolean UserBreak();
 	void StartTimer() { timedOut = false;  aTimer.Start(); }
 	void StopTimer() { aTimer.Stop(); }
 	Standard_Real ElapsedTime() { return aTimer.ElapsedTime(); }
 	bool TimedOut() { return timedOut; }
-	DEFINE_STANDARD_RTTI(XbimProgressIndicator, Message_ProgressIndicator)
+	/*DEFINE_STANDARD_RTTI(XbimProgressIndicator, Message_ProgressIndicator)*/
 };
 #endif
 

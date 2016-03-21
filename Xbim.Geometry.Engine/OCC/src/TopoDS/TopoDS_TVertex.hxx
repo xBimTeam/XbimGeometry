@@ -36,12 +36,12 @@ public:
 
   
   //! Returns VERTEX.
-  Standard_EXPORT TopAbs_ShapeEnum ShapeType() const;
+  Standard_EXPORT TopAbs_ShapeEnum ShapeType() const Standard_OVERRIDE;
 
 
 
 
-  DEFINE_STANDARD_RTTI(TopoDS_TVertex,TopoDS_TShape)
+  DEFINE_STANDARD_RTTIEXT(TopoDS_TVertex,TopoDS_TShape)
 
 protected:
 

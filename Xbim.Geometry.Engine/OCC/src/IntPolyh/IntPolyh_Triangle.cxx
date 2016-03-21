@@ -379,8 +379,8 @@ void IntPolyh_Triangle::TriangleDeflection(const Handle(Adaptor3d_HSurface)& MyS
 	Milieu.Middle( MySurface,P3, P1);
 	
 	
-      gp_Pnt PtXYZ = (MySurface)->Value( Milieu.U(), Milieu.V());
-      IntPolyh_Point MilieuReel(PtXYZ.X(), PtXYZ.Y(), PtXYZ.Z(), Milieu.U(), Milieu.V());
+      gp_Pnt PtXYZMilieu = (MySurface)->Value( Milieu.U(), Milieu.V());
+      IntPolyh_Point MilieuReel(PtXYZMilieu.X(), PtXYZMilieu.Y(), PtXYZMilieu.Z(), Milieu.U(), Milieu.V());
       Fleche = sqrt(Milieu.SquareDistance(MilieuReel));
     }
 }
@@ -1012,10 +1012,7 @@ void IntPolyh_Triangle::SetEdgeandOrientation(const Standard_Integer EdgeIndex,
   else { 
     Test=0;
   }
-
-
-  //SRL optimised code needs to go int OCC
-  /*if (Test!=0) {
+  if (Test!=0) {
     for(Standard_Integer iioo=0; iioo<FinTE; iioo++) {
       Standard_Integer EFP=TEdges[iioo].FirstPoint();
       if (EFP==PE1) {
@@ -1046,50 +1043,6 @@ void IntPolyh_Triangle::SetEdgeandOrientation(const Standard_Integer EdgeIndex,
 	}   
       }
     }
-  }*/
-
-  if (Test != 0)
-  {
-	  for (Standard_Integer iioo = 0; iioo < FinTE; iioo++)
-	  {
-		  Standard_Integer EFP = TEdges[iioo].FirstPoint();
-		  if (EFP == PE1)
-		  {
-			  Standard_Integer ESP = TEdges[iioo].SecondPoint();
-			  if (ESP != EFP)
-			  {
-				  if (ESP == PE2)
-				  {
-					  SetEdgeOrientation(EdgeIndex, 1);
-					  SetEdge(EdgeIndex, iioo);
-					  //iioo = FinTE;
-					  return;
-				  }
-			  }
-			  else
-			  {
-				  Test = 0;
-			  }
-		  }
-		  else if (EFP == PE2)
-		  {
-			  Standard_Integer ESP = TEdges[iioo].SecondPoint();
-			  if (ESP != EFP)
-			  {
-				  if (ESP == PE1)
-				  {
-					  SetEdgeOrientation(EdgeIndex, -1);
-					  SetEdge(EdgeIndex, iioo);
-					  //iioo = FinTE;
-					  return;
-				  }
-			  }
-			  else
-			  {
-
-			  }
-		  }
-	  }
   }
 }
 
@@ -1113,44 +1066,3 @@ void IntPolyh_Triangle::DumpFleche (const Standard_Integer i) const {
   printf("\nTriangle(%3d) fleche: %5f\n",i,Fleche);
 }
 
-//SRL Code to improve perfromance this needs to be added to OCC source
-//=======================================================================
-//function : SetEdgeandOrientation
-//purpose  : 
-//=======================================================================
-void IntPolyh_Triangle::SetEdgeandOrientation(const Standard_Integer EdgeIndex, const TColStd_DataMapOfIntegerInteger& maps) {
-
-	Standard_Integer PE1 = 0, PE2 = 0;
-	Standard_Integer Test = 1;
-	if (EdgeIndex == 1) { PE1 = p1; PE2 = p2; }
-	else if (EdgeIndex == 2) { PE1 = p2; PE2 = p3; }
-	else if (EdgeIndex == 3) { PE1 = p3; PE2 = p1; }
-	else
-	{
-		Test = 0;
-	}
-
-
-	if (Test != 0)
-	{
-		Standard_Integer hashPoint = (PE1 << sizeof(unsigned short)) | (unsigned short)PE2;
-		if (maps.IsBound(hashPoint))
-		{
-			Standard_Integer item = maps(hashPoint);
-			//take the first one
-			SetEdgeOrientation(EdgeIndex, 1);
-			SetEdge(EdgeIndex, item);
-		}
-		else
-		{
-			hashPoint = (PE2 << sizeof(unsigned short)) | (unsigned short)PE1;
-			if (maps.IsBound(hashPoint))
-			{
-				Standard_Integer item = maps(hashPoint);
-				//take the first one
-				SetEdgeOrientation(EdgeIndex, -1);
-				SetEdge(EdgeIndex, item);
-			}
-		}
-	}
-}

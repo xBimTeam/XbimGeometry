@@ -138,7 +138,7 @@ namespace Xbim
 			void Reverse();
 			bool Add(IXbimWire^ innerWire);
 			XbimPoint3D PointAtParameters(double u, double v);
-			Handle_Geom_Surface GetSurface();
+			Handle(Geom_Surface) GetSurface();
 			XbimVector3D NormalAt(double u, double v);
 			void SetLocation(TopLoc_Location loc);
 #pragma endregion

@@ -495,7 +495,7 @@ namespace Xbim
 			gp_Pnt startPoint(s.X, s.Y, s.Z);
 			//get where this is on the surface
 			XbimFace^ refSurface = gcnew XbimFace(repItem->ReferenceSurface);
-			Handle_Geom_Surface geomSurf = refSurface->GetSurface();
+			Handle(Geom_Surface) geomSurf = refSurface->GetSurface();
 			GeomAPI_ProjectPointOnSurf projector(startPoint, geomSurf);
 			projector.Perform(startPoint);
 			Quantity_Parameter u;
@@ -607,7 +607,7 @@ namespace Xbim
 				gp_Circ circ(ax2, v.Length);
 				double angle = Math::Min(repItem->Angle*radianConvert, M_PI * 2);;
 				GC_MakeArcOfCircle arcMaker(circ, 0., angle, Standard_True);
-				Handle_Geom_TrimmedCurve trimmed = arcMaker.Value();
+				Handle(Geom_TrimmedCurve) trimmed = arcMaker.Value();
 				XbimCurve^ curve = gcnew XbimCurve(trimmed);
 				XbimEdge^ edge = gcnew XbimEdge(curve);
 				XbimWire^ sweep = gcnew XbimWire(edge);
@@ -1086,7 +1086,7 @@ namespace Xbim
 					return;
 				}
 				gp_Pln plane = XbimConvert::ToPlane(ifcPlane->Position);
-				Handle_Geom_Surface hsPlane = new Geom_Plane(plane);
+				Handle(Geom_Surface) hsPlane = new Geom_Plane(plane);
 				gp_Pnt centre(centroid.X, centroid.Y, centroid.Z);
 				GeomAPI_ProjectPointOnSurf projector(centre, hsPlane, hs->Model->ModelFactors->Precision);
 				gp_Pnt nearest = projector.NearestPoint();

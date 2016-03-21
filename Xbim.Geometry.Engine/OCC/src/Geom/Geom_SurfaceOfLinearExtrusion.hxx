@@ -21,6 +21,7 @@
 #include <Standard_Type.hxx>
 
 #include <Geom_SweptSurface.hxx>
+#include <GeomEvaluator_SurfaceOfExtrusion.hxx>
 #include <Standard_Real.hxx>
 #include <Standard_Boolean.hxx>
 #include <Standard_Integer.hxx>
@@ -102,7 +103,7 @@ public:
   //! In the case of a surface of linear extrusion:
   //! - UReverse reverses the basis curve, and
   //! - VReverse reverses the direction of linear extrusion.
-  Standard_EXPORT void UReverse();
+  Standard_EXPORT void UReverse() Standard_OVERRIDE;
   
   //! Computes the u parameter on the modified
   //! surface, produced by reversing its u  parametric
@@ -111,7 +112,7 @@ public:
   //! - UReverseParameter returns the reversed
   //! parameter given by the function
   //! ReversedParameter called with U on the basis   curve,
-  Standard_EXPORT Standard_Real UReversedParameter (const Standard_Real U) const;
+  Standard_EXPORT Standard_Real UReversedParameter (const Standard_Real U) const Standard_OVERRIDE;
   
   //! Changes the orientation of this surface of linear
   //! extrusion in the v parametric direction. The
@@ -121,13 +122,13 @@ public:
   //! In the case of a surface of linear extrusion:
   //! - UReverse reverses the basis curve, and
   //! - VReverse reverses the direction of linear extrusion.
-  Standard_EXPORT void VReverse();
+  Standard_EXPORT void VReverse() Standard_OVERRIDE;
   
   //! Computes the v parameter on the modified
   //! surface, produced by reversing its u v parametric
   //! direction, for any point of v parameter V on this surface of linear extrusion.
   //! In the case of an extruded surface VReverse returns -V.
-  Standard_EXPORT Standard_Real VReversedParameter (const Standard_Real V) const;
+  Standard_EXPORT Standard_Real VReversedParameter (const Standard_Real V) const Standard_OVERRIDE;
   
   //! Returns the parametric bounds U1, U2, V1 and V2 of
   //! this surface of linear extrusion.
@@ -135,41 +136,41 @@ public:
   //! parametric direction, so:
   //! - V1 = Standard_Real::RealFirst()
   //! - V2 = Standard_Real::RealLast().
-  Standard_EXPORT void Bounds (Standard_Real& U1, Standard_Real& U2, Standard_Real& V1, Standard_Real& V2) const;
+  Standard_EXPORT void Bounds (Standard_Real& U1, Standard_Real& U2, Standard_Real& V1, Standard_Real& V2) const Standard_OVERRIDE;
   
   //! IsUClosed returns true if the "basis curve" of this
   //! surface of linear extrusion is closed.
-  Standard_EXPORT Standard_Boolean IsUClosed() const;
+  Standard_EXPORT Standard_Boolean IsUClosed() const Standard_OVERRIDE;
   
   //! IsVClosed always returns false.
-  Standard_EXPORT Standard_Boolean IsVClosed() const;
+  Standard_EXPORT Standard_Boolean IsVClosed() const Standard_OVERRIDE;
   
   //! IsCNu returns true if the degree of continuity for the
   //! "basis curve" of this surface of linear extrusion is at least N.
   //! Raises RangeError if N < 0.
-  Standard_EXPORT Standard_Boolean IsCNu (const Standard_Integer N) const;
+  Standard_EXPORT Standard_Boolean IsCNu (const Standard_Integer N) const Standard_OVERRIDE;
   
   //! IsCNv always returns true.
-  Standard_EXPORT Standard_Boolean IsCNv (const Standard_Integer N) const;
+  Standard_EXPORT Standard_Boolean IsCNv (const Standard_Integer N) const Standard_OVERRIDE;
   
   //! IsUPeriodic returns true if the "basis curve" of this
   //! surface of linear extrusion is periodic.
-  Standard_EXPORT Standard_Boolean IsUPeriodic() const;
+  Standard_EXPORT Standard_Boolean IsUPeriodic() const Standard_OVERRIDE;
   
   //! IsVPeriodic always returns false.
-  Standard_EXPORT Standard_Boolean IsVPeriodic() const;
+  Standard_EXPORT Standard_Boolean IsVPeriodic() const Standard_OVERRIDE;
   
   //! Computes the U isoparametric curve of this surface
   //! of linear extrusion. This is the line parallel to the
   //! direction of extrusion, passing through the point of
   //! parameter U of the basis curve.
-  Standard_EXPORT Handle(Geom_Curve) UIso (const Standard_Real U) const;
+  Standard_EXPORT Handle(Geom_Curve) UIso (const Standard_Real U) const Standard_OVERRIDE;
   
   //! Computes the V isoparametric curve of this surface
   //! of linear extrusion. This curve is obtained by
   //! translating the extruded curve in the direction of
   //! extrusion, with the magnitude V.
-  Standard_EXPORT Handle(Geom_Curve) VIso (const Standard_Real V) const;
+  Standard_EXPORT Handle(Geom_Curve) VIso (const Standard_Real V) const Standard_OVERRIDE;
   
 
   //! Computes the  point P (U, V) on the surface.
@@ -177,25 +178,25 @@ public:
   //! The parametrization V is a linear parametrization, and
   //! the direction of parametrization is the direction of
   //! extrusion. If the point is on the extruded curve, V = 0.0
-  Standard_EXPORT void D0 (const Standard_Real U, const Standard_Real V, gp_Pnt& P) const;
+  Standard_EXPORT void D0 (const Standard_Real U, const Standard_Real V, gp_Pnt& P) const Standard_OVERRIDE;
   
 
   //! Computes the current point and the first derivatives in the
   //! directions U and V.
   //! Raises UndefinedDerivative if the continuity of the surface is not C1.
-  Standard_EXPORT void D1 (const Standard_Real U, const Standard_Real V, gp_Pnt& P, gp_Vec& D1U, gp_Vec& D1V) const;
+  Standard_EXPORT void D1 (const Standard_Real U, const Standard_Real V, gp_Pnt& P, gp_Vec& D1U, gp_Vec& D1V) const Standard_OVERRIDE;
   
   //! --- Purpose ;
   //! Computes the current point, the first and the second derivatives
   //! in the directions U and V.
   //! Raises UndefinedDerivative if the continuity of the surface is not C2.
-  Standard_EXPORT void D2 (const Standard_Real U, const Standard_Real V, gp_Pnt& P, gp_Vec& D1U, gp_Vec& D1V, gp_Vec& D2U, gp_Vec& D2V, gp_Vec& D2UV) const;
+  Standard_EXPORT void D2 (const Standard_Real U, const Standard_Real V, gp_Pnt& P, gp_Vec& D1U, gp_Vec& D1V, gp_Vec& D2U, gp_Vec& D2V, gp_Vec& D2UV) const Standard_OVERRIDE;
   
 
   //! Computes the current point, the first,the second and the third
   //! derivatives in the directions U and V.
   //! Raises UndefinedDerivative if the continuity of the surface is not C3.
-  Standard_EXPORT void D3 (const Standard_Real U, const Standard_Real V, gp_Pnt& P, gp_Vec& D1U, gp_Vec& D1V, gp_Vec& D2U, gp_Vec& D2V, gp_Vec& D2UV, gp_Vec& D3U, gp_Vec& D3V, gp_Vec& D3UUV, gp_Vec& D3UVV) const;
+  Standard_EXPORT void D3 (const Standard_Real U, const Standard_Real V, gp_Pnt& P, gp_Vec& D1U, gp_Vec& D1V, gp_Vec& D2U, gp_Vec& D2V, gp_Vec& D2UV, gp_Vec& D3U, gp_Vec& D3V, gp_Vec& D3UUV, gp_Vec& D3UVV) const Standard_OVERRIDE;
   
 
   //! Computes the derivative of order Nu in the direction u
@@ -203,28 +204,10 @@ public:
   //! Raises UndefinedDerivative if the continuity of the surface is not CNu in the u
   //! direction and CNv in the v direction.
   //! Raises RangeError if Nu + Nv < 1 or Nu < 0 or Nv < 0.
-  Standard_EXPORT gp_Vec DN (const Standard_Real U, const Standard_Real V, const Standard_Integer Nu, const Standard_Integer Nv) const;
-  
-  //! The following  functions  evaluates the  local
-  //! derivatives on surface. Useful to manage discontinuities
-  //! on the surface.
-  //! if    Side  =  1  ->  P  =  S( U+,V )
-  //! if    Side  = -1  ->  P  =  S( U-,V )
-  //! else  P  is betveen discontinuities
-  //! can be evaluated using methods  of
-  //! global evaluations    P  =  S( U ,V )
-  Standard_EXPORT void LocalD0 (const Standard_Real U, const Standard_Real V, const Standard_Integer USide, gp_Pnt& P) const;
-  
-  Standard_EXPORT void LocalD1 (const Standard_Real U, const Standard_Real V, const Standard_Integer USide, gp_Pnt& P, gp_Vec& D1U, gp_Vec& D1V) const;
-  
-  Standard_EXPORT void LocalD2 (const Standard_Real U, const Standard_Real V, const Standard_Integer USide, gp_Pnt& P, gp_Vec& D1U, gp_Vec& D1V, gp_Vec& D2U, gp_Vec& D2V, gp_Vec& D2UV) const;
-  
-  Standard_EXPORT void LocalD3 (const Standard_Real U, const Standard_Real V, const Standard_Integer USide, gp_Pnt& P, gp_Vec& D1U, gp_Vec& D1V, gp_Vec& D2U, gp_Vec& D2V, gp_Vec& D2UV, gp_Vec& D3U, gp_Vec& D3V, gp_Vec& D3UUV, gp_Vec& D3UVV) const;
-  
-  Standard_EXPORT gp_Vec LocalDN (const Standard_Real U, const Standard_Real V, const Standard_Integer USide, const Standard_Integer Nu, const Standard_Integer Nv) const;
-  
+  Standard_EXPORT gp_Vec DN (const Standard_Real U, const Standard_Real V, const Standard_Integer Nu, const Standard_Integer Nv) const Standard_OVERRIDE;
+
   //! Applies the transformation T to this surface of linear extrusion.
-  Standard_EXPORT void Transform (const gp_Trsf& T);
+  Standard_EXPORT void Transform (const gp_Trsf& T) Standard_OVERRIDE;
   
   //! Computes the  parameters on the  transformed  surface for
   //! the transform of the point of parameters U,V on <me>.
@@ -264,12 +247,12 @@ public:
   Standard_EXPORT virtual gp_GTrsf2d ParametricTransformation (const gp_Trsf& T) const Standard_OVERRIDE;
   
   //! Creates a new object which is a copy of this surface of linear extrusion.
-  Standard_EXPORT Handle(Geom_Geometry) Copy() const;
+  Standard_EXPORT Handle(Geom_Geometry) Copy() const Standard_OVERRIDE;
 
 
 
 
-  DEFINE_STANDARD_RTTI(Geom_SurfaceOfLinearExtrusion,Geom_SweptSurface)
+  DEFINE_STANDARD_RTTIEXT(Geom_SurfaceOfLinearExtrusion,Geom_SweptSurface)
 
 protected:
 
@@ -277,7 +260,7 @@ protected:
 
 
 private:
-
+  Handle(GeomEvaluator_SurfaceOfExtrusion) myEvaluator;
 
 
 

@@ -45,10 +45,10 @@ class NCollection_IncAllocator : public NCollection_BaseAllocator
   Standard_EXPORT NCollection_IncAllocator (const size_t theBlockSize = DefaultBlockSize);
 
   //! Allocate memory with given size. Returns NULL on failure
-  Standard_EXPORT virtual void* Allocate        (const size_t size);
+  Standard_EXPORT virtual void* Allocate        (const size_t size) Standard_OVERRIDE;
 
   //! Free a previously allocated memory. Does nothing
-  Standard_EXPORT virtual void  Free            (void *anAddress);
+  Standard_EXPORT virtual void  Free            (void *anAddress) Standard_OVERRIDE;
 
   //! Diagnostic method, returns the total allocated size
   Standard_EXPORT size_t        GetMemSize      () const;
@@ -111,7 +111,7 @@ class NCollection_IncAllocator : public NCollection_BaseAllocator
 
  public:
 // Declaration of CASCADE RTTI
-  DEFINE_STANDARD_RTTI (NCollection_IncAllocator, NCollection_BaseAllocator)
+  DEFINE_STANDARD_RTTIEXT(NCollection_IncAllocator,NCollection_BaseAllocator)
 };
 
 // Definition of HANDLE object using Standard_DefineHandle.hxx

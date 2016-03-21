@@ -39,22 +39,30 @@ class BiTgte_HCurveOnEdge : public Adaptor3d_HCurve
 public:
 
   
+  //! Creates an empty GenHCurve.
   Standard_EXPORT BiTgte_HCurveOnEdge();
   
+  //! Creates a GenHCurve from a Curve
   Standard_EXPORT BiTgte_HCurveOnEdge(const BiTgte_CurveOnEdge& C);
   
+  //! Sets the field of the GenHCurve.
   Standard_EXPORT void Set (const BiTgte_CurveOnEdge& C);
   
-  Standard_EXPORT const Adaptor3d_Curve& Curve() const;
+  //! Returns the curve used to create the GenHCurve.
+  //! This is redefined from HCurve, cannot be inline.
+  Standard_EXPORT const Adaptor3d_Curve& Curve() const Standard_OVERRIDE;
   
-  Standard_EXPORT Adaptor3d_Curve& GetCurve();
+  //! Returns the curve used to create the GenHCurve.
+  //! This is redefined from HCurve, cannot be inline.
+  Standard_EXPORT Adaptor3d_Curve& GetCurve() Standard_OVERRIDE;
   
+  //! Returns the curve used to create the GenHCurve.
     BiTgte_CurveOnEdge& ChangeCurve();
 
 
 
 
-  DEFINE_STANDARD_RTTI(BiTgte_HCurveOnEdge,Adaptor3d_HCurve)
+  DEFINE_STANDARD_RTTI_INLINE(BiTgte_HCurveOnEdge,Adaptor3d_HCurve)
 
 protected:
 

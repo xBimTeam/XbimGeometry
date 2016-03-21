@@ -40,6 +40,8 @@
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Wire.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(ShapeFix_Shape,ShapeFix_Root)
+
 //=======================================================================
 //function : ShapeFix_Shape
 //purpose  : 
@@ -100,7 +102,7 @@ Standard_Boolean ShapeFix_Shape::Perform(const Handle(Message_ProgressIndicator)
 {
   Standard_Integer savFixSmallAreaWireMode = 0;
   Standard_Integer savFixVertexTolMode =  myFixVertexTolMode;
-  Handle(ShapeFix_Face) fft = Handle(ShapeFix_Face)::DownCast( FixFaceTool() );
+  Handle(ShapeFix_Face) fft = FixFaceTool();
   if ( !fft.IsNull() ) {
     savFixSmallAreaWireMode = fft->FixSmallAreaWireMode();
     if ( savFixSmallAreaWireMode == -1 &&
@@ -150,14 +152,14 @@ Standard_Boolean ShapeFix_Shape::Perform(const Handle(Message_ProgressIndicator)
       ++aShapesNb;
 
     // Open progress indication scope for sub-shape fixing
-    Message_ProgressSentry aPSentry(theProgress, "Fixing sub-shape", 0, aShapesNb, 1);
-    for ( TopoDS_Iterator anIter(S); anIter.More() && aPSentry.More(); anIter.Next(), aPSentry.Next() )
+    Message_ProgressSentry aPSentrySubShape(theProgress, "Fixing sub-shape", 0, aShapesNb, 1);
+    for ( TopoDS_Iterator anIter(S); anIter.More() && aPSentrySubShape.More(); anIter.Next(), aPSentrySubShape.Next() )
     {
       myShape = anIter.Value();
       if ( Perform(theProgress) )
         status = Standard_True;
     }
-    if ( !aPSentry.More() )
+    if ( !aPSentrySubShape.More() )
       return Standard_False; // aborted execution
 
     myFixSameParameterMode = savFixSameParameterMode;
@@ -227,6 +229,7 @@ Standard_Boolean ShapeFix_Shape::Perform(const Handle(Message_ProgressIndicator)
   }
   case TopAbs_EDGE: {
     Handle(ShapeFix_Edge) sfe = FixEdgeTool();
+    sfe->SetContext(Context());
     if(sfe->FixVertexTolerance(TopoDS::Edge(S)))
       myStatus |= ShapeExtend::EncodeStatus ( ShapeExtend_DONE1 );
     break;
@@ -238,9 +241,8 @@ Standard_Boolean ShapeFix_Shape::Perform(const Handle(Message_ProgressIndicator)
 
   // Switch to the second progress indication scope if it exists
   aPSentry.Next();
-  
-  myResult = Context()->Apply(S);  
 
+  myResult = Context()->Apply(S);
   if ( NeedFix(myFixSameParameterMode) )
   {
     SameParameter(myResult, Standard_False, theProgress);
@@ -257,14 +259,17 @@ Standard_Boolean ShapeFix_Shape::Perform(const Handle(Message_ProgressIndicator)
       // for case when vertex belong to the different faces it is necessary to check vertices tolerances
       //after all fixes.
       //This fix it should be performed for example for case when cutting edge was performed.
-
       Handle(ShapeFix_Edge) sfe = FixEdgeTool();
-      TopExp_Explorer anExpE (myResult, TopAbs_EDGE);
-      for ( ; anExpE.More(); anExpE.Next()) 
-        sfe->FixVertexTolerance( TopoDS::Edge (anExpE.Current()));
-
+      for (anExpF.ReInit(); anExpF.More(); anExpF.Next()) 
+      {
+        TopoDS_Face aF = TopoDS::Face(anExpF.Current());
+        TopExp_Explorer anExpE (aF, TopAbs_EDGE);
+        for ( ; anExpE.More(); anExpE.Next()) 
+          sfe->FixVertexTolerance( TopoDS::Edge (anExpE.Current()), aF);
+      }
     }
   }
+  myResult = Context()->Apply(myResult);
 
   if ( !fft.IsNull() )
     fft->FixSmallAreaWireMode() = savFixSmallAreaWireMode;

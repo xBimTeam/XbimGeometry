@@ -26,6 +26,7 @@
 #include <Storage_BaseDriver.hxx>
 #include <Storage_Error.hxx>
 #include <Storage_OpenMode.hxx>
+#include <Storage_Data.hxx>
 #include <Standard_Boolean.hxx>
 #include <Storage_Position.hxx>
 #include <Standard_Integer.hxx>
@@ -44,7 +45,20 @@ class Storage_StreamExtCharParityError;
 class TCollection_AsciiString;
 class TCollection_ExtendedString;
 class Storage_BaseDriver;
+class Storage_HeaderData;
 
+
+// Macro that tells if bytes must be reversed when read/write 
+// data to/from a binary file. It is needed to provide binary file compatibility
+// between little and big endian platforms.
+#ifndef OCCT_BINARY_FILE_DO_INVERSE
+#if defined ( SOLARIS ) || defined ( IRIX )
+// Do inverse on big endian platform
+#define OCCT_BINARY_FILE_DO_INVERSE 1
+#else
+#define OCCT_BINARY_FILE_DO_INVERSE 0
+#endif
+#endif
 
 
 class FSD_BinaryFile  : public Storage_BaseDriver
@@ -66,26 +80,52 @@ public:
   Standard_EXPORT static Storage_Error IsGoodFileType (const TCollection_AsciiString& aName);
   
   Standard_EXPORT Storage_Error BeginWriteInfoSection();
+
+  Standard_EXPORT static Standard_Integer WriteInfo (Standard_OStream& theOStream,
+                                                     const Standard_Integer nbObj,
+                                                     const TCollection_AsciiString& dbVersion,
+                                                     const TCollection_AsciiString& date,
+                                                     const TCollection_AsciiString& schemaName,
+                                                     const TCollection_AsciiString& schemaVersion,
+                                                     const TCollection_ExtendedString& appName,
+                                                     const TCollection_AsciiString& appVersion,
+                                                     const TCollection_ExtendedString& objectType,
+                                                     const TColStd_SequenceOfAsciiString& userInfo,
+                                                     const Standard_Boolean theOnlyCount = Standard_False);
   
   Standard_EXPORT void WriteInfo (const Standard_Integer nbObj, const TCollection_AsciiString& dbVersion, const TCollection_AsciiString& date, const TCollection_AsciiString& schemaName, const TCollection_AsciiString& schemaVersion, const TCollection_ExtendedString& appName, const TCollection_AsciiString& appVersion, const TCollection_ExtendedString& objectType, const TColStd_SequenceOfAsciiString& userInfo);
   
   Standard_EXPORT Storage_Error EndWriteInfoSection();
+
+  Standard_EXPORT Storage_Error EndWriteInfoSection(Standard_OStream& theOStream);
   
   Standard_EXPORT Storage_Error BeginReadInfoSection();
   
   Standard_EXPORT void ReadInfo (Standard_Integer& nbObj, TCollection_AsciiString& dbVersion, TCollection_AsciiString& date, TCollection_AsciiString& schemaName, TCollection_AsciiString& schemaVersion, TCollection_ExtendedString& appName, TCollection_AsciiString& appVersion, TCollection_ExtendedString& objectType, TColStd_SequenceOfAsciiString& userInfo);
   
+  Standard_EXPORT void ReadCompleteInfo (Standard_IStream& theIStream, Handle(Storage_Data)& theData);
+
   Standard_EXPORT Storage_Error EndReadInfoSection();
   
   Standard_EXPORT Storage_Error BeginWriteCommentSection();
   
+  Standard_EXPORT Storage_Error BeginWriteCommentSection (Standard_OStream& theOStream);
+  
   Standard_EXPORT void WriteComment (const TColStd_SequenceOfExtendedString& userComments);
   
+  Standard_EXPORT static Standard_Integer WriteComment (Standard_OStream& theOStream,
+                                                        const TColStd_SequenceOfExtendedString& theComments,
+                                                        const Standard_Boolean theOnlyCount = Standard_False);
+  
   Standard_EXPORT Storage_Error EndWriteCommentSection();
+
+  Standard_EXPORT Storage_Error EndWriteCommentSection (Standard_OStream& theOStream);
   
   Standard_EXPORT Storage_Error BeginReadCommentSection();
   
   Standard_EXPORT void ReadComment (TColStd_SequenceOfExtendedString& userComments);
+
+  Standard_EXPORT static void ReadComment (Standard_IStream& theIStream, TColStd_SequenceOfExtendedString& userComments);
   
   Standard_EXPORT Storage_Error EndReadCommentSection();
   
@@ -100,8 +140,12 @@ public:
   Standard_EXPORT Storage_Error BeginReadTypeSection();
   
   Standard_EXPORT Standard_Integer TypeSectionSize();
+
+  Standard_EXPORT static Standard_Integer TypeSectionSize(Standard_IStream& theIStream);
   
   Standard_EXPORT void ReadTypeInformations (Standard_Integer& typeNum, TCollection_AsciiString& typeName);
+
+  Standard_EXPORT static void ReadTypeInformations (Standard_IStream& theIStream, Standard_Integer& typeNum, TCollection_AsciiString& typeName);
   
   Standard_EXPORT Storage_Error EndReadTypeSection();
   
@@ -117,7 +161,11 @@ public:
   
   Standard_EXPORT Standard_Integer RootSectionSize();
   
+  Standard_EXPORT static Standard_Integer RootSectionSize(Standard_IStream& theIStream);
+  
   Standard_EXPORT void ReadRoot (TCollection_AsciiString& rootName, Standard_Integer& aRef, TCollection_AsciiString& aType);
+
+  Standard_EXPORT static void ReadRoot (Standard_IStream& theIStream, TCollection_AsciiString& rootName, Standard_Integer& aRef, TCollection_AsciiString& aType);
   
   Standard_EXPORT Storage_Error EndReadRootSection();
   
@@ -132,8 +180,12 @@ public:
   Standard_EXPORT Storage_Error BeginReadRefSection();
   
   Standard_EXPORT Standard_Integer RefSectionSize();
+
+  Standard_EXPORT static Standard_Integer RefSectionSize(Standard_IStream& theIStream);
   
   Standard_EXPORT void ReadReferenceType (Standard_Integer& reference, Standard_Integer& typeNum);
+
+  Standard_EXPORT static void ReadReferenceType (Standard_IStream& theIStream, Standard_Integer& reference, Standard_Integer& typeNum);
   
   Standard_EXPORT Storage_Error EndReadRefSection();
   
@@ -181,6 +233,10 @@ Storage_BaseDriver& operator << (const Standard_ExtCharacter aValue)
   return PutExtCharacter(aValue);
 }
   
+  Standard_EXPORT static Standard_Integer PutInteger (Standard_OStream& theOStream,
+                                                      const Standard_Integer aValue,
+                                                      const Standard_Boolean theOnlyCount = Standard_False);
+
   Standard_EXPORT Storage_BaseDriver& PutInteger (const Standard_Integer aValue);
 Storage_BaseDriver& operator << (const Standard_Integer aValue)
 {
@@ -212,6 +268,8 @@ Storage_BaseDriver& operator >> (Standard_Character& aValue)
 {
   return GetCharacter(aValue);
 }
+
+  Standard_EXPORT static void GetReference (Standard_IStream& theIStream, Standard_Integer& aValue);
   
   Standard_EXPORT Storage_BaseDriver& GetExtCharacter (Standard_ExtCharacter& aValue);
 Storage_BaseDriver& operator >> (Standard_ExtCharacter& aValue)
@@ -224,6 +282,8 @@ Storage_BaseDriver& operator >> (Standard_Integer& aValue)
 {
   return GetInteger(aValue);
 }
+
+  Standard_EXPORT static void GetInteger (Standard_IStream& theIStream, Standard_Integer& aValue);
   
   Standard_EXPORT Storage_BaseDriver& GetBoolean (Standard_Boolean& aValue);
 Storage_BaseDriver& operator >> (Standard_Boolean& aValue)
@@ -251,8 +311,44 @@ Storage_BaseDriver& operator >> (Standard_ShortReal& aValue)
   Destroy();
 }
 
+  ///Inverse bytes in integer value
+  static Standard_Integer InverseInt(const Standard_Integer theValue)
+  {
+    return (0 | (( theValue & 0x000000ff ) << 24 )
+              | (( theValue & 0x0000ff00 ) << 8  )
+              | (( theValue & 0x00ff0000 ) >> 8  )
+              | (( theValue >> 24 ) & 0x000000ff ) );
+  }
 
+  ///Inverse bytes in extended character value
+  static Standard_ExtCharacter InverseExtChar(const Standard_ExtCharacter theValue)
+  {
+    return (0 | (( theValue & 0x00ff ) << 8  )
+            |   (( theValue & 0xff00 ) >> 8  ) );
+  }
 
+  ///Inverse bytes in real value
+  Standard_EXPORT static Standard_Real InverseReal(const Standard_Real theValue);
+
+  ///Inverse bytes in short real value
+  Standard_EXPORT static Standard_ShortReal InverseShortReal(const Standard_ShortReal theValue);
+
+  ///Inverse bytes in size value
+  Standard_EXPORT static Standard_Size InverseSize(const Standard_Size theValue);
+
+  Standard_EXPORT static void ReadHeader (Standard_IStream& theIStream, FSD_FileHeader& theFileHeader);
+
+  Standard_EXPORT static void ReadHeaderData (Standard_IStream& theIStream, const Handle(Storage_HeaderData)& theHeaderData);
+
+  Standard_EXPORT static void ReadString (Standard_IStream& theIStream, TCollection_AsciiString& buffer);
+
+  Standard_EXPORT static void ReadExtendedString (Standard_IStream& theIStream, TCollection_ExtendedString& buffer);
+
+  Standard_EXPORT static Standard_Integer WriteHeader (Standard_OStream&      theOStream, 
+                                                       const FSD_FileHeader&  theHeader,
+                                                       const Standard_Boolean theOnlyCount = Standard_False);
+
+  Standard_EXPORT static Standard_CString MagicNumber();
 
 protected:
 
@@ -265,36 +361,34 @@ protected:
   
   //! write string at the current position.
   Standard_EXPORT void WriteString (const TCollection_AsciiString& buffer);
+
+  //! write string at the current position.
+  Standard_EXPORT static Standard_Integer WriteString (Standard_OStream&              theOStream,
+                                                       const TCollection_AsciiString& theString,
+                                                       const Standard_Boolean         theOnlyCount = Standard_False);
   
   //! read string from the current position.
   Standard_EXPORT void ReadExtendedString (TCollection_ExtendedString& buffer);
   
   //! write string at the current position.
   Standard_EXPORT void WriteExtendedString (const TCollection_ExtendedString& buffer);
+  
+  //! write string at the current position.
+  Standard_EXPORT static Standard_Integer WriteExtendedString (Standard_OStream& theOStream,
+                                                               const TCollection_ExtendedString& theString,
+                                                               const Standard_Boolean theOnlyCount = Standard_False);
 
-
-
+private:
+  
+  void WriteHeader();
+  
+  void ReadHeader();
+  
 
 private:
 
-  
-  Standard_EXPORT void WriteHeader();
-  
-  Standard_EXPORT void ReadHeader();
-  
-  Standard_EXPORT static const Standard_CString MagicNumber();
-
-
   FSD_BStream myStream;
   FSD_FileHeader myHeader;
-
-
 };
-
-
-
-
-
-
 
 #endif // _FSD_BinaryFile_HeaderFile

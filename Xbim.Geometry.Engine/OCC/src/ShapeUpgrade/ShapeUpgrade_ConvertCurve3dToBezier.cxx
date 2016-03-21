@@ -33,6 +33,8 @@
 #include <TColgp_Array1OfPnt.hxx>
 #include <TColStd_Array1OfReal.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(ShapeUpgrade_ConvertCurve3dToBezier,ShapeUpgrade_SplitCurve3d)
+
 ShapeUpgrade_ConvertCurve3dToBezier::ShapeUpgrade_ConvertCurve3dToBezier()
 {
   mySegments = new TColGeom_HSequenceOfCurve;
@@ -119,7 +121,7 @@ void ShapeUpgrade_ConvertCurve3dToBezier::Compute()
       GeomConvert_ApproxCurve approx (tcurve, Precision::Approximation(), 
 				      GeomAbs_C1, 100, 6 );
       if ( approx.HasResult() )
-	aBSpline = Handle(Geom_BSplineCurve)::DownCast(approx.Curve());
+	aBSpline = approx.Curve();
       else {
 	Handle(Geom_TrimmedCurve) t3d = new Geom_TrimmedCurve(myCurve,First,Last);
 	aBSpline = GeomConvert::CurveToBSplineCurve(t3d,Convert_QuasiAngular);

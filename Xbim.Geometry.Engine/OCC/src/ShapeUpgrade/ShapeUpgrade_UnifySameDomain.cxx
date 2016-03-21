@@ -87,6 +87,8 @@
 #include <BRepAdaptor_Curve.hxx>
 #include <BRepClass_FaceClassifier.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(ShapeUpgrade_UnifySameDomain,MMgt_TShared)
+
 struct SubSequenceOfEdges
 {
   TopTools_SequenceOfShape SeqsEdges;
@@ -810,9 +812,9 @@ static void GenerateSubSeq (const TopTools_SequenceOfShape& anInpEdgeSeq,
     isOk = IsMergingPossible(edge1, edge2, Tol, DegEdgeVrt);
     if (!isOk)
     {
-      SubSequenceOfEdges SubSeq;
-      SubSeq.SeqsEdges.Append(edge2);
-      SeqOfSubSeqOfEdges.Append(SubSeq);
+      SubSequenceOfEdges aSubSeq;
+      aSubSeq.SeqsEdges.Append(edge2);
+      SeqOfSubSeqOfEdges.Append(aSubSeq);
     }
     else
       SeqOfSubSeqOfEdges.ChangeLast().SeqsEdges.Append(edge2);
@@ -1079,7 +1081,7 @@ void ShapeUpgrade_UnifySameDomain::UnifyFaces()
   TopExp_Explorer exps;
   for (exps.Init(myShape, TopAbs_SHELL); exps.More(); exps.Next()) {
     TopoDS_Shell aShell = TopoDS::Shell(exps.Current());
-    
+
     // map of processed shapes
     TopTools_MapOfShape aProcessed;
 
@@ -1166,6 +1168,7 @@ void ShapeUpgrade_UnifySameDomain::UnifyFaces()
         B.MakeFace(aResult,aBaseSurface,aBaseLocation,0);
         Standard_Integer nbWires = 0;
 
+        TopoDS_Face tmpF = TopoDS::Face(myContext->Apply(faces(1).Oriented(TopAbs_FORWARD)));
         // connecting wires
         while (edges.Length()>0) {
 
@@ -1213,7 +1216,6 @@ void ShapeUpgrade_UnifySameDomain::UnifyFaces()
           aWire.Closed (BRep_Tool::IsClosed (aWire));
           aWire = TopoDS::Wire(myContext->Apply(aWire));
 
-          TopoDS_Face tmpF = TopoDS::Face(myContext->Apply(faces(1).Oriented(TopAbs_FORWARD)));
           Handle(ShapeFix_Wire) sfw = new ShapeFix_Wire(aWire,tmpF,Precision::Confusion());
           sfw->FixReorder();
           Standard_Boolean isDegRemoved = Standard_False;
@@ -1357,11 +1359,11 @@ void ShapeUpgrade_UnifySameDomain::UnifyFaces()
             }
             else
             {
-              Handle(ShapeExtend_WireData) sbwd =
+            Handle(ShapeExtend_WireData) sbwd =
                 new ShapeExtend_WireData (aWire);
-              ShapeFix_WireSegment seg ( sbwd, TopAbs_REVERSED );
-              wires.Append(seg);
-            }
+            ShapeFix_WireSegment seg ( sbwd, TopAbs_REVERSED );
+            wires.Append(seg);
+          }
           }
 
           CompShell.DispatchWires ( parts,wires );
@@ -1415,6 +1417,7 @@ void ShapeUpgrade_UnifySameDomain::UnifyFaces()
       TopoDS_Shape aResult = myContext->Apply(aShell);
 
       ShapeFix_Edge sfe;
+      if (!myContext.IsNull()) sfe.SetContext(myContext);
       for (exp.Init(aResult,TopAbs_EDGE); exp.More(); exp.Next()) {
         TopoDS_Edge E = TopoDS::Edge(exp.Current());
         sfe.FixVertexTolerance (E);
@@ -1512,6 +1515,15 @@ void ShapeUpgrade_UnifySameDomain::UnifyEdges()
     MergeSeq(SeqEdges, Tol, myConcatBSplines, myContext, myOldShapes, SharedVert, NewEdges2OldEdges);
   }
 
+  TopTools_DataMapOfShapeShape oldFaces2NewFaces;
+  for (exp.Init(myShape, TopAbs_FACE); exp.More(); exp.Next()) 
+  {
+    const TopoDS_Face& f = TopoDS::Face(exp.Current());
+    TopoDS_Face NewF = TopoDS::Face(myContext->Apply(f));
+    if (!NewF.IsNull())
+      oldFaces2NewFaces.Bind(f, NewF);
+  }
+
   // processing each face
   for (exp.Init(aRes, TopAbs_FACE); exp.More(); exp.Next()) {
     //TopoDS_Face aFace = TopoDS::Face(aContext->Apply(exp.Current().Oriented(TopAbs_FORWARD)));
@@ -1526,7 +1538,7 @@ void ShapeUpgrade_UnifySameDomain::UnifyEdges()
       Standard_Integer NbFacesPerEdge = aList.Extent();
       for ( ; anIter.More(); anIter.Next()) {
         TopoDS_Face face = TopoDS::Face(anIter.Value());
-        TopoDS_Face face1 = TopoDS::Face(myContext->Apply(anIter.Value()));
+        TopoDS_Face face1 = TopoDS::Face(oldFaces2NewFaces(anIter.Value()));
         if (face1.IsSame(aFace) && NbFacesPerEdge != 1)
           continue;
         if (NbFacesPerEdge == 1)

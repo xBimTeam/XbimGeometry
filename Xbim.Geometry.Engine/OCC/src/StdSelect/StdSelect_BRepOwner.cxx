@@ -26,6 +26,8 @@
 #include <TopLoc_Location.hxx>
 #include <TopoDS_Shape.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(StdSelect_BRepOwner,SelectMgr_EntityOwner)
+
 //==================================================
 // Function: 
 // Purpose :
@@ -241,4 +243,18 @@ void StdSelect_BRepOwner::SetZLayer (const Graphic3d_ZLayerId theLayerId)
   {
     myPrsSh->SetZLayer (theLayerId);
   }
+}
+
+//=======================================================================
+//function : UpdateHighlightTrsf
+//purpose  :
+//=======================================================================
+void StdSelect_BRepOwner::UpdateHighlightTrsf (const Handle(V3d_Viewer)& theViewer,
+                                               const Handle(PrsMgr_PresentationManager3d)& theManager,
+                                               const Standard_Integer theDispMode)
+{
+  if (myPrsSh.IsNull() && Selectable().IsNull())
+    return;
+
+  theManager->UpdateHighlightTrsf (theViewer, Selectable(), theDispMode, myPrsSh);
 }

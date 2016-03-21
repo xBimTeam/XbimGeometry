@@ -130,6 +130,8 @@
 #include <TopTools_MapOfShape.hxx>
 #include <TopTools_SequenceOfShape.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(BRepBuilderAPI_Sewing,MMgt_TShared)
+
 //#include <LocalAnalysis_SurfaceContinuity.hxx>
 //=======================================================================
 //function : SameRange
@@ -4121,7 +4123,6 @@ void BRepBuilderAPI_Sewing::CreateSewedShape()
           if (IndexMerged.Contains(i)) continue;
           TopoDS_Shell shell = TopoDS::Shell(OldShells.FindKey(i));
           if (NewShell.IsNull()) {
-            BRep_Builder aB;
             aB.MakeShell(NewShell);
             TopoDS_Iterator aItSS(shell) ;
             for( ; aItSS.More(); aItSS.Next())

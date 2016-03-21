@@ -81,7 +81,7 @@ Storage_Error FSD_File::Open(const TCollection_AsciiString& aName,const Storage_
 
   if (OpenMode() == Storage_VSNone) {
 
-#ifdef _WIN32
+#if defined(_MSC_VER)
     TCollection_ExtendedString aWName(aName);
     if (aMode == Storage_VSRead) {
       myStream.open( (const wchar_t*) aWName.ToExtString(),ios::in); // ios::nocreate is not portable
@@ -154,7 +154,7 @@ Storage_Error FSD_File::Close()
 //purpose  : ------------------ PROTECTED
 //=======================================================================
 
-const Standard_CString FSD_File::MagicNumber()
+Standard_CString FSD_File::MagicNumber()
 {
   return MAGICNUMBER;
 }
@@ -747,6 +747,16 @@ void FSD_File::ReadInfo(Standard_Integer& nbObj,
     userInfo.Append(line);
     line.Clear();
   }
+}
+
+//=======================================================================
+//function : ReadCompleteInfo
+//purpose  : 
+//           
+//=======================================================================
+void FSD_File::ReadCompleteInfo( Standard_IStream& /*theIStream*/, Handle(Storage_Data)& /*theData*/)
+{
+
 }
 
 //=======================================================================

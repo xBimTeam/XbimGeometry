@@ -22,6 +22,8 @@
 #include <TColStd_HArray2OfReal.hxx>
 
 
+IMPLEMENT_STANDARD_RTTIEXT(BSplCLib_Cache,Standard_Transient)
+
 //! Converts handle of array of Standard_Real into the pointer to Standard_Real
 static Standard_Real* ConvertArray(const Handle(TColStd_HArray2OfReal)& theHArray)
 {
@@ -45,7 +47,7 @@ BSplCLib_Cache::BSplCLib_Cache(const Standard_Integer&        theDegree,
                                const Standard_Boolean&        thePeriodic,
                                const TColStd_Array1OfReal&    theFlatKnots,
                                const TColgp_Array1OfPnt2d&    thePoles2d,
-                               const TColStd_Array1OfReal&    theWeights)
+                               const TColStd_Array1OfReal*    theWeights)
 {
   Standard_Real aCacheParam = theFlatKnots.Value(theFlatKnots.Lower() + theDegree);
   BuildCache(aCacheParam, theDegree, thePeriodic, 
@@ -56,7 +58,7 @@ BSplCLib_Cache::BSplCLib_Cache(const Standard_Integer&        theDegree,
                                const Standard_Boolean&        thePeriodic,
                                const TColStd_Array1OfReal&    theFlatKnots,
                                const TColgp_Array1OfPnt&      thePoles,
-                               const TColStd_Array1OfReal&    theWeights)
+                               const TColStd_Array1OfReal*    theWeights)
 {
   Standard_Real aCacheParam = theFlatKnots.Value(theFlatKnots.Lower() + theDegree);
   BuildCache(aCacheParam, theDegree, thePeriodic, 
@@ -71,7 +73,8 @@ Standard_Boolean BSplCLib_Cache::IsCacheValid(Standard_Real theParameter) const
     PeriodicNormalization(myFlatKnots->Array1(), aNewParam);
 
   Standard_Real aDelta = aNewParam - mySpanStart;
-  return (aDelta >= 0.0 && (aDelta < mySpanLength || mySpanIndex == mySpanIndexMax));
+  return ((aDelta >= 0.0 || mySpanIndex == mySpanIndexMin) &&
+          (aDelta < mySpanLength || mySpanIndex == mySpanIndexMax));
 }
 
 void BSplCLib_Cache::PeriodicNormalization(const TColStd_Array1OfReal& theFlatKnots, 
@@ -99,7 +102,7 @@ void BSplCLib_Cache::BuildCache(const Standard_Real&           theParameter,
                                 const Standard_Boolean&        thePeriodic,
                                 const TColStd_Array1OfReal&    theFlatKnots,
                                 const TColgp_Array1OfPnt2d&    thePoles2d,
-                                const TColStd_Array1OfReal&    theWeights)
+                                const TColStd_Array1OfReal*    theWeights)
 {
   // Normalize theParameter for periodical B-splines
   Standard_Real aNewParam = theParameter;
@@ -113,7 +116,7 @@ void BSplCLib_Cache::BuildCache(const Standard_Real&           theParameter,
     myFlatKnots.Nullify();
 
   // Change the size of cached data if needed
-  myIsRational = (&theWeights != NULL);
+  myIsRational = (theWeights != NULL);
   Standard_Integer aPWColNumber = myIsRational ? 3 : 2;
   if (theDegree > myDegree)
     myPolesWeights = new TColStd_HArray2OfReal(1, theDegree + 1, 1, aPWColNumber);
@@ -124,6 +127,7 @@ void BSplCLib_Cache::BuildCache(const Standard_Real&           theParameter,
                             aNewParam, thePeriodic, mySpanIndex, aNewParam);
   mySpanStart  = theFlatKnots.Value(mySpanIndex);
   mySpanLength = theFlatKnots.Value(mySpanIndex + 1) - mySpanStart;
+  mySpanIndexMin = thePeriodic ? 0 : myDegree + 1;
   mySpanIndexMax = theFlatKnots.Length() - 1 - theDegree;
 
   // Calculate new cache data
@@ -137,7 +141,7 @@ void BSplCLib_Cache::BuildCache(const Standard_Real&           theParameter,
                                 const Standard_Boolean&        thePeriodic,
                                 const TColStd_Array1OfReal&    theFlatKnots,
                                 const TColgp_Array1OfPnt&      thePoles,
-                                const TColStd_Array1OfReal&    theWeights)
+                                const TColStd_Array1OfReal*    theWeights)
 {
   // Create list of knots with repetitions and normalize theParameter for periodical B-splines
   Standard_Real aNewParam = theParameter;
@@ -151,7 +155,7 @@ void BSplCLib_Cache::BuildCache(const Standard_Real&           theParameter,
     myFlatKnots.Nullify();
 
   // Change the size of cached data if needed
-  myIsRational = (&theWeights != NULL);
+  myIsRational = (theWeights != NULL);
   Standard_Integer aPWColNumber = myIsRational ? 4 : 3;
   if (theDegree > myDegree)
     myPolesWeights = new TColStd_HArray2OfReal(1, theDegree + 1, 1, aPWColNumber);
@@ -162,6 +166,7 @@ void BSplCLib_Cache::BuildCache(const Standard_Real&           theParameter,
                             aNewParam, thePeriodic, mySpanIndex, aNewParam);
   mySpanStart  = theFlatKnots.Value(mySpanIndex);
   mySpanLength = theFlatKnots.Value(mySpanIndex + 1) - mySpanStart;
+  mySpanIndexMin = thePeriodic ? 0 : myDegree + 1;
   mySpanIndexMax = theFlatKnots.Length() - 1 - theDegree;
 
   // Calculate new cache data

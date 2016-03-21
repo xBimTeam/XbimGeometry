@@ -21,6 +21,8 @@
 #include <TopOpeBRepDS_ShapeShapeInterference.hxx>
 #include <TopOpeBRepDS_Transition.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(TopOpeBRepDS_ShapeShapeInterference,TopOpeBRepDS_Interference)
+
 //=======================================================================
 //function : TopOpeBRepDS_ShapeShapeInterference
 //purpose  : 
@@ -74,7 +76,7 @@ Standard_OStream& TopOpeBRepDS_ShapeShapeInterference::Dump
   (Standard_OStream& OS) const
 {
 #ifdef OCCT_DEBUG
-  OS<<"("; TopOpeBRepDS::Print(myC,OS); OS<<")"<<" ";
+  OS<<"("; TopOpeBRepDS::Print(myC,OS); OS<<") ";
   if (myGBound) OS<<"(Gb 1) ";
   else          OS<<"(Gb 0) ";
   TopOpeBRepDS_Interference::Dump(OS);

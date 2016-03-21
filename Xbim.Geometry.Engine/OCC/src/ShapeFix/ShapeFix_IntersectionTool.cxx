@@ -485,28 +485,32 @@ Standard_Boolean ShapeFix_IntersectionTool::UnionVertexes(const Handle(ShapeExte
       if(V21F.IsSame(V2F)) {
         NewE = sbe.CopyReplaceVertices(edge21,V1F,V21L);
         //NewE = sbe.CopyReplaceVertices(edge21,V,V21L);
-        boxes.Bind(NewE,boxes.Find(edge21)); // update boxes
+        if (boxes.IsBound(edge21))
+          boxes.Bind(NewE,boxes.Find(edge21)); // update boxes
         myContext->Replace(edge21,NewE);
         sewd->Set(NewE,num21);
       }
       if(V21L.IsSame(V2F)) {
         NewE = sbe.CopyReplaceVertices(edge21,V21F,V1F);
         //NewE = sbe.CopyReplaceVertices(edge21,V21F,V);
-        boxes.Bind(NewE,boxes.Find(edge21)); // update boxes
+        if (boxes.IsBound(edge21))
+          boxes.Bind(NewE,boxes.Find(edge21)); // update boxes
         myContext->Replace(edge21,NewE);
         sewd->Set(NewE,num21);
       }
       if(V22F.IsSame(V2F)) {
         NewE = sbe.CopyReplaceVertices(edge22,V1F,V22L);
         //NewE = sbe.CopyReplaceVertices(edge22,V,V22L);
-        boxes.Bind(NewE,boxes.Find(edge22)); // update boxes
+        if (boxes.IsBound(edge22))
+          boxes.Bind(NewE,boxes.Find(edge22)); // update boxes
         myContext->Replace(edge22,NewE);
         sewd->Set(NewE,num22);
       }
       if(V22L.IsSame(V2F)) {
         NewE = sbe.CopyReplaceVertices(edge22,V22F,V1F);
         //NewE = sbe.CopyReplaceVertices(edge22,V22F,V);
-        boxes.Bind(NewE,boxes.Find(edge22)); // update boxes
+        if (boxes.IsBound(edge22))
+          boxes.Bind(NewE,boxes.Find(edge22)); // update boxes
         myContext->Replace(edge22,NewE);
         sewd->Set(NewE,num22);
       }
@@ -545,28 +549,32 @@ Standard_Boolean ShapeFix_IntersectionTool::UnionVertexes(const Handle(ShapeExte
       if(V21F.IsSame(V2L)) {
         NewE = sbe.CopyReplaceVertices(edge21,V1F,V21L);
         //NewE = sbe.CopyReplaceVertices(edge21,V,V21L);
-        boxes.Bind(NewE,boxes.Find(edge21)); // update boxes
+        if (boxes.IsBound(edge21))
+          boxes.Bind(NewE,boxes.Find(edge21)); // update boxes
         myContext->Replace(edge21,NewE);
         sewd->Set(NewE,num21);
       }
       if(V21L.IsSame(V2L)) {
         NewE = sbe.CopyReplaceVertices(edge21,V21F,V1F);
         //NewE = sbe.CopyReplaceVertices(edge21,V21F,V);
-        boxes.Bind(NewE,boxes.Find(edge21)); // update boxes
+        if (boxes.IsBound(edge21))
+          boxes.Bind(NewE,boxes.Find(edge21)); // update boxes
         myContext->Replace(edge21,NewE);
         sewd->Set(NewE,num21);
       }
       if(V22F.IsSame(V2L)) {
         NewE = sbe.CopyReplaceVertices(edge22,V1F,V22L);
         //NewE = sbe.CopyReplaceVertices(edge22,V,V22L);
-        boxes.Bind(NewE,boxes.Find(edge22)); // update boxes
+        if (boxes.IsBound(edge22))
+          boxes.Bind(NewE,boxes.Find(edge22)); // update boxes
         myContext->Replace(edge22,NewE);
         sewd->Set(NewE,num22);
       }
       if(V22L.IsSame(V2L)) {
         NewE = sbe.CopyReplaceVertices(edge22,V22F,V1F);
         //NewE = sbe.CopyReplaceVertices(edge22,V22F,V);
-        boxes.Bind(NewE,boxes.Find(edge22)); // update boxes
+        if (boxes.IsBound(edge22))
+          boxes.Bind(NewE,boxes.Find(edge22)); // update boxes
         myContext->Replace(edge22,NewE);
         sewd->Set(NewE,num22);
       }
@@ -604,28 +612,32 @@ Standard_Boolean ShapeFix_IntersectionTool::UnionVertexes(const Handle(ShapeExte
       if(V21F.IsSame(V2F)) {
         NewE = sbe.CopyReplaceVertices(edge21,V1L,V21L);
         //NewE = sbe.CopyReplaceVertices(edge21,V,V21L);
-        boxes.Bind(NewE,boxes.Find(edge21)); // update boxes
+        if (boxes.IsBound(edge21))
+          boxes.Bind(NewE,boxes.Find(edge21)); // update boxes
         myContext->Replace(edge21,NewE);
         sewd->Set(NewE,num21);
       }
       if(V21L.IsSame(V2F)) {
         NewE = sbe.CopyReplaceVertices(edge21,V21F,V1L);
         //NewE = sbe.CopyReplaceVertices(edge21,V21F,V);
-        boxes.Bind(NewE,boxes.Find(edge21)); // update boxes
+        if (boxes.IsBound(edge21))
+          boxes.Bind(NewE,boxes.Find(edge21)); // update boxes
         myContext->Replace(edge21,NewE);
         sewd->Set(NewE,num21);
       }
       if(V22F.IsSame(V2F)) {
         NewE = sbe.CopyReplaceVertices(edge22,V1L,V22L);
         //NewE = sbe.CopyReplaceVertices(edge22,V,V22L);
-        boxes.Bind(NewE,boxes.Find(edge22)); // update boxes
+        if (boxes.IsBound(edge22))
+          boxes.Bind(NewE,boxes.Find(edge22)); // update boxes
         myContext->Replace(edge22,NewE);
         sewd->Set(NewE,num22);
       }
       if(V22L.IsSame(V2F)) {
         NewE = sbe.CopyReplaceVertices(edge22,V22F,V1L);
         //NewE = sbe.CopyReplaceVertices(edge22,V22F,V);
-        boxes.Bind(NewE,boxes.Find(edge22)); // update boxes
+        if (boxes.IsBound(edge22))
+          boxes.Bind(NewE,boxes.Find(edge22)); // update boxes
         myContext->Replace(edge22,NewE);
         sewd->Set(NewE,num22);
       }
@@ -663,28 +675,32 @@ Standard_Boolean ShapeFix_IntersectionTool::UnionVertexes(const Handle(ShapeExte
       if(V21F.IsSame(V2L)) {
         NewE = sbe.CopyReplaceVertices(edge21,V1L,V21L);
         //NewE = sbe.CopyReplaceVertices(edge21,V,V21L);
-        boxes.Bind(NewE,boxes.Find(edge21)); // update boxes
+        if (boxes.IsBound(edge21))
+          boxes.Bind(NewE,boxes.Find(edge21)); // update boxes
         myContext->Replace(edge21,NewE);
         sewd->Set(NewE,num21);
       }
       if(V21L.IsSame(V2L)) {
         NewE = sbe.CopyReplaceVertices(edge21,V21F,V1L);
         //NewE = sbe.CopyReplaceVertices(edge21,V21F,V);
-        boxes.Bind(NewE,boxes.Find(edge21)); // update boxes
+        if (boxes.IsBound(edge21))
+          boxes.Bind(NewE,boxes.Find(edge21)); // update boxes
         myContext->Replace(edge21,NewE);
         sewd->Set(NewE,num21);
       }
       if(V22F.IsSame(V2L)) {
         NewE = sbe.CopyReplaceVertices(edge22,V1L,V22L);
         //NewE = sbe.CopyReplaceVertices(edge22,V,V22L);
-        boxes.Bind(NewE,boxes.Find(edge22)); // update boxes
+        if (boxes.IsBound(edge22))
+          boxes.Bind(NewE,boxes.Find(edge22)); // update boxes
         myContext->Replace(edge22,NewE);
         sewd->Set(NewE,num22);
       }
       if(V22L.IsSame(V2L)) {
         NewE = sbe.CopyReplaceVertices(edge22,V22F,V1L);
         //NewE = sbe.CopyReplaceVertices(edge22,V22F,V);
-        boxes.Bind(NewE,boxes.Find(edge22)); // update boxes
+        if (boxes.IsBound(edge22))
+          boxes.Bind(NewE,boxes.Find(edge22)); // update boxes
         myContext->Replace(edge22,NewE);
         sewd->Set(NewE,num22);
       }
@@ -837,7 +853,7 @@ Standard_Boolean ShapeFix_IntersectionTool::FixSelfIntersectWire
   //Standard_Real area2d = ShapeAnalysis::TotCross2D(sewd,face);
   //if(area2d<Precision::PConfusion()*Precision::PConfusion()) return Standard_False; //gka 06.09.04 BUG 6555
 
-  TopoDS_Shape SF = face;
+  TopoDS_Shape SF = Context()->Apply(face);
   Standard_Real MaxTolVert=0.0;
   for(TopExp_Explorer exp(SF,TopAbs_VERTEX); exp.More(); exp.Next()) { 
     Standard_Real tolV = BRep_Tool::Tolerance(TopoDS::Vertex(exp.Current()));
