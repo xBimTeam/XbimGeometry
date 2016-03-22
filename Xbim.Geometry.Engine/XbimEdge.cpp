@@ -260,11 +260,11 @@ namespace Xbim
 			TopoDS_Edge ResEdge;
 
 			BRepLib::BuildCurves3d(aWire);
-			Handle(ShapeFix_Shape) Fixer = new ShapeFix_Shape(aWire);
-			Fixer->SetPrecision(tolerance);
-			Fixer->SetMaxTolerance(tolerance);
-			Fixer->Perform();
-			TopoDS_Wire theWire = TopoDS::Wire(Fixer->Shape());
+			ShapeFix_Shape fixer(aWire);
+			fixer.SetPrecision(tolerance);
+			fixer.SetMaxTolerance(tolerance);
+			fixer.Perform();
+			TopoDS_Wire theWire = TopoDS::Wire(fixer.Shape());
 
 			TColGeom_SequenceOfCurve CurveSeq;
 			TopTools_SequenceOfShape LocSeq;
@@ -928,7 +928,7 @@ namespace Xbim
 			}
 			else
 			{
-				XbimWire^ wire = gcnew XbimWire(pline);
+				TopoDS_Wire wire = gcnew XbimWire(pline);
 				IModelFactors^ mf = pline->Model->ModelFactors;
 				XbimEdge^ edge = gcnew XbimEdge(wire, mf->Precision, 0.05);
 				pEdge = new TopoDS_Edge();

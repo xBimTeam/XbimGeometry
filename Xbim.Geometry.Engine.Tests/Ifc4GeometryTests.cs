@@ -156,6 +156,17 @@ namespace Ifc4GeometryTests
 
         #region IfcAdvancedBrep geometries
 
+        [TestMethod]
+        public void AdvancedMultiSegmentPolylineTest()
+        {
+            using (var model = IfcStore.Open(@"Ifc4TestFiles\advanced-face-multisegment-polyline.ifc"))
+            {
+                var shape = model.Instances.OfType<IfcAdvancedBrep>().FirstOrDefault();
+                Assert.IsNotNull(shape);
+                var geom = _xbimGeometryCreator.CreateSolid(shape);
+                Assert.IsTrue(Math.Abs(geom.Volume -72765) < 1);
+            }
+        }
         
         [TestMethod]
         public void BrepSolidModelAdvancedTest()
