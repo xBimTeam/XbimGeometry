@@ -906,11 +906,34 @@ namespace Xbim
 
 		void XbimEdge::Init(IIfcPolyline^ pline)
 		{
-			XbimWire^ wire = gcnew XbimWire(pline);
-			IModelFactors^ mf = pline->Model->ModelFactors;
-			XbimEdge^ edge = gcnew XbimEdge(wire, mf->Precision, 0.05);
-			pEdge = new TopoDS_Edge();
-			*pEdge = edge;
+			if (Enumerable::Count(pline->Points) == 2)
+			{
+				IIfcCartesianPoint^ start= Enumerable::First(pline->Points);
+				IIfcCartesianPoint^ end = Enumerable::Last(pline->Points);						
+				BRepBuilderAPI_MakeEdge edgeMaker(XbimConvert::GetPoint3d(start), XbimConvert::GetPoint3d(end));
+				BRepBuilderAPI_EdgeError edgeErr = edgeMaker.Error();
+				if (edgeErr != BRepBuilderAPI_EdgeDone)
+				{
+					String^ errMsg = XbimEdge::GetBuildEdgeErrorMessage(edgeErr);
+					XbimGeometryCreator::LogWarning(pline, "Invalid edge found, {0}. It has been ignored", errMsg);
+				}
+				else
+				{
+					pEdge = new TopoDS_Edge();
+					*pEdge = edgeMaker.Edge();
+					// set the tolerance for this shape.
+					ShapeFix_ShapeTolerance FTol;
+					FTol.SetTolerance(*pEdge, pline->Model->ModelFactors->Precision, TopAbs_VERTEX);
+				}
+			}
+			else
+			{
+				XbimWire^ wire = gcnew XbimWire(pline);
+				IModelFactors^ mf = pline->Model->ModelFactors;
+				XbimEdge^ edge = gcnew XbimEdge(wire, mf->Precision, 0.05);
+				pEdge = new TopoDS_Edge();
+				*pEdge = edge;
+			}
 		}
 
 		void XbimEdge::Init(IIfcConic^ conic)
