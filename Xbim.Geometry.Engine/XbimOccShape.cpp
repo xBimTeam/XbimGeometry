@@ -198,6 +198,129 @@ namespace Xbim
 			GC::KeepAlive(this);
 		}
 
+		void XbimOccShape::WriteTriangulation(IXbimMeshReceiver^ meshReceiver, double tolerance, double deflection, double angle)
+		{
+			if (!IsValid) return;
+			TopTools_IndexedMapOfShape faceMap;
+			TopoDS_Shape shape = this; //hold on to it
+			TopExp::MapShapes(shape, TopAbs_FACE, faceMap);
+			int faceCount = faceMap.Extent();
+			if (faceCount == 0) return;		
+			array<bool>^ hasSeams = gcnew array<bool>(faceCount);
+			for (int f = 0; f < faceMap.Extent(); f++)
+			{
+				TopTools_IndexedMapOfShape edgeMap;
+				TopExp::MapShapes(faceMap(f+1), TopAbs_EDGE, edgeMap);
+				hasSeams[f] = false;
+				//deal with seams
+				for (Standard_Integer i = 1; i <= edgeMap.Extent(); i++)
+				{				
+					//find any seams					
+					hasSeams[f] = (BRep_Tool::IsClosed(edgeMap(i)) == Standard_True); //just check a seam once
+					if (hasSeams[f]) break; //this face has a seam no need to do more
+				}
+			}
+			
+			BRepMesh_IncrementalMesh incrementalMesh(this, deflection, Standard_False, angle); //triangulate the first time		
+
+			meshReceiver->BeginUpdate();
+			for (int f = 1; f <= faceMap.Extent(); f++)
+			{
+				const TopoDS_Face& face = TopoDS::Face(faceMap(f));
+				int faceId = meshReceiver->AddFace();
+				bool faceReversed = (face.Orientation() == TopAbs_REVERSED);
+
+				TopLoc_Location loc;
+				const Handle(Poly_Triangulation)& mesh = BRep_Tool::Triangulation(face, loc);
+				if (mesh.IsNull())
+					continue;
+				//check if we have a seam
+				bool hasSeam = hasSeams[f - 1];
+				gp_Trsf transform = loc.Transformation();
+				gp_Quaternion quaternion = transform.GetRotation();
+				const TColgp_Array1OfPnt & nodes = mesh->Nodes();				
+				Poly::ComputeNormals(mesh); //we need the normals					
+
+				if (hasSeam)
+				{
+
+					TColStd_Array1OfReal norms(1, mesh->Normals().Length());
+					for (Standard_Integer i = 1; i <= mesh->NbNodes() * 3; i += 3) //visit each node
+					{
+						gp_Dir dir(mesh->Normals().Value(i), mesh->Normals().Value(i + 1), mesh->Normals().Value(i + 2));
+						if (faceReversed) dir.Reverse();
+						dir = quaternion.Multiply(dir);
+						norms.SetValue(i, dir.X());
+						norms.SetValue(i + 1, dir.Y());
+						norms.SetValue(i + 2, dir.Z());
+					}
+					Dictionary<XbimPoint3DWithTolerance^, int>^ uniquePointsOnFace = gcnew Dictionary<XbimPoint3DWithTolerance^, int>(mesh->NbNodes());
+					for (Standard_Integer j = 1; j <= mesh->NbNodes(); j++) //visit each node for vertices
+					{
+						gp_Pnt p = nodes.Value(j);
+						XbimPoint3DWithTolerance^ pt = gcnew XbimPoint3DWithTolerance(p.X(), p.Y(), p.Z(), tolerance);
+						int nodeIndex;
+						if (uniquePointsOnFace->TryGetValue(pt, nodeIndex)) //we have a duplicate point on face need to smooth the normal
+						{
+							//balance the two normals
+							gp_Vec normalA(norms.Value(nodeIndex), norms.Value(nodeIndex) + 1, norms.Value(nodeIndex) + 2);
+							gp_Vec normalB(norms.Value(j), norms.Value(j) + 1, norms.Value(j) + 2);
+							gp_Vec normalBalanced = normalA + normalB;
+							normalBalanced.Normalize();
+							norms.SetValue(nodeIndex, normalBalanced.X());
+							norms.SetValue(nodeIndex + 1, normalBalanced.Y());
+							norms.SetValue(nodeIndex + 2, normalBalanced.Z());
+							norms.SetValue(j, normalBalanced.X());
+							norms.SetValue(j + 1, normalBalanced.Y());
+							norms.SetValue(j + 2, normalBalanced.Z());
+						}
+						else
+							uniquePointsOnFace->Add(pt, j);
+					}
+					//write the nodes
+					for (Standard_Integer j = 0; j < mesh->NbNodes(); j++) //visit each node for vertices
+					{
+						gp_Pnt p = nodes.Value(j + 1);
+						Standard_Real px = p.X();
+						Standard_Real py = p.Y();
+						Standard_Real pz = p.Z();
+						transform.Transforms(px, py, pz); //transform the point to the right location
+						gp_Dir dir(norms.Value((j * 3) + 1), norms.Value((j * 3) + 2), norms.Value((j * 3) + 3));
+						meshReceiver->AddNode(faceId, px, py, pz, dir.X(), dir.Y(), dir.Z()); //add the node to the face
+					}
+				}
+				else //write the nodes
+				{
+					for (Standard_Integer j = 0; j < mesh->NbNodes(); j++) //visit each node for vertices
+					{
+						gp_Pnt p = nodes.Value(j + 1);
+						Standard_Real px = p.X();
+						Standard_Real py = p.Y();
+						Standard_Real pz = p.Z();
+						transform.Transforms(px, py, pz); //transform the point to the right location
+						gp_Dir dir(mesh->Normals().Value((j * 3) + 1), mesh->Normals().Value((j * 3) + 2), mesh->Normals().Value((j * 3) + 3));
+						if (faceReversed) dir.Reverse();
+						dir = quaternion.Multiply(dir); //rotate the norm to the new location
+						meshReceiver->AddNode(faceId, px, py, pz, dir.X(), dir.Y(), dir.Z()); //add the node to the face
+					}
+				}
+
+				Standard_Integer t[3];
+				const Poly_Array1OfTriangle& triangles = mesh->Triangles();
+
+				List<int>^ elems = gcnew List<int>(mesh->NbTriangles() * 3);
+				for (Standard_Integer j = 1; j <= mesh->NbTriangles(); j++) //add each triangle as a face
+				{
+					if (faceReversed) //get nodes in the correct order of triangulation
+						triangles(j).Get(t[2], t[1], t[0]);
+					else
+						triangles(j).Get(t[0], t[1], t[2]);
+					meshReceiver->AddTriangle(faceId, t[0] - 1, t[1] - 1, t[2] - 1);
+				}
+			}
+			GC::KeepAlive(this);			
+		}
+
 
 		void XbimOccShape::WriteIndex(BinaryWriter^ bw, UInt32 index, UInt32 maxInt)
 		{

@@ -1,6 +1,7 @@
 // This is the main DLL file.
 
 #include "XbimGeometryCreator.h"
+
 #include "XbimFace.h"
 #include "XbimSolid.h"
 #include "XbimCompound.h"
@@ -70,7 +71,39 @@ namespace Xbim
 				logger->ErrorFormat("GeomEngine: {0} [{1}]", entity->GetType()->Name, msg);
 		}
 
-#pragma region Point Creation
+#pragma region  Creation
+
+		void XbimGeometryCreator::Mesh(IXbimMeshReceiver^ mesh, IXbimGeometryObject^ geometryObject, double precision, double deflection, double angle)
+		{
+			if (geometryObject->IsSet)
+			{
+				IEnumerable<IXbimGeometryObject^>^ set = dynamic_cast<IEnumerable<IXbimGeometryObject^>^>(geometryObject);
+				if (set != nullptr)
+				{
+					BRep_Builder builder;
+					TopoDS_Compound occCompound;
+					builder.MakeCompound(occCompound);
+					for each (IXbimGeometryObject^ geom in set)
+					{
+						XbimOccShape^ xShape = dynamic_cast<XbimOccShape^>(geom);
+						if (xShape != nullptr)
+						{
+							builder.Add(occCompound, xShape);
+						}
+					}
+					XbimCompound^ compound = gcnew XbimCompound(occCompound, false, precision);
+					compound->WriteTriangulation(mesh, precision, deflection, angle);
+				}
+			}
+			else
+			{
+				XbimOccShape^ xShape = dynamic_cast<XbimOccShape^>(geometryObject);
+				if (xShape != nullptr)
+				{
+					xShape->WriteTriangulation(mesh, precision, deflection, angle);
+				}
+			}
+		}
 
 
 		IXbimGeometryObject^ XbimGeometryCreator::Create(IIfcGeometricRepresentationItem^ geomRep)
@@ -757,6 +790,17 @@ namespace Xbim
 
 #pragma region Write Functions
 
+		void XbimGeometryCreator::WriteTriangulation(IXbimMeshReceiver^ mesh, IXbimGeometryObject^ shape, double tolerance, double deflection, double angle)
+		{
+
+			XbimOccShape^ xShape = dynamic_cast<XbimOccShape^>(shape);
+			if (xShape != nullptr)
+			{
+				xShape->WriteTriangulation(mesh, tolerance, deflection, angle);
+				return;
+			}
+
+		}
 		void XbimGeometryCreator::WriteTriangulation(TextWriter^ tw, IXbimGeometryObject^ shape, double tolerance, double deflection, double angle)
 		{
 

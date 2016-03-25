@@ -2,7 +2,6 @@
 #include "XbimVertex.h"
 #include "XbimVertex.h"
 #include "XbimEdge.h"
-
 using namespace System;
 using namespace System::IO;
 using namespace Xbim::Common;
@@ -47,6 +46,14 @@ namespace Xbim
 			};
 
 			virtual IXbimGeometryObject^ Create(IIfcGeometricRepresentationItem^ geomRep, IIfcAxis2Placement3D^ objectLocation);
+
+			virtual void Mesh(IXbimMeshReceiver^ mesh, IXbimGeometryObject^ geometry, double precision, double deflection, double angle);
+			virtual void Mesh(IXbimMeshReceiver^ mesh, IXbimGeometryObject^ geometry, double precision, double deflection/*, double angle = 0.5*/)
+			{
+				Mesh(mesh, geometry, precision, deflection, 0.5);
+			};			
+			
+			
 
 			virtual IXbimGeometryObject^ Create(IIfcGeometricRepresentationItem^ geomRep);
 			virtual IXbimGeometryObjectSet^ CreateGeometricSet(IIfcGeometricSet^ geomSet);
@@ -124,6 +131,7 @@ namespace Xbim
 			virtual IXbimGeometryObjectSet^ CreateSurfaceModel(IIfcShellBasedSurfaceModel^ ifcSurface);
 			virtual IXbimGeometryObjectSet^ CreateSurfaceModel(IIfcFaceBasedSurfaceModel^ ifcSurface);
 			//Read and write functions
+			virtual void WriteTriangulation(IXbimMeshReceiver^ mesh, IXbimGeometryObject^ shape, double tolerance, double deflection, double angle);
 			virtual void WriteTriangulation(TextWriter^ tw, IXbimGeometryObject^ shape, double tolerance, double deflection, double angle);
 			virtual void WriteTriangulation(BinaryWriter^ bw, IXbimGeometryObject^ shape, double tolerance, double deflection, double angle);		
 

@@ -338,6 +338,13 @@ namespace Xbim.Geometry.Engine.Interop
         {
             _engine.WriteTriangulation(bw, shape, tolerance, deflection, angle);
         }
+
+        public void Mesh(IXbimMeshReceiver receiver, IXbimGeometryObject geometryObject, double precision, double deflection,
+            double angle = 0.5)
+        {
+            _engine.Mesh(receiver, geometryObject, precision, deflection, angle);
+        }
+
         public void WriteTriangulation(BinaryWriter bw, IXbimGeometryObject shape, double tolerance, double deflection)
         {
             WriteTriangulation(bw, shape, tolerance, deflection: deflection, angle: 0.5);
