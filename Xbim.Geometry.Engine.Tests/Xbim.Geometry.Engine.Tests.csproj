@@ -57,6 +57,7 @@
     <Compile Include="Diff.cs" />
     <Compile Include="IfcExtrudedAreaSolidTests.cs" />
     <Compile Include="IfcModelBuilder.cs" />
+    <Compile Include="MeshHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="IfcRevolvedAreaSolidTests.cs" />
     <Compile Include="IfcSweptSolidTests.cs" />

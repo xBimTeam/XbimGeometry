@@ -308,7 +308,6 @@ namespace Xbim
 				Standard_Integer t[3];
 				const Poly_Array1OfTriangle& triangles = mesh->Triangles();
 
-				List<int>^ elems = gcnew List<int>(mesh->NbTriangles() * 3);
 				for (Standard_Integer j = 1; j <= mesh->NbTriangles(); j++) //add each triangle as a face
 				{
 					if (faceReversed) //get nodes in the correct order of triangulation
@@ -318,7 +317,8 @@ namespace Xbim
 					meshReceiver->AddTriangle(faceId, t[0] - 1, t[1] - 1, t[2] - 1);
 				}
 			}
-			GC::KeepAlive(this);			
+			GC::KeepAlive(this);
+			meshReceiver->EndUpdate();
 		}
 
 
