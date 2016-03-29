@@ -68,6 +68,7 @@
     <Compile Include="SurfaceSweepTests.cs" />
     <Compile Include="SceneTests.cs" />
     <Compile Include="Ifc4GeometryTests.cs" />
+    <Compile Include="ShapeInstanceEnumerationTests.cs" />
     <Compile Include="XbimAssemblyResolving.cs" />
     <Compile Include="WholeModelTests.cs" />
     <Compile Include="XbimFacetedMeshTests.cs" />
@@ -307,6 +308,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="SolidTestFiles\NestedBooleanClippingResults.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="SolidTestFiles\WallWithConvex.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="SolidTestFiles\WallWithOpening.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="test.runsettings" />
