@@ -193,3 +193,4 @@ FakesAssemblies/
 FILES
 SharedFileVersionInfo.cs
 Xbim.Geometry.Engine/SharedFileVersionInfo.cpp
+*.opendb

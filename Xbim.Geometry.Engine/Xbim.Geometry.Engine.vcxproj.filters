@@ -1008,12 +1008,6 @@
     <ClCompile Include="XbimFaceSet.cpp">
       <Filter>Source files\XbimGeometry</Filter>
     </ClCompile>
-    <ClCompile Include="XbimFacetedShell.cpp">
-      <Filter>Source files\XbimGeometry</Filter>
-    </ClCompile>
-    <ClCompile Include="XbimFacetedSolid.cpp">
-      <Filter>Source files\XbimGeometry</Filter>
-    </ClCompile>
     <ClCompile Include="XbimGeometryCreator.cpp">
       <Filter>Source files\XbimGeometry</Filter>
     </ClCompile>
@@ -1023,9 +1017,6 @@
     <ClCompile Include="XbimGeometryObjectSet.cpp">
       <Filter>Source files\XbimGeometry</Filter>
     </ClCompile>
-    <ClCompile Include="XbimLinearEdge.cpp">
-      <Filter>Source files\XbimGeometry</Filter>
-    </ClCompile>
     <ClCompile Include="XbimOccShape.cpp">
       <Filter>Source files\XbimGeometry</Filter>
     </ClCompile>
@@ -1033,9 +1024,6 @@
       <Filter>Source files\XbimGeometry</Filter>
     </ClCompile>
     <ClCompile Include="XbimPoint3DWithTolerance.cpp">
-      <Filter>Source files\XbimGeometry</Filter>
-    </ClCompile>
-    <ClCompile Include="XbimPolygonalFace.cpp">
       <Filter>Source files\XbimGeometry</Filter>
     </ClCompile>
     <ClCompile Include="XbimShell.cpp">
@@ -6816,12 +6804,6 @@
     <ClInclude Include="XbimFaceSet.h">
       <Filter>Source files\XbimGeometry</Filter>
     </ClInclude>
-    <ClInclude Include="XbimFacetedShell.h">
-      <Filter>Source files\XbimGeometry</Filter>
-    </ClInclude>
-    <ClInclude Include="XbimFacetedSolid.h">
-      <Filter>Source files\XbimGeometry</Filter>
-    </ClInclude>
     <ClInclude Include="XbimGeometryCreator.h">
       <Filter>Source files\XbimGeometry</Filter>
     </ClInclude>
@@ -6831,9 +6813,6 @@
     <ClInclude Include="XbimGeometryObjectSet.h">
       <Filter>Source files\XbimGeometry</Filter>
     </ClInclude>
-    <ClInclude Include="XbimLinearEdge.h">
-      <Filter>Source files\XbimGeometry</Filter>
-    </ClInclude>
     <ClInclude Include="XbimOccShape.h">
       <Filter>Source files\XbimGeometry</Filter>
     </ClInclude>
@@ -6841,9 +6820,6 @@
       <Filter>Source files\XbimGeometry</Filter>
     </ClInclude>
     <ClInclude Include="XbimPoint3DWithTolerance.h">
-      <Filter>Source files\XbimGeometry</Filter>
-    </ClInclude>
-    <ClInclude Include="XbimPolygonalFace.h">
       <Filter>Source files\XbimGeometry</Filter>
     </ClInclude>
     <ClInclude Include="XbimShell.h">

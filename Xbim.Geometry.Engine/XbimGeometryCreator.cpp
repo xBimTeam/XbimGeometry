@@ -5,7 +5,6 @@
 #include "XbimFace.h"
 #include "XbimSolid.h"
 #include "XbimCompound.h"
-#include "XbimFacetedSolid.h"
 #include "XbimSolidSet.h"
 #include "XbimGeometryObjectSet.h"
 #include "XbimCurve.h"
@@ -32,6 +31,7 @@
 #include <gp_Lin2d.hxx>
 #include <Geom2d_Line.hxx>
 #include <IntAna2d_AnaIntersection.hxx>
+
 using namespace  System::Threading;
 using namespace  System::Linq;
 
@@ -41,7 +41,7 @@ namespace Xbim
 	namespace Geometry
 	{
 
-		void XbimGeometryCreator::LogInfo(Object^ entity, String^ format, array<Object^>^ arg)
+		void XbimGeometryCreator::LogInfo(Object^ entity, String^ format, ...array<Object^>^ arg)
 		{
 			String^ msg = String::Format(format, arg);
 			IPersistEntity^ ifcEntity = dynamic_cast<IPersistEntity^>(entity);
@@ -51,7 +51,7 @@ namespace Xbim
 				logger->InfoFormat("GeomEngine: {0} [{1}]", entity->GetType()->Name, msg);
 		}
 
-		void XbimGeometryCreator::LogWarning(Object^ entity, String^ format, array<Object^>^ arg)
+		void XbimGeometryCreator::LogWarning(Object^ entity, String^ format, ...array<Object^>^ arg)
 		{
 			String^ msg = String::Format(format, arg);
 			IPersistEntity^ ifcEntity = dynamic_cast<IPersistEntity^>(entity);
@@ -61,7 +61,7 @@ namespace Xbim
 				logger->WarnFormat("GeomEngine: {0} [{1}]", entity->GetType()->Name, msg);
 		}
 
-		void XbimGeometryCreator::LogError(Object^ entity, String^ format, array<Object^>^ arg)
+		void XbimGeometryCreator::LogError(Object^ entity, String^ format, ...array<Object^>^ arg)
 		{
 			String^ msg = String::Format(format, arg);
 			IPersistEntity^ ifcEntity = dynamic_cast<IPersistEntity^>(entity);
@@ -1149,6 +1149,39 @@ namespace Xbim
 				solids->Add(gcnew XbimSolid(TopoDS::Solid(axisMaker.Shape())));
 			}
 			return solids;
+		}
+
+		Xbim::Common::Geometry::IXbimGeometryObject ^ XbimGeometryCreator::Transformed(Xbim::Common::Geometry::IXbimGeometryObject ^geometryObject, Xbim::Ifc4::Interfaces::IIfcCartesianTransformationOperator ^transformation)
+		{
+			XbimOccShape^ occShape = dynamic_cast<XbimOccShape^>(geometryObject);
+			if (occShape != nullptr)
+				return occShape->Transformed(transformation);
+			XbimSetObject^ occSet = dynamic_cast<XbimSetObject^>(geometryObject);
+			if (occSet != nullptr)
+				return occSet->Transformed(transformation);
+			return geometryObject;//do nothing
+		}
+
+		Xbim::Common::Geometry::IXbimGeometryObject ^ XbimGeometryCreator::Moved(IXbimGeometryObject ^geometryObject, IIfcPlacement ^placement)
+		{
+			XbimOccShape^ occShape = dynamic_cast<XbimOccShape^>(geometryObject);
+			if (occShape != nullptr)
+				return occShape->Moved(placement);
+			XbimSetObject^ occSet = dynamic_cast<XbimSetObject^>(geometryObject);
+			if (occSet != nullptr)
+				return occSet->Moved(placement);
+			return geometryObject;
+		}
+
+		Xbim::Common::Geometry::IXbimGeometryObject ^ XbimGeometryCreator::Moved(IXbimGeometryObject ^geometryObject, IIfcObjectPlacement ^objectPlacement)
+		{
+			XbimOccShape^ occShape = dynamic_cast<XbimOccShape^>(geometryObject);
+			if (occShape != nullptr)
+				return occShape->Moved(objectPlacement);
+			XbimSetObject^ occSet = dynamic_cast<XbimSetObject^>(geometryObject);
+			if (occSet != nullptr)
+				return occSet->Moved(objectPlacement);
+			return geometryObject;
 		}
 		
 	}

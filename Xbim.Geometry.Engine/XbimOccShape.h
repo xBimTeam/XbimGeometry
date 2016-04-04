@@ -6,7 +6,7 @@
 using namespace System::IO;
 using namespace System::Collections::Generic;
 using namespace Xbim::Common::Geometry;
-
+using namespace Xbim::Ifc4::Interfaces;
 #ifndef XBIMPROGRESSINDICATOR_H
 #define XBIMPROGRESSINDICATOR_H
 
@@ -53,6 +53,13 @@ namespace Xbim
 			void WriteTriangulation(BinaryWriter^ binaryWriter, double tolerance, double deflection, double angle);
 			void WriteTriangulation(IXbimMeshReceiver^ mesh, double tolerance, double deflection, double angle);
 			virtual property bool IsSet{bool get() override { return false; }; }
+			virtual XbimGeometryObject^ Transformed(IIfcCartesianTransformationOperator ^transformation) abstract;
+			virtual XbimGeometryObject^ Moved(IIfcPlacement ^placement) abstract;
+			virtual XbimGeometryObject^ Moved(IIfcObjectPlacement ^objectPlacement) abstract;
+
+			// Inherited via XbimGeometryObject
+
+			
 			
 		};
 	}

@@ -2,6 +2,7 @@
 #include "XbimConvert.h"
 #include <BRep_Builder.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
+#include <BRepBuilderAPI_GTransform.hxx>
 #include <TopoDS.hxx>
 using namespace System;
 namespace Xbim
@@ -94,15 +95,44 @@ namespace Xbim
 			return gcnew XbimVertex(vertex);
 		}
 
-#ifdef USE_CARVE_CSG
-		XbimVertex::XbimVertex(vertex_t* v, double precision)
+
+		XbimGeometryObject ^ XbimVertex::Transformed(IIfcCartesianTransformationOperator ^ transformation)
 		{
-			pVertex = new TopoDS_Vertex();
-			BRep_Builder b;
-			gp_Pnt pnt(v->v.x, v->v.y, v->v.z);
-			b.MakeVertex(*pVertex, pnt, precision);
+			IIfcCartesianTransformationOperator3DnonUniform^ nonUniform = dynamic_cast<IIfcCartesianTransformationOperator3DnonUniform^>(transformation);			
+			if (nonUniform != nullptr)
+			{
+				gp_GTrsf trans = XbimConvert::ToTransform(nonUniform);
+				BRepBuilderAPI_GTransform tr(this, trans, Standard_True); //make a copy of underlying shape
+				return gcnew XbimVertex(TopoDS::Vertex(tr.Shape()));
+			}
+			else
+			{
+				gp_Trsf trans = XbimConvert::ToTransform(transformation);
+				BRepBuilderAPI_Transform tr(this, trans, Standard_False); //do not make a copy of underlying shape
+				return gcnew XbimVertex(TopoDS::Vertex(tr.Shape()));
+			}
 		}
-#endif // USE_CARVE_CSG
+		void XbimVertex::Move(TopLoc_Location loc)
+		{
+			if (IsValid) pVertex->Move(loc);
+		}
+		XbimGeometryObject ^ XbimVertex::Moved(IIfcPlacement ^ placement)
+		{
+			if (!IsValid) return this;
+			XbimVertex^ copy = gcnew XbimVertex(this); //take a copy of the shape
+			TopLoc_Location loc = XbimConvert::ToLocation(placement);
+			copy->Move(loc);
+			return copy;
+		}
+
+		XbimGeometryObject ^ XbimVertex::Moved(IIfcObjectPlacement ^ objectPlacement)
+		{
+			if (!IsValid) return this;			
+			XbimVertex^ copy = gcnew XbimVertex(this); //take a copy of the shape
+			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
+			copy->Move(loc);
+			return copy;
+		}
 
 #pragma endregion
 

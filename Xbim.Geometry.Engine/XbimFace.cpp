@@ -4,6 +4,7 @@
 #include "XbimOccWriter.h"
 
 #include <BRepBuilderAPI_Transform.hxx>
+#include <BRepBuilderAPI_GTransform.hxx>
 #include <BRepTools_WireExplorer.hxx>
 #include <BRepBuilderAPI_MakeWire.hxx>
 #include <ShapeFix_ShapeTolerance.hxx>
@@ -1249,6 +1250,41 @@ namespace Xbim
 		{
 			if (IsValid)
 				pFace->Move(loc);
+		}
+
+		XbimGeometryObject ^ XbimFace::Transformed(IIfcCartesianTransformationOperator ^ transformation)
+		{
+			IIfcCartesianTransformationOperator3DnonUniform^ nonUniform = dynamic_cast<IIfcCartesianTransformationOperator3DnonUniform^>(transformation);
+			if (nonUniform != nullptr)
+			{
+				gp_GTrsf trans = XbimConvert::ToTransform(nonUniform);
+				BRepBuilderAPI_GTransform tr(this, trans, Standard_True); //make a copy of underlying shape
+				return gcnew XbimFace(TopoDS::Face(tr.Shape()));
+			}
+			else
+			{
+				gp_Trsf trans = XbimConvert::ToTransform(transformation);
+				BRepBuilderAPI_Transform tr(this, trans, Standard_False); //do not make a copy of underlying shape
+				return gcnew XbimFace(TopoDS::Face(tr.Shape()));
+			}
+		}
+
+		XbimGeometryObject ^ XbimFace::Moved(IIfcPlacement ^ placement)
+		{
+			if (!IsValid) return this;
+			XbimFace^ copy = gcnew XbimFace(this); //take a copy of the shape
+			TopLoc_Location loc = XbimConvert::ToLocation(placement);
+			copy->Move(loc);
+			return copy;
+		}
+
+		XbimGeometryObject ^ XbimFace::Moved(IIfcObjectPlacement ^ objectPlacement)
+		{
+			if (!IsValid) return this;
+			XbimFace^ copy = gcnew XbimFace(this); //take a copy of the shape
+			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
+			copy->Move(loc);
+			return copy;
 		}
 
 #pragma endregion

@@ -8,7 +8,7 @@ namespace Xbim
 {
 	namespace Geometry
 	{
-		ref class XbimVertexSet : IXbimVertexSet
+		ref class XbimVertexSet : XbimSetObject, IXbimVertexSet
 		{
 		private:			
 			List<IXbimVertex^>^ vertices;
@@ -64,6 +64,7 @@ namespace Xbim
 #pragma region IXbimVertexSet Interface definition
 			virtual property bool IsValid{bool get(){ return Count>0; }; }
 			virtual property bool IsSet{bool get() { return true; }; }
+			virtual void Add(IXbimVertex^ vertex) { vertices->Add(vertex); };
 			virtual property IXbimVertex^ First{IXbimVertex^ get(); }
 			virtual property int Count{int get(); }
 			virtual property XbimRect3D BoundingBox {XbimRect3D get(); }
@@ -73,6 +74,16 @@ namespace Xbim
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) ;
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D);
 #pragma endregion
+
+
+			// Inherited via XbimSetObject
+			virtual IXbimGeometryObject ^ Transformed(IIfcCartesianTransformationOperator ^ transformation) override;
+
+
+			// Inherited via XbimSetObject
+			virtual IXbimGeometryObject ^ Moved(IIfcPlacement ^ placement) override;
+
+			virtual IXbimGeometryObject ^ Moved(IIfcObjectPlacement ^ objectPlacement) override;
 
 		};
 

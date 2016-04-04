@@ -66,6 +66,7 @@ namespace Xbim
 			virtual property bool Is3D{ bool get(){ return true; }; }
 			virtual XbimVector3D TangentAt(double parameter);
 			IXbimCurve^ ToCurve3D();
+			virtual property XbimRect3D BoundingBox {XbimRect3D get() override; }
 		};
 	}
 }

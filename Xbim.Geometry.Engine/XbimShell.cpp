@@ -40,11 +40,13 @@
 #include <Geom_Line.hxx>
 #include <Geom_TrimmedCurve.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
+#include <BRepBuilderAPI_GTransform.hxx>
 #include <BRepPrimAPI_MakePrism.hxx>
 #include <ShapeFix_Shell.hxx>
 #include <BRepCheck_Analyzer.hxx>
 #include <BRepTools.hxx>
 #include <BRepBuilderAPI_Sewing.hxx>
+#include <GeomLib_IsPlanarSurface.hxx>
 using namespace System;
 using namespace Xbim::Common::Exceptions;
 namespace Xbim
@@ -204,24 +206,15 @@ namespace Xbim
 		bool XbimShell::IsPolyhedron::get()
 		{
 			if (!IsValid) return false;
-			for (TopExp_Explorer exp(*pShell, TopAbs_EDGE); exp.More(); exp.Next())
+			for (TopExp_Explorer exp(*pShell, TopAbs_FACE); exp.More(); exp.Next())
 			{
-				Standard_Real start, end;
-				Handle(Geom_Curve) c3d = BRep_Tool::Curve(TopoDS::Edge(exp.Current()),  start, end);
-				if (!c3d.IsNull())
-				{
-					Handle(Standard_Type) cType = c3d->DynamicType();
-					if (cType != STANDARD_TYPE(Geom_Line))
-					{
-						if (cType != STANDARD_TYPE(Geom_TrimmedCurve)) return false;
-						Handle(Geom_TrimmedCurve) tc = Handle(Geom_TrimmedCurve)::DownCast(c3d);
-						Handle(Standard_Type) tcType = tc->DynamicType();
-						if (tcType != STANDARD_TYPE(Geom_Line)) return false;
-					}
-				}
+				Handle(Geom_Surface) s = BRep_Tool::Surface(TopoDS::Face(exp.Current()));
+				GeomLib_IsPlanarSurface tester(s);
+				if (!tester.IsPlanar())
+					return false;
 			}
 			GC::KeepAlive(this);
-			//all edges are lines
+			//all faces are planar
 			return true;
 		}
 
@@ -393,6 +386,45 @@ namespace Xbim
 			const TopoDS_Shape& fixed = fixer.Shape();
 			if (fixed.ShapeType() == TopAbs_SHELL)
 				*pShell = TopoDS::Shell(fixed);			
+		}
+
+		XbimGeometryObject ^ XbimShell::Transformed(IIfcCartesianTransformationOperator ^ transformation)
+		{
+			IIfcCartesianTransformationOperator3DnonUniform^ nonUniform = dynamic_cast<IIfcCartesianTransformationOperator3DnonUniform^>(transformation);
+			if (nonUniform != nullptr)
+			{
+				gp_GTrsf trans = XbimConvert::ToTransform(nonUniform);
+				BRepBuilderAPI_GTransform tr(this, trans, Standard_True); //make a copy of underlying shape
+				return gcnew XbimShell(TopoDS::Shell(tr.Shape()));
+			}
+			else
+			{
+				gp_Trsf trans = XbimConvert::ToTransform(transformation);
+				BRepBuilderAPI_Transform tr(this, trans, Standard_False); //do not make a copy of underlying shape
+				return gcnew XbimShell(TopoDS::Shell(tr.Shape()));
+			}
+		}
+
+		void XbimShell::Move(TopLoc_Location loc)
+		{
+			if (IsValid) pShell->Move(loc);
+		}
+		XbimGeometryObject ^ XbimShell::Moved(IIfcPlacement ^ placement)
+		{
+			if (!IsValid) return this;
+			XbimShell^ copy = gcnew XbimShell(this); //take a copy of the shape
+			TopLoc_Location loc = XbimConvert::ToLocation(placement);
+			copy->Move(loc);
+			return copy;
+		}
+
+		XbimGeometryObject ^ XbimShell::Moved(IIfcObjectPlacement ^ objectPlacement)
+		{
+			if (!IsValid) return this;
+			XbimShell^ copy = gcnew XbimShell(this); //take a copy of the shape
+			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
+			copy->Move(loc);
+			return copy;
 		}
 
 		//makes the shell a solid, note does not check if the shell IsClosed, so can make solids that are not closed or manifold

@@ -7,7 +7,7 @@
 #include "XbimConvert.h"
 #include "XbimWire.h"
 #include <BRepBuilderAPI_Transform.hxx>
-
+#include <BRepBuilderAPI_GTransform.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
 #include <gp_Pnt.hxx>
@@ -808,6 +808,44 @@ namespace Xbim
 			return revEdge;
 		}
 
+		XbimGeometryObject ^ XbimEdge::Transformed(IIfcCartesianTransformationOperator ^ transformation)
+		{
+			IIfcCartesianTransformationOperator3DnonUniform^ nonUniform = dynamic_cast<IIfcCartesianTransformationOperator3DnonUniform^>(transformation);
+			if (nonUniform != nullptr)
+			{
+				gp_GTrsf trans = XbimConvert::ToTransform(nonUniform);
+				BRepBuilderAPI_GTransform tr(this, trans, Standard_True); //make a copy of underlying shape
+				return gcnew XbimEdge(TopoDS::Edge(tr.Shape()));
+			}
+			else
+			{
+				gp_Trsf trans = XbimConvert::ToTransform(transformation);
+				BRepBuilderAPI_Transform tr(this, trans, Standard_False); //do not make a copy of underlying shape
+				return gcnew XbimEdge(TopoDS::Edge(tr.Shape()));
+			}
+		}
+
+		XbimGeometryObject ^ XbimEdge::Moved(IIfcPlacement ^ placement)
+		{
+			if (!IsValid) return this;
+			XbimEdge^ copy = gcnew XbimEdge(this); //take a copy of the shape
+			TopLoc_Location loc = XbimConvert::ToLocation(placement);
+			copy->Move(loc);
+			return copy;
+		}
+
+		XbimGeometryObject ^ XbimEdge::Moved(IIfcObjectPlacement ^ objectPlacement)
+		{
+			if (!IsValid) return this;
+			XbimEdge^ copy = gcnew XbimEdge(this); //take a copy of the shape
+			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
+			copy->Move(loc);
+			return copy;
+		}
+		void XbimEdge::Move(TopLoc_Location loc)
+		{
+			if(IsValid) pEdge->Move(loc);
+		}
 #pragma endregion
 
 

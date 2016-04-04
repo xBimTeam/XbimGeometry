@@ -109,11 +109,19 @@ namespace Xbim
 			XbimCompound^ Intersection(XbimCompound^ solids, double tolerance);
 			virtual property XbimRect3D BoundingBox {XbimRect3D get()override ; }
 			virtual property double Volume{double get(); }
+			virtual property double SewingTolerance {double get() {return _sewingTolerance;}}
 			
-			
-			//moves the compound to the new position
+			//moves the compound to the new positio
 			void Move(IIfcAxis2Placement3D^ position);
-		};
+
+			// Inherited via XbimOccShape
+			virtual XbimGeometryObject ^ Transformed(IIfcCartesianTransformationOperator ^ transformation) override;
+
+			// Inherited via XbimOccShape
+			virtual void Move(TopLoc_Location loc);
+			virtual XbimGeometryObject ^ Moved(IIfcPlacement ^ placement) override;
+			virtual XbimGeometryObject ^ Moved(IIfcObjectPlacement ^ objectPlacement) override;
+};
 
 	}
 }

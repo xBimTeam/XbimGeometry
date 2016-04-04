@@ -13,6 +13,9 @@
 #include <GCE2d_MakeCircle.hxx>
 #include <GCE2d_MakeEllipse.hxx>
 #include <Geom2d_BSplineCurve.hxx>
+#include <BndLib_Add2dCurve.hxx>
+#include <Geom2dAdaptor_Curve.hxx>
+#include <Bnd_Box2d.hxx>
 using namespace System::Linq;
 namespace Xbim
 {
@@ -39,6 +42,17 @@ namespace Xbim
 			*pCurve2D = new Geom2d_TrimmedCurve(curve2d, p1, p2, true);
 		}
 
+		XbimRect3D XbimCurve2D::BoundingBox::get()
+		{
+			if (!IsValid) return XbimRect3D::Empty;
+			Standard_Real lp = (*pCurve2D)->LastParameter();
+			Standard_Real fp = (*pCurve2D)->FirstParameter();
+			Bnd_Box2d b1;
+			BndLib_Add2dCurve::Add(*pCurve2D, fp, lp, 0., b1);
+			Standard_Real srXmin, srYmin, srXmax, srYmax;
+			b1.Get(srXmin, srYmin, srXmax, srYmax);						
+			return XbimRect3D(srXmin, srYmin, 0., (srXmax - srXmin), (srYmax - srYmin), 0.);
+		}
 
 		XbimPoint3D XbimCurve2D::Start::get()
 		{

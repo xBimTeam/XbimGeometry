@@ -72,6 +72,18 @@ namespace Xbim
 			property double Tolerance{double get(){ return IsValid ? BRep_Tool::Tolerance(*pVertex) : 0; }}
 #pragma endregion
 
+
+			// Inherited via XbimOccShape
+			virtual XbimGeometryObject ^ Transformed(IIfcCartesianTransformationOperator ^ transformation) override;
+
+
+			// Inherited via XbimOccShape
+			virtual XbimGeometryObject ^ Moved(IIfcPlacement ^ placement) override;
+			virtual void Move(TopLoc_Location loc);
+
+			// Inherited via XbimOccShape
+			virtual XbimGeometryObject ^ Moved(IIfcObjectPlacement ^ objectPlacement) override;
+
 		};
 	}
 }

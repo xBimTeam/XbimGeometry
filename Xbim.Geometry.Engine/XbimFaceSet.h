@@ -9,7 +9,7 @@ namespace Xbim
 {
 	namespace Geometry
 	{
-		ref class XbimFaceSet : IXbimFaceSet
+		ref class XbimFaceSet : XbimSetObject, IXbimFaceSet
 		{
 		private:
 			List<IXbimFace^>^ faces;
@@ -68,6 +68,7 @@ namespace Xbim
 
 			virtual property bool IsValid{bool get(){ return true; }; }
 			virtual property bool IsSet{bool get()  { return true; }; }
+			virtual void Add(IXbimFace^ face) { faces->Add(face); };
 			virtual property IXbimFace^ First{IXbimFace^ get(); }
 			virtual property int Count{int get(); }
 			virtual property XbimRect3D BoundingBox {XbimRect3D get(); }
@@ -78,6 +79,16 @@ namespace Xbim
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D);
 #pragma endregion
 
+
+			// Inherited via XbimSetObject
+			virtual IXbimGeometryObject ^ Transformed(IIfcCartesianTransformationOperator ^ transformation) override;
+
+
+			// Inherited via XbimSetObject
+			virtual IXbimGeometryObject ^ Moved(IIfcPlacement ^ placement) override;
+
+			virtual IXbimGeometryObject ^ Moved(IIfcObjectPlacement ^ objectPlacement) override;
+			
 		};
 
 	}

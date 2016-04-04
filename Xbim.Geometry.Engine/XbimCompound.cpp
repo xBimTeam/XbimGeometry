@@ -27,6 +27,7 @@
 #include <BRepBndLib.hxx>
 #include <BRepTools.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
+#include <BRepBuilderAPI_GTransform.hxx>
 #include <BRepAlgoAPI_Check.hxx>
 #include <ShapeFix_Shape.hxx>
 #include <GProp_GProps.hxx>
@@ -185,11 +186,52 @@ namespace Xbim
 			
 		}
 
+		void XbimCompound::Move(TopLoc_Location loc)
+		{
+			if (IsValid) pCompound->Move(loc);
+		}
+
+
 		void XbimCompound::Move(IIfcAxis2Placement3D^ position)
 		{
 			if (!IsValid) return;
 			gp_Trsf toPos = XbimConvert::ToTransform(position);
 			pCompound->Move(toPos);
+		}
+
+		XbimGeometryObject ^ XbimCompound::Transformed(IIfcCartesianTransformationOperator ^ transformation)
+		{
+			IIfcCartesianTransformationOperator3DnonUniform^ nonUniform = dynamic_cast<IIfcCartesianTransformationOperator3DnonUniform^>(transformation);
+			if (nonUniform != nullptr)
+			{
+				gp_GTrsf trans = XbimConvert::ToTransform(nonUniform);
+				BRepBuilderAPI_GTransform tr(this, trans, Standard_True); //make a copy of underlying shape
+				return gcnew XbimCompound(TopoDS::Compound(tr.Shape()),_isSewn,_sewingTolerance);
+			}
+			else
+			{
+				gp_Trsf trans = XbimConvert::ToTransform(transformation);
+				BRepBuilderAPI_Transform tr(this, trans, Standard_False); //do not make a copy of underlying shape
+				return gcnew XbimCompound(TopoDS::Compound(tr.Shape()), _isSewn, _sewingTolerance);
+			}
+		}
+
+		XbimGeometryObject ^ XbimCompound::Moved(IIfcPlacement ^ placement)
+		{
+			if (!IsValid) return this;
+			XbimCompound^ copy = gcnew XbimCompound(this,_isSewn, _sewingTolerance); //take a copy of the shape
+			TopLoc_Location loc = XbimConvert::ToLocation(placement);
+			copy->Move(loc);
+			return copy;
+		}
+
+		XbimGeometryObject ^ XbimCompound::Moved(IIfcObjectPlacement ^ objectPlacement)
+		{
+			if (!IsValid) return this;
+			XbimCompound^ copy = gcnew XbimCompound(this, _isSewn, _sewingTolerance); //take a copy of the shape
+			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
+			copy->Move(loc);
+			return copy;
 		}
 
 		XbimCompound::XbimCompound(IIfcTriangulatedFaceSet^ faceSet)

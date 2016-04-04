@@ -5,13 +5,7 @@ namespace Xbim
 {
 	namespace Geometry
 	{
-		
-
-		XbimRect3D XbimGeometryObject::BoundingBox::get()
-		{
-			
-			return XbimRect3D::Empty;
-		}
+				
 
 		String^ XbimGeometryObject::ToBRep::get()
 		{

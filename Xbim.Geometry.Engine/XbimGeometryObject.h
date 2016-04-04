@@ -2,6 +2,7 @@
 using namespace System;
 using namespace Xbim::Common::Geometry;
 using namespace System::Collections::Generic;
+using namespace Xbim::Ifc4::Interfaces;
 namespace Xbim
 {
 	namespace Geometry
@@ -55,9 +56,21 @@ namespace Xbim
 			}
 		};
 
+		ref class XbimSetObject abstract
+		{
+		private:
+			Object^ tag;
+		public:
+			virtual IXbimGeometryObject^ Transformed(IIfcCartesianTransformationOperator ^transformation) abstract;
+			virtual IXbimGeometryObject^ Moved(IIfcPlacement ^placement) abstract;
+			virtual IXbimGeometryObject^ Moved(IIfcObjectPlacement ^objectPlacement) abstract;
+			virtual property Object^  Tag {Object^ get() { return tag; }; void set(Object^ value) { tag = value; }; }
+		};
 
 		ref class XbimGeometryObject abstract: IXbimGeometryObject 
 		{
+		private:
+			Object^ tag;
 		public:
 			XbimGeometryObject(){};
 #pragma region destructors
@@ -71,10 +84,11 @@ namespace Xbim
 			virtual property  XbimGeometryObjectType GeometryType{XbimGeometryObjectType  get() abstract;}
 			virtual bool Equals(IXbimGeometryObject^ geom, double tolerance){ throw gcnew NotImplementedException("Function not implemented"); }
 			virtual bool Intersects(IXbimGeometryObject^ geom, double tolerance){ throw gcnew NotImplementedException("Function not implemented"); }
-			virtual property XbimRect3D BoundingBox{XbimRect3D get(); }
+			virtual property XbimRect3D BoundingBox {XbimRect3D get() abstract; };
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) abstract;
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D) abstract;
 			virtual property String^  ToBRep{String^ get(); }
+			virtual property Object^  Tag {Object^ get() { return tag; }; void set(Object^ value) { tag = value; }; }
 		};
 	}
 }

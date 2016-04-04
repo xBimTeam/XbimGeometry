@@ -48,6 +48,9 @@ namespace Xbim
 			virtual bool Equals(IXbimPoint^ p);
 			virtual bool Equals(IXbimVertex^ v);
 #pragma endregion
+
+			// Inherited via IXbimPoint
+			virtual property Object^  Tag {Object^ get() { return nullptr; }; void set(Object^ value) { throw gcnew Exception("XbimPoint3DWithTolerance does not support Tag setting"); }; }
 		};
 	}
 }

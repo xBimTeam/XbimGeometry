@@ -8,7 +8,7 @@ namespace Xbim
 {
 	namespace Geometry
 	{
-		ref class XbimWireSet : IXbimWireSet
+		ref class XbimWireSet : XbimSetObject, IXbimWireSet
 		{
 		private:
 			List<IXbimWire^>^ wires;
@@ -62,6 +62,7 @@ namespace Xbim
 
 			virtual property bool IsValid{bool get(){ return Count>0; }; }
 			virtual property bool IsSet{bool get()  { return true; }; }
+			virtual void Add(IXbimWire^ wire) { wires->Add(wire); };
 			virtual property IXbimWire^ First{IXbimWire^ get(); }
 			virtual property int Count{int get(); }
 			virtual property XbimRect3D BoundingBox {XbimRect3D get() ; }
@@ -70,6 +71,11 @@ namespace Xbim
 			virtual System::Collections::IEnumerator^ GetEnumerator2() = System::Collections::IEnumerable::GetEnumerator{ return GetEnumerator(); }
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D);
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D);
+
+			// Inherited via XbimSetObject
+			virtual IXbimGeometryObject ^ Transformed(IIfcCartesianTransformationOperator ^ transformation) override;
+			virtual IXbimGeometryObject ^ Moved(IIfcPlacement ^ placement) override;
+			virtual IXbimGeometryObject ^ Moved(IIfcObjectPlacement ^ objectPlacement) override;
 		};
 
 	}

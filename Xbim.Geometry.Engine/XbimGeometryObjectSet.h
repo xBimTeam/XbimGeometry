@@ -16,7 +16,7 @@ namespace Xbim
 	{
 
 
-		ref class XbimGeometryObjectSet : IXbimGeometryObjectSet
+		ref class XbimGeometryObjectSet : XbimSetObject, IXbimGeometryObjectSet
 		{
 
 		private:
@@ -73,6 +73,11 @@ namespace Xbim
 			virtual bool Sew();
 #pragma endregion
 			virtual void Add(IXbimGeometryObject^ geomObj){ geometryObjects->Add(geomObj); }
+
+			// Inherited via XbimSetObject
+			virtual IXbimGeometryObject ^ Transformed(IIfcCartesianTransformationOperator ^ transformation) override;
+			virtual IXbimGeometryObject ^ Moved(IIfcPlacement ^ placement) override;
+			virtual IXbimGeometryObject ^ Moved(IIfcObjectPlacement ^ objectPlacement) override;
 		};
 	}
 }

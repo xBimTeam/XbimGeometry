@@ -17,6 +17,8 @@
 #include <Geom_OffsetCurve.hxx>
 #include <ShapeConstruct_ProjectCurveOnSurface.hxx>
 #include <ShapeFix_Edge.hxx>
+#include <BndLib_Add3dCurve.hxx>
+#include <Bnd_Box.hxx>
 using namespace System;
 using namespace System::Linq;
 namespace Xbim
@@ -38,7 +40,18 @@ namespace Xbim
 			*pCurve = curve;
 		}
 
-		
+		XbimRect3D XbimCurve::BoundingBox::get()
+		{
+			if (!IsValid) return XbimRect3D::Empty;
+			Bnd_Box b1;
+			GeomAdaptor_Curve myAdpSection;
+			myAdpSection.Load(*pCurve);
+			BndLib_Add3dCurve::Add(myAdpSection, 0., b1);
+			Standard_Real srXmin, srYmin, srZmin, srXmax, srYmax, srZmax;
+			b1.Get(srXmin, srYmin, srZmin, srXmax, srYmax, srZmax);
+			GC::KeepAlive(this);
+			return XbimRect3D(srXmin, srYmin, srZmin, (srXmax - srXmin), (srYmax - srYmin), (srZmax - srZmin));
+		}
 
 		XbimPoint3D XbimCurve::Start::get()
 		{

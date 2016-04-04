@@ -1,5 +1,8 @@
 #include "XbimOccShape.h"
 #include "XbimFaceSet.h"
+#include "XbimShell.h"
+#include "XbimSolid.h"
+#include "XbimCompound.h"
 #include "XbimPoint3DWithTolerance.h"
 #include "XbimConvert.h"
 #include <BRepCheck_Analyzer.hxx>
@@ -18,6 +21,8 @@
 #include <Geom_TrimmedCurve.hxx>
 #include <Geom_Line.hxx>
 #include <BRepTools_WireExplorer.hxx>
+#include <BRepBuilderAPI_GTransform.hxx>
+#include <BRepBuilderAPI_Transform.hxx>
 using namespace System::Threading;
 using namespace System::Collections::Generic;
 using namespace Xbim::Tessellator;
@@ -320,6 +325,10 @@ namespace Xbim
 			GC::KeepAlive(this);
 			meshReceiver->EndUpdate();
 		}
+
+
+
+	
 
 
 		void XbimOccShape::WriteIndex(BinaryWriter^ bw, UInt32 index, UInt32 maxInt)

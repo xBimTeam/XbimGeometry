@@ -349,6 +349,9 @@ namespace Xbim.Geometry.Engine.Interop
         {
             WriteTriangulation(bw, shape, tolerance, deflection: deflection, angle: 0.5);
         }
+
+       
+
         public ILogger Logger
         {
             get { return _engine.Logger; }
@@ -427,6 +430,27 @@ namespace Xbim.Geometry.Engine.Interop
         public XbimMatrix3D ToMatrix3D(IIfcObjectPlacement objPlacement)
         {
             return _engine.ToMatrix3D(objPlacement);
+        }
+
+        /// <summary>
+        /// Transforms an object geomtrically and returns a new object
+        /// </summary>
+        /// <param name="geometry"></param>
+        /// <param name="cartesianTransform"></param>
+        /// <returns></returns>
+        public IXbimGeometryObject Transformed(IXbimGeometryObject geometry, IIfcCartesianTransformationOperator cartesianTransform)
+        {
+           return _engine.Transformed(geometry, cartesianTransform);
+        }
+
+        public IXbimGeometryObject Moved(IXbimGeometryObject geometryObject, IIfcPlacement placement)
+        {
+            return _engine.Moved(geometryObject, placement);
+        }
+
+        public IXbimGeometryObject Moved(IXbimGeometryObject geometryObject, IIfcObjectPlacement objectPlacement)
+        {
+            return _engine.Moved(geometryObject, objectPlacement);
         }
     }
 }

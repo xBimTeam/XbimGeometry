@@ -21,7 +21,7 @@ namespace Xbim
 		};
 
 
-		ref class XbimSolidSet : IXbimSolidSet
+		ref class XbimSolidSet :XbimSetObject, IXbimSolidSet
 		{
 		private:
 			List<IXbimSolid^>^ solids;
@@ -95,6 +95,17 @@ namespace Xbim
 			//moves the solid set to the new position
 			void Move(IIfcAxis2Placement3D^ position);
 			
+
+			// Inherited via XbimSetObject
+			virtual IXbimGeometryObject ^ Transformed(IIfcCartesianTransformationOperator ^ transformation) override;
+
+
+			// Inherited via XbimSetObject
+			
+			virtual IXbimGeometryObject ^ Moved(IIfcPlacement ^ placement) override;
+
+			virtual IXbimGeometryObject ^ Moved(IIfcObjectPlacement ^ objectPlacement) override;
+
 		};
 
 	}

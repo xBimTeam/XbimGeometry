@@ -101,6 +101,14 @@ namespace Xbim
 #pragma endregion
 			void Reverse();
 			XbimEdge^ Reversed();
+
+			// Inherited via XbimOccShape
+			virtual XbimGeometryObject ^ Transformed(IIfcCartesianTransformationOperator ^ transformation) override;
+
+			// Inherited via XbimOccShape
+			virtual XbimGeometryObject ^ Moved(IIfcPlacement ^ placement) override;
+			virtual XbimGeometryObject ^ Moved(IIfcObjectPlacement ^ objectPlacement) override;
+			virtual void Move(TopLoc_Location loc);
 		};
 	}
 

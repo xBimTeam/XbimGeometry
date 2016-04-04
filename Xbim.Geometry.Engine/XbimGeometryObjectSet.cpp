@@ -62,6 +62,54 @@ namespace Xbim
 			return sewn;
 		}
 
+		IXbimGeometryObject ^ XbimGeometryObjectSet::Transformed(IIfcCartesianTransformationOperator ^ transformation)
+		{
+			if (!IsValid) return this;
+			XbimGeometryObjectSet^ result = gcnew XbimGeometryObjectSet();
+			for each (IXbimGeometryObject^ geometryObject in geometryObjects)
+			{
+				XbimOccShape^ occShape = dynamic_cast<XbimOccShape^>(geometryObject);
+				XbimSetObject^ occSet = dynamic_cast<XbimSetObject^>(geometryObject);
+				if (occShape != nullptr)
+					result->Add(occShape->Transformed(transformation));		
+				else if (occSet != nullptr)
+					result->Add(occSet->Transformed(transformation));			
+			}
+			return result;
+		}
+
+		IXbimGeometryObject ^ XbimGeometryObjectSet::Moved(IIfcPlacement ^ placement)
+		{
+			if (!IsValid) return this;
+			XbimGeometryObjectSet^ result = gcnew XbimGeometryObjectSet();			
+			for each (IXbimGeometryObject^ geometryObject in geometryObjects)
+			{
+				XbimOccShape^ occShape = dynamic_cast<XbimOccShape^>(geometryObject);
+				XbimSetObject^ occSet = dynamic_cast<XbimSetObject^>(geometryObject);
+				if (occShape != nullptr)
+					result->Add(occShape->Moved(placement));
+				else if (occSet != nullptr)
+					result->Add(occSet->Moved(placement));
+			}
+			return result;
+		}
+
+		IXbimGeometryObject ^ XbimGeometryObjectSet::Moved(IIfcObjectPlacement ^ objectPlacement)
+		{
+			if (!IsValid) return this;
+			XbimGeometryObjectSet^ result = gcnew XbimGeometryObjectSet();
+			for each (IXbimGeometryObject^ geometryObject in geometryObjects)
+			{
+				XbimOccShape^ occShape = dynamic_cast<XbimOccShape^>(geometryObject);
+				XbimSetObject^ occSet = dynamic_cast<XbimSetObject^>(geometryObject);
+				if (occShape != nullptr)
+					result->Add(occShape->Moved(objectPlacement));
+				else if (occSet != nullptr)
+					result->Add(occSet->Moved(objectPlacement));
+			}
+			return result;
+		}
+
 		IXbimGeometryObject^ XbimGeometryObjectSet::Transform(XbimMatrix3D matrix3D)
 		{
 			List<IXbimGeometryObject^>^ result = gcnew List<IXbimGeometryObject^>(geometryObjects->Count);

@@ -164,6 +164,11 @@ namespace Xbim
 			virtual IXbimCurve^ CreateCurve(IIfcOffsetCurve2D^ curve);
 			virtual XbimMatrix3D ToMatrix3D(IIfcObjectPlacement ^ objPlacement);
 			virtual IXbimSolidSet^ CreateGrid(IIfcGrid^ grid);
-		};
+
+			// Inherited via IXbimGeometryEngine
+			virtual Xbim::Common::Geometry::IXbimGeometryObject ^ Transformed(Xbim::Common::Geometry::IXbimGeometryObject ^geometryObject, Xbim::Ifc4::Interfaces::IIfcCartesianTransformationOperator ^transformation);
+			virtual Xbim::Common::Geometry::IXbimGeometryObject ^ Moved(Xbim::Common::Geometry::IXbimGeometryObject ^geometryObject, Xbim::Ifc4::Interfaces::IIfcPlacement ^placement);
+			virtual Xbim::Common::Geometry::IXbimGeometryObject ^ Moved(Xbim::Common::Geometry::IXbimGeometryObject ^geometryObject, Xbim::Ifc4::Interfaces::IIfcObjectPlacement ^objectPlacement);
+};
 	}
 }

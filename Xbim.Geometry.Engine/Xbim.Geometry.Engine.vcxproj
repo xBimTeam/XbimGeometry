@@ -213,19 +213,19 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="Xbim.Common">
-      <HintPath>..\packages\Xbim.Essentials.4.0.0-V161\lib\net40\Xbim.Common.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.4.0.0-V165\lib\net40\Xbim.Common.dll</HintPath>
       <Private>false</Private>
       <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
       <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
     </Reference>
     <Reference Include="Xbim.Ifc4">
-      <HintPath>..\packages\Xbim.Essentials.4.0.0-V161\lib\net40\Xbim.Ifc4.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.4.0.0-V165\lib\net40\Xbim.Ifc4.dll</HintPath>
       <Private>false</Private>
       <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
       <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
     </Reference>
     <Reference Include="Xbim.Tessellator">
-      <HintPath>..\packages\Xbim.Essentials.4.0.0-V161\lib\net40\Xbim.Tessellator.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.4.0.0-V165\lib\net40\Xbim.Tessellator.dll</HintPath>
       <Private>false</Private>
       <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
       <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
@@ -3259,17 +3259,13 @@
     <ClInclude Include="XbimEdgeSet.h" />
     <ClInclude Include="XbimFace.h" />
     <ClInclude Include="XbimFaceSet.h" />
-    <ClInclude Include="XbimFacetedShell.h" />
-    <ClInclude Include="XbimFacetedSolid.h" />
     <ClInclude Include="XbimGeometryCreator.h" />
     <ClInclude Include="XbimGeometryObject.h" />
     <ClInclude Include="XbimGeometryObjectSet.h" />
     <ClInclude Include="XbimConvert.h" />
-    <ClInclude Include="XbimLinearEdge.h" />
     <ClInclude Include="XbimOccShape.h" />
     <ClInclude Include="XbimOccWriter.h" />
     <ClInclude Include="XbimPoint3DWithTolerance.h" />
-    <ClInclude Include="XbimPolygonalFace.h" />
     <ClInclude Include="XbimShell.h" />
     <ClInclude Include="XbimShellSet.h" />
     <ClInclude Include="XbimSolid.h" />
@@ -4680,12 +4676,6 @@
     <ClCompile Include="XbimFaceSet.cpp">
       <CompileAsManaged>true</CompileAsManaged>
     </ClCompile>
-    <ClCompile Include="XbimFacetedShell.cpp">
-      <CompileAsManaged>true</CompileAsManaged>
-    </ClCompile>
-    <ClCompile Include="XbimFacetedSolid.cpp">
-      <CompileAsManaged>true</CompileAsManaged>
-    </ClCompile>
     <ClCompile Include="XbimGeometryCreator.cpp">
       <CompileAsManaged>true</CompileAsManaged>
     </ClCompile>
@@ -4698,9 +4688,6 @@
     <ClCompile Include="XbimConvert.cpp">
       <CompileAsManaged>true</CompileAsManaged>
     </ClCompile>
-    <ClCompile Include="XbimLinearEdge.cpp">
-      <CompileAsManaged>true</CompileAsManaged>
-    </ClCompile>
     <ClCompile Include="XbimOccShape.cpp">
       <CompileAsManaged>true</CompileAsManaged>
     </ClCompile>
@@ -4708,9 +4695,6 @@
       <CompileAsManaged>true</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="XbimPoint3DWithTolerance.cpp">
-      <CompileAsManaged>true</CompileAsManaged>
-    </ClCompile>
-    <ClCompile Include="XbimPolygonalFace.cpp">
       <CompileAsManaged>true</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="XbimShell.cpp">

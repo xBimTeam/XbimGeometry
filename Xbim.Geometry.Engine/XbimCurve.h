@@ -67,7 +67,7 @@ namespace Xbim
 			virtual property bool Is3D{ bool get(){ return true; }; }
 			virtual property double FirstParameter{double get(){ return IsValid ? (*pCurve)->FirstParameter() : 0; }; }
 			virtual property double LastParameter{double get(){ return IsValid ? (*pCurve)->LastParameter() : 0; }; }
-		
+			virtual property XbimRect3D BoundingBox {XbimRect3D get() override; }
 		};
 	}
 }

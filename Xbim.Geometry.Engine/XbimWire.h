@@ -177,6 +177,16 @@ namespace Xbim
 			//Fillets all points with the specified radius
 			bool FilletAll(double radius);
 		
-		};
+
+			// Inherited via XbimOccShape
+			virtual XbimGeometryObject ^ Transformed(IIfcCartesianTransformationOperator ^ transformation) override;
+
+
+			// Inherited via XbimOccShape
+			virtual XbimGeometryObject ^ Moved(IIfcPlacement ^ placement) override;
+
+			virtual XbimGeometryObject ^ Moved(IIfcObjectPlacement ^ objectPlacement) override;
+			virtual void Move(TopLoc_Location loc);
+};
 	}
 }

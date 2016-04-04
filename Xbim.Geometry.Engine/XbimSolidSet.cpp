@@ -1,5 +1,5 @@
 #include "XbimSolidSet.h"
-#include "XbimFacetedSolid.h"
+
 #include "XbimCompound.h"
 #include "XbimGeometryCreator.h"
 #include <TopTools_IndexedMapOfShape.hxx>
@@ -241,6 +241,7 @@ namespace Xbim
 			return gcnew XbimSolidSet(result);
 		}
 
+
 		void XbimSolidSet::Move(IIfcAxis2Placement3D^ position)
 		{
 			if (!IsValid) return;			
@@ -248,6 +249,43 @@ namespace Xbim
 			{
 				((XbimSolid^)solid)->Move(position);
 			}
+		}
+
+		IXbimGeometryObject ^ XbimSolidSet::Transformed(IIfcCartesianTransformationOperator ^ transformation)
+		{
+			if (!IsValid) return this;
+			XbimSolidSet^ result = gcnew XbimSolidSet();
+			for each (XbimSolid^ solid in solids)
+				result->Add(solid->Transformed(transformation));
+			return result;
+		}
+
+		IXbimGeometryObject ^ XbimSolidSet::Moved(IIfcPlacement ^ placement)
+		{
+			if (!IsValid) return this;
+			XbimSolidSet^ result = gcnew XbimSolidSet();
+			TopLoc_Location loc = XbimConvert::ToLocation(placement);
+			for each (IXbimSolid^ solid in solids)
+			{
+				XbimSolid^ copy = gcnew XbimSolid((XbimSolid^)solid);
+				copy->Move(loc);
+				result->Add(copy);
+			}
+			return result;
+		}
+
+		IXbimGeometryObject ^ XbimSolidSet::Moved(IIfcObjectPlacement ^ objectPlacement)
+		{
+			if (!IsValid) return this;
+			XbimSolidSet^ result = gcnew XbimSolidSet();
+			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
+			for each (IXbimSolid^ solid in solids)
+			{
+				XbimSolid^ copy = gcnew XbimSolid((XbimSolid^)solid);
+				copy->Move(loc);
+				result->Add(copy);
+			}
+			return result;
 		}
 
 

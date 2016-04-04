@@ -72,6 +72,18 @@ namespace Ifc4GeometryTests
             return model;
         }
 
+        public static IfcLocalPlacement MakeLocalPlacement(IfcStore model)
+        {
+            var objectPlacement = model.Instances.New<IfcLocalPlacement>();
+            var relPlacementTo = model.Instances.New<IfcLocalPlacement>();
+            var origin = MakeAxis2Placement3D(model);
+            relPlacementTo.RelativePlacement = origin;
+            objectPlacement.PlacementRelTo = relPlacementTo;
+            var displacement = MakeAxis2Placement3D(model);
+            objectPlacement.RelativePlacement = displacement;
+            return objectPlacement;
+        }
+
         public static IfcExtrudedAreaSolid MakeExtrudedAreaSolid(IfcStore m, IfcProfileDef profile, double extrude)
         {
             var extrusion = m.Instances.New<IfcExtrudedAreaSolid>();
@@ -128,6 +140,30 @@ namespace Ifc4GeometryTests
             iProfile.FlangeThickness = flangeThickness;
             iProfile.FilletRadius = filletRadius;
             return iProfile;
+        }
+
+        public static IfcCartesianTransformationOperator3D MakeCartesianTransformationOperator3D(IfcStore m)
+        {
+            var trans = m.Instances.New<IfcCartesianTransformationOperator3D>();
+            trans.Axis3 = m.Instances.New<IfcDirection>(d => d.SetXYZ(0, 0, 1));
+            trans.Axis2 = m.Instances.New<IfcDirection>(d => d.SetXYZ(0, 1, 0));
+            trans.Axis1 = m.Instances.New<IfcDirection>(d => d.SetXYZ(1, 0, 0));
+            trans.Scale = 1;
+            trans.LocalOrigin = m.Instances.New<IfcCartesianPoint>(p => p.SetXYZ(0, 0, 0));
+            return trans;
+        }
+
+        public static IfcCartesianTransformationOperator3DnonUniform MakeCartesianTransformationOperator3DnonUniform(IfcStore m)
+        {
+            var trans = m.Instances.New<IfcCartesianTransformationOperator3DnonUniform>();
+            trans.Axis3 = m.Instances.New<IfcDirection>(d => d.SetXYZ(0, 0, 1));
+            trans.Axis2 = m.Instances.New<IfcDirection>(d => d.SetXYZ(0, 1, 0));
+            trans.Axis1 = m.Instances.New<IfcDirection>(d => d.SetXYZ(1, 0, 0));
+            trans.Scale = 1;
+            trans.Scale = 1;
+            trans.Scale = 1;
+            trans.LocalOrigin = m.Instances.New<IfcCartesianPoint>(p => p.SetXYZ(0, 0, 0));
+            return trans;
         }
 
         public static IfcBlock MakeBlock(IfcStore m, double x, double y, double z)
@@ -396,5 +432,35 @@ namespace Ifc4GeometryTests
  
             return c;
         }
+
+        public static IfcGridAxis MakeGridAxis(IfcStore m, string tag, XbimPoint3D start, XbimVector3D dir, double len)
+        {
+            var gridAxis = m.Instances.New<IfcGridAxis>();
+            gridAxis.AxisCurve = MakeLine(m, start, dir,len);
+            gridAxis.AxisTag = tag;
+            return gridAxis;
+        }
+
+
+        public static IfcGrid MakeGrid(IfcStore m)
+        {
+            var grid = m.Instances.New<IfcGrid>();
+            var u1 = MakeGridAxis(m, "A", new XbimPoint3D(0, 0, 0), new XbimVector3D(0, 1, 0), 1000);
+            var u2 = MakeGridAxis(m, "B", new XbimPoint3D(100, 0, 0), new XbimVector3D(0, 1, 0), 1000);
+            var u3 = MakeGridAxis(m, "C", new XbimPoint3D(200, 0, 0), new XbimVector3D(0, 1, 0), 1000);
+
+            var v1 = MakeGridAxis(m, "1", new XbimPoint3D(0, 0, 0), new XbimVector3D(1, 0, 0), 1000);
+            var v2 = MakeGridAxis(m, "2", new XbimPoint3D(0, 100, 0), new XbimVector3D(1, 0, 0), 1000);
+            var v3 = MakeGridAxis(m, "3", new XbimPoint3D(0, 200, 0), new XbimVector3D(1, 0, 0), 1000);
+
+            grid.UAxes.Add(u1);
+            grid.UAxes.Add(u2);
+            grid.UAxes.Add(u3);
+            grid.VAxes.Add(v1);
+            grid.VAxes.Add(v2);
+            grid.VAxes.Add(v3);
+            return grid;
+        }
+
     }
 }
