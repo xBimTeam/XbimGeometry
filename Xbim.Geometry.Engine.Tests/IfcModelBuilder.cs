@@ -442,23 +442,17 @@ namespace Ifc4GeometryTests
         }
 
 
-        public static IfcGrid MakeGrid(IfcStore m)
+        public static IfcGrid MakeGrid(IfcStore m, int axisCount, double cellSize)
         {
             var grid = m.Instances.New<IfcGrid>();
-            var u1 = MakeGridAxis(m, "A", new XbimPoint3D(0, 0, 0), new XbimVector3D(0, 1, 0), 1000);
-            var u2 = MakeGridAxis(m, "B", new XbimPoint3D(100, 0, 0), new XbimVector3D(0, 1, 0), 1000);
-            var u3 = MakeGridAxis(m, "C", new XbimPoint3D(200, 0, 0), new XbimVector3D(0, 1, 0), 1000);
 
-            var v1 = MakeGridAxis(m, "1", new XbimPoint3D(0, 0, 0), new XbimVector3D(1, 0, 0), 1000);
-            var v2 = MakeGridAxis(m, "2", new XbimPoint3D(0, 100, 0), new XbimVector3D(1, 0, 0), 1000);
-            var v3 = MakeGridAxis(m, "3", new XbimPoint3D(0, 200, 0), new XbimVector3D(1, 0, 0), 1000);
-
-            grid.UAxes.Add(u1);
-            grid.UAxes.Add(u2);
-            grid.UAxes.Add(u3);
-            grid.VAxes.Add(v1);
-            grid.VAxes.Add(v2);
-            grid.VAxes.Add(v3);
+            for (int i = 0; i < axisCount; i++)
+            {
+                var u1 = MakeGridAxis(m, "A"+i, new XbimPoint3D(i*cellSize, 0, 0), new XbimVector3D(0, 1, 0), axisCount*cellSize);
+                var v1 = MakeGridAxis(m, "a"+i, new XbimPoint3D(0, i * cellSize, 0), new XbimVector3D(1, 0, 0), axisCount * cellSize);
+                grid.UAxes.Add(u1);
+                grid.VAxes.Add(v1);
+            }
             return grid;
         }
 

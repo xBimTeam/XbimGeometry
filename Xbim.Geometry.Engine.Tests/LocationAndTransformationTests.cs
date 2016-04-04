@@ -158,12 +158,11 @@ namespace GeometryTests
                 {
                     var block = IfcModelBuilder.MakeBlock(m, 10, 10, 10);
                     var solid = _geomEngine.CreateSolid(block);
-                    var grid = IfcModelBuilder.MakeGrid(m);
+                    var grid = IfcModelBuilder.MakeGrid(m,3,100);
                     var gridPlacement = m.Instances.New <IfcGridPlacement>();
                     gridPlacement.PlacementLocation = m.Instances.New<IfcVirtualGridIntersection>();
                     gridPlacement.PlacementLocation.IntersectingAxes.Add(grid.UAxes.Last());
                     gridPlacement.PlacementLocation.IntersectingAxes.Add(grid.VAxes.Last());
-                    var bb = solid.BoundingBox;
                     var solidA = _geomEngine.Moved(solid, gridPlacement) as IXbimSolid;
                     Assert.IsNotNull(solidA, "Should be the same type as the master");
                     var displacement = solidA.BoundingBox.Centroid() - solid.BoundingBox.Centroid();
