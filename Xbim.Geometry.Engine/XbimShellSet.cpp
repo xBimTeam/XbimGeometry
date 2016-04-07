@@ -142,7 +142,7 @@ namespace Xbim
 			TopLoc_Location loc = XbimConvert::ToLocation(placement);
 			for each (IXbimShell^ shell in shells)
 			{
-				XbimShell^ copy = gcnew XbimShell((XbimShell^)shell);
+				XbimShell^ copy = gcnew XbimShell((XbimShell^)shell, Tag);
 				copy->Move(loc);
 				result->Add(copy);
 			}
@@ -156,7 +156,7 @@ namespace Xbim
 			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
 			for each (IXbimShell^ shell in shells)
 			{
-				XbimShell^ copy = gcnew XbimShell((XbimShell^)shell);
+				XbimShell^ copy = gcnew XbimShell((XbimShell^)shell, Tag);
 				copy->Move(loc);
 				result->Add(copy);
 			}

@@ -104,6 +104,7 @@ namespace Xbim
 #pragma region constructors
 			XbimSolid(){};
 			XbimSolid(const TopoDS_Solid& solid);
+			XbimSolid(const TopoDS_Solid& solid, Object^ tag);
 			XbimSolid(IIfcSolidModel^ solid);
 			XbimSolid(IIfcManifoldSolidBrep^ solid);
 			XbimSolid(IIfcSweptAreaSolid^ solid);

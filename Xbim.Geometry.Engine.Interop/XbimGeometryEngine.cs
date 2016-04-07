@@ -443,6 +443,15 @@ namespace Xbim.Geometry.Engine.Interop
            return _engine.Transformed(geometry, cartesianTransform);
         }
 
+
+        public IXbimGeometryObject Moved(IXbimGeometryObject geometryObject, IIfcAxis2Placement3D placement)
+        { 
+            return _engine.Moved(geometryObject, placement);
+        }
+        public IXbimGeometryObject Moved(IXbimGeometryObject geometryObject, IIfcAxis2Placement2D placement)
+        {
+            return _engine.Moved(geometryObject, placement);
+        }
         public IXbimGeometryObject Moved(IXbimGeometryObject geometryObject, IIfcPlacement placement)
         {
             return _engine.Moved(geometryObject, placement);

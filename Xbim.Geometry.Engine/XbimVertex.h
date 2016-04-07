@@ -48,6 +48,7 @@ namespace Xbim
 			XbimVertex(XbimPoint3D point3D, double precision);
 			XbimVertex(XbimPoint3DWithTolerance^ point3D);
 			XbimVertex(const TopoDS_Vertex& occVertex);
+			XbimVertex(const TopoDS_Vertex& occVertex, Object^ tag);
 			XbimVertex(IXbimVertex^ vertex, double precision);
 			XbimVertex(IIfcCartesianPoint^ vertex);
 			XbimVertex(double x, double y, double z, double precision);

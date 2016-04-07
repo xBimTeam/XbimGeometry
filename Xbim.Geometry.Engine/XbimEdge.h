@@ -49,6 +49,7 @@ namespace Xbim
 #pragma region Constructors
 			XbimEdge(IXbimVertex^ edgeStart, IXbimVertex^ edgeEnd);
 			XbimEdge(const TopoDS_Edge& edge);
+			XbimEdge(const TopoDS_Edge& edge, Object^ tag);
 			XbimEdge(IIfcCurve^ edge);
 			XbimEdge(IIfcConic^ edge);
 			XbimEdge(IIfcCircle^ edge);

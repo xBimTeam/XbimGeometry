@@ -106,6 +106,12 @@ namespace Xbim
 			*pSolid = solid;
 		}
 
+		XbimSolid::XbimSolid(const TopoDS_Solid& solid, Object^ tag) : XbimSolid(solid)
+		{
+			Tag = tag;
+		}
+
+
 		XbimSolid::XbimSolid(IIfcSolidModel^ solid)
 		{
 			Init(solid);
@@ -2052,20 +2058,20 @@ namespace Xbim
 			{
 				gp_GTrsf trans = XbimConvert::ToTransform(nonUniform);
 				BRepBuilderAPI_GTransform tr(this, trans, Standard_True); //make a copy of underlying shape
-				return gcnew XbimSolid(TopoDS::Solid(tr.Shape()));
+				return gcnew XbimSolid(TopoDS::Solid(tr.Shape()), Tag);
 			}
 			else
 			{
 				gp_Trsf trans = XbimConvert::ToTransform(transformation);
 				BRepBuilderAPI_Transform tr(this, trans, Standard_False); //do not make a copy of underlying shape
-				return gcnew XbimSolid(TopoDS::Solid(tr.Shape()));
+				return gcnew XbimSolid(TopoDS::Solid(tr.Shape()), Tag);
 			}
 		}
 
 		XbimGeometryObject ^ XbimSolid::Moved(IIfcPlacement ^ placement)
 		{
 			if (!IsValid) return this;
-			XbimSolid^ copy = gcnew XbimSolid(this); //take a copy of the shape
+			XbimSolid^ copy = gcnew XbimSolid(this, Tag); //take a copy of the shape
 			TopLoc_Location loc = XbimConvert::ToLocation(placement);
 			copy->Move(loc);
 			return copy;
@@ -2074,7 +2080,7 @@ namespace Xbim
 		XbimGeometryObject ^ XbimSolid::Moved(IIfcObjectPlacement ^ objectPlacement)
 		{
 			if (!IsValid) return this;
-			XbimSolid^ copy = gcnew XbimSolid(this); //take a copy of the shape
+			XbimSolid^ copy = gcnew XbimSolid(this, Tag); //take a copy of the shape
 			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
 			copy->Move(loc);
 			return copy;

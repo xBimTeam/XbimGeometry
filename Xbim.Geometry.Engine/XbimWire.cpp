@@ -96,6 +96,12 @@ namespace Xbim
 			pWire = new TopoDS_Wire();
 			*pWire = wire;
 		}
+
+		XbimWire::XbimWire(const TopoDS_Wire& wire, Object^ tag) :XbimWire(wire)
+		{
+			Tag = tag;
+		}
+
 		XbimWire::XbimWire(const std::vector<gp_Pnt>& points, double tolerance)
 		{
 			BRepBuilderAPI_MakePolygon polyMaker;
@@ -2589,20 +2595,20 @@ namespace Xbim
 			{
 				gp_GTrsf trans = XbimConvert::ToTransform(nonUniform);
 				BRepBuilderAPI_GTransform tr(this, trans, Standard_True); //make a copy of underlying shape
-				return gcnew XbimWire(TopoDS::Wire(tr.Shape()));
+				return gcnew XbimWire(TopoDS::Wire(tr.Shape()),Tag);
 			}
 			else
 			{
 				gp_Trsf trans = XbimConvert::ToTransform(transformation);
 				BRepBuilderAPI_Transform tr(this, trans, Standard_False); //do not make a copy of underlying shape
-				return gcnew XbimWire(TopoDS::Wire(tr.Shape()));
+				return gcnew XbimWire(TopoDS::Wire(tr.Shape()), Tag);
 			}
 		}
 
 		XbimGeometryObject ^ XbimWire::Moved(IIfcPlacement ^ placement)
 		{
 			if (!IsValid) return this;
-			XbimWire^ copy = gcnew XbimWire(this); //take a copy of the shape
+			XbimWire^ copy = gcnew XbimWire(this, Tag); //take a copy of the shape
 			TopLoc_Location loc = XbimConvert::ToLocation(placement);
 			copy->Move(loc);
 			return copy;
@@ -2611,7 +2617,7 @@ namespace Xbim
 		XbimGeometryObject ^ XbimWire::Moved(IIfcObjectPlacement ^ objectPlacement)
 		{
 			if (!IsValid) return this;
-			XbimWire^ copy = gcnew XbimWire(this); //take a copy of the shape
+			XbimWire^ copy = gcnew XbimWire(this, Tag); //take a copy of the shape
 			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
 			copy->Move(loc);
 			return copy;

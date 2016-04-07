@@ -127,7 +127,7 @@ namespace Xbim
 					{
 						XbimSolidSet^ solidset = (XbimSolidSet^)CreateSolidSet(sweptAreaSolid);
 						if (objectLocation != nullptr) solidset->Move(objectLocation);
-						return solidset;
+						return Trim(solidset);
 					}
 					else
 					{
@@ -140,7 +140,7 @@ namespace Xbim
 				{
 					XbimCompound^ comp = gcnew XbimCompound((IIfcManifoldSolidBrep^)geomRep);
 					if (objectLocation != nullptr) comp->Move(objectLocation);
-					return comp;					
+					return Trim(comp);
 				}				
 				else if (dynamic_cast<IIfcSweptDiskSolid^>(geomRep))
 				{
@@ -153,7 +153,7 @@ namespace Xbim
 					XbimSolidSet^ solidSet = (XbimSolidSet^) CreateBooleanResult((IIfcBooleanResult^)geomRep);
 					//BRepTools::Write((XbimSolid^)(solidSet->First), "d:\\tmp\\s");
 					if (objectLocation != nullptr) solidSet->Move(objectLocation);
-					return solidSet;
+					return Trim(solidSet);
 				}				
 				/*else if (dynamic_cast<IIfcBooleanResult^>(geomRep))
 				{
@@ -165,19 +165,19 @@ namespace Xbim
 				{
 					XbimCompound^ comp = (XbimCompound^)CreateSurfaceModel((IIfcFaceBasedSurfaceModel^)geomRep);
 					if (objectLocation != nullptr) comp->Move(objectLocation);
-					return comp;
+					return Trim(comp);
 				} 
 				else if (dynamic_cast<IIfcShellBasedSurfaceModel^>(geomRep))
 				{
 					XbimCompound^ comp = (XbimCompound^)CreateSurfaceModel((IIfcShellBasedSurfaceModel^)geomRep);
 					if (objectLocation != nullptr) comp->Move(objectLocation);
-					return comp;
+					return Trim(comp);
 				}
 				else if (dynamic_cast<IIfcTriangulatedFaceSet^>(geomRep))
 				{
 					XbimCompound^ comp = (XbimCompound^)CreateSurfaceModel((IIfcTriangulatedFaceSet^)geomRep);
 					if (objectLocation != nullptr) comp->Move(objectLocation);
-					return comp;
+					return Trim(comp);
 				}
 				else if (dynamic_cast<IIfcSectionedSpine^>(geomRep))
 				{
@@ -1159,7 +1159,7 @@ namespace Xbim
 			XbimSetObject^ occSet = dynamic_cast<XbimSetObject^>(geometryObject);
 			if (occSet != nullptr)
 				return occSet->Transformed(transformation);
-			return geometryObject;//do nothing
+			return Trim(geometryObject);//do nothing
 		}
 
 		Xbim::Common::Geometry::IXbimGeometryObject ^ XbimGeometryCreator::Moved(IXbimGeometryObject ^geometryObject, IIfcPlacement ^placement)
@@ -1170,7 +1170,7 @@ namespace Xbim
 			XbimSetObject^ occSet = dynamic_cast<XbimSetObject^>(geometryObject);
 			if (occSet != nullptr)
 				return occSet->Moved(placement);
-			return geometryObject;
+			return Trim(geometryObject);
 		}
 
 		Xbim::Common::Geometry::IXbimGeometryObject ^ XbimGeometryCreator::Moved(IXbimGeometryObject ^geometryObject, IIfcObjectPlacement ^objectPlacement)
@@ -1181,8 +1181,16 @@ namespace Xbim
 			XbimSetObject^ occSet = dynamic_cast<XbimSetObject^>(geometryObject);
 			if (occSet != nullptr)
 				return occSet->Moved(objectPlacement);
+			return Trim(geometryObject);
+		}
+
+		IXbimGeometryObject ^ XbimGeometryCreator::Trim(IXbimGeometryObject ^geometryObject)
+		{			
+			IXbimGeometryObjectSet^ geometrySet = dynamic_cast<IXbimGeometryObjectSet^>(geometryObject);
+			if (geometrySet == nullptr) return geometryObject;
+			if (geometrySet->Count == 1) return geometrySet->First;
+			if (geometrySet->Count == 0) return nullptr;
 			return geometryObject;
 		}
-		
 	}
 }

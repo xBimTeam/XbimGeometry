@@ -66,6 +66,7 @@ namespace Xbim
 		{
 			if (!IsValid) return this;
 			XbimGeometryObjectSet^ result = gcnew XbimGeometryObjectSet();
+			result->Tag = Tag;
 			for each (IXbimGeometryObject^ geometryObject in geometryObjects)
 			{
 				XbimOccShape^ occShape = dynamic_cast<XbimOccShape^>(geometryObject);
@@ -81,7 +82,8 @@ namespace Xbim
 		IXbimGeometryObject ^ XbimGeometryObjectSet::Moved(IIfcPlacement ^ placement)
 		{
 			if (!IsValid) return this;
-			XbimGeometryObjectSet^ result = gcnew XbimGeometryObjectSet();			
+			XbimGeometryObjectSet^ result = gcnew XbimGeometryObjectSet();	
+			result->Tag = Tag;
 			for each (IXbimGeometryObject^ geometryObject in geometryObjects)
 			{
 				XbimOccShape^ occShape = dynamic_cast<XbimOccShape^>(geometryObject);
@@ -98,6 +100,7 @@ namespace Xbim
 		{
 			if (!IsValid) return this;
 			XbimGeometryObjectSet^ result = gcnew XbimGeometryObjectSet();
+			result->Tag = Tag;
 			for each (IXbimGeometryObject^ geometryObject in geometryObjects)
 			{
 				XbimOccShape^ occShape = dynamic_cast<XbimOccShape^>(geometryObject);

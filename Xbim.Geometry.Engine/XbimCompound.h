@@ -55,6 +55,7 @@ namespace Xbim
 			!XbimCompound(){ InstanceCleanup(); }
 			XbimCompound(double sewingTolerance);
 			XbimCompound(const TopoDS_Compound& compound, bool sewn, double tolerance);
+			XbimCompound(const TopoDS_Compound& compound, bool sewn, double tolerance, Object^ tag);
 			XbimCompound(IIfcConnectedFaceSet^ faceSet);
 			XbimCompound(IIfcShellBasedSurfaceModel^ sbsm);
 			XbimCompound(IIfcFaceBasedSurfaceModel^ fbsm);

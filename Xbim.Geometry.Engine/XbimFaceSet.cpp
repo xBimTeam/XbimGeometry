@@ -80,7 +80,7 @@ namespace Xbim
 			TopLoc_Location loc = XbimConvert::ToLocation(placement);
 			for each (IXbimFace^ face in faces)
 			{
-				XbimFace^ copy = gcnew XbimFace((XbimFace^)face);
+				XbimFace^ copy = gcnew XbimFace((XbimFace^)face, Tag);
 				copy->Move(loc);
 				result->Add(copy);
 			}
@@ -94,7 +94,7 @@ namespace Xbim
 			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
 			for each (IXbimFace^ face in faces)
 			{
-				XbimFace^ copy = gcnew XbimFace((XbimFace^)face);
+				XbimFace^ copy = gcnew XbimFace((XbimFace^)face, Tag);
 				copy->Move(loc);
 				result->Add(copy);
 			}

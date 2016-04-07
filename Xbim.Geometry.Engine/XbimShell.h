@@ -33,6 +33,7 @@ namespace Xbim
 			//Constructors
 			XbimShell();
 			XbimShell(const TopoDS_Shell& shell);
+			XbimShell(const TopoDS_Shell& shell, Object^ tag);
 			XbimShell(IIfcOpenShell^ openShell);
 			XbimShell(IIfcConnectedFaceSet^ faceset);
 			XbimShell(IIfcSurfaceOfLinearExtrusion^ linExt);

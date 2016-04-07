@@ -98,7 +98,10 @@ namespace Xbim
 			*pFace = face;
 		}
 
-
+		XbimFace::XbimFace(const TopoDS_Face& face, Object^ tag) : XbimFace(face)
+		{
+			Tag = tag;
+		}
 
 		XbimFace::XbimFace(IIfcProfileDef^ profile)
 		{
@@ -1259,20 +1262,20 @@ namespace Xbim
 			{
 				gp_GTrsf trans = XbimConvert::ToTransform(nonUniform);
 				BRepBuilderAPI_GTransform tr(this, trans, Standard_True); //make a copy of underlying shape
-				return gcnew XbimFace(TopoDS::Face(tr.Shape()));
+				return gcnew XbimFace(TopoDS::Face(tr.Shape()), Tag);
 			}
 			else
 			{
 				gp_Trsf trans = XbimConvert::ToTransform(transformation);
 				BRepBuilderAPI_Transform tr(this, trans, Standard_False); //do not make a copy of underlying shape
-				return gcnew XbimFace(TopoDS::Face(tr.Shape()));
+				return gcnew XbimFace(TopoDS::Face(tr.Shape()), Tag);
 			}
 		}
 
 		XbimGeometryObject ^ XbimFace::Moved(IIfcPlacement ^ placement)
 		{
 			if (!IsValid) return this;
-			XbimFace^ copy = gcnew XbimFace(this); //take a copy of the shape
+			XbimFace^ copy = gcnew XbimFace(this, Tag); //take a copy of the shape
 			TopLoc_Location loc = XbimConvert::ToLocation(placement);
 			copy->Move(loc);
 			return copy;
@@ -1281,7 +1284,7 @@ namespace Xbim
 		XbimGeometryObject ^ XbimFace::Moved(IIfcObjectPlacement ^ objectPlacement)
 		{
 			if (!IsValid) return this;
-			XbimFace^ copy = gcnew XbimFace(this); //take a copy of the shape
+			XbimFace^ copy = gcnew XbimFace(this, Tag); //take a copy of the shape
 			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
 			copy->Move(loc);
 			return copy;

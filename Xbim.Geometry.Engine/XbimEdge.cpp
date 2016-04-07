@@ -66,7 +66,7 @@ namespace Xbim
 			pEdge = new TopoDS_Edge();
 			*pEdge = edge;
 		}
-
+		XbimEdge::XbimEdge(const TopoDS_Edge& edge, Object^ tag) : XbimEdge(edge) { Tag = tag; }
 
 		IXbimCurve^ XbimEdge::EdgeGeometry::get()
 		{
@@ -815,20 +815,20 @@ namespace Xbim
 			{
 				gp_GTrsf trans = XbimConvert::ToTransform(nonUniform);
 				BRepBuilderAPI_GTransform tr(this, trans, Standard_True); //make a copy of underlying shape
-				return gcnew XbimEdge(TopoDS::Edge(tr.Shape()));
+				return gcnew XbimEdge(TopoDS::Edge(tr.Shape()), Tag);
 			}
 			else
 			{
 				gp_Trsf trans = XbimConvert::ToTransform(transformation);
 				BRepBuilderAPI_Transform tr(this, trans, Standard_False); //do not make a copy of underlying shape
-				return gcnew XbimEdge(TopoDS::Edge(tr.Shape()));
+				return gcnew XbimEdge(TopoDS::Edge(tr.Shape()), Tag);
 			}
 		}
 
 		XbimGeometryObject ^ XbimEdge::Moved(IIfcPlacement ^ placement)
 		{
 			if (!IsValid) return this;
-			XbimEdge^ copy = gcnew XbimEdge(this); //take a copy of the shape
+			XbimEdge^ copy = gcnew XbimEdge(this, Tag); //take a copy of the shape
 			TopLoc_Location loc = XbimConvert::ToLocation(placement);
 			copy->Move(loc);
 			return copy;
@@ -837,7 +837,7 @@ namespace Xbim
 		XbimGeometryObject ^ XbimEdge::Moved(IIfcObjectPlacement ^ objectPlacement)
 		{
 			if (!IsValid) return this;
-			XbimEdge^ copy = gcnew XbimEdge(this); //take a copy of the shape
+			XbimEdge^ copy = gcnew XbimEdge(this, Tag); //take a copy of the shape
 			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
 			copy->Move(loc);
 			return copy;

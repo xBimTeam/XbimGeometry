@@ -109,7 +109,7 @@ namespace Xbim
 			TopLoc_Location loc = XbimConvert::ToLocation(placement);
 			for each (IXbimEdge^ edge in edges)
 			{
-				XbimEdge^ copy = gcnew XbimEdge((XbimEdge^)edge);
+				XbimEdge^ copy = gcnew XbimEdge((XbimEdge^)edge, Tag);
 				copy->Move(loc);
 				result->Add(copy);
 			}
@@ -123,7 +123,7 @@ namespace Xbim
 			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
 			for each (IXbimEdge^ edge in edges)
 			{
-				XbimEdge^ copy = gcnew XbimEdge((XbimEdge^)edge);
+				XbimEdge^ copy = gcnew XbimEdge((XbimEdge^)edge, Tag);
 				copy->Move(loc);
 				result->Add(copy);
 			}

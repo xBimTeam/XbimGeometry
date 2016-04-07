@@ -185,6 +185,10 @@ namespace Xbim
 			_sewingTolerance = tolerance;
 			
 		}
+		XbimCompound::XbimCompound(const TopoDS_Compound& compound, bool sewn, double tolerance, Object^ tag) :XbimCompound(compound, sewn, tolerance)
+		{
+			Tag = tag;
+		}
 
 		void XbimCompound::Move(TopLoc_Location loc)
 		{

@@ -71,7 +71,7 @@ namespace Xbim
 			TopLoc_Location loc = XbimConvert::ToLocation(placement);
 			for each (IXbimFace^ wire in wires)
 			{
-				XbimWire^ copy = gcnew XbimWire((XbimWire^)wire);
+				XbimWire^ copy = gcnew XbimWire((XbimWire^)wire, Tag);
 				copy->Move(loc);
 				result->Add(copy);
 			}
@@ -85,7 +85,7 @@ namespace Xbim
 			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
 			for each (IXbimFace^ wire in wires)
 			{
-				XbimWire^ copy = gcnew XbimWire((XbimWire^)wire);
+				XbimWire^ copy = gcnew XbimWire((XbimWire^)wire, Tag);
 				copy->Move(loc);
 				result->Add(copy);
 			}

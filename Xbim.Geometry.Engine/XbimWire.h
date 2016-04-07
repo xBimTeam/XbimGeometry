@@ -76,10 +76,12 @@ namespace Xbim
 
 			XbimWire() {}; //an empty invalid wire
 			XbimWire(XbimEdge^ edge);
+			
 			XbimWire(double x, double y, double tolerance, bool centre);
 			XbimWire(double precision);
 			XbimWire(const std::vector<gp_Pnt>& points, double tolerance);
 			XbimWire(const TopoDS_Wire& wire);
+			XbimWire(const TopoDS_Wire& wire, Object^ tag);
 			XbimWire(IIfcPolyline^ loop);
 			XbimWire(IIfcBSplineCurve^ bspline);
 			XbimWire(IIfcBSplineCurveWithKnots^ bSpline);

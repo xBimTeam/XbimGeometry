@@ -84,6 +84,11 @@ namespace Xbim
 			*pShell = shell;
 		}
 
+		XbimShell::XbimShell(const TopoDS_Shell& shell, Object^ tag) : XbimShell(shell)
+		{
+			Tag = tag;
+		}
+
 		XbimShell::XbimShell(IIfcSurfaceOfLinearExtrusion^ linExt)
 		{
 			Init(linExt);
@@ -395,13 +400,13 @@ namespace Xbim
 			{
 				gp_GTrsf trans = XbimConvert::ToTransform(nonUniform);
 				BRepBuilderAPI_GTransform tr(this, trans, Standard_True); //make a copy of underlying shape
-				return gcnew XbimShell(TopoDS::Shell(tr.Shape()));
+				return gcnew XbimShell(TopoDS::Shell(tr.Shape()), Tag);
 			}
 			else
 			{
 				gp_Trsf trans = XbimConvert::ToTransform(transformation);
 				BRepBuilderAPI_Transform tr(this, trans, Standard_False); //do not make a copy of underlying shape
-				return gcnew XbimShell(TopoDS::Shell(tr.Shape()));
+				return gcnew XbimShell(TopoDS::Shell(tr.Shape()), Tag);
 			}
 		}
 
@@ -412,7 +417,7 @@ namespace Xbim
 		XbimGeometryObject ^ XbimShell::Moved(IIfcPlacement ^ placement)
 		{
 			if (!IsValid) return this;
-			XbimShell^ copy = gcnew XbimShell(this); //take a copy of the shape
+			XbimShell^ copy = gcnew XbimShell(this, Tag); //take a copy of the shape
 			TopLoc_Location loc = XbimConvert::ToLocation(placement);
 			copy->Move(loc);
 			return copy;
@@ -421,7 +426,7 @@ namespace Xbim
 		XbimGeometryObject ^ XbimShell::Moved(IIfcObjectPlacement ^ objectPlacement)
 		{
 			if (!IsValid) return this;
-			XbimShell^ copy = gcnew XbimShell(this); //take a copy of the shape
+			XbimShell^ copy = gcnew XbimShell(this, Tag); //take a copy of the shape
 			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
 			copy->Move(loc);
 			return copy;

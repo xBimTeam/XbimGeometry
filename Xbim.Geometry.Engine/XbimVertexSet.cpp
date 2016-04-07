@@ -76,7 +76,7 @@ namespace Xbim
 			TopLoc_Location loc = XbimConvert::ToLocation(placement);
 			for each (IXbimVertex^ vertex in vertices)
 			{
-				XbimVertex^ copy = gcnew XbimVertex((XbimVertex^)vertex);
+				XbimVertex^ copy = gcnew XbimVertex((XbimVertex^)vertex, Tag);
 				copy->Move(loc);
 				result->Add(copy);
 			}
@@ -90,7 +90,7 @@ namespace Xbim
 			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
 			for each (IXbimVertex^ vertex in vertices)
 			{
-				XbimVertex^ copy = gcnew XbimVertex((XbimVertex^)vertex);
+				XbimVertex^ copy = gcnew XbimVertex((XbimVertex^)vertex, Tag);
 				copy->Move(loc);
 				result->Add(copy);
 			}

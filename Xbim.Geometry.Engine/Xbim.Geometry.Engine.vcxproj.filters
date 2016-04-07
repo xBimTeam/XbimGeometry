@@ -17685,11 +17685,15 @@
       <Filter>Source files\THShHealing\ShapeUpgrade</Filter>
     </None>
     <None Include="OCC\src\Adaptor2d\Adaptor2d_OffsetCurve.lxx" />
+    <None Include="OCC\UpdateOCCSource.bat" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="app.ico" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="app.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="OCC\OCCDirList.txt" />
   </ItemGroup>
 </Project>

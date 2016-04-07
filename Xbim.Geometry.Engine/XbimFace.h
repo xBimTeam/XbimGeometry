@@ -99,6 +99,7 @@ namespace Xbim
 			property XbimPoint3D Location{XbimPoint3D get(); }
 #pragma region constructors
 			XbimFace(const TopoDS_Face& face);
+			XbimFace(const TopoDS_Face& face, Object^ tag);
 			XbimFace(){}; //an invalid empty face
 			XbimFace(XbimVector3D normal);
 			XbimFace(XbimPoint3D location, XbimVector3D normal);

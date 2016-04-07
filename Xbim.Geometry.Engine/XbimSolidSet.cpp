@@ -267,7 +267,7 @@ namespace Xbim
 			TopLoc_Location loc = XbimConvert::ToLocation(placement);
 			for each (IXbimSolid^ solid in solids)
 			{
-				XbimSolid^ copy = gcnew XbimSolid((XbimSolid^)solid);
+				XbimSolid^ copy = gcnew XbimSolid((XbimSolid^)solid, Tag);
 				copy->Move(loc);
 				result->Add(copy);
 			}
@@ -281,7 +281,7 @@ namespace Xbim
 			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
 			for each (IXbimSolid^ solid in solids)
 			{
-				XbimSolid^ copy = gcnew XbimSolid((XbimSolid^)solid);
+				XbimSolid^ copy = gcnew XbimSolid((XbimSolid^)solid, Tag);
 				copy->Move(loc);
 				result->Add(copy);
 			}
