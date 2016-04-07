@@ -28,7 +28,7 @@ namespace Ifc4GeometryTests
             {
                 var fbr = m.Instances[35] as IIfcFacetedBrep;
                 Assert.IsTrue(fbr != null, "No IfcFacetedBRep found");
-                var bodyShape = (IXbimShell)((IXbimGeometryObjectSet)_xbimGeometryCreator.Create(fbr)).First();
+                var bodyShape = (IXbimShell)_xbimGeometryCreator.Create(fbr);
                 Assert.IsTrue(bodyShape.IsValid, "Invalid IfcFacetedBRep");
                 var opening = m.Instances[133218] as IIfcExtrudedAreaSolid;
                 Assert.IsTrue(opening != null, "No IfcExtrudedAreaSolid found");
