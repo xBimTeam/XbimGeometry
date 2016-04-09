@@ -343,7 +343,7 @@ namespace Xbim.Geometry.Engine.Interop
         public void Mesh(IXbimMeshReceiver receiver, IXbimGeometryObject geometryObject, double precision, double deflection,
             double angle = 0.5)
         {
-            throw new NotImplementedException();
+            _engine.Mesh(receiver, geometryObject, precision, deflection, angle);
         }
 
        
