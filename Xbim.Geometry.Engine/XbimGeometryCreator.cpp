@@ -75,6 +75,7 @@ namespace Xbim
 
 		void XbimGeometryCreator::Mesh(IXbimMeshReceiver^ mesh, IXbimGeometryObject^ geometryObject, double precision, double deflection, double angle)
 		{
+			mesh->BeginUpdate();
 			if (geometryObject->IsSet)
 			{
 				IEnumerable<IXbimGeometryObject^>^ set = dynamic_cast<IEnumerable<IXbimGeometryObject^>^>(geometryObject);
@@ -103,6 +104,7 @@ namespace Xbim
 					xShape->WriteTriangulation(mesh, precision, deflection, angle);
 				}
 			}
+			mesh->EndUpdate();
 		}
 
 

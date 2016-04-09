@@ -228,7 +228,7 @@ namespace Xbim
 			
 			BRepMesh_IncrementalMesh incrementalMesh(this, deflection, Standard_False, angle); //triangulate the first time		
 
-			meshReceiver->BeginUpdate();
+			
 			for (int f = 1; f <= faceMap.Extent(); f++)
 			{
 				const TopoDS_Face& face = TopoDS::Face(faceMap(f));
@@ -323,7 +323,7 @@ namespace Xbim
 				}
 			}
 			GC::KeepAlive(this);
-			meshReceiver->EndUpdate();
+			
 		}
 
 
