@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Xbim.Common.Geometry;
+﻿using Xbim.Ifc4;
 
 namespace GeometryTests
 {
@@ -62,5 +58,7 @@ namespace GeometryTests
         {
             TriangleIndicesCount += 6;
         }
+
+        public IPhongMaterial Material { get; set; }
     }
 }

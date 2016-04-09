@@ -3,6 +3,7 @@ using System.IO;
 using System.Runtime.Remoting;
 using Xbim.Common.Geometry;
 using Xbim.Common.Logging;
+using Xbim.Ifc4;
 using Xbim.Ifc4.Interfaces;
 
 
@@ -342,9 +343,10 @@ namespace Xbim.Geometry.Engine.Interop
         public void Mesh(IXbimMeshReceiver receiver, IXbimGeometryObject geometryObject, double precision, double deflection,
             double angle = 0.5)
         {
-            _engine.Mesh(receiver, geometryObject, precision, deflection, angle);
+            throw new NotImplementedException();
         }
 
+       
         public void WriteTriangulation(BinaryWriter bw, IXbimGeometryObject shape, double tolerance, double deflection)
         {
             WriteTriangulation(bw, shape, tolerance, deflection: deflection, angle: 0.5);
