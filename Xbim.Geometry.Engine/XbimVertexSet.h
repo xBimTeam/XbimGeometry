@@ -66,7 +66,8 @@ namespace Xbim
 			virtual property bool IsSet{bool get() { return true; }; }
 			virtual void Add(IXbimVertex^ vertex) { vertices->Add(vertex); };
 			virtual property IXbimVertex^ First{IXbimVertex^ get(); }
-			virtual property int Count{int get(); }
+			virtual property int Count {int get() override; }
+			virtual IXbimGeometryObject^ Trim()  override { if (Count == 1) return First; else if (Count == 0) return nullptr; else return this; };
 			virtual property XbimRect3D BoundingBox {XbimRect3D get(); }
 			virtual property  XbimGeometryObjectType GeometryType{XbimGeometryObjectType  get() { return XbimGeometryObjectType::XbimVertexSetType; }}
 			virtual IEnumerator<IXbimVertex^>^ GetEnumerator();

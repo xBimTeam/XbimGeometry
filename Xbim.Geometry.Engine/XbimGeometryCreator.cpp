@@ -1188,11 +1188,9 @@ namespace Xbim
 
 		IXbimGeometryObject ^ XbimGeometryCreator::Trim(IXbimGeometryObject ^geometryObject)
 		{			
-			IXbimGeometryObjectSet^ geometrySet = dynamic_cast<IXbimGeometryObjectSet^>(geometryObject);
-			if (geometrySet == nullptr) return geometryObject;
-			if (geometrySet->Count == 1) return geometrySet->First;
-			if (geometrySet->Count == 0) return nullptr;
-			return geometryObject;
+			XbimSetObject^ geometrySet = dynamic_cast<XbimSetObject^>(geometryObject);
+			if (geometrySet == nullptr) return geometryObject;			
+			return geometrySet->Trim();
 		}
 	}
 }

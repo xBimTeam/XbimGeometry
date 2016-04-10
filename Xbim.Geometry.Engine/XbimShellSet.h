@@ -39,7 +39,8 @@ namespace Xbim
 			virtual property bool IsValid{bool get(){ return Count>0; }; }
 			virtual property bool IsSet{bool get()  { return true; }; }
 			virtual property IXbimShell^ First{IXbimShell^ get(); }
-			virtual property int Count{int get(); }
+			virtual property int Count{int get() override;}
+			virtual IXbimGeometryObject^ Trim()  override { if (Count == 1) return First; else if (Count == 0) return nullptr; else return this; };
 			virtual property XbimRect3D BoundingBox {XbimRect3D get() ; }
 			virtual property  XbimGeometryObjectType GeometryType{XbimGeometryObjectType  get() { return XbimGeometryObjectType::XbimShellSetType; }}
 			virtual IEnumerator<IXbimShell^>^ GetEnumerator();

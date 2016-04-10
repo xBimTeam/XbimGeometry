@@ -41,7 +41,8 @@ namespace Xbim
 			virtual property bool IsSet{bool get() { return true; }; }
 			virtual void Add(IXbimEdge^ edge) { edges->Add(edge); };
 			virtual property IXbimEdge^ First{IXbimEdge^ get(); }
-			virtual property int Count{int get(); }
+			virtual property int Count {int get() override; }
+			virtual IXbimGeometryObject^ Trim()  override { if (Count == 1) return First; else if (Count == 0) return nullptr; else return this; };
 			virtual property  XbimGeometryObjectType GeometryType{XbimGeometryObjectType  get() { return XbimGeometryObjectType::XbimEdgeSetType; }}
 			virtual IEnumerator<IXbimEdge^>^ GetEnumerator();
 			virtual System::Collections::IEnumerator^ GetEnumerator2() = System::Collections::IEnumerable::GetEnumerator{ return GetEnumerator(); }

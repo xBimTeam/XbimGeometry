@@ -70,7 +70,8 @@ namespace Xbim
 			virtual property bool IsSet{bool get()  { return true; }; }
 			virtual void Add(IXbimFace^ face) { faces->Add(face); };
 			virtual property IXbimFace^ First{IXbimFace^ get(); }
-			virtual property int Count{int get(); }
+			virtual property int Count {int get() override; }
+			virtual IXbimGeometryObject^ Trim()  override { if (Count == 1) return First; else if (Count == 0) return nullptr; else return this; };
 			virtual property XbimRect3D BoundingBox {XbimRect3D get(); }
 			virtual property  XbimGeometryObjectType GeometryType{XbimGeometryObjectType  get() { return XbimGeometryObjectType::XbimFaceSetType; }}
 			virtual IEnumerator<IXbimFace^>^ GetEnumerator();

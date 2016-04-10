@@ -65,6 +65,8 @@ namespace Xbim
 			virtual IXbimGeometryObject^ Moved(IIfcPlacement ^placement) abstract;
 			virtual IXbimGeometryObject^ Moved(IIfcObjectPlacement ^objectPlacement) abstract;
 			virtual property Object^  Tag {Object^ get() { return tag; }; void set(Object^ value) { tag = value; }; }
+			virtual property int Count {int get() abstract; }
+			virtual IXbimGeometryObject^ Trim() abstract; 
 		};
 
 		ref class XbimGeometryObject abstract: IXbimGeometryObject 
