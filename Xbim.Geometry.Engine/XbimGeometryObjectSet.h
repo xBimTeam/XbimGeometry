@@ -79,6 +79,9 @@ namespace Xbim
 			virtual IXbimGeometryObject ^ Transformed(IIfcCartesianTransformationOperator ^ transformation) override;
 			virtual IXbimGeometryObject ^ Moved(IIfcPlacement ^ placement) override;
 			virtual IXbimGeometryObject ^ Moved(IIfcObjectPlacement ^ objectPlacement) override;
+
+			// Inherited via XbimSetObject
+			virtual void Mesh(IXbimMeshReceiver ^ mesh, double precision, double deflection, double angle) override;
 		};
 	}
 }

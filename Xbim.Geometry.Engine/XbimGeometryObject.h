@@ -3,6 +3,7 @@ using namespace System;
 using namespace Xbim::Common::Geometry;
 using namespace System::Collections::Generic;
 using namespace Xbim::Ifc4::Interfaces;
+using namespace Xbim::Ifc4;
 namespace Xbim
 {
 	namespace Geometry
@@ -67,6 +68,7 @@ namespace Xbim
 			virtual property Object^  Tag {Object^ get() { return tag; }; void set(Object^ value) { tag = value; }; }
 			virtual property int Count {int get() abstract; }
 			virtual IXbimGeometryObject^ Trim() abstract; 
+			virtual void Mesh(IXbimMeshReceiver^ mesh, double precision, double deflection, double angle) abstract;
 		};
 
 		ref class XbimGeometryObject abstract: IXbimGeometryObject 

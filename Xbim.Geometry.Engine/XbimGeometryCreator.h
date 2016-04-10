@@ -10,7 +10,7 @@ using namespace Xbim::Common::Geometry;
 
 using namespace System::Configuration;
 using namespace Xbim::Ifc4::Interfaces;
-
+using namespace Xbim::Ifc4;
 namespace Xbim
 {
 	namespace Geometry
@@ -177,7 +177,7 @@ namespace Xbim
 				return Moved(geometryObject, (IIfcPlacement ^)placement);
 			};
 			virtual IXbimGeometryObject ^ Moved(IXbimGeometryObject ^geometryObject, IIfcObjectPlacement ^objectPlacement);
-			IXbimGeometryObject ^ Trim(IXbimGeometryObject ^geometryObject);
+			IXbimGeometryObject ^ Trim(XbimSetObject ^geometryObject);
 		};
 	}
 }

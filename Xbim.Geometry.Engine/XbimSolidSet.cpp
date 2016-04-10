@@ -288,6 +288,14 @@ namespace Xbim
 			return result;
 		}
 
+		void XbimSolidSet::Mesh(IXbimMeshReceiver ^ mesh, double precision, double deflection, double angle)
+		{
+			for each (IXbimSolid^ solid  in solids)
+			{
+				((XbimSolid^)solid)->Mesh(mesh, precision, deflection, angle);
+			}
+		}
+
 
 
 		XbimRect3D XbimSolidSet::BoundingBox::get()

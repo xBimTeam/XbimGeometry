@@ -846,6 +846,10 @@ namespace Xbim
 		{
 			if(IsValid) pEdge->Move(loc);
 		}
+		void XbimEdge::Mesh(IXbimMeshReceiver ^ mesh, double precision, double deflection, double angle)
+		{
+			return;//maybe add an implementation for this
+		}
 #pragma endregion
 
 

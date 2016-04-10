@@ -189,6 +189,9 @@ namespace Xbim
 
 			virtual XbimGeometryObject ^ Moved(IIfcObjectPlacement ^ objectPlacement) override;
 			virtual void Move(TopLoc_Location loc);
+
+			// Inherited via XbimOccShape
+			virtual void Mesh(IXbimMeshReceiver ^ mesh, double precision, double deflection, double angle) override;
 };
 	}
 }

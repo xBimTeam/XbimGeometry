@@ -101,6 +101,14 @@ namespace Xbim
 			return result;
 		}
 
+		void XbimFaceSet::Mesh(IXbimMeshReceiver ^ mesh, double precision, double deflection, double angle)
+		{
+			for each (IXbimFace^ face  in faces)
+			{
+				((XbimFace^)face)->Mesh(mesh, precision, deflection, angle);
+			}
+		}
+
 
 		XbimRect3D XbimFaceSet::BoundingBox::get()
 		{

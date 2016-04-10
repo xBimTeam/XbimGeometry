@@ -92,6 +92,11 @@ namespace Xbim
 			return result;
 		}
 
+		void XbimWireSet::Mesh(IXbimMeshReceiver ^ mesh, double precision, double deflection, double angle)
+		{
+			return;//maybe add an implementation for this
+		}
+
 		XbimRect3D XbimWireSet::BoundingBox::get()
 		{
 			XbimRect3D result = XbimRect3D::Empty;

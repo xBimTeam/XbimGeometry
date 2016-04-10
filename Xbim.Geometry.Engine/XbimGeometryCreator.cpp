@@ -72,38 +72,18 @@ namespace Xbim
 		}
 
 #pragma region  Creation
-
+		
 		void XbimGeometryCreator::Mesh(IXbimMeshReceiver^ mesh, IXbimGeometryObject^ geometryObject, double precision, double deflection, double angle)
 		{
 			mesh->BeginUpdate();
-			if (geometryObject->IsSet)
-			{
-				IEnumerable<IXbimGeometryObject^>^ set = dynamic_cast<IEnumerable<IXbimGeometryObject^>^>(geometryObject);
-				if (set != nullptr)
-				{
-					BRep_Builder builder;
-					TopoDS_Compound occCompound;
-					builder.MakeCompound(occCompound);
-					for each (IXbimGeometryObject^ geom in set)
-					{
-						XbimOccShape^ xShape = dynamic_cast<XbimOccShape^>(geom);
-						if (xShape != nullptr)
-						{
-							builder.Add(occCompound, xShape);
-						}
-					}
-					XbimCompound^ compound = gcnew XbimCompound(occCompound, false, precision);
-					compound->WriteTriangulation(mesh, precision, deflection, angle);
-				}
-			}
+			XbimSetObject^ objSet = dynamic_cast<XbimSetObject^>(geometryObject);
+			XbimOccShape^ occObject = dynamic_cast<XbimOccShape^>(geometryObject);
+			if(objSet!=nullptr)
+				objSet->Mesh(mesh, precision, deflection, angle);
+			else if (occObject != nullptr)
+				occObject->Mesh(mesh, precision, deflection, angle);
 			else
-			{
-				XbimOccShape^ xShape = dynamic_cast<XbimOccShape^>(geometryObject);
-				if (xShape != nullptr)
-				{
-					xShape->WriteTriangulation(mesh, precision, deflection, angle);
-				}
-			}
+				throw gcnew Exception("Unsupported geometry type cannot be meshed");
 			mesh->EndUpdate();
 		}
 
@@ -142,7 +122,7 @@ namespace Xbim
 				{
 					XbimCompound^ comp = gcnew XbimCompound((IIfcManifoldSolidBrep^)geomRep);
 					if (objectLocation != nullptr) comp->Move(objectLocation);
-					return Trim(comp);
+					return comp;
 				}				
 				else if (dynamic_cast<IIfcSweptDiskSolid^>(geomRep))
 				{
@@ -167,19 +147,19 @@ namespace Xbim
 				{
 					XbimCompound^ comp = (XbimCompound^)CreateSurfaceModel((IIfcFaceBasedSurfaceModel^)geomRep);
 					if (objectLocation != nullptr) comp->Move(objectLocation);
-					return Trim(comp);
+					return comp;
 				} 
 				else if (dynamic_cast<IIfcShellBasedSurfaceModel^>(geomRep))
 				{
 					XbimCompound^ comp = (XbimCompound^)CreateSurfaceModel((IIfcShellBasedSurfaceModel^)geomRep);
 					if (objectLocation != nullptr) comp->Move(objectLocation);
-					return Trim(comp);
+					return comp;
 				}
 				else if (dynamic_cast<IIfcTriangulatedFaceSet^>(geomRep))
 				{
 					XbimCompound^ comp = (XbimCompound^)CreateSurfaceModel((IIfcTriangulatedFaceSet^)geomRep);
 					if (objectLocation != nullptr) comp->Move(objectLocation);
-					return Trim(comp);
+					return comp;
 				}
 				else if (dynamic_cast<IIfcSectionedSpine^>(geomRep))
 				{
@@ -1161,7 +1141,7 @@ namespace Xbim
 			XbimSetObject^ occSet = dynamic_cast<XbimSetObject^>(geometryObject);
 			if (occSet != nullptr)
 				return occSet->Transformed(transformation);
-			return Trim(geometryObject);//do nothing
+			return geometryObject;//do nothing
 		}
 
 		Xbim::Common::Geometry::IXbimGeometryObject ^ XbimGeometryCreator::Moved(IXbimGeometryObject ^geometryObject, IIfcPlacement ^placement)
@@ -1172,7 +1152,7 @@ namespace Xbim
 			XbimSetObject^ occSet = dynamic_cast<XbimSetObject^>(geometryObject);
 			if (occSet != nullptr)
 				return occSet->Moved(placement);
-			return Trim(geometryObject);
+			return geometryObject;
 		}
 
 		Xbim::Common::Geometry::IXbimGeometryObject ^ XbimGeometryCreator::Moved(IXbimGeometryObject ^geometryObject, IIfcObjectPlacement ^objectPlacement)
@@ -1183,14 +1163,12 @@ namespace Xbim
 			XbimSetObject^ occSet = dynamic_cast<XbimSetObject^>(geometryObject);
 			if (occSet != nullptr)
 				return occSet->Moved(objectPlacement);
-			return Trim(geometryObject);
+			return geometryObject;
 		}
 
-		IXbimGeometryObject ^ XbimGeometryCreator::Trim(IXbimGeometryObject ^geometryObject)
-		{			
-			XbimSetObject^ geometrySet = dynamic_cast<XbimSetObject^>(geometryObject);
-			if (geometrySet == nullptr) return geometryObject;			
-			return geometrySet->Trim();
+		IXbimGeometryObject ^ XbimGeometryCreator::Trim(XbimSetObject ^geometryObject)
+		{						
+			return geometryObject->Trim();
 		}
 	}
 }

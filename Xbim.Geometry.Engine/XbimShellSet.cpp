@@ -163,6 +163,14 @@ namespace Xbim
 			return result;
 		}
 
+		void XbimShellSet::Mesh(IXbimMeshReceiver ^ mesh, double precision, double deflection, double angle)
+		{
+			for each (IXbimShell^ shell  in shells)
+			{
+				((XbimShell^)shell)->Mesh(mesh, precision, deflection, angle);
+			}
+		}
+
 		IXbimGeometryObjectSet^ XbimShellSet::Union(IXbimSolid^ solid, double tolerance)
 		{
 			if (Count == 0) return XbimGeometryObjectSet::Empty;

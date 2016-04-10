@@ -2299,6 +2299,11 @@ namespace Xbim
 			if (IsValid) pWire->Move(loc);
 		}
 
+		void XbimWire::Mesh(IXbimMeshReceiver ^ mesh, double precision, double deflection, double angle)
+		{
+			return;//maybe add an implementation for this
+		}
+
 		void XbimWire::Move(IIfcAxis2Placement3D^ position)
 		{
 			if (!IsValid) return;

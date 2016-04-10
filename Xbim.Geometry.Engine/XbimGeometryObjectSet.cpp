@@ -113,6 +113,21 @@ namespace Xbim
 			return result;
 		}
 
+		void XbimGeometryObjectSet::Mesh(IXbimMeshReceiver ^ mesh, double precision, double deflection, double angle)
+		{
+			for each (IXbimGeometryObject^ geometryObject  in geometryObjects)
+			{
+				XbimSetObject^ objSet = dynamic_cast<XbimSetObject^>(geometryObject);
+				XbimOccShape^ occObject = dynamic_cast<XbimOccShape^>(geometryObject);
+				if (objSet != nullptr)
+					objSet->Mesh(mesh, precision, deflection, angle);
+				else if (occObject != nullptr)
+					occObject->Mesh(mesh, precision, deflection, angle);
+				else
+					throw gcnew Exception("Unsupported geometry type cannot be meshed");
+			}
+		}
+
 		IXbimGeometryObject^ XbimGeometryObjectSet::Transform(XbimMatrix3D matrix3D)
 		{
 			List<IXbimGeometryObject^>^ result = gcnew List<IXbimGeometryObject^>(geometryObjects->Count);

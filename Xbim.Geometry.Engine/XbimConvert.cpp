@@ -33,7 +33,7 @@ namespace Xbim
 		{
 			XbimMatrix3D m3D = ConvertMatrix3D(placement);
 			gp_Trsf trsf = XbimConvert::ToTransform(m3D);
-			return TopLoc_Location(trsf);
+			return TopLoc_Location(trsf.Inverted());
 		}
 
 

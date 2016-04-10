@@ -139,6 +139,11 @@ namespace Xbim
 			return copy;
 		}
 
+		void XbimVertex::Mesh(IXbimMeshReceiver ^ mesh, double precision, double deflection, double angle)
+		{
+			return;//maybe add an implementation for this
+		}
+
 #pragma endregion
 
 

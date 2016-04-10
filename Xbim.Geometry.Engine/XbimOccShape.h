@@ -57,7 +57,10 @@ namespace Xbim
 			virtual XbimGeometryObject^ Transformed(IIfcCartesianTransformationOperator ^transformation) abstract;
 			virtual XbimGeometryObject^ Moved(IIfcPlacement ^placement) abstract;
 			virtual XbimGeometryObject^ Moved(IIfcObjectPlacement ^objectPlacement) abstract;
-
+			virtual void Mesh(IXbimMeshReceiver^ mesh, double precision, double deflection, double angle)
+			{
+				WriteTriangulation(mesh, precision, deflection, angle);
+			}
 			// Inherited via XbimGeometryObject
 
 			

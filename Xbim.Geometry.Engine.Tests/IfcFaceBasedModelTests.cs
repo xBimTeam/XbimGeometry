@@ -28,15 +28,16 @@ namespace Ifc4GeometryTests
             {
                 var fbr = m.Instances[35] as IIfcFacetedBrep;
                 Assert.IsTrue(fbr != null, "No IfcFacetedBRep found");
-                var bodyShape = (IXbimShell)_xbimGeometryCreator.Create(fbr);
+                var bodyShape = (IXbimGeometryObjectSet)_xbimGeometryCreator.Create(fbr);
                 Assert.IsTrue(bodyShape.IsValid, "Invalid IfcFacetedBRep");
+                var shell = bodyShape.Shells.First;
                 var opening = m.Instances[133218] as IIfcExtrudedAreaSolid;
                 Assert.IsTrue(opening != null, "No IfcExtrudedAreaSolid found");
                 var window = m.Instances[133212] as IIfcOpeningElement;
                 if (window != null)
                 {
                     var cutShape = (IXbimSolid)_xbimGeometryCreator.Create(opening, (IIfcAxis2Placement3D)((IIfcLocalPlacement)window.ObjectPlacement).RelativePlacement);
-                    bodyShape.Cut(cutShape, m.ModelFactors.OneMilliMetre);
+                    shell.Cut(cutShape, m.ModelFactors.OneMilliMetre);
                 }
             }
 
