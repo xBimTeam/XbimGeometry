@@ -63,12 +63,31 @@ namespace Xbim
 			//add all top level objects in to the collection, ignore nested objects
 			List<IXbimGeometryObject^>^ result = gcnew List<IXbimGeometryObject^>(1);
 			if (!IsValid) return result->GetEnumerator();
+			const TopLoc_Location& loc = ((const TopoDS_Compound&)this).Location();
 			for (TopExp_Explorer expl(*pCompound, TopAbs_SOLID); expl.More(); expl.Next())
-				result->Add(gcnew XbimSolid(TopoDS::Solid(expl.Current())));
+			{
+				XbimSolid^ solid = gcnew XbimSolid(TopoDS::Solid(expl.Current()));
+				solid->Move(loc);
+				solid->Tag = Tag;
+				result->Add(solid);
+			}
+				
 			for (TopExp_Explorer expl(*pCompound, TopAbs_SHELL, TopAbs_SOLID); expl.More(); expl.Next())
-				result->Add(gcnew XbimShell(TopoDS::Shell(expl.Current())));
+			{
+				XbimShell^ shell = gcnew XbimShell(TopoDS::Shell(expl.Current()));
+				shell->Move(loc);
+				shell->Tag = Tag;
+				result->Add(shell);
+			}
+
 			for (TopExp_Explorer expl(*pCompound, TopAbs_FACE, TopAbs_SHELL); expl.More(); expl.Next())
-				result->Add(gcnew XbimFace(TopoDS::Face(expl.Current())));
+			{
+				XbimFace^ face = gcnew XbimFace(TopoDS::Face(expl.Current()));
+				face->Move(loc);
+				face->Tag = Tag;
+				result->Add(face);
+			}
+
 			return result->GetEnumerator();
 		}
 
