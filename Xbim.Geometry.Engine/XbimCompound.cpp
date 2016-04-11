@@ -223,7 +223,7 @@ namespace Xbim
 		XbimGeometryObject ^ XbimCompound::Moved(IIfcPlacement ^ placement)
 		{
 			if (!IsValid) return this;
-			XbimCompound^ copy = gcnew XbimCompound(this,_isSewn, _sewingTolerance); //take a copy of the shape
+			XbimCompound^ copy = gcnew XbimCompound(this,_isSewn, _sewingTolerance,Tag); //take a copy of the shape
 			TopLoc_Location loc = XbimConvert::ToLocation(placement);
 			copy->Move(loc);
 			return copy;
@@ -232,9 +232,9 @@ namespace Xbim
 		XbimGeometryObject ^ XbimCompound::Moved(IIfcObjectPlacement ^ objectPlacement)
 		{
 			if (!IsValid) return this;
-			XbimCompound^ copy = gcnew XbimCompound(this, _isSewn, _sewingTolerance); //take a copy of the shape
+			XbimCompound^ copy = gcnew XbimCompound(this, _isSewn, _sewingTolerance,Tag); //take a copy of the shape
 			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
-			copy->Move(loc);
+			copy->Move(loc);			
 			return copy;
 		}
 
