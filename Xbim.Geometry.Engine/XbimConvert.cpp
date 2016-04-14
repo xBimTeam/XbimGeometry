@@ -65,7 +65,60 @@ namespace Xbim
 					localPlacement = dynamic_cast<IIfcLocalPlacement^>(localPlacement->PlacementRelTo);
 				}
 				else if (gridPlacement != nullptr)//gridplacement;
-				{ 
+				{ 					
+					IIfcVirtualGridIntersection^ vi = gridPlacement->PlacementLocation;
+					List<IIfcGridAxis^>^ axises = Enumerable::ToList(vi->IntersectingAxes);
+					double tolerance = vi->Model->ModelFactors->Precision;
+					//its 2d, it should always be		
+					XbimCurve2D^ axis1 = gcnew XbimCurve2D(axises[0]);
+					XbimCurve2D^ axis2 = gcnew XbimCurve2D(axises[1]);
+					IEnumerable<XbimPoint3D>^ intersects = axis1->Intersections(axis2, tolerance);
+					if (!Enumerable::Any(intersects)) return trsf;
+
+					XbimPoint3D intersection = Enumerable::First(intersects);
+					gp_Ax2d ax;
+
+					if (gridPlacement->PlacementRefDirection == nullptr)
+					{
+						double p1 = axis1->GetParameter(intersection, tolerance);
+						XbimVector3D v = axis1->TangentAt(p1);
+						ax.SetDirection(gp_Dir2d(v.X, v.Y));
+					}
+					else if (dynamic_cast<IIfcDirection^>(gridPlacement->PlacementRefDirection))
+					{
+						ax.SetDirection(XbimConvert::GetDir2d((IIfcDirection^)gridPlacement->PlacementRefDirection));
+					}
+					else if (dynamic_cast<IIfcVirtualGridIntersection^>(gridPlacement->PlacementRefDirection))
+					{
+						IIfcVirtualGridIntersection^ v2 = (IIfcVirtualGridIntersection^)gridPlacement->PlacementRefDirection;
+						List<IIfcGridAxis^>^ axisesv2 = Enumerable::ToList(v2->IntersectingAxes);
+						//its 2d, it should always be		
+						XbimCurve2D^ axis1v = gcnew XbimCurve2D(axisesv2[0]);
+						XbimCurve2D^ axis2v = gcnew XbimCurve2D(axisesv2[1]);
+						IEnumerable<XbimPoint3D>^ intersectsv = axis1v->Intersections(axis2v, tolerance);
+
+						XbimPoint3D intersectionv = Enumerable::First(intersectsv);
+						XbimVector3D vec2 = intersectionv - intersection;
+						ax.SetDirection(gp_Dir2d(vec2.X, vec2.Y));
+					}
+
+					gp_Vec v = XbimConvert::GetDir3d(vi->OffsetDistances); //go for 3D
+					gp_XY xy(v.X(), v.Y());
+					gp_Trsf2d tr;
+					tr.SetTransformation(ax);
+					tr.Transforms(xy);	
+					gp_Trsf localTrans;
+					localTrans.SetTranslationPart(gp_Vec(xy.X() + intersection.X, xy.Y() + intersection.Y, v.Z()));
+					trsf.PreMultiply(localTrans);
+
+					//now adopt the placement of the grid, this is not performant
+					IIfcGrid^ grid = Enumerable::FirstOrDefault(axises[0]->PartOfU);
+					if (grid == nullptr) grid = Enumerable::FirstOrDefault(axises[0]->PartOfV);
+					if (grid == nullptr) grid = Enumerable::FirstOrDefault(axises[0]->PartOfW);
+					//we must have one now
+					
+					TopLoc_Location gridLoc = ToLocation(grid->ObjectPlacement);
+					trsf.PreMultiply(gridLoc.Transformation());				
 					localPlacement = nullptr;
 					gridPlacement = nullptr;
 				}
