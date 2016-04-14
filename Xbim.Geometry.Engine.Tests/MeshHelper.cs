@@ -1,4 +1,5 @@
-﻿using Xbim.Ifc4;
+﻿using Xbim.Common.Geometry;
+using Xbim.Ifc4;
 
 namespace GeometryTests
 {
@@ -8,6 +9,7 @@ namespace GeometryTests
         public int FaceCount;
         public int TriangleIndicesCount;
         public int TriangleCount;
+        public XbimRect3D BoundingBox = XbimRect3D.Empty;
 
         public void BeginUpdate()
         {
@@ -32,6 +34,7 @@ namespace GeometryTests
         public int AddNode(int face, double px, double py, double pz, double nx, double ny, double nz, double u, double v)
         {
             PointCount++;
+            BoundingBox.Union(new XbimPoint3D(px, py, pz));
             return PointCount;
         }
 
@@ -39,6 +42,7 @@ namespace GeometryTests
         {
            // Console.WriteLine("{0}, {1}, {2} - {3}, {4}, {5}", px, py, pz, nx,ny,nz);
             PointCount++;
+            BoundingBox.Union(new XbimPoint3D(px,py,pz));
             return PointCount;
         }
 
@@ -46,6 +50,7 @@ namespace GeometryTests
         {
             
             PointCount++;
+            BoundingBox.Union(new XbimPoint3D(px, py, pz));
             return PointCount;
         }
 
@@ -60,5 +65,7 @@ namespace GeometryTests
         }
 
         public IPhongMaterial Material { get; set; }
+      
+        
     }
 }

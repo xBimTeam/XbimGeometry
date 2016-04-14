@@ -67,7 +67,7 @@ namespace Xbim
 			for (TopExp_Explorer expl(*pCompound, TopAbs_SOLID); expl.More(); expl.Next())
 			{
 				XbimSolid^ solid = gcnew XbimSolid(TopoDS::Solid(expl.Current()));
-				solid->Move(loc);
+				//solid->Move(loc);
 				solid->Tag = Tag;
 				result->Add(solid);
 			}
@@ -75,7 +75,7 @@ namespace Xbim
 			for (TopExp_Explorer expl(*pCompound, TopAbs_SHELL, TopAbs_SOLID); expl.More(); expl.Next())
 			{
 				XbimShell^ shell = gcnew XbimShell(TopoDS::Shell(expl.Current()));
-				shell->Move(loc);
+				//shell->Move(loc);
 				shell->Tag = Tag;
 				result->Add(shell);
 			}
@@ -83,7 +83,7 @@ namespace Xbim
 			for (TopExp_Explorer expl(*pCompound, TopAbs_FACE, TopAbs_SHELL); expl.More(); expl.Next())
 			{
 				XbimFace^ face = gcnew XbimFace(TopoDS::Face(expl.Current()));
-				face->Move(loc);
+				//face->Move(loc);
 				face->Tag = Tag;
 				result->Add(face);
 			}

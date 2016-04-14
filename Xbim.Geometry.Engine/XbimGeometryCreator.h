@@ -18,6 +18,8 @@ namespace Xbim
 
 		public ref class XbimGeometryCreator : IXbimGeometryEngine
 		{
+		private:
+			IXbimGeometryObject ^ Trim(XbimSetObject ^geometryObject);
 		protected:
 			~XbimGeometryCreator()
 			{
@@ -177,7 +179,7 @@ namespace Xbim
 				return Moved(geometryObject, (IIfcPlacement ^)placement);
 			};
 			virtual IXbimGeometryObject ^ Moved(IXbimGeometryObject ^geometryObject, IIfcObjectPlacement ^objectPlacement);
-			IXbimGeometryObject ^ Trim(XbimSetObject ^geometryObject);
+			
 		};
 	}
 }

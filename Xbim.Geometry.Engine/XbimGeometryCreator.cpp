@@ -74,8 +74,7 @@ namespace Xbim
 #pragma region  Creation
 		
 		void XbimGeometryCreator::Mesh(IXbimMeshReceiver^ mesh, IXbimGeometryObject^ geometryObject, double precision, double deflection, double angle)
-		{
-			mesh->BeginUpdate();
+		{			
 			XbimSetObject^ objSet = dynamic_cast<XbimSetObject^>(geometryObject);
 			XbimOccShape^ occObject = dynamic_cast<XbimOccShape^>(geometryObject);
 			if(objSet!=nullptr)
@@ -83,8 +82,7 @@ namespace Xbim
 			else if (occObject != nullptr)
 				occObject->Mesh(mesh, precision, deflection, angle);
 			else
-				throw gcnew Exception("Unsupported geometry type cannot be meshed");
-			mesh->EndUpdate();
+				throw gcnew Exception("Unsupported geometry type cannot be meshed");			
 		}
 
 

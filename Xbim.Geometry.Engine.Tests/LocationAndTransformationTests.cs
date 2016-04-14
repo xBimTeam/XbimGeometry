@@ -132,15 +132,30 @@ namespace GeometryTests
             {
                 using (var txn = m.BeginTransaction())
                 {
-                    var block = IfcModelBuilder.MakeBlock(m, 10, 10, 10);
+                    var block = IfcModelBuilder.MakeBlock(m, 50, 10, 10);
                     var solid = _geomEngine.CreateSolid(block);
                     var placement = IfcModelBuilder.MakeLocalPlacement(m);
-                    ((IfcAxis2Placement3D) placement.RelativePlacement).Location.Z = 100;
+                    ((IfcAxis2Placement3D) placement.RelativePlacement).Location.X = 100;
                     var bb = solid.BoundingBox;
                     var solidA = _geomEngine.Moved(solid, placement) as IXbimSolid;
                     Assert.IsNotNull(solidA, "Should be the same type as the master");
                     var displacement = solidA.BoundingBox.Centroid() - solid.BoundingBox.Centroid();
-                    Assert.IsTrue(displacement == new XbimVector3D(0, 0,100));
+                    Assert.IsTrue(displacement == new XbimVector3D(100,0, 0));
+
+                    var placementRelTo = ((IfcLocalPlacement) placement.PlacementRelTo);
+                    var zDir = m.Instances.New<IfcDirection>(d => d.SetXYZ(0, 0, 1));
+                    ((IfcAxis2Placement3D) placementRelTo.RelativePlacement).Axis = zDir;
+                    var yDir = m.Instances.New<IfcDirection>(d => d.SetXYZ(0, 1, 0));
+                    ((IfcAxis2Placement3D)placementRelTo.RelativePlacement).RefDirection = yDir; //point in Y
+                    ((IfcAxis2Placement3D)placementRelTo.RelativePlacement).Location.X = 2000;
+                    var solidB = _geomEngine.Moved(solid, placement) as IXbimSolid;
+                    displacement = solidB.BoundingBox.Centroid() - solid.BoundingBox.Centroid();
+                    var meshbuilder = new MeshHelper();
+                    _geomEngine.Mesh(meshbuilder,solidB,m.ModelFactors.Precision,m.ModelFactors.DeflectionTolerance);
+                    var box = meshbuilder.BoundingBox;
+                    Assert.IsTrue(displacement == new XbimVector3D(100,2000,0));
+
+
                 }
             }
         }

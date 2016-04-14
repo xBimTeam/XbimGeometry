@@ -29,11 +29,53 @@ namespace Xbim
 		}
 
 		// Converts an ObjectPlacement into a TopLoc_Location
-		TopLoc_Location XbimConvert::ToLocation(IIfcObjectPlacement^ placement)
+		TopLoc_Location XbimConvert::ToLocation(IIfcObjectPlacement^ objPlacement)
 		{
-			XbimMatrix3D m3D = ConvertMatrix3D(placement);
-			gp_Trsf trsf = XbimConvert::ToTransform(m3D);
-			return TopLoc_Location(trsf);
+						
+			IIfcLocalPlacement^ localPlacement = dynamic_cast<IIfcLocalPlacement^>(objPlacement);
+			IIfcGridPlacement^ gridPlacement = dynamic_cast<IIfcGridPlacement^>(objPlacement);
+			gp_Trsf trsf;
+
+			while (localPlacement != nullptr || gridPlacement != nullptr)
+			{
+				if (localPlacement != nullptr)
+				{
+					IIfcAxis2Placement3D^ axisPlacement3D = dynamic_cast<IIfcAxis2Placement3D^>(localPlacement->RelativePlacement);
+					IIfcAxis2Placement2D^ axisPlacement2D = dynamic_cast<IIfcAxis2Placement2D^>(localPlacement->RelativePlacement);
+					if (axisPlacement3D != nullptr)
+					{
+						gp_Trsf relTrsf;
+						gp_Pnt p = XbimConvert::GetPoint3d(axisPlacement3D->Location);
+						if (axisPlacement3D->RefDirection != nullptr && axisPlacement3D->Axis != nullptr)
+						{
+							gp_Ax3 ax3(p, GetDir3d(axisPlacement3D->Axis), GetDir3d(axisPlacement3D->RefDirection));
+							relTrsf.SetTransformation(ax3, gp_Ax3(gp_Pnt(), gp_Dir(0, 0, 1), gp_Dir(1, 0, 0)));
+						}
+						else
+						{
+							gp_Ax3 ax3(p, gp_Dir(0, 0, 1), gp_Dir(1, 0, 0));
+							relTrsf.SetTransformation(ax3, gp_Ax3(gp_Pnt(), gp_Dir(0, 0, 1), gp_Dir(1, 0, 0)));
+						}
+						trsf.PreMultiply(relTrsf);
+					}
+					else //must be 2D
+					{
+						throw(gcnew System::NotImplementedException("Support for Placements other than 3D not implemented"));
+					}
+					localPlacement = dynamic_cast<IIfcLocalPlacement^>(localPlacement->PlacementRelTo);
+				}
+				else if (gridPlacement != nullptr)//gridplacement;
+				{ 
+					localPlacement = nullptr;
+					gridPlacement = nullptr;
+				}
+				else
+				{
+					localPlacement = nullptr;
+					gridPlacement = nullptr;
+				}				
+			} 
+			return TopLoc_Location(trsf); 
 		}
 
 
