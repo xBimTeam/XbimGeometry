@@ -206,6 +206,19 @@ namespace Xbim
 		void XbimOccShape::WriteTriangulation(IXbimMeshReceiver^ meshReceiver, double tolerance, double deflection, double angle)
 		{
 			if (!IsValid) return;
+			if (meshReceiver == nullptr)
+			{
+				try
+				{
+					Monitor::Enter(this);
+					BRepMesh_IncrementalMesh incrementalMesh(this, deflection, Standard_False, angle); //triangulate the first time	
+				}
+				finally
+				{
+					Monitor::Exit(this);
+				}
+				return;
+			}
 			TopTools_IndexedMapOfShape faceMap;
 			TopoDS_Shape shape = this; //hold on to it
 			TopExp::MapShapes(shape, TopAbs_FACE, faceMap);
