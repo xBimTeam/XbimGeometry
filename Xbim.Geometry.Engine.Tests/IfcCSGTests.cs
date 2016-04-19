@@ -143,7 +143,9 @@ namespace Ifc4GeometryTests
                     Assert.IsTrue(solid.Faces.Count == 1, "1 face is required of a sphere");
                     Assert.IsTrue(solid.Vertices.Count == 2, "2 vertices are required of a sphere");
                     var meshRec = new MeshHelper();
+                    meshRec.BeginUpdate();
                     _xbimGeometryCreator.Mesh(meshRec, solid, m.ModelFactors.Precision, m.ModelFactors.DeflectionTolerance * 10);
+                    meshRec.EndUpdate();
                     Assert.IsTrue(meshRec.FaceCount == 1, "1 mesh face is required of a sphere");
                     Assert.IsTrue(meshRec.PointCount == 193, "193 mesh points are required of a sphere");
                     Assert.IsTrue(meshRec.TriangleCount == 358, "358 triangles are required of a sphere");

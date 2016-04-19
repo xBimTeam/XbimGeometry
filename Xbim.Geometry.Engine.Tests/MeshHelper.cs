@@ -64,7 +64,9 @@ namespace GeometryTests
             TriangleIndicesCount += 6;
         }
 
-        public IPhongMaterial Material { get; set; }
+        public SurfaceStyling SurfaceStyling { get; set; }
+
+       
       
         
     }

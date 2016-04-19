@@ -153,7 +153,7 @@ namespace GeometryTests
                     var meshbuilder = new MeshHelper();
                     _geomEngine.Mesh(meshbuilder,solidB,m.ModelFactors.Precision,m.ModelFactors.DeflectionTolerance);
                     var box = meshbuilder.BoundingBox;
-                    Assert.IsTrue(displacement == new XbimVector3D(100,2000,0));
+                    Assert.IsTrue(displacement == new XbimVector3D(1970,120,0));
 
 
                 }
