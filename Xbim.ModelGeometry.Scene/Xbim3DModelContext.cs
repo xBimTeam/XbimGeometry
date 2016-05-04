@@ -329,11 +329,20 @@ namespace Xbim.ModelGeometry.Scene
 
             private void GetOpeningsAndProjections()
             {
-                var compoundElementsDictionary =
-                    Model.Instances.OfType<IIfcRelAggregates>()
-                        .Where(x => x.RelatingObject is IIfcElement)
-                        .ToDictionary(x => x.RelatingObject, y => y.RelatedObjects);
-
+                var compoundElementsDictionary = new Dictionary<IIfcObjectDefinition, List<IEnumerable<IIfcObjectDefinition>>>();
+                {
+                    var relations = Model.Instances.OfType<IIfcRelAggregates>()
+                        .Where(x => x.RelatingObject is IIfcElement);
+                    foreach (var rel in relations) {
+                        var relatingElement = rel.RelatingObject;
+                        if (!compoundElementsDictionary.ContainsKey(relatingElement)) {
+                            compoundElementsDictionary[relatingElement] = new List<IEnumerable<IIfcObjectDefinition>> { rel.RelatedObjects };
+                        }
+                        else {
+                            compoundElementsDictionary[relatingElement].Add(rel.RelatedObjects);
+                        }
+                    }
+                }
 
                 // openings
                 var elementsWithFeatures = new List<ElementWithFeature>();
@@ -345,12 +354,12 @@ namespace Xbim.ModelGeometry.Scene
                 foreach (var openingRelation in openingRelations)
                 {
                     // process parts
-                    IEnumerable<IIfcObjectDefinition> childrenElements;
+                    List<IEnumerable<IIfcObjectDefinition>> childrenElements;
                     if (compoundElementsDictionary.TryGetValue(openingRelation.RelatingBuildingElement,
                         out childrenElements))
                     {
                         elementsWithFeatures.AddRange(
-                            childrenElements.OfType<IIfcElement>().Select(childElement => new ElementWithFeature()
+                            childrenElements.SelectMany(c => c).OfType<IIfcElement>().Select(childElement => new ElementWithFeature()
                             {
                                 Element = childElement,
                                 Feature = openingRelation.RelatedOpeningElement
@@ -367,31 +376,31 @@ namespace Xbim.ModelGeometry.Scene
 
 
                 // projections
-                var projectingRelations = Model.Instances.OfType<IIfcRelVoidsElement>()
+                var projectingRelations = Model.Instances.OfType<IIfcRelProjectsElement>()
                     .Where(
                         r =>
-                            r.RelatingBuildingElement.Representation != null &&
-                            r.RelatedOpeningElement.Representation != null).ToList();
+                            r.RelatingElement.Representation != null &&
+                            r.RelatedFeatureElement.Representation != null).ToList();
                 foreach (var projectionRelation in projectingRelations)
                 {
                     // process parts
-                    IEnumerable<IIfcObjectDefinition> childrenElements;
-                    if (compoundElementsDictionary.TryGetValue(projectionRelation.RelatingBuildingElement,
+                    List<IEnumerable<IIfcObjectDefinition>> childrenElements;
+                    if (compoundElementsDictionary.TryGetValue(projectionRelation.RelatingElement,
                         out childrenElements))
                     {
                         elementsWithFeatures.AddRange(
-                            childrenElements.OfType<IIfcElement>().Select(childElement => new ElementWithFeature()
+                            childrenElements.SelectMany(c => c).OfType<IIfcElement>().Select(childElement => new ElementWithFeature()
                             {
                                 Element = childElement,
-                                Feature = projectionRelation.RelatedOpeningElement
+                                Feature = projectionRelation.RelatedFeatureElement
                             }));
                     }
 
                     // process parent
                     elementsWithFeatures.Add(new ElementWithFeature()
                     {
-                        Element = projectionRelation.RelatingBuildingElement,
-                        Feature = projectionRelation.RelatedOpeningElement
+                        Element = projectionRelation.RelatingElement,
+                        Feature = projectionRelation.RelatedFeatureElement
                     });
                 }
 
