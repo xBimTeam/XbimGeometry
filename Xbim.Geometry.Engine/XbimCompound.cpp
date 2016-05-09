@@ -669,7 +669,7 @@ namespace Xbim
 			for each (IIfcFace^ unloadedFace in  faces)
 			{
 				IIfcFace^ fc = (IIfcFace^) model->Instances[unloadedFace->EntityLabel]; //improves performance and reduces memory load
-				List<Tuple<XbimWire^, IIfcPolyLoop^>^>^ loops = gcnew List<Tuple<XbimWire^, IIfcPolyLoop^>^>();
+				List<Tuple<XbimWire^, IIfcPolyLoop^, bool>^>^ loops = gcnew List<Tuple<XbimWire^, IIfcPolyLoop^, bool>^>();
 				for each (IIfcFaceBound^ bound in fc->Bounds) //build all the loops
 				{
 					
@@ -698,13 +698,13 @@ namespace Xbim
 						{
 							if (!bound->Orientation)
 								loop->Reverse(); 
-							loops->Add(gcnew Tuple<XbimWire^, IIfcPolyLoop^>(loop, polyLoop));
+							loops->Add(gcnew Tuple<XbimWire^, IIfcPolyLoop^, bool>(loop, polyLoop,bound->Orientation));
 						}
 					}
 				
 				}
 				XbimFace^ face = BuildFace(loops, fc);
-				for each (Tuple<XbimWire^, IIfcPolyLoop^>^ loop in loops) delete loop->Item1; //force removal of wires
+				for each (Tuple<XbimWire^, IIfcPolyLoop^, bool>^ loop in loops) delete loop->Item1; //force removal of wires
 				if (face->IsValid)
 					builder.Add(shell, face);
 				else
@@ -726,24 +726,26 @@ namespace Xbim
 
 
 		
-		XbimFace^ XbimCompound::BuildFace(List<Tuple<XbimWire^, IIfcPolyLoop^>^>^ wires, IIfcFace^ owningFace)
+		XbimFace^ XbimCompound::BuildFace(List<Tuple<XbimWire^, IIfcPolyLoop^, bool>^>^ wires, IIfcFace^ owningFace)
 		{
 
 			if (wires->Count == 0) return gcnew XbimFace();
 			IIfcCartesianPoint^ first = Enumerable::First(wires[0]->Item2->Polygon);
 			XbimPoint3D p(first->X, first->Y, first->Z);
 			XbimVector3D n = XbimConvert::NewellsNormal(wires[0]->Item2);
+			if (!wires[0]->Item3) n = n.Negated();
 			XbimFace^ face = gcnew XbimFace(wires[0]->Item1, p, n);
 			if (wires->Count == 1) return face; //take the first one
 
 			for (int i = 1; i < wires->Count; i++) face->Add(wires[i]->Item1);
 			IXbimWire^ outerBound = face->OuterBound;
 			XbimVector3D faceNormal;// = outerBound->Normal;
-			for each (Tuple<XbimWire^, IIfcPolyLoop^>^ wire in wires)
+			for each (Tuple<XbimWire^, IIfcPolyLoop^, bool>^ wire in wires)
 			{
 				if (wire->Item1->Equals(outerBound))
 				{
 					faceNormal = XbimConvert::NewellsNormal(wire->Item2);
+					if (!wire->Item3) faceNormal = faceNormal.Negated();
 					break;
 				}
 			}
@@ -756,6 +758,7 @@ namespace Xbim
 				if (!wire->Equals(outerBound))
 				{
 					XbimVector3D loopNormal = XbimConvert::NewellsNormal(wires[i]->Item2);
+					if (!wires[i]->Item3)loopNormal = loopNormal.Negated();
 					if (faceNormal.DotProduct(loopNormal) > 0) //they should be in opposite directions, so reverse
 						wire->Reverse();
 					if (!face->Add(wire))
