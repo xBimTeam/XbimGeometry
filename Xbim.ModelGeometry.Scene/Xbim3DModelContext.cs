@@ -367,31 +367,30 @@ namespace Xbim.ModelGeometry.Scene
 
 
                 // projections
-                var projectingRelations = Model.Instances.OfType<IIfcRelVoidsElement>()
+                var projectingRelations = Model.Instances.OfType<IIfcRelProjectsElement>()
                     .Where(
                         r =>
-                            r.RelatingBuildingElement.Representation != null &&
-                            r.RelatedOpeningElement.Representation != null).ToList();
+                            r.RelatingElement.Representation != null &&
+                            r.RelatedFeatureElement.Representation != null).ToList();
                 foreach (var projectionRelation in projectingRelations)
                 {
                     // process parts
                     IEnumerable<IIfcObjectDefinition> childrenElements;
-                    if (compoundElementsDictionary.TryGetValue(projectionRelation.RelatingBuildingElement,
-                        out childrenElements))
+                    if (compoundElementsDictionary.TryGetValue(projectionRelation.RelatingElement, out childrenElements))
                     {
                         elementsWithFeatures.AddRange(
                             childrenElements.OfType<IIfcElement>().Select(childElement => new ElementWithFeature()
                             {
                                 Element = childElement,
-                                Feature = projectionRelation.RelatedOpeningElement
+                                Feature = projectionRelation.RelatedFeatureElement
                             }));
                     }
 
                     // process parent
                     elementsWithFeatures.Add(new ElementWithFeature()
                     {
-                        Element = projectionRelation.RelatingBuildingElement,
-                        Feature = projectionRelation.RelatedOpeningElement
+                        Element = projectionRelation.RelatingElement,
+                        Feature = projectionRelation.RelatedFeatureElement
                     });
                 }
 
@@ -1129,8 +1128,8 @@ namespace Xbim.ModelGeometry.Scene
                     }
                 }
             }
-            Parallel.ForEach(contextHelper.ProductShapeIds, contextHelper.ParallelOptions, shapeId =>
-           //    foreach (var shapeId in contextHelper.ProductShapeIds)
+            // Parallel.ForEach(contextHelper.ProductShapeIds, contextHelper.ParallelOptions, shapeId =>
+             foreach (var shapeId in contextHelper.ProductShapeIds)
              {
                  Interlocked.Increment(ref localTally);
                  var shape = (IIfcGeometricRepresentationItem)Model.Instances[shapeId];
@@ -1235,7 +1234,7 @@ namespace Xbim.ModelGeometry.Scene
                      }
                  }
              }
-             );
+             //);
 
             contextHelper.PercentageParsed = localPercentageParsed;
             contextHelper.Tally = localTally;
