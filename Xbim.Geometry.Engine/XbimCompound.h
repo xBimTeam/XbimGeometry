@@ -41,7 +41,7 @@ namespace Xbim
 			void Init(IfcFacetedBrepWithVoids^ solid);
 			void Init(IfcClosedShell^ solid);
 			//Helpers
-			XbimFace^ BuildFace(List<Tuple<XbimWire^, IfcPolyLoop^>^>^ wires, int label);
+			XbimFace^ BuildFace(List<Tuple<XbimWire^, IfcPolyLoop^, bool>^>^ wires, IfcFace^ face);
 			static void  GetConnected(HashSet<XbimSolid^>^ connected, Dictionary<XbimSolid^, HashSet<XbimSolid^>^>^ clusters, XbimSolid^ clusterAround);
 			
 			

@@ -31,8 +31,8 @@
 #include <GProp_GProps.hxx>
 #include <BRepGProp.hxx>
 
-
 using namespace System;
+using namespace System::Linq;
 using namespace Xbim::Ifc2x3::Extensions;
 using namespace Xbim::XbimExtensions;
 using namespace Xbim::XbimExtensions::Interfaces;
@@ -366,7 +366,7 @@ namespace Xbim
 			for each (IfcFace^ unloadedFace in  faces)
 			{
 				IfcFace^ fc = (IfcFace^) model->Instances[unloadedFace->EntityLabel]; //improves performance and reduces memory load
-				List<Tuple<XbimWire^, IfcPolyLoop^>^>^ loops = gcnew List<Tuple<XbimWire^, IfcPolyLoop^>^>();
+				List<Tuple<XbimWire^, IfcPolyLoop^, bool>^>^ loops = gcnew List<Tuple<XbimWire^, IfcPolyLoop^, bool>^>();
 				for each (IfcFaceBound^ bound in fc->Bounds) //build all the loops
 				{
 					if (!dynamic_cast<IfcPolyLoop^>(bound->Bound) || ((IfcPolyLoop^)bound->Bound)->Polygon->Count < 3) continue;//skip non-polygonal faces
@@ -395,13 +395,13 @@ namespace Xbim
 						{
 							if (!bound->Orientation)
 								loop->Reverse(); 
-							loops->Add(gcnew Tuple<XbimWire^, IfcPolyLoop^>(loop, polyLoop));
+							loops->Add(gcnew Tuple<XbimWire^, IfcPolyLoop^, bool>(loop, polyLoop,bound->Orientation));
 						}
 					}
 				
 				}
-				XbimFace^ face = BuildFace(loops, fc->EntityLabel);
-				for each (Tuple<XbimWire^, IfcPolyLoop^>^ loop in loops) delete loop->Item1; //force removal of wires
+				XbimFace^ face = BuildFace(loops, fc);
+				for each (Tuple<XbimWire^, IfcPolyLoop^, bool>^ loop in loops) delete loop->Item1; //force removal of wires
 				if (face->IsValid)
 					builder.Add(shell, face);
 				else
@@ -423,28 +423,30 @@ namespace Xbim
 
 
 		
-		XbimFace^ XbimCompound::BuildFace(List<Tuple<XbimWire^, IfcPolyLoop^>^>^ wires, int label)
+		XbimFace^ XbimCompound::BuildFace(List<Tuple<XbimWire^, IfcPolyLoop^, bool>^>^ wires, IfcFace^ owningFace)
 		{
 
 			if (wires->Count == 0) return gcnew XbimFace();
-
-			XbimPoint3D p = wires[0]->Item2->Polygon[0]->XbimPoint3D();
+			IfcCartesianPoint^ first = Enumerable::First(wires[0]->Item2->Polygon);
+			XbimPoint3D p(first->X, first->Y, first->Z);
 			XbimVector3D n = PolyLoopExtensions::NewellsNormal(wires[0]->Item2);
+			if (!wires[0]->Item3) n.Negate();
 			XbimFace^ face = gcnew XbimFace(wires[0]->Item1, p, n);
 			if (wires->Count == 1) return face; //take the first one
 
 			for (int i = 1; i < wires->Count; i++) face->Add(wires[i]->Item1);
 			IXbimWire^ outerBound = face->OuterBound;
 			XbimVector3D faceNormal;// = outerBound->Normal;
-			for each (Tuple<XbimWire^, IfcPolyLoop^>^ wire in wires)
+			for each (Tuple<XbimWire^, IfcPolyLoop^, bool>^ wire in wires)
 			{
 				if (wire->Item1->Equals(outerBound))
 				{
 					faceNormal = PolyLoopExtensions::NewellsNormal(wire->Item2);
+					if (!wire->Item3) faceNormal.Negate();
 					break;
 				}
 			}
-		
+
 			face = gcnew XbimFace(outerBound, p, faceNormal); //create  a face with the right bound and direction
 
 			for (int i = 1; i < wires->Count; i++)
@@ -453,10 +455,11 @@ namespace Xbim
 				if (!wire->Equals(outerBound))
 				{
 					XbimVector3D loopNormal = PolyLoopExtensions::NewellsNormal(wires[i]->Item2);
+					if (!wires[i]->Item3) loopNormal.Negate();
 					if (faceNormal.DotProduct(loopNormal) > 0) //they should be in opposite directions, so reverse
 						wire->Reverse();
 					if (!face->Add(wire))
-						XbimGeometryCreator::logger->WarnFormat("WC003: Failed to add an inner bound to IfcFace #{0}", label);
+						XbimGeometryCreator::logger->WarnFormat("Failed to add an inner bound for face #{0}.", owningFace->EntityLabel);
 				}
 			}
 			return face;
