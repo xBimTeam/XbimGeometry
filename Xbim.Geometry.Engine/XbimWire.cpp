@@ -1133,9 +1133,9 @@ namespace Xbim
 						BRepAdaptor_Curve curve(wEx.Current());
 						double us = curve.FirstParameter();
 						double ue = curve.LastParameter();
-						double u1 = (us + ue) / 4;
-						double u2 = ((us + ue) / 4) * 2;
-						double u3 = ((us + ue) / 4) * 3;
+						double u1 = us + ((ue - us) / 4);
+						double u2 = us + (((ue - us) / 4) * 2);
+						double u3 = us + (((ue - us) / 4) * 3);
 						gp_Pnt p1;gp_Pnt p2;gp_Pnt p3;
 						gp_Vec v1; gp_Vec v2; gp_Vec v3;
 						curve.D1(u1, p1, v1);
