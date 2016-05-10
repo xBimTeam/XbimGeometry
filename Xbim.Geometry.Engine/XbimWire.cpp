@@ -312,10 +312,21 @@ namespace Xbim
 			//Make all the vertices
 			Standard_Boolean closed = Standard_False;
 
-			if (XbimConvert::IsEqual(pointList[0], pointList[total - 1], tolerance))
+			do
 			{
-				total--; //skip the last point
-				closed = Standard_True;
+				if (XbimConvert::IsEqual(pointList[0], pointList[total - 1], tolerance))
+				{
+					total--; //skip the last point
+					closed = Standard_True;
+				}
+				else
+					break;
+			} while (total > 1);
+
+			if (total < 2)
+			{
+				XbimGeometryCreator::LogWarning(pLine, "Polyline with less than 2 points found. Wire discarded");
+				return;
 			}
 
 			TopTools_Array1OfShape vertexStore(1, total + 1);
@@ -1251,17 +1262,17 @@ namespace Xbim
 			int numIntervals = cc.NbIntervals(continuity);
 			TColStd_Array1OfReal res(1, numIntervals + 1);
 			cc.Intervals(res, GeomAbs_C0);
-			List<XbimPoint3D>^ intervals = gcnew List<XbimPoint3D>(numIntervals + 1);
+			List<XbimPoint3D>^ intervals = gcnew List<XbimPoint3D>(numIntervals);
 			for (Standard_Integer i = 1; i <= numIntervals; i++)
 			{
 				gp_Pnt p = cc.Value(res.Value(i));
 				intervals->Add(XbimPoint3D(p.X(), p.Y(), p.Z()));
 			}
-			if (!IsClosed)
+			/*if (!IsClosed)
 			{
 				gp_Pnt l = cc.Value(cc.LastParameter());
 				intervals->Add(XbimPoint3D(l.X(), l.Y(), l.Z()));
-			}
+			}*/
 			return intervals;
 		}
 
