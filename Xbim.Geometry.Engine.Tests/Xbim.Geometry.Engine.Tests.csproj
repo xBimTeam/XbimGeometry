@@ -56,6 +56,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="AdvBrepRecursionTests.cs" />
     <Compile Include="Diff.cs" />
     <Compile Include="IfcExtrudedAreaSolidTests.cs" />
     <Compile Include="IfcModelBuilder.cs" />
@@ -192,6 +193,15 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Ifc4TestFiles\long-running-boolean.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Ifc4TestFiles\NBSAdvancedBreps\ASH_ArmitageShanks_BathTaps_Sandringham21-Pillars_B9866-_-Plumbing Fixtures.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Ifc4TestFiles\NBSAdvancedBreps\ASH_ArmitageShanks_CounterTopWashBasins_Orbit21_55cm-_-Plumbing Fixtures.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Ifc4TestFiles\NBSAdvancedBreps\ASH_ArmitageShanks_CounterTopWashBasins_Planet21_50cm-_-Plumbing Fixtures.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Ifc4TestFiles\ReinforcingAssembly.ifc">

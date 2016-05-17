@@ -738,10 +738,6 @@ namespace Xbim
 		}
 		void XbimFace::Init(IIfcRationalBSplineSurfaceWithKnots ^ surface)
 		{
-			if (dynamic_cast<IIfcRationalBSplineSurfaceWithKnots^>(surface))
-				return Init((IIfcRationalBSplineSurfaceWithKnots^)surface);
-
-
 			List<List<XbimPoint3D>^>^ ifcControlPoints = surface->ControlPoints;
 			if (surface->ControlPoints->Count < 2) throw gcnew XbimException("Incorrect number of poles for Bspline surface, must be at least 2");
 			TColgp_Array2OfPnt poles(1, (Standard_Integer)surface->UUpper + 1, 1, (Standard_Integer)surface->VUpper + 1);
@@ -759,10 +755,10 @@ namespace Xbim
 
 			List<List<Ifc4::MeasureResource::IfcReal>^>^ ifcWeights = surface->Weights;
 			TColStd_Array2OfReal weights(1, (Standard_Integer)surface->UUpper + 1, 1, (Standard_Integer)surface->VUpper + 1);
-			for (int u = 0; u <= surface->UUpper; u++)
+			for (int u = 0; u < surface->UUpper; u++)
 			{
 				List<Ifc4::MeasureResource::IfcReal>^ uRow = ifcWeights[u];
-				for (int v = 0; v <= surface->UUpper; v++)
+				for (int v = 0; v < surface->UUpper; v++)
 				{
 					double r = uRow[v];
 					weights.SetValue(u + 1, v + 1, r);
@@ -799,12 +795,22 @@ namespace Xbim
 				vMultiplicities.SetValue(i, multiplicity);
 				i++;
 			}
+			//TODO: REMOVE THIS TRY CATCH
+			try
+			{
+				Standard_Integer uDegree = (Standard_Integer)surface->UDegree;
+				Standard_Integer vDegree = (Standard_Integer)surface->VDegree;
+				Handle(Geom_BSplineSurface) hSurface = new Geom_BSplineSurface(poles,weights, uknots, vknots, uMultiplicities, vMultiplicities, uDegree, vDegree);
+				BRepBuilderAPI_MakeFace faceMaker(hSurface, surface->Model->ModelFactors->Precision);
+				pFace = new TopoDS_Face();
+				*pFace = faceMaker.Face();
 
-			Handle(Geom_BSplineSurface) hSurface = new Geom_BSplineSurface(poles,weights, uknots, vknots, uMultiplicities, vMultiplicities, (Standard_Integer)surface->UDegree, (Standard_Integer)surface->VDegree);
-			BRepBuilderAPI_MakeFace faceMaker(hSurface, surface->Model->ModelFactors->Precision);
+			}
+			catch (Standard_Failure e)
+			{
+				cout << "g";
+			}
 
-			pFace = new TopoDS_Face();
-			*pFace = faceMaker.Face();
 
 		}
 
