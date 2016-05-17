@@ -403,7 +403,7 @@ namespace Xbim
 				pFace = new TopoDS_Face();
 				*pFace = faceMaker.Face();
 				XbimVector3D tn = Normal;
-
+				
 				for each(IIfcCurve^ curve in profile->InnerCurves)
 				{
 
