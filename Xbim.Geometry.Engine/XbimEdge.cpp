@@ -231,15 +231,29 @@ namespace Xbim
 		XbimEdge::XbimEdge(IIfcCurve^ edgeCurve, XbimVertex^ start, XbimVertex^ end)
 		{
 			Init(edgeCurve);
-			
-
+			double tolerance = edgeCurve->Model->ModelFactors->Precision;
+			double toleranceMax = edgeCurve->Model->ModelFactors->PrecisionMax;
+			double currentTolerance = tolerance;
 			if (IsValid &&!start->Equals(end))//must be a closed loop or nothing, no need to trim			
 			{
 				Standard_Real p1, p2;
 				Handle(Geom_Curve)  curve = BRep_Tool::Curve(this, p1, p2);
 				curve = BRep_Tool::Curve(this, p1, p2);
-				BRepBuilderAPI_MakeEdge edgeMaker(curve, start, end);
+				ShapeFix_ShapeTolerance FTol;
+			TryMakeEdge:
+				BRepBuilderAPI_MakeEdge edgeMaker(curve, start, end);			
 				BRepBuilderAPI_EdgeError edgeErr = edgeMaker.Error();
+				if (edgeErr != BRepBuilderAPI_EdgeDone)
+				{
+					currentTolerance *= 10;
+					if (currentTolerance <= toleranceMax)
+					{
+						FTol.SetTolerance(start, currentTolerance);
+						FTol.SetTolerance(end, currentTolerance);
+						goto TryMakeEdge;
+					}
+				}
+				
 				if (edgeErr != BRepBuilderAPI_EdgeDone)
 				{
 					String^ errMsg = XbimEdge::GetBuildEdgeErrorMessage(edgeErr);

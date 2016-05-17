@@ -86,7 +86,7 @@ namespace Xbim
 
 		XbimFace::XbimFace(XbimVector3D n)
 		{
-			gp_Pln plane(gp_Pnt(0,0,0),  gp_Dir(n.X,n.Y,n.Z));
+			gp_Pln plane(gp_Pnt(0, 0, 0), gp_Dir(n.X, n.Y, n.Z));
 			BRepBuilderAPI_MakeFace faceMaker(plane);
 			pFace = new TopoDS_Face();
 			*pFace = faceMaker.Face();
@@ -118,7 +118,7 @@ namespace Xbim
 		{
 			Init(def);
 		}
-		
+
 		XbimFace::XbimFace(IIfcRectangularTrimmedSurface^ def)
 		{
 			Init(def);
@@ -138,7 +138,7 @@ namespace Xbim
 		{
 			Init(sLin);
 		}
-		
+
 		XbimFace::XbimFace(IIfcSurfaceOfRevolution^ sRev)
 		{
 			Init(sRev);
@@ -175,7 +175,7 @@ namespace Xbim
 
 		XbimFace::XbimFace(double x, double y, double tolerance)
 		{
-			Init(x,y,tolerance);
+			Init(x, y, tolerance);
 		}
 
 		XbimFace::XbimFace(IIfcSurface^ surface, XbimWire^ outerBound, IEnumerable<XbimWire^>^ innerBounds)
@@ -187,7 +187,7 @@ namespace Xbim
 			for each (XbimWire^ inner in innerBounds)
 			{
 				faceMaker.Add(inner);
-			}			
+			}
 			*pFace = faceMaker.Face();
 		}
 
@@ -202,7 +202,7 @@ namespace Xbim
 			ShapeFix_Wire wireFixer(outerBound, this, surface->Model->ModelFactors->Precision);
 			wireFixer.Perform();
 			BRepBuilderAPI_MakeFace faceMaker(geomSurface, wireFixer.Wire());
-			
+
 			for each (XbimWire^ inner in innerBounds)
 			{
 				ShapeFix_Wire innerWireFixer(inner, this, surface->Model->ModelFactors->Precision);
@@ -248,13 +248,13 @@ namespace Xbim
 			}
 		}
 
-		void XbimFace::Init(IXbimWire^ xbimWire, XbimPoint3D pointOnFace,  XbimVector3D faceNormal)
+		void XbimFace::Init(IXbimWire^ xbimWire, XbimPoint3D pointOnFace, XbimVector3D faceNormal)
 		{
 			if (!dynamic_cast<XbimWire^>(xbimWire))
 				throw gcnew ArgumentException("Only IXbimWires created by Xbim.OCC modules are supported", "xbimWire");
 			XbimWire^ wire = (XbimWire^)xbimWire;
 			if (wire->IsValid && !faceNormal.IsInvalid())
-			{			
+			{
 				gp_Pln plane(gp_Pnt(pointOnFace.X, pointOnFace.Y, pointOnFace.Z), gp_Dir(faceNormal.X, faceNormal.Y, faceNormal.Z));
 				BRepBuilderAPI_MakeFace faceMaker(plane, wire, Standard_False);
 				pFace = new TopoDS_Face();
@@ -273,22 +273,22 @@ namespace Xbim
 				XbimPoint3D pw = wire->Vertices->First->VertexGeometry;
 				XbimVector3D n = wire->Normal;
 				if (n.IsInvalid()) return;
-				gp_Pln plane(gp_Pnt(pw.X,pw.Y,pw.Z),gp_Dir(n.X,n.Y,n.Z));
-				BRepBuilderAPI_MakeFace faceMaker(plane,wire, Standard_False);
+				gp_Pln plane(gp_Pnt(pw.X, pw.Y, pw.Z), gp_Dir(n.X, n.Y, n.Z));
+				BRepBuilderAPI_MakeFace faceMaker(plane, wire, Standard_False);
 				pFace = new TopoDS_Face();
 				*pFace = faceMaker.Face();
 			}
 			GC::KeepAlive(xbimWire);
 		}
 
-		
+
 
 		void XbimFace::Init(IXbimFace^ face)
 		{
 			IXbimWire^ outerBound = face->OuterBound;
 			XbimWire^ outerWire = dynamic_cast<XbimWire^>(outerBound);
 			if (outerWire == nullptr) throw gcnew ArgumentException("Only IXbimWires created by Xbim.OCC modules are supported", "xbimWire");
-			XbimVector3D n = face->Normal;		
+			XbimVector3D n = face->Normal;
 			XbimPoint3D pw = outerWire->Vertices->First->VertexGeometry;
 			gp_Pln plane(gp_Pnt(pw.X, pw.Y, pw.Z), gp_Dir(n.X, n.Y, n.Z));
 			BRepBuilderAPI_MakeFace faceMaker(plane, outerWire, Standard_False);
@@ -313,7 +313,7 @@ namespace Xbim
 			IIfcRectangleHollowProfileDef^ rectHollow = dynamic_cast<IIfcRectangleHollowProfileDef^>(profile);
 			if (rectHollow != nullptr) //this is a compound wire so we need to build it at face level
 				return Init(rectHollow);
-		    if (dynamic_cast<IIfcCompositeProfileDef^>(profile))
+			if (dynamic_cast<IIfcCompositeProfileDef^>(profile))
 				return Init((IIfcCompositeProfileDef^)profile);
 			if (dynamic_cast<IIfcDerivedProfileDef^>(profile))
 				return Init((IIfcDerivedProfileDef^)profile);
@@ -340,7 +340,7 @@ namespace Xbim
 							goto TryBuildFace;
 						}
 						String^ errMsg = XbimFace::GetBuildFaceErrorMessage(err);
-						XbimGeometryCreator::LogWarning(profile,"Invalid bound, {0}. Face discarded", errMsg);
+						XbimGeometryCreator::LogWarning(profile, "Invalid bound, {0}. Face discarded", errMsg);
 						return;
 					}
 					else
@@ -369,7 +369,7 @@ namespace Xbim
 				gp_Ax1 mirrorAxis(origin, xDir);
 				gp_Trsf aTrsf;
 				aTrsf.SetMirror(mirrorAxis);
-				BRepBuilderAPI_Transform aBrepTrsf(*pFace, aTrsf);				
+				BRepBuilderAPI_Transform aBrepTrsf(*pFace, aTrsf);
 				*pFace = TopoDS::Face(aBrepTrsf.Shape());
 				Reverse();//correct the normal to be correct
 			}
@@ -403,7 +403,7 @@ namespace Xbim
 				pFace = new TopoDS_Face();
 				*pFace = faceMaker.Face();
 				XbimVector3D tn = Normal;
-				
+
 				for each(IIfcCurve^ curve in profile->InnerCurves)
 				{
 
@@ -458,7 +458,7 @@ namespace Xbim
 			for each (IIfcProfileDef^ profile in compProfile->Profiles)
 			{
 				if (!first)
-				{					
+				{
 					XbimFace^ face = gcnew XbimFace(profile);
 					faceBlder.Add((XbimWire^)face->OuterBound);
 					for each (IXbimWire^ inner in face->InnerBounds)
@@ -466,10 +466,10 @@ namespace Xbim
 						faceBlder.Add((XbimWire^)inner);
 					}
 				}
-				else 
+				else
 					first = false;
 			}
-			if(faceBlder.IsDone())
+			if (faceBlder.IsDone())
 			{
 				pFace = new TopoDS_Face();
 				*pFace = faceBlder.Face();
@@ -496,7 +496,7 @@ namespace Xbim
 				gpax2.SetDirection(gp_Dir(0, 0, 1));
 				gpax2.SetXDirection(gp_Dir(ax2->P[0].X, ax2->P[0].Y, 0.));
 			}
-			
+
 			//make the outer wire
 			gp_Circ outer(gpax2, circProfile->Radius);
 			Handle(Geom_Circle) hOuter = GC_MakeCircle(outer);
@@ -506,7 +506,7 @@ namespace Xbim
 			double innerRadius = circProfile->Radius - circProfile->WallThickness;
 			BRepBuilderAPI_MakeFace faceBlder(outerWire);
 			//now add inner wire
-			if (innerRadius>0)
+			if (innerRadius > 0)
 			{
 				gp_Circ inner(gpax2, circProfile->Radius - circProfile->WallThickness);
 				Handle(Geom_Circle) hInner = GC_MakeCircle(inner);
@@ -514,7 +514,7 @@ namespace Xbim
 				BRepBuilderAPI_MakeWire innerWire;
 				innerEdge.Reverse();
 				innerWire.Add(innerEdge);
-				
+
 				faceBlder.Add(innerWire);
 			}
 			pFace = new TopoDS_Face();
@@ -552,8 +552,8 @@ namespace Xbim
 				builder.Add(wire, BRepBuilderAPI_MakeEdge(vtr, vtl));
 				builder.Add(wire, BRepBuilderAPI_MakeEdge(vtl, vbl));
 				wire.Closed(Standard_True);
-				double oRad = rectProfile->OuterFilletRadius.HasValue?(double)(rectProfile->OuterFilletRadius.Value):0.0;
-				if (oRad>0) //consider fillets
+				double oRad = rectProfile->OuterFilletRadius.HasValue ? (double)(rectProfile->OuterFilletRadius.Value) : 0.0;
+				if (oRad > 0) //consider fillets
 				{
 					BRepBuilderAPI_MakeFace faceMaker(wire, true);
 					BRepFilletAPI_MakeFillet2d filleter(faceMaker.Face());
@@ -595,7 +595,7 @@ namespace Xbim
 					builder.Add(innerWire, BRepBuilderAPI_MakeEdge(vibr, vitr));
 					builder.Add(innerWire, BRepBuilderAPI_MakeEdge(vitr, vitl));
 					builder.Add(innerWire, BRepBuilderAPI_MakeEdge(vitl, vibl));
-					
+
 					double iRad = rectProfile->InnerFilletRadius.HasValue ? (double)(rectProfile->InnerFilletRadius.Value) : 0.0;
 					if (iRad > 0) //consider fillets
 					{
@@ -624,7 +624,7 @@ namespace Xbim
 				pFace = new TopoDS_Face();
 				*pFace = faceBlder.Face();
 				//apply the position transformation
-				if (rectProfile->Position!=nullptr)
+				if (rectProfile->Position != nullptr)
 					pFace->Move(XbimConvert::ToLocation(rectProfile->Position));
 
 			}
@@ -647,7 +647,7 @@ namespace Xbim
 			else if (dynamic_cast<IIfcBSplineSurface^>(surface))
 				return Init((IIfcBSplineSurface^)surface);
 			else if (dynamic_cast<IIfcCylindricalSurface^>(surface))
-				return Init((IIfcCylindricalSurface^)surface);	
+				return Init((IIfcCylindricalSurface^)surface);
 			else
 			{
 				Type ^ type = surface->GetType();
@@ -677,27 +677,27 @@ namespace Xbim
 		void XbimFace::Init(IIfcBSplineSurfaceWithKnots ^ surface)
 		{
 			if (dynamic_cast<IIfcRationalBSplineSurfaceWithKnots^>(surface))
-				return Init((IIfcRationalBSplineSurfaceWithKnots^)surface);	
-		
+				return Init((IIfcRationalBSplineSurfaceWithKnots^)surface);
+
 			List<List<XbimPoint3D>^>^ ifcControlPoints = surface->ControlPoints;
 			if (surface->ControlPoints->Count < 2)
 			{
-				XbimGeometryCreator::LogWarning(surface,"Incorrect number of poles for Bspline surface, it must be at least 2");
+				XbimGeometryCreator::LogWarning(surface, "Incorrect number of poles for Bspline surface, it must be at least 2");
 				return;
 			}
 			TColgp_Array2OfPnt poles(1, (Standard_Integer)surface->UUpper + 1, 1, (Standard_Integer)surface->VUpper + 1);
-			
+
 			for (int u = 0; u <= surface->UUpper; u++)
 			{
 				List<XbimPoint3D>^ uRow = ifcControlPoints[u];
 				for (int v = 0; v <= surface->VUpper; v++)
 				{
 					XbimPoint3D cp = uRow[v];
-					poles.SetValue(u+1, v+1, gp_Pnt(cp.X, cp.Y, cp.Z));
+					poles.SetValue(u + 1, v + 1, gp_Pnt(cp.X, cp.Y, cp.Z));
 				}
 
 			}
-			
+
 			TColStd_Array1OfReal uknots(1, (Standard_Integer)surface->KnotUUpper);
 			TColStd_Array1OfReal vknots(1, (Standard_Integer)surface->KnotVUpper);
 			TColStd_Array1OfInteger uMultiplicities(1, (Standard_Integer)surface->KnotUUpper);
@@ -728,7 +728,7 @@ namespace Xbim
 				vMultiplicities.SetValue(i, multiplicity);
 				i++;
 			}
-			
+
 			Handle(Geom_BSplineSurface) hSurface = new Geom_BSplineSurface(poles, uknots, vknots, uMultiplicities, vMultiplicities, (Standard_Integer)surface->UDegree, (Standard_Integer)surface->VDegree);
 			BRepBuilderAPI_MakeFace faceMaker(hSurface, 0.1/*surface->Model->ModelFactors->Precision*/);
 			pFace = new TopoDS_Face();
@@ -742,10 +742,10 @@ namespace Xbim
 			if (surface->ControlPoints->Count < 2) throw gcnew XbimException("Incorrect number of poles for Bspline surface, must be at least 2");
 			TColgp_Array2OfPnt poles(1, (Standard_Integer)surface->UUpper + 1, 1, (Standard_Integer)surface->VUpper + 1);
 
-			for (int u = 0; u < surface->UUpper; u++)
+			for (int u = 0; u <= surface->UUpper; u++)
 			{
 				List<XbimPoint3D>^ uRow = ifcControlPoints[u];
-				for (int v = 0; v < surface->VUpper; v++)
+				for (int v = 0; v <= surface->VUpper; v++)
 				{
 					XbimPoint3D cp = uRow[v];
 					poles.SetValue(u + 1, v + 1, gp_Pnt(cp.X, cp.Y, cp.Z));
@@ -755,10 +755,10 @@ namespace Xbim
 
 			List<List<Ifc4::MeasureResource::IfcReal>^>^ ifcWeights = surface->Weights;
 			TColStd_Array2OfReal weights(1, (Standard_Integer)surface->UUpper + 1, 1, (Standard_Integer)surface->VUpper + 1);
-			for (int u = 0; u < surface->UUpper; u++)
+			for (int u = 0; u <= surface->UUpper; u++)
 			{
 				List<Ifc4::MeasureResource::IfcReal>^ uRow = ifcWeights[u];
-				for (int v = 0; v < surface->UUpper; v++)
+				for (int v = 0; v <= surface->VUpper; v++)
 				{
 					double r = uRow[v];
 					weights.SetValue(u + 1, v + 1, r);
@@ -795,23 +795,13 @@ namespace Xbim
 				vMultiplicities.SetValue(i, multiplicity);
 				i++;
 			}
-			//TODO: REMOVE THIS TRY CATCH
-			try
-			{
-				Standard_Integer uDegree = (Standard_Integer)surface->UDegree;
-				Standard_Integer vDegree = (Standard_Integer)surface->VDegree;
-				Handle(Geom_BSplineSurface) hSurface = new Geom_BSplineSurface(poles,weights, uknots, vknots, uMultiplicities, vMultiplicities, uDegree, vDegree);
-				BRepBuilderAPI_MakeFace faceMaker(hSurface, surface->Model->ModelFactors->Precision);
-				pFace = new TopoDS_Face();
-				*pFace = faceMaker.Face();
 
-			}
-			catch (Standard_Failure e)
-			{
-				cout << "g";
-			}
-
-
+			Standard_Integer uDegree = (Standard_Integer)surface->UDegree;
+			Standard_Integer vDegree = (Standard_Integer)surface->VDegree;
+			Handle(Geom_BSplineSurface) hSurface = new Geom_BSplineSurface(poles, weights, uknots, vknots, uMultiplicities, vMultiplicities, uDegree, vDegree);
+			BRepBuilderAPI_MakeFace faceMaker(hSurface, surface->Model->ModelFactors->Precision);
+			pFace = new TopoDS_Face();
+			*pFace = faceMaker.Face();
 		}
 
 		//Builds a face from a Plane
@@ -821,7 +811,7 @@ namespace Xbim
 			gp_Pln pln(ax3);
 			BRepBuilderAPI_MakeFace  builder(pln);
 			pFace = new TopoDS_Face();
-			*pFace =  builder.Face();
+			*pFace = builder.Face();
 		}
 		void XbimFace::Init(IIfcSurfaceOfRevolution ^ sRev)
 		{
@@ -837,17 +827,17 @@ namespace Xbim
 			Handle(Geom_Curve) c3d = BRep_Tool::Curve(edge, loc, start, end);
 			Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(c3d, start, end);
 			gp_Pnt origin(sRev->AxisPosition->Location->X, sRev->AxisPosition->Location->Y, sRev->AxisPosition->Location->Z);
-			gp_Dir axisDir(0,0,1);
+			gp_Dir axisDir(0, 0, 1);
 			if (sRev->AxisPosition->Axis != nullptr)
 				axisDir = gp_Dir(sRev->AxisPosition->Axis->X, sRev->AxisPosition->Axis->Y, sRev->AxisPosition->Axis->Z);
-			gp_Ax1 axis(origin,axisDir);
+			gp_Ax1 axis(origin, axisDir);
 
 			Handle(Geom_SurfaceOfRevolution) rev = new  Geom_SurfaceOfRevolution(trimmed, axis);
 			BRep_Builder aBuilder;
 			pFace = new TopoDS_Face();
 			Standard_Real precision = sRev->Model->ModelFactors->Precision;
 			aBuilder.MakeFace(*pFace, rev, precision);
-			
+
 			////BRepBuilderAPI_MakeFace faceMaker(geomLin, 0, 2* Math::PI, start, end, sRev->Model->ModelFactors->Precision);
 			//
 			//
@@ -871,9 +861,9 @@ namespace Xbim
 			{
 				TopLoc_Location loc;
 				Handle(Geom_Surface) surface = BRep_Tool::Surface(this, loc);
-				Handle(Geom_RectangularTrimmedSurface) geomTrim(new  Geom_RectangularTrimmedSurface(surface,def->U1,def->U2,def->V1,def->V2));
+				Handle(Geom_RectangularTrimmedSurface) geomTrim(new  Geom_RectangularTrimmedSurface(surface, def->U1, def->U2, def->V1, def->V2));
 
-				BRepBuilderAPI_MakeFace faceMaker(geomTrim,def->Model->ModelFactors->Precision);
+				BRepBuilderAPI_MakeFace faceMaker(geomTrim, def->Model->ModelFactors->Precision);
 				if (faceMaker.IsDone())
 				{
 					pFace = new TopoDS_Face();
@@ -925,9 +915,9 @@ namespace Xbim
 			Handle(Geom_Curve) c3d = BRep_Tool::Curve(edge, loc, start, end);
 			gp_Vec extrude = XbimConvert::GetDir3d(sLin->ExtrudedDirection);
 			extrude.Normalize();
-			extrude *= sLin->Depth;			
-			Handle(Geom_SurfaceOfLinearExtrusion) geomLin(new  Geom_SurfaceOfLinearExtrusion(c3d, extrude));			
-			BRepBuilderAPI_MakeFace faceMaker(geomLin, start, end, 0, sLin->Depth,sLin->Model->ModelFactors->Precision);
+			extrude *= sLin->Depth;
+			Handle(Geom_SurfaceOfLinearExtrusion) geomLin(new  Geom_SurfaceOfLinearExtrusion(c3d, extrude));
+			BRepBuilderAPI_MakeFace faceMaker(geomLin, start, end, 0, sLin->Depth, sLin->Model->ModelFactors->Precision);
 			if (faceMaker.IsDone())
 			{
 				pFace = new TopoDS_Face();
@@ -944,7 +934,7 @@ namespace Xbim
 
 		void  XbimFace::Init(double x, double y, double tolerance)
 		{
-			XbimWire^ bounds = gcnew XbimWire(x, y, tolerance,false);
+			XbimWire^ bounds = gcnew XbimWire(x, y, tolerance, false);
 			if (bounds->IsValid)
 			{
 				BRepBuilderAPI_MakeFace faceMaker(bounds);
@@ -968,7 +958,7 @@ namespace Xbim
 			{
 				return gcnew XbimWire(outerWire);
 			}
-			
+
 		}
 
 		XbimWireSet^ XbimFace::Wires::get()
@@ -1072,7 +1062,7 @@ namespace Xbim
 			double u1, u2, v1, v2;
 			prop.Bounds(u1, u2, v1, v2);
 			prop.Normal((u1 + u2) / 2.0, (v1 + v2) / 2.0, centre, normalDir);
-			XbimVector3D vec(normalDir.X(), normalDir.Y(), normalDir.Z());		
+			XbimVector3D vec(normalDir.X(), normalDir.Y(), normalDir.Z());
 			GC::KeepAlive(this);
 			return vec.Normalized();
 		}
@@ -1116,7 +1106,7 @@ namespace Xbim
 
 		}
 
-		
+
 
 		bool XbimFace::IsPolygonal::get()
 		{
@@ -1207,7 +1197,7 @@ namespace Xbim
 
 		void XbimFace::Move(gp_Trsf transform)
 		{
-			if (!IsValid) return;			
+			if (!IsValid) return;
 			pFace->Move(transform);
 		}
 
@@ -1230,16 +1220,16 @@ namespace Xbim
 		{
 			if (!IsValid) return false;
 			XbimWire^ wire = dynamic_cast<XbimWire^>(innerWire);
-			if (wire==nullptr) throw gcnew ArgumentException("Only IXbimWires created bu Xbim.OCC modules are supported", "xbimWire");
+			if (wire == nullptr) throw gcnew ArgumentException("Only IXbimWires created bu Xbim.OCC modules are supported", "xbimWire");
 			BRepBuilderAPI_MakeFace faceMaker(*pFace);
 			faceMaker.Add(wire);
 			if (!faceMaker.IsDone()) return false;
-			*pFace=faceMaker.Face();
+			*pFace = faceMaker.Face();
 			GC::KeepAlive(this);
 			return true;
 		}
 
-		
+
 		XbimPoint3D XbimFace::PointAtParameters(double u, double v)
 		{
 			if (!IsValid) return XbimPoint3D();

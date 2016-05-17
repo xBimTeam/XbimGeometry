@@ -657,8 +657,14 @@ namespace Xbim
 				vec *= dir->Magnitude;
 				curve = GC_MakeLine(pnt, vec).Value();
 			}
+			else if (dynamic_cast<IIfcBSplineCurveWithKnots^>(tCurve->BasisCurve))
+			{
+				XbimCurve^ bSpline = gcnew XbimCurve(tCurve->BasisCurve);
+				curve = bSpline;
+			}
 			else
 			{
+				
 				Type ^ type = tCurve->BasisCurve->GetType();
 				throw(gcnew NotImplementedException(String::Format("XbimFaceBound. CompositeCurveSegments with BasisCurve of type {0} is not implemented", type->Name)));
 			}
