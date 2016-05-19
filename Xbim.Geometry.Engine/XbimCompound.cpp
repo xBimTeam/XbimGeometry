@@ -465,7 +465,7 @@ namespace Xbim
 			try
 			{
 				int f = 0;
-				XbimOccWriter^ occWriter = gcnew XbimOccWriter();
+				
 				BRepPrim_Builder builder;
 				TopoDS_Shell shell;
 				builder.MakeShell(shell);

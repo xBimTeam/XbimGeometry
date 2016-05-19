@@ -43,7 +43,7 @@ namespace Ifc4GeometryTests
 
         }
 
-
+        
 
         /// <summary>
         /// This is a bad Brep that does not correctly define the faceset
@@ -68,6 +68,26 @@ namespace Ifc4GeometryTests
 
         }
 
+        [TestMethod]
+        public void IIfcFaceBasedSurfaceModelAsSolid()
+        {
+            using (var eventTrace = LoggerFactory.CreateEventTrace())
+            {
+                using (var m = IfcStore.Open("SolidTestFiles\\FacebasedModelWithMissingFace.ifc"))
+                {
+                    var fbsm = m.Instances[154529] as IIfcFaceBasedSurfaceModel;
+                    Assert.IsTrue(fbsm != null, "No IIfcFaceBasedSurfaceModel found");
+                    int faceCount = fbsm.FbsmFaces.Count();
+                    
+                    var surface = _xbimGeometryCreator.CreateSurfaceModel(fbsm);
+                    var solid = _xbimGeometryCreator.CreateSolidSet();
+                    solid.Add(surface);
+                    Assert.IsTrue(eventTrace.Events.Count == 0, "Warning or Error events were raised"); //we should have no warnings
+                    Assert.IsTrue(solid.FirstOrDefault()!=null);                   
+                    IfcCsgTests.GeneralTest(solid.First);                
+                }
+            }
+        }
         [TestMethod]
         public void IfcFacetedBRepTest()
         {
