@@ -702,12 +702,12 @@ namespace Xbim
 			if (dynamic_cast<IIfcAxis2Placement3D^>(placement))
 			{
 				IIfcAxis2Placement3D^ axis3D = (IIfcAxis2Placement3D^)placement;
-				gp_Dir(axis3D->P[0].X, axis3D->P[0].Y, axis3D->P[0].Z);
+				return gp_Dir(axis3D->P[0].X, axis3D->P[0].Y, axis3D->P[0].Z);
 			}
 			else if (dynamic_cast<IIfcAxis2Placement2D^>(placement))
 			{
 				IIfcAxis2Placement2D^ axis2D = (IIfcAxis2Placement2D^)placement;
-				gp_Dir(axis2D->P[0].X, axis2D->P[0].Y, 0.);
+				return gp_Dir(axis2D->P[0].X, axis2D->P[0].Y, 0.);
 			}
 			else
 			{

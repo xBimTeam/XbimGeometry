@@ -559,6 +559,9 @@
     <Filter Include="Source files\TKMath\BVH">
       <UniqueIdentifier>{ee02ccfc-5fab-4bac-b3dc-54c4feb3c2fe}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source files\TKG3d\GeomEvaluator">
+      <UniqueIdentifier>{da64828c-37db-4b62-b8c7-b07a762bc7c4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include=".\OCC\src\FSD\FSD_BinaryFile.cxx">
@@ -5076,24 +5079,60 @@
     <ClCompile Include="XbimCurve2D.cpp">
       <Filter>Source files\XbimGeometry</Filter>
     </ClCompile>
-    <ClCompile Include="OCC\src\GeomEvaluator\GeomEvaluator_OffsetCurve.cxx" />
-    <ClCompile Include="OCC\src\GeomEvaluator\GeomEvaluator_OffsetSurface.cxx" />
-    <ClCompile Include="OCC\src\GeomEvaluator\GeomEvaluator_SurfaceOfExtrusion.cxx" />
-    <ClCompile Include="OCC\src\GeomEvaluator\GeomEvaluator_SurfaceOfRevolution.cxx" />
-    <ClCompile Include="OCC\src\Geom2dEvaluator\Geom2dEvaluator_OffsetCurve.cxx" />
-    <ClCompile Include="OCC\src\Standard\Standard_OutOfMemory.cxx" />
-    <ClCompile Include="OCC\src\ApproxInt\ApproxInt_KnotTools.cxx" />
-    <ClCompile Include="OCC\src\Adaptor2d\Adaptor2d_HOffsetCurve_0.cxx" />
-    <ClCompile Include="OCC\src\Adaptor2d\Adaptor2d_OffsetCurve.cxx" />
-    <ClCompile Include="OCC\src\GeomAdaptor\GeomAdaptor_HSurfaceOfLinearExtrusion_0.cxx" />
-    <ClCompile Include="OCC\src\GeomAdaptor\GeomAdaptor_HSurfaceOfRevolution_0.cxx" />
-    <ClCompile Include="OCC\src\GeomAdaptor\GeomAdaptor_SurfaceOfLinearExtrusion.cxx" />
-    <ClCompile Include="OCC\src\GeomAdaptor\GeomAdaptor_SurfaceOfRevolution.cxx" />
-    <ClCompile Include="OCC\src\IntPatch\IntPatch_WLineTool.cxx" />
-    <ClCompile Include="OCC\src\IntTools\IntTools_WLineTool.cxx" />
-    <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_PaveFiller_11.cxx" />
-    <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_CellsBuilder.cxx" />
-    <ClCompile Include="OCC\src\NCollection\NCollection_UtfString.cxx" />
+    <ClCompile Include="OCC\src\Adaptor2d\Adaptor2d_HOffsetCurve_0.cxx">
+      <Filter>Source files\TKG2d\Adaptor2d</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\Adaptor2d\Adaptor2d_OffsetCurve.cxx">
+      <Filter>Source files\TKG2d\Adaptor2d</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\Geom2dEvaluator\Geom2dEvaluator_OffsetCurve.cxx">
+      <Filter>Source files\TKG2d\Geom2dAdaptor</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\GeomAdaptor\GeomAdaptor_HSurfaceOfLinearExtrusion_0.cxx">
+      <Filter>Source files\TKG3d\GeomAdaptor</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\GeomAdaptor\GeomAdaptor_HSurfaceOfRevolution_0.cxx">
+      <Filter>Source files\TKG3d\GeomAdaptor</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\GeomAdaptor\GeomAdaptor_SurfaceOfLinearExtrusion.cxx">
+      <Filter>Source files\TKG3d\GeomAdaptor</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\GeomAdaptor\GeomAdaptor_SurfaceOfRevolution.cxx">
+      <Filter>Source files\TKG3d\GeomAdaptor</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\IntPatch\IntPatch_WLineTool.cxx">
+      <Filter>Source files\TKGeomAlgo\IntPatch</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\GeomEvaluator\GeomEvaluator_OffsetCurve.cxx">
+      <Filter>Source files\TKG3d\GeomEvaluator</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\GeomEvaluator\GeomEvaluator_OffsetSurface.cxx">
+      <Filter>Source files\TKG3d\GeomEvaluator</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\GeomEvaluator\GeomEvaluator_SurfaceOfExtrusion.cxx">
+      <Filter>Source files\TKG3d\GeomEvaluator</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\GeomEvaluator\GeomEvaluator_SurfaceOfRevolution.cxx">
+      <Filter>Source files\TKG3d\GeomEvaluator</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_CellsBuilder.cxx">
+      <Filter>Source files\TKBO\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_PaveFiller_11.cxx">
+      <Filter>Source files\TKBO\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\ApproxInt\ApproxInt_KnotTools.cxx">
+      <Filter>Source files\TKGeomAlgo\ApproxInt</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\IntTools\IntTools_WLineTool.cxx">
+      <Filter>Source files\TKBO\IntTools</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\NCollection\NCollection_UtfString.cxx">
+      <Filter>Source files\TKernel\NCollection</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\Standard\Standard_OutOfMemory.cxx">
+      <Filter>Source files\TKernel\Standard</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source files">
@@ -15855,24 +15894,60 @@
     <ClInclude Include="XbimCurve2D.h">
       <Filter>Source files\XbimGeometry</Filter>
     </ClInclude>
-    <ClInclude Include="OCC\src\GeomEvaluator\GeomEvaluator_Curve.hxx" />
-    <ClInclude Include="OCC\src\GeomEvaluator\GeomEvaluator_OffsetCurve.hxx" />
-    <ClInclude Include="OCC\src\GeomEvaluator\GeomEvaluator_OffsetSurface.hxx" />
-    <ClInclude Include="OCC\src\GeomEvaluator\GeomEvaluator_Surface.hxx" />
-    <ClInclude Include="OCC\src\GeomEvaluator\GeomEvaluator_SurfaceOfExtrusion.hxx" />
-    <ClInclude Include="OCC\src\GeomEvaluator\GeomEvaluator_SurfaceOfRevolution.hxx" />
-    <ClInclude Include="OCC\src\Geom2dEvaluator\Geom2dEvaluator_Curve.hxx" />
-    <ClInclude Include="OCC\src\Geom2dEvaluator\Geom2dEvaluator_OffsetCurve.hxx" />
-    <ClInclude Include="OCC\src\ApproxInt\ApproxInt_KnotTools.hxx" />
-    <ClInclude Include="OCC\src\Adaptor2d\Adaptor2d_HOffsetCurve.hxx" />
-    <ClInclude Include="OCC\src\Adaptor2d\Adaptor2d_OffsetCurve.hxx" />
-    <ClInclude Include="OCC\src\GeomAdaptor\GeomAdaptor_HSurfaceOfLinearExtrusion.hxx" />
-    <ClInclude Include="OCC\src\GeomAdaptor\GeomAdaptor_HSurfaceOfRevolution.hxx" />
-    <ClInclude Include="OCC\src\GeomAdaptor\GeomAdaptor_SurfaceOfLinearExtrusion.hxx" />
-    <ClInclude Include="OCC\src\GeomAdaptor\GeomAdaptor_SurfaceOfRevolution.hxx" />
-    <ClInclude Include="OCC\src\IntPatch\IntPatch_WLineTool.hxx" />
-    <ClInclude Include="OCC\src\IntTools\IntTools_WLineTool.hxx" />
-    <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_CellsBuilder.hxx" />
+    <ClInclude Include="OCC\src\Adaptor2d\Adaptor2d_HOffsetCurve.hxx">
+      <Filter>Source files\TKG2d\Adaptor2d</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\Adaptor2d\Adaptor2d_OffsetCurve.hxx">
+      <Filter>Source files\TKG2d\Adaptor2d</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\Geom2dEvaluator\Geom2dEvaluator_Curve.hxx">
+      <Filter>Source files\TKG2d\Geom2dAdaptor</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\Geom2dEvaluator\Geom2dEvaluator_OffsetCurve.hxx">
+      <Filter>Source files\TKG2d\Geom2dAdaptor</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\GeomAdaptor\GeomAdaptor_HSurfaceOfLinearExtrusion.hxx">
+      <Filter>Source files\TKG3d\GeomAdaptor</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\GeomAdaptor\GeomAdaptor_HSurfaceOfRevolution.hxx">
+      <Filter>Source files\TKG3d\GeomAdaptor</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\GeomAdaptor\GeomAdaptor_SurfaceOfLinearExtrusion.hxx">
+      <Filter>Source files\TKG3d\GeomAdaptor</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\GeomAdaptor\GeomAdaptor_SurfaceOfRevolution.hxx">
+      <Filter>Source files\TKG3d\GeomAdaptor</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IntPatch\IntPatch_WLineTool.hxx">
+      <Filter>Source files\TKGeomAlgo\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\GeomEvaluator\GeomEvaluator_Curve.hxx">
+      <Filter>Source files\TKG3d\GeomEvaluator</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\GeomEvaluator\GeomEvaluator_OffsetCurve.hxx">
+      <Filter>Source files\TKG3d\GeomEvaluator</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\GeomEvaluator\GeomEvaluator_OffsetSurface.hxx">
+      <Filter>Source files\TKG3d\GeomEvaluator</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\GeomEvaluator\GeomEvaluator_Surface.hxx">
+      <Filter>Source files\TKG3d\GeomEvaluator</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\GeomEvaluator\GeomEvaluator_SurfaceOfExtrusion.hxx">
+      <Filter>Source files\TKG3d\GeomEvaluator</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\GeomEvaluator\GeomEvaluator_SurfaceOfRevolution.hxx">
+      <Filter>Source files\TKG3d\GeomEvaluator</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_CellsBuilder.hxx">
+      <Filter>Source files\TKBO\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\ApproxInt\ApproxInt_KnotTools.hxx">
+      <Filter>Source files\TKGeomAlgo\ApproxInt</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IntTools\IntTools_WLineTool.hxx">
+      <Filter>Source files\TKBO\IntTools</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="OCC\src\Adaptor3d\Adaptor3d_GenHCurve.gxx">
@@ -17684,8 +17759,10 @@
     <None Include="OCC\src\ShapeUpgrade\ShapeUpgrade_Tool.lxx">
       <Filter>Source files\THShHealing\ShapeUpgrade</Filter>
     </None>
-    <None Include="OCC\src\Adaptor2d\Adaptor2d_OffsetCurve.lxx" />
     <None Include="OCC\UpdateOCCSource.bat" />
+    <None Include="OCC\src\Adaptor2d\Adaptor2d_OffsetCurve.lxx">
+      <Filter>Source files\TKG2d\Adaptor2d</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="app.ico" />

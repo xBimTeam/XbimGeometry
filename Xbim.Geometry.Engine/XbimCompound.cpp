@@ -501,12 +501,13 @@ namespace Xbim
 									edgeStart = gcnew XbimVertex(startPoint);
 									vertices->Add(edgeCurve->EdgeStart->EntityLabel, edgeStart);
 								}
-								XbimVertex^ edgeEnd;
+								XbimVertex^ edgeEnd;								
 								if (!vertices->TryGetValue(edgeCurve->EdgeEnd->EntityLabel, edgeEnd))
 								{
-									IIfcCartesianPoint^ endPoint = ((IIfcCartesianPoint ^)((IIfcVertexPoint^)edgeCurve->EdgeEnd)->VertexGeometry);
+									IIfcVertexPoint^ v = (IIfcVertexPoint^)edgeCurve->EdgeEnd;							
+									IIfcCartesianPoint^ endPoint = (IIfcCartesianPoint^)v->VertexGeometry;
 									edgeEnd = gcnew XbimVertex(endPoint);
-									vertices->Add(edgeCurve->EdgeEnd->EntityLabel, edgeEnd);
+									vertices->Add(edgeCurve->EdgeEnd->EntityLabel, edgeEnd);											
 								}
 								
 								//opencascade does not support edges made of multi-linear segments (polyline)
@@ -529,8 +530,10 @@ namespace Xbim
 									
 									XbimEdge^ xBimEdgeCurve;
 									if (!edgeCurves->TryGetValue(edgeCurve->EntityLabel, xBimEdgeCurve))
-									{
+									{									
 										xBimEdgeCurve = gcnew XbimEdge(edgeCurve->EdgeGeometry, edgeStart, edgeEnd);
+										if(!xBimEdgeCurve->IsValid)
+											throw gcnew XbimException("Incorrectly defined Edge, must be a valid edge curve");
 										if (!edgeCurve->SameSense)
 											xBimEdgeCurve->Reverse();
 										edgeCurves->Add(edgeCurve->EntityLabel, xBimEdgeCurve);

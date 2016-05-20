@@ -579,96 +579,43 @@ namespace Xbim
 			double parameterFactor = isConic ? mf->AngleToRadiansConversionFactor : 1;
 			Handle(Geom_Curve) curve;
 			bool rotateElipse = false;
-			IIfcAxis2Placement2D^ ax2;
+			
 			//it could be based on a circle, ellipse or line
 			if (dynamic_cast<IIfcCircle^>(tCurve->BasisCurve))
 			{
-				IIfcCircle^ c = (IIfcCircle^)tCurve->BasisCurve;
-				if (dynamic_cast<IIfcAxis2Placement2D^>(c->Position))
-				{
-					IIfcAxis2Placement2D^ ax2 = (IIfcAxis2Placement2D^)c->Position;
-					gp_Ax2 gpax2(gp_Pnt(ax2->Location->X, ax2->Location->Y, 0), gp_Dir(0, 0, 1), gp_Dir(ax2->P[0].X, ax2->P[0].Y, 0.));
-					gp_Circ gc(gpax2, c->Radius);
-					curve = GC_MakeCircle(gc).Value();
-				}
-				else if (dynamic_cast<IIfcAxis2Placement3D^>(c->Position))
-				{
-					IIfcAxis2Placement3D^ ax2 = (IIfcAxis2Placement3D^)c->Position;
-					gp_Ax3 	gpax3 = XbimConvert::ToAx3(ax2);
-					gp_Circ gc(gpax3.Ax2(), c->Radius);
-					curve = GC_MakeCircle(gc).Value();
-				}
-				else
-				{
-					Type ^ type = c->Position->GetType();
-					throw(gcnew NotImplementedException(String::Format("XbimFaceBound. Circle with Placement of type {0} is not implemented", type->Name)));
-				}
+				curve = gcnew XbimCurve((IIfcCircle^)tCurve->BasisCurve);
 			}
 			else if (dynamic_cast<IIfcEllipse^>(tCurve->BasisCurve))
-			{
-				IIfcEllipse^ c = (IIfcEllipse^)tCurve->BasisCurve;
-				if (dynamic_cast<IIfcAxis2Placement2D^>(c->Position))
-				{
-					ax2 = (IIfcAxis2Placement2D^)c->Position;
-					double s1;
-					double s2;
-
-					if (c->SemiAxis1 > c->SemiAxis2)
-					{
-						s1 = c->SemiAxis1;
-						s2 = c->SemiAxis2;
-						rotateElipse = false;
-					}
-					else //either same or two is larger than 1
-					{
-						s1 = c->SemiAxis2;
-						s2 = c->SemiAxis1;
-						rotateElipse = true;
-					}
-
-					gp_Ax2 gpax2(gp_Pnt(ax2->Location->X, ax2->Location->Y, 0), gp_Dir(0, 0, 1), gp_Dir(ax2->P[rotateElipse ? 1 : 0].X, ax2->P[rotateElipse ? 1 : 0].Y, 0.));
-
-					gp_Elips gc(gpax2, s1, s2);
-					curve = GC_MakeEllipse(gc).Value();
-
-
-				}
-				else if (dynamic_cast<IIfcAxis2Placement3D^>(c->Position))
-				{
-					Type ^ type = c->Position->GetType();
-					throw(gcnew NotImplementedException(String::Format("XbimFaceBound. Ellipse with Placement of type {0} is not implemented", type->Name)));
-				}
-				else
-				{
-					Type ^ type = c->Position->GetType();
-					throw(gcnew NotImplementedException(String::Format("XbimFaceBound. Ellipse with Placement of type {0} is not implemented", type->Name)));
-				}
+			{	
+				IIfcEllipse^ ellipse = (IIfcEllipse^)tCurve->BasisCurve;
+				curve = gcnew XbimCurve(ellipse);
+				rotateElipse = ellipse->SemiAxis1 < ellipse->SemiAxis2;				
 			}
 			else if (dynamic_cast<IIfcLine^>(tCurve->BasisCurve))
-			{
-				IIfcLine^ line = (IIfcLine^)(tCurve->BasisCurve);
-				IIfcCartesianPoint^ cp = line->Pnt;
-
-				IIfcVector^ dir = line->Dir;
-				gp_Pnt pnt(cp->X, cp->Y, XbimConvert::GetZValueOrZero(cp));
-
-				gp_Vec vec(dir->Orientation->X, dir->Orientation->Y, XbimConvert::GetZValueOrZero(dir->Orientation));
-				parameterFactor = dir->Magnitude;
-				vec *= dir->Magnitude;
-				curve = GC_MakeLine(pnt, vec).Value();
+			{			
+				curve = gcnew XbimCurve((IIfcLine^)tCurve->BasisCurve);
 			}
 			else if (dynamic_cast<IIfcBSplineCurveWithKnots^>(tCurve->BasisCurve))
+			{			
+				curve = gcnew XbimCurve((IIfcBSplineCurveWithKnots^)tCurve->BasisCurve);
+			}
+			else if (dynamic_cast<IIfcOffsetCurve3D^>(tCurve->BasisCurve))
 			{
-				XbimCurve^ bSpline = gcnew XbimCurve(tCurve->BasisCurve);
-				curve = bSpline;
+				curve = gcnew XbimCurve((IIfcOffsetCurve3D^)tCurve->BasisCurve);
+			}
+			else if (dynamic_cast<IIfcOffsetCurve2D^>(tCurve->BasisCurve))
+			{
+				curve = gcnew XbimCurve((IIfcOffsetCurve2D^)tCurve->BasisCurve);
+			}
+			else if (dynamic_cast<IIfcPcurve^>(tCurve->BasisCurve))
+			{
+				curve = gcnew XbimCurve((IIfcPcurve^)tCurve->BasisCurve);
 			}
 			else
-			{
-				
+			{				
 				Type ^ type = tCurve->BasisCurve->GetType();
 				throw(gcnew NotImplementedException(String::Format("XbimFaceBound. CompositeCurveSegments with BasisCurve of type {0} is not implemented", type->Name)));
 			}
-
 
 			bool trim_cartesian = (tCurve->MasterRepresentation == IfcTrimmingPreference::CARTESIAN);
 
@@ -706,13 +653,7 @@ namespace Xbim
 					gp_Pnt pnt2(cp->X, cp->Y, XbimConvert::GetZValueOrZero(cp));
 					if (!pnt1.IsEqual(pnt2, tolerance))
 					{
-
-						if (rotateElipse) //if we have had to rotate the elipse, then rotate the trims
-						{
-							gp_Ax1 centre(gp_Pnt(ax2->Location->X, ax2->Location->Y, 0), gp_Dir(0, 0, 1));
-							pnt1.Rotate(centre, 90.0);
-							pnt2.Rotate(centre, 90.0);
-						}
+						
 						TopoDS_Vertex v1, v2;
 						double currentTolerance = tolerance;
 						b.MakeVertex(v1, pnt1, currentTolerance);

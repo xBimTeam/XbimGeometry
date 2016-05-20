@@ -217,8 +217,7 @@ namespace Xbim
 			
 		}
 		void XbimCurve::Init(IIfcEllipse^ ellipse)
-		{
-			IIfcAxis2Placement2D^ ax2 = (IIfcAxis2Placement2D^)ellipse->Position;			
+		{				
 			double semiAx1 = ellipse->SemiAxis1;
 			double semiAx2 = ellipse->SemiAxis2;
 			if (semiAx1 <= 0)
@@ -230,18 +229,32 @@ namespace Xbim
 			{
 				XbimGeometryCreator::LogError(ellipse, "Illegal Ellipse Semi Axis 2, must be greater than 0");
 				return;
-			}				
-			bool rotateElipse;
-			if (semiAx1 <= semiAx2)//either same or two is larger than 1			 
-			{
-				semiAx1 = ellipse->SemiAxis2;
-				semiAx2 = ellipse->SemiAxis1;
-				rotateElipse = true;
 			}
-			gp_Ax2 gpax2(gp_Pnt(ax2->Location->X, ax2->Location->Y, 0), gp_Dir(0, 0, 1), gp_Dir(ax2->P[rotateElipse ? 1 : 0].X, ax2->P[rotateElipse ? 1 : 0].Y, 0.));			
-			GC_MakeEllipse maker(gpax2,semiAx1, semiAx2);
-			pCurve = new Handle(Geom_Curve)(maker.Value());
+			gp_Ax3 ax3 = XbimConvert::ToAx3(ellipse->Position);
+			if (Math::Abs(semiAx1 - semiAx2) < gp::Resolution()) //its a circle
+			{
+				GC_MakeCircle maker(ax3.Ax2(), semiAx1);
+				pCurve = new Handle(Geom_Curve)(maker.Value());
+			}
+			else //it really is an ellipse
+			{
+				gp_Trsf trsf;			
+				trsf.SetTransformation(ax3, gp_Ax3(gp_Pnt(), gp_Dir(0, 0, 1), gp_Dir(1, 0, 0)));
+				gp_Ax2 ax = gp_Ax2();
+
+				if (semiAx1 <= semiAx2)//major and minor axis are in the wrong order for opencascade			 
+				{
+					semiAx1 = ellipse->SemiAxis2;
+					semiAx2 = ellipse->SemiAxis1;
+					ax.Rotate(ax.Axis(), M_PI / 2.);
+				}
+				ax.Transform(trsf);
+				GC_MakeEllipse maker(ax, semiAx1, semiAx2);
+				pCurve = new Handle(Geom_Curve)(maker.Value());
+			}
 		}
+
+
 		void XbimCurve::Init(IIfcLine^ line)
 		{
 			IIfcCartesianPoint^ cp = line->Pnt;
@@ -261,13 +274,7 @@ namespace Xbim
 				//check if we have an ellipse in case we have to correct axis
 				IIfcEllipse^ ellipse = dynamic_cast<IIfcEllipse^>(curve->BasisCurve);
 				bool rotateEllipse = false;
-				gp_Ax1 centre;
-				if (ellipse != nullptr)
-				{
-					if(ellipse->SemiAxis1 < ellipse->SemiAxis2)	rotateEllipse = true;
-					IIfcAxis2Placement2D^ ax2 = (IIfcAxis2Placement2D^)ellipse->Position;
-					centre = gp_Ax1(gp_Pnt(ax2->Location->X, ax2->Location->Y, 0), gp_Dir(0, 0, 1));
-				}
+				
 				bool isConic = (dynamic_cast<IIfcConic^>(curve->BasisCurve) != nullptr);					
 				double parameterFactor = isConic ? curve->Model->ModelFactors->AngleToRadiansConversionFactor : 1;
 				double precision = curve->Model->ModelFactors->Precision;
@@ -282,9 +289,7 @@ namespace Xbim
 				{
 					if (dynamic_cast<IIfcCartesianPoint^>(trim))
 					{						
-						p1=XbimConvert::GetPoint3d((IIfcCartesianPoint^)trim);
-						if (rotateEllipse) //if we have had to rotate the elipse, then rotate the trims							
-							p1.Rotate(centre, 90.0);							
+						p1=XbimConvert::GetPoint3d((IIfcCartesianPoint^)trim);						
 						p1Found = true;
 					}
 					else if (dynamic_cast<Xbim::Ifc4::MeasureResource::IfcParameterValue^>(trim))
@@ -299,8 +304,6 @@ namespace Xbim
 					if (dynamic_cast<IIfcCartesianPoint^>(trim))
 					{
 						p2 = XbimConvert::GetPoint3d((IIfcCartesianPoint^)trim);
-						if (rotateEllipse) //if we have had to rotate the elipse, then rotate the trims							
-							p2.Rotate(centre, 90.0);
 						p2Found = true;
 					}
 					else if (dynamic_cast<Xbim::Ifc4::MeasureResource::IfcParameterValue^>(trim))
