@@ -69,7 +69,11 @@ namespace Xbim
 			static gp_Dir2d GetDir2d(IIfcDirection^ dir);
 			static gp_Vec2d GetDir2d(IEnumerable<IfcLengthMeasure>^ offsets);
 			static gp_Vec GetDir3d(IEnumerable<IfcLengthMeasure>^ offsets);
-			
+			static gp_Pnt GetPoint3d(IIfcAxis2Placement^ placement);
+			static gp_Vec GetRefDir3d(IIfcAxis2Placement^ placement);
+			static gp_Vec GetAxisDir3d(IIfcAxis2Placement^ placement);
+			static gp_Ax3 ToAx3(IIfcAxis2Placement2D^ axis2D);
+			static gp_Ax3 ToAx3(IIfcAxis2Placement^ axis2);
 		};
 
 	}

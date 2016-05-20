@@ -49,7 +49,7 @@
 #include <ShapeCustom_BSplineRestriction.hxx>
 #include <GC_MakeCircle.hxx>
 #include <GeomLib.hxx>
-
+#include <gce_MakeElips.hxx>
 using namespace Xbim::Common;
 using namespace System::Linq;
 namespace Xbim
@@ -232,7 +232,7 @@ namespace Xbim
 		{
 			Init(edgeCurve);
 			double tolerance = edgeCurve->Model->ModelFactors->Precision;
-			double toleranceMax = edgeCurve->Model->ModelFactors->PrecisionMax;
+			double toleranceMax = edgeCurve->Model->ModelFactors->PrecisionMax*10;
 			double currentTolerance = tolerance;
 			if (IsValid &&!start->Equals(end))//must be a closed loop or nothing, no need to trim			
 			{
@@ -1067,10 +1067,10 @@ namespace Xbim
 
 		void XbimEdge::Init(IIfcEllipse^ ellipse)
 		{
-			IIfcAxis2Placement2D^ ax2 = (IIfcAxis2Placement2D^)ellipse->Position;
-			gp_Ax2 gpax2(gp_Pnt(ax2->Location->X, ax2->Location->Y, 0), gp_Dir(0, 0, 1), gp_Dir(ax2->P[0].X, ax2->P[0].Y, 0.));
+			gp_Ax3 ax3 = XbimConvert::ToAx3(ellipse->Position);
 			double semiAx1 = ellipse->SemiAxis1;
 			double semiAx2 = ellipse->SemiAxis2;
+
 			if (semiAx1 <= 0)
 			{
 				IModelFactors^ mf = ellipse->Model->ModelFactors;
@@ -1081,15 +1081,30 @@ namespace Xbim
 			{
 				IModelFactors^ mf = ellipse->Model->ModelFactors;
 				semiAx2 = mf->OneMilliMetre;
-				XbimGeometryCreator::LogWarning(ellipse, "WIllegal ellipse semi axis 2, it must be greater than 0. It has been set to 1mm.");
+				XbimGeometryCreator::LogWarning(ellipse, "Illegal ellipse semi axis 2, it must be greater than 0. It has been set to 1mm.");
 			}
-			gp_Elips gc(gpax2, semiAx1, semiAx2);
-			Handle(Geom_Ellipse) hellipse = GC_MakeEllipse(gc);
-			BRepBuilderAPI_MakeEdge edgeMaker(hellipse);
-			pEdge = new TopoDS_Edge();
-			*pEdge = edgeMaker.Edge();
-			ShapeFix_ShapeTolerance FTol;
-			FTol.SetTolerance(*pEdge, ellipse->Model->ModelFactors->Precision, TopAbs_VERTEX);
+			if (Math::Abs(semiAx1 - semiAx2) < ellipse->Model->ModelFactors->Precision) //its a circle
+			{			
+				gp_Circ gc(ax3.Ax2(), semiAx1);
+				Handle(Geom_Circle) hCircle = GC_MakeCircle(gc).Value();
+				BRepBuilderAPI_MakeEdge edgeMaker(hCircle);
+				pEdge = new TopoDS_Edge();
+				*pEdge = edgeMaker.Edge();
+				ShapeFix_ShapeTolerance FTol;
+				FTol.SetTolerance(*pEdge, ellipse->Model->ModelFactors->Precision, TopAbs_VERTEX);
+			}
+			else //its an ellipse
+			{
+				gp_Pnt p1 = ax3.Location().Translated(gp_Vec(ax3.XDirection()) * semiAx1);
+				gp_Pnt p2 = ax3.Location().Translated(gp_Vec(ax3.YDirection()) * semiAx2);
+				gce_MakeElips  gc(p1, p2, ax3.Location());
+				Handle(Geom_Ellipse) hellipse = GC_MakeEllipse(gc);
+				BRepBuilderAPI_MakeEdge edgeMaker(hellipse);
+				pEdge = new TopoDS_Edge();
+				*pEdge = edgeMaker.Edge();
+				ShapeFix_ShapeTolerance FTol;
+				FTol.SetTolerance(*pEdge, ellipse->Model->ModelFactors->Precision, TopAbs_VERTEX);
+			}
 		}
 
 		void XbimEdge::Init(IIfcBSplineCurve^ bspline)

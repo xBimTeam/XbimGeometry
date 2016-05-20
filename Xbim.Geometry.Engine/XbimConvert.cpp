@@ -182,6 +182,25 @@ namespace Xbim
 			return TopLoc_Location(trsf);
 		}
 
+		gp_Ax3 XbimConvert::ToAx3(IIfcAxis2Placement^ placement)
+		{
+			if (dynamic_cast<IIfcAxis2Placement3D^>(placement))
+				return XbimConvert::ToAx3((IIfcAxis2Placement3D^)placement);			
+			else if (dynamic_cast<IIfcAxis2Placement2D^>(placement))
+				return XbimConvert::ToAx3((IIfcAxis2Placement2D^)placement);	
+			else
+				throw(gcnew NotImplementedException("XbimConvert. Unsupported Placement type, need to be Axis2 or Axis3"));
+		}
+
+		gp_Ax3 XbimConvert::ToAx3(IIfcAxis2Placement2D^ axis2D)
+		{
+			gp_Pnt loc(axis2D->Location->X, axis2D->Location->Y, 0);
+			if(axis2D->RefDirection==nullptr)
+				return gp_Ax3(loc, gp_Vec(1,0, 0));
+			else
+				return gp_Ax3(loc,gp_Vec(axis2D->RefDirection->X,axis2D->RefDirection->Y,0));
+		}
+
 		gp_Ax3 XbimConvert::ToAx3(IIfcAxis2Placement3D^ axis3D)
 		{
 			gp_XYZ loc(axis3D->Location->X, axis3D->Location->Y, axis3D->Location->Z);
@@ -660,6 +679,45 @@ namespace Xbim
 			return gp_Pnt2d(cartesian->X, cartesian->Y);
 		}
 
+		gp_Pnt XbimConvert::GetPoint3d(IIfcAxis2Placement^ placement)
+		{
+			if (dynamic_cast<IIfcAxis2Placement3D^>(placement))
+			{
+				IIfcAxis2Placement3D^ axis3D = (IIfcAxis2Placement3D^)placement;
+				return gp_Pnt(axis3D->Location->X,axis3D->Location->Y,axis3D->Location->Z);
+			}
+			else if (dynamic_cast<IIfcAxis2Placement2D^>(placement))
+			{
+				IIfcAxis2Placement2D^ axis2D = (IIfcAxis2Placement2D^)placement;
+				return gp_Pnt(axis2D->Location->X, axis2D->Location->Y, 0);
+			}
+			else
+			{
+				throw(gcnew NotImplementedException("XbimConvert. Unsupported Placement type, must axis 2D or 3D"));
+			}
+		}
+
+		gp_Vec XbimConvert::GetRefDir3d(IIfcAxis2Placement^ placement)
+		{
+			if (dynamic_cast<IIfcAxis2Placement3D^>(placement))
+			{
+				IIfcAxis2Placement3D^ axis3D = (IIfcAxis2Placement3D^)placement;
+				gp_Dir(axis3D->P[0].X, axis3D->P[0].Y, axis3D->P[0].Z);
+			}
+			else if (dynamic_cast<IIfcAxis2Placement2D^>(placement))
+			{
+				IIfcAxis2Placement2D^ axis2D = (IIfcAxis2Placement2D^)placement;
+				gp_Dir(axis2D->P[0].X, axis2D->P[0].Y, 0.);
+			}
+			else
+			{
+				throw(gcnew NotImplementedException("XbimConvert. Unsupported Placement type, must axis 2D or 3D"));
+			}
+		}
+		gp_Vec XbimConvert::GetAxisDir3d(IIfcAxis2Placement^ placement)
+		{
+			return gp_Vec(0, 0, 1);
+		}
 		bool  XbimConvert::Is3D(IIfcPolyline^ pline)
 		{
 			for each (IIfcCartesianPoint^ pt in pline->Points)
