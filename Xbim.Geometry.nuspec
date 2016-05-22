@@ -1,8 +1,8 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
     <metadata>
         <id>Xbim.Geometry</id>
-        <version>4.0.0-V0073</version>
+        <version>4.0.0-V0074</version>
         <title>xBIM Geometry</title>
         <authors>xBIM team</authors>
         <owners>Steve Lockley</owners>
@@ -32,7 +32,7 @@ IOS and Android versions are under development.</description>
         <tags>BIM, IFC, IfcXml, IfcZip, COBie, .Net, C#, BuildingSmart</tags>
       <dependencies>
         <dependency id="Newtonsoft.Json" version="6.0.8" />
-        <dependency id="Xbim.Essentials" version="4.0.0-V190" />
+        <dependency id="Xbim.Essentials" version="4.0.0-V191" />
       </dependencies>
     </metadata>
     <files>
