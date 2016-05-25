@@ -157,6 +157,9 @@ namespace Xbim
 		{
 			Init(edge);
 		}
+
+		
+
 		XbimEdge::XbimEdge(XbimVertex^ start, XbimVertex^ midPoint, XbimVertex^ end)
 		{
 			
@@ -198,8 +201,10 @@ namespace Xbim
 			}
 
 		}
-		XbimEdge::XbimEdge(XbimEdge^ edgeCurve, XbimVertex^ start, XbimVertex^ end)
+		XbimEdge::XbimEdge(XbimEdge^ edgeCurve, XbimVertex^ start, XbimVertex^ end, double maxTolerance)
 		{
+			double tolerance = Math::Max(start->Tolerance, end->Tolerance);
+			double currentTolerance = tolerance;
 			if (start->Equals(end))
 			{
 				//must be a closed loop or nothing
@@ -212,14 +217,25 @@ namespace Xbim
 			{
 				Standard_Real p1, p2;
 				Handle(Geom_Curve) curve = BRep_Tool::Curve(edgeCurve, p1, p2);
-				
+				ShapeFix_ShapeTolerance FTol;
+			TryMakeEdge:
 				BRepBuilderAPI_MakeEdge edgeMaker(curve, start, end);
 				BRepBuilderAPI_EdgeError edgeErr = edgeMaker.Error();
 				if (edgeErr != BRepBuilderAPI_EdgeDone)
 				{
+					currentTolerance *= 10;
+					if (currentTolerance <= maxTolerance)
+					{
+						FTol.SetTolerance(start, currentTolerance);
+						FTol.SetTolerance(end, currentTolerance);
+						goto TryMakeEdge;
+					}
+				}
+
+				if (edgeErr != BRepBuilderAPI_EdgeDone)
+				{
 					String^ errMsg = XbimEdge::GetBuildEdgeErrorMessage(edgeErr);
 					throw gcnew XbimException("WW013: Invalid edge found." + errMsg);
-
 				}
 				else
 				{
@@ -241,19 +257,19 @@ namespace Xbim
 				Handle(Geom_Curve)  curve = BRep_Tool::Curve(this, p1, p2);
 				curve = BRep_Tool::Curve(this, p1, p2);
 				ShapeFix_ShapeTolerance FTol;
-				XbimVertex^ pnt1 = gcnew XbimVertex(start->VertexGeometry.X, start->VertexGeometry.Y, start->VertexGeometry.Z,tolerance);
-				XbimVertex^ pnt2 = gcnew XbimVertex(end->VertexGeometry.X, end->VertexGeometry.Y, end->VertexGeometry.Z, tolerance);
-			TryMakeEdge:
 				
-				BRepBuilderAPI_MakeEdge edgeMaker(curve, pnt1, pnt2);			
+			TryMakeEdge:				
+				BRepBuilderAPI_MakeEdge edgeMaker(curve, start, end);
+				/*if(pnt1->Equals(pnt2))
+					throw gcnew XbimException("WW013: Invalid edge found.");*/
 				BRepBuilderAPI_EdgeError edgeErr = edgeMaker.Error();
 				if (edgeErr != BRepBuilderAPI_EdgeDone)
 				{
 					currentTolerance *= 10;
 					if (currentTolerance <= toleranceMax)
 					{
-						FTol.SetTolerance(pnt1, currentTolerance);
-						FTol.SetTolerance(pnt2, currentTolerance);
+						FTol.SetTolerance(start, currentTolerance);
+						FTol.SetTolerance(end, currentTolerance);
 						goto TryMakeEdge;
 					}
 				}
@@ -268,6 +284,10 @@ namespace Xbim
 					*pEdge = edgeMaker.Edge();
 				}
 
+			}
+			else
+			{
+				Console::WriteLine("loop");
 			}
 		}
 
@@ -884,6 +904,20 @@ namespace Xbim
 			if (!IsValid) return nullptr;
 			return gcnew XbimVertex(TopExp::LastVertex(*pEdge, Standard_True));
 		}
+		XbimPoint3D XbimEdge::EdgeStartPoint::get()
+		{
+			if (!IsValid) return XbimPoint3D();
+			gp_Pnt p = BRep_Tool::Pnt(TopExp::FirstVertex(*pEdge, Standard_True));
+			return XbimPoint3D(p.X(), p.Y(), p.Z());
+		}
+
+		XbimPoint3D XbimEdge::EdgeEndPoint::get()
+		{
+			if (!IsValid) return XbimPoint3D();
+			gp_Pnt p = BRep_Tool::Pnt(TopExp::LastVertex(*pEdge, Standard_True));
+			return XbimPoint3D(p.X(), p.Y(), p.Z());			
+		}
+
 
 		IXbimGeometryObject^ XbimEdge::Transform(XbimMatrix3D matrix3D)
 		{

@@ -547,9 +547,9 @@ namespace Ifc4GeometryTests
         }
 
         [TestMethod]
-        public void CloseProfileWithInvalidBoundTest()
+        public void TrimmedEllipseTest()
         {
-            using (var model = IfcStore.Open(@"Ifc4TestFiles\closed-profile-with-invalid-bound.ifc"))
+            using (var model = IfcStore.Open(@"Ifc4TestFiles\TrimmedEllipseTest.ifc"))
             {
                 using (var eventTrace = LoggerFactory.CreateEventTrace())
                 {

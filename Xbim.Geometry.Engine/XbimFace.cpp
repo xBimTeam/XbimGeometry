@@ -43,6 +43,9 @@
 #include <BRepFilletAPI_MakeFillet2d.hxx>
 #include <ShapeFix_Face.hxx>
 #include <ShapeFix_Wire.hxx>
+#include <Geom_CylindricalSurface.hxx>
+#include <GeomAPI_ProjectPointOnSurf.hxx>
+#include <BRepClass_FaceClassifier.hxx>
 using namespace System::Linq;
 namespace Xbim
 {
@@ -182,13 +185,30 @@ namespace Xbim
 		{
 			Init(surface);
 			if (!IsValid) return;
-			BRepBuilderAPI_MakeFace faceMaker(this);
-			faceMaker.Add(outerBound);
-			for each (XbimWire^ inner in innerBounds)
+
+			Handle(Geom_Surface) geomSurface = BRep_Tool::Surface(this);
+			BRepBuilderAPI_MakeFace faceMaker(geomSurface, outerBound, surface->Model->ModelFactors->PrecisionMax * 10);
+			if (faceMaker.IsDone())
 			{
-				faceMaker.Add(inner);
+				for each (XbimWire^ inner in innerBounds)
+				{
+					faceMaker.Add(inner);
+				}
+				BRepCheck_Analyzer analyser(faceMaker.Face(), Standard_False);
+				if (!analyser.IsValid())
+				{
+					ShapeFix_Face sfs(faceMaker.Face());
+					bool ok = sfs.Perform();
+					*pFace = sfs.Face();
+				}
+				else
+					*pFace = faceMaker.Face();
 			}
-			*pFace = faceMaker.Face();
+			else
+			{
+				delete pFace;
+				pFace = nullptr;
+			}
 		}
 
 		//NB the wires defined in the facesurface are ignored
@@ -196,23 +216,141 @@ namespace Xbim
 		{
 			Init(surface->FaceSurface);
 			if (!IsValid) return;
-			TopLoc_Location loc;
-			Handle(Geom_Surface) geomSurface = BRep_Tool::Surface(this, loc);
-			//make sure the wire is valid
-			ShapeFix_Wire wireFixer(outerBound, this, surface->Model->ModelFactors->Precision);
-			wireFixer.Perform();
-			BRepBuilderAPI_MakeFace faceMaker(geomSurface, wireFixer.Wire());
+			
+			Handle(Geom_Surface) geomSurface = BRep_Tool::Surface(this);	
+			/*if (surface->SameSense) 
+			{		
+				outerBound->Reverse();
+			}*/
+			//get any point on the surface
+			/*XbimPoint3D pt = outerBound->PointAtParameter(0);
+			GeomAPI_ProjectPointOnSurf projector(gp_Pnt(pt.X,pt.Y,pt.Z), geomSurface);
+			Quantity_Parameter u;
+			Quantity_Parameter v;
+			projector.Parameters(1, u, v);
+			gp_Pnt pnt;
+			gp_Vec uv;
+			gp_Vec vv;
+			geomSurface->D1(u, v, pnt, uv, vv);
+			gp_Vec sn = uv.Crossed(vv);
+			sn.Normalize();*/
+			
+			BRepBuilderAPI_MakeFace faceMaker(geomSurface,outerBound , surface->Model->ModelFactors->PrecisionMax*10);
 
-			for each (XbimWire^ inner in innerBounds)
+			
+			if (faceMaker.IsDone())
 			{
-				ShapeFix_Wire innerWireFixer(inner, this, surface->Model->ModelFactors->Precision);
-				innerWireFixer.Perform();
-				faceMaker.Add(innerWireFixer.Wire());
+				ShapeFix_Face sfs(faceMaker.Face());
+				bool ok = sfs.Perform();
+				*pFace = sfs.Face();
+				gp_Pnt2d p2d(Precision::Infinite()-1000, Precision::Infinite()-1000);
+				BRepClass_FaceClassifier fc(*pFace, p2d, surface->Model->ModelFactors->PrecisionMax * 10);
+				TopAbs_State state = fc.State();
+				if (state == TopAbs_IN)
+				{
+					Console::WriteLine("In");
+				}
+				if (state == TopAbs_OUT)
+				{
+					Console::WriteLine("Out");
+				}
+				if (state == TopAbs_ON)
+				{
+					Console::WriteLine("On");
+				}
+				if (state == TopAbs_UNKNOWN)
+				{
+					Console::WriteLine("Unknown");
+				}
+				
+
+				for each (XbimWire^ inner in innerBounds)
+				{
+					faceMaker.Add(inner);
+				}
+				/*BRepCheck_Analyzer analyser(faceMaker.Face(), Standard_False);
+				if (!analyser.IsValid())
+				{
+					ShapeFix_Face sfs(faceMaker.Face());
+					bool ok = sfs.Perform();
+					*pFace = sfs.Face();
+				}
+				else*/
+				//	*pFace = faceMaker.Face();
 			}
-			ShapeFix_Face fixer(faceMaker.Face());
-			fixer.Perform();
-			*pFace = fixer.Face();
-			if (!surface->SameSense) Reverse();
+			else
+			{
+				delete pFace;
+				pFace = nullptr;
+			}
+			
+			
+		//	BRepBuilderAPI_MakeFace faceMaker(this);
+			//faceMaker.Add(outerBound);
+			//for each (XbimWire^ inner in innerBounds)
+			//{
+			//	faceMaker.Add(inner);
+			//}
+			//*pFace = faceMaker.Face();
+			//Init(surface->FaceSurface);
+			//BRepCheck_Analyzer analyser3(this, Standard_True);
+
+			//if (!analyser3.IsValid())
+			//{
+			//	XbimGeometryCreator::LogWarning(surface, "Incorrectly defined surface #{0}, it has been ignored", surface->EntityLabel);
+			//}
+			//if (!IsValid) return;
+			//
+			////make sure the wire is valid
+			///*TopoDS_Face face;
+			//ShapeFix_Wire wireFixer(outerBound, this, surface->Model->ModelFactors->Precision);
+			//bool fixed = wireFixer.Perform();
+			//if (!fixed)
+			//{
+			//	XbimGeometryCreator::LogWarning(surface, "Incorrectly defined surface #{0}, it has been ignored", surface->EntityLabel);
+			//}*/
+			//
+			//
+			//Handle(Geom_Surface) geomSurface = BRep_Tool::Surface(this);
+			//BRepBuilderAPI_MakeFace faceMaker(geomSurface, outerBound, surface->Model->ModelFactors->Precision);
+			//if (faceMaker.IsDone())
+			//{
+			//	XbimFace^ f1 = gcnew XbimFace(faceMaker.Face());
+			//	BRepCheck_Analyzer analyser(faceMaker.Face(), Standard_True);
+			//
+			//	if (!analyser.IsValid())
+			//	{
+			//		
+			//		ShapeFix_Face fixer(faceMaker.Face());
+			//		fixer.SetMinTolerance(surface->Model->ModelFactors->Precision);
+			//		fixer.SetMaxTolerance(surface->Model->ModelFactors->PrecisionMax);
+
+			//		fixer.Perform();
+			//		XbimFace^ f = gcnew XbimFace(fixer.Face());
+			//		BRepCheck_Analyzer analyser2(f, Standard_False);
+			//		if (!analyser2.IsValid())
+			//		{
+			//			XbimGeometryCreator::LogWarning(surface, "Incorrectly defined surface #{0}, it has been ignored", surface->EntityLabel);
+			//		}
+			//		XbimGeometryCreator::LogWarning(surface, "Incorrectly defined surface #{0}, it has been ignored", surface->EntityLabel);
+			//	}
+			//	for each (XbimWire^ inner in innerBounds)
+			//	{
+			//		ShapeFix_Wire innerWireFixer(inner, this, surface->Model->ModelFactors->Precision);
+			//		innerWireFixer.Perform();
+			//		faceMaker.Add(innerWireFixer.Wire());
+			//	}
+			//	ShapeFix_Face fixer(faceMaker.Face());
+			//	fixer.Perform();
+			//	*pFace = fixer.Face();
+			//	if (!surface->SameSense) Reverse();
+			//}
+			//else
+			//{
+			//	delete pFace;
+			//	pFace = nullptr;
+			//}
+			//
 		}
 
 		void XbimFace::Init(IIfcCompositeCurve ^ cCurve)
@@ -659,8 +797,10 @@ namespace Xbim
 		void XbimFace::Init(IIfcCylindricalSurface ^ surface)
 		{
 			gp_Ax3 ax3 = XbimConvert::ToAx3(surface->Position);
-			gp_Cylinder cylinder(ax3, surface->Radius);
-			BRepBuilderAPI_MakeFace  builder(cylinder);
+			Handle(Geom_CylindricalSurface)   gcs = new Geom_CylindricalSurface(ax3, surface->Radius);
+			//gp_Cylinder cylinder(ax3, surface->Radius);
+			BRepBuilderAPI_MakeFace  builder;
+			builder.Init(gcs,Standard_False, surface->Model->ModelFactors->Precision);
 			pFace = new TopoDS_Face();
 			*pFace = builder.Face();
 		}

@@ -239,7 +239,7 @@ namespace Xbim
 			else //it really is an ellipse
 			{
 				gp_Trsf trsf;			
-				trsf.SetTransformation(ax3, gp_Ax3(gp_Pnt(), gp_Dir(0, 0, 1), gp_Dir(1, 0, 0)));
+				trsf.SetTransformation(ax3, gp::XOY());
 				gp_Ax2 ax = gp_Ax2();
 
 				if (semiAx1 <= semiAx2)//major and minor axis are in the wrong order for opencascade			 

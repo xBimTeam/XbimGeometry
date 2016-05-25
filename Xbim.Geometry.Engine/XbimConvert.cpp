@@ -195,10 +195,10 @@ namespace Xbim
 		gp_Ax3 XbimConvert::ToAx3(IIfcAxis2Placement2D^ axis2D)
 		{
 			gp_Pnt loc(axis2D->Location->X, axis2D->Location->Y, 0);
-			if(axis2D->RefDirection==nullptr)
-				return gp_Ax3(loc, gp_Vec(1,0, 0));
+			if (axis2D->RefDirection == nullptr)
+				return gp_Ax3(loc, gp_Dir(0, 0, 1), gp_Vec(1, 0, 0));
 			else
-				return gp_Ax3(loc,gp_Vec(axis2D->RefDirection->X,axis2D->RefDirection->Y,0));
+				return gp_Ax3(loc, gp_Dir(0, 0, 1), gp_Vec(axis2D->RefDirection->X, axis2D->RefDirection->Y, 0));
 		}
 
 		gp_Ax3 XbimConvert::ToAx3(IIfcAxis2Placement3D^ axis3D)
@@ -208,13 +208,13 @@ namespace Xbim
 			{
 				gp_Dir zDir(axis3D->Axis->X, axis3D->Axis->Y, axis3D->Axis->Z);
 				gp_Dir xDir(axis3D->RefDirection->X, axis3D->RefDirection->Y, axis3D->RefDirection->Z);
-				return gp_Ax3(gp_Ax2(loc, zDir, xDir));
+				return gp_Ax3(loc, zDir, xDir);
 			}
 			else
 			{
 				gp_Dir zDir(0, 0, 1);
 				gp_Dir xDir(1, 0, 0);
-				return gp_Ax3(gp_Ax2(loc, zDir, xDir));
+				return gp_Ax3(loc, zDir, xDir);
 			}
 		}
 

@@ -139,7 +139,7 @@
     <None Include="Ifc4TestFiles\brep-model.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Ifc4TestFiles\closed-profile-with-invalid-bound.ifc">
+    <None Include="Ifc4TestFiles\TrimmedEllipseTest.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Ifc4TestFiles\closed-profile-with-voids.ifc">

@@ -59,7 +59,7 @@ namespace Xbim
 			XbimEdge(IIfcBSplineCurveWithKnots^ bSpline);
 			XbimEdge(IIfcRationalBSplineCurveWithKnots^ bSpline);
 			XbimEdge(IIfcPcurve^ pCurve);
-			XbimEdge(XbimEdge^ edgeCurve, XbimVertex^ start, XbimVertex^ end);
+			XbimEdge(XbimEdge^ edgeCurve, XbimVertex^ start, XbimVertex^ end, double maxTolerance);
 			XbimEdge(const TopoDS_Wire& wire, double tolerance, double angleTolerance);
 			XbimEdge(IIfcCurve^ edgeCurve, XbimVertex^ start, XbimVertex^ end);
 			XbimEdge(XbimVertex^ start, XbimVertex^ midPoint, XbimVertex^ end);
@@ -89,6 +89,8 @@ namespace Xbim
 			virtual property  XbimGeometryObjectType GeometryType{XbimGeometryObjectType  get() override { return XbimGeometryObjectType::XbimEdgeType; }; }
 			virtual property IXbimVertex^ EdgeStart{IXbimVertex^ get(); }
 			virtual property IXbimVertex^ EdgeEnd{IXbimVertex^ get(); }
+			virtual property XbimPoint3D EdgeStartPoint {XbimPoint3D get(); }
+			virtual property XbimPoint3D EdgeEndPoint {XbimPoint3D get(); }
 			virtual property double Length{double get(); }
 			virtual property IXbimCurve^ EdgeGeometry{IXbimCurve^ get(); }
 			virtual property XbimRect3D BoundingBox {XbimRect3D get() override; }

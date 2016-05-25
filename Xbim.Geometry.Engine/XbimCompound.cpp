@@ -35,6 +35,8 @@
 #include <BRepBuilderAPI_MakeWire.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
 #include <ShapeFix_Shell.hxx>
+#include <BRepCheck_Analyzer.hxx>
+#include <ShapeFix_Edge.hxx>
 using namespace System;
 using namespace System::Linq;
 using namespace Xbim::Common; 
@@ -464,8 +466,7 @@ namespace Xbim
 		{
 			try
 			{
-				int f = 0;
-				
+				ShapeFix_Edge edgeFixer;
 				BRepPrim_Builder builder;
 				TopoDS_Shell shell;
 				builder.MakeShell(shell);
@@ -474,13 +475,15 @@ namespace Xbim
 				IModel^ model = aFace->Model;
 
 				_sewingTolerance = model->ModelFactors->Precision;
+				double maxTolerance = model->ModelFactors->PrecisionMax;
 				//collect all the geometry components
-				Dictionary<int, XbimEdge^>^ edgeCurves = gcnew Dictionary<int, XbimEdge^>();
+				Dictionary<int, XbimEdge^>^ orientedEdges = gcnew Dictionary<int, XbimEdge^>();
 				Dictionary<int, XbimVertex^>^ vertices = gcnew Dictionary<int, XbimVertex^>();
 				for each (IIfcFace^ unloadedFace in  faces)
 				{
 					IIfcAdvancedFace^ advancedFace = dynamic_cast<IIfcAdvancedFace^>(model->Instances[unloadedFace->EntityLabel]); //improves performance and reduces memory load				
-
+					
+					XbimFace^ faceSurface = gcnew XbimFace(advancedFace->FaceSurface);
 					XbimWire^ outerLoop = nullptr;
 					List<XbimWire^>^ innerLoops = gcnew List<XbimWire^>();
 					for each (IIfcFaceBound^ ifcBound in advancedFace->Bounds) //build all the loops
@@ -492,61 +495,76 @@ namespace Xbim
 						{							
 							for each (IIfcOrientedEdge^ orientedEdge in edgeLoop->EdgeList)
 							{
-								IIfcEdgeCurve^ edgeCurve = dynamic_cast<IIfcEdgeCurve^>(orientedEdge->EdgeElement);
-								if (edgeCurve == nullptr) throw gcnew XbimException("Incorrectly defined Edge, must be an edge curve");
-								XbimVertex^ edgeStart;
-								if (!vertices->TryGetValue(edgeCurve->EdgeStart->EntityLabel, edgeStart))
+								XbimEdge^ xBimOrientedEdge;
+								if (orientedEdges->TryGetValue(orientedEdge->EdgeElement->EntityLabel, xBimOrientedEdge)) //already built it
 								{
-									IIfcCartesianPoint^ startPoint = ((IIfcCartesianPoint ^)((IIfcVertexPoint^)edgeCurve->EdgeStart)->VertexGeometry);
-									edgeStart = gcnew XbimVertex(startPoint);
-									vertices->Add(edgeCurve->EdgeStart->EntityLabel, edgeStart);
+									//we need the reverse of this one
+									if (!orientedEdge->Orientation) xBimOrientedEdge = xBimOrientedEdge->Reversed();
 								}
-								XbimVertex^ edgeEnd;								
-								if (!vertices->TryGetValue(edgeCurve->EdgeEnd->EntityLabel, edgeEnd))
+								else //need to build it
 								{
-									IIfcVertexPoint^ v = (IIfcVertexPoint^)edgeCurve->EdgeEnd;							
-									IIfcCartesianPoint^ endPoint = (IIfcCartesianPoint^)v->VertexGeometry;
-									edgeEnd = gcnew XbimVertex(endPoint);
-									vertices->Add(edgeCurve->EdgeEnd->EntityLabel, edgeEnd);											
-								}
-								
+
+									IIfcEdgeCurve^ edgeCurve = dynamic_cast<IIfcEdgeCurve^>(orientedEdge->EdgeElement);
+									if (edgeCurve == nullptr) throw gcnew XbimException("Incorrectly defined Edge, must be an edge curve"); //illegal according to schema
+
+									//get or create the two vertices
+									XbimVertex^ edgeStart;
+									XbimVertex^ edgeEnd;
+									if (!vertices->TryGetValue(orientedEdge->EdgeElement->EdgeStart->EntityLabel, edgeStart)) //orientation is already considered
+									{
+										IIfcCartesianPoint^ startPoint = ((IIfcCartesianPoint ^)((IIfcVertexPoint^)orientedEdge->EdgeElement->EdgeStart)->VertexGeometry);
+										edgeStart = gcnew XbimVertex(XbimPoint3D(startPoint->X, startPoint->Y, startPoint->Z), _sewingTolerance);
+										vertices->Add(orientedEdge->EdgeElement->EdgeStart->EntityLabel, edgeStart);
+									}
+									if (!vertices->TryGetValue(orientedEdge->EdgeElement->EdgeEnd->EntityLabel, edgeEnd)) //orientation is already considered
+									{
+										IIfcCartesianPoint^ endPoint = ((IIfcCartesianPoint ^)((IIfcVertexPoint^)orientedEdge->EdgeElement->EdgeEnd)->VertexGeometry);
+										edgeEnd = gcnew XbimVertex(XbimPoint3D(endPoint->X, endPoint->Y, endPoint->Z), _sewingTolerance);
+										vertices->Add(orientedEdge->EdgeElement->EdgeEnd->EntityLabel, edgeEnd);
+									}
+									//build the geometry
+
+
+
+
 								//opencascade does not support edges made of multi-linear segments (polyline)
 								//these can be exapnded to discrete edges to maintain topological correctness
-								IIfcPolyline^ polyline = dynamic_cast<IIfcPolyline^>(edgeCurve->EdgeGeometry);
-								if (polyline!=nullptr && Enumerable::Count(polyline->Points) > 2) //we have multi segments
-								{ 
-									XbimWire^ wire = gcnew XbimWire(polyline);
-									wire = wire->Trim(edgeStart, edgeEnd, _sewingTolerance);
-									
-									if (!orientedEdge->Orientation)
-										wire->Reverse();
-									for each (XbimEdge^ edge in wire->Edges)
+									IIfcPolyline^ polyline = dynamic_cast<IIfcPolyline^>(edgeCurve->EdgeGeometry);
+									if (polyline != nullptr && Enumerable::Count(polyline->Points) > 2) //we have multi segments
+									{										
+										
+								
+										XbimWire^ wire = gcnew XbimWire(polyline);
+										wire = wire->Trim(edgeStart, edgeEnd, _sewingTolerance);
+
+										if (!edgeCurve->SameSense) wire->Reverse();
+										for each (XbimEdge^ edge in wire->Edges)
+										{
+											wireMaker.Add(edge);
+										}
+									}
+									else
 									{
-										wireMaker.Add(edge);
+										xBimOrientedEdge = gcnew XbimEdge(edgeCurve->EdgeGeometry);
+										if (!xBimOrientedEdge->IsValid)throw gcnew XbimException("Incorrectly defined Edge, must be a valid edge curve");
+										xBimOrientedEdge = gcnew XbimEdge(xBimOrientedEdge, edgeStart, edgeEnd, maxTolerance); //adjust start and end		
+										
+									}
+									if (!edgeCurve->SameSense) xBimOrientedEdge->Reverse();
+									orientedEdges->Add(orientedEdge->EdgeElement->EntityLabel, xBimOrientedEdge);
+									if (!orientedEdge->Orientation) xBimOrientedEdge = xBimOrientedEdge->Reversed();
+									wireMaker.Add(xBimOrientedEdge);
+									if (!wireMaker.IsDone())
+									{
+										throw gcnew XbimException("Incorrectly defined Edge, must be a valid edge curve");
 									}
 								}
-								else
-								{
-									
-									XbimEdge^ xBimEdgeCurve;
-									if (!edgeCurves->TryGetValue(edgeCurve->EntityLabel, xBimEdgeCurve))
-									{									
-										xBimEdgeCurve = gcnew XbimEdge(edgeCurve->EdgeGeometry, edgeStart, edgeEnd);
-										if(!xBimEdgeCurve->IsValid)
-											throw gcnew XbimException("Incorrectly defined Edge, must be a valid edge curve");
-										if (!edgeCurve->SameSense)
-											xBimEdgeCurve->Reverse();
-										edgeCurves->Add(edgeCurve->EntityLabel, xBimEdgeCurve);
-									}								
-									if (!orientedEdge->Orientation)
-										xBimEdgeCurve = xBimEdgeCurve->Reversed();
-									wireMaker.Add(xBimEdgeCurve);
-								}
+							}
 
-							} // we have a wire
-
+							} // we have a wire		
 							
 							TopoDS_Wire loopWire = wireMaker.Wire();
+							loopWire.Closed(Standard_True);
 							if (!ifcBound->Orientation) loopWire.Reverse();
 							XbimWire^ xbimLoop = gcnew XbimWire(loopWire);
 							if (isOuter && outerLoop == nullptr) //only choose one outer loop
@@ -554,7 +572,7 @@ namespace Xbim
 							else
 								innerLoops->Add(xbimLoop);
 						}
-					}
+					
 					//if we have no outer loop defined, find the longest
 					if (outerLoop == nullptr)
 					{
@@ -572,16 +590,14 @@ namespace Xbim
 					}
 					
 					XbimFace^ xbimAdvancedFace = gcnew XbimFace(advancedFace, outerLoop, innerLoops);
-
-					if (xbimAdvancedFace->IsValid)
-					{
-						/*String^ fName = "C:\\tmp\\f" + f;
-						occWriter->Write(xbimAdvancedFace, fName);*/
-						builder.AddShellFace(shell, xbimAdvancedFace);
-						f++;
-					}
+					BRepCheck_Analyzer analyser(xbimAdvancedFace, Standard_True);
+					
+					if(!analyser.IsValid() )
+						XbimGeometryCreator::LogWarning(advancedFace, "Incorrectly defined face #{0}, it has been ignored", advancedFace->EntityLabel);
+					if (xbimAdvancedFace->IsValid)						
+						builder.AddShellFace(shell, xbimAdvancedFace);						
 					else
-						XbimGeometryCreator::LogInfo(advancedFace, "Incorrectly defined face #{0}, it has been ignored", advancedFace->EntityLabel);
+						XbimGeometryCreator::LogWarning(advancedFace, "Incorrectly defined face #{0}, it has been ignored", advancedFace->EntityLabel);
 				}
 
 				builder.CompleteShell(shell);
@@ -596,6 +612,9 @@ namespace Xbim
 				pCompound = new TopoDS_Compound();
 				b.MakeCompound(*pCompound);
 				b.Add(*pCompound, shapeFixer.Shape());
+				/*pCompound = new TopoDS_Compound();
+				b.MakeCompound(*pCompound);
+				b.Add(*pCompound, shell);*/
 			}
 			catch (Standard_Failure e)
 			{
