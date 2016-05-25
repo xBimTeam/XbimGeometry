@@ -223,7 +223,7 @@ namespace Xbim
 				outerBound->Reverse();
 			}*/
 			//get any point on the surface
-			/*XbimPoint3D pt = outerBound->PointAtParameter(0);
+			XbimPoint3D pt = outerBound->PointAtParameter(0);
 			GeomAPI_ProjectPointOnSurf projector(gp_Pnt(pt.X,pt.Y,pt.Z), geomSurface);
 			Quantity_Parameter u;
 			Quantity_Parameter v;
@@ -233,18 +233,27 @@ namespace Xbim
 			gp_Vec vv;
 			geomSurface->D1(u, v, pnt, uv, vv);
 			gp_Vec sn = uv.Crossed(vv);
-			sn.Normalize();*/
+			sn.Normalize();
+			ShapeFix_Wire wFix(outerBound,this, surface->Model->ModelFactors->PrecisionMax * 10);
+			wFix.FixEdgeCurves();
+			XbimWire^ w = gcnew XbimWire(wFix.Wire());
+			BRepBuilderAPI_MakeFace faceMaker(geomSurface, wFix.Wire(), surface->Model->ModelFactors->PrecisionMax*10);
+			//make sure all the pcurves are built
 			
-			BRepBuilderAPI_MakeFace faceMaker(geomSurface,outerBound , surface->Model->ModelFactors->PrecisionMax*10);
-
 			
 			if (faceMaker.IsDone())
 			{
-				ShapeFix_Face sfs(faceMaker.Face());
-				bool ok = sfs.Perform();
-				*pFace = sfs.Face();
-				gp_Pnt2d p2d(Precision::Infinite()-1000, Precision::Infinite()-1000);
-				BRepClass_FaceClassifier fc(*pFace, p2d, surface->Model->ModelFactors->PrecisionMax * 10);
+				Quantity_Parameter uMin;
+				Quantity_Parameter vMin;
+				Quantity_Parameter uMax;
+				Quantity_Parameter vMax;
+				BRepTools::UVBounds(faceMaker.Face(), uMin, uMax, vMin, vMax);
+				if (!geomSurface->IsUPeriodic()) 
+					uMax += 1;
+				if (!geomSurface->IsVPeriodic()) 
+					vMax += 1;
+				gp_Pnt2d p2d(Math::Min(uMax, Precision::Infinite()), Math::Min(vMax,Precision::Infinite())); //pick a point that shhould be outside the natural bounds
+				BRepClass_FaceClassifier fc(faceMaker.Face(), p2d, surface->Model->ModelFactors->Precision);
 				TopAbs_State state = fc.State();
 				if (state == TopAbs_IN)
 				{
@@ -266,7 +275,8 @@ namespace Xbim
 
 				for each (XbimWire^ inner in innerBounds)
 				{
-					faceMaker.Add(inner);
+					wFix.Init(inner, this, surface->Model->ModelFactors->PrecisionMax * 10);
+					faceMaker.Add(wFix.Wire());
 				}
 				/*BRepCheck_Analyzer analyser(faceMaker.Face(), Standard_False);
 				if (!analyser.IsValid())
@@ -276,7 +286,7 @@ namespace Xbim
 					*pFace = sfs.Face();
 				}
 				else*/
-				//	*pFace = faceMaker.Face();
+				*pFace = faceMaker.Face();
 			}
 			else
 			{

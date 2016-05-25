@@ -553,11 +553,12 @@ namespace Xbim
 									if (!edgeCurve->SameSense) xBimOrientedEdge->Reverse();
 									orientedEdges->Add(orientedEdge->EdgeElement->EntityLabel, xBimOrientedEdge);
 									if (!orientedEdge->Orientation) xBimOrientedEdge = xBimOrientedEdge->Reversed();
-									wireMaker.Add(xBimOrientedEdge);
-									if (!wireMaker.IsDone())
-									{
-										throw gcnew XbimException("Incorrectly defined Edge, must be a valid edge curve");
-									}
+									
+								}
+								wireMaker.Add(xBimOrientedEdge);
+								if (!wireMaker.IsDone())
+								{
+									throw gcnew XbimException("Incorrectly defined Edge, must be a valid edge curve");
 								}
 							}
 
