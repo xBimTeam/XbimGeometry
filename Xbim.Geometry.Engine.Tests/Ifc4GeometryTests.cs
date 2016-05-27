@@ -191,7 +191,17 @@ namespace Ifc4GeometryTests
                 Assert.IsTrue((int)basin.Volume == 2045022);
             }
         }
-
+        [TestMethod]
+        public void AdvancedBrepComplexCurvesandSurfacesTest()
+        {
+            using (var model = IfcStore.Open(@"Ifc4TestFiles\Axis2PlacementError.ifc"))
+            {
+                var advancedBrep = model.Instances.OfType<IfcAdvancedBrep>().FirstOrDefault(i => i.EntityLabel== 27743);
+                Assert.IsNotNull(advancedBrep);
+                var basin = _xbimGeometryCreator.CreateSolid(advancedBrep);
+                Assert.IsTrue((int)basin.Volume == 44472872);
+            }
+        }
         [TestMethod]
         public void TriangulatedFaceSetAdvancedTest()
         {
@@ -591,5 +601,7 @@ namespace Ifc4GeometryTests
                 }
             }
         }
+
+
     }
 }

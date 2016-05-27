@@ -2038,6 +2038,16 @@ namespace Xbim
 			pSolid->Reverse();
 		}
 
+		void XbimSolid::CorrectOrientation()
+		{
+			if (IsValid)
+			{
+				BRepClass3d_SolidClassifier class3d(this);
+				class3d.PerformInfinitePoint(Precision::Confusion());
+				if (class3d.State() == TopAbs_IN) this->Reverse();
+			}		
+		}
+
 		
 		
 		void XbimSolid::FixTopology()

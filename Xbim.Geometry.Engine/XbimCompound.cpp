@@ -39,7 +39,7 @@
 #include <ShapeFix_Edge.hxx>
 using namespace System;
 using namespace System::Linq;
-using namespace Xbim::Common; 
+using namespace Xbim::Common;
 using namespace Xbim::Common::XbimExtensions;
 namespace Xbim
 {
@@ -55,7 +55,7 @@ namespace Xbim
 		void XbimCompound::InstanceCleanup()
 		{
 			IntPtr temp = System::Threading::Interlocked::Exchange(ptrContainer, IntPtr::Zero);
-			if (temp != IntPtr::Zero)			
+			if (temp != IntPtr::Zero)
 				delete (TopoDS_Compound*)(temp.ToPointer());
 			System::GC::SuppressFinalize(this);
 		}
@@ -73,7 +73,7 @@ namespace Xbim
 				solid->Tag = Tag;
 				result->Add(solid);
 			}
-				
+
 			for (TopExp_Explorer expl(*pCompound, TopAbs_SHELL, TopAbs_SOLID); expl.More(); expl.Next())
 			{
 				XbimShell^ shell = gcnew XbimShell(TopoDS::Shell(expl.Current()));
@@ -114,7 +114,7 @@ namespace Xbim
 			GC::KeepAlive(this);
 			return gcnew XbimCompound(temp, IsSewn, _sewingTolerance);
 		}
-		
+
 		IXbimGeometryObject^ XbimCompound::TransformShallow(XbimMatrix3D matrix3D)
 		{
 			TopoDS_Compound shallowCopy = TopoDS::Compound(pCompound->Moved(XbimConvert::ToTransform(matrix3D)));
@@ -149,19 +149,19 @@ namespace Xbim
 		XbimCompound::XbimCompound(IIfcConnectedFaceSet^ faceSet)
 		{
 			_sewingTolerance = faceSet->Model->ModelFactors->Precision;
-			Init(faceSet); 
+			Init(faceSet);
 		}
 
 		XbimCompound::XbimCompound(IIfcShellBasedSurfaceModel^ sbsm)
 		{
 			_sewingTolerance = sbsm->Model->ModelFactors->Precision;
-			Init(sbsm); 
+			Init(sbsm);
 		}
 
 		XbimCompound::XbimCompound(IIfcFaceBasedSurfaceModel^ fbsm)
 		{
 			_sewingTolerance = fbsm->Model->ModelFactors->Precision;
-			Init(fbsm); 
+			Init(fbsm);
 		}
 
 		XbimCompound::XbimCompound(IIfcManifoldSolidBrep^ solid)
@@ -204,7 +204,7 @@ namespace Xbim
 			*pCompound = compound;
 			_isSewn = sewn;
 			_sewingTolerance = tolerance;
-			
+
 		}
 		XbimCompound::XbimCompound(const TopoDS_Compound& compound, bool sewn, double tolerance, Object^ tag) :XbimCompound(compound, sewn, tolerance)
 		{
@@ -231,7 +231,7 @@ namespace Xbim
 			{
 				gp_GTrsf trans = XbimConvert::ToTransform(nonUniform);
 				BRepBuilderAPI_GTransform tr(this, trans, Standard_True); //make a copy of underlying shape
-				return gcnew XbimCompound(TopoDS::Compound(tr.Shape()),_isSewn,_sewingTolerance);
+				return gcnew XbimCompound(TopoDS::Compound(tr.Shape()), _isSewn, _sewingTolerance);
 			}
 			else
 			{
@@ -244,7 +244,7 @@ namespace Xbim
 		XbimGeometryObject ^ XbimCompound::Moved(IIfcPlacement ^ placement)
 		{
 			if (!IsValid) return this;
-			XbimCompound^ copy = gcnew XbimCompound(this,_isSewn, _sewingTolerance,Tag); //take a copy of the shape
+			XbimCompound^ copy = gcnew XbimCompound(this, _isSewn, _sewingTolerance, Tag); //take a copy of the shape
 			TopLoc_Location loc = XbimConvert::ToLocation(placement);
 			copy->Move(loc);
 			return copy;
@@ -253,9 +253,9 @@ namespace Xbim
 		XbimGeometryObject ^ XbimCompound::Moved(IIfcObjectPlacement ^ objectPlacement)
 		{
 			if (!IsValid) return this;
-			XbimCompound^ copy = gcnew XbimCompound(this, _isSewn, _sewingTolerance,Tag); //take a copy of the shape
+			XbimCompound^ copy = gcnew XbimCompound(this, _isSewn, _sewingTolerance, Tag); //take a copy of the shape
 			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
-			copy->Move(loc);			
+			copy->Move(loc);
 			return copy;
 		}
 
@@ -321,7 +321,7 @@ namespace Xbim
 
 		void XbimCompound::Init(IIfcConnectedFaceSet^ faceSet)
 		{
-			
+
 			if (!Enumerable::Any(faceSet->CfsFaces))
 			{
 				XbimGeometryCreator::LogWarning(faceSet, "Emty face set");
@@ -345,10 +345,37 @@ namespace Xbim
 
 		void XbimCompound::Init(IIfcAdvancedBrep^ solid)
 		{
-
 			IIfcAdvancedBrepWithVoids^ advancedBrepWithVoids = dynamic_cast<IIfcAdvancedBrepWithVoids^>(solid);
-			if (advancedBrepWithVoids != nullptr) return Init(advancedBrepWithVoids);
-			InitAdvancedFaces(solid->Outer->CfsFaces);
+			if (advancedBrepWithVoids != nullptr) return Init(advancedBrepWithVoids);			
+			BRep_Builder b;
+			XbimShell^ outerShell = InitAdvancedFaces(solid->Outer->CfsFaces);
+			if (!outerShell->IsValid) return;
+			XbimSolid^ theSolid;
+			if (!outerShell->IsClosed) //we need to close it
+			{
+				//advanced breps are always solids, so to make sure we have highest form
+				BRepBuilderAPI_Sewing seamstress(_sewingTolerance);
+				seamstress.Add(outerShell);
+				seamstress.Perform();
+				// Build solid
+				BRepBuilderAPI_MakeSolid solidmaker;
+				TopTools_IndexedMapOfShape shellMap;
+				TopExp::MapShapes(seamstress.SewedShape(), TopAbs_SHELL, shellMap);
+				for (int ishell = 1; ishell <= shellMap.Extent(); ++ishell)
+				{
+					const TopoDS_Shell& shell = TopoDS::Shell(shellMap(ishell));
+					solidmaker.Add(shell);
+				}
+				theSolid = gcnew XbimSolid(solidmaker.Solid());
+				theSolid->CorrectOrientation();
+			}
+			else
+			{				
+				theSolid = (XbimSolid^)outerShell->MakeSolid();
+			}
+			pCompound = new TopoDS_Compound();
+			b.MakeCompound(*pCompound);
+			b.Add(*pCompound, theSolid);
 		}
 
 		void XbimCompound::Init(IIfcFacetedBrep^ solid)
@@ -360,11 +387,34 @@ namespace Xbim
 
 		void XbimCompound::Init(IIfcAdvancedBrepWithVoids^ brepWithVoids)
 		{
-			InitAdvancedFaces(brepWithVoids->Outer->CfsFaces);
-			XbimShell^ outerShell = (XbimShell^)MakeShell();
-			if (!outerShell->IsClosed) //we have a shell that is not able to be made in to a solid
-				XbimGeometryCreator::LogWarning(brepWithVoids, "Can cut voids properly as the bounding shell #{0} is not a solid.", brepWithVoids->Outer->EntityLabel);
-			BRepBuilderAPI_MakeSolid builder(outerShell);
+			BRep_Builder b;
+			XbimShell^ outerShell = InitAdvancedFaces(brepWithVoids->Outer->CfsFaces);			
+			XbimSolid^ theSolid;			
+			if (!outerShell->IsClosed) //we need to close it
+			{									
+				//advanced breps are always solids, so to make sure we have highest form
+				BRepBuilderAPI_Sewing seamstress(_sewingTolerance);
+				seamstress.Add(outerShell);
+				seamstress.Perform();
+				// Build solid
+				BRepBuilderAPI_MakeSolid solidmaker;
+				TopTools_IndexedMapOfShape shellMap;
+				TopExp::MapShapes(seamstress.SewedShape(), TopAbs_SHELL, shellMap);
+				for (int ishell = 1; ishell <= shellMap.Extent(); ++ishell) 
+				{
+					const TopoDS_Shell& shell = TopoDS::Shell(shellMap(ishell));
+					solidmaker.Add(shell);
+				}
+				theSolid = gcnew XbimSolid(solidmaker.Solid());
+			}	
+			else
+			{
+				BRepBuilderAPI_MakeSolid solidmaker;
+				solidmaker.Add(outerShell);
+				theSolid = gcnew XbimSolid(solidmaker.Solid());
+			}
+
+			BRepBuilderAPI_MakeSolid builder(theSolid);
 			for each (IIfcClosedShell^ IIfcVoidShell in brepWithVoids->Voids)
 			{
 				XbimCompound^ voidShapes = gcnew XbimCompound(IIfcVoidShell);
@@ -375,12 +425,11 @@ namespace Xbim
 			}
 			if (builder.IsDone())
 			{
-				//pCompound = new TopoDS_Compound(); no need to do this as it is already completed
-				BRep_Builder b;
+				pCompound = new TopoDS_Compound(); 		
 				b.MakeCompound(*pCompound);
 				b.Add(*pCompound, builder.Solid());
 			}//leave the outer shell without the voids
-			else 
+			else
 				XbimGeometryCreator::LogWarning(brepWithVoids, "A correct shape could not be built and it has been ignored");
 		}
 
@@ -462,7 +511,7 @@ namespace Xbim
 				return 0;
 		}
 		//This method copes with faces that may be advanced as well as ordinary
-		void XbimCompound::InitAdvancedFaces(IEnumerable<IIfcFace^>^ faces)
+		XbimShell^ XbimCompound::InitAdvancedFaces(IEnumerable<IIfcFace^>^ faces)
 		{
 			try
 			{
@@ -471,19 +520,20 @@ namespace Xbim
 				TopoDS_Shell shell;
 				builder.MakeShell(shell);
 				IIfcFace^ aFace = Enumerable::FirstOrDefault(faces);
-				if (aFace == nullptr) return;
+				if (aFace == nullptr) return gcnew XbimShell();
 				IModel^ model = aFace->Model;
-
+				ShapeFix_ShapeTolerance FTol;
 				_sewingTolerance = model->ModelFactors->Precision;
-				double maxTolerance = model->ModelFactors->PrecisionMax;
+				double maxTolerance = Math::Max(model->ModelFactors->OneMilliMetre / 10, model->ModelFactors->Precision * 100);
 				//collect all the geometry components
 				Dictionary<int, XbimEdge^>^ orientedEdges = gcnew Dictionary<int, XbimEdge^>();
 				Dictionary<int, XbimVertex^>^ vertices = gcnew Dictionary<int, XbimVertex^>();
+				Dictionary<IIfcPolyline^, XbimWire^>^ polylines = gcnew Dictionary<IIfcPolyline^, XbimWire^>(gcnew IfcPolylineComparer());
 				for each (IIfcFace^ unloadedFace in  faces)
 				{
 					IIfcAdvancedFace^ advancedFace = dynamic_cast<IIfcAdvancedFace^>(model->Instances[unloadedFace->EntityLabel]); //improves performance and reduces memory load				
-					
-					XbimFace^ faceSurface = gcnew XbimFace(advancedFace->FaceSurface);
+
+
 					XbimWire^ outerLoop = nullptr;
 					List<XbimWire^>^ innerLoops = gcnew List<XbimWire^>();
 					for each (IIfcFaceBound^ ifcBound in advancedFace->Bounds) //build all the loops
@@ -491,8 +541,9 @@ namespace Xbim
 						BRepBuilderAPI_MakeWire wireMaker;
 						bool isOuter = dynamic_cast<IIfcFaceOuterBound^>(ifcBound) != nullptr;
 						IIfcEdgeLoop^ edgeLoop = dynamic_cast<IIfcEdgeLoop^>(ifcBound->Bound);
+						
 						if (edgeLoop != nullptr) //they always should be
-						{							
+						{
 							for each (IIfcOrientedEdge^ orientedEdge in edgeLoop->EdgeList)
 							{
 								XbimEdge^ xBimOrientedEdge;
@@ -500,6 +551,7 @@ namespace Xbim
 								{
 									//we need the reverse of this one
 									if (!orientedEdge->Orientation) xBimOrientedEdge = xBimOrientedEdge->Reversed();
+									wireMaker.Add(xBimOrientedEdge);
 								}
 								else //need to build it
 								{
@@ -523,57 +575,68 @@ namespace Xbim
 										vertices->Add(orientedEdge->EdgeElement->EdgeEnd->EntityLabel, edgeEnd);
 									}
 									//build the geometry
-
-
-
-
-								//opencascade does not support edges made of multi-linear segments (polyline)
-								//these can be exapnded to discrete edges to maintain topological correctness
+									//opencascade does not support edges made of multi-linear segments (polyline)
+									//these can be exapnded to discrete edges to maintain topological correctness
 									IIfcPolyline^ polyline = dynamic_cast<IIfcPolyline^>(edgeCurve->EdgeGeometry);
+									
 									if (polyline != nullptr && Enumerable::Count(polyline->Points) > 2) //we have multi segments
-									{										
-										
-								
-										XbimWire^ wire = gcnew XbimWire(polyline);
-										wire = wire->Trim(edgeStart, edgeEnd, _sewingTolerance);
-
-										if (!edgeCurve->SameSense) wire->Reverse();
-										for each (XbimEdge^ edge in wire->Edges)
+									{
+										XbimWire^ polyWire; //see if we have done the other half
+										if (!polylines->TryGetValue(polyline, polyWire))
 										{
-											wireMaker.Add(edge);
+											polyWire = gcnew XbimWire(polyline);
+											polyWire = polyWire->Trim(edgeStart, edgeEnd, _sewingTolerance);
+											polyWire->Tag = polyline;
+											FTol.SetTolerance(polyWire, _sewingTolerance);
+											polylines->Add(polyline, polyWire);
 										}
+										else
+										{
+											//the lookup up returns a wire regardles of the direction of the polyline, so we need to check if this polyline is the same direction or reversed
+											bool isSameDirection = IfcPolylineComparer::IsSameDirection(polyline, polyWire);
+											if (!isSameDirection) //means we have found by reverse lookup, wire needs to be a reverse
+												polyWire = polyWire->Reversed();
+										}
+
+										if (!edgeCurve->SameSense) polyWire = polyWire->Reversed();
+										if (!orientedEdge->Orientation) 
+											polyWire = polyWire->Reversed();
+										for each (XbimEdge^ edge in polyWire->Edges)
+											wireMaker.Add(edge);										
 									}
 									else
 									{
 										xBimOrientedEdge = gcnew XbimEdge(edgeCurve->EdgeGeometry);
 										if (!xBimOrientedEdge->IsValid)throw gcnew XbimException("Incorrectly defined Edge, must be a valid edge curve");
 										xBimOrientedEdge = gcnew XbimEdge(xBimOrientedEdge, edgeStart, edgeEnd, maxTolerance); //adjust start and end		
-										
+										if (!edgeCurve->SameSense) xBimOrientedEdge->Reverse();
+										FTol.SetTolerance(xBimOrientedEdge, _sewingTolerance);
+										//add the original before we orient t the oriented edge direction
+										orientedEdges->Add(orientedEdge->EdgeElement->EntityLabel, xBimOrientedEdge);
+										if (!orientedEdge->Orientation) xBimOrientedEdge = xBimOrientedEdge->Reversed();
+										wireMaker.Add(xBimOrientedEdge);
 									}
-									if (!edgeCurve->SameSense) xBimOrientedEdge->Reverse();
-									orientedEdges->Add(orientedEdge->EdgeElement->EntityLabel, xBimOrientedEdge);
-									if (!orientedEdge->Orientation) xBimOrientedEdge = xBimOrientedEdge->Reversed();
-									
 								}
-								wireMaker.Add(xBimOrientedEdge);
+
 								if (!wireMaker.IsDone())
 								{
 									throw gcnew XbimException("Incorrectly defined Edge, must be a valid edge curve");
 								}
+								
 							}
 
-							} // we have a wire		
-							
-							TopoDS_Wire loopWire = wireMaker.Wire();
-							loopWire.Closed(Standard_True);
-							if (!ifcBound->Orientation) loopWire.Reverse();
-							XbimWire^ xbimLoop = gcnew XbimWire(loopWire);
-							if (isOuter && outerLoop == nullptr) //only choose one outer loop
-								outerLoop = xbimLoop;
-							else
-								innerLoops->Add(xbimLoop);
-						}
-					
+						} // we have a wire		
+
+						TopoDS_Wire loopWire = wireMaker.Wire();
+						loopWire.Closed(Standard_True);
+						if (!ifcBound->Orientation) loopWire.Reverse();
+						XbimWire^ xbimLoop = gcnew XbimWire(loopWire);
+						if (isOuter && outerLoop == nullptr) //only choose one outer loop
+							outerLoop = xbimLoop;
+						else
+							innerLoops->Add(xbimLoop);
+					}
+
 					//if we have no outer loop defined, find the longest
 					if (outerLoop == nullptr)
 					{
@@ -589,33 +652,24 @@ namespace Xbim
 						}
 						innerLoops->Remove(outerLoop); //remove outer loop from inner loops
 					}
-					
-					XbimFace^ xbimAdvancedFace = gcnew XbimFace(advancedFace, outerLoop, innerLoops);
+
+					XbimFace^ xbimAdvancedFace = gcnew XbimFace(advancedFace, outerLoop, innerLoops, maxTolerance);
 					BRepCheck_Analyzer analyser(xbimAdvancedFace, Standard_True);
-					
-					if(!analyser.IsValid() )
+
+					if (!analyser.IsValid())
 						XbimGeometryCreator::LogWarning(advancedFace, "Incorrectly defined face #{0}, it has been ignored", advancedFace->EntityLabel);
-					if (xbimAdvancedFace->IsValid)						
-						builder.AddShellFace(shell, xbimAdvancedFace);						
+					if (xbimAdvancedFace->IsValid)
+						builder.AddShellFace(shell, xbimAdvancedFace);
 					else
 						XbimGeometryCreator::LogWarning(advancedFace, "Incorrectly defined face #{0}, it has been ignored", advancedFace->EntityLabel);
 				}
 
 				builder.CompleteShell(shell);
 
-				BRepBuilderAPI_Sewing seamstress(_sewingTolerance);
-				seamstress.Add(shell);
-				seamstress.Perform();
-				TopoDS_Shape result = seamstress.SewedShape();
-				ShapeFix_Shape shapeFixer(result);
-				shapeFixer.Perform();
-				BRep_Builder b;
-				pCompound = new TopoDS_Compound();
-				b.MakeCompound(*pCompound);
-				b.Add(*pCompound, shapeFixer.Shape());
-				/*pCompound = new TopoDS_Compound();
-				b.MakeCompound(*pCompound);
-				b.Add(*pCompound, shell);*/
+				ShapeFix_Shell sf(shell);
+				sf.Perform();
+				return gcnew XbimShell(sf.Shell());
+
 			}
 			catch (Standard_Failure e)
 			{
@@ -635,25 +689,25 @@ namespace Xbim
 			for each (IEnumerable<Ifc4::MeasureResource::IfcLengthMeasure>^ cp in faceSet->Coordinates->CoordList)
 			{
 				XbimTriplet<Ifc4::MeasureResource::IfcLengthMeasure> tpl = IEnumerableExtensions::AsTriplet<Ifc4::MeasureResource::IfcLengthMeasure>(cp);
-				XbimVertex^ v = gcnew XbimVertex(tpl.A,tpl.B, tpl.C,_sewingTolerance);
+				XbimVertex^ v = gcnew XbimVertex(tpl.A, tpl.B, tpl.C, _sewingTolerance);
 				vertices->Add(v);
 			}
 			//ignore the normals as we cannot observe them in an opencascade model, we will recalculate
-			
+
 
 			//make the triangles
 			for each (IEnumerable<Ifc4::MeasureResource::IfcPositiveInteger>^ indices in faceSet->CoordIndex)
 			{
 				XbimTriplet<Ifc4::MeasureResource::IfcPositiveInteger> tpl = IEnumerableExtensions::AsTriplet<Ifc4::MeasureResource::IfcPositiveInteger>(indices);
-				
+
 				XbimVertex^ v1; XbimVertex^ v2; XbimVertex^ v3;
-				v1 = vertices[(int)tpl.A - 1]; 
-				v2 = vertices[(int)tpl.B - 1]; 
+				v1 = vertices[(int)tpl.A - 1];
+				v2 = vertices[(int)tpl.B - 1];
 				v3 = vertices[(int)tpl.C - 1];
-				BRepBuilderAPI_MakePolygon triangleMaker(v1,v2,v3,Standard_True);
+				BRepBuilderAPI_MakePolygon triangleMaker(v1, v2, v3, Standard_True);
 				if (triangleMaker.IsDone())
 				{
-					BRepBuilderAPI_MakeFace faceMaker(triangleMaker.Wire(),Standard_True);
+					BRepBuilderAPI_MakeFace faceMaker(triangleMaker.Wire(), Standard_True);
 					if (faceMaker.IsDone())
 					{
 						builder.AddShellFace(shell, faceMaker.Face());
@@ -680,22 +734,22 @@ namespace Xbim
 			{
 				model = face->Model;
 				tolerance = model->ModelFactors->Precision;
-				_sewingTolerance = model->ModelFactors->Precision;			
+				_sewingTolerance = model->ModelFactors->Precision;
 				break;
 			}
-			
-			
+
+
 			BRep_Builder builder;
 			TopoDS_Shell shell;
 			builder.MakeShell(shell);
 			TopTools_DataMapOfIntegerShape vertexStore;
 			for each (IIfcFace^ unloadedFace in  faces)
 			{
-				IIfcFace^ fc = (IIfcFace^) model->Instances[unloadedFace->EntityLabel]; //improves performance and reduces memory load
+				IIfcFace^ fc = (IIfcFace^)model->Instances[unloadedFace->EntityLabel]; //improves performance and reduces memory load
 				List<Tuple<XbimWire^, IIfcPolyLoop^, bool>^>^ loops = gcnew List<Tuple<XbimWire^, IIfcPolyLoop^, bool>^>();
 				for each (IIfcFaceBound^ bound in fc->Bounds) //build all the loops
 				{
-					
+
 					if (!dynamic_cast<IIfcPolyLoop^>(bound->Bound) || !XbimConvert::IsPolygon((IIfcPolyLoop^)bound->Bound)) continue;//skip non-polygonal faces
 					IIfcPolyLoop^ polyLoop = (IIfcPolyLoop^)(bound->Bound);
 					bool is3D = XbimConvert::Is3D(polyLoop);
@@ -712,7 +766,7 @@ namespace Xbim
 							v = TopoDS::Vertex(vertexStore.Find(p->EntityLabel));
 						polyMaker.Add(v);
 					}
-					
+
 					if (polyMaker.IsDone())
 					{
 						polyMaker.Close();
@@ -720,11 +774,11 @@ namespace Xbim
 						if (loop->IsValid)
 						{
 							if (!bound->Orientation)
-								loop->Reverse(); 
-							loops->Add(gcnew Tuple<XbimWire^, IIfcPolyLoop^, bool>(loop, polyLoop,bound->Orientation));
+								loop->Reverse();
+							loops->Add(gcnew Tuple<XbimWire^, IIfcPolyLoop^, bool>(loop, polyLoop, bound->Orientation));
 						}
 					}
-				
+
 				}
 				XbimFace^ face = BuildFace(loops, fc);
 				for each (Tuple<XbimWire^, IIfcPolyLoop^, bool>^ loop in loops) delete loop->Item1; //force removal of wires
@@ -734,11 +788,11 @@ namespace Xbim
 					XbimGeometryCreator::LogInfo(fc, "Incorrectly defined face. It has been ignored");
 				//delete face;
 			}
-		
+
 			pCompound = new TopoDS_Compound();
 			builder.MakeCompound(*pCompound);
 			builder.Add(*pCompound, shell);
-			
+
 		}
 
 
@@ -748,7 +802,7 @@ namespace Xbim
 #pragma region Helpers
 
 
-		
+
 		XbimFace^ XbimCompound::BuildFace(List<Tuple<XbimWire^, IIfcPolyLoop^, bool>^>^ wires, IIfcFace^ owningFace)
 		{
 
@@ -772,7 +826,7 @@ namespace Xbim
 					break;
 				}
 			}
-		
+
 			face = gcnew XbimFace(outerBound, p, faceNormal); //create  a face with the right bound and direction
 
 			for (int i = 1; i < wires->Count; i++)
@@ -791,7 +845,7 @@ namespace Xbim
 			return face;
 		}
 
-		
+
 		//upgrades the result to the highest level and simplest object without loss of representation
 		IXbimGeometryObject^ XbimCompound::Upgrade()
 		{
@@ -816,12 +870,12 @@ namespace Xbim
 				{
 					XbimSolid^ solid = (XbimSolid^)shell->MakeSolid();
 					if (solid->IsValid)
-						builder.Add(newCompound,  solid);
+						builder.Add(newCompound, solid);
 					else
 						builder.Add(newCompound, TopoDS::Shell(expl.Current()));
 				}
 				else
-					builder.Add(newCompound, TopoDS::Shell(expl.Current()));	
+					builder.Add(newCompound, TopoDS::Shell(expl.Current()));
 				count++;
 			}
 			for (TopExp_Explorer expl(*pCompound, TopAbs_FACE, TopAbs_SHELL); expl.More(); expl.Next())
@@ -832,7 +886,7 @@ namespace Xbim
 			}
 
 			if (count == 1)
-			{				
+			{
 				TopAbs_ShapeEnum st = lastAdded.ShapeType();
 				if (st == TopAbs_SOLID)
 					return gcnew XbimSolid(TopoDS::Solid(lastAdded));
@@ -850,16 +904,16 @@ namespace Xbim
 			if (Count == 1) //if we have one shell or a solid with just one shell then just return it
 			{
 				IXbimGeometryObject^ geom = this->First;
-				
-					XbimShell^ shell = dynamic_cast<XbimShell^>(geom);
-					if (shell != nullptr) return shell;
-					XbimSolid^ solid = dynamic_cast<XbimSolid^>(geom);
-					if (solid != nullptr && solid->Shells->Count == 1)
-						return solid->Shells->First;
-				
+
+				XbimShell^ shell = dynamic_cast<XbimShell^>(geom);
+				if (shell != nullptr) return shell;
+				XbimSolid^ solid = dynamic_cast<XbimSolid^>(geom);
+				if (solid != nullptr && solid->Shells->Count == 1)
+					return solid->Shells->First;
+
 			}
 			//make all the faces in to one shell, this may be a topologically illegal object
-			
+
 			BRepPrim_Builder builder;
 			TopoDS_Shell shell;
 			builder.MakeShell(shell);
@@ -871,16 +925,16 @@ namespace Xbim
 			}
 			builder.CompleteShell(shell);
 			return gcnew XbimShell(shell);
-			
+
 		}
 
 
 		XbimCompound^ XbimCompound::Merge(IXbimSolidSet^ solids, double tolerance)
 		{
-			
+
 			TopoDS_Compound compound;
 			BRep_Builder b;
-			
+
 			////first remove any that intersect as simple merging leads to illegal geometries.
 			Dictionary<XbimSolid^, HashSet<XbimSolid^>^>^ clusters = gcnew Dictionary<XbimSolid^, HashSet<XbimSolid^>^>();
 			for each (IXbimSolid^ solid in solids) //init all the clusters
@@ -891,9 +945,9 @@ namespace Xbim
 			}
 			if (clusters->Count == 0) return nullptr; //nothing to do
 
-			
+
 			b.MakeCompound(compound);
-			if (clusters->Count == 1 ) //just one so return it
+			if (clusters->Count == 1) //just one so return it
 			{
 				for each(XbimSolid^ solid in clusters->Keys) //take the first one
 				{
@@ -919,7 +973,7 @@ namespace Xbim
 			Dictionary<XbimSolid^, HashSet<XbimSolid^>^>^ clustersSparse = gcnew Dictionary<XbimSolid^, HashSet<XbimSolid^>^>();
 			for each (KeyValuePair<XbimSolid^, HashSet<XbimSolid^>^>^ cluster in clusters)
 			{
-				if (cluster->Value->Count>0)
+				if (cluster->Value->Count > 0)
 					clustersSparse->Add(cluster->Key, cluster->Value);
 				else
 					toMergeReduced->Add(cluster->Key); //record the ones to simply merge
@@ -937,7 +991,7 @@ namespace Xbim
 			{
 				HashSet<XbimSolid^>^ connected = gcnew HashSet<XbimSolid^>();
 				XbimCompound::GetConnected(connected, clustersSparse, clusterAround);
-				
+
 				ShapeFix_ShapeTolerance fixTol;
 				TopoDS_Shape unionedShape;
 				for each (XbimSolid^ toConnect in connected) //join up the connected
@@ -960,13 +1014,13 @@ namespace Xbim
 							err = gcnew String(Standard_Failure::Caught()->GetMessageString());
 							XbimGeometryCreator::LogWarning(toConnect, "Boolean Union operation failed. " + err);
 						}
-						
+
 					}
 				}
 				XbimSolidSet^ solidSet = gcnew XbimSolidSet(unionedShape);
 
 				for each (XbimSolid^ solid in solidSet) toMergeReduced->Add(solid);
-				
+
 				for each (XbimSolid^ solid in connected) //remove what we have connected
 					clustersSparse->Remove(solid);
 
@@ -983,7 +1037,7 @@ namespace Xbim
 				b.Add(compound, solid);
 				GC::KeepAlive(solid);
 			}
-			
+
 			return gcnew XbimCompound(compound, true, tolerance);
 
 		}
@@ -993,7 +1047,7 @@ namespace Xbim
 			List<XbimSolid^>^ discrete = gcnew List<XbimSolid^>(toProcess->Count);
 			if (toProcess->Count > 0)
 			{
-				
+
 				List<XbimSolid^>^ connected = gcnew List<XbimSolid^>(toProcess->Count);
 
 				for each (XbimSolid^ solid in toProcess)
@@ -1011,7 +1065,7 @@ namespace Xbim
 								connected->Add(solid);
 								isConnected = true;
 								break;
-							}	
+							}
 						}
 						if (!isConnected) discrete->Add(solid);
 					}
@@ -1051,7 +1105,7 @@ namespace Xbim
 				BRepAlgoAPI_Cut boolOp(this, solids);
 				GC::KeepAlive(this);
 				GC::KeepAlive(solids);
-				
+
 				if (boolOp.ErrorStatus() == 0)
 				{
 					XbimCompound^ result = gcnew XbimCompound(TopoDS::Compound(boolOp.Shape()), true, tolerance);
@@ -1082,7 +1136,7 @@ namespace Xbim
 				GC::KeepAlive(this);
 				GC::KeepAlive(solids);
 				if (boolOp.ErrorStatus() == 0)
-					return gcnew XbimCompound(TopoDS::Compound(boolOp.Shape()),true,tolerance);
+					return gcnew XbimCompound(TopoDS::Compound(boolOp.Shape()), true, tolerance);
 			}
 			catch (Standard_Failure e)
 			{
@@ -1092,7 +1146,7 @@ namespace Xbim
 			return XbimCompound::Empty;
 		}
 
-		
+
 		XbimCompound^ XbimCompound::Intersection(XbimCompound^ solids, double tolerance)
 		{
 			if (!IsSewn) Sew();
@@ -1106,7 +1160,7 @@ namespace Xbim
 				GC::KeepAlive(this);
 				GC::KeepAlive(solids);
 				if (boolOp.ErrorStatus() == 0)
-					return gcnew XbimCompound(TopoDS::Compound(boolOp.Shape()),true,tolerance);
+					return gcnew XbimCompound(TopoDS::Compound(boolOp.Shape()), true, tolerance);
 			}
 			catch (Standard_Failure e)
 			{
@@ -1176,8 +1230,8 @@ namespace Xbim
 				{
 					pCompound = new TopoDS_Compound();
 					builder.MakeCompound(*pCompound);
-				}			
-				builder.Add(*pCompound,occ);
+				}
+				builder.Add(*pCompound, occ);
 			}
 		}
 

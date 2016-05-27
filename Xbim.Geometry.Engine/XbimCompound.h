@@ -35,7 +35,7 @@ namespace Xbim
 			//Initialisers
 			void Init(IIfcConnectedFaceSet^ faceSet);
 			void Init(IEnumerable<IIfcFace^>^ faces);
-			void InitAdvancedFaces(IEnumerable<IIfcFace^>^ faces);
+			XbimShell^ InitAdvancedFaces(IEnumerable<IIfcFace^>^ faces);
 			void Init(IIfcShellBasedSurfaceModel^ sbsm);
 			void Init(IIfcFaceBasedSurfaceModel^ fbsm);
 			void Init(IIfcManifoldSolidBrep^ solid);

@@ -31,6 +31,7 @@ namespace Ifc4GeometryTests
                     foreach (var brep in store.Instances.OfType<IIfcAdvancedBrep>())
                     {
                         var solid = engine.CreateSolid(brep);
+
                         Assert.IsTrue(solid.Volume>0,"Breps should have a positive volume");
                     }
                 }

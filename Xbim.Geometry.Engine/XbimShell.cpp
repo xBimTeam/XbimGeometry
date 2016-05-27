@@ -437,13 +437,17 @@ namespace Xbim
 		{
 			if (IsValid)
 			{
-				BRepClass3d_SolidClassifier class3d(this);
-				class3d.PerformInfinitePoint(Precision::Confusion());
-				if (class3d.State() == TopAbs_IN) 
-					this->Reverse();
+				
 				BRepBuilderAPI_MakeSolid solidMaker(this);
 				if (solidMaker.IsDone())
-					return gcnew XbimSolid(solidMaker.Solid());
+				{
+					XbimSolid^ solid = gcnew XbimSolid(solidMaker.Solid());
+					BRepClass3d_SolidClassifier class3d(solid);
+					class3d.PerformInfinitePoint(Precision::Confusion());
+					if (class3d.State() == TopAbs_IN)
+						solid->Reverse();					
+					return solid;
+				}
 			}
 			return gcnew XbimSolid(); //return an invalid solid if the shell is not valid
 		}

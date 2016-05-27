@@ -153,7 +153,7 @@ namespace Xbim
 			void Move(IIfcAxis2Placement3D^ position);
 			void Translate(XbimVector3D translation);
 			void Reverse();
-			
+			void CorrectOrientation();
 			void FixTopology();
 #pragma endregion
 

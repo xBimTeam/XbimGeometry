@@ -120,7 +120,7 @@ namespace Xbim
 			XbimFace(IXbimWire^ wire, XbimPoint3D pointOnface,  XbimVector3D faceNormal);
 			XbimFace(IXbimFace^ face);
 			XbimFace(IIfcSurface^ surface, XbimWire^ outerBound, IEnumerable<XbimWire^>^ innerBounds);
-			XbimFace(IIfcFaceSurface^ surface, XbimWire^ outerBound, IEnumerable<XbimWire^>^ innerBounds);
+			XbimFace(IIfcFaceSurface^ surface, XbimWire^ outerBound, IEnumerable<XbimWire^>^ innerBounds, double tolerance);
 			XbimFace(IIfcCylindricalSurface ^ surface);
 			XbimFace(double x, double y, double tolerance);
 #pragma endregion

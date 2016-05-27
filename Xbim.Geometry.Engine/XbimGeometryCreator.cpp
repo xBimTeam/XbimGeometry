@@ -1003,14 +1003,18 @@ namespace Xbim
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcAdvancedBrep^ ifcSolid)
 		{
 			XbimCompound^ comp = gcnew XbimCompound((IIfcAdvancedBrep^)ifcSolid);
-			XbimShell^ shell = (XbimShell^)comp->MakeShell();
-			return shell->MakeSolid();
+			if (comp->Solids->Count > 0)
+				return comp->Solids->First;
+			else
+				gcnew XbimSolid();
 		}
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcAdvancedBrepWithVoids^ ifcSolid)
 		{
-			XbimCompound^ comp = gcnew XbimCompound((IIfcAdvancedBrep^)ifcSolid);
-			XbimShell^ shell = (XbimShell^)comp->MakeShell();
-			return shell->MakeSolid();
+			XbimCompound^ comp = gcnew XbimCompound((IIfcAdvancedBrepWithVoids^)ifcSolid);
+			if (comp->Solids->Count > 0)
+				return comp->Solids->First;
+			else
+				gcnew XbimSolid();
 		}
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcSectionedSpine^ ifcSolid)
 		{

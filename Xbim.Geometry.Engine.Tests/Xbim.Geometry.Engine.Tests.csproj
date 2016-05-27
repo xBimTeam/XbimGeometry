@@ -96,7 +96,9 @@
     <None Include="Ifc4TestFiles\air-terminal-element.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Ifc4TestFiles\Axis2PlacementError.ifc" />
+    <None Include="Ifc4TestFiles\Axis2PlacementError.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Ifc4TestFiles\BasinAdvancedBrep.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

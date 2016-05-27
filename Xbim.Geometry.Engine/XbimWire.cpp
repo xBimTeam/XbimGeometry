@@ -2279,6 +2279,23 @@ namespace Xbim
 			pWire->Move(t);
 		}
 
+		XbimWire^ XbimWire::Reversed()
+		{
+			XbimWire^ copy = gcnew XbimWire(this);
+			copy->Reverse();
+			return copy;
+			//if (!IsValid) return this;
+			//BRep_Builder B;
+			//TopoDS_Shape copy = pWire->EmptyCopied();
+			//TopoDS_Iterator it(*pWire);
+			//while (it.More()) {
+			//	B.Add(copy, it.Value().Reversed());
+			//	it.Next();
+			//}
+			////copy.Reverse();
+			//return gcnew XbimWire(TopoDS::Wire(copy));
+		}
+
 		void XbimWire::Reverse()
 		{
 			if (!IsValid) return;
@@ -2607,5 +2624,65 @@ namespace Xbim
 		}
 #pragma endregion
 
-	}
+		bool IfcPolylineComparer::Equals(IIfcPolyline ^x, Xbim::Ifc4::Interfaces::IIfcPolyline ^y)
+		{
+			//it must be a reverse
+			List<IIfcCartesianPoint^>^ xPoints = Enumerable::ToList(x->Points);
+			//reverse becase they cannot be identical
+			List<IIfcCartesianPoint^>^ yPoints = Enumerable::ToList(y->Points);
+			if (xPoints->Count < 2 || yPoints->Count < 2 || xPoints->Count!=yPoints->Count) return false;			
+			double precision = x->Model->ModelFactors->Precision;
+			for (size_t i = 0; i < xPoints->Count; i++)
+			{
+				XbimPoint3DWithTolerance^ xPnt = gcnew XbimPoint3DWithTolerance(xPoints[i]->X, xPoints[i]->Y, xPoints[i]->Z, precision);
+				XbimPoint3DWithTolerance^ yPnt = gcnew XbimPoint3DWithTolerance(yPoints[i]->X, yPoints[i]->Y, yPoints[i]->Z, precision);
+				if (xPnt != yPnt)
+				{
+					if (i == 0) //check reverse order
+					{
+						int lastIndex = yPoints->Count - 1;
+						yPnt = gcnew XbimPoint3DWithTolerance(yPoints[lastIndex]->X, yPoints[lastIndex]->Y, yPoints[lastIndex]->Z, precision);
+						if (xPnt != yPnt) return false; //they are diferent
+						else yPoints = Enumerable::ToList(Enumerable::Reverse(yPoints));
+					}
+					else return false;
+				}
+			}
+			return true;	
+		}
+
+		
+
+		int IfcPolylineComparer::GetHashCode(IIfcPolyline ^pline)
+		{
+			//simple hash that does not distinguish between the direction of the line
+			//only considers the start,  end points and number of points for uniqueness
+			
+			List<IIfcCartesianPoint^>^ points = Enumerable::ToList(pline->Points);
+			int hash = points->Count;
+			if (hash == 0) return hash;			
+			IIfcCartesianPoint^ start = points[0];
+			hash += (int)start->X; //do them all as integers to avoid precision errors
+			hash += (int)start->Y;
+			hash += (int)start->Z;
+			if (hash == 1) return hash;
+			IIfcCartesianPoint^ end = points[points->Count-1];					
+			hash += (int)end->X; //do them all as integers to avoid precision errors
+			hash += (int)end->Y;
+			hash += (int)end->Z;
+			return hash;
+		}
+
+		bool IfcPolylineComparer::IsSameDirection(IIfcPolyline^ pline, IXbimWire^ polyWire)
+		{
+			IIfcCartesianPoint^ startLookup = Enumerable::FirstOrDefault(pline->Points);			
+			IIfcPolyline^ original = dynamic_cast<IIfcPolyline^>(polyWire->Tag);
+			if (startLookup == nullptr || original ==nullptr) throw gcnew XbimException("Illegal use of IsSameDirection");
+			IIfcCartesianPoint^ startOriginal = Enumerable::FirstOrDefault(original->Points);
+			XbimPoint3DWithTolerance^ startLookupPnt = gcnew XbimPoint3DWithTolerance(startLookup->X, startLookup->Y, startLookup->Z, pline->Model->ModelFactors->Precision);
+			XbimPoint3DWithTolerance^ startOriginalPnt = gcnew XbimPoint3DWithTolerance(startOriginal->X, startOriginal->Y, startOriginal->Z, pline->Model->ModelFactors->Precision);
+			return startLookupPnt == startOriginalPnt;
+		}
+
+}
 }
