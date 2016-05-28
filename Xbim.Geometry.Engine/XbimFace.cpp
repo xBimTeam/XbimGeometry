@@ -46,6 +46,7 @@
 #include <Geom_CylindricalSurface.hxx>
 #include <GeomAPI_ProjectPointOnSurf.hxx>
 #include <BRepClass_FaceClassifier.hxx>
+#include <BRepTopAdaptor_FClass2d.hxx>
 using namespace System::Linq;
 namespace Xbim
 {
@@ -228,11 +229,19 @@ namespace Xbim
 			if (faceMaker.IsDone())
 			{			
 				for each (XbimWire^ inner in innerBounds)
-				{
-					if (!surface->SameSense) inner->Reverse();
-					wFix.Init(inner, this, tolerance);
+				{					
+					wFix.Init(inner, faceMaker.Face(), tolerance*10);
 					wFix.FixEdgeCurves();
-					faceMaker.Add(TopoDS::Wire(wFix.Wire().Reversed()));
+				//	XbimWire^ w = gcnew XbimWire(wFix.Wire());
+					//if (surface->SameSense) w = w->Reversed();
+				//	faceMaker.Add(inner);
+					TopoDS_Face newface = TopoDS::Face(faceMaker.Face().EmptyCopied().Oriented(TopAbs_FORWARD));
+					BRep_Builder b;
+					b.Add(newface, wFix.Wire());
+					BRepTopAdaptor_FClass2d fClass2d(newface, Precision::PConfusion());
+					if( fClass2d.PerformInfinitePoint() != TopAbs_IN) //material shuld be on the outside of the wire
+						faceMaker.Add(TopoDS::Wire(wFix.Wire().Reversed()));
+					else faceMaker.Add(wFix.Wire());
 				}
 				*pFace = faceMaker.Face();
 				//the code below helps find errors in orientation, only for debugging
