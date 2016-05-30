@@ -37,6 +37,7 @@
 #include <ShapeFix_Shell.hxx>
 #include <BRepCheck_Analyzer.hxx>
 #include <ShapeFix_Edge.hxx>
+#include <ShapeFix_Face.hxx>
 using namespace System;
 using namespace System::Linq;
 using namespace Xbim::Common;
@@ -657,7 +658,17 @@ namespace Xbim
 					BRepCheck_Analyzer analyser(xbimAdvancedFace, Standard_True);
 
 					if (!analyser.IsValid())
-						XbimGeometryCreator::LogWarning(advancedFace, "Incorrectly defined face #{0}, it has been ignored", advancedFace->EntityLabel);
+					{
+						
+						ShapeFix_Face faceFix(xbimAdvancedFace);
+						faceFix.Perform();
+						ShapeExtend_Status status;
+						faceFix.Status(status);
+						if (status!=ShapeExtend_OK)
+							XbimGeometryCreator::LogWarning(advancedFace, "Incorrectly defined face #{0}, it has been accepted as it is defined", advancedFace->EntityLabel);
+						else
+							xbimAdvancedFace = gcnew XbimFace(faceFix.Face());
+					}
 					if (xbimAdvancedFace->IsValid)
 						builder.AddShellFace(shell, xbimAdvancedFace);
 					else

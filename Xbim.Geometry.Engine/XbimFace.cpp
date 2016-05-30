@@ -1001,9 +1001,13 @@ namespace Xbim
 			{
 				pFace = new TopoDS_Face();
 				*pFace = faceMaker.Face();
-				//apply the position transformation
-				if (sLin->Position != nullptr)
-					pFace->Move(XbimConvert::ToLocation(sLin->Position));
+				//apply the position transformation unless from a model that has this incorrect
+				// versions of the IFC explorter on or before 17.0.416 for Revit duplicated the placement, ignore for a correct result
+				if (!sLin->Model->ModelFactors->ApplyWorkAround("#SurfaceOfLinearExtrusion"))
+				{
+					if (sLin->Position != nullptr)
+						pFace->Move(XbimConvert::ToLocation(sLin->Position));
+				}
 			}
 			else
 				XbimGeometryCreator::LogWarning(sLin, "Invalid swept curve = #{0} found in surface of linearExtrusion. Face discarded", sLin->SweptCurve->EntityLabel);

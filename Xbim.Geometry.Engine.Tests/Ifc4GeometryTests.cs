@@ -197,9 +197,10 @@ namespace Ifc4GeometryTests
             using (var model = IfcStore.Open(@"Ifc4TestFiles\Axis2PlacementError.ifc"))
             {
                 var advancedBrep = model.Instances.OfType<IfcAdvancedBrep>().FirstOrDefault(i => i.EntityLabel== 27743);
+                bool wa = model.ModelFactors.ApplyWorkAround("#SurfaceOfLinearExtrusion");
                 Assert.IsNotNull(advancedBrep);
                 var basin = _xbimGeometryCreator.CreateSolid(advancedBrep);
-                Assert.IsTrue((int)basin.Volume == 44472872);
+                Assert.IsTrue((int)basin.Volume == 44025929);
             }
         }
         [TestMethod]
