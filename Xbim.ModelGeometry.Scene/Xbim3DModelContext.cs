@@ -345,7 +345,7 @@ namespace Xbim.ModelGeometry.Scene
                 foreach (var openingRelation in openingRelations)
                 {
                     // process parts
-                    IEnumerable<IIfcObjectDefinition> childrenElements;
+                    IItemSet<IIfcObjectDefinition> childrenElements;
                     if (compoundElementsDictionary.TryGetValue(openingRelation.RelatingBuildingElement,
                         out childrenElements))
                     {
@@ -375,7 +375,7 @@ namespace Xbim.ModelGeometry.Scene
                 foreach (var projectionRelation in projectingRelations)
                 {
                     // process parts
-                    IEnumerable<IIfcObjectDefinition> childrenElements;
+                    IItemSet<IIfcObjectDefinition> childrenElements;
                     if (compoundElementsDictionary.TryGetValue(projectionRelation.RelatingElement, out childrenElements))
                     {
                         elementsWithFeatures.AddRange(
