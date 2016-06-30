@@ -673,7 +673,7 @@ namespace Xbim.ModelGeometry.Scene
                     WriteMappedItems(contextHelper, progDelegate);
 
                     //start a new task to process features
-                    HashSet<int> processed = WriteFeatureElements(contextHelper, progDelegate, geomStorageType, geometryTransaction);
+                    var processed = WriteFeatureElements(contextHelper, progDelegate, geomStorageType, geometryTransaction);
 
                     if (progDelegate != null) progDelegate(-1, "WriteProductShapes");
                     var productsRemaining = _model.Instances.OfType<IIfcProduct>()
@@ -703,11 +703,15 @@ namespace Xbim.ModelGeometry.Scene
 
         }
 
-        private HashSet<int> WriteFeatureElements(XbimCreateContextHelper contextHelper,           
+        private ICollection<int> WriteFeatureElements(XbimCreateContextHelper contextHelper,           
             ReportProgressDelegate progDelegate, XbimGeometryType geomType, IGeometryStoreInitialiser txn
             )
         {
-            var processed = new HashSet<int>();
+            // "processed" has been changed to a concurrentDictonary (it was a hashset) because of multi-threading support in the parrallel loop
+            // resulted in fluctuating problems in release mode; the byte value is not used, but is a cheap cost to pay (there's no ConcurrentHashSet implementation in .Net)
+            // see http://stackoverflow.com/questions/18922985/concurrent-hashsett-in-net-framework
+            var processed = new ConcurrentDictionary<int, byte>();
+
             var localPercentageParsed = 0;
             var localTally = 0;
             var featureCount = contextHelper.OpeningsAndProjections.Count;
@@ -741,9 +745,7 @@ namespace Xbim.ModelGeometry.Scene
 
                 if (arguments.Count == 0)
                 {
-
-                    processed.Add(element.EntityLabel);
-
+                    processed.TryAdd(element.EntityLabel, 0);
                 }
                 if (arguments.Count > 0)
                 {
@@ -763,7 +765,7 @@ namespace Xbim.ModelGeometry.Scene
                             else
                                 projectTools.Add(featureShape);
                         }
-                        processed.Add(feature.EntityLabel);
+                        processed.TryAdd(feature.EntityLabel, 0);
 
                     }
                     var boolOp = new XbimBooleanDefinition(contextHelper, Engine, Model, dupIds, arguments, cutTools, projectTools, context, styleId);                
@@ -874,7 +876,7 @@ namespace Xbim.ModelGeometry.Scene
 
                             }
                         }
-                        processed.Add(elementLabel);
+                        processed.TryAdd(elementLabel, 0);
                     }
 
                     if (progDelegate != null)
@@ -898,7 +900,7 @@ namespace Xbim.ModelGeometry.Scene
             contextHelper.PercentageParsed = localPercentageParsed;
             contextHelper.Tally = localTally;
             if (progDelegate != null) progDelegate(101, "WriteFeatureElements, (" + localTally + " written)");
-            return processed;
+            return processed.Keys;
         }
 
 
