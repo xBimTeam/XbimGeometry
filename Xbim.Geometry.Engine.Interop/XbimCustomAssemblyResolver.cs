@@ -49,7 +49,7 @@ namespace Xbim.Geometry.Engine.Interop
                 var conventions = new XbimArchitectureConventions();                
                 
                 // Append the relevant suffix
-                var filename = String.Format("{0}{1}.dll", GeometryModuleName, conventions.Suffix);
+                var filename = String.Format("{0}{1}.dll", conventions.ModuleName, conventions.Suffix);
 
                 // Look in relevant Architecture subfolder off the main application deployment
                 libraryPath = Path.Combine(appDir, conventions.SubFolder, filename);

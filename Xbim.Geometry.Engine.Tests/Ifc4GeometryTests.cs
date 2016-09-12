@@ -8,8 +8,6 @@ using Xbim.Ifc;
 using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc4.GeometricModelResource;
 using Xbim.Ifc4.Interfaces;
-using Xbim.Ifc4.ProductExtension;
-using Xbim.ModelGeometry.Scene;
 
 
 namespace Ifc4GeometryTests

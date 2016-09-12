@@ -3,7 +3,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Xbim.Common.Geometry;
 using Xbim.Common.XbimExtensions;
 using Xbim.Ifc;
-using Xbim.IO;
 using Xbim.ModelGeometry.Scene;
 
 namespace Ifc4GeometryTests

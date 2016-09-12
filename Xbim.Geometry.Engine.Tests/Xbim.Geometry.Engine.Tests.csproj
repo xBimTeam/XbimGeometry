@@ -367,51 +367,41 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="Xbim.CobieExpress, Version=3.2.0.0, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xbim.Essentials.4.0.0-V226\lib\net40\Xbim.CobieExpress.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.4.0.0-V229\lib\net40\Xbim.CobieExpress.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Xbim.Common, Version=3.2.0.0, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xbim.Essentials.4.0.0-V226\lib\net40\Xbim.Common.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.4.0.0-V229\lib\net40\Xbim.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Xbim.Ifc, Version=3.2.0.0, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xbim.Essentials.4.0.0-V226\lib\net40\Xbim.Ifc.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.4.0.0-V229\lib\net40\Xbim.Ifc.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Xbim.Ifc.Extensions, Version=3.2.0.0, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xbim.Essentials.4.0.0-V226\lib\net40\Xbim.Ifc.Extensions.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.4.0.0-V229\lib\net40\Xbim.Ifc.Extensions.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Xbim.Ifc2x3, Version=3.2.0.0, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xbim.Essentials.4.0.0-V226\lib\net40\Xbim.Ifc2x3.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.4.0.0-V229\lib\net40\Xbim.Ifc2x3.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Xbim.Ifc2x3.IO, Version=3.2.0.0, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xbim.Essentials.4.0.0-V226\lib\net40\Xbim.Ifc2x3.IO.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.4.0.0-V229\lib\net40\Xbim.Ifc2x3.IO.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Xbim.Ifc4, Version=3.2.0.0, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xbim.Essentials.4.0.0-V226\lib\net40\Xbim.Ifc4.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.4.0.0-V229\lib\net40\Xbim.Ifc4.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Xbim.IO, Version=3.2.0.0, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xbim.Essentials.4.0.0-V226\lib\net40\Xbim.IO.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.4.0.0-V229\lib\net40\Xbim.IO.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Xbim.Tessellator, Version=3.2.0.0, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xbim.Essentials.4.0.0-V226\lib\net40\Xbim.Tessellator.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.4.0.0-V229\lib\net40\Xbim.Tessellator.dll</HintPath>
       <Private>True</Private>
     </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Xbim.Geometry.Engine.Interop\Xbim.Geometry.Engine.Interop.csproj">
-      <Project>{f94a98ea-ab29-4818-a51f-6b33beb7561a}</Project>
-      <Name>Xbim.Geometry.Engine.Interop</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Xbim.ModelGeometry.Scene\Xbim.ModelGeometry.Scene.csproj">
-      <Project>{3d9d37de-a254-4433-b172-7590cbd84c69}</Project>
-      <Name>Xbim.ModelGeometry.Scene</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\Output\$(Configuration)\x86\Xbim.Geometry.Engine32.dll">

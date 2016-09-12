@@ -31,6 +31,7 @@
 #include <gp_Lin2d.hxx>
 #include <Geom2d_Line.hxx>
 #include <IntAna2d_AnaIntersection.hxx>
+using System::Runtime::InteropServices::Marshal;
 
 using namespace  System::Threading;
 using namespace  System::Linq;
@@ -1006,7 +1007,7 @@ namespace Xbim
 			if (comp->Solids->Count > 0)
 				return comp->Solids->First;
 			else
-				gcnew XbimSolid();
+				return gcnew XbimSolid();
 		}
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcAdvancedBrepWithVoids^ ifcSolid)
 		{
@@ -1014,7 +1015,7 @@ namespace Xbim
 			if (comp->Solids->Count > 0)
 				return comp->Solids->First;
 			else
-				gcnew XbimSolid();
+				return gcnew XbimSolid();
 		}
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcSectionedSpine^ ifcSolid)
 		{
@@ -1166,6 +1167,54 @@ namespace Xbim
 			if (occSet != nullptr)
 				return occSet->Moved(objectPlacement);
 			return geometryObject;
+		}
+
+		IXbimGeometryObject ^ XbimGeometryCreator::FromBrep(String ^ brepStr)
+		{
+			TopoDS_Shape result;
+			BRep_Builder builder;
+			Standard_CString cStr = (const char*)(Marshal::StringToHGlobalAnsi(brepStr)).ToPointer();
+			try
+			{
+				std::istringstream iss(cStr);
+				BRepTools::Read(result, iss, builder);
+				switch (result.ShapeType())
+				{
+				case TopAbs_VERTEX:
+					return gcnew XbimVertex(TopoDS::Vertex(result));
+				case TopAbs_EDGE:
+					return gcnew XbimEdge(TopoDS::Edge(result));
+				case TopAbs_WIRE:
+					return gcnew XbimWire(TopoDS::Wire(result));
+				case TopAbs_FACE:
+					return gcnew XbimFace(TopoDS::Face(result));
+				case TopAbs_SHELL:
+					return gcnew XbimShell(TopoDS::Shell(result));
+				case TopAbs_SOLID:
+					return gcnew XbimSolid(TopoDS::Solid(result));
+				case TopAbs_COMPOUND:
+					return gcnew XbimCompound(TopoDS::Compound(result), true, 1e-5);
+				default:
+					return nullptr;
+				}
+			}
+			catch (...)
+			{
+				return nullptr;
+			}
+			finally
+			{
+				Marshal::FreeHGlobal(IntPtr((void*)cStr));
+			}
+		}
+
+		String ^ XbimGeometryCreator::ToBrep(IXbimGeometryObject ^ geometryObject)
+		{
+			XbimGeometryObject^ geom = dynamic_cast<XbimGeometryObject^>(geometryObject);
+			if (geom != nullptr)
+				return geom->ToBRep;
+			else
+				return nullptr;
 		}
 
 		IXbimGeometryObject ^ XbimGeometryCreator::Trim(XbimSetObject ^geometryObject)

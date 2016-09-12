@@ -2632,7 +2632,7 @@ namespace Xbim
 			List<IIfcCartesianPoint^>^ yPoints = Enumerable::ToList(y->Points);
 			if (xPoints->Count < 2 || yPoints->Count < 2 || xPoints->Count!=yPoints->Count) return false;			
 			double precision = x->Model->ModelFactors->Precision;
-			for (size_t i = 0; i < xPoints->Count; i++)
+			for (int i = 0; i < xPoints->Count; i++)
 			{
 				XbimPoint3DWithTolerance^ xPnt = gcnew XbimPoint3DWithTolerance(xPoints[i]->X, xPoints[i]->Y, xPoints[i]->Z, precision);
 				XbimPoint3DWithTolerance^ yPnt = gcnew XbimPoint3DWithTolerance(yPoints[i]->X, yPoints[i]->Y, yPoints[i]->Z, precision);

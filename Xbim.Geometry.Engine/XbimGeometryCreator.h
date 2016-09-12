@@ -25,7 +25,7 @@ namespace Xbim
 			{
 			}
 			bool Is3D(IIfcCurve^ rep);
-			static ILogger^ logger = LoggerFactory::GetLogger();
+			static ILogger^ logger = LoggerFactory::GetLogger(); ;
 		public:
 
 			static XbimGeometryCreator()
@@ -179,7 +179,8 @@ namespace Xbim
 				return Moved(geometryObject, (IIfcPlacement ^)placement);
 			};
 			virtual IXbimGeometryObject ^ Moved(IXbimGeometryObject ^geometryObject, IIfcObjectPlacement ^objectPlacement);
-			
+			virtual IXbimGeometryObject^ FromBrep(String^ brepStr);
+			virtual String^ ToBrep(IXbimGeometryObject^ geometryObject);
 		};
 	}
 }

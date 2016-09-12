@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc;
 using Xbim.Ifc4.Interfaces;
-using Xbim.ModelGeometry.Scene.Extensions;
 
 namespace Ifc4GeometryTests
 {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Reflection;
 using System.Runtime.Remoting;
 using Xbim.Common.Geometry;
 using Xbim.Common.Logging;
@@ -28,10 +29,19 @@ namespace Xbim.Geometry.Engine.Interop
             XbimPrerequisitesValidator.Validate();
 
             var conventions = new XbimArchitectureConventions();    // understands the process we run under
-            string assemblyName = "Xbim.Geometry.Engine" + conventions.Suffix;
+            string assemblyName = conventions.ModuleName + conventions.Suffix;
+            try
+            {               
+                var ass =  Assembly.Load(assemblyName);
+                var oh = Activator.CreateInstance(ass.FullName, "Xbim.Geometry.XbimGeometryCreator");           
+                _engine = oh.Unwrap() as IXbimGeometryEngine; 
+            }
+            catch (Exception e)
+            {
 
-            ObjectHandle oh = Activator.CreateInstance(assemblyName, "Xbim.Geometry.XbimGeometryCreator");
-            _engine = oh.Unwrap() as IXbimGeometryEngine;   
+                throw e;
+            }
+             
         }
         public IXbimGeometryObject Create(IIfcGeometricRepresentationItem ifcRepresentation)
         {
@@ -462,6 +472,16 @@ namespace Xbim.Geometry.Engine.Interop
         public IXbimGeometryObject Moved(IXbimGeometryObject geometryObject, IIfcObjectPlacement objectPlacement)
         {
             return _engine.Moved(geometryObject, objectPlacement);
+        }
+
+        public IXbimGeometryObject FromBrep(string brepStr)
+        {
+            return _engine.FromBrep(brepStr);
+        }
+
+        public string ToBrep(IXbimGeometryObject geometryObject)
+        {
+            return _engine.ToBrep(geometryObject);
         }
     }
 }
