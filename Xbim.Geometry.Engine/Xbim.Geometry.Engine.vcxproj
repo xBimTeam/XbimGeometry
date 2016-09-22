@@ -213,19 +213,19 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="Xbim.Common">
-      <HintPath>..\packages\Xbim.Essentials.4.0.0-V226\lib\net40\Xbim.Common.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.4.0.0-V232\lib\net40\Xbim.Common.dll</HintPath>
       <Private>false</Private>
       <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
       <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
     </Reference>
     <Reference Include="Xbim.Ifc4">
-      <HintPath>..\packages\Xbim.Essentials.4.0.0-V226\lib\net40\Xbim.Ifc4.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.4.0.0-V232\lib\net40\Xbim.Ifc4.dll</HintPath>
       <Private>false</Private>
       <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
       <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
     </Reference>
     <Reference Include="Xbim.Tessellator">
-      <HintPath>..\packages\Xbim.Essentials.4.0.0-V226\lib\net40\Xbim.Tessellator.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.4.0.0-V232\lib\net40\Xbim.Tessellator.dll</HintPath>
       <Private>false</Private>
       <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
       <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>

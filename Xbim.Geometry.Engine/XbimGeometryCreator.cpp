@@ -1208,6 +1208,8 @@ namespace Xbim
 			}
 		}
 
+		
+
 		String ^ XbimGeometryCreator::ToBrep(IXbimGeometryObject ^ geometryObject)
 		{
 			XbimGeometryObject^ geom = dynamic_cast<XbimGeometryObject^>(geometryObject);

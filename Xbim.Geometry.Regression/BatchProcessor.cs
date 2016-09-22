@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using log4net;
 using Xbim.Common.Logging;
 using Xbim.Common.Step21;
 using Xbim.Ifc;
@@ -70,7 +69,7 @@ namespace XbimRegression
             }
             
             Console.WriteLine("Finished. Press Enter to continue...");
-            LogManager.Shutdown();
+           // LogManager.Shutdown();
             Logger = null;
             Console.ReadLine();
         }

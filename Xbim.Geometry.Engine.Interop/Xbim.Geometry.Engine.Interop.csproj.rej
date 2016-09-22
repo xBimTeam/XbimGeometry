@@ -1,0 +1,19 @@
+diff a/Xbim.Geometry.Engine.Interop/Xbim.Geometry.Engine.Interop.csproj b/Xbim.Geometry.Engine.Interop/Xbim.Geometry.Engine.Interop.csproj	(rejected hunks)
+@@ -141,7 +141,16 @@
+       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+     </None>
+   </ItemGroup>
+-
++  <PropertyGroup>
++    <Year>$([System.DateTime]::Now.ToString("yy"))</Year>
++    <Month>$([System.DateTime]::Now.ToString("MM"))</Month>
++    <Day>$([System.DateTime]::Now.ToString("dd"))</Day>
++    <Minute>$([System.Int32]::Parse($([System.DateTime]::Now.ToString("mm"))))</Minute>
++    <Hour>$([System.Int32]::Parse($([System.DateTime]::Now.ToString("HH"))))</Hour>
++    <MinuteOfDay>$([MSBuild]::Add($(Minute),$([MSBuild]::Multiply($(Hour),60))))</MinuteOfDay>
++    <HalfMinuteOfDay>$([System.Convert]::ToInt16($([MSBuild]::Divide($(MinuteOfDay), 2))))</HalfMinuteOfDay>
++    <AssemblyFileVersionAttribute>[assembly:System.Reflection.AssemblyFileVersion("4.0.$(Year)$(Month).$(Day)$(HalfMinuteOfDay)")];</AssemblyFileVersionAttribute>
++  </PropertyGroup>
+   <Target Name="BeforeBuild">
+     <WriteLinesToFile File="..\SharedFileVersionInfo.cs" Lines="$(AssemblyFileVersionAttribute)" Overwrite="true" Encoding="Unicode" />
+     <MSBuild Projects="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj" Properties="Configuration=$(Configuration);Platform=Win32" Targets="Build">
