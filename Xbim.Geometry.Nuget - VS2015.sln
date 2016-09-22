@@ -9,7 +9,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Publish.bat = Publish.bat
 		PublishVS2015.bat = PublishVS2015.bat
 		Xbim.Geometry.nuspec = Xbim.Geometry.nuspec
-		Xbim.GeometryVS2015.nuspec = Xbim.GeometryVS2015.nuspec
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Xbim.Geometry.Engine2015", "Xbim.Geometry.Engine\Xbim.Geometry.Engine - VS2015.vcxproj", "{C01899BA-34A9-432A-8F08-EBD9AA4A08C7}"
