@@ -556,7 +556,7 @@ namespace Xbim.ModelGeometry.Scene
         /// <param name="model"></param>
         /// <param name="contextType"></param>
         /// <param name="contextIdentifier"></param>
-        public Xbim3DModelContext(IModel model, string contextType = "model", string contextIdentifier = "body")
+        public Xbim3DModelContext(IModel model, string contextType = "model", string contextIdentifier = null)
         {
             _model = model;
 
@@ -623,11 +623,7 @@ namespace Xbim.ModelGeometry.Scene
                 foreach (var context in contexts)
                 {
                     _contexts.Add(context);
-                    //roundingPrecisions.Add(context,
-                    //    Math.Abs(context.DefaultPrecision) < 1e-9
-                    //        ? 0
-                    //        : Math.Abs((int) Math.Log10(context.DefaultPrecision)));
-                    //contextLookup.Add(GetContextId(context), context);
+                   
                 }
                 
             }
