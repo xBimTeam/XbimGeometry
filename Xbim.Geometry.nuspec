@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
     <metadata>
         <id>Xbim.Geometry</id>
-        <version>4.0.0-V0085</version>
+        <version>4.0.0-V0086</version>
         <title>xBIM Geometry</title>
         <authors>xBIM team</authors>
         <owners>Steve Lockley</owners>
