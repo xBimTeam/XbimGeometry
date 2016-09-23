@@ -427,7 +427,7 @@ static Standard_Boolean isTreatAnalityc(const TopoDS_Face& theF1,
 void IntTools_FaceFace::Perform(const TopoDS_Face& aF1,
                                 const TopoDS_Face& aF2)
 {
-  Standard_Boolean RestrictLine = Standard_False, hasCone = Standard_False;
+  Standard_Boolean RestrictLine = Standard_False;
   
   if (myContext.IsNull()) {
     myContext=new IntTools_Context;
@@ -555,11 +555,6 @@ void IntTools_FaceFace::Perform(const TopoDS_Face& aF1,
     BRepTools::UVBounds(myFace2, umin, umax, vmin, vmax);
     CorrectSurfaceBoundaries(myFace2, (aTolF1 + aTolF2) * 2., umin, umax, vmin, vmax);
     myHS2->ChangeSurface().Load(S2, umin, umax, vmin, vmax);
-    //
-    if( aType2==GeomAbs_Cone ) { 
-      TolArc = 0.0001; 
-      hasCone = Standard_True; 
-    }
   }
   else if ((aType2==GeomAbs_Plane) && isFace1Quad)
   {
@@ -572,11 +567,6 @@ void IntTools_FaceFace::Perform(const TopoDS_Face& aF1,
     BRepTools::UVBounds(myFace2, umin, umax, vmin, vmax);
     CorrectPlaneBoundaries(umin, umax, vmin, vmax);
     myHS2->ChangeSurface().Load(S2, umin, umax, vmin, vmax);
-    //
-    if( aType1==GeomAbs_Cone ) {
-      TolArc = 0.0001; 
-      hasCone = Standard_True; 
-    }
   }
   else
   {
@@ -599,7 +589,7 @@ void IntTools_FaceFace::Perform(const TopoDS_Face& aF1,
 
   {
     const Standard_Real UVMaxStep = 0.001;
-    const Standard_Real Deflection = (hasCone) ? 0.085 : 0.1;
+    const Standard_Real Deflection = 0.1;
     myIntersector.SetTolerances(TolArc, TolTang, UVMaxStep, Deflection); 
   }
   
@@ -647,6 +637,28 @@ void IntTools_FaceFace::Perform(const TopoDS_Face& aF1,
       }
     }
   }
+
+#ifdef INTTOOLS_FACEFACE_DEBUG
+    if(!myListOfPnts.IsEmpty()) {
+      char aBuff[10000];
+      const IntSurf_PntOn2S& aPt = myListOfPnts.First();
+      Standard_Real u1, v1, u2, v2;
+      aPt.Parameters(u1, v1, u2, v2);
+
+      Sprintf(aBuff,"bopcurves <face1 face2> -2d");
+      IntSurf_ListIteratorOfListOfPntOn2S IterLOP1(myListOfPnts);
+      for(;IterLOP1.More(); IterLOP1.Next())
+      {
+        const IntSurf_PntOn2S& aPt = IterLOP1.Value();
+        Standard_Real u1, v1, u2, v2;
+        aPt.Parameters(u1, v1, u2, v2);
+
+        Sprintf(aBuff, "%s -p %+10.20f %+10.20f %+10.20f %+10.20f", aBuff, u1, v1, u2, v2);
+      }
+
+      cout << aBuff << endl;
+    }
+#endif
 
   const Standard_Boolean isGeomInt = isTreatAnalityc(aF1, aF2);
   myIntersector.Perform(myHS1, dom1, myHS2, dom2, TolArc, TolTang, 
@@ -887,28 +899,6 @@ void IntTools_FaceFace::MakeCurve(const Standard_Integer Index,
       return;
     }
     L = aWLine;
-
-#ifdef INTTOOLS_FACEFACE_DEBUG
-    if(!myListOfPnts.IsEmpty()) {
-      char aBuff[10000];
-      const IntSurf_PntOn2S& aPt = myListOfPnts.First();
-      Standard_Real u1, v1, u2, v2;
-      aPt.Parameters(u1, v1, u2, v2);
-
-      Sprintf(aBuff,"bopcurves <face1 face2> -2d");
-      IntSurf_ListIteratorOfListOfPntOn2S IterLOP1(myListOfPnts);
-      for(;IterLOP1.More(); IterLOP1.Next())
-      {
-        const IntSurf_PntOn2S& aPt = IterLOP1.Value();
-        Standard_Real u1, v1, u2, v2;
-        aPt.Parameters(u1, v1, u2, v2);
-
-        Sprintf(aBuff, "%s -p %+10.20f %+10.20f %+10.20f %+10.20f", aBuff, u1, v1, u2, v2);
-      }
-
-      cout << aBuff << endl;
-    }
-#endif
 
     Standard_Integer nbp = aWLine->NbPnts();
     const IntSurf_PntOn2S& p1 = aWLine->Point(1);

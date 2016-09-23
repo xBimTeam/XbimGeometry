@@ -113,6 +113,9 @@ public:
   
   //! Returns the vertex of range Index on the line.
   virtual const IntPatch_Point& Vertex (const Standard_Integer Index) const Standard_OVERRIDE;
+
+  //! Returns the vertex of range Index on the line.
+  virtual IntPatch_Point& ChangeVertex (const Standard_Integer Index) Standard_OVERRIDE;
   
   //! Set the parameters of all the vertex on the line.
   //! if a vertex is already in the line,
@@ -154,7 +157,8 @@ public:
   //! Removes vertices from the line (i.e. cleans svtx member)
   virtual void ClearVertexes() Standard_OVERRIDE;
   
-  Standard_EXPORT void RemoveVertex (const Standard_Integer theIndex);
+  //! Removes single vertex from the line
+  virtual void RemoveVertex (const Standard_Integer theIndex) Standard_OVERRIDE;
   
   Standard_EXPORT void InsertVertexBefore (const Standard_Integer theIndex, const IntPatch_Point& thePnt);
   
@@ -164,7 +168,17 @@ public:
   //! Otherwise,             prints list of 2d-points on the 2nd surface
   Standard_EXPORT void Dump(const Standard_Integer theMode) const;
 
+  //! Allows or forbides purging of existing WLine
+  void EnablePurging(const Standard_Boolean theIsEnabled)
+  {
+    myIsPurgerAllowed = theIsEnabled;
+  }
 
+  //! Returns TRUE if purging is allowed or forbiden for existing WLine
+  Standard_Boolean IsPurgingAllowed()
+  {
+    return myIsPurgerAllowed;
+  }
 
 
   DEFINE_STANDARD_RTTIEXT(IntPatch_WLine,IntPatch_PointLine)
@@ -194,6 +208,7 @@ private:
   Handle(Adaptor2d_HCurve2d) theArcOnS1;
   Standard_Boolean hasArcOnS2;
   Handle(Adaptor2d_HCurve2d) theArcOnS2;
+  Standard_Boolean myIsPurgerAllowed;
 
 
 };

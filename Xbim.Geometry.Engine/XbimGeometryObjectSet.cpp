@@ -307,7 +307,7 @@ namespace Xbim
 				
 				if (solid != nullptr)
 				{
-					FTol.SetTolerance(solid, tolerance);
+				//	FTol.SetTolerance(solid, tolerance); //do not do this it causes entropy
 					toBeProcessed.Append(solid);
 					hasObjectsToProcess = true;
 					
@@ -366,7 +366,7 @@ namespace Xbim
 				seamstress.Add(facesToBeCut);
 				seamstress.Perform();
 				TopoDS_Shape shape = seamstress.SewedShape();
-				FTol.SetTolerance(shape, tolerance);
+				//FTol.SetTolerance(shape, tolerance);
 				toBeProcessed.Append(shape);
 			}
 			return hasObjectsToProcess;
@@ -445,7 +445,7 @@ namespace Xbim
 						allBoxes(i).SetGap(-tolerance * 2); //reduce to only catch faces that are inside tolerance and not sitting on the opening
 						if (!bodyBox.IsOut(box)) //only try and cut it if it might intersect the body
 						{
-							FTol.SetTolerance(solid, tolerance);
+							//FTol.SetTolerance(solid, tolerance);
 							cuttingObjects.Append(solid);
 						}
 						i++;
