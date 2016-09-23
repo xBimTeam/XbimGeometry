@@ -349,7 +349,7 @@ namespace Xbim
 					XbimSolid^ solid = dynamic_cast<XbimSolid^>(iSolid);
 					if (solid!=nullptr)
 					{
-						FTol.SetTolerance(solid, tolerance);
+						//FTol.SetTolerance(solid, tolerance);
 						shapeTools.Append(solid);							
 					}
 				}
@@ -359,7 +359,7 @@ namespace Xbim
 					XbimSolid^ solid = dynamic_cast<XbimSolid^>(iSolid);
 					if (solid != nullptr)
 					{
-						FTol.SetTolerance(solid, tolerance);
+						//FTol.SetTolerance(solid, tolerance);
 						shapeObjects.Append(solid);
 					}
 				}

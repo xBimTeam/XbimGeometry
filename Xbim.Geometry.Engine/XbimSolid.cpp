@@ -372,11 +372,11 @@ namespace Xbim
 			}
 
 			if (swdSolid->StartParam.HasValue && swdSolid->EndParam.HasValue)
-				sweep = (XbimWire^)sweep->Trim(swdSolid->StartParam.Value, swdSolid->EndParam.Value, mf->Precision);
+				sweep = (XbimWire^)sweep->Trim(swdSolid->StartParam.Value, Math::Abs(swdSolid->EndParam.Value - 1.0)<Precision::Confusion() ? sweep->Length : swdSolid->EndParam.Value, mf->Precision);
 			else if (swdSolid->StartParam.HasValue && !swdSolid->EndParam.HasValue)
 				sweep = (XbimWire^)sweep->Trim(swdSolid->StartParam.Value, sweep->Length, mf->Precision);
 			else if (!swdSolid->StartParam.HasValue && swdSolid->EndParam.HasValue)
-				sweep = (XbimWire^)sweep->Trim(0, swdSolid->EndParam.Value, mf->Precision);
+				sweep = (XbimWire^)sweep->Trim(0, Math::Abs(swdSolid->EndParam.Value - 1.0)<Precision::Confusion() ? sweep->Length : swdSolid->EndParam.Value, mf->Precision);
 			//make the outer wire
 			XbimPoint3D s = sweep->Start;
 			gp_Ax2 axCircle(gp_Pnt(s.X, s.Y, s.Z), gp_Dir(0., 0., 1.));
@@ -483,11 +483,11 @@ namespace Xbim
 			XbimWire^ sweep = gcnew XbimWire(repItem->Directrix);
 
 			if (repItem->StartParam.HasValue && repItem->EndParam.HasValue)
-				sweep = (XbimWire^)sweep->Trim(repItem->StartParam.Value, repItem->EndParam.Value, mf->Precision);
+				sweep = (XbimWire^)sweep->Trim(repItem->StartParam.Value, Math::Abs(repItem->EndParam.Value - 1.0)<Precision::Confusion() ? sweep->Length : repItem->EndParam.Value, mf->Precision);
 			else if (repItem->StartParam.HasValue && !repItem->EndParam.HasValue)
 				sweep = (XbimWire^)sweep->Trim(repItem->StartParam.Value, sweep->Length, mf->Precision);
 			else if (!repItem->StartParam.HasValue && repItem->EndParam.HasValue)
-				sweep = (XbimWire^)sweep->Trim(0, repItem->EndParam.Value, mf->Precision);
+				sweep = (XbimWire^)sweep->Trim(0, Math::Abs(repItem->EndParam.Value - 1.0)<Precision::Confusion() ? sweep->Length : repItem->EndParam.Value, mf->Precision);
 			if (!sweep->IsValid)
 			{
 				XbimGeometryCreator::LogWarning(repItem, "Could not build Directrix");
@@ -813,11 +813,11 @@ namespace Xbim
 			XbimWire^ sweep = gcnew XbimWire(repItem->Directrix);
 
 			if (repItem->StartParam.HasValue && repItem->EndParam.HasValue)
-				sweep = (XbimWire^)sweep->Trim(repItem->StartParam.Value, repItem->EndParam.Value, mf->Precision);
+				sweep = (XbimWire^)sweep->Trim(repItem->StartParam.Value, Math::Abs(repItem->EndParam.Value - 1.0)<Precision::Confusion() ? sweep->Length : repItem->EndParam.Value, mf->Precision);
 			else if (repItem->StartParam.HasValue && !repItem->EndParam.HasValue)
 				sweep = (XbimWire^)sweep->Trim(repItem->StartParam.Value, sweep->Length, mf->Precision);
 			else if (!repItem->StartParam.HasValue && repItem->EndParam.HasValue)
-				sweep = (XbimWire^)sweep->Trim(0, repItem->EndParam.Value, mf->Precision);
+				sweep = (XbimWire^)sweep->Trim(0, Math::Abs(repItem->EndParam.Value - 1.0)<Precision::Confusion() ? sweep->Length : repItem->EndParam.Value, mf->Precision);
 			if (!sweep->IsValid)
 			{
 				XbimGeometryCreator::LogWarning(repItem,"Could not build directrix");
@@ -1203,11 +1203,11 @@ namespace Xbim
 			IModelFactors^ mf = swdSolid->Model->ModelFactors;
 			XbimWire^ sweep = gcnew XbimWire(swdSolid->Directrix);
 			if (swdSolid->StartParam.HasValue && swdSolid->EndParam.HasValue)
-				sweep = (XbimWire^)sweep->Trim(swdSolid->StartParam.Value, swdSolid->EndParam.Value, mf->Precision);
+				sweep = (XbimWire^)sweep->Trim(swdSolid->StartParam.Value, Math::Abs(swdSolid->EndParam.Value-1.0)<Precision::Confusion()? sweep->Length: swdSolid->EndParam.Value, mf->Precision);
 			else if (swdSolid->StartParam.HasValue && !swdSolid->EndParam.HasValue)
 				sweep = (XbimWire^)sweep->Trim(swdSolid->StartParam.Value, sweep->Length, mf->Precision);
 			else if (!swdSolid->StartParam.HasValue && swdSolid->EndParam.HasValue)
-				sweep = (XbimWire^)sweep->Trim(0, swdSolid->EndParam.Value, mf->Precision);
+				sweep = (XbimWire^)sweep->Trim(0, Math::Abs(swdSolid->EndParam.Value - 1.0)<Precision::Confusion() ? sweep->Length : swdSolid->EndParam.Value, mf->Precision);
 			//make the outer wire
 			XbimPoint3D s = sweep->Start;
 			gp_Ax2 axCircle(gp_Pnt(s.X, s.Y, s.Z), gp_Dir(0., 0., 1.));
@@ -1771,10 +1771,10 @@ namespace Xbim
 #ifdef OCC_6_9_SUPPORTED
 				ShapeFix_ShapeTolerance FTol;
 				TopTools_ListOfShape shapeTools;
-				FTol.SetTolerance(solidCut, tolerance);
+				//FTol.SetTolerance(solidCut, tolerance);
 				shapeTools.Append(solidCut);
 				TopTools_ListOfShape shapeObjects;
-				FTol.SetTolerance(this, tolerance);
+				//FTol.SetTolerance(this, tolerance);
 				shapeObjects.Append(this);
 				BRepAlgoAPI_Cut boolOp;
 				boolOp.SetArguments(shapeObjects);
@@ -1845,9 +1845,9 @@ namespace Xbim
 					return gcnew XbimSolidSet(this); // the result would be no change so return this
 				}
 			}
-			ShapeFix_ShapeTolerance fixTol;
+			/*ShapeFix_ShapeTolerance fixTol;
 			fixTol.SetTolerance(solidIntersect, tolerance);
-			fixTol.SetTolerance(this, tolerance);
+			fixTol.SetTolerance(this, tolerance);*/
 			String^ err = "";
 			try
 			{
@@ -1906,9 +1906,9 @@ namespace Xbim
 				}
 			}
 			
-			ShapeFix_ShapeTolerance fixTol;
+			/*ShapeFix_ShapeTolerance fixTol;
 			fixTol.SetTolerance(solidUnion, tolerance);
-			fixTol.SetTolerance(this, tolerance);
+			fixTol.SetTolerance(this, tolerance);*/
 			String^ err = "";
 			try
 			{

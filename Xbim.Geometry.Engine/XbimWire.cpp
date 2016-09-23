@@ -465,7 +465,7 @@ namespace Xbim
 			BRepBuilderAPI_MakeWire wire;
 			IModelFactors^ mf = cCurve->Model->ModelFactors;
 			ShapeFix_ShapeTolerance FTol;
-			double precision = mf->PrecisionBoolean; //use a courser precision for trimmed curves
+			double precision = mf->Precision; //use a courser precision for trimmed curves
 			double currentPrecision = precision;
 			double maxTolerance = mf->PrecisionBooleanMax;
 			bool first = true;
@@ -479,7 +479,8 @@ namespace Xbim
 										
 					if (!seg->SameSense) wireSegManaged->Reverse();
 					XbimWire^ currentWire;
-					if (!first&& wire.IsDone()) currentWire = gcnew XbimWire(wire.Wire());
+					if (!first&& wire.IsDone()) 
+						currentWire = gcnew XbimWire(wire.Wire());
 			retryAddWire:					
 					FTol.SetTolerance(wireSegManaged, currentPrecision, TopAbs_VERTEX);
 					
@@ -638,7 +639,7 @@ namespace Xbim
 				else if (dynamic_cast<Xbim::Ifc4::MeasureResource::IfcParameterValue^>(trim) && !trim_cartesian)
 				{
 					Xbim::Ifc4::MeasureResource::IfcParameterValue^ pv = (Xbim::Ifc4::MeasureResource::IfcParameterValue^)trim;
-					const double value = (double)(pv->Value);
+				    double value = (double)(pv->Value);
 					flt1 = value * parameterFactor;
 					trimmed1 = true;
 				}
@@ -716,7 +717,9 @@ namespace Xbim
 							flt1 -= (90 * parameterFactor);
 							flt2 -= (90 * parameterFactor);
 						}
+
 						BRepBuilderAPI_MakeEdge edgeMaker(curve, sense_agreement ? flt1 : flt2, sense_agreement ? flt2 : flt1);
+						
 						BRepBuilderAPI_EdgeError edgeErr = edgeMaker.Error();
 						if (edgeErr != BRepBuilderAPI_EdgeDone)
 						{
@@ -726,7 +729,10 @@ namespace Xbim
 						}
 						else
 						{
-							wireMaker.Add(edgeMaker.Edge());
+							if(sense_agreement)
+								wireMaker.Add(edgeMaker.Edge());
+							else
+								wireMaker.Add(TopoDS::Edge(edgeMaker.Edge().Reversed()));
 						}
 					}
 					trimmed2 = true;

@@ -1107,9 +1107,9 @@ namespace Xbim
 		XbimCompound^ XbimCompound::Cut(XbimCompound^ solids, double tolerance)
 		{
 			if (!IsSewn) Sew();
-			ShapeFix_ShapeTolerance fixTol;
+			/*ShapeFix_ShapeTolerance fixTol;
 			fixTol.SetTolerance(solids, tolerance);
-			fixTol.SetTolerance(this, tolerance);
+			fixTol.SetTolerance(this, tolerance);*/
 			String^ err = "";
 			try
 			{
@@ -1137,9 +1137,9 @@ namespace Xbim
 		XbimCompound^ XbimCompound::Union(XbimCompound^ solids, double tolerance)
 		{
 			if (!IsSewn) Sew();
-			ShapeFix_ShapeTolerance fixTol;
+			/*ShapeFix_ShapeTolerance fixTol;
 			fixTol.SetTolerance(solids, tolerance);
-			fixTol.SetTolerance(this, tolerance);
+			fixTol.SetTolerance(this, tolerance);*/
 			String^ err = "";
 			try
 			{
@@ -1161,9 +1161,9 @@ namespace Xbim
 		XbimCompound^ XbimCompound::Intersection(XbimCompound^ solids, double tolerance)
 		{
 			if (!IsSewn) Sew();
-			ShapeFix_ShapeTolerance fixTol;
+			/*ShapeFix_ShapeTolerance fixTol;
 			fixTol.SetTolerance(solids, tolerance);
-			fixTol.SetTolerance(this, tolerance);
+			fixTol.SetTolerance(this, tolerance);*/
 			String^ err = "";
 			try
 			{

@@ -839,18 +839,19 @@ namespace Xbim
 			ShapeFix_ShapeTolerance FTol;
 			double precision = Math::Max(mf->OneMilliMeter/100, mf->Precision); //set the precision to 100th mm but never less than precision
 			
-			if (solidSet->Count > 5) //do large ops all in one go
-			{
+			//if (solidSet->Count >0) //do large ops all in one go
+			//{
 				return body->Cut(solidSet, precision);
-			}
-			else
-			{
-				IXbimSolidSet^ r = gcnew XbimSolidSet(body);
-				for each (XbimSolid^ s in solidSet)	r = r->Cut(s, precision);
+			//}
+			//else
+			//{
+			//	IXbimSolidSet^ r = gcnew XbimSolidSet(body);
+			//	for each (XbimSolid^ s in solidSet)	
+			//		r = r->Cut(s, precision);
 
-				//BRepTools::Write((XbimSolid^)(r->First), "d:\\tmp\\r");			
-				return r;
-			}
+			//	//BRepTools::Write((XbimSolid^)(r->First), "d:\\tmp\\r");			
+			//	return r;
+			//}
 			
 #endif
 			IIfcBooleanOperand^ fOp = clip->FirstOperand;
