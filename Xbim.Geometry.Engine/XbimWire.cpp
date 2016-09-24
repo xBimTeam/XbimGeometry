@@ -714,8 +714,8 @@ namespace Xbim
 					{
 						if (rotateElipse) //if we have had to rotate the elipse, then rotate the trims
 						{
-							flt1 -= (90 * parameterFactor);
-							flt2 -= (90 * parameterFactor);
+							flt1 -= Math::PI / 2;
+							flt2 -= Math::PI / 2;
 						}
 
 						BRepBuilderAPI_MakeEdge edgeMaker(curve, sense_agreement ? flt1 : flt2, sense_agreement ? flt2 : flt1);
