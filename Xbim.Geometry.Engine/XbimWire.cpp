@@ -63,6 +63,7 @@
 #include <BRepGProp.hxx>
 #include <GProp_GProps.hxx>
 #include <GC_MakeSegment.hxx>
+#include <ShapeAnalysis_Wire.hxx>
 using namespace Xbim::Common;
 using namespace System::Linq;
 namespace Xbim
@@ -334,6 +335,7 @@ namespace Xbim
 			TopoDS_Wire wire;
 			builder.MakeWire(wire);
 			bool is3D = XbimConvert::Is3D(pLine);
+			
 
 			gp_Pnt first;
 			gp_Pnt previous;
@@ -389,32 +391,70 @@ namespace Xbim
 				}
 			}
 			wire.Closed(closed);
-			if (BRepCheck_Analyzer(wire, Standard_True).IsValid() == Standard_True)
+			if (total > 2) //if we have more than a line segment check it is ok and fix if self interecting
 			{
-				pWire = new TopoDS_Wire();
-				*pWire = wire;
-			}
-			else
-			{
-
-				double toleranceMax = pLine->Model->ModelFactors->PrecisionMax;
-				ShapeFix_Shape sfs(wire);
-				sfs.SetPrecision(tolerance);
-				sfs.SetMinTolerance(tolerance);
-				sfs.SetMaxTolerance(toleranceMax);
-				sfs.Perform();
-
-				if (BRepCheck_Analyzer(sfs.Shape(), Standard_True).IsValid() == Standard_True && sfs.Shape().ShapeType() == TopAbs_WIRE) //in release builds except the geometry is not compliant
+				XbimFace^ xFace;
+				if (is3D)
 				{
-					pWire = new TopoDS_Wire();
-					*pWire = TopoDS::Wire(sfs.Shape());
+					XbimWire^ xWire = gcnew XbimWire(wire);
+					xFace = gcnew XbimFace(xWire->Normal);
 				}
 				else
+					xFace = gcnew XbimFace(XbimVector3D(0, 0, 1));
+				ShapeAnalysis_Wire wireChecker(wire, xFace, tolerance);
+
+				Standard_Boolean needsFixing = wireChecker.CheckSelfIntersection();
+				if (needsFixing == Standard_True)
 				{
-					XbimGeometryCreator::LogWarning(pLine, "Invalid polyline. Wire discarded");
-					return;
+					ShapeFix_Wire wireFixer(wire, xFace, tolerance);
+					/*wireFixer.FixAddCurve3dMode();
+					wireFixer.FixConnectedMode();
+					wireFixer.FixDegeneratedMode();
+					wireFixer.FixGaps3dMode();
+					wireFixer.FixGaps2dMode();
+					wireFixer.FixIntersectingEdgesMode();
+					wireFixer.FixLackingMode();
+					wireFixer.FixNotchedEdgesMode();
+					wireFixer.FixReorderMode();
+					wireFixer.FixSeamMode();				
+					wireFixer.FixTailMode();
+					wireFixer.FixVertexToleranceMode();*/
+					wireFixer.FixSelfIntersectionMode()= Standard_True;
+					wireFixer.FixSelfIntersectingEdgeMode()= Standard_True;
+					wireFixer.FixIntersectingEdgesMode() = Standard_True;
+					wireFixer.FixVertexToleranceMode() = Standard_True;
+					wireFixer.Perform();
+					wire = wireFixer.Wire();
 				}
 			}
+			pWire = new TopoDS_Wire();
+			*pWire = wire;
+			//if (BRepCheck_Analyzer(wire, Standard_True).IsValid() == Standard_True)
+			//{
+			//	pWire = new TopoDS_Wire();
+			//	*pWire = wire;
+			//}
+			//else
+			//{
+
+			//	double toleranceMax = pLine->Model->ModelFactors->PrecisionMax;
+			//	ShapeFix_Shape sfs(wire);
+			//	sfs.SetPrecision(tolerance);
+			//	sfs.SetMinTolerance(tolerance);
+			//	sfs.SetMaxTolerance(toleranceMax);
+			//	sfs.Perform();
+
+			//	if (BRepCheck_Analyzer(sfs.Shape(), Standard_True).IsValid() == Standard_True && sfs.Shape().ShapeType() == TopAbs_WIRE) //in release builds except the geometry is not compliant
+			//	{
+			//		pWire = new TopoDS_Wire();
+			//		*pWire = TopoDS::Wire(sfs.Shape());
+			//	}
+			//	else
+			//	{
+			//		XbimGeometryCreator::LogWarning(pLine, "Invalid polyline. Wire discarded");
+			//		return;
+			//	}
+			//}
 		}
 
 		void XbimWire::Init(IIfcBSplineCurve^ bspline)
