@@ -1152,8 +1152,8 @@ namespace Xbim.ModelGeometry.Scene
                     }
                 }
             }
-            // Parallel.ForEach(contextHelper.ProductShapeIds, contextHelper.ParallelOptions, shapeId =>
-            foreach (var shapeId in contextHelper.ProductShapeIds)
+            Parallel.ForEach(contextHelper.ProductShapeIds, contextHelper.ParallelOptions, shapeId =>
+            // foreach (var shapeId in contextHelper.ProductShapeIds)
             {
                 Interlocked.Increment(ref localTally);
                 var shape = (IIfcGeometricRepresentationItem)Model.Instances[shapeId];
@@ -1258,7 +1258,7 @@ namespace Xbim.ModelGeometry.Scene
                     }
                 }
             }
-            //);
+           );
 
             contextHelper.PercentageParsed = localPercentageParsed;
             contextHelper.Tally = localTally;
