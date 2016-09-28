@@ -31,7 +31,7 @@ IOS and Android versions are under development.</description>
         <language>en-GB</language>
         <tags>BIM, IFC, IfcXml, IfcZip, COBie, .Net, C#, BuildingSmart</tags>
       <dependencies>
-        <dependency id="Xbim.Essentials" version="4.0.0-V232" />
+        <dependency id="Xbim.Essentials" version="4.0.0-V235" />
       </dependencies>
     </metadata>
     <files>
