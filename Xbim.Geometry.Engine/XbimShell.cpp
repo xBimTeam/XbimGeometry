@@ -9,8 +9,8 @@
 #include "XbimFaceSet.h"
 #include "XbimEdgeSet.h"
 #include "XbimShellSet.h"
-#include "XbimGeomPrim.h"
-
+#include "XbimConvert.h"
+#include "XbimOccWriter.h"
 
 #include <GProp_GProps.hxx>
 #include <BRepGProp.hxx>
@@ -40,11 +40,13 @@
 #include <Geom_Line.hxx>
 #include <Geom_TrimmedCurve.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
+#include <BRepBuilderAPI_GTransform.hxx>
 #include <BRepPrimAPI_MakePrism.hxx>
 #include <ShapeFix_Shell.hxx>
 #include <BRepCheck_Analyzer.hxx>
 #include <BRepTools.hxx>
 #include <BRepBuilderAPI_Sewing.hxx>
+#include <GeomLib_IsPlanarSurface.hxx>
 using namespace System;
 using namespace Xbim::Common::Exceptions;
 namespace Xbim
@@ -66,12 +68,12 @@ namespace Xbim
 		{
 		}
 
-		XbimShell::XbimShell(IfcOpenShell^ openShell)
+		XbimShell::XbimShell(IIfcOpenShell^ openShell)
 		{
 			Init(openShell);
 		}
 
-		XbimShell::XbimShell(IfcConnectedFaceSet^ fset)
+		XbimShell::XbimShell(IIfcConnectedFaceSet^ fset)
 		{
 			Init(fset);
 		}
@@ -82,7 +84,12 @@ namespace Xbim
 			*pShell = shell;
 		}
 
-		XbimShell::XbimShell(IfcSurfaceOfLinearExtrusion^ linExt)
+		XbimShell::XbimShell(const TopoDS_Shell& shell, Object^ tag) : XbimShell(shell)
+		{
+			Tag = tag;
+		}
+
+		XbimShell::XbimShell(IIfcSurfaceOfLinearExtrusion^ linExt)
 		{
 			Init(linExt);
 		}
@@ -91,7 +98,7 @@ namespace Xbim
 #pragma endregion
 
 		//initialisers
-		void XbimShell::Init(IfcOpenShell^ openShell)
+		void XbimShell::Init(IIfcOpenShell^ openShell)
 		{
 			XbimCompound^ shapes = gcnew XbimCompound(openShell);
 			shapes->Sew();
@@ -99,7 +106,7 @@ namespace Xbim
 			*pShell = (XbimShell^)shapes->MakeShell();
 		}
 
-		void XbimShell::Init(IfcConnectedFaceSet^ connectedFaceSet)
+		void XbimShell::Init(IIfcConnectedFaceSet^ connectedFaceSet)
 		{
 			XbimCompound^ shapes = gcnew XbimCompound(connectedFaceSet);
 			shapes->Sew();
@@ -107,29 +114,29 @@ namespace Xbim
 			*pShell = (XbimShell^)shapes->MakeShell();
 		}
 
-		void XbimShell::Init(IfcSurfaceOfLinearExtrusion ^ linExt)
+		void XbimShell::Init(IIfcSurfaceOfLinearExtrusion ^ linExt)
 		{
 			XbimWire^ prof = gcnew XbimWire(linExt->SweptCurve);
 			if (prof->IsValid && linExt->Depth > 0) //we have a valid wire and extrusion
 			{
-				IfcDirection^ dir = linExt->ExtrudedDirection;
+				IIfcDirection^ dir = linExt->ExtrudedDirection;
 				gp_Vec vec(dir->X, dir->Y, dir->Z);
+				vec.Normalize();
 				vec *= linExt->Depth;
 				BRepPrimAPI_MakePrism shellMaker(prof, vec);
 				if (shellMaker.IsDone())
 				{
 					pShell = new TopoDS_Shell();
 					*pShell = TopoDS::Shell(shellMaker.Shape());
-					pShell->Move(XbimGeomPrim::ToLocation(linExt->Position));
+					if (linExt->Position!=nullptr)
+						pShell->Move(XbimConvert::ToLocation(linExt->Position));
 				}
 				else
-					XbimGeometryCreator::logger->WarnFormat("WH006: Invalid Surface Extrusion, could not create shell, found in Entity #{0}=IfcSurfaceOfLinearExtrusion.",
-					linExt->EntityLabel);
+					XbimGeometryCreator::LogWarning(linExt, "Invalid Surface Extrusion, could not create shell");
 			}
 			else if (linExt->Depth <= 0)
 			{
-				XbimGeometryCreator::logger->WarnFormat("WS007: Invalid Solid Surface, Extrusion Depth must be >0, found in Entity #{0}=IfcSurfaceOfLinearExtrusion.",
-					linExt->EntityLabel);
+				XbimGeometryCreator::LogWarning(linExt, "Invalid shell surface, Extrusion Depth must be >0");
 			}
 			
 		}
@@ -204,24 +211,15 @@ namespace Xbim
 		bool XbimShell::IsPolyhedron::get()
 		{
 			if (!IsValid) return false;
-			for (TopExp_Explorer exp(*pShell, TopAbs_EDGE); exp.More(); exp.Next())
+			for (TopExp_Explorer exp(*pShell, TopAbs_FACE); exp.More(); exp.Next())
 			{
-				Standard_Real start, end;
-				Handle(Geom_Curve) c3d = BRep_Tool::Curve(TopoDS::Edge(exp.Current()),  start, end);
-				if (!c3d.IsNull())
-				{
-					Handle(Standard_Type) cType = c3d->DynamicType();
-					if (cType != STANDARD_TYPE(Geom_Line))
-					{
-						if (cType != STANDARD_TYPE(Geom_TrimmedCurve)) return false;
-						Handle(Geom_TrimmedCurve) tc = Handle(Geom_TrimmedCurve)::DownCast(c3d);
-						Handle(Standard_Type) tcType = tc->DynamicType();
-						if (tcType != STANDARD_TYPE(Geom_Line)) return false;
-					}
-				}
+				Handle(Geom_Surface) s = BRep_Tool::Surface(TopoDS::Face(exp.Current()));
+				GeomLib_IsPlanarSurface tester(s);
+				if (!tester.IsPlanar())
+					return false;
 			}
 			GC::KeepAlive(this);
-			//all edges are lines
+			//all faces are planar
 			return true;
 		}
 
@@ -264,17 +262,18 @@ namespace Xbim
 
 		IXbimGeometryObject^ XbimShell::Transform(XbimMatrix3D matrix3D)
 		{
-			BRepBuilderAPI_Copy copier(this);
-			BRepBuilderAPI_Transform gTran(copier.Shape(), XbimGeomPrim::ToTransform(matrix3D));
-			TopoDS_Shell temp = TopoDS::Shell(gTran.Shape());
-			return gcnew XbimShell(temp);
+			if (!IsValid) return nullptr;
+			gp_Trsf trans = XbimConvert::ToTransform(matrix3D);
+			BRepBuilderAPI_Transform gTran(this, trans, Standard_True);
+			return gcnew XbimSolid(TopoDS::Solid(gTran.Shape()));
 		}
 
 		IXbimGeometryObject^ XbimShell::TransformShallow(XbimMatrix3D matrix3D)
 		{
-			TopoDS_Shell shell = TopoDS::Shell(pShell->Moved(XbimGeomPrim::ToTransform(matrix3D)));
-			GC::KeepAlive(this);
-			return gcnew XbimShell(shell);
+			if (!IsValid) return nullptr;
+			gp_Trsf trans = XbimConvert::ToTransform(matrix3D);
+			BRepBuilderAPI_Transform gTran(this, trans, Standard_False);
+			return gcnew XbimSolid(TopoDS::Solid(gTran.Shape()));
 		}
 
 		IXbimGeometryObjectSet^ XbimShell::Cut(IXbimSolidSet^ solids, double tolerance)
@@ -360,7 +359,7 @@ namespace Xbim
 					return gcnew XbimFaceSet(result);
 				}
 			}
-			XbimGeometryCreator::logger->WarnFormat("WS008:Boolean Section operation has failed to create a section");
+			XbimGeometryCreator::LogWarning(this, "Boolean Section operation has failed to create a section");
 			return XbimFaceSet::Empty;
 		}
 
@@ -394,20 +393,72 @@ namespace Xbim
 				*pShell = TopoDS::Shell(fixed);			
 		}
 
+		XbimGeometryObject ^ XbimShell::Transformed(IIfcCartesianTransformationOperator ^ transformation)
+		{
+			IIfcCartesianTransformationOperator3DnonUniform^ nonUniform = dynamic_cast<IIfcCartesianTransformationOperator3DnonUniform^>(transformation);
+			if (nonUniform != nullptr)
+			{
+				gp_GTrsf trans = XbimConvert::ToTransform(nonUniform);
+				BRepBuilderAPI_GTransform tr(this, trans, Standard_True); //make a copy of underlying shape
+				return gcnew XbimShell(TopoDS::Shell(tr.Shape()), Tag);
+			}
+			else
+			{
+				gp_Trsf trans = XbimConvert::ToTransform(transformation);
+				BRepBuilderAPI_Transform tr(this, trans, Standard_False); //do not make a copy of underlying shape
+				return gcnew XbimShell(TopoDS::Shell(tr.Shape()), Tag);
+			}
+		}
+
+		void XbimShell::Move(TopLoc_Location loc)
+		{
+			if (IsValid) pShell->Move(loc);
+		}
+		XbimGeometryObject ^ XbimShell::Moved(IIfcPlacement ^ placement)
+		{
+			if (!IsValid) return this;
+			XbimShell^ copy = gcnew XbimShell(this, Tag); //take a copy of the shape
+			TopLoc_Location loc = XbimConvert::ToLocation(placement);
+			copy->Move(loc);
+			return copy;
+		}
+
+		XbimGeometryObject ^ XbimShell::Moved(IIfcObjectPlacement ^ objectPlacement)
+		{
+			if (!IsValid) return this;
+			XbimShell^ copy = gcnew XbimShell(this, Tag); //take a copy of the shape
+			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
+			copy->Move(loc);
+			return copy;
+		}
+
 		//makes the shell a solid, note does not check if the shell IsClosed, so can make solids that are not closed or manifold
 		IXbimSolid^ XbimShell::MakeSolid()
 		{
 			if (IsValid)
 			{
-				BRepClass3d_SolidClassifier class3d(this);
-				class3d.PerformInfinitePoint(Precision::Confusion());
-				if (class3d.State() == TopAbs_IN) 
-					this->Reverse();
+				
 				BRepBuilderAPI_MakeSolid solidMaker(this);
 				if (solidMaker.IsDone())
-					return gcnew XbimSolid(solidMaker.Solid());
+				{
+					XbimSolid^ solid = gcnew XbimSolid(solidMaker.Solid());
+					BRepClass3d_SolidClassifier class3d(solid);
+					class3d.PerformInfinitePoint(Precision::Confusion());
+					if (class3d.State() == TopAbs_IN)
+						solid->Reverse();					
+					return solid;
+				}
 			}
 			return gcnew XbimSolid(); //return an invalid solid if the shell is not valid
+		}
+
+		void XbimShell::SaveAsBrep(String^ fileName)
+		{
+			if (IsValid)
+			{
+				XbimOccWriter^ occWriter = gcnew XbimOccWriter();
+				occWriter->Write(this, fileName);
+			}
 		}
 
 #pragma endregion

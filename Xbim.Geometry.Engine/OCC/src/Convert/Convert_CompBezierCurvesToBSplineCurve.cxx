@@ -51,9 +51,10 @@ void  Convert_CompBezierCurvesToBSplineCurve::AddCurve
     P1 = mySequence.Last()->Value(mySequence.Last()->Upper());
     P2 = Poles(Poles.Lower());
 
-    // NYI
-  if ( !P1.IsEqual(P2,Precision::Confusion()))
-      cout << "Convert_CompBezierCurvesToBSplineCurve::Addcurve" << endl;;
+#ifdef OCCT_DEBUG
+    if (!P1.IsEqual(P2, Precision::Confusion()))
+      cout << "Convert_CompBezierCurvesToBSplineCurve::Addcurve" << endl;
+#endif
   }
   myDone = Standard_False;
   Handle(TColgp_HArray1OfPnt) HPoles = 
@@ -169,8 +170,8 @@ void Convert_CompBezierCurvesToBSplineCurve::Perform()
     Inc = myDegree - Deg;
     if ( Inc > 0) {
       BSplCLib::IncreaseDegree(myDegree, 
-			       mySequence(i)->Array1(), PLib::NoWeights(), 
-			       Points, PLib::NoWeights());
+			       mySequence(i)->Array1(), BSplCLib::NoWeights(), 
+			       Points, BSplCLib::NoWeights());
     }
     else {
       Points = mySequence(i)->Array1();
@@ -199,26 +200,26 @@ void Convert_CompBezierCurvesToBSplineCurve::Perform()
       
       Standard_Real D1 = V1.SquareMagnitude();
       Standard_Real D2 = V2.SquareMagnitude();
-      if (D1 > gp::Resolution() && D2 > gp::Resolution() && V1.IsParallel(V2, myAngular )) {
+      if (MaxDegree > 1 && //rln 20.06.99 work-around
+          D1 > gp::Resolution() && D2 > gp::Resolution() && V1.IsParallel(V2, myAngular ))
+      {
           Standard_Real Lambda = Sqrt(D2/D1);
           if(CurveKnVals(i-1) * Lambda > 10. * Epsilon(Det)) {
             KnotsMultiplicities.Append(MaxDegree-1);
             CurveKnVals(i) = CurveKnVals(i-1) * Lambda;
-            Det += CurveKnVals(i);
           }
           else {
             CurvePoles.Append(Points(1));
             KnotsMultiplicities.Append(MaxDegree);
             CurveKnVals(i) = 1.0 ;
-            Det += CurveKnVals(i) ;
           }
       }
       else {
         CurvePoles.Append(Points(1));
         KnotsMultiplicities.Append(MaxDegree);
         CurveKnVals(i) = 1.0 ;
-        Det += CurveKnVals(i) ;
       }
+      Det += CurveKnVals(i);
 
       // Store the poles.
       for (Standard_Integer j = 2 ; j <= MaxDegree ; j++) {

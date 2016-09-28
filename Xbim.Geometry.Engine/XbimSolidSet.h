@@ -3,9 +3,9 @@
 #include "XbimCompound.h"
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
-using namespace XbimGeometry::Interfaces;
+using namespace Xbim::Common;
 using namespace System::Collections::Generic;
-using namespace Xbim::Ifc2x3::TopologyResource;
+
 namespace Xbim
 {
 	namespace Geometry
@@ -21,17 +21,17 @@ namespace Xbim
 		};
 
 
-		ref class XbimSolidSet : IXbimSolidSet
+		ref class XbimSolidSet :XbimSetObject, IXbimSolidSet
 		{
 		private:
 			List<IXbimSolid^>^ solids;
 			static XbimSolidSet^ empty = gcnew XbimSolidSet();
-			void Init(IfcBooleanResult^ boolOp);
-			void Init(XbimCompound^ comp, int label);
-			void Init(IfcSweptAreaSolid^ solid);
-			void Init(IfcExtrudedAreaSolid^ solid);
-			void Init(IfcSurfaceCurveSweptAreaSolid^ ifcSolid);
-			void Init(IfcRevolvedAreaSolid^ solid);
+			void Init(IIfcBooleanResult^ boolOp);
+			void Init(XbimCompound^ comp, IPersistEntity^ ent);
+			void Init(IIfcSweptAreaSolid^ solid);
+			void Init(IIfcExtrudedAreaSolid^ solid);
+			void Init(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid);
+			void Init(IIfcRevolvedAreaSolid^ solid);
 			
 
 			static VolumeComparer^ _volumeComparer = gcnew VolumeComparer();
@@ -57,23 +57,24 @@ namespace Xbim
 			XbimSolidSet(XbimCompound^ shape);
 			XbimSolidSet(IXbimSolid^ solid);
 			XbimSolidSet(IEnumerable<IXbimSolid^>^ solids);
-			XbimSolidSet(IfcBooleanResult^ boolOp);
-			XbimSolidSet(IfcManifoldSolidBrep^ solid);
-			XbimSolidSet(IfcFacetedBrep^ solid);
-			XbimSolidSet(IfcFacetedBrepWithVoids^ solid);
-			XbimSolidSet(IfcClosedShell^ solid);
+			XbimSolidSet(IIfcBooleanResult^ boolOp);
+			XbimSolidSet(IIfcManifoldSolidBrep^ solid);
+			XbimSolidSet(IIfcFacetedBrep^ solid);
+			XbimSolidSet(IIfcFacetedBrepWithVoids^ solid);
+			XbimSolidSet(IIfcClosedShell^ solid);
 
-			XbimSolidSet(IfcSweptAreaSolid^ solid);
-			XbimSolidSet(IfcSurfaceCurveSweptAreaSolid^ ifcSolid);
-			XbimSolidSet(IfcExtrudedAreaSolid^ solid);
-			XbimSolidSet(IfcRevolvedAreaSolid^ solid);
+			XbimSolidSet(IIfcSweptAreaSolid^ solid);
+			XbimSolidSet(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid);
+			XbimSolidSet(IIfcExtrudedAreaSolid^ solid);
+			XbimSolidSet(IIfcRevolvedAreaSolid^ solid);
 			
 
-			virtual property bool IsValid{bool get(){ return Count>0; }; }
+			virtual property bool IsValid{bool get(){ return solids!=nullptr && Count>0; }; }
 			virtual property bool IsSimplified{bool get(){ return _isSimplified; }; void set(bool val){ _isSimplified = val; } }
 			virtual property bool IsSet{bool get()  { return true; }; }
 			virtual property IXbimSolid^ First{IXbimSolid^ get(); }
-			virtual property int Count{int get(); }
+			virtual property int Count {int get() override; }
+			virtual IXbimGeometryObject^ Trim()  override { if (Count == 1) return First; else if (Count == 0) return nullptr; else return this; };
 			virtual property XbimRect3D BoundingBox {XbimRect3D get(); }
 			virtual property  XbimGeometryObjectType GeometryType{XbimGeometryObjectType  get() { return XbimGeometryObjectType::XbimSolidSetType; }}
 			virtual IEnumerator<IXbimSolid^>^ GetEnumerator();
@@ -86,14 +87,30 @@ namespace Xbim
 			virtual IXbimSolidSet^ Union(IXbimSolid^ solid, double tolerance);
 			virtual IXbimSolidSet^ Intersection(IXbimSolidSet^ solids, double tolerance);
 			virtual IXbimSolidSet^ Intersection(IXbimSolid^ solid, double tolerance);
-			
+			virtual property String^  ToBRep{String^ get(); }
 			virtual property bool IsPolyhedron{ bool get(); }
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) ;
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D);
 			virtual property double Volume{double get(); }
+			virtual IXbimSolidSet^ Range(int start, int count);
 			//moves the solid set to the new position
-			void Move(IfcAxis2Placement3D^ position);
+			void Move(IIfcAxis2Placement3D^ position);
 			
+
+			// Inherited via XbimSetObject
+			virtual IXbimGeometryObject ^ Transformed(IIfcCartesianTransformationOperator ^ transformation) override;
+
+
+			// Inherited via XbimSetObject
+			
+			virtual IXbimGeometryObject ^ Moved(IIfcPlacement ^ placement) override;
+
+			virtual IXbimGeometryObject ^ Moved(IIfcObjectPlacement ^ objectPlacement) override;
+
+
+			// Inherited via XbimSetObject
+			virtual void Mesh(IXbimMeshReceiver ^ mesh, double precision, double deflection, double angle) override;
+
 		};
 
 	}

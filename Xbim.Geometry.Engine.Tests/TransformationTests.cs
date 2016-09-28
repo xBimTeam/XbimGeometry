@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Linq;
-using log4net.Util;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Xbim.Common.Geometry;
+using Xbim.Common.Step21;
 using Xbim.Geometry.Engine.Interop;
-using Xbim.IO;
-using Xbim.Geometry;
-using XbimGeometry.Interfaces;
+using Xbim.Ifc;
 
-namespace GeometryTests
+namespace Ifc4GeometryTests
 {
     [DeploymentItem(@"x64\", "x64")]
     [DeploymentItem(@"x86\", "x86")]
@@ -23,7 +21,7 @@ namespace GeometryTests
         [TestMethod]
         public void TransformSolidRectangularProfileDef()
         {
-            using (var m = XbimModel.CreateTemporaryModel())
+            using (var m = IfcStore.Create(new XbimEditorCredentials(), IfcSchemaVersion.Ifc4, XbimStoreType.InMemoryModel))
             {
                 using (var txn = m.BeginTransaction())
                 {
@@ -57,6 +55,7 @@ namespace GeometryTests
                         XbimVector3D v = s1Verts[i].VertexGeometry-s2Verts[i].VertexGeometry;
                         Assert.IsTrue(v.Length < m.ModelFactors.Precision, "vertices not the same");
                     }
+                    txn.Commit();
                 }
             }
         }

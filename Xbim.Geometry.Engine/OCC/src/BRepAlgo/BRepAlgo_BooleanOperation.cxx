@@ -36,7 +36,6 @@
 #include <TopOpeBRepBuild_HBuilder.hxx>
 #include <TopOpeBRepBuild_Tools.hxx>
 #include <TopOpeBRepDS_BuildTool.hxx>
-#include <TopOpeBRepDS_DSX.hxx>
 #include <TopOpeBRepDS_HDataStructure.hxx>
 #include <TopOpeBRepTool_GeomTool.hxx>
 #include <TopOpeBRepTool_OutCurveType.hxx>
@@ -77,10 +76,10 @@ extern void FDSCNX_Close();// see TopOpeBRepDS_connex.cxx
 extern void FDSSDM_Close();// see TopOpeBRepDS_samdom.cxx
 
 //=======================================================================
-//function : Delete 
-//purpose  : alias ~BRepAlgoAPI_BooleanOperation
+//function : ~BRepAlgo_BooleanOperation
+//purpose  : 
 //=======================================================================
-  void BRepAlgo_BooleanOperation::Delete()
+BRepAlgo_BooleanOperation::~BRepAlgo_BooleanOperation()
 {
   FDSSDM_Close();
   FDSCNX_Close();
@@ -115,10 +114,6 @@ extern void FDSSDM_Close();// see TopOpeBRepDS_samdom.cxx
     HDS = myHBuilder->DataStructure();
     HDS->ChangeDS().Init();
   }
-
-#ifdef OCCT_DEBUG
-  TopOpeBRepDS_SettraceSPSX_HDS(HDS);
-#endif
 
   // fill the data Structure
   TopOpeBRep_DSFiller DSFiller;

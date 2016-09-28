@@ -23,25 +23,30 @@ void Standard_Transient::Delete() const
   delete this;
 }
 
-//
-//
-const Handle(Standard_Type)& Standard_Transient::DynamicType() const
+const Handle(Standard_Type)& Standard_Transient::get_type_descriptor ()
 {
   return opencascade::type_instance<Standard_Transient>::get();
 }
 
 //
 //
+const Handle(Standard_Type)& Standard_Transient::DynamicType() const
+{
+  return get_type_descriptor();
+}
+
+//
+//
 Standard_Boolean Standard_Transient::IsInstance(const Handle(Standard_Type) &AType) const
 {
-  return (Standard_Boolean) (AType ==  DynamicType());
+  return (AType == DynamicType());
 }
 
 //
 //
 Standard_Boolean Standard_Transient::IsInstance(const Standard_CString theTypeName) const
 {
-  return IsSimilar ( DynamicType()->Name(), theTypeName );
+  return IsEqual ( DynamicType()->Name(), theTypeName );
 }
 
 //

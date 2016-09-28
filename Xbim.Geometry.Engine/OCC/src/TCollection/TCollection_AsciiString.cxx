@@ -12,13 +12,14 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
+#include <TCollection_AsciiString.hxx>
 
+#include <NCollection_UtfIterator.hxx>
 #include <Standard.hxx>
 #include <Standard_NegativeValue.hxx>
 #include <Standard_NullObject.hxx>
 #include <Standard_NumericError.hxx>
 #include <Standard_OutOfRange.hxx>
-#include <TCollection_AsciiString.hxx>
 #include <TCollection_ExtendedString.hxx>
 #include <TCollection_HAsciiString.hxx>
 
@@ -57,7 +58,7 @@ TCollection_AsciiString::TCollection_AsciiString()
 // Create an asciistring from a Standard_CString
 // ----------------------------------------------------------------------------
 TCollection_AsciiString::TCollection_AsciiString(const Standard_CString astring)
-     : mystring(0)
+  : mystring(0), mylength(0)
 {
   if (astring) {
     mylength = Standard_Integer( strlen(astring) );
@@ -75,10 +76,9 @@ TCollection_AsciiString::TCollection_AsciiString(const Standard_CString astring)
 // ----------------------------------------------------------------------------
 TCollection_AsciiString::TCollection_AsciiString(const Standard_CString astring,
                                                  const Standard_Integer aLen )
-     : mystring(0)
+  : mystring(0), mylength(aLen)
 {
   if (astring) {
-    mylength = aLen ;
     mystring = Allocate(mylength+1);
     strncpy( mystring , astring , mylength );
     mystring [ mylength ] = '\0' ;
@@ -235,6 +235,27 @@ TCollection_AsciiString::TCollection_AsciiString(const TCollection_ExtendedStrin
     mylength = astring.LengthOfCString();
     mystring = Allocate(mylength+1);
     astring.ToUTF8CString(mystring);
+  }
+}
+
+//---------------------------------------------------------------------------
+//  Create an TCollection_AsciiString from a Standard_WideChar
+//---------------------------------------------------------------------------
+TCollection_AsciiString::TCollection_AsciiString (const Standard_WideChar* theStringUtf)
+: mystring (NULL),
+  mylength (0)
+{
+  for (NCollection_UtfWideIter anIter (theStringUtf); *anIter != 0; ++anIter)
+  {
+    mylength += anIter.AdvanceBytesUtf8();
+  }
+
+  mystring = Allocate (mylength + 1);
+  mystring[mylength] = '\0';
+  NCollection_UtfWideIter anIterRead (theStringUtf);
+  for (Standard_Utf8Char* anIterWrite = mystring; *anIterRead != 0; ++anIterRead)
+  {
+    anIterWrite = anIterRead.GetUtf(anIterWrite);
   }
 }
 
@@ -397,7 +418,7 @@ void TCollection_AsciiString::Copy(const TCollection_AsciiString& fromwhere)
 // ----------------------------------------------------------------------------
 // Destroy
 // ----------------------------------------------------------------------------
-void TCollection_AsciiString::Destroy()
+TCollection_AsciiString::~TCollection_AsciiString()
 {
   if (mystring) 
     Free (mystring);
@@ -572,11 +593,31 @@ Standard_Boolean TCollection_AsciiString::IsEqual
 }
 
 // ----------------------------------------------------------------------------
-// IsEmpty
+// IsSameString
 // ----------------------------------------------------------------------------
-Standard_Boolean TCollection_AsciiString::IsEmpty() const
+Standard_Boolean TCollection_AsciiString::IsSameString (const TCollection_AsciiString& theString1,
+                                                        const TCollection_AsciiString& theString2,
+                                                        const Standard_Boolean theIsCaseSensitive)
 {
-  return (mylength == 0);
+  const Standard_Integer aSize1 = theString1.Length();
+  if (aSize1 != theString2.Length())
+  {
+    return Standard_False;
+  }
+
+  if (theIsCaseSensitive)
+  {
+    return (strncmp (theString1.ToCString(), theString2.ToCString(), aSize1) == 0);
+  }
+
+  for (Standard_Integer aCharIter = 1; aCharIter <= aSize1; ++aCharIter)
+  {
+    if (toupper (theString1.Value (aCharIter)) != toupper (theString2.Value (aCharIter)))
+    {
+      return Standard_False;
+    }
+  }
+  return Standard_True;
 }
 
 // ----------------------------------------------------------------------------
@@ -648,6 +689,34 @@ Standard_Boolean TCollection_AsciiString::IsGreater
                                 (const TCollection_AsciiString& other)const
 {
   return ( strncmp( mystring, other.mystring, mylength+1 ) > 0 );
+}
+
+// ----------------------------------------------------------------------------
+// StartsWith
+// ----------------------------------------------------------------------------
+Standard_Boolean TCollection_AsciiString::StartsWith (const TCollection_AsciiString& theStartString) const
+{
+  if (this == &theStartString)
+  {
+    return true;
+  }
+
+  return mylength >= theStartString.mylength
+      && strncmp (theStartString.mystring, mystring, theStartString.mylength) == 0;
+}
+
+// ----------------------------------------------------------------------------
+// EndsWith
+// ----------------------------------------------------------------------------
+Standard_Boolean TCollection_AsciiString::EndsWith (const TCollection_AsciiString& theEndString) const
+{
+  if (this == &theEndString)
+  {
+    return true;
+  }
+
+  return mylength >= theEndString.mylength
+      && strncmp (theEndString.mystring, mystring + mylength - theEndString.mylength, theEndString.mylength) == 0;
 }
 
 // ----------------------------------------------------------------------------

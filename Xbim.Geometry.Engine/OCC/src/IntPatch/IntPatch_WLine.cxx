@@ -26,6 +26,8 @@
 #include <Standard_OutOfRange.hxx>
 #include <Standard_Type.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(IntPatch_WLine,IntPatch_PointLine)
+
 #define DEBUG 0
 #define DEBUGV 0
 
@@ -39,7 +41,8 @@ IntPatch_WLine::IntPatch_WLine (const Handle(IntSurf_LineOn2S)& Line,
                                 const IntSurf_TypeTrans Trans1,
                                 const IntSurf_TypeTrans Trans2) :
   IntPatch_PointLine(Tang,Trans1,Trans2),fipt(Standard_False),lapt(Standard_False),
-  hasArcOnS1(Standard_False),hasArcOnS2(Standard_False)
+  hasArcOnS1(Standard_False),hasArcOnS2(Standard_False),
+  myIsPurgerAllowed(Standard_True)
 {
   typ = IntPatch_Walking;
   curv = Line;
@@ -55,7 +58,8 @@ IntPatch_WLine::IntPatch_WLine (const Handle(IntSurf_LineOn2S)& Line,
                                 const IntSurf_Situation Situ1,
                                 const IntSurf_Situation Situ2) :
   IntPatch_PointLine(Tang,Situ1,Situ2),fipt(Standard_False),lapt(Standard_False),
-  hasArcOnS1(Standard_False),hasArcOnS2(Standard_False)
+  hasArcOnS1(Standard_False),hasArcOnS2(Standard_False),
+  myIsPurgerAllowed(Standard_True)
 {
   typ = IntPatch_Walking;
   curv = Line;
@@ -69,7 +73,8 @@ IntPatch_WLine::IntPatch_WLine (const Handle(IntSurf_LineOn2S)& Line,
 IntPatch_WLine::IntPatch_WLine (const Handle(IntSurf_LineOn2S)& Line,
                                 const Standard_Boolean Tang) :
   IntPatch_PointLine(Tang),fipt(Standard_False),lapt(Standard_False),
-  hasArcOnS1(Standard_False),hasArcOnS2(Standard_False)
+  hasArcOnS1(Standard_False),hasArcOnS2(Standard_False),
+  myIsPurgerAllowed(Standard_True)
 {
   typ = IntPatch_Walking;
   curv = Line;
@@ -250,8 +255,7 @@ inline Standard_Boolean CompareVerticesOnS2(const IntPatch_Point& vtx1, const In
 {return CompareVerticesOnSurf (vtx1, vtx2, Standard_False);}
 
 
-void IntPatch_WLine::ComputeVertexParameters( const Standard_Real RTol,
-                                              const Standard_Boolean hasBeenAdded)
+void IntPatch_WLine::ComputeVertexParameters( const Standard_Real RTol)
 {
   // MSV Oct 15, 2001: use tolerance of vertex instead of RTol where 
   //                   it is possible
@@ -500,30 +504,8 @@ void IntPatch_WLine::ComputeVertexParameters( const Standard_Real RTol,
   for(i=1; i<=nbvtx; i++) {
     const gp_Pnt& P    = svtx.Value(i).Value();
     Standard_Real vTol = svtx.Value(i).Tolerance();
-    
-    if(hasBeenAdded)
-    {
-      if(nbvtx == 2)
-      {
-        if(i == nbvtx)
-        {
-          indicevertex = curv->NbPoints();
-        }
-        else
-        {
-          indicevertex = svtx.Value(i).ParameterOnLine();
-        }
-      }
-      else
-      {
-        indicevertex = svtx.Value(i).ParameterOnLine();
-      }
-    }
-    else
-    {
-      indicevertex = svtx.Value(i).ParameterOnLine();
-    }
-    
+
+    indicevertex = svtx.Value(i).ParameterOnLine();
     indicevertexonline = (Standard_Integer)indicevertex;
     //--------------------------------------------------
     //-- On Compare le vertex avec les points de la ligne

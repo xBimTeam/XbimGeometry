@@ -1,38 +1,30 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
     <metadata>
-        <id>Xbim.Geometry</id>
-        <version>3.1.17</version>
+        <id>Xbim.Geometry.4</id>
+        <version>4.0.0</version>
         <title>xBIM Geometry</title>
-        <authors>xBIM team</authors>
+        <authors>xBIM Team</authors>
         <owners>Steve Lockley</owners>
         <licenseUrl>http://xbim.codeplex.com/license</licenseUrl>
         <projectUrl>http://xbim.codeplex.com/</projectUrl>
         <iconUrl>http://download-codeplex.sec.s-msft.com/Download?ProjectName=xbim&amp;DownloadId=373774&amp;Build=20335</iconUrl>
         <requireLicenseAcceptance>true</requireLicenseAcceptance>
-        <description>xBIM Geometry is the Geometry processing part of the Xbim libraries.
-xBIM is an Open Source Toolkit for developing IFC based applications (BuildingSmart Data model). 
-It provides full support for reading and writing geometry, topology and data in accordance with the Ifc2x3 schema.
-xBIM reads and writes Ifc, IfcXMl and IfcZip formats.
-The xBIM project provides packages to convert IFC models to COBie spreadsheets in both UK and US cultures as well as a range of 3D viewing controls for use with Windows forms, WPF, WEBGL and OpenGL platforms.
-IOS and Android versions are under development.</description>
-        <summary>The .Net toolkit for developing BIM applications based on the IFC standard. Essential support for the Ifc data model</summary>
-        <releaseNotes>
-          3.1.15 Polyloop faces are meshed correctly considering orientation.
-          3.1.12 Minor change to update version of WexBIM files to 2
-          3.1.11 geometry engine syncronised with latest OCC build
-          3.1.4 performance significantly improved, support for complex geometries added, specifically large complex booleans
-          3.1.0 deploys net40 signed assemblies as opposed to net45 unsigned.
-          3.0.24 uses version 4 of the .Net framework for greater compatibility with installed clients.
-          3.0.23 Has improved performance and accuracy for boolean and other geometric operations and is updated to use OCC 6.9.0
-          3.0 contains a new geometry engine that has a full API to allow geometry constructions, boolean operations and meshing.
-          All Ifc2x3 geometry classes are now supported.
-        </releaseNotes>
+        <description>xBIM Geometry is the Geometry processing component of the Xbim libraries.
+        Release 4 provides full support for all Ifc2x3 and Ifc4 Geometries.
+        Support includes conversion to Boundary Representation and model triangulation.
+</description>
+        <summary>The .Net toolkit for developing BIM applications based on the IFC standard. Essential support for the Ifc2x4 and 4 data model</summary>
+        <releaseNotes>        
+          4.0.0 The first release that fully supports all Ifc4 and Design Transfer View        
+          All Ifc2x3 and Ifc4 geometry classes are now supported.
+          Also includes support for the WexBIM format which brings xBIM geometry to WebGL clients
+          Target .Net 4.0, Visual Studio 2012, 2013 and 2015, C Runtime 10, 11 and 12
+      </releaseNotes>
         <language>en-GB</language>
-        <tags>BIM, IFC, IfcXml, IfcZip, COBie, .Net, C#, BuildingSmart</tags>
+        <tags>BIM, IFC, IfcXml, IfcZip, Ifc4, COBie, .Net, C#, BuildingSmart, Geometry, Brep</tags>
       <dependencies>
-        <dependency id="Newtonsoft.Json" version="6.0.8" />
-        <dependency id="Xbim.Essentials" version="[3.1.11,4.0.0)" />
+        <dependency id="Xbim.Essentials.4" version="4.0.0" />
       </dependencies>
     </metadata>
     <files>
@@ -45,8 +37,5 @@ IOS and Android versions are under development.</description>
       <file src="Output\Release\Xbim.Geometry.targets" target="build\net40\Xbim.Geometry.targets" />
       <file src="Output\Release\Xbim.Geometry.Engine.Interop.pdb" target="lib\net40\Xbim.Geometry.Engine.Interop.pdb" />
       <file src="Output\Release\Xbim.ModelGeometry.Scene.pdb" target="lib\net40\Xbim.ModelGeometry.Scene.pdb" />
-      <file src="Output\Release\Xbim.Tessellator.dll" target="lib\net40\Xbim.Tessellator.dll" />
-      <file src="Output\Release\Xbim.Tessellator.pdb" target="lib\net40\Xbim.Tessellator.pdb" />
-      <file src="Output\Release\Xbim.Tessellator.xml" target="lib\net40\Xbim.Tessellator.xml" />
     </files>
   </package>

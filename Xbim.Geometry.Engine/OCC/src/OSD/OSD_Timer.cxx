@@ -21,7 +21,7 @@
 
 #include <OSD_Timer.hxx>
 
-#ifndef WNT
+#ifndef _WIN32
 
 //---------- No Windows NT Systems ----------------------------------
 
@@ -42,7 +42,6 @@ static inline Standard_Real GetWallClockTime ()
 }
 
 #else
-
 //-------------------  Windows NT  ------------------
 
 #define STRICT
@@ -62,10 +61,14 @@ static inline Standard_Real GetWallClockTime ()
   LARGE_INTEGER time;
   return isOk && QueryPerformanceCounter (&time) ? 
          (Standard_Real)time.QuadPart / (Standard_Real)freq.QuadPart :
+#ifndef OCCT_UWP
          0.001 * GetTickCount();
+#else
+         0.001 * GetTickCount64();
+#endif
 }
 
-#endif /* WNT */
+#endif /* _WIN32 */
 
 // ====================== PLATFORM-INDEPENDENT PART ========================
 

@@ -161,7 +161,6 @@
 #include <ChFi3d_Builder_0.hxx>
 
 #ifdef OCCT_DEBUG
-#include <OSD_Chronometer.hxx>
 extern Standard_Boolean ChFi3d_GetcontextFORCEBLEND(); 
 extern Standard_Boolean ChFi3d_GettraceDRAWINT();
 extern Standard_Boolean ChFi3d_GettraceDRAWENLARGE();
@@ -169,8 +168,6 @@ extern Standard_Boolean ChFi3d_GettraceDRAWSPINE();
 extern Standard_Real  t_sameparam, t_batten;
 extern void ChFi3d_SettraceDRAWINT(const Standard_Boolean b);
 extern void ChFi3d_SettraceDRAWSPINE(const Standard_Boolean b);
-extern void ChFi3d_InitChron(OSD_Chronometer& ch);
-extern void ChFi3d_ResultChron(OSD_Chronometer & ch,Standard_Real& time);
 #endif
 
 #include <stdio.h>
@@ -3039,8 +3036,6 @@ Standard_Boolean ChFi3d_ComputeCurves(const Handle(Adaptor3d_HSurface)&   S1,
   Standard_Real&              tolreached,
   const Standard_Boolean      wholeCurv) 
 {
-  Standard_Real Step = 0.1;
-
   gp_Pnt pdeb1 = S1->Value(Pardeb(1),Pardeb(2));
   gp_Pnt pfin1 = S1->Value(Parfin(1),Parfin(2));
   gp_Pnt pdeb2 = S2->Value(Pardeb(3),Pardeb(4));
@@ -3267,7 +3262,8 @@ Standard_Boolean ChFi3d_ComputeCurves(const Handle(Adaptor3d_HSurface)&   S1,
                 else         Ul = Uok;
               }
               else { // both projected, but where?
-                if (Uf == Ul) continue;
+                if (Abs(Uf - Ul) < Precision::PConfusion())
+                  continue;
               }
               ptestdeb = C3d->Value(Uf);
               ptestfin = C3d->Value(Ul);
@@ -3323,7 +3319,8 @@ Standard_Boolean ChFi3d_ComputeCurves(const Handle(Adaptor3d_HSurface)&   S1,
 
   // At this stage : 
   // classic intersections have failed, the path is approached in vain.
-  //  Standard_Real Step = 0.1;
+
+  Standard_Real Step = 0.1;
   for(;;) {
     //Attention the parameters of arrow for the path and
     //the tolerance for the approximation can't be taken as those of the  
@@ -3451,8 +3448,12 @@ Standard_Boolean ChFi3d_ComputeCurves(const Handle(Adaptor3d_HSurface)&   S1,
       //
       Handle(IntPatch_WLine) 	WL = new IntPatch_WLine(L2S,Standard_False);
 
+#ifdef OCCT_DEBUG
+      //WL->Dump(0);
+#endif
+
       GeomInt_WLApprox approx;
-      approx.SetParameters(tolap,tol2d,4,8,0,1);
+      approx.SetParameters(tolap, tol2d, 4, 8, 0, 30, Standard_True);
       // manage here the approximations that are not useful on planes!
       approx.Perform(S1,S2,WL,
         Standard_True,Standard_True,Standard_True,

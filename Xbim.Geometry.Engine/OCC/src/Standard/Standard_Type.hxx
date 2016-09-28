@@ -23,15 +23,36 @@
 #include <typeinfo>
 
 //! Helper macro to get instance of a type descriptor for a class in a legacy way.
-#define STANDARD_TYPE(theType) Standard_Type::Instance<theType>()
+#define STANDARD_TYPE(theType) theType::get_type_descriptor()
 
 //! Helper macro to be included in definition of the classes inheriting
-//! Standard_Transient to enable use of OCCT RTTI and smart pointers (handles).
-#define DEFINE_STANDARD_RTTI(Class,Base) \
+//! Standard_Transient to enable use of OCCT RTTI.
+//!
+//! Inline version, does not require IMPLEMENT_STANDARD_RTTIEXT, but when used
+//! for big hierarchies of classes may cause considerable increase of size of binaries.
+#define DEFINE_STANDARD_RTTI_INLINE(Class,Base) \
 public: \
   typedef Base base_type; \
   static const char* get_type_name () { return #Class; } \
-  virtual const Handle(Standard_Type)& DynamicType() const { return STANDARD_TYPE(Class); }
+  static const Handle(Standard_Type)& get_type_descriptor () { return Standard_Type::Instance<Class>(); } \
+  virtual const Handle(Standard_Type)& DynamicType() const Standard_OVERRIDE \
+  { return STANDARD_TYPE(Class); }
+
+//! Helper macro to be included in definition of the classes inheriting
+//! Standard_Transient to enable use of OCCT RTTI.
+//!
+//! Out-of-line version, requires IMPLEMENT_STANDARD_RTTIEXT.
+#define DEFINE_STANDARD_RTTIEXT(Class,Base) \
+public: \
+  typedef Base base_type; \
+  static const char* get_type_name () { return #Class; } \
+  Standard_EXPORT static const Handle(Standard_Type)& get_type_descriptor (); \
+  Standard_EXPORT virtual const Handle(Standard_Type)& DynamicType() const Standard_OVERRIDE;
+
+//! Defines implementation of type descriptor and DynamicType() function
+#define IMPLEMENT_STANDARD_RTTIEXT(Class,Base) \
+  const Handle(Standard_Type)& Class::get_type_descriptor () { return Standard_Type::Instance<Class>(); } \
+  const Handle(Standard_Type)& Class::DynamicType() const { return get_type_descriptor(); }
 
 // forward declaration of type_instance class
 namespace opencascade {
@@ -116,16 +137,13 @@ public:
   Standard_EXPORT ~Standard_Type ();
 
   // Define own RTTI
-  DEFINE_STANDARD_RTTI(Standard_Type, Standard_Transient)
+  DEFINE_STANDARD_RTTIEXT(Standard_Type,Standard_Transient)
 
 private:
 
   //! Constructor is private
   Standard_Type (const char* theSystemName, const char* theName,
-                 Standard_Size theSize, const Handle(Standard_Type)& theParent)
-  : mySystemName(theSystemName), myName(theName), mySize(theSize), myParent(theParent)
-  {
-  }
+                 Standard_Size theSize, const Handle(Standard_Type)& theParent);
 
 private:
   Standard_CString mySystemName;  //!< System name of the class (typeinfo.name)
@@ -136,11 +154,15 @@ private:
 
 namespace opencascade {
 
-  //! Template class providing instantiation of type descriptors as static
-  //! variables (one per binary module). Having type descriptors defined as 
-  //! static variables is essential to ensure that everything gets initialized
-  //! during library loading and thus no concurrency occurs when type system
-  //! is accessed from multiple threads.
+  //! Template class providing instantiation of type descriptors as singletons.
+  //! The descriptors are defined as static variables in function get(), which
+  //! is essential to ensure that they are initialized in correct sequence.
+  //!
+  //! For compilers that do not provide thread-safe initialization of static
+  //! variables (C++11 feature, N2660), additional global variable is
+  //! defined for each type to hold its type descriptor. These globals ensure
+  //! that all types get initialized during the library loading and thus no 
+  //! concurrency occurs when type system is accessed from multiple threads.
   template <typename T>
   class type_instance
   {
@@ -154,7 +176,7 @@ namespace opencascade {
   class type_instance<void>
   {
   public:
-    Standard_EXPORT static Handle(Standard_Type) get () { return 0; }
+    static Handle(Standard_Type) get () { return 0; }
   };
 
   // Implementation of static function returning instance of the
@@ -162,7 +184,12 @@ namespace opencascade {
   template <typename T>
   const Handle(Standard_Type)& type_instance<T>::get ()
   {
-    (void)myInstance; // ensure that myInstance is instantiated
+#if (defined(_MSC_VER) && _MSC_VER < 1900) || \
+    (defined(__GNUC__) && (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 3)) && \
+     ! defined(__clang__) && ! defined(__INTEL_COMPILER))
+    // ensure that myInstance is instantiated
+    (void)myInstance;
+#endif
 
     // static variable inside function ensures that descriptors
     // are initialized in correct sequence
@@ -173,10 +200,21 @@ namespace opencascade {
   }
 
   // Static class field is defined to ensure initialization of all type
-  // descriptors at load time of the library
+  // descriptors at load time of the library on compilers not supporting N2660:
+  // - VC++ below 14 (VS 2015)
+  // - GCC below 4.3
+  // Intel compiler reports itself as GCC on Linux and VC++ on Windows,
+  // and is claimed to support N2660 on Linux and on Windows "in VS2015 mode".
+  // CLang should support N2660 since version 2.9, but it is not clear how to 
+  // check its version reliably (on Linux it says it is GCC 4.2).
+#if (defined(_MSC_VER) && _MSC_VER < 1900) || \
+    (defined(__GNUC__) && (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 3)) && \
+     ! defined(__clang__) && ! defined(__INTEL_COMPILER))
+
   template <typename T>
   Handle(Standard_Type) type_instance<T>::myInstance (get());
 
+#endif
 }
 
 //! Operator printing type descriptor to stream

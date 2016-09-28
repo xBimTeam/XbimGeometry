@@ -102,6 +102,10 @@ public:
       Standard_Boolean   IsEmpty     () const {return (mySize == 0);}
       Standard_Integer   Length      () const {return mySize;}
 
+      //! Returns attached allocator
+      const Handle(NCollection_BaseAllocator)& Allocator() const
+      { return myAllocator; }
+
  protected:
   // Methods PROTECTED
   // 
@@ -114,6 +118,9 @@ public:
   {
     myAllocator = (theAllocator.IsNull() ? NCollection_BaseAllocator::CommonBaseAllocator() : theAllocator);
   }
+
+  //! Destructor
+  virtual ~NCollection_BaseSequence() {}
 
   Standard_EXPORT void   ClearSeq    (NCollection_DelSeqNode fDel);
   Standard_EXPORT void   PAppend     (NCollection_SeqNode *);

@@ -25,6 +25,7 @@
 #include <TopAbs_State.hxx>
 #include <Standard_Real.hxx>
 #include <IntTools_SequenceOfCurves.hxx>
+#include <Precision.hxx>
 class TopoDS_Vertex;
 class TopoDS_Wire;
 class TopoDS_Face;
@@ -160,9 +161,23 @@ public:
 
   //! Computes the max distance between points
   //! taken from 3D and 2D curves by the same parameter
-  Standard_EXPORT static Standard_Boolean ComputeTolerance (const Handle(Geom_Curve)& theCurve3D, const Handle(Geom2d_Curve)& theCurve2D, const Handle(Geom_Surface)& theSurf, const Standard_Real theFirst, const Standard_Real theLast, Standard_Real& theMaxDist, Standard_Real& theMaxPar);
+  Standard_EXPORT static
+    Standard_Boolean ComputeTolerance(const Handle(Geom_Curve)& theCurve3D,
+                                      const Handle(Geom2d_Curve)& theCurve2D,
+                                      const Handle(Geom_Surface)& theSurf,
+                                      const Standard_Real theFirst,
+                                      const Standard_Real theLast,
+                                      Standard_Real& theMaxDist,
+                                      Standard_Real& theMaxPar,
+                                      const Standard_Real theTolRange =
+                                                                  Precision::PConfusion());
 
 
+  //! Computes the correct Intersection range for 
+  //! Line/Line, Line/Plane and Plane/Plane intersections
+  Standard_EXPORT static Standard_Real ComputeIntRange(const Standard_Real theTol1,
+                                                       const Standard_Real theTol2,
+                                                       const Standard_Real theAngle);
 
 
 protected:

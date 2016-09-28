@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Xbim.Common;
 using Xbim.Common.Geometry;
-using Xbim.Ifc2x3.Kernel;
-using Xbim.Ifc2x3.PresentationAppearanceResource;
-using Xbim.IO;
-using Xbim.XbimExtensions;
+using Xbim.Ifc;
+using Xbim.Ifc4.Interfaces;
+using Xbim.Ifc4.Kernel;
+using Xbim.Ifc4.PresentationAppearanceResource;
 
 namespace Xbim.ModelGeometry.Scene
 {
@@ -24,7 +25,7 @@ namespace Xbim.ModelGeometry.Scene
         XbimRect3D _boundingBoxVisible = XbimRect3D.Empty;
         XbimRect3D _boundingBoxHidden = XbimRect3D.Empty;
 
-        public XbimModel Model { get; set; }
+        public IModel Model { get; set; }
 
 
         /// <summary>
@@ -136,8 +137,8 @@ namespace Xbim.ModelGeometry.Scene
         /// <summary>
         /// Creates a mesh using the default colour (typically white)
         /// </summary>
-        public XbimMeshLayer(XbimModel m)
-            :this(m, XbimColour.Default)
+        public XbimMeshLayer(IModel m)
+            :this(m, XbimColour.DefaultColour)
         {
            
         }
@@ -147,22 +148,22 @@ namespace Xbim.ModelGeometry.Scene
         /// If the mesh geometry item has a style specified in the IFC definition sub layers will be created for each style
         /// </summary>
         /// <param name="colour"></param>
-        public XbimMeshLayer(XbimModel m, XbimColour colour)
+        public XbimMeshLayer(IModel m, XbimColour colour)
         {
             Model = m;
-            Style = new XbimTexture().CreateTexture(colour);
+            Style =  XbimTexture.Create(colour);
         }
 
-        public XbimMeshLayer(XbimModel m, XbimColour colour, XbimColourMap subCategoryColourMap)
+        public XbimMeshLayer(IModel m, XbimColour colour, XbimColourMap subCategoryColourMap)
             :this(m, colour)
         {
             _layerColourMap = subCategoryColourMap;
         }
 
-        public XbimMeshLayer(XbimModel m, IfcSurfaceStyle style)
+        public XbimMeshLayer(IModel m, IIfcSurfaceStyle style)
         {
             Model = m;
-            Style = new XbimTexture().CreateTexture(style);
+            Style =  XbimTexture.Create(style);
            
         }
         public XbimMeshLayer(XbimTexture xbimTexture)
@@ -170,7 +171,7 @@ namespace Xbim.ModelGeometry.Scene
             Style = xbimTexture;
         }
 
-        public XbimMeshLayer(XbimModel m, XbimTexture xbimTexture)
+        public XbimMeshLayer(IModel m, XbimTexture xbimTexture)
         {
             Model = m;
             Style = xbimTexture;
@@ -178,7 +179,7 @@ namespace Xbim.ModelGeometry.Scene
 
         public XbimMeshLayer(XbimColour colour)
         {
-            Style = new XbimTexture().CreateTexture(colour);
+            Style = XbimTexture.Create(colour);
         }
 
         public static implicit operator TMesh(XbimMeshLayer<TMesh, TMaterial> layer)
@@ -242,7 +243,7 @@ namespace Xbim.ModelGeometry.Scene
         /// </summary>
         /// <param name="geomData"></param>
         /// <param name="model"></param>
-        public void AddToHidden(XbimGeometryData geomData, XbimModel model, short modelId)
+        public void AddToHidden(XbimGeometryData geomData, IModel model, short modelId)
         {
             var addingSuccessfull = Hidden.Add(geomData, modelId); // this is where the geometry is added to the main layer.
             if (addingSuccessfull)
@@ -272,9 +273,9 @@ namespace Xbim.ModelGeometry.Scene
         /// </summary>
         /// <param name="geomData"></param>
         /// <param name="model"></param>
-        public void AddToHidden(XbimGeometryData geomData, XbimModel model = null)
+        public void AddToHidden(XbimGeometryData geomData, IModel model = null)
         {
-            short modelId = 0;
+            int modelId = 0;
             if (model != null)
                 modelId = model.UserDefinedId;
             if (model != null && geomData.StyleLabel > 0) // check if we need to put this item on a sub layer
@@ -283,7 +284,7 @@ namespace Xbim.ModelGeometry.Scene
                 var layerName = geomData.StyleLabel.ToString();
                 if (!_subLayerMap.Contains(layerName))
                 {
-                    var style = model.InstancesLocal[geomData.StyleLabel] as IfcSurfaceStyle;
+                    var style = model.Instances[geomData.StyleLabel] as IfcSurfaceStyle;
                     //create a sub layer
                     subLayer = new XbimMeshLayer<TMesh, TMaterial>(model, style) {Name = layerName};
                     _subLayerMap.Add(subLayer);
@@ -291,11 +292,11 @@ namespace Xbim.ModelGeometry.Scene
                 else
                     subLayer = _subLayerMap[layerName];
                 
-                subLayer.AddToHidden(geomData, null, modelId);
+                subLayer.AddToHidden(geomData, null, (short) modelId);
             }
             else
             {
-                AddToHidden(geomData, model, modelId);
+                AddToHidden(geomData, model, (short)modelId);
             }
         }
 
@@ -348,7 +349,7 @@ namespace Xbim.ModelGeometry.Scene
        /// <param name="includeHidden">Include fragments in hidden layers</param>
        /// <param name="includSublayers">Recurse into sub layers</param>
        /// <returns></returns>
-        internal IEnumerable<XbimMeshFragment> GetMeshFragments(int entityLabel, bool includeHidden = false, bool includSublayers = false)
+        public IEnumerable<XbimMeshFragment> GetMeshFragments(int entityLabel, bool includeHidden = false, bool includSublayers = false)
         {
             foreach (var mf in Visible.Meshes.Where(m => m.EntityLabel == entityLabel))
                 yield return mf;

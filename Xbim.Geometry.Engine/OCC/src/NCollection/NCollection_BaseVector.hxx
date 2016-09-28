@@ -184,6 +184,9 @@ protected: //! @name protected methods
     myData = allocMemBlocks (myCapacity);
   }
 
+  //! Destructor
+  virtual ~NCollection_BaseVector() {}
+
   //! @return pointer to memory where to put the new item
   Standard_EXPORT void* expandV (const Standard_Integer theIndex);
 
@@ -207,6 +210,12 @@ public: //! @name public API
         myIncrement=aIncrement;
       }
     }
+  }
+
+  //! Returns attached allocator
+  const Handle(NCollection_BaseAllocator)& Allocator() const
+  {
+    return myAllocator;
   }
 
 protected: //! @name Protected fields

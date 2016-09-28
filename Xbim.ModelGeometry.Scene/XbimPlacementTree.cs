@@ -2,10 +2,10 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using Xbim.Common;
 using Xbim.Common.Geometry;
-using Xbim.Ifc2x3.Extensions;
-using Xbim.Ifc2x3.GeometricConstraintResource;
-using Xbim.IO;
+using Xbim.Ifc4.Interfaces;
+using Xbim.ModelGeometry.Scene.Extensions;
 
 #endregion
 
@@ -21,10 +21,10 @@ namespace Xbim.ModelGeometry.Scene
         ///     If there is a single root displacement, this is removed from the tree and added to the World
         ///     Coordinate System. Useful for models where the site has been located into a geographical context
         /// </param>
-        public XbimPlacementTree(XbimModel model, bool adjustWcs = true)
+        public XbimPlacementTree(IModel model, bool adjustWcs = true)
         {
             var rootNodes = new List<XbimPlacementNode>();
-            var localPlacements = model.InstancesLocal.OfType<IfcLocalPlacement>(true).ToList();
+            var localPlacements = model.Instances.OfType<IIfcLocalPlacement>(true).ToList();
             Nodes = new Dictionary<int, XbimPlacementNode>();
             foreach (var placement in localPlacements)
                 Nodes.Add(placement.EntityLabel, new XbimPlacementNode(placement));
@@ -66,7 +66,7 @@ namespace Xbim.ModelGeometry.Scene
             private List<XbimPlacementNode> _children;
             private bool _isAdjustedToGlobal;
 
-            public XbimPlacementNode(IfcLocalPlacement placement)
+            public XbimPlacementNode(IIfcLocalPlacement placement)
             {
                 PlacementLabel = placement.EntityLabel;
                 Matrix = placement.RelativePlacement.ToMatrix3D();

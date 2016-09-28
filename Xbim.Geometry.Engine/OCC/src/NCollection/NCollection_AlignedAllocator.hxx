@@ -30,10 +30,10 @@ public:
   Standard_EXPORT NCollection_AlignedAllocator (const size_t theAlignment);
 
   //! Allocate memory with given size. Returns NULL on failure.
-  Standard_EXPORT virtual void* Allocate (const size_t theSize);
+  Standard_EXPORT virtual void* Allocate (const size_t theSize) Standard_OVERRIDE;
 
   //! Free a previously allocated memory.
-  Standard_EXPORT virtual void  Free (void* thePtr);
+  Standard_EXPORT virtual void  Free (void* thePtr) Standard_OVERRIDE;
 
 private:
 
@@ -46,7 +46,7 @@ protected:
 
 public:
 
-  DEFINE_STANDARD_RTTI (NCollection_AlignedAllocator, NCollection_BaseAllocator)
+  DEFINE_STANDARD_RTTIEXT(NCollection_AlignedAllocator,NCollection_BaseAllocator)
 
 };
 

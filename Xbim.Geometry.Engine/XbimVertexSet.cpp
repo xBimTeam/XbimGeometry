@@ -1,10 +1,8 @@
 #include "XbimVertexSet.h"
+#include "XbimConvert.h"
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <TopExp.hxx>
 
-#pragma region Carve includes
-
-#pragma endregion
 
 using namespace System;
 namespace Xbim
@@ -60,6 +58,48 @@ namespace Xbim
 				result->Add((IXbimVertex^)((XbimVertex^)vertex)->TransformShallow(matrix3D));
 			}
 			return gcnew XbimVertexSet(result);
+		}
+
+		IXbimGeometryObject ^ XbimVertexSet::Transformed(IIfcCartesianTransformationOperator ^ transformation)
+		{
+			if (!IsValid) return this;
+			XbimVertexSet^ result = gcnew XbimVertexSet();
+			for each (XbimVertex^ vertex in vertices)
+				result->Add((XbimVertex^)vertex->Transformed(transformation));
+			return result;
+		}
+
+		IXbimGeometryObject ^ XbimVertexSet::Moved(IIfcPlacement ^ placement)
+		{
+			if (!IsValid) return this;
+			XbimVertexSet^ result = gcnew XbimVertexSet();
+			TopLoc_Location loc = XbimConvert::ToLocation(placement);
+			for each (IXbimVertex^ vertex in vertices)
+			{
+				XbimVertex^ copy = gcnew XbimVertex((XbimVertex^)vertex, Tag);
+				copy->Move(loc);
+				result->Add(copy);
+			}
+			return result;
+		}
+
+		IXbimGeometryObject ^ XbimVertexSet::Moved(IIfcObjectPlacement ^ objectPlacement)
+		{
+			if (!IsValid) return this;
+			XbimVertexSet^ result = gcnew XbimVertexSet();
+			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
+			for each (IXbimVertex^ vertex in vertices)
+			{
+				XbimVertex^ copy = gcnew XbimVertex((XbimVertex^)vertex, Tag);
+				copy->Move(loc);
+				result->Add(copy);
+			}
+			return result;
+		}
+
+		void XbimVertexSet::Mesh(IXbimMeshReceiver ^ mesh, double precision, double deflection, double angle)
+		{
+			return;//maybe add an implementation for this
 		}
 
 

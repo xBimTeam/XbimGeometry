@@ -21,6 +21,8 @@
 #include <TCollection_AsciiString.hxx>
 #include <TCollection_ExtendedString.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(Message_Messenger,MMgt_TShared)
+
 //=======================================================================
 //function : Message_Messenger
 //purpose  : 
@@ -103,7 +105,7 @@ void Message_Messenger::Send (const Standard_CString theString,
   Standard_Integer nb = myPrinters.Length();
   for (Standard_Integer i = 1; i <= nb; i++)
   {
-    Handle(Message_Printer) aPrinter = Handle(Message_Printer)::DownCast ( myPrinters(i) );
+    Handle(Message_Printer) aPrinter = myPrinters(i);
     if ( ! aPrinter.IsNull() ) 
       aPrinter->Send ( theString, theGravity, putEndl );
   }
@@ -121,7 +123,7 @@ void Message_Messenger::Send (const TCollection_AsciiString& theString,
   Standard_Integer nb = myPrinters.Length();
   for (Standard_Integer i = 1; i <= nb; i++)
   {
-    Handle(Message_Printer) aPrinter = Handle(Message_Printer)::DownCast ( myPrinters(i) );
+    Handle(Message_Printer) aPrinter = myPrinters(i);
     if ( ! aPrinter.IsNull() ) 
       aPrinter->Send ( theString, theGravity, putEndl );
   }
@@ -139,7 +141,7 @@ void Message_Messenger::Send (const TCollection_ExtendedString& theString,
   Standard_Integer nb = myPrinters.Length();
   for (Standard_Integer i = 1; i <= nb; i++)
   {
-    Handle(Message_Printer) aPrinter = Handle(Message_Printer)::DownCast ( myPrinters(i) );
+    Handle(Message_Printer) aPrinter = myPrinters(i);
     if ( ! aPrinter.IsNull() ) 
       aPrinter->Send ( theString, theGravity, putEndl );
   }

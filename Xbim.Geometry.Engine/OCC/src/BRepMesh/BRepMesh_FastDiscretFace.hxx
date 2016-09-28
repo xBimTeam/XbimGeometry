@@ -62,15 +62,14 @@ public:
 
   Standard_EXPORT void Perform(const Handle(BRepMesh_FaceAttribute)& theAttribute);
 
-  DEFINE_STANDARD_RTTI(BRepMesh_FastDiscretFace, Standard_Transient)
+  DEFINE_STANDARD_RTTIEXT(BRepMesh_FastDiscretFace,Standard_Transient)
 
 private:
 
   void add(const Handle(BRepMesh_FaceAttribute)& theAttribute);
   void add(const TopoDS_Vertex& theVertex);
 
-  Standard_Real control(BRepMesh::ListOfVertex&  theNewVertices,
-                        BRepMesh_Delaun&         theMeshBuilder,
+  Standard_Real control(BRepMesh_Delaun&         theMeshBuilder,
                         const Standard_Boolean   theIsFirst);
 
   //! Registers the given nodes in mesh data structure and
@@ -84,11 +83,9 @@ private:
     BRepMesh_Delaun&              theMeshBuilder);
 
   //! Calculates nodes lying on face's surface and inserts them to a mesh.
-  //! @param theNewVertices list of vertices to be extended and added to mesh.
   //! @param theMeshBuilder initialized tool refining mesh 
   //! in respect to inserting nodes.
-  void insertInternalVertices(BRepMesh::ListOfVertex&  theNewVertices,
-                              BRepMesh_Delaun&         theMeshBuilder);
+  void insertInternalVertices(BRepMesh_Delaun&         theMeshBuilder);
 
   //! Calculates nodes lying on spherical surface.
   //! @param theNewVertices list of vertices to be extended and added to mesh.
@@ -105,10 +102,6 @@ private:
   //! Calculates nodes lying on toroidal surface.
   //! @param theNewVertices list of vertices to be extended and added to mesh.
   void insertInternalVerticesTorus(BRepMesh::ListOfVertex& theNewVertices);
-
-  //! Calculates nodes lying on Bezier/BSpline surface.
-  //! @param theNewVertices list of vertices to be extended and added to mesh.
-  void insertInternalVerticesBSpline(BRepMesh::ListOfVertex& theNewVertices);
 
   //! Calculates nodes lying on custom-type surface.
   //! @param theNewVertices list of vertices to be extended and added to mesh.
@@ -178,7 +171,8 @@ private:
     const Standard_Real        theFaceDeflection,
     const BRepMesh_CircleTool& theCircleTool,
     BRepMesh::ListOfVertex&    theVertices,
-    Standard_Real&             theMaxTriangleDeflection);
+    Standard_Real&             theMaxTriangleDeflection,
+    const Handle(NCollection_IncAllocator)& theTempAlloc);
 
 private:
 

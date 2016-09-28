@@ -77,7 +77,8 @@ void BVH_QueueBuilder<T, N>::AddChildren (BVH_Tree<T, N>*                       
 
     theBVH->Level (aChildIndex) = theBVH->Level (theNode) + 1;
 
-    (anIdx == 0 ? theBVH->LeftChild (theNode) : theBVH->RightChild (theNode)) = aChildIndex;
+    (anIdx == 0 ? theBVH->template Child<0> (theNode)
+                : theBVH->template Child<1> (theNode)) = aChildIndex;
 
     // Check to see if the child node must be split
     const Standard_Boolean isLeaf = theSubNodes.NbPrims (anIdx) <= BVH_Builder<T, N>::myLeafNodeSize
@@ -103,12 +104,13 @@ void BVH_QueueBuilder<T, N>::Build (BVH_Set<T, N>*       theSet,
     "Error! BVH tree to construct is NULL", );
 
   theBVH->Clear();
-  if (theSet->Size() == 0)
+  const Standard_Integer aSetSize = theSet->Size();
+  if (aSetSize == 0)
   {
     return;
   }
 
-  const Standard_Integer aRoot = theBVH->AddLeafNode (theBox, 0, theSet->Size() - 1);
+  const Standard_Integer aRoot = theBVH->AddLeafNode (theBox, 0, aSetSize - 1);
   if (theSet->Size() == 1)
   {
     return;
@@ -121,7 +123,7 @@ void BVH_QueueBuilder<T, N>::Build (BVH_Set<T, N>*       theSet,
   if (myNumOfThreads > 1)
   {
     // Reserve the maximum possible number of nodes in the BVH
-    theBVH->Reserve (2 * theSet->Size() - 1);
+    theBVH->Reserve (2 * aSetSize - 1);
 
     NCollection_Vector<Handle(BVH_BuildThread)> aThreads;
 

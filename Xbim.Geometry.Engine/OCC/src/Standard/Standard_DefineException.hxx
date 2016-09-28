@@ -29,7 +29,7 @@
 #define DEFINE_STANDARD_EXCEPTION(C1,C2) \
  \
 class C1 : public C2 { \
-  void Throw () const { throw *this; } \
+  void Throw () const Standard_OVERRIDE { throw *this; } \
 public: \
   C1() : C2() {} \
   C1(const Standard_CString theMessage) : C2(theMessage) {} \
@@ -42,7 +42,7 @@ public: \
     _E->Reraise (theMessage); \
   } \
   static Handle(C1) NewInstance(const Standard_CString theMessage = "") { return new C1(theMessage); } \
-  DEFINE_STANDARD_RTTI(C1,C2) \
+  DEFINE_STANDARD_RTTI_INLINE(C1,C2) \
 };
 
 //! Obsolete macro, kept for compatibility with old code

@@ -48,7 +48,7 @@
 #include <DrawTrSurf.hxx>
 #endif
 #ifdef OCCT_DEBUG
-static Standard_Boolean AffichValue = Standard_False;
+//static Standard_Boolean AffichValue = Standard_False;
 #endif    
 
 //=======================================================================
@@ -225,8 +225,28 @@ static void Function_SetUVBounds(Standard_Real& myU1,
   switch ( mySurface->GetType()) {
 
     case GeomAbs_Cone:    {
+      Standard_Real tol = Epsilon(1.);
+      Standard_Real ptol = Precision::PConfusion();
       gp_Cone Cone = mySurface->Cone();
       VCouture = Standard_False;
+      //Calculation of cone parameters for P == ConeApex often produces wrong
+      //values of U
+      gp_Pnt ConeApex = Cone.Apex();
+      if(ConeApex.XYZ().IsEqual(P1.XYZ(), tol))
+      {
+        W1 += ptol;
+        P1 = myCurve->Value(W1);
+      }
+      if(ConeApex.XYZ().IsEqual(P2.XYZ(), tol))
+      {
+        W2 -= ptol;
+        P2 = myCurve->Value(W2);
+      }
+      if(ConeApex.XYZ().IsEqual(P.XYZ(), tol))
+      {
+        W += ptol;
+        P = myCurve->Value(W);
+      }
 
       switch( myCurve->GetType() ){
       case GeomAbs_Parabola:
@@ -255,26 +275,54 @@ static void Function_SetUVBounds(Standard_Real& myU1,
         myU1 = U1; myU2 = U1; Uf = U1; 
         Standard_Real Step = .1;
         Standard_Integer nbp = (Standard_Integer)((W2 - W1) / Step + 1);
+        if(myCurve->GetType() == GeomAbs_Line)
+        {
+          nbp = 3;
+        }
         nbp = Max(nbp, 3);
         Step = (W2 - W1) / (nbp - 1);
         Standard_Boolean isclandper = (!(myCurve->IsClosed()) && !(myCurve->IsPeriodic()));
-        for(Standard_Real par = W1 + Step; par <= W2; par += Step) {
+        Standard_Boolean isFirst = Standard_True;
+        for(Standard_Real par = W1 + Step; par <= W2; par += Step)
+        {
           if(!isclandper) par += Step;
           P = myCurve->Value(par);
           ElSLib::Parameters( Cone, P, U, V);
           U += Delta;
           d = U - U1;
-          if(d > M_PI)  {
+          if(d > M_PI)
+          {
             if( ( (IsEqual(U,(2*M_PI),1.e-10) && (U1 >= 0. && U1 <= M_PI)) && 
-              (IsEqual(U,Ul,1.e-10) && !IsEqual(Uf,0.,1.e-10)) ) && isclandper ) U = 0.;
-            else Delta -= 2*M_PI;
+              (IsEqual(U,Ul,1.e-10) && !IsEqual(Uf,0.,1.e-10)) ) && isclandper )
+              U = 0.0;
+            else
+            {
+              // Protection against first-last point on seam.
+              if (isFirst)
+                U1 = 2*M_PI;
+              else if (par + Step >= W2)
+                U = 0.0;
+              else
+                Delta -= 2*M_PI;
+            }
             U += Delta;
             d = U - U1;
           }
-          else if(d < -M_PI)	  {
+          else if(d < -M_PI)
+          {
             if( ( (IsEqual(U,0.,1.e-10) && (U1 >= M_PI && U1 <= (2*M_PI))) &&
-              (IsEqual(U,Ul,1.e-10) && !IsEqual(Uf,(2*M_PI),1.e-10)) ) && isclandper ) U = 2*M_PI;
-            else Delta += 2*M_PI;
+              (IsEqual(U,Ul,1.e-10) && !IsEqual(Uf,(2*M_PI),1.e-10)) ) && isclandper )
+              U = 2*M_PI;
+            else
+            {
+              // Protection against first-last point on seam.
+              if (isFirst)
+                U1 = 0.0;
+              else if (par + Step >= W2)
+                U = 2*M_PI;
+              else
+                Delta += 2*M_PI;
+            }
             U += Delta;
             d = U - U1;
           }
@@ -282,7 +330,8 @@ static void Function_SetUVBounds(Standard_Real& myU1,
           if(U < myU1) {myU1 = U; pmin = par;}
           if(U > myU2) {myU2 = U; pmax = par;}
           U1 = U;
-        }
+          isFirst = Standard_False;
+        } // for(Standard_Real par = W1 + Step; par <= W2; par += Step)
 
         if(!(Abs(pmin - W1) <= Precision::PConfusion() || Abs(pmin - W2) <= Precision::PConfusion()) ) myU1 -= dmax*.5;
         if(!(Abs(pmax - W1) <= Precision::PConfusion() || Abs(pmax - W2) <= Precision::PConfusion()) ) myU2 += dmax*.5;
@@ -845,6 +894,40 @@ class ProjLib_Function : public AppCont_Function
 };
 
 //=======================================================================
+//function : ComputeTolU
+//purpose  : 
+//=======================================================================
+
+static Standard_Real ComputeTolU(const Handle(Adaptor3d_HSurface)& theSurf,
+                                 const Standard_Real theTolerance)
+{
+  Standard_Real aTolU = theSurf->UResolution(theTolerance);
+  if (theSurf->IsUPeriodic())
+  {
+    aTolU = Min(aTolU, 0.01*theSurf->UPeriod());
+  }
+
+  return aTolU;
+}
+
+//=======================================================================
+//function : ComputeTolV
+//purpose  : 
+//=======================================================================
+
+static Standard_Real ComputeTolV(const Handle(Adaptor3d_HSurface)& theSurf,
+                                 const Standard_Real theTolerance)
+{
+  Standard_Real aTolV = theSurf->VResolution(theTolerance);
+  if (theSurf->IsVPeriodic())
+  {
+    aTolV = Min(aTolV, 0.01*theSurf->VPeriod());
+  }
+
+  return aTolV;
+}
+
+//=======================================================================
 //function : ProjLib_ComputeApprox
 //purpose  : 
 //=======================================================================
@@ -868,6 +951,7 @@ ProjLib_ComputeApprox::ProjLib_ComputeApprox
 
   Standard_Boolean CurvIsAnal = (CType != GeomAbs_BSplineCurve) &&
                                 (CType != GeomAbs_BezierCurve)  &&
+                                (CType != GeomAbs_OffsetCurve)  &&
                                 (CType != GeomAbs_OtherCurve)     ;
 
   Standard_Boolean simplecase = SurfIsAnal && CurvIsAnal;
@@ -981,8 +1065,13 @@ ProjLib_ComputeApprox::ProjLib_ComputeApprox
       Deg2 = 12; 
     }
 //-------------
-    Approx_FitAndDivide2d Fit(F,Deg1,Deg2,myTolerance,myTolerance,
-			      Standard_True);
+    const Standard_Real aTolU = ComputeTolU(S, myTolerance);
+    const Standard_Real aTolV = ComputeTolV(S, myTolerance);
+    const Standard_Real aTol2d = Max(Sqrt(aTolU*aTolU + aTolV*aTolV), Precision::PConfusion());
+
+    Approx_FitAndDivide2d Fit(F, Deg1, Deg2, myTolerance, aTol2d, Standard_True);
+
+    Standard_Real aNewTol2d = 0;
     if(Fit.IsAllApproximated()) {
       Standard_Integer i;
       Standard_Integer NbCurves = Fit.NbMultiCurves();
@@ -990,11 +1079,10 @@ ProjLib_ComputeApprox::ProjLib_ComputeApprox
     // on essaie de rendre la courbe au moins C1
       Convert_CompBezierCurves2dToBSplineCurve2d Conv;
 
-      myTolerance = 0;
       Standard_Real Tol3d,Tol2d;
       for (i = 1; i <= NbCurves; i++) {
 	      Fit.Error(i,Tol3d, Tol2d);
-	      myTolerance = Max(myTolerance, Tol2d);
+              aNewTol2d = Max(aNewTol2d, Tol2d);
 	      AppParCurves_MultiCurve MC = Fit.Value( i);       //Charge la Ieme Curve
 	      TColgp_Array1OfPnt2d Poles2d( 1, MC.Degree() + 1);//Recupere les poles
 	      MC.Curve(1, Poles2d);
@@ -1045,9 +1133,18 @@ ProjLib_ComputeApprox::ProjLib_ComputeApprox
       if(NbCurves != 0) {
 	      Standard_Real Tol3d,Tol2d;
 	      Fit.Error(NbCurves,Tol3d, Tol2d);
-	      myTolerance = Tol2d;
+              aNewTol2d = Tol2d;
       }
     }
+
+    // restore tolerance 3d from 2d
+
+    //Here we consider that 
+    //   aTolU(new)/aTolV(new) = aTolU(old)/aTolV(old)
+    //(it is assumption indeed).
+    //Then,
+    //  Tol3D(new)/Tol3D(old) = Tol2D(new)/Tol2D(old).
+    myTolerance *= (aNewTol2d / aTol2d);
 
     //Return curve home
     Standard_Real UFirst = F.FirstParameter();

@@ -57,6 +57,8 @@
 #include <TopTools_Array1OfShape.hxx>
 
 #include <stdio.h>
+IMPLEMENT_STANDARD_RTTIEXT(BRepFill_NSections,BRepFill_SectionLaw)
+
 #ifdef OCCT_DEBUG
 static Standard_Boolean Affich = 0;
 #endif
@@ -110,8 +112,8 @@ static Handle(Geom_BSplineCurve) EdgeToBSpline (const TopoDS_Edge& theEdge)
     // special treatment of conic curve
     if (aTrimCurve->BasisCurve()->IsKind(STANDARD_TYPE(Geom_Conic)))
     {
-      const Handle(Geom_Curve)& aCurve = aTrimCurve; // to avoid ambiguity
-      GeomConvert_ApproxCurve anAppr (aCurve, Precision::Confusion(), GeomAbs_C1, 16, 14);
+      const Handle(Geom_Curve)& aCurveTemp = aTrimCurve; // to avoid ambiguity
+      GeomConvert_ApproxCurve anAppr (aCurveTemp, Precision::Confusion(), GeomAbs_C1, 16, 14);
       if (anAppr.HasResult())
         aBSCurve = anAppr.Curve();
     }
@@ -358,6 +360,7 @@ BRepFill_NSections::BRepFill_NSections(const TopTools_SequenceOfShape& S,
   }
   myParams = par;
   Init(par,Build);
+  myDone = Standard_True;
 }
 
 //=======================================================================
@@ -397,7 +400,10 @@ BRepFill_NSections::BRepFill_NSections(const TopTools_SequenceOfShape& S,
     VFirst = VF;
     VLast = VL;
     Init(P,Build);
+    myDone = Standard_True;
   }
+  else
+    myDone = Standard_False;
 }
 
 //=======================================================================

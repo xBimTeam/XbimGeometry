@@ -1,7 +1,8 @@
 #include "XbimVertex.h"
-#include "XbimGeomPrim.h"
+#include "XbimConvert.h"
 #include <BRep_Builder.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
+#include <BRepBuilderAPI_GTransform.hxx>
 #include <TopoDS.hxx>
 using namespace System;
 namespace Xbim
@@ -28,7 +29,33 @@ namespace Xbim
 			b.MakeVertex(*pVertex);
 		};
 
+		XbimVertex::XbimVertex(const TopoDS_Vertex& vertex, Object^ tag) :XbimVertex(vertex)
+		{
+			Tag = tag;
+		}
 
+		XbimVertex::XbimVertex(IIfcCartesianPoint^ vertex)
+		{
+			pVertex = new TopoDS_Vertex();
+			BRep_Builder b;
+			gp_Pnt pnt(vertex->X, vertex->Y, vertex->Z);
+			b.MakeVertex(*pVertex, pnt, vertex->Model->ModelFactors->Precision);
+		}
+
+		XbimVertex::XbimVertex(double x, double y, double z, double precision)
+		{
+			pVertex = new TopoDS_Vertex();
+			BRep_Builder b;
+			gp_Pnt pnt(x, y, z);
+			b.MakeVertex(*pVertex, pnt, precision);
+		}
+		XbimVertex::XbimVertex(XbimPoint3DWithTolerance^ point3D)
+		{
+			pVertex = new TopoDS_Vertex();
+			BRep_Builder b;
+			gp_Pnt pnt(point3D->X, point3D->Y, point3D->Z);
+			b.MakeVertex(*pVertex, pnt, point3D->Tolerance);
+		}
 
 		XbimVertex::XbimVertex(XbimPoint3D point3D, double precision)
 		{
@@ -61,27 +88,61 @@ namespace Xbim
 		IXbimGeometryObject^ XbimVertex::Transform(XbimMatrix3D matrix3D)
 		{
 			BRepBuilderAPI_Copy copier(this);
-			BRepBuilderAPI_Transform gTran(copier.Shape(), XbimGeomPrim::ToTransform(matrix3D));
+			BRepBuilderAPI_Transform gTran(copier.Shape(), XbimConvert::ToTransform(matrix3D));
 			TopoDS_Vertex temp = TopoDS::Vertex(gTran.Shape());
 			return gcnew XbimVertex(temp);
 		}
 		
 		IXbimGeometryObject^ XbimVertex::TransformShallow(XbimMatrix3D matrix3D)
 		{
-			TopoDS_Vertex vertex = TopoDS::Vertex(pVertex->Moved(XbimGeomPrim::ToTransform(matrix3D)));
+			TopoDS_Vertex vertex = TopoDS::Vertex(pVertex->Moved(XbimConvert::ToTransform(matrix3D)));
 			GC::KeepAlive(this);			
 			return gcnew XbimVertex(vertex);
 		}
 
-#ifdef USE_CARVE_CSG
-		XbimVertex::XbimVertex(vertex_t* v, double precision)
+
+		XbimGeometryObject ^ XbimVertex::Transformed(IIfcCartesianTransformationOperator ^ transformation)
 		{
-			pVertex = new TopoDS_Vertex();
-			BRep_Builder b;
-			gp_Pnt pnt(v->v.x, v->v.y, v->v.z);
-			b.MakeVertex(*pVertex, pnt, precision);
+			IIfcCartesianTransformationOperator3DnonUniform^ nonUniform = dynamic_cast<IIfcCartesianTransformationOperator3DnonUniform^>(transformation);			
+			if (nonUniform != nullptr)
+			{
+				gp_GTrsf trans = XbimConvert::ToTransform(nonUniform);
+				BRepBuilderAPI_GTransform tr(this, trans, Standard_True); //make a copy of underlying shape
+				return gcnew XbimVertex(TopoDS::Vertex(tr.Shape()), Tag);
+			}
+			else
+			{
+				gp_Trsf trans = XbimConvert::ToTransform(transformation);
+				BRepBuilderAPI_Transform tr(this, trans, Standard_False); //do not make a copy of underlying shape
+				return gcnew XbimVertex(TopoDS::Vertex(tr.Shape()), Tag);
+			}
 		}
-#endif // USE_CARVE_CSG
+		void XbimVertex::Move(TopLoc_Location loc)
+		{
+			if (IsValid) pVertex->Move(loc);
+		}
+		XbimGeometryObject ^ XbimVertex::Moved(IIfcPlacement ^ placement)
+		{
+			if (!IsValid) return this;
+			XbimVertex^ copy = gcnew XbimVertex(this, Tag); //take a copy of the shape
+			TopLoc_Location loc = XbimConvert::ToLocation(placement);
+			copy->Move(loc);
+			return copy;
+		}
+
+		XbimGeometryObject ^ XbimVertex::Moved(IIfcObjectPlacement ^ objectPlacement)
+		{
+			if (!IsValid) return this;			
+			XbimVertex^ copy = gcnew XbimVertex(this, Tag); //take a copy of the shape
+			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
+			copy->Move(loc);
+			return copy;
+		}
+
+		void XbimVertex::Mesh(IXbimMeshReceiver ^ mesh, double precision, double deflection, double angle)
+		{
+			return;//maybe add an implementation for this
+		}
 
 #pragma endregion
 

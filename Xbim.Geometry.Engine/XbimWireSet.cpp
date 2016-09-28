@@ -1,4 +1,5 @@
 #include "XbimWireSet.h"
+#include "XbimConvert.h"
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <TopExp.hxx>
@@ -52,6 +53,48 @@ namespace Xbim
 				result->Add((IXbimWire^)((XbimWire^)wire)->TransformShallow(matrix3D));
 			}
 			return gcnew XbimWireSet(result);
+		}
+
+		IXbimGeometryObject ^ XbimWireSet::Transformed(IIfcCartesianTransformationOperator ^ transformation)
+		{
+			if (!IsValid) return this;
+			XbimWireSet^ result = gcnew XbimWireSet();
+			for each (XbimWire^ wire in wires)
+				result->Add((XbimWire^)wire->Transformed(transformation));
+			return result;
+		}
+
+		IXbimGeometryObject ^ XbimWireSet::Moved(IIfcPlacement ^ placement)
+		{
+			if (!IsValid) return this;
+			XbimWireSet^ result = gcnew XbimWireSet();
+			TopLoc_Location loc = XbimConvert::ToLocation(placement);
+			for each (IXbimFace^ wire in wires)
+			{
+				XbimWire^ copy = gcnew XbimWire((XbimWire^)wire, Tag);
+				copy->Move(loc);
+				result->Add(copy);
+			}
+			return result;
+		}
+
+		IXbimGeometryObject ^ XbimWireSet::Moved(IIfcObjectPlacement ^ objectPlacement)
+		{
+			if (!IsValid) return this;
+			XbimWireSet^ result = gcnew XbimWireSet();
+			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
+			for each (IXbimFace^ wire in wires)
+			{
+				XbimWire^ copy = gcnew XbimWire((XbimWire^)wire, Tag);
+				copy->Move(loc);
+				result->Add(copy);
+			}
+			return result;
+		}
+
+		void XbimWireSet::Mesh(IXbimMeshReceiver ^ mesh, double precision, double deflection, double angle)
+		{
+			return;//maybe add an implementation for this
 		}
 
 		XbimRect3D XbimWireSet::BoundingBox::get()

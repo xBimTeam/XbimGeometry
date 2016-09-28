@@ -1,14 +1,11 @@
-﻿using System;
-using System.IO;
-using System.Runtime.InteropServices;
+﻿using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Xbim.Common.Geometry;
 using Xbim.Common.XbimExtensions;
-using Xbim.IO;
+using Xbim.Ifc;
 using Xbim.ModelGeometry.Scene;
-using XbimGeometry.Interfaces;
 
-namespace GeometryTests
+namespace Ifc4GeometryTests
 {
     [DeploymentItem(@"x64\", "x64")]
     [DeploymentItem(@"x86\", "x86")]
@@ -31,14 +28,13 @@ namespace GeometryTests
         private static void WriteWexBim(string fnameIn)
         {
             var fNameOut = Path.ChangeExtension(fnameIn, "wexbim");
-            using (var m = new XbimModel())
-            {
-                m.CreateFrom(fnameIn, null, null, true, true);
+            using (var m = IfcStore.Open(fnameIn))
+            {            
                 var m3D = new Xbim3DModelContext(m);
-                m3D.CreateContext(XbimGeometryType.PolyhedronBinary);
+                m3D.CreateContext();
                 using (var bw = new BinaryWriter(new FileStream(fNameOut, FileMode.Create)))
                 {
-                    m3D.Write(bw);
+                    m.SaveAsWexBim(bw);
                     bw.Close();
                 }
             }
@@ -50,14 +46,14 @@ namespace GeometryTests
         [TestMethod]
         public void ReadAndWriteWexBimFile()
         {
-            using (var m = new XbimModel())
+            using (var m = IfcStore.Open("SolidTestFiles\\19 - TwoProxy.ifc"))
             {
-                m.CreateFrom("SolidTestFiles\\19 - TwoProxy.ifc", null, null, true, true);
+                
                 var m3D = new Xbim3DModelContext(m);
-                m3D.CreateContext(XbimGeometryType.PolyhedronBinary);
+                m3D.CreateContext();
                 using (var bw = new BinaryWriter(new FileStream("test.wexBIM", FileMode.Create)))
                 {
-                    m3D.Write(bw);
+                    m.SaveAsWexBim(bw);
                     bw.Close();
                 }
                 using (var fs = new FileStream(@"test.wexBIM", FileMode.Open, FileAccess.Read))

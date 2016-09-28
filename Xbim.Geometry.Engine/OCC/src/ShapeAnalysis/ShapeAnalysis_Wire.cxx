@@ -87,6 +87,8 @@
 #include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <TopTools_ListOfShape.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(ShapeAnalysis_Wire,MMgt_TShared)
+
 //szvsh addition
 //=======================================================================
 //function : ShapeAnalysis_Wire
@@ -1714,8 +1716,7 @@ Standard_Boolean ShapeAnalysis_Wire::CheckNotchedEdges(const Standard_Integer nu
 //function : CheckSmallArea
 //purpose  : 
 //=======================================================================
-Standard_Boolean ShapeAnalysis_Wire::CheckSmallArea(const TopoDS_Wire& theWire,
-                                                    const Standard_Boolean theIsOuterWire)
+Standard_Boolean ShapeAnalysis_Wire::CheckSmallArea(const TopoDS_Wire& theWire)
 {
   myStatus = ShapeExtend::EncodeStatus (ShapeExtend_FAIL1);
   const Standard_Integer aNbControl = 23;
@@ -1791,20 +1792,13 @@ Standard_Boolean ShapeAnalysis_Wire::CheckSmallArea(const TopoDS_Wire& theWire,
     // check real area in 3D
     GProp_GProps aProps;
     GProp_GProps aLProps;
-    if (theIsOuterWire)
-    {
-      BRepGProp::SurfaceProperties(myFace, aProps);
-      BRepGProp::LinearProperties(myFace, aLProps);
-    }
-    else
-    {
-      BRepBuilderAPI_MakeFace aFace(mySurf->Surface(), theWire);
-      BRepGProp::SurfaceProperties(aFace.Face(), aProps);
-      BRepGProp::LinearProperties(aFace.Face(), aLProps);
-    }
+    TopoDS_Face aFace = TopoDS::Face(myFace.EmptyCopied());
+    BRep_Builder().Add(aFace, theWire);
+    BRepGProp::SurfaceProperties(aFace, aProps);
+    BRepGProp::LinearProperties(aFace, aLProps);
 
     Standard_Real aNewTolerance = aLProps.Mass() * myPrecision;
-    if ( aProps.Mass() < 0.5 * aNewTolerance )
+    if ( Abs(aProps.Mass()) < 0.5 * aNewTolerance )
     {
       myStatus = ShapeExtend::EncodeStatus (ShapeExtend_DONE1);
       return Standard_True;

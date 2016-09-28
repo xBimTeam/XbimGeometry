@@ -38,8 +38,7 @@ public:
   
   Standard_EXPORT TopOpeBRepBuild_LoopSet();
   
-  Standard_EXPORT virtual void Delete();
-Standard_EXPORT virtual ~TopOpeBRepBuild_LoopSet(){Delete() ; }
+  Standard_EXPORT virtual ~TopOpeBRepBuild_LoopSet();
   
   Standard_EXPORT TopOpeBRepBuild_ListOfLoop& ChangeListOfLoop();
   
@@ -49,7 +48,7 @@ Standard_EXPORT virtual ~TopOpeBRepBuild_LoopSet(){Delete() ; }
   
   Standard_EXPORT virtual void NextLoop();
   
-  Standard_EXPORT virtual const Handle(TopOpeBRepBuild_Loop)& Loop() const;
+  Standard_EXPORT virtual Handle(TopOpeBRepBuild_Loop) Loop() const;
 
 
 

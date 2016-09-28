@@ -1,8 +1,7 @@
 #pragma once
 #include "XbimGeometryObject.h"
 using namespace Xbim::Common::Geometry;
-using namespace XbimGeometry::Interfaces;
-using namespace Xbim::Ifc2x3::GeometryResource;
+using namespace Xbim::Ifc4::Interfaces;
 namespace Xbim
 {
 	namespace Geometry
@@ -23,8 +22,8 @@ namespace Xbim
 			XbimPoint3DWithTolerance(double x, double y, double z, double tolerance);
 			XbimPoint3DWithTolerance(XbimPoint3D point, double t);
 			XbimPoint3DWithTolerance(IXbimPoint^ point);
-			XbimPoint3DWithTolerance(IfcPointOnCurve^ point);
-			XbimPoint3DWithTolerance(IfcPointOnSurface^ point);
+			XbimPoint3DWithTolerance(IIfcPointOnCurve^ point);
+			XbimPoint3DWithTolerance(IIfcPointOnSurface^ point);
 #pragma region Interface Overrides
 			virtual property bool IsValid{bool get() { return true; }; }
 			virtual property bool IsSet{bool get() { return false; }; }
@@ -38,6 +37,7 @@ namespace Xbim
 			virtual property XbimRect3D BoundingBox {XbimRect3D get(); }
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D);
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D);
+			virtual property String^  ToBRep{String^ get(); }
 #pragma endregion
 
 #pragma region Equality Overrides
@@ -48,6 +48,9 @@ namespace Xbim
 			virtual bool Equals(IXbimPoint^ p);
 			virtual bool Equals(IXbimVertex^ v);
 #pragma endregion
+
+			// Inherited via IXbimPoint
+			virtual property Object^  Tag {Object^ get() { return nullptr; }; void set(Object^ value) { throw gcnew Exception("XbimPoint3DWithTolerance does not support Tag setting"); }; }
 		};
 	}
 }

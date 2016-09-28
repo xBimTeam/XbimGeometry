@@ -3,6 +3,7 @@
 #include "XbimSolidSet.h"
 #include "XbimGeometryCreator.h"
 #include "XbimGeometryObjectSet.h"
+#include "XbimConvert.h"
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <TopExp.hxx>
 #include <BRepAlgoAPI_Cut.hxx>
@@ -123,6 +124,51 @@ namespace Xbim
 
 		void XbimShellSet::Union(double tolerance)
 		{
+		}
+
+		IXbimGeometryObject ^ XbimShellSet::Transformed(IIfcCartesianTransformationOperator ^ transformation)
+		{
+			if (!IsValid) return this;
+			XbimShellSet^ result = gcnew XbimShellSet();
+			for each (XbimShell^ shell in shells)
+				result->Add((XbimShell^)shell->Transformed(transformation));
+			return result;
+		}
+
+		IXbimGeometryObject ^ XbimShellSet::Moved(IIfcPlacement ^ placement)
+		{
+			if (!IsValid) return this;
+			XbimShellSet^ result = gcnew XbimShellSet();
+			TopLoc_Location loc = XbimConvert::ToLocation(placement);
+			for each (IXbimShell^ shell in shells)
+			{
+				XbimShell^ copy = gcnew XbimShell((XbimShell^)shell, Tag);
+				copy->Move(loc);
+				result->Add(copy);
+			}
+			return result;
+		}
+
+		IXbimGeometryObject ^ XbimShellSet::Moved(IIfcObjectPlacement ^ objectPlacement)
+		{
+			if (!IsValid) return this;
+			XbimShellSet^ result = gcnew XbimShellSet();
+			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
+			for each (IXbimShell^ shell in shells)
+			{
+				XbimShell^ copy = gcnew XbimShell((XbimShell^)shell, Tag);
+				copy->Move(loc);
+				result->Add(copy);
+			}
+			return result;
+		}
+
+		void XbimShellSet::Mesh(IXbimMeshReceiver ^ mesh, double precision, double deflection, double angle)
+		{
+			for each (IXbimShell^ shell  in shells)
+			{
+				((XbimShell^)shell)->Mesh(mesh, precision, deflection, angle);
+			}
 		}
 
 		IXbimGeometryObjectSet^ XbimShellSet::Union(IXbimSolid^ solid, double tolerance)

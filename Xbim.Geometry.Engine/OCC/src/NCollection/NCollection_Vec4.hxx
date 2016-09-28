@@ -80,19 +80,6 @@ public:
     v[3] = theAlpha;
   }
 
-  //! Copy constructor.
-  NCollection_Vec4 (const NCollection_Vec4& theVec4)
-  {
-    std::memcpy (this, &theVec4, sizeof(NCollection_Vec4));
-  }
-
-  //! Assignment operator.
-  const NCollection_Vec4& operator= (const NCollection_Vec4& theVec4)
-  {
-    std::memcpy (this, &theVec4, sizeof(NCollection_Vec4));
-    return *this;
-  }
-
   //! Alias to 1st component as X coordinate in XYZW.
   Element_t x() const { return v[0]; }
 
@@ -327,6 +314,15 @@ public:
     const Element_t aMin2 = v[2] < v[3] ? v[2] : v[3];
 
     return aMin1 < aMin2 ? aMin1 : aMin2;
+  }
+
+  //! Computes the dot product.
+  Element_t Dot (const NCollection_Vec4& theOther) const
+  {
+    return x() * theOther.x() +
+           y() * theOther.y() +
+           z() * theOther.z() +
+           w() * theOther.w();
   }
 
   //! Compute per-component division by scale factor.

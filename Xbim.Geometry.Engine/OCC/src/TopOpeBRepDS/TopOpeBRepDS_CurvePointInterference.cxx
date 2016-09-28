@@ -19,6 +19,8 @@
 #include <TopOpeBRepDS_CurvePointInterference.hxx>
 #include <TopOpeBRepDS_Transition.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(TopOpeBRepDS_CurvePointInterference,TopOpeBRepDS_Interference)
+
 //=======================================================================
 //function : TopOpeBRepDS_CurvePointInterference
 //purpose  : 
@@ -55,26 +57,4 @@ Standard_Real  TopOpeBRepDS_CurvePointInterference::Parameter()const
 void  TopOpeBRepDS_CurvePointInterference::Parameter(const Standard_Real P)
 {
   myParam = P;
-}
-
-
-//=======================================================================
-//function : Dump
-//purpose  : 
-//=======================================================================
-
-Standard_OStream& TopOpeBRepDS_CurvePointInterference::Dump
-  (Standard_OStream& OS) const
-{
-#ifdef OCCT_DEBUG
-  TopOpeBRepDS_Kind supporttype = SupportType();
-  if      (supporttype == TopOpeBRepDS_EDGE)  OS<<"EPI";
-  else if (supporttype == TopOpeBRepDS_CURVE) OS<<"CPI";
-  else if (supporttype == TopOpeBRepDS_FACE)  OS<<"ECPI";
-  else                                        OS<<"???";
-  OS<<" "; TopOpeBRepDS_Interference::Dump(OS);
-  OS<<" "<<myParam; 
-#endif
-
-  return OS;
 }

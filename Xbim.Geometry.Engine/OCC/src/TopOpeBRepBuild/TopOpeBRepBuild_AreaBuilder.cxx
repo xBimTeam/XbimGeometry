@@ -27,10 +27,6 @@
 #include <TopOpeBRepBuild_LoopClassifier.hxx>
 #include <TopOpeBRepBuild_LoopSet.hxx>
 
-#ifdef OCCT_DEBUG
-extern Standard_Boolean TopOpeBRepDS_GettraceSTRANGE();
-#endif
-
 //=======================================================================
 //function : TopOpeBRepBuild_AreaBuilder
 //purpose  : 
@@ -55,7 +51,7 @@ myUNKNOWNRaise(Standard_False) // no raise if UNKNOWN state found
   InitAreaBuilder(LS,LC,ForceClass);
 }
 
-void TopOpeBRepBuild_AreaBuilder::Delete()
+TopOpeBRepBuild_AreaBuilder::~TopOpeBRepBuild_AreaBuilder()
 {}
 
 //=======================================================================
@@ -115,12 +111,6 @@ void TopOpeBRepBuild_AreaBuilder::Atomize(TopAbs_State& state,
 				  "AreaBuilder : Position Unknown");
   }
   else {
-#ifdef OCCT_DEBUG
-    if ( TopOpeBRepDS_GettraceSTRANGE() ) { 
-      cout<<"AreaBuilder : state "; TopAbs::Print(state,cout);
-      cout<<" taken as "; TopAbs::Print(newstate,cout); cout<<endl;
-    }
-#endif
     state = newstate;
   }
 }

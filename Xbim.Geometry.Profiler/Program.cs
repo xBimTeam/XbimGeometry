@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using ICSharpCode.SharpZipLib.Core;
+using System.Linq;
+using Xbim.Common;
 using Xbim.Common.Logging;
+using Xbim.Ifc;
 using Xbim.IO;
+using Xbim.IO.Esent;
 using Xbim.ModelGeometry.Scene;
-using Xbim.XbimExtensions;
-using Xbim.XbimExtensions.Interfaces;
-using XbimGeometry.Interfaces;
 
 namespace Xbim.Geometry.Profiler
 {
@@ -16,72 +17,126 @@ namespace Xbim.Geometry.Profiler
     class Program
     {
         internal static readonly ILogger Logger = LoggerFactory.GetLogger();
+
         /// <summary>
         /// Converts an Ifc File to xBIM if it does not already exists, then converts the geoemtry to Xbim format and profiles the results
         /// </summary>
         /// <param name="args"> file[.ifc, xbim]</param>
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             if (args.Length < 1)
             {
                 Console.WriteLine("No Ifc or xBim file specified");
                 return;
             }
-            var fileName = args[0];
-            var mainStopWatch = new Stopwatch();
-            mainStopWatch.Start();
-            using (var model = GetModel(fileName))
+
+            var writeXbim = args.Any(t => t.ToLowerInvariant() == "/keepxbim");
+
+            var writeInInputFolder = args.Any(t => t.ToLowerInvariant() == "/samefolder");
+
+
+
+            // ReSharper disable once LoopCanBePartlyConvertedToQuery
+            foreach (var arg in args)
             {
-                if (model != null)
-                {
-                    var functionStack = new ConcurrentStack<Tuple<string,double>>();
-                    ReportProgressDelegate progDelegate = delegate(int percentProgress, object userState)
-                    {
-                        if (percentProgress == -1)
-                        {
-                            functionStack.Push(new Tuple<string,double>(userState.ToString(), DateTime.Now.TimeOfDay.TotalMilliseconds));
-                            Logger.InfoFormat("Entering - {0}", userState.ToString());
-                        }
-                    
-                        else if (percentProgress == 101)
-                        {
-                            Tuple<string,double> func; 
-                            if(functionStack.TryPop(out func))
-                                Logger.InfoFormat("Complete in \t\t{0:0.0} ms", DateTime.Now.TimeOfDay.TotalMilliseconds - func.Item2);
-                        }
-                    };
-                    var context = new Xbim3DModelContext(model);
-                    context.CreateContext(geomStorageType: XbimGeometryType.PolyhedronBinary, progDelegate: progDelegate);
-
-                    mainStopWatch.Stop();
-                    Logger.InfoFormat("Xbim total Compile Time \t\t{0:0.0} ms", mainStopWatch.ElapsedMilliseconds);
-                    var wexBimFilename = Path.ChangeExtension(fileName, "wexBIM");
-                    using (var wexBiMfile = new FileStream(wexBimFilename, FileMode.Create, FileAccess.Write))
-                    {
-                        using (var wexBimBinaryWriter = new BinaryWriter(wexBiMfile))
-                        {
-                            var stopWatch = new Stopwatch();
-                            Logger.InfoFormat("Entering -  Create wexBIM");
-                            stopWatch.Start();
-                            context.Write(wexBimBinaryWriter);
-                            stopWatch.Stop();
-                            Logger.InfoFormat("Complete - in \t\t{0:0.0} ms", stopWatch.ElapsedMilliseconds);
-                            wexBimBinaryWriter.Close();
-                        }
-                        wexBiMfile.Close();
-                    }
-
-                    model.Close();
-                }
+                if (!arg.StartsWith("/"))
+                    Profile(arg, writeXbim, writeInInputFolder);
             }
+            
             Console.WriteLine("Press any key to exit");
             Console.Read();
         }
 
-        private static XbimModel GetModel(string fileName)
+        private static void Profile(string fileNameInput, bool writeXbim, bool writeInInputFolder)
         {
-            XbimModel openModel = null;
+            var mainStopWatch = new Stopwatch();
+            mainStopWatch.Start();
+
+            var todo = new List<string>();
+
+            if (Directory.Exists(fileNameInput))
+            {
+                todo.AddRange(Directory.EnumerateFiles(fileNameInput, "*.ifc"));
+                if (!writeXbim)
+                    todo.AddRange(Directory.EnumerateFiles(fileNameInput, "*.xbim"));
+            }
+            else if (File.Exists(fileNameInput))
+            {
+                todo.Add(fileNameInput);
+            }   
+
+            foreach (var fileName in todo)
+            {
+                Logger.InfoFormat("Opening \t{0}", fileName);
+                using (var model = GetModel(fileName, writeXbim))
+                {
+                    Logger.InfoFormat("Parse Time \t{0:0.0} ms", mainStopWatch.ElapsedMilliseconds);
+                    if (model != null)
+                    {
+                        var functionStack = new ConcurrentStack<Tuple<string, double>>();
+                        ReportProgressDelegate progDelegate = delegate (int percentProgress, object userState)
+                        {
+                            if (percentProgress == -1)
+                            {
+                                functionStack.Push(new Tuple<string, double>(userState.ToString(),
+                                    DateTime.Now.TimeOfDay.TotalMilliseconds));
+                                Logger.InfoFormat("Entering - {0}", userState.ToString());
+                            }
+                            else if (percentProgress == 101)
+                            {
+                                Tuple<string, double> func;
+                                if (functionStack.TryPop(out func))
+                                    Logger.InfoFormat("Complete in \t{0:0.0} ms",
+                                        DateTime.Now.TimeOfDay.TotalMilliseconds - func.Item2);
+                            }
+                        };
+                        var context = new Xbim3DModelContext(model);
+                        context.CreateContext(progDelegate: progDelegate);
+
+                        mainStopWatch.Stop();
+                        Logger.InfoFormat("Xbim total Compile Time \t{0:0.0} ms", mainStopWatch.ElapsedMilliseconds);
+
+                        var wexBimFilename = Path.ChangeExtension(fileName, "wexBIM");
+                        using (var wexBiMfile = new FileStream(wexBimFilename, FileMode.Create, FileAccess.Write))
+                        {
+                            using (var wexBimBinaryWriter = new BinaryWriter(wexBiMfile))
+                            {
+                                var stopWatch = new Stopwatch();
+                                Logger.InfoFormat("Entering -  Create wexBIM");
+                                stopWatch.Start();
+                                model.SaveAsWexBim(wexBimBinaryWriter);
+
+                                stopWatch.Stop();
+                                Logger.InfoFormat("Complete - in \t{0:0.0} ms", stopWatch.ElapsedMilliseconds);
+                                wexBimBinaryWriter.Close();
+                            }
+                            wexBiMfile.Close();
+                        }
+                        if (writeXbim)
+                        {
+                            string fName;
+                            if (!writeInInputFolder)
+                            {
+                                fName = Path.GetFileNameWithoutExtension(fileName);
+                                fName = Path.ChangeExtension(fName, "xbim");
+                            }
+                            else
+                            {
+                                fName = Path.ChangeExtension(fileName, "xbim");
+                            }
+                            model.SaveAs(fName, IfcStorageType.Xbim);
+                        }
+                        model.Close();
+                    }
+                    Debug.Assert(EsentModel.ModelOpenCount == 0);
+                }
+            }
+        }
+
+
+        private static IfcStore GetModel(string fileName, bool writeXbim)
+        {
             var extension = Path.GetExtension(fileName);
             if (string.IsNullOrWhiteSpace(extension))
             {
@@ -95,43 +150,40 @@ namespace Xbim.Geometry.Profiler
                     fileName = Path.ChangeExtension(fileName, "ifcxml");
             }
 
-            if (File.Exists(fileName))
-            {
+            if (!File.Exists(fileName)) 
+                return null;
                 extension = Path.GetExtension(fileName);
-                if (String.Compare(extension, ".xbim", StringComparison.OrdinalIgnoreCase) == 0) //just open xbim
+            if (string.Compare(extension, ".xbim", StringComparison.OrdinalIgnoreCase) == 0) //just open xbim
                 {
-
                     try
                     {
-                        var model = new XbimModel();
-                        model.Open(fileName, XbimDBAccess.ReadWrite);
-                        //delete any geometry
-                        openModel = model;
+                        return IfcStore.Open(fileName);                      
                     }
                     catch (Exception e)
                     {
-                        Logger.ErrorFormat("Unable to open model {0}, {1}", fileName, e.Message);
-                        Console.WriteLine(String.Format("Unable to open model {0}, {1}", fileName, e.Message));
+                    var message = string.Format("Unable to open model {0}, {1}", fileName, e.Message);
+                    Logger.Error(message, e);
+                    Console.WriteLine(message);
                     }
-
                 }
-                else //we need to create the xBIM file
+                else //we need to create the store
                 {
-                    var model = new XbimModel();
                     try
                     {
-                        model.CreateFrom(fileName, null, null, true);
-                        openModel = model;
+                        double? threshhold=null;
+                        if(writeXbim) threshhold = 0; //otherwise let it do what it needs to based on size
+                       var model = IfcStore.Open(fileName, null, threshhold); 
+                      
+                        return model;
                     }
                     catch (Exception e)
                     {
-                        Logger.ErrorFormat("Unable to open model {0}, {1}", fileName, e.Message);
-                        Console.WriteLine(String.Format("Unable to open model {0}, {1}", fileName, e.Message));
-                    }
-
+                    var message = string.Format("Unable to open model {0}, {1}", fileName, e.Message);
+                    Logger.Error(message, e);
+                    Console.WriteLine(message);
                 }
             }
-            return openModel;
+            return null;
         }
     }
 }

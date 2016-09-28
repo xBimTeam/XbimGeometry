@@ -29,8 +29,12 @@ class BRepMesh_FaceAttribute : public Standard_Transient
 {
 public:
 
-  //! Default constructor.
-  Standard_EXPORT BRepMesh_FaceAttribute();
+  //! Constructor. Initializes empty attribute.
+  //! @param theBoundaryVertices shared map of shape vertices.
+  //! @param theBoundaryPoints shared discretization points of shape boundaries.
+  Standard_EXPORT BRepMesh_FaceAttribute(
+    const BRepMesh::HDMapOfVertexInteger& theBoundaryVertices,
+    const BRepMesh::HDMapOfIntegerPnt&    theBoundaryPoints);
 
   //! Constructor.
   //! @param theFace face the attribute is created for. 
@@ -38,10 +42,13 @@ public:
   //! to the source face with forward orientation.
   //! @param theBoundaryVertices shared map of shape vertices.
   //! @param theBoundaryPoints shared discretization points of shape boundaries.
+  //! @param theAdaptiveMin switches on adaptive computation of minimal parametric
+  //! tolerance (if true).
   Standard_EXPORT BRepMesh_FaceAttribute(
     const TopoDS_Face&                    theFace,
     const BRepMesh::HDMapOfVertexInteger& theBoundaryVertices,
-    const BRepMesh::HDMapOfIntegerPnt&    theBoundaryPoints);
+    const BRepMesh::HDMapOfIntegerPnt&    theBoundaryPoints,
+    const Standard_Boolean                theAdaptiveMin);
 
   //! Destructor.
   Standard_EXPORT virtual ~BRepMesh_FaceAttribute();
@@ -54,11 +61,16 @@ public: //! @name main geometrical properties.
     return mySurface;
   }
 
-  //! Sets reference face.
-  inline void SetFace(const TopoDS_Face& theFace)
+  //! Returns True in case if this attribute has already been intialized.
+  inline Standard_Boolean IsInitialized () const
   {
-    myFace = theFace;
+    return !myFace.IsNull ();
   }
+
+  //! Initializes this attribute by the given face.
+  Standard_EXPORT void SetFace (
+    const TopoDS_Face&     theFace, 
+    const Standard_Boolean theAdaptiveMin);
 
   //! Returns forward oriented face to be used for calculations.
   inline const TopoDS_Face& Face() const
@@ -322,9 +334,12 @@ public: //! @name Auxiliary methods
   Standard_EXPORT gp_XY Scale(const gp_XY&           thePoint2d, 
                               const Standard_Boolean isToFaceBasis);
 
-  DEFINE_STANDARD_RTTI(BRepMesh_FaceAttribute, Standard_Transient)
+  DEFINE_STANDARD_RTTIEXT(BRepMesh_FaceAttribute,Standard_Transient)
 
 private:
+
+  //! Default constructor.
+  BRepMesh_FaceAttribute();
 
   //! Assignment operator.
   void operator =(const BRepMesh_FaceAttribute& /*theOther*/)
@@ -360,7 +375,9 @@ private:
   Standard_Real                           myVMax;          //!< Describes maximal value in V domain
   Standard_Real                           myDeltaX;
   Standard_Real                           myDeltaY;
+  Standard_Real                           myMinStep;
   Standard_Integer                        myStatus;
+  Standard_Boolean                        myAdaptiveMin;
 
   BRepMesh::HDMapOfVertexInteger          myBoundaryVertices;
   BRepMesh::HDMapOfIntegerPnt             myBoundaryPoints;

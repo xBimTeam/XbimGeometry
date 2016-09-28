@@ -48,20 +48,25 @@ static Standard_Real PIPI = M_PI + M_PI;
 
 //=======================================================================
 //function : InPeriod
-//purpose  : 
+//purpose  : Value theULast is never returned.
 //=======================================================================
-
-Standard_Real  ElCLib::InPeriod(const Standard_Real U, 
-				const Standard_Real UFirst, 
-				const Standard_Real ULast)
+Standard_Real  ElCLib::InPeriod(const Standard_Real theU, 
+                                const Standard_Real theUFirst, 
+                                const Standard_Real theULast)
 {
-  Standard_Real u = U, period = ULast - UFirst;
-  Standard_Real Eps = Epsilon(period);
+  if( Precision::IsInfinite(theU) ||
+      Precision::IsInfinite(theUFirst) ||
+      Precision::IsInfinite(theULast))
+  {//In order to avoid FLT_Overflow exception
+    return theU;
+  }
 
-  while (Eps < (UFirst-u)) u += period;
-  while (Eps > (ULast -u)) u -= period;
-  if ( u < UFirst) u = UFirst;
-  return u;
+  const Standard_Real aPeriod = theULast - theUFirst;
+
+  if(aPeriod < Epsilon(theULast))
+    return theU;
+
+  return Max(theUFirst, theU + aPeriod*Ceiling((theUFirst-theU)/aPeriod));
 }
 
 //=======================================================================
@@ -1342,7 +1347,12 @@ Standard_Real ElCLib::HyperbolaParameter (const gp_Ax2& Pos,
   Standard_Real sht = 
     gp_Vec(Pos.Location (), P).Dot
       (gp_Vec (Pos.YDirection())) / MinorRadius;
+
+#if __QNX__
+  return std::asinh(sht);
+#else
   return asinh(sht);
+#endif
 }
 
 //=======================================================================
@@ -1421,7 +1431,11 @@ Standard_Real ElCLib::HyperbolaParameter (const gp_Ax22d& Pos,
 {
   gp_Vec2d V (Pos.YDirection().XY());
   Standard_Real sht = gp_Vec2d(Pos.Location(),P).Dot(V) /MinorRadius;
-  return asinh(sht); 
+#if __QNX__
+  return std::asinh(sht);
+#else
+  return asinh(sht);
+#endif
 }
 
 //=======================================================================

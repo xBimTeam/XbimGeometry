@@ -276,13 +276,13 @@ public:
   //! initial curve becomes the EndPoint of the reversed curve
   //! and the EndPoint of the initial curve becomes the StartPoint
   //! of the reversed curve.
-  Standard_EXPORT void Reverse();
+  Standard_EXPORT void Reverse() Standard_OVERRIDE;
   
   //! Returns the  parameter on the  reversed  curve for
   //! the point of parameter U on <me>.
   //!
   //! returns UFirst + ULast - U
-  Standard_EXPORT Standard_Real ReversedParameter (const Standard_Real U) const;
+  Standard_EXPORT Standard_Real ReversedParameter (const Standard_Real U) const Standard_OVERRIDE;
   
   //! Modifies this BSpline curve by segmenting it between
   //! U1 and U2. Either of these values can be outside the
@@ -296,6 +296,8 @@ public:
   //! of the curve <me> or if the curve makes loop.
   //! After the segmentation the length of a curve can be null.
   //! raises if U2 < U1.
+  //! Standard_DomainError if U2 - U1 exceeds the period for periodic curves.
+  //! i.e. ((U2 - U1) - Period) > Precision::PConfusion().
   Standard_EXPORT void Segment (const Standard_Real U1, const Standard_Real U2);
   
   //! Modifies this BSpline curve by assigning the value K
@@ -439,7 +441,7 @@ public:
 
   //! Returns the continuity of the curve, the curve is at least C0.
   //! Raised if N < 0.
-  Standard_EXPORT Standard_Boolean IsCN (const Standard_Integer N) const;
+  Standard_EXPORT Standard_Boolean IsCN (const Standard_Integer N) const Standard_OVERRIDE;
   
 
   //! Check if curve has at least G1 continuity in interval [theTf, theTl]
@@ -457,10 +459,10 @@ public:
   //! Warnings :
   //! The first and the last point can be different from the first
   //! pole and the last pole of the curve.
-  Standard_EXPORT Standard_Boolean IsClosed() const;
+  Standard_EXPORT Standard_Boolean IsClosed() const Standard_OVERRIDE;
   
   //! Returns True if the curve is periodic.
-  Standard_EXPORT Standard_Boolean IsPeriodic() const;
+  Standard_EXPORT Standard_Boolean IsPeriodic() const Standard_OVERRIDE;
   
 
   //! Returns True if the weights are not identical.
@@ -480,7 +482,7 @@ public:
   //! than Cd-p where p is the maximum multiplicity of the interior
   //! Knots. In the interior of a knot span the curve is infinitely
   //! continuously differentiable.
-  Standard_EXPORT GeomAbs_Shape Continuity() const;
+  Standard_EXPORT GeomAbs_Shape Continuity() const Standard_OVERRIDE;
   
   //! Returns the degree of this BSpline curve.
   //! The degree of a Geom_BSplineCurve curve cannot
@@ -489,16 +491,16 @@ public:
   Standard_EXPORT Standard_Integer Degree() const;
   
   //! Returns in P the point of parameter U.
-  Standard_EXPORT void D0 (const Standard_Real U, gp_Pnt& P) const;
+  Standard_EXPORT void D0 (const Standard_Real U, gp_Pnt& P) const Standard_OVERRIDE;
   
   //! Raised if the continuity of the curve is not C1.
-  Standard_EXPORT void D1 (const Standard_Real U, gp_Pnt& P, gp_Vec& V1) const;
+  Standard_EXPORT void D1 (const Standard_Real U, gp_Pnt& P, gp_Vec& V1) const Standard_OVERRIDE;
   
   //! Raised if the continuity of the curve is not C2.
-  Standard_EXPORT void D2 (const Standard_Real U, gp_Pnt& P, gp_Vec& V1, gp_Vec& V2) const;
+  Standard_EXPORT void D2 (const Standard_Real U, gp_Pnt& P, gp_Vec& V1, gp_Vec& V2) const Standard_OVERRIDE;
   
   //! Raised if the continuity of the curve is not C3.
-  Standard_EXPORT void D3 (const Standard_Real U, gp_Pnt& P, gp_Vec& V1, gp_Vec& V2, gp_Vec& V3) const;
+  Standard_EXPORT void D3 (const Standard_Real U, gp_Pnt& P, gp_Vec& V1, gp_Vec& V2, gp_Vec& V3) const Standard_OVERRIDE;
   
   //! For the point of parameter U of this BSpline curve,
   //! computes the vector corresponding to the Nth derivative.
@@ -522,45 +524,30 @@ public:
   //! the same as if we consider the whole definition of the
   //! curve. Of course the evaluations are different outside
   //! this parametric domain.
-  Standard_EXPORT gp_Vec DN (const Standard_Real U, const Standard_Integer N) const;
+  Standard_EXPORT gp_Vec DN (const Standard_Real U, const Standard_Integer N) const Standard_OVERRIDE;
   
   //! Raised if FromK1 = ToK2.
-  //!
-  //! Raised if FromK1 and ToK2 are not in the range
-  //! [FirstUKnotIndex, LastUKnotIndex].
   Standard_EXPORT gp_Pnt LocalValue (const Standard_Real U, const Standard_Integer FromK1, const Standard_Integer ToK2) const;
   
   //! Raised if FromK1 = ToK2.
-  //!
-  //! Raised if FromK1 and ToK2 are not in the range
-  //! [FirstUKnotIndex, LastUKnotIndex].
   Standard_EXPORT void LocalD0 (const Standard_Real U, const Standard_Integer FromK1, const Standard_Integer ToK2, gp_Pnt& P) const;
   
 
   //! Raised if the local continuity of the curve is not C1
   //! between the knot K1 and the knot K2.
   //! Raised if FromK1 = ToK2.
-  //!
-  //! Raised if FromK1 and ToK2 are not in the range
-  //! [FirstUKnotIndex, LastUKnotIndex].
   Standard_EXPORT void LocalD1 (const Standard_Real U, const Standard_Integer FromK1, const Standard_Integer ToK2, gp_Pnt& P, gp_Vec& V1) const;
   
 
   //! Raised if the local continuity of the curve is not C2
   //! between the knot K1 and the knot K2.
   //! Raised if FromK1 = ToK2.
-  //!
-  //! Raised if FromK1 and ToK2 are not in the range
-  //! [FirstUKnotIndex, LastUKnotIndex].
   Standard_EXPORT void LocalD2 (const Standard_Real U, const Standard_Integer FromK1, const Standard_Integer ToK2, gp_Pnt& P, gp_Vec& V1, gp_Vec& V2) const;
   
 
   //! Raised if the local continuity of the curve is not C3
   //! between the knot K1 and the knot K2.
   //! Raised if FromK1 = ToK2.
-  //!
-  //! Raised if FromK1 and ToK2 are not in the range
-  //! [FirstUKnotIndex, LastUKnotIndex].
   Standard_EXPORT void LocalD3 (const Standard_Real U, const Standard_Integer FromK1, const Standard_Integer ToK2, gp_Pnt& P, gp_Vec& V1, gp_Vec& V2, gp_Vec& V3) const;
   
 
@@ -568,9 +555,6 @@ public:
   //! between the knot K1 and the knot K2.
   //! Raised if FromK1 = ToK2.
   //! Raised if N < 1.
-  //!
-  //! Raises if FromK1 and ToK2 are not in the range
-  //! [FirstUKnotIndex, LastUKnotIndex].
   Standard_EXPORT gp_Vec LocalDN (const Standard_Real U, const Standard_Integer FromK1, const Standard_Integer ToK2, const Standard_Integer N) const;
   
 
@@ -579,7 +563,7 @@ public:
   //! The last point of the curve is different from the last
   //! pole of the curve if the multiplicity of the last knot
   //! is lower than Degree.
-  Standard_EXPORT gp_Pnt EndPoint() const;
+  Standard_EXPORT gp_Pnt EndPoint() const Standard_OVERRIDE;
   
   //! Returns the index in the knot array of the knot
   //! corresponding to the first or last parameter of this BSpline curve.
@@ -594,7 +578,7 @@ public:
   //! Returns the value of the first parameter of this
   //! BSpline curve. This is a knot value.
   //! The first parameter is the one of the start point of the BSpline curve.
-  Standard_EXPORT Standard_Real FirstParameter() const;
+  Standard_EXPORT Standard_Real FirstParameter() const Standard_OVERRIDE;
   
 
   //! Returns the knot of range Index. When there is a knot
@@ -610,7 +594,8 @@ public:
   //! repeated in the knot table. The Multiplicity function
   //! can be used to obtain the multiplicity of each knot.
   //!
-  //! Raised if the length of K is not equal to the number of knots.
+  //! Raised K.Lower() is less than number of first knot or
+  //! K.Upper() is more than number of last knot.
   Standard_EXPORT void Knots (TColStd_Array1OfReal& K) const;
   
   //! returns the knot values of the B-spline curve;
@@ -670,8 +655,9 @@ public:
   //! K = { k3-p k3-p k1 k1 k1 k2 k3 k3
   //! k4 k4 k4 k2+p k3+p }
   //! Exceptions
-  //! Standard_DimensionError if the array K is not of
-  //! the appropriate length.Returns the knots sequence.
+  //! Raised if K.Lower() is less than number of first knot
+  //! in knot sequence with repetitions or K.Upper() is more
+  //! than number of last knot in knot sequence with repetitions.
   Standard_EXPORT void KnotSequence (TColStd_Array1OfReal& K) const;
   
   //! returns the knots of the B-spline curve.
@@ -704,7 +690,7 @@ public:
 
   //! Computes the parametric value of the end point of the curve.
   //! It is a knot value.
-  Standard_EXPORT Standard_Real LastParameter() const;
+  Standard_EXPORT Standard_Real LastParameter() const Standard_OVERRIDE;
   
 
   //! Locates the parametric value U in the sequence of knots.
@@ -743,7 +729,7 @@ public:
   
   //! Returns the pole of range Index.
   //! Raised if Index < 1 or Index > NbPoles.
-  Standard_EXPORT gp_Pnt Pole (const Standard_Integer Index) const;
+  Standard_EXPORT const gp_Pnt& Pole(const Standard_Integer Index) const;
   
   //! Returns the poles of the B-spline curve;
   //!
@@ -758,7 +744,7 @@ public:
   //! Warnings :
   //! This point is different from the first pole of the curve if the
   //! multiplicity of the first knot is lower than Degree.
-  Standard_EXPORT gp_Pnt StartPoint() const;
+  Standard_EXPORT gp_Pnt StartPoint() const Standard_OVERRIDE;
   
   //! Returns the weight of the pole of range Index .
   //! Raised if Index < 1 or Index > NbPoles.
@@ -770,10 +756,10 @@ public:
   Standard_EXPORT void Weights (TColStd_Array1OfReal& W) const;
   
   //! Returns the weights of the B-spline curve;
-  Standard_EXPORT const TColStd_Array1OfReal& Weights() const;
+  Standard_EXPORT const TColStd_Array1OfReal* Weights() const;
   
   //! Applies the transformation T to this BSpline curve.
-  Standard_EXPORT void Transform (const gp_Trsf& T);
+  Standard_EXPORT void Transform (const gp_Trsf& T) Standard_OVERRIDE;
   
 
   //! Returns the value of the maximum degree of the normalized
@@ -789,7 +775,7 @@ public:
   Standard_EXPORT void Resolution (const Standard_Real Tolerance3D, Standard_Real& UTolerance);
   
   //! Creates a new object which is a copy of this BSpline curve.
-  Standard_EXPORT Handle(Geom_Geometry) Copy() const;
+  Standard_EXPORT Handle(Geom_Geometry) Copy() const Standard_OVERRIDE;
   
   //! Comapare two Bspline curve on identity;
   Standard_EXPORT Standard_Boolean IsEqual (const Handle(Geom_BSplineCurve)& theOther, const Standard_Real thePreci) const;
@@ -797,7 +783,7 @@ public:
 
 
 
-  DEFINE_STANDARD_RTTI(Geom_BSplineCurve,Geom_BoundedCurve)
+  DEFINE_STANDARD_RTTIEXT(Geom_BSplineCurve,Geom_BoundedCurve)
 
 protected:
 

@@ -28,7 +28,7 @@ class Poly_Triangulation;
 class Poly_PolygonOnTriangulation;
 class TopoDS_Edge;
 class TopoDS_Face;
-class Geom2d_Curve;
+class Geom2dAdaptor_HCurve;
 
 //! Auxiliary class implements functionality retrieving tessellated
 //! representation of an edge stored in polygon.
@@ -40,14 +40,14 @@ public:
   //! Initializes extractor.
   BRepMesh_EdgeTessellationExtractor(
     const TopoDS_Edge&                          theEdge,
-    const Handle(Geom2d_Curve)&                 thePCurve,
+    const Handle(Geom2dAdaptor_HCurve)&         thePCurve,
     const TopoDS_Face&                          theFace,
     const Handle(Poly_Triangulation)&           theTriangulation,
     const Handle(Poly_PolygonOnTriangulation)&  thePolygon,
     const TopLoc_Location&                      theLocation);
 
   //! Returns number of dicretization points.
-  virtual Standard_Integer NbPoints() const
+  virtual Standard_Integer NbPoints() const Standard_OVERRIDE
   {
     return myIndices.Length();
   }
@@ -57,12 +57,14 @@ public:
   //! @param theParameter parameters on PCurve corresponded to the solution.
   //! @param thePoint tessellation point.
   //! @param theUV coordinates of tessellation point in parametric space of face.
-  virtual void Value(const Standard_Integer theIndex,
-                     Standard_Real&         theParameter,
-                     gp_Pnt&                thePoint,
-                     gp_Pnt2d&              theUV);
+  //! @return True in case of valid result, false elewhere.
+  virtual Standard_Boolean Value(
+    const Standard_Integer theIndex,
+    Standard_Real&         theParameter,
+    gp_Pnt&                thePoint,
+    gp_Pnt2d&              theUV) Standard_OVERRIDE;
 
-  DEFINE_STANDARD_RTTI(BRepMesh_EdgeTessellationExtractor, BRepMesh_IEdgeTool)
+  DEFINE_STANDARD_RTTIEXT(BRepMesh_EdgeTessellationExtractor,BRepMesh_IEdgeTool)
 
 private:
 
@@ -74,7 +76,7 @@ private:
 private:
 
   BRepMesh_EdgeParameterProvider myProvider;
-  const Handle(Geom2d_Curve)&    myPCurve;
+  Handle(Geom2dAdaptor_HCurve)   myPCurve;
   const TColgp_Array1OfPnt&      myNodes;
   const TColStd_Array1OfInteger& myIndices;
   const TopLoc_Location          myLoc;

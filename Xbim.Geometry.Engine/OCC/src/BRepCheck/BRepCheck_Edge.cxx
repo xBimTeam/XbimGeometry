@@ -60,6 +60,8 @@
 #include <TopoDS_Face.hxx>
 #include <TopoDS_Shape.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(BRepCheck_Edge,BRepCheck_Result)
+
 //modified by NIZNHY-PKV Thu May 05 09:01:57 2011f
 static 
   Standard_Boolean Validate(const Adaptor3d_Curve&,
@@ -616,9 +618,9 @@ BRepCheck_Status BRepCheck_Edge::
       {
         const Standard_Real aParam = aPOnTriag->Parameters()->Value(i);
         const gp_Pnt  aPE(aBC.Value(aParam)), 
-          aPT(Nodes(anIndices(i)).Transformed(aLL));
+          aPnt(Nodes(anIndices(i)).Transformed(aLL));
 
-        const Standard_Real aSQDist = aPE.SquareDistance(aPT);
+        const Standard_Real aSQDist = aPE.SquareDistance(aPnt);
         if(aSQDist > aTol*aTol)
         {
           return BRepCheck_InvalidPolygonOnTriangulation;

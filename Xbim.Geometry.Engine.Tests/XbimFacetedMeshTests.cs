@@ -1,15 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Xbim.Common.Geometry;
-using Xbim.Ifc2x3.GeometricModelResource;
-using Xbim.Ifc2x3.GeometryResource;
-using Xbim.IO;
-using Xbim.Geometry;
-using XbimGeometry.Interfaces;
-
-namespace GeometryTests
+﻿namespace Ifc4GeometryTests
 {
 #if USE_CARVE_CSG
 

@@ -61,7 +61,8 @@ TopoDS_Shape ShapeProcess_OperLibrary::ApplyModifier (const TopoDS_Shape &S,
                                                       const Handle(ShapeProcess_ShapeContext)& context,
                                                       const Handle(BRepTools_Modification) &M,
                                                       TopTools_DataMapOfShapeShape &map,
-                                                      const Handle(ShapeExtend_MsgRegistrator) &msg)
+                                                      const Handle(ShapeExtend_MsgRegistrator) &msg,
+                                                      Standard_Boolean theMutableInput)
 {
   // protect against INTERNAL/EXTERNAL shapes
   TopoDS_Shape SF = S.Oriented(TopAbs_FORWARD);
@@ -81,7 +82,7 @@ TopoDS_Shape ShapeProcess_OperLibrary::ApplyModifier (const TopoDS_Shape &S,
 	res = map.Find ( shape ).Oriented ( shape.Orientation() );
 
       else {
-	res = ApplyModifier (shape, context, M, map );
+	res = ApplyModifier (shape, context, M, map, 0, theMutableInput );
 	map.Bind ( shape, res );
       }
       if ( ! res.IsSame ( shape ) ) locModified = Standard_True;
@@ -95,7 +96,9 @@ TopoDS_Shape ShapeProcess_OperLibrary::ApplyModifier (const TopoDS_Shape &S,
   }
 
   // Modify the shape
-  BRepTools_Modifier MD(SF,M);
+  BRepTools_Modifier MD(SF);
+  MD.SetMutableInput(theMutableInput);
+  MD.Perform(M);
   context->RecordModification ( SF, MD, msg );
   return MD.ModifiedShape(SF).Oriented(S.Orientation());
 }
@@ -118,7 +121,7 @@ static Standard_Boolean directfaces (const Handle(ShapeProcess_Context)& context
   Handle(ShapeCustom_DirectModification) DM = new ShapeCustom_DirectModification;
   DM->SetMsgRegistrator( msg );
   TopTools_DataMapOfShapeShape map;
-  TopoDS_Shape res = ShapeProcess_OperLibrary::ApplyModifier ( ctx->Result(), ctx, DM, map, msg );
+  TopoDS_Shape res = ShapeProcess_OperLibrary::ApplyModifier ( ctx->Result(), ctx, DM, map,  msg, Standard_True );
   ctx->RecordModification ( map, msg );
   ctx->SetResult ( res );
   return Standard_True;
@@ -140,7 +143,7 @@ static Standard_Boolean sameparam (const Handle(ShapeProcess_Context)& context)
   if ( ! ctx->Messages().IsNull() ) msg = new ShapeExtend_MsgRegistrator;
 
   ShapeFix::SameParameter ( ctx->Result(),
-                            ctx->IntegerVal ( "Force", Standard_False ),
+                            ctx->BooleanVal ( "Force", Standard_False ),
                             ctx->RealVal ( "Tolerance3d", Precision::Confusion() /* -1 */),
                             NULL, msg );
 
@@ -229,9 +232,9 @@ static Standard_Boolean bsplinerestriction (const Handle(ShapeProcess_Context)& 
   Handle(ShapeExtend_MsgRegistrator) msg;
   if ( ! ctx->Messages().IsNull() ) msg = new ShapeExtend_MsgRegistrator;
 
-  Standard_Boolean ModeSurf  = ctx->IntegerVal ( "SurfaceMode", Standard_True );
-  Standard_Boolean ModeC3d   = ctx->IntegerVal ( "Curve3dMode", Standard_True );
-  Standard_Boolean ModeC2d   = ctx->IntegerVal ( "Curve2dMode", Standard_True );
+  Standard_Boolean ModeSurf  = ctx->BooleanVal ( "SurfaceMode", Standard_True );
+  Standard_Boolean ModeC3d   = ctx->BooleanVal ( "Curve3dMode", Standard_True );
+  Standard_Boolean ModeC2d   = ctx->BooleanVal ( "Curve2dMode", Standard_True );
 
   Standard_Real aTol3d = ctx->RealVal ( "Tolerance3d", 0.01 );
   Standard_Real aTol2d = ctx->RealVal ( "Tolerance2d", 1e-06 );
@@ -242,8 +245,8 @@ static Standard_Boolean bsplinerestriction (const Handle(ShapeProcess_Context)& 
   Standard_Integer aMaxDeg = ctx->IntegerVal ( "RequiredDegree", 9 );
   Standard_Integer aMaxSeg = ctx->IntegerVal ( "RequiredNbSegments", 10000 );
   
-  Standard_Boolean ModeDeg  = ctx->IntegerVal ( "PreferDegree", Standard_True );
-  Standard_Boolean Rational = ctx->IntegerVal ( "RationalToPolynomial", Standard_False );
+  Standard_Boolean ModeDeg  = ctx->BooleanVal ( "PreferDegree", Standard_True );
+  Standard_Boolean Rational = ctx->BooleanVal ( "RationalToPolynomial", Standard_False );
   
   Handle(ShapeCustom_RestrictionParameters)   aParameters = new ShapeCustom_RestrictionParameters;
   ctx->GetInteger ( "MaxDegree",          aParameters->GMaxDegree() );
@@ -271,7 +274,7 @@ static Standard_Boolean bsplinerestriction (const Handle(ShapeProcess_Context)& 
 					 aMaxDeg, aMaxSeg, ModeDeg, Rational, aParameters );
   LD->SetMsgRegistrator( msg );
   TopTools_DataMapOfShapeShape map;
-  TopoDS_Shape res = ShapeProcess_OperLibrary::ApplyModifier ( ctx->Result(), ctx, LD, map, msg );
+  TopoDS_Shape res = ShapeProcess_OperLibrary::ApplyModifier ( ctx->Result(), ctx, LD, map,  msg, Standard_True );
   ctx->RecordModification ( map, msg );
   ctx->SetResult ( res );
   return Standard_True;
@@ -295,7 +298,7 @@ static Standard_Boolean torevol (const Handle(ShapeProcess_Context)& context)
   Handle(ShapeCustom_ConvertToRevolution) CR = new ShapeCustom_ConvertToRevolution();
   CR->SetMsgRegistrator( msg );
   TopTools_DataMapOfShapeShape map;
-  TopoDS_Shape res = ShapeProcess_OperLibrary::ApplyModifier ( ctx->Result(), ctx, CR, map, msg );
+  TopoDS_Shape res = ShapeProcess_OperLibrary::ApplyModifier ( ctx->Result(), ctx, CR, map,  msg, Standard_True );
   ctx->RecordModification ( map, msg );
   ctx->SetResult ( res );
   return Standard_True;
@@ -319,7 +322,7 @@ static Standard_Boolean swepttoelem (const Handle(ShapeProcess_Context)& context
   Handle(ShapeCustom_SweptToElementary) SE = new ShapeCustom_SweptToElementary();
   SE->SetMsgRegistrator( msg );
   TopTools_DataMapOfShapeShape map;
-  TopoDS_Shape res = ShapeProcess_OperLibrary::ApplyModifier ( ctx->Result(), ctx, SE, map, msg );
+  TopoDS_Shape res = ShapeProcess_OperLibrary::ApplyModifier ( ctx->Result(), ctx, SE, map, msg, Standard_True  );
   ctx->RecordModification ( map, msg );
   ctx->SetResult ( res );
   return Standard_True;
@@ -415,7 +418,7 @@ static Standard_Boolean converttobspline (const Handle(ShapeProcess_Context)& co
   CBspl->SetMsgRegistrator( msg );
     
   TopTools_DataMapOfShapeShape map;
-  TopoDS_Shape res = ShapeProcess_OperLibrary::ApplyModifier( ctx->Result(), ctx, CBspl, map, msg );
+  TopoDS_Shape res = ShapeProcess_OperLibrary::ApplyModifier( ctx->Result(), ctx, CBspl, map,  msg, Standard_True );
   ctx->RecordModification ( map, msg );
   ctx->SetResult ( res );
   return Standard_True;
@@ -692,8 +695,8 @@ static Standard_Boolean fixshape (const Handle(ShapeProcess_Context)& context)
   if ( ! ctx->Messages().IsNull() ) msg = new ShapeExtend_MsgRegistrator;
   
   Handle(ShapeFix_Shape) sfs = new ShapeFix_Shape;
-  Handle(ShapeFix_Face) sff  = Handle(ShapeFix_Face)::DownCast(sfs->FixFaceTool());
-  Handle(ShapeFix_Wire) sfw  = Handle(ShapeFix_Wire)::DownCast(sfs->FixWireTool());
+  Handle(ShapeFix_Face) sff  = sfs->FixFaceTool();
+  Handle(ShapeFix_Wire) sfw  = sfs->FixWireTool();
   sfs->SetMsgRegistrator( msg );
   
   sfs->SetPrecision    ( ctx->RealVal ( "Tolerance3d",    Precision::Confusion() ) );
@@ -708,7 +711,7 @@ static Standard_Boolean fixshape (const Handle(ShapeProcess_Context)& context)
   sfs->FixVertexPositionMode() = ctx->IntegerVal ( "FixVertexPositionMode", 0 );
 
   sfs->FixSolidTool()->FixShellMode() = ctx->IntegerVal ( "FixShellMode", -1 );
-  sfs->FixSolidTool()->CreateOpenSolidMode() = ctx->IntegerVal ( "CreateOpenSolidMode", 1 );
+  sfs->FixSolidTool()->CreateOpenSolidMode() = ctx->BooleanVal ( "CreateOpenSolidMode", Standard_True );
 
   sfs->FixShellTool()->FixFaceMode() = ctx->IntegerVal ( "FixFaceMode", -1 );
 

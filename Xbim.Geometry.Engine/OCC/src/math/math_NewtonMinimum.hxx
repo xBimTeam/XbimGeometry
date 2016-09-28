@@ -52,8 +52,7 @@ public:
   //! Search the solution.
   Standard_EXPORT void Perform (math_MultipleVarFunctionWithHessian& theFunction, const math_Vector& theStartingPoint);
   
-  //! Destructor alias.
-    void Delete() const;
+  //! Destructor
   Standard_EXPORT virtual ~math_NewtonMinimum();
   
 
@@ -99,6 +98,11 @@ public:
   //! calculation of the minimum.
   //! The exception NotDone is raised if an error has occured.
     Standard_Integer NbIterations() const;
+
+  //! Returns the Status of computation.
+  //! The exception NotDone is raised if an error has occured.
+    math_Status GetStatus() const;
+
   
   //! Prints on the stream o information on the current state
   //! of the object.

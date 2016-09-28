@@ -358,7 +358,7 @@ void BOPAlgo_FillIn3DParts::Perform()
       }
     }
   } // for (k=0; k<aNbFP; ++k) {
-};
+}
 //=======================================================================
 // function: MapEdgesAndFaces
 // purpose: 
@@ -581,6 +581,7 @@ void BOPAlgo_Builder::FillIn3DParts
         }
         Bnd_Box aBox;
         BRepBndLib::Add(aSx, aBox);
+        aBox.SetGap(aBox.GetGap() + Precision::Confusion());
         //
         BOPAlgo_ShapeBox& aSB=aVSB.Append1();
         aSB.SetShape(aSx);
@@ -666,7 +667,7 @@ void BOPAlgo_Builder::FillIn3DParts
     BOPAlgo_FillIn3DParts& aFIP=aVFIP(k);
     bHasImage=aFIP.HasImage();
     const TopoDS_Solid& aSolid=aFIP.Solid();
-    const TopoDS_Solid& aSD=aFIP.DraftSolid();
+    const TopoDS_Solid& aSDraft =aFIP.DraftSolid();
     const BOPCol_ListOfShape& aLFIN=aFIP.LFIN();
     const BOPCol_ListOfShape& aLIF=aFIP.LIF();
     //
@@ -691,7 +692,7 @@ void BOPAlgo_Builder::FillIn3DParts
     }
     //
     if (aNbFIN || bHasImage) {
-      theDraftSolids.Bind(aSolid, aSD);
+      theDraftSolids.Bind(aSolid, aSDraft);
     }
   }
 }

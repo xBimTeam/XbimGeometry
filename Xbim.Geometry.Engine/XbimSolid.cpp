@@ -2,6 +2,7 @@
 #include "XbimShell.h"
 #include "XbimFace.h"
 #include "XbimWire.h"
+#include "XbimWireSet.h"
 #include "XbimCompound.h"
 #include "XbimSolidSet.h"
 #include "XbimEdgeSet.h"
@@ -9,9 +10,9 @@
 #include "XbimShellSet.h"
 #include "XbimFaceSet.h"
 #include "XbimPoint3DWithTolerance.h"
-#include "XbimFacetedSolid.h"
+
 #include "XbimGeometryCreator.h"
-#include "XbimGeomPrim.h"
+#include "XbimConvert.h"
 #include "XbimOccWriter.h"
 
 #include <TopExp.hxx>
@@ -39,7 +40,7 @@
 #include <BRepAlgoAPI_Fuse.hxx>
 #include <BRepAlgoAPI_Section.hxx>
 #include <BRepAlgo_Loop.hxx>
-
+#include <Geom_OffsetCurve.hxx>
 #include <BRepBuilderAPI_MakeSolid.hxx>
 #include <BRepPrimAPI_MakeHalfSpace.hxx>
 #include <BRepAlgo_NormalProjection.hxx>
@@ -66,12 +67,21 @@
 #include <Geom_TrimmedCurve.hxx>
 #include <TColgp_Array1OfPnt.hxx>
 #include <TShort_Array1OfShortReal.hxx>
-
 #include <BRepBuilderAPI_Transform.hxx>
+#include <BRepBuilderAPI_GTransform.hxx>
 #include <ShapeFix_Solid.hxx>
 #include <ShapeFix_Wireframe.hxx>
+#include <BRepClass3d_SolidClassifier.hxx>
+#include <BRepBuilderAPI_Sewing.hxx>
+#include <Geom_Plane.hxx>
+#include <GeomAPI_ProjectPointOnSurf.hxx>
+#include <GC_MakeArcOfCircle.hxx>
+#include <BRepAdaptor_CompCurve.hxx>
+#include <Geom_SurfaceOfLinearExtrusion.hxx>
+#include <GeomLib_IsPlanarSurface.hxx>
 
 using namespace System;
+using namespace System::Linq;
 using namespace System::Threading;
 using namespace Xbim::Common;
 
@@ -96,73 +106,110 @@ namespace Xbim
 			*pSolid = solid;
 		}
 
-		XbimSolid::XbimSolid(IfcSolidModel^ solid)
+		XbimSolid::XbimSolid(const TopoDS_Solid& solid, Object^ tag) : XbimSolid(solid)
+		{
+			Tag = tag;
+		}
+
+
+		XbimSolid::XbimSolid(IIfcSolidModel^ solid)
 		{
 			Init(solid);
 		}
 
-		XbimSolid::XbimSolid(IfcManifoldSolidBrep^ solid)
+		XbimSolid::XbimSolid(IIfcManifoldSolidBrep^ solid)
 		{
 			Init(solid);
 		}
 
-		XbimSolid::XbimSolid(IfcSweptAreaSolid^ repItem)
+		XbimSolid::XbimSolid(IIfcSweptAreaSolid^ repItem)
 		{
 			Init(repItem);
 		}
 
-		XbimSolid::XbimSolid(IfcSweptAreaSolid^ repItem, IfcProfileDef^ overrideProfileDef)
+		XbimSolid::XbimSolid(IIfcSweptAreaSolid^ repItem, IIfcProfileDef^ overrideProfileDef)
 		{
 			Init(repItem, overrideProfileDef);
 		}
 
-		XbimSolid::XbimSolid(IfcRevolvedAreaSolid^ solid)
+		XbimSolid::XbimSolid(IIfcRevolvedAreaSolid^ solid)
 		{
 			Init(solid);
 		}
 
-		XbimSolid::XbimSolid(IfcRevolvedAreaSolid^ repItem, IfcProfileDef^ overrideProfileDef)
+		XbimSolid::XbimSolid(IIfcRevolvedAreaSolidTapered^ repItem)
+		{
+			Init(repItem, nullptr);
+
+		}
+
+		XbimSolid::XbimSolid(IIfcRevolvedAreaSolidTapered^ repItem, IIfcProfileDef^ overrideProfileDef)
 		{
 			Init(repItem, overrideProfileDef);
 
 		}
 
-		XbimSolid::XbimSolid(IfcExtrudedAreaSolid^ repItem)
+		XbimSolid::XbimSolid(IIfcRevolvedAreaSolid^ repItem, IIfcProfileDef^ overrideProfileDef)
+		{
+			Init(repItem, overrideProfileDef);
+
+		}
+		XbimSolid::XbimSolid(IIfcExtrudedAreaSolidTapered^ repItem, IIfcProfileDef^ overrideProfileDef)
+		{
+			Init(repItem, overrideProfileDef);
+
+		}
+		XbimSolid::XbimSolid(IIfcExtrudedAreaSolid^ repItem)
 		{
 			Init(repItem, nullptr);
 			
 		}
-		XbimSolid::XbimSolid(IfcExtrudedAreaSolid^ repItem, IfcProfileDef^ overrideProfileDef)
+		
+		XbimSolid::XbimSolid(IIfcExtrudedAreaSolidTapered^ repItem)
+		{
+			Init(repItem, nullptr);
+			
+		}
+		XbimSolid::XbimSolid(IIfcExtrudedAreaSolid^ repItem, IIfcProfileDef^ overrideProfileDef)
 		{
 			Init(repItem, overrideProfileDef);
 
 		}
-		XbimSolid::XbimSolid(IfcSweptDiskSolid^ repItem)
+		XbimSolid::XbimSolid(IIfcSweptDiskSolid^ repItem)
 		{
 			Init(repItem);
 		}
 
-		XbimSolid::XbimSolid(IfcBoundingBox^ repItem)
+		XbimSolid::XbimSolid(IIfcSectionedSpine^ repItem)
+		{
+			Init(repItem);
+		}
+
+		XbimSolid::XbimSolid(IIfcSweptDiskSolidPolygonal^ repItem)
+		{
+			Init(repItem);
+		}
+		XbimSolid::XbimSolid(IIfcBoundingBox^ repItem)
 		{
 			Init(repItem);
 		}
 		
-		XbimSolid::XbimSolid(IfcSurfaceCurveSweptAreaSolid^ repItem)
+		XbimSolid::XbimSolid(IIfcSurfaceCurveSweptAreaSolid^ repItem)
 		{
 			Init(repItem, nullptr);
 		}
 
-		XbimSolid::XbimSolid(IfcSurfaceCurveSweptAreaSolid^ repItem, IfcProfileDef^ overrideProfileDef)
+		XbimSolid::XbimSolid(IIfcSurfaceCurveSweptAreaSolid^ repItem, IIfcProfileDef^ overrideProfileDef)
 		{
 			Init(repItem, overrideProfileDef);
 		}
 
-		XbimSolid::XbimSolid(IfcHalfSpaceSolid^ repItem, double maxExtrusion, XbimPoint3D^ bboxCentroid)
+		XbimSolid::XbimSolid(IIfcHalfSpaceSolid^ repItem, double maxExtrusion, XbimPoint3D centroid)
 		{
-			Init(repItem, maxExtrusion, bboxCentroid);
+			Init(repItem, maxExtrusion,centroid);
 		}
 
-		XbimSolid::XbimSolid(IfcBoxedHalfSpace^ repItem)
+		XbimSolid::XbimSolid(IIfcBoxedHalfSpace^ repItem)
 		{
 			Init(repItem);
 		}
@@ -172,56 +219,66 @@ namespace Xbim
 			Init(rect3D, tolerance);
 		}
 
-		XbimSolid::XbimSolid(IfcPolygonalBoundedHalfSpace^ repItem, double maxExtrusion)
+		XbimSolid::XbimSolid(IIfcPolygonalBoundedHalfSpace^ repItem, double maxExtrusion)
 		{
 			Init(repItem, maxExtrusion);
 		}
 
-		XbimSolid::XbimSolid(IfcBooleanResult^ solid)
+		XbimSolid::XbimSolid(IIfcBooleanResult^ solid)
 		{
 			Init(solid);
 		}
 
-		XbimSolid::XbimSolid(IfcBooleanOperand^ repItem)
+		XbimSolid::XbimSolid(IIfcBooleanOperand^ repItem)
 		{
 			Init(repItem);
 		}
 
 		
 
-		XbimSolid::XbimSolid(IfcCsgPrimitive3D^ repItem)
+		XbimSolid::XbimSolid(IIfcCsgPrimitive3D^ repItem)
 		{
 			Init(repItem);
 		}
 
-		XbimSolid::XbimSolid(IfcCsgSolid^ repItem)
+		XbimSolid::XbimSolid(IIfcCsgSolid^ repItem)
 		{
 			Init(repItem);
 		}
 
-		XbimSolid::XbimSolid(IfcSphere^ repItem)
+		XbimSolid::XbimSolid(IIfcSphere^ repItem)
 		{
 			Init(repItem);
 		}
 
-		XbimSolid::XbimSolid(IfcBlock^ repItem)
+		XbimSolid::XbimSolid(IIfcBlock^ repItem)
 		{
 			Init(repItem);
 		}
 
-		XbimSolid::XbimSolid(IfcRightCircularCylinder^ repItem)
+		XbimSolid::XbimSolid(IIfcRightCircularCylinder^ repItem)
 		{
 			Init(repItem);
 		}
 
-		XbimSolid::XbimSolid(IfcRightCircularCone^ repItem)
+		XbimSolid::XbimSolid(IIfcRightCircularCone^ repItem)
 		{
 			Init(repItem);
 		}
 		
-		XbimSolid::XbimSolid(IfcRectangularPyramid^ repItem)
+		XbimSolid::XbimSolid(IIfcRectangularPyramid^ repItem)
 		{
 			Init(repItem);
+		}
+
+		XbimSolid::XbimSolid(IIfcFixedReferenceSweptAreaSolid^ repItem)
+		{
+			Init(repItem, nullptr);
+		}
+
+		XbimSolid::XbimSolid(IIfcFixedReferenceSweptAreaSolid^ repItem, IIfcProfileDef^ overrideProfileDef)
+		{
+			Init(repItem, overrideProfileDef);
 		}
 #pragma   endregion
 
@@ -278,184 +335,679 @@ namespace Xbim
 
 #pragma region Initialisation methods
 
-		void XbimSolid::Init(IfcSolidModel^ solid)
+		void XbimSolid::Init(IIfcSolidModel^ solid)
 		{
-			IfcSweptAreaSolid^ extrudeArea = dynamic_cast<IfcSweptAreaSolid^>(solid);
+			IIfcSweptAreaSolid^ extrudeArea = dynamic_cast<IIfcSweptAreaSolid^>(solid);
 			if (extrudeArea) return Init(extrudeArea,nullptr);
-			IfcSweptDiskSolid^ sd = dynamic_cast<IfcSweptDiskSolid^>(solid);
+			IIfcSweptDiskSolid^ sd = dynamic_cast<IIfcSweptDiskSolid^>(solid);
 			if (sd != nullptr) return Init(sd);
-			IfcManifoldSolidBrep^ ms = dynamic_cast<IfcManifoldSolidBrep^>(solid);
+			IIfcManifoldSolidBrep^ ms = dynamic_cast<IIfcManifoldSolidBrep^>(solid);
 			if (ms != nullptr) 
 				return Init(ms);
-			IfcCsgSolid^ csg = dynamic_cast<IfcCsgSolid^>(solid);
+			IIfcCsgSolid^ csg = dynamic_cast<IIfcCsgSolid^>(solid);
 			if (csg != nullptr) return Init(csg);
 			throw gcnew NotImplementedException(String::Format("Swept Solid of Type {0} in entity #{1} is not implemented", solid->GetType()->Name, solid->EntityLabel));
 		}
 
-		void XbimSolid::Init(IfcManifoldSolidBrep^ bRep)
+		void XbimSolid::Init(IIfcManifoldSolidBrep^ bRep)
 		{
 			XbimCompound^ comp = gcnew XbimCompound(bRep);
 			if (comp->IsValid)
 			{
 				comp->Sew();
 				XbimShell^ shell = (XbimShell^)comp->MakeShell();
-				IXbimSolid^ solid = shell->MakeSolid();
-				if (solid->IsValid)
+				pSolid = new TopoDS_Solid();
+				*pSolid = (XbimSolid^)(shell->CreateSolid());
+			}
+		}
+		void XbimSolid::Init(IIfcSweptDiskSolidPolygonal^ swdSolid)
+		{
+			//Build the directrix
+			IModelFactors^ mf = swdSolid->Model->ModelFactors;
+			XbimWire^ sweep = gcnew XbimWire(swdSolid->Directrix);
+			if (swdSolid->FilletRadius.HasValue)
+			{
+				if(!sweep->FilletAll((double)swdSolid->FilletRadius.Value))
+					XbimGeometryCreator::LogWarning(swdSolid, "Could not be corectly filleted");
+			}
+
+			if (swdSolid->StartParam.HasValue && swdSolid->EndParam.HasValue)
+				sweep = (XbimWire^)sweep->Trim(swdSolid->StartParam.Value, Math::Abs(swdSolid->EndParam.Value - 1.0)<Precision::Confusion() ? sweep->Length : swdSolid->EndParam.Value, mf->Precision);
+			else if (swdSolid->StartParam.HasValue && !swdSolid->EndParam.HasValue)
+				sweep = (XbimWire^)sweep->Trim(swdSolid->StartParam.Value, sweep->Length, mf->Precision);
+			else if (!swdSolid->StartParam.HasValue && swdSolid->EndParam.HasValue)
+				sweep = (XbimWire^)sweep->Trim(0, Math::Abs(swdSolid->EndParam.Value - 1.0)<Precision::Confusion() ? sweep->Length : swdSolid->EndParam.Value, mf->Precision);
+			//make the outer wire
+			XbimPoint3D s = sweep->Start;
+			gp_Ax2 axCircle(gp_Pnt(s.X, s.Y, s.Z), gp_Dir(0., 0., 1.));
+			gp_Circ outer(axCircle, swdSolid->Radius);
+			Handle(Geom_Circle) hOuter = GC_MakeCircle(outer);
+			TopoDS_Edge outerEdge = BRepBuilderAPI_MakeEdge(hOuter);
+			BRepBuilderAPI_MakeWire outerWire;
+			outerWire.Add(outerEdge);
+			BRepOffsetAPI_MakePipeShell pipeMaker1(sweep);
+			pipeMaker1.Add(outerWire.Wire(), Standard_False, Standard_True);
+			pipeMaker1.Build();
+			if (pipeMaker1.IsDone())
+			{
+				BRepPrim_Builder b;
+				TopoDS_Shell shell;
+				b.MakeShell(shell);
+				TopoDS_Wire firstOuter = TopoDS::Wire(pipeMaker1.FirstShape().Reversed());
+				TopoDS_Wire lastOuter = TopoDS::Wire(pipeMaker1.LastShape().Reversed());
+				BRepBuilderAPI_MakeFace firstMaker(firstOuter);
+				BRepBuilderAPI_MakeFace lastMaker(lastOuter);								
+				//now add inner wire if it is defined
+				if (swdSolid->InnerRadius.HasValue && swdSolid->InnerRadius.Value > 0)
 				{
-					XbimSolidSet^ ss = gcnew XbimSolidSet(solid);
-					if (ss->Count > 0)
+					gp_Circ inner(axCircle, swdSolid->InnerRadius.Value);
+					Handle(Geom_Circle) hInner = GC_MakeCircle(inner);
+					TopoDS_Edge innerEdge = BRepBuilderAPI_MakeEdge(hInner);
+					BRepBuilderAPI_MakeWire innerWire;
+					innerWire.Add(innerEdge);
+					BRepOffsetAPI_MakePipeShell pipeMaker2(sweep);
+					pipeMaker2.Add(innerWire.Wire(), Standard_False, Standard_True);
+					pipeMaker2.Build();
+					if (pipeMaker2.IsDone())
+					{										
+						//add the other faces to the shell
+						for (TopExp_Explorer explr(pipeMaker2.Shape(), TopAbs_FACE); explr.More(); explr.Next())
+						{
+							b.AddShellFace(shell, TopoDS::Face(explr.Current()));
+						}
+						firstMaker.Add(TopoDS::Wire(pipeMaker2.FirstShape()));
+						lastMaker.Add(TopoDS::Wire(pipeMaker2.LastShape()));
+					}
+					else
 					{
-						pSolid = new TopoDS_Solid();
-						*pSolid = (XbimSolid^)ss->First;
+						XbimGeometryCreator::LogWarning(swdSolid,"Inner loop could not be constructed");
 					}
 				}
-				else 
-					XbimGeometryCreator::logger->WarnFormat("WS032: IfcManifoldSolidBrep #{0} could not be built as a solid", bRep->EntityLabel);
-			}
-		}
-
-		void XbimSolid::Init(IfcSweptAreaSolid^ solid, IfcProfileDef^ overrideProfileDef)
-		{
-			IfcExtrudedAreaSolid^ extrudeArea = dynamic_cast<IfcExtrudedAreaSolid^>(solid);
-			if (extrudeArea) return Init(extrudeArea, overrideProfileDef);
-			IfcRevolvedAreaSolid^ ras = dynamic_cast<IfcRevolvedAreaSolid^>(solid);
-			if (ras != nullptr) return Init(ras, overrideProfileDef);
-			
-			XbimGeometryCreator::logger->WarnFormat("WS017: Swept Solid of Type {0} in entity #{1} is not implemented", solid->GetType()->Name, solid->EntityLabel);
-		}
-
-		void XbimSolid::Init(IfcSurfaceCurveSweptAreaSolid^ repItem, IfcProfileDef^ overrideProfileDef)
-		{
-			XbimFace^ profile;
-			if(overrideProfileDef==nullptr)
-				profile= gcnew XbimFace(repItem->SweptArea);
-			else
-				profile = gcnew XbimFace(overrideProfileDef);
-			if (!profile->IsValid)
-			{
-				XbimGeometryCreator::logger->WarnFormat("WS018: Could not build Swept Area of IfcSurfaceCurveSweptAreaSolid #{0}", repItem->EntityLabel);
+				//add top and bottom faces with their hole loops
+				b.AddShellFace(shell, firstMaker.Face());
+				b.AddShellFace(shell, lastMaker.Face());
+				for (TopExp_Explorer explr(pipeMaker1.Shape(), TopAbs_FACE); explr.More(); explr.Next())
+				{
+					b.AddShellFace(shell, TopoDS::Face(explr.Current()));
+				}
+				b.CompleteShell(shell);
+				TopoDS_Solid solid;
+				BRep_Builder bs;
+				bs.MakeSolid(solid);
+				bs.Add(solid, shell);
+				BRepClass3d_SolidClassifier sc(solid);
+				sc.PerformInfinitePoint(Precision::Confusion());
+				if (sc.State() == TopAbs_IN)
+				{
+					bs.MakeSolid(solid);
+					shell.Reverse();
+					bs.Add(solid, shell);
+				}
+				pSolid = new TopoDS_Solid();
+				*pSolid = solid;
+				pSolid->Closed(Standard_True);				
 				return;
 			}
-			
-			XbimModelFactors^ mf = repItem->ModelOf->ModelFactors;
+			else
+			{
+				XbimGeometryCreator::LogWarning(swdSolid, "Could not be constructed");
+
+			}
+		}
+
+		void XbimSolid::Init(IIfcSweptAreaSolid^ solid, IIfcProfileDef^ overrideProfileDef)
+		{
+			IIfcExtrudedAreaSolid^ extrudeArea = dynamic_cast<IIfcExtrudedAreaSolid^>(solid);
+			if (extrudeArea) return Init(extrudeArea, overrideProfileDef);
+			IIfcRevolvedAreaSolid^ ras = dynamic_cast<IIfcRevolvedAreaSolid^>(solid);
+			if (ras != nullptr) return Init(ras, overrideProfileDef);			
+			IIfcFixedReferenceSweptAreaSolid^ fas = dynamic_cast<IIfcFixedReferenceSweptAreaSolid^>(solid);
+			if (fas != nullptr) return Init(fas, overrideProfileDef);	
+			XbimGeometryCreator::LogError(solid, "Swept Solid of Type {0} is not implemented", solid->GetType()->Name);
+		}
+
+		void XbimSolid::Init(IIfcSurfaceCurveSweptAreaSolid^ repItem, IIfcProfileDef^ overrideProfileDef)
+		{
+			XbimFace^ faceStart;
+			if (overrideProfileDef == nullptr)
+				faceStart = gcnew XbimFace(repItem->SweptArea);
+			else
+				faceStart = gcnew XbimFace(overrideProfileDef);
+			if (!faceStart->IsValid)
+			{
+				XbimGeometryCreator::LogWarning(repItem, "Could not build Swept Area");
+				return;
+			}
+
+			IModelFactors^ mf = repItem->Model->ModelFactors;
 			XbimWire^ sweep = gcnew XbimWire(repItem->Directrix);
-			sweep = (XbimWire^)sweep->Trim(repItem->StartParam, repItem->EndParam, mf->Precision);
+
+			if (repItem->StartParam.HasValue && repItem->EndParam.HasValue)
+				sweep = (XbimWire^)sweep->Trim(repItem->StartParam.Value, Math::Abs(repItem->EndParam.Value - 1.0)<Precision::Confusion() ? sweep->Length : repItem->EndParam.Value, mf->Precision);
+			else if (repItem->StartParam.HasValue && !repItem->EndParam.HasValue)
+				sweep = (XbimWire^)sweep->Trim(repItem->StartParam.Value, sweep->Length, mf->Precision);
+			else if (!repItem->StartParam.HasValue && repItem->EndParam.HasValue)
+				sweep = (XbimWire^)sweep->Trim(0, Math::Abs(repItem->EndParam.Value - 1.0)<Precision::Confusion() ? sweep->Length : repItem->EndParam.Value, mf->Precision);
 			if (!sweep->IsValid)
 			{
-				XbimGeometryCreator::logger->WarnFormat("WS019: Could not build Directrix of IfcSurfaceCurveSweptAreaSolid #{0}", repItem->EntityLabel);
+				XbimGeometryCreator::LogWarning(repItem, "Could not build Directrix");
 				return;
 			}
-			BRepOffsetAPI_MakePipeShell pipeMaker1(sweep); 
+			BRepOffsetAPI_MakePipeShell pipeMaker1(sweep);
 
-			if (dynamic_cast<IfcPlane^>(repItem->ReferenceSurface))
+			BRepPrim_Builder b;
+			TopoDS_Shell shell;
+			b.MakeShell(shell);
+			//find the start point of the sweep
+			XbimPoint3D s = sweep->Start;
+			gp_Pnt startPoint(s.X, s.Y, s.Z);
+			//get where this is on the surface
+			XbimFace^ refSurface = gcnew XbimFace(repItem->ReferenceSurface);
+			Handle(Geom_Surface) geomSurf = refSurface->GetSurface();
+			GeomAPI_ProjectPointOnSurf projector(startPoint, geomSurf);
+			projector.Perform(startPoint);
+			Quantity_Parameter u;
+			Quantity_Parameter v;
+			projector.Parameters(1, u, v);
+			XbimVector3D norm =refSurface->NormalAt(u, v);
+			//move the wire to the start point
+			TopoDS_Edge edge;
+			Standard_Real uoe;
+			BRepAdaptor_CompCurve cc(sweep);
+			cc.Edge(0, edge, uoe);
+			Standard_Real l, f;
+			Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, f, l);
+			gp_Pnt p1;
+			gp_Vec tangent;
+			gp_Vec xDir;
+			curve->D1(0, p1, tangent);			
+			gp_Ax3 toAx3(startPoint, tangent, gp_Vec(norm.X,norm.Y,norm.Z));	//rotate so normal of profile is tangental and X axis 
+			gp_Trsf trsf;
+			trsf.SetTransformation(toAx3, gp_Ax3());
+			TopLoc_Location topLoc(trsf);		
+			faceStart->SetLocation(topLoc);
+			XbimWire^ outerBound = (XbimWire^)(faceStart->OuterBound);
+					
+			pipeMaker1.SetTransitionMode(BRepBuilderAPI_RightCorner); 
+			pipeMaker1.Add(outerBound, Standard_False, Standard_False);
+			pipeMaker1.Build();
+			if (pipeMaker1.IsDone())
 			{
-				IfcPlane^ ifcPlane = (IfcPlane^)repItem->ReferenceSurface;
-				gp_Ax3 ax3 = XbimGeomPrim::ToAx3(ifcPlane->Position);
-				pipeMaker1.SetMode(ax3.Direction()); 
-				//find the start position of the sweep
+				TopoDS_Wire firstOuter = TopoDS::Wire(pipeMaker1.FirstShape().Reversed());
+				TopoDS_Wire lastOuter = TopoDS::Wire(pipeMaker1.LastShape().Reversed());
+				BRepBuilderAPI_MakeFace firstMaker(firstOuter);
+				BRepBuilderAPI_MakeFace lastMaker(lastOuter);
+				for (int i = 0; i < faceStart->InnerBounds->Count; i++)
+				{
+					//it is a hollow section so we need to build the inside
+					BRepOffsetAPI_MakePipeShell pipeMaker2(sweep);
+					TopoDS_Wire innerBoundStart = faceStart->InnerWires->Wire[i];
+					pipeMaker2.SetTransitionMode(BRepBuilderAPI_RightCorner);
+					pipeMaker2.Add(innerBoundStart);					
+					pipeMaker2.Build();
+					if (pipeMaker2.IsDone())
+					{
+						for (TopExp_Explorer explr(pipeMaker2.Shape(), TopAbs_FACE); explr.More(); explr.Next())
+						{
+							b.AddShellFace(shell, TopoDS::Face(explr.Current().Reversed()));
+						}
+					}
+					firstMaker.Add(TopoDS::Wire(pipeMaker2.FirstShape()));
+					lastMaker.Add(TopoDS::Wire(pipeMaker2.LastShape()));
+				}
+				b.AddShellFace(shell, firstMaker.Face());
+				b.AddShellFace(shell, lastMaker.Face());
+				for (TopExp_Explorer explr(pipeMaker1.Shape(), TopAbs_FACE); explr.More(); explr.Next())
+				{
+					b.AddShellFace(shell, TopoDS::Face(explr.Current()));
+				}
+				TopoDS_Solid solid;
+				BRep_Builder bs;
+				bs.MakeSolid(solid);
+				bs.Add(solid, shell);
+				BRepClass3d_SolidClassifier sc(solid);
+				sc.PerformInfinitePoint(Precision::Confusion());
+				if (sc.State() == TopAbs_IN)
+				{
+					bs.MakeSolid(solid);
+					shell.Reverse();
+					bs.Add(solid, shell);
+
+				}
+				pSolid = new TopoDS_Solid();
+				*pSolid = solid;
+				pSolid->Closed(Standard_True);
+				if (repItem->Position != nullptr) //In Ifc4 this is now optional
+					pSolid->Move(XbimConvert::ToLocation(repItem->Position));
+				return;
+			}
+			
+			GC::KeepAlive(faceStart);
+			//GC::KeepAlive(faceEnd);
 				
-				BRepTools_WireExplorer wExp(sweep);
-				Standard_Real start = 0;
-				Standard_Real end = 1;
-				Handle_Geom_Curve curve = BRep_Tool::Curve(wExp.Current(), start, end);
+		
+		}
+		void XbimSolid::Init(IIfcRevolvedAreaSolidTapered^ repItem, IIfcProfileDef^ overrideProfileDef)
+		{
+			BRepPrim_Builder b;
+			TopoDS_Shell shell;
+			b.MakeShell(shell);
+			XbimFace^ faceStart;
+			if (overrideProfileDef == nullptr)
+				faceStart = gcnew XbimFace(repItem->SweptArea);
+			else
+				faceStart = gcnew XbimFace(overrideProfileDef);
+			XbimFace^ faceEnd = gcnew XbimFace(repItem->EndSweptArea);
+
+			if (faceStart->IsValid && faceEnd->IsValid && repItem->Angle > 0) //we have a valid face and angle
+			{
+				IIfcAxis1Placement^ revolaxis = repItem->Axis;
+				gp_Pnt origin(revolaxis->Location->X, revolaxis->Location->Y, revolaxis->Location->Z);
+				XbimVector3D zDir = repItem->Axis->Z;
+				gp_Dir vz(zDir.X, zDir.Y, zDir.Z);
+
+				double radianConvert = repItem->Model->ModelFactors->AngleToRadiansConversionFactor;
+				//create a curve trimmed to the 
+				XbimPoint3D faceCentre = faceStart->Location;
+				XbimPoint3D rotCentre(origin.X(), origin.Y(), origin.Z());
+				XbimVector3D v = faceCentre-rotCentre ;
+				gp_Ax2 ax2(origin, vz,  gp_Vec(v.X,v.Y,v.Z));
+				gp_Circ circ(ax2, v.Length);
+				double angle = Math::Min(repItem->Angle*radianConvert, M_PI * 2);;
+				GC_MakeArcOfCircle arcMaker(circ, 0., angle, Standard_True);
+				Handle(Geom_TrimmedCurve) trimmed = arcMaker.Value();
+				XbimCurve^ curve = gcnew XbimCurve(trimmed);
+				XbimEdge^ edge = gcnew XbimEdge(curve);
+				XbimWire^ sweep = gcnew XbimWire(edge);
+				//move the end face to the end position
+				gp_Pnt ep; gp_Vec tan; gp_Vec norm;
+				trimmed->D2(trimmed->LastParameter(), ep, tan, norm);
+				gp_Ax3 toAx3(ep,tan, norm );	//rotate so normal of profile is tangental and X axis 
+				gp_Trsf trsf;
+				trsf.SetTransformation(toAx3, gp_Ax3());								
+				faceEnd->Move(trsf);
+				BRepOffsetAPI_MakePipeShell pipeMaker1(sweep);
+				TopoDS_Wire outerBoundStart = (XbimWire^)(faceStart->OuterBound);
+				TopoDS_Wire outerBoundEnd = (XbimWire^)(faceEnd->OuterBound);
+				//pipeMaker1.SetMode(Standard_True);
+				pipeMaker1.SetTransitionMode(BRepBuilderAPI_Transformed);
+				pipeMaker1.Add(outerBoundStart);
+				pipeMaker1.Add(outerBoundEnd);
+				pipeMaker1.Build();
+				if (pipeMaker1.IsDone())
+				{
+					TopoDS_Wire firstOuter = TopoDS::Wire(pipeMaker1.FirstShape().Reversed());
+					TopoDS_Wire lastOuter = TopoDS::Wire(pipeMaker1.LastShape().Reversed());
+					BRepBuilderAPI_MakeFace firstMaker(firstOuter);
+					BRepBuilderAPI_MakeFace lastMaker(lastOuter);
+					for (int i = 0; i < faceStart->InnerBounds->Count; i++)					
+					{
+						//it is a hollow section so we need to build the inside
+						BRepOffsetAPI_MakePipeShell pipeMaker2(sweep);
+						TopoDS_Wire innerBoundStart = faceStart->InnerWires->Wire[i];
+						TopoDS_Wire innerBoundEnd = faceEnd->InnerWires->Wire[i];
+					
+						pipeMaker2.SetTransitionMode(BRepBuilderAPI_Transformed);
+						pipeMaker2.Add(innerBoundStart);
+						pipeMaker2.Add(innerBoundEnd);
+						pipeMaker2.Build();
+						if (pipeMaker2.IsDone())
+						{
+							for (TopExp_Explorer explr(pipeMaker2.Shape(), TopAbs_FACE); explr.More(); explr.Next())
+							{
+								b.AddShellFace(shell, TopoDS::Face(explr.Current().Reversed()));
+							}
+						}
+						firstMaker.Add(TopoDS::Wire(pipeMaker2.FirstShape()));
+						lastMaker.Add(TopoDS::Wire(pipeMaker2.LastShape()));
+					}
+					b.AddShellFace(shell, firstMaker.Face());
+					b.AddShellFace(shell, lastMaker.Face());
+					for (TopExp_Explorer explr(pipeMaker1.Shape(), TopAbs_FACE); explr.More(); explr.Next())
+					{
+						b.AddShellFace(shell, TopoDS::Face(explr.Current()));
+					}
+					TopoDS_Solid solid;
+					BRep_Builder bs;
+					bs.MakeSolid(solid);
+					bs.Add(solid, shell);
+					BRepClass3d_SolidClassifier sc(solid);
+					sc.PerformInfinitePoint(Precision::Confusion());
+					if (sc.State() == TopAbs_IN)
+					{
+						bs.MakeSolid(solid);
+						shell.Reverse();
+						bs.Add(solid, shell);
+
+					}
+					pSolid = new TopoDS_Solid();
+					*pSolid = solid;
+					pSolid->Closed(Standard_True);
+					if (repItem->Position != nullptr) //In Ifc4 this is now optional
+						pSolid->Move(XbimConvert::ToLocation(repItem->Position));
+					return;
+				}
+				else if (repItem->Angle <= 0)
+				{
+					XbimGeometryCreator::LogInfo(repItem, "Invalid extrusion,  angle must be >0 ");
+				}
+				GC::KeepAlive(faceStart);
+				GC::KeepAlive(faceEnd);
+			}
+		}
+
+		void XbimSolid::Init(IIfcExtrudedAreaSolidTapered^ repItem, IIfcProfileDef^ overrideProfileDef)
+		{
+			BRepPrim_Builder b;
+			TopoDS_Shell shell;
+			b.MakeShell(shell);
+			XbimFace^ faceStart;
+			if (overrideProfileDef == nullptr)
+				faceStart = gcnew XbimFace(repItem->SweptArea);
+			else
+				faceStart = gcnew XbimFace(overrideProfileDef);
+			XbimFace^ faceEnd = gcnew XbimFace(repItem->EndSweptArea);
+			
+			if (faceStart->IsValid && faceEnd->IsValid && repItem->Depth > 0) //we have valid faces and extrusion
+			{
+				
+				double precision = repItem->Model->ModelFactors->Precision;
+				IIfcDirection^ dir = repItem->ExtrudedDirection;
+				XbimVector3D vec(dir->X, dir->Y, dir->Z);
+				vec = vec.Normalized();
+				vec *= repItem->Depth;
+				faceEnd->Translate(vec);
+				XbimVertex^ start = gcnew XbimVertex(0, 0, 0, precision);
+				XbimVertex^ end = gcnew XbimVertex(vec.X, vec.Y, vec.Z, precision);
+				XbimEdge^ edge = gcnew XbimEdge(start, end);
+				XbimWire^ sweep = gcnew XbimWire(edge);
+				BRepOffsetAPI_MakePipeShell pipeMaker1(sweep);
+				TopoDS_Wire outerBoundStart = (XbimWire^)(faceStart->OuterBound);
+				TopoDS_Wire outerBoundEnd = (XbimWire^)(faceEnd->OuterBound);
+				//pipeMaker1.SetMode(Standard_True);
+				pipeMaker1.SetTransitionMode(BRepBuilderAPI_Transformed);				
+				pipeMaker1.Add(outerBoundStart);
+				pipeMaker1.Add(outerBoundEnd);
+				pipeMaker1.Build();
+				if (pipeMaker1.IsDone() )
+				{
+					TopoDS_Wire firstOuter = TopoDS::Wire(pipeMaker1.FirstShape().Reversed());
+					TopoDS_Wire lastOuter = TopoDS::Wire(pipeMaker1.LastShape().Reversed());
+					BRepBuilderAPI_MakeFace firstMaker(firstOuter);
+					BRepBuilderAPI_MakeFace lastMaker(lastOuter);
+					for (int i = 0; i < faceStart->InnerBounds->Count; i++)
+					{
+
+						//it is a hollow section so we need to build the inside
+						BRepOffsetAPI_MakePipeShell pipeMaker2(sweep);
+						TopoDS_Wire innerBoundStart =faceStart->InnerWires->Wire[i];
+						TopoDS_Wire innerBoundEnd = faceEnd->InnerWires->Wire[i];
+						//pipeMaker2.SetMode(Standard_True);
+						pipeMaker2.SetTransitionMode(BRepBuilderAPI_Transformed);
+						pipeMaker2.Add(innerBoundStart);
+						pipeMaker2.Add(innerBoundEnd);
+						pipeMaker2.Build();
+						if (pipeMaker2.IsDone())
+						{
+							for (TopExp_Explorer explr(pipeMaker2.Shape(), TopAbs_FACE); explr.More(); explr.Next())
+							{
+								b.AddShellFace(shell, TopoDS::Face(explr.Current()));
+							}
+						}
+						firstMaker.Add(TopoDS::Wire(pipeMaker2.FirstShape()));
+						lastMaker.Add(TopoDS::Wire(pipeMaker2.LastShape()));
+
+					}
+					b.AddShellFace(shell, firstMaker.Face());
+					b.AddShellFace(shell, lastMaker.Face());
+					
+					for (TopExp_Explorer explr(pipeMaker1.Shape(), TopAbs_FACE); explr.More(); explr.Next())
+					{						
+						b.AddShellFace(shell, TopoDS::Face(explr.Current()));
+					}
+					b.CompleteShell(shell);
+					TopoDS_Solid solid;
+					BRep_Builder bs;
+					bs.MakeSolid(solid);					
+					bs.Add(solid, shell);					
+					BRepClass3d_SolidClassifier sc(solid);
+					sc.PerformInfinitePoint(Precision::Confusion());
+					if (sc.State() == TopAbs_IN) 
+					{
+						bs.MakeSolid(solid);
+						shell.Reverse();						 
+						bs.Add(solid, shell);
+						
+					}
+					pSolid = new TopoDS_Solid();
+					*pSolid = solid;
+					pSolid->Closed(Standard_True);
+					if (repItem->Position != nullptr) //In Ifc4 this is now optional
+						pSolid->Move(XbimConvert::ToLocation(repItem->Position));
+					return;
+				}
+				GC::KeepAlive(faceStart);
+				GC::KeepAlive(faceEnd);				
+			}			
+			XbimGeometryCreator::LogWarning(repItem,"Invalid tapered extrusion, depth must be >0 and faces must be correctly defined");		
+			//if it has failed we will have a null solid
+		}
+
+		void XbimSolid::Init(IIfcFixedReferenceSweptAreaSolid^ repItem, IIfcProfileDef^ overrideProfileDef)
+		{
+			BRepPrim_Builder b;
+			TopoDS_Shell shell;
+			b.MakeShell(shell);
+			XbimFace^ faceStart;
+			if (overrideProfileDef == nullptr)
+				faceStart = gcnew XbimFace(repItem->SweptArea);
+			else
+				faceStart = gcnew XbimFace(overrideProfileDef);
+			if (!faceStart->IsValid)
+			{
+				XbimGeometryCreator::LogWarning(repItem,"Could not build swept area");
+				return;
+			}
+
+			IModelFactors^ mf = repItem->Model->ModelFactors;
+			XbimWire^ sweep = gcnew XbimWire(repItem->Directrix);
+
+			if (repItem->StartParam.HasValue && repItem->EndParam.HasValue)
+				sweep = (XbimWire^)sweep->Trim(repItem->StartParam.Value, Math::Abs(repItem->EndParam.Value - 1.0)<Precision::Confusion() ? sweep->Length : repItem->EndParam.Value, mf->Precision);
+			else if (repItem->StartParam.HasValue && !repItem->EndParam.HasValue)
+				sweep = (XbimWire^)sweep->Trim(repItem->StartParam.Value, sweep->Length, mf->Precision);
+			else if (!repItem->StartParam.HasValue && repItem->EndParam.HasValue)
+				sweep = (XbimWire^)sweep->Trim(0, Math::Abs(repItem->EndParam.Value - 1.0)<Precision::Confusion() ? sweep->Length : repItem->EndParam.Value, mf->Precision);
+			if (!sweep->IsValid)
+			{
+				XbimGeometryCreator::LogWarning(repItem,"Could not build directrix");
+				return;
+			}
+			if (faceStart->IsValid) //we have valid faces and extrusion
+			{
+				
+				IIfcDirection^ xdir = repItem->FixedReference;
+				gp_Vec xVec(xdir->X,xdir->Y,XbimConvert::GetZValueOrZero(xdir));
+				xVec.Normalize();
+				
+				TopoDS_Edge edge;
+				Standard_Real uoe;
+				BRepAdaptor_CompCurve cc(sweep);
+				cc.Edge(0, edge, uoe);
+				Standard_Real l, f;
+				Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, f, l);
+				//move the wire to the start point
 				gp_Pnt p1;
 				gp_Vec tangent;
 				curve->D1(0, p1, tangent);
-				const TopoDS_Vertex firstPoint = wExp.CurrentVertex();
-				gp_Ax3 toAx3(BRep_Tool::Pnt(firstPoint), tangent, ax3.Direction());	//rotate so normal of profile is tangental and X axis 
+				
+				gp_Ax3 toAx3(p1, tangent, xVec);	//rotate so normal of profile is tangental and X axis 
 				gp_Trsf trsf;
 				trsf.SetTransformation(toAx3, gp_Ax3());
 				TopLoc_Location topLoc(trsf);
-				XbimWire^ outerBound = (XbimWire^)(profile->OuterBound);
-				TopoDS_Wire p = outerBound;
-				p.Location(topLoc);
-				
-				pipeMaker1.SetTransitionMode(BRepBuilderAPI_RightCorner); 
-				pipeMaker1.Add(p, Standard_False, Standard_False);
+				faceStart->SetLocation(topLoc);
+				XbimWire^ outerBound = (XbimWire^)(faceStart->OuterBound);		
+				BRepOffsetAPI_MakePipeShell pipeMaker1(sweep);						
+				//pipeMaker1.SetMode(Standard_True);
+				pipeMaker1.SetTransitionMode(BRepBuilderAPI_Transformed);
+				pipeMaker1.Add(outerBound);
 				pipeMaker1.Build();
-				if (pipeMaker1.IsDone() && pipeMaker1.MakeSolid())
-				{		
-					//do any inner loops					
-					BRepPrim_Builder b;
-					TopoDS_Shell shell;
-					b.MakeShell(shell);
-					XbimFace^ bottomOuter = gcnew XbimFace(TopoDS::Face(pipeMaker1.FirstShape()));
-					XbimFace^ topOuter = gcnew XbimFace(TopoDS::Face(pipeMaker1.LastShape()));
-					const TopoDS_Shape& pipeOuter = pipeMaker1.Shape();
-					for (TopExp_Explorer explr(pipeOuter, TopAbs_FACE); explr.More(); explr.Next())
+				if (pipeMaker1.IsDone())
+				{
+					TopoDS_Wire firstOuter = TopoDS::Wire(pipeMaker1.FirstShape().Reversed());
+					TopoDS_Wire lastOuter = TopoDS::Wire(pipeMaker1.LastShape().Reversed());
+					BRepBuilderAPI_MakeFace firstMaker(firstOuter);
+					BRepBuilderAPI_MakeFace lastMaker(lastOuter);
+					for (int i = 0; i < faceStart->InnerBounds->Count; i++)
 					{
-						const TopoDS_Face& face = TopoDS::Face(explr.Current());
-						//Opencascade 6.8 changed first and lastshape so that isEqual failed, there is an issue with orientation so use isSame 
-						if (!face.IsSame(pipeMaker1.FirstShape()) && !face.IsSame(pipeMaker1.LastShape()))
-							b.AddShellFace(shell, face);
-					}
 
-					for each (IXbimWire^ innerBound in profile->InnerBounds) //only do the first
-					{
+						//it is a hollow section so we need to build the inside
 						BRepOffsetAPI_MakePipeShell pipeMaker2(sweep);
-						pipeMaker2.SetMode(ax3.Direction());
-						pipeMaker2.SetTransitionMode(BRepBuilderAPI_RightCorner);
-
-						XbimWire^ xInnerBound = (XbimWire^)innerBound;
-						TopoDS_Wire i = xInnerBound;
-						i.Location(topLoc);
-						pipeMaker2.Add(i, Standard_False, Standard_False);
+						TopoDS_Wire innerBoundStart = faceStart->InnerWires->Wire[i];						
+						//pipeMaker2.SetMode(Standard_True);
+						pipeMaker2.SetTransitionMode(BRepBuilderAPI_Transformed);
+						pipeMaker2.Add(innerBoundStart);						
 						pipeMaker2.Build();
-						if (pipeMaker2.IsDone() && pipeMaker2.MakeSolid())
+						if (pipeMaker2.IsDone())
 						{
-							XbimFace^ bottomInner = gcnew XbimFace(TopoDS::Face(pipeMaker2.FirstShape()));
-							XbimFace^ topInner = gcnew XbimFace(TopoDS::Face(pipeMaker2.LastShape()));
-							//add the inner loops to the end faces
-							bottomOuter->Add(bottomInner->OuterBound);
-							topOuter->Add(topInner->OuterBound);
-							//add the other faces to the shell
 							for (TopExp_Explorer explr(pipeMaker2.Shape(), TopAbs_FACE); explr.More(); explr.Next())
 							{
-								const TopoDS_Face& face = TopoDS::Face(explr.Current());
-								//Opencascade 6.8 changed first and lastshape so that isEqual failed, there is an issue with orientation so use isSame 
-								if (!face.IsSame(pipeMaker2.FirstShape()) && !face.IsSame(pipeMaker2.LastShape()))
-									b.AddShellFace(shell, face);
+								b.AddShellFace(shell, TopoDS::Face(explr.Current()));
 							}
 						}
-						break; //only do one
+						firstMaker.Add(TopoDS::Wire(pipeMaker2.FirstShape()));
+						lastMaker.Add(TopoDS::Wire(pipeMaker2.LastShape()));
 					}
-					//add top and bottom faces with their hole loops
-					b.AddShellFace(shell, bottomOuter);
-					b.AddShellFace(shell, topOuter);
+					b.AddShellFace(shell, firstMaker.Face());
+					b.AddShellFace(shell, lastMaker.Face());
+
+					for (TopExp_Explorer explr(pipeMaker1.Shape(), TopAbs_FACE); explr.More(); explr.Next())
+					{
+						b.AddShellFace(shell, TopoDS::Face(explr.Current()));
+					}
 					b.CompleteShell(shell);
+					TopoDS_Solid solid;
 					BRep_Builder bs;
+					bs.MakeSolid(solid);
+					bs.Add(solid, shell);
+					BRepClass3d_SolidClassifier sc(solid);
+					sc.PerformInfinitePoint(Precision::Confusion());
+					if (sc.State() == TopAbs_IN)
+					{
+						bs.MakeSolid(solid);
+						shell.Reverse();
+						bs.Add(solid, shell);
+
+					}
 					pSolid = new TopoDS_Solid();
-					bs.MakeSolid(*pSolid);
-					bs.Add(*pSolid, shell);
-					Move(repItem->Position);
+					*pSolid = solid;
+					pSolid->Closed(Standard_True);
+					if (repItem->Position != nullptr) //In Ifc4 this is now optional
+						pSolid->Move(XbimConvert::ToLocation(repItem->Position));
 					return;
-
 				}
-				else
-				{
-					XbimGeometryCreator::logger->WarnFormat("Entity #" + repItem->EntityLabel.ToString() + ", IfcSurfaceCurveSweptAreaSolid could not be constructed ");
-				}
-
+				GC::KeepAlive(faceStart);
+				
 			}
-			else
-			{
-				XbimGeometryCreator::logger->WarnFormat("WS019: Entity #" + repItem->EntityLabel.ToString() + ", IfcSurfaceCurveSweptAreaSolid has a Non-Planar surface");
-				pipeMaker1.SetMode(Standard_False); //use auto calculation of tangent and binormal
-				pipeMaker1.Add(profile, Standard_False, Standard_True);
-				pipeMaker1.Build();
-				if (pipeMaker1.IsDone() && pipeMaker1.MakeSolid())
-				{
-					TopoDS_Shape result = pipeMaker1.Shape();
-					result.Move(XbimGeomPrim::ToLocation(repItem->Position));
-					pSolid = new TopoDS_Solid();
-					*pSolid = TopoDS::Solid(result);
-					return;
-				}
-			}	
+			XbimGeometryCreator::LogInfo(repItem, "Invalid extrusion, depth must be >0 and faces must be correctly defined");
+			//if it has failed we will have a null solid
+
 		}
 
-		void XbimSolid::Init(IfcExtrudedAreaSolid^ repItem, IfcProfileDef^ overrideProfileDef)
+		void XbimSolid::Init(IIfcSectionedSpine^ repItem)
 		{
+			BRepPrim_Builder b;
+			TopoDS_Shell shell;
+			b.MakeShell(shell);
+
+			//make a list of faces for each cross section (wire is not good enough as there ay be holes to consider
+			List<XbimFace^>^ crossSections = gcnew List<XbimFace^>();
+			for each (IIfcProfileDef^ profile in repItem->CrossSections)
+			{
+				crossSections->Add(gcnew XbimFace(profile));
+			}
+			List<IIfcAxis2Placement3D^>^ positions = Enumerable::ToList<IIfcAxis2Placement3D^>(repItem->CrossSectionPositions);
+			
+			if (crossSections->Count>1) //we have valid faces 
+			{
+				double precision = repItem->Model->ModelFactors->Precision;
+				//build the spine
+				XbimWire^ sweep = gcnew XbimWire(repItem->SpineCurve);
+				BRepOffsetAPI_MakePipeShell pipeMaker1(sweep);
+				pipeMaker1.SetTransitionMode(BRepBuilderAPI_Transformed);
+				//move the sections to the right position
+				for (int i = 0; i < crossSections->Count; i++)
+				{					
+					crossSections[i]->Move(positions[i]);
+					TopoDS_Wire outerBound = (XbimWire^)(crossSections[i]->OuterBound);															
+					pipeMaker1.Add(outerBound);
+				}
+
+				pipeMaker1.Build();
+				if (pipeMaker1.IsDone())
+				{
+					TopoDS_Wire firstOuter = TopoDS::Wire(pipeMaker1.FirstShape().Reversed());
+					TopoDS_Wire lastOuter = TopoDS::Wire(pipeMaker1.LastShape().Reversed());
+					BRepBuilderAPI_MakeFace firstMaker(firstOuter);
+					BRepBuilderAPI_MakeFace lastMaker(lastOuter);
+					for (int i = 0; i < crossSections[0]->InnerBounds->Count; i++) //assume all sections have same topology
+					{
+						//it is a hollow section so we need to build the inside
+						BRepOffsetAPI_MakePipeShell pipeMaker2(sweep);
+						pipeMaker2.SetTransitionMode(BRepBuilderAPI_Transformed);
+						for (int j = 0; j < crossSections->Count; j++)
+						{							
+							TopoDS_Wire innerBound = (XbimWire^)(crossSections[j]->InnerWires->Wire[i]);
+							pipeMaker2.Add(innerBound);
+						}
+						pipeMaker2.Build();
+						if (pipeMaker2.IsDone())
+						{
+							for (TopExp_Explorer explr(pipeMaker2.Shape(), TopAbs_FACE); explr.More(); explr.Next())
+							{
+								b.AddShellFace(shell, TopoDS::Face(explr.Current()));
+							}
+						}
+						firstMaker.Add(TopoDS::Wire(pipeMaker2.FirstShape()));
+						lastMaker.Add(TopoDS::Wire(pipeMaker2.LastShape()));
+
+					}
+					b.AddShellFace(shell, firstMaker.Face());
+					b.AddShellFace(shell, lastMaker.Face());
+
+					for (TopExp_Explorer explr(pipeMaker1.Shape(), TopAbs_FACE); explr.More(); explr.Next())
+					{
+						b.AddShellFace(shell, TopoDS::Face(explr.Current()));
+					}
+					b.CompleteShell(shell);
+					TopoDS_Solid solid;
+					BRep_Builder bs;
+					bs.MakeSolid(solid);
+					bs.Add(solid, shell);
+					BRepClass3d_SolidClassifier sc(solid);
+					sc.PerformInfinitePoint(Precision::Confusion());
+					if (sc.State() == TopAbs_IN)
+					{
+						bs.MakeSolid(solid);
+						shell.Reverse();
+						bs.Add(solid, shell);
+
+					}
+					pSolid = new TopoDS_Solid();
+					*pSolid = solid;
+					pSolid->Closed(Standard_True);	
+					GC::KeepAlive(crossSections);
+					return;
+				}				
+			}
+			XbimGeometryCreator::LogInfo(repItem, "Invalid extrusion, depth must be >0 and faces must be correctly defined");
+			//if it has failed we will have a null solid
+		}
+
+		void XbimSolid::Init(IIfcExtrudedAreaSolid^ repItem, IIfcProfileDef^ overrideProfileDef)
+		{
+			IIfcExtrudedAreaSolidTapered^ extrudeTaperedArea = dynamic_cast<IIfcExtrudedAreaSolidTapered^>(repItem);
+			if (extrudeTaperedArea != nullptr) return Init(extrudeTaperedArea, overrideProfileDef);
 			XbimFace^ face;
 			if (overrideProfileDef == nullptr)
 				face = gcnew XbimFace(repItem->SweptArea);
@@ -464,8 +1016,9 @@ namespace Xbim
 			
 			if (face->IsValid && repItem->Depth > 0) //we have a valid face and extrusion
 			{
-				IfcDirection^ dir = repItem->ExtrudedDirection;
+				IIfcDirection^ dir = repItem->ExtrudedDirection;
 				gp_Vec vec(dir->X, dir->Y, dir->Z);
+				vec.Normalize();
 				vec *= repItem->Depth;
 				BRepPrimAPI_MakePrism prism(face, vec);
 				GC::KeepAlive(face);
@@ -473,23 +1026,24 @@ namespace Xbim
 				{
 					pSolid = new TopoDS_Solid();
 					*pSolid = TopoDS::Solid(prism.Shape());
-					pSolid->Move(XbimGeomPrim::ToLocation(repItem->Position));
+					if (repItem->Position!=nullptr) //In Ifc4 this is now optional
+						pSolid->Move(XbimConvert::ToLocation(repItem->Position));
 					//BRepTools::Write(*pSolid, "d:\\tmp\\b");
 				}
 				else
-					XbimGeometryCreator::logger->WarnFormat("WS002: Invalid Solid Extrusion, could not create solid, found in Entity #{0}=IfcExtrudedAreaSolid.",
-					repItem->EntityLabel);
+					XbimGeometryCreator::LogWarning(repItem, "Invalid extrusion, could not create solid");
 			}
 			else if (repItem->Depth <= 0)
 			{
-				XbimGeometryCreator::logger->WarnFormat("WS001: Invalid Solid Extrusion, Extrusion Depth must be >0, found in Entity #{0}=IfcExtrudedAreaSolid.",
-					repItem->EntityLabel);
+				XbimGeometryCreator::LogInfo(repItem, "Invalid extrusion, depth must be >0");
 			}
 			//if it has failed we will have a null solid
 		}
 
-		void XbimSolid::Init(IfcRevolvedAreaSolid^ repItem, IfcProfileDef^ overrideProfileDef)
+		void XbimSolid::Init(IIfcRevolvedAreaSolid^ repItem, IIfcProfileDef^ overrideProfileDef)
 		{
+			IIfcRevolvedAreaSolidTapered^ extrudeTaperedArea = dynamic_cast<IIfcRevolvedAreaSolidTapered^>(repItem);
+			if (extrudeTaperedArea != nullptr) return Init(extrudeTaperedArea, overrideProfileDef);
 			XbimFace^ face;
 			if (overrideProfileDef == nullptr)
 				face = gcnew XbimFace(repItem->SweptArea);
@@ -498,11 +1052,12 @@ namespace Xbim
 
 			if (face->IsValid && repItem->Angle > 0) //we have a valid face and angle
 			{
-				IfcAxis1Placement^ revolaxis = repItem->Axis;
+				IIfcAxis1Placement^ revolaxis = repItem->Axis;
 				gp_Pnt origin(revolaxis->Location->X, revolaxis->Location->Y, revolaxis->Location->Z);
-				gp_Dir vx(revolaxis->Axis->X, revolaxis->Axis->Y, revolaxis->Axis->Z);
+				XbimVector3D zDir = revolaxis->Z;
+				gp_Dir vx(zDir.X, zDir.Y, zDir.Z);
 				gp_Ax1 ax1(origin, vx);
-				double radianConvert = repItem->ModelOf->ModelFactors->AngleToRadiansConversionFactor;
+				double radianConvert = repItem->Model->ModelFactors->AngleToRadiansConversionFactor;
 				BRepPrimAPI_MakeRevol revol(face, ax1, repItem->Angle*radianConvert);
 				
 				GC::KeepAlive(face);
@@ -510,118 +1065,49 @@ namespace Xbim
 				{
 					//BRepTools::Write(revol.Shape(), "d:\\tmp\\rev");
 					pSolid = new TopoDS_Solid();
-					*pSolid = TopoDS::Solid(revol.Shape());
-					pSolid->Move(XbimGeomPrim::ToLocation(repItem->Position));
+					if (repItem->Position!=nullptr)
+						*pSolid = TopoDS::Solid(revol.Shape());
+					pSolid->Move(XbimConvert::ToLocation(repItem->Position));
 				}
 				else
-					XbimGeometryCreator::logger->WarnFormat("WS003: Invalid Solid Extrusion, could not create solid, found in Entity #{0}=IfcRevolvedAreaSolid.",
-					repItem->EntityLabel);
+					XbimGeometryCreator::LogWarning(repItem, "Invalidextrusion, could not create solid");
 			}
 			else if (repItem->Angle <= 0)
 			{
-				XbimGeometryCreator::logger->WarnFormat("WS004: Invalid Solid Extrusion, Extrusion Angle must be >0, found in Entity #{0}=IfcRevolvedAreaSolid.",
-					repItem->EntityLabel);
+				XbimGeometryCreator::LogWarning(repItem, "Invalidextrusion, angle must be >0");
 			}
 		}
 
-		void XbimSolid::Init(IfcHalfSpaceSolid^ hs, double maxExtrusion, XbimPoint3D^ bboxCentroid)
+		void XbimSolid::Init(IIfcHalfSpaceSolid^ hs, double maxExtrusion, XbimPoint3D centroid)
 		{
-			if (dynamic_cast<IfcPolygonalBoundedHalfSpace^>(hs))
-				return Init((IfcPolygonalBoundedHalfSpace^)hs, maxExtrusion);
-			else if (dynamic_cast<IfcBoxedHalfSpace^>(hs))
-				return Init((IfcBoxedHalfSpace^)hs);
+			if (dynamic_cast<IIfcPolygonalBoundedHalfSpace^>(hs))
+				return Init((IIfcPolygonalBoundedHalfSpace^)hs, maxExtrusion);
+			else if (dynamic_cast<IIfcBoxedHalfSpace^>(hs))
+				return Init((IIfcBoxedHalfSpace^)hs);
 			else //it is a simple Half space
 			{
-				IfcSurface^ surface = (IfcSurface^)hs->BaseSurface;
-				IfcPlane^ ifcPlane = dynamic_cast<IfcPlane^>(surface);
+				IIfcSurface^ surface = (IIfcSurface^)hs->BaseSurface;
+				IIfcPlane^ ifcPlane = dynamic_cast<IIfcPlane^>(surface);
 				if (ifcPlane == nullptr)
 				{
-					XbimGeometryCreator::logger->WarnFormat("WS011: Non-Planar half spaces are not supported in Entity #{0}, it has been ignored", hs->EntityLabel);
+					XbimGeometryCreator::LogWarning(hs, "Non-planar half spaces are not supported it has been ignored");
 					return;
 				}
-//#ifdef OCC_6_9_SUPPORTED
-//
-//
-//				gp_Ax3 ax3 = XbimGeomPrim::ToAx3(ifcPlane->Position);
-//				gp_Pln pln(ax3);
-//				gp_Vec zVec = hs->AgreementFlag ? -pln.Axis().Direction() : pln.Axis().Direction();
-//
-//				gp_Pnt pnt = ax3.Location();
-//				pnt.Translate(zVec);
-//				BRepBuilderAPI_MakeFace  faceMaker(pln);
-//				if (faceMaker.IsDone())
-//				{
-//					BRepPrimAPI_MakeHalfSpace halfSpaceBulder(faceMaker.Face(), pnt);
-//					if (halfSpaceBulder.IsDone())
-//					{
-//						pSolid = new TopoDS_Solid();
-//						*pSolid = TopoDS::Solid(halfSpaceBulder.Solid());
-//						BRepTools::Write(halfSpaceBulder.Solid(), "d:\\tmp\\hs");
-//					}
-//					else
-//						XbimGeometryCreator::logger->WarnFormat("WS012: Half space solid could not be formed in Entity #{0}, it has been ignored", hs->EntityLabel);
-//				}
-//
-//#else
-
+				gp_Pln plane = XbimConvert::ToPlane(ifcPlane->Position);
+				Handle(Geom_Surface) hsPlane = new Geom_Plane(plane);
+				gp_Pnt centre(centroid.X, centroid.Y, centroid.Z);
+				GeomAPI_ProjectPointOnSurf projector(centre, hsPlane, hs->Model->ModelFactors->Precision);
+				gp_Pnt nearest = projector.NearestPoint();
 				double bounds = 2 * maxExtrusion;
 				double z = hs->AgreementFlag ? -bounds : 0;
 				XbimPoint3D corner(-maxExtrusion, -maxExtrusion, z);
-				
 				XbimVector3D size(bounds, bounds, bounds);
 				XbimRect3D rect3D(corner, size);
-				Init(rect3D, hs->ModelOf->ModelFactors->Precision);
-
-				// here we have to shift the halfspace to the center of the main body
-				// geometric guidance from http://stackoverflow.com/questions/9605556/how-to-project-a-3d-point-to-a-3d-plane
-				// 
-				gp_Trsf toPos = XbimGeomPrim::ToTransform(ifcPlane->Position);
-				gp_XYZ posPnt = toPos.TranslationPart();
-				
-				XbimVector3D v = XbimVector3D(
-					bboxCentroid->X - posPnt.X(),
-					bboxCentroid->Y - posPnt.Y(),
-					bboxCentroid->Z - posPnt.Z()
-					);
-
-				// if Axis or refDirectopm are null then use default axis (Ifc Rule)
-				XbimVector3D n;
-				if (ifcPlane->Position->Axis == nullptr || ifcPlane->Position->RefDirection == nullptr) 
-				{
-					n = XbimVector3D(0, 0, 1);
-					// refdirection not needed.
-				}
-				else
-				{
-					n = XbimVector3D(
-						ifcPlane->Position->Axis->X,
-						ifcPlane->Position->Axis->Y,
-						ifcPlane->Position->Axis->Z
-						);
-					n.Normalize();
-				}
-
-				double dist = v.DotProduct(n);
-				XbimVector3D delta = XbimVector3D::Multiply(dist,n);
-
-				XbimPoint3D planar = XbimPoint3D(
-					bboxCentroid->X - delta.X,
-					bboxCentroid->Y - delta.Y,
-					bboxCentroid->Z - delta.Z
-					);
-
-				posPnt.SetX(planar.X);
-				posPnt.SetY(planar.Y);
-				posPnt.SetZ(planar.Z);
-
-				toPos.SetTranslationPart(posPnt);
-				pSolid->Move(toPos);
-				
-				// XbimGeometryCreator::logger->DebugFormat("{0} {1} {2}", posPnt.X(), posPnt.Y(), posPnt.Z());
-				// IfcAxis2Placement3D^ newPlacement = gcnew IfcAxis2Placement3D();
-				// newPlacement->Location = 
-
-				// Move(ifcPlane->Position); // commented becasue move happens just above.
+				Init(rect3D, hs->Model->ModelFactors->Precision);
+				Move(ifcPlane->Position);
+				IIfcCartesianPoint^ cp = ifcPlane->Position->Location;
+				XbimVector3D vec = XbimPoint3D(nearest.X(), nearest.Y(), nearest.Z()) - XbimPoint3D(cp->X,cp->Y,cp->Z);
+				Translate(vec);
 //#endif
 			}
 		}
@@ -637,15 +1123,15 @@ namespace Xbim
 			FTol.SetTolerance(*pSolid,tolerance, TopAbs_VERTEX);
 		}
 
-		void XbimSolid::Init(IfcBoxedHalfSpace^ bhs)
+		void XbimSolid::Init(IIfcBoxedHalfSpace^ bhs)
 		{
-			IfcSurface^ surface = (IfcSurface^)bhs->BaseSurface;
-			if (!dynamic_cast<IfcPlane^>(surface))
+			IIfcSurface^ surface = (IIfcSurface^)bhs->BaseSurface;
+			if (!dynamic_cast<IIfcPlane^>(surface))
 			{
-				XbimGeometryCreator::logger->WarnFormat("WS011: Non-Planar half spaces are not supported in Entity #{0}, it has been ignored", bhs->EntityLabel);
+				XbimGeometryCreator::LogWarning(bhs, "Non-Planar half spaces are not supported. It has been ignored");
 				return;
 			}
-			IfcPlane^ ifcPlane = (IfcPlane^)surface;
+			IIfcPlane^ ifcPlane = (IIfcPlane^)surface;
 			
 			Init(bhs->Enclosure);
 			if (bhs->AgreementFlag)
@@ -653,17 +1139,17 @@ namespace Xbim
 			Move(ifcPlane->Position);
 		}
 
-		void XbimSolid::Init(IfcPolygonalBoundedHalfSpace^ pbhs, double extrusionMax)
+		void XbimSolid::Init(IIfcPolygonalBoundedHalfSpace^ pbhs, double extrusionMax)
 		{
 
-			IfcSurface^ surface = (IfcSurface^)pbhs->BaseSurface;
-			if (!dynamic_cast<IfcPlane^>(surface))
+			IIfcSurface^ surface = (IIfcSurface^)pbhs->BaseSurface;
+			if (!dynamic_cast<IIfcPlane^>(surface))
 			{
-				XbimGeometryCreator::logger->WarnFormat("WS011: Non-Planar half spaces are not supported in Entity #{0}, it has been ignored", pbhs->EntityLabel);
+				XbimGeometryCreator::LogWarning(pbhs, "Non-Planar half spaces are not supported. It has been ignored");
 				return;
 			}
-			IfcPlane^ ifcPlane = (IfcPlane^)surface;
-			gp_Ax3 ax3 = XbimGeomPrim::ToAx3(ifcPlane->Position);
+			IIfcPlane^ ifcPlane = (IIfcPlane^)surface;
+			gp_Ax3 ax3 = XbimConvert::ToAx3(ifcPlane->Position);
 			gp_Pln pln(ax3);			
 			const gp_Pnt pnt = pln.Location().Translated(pbhs->AgreementFlag ? -pln.Axis().Direction() : pln.Axis().Direction());
 			TopoDS_Shape halfspace = BRepPrimAPI_MakeHalfSpace(BRepBuilderAPI_MakeFace(pln), pnt).Solid();
@@ -672,23 +1158,23 @@ namespace Xbim
 			
 			if (!polyBoundary->IsValid)
 			{
-				XbimGeometryCreator::logger->WarnFormat("WS005: The IfcPolygonalBoundedHalfSpace #{0} has an incorrectly defined PolygonalBoundary #{1}, it has been ignored", pbhs->EntityLabel, pbhs->PolygonalBoundary->EntityLabel);
+				XbimGeometryCreator::LogWarning(pbhs, "Incorrectly defined PolygonalBoundary #{0}. It has been ignored", pbhs->PolygonalBoundary->EntityLabel);
 				return;
 			}
 			//BRepTools::Write(polyBoundary, "d:\\tmp\\w1");
 			//removes any colinear edges that might generate unnecessary detail and confusion for boolean operations
 			if (polyBoundary->Edges->Count>4) //may sure we remove an colinear edges
-				polyBoundary->FuseColinearSegments(pbhs->ModelOf->ModelFactors->Precision, 0.05);
+				polyBoundary->FuseColinearSegments(pbhs->Model->ModelFactors->Precision, 0.05);
 			//BRepTools::Write(polyBoundary, "d:\\tmp\\w2");
 			XbimFace^ polyFace = gcnew XbimFace(polyBoundary);
 
 			if (!polyFace->IsValid)
 			{
-				XbimGeometryCreator::logger->WarnFormat("WS009: The IfcPolygonalBoundedHalfSpace #{0} has an incorrectly defined Face with PolygonalBoundary #{1}, it has been ignored", pbhs->EntityLabel, pbhs->PolygonalBoundary->EntityLabel);
+				XbimGeometryCreator::LogWarning(pbhs, "Incorrectly defined Face with PolygonalBoundary #{0}. It has been ignored", pbhs->PolygonalBoundary->EntityLabel);
 				return;
 			}
 			TopoDS_Shape boundedHalfSpace = BRepPrimAPI_MakePrism(polyFace, gp_Vec(0, 0, extrusionMax*4));
-			gp_Trsf trsf = XbimGeomPrim::ToTransform(pbhs->Position);
+			gp_Trsf trsf = XbimConvert::ToTransform(pbhs->Position);
 			gp_Trsf offset; 
 			offset.SetTranslation(gp_Vec(0, 0, -(extrusionMax/2 )));
 			boundedHalfSpace.Move(trsf*offset);
@@ -704,19 +1190,24 @@ namespace Xbim
 				return;
 			}
 			GC::KeepAlive(polyFace);
-			XbimGeometryCreator::logger->WarnFormat("WS010: Failed to create IfcPolygonalBoundedHalfSpace #{0}", pbhs->EntityLabel);
+			XbimGeometryCreator::LogWarning(pbhs, "Failed to create half space");
 
 		}
 
 
-		void XbimSolid::Init(IfcSweptDiskSolid^ swdSolid)
+		void XbimSolid::Init(IIfcSweptDiskSolid^ swdSolid)
 		{
-
-			//Build the directrix
-			XbimModelFactors^ mf = swdSolid->ModelOf->ModelFactors;
+			if (dynamic_cast<IIfcSweptDiskSolidPolygonal^>(swdSolid))
+				return Init((IIfcSweptDiskSolidPolygonal^)swdSolid);
+			//else Build the directrix
+			IModelFactors^ mf = swdSolid->Model->ModelFactors;
 			XbimWire^ sweep = gcnew XbimWire(swdSolid->Directrix);
-			sweep = (XbimWire^)sweep->Trim(swdSolid->StartParam, swdSolid->EndParam, mf->Precision);
-			
+			if (swdSolid->StartParam.HasValue && swdSolid->EndParam.HasValue)
+				sweep = (XbimWire^)sweep->Trim(swdSolid->StartParam.Value, Math::Abs(swdSolid->EndParam.Value-1.0)<Precision::Confusion()? sweep->Length: swdSolid->EndParam.Value, mf->Precision);
+			else if (swdSolid->StartParam.HasValue && !swdSolid->EndParam.HasValue)
+				sweep = (XbimWire^)sweep->Trim(swdSolid->StartParam.Value, sweep->Length, mf->Precision);
+			else if (!swdSolid->StartParam.HasValue && swdSolid->EndParam.HasValue)
+				sweep = (XbimWire^)sweep->Trim(0, Math::Abs(swdSolid->EndParam.Value - 1.0)<Precision::Confusion() ? sweep->Length : swdSolid->EndParam.Value, mf->Precision);
 			//make the outer wire
 			XbimPoint3D s = sweep->Start;
 			gp_Ax2 axCircle(gp_Pnt(s.X, s.Y, s.Z), gp_Dir(0., 0., 1.));
@@ -725,23 +1216,19 @@ namespace Xbim
 			TopoDS_Edge outerEdge = BRepBuilderAPI_MakeEdge(hOuter);
 			BRepBuilderAPI_MakeWire outerWire;
 			outerWire.Add(outerEdge);
-			BRepOffsetAPI_MakePipeShell pipeMaker(sweep);
-			pipeMaker.Add(outerWire.Wire(), Standard_False, Standard_True);
-			pipeMaker.Build();
-			if (pipeMaker.IsDone() && pipeMaker.MakeSolid())
+			BRepOffsetAPI_MakePipeShell pipeMaker1(sweep);
+			pipeMaker1.Add(outerWire.Wire(), Standard_False, Standard_True);
+			pipeMaker1.Build();
+			if (pipeMaker1.IsDone())
 			{	
 				BRepPrim_Builder b;
 				TopoDS_Shell shell;
 				b.MakeShell(shell);
-				XbimFace^ bottomOuter = gcnew XbimFace(TopoDS::Face(pipeMaker.FirstShape()));
-				XbimFace^ topOuter = gcnew XbimFace(TopoDS::Face(pipeMaker.LastShape()));
-				const TopoDS_Shape& pipeOuter = pipeMaker.Shape();
-				for (TopExp_Explorer explr(pipeOuter, TopAbs_FACE); explr.More(); explr.Next())
-				{
-					const TopoDS_Face& face = TopoDS::Face(explr.Current());
-					if (!face.IsSame(pipeMaker.FirstShape()) && !face.IsSame(pipeMaker.LastShape()))
-						b.AddShellFace(shell, face);
-				}
+				TopoDS_Wire firstOuter = TopoDS::Wire(pipeMaker1.FirstShape().Reversed());
+				TopoDS_Wire lastOuter = TopoDS::Wire(pipeMaker1.LastShape().Reversed());
+				BRepBuilderAPI_MakeFace firstMaker(firstOuter);
+				BRepBuilderAPI_MakeFace lastMaker(lastOuter);
+				
 				//now add inner wire if it is defined
 				if (swdSolid->InnerRadius.HasValue && swdSolid->InnerRadius.Value > 0)
 				{
@@ -753,61 +1240,70 @@ namespace Xbim
 					BRepOffsetAPI_MakePipeShell pipeMaker2(sweep);
 					pipeMaker2.Add(innerWire.Wire(), Standard_False, Standard_True);
 					pipeMaker2.Build();
-					if (pipeMaker2.IsDone() && pipeMaker2.MakeSolid())
+					if (pipeMaker2.IsDone() )
 					{
-
-						XbimFace^ bottomInner = gcnew XbimFace(TopoDS::Face(pipeMaker2.FirstShape()));
-						XbimFace^ topInner = gcnew XbimFace(TopoDS::Face(pipeMaker2.LastShape()));
-						//add the inner loops to the end faces
-						bottomOuter->Add(bottomInner->OuterBound);
-						topOuter->Add(topInner->OuterBound);
 						//add the other faces to the shell
 						for (TopExp_Explorer explr(pipeMaker2.Shape(), TopAbs_FACE); explr.More(); explr.Next())
 						{
-							const TopoDS_Face& face = TopoDS::Face(explr.Current());
-							if (!face.IsSame(pipeMaker2.FirstShape()) && !face.IsSame(pipeMaker2.LastShape()))
-								b.AddShellFace(shell, face);
+							b.AddShellFace(shell, TopoDS::Face(explr.Current()));
 						}
+						firstMaker.Add(TopoDS::Wire(pipeMaker2.FirstShape()));
+						lastMaker.Add(TopoDS::Wire(pipeMaker2.LastShape()));
 					}
 					else
 					{
-						XbimGeometryCreator::logger->WarnFormat("WS022: IfcSweptDiskSolid #{0} inner loop could not be constructed", swdSolid->EntityLabel);
+						XbimGeometryCreator::LogWarning(swdSolid, "Inner loop could not be constructed");
 					}
 				}
 				//add top and bottom faces with their hole loops
-				b.AddShellFace(shell, bottomOuter);
-				b.AddShellFace(shell, topOuter);
+				b.AddShellFace(shell, firstMaker.Face());
+				b.AddShellFace(shell, lastMaker.Face());
+				for (TopExp_Explorer explr(pipeMaker1.Shape(), TopAbs_FACE); explr.More(); explr.Next())
+				{
+					b.AddShellFace(shell, TopoDS::Face(explr.Current()));
+				}
 				b.CompleteShell(shell);
+				TopoDS_Solid solid;
 				BRep_Builder bs;
+				bs.MakeSolid(solid);
+				bs.Add(solid, shell);
+				BRepClass3d_SolidClassifier sc(solid);
+				sc.PerformInfinitePoint(Precision::Confusion());
+				if (sc.State() == TopAbs_IN)
+				{
+					bs.MakeSolid(solid);
+					shell.Reverse();
+					bs.Add(solid, shell);
+				}
 				pSolid = new TopoDS_Solid();
-				bs.MakeSolid(*pSolid);
-				bs.Add(*pSolid, shell);
+				*pSolid = solid;
+				pSolid->Closed(Standard_True);
 				return;
 			}
 			else
 			{
-				XbimGeometryCreator::logger->WarnFormat("WS021: IfcSweptDiskSolid #{0} could not be constructed", swdSolid->EntityLabel);
+				XbimGeometryCreator::LogWarning(swdSolid, "Could not be constructed. It has been ignored");
 				
 			}
 		}
 
-		void XbimSolid::Init(IfcBoundingBox^ box)
+		void XbimSolid::Init(IIfcBoundingBox^ box)
 		{
 			gp_Ax2 	gpax2(gp_Pnt(box->Corner->X, box->Corner->Y, box->Corner->Z), gp_Dir(0, 0, 1), gp_Dir(1, 0, 0));
 			BRepPrimAPI_MakeBox boxMaker(gpax2, box->XDim, box->YDim, box->ZDim);
 			pSolid = new TopoDS_Solid();
 			*pSolid = TopoDS::Solid(boxMaker.Shape());
 			ShapeFix_ShapeTolerance FTol;
-			FTol.SetTolerance(*pSolid, box->ModelOf->ModelFactors->Precision, TopAbs_VERTEX);
+			FTol.SetTolerance(*pSolid, box->Model->ModelFactors->Precision, TopAbs_VERTEX);
 		}
 
 
-		XbimSolid^ XbimSolid::BuildClippingList(IfcBooleanResult^ solid, List<IfcBooleanOperand^>^ clipList)
+		XbimSolid^ XbimSolid::BuildClippingList(IIfcBooleanResult^ solid, List<IIfcBooleanOperand^>^ clipList)
 		{
-			IfcBooleanOperand^ fOp = solid->FirstOperand;
-			IfcBooleanOperand^ sOp = solid->SecondOperand;
+			IIfcBooleanOperand^ fOp = solid->FirstOperand;
+			IIfcBooleanOperand^ sOp = solid->SecondOperand;
 			
-			IfcBooleanResult^ boolClip = dynamic_cast<IfcBooleanResult^>(fOp);
+			IIfcBooleanResult^ boolClip = dynamic_cast<IIfcBooleanResult^>(fOp);
 			if (boolClip!=nullptr)
 			{				
 				clipList->Add(sOp);
@@ -823,24 +1319,24 @@ namespace Xbim
 		}
 
 		//Booleans
-		void XbimSolid::Init(IfcBooleanResult^ solid)
+		void XbimSolid::Init(IIfcBooleanResult^ solid)
 		{
-			XbimModelFactors^ mf = solid->ModelOf->ModelFactors;
-			IfcBooleanOperand^ fOp = solid->FirstOperand;
+			IModelFactors^ mf = solid->Model->ModelFactors;
+			IIfcBooleanOperand^ fOp = solid->FirstOperand;
 #ifdef OCC_6_9_SUPPORTED			
-			IfcBooleanResult^ boolClip = dynamic_cast<IfcBooleanResult^>(fOp);
+			IIfcBooleanResult^ boolClip = dynamic_cast<IIfcBooleanResult^>(fOp);
 			if (boolClip != nullptr)
 			{
-				List<IfcBooleanOperand^>^ clips = gcnew List<IfcBooleanOperand^>();
+				List<IIfcBooleanOperand^>^ clips = gcnew List<IIfcBooleanOperand^>();
 
 				IXbimSolidSet^ solidSet = gcnew XbimSolidSet();			
 				XbimSolid^ body = XbimSolid::BuildClippingList(boolClip, clips);
 
 				double maxLen = body->BoundingBox.Length();
-				for each (IfcBooleanOperand^ bOp in clips)
+				for each (IIfcBooleanOperand^ bOp in clips)
 				{
-					IfcPolygonalBoundedHalfSpace^ pbhs = dynamic_cast<IfcPolygonalBoundedHalfSpace^>(bOp);
-					if (pbhs != nullptr) //special case for IfcPolygonalBoundedHalfSpace to keep extrusion to the minimum
+					IIfcPolygonalBoundedHalfSpace^ pbhs = dynamic_cast<IIfcPolygonalBoundedHalfSpace^>(bOp);
+					if (pbhs != nullptr) //special case for IIfcPolygonalBoundedHalfSpace to keep extrusion to the minimum
 					{
 						XbimSolid^ s = gcnew XbimSolid(pbhs, maxLen);
 						if (s->IsValid) solidSet->Add(s);
@@ -851,34 +1347,40 @@ namespace Xbim
 						if (s->IsValid) solidSet->Add(s);
 					}
 				}
-				//use a fuzzy tolerance of 1mm, less than this should be ignored			
-				IXbimSolidSet^ xbimSolidSet = body->Cut(solidSet, mf->OneMilliMetre);
+					
+				IXbimSolidSet^ xbimSolidSet = body->Cut(solidSet, mf->Precision);
 				if (xbimSolidSet != nullptr && xbimSolidSet->First != nullptr)
-				{
-					pSolid = new TopoDS_Solid(); 
-					*pSolid = (XbimSolid^)(xbimSolidSet->First); //just take the first as that is what is intended by IFC schema				
+				{ 
+					const TopoDS_Shape&  shape = (XbimSolid^) (xbimSolidSet->First);
+					if (!shape.IsNull())
+					{
+						pSolid = new TopoDS_Solid();
+						*pSolid = (XbimSolid^)(xbimSolidSet->First); //just take the first as that is what is intended by IIfc schema	
+					}
+					
 				}
 				return;
 			}
 
 #endif
 			
-			IfcBooleanOperand^ sOp = solid->SecondOperand;
+			IIfcBooleanOperand^ sOp = solid->SecondOperand;
 			XbimSolid^ left = gcnew XbimSolid(fOp);
 			XbimSolid^ right = gcnew XbimSolid(sOp);
 			/*BRepTools::Write(left, "d:\\xbim\\l");
 			BRepTools::Write(right, "d:\\xbim\\r");*/
 			if (!left->IsValid)
 			{
-				XbimGeometryCreator::logger->WarnFormat("WS006: IfcBooleanResult #{0} with invalid first operand", solid->EntityLabel);
+				XbimGeometryCreator::LogWarning(solid, "Invalid first operand");
 				return;
 			}
 
-			pSolid = new TopoDS_Solid(); //make sure this is deleted if not used
+			
 
 			if (!right->IsValid)
 			{
-				XbimGeometryCreator::logger->WarnFormat("WS007: IfcBooleanResult #{0} with invalid second operand", solid->EntityLabel);
+				XbimGeometryCreator::LogWarning(solid, "Invalid second operand");
+				pSolid = new TopoDS_Solid(); //make sure this is deleted if not used
 				*pSolid = left; //return the left operand
 				return;
 			}
@@ -890,20 +1392,21 @@ namespace Xbim
 				
 				switch (solid->Operator)
 				{
-				case IfcBooleanOperator::Union:
-					result = left->Union(right, mf->PrecisionBoolean);
+				case IfcBooleanOperator::UNION:
+					result = left->Union(right, mf->Precision);
 					break;
-				case IfcBooleanOperator::Intersection:
-					result = left->Intersection(right, mf->PrecisionBoolean);
+				case IfcBooleanOperator::INTERSECTION:
+					result = left->Intersection(right, mf->Precision);
 					break;
-				case IfcBooleanOperator::Difference:
-					result = left->Cut(right, mf->PrecisionBoolean);
+				case IfcBooleanOperator::DIFFERENCE:
+					result = left->Cut(right, mf->Precision);
 					break;
 				}
 			}
 			catch (Exception^ xbimE)
 			{
-				XbimGeometryCreator::logger->ErrorFormat("ES001: Error performing boolean operation for entity #{0}={1}\n{2}. The operation has been ignored", solid->EntityLabel, solid->GetType()->Name, xbimE->Message);
+				XbimGeometryCreator::LogError(solid, "Error performing boolean operation, {0}. The operation has been ignored", xbimE->Message);
+				pSolid = new TopoDS_Solid(); //make sure this is deleted if not used
 				*pSolid = left; //return the left operand
 				return;
 			}
@@ -912,121 +1415,111 @@ namespace Xbim
 #ifdef OCC_6_9_SUPPORTED //Later versions of OCC has fuzzy boolean which gives better results
 			if (xbimSolidSet != nullptr && xbimSolidSet->First != nullptr)
 			{
-				*pSolid = (XbimSolid^)(xbimSolidSet->First); //just take the first as that is what is intended by IFC schema
+				const TopoDS_Shape&  shape = (XbimSolid^)(xbimSolidSet->First);
+				if (!shape.IsNull())
+				{
+					pSolid = new TopoDS_Solid(); //make sure this is deleted if not used
+					*pSolid = (XbimSolid^)(xbimSolidSet->First); //just take the first as that is what is intended by IIfc schema
+				}				
 			}
 #else // otherwise we have to make sure we get a solid when an error occurs
 			if (xbimSolidSet == nullptr || xbimSolidSet->First==nullptr)
 			{
 				XbimGeometryCreator::logger->ErrorFormat("ES002: Error performing boolean operation for entity #{0}={1}. The operation has been ignored", solid->EntityLabel, solid->GetType()->Name);
+				pSolid = new TopoDS_Solid(); //make sure this is deleted if not used
 				*pSolid = left; //return the left operand
 			}
-			else //Ifc requires just one solid as a result so just take the first
+			else //IIfc requires just one solid as a result so just take the first
 			{
+				pSolid = new TopoDS_Solid(); //make sure this is deleted if not used
 				*pSolid = (XbimSolid^)(xbimSolidSet->First);
 			}
 #endif
 		}
 
-		void XbimSolid::Init(IfcBooleanOperand^ solid)
+		void XbimSolid::Init(IIfcBooleanOperand^ solid)
 		{
-			IfcSolidModel^ sol = dynamic_cast<IfcSolidModel^>(solid);
+			IIfcSolidModel^ sol = dynamic_cast<IIfcSolidModel^>(solid);
 			if (sol != nullptr) return Init(sol);
-			IfcHalfSpaceSolid^ hs = dynamic_cast<IfcHalfSpaceSolid^>(solid);
-			
-			if (hs != nullptr)
-			{
-				// take 100 metres as the largest extrusion
-				// todo: not sure what to do with the point p
-				// todo: probably needs taking from the model centre
-				XbimPoint3D^ p = gcnew XbimPoint3D(0, 0, 0);
-				return Init(hs, solid->ModelOf->ModelFactors->OneMetre * 100, p); 
-			}
-			IfcBooleanResult^ br = dynamic_cast<IfcBooleanResult^>(solid);
-			if (br != nullptr) return Init(br); //treat IfcBooleanResult and IfcBooleanClippingResult the same
-			//IfcBooleanResult^ br = dynamic_cast<IfcBooleanResult^>(solid);
-			//if (br != nullptr) //this should only return one solid
-			//{
-			//	XbimSolidSet^ solids = gcnew XbimSolidSet(br);
-			//	if (solids->First!=nullptr)
-			//	pSolid = new TopoDS_Solid();
-			//	XbimSolid^ solid  = (XbimSolid^)solids->First;fz
-			//	*pSolid = solid;
-			//	return;
-			//}
-			IfcCsgPrimitive3D^ csg = dynamic_cast<IfcCsgPrimitive3D^>(solid);
+			IIfcHalfSpaceSolid^ hs = dynamic_cast<IIfcHalfSpaceSolid^>(solid);
+			//TODO use a real halfspace when fixed in opencascade
+			if (hs != nullptr) return Init(hs, hs->Model->ModelFactors->OneMetre * 100, XbimPoint3D(0,0,0)); //take 100 metres as the largest extrusion and 0,0,0 as centre this is arbitrary due to bug in opencascade
+			IIfcBooleanResult^ br = dynamic_cast<IIfcBooleanResult^>(solid);
+			if (br != nullptr) return Init(br); //treat IIfcBooleanResult and IIfcBooleanClippingResult the same			
+			IIfcCsgPrimitive3D^ csg = dynamic_cast<IIfcCsgPrimitive3D^>(solid);
 			if (csg != nullptr) return Init(csg);
-			throw gcnew NotImplementedException("Sub-Type of IfcBooleanOperand is not implemented");
+			throw gcnew NotImplementedException("Sub-Type of IIfcBooleanOperand is not implemented");
 		}
 
 
-		void XbimSolid::Init(IfcCsgPrimitive3D^ ifcSolid)
+		void XbimSolid::Init(IIfcCsgPrimitive3D^ IIfcSolid)
 		{
-			IfcSphere^ sphere = dynamic_cast<IfcSphere^>(ifcSolid);
+			IIfcSphere^ sphere = dynamic_cast<IIfcSphere^>(IIfcSolid);
 			if (sphere != nullptr) return Init(sphere);
-			IfcBlock^ block = dynamic_cast<IfcBlock^>(ifcSolid);
+			IIfcBlock^ block = dynamic_cast<IIfcBlock^>(IIfcSolid);
 			if (block != nullptr) return Init(block);
-			IfcRightCircularCylinder^ cylinder = dynamic_cast<IfcRightCircularCylinder^>(ifcSolid);
+			IIfcRightCircularCylinder^ cylinder = dynamic_cast<IIfcRightCircularCylinder^>(IIfcSolid);
 			if (cylinder != nullptr) return Init(cylinder);
-			IfcRightCircularCone^ cone = dynamic_cast<IfcRightCircularCone^>(ifcSolid);
+			IIfcRightCircularCone^ cone = dynamic_cast<IIfcRightCircularCone^>(IIfcSolid);
 			if (cone != nullptr) return Init(cone);
-			IfcRectangularPyramid^ pyramid = dynamic_cast<IfcRectangularPyramid^>(ifcSolid);
+			IIfcRectangularPyramid^ pyramid = dynamic_cast<IIfcRectangularPyramid^>(IIfcSolid);
 			if (pyramid != nullptr) return Init(pyramid);
-			throw gcnew NotImplementedException(String::Format("IfcCsgPrimitive3D of Type {0} in entity #{1} is not implemented", ifcSolid->GetType()->Name, ifcSolid->EntityLabel));
+			throw gcnew NotImplementedException(String::Format("IIfcCsgPrimitive3D of Type {0} in entity #{1} is not implemented", IIfcSolid->GetType()->Name, IIfcSolid->EntityLabel));
 		}
 
-		void XbimSolid::Init(IfcCsgSolid^ ifcSolid)
+		void XbimSolid::Init(IIfcCsgSolid^ IIfcSolid)
 		{
-			IfcCsgPrimitive3D^ csgPrim = dynamic_cast<IfcCsgPrimitive3D^>(ifcSolid->TreeRootExpression);
+			IIfcCsgPrimitive3D^ csgPrim = dynamic_cast<IIfcCsgPrimitive3D^>(IIfcSolid->TreeRootExpression);
 			if (csgPrim != nullptr) return Init(csgPrim);
-			IfcBooleanResult^ booleanResult = dynamic_cast<IfcBooleanResult^>(ifcSolid->TreeRootExpression);
+			IIfcBooleanResult^ booleanResult = dynamic_cast<IIfcBooleanResult^>(IIfcSolid->TreeRootExpression);
 			if (booleanResult != nullptr) return Init(booleanResult);
-			throw gcnew NotImplementedException(String::Format("IfcCsgSolid of Type {0} in entity #{1} is not implemented", ifcSolid->GetType()->Name, ifcSolid->EntityLabel));
+			throw gcnew NotImplementedException(String::Format("IIfcCsgSolid of Type {0} in entity #{1} is not implemented", IIfcSolid->GetType()->Name, IIfcSolid->EntityLabel));
 		}
 
-		void XbimSolid::Init(IfcSphere^ ifcSolid)
+		void XbimSolid::Init(IIfcSphere^ IIfcSolid)
 		{
-			gp_Ax3 	gpax3 = XbimGeomPrim::ToAx3(ifcSolid->Position);			
-			BRepPrimAPI_MakeSphere sphereMaker(gpax3.Ax2(), ifcSolid->Radius);
+			gp_Ax3 	gpax3 = XbimConvert::ToAx3(IIfcSolid->Position);			
+			BRepPrimAPI_MakeSphere sphereMaker(gpax3.Ax2(), IIfcSolid->Radius);
 			pSolid = new TopoDS_Solid();
 			*pSolid = TopoDS::Solid(sphereMaker.Shape());
 		}
 
-		void XbimSolid::Init(IfcBlock^ ifcSolid)
+		void XbimSolid::Init(IIfcBlock^ IIfcSolid)
 		{
-			gp_Ax3 	gpax3 = XbimGeomPrim::ToAx3(ifcSolid->Position);
-			BRepPrimAPI_MakeBox boxMaker(gpax3.Ax2(), ifcSolid->XLength, ifcSolid->YLength, ifcSolid->ZLength);
+			gp_Ax3 	gpax3 = XbimConvert::ToAx3(IIfcSolid->Position);
+			BRepPrimAPI_MakeBox boxMaker(gpax3.Ax2(), IIfcSolid->XLength, IIfcSolid->YLength, IIfcSolid->ZLength);
 			pSolid = new TopoDS_Solid();
 			*pSolid = TopoDS::Solid(boxMaker.Shape());
 		}
 
-		void XbimSolid::Init(IfcRightCircularCylinder^ ifcSolid)
+		void XbimSolid::Init(IIfcRightCircularCylinder^ IIfcSolid)
 		{
-			gp_Ax3 	gpax3 = XbimGeomPrim::ToAx3(ifcSolid->Position);
-			BRepPrimAPI_MakeCylinder cylinderMaker(gpax3.Ax2(), ifcSolid->Radius, ifcSolid->Height);
+			gp_Ax3 	gpax3 = XbimConvert::ToAx3(IIfcSolid->Position);
+			BRepPrimAPI_MakeCylinder cylinderMaker(gpax3.Ax2(), IIfcSolid->Radius, IIfcSolid->Height);
 			pSolid = new TopoDS_Solid();
 			*pSolid = TopoDS::Solid(cylinderMaker.Shape());
 		}
 
-		void XbimSolid::Init(IfcRightCircularCone^ ifcSolid)
+		void XbimSolid::Init(IIfcRightCircularCone^ IIfcSolid)
 		{
-			gp_Ax3 	gpax3 = XbimGeomPrim::ToAx3(ifcSolid->Position);
-			BRepPrimAPI_MakeCone coneMaker(gpax3.Ax2(), ifcSolid->BottomRadius, 0., ifcSolid->Height);
+			gp_Ax3 	gpax3 = XbimConvert::ToAx3(IIfcSolid->Position);
+			BRepPrimAPI_MakeCone coneMaker(gpax3.Ax2(), IIfcSolid->BottomRadius, 0., IIfcSolid->Height);
 			pSolid = new TopoDS_Solid();
 			*pSolid = TopoDS::Solid(coneMaker.Shape());
 		}
 
-		void XbimSolid::Init(IfcRectangularPyramid^ ifcSolid)
+		void XbimSolid::Init(IIfcRectangularPyramid^ IIfcSolid)
 		{
 			
-			double xOff = ifcSolid->XLength / 2;
-			double yOff = ifcSolid->YLength / 2;
-			double precision = ifcSolid->ModelOf->ModelFactors->Precision;
+			double xOff = IIfcSolid->XLength / 2;
+			double yOff = IIfcSolid->YLength / 2;
+			double precision = IIfcSolid->Model->ModelFactors->Precision;
 			
 			gp_Pnt bl(0, 0, 0);
-			gp_Pnt br(ifcSolid->XLength, 0, 0);
-			gp_Pnt tr(ifcSolid->XLength, ifcSolid->YLength, 0);
-			gp_Pnt tl(0, ifcSolid->YLength, 0);
-			gp_Pnt p(xOff, yOff, ifcSolid->Height);
+			gp_Pnt br(IIfcSolid->XLength, 0, 0);
+			gp_Pnt tr(IIfcSolid->XLength, IIfcSolid->YLength, 0);
+			gp_Pnt tl(0, IIfcSolid->YLength, 0);
+			gp_Pnt p(xOff, yOff, IIfcSolid->Height);
 			//make the vertices
 			BRep_Builder builder;
 			TopoDS_Vertex vbl, vbr, vtr, vtl, vp;
@@ -1091,7 +1584,7 @@ namespace Xbim
 			BRepBuilderAPI_MakeSolid solidMaker(shell);
 			pSolid = new TopoDS_Solid();
 			*pSolid = TopoDS::Solid(solidMaker.Shape());
-			Move(ifcSolid->Position);		
+			Move(IIfcSolid->Position);		
 		}
 
 		TopoDS_Face BuildTriangularFace(const TopoDS_Edge& base, const TopoDS_Vertex& l, const TopoDS_Vertex& r, const TopoDS_Vertex& t)
@@ -1175,26 +1668,20 @@ namespace Xbim
 		bool XbimSolid::IsPolyhedron::get()
 		{
 			if (!IsValid) return false;
-			for (TopExp_Explorer exp(*pSolid, TopAbs_EDGE); exp.More(); exp.Next())
-			{
-				Standard_Real start, end;
-				Handle(Geom_Curve) c3d = BRep_Tool::Curve(TopoDS::Edge(exp.Current()), start, end);
-				if (!c3d.IsNull())
-				{
-					Handle(Standard_Type) cType = c3d->DynamicType();
-					if (cType != STANDARD_TYPE(Geom_Line))
-					{
-						if (cType != STANDARD_TYPE(Geom_TrimmedCurve)) return false;
-						Handle(Geom_TrimmedCurve) tc = Handle(Geom_TrimmedCurve)::DownCast(c3d);
-						Handle(Standard_Type) tcType = tc->DynamicType();
-						if (tcType != STANDARD_TYPE(Geom_Line)) return false;
-					}
-				}
+			for (TopExp_Explorer exp(*pSolid, TopAbs_FACE); exp.More(); exp.Next())
+			{								
+				Handle(Geom_Surface) s = BRep_Tool::Surface(TopoDS::Face(exp.Current()));
+				GeomLib_IsPlanarSurface tester(s);
+				if (!tester.IsPlanar())
+					return false;
 			}
 			GC::KeepAlive(this);
-			//all edges are lines
+			//all faces are planar
 			return true;
 		}
+
+		
+
 		double XbimSolid::SurfaceArea::get()
 		{
 			if (IsValid)
@@ -1217,19 +1704,21 @@ namespace Xbim
 			return analyser.IsValid() == Standard_True;
 		}
 
+
 		IXbimGeometryObject^ XbimSolid::Transform(XbimMatrix3D matrix3D)
 		{
-			BRepBuilderAPI_Copy copier(this);
-			BRepBuilderAPI_Transform gTran(copier.Shape(), XbimGeomPrim::ToTransform(matrix3D));
-			TopoDS_Solid temp = TopoDS::Solid(gTran.Shape());
-			return gcnew XbimSolid(temp);
+			if (!IsValid) return nullptr;
+			gp_Trsf trans = XbimConvert::ToTransform(matrix3D);
+			BRepBuilderAPI_Transform gTran(this, trans, Standard_True);
+			return gcnew XbimSolid(TopoDS::Solid(gTran.Shape()));
 		}
 
 		IXbimGeometryObject^ XbimSolid::TransformShallow(XbimMatrix3D matrix3D)
 		{
-			TopoDS_Solid solid = TopoDS::Solid(pSolid->Moved(XbimGeomPrim::ToTransform(matrix3D)));
-			GC::KeepAlive(this);
-			return gcnew XbimSolid(solid);
+			if (!IsValid) return nullptr;
+			gp_Trsf trans = XbimConvert::ToTransform(matrix3D);
+			BRepBuilderAPI_Transform gTran(this, trans, Standard_False);		
+			return gcnew XbimSolid(TopoDS::Solid(gTran.Shape()));
 		}
 
 		IXbimSolidSet^ XbimSolid::Cut(IXbimSolidSet^ toCut, double tolerance)
@@ -1261,7 +1750,7 @@ namespace Xbim
 						solidCut = (XbimSolid^)facetedSolidCut->ConvertToXbimSolid();
 						if (solidCut == nullptr)
 						{
-							XbimGeometryCreator::logger->WarnFormat("WS023: Invalid operation. Only solid shapes can be cut from another solid");
+							XbimGeometryCreator::LogWarning("WS023: Invalid operation. Only solid shapes can be cut from another solid");
 							return gcnew XbimSolidSet(this); // the result would be no change so return this
 						} //else carry on with the boolean
 					}
@@ -1270,7 +1759,7 @@ namespace Xbim
 #endif // USE_CARVE_CSG
 
 				{
-					XbimGeometryCreator::logger->WarnFormat("WS024: Invalid operation. Only solid shapes can be cut from another solid");
+					XbimGeometryCreator::LogWarning(toCut, "Invalid operation. Only solid shapes can be cut from another solid");
 					return gcnew XbimSolidSet(this); // the result would be no change so return this		
 				}
 			}
@@ -1281,6 +1770,7 @@ namespace Xbim
 			{
 #ifdef OCC_6_9_SUPPORTED
 				ShapeFix_ShapeTolerance FTol;
+				tolerance *= 1.1;
 				TopTools_ListOfShape shapeTools;
 				FTol.SetTolerance(solidCut, tolerance);
 				shapeTools.Append(solidCut);
@@ -1290,7 +1780,7 @@ namespace Xbim
 				BRepAlgoAPI_Cut boolOp;
 				boolOp.SetArguments(shapeObjects);
 				boolOp.SetTools(shapeTools);
-				boolOp.SetFuzzyValue(0);
+				//boolOp.SetFuzzyValue(0);
 				boolOp.Build();
 #else
 				ShapeFix_ShapeTolerance fixTol;
@@ -1307,7 +1797,7 @@ namespace Xbim
 			{
 				 err = gcnew String(Standard_Failure::Caught()->GetMessageString());			
 			}
-			XbimGeometryCreator::logger->WarnFormat("WS029: Boolean Cut operation failed. " + err);
+			XbimGeometryCreator::LogWarning(toCut, "Boolean Cut operation failed, {0}",err);
 			GC::KeepAlive(solidCut);
 			GC::KeepAlive(this);
 			return XbimSolidSet::Empty;
@@ -1342,7 +1832,7 @@ namespace Xbim
 						solidIntersect = (XbimSolid^)facetedSolidIntersect->ConvertToXbimSolid();
 						if (solidIntersect == nullptr)
 						{
-							XbimGeometryCreator::logger->WarnFormat("WS025: Invalid operation. Only solid shapes can be intersected with another solid");
+							XbimGeometryCreator::LogWarning("WS025: Invalid operation. Only solid shapes can be intersected with another solid");
 							return gcnew XbimSolidSet(this); // the result would be no change so return this
 						} //else carry on with the boolean
 					}
@@ -1352,13 +1842,13 @@ namespace Xbim
 
 				{
 					
-					XbimGeometryCreator::logger->WarnFormat("WS026: Invalid operation. Only solid shapes can be intersected with another solid");
+					XbimGeometryCreator::LogWarning(toIntersect, "Invalid operation. Only solid shapes can be intersected with another solid");
 					return gcnew XbimSolidSet(this); // the result would be no change so return this
 				}
 			}
-			ShapeFix_ShapeTolerance fixTol;
+			/*ShapeFix_ShapeTolerance fixTol;
 			fixTol.SetTolerance(solidIntersect, tolerance);
-			fixTol.SetTolerance(this, tolerance);
+			fixTol.SetTolerance(this, tolerance);*/
 			String^ err = "";
 			try
 			{
@@ -1370,7 +1860,7 @@ namespace Xbim
 			{
 				err = gcnew String(Standard_Failure::Caught()->GetMessageString());
 			}
-			XbimGeometryCreator::logger->WarnFormat("WS030: Boolean Intersect operation failed. " + err);
+			XbimGeometryCreator::LogWarning(toIntersect, "Intersect operation failed,{0}", err);
 			return XbimSolidSet::Empty;
 		}
 
@@ -1403,7 +1893,7 @@ namespace Xbim
 						solidUnion = (XbimSolid^)facetedSolidUnion->ConvertToXbimSolid();
 						if (solidUnion == nullptr)
 						{
-							XbimGeometryCreator::logger->WarnFormat("WS027: Invalid operation. Only solid shapes can be unioned with another solid");
+							XbimGeometryCreator::LogWarning("WS027: Invalid operation. Only solid shapes can be unioned with another solid");
 							return gcnew XbimSolidSet(this); // the result would be no change so return this
 						} //else carry on with the boolean
 					}
@@ -1412,14 +1902,14 @@ namespace Xbim
 #endif // USE_CARVE_CSG
 
 				{
-					XbimGeometryCreator::logger->WarnFormat("WS028: Invalid operation. Only solid shapes can be unioned with another solid");
+					XbimGeometryCreator::LogWarning(toUnion, "Invalid operation. Only solid shapes can be unioned with another solid");
 					return gcnew XbimSolidSet(this); // the result would be no change so return this
 				}
 			}
 			
-			ShapeFix_ShapeTolerance fixTol;
+			/*ShapeFix_ShapeTolerance fixTol;
 			fixTol.SetTolerance(solidUnion, tolerance);
-			fixTol.SetTolerance(this, tolerance);
+			fixTol.SetTolerance(this, tolerance);*/
 			String^ err = "";
 			try
 			{
@@ -1431,7 +1921,7 @@ namespace Xbim
 			{
 				err = gcnew String(Standard_Failure::Caught()->GetMessageString());
 			}
-			XbimGeometryCreator::logger->WarnFormat("WS031: Boolean Union operation failed. " + err);
+			XbimGeometryCreator::LogWarning(toUnion, "Boolean Union operation failed, {0}",err);
 			return XbimSolidSet::Empty;
 		}
 
@@ -1504,22 +1994,33 @@ namespace Xbim
 				GC::KeepAlive(toSection);
 				GC::KeepAlive(this);
 			}
-			XbimGeometryCreator::logger->WarnFormat("WS008:Boolean Section operation has failed to create a section");
+			XbimGeometryCreator::LogWarning(toSection, "Boolean Section operation has failed to create a section");
 			
 			return XbimFaceSet::Empty;
 		}
 
-			
+		void XbimSolid::SaveAsBrep(String^ fileName)
+		{
+			if (IsValid)
+			{
+				XbimOccWriter^ occWriter = gcnew XbimOccWriter();
+				occWriter->Write(this, fileName);
+			}
+		}
 
 #pragma endregion
 
 #pragma region Boolean operations
 
+		void XbimSolid::Move(TopLoc_Location loc)
+		{
+			if (IsValid) pSolid->Move(loc);
+		}
 	
-		void XbimSolid::Move(IfcAxis2Placement3D^ position)
+		void XbimSolid::Move(IIfcAxis2Placement3D^ position)
 		{
 			if (!IsValid) return;
-			gp_Trsf toPos = XbimGeomPrim::ToTransform(position);
+			gp_Trsf toPos = XbimConvert::ToTransform(position);
 			pSolid->Move(toPos);
 		}
 
@@ -1538,6 +2039,16 @@ namespace Xbim
 			pSolid->Reverse();
 		}
 
+		void XbimSolid::CorrectOrientation()
+		{
+			if (IsValid)
+			{
+				BRepClass3d_SolidClassifier class3d(this);
+				class3d.PerformInfinitePoint(Precision::Confusion());
+				if (class3d.State() == TopAbs_IN) this->Reverse();
+			}		
+		}
+
 		
 		
 		void XbimSolid::FixTopology()
@@ -1549,6 +2060,41 @@ namespace Xbim
 				*pSolid = fixer.SolidFromShell(TopoDS::Shell(fixed));
 			else if(fixed.ShapeType()==TopAbs_SOLID)
 				*pSolid = TopoDS::Solid(fixer.Shape());
+		}
+
+		XbimGeometryObject ^ XbimSolid::Transformed(IIfcCartesianTransformationOperator ^ transformation)
+		{
+			IIfcCartesianTransformationOperator3DnonUniform^ nonUniform = dynamic_cast<IIfcCartesianTransformationOperator3DnonUniform^>(transformation);
+			if (nonUniform != nullptr)
+			{
+				gp_GTrsf trans = XbimConvert::ToTransform(nonUniform);
+				BRepBuilderAPI_GTransform tr(this, trans, Standard_True); //make a copy of underlying shape
+				return gcnew XbimSolid(TopoDS::Solid(tr.Shape()), Tag);
+			}
+			else
+			{
+				gp_Trsf trans = XbimConvert::ToTransform(transformation);
+				BRepBuilderAPI_Transform tr(this, trans, Standard_False); //do not make a copy of underlying shape
+				return gcnew XbimSolid(TopoDS::Solid(tr.Shape()), Tag);
+			}
+		}
+
+		XbimGeometryObject ^ XbimSolid::Moved(IIfcPlacement ^ placement)
+		{
+			if (!IsValid) return this;
+			XbimSolid^ copy = gcnew XbimSolid(this, Tag); //take a copy of the shape
+			TopLoc_Location loc = XbimConvert::ToLocation(placement);
+			copy->Move(loc);
+			return copy;
+		}
+
+		XbimGeometryObject ^ XbimSolid::Moved(IIfcObjectPlacement ^ objectPlacement)
+		{
+			if (!IsValid) return this;
+			XbimSolid^ copy = gcnew XbimSolid(this, Tag); //take a copy of the shape
+			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
+			copy->Move(loc);
+			return copy;
 		}
 
 

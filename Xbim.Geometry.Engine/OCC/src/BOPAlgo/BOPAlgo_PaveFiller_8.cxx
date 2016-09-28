@@ -88,17 +88,16 @@ void BOPAlgo_PaveFiller::ProcessDE()
           // 1. Find PaveBlocks that are go through nV for nF
           FindPaveBlocks(nV, nF, aLPBOut);
           aNbPB=aLPBOut.Extent();
-          if (!aNbPB) {
-            continue;
+          if (aNbPB) {
+            //
+            // 2.
+            BOPDS_ListOfPaveBlock& aLPBD = myDS->ChangePaveBlocks(nE);
+            aPBD = aLPBD.First();
+            //
+            FillPaves(nV, nE, nF, aLPBOut, aPBD);
+            //
+            myDS->UpdatePaveBlock(aPBD);
           }
-          //
-          // 2.
-          BOPDS_ListOfPaveBlock& aLPBD=myDS->ChangePaveBlocks(nE);
-          aPBD=aLPBD.First();
-          //
-          FillPaves(nV, nE, nF, aLPBOut, aPBD);
-          //
-          myDS->UpdatePaveBlock(aPBD);
           //
           MakeSplitEdge(nE, nF);
           //
@@ -281,6 +280,9 @@ void BOPAlgo_PaveFiller::ProcessDE()
   for (; aItLPB.More(); aItLPB.Next()) {
     const Handle(BOPDS_PaveBlock)& aPB=aItLPB.Value();
     nE=aPB->Edge();
+    if (nE < 0) {
+      continue;
+    }
     const TopoDS_Edge& aE=(*(TopoDS_Edge *)(&myDS->Shape(nE)));
     aC2D=BRep_Tool::CurveOnSurface(aE, aDF, aT1, aT2);
     if (aC2D.IsNull()) {
@@ -330,8 +332,6 @@ void BOPAlgo_PaveFiller::ProcessDE()
       aPBD->AppendExtPave1(aPave);
     }
   }//for (; aItLPB.More(); aItLPB.Next()) {
-  //
-  myDS->UpdatePaveBlock(aPBD);
 }
 //=======================================================================
 // function:  MakeSplitEdge1

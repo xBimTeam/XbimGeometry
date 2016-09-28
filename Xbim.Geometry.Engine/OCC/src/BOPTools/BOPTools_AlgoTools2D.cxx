@@ -494,6 +494,21 @@ void BOPTools_AlgoTools2D::BuildPCurveForEdgeOnPlane
     aBB.UpdateEdge(aE, aC2D, aF, aTolE);
   }
 }
+
+//=======================================================================
+//function : BuildPCurveForEdgeOnPlane
+//purpose  : 
+//=======================================================================
+void BOPTools_AlgoTools2D::BuildPCurveForEdgeOnPlane 
+  (const TopoDS_Edge& aE,
+   const TopoDS_Face& aF,
+   Handle(Geom2d_Curve)& aC2D,
+   Standard_Boolean& bToUpdate)
+{
+  Standard_Real aT1, aT2;
+  aC2D=BRep_Tool_CurveOnSurface(aE, aF, aT1, aT2, bToUpdate);
+}
+
 //=======================================================================
 // function: BuildPCurveForEdgesOnPlane
 // purpose: 
@@ -875,4 +890,40 @@ Standard_Real MaxToleranceEdge (const TopoDS_Face& aF)
     }
   }
   return aTolMax;
+}
+
+//=======================================================================
+//function : IsEdgeIsoline
+//purpose  : 
+//=======================================================================
+void BOPTools_AlgoTools2D::IsEdgeIsoline( const TopoDS_Edge& theE,
+                                          const TopoDS_Face& theF,
+                                          Standard_Boolean& isTheUIso,
+                                          Standard_Boolean& isTheVIso)
+{
+  isTheUIso = isTheVIso = Standard_False;
+
+  gp_Vec2d aT;
+  gp_Pnt2d aP;
+  Standard_Real aFirst = 0.0, aLast = 0.0;
+  const Handle(Geom2d_Curve) aPC = BRep_Tool::CurveOnSurface(theE, theF, aFirst, aLast);
+
+  aPC->D1(0.5*(aFirst+aLast), aP, aT);
+
+  const Standard_Real aSqMagn = aT.SquareMagnitude();
+  if(aSqMagn <= gp::Resolution())
+    return;
+
+  //Normalyze aT
+  aT /= sqrt(aSqMagn);
+
+  //sin(da) ~ da, when da->0.
+  const Standard_Real aTol = Precision::Angular();
+  const gp_Vec2d aRefVDir(0.0, 1.0), aRefUDir(1.0, 0.0);
+
+  const Standard_Real aDPv = aT.CrossMagnitude(aRefVDir),
+                      aDPu = aT.CrossMagnitude(aRefUDir);
+
+  isTheUIso = (aDPv <= aTol);
+  isTheVIso = (aDPu <= aTol);
 }

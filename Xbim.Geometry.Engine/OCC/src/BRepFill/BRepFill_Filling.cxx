@@ -66,6 +66,7 @@
 #include <TopoDS_Vertex.hxx>
 #include <TopoDS_Wire.hxx>
 #include <TopTools_ListIteratorOfListOfShape.hxx>
+#include <Geom_Surface.hxx>
 
 static gp_Vec MakeFinVec( const TopoDS_Wire aWire, const TopoDS_Vertex aVertex )
 {
@@ -386,8 +387,6 @@ void BRepFill_Filling::AddConstraints( const BRepFill_SequenceOfEdgeFaceAndOrder
 //======================================================================
 void BRepFill_Filling::BuildWires( TopTools_ListOfShape& EdgeList, TopTools_ListOfShape& WireList )
 {
-  TopoDS_Wire CurWire;
-  TopoDS_Edge CurEdge;
   TopTools_ListIteratorOfListOfShape Itl;
   Standard_Integer i, j;
 
@@ -480,11 +479,20 @@ void BRepFill_Filling::FindExtremitiesOfHoles(const TopTools_ListOfShape& WireLi
   theWire = TopoDS::Wire(WireSeq(1));
   WireSeq.Remove(1);
 
-  if (theWire.Closed())
+  if (BRep_Tool::IsClosed(theWire))
     return;
 
   TopoDS_Vertex Vfirst, Vlast;
   TopExp::Vertices( theWire, Vfirst, Vlast );
+
+  if (Vfirst.IsSame(Vlast))
+  {
+    // The Wire is closed indeed despite its 
+    // being not detected earlier.
+
+    return;
+  }
+
   gp_Vec FinVec = MakeFinVec( theWire, Vlast );
   TopoDS_Vertex theVertex = Vlast;
   VerSeq.Append( Vlast );

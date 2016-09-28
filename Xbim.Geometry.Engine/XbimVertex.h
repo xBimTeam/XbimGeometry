@@ -1,9 +1,10 @@
 #pragma once
 #include "XbimOccShape.h"
+#include "XbimPoint3DWithTolerance.h"
 #include <TopoDS_Vertex.hxx>
-
-using namespace XbimGeometry::Interfaces;
+#include <BRep_Tool.hxx>
 using namespace Xbim::Common::Geometry;
+using namespace Xbim::Ifc4::Interfaces;
 namespace Xbim
 {
 	namespace Geometry
@@ -45,9 +46,12 @@ namespace Xbim
 			///Constructs vertex with no geometric location
 			XbimVertex();
 			XbimVertex(XbimPoint3D point3D, double precision);
+			XbimVertex(XbimPoint3DWithTolerance^ point3D);
 			XbimVertex(const TopoDS_Vertex& occVertex);
+			XbimVertex(const TopoDS_Vertex& occVertex, Object^ tag);
 			XbimVertex(IXbimVertex^ vertex, double precision);
-
+			XbimVertex(IIfcCartesianPoint^ vertex);
+			XbimVertex(double x, double y, double z, double precision);
 #ifdef USE_CARVE_CSG
 			XbimVertex(vertex_t* v, double precision);
 #endif // USE_CARVE_CSG
@@ -66,8 +70,24 @@ namespace Xbim
 
 			operator const TopoDS_Vertex& () { return *pVertex; }
 			virtual operator const TopoDS_Shape& () override { return *pVertex; }
-
+			property double Tolerance{double get(){ return IsValid ? BRep_Tool::Tolerance(*pVertex) : 0; }}
 #pragma endregion
+
+
+			// Inherited via XbimOccShape
+			virtual XbimGeometryObject ^ Transformed(IIfcCartesianTransformationOperator ^ transformation) override;
+
+
+			// Inherited via XbimOccShape
+			virtual XbimGeometryObject ^ Moved(IIfcPlacement ^ placement) override;
+			virtual void Move(TopLoc_Location loc);
+
+			// Inherited via XbimOccShape
+			virtual XbimGeometryObject ^ Moved(IIfcObjectPlacement ^ objectPlacement) override;
+
+
+			// Inherited via XbimOccShape
+			virtual void Mesh(IXbimMeshReceiver ^ mesh, double precision, double deflection, double angle) override;
 
 		};
 	}

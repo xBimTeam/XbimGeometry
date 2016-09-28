@@ -31,6 +31,7 @@
 #include <gp_Vec.hxx>
 #include <gp_Dir2d.hxx>
 #include <TColStd_SequenceOfInteger.hxx>
+#include <TColStd_DataMapOfIntegerListOfInteger.hxx>
 #include <IntPatch_SequenceOfIWLineOfTheIWalking.hxx>
 #include <IntSurf_SequenceOfInteriorPoint.hxx>
 #include <Standard_Integer.hxx>
@@ -46,11 +47,7 @@ class Adaptor3d_HSurface;
 class Adaptor3d_HSurfaceTool;
 class IntPatch_TheSurfFunction;
 class IntPatch_TheIWLineOfTheIWalking;
-class IntPatch_SequenceOfIWLineOfTheIWalking;
-class IntPatch_SequenceNodeOfSequenceOfIWLineOfTheIWalking;
 class IntSurf_PntOn2S;
-
-
 
 class IntPatch_TheIWalking 
 {
@@ -59,22 +56,56 @@ public:
   DEFINE_STANDARD_ALLOC
 
   
-  Standard_EXPORT IntPatch_TheIWalking(const Standard_Real Epsilon, const Standard_Real Deflection, const Standard_Real Step);
+  //! Deflection is the maximum deflection admitted between two
+  //! consecutive points on a resulting polyline.
+  //! Step is the maximum increment admitted between two
+  //! consecutive points (in 2d space).
+  //! Epsilon is the tolerance beyond which 2 points
+  //! are confused.
+  //! theToFillHoles is the flag defining whether possible holes
+  //! between resulting curves are filled or not
+  //! in case of IntPatch walking theToFillHoles is False
+  Standard_EXPORT IntPatch_TheIWalking(const Standard_Real Epsilon, const Standard_Real Deflection, const Standard_Real Step,
+                                       const Standard_Boolean theToFillHoles = Standard_False);
   
+  //! Deflection is the maximum deflection admitted between two
+  //! consecutive points on a resulting polyline.
+  //! Step is the maximum increment admitted between two
+  //! consecutive points (in 2d space).
+  //! Epsilon is the tolerance beyond which 2 points
+  //! are confused
     void SetTolerance (const Standard_Real Epsilon, const Standard_Real Deflection, const Standard_Real Step);
   
+  //! Searches a set of polylines starting on a point of Pnts1
+  //! or Pnts2.
+  //! Each point on a resulting polyline verifies F(u,v)=0
   Standard_EXPORT void Perform (const IntSurf_SequenceOfPathPoint& Pnts1, const IntSurf_SequenceOfInteriorPoint& Pnts2, IntPatch_TheSurfFunction& Func, const Handle(Adaptor3d_HSurface)& S, const Standard_Boolean Reversed = Standard_False);
   
+  //! Searches a set of polylines starting on a point of Pnts1.
+  //! Each point on a resulting polyline verifies F(u,v)=0
   Standard_EXPORT void Perform (const IntSurf_SequenceOfPathPoint& Pnts1, IntPatch_TheSurfFunction& Func, const Handle(Adaptor3d_HSurface)& S, const Standard_Boolean Reversed = Standard_False);
   
+  //! Returns true if the calculus was successful.
     Standard_Boolean IsDone() const;
   
+  //! Returns the number of resulting polylines.
+  //! An exception is raised if IsDone returns False.
     Standard_Integer NbLines() const;
   
+  //! Returns the polyline of range Index.
+  //! An exception is raised if IsDone is False.
+  //! An exception is raised if Index<=0 or Index>NbLines.
     const Handle(IntPatch_TheIWLineOfTheIWalking)& Value (const Standard_Integer Index) const;
   
+  //! Returns the number of points belonging to Pnts on which no
+  //! line starts or ends.
+  //! An exception is raised if IsDone returns False.
     Standard_Integer NbSinglePnts() const;
   
+  //! Returns the point of range Index .
+  //! An exception is raised if IsDone returns False.
+  //! An exception is raised if Index<=0 or
+  //! Index > NbSinglePnts.
     const IntSurf_PathPoint& SinglePnt (const Standard_Integer Index) const;
 
 
@@ -91,6 +122,10 @@ protected:
   
   Standard_EXPORT Standard_Boolean TestArretAjout (IntPatch_TheSurfFunction& Section, math_Vector& UV, Standard_Integer& Irang, IntSurf_PntOn2S& PSol);
   
+  Standard_EXPORT void FillPntsInHoles (IntPatch_TheSurfFunction& Section,
+                                        TColStd_SequenceOfInteger& CopySeqAlone,
+                                        IntSurf_SequenceOfInteriorPoint& PntsInHoles);
+  
   Standard_EXPORT void TestArretCadre (const TColStd_SequenceOfReal& Umult, const TColStd_SequenceOfReal& Vmult, const Handle(IntPatch_TheIWLineOfTheIWalking)& Line, IntPatch_TheSurfFunction& Section, math_Vector& UV, Standard_Integer& Irang);
   
   Standard_EXPORT IntWalk_StatusDeflection TestDeflection (IntPatch_TheSurfFunction& Section, const Standard_Boolean Finished, const math_Vector& UV, const IntWalk_StatusDeflection StatusPrecedent, Standard_Integer& NbDivision, Standard_Real& Step, const Standard_Integer StepSign);
@@ -99,12 +134,19 @@ protected:
   
   Standard_EXPORT void OpenLine (const Standard_Integer N, const IntSurf_PntOn2S& Psol, const IntSurf_SequenceOfPathPoint& Pnts1, IntPatch_TheSurfFunction& Section, const Handle(IntPatch_TheIWLineOfTheIWalking)& Line);
   
+  Standard_EXPORT Standard_Boolean IsValidEndPoint (const Standard_Integer IndOfPoint, const Standard_Integer IndOfLine);
+  
+  Standard_EXPORT void RemoveTwoEndPoints (const Standard_Integer IndOfPoint);
+  
+  Standard_EXPORT Standard_Boolean IsPointOnLine (const gp_Pnt2d& theP2d, const Standard_Integer Irang);
+  
   Standard_EXPORT void ComputeCloseLine (const TColStd_SequenceOfReal& Umult, const TColStd_SequenceOfReal& Vmult, const IntSurf_SequenceOfPathPoint& Pnts1, const IntSurf_SequenceOfInteriorPoint& Pnts2, IntPatch_TheSurfFunction& Section, Standard_Boolean& Rajout);
   
   Standard_EXPORT void AddPointInCurrentLine (const Standard_Integer N, const IntSurf_PathPoint& PathPnt, const Handle(IntPatch_TheIWLineOfTheIWalking)& CurrentLine) const;
   
   Standard_EXPORT void MakeWalkingPoint (const Standard_Integer Case, const Standard_Real U, const Standard_Real V, IntPatch_TheSurfFunction& Section, IntSurf_PntOn2S& Psol);
   
+  //! Clears up internal containers
   Standard_EXPORT void Clear();
 
 
@@ -132,7 +174,10 @@ private:
   gp_Vec previousd3d;
   gp_Dir2d previousd2d;
   TColStd_SequenceOfInteger seqAjout;
+  TColStd_SequenceOfInteger seqAlone;
+  TColStd_DataMapOfIntegerListOfInteger PointLineLine;
   IntPatch_SequenceOfIWLineOfTheIWalking lines;
+  Standard_Boolean ToFillHoles;
 
 
 };
@@ -159,13 +204,7 @@ private:
 #define IntWalk_TheIWLine_hxx <IntPatch_TheIWLineOfTheIWalking.hxx>
 #define IntWalk_SequenceOfIWLine IntPatch_SequenceOfIWLineOfTheIWalking
 #define IntWalk_SequenceOfIWLine_hxx <IntPatch_SequenceOfIWLineOfTheIWalking.hxx>
-#define IntWalk_SequenceNodeOfSequenceOfIWLine IntPatch_SequenceNodeOfSequenceOfIWLineOfTheIWalking
-#define IntWalk_SequenceNodeOfSequenceOfIWLine_hxx <IntPatch_SequenceNodeOfSequenceOfIWLineOfTheIWalking.hxx>
-#define IntWalk_SequenceNodeOfSequenceOfIWLine IntPatch_SequenceNodeOfSequenceOfIWLineOfTheIWalking
-#define IntWalk_SequenceNodeOfSequenceOfIWLine_hxx <IntPatch_SequenceNodeOfSequenceOfIWLineOfTheIWalking.hxx>
 #define Handle_IntWalk_TheIWLine Handle(IntPatch_TheIWLineOfTheIWalking)
-#define Handle_IntWalk_SequenceNodeOfSequenceOfIWLine Handle(IntPatch_SequenceNodeOfSequenceOfIWLineOfTheIWalking)
-#define Handle_IntWalk_SequenceNodeOfSequenceOfIWLine Handle(IntPatch_SequenceNodeOfSequenceOfIWLineOfTheIWalking)
 #define IntWalk_IWalking IntPatch_TheIWalking
 #define IntWalk_IWalking_hxx <IntPatch_TheIWalking.hxx>
 
@@ -193,13 +232,7 @@ private:
 #undef IntWalk_TheIWLine_hxx
 #undef IntWalk_SequenceOfIWLine
 #undef IntWalk_SequenceOfIWLine_hxx
-#undef IntWalk_SequenceNodeOfSequenceOfIWLine
-#undef IntWalk_SequenceNodeOfSequenceOfIWLine_hxx
-#undef IntWalk_SequenceNodeOfSequenceOfIWLine
-#undef IntWalk_SequenceNodeOfSequenceOfIWLine_hxx
 #undef Handle_IntWalk_TheIWLine
-#undef Handle_IntWalk_SequenceNodeOfSequenceOfIWLine
-#undef Handle_IntWalk_SequenceNodeOfSequenceOfIWLine
 #undef IntWalk_IWalking
 #undef IntWalk_IWalking_hxx
 

@@ -25,7 +25,6 @@
 #include <Adaptor2d_HCurve2d.hxx>
 #include <BSplCLib.hxx>
 #include <BSplCLib_Cache.hxx>
-#include <CSLib_Offset.hxx>
 #include <Geom2d_BezierCurve.hxx>
 #include <Geom2d_BSplineCurve.hxx>
 #include <Geom2d_Circle.hxx>
@@ -40,6 +39,7 @@
 #include <Geom2d_UndefinedValue.hxx>
 #include <Geom2dAdaptor_Curve.hxx>
 #include <Geom2dAdaptor_HCurve.hxx>
+#include <Geom2dEvaluator_OffsetCurve.hxx>
 #include <GeomAbs_Shape.hxx>
 #include <gp.hxx>
 #include <gp_Circ2d.hxx>
@@ -62,19 +62,8 @@
 #include <TColStd_HArray1OfInteger.hxx>
 
 //#include <Geom2dConvert_BSplineCurveKnotSplitting.hxx>
-#define myBspl Handle(Geom2d_BSplineCurve)::DownCast (myCurve)
-#define PosTol Precision::PConfusion()/2
+static const Standard_Real PosTol = Precision::PConfusion() / 2;
 
-static const int maxDerivOrder = 3;
-static const Standard_Real MinStep   = 1e-7;
-
-static gp_Vec2d dummyDerivative; // used as empty value for unused derivatives in AdjustDerivative
-
-// Recalculate derivatives in the singular point
-// Returns true is the direction of derivatives is changed
-static Standard_Boolean AdjustDerivative(const Handle(Adaptor2d_HCurve2d)& theAdaptor, Standard_Integer theMaxDerivative,
-                                         Standard_Real theU, gp_Vec2d& theD1, gp_Vec2d& theD2 = dummyDerivative,
-                                         gp_Vec2d& theD3 = dummyDerivative, gp_Vec2d& theD4 = dummyDerivative);
 
 //=======================================================================
 //function : LocalContinuity
@@ -86,21 +75,20 @@ static Standard_Boolean AdjustDerivative(const Handle(Adaptor2d_HCurve2d)& theAd
 //=======================================================================
 
 GeomAbs_Shape Geom2dAdaptor_Curve::LocalContinuity(const Standard_Real U1, 
-						   const Standard_Real U2) 
-     const {
-
+						   const Standard_Real U2) const
+{
        Standard_NoSuchObject_Raise_if(myTypeCurve!=GeomAbs_BSplineCurve," ");
-       Standard_Integer Nb = myBspl->NbKnots();
+       Standard_Integer Nb = myBSplineCurve->NbKnots();
        Standard_Integer Index1 = 0;
        Standard_Integer Index2 = 0;
        Standard_Real newFirst, newLast;
        TColStd_Array1OfReal    TK(1,Nb);
        TColStd_Array1OfInteger TM(1,Nb);
-       myBspl->Knots(TK);
-       myBspl->Multiplicities(TM);
-       BSplCLib::LocateParameter(myBspl->Degree(),TK,TM,U1,myBspl->IsPeriodic(),
+       myBSplineCurve->Knots(TK);
+       myBSplineCurve->Multiplicities(TM);
+       BSplCLib::LocateParameter(myBSplineCurve->Degree(),TK,TM,U1,myBSplineCurve->IsPeriodic(),
 				 1,Nb,Index1,newFirst);
-       BSplCLib::LocateParameter(myBspl->Degree(),TK,TM,U2,myBspl->IsPeriodic(),
+       BSplCLib::LocateParameter(myBSplineCurve->Degree(),TK,TM,U2,myBSplineCurve->IsPeriodic(),
 				 1,Nb,Index2,newLast);
        if ( Abs(newFirst-TK(Index1+1))<Precision::PConfusion()) { 
 	 if (Index1 < Nb)Index1++;
@@ -109,7 +97,7 @@ GeomAbs_Shape Geom2dAdaptor_Curve::LocalContinuity(const Standard_Real U1,
 	 Index2--;
        Standard_Integer MultMax;
        // attention aux courbes peridiques.
-       if ( (myBspl->IsPeriodic()) && (Index1 == Nb) )
+       if ( myBSplineCurve->IsPeriodic() && Index1 == Nb )
 	 Index1 = 1;
 
        if ( Index2 - Index1 <= 0) {
@@ -120,7 +108,7 @@ GeomAbs_Shape Geom2dAdaptor_Curve::LocalContinuity(const Standard_Real U1,
 	 for(Standard_Integer i = Index1+1;i<=Index2;i++) {
 	   if ( TM(i)>MultMax) MultMax=TM(i);
 	 }
-	 MultMax = myBspl->Degree() - MultMax;
+	 MultMax = myBSplineCurve->Degree() - MultMax;
        }
        if ( MultMax <= 0) {
 	 return GeomAbs_C0;
@@ -137,7 +125,7 @@ GeomAbs_Shape Geom2dAdaptor_Curve::LocalContinuity(const Standard_Real U1,
        else { 
 	 return GeomAbs_CN;
        }
-     }
+}
 
 
 //=======================================================================
@@ -192,9 +180,12 @@ void Geom2dAdaptor_Curve::load(const Handle(Geom2d_Curve)& C,
 {
   myFirst = UFirst;
   myLast  = ULast;
+  myCurveCache.Nullify();
 
   if ( myCurve != C) {
     myCurve = C;
+    myNestedEvaluator.Nullify();
+    myBSplineCurve.Nullify();
 
     Handle(Standard_Type) TheType = C->DynamicType();
     if ( TheType == STANDARD_TYPE(Geom2d_TrimmedCurve)) {
@@ -221,16 +212,16 @@ void Geom2dAdaptor_Curve::load(const Handle(Geom2d_Curve)& C,
     }
     else if ( TheType == STANDARD_TYPE(Geom2d_BSplineCurve)) {
       myTypeCurve = GeomAbs_BSplineCurve;
-      // Create cache for B-spline
-      myCurveCache = new BSplCLib_Cache(myBspl->Degree(), myBspl->IsPeriodic(), 
-        myBspl->KnotSequence(), myBspl->Poles(), myBspl->Weights());
+      myBSplineCurve = Handle(Geom2d_BSplineCurve)::DownCast(myCurve);
     }
     else if ( TheType == STANDARD_TYPE(Geom2d_OffsetCurve))
     {
-      myTypeCurve = GeomAbs_OtherCurve;
+      myTypeCurve = GeomAbs_OffsetCurve;
+      Handle(Geom2d_OffsetCurve) anOffsetCurve = Handle(Geom2d_OffsetCurve)::DownCast(myCurve);
       // Create nested adaptor for base curve
-      Handle(Geom2d_Curve) aBase = Handle(Geom2d_OffsetCurve)::DownCast(myCurve)->BasisCurve();
-      myOffsetBaseCurveAdaptor = new Geom2dAdaptor_HCurve(aBase);
+      Handle(Geom2d_Curve) aBaseCurve = anOffsetCurve->BasisCurve();
+      Handle(Geom2dAdaptor_HCurve) aBaseAdaptor = new Geom2dAdaptor_HCurve(aBaseCurve);
+      myNestedEvaluator = new Geom2dEvaluator_OffsetCurve(aBaseAdaptor, anOffsetCurve->Offset());
     }
     else {
       myTypeCurve = GeomAbs_OtherCurve;
@@ -252,7 +243,7 @@ GeomAbs_Shape Geom2dAdaptor_Curve::Continuity() const
   if (myTypeCurve == GeomAbs_BSplineCurve) {
     return LocalContinuity(myFirst, myLast);
   }
-  else if (myCurve->DynamicType() == STANDARD_TYPE(Geom2d_OffsetCurve)){
+  else if (myTypeCurve == GeomAbs_OffsetCurve){
     GeomAbs_Shape S = 
       Handle(Geom2d_OffsetCurve)::DownCast (myCurve)->GetBasisCurveContinuity(); 
     switch(S){
@@ -289,8 +280,8 @@ Standard_Integer Geom2dAdaptor_Curve::NbIntervals(const GeomAbs_Shape S) const
   Standard_Integer myNbIntervals = 1;
   Standard_Integer NbSplit;
   if (myTypeCurve == GeomAbs_BSplineCurve) {
-    Standard_Integer FirstIndex = myBspl->FirstUKnotIndex();
-    Standard_Integer LastIndex  = myBspl->LastUKnotIndex();
+    Standard_Integer FirstIndex = myBSplineCurve->FirstUKnotIndex();
+    Standard_Integer LastIndex  = myBSplineCurve->LastUKnotIndex();
     TColStd_Array1OfInteger Inter (1, LastIndex-FirstIndex+1);
     if ( S > Continuity()) {
       Standard_Integer Cont;
@@ -310,11 +301,11 @@ Standard_Integer Geom2dAdaptor_Curve::NbIntervals(const GeomAbs_Shape S) const
 	  if      ( S == GeomAbs_C1) Cont = 1;
 	  else if ( S == GeomAbs_C2) Cont = 2;
 	  else if ( S == GeomAbs_C3) Cont = 3;
-	  else                       Cont = myBspl->Degree();
-          Standard_Integer Degree = myBspl->Degree();
-          Standard_Integer NbKnots = myBspl->NbKnots();
+	  else                       Cont = myBSplineCurve->Degree();
+          Standard_Integer Degree = myBSplineCurve->Degree();
+          Standard_Integer NbKnots = myBSplineCurve->NbKnots();
           TColStd_Array1OfInteger Mults (1, NbKnots);
-          myBspl->Multiplicities (Mults);
+          myBSplineCurve->Multiplicities (Mults);
           NbSplit = 1;
           Standard_Integer Index   = FirstIndex;
           Inter (NbSplit) = Index;
@@ -333,19 +324,19 @@ Standard_Integer Geom2dAdaptor_Curve::NbIntervals(const GeomAbs_Shape S) const
 
           Standard_Integer NbInt = NbSplit-1;
 	  
-	  Standard_Integer Nb = myBspl->NbKnots();
+	  Standard_Integer Nb = myBSplineCurve->NbKnots();
 	  Standard_Integer Index1 = 0;
 	  Standard_Integer Index2 = 0;
 	  Standard_Real newFirst, newLast;
 	  TColStd_Array1OfReal    TK(1,Nb);
 	  TColStd_Array1OfInteger TM(1,Nb);
-	  myBspl->Knots(TK);
-	  myBspl->Multiplicities(TM);
-	  BSplCLib::LocateParameter(myBspl->Degree(),TK,TM,myFirst,
-				    myBspl->IsPeriodic(),
+	  myBSplineCurve->Knots(TK);
+	  myBSplineCurve->Multiplicities(TM);
+	  BSplCLib::LocateParameter(myBSplineCurve->Degree(),TK,TM,myFirst,
+				    myBSplineCurve->IsPeriodic(),
 				    1,Nb,Index1,newFirst);
-	  BSplCLib::LocateParameter(myBspl->Degree(),TK,TM,myLast,
-				    myBspl->IsPeriodic(),
+	  BSplCLib::LocateParameter(myBSplineCurve->Degree(),TK,TM,myLast,
+				    myBSplineCurve->IsPeriodic(),
 				    1,Nb,Index2,newLast);
 
 	  // On decale eventuellement les indices  
@@ -364,7 +355,7 @@ Standard_Integer Geom2dAdaptor_Curve::NbIntervals(const GeomAbs_Shape S) const
       }
     }
   }
-  else if (myCurve->DynamicType() == STANDARD_TYPE(Geom2d_OffsetCurve)){
+  else if (myTypeCurve == GeomAbs_OffsetCurve){
     GeomAbs_Shape BaseS=GeomAbs_C0;
     switch(S){
     case GeomAbs_G1:
@@ -376,7 +367,8 @@ Standard_Integer Geom2dAdaptor_Curve::NbIntervals(const GeomAbs_Shape S) const
     case GeomAbs_C2: BaseS = GeomAbs_C3; break;
     default: BaseS = GeomAbs_CN;
     }
-    myNbIntervals = myOffsetBaseCurveAdaptor->NbIntervals(BaseS);
+    Geom2dAdaptor_Curve anAdaptor( Handle(Geom2d_OffsetCurve)::DownCast(myCurve)->BasisCurve() );
+    myNbIntervals = anAdaptor.NbIntervals(BaseS);
   }
 
   return myNbIntervals;
@@ -393,8 +385,8 @@ void Geom2dAdaptor_Curve::Intervals(TColStd_Array1OfReal& T,
   Standard_Integer myNbIntervals = 1;
   Standard_Integer NbSplit;
   if (myTypeCurve == GeomAbs_BSplineCurve) {
-    Standard_Integer FirstIndex = myBspl->FirstUKnotIndex();
-    Standard_Integer LastIndex  = myBspl->LastUKnotIndex();
+    Standard_Integer FirstIndex = myBSplineCurve->FirstUKnotIndex();
+    Standard_Integer LastIndex  = myBSplineCurve->LastUKnotIndex();
     TColStd_Array1OfInteger Inter (1, LastIndex-FirstIndex+1);
     if ( S > Continuity()) {
       Standard_Integer Cont;
@@ -414,11 +406,11 @@ void Geom2dAdaptor_Curve::Intervals(TColStd_Array1OfReal& T,
 	  if      ( S == GeomAbs_C1) Cont = 1;
 	  else if ( S == GeomAbs_C2) Cont = 2;
 	  else if ( S == GeomAbs_C3) Cont = 3;
-	  else                       Cont = myBspl->Degree();
-          Standard_Integer Degree = myBspl->Degree();
-          Standard_Integer NbKnots = myBspl->NbKnots();
+	  else                       Cont = myBSplineCurve->Degree();
+          Standard_Integer Degree = myBSplineCurve->Degree();
+          Standard_Integer NbKnots = myBSplineCurve->NbKnots();
           TColStd_Array1OfInteger Mults (1, NbKnots);
-          myBspl->Multiplicities (Mults);
+          myBSplineCurve->Multiplicities (Mults);
           NbSplit = 1;
           Standard_Integer Index   = FirstIndex;
           Inter (NbSplit) = Index;
@@ -436,19 +428,19 @@ void Geom2dAdaptor_Curve::Intervals(TColStd_Array1OfReal& T,
 	  Inter (NbSplit) = Index;
           Standard_Integer NbInt = NbSplit-1;
 	  
-	  Standard_Integer Nb = myBspl->NbKnots();
+	  Standard_Integer Nb = myBSplineCurve->NbKnots();
 	  Standard_Integer Index1 = 0;
 	  Standard_Integer Index2 = 0;
 	  Standard_Real newFirst, newLast;
 	  TColStd_Array1OfReal    TK(1,Nb);
 	  TColStd_Array1OfInteger TM(1,Nb);
-	  myBspl->Knots(TK);
-	  myBspl->Multiplicities(TM);
-	  BSplCLib::LocateParameter(myBspl->Degree(),TK,TM,myFirst,
-				    myBspl->IsPeriodic(),
+	  myBSplineCurve->Knots(TK);
+	  myBSplineCurve->Multiplicities(TM);
+	  BSplCLib::LocateParameter(myBSplineCurve->Degree(),TK,TM,myFirst,
+				    myBSplineCurve->IsPeriodic(),
 				    1,Nb,Index1,newFirst);
-	  BSplCLib::LocateParameter(myBspl->Degree(),TK,TM,myLast,
-				    myBspl->IsPeriodic(),
+	  BSplCLib::LocateParameter(myBSplineCurve->Degree(),TK,TM,myLast,
+				    myBSplineCurve->IsPeriodic(),
 				    1,Nb,Index2,newLast);
 
 
@@ -479,7 +471,7 @@ void Geom2dAdaptor_Curve::Intervals(TColStd_Array1OfReal& T,
       }
     }
   }
-  else if (myCurve->DynamicType() == STANDARD_TYPE(Geom2d_OffsetCurve)){
+  else if (myTypeCurve == GeomAbs_OffsetCurve){
     GeomAbs_Shape BaseS=GeomAbs_C0;
     switch(S){
     case GeomAbs_G1:
@@ -491,8 +483,10 @@ void Geom2dAdaptor_Curve::Intervals(TColStd_Array1OfReal& T,
     case GeomAbs_C2: BaseS = GeomAbs_C3; break;
     default: BaseS = GeomAbs_CN;
     }
-    myNbIntervals = myOffsetBaseCurveAdaptor->NbIntervals(BaseS);
-    myOffsetBaseCurveAdaptor->Intervals(T, BaseS);
+
+    Geom2dAdaptor_Curve anAdaptor( Handle(Geom2d_OffsetCurve)::DownCast(myCurve)->BasisCurve() );
+    myNbIntervals = anAdaptor.NbIntervals(BaseS);
+    anAdaptor.Intervals(T, BaseS);
   }
 
   T( T.Lower() ) = myFirst;
@@ -561,9 +555,59 @@ Standard_Real Geom2dAdaptor_Curve::Period() const
 //=======================================================================
 void Geom2dAdaptor_Curve::RebuildCache(const Standard_Real theParameter) const
 {
-  myCurveCache->BuildCache(theParameter, myBspl->Degree(), 
-    myBspl->IsPeriodic(), myBspl->KnotSequence(), 
-    myBspl->Poles(), myBspl->Weights());
+  if (myTypeCurve == GeomAbs_BezierCurve)
+  {
+    // Create cache for Bezier
+    Handle(Geom2d_BezierCurve) aBezier = Handle(Geom2d_BezierCurve)::DownCast(myCurve);
+    Standard_Integer aDeg = aBezier->Degree();
+    TColStd_Array1OfReal aFlatKnots(BSplCLib::FlatBezierKnots(aDeg), 1, 2 * (aDeg + 1));
+    if (myCurveCache.IsNull())
+      myCurveCache = new BSplCLib_Cache(aDeg, aBezier->IsPeriodic(), aFlatKnots,
+        aBezier->Poles(), aBezier->Weights());
+    myCurveCache->BuildCache(theParameter, aDeg, aBezier->IsPeriodic(), aFlatKnots,
+      aBezier->Poles(), aBezier->Weights());
+  }
+  else if (myTypeCurve == GeomAbs_BSplineCurve)
+  {
+    // Create cache for B-spline
+    if (myCurveCache.IsNull())
+      myCurveCache = new BSplCLib_Cache(myBSplineCurve->Degree(), myBSplineCurve->IsPeriodic(),
+        myBSplineCurve->KnotSequence(), myBSplineCurve->Poles(), myBSplineCurve->Weights());
+    myCurveCache->BuildCache(theParameter, myBSplineCurve->Degree(),
+      myBSplineCurve->IsPeriodic(), myBSplineCurve->KnotSequence(),
+      myBSplineCurve->Poles(), myBSplineCurve->Weights());
+  }
+}
+
+//=======================================================================
+//function : IsBoundary
+//purpose  : 
+//=======================================================================
+Standard_Boolean Geom2dAdaptor_Curve::IsBoundary(const Standard_Real theU,
+                                                 Standard_Integer& theSpanStart,
+                                                 Standard_Integer& theSpanFinish) const
+{
+  if (!myBSplineCurve.IsNull() && (theU == myFirst || theU == myLast))
+  {
+    if (theU == myFirst)
+    {
+      myBSplineCurve->LocateU(myFirst, PosTol, theSpanStart, theSpanFinish);
+      if (theSpanStart < 1)
+        theSpanStart = 1;
+      if (theSpanStart >= theSpanFinish)
+        theSpanFinish = theSpanStart + 1;
+    }
+    else if (theU == myLast)
+    {
+      myBSplineCurve->LocateU(myLast, PosTol, theSpanStart, theSpanFinish);
+      if (theSpanFinish > myBSplineCurve->NbKnots())
+        theSpanFinish = myBSplineCurve->NbKnots();
+      if (theSpanStart >= theSpanFinish)
+        theSpanStart = theSpanFinish - 1;
+    }
+    return Standard_True;
+  }
+  return Standard_False;
 }
 
 //=======================================================================
@@ -573,65 +617,9 @@ void Geom2dAdaptor_Curve::RebuildCache(const Standard_Real theParameter) const
 
 gp_Pnt2d Geom2dAdaptor_Curve::Value(const Standard_Real U) const 
 {
-  if (myTypeCurve == GeomAbs_BSplineCurve)
-    return ValueBSpline(U);
-  else if (myCurve->DynamicType() == STANDARD_TYPE(Geom2d_OffsetCurve))
-    return ValueOffset(U);
-
-  return myCurve->Value(U);
-}
-
-//=======================================================================
-//function : ValueBSpline
-//purpose  : Computes the point of parameter U on the B-spline curve
-//=======================================================================
-gp_Pnt2d Geom2dAdaptor_Curve::ValueBSpline(const Standard_Real theU) const
-{
-  if (theU == myFirst || theU == myLast)
-  {
-    Standard_Integer Ideb = 0, Ifin = 0;
-    if (theU == myFirst)
-    {
-      myBspl->LocateU(myFirst, PosTol, Ideb, Ifin);
-      if (Ideb<1) Ideb=1;
-      if (Ideb>=Ifin) Ifin = Ideb+1;
-    }
-    if (theU == myLast)
-    {
-      myBspl->LocateU(myLast,  PosTol, Ideb, Ifin);
-      if (Ifin>myBspl->NbKnots()) Ifin = myBspl->NbKnots();
-      if (Ideb>=Ifin) Ideb = Ifin-1;
-    }
-    return myBspl->LocalValue(theU, Ideb, Ifin);
-  }
-  else if (!myCurveCache.IsNull()) // use cached B-spline data
-  {
-    if (!myCurveCache->IsCacheValid(theU))
-      RebuildCache(theU);
-    gp_Pnt2d aRes;
-    myCurveCache->D0(theU, aRes);
-    return aRes;
-  }
-  return myCurve->Value(theU);
-}
-
-//=======================================================================
-//function : ValueOffset
-//purpose  : Computes the point of parameter U on the offset curve
-//=======================================================================
-gp_Pnt2d Geom2dAdaptor_Curve::ValueOffset(const Standard_Real theU) const
-{
-  gp_Pnt2d aP;
-  gp_Vec2d aD1;
-  myOffsetBaseCurveAdaptor->D1(theU, aP, aD1);
-  Standard_Boolean isDirectionChange = Standard_False;
-  const Standard_Real aTol = gp::Resolution();
-  if(aD1.SquareMagnitude() <= aTol)
-    isDirectionChange = AdjustDerivative(myOffsetBaseCurveAdaptor, 1, theU, aD1);
-
-  Standard_Real anOffset = Handle(Geom2d_OffsetCurve)::DownCast(myCurve)->Offset();
-  CSLib_Offset::D0(aP, aD1, anOffset, isDirectionChange, aP);
-  return aP;
+  gp_Pnt2d aRes;
+  D0(U, aRes);
+  return aRes;
 }
 
 //=======================================================================
@@ -641,59 +629,33 @@ gp_Pnt2d Geom2dAdaptor_Curve::ValueOffset(const Standard_Real theU) const
 
 void Geom2dAdaptor_Curve::D0(const Standard_Real U, gp_Pnt2d& P) const
 {
-  if (myTypeCurve == GeomAbs_BSplineCurve)
+  switch (myTypeCurve)
   {
-    D0BSpline(U, P);
-    return;
-  }
-  else if (myCurve->DynamicType() == STANDARD_TYPE(Geom2d_OffsetCurve))
+  case GeomAbs_BezierCurve:
+  case GeomAbs_BSplineCurve:
   {
-    D0Offset(U, P);
-    return;
-  }
-
-  myCurve->D0(U, P);
-}
-
-//=======================================================================
-//function : D0BSpline
-//purpose  : Computes the point of parameter theU on the B-spline curve
-//=======================================================================
-void Geom2dAdaptor_Curve::D0BSpline(const Standard_Real theU, gp_Pnt2d& theP) const
-{
-  if (theU == myFirst || theU == myLast)
-  {
-    Standard_Integer Ideb = 0, Ifin = 0;
-    if (theU == myFirst) {
-      myBspl->LocateU(myFirst,  PosTol, Ideb, Ifin);
-      if (Ideb<1) Ideb=1;
-      if (Ideb>=Ifin) Ifin = Ideb+1;
+    Standard_Integer aStart = 0, aFinish = 0;
+    if (IsBoundary(U, aStart, aFinish))
+    {
+      myBSplineCurve->LocalD0(U, aStart, aFinish, P);
     }
-    if (theU == myLast) {
-      myBspl->LocateU(myLast,  PosTol, Ideb, Ifin);
-      if (Ifin>myBspl->NbKnots()) Ifin = myBspl->NbKnots();
-      if (Ideb>=Ifin) Ideb = Ifin-1;
+    else
+    {
+      // use cached data
+      if (myCurveCache.IsNull() || !myCurveCache->IsCacheValid(U))
+        RebuildCache(U);
+      myCurveCache->D0(U, P);
     }
-    myBspl->LocalD0(theU, Ideb, Ifin, theP);
-    return;
+    break;
   }
-  else if (!myCurveCache.IsNull()) // use cached B-spline data
-  {
-    if (!myCurveCache->IsCacheValid(theU))
-      RebuildCache(theU);
-    myCurveCache->D0(theU, theP);
-    return;
-  }
-  myCurve->D0(theU, theP);
-}
 
-//=======================================================================
-//function : D0Offset
-//purpose  : Computes the point of parameter theU on the offset curve
-//=======================================================================
-void Geom2dAdaptor_Curve::D0Offset(const Standard_Real theU, gp_Pnt2d& theP) const
-{
-  theP = ValueOffset(theU);
+  case GeomAbs_OffsetCurve:
+    myNestedEvaluator->D0(U, P);
+    break;
+
+  default:
+    myCurve->D0(U, P);
+  }
 }
 
 //=======================================================================
@@ -704,72 +666,33 @@ void Geom2dAdaptor_Curve::D0Offset(const Standard_Real theU, gp_Pnt2d& theP) con
 void Geom2dAdaptor_Curve::D1(const Standard_Real U, 
                              gp_Pnt2d& P, gp_Vec2d& V) const 
 {
-  if (myTypeCurve == GeomAbs_BSplineCurve)
+  switch (myTypeCurve)
   {
-    D1BSpline(U, P, V);
-    return;
-  }
-  else if (myCurve->DynamicType() == STANDARD_TYPE(Geom2d_OffsetCurve))
+  case GeomAbs_BezierCurve:
+  case GeomAbs_BSplineCurve:
   {
-    D1Offset(U, P, V);
-    return;
-  }
-
-  myCurve->D1(U, P, V);
-}
-
-//=======================================================================
-//function : D1BSpline
-//purpose  : Computes the point of parameter theU on the B-spline curve and its derivative
-//=======================================================================
-void Geom2dAdaptor_Curve::D1BSpline(const Standard_Real theU, gp_Pnt2d& theP, gp_Vec2d& theV) const
-{
-  if (theU == myFirst || theU == myLast)
-  {
-    Standard_Integer Ideb = 0, Ifin = 0;
-    if (theU == myFirst) {
-      myBspl->LocateU(myFirst,  PosTol, Ideb, Ifin);
-      if (Ideb<1) Ideb=1;
-      if (Ideb>=Ifin) Ifin = Ideb+1;
+    Standard_Integer aStart = 0, aFinish = 0;
+    if (IsBoundary(U, aStart, aFinish))
+    {
+      myBSplineCurve->LocalD1(U, aStart, aFinish, P, V);
     }
-    if (theU == myLast) {
-      myBspl->LocateU(myLast,  PosTol, Ideb, Ifin);
-      if (Ifin>myBspl->NbKnots()) Ifin = myBspl->NbKnots();
-      if (Ideb>=Ifin) Ideb = Ifin-1;
+    else
+    {
+      // use cached data
+      if (myCurveCache.IsNull() || !myCurveCache->IsCacheValid(U))
+        RebuildCache(U);
+      myCurveCache->D1(U, P, V);
     }
-    myBspl->LocalD1(theU, Ideb, Ifin, theP, theV); 
-    return;
+    break;
   }
-  else if (!myCurveCache.IsNull()) // use cached B-spline data
-  {
-    if (!myCurveCache->IsCacheValid(theU))
-      RebuildCache(theU);
-    myCurveCache->D1(theU, theP, theV);
-    return;
+
+  case GeomAbs_OffsetCurve:
+    myNestedEvaluator->D1(U, P, V);
+    break;
+
+  default:
+    myCurve->D1(U, P, V);
   }
-  myCurve->D1(theU, theP, theV);
-}
-
-//=======================================================================
-//function : D1Offset
-//purpose  : Computes the point of parameter theU on the offset curve and its derivative
-//=======================================================================
-void Geom2dAdaptor_Curve::D1Offset(const Standard_Real theU, gp_Pnt2d& theP, gp_Vec2d& theV) const
-{
-   // P(u) = p(u) + Offset * Ndir / R
-   // with R = || p' ^ Z|| and Ndir = P' ^ Z
-
-   // P'(u) = p'(u) + (Offset / R**2) * (DNdir/DU * R -  Ndir * (DR/R))
-
-  gp_Vec2d V2;
-  myOffsetBaseCurveAdaptor->D2 (theU, theP, theV, V2);
-
-  Standard_Boolean IsDirectionChange = Standard_False;
-  if(theV.SquareMagnitude() <= gp::Resolution())
-    IsDirectionChange = AdjustDerivative(myOffsetBaseCurveAdaptor, 2, theU, theV, V2);
-
-  Standard_Real anOffset = Handle(Geom2d_OffsetCurve)::DownCast(myCurve)->Offset();
-  CSLib_Offset::D1(theP, theV, V2, anOffset, IsDirectionChange, theP, theV);
 }
 
 //=======================================================================
@@ -780,76 +703,33 @@ void Geom2dAdaptor_Curve::D1Offset(const Standard_Real theU, gp_Pnt2d& theP, gp_
 void Geom2dAdaptor_Curve::D2(const Standard_Real U, 
                              gp_Pnt2d& P, gp_Vec2d& V1, gp_Vec2d& V2) const 
 {
-  if (myTypeCurve == GeomAbs_BSplineCurve)
+  switch (myTypeCurve)
   {
-    D2BSpline(U, P, V1, V2);
-    return;
-  }
-  else if (myCurve->DynamicType() == STANDARD_TYPE(Geom2d_OffsetCurve))
+  case GeomAbs_BezierCurve:
+  case GeomAbs_BSplineCurve:
   {
-    D2Offset(U, P, V1, V2);
-    return;
-  }
-
-  myCurve->D2(U, P, V1, V2);
-}
-
-//=======================================================================
-//function : D2BSpline
-//purpose  : Computes the point of parameter theU on the B-spline curve and its first and second derivatives
-//=======================================================================
-void Geom2dAdaptor_Curve::D2BSpline(const Standard_Real theU, gp_Pnt2d& theP,
-                                    gp_Vec2d& theV1, gp_Vec2d& theV2) const
-{
-  if (theU == myFirst || theU == myLast)
-  {
-    Standard_Integer Ideb = 0, Ifin = 0;
-    if (theU == myFirst) {
-      myBspl->LocateU(myFirst,  PosTol, Ideb, Ifin);
-      if (Ideb<1) Ideb=1;
-      if (Ideb>=Ifin) Ifin = Ideb+1;
+    Standard_Integer aStart = 0, aFinish = 0;
+    if (IsBoundary(U, aStart, aFinish))
+    {
+      myBSplineCurve->LocalD2(U, aStart, aFinish, P, V1, V2);
     }
-    if (theU == myLast) {
-      myBspl->LocateU(myLast,  PosTol, Ideb, Ifin);
-      if (Ifin>myBspl->NbKnots()) Ifin = myBspl->NbKnots();
-      if (Ideb>=Ifin) Ideb = Ifin-1;
+    else
+    {
+      // use cached data
+      if (myCurveCache.IsNull() || !myCurveCache->IsCacheValid(U))
+        RebuildCache(U);
+      myCurveCache->D2(U, P, V1, V2);
     }
-    myBspl->LocalD2(theU, Ideb, Ifin, theP, theV1, theV2);
-    return;
+    break;
   }
-  else if (!myCurveCache.IsNull()) // use cached B-spline data
-  {
-    if (!myCurveCache->IsCacheValid(theU))
-      RebuildCache(theU);
-    myCurveCache->D2(theU, theP, theV1, theV2);
-    return;
+
+  case GeomAbs_OffsetCurve:
+    myNestedEvaluator->D2(U, P, V1, V2);
+    break;
+
+  default:
+    myCurve->D2(U, P, V1, V2);
   }
-  myCurve->D2(theU, theP, theV1, theV2);
-}
-//=======================================================================
-//function : D2Offset
-//purpose  : Computes the point of parameter theU on the offset curve and its first and second derivatives
-//=======================================================================
-void Geom2dAdaptor_Curve::D2Offset(const Standard_Real theU, gp_Pnt2d& theP,
-                                    gp_Vec2d& theV1, gp_Vec2d& theV2) const
-{
-   // P(u) = p(u) + Offset * Ndir / R
-   // with R = || p' ^ Z|| and Ndir = P' ^ Z
-
-   // P'(u) = p'(u) + (Offset / R**2) * (DNdir/DU * R -  Ndir * (DR/R))
-
-   // P"(u) = p"(u) + (Offset / R) * (D2Ndir/DU - DNdir * (2.0 * Dr/ R**2) +
-   //         Ndir * ( (3.0 * Dr**2 / R**4) - (D2r / R**2)))
-
-  gp_Vec2d V3;
-  myOffsetBaseCurveAdaptor->D3 (theU, theP, theV1, theV2, V3);
-
-  Standard_Boolean IsDirectionChange = Standard_False;
-  if(theV1.SquareMagnitude() <= gp::Resolution())
-    IsDirectionChange = AdjustDerivative(myOffsetBaseCurveAdaptor, 3, theU, theV1, theV2, V3);
-
-  Standard_Real anOffset = Handle(Geom2d_OffsetCurve)::DownCast(myCurve)->Offset();
-  CSLib_Offset::D2(theP, theV1, theV2, V3, anOffset, IsDirectionChange, theP, theV1, theV2);
 }
 
 //=======================================================================
@@ -861,83 +741,33 @@ void Geom2dAdaptor_Curve::D3(const Standard_Real U,
                              gp_Pnt2d& P,  gp_Vec2d& V1, 
                              gp_Vec2d& V2, gp_Vec2d& V3) const 
 {
-  if (myTypeCurve == GeomAbs_BSplineCurve)
+  switch (myTypeCurve)
   {
-    D3BSpline(U, P, V1, V2, V3);
-    return;
-  }
-  else if (myCurve->DynamicType() == STANDARD_TYPE(Geom2d_OffsetCurve))
+  case GeomAbs_BezierCurve:
+  case GeomAbs_BSplineCurve:
   {
-    D3Offset(U, P, V1, V2, V3);
-    return;
-  }
-
-  myCurve->D3(U, P, V1, V2, V3);
-}
-
-//=======================================================================
-//function : D3BSpline
-//purpose  : Computes the point of parameter theU on the B-spline curve and its 1st - 3rd derivatives
-//=======================================================================
-void Geom2dAdaptor_Curve::D3BSpline(const Standard_Real theU, gp_Pnt2d& theP,
-                                    gp_Vec2d& theV1, gp_Vec2d& theV2, gp_Vec2d& theV3) const
-{
-  if (theU == myFirst || theU == myLast)
-  {
-    Standard_Integer Ideb = 0, Ifin = 0;
-    if (theU == myFirst) {
-      myBspl->LocateU(myFirst,  PosTol, Ideb, Ifin);
-      if (Ideb<1) Ideb=1;
-      if (Ideb>=Ifin) Ifin = Ideb+1;
+    Standard_Integer aStart = 0, aFinish = 0;
+    if (IsBoundary(U, aStart, aFinish))
+    {
+      myBSplineCurve->LocalD3(U, aStart, aFinish, P, V1, V2, V3);
     }
-    if (theU == myLast) {
-      myBspl->LocateU(myLast,  PosTol, Ideb, Ifin);
-      if (Ifin>myBspl->NbKnots()) Ifin = myBspl->NbKnots();
-      if (Ideb>=Ifin) Ideb = Ifin-1;
+    else
+    {
+      // use cached data
+      if (myCurveCache.IsNull() || !myCurveCache->IsCacheValid(U))
+        RebuildCache(U);
+      myCurveCache->D3(U, P, V1, V2, V3);
     }
-    myBspl->LocalD3(theU, Ideb, Ifin, theP, theV1, theV2, theV3);
-    return;
+    break;
   }
-  else if (!myCurveCache.IsNull()) // use cached B-spline data
-  {
-    if (!myCurveCache->IsCacheValid(theU))
-      RebuildCache(theU);
-    myCurveCache->D3(theU, theP, theV1, theV2, theV3);
-    return;
+
+  case GeomAbs_OffsetCurve:
+    myNestedEvaluator->D3(U, P, V1, V2, V3);
+    break;
+
+  default:
+    myCurve->D3(U, P, V1, V2, V3);
   }
-  myCurve->D3(theU, theP, theV1, theV2, theV3);
-}
-//=======================================================================
-//function : D3Offset
-//purpose  : Computes the point of parameter theU on the offset curve and its 1st - 3rd derivatives
-//=======================================================================
-void Geom2dAdaptor_Curve::D3Offset(const Standard_Real theU, gp_Pnt2d& theP,
-                                    gp_Vec2d& theV1, gp_Vec2d& theV2, gp_Vec2d& theV3) const
-{
-   // P(u) = p(u) + Offset * Ndir / R
-   // with R = || p' ^ Z|| and Ndir = P' ^ Z
-
-   // P'(u) = p'(u) + (Offset / R**2) * (DNdir/DU * R -  Ndir * (DR/R))
-
-   // P"(u) = p"(u) + (Offset / R) * (D2Ndir/DU - DNdir * (2.0 * Dr/ R**2) +
-   //         Ndir * ( (3.0 * Dr**2 / R**4) - (D2r / R**2)))
-
-   //P"'(u) = p"'(u) + (Offset / R) * (D3Ndir - (3.0 * Dr/R**2 ) * D2Ndir -
-   //         (3.0 * D2r / R2) * DNdir) + (3.0 * Dr * Dr / R4) * DNdir -
-   //         (D3r/R2) * Ndir + (6.0 * Dr * Dr / R4) * Ndir +
-   //         (6.0 * Dr * D2r / R4) * Ndir - (15.0 * Dr* Dr* Dr /R6) * Ndir
-
-  Standard_Boolean IsDirectionChange = Standard_False;
-
-  myOffsetBaseCurveAdaptor->D3 (theU, theP, theV1, theV2, theV3);
-  gp_Vec2d V4 = myOffsetBaseCurveAdaptor->DN (theU, 4);
-
-  if(theV1.SquareMagnitude() <= gp::Resolution())
-    IsDirectionChange = AdjustDerivative(myOffsetBaseCurveAdaptor, 4, theU, theV1, theV2, theV3, V4);
-
-  Standard_Real anOffset = Handle(Geom2d_OffsetCurve)::DownCast(myCurve)->Offset();
-  CSLib_Offset::D3(theP, theV1, theV2, theV3, V4, anOffset, IsDirectionChange,
-                   theP, theV1, theV2, theV3);
 }
 
 //=======================================================================
@@ -948,57 +778,29 @@ void Geom2dAdaptor_Curve::D3Offset(const Standard_Real theU, gp_Pnt2d& theP,
 gp_Vec2d Geom2dAdaptor_Curve::DN(const Standard_Real U, 
                                  const Standard_Integer N) const 
 {
-  if (myTypeCurve == GeomAbs_BSplineCurve)
-    return DNBSpline(U, N);
-  else if (myCurve->DynamicType() == STANDARD_TYPE(Geom2d_OffsetCurve))
-    return DNOffset(U, N);
-
-  return myCurve->DN(U, N);
-}
-
-gp_Vec2d Geom2dAdaptor_Curve::DNBSpline(const Standard_Real U, 
-                                        const Standard_Integer N) const 
-{
-  if (U==myFirst || U==myLast)
+  switch (myTypeCurve)
   {
-    Standard_Integer Ideb = 0, Ifin = 0;
-    if (U==myFirst) {
-      myBspl->LocateU(myFirst, PosTol, Ideb, Ifin);
-      if (Ideb<1) Ideb=1;
-      if (Ideb>=Ifin) Ifin = Ideb+1;
+  case GeomAbs_BezierCurve:
+  case GeomAbs_BSplineCurve:
+  {
+    Standard_Integer aStart = 0, aFinish = 0;
+    if (IsBoundary(U, aStart, aFinish))
+    {
+      myBSplineCurve->LocalDN(U, aStart, aFinish, N);
     }
-    if (U==myLast) {
-      myBspl->LocateU(myLast, PosTol, Ideb, Ifin);
-      if (Ifin>myBspl->NbKnots()) Ifin = myBspl->NbKnots();
-      if (Ideb>=Ifin) Ideb = Ifin-1;
-    } 
-    return myBspl->LocalDN( U, Ideb, Ifin, N);
+    else
+      return myCurve->DN(U, N);
+    break;
   }
 
-  return myCurve->DN( U, N);
-}
+  case GeomAbs_OffsetCurve:
+    return myNestedEvaluator->DN(U, N);
+    break;
 
-gp_Vec2d Geom2dAdaptor_Curve::DNOffset(const Standard_Real    U,
-                                       const Standard_Integer N) const
-{
-  gp_Pnt2d aPnt;
-  gp_Vec2d aVec, aVN;
-
-  switch (N)
-  {
-  case 1:
-    D1Offset(U, aPnt, aVN);
+  default: // to eliminate gcc warning
     break;
-  case 2:
-    D2Offset(U, aPnt, aVec, aVN);
-    break;
-  case 3:
-    D3Offset(U, aPnt, aVec, aVec, aVN);
-    break;
-  default:
-    aVN = myCurve->DN(U, N);
   }
-  return aVN;
+  return myCurve->DN(U, N);
 }
 
 //=======================================================================
@@ -1106,7 +908,7 @@ Standard_Integer Geom2dAdaptor_Curve::Degree() const
   if (myTypeCurve == GeomAbs_BezierCurve)
     return Handle(Geom2d_BezierCurve)::DownCast (myCurve)->Degree();
   else if (myTypeCurve == GeomAbs_BSplineCurve)
-    return Handle(Geom2d_BSplineCurve)::DownCast (myCurve)->Degree();
+    return myBSplineCurve->Degree();
   else
     Standard_NoSuchObject::Raise();
   // portage WNT 
@@ -1121,7 +923,7 @@ Standard_Integer Geom2dAdaptor_Curve::Degree() const
 Standard_Boolean Geom2dAdaptor_Curve::IsRational() const {
   switch( myTypeCurve) {
   case GeomAbs_BSplineCurve:
-    return Handle(Geom2d_BSplineCurve)::DownCast (myCurve)->IsRational();
+    return myBSplineCurve->IsRational();
   case GeomAbs_BezierCurve:
     return Handle(Geom2d_BezierCurve)::DownCast (myCurve)->IsRational();
   default:
@@ -1139,7 +941,7 @@ Standard_Integer Geom2dAdaptor_Curve::NbPoles() const
   if (myTypeCurve == GeomAbs_BezierCurve)
     return Handle(Geom2d_BezierCurve)::DownCast (myCurve)->NbPoles();
   else if (myTypeCurve == GeomAbs_BSplineCurve)
-    return Handle(Geom2d_BSplineCurve)::DownCast (myCurve)->NbPoles();
+    return myBSplineCurve->NbPoles();
   else
     Standard_NoSuchObject::Raise();
   // portage WNT 
@@ -1151,11 +953,11 @@ Standard_Integer Geom2dAdaptor_Curve::NbPoles() const
 //purpose  : 
 //=======================================================================
 
-Standard_Integer Geom2dAdaptor_Curve::NbKnots() const {
+Standard_Integer Geom2dAdaptor_Curve::NbKnots() const
+{
   if ( myTypeCurve != GeomAbs_BSplineCurve)
     Standard_NoSuchObject::Raise("Geom2dAdaptor_Curve::NbKnots");
-  return Handle(Geom2d_BSplineCurve)::DownCast (myCurve)->NbKnots();
-
+  return myBSplineCurve->NbKnots();
 }
 
 //=======================================================================
@@ -1175,13 +977,13 @@ Handle(Geom2d_BezierCurve) Geom2dAdaptor_Curve::Bezier() const
 
 Handle(Geom2d_BSplineCurve) Geom2dAdaptor_Curve::BSpline() const 
 {
-  return Handle(Geom2d_BSplineCurve)::DownCast (myCurve);
+  return myBSplineCurve;
 }
 
 static Standard_Integer nbPoints(const Handle(Geom2d_Curve)& theCurve) 
 {
  
-  Standard_Integer nbs = 10;
+  Standard_Integer nbs = 20;
   
   if(theCurve->IsKind(STANDARD_TYPE( Geom2d_Line)) )
     nbs = 2;
@@ -1208,64 +1010,10 @@ static Standard_Integer nbPoints(const Handle(Geom2d_Curve)& theCurve)
   if(nbs>300)
     nbs = 300;
   return nbs;
-  
+
 }
 
 Standard_Integer Geom2dAdaptor_Curve::NbSamples() const
 {
   return  nbPoints(myCurve);
-}
-
-
-// ============= Auxiliary functions ===================
-Standard_Boolean AdjustDerivative(const Handle(Adaptor2d_HCurve2d)& theAdaptor, Standard_Integer theMaxDerivative,
-                                  Standard_Real theU, gp_Vec2d& theD1, gp_Vec2d& theD2,
-                                  gp_Vec2d& theD3, gp_Vec2d& theD4)
-{
-  static const Standard_Real aTol = gp::Resolution();
-
-  Standard_Boolean IsDirectionChange = Standard_False;
-  const Standard_Real anUinfium   = theAdaptor->FirstParameter();
-  const Standard_Real anUsupremum = theAdaptor->LastParameter();
-
-  const Standard_Real DivisionFactor = 1.e-3;
-  Standard_Real du;
-  if((anUsupremum >= RealLast()) || (anUinfium <= RealFirst())) 
-    du = 0.0;
-  else
-    du = anUsupremum - anUinfium;
-
-  const Standard_Real aDelta = Max(du * DivisionFactor, MinStep);
-
-  //Derivative is approximated by Taylor-series
-  Standard_Integer anIndex = 1; //Derivative order
-  gp_Vec2d V;
-
-  do
-  {
-    V =  theAdaptor->DN(theU, ++anIndex);
-  }
-  while((V.Magnitude() <= aTol) && anIndex < maxDerivOrder);
-
-  Standard_Real u;
-
-  if(theU-anUinfium < aDelta)
-    u = theU+aDelta;
-  else
-    u = theU-aDelta;
-
-  gp_Pnt2d P1, P2;
-  theAdaptor->D0(Min(theU, u),P1);
-  theAdaptor->D0(Max(theU, u),P2);
-
-  gp_Vec2d V1(P1, P2);
-  IsDirectionChange = V.Dot(V1) < 0.0;
-  Standard_Real aSign = IsDirectionChange ? -1.0 : 1.0;
-
-  theD1 = V * aSign;
-  gp_Vec2d* aDeriv[3] = {&theD2, &theD3, &theD4};
-  for (Standard_Integer i = 1; i < theMaxDerivative; i++)
-    *(aDeriv[i-1]) = theAdaptor->DN(theU, anIndex + i) * aSign;
-
-  return IsDirectionChange;
 }

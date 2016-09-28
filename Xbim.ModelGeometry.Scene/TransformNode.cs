@@ -14,16 +14,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.IO.Compression;
 using System.Linq;
+using Xbim.Common;
 using Xbim.Common.Geometry;
-using Xbim.Ifc2x3.Kernel;
-using Xbim.Ifc2x3.SharedBldgElements;
-using Xbim.IO;
-using Xbim.XbimExtensions;
-using Xbim.XbimExtensions.Interfaces;
+using Xbim.Ifc4.Interfaces;
+
 
 #endregion
 
@@ -51,7 +46,7 @@ namespace Xbim.ModelGeometry.Scene
         {
         }
 
-        public TransformNode(IfcProduct prod)        
+        public TransformNode(IIfcProduct prod)        
         {
             if(prod!=null)
                 _productLabel = prod.EntityLabel;
@@ -68,20 +63,20 @@ namespace Xbim.ModelGeometry.Scene
             set { _productLabel = value; }
         }
 
-        public IfcProduct NearestProduct(XbimModel model)
+        public IIfcProduct NearestProduct(IModel model)
         {
             if (!_productLabel.HasValue && _parent != null)
                 return _parent.NearestProduct(model);
             else if (_productLabel.HasValue)
-                return model.InstancesLocal[_productLabel.Value] as IfcProduct;
+                return model.Instances[_productLabel.Value] as IIfcProduct;
             else
                 return null;
         }
 
-        public IfcProduct Product(XbimModel model)
+        public IIfcProduct Product(IModel model)
         {
             if (_productLabel.HasValue)
-                return model.InstancesLocal[_productLabel.Value] as IfcProduct;
+                return model.Instances[_productLabel.Value] as IIfcProduct;
             else
                 return null;
         }
@@ -100,7 +95,7 @@ namespace Xbim.ModelGeometry.Scene
 
         public void RemoveChild(TransformNode child)
         {
-            if (_children == null)
+            if (_children != null)
             {
                 _children.Remove(child);
             }

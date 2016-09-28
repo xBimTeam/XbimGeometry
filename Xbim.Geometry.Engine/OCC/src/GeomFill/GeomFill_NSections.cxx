@@ -49,6 +49,8 @@
 #include <TColStd_Array1OfReal.hxx>
 
 #include <stdio.h>
+IMPLEMENT_STANDARD_RTTIEXT(GeomFill_NSections,GeomFill_SectionLaw)
+
 #ifdef OCCT_DEBUG
 # ifdef DRAW
 #  include <DrawTrSurf.hxx>
@@ -206,6 +208,10 @@ static void ResultEval(const Handle(Geom_BSplineSurface)& surf,
 GeomFill_NSections::GeomFill_NSections(const TColGeom_SequenceOfCurve& NC)
 {
   mySections = NC;
+  UFirst = 0.;
+  ULast = 1.;
+  VFirst = 0.;
+  VLast = 1.;
   myRefSurf.Nullify();
   ComputeSurface();
 }
@@ -518,6 +524,12 @@ GeomFill_NSections::GeomFill_NSections(const TColGeom_SequenceOfCurve& NC,
     Standard_Real myPres3d = 1.e-06;
     Standard_Integer i,j,jdeb=1,jfin=mySections.Length();
     
+    if (jfin <= jdeb)
+    {
+      //We will not be able to create surface from single curve.
+      return;
+    }
+
     GeomFill_SectionGenerator section;
     Handle(Geom_BSplineSurface) surface;
 
@@ -563,16 +575,20 @@ GeomFill_NSections::GeomFill_NSections(const TColGeom_SequenceOfCurve& NC,
 
     Standard_Integer Nbcurves = mySections.Length();
     Standard_Integer Nbpar = myParams.Length();
-    Handle(TColStd_HArray1OfReal) HPar
-      = new TColStd_HArray1OfReal(1,Nbpar);
-    for (i=1;i<=Nbpar;i++) {
-      HPar->SetValue(i,myParams(i));
+    if (Nbpar > 0)
+    {
+      Handle(TColStd_HArray1OfReal) HPar
+        = new TColStd_HArray1OfReal(1, Nbpar);
+      for (i = 1; i <= Nbpar; i++) {
+        HPar->SetValue(i, myParams(i));
+      }
+      section.SetParam(HPar);
     }
-    section.SetParam(HPar);
     section.Perform(Precision::PConfusion());
+    
     Handle(GeomFill_Line) line = new GeomFill_Line(Nbcurves);
     Standard_Integer nbIt = 0, degmin = 2, degmax = 6;
-    Standard_Boolean knownP = Standard_True;
+    Standard_Boolean knownP = Nbpar > 0;
     GeomFill_AppSurf anApprox(degmin, degmax, myPres3d, myPres3d, nbIt, knownP);
     Standard_Boolean SpApprox = Standard_True;
     anApprox.Perform(line, section, SpApprox);
@@ -631,9 +647,12 @@ GeomFill_NSections::GeomFill_NSections(const TColGeom_SequenceOfCurve& NC,
                                             Standard_Integer& NbKnots,
                                             Standard_Integer& Degree) const
 {
-   NbPoles = mySurface->NbUPoles();
-   NbKnots = mySurface->NbUKnots();
-   Degree  = mySurface->UDegree();
+  if (mySurface.IsNull())
+    return;
+  
+  NbPoles = mySurface->NbUPoles();
+  NbKnots = mySurface->NbUKnots();
+  Degree  = mySurface->UDegree();
 }
 
 //=======================================================
@@ -641,7 +660,8 @@ GeomFill_NSections::GeomFill_NSections(const TColGeom_SequenceOfCurve& NC,
 //=======================================================
  void GeomFill_NSections::Knots(TColStd_Array1OfReal& TKnots) const
 {
-  mySurface->UKnots(TKnots);
+  if (!mySurface.IsNull())
+    mySurface->UKnots(TKnots);
 }
 
 //=======================================================
@@ -649,7 +669,8 @@ GeomFill_NSections::GeomFill_NSections(const TColGeom_SequenceOfCurve& NC,
 //=======================================================
  void GeomFill_NSections::Mults(TColStd_Array1OfInteger& TMults) const
 {
-  mySurface->UMultiplicities(TMults);
+  if (!mySurface.IsNull())
+    mySurface->UMultiplicities(TMults);
 }
 
 
@@ -658,7 +679,10 @@ GeomFill_NSections::GeomFill_NSections(const TColGeom_SequenceOfCurve& NC,
 //=======================================================
  Standard_Boolean GeomFill_NSections::IsRational() const
 {
-  return mySurface->IsURational();
+  if (!mySurface.IsNull())
+    return mySurface->IsURational();
+
+  return Standard_False;
 }
 
 //=======================================================
@@ -666,7 +690,10 @@ GeomFill_NSections::GeomFill_NSections(const TColGeom_SequenceOfCurve& NC,
 //=======================================================
  Standard_Boolean GeomFill_NSections::IsUPeriodic() const
 {
-  return  mySurface->IsUPeriodic();
+  if (!mySurface.IsNull())
+    return  mySurface->IsUPeriodic();
+
+  return Standard_False;
 }
 
 //=======================================================
@@ -674,7 +701,10 @@ GeomFill_NSections::GeomFill_NSections(const TColGeom_SequenceOfCurve& NC,
 //=======================================================
  Standard_Boolean GeomFill_NSections::IsVPeriodic() const
 {
-  return  mySurface->IsVPeriodic();
+  if (!mySurface.IsNull())
+    return  mySurface->IsVPeriodic();
+
+  return Standard_False;
 }
 
 //=======================================================
@@ -682,6 +712,9 @@ GeomFill_NSections::GeomFill_NSections(const TColGeom_SequenceOfCurve& NC,
 //=======================================================
  Standard_Integer GeomFill_NSections::NbIntervals(const GeomAbs_Shape S) const
 {
+  if (mySurface.IsNull())
+    return 0;
+
   GeomAdaptor_Surface AdS(mySurface);
   return AdS.NbVIntervals(S);
 }
@@ -693,6 +726,9 @@ GeomFill_NSections::GeomFill_NSections(const TColGeom_SequenceOfCurve& NC,
  void GeomFill_NSections::Intervals(TColStd_Array1OfReal& T,
                                          const GeomAbs_Shape S) const
 {
+  if (mySurface.IsNull())
+    return;
+
   GeomAdaptor_Surface AdS(mySurface);
   AdS.VIntervals(T,S);
 }
@@ -753,6 +789,9 @@ GeomFill_NSections::GeomFill_NSections(const TColGeom_SequenceOfCurve& NC,
   gp_Pnt P, Bary;
   Bary.SetCoord(0., 0., 0.);
 
+  if (mySurface.IsNull())
+    return Bary;
+
   Standard_Integer ii,jj;
   Standard_Real U0, U1, V0, V1;
   mySurface->Bounds(U0,U1,V0,V1);
@@ -791,6 +830,9 @@ GeomFill_NSections::GeomFill_NSections(const TColGeom_SequenceOfCurve& NC,
 //=======================================================
 void GeomFill_NSections::GetMinimalWeight(TColStd_Array1OfReal& Weights) const
 {
+  if (mySurface.IsNull())
+    return;
+
   if (mySurface->IsURational()) {
     Standard_Integer NbU = mySurface->NbUPoles(),
                      NbV = mySurface->NbVPoles();

@@ -1,15 +1,15 @@
 ﻿using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Xbim.Geometry.Engine.Interop;
-using Xbim.Ifc2x3.GeometricModelResource;
+using Xbim.Common.Geometry;
 using Xbim.Common.Logging;
-using Xbim.IO;
-using Xbim.Ifc2x3.GeometryResource;
-using Xbim.Geometry;
-using Xbim.ModelGeometry.Scene;
-using XbimGeometry.Interfaces;
+using Xbim.Geometry.Engine.Interop;
+using Xbim.Ifc;
+using Xbim.Ifc4.GeometricModelResource;
+using Xbim.Ifc4.GeometryResource;
+using Xbim.Ifc4.Interfaces;
 
-namespace GeometryTests
+
+namespace Ifc4GeometryTests
 {
     [DeploymentItem(@"x64\", "x64")]
     [DeploymentItem(@"x86\", "x86")]
@@ -23,12 +23,12 @@ namespace GeometryTests
         {
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new XbimModel())
+        
+                using (var m = IfcStore.Open("SolidTestFiles\\6- IfcSweptDiskSolid_With_BooleanResult.ifc"))
                 {
-                    m.CreateFrom("SolidTestFiles\\6- IfcSweptDiskSolid_With_BooleanResult.ifc", null, null, true, true);
-                    var ss = m.Instances.OfType<IfcSweptDiskSolid>().FirstOrDefault(e => e.Directrix is IfcPolyline);
+                    var ss = m.Instances.OfType<IIfcSweptDiskSolid>().FirstOrDefault(e => e.Directrix is IIfcPolyline);
                     Assert.IsTrue(ss != null, "No Swept Disk found");
-                    Assert.IsTrue(ss.Directrix is IfcPolyline, "Incorrect sweep found");
+                    Assert.IsTrue(ss.Directrix is IIfcPolyline, "Incorrect sweep found");
 
                     
                     var solid = _xbimGeometryCreator.CreateSolid(ss);
@@ -46,12 +46,11 @@ namespace GeometryTests
         {
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new XbimModel())
+                using (var m = IfcStore.Open("SolidTestFiles\\6- IfcSweptDiskSolid_With_BooleanResult.ifc"))
                 {
-                    m.CreateFrom("SolidTestFiles\\6- IfcSweptDiskSolid_With_BooleanResult.ifc", null, null, true, true);
-                    var ss = m.Instances.OfType<IfcSweptDiskSolid>().FirstOrDefault(e => e.Directrix is IfcCompositeCurve);
+                    var ss = m.Instances.OfType<IIfcSweptDiskSolid>().FirstOrDefault(e => e.Directrix is IIfcCompositeCurve);
                     Assert.IsTrue(ss != null, "No Swept Disk found");
-                    Assert.IsTrue(ss.Directrix is IfcCompositeCurve, "Incorrect sweep found");
+                    Assert.IsTrue(ss.Directrix is IIfcCompositeCurve, "Incorrect sweep found");
 
                     
                     var solid = _xbimGeometryCreator.CreateSolid(ss);
@@ -69,10 +68,9 @@ namespace GeometryTests
             var xbimGeometryCreator = new XbimGeometryEngine();
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new XbimModel())
+                using (var m = IfcStore.Open("SolidTestFiles\\BIM Logo-LetterM.ifc"))
                 {
-                    m.CreateFrom("SolidTestFiles\\BIM Logo-LetterM.ifc", null, null, true, true);
-                    var eas = m.Instances[57] as IfcSurfaceCurveSweptAreaSolid;
+                    var eas = m.Instances[57] as IIfcSurfaceCurveSweptAreaSolid;
                     Assert.IsTrue(eas != null, "No IfcSurfaceCurveSweptArea Solid found");
 
                     var solid = (IXbimSolid)xbimGeometryCreator.Create(eas);
@@ -80,11 +78,11 @@ namespace GeometryTests
 
                     IfcCsgTests.GeneralTest(solid);
                     Assert.IsTrue(solid.Faces.Count() == 26, "Letter M should have 26 faces");
-                    var xbimTessellator = new XbimTessellator(m, XbimGeometryType.PolyhedronBinary);
+                    //var xbimTessellator = new XbimTessellator(m, XbimGeometryType.PolyhedronBinary);
                     // Assert.IsTrue(xbimTessellator.CanMesh(solid));//if we can mesh the shape directly just do it
                     // var shapeGeom = xbimTessellator.Mesh(solid);
-                    var shapeGeom = xbimGeometryCreator.CreateShapeGeometry(solid, m.ModelFactors.Precision, m.ModelFactors.DeflectionTolerance, m.ModelFactors.DeflectionAngle, XbimGeometryType.PolyhedronBinary);
-
+                    var geom = xbimGeometryCreator.CreateShapeGeometry(solid, m.ModelFactors.Precision, m.ModelFactors.DeflectionTolerance, m.ModelFactors.DeflectionAngle, XbimGeometryType.PolyhedronBinary);
+                    Assert.IsTrue(geom.BoundingBox.Volume > 0);
                 }
             }
         }
@@ -94,10 +92,9 @@ namespace GeometryTests
         {
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new XbimModel())
+                using (var m = IfcStore.Open("SolidTestFiles\\11- IfcSurfaceCurveSweptAreaSolid.ifc"))
                 {
-                    m.CreateFrom("SolidTestFiles\\11- IfcSurfaceCurveSweptAreaSolid.ifc", null, null, true, true);
-                    var ss = m.Instances.OfType<IfcSurfaceCurveSweptAreaSolid>().FirstOrDefault();
+                    var ss = m.Instances.OfType<IIfcSurfaceCurveSweptAreaSolid>().FirstOrDefault();
                     Assert.IsTrue(ss != null, "No Swept Disk found");
                    
                     

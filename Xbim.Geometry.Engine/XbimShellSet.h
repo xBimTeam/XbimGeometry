@@ -2,13 +2,14 @@
 #include "XbimShell.h"
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
-using namespace XbimGeometry::Interfaces;
+
 using namespace System::Collections::Generic;
+using namespace Xbim::Common::Geometry;
 namespace Xbim
 {
 	namespace Geometry
 	{
-		ref class XbimShellSet : IXbimShellSet
+		ref class XbimShellSet :XbimSetObject, IXbimShellSet
 		{
 		private:
 			List<IXbimShell^>^ shells;
@@ -38,7 +39,8 @@ namespace Xbim
 			virtual property bool IsValid{bool get(){ return Count>0; }; }
 			virtual property bool IsSet{bool get()  { return true; }; }
 			virtual property IXbimShell^ First{IXbimShell^ get(); }
-			virtual property int Count{int get(); }
+			virtual property int Count{int get() override;}
+			virtual IXbimGeometryObject^ Trim()  override { if (Count == 1) return First; else if (Count == 0) return nullptr; else return this; };
 			virtual property XbimRect3D BoundingBox {XbimRect3D get() ; }
 			virtual property  XbimGeometryObjectType GeometryType{XbimGeometryObjectType  get() { return XbimGeometryObjectType::XbimShellSetType; }}
 			virtual IEnumerator<IXbimShell^>^ GetEnumerator();
@@ -55,6 +57,20 @@ namespace Xbim
 			virtual property bool IsPolyhedron{ bool get(); }
 			virtual void Union(double tolerance);
 #pragma endregion
+
+
+			// Inherited via XbimSetObject
+			virtual IXbimGeometryObject ^ Transformed(IIfcCartesianTransformationOperator ^ transformation) override;
+
+
+			// Inherited via XbimSetObject
+			virtual IXbimGeometryObject ^ Moved(IIfcPlacement ^ placement) override;
+
+			virtual IXbimGeometryObject ^ Moved(IIfcObjectPlacement ^ objectPlacement) override;
+
+
+			// Inherited via XbimSetObject
+			virtual void Mesh(IXbimMeshReceiver ^ mesh, double precision, double deflection, double angle) override;
 
 		};
 

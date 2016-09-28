@@ -16,14 +16,14 @@
 #include <BRepMesh_DiscretRoot.hxx>
 
 
+IMPLEMENT_STANDARD_RTTIEXT(BRepMesh_DiscretRoot,Standard_Transient)
+
 //=======================================================================
 //function : BRepMesh_DiscretRoot
 //purpose  :
 //=======================================================================
 BRepMesh_DiscretRoot::BRepMesh_DiscretRoot()
-: myDeflection (0.001),
-  myAngle      (0.1),
-  myIsDone     (Standard_False)
+: myIsDone     (Standard_False)
 {
 }
 

@@ -12,7 +12,7 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef WNT
+#ifndef _WIN32
 
 
 #include <OSD_Host.hxx>
@@ -187,7 +187,9 @@ Standard_Integer OSD_Host::Error()const{
 
 #include <OSD_Host.hxx>
 
-#pragma comment( lib, "WSOCK32.LIB" )
+#if defined(_MSC_VER)
+  #pragma comment( lib, "WSOCK32.LIB" )
+#endif
 
 void _osd_wnt_set_error ( OSD_Error&, OSD_WhoAmI, ... );
 
@@ -198,7 +200,7 @@ static TCollection_AsciiString interAddr;
 static Standard_Integer        memSize;
 
 OSD_Host :: OSD_Host () {
-
+#ifndef OCCT_UWP
  DWORD              nSize;
  Standard_Character szHostName[ MAX_COMPUTERNAME_LENGTH + 1 ];
  char*              hostAddr = 0;
@@ -216,6 +218,10 @@ OSD_Host :: OSD_Host () {
   ZeroMemory (&ms, sizeof(ms));
   ZeroMemory (  szHostName, sizeof ( Standard_Character ) *  (MAX_COMPUTERNAME_LENGTH + 1) );
 
+#ifdef _MSC_VER
+  // suppress GetVersionEx() deprecation warning
+  #pragma warning(disable : 4996)
+#endif
   if (  !GetVersionEx ( &osVerInfo )  ) {
 
    _osd_wnt_set_error ( myError, OSD_WHost );
@@ -230,6 +236,9 @@ OSD_Host :: OSD_Host () {
    GlobalMemoryStatus ( &ms );
 
   }  // end else
+#ifdef _MSC_VER
+  #pragma warning(default : 4996)
+#endif
 
   if (  !Failed ()  ) {
   
@@ -271,7 +280,7 @@ OSD_Host :: OSD_Host () {
  if ( fInit )
 
   myName = hostName;
-
+#endif
 }  // end constructor
 
 TCollection_AsciiString OSD_Host :: SystemVersion () {

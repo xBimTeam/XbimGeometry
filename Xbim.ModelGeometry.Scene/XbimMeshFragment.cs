@@ -1,9 +1,5 @@
 ﻿using System;
-
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Xbim.IO;
 
 namespace Xbim.ModelGeometry.Scene
 {
@@ -35,7 +31,8 @@ namespace Xbim.ModelGeometry.Scene
         {
             get
             {
-                return IfcMetaData.GetType(_entityTypeId);
+                throw new NotImplementedException();//need to fix this
+               // return IfcMetaData.GetType(_entityTypeId);
             }
         }
 
@@ -51,24 +48,14 @@ namespace Xbim.ModelGeometry.Scene
 
         public XbimMeshFragment(int pStart, int tStart, short productTypeId, int productLabel, int geometryLabel, short modelId)
         {
-            this.StartPosition = EndPosition = pStart;
-            this.StartTriangleIndex = EndTriangleIndex = tStart;
-            this._entityTypeId = productTypeId;
-            this.EntityLabel = productLabel;
-            this.GeometryId = geometryLabel;
-            this.ModelId = modelId;
+            StartPosition = EndPosition = pStart;
+            StartTriangleIndex = EndTriangleIndex = tStart;
+            _entityTypeId = productTypeId;
+            EntityLabel = productLabel;
+            GeometryId = geometryLabel;
+            ModelId = modelId;
         }
 
-        public XbimMeshFragment(int pStart, int tStart, Type productType, int productLabel, int geometryLabel, short modelId)
-        {
-
-            this.StartPosition = EndPosition = pStart;
-            this.StartTriangleIndex = EndTriangleIndex = tStart;
-            this._entityTypeId = IfcMetaData.IfcTypeId(productType);
-            this.EntityLabel = productLabel;
-            this.GeometryId = geometryLabel;
-            this.ModelId = modelId;
-        }
 
         public bool IsEmpty
         {

@@ -55,6 +55,7 @@
 #include <TopoDS_Face.hxx>
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Shell.hxx>
+#include <TopExp.hxx>
 
 #include <stdio.h>
 //OCC454(apo)->
@@ -247,13 +248,23 @@ Standard_Boolean BRepClass3d_SolidExplorer::PointInTheFace
   Standard_Real v,dv = (V2-V1)/6.0;
   if(du<1e-12) du=1e-12;
   if(dv<1e-12) dv=1e-12;
+  Standard_Boolean IsNotUper = !surf->IsUPeriodic(), IsNotVper = !surf->IsVPeriodic();
   Standard_Integer NbPntCalc=0;
   if(myMapOfInter.IsBound(Face)) { 
     void *ptr = (void*)(myMapOfInter.Find(Face));
+    Standard_Boolean IsInside = Standard_True;
+    if(IsNotUper)
+    {
+      IsInside = (u_ >= U1) && (u_ <= U2);
+    }
+    if(IsNotVper)
+    {
+      IsInside &= (v_ >= V1) && (v_ <= V2);
+    }
     if(ptr) { 
       const IntCurvesFace_Intersector& TheIntersector = (*((IntCurvesFace_Intersector *)ptr));
       // Check if the point is already in the face
-      if(TheIntersector.ClassifyUVPoint(gp_Pnt2d(u_,v_))==TopAbs_IN) {
+      if(IsInside && (TheIntersector.ClassifyUVPoint(gp_Pnt2d(u_,v_))==TopAbs_IN)) {
         gp_Pnt aPnt;
         surf->D1(u_, v_, aPnt, theVecD1U, theVecD1V);
         if (aPnt.SquareDistance(APoint_) < Precision::Confusion() * Precision::Confusion())
@@ -429,6 +440,8 @@ Standard_Integer BRepClass3d_SolidExplorer::OtherSegment(const gp_Pnt& P,
   Standard_Integer IndexPoint=0;
   Standard_Integer NbPointsOK=0;
   Standard_Integer NbFacesInSolid=0;
+  Standard_Boolean aRestr = Standard_True;
+  Standard_Boolean aTestInvert = Standard_False;
 
   for(;;) { 
     myFirstFace++; 
@@ -436,6 +449,7 @@ Standard_Integer BRepClass3d_SolidExplorer::OtherSegment(const gp_Pnt& P,
     // look for point on face starting from myFirstFace
 //  Modified by skv - Thu Sep  4 14:31:12 2003 OCC578 Begin
 //     while (faceexplorer.More()) {
+    NbFacesInSolid = 0;
     for (; faceexplorer.More(); faceexplorer.Next()) {
 //  Modified by skv - Thu Sep  4 14:31:12 2003 OCC578 End
       NbFacesInSolid++;
@@ -443,7 +457,26 @@ Standard_Integer BRepClass3d_SolidExplorer::OtherSegment(const gp_Pnt& P,
       face = TopoDS::Face(faceexplorer.Current());
 
       Handle(BRepAdaptor_HSurface) surf = new BRepAdaptor_HSurface();
-      surf->ChangeSurface().Initialize(face);
+      if(aTestInvert)
+      {
+        BRepTopAdaptor_FClass2d aClass(face, Precision::Confusion());
+        if(aClass.PerformInfinitePoint() == TopAbs_IN)
+        {
+          aRestr = Standard_False;
+          if(myMapOfInter.IsBound(face))
+          {
+            myMapOfInter.UnBind(face);
+            void *ptr = (void *)(new IntCurvesFace_Intersector(face, Precision::Confusion(),
+                                                               aRestr, Standard_False));
+            myMapOfInter.Bind(face,ptr);
+          }
+        }
+        else
+        {
+          aRestr = Standard_True;
+        }
+      }
+      surf->ChangeSurface().Initialize(face, aRestr);
       Standard_Real U1,V1,U2,V2;
       U1 = surf->FirstUParameter();
       V1 = surf->FirstVParameter();
@@ -452,7 +485,10 @@ Standard_Integer BRepClass3d_SolidExplorer::OtherSegment(const gp_Pnt& P,
       face.Orientation(TopAbs_FORWARD);
       //
       //avoid process faces from uncorrected shells
-      if( Abs (U2 - U1) < 1.e-12 || Abs(V2 - V1) < 1.e-12) {
+      const Standard_Real eps = Precision::PConfusion();
+      Standard_Real epsU = Max(eps * Max(Abs(U2), Abs(U1)), eps);
+      Standard_Real epsV = Max(eps * Max(Abs(V2), Abs(V1)), eps);
+      if( Abs (U2 - U1) < epsU || Abs(V2 - V1) < epsV) {
         return 2;
       }
       //
@@ -622,6 +658,7 @@ Standard_Integer BRepClass3d_SolidExplorer::OtherSegment(const gp_Pnt& P,
         return 0;
       }
     }
+    aTestInvert = Standard_True;
   } //-- for(;;) { ...  } 
 }
 
@@ -735,11 +772,11 @@ BRepClass3d_SolidExplorer::BRepClass3d_SolidExplorer(const TopoDS_Shape& S)
 }
 
 //=======================================================================
-//function : Delete
-//purpose  : 
+//function : ~BRepClass3d_SolidExplorer
+//purpose  :
 //=======================================================================
 
-void BRepClass3d_SolidExplorer::Delete()
+BRepClass3d_SolidExplorer::~BRepClass3d_SolidExplorer()
 {
  Destroy() ;
 }
@@ -768,6 +805,9 @@ void BRepClass3d_SolidExplorer::Destroy() {
 
 void BRepClass3d_SolidExplorer::InitShape(const TopoDS_Shape& S)
 {
+  myMapEV.Clear();
+  myTree.Clear();
+
   myShape = S;
   myFirstFace = 0;
   myParamOnEdge = 0.512345;
@@ -792,7 +832,7 @@ void BRepClass3d_SolidExplorer::InitShape(const TopoDS_Shape& S)
       Expl.More();
       Expl.Next()) { 
     const TopoDS_Face Face = TopoDS::Face(Expl.Current());
-    void *ptr = (void *)(new IntCurvesFace_Intersector(Face,Precision::Confusion()));
+    void *ptr = (void *)(new IntCurvesFace_Intersector(Face,Precision::Confusion(),Standard_True, Standard_False));
     myMapOfInter.Bind(Face,ptr);
     myReject=Standard_False;  //-- at least one face in the solid 
   }
@@ -801,11 +841,31 @@ void BRepClass3d_SolidExplorer::InitShape(const TopoDS_Shape& S)
   if(myReject) { 
     cout<<"\nWARNING : BRepClass3d_SolidExplorer.cxx  (Solid without face)"<<endl;
   }
-#endif      
+#endif
 
 #if REJECTION
   BRepBndLib::Add(myShape,myBox);
 #endif
+
+  // Fill mapEV with vertices and edges from shape.
+  TopExp::MapShapes(myShape, TopAbs_EDGE, myMapEV);
+  TopExp::MapShapes(myShape, TopAbs_VERTEX, myMapEV);  
+
+  NCollection_UBTreeFiller <Standard_Integer, Bnd_Box> aTreeFiller (myTree);
+
+  for (Standard_Integer i = 1; i <= myMapEV.Extent(); i++)
+  {
+    Bnd_Box B;
+    const TopoDS_Shape& Sh = myMapEV(i);
+    TopAbs_Orientation ori = Sh.Orientation();
+    if (ori == TopAbs_EXTERNAL || ori == TopAbs_INTERNAL)
+      continue;
+    if (Sh.ShapeType() == TopAbs_EDGE && BRep_Tool::Degenerated(TopoDS::Edge(Sh)))
+      continue;
+    BRepBndLib::Add(Sh,B);
+    aTreeFiller.Add(i, B);
+  }
+  aTreeFiller.Fill();
 }
 
 //=======================================================================
@@ -972,4 +1032,9 @@ void BRepClass3d_SolidExplorer::DumpSegment(const gp_Pnt&,
 #ifdef OCCT_DEBUG
  
 #endif
+}
+
+const TopoDS_Shape& BRepClass3d_SolidExplorer::GetShape() const 
+{ 
+  return(myShape);
 }

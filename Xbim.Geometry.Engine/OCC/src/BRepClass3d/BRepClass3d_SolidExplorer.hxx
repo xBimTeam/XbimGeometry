@@ -29,6 +29,9 @@
 #include <TopExp_Explorer.hxx>
 #include <BRepClass3d_MapOfInter.hxx>
 #include <TopAbs_State.hxx>
+#include <BRepClass3d_BndBoxTree.hxx>
+#include <TopTools_IndexedMapOfShape.hxx>
+
 class TopoDS_Shape;
 class gp_Pnt;
 class TopoDS_Face;
@@ -39,9 +42,8 @@ class gp_Lin;
 class Bnd_Box;
 class IntCurvesFace_Intersector;
 
-
-//! Provide an   exploration of a  BRep Shape   for the
-//! classification.
+//! Provide an exploration of a BRep Shape for the classification.
+//! Provide access to the special UB tree to obtain fast search.
 class BRepClass3d_SolidExplorer 
 {
 public:
@@ -56,8 +58,7 @@ public:
   
   Standard_EXPORT BRepClass3d_SolidExplorer(const TopoDS_Shape& S);
   
-  Standard_EXPORT virtual void Delete();
-Standard_EXPORT virtual ~BRepClass3d_SolidExplorer(){Destroy() ; }
+  Standard_EXPORT virtual ~BRepClass3d_SolidExplorer();
   
   Standard_EXPORT void InitShape (const TopoDS_Shape& S);
   
@@ -139,8 +140,15 @@ Standard_EXPORT virtual ~BRepClass3d_SolidExplorer(){Destroy() ; }
   Standard_EXPORT virtual void DumpSegment (const gp_Pnt& P, const gp_Lin& L, const Standard_Real Par, const TopAbs_State S) const;
   
   Standard_EXPORT const Bnd_Box& Box() const;
+
+  Standard_EXPORT const TopoDS_Shape& GetShape() const;
   
   Standard_EXPORT IntCurvesFace_Intersector& Intersector (const TopoDS_Face& F) const;
+
+  //! Return UB-tree instance which is used for edge / vertex checks.
+  const BRepClass3d_BndBoxTree& GetTree () {return myTree;}
+  //! Return edge/vertices map for current shape.
+  const TopTools_IndexedMapOfShape& GetMapEV () {return myMapEV;}
   
   Standard_EXPORT void Destroy();
 
@@ -165,6 +173,8 @@ private:
   TopExp_Explorer myShellExplorer;
   TopExp_Explorer myFaceExplorer;
   BRepClass3d_MapOfInter myMapOfInter;
+  BRepClass3d_BndBoxTree myTree;
+  TopTools_IndexedMapOfShape myMapEV;
 
 
 };

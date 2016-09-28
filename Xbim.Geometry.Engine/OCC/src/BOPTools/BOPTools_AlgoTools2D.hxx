@@ -112,8 +112,14 @@ public:
   //! Compute intermediate value of parameter for the edge <anE>.
   Standard_EXPORT static Standard_Real IntermediatePoint (const TopoDS_Edge& anE);
   
+  //! Build pcurve of edge on face if the surface is plane, and update the edge.
   Standard_EXPORT static void BuildPCurveForEdgeOnPlane (const TopoDS_Edge& theE, const TopoDS_Face& theF);
   
+  //! Build pcurve of edge on face if the surface is plane, but do not update the edge.
+  //! The output are the pcurve and the flag telling that pcurve was built.
+  Standard_EXPORT static void BuildPCurveForEdgeOnPlane (const TopoDS_Edge& theE, const TopoDS_Face& theF,
+                                                         Handle(Geom2d_Curve)& aC2D, Standard_Boolean& bToUpdate);
+
   Standard_EXPORT static void BuildPCurveForEdgesOnPlane (const BOPCol_ListOfShape& theLE, const TopoDS_Face& theF);
   
 
@@ -146,7 +152,20 @@ public:
   //! Returns 0 in case of success
   Standard_EXPORT static Standard_Integer AttachExistingPCurve (const TopoDS_Edge& aEold, const TopoDS_Edge& aEnew, const TopoDS_Face& aF, const Handle(IntTools_Context)& aCtx);
 
-
+  //! Checks if CurveOnSurface of theE on theF matches with isoline of theF surface.
+  //! Sets corresponding values for isTheUIso and isTheVIso variables.
+  //! ATTENTION!!!
+  //!     This method is based on comparation between direction of
+  //!   surface (which theF is based on) iso-lines and the direction
+  //!   of the edge p-curve (on theF) in middle-point of the p-curve.
+  //!     This method should be used carefully
+  //!   (e.g. BRep_Tool::IsClosed(...) together) in order to
+  //!   avoid false classification some p-curves as isoline (e.g. circle
+  //!   on a plane).
+  Standard_EXPORT static void IsEdgeIsoline(const TopoDS_Edge& theE,
+                                            const TopoDS_Face& theF,
+                                            Standard_Boolean& isTheUIso,
+                                            Standard_Boolean& isTheVIso);
 
 
 protected:

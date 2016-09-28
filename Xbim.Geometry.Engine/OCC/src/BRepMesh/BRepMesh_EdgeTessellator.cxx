@@ -17,6 +17,7 @@
 #include <Geom_Surface.hxx>
 #include <Geom_Plane.hxx>
 #include <Geom2d_Curve.hxx>
+#include <Geom2dAdaptor_Curve.hxx>
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Face.hxx>
 #include <BRepAdaptor_HSurface.hxx>
@@ -31,6 +32,8 @@
 #include <TopTools_ListOfShape.hxx>
 #include <TColStd_Array1OfReal.hxx>
 
+
+IMPLEMENT_STANDARD_RTTIEXT(BRepMesh_EdgeTessellator,BRepMesh_IEdgeTool)
 
 //=======================================================================
 //function : Constructor
@@ -52,6 +55,8 @@ BRepMesh_EdgeTessellator::BRepMesh_EdgeTessellator(
 
   mySquareEdgeDef = aPreciseLinDef * aPreciseLinDef;
   mySquareMinSize = Max(mySquareEdgeDef, theMinSize * theMinSize);
+  myEdgeSqTol     = BRep_Tool::Tolerance (theEdge);
+  myEdgeSqTol    *= myEdgeSqTol;
 
   Standard_Boolean isSameParam = BRep_Tool::SameParameter(theEdge);
   if (isSameParam)
@@ -59,13 +64,14 @@ BRepMesh_EdgeTessellator::BRepMesh_EdgeTessellator(
   else
     myCOnS.Initialize(theEdge, theFaceAttribute->Face());
 
-  TopLoc_Location aLoc;
   const GeomAbs_CurveType aCurveType = myCOnS.GetType();
   Standard_Integer aMinPntNb = (aCurveType == GeomAbs_Circle) ? 4 : 2; //OCC287
 
-  // Get range on 2d curve
+  // Get 2d curve and init geom tool
   Standard_Real aFirstParam, aLastParam;
-  BRep_Tool::Range(theEdge, theFaceAttribute->Face(), aFirstParam, aLastParam);
+  Handle(Geom2d_Curve) aCurve2d =
+    BRep_Tool::CurveOnSurface(theEdge, theFaceAttribute->Face(), aFirstParam, aLastParam);
+  myCurve2d.Load(aCurve2d, aFirstParam, aLastParam);
   myTool = new BRepMesh_GeomTool(myCOnS, aFirstParam, aLastParam, 
     aPreciseLinDef, aPreciseAngDef, aMinPntNb, theMinSize);
 
@@ -91,7 +97,9 @@ BRepMesh_EdgeTessellator::BRepMesh_EdgeTessellator(
           Standard_Real aParam;
           gp_Pnt        aPoint3d;
           gp_Pnt2d      aPoint2d;
-          aDetalizator.Value( aNodeIt, mySurface, aParam, aPoint3d, aPoint2d );
+          aDetalizator.Value( aNodeIt, aParam, aPoint3d);
+          myCurve2d.D0(aParam, aPoint2d);
+
           myTool->AddPoint( aPoint3d, aParam, Standard_False );
         }
       }
@@ -119,48 +127,84 @@ BRepMesh_EdgeTessellator::BRepMesh_EdgeTessellator(
     TopTools_ListIteratorOfListOfShape aFaceIt(aSharedFaces);
     for (; aFaceIt.More(); aFaceIt.Next())
     {
-      TopLoc_Location aLoc;
-      const TopoDS_Face&   aFace = TopoDS::Face(aFaceIt.Value());
-      Handle(Geom_Surface) aSurf = BRep_Tool::Surface(aFace, aLoc);
+      const TopoDS_Face& aFace = TopoDS::Face(aFaceIt.Value());
+      BRepAdaptor_Surface aSurf(aFace, Standard_False);
 
-      if (aSurf->IsInstance(STANDARD_TYPE(Geom_Plane)))
+      if (aSurf.GetType() == GeomAbs_Plane)
         continue;
 
       Standard_Real aF, aL;
-      Handle(Geom2d_Curve) aCurve2d = BRep_Tool::CurveOnSurface(theEdge, aFace, aF, aL);
+      aCurve2d = BRep_Tool::CurveOnSurface(theEdge, aFace, aF, aL);
       if ( Abs(aF - aFirstParam) > Precision::PConfusion() ||
            Abs(aL - aLastParam ) > Precision::PConfusion() )
       {
         continue;
       }
+      Geom2dAdaptor_Curve aGACurve(aCurve2d, aF, aL);
 
       aNodesNb = myTool->NbPoints();
       TColStd_Array1OfReal aParamArray(1, aNodesNb);
       for (Standard_Integer i = 1; i <= aNodesNb; ++i)
       {
-        gp_Pnt2d      aTmpUV;
         gp_Pnt        aTmpPnt;
         Standard_Real aParam;
-        myTool->Value(i, mySurface, aParam, aTmpPnt, aTmpUV);
+        myTool->Value(i, aParam, aTmpPnt);
         aParamArray.SetValue(i, aParam);
       }
 
       for (Standard_Integer i = 1; i < aNodesNb; ++i)
-        splitSegment(aSurf, aCurve2d, aParamArray(i), aParamArray(i + 1), 1);
+        splitSegment(aSurf, aGACurve, aParamArray(i), aParamArray(i + 1), 1);
     }
   }
+
+   const Standard_Real aTol = Precision::Confusion();
+   const Standard_Real aDu  = mySurface->UResolution (aTol);
+   const Standard_Real aDv  = mySurface->VResolution (aTol);
+
+   myFaceRangeU[0] = mySurface->FirstUParameter() - aDu;
+   myFaceRangeU[1] = mySurface->LastUParameter()  + aDu;
+
+   myFaceRangeV[0] = mySurface->FirstVParameter() - aDv;
+   myFaceRangeV[1] = mySurface->LastVParameter()  + aDv;
 }
 
 //=======================================================================
 //function : Value
 //purpose  : 
 //=======================================================================
-void BRepMesh_EdgeTessellator::Value(const Standard_Integer theIndex,
-                                     Standard_Real&         theParameter,
-                                     gp_Pnt&                thePoint,
-                                     gp_Pnt2d&              theUV)
+Standard_Boolean BRepMesh_EdgeTessellator::Value(
+  const Standard_Integer theIndex,
+  Standard_Real&         theParameter,
+  gp_Pnt&                thePoint,
+  gp_Pnt2d&              theUV)
 {
-  myTool->Value(theIndex, mySurface, theParameter, thePoint, theUV);
+  myTool->Value(theIndex, theParameter, thePoint);
+  myCurve2d.D0(theParameter, theUV);
+
+  // If point coordinates are out of surface range, 
+  // it is necessary to re-project point.
+  if (mySurface->GetType() != GeomAbs_BSplineSurface &&
+      mySurface->GetType() != GeomAbs_BezierSurface  &&
+      mySurface->GetType() != GeomAbs_OtherSurface)
+  {
+    return Standard_True;
+  }
+
+  // Let skip periodic case.
+  if (mySurface->IsUPeriodic() || mySurface->IsVPeriodic())
+    return Standard_True;
+
+  // Point lies within the surface range - nothing to do.
+  if (theUV.X() > myFaceRangeU[0] && theUV.X() < myFaceRangeU[1] &&
+      theUV.Y() > myFaceRangeV[0] && theUV.Y() < myFaceRangeV[1])
+  {
+    return Standard_True;
+  }
+
+  gp_Pnt aPntOnSurf;
+  mySurface->D0 (theUV.X (), theUV.Y (), aPntOnSurf);
+
+  return (thePoint.SquareDistance (aPntOnSurf) < myEdgeSqTol);
 }
 
 //=======================================================================
@@ -168,8 +212,8 @@ void BRepMesh_EdgeTessellator::Value(const Standard_Integer theIndex,
 //purpose  : 
 //=======================================================================
 void BRepMesh_EdgeTessellator::splitSegment(
-  const Handle(Geom_Surface)& theSurf,
-  const Handle(Geom2d_Curve)& theCurve2d,
+  const Adaptor3d_Surface&    theSurf,
+  const Geom2dAdaptor_Curve&  theCurve2d,
   const Standard_Real         theFirst,
   const Standard_Real         theLast,
   const Standard_Integer      theNbIter)
@@ -185,17 +229,17 @@ void BRepMesh_EdgeTessellator::splitSegment(
   if(Abs(theLast - theFirst) < 2 * Precision::PConfusion())
     return;
 
-  theCurve2d->D0(theFirst, uvf);
-  theCurve2d->D0(theLast,  uvl);
+  theCurve2d.D0(theFirst, uvf);
+  theCurve2d.D0(theLast,  uvl);
 
-  P3dF = theSurf->Value(uvf.X(), uvf.Y());
-  P3dL = theSurf->Value(uvl.X(), uvl.Y());
+  P3dF = theSurf.Value(uvf.X(), uvf.Y());
+  P3dL = theSurf.Value(uvl.X(), uvl.Y());
   
   if(P3dF.SquareDistance(P3dL) < mySquareMinSize)
     return;
 
   uvm = gp_Pnt2d((uvf.XY() + uvl.XY())*0.5);
-  midP3dFromSurf = theSurf->Value(uvm.X(), uvm.Y());
+  midP3dFromSurf = theSurf.Value(uvm.X(), uvm.Y());
 
   gp_XYZ Vec1 = midP3dFromSurf.XYZ() - P3dF.XYZ();
   if(Vec1.SquareModulus() < mySquareMinSize)

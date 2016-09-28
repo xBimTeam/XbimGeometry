@@ -73,11 +73,16 @@ public:
   
 
   //! Modifier
-  //! Adds the list of indices of faces <aLF>
-  //! to the list of indices of faces
+  //! Sets the list of indices of faces <aLF>
   //! of the common block
-  Standard_EXPORT void AddFaces (const BOPCol_ListOfInteger& aLF);
-  
+  Standard_EXPORT void SetFaces (const BOPCol_ListOfInteger& aLF);
+
+  //! Modifier
+  //! Appends the list of indices of faces <aLF>
+  //! to the list of indices of faces
+  //! of the common block (the input list is emptied)
+  Standard_EXPORT void AppendFaces(BOPCol_ListOfInteger& aLF);
+
 
   //! Selector
   //! Returns the list of pave blocks
@@ -145,7 +150,7 @@ public:
 
 
 
-  DEFINE_STANDARD_RTTI(BOPDS_CommonBlock,MMgt_TShared)
+  DEFINE_STANDARD_RTTIEXT(BOPDS_CommonBlock,MMgt_TShared)
 
 protected:
 

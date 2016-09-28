@@ -14,11 +14,13 @@
 // commercial license or contractual agreement.
 
 #include <BRepMesh_EdgeTessellationExtractor.hxx>
-#include <Geom2d_Curve.hxx>
+#include <Geom2dAdaptor_HCurve.hxx>
 #include <Poly_PolygonOnTriangulation.hxx>
 #include <Poly_Triangulation.hxx>
 #include <BRepMesh_ShapeTool.hxx>
 
+
+IMPLEMENT_STANDARD_RTTIEXT(BRepMesh_EdgeTessellationExtractor,BRepMesh_IEdgeTool)
 
 //=======================================================================
 //function : Constructor
@@ -26,7 +28,7 @@
 //=======================================================================
 BRepMesh_EdgeTessellationExtractor::BRepMesh_EdgeTessellationExtractor(
   const TopoDS_Edge&                          theEdge,
-  const Handle(Geom2d_Curve)&                 thePCurve,
+  const Handle(Geom2dAdaptor_HCurve)&         thePCurve,
   const TopoDS_Face&                          theFace,
   const Handle(Poly_Triangulation)&           theTriangulation,
   const Handle(Poly_PolygonOnTriangulation)&  thePolygon,
@@ -43,7 +45,7 @@ BRepMesh_EdgeTessellationExtractor::BRepMesh_EdgeTessellationExtractor(
 //function : Value
 //purpose  : 
 //=======================================================================
-void BRepMesh_EdgeTessellationExtractor::Value(
+Standard_Boolean BRepMesh_EdgeTessellationExtractor::Value(
   const Standard_Integer theIndex,
   Standard_Real&         theParameter,
   gp_Pnt&                thePoint,
@@ -54,4 +56,6 @@ void BRepMesh_EdgeTessellationExtractor::Value(
 
   theParameter = myProvider.Parameter(theIndex, thePoint);
   theUV        = myPCurve->Value(theParameter);
+
+  return Standard_True;
 }

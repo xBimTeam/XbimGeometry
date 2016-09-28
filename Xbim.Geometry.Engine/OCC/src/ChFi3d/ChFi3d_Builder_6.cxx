@@ -100,11 +100,6 @@
 #include <TopTools_ListOfShape.hxx>
 
 #include <stdio.h>
-#ifdef OCCT_DEBUG
-// For measurements.
-#include <OSD_Chronometer.hxx>
-//static OSD_Chronometer appclock;
-#endif
 
 //#define DRAW 
 
@@ -1484,8 +1479,8 @@ Standard_Boolean ChFi3d_Builder::ComputeData
  const Standard_Boolean Appro,
  const Standard_Boolean Forward,
  const math_Vector& Soldep,
- Standard_Boolean& intf,
- Standard_Boolean& intl,
+ Standard_Integer& intf,
+ Standard_Integer& intl,
  Standard_Boolean& Gd1,
  Standard_Boolean& Gd2,
  Standard_Boolean& Gf1,

@@ -21,6 +21,7 @@
 #include <Standard_Type.hxx>
 
 #include <IntPatch_Line.hxx>
+#include <IntPatch_Point.hxx>
 #include <Standard_Boolean.hxx>
 #include <IntSurf_TypeTrans.hxx>
 #include <IntSurf_Situation.hxx>
@@ -28,6 +29,7 @@
 class Standard_DomainError;
 class Standard_OutOfRange;
 class IntSurf_PntOn2S;
+class IntSurf_LineOn2S;
 
 
 class IntPatch_PointLine;
@@ -43,17 +45,38 @@ class IntPatch_PointLine : public IntPatch_Line
 
 public:
 
-  
+  //! Adds a vertex in the list. If theIsPrepend == TRUE the new
+  //! vertex will be added before the first element of vertices sequence.
+  //! Otherwise, to the end of the sequence
+  Standard_EXPORT virtual
+            void AddVertex (const IntPatch_Point& Pnt,
+                            const Standard_Boolean theIsPrepend = Standard_False) = 0;
+
   //! Returns the number of intersection points.
   Standard_EXPORT virtual Standard_Integer NbPnts() const = 0;
-  
+
+  //! Returns number of vertices (IntPatch_Point) of the line
+  Standard_EXPORT virtual Standard_Integer NbVertex() const = 0;
+
   //! Returns the intersection point of range Index.
   Standard_EXPORT virtual const IntSurf_PntOn2S& Point (const Standard_Integer Index) const = 0;
 
+  //! Returns the vertex of range Index on the line.
+  Standard_EXPORT virtual const IntPatch_Point& Vertex (const Standard_Integer Index) const = 0;
 
+  //! Returns the vertex of range Index on the line.
+  virtual IntPatch_Point& ChangeVertex (const Standard_Integer Index) = 0;
 
+  //! Removes vertices from the line
+  Standard_EXPORT virtual void ClearVertexes() = 0;
 
-  DEFINE_STANDARD_RTTI(IntPatch_PointLine,IntPatch_Line)
+  //! Removes single vertex from the line
+  Standard_EXPORT virtual void RemoveVertex (const Standard_Integer theIndex) = 0;
+
+  //! Returns set of intersection points
+  Standard_EXPORT virtual Handle(IntSurf_LineOn2S) Curve() const = 0;
+
+  DEFINE_STANDARD_RTTIEXT(IntPatch_PointLine,IntPatch_Line)
 
 protected:
 

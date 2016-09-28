@@ -48,22 +48,19 @@ Handle(Standard_Transient) Plugin::Load (const Standard_GUID& aGUID,
     theResource += ".Location";
 
     if(!PluginResource->Find(theResource.ToCString())) {
-      PluginResource = AdditionalPluginMap();
-      if (!PluginResource->Find(theResource.ToCString())) {
-        Standard_SStream aMsg; aMsg << "could not find the resource:";
-        aMsg << theResource.ToCString()<< endl;
-        if (theVerbose)
-            cout << "could not find the resource:"<<theResource.ToCString()<< endl;
-        Plugin_Failure::Raise(aMsg);
-      }
+      Standard_SStream aMsg; aMsg << "could not find the resource:";
+      aMsg << theResource.ToCString() << endl;
+      if (theVerbose)
+        cout << "could not find the resource:" << theResource.ToCString() << endl;
+      Plugin_Failure::Raise(aMsg);
     }
     
     TCollection_AsciiString thePluginLibrary("");
-#ifndef WNT
+#ifndef _WIN32
     thePluginLibrary += "lib";
 #endif
     thePluginLibrary +=  PluginResource->Value(theResource.ToCString());
-#ifdef WNT
+#ifdef _WIN32
     thePluginLibrary += ".dll";
 #elif defined(__APPLE__)
     thePluginLibrary += ".dylib";
@@ -101,12 +98,4 @@ Handle(Standard_Transient) Plugin::Load (const Standard_GUID& aGUID,
   Handle(Standard_Transient) theServiceFactory = (*fp) (aGUID);
   return theServiceFactory;
   
-}
-
-const Handle(Resource_Manager)& Plugin::AdditionalPluginMap()
-{
-  static Handle(Resource_Manager) aMap;
-  if (aMap.IsNull())
-    aMap = new Resource_Manager ("" /*theName*/, Standard_False /*theVerbose*/);
-  return aMap;
 }

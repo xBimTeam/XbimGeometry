@@ -19,9 +19,13 @@
 #include <IntPatch_Point.hxx>
 
 
-inline void IntPatch_WLine::AddVertex (const IntPatch_Point& Pnt)
+inline void IntPatch_WLine::AddVertex (const IntPatch_Point& thePnt,
+                                       const Standard_Boolean theIsPrepend)
 {
-  svtx.Append(Pnt);
+  if(theIsPrepend)
+    svtx.Prepend(thePnt);
+  else
+    svtx.Append(thePnt);
 }
 
 inline void IntPatch_WLine::Replace (const Standard_Integer Index,
@@ -94,6 +98,11 @@ inline Standard_Integer IntPatch_WLine::NbVertex () const
 }
 
 inline const IntPatch_Point& IntPatch_WLine::Vertex (const Standard_Integer Index) const
+{
+  return svtx(Index);
+}
+
+inline IntPatch_Point& IntPatch_WLine::ChangeVertex (const Standard_Integer Index)
 {
   return svtx(Index);
 }

@@ -39,15 +39,15 @@ public:
     TopoDS_TWire();
   
   //! Returns WIRE.
-  Standard_EXPORT TopAbs_ShapeEnum ShapeType() const;
+  Standard_EXPORT TopAbs_ShapeEnum ShapeType() const Standard_OVERRIDE;
   
   //! Returns an empty TWire.
-  Standard_EXPORT Handle(TopoDS_TShape) EmptyCopy() const;
+  Standard_EXPORT Handle(TopoDS_TShape) EmptyCopy() const Standard_OVERRIDE;
 
 
 
 
-  DEFINE_STANDARD_RTTI(TopoDS_TWire,TopoDS_TShape)
+  DEFINE_STANDARD_RTTIEXT(TopoDS_TWire,TopoDS_TShape)
 
 protected:
 

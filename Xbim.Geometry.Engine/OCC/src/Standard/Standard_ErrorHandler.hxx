@@ -18,20 +18,91 @@
 #define _Standard_ErrorHandler_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
 
 #include <Standard_PErrorHandler.hxx>
 #include <Standard_JmpBuf.hxx>
 #include <Standard_HandlerStatus.hxx>
 #include <Standard_ThreadId.hxx>
-#include <Standard_Address.hxx>
-#include <Standard_Boolean.hxx>
 #include <Standard_Type.hxx>
+
+//! @file
+//! Support of handling of C signals as C++-style exceptions, and implementation
+//! of C++ exception handling on platforms that do not implement these natively.
+//!
+//! The implementation is based on C long jumps.
+//!
+//! If macro NO_CXX_EXCEPTION is defined, "try" and "catch" are defined as
+//! macros that use jumps to implement exception handling. 
+//! See Standard_Failure::Reraise() for exception throwing code.
+//! Note that this option is obsolete and useless for modern platforms.
+//! 
+//! If macro OCC_CONVERT_SIGNALS is defined, this enables macro OCC_CATCH_SIGNALS
+//! that can be used in the code (often inside try {} blocks) to convert C-style 
+//! signals to standard C++ exceptions. This works only when OSD::SetSignal()
+//! is called to set appropriate signal handler. In the case of signal (like 
+//! access violation, division by zero, etc.) it will jump to the nearest 
+//! OCC_CATCH_SIGNALS in the call stack, which will then throw a C++ exception.
+//! This method is useful for Unix and Linux systems where C++ exceptions
+//! cannot be thrown from C signal handler.
+//! 
+//! On Windows with MSVC compiler, exceptions can be thrown directly from 
+//! signal handler, this OCC_CONVERT_SIGNALS is not needed. Note however that
+//! this requires that compiler option /EHa is used.
+
+#ifdef NO_CXX_EXCEPTION
+
+  // No CXX Exceeptions, only jumps in all the cases.
+  //
+  // Note: In the current version setjmp is used. The alternative solution is to
+  // use sigsetjmp that stores the signal mask (to be checked)
+  // In the original implementation sigsetjmp is tried to use for SUN and IRIX
+  // in the following way:
+  //    #ifdef SOLARIS
+  //      #define DoesNotAbort(aHandler) !sigsetjmp(aHandler.Label(),1)
+  //    #endif
+
+  #define try               Standard_ErrorHandler _Function; \
+                            if(!setjmp(_Function.Label()))
+  #define catch(Error)        else if(_Function.Catches(STANDARD_TYPE(Error)))
+  #define OCC_CATCH_SIGNALS 
+
+  // Suppress GCC warning "variable ...  might be clobbered by 'longjmp' or 'vfork'"
+  #if defined(__GNUC__) && ! defined(__INTEL_COMPILER) && ! defined(__clang__)
+  #pragma GCC diagnostic ignored "-Wclobbered"
+  #endif
+
+#elif defined(OCC_CONVERT_SIGNALS)
+
+  // Exceptions are raied as usual, signal cause jumps in the nearest 
+  // OCC_CATCH_SIGNALS and then thrown as exceptions.
+  #define OCC_CATCH_SIGNALS   Standard_ErrorHandler _aHandler; \
+                              if(setjmp(_aHandler.Label())) { \
+				_aHandler.Catches(STANDARD_TYPE(Standard_Failure)); \
+				_aHandler.Error()->Reraise(); \
+			      }
+
+  // Suppress GCC warning "variable ...  might be clobbered by 'longjmp' or 'vfork'"
+  #if defined(__GNUC__) && ! defined(__INTEL_COMPILER) && ! defined(__clang__)
+  #pragma GCC diagnostic ignored "-Wclobbered"
+  #endif
+
+#else
+
+  // Normal Exceptions (for example WNT with MSVC and option /GHa)
+  #define OCC_CATCH_SIGNALS
+
+#endif
+
 class Standard_Failure;
-class Standard_ErrorHandlerCallback;
 
-
+//! Class implementing mechanics of conversion of signals to exceptions.
+//!
+//! Each instance of it stores data for jump placement, thread id,
+//! and callbacks to be called during jump (for proper resource release).
+//!
+//! The active handlers are stored in the global stack, which is used
+//! to find appropriate handler when signal is raised.
 
 class Standard_ErrorHandler 
 {
@@ -46,10 +117,12 @@ public:
   
   //! Unlinks and checks if there is a raised exception.
   Standard_EXPORT void Destroy();
-~Standard_ErrorHandler()
-{
-  Destroy();
-}
+
+  //! Destructor
+  ~Standard_ErrorHandler()
+  {
+    Destroy();
+  }
   
   //! Removes handler from the handlers list
   Standard_EXPORT void Unlink();
@@ -59,7 +132,7 @@ public:
   Standard_EXPORT Standard_Boolean Catches (const Handle(Standard_Type)& aType);
   
   //! Returns label for jump
-    Standard_JmpBuf& Label();
+  Standard_JmpBuf& Label() { return myLabel; }
   
   //! Returns the current Error.
   Standard_EXPORT Handle(Standard_Failure) Error() const;
@@ -70,19 +143,7 @@ public:
   //! Test if the code is currently running in a try block
   Standard_EXPORT static Standard_Boolean IsInTryBlock();
 
-
-friend class Standard_Failure;
-friend class Standard_ErrorHandlerCallback;
-
-
-protected:
-
-
-
-
-
 private:
-
   
   //! A exception is raised but it is not yet caught.
   //! So Abort the current function and transmit the exception
@@ -94,25 +155,90 @@ private:
   //! Set the Error which will be transmitted to "calling routines".
   Standard_EXPORT static void Error (const Handle(Standard_Failure)& aError);
   
-  //! Returns the current handler (Top in former implemntations)
+  //! Returns the current handler (closest in the stack in the current execution thread)
   Standard_EXPORT static Standard_PErrorHandler FindHandler (const Standard_HandlerStatus theStatus, const Standard_Boolean theUnlink);
 
+public:
+  //! Defines a base class for callback objects that can be registered
+  //! in the OCC error handler (the class simulating C++ exceptions)
+  //! so as to be correctly destroyed when error handler is activated.
+  //!
+  //! Note that this is needed only when Open CASCADE is compiled with
+  //! NO_CXX_EXCEPTION or OCC_CONVERT_SIGNALS options (i.e. on UNIX/Linux).
+  //! In that case, raising OCC exception and/or signal will not cause
+  //! C++ stack unwinding and destruction of objects created in the stack.
+  //!
+  //! This class is intended to protect critical objects and operations in
+  //! the try {} catch {} block from being bypassed by OCC signal or exception.
+  //!
+  //! Inherit your object from that class, implement DestroyCallback() function,
+  //! and call Register/Unregister in critical points.
+  //!
+  //! Note that you must ensure that your object has life span longer than
+  //! that of the try {} block in which it calls Register().
+  class Callback
+  {
+  public:
+    DEFINE_STANDARD_ALLOC
+
+    //! Registers this callback object in the current error handler (if found).
+    void RegisterCallback();
+
+    //! Unregisters this callback object from the error handler.
+    void UnregisterCallback();
+
+    //! Destructor
+    virtual ~Callback();
+
+    //! The callback function to perform necessary callback action.
+    //! Called by the exception handler when it is being destroyed but
+    //! still has this callback registered.
+    Standard_EXPORT virtual void DestroyCallback() = 0;
+
+  protected:
+
+    //! Empty constructor
+    Callback();
+
+  private:
+    Standard_Address myHandler;
+    Standard_Address myPrev;
+    Standard_Address myNext;
+
+  friend class Standard_ErrorHandler;
+  };
+
+private:
 
   Standard_PErrorHandler myPrevious;
   Handle(Standard_Failure) myCaughtError;
   Standard_JmpBuf myLabel;
   Standard_HandlerStatus myStatus;
   Standard_ThreadId myThread;
-  Standard_Address myCallbackPtr;
+  Callback* myCallbackPtr;
 
-
+  friend class Standard_Failure;
 };
 
+// If neither NO_CXX_EXCEPTION nor OCC_CONVERT_SIGNALS is defined,
+// provide empty inline implementation
+#if ! defined(NO_CXX_EXCEPTION) && ! defined(OCC_CONVERT_SIGNALS)
+inline Standard_ErrorHandler::Callback::Callback ()
+       : myHandler(0), myPrev(0), myNext(0)
+{
+}
+inline Standard_ErrorHandler::Callback::~Callback ()
+{
+}
+inline void Standard_ErrorHandler::Callback::RegisterCallback ()
+{
+}
+inline void Standard_ErrorHandler::Callback::UnregisterCallback ()
+{
+}
+#endif
 
-#include <Standard_ErrorHandler.lxx>
-
-
-
-
+// Definition of the old name "Standard_ErrorHandlerCallback" was kept for compatibility
+typedef Standard_ErrorHandler::Callback Standard_ErrorHandlerCallback;
 
 #endif // _Standard_ErrorHandler_HeaderFile

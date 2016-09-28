@@ -51,6 +51,8 @@
 #include <Standard_Real.hxx>
 #include <Standard_Type.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(Geom_BSplineCurve,Geom_BoundedCurve)
+
 //=======================================================================
 //function : CheckCurveData
 //purpose  : Internal use only
@@ -262,9 +264,9 @@ void Geom_BSplineCurve::IncreaseDegree  (const Standard_Integer Degree)
     
     BSplCLib::IncreaseDegree
       (deg,Degree, periodic,
-       poles->Array1(),weights->Array1(),
+       poles->Array1(),&weights->Array1(),
        knots->Array1(),mults->Array1(),
-       npoles->ChangeArray1(),nweights->ChangeArray1(),
+       npoles->ChangeArray1(),&nweights->ChangeArray1(),
        nknots->ChangeArray1(),nmults->ChangeArray1());
   }
   else {
@@ -273,7 +275,7 @@ void Geom_BSplineCurve::IncreaseDegree  (const Standard_Integer Degree)
        poles->Array1(),BSplCLib::NoWeights(),
        knots->Array1(),mults->Array1(),
        npoles->ChangeArray1(),
-       *((TColStd_Array1OfReal*) NULL),
+       BSplCLib::NoWeights(),
        nknots->ChangeArray1(),nmults->ChangeArray1());
   }
 
@@ -369,7 +371,7 @@ void  Geom_BSplineCurve::InsertKnots(const TColStd_Array1OfReal& Knots,
 
   if (!BSplCLib::PrepareInsertKnots(deg,periodic,
 				    knots->Array1(),mults->Array1(),
-				    Knots,Mults,nbpoles,nbknots,Epsilon,Add))
+				    Knots,&Mults,nbpoles,nbknots,Epsilon,Add))
     Standard_ConstructionError::Raise("Geom_BSplineCurve::InsertKnots");
 
   if (nbpoles == poles->Length()) return;
@@ -387,10 +389,10 @@ void  Geom_BSplineCurve::InsertKnots(const TColStd_Array1OfReal& Knots,
     Handle(TColStd_HArray1OfReal) nweights = 
       new TColStd_HArray1OfReal(1,nbpoles);
     BSplCLib::InsertKnots(deg,periodic,
-			  poles->Array1(), weights->Array1(),
+			  poles->Array1(), &weights->Array1(),
 			  knots->Array1(), mults->Array1(),
-			  Knots, Mults,
-			  npoles->ChangeArray1(), nweights->ChangeArray1(),
+			  Knots, &Mults,
+			  npoles->ChangeArray1(), &nweights->ChangeArray1(),
 			  nknots->ChangeArray1(), nmults->ChangeArray1(),
 			  Epsilon, Add);
     weights = nweights;
@@ -399,9 +401,9 @@ void  Geom_BSplineCurve::InsertKnots(const TColStd_Array1OfReal& Knots,
     BSplCLib::InsertKnots(deg,periodic,
 			  poles->Array1(), BSplCLib::NoWeights(),
 			  knots->Array1(), mults->Array1(),
-			  Knots, Mults,
+			  Knots, &Mults,
 			  npoles->ChangeArray1(),
-			  *((TColStd_Array1OfReal*) NULL),
+        BSplCLib::NoWeights(),
 			  nknots->ChangeArray1(), nmults->ChangeArray1(),
 			  Epsilon, Add);
   }
@@ -455,9 +457,9 @@ Standard_Boolean  Geom_BSplineCurve::RemoveKnot(const Standard_Integer Index,
       new TColStd_HArray1OfReal(1,npoles->Length());
     if (!BSplCLib::RemoveKnot
 	(Index, M, deg, periodic,
-	 poles->Array1(),weights->Array1(), 
+	 poles->Array1(),&weights->Array1(), 
 	 knots->Array1(),mults->Array1(),
-	 npoles->ChangeArray1(), nweights->ChangeArray1(),
+	 npoles->ChangeArray1(), &nweights->ChangeArray1(),
 	 nknots->ChangeArray1(),nmults->ChangeArray1(),
 	 Tolerance))
       return Standard_False;
@@ -469,7 +471,7 @@ Standard_Boolean  Geom_BSplineCurve::RemoveKnot(const Standard_Integer Index,
 	 poles->Array1(), BSplCLib::NoWeights(),
 	 knots->Array1(),mults->Array1(),
 	 npoles->ChangeArray1(),
-	 *((TColStd_Array1OfReal*) NULL),
+   BSplCLib::NoWeights(),
 	 nknots->ChangeArray1(),nmults->ChangeArray1(),
 	 Tolerance))
       return Standard_False;
@@ -523,8 +525,8 @@ Standard_Real Geom_BSplineCurve::ReversedParameter
 void Geom_BSplineCurve::Segment(const Standard_Real U1,
 				const Standard_Real U2)
 {
-  Standard_DomainError_Raise_if ( U2 < U1,
-				 "Geom_BSplineCurve::Segment");
+  if (U2 < U1)
+    Standard_DomainError::Raise("Geom_BSplineCurve::Segment");
   
   Standard_Real NewU1, NewU2;
   Standard_Real U,DU=0,aDDU=0;
@@ -538,9 +540,9 @@ void Geom_BSplineCurve::Segment(const Standard_Real U1,
   if (periodic) {
     Standard_Real Period = LastParameter() - FirstParameter();
     DU = U2 - U1;
-    while (DU > Period)
-      DU -= Period;
-    if (DU <= Epsilon(Period))
+    if (DU - Period > Precision::PConfusion())
+      Standard_DomainError::Raise("Geom_BSplineCurve::Segment");
+    if (DU > Period)
       DU = Period;
     aDDU = DU;
   }
@@ -781,14 +783,15 @@ void Geom_BSplineCurve::SetPeriodic ()
 
 void Geom_BSplineCurve::SetOrigin(const Standard_Integer Index)
 {
-  Standard_NoSuchObject_Raise_if( !periodic,
-				 "Geom_BSplineCurve::SetOrigin");
+  if (!periodic)
+    Standard_NoSuchObject::Raise("Geom_BSplineCurve::SetOrigin");
+
   Standard_Integer i,k;
   Standard_Integer first = FirstUKnotIndex();
   Standard_Integer last  = LastUKnotIndex();
 
-  Standard_DomainError_Raise_if( (Index < first) || (Index > last),
-				"Geom_BSplineCurve::SetOrigine");
+  if ((Index < first) || (Index > last))
+    Standard_DomainError::Raise("Geom_BSplineCurve::SetOrigin");
 
   Standard_Integer nbknots = knots->Length();
   Standard_Integer nbpoles = poles->Length();
@@ -870,8 +873,8 @@ void Geom_BSplineCurve::SetOrigin(const Standard_Integer Index)
 void Geom_BSplineCurve::SetOrigin(const Standard_Real U,
 				  const Standard_Real Tol)
 {
-  Standard_NoSuchObject_Raise_if( !periodic,
-				 "Geom_BSplineCurve::SetOrigin");
+  if (!periodic)
+    Standard_NoSuchObject::Raise("Geom_BSplineCurve::SetOrigin");
   //U est il dans la period.
   Standard_Real uf = FirstParameter(), ul = LastParameter();
   Standard_Real u = U, period = ul - uf;
@@ -936,9 +939,9 @@ void Geom_BSplineCurve::SetNotPeriodic ()
       
       BSplCLib::Unperiodize
 	(deg,mults->Array1(),knots->Array1(),poles->Array1(),
-	 weights->Array1(),nmults->ChangeArray1(),
+	 &weights->Array1(),nmults->ChangeArray1(),
 	 nknots->ChangeArray1(),npoles->ChangeArray1(),
-	 nweights->ChangeArray1());
+	 &nweights->ChangeArray1());
       
     }
     else {
@@ -947,7 +950,7 @@ void Geom_BSplineCurve::SetNotPeriodic ()
 	(deg,mults->Array1(),knots->Array1(),poles->Array1(),
 	 BSplCLib::NoWeights(),nmults->ChangeArray1(),
 	 nknots->ChangeArray1(),npoles->ChangeArray1(),
-	 *((TColStd_Array1OfReal*) NULL));
+   BSplCLib::NoWeights());
       
     }
     poles   = npoles;

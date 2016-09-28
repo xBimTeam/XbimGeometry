@@ -609,8 +609,8 @@ CallPerformSurf(Handle(ChFiDS_Stripe)&              Stripe,
 		const Standard_Boolean              RecOnS1,
 		const Standard_Boolean              RecOnS2,
 		math_Vector&                        Soldep,
-		Standard_Boolean&                   intf,
-		Standard_Boolean&                   intl,
+		Standard_Integer&                   intf,
+		Standard_Integer&                   intl,
                 Handle(BRepAdaptor_HSurface)&       Surf1,
 		Handle(BRepAdaptor_HSurface)&       Surf2) 
 {
@@ -955,10 +955,10 @@ void ChFi3d_Builder::StartSol(const Handle(ChFiDS_Stripe)&      Stripe,
 				   Stripe->OrientationOnFace1(),
 				   Stripe->OrientationOnFace2(),
 				   RC);
-          const Handle(Adaptor3d_HSurface)& HSon1 = HS1; // to avoid ambiguity
-          const Handle(Adaptor3d_HSurface)& HSon2 = HS2; // to avoid ambiguity
-	  I1->Initialize(HSon1);
-	  I2->Initialize(HSon2);
+          const Handle(Adaptor3d_HSurface)& HSon1new = HS1; // to avoid ambiguity
+          const Handle(Adaptor3d_HSurface)& HSon2new = HS2; // to avoid ambiguity
+	  I1->Initialize(HSon1new);
+	  I2->Initialize(HSon2new);
 	  if(PerformFirstSection(Spine,HGuide,Choix,HS1,HS2,
 				 I1,I2,w,SolDep,Pos1,Pos2)){
 	    P1.SetCoord(SolDep(1),SolDep(2));
@@ -1747,8 +1747,8 @@ static void ChFi3d_Purge (Handle(ChFiDS_Stripe)&    Stripe,
 			  const ChFiDS_CommonPoint& VRef,
 			  const Standard_Boolean    isfirst,
 			  const Standard_Integer    ons,
-			  Standard_Boolean&         intf,
-			  Standard_Boolean&         intl)
+			  Standard_Integer&         intf,
+			  Standard_Integer&         intl)
 {
   if (isfirst) intf = 1; else intl = 1; // End.
   Standard_Integer opp = 3-ons;
@@ -2000,7 +2000,7 @@ void ChFi3d_Builder::PerformSetOfSurfOnElSpine
   }
   Standard_Real         MaxStep  = (bidl-bidf)*0.05/nbed;
   Standard_Real         Firstsov = 0.;
-  Standard_Boolean      intf = 0, intl = 0;
+  Standard_Integer      intf = 0, intl = 0;
   while(!fini){
     // are these the ends (no extension on periodic).
     Ok1 = 1,Ok2 = 1;
@@ -2322,7 +2322,7 @@ void ChFi3d_Builder::PerformSetOfKPart(Handle(ChFiDS_Stripe)& Stripe,
   Standard_Real WFirst,WLast = 0.;
   gp_Vec TFirst,TLast,TEndPeriodic;
   gp_Pnt PFirst,PLast,PEndPeriodic;
-  Standard_Boolean intf = 0, intl = 0;
+  Standard_Boolean intf = Standard_False, intl = Standard_False;
   
   Handle(ChFiDS_HElSpine) CurrentHE = new ChFiDS_HElSpine();
   Spine->D1(Spine->FirstParameter(),PFirst,TFirst);

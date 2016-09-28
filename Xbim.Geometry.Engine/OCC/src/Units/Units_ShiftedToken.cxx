@@ -21,6 +21,8 @@
 #include <Units_ShiftedToken.hxx>
 #include <Units_Token.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(Units_ShiftedToken,Units_Token)
+
 //=======================================================================
 //function : Units_ShiftedToken
 //purpose  : 
@@ -88,8 +90,4 @@ void Units_ShiftedToken::Dump(const Standard_Integer ashift,
   Units_Token::Dump(ashift,alevel);
   for(int i=0; i<ashift; i++)cout<<"  ";
   cout<<"  move  : "<<themove<<endl;
-}
-
-void Units_ShiftedToken::Destroy () {
-
 }

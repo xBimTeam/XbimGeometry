@@ -1,13 +1,13 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Xbim.Common.Logging;
 using Xbim.Geometry.Engine.Interop;
-using Xbim.IO;
-using Xbim.Ifc2x3.GeometricModelResource;
-using Xbim.Ifc2x3.ProfileResource;
+using Xbim.Ifc;
+using Xbim.Ifc4.GeometricModelResource;
+using Xbim.Ifc4.Interfaces;
+using Xbim.Ifc4.ProfileResource;
 
-namespace GeometryTests
+namespace Ifc4GeometryTests
 {
     [DeploymentItem(@"x64\", "x64")]
     [DeploymentItem(@"x86\", "x86")]
@@ -21,12 +21,11 @@ namespace GeometryTests
         {
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new XbimModel())
+                using (var m = IfcStore.Open("SolidTestFiles\\5- IfcRevolvedAreaSolid-IfcCircularHollowProfileDef.ifc"))
                 {
-                    m.CreateFrom("SolidTestFiles\\5- IfcRevolvedAreaSolid-IfcCircularHollowProfileDef.ifc", null, null, true, true);
-                    var ss = m.Instances.OfType<IfcRevolvedAreaSolid>().FirstOrDefault(e => e.SweptArea is IfcCircleHollowProfileDef);
+                    var ss = m.Instances.OfType<IIfcRevolvedAreaSolid>().FirstOrDefault(e => e.SweptArea is IIfcCircleHollowProfileDef);
                     Assert.IsTrue(ss != null, "No Revolved Area found");
-                    Assert.IsTrue(ss.SweptArea is IfcCircleHollowProfileDef, "Incorrect profiledef found");
+                    Assert.IsTrue(ss.SweptArea is IIfcCircleHollowProfileDef, "Incorrect profiledef found");
 
                     
                     var solid = _xbimGeometryCreator.CreateSolid(ss);
@@ -44,21 +43,15 @@ namespace GeometryTests
 
              using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = new XbimModel())
+                using (var m = IfcStore.Open(@"SolidTestFiles\BIM Logo-Coordination View 2 - No M.ifc"))
                 {
-                    m.CreateFrom(@"SolidTestFiles\BIM Logo-Coordination View 2 - No M.ifc", null, null, true, true);
-                    var ss = m.Instances.OfType<IfcRevolvedAreaSolid>().FirstOrDefault(e => e.EntityLabel==290);
+                    var ss = m.Instances.OfType<IIfcRevolvedAreaSolid>().FirstOrDefault(e => e.EntityLabel==290);
                     Assert.IsTrue(ss != null, "No Revolved Area found");
                   //  m.ModelFactors.DeflectionAngle = 0.1;
                   //  m.ModelFactors.DeflectionTolerance = 0.1;
-                    var solid = _xbimGeometryCreator.CreateSolid(ss);
+                    _xbimGeometryCreator.CreateSolid(ss);
                     Assert.IsTrue(eventTrace.Events.Count == 0); //no events should have been raised from this call
-                    var facetedSphere = _xbimGeometryCreator.CreateFacetedBrep(m, solid);
-                    var shell = _xbimGeometryCreator.CreateShell(facetedSphere.Outer);
-                    var xbimFacetedSphere = _xbimGeometryCreator.CreateSolidSet(facetedSphere);
-                    Assert.IsTrue(xbimFacetedSphere.Count==1);
-                    //_xbimGeometryCreator.WriteTriangulation(Console.Out,solid, 0.001,0.5);
-                  
+                                    
                 }
             }
         }

@@ -1,0 +1,65 @@
+ISO-10303-21;
+HEADER;
+FILE_DESCRIPTION(('ViewDefinition [DesignTransferView_V1]'),'2;1');
+FILE_NAME(
+/* name */ '',
+/* time_stamp */ '2015-07-10T21:12:02',
+/* author */ ('Jon'),
+/* organization */ ('Unknown'),
+/* preprocessor_version */ 'GeomGymIFC by Geometry Gym Pty Ltd',
+/* originating_system */ 'ggIFC v1.0.0.0 - Exporter by Geometry Gym Pty Ltd',
+/* authorization */ 'None');
+
+FILE_SCHEMA (('IFC4'));
+ENDSEC;
+
+DATA;
+/* general entities required for all IFC data sets, defining the context for the exchange */
+#1= IFCGEOMETRICREPRESENTATIONCONTEXT($,'Model',3,0.0001,#3,#4);
+#2= IFCCARTESIANPOINT((0.0,0.0,0.0));
+#3= IFCAXIS2PLACEMENT3D(#2,$,$);
+#4= IFCDIRECTION((0.0,1.0));
+#5= IFCGEOMETRICREPRESENTATIONSUBCONTEXT('Axis','Model',*,*,*,*,#1,$,.MODEL_VIEW.,$);
+#6= IFCGEOMETRICREPRESENTATIONSUBCONTEXT('Body','Model',*,*,*,*,#1,$,.MODEL_VIEW.,$);
+/* defines the default building (as required as the minimum spatial element)  */
+#50= IFCBUILDING('39t4Pu3nTC4ekXYRIHJB9W',$,'IfcBuilding',$,$,#51,$,$,.ELEMENT.,$,$,#56);
+#51= IFCLOCALPLACEMENT($,#52);
+#52= IFCAXIS2PLACEMENT3D(#2,$,$);
+#53= IFCRELCONTAINEDINSPATIALSTRUCTURE('3Sa3dTJGn0H8TQIGiuGQd5',$,'Building','Building Container for Elements',(#223),#50);
+#54= IFCLOCALPLACEMENT(#51,#52);
+#56= IFCPOSTALADDRESS($,$,$,$,$,$,$,'Unknown',$,$);
+#100= IFCPROJECT('0$WU4A9R19$vKWO$AdOnKA',$,'IfcProject',$,$,'IfcProject',$,(#1),#101);
+#101= IFCUNITASSIGNMENT((#102,#103,#104));
+#102= IFCSIUNIT(*,.LENGTHUNIT.,.MILLI.,.METRE.);
+#103= IFCSIUNIT(*,.PLANEANGLEUNIT.,$,.RADIAN.);
+#104= IFCSIUNIT(*,.TIMEUNIT.,$,.SECOND.);
+#105= IFCRELAGGREGATES('091a6ewbvCMQ2Vyiqspa7a',$,'Project Container','Project Container for Buildings',#100,(#50));
+#200= IFCBLOCK(#201,2000.0,800.0,800.0);
+#201= IFCAXIS2PLACEMENT3D(#2,$,$);
+#202= IFCROUNDEDRECTANGLEPROFILEDEF(.AREA.,'VoidProfile',$,1800.0,600.0,200.0);
+#203= IFCAXIS2PLACEMENT3D(#204,$,$);
+#204= IFCCARTESIANPOINT((1000.0,400.0,100.0));
+#205= IFCDIRECTION((0.0,0.0,1.0));
+#206= IFCEXTRUDEDAREASOLID(#202,#203,#205,700.0);
+#207= IFCBOOLEANRESULT(.DIFFERENCE.,#200,#206);
+#208= IFCCSGSOLID(#207);
+#209= IFCREPRESENTATIONMAP(#210,#211);
+#210= IFCAXIS2PLACEMENT3D(#2,$,$);
+#211= IFCSHAPEREPRESENTATION(#6,'Body','SolidModel',(#208));
+#212= IFCMATERIAL('Ceramic',$,$);
+#213= IFCRELASSOCIATESMATERIAL('0Pkhszwjv1qRMYyCFg9fjB',$,'MatAssoc','Material Associates',(#215),#212);
+#215= IFCSANITARYTERMINALTYPE('1HarmwaPv3OeJSXpaoPKpg',$,'Bath',$,$,$,(#209),$,$,.BATH.);
+#216= IFCRELDEFINESBYTYPE('1lO$X3e3j9lfVMhNy4MzKB',$,'Bath',$,(#223),#215);
+#217= IFCDIRECTION((1.0,0.0,0.0));
+#218= IFCDIRECTION((0.0,1.0,0.0));
+#219= IFCCARTESIANPOINT((0.0,0.0,0.0));
+#220= IFCCARTESIANTRANSFORMATIONOPERATOR3D(#217,#218,#219,1.0,#221);
+#221= IFCDIRECTION((0.0,0.0,1.0));
+#222= IFCMAPPEDITEM(#209,#220);
+#223= IFCSANITARYTERMINAL('3$$o7C03j0KQeLnoj018fc',$,$,$,$,#54,#224,$,.NOTDEFINED.);
+#224= IFCPRODUCTDEFINITIONSHAPE($,$,(#225));
+#225= IFCSHAPEREPRESENTATION(#6,'Body','MappedRepresentation',(#222));
+ENDSEC;
+
+END-ISO-10303-21;
+

@@ -23,7 +23,9 @@
 #include <Standard_Type.hxx>
 
 #include <algorithm>
-#ifdef WNT
+IMPLEMENT_STANDARD_RTTIEXT(BOPDS_PaveBlock,MMgt_TShared)
+
+#ifdef _MSC_VER
 #pragma warning ( disable : 4291 )
 #endif
 
@@ -40,6 +42,7 @@
   myOriginalEdge=-1;
   myTS1=-99.;
   myTS2=myTS1;
+  myIsSplittable=Standard_False;
 }
 //=======================================================================
 //function : 
@@ -55,6 +58,7 @@
   myOriginalEdge=-1;
   myTS1=-99.;
   myTS2=myTS1;
+  myIsSplittable=Standard_False;
 }
 
 //=======================================================================
@@ -331,11 +335,13 @@
 //=======================================================================
   void BOPDS_PaveBlock::SetShrunkData(const Standard_Real theT1,
                                       const Standard_Real theT2,
-                                      const Bnd_Box& theBox)
+                                      const Bnd_Box& theBox,
+                                      const Standard_Boolean theIsSplittable)
 {
   myTS1=theT1;
   myTS2=theT2;
   myShrunkBox=theBox;
+  myIsSplittable=theIsSplittable;
 }
 //=======================================================================
 //function : ShrunkData
@@ -343,11 +349,13 @@
 //=======================================================================
   void BOPDS_PaveBlock::ShrunkData(Standard_Real& theT1,
                                    Standard_Real& theT2,
-                                   Bnd_Box& theBox)const
+                                   Bnd_Box& theBox,
+                                   Standard_Boolean& theIsSplittable) const
 {
   theT1=myTS1;
   theT2=myTS2;
   theBox=myShrunkBox;
+  theIsSplittable=myIsSplittable;
 }
 //=======================================================================
 //function : Dump

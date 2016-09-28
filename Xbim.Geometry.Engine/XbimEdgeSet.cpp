@@ -1,4 +1,5 @@
 #include "XbimEdgeSet.h"
+#include "XbimConvert.h"
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <BRepTools_WireExplorer.hxx>
 #include <TopExp.hxx>
@@ -89,6 +90,49 @@ namespace Xbim
 				result->Add((IXbimEdge^)((XbimEdge^)edge)->TransformShallow(matrix3D));
 			}
 			return gcnew XbimEdgeSet(result);
+		}
+
+		IXbimGeometryObject ^ XbimEdgeSet::Transformed(IIfcCartesianTransformationOperator ^ transformation)
+		{
+			if (!IsValid) return this;
+			XbimEdgeSet^ result = gcnew XbimEdgeSet();
+			
+			for each (XbimEdge^ edge in edges)
+				result->Add((XbimEdge^)edge->Transformed(transformation));
+			return result;
+		}
+
+		IXbimGeometryObject ^ XbimEdgeSet::Moved(IIfcPlacement ^ placement)
+		{
+			if (!IsValid) return this;
+			XbimEdgeSet^ result = gcnew XbimEdgeSet();
+			TopLoc_Location loc = XbimConvert::ToLocation(placement);
+			for each (IXbimEdge^ edge in edges)
+			{
+				XbimEdge^ copy = gcnew XbimEdge((XbimEdge^)edge, Tag);
+				copy->Move(loc);
+				result->Add(copy);
+			}
+			return result;
+		}
+
+		IXbimGeometryObject ^ XbimEdgeSet::Moved(IIfcObjectPlacement ^ objectPlacement)
+		{
+			if (!IsValid) return this;
+			XbimEdgeSet^ result = gcnew XbimEdgeSet();
+			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
+			for each (IXbimEdge^ edge in edges)
+			{
+				XbimEdge^ copy = gcnew XbimEdge((XbimEdge^)edge, Tag);
+				copy->Move(loc);
+				result->Add(copy);
+			}
+			return result;
+		}
+
+		void XbimEdgeSet::Mesh(IXbimMeshReceiver ^ mesh, double precision, double deflection, double angle)
+		{
+			return;//maybe add an implementation for this
 		}
 
 		IEnumerator<IXbimEdge^>^ XbimEdgeSet::GetEnumerator()

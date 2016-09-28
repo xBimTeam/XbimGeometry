@@ -6,10 +6,8 @@ using System.Linq;
 using System.Text;
 using Xbim.Common.Exceptions;
 using Xbim.Common.Geometry;
-using Xbim.Ifc2x3.Kernel;
-using Xbim.IO;
-using Xbim.XbimExtensions;
-using XbimGeometry.Interfaces;
+using Xbim.Ifc4.Interfaces;
+
 
 namespace Xbim.ModelGeometry.Scene
 {
@@ -227,87 +225,7 @@ namespace Xbim.ModelGeometry.Scene
             return true;
         }
 
-        static public XbimMeshGeometry3D MakeBoundingBox(XbimRect3D r3D, XbimMatrix3D transform)
-        {
-            var mesh = new XbimMeshGeometry3D(8);
-            var p0 = transform.Transform(r3D.Location);
-            var p1 = p0;
-            p1.X += r3D.SizeX;
-            var p2 = p1;
-            p2.Z += r3D.SizeZ;
-            var p3 = p2;
-            p3.X -= r3D.SizeX;
-            var p4 = p3;
-            p4.Y += r3D.SizeY;
-            var p5 = p4;
-            p5.Z -= r3D.SizeZ;
-            var p6 = p5;
-            p6.X += r3D.SizeX;
-            var p7 = p6;
-            p7.Z += r3D.SizeZ;
-
-
-            mesh.Positions.Add(p0);
-            mesh.Positions.Add(p1);
-            mesh.Positions.Add(p2);
-            mesh.Positions.Add(p3);
-            mesh.Positions.Add(p4);
-            mesh.Positions.Add(p5);
-            mesh.Positions.Add(p6);
-            mesh.Positions.Add(p7);
-
-            mesh.TriangleIndices.Add(3);
-            mesh.TriangleIndices.Add(0);
-            mesh.TriangleIndices.Add(2);
-
-            mesh.TriangleIndices.Add(0);
-            mesh.TriangleIndices.Add(1);
-            mesh.TriangleIndices.Add(2);
-
-            mesh.TriangleIndices.Add(4);
-            mesh.TriangleIndices.Add(5);
-            mesh.TriangleIndices.Add(3);
-
-            mesh.TriangleIndices.Add(5);
-            mesh.TriangleIndices.Add(0);
-            mesh.TriangleIndices.Add(3);
-
-            mesh.TriangleIndices.Add(7);
-            mesh.TriangleIndices.Add(6);
-            mesh.TriangleIndices.Add(4);
-
-            mesh.TriangleIndices.Add(6);
-            mesh.TriangleIndices.Add(5);
-            mesh.TriangleIndices.Add(4);
-
-            mesh.TriangleIndices.Add(2);
-            mesh.TriangleIndices.Add(1);
-            mesh.TriangleIndices.Add(7);
-
-            mesh.TriangleIndices.Add(1);
-            mesh.TriangleIndices.Add(6);
-            mesh.TriangleIndices.Add(7);
-
-            mesh.TriangleIndices.Add(4);
-            mesh.TriangleIndices.Add(3);
-            mesh.TriangleIndices.Add(7);
-
-            mesh.TriangleIndices.Add(3);
-            mesh.TriangleIndices.Add(2);
-            mesh.TriangleIndices.Add(7);
-
-            mesh.TriangleIndices.Add(6);
-            mesh.TriangleIndices.Add(1);
-            mesh.TriangleIndices.Add(5);
-
-            mesh.TriangleIndices.Add(1);
-            mesh.TriangleIndices.Add(0);
-            mesh.TriangleIndices.Add(5);
-
-            return mesh;
-        }
-
-
+       
 
         #region standard calls
 
@@ -535,8 +453,9 @@ namespace Xbim.ModelGeometry.Scene
             fragment.EndPosition = PositionCount - 1;
             fragment.EndTriangleIndex = TriangleIndexCount - 1;
             fragment.EntityLabel = entityLabel;
-            fragment.EntityTypeId = IfcMetaData.IfcTypeId(ifcType);
-            _meshes.Add(fragment);
+            throw new NotImplementedException();//need to fix this
+           // fragment.EntityTypeId = IfcMetaData.IfcTypeId(ifcType);
+            //_meshes.Add(fragment);
         }
 
 
@@ -599,7 +518,8 @@ namespace Xbim.ModelGeometry.Scene
             else if (geometryMeshData.GeometryType == XbimGeometryType.BoundingBox)
             {
                 var r3D = XbimRect3D.FromArray(geometryMeshData.ShapeData);
-                Add(MakeBoundingBox(r3D, transform), geometryMeshData.IfcProductLabel, IfcMetaData.GetType(geometryMeshData.IfcTypeId), modelId);
+                throw new NotImplementedException();//need to fix this
+               // Add(MakeBoundingBox(r3D, transform), geometryMeshData.IfcProductLabel, IfcMetaData.GetType(geometryMeshData.IfcTypeId), modelId);
             }
             else
                 throw new XbimException("Illegal geometry type found");
@@ -727,16 +647,17 @@ namespace Xbim.ModelGeometry.Scene
         /// <param name="product">The product the geometry represents (this may be a partial representation)</param>
         /// <param name="transform">Transform the geometry to a new location or rotation</param>
         /// <param name="deflection">Deflection for triangulating curves, if null default defelction for the model is used</param>
-        public XbimMeshFragment Add(IXbimGeometryModel geometryModel, IfcProduct product, XbimMatrix3D transform, double? deflection = null, short modelId = 0)
+        public XbimMeshFragment Add(IXbimGeometryModel geometryModel, IIfcProduct product, XbimMatrix3D transform, double? deflection = null, short modelId = 0)
         {
-            return geometryModel.MeshTo(this, product, transform, deflection ?? product.ModelOf.ModelFactors.DeflectionTolerance);
+            return geometryModel.MeshTo(this, product, transform, deflection ?? product.Model.ModelFactors.DeflectionTolerance);
         }
 
 
 
         public void Add(string mesh, Type productType, int productLabel, int geometryLabel, XbimMatrix3D? transform, short modelId)
         {
-            Add(mesh, IfcMetaData.IfcTypeId(productType), productLabel, geometryLabel, transform, modelId);
+            throw new NotImplementedException();//need to fix this
+         //   Add(mesh, IfcMetaData.IfcTypeId(productType), productLabel, geometryLabel, transform, modelId);
 
         }
 

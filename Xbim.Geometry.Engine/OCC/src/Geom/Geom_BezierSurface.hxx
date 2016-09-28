@@ -31,6 +31,8 @@
 #include <TColgp_Array1OfPnt.hxx>
 #include <TColStd_Array1OfReal.hxx>
 #include <GeomAbs_Shape.hxx>
+#include <BSplSLib.hxx>
+
 class Standard_ConstructionError;
 class Standard_DimensionError;
 class Standard_RangeError;
@@ -394,7 +396,7 @@ public:
   //! u  parametric direction. The bounds of the
   //! surface are not changed, but the given parametric
   //! direction is reversed. Hence, the orientation of the surface is reversed.
-  Standard_EXPORT void UReverse();
+  Standard_EXPORT void UReverse() Standard_OVERRIDE;
   
   //! Computes the u (or v) parameter on the modified
   //! surface, produced by reversing its u (or v) parametric
@@ -402,14 +404,14 @@ public:
   //! parameter V) on this Bezier surface.
   //! In the case of a Bezier surface, these functions return respectively:
   //! - 1.-U, or 1.-V.
-  Standard_EXPORT Standard_Real UReversedParameter (const Standard_Real U) const;
+  Standard_EXPORT Standard_Real UReversedParameter (const Standard_Real U) const Standard_OVERRIDE;
   
   //! Changes the orientation of this Bezier surface in the
   //! v parametric direction. The bounds of the
   //! surface are not changed, but the given parametric
   //! direction is reversed. Hence, the orientation of the
   //! surface is reversed.
-  Standard_EXPORT void VReverse();
+  Standard_EXPORT void VReverse() Standard_OVERRIDE;
   
   //! Computes the u (or v) parameter on the modified
   //! surface, produced by reversing its u (or v) parametric
@@ -417,24 +419,24 @@ public:
   //! parameter V) on this Bezier surface.
   //! In the case of a Bezier surface, these functions return respectively:
   //! - 1.-U, or 1.-V.
-  Standard_EXPORT Standard_Real VReversedParameter (const Standard_Real V) const;
+  Standard_EXPORT Standard_Real VReversedParameter (const Standard_Real V) const Standard_OVERRIDE;
   
   //! Returns the parametric bounds U1, U2, V1 and V2 of
   //! this Bezier surface.
   //! In the case of a Bezier surface, this function returns
   //! U1 = 0, V1 = 0, U2 = 1, V2 = 1.
-  Standard_EXPORT void Bounds (Standard_Real& U1, Standard_Real& U2, Standard_Real& V1, Standard_Real& V2) const;
+  Standard_EXPORT void Bounds (Standard_Real& U1, Standard_Real& U2, Standard_Real& V1, Standard_Real& V2) const Standard_OVERRIDE;
   
 
   //! Returns the continuity of the surface CN : the order of
   //! continuity is infinite.
-  Standard_EXPORT GeomAbs_Shape Continuity() const;
+  Standard_EXPORT GeomAbs_Shape Continuity() const Standard_OVERRIDE;
   
-  Standard_EXPORT void D0 (const Standard_Real U, const Standard_Real V, gp_Pnt& P) const;
+  Standard_EXPORT void D0 (const Standard_Real U, const Standard_Real V, gp_Pnt& P) const Standard_OVERRIDE;
   
-  Standard_EXPORT void D1 (const Standard_Real U, const Standard_Real V, gp_Pnt& P, gp_Vec& D1U, gp_Vec& D1V) const;
+  Standard_EXPORT void D1 (const Standard_Real U, const Standard_Real V, gp_Pnt& P, gp_Vec& D1U, gp_Vec& D1V) const Standard_OVERRIDE;
   
-  Standard_EXPORT void D2 (const Standard_Real U, const Standard_Real V, gp_Pnt& P, gp_Vec& D1U, gp_Vec& D1V, gp_Vec& D2U, gp_Vec& D2V, gp_Vec& D2UV) const;
+  Standard_EXPORT void D2 (const Standard_Real U, const Standard_Real V, gp_Pnt& P, gp_Vec& D1U, gp_Vec& D1V, gp_Vec& D2U, gp_Vec& D2V, gp_Vec& D2UV) const Standard_OVERRIDE;
   
   //! Computes P, the point of parameters (U, V) of this Bezier surface, and
   //! - one or more of the following sets of vectors:
@@ -444,7 +446,7 @@ public:
   //! - D3U, D3V, D3UUV and D3UVV, the third
   //! derivative vectors at this point.
   //! Note: The parameters U and V can be outside the bounds of the surface.
-  Standard_EXPORT void D3 (const Standard_Real U, const Standard_Real V, gp_Pnt& P, gp_Vec& D1U, gp_Vec& D1V, gp_Vec& D2U, gp_Vec& D2V, gp_Vec& D2UV, gp_Vec& D3U, gp_Vec& D3V, gp_Vec& D3UUV, gp_Vec& D3UVV) const;
+  Standard_EXPORT void D3 (const Standard_Real U, const Standard_Real V, gp_Pnt& P, gp_Vec& D1U, gp_Vec& D1V, gp_Vec& D2U, gp_Vec& D2V, gp_Vec& D2UV, gp_Vec& D3U, gp_Vec& D3V, gp_Vec& D3UUV, gp_Vec& D3UVV) const Standard_OVERRIDE;
   
   //! Computes the derivative of order Nu in the u
   //! parametric direction, and Nv in the v parametric
@@ -453,7 +455,7 @@ public:
   //! Exceptions
   //! Standard_RangeError if:
   //! - Nu + Nv is less than 1, or Nu or Nv is negative.
-  Standard_EXPORT gp_Vec DN (const Standard_Real U, const Standard_Real V, const Standard_Integer Nu, const Standard_Integer Nv) const;
+  Standard_EXPORT gp_Vec DN (const Standard_Real U, const Standard_Real V, const Standard_Integer Nu, const Standard_Integer Nv) const Standard_OVERRIDE;
   
   //! Returns the number of poles in the U direction.
   Standard_EXPORT Standard_Integer NbUPoles() const;
@@ -464,14 +466,19 @@ public:
   //! Returns the pole of range UIndex, VIndex
   //! Raised if UIndex < 1 or UIndex > NbUPoles, or
   //! VIndex < 1 or VIndex > NbVPoles.
-  Standard_EXPORT gp_Pnt Pole (const Standard_Integer UIndex, const Standard_Integer VIndex) const;
+  Standard_EXPORT const gp_Pnt& Pole(const Standard_Integer UIndex, const Standard_Integer VIndex) const;
   
   //! Returns the poles of the Bezier surface.
   //!
   //! Raised if the length of P in the U an V direction is not equal to
   //! NbUPoles and NbVPoles.
   Standard_EXPORT void Poles (TColgp_Array2OfPnt& P) const;
-  
+
+  //! Returns the poles of the Bezier surface.
+  const TColgp_Array2OfPnt& Poles() const
+  {
+    return poles->Array2();
+  }
 
   //! Returns the degree of the surface in the U direction it is
   //! NbUPoles - 1
@@ -480,7 +487,7 @@ public:
 
   //! Computes the U isoparametric curve. For a Bezier surface the
   //! UIso curve is a Bezier curve.
-  Standard_EXPORT Handle(Geom_Curve) UIso (const Standard_Real U) const;
+  Standard_EXPORT Handle(Geom_Curve) UIso (const Standard_Real U) const Standard_OVERRIDE;
   
 
   //! Returns the degree of the surface in the V direction it is
@@ -490,7 +497,7 @@ public:
 
   //! Computes the V isoparametric curve. For a Bezier surface the
   //! VIso  curve is a Bezier curve.
-  Standard_EXPORT Handle(Geom_Curve) VIso (const Standard_Real V) const;
+  Standard_EXPORT Handle(Geom_Curve) VIso (const Standard_Real V) const Standard_OVERRIDE;
   
   //! Returns the weight of range UIndex, VIndex
   //!
@@ -504,29 +511,36 @@ public:
   //! equal to NbUPoles and NbVPoles.
   Standard_EXPORT void Weights (TColStd_Array2OfReal& W) const;
   
+  //! Returns the weights of the Bezier surface.
+  const TColStd_Array2OfReal* Weights() const
+  {
+    if (!weights.IsNull())
+      return &weights->Array2();
+    return BSplSLib::NoWeights();
+  }
 
   //! Returns True if the first control points row and the
   //! last control points row are identical. The tolerance
   //! criterion is Resolution from package gp.
-  Standard_EXPORT Standard_Boolean IsUClosed() const;
+  Standard_EXPORT Standard_Boolean IsUClosed() const Standard_OVERRIDE;
   
 
   //! Returns True if the first control points column
   //! and the last control points column are identical.
   //! The tolerance criterion is Resolution from package gp.
-  Standard_EXPORT Standard_Boolean IsVClosed() const;
+  Standard_EXPORT Standard_Boolean IsVClosed() const Standard_OVERRIDE;
   
   //! Returns True, a Bezier surface is always  CN
-  Standard_EXPORT Standard_Boolean IsCNu (const Standard_Integer N) const;
+  Standard_EXPORT Standard_Boolean IsCNu (const Standard_Integer N) const Standard_OVERRIDE;
   
   //! Returns True, a BezierSurface is always  CN
-  Standard_EXPORT Standard_Boolean IsCNv (const Standard_Integer N) const;
+  Standard_EXPORT Standard_Boolean IsCNv (const Standard_Integer N) const Standard_OVERRIDE;
   
   //! Returns False.
-  Standard_EXPORT Standard_Boolean IsUPeriodic() const;
+  Standard_EXPORT Standard_Boolean IsUPeriodic() const Standard_OVERRIDE;
   
   //! Returns False.
-  Standard_EXPORT Standard_Boolean IsVPeriodic() const;
+  Standard_EXPORT Standard_Boolean IsVPeriodic() const Standard_OVERRIDE;
   
 
   //! Returns False if the weights are identical in the U direction,
@@ -547,7 +561,7 @@ public:
   Standard_EXPORT Standard_Boolean IsVRational() const;
   
   //! Applies the transformation T to this Bezier surface.
-  Standard_EXPORT void Transform (const gp_Trsf& T);
+  Standard_EXPORT void Transform (const gp_Trsf& T) Standard_OVERRIDE;
   
 
   //! Returns the value of the maximum polynomial degree of a
@@ -567,12 +581,12 @@ public:
   Standard_EXPORT void Resolution (const Standard_Real Tolerance3D, Standard_Real& UTolerance, Standard_Real& VTolerance);
   
   //! Creates a new object which is a copy of this Bezier surface.
-  Standard_EXPORT Handle(Geom_Geometry) Copy() const;
+  Standard_EXPORT Handle(Geom_Geometry) Copy() const Standard_OVERRIDE;
 
 
 
 
-  DEFINE_STANDARD_RTTI(Geom_BezierSurface,Geom_BoundedSurface)
+  DEFINE_STANDARD_RTTIEXT(Geom_BezierSurface,Geom_BoundedSurface)
 
 protected:
 
@@ -582,7 +596,7 @@ protected:
 private:
 
   
-  Standard_EXPORT Geom_BezierSurface(const Handle(TColgp_HArray2OfPnt)& SurfacePoles, const Handle(TColgp_HArray2OfPnt)& SurfaceCoefficients, const Handle(TColStd_HArray2OfReal)& PoleWeights, const Handle(TColStd_HArray2OfReal)& CoefficientWeights, const Standard_Boolean IsURational, const Standard_Boolean IsVRational);
+  Geom_BezierSurface(const Handle(TColgp_HArray2OfPnt)& SurfacePoles, const Handle(TColStd_HArray2OfReal)& PoleWeights, const Standard_Boolean IsURational, const Standard_Boolean IsVRational);
   
   //! Set  poles  to  Poles,  weights to  Weights  (not
   //! copied).
@@ -591,22 +605,13 @@ private:
   //! coefficient 1.
   //!
   //! if nbpoles < 2 or nbpoles > MaDegree
-  Standard_EXPORT void Init (const Handle(TColgp_HArray2OfPnt)& Poles, const Handle(TColStd_HArray2OfReal)& Weights);
+  void Init (const Handle(TColgp_HArray2OfPnt)& Poles, const Handle(TColStd_HArray2OfReal)& Weights);
   
-  //! Recompute the coeficients.
-  Standard_EXPORT void UpdateCoefficients (const Standard_Real U = 0.0, const Standard_Real V = 0.0);
 
   Standard_Boolean urational;
   Standard_Boolean vrational;
   Handle(TColgp_HArray2OfPnt) poles;
   Handle(TColStd_HArray2OfReal) weights;
-  Handle(TColgp_HArray2OfPnt) coeffs;
-  Handle(TColStd_HArray2OfReal) wcoeffs;
-  Standard_Real ucacheparameter;
-  Standard_Real vcacheparameter;
-  Standard_Real ucachespanlenght;
-  Standard_Real vcachespanlenght;
-  Standard_Integer validcache;
   Standard_Real umaxderivinv;
   Standard_Real vmaxderivinv;
   Standard_Boolean maxderivinvok;

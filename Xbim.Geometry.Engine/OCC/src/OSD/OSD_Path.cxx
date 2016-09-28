@@ -21,34 +21,26 @@
 #include <Standard_ProgramError.hxx>
 #include <TCollection_AsciiString.hxx>
 
-static OSD_SysType whereAmI(){
-#if defined(__digital__) || defined(__FreeBSD__) || defined(SUNOS) || defined(__APPLE__)
+static OSD_SysType whereAmI()
+{
+#if defined(__digital__) || defined(__FreeBSD__) || defined(SUNOS) || defined(__APPLE__) || defined(__QNX__) || defined(__FreeBSD_kernel__)
   return OSD_UnixBSD;
-}
 #elif defined(sgi)  || defined(IRIX) || defined(__sun)  || defined(SOLARIS) ||  defined(__sco__) || defined(__hpux) || defined(HPUX)
   return OSD_UnixSystemV;
-}
 #elif defined(__osf__) || defined(DECOSF1)
   return OSD_OSF;
-}
 #elif defined(OS2)
   return OSD_WindowsNT;
-}
 #elif defined(_WIN32) || defined(__WIN32__)
   return OSD_WindowsNT;
-}
 #elif defined(__CYGWIN32_) || defined(__MINGW32__)
   return OSD_WindowsNT;
-}
 #elif defined(vax) || defined(__vms)
   return OSD_VMS;
-}
-#elif defined(__linux__) || defined(LIN)
+#elif defined(__linux__) || defined(__linux)
   return OSD_LinuxREDHAT;
-}
 #elif defined(_AIX) || defined(AIX)
   return OSD_Aix;
-}
 #else
   struct utsname info;
   uname(&info);
@@ -58,8 +50,8 @@ static OSD_SysType whereAmI(){
   cout << info.version << endl;
   cout << info.machine << endl;
   return OSD_Default;
-}
 #endif
+}
 
 #if !(defined(_WIN32) || defined(__WIN32__))
 
@@ -416,21 +408,8 @@ void OSD_Path::SetValues(const TCollection_AsciiString& Nod,
                          const TCollection_AsciiString& Dsk,
                          const TCollection_AsciiString& Trk,
                          const TCollection_AsciiString& Nam,
-                         const TCollection_AsciiString& ext){
-
- if (!Nod.IsAscii())
-  Standard_ConstructionError::Raise("OSD_Path::SetValues argument : Node");
- if (!UsrNm.IsAscii())
-  Standard_ConstructionError::Raise("OSD_Path::SetValues argument : User Name");
- if (!Dsk.IsAscii())
-  Standard_ConstructionError::Raise("OSD_Path::SetValues argument : Disk");
- if (!Trk.IsAscii())
-  Standard_ConstructionError::Raise("OSD_Path::SetValues argument : Trek");
- if (!Nam.IsAscii())
-  Standard_ConstructionError::Raise("OSD_Path::SetValues argument : Name");
- if (!ext.IsAscii())
-  Standard_ConstructionError::Raise("OSD_Path::SetValues argument : Extension");
-
+                         const TCollection_AsciiString& ext)
+{
  myNode = Nod;
  myUserName = UsrNm;
  myPassword = Passwd;
@@ -844,8 +823,6 @@ TCollection_AsciiString OSD_Path::Name()const{
 
 
 void OSD_Path::SetNode(const TCollection_AsciiString& aName){
- if (!aName.IsAscii())
-  Standard_ConstructionError::Raise("OSD_Path::SetNode bad name");
  myNode = aName;
 }
 
@@ -853,8 +830,6 @@ void OSD_Path::SetNode(const TCollection_AsciiString& aName){
 
 
 void OSD_Path::SetUserName(const TCollection_AsciiString& aName){
- if (!aName.IsAscii())
-  Standard_ConstructionError::Raise("OSD_Path::SetUserName bad name");
  myUserName = aName;
 }
 
@@ -862,8 +837,6 @@ void OSD_Path::SetUserName(const TCollection_AsciiString& aName){
 
 
 void OSD_Path::SetPassword(const TCollection_AsciiString& aName){
- if (!aName.IsAscii())
-  Standard_ConstructionError::Raise("OSD_Path::SetPassword bad name");
   myPassword = aName;
 }
 
@@ -871,8 +844,6 @@ void OSD_Path::SetPassword(const TCollection_AsciiString& aName){
 
 
 void OSD_Path::SetDisk(const TCollection_AsciiString& aName){
- if (!aName.IsAscii())
-  Standard_ConstructionError::Raise("OSD_Path::SetDisk bad name");
   myDisk = aName;
 }
 
@@ -880,8 +851,6 @@ void OSD_Path::SetDisk(const TCollection_AsciiString& aName){
 
 
 void OSD_Path::SetTrek(const TCollection_AsciiString& aName){
- if (!aName.IsAscii())
-  Standard_ConstructionError::Raise("OSD_Path::SetTrek bad name");
   myTrek = aName;
 }
 
@@ -889,8 +858,6 @@ void OSD_Path::SetTrek(const TCollection_AsciiString& aName){
 
 
 void OSD_Path::SetName(const TCollection_AsciiString& aName){
- if (!aName.IsAscii())
-  Standard_ConstructionError::Raise("OSD_Path::SetName bad name");
   myName = aName;
 }
 
@@ -898,8 +865,6 @@ void OSD_Path::SetName(const TCollection_AsciiString& aName){
 
 
 void OSD_Path::SetExtension(const TCollection_AsciiString& aName){
- if (!aName.IsAscii())
-  Standard_ConstructionError::Raise("OSD_Path::SetExtension bad name");
   myExtension = aName;
 }
 
@@ -1120,7 +1085,7 @@ void OSD_Path :: DownTrek ( const TCollection_AsciiString& aName ) {
 
  Standard_Integer pos = myTrek.Length ();
 
- if (  aName.Value ( 1 ) != '|'    &&
+ if ( !aName.IsEmpty() && aName.Value ( 1 ) != '|'    &&
        pos                                 &&
        myTrek.Value ( pos ) != '|'
  )
@@ -1138,7 +1103,7 @@ Standard_Integer OSD_Path :: TrekLength () const {
  Standard_Integer i      = 1;
  Standard_Integer retVal = 0;
 
- if (  myTrek.IsEmpty () || myTrek.Length () == 1 && myTrek.Value ( 1 ) == '|'  )
+ if (  myTrek.IsEmpty () || (myTrek.Length () == 1 && myTrek.Value ( 1 ) == '|') )
 
   return retVal;
 

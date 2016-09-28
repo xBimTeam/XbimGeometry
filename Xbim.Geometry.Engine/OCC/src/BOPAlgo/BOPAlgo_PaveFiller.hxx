@@ -33,6 +33,7 @@
 #include <Standard_Integer.hxx>
 #include <BOPDS_IndexedDataMapOfShapeCoupleOfPaveBlocks.hxx>
 #include <Standard_Boolean.hxx>
+#include <BOPCol_IndexedMapOfShape.hxx>
 #include <BOPCol_MapOfInteger.hxx>
 #include <BOPCol_DataMapOfIntegerReal.hxx>
 #include <BOPCol_ListOfInteger.hxx>
@@ -50,11 +51,12 @@ class IntTools_Context;
 class BOPDS_DS;
 class BOPAlgo_SectionAttribute;
 class BOPDS_PaveBlock;
-class TopoDS_Vertex;
+class BOPDS_CommonBlock;
 class gp_Pnt;
 class BOPDS_Curve;
+class TopoDS_Vertex;
+class TopoDS_Edge;
 class TopoDS_Face;
-
 
 
 class BOPAlgo_PaveFiller  : public BOPAlgo_Algo
@@ -65,7 +67,8 @@ public:
 
   
   Standard_EXPORT BOPAlgo_PaveFiller();
-Standard_EXPORT virtual ~BOPAlgo_PaveFiller();
+
+  Standard_EXPORT virtual ~BOPAlgo_PaveFiller();
   
   Standard_EXPORT BOPAlgo_PaveFiller(const BOPCol_BaseAllocator& theAllocator);
   
@@ -83,6 +86,16 @@ Standard_EXPORT virtual ~BOPAlgo_PaveFiller();
   
   Standard_EXPORT void SetSectionAttribute (const BOPAlgo_SectionAttribute& theSecAttr);
   
+  //! Sets the flag that defines the mode of treatment.
+  //! In non-destructive mode the argument shapes are not modified. Instead
+  //! a copy of a sub-shape is created in the result if it is needed to be updated.
+  Standard_EXPORT void SetNonDestructive(const Standard_Boolean theFlag);
+  
+  //! Returns the flag that defines the mode of treatment.
+  //! In non-destructive mode the argument shapes are not modified. Instead
+  //! a copy of a sub-shape is created in the result if it is needed to be updated.
+  Standard_EXPORT Standard_Boolean NonDestructive() const;
+
   Standard_EXPORT virtual void Perform() Standard_OVERRIDE;
   
   //! Sets the additional tolerance
@@ -96,7 +109,20 @@ Standard_EXPORT virtual ~BOPAlgo_PaveFiller();
 
 protected:
 
-  
+  typedef NCollection_DataMap
+            <Handle(BOPDS_PaveBlock),
+             Bnd_Box,
+             TColStd_MapTransientHasher> BOPAlgo_DataMapOfPaveBlockBndBox;
+
+
+  //! Sets non-destructive mode automatically if an argument 
+  //! contains a locked sub-shape (see TopoDS_Shape::Locked()).
+  Standard_EXPORT void SetNonDestructive();
+     
+  Standard_EXPORT void SetIsPrimary(const Standard_Boolean theFlag);
+   
+  Standard_EXPORT Standard_Boolean IsPrimary() const;
+
   Standard_EXPORT virtual void PerformInternal();
   
   Standard_EXPORT virtual void Clear();
@@ -134,6 +160,8 @@ protected:
   Standard_EXPORT void MakeBlocks();
   
   Standard_EXPORT void MakePCurves();
+
+  Standard_EXPORT void MakeSDVertices(const BOPCol_ListOfInteger& theVertIndices);
   
   Standard_EXPORT void ProcessDE();
   
@@ -168,13 +196,21 @@ protected:
   
   Standard_EXPORT void PutBoundPaveOnCurve (const TopoDS_Face& theF1, const TopoDS_Face& theF2, const Standard_Real theTolR3D, BOPDS_Curve& theNC, BOPCol_ListOfInteger& theLBV);
   
-  Standard_EXPORT Standard_Boolean IsExistingPaveBlock (const Handle(BOPDS_PaveBlock)& thePB, const BOPDS_Curve& theNC, const Standard_Real theTolR3D, const BOPDS_IndexedMapOfPaveBlock& theMPB, Handle(BOPDS_PaveBlock)& thePBOut);
+  Standard_EXPORT Standard_Boolean IsExistingPaveBlock
+    (const Handle(BOPDS_PaveBlock)& thePB, const BOPDS_Curve& theNC,
+     const Standard_Real theTolR3D, const BOPDS_IndexedMapOfPaveBlock& theMPB,
+     Handle(BOPDS_PaveBlock)& thePBOut, Standard_Real& theTolNew);
   
-  Standard_EXPORT Standard_Boolean IsExistingPaveBlock (const Handle(BOPDS_PaveBlock)& thePB, const BOPDS_Curve& theNC, const Standard_Real theTolR3D, const BOPCol_ListOfInteger& theLSE);
+  Standard_EXPORT Standard_Boolean IsExistingPaveBlock (const Handle(BOPDS_PaveBlock)& thePB, const BOPDS_Curve& theNC, const BOPCol_ListOfInteger& theLSE);
   
 
   //! Treatment of section edges.
-  Standard_EXPORT Standard_Integer PostTreatFF (BOPDS_IndexedDataMapOfShapeCoupleOfPaveBlocks& theMSCPB, BOPCol_DataMapOfShapeInteger& theMVI, BOPDS_DataMapOfPaveBlockListOfPaveBlock& theDMExEdges, BOPCol_DataMapOfIntegerInteger& theDMI, const BOPCol_BaseAllocator& theAllocator);
+  Standard_EXPORT Standard_Integer PostTreatFF (BOPDS_IndexedDataMapOfShapeCoupleOfPaveBlocks& theMSCPB,
+                                                BOPCol_DataMapOfShapeInteger& theMVI,
+                                                BOPDS_DataMapOfPaveBlockListOfPaveBlock& theDMExEdges,
+                                                BOPCol_DataMapOfIntegerInteger& theDMI,
+                                                const BOPCol_IndexedMapOfShape& theMicroEdges,
+                                                const BOPCol_BaseAllocator& theAllocator);
   
   Standard_EXPORT void FindPaveBlocks (const Standard_Integer theV, const Standard_Integer theF, BOPDS_ListOfPaveBlock& theLPB);
   
@@ -231,7 +267,7 @@ protected:
   
 
   //! Treatment of vertices that were created in EE intersections.
-  Standard_EXPORT void TreatNewVertices (const BOPCol_IndexedDataMapOfShapeInteger& theMVI, BOPCol_IndexedDataMapOfShapeListOfShape& theImages);
+  Standard_EXPORT void TreatNewVertices(const BOPDS_IndexedDataMapOfShapeCoupleOfPaveBlocks& theMVCPB, BOPCol_IndexedDataMapOfShapeListOfShape& theImages);
   
 
   //! Put paves on the curve <aBC> in case when <aBC>
@@ -276,6 +312,56 @@ protected:
   //! in the map <theDMI>.
   Standard_EXPORT void UpdatePaveBlocks (const BOPCol_DataMapOfIntegerInteger& theDMI);
 
+  //! Updates tolerance vertex nV due to V/E interference.
+  //! It always creates new vertex if nV is from arguments.
+  //! @return  DS index of updated vertex.
+  Standard_EXPORT Standard_Integer UpdateVertex(const Standard_Integer nV,
+                                                const Standard_Real aTolNew);
+   
+  Standard_EXPORT void UpdatePaveBlocksWithSDVertices();
+
+  Standard_EXPORT void UpdateCommonBlocksWithSDVertices();
+   
+  Standard_EXPORT void UpdateBlocksWithSharedVertices();
+   
+  Standard_EXPORT Standard_Boolean EstimatePaveOnCurve(const Standard_Integer nV,
+                                                       const BOPDS_Curve& theNC,
+                                                       const Standard_Real theTolR3D);
+      
+  Standard_EXPORT void UpdateEdgeTolerance(const Standard_Integer nE,
+                                           const Standard_Real aTolNew);
+
+  Standard_EXPORT void RemovePaveBlocks(const BOPCol_MapOfInteger theEdges);
+
+  Standard_EXPORT void CorrectToleranceOfSE();
+
+  //! Reduce the intersection range using the common ranges of
+  //! Edge/Edge interferences to avoid creation of close
+  //! intersection vertices
+  Standard_EXPORT void ReduceIntersectionRange(const Standard_Integer theV1,
+                                               const Standard_Integer theV2,
+                                               const Standard_Integer theE,
+                                               const Standard_Integer theF,
+                                               Standard_Real& theTS1,
+                                               Standard_Real& theTS2);
+
+  //! Gets the bounding box for the given Pave Block.
+  //! If Pave Block has shrunk data it will be used to get the box,
+  //! and the Shrunk Range (<theSFirst>, <theSLast>).
+  //! Otherwise the box will be computed using BndLib_Add3dCurve method,
+  //! and the Shrunk Range will be equal to the PB's range.
+  //! To avoid re-computation of the bounding box for the same Pave Block
+  //! it will be saved in the map <thePBBox>.
+  //! Returns FALSE in case the PB's range is less than the
+  //! Precision::PConfusion(), otherwise returns TRUE.
+  Standard_EXPORT Standard_Boolean GetPBBox(const TopoDS_Edge& theE,
+                                            const Handle(BOPDS_PaveBlock)& thePB,
+                                            BOPAlgo_DataMapOfPaveBlockBndBox& thePBBox,
+                                            Standard_Real& theFirst,
+                                            Standard_Real& theLast,
+                                            Standard_Real& theSFirst,
+                                            Standard_Real& theSLast,
+                                            Bnd_Box& theBox);
 
   BOPCol_ListOfShape myArguments;
   BOPDS_PDS myDS;
@@ -283,6 +369,8 @@ protected:
   Handle(IntTools_Context) myContext;
   BOPAlgo_SectionAttribute mySectionAttribute;
   Standard_Real myFuzzyValue;
+  Standard_Boolean myNonDestructive;
+  Standard_Boolean myIsPrimary;
 
 
 private:

@@ -1,12 +1,15 @@
 #pragma once
 #include "XbimOccShape.h"
+#include "XbimCurve.h"
+#include "XbimCurve2D.h"
+#include "XbimVertex.h"
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Wire.hxx>
 #include <BRepBuilderAPI_MakeEdge.hxx>
+#include "XbimPoint3DWithTolerance.h"
 
 using namespace System;
-using namespace XbimGeometry::Interfaces;
-using namespace Xbim::Ifc2x3::GeometryResource;
+using namespace Xbim::Ifc4::Interfaces;
 namespace Xbim
 {
 	namespace Geometry
@@ -23,15 +26,16 @@ namespace Xbim
 			}
 			void InstanceCleanup();
 #pragma region Initialisation
-			void Init(IfcCurve^ edge);
-			void Init(IfcConic^ edge);
-			void Init(IfcCircle^ edge);
-			void Init(IfcLine^ edge);
-			void Init(IfcEllipse^ edge);
-			void Init(IfcBSplineCurve^ bez);
-			void Init(IfcBezierCurve^ bez);
-			void Init(IfcRationalBezierCurve^ bez);
-
+			void Init(IIfcCurve^ edge);
+			void Init(IIfcConic^ edge);
+			void Init(IIfcCircle^ edge);
+			void Init(IIfcPolyline^ pline);
+			void Init(IIfcLine^ edge);
+			void Init(IIfcEllipse^ edge);
+			void Init(IIfcBSplineCurve^ bSpline);
+			void Init(IIfcBSplineCurveWithKnots^ bSpline);
+			void Init(IIfcRationalBSplineCurveWithKnots^ bSpline);
+			void Init(IIfcPcurve^ curve);
 #pragma endregion
 
 			XbimEdge(){};
@@ -45,15 +49,22 @@ namespace Xbim
 #pragma region Constructors
 			XbimEdge(IXbimVertex^ edgeStart, IXbimVertex^ edgeEnd);
 			XbimEdge(const TopoDS_Edge& edge);
-			XbimEdge(IfcCurve^ edge);
-			XbimEdge(IfcConic^ edge);
-			XbimEdge(IfcCircle^ edge);
-			XbimEdge(IfcLine^ edge);
-			XbimEdge(IfcEllipse^ edge);
-			XbimEdge(IfcBSplineCurve^ bez);
-			XbimEdge(IfcBezierCurve^ bez);
-			XbimEdge(IfcRationalBezierCurve^ bez);
+			XbimEdge(const TopoDS_Edge& edge, Object^ tag);
+			XbimEdge(IIfcCurve^ edge);
+			XbimEdge(IIfcConic^ edge);
+			XbimEdge(IIfcCircle^ edge);
+			XbimEdge(IIfcLine^ edge);
+			XbimEdge(IIfcEllipse^ edge);
+			XbimEdge(IIfcBSplineCurve^ bSpline);
+			XbimEdge(IIfcBSplineCurveWithKnots^ bSpline);
+			XbimEdge(IIfcRationalBSplineCurveWithKnots^ bSpline);
+			XbimEdge(IIfcPcurve^ pCurve);
+			XbimEdge(XbimEdge^ edgeCurve, XbimVertex^ start, XbimVertex^ end, double maxTolerance);
 			XbimEdge(const TopoDS_Wire& wire, double tolerance, double angleTolerance);
+			XbimEdge(IIfcCurve^ edgeCurve, XbimVertex^ start, XbimVertex^ end);
+			XbimEdge(XbimVertex^ start, XbimVertex^ midPoint, XbimVertex^ end);
+			XbimEdge(XbimCurve^ curve3D);
+			XbimEdge(XbimCurve2D^ curve2D);
 #pragma endregion
 
 
@@ -78,17 +89,32 @@ namespace Xbim
 			virtual property  XbimGeometryObjectType GeometryType{XbimGeometryObjectType  get() override { return XbimGeometryObjectType::XbimEdgeType; }; }
 			virtual property IXbimVertex^ EdgeStart{IXbimVertex^ get(); }
 			virtual property IXbimVertex^ EdgeEnd{IXbimVertex^ get(); }
+			virtual property XbimPoint3D EdgeStartPoint {XbimPoint3D get(); }
+			virtual property XbimPoint3D EdgeEndPoint {XbimPoint3D get(); }
 			virtual property double Length{double get(); }
 			virtual property IXbimCurve^ EdgeGeometry{IXbimCurve^ get(); }
 			virtual property XbimRect3D BoundingBox {XbimRect3D get() override; }
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) override;
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D)override;
+			virtual property bool IsClosed{bool get(){ return IsValid && pEdge->Closed() == Standard_True; }; }
 #pragma endregion	
 
 #pragma region Properties
 			property bool IsReversed{bool get(){ return IsValid && pEdge->Orientation() == TopAbs_REVERSED; }; }
 #pragma endregion
+			void Reverse();
+			XbimEdge^ Reversed();
 
+			// Inherited via XbimOccShape
+			virtual XbimGeometryObject ^ Transformed(IIfcCartesianTransformationOperator ^ transformation) override;
+
+			// Inherited via XbimOccShape
+			virtual XbimGeometryObject ^ Moved(IIfcPlacement ^ placement) override;
+			virtual XbimGeometryObject ^ Moved(IIfcObjectPlacement ^ objectPlacement) override;
+			virtual void Move(TopLoc_Location loc);
+
+			// Inherited via XbimOccShape
+			virtual void Mesh(IXbimMeshReceiver ^ mesh, double precision, double deflection, double angle) override;
 		};
 	}
 

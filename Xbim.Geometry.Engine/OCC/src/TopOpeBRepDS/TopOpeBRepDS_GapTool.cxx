@@ -25,9 +25,7 @@
 #include <TopOpeBRepDS_Interference.hxx>
 #include <TopOpeBRepDS_ListIteratorOfListOfInterference.hxx>
 
-#ifdef OCCT_DEBUG
-extern Standard_Boolean TopOpeBRepDS_GettraceGAP();
-#endif
+IMPLEMENT_STANDARD_RTTIEXT(TopOpeBRepDS_GapTool,MMgt_TShared)
 
 //=======================================================================
 //function : TopOpeBRepDS_GapTool
@@ -118,11 +116,6 @@ Standard_Boolean TopOpeBRepDS_GapTool::Curve(const Handle(TopOpeBRepDS_Interfere
       }
     }
   }
-#ifdef OCCT_DEBUG
-  if (TopOpeBRepDS_GettraceGAP()) {
-    cout <<"TopOpeBRepDS_GapTool::Curve Point "<<I->Geometry()<<" -> Pas sur Courbe "<<endl;
-  }
-#endif 
   return 0;
 }
 

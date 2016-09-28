@@ -20,6 +20,8 @@
 #include <TopOpeBRepDS_Kind.hxx>
 #include <TopOpeBRepDS_Transition.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(TopOpeBRepDS_FaceEdgeInterference,TopOpeBRepDS_ShapeShapeInterference)
+
 //=======================================================================
 //function : TopOpeBRepDS_FaceEdgeInterference
 //purpose  : 
@@ -33,20 +35,4 @@ TopOpeBRepDS_FaceEdgeInterference::TopOpeBRepDS_FaceEdgeInterference
   TopOpeBRepDS_ShapeShapeInterference
   (T,TopOpeBRepDS_FACE,S,TopOpeBRepDS_EDGE,G,GIsBound,C)
 {
-}
-
-//=======================================================================
-//function : Dump
-//purpose  : 
-//=======================================================================
-
-Standard_OStream& TopOpeBRepDS_FaceEdgeInterference::Dump
-(Standard_OStream& OS) const
-{
-#ifdef OCCT_DEBUG
-  OS<<"FEI ";
-  TopOpeBRepDS_ShapeShapeInterference::Dump(OS);
-#endif
-
-  return OS;
 }

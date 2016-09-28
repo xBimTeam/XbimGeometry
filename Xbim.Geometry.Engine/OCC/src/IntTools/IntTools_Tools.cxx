@@ -676,7 +676,7 @@ Standard_Boolean IntTools_Tools::IsOnPave1(const Standard_Real aTR,
   //
   aT1=aCPRange.First();
   aT2=aCPRange.Last();
-  bIsOnPave=(aTR>=aT1 && aTR<=aT1);
+  bIsOnPave=(aTR>=aT1 && aTR<=aT2);
   if (bIsOnPave) {
     return bIsOnPave;
   }
@@ -787,18 +787,52 @@ Standard_Boolean IntTools_Tools::ComputeTolerance
    const Standard_Real theFirst,
    const Standard_Real theLast,
    Standard_Real& theMaxDist,
-   Standard_Real& theMaxPar)
+   Standard_Real& theMaxPar,
+   const Standard_Real theTolRange)
 {
   GeomLib_CheckCurveOnSurface aCS;
   //
-  aCS.Init(theCurve3D, theSurf, theFirst, theLast);
+  aCS.Init(theCurve3D, theSurf, theFirst, theLast, theTolRange);
   aCS.Perform(theCurve2D);
   if (!aCS.IsDone()) {
     return Standard_False;
   }
-  //
-  theMaxDist = aCS.MaxDistance();
+
+  //Obtaining precise result is impossible if we use 
+  //numeric methods for solution. Therefore, we must provide
+  //some margin. Otherwise, in the future
+  //(when geometrical properties of the curve will be changed,
+  //e.g. after trimming) we will be able to come
+  //to the more precise minimum point. As result, this curve with the
+  //tolerance computed earlier will become invalid.
+  const Standard_Real anEps = (1.0+1.0e-9);
+  theMaxDist = anEps*aCS.MaxDistance();
   theMaxPar  = aCS.MaxParameter();
   //
   return Standard_True;
+}
+
+//=======================================================================
+// Function : ComputeIntRange
+// purpose : 
+//=======================================================================
+Standard_Real IntTools_Tools::ComputeIntRange(const Standard_Real theTol1,
+                                              const Standard_Real theTol2,
+                                              const Standard_Real theAngle)
+{
+  Standard_Real aDt;
+  //
+  if (Abs(M_PI_2 - theAngle) < Precision::Angular()) {
+    aDt = theTol2;
+  }
+  else {
+    Standard_Real a1, a2, anAngle;
+    //
+    anAngle = (theAngle > M_PI_2) ? (M_PI - theAngle) : theAngle;
+    a1 = theTol1 * tan(M_PI_2 - anAngle);
+    a2 = theTol2 / sin(anAngle);
+    aDt = a1 + a2;
+  }
+  //
+  return aDt;
 }

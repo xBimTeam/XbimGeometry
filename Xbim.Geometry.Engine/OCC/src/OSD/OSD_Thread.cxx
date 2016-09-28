@@ -51,7 +51,7 @@ void OSD_Thread::Assign (const OSD_Thread &other)
   myFunc = other.myFunc;
   myPriority = other.myPriority;
 
-#ifdef WNT
+#ifdef _WIN32
 
   // On Windows, close current handle 
   if ( myThread ) 
@@ -81,7 +81,7 @@ void OSD_Thread::Assign (const OSD_Thread &other)
 
 void OSD_Thread::Destroy ()
 {
-#ifdef WNT
+#ifdef _WIN32
 
   // On Windows, close current handle 
   if ( myThread ) 
@@ -105,7 +105,7 @@ void OSD_Thread::Destroy ()
 void OSD_Thread::SetPriority (const Standard_Integer thePriority)
 {
   myPriority = thePriority;
-#ifdef WNT
+#ifdef _WIN32
   if (myThread)
     SetThreadPriority (myThread, thePriority);
 #endif
@@ -126,7 +126,7 @@ void OSD_Thread::SetFunction (const OSD_ThreadFunction &func)
 // OSD_Thread::Run
 //=============================================
 
-#ifdef WNT
+#ifdef _WIN32
 #include <malloc.h>
 // On Windows the signature of the thread function differs from that on UNIX/Linux.
 // As we use the same definition of the thread function on all platforms (POSIX-like),
@@ -137,12 +137,12 @@ static DWORD WINAPI WNTthread_func (LPVOID data)
   WNTthread_data *adata = (WNTthread_data*)data;
   void* ret = adata->func ( adata->data );
   free ( adata );
-  return (DWORD)ret;
+  return PtrToLong (ret);
 }
 #endif
 
 Standard_Boolean OSD_Thread::Run (const Standard_Address data, 
-#ifdef WNT
+#ifdef _WIN32
                                   const Standard_Integer WNTStackSize
 #else
                                   const Standard_Integer
@@ -153,7 +153,7 @@ Standard_Boolean OSD_Thread::Run (const Standard_Address data,
 
   myThreadId = 0;
 
-#ifdef WNT
+#ifdef _WIN32
 
   // On Windows, close current handle if open
   if ( myThread ) 
@@ -195,7 +195,7 @@ Standard_Boolean OSD_Thread::Run (const Standard_Address data,
 
 void OSD_Thread::Detach ()
 {
-#ifdef WNT
+#ifdef _WIN32
 
   // On Windows, close current handle 
   if ( myThread ) 
@@ -234,7 +234,7 @@ Standard_Boolean OSD_Thread::Wait (Standard_Address &result) const
   if ( ! myThread ) 
     return Standard_False;
 
-#ifdef WNT
+#ifdef _WIN32
 
   // On Windows, wait for the thread handle to be signaled
   if ( WaitForSingleObject ( myThread, INFINITE ) != WAIT_OBJECT_0 ) 
@@ -243,7 +243,7 @@ Standard_Boolean OSD_Thread::Wait (Standard_Address &result) const
   // and convert result of the thread execution to Standard_Address
   DWORD anExitCode;
   if ( GetExitCodeThread ( myThread, &anExitCode ) )
-    result = (Standard_Address)anExitCode;
+    result = ULongToPtr (anExitCode);
   return Standard_True;
 
 #else
@@ -258,22 +258,22 @@ Standard_Boolean OSD_Thread::Wait (Standard_Address &result) const
 // OSD_Thread::Wait
 //=============================================
 
-Standard_Boolean OSD_Thread::Wait (const Standard_Integer time, Standard_Address &result) const
+Standard_Boolean OSD_Thread::Wait (const Standard_Integer theTimeMs, Standard_Address &result) const
 {
   // check that thread handle is not null
   result = 0;
   if ( ! myThread ) 
     return Standard_False;
 
-#ifdef WNT
+#ifdef _WIN32
 
   // On Windows, wait for the thread handle to be signaled
-  DWORD ret = WaitForSingleObject ( myThread, time );
+  DWORD ret = WaitForSingleObject (myThread, theTimeMs);
   if (ret == WAIT_OBJECT_0)
   {
     DWORD anExitCode;
     if ( GetExitCodeThread ( myThread, &anExitCode ) )
-      result = (Standard_Address)anExitCode;
+      result = ULongToPtr (anExitCode);
     return Standard_True;
   }
   else if (ret == WAIT_TIMEOUT)
@@ -284,11 +284,32 @@ Standard_Boolean OSD_Thread::Wait (const Standard_Integer time, Standard_Address
   return Standard_False;
 
 #else
+  #if defined(__GLIBC__) && defined(__GLIBC_PREREQ)
+    #if __GLIBC_PREREQ(2,4)
+      #define HAS_TIMED_NP
+    #endif
+  #endif
 
-  // On Unix/Linux, join the thread
-  return ! pthread_join ( myThread, &result );
+  #ifdef HAS_TIMED_NP
+    struct timespec aTimeout;
+    if (clock_gettime (CLOCK_REALTIME, &aTimeout) == -1)
+    {
+      return Standard_False;
+    }
 
-#endif  
+    time_t aSeconds      = (theTimeMs / 1000);
+    long   aMicroseconds = (theTimeMs - aSeconds * 1000) * 1000;
+    aTimeout.tv_sec  += aSeconds;
+    aTimeout.tv_nsec += aMicroseconds * 1000;
+
+    return pthread_timedjoin_np (myThread, &result, &aTimeout) == 0;
+  #else
+    // join the thread without timeout
+    (void )theTimeMs;
+    return pthread_join (myThread, &result) == 0;
+  #endif
+
+#endif
 }
 
 //=============================================
@@ -306,7 +327,7 @@ Standard_ThreadId OSD_Thread::GetId () const
 
 Standard_ThreadId OSD_Thread::Current () 
 {
-#ifdef WNT
+#ifdef _WIN32
   return GetCurrentThreadId();
 #else
   return pthread_self();

@@ -2,13 +2,13 @@
 #include "XbimVertex.h"
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
-using namespace XbimGeometry::Interfaces;
+
 using namespace System::Collections::Generic;
 namespace Xbim
 {
 	namespace Geometry
 	{
-		ref class XbimVertexSet : IXbimVertexSet
+		ref class XbimVertexSet : XbimSetObject, IXbimVertexSet
 		{
 		private:			
 			List<IXbimVertex^>^ vertices;
@@ -33,11 +33,41 @@ namespace Xbim
 
 #pragma endregion
 
+
+#pragma region operators
+			virtual property IXbimVertex^ default[int]
+			{
+				IXbimVertex^ get(int index)
+				{
+					return vertices[index];
+				}
+
+				void set(int index, IXbimVertex^ value)
+				{
+					vertices[index] = value;
+				}
+			}
+			property XbimVertex^ Vertex[int]
+			{
+				XbimVertex^ get(int index)
+				{
+					return (XbimVertex^)vertices[index];
+				}
+
+				void set(int index, XbimVertex^ value)
+				{
+					vertices[index] = value;
+				}
+			}
+#pragma endregion
+
 #pragma region IXbimVertexSet Interface definition
 			virtual property bool IsValid{bool get(){ return Count>0; }; }
 			virtual property bool IsSet{bool get() { return true; }; }
+			virtual void Add(IXbimVertex^ vertex) { vertices->Add(vertex); };
 			virtual property IXbimVertex^ First{IXbimVertex^ get(); }
-			virtual property int Count{int get(); }
+			virtual property int Count {int get() override; }
+			virtual IXbimGeometryObject^ Trim()  override { if (Count == 1) return First; else if (Count == 0) return nullptr; else return this; };
 			virtual property XbimRect3D BoundingBox {XbimRect3D get(); }
 			virtual property  XbimGeometryObjectType GeometryType{XbimGeometryObjectType  get() { return XbimGeometryObjectType::XbimVertexSetType; }}
 			virtual IEnumerator<IXbimVertex^>^ GetEnumerator();
@@ -45,6 +75,20 @@ namespace Xbim
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) ;
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D);
 #pragma endregion
+
+
+			// Inherited via XbimSetObject
+			virtual IXbimGeometryObject ^ Transformed(IIfcCartesianTransformationOperator ^ transformation) override;
+
+
+			// Inherited via XbimSetObject
+			virtual IXbimGeometryObject ^ Moved(IIfcPlacement ^ placement) override;
+
+			virtual IXbimGeometryObject ^ Moved(IIfcObjectPlacement ^ objectPlacement) override;
+
+
+			// Inherited via XbimSetObject
+			virtual void Mesh(IXbimMeshReceiver ^ mesh, double precision, double deflection, double angle) override;
 
 		};
 

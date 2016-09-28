@@ -15,5 +15,5 @@
 [assembly: AssemblyCulture("")]
  
 // AssemblyVersion is the CLR version. Change this only when making breaking changes
-[assembly: AssemblyVersion("3.1")]
+[assembly: AssemblyVersion("4.0")]
 

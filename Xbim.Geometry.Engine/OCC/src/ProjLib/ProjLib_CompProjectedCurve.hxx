@@ -56,7 +56,7 @@ public:
   Standard_EXPORT ProjLib_CompProjectedCurve(const Handle(Adaptor3d_HSurface)& S, const Handle(Adaptor3d_HCurve)& C, const Standard_Real TolU, const Standard_Real TolV);
   
   //! this constructor tries to optimize the search using the
-  //! assamption that maximum distance between surface and curve less or
+  //! assumption that maximum distance between surface and curve less or
   //! equal then MaxDist.
   //! if MaxDist < 0 then algorithm works as above.
   Standard_EXPORT ProjLib_CompProjectedCurve(const Handle(Adaptor3d_HSurface)& S, const Handle(Adaptor3d_HCurve)& C, const Standard_Real TolU, const Standard_Real TolV, const Standard_Real MaxDist);
@@ -85,7 +85,7 @@ public:
   //! returns the bounds of the continuous part corresponding to Index
   Standard_EXPORT void Bounds (const Standard_Integer Index, Standard_Real& Udeb, Standard_Real& Ufin) const;
   
-  //! returns  True  if  part  of  projection with  number  Index is  a  single  point  and  writes  its  coordinats in  P
+  //! returns  True  if  part  of  projection with  number  Index is  a  single  point  and  writes  its  coordinates in  P
   Standard_EXPORT Standard_Boolean IsSinglePnt (const Standard_Integer Index, gp_Pnt2d& P) const;
   
   //! returns  True  if  part  of  projection with  number  Index is  an  u-isoparametric curve  of  input  surface
@@ -141,7 +141,7 @@ public:
   //! Returns  the  parameters  corresponding  to
   //! S  discontinuities.
   //!
-  //! The array must provide  enough room to  accomodate
+  //! The array must provide  enough room to  accommodate
   //! for the parameters. i.e. T.Length() > NbIntervals()
   Standard_EXPORT void Intervals (TColStd_Array1OfReal& T, const GeomAbs_Shape S) const Standard_OVERRIDE;
   
@@ -167,7 +167,10 @@ protected:
 
 private:
 
-  
+  //! This method performs check possibility of optimization traps and tries to go out from them.
+  //@return thePoint - input / corrected point.
+  Standard_EXPORT void UpdateTripleByTrapCriteria(gp_Pnt &thePoint) const;
+
   Standard_EXPORT void BuildIntervals (const GeomAbs_Shape S) const;
 
 
@@ -183,8 +186,6 @@ private:
   Handle(TColStd_HArray1OfBoolean) mySnglPnts;
   Handle(TColStd_HArray1OfReal) myMaxDistance;
   Handle(TColStd_HArray1OfReal) myTabInt;
-
-
 };
 
 

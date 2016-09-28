@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 2013
+VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{CFAD1D1D-D584-4FB9-B795-64F25B888F26}"
 	ProjectSection(SolutionItems) = preProject
@@ -10,9 +10,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Xbim.Geometry.Engine", "Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj", "{737762E6-7784-41E8-8602-528DCB6F6DC5}"
-	ProjectSection(ProjectDependencies) = postProject
-		{5EE39029-873A-45A0-9259-2198BF8729F4} = {5EE39029-873A-45A0-9259-2198BF8729F4}
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xbim.Geometry.Engine.Interop", "Xbim.Geometry.Engine.Interop\Xbim.Geometry.Engine.Interop.csproj", "{F94A98EA-AB29-4818-A51F-6B33BEB7561A}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -28,8 +25,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xbim.Geometry.Profiler", "Xbim.Geometry.Profiler\Xbim.Geometry.Profiler.csproj", "{D5EA89B5-3E2D-4DE8-9F2B-8C2A04ABAF09}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XbimRegression", "Xbim.Geometry.Regression\XbimRegression.csproj", "{6EF22FB8-7048-4E6A-9B2F-AC2570A998A9}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xbim.Tessellator", "Xbim.Tessellator\Xbim.Tessellator.csproj", "{5EE39029-873A-45A0-9259-2198BF8729F4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,10 +54,6 @@ Global
 		{6EF22FB8-7048-4E6A-9B2F-AC2570A998A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6EF22FB8-7048-4E6A-9B2F-AC2570A998A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6EF22FB8-7048-4E6A-9B2F-AC2570A998A9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5EE39029-873A-45A0-9259-2198BF8729F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5EE39029-873A-45A0-9259-2198BF8729F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5EE39029-873A-45A0-9259-2198BF8729F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5EE39029-873A-45A0-9259-2198BF8729F4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

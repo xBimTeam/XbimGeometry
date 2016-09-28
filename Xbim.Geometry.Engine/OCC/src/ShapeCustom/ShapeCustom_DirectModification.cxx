@@ -42,6 +42,8 @@
 #include <TopoDS_Face.hxx>
 #include <TopoDS_Vertex.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(ShapeCustom_DirectModification,ShapeCustom_Modification)
+
 //=======================================================================
 //function : ShapeCustom_DirectModification
 //purpose  : 
@@ -67,7 +69,7 @@ static Standard_Integer IsIndirectSurface (Handle(Geom_Surface) &S,
     Standard_Boolean neg = t.IsNegative();
     Standard_Boolean det = ( t.VectorialPart().Determinant() < 0.0 );
     Standard_Boolean dir = ES->Position().Direct();
-    if ( (Standard_Boolean)( neg != det ) == dir ) result = 1;
+    if ((neg != det) == dir) result = 1;
     Handle(Geom_ConicalSurface) CS = Handle(Geom_ConicalSurface)::DownCast(ES);
     if (!CS.IsNull()) {
       // does the cone have negative semiangle ?

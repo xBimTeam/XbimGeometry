@@ -68,7 +68,10 @@ public:
   //! The tables Nodes and Parameters must be the same size.
   //! This property is not checked at construction time.
   Standard_EXPORT Poly_PolygonOnTriangulation(const TColStd_Array1OfInteger& Nodes, const TColStd_Array1OfReal& Parameters);
-  
+
+  //! Creates a copy of current polygon
+  Standard_EXPORT virtual Handle(Poly_PolygonOnTriangulation) Copy() const;
+
   //! Returns the deflection of this polygon
   Standard_EXPORT Standard_Real Deflection() const;
   
@@ -101,7 +104,7 @@ public:
 
 
 
-  DEFINE_STANDARD_RTTI(Poly_PolygonOnTriangulation,MMgt_TShared)
+  DEFINE_STANDARD_RTTIEXT(Poly_PolygonOnTriangulation,MMgt_TShared)
 
 protected:
 

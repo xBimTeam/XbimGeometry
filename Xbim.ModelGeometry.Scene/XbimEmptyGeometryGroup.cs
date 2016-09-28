@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Xbim.Common;
 using Xbim.Common.Geometry;
+using Xbim.Ifc4.Interfaces;
 
 namespace Xbim.ModelGeometry.Scene
 {
@@ -39,7 +40,7 @@ namespace Xbim.ModelGeometry.Scene
         }
 
        
-        public XbimMeshFragment MeshTo(IXbimMeshGeometry3D mesh3D, Ifc2x3.Kernel.IfcProduct product, XbimMatrix3D transform, double deflection, short modelId)
+        public XbimMeshFragment MeshTo(IXbimMeshGeometry3D mesh3D, IIfcProduct product, XbimMatrix3D transform, double deflection, short modelId)
         {
             return default(XbimMeshFragment);
         }

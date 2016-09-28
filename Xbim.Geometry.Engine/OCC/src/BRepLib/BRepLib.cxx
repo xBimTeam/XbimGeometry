@@ -33,6 +33,7 @@
 #include <BRep_TFace.hxx>
 #include <BRep_Tool.hxx>
 #include <BRep_TVertex.hxx>
+#include <BRepAdaptor_HCurve.hxx>
 #include <BRepAdaptor_HCurve2d.hxx>
 #include <BRepAdaptor_HSurface.hxx>
 #include <BRepAdaptor_Surface.hxx>
@@ -87,10 +88,33 @@
 #include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <TopTools_MapOfShape.hxx>
 #include <TShort_HArray1OfShortReal.hxx>
+#include <TColgp_Array1OfXY.hxx>
+
+#include <algorithm>
 
 // TODO - not thread-safe static variables
 static Standard_Real thePrecision = Precision::Confusion();     
 static Handle(Geom_Plane) thePlane;
+
+//=======================================================================
+// function: BRepLib_ComparePoints
+// purpose:  implementation of IsLess() function for two points
+//=======================================================================
+struct BRepLib_ComparePoints {
+  bool operator()(const gp_Pnt& theP1, const gp_Pnt& theP2)
+  {
+    for (Standard_Integer i = 1; i <= 3; ++i) {
+      if (theP1.Coord(i) < theP2.Coord(i)) {
+        return Standard_True;
+      }
+      else if (theP1.Coord(i) > theP2.Coord(i)) {
+        return Standard_False;
+      }
+    }
+    return Standard_False;
+  }
+};
+
 
 //=======================================================================
 //function : Precision
@@ -1245,7 +1269,7 @@ void BRepLib::SameParameter(const TopoDS_Edge&  AnEdge,
           }
           else if (SameP.IsDone()) {
             Standard_Real tolreached = SameP.TolReached();
-            if(tolreached < error) {
+            if(tolreached <= error) {
               curPC = SameP.Curve2d();
               updatepc = Standard_True;
               maxdist = Max(maxdist,tolreached);
@@ -1258,14 +1282,27 @@ void BRepLib::SameParameter(const TopoDS_Edge&  AnEdge,
               else GCurve->PCurve2(curPC);
             }
           }
-          else IsSameP = 0;
+          else
+          {
+            //Approx_SameParameter has failed.
+            //Consequently, the situation might be,
+            //when 3D and 2D-curve do not have same-range.
+            GeomLib::SameRange( Tol2d, PC[i], 
+                                GCurve->First(), GCurve->Last(),
+                                f3d,l3d,curPC);
+
+            if (i == 0) GCurve->PCurve(curPC);
+            else GCurve->PCurve2(curPC);
+
+            IsSameP = 0;
+          }
 
         }
         else IsSameP = 0;
 
         //  Modified by skv - Thu Jun  3 12:39:19 2004 OCC5898 Begin
         if (!IsSameP) {
-          if (anEdgeTol > error) {
+          if (anEdgeTol >= error) {
             maxdist = Max(maxdist, anEdgeTol);
             IsSameP = Standard_True;
           }
@@ -1457,6 +1494,99 @@ void  BRepLib::UpdateTolerances(const TopoDS_Shape& aShape,
 }
 
 //=======================================================================
+//function : UpdateInnerTolerances
+//purpose  : 
+//=======================================================================
+void  BRepLib::UpdateInnerTolerances(const TopoDS_Shape& aShape)
+{
+  TopTools_IndexedDataMapOfShapeListOfShape EFmap;
+  TopExp::MapShapesAndAncestors(aShape, TopAbs_EDGE, TopAbs_FACE, EFmap);
+  BRep_Builder BB;
+  for (Standard_Integer i = 1; i <= EFmap.Extent(); i++)
+  {
+    TopoDS_Edge anEdge = TopoDS::Edge(EFmap.FindKey(i));
+    TopoDS_Vertex V1, V2;
+    TopExp::Vertices(anEdge, V1, V2);
+    Standard_Real fpar, lpar;
+    BRep_Tool::Range(anEdge, fpar, lpar);
+    Standard_Real TolEdge = BRep_Tool::Tolerance(anEdge);
+    gp_Pnt Pnt1, Pnt2;
+    Handle(BRepAdaptor_HCurve) anHCurve = new BRepAdaptor_HCurve();
+    anHCurve->ChangeCurve().Initialize(anEdge);
+    if (!V1.IsNull())
+      Pnt1 = BRep_Tool::Pnt(V1);
+    if (!V2.IsNull())
+      Pnt2 = BRep_Tool::Pnt(V2);
+    
+    if (!BRep_Tool::Degenerated(anEdge) &&
+        EFmap(i).Extent() > 0)
+    {
+      NCollection_Sequence<Handle(Adaptor3d_HCurve)> theRep;
+      theRep.Append(anHCurve);
+      TopTools_ListIteratorOfListOfShape itl(EFmap(i));
+      for (; itl.More(); itl.Next())
+      {
+        const TopoDS_Face& aFace = TopoDS::Face(itl.Value());
+        Handle(BRepAdaptor_HCurve) anHCurvOnSurf = new BRepAdaptor_HCurve();
+        anHCurvOnSurf->ChangeCurve().Initialize(anEdge, aFace);
+        theRep.Append(anHCurvOnSurf);
+      }
+      
+      const Standard_Integer NbSamples = (BRep_Tool::SameParameter(anEdge))? 23 : 2;
+      Standard_Real delta = (lpar - fpar)/(NbSamples-1);
+      Standard_Real MaxDist = 0.;
+      for (Standard_Integer j = 2; j <= theRep.Length(); j++)
+      {
+        for (Standard_Integer k = 0; k <= NbSamples; k++)
+        {
+          Standard_Real ParamOnCenter = (k == NbSamples)? lpar :
+            fpar + k*delta;
+          gp_Pnt Center = theRep(1)->Value(ParamOnCenter);
+          Standard_Real ParamOnCurve = (BRep_Tool::SameParameter(anEdge))? ParamOnCenter
+            : ((k == 0)? theRep(j)->FirstParameter() : theRep(j)->LastParameter());
+          gp_Pnt aPoint = theRep(j)->Value(ParamOnCurve);
+          Standard_Real aDist = Center.Distance(aPoint);
+          //aDist *= 1.1;
+          aDist += 2.*Epsilon(aDist);
+          if (aDist > MaxDist)
+            MaxDist = aDist;
+
+          //Update tolerances of vertices
+          if (k == 0 && !V1.IsNull())
+          {
+            Standard_Real aDist1 = Pnt1.Distance(aPoint);
+            aDist1 += 2.*Epsilon(aDist1);
+            BB.UpdateVertex(V1, aDist1);
+          }
+          if (k == NbSamples && !V2.IsNull())
+          {
+            Standard_Real aDist2 = Pnt2.Distance(aPoint);
+            aDist2 += 2.*Epsilon(aDist2);
+            BB.UpdateVertex(V2, aDist2);
+          }
+        }
+      }
+      BB.UpdateEdge(anEdge, MaxDist);
+    }
+    TolEdge = BRep_Tool::Tolerance(anEdge);
+    if (!V1.IsNull())
+    {
+      gp_Pnt End1 = anHCurve->Value(fpar);
+      Standard_Real dist1 = Pnt1.Distance(End1);
+      dist1 += 2.*Epsilon(dist1);
+      BB.UpdateVertex(V1, Max(dist1, TolEdge));
+    }
+    if (!V2.IsNull())
+    {
+      gp_Pnt End2 = anHCurve->Value(lpar);
+      Standard_Real dist2 = Pnt2.Distance(End2);
+      dist2 += 2.*Epsilon(dist2);
+      BB.UpdateVertex(V2, Max(dist2, TolEdge));
+    }
+  }
+}
+
+//=======================================================================
 //function : OrientClosedSolid
 //purpose  : 
 //=======================================================================
@@ -1473,17 +1603,15 @@ Standard_Boolean BRepLib::OrientClosedSolid(TopoDS_Solid& solid)
 
   return Standard_True;
 }
-
 //=======================================================================
 //function : tgtfaces
 //purpose  : check the angle at the border between two squares.
 //           Two shares should have a shared front edge.
 //=======================================================================
-
-static Standard_Boolean tgtfaces(const TopoDS_Edge& Ed,
+static GeomAbs_Shape tgtfaces(const TopoDS_Edge& Ed,
   const TopoDS_Face& F1,
   const TopoDS_Face& F2,
-  const Standard_Real ta,
+  const Standard_Real theAngleTol,
   const Standard_Boolean couture)
 {
   // Check if pcurves exist on both faces of edge
@@ -1491,20 +1619,31 @@ static Standard_Boolean tgtfaces(const TopoDS_Edge& Ed,
   Handle(Geom2d_Curve) aCurve;
   aCurve = BRep_Tool::CurveOnSurface(Ed,F1,aFirst,aLast);
   if(aCurve.IsNull())
-    return Standard_False;
+    return GeomAbs_C0;
   aCurve = BRep_Tool::CurveOnSurface(Ed,F2,aFirst,aLast);
   if(aCurve.IsNull())
-    return Standard_False;
-
+    return GeomAbs_C0;
+  
   Standard_Real u;
   TopoDS_Edge E = Ed;
   BRepAdaptor_Surface aBAS1(F1,Standard_False);
   BRepAdaptor_Surface aBAS2(F2,Standard_False);
-  Handle(BRepAdaptor_HSurface) HS1 = new BRepAdaptor_HSurface(aBAS1);
+  
+  // seam edge on elementary surface is always CN
+  Standard_Boolean isElementary =
+    (aBAS1.Surface().Surface()->IsKind(STANDARD_TYPE(Geom_ElementarySurface)) &&
+     aBAS1.Surface().Surface()->IsKind(STANDARD_TYPE(Geom_ElementarySurface)));
+  if (couture && isElementary)
+  {
+    return GeomAbs_CN;
+  }
+  
+  Handle(BRepAdaptor_HSurface) HS1 = new BRepAdaptor_HSurface (aBAS1);
   Handle(BRepAdaptor_HSurface) HS2;
   if(couture) HS2 = HS1;
   else HS2 = new BRepAdaptor_HSurface(aBAS2);
-
+  //case when edge lies on the one face
+  
   E.Orientation(TopAbs_FORWARD);
   Handle(BRepAdaptor_HCurve2d) HC2d1 = new BRepAdaptor_HCurve2d();
   HC2d1->ChangeCurve2d().Initialize(E,F1);
@@ -1516,8 +1655,7 @@ static Standard_Boolean tgtfaces(const TopoDS_Edge& Ed,
 
   Standard_Boolean rev1 = (F1.Orientation() == TopAbs_REVERSED);
   Standard_Boolean rev2 = (F2.Orientation() == TopAbs_REVERSED);
-  Standard_Real f,l,eps, angmax = -M_PI;
-  Standard_Real ang =0.;
+  Standard_Real f,l,eps;
   BRep_Tool::Range(E,f,l);
   Extrema_LocateExtPC ext;
   Standard_Boolean IsInitialized = Standard_False;
@@ -1527,34 +1665,55 @@ static Standard_Boolean tgtfaces(const TopoDS_Edge& Ed,
   l -= eps; // points of pointed squares.
   gp_Pnt2d p;
   gp_Pnt pp1,pp2;//,PP;
-  gp_Vec du,dv;
+  gp_Vec du1, dv1, d2u1, d2v1, d2uv1;
+  gp_Vec du2, dv2, d2u2, d2v2, d2uv2;
   gp_Vec d1,d2;
   Standard_Real uu, vv, norm;
 
   Standard_Integer i;
-  Standard_Boolean Nok;
-  for(i = 0; (i<= 20) && (angmax<=ta) ; i++){
+  GeomAbs_Shape aCont = (isElementary ? GeomAbs_CN : GeomAbs_C2);
+  for(i = 0; i<= 20 && aCont > GeomAbs_C0; i++)
+  {
     // First suppose that this is sameParameter
-    Nok = Standard_True;
     u = f + (l-f)*i/20;
+
+    // take derivatives of surfaces at the same u, and compute normals
     HC2d1->D0(u,p);
-    HS1->D1(p.X(),p.Y(),pp1,du,dv);
-    d1 = (du.Crossed(dv));
+    HS1->D2 (p.X(), p.Y(), pp1, du1, dv1, d2u1, d2v1, d2uv1);
+    d1 = (du1.Crossed(dv1));
     norm = d1.Magnitude(); 
     if (norm > 1.e-12) d1 /= norm;
-    else Nok=Standard_False;
+    else continue; // skip degenerated point
     if(rev1) d1.Reverse();
 
     HC2d2->D0(u,p);
-    HS2->D1(p.X(), p.Y(), pp2, du, dv);
-    d2 = (du.Crossed(dv));
+    HS2->D2 (p.X(), p.Y(), pp2, du2, dv2, d2u2, d2v2, d2uv2);
+    d2 = (du2.Crossed(dv2));
     norm = d2.Magnitude();
-    if (norm> 1.e-12) d2 /= norm;
-    else Nok=Standard_False;
+    if (norm > 1.e-12) d2 /= norm;
+    else continue; // skip degenerated point
     if(rev2) d2.Reverse();
-    if (Nok) ang = d1.Angle(d2);
 
-    if (Nok &&(ang > ta)) { // Refine by projection
+    // check 
+    Standard_Real ang = d1.Angle(d2);
+
+    // check special case of precise equality of derivatives,
+    // occurring when edge connects two faces built on equally 
+    // defined surfaces (e.g. seam-like edges on periodic surfaces, 
+    // or planar faces on the same plane)
+    if (aCont >= GeomAbs_C2 && ang < Precision::Angular() &&
+        d2u1 .IsEqual (d2u2,  Precision::PConfusion(), Precision::Angular()) &&
+        d2v1 .IsEqual (d2v2,  Precision::PConfusion(), Precision::Angular()) &&
+        d2uv1.IsEqual (d2uv2, Precision::PConfusion(), Precision::Angular()))
+    {
+      continue;
+    }
+
+    aCont = GeomAbs_G1;
+
+    // Refine by projection
+    if (ang > theAngleTol)
+    {
       if (! IsInitialized ) {
         ext.Initialize(C2,f,l,Precision::PConfusion());
         IsInitialized = Standard_True;
@@ -1566,20 +1725,20 @@ static Standard_Boolean tgtfaces(const TopoDS_Edge& Ed,
 
         HC2d2->D0(v,p);
         p.Coord(uu,vv);
-        HS2->D1(p.X(), p.Y(), pp2, du, dv);
-        d2 = (du.Crossed(dv));
+        HS2->D1(p.X(), p.Y(), pp2, du2, dv2);
+        d2 = (du2.Crossed(dv2));
         norm = d2.Magnitude();
         if (norm> 1.e-12) d2 /= norm;
-        else Nok = Standard_False;
+        else continue; // degenerated point
         if(rev2) d2.Reverse();
-        if (Nok) ang = d1.Angle(d2);
+        ang = d1.Angle(d2);
       }
+      if (ang > theAngleTol)
+        return GeomAbs_C0;
     }
-    if(ang >= angmax) angmax = ang;
   }     
 
-  return (angmax<=ta);
-
+  return aCont;
 }
 
 
@@ -1628,9 +1787,8 @@ void BRepLib::EncodeRegularity(const TopoDS_Shape& S,
       if(BRep_Tool::Continuity(E,F1,F2)<=GeomAbs_C0){
 
         try {
-          if(tgtfaces(E, F1, F2, TolAng, couture)){
-            B.Continuity(E,F1,F2,GeomAbs_G1);
-          }
+          GeomAbs_Shape aCont = tgtfaces(E, F1, F2, TolAng, couture);
+          B.Continuity(E,F1,F2,aCont);
         }
         catch(Standard_Failure)
         {
@@ -1653,9 +1811,9 @@ void BRepLib::EncodeRegularity(TopoDS_Edge& E,
   BRep_Builder B;
   if(BRep_Tool::Continuity(E,F1,F2)<=GeomAbs_C0){
     try {
-      if( tgtfaces(E, F1, F2, TolAng, F1.IsEqual(F2))) {
-        B.Continuity(E,F1,F2,GeomAbs_G1);
-      }
+      GeomAbs_Shape aCont = tgtfaces(E, F1, F2, TolAng, F1.IsEqual(F2));
+      B.Continuity(E,F1,F2,aCont);
+      
     }
     catch(Standard_Failure)
     {
@@ -1762,6 +1920,10 @@ Standard_Boolean BRepLib::
 
     TShort_Array1OfShortReal& aNormArr1 = aPT1->ChangeNormals();
     TShort_Array1OfShortReal& aNormArr2 = aPT2->ChangeNormals();
+
+    if (aPTEF1->Nodes().Lower() != aPTEF2->Nodes().Lower() || 
+        aPTEF1->Nodes().Upper() != aPTEF2->Nodes().Upper()) 
+      continue; 
 
     for(Standard_Integer anEdgNode = aPTEF1->Nodes().Lower();
                          anEdgNode <= aPTEF1->Nodes().Upper(); anEdgNode++)
@@ -1870,18 +2032,17 @@ void  BRepLib::ReverseSortFaces (const TopoDS_Shape& Sh,
   TopTools_ListOfShape& LF)
 {
   LF.Clear();
-  TopTools_ListOfShape LTri,LPlan,LCyl,LCon,LSphere,LTor,LOther;
+  // Use the allocator of the result LF for intermediate results
+  TopTools_ListOfShape LTri(LF.Allocator()), LPlan(LF.Allocator()),
+    LCyl(LF.Allocator()), LCon(LF.Allocator()), LSphere(LF.Allocator()),
+    LTor(LF.Allocator()), LOther(LF.Allocator());
   TopExp_Explorer exp(Sh,TopAbs_FACE);
   TopLoc_Location l;
-  Handle(Geom_Surface) S;
 
   for (; exp.More(); exp.Next()) {
     const TopoDS_Face&   F = TopoDS::Face(exp.Current());
-    S = BRep_Tool::Surface(F, l);
+    const Handle(Geom_Surface)& S = BRep_Tool::Surface(F, l);
     if (!S.IsNull()) {
-      if (S->DynamicType() == STANDARD_TYPE(Geom_RectangularTrimmedSurface)) {
-        S = Handle(Geom_RectangularTrimmedSurface)::DownCast (S)->BasisSurface();
-      }
       GeomAdaptor_Surface AS(S);
       switch (AS.GetType()) {
       case GeomAbs_Plane: 
@@ -1920,3 +2081,108 @@ void  BRepLib::ReverseSortFaces (const TopoDS_Shape& Sh,
 
 }
 
+//=======================================================================
+// function: BoundingVertex
+// purpose : 
+//=======================================================================
+void BRepLib::BoundingVertex(const NCollection_List<TopoDS_Shape>& theLV,
+                             gp_Pnt& theNewCenter, Standard_Real& theNewTol)
+{
+  Standard_Integer aNb;
+  //
+  aNb=theLV.Extent();
+  if (aNb < 2) {
+    return;
+  }
+  //
+  else if (aNb==2) {
+    Standard_Integer m, n;
+    Standard_Real aR[2], dR, aD, aEps;
+    TopoDS_Vertex aV[2];
+    gp_Pnt aP[2];
+    //
+    aEps=RealEpsilon();
+    for (m=0; m<aNb; ++m) {
+      aV[m]=(!m)? 
+        *((TopoDS_Vertex*)(&theLV.First())):
+        *((TopoDS_Vertex*)(&theLV.Last()));
+      aP[m]=BRep_Tool::Pnt(aV[m]);
+      aR[m]=BRep_Tool::Tolerance(aV[m]);
+    }  
+    //
+    m=0; // max R
+    n=1; // min R
+    if (aR[0]<aR[1]) {
+      m=1;
+      n=0;
+    }
+    //
+    dR=aR[m]-aR[n]; // dR >= 0.
+    gp_Vec aVD(aP[m], aP[n]);
+    aD=aVD.Magnitude();
+    //
+    if (aD<=dR || aD<aEps) { 
+      theNewCenter = aP[m];
+      theNewTol = aR[m];
+    }
+    else {
+      Standard_Real aRr;
+      gp_XYZ aXYZr;
+      gp_Pnt aPr;
+      //
+      aRr=0.5*(aR[m]+aR[n]+aD);
+      aXYZr=0.5*(aP[m].XYZ()+aP[n].XYZ()-aVD.XYZ()*(dR/aD));
+      aPr.SetXYZ(aXYZr);
+      //
+      theNewCenter = aPr;
+      theNewTol = aRr;
+      //aBB.MakeVertex (aVnew, aPr, aRr);
+    }
+    return;
+  }// else if (aNb==2) {
+  //
+  else { // if (aNb>2)
+    // compute the point
+    //
+    // issue 0027540 - sum of doubles may depend on the order
+    // of addition, thus sort the coordinates for stable result
+    Standard_Integer i;
+    NCollection_Array1<gp_Pnt> aPoints(0, aNb-1);
+    NCollection_List<TopoDS_Edge>::Iterator aIt(theLV);
+    for (i = 0; aIt.More(); aIt.Next(), ++i) {
+      const TopoDS_Vertex& aVi = *((TopoDS_Vertex*)(&aIt.Value()));
+      gp_Pnt aPi = BRep_Tool::Pnt(aVi);
+      aPoints(i) = aPi;
+    }
+    //
+    std::sort(aPoints.begin(), aPoints.end(), BRepLib_ComparePoints());
+    //
+    gp_XYZ aXYZ(0., 0., 0.);
+    for (i = 0; i < aNb; ++i) {
+      aXYZ += aPoints(i).XYZ();
+    }
+    aXYZ.Divide((Standard_Real)aNb);
+    //
+    gp_Pnt aP(aXYZ);
+    //
+    // compute the tolerance for the new vertex
+    Standard_Real aTi, aDi, aDmax;
+    //
+    aDmax=-1.;
+    aIt.Initialize(theLV);
+    for (; aIt.More(); aIt.Next()) {
+      TopoDS_Vertex& aVi=*((TopoDS_Vertex*)(&aIt.Value()));
+      gp_Pnt aPi=BRep_Tool::Pnt(aVi);
+      aTi=BRep_Tool::Tolerance(aVi);
+      aDi=aP.SquareDistance(aPi);
+      aDi=sqrt(aDi);
+      aDi=aDi+aTi;
+      if (aDi > aDmax) {
+        aDmax=aDi;
+      }
+    }
+    //
+    theNewCenter = aP;
+    theNewTol = aDmax;
+  }
+}

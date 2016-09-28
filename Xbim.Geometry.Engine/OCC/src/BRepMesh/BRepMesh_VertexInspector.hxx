@@ -30,13 +30,11 @@ public:
   typedef Standard_Integer Target;
 
   //! Constructor.
-  //! @param theReservedSize size to be reserved for vector of vertices.
   //! @param theAllocator memory allocator to be used by internal collections.
-  Standard_EXPORT BRepMesh_VertexInspector (
-    const Standard_Integer                  theReservedSize,
+  BRepMesh_VertexInspector (
     const Handle(NCollection_IncAllocator)& theAllocator)
     : myResIndices(theAllocator),
-      myVertices  (new BRepMesh::VectorOfVertex(theReservedSize)),
+      myVertices  (new BRepMesh::VectorOfVertex),
       myDelNodes  (theAllocator)
   {
     SetTolerance( Precision::Confusion() );
@@ -44,7 +42,7 @@ public:
 
   //! Registers the given vertex.
   //! @param theVertex vertex to be registered.
-  Standard_EXPORT Standard_Integer Add(const BRepMesh_Vertex& theVertex)
+  Standard_Integer Add(const BRepMesh_Vertex& theVertex)
   {
     if( myDelNodes.IsEmpty() )
     {
@@ -113,7 +111,7 @@ public:
   }
 
   //! Returns index of point coinciding with regerence one.
-  inline const Standard_Integer GetCoincidentPoint() const
+  inline Standard_Integer GetCoincidentPoint() const
   {
     if ( myResIndices.Size() > 0 )
     {
@@ -147,7 +145,7 @@ public:
   Standard_EXPORT NCollection_CellFilter_Action Inspect(const Standard_Integer theTargetIndex);
 
   //! Checks indices for equlity.
-  Standard_EXPORT static Standard_Boolean IsEqual(const Standard_Integer theIndex,
+  static Standard_Boolean IsEqual(const Standard_Integer theIndex,
                                                   const Standard_Integer theTargetIndex)
   {
     return (theIndex == theTargetIndex);

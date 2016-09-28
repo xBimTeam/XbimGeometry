@@ -12,8 +12,7 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef WNT
-
+#ifndef _WIN32
 
 #include <OSD_Directory.hxx>
 #include <OSD_Path.hxx>
@@ -59,19 +58,17 @@ TCollection_AsciiString aBuffer;
 }
 
 OSD_Directory OSD_Directory::BuildTemporary(){
-OSD_Protection          Protect;
 OSD_Directory           aDirectoryToReturn;
-Standard_Integer        internal_prot;
-Standard_CString        name = tmpnam(NULL);
-TCollection_AsciiString aString (name);
+char                    name[] = "/tmp/CSFXXXXXX";
 
- internal_prot = Protect.Internal();
-
- umask ( 0 );
- mkdir (name, (mode_t)internal_prot);
- unlink(name);//Destroys link but directory still exists while 
+ // Create a temporary directory with 0700 permissions.
+ if (NULL == mkdtemp( name ))
+   return aDirectoryToReturn; // Can't create a directory
+  
+ unlink(name);//Destroys link but directory still exists while
               //current process lives.
 
+ TCollection_AsciiString aString (name);
  aDirectoryToReturn.SetPath ( aString );
  return aDirectoryToReturn;
 
@@ -87,6 +84,7 @@ TCollection_AsciiString aString (name);
 #include <OSD_Protection.hxx>
 #include <Standard_ProgramError.hxx>
 #include <TCollection_ExtendedString.hxx>
+#include <NCollection_String.hxx>
 
 #include <OSD_WNT_1.hxx>
 
@@ -113,7 +111,7 @@ OSD_Directory :: OSD_Directory ( const OSD_Path& Name ) :
 
 }  // end constructor ( 2 )
 
-void OSD_Directory :: Build (const OSD_Protection& Protect ) {
+void OSD_Directory :: Build (const OSD_Protection& Protect) {
 
  TCollection_AsciiString dirName;
 
@@ -121,15 +119,16 @@ void OSD_Directory :: Build (const OSD_Protection& Protect ) {
 
  if (  dirName.IsEmpty ()  )
 
-  Standard_ProgramError :: Raise (
-                            TEXT( "OSD_Directory :: Build (): incorrect call - no directory name" )
-                           );
+  Standard_ProgramError :: Raise ( "OSD_Directory :: Build (): incorrect call - no directory name");
  TCollection_ExtendedString dirNameW(dirName);
- if (  Exists () || CreateDirectoryW ( (const wchar_t*) dirNameW.ToExtString (), NULL )  )
-
-  SetProtection ( Protect );
-
- else
+ if (Exists() || CreateDirectoryW (dirNameW.ToWideString(), NULL))
+ {
+#ifndef OCCT_UWP
+   SetProtection(Protect);
+#else
+   (void)Protect;
+#endif
+ } else
 
   _osd_wnt_set_error ( myError, OSD_WDirectory );
 
@@ -139,7 +138,9 @@ OSD_Directory OSD_Directory :: BuildTemporary () {
 
  OSD_Directory           retVal;
  OSD_Protection          prt;
- OSD_Path                dirPath (  tctmpnam ( NULL )  );
+
+ wchar_t* aName = _wtmpnam(NULL);
+ OSD_Path dirPath (TCollection_AsciiString (aName != NULL ? aName : L""));
 
  retVal.SetPath ( dirPath );
  retVal.Build ( prt );                            

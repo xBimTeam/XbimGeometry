@@ -1,19 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Xbim.Common.Logging;
-using Xbim.IO;
+using Xbim.Common.Step21;
+using Xbim.Ifc;
+using Xbim.Ifc4.Interfaces;
 using Xbim.ModelGeometry.Scene;
-using Xbim.XbimExtensions.Interfaces;
-using System.Collections.Generic;
-using log4net;
-using Xbim.Ifc2x3.Kernel;
-using Xbim.Ifc2x3.GeometricModelResource;
-using Xbim.Ifc2x3.GeometryResource;
-using Xbim.Ifc2x3.UtilityResource;
-using XbimGeometry.Interfaces;
-using Xbim.Ifc2x3.TopologyResource;
 
 namespace XbimRegression
 {
@@ -75,7 +69,7 @@ namespace XbimRegression
             }
             
             Console.WriteLine("Finished. Press Enter to continue...");
-            LogManager.Shutdown();
+           // LogManager.Shutdown();
             Logger = null;
             Console.ReadLine();
         }
@@ -92,46 +86,44 @@ namespace XbimRegression
 
                     Stopwatch watch = new Stopwatch();
                     watch.Start();
-                    using (XbimModel model = ParseModelFile(ifcFile,Params.Caching))
+                    using (var  model = ParseModelFile(ifcFile,Params.Caching))
                     {
                         parseTime = watch.ElapsedMilliseconds;
                         string xbimFilename = BuildFileName(ifcFile, ".xbim");
-                        //model.Open(xbimFilename, XbimDBAccess.ReadWrite);
-                        //if (_params.GeometryV1)
-                        //    XbimMesher.GenerateGeometry(model, Logger, null);
-                        //else
-                        //{
                         Xbim3DModelContext context = new Xbim3DModelContext(model);
-                        context.CreateContext(XbimGeometryType.PolyhedronBinary);
+                        context.CreateContext();
                         //}
                         geomTime = watch.ElapsedMilliseconds - parseTime;
                         //XbimSceneBuilder sb = new XbimSceneBuilder();
                         //string xbimSceneName = BuildFileName(ifcFile, ".xbimScene");
                         //sb.BuildGlobalScene(model, xbimSceneName);
-                       // sceneTime = watch.ElapsedMilliseconds - geomTime;
-                        IIfcFileHeader header = model.Header;
+                        // sceneTime = watch.ElapsedMilliseconds - geomTime;
+                        IStepFileHeader header = model.Header;
                         watch.Stop();
-                        IfcOwnerHistory ohs = model.Instances.OfType<IfcOwnerHistory>().FirstOrDefault();
-                        result = new ProcessResult
+                        IIfcOwnerHistory ohs = model.Instances.OfType<IIfcOwnerHistory>().FirstOrDefault();
+                        using (var geomReader = model.GeometryStore.BeginRead())
                         {
+                            result = new ProcessResult
+                            {
                             ParseDuration = parseTime,
                             GeometryDuration = geomTime,
-                           // SceneDuration = sceneTime,
-                            FileName = ifcFile.Remove(0,Params.TestFileRoot.Length).TrimStart('\\'),
+                            // SceneDuration = sceneTime,
+                            FileName = ifcFile.Remove(0, Params.TestFileRoot.Length).TrimStart('\\'),
                             Entities = model.Instances.Count,
                             IfcSchema = header.FileSchema.Schemas.FirstOrDefault(),
                             IfcDescription = String.Format("{0}, {1}", header.FileDescription.Description.FirstOrDefault(), header.FileDescription.ImplementationLevel),
-                            GeometryEntries = model.GeometriesCount,
+                            GeometryEntries = geomReader.ShapeInstances.Count(),
                             IfcLength = ReadFileLength(ifcFile),
                             XbimLength = ReadFileLength(xbimFilename),
                             SceneLength = 0,
-                            IfcProductEntries = model.Instances.CountOf<IfcProduct>(),
-                            IfcSolidGeometries = model.Instances.CountOf<IfcSolidModel>(),
-                            IfcMappedGeometries = model.Instances.CountOf<IfcMappedItem>(),
-                            BooleanGeometries = model.Instances.CountOf<IfcBooleanResult>(),
-                            BReps =  model.Instances.CountOf<IfcFaceBasedSurfaceModel>() + model.Instances.CountOf<IfcShellBasedSurfaceModel>() + model.Instances.CountOf<IfcManifoldSolidBrep>(),
+                            IfcProductEntries = model.Instances.OfType<IIfcProduct>().Count(),
+                            IfcSolidGeometries = model.Instances.OfType<IIfcSolidModel>().Count(),
+                            IfcMappedGeometries = model.Instances.OfType<IIfcMappedItem>().Count(),
+                            BooleanGeometries = model.Instances.OfType<IIfcBooleanResult>().Count(),
+                            BReps = model.Instances.OfType<IIfcFaceBasedSurfaceModel>().Count() + model.Instances.OfType<IIfcShellBasedSurfaceModel>().Count() + model.Instances.OfType<IIfcManifoldSolidBrep>().Count(),
                             Application = ohs == null ? "Unknown" : ohs.OwningApplication.ToString(),
-                        };
+                            };
+                        }
                         model.Close();                       
                     }
                 }
@@ -164,21 +156,21 @@ namespace XbimRegression
             }
         }
 
-        private static XbimModel ParseModelFile(string ifcFileName,bool caching)
+        private static IfcStore ParseModelFile(string ifcFileName,bool caching)
         {
-            XbimModel model = new XbimModel();
+           
             //create a callback for progress
             switch (Path.GetExtension(ifcFileName).ToLowerInvariant())
             {
                 case ".ifc":
                 case ".ifczip":
                 case ".ifcxml":
-                    model.CreateFrom(ifcFileName, BuildFileName(ifcFileName, ".xBIM"), null, true, caching);
-                    break;
+                    return IfcStore.Open(ifcFileName, null,0);
+                  
                 default:
                     throw new NotImplementedException(String.Format("XbimConvert does not support converting {0} file formats currently", Path.GetExtension(ifcFileName)));
             }
-            return model;
+           
         }
 
 

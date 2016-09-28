@@ -62,8 +62,11 @@ public:
   //! transitions are Undecided.
   Standard_EXPORT IntPatch_WLine(const Handle(IntSurf_LineOn2S)& Line, const Standard_Boolean Tang);
   
-  //! Adds a vertex in the list.
-    void AddVertex (const IntPatch_Point& Pnt);
+  //! Adds a vertex in the list. If theIsPrepend == TRUE the new
+  //! vertex will be added before the first element of vertices sequence.
+  //! Otherwise, to the end of the sequence
+  virtual void AddVertex (const IntPatch_Point& Pnt,
+                    const Standard_Boolean theIsPrepend = Standard_False) Standard_OVERRIDE;
   
   //! Set the Point of index <Index> in the LineOn2S
   Standard_EXPORT void SetPoint (const Standard_Integer Index, const IntPatch_Point& Pnt);
@@ -79,10 +82,10 @@ public:
     void SetLastPoint (const Standard_Integer IndLast);
   
   //! Returns the number of intersection points.
-    Standard_Integer NbPnts() const;
+  virtual Standard_Integer NbPnts() const Standard_OVERRIDE;
   
   //! Returns the intersection point of range Index.
-    const IntSurf_PntOn2S& Point (const Standard_Integer Index) const;
+  virtual const IntSurf_PntOn2S& Point (const Standard_Integer Index) const Standard_OVERRIDE;
   
   //! Returns True if the line has a known First point.
   //! This point is given by the method FirstPoint().
@@ -108,18 +111,23 @@ public:
   //! of vertices.
     const IntPatch_Point& LastPoint (Standard_Integer& Indlast) const;
   
-    Standard_Integer NbVertex() const;
+  //! Returns number of vertices (IntPatch_Point) of the line
+  virtual Standard_Integer NbVertex() const Standard_OVERRIDE;
   
   //! Returns the vertex of range Index on the line.
-    const IntPatch_Point& Vertex (const Standard_Integer Index) const;
+  virtual const IntPatch_Point& Vertex (const Standard_Integer Index) const Standard_OVERRIDE;
+
+  //! Returns the vertex of range Index on the line.
+  virtual IntPatch_Point& ChangeVertex (const Standard_Integer Index) Standard_OVERRIDE;
   
   //! Set the parameters of all the vertex on the line.
   //! if a vertex is already in the line,
   //! its parameter is modified
   //! else a new point in the line is inserted.
-  Standard_EXPORT void ComputeVertexParameters (const Standard_Real Tol, const Standard_Boolean hasBeenAdded = Standard_False);
+  Standard_EXPORT void ComputeVertexParameters (const Standard_Real Tol);
   
-  Standard_EXPORT Handle(IntSurf_LineOn2S) Curve() const;
+  //! Returns set of intersection points
+  Standard_EXPORT virtual Handle(IntSurf_LineOn2S) Curve() const Standard_OVERRIDE;
   
   Standard_EXPORT Standard_Boolean IsOutSurf1Box (const gp_Pnt2d& P1);
   
@@ -149,9 +157,11 @@ public:
   
   Standard_EXPORT const Handle(Adaptor2d_HCurve2d)& GetArcOnS2() const;
   
-  Standard_EXPORT void ClearVertexes();
+  //! Removes vertices from the line (i.e. cleans svtx member)
+  virtual void ClearVertexes() Standard_OVERRIDE;
   
-  Standard_EXPORT void RemoveVertex (const Standard_Integer theIndex);
+  //! Removes single vertex from the line
+  virtual void RemoveVertex (const Standard_Integer theIndex) Standard_OVERRIDE;
   
   Standard_EXPORT void InsertVertexBefore (const Standard_Integer theIndex, const IntPatch_Point& thePnt);
   
@@ -161,10 +171,20 @@ public:
   //! Otherwise,             prints list of 2d-points on the 2nd surface
   Standard_EXPORT void Dump(const Standard_Integer theMode) const;
 
+  //! Allows or forbides purging of existing WLine
+  void EnablePurging(const Standard_Boolean theIsEnabled)
+  {
+    myIsPurgerAllowed = theIsEnabled;
+  }
+
+  //! Returns TRUE if purging is allowed or forbiden for existing WLine
+  Standard_Boolean IsPurgingAllowed()
+  {
+    return myIsPurgerAllowed;
+  }
 
 
-
-  DEFINE_STANDARD_RTTI(IntPatch_WLine,IntPatch_PointLine)
+  DEFINE_STANDARD_RTTIEXT(IntPatch_WLine,IntPatch_PointLine)
 
 protected:
 
@@ -191,6 +211,7 @@ private:
   Handle(Adaptor2d_HCurve2d) theArcOnS1;
   Standard_Boolean hasArcOnS2;
   Handle(Adaptor2d_HCurve2d) theArcOnS2;
+  Standard_Boolean myIsPurgerAllowed;
 
 
 };

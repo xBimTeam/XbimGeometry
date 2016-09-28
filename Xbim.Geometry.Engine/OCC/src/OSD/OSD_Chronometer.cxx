@@ -19,7 +19,7 @@
 #include <Standard_Stream.hxx>
 
 // ====================== PLATFORM-SPECIFIC PART ========================
-#ifndef WNT
+#ifndef _WIN32
 
 //---------- Systemes autres que WNT : ----------------------------------
 
@@ -57,7 +57,7 @@
 //=======================================================================
 void OSD_Chronometer::GetProcessCPU (Standard_Real& UserSeconds, Standard_Real& SystemSeconds)
 {
-#if defined(LIN) || defined(linux) || defined(__FreeBSD__) || defined(__ANDROID__)
+#if defined(__linux__) || defined(linux) || defined(__FreeBSD__) || defined(__ANDROID__) || defined(__QNX__)
   static const long aCLK_TCK = sysconf(_SC_CLK_TCK);
 #else
   static const long aCLK_TCK = CLK_TCK;
@@ -87,7 +87,7 @@ void OSD_Chronometer::GetThreadCPU (Standard_Real& theUserSeconds,
     theUserSeconds   = Standard_Real(aTaskInfo.user_time.seconds)   + 0.000001 * aTaskInfo.user_time.microseconds;
     theSystemSeconds = Standard_Real(aTaskInfo.system_time.seconds) + 0.000001 * aTaskInfo.system_time.microseconds;
   }
-#elif (defined(_POSIX_TIMERS) && defined(_POSIX_THREAD_CPUTIME)) || defined(__ANDROID__)
+#elif (defined(_POSIX_TIMERS) && defined(_POSIX_THREAD_CPUTIME)) || defined(__ANDROID__) || defined(__QNX__)
   // on Linux, only user times are available for threads via clock_gettime()
   struct timespec t;
   if (!clock_gettime (CLOCK_THREAD_CPUTIME_ID, &t))
@@ -136,10 +136,15 @@ static inline __int64 EncodeFILETIME (PFILETIME pFt)
 //=======================================================================
 void OSD_Chronometer::GetProcessCPU (Standard_Real& UserSeconds, Standard_Real& SystemSeconds)
 {
+#ifndef OCCT_UWP
   FILETIME ftStart, ftExit, ftKernel, ftUser;
   ::GetProcessTimes (GetCurrentProcess(), &ftStart, &ftExit, &ftKernel, &ftUser);
   UserSeconds   = 0.0000001 * EncodeFILETIME (&ftUser);
   SystemSeconds = 0.0000001 * EncodeFILETIME (&ftKernel);
+#else
+  UserSeconds = 0.0;
+  SystemSeconds = 0.0;
+#endif
 }
 
 //=======================================================================
@@ -148,13 +153,18 @@ void OSD_Chronometer::GetProcessCPU (Standard_Real& UserSeconds, Standard_Real& 
 //=======================================================================
 void OSD_Chronometer::GetThreadCPU (Standard_Real& UserSeconds, Standard_Real& SystemSeconds)
 {
+#ifndef OCCT_UWP
   FILETIME ftStart, ftExit, ftKernel, ftUser;
   ::GetThreadTimes (GetCurrentThread(), &ftStart, &ftExit, &ftKernel, &ftUser);
   UserSeconds   = 0.0000001 * EncodeFILETIME (&ftUser);
   SystemSeconds = 0.0000001 * EncodeFILETIME (&ftKernel);
+#else
+  UserSeconds = 0.0;
+  SystemSeconds = 0.0;
+#endif
 }
 
-#endif /* WNT */
+#endif /* _WIN32 */
 
 // ====================== PLATFORM-INDEPENDENT PART ========================
 

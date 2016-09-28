@@ -287,7 +287,7 @@ public:
 
 
 
-  DEFINE_STANDARD_RTTI(ShapeAnalysis_Surface,MMgt_TShared)
+  DEFINE_STANDARD_RTTIEXT(ShapeAnalysis_Surface,MMgt_TShared)
 
 protected:
 
@@ -295,7 +295,6 @@ protected:
   Handle(Geom_Surface) mySurf;
   Handle(GeomAdaptor_HSurface) myAdSur;
   Extrema_ExtPS myExtPS;
-  GeomAdaptor_Surface myExtSrf;
   Standard_Boolean myExtOK;
   Standard_Integer myNbDeg;
   Standard_Real myPreci[4];
@@ -348,9 +347,10 @@ private:
   Standard_EXPORT void ComputeSingularities();
   
   Standard_EXPORT void ComputeBoxes();
-  
-  Standard_EXPORT Standard_Boolean SurfaceNewton (const gp_Pnt2d& p2dPrev, const gp_Pnt& P3D, const Standard_Real preci, gp_Pnt2d& sol);
-  
+
+  //! @return 0, 1 or 2.
+  Standard_EXPORT Standard_Integer SurfaceNewton (const gp_Pnt2d& p2dPrev, const gp_Pnt& P3D, const Standard_Real preci, gp_Pnt2d& sol);
+
   Standard_EXPORT void SortSingularities();
 
 

@@ -17,29 +17,24 @@
 #ifndef _GCPnts_TangentialDeflection_HeaderFile
 #define _GCPnts_TangentialDeflection_HeaderFile
 
-#include <Standard.hxx>
-#include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
-
-#include <Standard_Real.hxx>
-#include <Standard_Integer.hxx>
 #include <TColgp_SequenceOfPnt.hxx>
 #include <TColStd_SequenceOfReal.hxx>
-#include <Standard_Boolean.hxx>
 #include <gp_Pnt.hxx>
+#include <gp_Lin.hxx>
+#include <math_Function.hxx>
+#include <math_MultipleVarFunction.hxx>
+#include <Adaptor3d_Curve.hxx>
+#include <Adaptor2d_Curve2d.hxx>
+
 class Standard_ConstructionError;
 class Standard_OutOfRange;
-class Adaptor3d_Curve;
-class Adaptor2d_Curve2d;
-class gp_Pnt;
-
 
 //! Computes a set of  points on a curve from package
 //! Adaptor3d  such  as between  two successive   points
 //! P1(u1)and P2(u2) :
 //!
 //! . ||P1P3^P3P2||/||P1P3||*||P3P2||<AngularDeflection
-//! . ||P1P2^P1P3||/||P1P2||*||P1P3||<CurvatureDeflection
+//! . ||P1P2^P1P3||/||P1P2||<CurvatureDeflection
 //!
 //! where P3 is the point of abscissa ((u1+u2)/2), with
 //! u1 the abscissa of the point P1 and u2 the abscissa
@@ -69,10 +64,12 @@ class gp_Pnt;
 //! U = PointsOnCurve.Parameter (i);
 //! P = PointsOnCurve.Value (i);
 //! }
+
 class GCPnts_TangentialDeflection 
 {
 public:
 
+//
   DEFINE_STANDARD_ALLOC
 
   
@@ -99,26 +96,25 @@ public:
   //! or founded with parametric tolerance (replaced if theIsReplace is true)
   Standard_EXPORT Standard_Integer AddPoint (const gp_Pnt& thePnt, const Standard_Real theParam, const Standard_Boolean theIsReplace = Standard_True);
   
-    Standard_Integer NbPoints() const;
+  Standard_Integer NbPoints () const
+  {
+    return parameters.Length ();
+  }
   
-    Standard_Real Parameter (const Standard_Integer I) const;
+  Standard_Real Parameter (const Standard_Integer I) const
+  {
+    return parameters.Value (I);
+  }
   
-    gp_Pnt Value (const Standard_Integer I) const;
+  gp_Pnt Value (const Standard_Integer I) const
+  {
+    return points.Value (I);
+  }
   
   //! Computes angular step for the arc using the given parameters.
   Standard_EXPORT static Standard_Real ArcAngularStep (const Standard_Real theRadius, const Standard_Real theLinearDeflection, const Standard_Real theAngularDeflection, const Standard_Real theMinLength);
 
-
-
-
-protected:
-
-
-
-
-
 private:
-
   
   Standard_EXPORT void PerformLinear (const Adaptor3d_Curve& C);
   
@@ -136,7 +132,13 @@ private:
   
   Standard_EXPORT void EvaluateDu (const Adaptor2d_Curve2d& C, const Standard_Real U, gp_Pnt& P, Standard_Real& Du, Standard_Boolean& NotDone) const;
 
+  Standard_EXPORT void EstimDefl (const Adaptor3d_Curve& C, const Standard_Real U1, const Standard_Real U2, 
+                                  Standard_Real& MaxDefl, Standard_Real& UMax);
+  
+  Standard_EXPORT void EstimDefl (const Adaptor2d_Curve2d& C, const Standard_Real U1, const Standard_Real U2, 
+                                  Standard_Real& MaxDefl, Standard_Real& UMax);
 
+private:
   Standard_Real angularDeflection;
   Standard_Real curvatureDeflection;
   Standard_Real uTol;
@@ -146,15 +148,6 @@ private:
   Standard_Real firstu;
   TColgp_SequenceOfPnt points;
   TColStd_SequenceOfReal parameters;
-
-
 };
-
-
-#include <GCPnts_TangentialDeflection.lxx>
-
-
-
-
 
 #endif // _GCPnts_TangentialDeflection_HeaderFile

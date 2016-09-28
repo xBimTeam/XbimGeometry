@@ -12,9 +12,10 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-
 #include <FSD_File.hxx>
+
 #include <OSD.hxx>
+#include <OSD_OpenFile.hxx>
 #include <Storage_BaseDriver.hxx>
 #include <Storage_StreamExtCharParityError.hxx>
 #include <Storage_StreamFormatError.hxx>
@@ -79,30 +80,36 @@ Storage_Error FSD_File::Open(const TCollection_AsciiString& aName,const Storage_
 
   SetName(aName);
 
-  if (OpenMode() == Storage_VSNone) {
-
-#ifdef _WIN32
-    TCollection_ExtendedString aWName(aName);
-    if (aMode == Storage_VSRead) {
-      myStream.open( (const wchar_t*) aWName.ToExtString(),ios::in); // ios::nocreate is not portable
+  if (OpenMode() == Storage_VSNone)
+  {
+    std::ios_base::openmode anOpenMode = std::ios_base::openmode(0);
+    switch (aMode)
+    {
+      case Storage_VSNone:
+      {
+        break;
+      }
+      case Storage_VSRead:
+      {
+        // ios::nocreate is not portable
+        anOpenMode = ios::in;
+        break;
+      }
+      case Storage_VSWrite:
+      {
+        anOpenMode = ios::out;
+        break;
+      }
+      case Storage_VSReadWrite:
+      {
+        anOpenMode = ios::in | ios::out;
+        break;
+      }
     }
-    else if (aMode == Storage_VSWrite) {
-      myStream.open( (const wchar_t*) aWName.ToExtString(),ios::out);
+    if (anOpenMode != 0)
+    {
+      OSD_OpenStream (myStream, aName.ToCString(), anOpenMode);
     }
-    else if (aMode == Storage_VSReadWrite) {
-      myStream.open( (const wchar_t*) aWName.ToExtString(),ios::in|ios::out);
-#else
-    if (aMode == Storage_VSRead) {
-      myStream.open(aName.ToCString(),ios::in); // ios::nocreate is not portable
-    }
-    else if (aMode == Storage_VSWrite) {
-      myStream.open(aName.ToCString(),ios::out);
-    }
-    else if (aMode == Storage_VSReadWrite) {
-      myStream.open(aName.ToCString(),ios::in|ios::out);
-#endif
-    }
-    
     if (myStream.fail()) {
       result = Storage_VSOpenError;
     }
@@ -154,7 +161,7 @@ Storage_Error FSD_File::Close()
 //purpose  : ------------------ PROTECTED
 //=======================================================================
 
-const Standard_CString FSD_File::MagicNumber()
+Standard_CString FSD_File::MagicNumber()
 {
   return MAGICNUMBER;
 }
@@ -443,7 +450,7 @@ Storage_BaseDriver& FSD_File::PutCharacter(const Standard_Character aValue)
 
 Storage_BaseDriver& FSD_File::PutExtCharacter(const Standard_ExtCharacter aValue)
 {
-  myStream << aValue << " ";
+  myStream << (short )aValue << " ";
   if (myStream.bad()) Storage_StreamWriteError::Raise();
   return *this;
 }
@@ -535,8 +542,9 @@ Storage_BaseDriver& FSD_File::GetCharacter(Standard_Character& aValue)
 
 Storage_BaseDriver& FSD_File::GetExtCharacter(Standard_ExtCharacter& aValue)
 {
-  if (!(myStream >> aValue)) Storage_StreamTypeMismatchError::Raise();
-  
+  short aChar = 0;
+  if (!(myStream >> aChar)) Storage_StreamTypeMismatchError::Raise();
+  aValue = aChar;
   return *this;
 }
 
@@ -747,6 +755,16 @@ void FSD_File::ReadInfo(Standard_Integer& nbObj,
     userInfo.Append(line);
     line.Clear();
   }
+}
+
+//=======================================================================
+//function : ReadCompleteInfo
+//purpose  : 
+//           
+//=======================================================================
+void FSD_File::ReadCompleteInfo( Standard_IStream& /*theIStream*/, Handle(Storage_Data)& /*theData*/)
+{
+
 }
 
 //=======================================================================

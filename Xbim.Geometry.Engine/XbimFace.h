@@ -1,14 +1,15 @@
 #pragma once
 #include "XbimOccShape.h"
+#include "XbimWire.h"
+#include "XbimWireSet.h"
 #include <TopoDS_Face.hxx>
 #include <BRepBuilderAPI_FaceError.hxx>
+#include "XbimWireSet.h"
+#include "OCC/src/Geom/Geom_Surface.hxx"
 
 using namespace System;
 using namespace System::Collections::Generic;
-using namespace XbimGeometry::Interfaces;
-using namespace Xbim::Ifc2x3::ProfileResource;
-using namespace Xbim::Ifc2x3::GeometryResource;
-using namespace Xbim::Ifc2x3::TopologyResource;
+using namespace Xbim::Ifc4::Interfaces;
 using namespace Xbim::Common::Geometry;
 namespace Xbim
 {
@@ -27,23 +28,28 @@ namespace Xbim
 			void InstanceCleanup();
 
 			//initialisers
-			void Init(IfcProfileDef^ profile);
-			void Init(IfcArbitraryProfileDefWithVoids^ profile);
-			void Init(IfcCircleHollowProfileDef ^ circProfile);
-			void Init(IfcCompositeProfileDef ^ profile);
-			void Init(IfcRectangleHollowProfileDef^ rectProfile);
-			void Init(IfcSurface^ surface);
-			void Init(IfcPlane^ plane);
-			void Init(IfcSurfaceOfLinearExtrusion^ sLin);
-			void Init(IfcSurfaceOfRevolution^ sRev);
-			void Init(IfcRectangularTrimmedSurface^ def);
-			void Init(IfcCurveBoundedPlane^ def);
-			void Init(IfcCompositeCurve ^ cCurve);
-			void Init(IfcPolyline ^ pline);
-			void Init(IfcPolyLoop ^ loop);
+			void Init(IIfcProfileDef^ profile);
+			void Init(IIfcArbitraryProfileDefWithVoids^ profile);
+			void Init(IIfcCircleHollowProfileDef ^ circProfile);
+			void Init(IIfcCompositeProfileDef ^ profile);
+			void Init(IIfcDerivedProfileDef ^ profile);
+			void Init(IIfcRectangleHollowProfileDef^ rectProfile);
+			void Init(IIfcSurface^ surface);
+			void Init(IIfcPlane^ plane);
+			void Init(IIfcSurfaceOfLinearExtrusion^ sLin);
+			void Init(IIfcSurfaceOfRevolution^ sRev);
+			void Init(IIfcRectangularTrimmedSurface^ def);
+			void Init(IIfcCurveBoundedPlane^ def);
+			void Init(IIfcCompositeCurve ^ cCurve);
+			void Init(IIfcPolyline ^ pline);
+			void Init(IIfcPolyLoop ^ loop);
 			void Init(IXbimWire^ wire);
 			void Init(IXbimWire^ wire, XbimPoint3D pointOnFace, XbimVector3D faceNormal);
 			void Init(IXbimFace^ face);
+			void Init(IIfcBSplineSurface ^ surface);
+			void Init(IIfcBSplineSurfaceWithKnots ^ surface);
+			void Init(IIfcRationalBSplineSurfaceWithKnots ^ surface);
+			void Init(IIfcCylindricalSurface ^ surface);
 			void Init(double x, double y, double tolerance); 
 		public:
 			
@@ -73,9 +79,9 @@ namespace Xbim
 #pragma region IXbimFace Interface
 			virtual property bool IsValid{bool get() override { return pFace != nullptr; }; }
 			virtual property  XbimGeometryObjectType GeometryType{XbimGeometryObjectType  get() override { return XbimGeometryObjectType::XbimFaceType; }; }
-			virtual property IXbimWire^ OuterBound{ IXbimWire^ get(); }
-			virtual property IXbimWireSet^ InnerBounds{IXbimWireSet^ get(); }
-			virtual property IXbimWireSet^ Bounds{IXbimWireSet^ get(); }
+			virtual property IXbimWire^ OuterBound{ IXbimWire^ get(){ return OuterWire; } }
+			virtual property IXbimWireSet^ InnerBounds{IXbimWireSet^ get(){ return InnerWires; } }
+			virtual property IXbimWireSet^ Bounds{IXbimWireSet^ get(){ return Wires; } }
 			virtual property double Area { double get(); }
 			virtual property double Perimeter { double get(); }
 			virtual property bool IsPlanar{bool get(); }
@@ -86,45 +92,70 @@ namespace Xbim
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) override;
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D)override;
 			virtual property bool IsQuadOrTriangle{bool get(); }
+			virtual void SaveAsBrep(String^ fileName);
 #pragma endregion
 
 			property bool IsReversed{bool get(){ return IsValid && pFace->Orientation() == TopAbs_REVERSED; }; }
 			property XbimPoint3D Location{XbimPoint3D get(); }
 #pragma region constructors
 			XbimFace(const TopoDS_Face& face);
+			XbimFace(const TopoDS_Face& face, Object^ tag);
 			XbimFace(){}; //an invalid empty face
 			XbimFace(XbimVector3D normal);
 			XbimFace(XbimPoint3D location, XbimVector3D normal);
-			XbimFace(IfcProfileDef^ profile);
+			XbimFace(IIfcProfileDef^ profile);
 			//Builds a face from a Surface
-			XbimFace(IfcSurface ^ surface);
+			XbimFace(IIfcSurface^ surface);
+
 			//Builds a face from a Plane
-			XbimFace(IfcPlane ^ plane);
-			XbimFace(IfcSurfaceOfLinearExtrusion ^ sLin);
-			XbimFace(IfcSurfaceOfRevolution ^ sRev);
-			XbimFace(IfcCurveBoundedPlane ^ def);
-			XbimFace(IfcRectangularTrimmedSurface ^ def);
-			XbimFace(IfcCompositeCurve ^ cCurve);
-			XbimFace(IfcPolyline ^ pline);
-			XbimFace(IfcPolyLoop ^ loop);
+			XbimFace(IIfcPlane ^ plane);
+			XbimFace(IIfcSurfaceOfLinearExtrusion ^ sLin);
+			XbimFace(IIfcSurfaceOfRevolution ^ sRev);
+			XbimFace(IIfcCurveBoundedPlane ^ def);
+			XbimFace(IIfcRectangularTrimmedSurface ^ def);
+			XbimFace(IIfcCompositeCurve ^ cCurve);
+			XbimFace(IIfcPolyline ^ pline);
+			XbimFace(IIfcPolyLoop ^ loop);
 			XbimFace(IXbimWire^ wire);
 			XbimFace(IXbimWire^ wire, XbimPoint3D pointOnface,  XbimVector3D faceNormal);
 			XbimFace(IXbimFace^ face);
+			XbimFace(IIfcSurface^ surface, XbimWire^ outerBound, IEnumerable<XbimWire^>^ innerBounds);
+			XbimFace(IIfcFaceSurface^ surface, XbimWire^ outerBound, IEnumerable<XbimWire^>^ innerBounds, double tolerance);
+			XbimFace(IIfcCylindricalSurface ^ surface);
 			XbimFace(double x, double y, double tolerance);
 #pragma endregion
 
-			
+#pragma region Internal Properties
+			property XbimWireSet^  Wires{XbimWireSet^ get(); }
+			property XbimWireSet^  InnerWires{XbimWireSet^ get(); }
+			property XbimWire^  OuterWire{XbimWire^ get(); }
+#pragma endregion	
+
 #pragma region Methods
 			//moves the face to the new position
-			void Move(IfcAxis2Placement3D^ position);
+			void Move(IIfcAxis2Placement3D^ position);
+			void Move(gp_Trsf transform);
 			void Translate(XbimVector3D translation);
 			void Reverse();
 			bool Add(IXbimWire^ innerWire);
 			XbimPoint3D PointAtParameters(double u, double v);
+			Handle(Geom_Surface) GetSurface();
+			XbimVector3D NormalAt(double u, double v);
+			void SetLocation(TopLoc_Location loc);
 #pragma endregion
 
 
-		};
+
+			// Inherited via XbimOccShape
+			virtual XbimGeometryObject ^ Transformed(IIfcCartesianTransformationOperator ^ transformation) override;
+
+
+			// Inherited via XbimOccShape
+			virtual XbimGeometryObject ^ Moved(IIfcPlacement ^ placement) override;
+
+			virtual XbimGeometryObject ^ Moved(IIfcObjectPlacement ^ objectPlacement) override;
+
+};
 	}
 
 }

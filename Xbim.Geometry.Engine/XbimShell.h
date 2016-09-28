@@ -8,7 +8,6 @@
 #include <TopTools_DataMapOfIntegerShape.hxx>
 
 using namespace System::Collections::Generic;
-using namespace XbimGeometry::Interfaces;
 using namespace Xbim::Common::Geometry;
 
 namespace Xbim
@@ -27,16 +26,17 @@ namespace Xbim
 				void set(TopoDS_Shell* val)sealed { ptrContainer = IntPtr(val); }
 			}
 			void InstanceCleanup();
-			void Init(IfcOpenShell^ openShell);
-			void Init(IfcConnectedFaceSet^ faceset);
-			void Init(IfcSurfaceOfLinearExtrusion^ linExt);
+			void Init(IIfcOpenShell^ openShell);
+			void Init(IIfcConnectedFaceSet^ faceset);
+			void Init(IIfcSurfaceOfLinearExtrusion^ linExt);
 		public:
 			//Constructors
 			XbimShell();
 			XbimShell(const TopoDS_Shell& shell);
-			XbimShell(IfcOpenShell^ openShell);
-			XbimShell(IfcConnectedFaceSet^ faceset);
-			XbimShell(IfcSurfaceOfLinearExtrusion^ linExt);
+			XbimShell(const TopoDS_Shell& shell, Object^ tag);
+			XbimShell(IIfcOpenShell^ openShell);
+			XbimShell(IIfcConnectedFaceSet^ faceset);
+			XbimShell(IIfcSurfaceOfLinearExtrusion^ linExt);
 			//destructors
 			~XbimShell(){ InstanceCleanup(); }
 			!XbimShell(){ InstanceCleanup(); }
@@ -73,6 +73,7 @@ namespace Xbim
 			virtual property bool HasValidTopology{bool get(); }
 			virtual bool CanCreateSolid(){ return IsClosed; };
 			virtual IXbimSolid^ CreateSolid(){ return MakeSolid(); };
+			virtual void SaveAsBrep(String^ fileName);
 #pragma endregion
 			
 #pragma region operators
@@ -85,6 +86,14 @@ namespace Xbim
 			//if the shell is closed make sure it is facing the correct way
 			void Orientate();
 			void FixTopology();
+
+			// Inherited via XbimOccShape
+			virtual XbimGeometryObject ^ Transformed(IIfcCartesianTransformationOperator ^ transformation) override;
+
+			// Inherited via XbimOccShape
+			virtual XbimGeometryObject ^ Moved(IIfcPlacement ^ placement) override;
+			virtual XbimGeometryObject ^ Moved(IIfcObjectPlacement ^ objectPlacement) override;
+				virtual void Move(TopLoc_Location loc);
 		};
 	}
 }

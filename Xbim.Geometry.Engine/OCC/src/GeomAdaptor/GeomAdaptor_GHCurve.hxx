@@ -39,22 +39,30 @@ class GeomAdaptor_GHCurve : public Adaptor3d_HCurve
 public:
 
   
+  //! Creates an empty GenHCurve.
   Standard_EXPORT GeomAdaptor_GHCurve();
   
+  //! Creates a GenHCurve from a Curve
   Standard_EXPORT GeomAdaptor_GHCurve(const GeomAdaptor_Curve& C);
   
+  //! Sets the field of the GenHCurve.
   Standard_EXPORT void Set (const GeomAdaptor_Curve& C);
   
-  Standard_EXPORT const Adaptor3d_Curve& Curve() const;
+  //! Returns the curve used to create the GenHCurve.
+  //! This is redefined from HCurve, cannot be inline.
+  Standard_EXPORT const Adaptor3d_Curve& Curve() const Standard_OVERRIDE;
   
-  Standard_EXPORT Adaptor3d_Curve& GetCurve();
+  //! Returns the curve used to create the GenHCurve.
+  //! This is redefined from HCurve, cannot be inline.
+  Standard_EXPORT Adaptor3d_Curve& GetCurve() Standard_OVERRIDE;
   
+  //! Returns the curve used to create the GenHCurve.
     GeomAdaptor_Curve& ChangeCurve();
 
 
 
 
-  DEFINE_STANDARD_RTTI(GeomAdaptor_GHCurve,Adaptor3d_HCurve)
+  DEFINE_STANDARD_RTTI_INLINE(GeomAdaptor_GHCurve,Adaptor3d_HCurve)
 
 protected:
 

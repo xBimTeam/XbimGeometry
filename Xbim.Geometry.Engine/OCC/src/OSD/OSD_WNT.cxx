@@ -13,7 +13,7 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifdef WNT
+#ifdef _WIN32
 
 /******************************************************************************/
 /* File:      OSD_WNT.cxx                                                     */
@@ -23,22 +23,26 @@
 /***/
 #include <OSD_WNT_1.hxx>
 
+#include <Strsafe.h>
 #include <wchar.h>
 #include <stdlib.h>
+
+#include <Standard_Macro.hxx>
+
 /***/
+#ifndef OCCT_UWP
 static void Init ( void );
-/***/
-static DWORD dwLevel;
 /***/
 class Init_OSD_WNT {  // provides initialization
 
  public:
 
-  Init_OSD_WNT () { Init (); dwLevel = TlsAlloc (); }
+  Init_OSD_WNT () { Init (); }
 
 }; // end Init_OSD_WNT
 
 static Init_OSD_WNT initOsdWnt;
+#endif
 /***/
 static BOOL   fInit = FALSE;
 static PSID*  predefinedSIDs;
@@ -61,6 +65,8 @@ static RESPONSE_DIR_PROC _response_dir_proc;
 #define SID_WORLD         7
 #define SID_NULL          8
 /***/
+#ifndef OCCT_UWP
+// None of the existing security APIs are supported in a UWP applications
 /******************************************************************************/
 /* Function : AllocSD                                                       */
 /* Purpose  : Allocates and initializes security identifier                 */
@@ -520,162 +526,8 @@ void FreeFileSecurity ( PSECURITY_DESCRIPTOR pSD ) {
  HeapFree (  hHeap, 0, ( LPVOID )pSD  );
 
 }  /* end FreeFileSecurity */
-/***/
-/******************************************************************************/
-/* Function : LookupAccountSidEx                                            */
-/* Purpose  : Looking for account corresponding to the given SID and returns*/
-/*            a name of that account on success                             */
-/* Returns  : TRUE if account was found in the security database            */
-/*            FALSE otherwise                                               */
-/* Warning  : If account was found then this function allocates memory      */
-/*            needed to hold the name of that account and the name of the   */
-/*            domain to which this account belongs. To free that memoty     */
-/*            use 'FreeAccountNames' function                               */
-/******************************************************************************/
-/***/
 
-#if defined(__CYGWIN32__) || defined(__MINGW32__)
-#define __try
-#define __finally
-#define __leave return retVal
-#endif
 
-BOOL LookupAccountSidEx ( PSID pSID, LPWSTR* name, LPWSTR* domain ) {
-
- DWORD        errVal;
- DWORD        dwSizeName   = 0;
- DWORD        dwSizeDomain = 0;
- BOOL         retVal       = FALSE;
- SID_NAME_USE eUse;
-
- __try {
-
-  do {   
-
-   errVal = ERROR_SUCCESS;
-
-   if (  !LookupAccountSidW (
-           NULL, pSID, *name, &dwSizeName, *domain, &dwSizeDomain, &eUse
-          )
-   ) {
-   
-    if (   (  errVal = GetLastError ()  ) != ERROR_INSUFFICIENT_BUFFER   ) __leave;
-
-    if (   (  *name   = ( LPWSTR )HeapAlloc ( hHeap, 0, dwSizeName   )  ) == NULL ||
-           (  *domain = ( LPWSTR )HeapAlloc ( hHeap, 0, dwSizeDomain )  ) == NULL
-    ) __leave;
-   
-   }  /* end if */
-
-  } while ( errVal != ERROR_SUCCESS );
-
-  retVal = TRUE;
- 
- }  /* end __try */
-
- __finally {
-
-  if ( !retVal ) {
-  
-   if ( *name   == NULL ) HeapFree ( hHeap, 0, *name   );
-   if ( *domain == NULL ) HeapFree ( hHeap, 0, *domain );
-  
-  }  /* end if */
- 
- }  /* end __finally */
-
-#ifdef VAC
-leave: ;        // added for VisualAge
-#endif
-
- return retVal;
-
-}  /* end LookupAccountSidEx */
-
-#if defined(__CYGWIN32__) || defined(__MINGW32__)
-#undef __try
-#undef __finally
-#undef __leave
-#endif
-
-/***/
-/******************************************************************************/
-/* Function : FreeAccountNames                                              */
-/* Purpose  : Deallocates memory which was allocated by the                 */
-/*            'LookupAccountSidEx' function                                 */
-/******************************************************************************/
-/***/
-void FreeAccountNames ( LPWSTR lpszName, LPWSTR lpszDomain ) {
-
- HeapFree (  hHeap, 0, ( PVOID )lpszDomain  );
- HeapFree (  hHeap, 0, ( PVOID )lpszName    );
-
-}  /* end FreeAccountNames */
-/***/
-/******************************************************************************/
-/* Function : GetSecurityDescriptorOwnerEx                                  */
-/* Purpose  : Returns owner SID in the specified security descriptor.       */
-/*            If specified security descriptor does not have an owner field */
-/*            then returns NULL                                             */
-/******************************************************************************/
-/***/
-PSID GetSecurityDescriptorOwnerEx ( PSECURITY_DESCRIPTOR pSD ) {
-
- BOOL bDummy;
- PSID retVal;
-
- if (  !GetSecurityDescriptorOwner ( pSD, &retVal, &bDummy )  )
-  
-  retVal = NULL;
-
- return retVal;
-
-}  /* end GetSecurityDescriptorOwnerEx */
-/***/
-/******************************************************************************/
-/* Function : GetSecurityDescriptorGroupEx                                  */
-/* Purpose  : Returns primary group SID in the specified security           */
-/*            descriptor. If specified security descriptor does not have a  */
-/*            primary group field then returns NULL                         */
-/******************************************************************************/
-/***/
-PSID GetSecurityDescriptorGroupEx ( PSECURITY_DESCRIPTOR pSD ) {
-
- BOOL bDummy;
- PSID retVal;
-
- if (  !GetSecurityDescriptorGroup ( pSD, &retVal, &bDummy )  )
-  
-  retVal = NULL;
-
- return retVal;
-
-}  /* end GetSecurityDescriptorGroupEx */
-/***/
-/******************************************************************************/
-/* Function : GetSecurityDescriptorDaclEx                                   */
-/* Purpose  : Returns a pointer to the discretionary access-control list in */
-/*            the specified security descriptor. If specified security      */
-/*            descriptor does not have a discretionary access-control list  */
-/*            then returns NULL                                             */
-/******************************************************************************/
-/***/
-PACL GetSecurityDescriptorDaclEx ( PSECURITY_DESCRIPTOR pSD ) {
-
- PACL retVal;
- BOOL bDummy;
- BOOL fPresent;
-
- if (  !GetSecurityDescriptorDacl ( pSD, &fPresent, &retVal, &bDummy ) ||
-       !fPresent
- )
-
-  retVal = NULL;
-
- return retVal;
- 
-}  /* end GetSecurityDescriptorDaclEx */
-/***/
 /******************************************************************************/
 /* Function : CreateAcl                                                     */
 /* Purpose  : Allocates and initializes access-control list                 */
@@ -709,140 +561,7 @@ void FreeAcl ( PACL pACL ) {
  HeapFree (  hHeap, 0, ( PVOID )pACL  );
 
 }  /* end FreeAcl */
-/***/
-/******************************************************************************/
-/* Function : CopySidEx                                                     */
-/* Purpose  : Makes a copy of the SID                                       */
-/* Returns  : Pointer to the copy of the specified SID on success,          */
-/*            NULL otherwise                                                */
-/* Warning  : Allocated SID must be deallocated by 'FreeSidEx' function     */
-/******************************************************************************/
-/***/
-PSID CopySidEx ( PSID pSIDsrc ) {
 
- DWORD dwLen;
- PSID  retVal;
-
- dwLen  = GetLengthSid ( pSIDsrc );
- retVal = ( PSID )HeapAlloc ( hHeap, 0, dwLen );
-
- if ( retVal != NULL )
-
-  CopySid ( dwLen, retVal, pSIDsrc );
-
- return retVal;
-
-}  /* end CopySidEx */
-/***/
-/******************************************************************************/
-/* Function : FreeSidEx                                                     */
-/* Purpose  : Deallocates SID which was allocated by the 'CopySidEx'        */
-/*            function                                                      */
-/******************************************************************************/
-/***/
-void FreeSidEx ( PSID pSID ) {
-
- HeapFree ( hHeap, 0, pSID );
-
-}  /* end FreeSidEx */
-/***/
-/******************************************************************************/
-/* Function : AllocGroupSid                                                 */
-/* Purpose  : Allocates a structure which holds SIDs of groups which are    */
-/*            not predefined. These SIDs is taking from the DACL of the     */
-/*            specified security descriptor                                 */
-/* Returns  : Pointer the allocated structure on success,                   */
-/*            NULL otherwise                                                */
-/* Warning  : Allocated structure must be deallocated by 'FreeGroupSid'     */
-/*            function                                                      */
-/******************************************************************************/
-/***/
-PGROUP_SID AllocGroupSid ( PSECURITY_DESCRIPTOR pSD ) {
-
- int        i;
- PGROUP_SID retVal  = NULL;
- PSID*      pSID    = NULL;
- DWORD      dwLen;
- DWORD      dwCount = 0;
- LPVOID     pACE;
- PACL       pACL;
- PSID       pSIDowner;
- PSID       pSIDadmin;
- PSID       pSIDworld;
- BOOL       fPresent;
- BOOL       fDefaulted;
-
- if (  GetSecurityDescriptorDacl ( pSD, &fPresent, &pACL, &fDefaulted ) &&
-       fPresent                                                         &&
-       GetSecurityDescriptorOwner ( pSD, &pSIDowner, &fDefaulted )      &&
-       pSIDowner != NULL                                                &&
-       (   retVal = ( PGROUP_SID )HeapAlloc (  hHeap, 0, sizeof ( GROUP_SID )  )   ) !=
-        NULL
- ) {
-
-  pSIDadmin = AdminSid ();
-  pSIDworld = WorldSid ();
- 
-  for ( i = 0; i < ( int )pACL -> AceCount; ++i )
-    if ( GetAce ( pACL, i, &pACE )                  &&
-         !EqualSid (  pSIDadmin, GET_SID( pACE )  ) &&
-         !EqualSid (  pSIDworld, GET_SID( pACE )  ) &&
-         !EqualSid (  pSIDowner, GET_SID( pACE )  ) )
-      ++dwCount;
-
-  pSID    = ( PSID* )HeapAlloc (  hHeap, 0, dwCount * sizeof ( PSID )  );
-  dwCount = 0;
-
-  if ( pSID != NULL ) {
-  
-   for ( i = 0; i < ( int )pACL -> AceCount; ++i )
-  
-    if (  GetAce ( pACL, i, &pACE )                  &&
-          !EqualSid (  pSIDadmin, GET_SID( pACE )  ) &&
-          !EqualSid (  pSIDworld, GET_SID( pACE )  ) &&
-          !EqualSid (  pSIDowner, GET_SID( pACE )  )
-    ) {
-   
-     pSID[ dwCount ] = ( PSID )HeapAlloc (
-                                hHeap, 0, dwLen = GetLengthSid (  GET_SID( pACE )  )
-                               );
-
-     if ( pSID[ dwCount ] != NULL )
-
-      CopySid (  dwLen, pSID[ dwCount++ ], GET_SID( pACE )  );
-   
-    }  /* end if */
-
-  }  /* end if */
-    
-  retVal -> nCount = dwCount;
-  retVal -> pSID   = pSID;
-
- }  /* end if */
-
- return retVal;
-
-}  /* end AllocGroupSid */
-/***/
-/******************************************************************************/
-/* Function : FreeGroupSid                                                  */
-/* Purpose  : Deallocates a structure which was allocated by the            */
-/*            'AllocGroupSid' function                                      */
-/******************************************************************************/
-/***/
-void FreeGroupSid ( PGROUP_SID pGSID ) {
-
- int i;
-
- for ( i = 0; i < ( int )pGSID -> nCount; ++i )
-
-  HeapFree ( hHeap, 0, pGSID -> pSID[ i ] );
-
- HeapFree ( hHeap, 0, pGSID -> pSID );
- HeapFree ( hHeap, 0, pGSID         );
-
-}  /* end FreeGroupSid */
-/***/
 /******************************************************************************/
 /* Function : AllocAccessAllowedAce                                         */
 /* Purpose  : Allocates and initializes access-control entry                */
@@ -886,7 +605,7 @@ void FreeAce ( PVOID pACE ) {
  HeapFree ( hHeap, 0, pACE );
 
 }  /* end FreeAce */
-
+#endif
 #define WILD_CARD     L"/*.*"
 #define WILD_CARD_LEN (  sizeof ( WILD_CARD )  )
 
@@ -897,7 +616,7 @@ void FreeAce ( PVOID pACE ) {
 /* Returns  : TRUE on success, FALSE otherwise                              */
 /******************************************************************************/
 /***/
-BOOL MoveDirectory ( LPCWSTR oldDir, LPCWSTR newDir ) {
+static BOOL MoveDirectory ( LPCWSTR oldDir, LPCWSTR newDir, DWORD& theRecurseLevel ) {
 
  PWIN32_FIND_DATAW    pFD;
  LPWSTR               pName;
@@ -909,12 +628,10 @@ BOOL MoveDirectory ( LPCWSTR oldDir, LPCWSTR newDir ) {
  BOOL                 fFind;
  BOOL                 retVal = FALSE;
  DIR_RESPONSE         response;
- DWORD                level;
 
- if (   (  level = ( DWORD )TlsGetValue ( dwLevel )  ) == NULL   ) {
+ if (theRecurseLevel == 0) {
 
-  ++level;
-  TlsSetValue (  dwLevel, ( LPVOID )level  );
+  ++theRecurseLevel;
 
   fFind = FALSE;
   driveSrc = driveDst = pathSrc = pathDst = NULL;
@@ -968,16 +685,14 @@ retry:
 
   if ( fFind ) {
     
-   --level;
-   TlsSetValue (  dwLevel, ( LPVOID )level  );
+   --theRecurseLevel;
    return retVal;
 
   }  // end if
  
  } else {
  
-  ++level;
-  TlsSetValue (  dwLevel, ( LPVOID )level  );
+  ++theRecurseLevel;
  
  }  // end else
 
@@ -990,23 +705,24 @@ retry:
  retVal = CreateDirectoryW ( newDir, NULL );
 
  if (   retVal || (  !retVal && GetLastError () == ERROR_ALREADY_EXISTS  )   ) {
-
+  size_t anOldDirLength;
+  StringCchLengthW (oldDir, sizeof(oldDir) / sizeof(oldDir[0]), &anOldDirLength);
   if (   (  pFD = ( PWIN32_FIND_DATAW )HeapAlloc (
                                        hHeap, 0, sizeof ( WIN32_FIND_DATAW )
                                       )
          ) != NULL &&
-         (  pName = ( LPWSTR )HeapAlloc (
-                               hHeap, 0, lstrlenW ( oldDir ) + WILD_CARD_LEN +
-                               sizeof (  L'\x00'  )
-                              )
+         (
+           pName = (LPWSTR)HeapAlloc(
+             hHeap, 0, anOldDirLength + WILD_CARD_LEN +
+             sizeof(L'\x00')
+           )
          ) != NULL
   ) {
-
-   lstrcpyW ( pName, oldDir    );
-   lstrcatW ( pName, WILD_CARD );
+    StringCchCopyW (pName, sizeof(pName) / sizeof(pName[0]), oldDir);
+    StringCchCatW  (pName, sizeof(pName), WILD_CARD);
 
    retVal = TRUE;
-   fFind  = (  hFindFile = FindFirstFileW ( pName, pFD )  ) != INVALID_HANDLE_VALUE;
+   fFind  = (  hFindFile = FindFirstFileExW(pName, FindExInfoStandard, pFD, FindExSearchNameMatch, NULL, 0)  ) != INVALID_HANDLE_VALUE;
 
    while ( fFind ) {
   
@@ -1014,32 +730,39 @@ retry:
           pFD -> cFileName[ 0 ] != L'.' &&
           pFD -> cFileName[ 1 ] != L'.'
     ) {
-  
-     if (   ( pFullNameSrc = ( LPWSTR )HeapAlloc (
-                                        hHeap, 0,
-                                        lstrlenW ( oldDir ) + lstrlenW ( pFD -> cFileName ) +
-                                        sizeof (  L'/'  ) + sizeof ( L'\x00'  )
-                                       )
-            ) == NULL ||
-            ( pFullNameDst = ( LPWSTR )HeapAlloc (
-                                        hHeap, 0,
-                                        lstrlenW ( newDir ) + lstrlenW ( pFD -> cFileName ) +
-                                        sizeof (  L'/'  ) + sizeof (  L'\x00'  )
-                                       )
-            ) == NULL
-     ) break;
-  
-     lstrcpyW ( pFullNameSrc, oldDir );
-     lstrcatW ( pFullNameSrc, L"/"  );
-     lstrcatW ( pFullNameSrc, pFD -> cFileName );
+     size_t anOldDirLength2;
+     size_t aNewDirLength;
+     size_t aFileNameLength;
 
-     lstrcpyW ( pFullNameDst, newDir );
-     lstrcatW ( pFullNameDst, L"/"  );
-     lstrcatW ( pFullNameDst, pFD -> cFileName );
+     StringCchLengthW (oldDir, sizeof(oldDir) / sizeof(oldDir[0]), &anOldDirLength2);
+     StringCchLengthW (newDir, sizeof(newDir) / sizeof(newDir[0]), &aNewDirLength);
+     StringCchLengthW (pFD->cFileName, sizeof(pFD->cFileName) / sizeof(pFD->cFileName[0]), &aFileNameLength);
+
+     if (    (pFullNameSrc = (LPWSTR)HeapAlloc(
+                                  hHeap, 0,
+                                  anOldDirLength2 + aFileNameLength +
+                                  sizeof(L'/') + sizeof(L'\x00')
+                                 )
+             ) == NULL ||
+             (pFullNameDst = (LPWSTR)HeapAlloc(
+                                      hHeap, 0,
+                                      aNewDirLength + aFileNameLength +
+                                      sizeof(L'/') + sizeof(L'\x00')
+                                 )
+             ) == NULL
+     ) break;
+
+     StringCchCopyW (pFullNameSrc, sizeof(pFullNameSrc) / sizeof(pFullNameSrc[0]), oldDir);
+     StringCchCatW  (pFullNameSrc, sizeof(pFullNameSrc) / sizeof(pFullNameSrc[0]), L"/");
+     StringCchCatW  (pFullNameSrc, sizeof(pFullNameSrc) / sizeof(pFullNameSrc[0]), pFD->cFileName);
+
+     StringCchCopyW (pFullNameDst, sizeof(pFullNameDst) / sizeof(pFullNameDst[0]), newDir);
+     StringCchCatW  (pFullNameDst, sizeof(pFullNameDst) / sizeof(pFullNameDst[0]), L"/");
+     StringCchCatW  (pFullNameDst, sizeof(pFullNameDst) / sizeof(pFullNameDst[0]), pFD->cFileName);
 
      if ( pFD -> dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) {
 
-       retVal = MoveDirectory ( pFullNameSrc, pFullNameDst );
+       retVal = MoveDirectory ( pFullNameSrc, pFullNameDst, theRecurseLevel );
        if (!retVal) break;
    
      } else {
@@ -1121,12 +844,18 @@ retry_2:
   
  }  /* end if */
 
- --level;
- TlsSetValue (  dwLevel, ( LPVOID )level  );
+ --theRecurseLevel;
 
  return retVal;
 
 }  /* end MoveDirectory */
+
+BOOL MoveDirectory (LPCWSTR oldDir, LPCWSTR newDir)
+{
+  DWORD aRecurseLevel = 0;
+  return MoveDirectory (oldDir, newDir, aRecurseLevel);
+}
+
 /***/
 /******************************************************************************/
 /* Function : CopyDirectory                                                 */
@@ -1149,22 +878,24 @@ BOOL CopyDirectory ( LPCWSTR dirSrc, LPCWSTR dirDst ) {
 
  if (   retVal || (  !retVal && GetLastError () == ERROR_ALREADY_EXISTS  )   ) {
 
+   size_t aDirSrcLength;
+   StringCchLengthW (dirSrc, sizeof(dirSrc) / sizeof(dirSrc[0]), &aDirSrcLength);
+
   if (   (  pFD = ( PWIN32_FIND_DATAW )HeapAlloc (
                                        hHeap, 0, sizeof ( WIN32_FIND_DATAW )
                                       )
          ) != NULL &&
          (  pName = ( LPWSTR )HeapAlloc (
-                               hHeap, 0, lstrlenW ( dirSrc ) + WILD_CARD_LEN +
+                               hHeap, 0, aDirSrcLength + WILD_CARD_LEN +
                                sizeof (  L'\x00'  )
                               )
          ) != NULL
   ) {
-
-   lstrcpyW ( pName, dirSrc    );
-   lstrcatW ( pName, WILD_CARD );
+   StringCchCopyW (pName, sizeof(pName) / sizeof(pName[0]), dirSrc);
+   StringCchCatW (pName, sizeof(pName) / sizeof(pName[0]), WILD_CARD);
 
    retVal = TRUE;
-   fFind  = (  hFindFile = FindFirstFileW ( pName, pFD )  ) != INVALID_HANDLE_VALUE;
+   fFind = (hFindFile = FindFirstFileExW(pName, FindExInfoStandard, pFD, FindExSearchNameMatch, NULL, 0)) != INVALID_HANDLE_VALUE;
 
    while ( fFind ) {
   
@@ -1172,28 +903,36 @@ BOOL CopyDirectory ( LPCWSTR dirSrc, LPCWSTR dirDst ) {
           pFD -> cFileName[ 0 ] != L'.' &&
           pFD -> cFileName[ 1 ] != L'.'
     ) {
-  
+      size_t aDirSrcLength2;
+      size_t aDirDstLength;
+      size_t aFileNameLength;
+
+      StringCchLengthW (dirSrc, sizeof(dirSrc) / sizeof(dirSrc[0]), &aDirSrcLength2);
+      StringCchLengthW (dirDst, sizeof(dirDst) / sizeof(dirDst[0]), &aDirDstLength);
+      StringCchLengthW (pFD -> cFileName, sizeof(pFD -> cFileName) / sizeof(pFD -> cFileName[0]), &aFileNameLength);
+
      if (   ( pFullNameSrc = ( LPWSTR )HeapAlloc (
                                         hHeap, 0,
-                                        lstrlenW ( dirSrc ) + lstrlenW ( pFD -> cFileName ) +
+                                        aDirSrcLength2 + aFileNameLength +
                                         sizeof (  L'/'  ) + sizeof (  L'\x00'  )
                                        )
             ) == NULL ||
             ( pFullNameDst = ( LPWSTR )HeapAlloc (
                                         hHeap, 0,
-                                        lstrlenW ( dirDst ) + lstrlenW ( pFD -> cFileName ) +
+                                        aDirDstLength + aFileNameLength +
                                         sizeof (  L'/'  ) + sizeof (  L'\x00'  )
                                        )
             ) == NULL
      ) break;
   
-     lstrcpyW ( pFullNameSrc, dirSrc );
-     lstrcatW ( pFullNameSrc, L"/"  );
-     lstrcatW ( pFullNameSrc, pFD -> cFileName );
 
-     lstrcpyW ( pFullNameDst, dirDst );
-     lstrcatW ( pFullNameDst, L"/"  );
-     lstrcatW ( pFullNameDst, pFD -> cFileName );
+     StringCchCopyW (pFullNameSrc, sizeof(pFullNameSrc) / sizeof(pFullNameSrc[0]), dirSrc);
+     StringCchCatW  (pFullNameSrc, sizeof(pFullNameSrc) / sizeof(pFullNameSrc[0]), L"/");
+     StringCchCatW  (pFullNameSrc, sizeof(pFullNameSrc) / sizeof(pFullNameSrc[0]), pFD->cFileName);
+
+     StringCchCopyW (pFullNameDst, sizeof(pFullNameDst) / sizeof(pFullNameDst[0]), dirDst);
+     StringCchCatW  (pFullNameDst, sizeof(pFullNameDst) / sizeof(pFullNameDst[0]), L"/");
+     StringCchCatW  (pFullNameDst, sizeof(pFullNameDst) / sizeof(pFullNameDst[0]), pFD->cFileName);
 
      if ( pFD -> dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) {
 
@@ -1202,7 +941,11 @@ BOOL CopyDirectory ( LPCWSTR dirSrc, LPCWSTR dirDst ) {
    
      } else {
 retry:   
-      retVal = CopyFileW ( pFullNameSrc, pFullNameDst, FALSE );
+#ifndef OCCT_UWP
+      retVal = CopyFileW(pFullNameSrc, pFullNameDst, FALSE);
+#else
+      retVal = (CopyFile2(pFullNameSrc, pFullNameDst, FALSE) == S_OK) ? TRUE : FALSE;
+#endif
       if ( ! retVal ) {
       
        if ( _response_dir_proc != NULL ) {

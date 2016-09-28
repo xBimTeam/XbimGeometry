@@ -1,4 +1,5 @@
 #include "XbimFaceSet.h"
+#include "XbimConvert.h"
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <TopExp.hxx>
@@ -61,6 +62,51 @@ namespace Xbim
 				result->Add((IXbimFace^)((XbimFace^)face)->TransformShallow(matrix3D));
 			}
 			return gcnew XbimFaceSet(result);
+		}
+
+		IXbimGeometryObject ^ XbimFaceSet::Transformed(IIfcCartesianTransformationOperator ^ transformation)
+		{
+			if (!IsValid) return this;
+			XbimFaceSet^ result = gcnew XbimFaceSet();
+			for each (XbimFace^ face in faces)
+				result->Add((XbimFace^)face->Transformed(transformation));
+			return result;
+		}
+
+		IXbimGeometryObject ^ XbimFaceSet::Moved(IIfcPlacement ^ placement)
+		{
+			if (!IsValid) return this;
+			XbimFaceSet^ result = gcnew XbimFaceSet();
+			TopLoc_Location loc = XbimConvert::ToLocation(placement);
+			for each (IXbimFace^ face in faces)
+			{
+				XbimFace^ copy = gcnew XbimFace((XbimFace^)face, Tag);
+				copy->Move(loc);
+				result->Add(copy);
+			}
+			return result;
+		}
+
+		IXbimGeometryObject ^ XbimFaceSet::Moved(IIfcObjectPlacement ^ objectPlacement)
+		{
+			if (!IsValid) return this;
+			XbimFaceSet^ result = gcnew XbimFaceSet();
+			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
+			for each (IXbimFace^ face in faces)
+			{
+				XbimFace^ copy = gcnew XbimFace((XbimFace^)face, Tag);
+				copy->Move(loc);
+				result->Add(copy);
+			}
+			return result;
+		}
+
+		void XbimFaceSet::Mesh(IXbimMeshReceiver ^ mesh, double precision, double deflection, double angle)
+		{
+			for each (IXbimFace^ face  in faces)
+			{
+				((XbimFace^)face)->Mesh(mesh, precision, deflection, angle);
+			}
 		}
 
 

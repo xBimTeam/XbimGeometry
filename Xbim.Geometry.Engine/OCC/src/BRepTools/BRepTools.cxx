@@ -62,7 +62,7 @@
 #include <TopoDS_Vertex.hxx>
 #include <TopoDS_Wire.hxx>
 #include <TopTools_SequenceOfShape.hxx>
-
+#include <GeomLib_CheckCurveOnSurface.hxx>
 #include <errno.h>
 //=======================================================================
 //function : UVBounds
@@ -74,7 +74,14 @@ void  BRepTools::UVBounds(const TopoDS_Face& F,
 {
   Bnd_Box2d B;
   AddUVBounds(F,B);
-  B.Get(UMin,VMin,UMax,VMax);
+  if (!B.IsVoid())
+  {
+    B.Get(UMin,VMin,UMax,VMax);
+  }
+  else
+  {
+    UMin = UMax = VMin = VMax = 0.0;
+  }
 }
 
 //=======================================================================
@@ -89,7 +96,14 @@ void  BRepTools::UVBounds(const TopoDS_Face& F,
 {
   Bnd_Box2d B;
   AddUVBounds(F,W,B);
-  B.Get(UMin,VMin,UMax,VMax);
+  if (!B.IsVoid())
+  {
+    B.Get(UMin,VMin,UMax,VMax);
+  }
+  else
+  {
+    UMin = UMax = VMin = VMax = 0.0;
+  }
 }
 
 
@@ -105,7 +119,14 @@ void  BRepTools::UVBounds(const TopoDS_Face& F,
 {
   Bnd_Box2d B;
   AddUVBounds(F,E,B);
-  B.Get(UMin,VMin,UMax,VMax);
+  if (!B.IsVoid())
+  {
+    B.Get(UMin,VMin,UMax,VMax);
+  }
+  else
+  {
+    UMin = UMax = VMin = VMax = 0.0;
+  }
 }
 
 //=======================================================================
@@ -130,7 +151,13 @@ void  BRepTools::AddUVBounds(const TopoDS_Face& FF, Bnd_Box2d& B)
   if (aBox.IsVoid()) {
     Standard_Real UMin,UMax,VMin,VMax;
     TopLoc_Location L;
-    BRep_Tool::Surface(F,L)->Bounds(UMin,UMax,VMin,VMax);
+    const Handle(Geom_Surface)& aSurf = BRep_Tool::Surface(F, L);
+    if (aSurf.IsNull())
+    {
+      return;
+    }
+
+    aSurf->Bounds(UMin,UMax,VMin,VMax);
     aBox.Update(UMin,VMin,UMax,VMax);
   }
   
@@ -162,7 +189,7 @@ void BRepTools::AddUVBounds(const TopoDS_Face& aF,
                             const TopoDS_Edge& aE,
                             Bnd_Box2d& aB)
 {
-  Standard_Real aT1, aT2, aXmin, aYmin, aXmax, aYmax;
+  Standard_Real aT1, aT2, aXmin = 0.0, aYmin = 0.0, aXmax = 0.0, aYmax = 0.0;
   Standard_Real aUmin, aUmax, aVmin, aVmax;
   Bnd_Box2d aBoxC, aBoxS; 
   TopLoc_Location aLoc;
@@ -173,7 +200,10 @@ void BRepTools::AddUVBounds(const TopoDS_Face& aF,
   }
   //
   BndLib_Add2dCurve::Add(aC2D, aT1, aT2, 0., aBoxC);
-  aBoxC.Get(aXmin, aYmin, aXmax, aYmax);
+  if (!aBoxC.IsVoid())
+  {
+    aBoxC.Get(aXmin, aYmin, aXmax, aYmax);
+  }
   //
   Handle(Geom_Surface) aS = BRep_Tool::Surface(aF, aLoc);
   aS->Bounds(aUmin, aUmax, aVmin, aVmax);
@@ -796,7 +826,7 @@ Standard_Boolean BRepTools::Read(TopoDS_Shape& Sh,
 {
   filebuf fic;
   istream in(&fic);
-  OSD_OpenFileBuf(fic,File,ios::in);
+  OSD_OpenStream (fic, File, ios::in);
   if(!fic.is_open()) return Standard_False;
   
   BRepTools_ShapeSet SS(B);
@@ -948,5 +978,92 @@ Standard_Boolean BRepTools::IsReallyClosed(const TopoDS_Edge& E,
   return nbocc == 2;
 }
 
+//=======================================================================
+//function : EvalAndUpdateTol
+//purpose  : 
+//=======================================================================
+
+Standard_Real BRepTools::EvalAndUpdateTol(const TopoDS_Edge& theE, 
+                                 const Handle(Geom_Curve)& C3d, 
+                                 const Handle(Geom2d_Curve) C2d, 
+                                 const Handle(Geom_Surface)& S,
+                                 const Standard_Real f,
+                                 const Standard_Real l)
+{
+  Standard_Real newtol = 0.;
+  Standard_Real first = f, last = l;
+  //Set first, last to avoid ErrosStatus = 2 because of 
+  //too strong checking of limits in class CheckCurveOnSurface
+  //
+  if(!C3d->IsPeriodic())
+  {
+    first = Max(first, C3d->FirstParameter());
+    last = Min(last, C3d->LastParameter());
+  }
+  if(!C2d->IsPeriodic())
+  {
+    first = Max(first, C2d->FirstParameter());
+    last = Min(last, C2d->LastParameter());
+  }
+
+  GeomLib_CheckCurveOnSurface CT(C3d, S, first, last);
+  CT.Perform(C2d);
+  if(CT.IsDone())
+  {
+    newtol = CT.MaxDistance();
+  }
+  else
+  {
+    if(CT.ErrorStatus() == 3 || (CT.ErrorStatus() == 2 &&
+      (C3d->IsPeriodic() || C2d->IsPeriodic())))
+    {
+      //Try to estimate by sample points
+      Standard_Integer nbint = 22;
+      Standard_Real dt = (last - first) / nbint;
+      dt = Max(dt, Precision::Confusion());
+      Standard_Real d, dmax = 0.;
+      gp_Pnt2d aP2d;
+      gp_Pnt aPC, aPS;
+      Standard_Integer cnt = 0; 
+      Standard_Real t = first;
+      for(; t <= last; t += dt)
+      {
+        cnt++;
+        C2d->D0(t, aP2d);
+        C3d->D0(t, aPC);
+        S->D0(aP2d.X(), aP2d.Y(), aPS);
+        d = aPS.SquareDistance(aPC);
+        if(d > dmax)
+        {
+          dmax = d;
+        }
+      }
+      if(cnt < nbint + 1)
+      {
+        t = last;
+        C2d->D0(t, aP2d);
+        C3d->D0(t, aPC);
+        S->D0(aP2d.X(), aP2d.Y(), aPS);
+        d = aPS.SquareDistance(aPC);
+        if(d > dmax)
+        {
+          dmax = d;
+        }
+      }
+
+      newtol = 1.2 * Sqrt(dmax);
+    }
+  }
+  Standard_Real Tol = BRep_Tool::Tolerance(theE);
+  if(newtol > Tol)
+  {
+    Tol = newtol;
+    BRep_Builder B;
+    B.UpdateEdge(theE, Tol);
+  }
+
+  return Tol;
+
+}
 
 

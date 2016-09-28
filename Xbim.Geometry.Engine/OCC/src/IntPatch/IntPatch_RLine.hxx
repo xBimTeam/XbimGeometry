@@ -58,8 +58,11 @@ public:
   //! when the transitions are Undecided.
   Standard_EXPORT IntPatch_RLine(const Standard_Boolean Tang);
   
-  //! To add a vertex in the list.
-    void AddVertex (const IntPatch_Point& Pnt);
+  //! Adds a vertex in the list. If theIsPrepend == TRUE the new
+  //! vertex will be added before the first element of vertices sequence.
+  //! Otherwise, to the end of the sequence
+  virtual void AddVertex (const IntPatch_Point& Pnt,
+                    const Standard_Boolean theIsPrepend = Standard_False) Standard_OVERRIDE;
   
   //! Replaces the element of range Index in the list
   //! of points.
@@ -117,18 +120,25 @@ public:
   //! An exception is raised when HasLastPoint returns False.
     const IntPatch_Point& LastPoint() const;
   
-    Standard_Integer NbVertex() const;
+  //! Returns number of vertices (IntPatch_Point) of the line
+  virtual Standard_Integer NbVertex() const Standard_OVERRIDE;
   
   //! Returns the vertex of range Index on the line.
-    const IntPatch_Point& Vertex (const Standard_Integer Index) const;
+  virtual const IntPatch_Point& Vertex (const Standard_Integer Index) const Standard_OVERRIDE;
+
+  //! Returns the vertex of range Index on the line.
+  virtual IntPatch_Point& ChangeVertex (const Standard_Integer Index) Standard_OVERRIDE;
   
+  //! Removes single vertex from the line
+  virtual void RemoveVertex (const Standard_Integer theIndex) Standard_OVERRIDE;
+
     Standard_Boolean HasPolygon() const;
   
   //! Returns the number of intersection points.
-    Standard_Integer NbPnts() const;
+  virtual Standard_Integer NbPnts() const Standard_OVERRIDE;
   
   //! Returns the intersection point of range Index.
-    const IntSurf_PntOn2S& Point (const Standard_Integer Index) const;
+  virtual const IntSurf_PntOn2S& Point (const Standard_Integer Index) const Standard_OVERRIDE;
   
   //! Set the Point of index <Index> in the LineOn2S
   Standard_EXPORT void SetPoint (const Standard_Integer Index, const IntPatch_Point& Pnt);
@@ -139,10 +149,27 @@ public:
   //! else a new point in the line is inserted.
   Standard_EXPORT void ComputeVertexParameters (const Standard_Real Tol);
 
+  //! Returns set of intersection points
+  Standard_EXPORT virtual Handle(IntSurf_LineOn2S) Curve() const Standard_OVERRIDE;
 
+  //! Removes vertices from the line (i.e. cleans svtx member)
+  virtual void ClearVertexes() Standard_OVERRIDE
+  {
+    svtx.Clear();
+  }
 
+  void SetCurve(const Handle(IntSurf_LineOn2S)& theNewCurve)
+  {
+    curv = theNewCurve;
+  }
 
-  DEFINE_STANDARD_RTTI(IntPatch_RLine,IntPatch_PointLine)
+  //! if (theMode == 0) then prints the information about WLine
+  //! if (theMode == 1) then prints the list of 3d-points
+  //! if (theMode == 2) then prints the list of 2d-points on the 1st surface
+  //! Otherwise,             prints list of 2d-points on the 2nd surface
+  Standard_EXPORT void Dump(const Standard_Integer theMode) const;
+
+  DEFINE_STANDARD_RTTIEXT(IntPatch_RLine,IntPatch_PointLine)
 
 protected:
 

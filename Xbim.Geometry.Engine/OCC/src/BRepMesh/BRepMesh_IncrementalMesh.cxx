@@ -48,17 +48,20 @@
 #include <TColgp_Array1OfPnt.hxx>
 #include <TColgp_Array1OfPnt2d.hxx>
 #include <TColStd_Array1OfReal.hxx>
+#include <TColStd_MapOfTransient.hxx>
 #include <TopTools_HArray1OfShape.hxx>
 #include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
 
 #include <GCPnts_TangentialDeflection.hxx>
+
+IMPLEMENT_STANDARD_RTTIEXT(BRepMesh_IncrementalMesh,BRepMesh_DiscretRoot)
 
 namespace
 {
   //! Default flag to control parallelization for BRepMesh_IncrementalMesh
   //! tool returned for Mesh Factory
   static Standard_Boolean IS_IN_PARALLEL = Standard_False;
-};
+}
 
 
 //=======================================================================
@@ -66,11 +69,9 @@ namespace
 //purpose  : 
 //=======================================================================
 BRepMesh_IncrementalMesh::BRepMesh_IncrementalMesh()
-: myRelative  (Standard_False),
-  myInParallel(Standard_False),
-  myMinSize   (Precision::Confusion()),
-  myInternalVerticesMode(Standard_True),
-  myIsControlSurfaceDeflection(Standard_True)
+: myMaxShapeSize(0.),
+  myModified(Standard_False),
+  myStatus(0)
 {
 }
 
@@ -78,20 +79,34 @@ BRepMesh_IncrementalMesh::BRepMesh_IncrementalMesh()
 //function : Constructor
 //purpose  : 
 //=======================================================================
-BRepMesh_IncrementalMesh::BRepMesh_IncrementalMesh(
-  const TopoDS_Shape&    theShape,
-  const Standard_Real    theLinDeflection,
-  const Standard_Boolean isRelative,
-  const Standard_Real    theAngDeflection,
-  const Standard_Boolean isInParallel)
-  : myRelative  (isRelative),
-    myInParallel(isInParallel),
-    myMinSize   (Precision::Confusion()),
-    myInternalVerticesMode(Standard_True),
-    myIsControlSurfaceDeflection(Standard_True)
+BRepMesh_IncrementalMesh::BRepMesh_IncrementalMesh( const TopoDS_Shape&    theShape,
+                                                    const Standard_Real    theLinDeflection,
+                                                    const Standard_Boolean isRelative,
+                                                    const Standard_Real    theAngDeflection,
+                                                    const Standard_Boolean isInParallel,
+                                                    const Standard_Boolean adaptiveMin)
+: myMaxShapeSize(0.),
+  myModified(Standard_False),
+  myStatus(0)
 {
-  myDeflection  = theLinDeflection;
-  myAngle       = theAngDeflection;
+  myParameters.Deflection = theLinDeflection;
+  myParameters.Relative = isRelative;
+  myParameters.Angle = theAngDeflection;
+  myParameters.InParallel = isInParallel;
+  myParameters.AdaptiveMin = adaptiveMin;
+
+  myShape = theShape;
+  Perform();
+}
+
+//=======================================================================
+//function : Constructor
+//purpose  : 
+//=======================================================================
+BRepMesh_IncrementalMesh::BRepMesh_IncrementalMesh(const TopoDS_Shape& theShape,
+                                                   const BRepMesh_FastDiscret::Parameters& theParameters)
+  : myParameters(theParameters)
+{
   myShape       = theShape;
   
   Perform();
@@ -111,8 +126,11 @@ BRepMesh_IncrementalMesh::~BRepMesh_IncrementalMesh()
 //=======================================================================
 void BRepMesh_IncrementalMesh::clear()
 {
-  myEdges.Clear();
-  myEdgeDeflection.Clear();
+  // the allocator will be alive while the structures are alive
+  Handle(NCollection_BaseAllocator) anAlloc =
+    new NCollection_IncAllocator(BRepMesh::MEMORY_BLOCK_SIZE_HUGE);
+  myEdges.Clear(anAlloc);
+  myEdgeDeflection.Clear(anAlloc);
   myFaces.Clear();
   myMesh.Nullify();
 }
@@ -132,21 +150,21 @@ void BRepMesh_IncrementalMesh::init()
   collectFaces();
 
   Bnd_Box aBox;
-  BRepBndLib::Add(myShape, aBox, Standard_False);
-
-  if (aBox.IsVoid())
+  if ( myParameters.Relative ) 
   {
-    // Nothing to mesh.
-    return;
+    BRepBndLib::Add(myShape, aBox, Standard_False);
+
+    if (aBox.IsVoid())
+    {
+      // Nothing to mesh.
+      return;
+    }
+
+    BRepMesh_ShapeTool::BoxMaxDimension(aBox, myMaxShapeSize);
   }
 
-  BRepMesh_ShapeTool::BoxMaxDimension(aBox, myMaxShapeSize);
-
-  myMesh = new BRepMesh_FastDiscret(myDeflection, 
-    myAngle, aBox, Standard_True, Standard_True, 
-    myRelative, Standard_True, myInParallel, myMinSize,
-    myInternalVerticesMode, myIsControlSurfaceDeflection);
-
+  myMesh = new BRepMesh_FastDiscret (aBox, myParameters);
+  
   myMesh->InitSharedFaces(myShape);
 }
 
@@ -156,22 +174,21 @@ void BRepMesh_IncrementalMesh::init()
 //=======================================================================
 void BRepMesh_IncrementalMesh::collectFaces()
 {
-  TopTools_ListOfShape aFaceList;
+  Handle(NCollection_IncAllocator) anAlloc = new NCollection_IncAllocator;
+  TopTools_ListOfShape aFaceList(anAlloc);
   BRepLib::ReverseSortFaces(myShape, aFaceList);
-  TopTools_MapOfShape aFaceMap;
+  TColStd_MapOfTransient aTFaceMap(1, anAlloc);
 
   // make array of faces suitable for processing (excluding faces without surface)
   TopLoc_Location aDummyLoc;
-  const TopLoc_Location aEmptyLoc;
   TopTools_ListIteratorOfListOfShape aFaceIter(aFaceList);
   for (; aFaceIter.More(); aFaceIter.Next())
   {
-    TopoDS_Shape aFaceNoLoc = aFaceIter.Value();
-    aFaceNoLoc.Location(aEmptyLoc);
-    if (!aFaceMap.Add (aFaceNoLoc))
+    const TopoDS_Face& aFace = TopoDS::Face(aFaceIter.Value());
+    const Handle(TopoDS_TShape)& aTFace = aFace.TShape();
+    if (!aTFaceMap.Add (aTFace))
       continue; // already processed
 
-    TopoDS_Face aFace = TopoDS::Face(aFaceIter.Value());
     const Handle(Geom_Surface)& aSurf = BRep_Tool::Surface(aFace, aDummyLoc);
     if (aSurf.IsNull())
       continue;
@@ -217,7 +234,7 @@ void BRepMesh_IncrementalMesh::update()
     update(aFaceIt.Value());
 
   // Mesh faces
-  OSD_Parallel::ForEach(myFaces.begin(), myFaces.end(), *myMesh, !myInParallel);
+  OSD_Parallel::ForEach(myFaces.begin(), myFaces.end(), *myMesh, !myParameters.InParallel);
 
   commit();
   clear();
@@ -244,7 +261,8 @@ void BRepMesh_IncrementalMesh::discretizeFreeEdges()
 
     BRepAdaptor_Curve aCurve(aEdge);
     GCPnts_TangentialDeflection aDiscret(aCurve, aCurve.FirstParameter(),
-      aCurve.LastParameter(), myAngle, aEdgeDeflection, 2, myMinSize);
+      aCurve.LastParameter(), myParameters.Angle, aEdgeDeflection, 2,
+      Precision::PConfusion(), myParameters.MinSize);
 
     Standard_Integer aNodesNb = aDiscret.NbPoints();
     TColgp_Array1OfPnt   aNodes  (1, aNodesNb);
@@ -256,7 +274,7 @@ void BRepMesh_IncrementalMesh::discretizeFreeEdges()
     }
     
     aPoly3D = new Poly_Polygon3D(aNodes, aUVNodes);
-    aPoly3D->Deflection(myDeflection);
+    aPoly3D->Deflection(myParameters.Deflection);
 
     BRep_Builder aBuilder;
     aBuilder.UpdateEdge(aEdge, aPoly3D);
@@ -270,18 +288,19 @@ void BRepMesh_IncrementalMesh::discretizeFreeEdges()
 Standard_Real BRepMesh_IncrementalMesh::edgeDeflection(
   const TopoDS_Edge& theEdge)
 {
-  if (myEdgeDeflection.IsBound(theEdge))
-    return myEdgeDeflection(theEdge);
+  const Standard_Real* pDef = myEdgeDeflection.Seek(theEdge);
+  if (pDef)
+    return *pDef;
 
   Standard_Real aEdgeDeflection;
-  if (myRelative) 
+  if ( myParameters.Relative ) 
   {
     Standard_Real aScale;
     aEdgeDeflection = BRepMesh_ShapeTool::RelativeEdgeDeflection(theEdge, 
-      myDeflection, myMaxShapeSize, aScale);
+      myParameters.Deflection, myMaxShapeSize, aScale);
   }
   else
-    aEdgeDeflection = myDeflection;
+    aEdgeDeflection = myParameters.Deflection;
 
   myEdgeDeflection.Bind(theEdge, aEdgeDeflection);
   return aEdgeDeflection;
@@ -294,8 +313,8 @@ Standard_Real BRepMesh_IncrementalMesh::edgeDeflection(
 Standard_Real BRepMesh_IncrementalMesh::faceDeflection(
   const TopoDS_Face& theFace)
 {
-  if (!myRelative)
-    return myDeflection;
+  if ( !myParameters.Relative )
+    return myParameters.Deflection;
 
   Standard_Integer aEdgesNb        = 0;
   Standard_Real    aFaceDeflection = 0.;
@@ -307,7 +326,7 @@ Standard_Real BRepMesh_IncrementalMesh::faceDeflection(
     aFaceDeflection += edgeDeflection(aEdge);
   }
 
-  return (aEdgesNb == 0) ? myDeflection : (aFaceDeflection / aEdgesNb);
+  return (aEdgesNb == 0) ? myParameters.Deflection : (aFaceDeflection / aEdgesNb);
 }
 
 //=======================================================================
@@ -317,7 +336,7 @@ Standard_Real BRepMesh_IncrementalMesh::faceDeflection(
 void BRepMesh_IncrementalMesh::update(const TopoDS_Edge& theEdge)
 {
   if (!myEdges.IsBound(theEdge))
-    myEdges.Bind(theEdge, BRepMesh::DMapOfTriangulationBool());
+    myEdges.Bind(theEdge, BRepMesh::DMapOfTriangulationBool(3, myEdges.Allocator()));
 
   Standard_Real aEdgeDeflection = edgeDeflection(theEdge);
   // Check that triangulation relies to face of the given shape.
@@ -545,10 +564,10 @@ Standard_Integer BRepMesh_IncrementalMesh::Discret(
   BRepMesh_DiscretRoot* &theAlgo)
 {
   BRepMesh_IncrementalMesh* anAlgo = new BRepMesh_IncrementalMesh();
-  anAlgo->SetDeflection(theDeflection);
-  anAlgo->SetAngle     (theAngle);
+  anAlgo->ChangeParameters().Deflection = theDeflection;
+  anAlgo->ChangeParameters().Angle = theAngle;
+  anAlgo->ChangeParameters().InParallel = IS_IN_PARALLEL;
   anAlgo->SetShape     (theShape);
-  anAlgo->SetParallel  (IS_IN_PARALLEL);
   theAlgo = anAlgo;
   return 0; // no error
 }
