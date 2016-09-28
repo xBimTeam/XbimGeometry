@@ -494,7 +494,8 @@ namespace Xbim.ModelGeometry.Scene
                 _disposed = true;
                 foreach (var cachedGeom in CachedGeometries)
                 {
-                    cachedGeom.Value.Dispose();
+                    if(cachedGeom.Value!=null)
+                        cachedGeom.Value.Dispose();
                 }
                 GC.SuppressFinalize(this);
             }
