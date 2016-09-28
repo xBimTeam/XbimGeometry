@@ -714,9 +714,6 @@
     <ClCompile Include=".\OCC\src\BOPAlgo\BOPAlgo_Tools.cxx">
       <Filter>Source files\TKBO\BOPAlgo</Filter>
     </ClCompile>
-    <ClCompile Include=".\OCC\src\BOPAlgo\BOPAlgo_WireEdgeSet.cxx">
-      <Filter>Source files\TKBO\BOPAlgo</Filter>
-    </ClCompile>
     <ClCompile Include=".\OCC\src\BOPAlgo\BOPAlgo_WireSplitter.cxx">
       <Filter>Source files\TKBO\BOPAlgo</Filter>
     </ClCompile>
@@ -732,13 +729,7 @@
     <ClCompile Include=".\OCC\src\BOPDS\BOPDS_CommonBlock.cxx">
       <Filter>Source files\TKBO\BOPDS</Filter>
     </ClCompile>
-    <ClCompile Include=".\OCC\src\BOPDS\BOPDS_Curve.cxx">
-      <Filter>Source files\TKBO\BOPDS</Filter>
-    </ClCompile>
     <ClCompile Include=".\OCC\src\BOPDS\BOPDS_DS.cxx">
-      <Filter>Source files\TKBO\BOPDS</Filter>
-    </ClCompile>
-    <ClCompile Include=".\OCC\src\BOPDS\BOPDS_FaceInfo.cxx">
       <Filter>Source files\TKBO\BOPDS</Filter>
     </ClCompile>
     <ClCompile Include=".\OCC\src\BOPDS\BOPDS_IndexRange.cxx">
@@ -753,31 +744,16 @@
     <ClCompile Include=".\OCC\src\BOPDS\BOPDS_PassKey.cxx">
       <Filter>Source files\TKBO\BOPDS</Filter>
     </ClCompile>
-    <ClCompile Include=".\OCC\src\BOPDS\BOPDS_PassKeyBoolean.cxx">
-      <Filter>Source files\TKBO\BOPDS</Filter>
-    </ClCompile>
-    <ClCompile Include=".\OCC\src\BOPDS\BOPDS_PassKeyMapHasher.cxx">
-      <Filter>Source files\TKBO\BOPDS</Filter>
-    </ClCompile>
     <ClCompile Include=".\OCC\src\BOPDS\BOPDS_Pave.cxx">
       <Filter>Source files\TKBO\BOPDS</Filter>
     </ClCompile>
     <ClCompile Include=".\OCC\src\BOPDS\BOPDS_PaveBlock.cxx">
       <Filter>Source files\TKBO\BOPDS</Filter>
     </ClCompile>
-    <ClCompile Include=".\OCC\src\BOPDS\BOPDS_PaveMapHasher.cxx">
-      <Filter>Source files\TKBO\BOPDS</Filter>
-    </ClCompile>
-    <ClCompile Include=".\OCC\src\BOPDS\BOPDS_Point.cxx">
-      <Filter>Source files\TKBO\BOPDS</Filter>
-    </ClCompile>
     <ClCompile Include=".\OCC\src\BOPDS\BOPDS_ShapeInfo.cxx">
       <Filter>Source files\TKBO\BOPDS</Filter>
     </ClCompile>
     <ClCompile Include=".\OCC\src\BOPDS\BOPDS_SubIterator.cxx">
-      <Filter>Source files\TKBO\BOPDS</Filter>
-    </ClCompile>
-    <ClCompile Include=".\OCC\src\BOPDS\BOPDS_Tools.cxx">
       <Filter>Source files\TKBO\BOPDS</Filter>
     </ClCompile>
     <ClCompile Include=".\OCC\src\BOPTools\BOPTools.cxx">
@@ -802,9 +778,6 @@
       <Filter>Source files\TKBO\BOPTools</Filter>
     </ClCompile>
     <ClCompile Include=".\OCC\src\BOPTools\BOPTools_Set.cxx">
-      <Filter>Source files\TKBO\BOPTools</Filter>
-    </ClCompile>
-    <ClCompile Include=".\OCC\src\BOPTools\BOPTools_SetMapHasher.cxx">
       <Filter>Source files\TKBO\BOPTools</Filter>
     </ClCompile>
     <ClCompile Include=".\OCC\src\BOPTools\BOPTools_ShapeSet.cxx">
@@ -911,9 +884,6 @@
     </ClCompile>
     <ClCompile Include=".\OCC\src\ChFi3d\ChFi3d_SearchSing.cxx">
       <Filter>Source files\TKFillet\ChFi3d</Filter>
-    </ClCompile>
-    <ClCompile Include=".\OCC\src\BRepFilletAPI\BRepFilletAPI_LocalOperation.cxx">
-      <Filter>Source files\TKFillet\BRepFilletAPI</Filter>
     </ClCompile>
     <ClCompile Include=".\OCC\src\BRepFilletAPI\BRepFilletAPI_MakeChamfer.cxx">
       <Filter>Source files\TKFillet\BRepFilletAPI</Filter>
@@ -1170,9 +1140,6 @@
     <ClCompile Include="OCC\src\OSD\OSD_PerfMeter.cxx">
       <Filter>Source files\TKernel\OSD</Filter>
     </ClCompile>
-    <ClCompile Include="OCC\src\OSD\OSD_Printer.cxx">
-      <Filter>Source files\TKernel\OSD</Filter>
-    </ClCompile>
     <ClCompile Include="OCC\src\OSD\OSD_Process.cxx">
       <Filter>Source files\TKernel\OSD</Filter>
     </ClCompile>
@@ -1183,9 +1150,6 @@
       <Filter>Source files\TKernel\OSD</Filter>
     </ClCompile>
     <ClCompile Include="OCC\src\OSD\OSD_signal.cxx">
-      <Filter>Source files\TKernel\OSD</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\OSD\OSD_signal_WNT.cxx">
       <Filter>Source files\TKernel\OSD</Filter>
     </ClCompile>
     <ClCompile Include="OCC\src\OSD\OSD_Thread.cxx">
@@ -1234,9 +1198,6 @@
       <Filter>Source files\TKernel\Standard</Filter>
     </ClCompile>
     <ClCompile Include="OCC\src\Standard\Standard_ErrorHandler.cxx">
-      <Filter>Source files\TKernel\Standard</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\Standard\Standard_ErrorHandlerCallback.cxx">
       <Filter>Source files\TKernel\Standard</Filter>
     </ClCompile>
     <ClCompile Include="OCC\src\Standard\Standard_ExtString.cxx">
@@ -1446,9 +1407,6 @@
     <ClCompile Include="OCC\src\Extrema\Extrema_CCLocFOfLocECC2d_0.cxx">
       <Filter>Source files\TKGeomBase\Extrema</Filter>
     </ClCompile>
-    <ClCompile Include="OCC\src\Extrema\Extrema_Curve2dTool.cxx">
-      <Filter>Source files\TKGeomBase\Extrema</Filter>
-    </ClCompile>
     <ClCompile Include="OCC\src\Extrema\Extrema_CurveTool.cxx">
       <Filter>Source files\TKGeomBase\Extrema</Filter>
     </ClCompile>
@@ -1527,9 +1485,6 @@
     <ClCompile Include="OCC\src\Extrema\Extrema_FuncExtCS.cxx">
       <Filter>Source files\TKGeomBase\Extrema</Filter>
     </ClCompile>
-    <ClCompile Include="OCC\src\Extrema\Extrema_FuncExtPS.cxx">
-      <Filter>Source files\TKGeomBase\Extrema</Filter>
-    </ClCompile>
     <ClCompile Include="OCC\src\Extrema\Extrema_FuncExtSS.cxx">
       <Filter>Source files\TKGeomBase\Extrema</Filter>
     </ClCompile>
@@ -1603,12 +1558,6 @@
       <Filter>Source files\TKGeomBase\Extrema</Filter>
     </ClCompile>
     <ClCompile Include="OCC\src\Extrema\Extrema_POnCurv2d_0.cxx">
-      <Filter>Source files\TKGeomBase\Extrema</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\Extrema\Extrema_POnSurf.cxx">
-      <Filter>Source files\TKGeomBase\Extrema</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\Extrema\Extrema_POnSurfParams.cxx">
       <Filter>Source files\TKGeomBase\Extrema</Filter>
     </ClCompile>
     <ClCompile Include="OCC\src\AdvApp2Var\AdvApp2Var_ApproxAFunc2Var.cxx">
@@ -2118,9 +2067,6 @@
     <ClCompile Include="OCC\src\TopOpeBRep\TopOpeBRep_FacesFiller_1.cxx">
       <Filter>Source files\TKBool\TopOpeBRep</Filter>
     </ClCompile>
-    <ClCompile Include="OCC\src\TopOpeBRep\TopOpeBRep_FacesFiller_VPonR.cxx">
-      <Filter>Source files\TKBool\TopOpeBRep</Filter>
-    </ClCompile>
     <ClCompile Include="OCC\src\TopOpeBRep\TopOpeBRep_FacesIntersector.cxx">
       <Filter>Source files\TKBool\TopOpeBRep</Filter>
     </ClCompile>
@@ -2448,9 +2394,6 @@
     <ClCompile Include="OCC\src\TopOpeBRepDS\TopOpeBRepDS_DRAW.cxx">
       <Filter>Source files\TKBool\TopOpeBRepDS</Filter>
     </ClCompile>
-    <ClCompile Include="OCC\src\TopOpeBRepDS\TopOpeBRepDS_DSS.cxx">
-      <Filter>Source files\TKBool\TopOpeBRepDS</Filter>
-    </ClCompile>
     <ClCompile Include="OCC\src\TopOpeBRepDS\TopOpeBRepDS_Dumper.cxx">
       <Filter>Source files\TKBool\TopOpeBRepDS</Filter>
     </ClCompile>
@@ -2544,9 +2487,6 @@
     <ClCompile Include="OCC\src\TopOpeBRepDS\TopOpeBRepDS_ProcessInterferencesTool.cxx">
       <Filter>Source files\TKBool\TopOpeBRepDS</Filter>
     </ClCompile>
-    <ClCompile Include="OCC\src\TopOpeBRepDS\TopOpeBRepDS_reDEB.cxx">
-      <Filter>Source files\TKBool\TopOpeBRepDS</Filter>
-    </ClCompile>
     <ClCompile Include="OCC\src\TopOpeBRepDS\TopOpeBRepDS_redu.cxx">
       <Filter>Source files\TKBool\TopOpeBRepDS</Filter>
     </ClCompile>
@@ -2590,12 +2530,6 @@
       <Filter>Source files\TKBool\TopOpeBRepDS</Filter>
     </ClCompile>
     <ClCompile Include="OCC\src\TopOpeBRepDS\TopOpeBRepDS_TOOL.cxx">
-      <Filter>Source files\TKBool\TopOpeBRepDS</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\TopOpeBRepDS\TopOpeBRepDS_trace.cxx">
-      <Filter>Source files\TKBool\TopOpeBRepDS</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\TopOpeBRepDS\TopOpeBRepDS_traceDSX.cxx">
       <Filter>Source files\TKBool\TopOpeBRepDS</Filter>
     </ClCompile>
     <ClCompile Include="OCC\src\TopOpeBRepDS\TopOpeBRepDS_Transition.cxx">
@@ -2853,22 +2787,7 @@
     <ClCompile Include="OCC\src\BRepTools\BRepTools_WireExplorer.cxx">
       <Filter>Source files\TKBrep\BRepTools</Filter>
     </ClCompile>
-    <ClCompile Include="OCC\src\TopoDS\TopoDS.cxx">
-      <Filter>Source files\TKBrep\TopoDS</Filter>
-    </ClCompile>
     <ClCompile Include="OCC\src\TopoDS\TopoDS_Builder.cxx">
-      <Filter>Source files\TKBrep\TopoDS</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\TopoDS\TopoDS_Compound.cxx">
-      <Filter>Source files\TKBrep\TopoDS</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\TopoDS\TopoDS_CompSolid.cxx">
-      <Filter>Source files\TKBrep\TopoDS</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\TopoDS\TopoDS_Edge.cxx">
-      <Filter>Source files\TKBrep\TopoDS</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\TopoDS\TopoDS_Face.cxx">
       <Filter>Source files\TKBrep\TopoDS</Filter>
     </ClCompile>
     <ClCompile Include="OCC\src\TopoDS\TopoDS_HShape.cxx">
@@ -2878,12 +2797,6 @@
       <Filter>Source files\TKBrep\TopoDS</Filter>
     </ClCompile>
     <ClCompile Include="OCC\src\TopoDS\TopoDS_Shape.cxx">
-      <Filter>Source files\TKBrep\TopoDS</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\TopoDS\TopoDS_Shell.cxx">
-      <Filter>Source files\TKBrep\TopoDS</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\TopoDS\TopoDS_Solid.cxx">
       <Filter>Source files\TKBrep\TopoDS</Filter>
     </ClCompile>
     <ClCompile Include="OCC\src\TopoDS\TopoDS_TCompound.cxx">
@@ -2913,12 +2826,6 @@
     <ClCompile Include="OCC\src\TopoDS\TopoDS_TWire.cxx">
       <Filter>Source files\TKBrep\TopoDS</Filter>
     </ClCompile>
-    <ClCompile Include="OCC\src\TopoDS\TopoDS_Vertex.cxx">
-      <Filter>Source files\TKBrep\TopoDS</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\TopoDS\TopoDS_Wire.cxx">
-      <Filter>Source files\TKBrep\TopoDS</Filter>
-    </ClCompile>
     <ClCompile Include="OCC\src\TopTools\TopTools.cxx">
       <Filter>Source files\TKBrep\TopTools</Filter>
     </ClCompile>
@@ -2926,12 +2833,6 @@
       <Filter>Source files\TKBrep\TopTools</Filter>
     </ClCompile>
     <ClCompile Include="OCC\src\TopTools\TopTools_MutexForShapeProvider.cxx">
-      <Filter>Source files\TKBrep\TopTools</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\TopTools\TopTools_OrientedShapeMapHasher.cxx">
-      <Filter>Source files\TKBrep\TopTools</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\TopTools\TopTools_ShapeMapHasher.cxx">
       <Filter>Source files\TKBrep\TopTools</Filter>
     </ClCompile>
     <ClCompile Include="OCC\src\TopTools\TopTools_ShapeSet.cxx">
@@ -3181,9 +3082,6 @@
       <Filter>Source files\TKTopAlgo\MAT2d</Filter>
     </ClCompile>
     <ClCompile Include="OCC\src\MAT2d\MAT2d_CutCurve.cxx">
-      <Filter>Source files\TKTopAlgo\MAT2d</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\MAT2d\MAT2d_MapBiIntHasher.cxx">
       <Filter>Source files\TKTopAlgo\MAT2d</Filter>
     </ClCompile>
     <ClCompile Include="OCC\src\MAT2d\MAT2d_Mat2d.cxx">
@@ -3921,9 +3819,6 @@
     <ClCompile Include="OCC\src\GeomInt\GeomInt_TheMultiLineOfWLApprox_0.cxx">
       <Filter>Source files\TKGeomAlgo\GeomInt</Filter>
     </ClCompile>
-    <ClCompile Include="OCC\src\GeomInt\GeomInt_TheMultiLineToolOfWLApprox_0.cxx">
-      <Filter>Source files\TKGeomAlgo\GeomInt</Filter>
-    </ClCompile>
     <ClCompile Include="OCC\src\GeomInt\GeomInt_ThePrmPrmSvSurfacesOfWLApprox_0.cxx">
       <Filter>Source files\TKGeomAlgo\GeomInt</Filter>
     </ClCompile>
@@ -4131,9 +4026,6 @@
     <ClCompile Include="OCC\src\IntPatch\IntPatch_Polyhedron.cxx">
       <Filter>Source files\TKGeomAlgo\IntPatch</Filter>
     </ClCompile>
-    <ClCompile Include="OCC\src\IntPatch\IntPatch_PolyhedronTool.cxx">
-      <Filter>Source files\TKGeomAlgo\IntPatch</Filter>
-    </ClCompile>
     <ClCompile Include="OCC\src\IntPatch\IntPatch_PolyLine.cxx">
       <Filter>Source files\TKGeomAlgo\IntPatch</Filter>
     </ClCompile>
@@ -4218,22 +4110,13 @@
     <ClCompile Include="OCC\src\IntSurf\IntSurf.cxx">
       <Filter>Source files\TKGeomAlgo\IntSurf</Filter>
     </ClCompile>
-    <ClCompile Include="OCC\src\IntSurf\IntSurf_Couple.cxx">
-      <Filter>Source files\TKGeomAlgo\IntSurf</Filter>
-    </ClCompile>
     <ClCompile Include="OCC\src\IntSurf\IntSurf_InteriorPoint.cxx">
-      <Filter>Source files\TKGeomAlgo\IntSurf</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\IntSurf\IntSurf_InteriorPointTool.cxx">
       <Filter>Source files\TKGeomAlgo\IntSurf</Filter>
     </ClCompile>
     <ClCompile Include="OCC\src\IntSurf\IntSurf_LineOn2S.cxx">
       <Filter>Source files\TKGeomAlgo\IntSurf</Filter>
     </ClCompile>
     <ClCompile Include="OCC\src\IntSurf\IntSurf_PathPoint.cxx">
-      <Filter>Source files\TKGeomAlgo\IntSurf</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\IntSurf\IntSurf_PathPointTool.cxx">
       <Filter>Source files\TKGeomAlgo\IntSurf</Filter>
     </ClCompile>
     <ClCompile Include="OCC\src\IntSurf\IntSurf_PntOn2S.cxx">
@@ -4467,9 +4350,6 @@
     <ClCompile Include="OCC\src\math\math_FunctionSetRoot.cxx">
       <Filter>Source files\TKMath\math</Filter>
     </ClCompile>
-    <ClCompile Include="OCC\src\math\math_FunctionSetWithDerivatives.cxx">
-      <Filter>Source files\TKMath\math</Filter>
-    </ClCompile>
     <ClCompile Include="OCC\src\math\math_FunctionWithDerivative.cxx">
       <Filter>Source files\TKMath\math</Filter>
     </ClCompile>
@@ -4510,12 +4390,6 @@
       <Filter>Source files\TKMath\math</Filter>
     </ClCompile>
     <ClCompile Include="OCC\src\math\math_MultipleVarFunction.cxx">
-      <Filter>Source files\TKMath\math</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\math\math_MultipleVarFunctionWithGradient.cxx">
-      <Filter>Source files\TKMath\math</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\math\math_MultipleVarFunctionWithHessian.cxx">
       <Filter>Source files\TKMath\math</Filter>
     </ClCompile>
     <ClCompile Include="OCC\src\math\math_NewtonFunctionRoot.cxx">
@@ -4815,9 +4689,6 @@
     <ClCompile Include="OCC\src\IntTools\IntTools_CurveRangeSample.cxx">
       <Filter>Source files\TKBO\IntTools</Filter>
     </ClCompile>
-    <ClCompile Include="OCC\src\IntTools\IntTools_CurveRangeSampleMapHasher.cxx">
-      <Filter>Source files\TKBO\IntTools</Filter>
-    </ClCompile>
     <ClCompile Include="OCC\src\IntTools\IntTools_EdgeEdge.cxx">
       <Filter>Source files\TKBO\IntTools</Filter>
     </ClCompile>
@@ -4852,9 +4723,6 @@
       <Filter>Source files\TKBO\IntTools</Filter>
     </ClCompile>
     <ClCompile Include="OCC\src\IntTools\IntTools_SurfaceRangeSample.cxx">
-      <Filter>Source files\TKBO\IntTools</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\IntTools\IntTools_SurfaceRangeSampleMapHasher.cxx">
       <Filter>Source files\TKBO\IntTools</Filter>
     </ClCompile>
     <ClCompile Include="OCC\src\IntTools\IntTools_Tools.cxx">
@@ -5133,6 +5001,11 @@
     <ClCompile Include="OCC\src\Standard\Standard_OutOfMemory.cxx">
       <Filter>Source files\TKernel\Standard</Filter>
     </ClCompile>
+    <ClCompile Include="OCC\src\BRepClass3d\BRepClass3d_BndBoxTree.cxx" />
+    <ClCompile Include="OCC\src\Extrema\Extrema_FuncPSDist.cxx" />
+    <ClCompile Include="OCC\src\Extrema\Extrema_FuncPSNorm.cxx" />
+    <ClCompile Include="OCC\src\GCPnts\GCPnts_DistFunction2d.cxx" />
+    <ClCompile Include="OCC\src\GCPnts\GCPnts_DistFunction.cxx" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source files">
@@ -5181,9 +5054,6 @@
     </ClCompile>
     <ClCompile Include=".\OCC\src\PLib\PLib_JacobiPolynomial.cxx">
       <Filter>Source files\TKMath\PLib</Filter>
-    </ClCompile>
-    <ClCompile Include=".\OCC\src\Precision\Precision.cxx">
-      <Filter>Source files\TKMath\Precision</Filter>
     </ClCompile>
     <ClCompile Include=".\OCC\src\CSLib\CSLib.cxx">
       <Filter>Source files\TKMath\CSLib</Filter>
@@ -5712,9 +5582,6 @@
     <ClCompile Include=".\OCC\src\GC\GC_MakeTrimmedCylinder.cxx">
       <Filter>Source files\TKGeomBase\GC</Filter>
     </ClCompile>
-    <ClCompile Include=".\OCC\src\GC\GC_Root.cxx">
-      <Filter>Source files\TKGeomBase\GC</Filter>
-    </ClCompile>
     <ClCompile Include=".\OCC\src\GCE2d\GCE2d_MakeArcOfCircle.cxx">
       <Filter>Source files\TKGeomBase\GCE2d</Filter>
     </ClCompile>
@@ -5755,9 +5622,6 @@
       <Filter>Source files\TKGeomBase\GCE2d</Filter>
     </ClCompile>
     <ClCompile Include=".\OCC\src\GCE2d\GCE2d_MakeTranslation.cxx">
-      <Filter>Source files\TKGeomBase\GCE2d</Filter>
-    </ClCompile>
-    <ClCompile Include=".\OCC\src\GCE2d\GCE2d_Root.cxx">
       <Filter>Source files\TKGeomBase\GCE2d</Filter>
     </ClCompile>
     <ClCompile Include=".\OCC\src\gce\gce_MakeCirc.cxx">
@@ -6093,9 +5957,6 @@
     <ClCompile Include=".\OCC\src\BRepPrimAPI\BRepPrimAPI_MakeSphere.cxx">
       <Filter>Source files\TKPrim\BRepPrimAPI</Filter>
     </ClCompile>
-    <ClCompile Include=".\OCC\src\BRepPrimAPI\BRepPrimAPI_MakeSweep.cxx">
-      <Filter>Source files\TKPrim\BRepPrimAPI</Filter>
-    </ClCompile>
     <ClCompile Include=".\OCC\src\BRepPrimAPI\BRepPrimAPI_MakeTorus.cxx">
       <Filter>Source files\TKPrim\BRepPrimAPI</Filter>
     </ClCompile>
@@ -6132,12 +5993,6 @@
       <Filter>Source files\THShHealing\ShapeBuild</Filter>
     </ClCompile>
     <ClCompile Include=".\OCC\src\ShapeConstruct\ShapeConstruct.cxx">
-      <Filter>Source files\THShHealing\ShapeConstruct</Filter>
-    </ClCompile>
-    <ClCompile Include=".\OCC\src\ShapeConstruct\ShapeConstruct_CompBezierCurves2dToBSplineCurve2d.cxx">
-      <Filter>Source files\THShHealing\ShapeConstruct</Filter>
-    </ClCompile>
-    <ClCompile Include=".\OCC\src\ShapeConstruct\ShapeConstruct_CompBezierCurvesToBSplineCurve.cxx">
       <Filter>Source files\THShHealing\ShapeConstruct</Filter>
     </ClCompile>
     <ClCompile Include=".\OCC\src\ShapeConstruct\ShapeConstruct_Curve.cxx">
@@ -6333,9 +6188,6 @@
       <Filter>Source files\TKGeomAlgo\IntImp</Filter>
     </ClCompile>
     <ClCompile Include=".\OCC\src\IntImpParGen\IntImpParGen.cxx">
-      <Filter>Source files\TKGeomAlgo\IntImpParGen</Filter>
-    </ClCompile>
-    <ClCompile Include=".\OCC\src\IntImpParGen\IntImpParGen_ImpTool.cxx">
       <Filter>Source files\TKGeomAlgo\IntImpParGen</Filter>
     </ClCompile>
     <ClCompile Include=".\OCC\src\IntImpParGen\IntImpParGen_Tool.cxx">
@@ -15948,6 +15800,17 @@
     <ClInclude Include="OCC\src\IntTools\IntTools_WLineTool.hxx">
       <Filter>Source files\TKBO\IntTools</Filter>
     </ClInclude>
+    <ClInclude Include="OCC\src\BRepClass3d\BRepClass3d_BndBoxTree.hxx" />
+    <ClInclude Include="OCC\src\BVH\BVH_BinaryTree.hxx" />
+    <ClInclude Include="OCC\src\BVH\BVH_QuadTree.hxx" />
+    <ClInclude Include="OCC\src\BVH\BVH_QuickSorter.hxx" />
+    <ClInclude Include="OCC\src\BVH\BVH_RadixSorter.hxx" />
+    <ClInclude Include="OCC\src\Extrema\Extrema_FuncPSDist.hxx" />
+    <ClInclude Include="OCC\src\Extrema\Extrema_FuncPSNorm.hxx" />
+    <ClInclude Include="OCC\src\GCPnts\GCPnts_DistFunction2d.hxx" />
+    <ClInclude Include="OCC\src\GCPnts\GCPnts_DistFunction.hxx" />
+    <ClInclude Include="OCC\src\Quantity\Quantity_ColorRGBA.hxx" />
+    <ClInclude Include="OCC\src\TColStd\TColStd_IndexedDataMapOfStringString.hxx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="OCC\src\Adaptor3d\Adaptor3d_GenHCurve.gxx">
@@ -17763,6 +17626,16 @@
     <None Include="OCC\src\Adaptor2d\Adaptor2d_OffsetCurve.lxx">
       <Filter>Source files\TKG2d\Adaptor2d</Filter>
     </None>
+    <None Include="OCC\src\BVH\BVH_BinaryTree.lxx" />
+    <None Include="OCC\src\BVH\BVH_QuadTree.lxx" />
+    <None Include="OCC\src\BVH\BVH_QuickSorter.lxx" />
+    <None Include="OCC\src\BVH\BVH_RadixSorter.lxx" />
+    <None Include="OCC\src\GCPnts\GCPnts_AbscissaPoint.pxx" />
+    <None Include="OCC\src\GCPnts\GCPnts_QuasiUniformAbscissa.pxx" />
+    <None Include="OCC\src\GCPnts\GCPnts_QuasiUniformDeflection.pxx" />
+    <None Include="OCC\src\GCPnts\GCPnts_TangentialDeflection.pxx" />
+    <None Include="OCC\src\GCPnts\GCPnts_UniformAbscissa.pxx" />
+    <None Include="OCC\src\GCPnts\GCPnts_UniformDeflection.pxx" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="app.ico" />
