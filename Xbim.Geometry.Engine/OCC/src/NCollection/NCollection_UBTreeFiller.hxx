@@ -68,7 +68,7 @@ template <class TheObjType, class TheBndType> class NCollection_UBTreeFiller
   NCollection_UBTreeFiller (UBTree& theTree,
                             const Handle(NCollection_BaseAllocator)& theAlloc=0L,
                             const Standard_Boolean isFullRandom = Standard_True)
-    : myTree(theTree), mySeqPtr(1000, theAlloc),
+    : myTree(theTree), mySeqPtr(256, theAlloc),
       myRandGen (5489u /* == std::mt19937::default_seed, not defined in older environments, e.g, on Debian 6.0 with GCC 4.4.5 */),
       myIsFullRandom (isFullRandom) {}
 
@@ -83,7 +83,7 @@ template <class TheObjType, class TheBndType> class NCollection_UBTreeFiller
    * @return
    *   the number of objects added to the tree.
    */
-  Standard_EXPORT Standard_Integer Fill ();
+  Standard_Integer Fill ();
 
   /**
    * Remove all data from Filler, partculary if the Tree no more needed
@@ -97,7 +97,7 @@ template <class TheObjType, class TheBndType> class NCollection_UBTreeFiller
    * @return
    *   the tree size (the same value is returned by method Fill()).
    */ 
-  Standard_EXPORT Standard_Integer CheckTree (Standard_OStream& theStream);
+  Standard_Integer CheckTree (Standard_OStream& theStream);
 
   /**
    * Destructor. Fills the tree with accumulated items if they have not been

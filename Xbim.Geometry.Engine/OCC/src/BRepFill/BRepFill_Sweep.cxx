@@ -73,6 +73,7 @@
 #include <TColgp_Array1OfPnt.hxx>
 #include <TColStd_Array1OfBoolean.hxx>
 #include <TColStd_Array1OfReal.hxx>
+#include <TColStd_Array2OfBoolean.hxx>
 #include <TColStd_Array2OfInteger.hxx>
 #include <TColStd_Array2OfReal.hxx>
 #include <TColStd_HArray1OfInteger.hxx>
@@ -1957,10 +1958,10 @@ BRepFill_Sweep::BRepFill_Sweep(const Handle(BRepFill_SectionLaw)& Section,
 
   // (1.1) Construction of Tables
 
-  TColStd_Array2OfInteger ExchUV(1, NbLaw, 1, NbPath);
-  TColStd_Array2OfInteger UReverse(1, NbLaw, 1, NbPath);
-  TColStd_Array2OfInteger Degenerated(1, NbLaw, 1, NbPath);
-  Degenerated.Init(0);
+  TColStd_Array2OfBoolean ExchUV     (1, NbLaw, 1, NbPath);
+  TColStd_Array2OfBoolean UReverse   (1, NbLaw, 1, NbPath);
+  TColStd_Array2OfBoolean Degenerated(1, NbLaw, 1, NbPath);
+  Degenerated.Init (false);
   // No VReverse for the moment...
   TColStd_Array2OfReal TabErr(1, NbLaw   , 1, NbPath);
   TColGeom_Array2OfSurface TabS(1, NbLaw , 1, NbPath);
@@ -2605,11 +2606,12 @@ BRepFill_Sweep::BRepFill_Sweep(const Handle(BRepFill_SectionLaw)& Section,
     B.MakeCompound(Comp);
     for (isec=1; isec <=  NbLaw+1; isec++) 
       for (ipath=1, IPath=IFirst; ipath<=  NbPath+1; ipath++, IPath++) {
-      if (ipath <= NbPath) myUEdges->SetValue(isec, IPath, UEdge(isec, ipath));
-      if (isec <= NbLaw) myVEdges->SetValue(isec, IPath, VEdge(isec, ipath)); 
-      if ((ipath <= NbPath) && (isec <= NbLaw) && 
-	  (myFaces->Value(isec, IPath).ShapeType() == TopAbs_FACE))
-	B.Add(Comp, myFaces->Value(isec, IPath));
+        if (ipath <= NbPath) myUEdges->SetValue(isec, IPath, UEdge(isec, ipath));
+        if (isec <= NbLaw) myVEdges->SetValue(isec, IPath, VEdge(isec, ipath)); 
+        if ((ipath <= NbPath) && (isec <= NbLaw) && 
+            !myFaces->Value(isec, IPath).IsNull() &&
+            myFaces->Value(isec, IPath).ShapeType() == TopAbs_FACE)
+          B.Add(Comp, myFaces->Value(isec, IPath));
     }
     BRepLib::EncodeRegularity(Comp, myTolAngular);
   }

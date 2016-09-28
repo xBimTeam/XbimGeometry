@@ -25,7 +25,6 @@
 #include <TopoDS_Iterator.hxx>
 #include <BRep_Tool.hxx>
 
-
 IMPLEMENT_STANDARD_RTTIEXT(BRepMesh_FaceAttribute,Standard_Transient)
 
 //=======================================================================
@@ -52,10 +51,32 @@ BRepMesh_FaceAttribute::BRepMesh_FaceAttribute()
 //purpose  : 
 //=======================================================================
 BRepMesh_FaceAttribute::BRepMesh_FaceAttribute(
+  const BRepMesh::HDMapOfVertexInteger& theBoundaryVertices,
+  const BRepMesh::HDMapOfIntegerPnt&    theBoundaryPoints)
+  : myDefFace         (0.),
+    myUMin            (0.),
+    myUMax            (0.),
+    myVMin            (0.),
+    myVMax            (0.),
+    myDeltaX          (1.),
+    myDeltaY          (1.),
+    myMinStep         (-1.),
+    myStatus          (BRepMesh_NoError),
+    myAdaptiveMin     (Standard_False),
+    myBoundaryVertices(theBoundaryVertices),
+    myBoundaryPoints  (theBoundaryPoints)
+{
+}
+
+//=======================================================================
+//function : Constructor
+//purpose  : 
+//=======================================================================
+BRepMesh_FaceAttribute::BRepMesh_FaceAttribute(
   const TopoDS_Face&                    theFace,
   const BRepMesh::HDMapOfVertexInteger& theBoundaryVertices,
   const BRepMesh::HDMapOfIntegerPnt&    theBoundaryPoints,
-  const Standard_Boolean theAdaptiveMin)
+  const Standard_Boolean                theAdaptiveMin)
   : myDefFace         (0.),
     myUMin            (0.),
     myUMax            (0.),
@@ -82,6 +103,20 @@ BRepMesh_FaceAttribute::~BRepMesh_FaceAttribute()
 }
 
 //=======================================================================
+//function : SetFace
+//purpose  : 
+//=======================================================================
+void BRepMesh_FaceAttribute::SetFace (
+  const TopoDS_Face&     theFace, 
+  const Standard_Boolean theAdaptiveMin)
+{
+  myFace        = theFace;
+  myAdaptiveMin = theAdaptiveMin;
+
+  init ();
+}
+
+//=======================================================================
 //function : init
 //purpose  : 
 //=======================================================================
@@ -105,14 +140,12 @@ void BRepMesh_FaceAttribute::init()
     // between vertices
 
     myMinStep = RealLast();
-    for (TopExp_Explorer anExp(myFace, TopAbs_WIRE); anExp.More(); anExp.Next()) 
+    for (TopoDS_Iterator aFaceIt(myFace); aFaceIt.More(); aFaceIt.Next()) 
     {
-      TopoDS_Wire aWire = TopoDS::Wire(anExp.Current());
-
-      for (TopoDS_Iterator aWireExp(aWire); aWireExp.More(); aWireExp.Next()) 
+      for (TopoDS_Iterator aWireIt(aFaceIt.Value()); aWireIt.More(); aWireIt.Next()) 
       {
-        TopoDS_Edge anEdge = TopoDS::Edge(aWireExp.Value());
-        if (BRep_Tool::IsClosed(anEdge))
+        const TopoDS_Edge& anEdge = TopoDS::Edge(aWireIt.Value());
+        if (anEdge.IsNull() || BRep_Tool::IsClosed(anEdge))
           continue;
 
         // Get end points on 2d curve

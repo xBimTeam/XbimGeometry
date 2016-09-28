@@ -53,7 +53,6 @@
 #include <gp_GTrsf2d.hxx>
 #include <gp_Pnt.hxx>
 #include <gp_TrsfForm.hxx>
-#include <OSD_Chronometer.hxx>
 #include <ProjLib_ComputeApprox.hxx>
 #include <ProjLib_ComputeApproxOnPolarSurface.hxx>
 #include <Standard_NoSuchObject.hxx>
@@ -662,6 +661,7 @@ Standard_Boolean BRepTools_NurbsConvertModification::NewParameter
     Standard_Real& P, 
     Standard_Real& Tol)
 {
+  Tol =  BRep_Tool::Tolerance(V);
   if(BRep_Tool::Degenerated(E))
     return Standard_False;
   Standard_Real f, l, param = BRep_Tool::Parameter(V,E);

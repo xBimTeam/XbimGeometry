@@ -342,14 +342,15 @@ namespace Xbim
 			try
 			{
 				
-				ShapeFix_ShapeTolerance FTol;				
+				ShapeFix_ShapeTolerance FTol;
+				tolerance *= 1.1;
 				TopTools_ListOfShape shapeTools;
 				for each (IXbimSolid^ iSolid in solids)
 				{
 					XbimSolid^ solid = dynamic_cast<XbimSolid^>(iSolid);
 					if (solid!=nullptr)
 					{
-						//FTol.SetTolerance(solid, tolerance);
+						FTol.SetTolerance(solid, tolerance);
 						shapeTools.Append(solid);							
 					}
 				}
@@ -359,7 +360,7 @@ namespace Xbim
 					XbimSolid^ solid = dynamic_cast<XbimSolid^>(iSolid);
 					if (solid != nullptr)
 					{
-						//FTol.SetTolerance(solid, tolerance);
+						FTol.SetTolerance(solid, tolerance);
 						shapeObjects.Append(solid);
 					}
 				}

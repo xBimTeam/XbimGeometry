@@ -1347,8 +1347,8 @@ namespace Xbim
 						if (s->IsValid) solidSet->Add(s);
 					}
 				}
-				//use a fuzzy tolerance of 1mm, less than this should be ignored			
-				IXbimSolidSet^ xbimSolidSet = body->Cut(solidSet, mf->OneMilliMetre);
+					
+				IXbimSolidSet^ xbimSolidSet = body->Cut(solidSet, mf->Precision);
 				if (xbimSolidSet != nullptr && xbimSolidSet->First != nullptr)
 				{ 
 					const TopoDS_Shape&  shape = (XbimSolid^) (xbimSolidSet->First);
@@ -1393,13 +1393,13 @@ namespace Xbim
 				switch (solid->Operator)
 				{
 				case IfcBooleanOperator::UNION:
-					result = left->Union(right, mf->PrecisionBoolean);
+					result = left->Union(right, mf->Precision);
 					break;
 				case IfcBooleanOperator::INTERSECTION:
-					result = left->Intersection(right, mf->PrecisionBoolean);
+					result = left->Intersection(right, mf->Precision);
 					break;
 				case IfcBooleanOperator::DIFFERENCE:
-					result = left->Cut(right, mf->PrecisionBoolean);
+					result = left->Cut(right, mf->Precision);
 					break;
 				}
 			}
@@ -1770,16 +1770,17 @@ namespace Xbim
 			{
 #ifdef OCC_6_9_SUPPORTED
 				ShapeFix_ShapeTolerance FTol;
+				tolerance *= 1.1;
 				TopTools_ListOfShape shapeTools;
-				//FTol.SetTolerance(solidCut, tolerance);
+				FTol.SetTolerance(solidCut, tolerance);
 				shapeTools.Append(solidCut);
 				TopTools_ListOfShape shapeObjects;
-				//FTol.SetTolerance(this, tolerance);
+				FTol.SetTolerance(this, tolerance);
 				shapeObjects.Append(this);
 				BRepAlgoAPI_Cut boolOp;
 				boolOp.SetArguments(shapeObjects);
 				boolOp.SetTools(shapeTools);
-				boolOp.SetFuzzyValue(0);
+				//boolOp.SetFuzzyValue(0);
 				boolOp.Build();
 #else
 				ShapeFix_ShapeTolerance fixTol;

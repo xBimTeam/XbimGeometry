@@ -113,6 +113,7 @@ void StdSelect_ViewerSelector3d::Pick (const Standard_Integer theXPix,
                                        const Standard_Integer theYPix,
                                        const Handle(V3d_View)& theView)
 {
+  updateZLayers (theView);
   if(myToUpdateTolerance)
   {
     mySelectingVolumeMgr.SetPixelTolerance (myTolerances.Tolerance());
@@ -127,7 +128,7 @@ void StdSelect_ViewerSelector3d::Pick (const Standard_Integer theXPix,
   gp_Pnt2d aMousePos (static_cast<Standard_Real> (theXPix),
                       static_cast<Standard_Real> (theYPix));
   mySelectingVolumeMgr.BuildSelectingVolume (aMousePos);
-  mySelectingVolumeMgr.SetViewClipping (theView->GetClipPlanes());
+  mySelectingVolumeMgr.SetViewClipping (theView->ClipPlanes());
 
   TraverseSensitives();
 }
@@ -142,6 +143,7 @@ void StdSelect_ViewerSelector3d::Pick (const Standard_Integer theXPMin,
                                        const Standard_Integer theYPMax,
                                        const Handle(V3d_View)& theView)
 {
+  updateZLayers (theView);
   mySelectingVolumeMgr.SetCamera (theView->Camera());
   mySelectingVolumeMgr.SetActiveSelectionType (SelectMgr_SelectingVolumeManager::Box);
   Standard_Integer aWidth = 0, aHeight = 0;
@@ -164,6 +166,7 @@ void StdSelect_ViewerSelector3d::Pick (const Standard_Integer theXPMin,
 void StdSelect_ViewerSelector3d::Pick (const TColgp_Array1OfPnt2d& thePolyline,
                                        const Handle(V3d_View)& theView)
 {
+  updateZLayers (theView);
   mySelectingVolumeMgr.SetCamera (theView->Camera());
   mySelectingVolumeMgr.SetActiveSelectionType (SelectMgr_SelectingVolumeManager::Polyline);
   Standard_Integer aWidth = 0, aHeight = 0;
@@ -180,9 +183,11 @@ void StdSelect_ViewerSelector3d::Pick (const TColgp_Array1OfPnt2d& thePolyline,
 //=======================================================================
 void StdSelect_ViewerSelector3d::DisplaySensitive (const Handle(V3d_View)& theView)
 {
-  for (Standard_Integer anObjectIdx = 0; anObjectIdx <= mySelectableObjects.Size(); ++anObjectIdx)
+  SelectMgr_SelectableObjectSet::Iterator aSelectableIt (mySelectableObjects);
+
+  for (; aSelectableIt.More(); aSelectableIt.Next())
   {
-    const Handle (SelectMgr_SelectableObject)& anObj = mySelectableObjects.GetObjectById (anObjectIdx);
+    const Handle (SelectMgr_SelectableObject)& anObj = aSelectableIt.Value();
 
     Handle(Graphic3d_Structure) aStruct = new Graphic3d_Structure (theView->Viewer()->StructureManager());
 
@@ -190,29 +195,7 @@ void StdSelect_ViewerSelector3d::DisplaySensitive (const Handle(V3d_View)& theVi
     {
       if (anObj->CurrentSelection()->GetSelectionState() == SelectMgr_SOS_Activated)
       {
-        ComputeSensitivePrs (aStruct, anObj->CurrentSelection(), anObj->Transformation(), Graphic3d_TransformPers());
-      }
-    }
-
-    myStructs.Append (aStruct);
-  }
-
-  for (Standard_Integer anObjectIdx = 0; anObjectIdx <= mySelectableObjectsTrsfPers.Size(); ++anObjectIdx)
-  {
-    const Handle (SelectMgr_SelectableObject)& anObj = mySelectableObjectsTrsfPers.GetObjectById (anObjectIdx);
-
-    Handle(Graphic3d_Structure) aStruct = new Graphic3d_Structure (theView->Viewer()->StructureManager());
-
-    if (!anObj->TransformPersistence().Flags || (anObj->TransformPersistence().Flags & Graphic3d_TMF_2d))
-    {
-      continue;
-    }
-
-    for (anObj->Init(); anObj->More(); anObj->Next())
-    {
-      if (anObj->CurrentSelection()->GetSelectionState() == SelectMgr_SOS_Activated)
-      {
-        ComputeSensitivePrs (aStruct, anObj->CurrentSelection(), anObj->Transformation(), anObj->TransformPersistence());
+        computeSensitivePrs (aStruct, anObj->CurrentSelection(), anObj->Transformation(), Graphic3d_TransformPers());
       }
     }
 
@@ -264,7 +247,7 @@ void StdSelect_ViewerSelector3d::DisplaySensitive (const Handle(SelectMgr_Select
 
   Handle(Graphic3d_Structure) aStruct = new Graphic3d_Structure (theView->Viewer()->StructureManager());
 
-  ComputeSensitivePrs (aStruct, theSel, theTrsf, Graphic3d_TransformPers());
+  computeSensitivePrs (aStruct, theSel, theTrsf, Graphic3d_TransformPers());
 
   myStructs.Append (aStruct);
   myStructs.Last()->SetDisplayPriority (10);
@@ -274,10 +257,10 @@ void StdSelect_ViewerSelector3d::DisplaySensitive (const Handle(SelectMgr_Select
 }
 
 //=======================================================================
-//function : ComputeSensitivePrs
+//function : computeSensitivePrs
 //purpose  :
 //=======================================================================
-void StdSelect_ViewerSelector3d::ComputeSensitivePrs (const Handle(Graphic3d_Structure)& theStructure,
+void StdSelect_ViewerSelector3d::computeSensitivePrs (const Handle(Graphic3d_Structure)& theStructure,
                                                       const Handle(SelectMgr_Selection)& theSel,
                                                       const gp_Trsf& theLoc,
                                                       const Graphic3d_TransformPers& theTransPers)
@@ -661,5 +644,30 @@ Standard_Boolean StdSelect_ViewerSelector3d::HasDepthClipping (const Handle(Sele
   }
 
   const Handle(SelectMgr_SelectableObject)& aSelectable = theOwner->Selectable();
-  return (aSelectable->GetClipPlanes().Size() > 0);
+  return !aSelectable->ClipPlanes().IsNull()
+      && !aSelectable->ClipPlanes()->IsEmpty();
+}
+
+//=======================================================================
+// Function: updateZLayers
+// Purpose :
+//=======================================================================
+void StdSelect_ViewerSelector3d::updateZLayers (const Handle(V3d_View)& theView)
+{
+  myZLayerOrderMap.Clear();
+  TColStd_SequenceOfInteger aZLayers;
+  theView->Viewer()->GetAllZLayers (aZLayers);
+  Standard_Integer aPos = 0;
+  Standard_Boolean isPrevDepthWrite = true;
+  for (TColStd_SequenceOfInteger::Iterator aLayerIter (aZLayers); aLayerIter.More(); aLayerIter.Next())
+  {
+    Graphic3d_ZLayerSettings aSettings = theView->Viewer()->ZLayerSettings (aLayerIter.Value());
+    if (aSettings.IsSettingEnabled (Graphic3d_ZLayerDepthClear)
+     || isPrevDepthWrite != aSettings.IsSettingEnabled (Graphic3d_ZLayerDepthWrite))
+    {
+      ++aPos;
+    }
+    isPrevDepthWrite = aSettings.IsSettingEnabled (Graphic3d_ZLayerDepthWrite);
+    myZLayerOrderMap.Bind (aLayerIter.Value(), aPos);
+  }
 }

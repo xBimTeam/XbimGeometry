@@ -179,11 +179,6 @@ void TopOpeBRepBuild_Builder::AddIntersectionEdges
   TopOpeBRepDS_CurveIterator FCurves = myDataStructure->FaceCurves(aFace);
   for (; FCurves.More(); FCurves.Next()) {
     Standard_Integer iC = FCurves.Current();
-#ifdef OCCT_DEBUG
-    Standard_Boolean tCU = TopOpeBRepBuild_GettraceCU();
-    Standard_Boolean NtCUV = !TopOpeBRepBuild_GettraceCUV();
-    if(tCU) {cout<<endl;myDataStructure->Curve(iC).Dump(cout,iC,NtCUV);}
-#endif
     const TopTools_ListOfShape& LnewE = NewEdges(iC);
     for (TopTools_ListIteratorOfListOfShape Iti(LnewE); Iti.More(); Iti.Next()) {
       anEdge = Iti.Value();
@@ -507,12 +502,9 @@ Standard_Boolean TopOpeBRepBuild_Builder::Reverse(const TopAbs_State ToBuild1,co
 //=======================================================================
 TopAbs_Orientation TopOpeBRepBuild_Builder::Orient(const TopAbs_Orientation Ori,const Standard_Boolean Reverse)
 {
-  TopAbs_Orientation result=TopAbs_FORWARD;
-  switch (Reverse) {
-    case Standard_True  : result = TopAbs::Complement(Ori); break;
-    case Standard_False : result = Ori; break;
-  }
-  return result;
+  return !Reverse
+       ? Ori
+       : TopAbs::Complement(Ori);
 }
 
 //=======================================================================

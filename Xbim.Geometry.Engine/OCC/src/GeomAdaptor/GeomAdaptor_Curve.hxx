@@ -52,6 +52,10 @@ class Geom_BSplineCurve;
 //! This class provides an interface between the services provided by any
 //! curve from the package Geom and those required of the curve by algorithms which use it.
 //! Creation of the loaded curve the curve is C1 by piece.
+//!
+//! Polynomial coefficients of BSpline curves used for their evaluation are
+//! cached for better performance. Therefore these evaluations are not
+//! thread-safe and parallel evaluations need to be prevented.
 class GeomAdaptor_Curve  : public Adaptor3d_Curve
 {
 public:
@@ -233,7 +237,7 @@ private:
   Standard_Real myLast;
   
   Handle(Geom_BSplineCurve) myBSplineCurve; ///< B-spline representation to prevent castings
-  Handle(BSplCLib_Cache) myCurveCache; ///< Cached data for B-spline or Bezier curve
+  mutable Handle(BSplCLib_Cache) myCurveCache; ///< Cached data for B-spline or Bezier curve
   Handle(GeomEvaluator_Curve) myNestedEvaluator; ///< Calculates value of offset curve
 
 

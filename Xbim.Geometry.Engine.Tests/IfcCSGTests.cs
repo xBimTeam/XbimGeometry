@@ -65,7 +65,7 @@ namespace Ifc4GeometryTests
                     var meshRec = new MeshHelper();
                     _xbimGeometryCreator.Mesh(meshRec, solid, m.ModelFactors.Precision, m.ModelFactors.DeflectionTolerance * 10);
                     Assert.IsTrue(meshRec.FaceCount == 3, "3 mesh faces are required of a cylinder");
-                    Assert.IsTrue(meshRec.PointCount == 102, "102 mesh points are required of a cylinder");
+                    Assert.IsTrue(meshRec.PointCount == 106, "106 mesh points are required of a cylinder");
                     txn.Commit();
                 }
             }
@@ -95,7 +95,7 @@ namespace Ifc4GeometryTests
                     var meshRec = new MeshHelper();
                     _xbimGeometryCreator.Mesh(meshRec, solid, m.ModelFactors.Precision, m.ModelFactors.DeflectionTolerance * 10);
                     Assert.IsTrue(meshRec.FaceCount == 2, "2 mesh faces are required of a cone");
-                    Assert.IsTrue(meshRec.PointCount == 139, "139 mesh points are required of a cone");
+                    Assert.IsTrue(meshRec.PointCount == 141, "141 mesh points are required of a cone");
                    txn.Commit();
                 }
             }
@@ -147,8 +147,8 @@ namespace Ifc4GeometryTests
                     _xbimGeometryCreator.Mesh(meshRec, solid, m.ModelFactors.Precision, m.ModelFactors.DeflectionTolerance * 10);
                     meshRec.EndUpdate();
                     Assert.IsTrue(meshRec.FaceCount == 1, "1 mesh face is required of a sphere");
-                    Assert.IsTrue(meshRec.PointCount == 193, "193 mesh points are required of a sphere");
-                    Assert.IsTrue(meshRec.TriangleCount == 358, "358 triangles are required of a sphere");
+                    Assert.IsTrue(meshRec.PointCount == 195, "195 mesh points are required of a sphere");
+                    Assert.IsTrue(meshRec.TriangleCount == 360, "360 triangles are required of a sphere");
                     Assert.IsTrue(meshRec.TriangleCount*3 == meshRec.TriangleIndicesCount,"Incorrect triangulation");
                     txn.Commit();
                 }

@@ -194,19 +194,35 @@ void Extrema_GenExtCC::Perform()
   Curve2 &C2 = *(Curve2*)myC[1];
 
   Standard_Integer aNbInter[2];
-  aNbInter[0] = C1.NbIntervals(GeomAbs_C2);
-  aNbInter[1] = C2.NbIntervals(GeomAbs_C2);
+  GeomAbs_Shape aContinuity = GeomAbs_C2;
+  aNbInter[0] = C1.NbIntervals(aContinuity);
+  aNbInter[1] = C2.NbIntervals(aContinuity);
+
+  if (aNbInter[0] * aNbInter[1] > 100)
+  {
+    aContinuity = GeomAbs_C1;
+    aNbInter[0] = C1.NbIntervals(aContinuity);
+    aNbInter[1] = C2.NbIntervals(aContinuity);
+  }
+
   TColStd_Array1OfReal anIntervals1(1, aNbInter[0] + 1);
   TColStd_Array1OfReal anIntervals2(1, aNbInter[1] + 1);
-  C1.Intervals(anIntervals1, GeomAbs_C2);
-  C2.Intervals(anIntervals2, GeomAbs_C2);
+  C1.Intervals(anIntervals1, aContinuity);
+  C2.Intervals(anIntervals2, aContinuity);
 
-  // Lipchitz constant approximation.
+  // Lipchitz constant computation.
   Standard_Real aLC = 9.0; // Default value.
+  const Standard_Real aMaxDer1 = 1.0 / C1.Resolution(1.0);
+  const Standard_Real aMaxDer2 = 1.0 / C2.Resolution(1.0);
+  Standard_Real aMaxDer = Max(aMaxDer1, aMaxDer2) * Sqrt(2.0);
+  if (aLC > aMaxDer)
+    aLC = aMaxDer;
+
+  // Change constant value according to the concrete curve types.
   Standard_Boolean isConstLockedFlag = Standard_False;
   if (C1.GetType() == GeomAbs_Line)
   {
-    Standard_Real aMaxDer = 1.0 / C2.Resolution(1.0);
+    aMaxDer = 1.0 / C2.Resolution(1.0);
     if (aLC > aMaxDer)
     {
       isConstLockedFlag = Standard_True;
@@ -215,7 +231,7 @@ void Extrema_GenExtCC::Perform()
   }
   if (C2.GetType() == GeomAbs_Line)
   {
-    Standard_Real aMaxDer = 1.0 / C1.Resolution(1.0);
+    aMaxDer = 1.0 / C1.Resolution(1.0);
     if (aLC > aMaxDer)
     {
       isConstLockedFlag = Standard_True;
@@ -226,6 +242,7 @@ void Extrema_GenExtCC::Perform()
   Extrema_GlobOptFuncCCC2 aFunc (C1, C2);
   math_GlobOptMin aFinder(&aFunc, myLowBorder, myUppBorder, aLC);
   aFinder.SetLipConstState(isConstLockedFlag);
+  aFinder.SetContinuity(aContinuity == GeomAbs_C2 ? 2 : 1);
   Standard_Real aDiscTol = 1.0e-2;
   Standard_Real aValueTol = 1.0e-2;
   Standard_Real aSameTol = myCurveMinTol / (aDiscTol);
@@ -233,10 +250,10 @@ void Extrema_GenExtCC::Perform()
   aFinder.SetFunctionalMinimalValue(0.0); // Best distance cannot be lower than 0.0.
 
   // Size computed to have cell index inside of int32 value.
-  const Standard_Real aCellSize = Max(anIntervals1.Upper() - anIntervals1.Lower(),
-                                      anIntervals2.Upper() - anIntervals2.Lower())
+  const Standard_Real aCellSize = Max(anIntervals1.Last() - anIntervals1.First(),
+                                      anIntervals2.Last() - anIntervals2.First())
                                   * Precision::PConfusion() / (2.0 * Sqrt(2.0));
-  Extrema_CCPointsInspector anInspector(Precision::PConfusion());
+  Extrema_CCPointsInspector anInspector(aCellSize);
   NCollection_CellFilter<Extrema_CCPointsInspector> aFilter(aCellSize);
   NCollection_Vector<gp_XY> aPnts;
 
@@ -318,8 +335,7 @@ void Extrema_GenExtCC::Perform()
 
   // Avoid mark parallel case when have duplicates out of tolerance.
   // Bad conditioned task: bug25635_1, bug23706_10, bug23706_13.
-  const Standard_Integer aMinNbInfSol = 100;
-  if (aPnts.Size() >= aMinNbInfSol)
+  if (aPnts.Size() >= 2)
   {
     isParallel = Standard_True;
     for(Standard_Integer anIdx = aPnts.Lower(); anIdx <= aPnts.Upper() - 1; anIdx++)

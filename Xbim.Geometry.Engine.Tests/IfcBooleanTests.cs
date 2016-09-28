@@ -534,7 +534,7 @@ namespace Ifc4GeometryTests
 
                     Assert.IsTrue(eventTrace.Events.Count == 0); //no events should have been raised from this call
                     IfcCsgTests.GeneralTest(solid);
-                    Assert.IsTrue(solid.Faces.Count() == 6, "This solid should have 6 faces");
+                    Assert.IsTrue(solid.Faces.Count() == 7, "This solid should have 7 faces");
 
                 }
             }

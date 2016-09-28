@@ -910,9 +910,9 @@ void IntPatch_Intersection::Perform(const Handle(Adaptor3d_HSurface)&  theS1,
   //                              3. ts1 == ts2 == 0 <Param-Param>
 
   // Geom - Geom
+  const Standard_Boolean RestrictLine = Standard_True;
   if(ts1 == ts2 && ts1 == 1)
   {
-    const Standard_Boolean RestrictLine = Standard_True;
     IntSurf_ListOfPntOn2S ListOfPnts;
     ListOfPnts.Clear();
     if(isGeomInt)
@@ -946,7 +946,6 @@ void IntPatch_Intersection::Perform(const Handle(Adaptor3d_HSurface)&  theS1,
   // Param - Param 
   if(ts1 == ts2 && ts1 == 0)
   {
-    const Standard_Boolean RestrictLine = Standard_True;
     IntSurf_ListOfPntOn2S ListOfPnts;
     ListOfPnts.Clear();
 
@@ -964,7 +963,8 @@ void IntPatch_Intersection::Perform(const Handle(Adaptor3d_HSurface)&  theS1,
     if(aWL.IsNull())
       continue;
 
-    Handle(IntPatch_WLine) aRW = IntPatch_WLineTool::ComputePurgedWLine(aWL, theS1, theS2, theD1, theD2);
+    Handle(IntPatch_WLine) aRW =
+      IntPatch_WLineTool::ComputePurgedWLine(aWL, theS1, theS2, theD1, theD2, RestrictLine);
 
     if(aRW.IsNull())
       continue;
@@ -1207,7 +1207,8 @@ void IntPatch_Intersection::Perform(const Handle(Adaptor3d_HSurface)&  theS1,
     if(!aWL->IsPurgingAllowed())
       continue;
 
-    Handle(IntPatch_WLine) aRW = IntPatch_WLineTool::ComputePurgedWLine(aWL, theS1, theS2, theD1, theD2);
+    Handle(IntPatch_WLine) aRW = 
+      IntPatch_WLineTool::ComputePurgedWLine(aWL, theS1, theS2, theD1, theD2, RestrictLine);
 
     if(aRW.IsNull())
       continue;
@@ -1442,12 +1443,34 @@ void IntPatch_Intersection::GeomGeomPerfom(const Handle(Adaptor3d_HSurface)& the
 
       if(isQuadSet)
       {
+        Bnd_Box2d aBx1, aBx2;
+        const Standard_Real aU1F = theS1->FirstUParameter(),
+                            aU1L = theS1->LastUParameter(),
+                            aV1F = theS1->FirstVParameter(),
+                            aV1L = theS1->LastVParameter(),
+                            aU2F = theS2->FirstUParameter(),
+                            aU2L = theS2->LastUParameter(),
+                            aV2F = theS2->FirstVParameter(),
+                            aV2L = theS2->LastVParameter();
+        aBx1.Add(gp_Pnt2d(aU1F, aV1F));
+        aBx1.Add(gp_Pnt2d(aU1L, aV1F));
+        aBx1.Add(gp_Pnt2d(aU1L, aV1L));
+        aBx1.Add(gp_Pnt2d(aU1F, aV1L));
+        aBx2.Add(gp_Pnt2d(aU2F, aV2F));
+        aBx2.Add(gp_Pnt2d(aU2L, aV2F));
+        aBx2.Add(gp_Pnt2d(aU2L, aV2L));
+        aBx2.Add(gp_Pnt2d(aU2F, aV2L));
+
+        aBx1.Enlarge(Precision::PConfusion());
+        aBx2.Enlarge(Precision::PConfusion());
+
         IntPatch_WLineTool::
           ExtendTwoWlinesToEachOther(slin, Quad1, Quad2, TolTang,
                                      theS1->IsUPeriodic()? theS1->UPeriod() : 0.0,
                                      theS2->IsUPeriodic()? theS2->UPeriod() : 0.0,
                                      theS1->IsVPeriodic()? theS1->VPeriod() : 0.0,
-                                     theS2->IsVPeriodic()? theS2->VPeriod() : 0.0);
+                                     theS2->IsVPeriodic()? theS2->VPeriod() : 0.0,
+                                     aBx1, aBx2);
       }
 
       for (Standard_Integer i = 1; i <= interii.NbPnts(); i++)
@@ -1698,7 +1721,8 @@ void IntPatch_Intersection::Perform(const Handle(Adaptor3d_HSurface)&  S1,
     if(aWL.IsNull())
       continue;
 
-    Handle(IntPatch_WLine) aRW = IntPatch_WLineTool::ComputePurgedWLine(aWL, S1, S2, D1, D2);
+    Handle(IntPatch_WLine) aRW =
+      IntPatch_WLineTool::ComputePurgedWLine(aWL, S1, S2, D1, D2, Standard_True);
 
     if(aRW.IsNull())
       continue;

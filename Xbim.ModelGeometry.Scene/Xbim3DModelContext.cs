@@ -340,8 +340,8 @@ namespace Xbim.ModelGeometry.Scene
                 var openingRelations = Model.Instances.OfType<IIfcRelVoidsElement>()
                     .Where(
                         r =>
-                            r.RelatingBuildingElement.Representation != null &&
-                            r.RelatedOpeningElement.Representation != null).ToList();
+                            r.RelatingBuildingElement!=null && r.RelatingBuildingElement.Representation != null &&
+                            r.RelatedOpeningElement!=null && r.RelatedOpeningElement.Representation != null).ToList();
                 foreach (var openingRelation in openingRelations)
                 {
                     // process parts

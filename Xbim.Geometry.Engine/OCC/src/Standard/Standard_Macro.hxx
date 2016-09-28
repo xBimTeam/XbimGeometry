@@ -29,6 +29,14 @@
   #define Standard_OVERRIDE
 #endif
 
+// Macro for marking variables / functions as possibly unused
+// so that compiler will not emit redundant "unused" warnings.
+#if defined(__GNUC__) || defined(__clang__)
+  #define Standard_UNUSED __attribute__((unused))
+#else
+  #define Standard_UNUSED
+#endif
+
 // Macro Standard_DEPRECATED("message") can be used to declare a method deprecated.
 // If OCCT_NO_DEPRECATED is defined, Standard_DEPRECATED is defined empty.
 #ifdef OCCT_NO_DEPRECATED
@@ -43,6 +51,25 @@
 #else
   #define Standard_DEPRECATED(theMsg)
 #endif
+#endif
+
+// Disable warnings about deprecated features.
+// This is useful for sections of code kept for backward compatibility and scheduled for removal.
+
+#if defined(__ICL) || defined (__INTEL_COMPILER)
+  #define Standard_DISABLE_DEPRECATION_WARNINGS __pragma(warning(push)) __pragma(warning(disable:1478))
+  #define Standard_ENABLE_DEPRECATION_WARNINGS  __pragma(warning(pop))
+#elif defined(_MSC_VER)
+  #define Standard_DISABLE_DEPRECATION_WARNINGS __pragma(warning(push)) __pragma(warning(disable:4996))
+  #define Standard_ENABLE_DEPRECATION_WARNINGS  __pragma(warning(pop))
+#elif (defined(__GNUC__) && __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)) || defined(__clang__)
+  // available since at least gcc 4.2 (maybe earlier), however only gcc 4.6+ supports this pragma inside the function body
+  // CLang also supports this gcc syntax (in addition to "clang diagnostic ignored")
+  #define Standard_DISABLE_DEPRECATION_WARNINGS _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"")
+  #define Standard_ENABLE_DEPRECATION_WARNINGS  _Pragma("GCC diagnostic warning \"-Wdeprecated-declarations\"")
+#else
+  #define Standard_DISABLE_DEPRECATION_WARNINGS
+  #define Standard_ENABLE_DEPRECATION_WARNINGS
 #endif
 
 //======================================================
@@ -150,4 +177,13 @@
 #   endif  // __Standard_DLL
 # endif  // __Standard_API
 
-#endif  
+// Support of Universal Windows Platform
+#if defined(WINAPI_FAMILY) && WINAPI_FAMILY == WINAPI_FAMILY_APP
+ #define OCCT_UWP
+#else
+ #ifdef OCCT_UWP
+   #undef OCCT_UWP
+ #endif
+#endif
+
+#endif

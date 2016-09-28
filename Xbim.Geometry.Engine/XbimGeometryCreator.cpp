@@ -837,8 +837,8 @@ namespace Xbim
 			}
 			//BRepTools::Write(body, "d:\\tmp\\b");
 			ShapeFix_ShapeTolerance FTol;
-			double precision = Math::Max(mf->OneMilliMeter/100, mf->Precision); //set the precision to 100th mm but never less than precision
-			
+			double precision = mf->Precision;
+		
 			//if (solidSet->Count >0) //do large ops all in one go
 			//{
 				return body->Cut(solidSet, precision);

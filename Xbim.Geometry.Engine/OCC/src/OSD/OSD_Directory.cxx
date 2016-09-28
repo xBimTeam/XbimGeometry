@@ -84,6 +84,7 @@ char                    name[] = "/tmp/CSFXXXXXX";
 #include <OSD_Protection.hxx>
 #include <Standard_ProgramError.hxx>
 #include <TCollection_ExtendedString.hxx>
+#include <NCollection_String.hxx>
 
 #include <OSD_WNT_1.hxx>
 
@@ -110,7 +111,7 @@ OSD_Directory :: OSD_Directory ( const OSD_Path& Name ) :
 
 }  // end constructor ( 2 )
 
-void OSD_Directory :: Build (const OSD_Protection& Protect ) {
+void OSD_Directory :: Build (const OSD_Protection& Protect) {
 
  TCollection_AsciiString dirName;
 
@@ -118,15 +119,16 @@ void OSD_Directory :: Build (const OSD_Protection& Protect ) {
 
  if (  dirName.IsEmpty ()  )
 
-  Standard_ProgramError :: Raise (
-                            TEXT( "OSD_Directory :: Build (): incorrect call - no directory name" )
-                           );
+  Standard_ProgramError :: Raise ( "OSD_Directory :: Build (): incorrect call - no directory name");
  TCollection_ExtendedString dirNameW(dirName);
- if (  Exists () || CreateDirectoryW ( (const wchar_t*) dirNameW.ToExtString (), NULL )  )
-
-  SetProtection ( Protect );
-
- else
+ if (Exists() || CreateDirectoryW (dirNameW.ToWideString(), NULL))
+ {
+#ifndef OCCT_UWP
+   SetProtection(Protect);
+#else
+   (void)Protect;
+#endif
+ } else
 
   _osd_wnt_set_error ( myError, OSD_WDirectory );
 
@@ -136,7 +138,9 @@ OSD_Directory OSD_Directory :: BuildTemporary () {
 
  OSD_Directory           retVal;
  OSD_Protection          prt;
- OSD_Path                dirPath (  tctmpnam ( NULL )  );
+
+ wchar_t* aName = _wtmpnam(NULL);
+ OSD_Path dirPath (TCollection_AsciiString (aName != NULL ? aName : L""));
 
  retVal.SetPath ( dirPath );
  retVal.Build ( prt );                            
