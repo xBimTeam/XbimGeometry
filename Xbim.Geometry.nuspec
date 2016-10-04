@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
     <metadata>
         <id>Xbim.Geometry.4</id>
-        <version>4.0.0</version>
+        <version>4.0.2</version>
         <title>xBIM Geometry</title>
         <authors>xBIM Team</authors>
         <owners>Steve Lockley</owners>
@@ -20,6 +20,7 @@
           All Ifc2x3 and Ifc4 geometry classes are now supported.
           Also includes support for the WexBIM format which brings xBIM geometry to WebGL clients
           Target .Net 4.0, Visual Studio 2012, 2013 and 2015, C Runtime 10, 11 and 12
+          Nuget target imports fixed
       </releaseNotes>
         <language>en-GB</language>
         <tags>BIM, IFC, IfcXml, IfcZip, Ifc4, COBie, .Net, C#, BuildingSmart, Geometry, Brep</tags>
