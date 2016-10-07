@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
     <metadata>
         <id>Xbim.Geometry.4</id>
-        <version>4.0.2</version>
+        <version>4.0.3</version>
         <title>xBIM Geometry</title>
         <authors>xBIM Team</authors>
         <owners>Steve Lockley</owners>
@@ -33,8 +33,8 @@
       <file src="Output\Release\Xbim.Geometry.Engine.Interop.xml" target="lib\net40\Xbim.Geometry.Engine.Interop.xml" />
       <file src="Output\Release\Xbim.ModelGeometry.Scene.dll" target="lib\net40\Xbim.ModelGeometry.Scene.dll" />
       <file src="Output\Release\Xbim.ModelGeometry.Scene.xml" target="lib\net40\Xbim.ModelGeometry.Scene.xml" />
-      <file src="Output\Release\x86\Xbim.Geometry.Engine32.dll" target="build\net40\x86\Xbim.Geometry.Engine32.dll" />
-      <file src="Output\Release\x64\Xbim.Geometry.Engine64.dll" target="build\net40\x64\Xbim.Geometry.Engine64.dll" />
+      <file src="Output\Release\x86\Xbim.Geometry.Engine32.dll" target="build\x86\Xbim.Geometry.Engine32.dll" />
+      <file src="Output\Release\x64\Xbim.Geometry.Engine64.dll" target="build\x64\Xbim.Geometry.Engine64.dll" />
       <file src="Output\Release\Xbim.Geometry.targets" target="build\Xbim.Geometry.4.targets" />
       <file src="Output\Release\Xbim.Geometry.Engine.Interop.pdb" target="lib\net40\Xbim.Geometry.Engine.Interop.pdb" />
       <file src="Output\Release\Xbim.ModelGeometry.Scene.pdb" target="lib\net40\Xbim.ModelGeometry.Scene.pdb" />
