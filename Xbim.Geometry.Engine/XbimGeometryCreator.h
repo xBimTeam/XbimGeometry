@@ -38,6 +38,7 @@ namespace Xbim
 			static void LogInfo(Object^ entity, String^ format, ... array<Object^>^ arg);
 			static void LogWarning(Object^ entity, String^ format, ... array<Object^>^ arg);
 			static void LogError(Object^ entity, String^ format, ... array<Object^>^ arg);
+			static void LogDebug(Object^ entity, String^ format, ... array<Object^>^ arg);
 
 			static double BooleanTimeOut;
 			virtual property ILogger^ Logger {ILogger^ get() { return XbimGeometryCreator::logger; }};
