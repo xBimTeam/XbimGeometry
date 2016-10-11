@@ -328,6 +328,9 @@
     <None Include="SolidTestFiles\NestedBooleanClippingResults.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="SolidTestFiles\SweptExtrusion.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="test.runsettings" />
   </ItemGroup>
   <!--<ItemGroup>

@@ -1210,7 +1210,14 @@ namespace Xbim
 				sweep = (XbimWire^)sweep->Trim(0, Math::Abs(swdSolid->EndParam.Value - 1.0)<Precision::Confusion() ? sweep->Length : swdSolid->EndParam.Value, mf->Precision);
 			//make the outer wire
 			XbimPoint3D s = sweep->Start;
-			gp_Ax2 axCircle(gp_Pnt(s.X, s.Y, s.Z), gp_Dir(0., 0., 1.));
+
+			// todo: fix for IfcSweptDisk_With_IFCCOMPOSITECURVE
+			// using 
+			// gp_Ax2 axCircle(gp_Pnt(s.X, s.Y, s.Z), gp_Dir(0., 0., -1.)); 
+			// works to pass IfcSweptDisk_With_IFCCOMPOSITECURVE test case
+			// Is there a function to detect the direction of the starting point of the swdSolid->Directrix?
+			// 
+			gp_Ax2 axCircle(gp_Pnt(s.X, s.Y, s.Z), gp_Dir(0., 0., 1.)); // todo: <-- replace gp_Dir with appropriate initial Directrix direction
 			gp_Circ outer(axCircle, swdSolid->Radius);
 			Handle(Geom_Circle) hOuter = GC_MakeCircle(outer);
 			TopoDS_Edge outerEdge = BRepBuilderAPI_MakeEdge(hOuter);

@@ -8,7 +8,6 @@ using Xbim.Ifc4.GeometricModelResource;
 using Xbim.Ifc4.GeometryResource;
 using Xbim.Ifc4.Interfaces;
 
-
 namespace Ifc4GeometryTests
 {
     [DeploymentItem(@"x64\", "x64")]
@@ -42,6 +41,35 @@ namespace Ifc4GeometryTests
         }
 
         [TestMethod]
+        public void IfcSweptDisk_With_IFCCOMPOSITECURVE()
+        {
+            using (var eventTrace = LoggerFactory.CreateEventTrace())
+            {
+
+                using (var m = IfcStore.Open("SolidTestFiles\\SweptExtrusion.ifc"))
+                {
+                    var ss = m.Instances.OfType<IIfcSweptDiskSolid>().FirstOrDefault(e => e.Directrix is IIfcCompositeCurve);
+                    Assert.IsTrue(ss != null, "No Swept Disk found");
+                    Assert.IsTrue(ss.Directrix is IIfcCompositeCurve, "Incorrect sweep found");
+
+                    // the test passes if changing Xbim.Geometry.Engine\XbimSolid.cpp line 1213 in function XbimSolid::Init(IIfcSweptDiskSolid^ swdSolid)
+                    // to
+                    //      gp_Ax2 axCircle(gp_Pnt(s.X, s.Y, s.Z), gp_Dir(0., 0., -1.));
+                    // instead of the current
+                    //      gp_Ax2 axCircle(gp_Pnt(s.X, s.Y, s.Z), gp_Dir(0., 0., 1.));
+                    // is there a way to detect the initial tangent of the Directrix and use it there for the gp_Dir?
+                    
+                    var solid = _xbimGeometryCreator.CreateSolid(ss);
+                    Assert.IsTrue(eventTrace.Events.Count == 0); //no events should have been raised from this call
+
+                    IfcCsgTests.GeneralTest(solid);
+
+                    Assert.IsTrue(solid.Faces.Count() == 9, "Swept disk should have 9 faces");
+                }
+            }
+        }
+
+        [TestMethod]
         public void IfcSweptDisk_With_IfcComposite()
         {
             using (var eventTrace = LoggerFactory.CreateEventTrace())
@@ -58,7 +86,7 @@ namespace Ifc4GeometryTests
                     Assert.IsTrue(eventTrace.Events.Count == 0); //no events should have been raised from this call
 
                     IfcCsgTests.GeneralTest(solid);
-                    Assert.IsTrue(solid.Faces.Count() == 4, "Swept disk solids along a this composite curve should have 4 faces");
+                    Assert.IsTrue(solid.Faces.Count() == 4, "Swept disk solids along this composite curve should have 4 faces");
                 }
             }
         }
