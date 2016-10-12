@@ -205,7 +205,7 @@ namespace Xbim
 		}
 		XbimEdge::XbimEdge(XbimEdge^ edgeCurve, XbimVertex^ start, XbimVertex^ end, double maxTolerance)
 		{
-			double tolerance = Math::Max(start->Tolerance, end->Tolerance);
+			double tolerance = Math::Min(start->Tolerance, end->Tolerance);
 			double currentTolerance = tolerance;
 			if (start->Equals(end))
 			{
@@ -233,16 +233,23 @@ namespace Xbim
 						goto TryMakeEdge;
 					}
 				}
+				
 
-				if (edgeErr != BRepBuilderAPI_EdgeDone)
-				{
-					String^ errMsg = XbimEdge::GetBuildEdgeErrorMessage(edgeErr);
-					throw gcnew XbimException("WW013: Invalid edge found." + errMsg);
-				}
-				else
+				if (edgeErr == BRepBuilderAPI_EdgeDone  )
 				{
 					pEdge = new TopoDS_Edge();
 					*pEdge = edgeMaker.Edge();
+				}	
+				else if ( edgeErr == BRepBuilderAPI_DifferentPointsOnClosedCurve)//this is normally start and end same as the single point of a closed edge
+				{
+					pEdge = new TopoDS_Edge();
+					*pEdge = edgeCurve;
+				}
+				else
+				{
+					String^ errMsg = XbimEdge::GetBuildEdgeErrorMessage(edgeErr);
+					throw gcnew XbimException("WW013: Invalid edge found." + errMsg);
+
 				}
 			}
 		}
