@@ -20,6 +20,7 @@
 #include <BRep_Builder.hxx>
 using namespace  System::Threading;
 using namespace Xbim::Common;
+using namespace Xbim::XbimExtensions::Interfaces;
 namespace Xbim
 {
 	namespace Geometry
@@ -27,6 +28,25 @@ namespace Xbim
 		
  
 #pragma region Point Creation
+		void XbimGeometryCreator::LogDebug(Object^ entity, String^ format, ...array<Object^>^ arg)
+		{
+			String^ msg = String::Format(format, arg);
+			IPersistIfcEntity^ ifcEntity = dynamic_cast<IPersistIfcEntity^>(entity);
+			if (ifcEntity != nullptr)
+				logger->DebugFormat("GeomEngine: #{0}={1} [{2}]", ifcEntity->EntityLabel, ifcEntity->GetType()->Name, msg);
+			else
+				logger->DebugFormat("GeomEngine: {0} [{1}]", entity->GetType()->Name, msg);
+		}
+
+		void XbimGeometryCreator::LogWarning(Object^ entity, String^ format, ...array<Object^>^ arg)
+		{
+			String^ msg = String::Format(format, arg);
+			IPersistIfcEntity^ ifcEntity = dynamic_cast<IPersistIfcEntity^>(entity);
+			if (ifcEntity != nullptr)
+				logger->WarnFormat("GeomEngine: #{0}={1} [{2}]", ifcEntity->EntityLabel, ifcEntity->GetType()->Name, msg);
+			else
+				logger->WarnFormat("GeomEngine: {0} [{1}]", entity->GetType()->Name, msg);
+		}
 
 
 		IXbimGeometryObject^ XbimGeometryCreator::Create(IfcGeometricRepresentationItem^ geomRep)

@@ -40,6 +40,8 @@ namespace Xbim
 			}
 			//Central point for logging all errors
 			static ILogger^ logger = LoggerFactory::GetLogger();
+			static void LogDebug(Object^ entity, String^ format, ... array<Object^>^ arg);
+			static void LogWarning(Object^ entity, String^ format, ... array<Object^>^ arg);
 			static double BooleanTimeOut;
 			virtual property ILogger^ Logger{ILogger^ get(){ return XbimGeometryCreator::logger; }};
 			virtual IXbimShapeGeometryData^ CreateShapeGeometry(IXbimGeometryObject^ geometryObject, double precision, double deflection, double angle, XbimGeometryType storageType);

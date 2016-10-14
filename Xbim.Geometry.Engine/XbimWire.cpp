@@ -58,6 +58,7 @@
 #include <TopTools_ListIteratorOfListOfShape.hxx>
 using namespace Xbim::Common;
 using namespace Xbim::Ifc2x3::MeasureResource;
+using namespace System::Linq;
 
 namespace Xbim
 {
@@ -283,24 +284,55 @@ namespace Xbim
 
 		void XbimWire::Init(IfcPolyline^ pLine)
 		{
-			int total = pLine->Points->Count;
+			List<IfcCartesianPoint^>^ pointList = Enumerable::ToList(pLine->Points);
+			int total = pointList->Count;
 			if (total < 2)
 			{
-				XbimGeometryCreator::logger->WarnFormat("WW001: Line with zero length found in IfcPolyline = #{0}. Ignored", pLine->EntityLabel);
+				XbimGeometryCreator::LogWarning(pLine, "Polyline with less than 2 points found. Wire discarded");
 				return;
 			}
 
+			// prepare tolerance for geometry fixes 
 			double tolerance = pLine->ModelOf->ModelFactors->Precision;
-			//Make all the vertices
-			Standard_Boolean closed = Standard_False;
 
-			if (pLine->Points[0]->IsEqual(pLine->Points[total - 1], tolerance))
+			// check for contiguous point tolerance
+			for (int i = 1; i < total;)
 			{
-				total--; //skip the last point
-				if (total > 2) closed = Standard_True;//closed polyline with two points is not a valid closed shape
+				if (pointList[i - 1]->IsEqual(pointList[i], tolerance))
+				{
+					// remove the redundant point
+					XbimGeometryCreator::LogDebug(pLine, "Polyline with redundant points simplified. Point {0} discarded.", pointList[i]->EntityLabel);
+					pointList->RemoveAt(i);
+					total--;
+				}
+				else
+				{
+					// check next
+					i++;
+				}
+			}
+			
+			// check for closing point
+			Standard_Boolean closed = Standard_False;
+			do
+			{
+				if (pointList[0]->IsEqual(pointList[total - 1], tolerance))
+				{
+					total--; //skip the last point
+					closed = Standard_True;
+				}
+				else
+					break;
+			} while (total > 1);
+
+			if (total < 2)
+			{
+				XbimGeometryCreator::LogWarning(pLine, "Polyline with less than 2 points found. Wire discarded");
+				return;
 			}
 
-			TopTools_Array1OfShape vertexStore(1, pLine->Points->Count + 1);
+			//Make all the vertices
+			TopTools_Array1OfShape vertexStore(1, total + 1);
 			BRep_Builder builder;
 			TopoDS_Wire wire;
 			builder.MakeWire(wire);
@@ -311,7 +343,7 @@ namespace Xbim
 
 			for (int i = 0; i < total; i++) //add all the points into unique collection
 			{
-				IfcCartesianPoint^ p = pLine->Points[i];
+				IfcCartesianPoint^ p = pointList[i];
 				gp_Pnt current(p->X, p->Y, is3D ? p->Z : 0);
 				TopoDS_Vertex v;
 				builder.MakeVertex(v, current, tolerance);
@@ -360,32 +392,42 @@ namespace Xbim
 				}
 			}
 			wire.Closed(closed);
-			if (BRepCheck_Analyzer(wire, Standard_True).IsValid() == Standard_True)
+			if (total > 2) //if we have more than a line segment check it is ok and fix if self interecting
 			{
-				pWire = new TopoDS_Wire();
-				*pWire = wire;
-			}
-			else
-			{
-
-				double toleranceMax = pLine->ModelOf->ModelFactors->PrecisionMax;
-				ShapeFix_Shape sfs(wire);
-				sfs.SetPrecision(tolerance);
-				sfs.SetMinTolerance(tolerance);
-				sfs.SetMaxTolerance(toleranceMax);
-				sfs.Perform();
-
-				if (BRepCheck_Analyzer(sfs.Shape(), Standard_True).IsValid() == Standard_True && sfs.Shape().ShapeType() == TopAbs_WIRE) //in release builds except the geometry is not compliant
+				XbimFace^ xFace = nullptr;
+				if (is3D)
 				{
-					pWire = new TopoDS_Wire();
-					*pWire = TopoDS::Wire(sfs.Shape());
+					XbimWire^ xWire = gcnew XbimWire(wire);
+					XbimVector3D norm = xWire->Normal;
+					if (!norm.IsInvalid()) //this is not a polyline on a face so we cannot fix any problems just go with it.
+						xFace = gcnew XbimFace(norm);
 				}
 				else
+					xFace = gcnew XbimFace(XbimVector3D(0, 0, 1));
+				if (xFace != nullptr)
 				{
-					XbimGeometryCreator::logger->WarnFormat("WW004: Invalid IfcPolyline #{0} found. Discarded", pLine->EntityLabel);
-					return;
+					ShapeAnalysis_Wire wireChecker(wire, xFace, tolerance);
+					Standard_Boolean needsFixing = wireChecker.CheckSelfIntersection();
+					if (needsFixing == Standard_True)
+					{
+						ShapeFix_Wire wireFixer(wire, xFace, tolerance);
+						wireFixer.FixTailMode() = Standard_True;
+						wireFixer.SetMaxTailWidth(tolerance * 10000);
+						wireFixer.ModifyGeometryMode() = Standard_True;
+						wireFixer.ModifyTopologyMode() = Standard_True;
+						wireFixer.SetMaxTailAngle(0.5);
+						wireFixer.ClosedWireMode() = closed;
+						wireFixer.FixSelfIntersectionMode() = Standard_True;
+						wireFixer.FixSelfIntersectingEdgeMode() = Standard_True;
+						wireFixer.FixIntersectingEdgesMode() = Standard_True;
+						wireFixer.FixVertexToleranceMode() = Standard_True;
+						wireFixer.Perform();
+						wire = wireFixer.Wire();
+					}
 				}
 			}
+			pWire = new TopoDS_Wire();
+			*pWire = wire;
 		}
 
 		void XbimWire::Init(IfcBSplineCurve^ bspline)

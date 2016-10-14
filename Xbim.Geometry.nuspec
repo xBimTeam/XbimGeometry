@@ -18,6 +18,7 @@ The xBIM project provides packages to convert IFC models to COBie spreadsheets i
 IOS and Android versions are under development.</description>
         <summary>The .Net toolkit for developing BIM applications based on the IFC standard. Essential support for the Ifc data model</summary>
         <releaseNotes>
+          3.1.19 Geometry bugfixes.
           3.1.18 Management of nuget done right to allow for smooth updates to 4.
           3.1.15 Polyloop faces are meshed correctly considering orientation.
           3.1.12 Minor change to update version of WexBIM files to 2
