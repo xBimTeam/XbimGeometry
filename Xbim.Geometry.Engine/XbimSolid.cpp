@@ -66,7 +66,7 @@
 #include <Geom_TrimmedCurve.hxx>
 #include <TColgp_Array1OfPnt.hxx>
 #include <TShort_Array1OfShortReal.hxx>
-
+#include <BRepAdaptor_CompCurve.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
 #include <ShapeFix_Solid.hxx>
 #include <ShapeFix_Wireframe.hxx>
@@ -711,22 +711,32 @@ namespace Xbim
 
 		void XbimSolid::Init(IfcSweptDiskSolid^ swdSolid)
 		{
-
 			//Build the directrix
 			XbimModelFactors^ mf = swdSolid->ModelOf->ModelFactors;
 			XbimWire^ sweep = gcnew XbimWire(swdSolid->Directrix);
 			sweep = (XbimWire^)sweep->Trim(swdSolid->StartParam, swdSolid->EndParam, mf->Precision);
-			
+			if (!sweep->IsValid)
+			{
+				XbimGeometryCreator::LogWarning(swdSolid, "Could not build Directrix");
+				return;
+			}
+
+			// detecting the wire tangent at start
+			//
+			TopoDS_Edge edge;
+			Standard_Real uoe;
+			BRepAdaptor_CompCurve cc(sweep);
+			cc.Edge(0, edge, uoe);
+			Standard_Real l, f;
+			Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, f, l);
+			gp_Pnt p1;
+			gp_Vec tangent;
+			gp_Vec xDir;
+			curve->D1(0, p1, tangent);
+
 			//make the outer wire
 			XbimPoint3D s = sweep->Start;
-
-			// todo: fix for IfcSweptDisk_With_IFCCOMPOSITECURVE
-			// using 
-			// gp_Ax2 axCircle(gp_Pnt(s.X, s.Y, s.Z), gp_Dir(0., 0., -1.)); 
-			// works to pass IfcSweptDisk_With_IFCCOMPOSITECURVE test case
-			// Is there a function to detect the direction of the starting point of the swdSolid->Directrix?
-			// 
-			gp_Ax2 axCircle(gp_Pnt(s.X, s.Y, s.Z), gp_Dir(0., 0., 1.)); // todo: <-- replace gp_Dir with appropriate initial Directrix direction
+			gp_Ax2 axCircle(gp_Pnt(s.X, s.Y, s.Z), gp_Dir(tangent.X(), tangent.Y(), tangent.Z()));
 			gp_Circ outer(axCircle, swdSolid->Radius);
 			Handle(Geom_Circle) hOuter = GC_MakeCircle(outer);
 			TopoDS_Edge outerEdge = BRepBuilderAPI_MakeEdge(hOuter);
