@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
     <metadata>
-        <id>Xbim.Geometry.4</id>
-        <version>4.0.1-V001</version>
+        <id>Xbim.Geometry</id>
+        <version>4.0.8</version>
         <title>xBIM Geometry</title>
         <authors>xBIM Team</authors>
         <owners>Steve Lockley</owners>
@@ -20,11 +20,12 @@
           All Ifc2x3 and Ifc4 geometry classes are now supported.
           Also includes support for the WexBIM format which brings xBIM geometry to WebGL clients
           Target .Net 4.0, Visual Studio 2012, 2013 and 2015, C Runtime 10, 11 and 12
+          Nuget target imports fixed
       </releaseNotes>
         <language>en-GB</language>
         <tags>BIM, IFC, IfcXml, IfcZip, Ifc4, COBie, .Net, C#, BuildingSmart, Geometry, Brep</tags>
       <dependencies>
-        <dependency id="Xbim.Essentials.4" version="4.0.1-V001" />
+        <dependency id="Xbim.Essentials" version="4.0.2" />
       </dependencies>
     </metadata>
     <files>
@@ -32,9 +33,9 @@
       <file src="Output\Release\Xbim.Geometry.Engine.Interop.xml" target="lib\net40\Xbim.Geometry.Engine.Interop.xml" />
       <file src="Output\Release\Xbim.ModelGeometry.Scene.dll" target="lib\net40\Xbim.ModelGeometry.Scene.dll" />
       <file src="Output\Release\Xbim.ModelGeometry.Scene.xml" target="lib\net40\Xbim.ModelGeometry.Scene.xml" />
-      <file src="Output\Release\x86\Xbim.Geometry.Engine32.dll" target="build\net40\x86\Xbim.Geometry.Engine32.dll" />
-      <file src="Output\Release\x64\Xbim.Geometry.Engine64.dll" target="build\net40\x64\Xbim.Geometry.Engine64.dll" />
-      <file src="Output\Release\Xbim.Geometry.targets" target="build\net40\Xbim.Geometry.targets" />
+      <file src="Output\Release\x86\Xbim.Geometry.Engine32.dll" target="build\x86\Xbim.Geometry.Engine32.dll" />
+      <file src="Output\Release\x64\Xbim.Geometry.Engine64.dll" target="build\x64\Xbim.Geometry.Engine64.dll" />
+      <file src="Output\Release\Xbim.Geometry.targets" target="build\Xbim.Geometry.targets" />
       <file src="Output\Release\Xbim.Geometry.Engine.Interop.pdb" target="lib\net40\Xbim.Geometry.Engine.Interop.pdb" />
       <file src="Output\Release\Xbim.ModelGeometry.Scene.pdb" target="lib\net40\Xbim.ModelGeometry.Scene.pdb" />
     </files>

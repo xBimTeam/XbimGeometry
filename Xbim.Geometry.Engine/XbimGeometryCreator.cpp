@@ -62,6 +62,16 @@ namespace Xbim
 				logger->WarnFormat("GeomEngine: {0} [{1}]", entity->GetType()->Name, msg);
 		}
 
+		void XbimGeometryCreator::LogDebug(Object^ entity, String^ format, ...array<Object^>^ arg)
+		{
+			String^ msg = String::Format(format, arg);
+			IPersistEntity^ ifcEntity = dynamic_cast<IPersistEntity^>(entity);
+			if (ifcEntity != nullptr)
+				logger->DebugFormat("GeomEngine: #{0}={1} [{2}]", ifcEntity->EntityLabel, ifcEntity->GetType()->Name, msg);
+			else
+				logger->DebugFormat("GeomEngine: {0} [{1}]", entity->GetType()->Name, msg);
+		}
+
 		void XbimGeometryCreator::LogError(Object^ entity, String^ format, ...array<Object^>^ arg)
 		{
 			String^ msg = String::Format(format, arg);

@@ -488,6 +488,7 @@ namespace Xbim
 				sweep = (XbimWire^)sweep->Trim(repItem->StartParam.Value, sweep->Length, mf->Precision);
 			else if (!repItem->StartParam.HasValue && repItem->EndParam.HasValue)
 				sweep = (XbimWire^)sweep->Trim(0, Math::Abs(repItem->EndParam.Value - 1.0)<Precision::Confusion() ? sweep->Length : repItem->EndParam.Value, mf->Precision);
+			
 			if (!sweep->IsValid)
 			{
 				XbimGeometryCreator::LogWarning(repItem, "Could not build Directrix");
@@ -509,7 +510,7 @@ namespace Xbim
 			Quantity_Parameter u;
 			Quantity_Parameter v;
 			projector.Parameters(1, u, v);
-			XbimVector3D norm =refSurface->NormalAt(u, v);
+			XbimVector3D norm = refSurface->NormalAt(u, v);
 			//move the wire to the start point
 			TopoDS_Edge edge;
 			Standard_Real uoe;
@@ -1208,9 +1209,30 @@ namespace Xbim
 				sweep = (XbimWire^)sweep->Trim(swdSolid->StartParam.Value, sweep->Length, mf->Precision);
 			else if (!swdSolid->StartParam.HasValue && swdSolid->EndParam.HasValue)
 				sweep = (XbimWire^)sweep->Trim(0, Math::Abs(swdSolid->EndParam.Value - 1.0)<Precision::Confusion() ? sweep->Length : swdSolid->EndParam.Value, mf->Precision);
+			if (!sweep->IsValid)
+			{
+				XbimGeometryCreator::LogWarning(swdSolid, "Could not build Directrix");
+				return;
+			}
+
+			// todo: should we have a test case with an inner radius as well?
+
+			// detecting the wire tangent at start
+			//
+			TopoDS_Edge edge;
+			Standard_Real uoe;
+			BRepAdaptor_CompCurve cc(sweep);
+			cc.Edge(0, edge, uoe);
+			Standard_Real l, f;
+			Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, f, l);
+			gp_Pnt p1;
+			gp_Vec tangent;
+			gp_Vec xDir;
+			curve->D1(0, p1, tangent);
+		
 			//make the outer wire
 			XbimPoint3D s = sweep->Start;
-			gp_Ax2 axCircle(gp_Pnt(s.X, s.Y, s.Z), gp_Dir(0., 0., 1.));
+			gp_Ax2 axCircle(gp_Pnt(s.X, s.Y, s.Z), gp_Dir(tangent.X(), tangent.Y(), tangent.Z())); 
 			gp_Circ outer(axCircle, swdSolid->Radius);
 			Handle(Geom_Circle) hOuter = GC_MakeCircle(outer);
 			TopoDS_Edge outerEdge = BRepBuilderAPI_MakeEdge(hOuter);

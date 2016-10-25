@@ -309,10 +309,29 @@ namespace Xbim
 				return;
 			}
 
+			// prepare tolerance for geometry fixes 
 			double tolerance = pLine->Model->ModelFactors->Precision;
-			//Make all the vertices
-			Standard_Boolean closed = Standard_False;
 
+			// check for contiguous point tolerance
+			for (int i = 1; i < total;) 
+			{
+				if (XbimConvert::IsEqual(pointList[i - 1], pointList[i], tolerance))
+				{
+					// remove the redundant point
+					XbimGeometryCreator::LogDebug(pLine, "Polyline with redundant points simplified. Point {0} discarded.", pointList[i]->EntityLabel);
+					pointList->RemoveAt(i);
+					total--;
+				}
+				else
+				{
+					// check next
+					i++;
+				}
+			}
+
+			
+			// check for closing point
+			Standard_Boolean closed = Standard_False;
 			do
 			{
 				if (XbimConvert::IsEqual(pointList[0], pointList[total - 1], tolerance))
@@ -330,13 +349,12 @@ namespace Xbim
 				return;
 			}
 
+			//Make all the vertices
 			TopTools_Array1OfShape vertexStore(1, total + 1);
 			BRep_Builder builder;
 			TopoDS_Wire wire;
 			builder.MakeWire(wire);
 			bool is3D = XbimConvert::Is3D(pLine);
-			
-
 			gp_Pnt first;
 			gp_Pnt previous;
 
@@ -348,6 +366,7 @@ namespace Xbim
 				builder.MakeVertex(v, current, tolerance);
 				vertexStore.SetValue(i + 1, v);
 			}
+
 			int firstIdx = 1;
 			bool edgeAdded = false;
 			for (int pt = 1; pt <= total; pt++)
@@ -362,6 +381,7 @@ namespace Xbim
 				}
 				const TopoDS_Vertex& v1 = TopoDS::Vertex(vertexStore.Value(pt));
 				const TopoDS_Vertex& v2 = TopoDS::Vertex(vertexStore.Value(next));
+				
 				try
 				{
 					BRepBuilderAPI_MakeEdge edgeMaker(v1, v2);
@@ -370,10 +390,10 @@ namespace Xbim
 					{
 						gp_Pnt p1 = BRep_Tool::Pnt(v1);
 						gp_Pnt p2 = BRep_Tool::Pnt(v2);
-						String^ errMsg = XbimEdge::GetBuildEdgeErrorMessage(edgeErr);
-						XbimGeometryCreator::LogInfo(pLine, "Invalid edge found in polyline, Start = {0}, {1}, {2} End = {3}, {4}, {5}. Edge discarded",
-							 p1.X(), p1.Y(), p1.Z(), p2.X(), p2.Y(), p2.Z());
 
+						String^ errMsg = XbimEdge::GetBuildEdgeErrorMessage(edgeErr);
+						XbimGeometryCreator::LogWarning(pLine, "Invalid edge found in polyline, Start = {0}, {1}, {2} End = {3}, {4}, {5}. Edge discarded.",
+							 p1.X(), p1.Y(), p1.Z(), p2.X(), p2.Y(), p2.Z());
 					}
 					else
 					{
