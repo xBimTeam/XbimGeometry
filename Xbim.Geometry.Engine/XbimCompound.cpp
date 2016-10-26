@@ -38,6 +38,7 @@
 #include <BRepCheck_Analyzer.hxx>
 #include <ShapeFix_Edge.hxx>
 #include <ShapeFix_Face.hxx>
+#include <ShapeUpgrade_UnifySameDomain.hxx>
 using namespace System;
 using namespace System::Linq;
 using namespace Xbim::Common;
@@ -347,7 +348,7 @@ namespace Xbim
 		void XbimCompound::Init(IIfcAdvancedBrep^ solid)
 		{
 			IIfcAdvancedBrepWithVoids^ advancedBrepWithVoids = dynamic_cast<IIfcAdvancedBrepWithVoids^>(solid);
-			if (advancedBrepWithVoids != nullptr) return Init(advancedBrepWithVoids);			
+			if (advancedBrepWithVoids != nullptr) return Init(advancedBrepWithVoids);
 			BRep_Builder b;
 			XbimShell^ outerShell = InitAdvancedFaces(solid->Outer->CfsFaces);
 			if (!outerShell->IsValid) return;
@@ -371,7 +372,7 @@ namespace Xbim
 				theSolid->CorrectOrientation();
 			}
 			else
-			{				
+			{
 				theSolid = (XbimSolid^)outerShell->MakeSolid();
 			}
 			pCompound = new TopoDS_Compound();
@@ -389,10 +390,10 @@ namespace Xbim
 		void XbimCompound::Init(IIfcAdvancedBrepWithVoids^ brepWithVoids)
 		{
 			BRep_Builder b;
-			XbimShell^ outerShell = InitAdvancedFaces(brepWithVoids->Outer->CfsFaces);			
-			XbimSolid^ theSolid;			
+			XbimShell^ outerShell = InitAdvancedFaces(brepWithVoids->Outer->CfsFaces);
+			XbimSolid^ theSolid;
 			if (!outerShell->IsClosed) //we need to close it
-			{									
+			{
 				//advanced breps are always solids, so to make sure we have highest form
 				BRepBuilderAPI_Sewing seamstress(_sewingTolerance);
 				seamstress.Add(outerShell);
@@ -401,13 +402,13 @@ namespace Xbim
 				BRepBuilderAPI_MakeSolid solidmaker;
 				TopTools_IndexedMapOfShape shellMap;
 				TopExp::MapShapes(seamstress.SewedShape(), TopAbs_SHELL, shellMap);
-				for (int ishell = 1; ishell <= shellMap.Extent(); ++ishell) 
+				for (int ishell = 1; ishell <= shellMap.Extent(); ++ishell)
 				{
 					const TopoDS_Shell& shell = TopoDS::Shell(shellMap(ishell));
 					solidmaker.Add(shell);
 				}
 				theSolid = gcnew XbimSolid(solidmaker.Solid());
-			}	
+			}
 			else
 			{
 				BRepBuilderAPI_MakeSolid solidmaker;
@@ -426,7 +427,7 @@ namespace Xbim
 			}
 			if (builder.IsDone())
 			{
-				pCompound = new TopoDS_Compound(); 		
+				pCompound = new TopoDS_Compound();
 				b.MakeCompound(*pCompound);
 				b.Add(*pCompound, builder.Solid());
 			}//leave the outer shell without the voids
@@ -542,7 +543,7 @@ namespace Xbim
 						BRepBuilderAPI_MakeWire wireMaker;
 						bool isOuter = dynamic_cast<IIfcFaceOuterBound^>(ifcBound) != nullptr;
 						IIfcEdgeLoop^ edgeLoop = dynamic_cast<IIfcEdgeLoop^>(ifcBound->Bound);
-						
+
 						if (edgeLoop != nullptr) //they always should be
 						{
 							for each (IIfcOrientedEdge^ orientedEdge in edgeLoop->EdgeList)
@@ -579,7 +580,7 @@ namespace Xbim
 									//opencascade does not support edges made of multi-linear segments (polyline)
 									//these can be exapnded to discrete edges to maintain topological correctness
 									IIfcPolyline^ polyline = dynamic_cast<IIfcPolyline^>(edgeCurve->EdgeGeometry);
-									
+
 									if (polyline != nullptr && Enumerable::Count(polyline->Points) > 2) //we have multi segments
 									{
 										XbimWire^ polyWire; //see if we have done the other half
@@ -600,10 +601,10 @@ namespace Xbim
 										}
 
 										if (!edgeCurve->SameSense) polyWire = polyWire->Reversed();
-										if (!orientedEdge->Orientation) 
+										if (!orientedEdge->Orientation)
 											polyWire = polyWire->Reversed();
 										for each (XbimEdge^ edge in polyWire->Edges)
-											wireMaker.Add(edge);										
+											wireMaker.Add(edge);
 									}
 									else
 									{
@@ -623,7 +624,7 @@ namespace Xbim
 								{
 									throw gcnew XbimException("Incorrectly defined Edge, must be a valid edge curve");
 								}
-								
+
 							}
 
 						} // we have a wire		
@@ -659,12 +660,12 @@ namespace Xbim
 
 					if (!analyser.IsValid())
 					{
-						
+
 						ShapeFix_Face faceFix(xbimAdvancedFace);
 						faceFix.Perform();
 						ShapeExtend_Status status;
 						faceFix.Status(status);
-						if (status!=ShapeExtend_OK)
+						if (status != ShapeExtend_OK)
 							XbimGeometryCreator::LogWarning(advancedFace, "Incorrectly defined face #{0}, it has been accepted as it is defined", advancedFace->EntityLabel);
 						else
 							xbimAdvancedFace = gcnew XbimFace(faceFix.Face());
@@ -692,64 +693,182 @@ namespace Xbim
 
 		void  XbimCompound::Init(IIfcTriangulatedFaceSet^ faceSet)
 		{
-			BRepPrim_Builder builder;
+			BRep_Builder builder;
 			TopoDS_Shell shell;
 			builder.MakeShell(shell);
 			//create a list of all the vertices
 			List<XbimVertex^>^ vertices = gcnew List<XbimVertex^>(Enumerable::Count(faceSet->Coordinates->CoordList));
+			Dictionary<long long, XbimEdge^>^ edgeMap = gcnew Dictionary<long long, XbimEdge^>();
+
 			for each (IEnumerable<Ifc4::MeasureResource::IfcLengthMeasure>^ cp in faceSet->Coordinates->CoordList)
 			{
 				XbimTriplet<Ifc4::MeasureResource::IfcLengthMeasure> tpl = IEnumerableExtensions::AsTriplet<Ifc4::MeasureResource::IfcLengthMeasure>(cp);
 				XbimVertex^ v = gcnew XbimVertex(tpl.A, tpl.B, tpl.C, _sewingTolerance);
 				vertices->Add(v);
 			}
-			//ignore the normals as we cannot observe them in an opencascade model, we will recalculate
 
 
 			//make the triangles
 			for each (IEnumerable<Ifc4::MeasureResource::IfcPositiveInteger>^ indices in faceSet->CoordIndex)
 			{
-				XbimTriplet<Ifc4::MeasureResource::IfcPositiveInteger> tpl = IEnumerableExtensions::AsTriplet<Ifc4::MeasureResource::IfcPositiveInteger>(indices);
-
-				XbimVertex^ v1; XbimVertex^ v2; XbimVertex^ v3;
-				v1 = vertices[(int)tpl.A - 1];
-				v2 = vertices[(int)tpl.B - 1];
-				v3 = vertices[(int)tpl.C - 1];
-				BRepBuilderAPI_MakePolygon triangleMaker(v1, v2, v3, Standard_True);
-				if (triangleMaker.IsDone())
+				try
 				{
-					BRepBuilderAPI_MakeFace faceMaker(triangleMaker.Wire(), Standard_True);
+					XbimTriplet<Ifc4::MeasureResource::IfcPositiveInteger> tpl = IEnumerableExtensions::AsTriplet<Ifc4::MeasureResource::IfcPositiveInteger>(indices);
+
+					TopoDS_Vertex v1; TopoDS_Vertex v2; TopoDS_Vertex v3;
+					int i1 = (int)tpl.A - 1;
+					int i2 = (int)tpl.B - 1;
+					int i3 = (int)tpl.C - 1;
+					if (i1 == i2 || i2 == i3 || i1 == i3) 
+						continue;//not a triangle
+					v1 = vertices[i1];
+					v2 = vertices[i2];
+					v3 = vertices[i3];
+
+					long long edgeKey1 = ((long long)i1 << 32) | i2;//put v1 in the high part of the key								
+					long long edgeKey2 = ((long long)i2 << 32) | i3;///put v2 in the high part of the key				
+					long long edgeKey3 = ((long long)i3 << 32) | i1;///put v3 in the high part of the key
+					//do the reverse of the keys
+					long long revEdgeKey1 = ((long long)i2 << 32) | i1;///put v1 in the high part of the key								
+					long long revEdgeKey2 = ((long long)i3 << 32) | i2;///put v2 in the high part of the key				
+					long long revEdgeKey3 = ((long long)i1 << 32) | i3;///put v3 in the high part of the key
+
+					XbimEdge^ edge1;
+					XbimEdge^ edge2;
+					XbimEdge^ edge3;
+					bool flip = false;
+					if (edgeMap->TryGetValue(revEdgeKey1, edge1)) //look for the opposite edge first
+					{
+						XbimEdge^ anoEdge1;
+						if (!edgeMap->TryGetValue(edgeKey1, anoEdge1)) //if we don't find it create it, this means an edge i reffed twice in the same direction
+						{
+							edge1 = edge1->Reversed(); //make a reverse copy and add it to map
+							edgeMap->Add(edgeKey1, edge1);//this will throw an exeption if the edge is in more than twice
+						}
+						/*else
+							edge1 = anoEdge1->Reversed();*/
+					}
+					else // it might be in there but the wrong direction but we cannot deal with that now as it works all through the mesh, so assume it is ok just to add it
+					{
+						if (!edgeMap->TryGetValue(edgeKey1, edge1)) //if we don't find it create it, this means an edge i reffed twice in the same direction
+						{// Make the edge						
+							BRepLib_MakeEdge edgeMaker(TopoDS::Vertex(v1.Oriented(TopAbs_FORWARD)), TopoDS::Vertex(v2.Oriented(TopAbs_REVERSED)));
+							if (edgeMaker.IsDone())
+							{
+								edge1 = gcnew XbimEdge(edgeMaker.Edge());
+								edgeMap->Add(edgeKey1, edge1); //this will throw an exeption if the edge is in more than twice
+							}
+							else
+								continue; //this triangle is not a triangle
+						}
+					}
+
+					if (edgeMap->TryGetValue(revEdgeKey2, edge2)) //look for the opposite edge first
+					{
+						XbimEdge^ anoEdge2;
+						if (!edgeMap->TryGetValue(edgeKey2, anoEdge2)) //if we don't find it create it, this means an edge i reffed twice in the same direction
+						{
+							edge2 = edge2->Reversed(); //make a reverse copy and add it to map
+							edgeMap->Add(edgeKey2, edge2);//this will throw an exeption if the edge is in more than twice
+						}
+						/*else
+							edge2 = anoEdge2->Reversed();*/
+					}
+					else // it might be in there but the wrong direction but we cannot deal with that now as it works all through the mesh, so assume it is ok just to add it
+					{
+						if (!edgeMap->TryGetValue(edgeKey2, edge2)) //if we don't find it create it, this means an edge i reffed twice in the same direction
+						{
+							// Make the edge						
+							BRepLib_MakeEdge edgeMaker(TopoDS::Vertex(v2.Oriented(TopAbs_FORWARD)), TopoDS::Vertex(v3.Oriented(TopAbs_REVERSED)));
+							if (edgeMaker.IsDone())
+							{
+								edge2 = gcnew XbimEdge(edgeMaker.Edge());
+								edgeMap->Add(edgeKey2, edge2); //this will throw an exeption if the edge is in more than twice
+							}
+							else
+								continue; //this triangle is not a triangle
+						}
+					}
+
+					if (edgeMap->TryGetValue(revEdgeKey3, edge3)) //look for the opposite edge first
+					{
+						XbimEdge^ anoEdge3;
+						if (!edgeMap->TryGetValue(edgeKey3, anoEdge3)) //if we don't find it create it, this means an edge i reffed twice in the same direction
+						{
+							edge3 = edge3->Reversed(); //make a reverse copy and add it to map
+							edgeMap->Add(edgeKey3, edge3);//this will throw an exeption if the edge is in more than twice
+						}
+						/*else
+							edge3 = anoEdge3->Reversed();*/
+					}
+					else // it might be in there but the wrong direction but we cannot deal with that now as it works all through the mesh, so assume it is ok just to add it
+					{
+						if (!edgeMap->TryGetValue(edgeKey3, edge3)) //if we don't find it create it, this means an edge i reffed twice in the same direction
+						{
+							// Make the edge						
+							BRepLib_MakeEdge edgeMaker(TopoDS::Vertex(v3.Oriented(TopAbs_FORWARD)), TopoDS::Vertex(v1.Oriented(TopAbs_REVERSED)));
+							if (edgeMaker.IsDone())
+							{
+								edge3 = gcnew XbimEdge(edgeMaker.Edge());
+								edgeMap->Add(edgeKey3, edge3); //this will throw an exeption if the edge is in more than twice
+							}
+							else
+								continue; //this triangle is not a triangle
+						}
+					}
+
+					TopoDS_Wire wire;
+					builder.MakeWire(wire);
+					builder.Add(wire, edge1);
+					builder.Add(wire, edge2);
+					builder.Add(wire, edge3);
+					
+					BRepBuilderAPI_MakeFace faceMaker(wire, Standard_True);
 					if (faceMaker.IsDone())
 					{
-						builder.AddShellFace(shell, faceMaker.Face());
+						
+						builder.Add(shell, faceMaker.Face());
 					}
 				}
+
+				catch (Standard_Failure e)
+				{
+					String^ err = gcnew String(Standard_Failure::Caught()->GetMessageString());
+					XbimGeometryCreator::LogWarning(faceSet, "Error build triangle in mesh. " + err);
+				}
 			}
+			/*ShapeFix_Shell shellFixer(shell);
+			Standard_Boolean fixed = shellFixer.Perform();*/
+			ShapeUpgrade_UnifySameDomain unifier(shell);
+			unifier.SetAngularTolerance(faceSet->Model->ModelFactors->DeflectionAngle);
+			unifier.SetLinearTolerance(_sewingTolerance);
+			unifier.Build();
 			BRep_Builder b;
 			pCompound = new TopoDS_Compound();
 			b.MakeCompound(*pCompound);
-			BRepBuilderAPI_Sewing seamstress(_sewingTolerance);
+			/*BRepBuilderAPI_Sewing seamstress(_sewingTolerance);
 			seamstress.Add(shell);
 			seamstress.Perform();
-			_isSewn = true;
-			TopoDS_Shape result = seamstress.SewedShape();
-			b.Add(*pCompound, result);
+			_isSewn = true;*/
+			//TopoDS_Shape result = seamstress.SewedShape();
+			b.Add(*pCompound, unifier.Shape());
 		}
 
 
 		void XbimCompound::Init(IEnumerable<IIfcFace^>^ faces)
 		{
+
 			double tolerance;
 			Xbim::Common::IModel^ model;
+			double angularTolerance;
 			for each (IIfcFace^ face in faces)
 			{
 				model = face->Model;
 				tolerance = model->ModelFactors->Precision;
+				angularTolerance = model->ModelFactors->DeflectionAngle;
 				_sewingTolerance = model->ModelFactors->Precision;
 				break;
 			}
-
-
 			BRep_Builder builder;
 			TopoDS_Shell shell;
 			builder.MakeShell(shell);
@@ -800,10 +919,20 @@ namespace Xbim
 				//delete face;
 			}
 
+
+
+
 			pCompound = new TopoDS_Compound();
 			builder.MakeCompound(*pCompound);
-			builder.Add(*pCompound, shell);
-
+			BRepBuilderAPI_Sewing seamstress(tolerance);
+			seamstress.Add(shell);
+			seamstress.Perform();
+			ShapeUpgrade_UnifySameDomain unifier(seamstress.SewedShape());
+			//unifier.SetAngularTolerance(angularTolerance);
+			unifier.SetLinearTolerance(_sewingTolerance);
+			unifier.Build();
+			builder.Add(*pCompound, unifier.Shape());
+			_isSewn = true;
 		}
 
 
