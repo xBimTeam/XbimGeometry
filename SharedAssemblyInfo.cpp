@@ -14,5 +14,5 @@ using namespace System::Reflection;
 
 
 // AssemblyVersion is the CLR version. Change this only when making breaking changes
-[assembly:AssemblyVersionAttribute("2.4.0.0")];
+[assembly:AssemblyVersionAttribute("4.0.0.0")];
 

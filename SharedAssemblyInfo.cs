@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 
 // This file contains all Assembly meta-data that is common across the solution
 
@@ -10,10 +10,10 @@
 
 [assembly: AssemblyCompany("Lockley Consulting")]
 [assembly: AssemblyProduct("Xbim Library")]
-[assembly: AssemblyCopyright("Copyright © Lockley Consulting 2007-2015")]
+[assembly: AssemblyCopyright("Copyright © Xbim Team 2007-2016")]
 [assembly: AssemblyTrademark("Xbim")]
 [assembly: AssemblyCulture("")]
  
 // AssemblyVersion is the CLR version. Change this only when making breaking changes
 [assembly: AssemblyVersion("4.0")]
-
+[assembly: AssemblyInformationalVersion("4.0.develop")]
