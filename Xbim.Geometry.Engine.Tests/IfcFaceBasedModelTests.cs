@@ -43,8 +43,28 @@ namespace Ifc4GeometryTests
 
         }
 
-        
-
+        [TestMethod]
+        public void BuildSolidFromComplexClosedShell()
+        {
+            using (var m = IfcStore.Open("SolidTestFiles\\ClosedShell_with_errors.ifc"))
+            {
+                var closedShell = m.Instances[2699] as IIfcClosedShell;
+                Assert.IsTrue(closedShell != null, "No closedShell found");
+                var bodyShape = _xbimGeometryCreator.CreateSolidSet(closedShell);
+                Assert.IsTrue(bodyShape.Count == 1);
+            }
+        }
+        [TestMethod]
+        public void BuildSolidFromTriangulatedFaceSet()
+        {
+            using (var m = IfcStore.Open("SolidTestFiles\\TriangulatedFaceset.ifc"))
+            {
+                var tfs = m.Instances[154353] as IIfcTriangulatedFaceSet;
+                Assert.IsTrue(tfs != null, "No triangulated face set found");
+                var bodyShape = _xbimGeometryCreator.Create(tfs);
+                //Assert.IsTrue(bodyShape.Count == 1);
+            }
+        }
         /// <summary>
         /// This is a bad Brep that does not correctly define the faceset
         /// </summary>
