@@ -8,7 +8,7 @@ using System.Reflection;
 [assembly: AssemblyConfiguration("Release")]
 #endif
 
-[assembly: AssemblyCompany("Lockley Consulting")]
+[assembly: AssemblyCompany("Xbim Team")]
 [assembly: AssemblyProduct("Xbim Library")]
 [assembly: AssemblyCopyright("Copyright © Xbim Team 2007-2016")]
 [assembly: AssemblyTrademark("Xbim")]
