@@ -924,15 +924,19 @@ namespace Xbim
 
 			pCompound = new TopoDS_Compound();
 			builder.MakeCompound(*pCompound);
-			BRepBuilderAPI_Sewing seamstress(tolerance);
-			seamstress.Add(shell);
-			seamstress.Perform();
-			ShapeUpgrade_UnifySameDomain unifier(seamstress.SewedShape());
-			//unifier.SetAngularTolerance(angularTolerance);
-			unifier.SetLinearTolerance(_sewingTolerance);
-			unifier.Build();
-			builder.Add(*pCompound, unifier.Shape());
-			_isSewn = true;
+			builder.Add(*pCompound, shell);
+			if (Sew()) //no point in unifying if we cannot sew
+			{
+				ShapeUpgrade_UnifySameDomain unifier(*pCompound);
+				//unifier.SetAngularTolerance(angularTolerance);
+				unifier.SetLinearTolerance(_sewingTolerance);
+				unifier.Build();
+				TopoDS_Compound* newCompound = new TopoDS_Compound();
+				builder.MakeCompound(*newCompound);
+				builder.Add(*newCompound, unifier.Shape());
+				*pCompound = *newCompound;
+			}
+			
 		}
 
 

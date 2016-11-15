@@ -517,7 +517,8 @@ namespace Xbim
 						{
 							if (!s->HasValidTopology)
 								s->FixTopology();
-							solids->Add(s);
+							if (s->Faces->Count>0) //if we have any face then let it through, ot really correct but some geometries are just broken
+								solids->Add(s);
 						}		
 
 					}
