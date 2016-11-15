@@ -576,8 +576,18 @@ namespace Ifc4GeometryTests
                             _xbimGeometryCreator.Create(windowShape,
                                 (IIfcAxis2Placement3D)
                                     ((IIfcLocalPlacement)windowOpening.ObjectPlacement).RelativePlacement);
-                    shapes.Cut(hole, m.ModelFactors.OneMilliMetre);
-
+                    var result = shapes.Cut(hole, m.ModelFactors.OneMilliMetre);
+                    double shapesSurfaceArea = 0;
+                    foreach (var item in shapes)
+                    {
+                        shapesSurfaceArea += item.SurfaceArea;
+                    }
+                    double resultSurfaceArea = 0;
+                    foreach (var item in result)
+                    {
+                        resultSurfaceArea += item.SurfaceArea;
+                    }
+                    Assert.IsTrue(Math.Abs(resultSurfaceArea -shapesSurfaceArea)<1e-5); //nothing should have happened as the opening is already in the faceted brep
                     Assert.IsTrue(eventTrace.Events.Count == 0); //no events should have been raised from this call
                 }
             }

@@ -1,8 +1,17 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xbim.Common;
 using Xbim.Common.Step21;
 using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc;
+using Xbim.Ifc4.GeometricConstraintResource;
+using Xbim.Ifc4.GeometricModelResource;
+using Xbim.Ifc4.GeometryResource;
+using Xbim.Ifc4.Interfaces;
+using Xbim.Ifc4.Kernel;
+using Xbim.Ifc4.ProductExtension;
 using Xbim.Ifc4.ProfileResource;
+using Xbim.Ifc4.RepresentationResource;
+using Xbim.Ifc4.SharedBldgElements;
 
 namespace Ifc4GeometryTests
 {
@@ -13,7 +22,127 @@ namespace Ifc4GeometryTests
     public class IfcProfileDefTests
     {
         private readonly XbimGeometryEngine _xbimGeometryCreator = new XbimGeometryEngine();
-       
+
+        [TestMethod]
+        public void ArbitraryClosedProfileDefWithIncorrectPlacementTest()
+        {
+
+            using (var model = IfcStore.Create(new XbimEditorCredentials(), IfcSchemaVersion.Ifc4, XbimStoreType.InMemoryModel))
+            {
+                using (var txn = model.BeginTransaction("Create Column"))
+                {
+                    IfcProject project = model.Instances.New<IfcProject>();
+                    project.Initialize(ProjectUnits.SIUnitsUK);
+                    project.Name = "Test Project";
+
+                    IfcColumn col = model.Instances.New<IfcColumn>();
+                    col.Name = "Column With ArbitraryClosedProfileDef";
+
+
+                    //Creating IfcArbitraryClosedProfileDef that will contain IfcCompositeCurve
+                    IfcArbitraryClosedProfileDef arbClosedProf = model.Instances.New<IfcArbitraryClosedProfileDef>();
+
+                    //To create IfcArbitraryClosedProfileDef, we'll need to create IfcCompositeCurve
+                    //Creating IfcCompositeCurve
+                    IfcCompositeCurve myCompCurve = model.Instances.New<IfcCompositeCurve>();
+
+                    //To Create IfcCompositeCurve, We'll need to create IfcCompositeCurveSegment
+                    //create IfcCompositeCurveSegment (polyline)
+                    IfcCompositeCurveSegment polylineSeg = model.Instances.New<IfcCompositeCurveSegment>();
+
+                    //create IfcCompositeCurveSegment (arc)
+                    IfcCompositeCurveSegment arcSeg = model.Instances.New<IfcCompositeCurveSegment>();
+
+                    //Creating IfcPolyline that will be the parent curve for IfcCompositeCurveSegment "polylineSeg"
+                    IfcPolyline myPolyline = model.Instances.New<IfcPolyline>();
+
+                    //Creating Points to build the IfcPolyline
+                    IfcCartesianPoint p0 = model.Instances.New<IfcCartesianPoint>();
+                    p0.SetXY(200, 100);
+
+                    IfcCartesianPoint p1 = model.Instances.New<IfcCartesianPoint>();
+                    p1.SetXY(0, 100);
+
+                    IfcCartesianPoint p2 = model.Instances.New<IfcCartesianPoint>();
+                    p2.SetXY(0, 0);
+
+                    IfcCartesianPoint p3 = model.Instances.New<IfcCartesianPoint>();
+                    p3.SetXY(400, 0);
+
+                    IfcCartesianPoint p4 = model.Instances.New<IfcCartesianPoint>();
+                    p4.SetXY(400, 600);
+
+                    IfcCartesianPoint p5 = model.Instances.New<IfcCartesianPoint>();
+                    p5.SetXY(0, 600);
+
+                    IfcCartesianPoint p6 = model.Instances.New<IfcCartesianPoint>();
+                    p6.SetXY(0, 500);
+
+                    IfcCartesianPoint p7 = model.Instances.New<IfcCartesianPoint>();
+                    p7.SetXY(200, 500);
+
+                    //Adding points to the polyline
+                    myPolyline.Points.Add(p0);
+                    myPolyline.Points.Add(p1);
+                    myPolyline.Points.Add(p2);
+                    myPolyline.Points.Add(p3);
+                    myPolyline.Points.Add(p4);
+                    myPolyline.Points.Add(p5);
+                    myPolyline.Points.Add(p6);
+                    myPolyline.Points.Add(p7);
+
+                    //Assigning myPolyline to the IfcCompositeCurveSegment polylineSeg
+                    polylineSeg.ParentCurve = myPolyline;
+
+                    //Creating Arc using IfcTrimmedCurve
+                    IfcTrimmedCurve myArc = model.Instances.New<IfcTrimmedCurve>();
+
+                    //To create IfcTrimmedCurve, We'll need to create IfcCircle and trim it using IfcTrimmingSelect
+                    IfcCircle myCirc = model.Instances.New<IfcCircle>();
+                    myCirc.Radius = 213.554;
+                    IfcCartesianPoint cP = model.Instances.New<IfcCartesianPoint>();
+                    cP.SetXY(125.1312, 300); //this should really be a 3D point
+
+                    IfcAxis2Placement3D plcmnt = model.Instances.New<IfcAxis2Placement3D>();
+                    plcmnt.Location = cP;
+                    plcmnt.RefDirection = model.Instances.New<IfcDirection>();
+                    plcmnt.RefDirection.SetXY(0, 1);//this should eb a 3D axis
+                    myCirc.Position = plcmnt;
+
+                    myArc.BasisCurve = myCirc;
+
+                    IfcTrimmingSelect v1 = p7;
+                    IfcTrimmingSelect v2 = p0;
+
+                    myArc.Trim1.Add(v1);
+                    myArc.Trim2.Add(v2);
+
+                    arcSeg.ParentCurve = myArc;
+
+                    //Adding the created two IfcCompositeCurveSegments to the IfcCompositeCurve
+                    myCompCurve.Segments.Add(arcSeg);
+                    myCompCurve.Segments.Add(polylineSeg);
+
+                    //Assigning IfcCompositeCurve "myCompCurve" to the IfcArbitraryClosedProfileDef
+                    arbClosedProf.OuterCurve = myCompCurve;
+
+                    arbClosedProf.ProfileType = IfcProfileTypeEnum.AREA;
+
+                    //model as a swept area solid
+                    IfcExtrudedAreaSolid body = model.Instances.New<IfcExtrudedAreaSolid>();
+                    body.Depth = 2000;
+                    body.SweptArea = arbClosedProf;
+                    body.ExtrudedDirection = model.Instances.New<IfcDirection>();
+                    body.ExtrudedDirection.SetXYZ(0, 0, 1);
+
+                   
+                    txn.Commit();
+                    var solid = _xbimGeometryCreator.CreateSolid(body);
+                    Assert.IsTrue((int)solid.Volume == 239345450);
+                }
+            }
+        }
+
         [TestMethod]
         public void CircleProfileDefTest()
         {

@@ -203,11 +203,11 @@ namespace Xbim
 
 		gp_Ax3 XbimConvert::ToAx3(IIfcAxis2Placement3D^ axis3D)
 		{
-			gp_XYZ loc(axis3D->Location->X, axis3D->Location->Y, axis3D->Location->Z);
+			gp_XYZ loc(axis3D->Location->X, axis3D->Location->Y, XbimConvert::GetZValueOrZero(axis3D->Location));
 			if (axis3D->Axis != nullptr && axis3D->RefDirection != nullptr) //if one or other is null then use default axis (Ifc Rule)
 			{
-				gp_Dir zDir(axis3D->Axis->X, axis3D->Axis->Y, axis3D->Axis->Z);
-				gp_Dir xDir(axis3D->RefDirection->X, axis3D->RefDirection->Y, axis3D->RefDirection->Z);
+				gp_Dir zDir(axis3D->Axis->X, axis3D->Axis->Y, XbimConvert::GetZValueOrZero(axis3D->Axis));
+				gp_Dir xDir(axis3D->RefDirection->X, axis3D->RefDirection->Y, XbimConvert::GetZValueOrZero(axis3D->RefDirection));
 				return gp_Ax3(loc, zDir, xDir);
 			}
 			else
