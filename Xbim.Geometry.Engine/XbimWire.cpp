@@ -117,7 +117,8 @@ namespace Xbim
 			fixer.SetTolerance(*pWire, tolerance, TopAbs_VERTEX);
 		}
 		XbimWire::XbimWire(double precision){ Init(precision); }
-		XbimWire::XbimWire(IIfcPolyline^ profile){ Init(profile); }
+		XbimWire::XbimWire(IIfcPolyline^ profile) { Init(profile, false); }
+		XbimWire::XbimWire(IIfcPolyline^ profile, bool attemptClosing) { Init(profile, attemptClosing); }
 		XbimWire::XbimWire(IIfcCompositeCurve^ profile){ Init(profile); }
 		XbimWire::XbimWire(IIfcCompositeCurveSegment^ profile){ Init(profile); };
 		XbimWire::XbimWire(IIfcTrimmedCurve^ profile){ Init(profile); }
@@ -301,6 +302,11 @@ namespace Xbim
 
 		void XbimWire::Init(IIfcPolyline^ pLine)
 		{
+			Init(pLine, false);
+		}
+
+		void XbimWire::Init(IIfcPolyline^ pLine, bool attemptClosing)
+		{
 			List<IIfcCartesianPoint^>^ pointList = Enumerable::ToList(pLine->Points);
 			int total = pointList->Count;
 			if (total < 2)
@@ -329,9 +335,10 @@ namespace Xbim
 				}
 			}
 
-			
 			// check for closing point
 			Standard_Boolean closed = Standard_False;
+			if (attemptClosing)
+				closed = Standard_True;
 			do
 			{
 				if (XbimConvert::IsEqual(pointList[0], pointList[total - 1], tolerance))

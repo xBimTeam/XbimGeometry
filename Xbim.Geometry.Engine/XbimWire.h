@@ -30,6 +30,7 @@ namespace Xbim
 
 			void Init(double precision);
 			void Init(IIfcPolyline^ loop);
+			void Init(IIfcPolyline^ loop, bool attemptClosing);
 			void Init(IIfcCompositeCurve^ loop);
 			void Init(IIfcTrimmedCurve^ loop);
 			void Init(IIfcCurve^ loop);
@@ -83,6 +84,7 @@ namespace Xbim
 			XbimWire(const TopoDS_Wire& wire);
 			XbimWire(const TopoDS_Wire& wire, Object^ tag);
 			XbimWire(IIfcPolyline^ loop);
+			XbimWire(IIfcPolyline^ loop, bool attemptClosing);
 			XbimWire(IIfcBSplineCurve^ bspline);
 			XbimWire(IIfcBSplineCurveWithKnots^ bSpline);
 			XbimWire(IIfcRationalBSplineCurveWithKnots^ bSpline);
