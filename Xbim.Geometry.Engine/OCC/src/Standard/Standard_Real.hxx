@@ -37,9 +37,14 @@ __Standard_API Standard_Real    ACosApprox  (const Standard_Real );
 __Standard_API Standard_Real    ASin        (const Standard_Real );
 __Standard_API Standard_Real    ATan2       (const Standard_Real , const Standard_Real );
 __Standard_API Standard_Real    NextAfter   (const Standard_Real , const Standard_Real );
-__Standard_API Standard_Real    Sign        (const Standard_Real , const Standard_Real );
+
+//! Returns |a| if b >= 0; -|a| if b < 0.
+__Standard_API Standard_Real    Sign(const Standard_Real a, const Standard_Real b);
+
 __Standard_API Standard_Real    ATanh       (const Standard_Real );
 __Standard_API Standard_Real    ACosh       (const Standard_Real );
+__Standard_API Standard_Real    Sinh       (const Standard_Real );
+__Standard_API Standard_Real    Cosh       (const Standard_Real );
 __Standard_API Standard_Real    Log         (const Standard_Real );
 __Standard_API Standard_Real    Sqrt        (const Standard_Real );
 
@@ -161,12 +166,6 @@ inline Standard_Real     Ceiling (const Standard_Real Value)
 inline Standard_Real     Cos (const Standard_Real Value) 
 { return cos(Value); }
 
-//-------------------------------------------------------------------
-// Cosh : Returns the hyperbolic cosine of a real
-//-------------------------------------------------------------------
-inline Standard_Real     Cosh (const Standard_Real Value) 
-{ return cosh(Value); }
-
 
 //-------------------------------------------------------------------
 // Epsilon : The function returns absolute value of difference
@@ -285,11 +284,6 @@ inline Standard_Real     Round (const Standard_Real Value)
 inline Standard_Real     Sin (const Standard_Real Value) 
 { return sin(Value); }
 
-//-------------------------------------------------------------------
-// Sinh : Returns the hyperbolic sine of a real
-//-------------------------------------------------------------------
-inline Standard_Real     Sinh(const Standard_Real Value) 
-{ return sinh(Value); }
 
 //-------------------------------------------------------------------
 // ASinh : Returns the hyperbolic arc sine of a real

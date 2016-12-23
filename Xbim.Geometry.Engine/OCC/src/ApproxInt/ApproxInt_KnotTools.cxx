@@ -28,9 +28,9 @@
 #include <TColgp_Array1OfPnt.hxx>
 
 // (Sqrt(5.0) - 1.0) / 4.0
-static const Standard_Real aSinCoeff = 0.30901699437494742410229341718282;
+//static const Standard_Real aSinCoeff = 0.30901699437494742410229341718282;
+static const Standard_Real aSinCoeff2 = 0.09549150281252627; // aSinCoeff^2 = (3. - Sqrt(5.)) / 8.
 static const Standard_Integer aMaxPntCoeff = 15;
-
 
 //=======================================================================
 //function : EvalCurv
@@ -57,17 +57,33 @@ static Standard_Real EvalCurv(const Standard_Real dim,
       mp += p*p;
     }
   }
-  //mp *= 2.; //P(j,i) = -P(i,j);
-  mp = Sqrt(mp);
   //
   Standard_Real q = 0.;
   for(i = 0; i < dim; ++i)
   {
     q += V1[i]*V1[i];
   }
-  q = Sqrt(q);
+
+  if (q < 1 / Precision::Infinite())
+  {
+    // Indeed, if q is small then we can
+    // obtain equivocation of "0/0" type.
+    // In this case, local curvature can be
+    // not equal to 0 or Infinity.
+    // However, it is good solution to insert
+    // knot in the place with such singularity.
+    // Therefore, we need imitation of curvature
+    // jumping. Return of Precision::Infinite() is
+    // enough for it.
+
+    return Precision::Infinite();
+  }
+
+  q = Min(q, Precision::Infinite());
+  q *= q*q;
+
   //
-  Standard_Real curv = mp / (q*q*q);
+  Standard_Real curv = Sqrt(mp / q);
 
   return curv;
 }
@@ -238,7 +254,6 @@ void ApproxInt_KnotTools::ComputeKnotInds(const NCollection_LocalArray<Standard_
       {
         Standard_Integer anIndPrev = theInds(j-1);
         Standard_Integer anIndNext = theInds(j+1);
-        Standard_Real sina;
         Standard_Integer ici = (anIndPrev - aCurv.Lower()) * theDim,
           ici1 = (anIndNext - aCurv.Lower()) * theDim,
           icm = (anInd - aCurv.Lower()) * theDim;
@@ -262,10 +277,8 @@ void ApproxInt_KnotTools::ComputeKnotInds(const NCollection_LocalArray<Standard_
         }
         //mp *= 2.; //P(j,i) = -P(i,j);
         //
-        sina = mp/(m1*m2);
-        sina = Sqrt(sina);
 
-        if(sina  > aSinCoeff) 
+        if(mp > aSinCoeff2 * m1 * m2) // Sqrt (mp/(m1*m2)) > aSinCoeff
         {
           //Insert new knots
           Standard_Real d1 = Abs(aCurv(anInd) - aCurv(anIndPrev));
@@ -494,7 +507,6 @@ Standard_Boolean ApproxInt_KnotTools::InsKnotBefI(const Standard_Integer theI,
     {
       if(ChkCurv)
       {
-        Standard_Real sina;
         Standard_Integer ici = (anInd - theCurv.Lower()) * theDim,
           ici1 = (anInd1 - theCurv.Lower()) * theDim,
           icm = (mid - theCurv.Lower()) * theDim;
@@ -519,10 +531,8 @@ Standard_Boolean ApproxInt_KnotTools::InsKnotBefI(const Standard_Integer theI,
         }
         //mp *= 2.; //P(j,i) = -P(i,j);
         //
-        sina = mp/(m1*m2);
-        sina = Sqrt(sina);
 
-        if(sina > aSinCoeff)
+        if (mp > aSinCoeff2 * m1 * m2) // Sqrt (mp / m1m2) > aSinCoeff
         {
           theInds.InsertBefore(theI, mid);
           return Standard_True;

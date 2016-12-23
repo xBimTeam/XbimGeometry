@@ -20,6 +20,7 @@
 #include <Message_ProgressIndicator.hxx>
 #include <ShapeFix_Shape.hxx>
 #include <BRepCheck_Analyzer.hxx>
+#include <ShapeUpgrade_UnifySameDomain.hxx>
 using namespace System;
 using namespace System::ComponentModel;
 namespace Xbim
@@ -485,7 +486,7 @@ namespace Xbim
 				default:
 					break;
 				}		
-								
+				
 				pBuilder->SetArguments(toBeProcessed);
 				pBuilder->SetTools(cuttingObjects);
 			//	pBuilder->SetFuzzyValue(tolerance);
@@ -506,15 +507,41 @@ namespace Xbim
 			   //	BRepTools::Write(pBuilder->Shape(), "c:\\tmp\\r");
 					TopoDS_Compound occCompound;
 					builder.MakeCompound(occCompound);
-					if (BRepCheck_Analyzer(pBuilder->Shape(), Standard_True).IsValid() == Standard_True)
+				
+					if (BRepCheck_Analyzer(pBuilder->Shape(), Standard_True).IsValid() == Standard_False)
 					{
 
 						ShapeFix_Shape shapeFixer(pBuilder->Shape());
+						shapeFixer.SetPrecision(tolerance);
+						/*shapeFixer.SetMaxTolerance(tolerance*10);
+						shapeFixer.SetMinTolerance(tolerance * 10);*/
+						shapeFixer.FixFaceTool()->FixIntersectingWiresMode() = Standard_True;
+						shapeFixer.FixFaceTool()->FixOrientationMode() = Standard_True;
+						shapeFixer.FixFaceTool()->FixWireTool()->FixAddCurve3dMode() = Standard_True;
+						shapeFixer.FixFaceTool()->FixWireTool()->FixIntersectingEdgesMode() = Standard_True;
 						shapeFixer.Perform();
-						builder.Add(occCompound, shapeFixer.Shape());
+						ShapeUpgrade_UnifySameDomain unifier(shapeFixer.Shape());
+						unifier.SetAngularTolerance(0.5);
+						unifier.SetLinearTolerance(tolerance);
+						unifier.Build();
+						builder.Add(occCompound, unifier.Shape());
+						
 					}
 					else
-						builder.Add(occCompound, pBuilder->Shape());
+					{
+						ShapeFix_Shape shapeFixer(pBuilder->Shape());
+						shapeFixer.SetPrecision(tolerance);
+						shapeFixer.FixFaceTool()->FixIntersectingWiresMode()=Standard_True;
+						shapeFixer.FixFaceTool()->FixOrientationMode() = Standard_True;
+						shapeFixer.FixFaceTool()->FixWireTool()->FixAddCurve3dMode() = Standard_True;
+						shapeFixer.FixFaceTool()->FixWireTool()->FixIntersectingEdgesMode() = Standard_True;
+						shapeFixer.Perform();
+						ShapeUpgrade_UnifySameDomain unifier(shapeFixer.Shape());
+						unifier.SetAngularTolerance(0.5);
+						unifier.SetLinearTolerance(tolerance);
+						unifier.Build();
+						builder.Add(occCompound, unifier.Shape());
+					}
 					XbimCompound^ compound = gcnew XbimCompound(occCompound, false, tolerance);
 
 					if (bop != BOPAlgo_COMMON) //do not need to add these as they by definition do not intersect

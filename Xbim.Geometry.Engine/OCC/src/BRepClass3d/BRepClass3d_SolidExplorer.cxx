@@ -226,6 +226,29 @@ Standard_Boolean BRepClass3d_SolidExplorer::PointInTheFace
 }
 
 //=======================================================================
+//function : ClassifyUVPoint
+//purpose  : 
+//=======================================================================
+
+TopAbs_State BRepClass3d_SolidExplorer::ClassifyUVPoint
+                   (const IntCurvesFace_Intersector& theIntersector,
+                    const Handle(BRepAdaptor_HSurface)& theSurf,
+                    const gp_Pnt2d& theP2d) const
+{
+  // first find if the point is near an edge/vertex
+  gp_Pnt aP3d = theSurf->Value(theP2d.X(), theP2d.Y());
+  BRepClass3d_BndBoxTreeSelectorPoint aSelectorPoint(myMapEV);
+  aSelectorPoint.SetCurrentPoint(aP3d);
+  Standard_Integer aSelsVE = myTree.Select(aSelectorPoint);
+  if (aSelsVE > 0)
+  {
+    // The point is inside the tolerance area of vertices/edges => return ON state.
+    return TopAbs_ON;
+  }
+  return theIntersector.ClassifyUVPoint(theP2d);
+}
+
+//=======================================================================
 //function : PointInTheFace
 //purpose  : 
 //=======================================================================
@@ -264,7 +287,7 @@ Standard_Boolean BRepClass3d_SolidExplorer::PointInTheFace
     if(ptr) { 
       const IntCurvesFace_Intersector& TheIntersector = (*((IntCurvesFace_Intersector *)ptr));
       // Check if the point is already in the face
-      if(IsInside && (TheIntersector.ClassifyUVPoint(gp_Pnt2d(u_,v_))==TopAbs_IN)) {
+      if (IsInside && (ClassifyUVPoint(TheIntersector, surf, gp_Pnt2d(u_, v_)) == TopAbs_IN)) {
         gp_Pnt aPnt;
         surf->D1(u_, v_, aPnt, theVecD1U, theVecD1V);
         if (aPnt.SquareDistance(APoint_) < Precision::Confusion() * Precision::Confusion())
@@ -280,7 +303,7 @@ Standard_Boolean BRepClass3d_SolidExplorer::PointInTheFace
       for(u=du+(U1+U2)*0.5; u<U2; u+=du) {          //--  0  X    u increases
         for(v=dv+(V1+V2)*0.5; v<V2; v+=dv) {        //--  0  0    v increases
           if(++NbPntCalc>=IndexPoint) { 
-            if(TheIntersector.ClassifyUVPoint(gp_Pnt2d(u,v))==TopAbs_IN) { 
+            if (ClassifyUVPoint(TheIntersector, surf, gp_Pnt2d(u, v)) == TopAbs_IN) {
               u_=u; v_=v;
               surf->D1 (u, v, APoint_, theVecD1U, theVecD1V);
               IndexPoint = NbPntCalc;
@@ -293,7 +316,7 @@ Standard_Boolean BRepClass3d_SolidExplorer::PointInTheFace
       for(u=-du+(U1+U2)*0.5; u>U1; u-=du) {         //--  0  0    u decreases
         for(v=-dv+(V1+V2)*0.5; v>V1; v-=dv) {       //--  X  0    v decreases
           if(++NbPntCalc>=IndexPoint) {
-            if(TheIntersector.ClassifyUVPoint(gp_Pnt2d(u,v))==TopAbs_IN) { 
+            if (ClassifyUVPoint(TheIntersector, surf, gp_Pnt2d(u, v)) == TopAbs_IN) {
               u_=u; v_=v;
               surf->D1 (u, v, APoint_, theVecD1U, theVecD1V);
               IndexPoint = NbPntCalc;
@@ -305,7 +328,7 @@ Standard_Boolean BRepClass3d_SolidExplorer::PointInTheFace
       for(u=-du+(U1+U2)*0.5; u>U1; u-=du) {         //--  X  0    u decreases
         for(v=dv+(V1+V2)*0.5; v<V2; v+=dv) {        //--  0  0    v increases
           if(++NbPntCalc>=IndexPoint) { 
-            if(TheIntersector.ClassifyUVPoint(gp_Pnt2d(u,v))==TopAbs_IN) { 
+            if (ClassifyUVPoint(TheIntersector, surf, gp_Pnt2d(u, v)) == TopAbs_IN) {
               u_=u; v_=v;
               surf->D1 (u, v, APoint_, theVecD1U, theVecD1V);
               IndexPoint = NbPntCalc;
@@ -317,7 +340,7 @@ Standard_Boolean BRepClass3d_SolidExplorer::PointInTheFace
       for(u=du+(U1+U2)*0.5; u<U2; u+=du) {         //--  0  0     u increases
         for(v=-dv+(V1+V2)*0.5; v>V1; v-=dv) {      //--  0  X     v decreases
           if(++NbPntCalc>=IndexPoint) {
-            if(TheIntersector.ClassifyUVPoint(gp_Pnt2d(u,v))==TopAbs_IN) { 
+            if (ClassifyUVPoint(TheIntersector, surf, gp_Pnt2d(u, v)) == TopAbs_IN) {
               u_=u; v_=v;
               surf->D1 (u, v, APoint_, theVecD1U, theVecD1V);
               IndexPoint = NbPntCalc;
@@ -335,7 +358,7 @@ Standard_Boolean BRepClass3d_SolidExplorer::PointInTheFace
       for(u=du+U1; u<U2; u+=du) { 
         for(v=dv+V1; v<V2; v+=dv) {
           if(++NbPntCalc>=IndexPoint) {
-            if(TheIntersector.ClassifyUVPoint(gp_Pnt2d(u,v))==TopAbs_IN) { 
+            if (ClassifyUVPoint(TheIntersector, surf, gp_Pnt2d(u, v)) == TopAbs_IN) {
               u_=u; v_=v;
               surf->D1 (u, v, APoint_, theVecD1U, theVecD1V);
               IndexPoint = NbPntCalc;
@@ -347,7 +370,7 @@ Standard_Boolean BRepClass3d_SolidExplorer::PointInTheFace
       u=(U1+U2)*0.5;
       v=(V1+V2)*0.5;
       if(++NbPntCalc>=IndexPoint) {
-        if(TheIntersector.ClassifyUVPoint(gp_Pnt2d(u,v))==TopAbs_IN) { 
+        if (ClassifyUVPoint(TheIntersector, surf, gp_Pnt2d(u, v)) == TopAbs_IN) {
           u_=u; v_=v;
           surf->D1 (u, v, APoint_, theVecD1U, theVecD1V);
           IndexPoint = NbPntCalc;
@@ -847,23 +870,44 @@ void BRepClass3d_SolidExplorer::InitShape(const TopoDS_Shape& S)
   BRepBndLib::Add(myShape,myBox);
 #endif
 
-  // Fill mapEV with vertices and edges from shape.
-  TopExp::MapShapes(myShape, TopAbs_EDGE, myMapEV);
-  TopExp::MapShapes(myShape, TopAbs_VERTEX, myMapEV);  
-
+  // since the internal/external parts should be avoided in tree filler,
+  // there is no need to add these parts in the EV map as well
+  TopExp_Explorer aExpF(myShape, TopAbs_FACE);
+  for (; aExpF.More(); aExpF.Next()) {
+    const TopoDS_Shape& aF = aExpF.Current();
+    //
+    TopAbs_Orientation anOrF = aF.Orientation();
+    if (anOrF == TopAbs_INTERNAL || anOrF == TopAbs_EXTERNAL) {
+      continue;
+    }
+    //
+    TopExp_Explorer aExpE(aF, TopAbs_EDGE);
+    for (; aExpE.More(); aExpE.Next()) {
+      const TopoDS_Shape& aE = aExpE.Current();
+      //
+      TopAbs_Orientation anOrE = aE.Orientation();
+      if (anOrE == TopAbs_INTERNAL || anOrE == TopAbs_EXTERNAL) {
+        continue;
+      }
+      //
+      if (BRep_Tool::Degenerated(TopoDS::Edge(aE))) {
+        continue;
+      }
+      //
+      TopExp::MapShapes(aE, myMapEV);
+    }
+  }
+  //
+  // Fill mapEV with vertices and edges from shape
   NCollection_UBTreeFiller <Standard_Integer, Bnd_Box> aTreeFiller (myTree);
-
-  for (Standard_Integer i = 1; i <= myMapEV.Extent(); i++)
-  {
-    Bnd_Box B;
-    const TopoDS_Shape& Sh = myMapEV(i);
-    TopAbs_Orientation ori = Sh.Orientation();
-    if (ori == TopAbs_EXTERNAL || ori == TopAbs_INTERNAL)
-      continue;
-    if (Sh.ShapeType() == TopAbs_EDGE && BRep_Tool::Degenerated(TopoDS::Edge(Sh)))
-      continue;
-    BRepBndLib::Add(Sh,B);
-    aTreeFiller.Add(i, B);
+  //
+  Standard_Integer i, aNbEV = myMapEV.Extent();
+  for (i = 1; i <= aNbEV; ++i) {
+    const TopoDS_Shape& aS = myMapEV(i);
+    //
+    Bnd_Box aBox;
+    BRepBndLib::Add(aS, aBox);
+    aTreeFiller.Add(i, aBox);
   }
   aTreeFiller.Fill();
 }

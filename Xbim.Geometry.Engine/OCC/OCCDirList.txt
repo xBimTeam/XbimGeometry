@@ -145,6 +145,7 @@ ShapeFix
 ShapeProcess
 ShapeProcessAPI
 ShapeUpgrade
+SHMessage
 Standard
 StdFail
 StdSelect

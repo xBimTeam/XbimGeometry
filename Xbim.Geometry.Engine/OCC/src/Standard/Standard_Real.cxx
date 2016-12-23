@@ -113,11 +113,9 @@ Standard_Real ATan2 (const Standard_Real Value, const Standard_Real Other)
 
 //-------------------------------------------------------------------
 // Sign : Returns |a| if B >= 0; -|a| if b < 0.
-//             from x in the direction y
 //-------------------------------------------------------------------
 Standard_Real Sign(const Standard_Real a, const Standard_Real b)
 {
-  //==== We use the function "nextafter()" fom library "math.h" ==============
   if (b >= 0.0) {
     return Abs(a);
   } else {
@@ -263,6 +261,34 @@ Standard_Real     ACosh (const Standard_Real Value)
 #else
   return acosh(Value);
 #endif
+}
+
+//-------------------------------------------------------------------
+// Cosh : Returns the hyperbolic cosine of a real
+//-------------------------------------------------------------------
+Standard_Real     Cosh (const Standard_Real Value) 
+{ 
+  if ( Abs(Value) > 0.71047586007394394e+03 ){
+    Standard_NumericError::Raise("Result of Cosh exceeds the maximum value Standard_Real");
+#ifdef OCCT_DEBUG
+    cout << "Result of Cosh exceeds the maximum value Standard_Real" << endl ;
+#endif
+  } 
+  return cosh(Value); 
+}
+
+//-------------------------------------------------------------------
+// Sinh : Returns the hyperbolicsine of a real
+//-------------------------------------------------------------------
+Standard_Real     Sinh (const Standard_Real Value) 
+{ 
+  if ( Abs(Value) > 0.71047586007394394e+03 ){
+    Standard_NumericError::Raise("Result of Sinh exceeds the maximum value Standard_Real");
+#ifdef OCCT_DEBUG
+    cout << "Result of Sinh exceeds the maximum value Standard_Real" << endl ;
+#endif
+  } 
+  return sinh(Value); 
 }
 
 //-------------------------------------------------------------------

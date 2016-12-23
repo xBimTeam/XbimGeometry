@@ -34,6 +34,8 @@
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Face.hxx>
 
+static const Standard_Real Epsilon1 = Epsilon(1.);
+
 //=======================================================================
 //function : UIntegrationOrder
 //purpose  : 
@@ -389,7 +391,8 @@ Standard_Integer BRepGProp_Face::LIntOrder(const Standard_Real Eps) const
   Standard_Real aVmin = mySurface.FirstVParameter();
   Standard_Real aVmax = mySurface.LastVParameter();
 
-  Standard_Real anR = Min((aYmax-aYmin)/(aVmax-aVmin), 1.);
+  Standard_Real dv = (aVmax-aVmin);
+  Standard_Real anR = (dv > Epsilon1 ? Min ((aYmax - aYmin) / dv, 1.) : 1.);
 
 //  Standard_Integer anRInt = Max(RealToInt(Ceiling(SVIntSubs()*anR)), 2);
   Standard_Integer anRInt = RealToInt(Ceiling(SVIntSubs()*anR));
@@ -467,7 +470,7 @@ void BRepGProp_Face::LKnots(TColStd_Array1OfReal& Knots) const
     break;
   case GeomAbs_Circle:
   case GeomAbs_Ellipse:
-    Knots(1) = 0.0;  Knots(2) = M_PI*2.0/3.0;  Knots(3) = M_PI*4.0/3.0;  Knots(2) = M_PI*6.0/3.0;
+    Knots(1) = 0.0;  Knots(2) = M_PI*2.0/3.0;  Knots(3) = M_PI*4.0/3.0;  Knots(4) = M_PI*6.0/3.0;
     break;
   case GeomAbs_Parabola:
   case GeomAbs_Hyperbola:

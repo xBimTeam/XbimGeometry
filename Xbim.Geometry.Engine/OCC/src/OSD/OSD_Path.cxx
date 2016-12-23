@@ -255,17 +255,9 @@ static void DosExtract(const TCollection_AsciiString& what,
   buffer.Remove(1,disk.Length());  // Removes <<disk:>>
  }
 
- if (buffer.Search(".") != -1){ // There is an extension to extract
-  ext = buffer.Token(".",2); 
-  ext.Insert(1,'.');            // Prepends 'dot'
-  pos = buffer.Search(".");     // Removes extension from buffer
-  if (pos != -1)
-   buffer.Remove(pos,ext.Length());
- }
-
  trek = buffer;
 
- trek.ChangeAll('\\','|');  
+ trek.ChangeAll('\\','|');
 
  pos = trek.Search("..");
  while (pos != -1){        // Changes every ".." by '^'
@@ -274,16 +266,20 @@ static void DosExtract(const TCollection_AsciiString& what,
   pos = trek.Search("..");
  }
 
- pos = trek.SearchFromEnd("|");  // Extract name
+ pos = trek.SearchFromEnd ("|");  // Extract name
  if (pos != -1) {
-  p = (Standard_PCharacter)trek.ToCString();
-  name = &p[pos];
-  trek.Remove(trek.Search(name),name.Length());
+   p = (Standard_PCharacter)trek.ToCString ();
+   name = &p[pos];
+   if (name.Length ()) trek.Remove (pos + 1, name.Length ());
  }
  else {   // No '|' means no trek but a name
-  name = buffer;
-  trek = "";
+   name = buffer;
+   trek = "";
  }
+
+ pos = name.SearchFromEnd (".");
+ if (pos != -1)      // There is an extension to extract
+   ext = name.Split (pos - 1);
 }
 
 
@@ -897,11 +893,11 @@ OSD_Path ::  OSD_Path (
 {
 
  Standard_Integer        i, j, len;
- static char __drive [ _MAX_DRIVE ];
- static char __dir [ _MAX_DIR ];
- static char __trek [ _MAX_DIR ];
- static char __fname [ _MAX_FNAME ];
- static char __ext [ _MAX_EXT ];
+ char __drive [ _MAX_DRIVE ];
+ char __dir [ _MAX_DIR ];
+ char __trek [ _MAX_DIR ];
+ char __fname [ _MAX_FNAME ];
+ char __ext [ _MAX_EXT ];
 
  memset(__drive, 0,_MAX_DRIVE);
  memset(__dir, 0,_MAX_DIR);
@@ -1022,7 +1018,7 @@ void OSD_Path :: SystemName (
 
  Standard_Integer        i, j;
  TCollection_AsciiString fullPath;
- static Standard_Character trek [ _MAX_PATH ];
+ Standard_Character trek [ _MAX_PATH ];
  Standard_Character      chr;
 
  memset(trek,0,_MAX_PATH);
