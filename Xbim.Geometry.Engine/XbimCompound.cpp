@@ -873,9 +873,9 @@ namespace Xbim
 			TopoDS_Shell shell;
 			builder.MakeShell(shell);
 			TopTools_DataMapOfIntegerShape vertexStore;
-			for each (IIfcFace^ unloadedFace in  faces)
+			for each (IIfcFace^ fc in  faces)
 			{
-				IIfcFace^ fc = (IIfcFace^)model->Instances[unloadedFace->EntityLabel]; //improves performance and reduces memory load
+				//IIfcFace^ fc = (IIfcFace^)model->Instances[unloadedFace->EntityLabel]; //improves performance and reduces memory load
 				List<Tuple<XbimWire^, IIfcPolyLoop^, bool>^>^ loops = gcnew List<Tuple<XbimWire^, IIfcPolyLoop^, bool>^>();
 				for each (IIfcFaceBound^ bound in fc->Bounds) //build all the loops
 				{
