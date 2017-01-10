@@ -79,7 +79,7 @@ namespace Ifc4GeometryTests
 
                 var solids = _xbimGeometryCreator.CreateSolidSet(fbr);
 
-                Assert.IsTrue(solids.Count == 2, "Expected 2 solids");
+                Assert.IsTrue(solids.Count == 1, "Expected 1 solid");
                 //foreach (var solid in solids)
                 //{
                 //    IfcCsgTests.GeneralTest(solid, true);

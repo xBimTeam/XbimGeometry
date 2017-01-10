@@ -704,6 +704,7 @@ namespace Xbim
 			BRep_Builder builder;
 			TopoDS_Shell shell;
 			builder.MakeShell(shell);
+			int faceCount = 0;
 			//create a list of all the vertices
 			List<XbimVertex^>^ vertices = gcnew List<XbimVertex^>(Enumerable::Count(faceSet->Coordinates->CoordList));
 			Dictionary<long long, XbimEdge^>^ edgeMap = gcnew Dictionary<long long, XbimEdge^>();
@@ -753,8 +754,7 @@ namespace Xbim
 							edge1 = edge1->Reversed(); //make a reverse copy and add it to map
 							edgeMap->Add(edgeKey1, edge1);//this will throw an exeption if the edge is in more than twice
 						}
-						/*else
-							edge1 = anoEdge1->Reversed();*/
+						
 					}
 					else // it might be in there but the wrong direction but we cannot deal with that now as it works all through the mesh, so assume it is ok just to add it
 					{
@@ -832,9 +832,10 @@ namespace Xbim
 					builder.Add(wire, edge3);
 					
 					BRepBuilderAPI_MakeFace faceMaker(wire, Standard_True);
+					
 					if (faceMaker.IsDone())
-					{
-						
+					{			
+						faceCount++;		
 						builder.Add(shell, faceMaker.Face());
 					}
 				}
@@ -845,16 +846,25 @@ namespace Xbim
 					XbimGeometryCreator::LogWarning(faceSet, "Error build triangle in mesh. " + err);
 				}
 			}
-			/*ShapeFix_Shell shellFixer(shell);
-			Standard_Boolean fixed = shellFixer.Perform();*/
-			ShapeUpgrade_UnifySameDomain unifier(shell);
-			unifier.SetAngularTolerance(faceSet->Model->ModelFactors->DeflectionAngle);
-			unifier.SetLinearTolerance(_sewingTolerance);
-			unifier.Build();
-			BRep_Builder b;
 			pCompound = new TopoDS_Compound();
-			b.MakeCompound(*pCompound);
-			b.Add(*pCompound, unifier.Shape());
+			builder.MakeCompound(*pCompound);
+			if (faceCount < MaxFacesToSew)
+			{
+				ShapeUpgrade_UnifySameDomain unifier(shell);
+				unifier.SetAngularTolerance(0.0174533); //1 degree
+				unifier.SetLinearTolerance(_sewingTolerance);
+				try
+				{
+					unifier.Build();
+					builder.Add(*pCompound, unifier.Shape());
+				}
+				catch (...)
+				{
+					builder.Add(*pCompound, shell);
+				}
+			}
+			else
+				builder.Add(*pCompound, shell);
 		}
 
 
@@ -1039,23 +1049,30 @@ namespace Xbim
 			}
 			else
 				result = shell;
-			//remove unnecesary faces, normally caused by triangulation, this improves boolean quality
-			ShapeUpgrade_UnifySameDomain unifier(result);
-			unifier.SetAngularTolerance(0.0174533); //1 degree
-			unifier.SetLinearTolerance(tolerance);		
 			pCompound = new TopoDS_Compound();
 			builder.MakeCompound(*pCompound);
-			try
+			//remove unnecesary faces, normally caused by triangulation, this improves boolean quality
+			if (allFaces->Count < MaxFacesToSew)
 			{
-				//sometimes unifier crashes
-				unifier.Build();					
-				builder.Add(*pCompound, unifier.Shape());				
+				ShapeUpgrade_UnifySameDomain unifier(result);
+				unifier.SetAngularTolerance(0.0174533); //1 degree
+				unifier.SetLinearTolerance(tolerance);
+				
+				try
+				{
+					//sometimes unifier crashes
+					unifier.Build();
+					builder.Add(*pCompound, unifier.Shape());
+				}
+				catch (...) //any failure
+				{
+					//default to what we had
+					builder.Add(*pCompound, result);
+				}
 			}
-			catch (...) //any failure
-			{
-				//default to what we had
+			else
 				builder.Add(*pCompound, result);
-			}				
+			_isSewn = true; //effectively further sewing will yield no advantage
 		}
 
 #pragma endregion
