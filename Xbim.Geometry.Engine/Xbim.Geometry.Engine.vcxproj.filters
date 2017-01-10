@@ -5001,16 +5001,36 @@
     <ClCompile Include="OCC\src\Standard\Standard_OutOfMemory.cxx">
       <Filter>Source files\TKernel\Standard</Filter>
     </ClCompile>
-    <ClCompile Include="OCC\src\BRepClass3d\BRepClass3d_BndBoxTree.cxx" />
-    <ClCompile Include="OCC\src\Extrema\Extrema_FuncPSDist.cxx" />
-    <ClCompile Include="OCC\src\Extrema\Extrema_FuncPSNorm.cxx" />
-    <ClCompile Include="OCC\src\GCPnts\GCPnts_DistFunction2d.cxx" />
-    <ClCompile Include="OCC\src\GCPnts\GCPnts_DistFunction.cxx" />
-    <ClCompile Include="OCC\src\Bnd\Bnd_Range.cxx" />
-    <ClCompile Include="OCC\src\BRepOffset\BRepOffset_MakeOffset_1.cxx" />
-    <ClCompile Include="OCC\src\IntPatch\IntPatch_SpecialPoints.cxx" />
-    <ClCompile Include="OCC\src\BRepOffset\BRepOffset_MakeSimpleOffset.cxx" />
-    <ClCompile Include="OCC\src\BRepOffset\BRepOffset_SimpleOffset.cxx" />
+    <ClCompile Include="OCC\src\Bnd\Bnd_Range.cxx">
+      <Filter>Source files\TKMath\Bnd</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepClass3d\BRepClass3d_BndBoxTree.cxx">
+      <Filter>Source files\TKTopAlgo\BRepClass3d</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepOffset\BRepOffset_MakeOffset_1.cxx">
+      <Filter>Source files\TKOffset\BRepOffset</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepOffset\BRepOffset_MakeSimpleOffset.cxx">
+      <Filter>Source files\TKOffset\BRepOffset</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepOffset\BRepOffset_SimpleOffset.cxx">
+      <Filter>Source files\TKOffset\BRepOffset</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\Extrema\Extrema_FuncPSDist.cxx">
+      <Filter>Source files\TKGeomBase\Extrema</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\Extrema\Extrema_FuncPSNorm.cxx">
+      <Filter>Source files\TKGeomBase\Extrema</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\GCPnts\GCPnts_DistFunction.cxx">
+      <Filter>Source files\TKGeomBase\GCPnts</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\GCPnts\GCPnts_DistFunction2d.cxx">
+      <Filter>Source files\TKGeomBase\GCPnts</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\IntPatch\IntPatch_SpecialPoints.cxx">
+      <Filter>Source files\TKGeomAlgo\IntPatch</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source files">
@@ -15778,26 +15798,66 @@
     <ClInclude Include="OCC\src\IntTools\IntTools_WLineTool.hxx">
       <Filter>Source files\TKBO\IntTools</Filter>
     </ClInclude>
-    <ClInclude Include="OCC\src\BRepClass3d\BRepClass3d_BndBoxTree.hxx" />
-    <ClInclude Include="OCC\src\BVH\BVH_BinaryTree.hxx" />
-    <ClInclude Include="OCC\src\BVH\BVH_QuadTree.hxx" />
-    <ClInclude Include="OCC\src\BVH\BVH_QuickSorter.hxx" />
-    <ClInclude Include="OCC\src\BVH\BVH_RadixSorter.hxx" />
-    <ClInclude Include="OCC\src\Extrema\Extrema_FuncPSDist.hxx" />
-    <ClInclude Include="OCC\src\Extrema\Extrema_FuncPSNorm.hxx" />
-    <ClInclude Include="OCC\src\GCPnts\GCPnts_DistFunction2d.hxx" />
-    <ClInclude Include="OCC\src\GCPnts\GCPnts_DistFunction.hxx" />
-    <ClInclude Include="OCC\src\Quantity\Quantity_ColorRGBA.hxx" />
-    <ClInclude Include="OCC\src\TColStd\TColStd_IndexedDataMapOfStringString.hxx" />
-    <ClInclude Include="OCC\src\Bnd\Bnd_Range.hxx" />
-    <ClInclude Include="OCC\src\gp\gp_TrsfNLerp.hxx" />
-    <ClInclude Include="OCC\src\IntPatch\IntPatch_SpecialPoints.hxx" />
-    <ClInclude Include="OCC\src\IntPatch\IntPatch_SpecPntType.hxx" />
-    <ClInclude Include="OCC\src\NCollection\NCollection_Lerp.hxx" />
-    <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_GlueEnum.hxx" />
-    <ClInclude Include="OCC\src\BRepOffset\BRepOffset_MakeSimpleOffset.hxx" />
-    <ClInclude Include="OCC\src\BRepOffset\BRepOffset_SimpleOffset.hxx" />
-    <ClInclude Include="OCC\src\Quantity\Quantity_ColorHasher.hxx" />
+    <ClInclude Include="OCC\src\Bnd\Bnd_Range.hxx">
+      <Filter>Source files\TKMath\Bnd</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_GlueEnum.hxx">
+      <Filter>Source files\TKBO\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepClass3d\BRepClass3d_BndBoxTree.hxx">
+      <Filter>Source files\TKTopAlgo\BRepClass3d</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepOffset\BRepOffset_MakeSimpleOffset.hxx">
+      <Filter>Source files\TKOffset\BRepOffset</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepOffset\BRepOffset_SimpleOffset.hxx">
+      <Filter>Source files\TKOffset\BRepOffset</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BVH\BVH_BinaryTree.hxx">
+      <Filter>Source files\TKMath\BVH</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BVH\BVH_QuadTree.hxx">
+      <Filter>Source files\TKMath\BVH</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BVH\BVH_QuickSorter.hxx">
+      <Filter>Source files\TKMath\BVH</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BVH\BVH_RadixSorter.hxx">
+      <Filter>Source files\TKMath\BVH</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\Extrema\Extrema_FuncPSDist.hxx">
+      <Filter>Source files\TKGeomBase\Extrema</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\Extrema\Extrema_FuncPSNorm.hxx">
+      <Filter>Source files\TKGeomBase\Extrema</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\GCPnts\GCPnts_DistFunction.hxx">
+      <Filter>Source files\TKGeomBase\GCPnts</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\GCPnts\GCPnts_DistFunction2d.hxx">
+      <Filter>Source files\TKGeomBase\GCPnts</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IntPatch\IntPatch_SpecialPoints.hxx">
+      <Filter>Source files\TKGeomAlgo\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IntPatch\IntPatch_SpecPntType.hxx">
+      <Filter>Source files\TKGeomAlgo\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\NCollection\NCollection_Lerp.hxx">
+      <Filter>Source files\TKernel\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\gp\gp_TrsfNLerp.hxx">
+      <Filter>Source files\TKMath\gp</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\Quantity\Quantity_ColorHasher.hxx">
+      <Filter>Source files\TKernel\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\Quantity\Quantity_ColorRGBA.hxx">
+      <Filter>Source files\TKernel\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\TColStd\TColStd_IndexedDataMapOfStringString.hxx">
+      <Filter>Source files\TKernel\TColStd</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="OCC\src\Adaptor3d\Adaptor3d_GenHCurve.gxx">
@@ -17613,16 +17673,36 @@
     <None Include="OCC\src\Adaptor2d\Adaptor2d_OffsetCurve.lxx">
       <Filter>Source files\TKG2d\Adaptor2d</Filter>
     </None>
-    <None Include="OCC\src\BVH\BVH_BinaryTree.lxx" />
-    <None Include="OCC\src\BVH\BVH_QuadTree.lxx" />
-    <None Include="OCC\src\BVH\BVH_QuickSorter.lxx" />
-    <None Include="OCC\src\BVH\BVH_RadixSorter.lxx" />
-    <None Include="OCC\src\GCPnts\GCPnts_AbscissaPoint.pxx" />
-    <None Include="OCC\src\GCPnts\GCPnts_QuasiUniformAbscissa.pxx" />
-    <None Include="OCC\src\GCPnts\GCPnts_QuasiUniformDeflection.pxx" />
-    <None Include="OCC\src\GCPnts\GCPnts_TangentialDeflection.pxx" />
-    <None Include="OCC\src\GCPnts\GCPnts_UniformAbscissa.pxx" />
-    <None Include="OCC\src\GCPnts\GCPnts_UniformDeflection.pxx" />
+    <None Include="OCC\src\BVH\BVH_BinaryTree.lxx">
+      <Filter>Source files\TKMath\BVH</Filter>
+    </None>
+    <None Include="OCC\src\BVH\BVH_QuadTree.lxx">
+      <Filter>Source files\TKMath\BVH</Filter>
+    </None>
+    <None Include="OCC\src\BVH\BVH_QuickSorter.lxx">
+      <Filter>Source files\TKMath\BVH</Filter>
+    </None>
+    <None Include="OCC\src\BVH\BVH_RadixSorter.lxx">
+      <Filter>Source files\TKMath\BVH</Filter>
+    </None>
+    <None Include="OCC\src\GCPnts\GCPnts_AbscissaPoint.pxx">
+      <Filter>Source files\TKGeomBase\GCPnts</Filter>
+    </None>
+    <None Include="OCC\src\GCPnts\GCPnts_QuasiUniformAbscissa.pxx">
+      <Filter>Source files\TKGeomBase\GCPnts</Filter>
+    </None>
+    <None Include="OCC\src\GCPnts\GCPnts_QuasiUniformDeflection.pxx">
+      <Filter>Source files\TKGeomBase\GCPnts</Filter>
+    </None>
+    <None Include="OCC\src\GCPnts\GCPnts_TangentialDeflection.pxx">
+      <Filter>Source files\TKGeomBase\GCPnts</Filter>
+    </None>
+    <None Include="OCC\src\GCPnts\GCPnts_UniformAbscissa.pxx">
+      <Filter>Source files\TKGeomBase\GCPnts</Filter>
+    </None>
+    <None Include="OCC\src\GCPnts\GCPnts_UniformDeflection.pxx">
+      <Filter>Source files\TKGeomBase\GCPnts</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="app.ico" />
