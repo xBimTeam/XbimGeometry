@@ -453,7 +453,7 @@ namespace Xbim
 						wireFixer.SetMaxTailWidth(tolerance * 10000);
 						wireFixer.ModifyGeometryMode() = Standard_True;
 						wireFixer.ModifyTopologyMode() = Standard_True;
-						wireFixer.SetMaxTailAngle(0.5);
+						wireFixer.SetMaxTailAngle(0.0174533); //1 degree
 						wireFixer.ClosedWireMode() = closed;
 						wireFixer.FixSelfIntersectionMode() = Standard_True;
 						wireFixer.FixSelfIntersectingEdgeMode() = Standard_True;

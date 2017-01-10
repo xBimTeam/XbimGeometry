@@ -77,7 +77,7 @@ namespace Xbim
 		int XbimPoint3DWithTolerance::GetHashCode()
 		{
 			double gridDim = tolerance * 10.; //coursen  up
-			//This hashcode snaps points to a grid of 100 * tolerance to ensure similar points fall into the same hash cell
+			//This hashcode snaps points to a grid of 10 * tolerance to ensure similar points fall into the same hash cell
 			double xs = point.X - std::fmod(point.X, gridDim);
 			double ys = point.Y - std::fmod(point.Y, gridDim);
 			double zs = point.Z - std::fmod(point.Z, gridDim);

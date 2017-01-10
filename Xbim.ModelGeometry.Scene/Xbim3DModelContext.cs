@@ -661,6 +661,8 @@ namespace Xbim.ModelGeometry.Scene
             var geometryStore = _model.GeometryStore;
 
             if (geometryStore == null) return false;
+           
+
             using (var geometryTransaction = geometryStore.BeginInit())
             {
                 if (geometryTransaction == null) return false;

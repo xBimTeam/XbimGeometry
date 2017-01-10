@@ -48,7 +48,7 @@ namespace Xbim
 #pragma endregion
 
 #pragma region IXbimGeometryObjectSet Interface
-			virtual property bool IsValid{bool get(){ return Count>0; }; }
+			virtual property bool IsValid {bool get() { return geometryObjects != nullptr && this != XbimGeometryObjectSet::Empty; }; }
 			virtual property bool IsSet{bool get(){ return true; }; }
 			virtual property IXbimGeometryObject^ First{IXbimGeometryObject^ get(); }
 			virtual property int Count {int get() override; }

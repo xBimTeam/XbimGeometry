@@ -311,7 +311,7 @@ namespace Xbim
 				if (solid != nullptr)
 				{
 				
-					//FTol.SetTolerance(solid, tolerance); 			
+					FTol.LimitTolerance(solid, tolerance); 			
 					toBeProcessed.Append(solid);
 					hasObjectsToProcess = true;
 					
@@ -370,9 +370,7 @@ namespace Xbim
 				seamstress.Add(facesToBeCut);
 				seamstress.Perform();
 				TopoDS_Shape shape = seamstress.SewedShape();
-				/*FTol.SetTolerance(shape, tolerance * 10, TopAbs_VERTEX);
-				FTol.SetTolerance(shape, tolerance, TopAbs_EDGE);
-				FTol.SetTolerance(shape, tolerance / 10, TopAbs_FACE);*/
+			    FTol.LimitTolerance(shape, tolerance);
 				toBeProcessed.Append(shape);
 			}
 			return hasObjectsToProcess;
@@ -423,7 +421,7 @@ namespace Xbim
 			{
 				BRep_Builder builder;
 				ShapeFix_ShapeTolerance FTol;
-//tolerance *= 1.1;
+
 				TopoDS_Compound comp = CreateCompound(geomObjects);
 				Bnd_Box bodyBox;
 				BRepBndLib::Add(comp, bodyBox);
@@ -439,37 +437,7 @@ namespace Xbim
 				int allBoxCount = 0;
 				Bnd_Array1OfBox allBoxes(1, solids->Count);
 				int i = 1;
-				for each (XbimSolid^ solid in solids)
-				{
-					if (solid->IsValid)
-					{
-						/*char buff[256];
-						sprintf(buff, "c:\\tmp\\O%d", i);
-						BRepTools::Write(solid, buff);*/
-											
-						Bnd_Box box;
-						BRepBndLib::Add(solid, box);
-						allBoxes(i).SetGap(-tolerance * 2); //reduce to only catch faces that are inside tolerance and not sitting on the opening
-						if (!bodyBox.IsOut(box)) //only try and cut it if it might intersect the body
-						{
-							
-						//	FTol.SetTolerance(solid, tolerance, TopAbs_FACE | TopAbs_EDGE);
-						/*	FTol.SetTolerance(solid, tolerance );
-							FTol.SetTolerance(solid, tolerance / 10, TopAbs_FACE);*/
-							cuttingObjects.Append(solid);
-						}
-						i++;
-					}					
-				}
 
-				if (cuttingObjects.Extent() == 0)
-				{					
-					XbimGeometryCreator::LogInfo(solids, "Openings cannot be cut, none intersect with the body shape");
-					return gcnew XbimGeometryObjectSet(geomObjects);
-				}
-				if (!ParseGeometry(geomObjects, toBeProcessed, allBoxes, toBePassedThrough, tolerance)) //nothing to do so just return what we had
-					return gcnew XbimGeometryObjectSet(geomObjects);
-				
 				switch (bop) {
 				case BOPAlgo_COMMON:
 					pBuilder = new BRepAlgoAPI_Common();
@@ -485,62 +453,86 @@ namespace Xbim
 					break;
 				default:
 					break;
-				}		
+				}
+
+
+				for each (XbimSolid^ solid in solids)
+				{
+					if (solid!=nullptr && solid->IsValid)
+					{
+						/*char buff[256];
+						sprintf(buff, "c:\\tmp\\O%d", i);
+						BRepTools::Write(solid, buff);*/
+						
+						Bnd_Box box;
+						BRepBndLib::Add(solid, box);
+						allBoxes(i).SetGap(-tolerance * 2); //reduce to only catch faces that are inside tolerance and not sitting on the opening
+						if (!bodyBox.IsOut(box)) //only try and cut it if it might intersect the body
+						{		
+							FTol.LimitTolerance(solid, tolerance);				
+							cuttingObjects.Append(solid);
+						}
+						i++;
+					}					
+				}
 				
+				if (cuttingObjects.Extent() == 0)
+				{					
+					XbimGeometryCreator::LogInfo(solids, "Openings cannot be cut, none intersect with the body shape");
+					return gcnew XbimGeometryObjectSet(geomObjects);
+				}
+				if (!ParseGeometry(geomObjects, toBeProcessed, allBoxes, toBePassedThrough, tolerance)) //nothing to do so just return what we had
+					return gcnew XbimGeometryObjectSet(geomObjects);
+			
 				pBuilder->SetArguments(toBeProcessed);
-				pBuilder->SetTools(cuttingObjects);
-			//	pBuilder->SetFuzzyValue(tolerance);
-				pBuilder->SetNonDestructive(Standard_True);
-				//pBuilder->RefineEdges();
+				pBuilder->SetTools(cuttingObjects);				
+				pBuilder->SetNonDestructive(Standard_True);				
 				Handle(XbimProgressIndicator) aPI = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);				
 				pBuilder->SetProgressIndicator(aPI);
 				pBuilder->Build();
 				aPI->StopTimer();
-				//XbimGeometryCreator::logger->FatalFormat("{0}", aPI->ElapsedTime());
+				
 				if (aPI->TimedOut())
 				{
 					XbimGeometryCreator::LogError(solids, "Boolean operation timed out after {0} seconds. Operation failed", (int)aPI->ElapsedTime());
+					return XbimGeometryObjectSet::Empty;
 				}
 				if (pBuilder->ErrorStatus() == 0 && !pBuilder->Shape().IsNull())
 				{
 					
-			   //	BRepTools::Write(pBuilder->Shape(), "c:\\tmp\\r");
+			   
 					TopoDS_Compound occCompound;
 					builder.MakeCompound(occCompound);
 				
-					if (BRepCheck_Analyzer(pBuilder->Shape(), Standard_True).IsValid() == Standard_False)
+					if (BRepCheck_Analyzer(pBuilder->Shape(), Standard_False).IsValid() == Standard_False)
 					{
 
 						ShapeFix_Shape shapeFixer(pBuilder->Shape());
 						shapeFixer.SetPrecision(tolerance);
-						/*shapeFixer.SetMaxTolerance(tolerance*10);
-						shapeFixer.SetMinTolerance(tolerance * 10);*/
+						shapeFixer.SetMinTolerance(tolerance);
 						shapeFixer.FixFaceTool()->FixIntersectingWiresMode() = Standard_True;
 						shapeFixer.FixFaceTool()->FixOrientationMode() = Standard_True;
 						shapeFixer.FixFaceTool()->FixWireTool()->FixAddCurve3dMode() = Standard_True;
 						shapeFixer.FixFaceTool()->FixWireTool()->FixIntersectingEdgesMode() = Standard_True;
 						shapeFixer.Perform();
 						ShapeUpgrade_UnifySameDomain unifier(shapeFixer.Shape());
-						unifier.SetAngularTolerance(0.5);
+						//unifier.SetAngularTolerance(0.0174533); //1 degree
 						unifier.SetLinearTolerance(tolerance);
-						unifier.Build();
-						builder.Add(occCompound, unifier.Shape());
-						
+						try
+						{
+							//sometimes unifier crashes
+							unifier.Build();
+							builder.Add(occCompound, unifier.Shape());
+						}
+						catch (Standard_Failure)
+						{
+							//default to what we had
+							builder.Add(occCompound, shapeFixer.Shape());
+						}
 					}
 					else
-					{
-						ShapeFix_Shape shapeFixer(pBuilder->Shape());
-						shapeFixer.SetPrecision(tolerance);
-						shapeFixer.FixFaceTool()->FixIntersectingWiresMode()=Standard_True;
-						shapeFixer.FixFaceTool()->FixOrientationMode() = Standard_True;
-						shapeFixer.FixFaceTool()->FixWireTool()->FixAddCurve3dMode() = Standard_True;
-						shapeFixer.FixFaceTool()->FixWireTool()->FixIntersectingEdgesMode() = Standard_True;
-						shapeFixer.Perform();
-						ShapeUpgrade_UnifySameDomain unifier(shapeFixer.Shape());
-						unifier.SetAngularTolerance(0.5);
-						unifier.SetLinearTolerance(tolerance);
-						unifier.Build();
-						builder.Add(occCompound, unifier.Shape());
+					{						
+						builder.Add(occCompound, pBuilder->Shape());
 					}
 					XbimCompound^ compound = gcnew XbimCompound(occCompound, false, tolerance);
 

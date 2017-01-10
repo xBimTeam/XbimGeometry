@@ -79,7 +79,7 @@
 #include <BRepAdaptor_CompCurve.hxx>
 #include <Geom_SurfaceOfLinearExtrusion.hxx>
 #include <GeomLib_IsPlanarSurface.hxx>
-
+#include <ShapeUpgrade_UnifySameDomain.hxx>
 using namespace System;
 using namespace System::Linq;
 using namespace System::Threading;
@@ -1170,8 +1170,9 @@ namespace Xbim
 			}
 			//BRepTools::Write(polyBoundary, "d:\\tmp\\w1");
 			//removes any colinear edges that might generate unnecessary detail and confusion for boolean operations
-			if (polyBoundary->Edges->Count>4) //may sure we remove an colinear edges
-				polyBoundary->FuseColinearSegments(pbhs->Model->ModelFactors->Precision, 0.05);
+			//SRL building of the wire now checks for self intersection so the code below is redundant
+			//if (polyBoundary->Edges->Count>4) //may sure we remove an colinear edges
+			//	polyBoundary->FuseColinearSegments(pbhs->Model->ModelFactors->Precision, 0.05);
 			//BRepTools::Write(polyBoundary, "d:\\tmp\\w2");
 			XbimFace^ polyFace = gcnew XbimFace(polyBoundary);
 
@@ -1317,8 +1318,12 @@ namespace Xbim
 
 		void XbimSolid::Init(IIfcBoundingBox^ box)
 		{
+			double precision = box->Model->ModelFactors->Precision;
+			double x = Math::Max(box->XDim, precision);
+			double y = Math::Max(box->YDim, precision);
+			double z = Math::Max(box->ZDim, precision);
 			gp_Ax2 	gpax2(gp_Pnt(box->Corner->X, box->Corner->Y, box->Corner->Z), gp_Dir(0, 0, 1), gp_Dir(1, 0, 0));
-			BRepPrimAPI_MakeBox boxMaker(gpax2, box->XDim, box->YDim, box->ZDim);
+			BRepPrimAPI_MakeBox boxMaker(gpax2, x, y, z);
 			pSolid = new TopoDS_Solid();
 			*pSolid = TopoDS::Solid(boxMaker.Shape());
 			ShapeFix_ShapeTolerance FTol;
@@ -1680,6 +1685,21 @@ namespace Xbim
 			return true;
 		}
 
+		bool XbimSolid::IsEmpty::get()
+		{
+			if (!IsValid) return true;
+			TopTools_IndexedMapOfShape shellMap;
+			TopExp::MapShapes(*pSolid, TopAbs_SHELL, shellMap);
+			if(shellMap.Extent()==0) return true;
+			for (int i = 1; i <= shellMap.Extent(); i++)
+			{
+				TopTools_IndexedMapOfShape faceMap;
+				TopExp::MapShapes(TopoDS::Shell(shellMap(i)), TopAbs_FACE, faceMap);
+				if (faceMap.Extent() > 0) return false; //if we find a face in a shell we have something to work with
+			}
+			return true;
+		}
+
 		double XbimSolid::Volume::get()
 		{
 			if (IsValid)
@@ -1762,54 +1782,37 @@ namespace Xbim
 		{			
 			if (!IsValid || !toCut->IsValid) return XbimSolidSet::Empty;
 			XbimSolid^ solidCut = dynamic_cast<XbimSolid^>(toCut);
-			if (solidCut == nullptr)
+			if (solidCut == nullptr || !solidCut->IsValid)
 			{
-#ifdef USE_CARVE_CSG
-				XbimFacetedSolid^ facetedSolidCut = dynamic_cast<XbimFacetedSolid^>(toCut);
-				if (facetedSolidCut != nullptr) //downgrade to facetation or upgrade and perform
-				{
-					if (this->IsPolyhedron) //downgrade this to facetation, faster
-					{
-						XbimFacetedSolid^ thisFacetedSolid = gcnew XbimFacetedSolid(this, tolerance);
-						return thisFacetedSolid->Cut(facetedSolidCut, tolerance);
-					}
-					else //upgrade tocut to occ, more accurate with curves
-					{
-						solidCut = (XbimSolid^)facetedSolidCut->ConvertToXbimSolid();
-						if (solidCut == nullptr)
-						{
-							XbimGeometryCreator::LogWarning("WS023: Invalid operation. Only solid shapes can be cut from another solid");
-							return gcnew XbimSolidSet(this); // the result would be no change so return this
-						} //else carry on with the boolean
-					}
-				}
-				else
-#endif // USE_CARVE_CSG
-
-				{
-					XbimGeometryCreator::LogWarning(toCut, "Invalid operation. Only solid shapes can be cut from another solid");
-					return gcnew XbimSolidSet(this); // the result would be no change so return this		
-				}
+				XbimGeometryCreator::LogWarning(toCut, "Invalid operation. Only solid shapes can be cut from another solid");
+				return gcnew XbimSolidSet(this); // the result would be no change so return this		
 			}
-
 			
 			String^ err="";
 			try
 			{
 #ifdef OCC_6_9_SUPPORTED
-				ShapeFix_ShapeTolerance FTol;
-				tolerance *= 1.1;
+				ShapeFix_ShapeTolerance FTol;				
 				TopTools_ListOfShape shapeTools;
-				FTol.SetTolerance(solidCut, tolerance);
+				FTol.LimitTolerance(solidCut, tolerance);
 				shapeTools.Append(solidCut);
 				TopTools_ListOfShape shapeObjects;
-				FTol.SetTolerance(this, tolerance);
+				FTol.LimitTolerance(this, tolerance);
 				shapeObjects.Append(this);
 				BRepAlgoAPI_Cut boolOp;
 				boolOp.SetArguments(shapeObjects);
 				boolOp.SetTools(shapeTools);
-				//boolOp.SetFuzzyValue(0);
+				boolOp.SetNonDestructive(Standard_True);
+				Handle(XbimProgressIndicator) aPI = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);
+				boolOp.SetProgressIndicator(aPI);
 				boolOp.Build();
+				aPI->StopTimer();
+
+				if (aPI->TimedOut())
+				{
+					XbimGeometryCreator::LogError(this, "Boolean operation timed out after {0} seconds. Operation failed", (int)aPI->ElapsedTime());
+					return XbimSolidSet::Empty;
+				}
 #else
 				ShapeFix_ShapeTolerance fixTol;
 				fixTol.SetTolerance(solidCut, tolerance);
@@ -1817,6 +1820,35 @@ namespace Xbim
 				BRepAlgoAPI_Cut boolOp(this, solidCut);
 #endif
 				if (boolOp.ErrorStatus() == 0)
+					if (BRepCheck_Analyzer(boolOp.Shape(), Standard_False).IsValid() == Standard_False)
+					{
+						ShapeFix_Shape shapeFixer(boolOp.Shape());
+						shapeFixer.SetPrecision(tolerance);
+						shapeFixer.SetMinTolerance(tolerance);
+						shapeFixer.FixFaceTool()->FixIntersectingWiresMode() = Standard_True;
+						shapeFixer.FixFaceTool()->FixOrientationMode() = Standard_True;
+						shapeFixer.FixFaceTool()->FixWireTool()->FixAddCurve3dMode() = Standard_True;
+						shapeFixer.FixFaceTool()->FixWireTool()->FixIntersectingEdgesMode() = Standard_True;
+						shapeFixer.Perform();
+						ShapeUpgrade_UnifySameDomain unifier(shapeFixer.Shape());
+						unifier.SetAngularTolerance(0.0174533); //1 degree
+						unifier.SetLinearTolerance(tolerance);
+						try
+						{
+							//sometimes unifier crashes
+							unifier.Build();
+							return gcnew XbimSolidSet(unifier.Shape());
+						}
+						catch (Standard_Failure)
+						{
+							//default to what we had
+							return gcnew XbimSolidSet(shapeFixer.Shape());
+						}						
+					}
+					else
+					{
+						return gcnew XbimSolidSet(boolOp.Shape());
+					}
 					return gcnew XbimSolidSet(boolOp.Shape());
 				err = "Error = " + boolOp.ErrorStatus();
 				

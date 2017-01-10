@@ -48,6 +48,7 @@
 #include <BOPDS_VectorOfCurve.hxx>
 #include <BOPCol_IndexedDataMapOfShapeInteger.hxx>
 #include <BOPCol_IndexedDataMapOfShapeListOfShape.hxx>
+#include <BOPAlgo_GlueEnum.hxx>
 class IntTools_Context;
 class BOPDS_DS;
 class BOPAlgo_SectionAttribute;
@@ -83,7 +84,7 @@ public:
   
   Standard_EXPORT const BOPCol_ListOfShape& Arguments() const;
   
-  Standard_EXPORT Handle(IntTools_Context) Context();
+  Standard_EXPORT const Handle(IntTools_Context)& Context();
   
   Standard_EXPORT void SetSectionAttribute (const BOPAlgo_SectionAttribute& theSecAttr);
   
@@ -100,6 +101,14 @@ public:
   Standard_EXPORT virtual void Perform() Standard_OVERRIDE;
   
   
+
+  //! Sets the glue option for the algorithm
+  Standard_EXPORT void SetGlue(const BOPAlgo_GlueEnum theGlue);
+  
+  //! Returns the glue option of the algorithm
+  Standard_EXPORT BOPAlgo_GlueEnum Glue() const;
+
+
 
 protected:
 
@@ -215,7 +224,6 @@ protected:
 
   //! Treatment of section edges.
   Standard_EXPORT Standard_Integer PostTreatFF (BOPDS_IndexedDataMapOfShapeCoupleOfPaveBlocks& theMSCPB,
-                                                BOPCol_DataMapOfShapeInteger& theMVI,
                                                 BOPDS_DataMapOfPaveBlockListOfPaveBlock& theDMExEdges,
                                                 BOPCol_DataMapOfIntegerInteger& theDMNewSD,
                                                 const BOPCol_IndexedMapOfShape& theMicroEdges,
@@ -348,7 +356,9 @@ protected:
   Standard_EXPORT void UpdateCommonBlocksWithSDVertices();
    
   Standard_EXPORT void UpdateBlocksWithSharedVertices();
-   
+
+  Standard_EXPORT void UpdateInterfsWithSDVertices();
+
   Standard_EXPORT Standard_Boolean EstimatePaveOnCurve(const Standard_Integer nV,
                                                        const BOPDS_Curve& theNC,
                                                        const Standard_Real theTolR3D);
@@ -395,6 +405,7 @@ protected:
   BOPAlgo_SectionAttribute mySectionAttribute;
   Standard_Boolean myNonDestructive;
   Standard_Boolean myIsPrimary;
+  BOPAlgo_GlueEnum myGlue;
 
 
 private:

@@ -148,7 +148,6 @@ ShapeUpgrade
 SHMessage
 Standard
 StdFail
-StdSelect
 Storage
 Sweep
 TColGeom

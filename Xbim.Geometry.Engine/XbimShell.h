@@ -49,8 +49,9 @@ namespace Xbim
 			virtual bool Equals(IXbimShell^ s);
 #pragma endregion
 
-#pragma region IXbimShell Interface		
-			virtual property bool IsValid{bool get() override { return pShell != nullptr; }; }
+#pragma region IXbimShell Interface	
+			virtual property bool IsEmpty {bool get(); }
+			virtual property bool IsValid{bool get() override { return pShell != nullptr && !pShell->IsNull(); }; }
 			virtual property  XbimGeometryObjectType GeometryType{XbimGeometryObjectType  get() override { return XbimGeometryObjectType::XbimShellType; }; }
 			virtual property IXbimFaceSet^ Faces{ IXbimFaceSet^ get(); }
 			virtual property IXbimEdgeSet^ Edges{ IXbimEdgeSet^ get(); }

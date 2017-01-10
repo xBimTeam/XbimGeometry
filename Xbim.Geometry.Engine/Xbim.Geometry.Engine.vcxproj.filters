@@ -5009,6 +5009,8 @@
     <ClCompile Include="OCC\src\Bnd\Bnd_Range.cxx" />
     <ClCompile Include="OCC\src\BRepOffset\BRepOffset_MakeOffset_1.cxx" />
     <ClCompile Include="OCC\src\IntPatch\IntPatch_SpecialPoints.cxx" />
+    <ClCompile Include="OCC\src\BRepOffset\BRepOffset_MakeSimpleOffset.cxx" />
+    <ClCompile Include="OCC\src\BRepOffset\BRepOffset_SimpleOffset.cxx" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source files">
@@ -15792,6 +15794,10 @@
     <ClInclude Include="OCC\src\IntPatch\IntPatch_SpecialPoints.hxx" />
     <ClInclude Include="OCC\src\IntPatch\IntPatch_SpecPntType.hxx" />
     <ClInclude Include="OCC\src\NCollection\NCollection_Lerp.hxx" />
+    <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_GlueEnum.hxx" />
+    <ClInclude Include="OCC\src\BRepOffset\BRepOffset_MakeSimpleOffset.hxx" />
+    <ClInclude Include="OCC\src\BRepOffset\BRepOffset_SimpleOffset.hxx" />
+    <ClInclude Include="OCC\src\Quantity\Quantity_ColorHasher.hxx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="OCC\src\Adaptor3d\Adaptor3d_GenHCurve.gxx">

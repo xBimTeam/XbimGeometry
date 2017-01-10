@@ -1188,8 +1188,11 @@ static void putIntWires(TopoDS_Shape& theFace, TopTools_SequenceOfShape& theWire
       const TopoDS_Edge& anEdge = TopoDS::Edge(it.Value());
       Standard_Real aFirst, aLast;
       Handle(Geom2d_Curve) aC2d = BRep_Tool::CurveOnSurface(anEdge, aFace, aFirst, aLast);
-      aC2d->D0((aFirst + aLast) * 0.5, aP2d);
-      isP2d = Standard_True;
+	  if (!aC2d.IsNull())
+	  {
+		  aC2d->D0((aFirst + aLast) * 0.5, aP2d);
+		  isP2d = Standard_True;
+	  }
     }
     BRepClass_FaceClassifier aClass(aFace, aP2d, Precision::PConfusion());
     if (aClass.State() == TopAbs_IN)
@@ -1681,11 +1684,16 @@ void ShapeUpgrade_UnifySameDomain::IntUnifyFaces(const TopoDS_Shape& theInpShape
       sfw->SetMinTolerance(Precision::Confusion());
       sfw->SetMaxTolerance(1.);
       sfw->SetFace(aFace);
-      for (TopoDS_Iterator iter (aFace,Standard_False); iter.More(); iter.Next()) {
-        TopoDS_Wire wire = TopoDS::Wire(iter.Value());
-        sfw->Load(wire);
-        sfw->FixReorder();
-        sfw->FixShifted();
+      for (TopoDS_Iterator iter (aFace,Standard_False); iter.More(); iter.Next()) 
+	  {
+		  //sometimes there is a vertex in this shape
+		  if (iter.Value().ShapeType() == TopAbs_WIRE)
+		  {
+			  TopoDS_Wire wire = TopoDS::Wire(iter.Value());
+			  sfw->Load(wire);
+			  sfw->FixReorder();
+			  sfw->FixShifted();
+		  }
       }
     }
   }

@@ -548,42 +548,54 @@ void BRepOffset_Tool::OrientSection (const TopoDS_Edge&  E,
 }
 
 //=======================================================================
-//function : HasCommonShape
+//function : FindCommonShapes
 //purpose  : 
 //=======================================================================
-
-Standard_Boolean BRepOffset_Tool::HasCommonShapes (const TopoDS_Face& F1,
-						   const TopoDS_Face& F2,
-						   TopTools_ListOfShape& LE,
-						   TopTools_ListOfShape& LV)
+Standard_Boolean BRepOffset_Tool::FindCommonShapes(const TopoDS_Face& theF1,
+                                                   const TopoDS_Face& theF2,
+                                                   TopTools_ListOfShape& theLE,
+                                                   TopTools_ListOfShape& theLV)
 {
-  Standard_Boolean Common = Standard_False;
-  LE.Clear(); LV.Clear();
+  Standard_Boolean bFoundEdges =
+    FindCommonShapes(theF1, theF2, TopAbs_EDGE,   theLE);
+  Standard_Boolean bFoundVerts =
+    FindCommonShapes(theF1, theF2, TopAbs_VERTEX, theLV);
+  return bFoundEdges || bFoundVerts;
+}
 
-  TopExp_Explorer exp1;
-  exp1.Init(F1,TopAbs_EDGE);
-
-  for (; exp1.More(); exp1.Next()) {
-    TopExp_Explorer exp2;
-    exp2.Init(F2,TopAbs_EDGE);
-    for (; exp2.More(); exp2.Next()) {
-      if (exp1.Current().IsSame(exp2.Current())) {
-	Common = Standard_True;
-	LE.Append(exp1.Current());
+//=======================================================================
+//function : FindCommonShapes
+//purpose  : 
+//=======================================================================
+Standard_Boolean BRepOffset_Tool::FindCommonShapes(const TopoDS_Shape& theS1,
+                                                   const TopoDS_Shape& theS2,
+                                                   const TopAbs_ShapeEnum theType,
+                                                   TopTools_ListOfShape& theLSC)
+{
+  theLSC.Clear();
+  //
+  TopTools_MapOfShape aMS;
+  TopExp_Explorer aExp(theS1, theType);
+  for (; aExp.More(); aExp.Next()) {
+    aMS.Add(aExp.Current());
+  }
+  //
+  if (aMS.IsEmpty()) {
+    return Standard_False;
+  }
+  //
+  TopTools_MapOfShape aMFence;
+  aExp.Init(theS2, theType);
+  for (; aExp.More(); aExp.Next()) {
+    const TopoDS_Shape& aS2 = aExp.Current();
+    if (aMS.Contains(aS2)) {
+      if (aMFence.Add(aS2)) {
+        theLSC.Append(aS2);
       }
     }
   }
-  for (exp1.Init(F1,TopAbs_VERTEX); exp1.More(); exp1.Next()) {
-    TopExp_Explorer exp2;
-    exp2.Init(F2,TopAbs_EDGE);
-    for (exp2.Init(F2,TopAbs_VERTEX); exp2.More(); exp2.Next()) {
-      if (exp1.Current().IsSame(exp2.Current())) {
-	Common = Standard_True;
-	LV.Append(exp1.Current());
-      }
-    }
-  }
-  return Common;
+  //
+  return !theLSC.IsEmpty();
 }
 
 //=======================================================================
@@ -1608,7 +1620,9 @@ void BRepOffset_Tool::Inter3D(const TopoDS_Face& F1,
   // Store Result
   L1.Clear(); L2.Clear();
   TopAbs_Orientation O1,O2;
-  
+  //
+  const Handle(IntTools_Context)& aContext = pPF->Context();
+  //
   for (i = 0; i < aNb; i++) {
     BOPDS_InterfFF& aFFi=aFFs(i);
     const BOPDS_VectorOfCurve& aBCurves=aFFi.Curves();
@@ -1645,10 +1659,10 @@ void BRepOffset_Tool::Inter3D(const TopoDS_Face& F1,
 		Handle(Geom2d_Curve) aC2dNew;
 		
 		if(aC3DE->IsPeriodic()) {
-                  BOPTools_AlgoTools2D::AdjustPCurveOnFace(cpF1, f, l,  aC2d, aC2dNew);
+                  BOPTools_AlgoTools2D::AdjustPCurveOnFace(cpF1, f, l,  aC2d, aC2dNew, aContext);
 		  }
 		else {
-                  BOPTools_AlgoTools2D::AdjustPCurveOnFace(cpF1, aC3DETrim, aC2d, aC2dNew); 
+                  BOPTools_AlgoTools2D::AdjustPCurveOnFace(cpF1, aC3DETrim, aC2d, aC2dNew, aContext); 
 		  }
 		aC2d = aC2dNew;
 	      }
@@ -1661,10 +1675,10 @@ void BRepOffset_Tool::Inter3D(const TopoDS_Face& F1,
 		Handle(Geom2d_Curve) aC2dNew;
 		
 		if(aC3DE->IsPeriodic()) {
-                  BOPTools_AlgoTools2D::AdjustPCurveOnFace(cpF2, f, l,  aC2d, aC2dNew);
+                  BOPTools_AlgoTools2D::AdjustPCurveOnFace(cpF2, f, l,  aC2d, aC2dNew, aContext);
 		  }
 		else {
-                  BOPTools_AlgoTools2D::AdjustPCurveOnFace(cpF2, aC3DETrim, aC2d, aC2dNew); 
+                  BOPTools_AlgoTools2D::AdjustPCurveOnFace(cpF2, aC3DETrim, aC2d, aC2dNew, aContext); 
 		  }
 		aC2d = aC2dNew;
 	      }

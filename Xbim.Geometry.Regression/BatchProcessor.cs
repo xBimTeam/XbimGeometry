@@ -124,6 +124,8 @@ namespace XbimRegression
                             Application = ohs == null ? "Unknown" : ohs.OwningApplication.ToString(),
                             };
                         }
+                        var xbim = Path.ChangeExtension(ifcFile, "xbim");
+                        model.SaveAs(xbim);
                         model.Close();                       
                     }
                 }
@@ -165,6 +167,7 @@ namespace XbimRegression
                 case ".ifc":
                 case ".ifczip":
                 case ".ifcxml":
+                    
                     return IfcStore.Open(ifcFileName, null,0);
                   
                 default:

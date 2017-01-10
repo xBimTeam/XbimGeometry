@@ -248,7 +248,15 @@ namespace Xbim
 			return gProps.Mass();	
 		}
 
-		
+		bool XbimShell::IsEmpty::get()
+		{
+			if (!IsValid) return true;
+			TopTools_IndexedMapOfShape faceMap;
+			TopExp::MapShapes(TopoDS::Shell(*pShell), TopAbs_FACE, faceMap);
+			if (faceMap.Extent() > 0) return false; //if we find a face in a shell we have something to work with			
+			return true;
+		}
+
 		//returns true if the shell is a closed manifold solid
 		bool XbimShell::IsClosed::get()
 		{

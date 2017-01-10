@@ -221,8 +221,12 @@ namespace Xbim
 			catch (Standard_Failure e)
 			{
 				String^ err = gcnew String(Standard_Failure::Caught()->GetMessageString());
-				LogError(geomRep, "Error creating geometry representation of type {0}, {1}", geomRep->GetType()->Name, err);
+				LogError(geomRep, "Error creating geometry #{2} representation of type {0}, {1}", geomRep->GetType()->Name, err, geomRep->EntityLabel);
 				return XbimGeometryObjectSet::Empty;
+			}
+			catch (...)
+			{
+				throw gcnew Exception(String::Format("General Error Creating {0}, #{1}", geomRep->GetType()->Name, geomRep->EntityLabel));
 			}
 			LogError(geomRep,"Geometry Representation of Type {0} is not implemented", geomRep->GetType()->Name);
 			return XbimGeometryObjectSet::Empty;

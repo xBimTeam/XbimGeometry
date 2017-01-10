@@ -10,6 +10,9 @@
 #include <ShapeFix_ShapeTolerance.hxx>
 #include <BRepPrimAPI_MakePrism.hxx>
 #include "XbimConvert.h"
+#include "BRepCheck_Analyzer.hxx"
+#include "ShapeFix_Shape.hxx"
+#include "ShapeUpgrade_UnifySameDomain.hxx"
 using namespace System;
 using namespace System::Linq;
 
@@ -136,7 +139,7 @@ namespace Xbim
 		{
 			if (solids == nullptr) solids = gcnew List<IXbimSolid^>();
 			IXbimSolid^ solid = dynamic_cast<IXbimSolid^>(shape);
-			if (solid != nullptr)
+			if (solid != nullptr && solid->IsValid)
 			{
 				return solids->Add(solid);
 			}
@@ -146,7 +149,7 @@ namespace Xbim
 			IXbimGeometryObjectSet^ geomSet = dynamic_cast<IXbimGeometryObjectSet^>(shape);
 			if (geomSet != nullptr)
 			{
-				//make sure any sewing has been performed
+				//make sure any sewing has been performed if the set is a compound object
 				XbimCompound^ compound = dynamic_cast<XbimCompound^>(geomSet);
 				
 				if (compound != nullptr)
@@ -162,24 +165,36 @@ namespace Xbim
 				for each (IXbimGeometryObject^ geom in geomSet)
 				{
 					
-					IXbimSolid^ compSolid = dynamic_cast<IXbimSolid^>(geom);
-					if (compSolid != nullptr) 
-						solids->Add(compSolid);
-					else
+					XbimSolid^ nestedSolid = dynamic_cast<XbimSolid^>(geom);
+					XbimCompound^ nestedCompound = dynamic_cast<XbimCompound^>(geom);
+					XbimShell^ shell = dynamic_cast<XbimShell^>(geom);
+					if (nestedSolid != nullptr && !nestedSolid->IsEmpty)
+						solids->Add(nestedSolid );
+					else if (nestedCompound != nullptr)
 					{
-						XbimShell^ shell = dynamic_cast<XbimShell^>(geom);
-						if (shell != nullptr)
-						{							
-							XbimSolid^ s = (XbimSolid^)shell->MakeSolid();								
-							solids->Add(s);
-						}					
+						nestedCompound->Sew();
+						for each (IXbimGeometryObject^ nestedGeom in nestedCompound)
+						{
+							XbimSolid^ nestedSolid = dynamic_cast<XbimSolid^>(nestedGeom);
+							XbimShell^ nestedShell = dynamic_cast<XbimShell^>(nestedGeom);
+							if(nestedSolid!=nullptr && !nestedSolid->IsEmpty)
+								solids->Add(nestedSolid );
+							else if (nestedShell != nullptr && nestedShell->IsValid)
+							    solids->Add(nestedShell->MakeSolid());
+						}
 					}
+					else if (shell != nullptr && shell->IsValid)
+					{							
+						XbimSolid^ s = (XbimSolid^)shell->MakeSolid();								
+						solids->Add(s);
+					}					
+					
 				}
 				
 				return;
 			}
 			XbimShell^ shell = dynamic_cast<XbimShell^>(shape);
-			if (shell != nullptr/* && shell->IsClosed*/)
+			if (shell != nullptr && shell->IsValid/* && shell->IsClosed*/)
 				return solids->Add(shell->MakeSolid());	
 			
 		}
@@ -340,39 +355,91 @@ namespace Xbim
 			if (!IsValid) return this;
 			String^ err = "";
 			try
-			{
-				
+			{			
 				ShapeFix_ShapeTolerance FTol;
-				tolerance *= 1.1;
 				TopTools_ListOfShape shapeTools;
 				for each (IXbimSolid^ iSolid in solids)
 				{
 					XbimSolid^ solid = dynamic_cast<XbimSolid^>(iSolid);
-					if (solid!=nullptr)
+					if (solid!=nullptr && solid->IsValid)
 					{
-						FTol.SetTolerance(solid, tolerance);
+						
+						FTol.LimitTolerance(solid, tolerance);
 						shapeTools.Append(solid);							
+					}
+					else
+					{
+						XbimGeometryCreator::LogWarning(this, "Invalid shape found in Boolean Cut operation. It has been ignored");
 					}
 				}
 				TopTools_ListOfShape shapeObjects;
 				for each (IXbimSolid^ iSolid in this)
 				{
 					XbimSolid^ solid = dynamic_cast<XbimSolid^>(iSolid);
-					if (solid != nullptr)
-					{
-						FTol.SetTolerance(solid, tolerance);
+					if (solid != nullptr && solid->IsValid)
+					{	
+						FTol.LimitTolerance(solid, tolerance);
 						shapeObjects.Append(solid);
+					}
+					else
+					{
+						XbimGeometryCreator::LogWarning(this, "Invalid shape found in Boolean Cut operation. It has been ignored");
 					}
 				}
 				
 				BRepAlgoAPI_Cut boolOp;
 				boolOp.SetArguments(shapeObjects);
-				boolOp.SetTools(shapeTools);				
-				boolOp.SetFuzzyValue(0);
+				boolOp.SetTools(shapeTools);	
+				boolOp.SetNonDestructive(Standard_True);
+				//boolOp.SetFuzzyValue(tolerance);
+				Handle(XbimProgressIndicator) aPI = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);
+				boolOp.SetProgressIndicator(aPI);
 				boolOp.Build();
-				
+				aPI->StopTimer();
+
+				if (aPI->TimedOut())
+				{
+					XbimGeometryCreator::LogError(solids, "Boolean operation timed out after {0} seconds. Try increasing the timeout in the App.config file", (int)aPI->ElapsedTime());
+					//throw gcnew XbimException(String::Format("Boolean operation timed out after {0} secs. Try increasing the timeout in the App.config file", (int)aPI->ElapsedTime()));
+					return XbimSolidSet::Empty;
+				}
+								
 				if (boolOp.ErrorStatus() == 0)
-					return gcnew XbimSolidSet(boolOp.Shape());
+				{
+					if (BRepCheck_Analyzer(boolOp.Shape(), Standard_False).IsValid() == Standard_False)
+					{
+
+						ShapeFix_Shape shapeFixer(boolOp.Shape());
+						shapeFixer.SetPrecision(tolerance);
+						shapeFixer.SetMinTolerance(tolerance);
+						shapeFixer.FixSolidMode()= Standard_True;
+						shapeFixer.FixFaceTool()->FixIntersectingWiresMode() = Standard_True;
+						shapeFixer.FixFaceTool()->FixOrientationMode() = Standard_True;
+						shapeFixer.FixFaceTool()->FixWireTool()->FixAddCurve3dMode() = Standard_True;
+						shapeFixer.FixFaceTool()->FixWireTool()->FixIntersectingEdgesMode() = Standard_True;
+						shapeFixer.Perform();
+						ShapeUpgrade_UnifySameDomain unifier(shapeFixer.Shape());
+						unifier.SetAngularTolerance(0.0174533); //1 degree
+						unifier.SetLinearTolerance(tolerance);
+						try
+						{
+							//sometimes unifier crashes
+							unifier.Build();
+							return gcnew XbimSolidSet(unifier.Shape());
+						}
+						catch (Standard_Failure)
+						{
+							//default to what we had
+							return gcnew XbimSolidSet(shapeFixer.Shape());
+						}
+										
+					}
+					else
+					{
+						return gcnew XbimSolidSet(boolOp.Shape());
+					}
+				}
+					
 				err = "Error = " + boolOp.ErrorStatus();
 				GC::KeepAlive(solids);
 				GC::KeepAlive(this);
@@ -380,8 +447,13 @@ namespace Xbim
 			catch (Standard_Failure e)
 			{
 				err = gcnew String(Standard_Failure::Caught()->GetMessageString());
+				throw gcnew Exception(String::Format("Boolean Cut operation failed. {0}" , err));
 			}
-			XbimGeometryCreator::LogWarning(this,"Boolean Cut operation failed. " + err);
+			catch (...)
+			{
+				throw gcnew Exception("General boolean cutting failure");
+			}
+			
 			return XbimSolidSet::Empty;
 #else
 
@@ -498,35 +570,14 @@ namespace Xbim
 
 		void XbimSolidSet::Init(XbimCompound^ comp, IPersistEntity^ entity)
 		{
-			
-			if (!comp->IsValid || comp->Count == 0)
+			solids = gcnew  List<IXbimSolid^>();
+			if (!comp->IsValid)
 			{
-				solids = gcnew  List<IXbimSolid^>();
 				XbimGeometryCreator::LogWarning(entity, "Empty or invalid solid");
 			}
 			else
 			{
-				comp->Sew();
-				solids = gcnew  List<IXbimSolid^>(comp->Count);
-				for each (IXbimGeometryObject^ geom in comp)
-				{
-					if (dynamic_cast<XbimShell^>(geom))
-					{
-						XbimSolid^ s = (XbimSolid ^ )((XbimShell^)geom)->MakeSolid();
-						if (s->IsValid)
-						{
-							if (!s->HasValidTopology)
-								s->FixTopology();
-							if (s->Faces->Count>0) //if we have any face then let it through, ot really correct but some geometries are just broken
-								solids->Add(s);
-						}		
-
-					}
-					else if (dynamic_cast<XbimSolid^>(geom))
-						solids->Add((XbimSolid^)geom);
-				}
-				if (solids->Count == 0)
-					XbimGeometryCreator::LogWarning(entity, "Empty solid");
+				Add(comp);
 			}
 		}
 

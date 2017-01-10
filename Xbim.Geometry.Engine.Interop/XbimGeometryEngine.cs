@@ -377,12 +377,12 @@ namespace Xbim.Geometry.Engine.Interop
             {
                 return _engine.Create(ifcRepresentation, objectLocation);
             }
-            catch (AccessViolationException e)
+            catch (Exception e)
             {
-
                 Logger.ErrorFormat("EE001: Failed to create geometry #{0} of type {1}, {2]", ifcRepresentation.EntityLabel, ifcRepresentation.GetType().Name, e.Message);
                 return null;
             }
+
         }
 
         public IXbimGeometryObjectSet CreateGeometryObjectSet()

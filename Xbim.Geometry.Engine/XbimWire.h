@@ -120,6 +120,7 @@ namespace Xbim
 #pragma region operators
 			operator const TopoDS_Wire& () { return *pWire; }
 			virtual operator const TopoDS_Shape& () override { return *pWire; }
+
 #pragma endregion
 
 

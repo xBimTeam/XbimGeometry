@@ -116,6 +116,82 @@ namespace Xbim
 			// Inherited via XbimOccShape
 			virtual void Mesh(IXbimMeshReceiver ^ mesh, double precision, double deflection, double angle) override;
 		};
+	 
+		ref class XbimBiPolarLinearEdge
+		{
+			XbimPoint3DWithTolerance^ pointA;
+			XbimVertex^ vertexA;
+			XbimPoint3DWithTolerance^ pointB;
+			XbimVertex^ vertexB;
+			XbimEdge^ edgeAB;
+			
+			int refCount=0;
+			int hashCode;
+		public:
+			XbimBiPolarLinearEdge(XbimPoint3DWithTolerance^ pA, XbimVertex^ vA, XbimPoint3DWithTolerance^ pB, XbimVertex^ vB)
+			{
+				pointA = pA;
+				vertexA = vA;
+				pointB = pB;
+				vertexB = vB;
+				int hashA = pointA->GetHashCode();
+				int hashB = pointB->GetHashCode();
+				hashCode = Math::Max(hashA, hashB) ^ Math::Min(hashA, hashB);
+				edgeAB = gcnew XbimEdge(vertexA, vertexB);
+				if (hashA == hashB && pA == pB)
+					refCount = -1;
+			}
+			
+			virtual property int ReferenceCount {int get() { return refCount; }}
+			virtual property int IsEmptyLine {int get() { return refCount==-1; }}
+			void ReleaseEdge() 
+			{
+				if (refCount > 0)refCount--;
+			}
+			XbimEdge^ TakeEdge(XbimPoint3DWithTolerance^ pA, XbimPoint3DWithTolerance^ pB)
+			{
+				if (IsEmptyLine) return nullptr;
+				refCount++;
+				if (pA == pointA)
+					return edgeAB;
+				if (pB == pointA)
+					return edgeAB->Reversed();
+			    
+			}
+
+#pragma region Equality Overrides
+			virtual bool Equals(Object^ obj) override
+			{
+				XbimBiPolarLinearEdge^ e = dynamic_cast<XbimBiPolarLinearEdge^>(obj);
+				// Check for null
+				if (e == nullptr) return false;
+				return this == e;
+			}
+			
+			virtual int GetHashCode() override
+			{			
+				return hashCode;
+			}
+			
+			static bool operator ==(XbimBiPolarLinearEdge^ left, XbimBiPolarLinearEdge^ right)
+			{
+				// If both are null, or both are same instance, return true.
+				if (System::Object::ReferenceEquals(left, right))
+					return true;
+
+				// If one is null, but not both, return false.
+				if (((Object^)left == nullptr) || ((Object^)right == nullptr))
+					return false;
+				return (left->pointA == right->pointA && left->pointB == right->pointB) || (left->pointA == right->pointB && left->pointB == right->pointA);
+			}
+			static bool operator !=(XbimBiPolarLinearEdge^ left, XbimBiPolarLinearEdge^ right)
+			{
+				return !(left == right);
+			}
+
+#pragma endregion
+		};
+
 	}
 
 }

@@ -69,7 +69,7 @@ namespace Xbim
 			XbimSolidSet(IIfcRevolvedAreaSolid^ solid);
 			
 
-			virtual property bool IsValid{bool get(){ return solids!=nullptr && Count>0; }; }
+			virtual property bool IsValid {bool get() { return solids != nullptr && this != XbimSolidSet::Empty; }; }
 			virtual property bool IsSimplified{bool get(){ return _isSimplified; }; void set(bool val){ _isSimplified = val; } }
 			virtual property bool IsSet{bool get()  { return true; }; }
 			virtual property IXbimSolid^ First{IXbimSolid^ get(); }

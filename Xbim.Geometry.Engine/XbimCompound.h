@@ -33,8 +33,8 @@ namespace Xbim
 			double _sewingTolerance;
 			void InstanceCleanup();
 			//Initialisers
-			void Init(IIfcConnectedFaceSet^ faceSet);
-			void Init(IEnumerable<IIfcFace^>^ faces);
+			void Init(IIfcConnectedFaceSet^ faceSet, bool close);
+			void Init(IEnumerable<IIfcFace^>^ faces, bool close, IIfcRepresentationItem^ theItem);
 			XbimShell^ InitAdvancedFaces(IEnumerable<IIfcFace^>^ faces);
 			void Init(IIfcShellBasedSurfaceModel^ sbsm);
 			void Init(IIfcFaceBasedSurfaceModel^ fbsm);

@@ -75,7 +75,8 @@ static  Standard_Boolean CheckEdges(const TopoDS_Shape& shape,
   }
   else {
     TopoDS_Edge E = TopoDS::Edge(shape);
-    if (BRep_Tool::Degenerated(E)) return Standard_False;
+    if (BRep_Tool::Degenerated(E)) 
+		return Standard_False;
 
     if (shape.Orientation() == TopAbs_FORWARD) {
       //szv#4:S4163:12Mar99 optimized

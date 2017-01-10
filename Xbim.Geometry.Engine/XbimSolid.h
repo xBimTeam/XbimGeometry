@@ -70,7 +70,8 @@ namespace Xbim
 #pragma endregion
 
 #pragma region IXbimSolid Interface
-			virtual property bool IsValid{bool get() override { return pSolid != nullptr; }; }
+			virtual property bool IsEmpty {bool get(); }
+			virtual property bool IsValid{bool get() override { return pSolid != nullptr && !pSolid->IsNull(); }; }
 			virtual property  XbimGeometryObjectType GeometryType{XbimGeometryObjectType  get() override { return XbimGeometryObjectType::XbimSolidType; }; }
 			virtual property IXbimShellSet^ Shells{ IXbimShellSet^ get(); }
 			virtual property IXbimFaceSet^ Faces{ IXbimFaceSet^ get(); }

@@ -3313,11 +3313,9 @@ void BRepOffset_MakeOffset::EncodeRegularity ()
     else if ( Type1 == TopAbs_FACE && Type2 == TopAbs_FACE) {
     //  if two root faces are tangent in 
     //  the initial shape, they will be tangent in the offset shape
-      TopTools_ListOfShape LE,LV;
-      BRepOffset_Tool::HasCommonShapes(TopoDS::Face(Root1),
-                                       TopoDS::Face(Root2),
-                                       LE,LV);
-      if ( LE.Extent() == 1) { 
+      TopTools_ListOfShape LE;
+      BRepOffset_Tool::FindCommonShapes(Root1, Root2, TopAbs_EDGE, LE);
+      if ( LE.Extent() == 1) {
         const TopoDS_Edge& Ed = TopoDS::Edge(LE.First());
         if ( myAnalyse.HasAncestor(Ed)) {
           const BRepOffset_ListOfInterval& LI = myAnalyse.Type(Ed);
@@ -3330,15 +3328,7 @@ void BRepOffset_MakeOffset::EncodeRegularity ()
     }
     else if ( Type1 == TopAbs_EDGE && Type2 == TopAbs_EDGE) {
       TopTools_ListOfShape LV;
-      TopExp_Explorer exp1;
-      for (exp1.Init(Root1,TopAbs_VERTEX); exp1.More(); exp1.Next()) {
-        TopExp_Explorer exp2(F2,TopAbs_EDGE);
-        for (exp2.Init(Root2,TopAbs_VERTEX); exp2.More(); exp2.Next()) {
-          if (exp1.Current().IsSame(exp2.Current())) {
-            LV.Append(exp1.Current());
-          }
-        }
-      }
+      BRepOffset_Tool::FindCommonShapes(Root1, Root2, TopAbs_VERTEX, LV);
       if ( LV.Extent() == 1) {
         TopTools_ListOfShape LEdTg;
         myAnalyse.TangentEdges(TopoDS::Edge(Root1),
@@ -4049,6 +4039,7 @@ Standard_Boolean BuildShellsCompleteInter(const BOPCol_ListOfShape& theLF,
   aMV1.SetArguments(theLF);
   // we need to intersect the faces to process the tangential faces
   aMV1.SetIntersect(Standard_True);
+  aMV1.SetAvoidInternalShapes(Standard_True);
   aMV1.Perform();
   //
   Standard_Boolean bDone = (aMV1.ErrorStatus() == 0);
@@ -4092,6 +4083,7 @@ Standard_Boolean BuildShellsCompleteInter(const BOPCol_ListOfShape& theLF,
   aMV2.SetArguments(aLF2);
   // no need to intersect this time
   aMV2.SetIntersect(Standard_False);
+  aMV2.SetAvoidInternalShapes(Standard_True);
   aMV2.Perform();
   bDone = (aMV2.ErrorStatus() == 0);
   if (!bDone) {
@@ -4136,6 +4128,7 @@ Standard_Boolean BuildShellsCompleteInter(const BOPCol_ListOfShape& theLF,
   BOPAlgo_MakerVolume aMV3;
   aMV3.SetArguments(aLF3);
   aMV3.SetIntersect(Standard_False);
+  aMV3.SetAvoidInternalShapes(Standard_True);
   aMV3.Perform();
   bDone = (aMV3.ErrorStatus() == 0);
   if (!bDone) {

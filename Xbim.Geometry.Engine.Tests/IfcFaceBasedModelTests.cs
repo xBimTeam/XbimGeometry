@@ -126,7 +126,7 @@ namespace Ifc4GeometryTests
                     
                     IfcCsgTests.GeneralTest(solids.First);
                     
-                    Assert.IsTrue(solids.First.Faces.Count() == 26, "Failed to convert all faces"); //faces are reduced due to domain unification now implemented
+                    Assert.IsTrue(solids.First.Faces.Count() == 26, "Failed to convert all faces"); 
                 }
             }
         }

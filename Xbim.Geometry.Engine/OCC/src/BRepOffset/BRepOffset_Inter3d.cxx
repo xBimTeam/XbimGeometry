@@ -213,7 +213,7 @@ void BRepOffset_Inter3d::FaceInter(const TopoDS_Face& F1,
                                  InitF2.ShapeType() == TopAbs_FACE);
   TopTools_ListOfShape LE,LV;
   LInt1.Clear(); LInt2.Clear(); 
-  if (BRepOffset_Tool::HasCommonShapes(F1,F2,LE,LV) ||
+  if (BRepOffset_Tool::FindCommonShapes(F1,F2,LE,LV) ||
       myAsDes->HasCommonDescendant(F1,F2,LE)) {
     //-------------------------------------------------
     // F1 and F2 share shapes.
@@ -248,8 +248,8 @@ void BRepOffset_Inter3d::FaceInter(const TopoDS_Face& F1,
         // many sections.
         //--------------------------------------------------------
         if (InterFaces) {
-          if (BRepOffset_Tool::HasCommonShapes(TopoDS::Face(InitF1),
-                                               TopoDS::Face(InitF2),LE,LV)) {
+          if (BRepOffset_Tool::FindCommonShapes(TopoDS::Face(InitF1),
+                                                TopoDS::Face(InitF2),LE,LV)) {
             if (!LE.IsEmpty()) {
               BRepOffset_Tool::Inter3D (F1,F2,LInt1,LInt2,mySide,NullEdge);
             }
@@ -443,7 +443,35 @@ void BRepOffset_Inter3d::ConnexIntByInt
   // map the shape for vertices
   if (bIsPlanar) {
     TopExp::MapShapes(SI, TopAbs_VERTEX, VEmap);
-    TopExp::MapShapesAndAncestors(SI, TopAbs_VERTEX, TopAbs_FACE, aMVF);
+    //
+    // make vertex-faces connexity map with unique ancestors
+    // TopExp::MapShapesAndAncestors(SI, TopAbs_VERTEX, TopAbs_FACE, aMVF);
+    TopExp_Explorer aExpF(SI, TopAbs_FACE);
+    for (; aExpF.More(); aExpF.Next()) {
+      const TopoDS_Shape& aF = aExpF.Current();
+      //
+      TopExp_Explorer aExpV(aF, TopAbs_VERTEX);
+      for (; aExpV.More(); aExpV.Next()) {
+        const TopoDS_Shape& aV = aExpV.Current();
+        //
+        TopTools_ListOfShape *pLF = aMVF.ChangeSeek(aV);
+        if (!pLF) {
+          pLF = &aMVF(aMVF.Add(aV, TopTools_ListOfShape()));
+          pLF->Append(aF);
+          continue;
+        }
+        //
+        TopTools_ListIteratorOfListOfShape aItLF(*pLF);
+        for (; aItLF.More(); aItLF.Next()) {
+          if (aItLF.Value().IsSame(aF)) {
+            break;
+          }
+        }
+        if (!aItLF.More()) {
+          pLF->Append(aF);
+        }
+      }
+    }
   }
   //
   TopTools_DataMapOfShapeListOfShape aDMVLF1, aDMVLF2, aDMIntFF;
@@ -462,19 +490,15 @@ void BRepOffset_Inter3d::ConnexIntByInt
       if (aLF.Extent() < 2) {
         continue;
       }
-      //
-      // find pairs in which the vertex is alone (not connected to shared edges)
+      // build lists of faces connected to the same vertex by looking for
+      // the pairs in which the vertex is alone (not connected to shared edges)
       TopTools_ListOfShape aLF1, aLF2;
-      Standard_Boolean bVertexOnly = Standard_False;
-      TopTools_MapOfShape aMFence;
       //
       it.Initialize(aLF);
       for (; it.More(); it.Next()) {
-        const TopoDS_Face& aFV1 = *(TopoDS_Face*)&it.Value();
-        if (!aMFence.Add(aFV1)) {
-          continue;
-        }
+        const TopoDS_Shape& aFV1 = it.Value();
         //
+        // get edges of first face connected to current vertex
         TopTools_MapOfShape aME;
         TopExp_Explorer aExp(aFV1, TopAbs_EDGE);
         for (; aExp.More(); aExp.Next()) {
@@ -488,37 +512,31 @@ void BRepOffset_Inter3d::ConnexIntByInt
           }
         }
         //
-        it1.Initialize(aLF);
+        // get to the next face in the list
+        it1 = it;
         for (it1.Next(); it1.More(); it1.Next()) {
-          const TopoDS_Face& aFV2 = *(TopoDS_Face*)&it1.Value();
-          if (aMFence.Contains(aFV2)) {
-            continue;
-          }
+          const TopoDS_Shape& aFV2 = it1.Value();
           //
-          bVertexOnly = Standard_True;
           aExp.Init(aFV2, TopAbs_EDGE);
           for (; aExp.More(); aExp.Next()) {
             const TopoDS_Shape& aEV2 = aExp.Current();
             if (aME.Contains(aEV2)) {
-              bVertexOnly = Standard_False;
               break;
             }
           }
           //
-          if (bVertexOnly) {
+          if (!aExp.More()) {
+            // faces share only vertex - make pair for intersection
             aLF1.Append(aFV1);
             aLF2.Append(aFV2);
-            aMFence.Add(aFV2);
           }
         }
       }
       //
-      if (aLF1.IsEmpty()) {
-        continue;
+      if (aLF1.Extent()) {
+        aDMVLF1.Bind(aS, aLF1);
+        aDMVLF2.Bind(aS, aLF2);
       }
-      //
-      aDMVLF1.Bind(aS, aLF1);
-      aDMVLF2.Bind(aS, aLF2);
     }
   }
   //
