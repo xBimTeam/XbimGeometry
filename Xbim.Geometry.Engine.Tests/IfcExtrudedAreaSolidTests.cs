@@ -18,6 +18,27 @@ namespace Ifc4GeometryTests
     [TestClass]
     public class IfcExtrudedAreaSolidTests
     {
+
+        [TestMethod]
+        public void CompositeCurveTest()
+        {
+            var xbimGeometryCreator = new XbimGeometryEngine();
+            using (var eventTrace = LoggerFactory.CreateEventTrace())
+            {
+                using (var m =  IfcStore.Open("SolidTestFiles\\CompositeCurveNotClosing.ifc"))
+                {
+                   
+                    var cc = m.Instances.OfType<IIfcCompositeCurve>().Where(c=>c.EntityLabel== 5556).FirstOrDefault();
+                    Assert.IsTrue(cc != null, "No Composite Curve found");
+                    
+                    var solid = xbimGeometryCreator.Create(cc);
+                    Assert.IsTrue(eventTrace.Events.Count == 0); //no events should have been raised from this call
+             
+
+                }
+            }
+
+        }
         [TestMethod]
         public void CompositeProfileDefTest()
         {

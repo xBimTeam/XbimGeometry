@@ -64,6 +64,7 @@
 #include <GProp_GProps.hxx>
 #include <GC_MakeSegment.hxx>
 #include <ShapeAnalysis_Wire.hxx>
+#include <ShapeAnalysis_WireOrder.hxx>
 using namespace Xbim::Common;
 using namespace System::Linq;
 namespace Xbim
@@ -212,7 +213,23 @@ namespace Xbim
 					return;
 				}
 				pWire = new TopoDS_Wire();
-				*pWire = loop;
+				if (!loop->IsClosed && loop->Edges->Count>1) //we need to close it if we have more thn one edge
+				{
+					double maxTol = profile->Model->ModelFactors->OneMilliMeter*10;
+					XbimFace^ face = gcnew XbimFace(loop);
+					ShapeFix_Wire wireFixer(loop,face, profile->Model->ModelFactors->Precision);
+					wireFixer.ClosedWireMode() = Standard_True;
+					wireFixer.SetMinTolerance(profile->Model->ModelFactors->Precision);
+					wireFixer.SetPrecision(profile->Model->ModelFactors->Precision);
+					wireFixer.SetMaxTolerance(maxTol);
+					Standard_Boolean closed = wireFixer.FixClosed();
+					if(closed)
+						*pWire = wireFixer.Wire();
+					else
+						*pWire = loop;
+				}
+				else
+					*pWire = loop;
 			}
 		}
 
@@ -538,113 +555,48 @@ namespace Xbim
 
 		void XbimWire::Init(IIfcCompositeCurve^ cCurve)
 		{
-			bool haveWarned = false;
-			BRepBuilderAPI_MakeWire wire;
-			IModelFactors^ mf = cCurve->Model->ModelFactors;
+			
 			ShapeFix_ShapeTolerance FTol;
-			double precision = mf->Precision; //use a courser precision for trimmed curves
-			double currentPrecision = precision;
-			double maxTolerance = mf->PrecisionBooleanMax;
-			bool first = true;
+			double precision = cCurve->Model->ModelFactors->Precision; //use a courser precision for trimmed curves	
+			double maxPrecision = 10/cCurve->Model->ModelFactors->OneMilliMetre;
+			NCollection_Vector<TopoDS_Edge> edgeList;
 			for each(IIfcCompositeCurveSegment^ seg in cCurve->Segments)
-			{
-				//XbimCurve^ cv = gcnew XbimCurve(seg->ParentCurve);
-				XbimWire^ wireSegManaged = gcnew XbimWire(seg->ParentCurve);
-				
+			{				
+				XbimWire^ wireSegManaged = gcnew XbimWire(seg->ParentCurve);				
 				if (wireSegManaged->IsValid)
 				{
-										
 					if (!seg->SameSense) wireSegManaged->Reverse();
-					XbimWire^ currentWire;
-					if (!first&& wire.IsDone()) 
-						currentWire = gcnew XbimWire(wire.Wire());
-			retryAddWire:					
-					FTol.SetTolerance(wireSegManaged, currentPrecision, TopAbs_VERTEX);
-					
-					if (!first) //only do this if we have something
-					{					
-						//see if start matches current e-nd
-						XbimPoint3DWithTolerance^ currentEnd = gcnew XbimPoint3DWithTolerance(currentWire->End, currentPrecision);
-						XbimPoint3DWithTolerance^ segStart = gcnew XbimPoint3DWithTolerance(wireSegManaged->Start, currentPrecision);
-						if (currentEnd!=segStart)
-						{
-							XbimPoint3DWithTolerance^ segEnd = gcnew XbimPoint3DWithTolerance(wireSegManaged->End, currentPrecision);
-							if (segEnd == currentEnd) //need to reverse the segment
-								wireSegManaged->Reverse();
-							else
-							{
-								XbimPoint3DWithTolerance^ currentStart = gcnew XbimPoint3DWithTolerance(currentWire->Start, currentPrecision);
-								if (currentStart==segStart)
-									wireSegManaged->Reverse();
-								else if (segStart != currentEnd || segEnd != currentStart)
-								{
-									currentPrecision *= 10;
-									if (currentPrecision <= maxTolerance)
-										goto retryAddWire;
-									else
-									{
-										haveWarned = true;
-										XbimGeometryCreator::LogWarning(cCurve, "Composite curve segment #{0} was not contiguous with any other segments. It has been ignored", seg->EntityLabel);
-										continue;
-									}
-								}					
-							}
-						}
-					}
 					for each (XbimEdge^ edge in wireSegManaged->Edges)
 					{
-						wire.Add(edge);
-					}
-				
-					currentPrecision = precision;
-					first = false; //we have added something
+						FTol.LimitTolerance(edge, precision);
+						
+						edgeList.Append(edge);
+					}			
+				}				
+			}
+			NCollection_Vector<TopoDS_Edge> sortedEdgeList;
+			double maxGap;
+			bool isClosed;
+			bool sorted = SortEdgesForWire(edgeList, sortedEdgeList, precision, &isClosed, &maxGap);
+			if (sorted)
+			{
+				size_t num = sortedEdgeList.Length();
+				BRepBuilderAPI_MakeWire wireMaker;
+				for (size_t i = 0; i < num; i++)
+				{
+					TopoDS_Edge e = sortedEdgeList(i);
+					wireMaker.Add(e);
 				}
 				
+				pWire = new TopoDS_Wire();
+				*pWire = wireMaker.Wire();
+				if (isClosed) pWire->Closed(Standard_True);
+			}
+			else //cannot build a wire
+			{
+				XbimGeometryCreator::LogWarning(cCurve, "Invalid composite curve found. It has been discarded");
 			}
 
-			if (wire.IsDone())
-			{
-				TopoDS_Wire w = wire.Wire();
-				if (BRepCheck_Analyzer(w, Standard_True).IsValid() == Standard_True)
-				{
-					pWire = new TopoDS_Wire();
-					*pWire = w;
-				}
-				else
-				{
-					double toleranceMax = cCurve->Model->ModelFactors->PrecisionMax;
-					ShapeFix_Shape sfs(w);
-					sfs.SetMinTolerance(mf->Precision);
-					sfs.SetMaxTolerance(mf->OneMilliMetre * 50);
-					sfs.Perform();
-					if (BRepCheck_Analyzer(sfs.Shape(), Standard_True).IsValid() == Standard_True && sfs.Shape().ShapeType() == TopAbs_WIRE) //in release builds except the geometry is not compliant
-					{
-						pWire = new TopoDS_Wire();
-						*pWire = TopoDS::Wire(sfs.Shape());
-					}
-					else
-						XbimGeometryCreator::LogWarning(cCurve, "Invalid composite curve found. It has been discarded");
-				}
-			}
-			else if (!haveWarned) //don't do it twice
-			{
-				BRepBuilderAPI_WireError err = wire.Error();
-				switch (err)
-				{
-				case BRepBuilderAPI_EmptyWire:
-					XbimGeometryCreator::LogWarning(cCurve, "Illegal bound found in composite curve, it has no edges. It has been discarded");
-					break;
-				case BRepBuilderAPI_DisconnectedWire:
-					XbimGeometryCreator::LogWarning(cCurve, "Illegal bound found in composite curve, all edges could not be connected. It has been discarded");
-					break;
-				case BRepBuilderAPI_NonManifoldWire:
-					XbimGeometryCreator::LogWarning(cCurve, "Illegal found in composite curve, it is non-manifold. It has been discarded");
-					break;
-				default:
-					XbimGeometryCreator::LogWarning(cCurve, "Illegal bound found in composite curve, unknown error. It has been discarded");
-					break;
-				}
-			}
 		}
 
 		void XbimWire::Init(IIfcTrimmedCurve^ tCurve)
@@ -2705,7 +2657,6 @@ namespace Xbim
 			y += (xn + xn1)*(zn - zn1);
 			z += (xn - xn1)*(yn + yn1);
 		}
-#pragma endregion
 
 		bool IfcPolylineComparer::Equals(IIfcPolyline ^x, Xbim::Ifc4::Interfaces::IIfcPolyline ^y)
 		{
@@ -2767,5 +2718,158 @@ namespace Xbim
 			return startLookupPnt == startOriginalPnt;
 		}
 
+		bool XbimWire::SortEdgesForWire(const NCollection_Vector<TopoDS_Edge>& oldedges, NCollection_Vector<TopoDS_Edge>& newedges, double tol, bool *pClosed, double* pMaxGap)
+		{
+			int i, n, minID, id, id2;
+			NCollection_Vector<int> bTaken, matchedIDs, sortedIDs;
+			NCollection_Vector<gp_Pnt> pnts;
+			TopExp_Explorer ex;
+			std::vector<TopoDS_Edge> edges;
+			gp_Pnt pnt, endPnts[2];
+			bool bSucc;
+			double minDis, otherDis, minminDis;
+			Standard_Boolean bDeg;
+			TopoDS_Vertex v1, v2;
+			TopoDS_Edge degEdge;
+
+			newedges.Clear();
+			if (pMaxGap)
+				*pMaxGap = 0.0;
+			n = oldedges.Length();
+			if (n == 0)
+				return false;
+
+			for (i = 0; i<n; ++i)
+			{
+				TopExp::Vertices(oldedges(i), v1, v2);
+				pnts.Append(BRep_Tool::Pnt(v1));
+				pnts.Append(BRep_Tool::Pnt(v2));
+				bTaken.Append(0);
+			}
+
+			endPnts[0] = pnts(0);
+			endPnts[1] = pnts(1);
+			bTaken(0) = 1;
+			edges.push_back(oldedges(0));
+
+			while (1)
+			{
+				bSucc = false;
+				minID = -1;
+				minminDis = DBL_MAX;
+				for (i = 0; i<n; ++i)
+				{
+					if (bTaken(i) != 0)
+						continue;
+					id = GetMatchTwoPntsPair(pnts(2 * i), pnts(2 * i + 1), endPnts[0], endPnts[1], minDis, otherDis);
+					if (minDis<minminDis)
+					{
+						id2 = id;
+						minID = i;
+						minminDis = minDis;
+					}
+				}
+				if (minID != -1 && minminDis<tol)
+				{
+					bTaken(minID) = 1;
+					bSucc = true;
+					if (id2 == 0)
+					{
+						edges.insert(edges.begin(), oldedges(minID));
+						endPnts[0] = pnts(2 * minID + 1);
+					}
+					else if (id2 == 1)
+					{
+						edges.push_back(oldedges(minID));
+						endPnts[1] = pnts(2 * minID + 1);
+					}
+					else if (id2 == 2)
+					{
+						edges.insert(edges.begin(), oldedges(minID));
+						endPnts[0] = pnts(2 * minID);
+					}
+					else if (id2 == 3)
+					{
+						edges.push_back(oldedges(minID));
+						endPnts[1] = pnts(2 * minID);
+					}
+					if (pMaxGap)
+					{
+						if (*pMaxGap<minminDis)
+							*pMaxGap = minminDis;
+					}
+				}
+				if (!bSucc)
+					break;
+			}
+
+			if (edges.size() != oldedges.Length())
+				return false;
+
+			if (endPnts[1].Distance(endPnts[0])<tol) //close
+			{
+				if (pClosed)
+					*pClosed = true;
+				int startID = -1;
+				for (i = 0; i<edges.size(); ++i)
+				{
+					if (oldedges(0).IsSame(edges[i]))
+					{
+						startID = i;
+						break;
+					}
+				}
+				if (startID == -1)
+				{
+					for (i = 0; i<edges.size(); ++i)
+						newedges.Append(edges[i]);
+				}
+				else
+				{
+					for (i = startID; i<edges.size(); ++i)
+						newedges.Append(edges[i]);
+					for (i = 0; i<startID; ++i)
+						newedges.Append(edges[i]);
+				}
+			}
+			else
+			{
+				if (pClosed)
+					*pClosed = false;
+
+				for (i = 0; i<edges.size(); ++i)
+					newedges.Append(edges[i]);
+			}
+
+			return true;
+		}
+
+
+
+		int XbimWire::GetMatchTwoPntsPair(const gp_Pnt& b1, const gp_Pnt& e1, const gp_Pnt& b2, const gp_Pnt& e2,
+			double& minDis, double& otherDis)
+		{
+			double distance[4];
+			int index = -1, i;
+
+			distance[0] = b1.SquareDistance(b2);
+			distance[1] = b1.SquareDistance(e2);
+			distance[2] = e1.SquareDistance(b2);
+			distance[3] = e1.SquareDistance(e2);
+			minDis = DBL_MAX;
+			for (i = 0; i<4; ++i)
+			{
+				if (distance[i]<minDis)
+				{
+					minDis = distance[i];
+					index = i;
+				}
+			}
+			otherDis = distance[3 - index];
+
+			minDis = sqrt(minDis);
+			otherDis = sqrt(otherDis);
+			return index;
+		}
 }
 }

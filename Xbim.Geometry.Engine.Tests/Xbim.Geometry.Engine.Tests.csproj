@@ -305,6 +305,9 @@
     <None Include="SolidTestFiles\Complex_BRep_Boolean.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="SolidTestFiles\CompositeCurveNotClosing.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="SolidTestFiles\Duplex_A_20110907.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
