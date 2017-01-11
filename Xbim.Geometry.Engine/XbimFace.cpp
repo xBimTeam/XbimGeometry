@@ -455,7 +455,19 @@ namespace Xbim
 			TopoDS_Face face;
 			XbimWire^ loop = gcnew XbimWire(profile->OuterCurve);
 			if (loop->IsValid)
-			{
+			{				
+				if (!loop->IsClosed && loop->Edges->Count>1) //we need to close it if we have more thn one edge
+				{
+					double maxTol = profile->Model->ModelFactors->OneMilliMeter * 10;
+					XbimFace^ face = gcnew XbimFace(loop);
+					ShapeFix_Wire wireFixer(loop, face, profile->Model->ModelFactors->Precision);
+					wireFixer.ClosedWireMode() = Standard_True;
+					wireFixer.SetMinTolerance(profile->Model->ModelFactors->Precision);
+					wireFixer.SetPrecision(profile->Model->ModelFactors->Precision);
+					wireFixer.SetMaxTolerance(maxTol);
+					Standard_Boolean closed = wireFixer.FixClosed();
+					if (closed) loop = gcnew XbimWire(wireFixer.Wire());					
+				}				
 				double currentFaceTolerance = tolerance;
 			TryBuildFace:
 				BRepBuilderAPI_MakeFace faceMaker(loop, false);
@@ -480,6 +492,18 @@ namespace Xbim
 				{
 
 					XbimWire^ innerWire = gcnew XbimWire(curve);
+					if (!innerWire->IsClosed && innerWire->Edges->Count>1) //we need to close it if we have more thn one edge
+					{
+						double maxTol = profile->Model->ModelFactors->OneMilliMeter * 10;
+						XbimFace^ face = gcnew XbimFace(innerWire);
+						ShapeFix_Wire wireFixer(innerWire, face, profile->Model->ModelFactors->Precision);
+						wireFixer.ClosedWireMode() = Standard_True;
+						wireFixer.SetMinTolerance(profile->Model->ModelFactors->Precision);
+						wireFixer.SetPrecision(profile->Model->ModelFactors->Precision);
+						wireFixer.SetMaxTolerance(maxTol);
+						Standard_Boolean closed = wireFixer.FixClosed();
+						if (closed) innerWire = gcnew XbimWire(wireFixer.Wire());
+					}
 					if (innerWire->IsClosed) //if the loop is not closed it is not a bound
 					{
 						XbimVector3D n = innerWire->Normal;
