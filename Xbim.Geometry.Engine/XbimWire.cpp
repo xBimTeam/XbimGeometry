@@ -5,7 +5,7 @@
 #include "XbimConvert.h"
 #include "XbimEdgeSet.h"
 #include "XbimVertexSet.h"
-
+#include "XbimCompound.h"
 #include <BRepBuilderAPI_Transform.hxx>
 #include <BRepBuilderAPI_GTransform.hxx>
 #include <TopExp_Explorer.hxx>
@@ -65,6 +65,7 @@
 #include <GC_MakeSegment.hxx>
 #include <ShapeAnalysis_Wire.hxx>
 #include <ShapeAnalysis_WireOrder.hxx>
+
 using namespace Xbim::Common;
 using namespace System::Linq;
 namespace Xbim
@@ -560,42 +561,90 @@ namespace Xbim
 			double precision = cCurve->Model->ModelFactors->Precision; //use a courser precision for trimmed curves	
 			double maxPrecision = 10/cCurve->Model->ModelFactors->OneMilliMetre;
 			NCollection_Vector<TopoDS_Edge> edgeList;
+			TopoDS_Wire w;
+			BRep_Builder builder; 			
+			bool isContinuous = true;
 			for each(IIfcCompositeCurveSegment^ seg in cCurve->Segments)
 			{				
-				XbimWire^ wireSegManaged = gcnew XbimWire(seg->ParentCurve);				
+				XbimWire^ wireSegManaged = gcnew XbimWire(seg->ParentCurve);
+				if (seg->Transition == IfcTransitionCode::DISCONTINUOUS) isContinuous = false;
 				if (wireSegManaged->IsValid)
 				{
 					if (!seg->SameSense) wireSegManaged->Reverse();
 					for each (XbimEdge^ edge in wireSegManaged->Edges)
 					{
-						FTol.LimitTolerance(edge, precision);
-						
-						edgeList.Append(edge);
+						FTol.LimitTolerance(edge, precision);						
+						edgeList.Append(edge);						
 					}			
 				}				
 			}
+			XbimWire^ comp = gcnew XbimWire(w);
 			NCollection_Vector<TopoDS_Edge> sortedEdgeList;
+			NCollection_Vector<TopoDS_Edge> notTakenEdgeList;
+			NCollection_Vector<TopoDS_Wire> wireList;
 			double maxGap;
 			bool isClosed;
-			bool sorted = SortEdgesForWire(edgeList, sortedEdgeList, precision, &isClosed, &maxGap);
-			if (sorted)
+			while (1)
 			{
-				size_t num = sortedEdgeList.Length();
+				bool finished = SortEdgesForWire(edgeList, sortedEdgeList, notTakenEdgeList, precision, &isClosed, &maxGap);
+				int sorted = sortedEdgeList.Length(); //always 1 edge will be returned
+				int unsorted = notTakenEdgeList.Length();
+
 				BRepBuilderAPI_MakeWire wireMaker;
-				for (size_t i = 0; i < num; i++)
+				for (int i = 0; i < sorted; i++)
 				{
 					TopoDS_Edge e = sortedEdgeList(i);
 					wireMaker.Add(e);
 				}
-				
-				pWire = new TopoDS_Wire();
-				*pWire = wireMaker.Wire();
-				if (isClosed) pWire->Closed(Standard_True);
+				if (wireMaker.IsDone())
+					wireList.Append(wireMaker.Wire());
+				edgeList.Clear();
+				if (finished || unsorted == 0) 
+					break;
+				for (int i = 0; i < unsorted; i++)
+				{
+					edgeList.Append(notTakenEdgeList(i));
+				}
+				notTakenEdgeList.Clear();
+
+				//else //cannot build a wire
+				//{
+				//	
+				//	XbimGeometryCreator::LogWarning(cCurve, "Invalid composite curve found. It has been discarded");
+				//}
 			}
-			else //cannot build a wire
+			//we have a list of one or more wires to join if we can
+			
+			
+			int wireCount = wireList.Length();
+			if (wireCount == 0) return; //invalid curve
+			pWire = new TopoDS_Wire();
+			//we are going to use one millimter for the precision becuase tolerance is clearly out of range now
+			double oneMilli = cCurve->Model->ModelFactors->OneMilliMeter;
+			if (wireCount == 1)
+				*pWire = wireList(0);
+			else
 			{
-				XbimGeometryCreator::LogWarning(cCurve, "Invalid composite curve found. It has been discarded");
+				FTol.LimitTolerance(wireList(0), oneMilli);
+				BRepBuilderAPI_MakeWire wireMaker(wireList(0));
+				NCollection_Vector<TopoDS_Wire> unattachedWireList;
+				for (int i = 1; i < wireCount; i++)
+				{					
+					wireMaker.Add(wireList(i));
+					if (!wireMaker.IsDone())
+					{
+						unattachedWireList.Append(wireList(i));					
+					}
+				}
+				if (unattachedWireList.Length() > 0) //give in
+				{
+					XbimGeometryCreator::LogWarning(cCurve, "Invalid part of a composite curve found. It has been discarded");
+				}
+				*pWire = wireMaker.Wire();
 			}
+
+			if (isContinuous) //if all edges are continuous
+				pWire->Closed(Standard_True);
 
 		}
 
@@ -2718,10 +2767,10 @@ namespace Xbim
 			return startLookupPnt == startOriginalPnt;
 		}
 
-		bool XbimWire::SortEdgesForWire(const NCollection_Vector<TopoDS_Edge>& oldedges, NCollection_Vector<TopoDS_Edge>& newedges, double tol, bool *pClosed, double* pMaxGap)
+		bool XbimWire::SortEdgesForWire(const NCollection_Vector<TopoDS_Edge>& oldedges, NCollection_Vector<TopoDS_Edge>& newedges, NCollection_Vector<TopoDS_Edge>& notTaken, double tol, bool *pClosed, double* pMaxGap)
 		{
 			int i, n, minID, id, id2;
-			NCollection_Vector<int> bTaken, matchedIDs, sortedIDs;
+			NCollection_Vector<int> bTaken;
 			NCollection_Vector<gp_Pnt> pnts;
 			TopExp_Explorer ex;
 			std::vector<TopoDS_Edge> edges;
@@ -2731,14 +2780,14 @@ namespace Xbim
 			Standard_Boolean bDeg;
 			TopoDS_Vertex v1, v2;
 			TopoDS_Edge degEdge;
-
+			notTaken.Clear();
 			newedges.Clear();
 			if (pMaxGap)
 				*pMaxGap = 0.0;
 			n = oldedges.Length();
 			if (n == 0)
 				return false;
-
+			
 			for (i = 0; i<n; ++i)
 			{
 				TopExp::Vertices(oldedges(i), v1, v2);
@@ -2804,7 +2853,16 @@ namespace Xbim
 			}
 
 			if (edges.size() != oldedges.Length())
+			{
+				for (int i = 0; i < n; i++)
+				{
+					if (bTaken(i) == 0)
+						notTaken.Append(oldedges(i));
+					else
+						newedges.Append(oldedges(i));
+				}
 				return false;
+			}
 
 			if (endPnts[1].Distance(endPnts[0])<tol) //close
 			{

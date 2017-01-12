@@ -11,6 +11,7 @@ namespace Xbim
 		private:
 			XbimPoint3D point;
 			double tolerance;
+			int hashCode;
 			
 		public:
 #pragma region destructors
@@ -47,6 +48,7 @@ namespace Xbim
 			static bool operator !=(XbimPoint3DWithTolerance^ left, XbimPoint3DWithTolerance^ right);
 			virtual bool Equals(IXbimPoint^ p);
 			virtual bool Equals(IXbimVertex^ v);
+			void CalculateHashCode();
 #pragma endregion
 
 			// Inherited via IXbimPoint

@@ -302,6 +302,9 @@
     <None Include="SolidTestFiles\ClosedShell_with_errors.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="SolidTestFiles\ComplexCompositeCurve.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="SolidTestFiles\Complex_BRep_Boolean.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -348,6 +351,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="SolidTestFiles\SweptExtrusion.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="SolidTestFiles\TotalBooleanDelete.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="SolidTestFiles\TriangulatedFaceset.ifc">

@@ -18,6 +18,61 @@ namespace Ifc4GeometryTests
     [TestClass]
     public class IfcExtrudedAreaSolidTests
     {
+
+        [TestMethod]
+        public void TotalBooleanDeletionTest()
+        {
+            var xbimGeometryCreator = new XbimGeometryEngine();
+            using (var eventTrace = LoggerFactory.CreateEventTrace())
+            {
+                using (var m = IfcStore.Open("SolidTestFiles\\TotalBooleanDelete.ifc"))
+                {
+                    var ifcOpening = m.Instances[305595] as IIfcOpeningElement;
+
+                    var body = m.Instances[305524] as IIfcExtrudedAreaSolid;
+                    Assert.IsTrue(body != null, "No IIfcExtrudedAreaSolid body found");
+                    var cut1 = m.Instances[305573] as IIfcExtrudedAreaSolid;
+                    Assert.IsTrue(cut1 != null, "No IIfcExtrudedAreaSolid cut1 found");
+                    var cut2 = m.Instances[305589] as IIfcExtrudedAreaSolid;
+                    Assert.IsTrue(cut2 != null, "No IIfcExtrudedAreaSolid cut2 found");
+                    var sBody = xbimGeometryCreator.CreateSolid(body);
+                    var sCut1 = xbimGeometryCreator.Create(cut1, (IIfcAxis2Placement3D)((IIfcLocalPlacement)(ifcOpening.ObjectPlacement)).RelativePlacement);
+                    var sCut2 = xbimGeometryCreator.Create(cut2, (IIfcAxis2Placement3D)((IIfcLocalPlacement)(ifcOpening.ObjectPlacement)).RelativePlacement);
+                    var ss = xbimGeometryCreator.CreateSolidSet();
+                    ss.Add(sCut1);
+                    ss.Add(sCut2);
+                    var res = sBody.Cut(ss, m.ModelFactors.Precision);
+                    
+                    Assert.IsTrue(res.Count == 0,"No solid should result");
+                    
+
+                }
+            }
+
+        }
+        /// <summary>
+        /// This test operates on a wire that is not properly closed due to tolerance errors in the model
+        /// </summary>
+        [TestMethod]
+        public void CompositeCurve3Test()
+        {
+            var xbimGeometryCreator = new XbimGeometryEngine();
+            using (var eventTrace = LoggerFactory.CreateEventTrace())
+            {
+                using (var m = IfcStore.Open("SolidTestFiles\\ComplexCompositeCurve.ifc"))
+                {
+
+                    var cc = m.Instances.OfType<IIfcCompositeCurve>().Where(c=>c.EntityLabel== 2589130).FirstOrDefault();
+                    Assert.IsTrue(cc != null, "No Composite Curve found");
+
+                    var wire = xbimGeometryCreator.Create(cc) as IXbimWire;
+                    Assert.IsTrue(eventTrace.Events.Count == 0); //0 event should have been raised from this call
+                    Assert.IsTrue(wire.IsClosed, "Wire should be closed");
+                    Assert.IsTrue(wire.Length > 0, "Wire should have a length > 0");
+                }
+            }
+        }
+
         [TestMethod]
         public void CompositeCurve2Test()
         {

@@ -154,7 +154,7 @@ namespace Xbim
 				refCount++;
 				if (pA == pointA)
 					return edgeAB;
-				if (pB == pointA)
+				else
 					return edgeAB->Reversed();
 			    
 			}
