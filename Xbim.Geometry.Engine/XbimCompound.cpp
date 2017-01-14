@@ -1047,6 +1047,7 @@ namespace Xbim
 				solidFixer.SetPrecision(tolerance);
 				solidFixer.SetMinTolerance(tolerance);
 				result = solidFixer.SolidFromShell(shell);
+				if (result.IsNull()) result = shell; //give in
 			}
 			else
 				result = shell;
