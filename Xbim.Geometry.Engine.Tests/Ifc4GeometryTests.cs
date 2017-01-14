@@ -509,7 +509,7 @@ namespace Ifc4GeometryTests
                     var pbhs = model.Instances[3942238] as IIfcBooleanClippingResult;
                     var solid = _xbimGeometryCreator.CreateSolid(pbhs);
                     Assert.IsTrue(solid.Volume > 0);
-                    Assert.IsTrue(eventTrace.Events.Count == 2); //2 events should have been raised from this call
+                    Assert.IsTrue(eventTrace.Events.Count == 8); //8 events should have been raised from this call
                 }
             }
         }

@@ -107,6 +107,7 @@ namespace Xbim
 			virtual IXbimSolid^ CreateSolid(IIfcBoundingBox^ ifcSolid);
 			virtual IXbimSolid^ CreateSolid(IIfcSurfaceCurveSweptAreaSolid^ ifcSolid);
 
+			virtual IXbimSolid^ CreateSolid(IIfcBooleanResult^ ifcSolid);
 			virtual IXbimSolid^ CreateSolid(IIfcBooleanClippingResult^ ifcSolid);
 			virtual IXbimSolid^ CreateSolid(IIfcBooleanOperand^ ifcSolid);
 			virtual IXbimSolid^ CreateSolid(IIfcHalfSpaceSolid^ ifcSolid);
@@ -142,7 +143,7 @@ namespace Xbim
 			//Creates collections of objects
 			virtual IXbimSolidSet^ CreateSolidSet();
 			virtual IXbimSolidSet^ CreateSolidSet(IIfcBooleanResult^ boolOp);
-			virtual IXbimSolidSet^ CreateBooleanResult(IIfcBooleanResult^ clip);
+			virtual IXbimSolidSet^ CreateBooleanResult(IIfcBooleanClippingResult^ clip);
 			virtual IXbimGeometryObjectSet^ CreateGeometryObjectSet();
 
 			//Ifc4 interfaces

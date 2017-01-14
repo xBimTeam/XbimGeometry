@@ -458,14 +458,17 @@ namespace Xbim
 			{				
 				if (!loop->IsClosed && loop->Edges->Count>1) //we need to close it if we have more thn one edge
 				{
-					double maxTol = profile->Model->ModelFactors->OneMilliMeter * 10;
+					double oneMilli = profile->Model->ModelFactors->OneMilliMeter;
 					XbimFace^ face = gcnew XbimFace(loop);
 					ShapeFix_Wire wireFixer(loop, face, profile->Model->ModelFactors->Precision);
 					wireFixer.ClosedWireMode() = Standard_True;
+					wireFixer.FixGaps2dMode() = Standard_True;
+					wireFixer.FixGaps3dMode() = Standard_True;
+					wireFixer.ModifyGeometryMode() = Standard_True;
 					wireFixer.SetMinTolerance(profile->Model->ModelFactors->Precision);
-					wireFixer.SetPrecision(profile->Model->ModelFactors->Precision);
-					wireFixer.SetMaxTolerance(maxTol);
-					Standard_Boolean closed = wireFixer.FixClosed();
+					wireFixer.SetPrecision(oneMilli);
+					wireFixer.SetMaxTolerance(oneMilli * 10);
+					Standard_Boolean closed = wireFixer.Perform();
 					if (closed) loop = gcnew XbimWire(wireFixer.Wire());					
 				}				
 				double currentFaceTolerance = tolerance;
@@ -490,18 +493,20 @@ namespace Xbim
 
 				for each(IIfcCurve^ curve in profile->InnerCurves)
 				{
-
 					XbimWire^ innerWire = gcnew XbimWire(curve);
 					if (!innerWire->IsClosed && innerWire->Edges->Count>1) //we need to close it if we have more thn one edge
 					{
-						double maxTol = profile->Model->ModelFactors->OneMilliMeter * 10;
+						double oneMilli = profile->Model->ModelFactors->OneMilliMeter;
 						XbimFace^ face = gcnew XbimFace(innerWire);
 						ShapeFix_Wire wireFixer(innerWire, face, profile->Model->ModelFactors->Precision);
 						wireFixer.ClosedWireMode() = Standard_True;
+						wireFixer.FixGaps2dMode() = Standard_True;
+						wireFixer.FixGaps3dMode() = Standard_True;
+						wireFixer.ModifyGeometryMode() = Standard_True;
 						wireFixer.SetMinTolerance(profile->Model->ModelFactors->Precision);
-						wireFixer.SetPrecision(profile->Model->ModelFactors->Precision);
-						wireFixer.SetMaxTolerance(maxTol);
-						Standard_Boolean closed = wireFixer.FixClosed();
+						wireFixer.SetPrecision(oneMilli);
+						wireFixer.SetMaxTolerance(oneMilli * 10);
+						Standard_Boolean closed = wireFixer.Perform();
 						if (closed) innerWire = gcnew XbimWire(wireFixer.Wire());
 					}
 					if (innerWire->IsClosed) //if the loop is not closed it is not a bound

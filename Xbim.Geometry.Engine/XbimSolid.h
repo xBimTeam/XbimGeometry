@@ -46,6 +46,7 @@ namespace Xbim
 			void Init(IIfcBoxedHalfSpace^ solid);
 			void Init(IIfcPolygonalBoundedHalfSpace^ solid, double maxExtrusion);
 			void Init(IIfcBooleanResult^ solid);
+			void Init(IIfcBooleanClippingResult^ solid);
 			void Init(IIfcBooleanOperand^ solid);
 			void Init(XbimRect3D rect3D, double tolerance);
 
@@ -60,7 +61,7 @@ namespace Xbim
 #pragma endregion
 
 		public:
-			static XbimSolid^ BuildClippingList(IIfcBooleanResult^ solid, List<IIfcBooleanOperand^>^ clipList);
+			static XbimSolid^ BuildClippingList(IIfcBooleanClippingResult^ solid, List<IIfcBooleanOperand^>^ clipList);
 #pragma region Equality Overrides
 			virtual bool Equals(Object^ v) override;
 			virtual int GetHashCode() override;

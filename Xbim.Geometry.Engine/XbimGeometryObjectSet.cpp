@@ -516,7 +516,7 @@ namespace Xbim
 						shapeFixer.FixFaceTool()->FixWireTool()->FixIntersectingEdgesMode() = Standard_True;
 						shapeFixer.Perform();
 						ShapeUpgrade_UnifySameDomain unifier(shapeFixer.Shape());
-						//unifier.SetAngularTolerance(0.0174533); //1 degree
+						unifier.SetAngularTolerance(0.00174533); //1 tenth of a degree
 						unifier.SetLinearTolerance(tolerance);
 						try
 						{

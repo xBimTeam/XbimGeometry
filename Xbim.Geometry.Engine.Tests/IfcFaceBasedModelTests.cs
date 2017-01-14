@@ -21,6 +21,30 @@ namespace Ifc4GeometryTests
         /// Cut a set of brep faces without forming a solid
         /// </summary>
         [TestMethod]
+        public void NotClosedFacetedBrep()
+        {
+
+            using (var m = IfcStore.Open("SolidTestFiles\\NonManifoldFacetedBrep.ifc"))
+            {
+                using (var eventTrace = LoggerFactory.CreateEventTrace())
+                {
+                    var bc = m.Instances[242338] as IIfcBooleanResult;
+                    Assert.IsTrue(bc != null, "No IIfcBooleanResult found");
+                    var bodyShape = _xbimGeometryCreator.CreateSolid(bc);
+                    Assert.IsTrue(bodyShape.IsValid, "Invalid IIfcBooleanResult");
+                    Assert.IsTrue(eventTrace.Events.Count == 1); //1 event should have been raised from this call
+
+                   
+                }
+            }
+
+        }
+
+
+        /// <summary>
+        /// Cut a set of brep faces without forming a solid
+        /// </summary>
+        [TestMethod]
         public void CutNonSolidBrep()
         {
 

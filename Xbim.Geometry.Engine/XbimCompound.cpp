@@ -851,7 +851,7 @@ namespace Xbim
 			if (faceCount < MaxFacesToSew)
 			{
 				ShapeUpgrade_UnifySameDomain unifier(shell);
-				unifier.SetAngularTolerance(0.0174533); //1 degree
+				unifier.SetAngularTolerance(0.00174533); //1 tenth of a degree
 				unifier.SetLinearTolerance(_sewingTolerance);
 				try
 				{
@@ -1016,13 +1016,13 @@ namespace Xbim
 				
 			}
 			bool closedShape = true;
+			
 			for each (XbimFace^ f in facesToRecheck)
 			{
 				List<XbimBiPolarLinearEdge^>^ linearEdges = (List<XbimBiPolarLinearEdge^>^)(f->Tag);			
 				for each (XbimBiPolarLinearEdge^ linEdge in linearEdges)
 				{
-					if (linEdge->ReferenceCount != 2) closedShape = false;
-						
+					if (linEdge->ReferenceCount != 2) closedShape = false;					
 				}
 			}
 
@@ -1035,12 +1035,13 @@ namespace Xbim
 				bool fixed = shellFixer.FixFaceOrientation(shell);
 				if(fixed) shell = shellFixer.Shell();
 			}
+			//XbimShell^ s = gcnew XbimShell(shell);
 			TopoDS_Shape result;
 			if (close) //we want it closed
 			{
 				if (!closedShape) //we think it is closed, we cannot really do much more if it is not, shape healing will not heal a shell that is not closed
 				{
-					XbimGeometryCreator::LogWarning(theItem, "Incorrectly defined closed shell. It has been processed but is decalred closed and is not defined as closed");
+					XbimGeometryCreator::LogWarning(theItem, "Incorrectly defined closed shell. It has been processed but is declared closed and is not defined as closed");
 				}
 				ShapeFix_Solid solidFixer;
 				solidFixer.SetPrecision(tolerance);
@@ -1052,10 +1053,10 @@ namespace Xbim
 			pCompound = new TopoDS_Compound();
 			builder.MakeCompound(*pCompound);
 			//remove unnecesary faces, normally caused by triangulation, this improves boolean quality
-			if (allFaces->Count < MaxFacesToSew)
+			if (allFaces->Count > 6 && allFaces->Count < MaxFacesToSew) //six is a cuboid no point in simplify that
 			{
 				ShapeUpgrade_UnifySameDomain unifier(result);
-				unifier.SetAngularTolerance(0.0174533); //1 degree
+				unifier.SetAngularTolerance(0.00174533); //1 tenth of a degree
 				unifier.SetLinearTolerance(tolerance);
 				
 				try

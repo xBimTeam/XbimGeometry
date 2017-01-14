@@ -141,17 +141,10 @@ namespace Xbim
 				}
 				else if (dynamic_cast<IIfcBooleanResult^>(geomRep))
 				{
-					XbimSolidSet^ solidSet = (XbimSolidSet^) CreateBooleanResult((IIfcBooleanResult^)geomRep);
-					//BRepTools::Write((XbimSolid^)(solidSet->First), "d:\\tmp\\s");
+					XbimSolidSet^ solidSet = gcnew XbimSolidSet((IIfcBooleanResult^)geomRep);
 					if (objectLocation != nullptr) solidSet->Move(objectLocation);
 					return Trim(solidSet);
-				}				
-				/*else if (dynamic_cast<IIfcBooleanResult^>(geomRep))
-				{
-					XbimSolidSet^ solidSet = (XbimSolidSet^)CreateSolidSet((IIfcBooleanResult^)geomRep);
-					if (objectLocation != nullptr) solidSet->Move(objectLocation);
-					return solidSet;
-				}*/
+				}								
 				else if (dynamic_cast<IIfcFaceBasedSurfaceModel^>(geomRep))
 				{
 					XbimCompound^ comp = (XbimCompound^)CreateSurfaceModel((IIfcFaceBasedSurfaceModel^)geomRep);
@@ -503,10 +496,24 @@ namespace Xbim
 			return gcnew XbimSolid(IIfcSolid);
 		};
 
-
+		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcBooleanResult^ IIfcSolid)
+		{
+			return gcnew XbimSolid(IIfcSolid);
+		};
 
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcBooleanOperand^ IIfcSolid)
 		{
+			//ensure operands get treated correctly
+			if (dynamic_cast<IIfcBooleanClippingResult^>(IIfcSolid))
+				return gcnew XbimSolid((IIfcBooleanClippingResult^)IIfcSolid);
+			else if(dynamic_cast<IIfcBooleanResult^>(IIfcSolid))
+				return gcnew XbimSolid((IIfcBooleanResult^)IIfcSolid);
+			else if (dynamic_cast<IIfcSolidModel^>(IIfcSolid))
+				return gcnew XbimSolid((IIfcSolidModel^)IIfcSolid);
+			else if (dynamic_cast<IIfcHalfSpaceSolid^>(IIfcSolid))
+				return gcnew XbimSolid((IIfcHalfSpaceSolid^)IIfcSolid);
+			else if (dynamic_cast<IIfcCsgPrimitive3D^>(IIfcSolid))
+				return gcnew XbimSolid((IIfcCsgPrimitive3D^)IIfcSolid);
 			return gcnew XbimSolid(IIfcSolid);
 		};
 		
@@ -822,7 +829,7 @@ namespace Xbim
 		}
 
 
-		IXbimSolidSet^ XbimGeometryCreator::CreateBooleanResult(IIfcBooleanResult^ clip)
+		IXbimSolidSet^ XbimGeometryCreator::CreateBooleanResult(IIfcBooleanClippingResult^ clip)
 		{
 			IModelFactors^ mf = clip->Model->ModelFactors;
 			
@@ -849,39 +856,25 @@ namespace Xbim
 					if (s->IsValid) solidSet->Add(s);
 				}
 			}
-			//BRepTools::Write(body, "d:\\tmp\\b");
-			ShapeFix_ShapeTolerance FTol;
-			double precision = mf->Precision;
-		
-			//if (solidSet->Count >0) //do large ops all in one go
-			//{
-				return body->Cut(solidSet, precision);
-			//}
-			//else
-			//{
-			//	IXbimSolidSet^ r = gcnew XbimSolidSet(body);
-			//	for each (XbimSolid^ s in solidSet)	
-			//		r = r->Cut(s, precision);
 
-			//	//BRepTools::Write((XbimSolid^)(r->First), "d:\\tmp\\r");			
-			//	return r;
-			//}
-			
-#endif
+			double precision = mf->Precision;
+		    return body->Cut(solidSet, precision);					
+#endif		
+			ShapeFix_ShapeTolerance FTol;
 			IIfcBooleanOperand^ fOp = clip->FirstOperand;
 			IIfcBooleanOperand^ sOp = clip->SecondOperand;
 			IXbimSolidSet^ left;
 			IXbimSolidSet^ right;
-			if (dynamic_cast<IIfcBooleanResult^>(fOp))
-				left = CreateBooleanResult((IIfcBooleanResult^)fOp);
+			if (dynamic_cast<IIfcBooleanClippingResult^>(fOp))
+				left = CreateBooleanResult((IIfcBooleanClippingResult^)fOp);
 			else
 			{
 				left = gcnew XbimSolidSet(); 
 				XbimSolid^ l = gcnew XbimSolid(fOp);
 				if (l->IsValid)	left->Add(l);
 			}
-			if (dynamic_cast<IIfcBooleanResult^>(sOp))
-				right = CreateBooleanResult((IIfcBooleanResult^)sOp);
+			if (dynamic_cast<IIfcBooleanClippingResult^>(sOp))
+				right = CreateBooleanResult((IIfcBooleanClippingResult^)sOp);
 			else
 			{
 				right = gcnew XbimSolidSet();
@@ -891,13 +884,15 @@ namespace Xbim
 
 			if (!left->IsValid)
 			{
-				LogWarning(fOp, "Boolean result has an empty shape in the first operand");
-				return XbimSolidSet::Empty;
+				if (clip->Operator != IfcBooleanOperator::UNION)
+				//LogWarning(fOp, "Boolean result has an empty shape in the first operand");
+					return XbimSolidSet::Empty;
 			}
 
 			if (!right->IsValid)
 			{
-				LogWarning(sOp, "Boolean result has an empty shape in the second operand");
+				if(!left->IsValid)
+				//LogWarning(sOp, "Boolean result has an empty shape in the second operand");
 				return left;
 			}
 
@@ -907,13 +902,13 @@ namespace Xbim
 				switch (clip->Operator)
 				{
 				case IfcBooleanOperator::UNION:
-					result = left->Union(right, mf->PrecisionBoolean);
+					result = left->Union(right, mf->Precision);
 					break;
 				case IfcBooleanOperator::INTERSECTION:
-					result = left->Intersection(right, mf->PrecisionBoolean);
+					result = left->Intersection(right, mf->Precision);
 					break;
 				case IfcBooleanOperator::DIFFERENCE:
-					result = left->Cut(right, mf->PrecisionBoolean);
+					result = left->Cut(right, mf->Precision);
 					break;
 				}
 			}

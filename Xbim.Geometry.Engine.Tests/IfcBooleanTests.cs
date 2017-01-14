@@ -19,92 +19,22 @@ namespace Ifc4GeometryTests
     public class IfcBooleanTests
     {
         private readonly XbimGeometryEngine _xbimGeometryCreator = new XbimGeometryEngine();
+        [TestMethod]
+        public void EmptyBooleanResultTest()
+        {
+            using (var eventTrace = LoggerFactory.CreateEventTrace())
+            {
+                using (var m = IfcStore.Open("SolidTestFiles\\EmptyBooleanResult.ifc"))
+                {
+                    var bres = m.Instances[1814010] as IIfcBooleanResult;
+                    Assert.IsTrue(bres != null, "No IfcBooleanResult found");                   
+                    var solid = _xbimGeometryCreator.Create(bres);
+                    Assert.IsTrue(eventTrace.Events.Count == 0);
+                    //Assert.IsFalse(solid.Faces.Any(), "This solid should have 0 faces");
+                }
+            }
+        }
 
-
-        //[TestMethod]
-        //public void BooleanCutShellTest()
-        //{
-        //    using (var m = new XbimModel())
-        //    {
-
-        //        m.CreateFrom("SolidTestFiles\\7- Boolean_IfcHalfspace_With_IfcExtrudedAreaSolid.ifc", null, null,
-        //            true, true);
-        //        var fbsm = m.Instances[57] as IfcConnectedFaceSet;
-        //        Assert.IsFalse(fbsm == null, "IfcConnectedFaceSet is invalid");
-
-        //        var shell = _xbimGeometryCreator.CreateShell(fbsm);
-
-        //        using (var txn = m.BeginTransaction())
-        //        {
-        //            var ifcCylinder = IfcModelBuilder.MakeRightCircularCylinder(m, 500, 1500);
-        //            ifcCylinder.Position.Location.SetXYZ(-23000, 12000, 2000);
-        //            var cylinder = _xbimGeometryCreator.CreateSolid(ifcCylinder);
-        //            var shellSet = (IXbimShellSet)shell.Cut(cylinder, m.ModelFactors.PrecisionBoolean);
-        //            Assert.IsTrue(shellSet.Count == 1, "Cutting this shell should return a single shell");
-        //            var resultShell = shellSet.First;
-        //            Assert.IsTrue(shell.SurfaceArea > resultShell.SurfaceArea,
-        //                "The surface area of the result should be less than the original");
-        //        }
-        //    }
-        //}
-
-        //[TestMethod]
-        //public void BooleanIntersectonShellTest()
-        //{
-        //    using (var m = new XbimModel())
-        //    {
-
-
-        //        m.CreateFrom("SolidTestFiles\\7- Boolean_IfcHalfspace_With_IfcExtrudedAreaSolid.ifc", null, null, true, true);
-        //        var fbsm1 = m.Instances[57] as IfcConnectedFaceSet;
-        //        Assert.IsNotNull(fbsm1, "IfcConnectedFaceSet is invalid");
-        //        using (var txn = m.BeginTransaction())
-        //        {
-
-
-        //            var ifcCylinder = IfcModelBuilder.MakeRightCircularCylinder(m, 500, 1500);
-        //            ifcCylinder.Position.Location.SetXYZ(-23000, 12000, 2000);
-        //            var cylinder = _xbimGeometryCreator.CreateSolid(ifcCylinder);
-        //            var shell1 = _xbimGeometryCreator.CreateShell(fbsm1);
-        //            var shell2 = ((IXbimShellSet)shell1.Cut(cylinder, m.ModelFactors.PrecisionBoolean)).First;
-        //            Assert.IsTrue(shell2.CanCreateSolid);
-        //            var shellSet = (IXbimShellSet)shell1.Intersection(shell2.CreateSolid(), m.ModelFactors.PrecisionBoolean);
-        //            Assert.IsTrue(shellSet.Count == 1,
-        //                string.Format("Cutting this shell should return a single shell, it returned {0}", shellSet.Count));
-        //            var resultShell = shellSet.First;
-        //            Assert.IsTrue(Math.Abs(shell2.SurfaceArea - resultShell.SurfaceArea) < m.ModelFactors.Precision,
-        //                "The surface area of the result should be the same as the second shell");
-
-        //        }
-
-        //    }
-        //}
-
-        //[TestMethod]
-        //public void BooleanUnionShellTest()
-        //{
-        //    using (var m = new XbimModel())
-        //    {
-
-
-        //        m.CreateFrom("SolidTestFiles\\7- Boolean_IfcHalfspace_With_IfcExtrudedAreaSolid.ifc", null, null, true, true);
-        //        var fbsm1 = m.Instances[57] as IfcConnectedFaceSet;
-        //        Assert.IsNotNull(fbsm1, "IfcConnectedFaceSet is invalid");
-        //        var fbsm2 = m.Instances[305] as IfcConnectedFaceSet;
-        //        Assert.IsNotNull(fbsm2, "IfcConnectedFaceSet is invalid");
-
-        //        var shell1 = _xbimGeometryCreator.CreateShell(fbsm1);         
-        //        var shell2 = _xbimGeometryCreator.CreateShell(fbsm2);
-        //        Assert.IsTrue(shell2.CanCreateSolid());
-        //        var shellSet = shell1.Union(shell2.CreateSolid(), m.ModelFactors.PrecisionBoolean);
-        //        Assert.IsTrue(shellSet.Count == 1,
-        //            string.Format("Cutting this shell should return a single shell, it returned {0}", shellSet.Count));
-        //        var resultShell = shellSet.First;
-        //        Assert.IsTrue(shell1.SurfaceArea < resultShell.SurfaceArea,
-        //            "The surface area of the result should be less than the original");
-
-        //    }
-        //}
         [TestMethod]
         public void BooleanCutSolidTest()
         {
@@ -557,6 +487,29 @@ namespace Ifc4GeometryTests
                 }
             }
         }
+        [TestMethod]
+        public void Empty_BooleanResult2()
+        {
+            using (var eventTrace = LoggerFactory.CreateEventTrace())
+            {
+                using (var m = IfcStore.Open("SolidTestFiles\\EmptyBooleanResult2.ifc"))
+                {
+                    foreach (var br in m.Instances.OfType<IIfcBooleanResult>())
+                    {
+                        if (br.EntityLabel == 2913840) continue;// these are nested booleans that do return a solid for a cut in another boolean
+                        var solid = _xbimGeometryCreator.CreateSolid(br);
+                        Assert.IsFalse(solid.IsValid, "The solid is empty and not valid");
+                        Assert.IsFalse(solid.Shells.Any(), "There should be no shell");
+                        Assert.IsTrue(eventTrace.Events.Count==0,"No events should be raised");
+                        Assert.IsFalse(solid.Faces.Any(), "This solid should have 0 faces");
+                    }      
+                }
+            }
+        }
+
+
+        
+
         [TestMethod]
         public void Faceted_BRep_With_Void()
         {

@@ -216,14 +216,17 @@ namespace Xbim
 				pWire = new TopoDS_Wire();
 				if (!loop->IsClosed && loop->Edges->Count>1) //we need to close it if we have more thn one edge
 				{
-					double maxTol = profile->Model->ModelFactors->OneMilliMeter*10;
+					double oneMilli = profile->Model->ModelFactors->OneMilliMeter;
 					XbimFace^ face = gcnew XbimFace(loop);
 					ShapeFix_Wire wireFixer(loop,face, profile->Model->ModelFactors->Precision);
 					wireFixer.ClosedWireMode() = Standard_True;
+					wireFixer.FixGaps2dMode() = Standard_True;
+					wireFixer.FixGaps3dMode() = Standard_True;
+					wireFixer.ModifyGeometryMode() = Standard_True;
 					wireFixer.SetMinTolerance(profile->Model->ModelFactors->Precision);
-					wireFixer.SetPrecision(profile->Model->ModelFactors->Precision);
-					wireFixer.SetMaxTolerance(maxTol);
-					Standard_Boolean closed = wireFixer.FixClosed();
+					wireFixer.SetPrecision(oneMilli);
+					wireFixer.SetMaxTolerance(oneMilli*10);
+					Standard_Boolean closed = wireFixer.Perform();
 					if(closed)
 						*pWire = wireFixer.Wire();
 					else
@@ -560,10 +563,10 @@ namespace Xbim
 			ShapeFix_ShapeTolerance FTol;
 			double precision = cCurve->Model->ModelFactors->Precision; //use a courser precision for trimmed curves	
 			double maxPrecision = 10/cCurve->Model->ModelFactors->OneMilliMetre;
-			NCollection_Vector<TopoDS_Edge> edgeList;
 			TopoDS_Wire w;
 			BRep_Builder builder; 			
 			bool isContinuous = true;
+			TopTools_ListOfShape topoEdgeList;
 			for each(IIfcCompositeCurveSegment^ seg in cCurve->Segments)
 			{				
 				XbimWire^ wireSegManaged = gcnew XbimWire(seg->ParentCurve);
@@ -573,79 +576,56 @@ namespace Xbim
 					if (!seg->SameSense) wireSegManaged->Reverse();
 					for each (XbimEdge^ edge in wireSegManaged->Edges)
 					{
-						FTol.LimitTolerance(edge, precision);						
-						edgeList.Append(edge);						
+						FTol.LimitTolerance(edge, precision);											
+						topoEdgeList.Append(edge);
 					}			
 				}				
 			}
-			XbimWire^ comp = gcnew XbimWire(w);
-			NCollection_Vector<TopoDS_Edge> sortedEdgeList;
-			NCollection_Vector<TopoDS_Edge> notTakenEdgeList;
-			NCollection_Vector<TopoDS_Wire> wireList;
-			double maxGap;
-			bool isClosed;
-			while (1)
-			{
-				bool finished = SortEdgesForWire(edgeList, sortedEdgeList, notTakenEdgeList, precision, &isClosed, &maxGap);
-				int sorted = sortedEdgeList.Length(); //always 1 edge will be returned
-				int unsorted = notTakenEdgeList.Length();
-
-				BRepBuilderAPI_MakeWire wireMaker;
-				for (int i = 0; i < sorted; i++)
-				{
-					TopoDS_Edge e = sortedEdgeList(i);
-					wireMaker.Add(e);
-				}
-				if (wireMaker.IsDone())
-					wireList.Append(wireMaker.Wire());
-				edgeList.Clear();
-				if (finished || unsorted == 0) 
-					break;
-				for (int i = 0; i < unsorted; i++)
-				{
-					edgeList.Append(notTakenEdgeList(i));
-				}
-				notTakenEdgeList.Clear();
-
-				//else //cannot build a wire
-				//{
-				//	
-				//	XbimGeometryCreator::LogWarning(cCurve, "Invalid composite curve found. It has been discarded");
-				//}
-			}
-			//we have a list of one or more wires to join if we can
-			
-			
-			int wireCount = wireList.Length();
-			if (wireCount == 0) return; //invalid curve
-			pWire = new TopoDS_Wire();
-			//we are going to use one millimter for the precision becuase tolerance is clearly out of range now
+			//we are going to use one millimeter for the precision when edges don't join
 			double oneMilli = cCurve->Model->ModelFactors->OneMilliMeter;
-			if (wireCount == 1)
-				*pWire = wireList(0);
-			else
+			BRepBuilderAPI_MakeWire wireMaker1;
+			wireMaker1.Add(topoEdgeList);
+			if (wireMaker1.IsDone())
 			{
-				FTol.LimitTolerance(wireList(0), oneMilli);
-				BRepBuilderAPI_MakeWire wireMaker(wireList(0));
-				NCollection_Vector<TopoDS_Wire> unattachedWireList;
-				for (int i = 1; i < wireCount; i++)
-				{					
-					wireMaker.Add(wireList(i));
-					if (!wireMaker.IsDone())
-					{
-						unattachedWireList.Append(wireList(i));					
-					}
-				}
-				if (unattachedWireList.Length() > 0) //give in
-				{
-					XbimGeometryCreator::LogWarning(cCurve, "Invalid part of a composite curve found. It has been discarded");
-				}
-				*pWire = wireMaker.Wire();
+				pWire = new TopoDS_Wire();
+				*pWire = wireMaker1.Wire();
+				return;
 			}
-
-			if (isContinuous) //if all edges are continuous
-				pWire->Closed(Standard_True);
-
+			else //coursen the precision to 1 mm 
+			{
+				TopTools_ListIteratorOfListOfShape anItL;
+				for (anItL.Initialize(topoEdgeList); anItL.More(); anItL.Next())
+				{
+					FTol.LimitTolerance(anItL.Value(), oneMilli);
+				}
+				BRepBuilderAPI_MakeWire wireMaker2;
+				wireMaker2.Add(topoEdgeList);
+				if (wireMaker2.IsDone())
+				{
+					pWire = new TopoDS_Wire();
+					*pWire = wireMaker2.Wire();
+					return;
+				}
+				else //coursen the precision to 5 mm
+				{
+					TopTools_ListIteratorOfListOfShape anItL;
+					for (anItL.Initialize(topoEdgeList); anItL.More(); anItL.Next())
+					{
+						FTol.LimitTolerance(anItL.Value(), oneMilli * 5);
+					}
+					BRepBuilderAPI_MakeWire wireMaker3;
+					wireMaker3.Add(topoEdgeList);
+					if (wireMaker3.IsDone())
+					{
+						pWire = new TopoDS_Wire();
+						*pWire = wireMaker3.Wire();
+						return;
+					}
+					
+				}			
+			}
+			//give up bad shape
+			XbimGeometryCreator::LogWarning(cCurve, "Invalid part of a composite curve found. It has been discarded");
 		}
 
 		void XbimWire::Init(IIfcTrimmedCurve^ tCurve)

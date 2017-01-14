@@ -419,7 +419,7 @@ namespace Xbim
 						shapeFixer.FixFaceTool()->FixWireTool()->FixIntersectingEdgesMode() = Standard_True;
 						shapeFixer.Perform();
 						ShapeUpgrade_UnifySameDomain unifier(shapeFixer.Shape());
-						unifier.SetAngularTolerance(0.0174533); //1 degree
+						unifier.SetAngularTolerance(0.00174533); //1 tenth of a degree
 						unifier.SetLinearTolerance(tolerance);
 						try
 						{
@@ -755,14 +755,15 @@ namespace Xbim
 			XbimSolid^ right = gcnew XbimSolid(sOp);
 			if (!left->IsValid)
 			{
-				XbimGeometryCreator::LogWarning(boolOp, "Boolean result has invalid first operand");
+				if (boolOp->Operator != IfcBooleanOperator::UNION)
+				//XbimGeometryCreator::LogWarning(boolOp, "Boolean result has invalid first operand");
 				return;
 			}
 
 			if (!right->IsValid)
 			{
-				XbimGeometryCreator::LogWarning(boolOp, "Boolean result has invalid second operand");
-				solids->Add(left); //return the left operand
+				//XbimGeometryCreator::LogWarning(boolOp, "Boolean result has invalid second operand");
+				if(left->IsValid) solids->Add(left); //return the left operand
 				return;
 			}
 
@@ -773,13 +774,13 @@ namespace Xbim
 				switch (boolOp->Operator)
 				{
 				case IfcBooleanOperator::UNION:
-					result = left->Union(right, mf->PrecisionBoolean);
+					result = left->Union(right, mf->Precision);
 					break;
 				case IfcBooleanOperator::INTERSECTION:
-					result = left->Intersection(right, mf->PrecisionBoolean);
+					result = left->Intersection(right, mf->Precision);
 					break;
 				case IfcBooleanOperator::DIFFERENCE:
-					result = left->Cut(right, mf->PrecisionBoolean);
+					result = left->Cut(right, mf->Precision);
 					break;
 				}
 			}
