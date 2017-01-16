@@ -44,6 +44,7 @@ namespace Xbim
 			void Init(IIfcAdvancedBrep^ solid);
 			void Init(IIfcAdvancedBrepWithVoids^ solid);
 			void Init(IIfcClosedShell^ solid);
+			void Init(IIfcOpenShell^ solid);
 			void Init(IIfcTriangulatedFaceSet^ faceSet);
 			//Helpers
 			XbimFace^ BuildFace(List<Tuple<XbimWire^, IIfcPolyLoop^, bool>^>^ wires, IIfcFace^ face);

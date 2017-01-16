@@ -362,6 +362,9 @@
     <None Include="SolidTestFiles\NonManifoldFacetedBrep.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="SolidTestFiles\ShellBasedSurfaceModel.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="SolidTestFiles\SweptExtrusion.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

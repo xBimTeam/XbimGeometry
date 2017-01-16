@@ -40,7 +40,28 @@ namespace Ifc4GeometryTests
 
         }
 
+        /// <summary>
+        /// This surface mode is invalid with all thre faces being illegal it is from Tekla
+        /// </summary>
+        [TestMethod]
+        public void ShellBasedSurfaceModelTest()
+        {
 
+            using (var m = IfcStore.Open("SolidTestFiles\\ShellBasedSurfaceModel.ifc"))
+            {
+                using (var eventTrace = LoggerFactory.CreateEventTrace())
+                {
+                    var sbsm = m.Instances[3442052] as IIfcShellBasedSurfaceModel;
+                    Assert.IsTrue(sbsm != null, "No IIfcShellBasedSurfaceModel found");
+                    var shell = _xbimGeometryCreator.Create(sbsm);
+                    Assert.IsFalse(shell.IsValid, "This IIfcShellBasedSurfaceModel is invalid and should fail");
+                    Assert.IsTrue(eventTrace.Events.Count == 3); //3 events should have been raised from this call
+
+                   
+                }
+            }
+
+        }
         /// <summary>
         /// Cut a set of brep faces without forming a solid
         /// </summary>

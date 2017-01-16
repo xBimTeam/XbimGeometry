@@ -478,7 +478,7 @@ namespace Xbim
 				
 				if (cuttingObjects.Extent() == 0)
 				{					
-					XbimGeometryCreator::LogInfo(solids, "Openings cannot be cut, none intersect with the body shape");
+					//XbimGeometryCreator::LogInfo(solids, "Openings cannot be cut, none intersect with the body shape");
 					return gcnew XbimGeometryObjectSet(geomObjects);
 				}
 				if (!ParseGeometry(geomObjects, toBeProcessed, allBoxes, toBePassedThrough, tolerance)) //nothing to do so just return what we had
@@ -494,16 +494,16 @@ namespace Xbim
 				
 				if (aPI->TimedOut())
 				{
-					XbimGeometryCreator::LogError(solids, "Boolean operation timed out after {0} seconds. Operation failed", (int)aPI->ElapsedTime());
+					XbimGeometryCreator::LogError(solids, "Boolean operation timed out after {0} seconds. Operation failed, increase timout time in the config file", (int)aPI->ElapsedTime());
 					return XbimGeometryObjectSet::Empty;
 				}
 				if (pBuilder->ErrorStatus() == 0 && !pBuilder->Shape().IsNull())
 				{
-					
-			   
+
+
 					TopoDS_Compound occCompound;
 					builder.MakeCompound(occCompound);
-				
+
 					if (BRepCheck_Analyzer(pBuilder->Shape(), Standard_False).IsValid() == Standard_False)
 					{
 
@@ -531,7 +531,7 @@ namespace Xbim
 						}
 					}
 					else
-					{						
+					{
 						builder.Add(occCompound, pBuilder->Shape());
 					}
 					XbimCompound^ compound = gcnew XbimCompound(occCompound, false, tolerance);
@@ -543,7 +543,7 @@ namespace Xbim
 						if (expl.More()) //only add if there are faces to consider
 							compound->Add(gcnew XbimShell(toBePassedThrough));
 					}
-					
+
 					XbimGeometryObjectSet^ geomObjs = gcnew XbimGeometryObjectSet();
 					geomObjs->Add(compound);
 					if (pBuilder != nullptr) delete pBuilder;
@@ -551,7 +551,9 @@ namespace Xbim
 					//BRepTools::Write(toBePassedThrough, "d:\\tmp\\s");
 					return geomObjs;
 
-				} 
+				}
+				else
+					err = "Boolean Operation error status #" + pBuilder->ErrorStatus();
 				GC::KeepAlive(solids);
 				GC::KeepAlive(geomObjects);
 			}
