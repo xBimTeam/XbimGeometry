@@ -506,7 +506,6 @@ namespace Xbim
 				
 					if (BRepCheck_Analyzer(pBuilder->Shape(), Standard_False).IsValid() == Standard_False)
 					{
-
 						ShapeFix_Shape shapeFixer(pBuilder->Shape());
 						shapeFixer.SetPrecision(tolerance);
 						shapeFixer.SetMinTolerance(tolerance);
@@ -514,21 +513,25 @@ namespace Xbim
 						shapeFixer.FixFaceTool()->FixOrientationMode() = Standard_True;
 						shapeFixer.FixFaceTool()->FixWireTool()->FixAddCurve3dMode() = Standard_True;
 						shapeFixer.FixFaceTool()->FixWireTool()->FixIntersectingEdgesMode() = Standard_True;
-						shapeFixer.Perform();
-						ShapeUpgrade_UnifySameDomain unifier(shapeFixer.Shape());
-						unifier.SetAngularTolerance(0.00174533); //1 tenth of a degree
-						unifier.SetLinearTolerance(tolerance);
-						try
+						if (shapeFixer.Perform())
 						{
-							//sometimes unifier crashes
-							unifier.Build();
-							builder.Add(occCompound, unifier.Shape());
+							ShapeUpgrade_UnifySameDomain unifier(shapeFixer.Shape());
+							unifier.SetAngularTolerance(0.00174533); //1 tenth of a degree
+							unifier.SetLinearTolerance(tolerance);
+							try
+							{
+								//sometimes unifier crashes
+								unifier.Build();
+								builder.Add(occCompound, unifier.Shape());
+							}
+							catch (...)
+							{
+								//default to what we had
+								builder.Add(occCompound, shapeFixer.Shape());
+							}
 						}
-						catch (Standard_Failure)
-						{
-							//default to what we had
-							builder.Add(occCompound, shapeFixer.Shape());
-						}
+						else
+							builder.Add(occCompound, pBuilder->Shape());
 					}
 					else
 					{						
@@ -546,14 +549,14 @@ namespace Xbim
 					
 					XbimGeometryObjectSet^ geomObjs = gcnew XbimGeometryObjectSet();
 					geomObjs->Add(compound);
-					if (pBuilder != nullptr) delete pBuilder;
-
-					//BRepTools::Write(toBePassedThrough, "d:\\tmp\\s");
+					if (pBuilder != nullptr) delete pBuilder;					
 					return geomObjs;
 
 				} 
 				GC::KeepAlive(solids);
 				GC::KeepAlive(geomObjects);
+				err = "Error = " + pBuilder->ErrorStatus();
+
 			}
 			catch (Standard_Failure e)
 			{				

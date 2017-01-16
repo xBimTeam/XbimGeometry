@@ -1883,29 +1883,28 @@ namespace Xbim
 						shapeFixer.FixFaceTool()->FixOrientationMode() = Standard_True;
 						shapeFixer.FixFaceTool()->FixWireTool()->FixAddCurve3dMode() = Standard_True;
 						shapeFixer.FixFaceTool()->FixWireTool()->FixIntersectingEdgesMode() = Standard_True;
-						shapeFixer.Perform();
-						ShapeUpgrade_UnifySameDomain unifier(shapeFixer.Shape());
-						unifier.SetAngularTolerance(0.00174533); //1 tenth of a degree
-						unifier.SetLinearTolerance(tolerance);
-						try
+						if (shapeFixer.Perform())
 						{
-							//sometimes unifier crashes
-							unifier.Build();
-							return gcnew XbimSolidSet(unifier.Shape());
+							ShapeUpgrade_UnifySameDomain unifier(shapeFixer.Shape());
+							unifier.SetAngularTolerance(0.00174533); //1 tenth of a degree
+							unifier.SetLinearTolerance(tolerance);
+							try
+							{
+								//sometimes unifier crashes
+								unifier.Build();
+								return gcnew XbimSolidSet(unifier.Shape());
+							}
+							catch (...)
+							{
+								//default to what we had
+								return gcnew XbimSolidSet(shapeFixer.Shape());
+							}
 						}
-						catch (Standard_Failure)
-						{
-							//default to what we had
-							return gcnew XbimSolidSet(shapeFixer.Shape());
-						}						
 					}
-					else
-					{
-						return gcnew XbimSolidSet(boolOp.Shape());
-					}
-					return gcnew XbimSolidSet(boolOp.Shape());
+
+				return gcnew XbimSolidSet(boolOp.Shape());
 				err = "Error = " + boolOp.ErrorStatus();
-				
+
 			}
 			catch (Standard_Failure e)
 			{
