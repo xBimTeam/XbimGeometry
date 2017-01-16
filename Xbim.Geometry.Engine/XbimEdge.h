@@ -137,9 +137,11 @@ namespace Xbim
 				int hashA = pointA->GetHashCode();
 				int hashB = pointB->GetHashCode();
 				hashCode = Math::Max(hashA, hashB) ^ Math::Min(hashA, hashB);
-				edgeAB = gcnew XbimEdge(vertexA, vertexB);
 				if (hashA == hashB && pA == pB)
 					refCount = -1;
+				else
+					edgeAB = gcnew XbimEdge(vertexA, vertexB);
+				
 			}
 			
 			virtual property int ReferenceCount {int get() { return refCount; }}

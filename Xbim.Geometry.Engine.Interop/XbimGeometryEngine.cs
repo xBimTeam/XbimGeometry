@@ -379,7 +379,7 @@ namespace Xbim.Geometry.Engine.Interop
             }
             catch (Exception e)
             {
-                Logger.ErrorFormat("EE001: Failed to create geometry #{0} of type {1}, {2]", ifcRepresentation.EntityLabel, ifcRepresentation.GetType().Name, e.Message);
+                Logger.ErrorFormat("EE001: Failed to create geometry #{0} of type {1}, {2}", ifcRepresentation.EntityLabel, ifcRepresentation.GetType().Name, e.Message);
                 return null;
             }
 

@@ -1409,7 +1409,7 @@ namespace Xbim
 			XbimSolidSet^ xbimSolidSet = dynamic_cast<XbimSolidSet^>(result);
 			if (xbimSolidSet != nullptr && xbimSolidSet->Count>0 && xbimSolidSet->First != nullptr)
 			{
-				const TopoDS_Solid&  shape = (XbimSolid^)(xbimSolidSet->First);
+			    TopoDS_Solid  shape = (XbimSolid^)(xbimSolidSet->First);
 				if (!shape.IsNull())
 				{
 					pSolid = new TopoDS_Solid(); //make sure this is deleted if not used
@@ -1514,7 +1514,7 @@ namespace Xbim
 
 			if (xbimSolidSet != nullptr && xbimSolidSet->First != nullptr)
 			{
-				const TopoDS_Shape&  shape = (XbimSolid^)(xbimSolidSet->First);
+			    TopoDS_Shape  shape = (XbimSolid^)(xbimSolidSet->First);
 				if (!shape.IsNull())
 				{
 					pSolid = new TopoDS_Solid(); //make sure this is deleted if not used
@@ -2168,7 +2168,7 @@ namespace Xbim
 		{
 			ShapeFix_Solid fixer(this);
 			fixer.Perform();
-			const TopoDS_Shape& fixed = fixer.Shape();
+		    TopoDS_Shape fixed = fixer.Shape();
 			if (fixed.ShapeType()==TopAbs_SHELL)
 				*pSolid = fixer.SolidFromShell(TopoDS::Shell(fixed));
 			else if(fixed.ShapeType()==TopAbs_SOLID)

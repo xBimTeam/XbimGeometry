@@ -311,21 +311,37 @@ namespace Xbim
 
 		void XbimCompound::Init(IIfcShellBasedSurfaceModel^ sbsm)
 		{
-			List<IIfcFace^>^ faces = gcnew List<IIfcFace^>();
+			List<XbimShell^>^ shells = gcnew List<XbimShell^>();
 			for each (IIfcShell^ shell in sbsm->SbsmBoundary)
 			{
+				//List<IIfcFace^>^ faces = gcnew List<IIfcFace^>();
 				//get the faces
 				IIfcConnectedFaceSet^ faceSet = dynamic_cast<IIfcConnectedFaceSet^>(shell);
 				if (faceSet != nullptr) //this should never fail
-					faces->AddRange(faceSet->CfsFaces);
+				{
+					XbimCompound^ occShell;
+					if (dynamic_cast<IIfcClosedShell^>(shell))
+						occShell = gcnew XbimCompound((IIfcClosedShell^)shell);
+					else
+						occShell = gcnew XbimCompound((IIfcOpenShell^)shell);
+					for each (XbimShell^ s in occShell->Shells)
+					{
+						XbimShell^ occShell = (XbimShell^)s;
+						if(occShell->IsValid && !occShell->IsEmpty) shells->Add((XbimShell^)s);
+					}
+					
+				}
 			}
-			Init(faces, false,sbsm);
-			for each (IXbimGeometryObject^ geomObj in this)
+			if (shells->Count > 0)
 			{
-				XbimShell^ shell = dynamic_cast<XbimShell^>(geomObj);
-				if (shell != nullptr) shell->Orientate();
+				BRep_Builder b;
+				pCompound = new TopoDS_Compound();
+				b.MakeCompound(*pCompound);
+				for each (XbimShell^ s in shells)
+				{
+					b.Add(*pCompound, s);
+				}
 			}
-
 		}
 
 		void XbimCompound::Init(IIfcConnectedFaceSet^ faceSet, bool close)
@@ -472,7 +488,10 @@ namespace Xbim
 		{
 			Init((IIfcConnectedFaceSet^)closedShell,true);
 		}
-
+		void XbimCompound::Init(IIfcOpenShell^ openShell)
+		{
+			Init((IIfcConnectedFaceSet^)openShell, false);
+		}
 		bool XbimCompound::Sew()
 		{
 
@@ -1041,7 +1060,7 @@ namespace Xbim
 			{
 				if (!closedShape) //we think it is closed, we cannot really do much more if it is not, shape healing will not heal a shell that is not closed
 				{
-					XbimGeometryCreator::LogWarning(theItem, "Incorrectly defined closed shell. It has been processed but is declared closed and is not defined as closed");
+					XbimGeometryCreator::LogInfo(theItem, "Incorrectly defined closed shell. It has been processed but is declared closed and is not defined as closed");
 				}
 				ShapeFix_Solid solidFixer;
 				solidFixer.SetPrecision(tolerance);
