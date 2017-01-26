@@ -58,6 +58,7 @@
   <ItemGroup>
     <Compile Include="AdvBrepRecursionTests.cs" />
     <Compile Include="Diff.cs" />
+    <Compile Include="Ifc2x3GeometryTests.cs" />
     <Compile Include="IfcExtrudedAreaSolidTests.cs" />
     <Compile Include="IfcModelBuilder.cs" />
     <Compile Include="LocationAndTransformationTests.cs" />
@@ -333,6 +334,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="SolidTestFiles\Faceted BRep with void.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="SolidTestFiles\Ifc2x3grid.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="SolidTestFiles\IfcCompositeProfileDefTest.ifc">
