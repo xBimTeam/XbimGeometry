@@ -128,11 +128,11 @@ namespace Ifc4GeometryTests
         }
 
         [TestMethod]
-        public void BrokenIfcSurfaceCurveSweptAreaSolid()
+        public void MultiSegmentIfcSurfaceCurveSweptAreaSolid()
         {
             using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
-                using (var m = IfcStore.Open("Ifc4TestFiles\\BrokenPipe.ifc"))
+                using (var m = IfcStore.Open("SolidTestFiles\\MultiSegmentPipe.ifc"))
                 {
                     var ss = m.Instances.OfType<IIfcSurfaceCurveSweptAreaSolid>().FirstOrDefault();
                     Assert.IsTrue(ss != null, "No Swept Disk found");
@@ -143,7 +143,7 @@ namespace Ifc4GeometryTests
                     Assert.IsTrue(eventTrace.Events.Count == 0); //no events should have been raised from this call
 
                     IfcCsgTests.GeneralTest(solid);
-                    Assert.IsTrue(solid.Faces.Count() == 6, "This IfcSurfaceCurveSweptAreaSolid with hollow circular profile def should have 6 faces");
+                    Assert.IsTrue(solid.Faces.Count() == 14, "This IfcSurfaceCurveSweptAreaSolid with multi segments should have 14 faces");
                 }
             }
         }

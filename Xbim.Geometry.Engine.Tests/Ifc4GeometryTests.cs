@@ -308,7 +308,7 @@ namespace Ifc4GeometryTests
                 var geom = _xbimGeometryCreator.CreateGrid(ifcGrid);
                 foreach (var solid in geom)
                 {
-                    Assert.IsTrue(solid.Volume>0);
+                    Assert.IsTrue(solid.Faces.Count == 4, "Each grid line must have four faces");
                 }
             }
         }
@@ -324,7 +324,7 @@ namespace Ifc4GeometryTests
                 var geom = _xbimGeometryCreator.CreateGrid(ifcGrid);
                 foreach (var solid in geom)
                 {
-                    Assert.IsTrue(solid.Volume > 0);
+                    Assert.IsTrue(solid.Faces.Count == 4, "Each grid line must have four faces");
                 }
             }
         }

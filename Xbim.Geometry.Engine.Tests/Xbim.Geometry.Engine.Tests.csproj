@@ -143,7 +143,7 @@
     <None Include="Ifc4TestFiles\brep-model.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Ifc4TestFiles\BrokenPipe.ifc">
+    <None Include="SolidTestFiles\MultiSegmentPipe.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Ifc4TestFiles\TrimmedEllipseTest.ifc">

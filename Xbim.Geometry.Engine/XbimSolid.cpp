@@ -582,7 +582,32 @@ namespace Xbim
 
 				}
 				pSolid = new TopoDS_Solid();
-				*pSolid = solid;
+				if (BRepCheck_Analyzer(solid, Standard_False).IsValid() == Standard_False)
+				{
+					ShapeFix_Shape shapeFixer(solid);
+					shapeFixer.SetPrecision(mf->Precision);
+					shapeFixer.SetMinTolerance(mf->Precision);
+					shapeFixer.FixFaceTool()->FixIntersectingWiresMode() = Standard_True;
+					shapeFixer.FixFaceTool()->FixOrientationMode() = Standard_True;
+					shapeFixer.FixFaceTool()->FixWireTool()->FixAddCurve3dMode() = Standard_True;
+					shapeFixer.FixFaceTool()->FixWireTool()->FixIntersectingEdgesMode() = Standard_True;
+					if (shapeFixer.Perform() )
+					{
+						TopoDS_Shell shell;
+						b.MakeShell(shell);
+						for (TopExp_Explorer explr(shapeFixer.Shape(), TopAbs_FACE); explr.More(); explr.Next())
+						{
+							b.AddShellFace(shell, TopoDS::Face(explr.Current()));
+						}
+						bs.MakeSolid(*pSolid);
+						bs.Add(*pSolid, shell);
+					}
+					else
+						*pSolid =solid;
+				}
+				else
+					*pSolid = solid;
+
 				pSolid->Closed(Standard_True);
 				if (repItem->Position != nullptr) //In Ifc4 this is now optional
 					pSolid->Move(XbimConvert::ToLocation(repItem->Position));

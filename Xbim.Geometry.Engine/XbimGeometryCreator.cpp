@@ -21,6 +21,7 @@
 #include <ShapeFix_ShapeTolerance.hxx>
 #include <BRep_Builder.hxx>
 #include <BRepOffsetAPI_MakePipe.hxx>
+#include <BRepOffsetAPI_MakePipeShell.hxx>
 #include <Geom_Circle.hxx>
 #include <BRepBuilderAPI_MakeWire.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
@@ -1056,6 +1057,7 @@ namespace Xbim
 			for each (IIfcGridAxis^ axis in grid->UAxes)
 			{
 				XbimCurve2D^ c = gcnew XbimCurve2D(axis->AxisCurve);
+				
 				UCurves->Add(c);					
 			}			
 			for each (IIfcGridAxis^ axis in grid->VAxes)
@@ -1094,6 +1096,7 @@ namespace Xbim
 			gp_Lin2d left(gp_Pnt2d(bb.X, bb.Y), gp_Dir2d(0, 1));
 			gp_Lin2d right(gp_Pnt2d(bb.X+bb.SizeX, bb.Y), gp_Dir2d(0, 1));
 			
+			bool failedGridLines = false;
 			IEnumerable<XbimCurve2D^>^ curves = Enumerable::Concat(Enumerable::Concat(UCurves, VCurves), WCurves);			
 			for each (XbimCurve2D^ curve in curves)
 			{
@@ -1139,10 +1142,31 @@ namespace Xbim
 				XbimCurve2D^ xCurve = gcnew XbimCurve2D(hcurve);
 				XbimEdge^ edge = gcnew XbimEdge(xCurve);			
 				TopoDS_Wire spine = BRepBuilderAPI_MakeWire(edge);
-				BRepOffsetAPI_MakePipe axisMaker(spine, profile);
-				axisMaker.Build();
-				solids->Add(gcnew XbimSolid(TopoDS::Solid(axisMaker.Shape())));
+				//XbimWire^ w = gcnew XbimWire(spine);
+				BRepOffsetAPI_MakePipeShell pipeMaker(spine);
+				pipeMaker.Add(profile->OuterWire, Standard_True, Standard_True);
+				pipeMaker.Build();
+				BRep_Builder b;
+				TopoDS_Shell shell;
+				b.MakeShell(shell);
+				if (pipeMaker.IsDone())
+				{
+					//add the other faces to the shell
+					for (TopExp_Explorer explr(pipeMaker.Shape(), TopAbs_FACE); explr.More(); explr.Next())
+					{
+						b.Add(shell, TopoDS::Face(explr.Current()));
+					}
+					TopoDS_Solid solid;
+					b.MakeSolid(solid);
+					b.Add(solid, shell);
+					solids->Add(gcnew XbimSolid(solid));
+				}
+				else
+					failedGridLines = true;
+					
 			}
+			if(failedGridLines) 
+				LogWarning(grid, "One or more grid lines has failed to convert successfully");
 			return solids;
 		}
 
