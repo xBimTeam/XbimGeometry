@@ -126,5 +126,26 @@ namespace Ifc4GeometryTests
                 }
             }
         }
+
+        [TestMethod]
+        public void BrokenIfcSurfaceCurveSweptAreaSolid()
+        {
+            using (var eventTrace = LoggerFactory.CreateEventTrace())
+            {
+                using (var m = IfcStore.Open("Ifc4TestFiles\\BrokenPipe.ifc"))
+                {
+                    var ss = m.Instances.OfType<IIfcSurfaceCurveSweptAreaSolid>().FirstOrDefault();
+                    Assert.IsTrue(ss != null, "No Swept Disk found");
+
+
+                    var solid = _xbimGeometryCreator.CreateSolid(ss);
+
+                    Assert.IsTrue(eventTrace.Events.Count == 0); //no events should have been raised from this call
+
+                    IfcCsgTests.GeneralTest(solid);
+                    Assert.IsTrue(solid.Faces.Count() == 6, "This IfcSurfaceCurveSweptAreaSolid with hollow circular profile def should have 6 faces");
+                }
+            }
+        }
     }
 }
