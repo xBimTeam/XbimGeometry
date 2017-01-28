@@ -1035,35 +1035,81 @@ namespace Xbim
 			XbimGeometryCreator::LogInfo(repItem, "Invalid extrusion, depth must be >0 and faces must be correctly defined");
 			//if it has failed we will have a null solid
 		}
+		///This is the case where we have a solid made of multiple solids
+		void XbimSolid::InitCompositeProfileExtrusion(IIfcExtrudedAreaSolid^ repItem, IIfcProfileDef^ overrideProfileDef)
+		{
+
+		}
+
 
 		void XbimSolid::Init(IIfcExtrudedAreaSolid^ repItem, IIfcProfileDef^ overrideProfileDef)
 		{
 			IIfcExtrudedAreaSolidTapered^ extrudeTaperedArea = dynamic_cast<IIfcExtrudedAreaSolidTapered^>(repItem);
 			if (extrudeTaperedArea != nullptr) return Init(extrudeTaperedArea, overrideProfileDef);
-			XbimFace^ face;
-			if (overrideProfileDef == nullptr)
-				face = gcnew XbimFace(repItem->SweptArea);
-			else
-				face = gcnew XbimFace(overrideProfileDef);
+			IIfcCompositeProfileDef^ compProf = dynamic_cast<IIfcCompositeProfileDef^>(repItem->SweptArea);
+			IIfcCompositeProfileDef^ compProfOverride = dynamic_cast<IIfcCompositeProfileDef^>(overrideProfileDef);
+			//if (compProf != nullptr || compProfOverride!=nullptr) return InitCompositeProfileExtrusion(repItem,overrideProfileDef);
+	
+			IIfcDirection^ dir = repItem->ExtrudedDirection;
+			gp_Vec vec(dir->X, dir->Y, dir->Z);
+			vec.Normalize();
+			vec *= repItem->Depth;		
 			
-			if (face->IsValid && repItem->Depth > 0) //we have a valid face and extrusion
-			{
-				IIfcDirection^ dir = repItem->ExtrudedDirection;
-				gp_Vec vec(dir->X, dir->Y, dir->Z);
-				vec.Normalize();
-				vec *= repItem->Depth;
-				BRepPrimAPI_MakePrism prism(face, vec);
-				GC::KeepAlive(face);
-				if (prism.IsDone())
+			
+
+			if (repItem->Depth > 0) //we have a valid face and extrusion
+			{				
+				if (compProf != nullptr || compProfOverride != nullptr) //some bim tools create bad faces when compound
 				{
-					pSolid = new TopoDS_Solid();
-					*pSolid = TopoDS::Solid(prism.Shape());
-					if (repItem->Position!=nullptr) //In Ifc4 this is now optional
-						pSolid->Move(XbimConvert::ToLocation(repItem->Position));
-					//BRepTools::Write(*pSolid, "d:\\tmp\\b");
+					if (compProfOverride != nullptr) compProf = compProfOverride; //use the override if we have one
+					TopoDS_CompSolid compSolid;
+					BRep_Builder b;
+					b.MakeCompSolid(compSolid);
+					//build a solid for each wire
+					for each (IIfcProfileDef^ profile in compProf->Profiles)
+					{
+						XbimFace^ f = gcnew XbimFace(profile); //use face because of profiles with voids
+						if (f->IsValid)
+						{
+							BRepPrimAPI_MakePrism prism(f, vec);
+							if (prism.IsDone())
+							{
+								b.Add(compSolid, TopoDS::Solid(prism.Shape()));
+							}
+						}
+					}
+					BRepLib_MakeSolid solidMaker(compSolid);
+					if (solidMaker.IsDone())
+					{
+						pSolid = new TopoDS_Solid();
+						*pSolid = solidMaker.Solid();
+					}
+					else
+						XbimGeometryCreator::LogWarning(repItem, "Invalid extrusion, could not create solid");
 				}
-				else
+				else 
+				{
+					XbimFace^ face;
+					if (overrideProfileDef == nullptr)
+						face = gcnew XbimFace(repItem->SweptArea);
+					else
+						face = gcnew XbimFace(overrideProfileDef);
+					if (face->IsValid)
+					{
+
+						BRepPrimAPI_MakePrism prism(face, vec);
+						GC::KeepAlive(face);
+						if (prism.IsDone())
+						{
+							pSolid = new TopoDS_Solid();
+							*pSolid = TopoDS::Solid(prism.Shape());
+							if (repItem->Position != nullptr) //In Ifc4 this is now optional
+								pSolid->Move(XbimConvert::ToLocation(repItem->Position));
+							return;
+						}
+					}
 					XbimGeometryCreator::LogWarning(repItem, "Invalid extrusion, could not create solid");
+				}
 			}
 			else if (repItem->Depth <= 0)
 			{

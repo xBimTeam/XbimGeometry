@@ -35,7 +35,7 @@ namespace Xbim
 			void Init(IIfcExtrudedAreaSolid^ solid, IIfcProfileDef^ overrideProfileDef);
 			void Init(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid, IIfcProfileDef^ overrideProfileDef);
 			void Init(IIfcRevolvedAreaSolid^ solid, IIfcProfileDef^ overrideProfileDef);
-
+			void InitCompositeProfileExtrusion(IIfcExtrudedAreaSolid^ repItem, IIfcProfileDef^ overrideProfileDef);
 			void Init(IIfcExtrudedAreaSolidTapered^ solid, IIfcProfileDef^ overrideProfileDef);
 			void Init(IIfcRevolvedAreaSolidTapered^ solid, IIfcProfileDef^ overrideProfileDef);
 			void Init(IIfcSectionedSpine^ solid);

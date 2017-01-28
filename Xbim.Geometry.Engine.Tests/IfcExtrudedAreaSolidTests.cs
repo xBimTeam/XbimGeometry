@@ -131,7 +131,31 @@ namespace Ifc4GeometryTests
                     Assert.IsTrue(eventTrace.Events.Count == 0); //no events should have been raised from this call
 
                     IfcCsgTests.GeneralTest(solid);
-                    Assert.IsTrue(solid.Faces.Count() == 40, "IfcCompositeProfileDef profile should have six faces");     
+                    Assert.IsTrue(solid.Volume > 0, "IfcCompositeProfileDef profile should a positive volume");     
+
+                }
+            }
+
+        }
+
+        [TestMethod]
+        public void ComplexCompositeProfileDefTest()
+        {
+            var xbimGeometryCreator = new XbimGeometryEngine();
+            using (var eventTrace = LoggerFactory.CreateEventTrace())
+            {
+                using (var m = IfcStore.Open("SolidTestFiles\\ComplexCompositeProfile.ifc"))
+                {
+
+                    var eas = m.Instances.OfType<IIfcExtrudedAreaSolid>().FirstOrDefault(e => e.SweptArea is IIfcCompositeProfileDef);
+                    Assert.IsTrue(eas != null, "No Extruded Solid found");
+                    Assert.IsTrue(eas.SweptArea is IIfcCompositeProfileDef, "Incorrect profiledef found");
+
+                    var solid = xbimGeometryCreator.CreateSolid(eas);
+                    Assert.IsTrue(eventTrace.Events.Count == 0); //no events should have been raised from this call
+
+                    IfcCsgTests.GeneralTest(solid);
+                    Assert.IsTrue(solid.Volume > 0, "IfcCompositeProfileDef profile should have a volume");
 
                 }
             }
