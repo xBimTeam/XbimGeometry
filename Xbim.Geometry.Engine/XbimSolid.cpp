@@ -1035,11 +1035,7 @@ namespace Xbim
 			XbimGeometryCreator::LogInfo(repItem, "Invalid extrusion, depth must be >0 and faces must be correctly defined");
 			//if it has failed we will have a null solid
 		}
-		///This is the case where we have a solid made of multiple solids
-		void XbimSolid::InitCompositeProfileExtrusion(IIfcExtrudedAreaSolid^ repItem, IIfcProfileDef^ overrideProfileDef)
-		{
-
-		}
+		
 
 
 		void XbimSolid::Init(IIfcExtrudedAreaSolid^ repItem, IIfcProfileDef^ overrideProfileDef)
@@ -1083,6 +1079,8 @@ namespace Xbim
 					{
 						pSolid = new TopoDS_Solid();
 						*pSolid = solidMaker.Solid();
+						if (repItem->Position != nullptr) //In Ifc4 this is now optional
+							pSolid->Move(XbimConvert::ToLocation(repItem->Position));
 					}
 					else
 						XbimGeometryCreator::LogWarning(repItem, "Invalid extrusion, could not create solid");
