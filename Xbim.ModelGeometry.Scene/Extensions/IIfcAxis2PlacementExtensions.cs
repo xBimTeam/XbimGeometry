@@ -42,8 +42,12 @@ namespace Xbim.ModelGeometry.Scene.Extensions
                 return new XbimMatrix3D(xa.X, xa.Y, xa.Z, 0, ya.X, ya.Y, ya.Z, 0, za.X, za.Y, za.Z, 0, axis3.Location.X,
                                     axis3.Location.Y, axis3.Location.Z, 1);
             }
-            return new XbimMatrix3D(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, axis3.Location.X, axis3.Location.Y,
-                axis3.Location.Z, 1);
+            else if (axis3.Location != null)
+            {
+                return new XbimMatrix3D(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, axis3.Location.X, axis3.Location.Y,
+                    axis3.Location.Z, 1);
+            }
+            return new XbimMatrix3D(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
         }
     }
 }
