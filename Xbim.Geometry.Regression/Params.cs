@@ -1,8 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using Xbim.Common.Logging;
-
 
 namespace XbimRegression
 {
@@ -11,14 +9,9 @@ namespace XbimRegression
     /// </summary>
     public class Params
     {
-
-       
-
         private const int DefaultTimeout = 1000 * 60 * 20; // 20 mins
         public bool Caching;
         public bool GeometryV1;
-
-       
 
         public Params(string[] args)
         {
@@ -30,7 +23,6 @@ namespace XbimRegression
             }
 
             TestFileRoot = args[0];
-
             if (!Directory.Exists(TestFileRoot))
             {
                 Console.WriteLine("Invalid model folder {0}", TestFileRoot);
@@ -39,8 +31,7 @@ namespace XbimRegression
 
             Timeout = DefaultTimeout;
 
-            CompoundParameter paramType = CompoundParameter.None;
-
+            var paramType = CompoundParameter.None;
             foreach (string arg in args.Skip(1))
             {
                 switch (paramType)
@@ -71,13 +62,9 @@ namespace XbimRegression
                         }
                         paramType = CompoundParameter.None;
                         break;
-                  
                 }
-                
             }
-
             IsValid = true;
-
         }
 
         private static void WriteSyntax()
@@ -107,7 +94,5 @@ namespace XbimRegression
             Timeout,
             CachingOn
         };
-    }
-
-     
+    }    
 }

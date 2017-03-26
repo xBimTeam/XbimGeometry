@@ -45,24 +45,27 @@ namespace XbimRegression
             Logger = LoggerFactory.GetLogger();
             DirectoryInfo di = new DirectoryInfo(Params.TestFileRoot);
 
-            String resultsFile = Path.Combine(Params.TestFileRoot, String.Format("XbimRegression_{0:yyyyMMdd-hhmmss}.csv", DateTime.Now));
+            String resultsFile = Path.Combine(Params.TestFileRoot,
+                String.Format("XbimRegression_{0:yyyyMMdd-hhmmss}.csv", DateTime.Now));
             // We need to use the logger early to initialise before we use EventTrace
             Logger.Debug("Conversion starting...");
             using (StreamWriter writer = new StreamWriter(resultsFile))
             {
                 writer.WriteLine(ProcessResult.CsvHeader);
-               // ParallelOptions opts = new ParallelOptions() { MaxDegreeOfParallelism = 12 };
+                // ParallelOptions opts = new ParallelOptions() { MaxDegreeOfParallelism = 12 };
                 FileInfo[] toProcess = di.GetFiles("*.IFC", SearchOption.AllDirectories);
-               // Parallel.ForEach<FileInfo>(toProcess, opts, file =>
+                // Parallel.ForEach<FileInfo>(toProcess, opts, file =>
                 foreach (var file in toProcess)
-	
+
                 {
                     Console.WriteLine("Processing {0}", file);
                     ProcessResult result = ProcessFile(file.FullName, writer);
                     if (!result.Failed)
                     {
-                        Console.WriteLine("Processed {0} : {1} errors, {2} Warnings in {3}ms. {4} IFC Elements & {5} Geometry Nodes.",
-                            file, result.Errors, result.Warnings, result.TotalTime, result.Entities, result.GeometryEntries);
+                        Console.WriteLine(
+                            "Processed {0} : {1} errors, {2} Warnings in {3}ms. {4} IFC Elements & {5} Geometry Nodes.",
+                            file, result.Errors, result.Warnings, result.TotalTime, result.Entities,
+                            result.GeometryEntries);
                     }
                     else
                     {
@@ -73,7 +76,7 @@ namespace XbimRegression
                 //);
                 writer.Close();
             }
-            
+
             Console.WriteLine("Finished. Press Enter to continue...");
             LogManager.Shutdown();
             Logger = null;
