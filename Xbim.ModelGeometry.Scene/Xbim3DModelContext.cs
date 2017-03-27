@@ -1159,7 +1159,30 @@ namespace Xbim.ModelGeometry.Scene
             // foreach (var shapeId in contextHelper.ProductShapeIds)
             {
                 Interlocked.Increment(ref localTally);
-                var shape = (IIfcGeometricRepresentationItem)Model.Instances[shapeId];
+                IIfcGeometricRepresentationItem shape = null;
+                try
+                {
+                    shape = (IIfcGeometricRepresentationItem)Model.Instances[shapeId];
+                }
+                catch (Exception ex)
+                {
+                    var errmsg = string.Format("Error getting IIfcGeometricRepresentationItem for EntityLabel #{0}. Geometry Ignored.", shapeId);
+                    Logger.Error(errmsg, ex);
+                    // when parallel this is a function called for each item, so return; is equivalent to a continue; in a single thread function
+                    // the following line needs to be continue; when single thread
+                    // the following line needs to be retur; when parallel
+                    return;
+                }
+                if (shape == null)
+                {
+                    var errmsg = string.Format("IIfcGeometricRepresentationItem for EntityLabel #{0} not found. Geometry Ignored.", shapeId);
+                    Logger.Error(errmsg);
+                    // when parallel this is a function called for each item, so return; is equivalent to a continue; in a single thread function
+                    // the following line needs to be continue; when single thread
+                    // the following line needs to be retur; when parallel
+                    return;
+                }
+                
                 //  var key = new RepresentationItemGeometricHashKey(shape);
                 var isFeatureElementShape = contextHelper.FeatureElementShapeIds.Contains(shapeId);
                 var isVoidedProductShape = contextHelper.VoidedShapeIds.Contains(shapeId);
@@ -1261,7 +1284,7 @@ namespace Xbim.ModelGeometry.Scene
                     }
                 }
             }
-           );
+            );
 
             contextHelper.PercentageParsed = localPercentageParsed;
             contextHelper.Tally = localTally;
