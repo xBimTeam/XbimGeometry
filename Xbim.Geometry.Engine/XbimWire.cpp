@@ -419,11 +419,23 @@ namespace Xbim
 					if (needsFixing == Standard_True)
 					{
 						ShapeFix_Wire wireFixer(wire, xFace, tolerance);
+						/*wireFixer.FixAddCurve3dMode();
+						wireFixer.FixConnectedMode();
+						wireFixer.FixDegeneratedMode();
+						wireFixer.FixGaps3dMode();
+						wireFixer.FixGaps2dMode();
+						wireFixer.FixIntersectingEdgesMode();
+						wireFixer.FixLackingMode();
+						wireFixer.FixNotchedEdgesMode();
+						wireFixer.FixReorderMode();
+						wireFixer.FixSeamMode();
+						wireFixer.FixTailMode();
+						wireFixer.FixVertexToleranceMode();*/
 						wireFixer.FixTailMode() = Standard_True;
 						wireFixer.SetMaxTailWidth(tolerance * 10000);
 						wireFixer.ModifyGeometryMode() = Standard_True;
 						wireFixer.ModifyTopologyMode() = Standard_True;
-						wireFixer.SetMaxTailAngle(0.5);
+						wireFixer.SetMaxTailAngle(0.0174533); //1 degree
 						wireFixer.ClosedWireMode() = closed;
 						wireFixer.FixSelfIntersectionMode() = Standard_True;
 						wireFixer.FixSelfIntersectingEdgeMode() = Standard_True;
@@ -1183,7 +1195,6 @@ namespace Xbim
 			Init(profile->ParentProfile);
 			gp_Trsf trsf = XbimGeomPrim::ToTransform(profile->Operator);
 			pWire->Move(TopLoc_Location(trsf));
-			
 		}
 
 		void XbimWire::Init(IfcParameterizedProfileDef ^ profile)

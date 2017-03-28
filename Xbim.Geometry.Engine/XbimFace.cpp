@@ -36,6 +36,7 @@
 #include <Geom_Curve.hxx>
 #include <Geom_Line.hxx>
 #include <Geom_TrimmedCurve.hxx>
+#include <BRepFilletAPI_MakeFillet2d.hxx>
 namespace Xbim
 {
 	namespace Geometry
@@ -261,6 +262,8 @@ namespace Xbim
 				return Init(rectHollow);
 		    if (dynamic_cast<IfcCompositeProfileDef^>(profile))
 				return Init((IfcCompositeProfileDef^)profile);
+			if (dynamic_cast<IfcDerivedProfileDef^>(profile))
+				return Init((IfcDerivedProfileDef^)profile);
 			if (dynamic_cast<IfcArbitraryOpenProfileDef^>(profile) && !dynamic_cast<IfcCenterLineProfileDef^>(profile))
 				throw gcnew Exception("Faces cannot be built with IfcArbitraryOpenProfileDef, a face requires a closed loop");
 			else //it is a standard profile that can be built as a single wire
@@ -296,7 +299,11 @@ namespace Xbim
 				GC::KeepAlive(wire);
 			}
 		}
-		
+
+		void XbimFace::Init(IfcDerivedProfileDef^ profile)
+		{
+			Init(profile->ParentProfile);
+		}
 
 		void XbimFace::Init(IfcArbitraryProfileDefWithVoids^ profile)
 		{
@@ -467,7 +474,27 @@ namespace Xbim
 				builder.Add(wire, BRepBuilderAPI_MakeEdge(vbr, vtr));
 				builder.Add(wire, BRepBuilderAPI_MakeEdge(vtr, vtl));
 				builder.Add(wire, BRepBuilderAPI_MakeEdge(vtl, vbl));
-
+				wire.Closed(Standard_True);
+				double oRad = rectProfile->OuterFilletRadius.HasValue ? (double)(rectProfile->OuterFilletRadius.Value) : 0.0;
+				if (oRad > 0) //consider fillets
+				{
+					BRepBuilderAPI_MakeFace faceMaker(wire, true);
+					BRepFilletAPI_MakeFillet2d filleter(faceMaker.Face());
+					for (BRepTools_WireExplorer exp(wire); exp.More(); exp.Next())
+					{
+						filleter.AddFillet(exp.CurrentVertex(), oRad);
+					}
+					filleter.Build();
+					if (filleter.IsDone())
+					{
+						TopoDS_Shape shape = filleter.Shape();
+						for (TopExp_Explorer exp(shape, TopAbs_WIRE); exp.More(); exp.Next()) //just take the first wire
+						{
+							wire = TopoDS::Wire(exp.Current());
+							break;
+						}
+					}
+				}
 				//make the face
 				BRepBuilderAPI_MakeFace faceBlder(wire);
 				//calculate hole
@@ -478,10 +505,10 @@ namespace Xbim
 					TopoDS_Wire innerWire;
 					builder.MakeWire(innerWire);
 					double t = rectProfile->WallThickness;
-					gp_Pnt ibl(-xOff+t, -yOff+t, 0);
-					gp_Pnt ibr(xOff-t, -yOff+t, 0);
-					gp_Pnt itr(xOff-t, yOff-t, 0);
-					gp_Pnt itl(-xOff+t, yOff-t, 0);
+					gp_Pnt ibl(-xOff + t, -yOff + t, 0);
+					gp_Pnt ibr(xOff - t, -yOff + t, 0);
+					gp_Pnt itr(xOff - t, yOff - t, 0);
+					gp_Pnt itl(-xOff + t, yOff - t, 0);
 					TopoDS_Vertex vibl, vibr, vitr, vitl;
 					builder.MakeVertex(vibl, ibl, precision);
 					builder.MakeVertex(vibr, ibr, precision);
@@ -491,13 +518,36 @@ namespace Xbim
 					builder.Add(innerWire, BRepBuilderAPI_MakeEdge(vibr, vitr));
 					builder.Add(innerWire, BRepBuilderAPI_MakeEdge(vitr, vitl));
 					builder.Add(innerWire, BRepBuilderAPI_MakeEdge(vitl, vibl));
+
+					double iRad = rectProfile->InnerFilletRadius.HasValue ? (double)(rectProfile->InnerFilletRadius.Value) : 0.0;
+					if (iRad > 0) //consider fillets
+					{
+						BRepBuilderAPI_MakeFace faceMaker(innerWire, true);
+						BRepFilletAPI_MakeFillet2d filleter(faceMaker.Face());
+						for (BRepTools_WireExplorer exp(innerWire); exp.More(); exp.Next())
+						{
+							filleter.AddFillet(exp.CurrentVertex(), iRad);
+						}
+						filleter.Build();
+						if (filleter.IsDone())
+						{
+							TopoDS_Shape shape = filleter.Shape();
+							for (TopExp_Explorer exp(shape, TopAbs_WIRE); exp.More(); exp.Next()) //just take the first wire
+							{
+								innerWire = TopoDS::Wire(exp.Current());
+								break;
+							}
+						}
+					}
 					innerWire.Reverse();
+					innerWire.Closed(Standard_True);
 					faceBlder.Add(innerWire);
 				}				
 				pFace = new TopoDS_Face();
 				*pFace = faceBlder.Face();
 				//apply the position transformation
-				pFace->Move(XbimGeomPrim::ToLocation(rectProfile->Position));
+				if (rectProfile->Position != nullptr)
+					pFace->Move(XbimGeomPrim::ToLocation(rectProfile->Position));
 
 			}
 

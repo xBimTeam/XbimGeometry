@@ -28,6 +28,7 @@ namespace Xbim
 
 			//initialisers
 			void Init(IfcProfileDef^ profile);
+			void Init(IfcDerivedProfileDef ^ profile);
 			void Init(IfcArbitraryProfileDefWithVoids^ profile);
 			void Init(IfcCircleHollowProfileDef ^ circProfile);
 			void Init(IfcCompositeProfileDef ^ profile);
