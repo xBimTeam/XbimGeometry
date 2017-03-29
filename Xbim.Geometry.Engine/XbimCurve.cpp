@@ -175,10 +175,15 @@ namespace Xbim
 		{
 			//only deal with the first two points of a polyline, should really use wire for more than one segment
 			List<IIfcCartesianPoint^>^ pts = Enumerable::ToList(curve->Points);
-			if (pts->Count != 2) throw gcnew Exception("XbimCurves can only be created with polylines that have a single segment");
+			int lastPt = 1;
+			if (pts->Count != 2)
+			{
+				XbimGeometryCreator::LogWarning(curve, "Curves can only be created with polylines that have a single segment, inner points have been ignored");
+				lastPt = pts->Count - 1;
+			}
 
 			gp_Pnt start = XbimConvert::GetPoint3d(pts[0]);
-			gp_Pnt end = XbimConvert::GetPoint3d(pts[1]);
+			gp_Pnt end = XbimConvert::GetPoint3d(pts[lastPt]);
 			
 			GC_MakeLine lineMaker(start, end);			
 			if(lineMaker.IsDone())

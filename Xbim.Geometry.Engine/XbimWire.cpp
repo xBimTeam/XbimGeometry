@@ -671,6 +671,10 @@ namespace Xbim
 			{
 				curve = gcnew XbimCurve((IIfcPcurve^)tCurve->BasisCurve);
 			}
+			else if (dynamic_cast<IIfcPolyline^>(tCurve->BasisCurve))
+			{
+				curve = gcnew XbimCurve((IIfcPolyline^)tCurve->BasisCurve);
+			}
 			else
 			{				
 				Type ^ type = tCurve->BasisCurve->GetType();

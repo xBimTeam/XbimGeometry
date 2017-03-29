@@ -96,6 +96,9 @@
     <None Include="Ifc4TestFiles\advanced-face-multisegment-polyline.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Ifc4TestFiles\AdvancedBrepSewingFailure.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Ifc4TestFiles\air-terminal-element.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

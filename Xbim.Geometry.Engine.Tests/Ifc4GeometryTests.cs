@@ -19,7 +19,19 @@ namespace Ifc4GeometryTests
     public class Ifc4GeometryTests
     {
         private readonly XbimGeometryEngine _xbimGeometryCreator = new XbimGeometryEngine();
-       
+
+        [TestMethod]
+        public void AdvancedBrepSewingFailureTest()
+        {
+            using (var model = IfcStore.Open(@"Ifc4TestFiles\AdvancedBrepSewingFailure.ifc"))
+            {
+                var brep = model.Instances.OfType<IIfcAdvancedBrep>().FirstOrDefault();
+                Assert.IsNotNull(brep);
+                var solid = _xbimGeometryCreator.CreateSolid(brep);
+                Assert.IsTrue(solid.Volume > 0);
+
+            }
+        }
 
 
         [TestMethod]
