@@ -8,7 +8,7 @@ namespace Xbim.ModelGeometry.Scene.Clustering
     /// <summary>
     /// Initial ideas for this class derive from the Density-based spatial clustering of applications with noise (DBSCAN).
     /// http://en.wikipedia.org/wiki/DBSCAN
-    /// Except the Noise portion has bot been implemented.
+    /// Except the Noise portion has not been implemented.
     /// </summary>
     public static class XbimDbscan
     {
@@ -19,22 +19,21 @@ namespace Xbim.ModelGeometry.Scene.Clustering
             var clusters = itemsToCluster.ToList();
             // eps *= eps; // square eps
 
-            int lastCount = 0;
+            var lastCount = 0;
             while (clusters.Count != lastCount)
             {
                 lastCount = clusters.Count;
-                for (int i = 0; i < clusters.Count; i++)
+                for (var i = 0; i < clusters.Count; i++)
                 {
                     var baseItem = clusters[i];
-                    for (int j = i+1; j < clusters.Count; j++)
+                    // efficiency fix: because clusters.removeat cost is O(count-index) then we start from the end of the list
+                    for (var j = clusters.Count - 1; j > i; j--)
                     {
-                        
                         if (ValidDistance(baseItem.Bound, clusters[j].Bound, eps))
                         {
                             baseItem.Add(clusters[j]);
                             clusters.RemoveAt(j);
-                        }  
-                       
+                        }                         
                     }
                 }
             }
@@ -52,10 +51,10 @@ namespace Xbim.ModelGeometry.Scene.Clustering
         {
             //if (r2.SizeZ > 2000000)
             //    Console.WriteLine("v big");
-            double dx = AxisDistance(r1.X, r1.SizeX, r2.X, r2.SizeX);
-            double dy = AxisDistance(r1.Y, r1.SizeY, r2.Y, r2.SizeY);
-            double dz = AxisDistance(r1.Z, r1.SizeZ, r2.Z, r2.SizeZ);
-            double max = Math.Max(Math.Max(dx, dy), dz);
+            var dx = AxisDistance(r1.X, r1.SizeX, r2.X, r2.SizeX);
+            var dy = AxisDistance(r1.Y, r1.SizeY, r2.Y, r2.SizeY);
+            var dz = AxisDistance(r1.Z, r1.SizeZ, r2.Z, r2.SizeZ);
+            var max = Math.Max(Math.Max(dx, dy), dz);
             return (max < eps);
         }
 
