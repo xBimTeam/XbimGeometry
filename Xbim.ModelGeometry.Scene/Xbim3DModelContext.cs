@@ -329,12 +329,23 @@ namespace Xbim.ModelGeometry.Scene
 
             private void GetOpeningsAndProjections()
             {
-                var compoundElementsDictionary =
-                    Model.Instances.OfType<IIfcRelAggregates>()
-                        .Where(x => x.RelatingObject is IIfcElement)
-                        .ToDictionary(x => x.RelatingObject, y => y.RelatedObjects);
 
+                //srl change the way we handle aggregation as some ifc models now send them in multiple relationships
+                //var compoundElementsDictionary =
+                //    Model.Instances.OfType<IIfcRelAggregates>()
+                //        .Where(x => x.RelatingObject is IIfcElement)
+                //        .ToDictionary(x => x.RelatingObject, y => y.RelatedObjects);
 
+                var compoundElementsDictionary = XbimMultiValueDictionary<IIfcObjectDefinition, IIfcObjectDefinition>.Create<HashSet<IIfcObjectDefinition>>();
+                foreach (var aggRel in Model.Instances.OfType<IIfcRelAggregates>())
+                {
+                    foreach (var relObj in aggRel.RelatedObjects)
+                    {
+                        compoundElementsDictionary.Add(aggRel.RelatingObject, relObj);
+                    }
+                    
+                }
+                
                 // openings
                 var elementsWithFeatures = new List<ElementWithFeature>();
                 var openingRelations = Model.Instances.OfType<IIfcRelVoidsElement>()
@@ -345,7 +356,7 @@ namespace Xbim.ModelGeometry.Scene
                 foreach (var openingRelation in openingRelations)
                 {
                     // process parts
-                    IItemSet<IIfcObjectDefinition> childrenElements;
+                    ICollection<IIfcObjectDefinition> childrenElements;
                     if (compoundElementsDictionary.TryGetValue(openingRelation.RelatingBuildingElement,
                         out childrenElements))
                     {
@@ -375,7 +386,7 @@ namespace Xbim.ModelGeometry.Scene
                 foreach (var projectionRelation in projectingRelations)
                 {
                     // process parts
-                    IItemSet<IIfcObjectDefinition> childrenElements;
+                    ICollection<IIfcObjectDefinition> childrenElements;
                     if (compoundElementsDictionary.TryGetValue(projectionRelation.RelatingElement, out childrenElements))
                     {
                         elementsWithFeatures.AddRange(
