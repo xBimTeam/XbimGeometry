@@ -2286,12 +2286,14 @@ namespace Xbim
 			int numIntervals = cc.NbIntervals(continuity);
 			if (numIntervals == 1)
 			{
-				TopoDS_Edge edge;
-				Standard_Real uoe;
+				TopoDS_Edge edge; // the edge we are interested in
+				Standard_Real uoe; // parameter U on the edge (not used)
 				cc.Edge(last, edge, uoe);
-				Standard_Real l, f;
+				Standard_Real l, f; // the parameter range is returned in f and l
 				Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, f, l);
-				Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(curve, first, last);
+				Standard_Real a = Math::Max(f, first);
+				Standard_Real b = Math::Min(l, last);
+				Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(curve, a, b);
 				BRepBuilderAPI_MakeWire wm;
 				wm.Add(BRepBuilderAPI_MakeEdge(trimmed));
 				return gcnew XbimWire(wm.Wire());
@@ -2307,10 +2309,10 @@ namespace Xbim
 					Standard_Real lp = res.Value(i );
 					if (lp>first  && fp<last)
 					{
-						TopoDS_Edge edge;
-						Standard_Real uoe;
+						TopoDS_Edge edge; // the edge we are interested in
+						Standard_Real uoe; // parameter U on the edge (not used)
 						cc.Edge(fp, edge, uoe);
-						Standard_Real l, f;
+						Standard_Real l, f; // the parameter range is returned in f and l
 						Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, f, l);
 						Standard_Real a = Math::Max(f, first);
 						Standard_Real b = Math::Min(l, last);

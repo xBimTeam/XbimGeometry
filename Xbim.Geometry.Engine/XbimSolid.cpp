@@ -1286,7 +1286,16 @@ namespace Xbim
 			IModelFactors^ mf = swdSolid->Model->ModelFactors;
 			XbimWire^ sweep = gcnew XbimWire(swdSolid->Directrix);
 			if (swdSolid->StartParam.HasValue && swdSolid->EndParam.HasValue)
-				sweep = (XbimWire^)sweep->Trim(swdSolid->StartParam.Value, Math::Abs(swdSolid->EndParam.Value-1.0)<Precision::Confusion()? sweep->Length: swdSolid->EndParam.Value, mf->Precision);
+			{
+				// if the last parameter is about 1, use the lenght
+				double last  = Math::Abs(swdSolid->EndParam.Value - 1.0) < Precision::Confusion() 
+					? sweep->Length 
+					: swdSolid->EndParam.Value;
+				sweep = (XbimWire^)sweep->Trim(
+					swdSolid->StartParam.Value,
+					last, 
+					mf->Precision);
+			}
 			else if (swdSolid->StartParam.HasValue && !swdSolid->EndParam.HasValue)
 				sweep = (XbimWire^)sweep->Trim(swdSolid->StartParam.Value, sweep->Length, mf->Precision);
 			else if (!swdSolid->StartParam.HasValue && swdSolid->EndParam.HasValue)
