@@ -12,7 +12,7 @@ namespace XbimRegression
     public class Params
     {
 
-       
+        public int MaxThreads;
 
         private const int DefaultTimeout = 1000 * 60 * 20; // 20 mins
         public bool Caching;
@@ -48,8 +48,14 @@ namespace XbimRegression
                     case CompoundParameter.None:
                         switch (arg.ToLowerInvariant())
                         {
+                            case "/singlethread":
+                                MaxThreads = 1;
+                                break;
                             case "/timeout":
                                 paramType = CompoundParameter.Timeout;
+                                break;
+                            case "/maxthreads":
+                                paramType = CompoundParameter.MaxThreads;
                                 break;
                             case "/caching":
                                 Caching = true;
@@ -71,7 +77,14 @@ namespace XbimRegression
                         }
                         paramType = CompoundParameter.None;
                         break;
-                  
+                    case CompoundParameter.MaxThreads:
+                        int mt;
+                        if (int.TryParse(arg, out mt))
+                        {
+                            MaxThreads = mt;
+                        }
+                        paramType = CompoundParameter.None;
+                        break;
                 }
                 
             }
@@ -105,6 +118,7 @@ namespace XbimRegression
         {
             None,
             Timeout,
+            MaxThreads,
             CachingOn
         };
     }

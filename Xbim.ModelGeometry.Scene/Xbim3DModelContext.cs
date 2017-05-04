@@ -503,10 +503,13 @@ namespace Xbim.ModelGeometry.Scene
             {
                 if (_disposed) return;
                 _disposed = true;
-                foreach (var cachedGeom in CachedGeometries)
+                if (CachedGeometries != null)
                 {
-                    if(cachedGeom.Value!=null)
-                        cachedGeom.Value.Dispose();
+                    foreach (var cachedGeom in CachedGeometries)
+                    {
+                        if (cachedGeom.Value != null)
+                            cachedGeom.Value.Dispose();
+                    }
                 }
                 GC.SuppressFinalize(this);
             }
@@ -679,15 +682,17 @@ namespace Xbim.ModelGeometry.Scene
                 if (geometryTransaction == null) return false;
                 using (var contextHelper = new XbimCreateContextHelper(_model, _contexts))
                 {
-
-
                     if (progDelegate != null) progDelegate(-1, "Initialise");
                     if (!contextHelper.Initialise())
                         throw new Exception("Failed to initialise geometric context, " + contextHelper.InitialiseError);
                     if (progDelegate != null) progDelegate(101, "Initialise");
 
-                    WriteShapeGeometries(contextHelper, progDelegate, geometryTransaction, geomStorageType);
+                    if (MaxThreads > 0)
+                    {
+                        contextHelper.ParallelOptions.MaxDegreeOfParallelism = MaxThreads;
+                    }
 
+                    WriteShapeGeometries(contextHelper, progDelegate, geometryTransaction, geomStorageType);
                     WriteMappedItems(contextHelper, progDelegate);
 
                     //start a new task to process features
@@ -1131,7 +1136,11 @@ namespace Xbim.ModelGeometry.Scene
             if (progDelegate != null) progDelegate(101, "WriteMappedItems, (" + contextHelper.MappedShapeIds.Count + " written)");
         }
 
-
+        /// <summary>
+        /// Defines the maximum number of threads to use in parallel operations  any value less then 1 is not used..
+        /// </summary>
+        public int MaxThreads { get; set; }
+        
         private void WriteShapeGeometries(XbimCreateContextHelper contextHelper, ReportProgressDelegate progDelegate, IGeometryStoreInitialiser geometryStore, XbimGeometryType geomStorageType)
         {
             var localPercentageParsed = contextHelper.PercentageParsed;

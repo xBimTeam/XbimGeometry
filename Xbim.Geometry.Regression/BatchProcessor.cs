@@ -91,6 +91,8 @@ namespace XbimRegression
                         parseTime = watch.ElapsedMilliseconds;
                         string xbimFilename = BuildFileName(ifcFile, ".xbim");
                         Xbim3DModelContext context = new Xbim3DModelContext(model);
+                        if (_params.MaxThreads > 0)
+                            context.MaxThreads = _params.MaxThreads;
                         context.CreateContext();
                         //}
                         geomTime = watch.ElapsedMilliseconds - parseTime;

@@ -259,12 +259,10 @@ namespace Xbim
 
 		void XbimWire::Init(IIfcCenterLineProfileDef^ profile)
 		{
-			
 			XbimWire^ centreWire = gcnew XbimWire(profile->Curve);
 			
 			if (!centreWire->IsValid)
 			{
-				
 				XbimGeometryCreator::LogWarning(profile, "Invalid curve. Wire discarded");
 				return;
 			}
