@@ -1268,7 +1268,7 @@ namespace Xbim
 		{			
 			if (!IsValid || !toCut->IsValid) return XbimSolidSet::Empty;
 			XbimSolid^ solidCut = dynamic_cast<XbimSolid^>(toCut);
-			if (solidCut == nullptr)
+			if (solidCut == nullptr || !solidCut->IsValid)
 			{
 #ifdef USE_CARVE_CSG
 				XbimFacetedSolid^ facetedSolidCut = dynamic_cast<XbimFacetedSolid^>(toCut);
@@ -1296,6 +1296,12 @@ namespace Xbim
 					XbimGeometryCreator::logger->WarnFormat("WS024: Invalid operation. Only solid shapes can be cut from another solid");
 					return gcnew XbimSolidSet(this); // the result would be no change so return this		
 				}
+			}
+
+			if (solidCut->Faces->Count == 0)
+			{
+				XbimGeometryCreator::logger->WarnFormat("WS024b: Invalid operation. Only positive shapes can be cut from another solid");
+				return gcnew XbimSolidSet(this); // the result would be no change so return this		
 			}
 
 			
