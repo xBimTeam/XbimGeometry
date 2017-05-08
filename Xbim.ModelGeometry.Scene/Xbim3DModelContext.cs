@@ -24,7 +24,6 @@ using Xbim.Tessellator;
 
 namespace Xbim.ModelGeometry.Scene
 {
-
     /// <summary>
     ///     Represents a gemetric representation context, i.e. a 'Body' and 'Model'Representation
     ///     Note a 3DModelContext may contain multiple IIfcGeometricRepresentationContexts
@@ -1083,8 +1082,7 @@ namespace Xbim.ModelGeometry.Scene
                         contextHelper.Clusters[rep.ContextOfItems].Enqueue(
                             new XbimBBoxClusterElement(instance.GeometryId,
                                 transproductBounds));
-                    }
-
+                    }    
                 }
             }
         }
@@ -1104,9 +1102,7 @@ namespace Xbim.ModelGeometry.Scene
                     {
                         //Check if we have already written this shape geometry, we should have so throw an exception if not
                         GeometryReference counter;
-
                         var mapShapeLabel = mapShape.EntityLabel;
-
                         if (contextHelper.ShapeLookup.TryGetValue(mapShapeLabel, out counter))
                         {
                             int style;

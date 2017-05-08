@@ -9,10 +9,11 @@ namespace Xbim.ModelGeometry.Scene
     public class XbimGrid
     {
         readonly Dictionary<IIfcGridAxis, IXbimCurve> _axis = new Dictionary<IIfcGridAxis, IXbimCurve>();
-        readonly IIfcGrid _ifcGrid;
+        public IIfcGrid IfcGrid { get; }
+
         public XbimGrid(IIfcGrid ifcGrid, IXbimGeometryEngine engine)
         {
-            _ifcGrid = ifcGrid;
+            IfcGrid = ifcGrid;
             foreach (var gridAxis in ifcGrid.UAxes)
             {
                 IXbimCurve curve = engine.CreateCurve(gridAxis.AxisCurve);
@@ -29,9 +30,7 @@ namespace Xbim.ModelGeometry.Scene
                 IXbimCurve curve = engine.CreateCurve(gridAxis.AxisCurve);
                 _axis.Add(gridAxis, curve);
             }
-
         }
-
 
         public XbimPoint3D? Position(IIfcVirtualGridIntersection intersect)
         {
