@@ -58,6 +58,7 @@
   <ItemGroup>
     <Compile Include="AdvBrepRecursionTests.cs" />
     <Compile Include="Diff.cs" />
+    <Compile Include="EnvironmentTests.cs" />
     <Compile Include="Ifc2x3GeometryTests.cs" />
     <Compile Include="IfcExtrudedAreaSolidTests.cs" />
     <Compile Include="IfcModelBuilder.cs" />

@@ -113,6 +113,7 @@
     <Compile Include="..\SharedFileVersionInfo.cs">
       <Link>Properties\SharedFileVersionInfo.cs</Link>
     </Compile>
+    <Compile Include="XbimEnvironment.cs" />
     <Compile Include="Extensions\IIfcAxis2PlacementExtensions.cs" />
     <Compile Include="Extensions\IIfcCartesianTransformExtensions.cs" />
     <Compile Include="Extensions\IIfcRepresentationExtensions.cs" />
