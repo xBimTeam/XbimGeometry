@@ -577,28 +577,42 @@ namespace Xbim.ModelGeometry.Scene
         /// </summary>
         /// <param name="model"></param>
         /// <param name="contextType"></param>
-        /// <param name="contextIdentifier"></param>
-        public Xbim3DModelContext(IModel model, string contextType = "model", string contextIdentifier = null)
+        /// <param name="requiredContextIdentifier"></param>
+        public Xbim3DModelContext(IModel model, string contextType = "model", string requiredContextIdentifier = null)
         {
             _model = model;
 
-            //Get the required context
-            //check for old versions
-            var contexts =
-                model.Instances.OfType<IIfcGeometricRepresentationContext>()
-                    .Where(
+            // Get the required context
+
+            // because IfcGeometricRepresentationSubContext is indexed but IIfcGeometricRepresentationContext is not we 
+            // build a list starting from subcontexts to speed up the lookup, this is a workaround so that the method
+            // is fast on xbimModels that have been already generated.
+            //
+
+            var builtContextList = new List<IIfcGeometricRepresentationContext>();
+            builtContextList.AddRange(
+                model.Instances.OfType<IIfcGeometricRepresentationSubContext>()
+                );
+            
+            var parentContexts = builtContextList.OfType<IIfcGeometricRepresentationSubContext>().Select(x=>x.ParentContext).Distinct().ToList(); // tolist is needed to prevent collection change.
+            builtContextList.AddRange(parentContexts);
+
+
+            // from this moment we are using the same code we were using before on the prepared builtContextList
+            // 
+            var contexts = builtContextList.Where(
                         c =>
-                            String.Compare(c.ContextType, contextType, true) == 0 ||
-                            String.Compare(c.ContextType, "design", true) == 0).ToList();
+                            string.Compare(c.ContextType, contextType, true) == 0 ||
+                            string.Compare(c.ContextType, "design", true) == 0).ToList();
             //allow for incorrect older models
 
 
-            if (contextIdentifier != null && contexts.Any())
+            if (requiredContextIdentifier != null && contexts.Any())
             //filter on the identifier if defined and we have more than one model context
             {
-                var subContexts =
-                    contexts.Where(c => c.ContextIdentifier.HasValue && contextIdentifier.ToLower()
-                        .Contains(c.ContextIdentifier.Value.ToString().ToLower())).ToList();
+                var subContexts = 
+                    contexts.Where(c => c.ContextIdentifier.HasValue 
+                        && requiredContextIdentifier.ToLower().Contains(c.ContextIdentifier.Value.ToString().ToLower())).ToList();
                 if (subContexts.Any())
                     contexts = subContexts;
                 //filter to use body if specified, if not just strtick with the generat model context (avoids problems with earlier Revit exports where sub contexts were not given)
@@ -610,13 +624,13 @@ namespace Xbim.ModelGeometry.Scene
                     model.Instances.OfType<IIfcGeometricRepresentationContext>()
                         .Where(
                             c =>
-                                String.Compare(c.ContextType, "design", true) == 0 ||
-                                String.Compare(c.ContextType, "model", true) == 0).ToList();
+                                string.Compare(c.ContextType, "design", true) == 0 ||
+                                string.Compare(c.ContextType, "model", true) == 0).ToList();
                 if (contexts.Any())
                 {
                     LogInfo(this,
                         "Unable to find any Geometric Representation contexts with Context Type = {0} and Context Identifier = {1}, using Context Type = 'Design' instead. NB This does not comply with IFC 2x3 or greater, the schema is {2}",
-                        contextType, contextIdentifier, string.Join(",", model.Header.FileSchema.Schemas));
+                        contextType, requiredContextIdentifier, string.Join(",", model.Header.FileSchema.Schemas));
                 }
                 else
                 {
@@ -627,7 +641,7 @@ namespace Xbim.ModelGeometry.Scene
                         if (string.IsNullOrWhiteSpace(ctxtString)) ctxtString = "$";
                         LogInfo(this,
                             "Unable to find any Geometric Representation contexts with Context Type = {0} and Context Identifier = {1}, using  available Context Types '{2}'. NB This does not comply with IFC 2x2 or greater",
-                            contextType, contextIdentifier, ctxtString.TrimEnd(' '));
+                            contextType, requiredContextIdentifier, ctxtString.TrimEnd(' '));
                     }
                     else
                     {
@@ -637,22 +651,27 @@ namespace Xbim.ModelGeometry.Scene
                 }
             }
             _contexts = new IfcRepresentationContextCollection();
-            if (contexts.Any())
+            if (!contexts.Any())
+                return;
+            foreach (var context in contexts)
             {
-
-                //var roundingPrecisions = new Dictionary<IIfcRepresentationContext, int>();
-                //var contextLookup = new Dictionary<short, IIfcRepresentationContext>();
-                foreach (var context in contexts)
-                {
-                    _contexts.Add(context);
-
-                }
-
+                _contexts.Add(context);
             }
-
         }
 
-
+        /// <summary>
+        /// Lists the context that have been identified by the 3dModelContext initialisation
+        /// </summary>
+        public IEnumerable<IIfcRepresentationContext> Contexts
+        {
+            get
+            {
+                foreach (var context in _contexts)
+                {
+                    yield return context;
+                }
+            }
+        }
 
         public IModel Model
         {
@@ -1417,8 +1436,7 @@ namespace Xbim.ModelGeometry.Scene
         {
             return ShapeGeometry(shapeInstance.ShapeGeometryLabel);
         }
-
-
+        
         public IEnumerable<XbimRegion> GetRegions()
         {
             var contextIds = _contexts.Select(c => c.EntityLabel).ToList();
