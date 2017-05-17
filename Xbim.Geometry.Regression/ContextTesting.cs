@@ -35,7 +35,7 @@ namespace XbimRegression
                     {
                         using (var model = IfcStore.Open(fileInfo.FullName, null,-1))
                         {
-                            Stopwatch watch = new Stopwatch();
+                            var watch = new Stopwatch();
                             watch.Start();
                             var c = new Xbim3DModelContext(model);
                             watch.Stop();
@@ -49,13 +49,14 @@ namespace XbimRegression
                                 .Select(x => x.EntityLabel).ToList();
                             all.Sort();
                             var allSorted = string.Join(",", all);
-                            log.WriteLine($"{fileInfo.FullName}\t{ctUnsorted}\t{ctSorted}\t{allSorted}");
+                            log.WriteLine(string.Format("{0}\t{1}\t{2}\t{3}", fileInfo.FullName, ctUnsorted, ctSorted,
+                                allSorted));
                             log.Flush();
                         }
                     }
                     catch (Exception e)
                     {
-                        log.WriteLine($"{fileInfo.FullName}\t{e.Message}");
+                        log.WriteLine(string.Format("{0}\t{1}", fileInfo.FullName, e.Message));
                         log.Flush();
                     }
                 }
