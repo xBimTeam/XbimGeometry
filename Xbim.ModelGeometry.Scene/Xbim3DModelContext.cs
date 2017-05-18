@@ -1138,7 +1138,7 @@ namespace Xbim.ModelGeometry.Scene
                     var mapId = shape.EntityLabel;
 
                     if (contextHelper.MapsWritten.TryGetValue(mapId, out mapGeomIds))
-                        //if we have something to write                           
+                    // if we have something to write                           
                     {
                         var mapTransform = contextHelper.MapTransforms[mapId];
                         foreach (var instance in mapGeomIds)
@@ -1151,13 +1151,15 @@ namespace Xbim.ModelGeometry.Scene
                                     trans, instance.BoundingBox /*productBounds*/,
                                     repType)
                             );
-                            var transproductBounds = instance.BoundingBox /*productBounds*/.Transform(placementTransform);
-                            //transform the bounds
 
-                            //if (transproductBounds.SizeX < _maxXyz && transproductBounds.SizeY < _maxXyz && transproductBounds.SizeZ < _maxXyz)
-                            contextHelper.Clusters[rep.ContextOfItems].Enqueue(
-                                new XbimBBoxClusterElement(instance.GeometryId,
-                                    transproductBounds));
+                            // add to cluster if not an opening
+                            if (!(element is IfcOpeningElement))
+                            {
+                                //transform the bounds
+                                var transproductBounds = instance.BoundingBox.Transform(placementTransform);
+                                contextHelper.Clusters[rep.ContextOfItems].Enqueue(
+                                    new XbimBBoxClusterElement(instance.GeometryId, transproductBounds));
+                            }
                         }
                     }
                 }
@@ -1168,17 +1170,18 @@ namespace Xbim.ModelGeometry.Scene
                     {
                         shapesInstances.Add(
                             WriteShapeInstanceToDb(instance.GeometryId, instance.StyleLabel, contextId, element,
-                                placementTransform, instance.BoundingBox /*productBounds*/,
-                                repType)
+                                placementTransform, instance.BoundingBox, repType)
                         );
-                        var transproductBounds = instance.BoundingBox /*productBounds*/.Transform(placementTransform);
-                        //transform the bounds
-                        contextHelper.Clusters[rep.ContextOfItems].Enqueue(
-                            new XbimBBoxClusterElement(instance.GeometryId,
-                                transproductBounds));
+                        // add to cluster if not an opening
+                        if (!(element is IfcOpeningElement))
+                        {
+                            //transform the bounds
+                            var transproductBounds = instance.BoundingBox.Transform(placementTransform);
+                            contextHelper.Clusters[rep.ContextOfItems].Enqueue(
+                                new XbimBBoxClusterElement(instance.GeometryId,
+                                    transproductBounds));
+                        }
                     }
-                    //else
-                    //    Logger.ErrorFormat("Failed to find shape #{0}", shape.EntityLabel);
                 }
             }
             return shapesInstances;
