@@ -611,8 +611,6 @@ namespace Xbim
 			}
 			GC::KeepAlive(this);
 			binaryWriter->Flush();
-		}
-
-		
+		}	
 	}
 }

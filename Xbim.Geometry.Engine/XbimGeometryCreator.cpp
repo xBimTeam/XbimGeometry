@@ -826,9 +826,7 @@ namespace Xbim
 				xShape->WriteTriangulation(bw, tolerance, deflection, angle);
 				return;
 			}
-
 		}
-
 
 		IXbimSolidSet^ XbimGeometryCreator::CreateBooleanResult(IIfcBooleanClippingResult^ clip)
 		{

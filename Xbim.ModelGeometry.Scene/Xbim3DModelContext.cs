@@ -30,7 +30,7 @@ namespace Xbim.ModelGeometry.Scene
     /// </summary>
     public class Xbim3DModelContext
     {
-        static private readonly IList<XbimShapeInstance> EmptyShapeList = new List<XbimShapeInstance>(1);
+        private static readonly IList<XbimShapeInstance> EmptyShapeList = new List<XbimShapeInstance>(1);
         #region Helper classes
 
         private class XbimBooleanDefinition
@@ -688,13 +688,12 @@ namespace Xbim.ModelGeometry.Scene
             //NB we no longer support creation of  geometry storage other than binary, other code remains for reading but not writing 
             var geomStorageType = XbimGeometryType.PolyhedronBinary;
             if (_contexts == null || Engine == null) return false;
-
-
+            
             var geometryStore = _model.GeometryStore;
 
-            if (geometryStore == null) return false;
+            if (geometryStore == null)
+                return false;
            
-
             using (var geometryTransaction = geometryStore.BeginInit())
             {
                 if (geometryTransaction == null) return false;
@@ -1070,13 +1069,19 @@ namespace Xbim.ModelGeometry.Scene
                                     trans, instance.BoundingBox /*productBounds*/,
                                     repType, txn)
                                 );
-                            var transproductBounds = instance.BoundingBox /*productBounds*/.Transform(placementTransform);
-                            //transform the bounds
 
-                            //if (transproductBounds.SizeX < _maxXyz && transproductBounds.SizeY < _maxXyz && transproductBounds.SizeZ < _maxXyz)
-                            contextHelper.Clusters[rep.ContextOfItems].Enqueue(
-                            new XbimBBoxClusterElement(instance.GeometryId,
-                                transproductBounds));
+                            if (!(element is IIfcOpeningElement))
+                            {
+
+                                var transproductBounds =
+                                    instance.BoundingBox /*productBounds*/.Transform(placementTransform);
+                                //transform the bounds
+
+                                //if (transproductBounds.SizeX < _maxXyz && transproductBounds.SizeY < _maxXyz && transproductBounds.SizeZ < _maxXyz)
+                                contextHelper.Clusters[rep.ContextOfItems].Enqueue(
+                                    new XbimBBoxClusterElement(instance.GeometryId,
+                                        transproductBounds));
+                            }
                         }
                     }
                     else
@@ -1096,11 +1101,17 @@ namespace Xbim.ModelGeometry.Scene
                                 placementTransform, instance.BoundingBox /*productBounds*/,
                                 repType, txn)
                             );
-                        var transproductBounds = instance.BoundingBox /*productBounds*/.Transform(placementTransform);
-                        //transform the bounds
-                        contextHelper.Clusters[rep.ContextOfItems].Enqueue(
-                            new XbimBBoxClusterElement(instance.GeometryId,
-                                transproductBounds));
+                        // add to cluster if not an opening
+                        //
+                        if (!(element is IIfcOpeningElement))
+                        {
+                            var transproductBounds =
+                                instance.BoundingBox /*productBounds*/.Transform(placementTransform);
+                            //transform the bounds
+                            contextHelper.Clusters[rep.ContextOfItems].Enqueue(
+                                new XbimBBoxClusterElement(instance.GeometryId,
+                                    transproductBounds));
+                        }
                     }    
                 }
             }
@@ -1249,7 +1260,6 @@ namespace Xbim.ModelGeometry.Scene
                             }
                             else //we need to create a geometry object
                             {
-
                                 geomModel = Engine.Create(shape);
                                 if (geomModel != null && geomModel.IsValid)
                                 {
