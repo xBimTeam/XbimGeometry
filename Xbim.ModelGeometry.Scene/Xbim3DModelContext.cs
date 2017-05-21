@@ -197,7 +197,7 @@ namespace Xbim.ModelGeometry.Scene
             internal HashSet<int> FeatureElementShapeIds { get; private set; }
             internal List<IGrouping<IfcElement, IfcFeatureElement>> OpeningsAndProjections { get; private set; }
             private HashSet<int> VoidedShapeIds { get; set; }
-            internal HashSet<int> ProductShapeIds { get; private set; }
+            
             internal ConcurrentDictionary<int, IXbimGeometryObject> CachedGeometries { get; private set; }
             internal int Total { get; private set; }
             internal int PercentageParsed { get; set; }
@@ -386,7 +386,7 @@ namespace Xbim.ModelGeometry.Scene
             {
                 MappedShapeIds = new HashSet<int>();
                 FeatureElementShapeIds = new HashSet<int>();
-                ProductShapeIds = new HashSet<int>();
+                ProductShapeIds = new Dictionary<int, List<ProductAndTypeIds>>();
                 foreach (
                     var product in Model.InstancesLocal.OfType<IfcProduct>(true).Where(p => p.Representation != null))
                 {
@@ -418,7 +418,7 @@ namespace Xbim.ModelGeometry.Scene
                                         {
                                             var mappedItemLabel = item.EntityLabel;
                                             //if not already processed add it
-                                            ProductShapeIds.Add(mappedItemLabel);
+                                            ProductShapeIdsAdd(mappedItemLabel, product);
                                             if (isFeatureElementShape) FeatureElementShapeIds.Add(mappedItemLabel);
                                         }
                                     }
@@ -426,7 +426,7 @@ namespace Xbim.ModelGeometry.Scene
                                 else
                                 {
                                     //if not already processed add it
-                                    ProductShapeIds.Add(shape.EntityLabel);
+                                    ProductShapeIdsAdd(shape.EntityLabel, product);
                                     if (isFeatureElementShape) FeatureElementShapeIds.Add(shape.EntityLabel);
                                 }
                             }
@@ -435,7 +435,34 @@ namespace Xbim.ModelGeometry.Scene
                 }
             }
 
+            internal class ProductAndTypeIds
+            {
+                internal int ProductLabel;
+                internal short TypeId;
+                
+                public ProductAndTypeIds(IfcProduct product)
+                {
+                    ProductLabel = product.EntityLabel;
+                    TypeId = product.IfcTypeId();
+                }
+            }
 
+            internal Dictionary<int, List<ProductAndTypeIds>> ProductShapeIds { get; private set; }
+           
+            private void ProductShapeIdsAdd(int mappedItemLabel, IfcProduct product)
+            {
+                var newProducMap = new ProductAndTypeIds(product);
+                List<ProductAndTypeIds> products;
+                if (ProductShapeIds.TryGetValue(mappedItemLabel, out products))
+                {
+                    products.Add(newProducMap);
+                }
+                else
+                {
+                    ProductShapeIds.Add(mappedItemLabel, new List<ProductAndTypeIds>() {newProducMap});
+                }
+            }
+            
             public void Dispose()
             {
                 if (_disposed) return;
@@ -1249,9 +1276,23 @@ namespace Xbim.ModelGeometry.Scene
         }
 
 
-        [Flags]        public enum MeshingBehaviourResult        {            PerformAdditions = 1,            PerformSubtractions = 2,            ReplaceBoundingBox = 4,            Skip = 8,            Default = PerformAdditions | PerformSubtractions        }
+        [Flags]
+        public enum MeshingBehaviourResult
+        {
+            Skip = 0,
+            PerformAdditions = 1,
+            PerformSubtractions = 2,
+            ReplaceBoundingBox = 4,
+            Default = PerformAdditions | PerformSubtractions
+        }
 
-        public delegate MeshingBehaviourResult MeshingBehaviourSetter(int elementId, int typeId, ref double linearDeflection,            ref double angularDeflection);
+        private MeshingBehaviourResult SumOf(MeshingBehaviourResult res1, MeshingBehaviourResult res2)
+        {
+            // todo: replace bounding box should not be treated as a normal bitwise and
+            return res1 & res2;
+        }
+
+        public delegate MeshingBehaviourResult MeshingBehaviourSetter(int elementId, short typeId, ref double linearDeflection,            ref double angularDeflection);
         /// <summary>        /// A custom function to determine the behaviour and deflection associated with individual items in the mesher.        /// Default properties can set in the Model.Modelfactors if the same deflection applies to all elements.        /// </summary>        public MeshingBehaviourSetter CustomMeshingBehaviour;
 
         private void WriteShapeGeometries(XbimCreateContextHelper contextHelper, ReportProgressDelegate progDelegate,
@@ -1268,12 +1309,34 @@ namespace Xbim.ModelGeometry.Scene
                 progDelegate(-1, "WriteShapeGeometries (" + contextHelper.ProductShapeIds.Count + " shapes)");
 
             var precision = Model.ModelFactors.Precision;
-            var thisDeflectionDistance = Model.ModelFactors.DeflectionTolerance;
-            var thisDeflectionAngle = Model.ModelFactors.DeflectionAngle;
+            
 
-            Parallel.ForEach(contextHelper.ProductShapeIds, contextHelper.ParallelOptions, shapeId =>
+            Parallel.ForEach(contextHelper.ProductShapeIds.Keys, contextHelper.ParallelOptions, shapeId =>
             //  foreach (var shapeId in contextHelper.ProductShapeIds)
             {
+                var thisDeflectionDistance = Model.ModelFactors.DeflectionTolerance;
+                var thisDeflectionAngle = Model.ModelFactors.DeflectionAngle;
+                var behaviour = MeshingBehaviourResult.Default;
+                
+                if (CustomMeshingBehaviour != null)
+                {
+                    var correspondingProducts = contextHelper.ProductShapeIds[shapeId];
+                    var requirement = MeshingBehaviourResult.Skip;
+
+                    foreach (var correspondingProduct in correspondingProducts)
+                    {
+                        var thisBehaviour = CustomMeshingBehaviour(correspondingProduct.ProductLabel, correspondingProduct.TypeId, ref thisDeflectionDistance, ref thisDeflectionAngle);
+                        behaviour = SumOf(requirement, thisBehaviour);
+                        if (behaviour == MeshingBehaviourResult.Default)
+                            break; // break the loop, we already have to do the complete set of work
+                    }
+                    
+                    if (behaviour == MeshingBehaviourResult.Skip)
+                    {
+                        return; // we are in a parallel loop, this continues to the next
+                    }
+                }
+
                 Interlocked.Increment(ref localTally);
                 IfcGeometricRepresentationItem shape = null;
                 try
@@ -1334,7 +1397,6 @@ namespace Xbim.ModelGeometry.Scene
                                         //we need for boolean operations later, add the polyhedron if the face is planar
                                         contextHelper.CachedGeometries.TryAdd(shapeId, geomModel);
                                 }
-
                             }
 
                             if (shapeGeom == null || shapeGeom.ShapeData == null || shapeGeom.ShapeData.Length == 0)
@@ -1349,7 +1411,6 @@ namespace Xbim.ModelGeometry.Scene
                             {
                                 geomModel.Dispose();
                             }
-
                         }
                     }
                     catch (Exception e)
@@ -1392,6 +1453,8 @@ namespace Xbim.ModelGeometry.Scene
             //);
             if (progDelegate != null) progDelegate(101, "WriteShapeGeometries, (" + localTally + " written)");
         }
+
+        
 
 
         private void WriteRegionsToDb(IfcRepresentationContext context,

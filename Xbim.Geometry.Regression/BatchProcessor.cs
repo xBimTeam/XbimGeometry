@@ -171,8 +171,13 @@ namespace XbimRegression
             }
         }
 
-        private Xbim3DModelContext.MeshingBehaviourResult CustomMeshingBehaviour(int elementId, int typeId, ref double linearDeflection, ref double angularDeflection)
+        private Xbim3DModelContext.MeshingBehaviourResult CustomMeshingBehaviour(int elementId, short typeId, ref double linearDeflection, ref double angularDeflection)
         {
+            if (typeId == 571)
+            {
+                linearDeflection = linearDeflection * 5;
+                angularDeflection = 3;
+            }
             return Xbim3DModelContext.MeshingBehaviourResult.Default;
         }
 
