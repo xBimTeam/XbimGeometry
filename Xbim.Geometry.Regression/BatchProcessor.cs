@@ -95,7 +95,7 @@ namespace XbimRegression
 
                     Stopwatch watch = new Stopwatch();
                     watch.Start();
-                    using (XbimModel model = ParseModelFile(ifcFile,Params.Caching))
+                    using (XbimModel model = ParseModelFile(ifcFile, Params.Caching))
                     {
                         parseTime = watch.ElapsedMilliseconds;
                         string xbimFilename = BuildFileName(ifcFile, ".xbim");
@@ -105,13 +105,15 @@ namespace XbimRegression
                         //else
                         //{
                         Xbim3DModelContext context = new Xbim3DModelContext(model);
+                        context.CustomMeshingBehaviour = CustomMeshingBehaviour;
+
                         context.CreateContext(XbimGeometryType.PolyhedronBinary);
                         //}
                         geomTime = watch.ElapsedMilliseconds - parseTime;
                         //XbimSceneBuilder sb = new XbimSceneBuilder();
                         //string xbimSceneName = BuildFileName(ifcFile, ".xbimScene");
                         //sb.BuildGlobalScene(model, xbimSceneName);
-                       // sceneTime = watch.ElapsedMilliseconds - geomTime;
+                        // sceneTime = watch.ElapsedMilliseconds - geomTime;
                         IIfcFileHeader header = model.Header;
                         watch.Stop();
                         IfcOwnerHistory ohs = model.Instances.OfType<IfcOwnerHistory>().FirstOrDefault();
@@ -119,11 +121,13 @@ namespace XbimRegression
                         {
                             ParseDuration = parseTime,
                             GeometryDuration = geomTime,
-                           // SceneDuration = sceneTime,
-                            FileName = ifcFile.Remove(0,Params.TestFileRoot.Length).TrimStart('\\'),
+                            // SceneDuration = sceneTime,
+                            FileName = ifcFile.Remove(0, Params.TestFileRoot.Length).TrimStart('\\'),
                             Entities = model.Instances.Count,
                             IfcSchema = header.FileSchema.Schemas.FirstOrDefault(),
-                            IfcDescription = String.Format("{0}, {1}", header.FileDescription.Description.FirstOrDefault(), header.FileDescription.ImplementationLevel),
+                            IfcDescription =
+                                String.Format("{0}, {1}", header.FileDescription.Description.FirstOrDefault(),
+                                    header.FileDescription.ImplementationLevel),
                             GeometryEntries = model.GeometriesCount,
                             IfcLength = ReadFileLength(ifcFile),
                             XbimLength = ReadFileLength(xbimFilename),
@@ -132,10 +136,13 @@ namespace XbimRegression
                             IfcSolidGeometries = model.Instances.CountOf<IfcSolidModel>(),
                             IfcMappedGeometries = model.Instances.CountOf<IfcMappedItem>(),
                             BooleanGeometries = model.Instances.CountOf<IfcBooleanResult>(),
-                            BReps =  model.Instances.CountOf<IfcFaceBasedSurfaceModel>() + model.Instances.CountOf<IfcShellBasedSurfaceModel>() + model.Instances.CountOf<IfcManifoldSolidBrep>(),
+                            BReps =
+                                model.Instances.CountOf<IfcFaceBasedSurfaceModel>() +
+                                model.Instances.CountOf<IfcShellBasedSurfaceModel>() +
+                                model.Instances.CountOf<IfcManifoldSolidBrep>(),
                             Application = ohs == null ? "Unknown" : ohs.OwningApplication.ToString(),
                         };
-                        model.Close();                       
+                        model.Close();
                     }
                 }
 
@@ -147,24 +154,26 @@ namespace XbimRegression
                 finally
                 {
                     result.Errors = (from e in eventTrace.Events
-                                     where (e.EventLevel == EventLevel.ERROR)
-                                     select e).Count();
+                        where (e.EventLevel == EventLevel.ERROR)
+                        select e).Count();
                     result.Warnings = (from e in eventTrace.Events
-                                       where (e.EventLevel == EventLevel.WARN)
-                                       select e).Count();
+                        where (e.EventLevel == EventLevel.WARN)
+                        select e).Count();
                     result.FileName = ifcFile.Remove(0, Params.TestFileRoot.Length).TrimStart('\\');
                     if (eventTrace.Events.Count > 0)
                     {
                         CreateLogFile(ifcFile, eventTrace.Events);
                     }
-
-                  
-                        writer.WriteLine(result.ToCsv());
-                        writer.Flush();
-                   
+                    writer.WriteLine(result.ToCsv());
+                    writer.Flush();
                 }
                 return result;
             }
+        }
+
+        private Xbim3DModelContext.MeshingBehaviourResult CustomMeshingBehaviour(int elementId, int typeId, ref double linearDeflection, ref double angularDeflection)
+        {
+            return Xbim3DModelContext.MeshingBehaviourResult.Default;
         }
 
         private static XbimModel ParseModelFile(string ifcFileName,bool caching)

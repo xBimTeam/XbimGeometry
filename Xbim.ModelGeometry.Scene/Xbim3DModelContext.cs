@@ -850,6 +850,7 @@ namespace Xbim.ModelGeometry.Scene
                 var boolOp = new XbimBooleanDefinition(arguments, cutTools, projectTools, context, styleId);
                 booleanOps.Add(boolOp);
             }
+            var thisPrecision = _model.ModelFactors.Precision;
 
             Parallel.ForEach(booleanOps, contextHelper.ParallelOptions, bop =>
                     //         foreach (IGrouping<IfcElement, IfcFeatureElement> pair in contextHelper.OpeningsAndProjections)
@@ -864,6 +865,24 @@ namespace Xbim.ModelGeometry.Scene
                                 elementLabel = bop.ArgumentIds.First().IfcProductLabel;
                                 typeId = bop.ArgumentIds.First().IfcTypeId;
                                 //Get all the parts of this element into a set of solid geometries
+
+                                // determine quality and behaviour for specific geometry
+                                //
+                                
+                                var thisDeflectionDistance = _model.ModelFactors.DeflectionTolerance;
+                                var thisDeflectionAngle = _model.ModelFactors.DeflectionAngle;
+                                var behaviour = MeshingBehaviourResult.Default;
+
+                                if (CustomMeshingBehaviour != null)
+                                {
+                                    behaviour = CustomMeshingBehaviour(elementLabel, typeId, ref thisDeflectionDistance, ref thisDeflectionAngle);
+                                    if (behaviour == MeshingBehaviourResult.Skip)
+                                    {
+                                        // processed.Add(elementLabel); // todo: not sure this is needed
+                                        return; // we are in a parallel loop, this continues to the next
+                                    }
+                                }
+
                                 var elementGeom = Engine.CreateGeometryObjectSet();
 
                                 foreach (var argument in bop.ArgumentIds)
@@ -896,8 +915,6 @@ namespace Xbim.ModelGeometry.Scene
 
                                 //now all the projections
                                 var allProjections = Engine.CreateSolidSet();
-
-
                                 foreach (var projectionShape in bop.ProjectToolIds)
                                 {
                                     var projGeom = contextHelper.GetGeometryFromCache(projectionShape,
@@ -912,7 +929,7 @@ namespace Xbim.ModelGeometry.Scene
                                 }
 
                                 //make the finished shape
-                                if (allProjections.Any())
+                                if (behaviour.HasFlag(MeshingBehaviourResult.PerformAdditions) && allProjections.Any())
                                 {
                                     var nextGeom = elementGeom.Union(allProjections, precision.Value);
                                     if (nextGeom.IsValid)
@@ -931,9 +948,8 @@ namespace Xbim.ModelGeometry.Scene
                                 }
 
 
-                                if (allOpenings.Any())
+                                if (behaviour.HasFlag(MeshingBehaviourResult.PerformSubtractions) && allOpenings.Any())
                                 {
-
                                     var nextGeom = elementGeom.Cut(allOpenings, precision.Value);
                                     if (nextGeom.IsValid)
                                     {
@@ -951,7 +967,7 @@ namespace Xbim.ModelGeometry.Scene
                                 }
 
                                 ////now add to the DB               
-                                XbimModelFactors mf = _model.ModelFactors;
+                                
                                 foreach (var geom in elementGeom)
                                 {
                                     IXbimShapeGeometryData shapeGeometry = new XbimShapeGeometry
@@ -967,16 +983,14 @@ namespace Xbim.ModelGeometry.Scene
                                     {
                                         using (var bw = new BinaryWriter(memStream))
                                         {
-                                            Engine.WriteTriangulation(bw, geom, mf.Precision, mf.DeflectionTolerance,
-                                                mf.DeflectionAngle);
+                                            Engine.WriteTriangulation(bw, geom, thisPrecision, thisDeflectionDistance, thisDeflectionAngle);
                                         }
                                     }
                                     else
                                     {
                                         using (var tw = new StreamWriter(memStream))
                                         {
-                                            Engine.WriteTriangulation(tw, geom, mf.Precision, mf.DeflectionTolerance,
-                                                mf.DeflectionAngle);
+                                            Engine.WriteTriangulation(tw, geom, thisPrecision, thisDeflectionDistance, thisDeflectionAngle);
                                         }
                                     }
                                     shapeGeometry.ShapeData = memStream.ToArray();
@@ -995,8 +1009,7 @@ namespace Xbim.ModelGeometry.Scene
                                             Transformation = XbimMatrix3D.Identity,
                                             BoundingBox = elementGeom.BoundingBox
                                         };
-                                        features.Add(new Tuple<XbimShapeInstance, IXbimShapeGeometryData>(shapeInstance,
-                                            shapeGeometry));
+                                        features.Add(new Tuple<XbimShapeInstance, IXbimShapeGeometryData>(shapeInstance, shapeGeometry));
                                     }
                                 }
                                 processed.Add(elementLabel);
@@ -1236,6 +1249,11 @@ namespace Xbim.ModelGeometry.Scene
         }
 
 
+        [Flags]        public enum MeshingBehaviourResult        {            PerformAdditions = 1,            PerformSubtractions = 2,            ReplaceBoundingBox = 4,            Skip = 8,            Default = PerformAdditions | PerformSubtractions        }
+
+        public delegate MeshingBehaviourResult MeshingBehaviourSetter(int elementId, int typeId, ref double linearDeflection,            ref double angularDeflection);
+        /// <summary>        /// A custom function to determine the behaviour and deflection associated with individual items in the mesher.        /// Default properties can set in the Model.Modelfactors if the same deflection applies to all elements.        /// </summary>        public MeshingBehaviourSetter CustomMeshingBehaviour;
+
         private void WriteShapeGeometries(XbimCreateContextHelper contextHelper, ReportProgressDelegate progDelegate,
             BlockingCollection<IXbimShapeGeometryData> shapeGeometries, XbimGeometryType geomStorageType)
         {
@@ -1248,9 +1266,10 @@ namespace Xbim.ModelGeometry.Scene
             //var mapLookup = new ConcurrentDictionary<int, int>();
             if (progDelegate != null)
                 progDelegate(-1, "WriteShapeGeometries (" + contextHelper.ProductShapeIds.Count + " shapes)");
+
             var precision = Model.ModelFactors.Precision;
-            var deflection = Model.ModelFactors.DeflectionTolerance;
-            var deflectionAngle = Model.ModelFactors.DeflectionAngle;
+            var thisDeflectionDistance = Model.ModelFactors.DeflectionTolerance;
+            var thisDeflectionAngle = Model.ModelFactors.DeflectionAngle;
 
             Parallel.ForEach(contextHelper.ProductShapeIds, contextHelper.ParallelOptions, shapeId =>
             //  foreach (var shapeId in contextHelper.ProductShapeIds)
@@ -1283,7 +1302,10 @@ namespace Xbim.ModelGeometry.Scene
                 //    //Interlocked.Increment(ref dedupCount);
                 //}
                 //else //we have added a new shape geometry
+
+                // determine quality and behaviour for specific geometry
                 //
+                
 
                 //  if (shape.EntityLabel == 43823)
                 {
@@ -1306,8 +1328,8 @@ namespace Xbim.ModelGeometry.Scene
                                 geomModel = Engine.Create(shape);
                                 if (geomModel != null && geomModel.IsValid)
                                 {
-                                    shapeGeom = Engine.CreateShapeGeometry(geomModel, precision, deflection,
-                                        deflectionAngle, geomStorageType);
+                                    shapeGeom = Engine.CreateShapeGeometry(geomModel, precision, thisDeflectionDistance,
+                                        thisDeflectionAngle, geomStorageType);
                                     if (isFeatureElementShape)
                                         //we need for boolean operations later, add the polyhedron if the face is planar
                                         contextHelper.CachedGeometries.TryAdd(shapeId, geomModel);
