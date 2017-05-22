@@ -8,6 +8,7 @@ using Xbim.ModelGeometry.Scene;
 using Xbim.XbimExtensions.Interfaces;
 using System.Collections.Generic;
 using log4net;
+using Xbim.Common;
 using Xbim.Ifc2x3.Kernel;
 using Xbim.Ifc2x3.GeometricModelResource;
 using Xbim.Ifc2x3.GeometryResource;
@@ -172,12 +173,13 @@ namespace XbimRegression
             }
         }
 
-        private Xbim3DModelContext.MeshingSimplification CustomMeshingBehaviour(int elementId, short typeId, ref double linearDeflection, ref double angularDeflection)
+        private Xbim3DModelContext.MeshingSimplification CustomMeshingBehaviour(int elementId, short typeId, XbimModelFactors modelFactors,
+            ref double linearDeflection, ref double angularDeflection)
         {
-            // to know the type it's possible to use
-            int typeIdOfWall = IfcMetaData.IfcTypeId(typeof(Xbim.Ifc2x3.SharedBldgElements.IfcWallStandardCase));
+            // Tip: to know the number associated with a type it's possible to use
+            // int typeIdOfWall = IfcMetaData.IfcTypeId(typeof(Xbim.Ifc2x3.SharedBldgElements.IfcWallStandardCase));
 
-            // ie enables the following does not punch openings into walls
+            // if enabled, the following does not punch openings into walls
             if (false)
             {
                 if (typeId == 452 || typeId == 453) // ifcWall or wallStandardCase

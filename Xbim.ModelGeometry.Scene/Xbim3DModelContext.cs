@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Xbim.Common;
 using Xbim.Common.Geometry;
 using Xbim.Common.Logging;
 using Xbim.Common.XbimExtensions;
@@ -890,14 +891,14 @@ namespace Xbim.ModelGeometry.Scene
 
                                 if (CustomMeshingBehaviour != null)
                                 {
-                                    behaviour = CustomMeshingBehaviour(elementLabel, typeId, ref thisDeflectionDistance, ref thisDeflectionAngle);
+                                    behaviour = CustomMeshingBehaviour(elementLabel, typeId, Model.ModelFactors,
+                                        ref thisDeflectionDistance, ref thisDeflectionAngle);
                                     if (behaviour == MeshingSimplification.SkipAll )
                                     {
                                         // processed.Add(elementLabel); // todo: not sure this is needed
                                         return; // we are in a parallel loop, this continues to the next
                                     }
-                                }
-
+                                }                                
                                 var elementGeom = Engine.CreateGeometryObjectSet();
 
                                 foreach (var argument in bop.ArgumentIds)
@@ -1257,7 +1258,7 @@ namespace Xbim.ModelGeometry.Scene
             return res1 & res2;
         }
 
-        public delegate MeshingSimplification MeshingBehaviourSetter(int elementId, short typeId, ref double linearDeflection,            ref double angularDeflection);
+        public delegate MeshingSimplification MeshingBehaviourSetter(int elementId, short typeId, XbimModelFactors modelfactors,             ref double linearDeflection, ref double angularDeflection);
         /// <summary>        /// A custom function to determine the behaviour and deflection associated with individual items in the mesher.        /// Default properties can set in the Model.Modelfactors if the same deflection applies to all elements.        /// </summary>        public MeshingBehaviourSetter CustomMeshingBehaviour;
 
         private void WriteShapeGeometries(XbimCreateContextHelper contextHelper, ReportProgressDelegate progDelegate,
@@ -1295,7 +1296,8 @@ namespace Xbim.ModelGeometry.Scene
                     {
                         var defDist = thisDeflectionDistance;
                         var defAngle = thisDeflectionAngle;
-                        var thisBehaviour = CustomMeshingBehaviour(correspondingProduct.ProductLabel, correspondingProduct.TypeId, ref defDist, ref defAngle);
+                        var thisBehaviour = CustomMeshingBehaviour(correspondingProduct.ProductLabel, correspondingProduct.TypeId, Model.ModelFactors, 
+                            ref defDist, ref defAngle);
                         behaviour = SumOf(requirement, thisBehaviour);
                         replaceDefDist = Math.Min(replaceDefDist, defDist);
                         replaceDefAngle = Math.Min(replaceDefAngle, defAngle);
