@@ -408,7 +408,6 @@ namespace Xbim
 				{
 					if (BRepCheck_Analyzer(boolOp.Shape(), Standard_False).IsValid() == Standard_False)
 					{
-
 						ShapeFix_Shape shapeFixer(boolOp.Shape());
 						shapeFixer.SetPrecision(tolerance);
 						shapeFixer.SetMinTolerance(tolerance);

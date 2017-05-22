@@ -1280,7 +1280,6 @@ namespace Xbim
 			}
 			GC::KeepAlive(polyFace);
 			XbimGeometryCreator::LogWarning(pbhs, "Failed to create half space");
-
 		}
 
 
