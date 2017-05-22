@@ -13,6 +13,9 @@ namespace XbimRegression
         public bool Caching;
         public bool GeometryV1;
 
+
+        public int MaxThreads;
+
         public Params(string[] args)
         {
             if (args.Length < 1)
@@ -39,6 +42,12 @@ namespace XbimRegression
                     case CompoundParameter.None:
                         switch (arg.ToLowerInvariant())
                         {
+                            case "/singlethread":
+                                MaxThreads = 1;
+                                break;
+                            case "/maxthreads":
+                                paramType = CompoundParameter.MaxThreads;
+                                break;
                             case "/timeout":
                                 paramType = CompoundParameter.Timeout;
                                 break;
@@ -59,6 +68,14 @@ namespace XbimRegression
                         if (int.TryParse(arg, out timeout))
                         {
                             Timeout = timeout * 1000;
+                        }
+                        paramType = CompoundParameter.None;
+                        break;
+                    case CompoundParameter.MaxThreads:
+                        int mt;
+                        if (int.TryParse(arg, out mt))
+                        {
+                            MaxThreads = mt;
                         }
                         paramType = CompoundParameter.None;
                         break;
@@ -92,7 +109,8 @@ namespace XbimRegression
         {
             None,
             Timeout,
-            CachingOn
+            CachingOn,
+            MaxThreads
         };
     }    
 }

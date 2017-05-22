@@ -2037,7 +2037,7 @@ namespace Xbim
 				cc.Edge(last, edge, uoe);
 				Standard_Real l, f;
 				Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, f, l);
-				Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(curve, first, last);
+				Standard_Real a = Math::Max(f, first);				Standard_Real b = Math::Min(l, last);				Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(curve, a, b);
 				BRepBuilderAPI_MakeWire wm;
 				wm.Add(BRepBuilderAPI_MakeEdge(trimmed));
 				return gcnew XbimWire(wm.Wire());

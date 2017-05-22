@@ -13,7 +13,6 @@ using Xbim.Ifc2x3.GeometricModelResource;
 using Xbim.Ifc2x3.GeometryResource;
 using Xbim.Ifc2x3.UtilityResource;
 using XbimGeometry.Interfaces;
-using Xbim.Ifc2x3.TopologyResource;
 
 namespace XbimRegression
 {
@@ -105,6 +104,8 @@ namespace XbimRegression
                         //else
                         //{
                         Xbim3DModelContext context = new Xbim3DModelContext(model);
+                        if (_params.MaxThreads > 0)
+                            context.MaxThreads = _params.MaxThreads;
                         context.CustomMeshingBehaviour = CustomMeshingBehaviour;
 
                         context.CreateContext(XbimGeometryType.PolyhedronBinary);
@@ -171,14 +172,27 @@ namespace XbimRegression
             }
         }
 
-        private Xbim3DModelContext.MeshingBehaviourResult CustomMeshingBehaviour(int elementId, short typeId, ref double linearDeflection, ref double angularDeflection)
+        private Xbim3DModelContext.MeshingSimplification CustomMeshingBehaviour(int elementId, short typeId, ref double linearDeflection, ref double angularDeflection)
         {
+            // to know the type it's possible to use
+            int typeIdOfWall = IfcMetaData.IfcTypeId(typeof(Xbim.Ifc2x3.SharedBldgElements.IfcWallStandardCase));
+
+            // ie enables the following does not punch openings into walls
+            if (false)
+            {
+                if (typeId == 452 || typeId == 453) // ifcWall or wallStandardCase
+                {
+                    return Xbim3DModelContext.MeshingSimplification.SkipSubtractions;
+                }
+            }
+
             if (typeId == 571)
             {
-                linearDeflection = linearDeflection * 5;
+                // reduces meshing on rebars
+                linearDeflection = linearDeflection * 10;
                 angularDeflection = 3;
             }
-            return Xbim3DModelContext.MeshingBehaviourResult.Default;
+            return Xbim3DModelContext.MeshingSimplification.None;
         }
 
         private static XbimModel ParseModelFile(string ifcFileName,bool caching)

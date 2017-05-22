@@ -6,11 +6,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Runtime.Remoting.Messaging;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using Xbim.Common;
 using Xbim.Common.Geometry;
 using Xbim.Common.Logging;
 using Xbim.Common.XbimExtensions;
@@ -22,7 +20,6 @@ using Xbim.Ifc2x3.Kernel;
 using Xbim.Ifc2x3.PresentationAppearanceResource;
 using Xbim.Ifc2x3.ProductExtension;
 using Xbim.Ifc2x3.RepresentationResource;
-using Xbim.Ifc2x3.StructuralElementsDomain;
 using Xbim.IO;
 using Xbim.ModelGeometry.Scene.Clustering;
 using Xbim.XbimExtensions;
@@ -43,8 +40,7 @@ namespace Xbim.ModelGeometry.Scene
 
         private class XbimBooleanDefinition
         {
-            private int contextId;
-            private int styleId;
+            private int _styleId;
             private List<XbimShapeInstance> _argumentIds;
             private List<XbimShapeInstance> _cutToolIds;
             private List<XbimShapeInstance> _projectToolIds;
@@ -53,11 +49,14 @@ namespace Xbim.ModelGeometry.Scene
                 IEnumerable<XbimShapeInstance> cutToolIds, IEnumerable<XbimShapeInstance> projectToolIds, int context,
                 int styleId)
             {
-                if (argumentIds.Any()) _argumentIds = new List<XbimShapeInstance>(argumentIds);
-                if (cutToolIds.Any()) _cutToolIds = new List<XbimShapeInstance>(cutToolIds);
-                if (projectToolIds.Any()) _projectToolIds = new List<XbimShapeInstance>(projectToolIds);
-                this.contextId = context;
-                this.styleId = styleId;
+                if (argumentIds.Any())
+                    _argumentIds = new List<XbimShapeInstance>(argumentIds);
+                if (cutToolIds.Any())
+                    _cutToolIds = new List<XbimShapeInstance>(cutToolIds);
+                if (projectToolIds.Any())
+                    _projectToolIds = new List<XbimShapeInstance>(projectToolIds);
+                ContextId = context;
+                _styleId = styleId;
             }
 
             /// <summary>
@@ -68,10 +67,7 @@ namespace Xbim.ModelGeometry.Scene
                 get { return _argumentIds == null ? Enumerable.Empty<XbimShapeInstance>() : _argumentIds; }
             }
 
-            public int ContextId
-            {
-                get { return contextId; }
-            }
+            public int ContextId { get; }
 
             /// <summary>
             /// The ids of geometry tools to be used in the boolean cut operation
@@ -91,7 +87,7 @@ namespace Xbim.ModelGeometry.Scene
 
             public int StyleId
             {
-                get { return styleId; }
+                get { return _styleId; }
             }
         }
 
@@ -173,7 +169,7 @@ namespace Xbim.ModelGeometry.Scene
         {
             internal String InitialiseError;
             internal ConcurrentDictionary<int, GeometryReference> ShapeLookup;
-            private bool _disposed = false;
+            private bool _disposed;
             private bool _adjustWCS;
 
             public XbimCreateContextHelper(XbimModel model, IfcRepresentationContextCollection contexts,
@@ -475,7 +471,15 @@ namespace Xbim.ModelGeometry.Scene
             }
         }
 
+
+
+
         #endregion
+
+        /// <summary>
+        /// Defines the maximum number of threads to use in parallel operations  any value less then 1 is not used..
+        /// </summary>
+        public int MaxThreads { get; set; }
 
         public static readonly ILogger Logger = LoggerFactory.GetLogger();
         private readonly IfcRepresentationContextCollection _contexts;
@@ -565,20 +569,12 @@ namespace Xbim.ModelGeometry.Scene
             if (contexts.Any())
             {
                 _contexts = new IfcRepresentationContextCollection();
-                //var roundingPrecisions = new Dictionary<IfcRepresentationContext, int>();
-                //var contextLookup = new Dictionary<short, IfcRepresentationContext>();
                 foreach (var context in contexts)
                 {
                     _contexts.Add(context);
-                    //roundingPrecisions.Add(context,
-                    //    Math.Abs(context.DefaultPrecision) < 1e-9
-                    //        ? 0
-                    //        : Math.Abs((int) Math.Log10(context.DefaultPrecision)));
-                    //contextLookup.Add(GetContextId(context), context);
                 }
                 _contextIsPersisted = false;
             }
-
         }
 
         /// <summary>
@@ -594,11 +590,6 @@ namespace Xbim.ModelGeometry.Scene
             get { return _model; }
         }
 
-        //private static short GetContextId(IfcRepresentationContext context)
-        //{
-        //    return (short) ((context.EntityLabel >> 16) ^ context.EntityLabel);
-        //}
-
         /// <summary>
         /// </summary>
         /// <param name="progDelegate"></param>
@@ -607,18 +598,21 @@ namespace Xbim.ModelGeometry.Scene
         public bool CreateContext(XbimGeometryType geomStorageType = XbimGeometryType.Polyhedron,
             ReportProgressDelegate progDelegate = null, bool adjustWCS = true)
         {
-            if (_contexts == null || Engine == null) return false;
-            if (_contextIsPersisted) return false; //already created it
-
-
+            if (_contexts == null || Engine == null)
+                return false;
+            if (_contextIsPersisted)
+                return false; //already created it
             using (var contextHelper = new XbimCreateContextHelper(_model, _contexts, adjustWCS))
             {
-
-
                 if (progDelegate != null) progDelegate(-1, "Initialise");
                 if (!contextHelper.Initialise())
                     throw new Exception("Failed to initialise geometric context, " + contextHelper.InitialiseError);
                 if (progDelegate != null) progDelegate(101, "Initialise");
+
+                if (MaxThreads > 0)
+                {
+                    contextHelper.ParallelOptions.MaxDegreeOfParallelism = MaxThreads;
+                }
 
                 using (var shapeGeometries = new BlockingCollection<IXbimShapeGeometryData>())
                 {
@@ -819,7 +813,9 @@ namespace Xbim.ModelGeometry.Scene
             var dupIds = new HashSet<int>();
             var allIds = new HashSet<int>();
             var booleanOps = new List<XbimBooleanDefinition>();
-            double? precision = null;
+
+            //set the precision to 2/100th mm but never less than precision
+            var thisPrecision = Math.Max(_model.ModelFactors.OneMilliMeter / 50, _model.ModelFactors.Precision);
 
             //   Parallel.ForEach(contextHelper.OpeningsAndProjections, contextHelper.ParallelOptions, pair =>
             //         foreach (IGrouping<IfcElement, IfcFeatureElement> pair in contextHelper.OpeningsAndProjections)
@@ -828,11 +824,7 @@ namespace Xbim.ModelGeometry.Scene
                 int context = 0;
                 int styleId = 0; //take the style of any part of the main shape
                 var element = pair.Key;
-
-                if (!precision.HasValue)
-                    precision = Math.Max(element.ModelOf.ModelFactors.OneMilliMeter/50,
-                        element.ModelOf.ModelFactors.Precision);
-                //set the precision to 100th mm but never less than precision
+                
                 var elementShapes = WriteProductShape(contextHelper, element, false);
                 var arguments = new List<XbimShapeInstance>();
                 foreach (var elemShape in elementShapes)
@@ -846,10 +838,6 @@ namespace Xbim.ModelGeometry.Scene
 
                 if (arguments.Count == 0)
                 {
-                    //Logger.WarnFormat(
-                    //    "WM003: {2}[#{0}]-{1} does not have a solid representation, openings cannot be formed",
-                    //    element.EntityLabel, element.Name, element.GetType().Name);
-                    // the warning is obsolete because it's been handled int the original geometry creation
                     processed.Add(element.EntityLabel);
                     continue;
                 }
@@ -877,7 +865,7 @@ namespace Xbim.ModelGeometry.Scene
                 var boolOp = new XbimBooleanDefinition(arguments, cutTools, projectTools, context, styleId);
                 booleanOps.Add(boolOp);
             }
-            var thisPrecision = _model.ModelFactors.Precision;
+            
 
             Parallel.ForEach(booleanOps, contextHelper.ParallelOptions, bop =>
                     //         foreach (IGrouping<IfcElement, IfcFeatureElement> pair in contextHelper.OpeningsAndProjections)
@@ -898,12 +886,12 @@ namespace Xbim.ModelGeometry.Scene
                                 
                                 var thisDeflectionDistance = _model.ModelFactors.DeflectionTolerance;
                                 var thisDeflectionAngle = _model.ModelFactors.DeflectionAngle;
-                                var behaviour = MeshingBehaviourResult.Default;
+                                var behaviour = MeshingSimplification.None;
 
                                 if (CustomMeshingBehaviour != null)
                                 {
                                     behaviour = CustomMeshingBehaviour(elementLabel, typeId, ref thisDeflectionDistance, ref thisDeflectionAngle);
-                                    if (behaviour == MeshingBehaviourResult.Skip)
+                                    if (behaviour == MeshingSimplification.SkipAll )
                                     {
                                         // processed.Add(elementLabel); // todo: not sure this is needed
                                         return; // we are in a parallel loop, this continues to the next
@@ -956,9 +944,9 @@ namespace Xbim.ModelGeometry.Scene
                                 }
 
                                 //make the finished shape
-                                if (behaviour.HasFlag(MeshingBehaviourResult.PerformAdditions) && allProjections.Any())
+                                if (!behaviour.HasFlag(MeshingSimplification.SkipAdditions) && allProjections.Any())
                                 {
-                                    var nextGeom = elementGeom.Union(allProjections, precision.Value);
+                                    var nextGeom = elementGeom.Union(allProjections, thisPrecision);
                                     if (nextGeom.IsValid)
                                     {
                                         if (nextGeom.First != null && nextGeom.First.IsValid)
@@ -975,9 +963,9 @@ namespace Xbim.ModelGeometry.Scene
                                 }
 
 
-                                if (behaviour.HasFlag(MeshingBehaviourResult.PerformSubtractions) && allOpenings.Any())
+                                if (!behaviour.HasFlag(MeshingSimplification.SkipSubtractions) && allOpenings.Any())
                                 {
-                                    var nextGeom = elementGeom.Cut(allOpenings, precision.Value);
+                                    var nextGeom = elementGeom.Cut(allOpenings, thisPrecision);
                                     if (nextGeom.IsValid)
                                     {
                                         if (nextGeom.First != null && nextGeom.First.IsValid)
@@ -1091,50 +1079,6 @@ namespace Xbim.ModelGeometry.Scene
             );
             contextHelper.Tally = localTally;
             contextHelper.PercentageParsed = localPercentageParsed;
-        }
-
-        /// <summary>
-        ///     Process the products shape and gets the shape ids, does not write to the databaseto the Database
-        /// </summary>
-        /// <param name="contextHelper"></param>
-        /// <param name="element">Element to write</param>
-        /// <param name="includesOpenings"></param>
-        /// <returns>IEnumerable of XbimShapeInstance that have been written</returns>
-        private IEnumerable<int> GetProductShapeIds(XbimCreateContextHelper contextHelper, IfcProduct element)
-        {
-
-            var shapesIds = new List<int>();
-            var rep = element.Representation.Representations
-                .FirstOrDefault(r => _contexts.Contains(r.ContextOfItems)
-                                     && r.IsBodyRepresentation());
-            //get shape ids                   
-            foreach (var shape in rep.Items)
-            {
-                if (shape is IfcMappedItem)
-                {
-                    List<GeometryReference> mapGeomIds;
-                    var mapId = shape.EntityLabel;
-
-                    if (contextHelper.MapsWritten.TryGetValue(mapId, out mapGeomIds))
-                        //if we have something to write                           
-                    {
-                        var mapTransform = contextHelper.MapTransforms[mapId];
-                        foreach (var instance in mapGeomIds)
-                        {
-                            shapesIds.Add(instance.GeometryId);
-                        }
-                    }
-                }
-                else //it is a direct reference to geometry shape
-                {
-                    GeometryReference instance;
-                    if (contextHelper.ShapeLookup.TryGetValue(shape.EntityLabel, out instance))
-                    {
-                        shapesIds.Add(instance.GeometryId);
-                    }
-                }
-            }
-            return shapesIds;
         }
 
         /// <summary>
@@ -1276,23 +1220,44 @@ namespace Xbim.ModelGeometry.Scene
         }
 
 
+        /// <summary>
+        /// Determines if a simplified mesh should be generated.
+        /// </summary>
         [Flags]
-        public enum MeshingBehaviourResult
+        public enum MeshingSimplification
         {
-            Skip = 0,
-            PerformAdditions = 1,
-            PerformSubtractions = 2,
+            /// <summary>
+            /// Perform meshing as normal
+            /// </summary>
+            None = 0,
+            /// <summary>
+            /// Prevent the boolean operations adding feature elements.
+            /// </summary>
+            SkipAdditions = 1,
+            /// <summary>
+            /// Prevent the boolean operations subtracting feature elements.
+            /// </summary>
+            SkipSubtractions = 2,
+            /// <summary>
+            /// Prevent all boolean operations
+            /// </summary>
+            SkipBooleans = SkipAdditions | SkipAdditions,
+            /// <summary>
+            /// Not implemented
+            /// </summary>
             ReplaceBoundingBox = 4,
-            Default = PerformAdditions | PerformSubtractions
+            /// <summary>
+            /// Ignore element completely
+            /// </summary>
+            SkipAll = ~None
         }
 
-        private MeshingBehaviourResult SumOf(MeshingBehaviourResult res1, MeshingBehaviourResult res2)
+        private MeshingSimplification SumOf(MeshingSimplification res1, MeshingSimplification res2)
         {
-            // todo: replace bounding box should not be treated as a normal bitwise and
             return res1 & res2;
         }
 
-        public delegate MeshingBehaviourResult MeshingBehaviourSetter(int elementId, short typeId, ref double linearDeflection,            ref double angularDeflection);
+        public delegate MeshingSimplification MeshingBehaviourSetter(int elementId, short typeId, ref double linearDeflection,            ref double angularDeflection);
         /// <summary>        /// A custom function to determine the behaviour and deflection associated with individual items in the mesher.        /// Default properties can set in the Model.Modelfactors if the same deflection applies to all elements.        /// </summary>        public MeshingBehaviourSetter CustomMeshingBehaviour;
 
         private void WriteShapeGeometries(XbimCreateContextHelper contextHelper, ReportProgressDelegate progDelegate,
@@ -1308,30 +1273,42 @@ namespace Xbim.ModelGeometry.Scene
             if (progDelegate != null)
                 progDelegate(-1, "WriteShapeGeometries (" + contextHelper.ProductShapeIds.Count + " shapes)");
 
-            var precision = Model.ModelFactors.Precision;
-            
+            //set the precision to 2/100th mm but never less than precision
+            var thisPrecision = Math.Max(_model.ModelFactors.OneMilliMeter / 50, _model.ModelFactors.Precision);
+
 
             Parallel.ForEach(contextHelper.ProductShapeIds.Keys, contextHelper.ParallelOptions, shapeId =>
             //  foreach (var shapeId in contextHelper.ProductShapeIds)
             {
                 var thisDeflectionDistance = Model.ModelFactors.DeflectionTolerance;
                 var thisDeflectionAngle = Model.ModelFactors.DeflectionAngle;
-                var behaviour = MeshingBehaviourResult.Default;
+                var behaviour = MeshingSimplification.None;
                 
                 if (CustomMeshingBehaviour != null)
                 {
                     var correspondingProducts = contextHelper.ProductShapeIds[shapeId];
-                    var requirement = MeshingBehaviourResult.Skip;
-
+                    var requirement = MeshingSimplification.SkipAll;
+                    var replaceDefDist = double.PositiveInfinity;
+                    var replaceDefAngle = double.PositiveInfinity;
+                    
                     foreach (var correspondingProduct in correspondingProducts)
                     {
-                        var thisBehaviour = CustomMeshingBehaviour(correspondingProduct.ProductLabel, correspondingProduct.TypeId, ref thisDeflectionDistance, ref thisDeflectionAngle);
+                        var defDist = thisDeflectionDistance;
+                        var defAngle = thisDeflectionAngle;
+                        var thisBehaviour = CustomMeshingBehaviour(correspondingProduct.ProductLabel, correspondingProduct.TypeId, ref defDist, ref defAngle);
                         behaviour = SumOf(requirement, thisBehaviour);
-                        if (behaviour == MeshingBehaviourResult.Default)
-                            break; // break the loop, we already have to do the complete set of work
+                        replaceDefDist = Math.Min(replaceDefDist, defDist);
+                        replaceDefAngle = Math.Min(replaceDefAngle, defAngle);
                     }
-                    
-                    if (behaviour == MeshingBehaviourResult.Skip)
+
+                    if (!double.IsInfinity(replaceDefDist))
+                        thisDeflectionDistance = replaceDefDist;
+
+                    if (!double.IsInfinity(replaceDefAngle))
+                        thisDeflectionAngle = replaceDefAngle;
+
+
+                    if (behaviour == MeshingSimplification.SkipAll)
                     {
                         return; // we are in a parallel loop, this continues to the next
                     }
@@ -1391,7 +1368,7 @@ namespace Xbim.ModelGeometry.Scene
                                 geomModel = Engine.Create(shape);
                                 if (geomModel != null && geomModel.IsValid)
                                 {
-                                    shapeGeom = Engine.CreateShapeGeometry(geomModel, precision, thisDeflectionDistance,
+                                    shapeGeom = Engine.CreateShapeGeometry(geomModel, thisPrecision, thisDeflectionDistance,
                                         thisDeflectionAngle, geomStorageType);
                                     if (isFeatureElementShape)
                                         //we need for boolean operations later, add the polyhedron if the face is planar
@@ -1478,7 +1455,6 @@ namespace Xbim.ModelGeometry.Scene
                 geomTable.AddGeometry(context.EntityLabel, XbimGeometryType.Region,
                     IfcMetaData.IfcTypeId(context.GetType()), wcsMatrix3D.ToArray(), regions.ToArray());
                 transaction.Commit();
-
             }
         }
 
