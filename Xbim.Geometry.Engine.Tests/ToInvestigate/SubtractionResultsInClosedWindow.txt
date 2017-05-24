@@ -1,0 +1,26 @@
+Notes on the problem:
+=====================
+
+File comes from:
+https://github.com/xBimTeam/XbimGeometry/issues/46
+
+#12756=IFCSHAPEREPRESENTATION(#87,'Body','Brep',(#12752));
+Has two window openings embedded in the Brep.
+
+However once the IFCRELVOIDSELEMENT #286492 solid subtraction is performed one of the two openings disappears.
+
+The subtraction results in an addition of volume.
+
+A warning sign might be that the volume of the BREP is 0.
+
+Geometry functions for IfcFacetedBrep #12752 succeed but the volume is always 0.
+- Create(IfcGeometricRepresentationItem)
+  ok, returned XbimCompound (Xbim.Geometry.XbimCompound)
+- CreateSolid(IfcBooleanOperand)
+  ok, returned XbimSolid - Volume: 0
+- CreateSolidSet(IfcManifoldSolidBrep)
+  ok, returned XbimSolidSet
+    [0]: XbimSolid - Volume: 0
+- CreateSolidSet(IfcFacetedBrep)
+  ok, returned XbimSolidSet
+    [0]: XbimSolid - Volume: 0

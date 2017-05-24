@@ -38,7 +38,6 @@ namespace Xbim.Geometry.Engine.Interop
             }
             catch (Exception e)
             {
-
                 throw e;
             }
              

@@ -826,9 +826,7 @@ namespace Xbim
 				xShape->WriteTriangulation(bw, tolerance, deflection, angle);
 				return;
 			}
-
 		}
-
 
 		IXbimSolidSet^ XbimGeometryCreator::CreateBooleanResult(IIfcBooleanClippingResult^ clip)
 		{
@@ -1122,7 +1120,10 @@ namespace Xbim
 						its.Perform(line2d, right);
 						if (its.NbPoints() > 0) params->Add(its.Point(1).ParamOnFirst());
 					}
-					if (params->Count != 2) continue;//give up
+					if (params->Count != 2) 
+						continue; //give up
+					if (isnan(params[0]) || isnan(params[1]))
+						continue; //give up
 					hcurve = new Geom2d_TrimmedCurve(hcurve, Math::Min(params[0], params[1]), Math::Max(params[0], params[1]));
 				}
 				

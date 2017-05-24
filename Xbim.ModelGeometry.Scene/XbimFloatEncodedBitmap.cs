@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
 
 namespace Xbim.ModelGeometry.Scene
 {
@@ -59,9 +58,11 @@ namespace Xbim.ModelGeometry.Scene
         /// This function will save the bitmap to the specified PNG file. Extension will be added if no extension is specified.
         /// </summary>
         /// <param name="path">Target file path</param>
+        // ReSharper disable once InconsistentNaming
         public void SaveAsPNG(string path)
         {
-            if (Path.GetExtension(path).ToLower() != ".png")
+            var extension = Path.GetExtension(path);
+            if (extension != null && extension.ToLower() != ".png")
                 path += ".png";
             using (var stream = File.Create(path))
             {
@@ -75,6 +76,7 @@ namespace Xbim.ModelGeometry.Scene
         /// This function WON'T close the stream.
         /// </summary>
         /// <param name="stream">Stream used to write the PNG image</param>
+        // ReSharper disable once InconsistentNaming
         public void SaveAsPNG(Stream stream)
         {
             _bmp.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
@@ -98,7 +100,6 @@ namespace Xbim.ModelGeometry.Scene
                 Array.Copy(entriesArray, i * _arity, oneEntryArray, 0, _arity);
                 AddDataEntry(oneEntryArray);
             }
-
             return _dataIndex;
         }
 
@@ -110,7 +111,7 @@ namespace Xbim.ModelGeometry.Scene
         public long AddDataEntry(IList<float> values)
         {
             if (values.Count != _arity)
-                throw new ArgumentException(String.Format("There must be exactly {0} values specified.", _arity));
+                throw new ArgumentException(string.Format("There must be exactly {0} values specified.", _arity));
 
             SetDataEntry(values, ++_dataIndex);
 
@@ -136,7 +137,7 @@ namespace Xbim.ModelGeometry.Scene
         public void SetDataEntry(IList<float> values, long index)
         {
             if (values.Count != _arity)
-                throw new ArgumentException(String.Format("There must be exactly {0} values specified.", _arity));
+                throw new ArgumentException(string.Format("There must be exactly {0} values specified.", _arity));
 
             var pixelIndex = index * _arity; //to get actual index
             var imageLength = _size * _size;
@@ -212,19 +213,19 @@ namespace Xbim.ModelGeometry.Scene
             var bits = GetBitArray(vals);
 
             //split into parts as defined by IEEE
-            int sign = bits[0] == 0 ? 1 : -1;
-            int exponent = BitsToUInt8(SubArray<int>(bits, 1, 8)) - 127;
-            float fraction = GetFraction(SubArray<int>(bits, 9, 23));
+            var sign = bits[0] == 0 ? 1 : -1;
+            var exponent = BitsToUInt8(SubArray<int>(bits, 1, 8)) - 127;
+            var fraction = GetFraction(SubArray<int>(bits, 9, 23));
 
             //compute decimal value from IEEE encoding
-            float result = sign * fraction * (float)Math.Pow(2, exponent);
+            var result = sign * fraction * (float)Math.Pow(2, exponent);
             return result;
         }
 
         private float GetFraction(int[] bits)
         {
             var result = 1f;
-            for (int i = 0; i < 23; i++)
+            for (var i = 0; i < 23; i++)
             {
                 result += bits[i] * (float)Math.Pow(2, (-1)*(i+1));
             }
@@ -234,7 +235,7 @@ namespace Xbim.ModelGeometry.Scene
         private int BitsToUInt8(int[] bits)
         {
             var result = 0;
-            for (int i = 0; i < 8; i++)
+            for (var i = 0; i < 8; i++)
             {
                 result += bits[7 - i] * (int)Math.Pow(2, i);
             }
@@ -244,10 +245,10 @@ namespace Xbim.ModelGeometry.Scene
         private int[] GetBitArray(byte[] input)
         {
             var result = new int[32];
-            for (int i = 0; i < 4; i++)
+            for (var i = 0; i < 4; i++)
             {
                 var actualByte = input[i];
-                for (int j = 0; j < 8; j++)
+                for (var j = 0; j < 8; j++)
                 {
                     var index = 31 - (j + i * 8);
                     result[index] =  actualByte % 2;
@@ -259,7 +260,7 @@ namespace Xbim.ModelGeometry.Scene
 
         private T[] SubArray<T>(T[] data, int index, int length)
         {
-            T[] result = new T[length];
+            var result = new T[length];
             Array.Copy(data, index, result, 0, length);
             return result;
         }

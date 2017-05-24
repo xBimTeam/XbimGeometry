@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using Xbim.Common;
 using Xbim.Common.Geometry;
 
 namespace Xbim.ModelGeometry.Scene

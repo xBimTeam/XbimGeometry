@@ -374,7 +374,7 @@ namespace Xbim
 			if (advancedBrepWithVoids != nullptr) return Init(advancedBrepWithVoids);
 			BRep_Builder b;
 			XbimShell^ outerShell = InitAdvancedFaces(solid->Outer->CfsFaces);
-			if (!outerShell->IsValid) return;
+			if (outerShell==nullptr || !outerShell->IsValid) return;
 			XbimSolid^ theSolid;
 			if (!outerShell->IsClosed) //we need to close it
 			{
@@ -706,8 +706,10 @@ namespace Xbim
 				builder.CompleteShell(shell);
 
 				ShapeFix_Shell sf(shell);
-				sf.Perform();
-				return gcnew XbimShell(sf.Shell());
+				if(sf.Perform()==Standard_True)
+				    return gcnew XbimShell(sf.Shell());
+				else
+					return gcnew XbimShell(shell);
 
 			}
 			catch (Standard_Failure e)
@@ -715,6 +717,7 @@ namespace Xbim
 				String^ err = gcnew String(Standard_Failure::Caught()->GetMessageString());
 				throw gcnew Exception("General failure in advanced face building: " + err);
 			}
+			
 		}
 
 

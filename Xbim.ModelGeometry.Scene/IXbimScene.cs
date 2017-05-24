@@ -6,6 +6,7 @@ namespace Xbim.ModelGeometry.Scene
     {
         void Close();
         TransformGraph Graph { get; }
+        // ReSharper disable once InconsistentNaming
         XbimLOD LOD { get; set; }
     }
 }

@@ -392,6 +392,7 @@ namespace Xbim
 			BRepBuilderAPI_MakeWire outerWire;
 			outerWire.Add(outerEdge);
 			BRepOffsetAPI_MakePipeShell pipeMaker1(sweep);
+			pipeMaker1.SetTransitionMode(BRepBuilderAPI_RightCorner);
 			pipeMaker1.Add(outerWire.Wire(), Standard_False, Standard_True);
 			pipeMaker1.Build();
 			if (pipeMaker1.IsDone())
@@ -412,6 +413,7 @@ namespace Xbim
 					BRepBuilderAPI_MakeWire innerWire;
 					innerWire.Add(innerEdge);
 					BRepOffsetAPI_MakePipeShell pipeMaker2(sweep);
+					pipeMaker2.SetTransitionMode(BRepBuilderAPI_RightCorner);
 					pipeMaker2.Add(innerWire.Wire(), Standard_False, Standard_True);
 					pipeMaker2.Build();
 					if (pipeMaker2.IsDone())
@@ -500,8 +502,7 @@ namespace Xbim
 				XbimGeometryCreator::LogWarning(repItem, "Could not build Directrix");
 				return;
 			}
-			BRepOffsetAPI_MakePipeShell pipeMaker1(sweep);
-
+			
 			BRepPrim_Builder b;
 			TopoDS_Shell shell;
 			b.MakeShell(shell);
@@ -534,7 +535,8 @@ namespace Xbim
 			TopLoc_Location topLoc(trsf);		
 			faceStart->SetLocation(topLoc);
 			XbimWire^ outerBound = (XbimWire^)(faceStart->OuterBound);
-					
+			
+			BRepOffsetAPI_MakePipeShell pipeMaker1(sweep);
 			pipeMaker1.SetTransitionMode(BRepBuilderAPI_RightCorner); 
 			pipeMaker1.Add(outerBound, Standard_False, Standard_False);
 			pipeMaker1.Build();
@@ -662,6 +664,10 @@ namespace Xbim
 				TopoDS_Wire outerBoundStart = (XbimWire^)(faceStart->OuterBound);
 				TopoDS_Wire outerBoundEnd = (XbimWire^)(faceEnd->OuterBound);
 				//pipeMaker1.SetMode(Standard_True);
+				
+				// todo: all usages of BRepBuilderAPI_Transformed should be reviewed
+				// it's possible that BRepBuilderAPI_RightCorner should be used in most cases
+				// 
 				pipeMaker1.SetTransitionMode(BRepBuilderAPI_Transformed);
 				pipeMaker1.Add(outerBoundStart);
 				pipeMaker1.Add(outerBoundEnd);
@@ -1274,7 +1280,6 @@ namespace Xbim
 			}
 			GC::KeepAlive(polyFace);
 			XbimGeometryCreator::LogWarning(pbhs, "Failed to create half space");
-
 		}
 
 
@@ -1286,7 +1291,16 @@ namespace Xbim
 			IModelFactors^ mf = swdSolid->Model->ModelFactors;
 			XbimWire^ sweep = gcnew XbimWire(swdSolid->Directrix);
 			if (swdSolid->StartParam.HasValue && swdSolid->EndParam.HasValue)
-				sweep = (XbimWire^)sweep->Trim(swdSolid->StartParam.Value, Math::Abs(swdSolid->EndParam.Value-1.0)<Precision::Confusion()? sweep->Length: swdSolid->EndParam.Value, mf->Precision);
+			{
+				// if the last parameter is about 1, use the lenght
+				double last  = Math::Abs(swdSolid->EndParam.Value - 1.0) < Precision::Confusion() 
+					? sweep->Length 
+					: swdSolid->EndParam.Value;
+				sweep = (XbimWire^)sweep->Trim(
+					swdSolid->StartParam.Value,
+					last, 
+					mf->Precision);
+			}
 			else if (swdSolid->StartParam.HasValue && !swdSolid->EndParam.HasValue)
 				sweep = (XbimWire^)sweep->Trim(swdSolid->StartParam.Value, sweep->Length, mf->Precision);
 			else if (!swdSolid->StartParam.HasValue && swdSolid->EndParam.HasValue)
@@ -1321,7 +1335,13 @@ namespace Xbim
 			BRepBuilderAPI_MakeWire outerWire;
 			outerWire.Add(outerEdge);
 			BRepOffsetAPI_MakePipeShell pipeMaker1(sweep);
+			
+			// SetTransitionMode makes for a step alignement of the profile along the outerWire, 
+			// two adjacent segments of the spine are extended and intersected at a fracture of the spine
+			pipeMaker1.SetTransitionMode(BRepBuilderAPI_RightCorner); 
+
 			pipeMaker1.Add(outerWire.Wire(), Standard_False, Standard_True);
+			
 			pipeMaker1.Build();
 			if (pipeMaker1.IsDone())
 			{	
@@ -1342,6 +1362,7 @@ namespace Xbim
 					BRepBuilderAPI_MakeWire innerWire;
 					innerWire.Add(innerEdge);
 					BRepOffsetAPI_MakePipeShell pipeMaker2(sweep);
+					pipeMaker2.SetTransitionMode(BRepBuilderAPI_RightCorner);
 					pipeMaker2.Add(innerWire.Wire(), Standard_False, Standard_True);
 					pipeMaker2.Build();
 					if (pipeMaker2.IsDone() )

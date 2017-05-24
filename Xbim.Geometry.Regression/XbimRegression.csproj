@@ -68,46 +68,46 @@
       <HintPath>..\packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="log4net, Version=1.2.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
-      <HintPath>..\packages\log4net.2.0.5\lib\net40-full\log4net.dll</HintPath>
+    <Reference Include="log4net, Version=2.0.8.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\packages\log4net.2.0.8\lib\net40-full\log4net.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Xbim.CobieExpress, Version=4.0.0.0, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xbim.Essentials.4.0.28-V006\lib\net40\Xbim.CobieExpress.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.4.0.28-V022\lib\net40\Xbim.CobieExpress.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Xbim.Common, Version=4.0.0.0, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xbim.Essentials.4.0.28-V006\lib\net40\Xbim.Common.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.4.0.28-V022\lib\net40\Xbim.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Xbim.Ifc, Version=4.0.0.0, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xbim.Essentials.4.0.28-V006\lib\net40\Xbim.Ifc.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.4.0.28-V022\lib\net40\Xbim.Ifc.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Xbim.Ifc.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xbim.Essentials.4.0.28-V006\lib\net40\Xbim.Ifc.Extensions.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.4.0.28-V022\lib\net40\Xbim.Ifc.Extensions.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Xbim.Ifc2x3, Version=4.0.0.0, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xbim.Essentials.4.0.28-V006\lib\net40\Xbim.Ifc2x3.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.4.0.28-V022\lib\net40\Xbim.Ifc2x3.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Xbim.Ifc2x3.IO, Version=4.0.0.0, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xbim.Essentials.4.0.28-V006\lib\net40\Xbim.Ifc2x3.IO.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.4.0.28-V022\lib\net40\Xbim.Ifc2x3.IO.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Xbim.Ifc4, Version=4.0.0.0, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xbim.Essentials.4.0.28-V006\lib\net40\Xbim.Ifc4.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.4.0.28-V022\lib\net40\Xbim.Ifc4.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Xbim.IO, Version=4.0.0.0, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xbim.Essentials.4.0.28-V006\lib\net40\Xbim.IO.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.4.0.28-V022\lib\net40\Xbim.IO.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Xbim.Tessellator, Version=4.0.0.0, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xbim.Essentials.4.0.28-V006\lib\net40\Xbim.Tessellator.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.4.0.28-V022\lib\net40\Xbim.Tessellator.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>
@@ -119,6 +119,7 @@
       <Link>Properties\SharedFileVersionInfo.cs</Link>
     </Compile>
     <Compile Include="BatchProcessor.cs" />
+    <Compile Include="ContextTesting.cs" />
     <Compile Include="Params.cs" />
     <Compile Include="ProcessResult.cs" />
     <Compile Include="Program.cs" />

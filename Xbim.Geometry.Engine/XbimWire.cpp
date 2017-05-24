@@ -259,12 +259,10 @@ namespace Xbim
 
 		void XbimWire::Init(IIfcCenterLineProfileDef^ profile)
 		{
-			
 			XbimWire^ centreWire = gcnew XbimWire(profile->Curve);
 			
 			if (!centreWire->IsValid)
 			{
-				
 				XbimGeometryCreator::LogWarning(profile, "Invalid curve. Wire discarded");
 				return;
 			}
@@ -671,6 +669,10 @@ namespace Xbim
 			{
 				curve = gcnew XbimCurve((IIfcPcurve^)tCurve->BasisCurve);
 			}
+			else if (dynamic_cast<IIfcPolyline^>(tCurve->BasisCurve))
+			{
+				curve = gcnew XbimCurve((IIfcPolyline^)tCurve->BasisCurve);
+			}
 			else
 			{				
 				Type ^ type = tCurve->BasisCurve->GetType();
@@ -945,15 +947,11 @@ namespace Xbim
 						XbimVertex^ end = vertices[(int)indices[i + 1] - 1];
 						if (start != end)
 						{
-
 							XbimEdge^ e = gcnew XbimEdge(start,end);
 							wireMaker.Add(e);
 						}
 					}
-
-
 				}
-
 			}
 
 			pWire = new TopoDS_Wire();
@@ -1121,7 +1119,6 @@ namespace Xbim
 
 			for (BRepTools_WireExplorer wEx(*pWire); wEx.More(); wEx.Next())
 			{
-				
 				const TopoDS_Vertex& v = wEx.CurrentVertex();
 				currentStart = BRep_Tool::Pnt(v);
 				Handle(Geom_Curve) c3d = BRep_Tool::Curve(wEx.Current(), loc, start, end);
@@ -1193,7 +1190,6 @@ namespace Xbim
 			AddNewellPoint(previousEnd, first, x, y, z);
 			XbimVector3D vec(x, y, z);
 			return vec.Normalized();
-			
 		}
 
 		bool XbimWire::IsPlanar::get()
@@ -1489,13 +1485,11 @@ namespace Xbim
 					*pWire = wire;
 				}
 			}
-			
 		}
 		
 		//Creates a rectangle approx to the max bounds / 2
 		void XbimWire::Init(double precision)
-		{
-			
+		{	
 			double xOff = 2e10;
 			double yOff = 2e10;
 					
@@ -1624,8 +1618,8 @@ namespace Xbim
 				double radConv = profile->Model->ModelFactors->AngleToRadiansConversionFactor;
 				p4.SetY(p4.Y() - (((dX * 2) - tW)* Math::Tan(profile->FlangeSlope.Value*radConv)));
 				p5.SetY(p5.Y() + (((dX * 2) - tW)* Math::Tan(profile->FlangeSlope.Value*radConv)));
-
 			}
+
 			BRepBuilderAPI_MakeWire wireMaker;
 			wireMaker.Add(BRepBuilderAPI_MakeEdge(p1, p2));
 			wireMaker.Add(BRepBuilderAPI_MakeEdge(p2, p3));
@@ -1835,7 +1829,6 @@ namespace Xbim
 			double dY = profile->OverallDepth / 2;
 			double tF = profile->FlangeThickness;
 			double tW = profile->WebThickness;
-
 
 			gp_Pnt p1(-dX, dY, 0);
 			gp_Pnt p2(dX, dY, 0);
@@ -2276,18 +2269,21 @@ namespace Xbim
 
 		IXbimWire^ XbimWire::Trim(double first, double last, double tolerance)
 		{
-			if (!IsValid) return this;
+			if (!IsValid) 
+				return this;
 			BRepAdaptor_CompCurve cc(*pWire, Standard_True);
 			GeomAbs_Shape continuity = cc.Continuity();
 			int numIntervals = cc.NbIntervals(continuity);
 			if (numIntervals == 1)
 			{
-				TopoDS_Edge edge;
-				Standard_Real uoe;
+				TopoDS_Edge edge; // the edge we are interested in
+				Standard_Real uoe; // parameter U on the edge (not used)
 				cc.Edge(last, edge, uoe);
-				Standard_Real l, f;
+				Standard_Real l, f; // the parameter range is returned in f and l
 				Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, f, l);
-				Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(curve, first, last);
+				Standard_Real a = Math::Max(f, first);
+				Standard_Real b = Math::Min(l, last);
+				Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(curve, a, b);
 				BRepBuilderAPI_MakeWire wm;
 				wm.Add(BRepBuilderAPI_MakeEdge(trimmed));
 				return gcnew XbimWire(wm.Wire());
@@ -2303,15 +2299,21 @@ namespace Xbim
 					Standard_Real lp = res.Value(i );
 					if (lp>first  && fp<last)
 					{
-						TopoDS_Edge edge;
-						Standard_Real uoe;
+						TopoDS_Edge edge; // the edge we are interested in
+						Standard_Real uoe; // parameter U on the edge (not used)
 						cc.Edge(fp, edge, uoe);
-						Standard_Real l, f;
+						Standard_Real l, f; // the parameter range is returned in f and l
 						Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, f, l);
 						Standard_Real a = Math::Max(f, first);
 						Standard_Real b = Math::Min(l, last);
 						wm.Add(BRepBuilderAPI_MakeEdge(new Geom_TrimmedCurve(curve, a, b)));
 					}
+				}
+				if (wm.Error() != BRepBuilderAPI_WireDone)
+				{
+					// todo: for SRL, what is the correct way to handle this?
+					XbimGeometryCreator::LogError(this, "Error trimming. Trim discarded");
+					return this;
 				}
 				return gcnew XbimWire(wm.Wire());
 			}
