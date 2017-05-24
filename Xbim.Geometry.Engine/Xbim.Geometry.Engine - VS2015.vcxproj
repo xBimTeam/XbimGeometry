@@ -118,7 +118,7 @@
       <PrecompiledHeaderFile />
     </ClCompile>
     <Link>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>Debug</GenerateDebugInformation>
       <AdditionalDependencies>msvcrtd.lib;advapi32.lib;gdi32.lib;user32.lib;kernel32.lib;ws2_32.lib;vfw32.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4248 </AdditionalOptions>
       <Profile>false</Profile>
@@ -145,7 +145,7 @@
       <OmitFramePointers>false</OmitFramePointers>
     </ClCompile>
     <Link>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>Debug</GenerateDebugInformation>
       <AdditionalDependencies>msvcrtd.lib;advapi32.lib;gdi32.lib;user32.lib;kernel32.lib;ws2_32.lib;vfw32.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4248 </AdditionalOptions>
       <Profile>false</Profile>
@@ -214,19 +214,19 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="Xbim.Common">
-      <HintPath>..\packages\Xbim.Essentials.4.0.20\lib\net40\Xbim.Common.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.4.0.28-V024\lib\net40\Xbim.Common.dll</HintPath>
       <Private>false</Private>
       <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
       <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
     </Reference>
     <Reference Include="Xbim.Ifc4">
-      <HintPath>..\packages\Xbim.Essentials.4.0.20\lib\net40\Xbim.Ifc4.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.4.0.28-V024\lib\net40\Xbim.Ifc4.dll</HintPath>
       <Private>false</Private>
       <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
       <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
     </Reference>
     <Reference Include="Xbim.Tessellator">
-      <HintPath>..\packages\Xbim.Essentials.4.0.20\lib\net40\Xbim.Tessellator.dll</HintPath>
+      <HintPath>..\packages\Xbim.Essentials.4.0.28-V024\lib\net40\Xbim.Tessellator.dll</HintPath>
       <Private>false</Private>
       <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
       <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
@@ -423,6 +423,7 @@
     <ClInclude Include="OCC\src\Bnd\Bnd_HArray1OfBox.hxx" />
     <ClInclude Include="OCC\src\Bnd\Bnd_HArray1OfBox2d.hxx" />
     <ClInclude Include="OCC\src\Bnd\Bnd_HArray1OfSphere.hxx" />
+    <ClInclude Include="OCC\src\Bnd\Bnd_Range.hxx" />
     <ClInclude Include="OCC\src\Bnd\Bnd_SeqOfBox.hxx" />
     <ClInclude Include="OCC\src\Bnd\Bnd_Sphere.hxx" />
     <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_Algo.hxx" />
@@ -916,8 +917,10 @@
     <ClInclude Include="OCC\src\BRepOffset\BRepOffset_ListOfInterval.hxx" />
     <ClInclude Include="OCC\src\BRepOffset\BRepOffset_MakeLoops.hxx" />
     <ClInclude Include="OCC\src\BRepOffset\BRepOffset_MakeOffset.hxx" />
+    <ClInclude Include="OCC\src\BRepOffset\BRepOffset_MakeSimpleOffset.hxx" />
     <ClInclude Include="OCC\src\BRepOffset\BRepOffset_Mode.hxx" />
     <ClInclude Include="OCC\src\BRepOffset\BRepOffset_Offset.hxx" />
+    <ClInclude Include="OCC\src\BRepOffset\BRepOffset_SimpleOffset.hxx" />
     <ClInclude Include="OCC\src\BRepOffset\BRepOffset_Status.hxx" />
     <ClInclude Include="OCC\src\BRepOffset\BRepOffset_Tool.hxx" />
     <ClInclude Include="OCC\src\BRepOffset\BRepOffset_Type.hxx" />
@@ -1861,6 +1864,8 @@
     <ClInclude Include="OCC\src\IntPatch\IntPatch_SequenceOfPathPointOfTheSOnBounds.hxx" />
     <ClInclude Include="OCC\src\IntPatch\IntPatch_SequenceOfPoint.hxx" />
     <ClInclude Include="OCC\src\IntPatch\IntPatch_SequenceOfSegmentOfTheSOnBounds.hxx" />
+    <ClInclude Include="OCC\src\IntPatch\IntPatch_SpecialPoints.hxx" />
+    <ClInclude Include="OCC\src\IntPatch\IntPatch_SpecPntType.hxx" />
     <ClInclude Include="OCC\src\IntPatch\IntPatch_TheIWalking.hxx" />
     <ClInclude Include="OCC\src\IntPatch\IntPatch_TheIWLineOfTheIWalking.hxx" />
     <ClInclude Include="OCC\src\IntPatch\IntPatch_ThePathPointOfTheSOnBounds.hxx" />
@@ -3391,6 +3396,7 @@
     <ClCompile Include="OCC\src\Bnd\Bnd_BoundSortBox2d.cxx" />
     <ClCompile Include="OCC\src\Bnd\Bnd_Box.cxx" />
     <ClCompile Include="OCC\src\Bnd\Bnd_Box2d.cxx" />
+    <ClCompile Include="OCC\src\Bnd\Bnd_Range.cxx" />
     <ClCompile Include="OCC\src\Bnd\Bnd_Sphere.cxx" />
     <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_CellsBuilder.cxx" />
     <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_MakerVolume.cxx" />
@@ -3583,7 +3589,10 @@
     <ClCompile Include="OCC\src\BRepOffset\BRepOffset_Interval.cxx" />
     <ClCompile Include="OCC\src\BRepOffset\BRepOffset_MakeLoops.cxx" />
     <ClCompile Include="OCC\src\BRepOffset\BRepOffset_MakeOffset.cxx" />
+    <ClCompile Include="OCC\src\BRepOffset\BRepOffset_MakeOffset_1.cxx" />
+    <ClCompile Include="OCC\src\BRepOffset\BRepOffset_MakeSimpleOffset.cxx" />
     <ClCompile Include="OCC\src\BRepOffset\BRepOffset_Offset.cxx" />
+    <ClCompile Include="OCC\src\BRepOffset\BRepOffset_SimpleOffset.cxx" />
     <ClCompile Include="OCC\src\BRepOffset\BRepOffset_Tool.cxx" />
     <ClCompile Include="OCC\src\BRepPrim\BRepPrim_GWedge.cxx" />
     <ClCompile Include="OCC\src\BRepPrim\BRepPrim_OneAxis.cxx" />
@@ -4039,6 +4048,7 @@
     <ClCompile Include="OCC\src\IntPatch\IntPatch_PrmPrmIntersection_T3Bits.cxx" />
     <ClCompile Include="OCC\src\IntPatch\IntPatch_RLine.cxx" />
     <ClCompile Include="OCC\src\IntPatch\IntPatch_RstInt.cxx" />
+    <ClCompile Include="OCC\src\IntPatch\IntPatch_SpecialPoints.cxx" />
     <ClCompile Include="OCC\src\IntPatch\IntPatch_TheIWalking_0.cxx" />
     <ClCompile Include="OCC\src\IntPatch\IntPatch_TheIWLineOfTheIWalking_0.cxx" />
     <ClCompile Include="OCC\src\IntPatch\IntPatch_ThePathPointOfTheSOnBounds_0.cxx" />

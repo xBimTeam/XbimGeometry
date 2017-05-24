@@ -564,7 +564,7 @@ namespace Xbim
 			double precision = cCurve->Model->ModelFactors->Precision; //use a courser precision for trimmed curves	
 			double maxPrecision = 10/cCurve->Model->ModelFactors->OneMilliMetre;
 			TopoDS_Wire w;
-			BRep_Builder builder; 			
+						
 			bool isContinuous = true;
 			TopTools_ListOfShape topoEdgeList;
 			for each(IIfcCompositeCurveSegment^ seg in cCurve->Segments)
@@ -2757,7 +2757,7 @@ namespace Xbim
 			gp_Pnt pnt, endPnts[2];
 			bool bSucc;
 			double minDis, otherDis, minminDis;
-			Standard_Boolean bDeg;
+			
 			TopoDS_Vertex v1, v2;
 			TopoDS_Edge degEdge;
 			notTaken.Clear();
@@ -2849,7 +2849,7 @@ namespace Xbim
 				if (pClosed)
 					*pClosed = true;
 				int startID = -1;
-				for (i = 0; i<edges.size(); ++i)
+				for (i = 0; i<(int)(edges.size()); ++i)
 				{
 					if (oldedges(0).IsSame(edges[i]))
 					{
@@ -2859,12 +2859,12 @@ namespace Xbim
 				}
 				if (startID == -1)
 				{
-					for (i = 0; i<edges.size(); ++i)
+					for (i = 0; i<(int)(edges.size()); ++i)
 						newedges.Append(edges[i]);
 				}
 				else
 				{
-					for (i = startID; i<edges.size(); ++i)
+					for (i = startID; i<(int)(edges.size()); ++i)
 						newedges.Append(edges[i]);
 					for (i = 0; i<startID; ++i)
 						newedges.Append(edges[i]);
@@ -2875,7 +2875,7 @@ namespace Xbim
 				if (pClosed)
 					*pClosed = false;
 
-				for (i = 0; i<edges.size(); ++i)
+				for (i = 0; i<(int)(edges.size()); ++i)
 					newedges.Append(edges[i]);
 			}
 
