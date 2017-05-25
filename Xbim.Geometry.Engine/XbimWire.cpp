@@ -1189,6 +1189,7 @@ namespace Xbim
 			//do the last one
 			AddNewellPoint(previousEnd, first, x, y, z);
 			XbimVector3D vec(x, y, z);
+			GC::KeepAlive(this);
 			return vec.Normalized();
 		}
 
