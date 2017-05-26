@@ -112,6 +112,7 @@ namespace Xbim
 				count++;
 			for (TopExp_Explorer expl(*pCompound, TopAbs_FACE, TopAbs_SHELL); expl.More(); expl.Next())
 				count++;
+			GC::KeepAlive(this);
 			return count;
 		}
 
@@ -139,6 +140,7 @@ namespace Xbim
 			Standard_Real srXmin, srYmin, srZmin, srXmax, srYmax, srZmax;
 			if (pBox.IsVoid()) return XbimRect3D::Empty;
 			pBox.Get(srXmin, srYmin, srZmin, srXmax, srYmax, srZmax);
+			GC::KeepAlive(this);
 			return XbimRect3D(srXmin, srYmin, srZmin, (srXmax - srXmin), (srYmax - srYmin), (srZmax - srZmin));
 		}
 
@@ -151,6 +153,7 @@ namespace Xbim
 				return gcnew XbimShell(TopoDS::Shell(expl.Current()));
 			for (TopExp_Explorer expl(*pCompound, TopAbs_FACE, TopAbs_SHELL); expl.More(); expl.Next())
 				return gcnew XbimFace(TopoDS::Face(expl.Current()));
+			GC::KeepAlive(this);
 			return nullptr;
 		}
 
@@ -240,12 +243,14 @@ namespace Xbim
 			{
 				gp_GTrsf trans = XbimConvert::ToTransform(nonUniform);
 				BRepBuilderAPI_GTransform tr(this, trans, Standard_True); //make a copy of underlying shape
+				GC::KeepAlive(this);
 				return gcnew XbimCompound(TopoDS::Compound(tr.Shape()), _isSewn, _sewingTolerance);
 			}
 			else
 			{
 				gp_Trsf trans = XbimConvert::ToTransform(transformation);
 				BRepBuilderAPI_Transform tr(this, trans, Standard_False); //do not make a copy of underlying shape
+				GC::KeepAlive(this);
 				return gcnew XbimCompound(TopoDS::Compound(tr.Shape()), _isSewn, _sewingTolerance);
 			}
 		}
@@ -1481,6 +1486,7 @@ namespace Xbim
 			TopExp::MapShapes(*pCompound, TopAbs_SOLID, map);
 			for (int i = 1; i <= map.Extent(); i++)
 				solids->Add(gcnew XbimSolid(TopoDS::Solid(map(i))));
+			GC::KeepAlive(this);
 			return solids;
 		}
 
@@ -1491,6 +1497,7 @@ namespace Xbim
 			TopExp::MapShapes(*pCompound, TopAbs_SHELL, map);
 			for (int i = 1; i <= map.Extent(); i++)
 				shells->Add(gcnew XbimShell(TopoDS::Shell(map(i))));
+			GC::KeepAlive(this);
 			return gcnew XbimShellSet(shells);
 		}
 
@@ -1501,6 +1508,7 @@ namespace Xbim
 			TopExp::MapShapes(*pCompound, TopAbs_FACE, map);
 			for (int i = 1; i <= map.Extent(); i++)
 				faces->Add(gcnew XbimFace(TopoDS::Face(map(i))));
+			GC::KeepAlive(this);
 			return gcnew XbimFaceSet(faces);
 		}
 
@@ -1511,6 +1519,7 @@ namespace Xbim
 			TopExp::MapShapes(*pCompound, TopAbs_EDGE, map);
 			for (int i = 1; i <= map.Extent(); i++)
 				edges->Add(gcnew XbimEdge(TopoDS::Edge(map(i))));
+			GC::KeepAlive(this);
 			return gcnew XbimEdgeSet(edges);
 		}
 
@@ -1521,6 +1530,7 @@ namespace Xbim
 			TopExp::MapShapes(*pCompound, TopAbs_VERTEX, map);
 			for (int i = 1; i <= map.Extent(); i++)
 				vertices->Add(gcnew XbimVertex(TopoDS::Vertex(map(i))));
+			GC::KeepAlive(this);
 			return gcnew XbimVertexSet(vertices);
 		}
 

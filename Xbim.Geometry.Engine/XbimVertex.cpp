@@ -209,6 +209,7 @@ namespace Xbim
 		{
 			if (!IsValid) return XbimPoint3D();
 			gp_Pnt p = BRep_Tool::Pnt(*pVertex);
+			GC::KeepAlive(this);
 			return XbimPoint3D(p.X(), p.Y(), p.Z());
 		}
 	}

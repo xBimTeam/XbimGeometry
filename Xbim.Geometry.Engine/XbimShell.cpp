@@ -273,6 +273,7 @@ namespace Xbim
 			if (!IsValid) return nullptr;
 			gp_Trsf trans = XbimConvert::ToTransform(matrix3D);
 			BRepBuilderAPI_Transform gTran(this, trans, Standard_True);
+			GC::KeepAlive(this);
 			return gcnew XbimSolid(TopoDS::Solid(gTran.Shape()));
 		}
 
@@ -281,6 +282,7 @@ namespace Xbim
 			if (!IsValid) return nullptr;
 			gp_Trsf trans = XbimConvert::ToTransform(matrix3D);
 			BRepBuilderAPI_Transform gTran(this, trans, Standard_False);
+			GC::KeepAlive(this);
 			return gcnew XbimSolid(TopoDS::Solid(gTran.Shape()));
 		}
 
@@ -408,12 +410,14 @@ namespace Xbim
 			{
 				gp_GTrsf trans = XbimConvert::ToTransform(nonUniform);
 				BRepBuilderAPI_GTransform tr(this, trans, Standard_True); //make a copy of underlying shape
+				GC::KeepAlive(this);
 				return gcnew XbimShell(TopoDS::Shell(tr.Shape()), Tag);
 			}
 			else
 			{
 				gp_Trsf trans = XbimConvert::ToTransform(transformation);
 				BRepBuilderAPI_Transform tr(this, trans, Standard_False); //do not make a copy of underlying shape
+				GC::KeepAlive(this);
 				return gcnew XbimShell(TopoDS::Shell(tr.Shape()), Tag);
 			}
 		}

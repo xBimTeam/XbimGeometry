@@ -1112,6 +1112,7 @@ namespace Xbim
 			BRepBuilderAPI_Copy copier(this);
 			BRepBuilderAPI_Transform gTran(copier.Shape(), XbimConvert::ToTransform(matrix3D));
 			TopoDS_Face temp = TopoDS::Face(gTran.Shape());
+			GC::KeepAlive(this);
 			return gcnew XbimFace(temp);
 		}
 
@@ -1241,6 +1242,7 @@ namespace Xbim
 					}
 				}
 			}
+			GC::KeepAlive(this);
 			return true;
 		}
 
@@ -1354,7 +1356,8 @@ namespace Xbim
 
 		Handle(Geom_Surface) XbimFace::GetSurface()
 		{
-			return BRep_Tool::Surface(this);
+			TopoDS_Face face = this;
+			return BRep_Tool::Surface(face);
 		}
 
 		void XbimFace::SetLocation(TopLoc_Location loc)
@@ -1370,12 +1373,14 @@ namespace Xbim
 			{
 				gp_GTrsf trans = XbimConvert::ToTransform(nonUniform);
 				BRepBuilderAPI_GTransform tr(this, trans, Standard_True); //make a copy of underlying shape
+				GC::KeepAlive(this);
 				return gcnew XbimFace(TopoDS::Face(tr.Shape()), Tag);
 			}
 			else
 			{
 				gp_Trsf trans = XbimConvert::ToTransform(transformation);
 				BRepBuilderAPI_Transform tr(this, trans, Standard_False); //do not make a copy of underlying shape
+				GC::KeepAlive(this);
 				return gcnew XbimFace(TopoDS::Face(tr.Shape()), Tag);
 			}
 		}

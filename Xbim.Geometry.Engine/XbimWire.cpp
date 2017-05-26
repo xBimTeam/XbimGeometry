@@ -1087,6 +1087,7 @@ namespace Xbim
 			Standard_Real srXmin, srYmin, srZmin, srXmax, srYmax, srZmax;
 			if (pBox.IsVoid()) return XbimRect3D::Empty;
 			pBox.Get(srXmin, srYmin, srZmin, srXmax, srYmax, srZmax);
+			GC::KeepAlive(this);
 			return XbimRect3D(srXmin, srYmin, srZmin, (srXmax - srXmin), (srYmax - srYmin), (srZmax - srZmin));
 		}
 		 
@@ -1197,6 +1198,7 @@ namespace Xbim
 		{
 			if (!IsValid) return false;
 			BRepBuilderAPI_FindPlane finder(*pWire);
+			GC::KeepAlive(this);
 			return (finder.Found() == Standard_True);
 		}
 
@@ -1205,6 +1207,7 @@ namespace Xbim
 			if (!IsValid) return XbimPoint3D();
 			BRepAdaptor_CompCurve cc(*pWire, Standard_True);
 			gp_Pnt p = cc.Value(cc.FirstParameter());
+			GC::KeepAlive(this);
 			return XbimPoint3D(p.X(),p.Y(),p.Z());
 		}
 
@@ -1224,6 +1227,7 @@ namespace Xbim
 		{
 			if (!IsValid) return 0.;
 			BRepAdaptor_CompCurve cc(*pWire, Standard_True);
+			GC::KeepAlive(this);
 			return cc.LastParameter() - cc.FirstParameter();
 		}
 

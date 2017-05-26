@@ -908,11 +908,13 @@ namespace Xbim
 		IXbimVertex^ XbimEdge::EdgeEnd::get()
 		{
 			if (!IsValid) return nullptr;
-			return gcnew XbimVertex(TopExp::LastVertex(*pEdge, Standard_True));
+			TopoDS_Edge edge = *pEdge;
+			return gcnew XbimVertex(TopExp::LastVertex(edge, Standard_True));
 		}
 		XbimPoint3D XbimEdge::EdgeStartPoint::get()
 		{
 			if (!IsValid) return XbimPoint3D();
+			TopoDS_Edge edge = *pEdge;
 			gp_Pnt p = BRep_Tool::Pnt(TopExp::FirstVertex(*pEdge, Standard_True));
 			return XbimPoint3D(p.X(), p.Y(), p.Z());
 		}
