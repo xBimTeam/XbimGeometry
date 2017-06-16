@@ -18,6 +18,8 @@ namespace Xbim
 		ref class XbimWire : IXbimWire, XbimOccShape
 		{
 		private:
+			// Lock for preventing a usage of BRepOffsetAPI_MakeOffset.Perform(...) in a multi-threaded mode.
+			static Object^ _makeOffsetLock = gcnew Object();
 
 			IntPtr ptrContainer;
 			virtual property TopoDS_Wire* pWire
