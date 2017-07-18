@@ -733,7 +733,7 @@ namespace Xbim.ModelGeometry.Scene
                     if (progDelegate != null) progDelegate(-1, "WriteRegionsToDb");
                     foreach (var cluster in contextHelper.Clusters)
                     {
-                        WriteRegionsToStore(cluster.Key, cluster.Value, geometryTransaction);
+                        WriteRegionsToStore(cluster.Key, cluster.Value, geometryTransaction, contextHelper.PlacementTree.WorldCoordinateSystem);
                     }
                     if (progDelegate != null) progDelegate(101, "WriteRegionsToDb");
 
@@ -1386,7 +1386,7 @@ namespace Xbim.ModelGeometry.Scene
         }
 
 
-        private void WriteRegionsToStore(IIfcRepresentationContext context, IEnumerable<XbimBBoxClusterElement> elementsToCluster, IGeometryStoreInitialiser txn)
+        private void WriteRegionsToStore(IIfcRepresentationContext context, IEnumerable<XbimBBoxClusterElement> elementsToCluster, IGeometryStoreInitialiser txn, XbimMatrix3D WorldCoordinateSystem)
         {
             //set up a world to partition the model
             var metre = _model.ModelFactors.OneMetre;
@@ -1397,7 +1397,7 @@ namespace Xbim.ModelGeometry.Scene
             //
             var v = XbimDbscan.GetClusters(elementsToCluster, 5 * metre); // .OrderByDescending(x => x.GeometryIds.Count);
             var i = 1;
-            regions.AddRange(v.Select(item => new XbimRegion("Region " + i++, item.Bound, item.GeometryIds.Count)));
+            regions.AddRange(v.Select(item => new XbimRegion("Region " + i++, item.Bound, item.GeometryIds.Count, WorldCoordinateSystem)));
             regions.ContextLabel = context.EntityLabel;
             txn.AddRegions(regions);
         }
