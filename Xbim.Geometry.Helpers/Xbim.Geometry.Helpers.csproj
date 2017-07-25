@@ -2,6 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard1.6</TargetFramework>
+    <Timestamp>$([System.DateTime]::Now.ToString("yyyyMMdd-HHmmss"))</Timestamp>
+    <Version>2.0.0-ci-$(Timestamp)</Version>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Description>General support class library for Geometry, NET Standard and Ifc aware</Description>
+    <Copyright>Xbim Ltd.</Copyright>
+    <PackageIconUrl>https://avatars1.githubusercontent.com/u/2284875?v=3&amp;amp;amp;s=240</PackageIconUrl>
+    <PackageTags>Ifc Geometry</PackageTags>
+    <AssemblyVersion>5.0</AssemblyVersion>
+    <FileVersion>5.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
