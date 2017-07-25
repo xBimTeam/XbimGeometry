@@ -99,10 +99,6 @@
     <Compile Include="..\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="Extensions\IIfcAxis2PlacementExtensions.cs" />
-    <Compile Include="Extensions\IIfcCartesianTransformExtensions.cs" />
-    <Compile Include="Extensions\IIfcRepresentationExtensions.cs" />
-    <Compile Include="Extensions\XbimModelExtensions.cs" />
     <Compile Include="IXbimGeometryModel.cs" />
     <Compile Include="IXbimGeometryModelGroup.cs" />
     <Compile Include="IXbimMeshGeometry3D.cs" />
@@ -123,7 +119,6 @@
     <Compile Include="XbimEmptyGeometryGroup.cs" />
     <Compile Include="XbimGrid.cs" />
     <Compile Include="XbimGridCollection.cs" />
-    <Compile Include="XbimPlacementTree.cs" />
     <Compile Include="XbimMeshFragment.cs" />
     <Compile Include="XbimMeshFragmentCollection.cs" />
     <Compile Include="XbimMeshGeometry3D.cs" />

@@ -1,7 +1,7 @@
 ﻿using Xbim.Common.Geometry;
 using Xbim.Ifc4.Interfaces;
 
-namespace Xbim.ModelGeometry.Scene.Extensions
+namespace Xbim.Geometry.Helpers
 {
     public static class IIfcAxis2PlacementExtensions
     {
