@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26711.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{CFAD1D1D-D584-4FB9-B795-64F25B888F26}"
 	ProjectSection(SolutionItems) = preProject
@@ -11,7 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Xbim.Geometry.nuspec = Xbim.Geometry.nuspec
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Xbim.Geometry.Engine2015", "Xbim.Geometry.Engine\Xbim.Geometry.Engine - VS2015.vcxproj", "{C01899BA-34A9-432A-8F08-EBD9AA4A08C7}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Xbim.Geometry.Engine - VS2015", "Xbim.Geometry.Engine\Xbim.Geometry.Engine - VS2015.vcxproj", "{C01899BA-34A9-432A-8F08-EBD9AA4A08C7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xbim.Geometry.Engine.Interop - VS2015", "Xbim.Geometry.Engine.Interop\Xbim.Geometry.Engine.Interop - VS2015.csproj", "{F94A98EA-AB29-4818-A51F-6B33BEB7561A}"
 EndProject
@@ -22,6 +22,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xbim.Geometry.Profiler - VS2015", "Xbim.Geometry.Profiler\Xbim.Geometry.Profiler - VS2015.csproj", "{D5EA89B5-3E2D-4DE8-9F2B-8C2A04ABAF09}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xbim.Geometry.Engine.Tests - VS2015", "Xbim.Geometry.Engine.Tests\Xbim.Geometry.Engine.Tests - VS2015.csproj", "{2D2B7265-3A5E-4C50-BAB5-05F38322DB55}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xbim.Geometry.Helpers", "Xbim.Geometry.Helpers\Xbim.Geometry.Helpers.csproj", "{A23825A4-338E-4080-B0BC-60C68069855A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -103,8 +105,23 @@ Global
 		{2D2B7265-3A5E-4C50-BAB5-05F38322DB55}.Release|x64.Build.0 = Release|Any CPU
 		{2D2B7265-3A5E-4C50-BAB5-05F38322DB55}.Release|x86.ActiveCfg = Release|Any CPU
 		{2D2B7265-3A5E-4C50-BAB5-05F38322DB55}.Release|x86.Build.0 = Release|Any CPU
+		{A23825A4-338E-4080-B0BC-60C68069855A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A23825A4-338E-4080-B0BC-60C68069855A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A23825A4-338E-4080-B0BC-60C68069855A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A23825A4-338E-4080-B0BC-60C68069855A}.Debug|x64.Build.0 = Debug|Any CPU
+		{A23825A4-338E-4080-B0BC-60C68069855A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A23825A4-338E-4080-B0BC-60C68069855A}.Debug|x86.Build.0 = Debug|Any CPU
+		{A23825A4-338E-4080-B0BC-60C68069855A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A23825A4-338E-4080-B0BC-60C68069855A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A23825A4-338E-4080-B0BC-60C68069855A}.Release|x64.ActiveCfg = Release|Any CPU
+		{A23825A4-338E-4080-B0BC-60C68069855A}.Release|x64.Build.0 = Release|Any CPU
+		{A23825A4-338E-4080-B0BC-60C68069855A}.Release|x86.ActiveCfg = Release|Any CPU
+		{A23825A4-338E-4080-B0BC-60C68069855A}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {50598C0F-63E3-4B49-B281-63F8F179DC2A}
 	EndGlobalSection
 EndGlobal
