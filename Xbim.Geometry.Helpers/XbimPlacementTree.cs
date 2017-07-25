@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Xbim.Common;
 using Xbim.Common.Geometry;
+using Xbim.Ifc.Extensions;
 using Xbim.Ifc4.Interfaces;
 
 
