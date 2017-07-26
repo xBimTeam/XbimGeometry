@@ -64,7 +64,9 @@
 #include <GProp_GProps.hxx>
 #include <GC_MakeSegment.hxx>
 #include <ShapeAnalysis_Wire.hxx>
+#include <msclr\lock.h>
 #include <ShapeAnalysis_WireOrder.hxx>
+
 
 using namespace Xbim::Common;
 using namespace System::Linq;
@@ -273,7 +275,15 @@ namespace Xbim
 
 			BRepOffsetAPI_MakeOffset offseter(centreWire);
 			Standard_Real offset = profile->Thickness / 2;
-			offseter.Perform(offset);
+			// Pyatkov 15.06.2017. (Artoymyp on Github)
+			// Somewhere in the BRepOffsetAPI_MakeOffset.Perform() a static variable is used:
+			// static BRepMAT2d_Explorer Exp;
+			// That is why calls to this function in a multi-threaded mode 
+			// lead to an unpredictable behavior.
+			{
+				msclr::lock l(_makeOffsetLock);
+				offseter.Perform(offset);
+			} // local scope ends, destructor of lock is called (lock is released).
 			
 			double precision = profile->Model->ModelFactors->Precision;
 			if (offseter.IsDone() && offseter.Shape().ShapeType() == TopAbs_WIRE)
