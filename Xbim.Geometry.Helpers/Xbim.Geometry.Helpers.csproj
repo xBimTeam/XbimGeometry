@@ -16,7 +16,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Xbim.Ifc2x3.Extensions" Version="2.0.0-ci-20170726-123347" />
+    <PackageReference Include="Xbim.Ifc2x3.Extensions" Version="2.0.0-ci-20170726-154835" />
   </ItemGroup>
 
 </Project>
