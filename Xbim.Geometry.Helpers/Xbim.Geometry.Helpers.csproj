@@ -11,6 +11,8 @@
     <PackageTags>Ifc Geometry</PackageTags>
     <AssemblyVersion>5.0</AssemblyVersion>
     <FileVersion>5.0</FileVersion>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>XbimOpenSourceKeyFile.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>
