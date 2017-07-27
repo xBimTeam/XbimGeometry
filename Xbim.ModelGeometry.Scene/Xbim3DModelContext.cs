@@ -898,7 +898,8 @@ namespace Xbim.ModelGeometry.Scene
                                         // processed.Add(elementLabel); // todo: not sure this is needed
                                         return; // we are in a parallel loop, this continues to the next
                                     }
-                                }                                
+                                }
+                                
                                 var elementGeom = Engine.CreateGeometryObjectSet();
 
                                 foreach (var argument in bop.ArgumentIds)
@@ -948,7 +949,7 @@ namespace Xbim.ModelGeometry.Scene
                                 if (!behaviour.HasFlag(MeshingSimplification.SkipAdditions) && allProjections.Any())
                                 {
                                     var nextGeom = elementGeom.Union(allProjections, thisPrecision);
-                                    if (nextGeom.IsValid)
+                                    if (nextGeom != null && nextGeom.IsValid)
                                     {
                                         if (nextGeom.First != null && nextGeom.First.IsValid)
                                             elementGeom = nextGeom;
@@ -967,7 +968,7 @@ namespace Xbim.ModelGeometry.Scene
                                 if (!behaviour.HasFlag(MeshingSimplification.SkipSubtractions) && allOpenings.Any())
                                 {
                                     var nextGeom = elementGeom.Cut(allOpenings, thisPrecision);
-                                    if (nextGeom.IsValid)
+                                    if (nextGeom != null && nextGeom.IsValid)
                                     {
                                         if (nextGeom.First != null && nextGeom.First.IsValid)
                                             elementGeom = nextGeom;
@@ -1258,8 +1259,14 @@ namespace Xbim.ModelGeometry.Scene
             return res1 & res2;
         }
 
-        public delegate MeshingSimplification MeshingBehaviourSetter(int elementId, short typeId, XbimModelFactors modelfactors,             ref double linearDeflection, ref double angularDeflection);
-        /// <summary>        /// A custom function to determine the behaviour and deflection associated with individual items in the mesher.        /// Default properties can set in the Model.Modelfactors if the same deflection applies to all elements.        /// </summary>        public MeshingBehaviourSetter CustomMeshingBehaviour;
+        public delegate MeshingSimplification MeshingBehaviourSetter(int elementId, short typeId, XbimModelFactors modelfactors, 
+            ref double linearDeflection, ref double angularDeflection);
+
+        /// <summary>
+        /// A custom function to determine the behaviour and deflection associated with individual items in the mesher.
+        /// Default properties can set in the Model.Modelfactors if the same deflection applies to all elements.
+        /// </summary>
+        public MeshingBehaviourSetter CustomMeshingBehaviour;
 
         private void WriteShapeGeometries(XbimCreateContextHelper contextHelper, ReportProgressDelegate progDelegate,
             BlockingCollection<IXbimShapeGeometryData> shapeGeometries, XbimGeometryType geomStorageType)
