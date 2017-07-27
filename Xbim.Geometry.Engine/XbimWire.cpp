@@ -56,6 +56,8 @@
 #include <BRepOffsetAPI_MakeOffset.hxx>
 #include <TColStd_IndexedDataMapOfTransientTransient.hxx>
 #include <TopTools_ListIteratorOfListOfShape.hxx>
+#include <msclr\lock.h>
+
 using namespace Xbim::Common;
 using namespace Xbim::Ifc2x3::MeasureResource;
 using namespace System::Linq;
@@ -237,7 +239,15 @@ namespace Xbim
 
 			BRepOffsetAPI_MakeOffset offseter(centreWire);
 			Standard_Real offset = profile->Thickness / 2;
-			offseter.Perform(offset);
+			// Pyatkov 15.06.2017. (Artoymyp on Github)
+			// Somewhere in the BRepOffsetAPI_MakeOffset.Perform() a static variable is used:
+			// static BRepMAT2d_Explorer Exp;
+			// That is why calls to this function in a multi-threaded mode 
+			// lead to an unpredictable behavior.
+			{
+				msclr::lock l(_makeOffsetLock);
+				offseter.Perform(offset);
+			} // local scope ends, destructor of lock is called (lock is released).
 			
 			double precision = profile->ModelOf->ModelFactors->Precision;
 			if (offseter.IsDone() && offseter.Shape().ShapeType() == TopAbs_WIRE)
@@ -2037,7 +2047,9 @@ namespace Xbim
 				cc.Edge(last, edge, uoe);
 				Standard_Real l, f;
 				Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, f, l);
-				Standard_Real a = Math::Max(f, first);				Standard_Real b = Math::Min(l, last);				Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(curve, a, b);
+				Standard_Real a = Math::Max(f, first);
+				Standard_Real b = Math::Min(l, last);
+				Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(curve, a, b);
 				BRepBuilderAPI_MakeWire wm;
 				wm.Add(BRepBuilderAPI_MakeEdge(trimmed));
 				return gcnew XbimWire(wm.Wire());

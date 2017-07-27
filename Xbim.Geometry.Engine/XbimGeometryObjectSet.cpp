@@ -18,6 +18,9 @@
 #include <BRepTools.hxx>
 #include <ShapeFix_ShapeTolerance.hxx>
 #include <Message_ProgressIndicator.hxx>
+#include <ShapeFix_Shape.hxx>
+#include <BRepCheck_Analyzer.hxx>
+
 using namespace System;
 using namespace System::ComponentModel;
 namespace Xbim
@@ -397,6 +400,7 @@ namespace Xbim
 				
 				Handle(XbimProgressIndicator) aPI = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);				
 				pBuilder->SetProgressIndicator(aPI);
+				// pBuilder->SetNonDestructive(Standard_True); only available in 7.1
 				pBuilder->Build();
 				aPI->StopTimer();
 				//XbimGeometryCreator::logger->FatalFormat("{0}", aPI->ElapsedTime());
@@ -409,7 +413,15 @@ namespace Xbim
 			   //	BRepTools::Write(pBuilder->Shape(), "c:\\tmp\\r");
 					TopoDS_Compound occCompound;
 					builder.MakeCompound(occCompound);
-					builder.Add(occCompound, pBuilder->Shape());
+					if (BRepCheck_Analyzer(pBuilder->Shape(), Standard_True).IsValid() == Standard_True)
+					{
+
+						ShapeFix_Shape shapeFixer(pBuilder->Shape());
+						shapeFixer.Perform();
+						builder.Add(occCompound, shapeFixer.Shape());
+					}
+					else
+						builder.Add(occCompound, pBuilder->Shape());
 					XbimCompound^ compound = gcnew XbimCompound(occCompound, false, tolerance);
 
 					if (bop != BOPAlgo_COMMON) //do not need to add these as they by definition do not intersect
