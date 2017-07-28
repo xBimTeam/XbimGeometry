@@ -272,14 +272,14 @@ Handle(Geom2d_Curve)  GeomPlate_BuildPlateSurface::ProjectCurve(const Handle(Ada
 
  ProjLib_CompProjectedCurve Projector(hsur, Curv, myTol3d/10, myTol3d/10);
 
- Standard_Real Udeb, Ufin, ProjUdeb, ProjUfin;
- Udeb = Curv->FirstParameter();
- Ufin = Curv->LastParameter();
+ Standard_Real UdebCheck, UfinCheck, ProjUdeb, ProjUfin;
+ UdebCheck = Curv->FirstParameter();
+ UfinCheck = Curv->LastParameter();
  Projector.Bounds( 1, ProjUdeb, ProjUfin );
 
  if (Projector.NbCurves() != 1 ||
-     Abs( Udeb-ProjUdeb ) > Precision::PConfusion() ||
-     Abs( Ufin-ProjUfin ) > Precision::PConfusion())
+     Abs( UdebCheck -ProjUdeb ) > Precision::PConfusion() ||
+     Abs( UfinCheck -ProjUfin ) > Precision::PConfusion())
    {
      if (Projector.IsSinglePnt(1, P2d))
        {
@@ -474,8 +474,14 @@ void GeomPlate_BuildPlateSurface::Perform()
   NTPntCont = myPntCont->Length(), NbBoucle=0;
   // La variable  NTPoint peut etre enlevee
   Standard_Boolean Fini=Standard_True;
-  if ((NTLinCont+NTPntCont)==0)
-    Standard_RangeError::Raise("GeomPlate : The number of constraints is null.");
+  if ((NTLinCont + NTPntCont) == 0)
+  {
+#ifdef OCCT_DEBUG
+    cout << "WARNING : GeomPlate : The number of constraints is null." << endl;
+#endif
+
+    return;
+  }
 
   //======================================================================   
   // Surface Initiale
@@ -504,20 +510,24 @@ void GeomPlate_BuildPlateSurface::Perform()
      }
  }
 
+  if (mySurfInit.IsNull())
+  {
+    return;
+  }
+
   Standard_Real u1,v1,u2,v2;
   mySurfInit->Bounds(u1,v1,u2,v2);
-  GeomAdaptor_Surface Surf(mySurfInit);
-  myTolU = Surf.UResolution(myTol3d);
-  myTolV = Surf.VResolution(myTol3d);
-  myProj.Initialize(Surf,u1,v1,u2,v2,
+  GeomAdaptor_Surface aSurfInit(mySurfInit);
+  myTolU = aSurfInit.UResolution(myTol3d);
+  myTolV = aSurfInit.VResolution(myTol3d);
+  myProj.Initialize(aSurfInit,u1,v1,u2,v2,
 		    myTolU,myTolV);
 
   //======================================================================
   // Projection des courbes
   //======================================================================
-  Standard_Integer i;
   Standard_Boolean Ok = Standard_True;
-  for (i = 1; i <= NTLinCont; i++)
+  for (Standard_Integer i = 1; i <= NTLinCont; i++)
     if(myLinCont->Value(i)->Curve2dOnSurf().IsNull())
       {
 	Handle( Geom2d_Curve ) Curve2d = ProjectCurve( myLinCont->Value(i)->Curve3d() );
@@ -545,7 +555,7 @@ void GeomPlate_BuildPlateSurface::Perform()
 			myTolU,myTolV);
 
       Ok = Standard_True;
-      for (i = 1; i <= NTLinCont; i++)
+      for (Standard_Integer i = 1; i <= NTLinCont; i++)
 	{
 	  Handle( Geom2d_Curve ) Curve2d = ProjectCurve( myLinCont->Value(i)->Curve3d() );
 	  if (Curve2d.IsNull())
@@ -560,18 +570,18 @@ void GeomPlate_BuildPlateSurface::Perform()
 	  mySurfInit = myPlanarSurfInit;
 
 	  mySurfInit->Bounds(u1,v1,u2,v2);
-	  GeomAdaptor_Surface Surf(mySurfInit);
-	  myTolU = Surf.UResolution(myTol3d);
-	  myTolV = Surf.VResolution(myTol3d);
-	  myProj.Initialize(Surf,u1,v1,u2,v2,
+	  GeomAdaptor_Surface SurfNew(mySurfInit);
+	  myTolU = SurfNew.UResolution(myTol3d);
+	  myTolV = SurfNew.VResolution(myTol3d);
+	  myProj.Initialize(SurfNew,u1,v1,u2,v2,
 			    myTolU,myTolV);
 
-	  for (i = 1; i <= NTLinCont; i++)
+	  for (Standard_Integer i = 1; i <= NTLinCont; i++)
 	    myLinCont->ChangeValue(i)->
 	      SetCurve2dOnSurf(ProjectCurve( myLinCont->Value(i)->Curve3d() ) );
 	}
       else { // Project the points
-	for ( i=1;i<=NTPntCont;i++) { 
+	for (Standard_Integer i=1; i<=NTPntCont; i++) { 
 	  gp_Pnt P;
 	  myPntCont->Value(i)->D0(P);
 	  myPntCont->ChangeValue(i)->SetPnt2dOnSurf(ProjectPoint(P));
@@ -582,7 +592,7 @@ void GeomPlate_BuildPlateSurface::Perform()
   //======================================================================
   // Projection des points
   //======================================================================
-  for ( i=1;i<=NTPntCont;i++) {
+  for (Standard_Integer i=1;i<=NTPntCont;i++) {
     if (! myPntCont->Value(i)->HasPnt2dOnSurf()) {
       gp_Pnt P;
       myPntCont->Value(i)->D0(P);
@@ -648,9 +658,16 @@ void GeomPlate_BuildPlateSurface::Perform()
 	  //Resolution de la surface
 	  //====================================================================
 	  myPlate.SolveTI(myDegree, ComputeAnisotropie());
-	  if (!myPlate.IsDone())   
-	    Standard_Failure::Raise("GeomPlate : abort calcul of Plate.");
-	  myGeomPlateSurface = new GeomPlate_Surface(mySurfInit,myPlate);
+          if (!myPlate.IsDone())
+          {
+#ifdef OCCT_DEBUG
+            cout << "WARNING : GeomPlate : abort calcul of Plate." << endl;
+#endif
+
+            return;
+          }
+
+          myGeomPlateSurface = new GeomPlate_Surface(mySurfInit,myPlate);
 	  Standard_Real Umin,Umax,Vmin,Vmax; 
           myPlate.UVBox(Umin,Umax,Vmin,Vmax);
 	  myGeomPlateSurface->SetBounds(Umin,Umax,Vmin,Vmax);
@@ -675,9 +692,15 @@ void GeomPlate_BuildPlateSurface::Perform()
 	  //Resolution de la surface
 	  //====================================================================
 	  myPlate.SolveTI(myDegree, ComputeAnisotropie());
-	  if (!myPlate.IsDone())   
-	    Standard_Failure::Raise("GeomPlate : abort calcul of Plate.");
-	  myGeomPlateSurface = new GeomPlate_Surface(mySurfInit,myPlate);
+          if (!myPlate.IsDone())
+          {
+#ifdef OCCT_DEBUG
+            cout << "WARNING : GeomPlate : abort calcul of Plate." << endl;
+#endif
+            return;
+          }
+
+          myGeomPlateSurface = new GeomPlate_Surface(mySurfInit,myPlate);
 	  Standard_Real Umin,Umax,Vmin,Vmax; 
           myPlate.UVBox(Umin,Umax,Vmin,Vmax);
 	  myGeomPlateSurface->SetBounds(Umin,Umax,Vmin,Vmax);
@@ -768,8 +791,7 @@ EcartContraintesMil  ( const Standard_Integer c,
 	  }
 	break;
       case 2 :
-	Handle(Geom_Surface) Splate;
-	Splate = Handle(Geom_Surface)::DownCast(myGeomPlateSurface);
+	Handle(Geom_Surface) Splate (myGeomPlateSurface);
 	LocalAnalysis_SurfaceContinuity CG2;
 	for (i=1; i<NbPt; i++)
 	  { U = ( myParCont->Value(c).Value(i) + 
@@ -1552,7 +1574,14 @@ void GeomPlate_BuildPlateSurface::ComputeSurfInit()
       if (!CourbeJoint)
 	myNbBounds = 0;
       GeomPlate_BuildAveragePlane BAP( Pts, NbPoint*myNbBounds, myTol3d/1000, popt, nopt );
-      if (!BAP.IsPlane()) Standard_Failure::Raise("the initial surface is not a plane.");
+      if (!BAP.IsPlane())
+      {
+#ifdef OCCT_DEBUG
+        cout << "WARNING : GeomPlate : the initial surface is not a plane." << endl;
+#endif
+
+        return;
+      }
       Standard_Real u1,u2,v1,v2;
       BAP.MinMaxBox(u1,u2,v1,v2);
       // On agrandit le bazar pour les projections
@@ -1690,8 +1719,13 @@ void GeomPlate_BuildPlateSurface::ComputeSurfInit()
       //Resolution de la surface
       //====================================================================
       myPlate.SolveTI(2, ComputeAnisotropie());
-      if (!myPlate.IsDone())   
-	Standard_Failure::Raise("GeomPlate : abort calcul of Plate.");
+      if (!myPlate.IsDone())
+      {
+#ifdef OCCT_DEBUG
+        cout << "WARNING : GeomPlate : abort calcul of Plate." << endl;
+#endif
+        return;
+      }
 
       myGeomPlateSurface = new GeomPlate_Surface( mySurfInit, myPlate );
 
@@ -1808,10 +1842,10 @@ Intersect(Handle(GeomPlate_HArray1OfSequenceOfReal)& PntInter,
 			    { Standard_Real coin;
 			      Standard_Real Tol= 100 * myTol3d;
 			      Standard_Real A1;
-			      gp_Pnt2d P1,P2;
+			      gp_Pnt2d P1temp,P2temp;
 			      gp_Vec2d V1,V2;
-			      myLinCont->Value(i)->Curve2dOnSurf()->D1( int2d.ParamOnFirst(), P1, V1);
-			      myLinCont->Value(j)->Curve2dOnSurf()->D1( int2d.ParamOnSecond(), P2, V2);
+			      myLinCont->Value(i)->Curve2dOnSurf()->D1( int2d.ParamOnFirst(), P1temp, V1);
+			      myLinCont->Value(j)->Curve2dOnSurf()->D1( int2d.ParamOnSecond(), P2temp, V2);
 			      A1 = V1.Angle(V2);
 			      if (A1>(M_PI/2))
 				A1= M_PI - A1;
@@ -1862,10 +1896,10 @@ Intersect(Handle(GeomPlate_HArray1OfSequenceOfReal)& PntInter,
 			      Standard_Real coin;
 			      Standard_Real Tol= 100 * myTol3d;
 			      Standard_Real A1;
-			      gp_Pnt2d P1,P2;
+			      gp_Pnt2d P1temp,P2temp;
 			      gp_Vec2d V1,V2;
-			      myLinCont->Value(i)->Curve2dOnSurf()->D1( int2d.ParamOnFirst(), P1, V1);
-			      myLinCont->Value(j)->Curve2dOnSurf()->D1( int2d.ParamOnSecond(), P2, V2);
+			      myLinCont->Value(i)->Curve2dOnSurf()->D1( int2d.ParamOnFirst(), P1temp, V1);
+			      myLinCont->Value(j)->Curve2dOnSurf()->D1( int2d.ParamOnSecond(), P2temp, V2);
 			      A1 = V1.Angle( V2 );
 			      if (A1 > M_PI/2)
 				A1= M_PI - A1;
@@ -2298,7 +2332,6 @@ void GeomPlate_BuildPlateSurface::LoadPoint(const Standard_Integer ,
   Standard_Integer NTPntCont=myPntCont->Length();
   Standard_Integer Tang, i;
 //  gp_Vec  V1,V2,V3,V4,V5,V6,V7,V8,V9,V10;
-  gp_Vec  V1,V2,V3,V4;
  
   // Chargement des points de contraintes ponctuel
   for (i=1;i<=NTPntCont;i++) { 
@@ -2312,6 +2345,7 @@ void GeomPlate_BuildPlateSurface::LoadPoint(const Standard_Integer ,
     myPlate.Load(PC);
     Tang = Min(myPntCont->Value(i)->Order(), OrderMax);
     if (Tang==1) {// ==1
+      gp_Vec  V1,V2,V3,V4;
       myPntCont->Value(i)->D1(PP,V1,V2);
       mySurfInit->D1(P2d.Coord(1),P2d.Coord(2),PP,V3,V4);
       Plate_D1 D1final(V1.XYZ(),V2.XYZ());
@@ -2533,8 +2567,7 @@ void GeomPlate_BuildPlateSurface::
 	    Ang = M_PI -Ang;
 	  break;
 	case 2 :
-	  Handle(Geom_Surface) Splate;
-	  Splate = Handle(Geom_Surface)::DownCast(myGeomPlateSurface);
+	  Handle(Geom_Surface) Splate (myGeomPlateSurface);
 	  LocalAnalysis_SurfaceContinuity CG2;
 	  P2d = PntCont->Pnt2dOnSurf();
 	  GeomLProp_SLProps Prop (Splate, P2d.Coord(1), P2d.Coord(2), 

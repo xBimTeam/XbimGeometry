@@ -113,11 +113,9 @@ Standard_Real ATan2 (const Standard_Real Value, const Standard_Real Other)
 
 //-------------------------------------------------------------------
 // Sign : Returns |a| if B >= 0; -|a| if b < 0.
-//             from x in the direction y
 //-------------------------------------------------------------------
 Standard_Real Sign(const Standard_Real a, const Standard_Real b)
 {
-  //==== We use the function "nextafter()" fom library "math.h" ==============
   if (b >= 0.0) {
     return Abs(a);
   } else {
@@ -239,8 +237,12 @@ Standard_Real     ATanh(const Standard_Real Value)
 #ifdef OCCT_DEBUG
     cout << "Illegal agument in ATanh" << endl ;
 #endif
-  } 
-  return atanh(Value); 
+  }
+#if __QNX__
+  return std::atanh(Value);
+#else
+  return atanh(Value);
+#endif
 }
 
 //-------------------------------------------------------------------
@@ -253,8 +255,40 @@ Standard_Real     ACosh (const Standard_Real Value)
 #ifdef OCCT_DEBUG
     cout << "Illegal agument in ACosh" << endl ;
 #endif
+  }
+#if __QNX__
+  return std::acosh(Value);
+#else
+  return acosh(Value);
+#endif
+}
+
+//-------------------------------------------------------------------
+// Cosh : Returns the hyperbolic cosine of a real
+//-------------------------------------------------------------------
+Standard_Real     Cosh (const Standard_Real Value) 
+{ 
+  if ( Abs(Value) > 0.71047586007394394e+03 ){
+    Standard_NumericError::Raise("Result of Cosh exceeds the maximum value Standard_Real");
+#ifdef OCCT_DEBUG
+    cout << "Result of Cosh exceeds the maximum value Standard_Real" << endl ;
+#endif
   } 
-  return acosh(Value); 
+  return cosh(Value); 
+}
+
+//-------------------------------------------------------------------
+// Sinh : Returns the hyperbolicsine of a real
+//-------------------------------------------------------------------
+Standard_Real     Sinh (const Standard_Real Value) 
+{ 
+  if ( Abs(Value) > 0.71047586007394394e+03 ){
+    Standard_NumericError::Raise("Result of Sinh exceeds the maximum value Standard_Real");
+#ifdef OCCT_DEBUG
+    cout << "Result of Sinh exceeds the maximum value Standard_Real" << endl ;
+#endif
+  } 
+  return sinh(Value); 
 }
 
 //-------------------------------------------------------------------

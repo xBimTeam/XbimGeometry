@@ -21,6 +21,7 @@
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
 
+#include <Precision.hxx>
 #include <Standard_Boolean.hxx>
 #include <math_Status.hxx>
 #include <math_Vector.hxx>
@@ -47,13 +48,16 @@ public:
   //! positive (if the smaller eigenvalue of H < Convexity)
   //! or IsConverged() returns True for 2 successives Iterations.
   //! Warning: This constructor does not perform computation.
-  Standard_EXPORT math_NewtonMinimum(const math_MultipleVarFunctionWithHessian& theFunction, const Standard_Real theTolerance = 1.0e-7, const Standard_Integer theNbIterations = 40, const Standard_Real theConvexity = 1.0e-6, const Standard_Boolean theWithSingularity = Standard_True);
+  Standard_EXPORT math_NewtonMinimum(const math_MultipleVarFunctionWithHessian& theFunction,
+                                     const Standard_Real theTolerance = Precision::Confusion(),
+                                     const Standard_Integer theNbIterations = 40,
+                                     const Standard_Real theConvexity = 1.0e-6,
+                                     const Standard_Boolean theWithSingularity = Standard_True);
   
   //! Search the solution.
   Standard_EXPORT void Perform (math_MultipleVarFunctionWithHessian& theFunction, const math_Vector& theStartingPoint);
   
-  //! Destructor alias.
-    void Delete() const;
+  //! Destructor
   Standard_EXPORT virtual ~math_NewtonMinimum();
   
 
@@ -99,6 +103,11 @@ public:
   //! calculation of the minimum.
   //! The exception NotDone is raised if an error has occured.
     Standard_Integer NbIterations() const;
+
+  //! Returns the Status of computation.
+  //! The exception NotDone is raised if an error has occured.
+    math_Status GetStatus() const;
+
   
   //! Prints on the stream o information on the current state
   //! of the object.

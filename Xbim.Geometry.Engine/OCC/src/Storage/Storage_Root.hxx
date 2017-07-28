@@ -53,9 +53,14 @@ public:
   
   Standard_EXPORT Storage_Root();
   
-  Standard_EXPORT Storage_Root(const TCollection_AsciiString& aName, const Handle(Standard_Persistent)& anObject);
+  Standard_EXPORT Storage_Root (const TCollection_AsciiString&     theName,
+                                const Handle(Standard_Persistent)& theObject);
+
+  Standard_EXPORT Storage_Root (const TCollection_AsciiString& theName,
+                                const Standard_Integer         theRef,
+                                const TCollection_AsciiString& theType);
   
-  Standard_EXPORT void SetName (const TCollection_AsciiString& aName);
+  Standard_EXPORT void SetName (const TCollection_AsciiString& theName);
   
 
   //! Returns the name of this root object.
@@ -83,11 +88,17 @@ public:
   //! Returns the name of this root type.
   Standard_EXPORT TCollection_AsciiString Type() const;
 
+  Standard_EXPORT void SetReference (const Standard_Integer aRef);
+
+  Standard_EXPORT Standard_Integer Reference() const;
+
+  Standard_EXPORT void SetType (const TCollection_AsciiString& aType);
+
 
 friend class Storage_Schema;
 
 
-  DEFINE_STANDARD_RTTI(Storage_Root,MMgt_TShared)
+  DEFINE_STANDARD_RTTIEXT(Storage_Root,MMgt_TShared)
 
 protected:
 
@@ -97,11 +108,6 @@ protected:
 private:
 
   
-  Standard_EXPORT void SetReference (const Standard_Integer aRef);
-  
-  Standard_EXPORT Standard_Integer Reference() const;
-  
-  Standard_EXPORT void SetType (const TCollection_AsciiString& aType);
 
   TCollection_AsciiString myName;
   TCollection_AsciiString myType;

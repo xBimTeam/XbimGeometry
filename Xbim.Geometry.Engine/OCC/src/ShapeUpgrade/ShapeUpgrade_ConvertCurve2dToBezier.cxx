@@ -34,6 +34,8 @@
 #include <TColgp_Array1OfPnt2d.hxx>
 #include <TColStd_Array1OfReal.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(ShapeUpgrade_ConvertCurve2dToBezier,ShapeUpgrade_SplitCurve2d)
+
 ShapeUpgrade_ConvertCurve2dToBezier::ShapeUpgrade_ConvertCurve2dToBezier()
 {
   mySegments = new TColGeom2d_HSequenceOfCurve;
@@ -136,7 +138,7 @@ void ShapeUpgrade_ConvertCurve2dToBezier::Compute()
       Geom2dConvert_ApproxCurve approx (tcurve, Precision::Approximation(), 
 					GeomAbs_C1, 100, 6 );
       if ( approx.HasResult() )
-	aBSpline2d = Handle(Geom2d_BSplineCurve)::DownCast(approx.Curve());
+	aBSpline2d = approx.Curve();
       else 
 	aBSpline2d = Geom2dConvert::CurveToBSplineCurve(tcurve,Convert_QuasiAngular);
       

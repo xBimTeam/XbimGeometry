@@ -27,6 +27,7 @@
 
 #include <GeomAPI_ProjectPointOnCurve.hxx>
 
+#include <TopoDS.hxx>
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Face.hxx>
 
@@ -37,6 +38,7 @@
 #include <TopExp_Explorer.hxx>
 
 #include <IntTools_Context.hxx>
+#include <IntTools_Tools.hxx>
 
 #include <BOPTools_AlgoTools2D.hxx>
 
@@ -55,7 +57,6 @@ static
   Standard_Boolean IsClosed(const TopoDS_Edge& ,
                             const TopoDS_Face& );
 
-
 //=======================================================================
 //function : AttachExistingPCurve
 //purpose  : 
@@ -66,9 +67,10 @@ Standard_Integer BOPTools_AlgoTools2D::AttachExistingPCurve
    const TopoDS_Face& aF, 
    const Handle(IntTools_Context)& aCtx)
 {
-  Standard_Boolean bIsToReverse, bIsClosed;
+  Standard_Boolean bIsToReverse, bIsClosed, bComp;
   Standard_Integer iRet;
   Standard_Real aTol, aT11, aT12, aT21, aT22, aTolPPC;
+  Standard_Real aTolSP, aTMax;
   Handle(Geom2d_Curve) aC2Dold, aC2DoldC;
   Handle(Geom2d_Curve) aC2DT;
   BRep_Builder aBB;
@@ -97,12 +99,9 @@ Standard_Integer BOPTools_AlgoTools2D::AttachExistingPCurve
   //
   aC2DT=new Geom2d_TrimmedCurve(aC2DoldC, aT21, aT22);
   //
-  aTol=BRep_Tool::Tolerance(aE1);
-  BRep_Tool::Range (aE1, aT11, aT12);
-  aBB.SameRange(aE1, Standard_False);
-  aBB.SameParameter(aE1, Standard_False);
-  
   aTolPPC=Precision::PConfusion();
+  //
+  Handle(Geom_Curve) aCE1 = BRep_Tool::Curve(aE1, aT11, aT12);
   //
   GeomLib::SameRange(aTolPPC, aC2DT, aT21, aT22, aT11, aT12, aC2DT);
   //
@@ -111,18 +110,57 @@ Standard_Integer BOPTools_AlgoTools2D::AttachExistingPCurve
     return iRet;
   }
   //
-  aBB.UpdateEdge(aE1, aC2DT, aF, aTol);
-  BRepLib::SameParameter(aE1);
-  BRepLib::SameRange(aE1);
+  // check the curves on same parameter to prevent 
+  // big tolerance increasing
+  Handle(Geom_Surface) aSF = BRep_Tool::Surface(aF);
   //
-  bIsClosed=IsClosed(aE2, aF);
-  if (bIsClosed) {
-    iRet=UpdateClosedPCurve(aE2, aE1, aF, aCtx);
-    if(iRet) {
-      iRet=3;
-    }
+  bComp = IntTools_Tools::ComputeTolerance
+    (aCE1, aC2DT, aSF, aT11, aT12, aTolSP, aTMax, aTolPPC);
+  if (!bComp) {
+    iRet = 3;
+    return iRet;
   }
   //
+  aTol = BRep_Tool::Tolerance(aE1);
+  //
+  if ((aTolSP > 10.*aTol) && aTolSP > 0.1) {
+    iRet = 4;
+    return iRet;
+  }
+  //
+  // create a temporary edge to make same parameter pcurve
+  TopoDS_Edge aE1T;
+  aBB.MakeEdge(aE1T, aCE1, aTol);
+  aBB.Range(aE1T, aT11, aT12);
+  aBB.SameRange(aE1T, Standard_False);
+  aBB.SameParameter(aE1T, Standard_False);
+  //
+  aBB.UpdateEdge(aE1T, aC2DT, aF, aTol);
+  try {
+    BRepLib::SameParameter(aE1T);
+    BRepLib::SameRange(aE1T);
+  }
+  catch (Standard_Failure)
+  {
+    iRet = 6;
+    return iRet;
+  }
+  //
+  bIsClosed = IsClosed(aE2, aF);
+  if (bIsClosed) {
+    iRet = UpdateClosedPCurve(aE2, aE1T, aF, aCtx);
+    if(iRet) {
+      iRet = 5;
+      return iRet;
+    }
+  }
+  // transfer pcurve(s) from the temporary edge to the new edge
+  aBB.Transfert(aE1T, aE1);
+  // update tolerance of vertices
+  Standard_Real aNewTol = BRep_Tool::Tolerance(aE1T);
+  TopoDS_Iterator it(aE1);
+  for (; it.More(); it.Next())
+    aBB.UpdateVertex(TopoDS::Vertex(it.Value()), aNewTol);
   return iRet;
 }
 //=======================================================================
@@ -275,7 +313,8 @@ Standard_Boolean IsToReverse(const TopoDS_Edge& aEold,
   aCnew->D1(aTnew, aP, aVnew);
   aVnew.Normalize(); 
   //
-  aCtx->ProjectPointOnEdge(aP, aEold, aTold);
+  if (!aCtx->ProjectPointOnEdge(aP, aEold, aTold))
+    return Standard_False;
   aCold->D1(aTold, aP, aVold);
   aVold.Normalize(); 
   //
@@ -309,4 +348,3 @@ Standard_Boolean IsClosed(const TopoDS_Edge& aE,
   }
   return bRet;
 }
-

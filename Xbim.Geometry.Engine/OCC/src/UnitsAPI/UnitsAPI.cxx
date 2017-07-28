@@ -29,13 +29,6 @@ static Units_UnitsSystem LocalSystemUnits,SILocalSystemUnits,MDTVLocalSystemUnit
 static TCollection_AsciiString rstring;
 static UnitsAPI_SystemUnits localSystem = UnitsAPI_SI;
 static UnitsAPI_SystemUnits currentSystem = UnitsAPI_DEFAULT;
-static OSD_Environment env1("CSF_UnitsLexicon");
-static OSD_Environment env2("CSF_UnitsDefinition");
-#ifdef WNT
-static OSD_Environment env3("CSF_CurrentUnits");
-static OSD_Environment env4("CSF_MDTVCurrentUnits");
-#endif
-
 
 //=======================================================================
 //function : CheckLoading
@@ -45,41 +38,14 @@ static OSD_Environment env4("CSF_MDTVCurrentUnits");
 void UnitsAPI::CheckLoading (const UnitsAPI_SystemUnits aSystemUnits)
 {
   if( currentSystem != aSystemUnits || CurrentUnits.IsNull()) {
-    TCollection_AsciiString slexiconfile(env1.Value());
-    if( slexiconfile.Length() > 0 )
-      Units::LexiconFile(slexiconfile.ToCString());
-    else {
-      OSD_Environment CasRootEnv("CASROOT");
-      TCollection_AsciiString CasRootString(CasRootEnv.Value());
-      if (CasRootString.Length() > 0 )  {
-	CasRootString += "/src/UnitsAPI/Lexi_Expr.dat" ;
-	Units::LexiconFile(CasRootString.ToCString());
-      }
-      else {
-	Standard_NoSuchObject::Raise("environment variable CSF_UnitsLexicon undefined");
-      }
-    }
-    TCollection_AsciiString sunitsfile(env2.Value());
-    if( sunitsfile.Length() > 0 )
-      Units::UnitsFile(sunitsfile.ToCString());
-    else {
-      OSD_Environment CasRootEnv("CASROOT");
-      TCollection_AsciiString CasRootString(CasRootEnv.Value());
-      if (CasRootString.Length() > 0 ) {
-	CasRootString += "/src/UnitsAPI/Units.dat";
-	Units::UnitsFile(CasRootString.ToCString());
-      }
-      else {
-	Standard_NoSuchObject::Raise("environment variable CSF_UnitsDefinition undefined");
-      }
-    }  
     switch (aSystemUnits) {
       case UnitsAPI_DEFAULT :
         if( !CurrentUnits.IsNull() ) break;
       case UnitsAPI_SI :  
         currentSystem = UnitsAPI_SI; 
         if( SICurrentUnits.IsNull() ) {
-#ifdef WNT
+#ifdef _WIN32
+          OSD_Environment env3("CSF_CurrentUnits");
           TCollection_AsciiString csfcurrent (env3.Value());
           if( csfcurrent.Length() > 0 )
                 SICurrentUnits = new Resource_Manager(csfcurrent.ToCString());
@@ -95,7 +61,8 @@ void UnitsAPI::CheckLoading (const UnitsAPI_SystemUnits aSystemUnits)
       case UnitsAPI_MDTV :  
         currentSystem = UnitsAPI_MDTV; 
         if( MDTVCurrentUnits.IsNull() )  {
-#ifdef WNT
+#ifdef _WIN32
+          OSD_Environment env4("CSF_MDTVCurrentUnits");
           TCollection_AsciiString csfmdtvcurrent (env4.Value());
           if( csfmdtvcurrent.Length() > 0 )
                 MDTVCurrentUnits = new Resource_Manager(csfmdtvcurrent.ToCString());

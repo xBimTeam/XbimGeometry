@@ -45,6 +45,9 @@
 #include <BOPTools_MapOfSet.hxx>
 #include <BRep_Builder.hxx>
 #include <BRep_Tool.hxx>
+#include <GeomAdaptor_Surface.hxx>
+#include <GeomLib.hxx>
+#include <Precision.hxx>
 #include <IntTools_Context.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopoDS_Compound.hxx>
@@ -53,13 +56,6 @@
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Vertex.hxx>
 
-//
-//
-//
-//
-//
-//
-//
 //
 static
   Standard_Boolean HasPaveBlocksOnIn(const BOPDS_FaceInfo& aFI1,
@@ -125,7 +121,7 @@ class BOPAlgo_PairOfShapeBoolean : public BOPAlgo_Algo {
     //  
     const TopoDS_Face& aFj=*((TopoDS_Face*)&myShape1);
     const TopoDS_Face& aFk=*((TopoDS_Face*)&myShape2);
-    myFlag=BOPTools_AlgoTools::AreFacesSameDomain(aFj, aFk, myContext);
+    myFlag=BOPTools_AlgoTools::AreFacesSameDomain(aFj, aFk, myContext, myFuzzyValue);
   }
   //
  protected: 
@@ -208,10 +204,10 @@ class BOPAlgo_VFI : public BOPAlgo_Algo {
   }
   //
   virtual void Perform() {
-    Standard_Real aT1, aT2;
+    Standard_Real aT1, aT2, dummy;
     //
     BOPAlgo_Algo::UserBreak();
-    myFlag=myContext->ComputeVF(myV, myF, aT1, aT2);
+    myFlag = myContext->ComputeVF(myV, myF, aT1, aT2, dummy, myFuzzyValue);
   }
   //
  protected:
@@ -284,6 +280,9 @@ void BOPAlgo_Builder::BuildSplitFaces()
     }
     //
     const TopoDS_Face& aF=(*(TopoDS_Face*)(&aSI.Shape()));
+    Standard_Boolean isUClosed = Standard_False,
+                     isVClosed = Standard_False,
+                     isChecked = Standard_False;
     //
     bHasFaceInfo=myDS->HasFaceInfo(i);
     if(!bHasFaceInfo) {
@@ -321,8 +320,6 @@ void BOPAlgo_Builder::BuildSplitFaces()
     for (; aExp.More(); aExp.Next()) {
       const TopoDS_Edge& aE=(*(TopoDS_Edge*)(&aExp.Current()));
       anOriE=aE.Orientation();
-      bIsDegenerated=BRep_Tool::Degenerated(aE);
-      bIsClosed=BRep_Tool::IsClosed(aE, aF);
       //
       if (!myImages.IsBound(aE)) {
         if (anOriE==TopAbs_INTERNAL) {
@@ -335,48 +332,71 @@ void BOPAlgo_Builder::BuildSplitFaces()
         else {
           aLE.Append(aE);
         }
+
+        continue;
       }
-      else {//else 1
-        const BOPCol_ListOfShape& aLIE=myImages.Find(aE);
-        aIt.Initialize(aLIE);
-        for (; aIt.More(); aIt.Next()) {
-          aSp=(*(TopoDS_Edge*)(&aIt.Value()));
-          if (bIsDegenerated) {
-            aSp.Orientation(anOriE);
-            aLE.Append(aSp);
-            continue;
-          }
+
+      if(!isChecked)
+      {
+        const Handle(Geom_Surface) aSurf = BRep_Tool::Surface(aF);
+        GeomLib::IsClosed(aSurf, BRep_Tool::Tolerance(aE),
+          isUClosed, isVClosed);
+
+        isChecked = Standard_True;
+      }
+
+      bIsClosed = Standard_False;
+
+      if((isUClosed || isVClosed) && BRep_Tool::IsClosed(aE, aF)) 
+      {
+
+        Standard_Boolean isUIso = Standard_False, isVIso = Standard_False;
+        BOPTools_AlgoTools2D::IsEdgeIsoline(aE, aF, isUIso, isVIso);
+
+        bIsClosed = ((isUClosed && isUIso) || (isVClosed && isVIso));
+      }
+
+      bIsDegenerated=BRep_Tool::Degenerated(aE);
+
+      const BOPCol_ListOfShape& aLIE=myImages.Find(aE);
+      aIt.Initialize(aLIE);
+      for (; aIt.More(); aIt.Next()) {
+        aSp=(*(TopoDS_Edge*)(&aIt.Value()));
+        if (bIsDegenerated) {
+          aSp.Orientation(anOriE);
+          aLE.Append(aSp);
+          continue;
+        }
+        //
+        if (anOriE==TopAbs_INTERNAL) {
+          aSp.Orientation(TopAbs_FORWARD);
+          aLE.Append(aSp);
+          aSp.Orientation(TopAbs_REVERSED);
+          aLE.Append(aSp);
+          continue;
+        }
           //
-          if (anOriE==TopAbs_INTERNAL) {
+        if (bIsClosed) {
+          if (aMFence.Add(aSp)) {
+            if (!BRep_Tool::IsClosed(aSp, aF)){
+              BOPTools_AlgoTools3D::DoSplitSEAMOnFace(aSp, aF);
+            }
+            //
             aSp.Orientation(TopAbs_FORWARD);
             aLE.Append(aSp);
             aSp.Orientation(TopAbs_REVERSED);
             aLE.Append(aSp);
-            continue;
-          }
-          //
-          if (bIsClosed) {
-            if (aMFence.Add(aSp)) {
-              if (!BRep_Tool::IsClosed(aSp, aF)){
-                BOPTools_AlgoTools3D::DoSplitSEAMOnFace(aSp, aF);
-                }
-              //
-              aSp.Orientation(TopAbs_FORWARD);
-              aLE.Append(aSp);
-              aSp.Orientation(TopAbs_REVERSED);
-              aLE.Append(aSp);
-            }// if (aMFence.Add(aSp))
-            continue;
-          }// if (bIsClosed){
-          //
-          aSp.Orientation(anOriE);
-          bToReverse=BOPTools_AlgoTools::IsSplitToReverse(aSp, aE, myContext);
-          if (bToReverse) {
-            aSp.Reverse();
-          }
-          aLE.Append(aSp);
-        }// for (; aIt.More(); aIt.Next()) {
-      }// else 1
+          }// if (aMFence.Add(aSp))
+          continue;
+        }// if (bIsClosed){
+        //
+        aSp.Orientation(anOriE);
+        bToReverse=BOPTools_AlgoTools::IsSplitToReverse(aSp, aE, myContext);
+        if (bToReverse) {
+          aSp.Reverse();
+        }
+        aLE.Append(aSp);
+      }// for (; aIt.More(); aIt.Next()) {
     }// for (; aExp.More(); aExp.Next()) {
     // 
     //
@@ -405,8 +425,10 @@ void BOPAlgo_Builder::BuildSplitFaces()
       aLE.Append(aSp);
     }
     //
-    BOPTools_AlgoTools2D::BuildPCurveForEdgesOnPlane (aLE, aFF);
-    //
+    if (!myPaveFiller->NonDestructive()) {
+      // speed up for planar faces
+      BOPTools_AlgoTools2D::BuildPCurveForEdgesOnPlane (aLE, aFF);
+    }
     // 3 Build split faces
     BOPAlgo_BuilderFace& aBF=aVBF.Append1();
     aBF.SetFace(aF);
@@ -596,6 +618,7 @@ void BOPAlgo_Builder::FillSameDomainFaces()
         BOPAlgo_PairOfShapeBoolean& aPSB=aVPSB.Append1();
         aPSB.Shape1()=aFj;
         aPSB.Shape2()=aFk;
+        aPSB.SetFuzzyValue(myFuzzyValue);
         aPSB.SetProgressIndicator(myProgressIndicator);
       }
     }
@@ -692,7 +715,7 @@ void BOPAlgo_Builder::FillImagesFaces1()
       }
       else {
         aFSD=(*(TopoDS_Face*)(&myShapesSD.Find(aFSp)));
-        iSense=BOPTools_AlgoTools::Sense(aFSp, aFSD);
+        iSense=BOPTools_AlgoTools::Sense(aFSp, aFSD, myContext);
         if (iSense<0) {
           aFSD.Reverse();
         }
@@ -725,6 +748,7 @@ void BOPAlgo_Builder::FillImagesFaces1()
         BOPAlgo_VFI& aVFI=aVVFI.Append1();
         aVFI.SetVertex(aVx);
         aVFI.SetFace(aFy);
+        aVFI.SetFuzzyValue(myFuzzyValue);
         aVFI.SetProgressIndicator(myProgressIndicator);
       }
     }
@@ -741,9 +765,9 @@ void BOPAlgo_Builder::FillImagesFaces1()
     //
     iFlag=aVFI.Flag();
     if (!iFlag) {
-      TopoDS_Vertex& aVx=aVFI.Vertex();
+      TopoDS_Vertex& aVertex=aVFI.Vertex();
       TopoDS_Face& aFy=aVFI.Face(); 
-      aBB.Add(aFy, aVx);
+      aBB.Add(aFy, aVertex);
     }
   }
 }

@@ -24,6 +24,7 @@
 #include <Standard_Boolean.hxx>
 #include <MMgt_TShared.hxx>
 #include <TopTools_DataMapOfShapeShape.hxx>
+#include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
 class ShapeBuild_ReShape;
 class TopoDS_Shape;
 
@@ -56,6 +57,24 @@ public:
   //! Initializes with a shape
   Standard_EXPORT void Initialize (const TopoDS_Shape& aShape, const Standard_Boolean UnifyEdges = Standard_True, const Standard_Boolean UnifyFaces = Standard_True, const Standard_Boolean ConcatBSplines = Standard_False);
   
+  //! Sets the flag defining whether it is allowed to create
+  //! internal edges inside merged faces in the case of non-manifold
+  //! topology. Without this flag merging through multi connected edge
+  //! is forbidden. Default value is false.
+  Standard_EXPORT void AllowInternalEdges (const Standard_Boolean theValue);
+
+  //! Sets the linear tolerance. Default value is Precision::Confusion().
+  void SetLinearTolerance(const Standard_Real theValue)
+  {
+    myLinTol = theValue;
+  }
+
+  //! Sets the angular tolerance. Default value is Precision::Angular().
+  void SetAngularTolerance(const Standard_Real theValue)
+  {
+    myAngTol = theValue;
+  }
+
   //! Builds the resulting shape
   Standard_EXPORT void Build();
   
@@ -79,7 +98,7 @@ public:
 
 
 
-  DEFINE_STANDARD_RTTI(ShapeUpgrade_UnifySameDomain,MMgt_TShared)
+  DEFINE_STANDARD_RTTIEXT(ShapeUpgrade_UnifySameDomain,MMgt_TShared)
 
 protected:
 
@@ -88,11 +107,17 @@ protected:
 
 private:
 
+  void IntUnifyFaces(const TopoDS_Shape& theInpShape,
+                     const TopTools_IndexedDataMapOfShapeListOfShape& theGMapEdgeFaces,
+                     Standard_Boolean IsCheckSharedEdgeOri);
 
   TopoDS_Shape myInitShape;
+  Standard_Real myLinTol;
+  Standard_Real myAngTol;
   Standard_Boolean myUnifyFaces;
   Standard_Boolean myUnifyEdges;
   Standard_Boolean myConcatBSplines;
+  Standard_Boolean myAllowInternal;
   TopoDS_Shape myShape;
   Handle(ShapeBuild_ReShape) myContext;
   TopTools_DataMapOfShapeShape myOldShapes; 

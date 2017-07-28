@@ -40,41 +40,27 @@ class Units_UnitsLexicon : public Units_Lexicon
 
 public:
 
-  
   //! Returns an empty instance of UnitsLexicon
   Standard_EXPORT Units_UnitsLexicon();
   
   //! Reads  the files  <afilename1>  and  <afilename2>   to
   //! create     a   sequence     of    tokens   stored   in
   //! <thesequenceoftokens>.
-  Standard_EXPORT void Creates (const Standard_CString afilename1, const Standard_CString afilename2, const Standard_Boolean amode = Standard_True);
-  
-  //! Returns in a AsciiString from TCollection the name of the file.
-  Standard_EXPORT TCollection_AsciiString FileName2() const;
-  
-  //! Returns true if  the  file has not  changed  since the
-  //! creation   of   the  Lexicon   object.   Returns false
-  //! otherwise.
-  Standard_EXPORT virtual Standard_Boolean UpToDate() const Standard_OVERRIDE;
-  
+  Standard_EXPORT void Creates (const Standard_Boolean amode = Standard_True);
+
   //! Useful for debugging.
     virtual void Dump() const Standard_OVERRIDE;
 
 
 
 
-  DEFINE_STANDARD_RTTI(Units_UnitsLexicon,Units_Lexicon)
+  DEFINE_STANDARD_RTTIEXT(Units_UnitsLexicon,Units_Lexicon)
 
 protected:
 
 
 
-
 private:
-
-
-  Handle(TCollection_HAsciiString) thefilename;
-  Standard_Time thetime;
 
 
 };

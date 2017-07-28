@@ -53,9 +53,25 @@ public:
   
   Standard_EXPORT BRepOffset_MakeOffset();
   
-  Standard_EXPORT BRepOffset_MakeOffset(const TopoDS_Shape& S, const Standard_Real Offset, const Standard_Real Tol, const BRepOffset_Mode Mode = BRepOffset_Skin, const Standard_Boolean Intersection = Standard_False, const Standard_Boolean SelfInter = Standard_False, const GeomAbs_JoinType Join = GeomAbs_Arc, const Standard_Boolean Thickening = Standard_False);
+  Standard_EXPORT BRepOffset_MakeOffset(const TopoDS_Shape& S,
+                                        const Standard_Real Offset,
+                                        const Standard_Real Tol,
+                                        const BRepOffset_Mode Mode = BRepOffset_Skin,
+                                        const Standard_Boolean Intersection = Standard_False,
+                                        const Standard_Boolean SelfInter = Standard_False,
+                                        const GeomAbs_JoinType Join = GeomAbs_Arc,
+                                        const Standard_Boolean Thickening = Standard_False,
+                                        const Standard_Boolean RemoveIntEdges = Standard_False);
   
-  Standard_EXPORT void Initialize (const TopoDS_Shape& S, const Standard_Real Offset, const Standard_Real Tol, const BRepOffset_Mode Mode = BRepOffset_Skin, const Standard_Boolean Intersection = Standard_False, const Standard_Boolean SelfInter = Standard_False, const GeomAbs_JoinType Join = GeomAbs_Arc, const Standard_Boolean Thickening = Standard_False);
+  Standard_EXPORT void Initialize (const TopoDS_Shape& S,
+                                   const Standard_Real Offset,
+                                   const Standard_Real Tol,
+                                   const BRepOffset_Mode Mode = BRepOffset_Skin,
+                                   const Standard_Boolean Intersection = Standard_False,
+                                   const Standard_Boolean SelfInter = Standard_False,
+                                   const GeomAbs_JoinType Join = GeomAbs_Arc,
+                                   const Standard_Boolean Thickening = Standard_False,
+                                   const Standard_Boolean RemoveIntEdges = Standard_False);
   
   Standard_EXPORT void Clear();
   
@@ -106,21 +122,18 @@ public:
   Standard_EXPORT const TopoDS_Shape& GetBadShape() const;
 
 
-
-
 protected:
-
-
-
 
 
 private:
 
-  
   Standard_EXPORT void BuildOffsetByArc();
   
   Standard_EXPORT void BuildOffsetByInter();
-  
+
+  //! Make Offset faces
+  Standard_EXPORT void MakeOffsetFaces(BRepOffset_DataMapOfShapeOffset& theMapSF);
+
   Standard_EXPORT void SelfInter (TopTools_MapOfShape& Modif);
   
   Standard_EXPORT void Intersection3D (BRepOffset_Inter3d& Inter);
@@ -152,6 +165,33 @@ private:
   //! Private method used to build walls for thickening the shell
   Standard_EXPORT void MakeMissingWalls();
 
+  //! Removes INTERNAL edges from the result
+  Standard_EXPORT void RemoveInternalEdges();
+
+  //! Intersects edges
+  Standard_EXPORT void IntersectEdges (const TopoDS_Shape& theShape,
+                                       BRepOffset_DataMapOfShapeOffset& theMapSF,
+                                       TopTools_DataMapOfShapeShape& theMES,
+                                       TopTools_DataMapOfShapeShape& theBuild,
+                                       Handle(BRepAlgo_AsDes)& theAsDes,
+                                       Handle(BRepAlgo_AsDes)& theAsDes2d);
+
+  //! Building of the splits of the offset faces for mode Complete
+  //! and joint type Intersection. This method is an advanced alternative
+  //! for BRepOffset_MakeLoops::Build method.
+  //! Currently the Complete intersection mode is limited to work only on planar cases.
+  Standard_EXPORT void BuildSplitsOfExtendedFaces(const TopTools_ListOfShape& theLF,
+                                                  Handle(BRepAlgo_AsDes)& theAsDes,
+                                                  TopTools_DataMapOfShapeListOfShape& theEdgesOrigins,
+                                                  TopTools_DataMapOfShapeShape& theFacesOrigins,
+                                                  TopTools_DataMapOfShapeShape& theETrimEInf,
+                                                  BRepAlgo_Image& theImage);
+
+  //! Building of the splits of the already trimmed offset faces for mode Complete
+  //! and joint type Intersection.
+  Standard_EXPORT void BuildSplitsOfTrimmedFaces(const TopTools_ListOfShape& theLF,
+                                                 Handle(BRepAlgo_AsDes)& theAsDes,
+                                                 BRepAlgo_Image& theImage);
 
   Standard_Real myOffset;
   Standard_Real myTol;
@@ -161,6 +201,7 @@ private:
   Standard_Boolean mySelfInter;
   GeomAbs_JoinType myJoin;
   Standard_Boolean myThickening;
+  Standard_Boolean myRemoveIntEdges;
   TopTools_DataMapOfShapeReal myFaceOffset;
   TopTools_IndexedMapOfShape myFaces;
   BRepOffset_Analyse myAnalyse;
@@ -174,15 +215,9 @@ private:
   BRepOffset_Error myError;
   BRepOffset_MakeLoops myMakeLoops;
   Standard_Boolean myIsPerformSewing; // Handle bad walls in thicksolid mode.
+  Standard_Boolean myIsPlanar;
   TopoDS_Shape myBadShape;
 
-
 };
-
-
-
-
-
-
 
 #endif // _BRepOffset_MakeOffset_HeaderFile

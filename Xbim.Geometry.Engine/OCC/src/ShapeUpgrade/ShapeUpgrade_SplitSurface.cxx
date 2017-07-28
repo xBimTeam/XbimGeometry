@@ -38,6 +38,8 @@
 #include <TColStd_Array1OfReal.hxx>
 #include <TColStd_HSequenceOfReal.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(ShapeUpgrade_SplitSurface,MMgt_TShared)
+
 //=======================================================================
 //function : ShapeUpgrade_SplitSurface
 //purpose  : 
@@ -447,10 +449,8 @@ void ShapeUpgrade_SplitSurface::Build(const Standard_Boolean Segment)
       }
       else {
 	// not a BSpline: trimming instead of segmentation
-	Handle(Geom_Surface) 
-	  theNewSurf = Handle(Geom_Surface)::DownCast(theNew);
 	Handle(Geom_RectangularTrimmedSurface) SplittedSurf= 
-	  new Geom_RectangularTrimmedSurface(theNewSurf,U1,U2,V1,V2);
+	  new Geom_RectangularTrimmedSurface(theNew,U1,U2,V1,V2);
 	Surfaces->SetValue((irow-1),(icol-1),SplittedSurf);
       }
       

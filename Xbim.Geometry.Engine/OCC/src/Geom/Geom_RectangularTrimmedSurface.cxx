@@ -45,6 +45,8 @@
 #include <Standard_RangeError.hxx>
 #include <Standard_Type.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(Geom_RectangularTrimmedSurface,Geom_BoundedSurface)
+
 typedef Geom_RectangularTrimmedSurface RectangularTrimmedSurface;
 typedef gp_Ax1  Ax1;
 typedef gp_Ax2  Ax2;
@@ -116,8 +118,7 @@ const Standard_Boolean          VSense)
   {
     Handle(Geom_RectangularTrimmedSurface) S2 = 
            new Geom_RectangularTrimmedSurface( O->BasisSurface(),U1,U2, V1, V2, USense, VSense);
-    Handle(Geom_OffsetSurface) OS = new Geom_OffsetSurface(S2, O->Offset());
-    basisSurf = Handle(Geom_Surface)::DownCast(OS);
+    basisSurf = new Geom_OffsetSurface(S2, O->Offset());
   }  
 
   SetTrim( U1, U2, V1, V2, USense, VSense);
@@ -152,8 +153,7 @@ Geom_RectangularTrimmedSurface::Geom_RectangularTrimmedSurface (
   {
     Handle(Geom_RectangularTrimmedSurface) S2 = 
            new Geom_RectangularTrimmedSurface( O->BasisSurface(),Param1,Param2, UTrim, Sense);
-    Handle(Geom_OffsetSurface) OS = new Geom_OffsetSurface(S2, O->Offset());
-    basisSurf = Handle(Geom_Surface)::DownCast(OS);
+    basisSurf = new Geom_OffsetSurface(S2, O->Offset());
   }  
 
   SetTrim(Param1, Param2, UTrim, Sense);

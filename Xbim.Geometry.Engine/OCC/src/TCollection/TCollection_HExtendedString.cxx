@@ -26,6 +26,8 @@
 #include <TCollection_HAsciiString.hxx>
 #include <TCollection_HExtendedString.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(TCollection_HExtendedString,MMgt_TShared)
+
 // ----------------------------------------------------------------------------
 // Create
 // ----------------------------------------------------------------------------
@@ -254,14 +256,6 @@ Handle(TCollection_HExtendedString) TCollection_HExtendedString::Token
 }
 
 // ----------------------------------------------------------------------------
-// ToExtString
-// ----------------------------------------------------------------------------
-const Standard_ExtString TCollection_HExtendedString::ToExtString() const
-{ 
-   return (myString.ToExtString());
-}
-
-// ----------------------------------------------------------------------------
 // Trunc
 // ----------------------------------------------------------------------------
 void TCollection_HExtendedString::Trunc(const Standard_Integer ahowmany)
@@ -302,9 +296,7 @@ void TCollection_HExtendedString::Print(Standard_OStream& S) const
 Standard_Boolean TCollection_HExtendedString::IsSameState
    (const Handle(TCollection_HExtendedString)& other) const
  {
-   Handle(TCollection_HExtendedString) H;
-   H = Handle(TCollection_HExtendedString)::DownCast(other);
-   return ( myString == H->ChangeString() );
+   return myString == other->String();
  }
 
 

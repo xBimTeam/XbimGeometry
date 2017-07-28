@@ -254,6 +254,10 @@ static Standard_Boolean MinimizeDirection(const math_Vector&   P,
                                           //----------------------------------------------------------------------
 
 {
+  if(Precision::IsInfinite(PValue) || Precision::IsInfinite(PDirValue))
+  {
+    return Standard_False;
+  }
   // (0) Evaluation d'un tolerance parametrique 1D
   Standard_Boolean good = Standard_False;
   Standard_Real Eps = 1.e-20;
@@ -473,7 +477,7 @@ static void SearchDirection(const math_Matrix& DF,
       Direction, Dy);
   }
   else if (Cons == Ninc) { // il n'y a plus rien a faire...
-    for(Standard_Integer i = Direction.Lower(); i <= Direction.Upper(); i++) {
+    for(i = Direction.Lower(); i <= Direction.Upper(); i++) {
       Direction(i) = 0;
     }
     Dy = 0;
@@ -666,7 +670,6 @@ math_FunctionSetRoot::math_FunctionSetRoot(math_FunctionSetWithDerivatives& theF
 //=======================================================================
 math_FunctionSetRoot::~math_FunctionSetRoot()
 {
-  Delete();
 }
 
 //=======================================================================
@@ -717,9 +720,9 @@ void math_FunctionSetRoot::Perform(math_FunctionSetWithDerivatives& F,
   math_Vector InvLengthMax(1, Ninc); // Pour bloquer les pas a 1/4 du domaine
   math_IntegerVector aConstraints(1, Ninc); // Pour savoir sur quels bord on se trouve
   for (i = 1; i <= Ninc ; i++) {
-    // modified by NIZHNY-MKK  Mon Oct  3 18:03:50 2005
-    //      InvLengthMax(i) = 1. / Max(Abs(SupBound(i) - InfBound(i))/4, 1.e-9);
-    InvLengthMax(i) = 1. / Max((theSupBound(i) - theInfBound(i))/4, 1.e-9);
+    const Standard_Real aSupBound  = Min (theSupBound(i),  Precision::Infinite());
+    const Standard_Real anInfBound = Max (theInfBound(i), -Precision::Infinite());
+    InvLengthMax(i) = 1. / Max((aSupBound - anInfBound)/4, 1.e-9);
   }
 
   MyDirFunction F_Dir(Temp1, Temp2, Temp3, Temp4, F);

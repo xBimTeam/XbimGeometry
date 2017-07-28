@@ -36,16 +36,16 @@ TopOpeBRepBuild_GTopo::TopOpeBRepBuild_GTopo()
 //=======================================================================
 
 TopOpeBRepBuild_GTopo::TopOpeBRepBuild_GTopo
-(const Standard_Integer ii,const Standard_Integer in,const Standard_Integer io,
- const Standard_Integer ni,const Standard_Integer nn,const Standard_Integer no,
- const Standard_Integer oi,const Standard_Integer on,const Standard_Integer oo,
+(const Standard_Boolean ii,const Standard_Boolean in,const Standard_Boolean io,
+ const Standard_Boolean ni,const Standard_Boolean nn,const Standard_Boolean no,
+ const Standard_Boolean oi,const Standard_Boolean on,const Standard_Boolean oo,
  const TopAbs_ShapeEnum t1, const TopAbs_ShapeEnum t2,
  const TopOpeBRepDS_Config C1, const TopOpeBRepDS_Config C2)
 {
   Reset();
-  Set((Standard_Boolean)ii,(Standard_Boolean)in,(Standard_Boolean)io,
-      (Standard_Boolean)ni,(Standard_Boolean)nn,(Standard_Boolean)no,  
-      (Standard_Boolean)oi,(Standard_Boolean)on,(Standard_Boolean)oo);
+  Set (ii, in, io,
+       ni, nn, no,
+       oi, on, oo);
   myt1 = t1; 
   myt2 = t2;
   myConfig1 = C1;
@@ -171,7 +171,8 @@ Standard_Boolean TopOpeBRepBuild_GTopo::Value(const TopAbs_State s1,
 
 Standard_Boolean TopOpeBRepBuild_GTopo::Value(const Standard_Integer II) const
 {
-  Standard_Integer i1,i2; Index(II,i1,i2);
+  Standard_Integer i1=0,i2=0;
+  Index(II,i1,i2);
   Standard_Boolean b = Value(i1,i2);
   return b;
 }

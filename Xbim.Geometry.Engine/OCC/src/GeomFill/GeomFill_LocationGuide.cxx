@@ -18,7 +18,6 @@
 #include <Adaptor3d_HCurve.hxx>
 #include <Adaptor3d_HSurface.hxx>
 #include <Adaptor3d_Surface.hxx>
-#include <Adaptor3d_SurfaceOfRevolution.hxx>
 #include <ElCLib.hxx>
 #include <Extrema_ExtCS.hxx>
 #include <Extrema_POnSurf.hxx>
@@ -61,6 +60,8 @@
 #include <TColgp_HArray1OfPnt.hxx>
 #include <TColStd_HArray1OfInteger.hxx>
 #include <TColStd_HArray1OfReal.hxx>
+
+IMPLEMENT_STANDARD_RTTIEXT(GeomFill_LocationGuide,GeomFill_LocationLaw)
 
 #if DRAW
 static Standard_Integer Affich = 0;

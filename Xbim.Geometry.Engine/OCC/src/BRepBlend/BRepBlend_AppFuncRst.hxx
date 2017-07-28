@@ -42,14 +42,14 @@ public:
   
   Standard_EXPORT BRepBlend_AppFuncRst(Handle(BRepBlend_Line)& Line, Blend_SurfRstFunction& Func, const Standard_Real Tol3d, const Standard_Real Tol2d);
   
-  Standard_EXPORT void Point (const Blend_AppFunction& Func, const Standard_Real Param, const math_Vector& Sol, Blend_Point& Pnt) const;
+  Standard_EXPORT void Point (const Blend_AppFunction& Func, const Standard_Real Param, const math_Vector& Sol, Blend_Point& Pnt) const Standard_OVERRIDE;
   
-  Standard_EXPORT void Vec (math_Vector& Sol, const Blend_Point& Pnt) const;
+  Standard_EXPORT void Vec (math_Vector& Sol, const Blend_Point& Pnt) const Standard_OVERRIDE;
 
 
 
 
-  DEFINE_STANDARD_RTTI(BRepBlend_AppFuncRst,BRepBlend_AppFuncRoot)
+  DEFINE_STANDARD_RTTIEXT(BRepBlend_AppFuncRst,BRepBlend_AppFuncRoot)
 
 protected:
 

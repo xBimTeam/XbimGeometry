@@ -42,11 +42,11 @@ public:
   
   Standard_EXPORT BRepCheck_Edge(const TopoDS_Edge& E);
   
-  Standard_EXPORT void InContext (const TopoDS_Shape& ContextShape);
+  Standard_EXPORT void InContext (const TopoDS_Shape& ContextShape) Standard_OVERRIDE;
   
-  Standard_EXPORT void Minimum();
+  Standard_EXPORT void Minimum() Standard_OVERRIDE;
   
-  Standard_EXPORT void Blind();
+  Standard_EXPORT void Blind() Standard_OVERRIDE;
   
   Standard_EXPORT Standard_Boolean GeometricControls() const;
   
@@ -64,7 +64,7 @@ public:
 
 
 
-  DEFINE_STANDARD_RTTI(BRepCheck_Edge,BRepCheck_Result)
+  DEFINE_STANDARD_RTTIEXT(BRepCheck_Edge,BRepCheck_Result)
 
 protected:
 

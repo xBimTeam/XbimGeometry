@@ -38,11 +38,6 @@
 #include <TopoDS_Face.hxx>
 #include <TopoDS_Vertex.hxx>
 
-//
-//
-//
-//
-//
 //=======================================================================
 //class    : BOPAlgo_VertexFace
 //purpose  : 
@@ -53,27 +48,23 @@ class BOPAlgo_VertexFace : public BOPAlgo_Algo {
 
   BOPAlgo_VertexFace() : 
     BOPAlgo_Algo(),
-    myIV(-1), myIF(-1), myIVx(-1), 
-    myFlag(-1), myT1(-1.),  myT2(-1.) {
+    myIV(-1), myIF(-1),
+    myFlag(-1), myT1(-1.),  myT2(-1.), myTolVNew(-1.) {
   }
   //
   virtual ~BOPAlgo_VertexFace(){
   }
   //
   void SetIndices(const Standard_Integer nV,
-                  const Standard_Integer nF,
-                  const Standard_Integer nVx) {
+                  const Standard_Integer nF) {
     myIV=nV;
     myIF=nF;
-    myIVx=nVx;
   }
   //
   void Indices(Standard_Integer& nV,
-               Standard_Integer& nF,
-               Standard_Integer& nVx) const {
+               Standard_Integer& nF) const {
     nV=myIV;
     nF=myIF;
-    nVx=myIVx;
   }
   //
   void SetVertex(const TopoDS_Vertex& aV) {
@@ -102,6 +93,10 @@ class BOPAlgo_VertexFace : public BOPAlgo_Algo {
     aT2=myT2;
   }
   //
+  Standard_Real VertexNewTolerance()const {
+    return myTolVNew;
+  }
+  //
   void SetContext(const Handle(IntTools_Context)& aContext) {
     myContext=aContext;
   }
@@ -112,16 +107,16 @@ class BOPAlgo_VertexFace : public BOPAlgo_Algo {
   //
   virtual void Perform() {
     BOPAlgo_Algo::UserBreak();
-    myFlag=myContext->ComputeVF(myV, myF, myT1, myT2);
+    myFlag=myContext->ComputeVF(myV, myF, myT1, myT2, myTolVNew, myFuzzyValue);
   }
   //
  protected:
   Standard_Integer myIV;
   Standard_Integer myIF;
-  Standard_Integer myIVx;
   Standard_Integer myFlag;
   Standard_Real myT1;
   Standard_Real myT2;
+  Standard_Real myTolVNew;
   TopoDS_Vertex myV;
   TopoDS_Face myF;
   Handle(IntTools_Context) myContext;
@@ -147,101 +142,108 @@ typedef BOPCol_ContextCnt
 //=======================================================================
 void BOPAlgo_PaveFiller::PerformVF()
 {
-  Standard_Boolean bJustAdd;
-  Standard_Integer iSize, nV, nF, nVSD, iFlag, nVx, aNbVF, k;
-  Standard_Real aT1, aT2, aTolF, aTolV;
-  BRep_Builder aBB;
-  BOPAlgo_VectorOfVertexFace aVVF; 
-  //
   myErrorStatus=0;
   //
   myIterator->Initialize(TopAbs_VERTEX, TopAbs_FACE);
-  iSize=myIterator->ExpectedLength();
-  if (iSize) {
-    //
-    BOPDS_VectorOfInterfVF& aVFs=myDS->InterfVF();
-    aVFs.SetIncrement(iSize);
-    //
+  Standard_Integer iSize = myIterator->ExpectedLength();
+  //
+  Standard_Boolean bJustAdd;
+  Standard_Integer nV, nF;
+  //
+  if (myGlue == BOPAlgo_GlueFull) {
+    // there is no need to intersect vertices with faces in this mode
+    // just initialize FaceInfo for all faces
     for (; myIterator->More(); myIterator->Next()) {
       myIterator->Value(nV, nF, bJustAdd);
-      if(bJustAdd) {
-        continue;
-      }
-      //
-      if (myDS->IsSubShape(nV, nF)) {
-        continue;
-      }
-      //
-      if (myDS->HasInterfShapeSubShapes(nV, nF)) {
+      if (!bJustAdd && !myDS->IsSubShape(nV, nF)) {
         myDS->ChangeFaceInfo(nF);
-        continue;
       }
-      //
-      nVx=nV;
-      if (myDS->HasShapeSD(nV, nVSD)) {
-        nVx=nVSD;
-      }
-      //
-      if (myDS->HasInterf(nVx, nF)) {
-        continue;
-      }
-      //
-      myDS->ChangeFaceInfo(nF);// !
-      //
-      const TopoDS_Vertex& aV=(*(TopoDS_Vertex *)(&myDS->Shape(nVx))); 
-      const TopoDS_Face& aF=(*(TopoDS_Face *)(&myDS->Shape(nF))); 
-      //
-      BOPAlgo_VertexFace& aVertexFace=aVVF.Append1();
-      //
-      aVertexFace.SetIndices(nV, nF, nVx);
-      aVertexFace.SetVertex(aV);
-      aVertexFace.SetFace(aF);
-      aVertexFace.SetProgressIndicator(myProgressIndicator);
-    }//for (; myIterator->More(); myIterator->Next()) {
-    //
-    aNbVF=aVVF.Extent();
-    //================================================================
-    BOPAlgo_VertexFaceCnt::Perform(myRunParallel, aVVF, myContext);
-    //================================================================
-    //
-    for (k=0; k < aNbVF; ++k) {
-      const BOPAlgo_VertexFace& aVertexFace=aVVF(k);
-      // 
-      iFlag=aVertexFace.Flag();
-      if (iFlag) {
-        continue;
-      }
-      //
-      aVertexFace.Indices(nV, nF, nVx);
-      aVertexFace.Parameters(aT1, aT2);
-      const TopoDS_Vertex& aV=aVertexFace.Vertex();
-      const TopoDS_Face& aF=aVertexFace.Face();
-      // 1
-      BOPDS_InterfVF& aVF=aVFs.Append1();
-      aVF.SetIndices(nVx, nF);
-      aVF.SetUV(aT1, aT2);
-      // 2
-      myDS->AddInterf(nVx, nF);
-      // 3
-      BOPDS_FaceInfo& aFI=myDS->ChangeFaceInfo(nF);
-      BOPCol_MapOfInteger& aMVIn=aFI.ChangeVerticesIn();
-      aMVIn.Add(nVx);
-      // 4
-      aTolV = BRep_Tool::Tolerance(aV);
-      aTolF = BRep_Tool::Tolerance(aF);
-      if (aTolV < aTolF) {
-        aBB.UpdateVertex(aV, aTolF);
-        BOPDS_ShapeInfo& aSIV = myDS->ChangeShapeInfo(nVx);
-        Bnd_Box& aBoxV = aSIV.ChangeBox();
-        BRepBndLib::Add(aV, aBoxV);
-      }
-    }//for (k=0; k < aNbVF; ++k) {
-  }// if (iSize) {
-  else {
-    iSize=10;
-    BOPDS_VectorOfInterfVF& aVFs=myDS->InterfVF();
-    aVFs.SetIncrement(iSize);
+    }
+    return;
   }
+  //
+  BOPDS_VectorOfInterfVF& aVFs = myDS->InterfVF();
+  if (!iSize) {
+    iSize = 10;
+    aVFs.SetIncrement(iSize);
+    //
+    TreatVerticesEE();
+    return;
+  }
+  //
+  Standard_Integer nVSD, iFlag, nVx, aNbVF, k;
+  Standard_Real aT1, aT2;
+  BOPAlgo_VectorOfVertexFace aVVF; 
+  //
+  aVFs.SetIncrement(iSize);
+  //
+  for (; myIterator->More(); myIterator->Next()) {
+    myIterator->Value(nV, nF, bJustAdd);
+    if(bJustAdd) {
+      continue;
+    }
+    //
+    if (myDS->IsSubShape(nV, nF)) {
+      continue;
+    }
+    //
+    myDS->ChangeFaceInfo(nF);
+    if (myDS->HasInterfShapeSubShapes(nV, nF)) {
+      continue;
+    }
+    //
+    nVx=nV;
+    if (myDS->HasShapeSD(nV, nVSD)) {
+      nVx=nVSD;
+    }
+    //
+    const TopoDS_Vertex& aV=(*(TopoDS_Vertex *)(&myDS->Shape(nVx))); 
+    const TopoDS_Face& aF=(*(TopoDS_Face *)(&myDS->Shape(nF))); 
+    //
+    BOPAlgo_VertexFace& aVertexFace=aVVF.Append1();
+    //
+    aVertexFace.SetIndices(nV, nF);
+    aVertexFace.SetVertex(aV);
+    aVertexFace.SetFace(aF);
+    aVertexFace.SetFuzzyValue(myFuzzyValue);
+    aVertexFace.SetProgressIndicator(myProgressIndicator);
+  }//for (; myIterator->More(); myIterator->Next()) {
+  //
+  aNbVF=aVVF.Extent();
+  //================================================================
+  BOPAlgo_VertexFaceCnt::Perform(myRunParallel, aVVF, myContext);
+  //================================================================
+  //
+  for (k=0; k < aNbVF; ++k) {
+    const BOPAlgo_VertexFace& aVertexFace=aVVF(k);
+    // 
+    iFlag=aVertexFace.Flag();
+    if (iFlag) {
+      continue;
+    }
+    //
+    aVertexFace.Indices(nV, nF);
+    aVertexFace.Parameters(aT1, aT2);
+    // 1
+    BOPDS_InterfVF& aVF=aVFs.Append1();
+    aVF.SetIndices(nV, nF);
+    aVF.SetUV(aT1, aT2);
+    // 2
+    myDS->AddInterf(nV, nF);
+    //
+    // 3 update vertex V/F if necessary
+    Standard_Real aTolVNew = aVertexFace.VertexNewTolerance();
+    nVx=UpdateVertex(nV, aTolVNew);
+    //
+    // 4
+    if (myDS->IsNewShape(nVx)) {
+      aVF.SetIndexNew(nVx);
+    }
+    // 5 update FaceInfo
+    BOPDS_FaceInfo& aFI=myDS->ChangeFaceInfo(nF);
+    BOPCol_MapOfInteger& aMVIn=aFI.ChangeVerticesIn();
+    aMVIn.Add(nVx);
+  }//for (k=0; k < aNbVF; ++k) {
   //
   TreatVerticesEE();
 }
@@ -252,7 +254,7 @@ void BOPAlgo_PaveFiller::PerformVF()
 void BOPAlgo_PaveFiller::TreatVerticesEE()
 {
   Standard_Integer i, aNbS,aNbEEs, nF, nV, iFlag;
-  Standard_Real aT1, aT2;
+  Standard_Real aT1, aT2, dummy;
   BOPCol_ListIteratorOfListOfInteger aItLI;
   Handle(NCollection_BaseAllocator) aAllocator;
   //
@@ -313,7 +315,7 @@ void BOPAlgo_PaveFiller::TreatVerticesEE()
     if (!aMVOn.Contains(nV)) {
       const TopoDS_Vertex& aV=(*(TopoDS_Vertex *)(&myDS->Shape(nV))); 
       const TopoDS_Face& aF=(*(TopoDS_Face *)(&myDS->Shape(nF))); 
-      iFlag=myContext->ComputeVF(aV, aF, aT1, aT2);
+      iFlag = myContext->ComputeVF(aV, aF, aT1, aT2, dummy, myFuzzyValue);
       if (!iFlag) {
         // 1
         BOPDS_InterfVF& aVF=aVFs.Append1();

@@ -27,8 +27,6 @@
 #include <TColStd_Array1OfReal.hxx>
 
 #include <stdio.h>
-//#ifdef WNT
-//#endif
 #define ITMAX  100
 #define EPS    1e-14
 #define EPSEPS 2e-14
@@ -936,7 +934,7 @@ math_FunctionRoots::math_FunctionRoots(math_FunctionWithDerivative& F,
 	    else { AA = Fyu-Fxu;}
 	    if (!Sol.IsEmpty()) {
 	      if (Abs(Sol.Last() - U) > 5.*EpsX 
-		  || OldDF*AA < 0. ) {
+		  || (OldDF != RealLast() && OldDF*AA < 0.) ) {
 		Sol.Append(U);
 		NbStateSol.Append(F.GetStateNumber());
 	      }

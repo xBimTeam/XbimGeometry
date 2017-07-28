@@ -13,18 +13,8 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-//-Version	
-//-Design	Declaration des variables specifiques aux couleurs
-//-Warning	Une couleur est definie, soit en RGB, soit en HLS,
-//		soit par un nom predefini extrait des noms X11.
-//-References	
-//-Language	C++ 2.0
-//-Declarations
-// for Test method
-// for the class
-
 #include <Quantity_Color.hxx>
-#include <Quantity_Color_1.hxx>
+
 #include <Quantity_ColorDefinitionError.hxx>
 #include <Standard_ErrorHandler.hxx>
 #include <Standard_OutOfRange.hxx>
@@ -38,6 +28,10 @@ void call_rgbhls(float r, float g, float b, float& h, float& l, float& s);
 //-Aliases
 
 //-Global data definitions
+
+#define RGBHLS_H_UNDEFINED -1.0
+
+static Quantity_Parameter TheEpsilon = 0.0001;
 
 //	-- les composantes RGB
 //	MyRed		:	Standard_ShortReal;
@@ -114,6 +108,19 @@ Quantity_Color::Quantity_Color (const Quantity_Parameter R1, const Quantity_Para
 
 }
 
+Quantity_Color::Quantity_Color (const NCollection_Vec3<float>& theRgb)
+: MyRed  (theRgb.r()),
+  MyGreen(theRgb.g()),
+  MyBlue (theRgb.b())
+{
+  if (theRgb.r() < 0.0f || theRgb.r() > 1.0f
+   || theRgb.g() < 0.0f || theRgb.g() > 1.0f
+   || theRgb.b() < 0.0f || theRgb.b() > 1.0f)
+  {
+    Standard_OutOfRange::Raise ("Color out");
+  }
+}
+
 void Quantity_Color::ChangeContrast (const Quantity_Rate ADelta) {
 
 Standard_ShortReal MyHue, MyLight, MySaturation;
@@ -142,15 +149,6 @@ Standard_ShortReal MyHue, MyLight, MySaturation;
 		Quantity_Color::hlsrgb
 			(MyHue, MyLight, MySaturation, MyRed, MyGreen, MyBlue);
 	}
-
-}
-
-Quantity_Color& Quantity_Color::Assign (const Quantity_Color& Other) {
-
-	MyRed	= Standard_ShortReal (Other.Red ());
-	MyGreen	= Standard_ShortReal (Other.Green ());
-	MyBlue	= Standard_ShortReal (Other.Blue ());
-	return (*this);
 
 }
 

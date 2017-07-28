@@ -67,13 +67,12 @@ public:
   Standard_EXPORT Standard_Real Parameter() const;
   
   Standard_EXPORT void Parameter (const Standard_Real P);
-  
-  Standard_EXPORT virtual Standard_OStream& Dump (Standard_OStream& OS) const Standard_OVERRIDE;
 
 
 
 
-  DEFINE_STANDARD_RTTI(TopOpeBRepDS_EdgeVertexInterference,TopOpeBRepDS_ShapeShapeInterference)
+
+  DEFINE_STANDARD_RTTIEXT(TopOpeBRepDS_EdgeVertexInterference,TopOpeBRepDS_ShapeShapeInterference)
 
 protected:
 

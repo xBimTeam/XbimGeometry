@@ -800,8 +800,8 @@ ChFi3d_ChBuilder::SimulSurf(Handle(ChFiDS_SurfData)&            Data,
 			    const Standard_Boolean              RecOnS1,
 			    const Standard_Boolean              RecOnS2,
 			    const math_Vector&                  Soldep,
-			    Standard_Boolean&                   intf,
-			    Standard_Boolean&                   intl)
+			    Standard_Integer&                   intf,
+			    Standard_Integer&                   intl)
      
 {
   Handle(ChFiDS_ChamfSpine) 
@@ -887,12 +887,13 @@ ChFi3d_ChBuilder::SimulSurf(Handle(ChFiDS_SurfData)&            Data,
     
     Standard_Boolean reverse = (!Forward || Inside);
     if(intf && reverse){
-      Standard_Boolean ok = 0;
+      Standard_Boolean ok = Standard_False;
       const ChFiDS_CommonPoint& cp1 = Data->VertexFirstOnS1();
       if(cp1.IsOnArc()){
 	TopoDS_Face F1 = S1->ChangeSurface().Face();
 	TopoDS_Face bid;
-	ok = intf = !SearchFace(Spine,cp1,F1,bid);
+	intf = !SearchFace(Spine,cp1,F1,bid);
+	ok = intf != 0;
       }
       const ChFiDS_CommonPoint& cp2 = Data->VertexFirstOnS2();
       if(cp2.IsOnArc() && !ok){
@@ -902,12 +903,13 @@ ChFi3d_ChBuilder::SimulSurf(Handle(ChFiDS_SurfData)&            Data,
       }
     }
     if(intl){
-      Standard_Boolean ok = 0;
+      Standard_Boolean ok = Standard_False;
       const ChFiDS_CommonPoint& cp1 = Data->VertexLastOnS1();
       if(cp1.IsOnArc()){
 	TopoDS_Face F1 = S1->ChangeSurface().Face();
 	TopoDS_Face bid;
-	ok = intl = !SearchFace(Spine,cp1,F1,bid);
+	intl = !SearchFace(Spine,cp1,F1,bid);
+	ok = intl != 0;
       }
       const ChFiDS_CommonPoint& cp2 = Data->VertexLastOnS2();
       if(cp2.IsOnArc() && !ok){
@@ -967,12 +969,13 @@ ChFi3d_ChBuilder::SimulSurf(Handle(ChFiDS_SurfData)&            Data,
     
     Standard_Boolean reverse = (!Forward || Inside);
     if(intf && reverse){
-      Standard_Boolean ok = 0;
+      Standard_Boolean ok = Standard_False;
       const ChFiDS_CommonPoint& cp1 = Data->VertexFirstOnS1();
       if(cp1.IsOnArc()){
 	TopoDS_Face F1 = S1->ChangeSurface().Face();
 	TopoDS_Face bid;
-	ok = intf = !SearchFace(Spine,cp1,F1,bid);
+	intf = !SearchFace(Spine,cp1,F1,bid);
+	ok = intf != 0;
       }
       const ChFiDS_CommonPoint& cp2 = Data->VertexFirstOnS2();
       if(cp2.IsOnArc() && !ok){
@@ -982,12 +985,13 @@ ChFi3d_ChBuilder::SimulSurf(Handle(ChFiDS_SurfData)&            Data,
       }
     }
     if(intl){
-      Standard_Boolean ok = 0;
+      Standard_Boolean ok = Standard_False;
       const ChFiDS_CommonPoint& cp1 = Data->VertexLastOnS1();
       if(cp1.IsOnArc()){
 	TopoDS_Face F1 = S1->ChangeSurface().Face();
 	TopoDS_Face bid;
-	ok = intl = !SearchFace(Spine,cp1,F1,bid);
+	intl = !SearchFace(Spine,cp1,F1,bid);
+	ok = intl != 0;
       }
       const ChFiDS_CommonPoint& cp2 = Data->VertexLastOnS2();
       if(cp2.IsOnArc() && !ok){
@@ -1052,12 +1056,13 @@ ChFi3d_ChBuilder::SimulSurf(Handle(ChFiDS_SurfData)&            Data,
 
       Standard_Boolean reverse = (!Forward || Inside);
       if(intf && reverse){
-	Standard_Boolean ok = 0;
+	Standard_Boolean ok = Standard_False;
 	const ChFiDS_CommonPoint& cp1 = Data->VertexFirstOnS1();
 	if(cp1.IsOnArc()){
 	  TopoDS_Face F1 = S1->ChangeSurface().Face();
 	  TopoDS_Face bid;
-	  ok = intf = !SearchFace(Spine,cp1,F1,bid);
+	  intf = !SearchFace(Spine,cp1,F1,bid);
+	  ok = intf != 0;
 	}
 	const ChFiDS_CommonPoint& cp2 = Data->VertexFirstOnS2();
 	if(cp2.IsOnArc() && !ok){
@@ -1068,12 +1073,13 @@ ChFi3d_ChBuilder::SimulSurf(Handle(ChFiDS_SurfData)&            Data,
       }
       
       if(intl){
-	Standard_Boolean ok = 0;
+	Standard_Boolean ok = Standard_False;
 	const ChFiDS_CommonPoint& cp1 = Data->VertexLastOnS1();
 	if(cp1.IsOnArc()){
 	  TopoDS_Face F1 = S1->ChangeSurface().Face();
 	  TopoDS_Face bid;
-	  ok = intl = !SearchFace(Spine,cp1,F1,bid);
+	  intl = !SearchFace(Spine,cp1,F1,bid);
+	  ok = intl != 0;
 	}
 	const ChFiDS_CommonPoint& cp2 = Data->VertexLastOnS2();
 	if(cp2.IsOnArc() && !ok){
@@ -1136,12 +1142,13 @@ ChFi3d_ChBuilder::SimulSurf(Handle(ChFiDS_SurfData)&            Data,
 
       Standard_Boolean reverse = (!Forward || Inside);
       if(intf && reverse){
-	Standard_Boolean ok = 0;
+	Standard_Boolean ok = Standard_False;
 	const ChFiDS_CommonPoint& cp1 = Data->VertexFirstOnS1();
 	if(cp1.IsOnArc()){
 	  TopoDS_Face F1 = S1->ChangeSurface().Face();
 	  TopoDS_Face bid;
-	  ok = intf = !SearchFace(Spine,cp1,F1,bid);
+	  intf = !SearchFace(Spine,cp1,F1,bid);
+	  ok = intf != 0;
 	}
 	const ChFiDS_CommonPoint& cp2 = Data->VertexFirstOnS2();
 	if(cp2.IsOnArc() && !ok){
@@ -1152,12 +1159,13 @@ ChFi3d_ChBuilder::SimulSurf(Handle(ChFiDS_SurfData)&            Data,
       }
       
       if(intl){
-	Standard_Boolean ok = 0;
+	Standard_Boolean ok = Standard_False;
 	const ChFiDS_CommonPoint& cp1 = Data->VertexLastOnS1();
 	if(cp1.IsOnArc()){
 	  TopoDS_Face F1 = S1->ChangeSurface().Face();
 	  TopoDS_Face bid;
-	  ok = intl = !SearchFace(Spine,cp1,F1,bid);
+	  intl = !SearchFace(Spine,cp1,F1,bid);
+	  ok = intl != 0;
 	}
 	const ChFiDS_CommonPoint& cp2 = Data->VertexLastOnS2();
 	if(cp2.IsOnArc() && !ok){
@@ -1332,8 +1340,11 @@ Standard_Boolean ChFi3d_ChBuilder::PerformFirstSection
     
     Standard_Real tol = tolesp*1.e2;
 //    Standard_Real u,v;
-    Extrema_GenLocateExtPS proj1(pt1,S1->Surface(),SolDep(1),SolDep(2),tol,tol);
-    Extrema_GenLocateExtPS proj2(pt2,S2->Surface(),SolDep(3),SolDep(4),tol,tol);
+    Extrema_GenLocateExtPS proj1(S1->Surface(), tol, tol);
+    proj1.Perform(pt1, SolDep(1), SolDep(2));
+    Extrema_GenLocateExtPS proj2(S2->Surface(), tol, tol);
+    proj2.Perform(pt2, SolDep(3), SolDep(4));
+
     if( proj1.IsDone() ){
       (proj1.Point()).Parameter(SolDep(1),SolDep(2)); 
     }
@@ -1389,8 +1400,12 @@ Standard_Boolean ChFi3d_ChBuilder::PerformFirstSection
     
     Standard_Real tol = tolesp*1.e2;
 //    Standard_Real u,v;
-    Extrema_GenLocateExtPS proj1(pt1,S1->Surface(),SolDep(1),SolDep(2),tol,tol);
-    Extrema_GenLocateExtPS proj2(pt2,S2->Surface(),SolDep(3),SolDep(4),tol,tol);
+
+    Extrema_GenLocateExtPS proj1(S1->Surface(), tol, tol);
+    proj1.Perform(pt1, SolDep(1), SolDep(2));
+    Extrema_GenLocateExtPS proj2(S2->Surface(), tol, tol);
+    proj2.Perform(pt2, SolDep(3), SolDep(4));
+
     if( proj1.IsDone() ){
       (proj1.Point()).Parameter(SolDep(1),SolDep(2)); 
     }
@@ -1457,8 +1472,10 @@ Standard_Boolean ChFi3d_ChBuilder::PerformFirstSection
       
       Standard_Real tol = tolesp*1.e2;
 //      Standard_Real u,v;
-      Extrema_GenLocateExtPS proj1(pt1,S1->Surface(),SolDep(1),SolDep(2),tol,tol);
-      Extrema_GenLocateExtPS proj2(pt2,S2->Surface(),SolDep(3),SolDep(4),tol,tol);
+      Extrema_GenLocateExtPS proj1(S1->Surface(), tol, tol);
+      proj1.Perform(pt1, SolDep(1), SolDep(2));
+      Extrema_GenLocateExtPS proj2(S2->Surface(), tol, tol);
+      proj2.Perform(pt2, SolDep(3), SolDep(4));
       if( proj1.IsDone() ){
 	(proj1.Point()).Parameter(SolDep(1),SolDep(2)); 
       }
@@ -1525,8 +1542,10 @@ Standard_Boolean ChFi3d_ChBuilder::PerformFirstSection
       
       Standard_Real tol = tolesp*1.e2;
 //      Standard_Real u,v;
-      Extrema_GenLocateExtPS proj1(pt1,S2->Surface(),SolDep(1),SolDep(2),tol,tol);
-      Extrema_GenLocateExtPS proj2(pt2,S1->Surface(),SolDep(3),SolDep(4),tol,tol);
+      Extrema_GenLocateExtPS proj1(S2->Surface(), tol, tol);
+      proj1.Perform(pt1, SolDep(1), SolDep(2));
+      Extrema_GenLocateExtPS proj2(S1->Surface(), tol, tol);
+      proj2.Perform(pt2, SolDep(3), SolDep(4));
       if( proj1.IsDone() ) {
 	(proj1.Point()).Parameter(SolDep(1),SolDep(2)); 
       }
@@ -1574,8 +1593,8 @@ ChFi3d_ChBuilder::PerformSurf(ChFiDS_SequenceOfSurfData&          SeqData,
 			      const Standard_Boolean              RecOnS1,
 			      const Standard_Boolean              RecOnS2,
 			      const math_Vector&                  Soldep,
-			      Standard_Boolean&                   intf,
-			      Standard_Boolean&                   intl)
+			      Standard_Integer&                   intf,
+			      Standard_Integer&                   intl)
      
 {
   Handle(ChFiDS_SurfData) Data = SeqData(1);

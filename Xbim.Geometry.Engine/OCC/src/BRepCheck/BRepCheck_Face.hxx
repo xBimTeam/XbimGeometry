@@ -40,11 +40,11 @@ public:
   
   Standard_EXPORT BRepCheck_Face(const TopoDS_Face& F);
   
-  Standard_EXPORT void InContext (const TopoDS_Shape& ContextShape);
+  Standard_EXPORT void InContext (const TopoDS_Shape& ContextShape) Standard_OVERRIDE;
   
-  Standard_EXPORT void Minimum();
+  Standard_EXPORT void Minimum() Standard_OVERRIDE;
   
-  Standard_EXPORT void Blind();
+  Standard_EXPORT void Blind() Standard_OVERRIDE;
   
   Standard_EXPORT BRepCheck_Status IntersectWires (const Standard_Boolean Update = Standard_False);
   
@@ -66,7 +66,7 @@ public:
 
 
 
-  DEFINE_STANDARD_RTTI(BRepCheck_Face,BRepCheck_Result)
+  DEFINE_STANDARD_RTTIEXT(BRepCheck_Face,BRepCheck_Result)
 
 protected:
 

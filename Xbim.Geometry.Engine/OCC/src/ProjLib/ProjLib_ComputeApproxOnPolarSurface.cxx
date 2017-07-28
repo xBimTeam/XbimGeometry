@@ -94,6 +94,65 @@ struct aFuncStruct
 };
 
 //=======================================================================
+//function : computePeriodicity
+//purpose  : Compute period information on adaptor.
+//=======================================================================
+static void computePeriodicity(const Handle(Adaptor3d_HSurface)& theSurf,
+                               Standard_Real &theUPeriod,
+                               Standard_Real &theVPeriod)
+{
+  theUPeriod = 0.0;
+  theVPeriod = 0.0;
+
+  // Compute once information about periodicity.
+  // Param space may be reduced in case of rectangular trimmed surface,
+  // in this case really trimmed bounds should be set as unperiodic.
+  Standard_Real aTrimF, aTrimL, aBaseF, aBaseL, aDummyF, aDummyL;
+  Handle(Geom_Surface) aS = GeomAdaptor::MakeSurface(theSurf->Surface(), Standard_False); // Not trim.
+  // U param space.
+  if (theSurf->IsUPeriodic())
+  {
+    theUPeriod = theSurf->UPeriod();
+  }
+  else if(theSurf->IsUClosed())
+  {
+    theUPeriod = theSurf->LastUParameter() - theSurf->FirstUParameter();
+  }
+  if (theUPeriod != 0.0)
+  {
+    aTrimF = theSurf->FirstUParameter(); // Trimmed first
+    aTrimL = theSurf->LastUParameter(); // Trimmed last
+    aS->Bounds(aBaseF, aBaseL, aDummyF, aDummyL); // Non-trimmed values.
+    if (Abs (aBaseF - aTrimF) + Abs (aBaseL - aTrimL) > Precision::PConfusion())
+    {
+      // Param space reduced.
+      theUPeriod = 0.0;
+    }
+  }
+
+  // V param space.
+  if (theSurf->IsVPeriodic())
+  {
+    theVPeriod = theSurf->VPeriod();
+  }
+  else if(theSurf->IsVClosed())
+  {
+    theVPeriod = theSurf->LastVParameter() - theSurf->FirstVParameter();
+  }
+  if (theVPeriod != 0.0)
+  {
+    aTrimF = theSurf->FirstVParameter(); // Trimmed first
+    aTrimL = theSurf->LastVParameter(); // Trimmed last
+    aS->Bounds(aDummyF, aDummyL, aBaseF, aBaseL); // Non-trimmed values.
+    if (Abs (aBaseF - aTrimF) + Abs (aBaseL - aTrimL) > Precision::PConfusion())
+    {
+      // Param space reduced.
+      theVPeriod = 0.0;
+    }
+  }
+}
+
+//=======================================================================
 //function : aFuncValue
 //purpose  : compute functional value in (theU,theV) point
 //=======================================================================
@@ -128,7 +187,6 @@ static Standard_Real anOrthogSqValue(const gp_Pnt& aBasePnt,
 //purpose  : (OCC217 - apo)- Compute Point2d that project on polar surface(<Surf>) 3D<Curve>
 //            <InitCurve2d> use for calculate start 2D point.
 //=======================================================================
-
 static gp_Pnt2d Function_Value(const Standard_Real theU,
                                const aFuncStruct& theData)
 {
@@ -236,10 +294,8 @@ static gp_Pnt2d Function_Value(const Standard_Real theU,
   Standard_Real uperiod = theData.myPeriod[0],
                 vperiod = theData.myPeriod[1],
                 u, v;
-  // U0 and V0 are the points within the initialized period 
-  // (periode with u and v),
-  // U1 and V1 are the points for construction of tops
-  
+
+  // U0 and V0 are the points within the initialized period.
   if(U0 < Uinf)
   {
     if(!uperiod)
@@ -280,8 +336,8 @@ static gp_Pnt2d Function_Value(const Standard_Real theU,
       V0 += decalV*vperiod;
     }
   }
-  
-  // The surface around U0 is reduced.
+
+  // The surface around (U0,V0) is reduced.
   Standard_Real uLittle = (Usup - Uinf)/10, vLittle = (Vsup - Vinf)/10;
   Standard_Real uInfLi = 0, vInfLi = 0,uSupLi = 0, vSupLi = 0;
   if((U0 - Uinf) > uLittle) uInfLi = U0 - uLittle; else uInfLi = Uinf;
@@ -311,7 +367,8 @@ static gp_Pnt2d Function_Value(const Standard_Real theU,
   }
 
   // Try to run simple search with initial point (U0, V0).
-  Extrema_GenLocateExtPS  locext(p, SurfLittle, U0, V0, theData.myTolU, theData.myTolV);
+  Extrema_GenLocateExtPS  locext(SurfLittle, theData.myTolU, theData.myTolV);
+  locext.Perform(p, U0, V0);
   if (locext.IsDone()) 
   {
     locext.Point().Parameter(u, v);
@@ -372,18 +429,7 @@ class ProjLib_PolarFunction : public AppCont_Function
     myNbPnt = 0;
     myNbPnt2d = 1;
 
-    myStruct.myPeriod[0] = 0.0;
-    myStruct.myPeriod[1] = 0.0;
-
-    // Compute once information about periodicity.
-    if(Surf->IsUPeriodic() || Surf->IsUClosed())
-    {
-      myStruct.myPeriod[0] =  Surf->LastUParameter() - Surf->FirstUParameter();
-    }
-    if(Surf->IsVPeriodic() || Surf->IsVClosed())
-    {
-      myStruct.myPeriod[1] = Surf->LastVParameter() - Surf->FirstVParameter();
-    }
+    computePeriodicity(Surf, myStruct.myPeriod[0], myStruct.myPeriod[1]);
 
     myStruct.myCurve = C;
     myStruct.myInitCurve2d = InitialCurve2d;
@@ -766,6 +812,8 @@ Handle(Geom2d_BSplineCurve) ProjLib_ComputeApproxOnPolarSurface::Perform
 	}
       }
 
+      Standard_Real anUPeriod, anVPeriod;
+      computePeriodicity(S, anUPeriod, anVPeriod);
       Standard_Integer NbC = LOfBSpline2d.Extent();
       Handle(Geom2d_BSplineCurve) CurBS;
       CurBS = Handle(Geom2d_BSplineCurve)::DownCast(LOfBSpline2d.First());
@@ -780,22 +828,18 @@ Handle(Geom2d_BSplineCurve) ProjLib_ComputeApproxOnPolarSurface::Perform
         gp_Pnt2d aC2Beg = BS->Pole(1); // Beginning of C2.
         Standard_Real anUJump = 0.0, anVJump = 0.0;
 
-        if (S->IsUPeriodic() || S->IsUClosed())
+        if (anUPeriod > 0.0 &&
+            Abs (aC1End.X() - aC2Beg.X()) > (anUPeriod ) / 2.01)
         {
-          if (Abs (aC1End.X() - aC2Beg.X()) > (S->LastUParameter() - S->FirstUParameter() ) / 2.01)
-          {
-            Standard_Real aMultCoeff =  aC2Beg.X() < aC1End.X() ? 1.0 : -1.0;
-            anUJump = (S->LastUParameter() - S->FirstUParameter() ) * aMultCoeff;
-          }
+          Standard_Real aMultCoeff =  aC2Beg.X() < aC1End.X() ? 1.0 : -1.0;
+          anUJump = (anUPeriod) * aMultCoeff;
         }
 
-        if (S->IsVPeriodic() || S->IsVClosed())
+        if (anVPeriod &&
+            Abs (aC1End.Y() - aC2Beg.Y()) > (anVPeriod) / 2.01)
         {
-          if (Abs (aC1End.Y() - aC2Beg.Y()) > (S->LastVParameter() - S->FirstVParameter() ) / 2.01)
-          {
-            Standard_Real aMultCoeff =  aC2Beg.Y() < aC1End.Y() ? 1.0 : -1.0;
-            anVJump = (S->LastVParameter() - S->FirstVParameter() ) * aMultCoeff;
-          }
+          Standard_Real aMultCoeff =  aC2Beg.Y() < aC1End.Y() ? 1.0 : -1.0;
+          anVJump = (anVPeriod) * aMultCoeff;
         }
 
         CurBS = Concat(CurBS,BS, anUJump, anVJump);
@@ -832,14 +876,9 @@ Handle(Adaptor2d_HCurve2d)
   Standard_Real TolU = Surf->UResolution(Tol3d), TolV = Surf->VResolution(Tol3d);
   Standard_Real DistTol3d = 100.0*Tol3d;
 
-  Standard_Real uperiod = 0., vperiod = 0.;
-  if(Surf->IsUPeriodic() || Surf->IsUClosed())
-    uperiod = Surf->LastUParameter() - Surf->FirstUParameter(); 
-  
-  if(Surf->IsVPeriodic() || Surf->IsVClosed())
-    vperiod = Surf->LastVParameter() - Surf->FirstVParameter(); 
+  Standard_Real uperiod = 0.0, vperiod = 0.0;
+  computePeriodicity(Surf, uperiod, vperiod);
 
-  
   // NO myTol is Tol2d !!!!
   //Standard_Real TolU = myTolerance, TolV = myTolerance;
   //Standard_Real Tol3d = 100*myTolerance; // At random Balthazar.
@@ -1180,9 +1219,9 @@ Handle(Adaptor2d_HCurve2d)
 	  myProjIsDone = Standard_False;
 	  Dist2Min = RealLast();
 	  Curve->D0(Param.Value(i), pntproj);
-	  Extrema_GenLocateExtPS  aLocateExtPS
-	    (pntproj, Surf->Surface(), U0, V0, TolU, TolV) ;
-	  
+          Extrema_GenLocateExtPS  aLocateExtPS(Surf->Surface(), TolU, TolV);
+          aLocateExtPS.Perform(pntproj, U0, V0);
+
 	  if (aLocateExtPS.IsDone())
           {
 	    if (aLocateExtPS.SquareDistance() < DistTol3d * DistTol3d)
@@ -1270,21 +1309,22 @@ Handle(Adaptor2d_HCurve2d)
             }
           }
 	  if(!myProjIsDone && uperiod) {
-	    Standard_Real Uinf, Usup, Uaux;
-	    Uinf = Surf->Surface().FirstUParameter();
-	    Usup = Surf->Surface().LastUParameter();
-	    if((Usup - U0) > (U0 - Uinf)) 
-	      Uaux = 2*Uinf - U0 + uperiod;
+	    Standard_Real aUinf, aUsup, Uaux;
+	    aUinf = Surf->Surface().FirstUParameter();
+	    aUsup = Surf->Surface().LastUParameter();
+	    if((aUsup - U0) > (U0 - aUinf)) 
+	      Uaux = 2*aUinf - U0 + uperiod;
 	    else 
-	      Uaux = 2*Usup - U0 - uperiod;
-	    Extrema_GenLocateExtPS  locext(pntproj, 
-					   Surf->Surface(), 
-					   Uaux, V0, TolU, TolV);
+	      Uaux = 2*aUsup - U0 - uperiod;
+
+            Extrema_GenLocateExtPS  locext(Surf->Surface(), TolU, TolV);
+            locext.Perform(pntproj, Uaux, V0);
+
 	    if (locext.IsDone())
 	      if (locext.SquareDistance() < DistTol3d * DistTol3d) {  //OCC217
 	      //if (locext.SquareDistance() < Tol3d * Tol3d) {
 		(locext.Point()).Parameter(u,v);
-		if((Usup - U0) > (U0 - Uinf)) 
+		if((aUsup - U0) > (U0 - aUinf)) 
 		  usens--;
 		else 
 		  usens++;
@@ -1296,21 +1336,22 @@ Handle(Adaptor2d_HCurve2d)
 	      }
 	  }
 	  if(!myProjIsDone && vperiod) {
-	    Standard_Real Vinf, Vsup, Vaux;
-	    Vinf = Surf->Surface().FirstVParameter();
-	    Vsup = Surf->Surface().LastVParameter();
-	    if((Vsup - V0) > (V0 - Vinf)) 
-	      Vaux = 2*Vinf - V0 + vperiod;
+	    Standard_Real aVinf, aVsup, Vaux;
+	    aVinf = Surf->Surface().FirstVParameter();
+	    aVsup = Surf->Surface().LastVParameter();
+	    if((aVsup - V0) > (V0 - aVinf)) 
+	      Vaux = 2*aVinf - V0 + vperiod;
 	    else 
-	      Vaux = 2*Vsup - V0 - vperiod;
-	    Extrema_GenLocateExtPS  locext(pntproj, 
-					   Surf->Surface(), 
-					   U0, Vaux, TolU, TolV) ;
+	      Vaux = 2*aVsup - V0 - vperiod;
+
+            Extrema_GenLocateExtPS  locext(Surf->Surface(), TolU, TolV);
+            locext.Perform(pntproj, U0, Vaux);
+
 	    if (locext.IsDone())
 	      if (locext.SquareDistance() < DistTol3d * DistTol3d) {  //OCC217
 	      //if (locext.SquareDistance() < Tol3d * Tol3d) {
 		(locext.Point()).Parameter(u,v);
-		if((Vsup - V0) > (V0 - Vinf)) 
+		if((aVsup - V0) > (V0 - aVinf)) 
 		  vsens--;
 		else 
 		  vsens++;
@@ -1331,9 +1372,10 @@ Handle(Adaptor2d_HCurve2d)
 	      Vaux = 2*Vinf - V0 + vperiod;
 	    else 
 	      Vaux = 2*Vsup - V0 - vperiod;
-	    Extrema_GenLocateExtPS  locext(pntproj, 
-					   Surf->Surface(), 
-					   Uaux, Vaux, TolU, TolV);
+
+            Extrema_GenLocateExtPS  locext(Surf->Surface(), TolU, TolV);
+            locext.Perform(pntproj, Uaux, Vaux);
+
 	    if (locext.IsDone())
 	      if (locext.SquareDistance() < DistTol3d * DistTol3d) {
 	      //if (locext.SquareDistance() < Tol3d * Tol3d) {
@@ -1357,15 +1399,15 @@ Handle(Adaptor2d_HCurve2d)
 	    Extrema_ExtPS ext(pntproj, Surf->Surface(), TolU, TolV) ;
 	    if (ext.IsDone()) {
 	      Dist2Min = ext.SquareDistance(1);
-	      Standard_Integer GoodValue = 1;
+	      Standard_Integer aGoodValue = 1;
 	      for ( j = 2 ; j <= ext.NbExt() ; j++ )
 		if( Dist2Min > ext.SquareDistance(j)) {
 		  Dist2Min = ext.SquareDistance(j);
-		  GoodValue = j;
+		  aGoodValue = j;
 		}
 	      if (Dist2Min < DistTol3d * DistTol3d) {
 	      //if (Dist2Min < Tol3d * Tol3d) {
-		(ext.Point(GoodValue)).Parameter(u,v);
+		(ext.Point(aGoodValue)).Parameter(u,v);
 		if(uperiod) {
 		  if((U0 - u) > (2*uperiod/3)) {
 		    usens++;
@@ -1546,8 +1588,10 @@ Handle(Geom2d_BSplineCurve)
 	  for(i = 1;i <= Curve->NbPoles();i++) {
 	    myProjIsDone = Standard_False;
 	    Dist2Min = IntegerLast();
-	    Extrema_GenLocateExtPS  extrloc(BSC->Pole(i),Surf->Surface(),(p11.X()+p22.X())/2,
-					    (p11.Y()+p22.Y())/2,TolU,TolV) ;
+
+            Extrema_GenLocateExtPS  extrloc(Surf->Surface(), TolU, TolV);
+            extrloc.Perform(BSC->Pole(i), (p11.X()+p22.X())/2, (p11.Y()+p22.Y())/2);
+
 	    if (extrloc.IsDone()) {
 	      Dist2Min = (Standard_Integer ) extrloc.SquareDistance();
 	      if (Dist2Min < DistTol3d * DistTol3d) {  //OCC217
@@ -1584,8 +1628,10 @@ Handle(Geom2d_BSplineCurve)
 	  TColgp_Array1OfPnt2d Poles2d(1,Curve->NbPoles());
 	  for(i = 1;i <= Curve->NbPoles();i++) {
 	    Dist2Min = IntegerLast();
-	    Extrema_GenLocateExtPS  extrloc(BC->Pole(i),Surf->Surface(),0.5,
-					    0.5,TolU,TolV) ;
+
+            Extrema_GenLocateExtPS  extrloc(Surf->Surface(), TolU, TolV);
+            extrloc.Perform(BC->Pole(i), 0.5, 0.5);
+
 	    if (extrloc.IsDone()) {
 	      Dist2Min = (Standard_Integer ) extrloc.SquareDistance();
 	      if (Dist2Min < DistTol3d * DistTol3d) {  //OCC217
@@ -1647,8 +1693,10 @@ Handle(Geom2d_BSplineCurve)
 	  for(i = 1;i <= Curve->NbPoles();i++) {
 	    myProjIsDone = Standard_False;
 	    Dist2Min = IntegerLast();
-	    Extrema_GenLocateExtPS  extrloc(BSC->Pole(i),Surf->Surface(),(p11.X()+p22.X())/2,
-					    (p11.Y()+p22.Y())/2,TolU,TolV) ;
+
+            Extrema_GenLocateExtPS  extrloc(Surf->Surface(), TolU, TolV);
+            extrloc.Perform(BSC->Pole(i), (p11.X()+p22.X())/2, (p11.Y()+p22.Y())/2);
+
 	    if (extrloc.IsDone()) {
 	      Dist2Min = (Standard_Integer ) extrloc.SquareDistance();
 	      if (Dist2Min < DistTol3d * DistTol3d) {  //OCC217
@@ -1685,8 +1733,10 @@ Handle(Geom2d_BSplineCurve)
 	  TColgp_Array1OfPnt2d Poles2d(1,Curve->NbPoles());
 	  for(i = 1;i <= Curve->NbPoles();i++) {
 	    Dist2Min = IntegerLast();
-	    Extrema_GenLocateExtPS  extrloc(BC->Pole(i),Surf->Surface(),0.5,
-					    0.5,TolU,TolV) ;
+
+            Extrema_GenLocateExtPS  extrloc(Surf->Surface(), TolU, TolV);
+            extrloc.Perform(BC->Pole(i), 0.5, 0.5);
+
 	    if (extrloc.IsDone()) {
 	      Dist2Min = (Standard_Integer ) extrloc.SquareDistance();
 	      if (Dist2Min < DistTol3d * DistTol3d) {  //OCC217
@@ -1772,14 +1822,14 @@ Handle(Geom2d_BSplineCurve)
 			    Standard_True);
 
   if(Fit.IsAllApproximated()) {
-    Standard_Integer i;
+    Standard_Integer j;
     Standard_Integer NbCurves = Fit.NbMultiCurves();
     Standard_Integer MaxDeg = 0;
     // To transform the MultiCurve into BSpline, it is required that all  
     // Bezier constituing it have the same degree -> Calculation of MaxDeg
     Standard_Integer NbPoles  = 1;
-    for (i = 1; i <= NbCurves; i++) {
-      Standard_Integer Deg = Fit.Value(i).Degree();
+    for (j = 1; j <= NbCurves; j++) {
+      Standard_Integer Deg = Fit.Value(j).Degree();
       MaxDeg = Max ( MaxDeg, Deg);
     }
 
@@ -1801,18 +1851,18 @@ Handle(Geom2d_BSplineCurve)
       Standard_Integer Inc = MaxDeg - MC.Degree();
       if ( Inc > 0) {
 //	BSplCLib::IncreaseDegree( Inc, Poles2d, PLib::NoWeights(), 
-	BSplCLib::IncreaseDegree( MaxDeg, Poles2d, PLib::NoWeights(), 
-			 TempPoles, PLib::NoWeights());
+	BSplCLib::IncreaseDegree( MaxDeg, Poles2d, BSplCLib::NoWeights(), 
+			 TempPoles, BSplCLib::NoWeights());
 	//update of tops of the PCurve
-	for (Standard_Integer j = 1 ; j <= MaxDeg + 1; j++) {
-	  Poles.SetValue( Compt, TempPoles( j));
+	for (Standard_Integer k = 1 ; k <= MaxDeg + 1; k++) {
+	  Poles.SetValue( Compt, TempPoles( k));
 	  Compt++;
 	}
       }
       else {
 	//update of tops of the PCurve
-	for (Standard_Integer j = 1 ; j <= MaxDeg + 1; j++) {
-	  Poles.SetValue( Compt, Poles2d( j));
+	for (Standard_Integer k = 1 ; k <= MaxDeg + 1; k++) {
+	  Poles.SetValue( Compt, Poles2d( k));
 	  Compt++;
 	}
       } 

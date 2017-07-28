@@ -33,6 +33,7 @@
 #include <OSD_Parallel.hxx>
 #include <Standard_ErrorHandler.hxx>
 #include <TColStd_Array1OfReal.hxx>
+#include <TColStd_HArray1OfReal.hxx>
 
 class GeomLib_CheckCurveOnSurface_TargetFunc;
 
@@ -310,7 +311,8 @@ GeomLib_CheckCurveOnSurface::GeomLib_CheckCurveOnSurface()
   myLast(0.),
   myErrorStatus(0),
   myMaxDistance(RealLast()),
-  myMaxParameter(0.)
+  myMaxParameter(0.),
+  myTolRange(Precision::PConfusion())
 {
 }
 
@@ -322,14 +324,16 @@ GeomLib_CheckCurveOnSurface::
   GeomLib_CheckCurveOnSurface(const Handle(Geom_Curve)& theCurve,
                               const Handle(Geom_Surface)& theSurface,
                               const Standard_Real theFirst,
-                              const Standard_Real theLast):
+                              const Standard_Real theLast,
+                              const Standard_Real theTolRange):
   myCurve(theCurve),
   mySurface(theSurface),
   myFirst(theFirst),
   myLast(theLast),
   myErrorStatus(0),
   myMaxDistance(RealLast()),
-  myMaxParameter(0.)
+  myMaxParameter(0.),
+  myTolRange(theTolRange)
 {
 }
 
@@ -346,6 +350,7 @@ void GeomLib_CheckCurveOnSurface::Init()
   myErrorStatus = 0;
   myMaxDistance = RealLast();
   myMaxParameter = 0.0;
+  myTolRange = Precision::PConfusion();
 }
 
 //=======================================================================
@@ -355,7 +360,8 @@ void GeomLib_CheckCurveOnSurface::Init()
 void GeomLib_CheckCurveOnSurface::Init( const Handle(Geom_Curve)& theCurve,
                                         const Handle(Geom_Surface)& theSurface,
                                         const Standard_Real theFirst,
-                                        const Standard_Real theLast)
+                                        const Standard_Real theLast,
+                                        const Standard_Real theTolRange)
 {
   myCurve = theCurve;
   mySurface = theSurface;
@@ -364,13 +370,13 @@ void GeomLib_CheckCurveOnSurface::Init( const Handle(Geom_Curve)& theCurve,
   myErrorStatus = 0;
   myMaxDistance = RealLast();
   myMaxParameter = 0.0;
+  myTolRange = theTolRange;
 }
 
 //=======================================================================
 //function : Perform
 //purpose  : 
 //=======================================================================
-
 #ifndef HAVE_TBB
 //After fixing bug # 26365, this fragment should be deleted
 //(together the text "#ifdef HAVE_TBB")
@@ -392,10 +398,10 @@ void GeomLib_CheckCurveOnSurface::Perform(const Handle(Geom2d_Curve)& thePCurve,
     return;
   }
 
-  if( (myCurve->FirstParameter() > myFirst) ||
-      (myCurve->LastParameter() < myLast) ||
-      (thePCurve->FirstParameter() > myFirst) ||
-      (thePCurve->LastParameter() < myLast))
+  if(((myCurve->FirstParameter() - myFirst) > myTolRange) ||
+     ((myCurve->LastParameter() - myLast) < -myTolRange) ||
+     ((thePCurve->FirstParameter() - myFirst) > myTolRange) ||
+     ((thePCurve->LastParameter() - myLast) < -myTolRange))
   {
     myErrorStatus = 2;
     return;
@@ -456,12 +462,14 @@ Standard_Integer FillSubIntervals(const Handle(Geom_Curve)& theCurve3d,
                                   Standard_Integer &theNbParticles,
                                   TColStd_Array1OfReal* const theSubIntervals)
 {
+  const Standard_Integer aMaxKnots = 101;
   const Standard_Real anArrTempC[2] = {theFirst, theLast};
   const TColStd_Array1OfReal anArrTemp(anArrTempC[0], 1, 2);
 
   theNbParticles = 3;
   Handle(Geom2d_BSplineCurve) aBS2DCurv;
   Handle(Geom_BSplineCurve) aBS3DCurv;
+  Standard_Boolean isTrimmed3D = Standard_False, isTrimmed2D = Standard_False;
 
   //
   if (theCurve3d->IsKind(STANDARD_TYPE(Geom_TrimmedCurve)))
@@ -469,6 +477,7 @@ Standard_Integer FillSubIntervals(const Handle(Geom_Curve)& theCurve3d,
     aBS3DCurv = Handle(Geom_BSplineCurve)::
                       DownCast(Handle(Geom_TrimmedCurve)::
                       DownCast(theCurve3d)->BasisCurve());
+    isTrimmed3D = Standard_True;
   }
   else
   {
@@ -480,37 +489,135 @@ Standard_Integer FillSubIntervals(const Handle(Geom_Curve)& theCurve3d,
     aBS2DCurv = Handle(Geom2d_BSplineCurve)::
                       DownCast(Handle(Geom2d_TrimmedCurve)::
                       DownCast(theCurve2d)->BasisCurve());
+    isTrimmed2D = Standard_True;
   }
   else
   {
     aBS2DCurv = Handle(Geom2d_BSplineCurve)::DownCast(theCurve2d);
   }
 
-  const TColStd_Array1OfReal &anArrKnots3D = !aBS3DCurv.IsNull() ? 
-                                              aBS3DCurv->Knots() :
-                                              anArrTemp;
-  const TColStd_Array1OfReal &anArrKnots2D = !aBS2DCurv.IsNull() ?
-                                              aBS2DCurv->Knots() :
-                                              anArrTemp;
+  Handle(TColStd_HArray1OfReal) anArrKnots3D,  anArrKnots2D; 
+ 
+  if(!aBS3DCurv.IsNull())
+  {
+    if(aBS3DCurv->NbKnots() <= aMaxKnots)
+    {
+      anArrKnots3D = new TColStd_HArray1OfReal(aBS3DCurv->Knots());
+    }
+    else
+    {
+      Standard_Integer KnotCount;
+      if(isTrimmed3D)
+      {
+        Standard_Integer i;
+        KnotCount = 0;
+        const TColStd_Array1OfReal& aKnots = aBS3DCurv->Knots();
+        for(i = aBS3DCurv->FirstUKnotIndex(); i <= aBS3DCurv->LastUKnotIndex(); ++i)
+        {
+          if(aKnots(i) > theFirst && aKnots(i) < theLast)
+          {
+            ++KnotCount;
+          }
+        }
+        KnotCount += 2;
+      }
+      else
+      {
+        KnotCount = aBS3DCurv->LastUKnotIndex() - aBS3DCurv->FirstUKnotIndex() + 1;
+      }
+      if(KnotCount <= aMaxKnots)
+      {
+        anArrKnots3D = new TColStd_HArray1OfReal(aBS3DCurv->Knots());
+      }   
+      else
+      {
+        anArrKnots3D = new TColStd_HArray1OfReal(1, aMaxKnots);
+        anArrKnots3D->SetValue(1, theFirst);
+        anArrKnots3D->SetValue(aMaxKnots, theLast);
+        Standard_Integer i;
+        Standard_Real dt = (theLast - theFirst) / (aMaxKnots - 1);
+        Standard_Real t = theFirst + dt;
+        for(i = 2; i < aMaxKnots; ++i, t += dt)
+        {
+          anArrKnots3D->SetValue(i, t);
+        }
+      }
+    }
+  }
+  else
+  {
+    anArrKnots3D = new TColStd_HArray1OfReal(anArrTemp);
+  }
+  if(!aBS2DCurv.IsNull())
+  {
+    if(aBS2DCurv->NbKnots() <= aMaxKnots)
+    {
+      anArrKnots2D = new TColStd_HArray1OfReal(aBS2DCurv->Knots());
+    }
+    else
+    {
+      Standard_Integer KnotCount;
+      if(isTrimmed2D)
+      {
+        Standard_Integer i;
+        KnotCount = 0;
+        const TColStd_Array1OfReal& aKnots = aBS2DCurv->Knots();
+        for(i = aBS2DCurv->FirstUKnotIndex(); i <= aBS2DCurv->LastUKnotIndex(); ++i)
+        {
+          if(aKnots(i) > theFirst && aKnots(i) < theLast)
+          {
+            ++KnotCount;
+          }
+        }
+        KnotCount += 2;
+      }
+      else
+      {
+        KnotCount = aBS2DCurv->LastUKnotIndex() - aBS2DCurv->FirstUKnotIndex() + 1;
+      }
+      if(KnotCount <= aMaxKnots)
+      {
+        anArrKnots2D = new TColStd_HArray1OfReal(aBS2DCurv->Knots());
+      }   
+      else
+      {
+        anArrKnots2D = new TColStd_HArray1OfReal(1, aMaxKnots);
+        anArrKnots2D->SetValue(1, theFirst);
+        anArrKnots2D->SetValue(aMaxKnots, theLast);
+        Standard_Integer i;
+        Standard_Real dt = (theLast - theFirst) / (aMaxKnots - 1);
+        Standard_Real t = theFirst + dt;
+        for(i = 2; i < aMaxKnots; ++i, t += dt)
+        {
+          anArrKnots2D->SetValue(i, t);
+        }
+      }
+    }
+  }
+  else
+  {
+    anArrKnots2D = new TColStd_HArray1OfReal(anArrTemp);
+  }
+
 
   Standard_Integer aNbSubIntervals = 1;
 
   try
   {
     OCC_CATCH_SIGNALS
-    const Standard_Integer  anIndMax3D = anArrKnots3D.Upper(),
-                            anIndMax2D = anArrKnots2D.Upper();
+    const Standard_Integer  anIndMax3D = anArrKnots3D->Upper(),
+                            anIndMax2D = anArrKnots2D->Upper();
 
-    Standard_Integer  anIndex3D = anArrKnots3D.Lower(),
-                      anIndex2D = anArrKnots2D.Lower();
+    Standard_Integer  anIndex3D = anArrKnots3D->Lower(),
+                      anIndex2D = anArrKnots2D->Lower();
 
     if(theSubIntervals)
       theSubIntervals->ChangeValue(aNbSubIntervals) = theFirst;
 
     while((anIndex3D <= anIndMax3D) && (anIndex2D <= anIndMax2D))
     {
-      const Standard_Real aVal3D = anArrKnots3D.Value(anIndex3D),
-                          aVal2D = anArrKnots2D.Value(anIndex2D);
+      const Standard_Real aVal3D = anArrKnots3D->Value(anIndex3D),
+                          aVal2D = anArrKnots2D->Value(anIndex2D);
       const Standard_Real aDelta = aVal3D - aVal2D;
 
       if(aDelta < Precision::PConfusion())
@@ -571,6 +678,56 @@ Standard_Integer FillSubIntervals(const Handle(Geom_Curve)& theCurve3d,
 }
 
 //=======================================================================
+//class   : PSO_Perform
+//purpose : Searches minimal distance with math_PSO class
+//=======================================================================
+Standard_Boolean PSO_Perform(GeomLib_CheckCurveOnSurface_TargetFunc& theFunction,
+                             const math_Vector &theParInf,
+                             const math_Vector &theParSup,
+                             const Standard_Real theEpsilon,
+                             const Standard_Integer theNbParticles, 
+                             Standard_Real& theBestValue,
+                             math_Vector &theOutputParam)
+{
+  const Standard_Real aDeltaParam = theParSup(1) - theParInf(1);
+  if(aDeltaParam < Precision::PConfusion())
+    return Standard_False;
+
+  math_Vector aStepPar(1, 1);
+  aStepPar(1) = theEpsilon*aDeltaParam;
+
+  math_PSOParticlesPool aParticles(theNbParticles, 1);
+
+  //They are used for finding a position of theNbParticles worst places
+  const Standard_Integer aNbControlPoints = 3*theNbParticles;
+
+  const Standard_Real aStep = aDeltaParam/(aNbControlPoints-1);
+  Standard_Integer aCount = 1;
+  for(Standard_Real aPrm = theParInf(1); aCount <= aNbControlPoints; aCount++,
+    aPrm = (aCount == aNbControlPoints)? theParSup(1) : aPrm+aStep)
+  {
+    Standard_Real aVal = RealLast();
+    if(!theFunction.Value(aPrm, aVal))
+      continue;
+
+    PSO_Particle* aParticle = aParticles.GetWorstParticle();
+
+    if(aVal > aParticle->BestDistance)
+      continue;
+
+    aParticle->Position[0] = aPrm;
+    aParticle->BestPosition[0] = aPrm;
+    aParticle->Distance     = aVal;
+    aParticle->BestDistance = aVal;
+  }
+
+  math_PSO aPSO(&theFunction, theParInf, theParSup, aStepPar);
+  aPSO.Perform(aParticles, theNbParticles, theBestValue, theOutputParam);
+
+  return Standard_True;
+}
+
+//=======================================================================
 //class   : MinComputing
 //purpose : Performs computing minimal value
 //=======================================================================
@@ -585,61 +742,52 @@ Standard_Boolean MinComputing (
   {
     OCC_CATCH_SIGNALS
 
-    //They are used for finding a position of theNbParticles worst places
-    const Standard_Integer aNbControlPoints = 3*theNbParticles;
     //
-    math_Vector aParInf(1, 1), aParSup(1, 1), anOutputParam(1, 1), aStepPar(1,1);
+    math_Vector aParInf(1, 1), aParSup(1, 1), anOutputParam(1, 1);
     aParInf(1) = theFunction.FirstParameter();
     aParSup(1) = theFunction.LastParameter();
     theBestParameter = aParInf(1);
     theBestValue = RealLast();
 
-    const Standard_Real aDeltaParam = aParSup(1) - aParInf(1);
-    if(aDeltaParam < Precision::PConfusion())
-        return Standard_False;
-
-    aStepPar(1) = theEpsilon*aDeltaParam;
-
-    math_PSOParticlesPool aParticles(theNbParticles, 1);
-
-    const Standard_Real aStep = aDeltaParam/(aNbControlPoints-1);
-    Standard_Integer aCount = 1;
-    for(Standard_Real aPrm = aParInf(1); aCount <= aNbControlPoints; aCount++,
-                      aPrm = (aCount == aNbControlPoints)? aParSup(1) : aPrm+aStep)
-    {
-      Standard_Real aVal = RealLast();
-      theFunction.Value(aPrm, aVal);
-
-      PSO_Particle* aParticle = aParticles.GetWorstParticle();
-
-      if(aVal > aParticle->BestDistance)
-        continue;
-
-      aParticle->Position[0] = aPrm;
-      aParticle->BestPosition[0] = aPrm;
-      aParticle->Distance     = aVal;
-      aParticle->BestDistance = aVal;
-    }
-
-    math_PSO aPSO(&theFunction, aParInf, aParSup, aStepPar);
-    aPSO.Perform(aParticles, theNbParticles, theBestValue, anOutputParam);
-
-    //Here, anOutputParam contains parameter, which is near to optimal.
-    //It needs to be more precise. Precision is made by math_NewtonMinimum.
-    math_NewtonMinimum anA(theFunction);
-    anA.Perform(theFunction, anOutputParam);
-
-    if(!anA.IsDone())
+    if(!PSO_Perform(theFunction, aParInf, aParSup, theEpsilon, theNbParticles,
+                    theBestValue, anOutputParam))
     {
 #ifdef OCCT_DEBUG
-      cout << "BRepLib_CheckCurveOnSurface::Compute(): No solution found!" << endl;
+      cout << "BRepLib_CheckCurveOnSurface::Compute(): math_PSO is failed!" << endl;
 #endif
       return Standard_False;
     }
 
-    anA.Location(anOutputParam);
-    theBestParameter =  anOutputParam(1);
-    theBestValue = anA.Minimum();
+    theBestParameter = anOutputParam(1);
+
+    //Here, anOutputParam contains parameter, which is near to optimal.
+    //It needs to be more precise. Precision is made by math_NewtonMinimum.
+    math_NewtonMinimum aMinSol(theFunction);
+    aMinSol.Perform(theFunction, anOutputParam);
+
+    if(aMinSol.IsDone() && (aMinSol.GetStatus() == math_OK))
+    {//math_NewtonMinimum has precised the value. We take it.
+      aMinSol.Location(anOutputParam);
+      theBestParameter =  anOutputParam(1);
+      theBestValue = aMinSol.Minimum();
+    }
+    else
+    {//Use math_PSO again but on smaller range.
+      const Standard_Real aStep = theEpsilon*(aParSup(1) - aParInf(1));
+      aParInf(1) = theBestParameter - 0.5*aStep;
+      aParSup(1) = theBestParameter + 0.5*aStep;
+
+      Standard_Real aValue = RealLast();
+      if(PSO_Perform(theFunction, aParInf, aParSup, theEpsilon, theNbParticles,
+                     aValue, anOutputParam))
+      {
+        if(aValue < theBestValue)
+        {
+          theBestValue = aValue;
+          theBestParameter = anOutputParam(1);
+        }
+      }
+    }
   }
   catch(Standard_Failure)
   {

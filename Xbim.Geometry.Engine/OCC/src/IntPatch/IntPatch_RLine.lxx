@@ -32,9 +32,13 @@ inline const Handle(Adaptor2d_HCurve2d)& IntPatch_RLine::ArcOnS2() const
 //-- Il faut mettre cet include ici , car l include fait un define Handle(Adaptor2d_HCurve2d) ...
 //-- et en fin de fichier un undef Handle(Adaptor2d_HCurve2d) ... 
 
-inline void IntPatch_RLine::AddVertex (const IntPatch_Point& Pnt)
+inline void IntPatch_RLine::AddVertex (const IntPatch_Point& thePnt,
+                                       const Standard_Boolean theIsPrepend)
 {
-  svtx.Append(Pnt);
+  if(theIsPrepend)
+    svtx.Prepend(thePnt);
+  else
+    svtx.Append(thePnt);
 }
 
 inline void IntPatch_RLine::Replace (const Standard_Integer Index,
@@ -102,6 +106,18 @@ inline const IntPatch_Point& IntPatch_RLine::Vertex (const Standard_Integer Inde
   return svtx(Index);
 }
 
+inline IntPatch_Point& IntPatch_RLine::ChangeVertex (const Standard_Integer Index)
+{
+  return svtx(Index);
+}
+
+inline void IntPatch_RLine::RemoveVertex(const Standard_Integer theIndex)
+{
+  if((theIndex < 1) || (theIndex > NbVertex()))
+    Standard_OutOfRange::Raise("Cannot delete not existing vertex");
+  svtx.Remove(theIndex);
+}
+
 inline Standard_Boolean IntPatch_RLine::HasPolygon () const
 {
   return (!curv.IsNull());
@@ -117,4 +133,9 @@ inline const IntSurf_PntOn2S& IntPatch_RLine::Point (const Standard_Integer Inde
 {
   if (curv.IsNull()) {Standard_DomainError::Raise();}
   return curv->Value(Index);
+}
+
+inline Handle(IntSurf_LineOn2S) IntPatch_RLine::Curve() const
+{ 
+  return(curv);
 }

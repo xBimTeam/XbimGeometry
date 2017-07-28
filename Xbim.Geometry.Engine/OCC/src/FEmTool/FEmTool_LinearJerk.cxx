@@ -32,6 +32,8 @@
 #include <TColStd_HArray2OfInteger.hxx>
 #include <TColStd_HArray2OfReal.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(FEmTool_LinearJerk,FEmTool_ElementaryCriterion)
+
 FEmTool_LinearJerk::FEmTool_LinearJerk(const Standard_Integer WorkDegree,
 				       const GeomAbs_Shape ConstraintOrder):
        RefMatrix(0,WorkDegree,0,WorkDegree)
@@ -53,11 +55,11 @@ FEmTool_LinearJerk::FEmTool_LinearJerk(const Standard_Integer WorkDegree,
     
     Standard_Integer maxDegree = WDeg+1;
     
-    math_IntegerVector Order(1,1,Min(4*(maxDegree/2+1),math::GaussPointsMax()));
+    math_IntegerVector anOrder(1,1,Min(4*(maxDegree/2+1),math::GaussPointsMax()));
 
     math_Vector Lower(1,1,-1.), Upper(1,1,1.); 
     
-    math_GaussSetIntegration anInt(Elem, Lower, Upper, Order);
+    math_GaussSetIntegration anInt(Elem, Lower, Upper, anOrder);
     
     MatrixElemts = anInt.Value();
   }

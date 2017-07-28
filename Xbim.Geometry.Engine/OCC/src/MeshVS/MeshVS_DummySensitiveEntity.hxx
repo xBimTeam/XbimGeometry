@@ -49,9 +49,9 @@ public:
 
   Standard_EXPORT virtual Standard_Boolean HasInitLocation() const Standard_OVERRIDE;
 
-  Standard_EXPORT virtual gp_Trsf InvInitLocation() const Standard_OVERRIDE;
+  Standard_EXPORT virtual gp_GTrsf InvInitLocation() const Standard_OVERRIDE;
 
-  DEFINE_STANDARD_RTTI(MeshVS_DummySensitiveEntity, SelectBasics_SensitiveEntity)
+  DEFINE_STANDARD_RTTIEXT(MeshVS_DummySensitiveEntity,SelectBasics_SensitiveEntity)
 };
 
 DEFINE_STANDARD_HANDLE(MeshVS_DummySensitiveEntity, SelectBasics_SensitiveEntity)

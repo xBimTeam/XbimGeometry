@@ -50,14 +50,9 @@ public:
   
   Standard_EXPORT void PCurve (const Handle(Geom2d_Curve)& PC);
   
-  Standard_EXPORT Standard_OStream& DumpPCurve (Standard_OStream& OS, const Standard_Boolean compact = Standard_True) const;
-  
-  Standard_EXPORT virtual Standard_OStream& Dump (Standard_OStream& OS) const Standard_OVERRIDE;
 
 
-
-
-  DEFINE_STANDARD_RTTI(TopOpeBRepDS_SurfaceCurveInterference,TopOpeBRepDS_Interference)
+  DEFINE_STANDARD_RTTIEXT(TopOpeBRepDS_SurfaceCurveInterference,TopOpeBRepDS_Interference)
 
 protected:
 

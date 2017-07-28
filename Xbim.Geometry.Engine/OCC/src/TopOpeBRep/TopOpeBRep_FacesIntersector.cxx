@@ -217,7 +217,8 @@ void TopOpeBRep_FacesIntersector::Perform(const TopoDS_Shape& F1,const TopoDS_Sh
 
   myIntersector.SetTolerances(myTol1,myTol2,MaxUV,Deflection); 
   myIntersector.Perform(mySurface1,myDomain1,mySurface2,myDomain2,
-                        myTol1,myTol2,Standard_True,Standard_True);
+                        myTol1,myTol2,Standard_True,Standard_True,
+                        Standard_False);
 
 #ifdef OCCT_DEBUG
   if (TopOpeBRepTool_GettraceKRO()) KRO_DSFILLER_INTFF.Stop();
@@ -1190,7 +1191,7 @@ static void MergeWLinesIfAllSegmentsAlongRestriction(IntPatch_SequenceOfLine&   
   if (!anWLine.IsNull()) {
     theSlin.Clear();
     theSlin.Append(anWLine);
-#ifdef DEB
+#ifdef OCCT_DEBUG
     cout << "*** TopOpeBRep_FaceIntersector: Merge WLines on Restriction " 
          << ((WLineRank == 1) ? "S1" : "S2") << " to WLine***" << endl;
 #endif

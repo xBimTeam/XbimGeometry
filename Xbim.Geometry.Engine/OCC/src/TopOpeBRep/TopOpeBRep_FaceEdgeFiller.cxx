@@ -33,7 +33,6 @@
 #ifdef OCCT_DEBUG
 extern void FEINT_DUMPPOINTS(TopOpeBRep_FaceEdgeIntersector& FEINT,
 			     const TopOpeBRepDS_DataStructure& BDS);
-extern Standard_Boolean TopOpeBRepDS_GettraceDSF(); 
 #endif
 
 //=======================================================================
@@ -60,12 +59,6 @@ void TopOpeBRep_FaceEdgeFiller::Insert
   const TopoDS_Face& FF = TopoDS::Face(F);
   const TopoDS_Edge& EE = TopoDS::Edge(E);
 
-#ifdef OCCT_DEBUG
-  if (TopOpeBRepDS_GettraceDSF()) {
-    FEINT_DUMPPOINTS(FEINT,HDS->DS());
-  }
-#endif
-
   // exit if no point.
   FEINT.InitPoint(); 
   if ( ! FEINT.MorePoint() ) return;
@@ -73,7 +66,6 @@ void TopOpeBRep_FaceEdgeFiller::Insert
   TopOpeBRepDS_DataStructure& BDS = HDS->ChangeDS();
 
   TopAbs_Orientation FFori = FF.Orientation();
-  TopAbs_Orientation EEori = EE.Orientation();
 
   // --- Add <FF,EE> in BDS
   Standard_Integer FFindex = BDS.AddShape(FF,1);
@@ -91,9 +83,9 @@ void TopOpeBRep_FaceEdgeFiller::Insert
     Standard_Real parE = FEINT.Parameter();
 
 #ifdef OCCT_DEBUG
-    TopOpeBRepDS_Transition TFF =
+    TopAbs_Orientation EEori = EE.Orientation();
+    TopOpeBRepDS_Transition TFF = FEINT.Transition(1,EEori); (void)TFF;
 #endif
-                                  FEINT.Transition(1,EEori); //  EEori bidon = EXTERNAL
     TopOpeBRepDS_Transition TEE = FEINT.Transition(2,FFori);
     TEE.Index(FFindex);
     
@@ -259,9 +251,6 @@ void TopOpeBRep_FaceEdgeFiller::StoreInterference
   // append I to list LI
   LI.Append(I);
 
-#ifdef OCCT_DEBUG
-  Standard_Boolean appendtoG = Standard_False;
-#endif
   Standard_Integer G = I->Geometry();
 
   // append I to list of interference connected to G = I->Geometry()
@@ -274,16 +263,10 @@ void TopOpeBRep_FaceEdgeFiller::StoreInterference
     break;
     
   case TopOpeBRepDS_SURFACE :
-#ifdef OCCT_DEBUG
-    appendtoG = Standard_True;
-#endif
     BDS.ChangeSurfaceInterferences(G).Append(I);
     break;
     
   case TopOpeBRepDS_CURVE :
-#ifdef OCCT_DEBUG
-    appendtoG = Standard_True;
-#endif
     BDS.ChangeCurveInterferences(G).Append(I);
     break;
     
@@ -294,14 +277,6 @@ void TopOpeBRep_FaceEdgeFiller::StoreInterference
   default:
     break;
   }
-
-#ifdef OCCT_DEBUG
-  if (TopOpeBRepDS_GettraceDSF()) {
-    cout<<"append "; I->Dump(cout); 
-    if (appendtoG) cout<<" and to G"<<G<<" list";
-    cout<<endl;
-  }
-#endif
 }
 
 //=======================================================================

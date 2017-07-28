@@ -152,8 +152,8 @@ public:
 public: //! @name public methods
 
   //! Constructor
-  NCollection_Vector (const Standard_Integer theIncrement              = 256,
-                      const Handle(NCollection_BaseAllocator)& theAlloc = NULL) :
+  explicit NCollection_Vector (const Standard_Integer theIncrement              = 256,
+                               const Handle(NCollection_BaseAllocator)& theAlloc = NULL) :
     NCollection_BaseVector (theAlloc, initMemBlocks, sizeof(TheItemType), theIncrement)
   {}
 
@@ -165,7 +165,7 @@ public: //! @name public methods
   }
 
   //! Destructor
-  ~NCollection_Vector()
+  virtual ~NCollection_Vector()
   {
     for (Standard_Integer anItemIter = 0; anItemIter < myCapacity; ++anItemIter)
     {

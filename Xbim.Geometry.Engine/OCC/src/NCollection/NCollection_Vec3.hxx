@@ -73,19 +73,6 @@ public:
     v[2] = Element_t(0);
   }
 
-  //! Copy constructor.
-  NCollection_Vec3 (const NCollection_Vec3& theVec3)
-  {
-    std::memcpy (this, &theVec3, sizeof(NCollection_Vec3));
-  }
-
-  //! Assignment operator.
-  const NCollection_Vec3& operator= (const NCollection_Vec3& theVec3)
-  {
-    std::memcpy (this, &theVec3, sizeof(NCollection_Vec3));
-    return *this;
-  }
-
   //! Alias to 1st component as X coordinate in XYZ.
   Element_t x() const { return v[0]; }
 
@@ -141,6 +128,22 @@ public:
   {
     return *((NCollection_Vec2<Element_t>* )&v[1]);
   }
+
+  //! Check this vector with another vector for equality (without tolerance!).
+  bool IsEqual (const NCollection_Vec3& theOther) const
+  {
+    return v[0] == theOther.v[0]
+        && v[1] == theOther.v[1]
+        && v[2] == theOther.v[2];
+  }
+
+  //! Check this vector with another vector for equality (without tolerance!).
+  bool operator== (const NCollection_Vec3& theOther)       { return IsEqual (theOther); }
+  bool operator== (const NCollection_Vec3& theOther) const { return IsEqual (theOther); }
+
+  //! Check this vector with another vector for non-equality (without tolerance!).
+  bool operator!= (const NCollection_Vec3& theOther)       { return !IsEqual (theOther); }
+  bool operator!= (const NCollection_Vec3& theOther) const { return !IsEqual (theOther); }
 
   //! Raw access to the data (for OpenGL exchange).
   const Element_t* GetData()    const { return v; }

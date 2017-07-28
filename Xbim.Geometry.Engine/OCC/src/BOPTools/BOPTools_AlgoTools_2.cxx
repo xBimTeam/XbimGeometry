@@ -150,8 +150,12 @@ void BOPTools_AlgoTools::MakeSplitEdge(const TopoDS_Edge&   aE,
   E.EmptyCopy();
   //
   BRep_Builder BB;
-  BB.Add  (E, aV1);
-  BB.Add  (E, aV2);
+  if (!aV1.IsNull()) {
+    BB.Add  (E, aV1);
+  }
+  if (!aV2.IsNull()) {
+    BB.Add  (E, aV2);
+  }
   BB.Range(E, aP1, aP2);
   BB.UpdateEdge(E, aTol);
   aNewEdge=E;
@@ -301,6 +305,7 @@ void BOPTools_AlgoTools::CorrectRange(const TopoDS_Edge& aE1,
     //
     if (aCT==GeomAbs_BezierCurve ||
         aCT==GeomAbs_BSplineCurve||
+        aCT==GeomAbs_OffsetCurve ||
         aCT==GeomAbs_OtherCurve) {
       
       if(!i){
@@ -369,6 +374,7 @@ void BOPTools_AlgoTools::CorrectRange(const TopoDS_Edge& aE,
 
     if (aCT==GeomAbs_BezierCurve ||
         aCT==GeomAbs_BSplineCurve||
+        aCT==GeomAbs_OffsetCurve ||
         aCT==GeomAbs_OtherCurve) {
       
       if(!i){

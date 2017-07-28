@@ -226,7 +226,6 @@ public:
   
   Standard_EXPORT static Standard_Boolean EqualpPonR (const TopOpeBRep_LineInter& Lrest, const TopOpeBRep_VPointInter& VP1, const TopOpeBRep_VPointInter& VP2);
   
-  Standard_EXPORT static Standard_Boolean EqualpP (const TopOpeBRep_LineInter& L, const Standard_Integer iVP1, const Standard_Integer iVP2);
 
 
 
@@ -274,7 +273,7 @@ private:
   TopTools_ListOfShape myERL;
   TopTools_DataMapOfShapeListOfShape myDataforDegenEd;
   Standard_Boolean myLastVPison0;
-  Standard_Boolean mykeptVPnbr;
+  Standard_Integer mykeptVPnbr;
   Standard_Integer myDSCIndex;
   TopOpeBRepDS_ListOfInterference myDSCIL;
   TopOpeBRep_PointClassifier myPointClassifier;

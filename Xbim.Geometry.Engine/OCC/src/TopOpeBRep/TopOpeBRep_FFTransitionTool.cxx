@@ -36,10 +36,6 @@
 #include <TopOpeBRepDS_SurfaceCurveInterference.hxx>
 #include <TopOpeBRepDS_Transition.hxx>
 
-#ifdef OCCT_DEBUG
-extern Standard_Boolean TopOpeBRepDS_GettraceDSF();
-#endif
-
 //-----------------------------------------------------------------------
 //function : TransitionToOrientation
 //purpose  : static
@@ -68,22 +64,12 @@ static Standard_Boolean TransitionToOrientation
     case IntSurf_Outside : result = TopAbs_EXTERNAL; break;
     case IntSurf_Unknown :
     Odefined = Standard_False;
-#ifdef OCCT_DEBUG
-//    if ( TopOpeBRepDS_GettraceDSF() ) { 
-//      cout<<"TopOpeBRepDS:TransitionToOrientation : unknown situation"<<endl;
-//    }
-#endif
     break;
     }
     break;
 
   case IntSurf_Undecided :
   Odefined = Standard_False;
-#ifdef OCCT_DEBUG
-//  if ( TopOpeBRepDS_GettraceDSF() ) { 
-//    cout<<"TopOpeBRepDS:TransitionToOrientation : undecided transition"<<endl;
-//  }
-#endif
   break;
   }
 
@@ -244,25 +230,14 @@ TopOpeBRepDS_Transition TopOpeBRep_FFTransitionTool::ProcessFaceTransition
       case IntSurf_Unknown :
 
 	Odefined = Standard_False;
-#ifdef OCCT_DEBUG
-	if ( TopOpeBRepDS_GettraceDSF() ) { 
-	  cout<<"ProcessFaceTransition : unknown situation"<<endl;
-	}
-#endif
 	break;
       }
       break;
       } // case Touch
 
     case IntSurf_Undecided :
-
-    Odefined = Standard_False;
-#ifdef OCCT_DEBUG
-    if ( TopOpeBRepDS_GettraceDSF() ) { 
-      cout<<"ProcessFaceTransition : undecided transition"<<endl;
-    }
-#endif
-    break;
+      Odefined = Standard_False;
+      break;
 
     } // trans
   
@@ -293,21 +268,16 @@ static Standard_Boolean FUN_ProjectPoint(const gp_Pnt& P1,
   if ( C2.IsNull() ) {
     return Standard_False;
   }
-  Standard_Real res = Standard_False;
-  
+
   GeomAPI_ProjectPointOnCurve mydist(P1,C2,FC2,LC2);
   if ( mydist.Extrema().IsDone() ) {
     if ( mydist.NbPoints() ) {
       T2 = mydist.LowerDistanceParameter();
-      res = Standard_True;
+      return Standard_True;
     }
   }
-//#ifdef OCCT_DEBUG
-//  return res; // BUG ???
-//#else
-  return (Standard_Boolean ) res ;
-//#endif
 
+  return Standard_False;
 }
 
 // -------------------------------------------------

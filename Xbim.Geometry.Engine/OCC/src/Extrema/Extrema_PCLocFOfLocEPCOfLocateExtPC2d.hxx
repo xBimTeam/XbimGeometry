@@ -26,7 +26,7 @@
 #include <Standard_Real.hxx>
 #include <TColStd_SequenceOfReal.hxx>
 #include <TColStd_SequenceOfInteger.hxx>
-#include <Extrema_SeqPCOfPCLocFOfLocEPCOfLocateExtPC2d.hxx>
+#include <Extrema_SequenceOfPOnCurv2d.hxx>
 #include <Standard_Boolean.hxx>
 #include <Standard_Integer.hxx>
 #include <math_FunctionWithDerivative.hxx>
@@ -37,10 +37,6 @@ class Extrema_Curve2dTool;
 class Extrema_POnCurv2d;
 class gp_Pnt2d;
 class gp_Vec2d;
-class Extrema_SeqPCOfPCLocFOfLocEPCOfLocateExtPC2d;
-class Extrema_SequenceNodeOfSeqPCOfPCLocFOfLocEPCOfLocateExtPC2d;
-
-
 
 class Extrema_PCLocFOfLocEPCOfLocateExtPC2d  : public math_FunctionWithDerivative
 {
@@ -53,28 +49,41 @@ public:
   
   Standard_EXPORT Extrema_PCLocFOfLocEPCOfLocateExtPC2d(const gp_Pnt2d& P, const Adaptor2d_Curve2d& C);
   
+  //! sets the field mycurve of the function.
   Standard_EXPORT void Initialize (const Adaptor2d_Curve2d& C);
   
+  //! sets the field P of the function.
   Standard_EXPORT void SetPoint (const gp_Pnt2d& P);
   
-  Standard_EXPORT Standard_Boolean Value (const Standard_Real U, Standard_Real& F);
+  //! Calculation of F(U).
+  Standard_EXPORT Standard_Boolean Value (const Standard_Real U, Standard_Real& F) Standard_OVERRIDE;
   
-  Standard_EXPORT Standard_Boolean Derivative (const Standard_Real U, Standard_Real& DF);
+  //! Calculation of F'(U).
+  Standard_EXPORT Standard_Boolean Derivative (const Standard_Real U, Standard_Real& DF) Standard_OVERRIDE;
   
-  Standard_EXPORT Standard_Boolean Values (const Standard_Real U, Standard_Real& F, Standard_Real& DF);
+  //! Calculation of F(U) and F'(U).
+  Standard_EXPORT Standard_Boolean Values (const Standard_Real U, Standard_Real& F, Standard_Real& DF) Standard_OVERRIDE;
   
+  //! Save the found extremum.
   Standard_EXPORT virtual Standard_Integer GetStateNumber() Standard_OVERRIDE;
   
+  //! Return the nunber of found extrema.
   Standard_EXPORT Standard_Integer NbExt() const;
   
+  //! Returns the Nth distance.
   Standard_EXPORT Standard_Real SquareDistance (const Standard_Integer N) const;
   
+  //! Shows if the Nth distance is a minimum.
   Standard_EXPORT Standard_Boolean IsMin (const Standard_Integer N) const;
   
+  //! Returns the Nth extremum.
   Standard_EXPORT const Extrema_POnCurv2d& Point (const Standard_Integer N) const;
   
+  //! Determines boundaries of subinterval for find of root.
   Standard_EXPORT void SubIntervalInitialize (const Standard_Real theUfirst, const Standard_Real theUlast);
   
+  //! Computes a Tol value. If 1st derivative of curve
+  //! |D1|<Tol, it is considered D1=0.
   Standard_EXPORT Standard_Real SearchOfTolerance();
 
 
@@ -97,7 +106,7 @@ private:
   Standard_Real myD1f;
   TColStd_SequenceOfReal mySqDist;
   TColStd_SequenceOfInteger myIsMin;
-  Extrema_SeqPCOfPCLocFOfLocEPCOfLocateExtPC2d myPoint;
+  Extrema_SequenceOfPOnCurv2d myPoint;
   Standard_Boolean myPinit;
   Standard_Boolean myCinit;
   Standard_Boolean myD1Init;

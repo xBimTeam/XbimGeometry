@@ -12,7 +12,7 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef WNT
+#ifndef _WIN32
 
 
 #include <OSD_File.hxx>
@@ -50,13 +50,21 @@ extern char *vmsify PARAMS ((char *name, int type));
 //const OSD_WhoAmI Iam = OSD_WFileIterator;
 
 
-OSD_FileIterator::OSD_FileIterator() {
- myDescr = NULL ;
+OSD_FileIterator::OSD_FileIterator()
+: myFlag(false),
+  myDescr(0),
+  myEntry(0),
+  myInit(0)
+{
 }
 
 OSD_FileIterator::OSD_FileIterator(const OSD_Path& where,
-                                   const TCollection_AsciiString& Mask){
- myDescr = NULL ;
+                                   const TCollection_AsciiString& Mask)
+: myFlag(false),
+  myDescr(0),
+  myEntry(0),
+  myInit(0)
+{
  Initialize(where, Mask) ;
 }
 
@@ -88,7 +96,7 @@ Standard_Boolean OSD_FileIterator::More(){
      Next();          // Now find first entry
    }
  }
- return (myFlag);
+ return myFlag;
 }
 
 // Private :  See if file name matches with a mask (like "*.c")
@@ -170,7 +178,7 @@ int again = 1;
 struct stat stat_buf;
 char full_name[255];
 
- myFlag = 0;   // Initialize to nothing found
+ myFlag = false;   // Initialize to nothing found
 
  do {
     myEntry = readdir((DIR *)myDescr);
@@ -309,7 +317,7 @@ Standard_Boolean OSD_FileIterator :: More () {
 
   // make wchar_t string from UTF-8
   TCollection_ExtendedString wcW(wc);
-  myHandle = FindFirstFileW ((const wchar_t*)wcW.ToExtString(), (PWIN32_FIND_DATAW)myData);
+  myHandle = FindFirstFileExW (wcW.ToWideString(), FindExInfoStandard, (PWIN32_FIND_DATAW)myData, FindExSearchNameMatch, NULL, 0);
 
   if (  myHandle == INVALID_HANDLE_VALUE  )
   
@@ -337,9 +345,7 @@ Standard_Boolean OSD_FileIterator :: More () {
 
 void OSD_FileIterator :: Next () {
 
- if (  myFirstCall && ( _FD -> dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY )  ||
-       !myFirstCall
- ) {
+ if ( ! myFirstCall || ( _FD -> dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) ) {
  
   do {
   

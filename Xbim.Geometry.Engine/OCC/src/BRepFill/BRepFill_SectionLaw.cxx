@@ -38,6 +38,8 @@
 #include <TopoDS_Vertex.hxx>
 #include <TopoDS_Wire.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(BRepFill_SectionLaw,MMgt_TShared)
+
 //=======================================================================
 //function : NbLaw
 //purpose  : Gives the number of elementary (or Geometric) law
@@ -59,6 +61,15 @@ Standard_Integer BRepFill_SectionLaw::NbLaw() const
 }
 
 //=======================================================================
+//function : Indices
+//purpose  :
+//=======================================================================
+Standard_Integer BRepFill_SectionLaw::IndexOfEdge(const TopoDS_Shape& anEdge) const
+{
+  return myIndices(anEdge);
+}
+
+//=======================================================================
 //function : IsUClosed
 //purpose  : 
 //=======================================================================
@@ -74,6 +85,15 @@ Standard_Integer BRepFill_SectionLaw::NbLaw() const
  Standard_Boolean BRepFill_SectionLaw::IsVClosed() const
 {
   return vclosed;
+}
+
+//=======================================================================
+//function : IsDone
+//purpose  : 
+//=======================================================================
+ Standard_Boolean BRepFill_SectionLaw::IsDone() const
+{
+  return myDone;
 }
 
 //=======================================================================

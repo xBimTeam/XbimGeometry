@@ -412,7 +412,7 @@ void GeomFill_SectionPlacement::Perform(const Handle(Adaptor3d_HCurve)& Path,
       PathParam = Path->FirstParameter();
       SecParam =  myAdpSection.FirstParameter();
       
-      Standard_Real distaux, taux, alpha;
+      Standard_Real distaux, taux = 0.0, alpha;
       gp_Pnt PonPath, PonSec, P;
       gp_Vec VRef, dp1;
       VRef.SetXYZ(TheAxe.Direction().XYZ());
@@ -465,12 +465,11 @@ void GeomFill_SectionPlacement::Perform(const Handle(Adaptor3d_HCurve)& Path,
 	if (Intersector.IsDone())
 	  {
 	    Standard_Real w;
-	    gp_Pnt P;
 	    Standard_Real aDist;
 	    for (ii=1; ii<=Intersector.NbPoints(); ii++)
 	      {
 		w = Intersector.Point(ii).W();
-		P = Path->Value( w );
+                P = Path->Value( w );
 		aDist = P.Distance( TheAxe.Location() );
 		if (aDist < DistCenter)
 		  {

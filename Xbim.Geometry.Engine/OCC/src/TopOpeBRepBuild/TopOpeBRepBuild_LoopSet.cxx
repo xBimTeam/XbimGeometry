@@ -27,7 +27,7 @@ myLoopIndex(1), myNbLoop(0)
 {
 }
 
-void TopOpeBRepBuild_LoopSet::Delete()
+TopOpeBRepBuild_LoopSet::~TopOpeBRepBuild_LoopSet()
 {}
 
 //=======================================================================
@@ -68,7 +68,7 @@ void TopOpeBRepBuild_LoopSet::NextLoop()
 //purpose  : 
 //=======================================================================
 
-const Handle(TopOpeBRepBuild_Loop)& TopOpeBRepBuild_LoopSet::Loop() const
+Handle(TopOpeBRepBuild_Loop) TopOpeBRepBuild_LoopSet::Loop() const
 {
   const Handle(TopOpeBRepBuild_Loop)& L = myLoopIterator.Value();
   return L;

@@ -45,10 +45,25 @@ public:
 
   DEFINE_STANDARD_ALLOC
 
-  
+  enum IntStatus
+  {
+    //! OK. Good intersection result.
+    IntStatus_OK,
+
+    //! Intersection curve is too long (e.g. as in the bug #26894).
+    //! We cannot provide precise computation of value and
+    //! derivatives of this curve having used floating-point model
+    //! determined by IEEE 754 standard. As result, OCCT algorithms
+    //! cannot work with that curve correctly.
+    IntStatus_InfiniteSectionCurve,
+
+    //! Algorithm cannot finish correctly.
+    IntStatus_Fail   
+  };
+
   Standard_EXPORT IntPatch_ImpImpIntersection();
   
-  //! Flag theIsReqToKeepRLine has been enterred only for
+  //! Flag theIsReqToKeepRLine has been entered only for
   //! compatibility with TopOpeBRep package. It shall be deleted
   //! after deleting TopOpeBRep.
   //! When intersection result returns IntPatch_RLine and another
@@ -56,23 +71,33 @@ public:
   //! will always keep both lines even if they are coincided.
   Standard_EXPORT IntPatch_ImpImpIntersection(const Handle(Adaptor3d_HSurface)& S1, const Handle(Adaptor3d_TopolTool)& D1, const Handle(Adaptor3d_HSurface)& S2, const Handle(Adaptor3d_TopolTool)& D2, const Standard_Real TolArc, const Standard_Real TolTang, const Standard_Boolean theIsReqToKeepRLine = Standard_False);
   
-  //! Flag theIsReqToKeepRLine has been enterred only for
+  //! Flag theIsReqToKeepRLine has been entered only for
   //! compatibility with TopOpeBRep package. It shall be deleted
   //! after deleting TopOpeBRep.
   //! When intersection result returns IntPatch_RLine and another
   //! IntPatch_Line (not restriction) we (in case of theIsReqToKeepRLine==TRUE)
   //! will always keep both lines even if they are coincided.
-  Standard_EXPORT void Perform (const Handle(Adaptor3d_HSurface)& S1, const Handle(Adaptor3d_TopolTool)& D1, const Handle(Adaptor3d_HSurface)& S2, const Handle(Adaptor3d_TopolTool)& D2, const Standard_Real TolArc, const Standard_Real TolTang, const Standard_Boolean isTheTrimmed = Standard_False, const Standard_Boolean theIsReqToKeepRLine = Standard_False);
+  Standard_EXPORT void Perform (const Handle(Adaptor3d_HSurface)& S1,
+                                const Handle(Adaptor3d_TopolTool)& D1,
+                                const Handle(Adaptor3d_HSurface)& S2,
+                                const Handle(Adaptor3d_TopolTool)& D2,
+                                const Standard_Real TolArc,
+                                const Standard_Real TolTang,
+                                const Standard_Boolean theIsReqToKeepRLine =
+                                                                  Standard_False);
   
-  //! Returns True if the calculus was succesfull.
-    Standard_Boolean IsDone() const;
+  //! Returns True if the calculus was successful.
+  Standard_Boolean IsDone() const;
+
+  //! Returns status
+  IntStatus GetStatus() const;
   
   //! Returns true if the is no intersection.
     Standard_Boolean IsEmpty() const;
   
   //! Returns True if the two patches are considered as
-  //! entierly tangent, i-e every restriction arc of one
-  //! patch is inside the geometric base of the otehr patch.
+  //! entirely tangent, i.e every restriction arc of one
+  //! patch is inside the geometric base of the other patch.
     Standard_Boolean TangentFaces() const;
   
   //! Returns True when the TangentFaces returns True and the
@@ -109,7 +134,7 @@ private:
 
 
 
-  Standard_Boolean done;
+  IntStatus myDone;
   Standard_Boolean empt;
   Standard_Boolean tgte;
   Standard_Boolean oppo;

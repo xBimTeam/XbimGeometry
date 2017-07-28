@@ -60,6 +60,8 @@
 #include <TopTools_MapOfShape.hxx>
 #include <TopTools_SequenceOfShape.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(ShapeFix_Solid,ShapeFix_Root)
+
 //======================================================
 //function : ShapeFix_Solid
 //purpose  : 
@@ -402,10 +404,10 @@ Standard_Boolean ShapeFix_Solid::Perform(const Handle(Message_ProgressIndicator)
   if ( NeedFix(myFixShellMode) )
   {
     // Start progress scope (no need to check if progress exists -- it is safe)
-    Message_ProgressSentry aPSentry(theProgress, "Fixing shell", 0, aNbShells, 1);
+    Message_ProgressSentry aPSentryFixShell(theProgress, "Fixing shell", 0, aNbShells, 1);
 
     // Fix shell by shell using ShapeFix_Shell tool
-    for ( TopExp_Explorer aExpSh(S, TopAbs_SHELL); aExpSh.More() && aPSentry.More(); aExpSh.Next(), aPSentry.Next() )
+    for ( TopExp_Explorer aExpSh(S, TopAbs_SHELL); aExpSh.More() && aPSentryFixShell.More(); aExpSh.Next(), aPSentryFixShell.Next() )
     { 
       TopoDS_Shape sh = aExpSh.Current();
 
@@ -419,7 +421,7 @@ Standard_Boolean ShapeFix_Solid::Perform(const Handle(Message_ProgressIndicator)
     }
 
     // Halt algorithm in case of user's abort
-    if ( !aPSentry.More() )
+    if ( !aPSentryFixShell.More() )
       return Standard_False;
   }
   else 
@@ -499,10 +501,10 @@ Standard_Boolean ShapeFix_Solid::Perform(const Handle(Message_ProgressIndicator)
         BRep_Builder aB;
         TopoDS_Compound aComp;
         aB.MakeCompound(aComp);
-        Message_ProgressSentry aPSentry(theProgress, "Creating solid",
+        Message_ProgressSentry aPSentryCreatingSolid(theProgress, "Creating solid",
                                         0, aMapSolids.Extent(), 1);
-        for(Standard_Integer i =1; (i <= aMapSolids.Extent()) && (aPSentry.More()); 
-            i++, aPSentry.Next()) 
+        for(Standard_Integer i =1; (i <= aMapSolids.Extent()) && (aPSentryCreatingSolid.More());
+            i++, aPSentryCreatingSolid.Next())
         {
           TopoDS_Shape aResSh =aMapSolids.FindKey(i);
           if(aResShape.ShapeType() == TopAbs_SHELL && myCreateOpenSolidMode) {
@@ -518,7 +520,7 @@ Standard_Boolean ShapeFix_Solid::Perform(const Handle(Message_ProgressIndicator)
           aB.Add(aComp,aResSh);
           
         }
-        if ( !aPSentry.More() )
+        if ( !aPSentryCreatingSolid.More() )
           return Standard_False; // aborted execution
         Context()->Replace(aResShape,aComp);
       }
@@ -585,9 +587,9 @@ TopoDS_Solid ShapeFix_Solid::SolidFromShell (const TopoDS_Shell& shell)
 //purpose  : 
 //=======================================================================
 
- Standard_Boolean ShapeFix_Solid::Status(const ShapeExtend_Status /*status*/) const
+Standard_Boolean ShapeFix_Solid::Status (const ShapeExtend_Status theStatus) const
 {
- return myStatus;
+  return ShapeExtend::DecodeStatus (myStatus, theStatus);
 }
 
 //=======================================================================

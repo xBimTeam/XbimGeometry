@@ -44,12 +44,12 @@ public:
   Standard_EXPORT virtual gp_Lin2d Line() const Standard_OVERRIDE;
   
   //! Returns GccInt_Lin, which is the type of any GccInt_BLine bisecting line.
-  Standard_EXPORT GccInt_IType ArcType() const;
+  Standard_EXPORT GccInt_IType ArcType() const Standard_OVERRIDE;
 
 
 
 
-  DEFINE_STANDARD_RTTI(GccInt_BLine,GccInt_Bisec)
+  DEFINE_STANDARD_RTTIEXT(GccInt_BLine,GccInt_Bisec)
 
 protected:
 

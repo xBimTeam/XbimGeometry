@@ -163,7 +163,10 @@ public:
   Standard_EXPORT Standard_Integer SearchFromEnd (const Handle(TCollection_HExtendedString)& what) const;
   
   //! Returns pointer to ExtString
-  Standard_EXPORT const Standard_ExtString ToExtString() const;
+  Standard_ExtString ToExtString() const
+  { 
+    return myString.ToExtString();
+  }
   
   //! Extracts <whichone> token from <me>.
   //! By default, the <separators> is set to space and tabulation.
@@ -205,7 +208,7 @@ public:
 
 
 
-  DEFINE_STANDARD_RTTI(TCollection_HExtendedString,MMgt_TShared)
+  DEFINE_STANDARD_RTTIEXT(TCollection_HExtendedString,MMgt_TShared)
 
 protected:
 

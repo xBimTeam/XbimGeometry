@@ -57,11 +57,6 @@
 #include <TopoDS_Wire.hxx>
 
 //
-//
-//
-//
-//
-//
 static
   Standard_Boolean IsGrowthWire(const TopoDS_Shape& ,
                                 const BOPCol_IndexedMapOfShape& );
@@ -348,6 +343,7 @@ void BOPAlgo_BuilderFace::PerformLoops()
   //
   aWSp.SetWES(aWES);
   aWSp.SetRunParallel(myRunParallel);
+  aWSp.SetContext(myContext);
   aWSp.Perform();
   iErr=aWSp.ErrorStatus();
   if (iErr) {
@@ -619,7 +615,6 @@ void BOPAlgo_BuilderFace::PerformAreas()
       }
       //
       if (anUnUsedHoles.Extent()) {
-        TopoDS_Face aFace;
         aBB.MakeFace(aFace, aS, aLoc, aTol);
         aMSH.Add(aFace, anUnUsedHoles);
         //
@@ -688,6 +683,9 @@ void GetWire(const TopoDS_Shape& aF, TopoDS_Shape& aW)
 void BOPAlgo_BuilderFace::PerformInternalShapes()
 {
   myErrorStatus=0;
+  if (myAvoidInternalShapes) {
+    return;
+  }
   //
   Standard_Integer aNbWI=myLoopsInternal.Extent();
   if (!aNbWI) {// nothing to do
@@ -840,7 +838,7 @@ Standard_Boolean IsInside(const TopoDS_Shape& theHole,
     if (!BRep_Tool::Degenerated(aE)) {
       //
       aT=BOPTools_AlgoTools2D::IntermediatePoint(aE);
-      BOPTools_AlgoTools2D::PointOnSurface(aE, aF2, aT, aU, aV);
+      BOPTools_AlgoTools2D::PointOnSurface(aE, aF2, aT, aU, aV, theContext);
       aP2D.SetCoord(aU, aV);
       //
       IntTools_FClass2d& aClsf=theContext->FClass2d(aF2);

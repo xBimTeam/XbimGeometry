@@ -86,6 +86,8 @@ public:
   Standard_EXPORT Storage_Error BeginReadInfoSection();
   
   Standard_EXPORT void ReadInfo (Standard_Integer& nbObj, TCollection_AsciiString& dbVersion, TCollection_AsciiString& date, TCollection_AsciiString& schemaName, TCollection_AsciiString& schemaVersion, TCollection_ExtendedString& appName, TCollection_AsciiString& appVersion, TCollection_ExtendedString& objectType, TColStd_SequenceOfAsciiString& userInfo);
+
+  Standard_EXPORT void ReadCompleteInfo (Standard_IStream& theIStream, Handle(Storage_Data)& theData);
   
   Standard_EXPORT Storage_Error EndReadInfoSection();
   
@@ -269,6 +271,7 @@ Storage_BaseDriver& operator >> (Standard_ShortReal& aValue)
   Destroy();
 }
 
+  Standard_EXPORT static Standard_CString MagicNumber();
 
 
 
@@ -297,24 +300,11 @@ protected:
   
   Standard_EXPORT Storage_Error FindTag (const Standard_CString aTag);
 
-
-
-
 private:
-
   
-  Standard_EXPORT static const Standard_CString MagicNumber();
 
 
   FSD_FStream myStream;
-
-
 };
-
-
-
-
-
-
 
 #endif // _FSD_File_HeaderFile

@@ -29,6 +29,7 @@
 #include <Standard_Integer.hxx>
 #include <TColStd_Array1OfReal.hxx>
 #include <Standard_Boolean.hxx>
+#include <GeomEvaluator_Surface.hxx>
 class Geom_Surface;
 class Standard_NoSuchObject;
 class Standard_OutOfRange;
@@ -53,6 +54,10 @@ class Adaptor3d_HCurve;
 //! surface from the package Geom and those required
 //! of the surface by algorithms which use it.
 //! Creation of the loaded surface the surface is C1 by piece
+//!
+//! Polynomial coefficients of BSpline surfaces used for their evaluation are
+//! cached for better performance. Therefore these evaluations are not
+//! thread-safe and parallel evaluations need to be prevented.
 class GeomAdaptor_Surface  : public Adaptor3d_Surface
 {
 public:
@@ -259,16 +264,19 @@ private:
 
 
   Handle(Geom_Surface) mySurface;
-  GeomAbs_SurfaceType mySurfaceType;
   Standard_Real myUFirst;
   Standard_Real myULast;
   Standard_Real myVFirst;
   Standard_Real myVLast;
   Standard_Real myTolU;
   Standard_Real myTolV;
-  Handle(BSplSLib_Cache) mySurfaceCache;
+  
+  Handle(Geom_BSplineSurface) myBSplineSurface; ///< B-spline representation to prevent downcasts
+  mutable Handle(BSplSLib_Cache) mySurfaceCache; ///< Cached data for B-spline or Bezier surface
 
-
+protected:
+  GeomAbs_SurfaceType mySurfaceType;
+  Handle(GeomEvaluator_Surface) myNestedEvaluator; ///< Calculates values of nested complex surfaces (offset surface, surface of extrusion or revolution)
 };
 
 

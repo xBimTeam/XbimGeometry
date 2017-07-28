@@ -33,6 +33,8 @@
 #include <Standard_Type.hxx>
 #include <TColStd_SequenceOfReal.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(GeomFill_GuideTrihedronAC,GeomFill_TrihedronWithGuide)
+
 //=======================================================================
 //function : GuideTrihedron
 //purpose  : Constructor
@@ -247,9 +249,7 @@ GeomFill_GuideTrihedronAC::GeomFill_GuideTrihedronAC(const Handle(Adaptor3d_HCur
 
 //derivee seconde du triedre
 #ifdef OCCT_DEBUG
-  gp_Vec DTDN = DTo.Crossed(DNormal);
-#else
-  DTo.Crossed(DNormal);
+  gp_Vec DTDN = DTo.Crossed(DNormal); (void)DTDN;
 #endif
   Standard_Real TN2 = TN.SquareMagnitude();
 

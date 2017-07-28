@@ -183,19 +183,12 @@ public:
   //! false otherwise.
     Standard_Boolean IsGreaterOrEqual (const Handle(Units_Token)& atoken) const;
   
-  //! Destroies the Token
-  Standard_EXPORT virtual void Destroy();
-~Units_Token()
-{
-  Destroy();
-}
-  
   //! Useful for debugging
   Standard_EXPORT virtual void Dump (const Standard_Integer ashift, const Standard_Integer alevel) const;
 
 
 
-  DEFINE_STANDARD_RTTI(Units_Token,MMgt_TShared)
+  DEFINE_STANDARD_RTTIEXT(Units_Token,MMgt_TShared)
 
 protected:
 

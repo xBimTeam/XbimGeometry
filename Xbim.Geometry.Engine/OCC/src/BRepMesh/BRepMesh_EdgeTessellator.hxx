@@ -23,10 +23,10 @@
 #include <BRepMesh_GeomTool.hxx>
 #include <BRepMesh_FaceAttribute.hxx>
 #include <BRepAdaptor_Curve.hxx>
+#include <Geom2dAdaptor_Curve.hxx>
 #include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
 
-class Geom_Surface;
-class Geom2d_Curve;
+class Adaptor3d_Surface;
 class TopoDS_Edge;
 class BRepAdaptor_HSurface;
 
@@ -48,7 +48,7 @@ public:
     const Standard_Real                              theMinSize);
 
   //! Returns number of dicretization points.
-  virtual Standard_Integer NbPoints() const
+  virtual Standard_Integer NbPoints() const Standard_OVERRIDE
   {
     return myTool->NbPoints();
   }
@@ -58,18 +58,20 @@ public:
   //! @param theParameter parameters on PCurve corresponded to the solution.
   //! @param thePoint tessellation point.
   //! @param theUV coordinates of tessellation point in parametric space of face.
-  virtual void Value(const Standard_Integer theIndex,
-                     Standard_Real&         theParameter,
-                     gp_Pnt&                thePoint,
-                     gp_Pnt2d&              theUV);
+  //! @return True in case of valid result, false elewhere.
+  virtual Standard_Boolean Value(
+    const Standard_Integer theIndex,
+    Standard_Real&         theParameter,
+    gp_Pnt&                thePoint,
+    gp_Pnt2d&              theUV) Standard_OVERRIDE;
 
-  DEFINE_STANDARD_RTTI(BRepMesh_EdgeTessellator, BRepMesh_IEdgeTool)
+  DEFINE_STANDARD_RTTIEXT(BRepMesh_EdgeTessellator,BRepMesh_IEdgeTool)
 
 private:
 
   //! 
-  void splitSegment(const Handle(Geom_Surface)& theSurf,
-                    const Handle(Geom2d_Curve)& theCurve2d,
+  void splitSegment(const Adaptor3d_Surface&    theSurf,
+                    const Geom2dAdaptor_Curve&  theCurve2d,
                     const Standard_Real         theFirst,
                     const Standard_Real         theLast,
                     const Standard_Integer      theNbIter);
@@ -78,8 +80,12 @@ private:
   NCollection_Handle<BRepMesh_GeomTool> myTool;
   Handle(BRepAdaptor_HSurface)          mySurface;
   BRepAdaptor_Curve                     myCOnS;
+  Geom2dAdaptor_Curve                   myCurve2d;
   Standard_Real                         mySquareEdgeDef;
   Standard_Real                         mySquareMinSize;
+  Standard_Real                         myEdgeSqTol;
+  Standard_Real                         myFaceRangeU[2];
+  Standard_Real                         myFaceRangeV[2];
 };
 
 DEFINE_STANDARD_HANDLE(BRepMesh_EdgeTessellator, BRepMesh_IEdgeTool)

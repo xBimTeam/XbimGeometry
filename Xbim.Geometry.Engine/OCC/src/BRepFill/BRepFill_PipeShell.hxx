@@ -34,6 +34,8 @@
 #include <MMgt_TShared.hxx>
 #include <BRepFill_TypeOfContact.hxx>
 #include <TopTools_ListOfShape.hxx>
+#include <TopTools_SequenceOfShape.hxx>
+#include <TColStd_SequenceOfInteger.hxx>
 class Law_Function;
 class BRepFill_LocationLaw;
 class BRepFill_SectionLaw;
@@ -146,7 +148,7 @@ public:
   Standard_EXPORT void SetLaw (const TopoDS_Shape& Profile, const Handle(Law_Function)& L, const TopoDS_Vertex& Location, const Standard_Boolean WithContact = Standard_False, const Standard_Boolean WithCorrection = Standard_False);
   
   //! Delete an section.
-  Standard_EXPORT void Delete (const TopoDS_Shape& Profile);
+  Standard_EXPORT void DeleteProfile (const TopoDS_Shape& Profile);
   
   //! Say if <me> is ready to build the shape
   //! return False if <me> do not have section definition
@@ -190,7 +192,7 @@ public:
 
 
 
-  DEFINE_STANDARD_RTTI(BRepFill_PipeShell,MMgt_TShared)
+  DEFINE_STANDARD_RTTIEXT(BRepFill_PipeShell,MMgt_TShared)
 
 protected:
 
@@ -213,6 +215,9 @@ private:
   TopoDS_Shape myLast;
   TopoDS_Shape myShape;
   BRepFill_SequenceOfSection mySeq;
+  TopTools_SequenceOfShape WSeq;
+  TColStd_SequenceOfInteger  myIndOfSec;
+  TopTools_DataMapOfShapeListOfShape myEdgeNewEdges;
   TopTools_DataMapOfShapeListOfShape myGenMap;
   Standard_Real myTol3d;
   Standard_Real myBoundTol;

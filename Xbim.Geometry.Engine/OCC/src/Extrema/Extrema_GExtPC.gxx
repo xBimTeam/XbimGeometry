@@ -103,9 +103,9 @@ void Extrema_GExtPC::Perform(const ThePoint& P)
       TheCurveTool::BSpline(aCurve)->Knots(aKnots); 
 
       // Workaround to work with:
-      // blend, where knots may be moved from param space.
+      // blend, where knots may be moved from parameter space.
       Standard_Real aPeriodJump = 0.0;
-      // Avoid prolem with too close knots.
+      // Avoid problem with too close knots.
       const Standard_Real aTolCoeff = (myusup - myuinf) * Precision::PConfusion();
       if (TheCurveTool::IsPeriodic(aCurve))
       {
@@ -203,8 +203,8 @@ void Extrema_GExtPC::Perform(const ThePoint& P)
         }
       }
 
-      // Solve on first and last interval.
-      if (mydist1 > Precision::SquareConfusion())
+      // Solve on the first and last intervals.
+      if (mydist1 > Precision::SquareConfusion() && !Precision::IsPositiveInfinite(mydist1))
       {
         ThePoint aP1, aP2;
         TheVector aV1, aV2;
@@ -213,19 +213,23 @@ void Extrema_GExtPC::Perform(const ThePoint& P)
         TheVector aBase1(P, aP1), aBase2(P, aP2);
         Standard_Real aVal1 = aV1.Dot(aBase1); // Derivative of (C(u) - P)^2
         Standard_Real aVal2 = aV2.Dot(aBase2); // Derivative of (C(u) - P)^2
-
-        // Derivatives have opposite signs - min or max inside of interval (sufficient condition).
-        // Necessary condition - when point lies on curve.
-        if(aVal1 * aVal2 <= 0.0 ||
-           aBase1.Dot(aBase2) <= 0.0)
+        if(!(Precision::IsInfinite(aVal1) || Precision::IsInfinite(aVal2)))
         {
-          myintuinf = aParam(aVal.Lower());
-          myintusup = aParam(aVal.Lower() + 1);
-          IntervalPerform(P);
+          // Derivatives have opposite signs - min or max inside of interval (sufficient condition).
+          // Necessary condition - when point lies on curve.
+          // Necessary condition - when derivative of point is too small.
+          if(aVal1 * aVal2 <= 0.0 ||
+            aBase1.Dot(aBase2) <= 0.0 ||
+            2.0 * Abs(aVal1) < Precision::Confusion() )
+          {
+            myintuinf = aParam(aVal.Lower());
+            myintusup = aParam(aVal.Lower() + 1);
+            IntervalPerform(P);
+          }
         }
       }
 
-      if (mydist2 > Precision::SquareConfusion())
+      if (mydist2 > Precision::SquareConfusion() && !Precision::IsPositiveInfinite(mydist2))
       {
         ThePoint aP1, aP2;
         TheVector aV1, aV2;
@@ -235,21 +239,26 @@ void Extrema_GExtPC::Perform(const ThePoint& P)
         Standard_Real aVal1 = aV1.Dot(aBase1); // Derivative of (C(u) - P)^2
         Standard_Real aVal2 = aV2.Dot(aBase2); // Derivative of (C(u) - P)^2
 
-        // Derivatives have opposite signs - min or max inside of interval (sufficient condition).
-        // Necessary condition - when point lies on curve.
-        if(aVal1 * aVal2 <= 0.0 ||
-           aBase1.Dot(aBase2) <= 0.0)
+        if(!(Precision::IsInfinite(aVal1) || Precision::IsInfinite(aVal2)))
         {
-          myintuinf = aParam(aVal.Upper() - 1);
-          myintusup = aParam(aVal.Upper());
-          IntervalPerform(P);
+          // Derivatives have opposite signs - min or max inside of interval (sufficient condition).
+          // Necessary condition - when point lies on curve.
+          // Necessary condition - when derivative of point is too small.
+          if(aVal1 * aVal2 <= 0.0 ||
+            aBase1.Dot(aBase2) <= 0.0 ||
+            2.0 * Abs(aVal2) < Precision::Confusion() )
+          {
+            myintuinf = aParam(aVal.Upper() - 1);
+            myintusup = aParam(aVal.Upper());
+            IntervalPerform(P);
+          }
         }
       }
 
       mydone = Standard_True;
       break;
     }
-  case GeomAbs_OtherCurve:
+  default:
     {
       Standard_Boolean IntExtIsDone = Standard_False;
       Standard_Boolean IntIsNotValid;
@@ -310,6 +319,7 @@ void Extrema_GExtPC::Perform(const ThePoint& P)
 
   // Postprocessing.
   if (type == GeomAbs_BSplineCurve ||
+      type == GeomAbs_OffsetCurve ||
       type == GeomAbs_OtherCurve)
   {
     // Additional checking if the point is on the first or last point of the curve

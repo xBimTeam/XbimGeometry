@@ -29,14 +29,52 @@
   #define Standard_OVERRIDE
 #endif
 
+// Macro for marking variables / functions as possibly unused
+// so that compiler will not emit redundant "unused" warnings.
+#if defined(__GNUC__) || defined(__clang__)
+  #define Standard_UNUSED __attribute__((unused))
+#else
+  #define Standard_UNUSED
+#endif
+
+// Macro Standard_DEPRECATED("message") can be used to declare a method deprecated.
+// If OCCT_NO_DEPRECATED is defined, Standard_DEPRECATED is defined empty.
+#ifdef OCCT_NO_DEPRECATED
+  #define Standard_DEPRECATED(theMsg)
+#else
+#if defined(_MSC_VER)
+  #define Standard_DEPRECATED(theMsg) __declspec(deprecated(theMsg))
+#elif defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5) || defined(__clang__))
+  #define Standard_DEPRECATED(theMsg) __attribute__((deprecated(theMsg)))
+#elif defined(__GNUC__) && (__GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 1))
+  #define Standard_DEPRECATED(theMsg) __attribute__((deprecated))
+#else
+  #define Standard_DEPRECATED(theMsg)
+#endif
+#endif
+
+// Disable warnings about deprecated features.
+// This is useful for sections of code kept for backward compatibility and scheduled for removal.
+
+#if defined(__ICL) || defined (__INTEL_COMPILER)
+  #define Standard_DISABLE_DEPRECATION_WARNINGS __pragma(warning(push)) __pragma(warning(disable:1478))
+  #define Standard_ENABLE_DEPRECATION_WARNINGS  __pragma(warning(pop))
+#elif defined(_MSC_VER)
+  #define Standard_DISABLE_DEPRECATION_WARNINGS __pragma(warning(push)) __pragma(warning(disable:4996))
+  #define Standard_ENABLE_DEPRECATION_WARNINGS  __pragma(warning(pop))
+#elif (defined(__GNUC__) && __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)) || defined(__clang__)
+  // available since at least gcc 4.2 (maybe earlier), however only gcc 4.6+ supports this pragma inside the function body
+  // CLang also supports this gcc syntax (in addition to "clang diagnostic ignored")
+  #define Standard_DISABLE_DEPRECATION_WARNINGS _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"")
+  #define Standard_ENABLE_DEPRECATION_WARNINGS  _Pragma("GCC diagnostic warning \"-Wdeprecated-declarations\"")
+#else
+  #define Standard_DISABLE_DEPRECATION_WARNINGS
+  #define Standard_ENABLE_DEPRECATION_WARNINGS
+#endif
+
 //======================================================
 // Windows-specific definitions
 //======================================================
-
-// check if WNT macro is not defined but compiler is MSVC
-#if defined(_MSC_VER) && !defined(WNT)
-#error "Wrong compiler options has been detected. Add /DWNT option for proper compilation!!!!!"
-#endif
 
 # if defined(_WIN32) && !defined(HAVE_NO_DLL)
 
@@ -94,7 +132,7 @@
 #define NOIME NOIME
 #endif
 
-# else  /* WNT */
+# else  /* UNIX */
 
 //======================================================
 // UNIX definitions
@@ -123,14 +161,13 @@
 #define	_MEMORY_H
 #endif
 
-# endif  /* WNT */
+# endif  /* _WIN32 */
 
 //======================================================
 // Other
 //======================================================
 
 # ifndef __Standard_API
-//#  ifdef WNT
 #   if !defined(_WIN32) || defined(__Standard_DLL) || defined(__FSD_DLL) || defined(__MMgt_DLL) || defined(__OSD_DLL) || defined(__Plugin_DLL) || defined(__Quantity_DLL) || defined(__Resource_DLL) || defined(__SortTools_DLL) || defined(__StdFail_DLL) || defined(__Storage_DLL) || defined(__TColStd_DLL) || defined(__TCollection_DLL) || defined(__TShort_DLL) || defined(__Units_DLL) || defined(__UnitsAPI_DLL) || defined(__Dico_DLL)
 #    define __Standard_API Standard_EXPORT
 #    define __Standard_APIEXTERN Standard_EXPORTEXTERN
@@ -138,9 +175,15 @@
 #    define __Standard_API Standard_IMPORT
 #    define __Standard_APIEXTERN Standard_IMPORT
 #   endif  // __Standard_DLL
-//#  else
-//#   define __Standard_API
-//#  endif  // WNT
 # endif  // __Standard_API
 
-#endif  
+// Support of Universal Windows Platform
+#if defined(WINAPI_FAMILY) && WINAPI_FAMILY == WINAPI_FAMILY_APP
+ #define OCCT_UWP
+#else
+ #ifdef OCCT_UWP
+   #undef OCCT_UWP
+ #endif
+#endif
+
+#endif

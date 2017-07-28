@@ -96,19 +96,12 @@ public:
   Standard_EXPORT Standard_Boolean HasSameSupport (const Handle(TopOpeBRepDS_Interference)& Other) const;
   
   Standard_EXPORT Standard_Boolean HasSameGeometry (const Handle(TopOpeBRepDS_Interference)& Other) const;
-  
-  Standard_EXPORT Standard_OStream& DumpG (Standard_OStream& OS) const;
-  
-  Standard_EXPORT Standard_OStream& DumpS (Standard_OStream& OS) const;
-  
-  Standard_EXPORT virtual Standard_OStream& Dump (Standard_OStream& OS) const;
-  
-  Standard_EXPORT Standard_OStream& Dump (Standard_OStream& OS, const TCollection_AsciiString& s1, const TCollection_AsciiString& s2) const;
 
 
 
 
-  DEFINE_STANDARD_RTTI(TopOpeBRepDS_Interference,MMgt_TShared)
+
+  DEFINE_STANDARD_RTTIEXT(TopOpeBRepDS_Interference,MMgt_TShared)
 
 protected:
 

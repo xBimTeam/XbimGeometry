@@ -56,12 +56,12 @@ public:
   Standard_EXPORT virtual const Handle(Poly_PolygonOnTriangulation)& PolygonOnTriangulation() const Standard_OVERRIDE;
   
   //! Return a copy of this representation.
-  Standard_EXPORT virtual Handle(BRep_CurveRepresentation) Copy() const;
+  Standard_EXPORT virtual Handle(BRep_CurveRepresentation) Copy() const Standard_OVERRIDE;
 
 
 
 
-  DEFINE_STANDARD_RTTI(BRep_PolygonOnTriangulation,BRep_CurveRepresentation)
+  DEFINE_STANDARD_RTTIEXT(BRep_PolygonOnTriangulation,BRep_CurveRepresentation)
 
 protected:
 

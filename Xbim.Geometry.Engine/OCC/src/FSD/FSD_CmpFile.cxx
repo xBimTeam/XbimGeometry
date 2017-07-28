@@ -12,9 +12,10 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-
 #include <FSD_CmpFile.hxx>
+
 #include <OSD.hxx>
+#include <OSD_OpenFile.hxx>
 #include <Standard_PCharacter.hxx>
 #include <Storage_BaseDriver.hxx>
 #include <Storage_StreamExtCharParityError.hxx>
@@ -79,40 +80,46 @@ Storage_Error FSD_CmpFile::Open(const TCollection_AsciiString& aName,const Stora
   SetName(aName);
 
   if (OpenMode() == Storage_VSNone) {
-
-#if defined(_WNT32)
-    TCollection_ExtendedString aWName(aName);
-    if (aMode == Storage_VSRead) {
-      myStream.open((const wchar_t*)aWName.ToExtString(),ios::in|ios::binary); // ios::nocreate is not portable
+    std::ios_base::openmode anOpenMode = std::ios_base::openmode(0);
+    switch (aMode)
+    {
+      case Storage_VSNone:
+      {
+        break;
+      }
+      case Storage_VSRead:
+      {
+        // ios::nocreate is not portable
+      #if !defined(IRIX) && !defined(DECOSF1)
+        anOpenMode = ios::in | ios::binary;
+      #else
+        anOpenMode = ios::in;
+      #endif
+        break;
+      }
+      case Storage_VSWrite:
+      {
+      #if !defined(IRIX) && !defined(DECOSF1)
+        anOpenMode = ios::out | ios::binary;
+      #else
+        anOpenMode = ios::out;
+      #endif
+        break;
+      }
+      case Storage_VSReadWrite:
+      {
+      #if !defined(IRIX) && !defined(DECOSF1)
+        anOpenMode = ios::in | ios::out | ios::binary;
+      #else
+        anOpenMode = ios::in | ios::out;
+      #endif
+        break;
+      }
     }
-    else if (aMode == Storage_VSWrite) {
-      myStream.open((const wchar_t*)aWName.ToExtString(),ios::out|ios::binary);
+    if (anOpenMode != 0)
+    {
+      OSD_OpenStream (myStream, aName, anOpenMode);
     }
-    else if (aMode == Storage_VSReadWrite) {
-      myStream.open((const wchar_t*)aWName.ToExtString(),ios::in|ios::out|ios::binary);
-    }
-#elif !defined(IRIX) && !defined(DECOSF1)
-    if (aMode == Storage_VSRead) {
-      myStream.open(aName.ToCString(),ios::in|ios::binary); // ios::nocreate is not portable
-    }
-    else if (aMode == Storage_VSWrite) {
-      myStream.open(aName.ToCString(),ios::out|ios::binary);
-    }
-    else if (aMode == Storage_VSReadWrite) {
-      myStream.open(aName.ToCString(),ios::in|ios::out|ios::binary);
-    }
-#else
-    if (aMode == Storage_VSRead) {
-      myStream.open(aName.ToCString(),ios::in); // ios::nocreate is not portable
-    }
-    else if (aMode == Storage_VSWrite) {
-      myStream.open(aName.ToCString(),ios::out);
-    }
-    else if (aMode == Storage_VSReadWrite) {
-      myStream.open(aName.ToCString(),ios::in|ios::out);
-    }
-#endif
-
     if (myStream.fail()) {
       result = Storage_VSOpenError;
     }
@@ -163,7 +170,7 @@ Storage_Error FSD_CmpFile::Close()
 //purpose  : ------------------ PROTECTED
 //=======================================================================
 
-const Standard_CString FSD_CmpFile::MagicNumber()
+Standard_CString FSD_CmpFile::MagicNumber()
 {
   return MAGICNUMBER;
 }
@@ -447,7 +454,7 @@ Storage_BaseDriver& FSD_CmpFile::PutCharacter(const Standard_Character aValue)
 
 Storage_BaseDriver& FSD_CmpFile::PutExtCharacter(const Standard_ExtCharacter aValue)
 {
-  myStream << aValue << " ";
+  myStream << (short )aValue << " ";
   if (myStream.bad()) Storage_StreamWriteError::Raise();
   return *this;
 }
@@ -539,8 +546,9 @@ Storage_BaseDriver& FSD_CmpFile::GetCharacter(Standard_Character& aValue)
 
 Storage_BaseDriver& FSD_CmpFile::GetExtCharacter(Standard_ExtCharacter& aValue)
 {
-  if (!(myStream >> aValue)) Storage_StreamTypeMismatchError::Raise();
-  
+  short aChar = 0;
+  if (!(myStream >> aChar)) Storage_StreamTypeMismatchError::Raise();
+  aValue = aChar;
   return *this;
 }
 
@@ -753,6 +761,16 @@ void FSD_CmpFile::ReadInfo(Standard_Integer& nbObj,
     userInfo.Append(line);
     line.Clear();
   }
+}
+
+//=======================================================================
+//function : ReadCompleteInfo
+//purpose  : 
+//           
+//=======================================================================
+void FSD_CmpFile::ReadCompleteInfo( Standard_IStream& /*theIStream*/, Handle(Storage_Data)& /*theData*/)
+{
+
 }
 
 //=======================================================================

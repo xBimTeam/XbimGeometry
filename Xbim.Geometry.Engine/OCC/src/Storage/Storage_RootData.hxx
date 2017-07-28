@@ -29,6 +29,7 @@
 #include <Standard_Boolean.hxx>
 class Standard_NoSuchObject;
 class Storage_Schema;
+class Storage_BaseDriver;
 class Storage_Root;
 class TCollection_AsciiString;
 class Standard_Persistent;
@@ -45,6 +46,8 @@ public:
 
   
   Standard_EXPORT Storage_RootData();
+
+  Standard_EXPORT Standard_Boolean Read (Storage_BaseDriver& theDriver);
   
   //! returns the number of roots.
   Standard_EXPORT Standard_Integer NumberOfRoots() const;
@@ -70,11 +73,12 @@ public:
   
   Standard_EXPORT void ClearErrorStatus();
 
+  Standard_EXPORT void UpdateRoot (const TCollection_AsciiString& aName, const Handle(Standard_Persistent)& aPers);
 
 friend class Storage_Schema;
 
 
-  DEFINE_STANDARD_RTTI(Storage_RootData,MMgt_TShared)
+  DEFINE_STANDARD_RTTIEXT(Storage_RootData,MMgt_TShared)
 
 protected:
 
@@ -84,7 +88,6 @@ protected:
 private:
 
   
-  Standard_EXPORT void UpdateRoot (const TCollection_AsciiString& aName, const Handle(Standard_Persistent)& aPers);
   
   Standard_EXPORT void SetErrorStatus (const Storage_Error anError);
   

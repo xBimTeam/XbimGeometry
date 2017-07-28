@@ -12,7 +12,7 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef WNT
+#ifndef _WIN32
 
 
 #include <OSD_Environment.hxx>
@@ -36,10 +36,10 @@ OSD_Process::OSD_Process(){
 }
 
 
-void OSD_Process::Spawn (const TCollection_AsciiString& cmd,
+Standard_Integer OSD_Process::Spawn (const TCollection_AsciiString& cmd,
 			 const Standard_Boolean /*ShowWindow*/)
 {
- system(cmd.ToCString());
+ return system(cmd.ToCString());
 }
 
 
@@ -84,12 +84,6 @@ tm));
 Standard_Integer OSD_Process::ProcessId(){
  return (getpid());
 }
-
-
-Standard_Integer OSD_Process::UserId(){
- return (getuid());
-}
-
 
 TCollection_AsciiString OSD_Process::UserName(){
  struct passwd *infos;
@@ -203,8 +197,9 @@ Standard_Integer OSD_Process::Error()const{
 #include <OSD_WNT_1.hxx>
 #include <LMCONS.H> /// pour UNLEN  ( see MSDN about GetUserName() )
 
-
-#pragma warning( disable : 4700 )
+#if defined(_MSC_VER)
+  #pragma warning( disable : 4700 )
+#endif
 
 void _osd_wnt_set_error ( OSD_Error&, OSD_WhoAmI, ... );
 
@@ -212,11 +207,13 @@ OSD_Process :: OSD_Process () {
 
 }  // end constructor
 
-void OSD_Process :: Spawn ( const TCollection_AsciiString& cmd ,
-			    const Standard_Boolean ShowWindow /* = Standard_True */) {
 
+Standard_Integer OSD_Process::Spawn (const TCollection_AsciiString& cmd,
+			    const Standard_Boolean ShowWindow /* = Standard_True */) {
+#ifndef OCCT_UWP
  STARTUPINFO         si;
  PROCESS_INFORMATION pi;
+ DWORD aRes = 0;
 
  ZeroMemory (  &si, sizeof ( STARTUPINFO )  );
 
@@ -235,20 +232,27 @@ void OSD_Process :: Spawn ( const TCollection_AsciiString& cmd ,
  if (!CreateProcess (
       NULL, (char *)cmd.ToCString (), NULL, NULL, TRUE, CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi
                     )
- )
+ ) {
 
   _osd_wnt_set_error ( myError, OSD_WProcess );
-
+  aRes = myError.Error();
+ }
  else {
  
   CloseHandle ( pi.hThread );
 
   WaitForSingleObject ( pi.hProcess, INFINITE );
-
+  GetExitCodeProcess (pi.hProcess, &aRes);
   CloseHandle ( pi.hProcess );
  
  }  // end else
 
+ return aRes;
+#else
+  (void)cmd;
+  (void)ShowWindow;
+  return 0;
+#endif
 }  // end OSD_Process :: Spawn
 
 void OSD_Process :: TerminalType ( TCollection_AsciiString& Name ) {
@@ -272,34 +276,9 @@ Quantity_Date OSD_Process :: SystemDate () {
 
 }  // end OSD_Process :: SystemDate
 
-Standard_Integer OSD_Process :: UserId () {
-
- PSID         retVal        = NULL;
- HANDLE       hProcessToken = INVALID_HANDLE_VALUE;
- PTOKEN_OWNER pTKowner      = NULL;
-
- if (  !OpenProcessToken (
-         GetCurrentProcess (),
-         TOKEN_QUERY, &hProcessToken
-        ) ||
-        (  pTKowner = ( PTOKEN_OWNER )GetTokenInformationEx (
-                                       hProcessToken, TokenOwner
-                                      )
-        ) == NULL ||
-        (  retVal   = CopySidEx ( pTKowner -> Owner )  ) == NULL
- )
-
-  _osd_wnt_set_error ( myError, OSD_WProcess );
-
- if ( hProcessToken != INVALID_HANDLE_VALUE ) CloseHandle ( hProcessToken );
- if ( pTKowner      != NULL                 ) FreeTokenInformation ( pTKowner );
-
- return ( Standard_Integer )retVal;
-
-}  // end OSD_Process :: UserId
-
 TCollection_AsciiString OSD_Process :: UserName () 
 {
+#ifndef OCCT_UWP
 	Standard_PCharacter pBuff = new char[UNLEN + 1];
 	DWORD                   dwSize = UNLEN + 1;
 	TCollection_AsciiString retVal;
@@ -314,10 +293,13 @@ TCollection_AsciiString OSD_Process :: UserName ()
 	}
 	delete [] pBuff;
 	return retVal;
+#else
+  return "";
+#endif
 }  // end OSD_Process :: UserName
 
 Standard_Boolean OSD_Process :: IsSuperUser () {
-
+#ifndef OCCT_UWP
  Standard_Boolean retVal = FALSE;
  PSID             pSIDadmin;
  HANDLE           hProcessToken = INVALID_HANDLE_VALUE;
@@ -354,7 +336,9 @@ Standard_Boolean OSD_Process :: IsSuperUser () {
  if ( pTKgroups     != NULL                 ) FreeTokenInformation ( pTKgroups );
 
  return retVal;
-
+#else
+ return FALSE;
+#endif
 }  // end OSD_Process :: IsSuperUser
 
 Standard_Integer OSD_Process :: ProcessId () {
@@ -364,22 +348,22 @@ Standard_Integer OSD_Process :: ProcessId () {
 }  // end OSD_Process :: ProcessId
 
 OSD_Path OSD_Process :: CurrentDirectory () {
-
   OSD_Path anCurrentDirectory;
-
+#ifndef OCCT_UWP
   DWORD dwSize = PATHLEN + 1;
   Standard_WideChar* pBuff = new wchar_t[dwSize];
 
-  if ( GetCurrentDirectoryW(dwSize, (wchar_t*)pBuff) > 0 )
+  if (GetCurrentDirectoryW (dwSize, pBuff) > 0)
   {
     // conversion to UTF-8 is performed inside
-    TCollection_AsciiString aPath(TCollection_ExtendedString((Standard_ExtString)pBuff));
+    TCollection_AsciiString aPath (pBuff);
     anCurrentDirectory = OSD_Path ( aPath );
   }
   else
     _osd_wnt_set_error ( myError, OSD_WProcess );
  
   delete[] pBuff;
+#endif
   return anCurrentDirectory;
 }  // end OSD_Process :: CurrentDirectory
 
@@ -390,7 +374,7 @@ void OSD_Process :: SetCurrentDirectory ( const OSD_Path& where ) {
  where.SystemName ( path );
  TCollection_ExtendedString pathW(path);
 
- if (   !::SetCurrentDirectoryW ( (const wchar_t*) pathW.ToExtString ()  )   )
+ if (!::SetCurrentDirectoryW (pathW.ToWideString()))
 
   _osd_wnt_set_error ( myError, OSD_WProcess );
 

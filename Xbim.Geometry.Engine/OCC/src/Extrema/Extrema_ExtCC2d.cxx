@@ -41,27 +41,30 @@
 #include <StdFail_NotDone.hxx>
 
 Extrema_ExtCC2d::Extrema_ExtCC2d()
+: myIsFindSingleSolution(Standard_False)
 {
 }
 
 
-Extrema_ExtCC2d::Extrema_ExtCC2d(const Adaptor2d_Curve2d&       C1, 
-				   const Adaptor2d_Curve2d&       C2,
-				   const Standard_Real TolC1, 
-				   const Standard_Real TolC2)
+Extrema_ExtCC2d::Extrema_ExtCC2d(const Adaptor2d_Curve2d&       C1,
+                                 const Adaptor2d_Curve2d&       C2,
+                                 const Standard_Real TolC1,
+                                 const Standard_Real TolC2)
+: myIsFindSingleSolution(Standard_False)
 {
   Initialize(C2, Extrema_Curve2dTool::FirstParameter(C2), Extrema_Curve2dTool::LastParameter(C2), TolC1, TolC2);
   Perform(C1, Extrema_Curve2dTool::FirstParameter(C1), Extrema_Curve2dTool::LastParameter(C1));
 }
 
 Extrema_ExtCC2d::Extrema_ExtCC2d(const Adaptor2d_Curve2d&        C1, 
-				   const Adaptor2d_Curve2d&        C2,
-				   const Standard_Real  U1,
-				   const Standard_Real  U2,
-				   const Standard_Real  V1,
-				   const Standard_Real  V2,
-				   const Standard_Real  TolC1,
-				   const Standard_Real  TolC2)
+                                 const Adaptor2d_Curve2d&        C2,
+                                 const Standard_Real  U1,
+                                 const Standard_Real  U2,
+                                 const Standard_Real  V1,
+                                 const Standard_Real  V2,
+                                 const Standard_Real  TolC1,
+                                 const Standard_Real  TolC2)
+: myIsFindSingleSolution(Standard_False)
 {
   Initialize(C2, V1, V2, TolC1, TolC2);
   Perform(C1, U1, U2);
@@ -114,6 +117,12 @@ void Extrema_ExtCC2d::Perform (const Adaptor2d_Curve2d&       C1,
   case GeomAbs_Circle: {
 
     switch(type2) {
+      case GeomAbs_Line: {
+	inverse = Standard_True;
+	Extrema_ExtElC2d Xtrem(Extrema_Curve2dTool::Line(*((Adaptor2d_Curve2d*)myC)), Extrema_Curve2dTool::Circle(C1), Tol);
+	Results(Xtrem, U11, U12, U21, U22, 2*M_PI, 0.);
+        }
+	break;
       case GeomAbs_Circle: {
 	Extrema_ExtElC2d Xtrem(Extrema_Curve2dTool::Circle(C1), Extrema_Curve2dTool::Circle(*((Adaptor2d_Curve2d*)myC)));
 	Results(Xtrem, U11, U12, U21, U22, 2*M_PI, 2*M_PI);
@@ -134,20 +143,13 @@ void Extrema_ExtCC2d::Perform (const Adaptor2d_Curve2d&       C1,
 	Results(Xtrem, U11, U12, U21, U22, 2*M_PI, 0. );
       }
 	break;
-      case GeomAbs_BezierCurve:
-      case GeomAbs_OtherCurve:
-      case GeomAbs_BSplineCurve: {
-	Extrema_ECC2d Xtrem(C1, *((Adaptor2d_Curve2d*)myC));
-			Xtrem.Perform();
-	Standard_Real Period2 = 0.;
-	if (Extrema_Curve2dTool::IsPeriodic(*((Adaptor2d_Curve2d*)myC))) Period2 = Extrema_Curve2dTool::Period(*((Adaptor2d_Curve2d*)myC));
-	Results(Xtrem, U11, U12, U21, U22, 2*M_PI,Period2);
-        }
-	break;
-      case GeomAbs_Line: {
-	inverse = Standard_True;
-	Extrema_ExtElC2d Xtrem(Extrema_Curve2dTool::Line(*((Adaptor2d_Curve2d*)myC)), Extrema_Curve2dTool::Circle(C1), Tol);
-	Results(Xtrem, U11, U12, U21, U22, 2*M_PI, 0.);
+      default: {
+          Extrema_ECC2d aParamSolver(C1, *((Adaptor2d_Curve2d*)myC));
+          aParamSolver.SetSingleSolutionFlag(GetSingleSolutionFlag());
+          aParamSolver.Perform();
+          Standard_Real Period2 = 0.;
+          if (Extrema_Curve2dTool::IsPeriodic(*((Adaptor2d_Curve2d*)myC))) Period2 = Extrema_Curve2dTool::Period(*((Adaptor2d_Curve2d*)myC));
+          Results(aParamSolver, U11, U12, U21, U22, 2*M_PI,Period2);
         }
 	break;
       };  // switch(type2)
@@ -160,47 +162,49 @@ void Extrema_ExtCC2d::Perform (const Adaptor2d_Curve2d&       C1,
   case GeomAbs_Ellipse: {
 
     switch(type2) {
+      case GeomAbs_Line: {
+        inverse = Standard_True;
+	Extrema_ExtElC2d Xtrem(Extrema_Curve2dTool::Line(*((Adaptor2d_Curve2d*)myC)), Extrema_Curve2dTool::Ellipse(C1));
+	Results(Xtrem, U11, U12, U21, U22, 2*M_PI, 0.);
+        }
+	break;
       case GeomAbs_Circle: {
 	inverse = Standard_True;
 	Extrema_ExtElC2d Xtrem(Extrema_Curve2dTool::Circle(*((Adaptor2d_Curve2d*)myC)), Extrema_Curve2dTool::Ellipse(C1));
 	Results(Xtrem, U11, U12, U21, U22, 2*M_PI, 2*M_PI);
         }
 	break;
-      case GeomAbs_Ellipse: {
-	//Extrema_ExtElC2d Xtrem(Extrema_Curve2dTool::Ellipse(C1), Extrema_Curve2dTool::Ellipse(*((Adaptor2d_Curve2d*)myC)));
-	Extrema_ECC2d Xtrem(C1, *((Adaptor2d_Curve2d*)myC));
-			Xtrem.Perform();
-	Results(Xtrem, U11, U12, U21, U22,2*M_PI, 2*M_PI);
+      case GeomAbs_Ellipse:
+        {
+	Extrema_ECC2d aParamSolver(C1, *((Adaptor2d_Curve2d*)myC));
+        aParamSolver.SetSingleSolutionFlag(GetSingleSolutionFlag());
+        aParamSolver.Perform();
+	Results(aParamSolver, U11, U12, U21, U22,2*M_PI, 2*M_PI);
         }
 	break;
       case GeomAbs_Parabola: {
 	//Extrema_ExtElC2d Xtrem(Extrema_Curve2dTool::Ellipse(C1), Extrema_Curve2dTool::Parabola(*((Adaptor2d_Curve2d*)myC)));
-	Extrema_ECC2d Xtrem(C1, *((Adaptor2d_Curve2d*)myC));
-			Xtrem.Perform();
-	Results(Xtrem, U11, U12, U21, U22, 2*M_PI, 0.);
+	Extrema_ECC2d aParamSolver(C1, *((Adaptor2d_Curve2d*)myC));
+        aParamSolver.SetSingleSolutionFlag(GetSingleSolutionFlag());
+        aParamSolver.Perform();
+	Results(aParamSolver, U11, U12, U21, U22, 2*M_PI, 0.);
       }
 	break;
       case GeomAbs_Hyperbola: {
 	//Extrema_ExtElC2d Xtrem(Extrema_Curve2dTool::Ellipse(C1), Extrema_Curve2dTool::Hyperbola(*((Adaptor2d_Curve2d*)myC)));
-	Extrema_ECC2d Xtrem(C1, *((Adaptor2d_Curve2d*)myC));
-			Xtrem.Perform();
-	Results(Xtrem, U11, U12, U21, U22, 2*M_PI, 0.);
+	Extrema_ECC2d aParamSolver(C1, *((Adaptor2d_Curve2d*)myC));
+        aParamSolver.SetSingleSolutionFlag(GetSingleSolutionFlag());
+        aParamSolver.Perform();
+	Results(aParamSolver, U11, U12, U21, U22, 2*M_PI, 0.);
       }
 	break;
-      case GeomAbs_BezierCurve:
-      case GeomAbs_OtherCurve:
-      case GeomAbs_BSplineCurve: {
-	Extrema_ECC2d Xtrem(C1, *((Adaptor2d_Curve2d*)myC));
-			Xtrem.Perform();	
+      default: {
+	Extrema_ECC2d aParamSolver(C1, *((Adaptor2d_Curve2d*)myC));
+        aParamSolver.SetSingleSolutionFlag(GetSingleSolutionFlag());
+        aParamSolver.Perform();
 	Standard_Real Period2 = 0.;
 	if (Extrema_Curve2dTool::IsPeriodic(*((Adaptor2d_Curve2d*)myC))) Period2 = Extrema_Curve2dTool::Period(*((Adaptor2d_Curve2d*)myC));
-	Results(Xtrem, U11, U12, U21, U22, 2*M_PI,Period2);
-        }
-	break;
-      case GeomAbs_Line: {
-        inverse = Standard_True;
-	Extrema_ExtElC2d Xtrem(Extrema_Curve2dTool::Line(*((Adaptor2d_Curve2d*)myC)), Extrema_Curve2dTool::Ellipse(C1));
-	Results(Xtrem, U11, U12, U21, U22, 2*M_PI, 0.);
+	Results(aParamSolver, U11, U12, U21, U22, 2*M_PI,Period2);
         }
 	break;
       };  // switch(type2)
@@ -213,6 +217,12 @@ void Extrema_ExtCC2d::Perform (const Adaptor2d_Curve2d&       C1,
   case GeomAbs_Parabola: {
 
     switch(type2) {
+      case GeomAbs_Line: {
+	inverse = Standard_True;
+	Extrema_ExtElC2d Xtrem(Extrema_Curve2dTool::Line(*((Adaptor2d_Curve2d*)myC)), Extrema_Curve2dTool::Parabola(C1));
+	Results(Xtrem, U11, U12, U21, U22, 0., 0.);
+        }
+	break;
       case GeomAbs_Circle: {
 	inverse = Standard_True;
 	Extrema_ExtElC2d Xtrem(Extrema_Curve2dTool::Circle(*((Adaptor2d_Curve2d*)myC)), Extrema_Curve2dTool::Parabola(C1));
@@ -222,40 +232,36 @@ void Extrema_ExtCC2d::Perform (const Adaptor2d_Curve2d&       C1,
       case GeomAbs_Ellipse: {
 	//inverse = Standard_True;
 	//Extrema_ExtElC2d Xtrem(Extrema_Curve2dTool::Ellipse(*((Adaptor2d_Curve2d*)myC)), Extrema_Curve2dTool::Parabola(C1));
-	Extrema_ECC2d Xtrem(C1, *((Adaptor2d_Curve2d*)myC));
-			Xtrem.Perform();
-	Results(Xtrem, U11, U12, U21, U22, 0., 2*M_PI);
+	Extrema_ECC2d aParamSolver(C1, *((Adaptor2d_Curve2d*)myC));
+        aParamSolver.SetSingleSolutionFlag(GetSingleSolutionFlag());
+        aParamSolver.Perform();
+	Results(aParamSolver, U11, U12, U21, U22, 0., 2*M_PI);
         }
 	break;
       case GeomAbs_Parabola: {
 	//Extrema_ExtElC2d Xtrem(Extrema_Curve2dTool::Parabola(C1), Extrema_Curve2dTool::Parabola(*((Adaptor2d_Curve2d*)myC)));
-	Extrema_ECC2d Xtrem(C1, *((Adaptor2d_Curve2d*)myC));
-			Xtrem.Perform();
-	Results(Xtrem, U11, U12, U21, U22, 0., 0.);
+	Extrema_ECC2d aParamSolver(C1, *((Adaptor2d_Curve2d*)myC));
+        aParamSolver.SetSingleSolutionFlag(GetSingleSolutionFlag());
+        aParamSolver.Perform();
+	Results(aParamSolver, U11, U12, U21, U22, 0., 0.);
       }
 	break;
       case GeomAbs_Hyperbola: {
 	//inverse = Standard_True;
 	//Extrema_ExtElC2d Xtrem(Extrema_Curve2dTool::Hyperbola(*((Adaptor2d_Curve2d*)myC)), Extrema_Curve2dTool::Parabola(C1));
-	Extrema_ECC2d Xtrem(C1, *((Adaptor2d_Curve2d*)myC));
-			Xtrem.Perform();
-	Results(Xtrem, U11, U12, U21, U22, 0., 0.);
+	Extrema_ECC2d aParamSolver(C1, *((Adaptor2d_Curve2d*)myC));
+        aParamSolver.SetSingleSolutionFlag(GetSingleSolutionFlag());
+        aParamSolver.Perform();
+	Results(aParamSolver, U11, U12, U21, U22, 0., 0.);
       }
 	break;
-      case GeomAbs_BezierCurve:
-      case GeomAbs_OtherCurve:
-      case GeomAbs_BSplineCurve: {
-	Extrema_ECC2d Xtrem(C1, *((Adaptor2d_Curve2d*)myC));
-			Xtrem.Perform();
+      default: {
+	Extrema_ECC2d aParamSolver(C1, *((Adaptor2d_Curve2d*)myC));
+        aParamSolver.SetSingleSolutionFlag(GetSingleSolutionFlag());
+        aParamSolver.Perform();
 	Standard_Real Period2 = 0.;
 	if (Extrema_Curve2dTool::IsPeriodic(*((Adaptor2d_Curve2d*)myC))) Period2 = Extrema_Curve2dTool::Period(*((Adaptor2d_Curve2d*)myC));
-	Results(Xtrem, U11, U12, U21, U22, 0., Period2);
-        }
-	break;
-      case GeomAbs_Line: {
-	inverse = Standard_True;
-	Extrema_ExtElC2d Xtrem(Extrema_Curve2dTool::Line(*((Adaptor2d_Curve2d*)myC)), Extrema_Curve2dTool::Parabola(C1));
-	Results(Xtrem, U11, U12, U21, U22, 0., 0.);
+	Results(aParamSolver, U11, U12, U21, U22, 0., Period2);
         }
 	break;
       };  // switch(type2)
@@ -268,6 +274,12 @@ void Extrema_ExtCC2d::Perform (const Adaptor2d_Curve2d&       C1,
   case GeomAbs_Hyperbola: {
 
     switch(type2) {
+      case GeomAbs_Line: {
+	inverse = Standard_True;
+	Extrema_ExtElC2d Xtrem(Extrema_Curve2dTool::Line(*((Adaptor2d_Curve2d*)myC)), Extrema_Curve2dTool::Hyperbola(C1));
+	Results(Xtrem, U11, U12, U21, U22, 0., 0.);
+        }
+	break;
       case GeomAbs_Circle: {
 	inverse = Standard_True;
 	Extrema_ExtElC2d Xtrem(Extrema_Curve2dTool::Circle(*((Adaptor2d_Curve2d*)myC)), Extrema_Curve2dTool::Hyperbola(C1));
@@ -277,39 +289,35 @@ void Extrema_ExtCC2d::Perform (const Adaptor2d_Curve2d&       C1,
       case GeomAbs_Ellipse: {
 	//inverse = Standard_True;
 	//Extrema_ExtElC2d Xtrem(Extrema_Curve2dTool::Ellipse(*((Adaptor2d_Curve2d*)myC)), Extrema_Curve2dTool::Hyperbola(C1));
-	Extrema_ECC2d Xtrem(C1, *((Adaptor2d_Curve2d*)myC));
-			Xtrem.Perform();
-	Results(Xtrem, U11, U12, U21, U22, 0., 2*M_PI );
+	Extrema_ECC2d aParamSolver(C1, *((Adaptor2d_Curve2d*)myC));
+        aParamSolver.SetSingleSolutionFlag(GetSingleSolutionFlag());
+        aParamSolver.Perform();
+	Results(aParamSolver, U11, U12, U21, U22, 0., 2*M_PI );
         }
 	break;
       case GeomAbs_Parabola: {
 	//Extrema_ExtElC2d Xtrem(Extrema_Curve2dTool::Hyperbola(C1), Extrema_Curve2dTool::Parabola(*((Adaptor2d_Curve2d*)myC)));
-	Extrema_ECC2d Xtrem(C1, *((Adaptor2d_Curve2d*)myC));
-			Xtrem.Perform();
-	Results(Xtrem, U11, U12, U21, U22, 0., 0.);
+	Extrema_ECC2d aParamSolver(C1, *((Adaptor2d_Curve2d*)myC));
+        aParamSolver.SetSingleSolutionFlag(GetSingleSolutionFlag());
+        aParamSolver.Perform();
+	Results(aParamSolver, U11, U12, U21, U22, 0., 0.);
       }
 	break;
       case GeomAbs_Hyperbola: {
 	//Extrema_ExtElC2d Xtrem(Extrema_Curve2dTool::Hyperbola(C1), Extrema_Curve2dTool::Hyperbola(*((Adaptor2d_Curve2d*)myC)));
-	Extrema_ECC2d Xtrem(C1, *((Adaptor2d_Curve2d*)myC));
-			Xtrem.Perform();
-	Results(Xtrem, U11, U12, U21, U22, 0., 0.);
+	Extrema_ECC2d aParamSolver(C1, *((Adaptor2d_Curve2d*)myC));
+        aParamSolver.SetSingleSolutionFlag(GetSingleSolutionFlag());
+        aParamSolver.Perform();
+	Results(aParamSolver, U11, U12, U21, U22, 0., 0.);
       }
 	break;
-      case GeomAbs_OtherCurve:
-      case GeomAbs_BezierCurve:
-      case GeomAbs_BSplineCurve: {
-	Extrema_ECC2d Xtrem(C1, *((Adaptor2d_Curve2d*)myC));
-  Xtrem.Perform();
+      default: {
+	Extrema_ECC2d aParamSolver(C1, *((Adaptor2d_Curve2d*)myC));
+        aParamSolver.SetSingleSolutionFlag(GetSingleSolutionFlag());
+        aParamSolver.Perform();
 	Standard_Real Period2 = 0.;
 	if (Extrema_Curve2dTool::IsPeriodic(*((Adaptor2d_Curve2d*)myC))) Period2 = Extrema_Curve2dTool::Period(*((Adaptor2d_Curve2d*)myC));
-	Results(Xtrem, U11, U12, U21, U22, 0., Period2);
-        }
-	break;
-      case GeomAbs_Line: {
-	inverse = Standard_True;
-	Extrema_ExtElC2d Xtrem(Extrema_Curve2dTool::Line(*((Adaptor2d_Curve2d*)myC)), Extrema_Curve2dTool::Hyperbola(C1));
-	Results(Xtrem, U11, U12, U21, U22, 0., 0.);
+	Results(aParamSolver, U11, U12, U21, U22, 0., Period2);
         }
 	break;
       };  // switch(type2)
@@ -317,27 +325,16 @@ void Extrema_ExtCC2d::Perform (const Adaptor2d_Curve2d&       C1,
     break;
 
     //
-    // La premiere courbe est une BezierCurve ou une BSplineCurve:
-    //
-  case GeomAbs_BezierCurve:
-  case GeomAbs_OtherCurve:
-  case GeomAbs_BSplineCurve: {
-    Extrema_ECC2d Xtrem(C1, *((Adaptor2d_Curve2d*)myC));
-    Xtrem.Perform();
-    Standard_Real Period1 = 0.;
-    if (Extrema_Curve2dTool::IsPeriodic(C1)) Period1 = Extrema_Curve2dTool::Period(C1);
-    Standard_Real Period2 = 0.;
-    if (Extrema_Curve2dTool::IsPeriodic(*((Adaptor2d_Curve2d*)myC))) Period2 = Extrema_Curve2dTool::Period(*((Adaptor2d_Curve2d*)myC));
-    Results(Xtrem, U11, U12, U21, U22, Period1, Period2);
-  }
-  break;
-
-    //
     // La premiere courbe est une Line:
     //
   case GeomAbs_Line: {
 
     switch(type2) {
+      case GeomAbs_Line: {
+	Extrema_ExtElC2d Xtrem(Extrema_Curve2dTool::Line(C1), Extrema_Curve2dTool::Line(*((Adaptor2d_Curve2d*)myC)), Tol);
+	Results(Xtrem, U11, U12, U21, U22, 0., 0.);
+        } 
+	break;
       case GeomAbs_Circle: {
   	Extrema_ExtElC2d Xtrem(Extrema_Curve2dTool::Line(C1), Extrema_Curve2dTool::Circle(*((Adaptor2d_Curve2d*)myC)), Tol);
 	Results(Xtrem, U11, U12, U21, U22, 0., 2*M_PI);
@@ -358,22 +355,31 @@ void Extrema_ExtCC2d::Perform (const Adaptor2d_Curve2d&       C1,
 	Results(Xtrem, U11, U12, U21, U22, 0., 0.);
       }
 	break;
-      case GeomAbs_BezierCurve:
-      case GeomAbs_OtherCurve:
-      case GeomAbs_BSplineCurve: {
-	Extrema_ECC2d Xtrem(C1, *((Adaptor2d_Curve2d*)myC));
-			Xtrem.Perform();
+      default: {
+	Extrema_ECC2d aParamSolver(C1, *((Adaptor2d_Curve2d*)myC));
+        aParamSolver.SetSingleSolutionFlag(GetSingleSolutionFlag());
+        aParamSolver.Perform();
 	Standard_Real Period2 = 0.;
 	if (Extrema_Curve2dTool::IsPeriodic(*((Adaptor2d_Curve2d*)myC))) Period2 = Extrema_Curve2dTool::Period(*((Adaptor2d_Curve2d*)myC));
-	Results(Xtrem, U11, U12, U21, U22, 0., Period2);
+	Results(aParamSolver, U11, U12, U21, U22, 0., Period2);
         }
 	break;
-      case GeomAbs_Line: {
-	Extrema_ExtElC2d Xtrem(Extrema_Curve2dTool::Line(C1), Extrema_Curve2dTool::Line(*((Adaptor2d_Curve2d*)myC)), Tol);
-	Results(Xtrem, U11, U12, U21, U22, 0., 0.);
-        } 
-	break;
       };  // switch(type2)
+    }
+    break;
+
+    //
+    // La premiere courbe est une BezierCurve ou une BSplineCurve:
+    //
+  default: {
+    Extrema_ECC2d aParamSolver(C1, *((Adaptor2d_Curve2d*)myC));
+    aParamSolver.SetSingleSolutionFlag(GetSingleSolutionFlag());
+    aParamSolver.Perform();
+    Standard_Real Period1 = 0.;
+    if (Extrema_Curve2dTool::IsPeriodic(C1)) Period1 = Extrema_Curve2dTool::Period(C1);
+    Standard_Real Period2 = 0.;
+    if (Extrema_Curve2dTool::IsPeriodic(*((Adaptor2d_Curve2d*)myC))) Period2 = Extrema_Curve2dTool::Period(*((Adaptor2d_Curve2d*)myC));
+    Results(aParamSolver, U11, U12, U21, U22, Period1, Period2);
     }
     break;
 
@@ -515,33 +521,30 @@ void Extrema_ExtCC2d::Results(const Extrema_ECC2d& AlgExt,
   if (myDone)
   {
     myIsPar = AlgExt.IsParallel();
-    if (!myIsPar)
+    NbExt = AlgExt.NbExt();
+    for (i = 1; i <= NbExt; i++)
     {
-      NbExt = AlgExt.NbExt();
-      for (i = 1; i <= NbExt; i++)
-      {
-        // Verification de la validite des parametres pour le cas trimme:
-        AlgExt.Points(i, P1, P2);
-        U = P1.Parameter();
-        if (Period1 != 0.0) 
-          U = ElCLib::InPeriod(U,Ut11,Ut11+Period1);
-        U2 = P2.Parameter();
-        if (Period2 != 0.0) 
-          U2 = ElCLib::InPeriod(U2,Ut21,Ut21+Period2);
+      // Verification de la validite des parametres pour le cas trimme:
+      AlgExt.Points(i, P1, P2);
+      U = P1.Parameter();
+      if (Period1 != 0.0) 
+        U = ElCLib::InPeriod(U,Ut11,Ut11+Period1);
+      U2 = P2.Parameter();
+      if (Period2 != 0.0) 
+        U2 = ElCLib::InPeriod(U2,Ut21,Ut21+Period2);
 
-        if ((U  >= Ut11 - Precision::PConfusion())  && 
-            (U  <= Ut12 + Precision::PConfusion())  &&
-            (U2 >= Ut21 - Precision::PConfusion())  &&
-            (U2 <= Ut22 + Precision::PConfusion()))
-        {
-            mynbext++;
-            Val = AlgExt.SquareDistance(i);
-            P1.SetValues(U, P1.Value());
-            P2.SetValues(U2, P2.Value());
-            mySqDist.Append(Val);
-            mypoints.Append(P1);
-            mypoints.Append(P2);
-        }
+      if ((U  >= Ut11 - Precision::PConfusion())  && 
+        (U  <= Ut12 + Precision::PConfusion())  &&
+        (U2 >= Ut21 - Precision::PConfusion())  &&
+        (U2 <= Ut22 + Precision::PConfusion()))
+      {
+        mynbext++;
+        Val = AlgExt.SquareDistance(i);
+        P1.SetValues(U, P1.Value());
+        P2.SetValues(U2, P2.Value());
+        mySqDist.Append(Val);
+        mypoints.Append(P1);
+        mypoints.Append(P2);
       }
     }
 
@@ -557,4 +560,22 @@ Standard_Boolean Extrema_ExtCC2d::IsParallel() const
 {
   if (!myDone) StdFail_NotDone::Raise();
   return myIsPar;
+}
+
+//=======================================================================
+//function : SetSingleSolutionFlag
+//purpose  : 
+//=======================================================================
+void Extrema_ExtCC2d::SetSingleSolutionFlag(const Standard_Boolean theFlag)
+{
+  myIsFindSingleSolution = theFlag;
+}
+
+//=======================================================================
+//function : GetSingleSolutionFlag
+//purpose  : 
+//=======================================================================
+Standard_Boolean Extrema_ExtCC2d::GetSingleSolutionFlag() const
+{
+  return myIsFindSingleSolution;
 }

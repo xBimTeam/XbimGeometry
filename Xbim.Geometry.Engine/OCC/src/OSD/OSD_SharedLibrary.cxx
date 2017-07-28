@@ -12,7 +12,7 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef WNT
+#ifndef _WIN32
 
 
 #include <OSD_Function.hxx>
@@ -42,9 +42,6 @@ extern "C" {void    *dlerror (void);}
 #endif
 
 #include <dlfcn.h>
-
-extern "C" {size_t  strlen  (const  char*  s      );}
-
 
 #define BAD(X)  ((X) == NULL)
 
@@ -187,13 +184,15 @@ void OSD_SharedLibrary::Destroy() {
 #endif
 #include <windows.h>
 
-
 #include <OSD_Path.hxx>
 #include <OSD_SharedLibrary.hxx>
 #include <TCollection_AsciiString.hxx>
+#include <TCollection_ExtendedString.hxx>
 
 static DWORD              lastDLLError;
-static Standard_Character errMsg[ 1024 ];
+
+static wchar_t errMsg[1024];
+static char errMsgA[1024];
 
 OSD_SharedLibrary :: OSD_SharedLibrary () {
 
@@ -227,7 +226,13 @@ void OSD_SharedLibrary :: SetName ( const Standard_CString aName ) {
  name = path.Name ();
  name.AssignCat (  path.Extension ()  );
 
- myHandle = GetModuleHandle (  name.ToCString ()  );
+ TCollection_ExtendedString nameW (name);
+#ifndef OCCT_UWP
+ myHandle = GetModuleHandleW (nameW.ToWideString());
+#else
+ myHandle = LoadPackagedLibrary (nameW.ToWideString(), NULL);
+ FreeLibrary ((HMODULE) myHandle);
+#endif
 
 }  // end OSD_SharedLibrary :: SetName
 
@@ -241,15 +246,18 @@ Standard_Boolean OSD_SharedLibrary :: DlOpen ( const OSD_LoadMode /*Mode*/ ) {
 
  Standard_Boolean retVal = Standard_True;
 
- if (  (  myHandle ) == NULL &&
-       (  myHandle = ( HINSTANCE )LoadLibraryEx (
-                                   myName, NULL, LOAD_WITH_ALTERED_SEARCH_PATH
-                                  )  ) == NULL
- ) {
- 
-  lastDLLError = GetLastError ();
-  retVal       = Standard_False;
- 
+ if (myHandle == NULL)
+ {
+  TCollection_ExtendedString myNameW (myName);
+#ifndef OCCT_UWP
+  myHandle = (HINSTANCE)LoadLibraryExW (myNameW.ToWideString(), NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
+#else
+  myHandle = (HINSTANCE)LoadPackagedLibrary (myNameW.ToWideString(), NULL);
+#endif
+  if ( myHandle == NULL ) {
+   lastDLLError = GetLastError ();
+   retVal       = Standard_False;
+  }
  }  // end if
 
  return retVal;
@@ -276,13 +284,14 @@ void OSD_SharedLibrary :: DlClose () const {
 
 Standard_CString OSD_SharedLibrary :: DlError () const {
 
- FormatMessage (
+ FormatMessageW (
   FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ARGUMENT_ARRAY,
-  0, lastDLLError, MAKELANGID( LANG_NEUTRAL, SUBLANG_NEUTRAL ), errMsg, 1024, ( va_list* )&myName
+  0, lastDLLError, MAKELANGID( LANG_NEUTRAL, SUBLANG_NEUTRAL ),
+   errMsg, 1024, ( va_list* )&myName
  );
 
- return errMsg;
-
+ WideCharToMultiByte(CP_UTF8, 0, errMsg, -1, errMsgA, sizeof(errMsgA), NULL, NULL);
+ return errMsgA;
 }  // end OSD_SharedLibrary :: DlError
 
 void OSD_SharedLibrary :: Destroy () {

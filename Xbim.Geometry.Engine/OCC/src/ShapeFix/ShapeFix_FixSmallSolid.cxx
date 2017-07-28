@@ -34,6 +34,8 @@
 #include <TopTools_MapIteratorOfMapOfShape.hxx>
 #include <TopTools_MapOfShape.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(ShapeFix_FixSmallSolid,ShapeFix_Root)
+
 //=======================================================================
 //function : ShapeFix_FixSmallSolid
 //purpose  : Construct
@@ -434,10 +436,10 @@ TopoDS_Shape ShapeFix_FixSmallSolid::Merge (
     // compose their shells in lists associated with non-small solids' shells
     // which they should be merged to
     TopTools_DataMapOfShapeListOfShape aShellsToMerge, aShellsToAdd;
-    TopTools_ListIteratorOfListOfShape aSolidIter (aSmallSolids);
-    while (aSolidIter.More())
+    TopTools_ListIteratorOfListOfShape aSmallIter(aSmallSolids);
+    while (aSmallIter.More())
     {
-      const TopoDS_Shape& aSmallSolid = aSolidIter.Value();
+      const TopoDS_Shape& aSmallSolid = aSmallIter.Value();
 
       // find a non-small solid's shell having greatest sum area of
       // all faces shared with the current small solid
@@ -456,10 +458,10 @@ TopoDS_Shape ShapeFix_FixSmallSolid::Merge (
         theContext->Remove (aSmallSolid);
         SendWarning ( aSmallSolid, Message_Msg( "ShapeFix.FixSmallSolid.MSG1" ));
 
-        aSmallSolids.Remove (aSolidIter);
+        aSmallSolids.Remove (aSmallIter);
       }
       else
-        aSolidIter.Next();
+        aSmallIter.Next();
     }
 
     // stop if no solids can be merged

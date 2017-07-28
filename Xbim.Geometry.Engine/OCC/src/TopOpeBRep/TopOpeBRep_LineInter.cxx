@@ -33,6 +33,7 @@
 #include <IntPatch_IType.hxx>
 #include <IntPatch_Line.hxx>
 #include <IntPatch_RLine.hxx>
+#include <IntPatch_SequenceOfLine.hxx>
 #include <IntPatch_WLine.hxx>
 #include <IntSurf_Quadric.hxx>
 #include <Standard_NotImplemented.hxx>
@@ -50,51 +51,28 @@
 #include <TopOpeBRep_WPointInter.hxx>
 #include <TopOpeBRepDS_Transition.hxx>
 
+#include <BRepAdaptor_HSurface.hxx>
+
 #ifdef OCCT_DEBUG
 extern Standard_Boolean TopOpeBRep_GetcontextALWLNBP(Standard_Integer&);
 extern Standard_Boolean TopOpeBRep_GettraceCONIC();
-extern Standard_Boolean TopOpeBRepDS_GettraceDSF();
-extern Standard_Boolean TopOpeBRepDS_GettraceDSNC();
 #endif
 
 //-----------------------------------------------------------------------
-static Handle(IntPatch_WLine) FUN_ALINETOWLINE
-(const Handle(IntPatch_ALine)& AL,
- const BRepAdaptor_Surface surf1,const BRepAdaptor_Surface surf2)
-//-----------------------------------------------------------------------
+static void FUN_ALINETOWLINE (const Handle(IntPatch_ALine)& AL,
+                              const Handle(BRepAdaptor_HSurface) surf1,
+                              const Handle(BRepAdaptor_HSurface) surf2,
+                              IntPatch_SequenceOfLine& theLines)
 {
-  IntSurf_Quadric Quad1,Quad2;
-
-  switch(surf1.GetType())
-  {
-    case GeomAbs_Plane:    Quad1.SetValue(surf1.Plane()); break;
-    case GeomAbs_Cylinder: Quad1.SetValue(surf1.Cylinder()); break;
-    case GeomAbs_Sphere:   Quad1.SetValue(surf1.Sphere()); break;
-    case GeomAbs_Cone:     Quad1.SetValue(surf1.Cone()); break;
-    default : Standard_ProgramError::Raise
-      ("TopOpeBRep_LineInter::FUN_ALINETOWLINE"); break;
-  }
-  
-  switch(surf2.GetType())
-  {
-    case GeomAbs_Plane:    Quad2.SetValue(surf2.Plane()); break;
-    case GeomAbs_Cylinder: Quad2.SetValue(surf2.Cylinder()); break;
-    case GeomAbs_Sphere:   Quad2.SetValue(surf2.Sphere()); break;
-    case GeomAbs_Cone:     Quad2.SetValue(surf2.Cone()); break;
-    default : Standard_ProgramError::Raise
-      ("TopOpeBRep_LineInter::FUN_ALINETOWLINE"); break;
-  }
-
-  const Standard_Real deflectionmax = 0.01;
-  const Standard_Real pasUVmax = 0.05;
   Standard_Integer nbpointsmax = 200;
 #ifdef OCCT_DEBUG
   Standard_Integer newnbp;
   if (TopOpeBRep_GetcontextALWLNBP(newnbp)) nbpointsmax = newnbp;
 #endif
   IntPatch_ALineToWLine 
-    AToL(Quad1,Quad2,deflectionmax,pasUVmax,nbpointsmax);
-  return AToL.MakeWLine(AL);
+    AToL(surf1,surf2,nbpointsmax);
+
+  AToL.MakeWLine(AL, theLines);
 }
 
 //=======================================================================
@@ -137,7 +115,13 @@ void TopOpeBRep_LineInter::SetLine(const Handle(IntPatch_Line)& L,
 
   // transform an analytic line to a walking line
   if (myTypeLineCurve == TopOpeBRep_ANALYTIC) {
-    myILW = ::FUN_ALINETOWLINE(myILA,S1,S2);
+    IntPatch_SequenceOfLine aSLin;
+    FUN_ALINETOWLINE(myILA,new BRepAdaptor_HSurface(S1),
+                        new BRepAdaptor_HSurface(S2), aSLin);
+
+    if(aSLin.Length() > 0)
+      myILW = Handle(IntPatch_WLine)::DownCast(aSLin.Value(1));
+
     myTypeLineCurve = TopOpeBRep_WALKING;
   }
 
@@ -647,16 +631,6 @@ void TopOpeBRep_LineInter::DumpBipoint
 
 void TopOpeBRep_LineInter::SetOK(const Standard_Boolean B)
 {
-#ifdef OCCT_DEBUG
-  if (TopOpeBRepDS_GettraceDSF() || TopOpeBRepDS_GettraceDSNC()) {
-    if (myOK != B) {
-      cout<<"line "<<myIndex<<" (";
-      TopOpeBRep::Print(myTypeLineCurve,cout);cout<<") ";
-      if (!B) cout<<"OK->NOK"; else cout<<"NOK->OK";
-      cout<<endl;
-    }
-  }
-#endif
   myOK = B;
 }
 
@@ -692,9 +666,7 @@ Standard_OStream& TopOpeBRep_LineInter::DumpLineTransitions(Standard_OStream& OS
 {
 #ifdef OCCT_DEBUG
   OS<<"transition from f1 / f2 "; TopAbs::Print(myF2.Orientation(),OS);
-  OS<<" : "; myLineTonF1.Dump(OS); OS<<endl;
   OS<<"transition from f2 / f1 "; TopAbs::Print(myF1.Orientation(),OS);
-  OS<<" : "; myLineTonF2.Dump(OS); OS<<endl;
 #endif
   return OS;
 }

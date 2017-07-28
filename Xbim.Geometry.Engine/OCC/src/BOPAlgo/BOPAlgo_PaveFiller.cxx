@@ -37,11 +37,13 @@
 //=======================================================================
 BOPAlgo_PaveFiller::BOPAlgo_PaveFiller()
 :
-  BOPAlgo_Algo(),
-  myFuzzyValue(0.)
+  BOPAlgo_Algo()
 {
   myDS=NULL;
   myIterator=NULL;
+  myNonDestructive=Standard_False;
+  myIsPrimary=Standard_True;
+  myGlue=BOPAlgo_GlueOff;
 }
 //=======================================================================
 //function : 
@@ -50,11 +52,13 @@ BOPAlgo_PaveFiller::BOPAlgo_PaveFiller()
 BOPAlgo_PaveFiller::BOPAlgo_PaveFiller
   (const Handle(NCollection_BaseAllocator)& theAllocator)
 :
-  BOPAlgo_Algo(theAllocator),
-  myFuzzyValue(0.)
+  BOPAlgo_Algo(theAllocator)
 {
   myDS=NULL;
   myIterator=NULL;
+  myNonDestructive=Standard_False;
+  myIsPrimary=Standard_True;
+  myGlue=BOPAlgo_GlueOff;
 }
 //=======================================================================
 //function : ~
@@ -63,6 +67,54 @@ BOPAlgo_PaveFiller::BOPAlgo_PaveFiller
 BOPAlgo_PaveFiller::~BOPAlgo_PaveFiller()
 {
   Clear();
+}
+//=======================================================================
+//function : SetNonDestructive
+//purpose  : 
+//=======================================================================
+void BOPAlgo_PaveFiller::SetNonDestructive(const Standard_Boolean bFlag)
+{
+  myNonDestructive=bFlag;
+}
+//=======================================================================
+//function : NonDestructive
+//purpose  : 
+//=======================================================================
+Standard_Boolean BOPAlgo_PaveFiller::NonDestructive()const 
+{
+  return myNonDestructive;
+}
+//=======================================================================
+//function : SetGlue
+//purpose  : 
+//=======================================================================
+void BOPAlgo_PaveFiller::SetGlue(const BOPAlgo_GlueEnum theGlue)
+{
+  myGlue=theGlue;
+}
+//=======================================================================
+//function : Glue
+//purpose  : 
+//=======================================================================
+BOPAlgo_GlueEnum BOPAlgo_PaveFiller::Glue() const 
+{
+  return myGlue;
+}
+//=======================================================================
+//function : SetIsPrimary
+//purpose  : 
+//=======================================================================
+void BOPAlgo_PaveFiller::SetIsPrimary(const Standard_Boolean bFlag)
+{
+  myIsPrimary=bFlag;
+}
+//=======================================================================
+//function : IsPrimary
+//purpose  : 
+//=======================================================================
+Standard_Boolean BOPAlgo_PaveFiller::IsPrimary()const 
+{
+  return myIsPrimary;
 }
 //=======================================================================
 //function : Clear
@@ -99,7 +151,7 @@ BOPDS_PDS BOPAlgo_PaveFiller::PDS()
 //function : Context
 //purpose  : 
 //=======================================================================
-Handle(IntTools_Context) BOPAlgo_PaveFiller::Context()
+const Handle(IntTools_Context)& BOPAlgo_PaveFiller::Context()
 {
   return myContext;
 }
@@ -129,22 +181,6 @@ const BOPCol_ListOfShape& BOPAlgo_PaveFiller::Arguments()const
   return myArguments;
 }
 //=======================================================================
-//function : SetFuzzyValue
-//purpose  : 
-//=======================================================================
-void BOPAlgo_PaveFiller::SetFuzzyValue(const Standard_Real theFuzz)
-{
-  myFuzzyValue = (theFuzz < 0.) ? 0. : theFuzz;
-}
-//=======================================================================
-//function : FuzzyValue
-//purpose  : 
-//=======================================================================
-Standard_Real BOPAlgo_PaveFiller::FuzzyValue() const
-{
-  return myFuzzyValue;
-}
-//=======================================================================
 // function: Init
 // purpose: 
 //=======================================================================
@@ -163,8 +199,7 @@ void BOPAlgo_PaveFiller::Init()
   // 1.myDS 
   myDS=new BOPDS_DS(myAllocator);
   myDS->SetArguments(myArguments);
-  myDS->SetFuzzyValue(myFuzzyValue);
-  myDS->Init();
+  myDS->Init(myFuzzyValue);
   //
   // 2.myIterator 
   myIterator=new BOPDS_Iterator(myAllocator);
@@ -174,6 +209,9 @@ void BOPAlgo_PaveFiller::Init()
   //
   // 3 myContext
   myContext=new IntTools_Context;
+  //
+  // 4 NonDestructive flag
+  SetNonDestructive();
   //
   myErrorStatus=0;
 }
@@ -193,8 +231,6 @@ void BOPAlgo_PaveFiller::Perform()
   catch (Standard_Failure) {
     myErrorStatus=11;
   } 
-  //
-  myDS->SetDefaultTolerances();
 }
 //=======================================================================
 // function: PerformInternal
@@ -224,27 +260,26 @@ void BOPAlgo_PaveFiller::PerformInternal()
     return; 
   }
   //
+  UpdatePaveBlocksWithSDVertices();
   myDS->UpdatePaveBlocks();
   // 11
   PerformEE();
   if (myErrorStatus) {
     return; 
   }
+  UpdatePaveBlocksWithSDVertices();
   // 02
   PerformVF();
   if (myErrorStatus) {
     return; 
   }
+  UpdatePaveBlocksWithSDVertices();
   // 12
   PerformEF();
   if (myErrorStatus) {
     return; 
   }
-  //
-  MakeSplitEdges();
-  if (myErrorStatus) {
-    return; 
-  }
+  UpdatePaveBlocksWithSDVertices();
   //
   // 22
   PerformFF();
@@ -252,11 +287,21 @@ void BOPAlgo_PaveFiller::PerformInternal()
     return; 
   }
   //
+  UpdateBlocksWithSharedVertices();
+  //
+  MakeSplitEdges();
+  if (myErrorStatus) {
+    return; 
+  }
+  //
+  UpdatePaveBlocksWithSDVertices();
+  //
   MakeBlocks();
   if (myErrorStatus) {
     return; 
   }
   //
+  UpdateInterfsWithSDVertices();
   RefineFaceInfoOn();
   //
   MakePCurves();
@@ -269,6 +314,9 @@ void BOPAlgo_PaveFiller::PerformInternal()
     return; 
   }
   //
+  if (myGlue != BOPAlgo_GlueOff) {
+    return;
+  }
   // 03
   PerformVZ();
   if (myErrorStatus) {

@@ -290,7 +290,7 @@ class NCollection_Map : public NCollection_BaseMap
   }
 
   //! Destructor
-  ~NCollection_Map (void)
+  virtual ~NCollection_Map (void)
   { Clear(); }
 
   //! Size
@@ -381,6 +381,28 @@ class NCollection_Map : public NCollection_BaseMap
     const Standard_Integer anOldExtent = Extent();
     Union (*this, theOther);
     return anOldExtent != Extent();
+  }
+
+  //! Returns true if this and theMap have common elements.
+  Standard_Boolean HasIntersection (const NCollection_Map& theMap) const
+  {
+    const NCollection_Map* aMap1 = this;
+    const NCollection_Map* aMap2 = &theMap;
+    if (theMap.Size() < Size())
+    {
+      aMap1 = &theMap;
+      aMap2 = this;
+    }
+
+    for (NCollection_Map::Iterator aIt(*aMap1); aIt.More(); aIt.Next())
+    {
+      if (aMap2->Contains(aIt.Value()))
+      {
+        return Standard_True;
+      }
+    }
+
+    return Standard_False;
   }
 
   //! Sets this Map to be the result of intersection (aka multiplication, common, boolean AND) operation between two given Maps.

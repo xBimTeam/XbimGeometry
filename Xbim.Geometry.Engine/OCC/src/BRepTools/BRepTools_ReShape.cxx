@@ -35,6 +35,8 @@
 #include <TopoDS_Shell.hxx>
 #include <TopoDS_Solid.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(BRepTools_ReShape,MMgt_TShared)
+
 //include <ShapeExtend.hxx>
 //#include <BRepTools_Edge.hxx>
 static void CopyRanges (const TopoDS_Shape& toedge, const TopoDS_Shape& fromedge,
@@ -493,18 +495,21 @@ TopoDS_Shape BRepTools_ReShape::Apply (const TopoDS_Shape& shape,
   Standard_Integer locStatus = myStatus;
   
   // apply recorded modifications to subshapes
+  Standard_Boolean isEmpty = Standard_True;
   for ( TopoDS_Iterator it(shape,Standard_False); it.More(); it.Next() ) {
     TopoDS_Shape sh = it.Value();
     newsh = Apply ( sh, until );
     if ( newsh != sh ) {
       if ( myStatus & EncodeStatus(4)) //ShapeExtend::DecodeStatus ( myStatus, ShapeExtend_DONE4 ) )
-	locStatus |= EncodeStatus(4); //|= ShapeExtend::EncodeStatus ( ShapeExtend_DONE4 );
+        locStatus |= EncodeStatus(4); //|= ShapeExtend::EncodeStatus ( ShapeExtend_DONE4 );
       modif = 1;
     }
     if ( newsh.IsNull() ) {
       locStatus |= EncodeStatus(4); //ShapeExtend::EncodeStatus ( ShapeExtend_DONE4 );
       continue;
     }
+    if ( isEmpty )
+      isEmpty = Standard_False;
     locStatus |= EncodeStatus(3);//ShapeExtend::EncodeStatus ( ShapeExtend_DONE3 );
     if ( st == TopAbs_COMPOUND || newsh.ShapeType() == sh.ShapeType()) { //fix for SAMTECH bug OCC322 about abcense internal vertices after sewing.
       B.Add ( result, newsh );
@@ -520,23 +525,33 @@ TopoDS_Shape BRepTools_ReShape::Apply (const TopoDS_Shape& shape,
   }
   if ( ! modif ) return shape;
 
-  // restore Range on edge broken by EmptyCopied()
-  if ( st == TopAbs_EDGE ) {
-    CopyRanges (result, shape, 0, 1);
+  // For empty topological containers (any kind of shape except vertex, edge
+  // and face) we have to produce an empty result
+  if ( isEmpty && st != TopAbs_VERTEX && st != TopAbs_EDGE && st != TopAbs_FACE )
+  {
+    result = TopoDS_Shape();
   }
-  else if (st == TopAbs_FACE)  {
-    TopoDS_Face face = TopoDS::Face ( shape );
-    if( BRep_Tool::NaturalRestriction( face ) ) {
-      BRep_Builder aB;
-      aB.NaturalRestriction( TopoDS::Face (  result ), Standard_True );
+  else
+  {
+    // restore Range on edge broken by EmptyCopied()
+    if ( st == TopAbs_EDGE ) {
+      CopyRanges (result, shape, 0, 1);
     }
-  }
-  else if (st == TopAbs_WIRE || st == TopAbs_SHELL)
-    result.Closed (BRep_Tool::IsClosed (result));
+    else if (st == TopAbs_FACE)  {
+      TopoDS_Face face = TopoDS::Face ( shape );
+      if( BRep_Tool::NaturalRestriction( face ) ) {
+        BRep_Builder aB;
+        aB.NaturalRestriction( TopoDS::Face (  result ), Standard_True );
+      }
+    }
+    else if (st == TopAbs_WIRE || st == TopAbs_SHELL)
+      result.Closed (BRep_Tool::IsClosed (result));
 
-  result.Orientation(orien);
-  myStatus = locStatus;
+    result.Orientation(orien);
+  }
+
   Replace ( shape, result );
+  myStatus = locStatus;
 
   return result;
 }
@@ -572,4 +587,38 @@ Standard_Boolean& BRepTools_ReShape::ModeConsiderLocation()
 Standard_Boolean& BRepTools_ReShape::ModeConsiderOrientation() 
 {
   return myConsiderOrientation;
+}
+
+//=======================================================================
+//function : CopyVertex
+//purpose  : 
+//=======================================================================
+
+TopoDS_Vertex BRepTools_ReShape::CopyVertex(const TopoDS_Vertex& theV,
+                                            const Standard_Real theTol)
+{
+  return CopyVertex(theV, BRep_Tool::Pnt(theV), theTol);
+}
+
+//=======================================================================
+//function : CopyVertex
+//purpose  : 
+//=======================================================================
+
+TopoDS_Vertex BRepTools_ReShape::CopyVertex(const TopoDS_Vertex& theV,
+                                            const gp_Pnt& theNewPos,
+                                            const Standard_Real theTol)
+{
+  TopoDS_Vertex aVertexCopy;
+  Standard_Boolean isRecorded = IsRecorded(theV);
+  aVertexCopy = isRecorded ? TopoDS::Vertex(Apply(theV)) : TopoDS::Vertex(theV.EmptyCopied());
+
+  BRep_Builder B;
+  Standard_Real aNewTol = theTol > 0.0 ? theTol : BRep_Tool::Tolerance(theV);
+  B.UpdateVertex(aVertexCopy, theNewPos, aNewTol);
+
+  if (!isRecorded)
+    Replace(theV, aVertexCopy);
+
+  return aVertexCopy;
 }

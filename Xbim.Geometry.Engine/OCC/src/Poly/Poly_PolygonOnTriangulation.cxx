@@ -19,6 +19,8 @@
 #include <Standard_NullObject.hxx>
 #include <Standard_Type.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(Poly_PolygonOnTriangulation,MMgt_TShared)
+
 //=======================================================================
 //function : Poly_PolygonOnTriangulation
 //purpose  : 
@@ -45,6 +47,22 @@ Poly_PolygonOnTriangulation::Poly_PolygonOnTriangulation
   myNodes = Nodes;
   myParameters = new TColStd_HArray1OfReal(1, Parameters.Length());
   myParameters->ChangeArray1() = Parameters;
+}
+
+//=======================================================================
+//function : Copy
+//purpose  : 
+//=======================================================================
+
+Handle(Poly_PolygonOnTriangulation) Poly_PolygonOnTriangulation::Copy() const
+{
+  Handle(Poly_PolygonOnTriangulation) aCopy;
+  if (myParameters.IsNull())
+    aCopy = new Poly_PolygonOnTriangulation(myNodes);
+  else
+    aCopy = new Poly_PolygonOnTriangulation(myNodes, myParameters->Array1());
+  aCopy->Deflection(myDeflection);
+  return aCopy;
 }
 
 //=======================================================================

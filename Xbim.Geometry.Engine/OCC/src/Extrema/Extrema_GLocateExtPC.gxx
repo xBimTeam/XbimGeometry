@@ -88,8 +88,10 @@ void Extrema_GLocateExtPC::Initialize(const TheCurve&     C,
   type = TheCurveTool::GetType(C);
   Standard_Real tolu = TheCurveTool::Resolution(C, Precision::Confusion());
   if ((type == GeomAbs_BSplineCurve) || 
-    (type == GeomAbs_BezierCurve)  || 
-    (type == GeomAbs_OtherCurve)) {
+      (type == GeomAbs_BezierCurve)  || 
+      (type == GeomAbs_OffsetCurve)   ||
+      (type == GeomAbs_OtherCurve))
+  {
       myLocExtPC.Initialize(C, Umin, Usup, tolu);
   }
   else {
@@ -116,6 +118,7 @@ void Extrema_GLocateExtPC::Perform(const ThePoint&     P,
   switch(type)
   {
   case GeomAbs_OtherCurve:
+  case GeomAbs_OffsetCurve:
   case GeomAbs_BSplineCurve:
     {
       // La recherche de l extremum est faite intervalle continu C2 par
@@ -184,6 +187,10 @@ void Extrema_GLocateExtPC::Perform(const ThePoint&     P,
             {
               TheCurveTool::D1(*((TheCurve*)myC), myintuinf, P1, V1);
               s2sup = (TheVector(P, P1)*V1);
+              if(Precision::IsInfinite(s2sup) || Precision::IsInfinite(s1sup))
+              {
+                break;
+              }
               if (s1sup*s2sup <= RealEpsilon())
               {
                 // extremum:
@@ -217,6 +224,10 @@ void Extrema_GLocateExtPC::Perform(const ThePoint&     P,
             {
               TheCurveTool::D1(*((TheCurve*)myC), myintusup, P1, V1);
               s1inf = (TheVector(P, P1)*V1);
+              if(Precision::IsInfinite(s2inf) || Precision::IsInfinite(s1inf))
+              {
+                break;
+              }
               if (s1inf*s2inf <= RealEpsilon())
               {
                 // extremum:
@@ -311,7 +322,9 @@ Standard_Real Extrema_GLocateExtPC::SquareDistance () const
   if ((type == GeomAbs_BezierCurve)) {
     d =  myLocExtPC.SquareDistance();
   }
-  else if(type == GeomAbs_BSplineCurve || type == GeomAbs_OtherCurve) {
+  else if(type == GeomAbs_BSplineCurve ||
+          type == GeomAbs_OffsetCurve  ||
+          type == GeomAbs_OtherCurve) {
     d = mydist2;
   }
   else {
@@ -335,7 +348,9 @@ Standard_Boolean Extrema_GLocateExtPC::IsMin () const
   if ((type == GeomAbs_BezierCurve)) {
     b = myLocExtPC.IsMin();
   }
-  else if(type == GeomAbs_BSplineCurve || type == GeomAbs_OtherCurve) {
+  else if(type == GeomAbs_BSplineCurve ||
+          type == GeomAbs_OffsetCurve  ||
+          type == GeomAbs_OtherCurve) {
     b = myismin;
   }
   else {
@@ -358,7 +373,9 @@ const ThePOnC & Extrema_GLocateExtPC::Point () const
   if (type == GeomAbs_BezierCurve) {
     return myLocExtPC.Point();
   }
-  else if(type == GeomAbs_BSplineCurve || type == GeomAbs_OtherCurve) {
+  else if(type == GeomAbs_BSplineCurve ||
+          type == GeomAbs_OffsetCurve  ||
+          type == GeomAbs_OtherCurve) {
     return mypp;
   }
   return myExtremPC.Point(numberext);

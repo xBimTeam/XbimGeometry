@@ -94,58 +94,41 @@ void  ProjLib_Cone::Init(const gp_Cone& Co)
 
 void  ProjLib_Cone::Project(const gp_Lin& L)
 {
+  gp_Pnt aPnt = L.Location(), anApex = myCone.Apex();
+
+  Standard_Real aDeltaV = 0.0;
 
   Standard_Real U,V;
-  
-  // Compute V
-  V = gp_Vec(myCone.Location(),L.Location())
-    .Dot(gp_Vec(myCone.Position().Direction()));
-  V /= Cos( myCone.SemiAngle());
-
-  // Compute U
-  gp_Ax3 CPos  = myCone.Position();
-  gp_Dir ZCone = CPos.XDirection() ^ CPos.YDirection();
-  
-  gp_Ax3 RightHanded(CPos.Location(), ZCone, CPos.XDirection());
-  gp_Trsf T;
-  T.SetTransformation(RightHanded);
-
-  gp_Dir D = L.Position().Direction();
-  D.Transform(T);
-
-  if ( D.Z() < 0.) D.Reverse();
-  D.SetCoord(3, 0.);
-  U = gp::DX().AngleWithRef( D, gp::DZ());
-
-  Standard_Integer a1 = 
-    (ZCone.IsEqual(CPos.Direction(), Precision::Angular())) ? 1 : -1;
-  Standard_Integer a2 = 
-    (myCone.SemiAngle() > 0) ? 1 : -1;
-  if ( ( a1 * a2) == -1) U -= M_PI;
-
-  if ( U < 0.) U += 2.*M_PI;
-
+  if (aPnt.IsEqual(anApex, Precision::Confusion()))
+  {
+    //Take another point in the line L, which does not coincide with the cone apex.
+    aPnt.Translate(L.Direction().XYZ());
+    aDeltaV = 1.0; // == ||L.Direction()|| == 1.0
+  }
+ 
+  ElSLib::ConeParameters(myCone.Position(), myCone.RefRadius(), myCone.SemiAngle(), aPnt,
+			                   U, V);
+  //
   gp_Pnt P;
   gp_Vec Vu, Vv;
 
-  ElSLib::ConeD1(U, V, CPos, myCone.RefRadius(), myCone.SemiAngle(),
+  ElSLib::ConeD1(U, V, myCone.Position(), myCone.RefRadius(), myCone.SemiAngle(),
 		 P, Vu, Vv);
 
-  if(Vv.IsParallel(gp_Vec(L.Position().Direction()), Precision::Angular())) {
-
+  gp_Dir Dv(Vv);
+  if(Dv.IsParallel(L.Direction(), Precision::Angular()))
+  {
+    // L is parallel to U-isoline of the cone.
     myType = GeomAbs_Line;
-
-    gp_Pnt2d P2d(U,V);
   
-    Standard_Real Signe = L.Direction().Dot(myCone.Position().Direction());
-    Signe = (Signe > 0.) ? 1. : -1.;
-    gp_Dir2d D2d(0., Signe);
+    const Standard_Real aSign = Sign(1.0, L.Direction().Dot(Dv));
+    gp_Pnt2d P2d(U, V - aDeltaV*aSign);
+    gp_Dir2d D2d(0., aSign);
   
     myLin = gp_Lin2d( P2d, D2d);
 
     isDone = Standard_True;
-  }
-    
+  }    
 }
 
 

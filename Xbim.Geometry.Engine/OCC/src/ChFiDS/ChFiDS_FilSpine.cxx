@@ -35,6 +35,8 @@
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Vertex.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(ChFiDS_FilSpine,ChFiDS_Spine)
+
 //=======================================================================
 //function : ChFiDS_FilSpine
 //purpose  : 
@@ -496,7 +498,7 @@ Handle(Law_Composite) ChFiDS_FilSpine::ComputeLaw
   Standard_Real spinefin = LastParameter();
 
   Standard_Integer nbed = ifin - ideb + 1;
-  Standard_Integer biddeb = ideb, bidfin = ifin;
+  Standard_Integer bidfin = ifin;
 
   Handle(Law_Composite) loi = new Law_Composite();
   Law_Laws& list = loi->ChangeLaws();
@@ -510,11 +512,11 @@ Handle(Law_Composite) ChFiDS_FilSpine::ComputeLaw
   if(IsPeriodic()){
     if(deb < 0 && ideb > ifin)  bidfin += len;
     else if(fin > LastParameter(len) && ideb > ifin)  bidfin += len;
-    nbed = bidfin - biddeb + 1;
+    nbed = bidfin - ideb + 1;
   }
   TColStd_Array1OfInteger ind(1,nbed);
   Standard_Integer j = 1;
-  for(Standard_Integer i = biddeb; i <= bidfin; i++){
+  for(Standard_Integer i = ideb; i <= bidfin; i++){
     ind(j++) = ((i - 1)%len) + 1; 
   }
 

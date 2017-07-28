@@ -25,6 +25,8 @@
 #include <TColStd_HPackedMapOfInteger.hxx>
 #include <TColStd_MapIteratorOfPackedMapOfInteger.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(MeshVS_MeshOwner,SelectMgr_EntityOwner)
+
 #ifndef MeshVS_PRSBUILDERHXX
 #include <MeshVS_PrsBuilder.hxx>
 #endif
@@ -134,7 +136,7 @@ void MeshVS_MeshOwner::SetDetectedEntities (const Handle(TColStd_HPackedMapOfInt
 // Purpose  :
 //================================================================
 void MeshVS_MeshOwner::HilightWithColor (const Handle(PrsMgr_PresentationManager3d)& thePM,
-                                         const Quantity_NameOfColor theColor,
+                                         const Handle(Prs3d_Drawer)& theStyle,
                                          const Standard_Integer /*theMode*/)
 {
   Handle( SelectMgr_SelectableObject ) aSelObj;
@@ -165,14 +167,13 @@ void MeshVS_MeshOwner::HilightWithColor (const Handle(PrsMgr_PresentationManager
 
     // hilight detected entities
     Handle( MeshVS_Mesh ) aMesh = Handle( MeshVS_Mesh )::DownCast ( aSelObj );
-    aMesh->HilightOwnerWithColor ( thePM, theColor, this );
+    aMesh->HilightOwnerWithColor ( thePM, theStyle, this );
   }
 }
 
-void MeshVS_MeshOwner::Unhilight(const Handle(PrsMgr_PresentationManager)& thePM,
-				 const Standard_Integer theMode)
+void MeshVS_MeshOwner::Unhilight (const Handle(PrsMgr_PresentationManager)& thePM, const Standard_Integer )
 {
-  SelectMgr_EntityOwner::Unhilight( thePM, theMode );
+  SelectMgr_EntityOwner::Unhilight (thePM);
 
   Handle(TColStd_HPackedMapOfInteger) aNodes = GetDetectedNodes();
   Handle(TColStd_HPackedMapOfInteger) aElems = GetDetectedElements();  

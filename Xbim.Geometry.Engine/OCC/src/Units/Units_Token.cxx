@@ -30,6 +30,8 @@
 #include <Units_Operators.hxx>
 #include <Units_Token.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(Units_Token,MMgt_TShared)
+
 //=======================================================================
 //function : Units_Token
 //purpose  : 
@@ -521,8 +523,4 @@ Standard_Boolean operator >(const Handle(Units_Token)& atoken1,const Handle(Unit
 Standard_Boolean operator >=(const Handle(Units_Token)& atoken1,const Handle(Units_Token)& atoken2)
 {
   return atoken1->IsGreaterOrEqual(atoken2);
-}
-
-void Units_Token::Destroy () {
-
 }

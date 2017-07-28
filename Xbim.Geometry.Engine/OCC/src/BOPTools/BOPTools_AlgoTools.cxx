@@ -63,17 +63,9 @@
 #include <TopoDS_Solid.hxx>
 #include <TopoDS_Vertex.hxx>
 #include <TopoDS_Wire.hxx>
+#include <NCollection_Array1.hxx>
+#include <algorithm>
 
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 //
 static
   Standard_Real AngleWithRef(const gp_Dir& theD1,
@@ -114,6 +106,8 @@ static
                           const TopoDS_Face& theF1,
                           const BOPTools_ListOfCoupleOfShape& theLCS,
                           const gp_Pnt& aP);
+
+
 
 //=======================================================================
 // function: MakeConnexityBlocks
@@ -598,7 +592,7 @@ TopAbs_State BOPTools_AlgoTools::ComputeState
 //function : IsInternalFace
 //purpose  : 
 //=======================================================================
-Standard_Integer BOPTools_AlgoTools::IsInternalFace
+Standard_Boolean BOPTools_AlgoTools::IsInternalFace
   (const TopoDS_Face& theFace,
    const TopoDS_Solid& theSolid,
    BOPCol_IndexedDataMapOfShapeListOfShape& theMEF,
@@ -646,7 +640,7 @@ Standard_Integer BOPTools_AlgoTools::IsInternalFace
     BOPCol_ListOfShape& aLF=theMEF.ChangeFromKey(aE);
     aNbF=aLF.Extent();
     if (!aNbF) {
-      return iRet; // it can not be so
+      return iRet != 0; // it can not be so
     }
     //
     else if (aNbF==1) {
@@ -676,8 +670,7 @@ Standard_Integer BOPTools_AlgoTools::IsInternalFace
     }
     //
     if (aNbF%2) {
-      iRet=0;
-      return iRet; // it can not be so
+      return Standard_False; // it can not be so
     }
     else { // aNbF=2,4,6,8,...
       iRet=BOPTools_AlgoTools::IsInternalFace(theFace, aE, aLF, 
@@ -692,7 +685,7 @@ Standard_Integer BOPTools_AlgoTools::IsInternalFace
   }
   //
   if (iRet!=2) {
-    return iRet;
+    return iRet == 1;
   }
   //
   //========================================
@@ -705,10 +698,7 @@ Standard_Integer BOPTools_AlgoTools::IsInternalFace
   //
   aState=BOPTools_AlgoTools::ComputeState(theFace, theSolid, 
                                           theTol, aBounds, theContext);
-  //
-  iRet=(aState==TopAbs_IN)? 1 : 0;
-  //
-  return iRet;
+  return aState == TopAbs_IN;
 }
 //=======================================================================
 //function : IsInternalFace
@@ -932,7 +922,8 @@ Standard_Boolean BOPTools_AlgoTools::GetEdgeOff(const TopoDS_Edge& theE1,
 Standard_Boolean BOPTools_AlgoTools::AreFacesSameDomain
   (const TopoDS_Face& theF1,
    const TopoDS_Face& theF2,
-   Handle(IntTools_Context)& theContext)
+   Handle(IntTools_Context)& theContext,
+   const Standard_Real theFuzz)
 {
   Standard_Boolean bFlag;
   Standard_Integer iErr;
@@ -942,6 +933,7 @@ Standard_Boolean BOPTools_AlgoTools::AreFacesSameDomain
   TopoDS_Face aF1, aF2;
   TopoDS_Edge aE1;
   TopExp_Explorer aExp;
+  Standard_Real aFuzz1 = (theFuzz > Precision::Confusion() ? theFuzz : Precision::Confusion());
   //
   bFlag=Standard_False;
   //
@@ -957,12 +949,14 @@ Standard_Boolean BOPTools_AlgoTools::AreFacesSameDomain
     aE1=(*(TopoDS_Edge*)(&aExp.Current()));
     if (!BRep_Tool::Degenerated(aE1)) {
       Standard_Real aTolE = BRep_Tool::Tolerance(aE1);
-      aTolF1 = (aTolE > aTolF1) ? aTolE : aTolF1;
+      if (aTolE > aTolF1) {
+        aTolF1 = aTolE;
+      }
     }
   }
   // 2
   aTolF2=BRep_Tool::Tolerance(aF2);
-  aTol=aTolF1+aTolF2;
+  aTol = aTolF1 + aTolF2 + aFuzz1;
   //
   iErr = BOPTools_AlgoTools3D::PointInFace(aF1, aP, aP2D,
                                            theContext);
@@ -1008,7 +1002,8 @@ Standard_Boolean BOPTools_AlgoTools::CheckSameGeom
 // purpose: 
 //=======================================================================
 Standard_Integer BOPTools_AlgoTools::Sense (const TopoDS_Face& theF1,
-                                            const TopoDS_Face& theF2)
+                                            const TopoDS_Face& theF2,
+                                            const Handle(IntTools_Context)& theContext)
 {
   Standard_Integer iSense=0;
   gp_Dir aDNF1, aDNF2;
@@ -1042,8 +1037,8 @@ Standard_Integer BOPTools_AlgoTools::Sense (const TopoDS_Face& theF1,
     return iSense;
   }
   //
-  BOPTools_AlgoTools3D::GetNormalToFaceOnEdge(aE1, theF1, aDNF1);
-  BOPTools_AlgoTools3D::GetNormalToFaceOnEdge(aE2, theF2, aDNF2);
+  BOPTools_AlgoTools3D::GetNormalToFaceOnEdge(aE1, theF1, aDNF1, theContext);
+  BOPTools_AlgoTools3D::GetNormalToFaceOnEdge(aE2, theF2, aDNF2, theContext);
   //
   iSense=BOPTools_AlgoTools3D::SenseFlag(aDNF1, aDNF2);
   //
@@ -1363,7 +1358,8 @@ void BOPTools_AlgoTools::MakePCurve(const TopoDS_Edge& aE,
                                     const TopoDS_Face& aF2,
                                     const IntTools_Curve& aIC,
                                     const Standard_Boolean bPC1,
-                                    const Standard_Boolean bPC2)
+                                    const Standard_Boolean bPC2,
+                                    const Handle(IntTools_Context)& theContext)
 
 {
   Standard_Integer i;
@@ -1398,19 +1394,19 @@ void BOPTools_AlgoTools::MakePCurve(const TopoDS_Edge& aE,
     //
     aC2D=aC2Dx1;
     if (aC2D.IsNull()) { 
-      BOPTools_AlgoTools2D::BuildPCurveForEdgeOnFace(aE, aFFWD);
+      BOPTools_AlgoTools2D::BuildPCurveForEdgeOnFace(aE, aFFWD, theContext);
       BOPTools_AlgoTools2D::CurveOnSurface(aE, aFFWD, aC2D, 
                                        aOutFirst, aOutLast, 
-                                       aOutTol);
+                                       aOutTol, theContext);
       }
     //
     if (aC3DE->IsPeriodic()) {
       BOPTools_AlgoTools2D::AdjustPCurveOnFace(aFFWD, aT1, aT2,  aC2D, 
-                                               aC2DA); 
+                                               aC2DA, theContext);
     }
     else {
       BOPTools_AlgoTools2D::AdjustPCurveOnFace(aFFWD, aC3DETrim, aC2D, 
-                                               aC2DA); 
+                                               aC2DA, theContext);
     }
     //
     aBB.UpdateEdge(aE, aC2DA, aFFWD, aTolE);
@@ -1430,23 +1426,16 @@ void BOPTools_AlgoTools::MakeEdge(const IntTools_Curve& theIC,
                                   const Standard_Real theTolR3D,
                                   TopoDS_Edge& theE)
 {
-  Standard_Real aTolV;
   BRep_Builder aBB;
+  Standard_Real aNeedTol = theTolR3D + 1e-12;
+  //
+  aBB.UpdateVertex(theV1, aNeedTol);
+  aBB.UpdateVertex(theV2, aNeedTol);
   //
   BOPTools_AlgoTools::MakeSectEdge (theIC, theV1, theT1, theV2, theT2, 
                                     theE);
   //
   aBB.UpdateEdge(theE, theTolR3D);
-  //
-  aTolV=BRep_Tool::Tolerance(theV1);
-  if (aTolV<theTolR3D) {
-    aBB.UpdateVertex(theV1, theTolR3D);
-  }
-  //
-  aTolV=BRep_Tool::Tolerance(theV2);
-  if (aTolV<theTolR3D) {
-    aBB.UpdateVertex(theV2, theTolR3D);
-  }
 }
 //=======================================================================
 // function: ComputeVV
@@ -1461,7 +1450,7 @@ Standard_Integer BOPTools_AlgoTools::ComputeVV(const TopoDS_Vertex& aV1,
   //
   aTolV1=BRep_Tool::Tolerance(aV1);
   
-  aTolSum=aTolV1+aTolP2;
+  aTolSum = aTolV1 + aTolP2 + Precision::Confusion();
   aTolSum2=aTolSum*aTolSum;
   //
   aP1=BRep_Tool::Pnt(aV1);
@@ -1477,14 +1466,16 @@ Standard_Integer BOPTools_AlgoTools::ComputeVV(const TopoDS_Vertex& aV1,
 // purpose: 
 //=======================================================================
 Standard_Integer BOPTools_AlgoTools::ComputeVV(const TopoDS_Vertex& aV1, 
-                                               const TopoDS_Vertex& aV2)
+                                               const TopoDS_Vertex& aV2,
+                                               const Standard_Real aFuzz)
 {
   Standard_Real aTolV1, aTolV2, aTolSum, aTolSum2, aD2;
   gp_Pnt aP1, aP2;
+  Standard_Real aFuzz1 = (aFuzz > Precision::Confusion() ? aFuzz : Precision::Confusion());
   //
   aTolV1=BRep_Tool::Tolerance(aV1);
   aTolV2=BRep_Tool::Tolerance(aV2);
-  aTolSum=aTolV1+aTolV2;
+  aTolSum=aTolV1+aTolV2+aFuzz1;
   aTolSum2=aTolSum*aTolSum;
   //
   aP1=BRep_Tool::Pnt(aV1);
@@ -1500,98 +1491,19 @@ Standard_Integer BOPTools_AlgoTools::ComputeVV(const TopoDS_Vertex& aV1,
 // function: MakeVertex
 // purpose : 
 //=======================================================================
-void BOPTools_AlgoTools::MakeVertex(BOPCol_ListOfShape& aLV,
+void BOPTools_AlgoTools::MakeVertex(const BOPCol_ListOfShape& aLV,
                                     TopoDS_Vertex& aVnew)
 {
-  Standard_Integer aNb;
-  //
-  aNb=aLV.Extent();
-  if (!aNb) {
-    return;
-  }
-  //
-  else if (aNb==1) {
+  Standard_Integer aNb = aLV.Extent();
+  if (aNb == 1)
     aVnew=*((TopoDS_Vertex*)(&aLV.First()));
-    return;
-  }
-  //
-  else if (aNb==2) {
-    Standard_Integer m, n;
-    Standard_Real aR[2], dR, aD, aEps;
-    TopoDS_Vertex aV[2];
-    gp_Pnt aP[2];
+  else if (aNb > 1)
+  {
+    Standard_Real aNTol;
+    gp_Pnt aNC;
+    BRepLib::BoundingVertex(aLV, aNC, aNTol);
     BRep_Builder aBB;
-    //
-    aEps=RealEpsilon();
-    for (m=0; m<aNb; ++m) {
-      aV[m]=(!m)? 
-	*((TopoDS_Vertex*)(&aLV.First())):
-	*((TopoDS_Vertex*)(&aLV.Last()));
-      aP[m]=BRep_Tool::Pnt(aV[m]);
-      aR[m]=BRep_Tool::Tolerance(aV[m]);
-    }  
-    //
-    m=0; // max R
-    n=1; // min R
-    if (aR[0]<aR[1]) {
-      m=1;
-      n=0;
-    }
-    //
-    dR=aR[m]-aR[n]; // dR >= 0.
-    gp_Vec aVD(aP[m], aP[n]);
-    aD=aVD.Magnitude();
-    //
-    if (aD<=dR || aD<aEps) { 
-      aBB.MakeVertex (aVnew, aP[m], aR[m]);
-    }
-    else {
-      Standard_Real aRr;
-      gp_XYZ aXYZr;
-      gp_Pnt aPr;
-      //
-      aRr=0.5*(aR[m]+aR[n]+aD);
-      aXYZr=0.5*(aP[m].XYZ()+aP[n].XYZ()-aVD.XYZ()*(dR/aD));
-      aPr.SetXYZ(aXYZr);
-      //
-      aBB.MakeVertex (aVnew, aPr, aRr);
-    }
-    return;
-  }// else if (aNb==2) {
-  //
-  else { // if (aNb>2) 
-    Standard_Real aTi, aDi, aDmax;
-    gp_Pnt aPi, aP;
-    gp_XYZ aXYZ(0.,0.,0.), aXYZi;
-    BOPCol_ListIteratorOfListOfShape aIt;
-    //
-    aIt.Initialize(aLV);
-    for (; aIt.More(); aIt.Next()) {
-      TopoDS_Vertex& aVi=*((TopoDS_Vertex*)(&aIt.Value()));
-      aPi=BRep_Tool::Pnt(aVi);
-      aXYZi=aPi.XYZ();
-      aXYZ=aXYZ+aXYZi;
-    }
-    //
-    aXYZ.Divide((Standard_Real)aNb);
-    aP.SetXYZ(aXYZ);
-    //
-    aDmax=-1.;
-    aIt.Initialize(aLV);
-    for (; aIt.More(); aIt.Next()) {
-      TopoDS_Vertex& aVi=*((TopoDS_Vertex*)(&aIt.Value()));
-      aPi=BRep_Tool::Pnt(aVi);
-      aTi=BRep_Tool::Tolerance(aVi);
-      aDi=aP.SquareDistance(aPi);
-      aDi=sqrt(aDi);
-      aDi=aDi+aTi;
-      if (aDi > aDmax) {
-        aDmax=aDi;
-      }
-    }
-    //
-    BRep_Builder aBB;
-    aBB.MakeVertex (aVnew, aP, aDmax);
+    aBB.MakeVertex(aVnew, aNC, aNTol);
   }
 }
 //=======================================================================
@@ -1845,10 +1757,10 @@ Standard_Boolean BOPTools_AlgoTools::IsBlockInOnFace
 //=======================================================================
 Standard_Boolean BOPTools_AlgoTools::IsMicroEdge
   (const TopoDS_Edge& aE,
-   const Handle(IntTools_Context)& aCtx) 
+   const Handle(IntTools_Context)& aCtx,
+   const Standard_Boolean bCheckSplittable)
 {
   Standard_Boolean bRet;
-  Standard_Integer iErr;
   Standard_Real aT1, aT2, aTmp;
   Handle(Geom_Curve) aC3D;
   TopoDS_Vertex aV1, aV2;
@@ -1873,8 +1785,10 @@ Standard_Boolean BOPTools_AlgoTools::IsMicroEdge
   aSR.SetContext(aCtx);
   aSR.SetData(aE, aT1, aT2, aV1, aV2);
   aSR.Perform();
-  iErr=aSR.ErrorStatus();
-  bRet = !(iErr==0);
+  bRet = !aSR.IsDone();
+  if (!bRet && bCheckSplittable) {
+    bRet = !aSR.IsSplittable();
+  }
   //
   return bRet;
 }
@@ -1897,7 +1811,7 @@ void GetFaceDir(const TopoDS_Edge& aE,
   Standard_Real aTolE;
   gp_Pnt aPx;
   //
-  BOPTools_AlgoTools3D::GetNormalToFaceOnEdge(aE, aF, aT, aDN);
+  BOPTools_AlgoTools3D::GetNormalToFaceOnEdge(aE, aF, aT, aDN, theContext);
   if (aF.Orientation()==TopAbs_REVERSED){
     aDN.Reverse();
   }
@@ -2012,6 +1926,7 @@ Standard_Real MinStep3D(const TopoDS_Edge& theE1,
   for (; aIt.More(); aIt.Next()) {
     const BOPTools_CoupleOfShape& aCS = aIt.Value();
     const TopoDS_Face& aF = (*(TopoDS_Face*)(&aCS.Shape2()));
+	
     //
     aTolF = BRep_Tool::Tolerance(aF);
     aDt = 2*(aTolE + aTolF);

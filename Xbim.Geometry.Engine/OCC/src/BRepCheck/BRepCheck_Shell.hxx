@@ -42,11 +42,11 @@ public:
   
   Standard_EXPORT BRepCheck_Shell(const TopoDS_Shell& S);
   
-  Standard_EXPORT void InContext (const TopoDS_Shape& ContextShape);
+  Standard_EXPORT void InContext (const TopoDS_Shape& ContextShape) Standard_OVERRIDE;
   
-  Standard_EXPORT void Minimum();
+  Standard_EXPORT void Minimum() Standard_OVERRIDE;
   
-  Standard_EXPORT void Blind();
+  Standard_EXPORT void Blind() Standard_OVERRIDE;
   
   //! Checks if the oriented  faces of the shell  give a
   //! closed shell.    If the  wire is  closed,  returns
@@ -69,7 +69,7 @@ public:
 
 
 
-  DEFINE_STANDARD_RTTI(BRepCheck_Shell,BRepCheck_Result)
+  DEFINE_STANDARD_RTTIEXT(BRepCheck_Shell,BRepCheck_Result)
 
 protected:
 

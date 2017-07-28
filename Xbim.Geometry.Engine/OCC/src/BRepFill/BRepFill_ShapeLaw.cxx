@@ -43,6 +43,8 @@
 #include <TopoDS_Vertex.hxx>
 #include <TopoDS_Wire.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(BRepFill_ShapeLaw,BRepFill_SectionLaw)
+
 //=======================================================================
 //function : Create
 //purpose  : Process the case of Vertex by constructing a line
@@ -70,6 +72,7 @@ BRepFill_ShapeLaw::BRepFill_ShapeLaw(const TopoDS_Vertex& V,
     myLaws->ChangeValue(1) = 
       new (GeomFill_UniformSection)(TC);
   }
+  myDone = Standard_True;
 }
 
 //=======================================================================
@@ -86,6 +89,7 @@ BRepFill_ShapeLaw::BRepFill_ShapeLaw(const TopoDS_Wire& W,
 {
   TheLaw.Nullify();
   Init(Build);
+  myDone = Standard_True;
 }
 
 //=======================================================================
@@ -102,6 +106,7 @@ BRepFill_ShapeLaw::BRepFill_ShapeLaw(const TopoDS_Wire& W,
 {
   TheLaw = L;
   Init(Build);
+  myDone = Standard_True;
 }
 
 //=======================================================================
@@ -139,6 +144,7 @@ void BRepFill_ShapeLaw::Init(const Standard_Boolean Build)
       Handle(Geom_Curve) C = BRep_Tool::Curve(E,First,Last);
       if( !C.IsNull() ) {
 	myEdges->SetValue(ii, E);
+        myIndices.Bind(E, ii);
 	if(Build) {
 	  //Handle(Geom_Curve) C = BRep_Tool::Curve(E,First,Last);
 	  if (E.Orientation() == TopAbs_REVERSED) {

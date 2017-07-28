@@ -44,7 +44,7 @@ TopTools_ShapeSet::TopTools_ShapeSet() : myFormatNb(1)
 {
 }
 
-void TopTools_ShapeSet::Delete()
+TopTools_ShapeSet::~TopTools_ShapeSet()
 {}
 
 //=======================================================================
@@ -380,7 +380,7 @@ void  TopTools_ShapeSet::Dump(Standard_OStream& OS)const
   OS << "\nDump of " << nbShapes << " TShapes";
   OS << "\n\n-----------------\n\n";
 
-  OS << "Flags : Free, Modified, Checked, Orientable, Closed, Infinite, Convex";
+  OS << "Flags : Free, Modified, Checked, Orientable, Closed, Infinite, Convex, Locked";
   OS << "\n\n";
   
   for (i = nbShapes; i >= 1; i--) {
@@ -399,6 +399,7 @@ void  TopTools_ShapeSet::Dump(Standard_OStream& OS)const
     OS << (S.Closed()     ? 1 : 0);
     OS << (S.Infinite()   ? 1 : 0);
     OS << (S.Convex()     ? 1 : 0);
+    OS << (S.Locked()     ? 1 : 0);
     OS << " " << (void*) &(*S.TShape()) <<"\n";
 
     // sub-shapes
@@ -433,7 +434,7 @@ void  TopTools_ShapeSet::Dump(Standard_OStream& OS)const
 
   myLocations.Dump(OS);
 
-  OS << endl;
+  OS << "\n";
 }
 
 
@@ -452,9 +453,9 @@ void  TopTools_ShapeSet::Write(Standard_OStream& OS)
 
   // write the copyright
   if (myFormatNb == 2)
-    OS << "\n" << Version2 << endl;
+    OS << "\n" << Version2 << "\n";
   else
-    OS << "\n" << Version << endl;
+    OS << "\n" << Version << "\n";
 
   //-----------------------------------------
   // write the locations
@@ -470,7 +471,7 @@ void  TopTools_ShapeSet::Write(Standard_OStream& OS)
   }
 
   if (!myProgress.IsNull() && myProgress->UserBreak()) {
-    OS << "Interrupted by the user"<<endl;
+    OS << "Interrupted by the user\n";
     OS.imbue (anOldLocale);
     return;
   }
@@ -538,7 +539,7 @@ void  TopTools_ShapeSet::Write(Standard_OStream& OS)
     OS << "\n";
   }
   
-  OS << endl;
+  OS << "\n";
   OS.precision(prec);
   OS.imbue (anOldLocale);
 
@@ -547,7 +548,7 @@ void  TopTools_ShapeSet::Write(Standard_OStream& OS)
     myProgress->EndScope();
     myProgress->Show();
     if (myProgress->UserBreak())
-      OS << "Interrupted by the user"<<endl;
+      OS << "Interrupted by the user\n";
   }
 }
 

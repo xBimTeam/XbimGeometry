@@ -20,6 +20,8 @@
 #include <TColgp_Array1OfPnt2d.hxx>
 
 
+IMPLEMENT_STANDARD_RTTIEXT(MeshVS_DummySensitiveEntity,SelectBasics_SensitiveEntity)
+
 //================================================================
 // Function : Constructor MeshVS_DummySensitiveEntity
 // Purpose  :
@@ -83,7 +85,7 @@ Standard_Boolean MeshVS_DummySensitiveEntity::HasInitLocation() const
 //function : InvInitLocation
 //purpose  :
 //=======================================================================
-inline gp_Trsf MeshVS_DummySensitiveEntity::InvInitLocation() const
+inline gp_GTrsf MeshVS_DummySensitiveEntity::InvInitLocation() const
 {
-  return gp_Trsf();
+  return gp_GTrsf();
 }

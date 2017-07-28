@@ -77,6 +77,8 @@ static void SeveralWlinesProcessing(const Handle(Adaptor3d_HSurface)& theSurf1,
                                     const IntSurf_TypeTrans theTrans1,
                                     const IntSurf_TypeTrans theTrans2,
                                     const Standard_Real theTol,
+                                    const Standard_Real theMaxStepS1,
+                                    const Standard_Real theMaxStepS2,
                                     Handle(IntPatch_WLine)& theWLline)
 {
   if(theSLin.Length() == 0)
@@ -84,7 +86,6 @@ static void SeveralWlinesProcessing(const Handle(Adaptor3d_HSurface)& theSurf1,
 
   Standard_Real aU1 = 0.0, aV1 = 0.0, aU2 = 0.0, aV2 = 0.0;
 
-  const Standard_Real aTol2D = 1.e-4;
   Standard_Integer cnbV = theWLline->NbVertex();
   Standard_Integer ciV;
   for( ciV = 1; ciV <= cnbV; ciV++ )
@@ -119,11 +120,14 @@ static void SeveralWlinesProcessing(const Handle(Adaptor3d_HSurface)& theSurf1,
         Standard_Real vRs2 = theSurf2->Surface().VResolution(tDistance);
         Standard_Real RmaxS1 = Max(uRs1,vRs1);
         Standard_Real RmaxS2 = Max(uRs2,vRs2);
-        if((aPCS1.SquareDistance(aPTS1) < RmaxS1*RmaxS1) && (aPCS2.SquareDistance(aPTS2) < RmaxS2*RmaxS2))
+        
+        if(RmaxS1 < theMaxStepS1 && RmaxS2 < theMaxStepS2)
         {
-          if(RmaxS1 < aTol2D && RmaxS2 < aTol2D)
+          if( pntDMin > tDistance && tDistance > Precision::PConfusion())
           {
-            if( pntDMin > tDistance && tDistance > 1.e-9)
+            const Standard_Real aSqDist1 = aPCS1.SquareDistance(aPTS1),
+                                aSqDist2 = aPCS2.SquareDistance(aPTS2);
+            if((aSqDist1 < RmaxS1*RmaxS1) && (aSqDist2 < RmaxS2*RmaxS2))
             {
               pntDMin = tDistance;
               VDMin = tiV;
@@ -1712,8 +1716,8 @@ void IntPatch_PrmPrmIntersection::Perform (const Handle(Adaptor3d_HSurface)&    
         if(PW.IsDone())	{
           if(PW.NbPoints()>2)
           {
-            //Try to extend the intersection line to boundary, if it is possibly
-            Standard_Boolean hasBeenAdded = PW.PutToBoundary(Surf1, Surf2);
+            //Try to extend the intersection line to boundary, if it is possible.
+            PW.PutToBoundary(Surf1, Surf2);
 
             RejetLigne = Standard_False;
             Point3dDebut = PW.Value(1).Value();
@@ -1769,8 +1773,8 @@ void IntPatch_PrmPrmIntersection::Perform (const Handle(Adaptor3d_HSurface)&    
               Standard_Real TolTang = TolTangency;
               Handle(IntPatch_WLine) wline = new IntPatch_WLine(PW.Line(),Standard_False,trans1,trans2);
               if (RestrictLine){
-                IntPatch_RstInt::PutVertexOnLine(wline,Surf1,D1,Surf2,Standard_True,TolTang,hasBeenAdded);
-                IntPatch_RstInt::PutVertexOnLine(wline,Surf2,D2,Surf1,Standard_False,TolTang,hasBeenAdded);
+                IntPatch_RstInt::PutVertexOnLine(wline,Surf1,D1,Surf2,Standard_True,TolTang);
+                IntPatch_RstInt::PutVertexOnLine(wline,Surf2,D2,Surf1,Standard_False,TolTang);
               }
 
               if(wline->NbVertex() == 0) {
@@ -1790,7 +1794,9 @@ void IntPatch_PrmPrmIntersection::Perform (const Handle(Adaptor3d_HSurface)&    
                 wline->AddVertex(vtx);
               }              
 
-              SeveralWlinesProcessing(Surf1, Surf2, SLin, Periods, trans1, trans2, TolTang, wline);
+              SeveralWlinesProcessing(Surf1, Surf2, SLin, Periods, trans1, trans2,
+                                      TolTang, Max(PW.MaxStep(0), PW.MaxStep(1)),
+                                      Max(PW.MaxStep(2), PW.MaxStep(3)), wline);
 
               AddWLine(SLin, wline, Deflection);
               empt = Standard_False;
@@ -1888,60 +1894,58 @@ void IntPatch_PrmPrmIntersection::Perform(const Handle(Adaptor3d_HSurface)&    S
 
     PW.Perform(StartParams);
     if(PW.IsDone()) {
+      if(PW.NbPoints()>2) {
+        Point3dDebut = PW.Value(1).Value();
+        Point3dFin   = PW.Value(PW.NbPoints()).Value();
 
-      Point3dDebut = PW.Value(1).Value();
-      Point3dFin   = PW.Value(PW.NbPoints()).Value();
+        IntSurf_TypeTrans trans1,trans2;
+        Standard_Real locu,locv;
+        gp_Vec norm1,norm2,d1u,d1v;
+        gp_Pnt ptbid;
+        Standard_Integer indextg;
+        gp_Vec tgline(PW.TangentAtLine(indextg));
+        PW.Line()->Value(indextg).ParametersOnS1(locu,locv);
+        Surf1->D1(locu,locv,ptbid,d1u,d1v);
+        norm1 = d1u.Crossed(d1v);
+        PW.Line()->Value(indextg).ParametersOnS2(locu,locv);
+        Surf2->D1(locu,locv,ptbid,d1u,d1v);
+        norm2 = d1u.Crossed(d1v);
+        if (tgline.DotCross(norm2,norm1)>0.) {
+          trans1 = IntSurf_Out;
+          trans2 = IntSurf_In;
+        }
+        else {
+          trans1 = IntSurf_In;
+          trans2 = IntSurf_Out;
+        }
 
-      IntSurf_TypeTrans trans1,trans2;
-      Standard_Real locu,locv;
-      gp_Vec norm1,norm2,d1u,d1v;
-      gp_Pnt ptbid;
-      Standard_Integer indextg;
-      gp_Vec tgline(PW.TangentAtLine(indextg));
-      PW.Line()->Value(indextg).ParametersOnS1(locu,locv);
-      Surf1->D1(locu,locv,ptbid,d1u,d1v);
-      norm1 = d1u.Crossed(d1v);
-      PW.Line()->Value(indextg).ParametersOnS2(locu,locv);
-      Surf2->D1(locu,locv,ptbid,d1u,d1v);
-      norm2 = d1u.Crossed(d1v);
-      if (tgline.DotCross(norm2,norm1)>0.) {
-        trans1 = IntSurf_Out;
-        trans2 = IntSurf_In;
+        Standard_Real TolTang = TolTangency;
+        Handle(IntPatch_WLine) wline = new IntPatch_WLine(PW.Line(),Standard_False,trans1,trans2);
+        IntPatch_RstInt::PutVertexOnLine(wline,Surf1,D1,Surf2,Standard_True,TolTang);
+        IntPatch_RstInt::PutVertexOnLine(wline,Surf2,D2,Surf1,Standard_False,TolTang);
+
+        //---------------
+        if(wline->NbVertex() == 0) {
+          IntPatch_Point vtx;
+          IntSurf_PntOn2S POn2S = PW.Line()->Value(1);
+          POn2S.Parameters(pu1,pv1,pu2,pv2);
+          vtx.SetValue(Point3dDebut,TolTang,Standard_False);
+          vtx.SetParameters(pu1,pv1,pu2,pv2);
+          vtx.SetParameter(1);
+          wline->AddVertex(vtx);
+
+          POn2S = PW.Line()->Value(wline->NbPnts());
+          POn2S.Parameters(pu1,pv1,pu2,pv2);
+          vtx.SetValue(Point3dFin,TolTang,Standard_False);
+          vtx.SetParameters(pu1,pv1,pu2,pv2);
+          vtx.SetParameter(wline->NbPnts());
+          wline->AddVertex(vtx);
+        }
+
+        //---------------
+        SLin.Append(wline);
+        empt = Standard_False;
       }
-      else {
-        trans1 = IntSurf_In;
-        trans2 = IntSurf_Out;
-      }
-
-
-
-      Standard_Real TolTang = TolTangency;
-      Handle(IntPatch_WLine) wline = new IntPatch_WLine(PW.Line(),Standard_False,trans1,trans2);
-      IntPatch_RstInt::PutVertexOnLine(wline,Surf1,D1,Surf2,Standard_True,TolTang);
-      IntPatch_RstInt::PutVertexOnLine(wline,Surf2,D2,Surf1,Standard_False,TolTang);
-
-      //---------------
-      if(wline->NbVertex() == 0) {
-        IntPatch_Point vtx;
-        IntSurf_PntOn2S POn2S = PW.Line()->Value(1);
-        POn2S.Parameters(pu1,pv1,pu2,pv2);
-        vtx.SetValue(Point3dDebut,TolTang,Standard_False);
-        vtx.SetParameters(pu1,pv1,pu2,pv2);
-        vtx.SetParameter(1);
-        wline->AddVertex(vtx);
-
-        POn2S = PW.Line()->Value(wline->NbPnts());
-        POn2S.Parameters(pu1,pv1,pu2,pv2);
-        vtx.SetValue(Point3dFin,TolTang,Standard_False);
-        vtx.SetParameters(pu1,pv1,pu2,pv2);
-        vtx.SetParameter(wline->NbPnts());
-        wline->AddVertex(vtx);
-      }
-
-      //---------------
-      SLin.Append(wline);
-      empt = Standard_False;
-
     }
   }
 }
@@ -2327,31 +2331,29 @@ void IntPatch_PrmPrmIntersection::Perform (const Handle(Adaptor3d_HSurface)& Sur
 
                 //
                 Standard_Boolean bPWIsDone;
-                Standard_Integer iPWNbPoints, aNbPointsVer;
                 Standard_Real aD11, aD12, aD21, aD22, aDx;
                 //
                 bPWIsDone=PW.IsDone();
 
                 if(bPWIsDone)
                 {
-                  iPWNbPoints=PW.NbPoints();
-                  //
-                  if( iPWNbPoints > 2 )
+                  Standard_Boolean hasBeenAdded = Standard_False;
+                  if(PW.NbPoints() > 2 )
                   {
-                    //Try to extend the intersection line to boundary, if it is possibly
-                    Standard_Boolean hasBeenAdded = PW.PutToBoundary(Surf1, Surf2);
+                    //Try to extend the intersection line to the boundary,
+                    //if it is possibly
+                    PW.PutToBoundary(Surf1, Surf2);
 
                     const Standard_Integer aMinNbPoints = 40;
-                    if(iPWNbPoints < aMinNbPoints)
+                    if(PW.NbPoints() < aMinNbPoints)
                     {
-                      hasBeenAdded = 
-                        PW.SeekAdditionalPoints(Surf1, Surf2, aMinNbPoints) || hasBeenAdded;
-                      iPWNbPoints = PW.NbPoints();
+                      hasBeenAdded = PW.SeekAdditionalPoints(Surf1, Surf2, aMinNbPoints);
                     }
                     
+                    Standard_Integer iPWNbPoints = PW.NbPoints(), aNbPointsVer = 0;
                     RejectLine = Standard_False;
                     Point3dDebut = PW.Value(1).Value();
-                    Point3dFin   = PW.Value(iPWNbPoints).Value();
+                    Point3dFin = PW.Value(iPWNbPoints).Value();
                     for( ver = 1; (!RejectLine) && (ver<= NbLigCalculee); ++ver)
                     {
                       const Handle(IntPatch_WLine)& verwline = *((Handle(IntPatch_WLine)*)&SLin.Value(ver));
@@ -2447,9 +2449,9 @@ void IntPatch_PrmPrmIntersection::Perform (const Handle(Adaptor3d_HSurface)& Sur
 
                       Standard_Real TolTang = TolTangency;
                       Handle(IntPatch_WLine) wline = new IntPatch_WLine(PW.Line(),Standard_False,trans1,trans2);
-                      IntPatch_RstInt::PutVertexOnLine(wline,Surf1,D1,Surf2,Standard_True,TolTang,hasBeenAdded);
-                      IntPatch_RstInt::PutVertexOnLine(wline,Surf2,D2,Surf1,Standard_False,TolTang,hasBeenAdded);
-
+                      wline->EnablePurging(!hasBeenAdded);
+                      IntPatch_RstInt::PutVertexOnLine(wline,Surf1,D1,Surf2,Standard_True,TolTang);
+                      IntPatch_RstInt::PutVertexOnLine(wline,Surf2,D2,Surf1,Standard_False,TolTang);
                       if(wline->NbVertex() == 0)
                       {
                         IntPatch_Point vtx;
@@ -2470,7 +2472,9 @@ void IntPatch_PrmPrmIntersection::Perform (const Handle(Adaptor3d_HSurface)& Sur
 
                       lignetrouvee = Standard_True;
 
-                      SeveralWlinesProcessing(Surf1, Surf2, SLin, Periods, trans1, trans2, TolTang, wline);
+                      SeveralWlinesProcessing(Surf1, Surf2, SLin, Periods, trans1, trans2,
+                                              TolTang, Max(PW.MaxStep(0), PW.MaxStep(1)),
+                                              Max(PW.MaxStep(2), PW.MaxStep(3)), wline);
 
                       AddWLine(SLin, wline, Deflection);
                       empt = Standard_False;
@@ -2579,12 +2583,13 @@ void IntPatch_PrmPrmIntersection::Perform (const Handle(Adaptor3d_HSurface)& Sur
 
           if(PW.IsDone())
           {
+            Standard_Boolean hasBeenAdded = Standard_False;
             if(PW.NbPoints()>2)
             { 
               const Standard_Integer aMinNbPoints = 40;
               if(PW.NbPoints() < aMinNbPoints)
               {
-                PW.SeekAdditionalPoints(Surf1, Surf2, aMinNbPoints);
+                hasBeenAdded = PW.SeekAdditionalPoints(Surf1, Surf2, aMinNbPoints);
               }
 
               //-----------------------------------------------
@@ -2653,6 +2658,7 @@ void IntPatch_PrmPrmIntersection::Perform (const Handle(Adaptor3d_HSurface)& Sur
 
                 Standard_Real TolTang = TolTangency;
                 Handle(IntPatch_WLine) wline = new IntPatch_WLine(PW.Line(),Standard_False,trans1,trans2);
+                wline->EnablePurging(!hasBeenAdded);
                 IntPatch_RstInt::PutVertexOnLine(wline,Surf1,D1,Surf2,Standard_True,TolTang);
                 IntPatch_RstInt::PutVertexOnLine(wline,Surf2,D2,Surf1,Standard_False,TolTang);
 
@@ -2704,7 +2710,6 @@ void IntPatch_PrmPrmIntersection::Perform (const Handle(Adaptor3d_HSurface)& Sur
   PointDepart( LOn2S, Surf1, NbU1, NbV1, Surf2, NbU2, NbV2 );
   empt = Standard_True;
   done = Standard_True;
-  SLin.Clear();  
 
   Standard_Integer NbLigCalculee = 0;
   Standard_Real U1,U2,V1,V2;

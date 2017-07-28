@@ -29,6 +29,8 @@
 #include <Standard_Integer.hxx>
 #include <TColStd_Array1OfReal.hxx>
 #include <Standard_Boolean.hxx>
+#include <Geom2dEvaluator_Curve.hxx>
+
 class Geom2d_Curve;
 class Adaptor2d_HCurve2d;
 class Standard_NoSuchObject;
@@ -49,6 +51,10 @@ class Geom2d_BSplineCurve;
 //! An interface between the services provided by any
 //! curve from the package Geom2d and those required
 //! of the curve by algorithms which use it.
+//!
+//! Polynomial coefficients of BSpline curves used for their evaluation are
+//! cached for better performance. Therefore these evaluations are not
+//! thread-safe and parallel evaluations need to be prevented.
 class Geom2dAdaptor_Curve  : public Adaptor2d_Curve2d
 {
 public:
@@ -174,68 +180,26 @@ protected:
 
 private:
 
-  
-  //! Computes the point of parameter U on the B-spline curve
-  Standard_EXPORT gp_Pnt2d ValueBSpline (const Standard_Real U) const;
-  
-  //! Computes the point of parameter U on the offset curve
-  Standard_EXPORT gp_Pnt2d ValueOffset (const Standard_Real U) const;
-  
-  //! Computes the point of parameter U on the B-spline curve
-  Standard_EXPORT void D0BSpline (const Standard_Real theU, gp_Pnt2d& theP) const;
-  
-  //! Computes the point of parameter U on the offset curve
-  Standard_EXPORT void D0Offset (const Standard_Real theU, gp_Pnt2d& theP) const;
-  
-  //! Computes the point of parameter U on the B-spline curve
-  //! and its derivative
-  Standard_EXPORT void D1BSpline (const Standard_Real theU, gp_Pnt2d& theP, gp_Vec2d& theV) const;
-  
-  //! Computes the point of parameter U on the offset curve
-  //! and its derivative
-  Standard_EXPORT void D1Offset (const Standard_Real theU, gp_Pnt2d& theP, gp_Vec2d& theV) const;
-  
-  //! Computes the point of parameter U on the B-spline curve
-  //! and its first and second derivatives
-  Standard_EXPORT void D2BSpline (const Standard_Real theU, gp_Pnt2d& theP, gp_Vec2d& theV1, gp_Vec2d& theV2) const;
-  
-  //! Computes the point of parameter U on the offset curve
-  //! and its first and second derivatives
-  Standard_EXPORT void D2Offset (const Standard_Real theU, gp_Pnt2d& theP, gp_Vec2d& theV1, gp_Vec2d& theV2) const;
-  
-  //! Computes the point of parameter U on the B-spline curve
-  //! and its first, second and third derivatives
-  Standard_EXPORT void D3BSpline (const Standard_Real theU, gp_Pnt2d& theP, gp_Vec2d& theV1, gp_Vec2d& theV2, gp_Vec2d& theV3) const;
-  
-  //! Computes the point of parameter U on the offset curve
-  //! and its first, second and third derivatives
-  Standard_EXPORT void D3Offset (const Standard_Real theU, gp_Pnt2d& theP, gp_Vec2d& theV1, gp_Vec2d& theV2, gp_Vec2d& theV3) const;
-  
-
-  //! The returned vector gives the value of the derivative for the
-  //! order of derivation N.
-  Standard_EXPORT gp_Vec2d DNBSpline (const Standard_Real theU, const Standard_Integer N) const;
-  
-
-  //! The returned vector gives the value of the derivative for the
-  //! order of derivation N.
-  Standard_EXPORT gp_Vec2d DNOffset (const Standard_Real theU, const Standard_Integer N) const;
-  
   Standard_EXPORT GeomAbs_Shape LocalContinuity (const Standard_Real U1, const Standard_Real U2) const;
   
   Standard_EXPORT void load (const Handle(Geom2d_Curve)& C, const Standard_Real UFirst, const Standard_Real ULast);
-  
+
+  //! Check theU relates to start or finish point of B-spline curve and return indices of span the point is located
+  Standard_Boolean IsBoundary(const Standard_Real theU, Standard_Integer& theSpanStart, Standard_Integer& theSpanFinish) const;
+
   //! Rebuilds B-spline cache
   //! \param theParameter the value on the knot axis which identifies the caching span
-  Standard_EXPORT void RebuildCache (const Standard_Real theParameter) const;
+  void RebuildCache (const Standard_Real theParameter) const;
 
 
   Handle(Geom2d_Curve) myCurve;
   GeomAbs_CurveType myTypeCurve;
   Standard_Real myFirst;
   Standard_Real myLast;
-  Handle(BSplCLib_Cache) myCurveCache;
-  Handle(Adaptor2d_HCurve2d) myOffsetBaseCurveAdaptor;
+
+  Handle(Geom2d_BSplineCurve) myBSplineCurve; ///< B-spline representation to prevent castings
+  mutable Handle(BSplCLib_Cache) myCurveCache; ///< Cached data for B-spline or Bezier curve
+  Handle(Geom2dEvaluator_Curve) myNestedEvaluator; ///< Calculates value of offset curve
 
 
 };

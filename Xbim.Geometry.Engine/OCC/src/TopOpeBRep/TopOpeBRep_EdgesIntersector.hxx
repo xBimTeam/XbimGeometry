@@ -60,8 +60,7 @@ public:
   
   Standard_EXPORT TopOpeBRep_EdgesIntersector();
   
-  Standard_EXPORT virtual void Delete();
-Standard_EXPORT virtual ~TopOpeBRep_EdgesIntersector(){Delete() ; }
+  Standard_EXPORT virtual ~TopOpeBRep_EdgesIntersector();
   
   Standard_EXPORT void SetFaces (const TopoDS_Shape& F1, const TopoDS_Shape& F2);
   
@@ -99,8 +98,6 @@ Standard_EXPORT virtual ~TopOpeBRep_EdgesIntersector(){Delete() ; }
   Standard_EXPORT Standard_Real ToleranceMax() const;
   
   Standard_EXPORT void Tolerances (Standard_Real& tol1, Standard_Real& tol2) const;
-  
-  Standard_EXPORT Standard_Real Tolerance2() const;
   
   Standard_EXPORT Standard_Integer NbPoints() const;
   

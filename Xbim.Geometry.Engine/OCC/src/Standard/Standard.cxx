@@ -19,6 +19,7 @@
 #include <Standard_MMgrOpt.hxx>
 #include <Standard_MMgrRaw.hxx>
 #include <Standard_MMgrTBBalloc.hxx>
+#include <Standard_Assert.hxx>
 
 #include <stdlib.h>
 #if(defined(_WIN32) || defined(__WIN32__))
@@ -27,12 +28,18 @@
   #include <locale.h>
 #endif
 
-#if defined(_MSC_VER) || defined(__ANDROID__)
+#if defined(_MSC_VER) || defined(__ANDROID__) || defined(__QNX__)
   #include <malloc.h>
-#elif (defined(__GNUC__) && __GNUC__ >= 4 && __GNUC_MINOR__ >= 1)
+#elif (defined(__GNUC__) && __GNUC__ >= 4 && __GNUC_MINOR__ >= 1 && (defined(__i386) || defined(__x86_64)))
   #include <mm_malloc.h>
 #else
   extern "C" int posix_memalign (void** thePtr, size_t theAlign, size_t theSize);
+#endif
+
+// There is no support for environment variables in UWP
+// OSD_Environment could not be used here because of cyclic dependency
+#ifdef OCCT_UWP
+#define getenv(x) NULL
 #endif
 
 #ifndef OCCT_MMGT_OPT_DEFAULT
@@ -80,11 +87,21 @@ Standard_MMgrFactory::Standard_MMgrFactory()
   _configthreadlocale (-1);
 #endif*/
 
+  // Check basic assumption.
+  // If assertion happens, then OCCT should be corrected for compatibility with such CPU architecture.
+  Standard_STATIC_ASSERT(sizeof(Standard_Utf8Char)  == 1);
+  Standard_STATIC_ASSERT(sizeof(short) == 2);
+  Standard_STATIC_ASSERT(sizeof(Standard_Utf16Char) == 2);
+  Standard_STATIC_ASSERT(sizeof(Standard_Utf32Char) == 4);
+#ifdef _WIN32
+  Standard_STATIC_ASSERT(sizeof(Standard_WideChar) == sizeof(Standard_Utf16Char));
+#endif
+
   char* aVar;
   aVar = getenv ("MMGT_OPT");
   Standard_Integer anAllocId   = (aVar ?  atoi (aVar): OCCT_MMGT_OPT_DEFAULT);
 
-#if defined(_WIN32) && !defined(_WIN64)
+#if defined(_WIN32) && !defined(_WIN64) && !defined(__MINGW32__)
   static const DWORD _SSE2_FEATURE_BIT(0x04000000);
   if ( anAllocId == 2 )
   {
@@ -264,9 +281,9 @@ Standard_Address Standard::AllocateAligned (const Standard_Size theSize,
 {
 #if defined(_MSC_VER)
   return _aligned_malloc (theSize, theAlign);
-#elif defined(__ANDROID__)
+#elif defined(__ANDROID__) || defined(__QNX__)
   return memalign (theAlign, theSize);
-#elif (defined(__GNUC__) && __GNUC__ >= 4 && __GNUC_MINOR__ >= 1)
+#elif (defined(__GNUC__) && __GNUC__ >= 4 && __GNUC_MINOR__ >= 1 && (defined(__i386) || defined(__x86_64)))
   return _mm_malloc (theSize, theAlign);
 #else
   void* aPtr;
@@ -287,9 +304,9 @@ void Standard::FreeAligned (Standard_Address thePtrAligned)
 {
 #if defined(_MSC_VER)
   _aligned_free (thePtrAligned);
-#elif defined(__ANDROID__)
+#elif defined(__ANDROID__) || defined(__QNX__)
   free (thePtrAligned);
-#elif (defined(__GNUC__) && __GNUC__ >= 4 && __GNUC_MINOR__ >= 1)
+#elif (defined(__GNUC__) && __GNUC__ >= 4 && __GNUC_MINOR__ >= 1 && (defined(__i386) || defined(__x86_64)))
   _mm_free (thePtrAligned);
 #else
   free (thePtrAligned);

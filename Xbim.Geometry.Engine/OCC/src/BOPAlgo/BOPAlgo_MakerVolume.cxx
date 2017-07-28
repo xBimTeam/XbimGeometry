@@ -100,6 +100,8 @@ void BOPAlgo_MakerVolume::Perform()
   pPF->SetRunParallel(myRunParallel);
   pPF->SetProgressIndicator(myProgressIndicator);
   pPF->SetFuzzyValue(myFuzzyValue);
+  pPF->SetNonDestructive(myNonDestructive);
+  pPF->SetGlue(myGlue);
   pPF->Perform();
   //
   myEntryPoint = 1;
@@ -199,6 +201,7 @@ void BOPAlgo_MakerVolume::CollectFaces()
   //
   Standard_Integer i, aNbShapes;
   BOPCol_ListIteratorOfListOfShape aIt;
+  BOPCol_MapOfShape aMFence;
   //
   aNbShapes = myDS->NbSourceShapes();
   for (i = 0; i < aNbShapes; ++i) {
@@ -216,7 +219,9 @@ void BOPAlgo_MakerVolume::CollectFaces()
       aIt.Initialize(aLFIm);
       for (; aIt.More(); aIt.Next()) {
         const TopoDS_Shape& aFIm = aIt.Value();
-        AddFace(aFIm, myFaces);
+        if (aMFence.Add(aFIm)) {
+          AddFace(aFIm, myFaces);
+        }
       }
     }
     else {
@@ -265,6 +270,7 @@ void BOPAlgo_MakerVolume::BuildSolids(BOPCol_ListOfShape& theLSR)
   aBS.SetSolid(mySBox);
   aBS.SetShapes(myFaces);
   aBS.SetRunParallel(myRunParallel);
+  aBS.SetAvoidInternalShapes(myAvoidInternalShapes);
   aBS.Perform();
   if (aBS.ErrorStatus()) {
     myErrorStatus = 103;
@@ -334,6 +340,10 @@ void BOPAlgo_MakerVolume::BuildShape(const BOPCol_ListOfShape& theLSR)
 //=======================================================================
 void BOPAlgo_MakerVolume::FillInternalShapes(const BOPCol_ListOfShape& theLSR)
 {
+  if (myAvoidInternalShapes) {
+    return;
+  }
+  //
   UserBreak();
   //
   Standard_Integer aNbSI;

@@ -99,10 +99,10 @@ TopOpeBRepBuild_Builder::TopOpeBRepBuild_Builder(const TopOpeBRepDS_BuildTool& B
 
 //modified by NIZHNY-MZV  Sat May  6 10:04:49 2000
 //=======================================================================
-//function : Destroy
+//function : ~TopOpeBRepBuild_Builder
 //purpose  : virtual destructor
 //=======================================================================
-void TopOpeBRepBuild_Builder::Destroy()
+TopOpeBRepBuild_Builder::~TopOpeBRepBuild_Builder()
 {
 } 
 
@@ -179,11 +179,6 @@ void TopOpeBRepBuild_Builder::AddIntersectionEdges
   TopOpeBRepDS_CurveIterator FCurves = myDataStructure->FaceCurves(aFace);
   for (; FCurves.More(); FCurves.Next()) {
     Standard_Integer iC = FCurves.Current();
-#ifdef OCCT_DEBUG
-    Standard_Boolean tCU = TopOpeBRepBuild_GettraceCU();
-    Standard_Boolean NtCUV = !TopOpeBRepBuild_GettraceCUV();
-    if(tCU) {cout<<endl;myDataStructure->Curve(iC).Dump(cout,iC,NtCUV);}
-#endif
     const TopTools_ListOfShape& LnewE = NewEdges(iC);
     for (TopTools_ListIteratorOfListOfShape Iti(LnewE); Iti.More(); Iti.Next()) {
       anEdge = Iti.Value();
@@ -316,7 +311,7 @@ Standard_Boolean TopOpeBRepBuild_Builder::ToSplit(const TopoDS_Shape& S,const To
 #ifdef OCCT_DEBUG
   Standard_Integer iS; Standard_Boolean tSPS = GtraceSPS(S,iS);
   if (tSPS) { 
-    cout<<"tosplit "<<tosplit<<" : "<<"!issplit "<<(!issplit);
+    cout<<"tosplit "<<tosplit<<" : !issplit "<<(!issplit);
     cout<<" && (hasgeom || hassame) ("<<hasgeom<<" || "<<hassame<<")"<<endl;
   }
 #endif
@@ -507,12 +502,9 @@ Standard_Boolean TopOpeBRepBuild_Builder::Reverse(const TopAbs_State ToBuild1,co
 //=======================================================================
 TopAbs_Orientation TopOpeBRepBuild_Builder::Orient(const TopAbs_Orientation Ori,const Standard_Boolean Reverse)
 {
-  TopAbs_Orientation result=TopAbs_FORWARD;
-  switch (Reverse) {
-    case Standard_True  : result = TopAbs::Complement(Ori); break;
-    case Standard_False : result = Ori; break;
-  }
-  return result;
+  return !Reverse
+       ? Ori
+       : TopAbs::Complement(Ori);
 }
 
 //=======================================================================

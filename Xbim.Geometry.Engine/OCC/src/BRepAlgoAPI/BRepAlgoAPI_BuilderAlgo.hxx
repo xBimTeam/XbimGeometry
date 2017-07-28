@@ -22,6 +22,7 @@
 #include <Standard_Integer.hxx>
 #include <BOPAlgo_PPaveFiller.hxx>
 #include <BOPAlgo_PBuilder.hxx>
+#include <BOPAlgo_GlueEnum.hxx>
 #include <Standard_Real.hxx>
 #include <TopTools_ListOfShape.hxx>
 #include <BRepAlgoAPI_Algo.hxx>
@@ -51,7 +52,23 @@ Standard_EXPORT virtual ~BRepAlgoAPI_BuilderAlgo();
   
   //! Returns the additional tolerance
   Standard_EXPORT Standard_Real FuzzyValue() const;
+
+  //! Sets the flag that defines the mode of treatment.
+  //! In non-destructive mode the argument shapes are not modified. Instead
+  //! a copy of a sub-shape is created in the result if it is needed to be updated.
+  Standard_EXPORT void SetNonDestructive(const Standard_Boolean theFlag);
+
+  //! Returns the flag that defines the mode of treatment.
+  //! In non-destructive mode the argument shapes are not modified. Instead
+  //! a copy of a sub-shape is created in the result if it is needed to be updated.
+  Standard_EXPORT Standard_Boolean NonDestructive() const;
+
+  //! Sets the glue option for the algorithm
+  Standard_EXPORT void SetGlue(const BOPAlgo_GlueEnum theGlue);
   
+  //! Returns the glue option of the algorithm
+  Standard_EXPORT BOPAlgo_GlueEnum Glue() const;
+
   //! Sets the arguments
   Standard_EXPORT void SetArguments (const TopTools_ListOfShape& theLS);
   
@@ -101,7 +118,9 @@ protected:
   BOPAlgo_PPaveFiller myDSFiller;
   BOPAlgo_PBuilder myBuilder;
   Standard_Real myFuzzyValue;
+  Standard_Boolean myNonDestructive;
   TopTools_ListOfShape myArguments;
+  BOPAlgo_GlueEnum myGlue;
 
 
 private:

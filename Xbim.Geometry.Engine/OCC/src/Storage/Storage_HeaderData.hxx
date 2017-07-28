@@ -28,6 +28,7 @@
 #include <Storage_Error.hxx>
 #include <MMgt_TShared.hxx>
 class Storage_Schema;
+class Storage_BaseDriver;
 class TCollection_AsciiString;
 class TCollection_ExtendedString;
 
@@ -43,6 +44,8 @@ public:
 
   
   Standard_EXPORT Storage_HeaderData();
+
+  Standard_EXPORT Standard_Boolean Read (Storage_BaseDriver& theDriver);
   
   //! return the creation date
   Standard_EXPORT TCollection_AsciiString CreationDate() const;
@@ -101,15 +104,9 @@ public:
 friend class Storage_Schema;
 
 
-  DEFINE_STANDARD_RTTI(Storage_HeaderData,MMgt_TShared)
+  DEFINE_STANDARD_RTTIEXT(Storage_HeaderData,MMgt_TShared)
 
-protected:
-
-
-
-
-private:
-
+public:
   
   Standard_EXPORT void SetNumberOfObjects (const Standard_Integer anObjectNumber);
   
@@ -120,7 +117,9 @@ private:
   Standard_EXPORT void SetSchemaVersion (const TCollection_AsciiString& aVersion);
   
   Standard_EXPORT void SetSchemaName (const TCollection_AsciiString& aName);
-  
+
+private:
+ 
   Standard_EXPORT void SetErrorStatus (const Storage_Error anError);
   
   Standard_EXPORT void SetErrorStatusExtension (const TCollection_AsciiString& anErrorExt);

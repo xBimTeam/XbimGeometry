@@ -46,6 +46,8 @@
 #include <TopoDS_Solid.hxx>
 #include <TopoDS_Vertex.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(IntTools_Context,Standard_Transient)
+
 // 
 //=======================================================================
 //function : 
@@ -62,6 +64,7 @@ IntTools_Context::IntTools_Context()
   myHatcherMap(100, myAllocator),
   myProjSDataMap(100, myAllocator),
   myBndBoxDataMap(100, myAllocator),
+  mySurfAdaptorMap(100, myAllocator),
   myCreateFlag(0),
   myPOnSTolerance(1.e-12)
 {
@@ -82,6 +85,7 @@ IntTools_Context::IntTools_Context
   myHatcherMap(100, myAllocator),
   myProjSDataMap(100, myAllocator),
   myBndBoxDataMap(100, myAllocator),
+  mySurfAdaptorMap(100, myAllocator),
   myCreateFlag(1),
   myPOnSTolerance(1.e-12)
 {
@@ -169,6 +173,16 @@ IntTools_Context::~IntTools_Context()
     myAllocator->Free(anAdr); 
   }
   myBndBoxDataMap.Clear();
+  //
+  BRepAdaptor_Surface* pSurfAdaptor;
+  aIt.Initialize(mySurfAdaptorMap);
+  for (; aIt.More(); aIt.Next()) {
+    anAdr=aIt.Value();
+    pSurfAdaptor=(BRepAdaptor_Surface*)anAdr;
+    (*pSurfAdaptor).~BRepAdaptor_Surface();
+    myAllocator->Free(anAdr);
+  }
+  mySurfAdaptorMap.Clear();
 }
 //=======================================================================
 //function : BndBox
@@ -263,15 +277,8 @@ GeomAPI_ProjectPointOnSurf& IntTools_Context::ProjPS(const TopoDS_Face& aF)
  
   if (!myProjPSMap.IsBound(aF)) {
     Standard_Real Umin, Usup, Vmin, Vsup;
-    BRepAdaptor_Surface aBAS;
-    //
+    UVBounds(aF, Umin, Usup, Vmin, Vsup);
     const Handle(Geom_Surface)& aS=BRep_Tool::Surface(aF);
-    aBAS.Initialize (aF, Standard_True);
-    //
-    Umin=aBAS.FirstUParameter();
-    Usup=aBAS.LastUParameter ();
-    Vmin=aBAS.FirstVParameter();
-    Vsup=aBAS.LastVParameter ();
     //
     pProjPS=(GeomAPI_ProjectPointOnSurf*)myAllocator->Allocate(sizeof(GeomAPI_ProjectPointOnSurf));
     new (pProjPS) GeomAPI_ProjectPointOnSurf();
@@ -375,6 +382,32 @@ BRepClass3d_SolidClassifier& IntTools_Context::SolidClassifier
 }
 
 //=======================================================================
+//function : SurfaceAdaptor
+//purpose  : 
+//=======================================================================
+BRepAdaptor_Surface& IntTools_Context::SurfaceAdaptor
+  (const TopoDS_Face& theFace)
+{
+  Standard_Address anAdr;
+  BRepAdaptor_Surface* pBAS;
+ 
+  if (!mySurfAdaptorMap.IsBound(theFace)) {
+    //
+    pBAS=(BRepAdaptor_Surface*)myAllocator->Allocate(sizeof(BRepAdaptor_Surface));
+    new (pBAS) BRepAdaptor_Surface(theFace, Standard_True);
+    //
+    anAdr=(Standard_Address)pBAS;
+    mySurfAdaptorMap.Bind(theFace, anAdr);
+  }
+  
+  else {
+    anAdr=mySurfAdaptorMap.Find(theFace);
+    pBAS =(BRepAdaptor_Surface*)anAdr;
+  }
+  return *pBAS;
+}
+
+//=======================================================================
 //function : Hatcher
 //purpose  : 
 //=======================================================================
@@ -400,10 +433,11 @@ Geom2dHatch_Hatcher& IntTools_Context::Hatcher(const TopoDS_Face& aF)
     aEpsT=Precision::PConfusion();
     //
     Geom2dHatch_Intersector aIntr(aTolArcIntr, aTolTangfIntr);
-    pHatcher=new Geom2dHatch_Hatcher(aIntr,
-                                     aTolHatch2D, aTolHatch3D,
-                                     Standard_True, Standard_False);
-    
+    pHatcher=(Geom2dHatch_Hatcher*)
+      myAllocator->Allocate(sizeof(Geom2dHatch_Hatcher));
+    new (pHatcher) Geom2dHatch_Hatcher(aIntr,
+                                       aTolHatch2D, aTolHatch3D,
+                                       Standard_True, Standard_False);
     //
     aFF=aF;
     aFF.Orientation(TopAbs_FORWARD);
@@ -450,7 +484,9 @@ IntTools_SurfaceRangeLocalizeData& IntTools_Context::SurfaceData
   IntTools_SurfaceRangeLocalizeData* pSData;
   //
   if (!myProjSDataMap.IsBound(aF)) {
-    pSData=new IntTools_SurfaceRangeLocalizeData
+    pSData=(IntTools_SurfaceRangeLocalizeData*)
+      myAllocator->Allocate(sizeof(IntTools_SurfaceRangeLocalizeData));
+    new (pSData) IntTools_SurfaceRangeLocalizeData
       (3, 
        3, 
        10. * Precision::PConfusion(), 
@@ -476,30 +512,56 @@ Standard_Integer IntTools_Context::ComputePE
   (const gp_Pnt& aP1,
    const Standard_Real aTolP1,
    const TopoDS_Edge& aE2,
-   Standard_Real& aT)
+   Standard_Real& aT,
+   Standard_Real& aDist)
 {
   if (!BRep_Tool::IsGeometric(aE2)) { 
     return -2;
   }
-  Standard_Real aDist, aTolE2, aTolSum;
+  Standard_Real aTolE2, aTolSum;
   Standard_Integer aNbProj;
   //
   GeomAPI_ProjectPointOnCurve& aProjector=ProjPC(aE2);
   aProjector.Perform(aP1);
 
   aNbProj=aProjector.NbPoints();
-  if (!aNbProj) {
-    return -3;
+  if (aNbProj)
+  {
+    // point falls on the curve
+    aDist = aProjector.LowerDistance();
+    //
+    aTolE2 = BRep_Tool::Tolerance(aE2);
+    aTolSum = aTolP1 + aTolE2 + Precision::Confusion();
+    //
+    aT = aProjector.LowerDistanceParameter();
+    if (aDist > aTolSum) {
+      return -4;
+    }
   }
-  //
-  aDist=aProjector.LowerDistance();
-  //
-  aTolE2=BRep_Tool::Tolerance(aE2);
-  aTolSum=aTolP1+aTolE2;
-  //
-  aT=aProjector.LowerDistanceParameter();
-  if (aDist > aTolSum) {
-    return -4;
+  else
+  {
+    // point falls out of the curve, check distance to vertices
+    TopoDS_Edge aEFwd = TopoDS::Edge(aE2.Oriented(TopAbs_FORWARD));
+    TopoDS_Iterator itV(aEFwd);
+    aDist = RealLast();
+    for (; itV.More(); itV.Next())
+    {
+      const TopoDS_Vertex& aV = TopoDS::Vertex(itV.Value());
+      if (aV.Orientation() == TopAbs_FORWARD || aV.Orientation() == TopAbs_REVERSED)
+      {
+        gp_Pnt aPV = BRep_Tool::Pnt(aV);
+        aTolSum = aTolP1 + BRep_Tool::Tolerance(aV) + Precision::Confusion();
+        Standard_Real aDist1 = aP1.SquareDistance(aPV);
+        if (aDist1 < aDist && aDist1 < Square(aTolSum))
+        {
+          aDist = aDist1;
+          aT = BRep_Tool::Parameter(aV, aEFwd);
+        }
+      }
+    }
+    if (Precision::IsInfinite(aDist)) {
+      return -3;
+    }
   }
   return 0;
 }
@@ -508,23 +570,25 @@ Standard_Integer IntTools_Context::ComputePE
 //purpose  : 
 //=======================================================================
 Standard_Integer IntTools_Context::ComputeVE
-  (const TopoDS_Vertex& aV1, 
-   const TopoDS_Edge&   aE2,
-   Standard_Real& aT)
+  (const TopoDS_Vertex& theV, 
+   const TopoDS_Edge&   theE,
+   Standard_Real& theT,
+   Standard_Real& theTol,
+   const Standard_Real theFuzz)
 {
-  if (BRep_Tool::Degenerated(aE2)) {
+  if (BRep_Tool::Degenerated(theE)) {
     return -1;
   }
-  if (!BRep_Tool::IsGeometric(aE2)) { 
+  if (!BRep_Tool::IsGeometric(theE)) { 
     return -2;
   }
-  Standard_Real aDist, aTolV1, aTolE2, aTolSum;
+  Standard_Real aDist, aTolV, aTolE, aTolSum;
   Standard_Integer aNbProj;
   gp_Pnt aP;
   //
-  aP=BRep_Tool::Pnt(aV1);
+  aP=BRep_Tool::Pnt(theV);
   //
-  GeomAPI_ProjectPointOnCurve& aProjector=ProjPC(aE2);
+  GeomAPI_ProjectPointOnCurve& aProjector=ProjPC(theE);
   aProjector.Perform(aP);
 
   aNbProj=aProjector.NbPoints();
@@ -533,37 +597,37 @@ Standard_Integer IntTools_Context::ComputeVE
   }
   //
   aDist=aProjector.LowerDistance();
-
-  // tolerance of check for coincidence is sum of tolerances of edge and vertex 
-  // extended by additional Precision::Confusion() to allow for interference where
-  // it is very close but not fit to tolerance (see #24108)
-  aTolV1=BRep_Tool::Tolerance(aV1);
-  aTolE2=BRep_Tool::Tolerance(aE2);
-  aTolSum = aTolV1 + aTolE2 + Precision::Confusion();
   //
-  aT=aProjector.LowerDistanceParameter();
+  aTolV=BRep_Tool::Tolerance(theV);
+  aTolE=BRep_Tool::Tolerance(theE);
+  aTolSum = aTolV + aTolE + Max(theFuzz, Precision::Confusion());
+  //
+  theTol = aDist + aTolE;
+  theT = aProjector.LowerDistanceParameter();
   if (aDist > aTolSum) {
     return -4;
   }
   return 0;
 }
 //=======================================================================
-//function : ComputeVS
+//function : ComputeVF
 //purpose  : 
 //=======================================================================
 Standard_Integer IntTools_Context::ComputeVF
-  (const TopoDS_Vertex& aV1, 
-   const TopoDS_Face&   aF2,
-   Standard_Real& U,
-   Standard_Real& V)
+  (const TopoDS_Vertex& theVertex, 
+   const TopoDS_Face&   theFace,
+   Standard_Real& theU,
+   Standard_Real& theV,
+   Standard_Real& theTol,
+   const Standard_Real theFuzz)
 {
-  Standard_Real aTolV1, aTolF2, aTolSum, aDist;
+  Standard_Real aTolV, aTolF, aTolSum, aDist;
   gp_Pnt aP;
 
-  aP=BRep_Tool::Pnt(aV1);
+  aP = BRep_Tool::Pnt(theVertex);
   //
   // 1. Check if the point is projectable on the surface
-  GeomAPI_ProjectPointOnSurf& aProjector=ProjPS(aF2);
+  GeomAPI_ProjectPointOnSurf& aProjector=ProjPS(theFace);
   aProjector.Perform(aP);
   //
   if (!aProjector.IsDone()) { // the point is not  projectable on the surface
@@ -572,19 +636,22 @@ Standard_Integer IntTools_Context::ComputeVF
   //
   // 2. Check the distance between the projection point and 
   //    the original point
-  aDist=aProjector.LowerDistance();
-
-  aTolV1=BRep_Tool::Tolerance(aV1);
-  aTolF2=BRep_Tool::Tolerance(aF2);
-  aTolSum=aTolV1+aTolF2;
+  aDist = aProjector.LowerDistance();
+  //
+  aTolV = BRep_Tool::Tolerance(theVertex);
+  aTolF = BRep_Tool::Tolerance(theFace);
+  //
+  aTolSum = aTolV + aTolF + Max(theFuzz, Precision::Confusion());
+  theTol = aDist + aTolF;
+  aProjector.LowerDistanceParameters(theU, theV);
+  //
   if (aDist > aTolSum) {
     // the distance is too large
     return -2;
   }
-  aProjector.LowerDistanceParameters(U, V);
   //
-  gp_Pnt2d aP2d(U, V);
-  Standard_Boolean pri=IsPointInFace (aF2, aP2d);
+  gp_Pnt2d aP2d(theU, theV);
+  Standard_Boolean pri = IsPointInFace (theFace, aP2d);
   if (!pri) {//  the point lays on the surface but out of the face 
     return -3;
   }
@@ -830,14 +897,19 @@ Standard_Boolean IntTools_Context::IsVertexOnLine
   aFirst=aC3D->FirstParameter();
   aLast =aC3D->LastParameter();
   //
-  //Checking extermities first
+  // Checking extermities first
+  // It is necessary to chose the closest bound to the point
+  Standard_Boolean bFirstValid = Standard_False;
+  Standard_Real aFirstDist = Precision::Infinite();
+  //
   if (!Precision::IsInfinite(aFirst)) {
     gp_Pnt aPCFirst=aC3D->Value(aFirst);
-    aDist=aPv.Distance(aPCFirst);
-    if (aDist < aTolSum) {
+    aFirstDist = aPv.Distance(aPCFirst);
+    if (aFirstDist < aTolSum) {
+      bFirstValid = Standard_True;
       aT=aFirst;
       //
-      if(aDist > aTolV) {
+      if (aFirstDist > aTolV) {
         Extrema_LocateExtPC anExt(aPv, aGAC, aFirst, 1.e-10);
         
         if(anExt.IsDone()) {
@@ -849,16 +921,46 @@ Standard_Boolean IntTools_Context::IsVertexOnLine
              (aPCFirst.Distance(aPOncurve.Value()) < Precision::Confusion()))
             aT = aFirst;
         }
+        else
+        {
+          // Local search may fail. Try to use more precise algo.
+          Extrema_ExtPC anExt2(aPv, aGAC, 1.e-10);
+          Standard_Real aMinDist = RealLast();
+          Standard_Integer aMinIdx = -1;
+          if (anExt2.IsDone()) {
+            for (Standard_Integer anIdx = 1; anIdx <= anExt2.NbExt(); anIdx++)
+            {
+              if ( anExt2.IsMin(anIdx) &&
+                   anExt2.SquareDistance(anIdx) < aMinDist )
+              {
+                aMinDist = anExt2.SquareDistance(anIdx);
+                aMinIdx = anIdx;
+              }
+            }
+          }
+          if (aMinIdx != -1)
+          {
+            const Extrema_POnCurv& aPOncurve = anExt2.Point(aMinIdx);
+            aT = aPOncurve.Parameter();
+
+            if((aT > (aLast + aFirst) * 0.5) ||
+              (aPv.Distance(aPOncurve.Value()) > aTolSum) ||
+              (aPCFirst.Distance(aPOncurve.Value()) < Precision::Confusion()))
+              aT = aFirst;
+          }
+        }
+
       }
-      //
-      return Standard_True;
     }
   }
   //
-  //if (!Precision::IsInfinite(aFirst)) {
   if (!Precision::IsInfinite(aLast)) {
     gp_Pnt aPCLast=aC3D->Value(aLast);
     aDist=aPv.Distance(aPCLast);
+    if (bFirstValid && (aFirstDist < aDist)) {
+      return Standard_True;
+    }
+    //
     if (aDist < aTolSum) {
       aT=aLast;
       //
@@ -874,10 +976,41 @@ Standard_Boolean IntTools_Context::IsVertexOnLine
              (aPCLast.Distance(aPOncurve.Value()) < Precision::Confusion()))
             aT = aLast;
         }
+        else
+        {
+          // Local search may fail. Try to use more precise algo.
+          Extrema_ExtPC anExt2(aPv, aGAC, 1.e-10);
+          Standard_Real aMinDist = RealLast();
+          Standard_Integer aMinIdx = -1;
+          if (anExt2.IsDone()) {
+            for (Standard_Integer anIdx = 1; anIdx <= anExt2.NbExt(); anIdx++)
+            {
+              if ( anExt2.IsMin(anIdx) &&
+                   anExt2.SquareDistance(anIdx) < aMinDist )
+              {
+                aMinDist = anExt2.SquareDistance(anIdx);
+                aMinIdx = anIdx;
+              }
+            }
+          }
+          if (aMinIdx != -1)
+          {
+            const Extrema_POnCurv& aPOncurve = anExt2.Point(aMinIdx);
+            aT = aPOncurve.Parameter();
+
+            if((aT < (aLast + aFirst) * 0.5) ||
+              (aPv.Distance(aPOncurve.Value()) > aTolSum) ||
+              (aPCLast.Distance(aPOncurve.Value()) < Precision::Confusion()))
+              aT = aLast;
+          }
+        }
       }
       //
       return Standard_True;
     }
+  }
+  else if (bFirstValid) {
+    return Standard_True;
   }
   //
   GeomAPI_ProjectPointOnCurve& aProjector=ProjPT(aC3D);
@@ -964,4 +1097,21 @@ void IntTools_Context::clearCachedPOnSProjectors()
     myAllocator->Free(anAdr); 
   }
   myProjPSMap.Clear();
+}
+
+//=======================================================================
+//function : UVBounds
+//purpose  : 
+//=======================================================================
+void IntTools_Context::UVBounds(const TopoDS_Face& theFace,
+                                Standard_Real& UMin,
+                                Standard_Real& UMax,
+                                Standard_Real& VMin,
+                                Standard_Real& VMax)
+{
+  const BRepAdaptor_Surface& aBAS = SurfaceAdaptor(theFace);
+  UMin = aBAS.FirstUParameter();
+  UMax = aBAS.LastUParameter ();
+  VMin = aBAS.FirstVParameter();
+  VMax = aBAS.LastVParameter ();
 }

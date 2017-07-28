@@ -407,16 +407,16 @@ Standard_Boolean FairCurve_MinimalVariation::Compute(const gp_Vec2d& DeltaP1,
    } 
 
    NewBS -> InsertKnots(NKnots->Array1(), NMults->Array1(), 1.e-10);
-   Handle(TColgp_HArray1OfPnt2d) NPoles = 
+   Handle(TColgp_HArray1OfPnt2d) NewNPoles =
       new  TColgp_HArray1OfPnt2d(1, NewBS->NbPoles());
-   NewBS -> Poles( NPoles->ChangeArray1() );
+   NewBS -> Poles(NewNPoles->ChangeArray1() );
    NewBS -> Multiplicities( NMults->ChangeArray1() );
    NewBS -> Knots( NKnots->ChangeArray1() );
    Handle(TColStd_HArray1OfReal) FKnots  =
       new TColStd_HArray1OfReal (1, NewBS->NbPoles() + Degree+1);
    NewBS -> KnotSequence( FKnots->ChangeArray1()); 
 
-   Poles = NPoles;
+   Poles = NewNPoles;
    Mults = NMults;
    Knots = NKnots;
    Flatknots = FKnots;		      
@@ -434,7 +434,7 @@ void FairCurve_MinimalVariation::Dump(Standard_OStream& o) const
 //======================================================================================
 {
 
-o << "  MVCurve      |"; o.width(7); o<< "Old " << " | " << "  New" << endl;
+o << "  MVCurve      |"; o.width(7); o<< "Old  |   New" << endl;
 o << "  P1    X      |"; o.width(7); o<<  OldP1.X() << " | " << NewP1.X() << endl;
 o << "        Y      |"; o.width(7); o<<  OldP1.Y() << " | " << NewP1.Y() << endl;
 o << "  P2    X      |"; o.width(7); o<<  OldP2.X() << " | " << NewP2.X() << endl;

@@ -39,22 +39,30 @@ class BRepAdaptor_HCompCurve : public Adaptor3d_HCurve
 public:
 
   
+  //! Creates an empty GenHCurve.
   Standard_EXPORT BRepAdaptor_HCompCurve();
   
+  //! Creates a GenHCurve from a Curve
   Standard_EXPORT BRepAdaptor_HCompCurve(const BRepAdaptor_CompCurve& C);
   
+  //! Sets the field of the GenHCurve.
   Standard_EXPORT void Set (const BRepAdaptor_CompCurve& C);
   
-  Standard_EXPORT const Adaptor3d_Curve& Curve() const;
+  //! Returns the curve used to create the GenHCurve.
+  //! This is redefined from HCurve, cannot be inline.
+  Standard_EXPORT const Adaptor3d_Curve& Curve() const Standard_OVERRIDE;
   
-  Standard_EXPORT Adaptor3d_Curve& GetCurve();
+  //! Returns the curve used to create the GenHCurve.
+  //! This is redefined from HCurve, cannot be inline.
+  Standard_EXPORT Adaptor3d_Curve& GetCurve() Standard_OVERRIDE;
   
+  //! Returns the curve used to create the GenHCurve.
     BRepAdaptor_CompCurve& ChangeCurve();
 
 
 
 
-  DEFINE_STANDARD_RTTI(BRepAdaptor_HCompCurve,Adaptor3d_HCurve)
+  DEFINE_STANDARD_RTTI_INLINE(BRepAdaptor_HCompCurve,Adaptor3d_HCurve)
 
 protected:
 

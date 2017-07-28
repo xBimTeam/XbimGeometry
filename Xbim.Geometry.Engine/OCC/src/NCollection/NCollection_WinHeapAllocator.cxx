@@ -16,6 +16,8 @@
 #include <NCollection_WinHeapAllocator.hxx>
 #include <Standard_OutOfMemory.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(NCollection_WinHeapAllocator,NCollection_BaseAllocator)
+
 #if(defined(_WIN32) || defined(__WIN32__))
   #include <windows.h>
 #endif
@@ -32,11 +34,13 @@ NCollection_WinHeapAllocator::NCollection_WinHeapAllocator
 #endif
   myToZeroMemory (Standard_False)
 {
-#if(defined(_WIN32) || defined(__WIN32__))
+#if defined(_WIN32) && (_WIN32_WINNT >= 0x0501)
   // activate LHF to improve small size allocations
   ULONG aHeapInfo = 2;
   HeapSetInformation (myHeapH, HeapCompatibilityInformation,
                       &aHeapInfo, sizeof(aHeapInfo));
+#else
+  (void )theInitSizeBytes;
 #endif
 }
 
@@ -69,7 +73,7 @@ void* NCollection_WinHeapAllocator::Allocate (const Standard_Size theSize)
   if (aResult == NULL)
   {
     char aBuf[128];
-    Sprintf (aBuf, "Failed to allocate " PRIuPTR " bytes in local dynamic heap", theSize);
+    Sprintf (aBuf, "Failed to allocate %" PRIuPTR " bytes in local dynamic heap", theSize);
     Standard_OutOfMemory::Raise (aBuf);
   }
   return aResult;

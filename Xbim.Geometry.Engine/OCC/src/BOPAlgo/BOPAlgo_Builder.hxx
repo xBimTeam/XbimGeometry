@@ -25,6 +25,7 @@
 #include <BOPCol_ListOfShape.hxx>
 #include <BOPCol_MapOfShape.hxx>
 #include <BOPAlgo_PPaveFiller.hxx>
+#include <BOPAlgo_GlueEnum.hxx>
 #include <BOPDS_PDS.hxx>
 #include <Standard_Integer.hxx>
 #include <BOPCol_DataMapOfShapeListOfShape.hxx>
@@ -64,7 +65,7 @@ Standard_EXPORT virtual ~BOPAlgo_Builder();
   Standard_EXPORT virtual void SetArguments (const BOPCol_ListOfShape& theLS);
   
   Standard_EXPORT const BOPCol_ListOfShape& Arguments() const;
-  
+
   Standard_EXPORT virtual void Perform() Standard_OVERRIDE;
   
   Standard_EXPORT virtual void PerformWithFiller (const BOPAlgo_PaveFiller& theFiller);
@@ -93,18 +94,28 @@ Standard_EXPORT virtual ~BOPAlgo_Builder();
   //! Returns mySplits.
   Standard_EXPORT const BOPCol_DataMapOfShapeListOfShape& Splits() const;
   
-  //! Sets the additional tolerance
-  Standard_EXPORT void SetFuzzyValue (const Standard_Real theFuzz);
   
-  //! Returns the additional tolerance
-  Standard_EXPORT Standard_Real FuzzyValue() const;
+  //! Sets the flag that defines the mode of treatment.
+  //! In non-destructive mode the argument shapes are not modified. Instead
+  //! a copy of a sub-shape is created in the result if it is needed to be updated.
+  //! This flag is taken into account if internal PaveFiller is used only.
+  //! In the case of calling PerformWithFiller the corresponding flag of that PaveFiller
+  //! is in force.
+  Standard_EXPORT void SetNonDestructive(const Standard_Boolean theFlag);
 
+  //! Returns the flag that defines the mode of treatment.
+  //! In non-destructive mode the argument shapes are not modified. Instead
+  //! a copy of a sub-shape is created in the result if it is needed to be updated.
+  Standard_EXPORT Standard_Boolean NonDestructive() const;
 
-
+  //! Sets the glue option for the algorithm
+  Standard_EXPORT void SetGlue(const BOPAlgo_GlueEnum theGlue);
+  
+  //! Returns the glue option of the algorithm
+  Standard_EXPORT BOPAlgo_GlueEnum Glue() const;
 
 protected:
 
-  
   //! Prepare information for history support
   Standard_EXPORT virtual void PrepareHistory() Standard_OVERRIDE;
   
@@ -161,21 +172,12 @@ protected:
   BOPCol_DataMapOfShapeShape myShapesSD;
   BOPCol_DataMapOfShapeListOfShape mySplits;
   BOPCol_DataMapOfShapeShape myOrigins;
-  Standard_Real myFuzzyValue;
-
+  Standard_Boolean myNonDestructive;
+  BOPAlgo_GlueEnum myGlue;
 
 private:
 
-
-
-
-
 };
-
-
-
-
-
 
 
 #endif // _BOPAlgo_Builder_HeaderFile

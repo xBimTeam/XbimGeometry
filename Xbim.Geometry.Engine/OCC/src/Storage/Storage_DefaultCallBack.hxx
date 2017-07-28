@@ -38,18 +38,18 @@ public:
   
   Standard_EXPORT Storage_DefaultCallBack();
   
-  Standard_EXPORT Handle(Standard_Persistent) New() const;
+  Standard_EXPORT Handle(Standard_Persistent) New() const Standard_OVERRIDE;
   
-  Standard_EXPORT void Add (const Handle(Standard_Persistent)& aPers, const Handle(Storage_Schema)& aSchema) const;
+  Standard_EXPORT void Add (const Handle(Standard_Persistent)& aPers, const Handle(Storage_Schema)& aSchema) const Standard_OVERRIDE;
   
-  Standard_EXPORT void Write (const Handle(Standard_Persistent)& aPers, Storage_BaseDriver& aDriver, const Handle(Storage_Schema)& aSchema) const;
+  Standard_EXPORT void Write (const Handle(Standard_Persistent)& aPers, Storage_BaseDriver& aDriver, const Handle(Storage_Schema)& aSchema) const Standard_OVERRIDE;
   
-  Standard_EXPORT void Read (const Handle(Standard_Persistent)& aPers, Storage_BaseDriver& aDriver, const Handle(Storage_Schema)& aSchema) const;
+  Standard_EXPORT void Read (const Handle(Standard_Persistent)& aPers, Storage_BaseDriver& aDriver, const Handle(Storage_Schema)& aSchema) const Standard_OVERRIDE;
 
 
 
 
-  DEFINE_STANDARD_RTTI(Storage_DefaultCallBack,Storage_CallBack)
+  DEFINE_STANDARD_RTTIEXT(Storage_DefaultCallBack,Storage_CallBack)
 
 protected:
 

@@ -70,22 +70,6 @@ void BOPAlgo_CheckerSI::SetLevelOfCheck(const Standard_Integer theLevel)
   }
 }
 //=======================================================================
-//function : SetNonDestructive
-//purpose  : 
-//=======================================================================
-void BOPAlgo_CheckerSI::SetNonDestructive(const Standard_Boolean theFlag)
-{
-  myNonDestructive=theFlag;
-}
-//=======================================================================
-//function : NonDestructive
-//purpose  : 
-//=======================================================================
-Standard_Boolean BOPAlgo_CheckerSI::NonDestructive() const 
-{
-  return myNonDestructive;
-}
-//=======================================================================
 //function : Init
 //purpose  : 
 //=======================================================================
@@ -98,8 +82,7 @@ void BOPAlgo_CheckerSI::Init()
   // 1. myDS
   myDS=new BOPDS_DS(myAllocator);
   myDS->SetArguments(myArguments);
-  myDS->SetFuzzyValue(myFuzzyValue);
-  myDS->Init();
+  myDS->Init(myFuzzyValue);
   //
   // 2.myIterator 
   BOPDS_PIteratorSI theIterSI=new BOPDS_IteratorSI(myAllocator);
@@ -272,7 +255,7 @@ void BOPAlgo_CheckerSI::PostTreat()
       const TopoDS_Face& aF1=*((TopoDS_Face*)&myDS->Shape(n1));
       const TopoDS_Face& aF2=*((TopoDS_Face*)&myDS->Shape(n2));
       bFlag=BOPTools_AlgoTools::AreFacesSameDomain
-        (aF1, aF2, myContext);
+        (aF1, aF2, myContext, myFuzzyValue);
       if (bFlag) {
         ++iFound;
       }

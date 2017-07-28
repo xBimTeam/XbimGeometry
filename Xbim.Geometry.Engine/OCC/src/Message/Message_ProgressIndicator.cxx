@@ -17,6 +17,8 @@
 #include <Standard_Type.hxx>
 #include <TCollection_HAsciiString.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(Message_ProgressIndicator,MMgt_TShared)
+
 //=======================================================================
 //function : Message_ProgressIndicator
 //purpose  : 
@@ -113,7 +115,7 @@ Standard_Boolean Message_ProgressIndicator::NewScope (const Standard_Real span,
   scale.SetName ( name );
   scale.SetSpan ( myPosition, myScopes(1).LocalToBase ( GetValue() + span ) );
   myScopes.Prepend ( scale );
-//  Show(Standard_False); // to update textual representation, if any
+  Show(Standard_False); // to update textual representation, if any
   return myPosition < 1.;
 }
 

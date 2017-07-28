@@ -12,7 +12,7 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef WNT
+#ifndef _WIN32
 
 
 #include <OSD_Error.hxx>
@@ -449,6 +449,7 @@ void OSD_Error::Perror() {
 #include <TCollection_ExtendedString.hxx>
 
 #include <windows.h>
+#include <Strsafe.h>
 
 typedef struct _error_table {
 
@@ -456,9 +457,6 @@ typedef struct _error_table {
                 Standard_Integer csf_error;
 
                } ERROR_TABLE;
-
-static int      fPrefix     = 1;
-static ostream* errorStream = &cerr;
 
 static ERROR_TABLE commErrorTable [] = {
 
@@ -573,92 +571,62 @@ OSD_Error :: OSD_Error () :
 
 void OSD_Error :: Perror () {
 
-  if (errorStream == NULL)
-    return;
+ wchar_t buff[32];
 
- Standard_Character buff[ 32 ];
- Standard_CString   ptr;
-
- if ( fPrefix ) {
- 
-  lstrcpy (  buff, "Error ( "  );
+  StringCchCopyW(buff, _countof(buff), L"Error ( ");
 
   switch ( myCode ) {
   
    case OSD_WDirectoryIterator:
-
-    ptr = "OSD_DirectoryIterator";
-
+     StringCchCatW(buff, _countof(buff), L"OSD_DirectoryIterator");
    break;
 
    case OSD_WDirectory:
-
-    ptr = "OSD_Directory";
-
+    StringCchCatW(buff, _countof(buff), L"OSD_Directory");
    break;
 
    case OSD_WFileIterator:
-
-    ptr = "OSD_FileIterator";
-
+    StringCchCatW(buff, _countof(buff), L"OSD_FileIterator");
    break;
 
    case OSD_WFile:
-  
-    ptr = "OSD_File";
-
+    StringCchCatW(buff, _countof(buff), L"OSD_File");
    break;
 
    case OSD_WFileNode:
-
-    ptr = "OSD_FileNode";
-
+    StringCchCatW(buff, _countof(buff), L"OSD_FileNode");
    break;
 
    case OSD_WHost:
-
-    ptr = "OSD_Host";
-
+    StringCchCatW(buff, _countof(buff), L"OSD_Host");
    break;
 
    case OSD_WProcess:
-
-    ptr = "OSD_Environment";
-
+    StringCchCatW(buff, _countof(buff), L"OSD_Environment");
    break;
 
    case OSD_WEnvironmentIterator:
-
-    ptr = "OSD_EnvironmentIterator";
-
+     StringCchCatW(buff, _countof(buff), L"OSD_EnvironmentIterator");
    break;
 
    case OSD_WEnvironment:
-
-    ptr = "OSD_Environment";
-
+     StringCchCatW(buff, _countof(buff), L"OSD_Environment");
    break;
 
    case OSD_WDisk:
-
-    ptr = "OSD_Disk";
-
+     StringCchCatW(buff, _countof(buff), L"OSD_Disk");
    break;
 
    default:
-
-    ptr = "Unknown";
+     StringCchCatW(buff, _countof(buff), L"Unknown");
 
   }  // end switch
 
-  lstrcat ( buff, ptr );
-  lstrcat (  buff, " )"  );
-  ( *errorStream ) << buff;
- 
- }  // end if ( fPrefix . . . )
+  StringCchCatW(buff, _countof(buff), L" )");
 
- TCollection_ExtendedString aMessageW(myMessage);
- ( *errorStream ) << L": " << (const wchar_t*)aMessageW.ToExtString () << endl << flush;
+  std::wcerr << buff;
+ 
+ std::cerr << myMessage.ToCString() << std::endl << std::flush;
 
 }  // end OSD_Error :: Perror
 
@@ -741,41 +709,10 @@ Standard_Boolean OSD_Error :: Failed () const {
 
 }  // end OSD_Error :: Failed
 
-void OSD_Error :: Reset () {
-
- myErrno = ERROR_SUCCESS; 
- if (errorStream != NULL)
- {
-   ( *errorStream ).clear ();
-   ( *errorStream ).seekp ( 0 );
-   ( *errorStream ).clear ();
- }
-
+void OSD_Error :: Reset ()
+{
+  myErrno = ERROR_SUCCESS;
 }  // end OSD_Error :: Reset
-
-void SetErrorStream ( ostream* errStream ) {
-
- errorStream = errStream;
-
-}  // end SetErrorStream
-
-void EnablePrefix ( int fEnable ) {
-
- fPrefix = fEnable;
-
-}  // end EnablePrefix
-
-int ErrorPrefix ( void ) {
-
- return fPrefix;
-
-}  // end ErrorPrefix
-
-ostream* ErrorStream ( void ) {
-
- return errorStream;
-
-}  // end ErrorStream
 
 static Standard_Integer _get_comm_error ( DWORD dwCode ) {
 

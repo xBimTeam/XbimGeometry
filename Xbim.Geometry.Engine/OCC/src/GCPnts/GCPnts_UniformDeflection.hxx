@@ -17,15 +17,10 @@
 #ifndef _GCPnts_UniformDeflection_HeaderFile
 #define _GCPnts_UniformDeflection_HeaderFile
 
-#include <Standard.hxx>
-#include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
-
-#include <Standard_Boolean.hxx>
-#include <Standard_Real.hxx>
+#include <StdFail_NotDone.hxx>
 #include <TColStd_SequenceOfReal.hxx>
 #include <TColgp_SequenceOfPnt.hxx>
-#include <Standard_Integer.hxx>
+
 class Standard_DomainError;
 class Standard_ConstructionError;
 class Standard_OutOfRange;
@@ -33,7 +28,6 @@ class StdFail_NotDone;
 class Adaptor3d_Curve;
 class Adaptor2d_Curve2d;
 class gp_Pnt;
-
 
 //! Provides an algorithm to compute a distribution of
 //! points on a 'C2' continuous curve. The algorithm
@@ -58,35 +52,35 @@ public:
   //! the Curve <C>.
   //! if <WithControl> is True,the algorithm controls the estimate
   //! deflection
-  Standard_EXPORT GCPnts_UniformDeflection(Adaptor3d_Curve& C, const Standard_Real Deflection, const Standard_Boolean WithControl = Standard_True);
+  Standard_EXPORT GCPnts_UniformDeflection(const Adaptor3d_Curve& C, const Standard_Real Deflection, const Standard_Boolean WithControl = Standard_True);
   
   //! Computes a uniform Deflection distribution of points on
   //! the Curve <C>.
   //! if <WithControl> is True,the algorithm controls the estimate
   //! deflection
-  Standard_EXPORT GCPnts_UniformDeflection(Adaptor2d_Curve2d& C, const Standard_Real Deflection, const Standard_Boolean WithControl = Standard_True);
+  Standard_EXPORT GCPnts_UniformDeflection(const Adaptor2d_Curve2d& C, const Standard_Real Deflection, const Standard_Boolean WithControl = Standard_True);
   
   //! Computes a Uniform Deflection distribution of points
   //! on a part of the Curve <C>.
   //! if <WithControl> is True,the algorithm controls the estimate
   //! deflection
-  Standard_EXPORT GCPnts_UniformDeflection(Adaptor3d_Curve& C, const Standard_Real Deflection, const Standard_Real U1, const Standard_Real U2, const Standard_Boolean WithControl = Standard_True);
+  Standard_EXPORT GCPnts_UniformDeflection(const Adaptor3d_Curve& C, const Standard_Real Deflection, const Standard_Real U1, const Standard_Real U2, const Standard_Boolean WithControl = Standard_True);
   
   //! Computes a Uniform Deflection distribution of points
   //! on a part of the Curve <C>.
   //! if <WithControl> is True,the algorithm controls the estimate
   //! deflection
-  Standard_EXPORT GCPnts_UniformDeflection(Adaptor2d_Curve2d& C, const Standard_Real Deflection, const Standard_Real U1, const Standard_Real U2, const Standard_Boolean WithControl = Standard_True);
+  Standard_EXPORT GCPnts_UniformDeflection(const Adaptor2d_Curve2d& C, const Standard_Real Deflection, const Standard_Real U1, const Standard_Real U2, const Standard_Boolean WithControl = Standard_True);
   
   //! Initialize the algoritms with <C>, <Deflection>
-  Standard_EXPORT void Initialize (Adaptor3d_Curve& C, const Standard_Real Deflection, const Standard_Boolean WithControl = Standard_True);
+  Standard_EXPORT void Initialize (const Adaptor3d_Curve& C, const Standard_Real Deflection, const Standard_Boolean WithControl = Standard_True);
   
   //! Initialize the algoritms with <C>, <Deflection>
-  Standard_EXPORT void Initialize (Adaptor2d_Curve2d& C, const Standard_Real Deflection, const Standard_Boolean WithControl = Standard_True);
+  Standard_EXPORT void Initialize (const Adaptor2d_Curve2d& C, const Standard_Real Deflection, const Standard_Boolean WithControl = Standard_True);
   
   //! Initialize the algoritms with <C>, <Deflection>,
   //! <U1>,<U2>
-  Standard_EXPORT void Initialize (Adaptor3d_Curve& C, const Standard_Real Deflection, const Standard_Real U1, const Standard_Real U2, const Standard_Boolean WithControl = Standard_True);
+  Standard_EXPORT void Initialize (const Adaptor3d_Curve& C, const Standard_Real Deflection, const Standard_Real U1, const Standard_Real U2, const Standard_Boolean WithControl = Standard_True);
   
   //! Initialize the algoritms with <C>, <Deflection>,
   //! <U1>,<U2>
@@ -131,20 +125,27 @@ public:
   //! Adaptor2d_Curve2d curve) or a 3D curve from
   //! the package Geom (in the case of an Adaptor3d_Curve curve),
   //! -   and those required on the curve by the computation algorithm.
-  Standard_EXPORT void Initialize (Adaptor2d_Curve2d& C, const Standard_Real Deflection, const Standard_Real U1, const Standard_Real U2, const Standard_Boolean WithControl = Standard_True);
+  Standard_EXPORT void Initialize (const Adaptor2d_Curve2d& C, const Standard_Real Deflection, const Standard_Real U1, const Standard_Real U2, const Standard_Boolean WithControl = Standard_True);
   
   //! Returns true if the computation was successful.
   //! IsDone is a protection against:
   //! -   non-convergence of the algorithm
   //! -   querying the results before computation.
-    Standard_Boolean IsDone() const;
+  Standard_Boolean IsDone () const
+  {
+    return myDone;
+  }
   
   //! Returns the number of points of the distribution
   //! computed by this algorithm.
   //! Exceptions
   //! StdFail_NotDone if this algorithm has not been
   //! initialized, or if the computation was not successful.
-    Standard_Integer NbPoints() const;
+  Standard_Integer NbPoints () const
+  {
+    StdFail_NotDone_Raise_if (!myDone, "GCPnts_UniformDeflection::NbPoints()");
+    return myParams.Length ();
+  }
   
   //! Returns the parameter of the point of index Index in
   //! the distribution computed by this algorithm.
@@ -156,7 +157,11 @@ public:
   //! Exceptions
   //! StdFail_NotDone if this algorithm has not been
   //! initialized, or if the computation was not successful.
-    Standard_Real Parameter (const Standard_Integer Index) const;
+  Standard_Real Parameter (const Standard_Integer Index) const
+  {
+    StdFail_NotDone_Raise_if (!myDone, "GCPnts_UniformDeflection::Parameter()");
+    return myParams (Index);
+  }
   
   //! Returns the point of index Index in the distribution
   //! computed by this algorithm.
@@ -178,34 +183,17 @@ public:
   //! Exceptions
   //! StdFail_NotDone if this algorithm has not been
   //! initialized, or if the computation was not successful.
-    Standard_Real Deflection() const;
-
-
-
-
-protected:
-
-
-
-
+  Standard_Real Deflection () const
+  {
+    StdFail_NotDone_Raise_if (!myDone, "GCPnts_UniformDeflection::Deflection()");
+    return myDeflection;
+  }
 
 private:
-
-
-
   Standard_Boolean myDone;
   Standard_Real myDeflection;
   TColStd_SequenceOfReal myParams;
   TColgp_SequenceOfPnt myPoints;
-
-
 };
-
-
-#include <GCPnts_UniformDeflection.lxx>
-
-
-
-
 
 #endif // _GCPnts_UniformDeflection_HeaderFile

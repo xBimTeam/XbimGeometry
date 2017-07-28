@@ -21,6 +21,7 @@
 #include <Standard_Type.hxx>
 
 #include <GeomFill_HArray1OfSectionLaw.hxx>
+#include <TopTools_DataMapOfShapeInteger.hxx>
 #include <Standard_Boolean.hxx>
 #include <BRepTools_WireExplorer.hxx>
 #include <MMgt_TShared.hxx>
@@ -32,7 +33,6 @@ class TopoDS_Vertex;
 class TopoDS_Shape;
 class TopoDS_Wire;
 class TopoDS_Edge;
-
 
 class BRepFill_SectionLaw;
 DEFINE_STANDARD_HANDLE(BRepFill_SectionLaw, MMgt_TShared)
@@ -48,13 +48,17 @@ public:
   
   Standard_EXPORT const Handle(GeomFill_SectionLaw)& Law (const Standard_Integer Index) const;
   
+  Standard_EXPORT Standard_Integer IndexOfEdge(const TopoDS_Shape& anEdge) const;
+  
   Standard_EXPORT virtual Standard_Boolean IsConstant() const = 0;
   
   Standard_EXPORT Standard_Boolean IsUClosed() const;
   
   Standard_EXPORT Standard_Boolean IsVClosed() const;
   
-  //! Say if the input sahpe is a  vertex.
+  Standard_EXPORT Standard_Boolean IsDone() const;
+  
+  //! Say if the input shape is a  vertex.
   Standard_EXPORT virtual Standard_Boolean IsVertex() const = 0;
   
   Standard_EXPORT virtual Handle(GeomFill_SectionLaw) ConcatenedLaw() const = 0;
@@ -74,7 +78,7 @@ public:
 
 
 
-  DEFINE_STANDARD_RTTI(BRepFill_SectionLaw,MMgt_TShared)
+  DEFINE_STANDARD_RTTIEXT(BRepFill_SectionLaw,MMgt_TShared)
 
 protected:
 
@@ -82,6 +86,8 @@ protected:
   Handle(GeomFill_HArray1OfSectionLaw) myLaws;
   Standard_Boolean uclosed;
   Standard_Boolean vclosed;
+  Standard_Boolean myDone;
+  TopTools_DataMapOfShapeInteger myIndices;
 
 
 private:

@@ -69,12 +69,10 @@ public:
   
   Standard_EXPORT void SetGBound (const Standard_Boolean b);
   
-  Standard_EXPORT virtual Standard_OStream& Dump (Standard_OStream& OS) const Standard_OVERRIDE;
 
 
 
-
-  DEFINE_STANDARD_RTTI(TopOpeBRepDS_ShapeShapeInterference,TopOpeBRepDS_Interference)
+  DEFINE_STANDARD_RTTIEXT(TopOpeBRepDS_ShapeShapeInterference,TopOpeBRepDS_Interference)
 
 protected:
 

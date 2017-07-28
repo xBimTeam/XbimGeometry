@@ -117,6 +117,13 @@ protected:
       const Standard_Integer anIndex = myCurIndex + myICurBlock * myVector->myIncrement + theOffset;
       myICurBlock = anIndex / myVector->myIncrement;
       myCurIndex = anIndex % myVector->myIncrement;
+      if (myICurBlock > myIEndBlock)
+      {
+        // make sure that iterator produced by Offset()
+        // is equal to the end() iterator
+        --myICurBlock;
+        myCurIndex += myVector->myIncrement;
+      }
     }
 
     Standard_Integer differV (const Iterator& theOther) const
@@ -184,6 +191,9 @@ protected: //! @name protected methods
     myData = allocMemBlocks (myCapacity);
   }
 
+  //! Destructor
+  virtual ~NCollection_BaseVector() {}
+
   //! @return pointer to memory where to put the new item
   Standard_EXPORT void* expandV (const Standard_Integer theIndex);
 
@@ -207,6 +217,12 @@ public: //! @name public API
         myIncrement=aIncrement;
       }
     }
+  }
+
+  //! Returns attached allocator
+  const Handle(NCollection_BaseAllocator)& Allocator() const
+  {
+    return myAllocator;
   }
 
 protected: //! @name Protected fields

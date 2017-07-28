@@ -139,14 +139,17 @@ public:
   
 
   //! Modifier
-  //! Appends extra paves <theLP>
-  Standard_EXPORT void AppendExtPave (const BOPDS_Pave& theLP);
+  //! Appends extra paves <thePave>
+  Standard_EXPORT void AppendExtPave(const BOPDS_Pave& thePave);
   
 
   //! Modifier
   //! Appends extra pave <thePave>
   Standard_EXPORT void AppendExtPave1 (const BOPDS_Pave& thePave);
   
+  //! Modifier
+  //! Removes a pave with the given vertex number from extra paves
+  Standard_EXPORT void RemoveExtPave(const Standard_Integer theVertNum);
 
   //! Selector
   //! Returns the  extra paves
@@ -181,18 +184,22 @@ public:
   //! Sets the shrunk data for the pave block
   //! <theTS1>,  <theTS2> - shrunk range
   //! <theBox> - the bounding box
+  //! <theIsSplittable> - defines whether the edge can be split
   Standard_EXPORT void SetShrunkData (const Standard_Real theTS1, 
                                       const Standard_Real theTS2, 
-                                      const Bnd_Box& theBox);
+                                      const Bnd_Box& theBox,
+                                      const Standard_Boolean theIsSplittable);
   
 
   //! Selector
   //! Returns  the shrunk data for the pave block
   //! <theTS1>,  <theTS2> - shrunk range
   //! <theBox> - the bounding box
+  //! <theIsSplittable> - defines whether the edge can be split
   Standard_EXPORT void ShrunkData (Standard_Real& theTS1, 
                                    Standard_Real& theTS2, 
-                                   Bnd_Box& theBox) const;
+                                   Bnd_Box& theBox,
+                                   Standard_Boolean& theIsSplittable) const;
   
 
   //! Query
@@ -202,10 +209,17 @@ public:
   
   Standard_EXPORT void Dump() const;
 
+  //! Query
+  //! Returns FALSE if the pave block has a too short
+  //! shrunk range and cannot be split, otherwise returns TRUE
+  Standard_Boolean IsSplittable() const
+  {
+    return myIsSplittable;
+  }
 
 
 
-  DEFINE_STANDARD_RTTI(BOPDS_PaveBlock,MMgt_TShared)
+  DEFINE_STANDARD_RTTIEXT(BOPDS_PaveBlock,MMgt_TShared)
 
 protected:
 
@@ -220,7 +234,7 @@ protected:
   Standard_Real myTS2;
   Bnd_Box myShrunkBox;
   BOPCol_MapOfInteger myMFence;
-
+  Standard_Boolean myIsSplittable;
 
 private:
 

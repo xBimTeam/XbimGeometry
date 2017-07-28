@@ -18,8 +18,6 @@
 #include <BRep_Builder.hxx>
 #include <BRep_Tool.hxx>
 #include <BRepTools.hxx>
-#include <Draft_DataMapIteratorOfDataMapOfEdgeEdgeInfo.hxx>
-#include <Draft_DataMapIteratorOfDataMapOfFaceFaceInfo.hxx>
 #include <Draft_EdgeInfo.hxx>
 #include <Draft_FaceInfo.hxx>
 #include <Draft_Modification.hxx>
@@ -57,12 +55,14 @@
 #include <TopoDS_Vertex.hxx>
 #include <TopTools_ListIteratorOfListOfShape.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(Draft_Modification,BRepTools_Modification)
+
 //=======================================================================
 //function : Draft_Modification
 //purpose  : 
 //=======================================================================
 Draft_Modification::Draft_Modification (const TopoDS_Shape& S) :
-       myComp(Standard_False),myShape(S)
+myComp(Standard_False),myShape(S)
 {
   TopExp::MapShapesAndAncestors(myShape,TopAbs_EDGE,TopAbs_FACE,myEFMap);
 }
@@ -105,10 +105,10 @@ void Draft_Modification::Init(const TopoDS_Shape& S)
 //=======================================================================
 
 Standard_Boolean Draft_Modification::Add(const TopoDS_Face& F,
-					 const gp_Dir& Direction,
-					 const Standard_Real Angle,
-					 const gp_Pln& NeutralPlane,
-					 const Standard_Boolean Flag)
+  const gp_Dir& Direction,
+  const Standard_Real Angle,
+  const gp_Pln& NeutralPlane,
+  const Standard_Boolean Flag)
 {
   if (!badShape.IsNull()) {
     Standard_ConstructionError::Raise();
@@ -129,44 +129,60 @@ Standard_Boolean Draft_Modification::Add(const TopoDS_Face& F,
 
 void Draft_Modification::Remove(const TopoDS_Face& F)
 {
-  if (!myFMap.IsBound(F) || myComp) {
+  if (!myFMap.Contains(F) || myComp) {
     Standard_NoSuchObject::Raise();
   }
 
   conneF.Clear();
   TopTools_ListIteratorOfListOfShape ltod;
 
-  curFace = myFMap(F).RootFace();
-  Draft_DataMapIteratorOfDataMapOfFaceFaceInfo itf(myFMap);
-  while (itf.More()) {
-    const TopoDS_Face& theF = itf.Key();
-    if (myFMap(theF).RootFace().IsSame(curFace)) {
+  curFace = myFMap.FindFromKey(F).RootFace();
+  for (Standard_Integer i = 1; i <= myFMap.Extent(); i++)
+  {
+    const TopoDS_Face& theF = myFMap.FindKey(i);
+    if (myFMap.FindFromKey(theF).RootFace().IsSame(curFace)) {
       conneF.Append(theF);
       if (theF.IsSame(badShape)) {
-	badShape.Nullify();
+        badShape.Nullify();
       }
     }
-    itf.Next();
   }
 
   ltod.Initialize(conneF);
+  Standard_Integer IndToReplace = 0;
   while (ltod.More()) {
-    myFMap.UnBind(TopoDS::Face(ltod.Value()));
+    IndToReplace = myFMap.FindIndex(TopoDS::Face(ltod.Value()));
+    if (IndToReplace)
+    {
+      Standard_Integer LInd = myFMap.Extent();
+      TopoDS_Face LF = myFMap.FindKey(LInd);
+      Draft_FaceInfo LFInfo = myFMap.FindFromIndex(LInd);
+      myFMap.RemoveLast();
+      if (IndToReplace != LInd)
+        myFMap.Substitute(IndToReplace, LF, LFInfo);
+    }
     ltod.Next();
   }
 
   conneF.Clear();
-  Draft_DataMapIteratorOfDataMapOfEdgeEdgeInfo ite(myEMap);
-  while (ite.More()) {
-    const TopoDS_Edge& theE = ite.Key();
-    if (myEMap(theE).RootFace().IsSame(curFace)) {
+  for (Standard_Integer i = 1; i <= myEMap.Extent(); i++)
+  {
+    const TopoDS_Edge& theE = myEMap.FindKey(i);
+    if (myEMap.FindFromKey(theE).RootFace().IsSame(curFace))
       conneF.Append(theE);
-    }
-    ite.Next();
   }
   ltod.Initialize(conneF);
   while (ltod.More()) {
-    myEMap.UnBind(TopoDS::Edge(ltod.Value()));
+    IndToReplace = myFMap.FindIndex(TopoDS::Face(ltod.Value()));
+    if (IndToReplace)
+    {
+      Standard_Integer LInd = myEMap.Extent();
+      TopoDS_Edge LF = myEMap.FindKey(LInd);
+      Draft_EdgeInfo LFInfo = myEMap.FindFromIndex(LInd);
+      myEMap.RemoveLast();
+      if (IndToReplace != LInd)
+        myEMap.Substitute(IndToReplace, LF, LFInfo);
+    }
     ltod.Next();
   }
 }
@@ -212,26 +228,25 @@ const TopoDS_Shape& Draft_Modification::ProblematicShape() const
 
 const TopTools_ListOfShape & Draft_Modification::ConnectedFaces(const TopoDS_Face& F)
 {
-  if (!myFMap.IsBound(F)) {
+  if (!myFMap.Contains(F)) {
     Standard_NoSuchObject::Raise();
   }
   if (!IsDone()) {
     StdFail_NotDone::Raise();
   }
   conneF.Clear();
-  curFace = myFMap(F).RootFace();
+  curFace = myFMap.FindFromKey(F).RootFace();
 
-  Draft_DataMapIteratorOfDataMapOfFaceFaceInfo itf(myFMap);
-  while (itf.More()) {
-    const TopoDS_Face& theF = itf.Key();
-    if (myFMap(theF).RootFace().IsSame(curFace)) {
+  for (Standard_Integer i = 1; i <= myFMap.Extent(); i++)
+  {
+    const TopoDS_Face& theF = myFMap.FindKey(i);
+    if (myFMap.FindFromKey(theF).RootFace().IsSame(curFace)) {
       conneF.Append(theF);
     }
-    itf.Next();
   }
 
   return conneF;
-  
+
 
 }
 
@@ -248,17 +263,16 @@ const TopTools_ListOfShape & Draft_Modification::ModifiedFaces()
   }
   conneF.Clear();
 
-  Draft_DataMapIteratorOfDataMapOfFaceFaceInfo itf(myFMap);
-  while (itf.More()) {
-    const TopoDS_Face& theF = itf.Key();
-    if (!myFMap(theF).RootFace().IsNull()) {
+  for (Standard_Integer i = 1; i <= myFMap.Extent(); i++)
+  {
+    const TopoDS_Face& theF = myFMap.FindKey(i);
+    if (!myFMap.FindFromKey(theF).RootFace().IsNull()) {
       conneF.Append(theF);
     }
-    itf.Next();
   }
 
   return conneF;
-  
+
 
 }
 
@@ -269,15 +283,15 @@ const TopTools_ListOfShape & Draft_Modification::ModifiedFaces()
 //=======================================================================
 
 Standard_Boolean Draft_Modification::NewSurface(const TopoDS_Face& F,
-						Handle(Geom_Surface)& S,
-						TopLoc_Location& L,
-						Standard_Real& Tol,
-						Standard_Boolean& RevWires,
-						Standard_Boolean& RevFace)
+  Handle(Geom_Surface)& S,
+  TopLoc_Location& L,
+  Standard_Real& Tol,
+  Standard_Boolean& RevWires,
+  Standard_Boolean& RevFace)
 {
   if (!IsDone()) {Standard_DomainError::Raise();}
 
-  if (!myFMap.IsBound(F) || !myFMap(F).NewGeometry()) {
+  if (!myFMap.Contains(F) || !myFMap.FindFromKey(F).NewGeometry()) {
     return Standard_False;
   }
 
@@ -289,11 +303,11 @@ Standard_Boolean Draft_Modification::NewSurface(const TopoDS_Face& F,
 
   L.Identity();
 
-  S = myFMap(F).Geometry();
+  S = myFMap.FindFromKey(F).Geometry();
 
   return Standard_True;
 }
-						
+
 
 //=======================================================================
 //function : NewCurve
@@ -301,23 +315,23 @@ Standard_Boolean Draft_Modification::NewSurface(const TopoDS_Face& F,
 //=======================================================================
 
 Standard_Boolean Draft_Modification::NewCurve(const TopoDS_Edge& E,
-					      Handle(Geom_Curve)& C,
-					      TopLoc_Location& L, 
-					      Standard_Real& Tol)
+  Handle(Geom_Curve)& C,
+  TopLoc_Location& L, 
+  Standard_Real& Tol)
 {
   if (!IsDone()) {Standard_DomainError::Raise();}
 
-  if (!myEMap.IsBound(E)) 
+  if (!myEMap.Contains(E)) 
     return Standard_False;
-  
-  const Draft_EdgeInfo& Einf= myEMap(E);
-  if (!myEMap(E).NewGeometry())
+
+  const Draft_EdgeInfo& Einf= myEMap.FindFromKey(E);
+  if (!myEMap.FindFromKey(E).NewGeometry())
     return Standard_False;
-  
+
   Tol = Einf.Tolerance();
   Tol = Max(Tol, BRep_Tool::Tolerance(E));
   L.Identity();
-  C = myEMap(E).Geometry();
+  C = myEMap.FindFromKey(E).Geometry();
 
   return Standard_True;
 
@@ -330,17 +344,17 @@ Standard_Boolean Draft_Modification::NewCurve(const TopoDS_Edge& E,
 //=======================================================================
 
 Standard_Boolean Draft_Modification::NewPoint(const TopoDS_Vertex& V,
-					      gp_Pnt& P, 
-					      Standard_Real& Tol)
+  gp_Pnt& P, 
+  Standard_Real& Tol)
 {
   if (!IsDone()) {Standard_DomainError::Raise();};
 
-  if (!myVMap.IsBound(V)) {
+  if (!myVMap.Contains(V)) {
     return Standard_False;
   }
 
   Tol = BRep_Tool::Tolerance(V);
-  P = myVMap(V).Geometry();
+  P = myVMap.FindFromKey(V).Geometry();
   return Standard_True;
 }
 
@@ -351,25 +365,27 @@ Standard_Boolean Draft_Modification::NewPoint(const TopoDS_Vertex& V,
 //=======================================================================
 
 Standard_Boolean Draft_Modification::NewCurve2d(const TopoDS_Edge& E, 
-						const TopoDS_Face& F, 
-						const TopoDS_Edge& NewE, 
-						const TopoDS_Face&, 
-						Handle(Geom2d_Curve)& C,
-						Standard_Real& Tol)
+  const TopoDS_Face& F, 
+  const TopoDS_Edge& NewE, 
+  const TopoDS_Face&, 
+  Handle(Geom2d_Curve)& C,
+  Standard_Real& Tol)
 {
-  
+
   if (!IsDone()) {Standard_DomainError::Raise();};
 
-  if (!myEMap.IsBound(E)) {
+  if (!myEMap.Contains(E)) {
     return Standard_False;
   }
-  
+
   Standard_Real Fp,Lp;
   BRep_Tool::Range(NewE,Fp,Lp);
-  
-  Handle(Geom_Surface) SB = myFMap(F).Geometry();
 
-  const Draft_EdgeInfo& Einf = myEMap(E);
+  Handle(Geom_Surface) SB = myFMap.FindFromKey(F).Geometry();
+
+  Tol = BRep_Tool::Tolerance(E);
+
+  const Draft_EdgeInfo& Einf = myEMap.FindFromKey(E);
   if ( Einf.FirstFace().IsSame(F) && !Einf.FirstPC().IsNull()) {
     C = Einf.FirstPC();
   }
@@ -377,21 +393,19 @@ Standard_Boolean Draft_Modification::NewCurve2d(const TopoDS_Edge& E,
     C = Einf.SecondPC();
   }
   else {
-    
-    if (!myEMap(E).NewGeometry()) {
+
+    if (!myEMap.FindFromKey(E).NewGeometry()) {
       Standard_Real Fpi,Lpi;
       BRep_Tool::Range(E,Fpi,Lpi);
       if (Fpi <= Fp && Fp <= Lpi && Fpi <= Lp && Lp <= Lpi) {
-	return Standard_False;
+        return Standard_False;
       }
     }
-    
-    Tol = BRep_Tool::Tolerance(E);
-    
+
     //  if (!BRep_Tool::IsClosed(E,F)) {
     BRep_Tool::Range(NewE,Fp,Lp);
-    Handle(Geom_TrimmedCurve) TC = new Geom_TrimmedCurve(myEMap(E).Geometry(),
-							 Fp,Lp);
+    Handle(Geom_TrimmedCurve) TC = new Geom_TrimmedCurve(myEMap.FindFromKey(E).Geometry(),
+      Fp,Lp);
     Fp = TC->FirstParameter();
     Lp = TC->LastParameter();
     BRep_Builder B;
@@ -414,9 +428,9 @@ Standard_Boolean Draft_Modification::NewCurve2d(const TopoDS_Edge& E,
   }
 
   JeRecadre = JeRecadre || 
-              (typs == STANDARD_TYPE(Geom_CylindricalSurface)) || 
-              (typs == STANDARD_TYPE(Geom_SphericalSurface)) || 
-	      (typs == STANDARD_TYPE(Geom_ConicalSurface));
+    (typs == STANDARD_TYPE(Geom_CylindricalSurface)) || 
+    (typs == STANDARD_TYPE(Geom_SphericalSurface)) || 
+    (typs == STANDARD_TYPE(Geom_ConicalSurface));
 
   if ( JeRecadre) {
     Standard_Boolean bTranslate;
@@ -447,6 +461,9 @@ Standard_Boolean Draft_Modification::NewCurve2d(const TopoDS_Edge& E,
       C->Translate(aV2DT);
     }
   }
+  //
+  Handle(Geom_Curve) aC3d = BRep_Tool::Curve(NewE, Fp, Lp);
+  Tol = BRepTools::EvalAndUpdateTol(NewE,aC3d, C, SB, Fp, Lp);
   return Standard_True;
 }
 
@@ -457,19 +474,19 @@ Standard_Boolean Draft_Modification::NewCurve2d(const TopoDS_Edge& E,
 //=======================================================================
 
 Standard_Boolean Draft_Modification::NewParameter(const TopoDS_Vertex& V,
-						  const TopoDS_Edge& E,
-						  Standard_Real& P,
-						  Standard_Real& Tol)
+  const TopoDS_Edge& E,
+  Standard_Real& P,
+  Standard_Real& Tol)
 {
 
   if (!IsDone()) {Standard_DomainError::Raise();};
 
-  if (!myVMap.IsBound(V)) {
+  if (!myVMap.Contains(V)) {
     return Standard_False;
   }
 
-  P = myVMap(V).Parameter(E);
-  Handle(Geom_Curve) GC = myEMap(E).Geometry();
+  P = myVMap.ChangeFromKey(V).Parameter(E);
+  Handle(Geom_Curve) GC = myEMap.FindFromKey(E).Geometry();
   Handle(Standard_Type) typc = GC->DynamicType();
   if (typc == STANDARD_TYPE(Geom_TrimmedCurve)) {
     GC = Handle(Geom_TrimmedCurve)::DownCast(GC);
@@ -479,8 +496,8 @@ Standard_Boolean Draft_Modification::NewParameter(const TopoDS_Vertex& V,
   if (GC->IsClosed()) {
     TopoDS_Vertex FV = TopExp::FirstVertex(E);
     Standard_Real paramf;
-    if (myVMap.IsBound(FV)) {
-      paramf = myVMap(FV).Parameter(E);
+    if (myVMap.Contains(FV)) {
+      paramf = myVMap.ChangeFromKey(FV).Parameter(E);
     }
     else {
       paramf = BRep_Tool::Parameter(FV,E);
@@ -490,24 +507,24 @@ Standard_Boolean Draft_Modification::NewParameter(const TopoDS_Vertex& V,
     Standard_Real FirstPar = GC->FirstParameter(), LastPar = GC->LastParameter();
     Standard_Real pconf = Precision::PConfusion();
     if (Abs( paramf - LastPar ) <= pconf)
-      {
-	paramf = FirstPar;
-	FV.Orientation(E.Orientation());
-	if (V.IsEqual( FV ))
-	  P = paramf;
-      }
+    {
+      paramf = FirstPar;
+      FV.Orientation(E.Orientation());
+      if (V.IsEqual( FV ))
+        P = paramf;
+    }
 
     FV.Orientation(E.Orientation());
     if (!V.IsEqual(FV) && P <= paramf) {
       if (GC->IsPeriodic()) {
-	P += GC->Period();
+        P += GC->Period();
       }
       else {
-	P = GC->LastParameter();
+        P = GC->LastParameter();
       }
     }
   }
-  
+
   Tol = Max (BRep_Tool::Tolerance(V), BRep_Tool::Tolerance(E));
   return Standard_True;
 }
@@ -520,13 +537,13 @@ Standard_Boolean Draft_Modification::NewParameter(const TopoDS_Vertex& V,
 //=======================================================================
 
 GeomAbs_Shape Draft_Modification::Continuity(const TopoDS_Edge& E,
-					     const TopoDS_Face& F1,
-					     const TopoDS_Face& F2,
-					     const TopoDS_Edge&,
-					     const TopoDS_Face&,
-					     const TopoDS_Face&)
+  const TopoDS_Face& F1,
+  const TopoDS_Face& F2,
+  const TopoDS_Edge&,
+  const TopoDS_Face&,
+  const TopoDS_Face&)
 {
   return BRep_Tool::Continuity(E,F1,F2);
 }
-					     
+
 

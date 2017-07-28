@@ -24,13 +24,27 @@ class Standard_Transient;
 
 namespace opencascade {
 
+  //! Trait yielding true if class T1 is base of T2 but not the same
+  template <class T1, class T2, class Dummy = void>
+  struct is_base_but_not_same : std::is_base_of <T1, T2> {};
+
+  //! Explicit specialization of is_base_of trait to workaround the
+  //! requirement of type to be complete when T1 and T2 are the same.
+  template <class T1, class T2>
+  struct is_base_but_not_same <T1, T2, typename std::enable_if <std::is_same <T1, T2>::value>::type> : std::false_type {};
+
   //! Intrusive smart pointer for use with Standard_Transient class and its descendants.
   //!
   //! This class is similar to boost::intrusive_ptr<>, with additional
   //! feature historically supported by Handles in OCCT:
   //! it has type conversion to const reference to handle to the base types,
   //! which allows it to be passed by reference
-  //! in functions accepring reference to handle to base class.
+  //! in functions accepting reference to handle to base class.
+  //!
+  //! These casts (potentially unsafe) can be disabled by defining macro
+  //! OCCT_HANDLE_NOCAST; if it is defined, generalized copy constructor
+  //! and assignment operators are defined allowing to initialize handle
+  //! of base type from handle to derived type.
   template <class T>
   class handle
   {
@@ -48,18 +62,17 @@ namespace opencascade {
     {
       BeginScope();
     }
-/* TODO: uncomment and remove const from method above
-    //! Constructor from const pointer to new object;
-    //! will raise exception if object's reference counter is zero 
-    explicit handle (const T *thePtr) : entity(thePtr->This()) 
-    {
-      BeginScope();
-    }
-*/
+
     //! Copy constructor
     handle (const handle& theHandle) : entity(theHandle.entity)
     {
       BeginScope();
+    }
+
+    //! Move constructor
+    handle (handle&& theHandle) : entity(theHandle.entity)
+    {
+      theHandle.entity = 0;
     }
 
     //! Destructor
@@ -96,28 +109,23 @@ namespace opencascade {
       Assign (const_cast<T*>(thePtr));
       return *this;
     }
-/* uncomment along with constructor 
-    //! Assignment to pointer to const object
-    handle& operator= (const T* thePtr)
+
+    //! Move operator
+    handle& operator= (handle&& theHandle)
     {
-      Assign (thePtr->This());
+      std::swap (this->entity, theHandle.entity);
       return *this;
     }
-*/
-    //! STL-like cast to pointer to referred object
-    const T* get () const { return static_cast<const T*>(this->entity); }
 
-    //! STL-like cast to pointer to referred object
-    T* get () { return static_cast<T*>(this->entity); }
+    //! STL-like cast to pointer to referred object (note non-const).
+    //! @sa std::shared_ptr::get()
+    T* get() const { return static_cast<T*>(this->entity); }
 
     //! Member access operator (note non-const)
     T* operator-> () const { return static_cast<T*>(this->entity); }
 
-    //! Dereferencing operator
-    T& operator* () { return *get(); }
-
-    //! Const dereferencing operator
-    const T& operator*() const { return *get(); }
+    //! Dereferencing operator (note non-const)
+    T& operator* () const { return *get(); }
 
     //! Check for equality
     template <class T2>
@@ -168,21 +176,41 @@ namespace opencascade {
       return get() < theHandle.get();
     }
 
-    //! Down casting operator
+    //! Down casting operator from handle to base type
     template <class T2>
-    static handle DownCast (const handle<T2>& theObject)
+    static typename std::enable_if<is_base_but_not_same<T2, T>::value, handle>::type
+      DownCast (const handle<T2>& theObject)
     {
       return handle (dynamic_cast<T*>(const_cast<T2*>(theObject.get())));
     }
 
-    //! Down casting operator
+    //! Down casting operator from pointer to base type
     template <class T2>
-    static handle DownCast (const T2* thePtr)
+    static typename std::enable_if<is_base_but_not_same<T2, T>::value, handle>::type 
+      DownCast (const T2* thePtr)
     {
       return handle (dynamic_cast<T*>(const_cast<T2*>(thePtr)));
     }
 
-#if __cplusplus >= 201103L || (defined(_MSC_VER) && _MSC_VER >= 1800) || (defined(__GNUC__) && __GNUC__ >= 4 && __GNUC_MINOR__ >= 6)
+    //! For compatibility, define down casting operator from non-base type, as deprecated
+    template <class T2>
+    Standard_DEPRECATED("down-casting from object of the same or unrelated type is meaningless")
+    static handle DownCast (const handle<T2>& theObject, typename std::enable_if<!is_base_but_not_same<T2, T>::value, void*>::type = 0)
+    {
+      return handle (dynamic_cast<T*>(const_cast<T2*>(theObject.get())));
+    }
+
+    //! For compatibility, define down casting operator from non-base type, as deprecated
+    template <class T2>
+    Standard_DEPRECATED("down-casting from object of the same or unrelated type is meaningless")
+    static handle DownCast (const T2* thePtr, typename std::enable_if<!is_base_but_not_same<T2, T>::value, void*>::type = 0)
+    {
+      return handle (dynamic_cast<T*>(const_cast<T2*>(thePtr)));
+    }
+
+#if (defined(__clang__)) || (defined(__INTEL_COMPILER) && __INTEL_COMPILER >= 1300) || \
+    (defined(_MSC_VER) && _MSC_VER >= 1800) || \
+    (defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)))
 
     //! Conversion to bool for use in conditional expressions
     explicit operator bool () const
@@ -200,11 +228,52 @@ namespace opencascade {
 
 #endif
 
-    //! Upcast to const reference to base type.
-#if __cplusplus >= 201103L || (defined(_MSC_VER) && _MSC_VER >= 1800) || (defined(__GNUC__) && __GNUC__ >= 4 && __GNUC_MINOR__ >= 3)
+    // Support of conversions to handle of base type:
+    // - copy and move constructors and assignment operators if OCCT_HANDLE_NOCAST is defined
+    // - operators of upcast to const reference to base type otherwise
+#if (defined(__clang__)) || (defined(__INTEL_COMPILER) && __INTEL_COMPILER >= 1206) || \
+    (defined(_MSC_VER) && _MSC_VER >= 1800) || \
+    (defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 3)))
+
+#ifdef OCCT_HANDLE_NOCAST
+
+    //! Generalized copy constructor.
+    //! Constructs handle holding entity of base type (T) from the one which holds entity of derived type (T2).
+    template <class T2, typename = typename std::enable_if <is_base_but_not_same <T, T2>::value>::type>
+    handle (const handle<T2>& theHandle) :
+      entity(theHandle.entity)
+    {
+      BeginScope();
+    }
+
+    //! Generalized move constructor
+    template <class T2, typename = typename std::enable_if <is_base_but_not_same <T, T2>::value>::type>
+    handle (handle<T2>&& theHandle)
+      : entity(theHandle.entity)
+    {
+      theHandle.entity = 0;
+    }
+
+    //! Generalized assignment operator
+    template <class T2, typename = typename std::enable_if <is_base_but_not_same <T, T2>::value>::type>
+    handle operator = (const handle<T2>& theHandle)
+    {
+      Assign (theHandle.entity);
+      return *this;
+    }
+
+    //! Generalized move operator
+    template <class T2, typename = typename std::enable_if <is_base_but_not_same <T, T2>::value>::type>
+    handle& operator= (handle<T2>&& theHandle)
+    {
+      std::swap (this->entity, theHandle.entity);
+      return *this;
+    }
+
+#else
 
     //! Upcast to const reference to base type.
-    template <class T2, typename = typename std::enable_if<std::is_base_of<T2, T>::value>::type>
+    template <class T2, typename = typename std::enable_if<is_base_but_not_same<T2, T>::value>::type>
     operator const handle<T2>& () const
     {
       return reinterpret_cast<const handle<T2>&>(*this);
@@ -212,13 +281,56 @@ namespace opencascade {
 
     //! Upcast to non-const reference to base type.
     //! NB: this cast can be dangerous, but required for legacy code; see #26377
-    template <class T2, typename = typename std::enable_if<std::is_base_of<T2, T>::value>::type>
+    template <class T2, typename = typename std::enable_if<is_base_but_not_same<T2, T>::value>::type>
     operator handle<T2>& ()
     {
       return reinterpret_cast<handle<T2>&>(*this);
     }
 
+#endif /* OCCT_HANDLE_NOCAST */
+
 #else /* fallback version for compilers not supporting default arguments of function templates (VC10, VC11, GCC below 4.3) */
+
+#ifdef OCCT_HANDLE_NOCAST
+
+    //! Generalized copy constructor.
+    //! Constructs handle holding entity of base type (T) from the one which holds entity of derived type (T2).
+    template <class T2>
+    handle (const handle<T2>& theHandle, typename std::enable_if <is_base_but_not_same <T, T2>::value>::type* = nullptr) :
+      entity(theHandle.entity)
+    {
+      BeginScope();
+    }
+
+    //! Generalized move constructor
+    template <class T2>
+    handle (handle<T2>&& theHandle, typename std::enable_if <is_base_but_not_same <T, T2>::value>::type* = nullptr)
+      : entity(theHandle.entity)
+    {
+      theHandle.entity = 0;
+    }
+
+    //! Generalized assignment operator.
+    template <class T2>
+    handle operator = (const handle<T2>& theHandle)
+    {
+      std::enable_if <is_base_but_not_same <T, T2>::value, void*>::type aTypeCheckHelperVar;
+      (void)aTypeCheckHelperVar;
+      Assign (theHandle.entity);
+      return *this;
+    }
+
+    //! Generalized move operator
+    template <class T2>
+    handle& operator= (handle<T2>&& theHandle)
+    {
+      std::enable_if <is_base_but_not_same <T, T2>::value, void*>::type aTypeCheckHelperVar;
+      (void)aTypeCheckHelperVar;
+      std::swap (this->entity, theHandle.entity);
+      return *this;
+    }
+
+#else
 
     //! Upcast to const reference to base type.
     //! NB: this implementation will cause ambiguity errors on calls to overloaded
@@ -229,20 +341,23 @@ namespace opencascade {
     {
       // error "type is not a member of enable_if" will be generated if T2 is not sub-type of T
       // (handle is being cast to const& to handle of non-base type)
-      return reinterpret_cast<typename std::enable_if<std::is_base_of<T2, T>::value, const handle<T2>&>::type>(*this);
+      return reinterpret_cast<typename std::enable_if<is_base_but_not_same<T2, T>::value, const handle<T2>&>::type>(*this);
     }
 
     //! Upcast to non-const reference to base type.
     //! NB: this cast can be dangerous, but required for legacy code; see #26377
     template <class T2>
+    Standard_DEPRECATED("Passing non-const reference to handle of base type in function is unsafe; use variable of exact type")
     operator handle<T2>& ()
     {
       // error "type is not a member of enable_if" will be generated if T2 is not sub-type of T
       // (handle is being cast to const& to handle of non-base type)
-      return reinterpret_cast<typename std::enable_if<std::is_base_of<T2, T>::value, handle<T2>&>::type>(*this);
+      return reinterpret_cast<typename std::enable_if<is_base_but_not_same<T2, T>::value, handle<T2>&>::type>(*this);
     }
 
-#endif
+#endif /* OCCT_HANDLE_NOCAST */
+
+#endif /* compiler switch */
 
   private:
 
@@ -289,8 +404,25 @@ inline Standard_Integer HashCode (const Handle(T)& theHandle, const Standard_Int
   return ::HashCode (const_cast<Standard_Address>(static_cast<const void*>(theHandle.get())), theUpper);
 }
 
-//! For compatibility with previous versions of OCCT, defines typedef opencascade::handle<Class> Handle(Class)
+//! For compatibility with previous versions of OCCT, define Handle_Class alias for opencascade::handle<Class>.
+#if (defined(_MSC_VER) && _MSC_VER >= 1800) 
+//! For Visual Studio 2013+, define Handle_Class as non-template class to allow exporting this type in C++/CLI.
+#define DEFINE_STANDARD_HANDLECLASS(C1,C2,BC) class C1; class Handle_##C1 : public Handle(C1) \
+{ \
+public: \
+  Handle_##C1() {} \
+  Handle_##C1(Handle(C1)&& theHandle) : Handle(C1)(theHandle) {} \
+  template <class T2, typename = typename std::enable_if <std::is_base_of <C1,T2>::value>::type> \
+  inline Handle_##C1(const opencascade::handle<T2>& theOther) : Handle(C1)(theOther) {} \
+  template <class T2, typename = typename std::enable_if <std::is_base_of <C1,T2>::value>::type> \
+  inline Handle_##C1(const T2* theOther) : Handle(C1)(theOther) {} \
+  template<typename T> inline Handle_##C1& operator=(T theOther) { Handle(C1)::operator=(theOther); return *this; } \
+};
+#else
+//! For other compilers, use simple typedef
 #define DEFINE_STANDARD_HANDLECLASS(C1,C2,BC) class C1; typedef Handle(C1) Handle_##C1;
+#endif
+
 #define DEFINE_STANDARD_HANDLE(C1,C2) DEFINE_STANDARD_HANDLECLASS(C1,C2,Standard_Transient)
 #define DEFINE_STANDARD_PHANDLE(C1,C2) DEFINE_STANDARD_HANDLECLASS(C1,C2,Standard_Persistent)
 

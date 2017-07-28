@@ -15,8 +15,8 @@
 #ifndef _Standard_Real_HeaderFile
 #define _Standard_Real_HeaderFile
 
+#include <cmath>
 #include <float.h>
-#include <math.h>
 #include <Standard_values.h>
 #include <Standard_math.hxx>
 #include <Standard_TypeDef.hxx>
@@ -25,7 +25,6 @@
 // Methods from Standard_Entity class which are redefined:  
 //    - Hascode
 //    - IsEqual
-//    - IsSimilar
 // ===============================================
 
 // ==================================
@@ -38,9 +37,14 @@ __Standard_API Standard_Real    ACosApprox  (const Standard_Real );
 __Standard_API Standard_Real    ASin        (const Standard_Real );
 __Standard_API Standard_Real    ATan2       (const Standard_Real , const Standard_Real );
 __Standard_API Standard_Real    NextAfter   (const Standard_Real , const Standard_Real );
-__Standard_API Standard_Real    Sign        (const Standard_Real , const Standard_Real );
+
+//! Returns |a| if b >= 0; -|a| if b < 0.
+__Standard_API Standard_Real    Sign(const Standard_Real a, const Standard_Real b);
+
 __Standard_API Standard_Real    ATanh       (const Standard_Real );
 __Standard_API Standard_Real    ACosh       (const Standard_Real );
+__Standard_API Standard_Real    Sinh       (const Standard_Real );
+__Standard_API Standard_Real    Cosh       (const Standard_Real );
 __Standard_API Standard_Real    Log         (const Standard_Real );
 __Standard_API Standard_Real    Sqrt        (const Standard_Real );
 
@@ -63,15 +67,6 @@ inline Standard_Real     Abs(const Standard_Real Value)
 inline Standard_Boolean  IsEqual (const Standard_Real Value1, 
 				  const Standard_Real Value2) 
 { return Abs((Value1 - Value2)) < RealSmall(); }
-
-//-------------------------------------------------------------------
-// IsSimilar : Returns Standard_True if two reals are equal
-//-------------------------------------------------------------------
-inline Standard_Boolean  IsSimilar(const Standard_Real One, 
-				  const Standard_Real Two)
-{ return IsEqual (One,Two); }
-
-
 
          //  *********************************** //
          //       Class methods                  //
@@ -170,12 +165,6 @@ inline Standard_Real     Ceiling (const Standard_Real Value)
 //-------------------------------------------------------------------
 inline Standard_Real     Cos (const Standard_Real Value) 
 { return cos(Value); }
-
-//-------------------------------------------------------------------
-// Cosh : Returns the hyperbolic cosine of a real
-//-------------------------------------------------------------------
-inline Standard_Real     Cosh (const Standard_Real Value) 
-{ return cosh(Value); }
 
 
 //-------------------------------------------------------------------
@@ -295,17 +284,16 @@ inline Standard_Real     Round (const Standard_Real Value)
 inline Standard_Real     Sin (const Standard_Real Value) 
 { return sin(Value); }
 
-//-------------------------------------------------------------------
-// Sinh : Returns the hyperbolic sine of a real
-//-------------------------------------------------------------------
-inline Standard_Real     Sinh(const Standard_Real Value) 
-{ return sinh(Value); }
 
 //-------------------------------------------------------------------
 // ASinh : Returns the hyperbolic arc sine of a real
 //-------------------------------------------------------------------
-inline Standard_Real     ASinh(const Standard_Real Value) 
+inline Standard_Real     ASinh(const Standard_Real Value)
+#if __QNX__
+{ return std::asinh(Value); }
+#else
 { return asinh(Value); }
+#endif
 
 //-------------------------------------------------------------------
 // Square : Returns a real to the power 2

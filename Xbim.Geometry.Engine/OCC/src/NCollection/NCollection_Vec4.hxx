@@ -80,19 +80,6 @@ public:
     v[3] = theAlpha;
   }
 
-  //! Copy constructor.
-  NCollection_Vec4 (const NCollection_Vec4& theVec4)
-  {
-    std::memcpy (this, &theVec4, sizeof(NCollection_Vec4));
-  }
-
-  //! Assignment operator.
-  const NCollection_Vec4& operator= (const NCollection_Vec4& theVec4)
-  {
-    std::memcpy (this, &theVec4, sizeof(NCollection_Vec4));
-    return *this;
-  }
-
   //! Alias to 1st component as X coordinate in XYZW.
   Element_t x() const { return v[0]; }
 
@@ -187,6 +174,23 @@ public:
   {
     return *((NCollection_Vec3<Element_t>* )&v[1]);
   }
+
+  //! Check this vector with another vector for equality (without tolerance!).
+  bool IsEqual (const NCollection_Vec4& theOther) const
+  {
+    return v[0] == theOther.v[0]
+        && v[1] == theOther.v[1]
+        && v[2] == theOther.v[2]
+        && v[3] == theOther.v[3];
+  }
+
+  //! Check this vector with another vector for equality (without tolerance!).
+  bool operator== (const NCollection_Vec4& theOther)       { return IsEqual (theOther); }
+  bool operator== (const NCollection_Vec4& theOther) const { return IsEqual (theOther); }
+
+  //! Check this vector with another vector for non-equality (without tolerance!).
+  bool operator!= (const NCollection_Vec4& theOther)       { return !IsEqual (theOther); }
+  bool operator!= (const NCollection_Vec4& theOther) const { return !IsEqual (theOther); }
 
   //! Raw access to the data (for OpenGL exchange).
   const Element_t* GetData()    const { return v; }
@@ -327,6 +331,15 @@ public:
     const Element_t aMin2 = v[2] < v[3] ? v[2] : v[3];
 
     return aMin1 < aMin2 ? aMin1 : aMin2;
+  }
+
+  //! Computes the dot product.
+  Element_t Dot (const NCollection_Vec4& theOther) const
+  {
+    return x() * theOther.x() +
+           y() * theOther.y() +
+           z() * theOther.z() +
+           w() * theOther.w();
   }
 
   //! Compute per-component division by scale factor.

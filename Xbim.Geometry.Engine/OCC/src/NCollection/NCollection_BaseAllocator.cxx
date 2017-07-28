@@ -25,6 +25,8 @@
 #include <iomanip>
 
 
+IMPLEMENT_STANDARD_RTTIEXT(NCollection_BaseAllocator,MMgt_TShared)
+
 //=======================================================================
 //function : Allocate
 //purpose  : Standard allocation
@@ -171,7 +173,7 @@ Standard_EXPORT void StandardCallBack_Reset()
 namespace {
   // dummy function for break point
   inline void place_for_break_point () {}
-};
+}
 
 //=======================================================================
 //function : StandardCallBack

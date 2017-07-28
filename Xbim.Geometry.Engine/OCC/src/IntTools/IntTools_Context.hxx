@@ -23,9 +23,11 @@
 #include <BOPCol_DataMapOfTransientAddress.hxx>
 #include <Standard_Integer.hxx>
 #include <Standard_Real.hxx>
+#include <Precision.hxx>
 #include <MMgt_TShared.hxx>
 #include <TopAbs_State.hxx>
 #include <Standard_Boolean.hxx>
+#include <BRepAdaptor_Surface.hxx>
 class IntTools_FClass2d;
 class TopoDS_Face;
 class GeomAPI_ProjectPointOnSurf;
@@ -44,17 +46,12 @@ class Bnd_Box;
 class TopoDS_Shape;
 
 
-class IntTools_Context;
-DEFINE_STANDARD_HANDLE(IntTools_Context, MMgt_TShared)
-
-
 //! The intersection Context contains geometrical
 //! and topological toolkit (classifiers, projectors, etc).
 //! The intersection Context is for caching the tools
 //! to increase the performance.
-class IntTools_Context : public MMgt_TShared
+class IntTools_Context : public Standard_Transient
 {
-
 public:
 
   
@@ -98,6 +95,15 @@ Standard_EXPORT virtual  ~IntTools_Context();
   //! for given face
   Standard_EXPORT Geom2dHatch_Hatcher& Hatcher (const TopoDS_Face& aF);
   
+  //! Returns a reference to surface adaptor for given face
+  Standard_EXPORT BRepAdaptor_Surface& SurfaceAdaptor (const TopoDS_Face& theFace);
+
+  //! Computes the boundaries of the face using surface adaptor
+  Standard_EXPORT void UVBounds (const TopoDS_Face& theFace,
+                                 Standard_Real& UMin,
+                                 Standard_Real& UMax,
+                                 Standard_Real& VMin,
+                                 Standard_Real& VMax);
 
   //! Computes parameter of the Point theP on
   //! the edge aE.
@@ -108,31 +114,44 @@ Standard_EXPORT virtual  ~IntTools_Context();
   //! 1. the edge is degenerated (-1)
   //! 2. the edge does not contain 3d curve and pcurves (-2)
   //! 3. projection algorithm failed (-3)
-  Standard_EXPORT Standard_Integer ComputePE (const gp_Pnt& theP, const Standard_Real theTolP, const TopoDS_Edge& theE, Standard_Real& theT);
-  
+  Standard_EXPORT Standard_Integer ComputePE (const gp_Pnt& theP, const Standard_Real theTolP,
+                                              const TopoDS_Edge& theE, Standard_Real& theT,
+                                              Standard_Real& theDist);
+
 
   //! Computes parameter of the vertex aV on
-  //! the edge aE.
+  //! the edge aE and correct tolerance value for 
+  //! the vertex on the edge.
   //! Returns zero if the distance between vertex
-  //! and edge is less than sum of tolerances,
+  //! and edge is less than sum of tolerances and the fuzzy value,
   //! otherwise and for following conditions returns
-  //! negative value
-  //! 1. the edge is degenerated (-1)
-  //! 2. the edge does not contain 3d curve and pcurves (-2)
+  //! negative value: <br>
+  //! 1. the edge is degenerated (-1) <br>
+  //! 2. the edge does not contain 3d curve and pcurves (-2) <br>
   //! 3. projection algorithm failed (-3)
-  Standard_EXPORT Standard_Integer ComputeVE (const TopoDS_Vertex& aV, const TopoDS_Edge& aE, Standard_Real& aT);
-  
+  Standard_EXPORT Standard_Integer ComputeVE (const TopoDS_Vertex& theV,
+                                const TopoDS_Edge& theE, 
+                                Standard_Real& theT,
+                                Standard_Real& theTol,
+                                const Standard_Real theFuzz = Precision::Confusion());
+
 
   //! Computes UV parameters of the vertex aV on face aF
+  //! and correct tolerance value for the vertex on the face.
   //! Returns zero if the distance between vertex and face is
-  //! less than or equal the sum of tolerances and the projection
-  //! point lays inside boundaries of the face.
-  //! For following conditions returns negative value
-  //! 1. projection algorithm failed (-1)
-  //! 2. distance is more than sum of tolerances (-2)
+  //! less than or equal the sum of tolerances and the fuzzy value 
+  //! and the projection point lays inside boundaries of the face.
+  //! For following conditions returns negative value <br>
+  //! 1. projection algorithm failed (-1) <br>
+  //! 2. distance is more than sum of tolerances (-2) <br>
   //! 3. projection point out or on the boundaries of face (-3)
-  Standard_EXPORT Standard_Integer ComputeVF (const TopoDS_Vertex& aV, const TopoDS_Face& aF, Standard_Real& U, Standard_Real& V);
-  
+  Standard_EXPORT Standard_Integer ComputeVF (const TopoDS_Vertex& theVertex, 
+                                const TopoDS_Face& theFace, 
+                                Standard_Real& theU,
+                                Standard_Real& theV,
+                                Standard_Real& theTol,
+                                const Standard_Real theFuzz = Precision::Confusion());
+
 
   //! Returns the state of the point aP2D
   //! relative to face aF
@@ -216,8 +235,7 @@ Standard_EXPORT virtual  ~IntTools_Context();
 
 
 
-
-  DEFINE_STANDARD_RTTI(IntTools_Context,MMgt_TShared)
+  DEFINE_STANDARD_RTTIEXT(IntTools_Context,Standard_Transient)
 
 protected:
 
@@ -231,6 +249,7 @@ protected:
   BOPCol_DataMapOfShapeAddress myHatcherMap;
   BOPCol_DataMapOfShapeAddress myProjSDataMap;
   BOPCol_DataMapOfShapeAddress myBndBoxDataMap;
+  BOPCol_DataMapOfShapeAddress mySurfAdaptorMap;
   Standard_Integer myCreateFlag;
   Standard_Real myPOnSTolerance;
 
@@ -241,14 +260,8 @@ private:
   //! Clears map of already cached projectors.
   Standard_EXPORT void clearCachedPOnSProjectors();
 
-
-
 };
 
-
-
-
-
-
+DEFINE_STANDARD_HANDLE(IntTools_Context, Standard_Transient)
 
 #endif // _IntTools_Context_HeaderFile

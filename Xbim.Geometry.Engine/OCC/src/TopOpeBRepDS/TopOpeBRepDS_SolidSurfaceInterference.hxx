@@ -39,12 +39,10 @@ public:
   
   Standard_EXPORT TopOpeBRepDS_SolidSurfaceInterference(const TopOpeBRepDS_Transition& Transition, const TopOpeBRepDS_Kind SupportType, const Standard_Integer Support, const TopOpeBRepDS_Kind GeometryType, const Standard_Integer Geometry);
   
-  Standard_EXPORT virtual Standard_OStream& Dump (Standard_OStream& OS) const Standard_OVERRIDE;
 
 
 
-
-  DEFINE_STANDARD_RTTI(TopOpeBRepDS_SolidSurfaceInterference,TopOpeBRepDS_Interference)
+  DEFINE_STANDARD_RTTIEXT(TopOpeBRepDS_SolidSurfaceInterference,TopOpeBRepDS_Interference)
 
 protected:
 

@@ -12,7 +12,7 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef WNT
+#ifndef _WIN32
 
 
 #include <OSD_Environment.hxx>
@@ -23,6 +23,7 @@
 #include <Standard_Mutex.hxx>
 #include <Standard_NullObject.hxx>
 #include <TCollection_AsciiString.hxx>
+#include <NCollection_UtfString.hxx>
 
 #include <errno.h>
 #include <stdio.h>
@@ -239,9 +240,24 @@ Standard_Integer OSD_Environment::Error() const
 
 #include <windows.h>
 
-#pragma warning( disable : 4700 )
+#include <NCollection_DataMap.hxx>
+#include <NCollection_UtfString.hxx>
+#include <Standard_Mutex.hxx>
 
+#if defined(_MSC_VER)
+  #pragma warning( disable : 4700 )
+#endif
+
+#ifdef OCCT_UWP
+namespace
+{
+  // emulate global map of environment variables
+  static Standard_Mutex THE_ENV_LOCK;
+  static NCollection_DataMap<TCollection_AsciiString, TCollection_AsciiString> THE_ENV_MAP;
+}
+#else
 static void __fastcall _set_error ( OSD_Error&, DWORD );
+#endif
 
 OSD_Environment :: OSD_Environment () {
 
@@ -269,41 +285,43 @@ void OSD_Environment :: SetValue ( const TCollection_AsciiString& Value ) {
 
 }  // end OSD_Environment :: SetValue
 
-TCollection_AsciiString OSD_Environment :: Value () {
+TCollection_AsciiString OSD_Environment::Value()
+{
+  myValue.Clear();
+#ifdef OCCT_UWP
+  Standard_Mutex::Sentry aLock (THE_ENV_LOCK);
+  THE_ENV_MAP.Find (myName, myValue);
+#else
+  SetLastError (ERROR_SUCCESS);
+  wchar_t* anEnvVal = NULL;
+  NCollection_UtfWideString aNameWide (myName.ToCString());
+  DWORD aSize = GetEnvironmentVariableW (aNameWide.ToCString(), NULL, 0);
+  if ((aSize == 0 && GetLastError() != ERROR_SUCCESS)
+   || (anEnvVal = _wgetenv (aNameWide.ToCString())) == NULL)
+  {
+    _set_error (myError, ERROR_ENVVAR_NOT_FOUND);
+    return myValue;
+  }
 
- Standard_PCharacter pBuff=0;
- DWORD            dwSize = 0;
- char*            envVal = NULL;
-
- myValue.Clear ();
-
- SetLastError ( ERROR_SUCCESS );
- dwSize = GetEnvironmentVariable (  myName.ToCString (), pBuff, dwSize  );
-
- if (    ( dwSize == 0 && GetLastError () != ERROR_SUCCESS ) ||
-         (  envVal = getenv (  myName.ToCString ()  )  ) == NULL
- )
-
-  _set_error ( myError, ERROR_ENVVAR_NOT_FOUND );
-
- else if ( envVal != NULL )
-
-  myValue = envVal;
-
- else {
-
-  ++dwSize; 
-  pBuff = new Standard_Character[ dwSize ];
-  GetEnvironmentVariable (  (char *)myName.ToCString (), pBuff, dwSize  );
-  myValue = pBuff;
-  delete [] pBuff;
-  Reset ();
- 
- }  // end else
-
- return myValue;
-
-}  // end OSD_Environment :: Value
+  NCollection_Utf8String aValue;
+  if (anEnvVal != NULL)
+  {
+    aValue.FromUnicode (anEnvVal);
+  }
+  else
+  {
+    aSize += 1; // NULL-terminator
+    wchar_t* aBuff = new wchar_t[aSize];
+    GetEnvironmentVariableW (aNameWide.ToCString(), aBuff, aSize);
+    aBuff[aSize - 1] = L'\0';
+    aValue.FromUnicode (aBuff);
+    delete[] aBuff;
+    Reset();
+  }
+  myValue = aValue.ToCString();
+#endif
+  return myValue;
+}
 
 void OSD_Environment :: SetName ( const TCollection_AsciiString& name ) {
 
@@ -317,25 +335,27 @@ TCollection_AsciiString OSD_Environment :: Name () const {
 
 }  // end OSD_Environment :: Name
 
-void OSD_Environment :: Build () {
+void OSD_Environment::Build()
+{
+#ifdef OCCT_UWP
+  Standard_Mutex::Sentry aLock(THE_ENV_LOCK);
+  THE_ENV_MAP.Bind (myName, myValue);
+#else
+  NCollection_Utf8String aSetVariable = NCollection_Utf8String(myName.ToCString()) + "=" + myValue.ToCString();
+  _wputenv (aSetVariable.ToUtfWide().ToCString());
+#endif
+}
 
- TCollection_AsciiString str;
-
- str = myName + TEXT( "=" ) + myValue;
-
- putenv (  str.ToCString ()  );
-
-}  // end OSD_Environment :: Build
-
-void OSD_Environment :: Remove () {
-
- TCollection_AsciiString str;
-
- str = myName + TEXT( "=" );
-
- putenv (  str.ToCString ()  );
-
-}  // end OSD_Environment :: Remove
+void OSD_Environment::Remove()
+{
+#ifdef OCCT_UWP
+  Standard_Mutex::Sentry aLock(THE_ENV_LOCK);
+  THE_ENV_MAP.UnBind (myName);
+#else
+  NCollection_Utf8String aSetVariable = NCollection_Utf8String(myName.ToCString()) + "=";
+  _wputenv (aSetVariable.ToUtfWide().ToCString());
+#endif
+}
 
 Standard_Boolean OSD_Environment :: Failed () const {
 
@@ -349,14 +369,9 @@ void OSD_Environment :: Reset () {
 
 }  // end OSD_Environment :: Reset
 
-void OSD_Environment :: Perror () {
-
- if (  ErrorPrefix ()  )
-
-  (  *ErrorStream ()  ) << TEXT( '\'' ) << myName.ToCString () << TEXT( "' - " );
-
- myError.Perror ();
-
+void OSD_Environment :: Perror ()
+{
+  myError.Perror ();
 }  // end OSD_Environment :: Perror
 
 Standard_Integer OSD_Environment :: Error () const {
@@ -365,6 +380,7 @@ Standard_Integer OSD_Environment :: Error () const {
 
 }  // end OSD_Environment :: Error
 
+#ifndef OCCT_UWP
 static void __fastcall _set_error ( OSD_Error& err, DWORD code ) {
 
  DWORD              errCode;
@@ -387,5 +403,6 @@ static void __fastcall _set_error ( OSD_Error& err, DWORD code ) {
  err.SetValue ( errCode, OSD_WEnvironment, buffer );
 
 }  // end _set_error
+#endif
 
 #endif

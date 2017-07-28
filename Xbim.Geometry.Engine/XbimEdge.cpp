@@ -786,14 +786,14 @@ namespace Xbim
 				IfcAxis2Placement2D^ ax2 = (IfcAxis2Placement2D^)circle->Position;
 				gp_Ax2 gpax2(gp_Pnt(ax2->Location->X, ax2->Location->Y, 0), gp_Dir(0, 0, 1), gp_Dir(ax2->P[0].X, ax2->P[0].Y, 0.));
 				gp_Circ gc(gpax2, circle->Radius);
-				curve = GC_MakeCircle(gc);
+				curve = GC_MakeCircle(gc).Value();;
 			}
 			else if (dynamic_cast<IfcAxis2Placement3D^>(circle->Position))
 			{
 				IfcAxis2Placement3D^ ax2 = (IfcAxis2Placement3D^)circle->Position;
 				gp_Ax3 	gpax3 = XbimGeomPrim::ToAx3(ax2);
 				gp_Circ gc(gpax3.Ax2(), circle->Radius);
-				curve = GC_MakeCircle(gc);
+				curve = GC_MakeCircle(gc).Value();;
 			}
 			else
 			{
@@ -825,7 +825,7 @@ namespace Xbim
 			gp_Pnt pnt(cp->X, cp->Y, cp->Z);
 			XbimVector3D v3d = dir->XbimVector3D();
 			gp_Vec vec(v3d.X, v3d.Y, v3d.Z);
-			BRepBuilderAPI_MakeEdge edgeMaker(GC_MakeLine(pnt, vec), 0, dir->Magnitude);
+			BRepBuilderAPI_MakeEdge edgeMaker(GC_MakeLine(pnt, vec).Value(), 0, dir->Magnitude);
 			BRepBuilderAPI_EdgeError edgeErr = edgeMaker.Error();
 			if (edgeErr != BRepBuilderAPI_EdgeDone)
 			{
