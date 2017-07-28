@@ -2,8 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard1.6</TargetFramework>
-    <Timestamp>$([System.DateTime]::Now.ToString("yyyyMMdd-HHmmss"))</Timestamp>
-    <Version>2.0.0-ci-$(Timestamp)</Version>
+    <Version>5.0.0-Beta</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>General support class library for Geometry, NET Standard and Ifc aware</Description>
     <Copyright>Xbim Ltd.</Copyright>
@@ -16,7 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Xbim.Ifc2x3.Extensions" Version="2.0.0-ci-20170726-154835" />
+    <PackageReference Include="Xbim.Ifc2x3.Extensions" Version="5.0.0-Beta-228" />
   </ItemGroup>
 
 </Project>
