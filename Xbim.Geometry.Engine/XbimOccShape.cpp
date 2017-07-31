@@ -331,8 +331,8 @@ namespace Xbim
 								XbimPackedNormal normalA = norms[nodeIndex-1];
 								XbimPackedNormal normalB = norms[j-1];
 								XbimVector3D vec = normalA.Normal + normalB.Normal;
-								// todo: restore normalisation
-								// vec = vec.Normalized();
+								
+								vec.Normalize();
 								XbimPackedNormal normalBalanced = XbimPackedNormal(vec);
 								norms[nodeIndex-1] = normalBalanced;
 								norms[j-1] = normalBalanced;

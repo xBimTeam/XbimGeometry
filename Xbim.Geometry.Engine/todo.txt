@@ -1,2 +1,0 @@
-C:\Users\Claudio\Dev\Xbim3\XbimGeometry\Xbim.Geometry.Engine\XbimOccShape.cpp
-has an essential todo
