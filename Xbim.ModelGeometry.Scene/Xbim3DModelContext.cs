@@ -799,6 +799,8 @@ namespace Xbim.ModelGeometry.Scene
             }
         }
 
+        public int MaxSolidSubtractions { get; set; } = 40;
+
         private HashSet<int> WriteFeatureElements(XbimCreateContextHelper contextHelper,
             BlockingCollection<Tuple<XbimShapeInstance, IXbimShapeGeometryData>> features,
             ReportProgressDelegate progDelegate, XbimGeometryType geomType
@@ -871,6 +873,7 @@ namespace Xbim.ModelGeometry.Scene
             Parallel.ForEach(booleanOps, contextHelper.ParallelOptions, bop =>
                     //         foreach (IGrouping<IfcElement, IfcFeatureElement> pair in contextHelper.OpeningsAndProjections)
                     {
+
                         Interlocked.Increment(ref localTally);
                         int elementLabel = 0;
                         short typeId = 0;
@@ -965,22 +968,32 @@ namespace Xbim.ModelGeometry.Scene
                                 }
 
 
-                                if (!behaviour.HasFlag(MeshingSimplification.SkipSubtractions) && allOpenings.Any())
+                                if (
+                                    !behaviour.HasFlag(MeshingSimplification.SkipSubtractions) && allOpenings.Any() 
+                                    && (MaxSolidSubtractions == -1 || allOpenings.Count < MaxSolidSubtractions)
+                                    )
                                 {
                                     var nextGeom = elementGeom.Cut(allOpenings, thisPrecision);
                                     if (nextGeom != null && nextGeom.IsValid)
                                     {
                                         if (nextGeom.First != null && nextGeom.First.IsValid)
+                                        {
                                             elementGeom = nextGeom;
+                                            //if (allOpenings.Count > 30)
+                                            //{
+                                            //    Logger.WarnFormat(
+                                            //        "WM009: Cutting of {2} openings in {1}[#{0}] has resulted in correct shape", elementLabel, IfcMetaData.IfcType(typeId).Name, allOpenings.Count);
+                                            //}
+                                        }
                                         else
                                             Logger.WarnFormat(
-                                                "WM009: Cutting of openings in {1}[#{0}] has resulted in an empty shape",
-                                                elementLabel, IfcMetaData.IfcType(typeId).Name);
+                                                "WM009: Cutting of {2} openings in {1}[#{0}] has resulted in an empty shape",
+                                                elementLabel, IfcMetaData.IfcType(typeId).Name, allOpenings.Count);
                                     }
                                     else
                                         Logger.WarnFormat(
-                                            "WM008: Cutting of openings in {1}[#{0}] has failed, openings have been ignored",
-                                            elementLabel, IfcMetaData.IfcType(typeId).Name);
+                                            "WM008: Cutting of {2} openings in {1}[#{0}] has failed, openings have been ignored",
+                                            elementLabel, IfcMetaData.IfcType(typeId).Name, allOpenings.Count);
                                 }
 
                                 ////now add to the DB               

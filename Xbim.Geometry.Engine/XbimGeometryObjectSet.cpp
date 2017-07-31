@@ -400,7 +400,7 @@ namespace Xbim
 				
 				Handle(XbimProgressIndicator) aPI = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);				
 				pBuilder->SetProgressIndicator(aPI);
-				// pBuilder->SetNonDestructive(Standard_True); only available in 7.1
+				pBuilder->SetNonDestructive(Standard_True); // only available in 7.1
 				pBuilder->Build();
 				aPI->StopTimer();
 				//XbimGeometryCreator::logger->FatalFormat("{0}", aPI->ElapsedTime());
