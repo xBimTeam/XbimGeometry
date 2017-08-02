@@ -71,9 +71,6 @@
 #include <TopTools_ListOfShape.hxx>
 #include <TopTools_MapOfShape.hxx>
 
-//#ifdef OCCT_DEBUG
-//Standard_IMPORT Standard_Boolean TopOpeBRepBuild_GettraceFE();
-//#endif
 static void BCSmoothing(Handle(Geom_BSplineCurve)& theC,
 			const Standard_Integer theCont,
 			const Standard_Real theTol)
@@ -187,7 +184,7 @@ static void MakeClosedCurve(Handle(Geom_Curve)& C, const gp_Pnt& PF,
       porig = aPrj.Point().Parameter();
     }
     else {
-      Standard_ConstructionError::Raise("FuseEdges : Projection failed for closed curve");
+      throw Standard_ConstructionError("FuseEdges : Projection failed for closed curve");
     }
   }
 	    
@@ -217,7 +214,7 @@ BRepLib_FuseEdges::BRepLib_FuseEdges(const TopoDS_Shape& theShape,
  myResultEdgesDone(Standard_False),myNbConnexEdge(0), myConcatBSpl(Standard_False)
 {
 //  if (theShape.ShapeType() != TopAbs_SHELL && theShape.ShapeType() != TopAbs_SOLID)
-//    Standard_ConstructionError::Raise("FuseEdges");
+//    throw Standard_ConstructionError("FuseEdges");
   Standard_NullObject_Raise_if(theShape.IsNull(),"FuseEdges");
   myMapFaces.Clear();
 
@@ -366,11 +363,6 @@ TopoDS_Shape& BRepLib_FuseEdges::Shape()
 
 void BRepLib_FuseEdges::BuildListEdges()
 {
-
-//#ifdef OCCT_DEBUG
-  //Standard_Boolean tFE = TopOpeBRepBuild_GettraceFE();
-//#endif
-
   //--------------------------------------------------------
   // Step One : Build the map ancestors
   //--------------------------------------------------------
@@ -380,7 +372,7 @@ void BRepLib_FuseEdges::BuildListEdges()
   myMapVerLstEdg.Clear();
   myMapEdgLstFac.Clear();
   
-  BuildAncestors(myShape,TopAbs_VERTEX,TopAbs_EDGE,myMapVerLstEdg);
+  TopExp::MapShapesAndUniqueAncestors(myShape,TopAbs_VERTEX,TopAbs_EDGE,myMapVerLstEdg);
   TopExp::MapShapesAndAncestors(myShape,TopAbs_EDGE,TopAbs_FACE,myMapEdgLstFac);
 
   Standard_Integer iEdg;
@@ -416,11 +408,6 @@ void BRepLib_FuseEdges::BuildListEdges()
 
 void BRepLib_FuseEdges::BuildListResultEdges()
 {
-
-//#ifdef OCCT_DEBUG
-  //Standard_Boolean tFE = TopOpeBRepBuild_GettraceFE();
-//#endif
-
   // if we have edges to fuse
   if (myMapLstEdg.Extent() > 0) {
     TopTools_DataMapIteratorOfDataMapOfIntegerListOfShape itLstEdg;
@@ -471,7 +458,7 @@ void BRepLib_FuseEdges::BuildListResultEdges()
 	    aTC = new Geom_TrimmedCurve(aC, f, l);
 	    if (!Concat.Add(aTC, Precision::Confusion())) {
                   // cannot merge curves
-	      Standard_ConstructionError::Raise("FuseEdges : Concatenation failed");
+	      throw Standard_ConstructionError("FuseEdges : Concatenation failed");
 	    }
 	  }
 	  C = Concat.BSplineCurve();			
@@ -490,7 +477,7 @@ void BRepLib_FuseEdges::BuildListResultEdges()
 	gp_Pnt aPf = C->Value(f);
 	gp_Pnt aPl = C->Value(l);
 	if(aPf.Distance(aPl) > Precision::Confusion()) {
-	    Standard_ConstructionError::Raise("FuseEdges : Curve must be closed");
+	    throw Standard_ConstructionError("FuseEdges : Curve must be closed");
 	}
 	gp_Pnt PF = BRep_Tool::Pnt(VF);
 	if(PF.Distance(aPf) > Precision::Confusion()) {
@@ -499,7 +486,7 @@ void BRepLib_FuseEdges::BuildListResultEdges()
 	//
 	ME.Init(C, VF, VL, f, l);
 	if (!ME.IsDone()) {
-	  Standard_ConstructionError::Raise("FuseEdges : MakeEdge failed for closed curve");
+	  throw Standard_ConstructionError("FuseEdges : MakeEdge failed for closed curve");
 	}
       }
       else {
@@ -521,10 +508,10 @@ void BRepLib_FuseEdges::BuildListResultEdges()
 
 	  ME.Init(ExtC,VF,VL);
 	  if (!ME.IsDone()) 
-	    Standard_ConstructionError::Raise("FuseEdges : Fusion failed");
+	    throw Standard_ConstructionError("FuseEdges : Fusion failed");
 	}
 	else
-	  Standard_ConstructionError::Raise("FuseEdges : Fusion failed");
+	  throw Standard_ConstructionError("FuseEdges : Fusion failed");
       }
 
       NewEdge = ME.Edge();
@@ -545,11 +532,6 @@ void BRepLib_FuseEdges::BuildListResultEdges()
 
 void BRepLib_FuseEdges::Perform()
 {
-
-//#ifdef OCCT_DEBUG
-  //Standard_Boolean tFE = TopOpeBRepBuild_GettraceFE();
-//#endif
-
   if (!myResultEdgesDone) {
     BuildListResultEdges();
   }
@@ -803,9 +785,6 @@ Standard_Boolean BRepLib_FuseEdges::SameSupport(const TopoDS_Edge& E1,
       typC1 != STANDARD_TYPE(Geom_Ellipse) &&
       typC1 != STANDARD_TYPE(Geom_BSplineCurve) && 
       typC1 != STANDARD_TYPE(Geom_BezierCurve)) {
-#ifdef OCCT_DEBUG
-    cout << " TopOpeBRepTool_FuseEdge : Type de Support non traite" << endl;
-#endif
     return Standard_False;
   }
 
@@ -999,49 +978,6 @@ Standard_Boolean BRepLib_FuseEdges::SameSupport(const TopoDS_Edge& E1,
   }
   return Standard_False;
 }
-
-
-//=======================================================================
-//function : BuildAncestors
-//purpose  : This function is like TopExp::MapShapesAndAncestors except
-// that in the list of shape we do not want duplicate shapes.
-// if this is useful for other purpose we should create a new method in
-// TopExp
-//=======================================================================
-
-void BRepLib_FuseEdges::BuildAncestors
-  (const TopoDS_Shape& S, 
-   const TopAbs_ShapeEnum TS, 
-   const TopAbs_ShapeEnum TA, 
-   TopTools_IndexedDataMapOfShapeListOfShape& M) const
-{
-
-  TopTools_MapOfShape mapDuplicate;
-  TopTools_ListIteratorOfListOfShape it;
-  Standard_Integer iSh;
-
-  TopExp::MapShapesAndAncestors(S,TS,TA,M);
-
-  // for each shape of M
-  for (iSh = 1; iSh <= M.Extent(); iSh++) {
-    TopTools_ListOfShape& Lsh = M(iSh);
-
-    mapDuplicate.Clear();
-    // we check for duplicate in the list of Shape
-    it.Initialize(Lsh);
-    while (it.More() ) {
-      if (!mapDuplicate.Contains(it.Value())) {
-	mapDuplicate.Add(it.Value());
-	it.Next();
-      }
-      else {
-	Lsh.Remove(it);
-      }
-    }
-  }  
-
-}
-
 
 //=======================================================================
 //function : UpdatePCurve

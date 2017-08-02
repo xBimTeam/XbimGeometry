@@ -335,7 +335,7 @@ Standard_Boolean Bisector_BisecCC::IsEmpty() const
 //=============================================================================
 void Bisector_BisecCC::Reverse()
 {
-  Standard_NotImplemented::Raise();  
+  throw Standard_NotImplemented();
 }
 
 //=============================================================================
@@ -684,12 +684,13 @@ gp_Pnt2d Bisector_BisecCC::ValueAndDist (const Standard_Real  U,
     gp_Vec2d P2P1(P1.X() - P2.X(),P1.Y() - P2.Y());
     Standard_Real SquareP2P1 = P2P1.SquareMagnitude();
     Standard_Real N1P2P1     = N1.Dot(P2P1);
+    const Standard_Real anEps = Epsilon(1);
 
     if (P1.IsEqual(P2,Precision::Confusion())) {
       PBis = P1 ;
       Dist = 0.0;
     }
-    else if (N1P2P1*sign1 < 0) {
+    else if (N1P2P1*sign1 < anEps) {
       Valid = Standard_False;
     }
     else {	
@@ -999,10 +1000,9 @@ gp_Vec2d Bisector_BisecCC::DN(const Standard_Real    U,
   case 2 : return V2;
   case 3 : return V3;
   default: {
-    Standard_NotImplemented::Raise();
+    throw Standard_NotImplemented();
            }
   }
-  return V1;
 }
 
 //=============================================================================
@@ -1393,8 +1393,7 @@ Handle(Geom2d_Curve) Bisector_BisecCC::Curve(const Standard_Integer I) const
 {
   if      (I == 1) return curve1;
   else if (I == 2) return curve2;
-  else             Standard_OutOfRange::Raise();  
-  return curve1;
+  else             throw Standard_OutOfRange();
 }
 
 //=============================================================================
@@ -1490,7 +1489,7 @@ void Bisector_BisecCC::Curve(const Standard_Integer      I,
 {
   if      (I == 1) curve1 = C;
   else if (I == 2) curve2 = C;
-  else             Standard_OutOfRange::Raise();  
+  else             throw Standard_OutOfRange();
 }
 
 //=============================================================================
@@ -1502,7 +1501,7 @@ void Bisector_BisecCC::Sign(const Standard_Integer      I,
 {
   if      (I == 1) sign1 = S;
   else if (I == 2) sign2 = S;
-  else             Standard_OutOfRange::Raise();  
+  else             throw Standard_OutOfRange();
 }
 
 //=============================================================================
@@ -1532,7 +1531,7 @@ void Bisector_BisecCC::IsConvex(const Standard_Integer     I,
 {
   if      (I == 1) isConvex1 = IsConvex;
   else if (I == 2) isConvex2 = IsConvex;
-  else             Standard_OutOfRange::Raise();  
+  else             throw Standard_OutOfRange();
 }
 
 //=============================================================================

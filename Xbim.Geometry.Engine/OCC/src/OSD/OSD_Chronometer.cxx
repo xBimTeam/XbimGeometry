@@ -111,7 +111,6 @@ void OSD_Chronometer::GetThreadCPU (Standard_Real& theUserSeconds,
 
 //---------------------------- Systeme WNT --------------------------------
 
-#define STRICT
 #include <windows.h>
 
 //=======================================================================
@@ -197,6 +196,17 @@ void OSD_Chronometer::Reset ()
   Stopped    = Standard_True;
   Start_user = Start_sys = 0.;
   Cumul_user = Cumul_sys = 0.;
+}
+
+
+//=======================================================================
+//function : Restart
+//purpose  :
+//=======================================================================
+void OSD_Chronometer::Restart ()
+{
+  Stopped = Standard_True;
+  Start();
 }
 
 //=======================================================================

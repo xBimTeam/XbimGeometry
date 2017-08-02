@@ -155,9 +155,6 @@ Standard_Integer OSD_Disk::Error()const{
 //---------------------------- Windows NT System --------------------------------
 //-------------------------------------------------------------------------------
 
-#define STRICT
-
-
 #include <OSD_Disk.hxx>
 #include <OSD_OSDError.hxx>
 #include <OSD_Path.hxx>
@@ -403,7 +400,7 @@ static void __fastcall _osd_wnt_set_disk_name ( TCollection_AsciiString& result,
   
   } else {
 badPath:  
-   Standard_ProgramError :: Raise ( "OSD_Disk: bad disk name" );
+   throw Standard_ProgramError ( "OSD_Disk: bad disk name" );
 
   }  // end else
  

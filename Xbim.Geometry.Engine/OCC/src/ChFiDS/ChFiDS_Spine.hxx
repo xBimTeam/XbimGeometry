@@ -31,20 +31,21 @@
 #include <gp_Pnt.hxx>
 #include <gp_Vec.hxx>
 #include <ChFiDS_ErrorStatus.hxx>
-#include <MMgt_TShared.hxx>
+#include <Standard_Transient.hxx>
 #include <GeomAbs_CurveType.hxx>
 class TopoDS_Edge;
 class ChFiDS_HElSpine;
-class gp_Pnt;
-class gp_Vec;
-class BRepAdaptor_Curve;
 class gp_Lin;
 class gp_Circ;
 class TopoDS_Vertex;
 
+// resolve name collisions with X11 headers
+#ifdef Status
+  #undef Status
+#endif
 
 class ChFiDS_Spine;
-DEFINE_STANDARD_HANDLE(ChFiDS_Spine, MMgt_TShared)
+DEFINE_STANDARD_HANDLE(ChFiDS_Spine, Standard_Transient)
 
 //! Contains information necessary for construction of
 //! a 3D fillet or chamfer:
@@ -69,7 +70,7 @@ DEFINE_STANDARD_HANDLE(ChFiDS_Spine, MMgt_TShared)
 //! the approach and double the Spine of line C2 with
 //! the known consequences for management of
 //! interactions between KPart Blend in Fil3d.
-class ChFiDS_Spine : public MMgt_TShared
+class ChFiDS_Spine : public Standard_Transient
 {
 
 public:
@@ -229,7 +230,7 @@ public:
 
 
 
-  DEFINE_STANDARD_RTTIEXT(ChFiDS_Spine,MMgt_TShared)
+  DEFINE_STANDARD_RTTIEXT(ChFiDS_Spine,Standard_Transient)
 
 protected:
 

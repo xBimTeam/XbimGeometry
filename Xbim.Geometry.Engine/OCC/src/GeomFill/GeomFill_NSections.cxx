@@ -920,7 +920,7 @@ void GeomFill_NSections::GetMinimalWeight(TColStd_Array1OfReal& Weights) const
  Handle(Geom_Curve) GeomFill_NSections::ConstantSection() const
 {
 //  Standard_Real Err;
-//  if (!IsConstant(Err)) StdFail_NotDone::Raise("The Law is not Constant!");
+//  if (!IsConstant(Err)) throw StdFail_NotDone("The Law is not Constant!");
   Handle(Geom_Curve) C;
   C = Handle(Geom_Curve)::DownCast( mySections(1)->Copy());
   return C;
@@ -992,7 +992,7 @@ void GeomFill_NSections::GetMinimalWeight(TColStd_Array1OfReal& Weights) const
  Handle(Geom_Curve) GeomFill_NSections::CirclSection(const Standard_Real V) const
 {
   Standard_Real Err;
-  if (!IsConicalLaw(Err)) StdFail_NotDone::Raise("The Law is not Conical!");
+  if (!IsConicalLaw(Err)) throw StdFail_NotDone("The Law is not Conical!");
 
   GeomAdaptor_Curve AC1(mySections(1));
   GeomAdaptor_Curve AC2(mySections(mySections.Length()));
@@ -1005,9 +1005,14 @@ void GeomFill_NSections::GetMinimalWeight(TColStd_Array1OfReal& Weights) const
 
   C1.SetRadius(radius);
   Handle(Geom_Curve) C = new (Geom_Circle) (C1);
-  if (! AC1.IsPeriodic()) {
-    Handle(Geom_Curve) Cbis = new (Geom_TrimmedCurve) 
-      (C, AC1.FirstParameter(),  AC1.LastParameter());
+
+  const Standard_Real aParF = AC1.FirstParameter();
+  const Standard_Real aParL = AC1.LastParameter();
+  const Standard_Real aPeriod = AC1.IsPeriodic() ? AC1.Period() : 0.0;
+
+  if ((aPeriod == 0.0) || (Abs(aParL - aParF - aPeriod) > Precision::PConfusion()))
+  {
+    Handle(Geom_Curve) Cbis = new Geom_TrimmedCurve(C, aParF, aParL);
     C = Cbis;
   }
   return C;

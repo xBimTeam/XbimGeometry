@@ -23,7 +23,7 @@
 #include <TopoDS_Face.hxx>
 #include <Standard_Real.hxx>
 #include <Standard_Integer.hxx>
-#include <MMgt_TShared.hxx>
+#include <Standard_Transient.hxx>
 #include <Standard_Boolean.hxx>
 #include <IntRes2d_SequenceOfIntersectionPoint.hxx>
 #include <TColgp_SequenceOfPnt.hxx>
@@ -35,7 +35,6 @@
 class ShapeExtend_WireData;
 class ShapeAnalysis_Surface;
 class TopoDS_Wire;
-class TopoDS_Face;
 class Geom_Surface;
 class TopLoc_Location;
 class ShapeAnalysis_WireOrder;
@@ -44,9 +43,13 @@ class gp_Pnt2d;
 class TopoDS_Shape;
 class TopoDS_Edge;
 
+// resolve name collisions with X11 headers
+#ifdef Status
+  #undef Status
+#endif
 
 class ShapeAnalysis_Wire;
-DEFINE_STANDARD_HANDLE(ShapeAnalysis_Wire, MMgt_TShared)
+DEFINE_STANDARD_HANDLE(ShapeAnalysis_Wire, Standard_Transient)
 
 //! This class provides analysis of a wire to be compliant to
 //! CAS.CADE requirements.
@@ -85,7 +88,7 @@ DEFINE_STANDARD_HANDLE(ShapeAnalysis_Wire, MMgt_TShared)
 //!
 //! In order to prepare an analyzer, it is necessary to load a wire,
 //! set face and precision.
-class ShapeAnalysis_Wire : public MMgt_TShared
+class ShapeAnalysis_Wire : public Standard_Transient
 {
 
 public:
@@ -515,7 +518,7 @@ public:
 
 
 
-  DEFINE_STANDARD_RTTIEXT(ShapeAnalysis_Wire,MMgt_TShared)
+  DEFINE_STANDARD_RTTIEXT(ShapeAnalysis_Wire,Standard_Transient)
 
 protected:
 

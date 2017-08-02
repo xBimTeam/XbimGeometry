@@ -45,10 +45,13 @@
 #include <IntSurf_ListOfPntOn2S.hxx>
 #include <BOPCol_DataMapOfIntegerListOfInteger.hxx>
 #include <BOPDS_MapOfPaveBlock.hxx>
+#include <BOPDS_MapOfPair.hxx>
 #include <BOPDS_VectorOfCurve.hxx>
+#include <BOPDS_IndexedDataMapOfPaveBlockListOfInteger.hxx>
 #include <BOPCol_IndexedDataMapOfShapeInteger.hxx>
 #include <BOPCol_IndexedDataMapOfShapeListOfShape.hxx>
 #include <BOPAlgo_GlueEnum.hxx>
+#include <IntTools_ShrunkRange.hxx>
 class IntTools_Context;
 class BOPDS_DS;
 class BOPAlgo_SectionAttribute;
@@ -60,7 +63,44 @@ class TopoDS_Vertex;
 class TopoDS_Edge;
 class TopoDS_Face;
 
-
+//!
+//! The class represents the Intersection phase of the
+//! Boolean Operations algorithm.<br>
+//! It performs the pairwise intersection of the sub-shapes of
+//! the arguments in the following order:<br>
+//! 1. Vertex/Vertex;<br>
+//! 2. Vertex/Edge;<br>
+//! 3. Edge/Edge;<br>
+//! 4. Vertex/Face;<br>
+//! 5. Edge/Face;<br>
+//! 6. Face/Face.<br>
+//!
+//! The results of intersection are stored into the Data Structure
+//! of the algorithm.<br>
+//!
+//! Additionally to the options provided by the parent class,
+//! the algorithm has the following options:<br>
+//! - *Section attributes* - allows to customize the intersection of the faces
+//!                          (avoid approximation or building 2d curves);<br>
+//! - *Safe processing mode* - allows to avoid modification of the input
+//!                            shapes during the operation (by default it is off);<br>
+//! - *Gluing options* - allows to speed up the calculation on the special
+//!                      cases, in which some sub-shapes are coincide.<br>
+//!
+//! The algorithm returns the following Warning statuses:<br>
+//! - *BOPAlgo_AlertSelfInterferingShape* - in case some of the argument shapes are self-interfering shapes;<br>
+//! - *BOPAlgo_AlertTooSmallEdge* - in case some edges of the input shapes have no valid range;<br>
+//! - *BOPAlgo_AlertNotSplittableEdge* - in case some edges of the input shapes has such a small
+//!                         valid range so it cannot be split;<br>
+//! - *BOPAlgo_AlertBadPositioning* - in case the positioning of the input shapes leads to creation
+//!                      of small edges.<br>
+//!
+//! The algorithm returns the following Error alerts:
+//! - *BOPAlgo_AlertTooFewArguments* - in case there are no enough arguments to
+//!                      perform the operation;<br>
+//! - *BOPAlgo_AlertIntersectionFailed* - in case some unexpected error occurred;<br>
+//! - *BOPAlgo_AlertNullInputShapes* - in case some of the arguments are null shapes.<br>
+//!
 class BOPAlgo_PaveFiller  : public BOPAlgo_Algo
 {
 public:
@@ -108,7 +148,17 @@ public:
   //! Returns the glue option of the algorithm
   Standard_EXPORT BOPAlgo_GlueEnum Glue() const;
 
+  //! Sets the flag to avoid building of p-curves of edges on faces
+  void SetAvoidBuildPCurve(const Standard_Boolean theValue)
+  {
+    myAvoidBuildPCurve = theValue;
+  }
 
+  //! Returns the flag to avoid building of p-curves of edges on faces
+  Standard_Boolean IsAvoidBuildPCurve() const
+  {
+    return myAvoidBuildPCurve;
+  }
 
 protected:
 
@@ -128,7 +178,7 @@ protected:
 
   Standard_EXPORT virtual void PerformInternal();
   
-  Standard_EXPORT virtual void Clear();
+  Standard_EXPORT virtual void Clear() Standard_OVERRIDE;
   
   Standard_EXPORT virtual void Init();
   
@@ -137,6 +187,21 @@ protected:
   Standard_EXPORT virtual void PerformVV();
   
   Standard_EXPORT virtual void PerformVE();
+
+  //! Performs the intersection of the vertices with edges.
+  Standard_EXPORT void IntersectVE(const BOPDS_IndexedDataMapOfPaveBlockListOfInteger& theVEPairs,
+                                   const Standard_Boolean bAddInterfs = Standard_True);
+
+  //! Splits the Pave Blocks of the given edges with the extra paves.<br>
+  //! The method also builds the shrunk data for the new pave blocks and
+  //! in case there is no valid range on the pave block, the vertices of
+  //! this pave block will be united making SD vertex.<br>
+  //! Parameter <theAddInterfs> defines whether this interference will be added
+  //! into common table of interferences or not.<br>
+  //! If some of the Pave Blocks are forming the Common Blocks, the splits
+  //! of the Pave Blocks will also form a Common Block.
+  Standard_EXPORT void SplitPaveBlocks(const BOPCol_MapOfInteger& theMEdges,
+                                       const Standard_Boolean theAddInterfs);
   
   Standard_EXPORT virtual void PerformVF();
   
@@ -145,16 +210,6 @@ protected:
   Standard_EXPORT virtual void PerformEF();
   
   Standard_EXPORT virtual void PerformFF();
-  
-  Standard_EXPORT virtual void PerformVZ();
-  
-  Standard_EXPORT virtual void PerformEZ();
-  
-  Standard_EXPORT virtual void PerformFZ();
-  
-  Standard_EXPORT virtual void PerformZZ();
-
-  Standard_EXPORT virtual void PerformSZ(const TopAbs_ShapeEnum aTS);
   
   Standard_EXPORT void TreatVerticesEE();
   
@@ -175,10 +230,17 @@ protected:
   Standard_EXPORT void FillShrunkData (Handle(BOPDS_PaveBlock)& thePB);
   
   Standard_EXPORT void FillShrunkData (const TopAbs_ShapeEnum theType1, const TopAbs_ShapeEnum theType2);
-  
-  Standard_EXPORT Standard_Integer PerformVerticesEE (BOPDS_IndexedDataMapOfShapeCoupleOfPaveBlocks& theMVCPB, const BOPCol_BaseAllocator& theAllocator);
-  
-  Standard_EXPORT Standard_Integer PerformVerticesEF (BOPDS_IndexedDataMapOfShapeCoupleOfPaveBlocks& theMVCPB, const BOPCol_BaseAllocator& theAllocator);
+
+  //! Analyzes the results of computation of the valid range for the
+  //! pave block and in case of error adds the warning status, otherwise
+  //! saves the valid range in the pave block.
+  Standard_EXPORT void AnalyzeShrunkData(const Handle(BOPDS_PaveBlock)& thePB,
+                                         const IntTools_ShrunkRange& theSR);
+
+  //! Performs intersection of new vertices, obtained in E/E and E/F intersections
+  Standard_EXPORT void PerformNewVertices(BOPDS_IndexedDataMapOfShapeCoupleOfPaveBlocks& theMVCPB,
+                                          const BOPCol_BaseAllocator& theAllocator,
+                                          const Standard_Boolean theIsEEIntersection = Standard_True);
   
   Standard_EXPORT Standard_Boolean CheckFacePaves (const TopoDS_Vertex& theVnew, const BOPCol_MapOfInteger& theMIF);
   
@@ -189,7 +251,6 @@ protected:
 
   //! Checks and puts paves from <theMVOn> on the curve <theNC>.
   Standard_EXPORT void PutPavesOnCurve (const BOPCol_MapOfInteger& theMVOn, 
-                                const Standard_Real theTolR3D, 
                                 BOPDS_Curve& theNC, 
                                 const Standard_Integer nF1, 
                                 const Standard_Integer nF2, 
@@ -198,8 +259,7 @@ protected:
                                 BOPCol_DataMapOfIntegerReal& theMVTol,
                                 BOPCol_DataMapOfIntegerListOfInteger& aDMVLV);
 
-  Standard_EXPORT void FilterPavesOnCurves(const BOPDS_VectorOfCurve& theVNC,
-                                           const Standard_Real theTolR3D);
+  Standard_EXPORT void FilterPavesOnCurves(const BOPDS_VectorOfCurve& theVNC);
 
   //! Depending on the parameter aType it checks whether
   //! the vertex nV was created in EE or EF intersections.
@@ -211,7 +271,10 @@ protected:
   //! other - checks both types of intersections.
   Standard_EXPORT Standard_Boolean ExtendedTolerance (const Standard_Integer nV, const BOPCol_MapOfInteger& aMI, Standard_Real& aTolVExt, const Standard_Integer aType = 0);
   
-  Standard_EXPORT void PutBoundPaveOnCurve (const TopoDS_Face& theF1, const TopoDS_Face& theF2, const Standard_Real theTolR3D, BOPDS_Curve& theNC, BOPCol_ListOfInteger& theLBV);
+  Standard_EXPORT void PutBoundPaveOnCurve(const TopoDS_Face& theF1,
+                                           const TopoDS_Face& theF2,
+                                           BOPDS_Curve& theNC,
+                                           BOPCol_ListOfInteger& theLBV);
   
   Standard_EXPORT Standard_Boolean IsExistingPaveBlock
     (const Handle(BOPDS_PaveBlock)& thePB, const BOPDS_Curve& theNC,
@@ -223,11 +286,11 @@ protected:
   
 
   //! Treatment of section edges.
-  Standard_EXPORT Standard_Integer PostTreatFF (BOPDS_IndexedDataMapOfShapeCoupleOfPaveBlocks& theMSCPB,
-                                                BOPDS_DataMapOfPaveBlockListOfPaveBlock& theDMExEdges,
-                                                BOPCol_DataMapOfIntegerInteger& theDMNewSD,
-                                                const BOPCol_IndexedMapOfShape& theMicroEdges,
-                                                const BOPCol_BaseAllocator& theAllocator);
+  Standard_EXPORT void PostTreatFF (BOPDS_IndexedDataMapOfShapeCoupleOfPaveBlocks& theMSCPB,
+                                    BOPDS_DataMapOfPaveBlockListOfPaveBlock& theDMExEdges,
+                                    BOPCol_DataMapOfIntegerInteger& theDMNewSD,
+                                    const BOPCol_IndexedMapOfShape& theMicroEdges,
+                                    const BOPCol_BaseAllocator& theAllocator);
   
   Standard_EXPORT void FindPaveBlocks (const Standard_Integer theV, const Standard_Integer theF, BOPDS_ListOfPaveBlock& theLPB);
   
@@ -310,12 +373,6 @@ protected:
 
   //! Keeps data for post treatment
   Standard_EXPORT void PreparePostTreatFF (const Standard_Integer aInt, const Standard_Integer aCur, const Handle(BOPDS_PaveBlock)& aPB, BOPDS_IndexedDataMapOfShapeCoupleOfPaveBlocks& aMSCPB, BOPCol_DataMapOfShapeInteger& aMVI, BOPDS_ListOfPaveBlock& aLPB);
-  
-
-  //! Refines the state On for the all faces having
-  //! state information
-  Standard_EXPORT void RefineFaceInfoOn();
-  
 
   //! Updates the information about faces
   Standard_EXPORT void UpdateFaceInfo (BOPDS_DataMapOfPaveBlockListOfPaveBlock& theDME, const BOPCol_DataMapOfIntegerInteger& theDMV);
@@ -323,8 +380,9 @@ protected:
 
   //! Updates tolerance of vertex with index <nV>
   //! to make it interfere with edge
-  Standard_EXPORT void ForceInterfVE (const Standard_Integer nV, Handle(BOPDS_PaveBlock)& aPB, BOPDS_MapOfPaveBlock& aMPB);
-  
+  Standard_EXPORT void ForceInterfVE(const Standard_Integer nV,
+                                     Handle(BOPDS_PaveBlock)& aPB,
+                                     BOPCol_MapOfInteger& theMEdges);
 
   //! Updates tolerance of vertex with index <nV>
   //! to make it interfere with face with index <nF>
@@ -398,6 +456,25 @@ protected:
                                             Standard_Real& theSLast,
                                             Bnd_Box& theBox);
 
+  //! Treatment of the possible common zones, not detected by the
+  //! Face/Face intersection algorithm, by intersection of each section edge
+  //! with all faces not participated in creation of that section edge.
+  //! If the intersection says that the section edge is lying on the face
+  //! it will be added into FaceInfo structure of the face as IN edge
+  //! and will be used for splitting.
+  Standard_EXPORT void PutSEInOtherFaces();
+
+  //! Analyzes the results of interferences of sub-shapes of the shapes
+  //! looking for self-interfering entities by the following rules:<br>
+  //! 1. The Faces of the same shape considered interfering in case they:<br>
+  //!    - Interfere with the other shapes in the same place (in the same vertex) or;<br>
+  //!    - Included in the same common block.
+  //! 2. The Faces of the same shape considered interfering in case they
+  //!    share the IN or SECTION edges.<br>
+  //! In case self-interference is found the warning is added.
+  Standard_EXPORT void CheckSelfInterference();
+
+
   BOPCol_ListOfShape myArguments;
   BOPDS_PDS myDS;
   BOPDS_PIterator myIterator;
@@ -405,6 +482,7 @@ protected:
   BOPAlgo_SectionAttribute mySectionAttribute;
   Standard_Boolean myNonDestructive;
   Standard_Boolean myIsPrimary;
+  Standard_Boolean myAvoidBuildPCurve;
   BOPAlgo_GlueEnum myGlue;
 
 

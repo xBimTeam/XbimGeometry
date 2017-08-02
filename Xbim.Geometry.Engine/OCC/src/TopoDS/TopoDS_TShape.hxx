@@ -22,16 +22,20 @@
 
 #include <TopoDS_ListOfShape.hxx>
 #include <Standard_Integer.hxx>
-#include <MMgt_TShared.hxx>
+#include <Standard_Transient.hxx>
 #include <Standard_Boolean.hxx>
 #include <TopAbs_ShapeEnum.hxx>
-class Standard_ConstructionError;
+
 class TopoDS_Iterator;
 class TopoDS_Builder;
 
+// resolve name collisions with X11 headers
+#ifdef Convex
+  #undef Convex
+#endif
 
 class TopoDS_TShape;
-DEFINE_STANDARD_HANDLE(TopoDS_TShape, MMgt_TShared)
+DEFINE_STANDARD_HANDLE(TopoDS_TShape, Standard_Transient)
 
 //! A TShape  is a topological  structure describing a
 //! set of points in a 2D or 3D space.
@@ -58,7 +62,7 @@ DEFINE_STANDARD_HANDLE(TopoDS_TShape, MMgt_TShared)
 //! Users have no direct access to the classes derived
 //! from TShape.  They  handle them with   the classes
 //! derived from Shape.
-class TopoDS_TShape : public MMgt_TShared
+class TopoDS_TShape : public Standard_Transient
 {
 
 public:
@@ -124,7 +128,7 @@ friend class TopoDS_Iterator;
 friend class TopoDS_Builder;
 
 
-  DEFINE_STANDARD_RTTIEXT(TopoDS_TShape,MMgt_TShared)
+  DEFINE_STANDARD_RTTIEXT(TopoDS_TShape,Standard_Transient)
 
 protected:
 

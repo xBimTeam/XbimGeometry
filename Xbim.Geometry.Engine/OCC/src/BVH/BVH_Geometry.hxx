@@ -18,6 +18,7 @@
 
 #include <BVH_ObjectSet.hxx>
 #include <BVH_Builder.hxx>
+#include <BVH_BinnedBuilder.hxx>
 
 //! BVH geometry as a set of abstract geometric objects
 //! organized with bounding volume hierarchy (BVH).
@@ -29,46 +30,88 @@ class BVH_Geometry : public BVH_ObjectSet<T, N>
 public:
 
   //! Creates uninitialized BVH geometry.
-  BVH_Geometry();
+  BVH_Geometry()
+  : myIsDirty (Standard_False),
+    myBVH (new BVH_Tree<T, N>()),
+    // set default builder - binned SAH split
+    myBuilder (new BVH_BinnedBuilder<T, N, BVH_Constants_NbBinsOptimal> (BVH_Constants_LeafNodeSizeSingle))
+  {
+    //
+  }
+
+  //! Creates uninitialized BVH geometry.
+  BVH_Geometry (const opencascade::handle<BVH_Builder<T, N> >& theBuilder)
+  : myIsDirty (Standard_False),
+    myBVH (new BVH_Tree<T, N>()),
+    myBuilder (theBuilder)
+  {
+    //
+  }
 
   //! Releases resources of BVH geometry.
-  virtual ~BVH_Geometry();
+  virtual ~BVH_Geometry()
+  {
+    myBVH.Nullify();
+    myBuilder.Nullify();
+  }
 
 public:
 
+  //! Returns TRUE if geometry state should be updated.
+  virtual Standard_Boolean IsDirty() const { return myIsDirty; }
+
   //! Marks geometry as outdated.
-  virtual void MarkDirty();
+  virtual void MarkDirty() { myIsDirty = Standard_True; }
 
   //! Returns AABB of the given object.
   using BVH_ObjectSet<T, N>::Box;
 
   //! Returns AABB of the whole geometry.
-  virtual BVH_Box<T, N> Box() const;
+  virtual BVH_Box<T, N> Box() const Standard_OVERRIDE
+  {
+    if (myIsDirty)
+    {
+      myBox = BVH_Set<T, N>::Box();
+    }
+    return myBox;
+  }
 
   //! Returns BVH tree (and builds it if necessary).
-  virtual const NCollection_Handle<BVH_Tree<T, N> >& BVH();
+  virtual const opencascade::handle<BVH_Tree<T, N> >& BVH()
+  {
+    if (myIsDirty)
+    {
+      Update();
+    }
+    return myBVH;
+  }
 
   //! Returns the method (builder) used to construct BVH.
-  virtual const NCollection_Handle<BVH_Builder<T, N> >& Builder() const;
+  virtual const opencascade::handle<BVH_Builder<T, N> >& Builder() const { return myBuilder; }
 
   //! Sets the method (builder) used to construct BVH.
-  virtual void SetBuilder (NCollection_Handle<BVH_Builder<T, N> >& theBuilder);
+  virtual void SetBuilder (const opencascade::handle<BVH_Builder<T, N> >& theBuilder) { myBuilder = theBuilder; }
 
 protected:
 
   //! Updates internal geometry state.
-  virtual void Update();
+  virtual void Update()
+  {
+    if (myIsDirty)
+    {
+      myBuilder->Build (this, myBVH.operator->(), Box());
+      myIsDirty = Standard_False;
+    }
+  }
 
 protected:
 
-  Standard_Boolean                       myIsDirty; //!< Is geometry state outdated?
-  NCollection_Handle<BVH_Tree<T, N> >    myBVH;     //!< Constructed hight-level BVH
-  NCollection_Handle<BVH_Builder<T, N> > myBuilder; //!< Builder for hight-level BVH
+  Standard_Boolean                        myIsDirty; //!< Is geometry state outdated?
+  opencascade::handle<BVH_Tree<T, N> >    myBVH;     //!< Constructed hight-level BVH
+  opencascade::handle<BVH_Builder<T, N> > myBuilder; //!< Builder for hight-level BVH
 
   mutable BVH_Box<T, N> myBox; //!< Cached bounding box of geometric objects
 
 };
-
-#include <BVH_Geometry.lxx>
 
 #endif // _BVH_Geometry_Header

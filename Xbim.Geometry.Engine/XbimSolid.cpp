@@ -1327,9 +1327,9 @@ namespace Xbim
 				fixTol.SetTolerance(this, tolerance);
 				BRepAlgoAPI_Cut boolOp(this, solidCut);
 #endif
-				if (boolOp.ErrorStatus() == 0)
+				if (!boolOp.HasErrors())
 					return gcnew XbimSolidSet(boolOp.Shape());
-				err = "Error = " + boolOp.ErrorStatus();
+				err = "Error (improve reporting)";
 				
 			}
 			catch (Standard_Failure e)
@@ -1392,7 +1392,7 @@ namespace Xbim
 			try
 			{
 				BRepAlgoAPI_Common boolOp(this, solidIntersect);
-				if (boolOp.ErrorStatus() == 0)
+				if (!boolOp.HasErrors() )
 					return gcnew XbimSolidSet(boolOp.Shape());
 			}
 			catch (Standard_Failure e)
@@ -1453,7 +1453,7 @@ namespace Xbim
 			try
 			{
 				BRepAlgoAPI_Fuse boolOp(this, solidUnion);
-				if (boolOp.ErrorStatus() == 0)
+				if (!boolOp.HasErrors() )
 					return gcnew XbimSolidSet(boolOp.Shape());
 			}
 			catch (Standard_Failure e)

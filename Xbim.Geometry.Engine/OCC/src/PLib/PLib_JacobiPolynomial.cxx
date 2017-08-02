@@ -17,12 +17,13 @@
 #include <math_Vector.hxx>
 #include <PLib.hxx>
 #include <PLib_JacobiPolynomial.hxx>
-#include <PLib_JacobiPolynomial_0.hxx>
 #include <Standard_ConstructionError.hxx>
 #include <Standard_Type.hxx>
 #include <TColStd_Array2OfReal.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(PLib_JacobiPolynomial,PLib_Base)
+
+#include "PLib_JacobiPolynomial_Data.pxx"
 
 // The possible values for NbGaussPoints
 const Standard_Integer NDEG8=8,   NDEG10=10, NDEG15=15, NDEG20=20, NDEG25=25, 
@@ -45,11 +46,11 @@ const Standard_Integer UNDEFINED=-999;
     case GeomAbs_C1: myNivConstr = 1; break;
     case GeomAbs_C2: myNivConstr = 2; break;
     default: 
-      Standard_ConstructionError::Raise("Invalid ConstraintOrder");
+      throw Standard_ConstructionError("Invalid ConstraintOrder");
   }
   myDegree = myWorkDegree - 2*(myNivConstr+1);
   if (myDegree > 30)
-    Standard_ConstructionError::Raise("Invalid Degree");
+    throw Standard_ConstructionError("Invalid Degree");
 }
 
 //=======================================================================
@@ -66,7 +67,7 @@ void PLib_JacobiPolynomial::Points(const Standard_Integer NbGaussPoints,
       NbGaussPoints != NDEG40 && NbGaussPoints != NDEG50 && 
       NbGaussPoints != NDEG61) || 
       NbGaussPoints <= myDegree)
-    Standard_ConstructionError::Raise("Invalid NbGaussPoints");
+    throw Standard_ConstructionError("Invalid NbGaussPoints");
 
   math_Vector DecreasingPoints(1,NbGaussPoints);
 

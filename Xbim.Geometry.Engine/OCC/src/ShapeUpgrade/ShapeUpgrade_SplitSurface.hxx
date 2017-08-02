@@ -22,19 +22,23 @@
 
 #include <TColStd_HSequenceOfReal.hxx>
 #include <Standard_Integer.hxx>
-#include <MMgt_TShared.hxx>
+#include <Standard_Transient.hxx>
 #include <Standard_Real.hxx>
 #include <Standard_Boolean.hxx>
 #include <ShapeExtend_Status.hxx>
 class Geom_Surface;
 class ShapeExtend_CompositeSurface;
 
+// resolve name collisions with X11 headers
+#ifdef Status
+  #undef Status
+#endif
 
 class ShapeUpgrade_SplitSurface;
-DEFINE_STANDARD_HANDLE(ShapeUpgrade_SplitSurface, MMgt_TShared)
+DEFINE_STANDARD_HANDLE(ShapeUpgrade_SplitSurface, Standard_Transient)
 
 //! Splits a Surface with a criterion.
-class ShapeUpgrade_SplitSurface : public MMgt_TShared
+class ShapeUpgrade_SplitSurface : public Standard_Transient
 {
 
 public:
@@ -95,7 +99,7 @@ public:
 
 
 
-  DEFINE_STANDARD_RTTIEXT(ShapeUpgrade_SplitSurface,MMgt_TShared)
+  DEFINE_STANDARD_RTTIEXT(ShapeUpgrade_SplitSurface,Standard_Transient)
 
 protected:
 

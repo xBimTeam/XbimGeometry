@@ -30,7 +30,7 @@
 #include <TColStd_HArray1OfReal.hxx>
 #include <TColStd_HArray2OfInteger.hxx>
 
-IMPLEMENT_STANDARD_RTTIEXT(Geom_OsculatingSurface,MMgt_TShared)
+IMPLEMENT_STANDARD_RTTIEXT(Geom_OsculatingSurface,Standard_Transient)
 
 //=======================================================================
 //function : Geom_OffsetOsculatingSurface
@@ -464,7 +464,7 @@ Standard_Boolean  Geom_OsculatingSurface::BuildOsculatingSurface
 #ifdef OCCT_DEBUG
     cout<<" surface osculatrice nulle "<<endl;
 #endif
-    //Standard_ConstructionError::Raise("Geom_OsculatingSurface");
+    //throw Standard_ConstructionError("Geom_OsculatingSurface");
     OsculSurf=Standard_False;
   }
   else

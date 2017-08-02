@@ -19,7 +19,7 @@
 #include <NCollection_UBTree.hxx>
 #include <Bnd_Box.hxx>
 #include <gp_Pnt.hxx>
-#include <MMgt_TShared.hxx>
+#include <Standard_Transient.hxx>
 #include <TopTools_HArray1OfShape.hxx>
 
 #include <ShapeExtend.hxx>
@@ -84,8 +84,8 @@ class ShapeAnalysis_BoxBndTreeSelector
   Standard_Boolean ContWire(Standard_Integer nbWire)
     { return myList.Contains(nbWire); }
   
-  inline Standard_Boolean LastCheckStatus (const ShapeExtend_Status Status) const
-    { return ShapeExtend::DecodeStatus ( myStatus, Status ); }
+  inline Standard_Boolean LastCheckStatus (const ShapeExtend_Status theStatus) const
+    { return ShapeExtend::DecodeStatus ( myStatus, theStatus ); }
     
   Standard_Boolean Reject (const Bnd_Box& theBnd) const;
   Standard_Boolean Accept (const Standard_Integer &);

@@ -132,7 +132,7 @@ void GeomAdaptor_SurfaceOfRevolution::Load(const gp_Ax1& V)
     while ( Dist < Precision::Confusion() && Ratio < 100);
 
     if ( Ratio >= 100 ) {
-      Standard_ConstructionError::Raise("Adaptor3d_SurfaceOfRevolution : Axe and meridian are confused");
+      throw Standard_ConstructionError("Adaptor3d_SurfaceOfRevolution : Axe and meridian are confused");
     }
     Ox = ( (Oz^gp_Vec(PP.XYZ()-O.XYZ()))^Oz); 
   }
@@ -401,13 +401,21 @@ GeomAbs_SurfaceType GeomAdaptor_SurfaceOfRevolution::GetType() const
 {
   Standard_Real TolConf = Precision::Confusion();
   Standard_Real TolAng  = Precision::Angular();
+  Standard_Real TolConeSemiAng = Precision::Confusion();
 
   switch (myBasisCurve->GetType()) {
   case GeomAbs_Line:    {
     gp_Ax1 Axe = myBasisCurve->Line().Position();
     
     if (myAxis.IsParallel(Axe, TolAng))
-      return GeomAbs_Cylinder;
+    {
+      gp_Pnt P = Value(0., 0.);
+      Standard_Real R = gp_Vec(myAxeRev.Location(), P) * myAxeRev.XDirection();
+      if (R > TolConf)
+      {
+        return GeomAbs_Cylinder;
+      }
+    }
     else if (myAxis.IsNormal(Axe, TolAng))
       return GeomAbs_Plane;
     else
@@ -425,16 +433,27 @@ GeomAbs_SurfaceType GeomAdaptor_SurfaceOfRevolution::GetType() const
         gp_Vec vlin(pf,pl);
         gp_Vec vaxe(myAxis.Direction());
         Standard_Real projlen = Abs(vaxe.Dot(vlin));
-        Standard_Real aTolConf = len*TolAng;
-        if ((len - projlen) <= aTolConf)
-          return GeomAbs_Cylinder;
-        else if (projlen <= aTolConf)
+        if ((len - projlen) <= TolConf)
+        {
+          gp_Pnt P = Value(0., 0.);
+          Standard_Real R = gp_Vec(myAxeRev.Location(), P) * myAxeRev.XDirection();
+          if (R > TolConf)
+          {
+            return GeomAbs_Cylinder;
+          }
+        }
+        else if (projlen <= TolConf)
           return GeomAbs_Plane;
       }
       gp_Vec V(myAxis.Location(), myBasisCurve->Line().Location());
       gp_Vec W(Axe.Direction());
-      if (Abs(V.DotCross(myAxis.Direction(), W)) <= TolConf)
+      gp_Vec AxisDir(myAxis.Direction());
+      Standard_Real proj = Abs(W.Dot(AxisDir));
+      if (Abs(V.DotCross(AxisDir, W)) <= TolConf &&
+        (proj >= TolConeSemiAng && proj <= 1. - TolConeSemiAng))
+      {
         return GeomAbs_Cone;
+      }
     }
     break;
   }//case GeomAbs_Line: 
@@ -602,8 +621,7 @@ Standard_Integer GeomAdaptor_SurfaceOfRevolution::NbVPoles() const
 
 Standard_Integer GeomAdaptor_SurfaceOfRevolution::NbVKnots() const 
 {
-  Standard_NoSuchObject::Raise("GeomAdaptor_SurfaceOfRevolution::NbVKnots");
-  return 0;
+  throw Standard_NoSuchObject("GeomAdaptor_SurfaceOfRevolution::NbVKnots");
 }
 
 
@@ -615,8 +633,7 @@ Standard_Integer GeomAdaptor_SurfaceOfRevolution::NbVKnots() const
 
 Standard_Boolean GeomAdaptor_SurfaceOfRevolution::IsURational() const 
 {
-  Standard_NoSuchObject::Raise("GeomAdaptor_SurfaceOfRevolution::IsURational");
-  return Standard_False;
+  throw Standard_NoSuchObject("GeomAdaptor_SurfaceOfRevolution::IsURational");
 }
 
 //=======================================================================
@@ -626,8 +643,7 @@ Standard_Boolean GeomAdaptor_SurfaceOfRevolution::IsURational() const
 
 Standard_Boolean GeomAdaptor_SurfaceOfRevolution::IsVRational() const 
 {
-  Standard_NoSuchObject::Raise("GeomAdaptor_SurfaceOfRevolution::IsVRational");
-  return Standard_False;
+  throw Standard_NoSuchObject("GeomAdaptor_SurfaceOfRevolution::IsVRational");
 }
 
 
@@ -638,8 +654,7 @@ Standard_Boolean GeomAdaptor_SurfaceOfRevolution::IsVRational() const
 
 Handle(Geom_BezierSurface) GeomAdaptor_SurfaceOfRevolution::Bezier() const 
 {
-  Standard_NoSuchObject::Raise("GeomAdaptor_SurfaceOfRevolution::Bezier");
-  return Handle(Geom_BezierSurface)();
+  throw Standard_NoSuchObject("GeomAdaptor_SurfaceOfRevolution::Bezier");
 }
 
 
@@ -650,8 +665,7 @@ Handle(Geom_BezierSurface) GeomAdaptor_SurfaceOfRevolution::Bezier() const
 
 Handle(Geom_BSplineSurface) GeomAdaptor_SurfaceOfRevolution::BSpline() const 
 {
-  Standard_NoSuchObject::Raise("GeomAdaptor_SurfaceOfRevolution::BSpline");
-  return Handle(Geom_BSplineSurface)();
+  throw Standard_NoSuchObject("GeomAdaptor_SurfaceOfRevolution::BSpline");
 }
 
 //=======================================================================
