@@ -1,3 +1,4 @@
+#include <windows.h>
 #include "XbimCompound.h"
 #include "XbimGeometryCreator.h"
 #include "XbimGeometryObjectSet.h"

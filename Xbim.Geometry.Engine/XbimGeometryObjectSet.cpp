@@ -1,3 +1,5 @@
+#include <windows.h>
+
 #include "XbimGeometryObjectSet.h"
 #include "XbimSolidSet.h"
 #include "XbimShellSet.h"

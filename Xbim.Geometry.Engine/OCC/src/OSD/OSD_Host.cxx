@@ -262,11 +262,12 @@ OSD_Host :: OSD_Host () {
   
    hostName  = szHostName;
    interAddr = Standard_CString ( hostAddr );
-   wsprintf (
+   version = osVerInfo.szCSDVersion;
+   /*wsprintf (
     osVerInfo.szCSDVersion, TEXT( "Windows NT Version %d.%d" ),
     osVerInfo.dwMajorVersion, osVerInfo.dwMinorVersion
-   );
-   version = osVerInfo.szCSDVersion;
+   );*/
+   
 
    fInit = TRUE;
   

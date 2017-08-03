@@ -1,3 +1,4 @@
+#include <windows.h>
 #include "XbimSolid.h"
 #include "XbimShell.h"
 #include "XbimFace.h"
