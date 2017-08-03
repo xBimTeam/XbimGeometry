@@ -5937,6 +5937,7 @@
   <ItemGroup>
     <Text Include="OCC\OCCDirList.txt" />
   </ItemGroup>
+  <!-- occSource -->
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <!--Override the target GenerateTargetFrameworkMonikerAttribute so that we ClCompile as clr, default is not so-->
   <Target Name="GenerateTargetFrameworkMonikerAttribute" BeforeTargets="ClCompile" DependsOnTargets="PrepareForBuild;GetReferenceAssemblyPaths" Inputs="$(VCTargetsPath)\Microsoft.BuildSteps.targets" Outputs="$(TargetFrameworkMonikerAssemblyAttributesPath)" Condition="'$(GenerateTargetFrameworkAttribute)' == 'true'">
