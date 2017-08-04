@@ -42,46 +42,54 @@ namespace Xbim
 {
 	namespace Geometry
 	{
-
+#pragma warning( push )
+#pragma warning( disable : 4691)
+		
 		void XbimGeometryCreator::LogInfo(Object^ entity, String^ format, ...array<Object^>^ arg)
 		{
 			String^ msg = String::Format(format, arg);
 			IPersistEntity^ ifcEntity = dynamic_cast<IPersistEntity^>(entity);
+			ILogger^ log = ApplicationLogging::CreateLogger<XbimGeometryCreator^>();
+			
 			if (ifcEntity!=nullptr)
-				logger->InfoFormat("GeomEngine: #{0}={1} [{2}]", ifcEntity->EntityLabel, ifcEntity->GetType()->Name, msg);
+				LoggerExtensions::LogInformation(log,"GeomEngine: #{0}={1} [{2}]", ifcEntity->EntityLabel, ifcEntity->GetType()->Name, msg);
 			else
-				logger->InfoFormat("GeomEngine: {0} [{1}]", entity->GetType()->Name, msg);
+				LoggerExtensions::LogInformation(log,"GeomEngine: {0} [{1}]", entity->GetType()->Name, msg);
 		}
 
 		void XbimGeometryCreator::LogWarning(Object^ entity, String^ format, ...array<Object^>^ arg)
 		{
 			String^ msg = String::Format(format, arg);
 			IPersistEntity^ ifcEntity = dynamic_cast<IPersistEntity^>(entity);
+			ILogger^ log = ApplicationLogging::CreateLogger<XbimGeometryCreator^>();
 			if (ifcEntity != nullptr)
-				logger->WarnFormat("GeomEngine: #{0}={1} [{2}]", ifcEntity->EntityLabel, ifcEntity->GetType()->Name, msg);
+				LoggerExtensions::LogWarning(log,"GeomEngine: #{0}={1} [{2}]", ifcEntity->EntityLabel, ifcEntity->GetType()->Name, msg);
 			else
-				logger->WarnFormat("GeomEngine: {0} [{1}]", entity->GetType()->Name, msg);
+				LoggerExtensions::LogWarning(log,"GeomEngine: {0} [{1}]", entity->GetType()->Name, msg);
 		}
 
 		void XbimGeometryCreator::LogDebug(Object^ entity, String^ format, ...array<Object^>^ arg)
 		{
 			String^ msg = String::Format(format, arg);
 			IPersistEntity^ ifcEntity = dynamic_cast<IPersistEntity^>(entity);
+			ILogger^ log = ApplicationLogging::CreateLogger<XbimGeometryCreator^>();
 			if (ifcEntity != nullptr)
-				logger->DebugFormat("GeomEngine: #{0}={1} [{2}]", ifcEntity->EntityLabel, ifcEntity->GetType()->Name, msg);
+				LoggerExtensions::LogDebug(log,"GeomEngine: #{0}={1} [{2}]", ifcEntity->EntityLabel, ifcEntity->GetType()->Name, msg);
 			else
-				logger->DebugFormat("GeomEngine: {0} [{1}]", entity->GetType()->Name, msg);
+				LoggerExtensions::LogDebug(log, "GeomEngine: {0} [{1}]", entity->GetType()->Name, msg);
 		}
 
 		void XbimGeometryCreator::LogError(Object^ entity, String^ format, ...array<Object^>^ arg)
 		{
 			String^ msg = String::Format(format, arg);
 			IPersistEntity^ ifcEntity = dynamic_cast<IPersistEntity^>(entity);
+			ILogger^ log = ApplicationLogging::CreateLogger<XbimGeometryCreator^>();
 			if (ifcEntity != nullptr)
-				logger->ErrorFormat("GeomEngine: #{0}={1} [{2}]", ifcEntity->EntityLabel, ifcEntity->GetType()->Name, msg);
+				LoggerExtensions::LogError(log,"GeomEngine: #{0}={1} [{2}]", ifcEntity->EntityLabel, ifcEntity->GetType()->Name, msg);
 			else
-				logger->ErrorFormat("GeomEngine: {0} [{1}]", entity->GetType()->Name, msg);
+				LoggerExtensions::LogError(log, "GeomEngine: {0} [{1}]", entity->GetType()->Name, msg);
 		}
+#pragma warning( pop)
 
 #pragma region  Creation
 		
@@ -650,7 +658,7 @@ namespace Xbim
 
 #pragma region IIfcFacetedBrep Conversions
 
-	IIfcFacetedBrep^ XbimGeometryCreator::CreateFacetedBrep(IModel^ model, IXbimSolid^ solid)
+	IIfcFacetedBrep^ XbimGeometryCreator::CreateFacetedBrep(IModel^ /*model*/, IXbimSolid^ /*solid*/ )
 		{	
 		//	XbimSolid^ xSolid = dynamic_cast<XbimSolid^>(solid);
 		//	ITransaction^ txn = model->CurrentTransaction;
@@ -858,7 +866,7 @@ namespace Xbim
 
 			double precision = mf->Precision;
 		    return body->Cut(solidSet, precision);					
-#endif		
+#else		
 			ShapeFix_ShapeTolerance FTol;
 			IIfcBooleanOperand^ fOp = clip->FirstOperand;
 			IIfcBooleanOperand^ sOp = clip->SecondOperand;
@@ -925,6 +933,7 @@ namespace Xbim
 			}
 			else
 				return xbimSolidSet;
+#endif
 		}
 
 #pragma endregion
@@ -1045,7 +1054,7 @@ namespace Xbim
 			double mm = grid->Model->ModelFactors->OneMilliMeter;
 			double precision = grid->Model->ModelFactors->Precision;
 			XbimSolidSet^ solids = gcnew XbimSolidSet();
-			gp_Pnt origin;
+			
 			gp_Vec normal;
 			List<XbimCurve2D^>^ UCurves = gcnew List<XbimCurve2D^>();
 			List<XbimCurve2D^>^ VCurves = gcnew List<XbimCurve2D^>();

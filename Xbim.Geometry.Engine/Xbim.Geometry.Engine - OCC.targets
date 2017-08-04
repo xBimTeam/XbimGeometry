@@ -1,137 +1,130 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;HAVE_NO_DLL;_CRT_SECURE_NO_WARNINGS;_DEBUG;_WINDOWS;WNT;CSFDB;$(CSF_DEFINES);OCC_6_9_SUPPORTED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PreprocessorDefinitions>_DEBUG;HAVE_NO_DLL;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);OCC_6_9_SUPPORTED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+     <CompileAs>Default</CompileAs>
+	 
       <AdditionalIncludeDirectories>.\OCC\src\Adaptor2d;.\OCC\src\Adaptor3d;.\OCC\src\AdvApp2Var;.\OCC\src\AdvApprox;.\OCC\src\AppBlend;.\OCC\src\AppCont;.\OCC\src\AppDef;.\OCC\src\AppParCurves;.\OCC\src\Approx;.\OCC\src\ApproxInt;.\OCC\src\Bisector;.\OCC\src\BiTgte;.\OCC\src\Blend;.\OCC\src\BlendFunc;.\OCC\src\Bnd;.\OCC\src\BndLib;.\OCC\src\BOPAlgo;.\OCC\src\BOPCol;.\OCC\src\BOPDS;.\OCC\src\BOPTools;.\OCC\src\BRep;.\OCC\src\BRepAdaptor;.\OCC\src\BRepAlgo;.\OCC\src\BRepAlgoAPI;.\OCC\src\BRepApprox;.\OCC\src\BRepBlend;.\OCC\src\BRepBndLib;.\OCC\src\BRepBuilderAPI;.\OCC\src\BRepCheck;.\OCC\src\BRepClass;.\OCC\src\BRepClass3d;.\OCC\src\BRepExtrema;.\OCC\src\BRepFill;.\OCC\src\BRepFilletAPI;.\OCC\src\BRepGProp;.\OCC\src\BRepIntCurveSurface;.\OCC\src\BRepLib;.\OCC\src\BRepLProp;.\OCC\src\BRepMAT2d;.\OCC\src\BRepMesh;.\OCC\src\BRepOffset;.\OCC\src\BRepOffsetAPI;.\OCC\src\BRepPrim;.\OCC\src\BRepPrimAPI;.\OCC\src\BRepProj;.\OCC\src\BRepSweep;.\OCC\src\BRepTools;.\OCC\src\BRepTopAdaptor;.\OCC\src\BSplCLib;.\OCC\src\BSplSLib;.\OCC\src\BVH;.\OCC\src\ChFi2d;.\OCC\src\ChFi3d;.\OCC\src\ChFiDS;.\OCC\src\ChFiKPart;.\OCC\src\Convert;.\OCC\src\CPnts;.\OCC\src\CSLib;.\OCC\src\Dico;.\OCC\src\Draft;.\OCC\src\ElCLib;.\OCC\src\ElSLib;.\OCC\src\Extrema;.\OCC\src\FairCurve;.\OCC\src\FEmTool;.\OCC\src\FilletSurf;.\OCC\src\FSD;.\OCC\src\GC;.\OCC\src\GccAna;.\OCC\src\GccEnt;.\OCC\src\GccInt;.\OCC\src\gce;.\OCC\src\GCE2d;.\OCC\src\GCPnts;.\OCC\src\Geom;.\OCC\src\Geom2d;.\OCC\src\Geom2dAdaptor;.\OCC\src\Geom2dAPI;.\OCC\src\Geom2dConvert;.\OCC\src\Geom2dEvaluator;.\OCC\src\Geom2dGcc;.\OCC\src\Geom2dHatch;.\OCC\src\Geom2dInt;.\OCC\src\Geom2dLProp;.\OCC\src\GeomAbs;.\OCC\src\GeomAdaptor;.\OCC\src\GeomAPI;.\OCC\src\GeomConvert;.\OCC\src\GeomEvaluator;.\OCC\src\GeomFill;.\OCC\src\GeomInt;.\OCC\src\GeomLib;.\OCC\src\GeomLProp;.\OCC\src\GeomPlate;.\OCC\src\GeomProjLib;.\OCC\src\GeomTools;.\OCC\src\gp;.\OCC\src\GProp;.\OCC\src\Hatch;.\OCC\src\HatchGen;.\OCC\src\Hermit;.\OCC\src\IntAna;.\OCC\src\IntAna2d;.\OCC\src\IntCurve;.\OCC\src\IntCurvesFace;.\OCC\src\IntCurveSurface;.\OCC\src\Intf;.\OCC\src\IntImp;.\OCC\src\IntImpParGen;.\OCC\src\IntPatch;.\OCC\src\IntPolyh;.\OCC\src\IntRes2d;.\OCC\src\IntStart;.\OCC\src\IntSurf;.\OCC\src\IntTools;.\OCC\src\IntWalk;.\OCC\src\Law;.\OCC\src\LocalAnalysis;.\OCC\src\LProp;.\OCC\src\LProp3d;.\OCC\src\MAT;.\OCC\src\MAT2d;.\OCC\src\math;.\OCC\src\MeshVS;.\OCC\src\Message;.\OCC\src\MMgt;.\OCC\src\NCollection;.\OCC\src\NLPlate;.\OCC\src\OSD;.\OCC\src\Plate;.\OCC\src\PLib;.\OCC\src\Plugin;.\OCC\src\Poly;.\OCC\src\Precision;.\OCC\src\ProjLib;.\OCC\src\Quantity;.\OCC\src\Resource;.\OCC\src\ShapeAlgo;.\OCC\src\ShapeAnalysis;.\OCC\src\ShapeBuild;.\OCC\src\ShapeConstruct;.\OCC\src\ShapeCustom;.\OCC\src\ShapeExtend;.\OCC\src\ShapeFix;.\OCC\src\ShapeProcess;.\OCC\src\ShapeProcessAPI;.\OCC\src\ShapeUpgrade;.\OCC\src\SortTools;.\OCC\src\Standard;.\OCC\src\StdFail;.\OCC\src\StdSelect;.\OCC\src\Storage;.\OCC\src\Sweep;.\OCC\src\TColGeom;.\OCC\src\TColGeom2d;.\OCC\src\TColgp;.\OCC\src\TCollection;.\OCC\src\TColStd;.\OCC\src\TopAbs;.\OCC\src\TopClass;.\OCC\src\TopExp;.\OCC\src\TopLoc;.\OCC\src\TopoDS;.\OCC\src\TopOpeBRep;.\OCC\src\TopOpeBRepBuild;.\OCC\src\TopOpeBRepDS;.\OCC\src\TopOpeBRepTool;.\OCC\src\TopTools;.\OCC\src\TopTrans;.\OCC\src\TShort;.\OCC\src\Units;.\OCC\src\UnitsAPI;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <EnableParallelCodeGeneration>false</EnableParallelCodeGeneration>
-      <StringPooling>true</StringPooling>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
-      <CompileAsManaged>false</CompileAsManaged>
-      <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <OpenMPSupport>false</OpenMPSupport>
-      <PrecompiledHeaderFile />
+
+	  <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>  
+	  <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+	  
+	  <StringPooling>true</StringPooling>
+	  <MultiProcessorCompilation>true</MultiProcessorCompilation>
+	  <Optimization>Disabled</Optimization>
+	  <ExceptionHandling>Async</ExceptionHandling>
+	  <DisableSpecificWarnings>4564;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+	  <PrecompiledHeader>NotUsing</PrecompiledHeader>
+	  <FloatingPointModel>Precise</FloatingPointModel>
+	  <PrecompiledHeader>NotUsing</PrecompiledHeader>
+	  <CompileAsManaged>false</CompileAsManaged>
+	  <FunctionLevelLinking>true</FunctionLevelLinking>
+	  <WarningLevel>Level4</WarningLevel>
+	  <SuppressStartupBanner>true</SuppressStartupBanner>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>Debug</GenerateDebugInformation>
-      <AdditionalDependencies>msvcrtd.lib;advapi32.lib;gdi32.lib;user32.lib;kernel32.lib;ws2_32.lib;vfw32.lib</AdditionalDependencies>
+      <AdditionalDependencies>Advapi32.lib;ws2_32.lib;vfw32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/ignore:4248 </AdditionalOptions>
-      <Profile>false</Profile>
-      <ForceSymbolReferences>__DllMainCRTStartup@12 </ForceSymbolReferences>
+      <Profile>false</Profile>   
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+	<RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_DEBUG;HAVE_NO_DLL;WIN64;_WINDOWS;WNT;CSFDB;$(CSF_DEFINES);_OCC64;OCC_6_9_SUPPORTED;%(PreprocessorDefinitions);OCCT_UWP</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;HAVE_NO_DLL;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);OCC_6_9_SUPPORTED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+     <CompileAs>Default</CompileAs>
+	 <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <AdditionalIncludeDirectories>.\OCC\src\Adaptor2d;.\OCC\src\Adaptor3d;.\OCC\src\AdvApp2Var;.\OCC\src\AdvApprox;.\OCC\src\AppBlend;.\OCC\src\AppCont;.\OCC\src\AppDef;.\OCC\src\AppParCurves;.\OCC\src\Approx;.\OCC\src\ApproxInt;.\OCC\src\Bisector;.\OCC\src\BiTgte;.\OCC\src\Blend;.\OCC\src\BlendFunc;.\OCC\src\Bnd;.\OCC\src\BndLib;.\OCC\src\BOPAlgo;.\OCC\src\BOPCol;.\OCC\src\BOPDS;.\OCC\src\BOPTools;.\OCC\src\BRep;.\OCC\src\BRepAdaptor;.\OCC\src\BRepAlgo;.\OCC\src\BRepAlgoAPI;.\OCC\src\BRepApprox;.\OCC\src\BRepBlend;.\OCC\src\BRepBndLib;.\OCC\src\BRepBuilderAPI;.\OCC\src\BRepCheck;.\OCC\src\BRepClass;.\OCC\src\BRepClass3d;.\OCC\src\BRepExtrema;.\OCC\src\BRepFill;.\OCC\src\BRepFilletAPI;.\OCC\src\BRepGProp;.\OCC\src\BRepIntCurveSurface;.\OCC\src\BRepLib;.\OCC\src\BRepLProp;.\OCC\src\BRepMAT2d;.\OCC\src\BRepMesh;.\OCC\src\BRepOffset;.\OCC\src\BRepOffsetAPI;.\OCC\src\BRepPrim;.\OCC\src\BRepPrimAPI;.\OCC\src\BRepProj;.\OCC\src\BRepSweep;.\OCC\src\BRepTools;.\OCC\src\BRepTopAdaptor;.\OCC\src\BSplCLib;.\OCC\src\BSplSLib;.\OCC\src\BVH;.\OCC\src\ChFi2d;.\OCC\src\ChFi3d;.\OCC\src\ChFiDS;.\OCC\src\ChFiKPart;.\OCC\src\Convert;.\OCC\src\CPnts;.\OCC\src\CSLib;.\OCC\src\Dico;.\OCC\src\Draft;.\OCC\src\ElCLib;.\OCC\src\ElSLib;.\OCC\src\Extrema;.\OCC\src\FairCurve;.\OCC\src\FEmTool;.\OCC\src\FilletSurf;.\OCC\src\FSD;.\OCC\src\GC;.\OCC\src\GccAna;.\OCC\src\GccEnt;.\OCC\src\GccInt;.\OCC\src\gce;.\OCC\src\GCE2d;.\OCC\src\GCPnts;.\OCC\src\Geom;.\OCC\src\Geom2d;.\OCC\src\Geom2dAdaptor;.\OCC\src\Geom2dAPI;.\OCC\src\Geom2dConvert;.\OCC\src\Geom2dEvaluator;.\OCC\src\Geom2dGcc;.\OCC\src\Geom2dHatch;.\OCC\src\Geom2dInt;.\OCC\src\Geom2dLProp;.\OCC\src\GeomAbs;.\OCC\src\GeomAdaptor;.\OCC\src\GeomAPI;.\OCC\src\GeomConvert;.\OCC\src\GeomEvaluator;.\OCC\src\GeomFill;.\OCC\src\GeomInt;.\OCC\src\GeomLib;.\OCC\src\GeomLProp;.\OCC\src\GeomPlate;.\OCC\src\GeomProjLib;.\OCC\src\GeomTools;.\OCC\src\gp;.\OCC\src\GProp;.\OCC\src\Hatch;.\OCC\src\HatchGen;.\OCC\src\Hermit;.\OCC\src\IntAna;.\OCC\src\IntAna2d;.\OCC\src\IntCurve;.\OCC\src\IntCurvesFace;.\OCC\src\IntCurveSurface;.\OCC\src\Intf;.\OCC\src\IntImp;.\OCC\src\IntImpParGen;.\OCC\src\IntPatch;.\OCC\src\IntPolyh;.\OCC\src\IntRes2d;.\OCC\src\IntStart;.\OCC\src\IntSurf;.\OCC\src\IntTools;.\OCC\src\IntWalk;.\OCC\src\Law;.\OCC\src\LocalAnalysis;.\OCC\src\LProp;.\OCC\src\LProp3d;.\OCC\src\MAT;.\OCC\src\MAT2d;.\OCC\src\math;.\OCC\src\MeshVS;.\OCC\src\Message;.\OCC\src\MMgt;.\OCC\src\NCollection;.\OCC\src\NLPlate;.\OCC\src\OSD;.\OCC\src\Plate;.\OCC\src\PLib;.\OCC\src\Plugin;.\OCC\src\Poly;.\OCC\src\Precision;.\OCC\src\ProjLib;.\OCC\src\Quantity;.\OCC\src\Resource;.\OCC\src\ShapeAlgo;.\OCC\src\ShapeAnalysis;.\OCC\src\ShapeBuild;.\OCC\src\ShapeConstruct;.\OCC\src\ShapeCustom;.\OCC\src\ShapeExtend;.\OCC\src\ShapeFix;.\OCC\src\ShapeProcess;.\OCC\src\ShapeProcessAPI;.\OCC\src\ShapeUpgrade;.\OCC\src\SortTools;.\OCC\src\Standard;.\OCC\src\StdFail;.\OCC\src\StdSelect;.\OCC\src\Storage;.\OCC\src\Sweep;.\OCC\src\TColGeom;.\OCC\src\TColGeom2d;.\OCC\src\TColgp;.\OCC\src\TCollection;.\OCC\src\TColStd;.\OCC\src\TopAbs;.\OCC\src\TopClass;.\OCC\src\TopExp;.\OCC\src\TopLoc;.\OCC\src\TopoDS;.\OCC\src\TopOpeBRep;.\OCC\src\TopOpeBRepBuild;.\OCC\src\TopOpeBRepDS;.\OCC\src\TopOpeBRepTool;.\OCC\src\TopTools;.\OCC\src\TopTrans;.\OCC\src\TShort;.\OCC\src\Units;.\OCC\src\UnitsAPI;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <EnableParallelCodeGeneration>false</EnableParallelCodeGeneration>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
-      <CompileAsManaged>false</CompileAsManaged>
-      <StringPooling>true</StringPooling>
-      <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <OpenMPSupport>false</OpenMPSupport>
-      <PrecompiledHeaderFile />
-      <OmitFramePointers>false</OmitFramePointers>
+      <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>  
+	  <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+	  <PreprocessorDefinitions>NDEBUG;No_Exception;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);OCC_6_9_SUPPORTED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+	  <StringPooling>true</StringPooling>
+	  <MultiProcessorCompilation>true</MultiProcessorCompilation>
+	  <Optimization>Disabled</Optimization>
+	  <ExceptionHandling>Async</ExceptionHandling>
+	  <DisableSpecificWarnings>4564;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+	  <PrecompiledHeader>NotUsing</PrecompiledHeader>
+	  <FloatingPointModel>Precise</FloatingPointModel>
+	  <PrecompiledHeader>NotUsing</PrecompiledHeader>
+	  <CompileAsManaged>false</CompileAsManaged>
+	  <FunctionLevelLinking>true</FunctionLevelLinking>
+	  <WarningLevel>Level4</WarningLevel>
+	  <SuppressStartupBanner>true</SuppressStartupBanner>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>Debug</GenerateDebugInformation>
-      <AdditionalDependencies>msvcrtd.lib;advapi32.lib;gdi32.lib;user32.lib;kernel32.lib;ws2_32.lib;vfw32.lib</AdditionalDependencies>
+      <AdditionalDependencies>Advapi32.lib;ws2_32.lib;vfw32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/ignore:4248 </AdditionalOptions>
-      <Profile>false</Profile>
-      <ForceSymbolReferences>_DllMainCRTStartup</ForceSymbolReferences>
+      <Profile>false</Profile>     
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>WIN32;NDEBUG;HAVE_NO_DLL;_CRT_SECURE_NO_WARNINGS;_WINDOWS;WNT;CSFDB;$(CSF_DEFINES);OCC_6_9_SUPPORTED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+	  
+      <PreprocessorDefinitions>WIN32;NDEBUG;HAVE_NO_DLL;No_Exception;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);OCC_6_9_SUPPORTED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>.\OCC\src\Adaptor2d;.\OCC\src\Adaptor3d;.\OCC\src\AdvApp2Var;.\OCC\src\AdvApprox;.\OCC\src\AppBlend;.\OCC\src\AppCont;.\OCC\src\AppDef;.\OCC\src\AppParCurves;.\OCC\src\Approx;.\OCC\src\ApproxInt;.\OCC\src\Bisector;.\OCC\src\BiTgte;.\OCC\src\Blend;.\OCC\src\BlendFunc;.\OCC\src\Bnd;.\OCC\src\BndLib;.\OCC\src\BOPAlgo;.\OCC\src\BOPCol;.\OCC\src\BOPDS;.\OCC\src\BOPTools;.\OCC\src\BRep;.\OCC\src\BRepAdaptor;.\OCC\src\BRepAlgo;.\OCC\src\BRepAlgoAPI;.\OCC\src\BRepApprox;.\OCC\src\BRepBlend;.\OCC\src\BRepBndLib;.\OCC\src\BRepBuilderAPI;.\OCC\src\BRepCheck;.\OCC\src\BRepClass;.\OCC\src\BRepClass3d;.\OCC\src\BRepExtrema;.\OCC\src\BRepFill;.\OCC\src\BRepFilletAPI;.\OCC\src\BRepGProp;.\OCC\src\BRepIntCurveSurface;.\OCC\src\BRepLib;.\OCC\src\BRepLProp;.\OCC\src\BRepMAT2d;.\OCC\src\BRepMesh;.\OCC\src\BRepOffset;.\OCC\src\BRepOffsetAPI;.\OCC\src\BRepPrim;.\OCC\src\BRepPrimAPI;.\OCC\src\BRepProj;.\OCC\src\BRepSweep;.\OCC\src\BRepTools;.\OCC\src\BRepTopAdaptor;.\OCC\src\BSplCLib;.\OCC\src\BSplSLib;.\OCC\src\BVH;.\OCC\src\ChFi2d;.\OCC\src\ChFi3d;.\OCC\src\ChFiDS;.\OCC\src\ChFiKPart;.\OCC\src\Convert;.\OCC\src\CPnts;.\OCC\src\CSLib;.\OCC\src\Dico;.\OCC\src\Draft;.\OCC\src\ElCLib;.\OCC\src\ElSLib;.\OCC\src\Extrema;.\OCC\src\FairCurve;.\OCC\src\FEmTool;.\OCC\src\FilletSurf;.\OCC\src\FSD;.\OCC\src\GC;.\OCC\src\GccAna;.\OCC\src\GccEnt;.\OCC\src\GccInt;.\OCC\src\gce;.\OCC\src\GCE2d;.\OCC\src\GCPnts;.\OCC\src\Geom;.\OCC\src\Geom2d;.\OCC\src\Geom2dAdaptor;.\OCC\src\Geom2dAPI;.\OCC\src\Geom2dConvert;.\OCC\src\Geom2dEvaluator;.\OCC\src\Geom2dGcc;.\OCC\src\Geom2dHatch;.\OCC\src\Geom2dInt;.\OCC\src\Geom2dLProp;.\OCC\src\GeomAbs;.\OCC\src\GeomAdaptor;.\OCC\src\GeomAPI;.\OCC\src\GeomConvert;.\OCC\src\GeomEvaluator;.\OCC\src\GeomFill;.\OCC\src\GeomInt;.\OCC\src\GeomLib;.\OCC\src\GeomLProp;.\OCC\src\GeomPlate;.\OCC\src\GeomProjLib;.\OCC\src\GeomTools;.\OCC\src\gp;.\OCC\src\GProp;.\OCC\src\Hatch;.\OCC\src\HatchGen;.\OCC\src\Hermit;.\OCC\src\IntAna;.\OCC\src\IntAna2d;.\OCC\src\IntCurve;.\OCC\src\IntCurvesFace;.\OCC\src\IntCurveSurface;.\OCC\src\Intf;.\OCC\src\IntImp;.\OCC\src\IntImpParGen;.\OCC\src\IntPatch;.\OCC\src\IntPolyh;.\OCC\src\IntRes2d;.\OCC\src\IntStart;.\OCC\src\IntSurf;.\OCC\src\IntTools;.\OCC\src\IntWalk;.\OCC\src\Law;.\OCC\src\LocalAnalysis;.\OCC\src\LProp;.\OCC\src\LProp3d;.\OCC\src\MAT;.\OCC\src\MAT2d;.\OCC\src\math;.\OCC\src\MeshVS;.\OCC\src\Message;.\OCC\src\MMgt;.\OCC\src\NCollection;.\OCC\src\NLPlate;.\OCC\src\OSD;.\OCC\src\Plate;.\OCC\src\PLib;.\OCC\src\Plugin;.\OCC\src\Poly;.\OCC\src\Precision;.\OCC\src\ProjLib;.\OCC\src\Quantity;.\OCC\src\Resource;.\OCC\src\ShapeAlgo;.\OCC\src\ShapeAnalysis;.\OCC\src\ShapeBuild;.\OCC\src\ShapeConstruct;.\OCC\src\ShapeCustom;.\OCC\src\ShapeExtend;.\OCC\src\ShapeFix;.\OCC\src\ShapeProcess;.\OCC\src\ShapeProcessAPI;.\OCC\src\ShapeUpgrade;.\OCC\src\SortTools;.\OCC\src\Standard;.\OCC\src\StdFail;.\OCC\src\StdSelect;.\OCC\src\Storage;.\OCC\src\Sweep;.\OCC\src\TColGeom;.\OCC\src\TColGeom2d;.\OCC\src\TColgp;.\OCC\src\TCollection;.\OCC\src\TColStd;.\OCC\src\TopAbs;.\OCC\src\TopClass;.\OCC\src\TopExp;.\OCC\src\TopLoc;.\OCC\src\TopoDS;.\OCC\src\TopOpeBRep;.\OCC\src\TopOpeBRepBuild;.\OCC\src\TopOpeBRepDS;.\OCC\src\TopOpeBRepTool;.\OCC\src\TopTools;.\OCC\src\TopTrans;.\OCC\src\TShort;.\OCC\src\Units;.\OCC\src\UnitsAPI;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <EnableParallelCodeGeneration>false</EnableParallelCodeGeneration>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
-      <CompileAsManaged>false</CompileAsManaged>
-      <StringPooling>true</StringPooling>
-      <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <OpenMPSupport>false</OpenMPSupport>
-      <PrecompiledHeaderFile />
-      <OmitFramePointers>false</OmitFramePointers>
-      <Optimization>MaxSpeed</Optimization>
+
+	  <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>  
+	  <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+	  <PreprocessorDefinitions>NDEBUG;No_Exception;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);OCC_6_9_SUPPORTED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+	  <StringPooling>true</StringPooling>
+	  <MultiProcessorCompilation>true</MultiProcessorCompilation>
+	  <Optimization>MaxSpeed</Optimization>
+	  <ExceptionHandling>Async</ExceptionHandling>
+	  <DisableSpecificWarnings>4564;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+	  <PrecompiledHeader>NotUsing</PrecompiledHeader>
+	  <FloatingPointModel>Precise</FloatingPointModel>
+	  <PrecompiledHeader>NotUsing</PrecompiledHeader>
+	  <CompileAsManaged>false</CompileAsManaged>
+	  <FunctionLevelLinking>true</FunctionLevelLinking>
+	  <WarningLevel>Level4</WarningLevel>
+	  <SuppressStartupBanner>true</SuppressStartupBanner>
     </ClCompile>
     <Link>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>msvcrt.lib;advapi32.lib;gdi32.lib;user32.lib;kernel32.lib;ws2_32.lib;vfw32.lib</AdditionalDependencies>
-      <AdditionalOptions>/ignore:4248 </AdditionalOptions>
+      <GenerateDebugInformation>false</GenerateDebugInformation> 
+      <AdditionalOptions>/ignore:4248 </AdditionalOptions>	 
+	  <AdditionalDependencies>Advapi32.lib;ws2_32.lib;vfw32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
-      <ForceSymbolReferences>__DllMainCRTStartup@12 </ForceSymbolReferences>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>NDEBUG;WIN64;HAVE_NO_DLL;_WINDOWS;WNT;CSFDB;$(CSF_DEFINES);_OCC64;OCC_6_9_SUPPORTED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+	  <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+	  <PreprocessorDefinitions>NDEBUG;HAVE_NO_DLL;No_Exception;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);OCC_6_9_SUPPORTED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>.\OCC\src\Adaptor2d;.\OCC\src\Adaptor3d;.\OCC\src\AdvApp2Var;.\OCC\src\AdvApprox;.\OCC\src\AppBlend;.\OCC\src\AppCont;.\OCC\src\AppDef;.\OCC\src\AppParCurves;.\OCC\src\Approx;.\OCC\src\ApproxInt;.\OCC\src\Bisector;.\OCC\src\BiTgte;.\OCC\src\Blend;.\OCC\src\BlendFunc;.\OCC\src\Bnd;.\OCC\src\BndLib;.\OCC\src\BOPAlgo;.\OCC\src\BOPCol;.\OCC\src\BOPDS;.\OCC\src\BOPTools;.\OCC\src\BRep;.\OCC\src\BRepAdaptor;.\OCC\src\BRepAlgo;.\OCC\src\BRepAlgoAPI;.\OCC\src\BRepApprox;.\OCC\src\BRepBlend;.\OCC\src\BRepBndLib;.\OCC\src\BRepBuilderAPI;.\OCC\src\BRepCheck;.\OCC\src\BRepClass;.\OCC\src\BRepClass3d;.\OCC\src\BRepExtrema;.\OCC\src\BRepFill;.\OCC\src\BRepFilletAPI;.\OCC\src\BRepGProp;.\OCC\src\BRepIntCurveSurface;.\OCC\src\BRepLib;.\OCC\src\BRepLProp;.\OCC\src\BRepMAT2d;.\OCC\src\BRepMesh;.\OCC\src\BRepOffset;.\OCC\src\BRepOffsetAPI;.\OCC\src\BRepPrim;.\OCC\src\BRepPrimAPI;.\OCC\src\BRepProj;.\OCC\src\BRepSweep;.\OCC\src\BRepTools;.\OCC\src\BRepTopAdaptor;.\OCC\src\BSplCLib;.\OCC\src\BSplSLib;.\OCC\src\BVH;.\OCC\src\ChFi2d;.\OCC\src\ChFi3d;.\OCC\src\ChFiDS;.\OCC\src\ChFiKPart;.\OCC\src\Convert;.\OCC\src\CPnts;.\OCC\src\CSLib;.\OCC\src\Dico;.\OCC\src\Draft;.\OCC\src\ElCLib;.\OCC\src\ElSLib;.\OCC\src\Extrema;.\OCC\src\FairCurve;.\OCC\src\FEmTool;.\OCC\src\FilletSurf;.\OCC\src\FSD;.\OCC\src\GC;.\OCC\src\GccAna;.\OCC\src\GccEnt;.\OCC\src\GccInt;.\OCC\src\gce;.\OCC\src\GCE2d;.\OCC\src\GCPnts;.\OCC\src\Geom;.\OCC\src\Geom2d;.\OCC\src\Geom2dAdaptor;.\OCC\src\Geom2dAPI;.\OCC\src\Geom2dConvert;.\OCC\src\Geom2dEvaluator;.\OCC\src\Geom2dGcc;.\OCC\src\Geom2dHatch;.\OCC\src\Geom2dInt;.\OCC\src\Geom2dLProp;.\OCC\src\GeomAbs;.\OCC\src\GeomAdaptor;.\OCC\src\GeomAPI;.\OCC\src\GeomConvert;.\OCC\src\GeomEvaluator;.\OCC\src\GeomFill;.\OCC\src\GeomInt;.\OCC\src\GeomLib;.\OCC\src\GeomLProp;.\OCC\src\GeomPlate;.\OCC\src\GeomProjLib;.\OCC\src\GeomTools;.\OCC\src\gp;.\OCC\src\GProp;.\OCC\src\Hatch;.\OCC\src\HatchGen;.\OCC\src\Hermit;.\OCC\src\IntAna;.\OCC\src\IntAna2d;.\OCC\src\IntCurve;.\OCC\src\IntCurvesFace;.\OCC\src\IntCurveSurface;.\OCC\src\Intf;.\OCC\src\IntImp;.\OCC\src\IntImpParGen;.\OCC\src\IntPatch;.\OCC\src\IntPolyh;.\OCC\src\IntRes2d;.\OCC\src\IntStart;.\OCC\src\IntSurf;.\OCC\src\IntTools;.\OCC\src\IntWalk;.\OCC\src\Law;.\OCC\src\LocalAnalysis;.\OCC\src\LProp;.\OCC\src\LProp3d;.\OCC\src\MAT;.\OCC\src\MAT2d;.\OCC\src\math;.\OCC\src\MeshVS;.\OCC\src\Message;.\OCC\src\MMgt;.\OCC\src\NCollection;.\OCC\src\NLPlate;.\OCC\src\OSD;.\OCC\src\Plate;.\OCC\src\PLib;.\OCC\src\Plugin;.\OCC\src\Poly;.\OCC\src\Precision;.\OCC\src\ProjLib;.\OCC\src\Quantity;.\OCC\src\Resource;.\OCC\src\ShapeAlgo;.\OCC\src\ShapeAnalysis;.\OCC\src\ShapeBuild;.\OCC\src\ShapeConstruct;.\OCC\src\ShapeCustom;.\OCC\src\ShapeExtend;.\OCC\src\ShapeFix;.\OCC\src\ShapeProcess;.\OCC\src\ShapeProcessAPI;.\OCC\src\ShapeUpgrade;.\OCC\src\SortTools;.\OCC\src\Standard;.\OCC\src\StdFail;.\OCC\src\StdSelect;.\OCC\src\Storage;.\OCC\src\Sweep;.\OCC\src\TColGeom;.\OCC\src\TColGeom2d;.\OCC\src\TColgp;.\OCC\src\TCollection;.\OCC\src\TColStd;.\OCC\src\TopAbs;.\OCC\src\TopClass;.\OCC\src\TopExp;.\OCC\src\TopLoc;.\OCC\src\TopoDS;.\OCC\src\TopOpeBRep;.\OCC\src\TopOpeBRepBuild;.\OCC\src\TopOpeBRepDS;.\OCC\src\TopOpeBRepTool;.\OCC\src\TopTools;.\OCC\src\TopTrans;.\OCC\src\TShort;.\OCC\src\Units;.\OCC\src\UnitsAPI;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <EnableParallelCodeGeneration>false</EnableParallelCodeGeneration>
-      <PrecompiledHeaderFile />
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
-      <CompileAsManaged>false</CompileAsManaged>
-      <StringPooling>true</StringPooling>
-      <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <OpenMPSupport>false</OpenMPSupport>
-      <OmitFramePointers>false</OmitFramePointers>
-      <Optimization>MaxSpeed</Optimization>
+           
+      <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>  
+	  
+	  <StringPooling>true</StringPooling>
+	  <MultiProcessorCompilation>true</MultiProcessorCompilation>
+	  <Optimization>MaxSpeed</Optimization>
+	  <ExceptionHandling>Async</ExceptionHandling>	  
+	  <DisableSpecificWarnings>4564;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+	  <PrecompiledHeader>NotUsing</PrecompiledHeader>
+	  <FloatingPointModel>Precise</FloatingPointModel>
+	  <PrecompiledHeader>NotUsing</PrecompiledHeader>
+	  <CompileAsManaged>false</CompileAsManaged>
+	  <FunctionLevelLinking>true</FunctionLevelLinking>
+	  <WarningLevel>Level4</WarningLevel>
+	  <SuppressStartupBanner>true</SuppressStartupBanner>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>msvcrt.lib;advapi32.lib;gdi32.lib;user32.lib;kernel32.lib;ws2_32.lib;vfw32.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4248 </AdditionalOptions>
+	  <AdditionalDependencies>Advapi32.lib;ws2_32.lib;vfw32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
-      <ForceSymbolReferences>_DllMainCRTStartup</ForceSymbolReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <Reference Include="System">
-    </Reference>
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
-    <Reference Include="Xbim.Common">
-      <HintPath>..\packages\Xbim.Essentials.4.0.29-V001\lib\net40\Xbim.Common.dll</HintPath>
-      <Private>false</Private>
-      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
-      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
-    </Reference>
-    <Reference Include="Xbim.Ifc4">
-      <HintPath>..\packages\Xbim.Essentials.4.0.29-V001\lib\net40\Xbim.Ifc4.dll</HintPath>
-      <Private>false</Private>
-      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
-      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
-    </Reference>
-    <Reference Include="Xbim.Tessellator">
-      <HintPath>..\packages\Xbim.Essentials.4.0.29-V001\lib\net40\Xbim.Tessellator.dll</HintPath>
-      <Private>false</Private>
-      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
-      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
-    </Reference>
-  </ItemGroup>
+  
   <ItemGroup>
     <ClInclude Include="OCC\src\Adaptor2d\Adaptor2d_Curve2d.hxx" />
     <ClInclude Include="OCC\src\Adaptor2d\Adaptor2d_Curve2dPtr.hxx" />
@@ -3280,7 +3273,6 @@
     <ClCompile Include="OCC\src\Blend\Blend_AppFunction.cxx" />
     <ClCompile Include="OCC\src\Blend\Blend_CSFunction.cxx" />
     <ClCompile Include="OCC\src\Blend\Blend_CurvPointFuncInv.cxx" />
-    <ClCompile Include="OCC\src\Blend\Blend_Debug.cxx" />
     <ClCompile Include="OCC\src\Blend\Blend_FuncInv.cxx" />
     <ClCompile Include="OCC\src\Blend\Blend_Function.cxx" />
     <ClCompile Include="OCC\src\Blend\Blend_Point.cxx" />
@@ -3498,7 +3490,6 @@
     <ClCompile Include="OCC\src\BRepPrim\BRepPrim_OneAxis.cxx" />
     <ClCompile Include="OCC\src\BRepSweep\BRepSweep_NumLinearRegularSweep.cxx" />
     <ClCompile Include="OCC\src\BRepTools\BRepTools.cxx" />
-    <ClCompile Include="OCC\src\BRepTools\BRepTools_Debug.cxx" />
     <ClCompile Include="OCC\src\BRepTools\BRepTools_GTrsfModification.cxx" />
     <ClCompile Include="OCC\src\BRepTools\BRepTools_Modification.cxx" />
     <ClCompile Include="OCC\src\BRepTools\BRepTools_Modifier.cxx" />
@@ -4796,8 +4787,7 @@
     <ClCompile Include=".\OCC\src\BndLib\BndLib_AddSurface.cxx" />
     <ClCompile Include=".\OCC\src\GeomTools\GeomTools.cxx" />
     <ClCompile Include=".\OCC\src\GeomTools\GeomTools_Curve2dSet.cxx" />
-    <ClCompile Include=".\OCC\src\GeomTools\GeomTools_CurveSet.cxx" />
-    <ClCompile Include=".\OCC\src\GeomTools\GeomTools_Debug.cxx" />
+    <ClCompile Include=".\OCC\src\GeomTools\GeomTools_CurveSet.cxx" />    
     <ClCompile Include=".\OCC\src\GeomTools\GeomTools_SurfaceSet.cxx" />
     <ClCompile Include=".\OCC\src\GeomTools\GeomTools_UndefinedTypeHandler.cxx" />
     <ClCompile Include=".\OCC\src\GC\GC_MakeArcOfCircle.cxx" />
@@ -4974,7 +4964,7 @@
     <ClCompile Include=".\OCC\src\GccInt\GccInt_BPoint.cxx" />
     <ClCompile Include=".\OCC\src\GccInt\GccInt_Bisec.cxx" />
     <ClCompile Include=".\OCC\src\AppBlend\AppBlend_Approx.cxx" />
-    <ClCompile Include=".\OCC\src\AppBlend\AppBlend_Debug.cxx" />
+	<ClCompile Include=".\OCC\src\AppBlend\AppBlend_Debug.cxx" />
     <ClCompile Include=".\OCC\src\LocalAnalysis\LocalAnalysis.cxx" />
     <ClCompile Include=".\OCC\src\LocalAnalysis\LocalAnalysis_CurveContinuity.cxx" />
     <ClCompile Include=".\OCC\src\LocalAnalysis\LocalAnalysis_SurfaceContinuity.cxx" />
@@ -5187,7 +5177,6 @@
     <ClCompile Include=".\OCC\src\ChFi3d\ChFi3d_ChBuilder.cxx" />
     <ClCompile Include=".\OCC\src\ChFi3d\ChFi3d_ChBuilder_C2.cxx" />
     <ClCompile Include=".\OCC\src\ChFi3d\ChFi3d_ChBuilder_C3.cxx" />
-    <ClCompile Include=".\OCC\src\ChFi3d\ChFi3d_Debug.cxx" />
     <ClCompile Include=".\OCC\src\ChFi3d\ChFi3d_FilBuilder.cxx" />
     <ClCompile Include=".\OCC\src\ChFi3d\ChFi3d_FilBuilder_C2.cxx" />
     <ClCompile Include=".\OCC\src\ChFi3d\ChFi3d_FilBuilder_C3.cxx" />
@@ -5198,12 +5187,7 @@
     <ClCompile Include=".\OCC\src\FilletSurf\FilletSurf_Builder.cxx" />
     <ClCompile Include=".\OCC\src\FilletSurf\FilletSurf_InternalBuilder.cxx" />
   </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="app.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="app.ico" />
-  </ItemGroup>
+ 
   <ItemGroup>
     <None Include="OCC\src\Adaptor2d\Adaptor2d_GenHCurve2d.gxx" />
     <None Include="OCC\src\Adaptor2d\Adaptor2d_GenHCurve2d.lxx" />
@@ -5815,7 +5799,6 @@
   <ItemGroup>
     <Text Include="OCC\OCCDirList.txt" />
   </ItemGroup>
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <!--Override the target GenerateTargetFrameworkMonikerAttribute so that we ClCompile as clr, default is not so-->
   <Target Name="GenerateTargetFrameworkMonikerAttribute" BeforeTargets="ClCompile" DependsOnTargets="PrepareForBuild;GetReferenceAssemblyPaths" Inputs="$(VCTargetsPath)\Microsoft.BuildSteps.targets" Outputs="$(TargetFrameworkMonikerAssemblyAttributesPath)" Condition="'$(GenerateTargetFrameworkAttribute)' == 'true'">
     <PropertyGroup>

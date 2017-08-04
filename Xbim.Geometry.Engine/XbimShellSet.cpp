@@ -122,8 +122,9 @@ namespace Xbim
 			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_FUSE, (IEnumerable<IXbimGeometryObject^>^)this, solids, tolerance);
 		}
 
-		void XbimShellSet::Union(double tolerance)
+		void XbimShellSet::Union(double /*tolerance*/)
 		{
+			throw gcnew NotImplementedException("XbimShellSet::Union");
 		}
 
 		IXbimGeometryObject ^ XbimShellSet::Transformed(IIfcCartesianTransformationOperator ^ transformation)

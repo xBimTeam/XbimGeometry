@@ -177,7 +177,7 @@ namespace Xbim
 				List<size_t>^ nodeLookup = pointLookup[faceIndex];
 				TopLoc_Location loc;
 				const Handle(Poly_Triangulation)& mesh = BRep_Tool::Triangulation(face, loc);
-				const TColgp_Array1OfPnt & nodes = mesh->Nodes();
+				/*const TColgp_Array1OfPnt & nodes = mesh->Nodes();*/
 				const Poly_Array1OfTriangle& triangles = mesh->Triangles();
 				Standard_Integer nbTriangles = mesh->NbTriangles();
 				bool faceReversed = face->IsReversed;
@@ -368,7 +368,7 @@ namespace Xbim
 			List<List<int>^>^ pointLookup = gcnew List<List<int>^>(faceCount);
 			List<XbimPoint3D>^ points = gcnew List<XbimPoint3D>(faceCount * 3);;
 
-			Dictionary<int, int>^ normalMap = gcnew Dictionary<int, int>();
+			/*Dictionary<int, int>^ normalMap = gcnew Dictionary<int, int>();*/
 			List<List<XbimPackedNormal>^>^ normalLookup = gcnew List<List<XbimPackedNormal>^>(faceCount);
 			
 			//First write out all the vertices

@@ -150,7 +150,7 @@ namespace Xbim
 			{
 				if (refCount > 0)refCount--;
 			}
-			XbimEdge^ TakeEdge(XbimPoint3DWithTolerance^ pA, XbimPoint3DWithTolerance^ pB)
+			XbimEdge^ TakeEdge(XbimPoint3DWithTolerance^ pA)
 			{
 				if (IsEmptyLine) return nullptr;
 				refCount++;

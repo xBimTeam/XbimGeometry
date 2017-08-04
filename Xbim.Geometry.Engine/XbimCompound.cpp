@@ -74,7 +74,7 @@ namespace Xbim
 			//add all top level objects in to the collection, ignore nested objects
 			List<IXbimGeometryObject^>^ result = gcnew List<IXbimGeometryObject^>(1);
 			if (!IsValid) return result->GetEnumerator();
-			const TopLoc_Location& loc = ((const TopoDS_Compound&)this).Location();
+			
 			for (TopExp_Explorer expl(*pCompound, TopAbs_SOLID); expl.More(); expl.Next())
 			{
 				XbimSolid^ solid = gcnew XbimSolid(TopoDS::Solid(expl.Current()));
@@ -147,11 +147,11 @@ namespace Xbim
 		IXbimGeometryObject^ XbimCompound::First::get()
 		{
 			if (!IsValid) return nullptr;
-			for (TopExp_Explorer expl(*pCompound, TopAbs_SOLID); expl.More(); expl.Next())
+			for (TopExp_Explorer expl(*pCompound, TopAbs_SOLID); expl.More();)
 				return gcnew XbimSolid(TopoDS::Solid(expl.Current()));
-			for (TopExp_Explorer expl(*pCompound, TopAbs_SHELL, TopAbs_SOLID); expl.More(); expl.Next())
+			for (TopExp_Explorer expl(*pCompound, TopAbs_SHELL, TopAbs_SOLID); expl.More();)
 				return gcnew XbimShell(TopoDS::Shell(expl.Current()));
-			for (TopExp_Explorer expl(*pCompound, TopAbs_FACE, TopAbs_SHELL); expl.More(); expl.Next())
+			for (TopExp_Explorer expl(*pCompound, TopAbs_FACE, TopAbs_SHELL); expl.More();)
 				return gcnew XbimFace(TopoDS::Face(expl.Current()));
 			GC::KeepAlive(this);
 			return nullptr;
@@ -331,8 +331,8 @@ namespace Xbim
 						occShell = gcnew XbimCompound((IIfcOpenShell^)shell);
 					for each (XbimShell^ s in occShell->Shells)
 					{
-						XbimShell^ occShell = (XbimShell^)s;
-						if(occShell->IsValid && !occShell->IsEmpty) shells->Add((XbimShell^)s);
+						XbimShell^ nestedShell = (XbimShell^)s;
+						if(nestedShell->IsValid && !nestedShell->IsEmpty) shells->Add(nestedShell);
 					}
 					
 				}
@@ -772,7 +772,7 @@ namespace Xbim
 					XbimEdge^ edge1;
 					XbimEdge^ edge2;
 					XbimEdge^ edge3;
-					bool flip = false;
+					
 					if (edgeMap->TryGetValue(revEdgeKey1, edge1)) //look for the opposite edge first
 					{
 						XbimEdge^ anoEdge1;
@@ -948,7 +948,7 @@ namespace Xbim
 								edgeMap->Add(linearEdge, linearEdge);
 							}
 
-							XbimEdge^ edge = linearEdge->TakeEdge(currentPoint, nextPoint);
+							XbimEdge^ edge = linearEdge->TakeEdge(currentPoint);
 							linearEdges->Add(linearEdge);
 							if (edge != nullptr && edge->IsValid)builder.Add(wire, edge);
 						}

@@ -97,9 +97,9 @@ namespace Xbim
 			return result;
 		}
 
-		void XbimVertexSet::Mesh(IXbimMeshReceiver ^ mesh, double precision, double deflection, double angle)
+		void XbimVertexSet::Mesh(IXbimMeshReceiver ^ /*mesh*/, double /*precision*/, double /*deflection*/, double /*angle*/)
 		{
-			return;//maybe add an implementation for this
+			throw gcnew NotImplementedException("XbimVertexSet::Mesh");
 		}
 
 

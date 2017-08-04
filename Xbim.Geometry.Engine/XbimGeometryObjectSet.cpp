@@ -182,7 +182,7 @@ namespace Xbim
 				{
 					for each (XbimSolid^ solid in ss)
 					{
-						solids->Add(ss);
+						solids->Add(solid);
 					}		
 				}
 
@@ -433,8 +433,7 @@ namespace Xbim
 				builder.MakeShell(facesToCut);
 				builder.MakeShell(toBePassedThrough);
 				TopTools_ListOfShape toBeProcessed;
-				TopTools_ListOfShape cuttingObjects;
-				int allBoxCount = 0;
+				TopTools_ListOfShape cuttingObjects;				
 				Bnd_Array1OfBox allBoxes(1, solids->Count);
 				int i = 1;
 

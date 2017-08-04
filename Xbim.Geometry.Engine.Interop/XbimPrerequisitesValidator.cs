@@ -1,14 +1,15 @@
 ﻿using System;
-using System.Configuration;
 using Microsoft.Win32;
-using Xbim.Common.Logging;
+using Microsoft.Extensions.Logging;
+using Xbim.Common;
+using System.Configuration;
 
 namespace Xbim.Geometry.Engine.Interop
 {
     internal class XbimPrerequisitesValidator
     {
 
-        static readonly ILogger Logger = LoggerFactory.GetLogger();
+        
         const string PrequisitesKey = "SuppressVCRuntimeWarning";
 
         // Key under HKLM that indicates that VC12 runtime has been installed
@@ -26,7 +27,8 @@ namespace Xbim.Geometry.Engine.Interop
                         Vc12Download);
                 if (SuppressPrequisiteErrors())
                 {
-                    Logger.Warn(message);
+                    var logger = ApplicationLogging.CreateLogger<XbimCustomAssemblyResolver>();
+                    logger.LogWarning(message);
                 }
                 else
                 {

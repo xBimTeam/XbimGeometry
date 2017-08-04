@@ -69,7 +69,7 @@ namespace Xbim
 			XbimCompound(IIfcTriangulatedFaceSet^ faceSet);
 			static property XbimCompound^ Empty{XbimCompound^ get(){ return empty; }};
 #pragma region IXbimCompound Interface
-			virtual property bool IsValid {bool get()override{ return ptrContainer != IntPtr::Zero && Count > 0; }; }
+			virtual property bool IsValid {bool get() override { return ptrContainer != IntPtr::Zero && Count > 0; }; }
 			virtual property bool IsSet{bool get() override { return true; }; }
 			virtual property  XbimGeometryObjectType GeometryType  {XbimGeometryObjectType  get()override { return XbimGeometryObjectType::XbimCompoundType; }}
 			virtual property int Count{int get(); }

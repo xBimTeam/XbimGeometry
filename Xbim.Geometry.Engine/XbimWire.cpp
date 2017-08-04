@@ -299,11 +299,11 @@ namespace Xbim
 								if (Math::Abs(circ->Axis().Location().Distance(wStart) <= precision) ||
 									Math::Abs(circ->Axis().Location().Distance(wEnd) <= precision))
 								{						
-									gp_Pnt s, e;
+									gp_Pnt s, pe;
 									c3d->D0(start, s);
-									c3d->D0(end, e);
+									c3d->D0(end, pe);
 									//make straight edge
-									wireMaker.Add(BRepBuilderAPI_MakeEdge(s, e));
+									wireMaker.Add(BRepBuilderAPI_MakeEdge(s, pe));
 									continue;
 								}
 							}
@@ -418,8 +418,8 @@ namespace Xbim
 						gp_Pnt p2 = BRep_Tool::Pnt(v2);
 
 						String^ errMsg = XbimEdge::GetBuildEdgeErrorMessage(edgeErr);
-						XbimGeometryCreator::LogWarning(pLine, "Invalid edge found in polyline, Start = {0}, {1}, {2} End = {3}, {4}, {5}. Edge discarded.",
-							 p1.X(), p1.Y(), p1.Z(), p2.X(), p2.Y(), p2.Z());
+						XbimGeometryCreator::LogWarning(pLine, "Invalid edge found in polyline, {6}.Start = {0}, {1}, {2} End = {3}, {4}, {5}. Edge discarded.",
+							 p1.X(), p1.Y(), p1.Z(), p2.X(), p2.Y(), p2.Z(), errMsg);
 					}
 					else
 					{
@@ -560,7 +560,7 @@ namespace Xbim
 			
 			ShapeFix_ShapeTolerance FTol;
 			double precision = cCurve->Model->ModelFactors->Precision; //use a courser precision for trimmed curves	
-			double maxPrecision = 10/cCurve->Model->ModelFactors->OneMilliMetre;
+			
 			TopoDS_Wire w;
 						
 			bool isContinuous = true;
@@ -606,10 +606,10 @@ namespace Xbim
 				}
 				else //coursen the precision to 5 mm
 				{
-					TopTools_ListIteratorOfListOfShape anItL;
-					for (anItL.Initialize(topoEdgeList); anItL.More(); anItL.Next())
+					TopTools_ListIteratorOfListOfShape anItL2;
+					for (anItL2.Initialize(topoEdgeList); anItL2.More(); anItL2.Next())
 					{
-						FTol.LimitTolerance(anItL.Value(), oneMilli * 5);
+						FTol.LimitTolerance(anItL2.Value(), oneMilli * 5);
 					}
 					BRepBuilderAPI_MakeWire wireMaker3;
 					wireMaker3.Add(topoEdgeList);
@@ -847,8 +847,8 @@ namespace Xbim
 			}
 			else if (3 ==(int)curve->Dim )
 			{
-				XbimCurve^ curve = gcnew XbimCurve(curve);
-				XbimEdge^ edge = gcnew XbimEdge(curve);
+				XbimCurve^ xcurve = gcnew XbimCurve(curve);
+				XbimEdge^ edge = gcnew XbimEdge(xcurve);
 				if (edge->IsValid)
 				{
 					BRepBuilderAPI_MakeWire b(edge);
@@ -858,8 +858,8 @@ namespace Xbim
 			}
 			else if (2 == (int) curve->Dim )
 			{
-				XbimCurve2D^ curve = gcnew XbimCurve2D(curve);
-				XbimEdge^ edge = gcnew XbimEdge(curve);
+				XbimCurve2D^ xcurve = gcnew XbimCurve2D(curve);
+				XbimEdge^ edge = gcnew XbimEdge(xcurve);
 				if (edge->IsValid)
 				{
 					BRepBuilderAPI_MakeWire b(edge);
@@ -1052,10 +1052,9 @@ namespace Xbim
 			else if ((ipc = dynamic_cast<IIfcIndexedPolyCurve^>(bCurve)) != nullptr) 
 				return Init(ipc);
 			else
-			{
-				Type ^ type = bCurve->GetType();
+			{				
 				throw gcnew NotImplementedException("Bounded Curve type is not implemented");
-				return;
+			
 			}
 		}
 
@@ -1429,7 +1428,7 @@ namespace Xbim
 				if (filleter.IsDone())
 				{
 					TopoDS_Shape shape = filleter.Shape();
-					for (TopExp_Explorer exp(shape, TopAbs_WIRE); exp.More(); exp.Next()) //just take the first wire
+					for (TopExp_Explorer exp(shape, TopAbs_WIRE); exp.More(); ) //just take the first wire
 					{
 						wire = TopoDS::Wire(exp.Current());
 						break;
@@ -1558,7 +1557,7 @@ namespace Xbim
 			{				
 				BRepBuilderAPI_MakeFace faceMaker(wire, true);
 				BRepFilletAPI_MakeFillet2d filleter(faceMaker.Face());
-				double fRad = profile->FilletRadius.Value;
+				
 				int i = 1;
 				for (BRepTools_WireExplorer exp(wire); exp.More(); exp.Next())
 				{
@@ -1572,7 +1571,7 @@ namespace Xbim
 				if (filleter.IsDone())
 				{
 					TopoDS_Shape shape = filleter.Shape();
-					for (TopExp_Explorer exp(shape, TopAbs_WIRE); exp.More(); exp.Next()) //just take the first wire
+					for (TopExp_Explorer exp(shape, TopAbs_WIRE); exp.More(); ) //just take the first wire
 					{
 						wire = TopoDS::Wire(exp.Current());
 						break;
@@ -1641,7 +1640,7 @@ namespace Xbim
 			{
 				BRepBuilderAPI_MakeFace faceMaker(wire, true);
 				BRepFilletAPI_MakeFillet2d filleter(faceMaker.Face());
-				double fRad = profile->FilletRadius.Value;
+				
 				int i = 1;
 				for (BRepTools_WireExplorer exp(wire); exp.More(); exp.Next())
 				{
@@ -1655,7 +1654,7 @@ namespace Xbim
 				if (filleter.IsDone())
 				{
 					TopoDS_Shape shape = filleter.Shape();
-					for (TopExp_Explorer exp(shape, TopAbs_WIRE); exp.More(); exp.Next()) //just take the first wire
+					for (TopExp_Explorer exp(shape, TopAbs_WIRE); exp.More(); ) //just take the first wire
 					{
 						wire = TopoDS::Wire(exp.Current());
 						break;
@@ -1898,7 +1897,7 @@ namespace Xbim
 				if (filleter.IsDone())
 				{
 					TopoDS_Shape shape = filleter.Shape();
-					for (TopExp_Explorer exp(shape, TopAbs_WIRE); exp.More(); exp.Next()) //just take the first wire
+					for (TopExp_Explorer exp(shape, TopAbs_WIRE); exp.More(); ) //just take the first wire
 					{
 						wire = TopoDS::Wire(exp.Current());
 						break;
@@ -1961,7 +1960,7 @@ namespace Xbim
 				if (filleter.IsDone())
 				{
 					TopoDS_Shape shape = filleter.Shape();
-					for (TopExp_Explorer exp(shape, TopAbs_WIRE); exp.More(); exp.Next()) //just take the first wire
+					for (TopExp_Explorer exp(shape, TopAbs_WIRE); exp.More(); ) //just take the first wire
 					{
 						wire = TopoDS::Wire(exp.Current());
 						break;
@@ -2065,7 +2064,7 @@ namespace Xbim
 				if (filleter.IsDone())
 				{
 					TopoDS_Shape shape = filleter.Shape();
-					for (TopExp_Explorer exp(shape, TopAbs_WIRE); exp.More(); exp.Next()) //just take the first wire
+					for (TopExp_Explorer exp(shape, TopAbs_WIRE); exp.More(); ) //just take the first wire
 					{
 						wire = TopoDS::Wire(exp.Current());
 						break;
@@ -2165,7 +2164,7 @@ namespace Xbim
 				if (filleter.IsDone())
 				{
 					TopoDS_Shape shape = filleter.Shape();
-					for (TopExp_Explorer exp(shape, TopAbs_WIRE); exp.More(); exp.Next()) //just take the first wire
+					for (TopExp_Explorer exp(shape, TopAbs_WIRE); exp.More(); ) //just take the first wire
 					{
 						wire = TopoDS::Wire(exp.Current());
 						break;
@@ -2272,7 +2271,7 @@ namespace Xbim
 			return (XbimWire^)Trim(startParam, endParam, tolerance);
 		}
 
-		IXbimWire^ XbimWire::Trim(double first, double last, double tolerance)
+		IXbimWire^ XbimWire::Trim(double first, double last, double /*tolerance*/)
 		{
 			if (!IsValid) 
 				return this;
@@ -2329,9 +2328,9 @@ namespace Xbim
 			if (IsValid) pWire->Move(loc);
 		}
 
-		void XbimWire::Mesh(IXbimMeshReceiver ^ mesh, double precision, double deflection, double angle)
+		void XbimWire::Mesh(IXbimMeshReceiver ^ /*mesh*/, double /*precision*/, double /*deflection*/, double /*angle*/)
 		{
-			return;//maybe add an implementation for this
+			throw gcnew NotImplementedException("XbimWire::Mesh");
 		}
 
 		void XbimWire::Move(IIfcAxis2Placement3D^ position)
@@ -2425,13 +2424,12 @@ namespace Xbim
 							B.Add(aCurrWire, TopoDS::Edge(aValue));
 						}
 						// make edge from the wire
-						XbimEdge^ anEdge = gcnew XbimEdge(aCurrWire, tolerance, angleTolerance);
-						if (!anEdge->IsValid) //probably could not get C1 continuity just add all edges
+						XbimEdge^ xanEdge = gcnew XbimEdge(aCurrWire, tolerance, angleTolerance);
+						if (!xanEdge->IsValid) //probably could not get C1 continuity just add all edges
 						{
 							for (itEdges.Initialize(currChain); itEdges.More(); itEdges.Next()) {
 								TopoDS_Shape aValue = itEdges.Value();
-								anEdge = gcnew XbimEdge(TopoDS::Edge(aValue));
-								finalList.Append(anEdge);
+								finalList.Append(gcnew XbimEdge(TopoDS::Edge(aValue)));
 							}
 						}
 						else
@@ -2753,7 +2751,8 @@ namespace Xbim
 			XbimPoint3DWithTolerance^ startOriginalPnt = gcnew XbimPoint3DWithTolerance(startOriginal->X, startOriginal->Y, startOriginal->Z, pline->Model->ModelFactors->Precision);
 			return startLookupPnt == startOriginalPnt;
 		}
-
+#pragma warning( push )
+#pragma warning( disable : 4701)
 		bool XbimWire::SortEdgesForWire(const NCollection_Vector<TopoDS_Edge>& oldedges, NCollection_Vector<TopoDS_Edge>& newedges, NCollection_Vector<TopoDS_Edge>& notTaken, double tol, bool *pClosed, double* pMaxGap)
 		{
 			int i, n, minID, id, id2;
@@ -2839,14 +2838,14 @@ namespace Xbim
 					break;
 			}
 
-			if (edges.size() != oldedges.Length())
+			if (edges.size() != (size_t)oldedges.Length())
 			{
-				for (int i = 0; i < n; i++)
+				for (int x = 0; x < n; x++)
 				{
-					if (bTaken(i) == 0)
-						notTaken.Append(oldedges(i));
+					if (bTaken(x) == 0)
+						notTaken.Append(oldedges(x));
 					else
-						newedges.Append(oldedges(i));
+						newedges.Append(oldedges(x));
 				}
 				return false;
 			}
@@ -2889,6 +2888,7 @@ namespace Xbim
 			return true;
 		}
 
+#pragma warning( pop )
 
 
 		int XbimWire::GetMatchTwoPntsPair(const gp_Pnt& b1, const gp_Pnt& e1, const gp_Pnt& b2, const gp_Pnt& e2,

@@ -1,13 +1,14 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
-using Xbim.Common.Logging;
+using Xbim.Common;
+using Microsoft.Extensions.Logging;
 
 namespace Xbim.Geometry.Engine.Interop
 {
     internal class XbimCustomAssemblyResolver
     {
-        static readonly ILogger Logger = LoggerFactory.GetLogger();
+        
 
         const string GeometryModuleName = "Xbim.Geometry.Engine";
         const string XbimModulePrefix = "Xbim.";
@@ -36,7 +37,8 @@ namespace Xbim.Geometry.Engine.Interop
 
             if (appDir == null)
             {
-                Logger.WarnFormat("Unable to resolve {0} because the system was not able to acquire base location of running application from {1}.", 
+                var logger = ApplicationLogging.CreateLogger<XbimCustomAssemblyResolver>();
+                logger.LogWarning("Unable to resolve {0} because the system was not able to acquire base location of running application from {1}.", 
                     moduleName, assembly.FullName);
                 return null;
             }
@@ -46,18 +48,20 @@ namespace Xbim.Geometry.Engine.Interop
             if (moduleName.StartsWith(GeometryModuleName))
             {
                 // Get conventions used by this process architecture
-                var conventions = new XbimArchitectureConventions();                
-                
-                // Append the relevant suffix
-                var filename = String.Format("{0}{1}.dll", conventions.ModuleName, conventions.Suffix);
+                var conventions = new XbimArchitectureConventions();
 
+                // Append the relevant suffix
+                // var filename = String.Format("{0}{1}.dll", conventions.ModuleName, conventions.Suffix);
+                //dropping the use of a suffix
+                var filename = conventions.ModuleName;
                 // Look in relevant Architecture subfolder off the main application deployment
                 libraryPath = Path.Combine(appDir, conventions.SubFolder, filename);
 
                 // Try a relative folder to CWD.
                 if (!File.Exists(libraryPath))
                 {
-                    Logger.DebugFormat("Assembly not found at {0}. Attempting relative path...", libraryPath);
+                    var logger = ApplicationLogging.CreateLogger<XbimCustomAssemblyResolver>();
+                    logger.LogDebug("Assembly not found at {0}. Attempting relative path...", libraryPath);
                     libraryPath = Path.Combine(conventions.SubFolder, filename);
                 }
             }
@@ -85,15 +89,17 @@ namespace Xbim.Geometry.Engine.Interop
 
         private static Assembly LoadAssembly(string moduleName, string assemblyPath)
         {
+            var logger = ApplicationLogging.CreateLogger<XbimCustomAssemblyResolver>();
             if (!File.Exists(assemblyPath))
             {
-                Logger.WarnFormat("Failed to locate assembly '{0}'. Attempted to find at '{1}' but gave up.",
+               
+                logger.LogWarning("Failed to locate assembly '{0}'. Attempted to find at '{1}' but gave up.",
                     moduleName, assemblyPath);
                 return null;
             }
             else
             {
-                Logger.DebugFormat("Loading assembly from: {0}", assemblyPath);
+                logger.LogDebug("Loading assembly from: {0}", assemblyPath);
                 // Failures can occur at Load if a dependent assembly cannot be found.
                 Assembly geomLoaded = Assembly.LoadFile(assemblyPath);
                 return geomLoaded;

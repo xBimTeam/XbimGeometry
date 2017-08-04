@@ -459,8 +459,8 @@ namespace Xbim
 				if (!loop->IsClosed && loop->Edges->Count>1) //we need to close it if we have more thn one edge
 				{
 					double oneMilli = profile->Model->ModelFactors->OneMilliMeter;
-					XbimFace^ face = gcnew XbimFace(loop);
-					ShapeFix_Wire wireFixer(loop, face, profile->Model->ModelFactors->Precision);
+					XbimFace^ xface = gcnew XbimFace(loop);
+					ShapeFix_Wire wireFixer(loop, xface, profile->Model->ModelFactors->Precision);
 					wireFixer.ClosedWireMode() = Standard_True;
 					wireFixer.FixGaps2dMode() = Standard_True;
 					wireFixer.FixGaps3dMode() = Standard_True;
@@ -497,8 +497,8 @@ namespace Xbim
 					if (!innerWire->IsClosed && innerWire->Edges->Count>1) //we need to close it if we have more thn one edge
 					{
 						double oneMilli = profile->Model->ModelFactors->OneMilliMeter;
-						XbimFace^ face = gcnew XbimFace(innerWire);
-						ShapeFix_Wire wireFixer(innerWire, face, profile->Model->ModelFactors->Precision);
+						XbimFace^ xface = gcnew XbimFace(innerWire);
+						ShapeFix_Wire wireFixer(innerWire, xface, profile->Model->ModelFactors->Precision);
 						wireFixer.ClosedWireMode() = Standard_True;
 						wireFixer.FixGaps2dMode() = Standard_True;
 						wireFixer.FixGaps3dMode() = Standard_True;
@@ -666,7 +666,7 @@ namespace Xbim
 					if (filleter.IsDone())
 					{
 						TopoDS_Shape shape = filleter.Shape();
-						for (TopExp_Explorer exp(shape, TopAbs_WIRE); exp.More(); exp.Next()) //just take the first wire
+						for (TopExp_Explorer exp(shape, TopAbs_WIRE); exp.More();) //just take the first wire
 						{
 							wire = TopoDS::Wire(exp.Current());
 							break;
@@ -710,7 +710,7 @@ namespace Xbim
 						if (filleter.IsDone())
 						{
 							TopoDS_Shape shape = filleter.Shape();
-							for (TopExp_Explorer exp(shape, TopAbs_WIRE); exp.More(); exp.Next()) //just take the first wire
+							for (TopExp_Explorer exp(shape, TopAbs_WIRE); exp.More();) //just take the first wire
 							{
 								innerWire = TopoDS::Wire(exp.Current());
 								break;

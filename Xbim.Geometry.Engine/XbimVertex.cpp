@@ -139,9 +139,9 @@ namespace Xbim
 			return copy;
 		}
 
-		void XbimVertex::Mesh(IXbimMeshReceiver ^ mesh, double precision, double deflection, double angle)
+		void XbimVertex::Mesh(IXbimMeshReceiver ^ /*mesh*/, double /*precision*/ , double /*deflection*/ , double /*angle*/  )
 		{
-			return;//maybe add an implementation for this
+			throw gcnew NotImplementedException("XbimVertex::Mesh");
 		}
 
 #pragma endregion

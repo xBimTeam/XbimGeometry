@@ -1,9 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
-using System.Runtime.Remoting;
+
+using Xbim.Common;
 using Xbim.Common.Geometry;
-using Xbim.Common.Logging;
+using Microsoft.Extensions.Logging;
 using Xbim.Ifc4;
 using Xbim.Ifc4.Interfaces;
 
@@ -29,7 +30,7 @@ namespace Xbim.Geometry.Engine.Interop
             XbimPrerequisitesValidator.Validate();
 
             var conventions = new XbimArchitectureConventions();    // understands the process we run under
-            string assemblyName = conventions.ModuleName + conventions.Suffix;
+            string assemblyName = conventions.ModuleName;// + conventions.Suffix; dropping the use of a suffix
             try
             {               
                 var ass =  Assembly.Load(assemblyName);
@@ -363,11 +364,7 @@ namespace Xbim.Geometry.Engine.Interop
 
        
 
-        public ILogger Logger
-        {
-            get { return _engine.Logger; }
-        }
-
+        
 
 
         public IXbimGeometryObject Create(IIfcGeometricRepresentationItem ifcRepresentation, IIfcAxis2Placement3D objectLocation)
@@ -378,7 +375,8 @@ namespace Xbim.Geometry.Engine.Interop
             }
             catch (Exception e)
             {
-                Logger.ErrorFormat("EE001: Failed to create geometry #{0} of type {1}, {2}", ifcRepresentation.EntityLabel, ifcRepresentation.GetType().Name, e.Message);
+                var logger = ApplicationLogging.CreateLogger<XbimCustomAssemblyResolver>();
+                logger.LogError("EE001: Failed to create geometry #{0} of type {1}, {2}", ifcRepresentation.EntityLabel, ifcRepresentation.GetType().Name, e.Message);
                 return null;
             }
 

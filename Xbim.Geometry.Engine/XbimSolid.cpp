@@ -595,14 +595,14 @@ namespace Xbim
 					shapeFixer.FixFaceTool()->FixWireTool()->FixIntersectingEdgesMode() = Standard_True;
 					if (shapeFixer.Perform() )
 					{
-						TopoDS_Shell shell;
-						b.MakeShell(shell);
+						TopoDS_Shell sshell;
+						b.MakeShell(sshell);
 						for (TopExp_Explorer explr(shapeFixer.Shape(), TopAbs_FACE); explr.More(); explr.Next())
 						{
-							b.AddShellFace(shell, TopoDS::Face(explr.Current()));
+							b.AddShellFace(sshell, TopoDS::Face(explr.Current()));
 						}
 						bs.MakeSolid(*pSolid);
-						bs.Add(*pSolid, shell);
+						bs.Add(*pSolid, sshell);
 					}
 					else
 						*pSolid =solid;
@@ -968,7 +968,7 @@ namespace Xbim
 			
 			if (crossSections->Count>1) //we have valid faces 
 			{
-				double precision = repItem->Model->ModelFactors->Precision;
+				
 				//build the spine
 				XbimWire^ sweep = gcnew XbimWire(repItem->SpineCurve);
 				BRepOffsetAPI_MakePipeShell pipeMaker1(sweep);
@@ -1271,7 +1271,7 @@ namespace Xbim
 			//BRepTools::Write(halfspace, "d:\\tmp\\hs");
 			TopoDS_Shape result = BRepAlgoAPI_Common(boundedHalfSpace,halfspace);
 			
-			for (TopExp_Explorer explr(result, TopAbs_SOLID); explr.More(); explr.Next())
+			for (TopExp_Explorer explr(result, TopAbs_SOLID); explr.More();)
 			{
 				pSolid = new TopoDS_Solid();
 				*pSolid = TopoDS::Solid(explr.Current()); //just take the first solid
@@ -1996,8 +1996,7 @@ namespace Xbim
 					}
 
 				return gcnew XbimSolidSet(boolOp.Shape());
-				err = "Error = " + boolOp.ErrorStatus();
-
+				
 			}
 			catch (Standard_Failure e)
 			{
@@ -2017,40 +2016,14 @@ namespace Xbim
 			return thisSolidSet->Intersection(toIntersect, tolerance);
 		}
 
-		IXbimSolidSet^ XbimSolid::Intersection(IXbimSolid^ toIntersect, double tolerance)
+		IXbimSolidSet^ XbimSolid::Intersection(IXbimSolid^ toIntersect, double /*tolerance*/)
 		{
 			if (!IsValid || !toIntersect->IsValid) return XbimSolidSet::Empty;
 			XbimSolid^ solidIntersect = dynamic_cast<XbimSolid^>(toIntersect);
 			if (solidIntersect == nullptr)
 			{
-				
-#ifdef USE_CARVE_CSG
-				XbimFacetedSolid^ facetedSolidIntersect = dynamic_cast<XbimFacetedSolid^>(toIntersect);
-				if (facetedSolidIntersect != nullptr) //downgrade to facetation or upgrade and perform
-				{
-					if (this->IsPolyhedron) //downgrade this to facetation, faster
-					{
-						XbimFacetedSolid^ thisFacetedSolid = gcnew XbimFacetedSolid(this, tolerance);
-						return thisFacetedSolid->Cut(facetedSolidIntersect, tolerance);
-					}
-					else //upgrade tocut to occ, more accurate with curves
-					{
-						solidIntersect = (XbimSolid^)facetedSolidIntersect->ConvertToXbimSolid();
-						if (solidIntersect == nullptr)
-						{
-							XbimGeometryCreator::LogWarning("WS025: Invalid operation. Only solid shapes can be intersected with another solid");
-							return gcnew XbimSolidSet(this); // the result would be no change so return this
-						} //else carry on with the boolean
-					}
-				}
-				else
-#endif // USE_CARVE_CSG
-
-				{
-					
-					XbimGeometryCreator::LogWarning(toIntersect, "Invalid operation. Only solid shapes can be intersected with another solid");
-					return gcnew XbimSolidSet(this); // the result would be no change so return this
-				}
+				XbimGeometryCreator::LogWarning(toIntersect, "Invalid operation. Only solid shapes can be intersected with another solid");
+			    return gcnew XbimSolidSet(this); // the result would be no change so return this			
 			}
 			/*ShapeFix_ShapeTolerance fixTol;
 			fixTol.SetTolerance(solidIntersect, tolerance);
@@ -2078,40 +2051,18 @@ namespace Xbim
 			return thisSolidSet->Union(toUnion, tolerance);
 		}
 
-		IXbimSolidSet^ XbimSolid::Union(IXbimSolid^ toUnion, double tolerance)
+		IXbimSolidSet^ XbimSolid::Union(IXbimSolid^ toUnion, double /*tolerance*/)
 		{
 			if (!IsValid || !toUnion->IsValid) return XbimSolidSet::Empty;
 			XbimSolid^ solidUnion = dynamic_cast<XbimSolid^>(toUnion);
 			if (solidUnion == nullptr)
 			{
 
-#ifdef USE_CARVE_CSG
-				XbimFacetedSolid^ facetedSolidUnion = dynamic_cast<XbimFacetedSolid^>(toUnion);
-				if (facetedSolidUnion != nullptr) //downgrade to facetation or upgrade and perform
-				{
-					if (this->IsPolyhedron) //downgrade this to facetation, faster
-					{
-						XbimFacetedSolid^ thisFacetedSolid = gcnew XbimFacetedSolid(this, tolerance);
-						return thisFacetedSolid->Cut(facetedSolidUnion, tolerance);
-					}
-					else //upgrade tocut to occ, more accurate with curves
-					{
-						solidUnion = (XbimSolid^)facetedSolidUnion->ConvertToXbimSolid();
-						if (solidUnion == nullptr)
-						{
-							XbimGeometryCreator::LogWarning("WS027: Invalid operation. Only solid shapes can be unioned with another solid");
-							return gcnew XbimSolidSet(this); // the result would be no change so return this
-						} //else carry on with the boolean
-					}
-				}
-				else
-#endif // USE_CARVE_CSG
 
-				{
-					XbimGeometryCreator::LogWarning(toUnion, "Invalid operation. Only solid shapes can be unioned with another solid");
-					return gcnew XbimSolidSet(this); // the result would be no change so return this
-				}
+				XbimGeometryCreator::LogWarning(toUnion, "Invalid operation. Only solid shapes can be unioned with another solid");
+				return gcnew XbimSolidSet(this); // the result would be no change so return this
 			}
+			
 			
 			/*ShapeFix_ShapeTolerance fixTol;
 			fixTol.SetTolerance(solidUnion, tolerance);
@@ -2178,11 +2129,12 @@ namespace Xbim
 				BRepAlgo_FaceRestrictor fr;
 				TopoDS_Shape aLocalS = boolOp.Shape2().Oriented(TopAbs_FORWARD);
 				fr.Init(TopoDS::Face(aLocalS), Standard_True, Standard_True);
-				for (TopExp_Explorer exp(closed, TopAbs_WIRE); exp.More(); exp.Next()) 
+				for (TopExp_Explorer exp2(closed, TopAbs_WIRE); exp2.More(); exp2.Next()) 
 				{
-					ShapeFix_Wire wireFixer(TopoDS::Wire(exp.Current()), faceSection, tolerance);
+					ShapeFix_Wire wireFixer(TopoDS::Wire(exp2.Current()), faceSection, tolerance);
 					wireFixer.Perform();
-					fr.Add(wireFixer.Wire());
+					TopoDS_Wire w = wireFixer.Wire();
+					fr.Add(w);
 				}
 				fr.Perform();			
 				if (fr.IsDone())

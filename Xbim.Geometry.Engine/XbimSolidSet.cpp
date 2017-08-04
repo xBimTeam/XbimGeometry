@@ -175,12 +175,12 @@ namespace Xbim
 						nestedCompound->Sew();
 						for each (IXbimGeometryObject^ nestedGeom in nestedCompound)
 						{
-							XbimSolid^ nestedSolid = dynamic_cast<XbimSolid^>(nestedGeom);
-							XbimShell^ nestedShell = dynamic_cast<XbimShell^>(nestedGeom);
-							if(nestedSolid!=nullptr && !nestedSolid->IsEmpty)
-								solids->Add(nestedSolid );
-							else if (nestedShell != nullptr && nestedShell->IsValid)
-							    solids->Add(nestedShell->MakeSolid());
+							XbimSolid^ subSolid = dynamic_cast<XbimSolid^>(nestedGeom);
+							XbimShell^ subShell = dynamic_cast<XbimShell^>(nestedGeom);
+							if(subSolid !=nullptr && !subSolid->IsEmpty)
+								solids->Add(subSolid);
+							else if (subShell != nullptr && subShell->IsValid)
+							    solids->Add(subShell->MakeSolid());
 						}
 					}
 					else if (shell != nullptr && shell->IsValid)
@@ -345,25 +345,19 @@ namespace Xbim
 			return true;
 		}
 
-		IXbimSolidSet^ XbimSolidSet::Cut(IXbimSolidSet^ solids, double tolerance)
-		{
-			IXbimSolidSet^ toCutSolidSet = solids; //just to sort out carve exclusion, they must be all OCC solids if no carve
-			IXbimSolidSet^ thisSolidSet = this;
-
-
-#ifdef OCC_6_9_SUPPORTED
+		IXbimSolidSet^ XbimSolidSet::Cut(IXbimSolidSet^ solidsToCut, double tolerance)
+		{			
 			if (!IsValid) return this;
 			String^ err = "";
 			try
 			{			
 				ShapeFix_ShapeTolerance FTol;
 				TopTools_ListOfShape shapeTools;
-				for each (IXbimSolid^ iSolid in solids)
+				for each (IXbimSolid^ iSolid in solidsToCut)
 				{
 					XbimSolid^ solid = dynamic_cast<XbimSolid^>(iSolid);
 					if (solid!=nullptr && solid->IsValid)
-					{
-						
+					{					
 						FTol.LimitTolerance(solid, tolerance);
 						shapeTools.Append(solid);							
 					}
@@ -399,7 +393,7 @@ namespace Xbim
 
 				if (aPI->TimedOut())
 				{
-					XbimGeometryCreator::LogError(solids, "Boolean operation timed out after {0} seconds. Try increasing the timeout in the App.config file", (int)aPI->ElapsedTime());
+					XbimGeometryCreator::LogError(solidsToCut, "Boolean operation timed out after {0} seconds. Try increasing the timeout in the App.config file", (int)aPI->ElapsedTime());
 					//throw gcnew XbimException(String::Format("Boolean operation timed out after {0} secs. Try increasing the timeout in the App.config file", (int)aPI->ElapsedTime()));
 					return XbimSolidSet::Empty;
 				}
@@ -439,7 +433,7 @@ namespace Xbim
 				}
 
 				err = "Error = " + boolOp.ErrorStatus();
-				GC::KeepAlive(solids);
+				GC::KeepAlive(solidsToCut);
 				GC::KeepAlive(this);
 			}
 			catch (Standard_Failure e)
@@ -453,62 +447,13 @@ namespace Xbim
 			}
 			
 			return XbimSolidSet::Empty;
-#else
 
-			if (thisSolidSet->Count >_maxOpeningsToCut) //if the base shape is really complicate just give up trying
-			{
-				IsSimplified = true;
-				return this;
-			}
-			XbimCompound^ thisSolid = XbimCompound::Merge(thisSolidSet, tolerance);
-			
-			XbimCompound^ toCutSolid;
-			if (thisSolid == nullptr) return XbimSolidSet::Empty;
-			bool isSimplified = false;
-			if (toCutSolidSet->Count > _maxOpeningsToCut)
-			{
-				isSimplified = true;
-				List<Tuple<double, XbimSolid^>^>^ solidsList = gcnew List<Tuple<double, XbimSolid^>^>(toCutSolidSet->Count);
-				for each (XbimSolid^ solid in toCutSolidSet)
-				{
-					solidsList->Add(gcnew Tuple<double, XbimSolid^>(solid->Volume, solid));
-				}
-				solidsList->Sort(_volumeComparer);
-				TopoDS_Compound subsetToCut;
-				BRep_Builder b;
-				b.MakeCompound(subsetToCut);
-				//int i = 0;
-				double totalVolume = this->Volume;
-				double minVolume = totalVolume * _maxOpeningVolumePercentage;
-
-				for (int i = 0; i < _maxOpeningsToCut; i++)
-				{
-					if (solidsList[i]->Item1 < minVolume) break; //give up for small things
-					b.Add(subsetToCut, solidsList[i]->Item2);
-				}
-				
-				toCutSolid = gcnew XbimCompound(subsetToCut,true, tolerance);
-				
-			}
-			else
-			{
-				toCutSolid = XbimCompound::Merge(toCutSolidSet, tolerance);
-			}
-
-			if (toCutSolid == nullptr) return this;
-			XbimCompound^ result = thisSolid->Cut(toCutSolid, tolerance);
-			XbimSolidSet^ ss = gcnew XbimSolidSet(result);
-			//BRepTools::Write(result, "d:\\c");
-			GC::KeepAlive(result);
-			ss->IsSimplified = isSimplified;
-			return ss;
-#endif
 		}
 
-		IXbimSolidSet^ XbimSolidSet::Union(IXbimSolidSet^ solids, double tolerance)
+		IXbimSolidSet^ XbimSolidSet::Union(IXbimSolidSet^ solidSet, double tolerance)
 		{
 			if (!IsValid) return this;
-			IXbimSolidSet^ toUnionSolidSet = solids; //just to sort out carve exclusion, they must be all OCC solids if no carve
+			IXbimSolidSet^ toUnionSolidSet = solidSet; //just to sort out carve exclusion, they must be all OCC solids if no carve
 			IXbimSolidSet^ thisSolidSet = this;
 
 			XbimCompound^ thisSolid = XbimCompound::Merge(thisSolidSet, tolerance);
@@ -521,16 +466,16 @@ namespace Xbim
 				ss->Add(result);
 				return ss;
 			}
-			if (toUnionSolid != nullptr) return solids;
+			if (toUnionSolid != nullptr) return solidSet;
 			return this;
 		}
 
 		
 
-		IXbimSolidSet^ XbimSolidSet::Intersection(IXbimSolidSet^ solids, double tolerance)
+		IXbimSolidSet^ XbimSolidSet::Intersection(IXbimSolidSet^ solidSet, double tolerance)
 		{
 			if (!IsValid) return this;
-			IXbimSolidSet^ toIntersectSolidSet = solids; //just to sort out carve exclusion, they must be all OCC solids if no carve
+			IXbimSolidSet^ toIntersectSolidSet = solidSet; //just to sort out carve exclusion, they must be all OCC solids if no carve
 			IXbimSolidSet^ thisSolidSet = this;
 
 			XbimCompound^ thisSolid = XbimCompound::Merge(thisSolidSet, tolerance);

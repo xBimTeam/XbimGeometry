@@ -98,12 +98,12 @@ namespace Xbim
 		
 
 
-		IXbimGeometryObject^ XbimCurve::Transform(XbimMatrix3D matrix3D)
+		IXbimGeometryObject^ XbimCurve::Transform(XbimMatrix3D /*matrix3D*/)
 		{
 			throw gcnew Exception("Tranformation of curves is not currently supported");
 		}
 		
-		IXbimGeometryObject^ XbimCurve::TransformShallow(XbimMatrix3D matrix3D)
+		IXbimGeometryObject^ XbimCurve::TransformShallow(XbimMatrix3D /*matrix3D*/)
 		{
 			throw gcnew Exception("TransformShallow of curves is not currently supported");
 		}
@@ -277,8 +277,7 @@ namespace Xbim
 			if(IsValid)
 			{
 				//check if we have an ellipse in case we have to correct axis
-				IIfcEllipse^ ellipse = dynamic_cast<IIfcEllipse^>(curve->BasisCurve);
-				bool rotateEllipse = false;
+				/*IIfcEllipse^ ellipse = dynamic_cast<IIfcEllipse^>(curve->BasisCurve);*/
 				
 				bool isConic = (dynamic_cast<IIfcConic^>(curve->BasisCurve) != nullptr);					
 				double parameterFactor = isConic ? curve->Model->ModelFactors->AngleToRadiansConversionFactor : 1;

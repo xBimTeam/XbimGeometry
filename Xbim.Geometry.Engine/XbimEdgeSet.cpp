@@ -130,7 +130,7 @@ namespace Xbim
 			return result;
 		}
 
-		void XbimEdgeSet::Mesh(IXbimMeshReceiver ^ mesh, double precision, double deflection, double angle)
+		void XbimEdgeSet::Mesh(IXbimMeshReceiver ^ /*mesh*/, double /*precision*/, double /*deflection*/, double /*angle*/)
 		{
 			return;//maybe add an implementation for this
 		}

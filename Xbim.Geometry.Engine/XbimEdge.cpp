@@ -297,7 +297,8 @@ namespace Xbim
 			
 		}
 
-
+#pragma warning( push )
+#pragma warning( disable : 4701)
 		XbimEdge::XbimEdge(const TopoDS_Wire& aWire, double tolerance, double angleTolerance)
 		{
 			
@@ -779,7 +780,7 @@ namespace Xbim
 			pEdge = new TopoDS_Edge();
 			*pEdge = ResEdge;
 		}
-
+#pragma warning( pop )
 #pragma endregion
 
 
@@ -890,7 +891,7 @@ namespace Xbim
 		{
 			if(IsValid) pEdge->Move(loc);
 		}
-		void XbimEdge::Mesh(IXbimMeshReceiver ^ mesh, double precision, double deflection, double angle)
+		void XbimEdge::Mesh(IXbimMeshReceiver ^ /*mesh*/, double /*precision*/, double /*deflection*/, double /*angle*/)
 		{
 			return;//maybe add an implementation for this
 		}

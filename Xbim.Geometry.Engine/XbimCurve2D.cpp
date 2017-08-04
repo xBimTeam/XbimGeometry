@@ -112,12 +112,12 @@ namespace Xbim
 			return XbimVector3D(v.X(), v.Y(), 0.);
 		}
 
-		IXbimGeometryObject^ XbimCurve2D::Transform(XbimMatrix3D matrix3D)
+		IXbimGeometryObject^ XbimCurve2D::Transform(XbimMatrix3D /*matrix3D*/)
 		{
 			throw gcnew Exception("Tranformation of curves is not currently supported");
 		}
 
-		IXbimGeometryObject^ XbimCurve2D::TransformShallow(XbimMatrix3D matrix3D)
+		IXbimGeometryObject^ XbimCurve2D::TransformShallow(XbimMatrix3D /*matrix3D*/)
 		{
 			throw gcnew Exception("TransformShallow of curves is not currently supported");
 		}
@@ -228,7 +228,7 @@ namespace Xbim
 			{
 				throw gcnew Exception(String::Format("WE005: Illegal Ellipse Semi Axis 2, must be greater than 0, in entity #{0}", ellipse->EntityLabel));
 			}
-			bool rotateElipse;
+			bool rotateElipse = false;
 			if (semiAx1 < semiAx2)//either same or two is larger than 1			 
 			{
 				semiAx1 = ellipse->SemiAxis2;

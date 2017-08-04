@@ -86,8 +86,8 @@ namespace Xbim
 			virtual property  bool IsValid{bool  get() abstract; }
 			virtual property bool IsSet{bool get() abstract; }
 			virtual property  XbimGeometryObjectType GeometryType{XbimGeometryObjectType  get() abstract;}
-			virtual bool Equals(IXbimGeometryObject^ geom, double tolerance){ throw gcnew NotImplementedException("Function not implemented"); }
-			virtual bool Intersects(IXbimGeometryObject^ geom, double tolerance){ throw gcnew NotImplementedException("Function not implemented"); }
+			virtual bool Equals(IXbimGeometryObject^ , double ){ throw gcnew NotImplementedException("Function not implemented"); }
+			virtual bool Intersects(IXbimGeometryObject^ , double ){ throw gcnew NotImplementedException("Function not implemented"); }
 			virtual property XbimRect3D BoundingBox {XbimRect3D get() abstract; };
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) abstract;
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D) abstract;

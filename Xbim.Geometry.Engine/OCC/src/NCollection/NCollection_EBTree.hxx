@@ -105,7 +105,8 @@ template <class TheObjType, class TheBndType> class NCollection_EBTree
 //purpose  : Updates the tree with a new object and its bounding box.
 //           Returns false if the tree already contains theObj.
 //=======================================================================
-
+#pragma warning(push)
+#pragma warning( disable : 4505)
 template <class TheObjType, class TheBndType>
 Standard_Boolean NCollection_EBTree<TheObjType,TheBndType>::Add
                         (const TheObjType& theObj,
@@ -132,6 +133,7 @@ Standard_Boolean NCollection_EBTree<TheObjType,TheBndType>::Add
   return result;
 }
 
+#pragma warning(pop)
 //=======================================================================
 //function : Remove
 //purpose  : Removes the given object and updates the tree.

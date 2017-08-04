@@ -24,7 +24,7 @@ private:
 	bool timedOut;
 public:
 	XbimProgressIndicator(Standard_Real maxDurationSeconds, bool startTimer=true);
-	virtual Standard_Boolean Show(const Standard_Boolean force) { return true; }
+	virtual Standard_Boolean Show(const Standard_Boolean ) { return true; }
 	virtual Standard_Boolean UserBreak();
 	void StartTimer() { timedOut = false;  aTimer.Start(); }
 	void StopTimer() { aTimer.Stop(); }

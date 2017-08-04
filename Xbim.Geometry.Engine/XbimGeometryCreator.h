@@ -5,12 +5,13 @@
 using namespace System;
 using namespace System::IO;
 using namespace Xbim::Common;
-using namespace Xbim::Common::Logging;
 using namespace Xbim::Common::Geometry;
 
 using namespace System::Configuration;
 using namespace Xbim::Ifc4::Interfaces;
 using namespace Xbim::Ifc4;
+using namespace Microsoft::Extensions::Logging;
+using namespace Microsoft::Extensions::Logging::Abstractions;
 namespace Xbim
 {
 	namespace Geometry
@@ -20,20 +21,20 @@ namespace Xbim
 		{
 		private:
 			IXbimGeometryObject ^ Trim(XbimSetObject ^geometryObject);
-		protected:
-			~XbimGeometryCreator()
-			{
-			}
-			bool Is3D(IIfcCurve^ rep);
-			static ILogger^ logger = LoggerFactory::GetLogger(); ;
-		public:
-
 			static XbimGeometryCreator()
 			{
 				String^ timeOut = ConfigurationManager::AppSettings["BooleanTimeOut"];
 				if (!double::TryParse(timeOut, BooleanTimeOut))
 					BooleanTimeOut = 60;
 			}
+		protected:
+			~XbimGeometryCreator()
+			{
+			}
+			bool Is3D(IIfcCurve^ rep);			
+		public:
+
+			
 			//Central point for logging all errors
 			static void LogInfo(Object^ entity, String^ format, ... array<Object^>^ arg);
 			static void LogWarning(Object^ entity, String^ format, ... array<Object^>^ arg);
@@ -41,7 +42,10 @@ namespace Xbim
 			static void LogDebug(Object^ entity, String^ format, ... array<Object^>^ arg);
 
 			static double BooleanTimeOut;
-			virtual property ILogger^ Logger {ILogger^ get() { return XbimGeometryCreator::logger; }};
+			virtual property ILogger^ Logger {ILogger^ get() 
+			{ 
+				return ApplicationLogging::CreateLogger<XbimGeometryCreator^>();				
+			}};
 			virtual XbimShapeGeometry^ CreateShapeGeometry(IXbimGeometryObject^ geometryObject, double precision, double deflection, double angle, XbimGeometryType storageType);
 			virtual XbimShapeGeometry^ CreateShapeGeometry(IXbimGeometryObject^ geometryObject, double precision, double deflection/*, double angle = 0.5, XbimGeometryType storageType = XbimGeometryType::Polyhedron*/)
 			{
@@ -50,7 +54,7 @@ namespace Xbim
 
 			virtual IXbimGeometryObject^ Create(IIfcGeometricRepresentationItem^ geomRep, IIfcAxis2Placement3D^ objectLocation);
 
-			virtual void Mesh(IXbimMeshReceiver^ mesh, IXbimGeometryObject^ geometry, double precision, double deflection, double angle);
+			virtual void Mesh(IXbimMeshReceiver^ mesh, IXbimGeometryObject^ geometry, double precision, double deflection, double /*angle*/);
 			virtual void Mesh(IXbimMeshReceiver^ mesh, IXbimGeometryObject^ geometry, double precision, double deflection/*, double angle = 0.5*/)
 			{
 				Mesh(mesh, geometry, precision, deflection, 0.5);

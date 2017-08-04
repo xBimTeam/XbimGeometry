@@ -41,7 +41,7 @@ namespace Xbim
 				if (localPlacement != nullptr)
 				{
 					IIfcAxis2Placement3D^ axisPlacement3D = dynamic_cast<IIfcAxis2Placement3D^>(localPlacement->RelativePlacement);
-					IIfcAxis2Placement2D^ axisPlacement2D = dynamic_cast<IIfcAxis2Placement2D^>(localPlacement->RelativePlacement);
+					/*IIfcAxis2Placement2D^ axisPlacement2D = dynamic_cast<IIfcAxis2Placement2D^>(localPlacement->RelativePlacement);*/
 					if (axisPlacement3D != nullptr)
 					{
 						gp_Trsf relTrsf;
@@ -714,7 +714,7 @@ namespace Xbim
 				throw(gcnew NotImplementedException("XbimConvert. Unsupported Placement type, must axis 2D or 3D"));
 			}
 		}
-		gp_Vec XbimConvert::GetAxisDir3d(IIfcAxis2Placement^ placement)
+		gp_Vec XbimConvert::GetAxisDir3d(IIfcAxis2Placement^ /*placement*/)
 		{
 			return gp_Vec(0, 0, 1);
 		}
@@ -731,6 +731,8 @@ namespace Xbim
 				return Enumerable::Count(pt->Coordinates) == 3;
 			return false;
 		}
+#pragma warning( push )
+#pragma warning( disable : 4189)
 		bool  XbimConvert::IsPolygon(IIfcPolyLoop^ pLoop)
 		{
 			int sides = 0;
@@ -741,7 +743,7 @@ namespace Xbim
 			}
 			return false;
 		}
-
+#pragma warning( pop )
 		/// <summary>
 		/// Calculates the Newell's Normal of the polygon of the loop
 		/// </summary>
