@@ -53,7 +53,7 @@ namespace Xbim.Geometry.Engine.Interop
                 // Append the relevant suffix
                 // var filename = String.Format("{0}{1}.dll", conventions.ModuleName, conventions.Suffix);
                 //dropping the use of a suffix
-                var filename = conventions.ModuleName;
+                var filename = $"{conventions.ModuleName}.dll";
                 // Look in relevant Architecture subfolder off the main application deployment
                 libraryPath = Path.Combine(appDir, conventions.SubFolder, filename);
 

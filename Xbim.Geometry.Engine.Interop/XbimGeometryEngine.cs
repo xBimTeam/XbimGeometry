@@ -26,11 +26,11 @@ namespace Xbim.Geometry.Engine.Interop
         public XbimGeometryEngine()
         {
 
-            // Warn if runtime for Engine is not present
-            XbimPrerequisitesValidator.Validate();
+            // Warn if runtime for Engine is not present, this is not necessary any more as we are net47
+           // XbimPrerequisitesValidator.Validate();
 
             var conventions = new XbimArchitectureConventions();    // understands the process we run under
-            string assemblyName = conventions.ModuleName;// + conventions.Suffix; dropping the use of a suffix
+            string assemblyName = $"{conventions.ModuleName}.dll";// + conventions.Suffix; dropping the use of a suffix
             try
             {               
                 var ass =  Assembly.Load(assemblyName);
@@ -39,7 +39,7 @@ namespace Xbim.Geometry.Engine.Interop
             }
             catch (Exception e)
             {
-                throw e;
+                throw new FileLoadException("Failed to load Xbim.Geometry.Engine.dll",e);
             }
              
         }

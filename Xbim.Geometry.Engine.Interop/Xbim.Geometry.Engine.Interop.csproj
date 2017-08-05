@@ -1,11 +1,21 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <Year>$([System.DateTime]::Now.ToString("yy"))</Year>
+    <Month>$([System.DateTime]::Now.ToString("MM"))</Month>
+    <Day>$([System.DateTime]::Now.ToString("dd"))</Day>
+    <Minute>$([System.Int32]::Parse($([System.DateTime]::Now.ToString("mm"))))</Minute>
+    <Hour>$([System.Int32]::Parse($([System.DateTime]::Now.ToString("HH"))))</Hour>
+    <MinuteOfDay>$([MSBuild]::Add($(Minute),$([MSBuild]::Multiply($(Hour),60))))</MinuteOfDay>
+    <HalfMinuteOfDay>$([System.Convert]::ToInt16($([MSBuild]::Divide($(MinuteOfDay), 2))))</HalfMinuteOfDay>
+    <AssemblyFileVersionAttribute>[assembly:System.Reflection.AssemblyVersionAttribute("5.0.$(Year)$(Month).$(Day)$(HalfMinuteOfDay)")];</AssemblyFileVersionAttribute>
+  </PropertyGroup>
+  <PropertyGroup>
     <TargetFramework>net47</TargetFramework>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>aimkey.snk</AssemblyOriginatorKeyFile>
     <Title>Xbim Geometry Engine</Title>
-    <Version>5.0.0-Unreleased</Version>
+    <Version>5.0.0-Beta-$(Year)$(Month)-$(Day)$(HalfMinuteOfDay)</Version>
     <Copyright>Copyright Xbim Ltd.</Copyright>
     <Description>.net library that provides support for the  Ifc4 and Ifc2x3 Geometry conversion.</Description>
     <Authors>Steve Lockley</Authors>
@@ -16,8 +26,8 @@
     <PackageTags>BIM, IFC, IfcXml, IfcZip, Ifc4,  COBie, .Net, C#, BuildingSmart</PackageTags>
     <PackageReleaseNotes>migrated Xbim.Geometry.Interop to .net47</PackageReleaseNotes>
     <AssemblyVersion>5.0.0.0</AssemblyVersion>
-    <FileVersion>5.0.0.0</FileVersion>
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <FileVersion>$(AssemblyFileVersionAttribute)</FileVersion>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageIconUrl>https://avatars1.githubusercontent.com/u/2284875?v=3&amp;amp;s=240</PackageIconUrl>
   </PropertyGroup>
 
@@ -29,16 +39,7 @@
   <ItemGroup>
     <Reference Include="System.Configuration" />
   </ItemGroup>
-  <PropertyGroup>
-    <Year>$([System.DateTime]::Now.ToString("yy"))</Year>
-    <Month>$([System.DateTime]::Now.ToString("MM"))</Month>
-    <Day>$([System.DateTime]::Now.ToString("dd"))</Day>
-    <Minute>$([System.Int32]::Parse($([System.DateTime]::Now.ToString("mm"))))</Minute>
-    <Hour>$([System.Int32]::Parse($([System.DateTime]::Now.ToString("HH"))))</Hour>
-    <MinuteOfDay>$([MSBuild]::Add($(Minute),$([MSBuild]::Multiply($(Hour),60))))</MinuteOfDay>
-    <HalfMinuteOfDay>$([System.Convert]::ToInt16($([MSBuild]::Divide($(MinuteOfDay), 2))))</HalfMinuteOfDay>
-    <AssemblyFileVersionAttribute>[assembly:System.Reflection.AssemblyFileVersion("4.0.$(Year)$(Month).$(Day)$(HalfMinuteOfDay)")];</AssemblyFileVersionAttribute>
-  </PropertyGroup>
+ 
 
   <ItemGroup>
     <Content Include="bin\$(Configuration)\net47\x86\Xbim.Geometry.Engine.dll">
@@ -49,15 +50,22 @@
       <Pack>true</Pack>
       <PackagePath>build\net47\x64;</PackagePath>
     </Content>
-    <Content Include="..\Xbim.Geometry.targets">
-      <Link>Xbim.Geometry.targets</Link>
+    <Content Include="C:\Users\Steve\Source\Repos\Xbim.Geometry\Xbim.Geometry.Engine.Interop.targets">
+      <Link>Xbim.Geometry.Interop.targets</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <PackagePath>build\;</PackagePath>
+      <PackagePath>build\net47;</PackagePath>
       <Pack>true</Pack>
     </Content>
   </ItemGroup>
+  <Target Name=" CleanNativeCodeEngine" BeforeTargets="Clean">
+    <Message Text="Cleaning Xbim.Geometry.Engine Native Dlls" Importance="High" />
+    <MSBuild Projects="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj" Properties="Configuration=$(Configuration);Platform=Win32;OutDir=..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\x86\" Targets="Clean">      
+    </MSBuild>
+    <MSBuild Projects="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj" Properties="Configuration=$(Configuration);Platform=x64;OutDir=..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\x64\" Targets="Clean">      
+    </MSBuild>
+  </Target>
   <Target Name="BuildNativeCodeEngine" BeforeTargets="Build">
-    <Message Text="Building Xbim.Geometry.Engine Native Dlls" Importance="High" />
+    <Message Text="Building Xbim.Geometry.Engine Native Dlls, version $(AssemblyFileVersionAttribute)" Importance="High" />
     <WriteLinesToFile File="..\SharedFileVersionInfo.cs" Lines="$(AssemblyFileVersionAttribute)" Overwrite="true" Encoding="Unicode" />
     <MSBuild Projects="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj" Properties="Configuration=$(Configuration);Platform=Win32;OutDir=..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\x86\" Targets="Build">
       <Output ItemName="AssembliesBuiltByChildProjects" TaskParameter="TargetOutputs" />
@@ -66,5 +74,11 @@
       <Output ItemName="AssembliesBuiltByChildProjects" TaskParameter="TargetOutputs" />
     </MSBuild>  
   </Target>
-
+  <Target Name="PublishBimpGet" DependsOnTargets="Pack">
+    <Message Text="Publishing package to BimpGet from $(MSBuildProjectDirectory)\bin\$(Configuration)\net47" Importance="High" />
+    
+    <!-- Publish the nupkg to the BimpGet server 
+          Note: "nuget setApiKey {put-your-api-key-here} -Source http://My_Nuget_Gallery_Service_Url/" must be run prior on the machine to ensure the api key is set correctly. -->
+    <Exec WorkingDirectory="$(MSBuildProjectDirectory)\bin\$(Configuration)\" Command="NuGet.exe push &quot;$(MSBuildProjectDirectory)\bin\$(Configuration)\$(AssemblyName).$(Version).nupkg&quot;  -ApiKey C7C8A900-FD5A-4351-A4D8-93CC245C6B2A -Source http://bimpnugetgallery.azurewebsites.net/nuget/" />
+  </Target>
 </Project>
