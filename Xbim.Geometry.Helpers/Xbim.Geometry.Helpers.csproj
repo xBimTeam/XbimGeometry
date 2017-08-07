@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard1.6</TargetFramework>
+    <TargetFrameworks>netstandard1.6;net47</TargetFrameworks>
     <Version>5.0.0-Beta</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>General support class library for Geometry, NET Standard and Ifc aware</Description>
@@ -15,7 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Xbim.Ifc2x3.Extensions" Version="5.0.0-Beta-228" />
+    <PackageReference Include="Xbim.Ifc2x3.Extensions" Version="5.0.0-Beta-251" />
   </ItemGroup>
 
 </Project>
