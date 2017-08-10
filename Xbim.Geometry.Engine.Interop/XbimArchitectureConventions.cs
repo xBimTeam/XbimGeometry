@@ -12,14 +12,14 @@ namespace Xbim.Geometry.Engine.Interop
         {
             if (Is64BitProcess())
             {
-               // Suffix = "64";
-                SubFolder = "x64";
+                Suffix = "64";
+                //SubFolder = "x64";
                 
             }
             else
             {
-               // Suffix = "32";
-                SubFolder = "x86";
+                Suffix = "32";
+                //SubFolder = "x86";
             }
 
 
@@ -29,11 +29,11 @@ namespace Xbim.Geometry.Engine.Interop
         /// <summary>
         /// The suffix we apply to platform-specific assemblys in the current process architecture
         /// </summary>
-       // public string Suffix { get; private set; }
+        public string Suffix { get; private set; }
         /// <summary>
         /// The default subfolder to look for platform-specific assemblys in the current process architecture
         /// </summary>
-        public string SubFolder { get; private set; }
+        //public string SubFolder { get; private set; }
 
         /// <summary>
         /// name of the dll that that holds the geometry functionality

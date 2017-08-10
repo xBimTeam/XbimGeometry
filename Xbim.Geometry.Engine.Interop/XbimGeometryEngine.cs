@@ -43,242 +43,242 @@ namespace Xbim.Geometry.Engine.Interop
             }
              
         }
-        public IXbimGeometryObject Create(IIfcGeometricRepresentationItem ifcRepresentation)
+        public IXbimGeometryObject Create(IIfcGeometricRepresentationItem ifcRepresentation, ILogger logger)
         {
-            return Create(ifcRepresentation, null);
+            return _engine.Create(ifcRepresentation, null,logger);
         }
 
         public XbimShapeGeometry CreateShapeGeometry(IXbimGeometryObject geometryObject, double precision, double deflection,
-            double angle, XbimGeometryType storageType)
+            double angle, XbimGeometryType storageType, ILogger logger)
         {
-            return _engine.CreateShapeGeometry(geometryObject, precision, deflection, angle, storageType);
+            return _engine.CreateShapeGeometry(geometryObject, precision, deflection, angle, storageType,logger);
         }
 
-        public XbimShapeGeometry CreateShapeGeometry(IXbimGeometryObject geometryObject, double precision, double deflection, double angle)
+        public XbimShapeGeometry CreateShapeGeometry(IXbimGeometryObject geometryObject, double precision, double deflection, double angle, ILogger logger)
         {
-            return _engine.CreateShapeGeometry(geometryObject,  precision,  deflection,  angle, XbimGeometryType.Polyhedron);
+            return _engine.CreateShapeGeometry(geometryObject,  precision,  deflection,  angle, XbimGeometryType.Polyhedron,logger);
         }
-        public XbimShapeGeometry CreateShapeGeometry(IXbimGeometryObject geometryObject, double precision, double deflection /*, angle = 0.5*/)
+        public XbimShapeGeometry CreateShapeGeometry(IXbimGeometryObject geometryObject, double precision, double deflection, ILogger logger /*, angle = 0.5*/)
         {
-            return _engine.CreateShapeGeometry(geometryObject, precision, deflection, 0.5, XbimGeometryType.Polyhedron);
+            return _engine.CreateShapeGeometry(geometryObject, precision, deflection, 0.5, XbimGeometryType.Polyhedron,logger);
         }
 
-        public IXbimSolid CreateSolid(IIfcSweptAreaSolid ifcSolid)
+        public IXbimSolid CreateSolid(IIfcSweptAreaSolid ifcSolid, ILogger logger)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IIfcExtrudedAreaSolid ifcSolid)
+        public IXbimSolid CreateSolid(IIfcExtrudedAreaSolid ifcSolid, ILogger logger)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IIfcRevolvedAreaSolid ifcSolid)
+        public IXbimSolid CreateSolid(IIfcRevolvedAreaSolid ifcSolid, ILogger logger)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IIfcSweptDiskSolid ifcSolid)
+        public IXbimSolid CreateSolid(IIfcSweptDiskSolid ifcSolid, ILogger logger)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IIfcBoundingBox ifcSolid)
+        public IXbimSolid CreateSolid(IIfcBoundingBox ifcSolid, ILogger logger)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IIfcSurfaceCurveSweptAreaSolid ifcSolid)
+        public IXbimSolid CreateSolid(IIfcSurfaceCurveSweptAreaSolid ifcSolid, ILogger logger)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IIfcBooleanClippingResult ifcSolid)
+        public IXbimSolid CreateSolid(IIfcBooleanClippingResult ifcSolid, ILogger logger)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IIfcBooleanOperand ifcSolid)
+        public IXbimSolid CreateSolid(IIfcBooleanOperand ifcSolid, ILogger logger)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IIfcHalfSpaceSolid ifcSolid)
+        public IXbimSolid CreateSolid(IIfcHalfSpaceSolid ifcSolid, ILogger logger)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IIfcPolygonalBoundedHalfSpace ifcSolid)
+        public IXbimSolid CreateSolid(IIfcPolygonalBoundedHalfSpace ifcSolid, ILogger logger)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IIfcBoxedHalfSpace ifcSolid)
+        public IXbimSolid CreateSolid(IIfcBoxedHalfSpace ifcSolid, ILogger logger)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolidSet CreateSolidSet(IIfcManifoldSolidBrep ifcSolid)
+        public IXbimSolidSet CreateSolidSet(IIfcManifoldSolidBrep ifcSolid, ILogger logger)
+        {
+            return _engine.CreateSolidSet(ifcSolid,logger);
+        }
+
+        public IXbimSolidSet CreateSolidSet(IIfcFacetedBrep ifcSolid, ILogger logger)
         {
             return _engine.CreateSolidSet(ifcSolid);
         }
 
-        public IXbimSolidSet CreateSolidSet(IIfcFacetedBrep ifcSolid)
+        public IXbimSolidSet CreateSolidSet(IIfcFacetedBrepWithVoids ifcSolid, ILogger logger)
         {
             return _engine.CreateSolidSet(ifcSolid);
         }
 
-        public IXbimSolidSet CreateSolidSet(IIfcFacetedBrepWithVoids ifcSolid)
+        public IXbimSolidSet CreateSolidSet(IIfcClosedShell ifcSolid, ILogger logger)
         {
             return _engine.CreateSolidSet(ifcSolid);
         }
 
-        public IXbimSolidSet CreateSolidSet(IIfcClosedShell ifcSolid)
-        {
-            return _engine.CreateSolidSet(ifcSolid);
-        }
-
-        public IXbimSolid CreateSolid(IIfcCsgPrimitive3D ifcSolid)
+        public IXbimSolid CreateSolid(IIfcCsgPrimitive3D ifcSolid, ILogger logger)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IIfcCsgSolid ifcSolid)
+        public IXbimSolid CreateSolid(IIfcCsgSolid ifcSolid, ILogger logger)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IIfcSphere ifcSolid)
+        public IXbimSolid CreateSolid(IIfcSphere ifcSolid, ILogger logger)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IIfcBlock ifcSolid)
+        public IXbimSolid CreateSolid(IIfcBlock ifcSolid, ILogger logger)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IIfcRightCircularCylinder ifcSolid)
+        public IXbimSolid CreateSolid(IIfcRightCircularCylinder ifcSolid, ILogger logger)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IIfcRightCircularCone ifcSolid)
+        public IXbimSolid CreateSolid(IIfcRightCircularCone ifcSolid, ILogger logger)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IIfcRectangularPyramid ifcSolid)
+        public IXbimSolid CreateSolid(IIfcRectangularPyramid ifcSolid, ILogger logger)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IIfcSweptDiskSolidPolygonal ifcSolid)
+        public IXbimSolid CreateSolid(IIfcSweptDiskSolidPolygonal ifcSolid, ILogger logger)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IIfcRevolvedAreaSolidTapered ifcSolid)
+        public IXbimSolid CreateSolid(IIfcRevolvedAreaSolidTapered ifcSolid, ILogger logger)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IIfcFixedReferenceSweptAreaSolid ifcSolid)
+        public IXbimSolid CreateSolid(IIfcFixedReferenceSweptAreaSolid ifcSolid, ILogger logger)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IIfcAdvancedBrep ifcSolid)
+        public IXbimSolid CreateSolid(IIfcAdvancedBrep ifcSolid, ILogger logger)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IIfcAdvancedBrepWithVoids ifcSolid)
+        public IXbimSolid CreateSolid(IIfcAdvancedBrepWithVoids ifcSolid, ILogger logger)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimSolid CreateSolid(IIfcSectionedSpine ifcSolid)
+        public IXbimSolid CreateSolid(IIfcSectionedSpine ifcSolid, ILogger logger)
         {
             return _engine.CreateSolid(ifcSolid);
         }
 
-        public IXbimShell CreateShell(IIfcOpenShell shell)
+        public IXbimShell CreateShell(IIfcOpenShell shell, ILogger logger)
         {
             return _engine.CreateShell(shell);
         }
 
-        public IXbimShell CreateShell(IIfcConnectedFaceSet shell)
+        public IXbimShell CreateShell(IIfcConnectedFaceSet shell, ILogger logger)
         {
             return _engine.CreateShell(shell);
         }
 
-        public IXbimShell CreateShell(IIfcSurfaceOfLinearExtrusion linExt)
+        public IXbimShell CreateShell(IIfcSurfaceOfLinearExtrusion linExt, ILogger logger)
         {
             return _engine.CreateShell(linExt);
         }
 
-        public IXbimGeometryObjectSet CreateSurfaceModel(IIfcTriangulatedFaceSet shell)
+        public IXbimGeometryObjectSet CreateSurfaceModel(IIfcTriangulatedFaceSet shell, ILogger logger)
         {
             return _engine.CreateSurfaceModel(shell);
         }
 
-        public IXbimGeometryObjectSet CreateSurfaceModel(IIfcShellBasedSurfaceModel ifcSurface)
+        public IXbimGeometryObjectSet CreateSurfaceModel(IIfcShellBasedSurfaceModel ifcSurface, ILogger logger)
         {
             return _engine.CreateSurfaceModel(ifcSurface);
         }
 
-        public IXbimGeometryObjectSet CreateSurfaceModel(IIfcFaceBasedSurfaceModel ifcSurface)
+        public IXbimGeometryObjectSet CreateSurfaceModel(IIfcFaceBasedSurfaceModel ifcSurface, ILogger logger)
         {
             return _engine.CreateSurfaceModel(ifcSurface);
         }
 
-        public IXbimFace CreateFace(IIfcProfileDef profileDef)
+        public IXbimFace CreateFace(IIfcProfileDef profileDef, ILogger logger)
         {
             return _engine.CreateFace(profileDef);
         }
 
        
-        public IXbimFace CreateFace(IIfcCompositeCurve cCurve)
+        public IXbimFace CreateFace(IIfcCompositeCurve cCurve, ILogger logger)
         {
             return _engine.CreateFace(cCurve);
 
         }
-        public IXbimFace CreateFace(IIfcPolyline pline)
+        public IXbimFace CreateFace(IIfcPolyline pline, ILogger logger)
         {
             return _engine.CreateFace(pline);
 
         }
 
-        public IXbimFace CreateFace(IIfcPolyLoop loop)
+        public IXbimFace CreateFace(IIfcPolyLoop loop, ILogger logger)
         {
             return _engine.CreateFace(loop);
         }
 
 
-        public IXbimFace CreateFace(IIfcSurface surface)
+        public IXbimFace CreateFace(IIfcSurface surface, ILogger logger)
         {
             return _engine.CreateFace(surface);
 
         }
 
-        public IXbimFace CreateFace(IIfcPlane plane)
+        public IXbimFace CreateFace(IIfcPlane plane, ILogger logger)
         {
             return _engine.CreateFace(plane);
 
         }
-        public IXbimFace CreateFace(IXbimWire wire)
+        public IXbimFace CreateFace(IXbimWire wire, ILogger logger)
         {
             return _engine.CreateFace(wire);
 
         }
 
-        public IXbimWire CreateWire(IIfcCurve curve)
+        public IXbimWire CreateWire(IIfcCurve curve, ILogger logger)
         {
             return _engine.CreateWire(curve);
         }
 
-        public IXbimWire CreateWire(IIfcCompositeCurveSegment compCurveSeg)
+        public IXbimWire CreateWire(IIfcCompositeCurveSegment compCurveSeg, ILogger logger)
         {
             return _engine.CreateWire(compCurveSeg);
         }
@@ -305,12 +305,12 @@ namespace Xbim.Geometry.Engine.Interop
             return _engine.CreatePoint(pt);
         }
 
-        public IXbimPoint CreatePoint(IIfcPointOnCurve p)
+        public IXbimPoint CreatePoint(IIfcPointOnCurve p, ILogger logger)
         {
             return _engine.CreatePoint(p);
         }
 
-        public IXbimPoint CreatePoint(IIfcPointOnSurface p)
+        public IXbimPoint CreatePoint(IIfcPointOnSurface p, ILogger logger)
         {
             return _engine.CreatePoint(p);
         }
@@ -326,12 +326,12 @@ namespace Xbim.Geometry.Engine.Interop
             return _engine.CreateSolidSet();
         }
 
-        public IXbimSolidSet CreateSolidSet(IIfcBooleanResult boolOp)
+        public IXbimSolidSet CreateSolidSet(IIfcBooleanResult boolOp, ILogger logger)
         {
             return _engine.CreateSolidSet(boolOp);
         }
 
-        public IXbimSolidSet CreateGrid(IIfcGrid grid)
+        public IXbimSolidSet CreateGrid(IIfcGrid grid, ILogger logger)
         {
             return _engine.CreateGrid(grid);
         }
@@ -362,20 +362,15 @@ namespace Xbim.Geometry.Engine.Interop
             WriteTriangulation(bw, shape, tolerance, deflection: deflection, angle: 0.5);
         }
 
-       
 
-        
-
-
-        public IXbimGeometryObject Create(IIfcGeometricRepresentationItem ifcRepresentation, IIfcAxis2Placement3D objectLocation)
+        public IXbimGeometryObject Create(IIfcGeometricRepresentationItem ifcRepresentation, IIfcAxis2Placement3D objectLocation, ILogger logger)
         {
             try
             {
-                return _engine.Create(ifcRepresentation, objectLocation);
+                return _engine.Create(ifcRepresentation, objectLocation,logger);
             }
             catch (Exception e)
             {
-                var logger = ApplicationLogging.CreateLogger<XbimCustomAssemblyResolver>();
                 logger.LogError("EE001: Failed to create geometry #{0} of type {1}, {2}", ifcRepresentation.EntityLabel, ifcRepresentation.GetType().Name, e.Message);
                 return null;
             }
@@ -387,51 +382,51 @@ namespace Xbim.Geometry.Engine.Interop
             return _engine.CreateGeometryObjectSet();
         }
 
-        public IXbimCurve CreateCurve(IIfcCurve curve)
+        public IXbimCurve CreateCurve(IIfcCurve curve, ILogger logger)
         {
             return _engine.CreateCurve(curve);
         }
 
-        public IXbimCurve CreateCurve(IIfcPolyline ifcPolyline)
+        public IXbimCurve CreateCurve(IIfcPolyline ifcPolyline, ILogger logger)
         {
             return _engine.CreateCurve(ifcPolyline);
         }
 
-        public IXbimCurve CreateCurve(IIfcCircle curve)
+        public IXbimCurve CreateCurve(IIfcCircle curve, ILogger logger)
         {
             return _engine.CreateCurve(curve);
         }
 
-        public IXbimCurve CreateCurve(IIfcEllipse curve)
+        public IXbimCurve CreateCurve(IIfcEllipse curve, ILogger logger)
         {
             return _engine.CreateCurve(curve);
         }
 
-        public IXbimCurve CreateCurve(IIfcLine curve)
+        public IXbimCurve CreateCurve(IIfcLine curve, ILogger logger)
         {
             return _engine.CreateCurve(curve);
         }
 
-        public IXbimCurve CreateCurve(IIfcTrimmedCurve curve)
+        public IXbimCurve CreateCurve(IIfcTrimmedCurve curve, ILogger logger)
         {
             return _engine.CreateCurve(curve);
         }
 
-        public IXbimCurve CreateCurve(IIfcBSplineCurveWithKnots curve)
+        public IXbimCurve CreateCurve(IIfcBSplineCurveWithKnots curve, ILogger logger)
         {
             return _engine.CreateCurve(curve);
         }
 
-        public IXbimCurve CreateCurve(IIfcRationalBSplineCurveWithKnots curve)
+        public IXbimCurve CreateCurve(IIfcRationalBSplineCurveWithKnots curve, ILogger logger)
         {
             return _engine.CreateCurve(curve);
         }
 
-        public IXbimCurve CreateCurve(IIfcOffsetCurve3D curve)
+        public IXbimCurve CreateCurve(IIfcOffsetCurve3D curve, ILogger logger)
         {
             return _engine.CreateCurve(curve);
         }
-        public IXbimCurve CreateCurve(IIfcOffsetCurve2D curve)
+        public IXbimCurve CreateCurve(IIfcOffsetCurve2D curve, ILogger logger)
         {
             return _engine.CreateCurve(curve);
         }
@@ -482,5 +477,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             return _engine.ToBrep(geometryObject);
         }
+
+       
     }
 }

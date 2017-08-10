@@ -1,0 +1,1 @@
+msbuild /Property:Configuration=Release /t:PublishBimpGet

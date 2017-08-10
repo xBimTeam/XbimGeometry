@@ -53,16 +53,16 @@ namespace Xbim.Geometry.Engine.Interop
                 // Append the relevant suffix
                 // var filename = String.Format("{0}{1}.dll", conventions.ModuleName, conventions.Suffix);
                 //dropping the use of a suffix
-                var filename = $"{conventions.ModuleName}.dll";
+                var filename = $"{conventions.ModuleName}{conventions.Suffix}.dll";
                 // Look in relevant Architecture subfolder off the main application deployment
-                libraryPath = Path.Combine(appDir, conventions.SubFolder, filename);
+                libraryPath = Path.Combine(appDir, filename);
 
                 // Try a relative folder to CWD.
                 if (!File.Exists(libraryPath))
                 {
                     var logger = ApplicationLogging.CreateLogger<XbimCustomAssemblyResolver>();
                     logger.LogDebug("Assembly not found at {0}. Attempting relative path...", libraryPath);
-                    libraryPath = Path.Combine(conventions.SubFolder, filename);
+                    libraryPath = filename;
                 }
             }
             else if (moduleName.StartsWith(XbimModulePrefix) && !moduleName.Contains("resources"))
