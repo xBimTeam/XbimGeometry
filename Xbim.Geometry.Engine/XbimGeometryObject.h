@@ -4,6 +4,8 @@ using namespace Xbim::Common::Geometry;
 using namespace System::Collections::Generic;
 using namespace Xbim::Ifc4::Interfaces;
 using namespace Xbim::Ifc4;
+using namespace Microsoft::Extensions::Logging;
+using namespace Microsoft::Extensions::Logging::Abstractions;
 namespace Xbim
 {
 	namespace Geometry

@@ -28,29 +28,29 @@ namespace Xbim
 			void InstanceCleanup();
 
 			//initialisers
-			void Init(IIfcProfileDef^ profile);
-			void Init(IIfcArbitraryProfileDefWithVoids^ profile);
-			void Init(IIfcCircleHollowProfileDef ^ circProfile);
-			void Init(IIfcCompositeProfileDef ^ profile);
-			void Init(IIfcDerivedProfileDef ^ profile);
-			void Init(IIfcRectangleHollowProfileDef^ rectProfile);
-			void Init(IIfcSurface^ surface);
-			void Init(IIfcPlane^ plane);
-			void Init(IIfcSurfaceOfLinearExtrusion^ sLin);
-			void Init(IIfcSurfaceOfRevolution^ sRev);
-			void Init(IIfcRectangularTrimmedSurface^ def);
-			void Init(IIfcCurveBoundedPlane^ def);
-			void Init(IIfcCompositeCurve ^ cCurve);
-			void Init(IIfcPolyline ^ pline);
-			void Init(IIfcPolyLoop ^ loop);
-			void Init(IXbimWire^ wire);
-			void Init(IXbimWire^ wire, XbimPoint3D pointOnFace, XbimVector3D faceNormal);
-			void Init(IXbimFace^ face);
-			void Init(IIfcBSplineSurface ^ surface);
-			void Init(IIfcBSplineSurfaceWithKnots ^ surface);
-			void Init(IIfcRationalBSplineSurfaceWithKnots ^ surface);
-			void Init(IIfcCylindricalSurface ^ surface);
-			void Init(double x, double y, double tolerance); 
+			void Init(IIfcProfileDef^ profile, ILogger^ logger);
+			void Init(IIfcArbitraryProfileDefWithVoids^ profile, ILogger^ logger);
+			void Init(IIfcCircleHollowProfileDef ^ circProfile, ILogger^ logger);
+			void Init(IIfcCompositeProfileDef ^ profile, ILogger^ logger);
+			void Init(IIfcDerivedProfileDef ^ profile, ILogger^ logger);
+			void Init(IIfcRectangleHollowProfileDef^ rectProfile, ILogger^ logger);
+			void Init(IIfcSurface^ surface, ILogger^ logger);
+			void Init(IIfcPlane^ plane, ILogger^ logger);
+			void Init(IIfcSurfaceOfLinearExtrusion^ sLin, ILogger^ logger);
+			void Init(IIfcSurfaceOfRevolution^ sRev, ILogger^ logger);
+			void Init(IIfcRectangularTrimmedSurface^ def, ILogger^ logger);
+			void Init(IIfcCurveBoundedPlane^ def, ILogger^ logger);
+			void Init(IIfcCompositeCurve ^ cCurve, ILogger^ logger);
+			void Init(IIfcPolyline ^ pline, ILogger^ logger);
+			void Init(IIfcPolyLoop ^ loop, ILogger^ logger);
+			void Init(IXbimWire^ wire, ILogger^ logger);
+			void Init(IXbimWire^ wire, XbimPoint3D pointOnFace, XbimVector3D faceNormal, ILogger^ logger);
+			void Init(IXbimFace^ face, ILogger^ logger);
+			void Init(IIfcBSplineSurface ^ surface, ILogger^ logger);
+			void Init(IIfcBSplineSurfaceWithKnots ^ surface, ILogger^ logger);
+			void Init(IIfcRationalBSplineSurfaceWithKnots ^ surface, ILogger^ logger);
+			void Init(IIfcCylindricalSurface ^ surface, ILogger^ logger);
+			void Init(double x, double y, double tolerance, ILogger^ logger); 
 		public:
 			
 			//destructors
@@ -101,28 +101,28 @@ namespace Xbim
 			XbimFace(const TopoDS_Face& face);
 			XbimFace(const TopoDS_Face& face, Object^ tag);
 			XbimFace(){}; //an invalid empty face
-			XbimFace(XbimVector3D normal);
-			XbimFace(XbimPoint3D location, XbimVector3D normal);
-			XbimFace(IIfcProfileDef^ profile);
+			XbimFace(XbimVector3D normal, ILogger^ logger);
+			XbimFace(XbimPoint3D location, XbimVector3D normal, ILogger^ logger);
+			XbimFace(IIfcProfileDef^ profile, ILogger^ logger);
 			//Builds a face from a Surface
-			XbimFace(IIfcSurface^ surface);
+			XbimFace(IIfcSurface^ surface, ILogger^ logger);
 
 			//Builds a face from a Plane
-			XbimFace(IIfcPlane ^ plane);
-			XbimFace(IIfcSurfaceOfLinearExtrusion ^ sLin);
-			XbimFace(IIfcSurfaceOfRevolution ^ sRev);
-			XbimFace(IIfcCurveBoundedPlane ^ def);
-			XbimFace(IIfcRectangularTrimmedSurface ^ def);
-			XbimFace(IIfcCompositeCurve ^ cCurve);
-			XbimFace(IIfcPolyline ^ pline);
-			XbimFace(IIfcPolyLoop ^ loop);
-			XbimFace(IXbimWire^ wire);
-			XbimFace(IXbimWire^ wire, XbimPoint3D pointOnface,  XbimVector3D faceNormal);
-			XbimFace(IXbimFace^ face);
-			XbimFace(IIfcSurface^ surface, XbimWire^ outerBound, IEnumerable<XbimWire^>^ innerBounds);
-			XbimFace(IIfcFaceSurface^ surface, XbimWire^ outerBound, IEnumerable<XbimWire^>^ innerBounds, double tolerance);
-			XbimFace(IIfcCylindricalSurface ^ surface);
-			XbimFace(double x, double y, double tolerance);
+			XbimFace(IIfcPlane ^ plane, ILogger^ logger);
+			XbimFace(IIfcSurfaceOfLinearExtrusion ^ sLin, ILogger^ logger);
+			XbimFace(IIfcSurfaceOfRevolution ^ sRev, ILogger^ logger);
+			XbimFace(IIfcCurveBoundedPlane ^ def, ILogger^ logger);
+			XbimFace(IIfcRectangularTrimmedSurface ^ def, ILogger^ logger);
+			XbimFace(IIfcCompositeCurve ^ cCurve, ILogger^ logger);
+			XbimFace(IIfcPolyline ^ pline, ILogger^ logger);
+			XbimFace(IIfcPolyLoop ^ loop, ILogger^ logger);
+			XbimFace(IXbimWire^ wire, ILogger^ logger);
+			XbimFace(IXbimWire^ wire, XbimPoint3D pointOnface,  XbimVector3D faceNormal, ILogger^ logger);
+			XbimFace(IXbimFace^ face, ILogger^ logger);
+			XbimFace(IIfcSurface^ surface, XbimWire^ outerBound, IEnumerable<XbimWire^>^ innerBounds, ILogger^ logger);
+			XbimFace(IIfcFaceSurface^ surface, XbimWire^ outerBound, IEnumerable<XbimWire^>^ innerBounds, double tolerance, ILogger^ logger);
+			XbimFace(IIfcCylindricalSurface ^ surface, ILogger^ logger);
+			XbimFace(double x, double y, double tolerance, ILogger^ logger);
 #pragma endregion
 
 #pragma region Internal Properties

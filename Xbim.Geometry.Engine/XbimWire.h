@@ -29,38 +29,38 @@ namespace Xbim
 			void InstanceCleanup();
 #pragma region initialisation functions
 
-			void Init(double precision);
-			void Init(IIfcPolyline^ loop);
-			void Init(IIfcPolyline^ loop, bool attemptClosing);
-			void Init(IIfcCompositeCurve^ loop);
-			void Init(IIfcTrimmedCurve^ loop);
-			void Init(IIfcCurve^ loop);
-			void Init(IIfcIndexedPolyCurve^ pcurve);
-			void Init(IIfcBSplineCurve^ bspline);
-			void Init(IIfcBSplineCurveWithKnots^ bSpline);
-			void Init(IIfcRationalBSplineCurveWithKnots^ bSpline);
-			void Init(IIfcCompositeCurveSegment^ compCurveSeg);
-			void Init(IIfcBoundedCurve^ loop);
-			void Init(IIfcPolyLoop^ loop);
-			void Init(IIfcArbitraryClosedProfileDef^ profile);
-			void Init(IIfcArbitraryOpenProfileDef^ profile);
-			void Init(IIfcCenterLineProfileDef^ profile);
+			void Init(double precision, ILogger^ logger);
+			void Init(IIfcPolyline^ loop, ILogger^ logger);
+			void Init(IIfcPolyline^ loop, bool attemptClosing, ILogger^ logger);
+			void Init(IIfcCompositeCurve^ loop, ILogger^ logger);
+			void Init(IIfcTrimmedCurve^ loop, ILogger^ logger);
+			void Init(IIfcCurve^ loop, ILogger^ logger);
+			void Init(IIfcIndexedPolyCurve^ pcurve, ILogger^ logger);
+			void Init(IIfcBSplineCurve^ bspline, ILogger^ logger);
+			void Init(IIfcBSplineCurveWithKnots^ bSpline, ILogger^ logger);
+			void Init(IIfcRationalBSplineCurveWithKnots^ bSpline, ILogger^ logger);
+			void Init(IIfcCompositeCurveSegment^ compCurveSeg, ILogger^ logger);
+			void Init(IIfcBoundedCurve^ loop, ILogger^ logger);
+			void Init(IIfcPolyLoop^ loop, ILogger^ logger);
+			void Init(IIfcArbitraryClosedProfileDef^ profile, ILogger^ logger);
+			void Init(IIfcArbitraryOpenProfileDef^ profile, ILogger^ logger);
+			void Init(IIfcCenterLineProfileDef^ profile, ILogger^ logger);
 			//parametrised profiles
-			void Init(IIfcProfileDef^ profile);
-			void Init(IIfcDerivedProfileDef^ profile);
-			void Init(IIfcParameterizedProfileDef^ profile);
-			void Init(IIfcCircleProfileDef^ circProfile);
-			void Init(IIfcRectangleProfileDef^ rectProfile);
-			void Init(IIfcRoundedRectangleProfileDef^ rectProfile);
-			void Init(IIfcLShapeProfileDef^ profile);
-			void Init(IIfcUShapeProfileDef^ profile);
-			void Init(IIfcEllipseProfileDef^ profile);
-			void Init(IIfcIShapeProfileDef^ profile);
-			void Init(IIfcZShapeProfileDef^ profile);
-			void Init(IIfcCShapeProfileDef^ profile);
-			void Init(IIfcTShapeProfileDef^ profile);
+			void Init(IIfcProfileDef^ profile, ILogger^ logger);
+			void Init(IIfcDerivedProfileDef^ profile, ILogger^ logger);
+			void Init(IIfcParameterizedProfileDef^ profile, ILogger^ logger);
+			void Init(IIfcCircleProfileDef^ circProfile, ILogger^ logger);
+			void Init(IIfcRectangleProfileDef^ rectProfile, ILogger^ logger);
+			void Init(IIfcRoundedRectangleProfileDef^ rectProfile, ILogger^ logger);
+			void Init(IIfcLShapeProfileDef^ profile, ILogger^ logger);
+			void Init(IIfcUShapeProfileDef^ profile, ILogger^ logger);
+			void Init(IIfcEllipseProfileDef^ profile, ILogger^ logger);
+			void Init(IIfcIShapeProfileDef^ profile, ILogger^ logger);
+			void Init(IIfcZShapeProfileDef^ profile, ILogger^ logger);
+			void Init(IIfcCShapeProfileDef^ profile, ILogger^ logger);
+			void Init(IIfcTShapeProfileDef^ profile, ILogger^ logger);
 			//constructs a rectangle wire with the bottom left corner at 0,0,0, top right at x,y,0
-			void Init(double x, double y, double tolerance, bool centre);
+			void Init(double x, double y, double tolerance, bool centre, ILogger^ logger);
 #pragma endregion
 
 			//helpers

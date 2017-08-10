@@ -511,7 +511,7 @@ namespace Xbim
 			return Intersection(gcnew XbimSolidSet(solid), tolerance);
 		}
 
-		void XbimSolidSet::Init(XbimCompound^ comp, IPersistEntity^ entity)
+		void XbimSolidSet::Init(XbimCompound^ comp, IPersistEntity^ entity, ILogger^ logger)
 		{
 			solids = gcnew  List<IXbimSolid^>();
 			if (!comp->IsValid)
@@ -524,7 +524,7 @@ namespace Xbim
 			}
 		}
 
-		void XbimSolidSet::Init(IIfcSweptAreaSolid^ repItem)
+		void XbimSolidSet::Init(IIfcSweptAreaSolid^ repItem, ILogger^ logger)
 		{
 			IIfcCompositeProfileDef^ compProfile = dynamic_cast<IIfcCompositeProfileDef^>(repItem->SweptArea);
 			int profileCount = Enumerable::Count(compProfile->Profiles);
@@ -564,7 +564,7 @@ namespace Xbim
 				}
 			}
 		}
-		void XbimSolidSet::Init(IIfcRevolvedAreaSolid^ repItem)
+		void XbimSolidSet::Init(IIfcRevolvedAreaSolid^ repItem, ILogger^ logger)
 		{
 			IIfcCompositeProfileDef^ compProfile = dynamic_cast<IIfcCompositeProfileDef^>(repItem->SweptArea);
 			int profileCount = Enumerable::Count(compProfile->Profiles);
@@ -605,7 +605,7 @@ namespace Xbim
 			}
 		}
 
-		void XbimSolidSet::Init(IIfcExtrudedAreaSolid^ repItem)
+		void XbimSolidSet::Init(IIfcExtrudedAreaSolid^ repItem, ILogger^ logger)
 		{
 			IIfcCompositeProfileDef^ compProfile = dynamic_cast<IIfcCompositeProfileDef^>(repItem->SweptArea);
 			int profileCount = Enumerable::Count(compProfile->Profiles);
@@ -646,7 +646,7 @@ namespace Xbim
 			}
 		}
 
-		void XbimSolidSet::Init(IIfcSurfaceCurveSweptAreaSolid^ repItem)
+		void XbimSolidSet::Init(IIfcSurfaceCurveSweptAreaSolid^ repItem, ILogger^ logger)
 		{
 			IIfcCompositeProfileDef^ compProfile = dynamic_cast<IIfcCompositeProfileDef^>(repItem->SweptArea);
 			int profileCount = Enumerable::Count(compProfile->Profiles);
@@ -689,7 +689,7 @@ namespace Xbim
 
 
 
-		void XbimSolidSet::Init(IIfcBooleanResult^ boolOp)
+		void XbimSolidSet::Init(IIfcBooleanResult^ boolOp, ILogger^ logger)
 		{
 			solids = gcnew List<IXbimSolid^>();
 			IIfcBooleanOperand^ fOp = boolOp->FirstOperand; //thse must be solids according to the schema

@@ -26,12 +26,12 @@ namespace Xbim
 		private:
 			List<IXbimSolid^>^ solids;
 			static XbimSolidSet^ empty = gcnew XbimSolidSet();
-			void Init(IIfcBooleanResult^ boolOp);
-			void Init(XbimCompound^ comp, IPersistEntity^ ent);
-			void Init(IIfcSweptAreaSolid^ solid);
-			void Init(IIfcExtrudedAreaSolid^ solid);
-			void Init(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid);
-			void Init(IIfcRevolvedAreaSolid^ solid);
+			void Init(IIfcBooleanResult^ boolOp, ILogger^ logger);
+			void Init(XbimCompound^ comp, IPersistEntity^ ent, ILogger^ logger);
+			void Init(IIfcSweptAreaSolid^ solid, ILogger^ logger);
+			void Init(IIfcExtrudedAreaSolid^ solid, ILogger^ logger);
+			void Init(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid, ILogger^ logger);
+			void Init(IIfcRevolvedAreaSolid^ solid, ILogger^ logger);
 			
 
 			static VolumeComparer^ _volumeComparer = gcnew VolumeComparer();

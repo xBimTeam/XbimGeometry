@@ -158,56 +158,56 @@ namespace Xbim
 		}
 
 
-		XbimCompound::XbimCompound(IIfcConnectedFaceSet^ faceSet)
+		XbimCompound::XbimCompound(IIfcConnectedFaceSet^ faceSet, ILogger^ logger)
 		{
 			_sewingTolerance = faceSet->Model->ModelFactors->Precision;
-			Init(faceSet, false);
+			Init(faceSet, false,logger);
 		}
 
-		XbimCompound::XbimCompound(IIfcShellBasedSurfaceModel^ sbsm)
+		XbimCompound::XbimCompound(IIfcShellBasedSurfaceModel^ sbsm, ILogger^ logger)
 		{
 			_sewingTolerance = sbsm->Model->ModelFactors->Precision;
-			Init(sbsm);
+			Init(sbsm, logger);
 		}
 
-		XbimCompound::XbimCompound(IIfcFaceBasedSurfaceModel^ fbsm)
+		XbimCompound::XbimCompound(IIfcFaceBasedSurfaceModel^ fbsm, ILogger^ logger)
 		{
 			_sewingTolerance = fbsm->Model->ModelFactors->Precision;
-			Init(fbsm);
+			Init(fbsm, logger);
 		}
 
-		XbimCompound::XbimCompound(IIfcManifoldSolidBrep^ solid)
+		XbimCompound::XbimCompound(IIfcManifoldSolidBrep^ solid, ILogger^ logger)
 		{
 			_sewingTolerance = solid->Model->ModelFactors->Precision;
-			Init(solid);
+			Init(solid, logger);
 		}
-		XbimCompound::XbimCompound(IIfcFacetedBrep^ solid)
+		XbimCompound::XbimCompound(IIfcFacetedBrep^ solid, ILogger^ logger)
 		{
 			_sewingTolerance = solid->Model->ModelFactors->Precision;
-			Init(solid);
-		}
-
-		XbimCompound::XbimCompound(IIfcFacetedBrepWithVoids^ solid)
-		{
-			_sewingTolerance = solid->Model->ModelFactors->Precision;
-			Init(solid);
-		}
-		XbimCompound::XbimCompound(IIfcAdvancedBrep^ solid)
-		{
-			_sewingTolerance = solid->Model->ModelFactors->Precision;
-			Init(solid);
+			Init(solid, logger);
 		}
 
-		XbimCompound::XbimCompound(IIfcAdvancedBrepWithVoids^ solid)
+		XbimCompound::XbimCompound(IIfcFacetedBrepWithVoids^ solid, ILogger^ logger)
 		{
 			_sewingTolerance = solid->Model->ModelFactors->Precision;
-			Init(solid);
+			Init(solid, logger);
+		}
+		XbimCompound::XbimCompound(IIfcAdvancedBrep^ solid, ILogger^ logger)
+		{
+			_sewingTolerance = solid->Model->ModelFactors->Precision;
+			Init(solid, logger);
 		}
 
-		XbimCompound::XbimCompound(IIfcClosedShell^ solid)
+		XbimCompound::XbimCompound(IIfcAdvancedBrepWithVoids^ solid, ILogger^ logger)
 		{
 			_sewingTolerance = solid->Model->ModelFactors->Precision;
-			Init(solid);
+			Init(solid, logger);
+		}
+
+		XbimCompound::XbimCompound(IIfcClosedShell^ solid, ILogger^ logger)
+		{
+			_sewingTolerance = solid->Model->ModelFactors->Precision;
+			Init(solid, logger);
 		}
 
 		XbimCompound::XbimCompound(const TopoDS_Compound& compound, bool sewn, double tolerance)
@@ -273,23 +273,23 @@ namespace Xbim
 			return copy;
 		}
 
-		XbimCompound::XbimCompound(IIfcTriangulatedFaceSet^ faceSet)
+		XbimCompound::XbimCompound(IIfcTriangulatedFaceSet^ faceSet, ILogger^ logger)
 		{
 			_sewingTolerance = faceSet->Model->ModelFactors->Precision;
-			Init(faceSet);
+			Init(faceSet,logger);
 		}
 
 
 #pragma region Initialisers
 
-		void XbimCompound::Init(IIfcFaceBasedSurfaceModel^ fbsm)
+		void XbimCompound::Init(IIfcFaceBasedSurfaceModel^ fbsm, ILogger^ logger)
 		{
 			pCompound = new TopoDS_Compound();
 			BRep_Builder builder;
 			builder.MakeCompound(*pCompound);
 			for each (IIfcConnectedFaceSet^ faceSet in fbsm->FbsmFaces)
 			{
-				XbimCompound^ compound = gcnew XbimCompound(faceSet);
+				XbimCompound^ compound = gcnew XbimCompound(faceSet, logger);
 				for each (IXbimGeometryObject^ geom in compound)
 				{
 					if (dynamic_cast<XbimSolid^>(geom))
@@ -314,7 +314,7 @@ namespace Xbim
 			}
 		}
 
-		void XbimCompound::Init(IIfcShellBasedSurfaceModel^ sbsm)
+		void XbimCompound::Init(IIfcShellBasedSurfaceModel^ sbsm, ILogger^ logger)
 		{
 			List<XbimShell^>^ shells = gcnew List<XbimShell^>();
 			for each (IIfcShell^ shell in sbsm->SbsmBoundary)
@@ -326,9 +326,9 @@ namespace Xbim
 				{
 					XbimCompound^ occShell;
 					if (dynamic_cast<IIfcClosedShell^>(shell))
-						occShell = gcnew XbimCompound((IIfcClosedShell^)shell);
+						occShell = gcnew XbimCompound((IIfcClosedShell^)shell, logger);
 					else
-						occShell = gcnew XbimCompound((IIfcOpenShell^)shell);
+						occShell = gcnew XbimCompound((IIfcOpenShell^)shell, logger);
 					for each (XbimShell^ s in occShell->Shells)
 					{
 						XbimShell^ nestedShell = (XbimShell^)s;
@@ -349,36 +349,36 @@ namespace Xbim
 			}
 		}
 
-		void XbimCompound::Init(IIfcConnectedFaceSet^ faceSet, bool close)
+		void XbimCompound::Init(IIfcConnectedFaceSet^ faceSet, bool close, ILogger^ logger)
 		{
 
 			if (!Enumerable::Any(faceSet->CfsFaces))
 			{
-				XbimGeometryCreator::LogWarning(faceSet, "Emty face set");
+				XbimGeometryCreator::LogWarning(logger, faceSet, "Emty face set");
 				return;
 			}
-			Init(faceSet->CfsFaces, close, faceSet);
+			Init(faceSet->CfsFaces, close, faceSet,logger);
 
 		}
 
 
-		void XbimCompound::Init(IIfcManifoldSolidBrep^ solid)
+		void XbimCompound::Init(IIfcManifoldSolidBrep^ solid, ILogger^ logger)
 		{
 			IIfcFacetedBrep^ facetedBrep = dynamic_cast<IIfcFacetedBrep^>(solid);
-			if (facetedBrep != nullptr) return Init(facetedBrep);
+			if (facetedBrep != nullptr) return Init(facetedBrep,logger);
 
 			IIfcAdvancedBrep^ advancedBrep = dynamic_cast<IIfcAdvancedBrep^>(solid);
-			if (advancedBrep != nullptr) return Init(advancedBrep);
+			if (advancedBrep != nullptr) return Init(advancedBrep, logger);
 
 			throw gcnew NotImplementedException("Sub-Type of IIfcManifoldSolidBrep is not implemented");
 		}
 
-		void XbimCompound::Init(IIfcAdvancedBrep^ solid)
+		void XbimCompound::Init(IIfcAdvancedBrep^ solid, ILogger^ logger)
 		{
 			IIfcAdvancedBrepWithVoids^ advancedBrepWithVoids = dynamic_cast<IIfcAdvancedBrepWithVoids^>(solid);
-			if (advancedBrepWithVoids != nullptr) return Init(advancedBrepWithVoids);
+			if (advancedBrepWithVoids != nullptr) return Init(advancedBrepWithVoids, logger);
 			BRep_Builder b;
-			XbimShell^ outerShell = InitAdvancedFaces(solid->Outer->CfsFaces);
+			XbimShell^ outerShell = InitAdvancedFaces(solid->Outer->CfsFaces, logger);
 			if (outerShell==nullptr || !outerShell->IsValid) return;
 			XbimSolid^ theSolid;
 			if (!outerShell->IsClosed) //we need to close it
@@ -408,17 +408,17 @@ namespace Xbim
 			b.Add(*pCompound, theSolid);
 		}
 
-		void XbimCompound::Init(IIfcFacetedBrep^ solid)
+		void XbimCompound::Init(IIfcFacetedBrep^ solid, ILogger^ logger)
 		{
 			IIfcFacetedBrepWithVoids^ facetedBrepWithVoids = dynamic_cast<IIfcFacetedBrepWithVoids^>(solid);
-			if (facetedBrepWithVoids != nullptr) return Init(facetedBrepWithVoids);
-			Init(solid->Outer);
+			if (facetedBrepWithVoids != nullptr) return Init(facetedBrepWithVoids, logger);
+			Init(solid->Outer, logger);
 		}
 
-		void XbimCompound::Init(IIfcAdvancedBrepWithVoids^ brepWithVoids)
+		void XbimCompound::Init(IIfcAdvancedBrepWithVoids^ brepWithVoids, ILogger^ logger)
 		{
 			BRep_Builder b;
-			XbimShell^ outerShell = InitAdvancedFaces(brepWithVoids->Outer->CfsFaces);
+			XbimShell^ outerShell = InitAdvancedFaces(brepWithVoids->Outer->CfsFaces, logger);
 			XbimSolid^ theSolid;
 			if (!outerShell->IsClosed) //we need to close it
 			{
@@ -447,10 +447,10 @@ namespace Xbim
 			BRepBuilderAPI_MakeSolid builder(theSolid);
 			for each (IIfcClosedShell^ IIfcVoidShell in brepWithVoids->Voids)
 			{
-				XbimCompound^ voidShapes = gcnew XbimCompound(IIfcVoidShell);
+				XbimCompound^ voidShapes = gcnew XbimCompound(IIfcVoidShell, logger);
 				XbimShell^ voidShell = (XbimShell^)voidShapes->MakeShell();
 				if (!voidShell->IsClosed) //we have a shell that is not able to be made in to a solid
-					XbimGeometryCreator::LogWarning(brepWithVoids, "Cannot cut voids properly as the void #{0} is not a solid.", IIfcVoidShell->EntityLabel);
+					XbimGeometryCreator::LogWarning(logger,brepWithVoids, "Cannot cut voids properly as the void #{0} is not a solid.", IIfcVoidShell->EntityLabel);
 				builder.Add(voidShell);
 			}
 			if (builder.IsDone())
@@ -460,22 +460,22 @@ namespace Xbim
 				b.Add(*pCompound, builder.Solid());
 			}//leave the outer shell without the voids
 			else
-				XbimGeometryCreator::LogWarning(brepWithVoids, "A correct shape could not be built and it has been ignored");
+				XbimGeometryCreator::LogWarning(logger,brepWithVoids, "A correct shape could not be built and it has been ignored");
 		}
 
-		void XbimCompound::Init(IIfcFacetedBrepWithVoids^ brepWithVoids)
+		void XbimCompound::Init(IIfcFacetedBrepWithVoids^ brepWithVoids, ILogger^ logger)
 		{
-			XbimCompound^ shapes = gcnew XbimCompound(brepWithVoids->Outer);
+			XbimCompound^ shapes = gcnew XbimCompound(brepWithVoids->Outer, logger);
 			XbimShell^ outerShell = (XbimShell^)shapes->MakeShell();
 			if (!outerShell->IsClosed) //we have a shell that is not able to be made in to a solid
-				XbimGeometryCreator::LogWarning(brepWithVoids, "Can cut voids properly as the bounding shell #{0} is not a solid.", brepWithVoids->Outer->EntityLabel);
+				XbimGeometryCreator::LogWarning(logger,brepWithVoids, "Can cut voids properly as the bounding shell #{0} is not a solid.", brepWithVoids->Outer->EntityLabel);
 			BRepBuilderAPI_MakeSolid builder(outerShell);
 			for each (IIfcClosedShell^ IIfcVoidShell in brepWithVoids->Voids)
 			{
-				XbimCompound^ voidShapes = gcnew XbimCompound(IIfcVoidShell);
+				XbimCompound^ voidShapes = gcnew XbimCompound(IIfcVoidShell, logger);
 				XbimShell^ voidShell = (XbimShell^)voidShapes->MakeShell();
 				if (!voidShell->IsClosed) //we have a shell that is not able to be made in to a solid
-					XbimGeometryCreator::LogWarning(brepWithVoids, "Can cut voids properly as the void #{0} is not a solid.", IIfcVoidShell->EntityLabel);
+					XbimGeometryCreator::LogWarning(logger,brepWithVoids, "Can cut voids properly as the void #{0} is not a solid.", IIfcVoidShell->EntityLabel);
 				builder.Add(voidShell);
 			}
 			if (builder.IsDone())
@@ -486,16 +486,16 @@ namespace Xbim
 				b.Add(*pCompound, builder.Solid());
 			}
 			else
-				XbimGeometryCreator::LogWarning(brepWithVoids, "A correct shape could not be built and it has been ignored");
+				XbimGeometryCreator::LogWarning(logger,brepWithVoids, "A correct shape could not be built and it has been ignored");
 		}
 
-		void XbimCompound::Init(IIfcClosedShell^ closedShell)
+		void XbimCompound::Init(IIfcClosedShell^ closedShell, ILogger^ logger)
 		{
-			Init((IIfcConnectedFaceSet^)closedShell,true);
+			Init((IIfcConnectedFaceSet^)closedShell,true, logger);
 		}
-		void XbimCompound::Init(IIfcOpenShell^ openShell)
+		void XbimCompound::Init(IIfcOpenShell^ openShell, ILogger^ logger)
 		{
-			Init((IIfcConnectedFaceSet^)openShell, false);
+			Init((IIfcConnectedFaceSet^)openShell, false, logger);
 		}
 		bool XbimCompound::Sew()
 		{
@@ -545,7 +545,7 @@ namespace Xbim
 				return 0;
 		}
 		//This method copes with faces that may be advanced as well as ordinary
-		XbimShell^ XbimCompound::InitAdvancedFaces(IEnumerable<IIfcFace^>^ faces)
+		XbimShell^ XbimCompound::InitAdvancedFaces(IEnumerable<IIfcFace^>^ faces, ILogger^ logger)
 		{
 			try
 			{
@@ -687,7 +687,7 @@ namespace Xbim
 						innerLoops->Remove(outerLoop); //remove outer loop from inner loops
 					}
 
-					XbimFace^ xbimAdvancedFace = gcnew XbimFace(advancedFace, outerLoop, innerLoops, maxTolerance);
+					XbimFace^ xbimAdvancedFace = gcnew XbimFace(advancedFace, outerLoop, innerLoops, maxTolerance, logger);
 					BRepCheck_Analyzer analyser(xbimAdvancedFace, Standard_True);
 
 					if (!analyser.IsValid())
@@ -698,14 +698,14 @@ namespace Xbim
 						ShapeExtend_Status status;
 						faceFix.Status(status);
 						if (status != ShapeExtend_OK)
-							XbimGeometryCreator::LogWarning(advancedFace, "Incorrectly defined face #{0}, it has been accepted as it is defined", advancedFace->EntityLabel);
+							XbimGeometryCreator::LogWarning(logger,advancedFace, "Incorrectly defined face #{0}, it has been accepted as it is defined", advancedFace->EntityLabel);
 						else
 							xbimAdvancedFace = gcnew XbimFace(faceFix.Face());
 					}
 					if (xbimAdvancedFace->IsValid)
 						builder.AddShellFace(shell, xbimAdvancedFace);
 					else
-						XbimGeometryCreator::LogWarning(advancedFace, "Incorrectly defined face #{0}, it has been ignored", advancedFace->EntityLabel);
+						XbimGeometryCreator::LogWarning(logger,advancedFace, "Incorrectly defined face #{0}, it has been ignored", advancedFace->EntityLabel);
 				}
 
 				builder.CompleteShell(shell);
@@ -726,7 +726,7 @@ namespace Xbim
 		}
 
 
-		void  XbimCompound::Init(IIfcTriangulatedFaceSet^ faceSet)
+		void  XbimCompound::Init(IIfcTriangulatedFaceSet^ faceSet, ILogger^ logger)
 		{
 			BRep_Builder builder;
 			TopoDS_Shell shell;
@@ -870,7 +870,7 @@ namespace Xbim
 				catch (Standard_Failure e)
 				{
 					String^ err = gcnew String(Standard_Failure::Caught()->GetMessageString());
-					XbimGeometryCreator::LogWarning(faceSet, "Error build triangle in mesh. " + err);
+					XbimGeometryCreator::LogWarning(logger,faceSet, "Error build triangle in mesh. " + err);
 				}
 			}
 			pCompound = new TopoDS_Compound();
@@ -895,7 +895,7 @@ namespace Xbim
 		}
 
 
-		void XbimCompound::Init(IEnumerable<IIfcFace^>^ faces, bool close, IIfcRepresentationItem^ theItem)
+		void XbimCompound::Init(IEnumerable<IIfcFace^>^ faces, bool close, IIfcRepresentationItem^ theItem, ILogger^ logger)
 		{						
 			double tolerance = theItem->Model->ModelFactors->Precision;			
 			_sewingTolerance = tolerance;
@@ -964,10 +964,10 @@ namespace Xbim
 					{						
 						XbimVector3D norm = loop->Normal;
 						if (!norm.IsInvalid()) //this is not a polyline on a face so we cannot fix any problems just go with it.
-							xFace = gcnew XbimFace(norm);
+							xFace = gcnew XbimFace(norm, logger);
 					}
 					else
-						xFace = gcnew XbimFace(XbimVector3D(0, 0, 1));
+						xFace = gcnew XbimFace(XbimVector3D(0, 0, 1), logger);
 					if (xFace != nullptr)
 					{
 						ShapeAnalysis_Wire wireChecker(wire, xFace, tolerance);
@@ -992,7 +992,7 @@ namespace Xbim
 						loops->Add(gcnew Tuple<XbimWire^, IIfcPolyLoop^, bool>(loop, polyLoop, bound->Orientation));
 					}					
 				}
-				XbimFace^ face = BuildFace(loops, fc);
+				XbimFace^ face = BuildFace(loops, fc, logger);
 				face->Tag = linearEdges;
 				for each (Tuple<XbimWire^, IIfcPolyLoop^, bool>^ loop in loops) delete loop->Item1; //force removal of wires
 				if (face->IsValid )
@@ -1006,7 +1006,7 @@ namespace Xbim
 					{
 						linEdge->ReleaseEdge();
 					}
-					XbimGeometryCreator::LogInfo(fc, "Incorrectly defined face. It has been ignored");
+					XbimGeometryCreator::LogInfo(logger,fc, "Incorrectly defined face. It has been ignored");
 				}
 			}
 			
@@ -1030,7 +1030,7 @@ namespace Xbim
 						linEdge->ReleaseEdge();
 					}
 					facesToDelete->Add(f);
-					XbimGeometryCreator::LogInfo(f, "Incorrectly defined face, it is connected to more than one other face at every edge. It has been ignored");
+					XbimGeometryCreator::LogInfo(logger,f, "Incorrectly defined face, it is connected to more than one other face at every edge. It has been ignored");
 				}
 				else
 				{
@@ -1068,7 +1068,7 @@ namespace Xbim
 			{
 				if (!closedShape) //we think it is closed, we cannot really do much more if it is not, shape healing will not heal a shell that is not closed
 				{
-					XbimGeometryCreator::LogInfo(theItem, "Incorrectly defined closed shell. It has been processed but is declared closed and is not defined as closed");
+					XbimGeometryCreator::LogInfo(logger,theItem, "Incorrectly defined closed shell. It has been processed but is declared closed and is not defined as closed");
 				}
 				ShapeFix_Solid solidFixer;
 				solidFixer.SetPrecision(tolerance);
@@ -1111,7 +1111,7 @@ namespace Xbim
 
 
 
-		XbimFace^ XbimCompound::BuildFace(List<Tuple<XbimWire^, IIfcPolyLoop^, bool>^>^ wires, IIfcFace^ owningFace)
+		XbimFace^ XbimCompound::BuildFace(List<Tuple<XbimWire^, IIfcPolyLoop^, bool>^>^ wires, IIfcFace^ owningFace, ILogger^ logger)
 		{
 
 			if (wires->Count == 0) 
@@ -1120,7 +1120,7 @@ namespace Xbim
 			XbimPoint3D p(first->X, first->Y, first->Z);
 			XbimVector3D n = XbimConvert::NewellsNormal(wires[0]->Item2);
 			if (!wires[0]->Item3) n = n.Negated();
-			XbimFace^ face = gcnew XbimFace(wires[0]->Item1, p, n);
+			XbimFace^ face = gcnew XbimFace(wires[0]->Item1, p, n, logger);
 			if (wires->Count == 1) return face; //take the first one
 
 			for (int i = 1; i < wires->Count; i++) face->Add(wires[i]->Item1);
@@ -1136,7 +1136,7 @@ namespace Xbim
 				}
 			}
 
-			face = gcnew XbimFace(outerBound, p, faceNormal); //create  a face with the right bound and direction
+			face = gcnew XbimFace(outerBound, p, faceNormal, logger); //create  a face with the right bound and direction
 
 			for (int i = 1; i < wires->Count; i++)
 			{
@@ -1148,7 +1148,7 @@ namespace Xbim
 					if (faceNormal.DotProduct(loopNormal) > 0) //they should be in opposite directions, so reverse
 						wire->Reverse();
 					if (!face->Add(wire))
-						XbimGeometryCreator::LogWarning(owningFace, "Failed to add an inner bound");
+						XbimGeometryCreator::LogWarning(logger,owningFace, "Failed to add an inner bound");
 				}
 			}
 			return face;
@@ -1238,7 +1238,7 @@ namespace Xbim
 		}
 
 
-		XbimCompound^ XbimCompound::Merge(IXbimSolidSet^ solids, double tolerance)
+		XbimCompound^ XbimCompound::Merge(IXbimSolidSet^ solids, double tolerance, ILogger^ logger)
 		{
 
 			TopoDS_Compound compound;
@@ -1316,12 +1316,12 @@ namespace Xbim
 							if (boolOp.ErrorStatus() == 0)
 								unionedShape = boolOp.Shape();
 							else
-								XbimGeometryCreator::LogWarning(toConnect, "Boolean Union operation failed.");
+								XbimGeometryCreator::LogWarning(logger,toConnect, "Boolean Union operation failed.");
 						}
 						catch (Standard_Failure e)
 						{
 							err = gcnew String(Standard_Failure::Caught()->GetMessageString());
-							XbimGeometryCreator::LogWarning(toConnect, "Boolean Union operation failed. " + err);
+							XbimGeometryCreator::LogWarning(logger,toConnect, "Boolean Union operation failed. " + err);
 						}
 
 					}
@@ -1402,7 +1402,7 @@ namespace Xbim
 			}
 		}
 
-		XbimCompound^ XbimCompound::Cut(XbimCompound^ solids, double tolerance)
+		XbimCompound^ XbimCompound::Cut(XbimCompound^ solids, double tolerance, ILogger^ logger)
 		{
 			if (!IsSewn) Sew();
 			/*ShapeFix_ShapeTolerance fixTol;
@@ -1428,11 +1428,11 @@ namespace Xbim
 			{
 				err = gcnew String(Standard_Failure::Caught()->GetMessageString());
 			}
-			XbimGeometryCreator::LogWarning(solids, "Boolean Cut operation failed. " + err);
+			XbimGeometryCreator::LogWarning(logger, solids, "Boolean Cut operation failed. " + err);
 			return XbimCompound::Empty;
 		}
 
-		XbimCompound^ XbimCompound::Union(XbimCompound^ solids, double tolerance)
+		XbimCompound^ XbimCompound::Union(XbimCompound^ solids, double tolerance, ILogger^ logger)
 		{
 			if (!IsSewn) Sew();
 			/*ShapeFix_ShapeTolerance fixTol;
@@ -1451,12 +1451,12 @@ namespace Xbim
 			{
 				err = gcnew String(Standard_Failure::Caught()->GetMessageString());
 			}
-			XbimGeometryCreator::LogWarning(solids, "Boolean Union operation failed. " + err);
+			XbimGeometryCreator::LogWarning(logger, solids, "Boolean Union operation failed. " + err);
 			return XbimCompound::Empty;
 		}
 
 
-		XbimCompound^ XbimCompound::Intersection(XbimCompound^ solids, double tolerance)
+		XbimCompound^ XbimCompound::Intersection(XbimCompound^ solids, double tolerance, ILogger^ logger)
 		{
 			if (!IsSewn) Sew();
 			/*ShapeFix_ShapeTolerance fixTol;
@@ -1475,7 +1475,7 @@ namespace Xbim
 			{
 				err = gcnew String(Standard_Failure::Caught()->GetMessageString());
 			}
-			XbimGeometryCreator::LogWarning(solids, "Boolean Intersection operation failed. " + err);
+			XbimGeometryCreator::LogWarning(logger,solids, "Boolean Intersection operation failed. " + err);
 			return XbimCompound::Empty;
 		}
 
@@ -1549,43 +1549,43 @@ namespace Xbim
 			}
 		}
 
-		IXbimGeometryObjectSet^ XbimCompound::Cut(IXbimSolidSet^ solids, double tolerance)
+		IXbimGeometryObjectSet^ XbimCompound::Cut(IXbimSolidSet^ solids, double tolerance, ILogger^ logger)
 		{
 
-			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_CUT, (IEnumerable<IXbimGeometryObject^>^)this, solids, tolerance);
+			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_CUT, (IEnumerable<IXbimGeometryObject^>^)this, solids, tolerance, logger);
 		}
 
 
-		IXbimGeometryObjectSet^ XbimCompound::Cut(IXbimSolid^ solid, double tolerance)
+		IXbimGeometryObjectSet^ XbimCompound::Cut(IXbimSolid^ solid, double tolerance, ILogger^ logger)
 		{
 			if (Count == 0) return XbimGeometryObjectSet::Empty;
-			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_CUT, (IEnumerable<IXbimGeometryObject^>^)this, gcnew XbimSolidSet(solid), tolerance);
+			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_CUT, (IEnumerable<IXbimGeometryObject^>^)this, gcnew XbimSolidSet(solid), tolerance, logger);
 		}
 
 
-		IXbimGeometryObjectSet^ XbimCompound::Union(IXbimSolidSet^ solids, double tolerance)
+		IXbimGeometryObjectSet^ XbimCompound::Union(IXbimSolidSet^ solids, double tolerance, ILogger^ logger)
 		{
 
-			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_FUSE, (IEnumerable<IXbimGeometryObject^>^)this, solids, tolerance);
+			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_FUSE, (IEnumerable<IXbimGeometryObject^>^)this, solids, tolerance, logger);
 		}
 
-		IXbimGeometryObjectSet^ XbimCompound::Union(IXbimSolid^ solid, double tolerance)
-		{
-			if (Count == 0) return XbimGeometryObjectSet::Empty;
-			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_FUSE, (IEnumerable<IXbimGeometryObject^>^)this, gcnew XbimSolidSet(solid), tolerance);
-		}
-
-		IXbimGeometryObjectSet^ XbimCompound::Intersection(IXbimSolidSet^ solids, double tolerance)
-		{
-
-			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_COMMON, (IEnumerable<IXbimGeometryObject^>^)this, solids, tolerance);
-		}
-
-
-		IXbimGeometryObjectSet^ XbimCompound::Intersection(IXbimSolid^ solid, double tolerance)
+		IXbimGeometryObjectSet^ XbimCompound::Union(IXbimSolid^ solid, double tolerance, ILogger^ logger)
 		{
 			if (Count == 0) return XbimGeometryObjectSet::Empty;
-			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_COMMON, (IEnumerable<IXbimGeometryObject^>^)this, gcnew XbimSolidSet(solid), tolerance);
+			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_FUSE, (IEnumerable<IXbimGeometryObject^>^)this, gcnew XbimSolidSet(solid), tolerance, logger);
+		}
+
+		IXbimGeometryObjectSet^ XbimCompound::Intersection(IXbimSolidSet^ solids, double tolerance, ILogger^ logger)
+		{
+
+			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_COMMON, (IEnumerable<IXbimGeometryObject^>^)this, solids, tolerance, logger);
+		}
+
+
+		IXbimGeometryObjectSet^ XbimCompound::Intersection(IXbimSolid^ solid, double tolerance, ILogger^ logger)
+		{
+			if (Count == 0) return XbimGeometryObjectSet::Empty;
+			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_COMMON, (IEnumerable<IXbimGeometryObject^>^)this, gcnew XbimSolidSet(solid), tolerance, logger);
 		}
 #pragma endregion
 

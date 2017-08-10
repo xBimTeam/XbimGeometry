@@ -981,7 +981,7 @@ namespace Xbim
 		
 #pragma region Initialisers
 
-		void XbimEdge::Init(IIfcCurve^ curve)
+		void XbimEdge::Init(IIfcCurve^ curve, ILogger^ logger)
 		{
 			IIfcLine^ line = dynamic_cast<IIfcLine^>(curve);
 			if (line != nullptr) return Init(line);
@@ -996,7 +996,7 @@ namespace Xbim
 			throw gcnew NotImplementedException(String::Format("Curve of Type {0} in entity #{1} is not implemented", curve->GetType()->Name, curve->EntityLabel));
 		}
 
-		void XbimEdge::Init(IIfcPcurve^ curve)
+		void XbimEdge::Init(IIfcPcurve^ curve, ILogger^ logger)
 		{
 			XbimCurve^ occCurve = gcnew XbimCurve(curve);
 			if (occCurve->IsValid)
@@ -1012,7 +1012,7 @@ namespace Xbim
 			}
 		}
 
-		void XbimEdge::Init(IIfcPolyline^ pline)
+		void XbimEdge::Init(IIfcPolyline^ pline, ILogger^ logger)
 		{
 			if (Enumerable::Count(pline->Points) == 2)
 			{
@@ -1046,7 +1046,7 @@ namespace Xbim
 			}
 		}
 
-		void XbimEdge::Init(IIfcConic^ conic)
+		void XbimEdge::Init(IIfcConic^ conic, ILogger^ logger)
 		{
 			IIfcCircle^ circle = dynamic_cast<IIfcCircle^>(conic);
 			if (circle != nullptr) return Init(circle);
@@ -1054,7 +1054,7 @@ namespace Xbim
 			if (ellipse != nullptr) return Init(ellipse);
 		}
 
-		void XbimEdge::Init(IIfcCircle^ circle)
+		void XbimEdge::Init(IIfcCircle^ circle, ILogger^ logger)
 		{
 			Handle(Geom_Curve) curve;
 			if (dynamic_cast<IIfcAxis2Placement2D^>(circle->Position))
@@ -1094,7 +1094,7 @@ namespace Xbim
 			}
 		}
 
-		void XbimEdge::Init(IIfcLine^ line)
+		void XbimEdge::Init(IIfcLine^ line, ILogger^ logger)
 		{
 			IIfcCartesianPoint^ cp = line->Pnt;
 			IIfcVector^ ifcVec = line->Dir;
@@ -1119,7 +1119,7 @@ namespace Xbim
 			}
 		}
 
-		void XbimEdge::Init(IIfcEllipse^ ellipse)
+		void XbimEdge::Init(IIfcEllipse^ ellipse, ILogger^ logger)
 		{
 			XbimCurve^ curve = gcnew XbimCurve(ellipse);
 			if(curve->IsValid)
@@ -1132,13 +1132,13 @@ namespace Xbim
 			}
 		}
 
-		void XbimEdge::Init(IIfcBSplineCurve^ bspline)
+		void XbimEdge::Init(IIfcBSplineCurve^ bspline, ILogger^ logger)
 		{
 			IIfcBSplineCurveWithKnots^ bsplineWithKnots = dynamic_cast<IIfcBSplineCurveWithKnots^>(bspline);
 			if (bsplineWithKnots != nullptr) return Init(bsplineWithKnots);
 			XbimGeometryCreator::LogError(bspline, "Unsupported IfcBSplineCurve type #{0} found. It has been ignored", bspline->GetType()->Name);
 		}
-		void XbimEdge::Init(IIfcBSplineCurveWithKnots^ bspline)
+		void XbimEdge::Init(IIfcBSplineCurveWithKnots^ bspline, ILogger^ logger)
 		{
 			IIfcRationalBSplineCurveWithKnots^ ratBez = dynamic_cast<IIfcRationalBSplineCurveWithKnots^>(bspline);
 			if (ratBez != nullptr)
@@ -1177,7 +1177,7 @@ namespace Xbim
 		}
 
 
-		void XbimEdge::Init(IIfcRationalBSplineCurveWithKnots^ bspline)
+		void XbimEdge::Init(IIfcRationalBSplineCurveWithKnots^ bspline, ILogger^ logger)
 		{
 			TColgp_Array1OfPnt poles(1, Enumerable::Count(bspline->ControlPointsList));
 			int i = 1;

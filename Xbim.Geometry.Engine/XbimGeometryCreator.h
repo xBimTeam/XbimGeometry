@@ -133,6 +133,7 @@ namespace Xbim
 			virtual IXbimSolid^ CreateSolid(IIfcBoxedHalfSpace^ ifcSolid, ILogger^ logger);
 
 			virtual IXbimSolidSet^ CreateSolidSet(IIfcManifoldSolidBrep^ ifcSolid, ILogger^ logger);
+
 			virtual IXbimSolidSet^ CreateSolidSet(IIfcFacetedBrep^ ifcSolid, ILogger^ logger);
 			virtual IXbimSolidSet^ CreateSolidSet(IIfcFacetedBrepWithVoids^ ifcSolid, ILogger^ logger);
 			virtual IXbimSolidSet^ CreateSolidSet(IIfcClosedShell^ ifcSolid, ILogger^ logger);

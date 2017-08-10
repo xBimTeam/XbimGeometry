@@ -98,7 +98,7 @@ namespace Xbim
 #pragma endregion
 
 		//initialisers
-		void XbimShell::Init(IIfcOpenShell^ openShell)
+		void XbimShell::Init(IIfcOpenShell^ openShell, ILogger^ logger)
 		{
 			XbimCompound^ shapes = gcnew XbimCompound(openShell);
 			shapes->Sew();
@@ -106,7 +106,7 @@ namespace Xbim
 			*pShell = (XbimShell^)shapes->MakeShell();
 		}
 
-		void XbimShell::Init(IIfcConnectedFaceSet^ connectedFaceSet)
+		void XbimShell::Init(IIfcConnectedFaceSet^ connectedFaceSet, ILogger^ logger)
 		{
 			XbimCompound^ shapes = gcnew XbimCompound(connectedFaceSet);
 			shapes->Sew();
@@ -114,7 +114,7 @@ namespace Xbim
 			*pShell = (XbimShell^)shapes->MakeShell();
 		}
 
-		void XbimShell::Init(IIfcSurfaceOfLinearExtrusion ^ linExt)
+		void XbimShell::Init(IIfcSurfaceOfLinearExtrusion ^ linExt, ILogger^ logger)
 		{
 			XbimWire^ prof = gcnew XbimWire(linExt->SweptCurve);
 			if (prof->IsValid && linExt->Depth > 0) //we have a valid wire and extrusion

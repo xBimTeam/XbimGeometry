@@ -328,7 +328,7 @@ namespace Xbim.Geometry.Engine.Interop
 
         public IXbimSolidSet CreateSolidSet(IIfcBooleanResult boolOp, ILogger logger)
         {
-            return _engine.CreateSolidSet(boolOp);
+            return _engine.CreateSolidSet(boolOp,logger);
         }
 
         public IXbimSolidSet CreateGrid(IIfcGrid grid, ILogger logger)

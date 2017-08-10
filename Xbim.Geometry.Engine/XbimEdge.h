@@ -26,16 +26,16 @@ namespace Xbim
 			}
 			void InstanceCleanup();
 #pragma region Initialisation
-			void Init(IIfcCurve^ edge);
-			void Init(IIfcConic^ edge);
-			void Init(IIfcCircle^ edge);
-			void Init(IIfcPolyline^ pline);
-			void Init(IIfcLine^ edge);
-			void Init(IIfcEllipse^ edge);
-			void Init(IIfcBSplineCurve^ bSpline);
-			void Init(IIfcBSplineCurveWithKnots^ bSpline);
-			void Init(IIfcRationalBSplineCurveWithKnots^ bSpline);
-			void Init(IIfcPcurve^ curve);
+			void Init(IIfcCurve^ edge, ILogger^ logger);
+			void Init(IIfcConic^ edge, ILogger^ logger);
+			void Init(IIfcCircle^ edge, ILogger^ logger);
+			void Init(IIfcPolyline^ pline, ILogger^ logger);
+			void Init(IIfcLine^ edge, ILogger^ logger);
+			void Init(IIfcEllipse^ edge, ILogger^ logger);
+			void Init(IIfcBSplineCurve^ bSpline, ILogger^ logger);
+			void Init(IIfcBSplineCurveWithKnots^ bSpline, ILogger^ logger);
+			void Init(IIfcRationalBSplineCurveWithKnots^ bSpline, ILogger^ logger);
+			void Init(IIfcPcurve^ curve, ILogger^ logger);
 #pragma endregion
 
 			XbimEdge(){};

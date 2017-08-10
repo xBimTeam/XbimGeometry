@@ -26,9 +26,9 @@ namespace Xbim
 				void set(TopoDS_Shell* val)sealed { ptrContainer = IntPtr(val); }
 			}
 			void InstanceCleanup();
-			void Init(IIfcOpenShell^ openShell);
-			void Init(IIfcConnectedFaceSet^ faceset);
-			void Init(IIfcSurfaceOfLinearExtrusion^ linExt);
+			void Init(IIfcOpenShell^ openShell, ILogger^ logger);
+			void Init(IIfcConnectedFaceSet^ faceset, ILogger^ logger);
+			void Init(IIfcSurfaceOfLinearExtrusion^ linExt, ILogger^ logger);
 		public:
 			//Constructors
 			XbimShell();
