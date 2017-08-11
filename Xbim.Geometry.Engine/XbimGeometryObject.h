@@ -5,7 +5,7 @@ using namespace System::Collections::Generic;
 using namespace Xbim::Ifc4::Interfaces;
 using namespace Xbim::Ifc4;
 using namespace Microsoft::Extensions::Logging;
-using namespace Microsoft::Extensions::Logging::Abstractions;
+
 namespace Xbim
 {
 	namespace Geometry
@@ -66,7 +66,7 @@ namespace Xbim
 		public:
 			virtual IXbimGeometryObject^ Transformed(IIfcCartesianTransformationOperator ^transformation) abstract;
 			virtual IXbimGeometryObject^ Moved(IIfcPlacement ^placement) abstract;
-			virtual IXbimGeometryObject^ Moved(IIfcObjectPlacement ^objectPlacement) abstract;
+			virtual IXbimGeometryObject^ Moved(IIfcObjectPlacement ^objectPlacement, ILogger^ logger) abstract;
 			virtual property Object^  Tag {Object^ get() { return tag; }; void set(Object^ value) { tag = value; }; }
 			virtual property int Count {int get() abstract; }
 			virtual IXbimGeometryObject^ Trim() abstract; 

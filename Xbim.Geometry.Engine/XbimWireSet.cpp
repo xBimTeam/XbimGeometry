@@ -78,11 +78,11 @@ namespace Xbim
 			return result;
 		}
 
-		IXbimGeometryObject ^ XbimWireSet::Moved(IIfcObjectPlacement ^ objectPlacement)
+		IXbimGeometryObject ^ XbimWireSet::Moved(IIfcObjectPlacement ^ objectPlacement, ILogger^ logger)
 		{
 			if (!IsValid) return this;
 			XbimWireSet^ result = gcnew XbimWireSet();
-			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
+			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement,logger);
 			for each (IXbimFace^ wire in wires)
 			{
 				XbimWire^ copy = gcnew XbimWire((XbimWire^)wire, Tag);

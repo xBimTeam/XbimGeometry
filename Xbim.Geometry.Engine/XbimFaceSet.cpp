@@ -87,11 +87,11 @@ namespace Xbim
 			return result;
 		}
 
-		IXbimGeometryObject ^ XbimFaceSet::Moved(IIfcObjectPlacement ^ objectPlacement)
+		IXbimGeometryObject ^ XbimFaceSet::Moved(IIfcObjectPlacement ^ objectPlacement, ILogger^ logger)
 		{
 			if (!IsValid) return this;
 			XbimFaceSet^ result = gcnew XbimFaceSet();
-			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
+			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement,logger);
 			for each (IXbimFace^ face in faces)
 			{
 				XbimFace^ copy = gcnew XbimFace((XbimFace^)face, Tag);

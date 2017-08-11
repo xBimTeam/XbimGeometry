@@ -50,21 +50,21 @@ namespace Xbim
 			XbimEdge(IXbimVertex^ edgeStart, IXbimVertex^ edgeEnd);
 			XbimEdge(const TopoDS_Edge& edge);
 			XbimEdge(const TopoDS_Edge& edge, Object^ tag);
-			XbimEdge(IIfcCurve^ edge);
-			XbimEdge(IIfcConic^ edge);
-			XbimEdge(IIfcCircle^ edge);
-			XbimEdge(IIfcLine^ edge);
-			XbimEdge(IIfcEllipse^ edge);
-			XbimEdge(IIfcBSplineCurve^ bSpline);
-			XbimEdge(IIfcBSplineCurveWithKnots^ bSpline);
-			XbimEdge(IIfcRationalBSplineCurveWithKnots^ bSpline);
-			XbimEdge(IIfcPcurve^ pCurve);
+			XbimEdge(IIfcCurve^ edge, ILogger^ logger);
+			XbimEdge(IIfcConic^ edge, ILogger^ logger);
+			XbimEdge(IIfcCircle^ edge, ILogger^ logger);
+			XbimEdge(IIfcLine^ edge, ILogger^ logger);
+			XbimEdge(IIfcEllipse^ edge, ILogger^ logger);
+			XbimEdge(IIfcBSplineCurve^ bSpline, ILogger^ logger);
+			XbimEdge(IIfcBSplineCurveWithKnots^ bSpline, ILogger^ logger);
+			XbimEdge(IIfcRationalBSplineCurveWithKnots^ bSpline, ILogger^ logger);
+			XbimEdge(IIfcPcurve^ pCurve, ILogger^ logger);
 			XbimEdge(XbimEdge^ edgeCurve, XbimVertex^ start, XbimVertex^ end, double maxTolerance);
-			XbimEdge(const TopoDS_Wire& wire, double tolerance, double angleTolerance);
-			XbimEdge(IIfcCurve^ edgeCurve, XbimVertex^ start, XbimVertex^ end);
+			XbimEdge(const TopoDS_Wire& wire, double tolerance, double angleTolerance, ILogger^ logger);
+			XbimEdge(IIfcCurve^ edgeCurve, XbimVertex^ start, XbimVertex^ end, ILogger^ logger);
 			XbimEdge(XbimVertex^ start, XbimVertex^ midPoint, XbimVertex^ end);
 			XbimEdge(XbimCurve^ curve3D);
-			XbimEdge(XbimCurve2D^ curve2D);
+			XbimEdge(XbimCurve2D^ curve2D, ILogger^ logger);
 #pragma endregion
 
 
@@ -110,7 +110,7 @@ namespace Xbim
 
 			// Inherited via XbimOccShape
 			virtual XbimGeometryObject ^ Moved(IIfcPlacement ^ placement) override;
-			virtual XbimGeometryObject ^ Moved(IIfcObjectPlacement ^ objectPlacement) override;
+			virtual XbimGeometryObject ^ Moved(IIfcObjectPlacement ^ objectPlacement, ILogger^ logger) override;
 			virtual void Move(TopLoc_Location loc);
 
 			// Inherited via XbimOccShape

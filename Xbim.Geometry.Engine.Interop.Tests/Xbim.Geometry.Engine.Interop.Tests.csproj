@@ -73,6 +73,9 @@
       <HintPath>..\packages\System.AppContext.4.3.0\lib\net463\System.AppContext.dll</HintPath>
     </Reference>
     <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.ComponentModel.Primitives, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ComponentModel.Primitives.4.3.0\lib\net45\System.ComponentModel.Primitives.dll</HintPath>
+    </Reference>
     <Reference Include="System.Console, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Console.4.3.0\lib\net46\System.Console.dll</HintPath>
     </Reference>
@@ -135,6 +138,16 @@
       <HintPath>..\packages\System.Runtime.InteropServices.RuntimeInformation.4.3.0\lib\net45\System.Runtime.InteropServices.RuntimeInformation.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Runtime.Serialization.Formatters, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.Serialization.Formatters.4.3.0\lib\net46\System.Runtime.Serialization.Formatters.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.Serialization.Primitives, Version=4.1.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.Serialization.Primitives.4.3.0\lib\net46\System.Runtime.Serialization.Primitives.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.Serialization.Xml, Version=4.1.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.Serialization.Xml.4.3.0\lib\net46\System.Runtime.Serialization.Xml.dll</HintPath>
+    </Reference>
     <Reference Include="System.Security.Cryptography.Algorithms, Version=4.2.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Security.Cryptography.Algorithms.4.3.0\lib\net463\System.Security.Cryptography.Algorithms.dll</HintPath>
     </Reference>
@@ -156,7 +169,19 @@
       <HintPath>..\packages\System.Xml.ReaderWriter.4.3.0\lib\net46\System.Xml.ReaderWriter.dll</HintPath>
     </Reference>
     <Reference Include="Xbim.Common, Version=5.0.0.0, Culture=neutral, PublicKeyToken=cb55c3cec6e68f1b, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xbim.Common.5.0.0-Beta-285\lib\net47\Xbim.Common.dll</HintPath>
+      <HintPath>..\packages\Xbim.Common.5.0.0-Beta-306\lib\net47\Xbim.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Xbim.Ifc2x3, Version=5.0.0.0, Culture=neutral, PublicKeyToken=cb55c3cec6e68f1b, processorArchitecture=MSIL">
+      <HintPath>..\packages\Xbim.Ifc2x3.5.0.0-Beta-308\lib\net47\Xbim.Ifc2x3.dll</HintPath>
+    </Reference>
+    <Reference Include="Xbim.Ifc2x3.Extensions, Version=5.0.0.0, Culture=neutral, PublicKeyToken=cb55c3cec6e68f1b, processorArchitecture=MSIL">
+      <HintPath>..\packages\Xbim.Ifc2x3.Extensions.5.0.0-Beta-309\lib\net47\Xbim.Ifc2x3.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Xbim.Ifc4, Version=5.0.0.0, Culture=neutral, PublicKeyToken=cb55c3cec6e68f1b, processorArchitecture=MSIL">
+      <HintPath>..\packages\Xbim.Ifc4.5.0.0-Beta-307\lib\net47\Xbim.Ifc4.dll</HintPath>
+    </Reference>
+    <Reference Include="Xbim.IO.MemoryModel, Version=5.0.0.0, Culture=neutral, PublicKeyToken=cb55c3cec6e68f1b, processorArchitecture=MSIL">
+      <HintPath>..\packages\Xbim.IO.MemoryModel.5.0.0-Beta-311\lib\net47\Xbim.IO.MemoryModel.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

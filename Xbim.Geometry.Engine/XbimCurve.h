@@ -35,7 +35,7 @@ namespace Xbim
 			~XbimCurve(){ InstanceCleanup(); }
 			!XbimCurve(){ InstanceCleanup(); }
 			//constructors
-			XbimCurve(const Handle(Geom_Curve)& curve, ILogger^ logger);
+			XbimCurve(const Handle(Geom_Curve)& curve);
 			XbimCurve(IIfcCurve^ curve, ILogger^ logger) { Init(curve, logger); }
 			XbimCurve(IIfcPolyline^ curve, ILogger^ logger) {  Init(curve, logger); }
 			XbimCurve(IIfcCircle^ curve, ILogger^ logger) {  Init(curve, logger); }

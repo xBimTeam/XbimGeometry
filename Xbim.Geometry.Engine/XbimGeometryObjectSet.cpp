@@ -99,7 +99,7 @@ namespace Xbim
 			return result;
 		}
 
-		IXbimGeometryObject ^ XbimGeometryObjectSet::Moved(IIfcObjectPlacement ^ objectPlacement)
+		IXbimGeometryObject ^ XbimGeometryObjectSet::Moved(IIfcObjectPlacement ^ objectPlacement, ILogger^ logger)
 		{
 			if (!IsValid) return this;
 			XbimGeometryObjectSet^ result = gcnew XbimGeometryObjectSet();
@@ -109,9 +109,9 @@ namespace Xbim
 				XbimOccShape^ occShape = dynamic_cast<XbimOccShape^>(geometryObject);
 				XbimSetObject^ occSet = dynamic_cast<XbimSetObject^>(geometryObject);
 				if (occShape != nullptr)
-					result->Add(occShape->Moved(objectPlacement));
+					result->Add(occShape->Moved(objectPlacement,logger));
 				else if (occSet != nullptr)
-					result->Add(occSet->Moved(objectPlacement));
+					result->Add(occSet->Moved(objectPlacement,logger));
 			}
 			return result;
 		}

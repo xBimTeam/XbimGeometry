@@ -116,11 +116,11 @@ namespace Xbim
 			return result;
 		}
 
-		IXbimGeometryObject ^ XbimEdgeSet::Moved(IIfcObjectPlacement ^ objectPlacement)
+		IXbimGeometryObject ^ XbimEdgeSet::Moved(IIfcObjectPlacement ^ objectPlacement, ILogger^ logger)
 		{
 			if (!IsValid) return this;
 			XbimEdgeSet^ result = gcnew XbimEdgeSet();
-			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
+			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement,logger);
 			for each (IXbimEdge^ edge in edges)
 			{
 				XbimEdge^ copy = gcnew XbimEdge((XbimEdge^)edge, Tag);

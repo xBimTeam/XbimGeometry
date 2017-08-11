@@ -33,9 +33,8 @@
 
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="1.1.1" />
-    <PackageReference Include="Xbim.Ifc4" Version="5.0.0-Beta-294" />
-    <PackageReference Include="Xbim.Tessellator" Version="5.0.0-Beta-290" />
+    <PackageReference Include="Xbim.Ifc4" Version="5.0.0-Beta-307" />
+    <PackageReference Include="Xbim.Tessellator" Version="5.0.0-Beta-310" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Configuration" />

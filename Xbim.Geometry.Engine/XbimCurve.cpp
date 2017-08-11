@@ -34,7 +34,7 @@ namespace Xbim
 			System::GC::SuppressFinalize(this);
 		}
 
-		XbimCurve::XbimCurve(const Handle(Geom_Curve)& curve, ILogger^ logger)
+		XbimCurve::XbimCurve(const Handle(Geom_Curve)& curve)
 		{
 			this->pCurve = new Handle(Geom_Curve);
 			*pCurve = curve;
@@ -108,10 +108,10 @@ namespace Xbim
 			throw gcnew Exception("TransformShallow of curves is not currently supported");
 		}
 
-		IEnumerable<XbimPoint3D>^ XbimCurve::Intersections(IXbimCurve^ intersector, double tolerance, ILogger^ logger)
+		IEnumerable<XbimPoint3D>^ XbimCurve::Intersections(IXbimCurve^ intersector, double tolerance, ILogger^ /*logger*/)
 		{
 			List<XbimPoint3D>^ intersects = gcnew List<XbimPoint3D>();
-			if (!intersector->Is3D) intersector = ((XbimCurve2D^)intersector)->ToCurve3D(logger);
+			if (!intersector->Is3D) intersector = ((XbimCurve2D^)intersector)->ToCurve3D();
 			if (IsValid && intersector->IsValid)
 			{
 				GeomAPI_ExtremaCurveCurve extrema(*pCurve, *((XbimCurve^)intersector)->pCurve);
@@ -260,7 +260,7 @@ namespace Xbim
 		}
 
 
-		void XbimCurve::Init(IIfcLine^ line, ILogger^ logger)
+		void XbimCurve::Init(IIfcLine^ line, ILogger^ /*logger*/)
 		{
 			IIfcCartesianPoint^ cp = line->Pnt;
 			IIfcVector^ ifcVec = line->Dir;
@@ -332,7 +332,7 @@ namespace Xbim
 			}
 		}
 
-		void XbimCurve::Init(IIfcRationalBSplineCurveWithKnots^ bspline, ILogger^ logger)
+		void XbimCurve::Init(IIfcRationalBSplineCurveWithKnots^ bspline, ILogger^ /*logger*/)
 		{
 			TColgp_Array1OfPnt poles(1, Enumerable::Count(bspline->ControlPointsList));
 			int i = 1;
@@ -368,7 +368,7 @@ namespace Xbim
 
 		}
 
-		void XbimCurve::Init(IIfcBSplineCurveWithKnots^ bspline, ILogger^ logger)
+		void XbimCurve::Init(IIfcBSplineCurveWithKnots^ bspline, ILogger^ /*logger*/)
 		{
 			TColgp_Array1OfPnt poles(1, Enumerable::Count(bspline->ControlPointsList));
 			int i = 1;

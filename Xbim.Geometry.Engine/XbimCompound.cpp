@@ -264,11 +264,11 @@ namespace Xbim
 			return copy;
 		}
 
-		XbimGeometryObject ^ XbimCompound::Moved(IIfcObjectPlacement ^ objectPlacement)
+		XbimGeometryObject ^ XbimCompound::Moved(IIfcObjectPlacement ^ objectPlacement, ILogger^ logger)
 		{
 			if (!IsValid) return this;
 			XbimCompound^ copy = gcnew XbimCompound(this, _isSewn, _sewingTolerance, Tag); //take a copy of the shape
-			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
+			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement,logger);
 			copy->Move(loc);
 			return copy;
 		}
@@ -618,8 +618,8 @@ namespace Xbim
 										XbimWire^ polyWire; //see if we have done the other half
 										if (!polylines->TryGetValue(polyline, polyWire))
 										{
-											polyWire = gcnew XbimWire(polyline);
-											polyWire = polyWire->Trim(edgeStart, edgeEnd, _sewingTolerance);
+											polyWire = gcnew XbimWire(polyline, logger);
+											polyWire = polyWire->Trim(edgeStart, edgeEnd, _sewingTolerance,logger);
 											polyWire->Tag = polyline;
 											FTol.SetTolerance(polyWire, _sewingTolerance);
 											polylines->Add(polyline, polyWire);
@@ -640,7 +640,7 @@ namespace Xbim
 									}
 									else
 									{
-										xBimOrientedEdge = gcnew XbimEdge(edgeCurve->EdgeGeometry);
+										xBimOrientedEdge = gcnew XbimEdge(edgeCurve->EdgeGeometry, logger);
 										if (!xBimOrientedEdge->IsValid)throw gcnew XbimException("Incorrectly defined Edge, must be a valid edge curve");
 										xBimOrientedEdge = gcnew XbimEdge(xBimOrientedEdge, edgeStart, edgeEnd, maxTolerance); //adjust start and end		
 										if (!edgeCurve->SameSense) xBimOrientedEdge->Reverse();

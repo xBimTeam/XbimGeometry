@@ -56,7 +56,7 @@ namespace Xbim
 			virtual property bool IsSet{bool get() override { return false; }; }
 			virtual XbimGeometryObject^ Transformed(IIfcCartesianTransformationOperator ^transformation) abstract;
 			virtual XbimGeometryObject^ Moved(IIfcPlacement ^placement) abstract;
-			virtual XbimGeometryObject^ Moved(IIfcObjectPlacement ^objectPlacement) abstract;
+			virtual XbimGeometryObject^ Moved(IIfcObjectPlacement ^objectPlacement, ILogger^ logger) abstract;
 			virtual void Mesh(IXbimMeshReceiver^ mesh, double precision, double deflection, double angle)
 			{
 				WriteTriangulation(mesh, precision, deflection, angle);

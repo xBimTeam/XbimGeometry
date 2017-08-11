@@ -56,7 +56,7 @@ namespace Xbim
 			virtual property  XbimGeometryObjectType GeometryType{XbimGeometryObjectType  get() override { return XbimGeometryObjectType::XbimCurveType; }; }
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) override;
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D)override;
-			virtual IEnumerable<XbimPoint3D>^ Intersections(IXbimCurve^ intersector,double tolerance);
+			virtual IEnumerable<XbimPoint3D>^ Intersections(IXbimCurve^ intersector,double tolerance, ILogger^logger);
 			virtual property XbimPoint3D Start{XbimPoint3D get(); }
 			virtual property XbimPoint3D End{XbimPoint3D get(); }
 			virtual property double Length{double get(); }
@@ -65,7 +65,7 @@ namespace Xbim
 			virtual property bool IsClosed{ bool get(); }
 			virtual property bool Is3D{ bool get(){ return true; }; }
 			virtual XbimVector3D TangentAt(double parameter);
-			IXbimCurve^ ToCurve3D(ILogger^ logger);
+			IXbimCurve^ ToCurve3D();
 			virtual property XbimRect3D BoundingBox {XbimRect3D get() override; }
 		};
 	}

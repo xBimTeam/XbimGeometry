@@ -132,7 +132,7 @@
     <Reference Include="Microsoft.Extensions.Logging.Abstractions">
       <HintPath>..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Extensions.Logging.Abstractions">
+    <Reference Include="Microsoft.Extensions.Logging.DependencyInjection.Abstractions">
       <HintPath>..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
     </Reference>
     <Reference Include="Xbim.Common">

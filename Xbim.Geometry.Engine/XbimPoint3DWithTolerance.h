@@ -23,8 +23,8 @@ namespace Xbim
 			XbimPoint3DWithTolerance(double x, double y, double z, double tolerance);
 			XbimPoint3DWithTolerance(XbimPoint3D point, double t);
 			XbimPoint3DWithTolerance(IXbimPoint^ point);
-			XbimPoint3DWithTolerance(IIfcPointOnCurve^ point);
-			XbimPoint3DWithTolerance(IIfcPointOnSurface^ point);
+			XbimPoint3DWithTolerance(IIfcPointOnCurve^ point, ILogger^ logger);
+			XbimPoint3DWithTolerance(IIfcPointOnSurface^ point, ILogger^ logger);
 #pragma region Interface Overrides
 			virtual property bool IsValid{bool get() { return true; }; }
 			virtual property bool IsSet{bool get() { return false; }; }

@@ -57,16 +57,16 @@ namespace Xbim
 			XbimSolidSet(XbimCompound^ shape);
 			XbimSolidSet(IXbimSolid^ solid);
 			XbimSolidSet(IEnumerable<IXbimSolid^>^ solids);
-			XbimSolidSet(IIfcBooleanResult^ boolOp);
-			XbimSolidSet(IIfcManifoldSolidBrep^ solid);
-			XbimSolidSet(IIfcFacetedBrep^ solid);
-			XbimSolidSet(IIfcFacetedBrepWithVoids^ solid);
-			XbimSolidSet(IIfcClosedShell^ solid);
+			XbimSolidSet(IIfcBooleanResult^ boolOp, ILogger^ logger);
+			XbimSolidSet(IIfcManifoldSolidBrep^ solid, ILogger^ logger);
+			XbimSolidSet(IIfcFacetedBrep^ solid, ILogger^ logger);
+			XbimSolidSet(IIfcFacetedBrepWithVoids^ solid, ILogger^ logger);
+			XbimSolidSet(IIfcClosedShell^ solid, ILogger^ logger);
 
-			XbimSolidSet(IIfcSweptAreaSolid^ solid);
-			XbimSolidSet(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid);
-			XbimSolidSet(IIfcExtrudedAreaSolid^ solid);
-			XbimSolidSet(IIfcRevolvedAreaSolid^ solid);
+			XbimSolidSet(IIfcSweptAreaSolid^ solid, ILogger^ logger);
+			XbimSolidSet(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid, ILogger^ logger);
+			XbimSolidSet(IIfcExtrudedAreaSolid^ solid, ILogger^ logger);
+			XbimSolidSet(IIfcRevolvedAreaSolid^ solid, ILogger^ logger);
 			
 
 			virtual property bool IsValid {bool get() { return solids != nullptr && this != XbimSolidSet::Empty; }; }
@@ -81,12 +81,12 @@ namespace Xbim
 			virtual System::Collections::IEnumerator^ GetEnumerator2() = System::Collections::IEnumerable::GetEnumerator{ return GetEnumerator(); };
 			virtual void Add(IXbimGeometryObject^ solid);
 			virtual void Reverse();
-			virtual IXbimSolidSet^ Cut(IXbimSolidSet^ solids, double tolerance);
-			virtual IXbimSolidSet^ Cut(IXbimSolid^ solid, double tolerance);
-			virtual IXbimSolidSet^ Union(IXbimSolidSet^ solids, double tolerance);
-			virtual IXbimSolidSet^ Union(IXbimSolid^ solid, double tolerance);
-			virtual IXbimSolidSet^ Intersection(IXbimSolidSet^ solids, double tolerance);
-			virtual IXbimSolidSet^ Intersection(IXbimSolid^ solid, double tolerance);
+			virtual IXbimSolidSet^ Cut(IXbimSolidSet^ solids, double tolerance, ILogger^ logger);
+			virtual IXbimSolidSet^ Cut(IXbimSolid^ solid, double tolerance, ILogger^ logger);
+			virtual IXbimSolidSet^ Union(IXbimSolidSet^ solids, double tolerance, ILogger^ logger);
+			virtual IXbimSolidSet^ Union(IXbimSolid^ solid, double tolerance, ILogger^ logger);
+			virtual IXbimSolidSet^ Intersection(IXbimSolidSet^ solids, double tolerance, ILogger^ logger);
+			virtual IXbimSolidSet^ Intersection(IXbimSolid^ solid, double tolerance, ILogger^ logger);
 			virtual property String^  ToBRep{String^ get(); }
 			virtual property bool IsPolyhedron{ bool get(); }
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) ;
@@ -105,7 +105,7 @@ namespace Xbim
 			
 			virtual IXbimGeometryObject ^ Moved(IIfcPlacement ^ placement) override;
 
-			virtual IXbimGeometryObject ^ Moved(IIfcObjectPlacement ^ objectPlacement) override;
+			virtual IXbimGeometryObject ^ Moved(IIfcObjectPlacement ^ objectPlacement, ILogger^ logger) override;
 
 
 			// Inherited via XbimSetObject

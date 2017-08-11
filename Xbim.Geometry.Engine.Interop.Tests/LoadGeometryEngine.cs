@@ -1,5 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xbim.Ifc4.GeometryResource;
+using Xbim.IO.Memory;
+
 namespace Xbim.Geometry.Engine.Interop.Tests
 {
     [TestClass]
@@ -15,15 +18,21 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void TestLogging()
         {
-            //Xbim.Common.ApplicationLogging.LoggerFactory.AddConsole(LogLevel.Trace);
-            //var ge = new XbimGeometryEngine();
-            
-            //ge.Logger.LogTrace("Lets see if we trace what logging does");
-            //ge.Logger.LogDebug("Trying to debug logging");
-            //ge.Logger.LogInformation("I am informing you before I warn you");
-            //ge.Logger.LogWarning("I have warned you!");
-            //ge.Logger.LogError("Sorry I am in error");
-            //ge.Logger.LogCritical("It was a critical mistake");
+
+
+            Xbim.Common.ApplicationLogging.LoggerFactory.AddConsole(LogLevel.Trace);
+            var logger = Xbim.Common.ApplicationLogging.LoggerFactory.CreateLogger<LoadGeometryEngine>();
+            var ge = new XbimGeometryEngine();
+            using (var m = new MemoryModel(new Ifc4.EntityFactory()))
+            {
+                using (var txn = m.BeginTransaction("new"))
+                {
+                    var pline = m.Instances.New<IfcPolyline>();
+                    ge.CreateCurve(pline, logger);
+                }
+
+            }
+
 
         }
     }

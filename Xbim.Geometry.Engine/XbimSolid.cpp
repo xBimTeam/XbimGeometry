@@ -351,7 +351,7 @@ namespace Xbim
 
 		void XbimSolid::Init(IIfcManifoldSolidBrep^ bRep, ILogger^ logger)
 		{
-			XbimCompound^ comp = gcnew XbimCompound(bRep);
+			XbimCompound^ comp = gcnew XbimCompound(bRep, logger);
 			if (comp->IsValid)
 			{
 				if (comp->Solids->Count == 1) //we have one solid just return it and ignore extraneous faces
@@ -370,7 +370,7 @@ namespace Xbim
 		{
 			//Build the directrix
 			IModelFactors^ mf = swdSolid->Model->ModelFactors;
-			XbimWire^ sweep = gcnew XbimWire(swdSolid->Directrix);
+			XbimWire^ sweep = gcnew XbimWire(swdSolid->Directrix, logger);
 			if (swdSolid->FilletRadius.HasValue)
 			{
 				if(!sweep->FilletAll((double)swdSolid->FilletRadius.Value))
@@ -378,11 +378,11 @@ namespace Xbim
 			}
 
 			if (swdSolid->StartParam.HasValue && swdSolid->EndParam.HasValue)
-				sweep = (XbimWire^)sweep->Trim(swdSolid->StartParam.Value, Math::Abs(swdSolid->EndParam.Value - 1.0)<Precision::Confusion() ? sweep->Length : swdSolid->EndParam.Value, mf->Precision);
+				sweep = (XbimWire^)sweep->Trim(swdSolid->StartParam.Value, Math::Abs(swdSolid->EndParam.Value - 1.0)<Precision::Confusion() ? sweep->Length : swdSolid->EndParam.Value, mf->Precision, logger);
 			else if (swdSolid->StartParam.HasValue && !swdSolid->EndParam.HasValue)
-				sweep = (XbimWire^)sweep->Trim(swdSolid->StartParam.Value, sweep->Length, mf->Precision);
+				sweep = (XbimWire^)sweep->Trim(swdSolid->StartParam.Value, sweep->Length, mf->Precision, logger);
 			else if (!swdSolid->StartParam.HasValue && swdSolid->EndParam.HasValue)
-				sweep = (XbimWire^)sweep->Trim(0, Math::Abs(swdSolid->EndParam.Value - 1.0)<Precision::Confusion() ? sweep->Length : swdSolid->EndParam.Value, mf->Precision);
+				sweep = (XbimWire^)sweep->Trim(0, Math::Abs(swdSolid->EndParam.Value - 1.0)<Precision::Confusion() ? sweep->Length : swdSolid->EndParam.Value, mf->Precision, logger);
 			//make the outer wire
 			XbimPoint3D s = sweep->Start;
 			gp_Ax2 axCircle(gp_Pnt(s.X, s.Y, s.Z), gp_Dir(0., 0., 1.));
@@ -478,9 +478,9 @@ namespace Xbim
 		{
 			XbimFace^ faceStart;
 			if (overrideProfileDef == nullptr)
-				faceStart = gcnew XbimFace(repItem->SweptArea);
+				faceStart = gcnew XbimFace(repItem->SweptArea, logger);
 			else
-				faceStart = gcnew XbimFace(overrideProfileDef);
+				faceStart = gcnew XbimFace(overrideProfileDef, logger);
 			if (!faceStart->IsValid)
 			{
 				XbimGeometryCreator::LogWarning(logger, repItem, "Could not build Swept Area");
@@ -488,14 +488,14 @@ namespace Xbim
 			}
 
 			IModelFactors^ mf = repItem->Model->ModelFactors;
-			XbimWire^ sweep = gcnew XbimWire(repItem->Directrix);
+			XbimWire^ sweep = gcnew XbimWire(repItem->Directrix, logger);
 
 			if (repItem->StartParam.HasValue && repItem->EndParam.HasValue)
-				sweep = (XbimWire^)sweep->Trim(repItem->StartParam.Value, Math::Abs(repItem->EndParam.Value - 1.0)<Precision::Confusion() ? sweep->Length : repItem->EndParam.Value, mf->Precision);
+				sweep = (XbimWire^)sweep->Trim(repItem->StartParam.Value, Math::Abs(repItem->EndParam.Value - 1.0)<Precision::Confusion() ? sweep->Length : repItem->EndParam.Value, mf->Precision, logger);
 			else if (repItem->StartParam.HasValue && !repItem->EndParam.HasValue)
-				sweep = (XbimWire^)sweep->Trim(repItem->StartParam.Value, sweep->Length, mf->Precision);
+				sweep = (XbimWire^)sweep->Trim(repItem->StartParam.Value, sweep->Length, mf->Precision, logger);
 			else if (!repItem->StartParam.HasValue && repItem->EndParam.HasValue)
-				sweep = (XbimWire^)sweep->Trim(0, Math::Abs(repItem->EndParam.Value - 1.0)<Precision::Confusion() ? sweep->Length : repItem->EndParam.Value, mf->Precision);
+				sweep = (XbimWire^)sweep->Trim(0, Math::Abs(repItem->EndParam.Value - 1.0)<Precision::Confusion() ? sweep->Length : repItem->EndParam.Value, mf->Precision, logger);
 			
 			if (!sweep->IsValid)
 			{
@@ -510,7 +510,7 @@ namespace Xbim
 			XbimPoint3D s = sweep->Start;
 			gp_Pnt startPoint(s.X, s.Y, s.Z);
 			//get where this is on the surface
-			XbimFace^ refSurface = gcnew XbimFace(repItem->ReferenceSurface);
+			XbimFace^ refSurface = gcnew XbimFace(repItem->ReferenceSurface, logger);
 			Handle(Geom_Surface) geomSurf = refSurface->GetSurface();
 			GeomAPI_ProjectPointOnSurf projector(startPoint, geomSurf);
 			projector.Perform(startPoint);
@@ -628,10 +628,10 @@ namespace Xbim
 			b.MakeShell(shell);
 			XbimFace^ faceStart;
 			if (overrideProfileDef == nullptr)
-				faceStart = gcnew XbimFace(repItem->SweptArea);
+				faceStart = gcnew XbimFace(repItem->SweptArea, logger);
 			else
-				faceStart = gcnew XbimFace(overrideProfileDef);
-			XbimFace^ faceEnd = gcnew XbimFace(repItem->EndSweptArea);
+				faceStart = gcnew XbimFace(overrideProfileDef, logger);
+			XbimFace^ faceEnd = gcnew XbimFace(repItem->EndSweptArea, logger);
 
 			if (faceStart->IsValid && faceEnd->IsValid && repItem->Angle > 0) //we have a valid face and angle
 			{
@@ -741,10 +741,10 @@ namespace Xbim
 			b.MakeShell(shell);
 			XbimFace^ faceStart;
 			if (overrideProfileDef == nullptr)
-				faceStart = gcnew XbimFace(repItem->SweptArea);
+				faceStart = gcnew XbimFace(repItem->SweptArea, logger);
 			else
-				faceStart = gcnew XbimFace(overrideProfileDef);
-			XbimFace^ faceEnd = gcnew XbimFace(repItem->EndSweptArea);
+				faceStart = gcnew XbimFace(overrideProfileDef, logger);
+			XbimFace^ faceEnd = gcnew XbimFace(repItem->EndSweptArea, logger);
 			
 			if (faceStart->IsValid && faceEnd->IsValid && repItem->Depth > 0) //we have valid faces and extrusion
 			{
@@ -838,9 +838,9 @@ namespace Xbim
 			b.MakeShell(shell);
 			XbimFace^ faceStart;
 			if (overrideProfileDef == nullptr)
-				faceStart = gcnew XbimFace(repItem->SweptArea);
+				faceStart = gcnew XbimFace(repItem->SweptArea, logger);
 			else
-				faceStart = gcnew XbimFace(overrideProfileDef);
+				faceStart = gcnew XbimFace(overrideProfileDef, logger);
 			if (!faceStart->IsValid)
 			{
 				XbimGeometryCreator::LogWarning(logger, repItem,"Could not build swept area");
@@ -848,14 +848,14 @@ namespace Xbim
 			}
 
 			IModelFactors^ mf = repItem->Model->ModelFactors;
-			XbimWire^ sweep = gcnew XbimWire(repItem->Directrix);
+			XbimWire^ sweep = gcnew XbimWire(repItem->Directrix, logger);
 
 			if (repItem->StartParam.HasValue && repItem->EndParam.HasValue)
-				sweep = (XbimWire^)sweep->Trim(repItem->StartParam.Value, Math::Abs(repItem->EndParam.Value - 1.0)<Precision::Confusion() ? sweep->Length : repItem->EndParam.Value, mf->Precision);
+				sweep = (XbimWire^)sweep->Trim(repItem->StartParam.Value, Math::Abs(repItem->EndParam.Value - 1.0)<Precision::Confusion() ? sweep->Length : repItem->EndParam.Value, mf->Precision, logger);
 			else if (repItem->StartParam.HasValue && !repItem->EndParam.HasValue)
-				sweep = (XbimWire^)sweep->Trim(repItem->StartParam.Value, sweep->Length, mf->Precision);
+				sweep = (XbimWire^)sweep->Trim(repItem->StartParam.Value, sweep->Length, mf->Precision, logger);
 			else if (!repItem->StartParam.HasValue && repItem->EndParam.HasValue)
-				sweep = (XbimWire^)sweep->Trim(0, Math::Abs(repItem->EndParam.Value - 1.0)<Precision::Confusion() ? sweep->Length : repItem->EndParam.Value, mf->Precision);
+				sweep = (XbimWire^)sweep->Trim(0, Math::Abs(repItem->EndParam.Value - 1.0)<Precision::Confusion() ? sweep->Length : repItem->EndParam.Value, mf->Precision, logger);
 			if (!sweep->IsValid)
 			{
 				XbimGeometryCreator::LogWarning(logger, repItem,"Could not build directrix");
@@ -962,7 +962,7 @@ namespace Xbim
 			List<XbimFace^>^ crossSections = gcnew List<XbimFace^>();
 			for each (IIfcProfileDef^ profile in repItem->CrossSections)
 			{
-				crossSections->Add(gcnew XbimFace(profile));
+				crossSections->Add(gcnew XbimFace(profile,logger));
 			}
 			List<IIfcAxis2Placement3D^>^ positions = Enumerable::ToList<IIfcAxis2Placement3D^>(repItem->CrossSectionPositions);
 			
@@ -970,7 +970,7 @@ namespace Xbim
 			{
 				
 				//build the spine
-				XbimWire^ sweep = gcnew XbimWire(repItem->SpineCurve);
+				XbimWire^ sweep = gcnew XbimWire(repItem->SpineCurve, logger);
 				BRepOffsetAPI_MakePipeShell pipeMaker1(sweep);
 				pipeMaker1.SetTransitionMode(BRepBuilderAPI_Transformed);
 				//move the sections to the right position
@@ -1070,7 +1070,7 @@ namespace Xbim
 					//build a solid for each wire
 					for each (IIfcProfileDef^ profile in compProf->Profiles)
 					{
-						XbimFace^ f = gcnew XbimFace(profile); //use face because of profiles with voids
+						XbimFace^ f = gcnew XbimFace(profile, logger); //use face because of profiles with voids
 						if (f->IsValid)
 						{
 							BRepPrimAPI_MakePrism prism(f, vec);
@@ -1095,9 +1095,9 @@ namespace Xbim
 				{
 					XbimFace^ face;
 					if (overrideProfileDef == nullptr)
-						face = gcnew XbimFace(repItem->SweptArea);
+						face = gcnew XbimFace(repItem->SweptArea, logger);
 					else
-						face = gcnew XbimFace(overrideProfileDef);
+						face = gcnew XbimFace(overrideProfileDef, logger);
 					if (face->IsValid)
 					{
 
@@ -1128,9 +1128,9 @@ namespace Xbim
 			if (extrudeTaperedArea != nullptr) return Init(extrudeTaperedArea, overrideProfileDef, logger);
 			XbimFace^ face;
 			if (overrideProfileDef == nullptr)
-				face = gcnew XbimFace(repItem->SweptArea);
+				face = gcnew XbimFace(repItem->SweptArea, logger);
 			else
-				face = gcnew XbimFace(overrideProfileDef);
+				face = gcnew XbimFace(overrideProfileDef, logger);
 
 			if (face->IsValid && repItem->Angle > 0) //we have a valid face and angle
 			{
@@ -1194,7 +1194,7 @@ namespace Xbim
 			}
 		}
 
-		void XbimSolid::Init(XbimRect3D rect3D, double tolerance, ILogger^ logger)
+		void XbimSolid::Init(XbimRect3D rect3D, double tolerance, ILogger^ /*logger*/)
 		{
 			
 			XbimPoint3D l = rect3D.Location;		
@@ -1239,9 +1239,9 @@ namespace Xbim
 			XbimWire^ polyBoundary;
 			if (dynamic_cast<IIfcPolyline^>(pbhs->PolygonalBoundary))
 				// we can attempt to close a polyline if it was open
-				polyBoundary = gcnew XbimWire((IIfcPolyline^)pbhs->PolygonalBoundary, true);
+				polyBoundary = gcnew XbimWire((IIfcPolyline^)pbhs->PolygonalBoundary, true, logger);
 			else
-				polyBoundary = gcnew XbimWire(pbhs->PolygonalBoundary);
+				polyBoundary = gcnew XbimWire(pbhs->PolygonalBoundary, logger);
 
 			
 			if (!polyBoundary->IsValid)
@@ -1255,7 +1255,7 @@ namespace Xbim
 			//if (polyBoundary->Edges->Count>4) //may sure we remove an colinear edges
 			//	polyBoundary->FuseColinearSegments(pbhs->Model->ModelFactors->Precision, 0.05);
 			//BRepTools::Write(polyBoundary, "d:\\tmp\\w2");
-			XbimFace^ polyFace = gcnew XbimFace(polyBoundary);
+			XbimFace^ polyFace = gcnew XbimFace(polyBoundary, logger);
 
 			if (!polyFace->IsValid)
 			{
@@ -1289,7 +1289,7 @@ namespace Xbim
 				return Init((IIfcSweptDiskSolidPolygonal^)swdSolid, logger);
 			//else Build the directrix
 			IModelFactors^ mf = swdSolid->Model->ModelFactors;
-			XbimWire^ sweep = gcnew XbimWire(swdSolid->Directrix);
+			XbimWire^ sweep = gcnew XbimWire(swdSolid->Directrix, logger);
 			if (swdSolid->StartParam.HasValue && swdSolid->EndParam.HasValue)
 			{
 				// if the last parameter is about 1, use the lenght
@@ -1299,12 +1299,12 @@ namespace Xbim
 				sweep = (XbimWire^)sweep->Trim(
 					swdSolid->StartParam.Value,
 					last, 
-					mf->Precision);
+					mf->Precision, logger);
 			}
 			else if (swdSolid->StartParam.HasValue && !swdSolid->EndParam.HasValue)
-				sweep = (XbimWire^)sweep->Trim(swdSolid->StartParam.Value, sweep->Length, mf->Precision);
+				sweep = (XbimWire^)sweep->Trim(swdSolid->StartParam.Value, sweep->Length, mf->Precision, logger);
 			else if (!swdSolid->StartParam.HasValue && swdSolid->EndParam.HasValue)
-				sweep = (XbimWire^)sweep->Trim(0, Math::Abs(swdSolid->EndParam.Value - 1.0)<Precision::Confusion() ? sweep->Length : swdSolid->EndParam.Value, mf->Precision);
+				sweep = (XbimWire^)sweep->Trim(0, Math::Abs(swdSolid->EndParam.Value - 1.0)<Precision::Confusion() ? sweep->Length : swdSolid->EndParam.Value, mf->Precision, logger);
 			if (!sweep->IsValid)
 			{
 				XbimGeometryCreator::LogWarning(logger, swdSolid, "Could not build Directrix");
@@ -1412,7 +1412,7 @@ namespace Xbim
 			}
 		}
 
-		void XbimSolid::Init(IIfcBoundingBox^ box, ILogger^ logger)
+		void XbimSolid::Init(IIfcBoundingBox^ box, ILogger^ /*logger*/)
 		{
 			double precision = box->Model->ModelFactors->Precision;
 			double x = Math::Max(box->XDim, precision);
@@ -1653,7 +1653,7 @@ namespace Xbim
 			throw gcnew NotImplementedException(String::Format("IIfcCsgSolid of Type {0} in entity #{1} is not implemented", IIfcSolid->GetType()->Name, IIfcSolid->EntityLabel));
 		}
 
-		void XbimSolid::Init(IIfcSphere^ IIfcSolid, ILogger^ logger)
+		void XbimSolid::Init(IIfcSphere^ IIfcSolid, ILogger^ /*logger*/)
 		{
 			gp_Ax3 	gpax3 = XbimConvert::ToAx3(IIfcSolid->Position);			
 			BRepPrimAPI_MakeSphere sphereMaker(gpax3.Ax2(), IIfcSolid->Radius);
@@ -1661,7 +1661,7 @@ namespace Xbim
 			*pSolid = TopoDS::Solid(sphereMaker.Shape());
 		}
 
-		void XbimSolid::Init(IIfcBlock^ IIfcSolid, ILogger^ logger)
+		void XbimSolid::Init(IIfcBlock^ IIfcSolid, ILogger^ /*logger*/)
 		{
 			gp_Ax3 	gpax3 = XbimConvert::ToAx3(IIfcSolid->Position);
 			BRepPrimAPI_MakeBox boxMaker(gpax3.Ax2(), IIfcSolid->XLength, IIfcSolid->YLength, IIfcSolid->ZLength);
@@ -1669,7 +1669,7 @@ namespace Xbim
 			*pSolid = TopoDS::Solid(boxMaker.Shape());
 		}
 
-		void XbimSolid::Init(IIfcRightCircularCylinder^ IIfcSolid, ILogger^ logger)
+		void XbimSolid::Init(IIfcRightCircularCylinder^ IIfcSolid, ILogger^ /*logger*/)
 		{
 			gp_Ax3 	gpax3 = XbimConvert::ToAx3(IIfcSolid->Position);
 			BRepPrimAPI_MakeCylinder cylinderMaker(gpax3.Ax2(), IIfcSolid->Radius, IIfcSolid->Height);
@@ -1677,7 +1677,7 @@ namespace Xbim
 			*pSolid = TopoDS::Solid(cylinderMaker.Shape());
 		}
 
-		void XbimSolid::Init(IIfcRightCircularCone^ IIfcSolid, ILogger^ logger)
+		void XbimSolid::Init(IIfcRightCircularCone^ IIfcSolid, ILogger^ /*logger*/)
 		{
 			gp_Ax3 	gpax3 = XbimConvert::ToAx3(IIfcSolid->Position);
 			BRepPrimAPI_MakeCone coneMaker(gpax3.Ax2(), IIfcSolid->BottomRadius, 0., IIfcSolid->Height);
@@ -1685,7 +1685,7 @@ namespace Xbim
 			*pSolid = TopoDS::Solid(coneMaker.Shape());
 		}
 
-		void XbimSolid::Init(IIfcRectangularPyramid^ IIfcSolid, ILogger^ logger)
+		void XbimSolid::Init(IIfcRectangularPyramid^ IIfcSolid, ILogger^ /*logger*/)
 		{
 			
 			double xOff = IIfcSolid->XLength / 2;
@@ -1921,7 +1921,7 @@ namespace Xbim
 			if (toCut->Count == 1) return this->Cut(toCut->First, tolerance, logger);
 			XbimSolidSet^ thisSolidSet = gcnew XbimSolidSet(this);
 			GC::KeepAlive(this);
-			return thisSolidSet->Cut(toCut, tolerance);
+			return thisSolidSet->Cut(toCut, tolerance,logger);
 		}
 
 
@@ -2013,7 +2013,7 @@ namespace Xbim
 			if (toIntersect->Count == 0) return gcnew XbimSolidSet(this);
 			if (toIntersect->Count == 1) return this->Intersection(toIntersect->First, tolerance,logger);
 			XbimSolidSet^ thisSolidSet = gcnew XbimSolidSet(this);			
-			return thisSolidSet->Intersection(toIntersect, tolerance);
+			return thisSolidSet->Intersection(toIntersect, tolerance,logger);
 		}
 
 		IXbimSolidSet^ XbimSolid::Intersection(IXbimSolid^ toIntersect, double /*tolerance*/, ILogger^ logger)
@@ -2048,7 +2048,7 @@ namespace Xbim
 			if (toUnion->Count == 0) return gcnew XbimSolidSet(this);
 			if (toUnion->Count == 1) return this->Union(toUnion->First, tolerance,logger);
 			XbimSolidSet^ thisSolidSet = gcnew XbimSolidSet(this);
-			return thisSolidSet->Union(toUnion, tolerance);
+			return thisSolidSet->Union(toUnion, tolerance,logger);
 		}
 
 		IXbimSolidSet^ XbimSolid::Union(IXbimSolid^ toUnion, double /*tolerance*/, ILogger^ logger)
@@ -2248,11 +2248,11 @@ namespace Xbim
 			return copy;
 		}
 
-		XbimGeometryObject ^ XbimSolid::Moved(IIfcObjectPlacement ^ objectPlacement)
+		XbimGeometryObject ^ XbimSolid::Moved(IIfcObjectPlacement ^ objectPlacement, ILogger^ logger)
 		{
 			if (!IsValid) return this;
 			XbimSolid^ copy = gcnew XbimSolid(this, Tag); //take a copy of the shape
-			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
+			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement, logger);
 			copy->Move(loc);
 			return copy;
 		}

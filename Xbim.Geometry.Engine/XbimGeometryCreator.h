@@ -10,8 +10,8 @@ using namespace Xbim::Common::Geometry;
 using namespace System::Configuration;
 using namespace Xbim::Ifc4::Interfaces;
 using namespace Xbim::Ifc4;
-using namespace Microsoft::Extensions::Logging;
-using namespace Microsoft::Extensions::Logging::Abstractions;
+
+
 
 using namespace System::Reflection;
 
@@ -34,7 +34,7 @@ namespace Xbim
 			
 
 		private:
-		    ILogger^ _logger;
+			
 			IXbimGeometryObject ^ Trim(XbimSetObject ^geometryObject);
 			static XbimGeometryCreator()
 			{
@@ -162,7 +162,7 @@ namespace Xbim
 			//Creates collections of objects
 			virtual IXbimSolidSet^ CreateSolidSet();
 			virtual IXbimSolidSet^ CreateSolidSet(IIfcBooleanResult^ boolOp, ILogger^ logger);
-			virtual IXbimSolidSet^ CreateBooleanResult(IIfcBooleanClippingResult^ clip);
+			virtual IXbimSolidSet^ CreateBooleanResult(IIfcBooleanClippingResult^ clip, ILogger^ logger);
 			virtual IXbimGeometryObjectSet^ CreateGeometryObjectSet();
 
 			//Ifc4 interfaces
@@ -185,7 +185,7 @@ namespace Xbim
 			virtual IXbimCurve^ CreateCurve(IIfcBSplineCurveWithKnots^ curve, ILogger^ logger);
 			virtual IXbimCurve^ CreateCurve(IIfcOffsetCurve3D^ curve, ILogger^ logger);
 			virtual IXbimCurve^ CreateCurve(IIfcOffsetCurve2D^ curve, ILogger^ logger);
-			virtual XbimMatrix3D ToMatrix3D(IIfcObjectPlacement ^ objPlacement);
+			virtual XbimMatrix3D ToMatrix3D(IIfcObjectPlacement ^ objPlacement, ILogger^ logger);
 			virtual IXbimSolidSet^ CreateGrid(IIfcGrid^ grid, ILogger^ logger);
 
 			// Inherited via IXbimGeometryEngine
@@ -199,7 +199,7 @@ namespace Xbim
 			{
 				return Moved(geometryObject, (IIfcPlacement ^)placement);
 			};
-			virtual IXbimGeometryObject ^ Moved(IXbimGeometryObject ^geometryObject, IIfcObjectPlacement ^objectPlacement);
+			virtual IXbimGeometryObject ^ Moved(IXbimGeometryObject ^geometryObject, IIfcObjectPlacement ^objectPlacement, ILogger^ logger);
 			virtual IXbimGeometryObject^ FromBrep(String^ brepStr);
 			virtual String^ ToBrep(IXbimGeometryObject^ geometryObject);
 		};

@@ -130,11 +130,11 @@ namespace Xbim
 			return copy;
 		}
 
-		XbimGeometryObject ^ XbimVertex::Moved(IIfcObjectPlacement ^ objectPlacement)
+		XbimGeometryObject ^ XbimVertex::Moved(IIfcObjectPlacement ^ objectPlacement, ILogger^ logger)
 		{
 			if (!IsValid) return this;			
 			XbimVertex^ copy = gcnew XbimVertex(this, Tag); //take a copy of the shape
-			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
+			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement,logger);
 			copy->Move(loc);
 			return copy;
 		}

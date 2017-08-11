@@ -29,7 +29,7 @@ namespace Xbim
 			void InstanceCleanup();
 #pragma region initialisation functions
 
-			void Init(double precision, ILogger^ logger);
+			void Init(double precision);
 			void Init(IIfcPolyline^ loop, ILogger^ logger);
 			void Init(IIfcPolyline^ loop, bool attemptClosing, ILogger^ logger);
 			void Init(IIfcCompositeCurve^ loop, ILogger^ logger);
@@ -60,7 +60,7 @@ namespace Xbim
 			void Init(IIfcCShapeProfileDef^ profile, ILogger^ logger);
 			void Init(IIfcTShapeProfileDef^ profile, ILogger^ logger);
 			//constructs a rectangle wire with the bottom left corner at 0,0,0, top right at x,y,0
-			void Init(double x, double y, double tolerance, bool centre, ILogger^ logger);
+			void Init(double x, double y, double tolerance, bool centre);
 #pragma endregion
 
 			//helpers
@@ -88,35 +88,35 @@ namespace Xbim
 			XbimWire(const std::vector<gp_Pnt>& points, double tolerance);
 			XbimWire(const TopoDS_Wire& wire);
 			XbimWire(const TopoDS_Wire& wire, Object^ tag);
-			XbimWire(IIfcPolyline^ loop);
-			XbimWire(IIfcPolyline^ loop, bool attemptClosing);
-			XbimWire(IIfcBSplineCurve^ bspline);
-			XbimWire(IIfcBSplineCurveWithKnots^ bSpline);
-			XbimWire(IIfcRationalBSplineCurveWithKnots^ bSpline);
-			XbimWire(IIfcCompositeCurve^ loop);
-			XbimWire(IIfcTrimmedCurve^ loop);
-			XbimWire(IIfcCurve^ loop);
-			XbimWire(IIfcIndexedPolyCurve^ pcurve);
-			XbimWire(IIfcCompositeCurveSegment^ compCurveSeg);
-			XbimWire(IIfcBoundedCurve^ loop);
-			XbimWire(IIfcPolyLoop^ loop);
-			XbimWire(IIfcArbitraryClosedProfileDef^ profile);
-			XbimWire(IIfcArbitraryOpenProfileDef^ profile);
-			XbimWire(IIfcCenterLineProfileDef^ profile);
+			XbimWire(IIfcPolyline^ loop, ILogger^ logger);
+			XbimWire(IIfcPolyline^ loop, bool attemptClosing, ILogger^ logger);
+			XbimWire(IIfcBSplineCurve^ bspline, ILogger^ logger);
+			XbimWire(IIfcBSplineCurveWithKnots^ bSpline, ILogger^ logger);
+			XbimWire(IIfcRationalBSplineCurveWithKnots^ bSpline, ILogger^ logger);
+			XbimWire(IIfcCompositeCurve^ loop, ILogger^ logger);
+			XbimWire(IIfcTrimmedCurve^ loop, ILogger^ logger);
+			XbimWire(IIfcCurve^ loop, ILogger^ logger);
+			XbimWire(IIfcIndexedPolyCurve^ pcurve, ILogger^ logger);
+			XbimWire(IIfcCompositeCurveSegment^ compCurveSeg, ILogger^ logger);
+			XbimWire(IIfcBoundedCurve^ loop, ILogger^ logger);
+			XbimWire(IIfcPolyLoop^ loop, ILogger^ logger);
+			XbimWire(IIfcArbitraryClosedProfileDef^ profile, ILogger^ logger);
+			XbimWire(IIfcArbitraryOpenProfileDef^ profile, ILogger^ logger);
+			XbimWire(IIfcCenterLineProfileDef^ profile, ILogger^ logger);
 			//parametrised profiles
-			XbimWire(IIfcProfileDef^ profile);
-			XbimWire(IIfcDerivedProfileDef^ profile);
-			XbimWire(IIfcParameterizedProfileDef^ profile);
-			XbimWire(IIfcCircleProfileDef^ circProfile);
-			XbimWire(IIfcRectangleProfileDef^ rectProfile);
-			XbimWire(IIfcRoundedRectangleProfileDef^ rectProfile);
-			XbimWire(IIfcLShapeProfileDef^ profile);
-			XbimWire(IIfcUShapeProfileDef^ profile);
-			XbimWire(IIfcEllipseProfileDef^ profile);
-			XbimWire(IIfcIShapeProfileDef^ profile);
-			XbimWire(IIfcZShapeProfileDef^ profile);
-			XbimWire(IIfcCShapeProfileDef^ profile);
-			XbimWire(IIfcTShapeProfileDef^ profile);
+			XbimWire(IIfcProfileDef^ profile, ILogger^ logger);
+			XbimWire(IIfcDerivedProfileDef^ profile, ILogger^ logger);
+			XbimWire(IIfcParameterizedProfileDef^ profile, ILogger^ logger);
+			XbimWire(IIfcCircleProfileDef^ circProfile, ILogger^ logger);
+			XbimWire(IIfcRectangleProfileDef^ rectProfile, ILogger^ logger);
+			XbimWire(IIfcRoundedRectangleProfileDef^ rectProfile, ILogger^ logger);
+			XbimWire(IIfcLShapeProfileDef^ profile, ILogger^ logger);
+			XbimWire(IIfcUShapeProfileDef^ profile, ILogger^ logger);
+			XbimWire(IIfcEllipseProfileDef^ profile, ILogger^ logger);
+			XbimWire(IIfcIShapeProfileDef^ profile, ILogger^ logger);
+			XbimWire(IIfcZShapeProfileDef^ profile, ILogger^ logger);
+			XbimWire(IIfcCShapeProfileDef^ profile, ILogger^ logger);
+			XbimWire(IIfcTShapeProfileDef^ profile, ILogger^ logger);
 
 
 #pragma endregion
@@ -141,13 +141,13 @@ namespace Xbim
 			virtual property bool IsPlanar {bool get(); }
 			virtual property XbimPoint3D Start {XbimPoint3D get(); }
 			virtual property XbimPoint3D End {XbimPoint3D get(); }
-			virtual IXbimWire^ Trim(double first, double last, double tolerance);
+			virtual IXbimWire^ Trim(double first, double last, double tolerance,ILogger^ logger);
 
 			virtual property double Length {double get(); }
 			virtual property XbimRect3D BoundingBox {XbimRect3D get() override; }
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) override;
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D)override;
-			void FuseColinearSegments(double tolerance, double angleTolerance);
+			void FuseColinearSegments(double tolerance, double angleTolerance, ILogger^ logger);
 			virtual property double Area {double get(); }
 #pragma endregion
 
@@ -162,7 +162,7 @@ namespace Xbim
 			//properties
 			property bool IsReversed {bool get() { return IsValid && pWire->Orientation() == TopAbs_REVERSED; }; }
 
-			XbimWire^ Trim(XbimVertex^ first, XbimVertex^ last, double tolerance);
+			XbimWire^ Trim(XbimVertex^ first, XbimVertex^ last, double tolerance, ILogger^ logger);
 
 
 
@@ -196,7 +196,7 @@ namespace Xbim
 			// Inherited via XbimOccShape
 			virtual XbimGeometryObject ^ Moved(IIfcPlacement ^ placement) override;
 
-			virtual XbimGeometryObject ^ Moved(IIfcObjectPlacement ^ objectPlacement) override;
+			virtual XbimGeometryObject ^ Moved(IIfcObjectPlacement ^ objectPlacement, ILogger^ logger) override;
 			virtual void Move(TopLoc_Location loc);
 
 			// Inherited via XbimOccShape

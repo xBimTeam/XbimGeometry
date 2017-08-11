@@ -97,10 +97,10 @@ namespace Xbim
 			return XbimPoint3D(pt.X(), pt.Y(),0);
 		}
 
-		IXbimCurve^ XbimCurve2D::ToCurve3D(ILogger^ logger)
+		IXbimCurve^ XbimCurve2D::ToCurve3D()
 		{	
 			if (!IsValid) return nullptr;
-			return gcnew XbimCurve(GeomLib::To3d(gp_Ax2(), *pCurve2D),logger);
+			return gcnew XbimCurve(GeomLib::To3d(gp_Ax2(), *pCurve2D));
 		}
 
 		XbimVector3D XbimCurve2D::TangentAt(double parameter)
@@ -122,7 +122,7 @@ namespace Xbim
 			throw gcnew Exception("TransformShallow of curves is not currently supported");
 		}
 
-		IEnumerable<XbimPoint3D>^ XbimCurve2D::Intersections(IXbimCurve^ intersector, double tolerance)
+		IEnumerable<XbimPoint3D>^ XbimCurve2D::Intersections(IXbimCurve^ intersector, double tolerance, ILogger^ /*logger*/)
 		{
 			Geom2dAPI_InterCurveCurve extrema(*pCurve2D, *((XbimCurve2D^)intersector)->pCurve2D, tolerance);
 			List<XbimPoint3D>^ intersects = gcnew List<XbimPoint3D>();
@@ -166,7 +166,11 @@ namespace Xbim
 		{
 			//only deal with the first two points of a polyline, should really use wire for more than one segment
 			List<IIfcCartesianPoint^>^ pts = Enumerable::ToList(curve->Points);
-			if (pts->Count != 2) throw gcnew Exception("XbimCurves can only be created with polylines that have a single segment");
+			if (pts->Count != 2)
+			{
+				XbimGeometryCreator::LogWarning(logger, curve, "XbimCurves can only be created with polylines that have a single segment, consider creating a wire");
+				return;
+			}
 
 			gp_Pnt2d start = XbimConvert::GetPoint2d(pts[0]);
 			gp_Pnt2d end = XbimConvert::GetPoint2d(pts[1]);
@@ -222,11 +226,13 @@ namespace Xbim
 			
 			if (semiAx1 <= 0)
 			{
-				throw gcnew Exception(String::Format("WC002: Illegal Ellipse Semi Axis 1, must be greater than 0, in entity #{0}", ellipse->EntityLabel));
+				XbimGeometryCreator::LogError(logger, ellipse,"WC002: Illegal Ellipse Semi Axis 1, must be greater than 0, in entity #{0}", ellipse->EntityLabel);
+				return;
 			}
 			if (semiAx2 <= 0)
 			{
-				throw gcnew Exception(String::Format("WE005: Illegal Ellipse Semi Axis 2, must be greater than 0, in entity #{0}", ellipse->EntityLabel));
+				XbimGeometryCreator::LogError(logger, ellipse, "WE005: Illegal Ellipse Semi Axis 2, must be greater than 0, in entity #{0}", ellipse->EntityLabel);
+				return;
 			}
 			bool rotateElipse = false;
 			if (semiAx1 < semiAx2)//either same or two is larger than 1			 
@@ -242,7 +248,7 @@ namespace Xbim
 			pCurve2D = new Handle(Geom2d_Curve)(maker.Value());			
 		}
 
-		void XbimCurve2D::Init(IIfcLine^ line, ILogger^ logger)
+		void XbimCurve2D::Init(IIfcLine^ line, ILogger^ /*logger*/)
 		{
 			IIfcCartesianPoint^ cp = line->Pnt;
 			IIfcVector^ ifcVec = line->Dir;
@@ -325,7 +331,7 @@ namespace Xbim
 			}
 		}
 
-		void XbimCurve2D::Init(IIfcRationalBSplineCurveWithKnots^ bspline, ILogger^ logger)
+		void XbimCurve2D::Init(IIfcRationalBSplineCurveWithKnots^ bspline, ILogger^ /*logger*/)
 		{
 			TColgp_Array1OfPnt2d poles(1, Enumerable::Count(bspline->ControlPointsList));
 			int i = 1;
@@ -361,7 +367,7 @@ namespace Xbim
 
 		}
 
-		void XbimCurve2D::Init(IIfcBSplineCurveWithKnots^ bspline, ILogger^ logger)
+		void XbimCurve2D::Init(IIfcBSplineCurveWithKnots^ bspline, ILogger^ /*logger*/)
 		{
 			TColgp_Array1OfPnt2d poles(1, Enumerable::Count(bspline->ControlPointsList));
 			int i = 1;
