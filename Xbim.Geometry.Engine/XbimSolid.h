@@ -4,7 +4,7 @@
 #include "XbimFace.h"
 #include "XbimFaceSet.h"
 #include <TopoDS_Solid.hxx>
-
+using namespace System::Runtime;
 using namespace System::Collections::Generic;
 using namespace System::IO;
 using namespace Xbim::Ifc4;

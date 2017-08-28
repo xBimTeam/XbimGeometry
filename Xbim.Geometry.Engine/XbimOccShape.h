@@ -3,6 +3,7 @@
 #include <TopoDS_Shape.hxx>
 #include <BRepBuilderAPI_Copy.hxx>
 #include <OSD_Timer.hxx>
+using namespace System::Runtime;
 using namespace System::IO;
 using namespace System::Collections::Generic;
 using namespace Xbim::Common::Geometry;

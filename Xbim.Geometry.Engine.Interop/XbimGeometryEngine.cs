@@ -44,7 +44,9 @@ namespace Xbim.Geometry.Engine.Interop
             }
              
         }
-        public IXbimGeometryObject Create(IIfcGeometricRepresentationItem ifcRepresentation, ILogger logger)
+
+       
+            public IXbimGeometryObject Create(IIfcGeometricRepresentationItem ifcRepresentation, ILogger logger)
         {
             return _engine.Create(ifcRepresentation, null,logger);
         }

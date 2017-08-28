@@ -81,6 +81,7 @@
 #include <GeomLib_IsPlanarSurface.hxx>
 #include <ShapeUpgrade_UnifySameDomain.hxx>
 using namespace System;
+using namespace System::Runtime;
 using namespace System::Linq;
 using namespace System::Threading;
 using namespace Xbim::Common;

@@ -25,16 +25,17 @@
     <RepositoryUrl></RepositoryUrl>
     <PackageTags>BIM, IFC, IfcXml, IfcZip, Ifc4,  COBie, .Net, C#, BuildingSmart</PackageTags>
     <PackageReleaseNotes>migrated Xbim.Geometry.Interop to .net47</PackageReleaseNotes>
-    <AssemblyVersion>5.0.0.0</AssemblyVersion>
-    <FileVersion>$(AssemblyFileVersionAttribute)</FileVersion>
+    <AssemblyVersion>5.0.0.0</AssemblyVersion>    
+    <FileVersion>5.0.$(Year)$(Month).$(Day)$(HalfMinuteOfDay)</FileVersion>
+    <ProductVersion>5.0.$(Year)$(Month).$(Day)$(HalfMinuteOfDay)</ProductVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageIconUrl>https://avatars1.githubusercontent.com/u/2284875?v=3&amp;amp;s=240</PackageIconUrl>
   </PropertyGroup>
 
 
   <ItemGroup>
-    <PackageReference Include="Xbim.Ifc4" Version="5.0.0-Beta-307" />
-    <PackageReference Include="Xbim.Tessellator" Version="5.0.0-Beta-310" />
+    <PackageReference Include="Xbim.Ifc4" Version="5.0.0-Beta-331" />
+    <PackageReference Include="Xbim.Tessellator" Version="5.0.0-Beta-336" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Configuration" />

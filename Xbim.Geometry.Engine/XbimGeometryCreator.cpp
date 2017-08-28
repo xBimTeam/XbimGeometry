@@ -36,7 +36,7 @@ using System::Runtime::InteropServices::Marshal;
 using namespace Microsoft::Extensions::Logging::Abstractions;
 using namespace  System::Threading;
 using namespace  System::Linq;
-
+using namespace  System::Runtime;
 
 namespace Xbim
 {

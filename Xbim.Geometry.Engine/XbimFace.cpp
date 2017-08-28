@@ -48,6 +48,7 @@
 #include <BRepClass_FaceClassifier.hxx>
 #include <BRepTopAdaptor_FClass2d.hxx>
 using namespace System::Linq;
+using namespace System::Runtime;
 namespace Xbim
 {
 	namespace Geometry

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
-using Xbim.Common;
-using Microsoft.Extensions.Logging;
 
 namespace Xbim.Geometry.Engine.Interop
 {
@@ -37,9 +35,7 @@ namespace Xbim.Geometry.Engine.Interop
 
             if (appDir == null)
             {
-                var logger = ApplicationLogging.CreateLogger<XbimCustomAssemblyResolver>();
-                logger.LogWarning("Unable to resolve {0} because the system was not able to acquire base location of running application from {1}.", 
-                    moduleName, assembly.FullName);
+
                 return null;
             }
                 
@@ -60,8 +56,7 @@ namespace Xbim.Geometry.Engine.Interop
                 // Try a relative folder to CWD.
                 if (!File.Exists(libraryPath))
                 {
-                    var logger = ApplicationLogging.CreateLogger<XbimCustomAssemblyResolver>();
-                    logger.LogDebug("Assembly not found at {0}. Attempting relative path...", libraryPath);
+                    
                     libraryPath = filename;
                 }
             }
@@ -89,17 +84,16 @@ namespace Xbim.Geometry.Engine.Interop
 
         private static Assembly LoadAssembly(string moduleName, string assemblyPath)
         {
-            var logger = ApplicationLogging.CreateLogger<XbimCustomAssemblyResolver>();
+            
             if (!File.Exists(assemblyPath))
             {
                
-                logger.LogWarning("Failed to locate assembly '{0}'. Attempted to find at '{1}' but gave up.",
-                    moduleName, assemblyPath);
+               
                 return null;
             }
             else
             {
-                logger.LogDebug("Loading assembly from: {0}", assemblyPath);
+               
                 // Failures can occur at Load if a dependent assembly cannot be found.
                 Assembly geomLoaded = Assembly.LoadFile(assemblyPath);
                 return geomLoaded;

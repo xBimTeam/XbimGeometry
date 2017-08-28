@@ -8,6 +8,7 @@
 #include "OCC/src/Geom/Geom_Surface.hxx"
 
 using namespace System;
+using namespace System::Runtime;
 using namespace System::Collections::Generic;
 using namespace Xbim::Ifc4::Interfaces;
 using namespace Xbim::Common::Geometry;

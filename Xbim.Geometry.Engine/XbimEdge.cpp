@@ -1217,7 +1217,7 @@ namespace Xbim
 		}
 		
 #pragma endregion
-		XbimEdge::XbimEdge(XbimCurve2D^ curve2D, ILogger^ logger)
+		XbimEdge::XbimEdge(XbimCurve2D^ curve2D, ILogger^ /*logger*/)
 		{
 			XbimCurve^ curve = (XbimCurve^)curve2D->ToCurve3D();
 			BRepBuilderAPI_MakeEdge edgeMaker(curve);

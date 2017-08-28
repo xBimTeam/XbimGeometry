@@ -20,8 +20,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         {
 
 
-            Xbim.Common.ApplicationLogging.LoggerFactory.AddConsole(LogLevel.Trace);
-            var logger = Xbim.Common.ApplicationLogging.LoggerFactory.CreateLogger<LoadGeometryEngine>();
+            var loggerFactory = new LoggerFactory().AddConsole(LogLevel.Trace);
+            var logger = loggerFactory.CreateLogger<LoadGeometryEngine>();
             var ge = new XbimGeometryEngine();
             using (var m = new MemoryModel(new Ifc4.EntityFactory()))
             {

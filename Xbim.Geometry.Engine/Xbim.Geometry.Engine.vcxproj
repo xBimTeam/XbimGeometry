@@ -28,6 +28,8 @@
     <Keyword>ManagedCProj</Keyword>
     <RootNamespace>Xbim.Geometry.Engine</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -124,17 +126,13 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Configuration" />
+    <Reference Include="System.Runtime" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.Extensions.Logging">
-      <HintPath>..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\Microsoft.Extensions.Logging.dll</HintPath>
-    </Reference>
+    
     <Reference Include="Microsoft.Extensions.Logging.Abstractions">
       <HintPath>..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Extensions.Logging.DependencyInjection.Abstractions">
-      <HintPath>..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
-    </Reference>
+    </Reference>    
     <Reference Include="Xbim.Common">
       <HintPath>..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\Xbim.Common.dll</HintPath>
     </Reference>
