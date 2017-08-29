@@ -4,7 +4,7 @@
 #include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <TopExp.hxx>
 using namespace System;
- 
+using namespace System::Runtime;
 namespace Xbim
 {
 	namespace Geometry

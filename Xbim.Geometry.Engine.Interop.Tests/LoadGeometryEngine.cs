@@ -7,13 +7,13 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 {
     [TestClass]
     public class LoadGeometryEngine
-    {
+    { 
         [TestMethod]
         public void SimpleLoad()
         {
             var ge = new XbimGeometryEngine();
-            Assert.IsNotNull(ge);
-
+            Assert.IsNotNull(ge); 
+             
         }
         [TestMethod]
         public void TestLogging()
@@ -32,8 +32,6 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 }
 
             }
-
-
         }
     }
 }

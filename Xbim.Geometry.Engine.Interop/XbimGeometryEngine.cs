@@ -35,8 +35,8 @@ namespace Xbim.Geometry.Engine.Interop
             try
             {               
                 var ass =  Assembly.Load(assemblyName);
-                var oh = Activator.CreateInstance(ass.FullName, "Xbim.Geometry.XbimGeometryCreator");           
-                _engine = oh.Unwrap() as IXbimGeometryEngine; 
+                var t = ass.GetType("Xbim.Geometry.XbimGeometryCreator");                       
+                _engine = Activator.CreateInstance(t) as IXbimGeometryEngine; 
             }
             catch (Exception e)
             {

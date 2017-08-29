@@ -1,21 +1,26 @@
-﻿using Xbim.Ifc4.Interfaces;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.IO;
+using Xbim.Common;
 using Xbim.IO.Memory;
 
 namespace Xbim.Geometry.Engine.Interop.Tests
 {
-    public static class EntityRepository
+    public class EntityRepository<T> : IDisposable where T:IPersistEntity
     {
-        public static IIfcGeometricRepresentationItem GetGeometry(string name)
+        MemoryModel model;
+        public T Entity;
+        public EntityRepository(string name)
         {
-            using (var mm = MemoryModel.OpenRead($@"TestFiles\{name}.ifc"))
-            {
-                return mm.Instances[1] as IIfcGeometricRepresentationItem;
-            }
-        }
-        public static T GetGeometry<T>(string name)
-        {
-            return (T)GetGeometry(name);
-        }
+            var path = Path.GetFullPath($@"TestFiles\{name}.ifc");
+            Assert.IsTrue(File.Exists(path), path);
+            model = MemoryModel.OpenRead(path);
+            Entity = (T)model.Instances[1];
+        }        
 
+        public void Dispose()
+        {
+            model.Dispose();
+        }
     }
 }

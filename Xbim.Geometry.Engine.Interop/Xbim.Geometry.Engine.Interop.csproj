@@ -37,9 +37,6 @@
     <PackageReference Include="Xbim.Ifc4" Version="5.0.0-Beta-331" />
     <PackageReference Include="Xbim.Tessellator" Version="5.0.0-Beta-336" />
   </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System.Configuration" />
-  </ItemGroup>
  
 
   <ItemGroup>
@@ -50,12 +47,6 @@
     <Content Include="bin\$(Configuration)\net47\Xbim.Geometry.Engine64.dll">
       <Pack>true</Pack>
       <PackagePath>build\net47;</PackagePath>
-    </Content>
-    <Content Include="C:\Users\Steve\Source\Repos\Xbim.Geometry\Xbim.Geometry.Engine.Interop.targets">
-      <Link>Xbim.Geometry.Interop.targets</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <PackagePath>build\net47;</PackagePath>
-      <Pack>true</Pack>
     </Content>
   </ItemGroup>
   <Target Name=" CleanNativeCodeEngine" BeforeTargets="Clean">

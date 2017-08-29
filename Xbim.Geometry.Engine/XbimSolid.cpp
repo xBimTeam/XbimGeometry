@@ -339,7 +339,7 @@ namespace Xbim
 		void XbimSolid::Init(IIfcSolidModel^ solid, ILogger^ logger)
 		{
 			IIfcSweptAreaSolid^ extrudeArea = dynamic_cast<IIfcSweptAreaSolid^>(solid);
-			if (extrudeArea) return Init(extrudeArea,nullptr);
+			if (extrudeArea) return Init(extrudeArea,nullptr,logger);
 			IIfcSweptDiskSolid^ sd = dynamic_cast<IIfcSweptDiskSolid^>(solid);
 			if (sd != nullptr) return Init(sd,logger);
 			IIfcManifoldSolidBrep^ ms = dynamic_cast<IIfcManifoldSolidBrep^>(solid);
