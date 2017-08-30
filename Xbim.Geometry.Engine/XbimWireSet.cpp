@@ -3,7 +3,7 @@
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <TopExp.hxx>
-using namespace System;
+
 namespace Xbim
 {
 	namespace Geometry

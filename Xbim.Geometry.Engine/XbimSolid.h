@@ -4,10 +4,10 @@
 #include "XbimFace.h"
 #include "XbimFaceSet.h"
 #include <TopoDS_Solid.hxx>
-using namespace System::Runtime;
+
 using namespace System::Collections::Generic;
 using namespace System::IO;
-using namespace Xbim::Ifc4;
+using namespace Xbim::Ifc4::Interfaces;
 using namespace Xbim::Common::Geometry;
 
 namespace Xbim
@@ -58,6 +58,9 @@ namespace Xbim
 			void Init(IIfcRightCircularCylinder^ IIfcSolid, ILogger^ logger);
 			void Init(IIfcRightCircularCone^ IIfcSolid, ILogger^ logger);
 			void Init(IIfcRectangularPyramid^ IIfcSolid, ILogger^ logger);
+			void Init(IIfcTriangulatedFaceSet^ IIfcSolid, ILogger^ logger);
+			void Init(IIfcFaceBasedSurfaceModel^ solid, ILogger^ logger);
+			void Init(IIfcShellBasedSurfaceModel^ solid, ILogger^ logger);
 #pragma endregion
 
 		public:
@@ -140,6 +143,9 @@ namespace Xbim
 			XbimSolid(IIfcRightCircularCone^ IIfcSolid, ILogger^ logger);
 			XbimSolid(IIfcRectangularPyramid^ IIfcSolid, ILogger^ logger);
 			XbimSolid(XbimRect3D rect3D, double tolerance, ILogger^ logger);
+			XbimSolid(IIfcTriangulatedFaceSet^ IIfcSolid, ILogger^ logger);
+			XbimSolid(IIfcFaceBasedSurfaceModel^ solid, ILogger^ logger);
+			XbimSolid(IIfcShellBasedSurfaceModel^ solid, ILogger^ logger);
 #pragma endregion
 
 			

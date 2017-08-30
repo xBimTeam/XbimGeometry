@@ -117,6 +117,21 @@ namespace Xbim
 			Init(solid, logger);
 		}
 
+		XbimSolidSet::XbimSolidSet(IIfcTriangulatedFaceSet ^ IIfcSolid, ILogger ^ logger)
+		{
+			Init(IIfcSolid, logger);
+		}
+
+		XbimSolidSet::XbimSolidSet(IIfcFaceBasedSurfaceModel ^ solid, ILogger ^ logger)
+		{
+			Init(solid, logger);
+		}
+
+		XbimSolidSet::XbimSolidSet(IIfcShellBasedSurfaceModel ^ solid, ILogger ^ logger)
+		{
+			Init(solid, logger);
+		}
+
 		XbimSolidSet::XbimSolidSet(IIfcExtrudedAreaSolid^ repItem, ILogger^ logger)
 		{
 			Init(repItem, logger);
@@ -602,6 +617,39 @@ namespace Xbim
 					solids = gcnew List<IXbimSolid^>();
 					solids->Add(s);
 				}
+			}
+		}
+
+		void XbimSolidSet::Init(IIfcTriangulatedFaceSet ^ IIfcSolid, ILogger ^ logger)
+		{
+			XbimCompound^ comp = gcnew XbimCompound(IIfcSolid, logger);
+			solids = gcnew List<IXbimSolid^>();
+			for each (IXbimSolid^ xbimSolid in comp->Solids)
+			{				
+				if (xbimSolid->IsValid)
+					solids->Add(xbimSolid);
+			}
+		}
+
+		void XbimSolidSet::Init(IIfcFaceBasedSurfaceModel ^ solid, ILogger ^ logger)
+		{
+			XbimCompound^ comp = gcnew XbimCompound(solid, logger);
+			solids = gcnew List<IXbimSolid^>();
+			for each (IXbimSolid^ xbimSolid in comp->Solids)
+			{
+				if (xbimSolid->IsValid)
+					solids->Add(xbimSolid);
+			}
+		}
+
+		void XbimSolidSet::Init(IIfcShellBasedSurfaceModel ^ solid, ILogger ^ logger)
+		{
+			XbimCompound^ comp = gcnew XbimCompound(solid, logger);
+			solids = gcnew List<IXbimSolid^>();
+			for each (IXbimSolid^ xbimSolid in comp->Solids)
+			{
+				if (xbimSolid->IsValid)
+					solids->Add(xbimSolid);
 			}
 		}
 

@@ -33,10 +33,10 @@
 #include <Geom2d_Line.hxx>
 #include <IntAna2d_AnaIntersection.hxx>
 using System::Runtime::InteropServices::Marshal;
-using namespace Microsoft::Extensions::Logging::Abstractions;
+
 using namespace  System::Threading;
 using namespace  System::Linq;
-using namespace  System::Runtime;
+
 
 namespace Xbim
 {
@@ -495,7 +495,32 @@ namespace Xbim
 		IXbimSolidSet^ XbimGeometryCreator::CreateSolidSet(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid, ILogger^ logger)
 		{
 			return gcnew XbimSolidSet(IIfcSolid, logger);
-		};
+		}
+		IXbimSolidSet ^ XbimGeometryCreator::CreateSolidSet(IIfcTriangulatedFaceSet ^ shell, ILogger ^ logger)
+		{
+			return gcnew XbimSolidSet(shell, logger);
+		}
+		IXbimSolidSet ^ XbimGeometryCreator::CreateSolidSet(IIfcShellBasedSurfaceModel ^ ifcSurface, ILogger ^ logger)
+		{
+			return gcnew XbimSolidSet(ifcSurface, logger);
+		}
+		IXbimSolidSet ^ XbimGeometryCreator::CreateSolidSet(IIfcFaceBasedSurfaceModel ^ ifcSurface, ILogger ^ logger)
+		{
+			return gcnew XbimSolidSet(ifcSurface, logger);
+		}
+		IXbimSolid ^ XbimGeometryCreator::CreateSolid(IIfcTriangulatedFaceSet ^ shell, ILogger ^ logger)
+		{
+			return gcnew XbimSolid(shell, logger);
+		}
+		IXbimSolid ^ XbimGeometryCreator::CreateSolid(IIfcShellBasedSurfaceModel ^ ifcSurface, ILogger ^ logger)
+		{
+			return gcnew XbimSolid(ifcSurface, logger);
+		}
+		IXbimSolid ^ XbimGeometryCreator::CreateSolid(IIfcFaceBasedSurfaceModel ^ ifcSurface, ILogger ^ logger)
+		{
+			return gcnew XbimSolid(ifcSurface, logger);
+		}
+		
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcExtrudedAreaSolid^ IIfcSolid, ILogger^ logger)
 		{
 			return gcnew XbimSolid(IIfcSolid, logger);

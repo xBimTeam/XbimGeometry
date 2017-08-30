@@ -1,6 +1,4 @@
 #include "XbimFace.h"
-#include "XbimWire.h"
-#include "XbimWireSet.h"
 #include "XbimOccWriter.h"
 
 #include <BRepBuilderAPI_Transform.hxx>
@@ -48,7 +46,7 @@
 #include <BRepClass_FaceClassifier.hxx>
 #include <BRepTopAdaptor_FClass2d.hxx>
 using namespace System::Linq;
-using namespace System::Runtime;
+ 
 namespace Xbim
 {
 	namespace Geometry
@@ -61,7 +59,7 @@ namespace Xbim
 				delete (TopoDS_Face*)(temp.ToPointer());
 			System::GC::SuppressFinalize(this);
 		}
-
+		 
 		String^ XbimFace::GetBuildFaceErrorMessage(BRepBuilderAPI_FaceError err)
 		{
 			switch (err)
@@ -1389,7 +1387,7 @@ namespace Xbim
 		XbimGeometryObject ^ XbimFace::Moved(IIfcPlacement ^ placement)
 		{
 			if (!IsValid) return this;
-			XbimFace^ copy = gcnew XbimFace(this, Tag); //take a copy of the shape
+			XbimFace^ copy = gcnew XbimFace(*pFace, Tag); //take a copy of the shape
 			TopLoc_Location loc = XbimConvert::ToLocation(placement);
 			copy->Move(loc);
 			return copy;
@@ -1398,7 +1396,7 @@ namespace Xbim
 		XbimGeometryObject ^ XbimFace::Moved(IIfcObjectPlacement ^ objectPlacement, ILogger^ logger)
 		{
 			if (!IsValid) return this;
-			XbimFace^ copy = gcnew XbimFace(this, Tag); //take a copy of the shape
+			XbimFace^ copy = gcnew XbimFace(*pFace, Tag); //take a copy of the shape
 			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement,logger);
 			copy->Move(loc);
 			return copy;

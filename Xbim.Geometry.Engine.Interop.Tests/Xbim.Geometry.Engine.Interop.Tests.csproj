@@ -28,6 +28,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="TestFiles\CuttingOpeningInIfcFaceBasedSurfaceModelBodyTest.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestFiles\CuttingOpeningInIfcFaceBasedSurfaceModelVoidTest.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="TestFiles\EmptyBooleanClippingResultTest.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

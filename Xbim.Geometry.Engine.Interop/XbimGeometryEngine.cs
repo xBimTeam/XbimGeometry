@@ -236,6 +236,36 @@ namespace Xbim.Geometry.Engine.Interop
             return _engine.CreateSurfaceModel(ifcSurface, logger);
         }
 
+        public IXbimSolidSet CreateSolidSet(IIfcTriangulatedFaceSet shell, ILogger logger)
+        {
+            return _engine.CreateSolidSet(shell, logger);
+        }
+
+        public IXbimSolidSet CreateSolidSet(IIfcShellBasedSurfaceModel ifcSurface, ILogger logger)
+        {
+            return _engine.CreateSolidSet(ifcSurface, logger);
+        }
+
+        public IXbimSolidSet CreateSolidSet(IIfcFaceBasedSurfaceModel ifcSurface, ILogger logger)
+        {
+            return _engine.CreateSolidSet(ifcSurface, logger);
+        }
+
+        public IXbimSolid CreateSolid(IIfcTriangulatedFaceSet shell, ILogger logger)
+        {
+            return _engine.CreateSolid(shell, logger);
+        }
+
+        public IXbimSolid CreateSolid(IIfcShellBasedSurfaceModel ifcSurface, ILogger logger)
+        {
+            return _engine.CreateSolid(ifcSurface, logger);
+        }
+
+        public IXbimSolid CreateSolid(IIfcFaceBasedSurfaceModel ifcSurface, ILogger logger)
+        {
+            return _engine.CreateSolid(ifcSurface, logger);
+        }
+
         public IXbimFace CreateFace(IIfcProfileDef profileDef, ILogger logger)
         {
             return _engine.CreateFace(profileDef, logger);

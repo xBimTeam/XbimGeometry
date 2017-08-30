@@ -34,7 +34,7 @@
 
 
   <ItemGroup>
-    <PackageReference Include="Xbim.Ifc4" Version="5.0.0-Beta-331" />
+    <PackageReference Include="Xbim.Ifc4" Version="5.0.0-Beta-348" />
     <PackageReference Include="Xbim.Tessellator" Version="5.0.0-Beta-336" />
   </ItemGroup>
  
@@ -48,7 +48,16 @@
       <Pack>true</Pack>
       <PackagePath>build\net47;</PackagePath>
     </Content>
+    <Content Include="..\Xbim.Geometry.Engine.Interop.targets">
+      <Link>Xbim.Geometry.Interop.targets</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <PackagePath>build\net47;</PackagePath>
+      <Pack>true</Pack>
+    </Content>
+   
   </ItemGroup>
+
+  
   <Target Name=" CleanNativeCodeEngine" BeforeTargets="Clean">
     <Message Text="Cleaning Xbim.Geometry.Engine Native Dlls" Importance="High" />
     <MSBuild Projects="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj" Properties="Configuration=$(Configuration);Platform=Win32;OutDir=..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\" Targets="Clean">      

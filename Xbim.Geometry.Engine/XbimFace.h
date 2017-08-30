@@ -4,11 +4,8 @@
 #include "XbimWireSet.h"
 #include <TopoDS_Face.hxx>
 #include <BRepBuilderAPI_FaceError.hxx>
-#include "XbimWireSet.h"
 #include "OCC/src/Geom/Geom_Surface.hxx"
-
-using namespace System;
-using namespace System::Runtime;
+ 
 using namespace System::Collections::Generic;
 using namespace Xbim::Ifc4::Interfaces;
 using namespace Xbim::Common::Geometry;

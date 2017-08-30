@@ -69,7 +69,7 @@
 using namespace Xbim::Common;
 using namespace System::Linq;
 namespace Xbim
-{
+{ 
 	namespace Geometry
 	{
 

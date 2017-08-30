@@ -32,7 +32,9 @@ namespace Xbim
 			void Init(IIfcExtrudedAreaSolid^ solid, ILogger^ logger);
 			void Init(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid, ILogger^ logger);
 			void Init(IIfcRevolvedAreaSolid^ solid, ILogger^ logger);
-			
+			void Init(IIfcTriangulatedFaceSet^ IIfcSolid, ILogger^ logger);
+			void Init(IIfcFaceBasedSurfaceModel^ solid, ILogger^ logger);
+			void Init(IIfcShellBasedSurfaceModel^ solid, ILogger^ logger);
 
 			static VolumeComparer^ _volumeComparer = gcnew VolumeComparer();
 			static int _maxOpeningsToCut = 100;
@@ -67,7 +69,9 @@ namespace Xbim
 			XbimSolidSet(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid, ILogger^ logger);
 			XbimSolidSet(IIfcExtrudedAreaSolid^ solid, ILogger^ logger);
 			XbimSolidSet(IIfcRevolvedAreaSolid^ solid, ILogger^ logger);
-			
+			XbimSolidSet(IIfcTriangulatedFaceSet^ IIfcSolid, ILogger^ logger);
+			XbimSolidSet(IIfcFaceBasedSurfaceModel^ solid, ILogger^ logger);
+			XbimSolidSet(IIfcShellBasedSurfaceModel^ solid, ILogger^ logger);
 
 			virtual property bool IsValid {bool get() { return solids != nullptr && this != XbimSolidSet::Empty; }; }
 			virtual property bool IsSimplified{bool get(){ return _isSimplified; }; void set(bool val){ _isSimplified = val; } }

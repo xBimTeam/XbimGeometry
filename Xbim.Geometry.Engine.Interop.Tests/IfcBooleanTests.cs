@@ -491,7 +491,18 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             }
         }
 
-        
+      public void CuttingOpeningInIfcFaceBasedSurfaceModelTest()
+        {
+            using (var body = new EntityRepository<IIfcFaceBasedSurfaceModel>("CuttingOpeningInIfcFaceBasedSurfaceModelBodyTest"))
+            {
+                using (var hole = new EntityRepository<IIfcExtrudedAreaSolid>("CuttingOpeningInIfcFaceBasedSurfaceModelVoidTest"))
+                {
+                    var solid = geomEngine.Create(body.Entity, logger);
+                }
+                //var solid = geomEngine.CreateSolid(er.Entity, logger);
+                // Assert.IsFalse(solid.Faces.Any(), "This solid should have 0 faces");
+            }
+        }   
 
         //        [TestMethod]
         //        public void Faceted_BRep_With_Void()

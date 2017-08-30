@@ -80,11 +80,9 @@
 #include <Geom_SurfaceOfLinearExtrusion.hxx>
 #include <GeomLib_IsPlanarSurface.hxx>
 #include <ShapeUpgrade_UnifySameDomain.hxx>
-using namespace System;
-using namespace System::Runtime;
 using namespace System::Linq;
-using namespace System::Threading;
 using namespace Xbim::Common;
+
 
 namespace Xbim
 {
@@ -218,6 +216,21 @@ namespace Xbim
 		XbimSolid::XbimSolid(XbimRect3D rect3D, double tolerance, ILogger^ logger)
 		{
 			Init(rect3D, tolerance, logger);
+		}
+
+		XbimSolid::XbimSolid(IIfcTriangulatedFaceSet ^ IIfcSolid, ILogger ^ logger)
+		{
+			Init(IIfcSolid, logger);
+		}
+
+		XbimSolid::XbimSolid(IIfcFaceBasedSurfaceModel ^ solid, ILogger ^ logger)
+		{
+			Init(solid, logger);
+		}
+
+		XbimSolid::XbimSolid(IIfcShellBasedSurfaceModel ^ solid, ILogger ^ logger)
+		{
+			Init(solid, logger); 
 		}
 
 		XbimSolid::XbimSolid(IIfcPolygonalBoundedHalfSpace^ repItem, double maxExtrusion, ILogger^ logger)
@@ -1164,9 +1177,9 @@ namespace Xbim
 		void XbimSolid::Init(IIfcHalfSpaceSolid^ hs, double maxExtrusion, XbimPoint3D centroid, ILogger^ logger)
 		{
 			if (dynamic_cast<IIfcPolygonalBoundedHalfSpace^>(hs))
-				return Init((IIfcPolygonalBoundedHalfSpace^)hs, maxExtrusion, logger);
-			else if (dynamic_cast<IIfcBoxedHalfSpace^>(hs, logger))
-				return Init((IIfcBoxedHalfSpace^)hs, logger);
+				 Init((IIfcPolygonalBoundedHalfSpace^)hs, maxExtrusion, logger);
+			else if (dynamic_cast<IIfcBoxedHalfSpace^>(hs))
+				 Init((IIfcBoxedHalfSpace^)hs, logger);
 			else //it is a simple Half space
 			{
 				IIfcSurface^ surface = (IIfcSurface^)hs->BaseSurface;
@@ -1191,7 +1204,6 @@ namespace Xbim
 				IIfcCartesianPoint^ cp = ifcPlane->Position->Location;
 				XbimVector3D vec = XbimPoint3D(nearest.X(), nearest.Y(), nearest.Z()) - XbimPoint3D(cp->X,cp->Y,cp->Z);
 				Translate(vec);
-//#endif
 			}
 		}
 
@@ -1765,6 +1777,60 @@ namespace Xbim
 			Move(IIfcSolid->Position);		
 		}
 
+		void XbimSolid::Init(IIfcTriangulatedFaceSet ^ IIfcSolid, ILogger ^ logger)
+		{
+			XbimCompound^ comp = gcnew XbimCompound(IIfcSolid, logger);
+			if (comp->IsValid)
+			{
+				if (comp->Solids->Count == 1) //we have one solid just return it and ignore extraneous faces
+				{
+					pSolid = new TopoDS_Solid();
+					*pSolid = (XbimSolid^)comp->Solids->First;
+					return;
+				}
+				comp->Sew();
+				XbimShell^ shell = (XbimShell^)comp->MakeShell();
+				pSolid = new TopoDS_Solid();
+				*pSolid = (XbimSolid^)(shell->CreateSolid());
+			}
+		}
+
+		void XbimSolid::Init(IIfcFaceBasedSurfaceModel ^ solid, ILogger ^ logger)
+		{
+			XbimCompound^ comp = gcnew XbimCompound(solid, logger);
+			if (comp->IsValid)
+			{
+				if (comp->Solids->Count == 1) //we have one solid just return it and ignore extraneous faces
+				{
+					pSolid = new TopoDS_Solid();
+					*pSolid = (XbimSolid^)comp->Solids->First;
+					return;
+				}
+				comp->Sew();
+				XbimShell^ shell = (XbimShell^)comp->MakeShell();
+				pSolid = new TopoDS_Solid();
+				*pSolid = (XbimSolid^)(shell->CreateSolid());
+			}
+		}
+
+		void XbimSolid::Init(IIfcShellBasedSurfaceModel ^ solid, ILogger ^ logger)
+		{
+			XbimCompound^ comp = gcnew XbimCompound(solid, logger);
+			if (comp->IsValid)
+			{
+				if (comp->Solids->Count == 1) //we have one solid just return it and ignore extraneous faces
+				{
+					pSolid = new TopoDS_Solid();
+					*pSolid = (XbimSolid^)comp->Solids->First;
+					return;
+				}
+				comp->Sew();
+				XbimShell^ shell = (XbimShell^)comp->MakeShell();
+				pSolid = new TopoDS_Solid();
+				*pSolid = (XbimSolid^)(shell->CreateSolid());
+			}
+		}
+
 		TopoDS_Face BuildTriangularFace(const TopoDS_Edge& base, const TopoDS_Vertex& l, const TopoDS_Vertex& r, const TopoDS_Vertex& t)
 		{
 			BRep_Builder builder;
@@ -2202,7 +2268,7 @@ namespace Xbim
 		{
 			if (IsValid)
 			{
-				BRepClass3d_SolidClassifier class3d(this);
+				BRepClass3d_SolidClassifier class3d(*pSolid);
 				class3d.PerformInfinitePoint(Precision::Confusion());
 				if (class3d.State() == TopAbs_IN) this->Reverse();
 			}		
@@ -2212,7 +2278,7 @@ namespace Xbim
 		
 		void XbimSolid::FixTopology()
 		{
-			ShapeFix_Solid fixer(this);
+			ShapeFix_Solid fixer(*pSolid);
 			fixer.Perform();
 		    TopoDS_Shape fixed = fixer.Shape();
 			if (fixed.ShapeType()==TopAbs_SHELL)
@@ -2227,14 +2293,14 @@ namespace Xbim
 			if (nonUniform != nullptr)
 			{
 				gp_GTrsf trans = XbimConvert::ToTransform(nonUniform);
-				BRepBuilderAPI_GTransform tr(this, trans, Standard_True); //make a copy of underlying shape
+				BRepBuilderAPI_GTransform tr(*pSolid, trans, Standard_True); //make a copy of underlying shape
 				GC::KeepAlive(this);
 				return gcnew XbimSolid(TopoDS::Solid(tr.Shape()), Tag);
 			}
 			else
 			{
 				gp_Trsf trans = XbimConvert::ToTransform(transformation);
-				BRepBuilderAPI_Transform tr(this, trans, Standard_False); //do not make a copy of underlying shape
+				BRepBuilderAPI_Transform tr(*pSolid, trans, Standard_False); //do not make a copy of underlying shape
 				GC::KeepAlive(this);
 				return gcnew XbimSolid(TopoDS::Solid(tr.Shape()), Tag);
 			}
@@ -2243,7 +2309,7 @@ namespace Xbim
 		XbimGeometryObject ^ XbimSolid::Moved(IIfcPlacement ^ placement)
 		{
 			if (!IsValid) return this;
-			XbimSolid^ copy = gcnew XbimSolid(this, Tag); //take a copy of the shape
+			XbimSolid^ copy = gcnew XbimSolid(*pSolid, Tag); //take a copy of the shape
 			TopLoc_Location loc = XbimConvert::ToLocation(placement);
 			copy->Move(loc);
 			return copy;
@@ -2252,7 +2318,7 @@ namespace Xbim
 		XbimGeometryObject ^ XbimSolid::Moved(IIfcObjectPlacement ^ objectPlacement, ILogger^ logger)
 		{
 			if (!IsValid) return this;
-			XbimSolid^ copy = gcnew XbimSolid(this, Tag); //take a copy of the shape
+			XbimSolid^ copy = gcnew XbimSolid(*pSolid, Tag); //take a copy of the shape
 			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement, logger);
 			copy->Move(loc);
 			return copy;

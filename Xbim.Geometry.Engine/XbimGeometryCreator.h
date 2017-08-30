@@ -141,6 +141,14 @@ namespace Xbim
 			virtual IXbimSolidSet^ CreateSolidSet(IIfcExtrudedAreaSolid^ ifcSolid, ILogger^ logger);
 			virtual IXbimSolidSet^ CreateSolidSet(IIfcRevolvedAreaSolid^ ifcSolid, ILogger^ logger);
 			virtual IXbimSolidSet^ CreateSolidSet(IIfcSurfaceCurveSweptAreaSolid^ ifcSolid, ILogger^ logger);
+
+			virtual IXbimSolidSet^ CreateSolidSet(IIfcTriangulatedFaceSet^ shell, ILogger^ logger);
+			virtual IXbimSolidSet^ CreateSolidSet(IIfcShellBasedSurfaceModel^ ifcSurface, ILogger^ logger);
+			virtual IXbimSolidSet^ CreateSolidSet(IIfcFaceBasedSurfaceModel^ ifcSurface, ILogger^ logger);
+			virtual IXbimSolid^ CreateSolid(IIfcTriangulatedFaceSet^ shell, ILogger^ logger);
+			virtual IXbimSolid^ CreateSolid(IIfcShellBasedSurfaceModel^ ifcSurface, ILogger^ logger);
+			virtual IXbimSolid^ CreateSolid(IIfcFaceBasedSurfaceModel^ ifcSurface, ILogger^ logger);
+
 			virtual IXbimSolid^ CreateSolid(IIfcCsgPrimitive3D^ ifcSolid, ILogger^ logger);
 			virtual IXbimSolid^ CreateSolid(IIfcCsgSolid^ ifcSolid, ILogger^ logger);
 			virtual IXbimSolid^ CreateSolid(IIfcSphere^ ifcSolid, ILogger^ logger);

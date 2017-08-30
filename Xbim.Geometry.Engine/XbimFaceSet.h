@@ -3,7 +3,7 @@
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
 #include <TopTools_ListOfShape.hxx>
-using namespace System::Runtime;
+
 using namespace System::Collections::Generic;
 namespace Xbim
 {
