@@ -35,7 +35,7 @@
 
   <ItemGroup>
     <PackageReference Include="Xbim.Ifc4" Version="5.0.0-Beta-348" />
-    <PackageReference Include="Xbim.Tessellator" Version="5.0.0-Beta-336" />
+    <PackageReference Include="Xbim.Tessellator" Version="5.0.0-Beta-352" />
   </ItemGroup>
  
 

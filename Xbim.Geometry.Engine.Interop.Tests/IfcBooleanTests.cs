@@ -16,7 +16,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
     [TestClass]
     public class IfcBooleanTests
     {
-        static private XbimGeometryEngine geomEngine;
+        static private IXbimGeometryEngine geomEngine;
         static private ILoggerFactory loggerFactory;
         static private ILogger logger;
 
@@ -490,17 +490,24 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.IsFalse(solid.Faces.Any(), "This solid should have 0 faces");
             }
         }
-
-      public void CuttingOpeningInIfcFaceBasedSurfaceModelTest()
+        [TestMethod]
+        public void CuttingOpeningInIfcFaceBasedSurfaceModelTest()
         {
-            using (var body = new EntityRepository<IIfcFaceBasedSurfaceModel>("CuttingOpeningInIfcFaceBasedSurfaceModelBodyTest"))
+            using (var bodyEntity = new EntityRepository<IIfcFaceBasedSurfaceModel>("CuttingOpeningInIfcFaceBasedSurfaceModelBodyTest"))
             {
-                using (var hole = new EntityRepository<IIfcExtrudedAreaSolid>("CuttingOpeningInIfcFaceBasedSurfaceModelVoidTest"))
+                using (var holeEntity = new EntityRepository<IIfcExtrudedAreaSolid>("CuttingOpeningInIfcFaceBasedSurfaceModelVoidTest"))
                 {
-                    var solid = geomEngine.Create(body.Entity, logger);
-                }
-                //var solid = geomEngine.CreateSolid(er.Entity, logger);
-                // Assert.IsFalse(solid.Faces.Any(), "This solid should have 0 faces");
+                    var body = geomEngine.CreateSolidSet(bodyEntity.Entity, logger);
+                    var hole = geomEngine.CreateSolid(holeEntity.Entity, logger);
+                    var result = body.Cut(hole,bodyEntity.Entity.Model.ModelFactors.Precision);
+                    Assert.IsTrue(result.Count == 2, "Two solids should be returned");
+                    foreach (var solid in result)
+                    {
+                        IsSolidTest(solid);
+                    }
+                   
+                } 
+               
             }
         }   
 
