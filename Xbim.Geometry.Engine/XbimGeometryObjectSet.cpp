@@ -497,10 +497,8 @@ namespace Xbim
 					XbimGeometryCreator::LogError(solids, "Boolean operation timed out after {0} seconds. Operation failed, increase timout time in the config file", (int)aPI->ElapsedTime());
 					return XbimGeometryObjectSet::Empty;
 				}
-				if (pBuilder->ErrorStatus() == 0 && !pBuilder->Shape().IsNull())
+				if (pBuilder->HasErrors() == Standard_False && !pBuilder->Shape().IsNull())
 				{
-
-
 					TopoDS_Compound occCompound;
 					builder.MakeCompound(occCompound);
 
@@ -554,11 +552,10 @@ namespace Xbim
 
 				}
 				else
-					err = "Boolean Operation error status #" + pBuilder->ErrorStatus();
+					err = "Unspecified Boolean Error";
 				GC::KeepAlive(solids);
 				GC::KeepAlive(geomObjects);
-				err = "Error = " + pBuilder->ErrorStatus();
-
+				err = "Unspecified Error";
 			}
 			catch (Standard_Failure e)
 			{				
