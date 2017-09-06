@@ -75,7 +75,7 @@ GccAna_Circ2d3Tan::
 	Qualified2.IsOutside() || Qualified2.IsUnqualified()) ||
       !(Qualified3.IsEnclosed() || 
 	Qualified3.IsOutside() || Qualified3.IsUnqualified())) {
-    GccEnt_BadQualifier::Raise();
+    throw GccEnt_BadQualifier();
     return;
   }
 
@@ -89,11 +89,9 @@ GccAna_Circ2d3Tan::
   Standard_Real R1 = C1.Radius();
   Standard_Real R2 = C2.Radius();
   gp_Pnt2d center1(C1.Location());
-#ifdef OCCT_DEBUG
   gp_Pnt2d center2(C2.Location());
-#else
-  C2.Location() ;
-#endif
+  (void )center2;
+
   gp_Pnt2d origin3(L3.Location());
   gp_Dir2d dir3(L3.Direction());
   gp_Dir2d normL3(-dir3.Y(),dir3.X());

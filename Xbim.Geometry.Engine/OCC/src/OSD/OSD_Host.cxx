@@ -14,7 +14,6 @@
 
 #ifndef _WIN32
 
-
 #include <OSD_Host.hxx>
 #include <OSD_OSDError.hxx>
 #include <OSD_WhoAmI.hxx>
@@ -182,7 +181,6 @@ Standard_Integer OSD_Host::Error()const{
 //-------------------  WNT Sources of OSD_Host ---------------------------
 //------------------------------------------------------------------------
 
-#define STRICT
 #include <windows.h>
 
 #include <OSD_Host.hxx>
@@ -202,13 +200,13 @@ static Standard_Integer        memSize;
 OSD_Host :: OSD_Host () {
 #ifndef OCCT_UWP
  DWORD              nSize;
- Standard_Character szHostName[ MAX_COMPUTERNAME_LENGTH + 1 ];
+ char               szHostName[MAX_COMPUTERNAME_LENGTH + 1];
  char*              hostAddr = 0;
  MEMORYSTATUS       ms;
  WSADATA            wd;
  PHOSTENT           phe;
  IN_ADDR            inAddr;
- OSVERSIONINFO      osVerInfo;
+ OSVERSIONINFOW     osVerInfo;
 
  if ( !fInit ) {
 
@@ -216,25 +214,24 @@ OSD_Host :: OSD_Host () {
   osVerInfo.dwOSVersionInfoSize = sizeof ( OSVERSIONINFO );
 
   ZeroMemory (&ms, sizeof(ms));
-  ZeroMemory (  szHostName, sizeof ( Standard_Character ) *  (MAX_COMPUTERNAME_LENGTH + 1) );
+  ZeroMemory (szHostName, sizeof(char) * (MAX_COMPUTERNAME_LENGTH + 1));
 
 #ifdef _MSC_VER
   // suppress GetVersionEx() deprecation warning
   #pragma warning(disable : 4996)
 #endif
-  if (  !GetVersionEx ( &osVerInfo )  ) {
-
-   _osd_wnt_set_error ( myError, OSD_WHost );
-
-  } else if (  !GetComputerName ( szHostName, &nSize )  ) {
-  
-   _osd_wnt_set_error ( myError, OSD_WHost );
-  
-  } else {
- 
-   ms.dwLength = sizeof ( MEMORYSTATUS );
-   GlobalMemoryStatus ( &ms );
-
+  if (!GetVersionExW (&osVerInfo))
+  {
+    _osd_wnt_set_error (myError, OSD_WHost);
+  }
+  else if (!GetComputerNameA (szHostName, &nSize))
+  {
+    _osd_wnt_set_error (myError, OSD_WHost);
+  }
+  else
+  {
+    ms.dwLength = sizeof(MEMORYSTATUS);
+    GlobalMemoryStatus (&ms);
   }  // end else
 #ifdef _MSC_VER
   #pragma warning(default : 4996)
@@ -248,7 +245,7 @@ OSD_Host :: OSD_Host () {
    
     _osd_wnt_set_error ( myError, OSD_WHost );
    
-   } else if (   (  phe = gethostbyname ( szHostName )  ) == NULL   ) {
+   } else if (   (  phe = gethostbyname (szHostName)  ) == NULL   ) {
    
     _osd_wnt_set_error ( myError, OSD_WHost );
    
@@ -265,10 +262,11 @@ OSD_Host :: OSD_Host () {
   
    hostName  = szHostName;
    interAddr = Standard_CString ( hostAddr );
-   wsprintf (
+   /*wsprintf (
     osVerInfo.szCSDVersion, TEXT( "Windows NT Version %d.%d" ),
     osVerInfo.dwMajorVersion, osVerInfo.dwMinorVersion
    );
+   */
    version = osVerInfo.szCSDVersion;
 
    fInit = TRUE;

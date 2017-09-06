@@ -29,7 +29,6 @@
 
 #include <Precision.hxx>
 
-#include <Standard_ErrorHandler.hxx>
 #include <Standard_Failure.hxx>
 
 #include <TopExp_Explorer.hxx>
@@ -211,6 +210,7 @@ Standard_Boolean ShapeFix::SameParameter(const TopoDS_Shape& shape,
         Standard_Real tol0 = BRep_Tool::Tolerance(edge);
         tol = tol0;
         Standard_Real tol2 = tol*tol;
+        Standard_Boolean isChanged = Standard_False;
         const Standard_Integer NCONTROL = 23;
         for ( Standard_Integer i = 0; i < NCONTROL; i++ )
         {
@@ -218,17 +218,23 @@ Standard_Boolean ShapeFix::SameParameter(const TopoDS_Shape& shape,
           gp_Pnt pnt = crv->Value ( par );
           gp_Pnt prj = ACS.Value( par );
           Standard_Real dist = pnt.SquareDistance(prj);
-          if ( tol2 < dist )
-            tol2 = dist;
-        }
-        tol = 1.00005 * sqrt(tol2); // coeff: see trj3_pm1-ct-203.stp #19681, edge 10
-        if ( tol >= tol0 )
-        {
-          B.UpdateEdge ( edge, tol );
-          for ( TopoDS_Iterator itV(edge); itV.More(); itV.Next() )
+          if ( tol2 < dist ) 
           {
-            TopoDS_Shape S = itV.Value();
-            B.UpdateVertex ( TopoDS::Vertex ( S ), tol );
+            tol2 = dist;
+            isChanged = Standard_True;
+          }
+        }
+        if ( isChanged )
+        {
+          tol = 1.00005 * sqrt(tol2); // coeff: see trj3_pm1-ct-203.stp #19681, edge 10
+          if ( tol >= tol0 )
+          {
+            B.UpdateEdge ( edge, tol );
+            for ( TopoDS_Iterator itV(edge); itV.More(); itV.Next() )
+            {
+              TopoDS_Shape S = itV.Value();
+              B.UpdateVertex ( TopoDS::Vertex ( S ), tol );
+            }
           }
         }
       }
@@ -255,41 +261,10 @@ Standard_Boolean ShapeFix::SameParameter(const TopoDS_Shape& shape,
 //purpose  : 
 //=======================================================================
 
-static void EncodeRegularity (const TopoDS_Shape& shape,
-                              const Standard_Real tolang,
-                              TopTools_MapOfShape &aMap)
-{
-  TopoDS_Shape S = shape;
-  TopLoc_Location L;
-  S.Location ( L );
-  if ( ! aMap.Add ( S ) ) return;
-  
-  if ( S.ShapeType() == TopAbs_COMPOUND || 
-       S.ShapeType() == TopAbs_COMPSOLID ) {
-    for ( TopoDS_Iterator it(S); it.More(); it.Next() ) {
-      EncodeRegularity ( it.Value(), tolang, aMap );
-    }
-    return;
-  }
-  
-  try {
-    OCC_CATCH_SIGNALS
-    BRepLib::EncodeRegularity ( S, tolang );
-  }
-  catch(Standard_Failure) {
-#ifdef OCCT_DEBUG
-    cout << "Warning: Exception in ShapeFix::EncodeRegularity(): ";
-    Standard_Failure::Caught()->Print ( cout );
-    cout << endl;
-#endif
-  }
-}
-
 void ShapeFix::EncodeRegularity (const TopoDS_Shape& shape,
                                  const Standard_Real tolang)
 {
-  TopTools_MapOfShape aMap;
-  ::EncodeRegularity ( shape, tolang, aMap );
+  BRepLib::EncodeRegularity(shape, tolang);
 }
 
 

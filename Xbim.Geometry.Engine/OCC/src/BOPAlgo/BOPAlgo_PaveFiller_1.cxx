@@ -18,20 +18,20 @@
 
 #include <Bnd_Box.hxx>
 #include <BOPAlgo_PaveFiller.hxx>
-#include <BOPAlgo_SectionAttribute.hxx>
 #include <BOPAlgo_Tools.hxx>
+#include <BOPAlgo_Alerts.hxx>
 #include <BOPCol_DataMapOfIntegerInteger.hxx>
 #include <BOPCol_DataMapOfIntegerListOfInteger.hxx>
+#include <BOPCol_IndexedDataMapOfIntegerListOfInteger.hxx>
 #include <BOPCol_ListOfShape.hxx>
 #include <BOPCol_MapOfInteger.hxx>
-#include <BOPDS_Curve.hxx>
 #include <BOPDS_DS.hxx>
 #include <BOPDS_Iterator.hxx>
 #include <BOPDS_PaveBlock.hxx>
 #include <BOPDS_ShapeInfo.hxx>
 #include <BOPDS_VectorOfInterfVV.hxx>
 #include <BOPTools_AlgoTools.hxx>
-#include <BRepBndLib.hxx>
+#include <BRep_Builder.hxx>
 #include <BRep_TVertex.hxx>
 #include <BRep_Tool.hxx>
 #include <gp_Pnt.hxx>
@@ -41,6 +41,7 @@
 #include <TopoDS.hxx>
 #include <TopoDS_Face.hxx>
 #include <TopoDS_Vertex.hxx>
+#include <TopoDS_Compound.hxx>
 
 //=======================================================================
 // function: PerformVV
@@ -48,11 +49,8 @@
 //=======================================================================
 void BOPAlgo_PaveFiller::PerformVV() 
 {
-  Standard_Boolean bWithSubShape;
-  Standard_Integer n1, n2, iFlag, aSize, k, aNbBlocks;
+  Standard_Integer n1, n2, iFlag, aSize;
   Handle(NCollection_BaseAllocator) aAllocator;
-  //
-  myErrorStatus=0;
   //
   myIterator->Initialize(TopAbs_VERTEX, TopAbs_VERTEX);
   aSize=myIterator->ExpectedLength();
@@ -67,29 +65,28 @@ void BOPAlgo_PaveFiller::PerformVV()
   aAllocator=
     NCollection_BaseAllocator::CommonBaseAllocator();
   BOPCol_IndexedDataMapOfIntegerListOfInteger aMILI(100, aAllocator);
-  BOPCol_DataMapOfIntegerListOfInteger aMBlocks(100, aAllocator);
+  NCollection_List<BOPCol_ListOfInteger> aMBlocks(aAllocator);
   //
   // 1. Map V/LV
   for (; myIterator->More(); myIterator->Next()) {
-    myIterator->Value(n1, n2, bWithSubShape);
+    myIterator->Value(n1, n2);
     //
     const TopoDS_Vertex& aV1=(*(TopoDS_Vertex *)(&myDS->Shape(n1))); 
     const TopoDS_Vertex& aV2=(*(TopoDS_Vertex *)(&myDS->Shape(n2))); 
     //
     iFlag=BOPTools_AlgoTools::ComputeVV(aV1, aV2, myFuzzyValue);
     if (!iFlag) {
-      BOPAlgo_Tools::FillMap(n1, n2, aMILI, aAllocator);
+      BOPAlgo_Tools::FillMap<Standard_Integer, TColStd_MapIntegerHasher>(n1, n2, aMILI, aAllocator);
     }
   } 
   //
   // 2. Make blocks
-  BOPAlgo_Tools::MakeBlocksCnx(aMILI, aMBlocks, aAllocator);
+  BOPAlgo_Tools::MakeBlocks<Standard_Integer, TColStd_MapIntegerHasher>(aMILI, aMBlocks, aAllocator);
   //
   // 3. Make vertices
-  aNbBlocks=aMBlocks.Extent();
-  for (k=0; k<aNbBlocks; ++k) {
-    const BOPCol_ListOfInteger& aLI=aMBlocks.Find(k);
-    //
+  NCollection_List<BOPCol_ListOfInteger>::Iterator aItB(aMBlocks);
+  for (; aItB.More(); aItB.Next()) {
+    const BOPCol_ListOfInteger& aLI = aItB.Value();
     MakeSDVertices(aLI);
   }
   //
@@ -154,8 +151,8 @@ Standard_Integer BOPAlgo_PaveFiller::MakeSDVertices
   }
   BOPDS_ShapeInfo& aSIDS = myDS->ChangeShapeInfo(nV);
   Bnd_Box& aBox = aSIDS.ChangeBox();
-  BRepBndLib::Add(aVn, aBox);
-  aBox.SetGap(aBox.GetGap() + Precision::Confusion());
+  aBox.Add(BRep_Tool::Pnt(aVn));
+  aBox.SetGap(BRep_Tool::Tolerance(aVn) + Precision::Confusion());
   //
   // Fill ShapesSD
   BOPDS_VectorOfInterfVV& aVVs = myDS->InterfVV();
@@ -167,12 +164,27 @@ Standard_Integer BOPAlgo_PaveFiller::MakeSDVertices
     Standard_Integer n1 = aItLI.Value();
     myDS->AddShapeSD(n1, nV);
     //
-    if (theAddInterfs) {
-      BOPCol_ListIteratorOfListOfInteger aItLI2 = aItLI;
-      aItLI2.Next();
-      for (; aItLI2.More(); aItLI2.Next()) {
-        Standard_Integer n2 = aItLI2.Value();
+    Standard_Integer iR1 = myDS->Rank(n1);
+    const TopoDS_Shape& aV1 = myDS->Shape(n1);
+    //
+    BOPCol_ListIteratorOfListOfInteger aItLI2 = aItLI;
+    aItLI2.Next();
+    for (; aItLI2.More(); aItLI2.Next()) {
+      Standard_Integer n2 = aItLI2.Value();
+      //
+      if (iR1 >= 0 && iR1 == myDS->Rank(n2)) {
+        // add warning status
+        const TopoDS_Shape& aV2 = myDS->Shape(n2);
         //
+        TopoDS_Compound aWC;
+        BRep_Builder().MakeCompound(aWC);
+        BRep_Builder().Add(aWC, aV1);
+        BRep_Builder().Add(aWC, aV2);
+        //
+        AddWarning (new BOPAlgo_AlertSelfInterferingShape (aWC));
+      }
+      //
+      if (theAddInterfs) {
         myDS->AddInterf(n1, n2);
         BOPDS_InterfVV& aVV = aVVs.Append1();
         //

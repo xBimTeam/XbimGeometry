@@ -25,7 +25,7 @@
 #include <Standard_ConstructionError.hxx>
 #include <Standard_Type.hxx>
 
-IMPLEMENT_STANDARD_RTTIEXT(Geom_Geometry,MMgt_TShared)
+IMPLEMENT_STANDARD_RTTIEXT(Geom_Geometry,Standard_Transient)
 
 typedef Geom_Geometry         Geometry;
 typedef gp_Pnt                Pnt;
@@ -37,8 +37,7 @@ typedef gp_Trsf               Trsf;
 Handle(Geom_Geometry) Geom_Geometry::Copy() const {
 
    Handle(Geom_Geometry) G;
-   Standard_ConstructionError::Raise();
-   return G;
+   throw Standard_ConstructionError();
 }
 
 

@@ -142,20 +142,17 @@ typedef BOPCol_ContextCnt
 //=======================================================================
 void BOPAlgo_PaveFiller::PerformVF()
 {
-  myErrorStatus=0;
-  //
   myIterator->Initialize(TopAbs_VERTEX, TopAbs_FACE);
   Standard_Integer iSize = myIterator->ExpectedLength();
   //
-  Standard_Boolean bJustAdd;
   Standard_Integer nV, nF;
   //
   if (myGlue == BOPAlgo_GlueFull) {
     // there is no need to intersect vertices with faces in this mode
     // just initialize FaceInfo for all faces
     for (; myIterator->More(); myIterator->Next()) {
-      myIterator->Value(nV, nF, bJustAdd);
-      if (!bJustAdd && !myDS->IsSubShape(nV, nF)) {
+      myIterator->Value(nV, nF);
+      if (!myDS->IsSubShape(nV, nF)) {
         myDS->ChangeFaceInfo(nF);
       }
     }
@@ -178,10 +175,7 @@ void BOPAlgo_PaveFiller::PerformVF()
   aVFs.SetIncrement(iSize);
   //
   for (; myIterator->More(); myIterator->Next()) {
-    myIterator->Value(nV, nF, bJustAdd);
-    if(bJustAdd) {
-      continue;
-    }
+    myIterator->Value(nV, nF);
     //
     if (myDS->IsSubShape(nV, nF)) {
       continue;
@@ -264,9 +258,6 @@ void BOPAlgo_PaveFiller::TreatVerticesEE()
   BOPCol_MapOfInteger aMI(100, aAllocator);
   BOPDS_MapOfPaveBlock aMPBF(100, aAllocator);
   //
-  myErrorStatus=0;
-  //
-  
   aNbS=myDS->NbSourceShapes();
   //
   BOPDS_VectorOfInterfEE& aEEs=myDS->InterfEE();

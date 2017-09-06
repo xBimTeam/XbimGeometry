@@ -31,7 +31,7 @@ void call_rgbhls(float r, float g, float b, float& h, float& l, float& s);
 
 #define RGBHLS_H_UNDEFINED -1.0
 
-static Quantity_Parameter TheEpsilon = 0.0001;
+static Standard_Real TheEpsilon = 0.0001;
 
 //	-- les composantes RGB
 //	MyRed		:	Standard_ShortReal;
@@ -78,7 +78,7 @@ Quantity_Color::Quantity_Color (const Quantity_NameOfColor AName) {
 		(AName, Quantity_TOC_RGB, MyRed, MyGreen, MyBlue);
 }
 
-Quantity_Color::Quantity_Color (const Quantity_Parameter R1, const Quantity_Parameter R2, const Quantity_Parameter R3, const Quantity_TypeOfColor AType) {
+Quantity_Color::Quantity_Color (const Standard_Real R1, const Standard_Real R2, const Standard_Real R3, const Quantity_TypeOfColor AType) {
 
 	switch (AType) {
 
@@ -86,7 +86,7 @@ Quantity_Color::Quantity_Color (const Quantity_Parameter R1, const Quantity_Para
 			if ( R1 < 0. || R1 > 1. ||
 			     R2 < 0. || R2 > 1. ||
 			     R3 < 0. || R3 > 1. )
-				Standard_OutOfRange::Raise ("Color out");
+				throw Standard_OutOfRange("Color out");
 			MyRed	= Standard_ShortReal (R1);
 			MyGreen	= Standard_ShortReal (R2);
 			MyBlue	= Standard_ShortReal (R3);
@@ -97,7 +97,7 @@ Quantity_Color::Quantity_Color (const Quantity_Parameter R1, const Quantity_Para
 			  || (R1 > 360.) ||
 			     R2 < 0. || R2 > 1. ||
 			     R3 < 0. || R3 > 1. )
-				Standard_OutOfRange::Raise ("Color out");
+				throw Standard_OutOfRange("Color out");
 			Quantity_Color::hlsrgb
 				(Standard_ShortReal (R1),
 				 Standard_ShortReal (R2),
@@ -117,11 +117,11 @@ Quantity_Color::Quantity_Color (const NCollection_Vec3<float>& theRgb)
    || theRgb.g() < 0.0f || theRgb.g() > 1.0f
    || theRgb.b() < 0.0f || theRgb.b() > 1.0f)
   {
-    Standard_OutOfRange::Raise ("Color out");
+    throw Standard_OutOfRange("Color out");
   }
 }
 
-void Quantity_Color::ChangeContrast (const Quantity_Rate ADelta) {
+void Quantity_Color::ChangeContrast (const Standard_Real ADelta) {
 
 Standard_ShortReal MyHue, MyLight, MySaturation;
 
@@ -136,7 +136,7 @@ Standard_ShortReal MyHue, MyLight, MySaturation;
 	}
 }
 
-void Quantity_Color::ChangeIntensity (const Quantity_Rate ADelta) {
+void Quantity_Color::ChangeIntensity (const Standard_Real ADelta) {
 
 Standard_ShortReal MyHue, MyLight, MySaturation;
 
@@ -159,7 +159,7 @@ void Quantity_Color::SetValues (const Quantity_NameOfColor AName) {
 
 }
 
-void Quantity_Color::SetValues (const Quantity_Parameter R1, const Quantity_Parameter R2, const Quantity_Parameter R3, const Quantity_TypeOfColor AType) {
+void Quantity_Color::SetValues (const Standard_Real R1, const Standard_Real R2, const Standard_Real R3, const Quantity_TypeOfColor AType) {
 
 	switch (AType) {
 
@@ -167,7 +167,7 @@ void Quantity_Color::SetValues (const Quantity_Parameter R1, const Quantity_Para
 			if ( R1 < 0. || R1 > 1. ||
 			     R2 < 0. || R2 > 1. ||
 			     R3 < 0. || R3 > 1. )
-				Standard_OutOfRange::Raise ("Color out");
+				throw Standard_OutOfRange("Color out");
 			else {
 				MyRed	= Standard_ShortReal (R1);
 				MyGreen	= Standard_ShortReal (R2);
@@ -179,7 +179,7 @@ void Quantity_Color::SetValues (const Quantity_Parameter R1, const Quantity_Para
 			if ( R1 < 0. || R1 > 360. ||
 			     R2 < 0. || R2 > 1. ||
 			     R3 < 0. || R3 > 1. )
-				Standard_OutOfRange::Raise ("Color out");
+				throw Standard_OutOfRange("Color out");
 			else {
 				Quantity_Color::hlsrgb
 					(Standard_ShortReal (R1),
@@ -234,15 +234,15 @@ Standard_Real R2, G2, B2;
 
 }
 
-void Quantity_Color::Delta (const Quantity_Color& AColor, Quantity_Parameter& DC, Quantity_Parameter& DI) const {
+void Quantity_Color::Delta (const Quantity_Color& AColor, Standard_Real& DC, Standard_Real& DI) const {
 
 Standard_ShortReal MyHue, MyLight, MySaturation;
 
 	Quantity_Color::rgbhls
 			(MyRed, MyGreen, MyBlue, MyHue, MyLight, MySaturation);
 
-	DC	= Quantity_Parameter (MySaturation	- AColor.Saturation ());
-	DI	= Quantity_Parameter (MyLight		- AColor.Light ());
+	DC	= Standard_Real (MySaturation	- AColor.Saturation ());
+	DI	= Standard_Real (MyLight		- AColor.Light ());
 
 }
 
@@ -292,24 +292,23 @@ Standard_Integer Begin, End, Current;
 
 }
 
-Quantity_Parameter Quantity_Color::Epsilon () {
-
-	return (TheEpsilon);
-
+Standard_Real Quantity_Color::Epsilon()
+{
+  return TheEpsilon;
 }
 
-void Quantity_Color::SetEpsilon (const Quantity_Parameter AnEpsilon) {
+void Quantity_Color::SetEpsilon (const Standard_Real AnEpsilon) {
 
 	TheEpsilon	= AnEpsilon;
 
 }
 
-Quantity_NameOfColor Quantity_Color::Name (const Quantity_Parameter R, const Quantity_Parameter G, const Quantity_Parameter B) {
+Quantity_NameOfColor Quantity_Color::Name (const Standard_Real R, const Standard_Real G, const Standard_Real B) {
 
 	if ( R < 0. || R > 1. ||
 	     G < 0. || G > 1. ||
 	     B < 0. || B > 1. )
-		Standard_OutOfRange::Raise ("Color out");
+		throw Standard_OutOfRange("Color out");
 
 Quantity_Color AColor (R, G, B, Quantity_TOC_RGB);	// Couleur definie en RGB.
 
@@ -317,25 +316,25 @@ Quantity_Color AColor (R, G, B, Quantity_TOC_RGB);	// Couleur definie en RGB.
 
 }
 
-Quantity_Parameter Quantity_Color::Red () const {
+Standard_Real Quantity_Color::Red () const {
 
 	return (Standard_Real (MyRed));
 
 }
 
-Quantity_Parameter Quantity_Color::Green () const {
+Standard_Real Quantity_Color::Green () const {
 
 	return (Standard_Real (MyGreen));
 
 }
 
-Quantity_Parameter Quantity_Color::Blue () const {
+Standard_Real Quantity_Color::Blue () const {
 
 	return (Standard_Real (MyBlue));
 
 }
 
-Quantity_Parameter Quantity_Color::Hue () const {
+Standard_Real Quantity_Color::Hue () const {
 
 Standard_ShortReal MyHue, MyLight, MySaturation;
 
@@ -346,7 +345,7 @@ Standard_ShortReal MyHue, MyLight, MySaturation;
 
 }
 
-Quantity_Parameter Quantity_Color::Light () const {
+Standard_Real Quantity_Color::Light () const {
 
 Standard_ShortReal MyHue, MyLight, MySaturation;
 
@@ -357,7 +356,7 @@ Standard_ShortReal MyHue, MyLight, MySaturation;
 
 }
 
-Quantity_Parameter Quantity_Color::Saturation () const {
+Standard_Real Quantity_Color::Saturation () const {
 
 Standard_ShortReal MyHue, MyLight, MySaturation;
 
@@ -368,15 +367,15 @@ Standard_ShortReal MyHue, MyLight, MySaturation;
 
 }
 
-void Quantity_Color::Values (Quantity_Parameter& R1, Quantity_Parameter& R2, Quantity_Parameter& R3, const Quantity_TypeOfColor AType) const {
+void Quantity_Color::Values (Standard_Real& R1, Standard_Real& R2, Standard_Real& R3, const Quantity_TypeOfColor AType) const {
 
 
 	switch (AType) {
 
 		case Quantity_TOC_RGB :
-			R1	= Quantity_Parameter (MyRed);
-			R2	= Quantity_Parameter (MyGreen);
-			R3	= Quantity_Parameter (MyBlue);
+			R1	= Standard_Real (MyRed);
+			R2	= Standard_Real (MyGreen);
+			R3	= Standard_Real (MyBlue);
 		break;
 
 		case Quantity_TOC_HLS :
@@ -385,16 +384,16 @@ void Quantity_Color::Values (Quantity_Parameter& R1, Quantity_Parameter& R2, Qua
 			Quantity_Color::rgbhls
 			 (MyRed, MyGreen, MyBlue, MyHue, MyLight, MySaturation);
 
-			R1	= Quantity_Parameter (MyHue);
-			R2	= Quantity_Parameter (MyLight);
-			R3	= Quantity_Parameter (MySaturation);
+			R1	= Standard_Real (MyHue);
+			R2	= Standard_Real (MyLight);
+			R3	= Standard_Real (MySaturation);
 		      }
 		break;
 	}
 
 }
 
-void Quantity_Color::RgbHls (const Quantity_Parameter R, const Quantity_Parameter G, const Quantity_Parameter B, Quantity_Parameter& H, Quantity_Parameter& L, Quantity_Parameter& S) {
+void Quantity_Color::RgbHls (const Standard_Real R, const Standard_Real G, const Standard_Real B, Standard_Real& H, Standard_Real& L, Standard_Real& S) {
 
 Standard_ShortReal HH, LL, SS;
 
@@ -403,13 +402,13 @@ Standard_ShortReal HH, LL, SS;
 			Standard_ShortReal (B),
 			HH, LL, SS);
 
-	H	= Quantity_Parameter (HH);
-	L	= Quantity_Parameter (LL);
-	S	= Quantity_Parameter (SS);
+	H	= Standard_Real (HH);
+	L	= Standard_Real (LL);
+	S	= Standard_Real (SS);
 
 }
 
-void Quantity_Color::HlsRgb (const Quantity_Parameter H, const Quantity_Parameter L, const Quantity_Parameter S, Quantity_Parameter& R, Quantity_Parameter& G, Quantity_Parameter& B) {
+void Quantity_Color::HlsRgb (const Standard_Real H, const Standard_Real L, const Standard_Real S, Standard_Real& R, Standard_Real& G, Standard_Real& B) {
 
 Standard_ShortReal RR, GG, BB;
 
@@ -418,9 +417,9 @@ Standard_ShortReal RR, GG, BB;
 			Standard_ShortReal (S),
 			RR, GG, BB);
 
-	R	= Quantity_Parameter (RR);
-	G	= Quantity_Parameter (GG);
-	B	= Quantity_Parameter (BB);
+	R	= Standard_Real (RR);
+	G	= Standard_Real (GG);
+	B	= Standard_Real (BB);
 
 }
 
@@ -462,10 +461,10 @@ void Quantity_Color::Color2argb (const Quantity_Color& theColor,
 void Quantity_Color::Argb2color (const Standard_Integer theARGB,
                                  Quantity_Color& theColor)
 {
-  const Quantity_Parameter aColor[3] = {
-    static_cast <Quantity_Parameter> ((theARGB & 0xff0000) >> 16),
-    static_cast <Quantity_Parameter> ((theARGB & 0x00ff00) >> 8),
-    static_cast <Quantity_Parameter> ((theARGB & 0x0000ff))
+  const Standard_Real aColor[3] = {
+    static_cast <Standard_Real> ((theARGB & 0xff0000) >> 16),
+    static_cast <Standard_Real> ((theARGB & 0x00ff00) >> 8),
+    static_cast <Standard_Real> ((theARGB & 0x0000ff))
   };
   theColor.SetValues(aColor[0] / 255.0, aColor[1] / 255.0, aColor[2] / 255.0,
                      Quantity_TOC_RGB);
@@ -2031,7 +2030,7 @@ switch (AName) {
 		RR = R1 = (float ) 0.603922; RG = R2 = (float ) 0.803922; RB = R3 = (float ) 0.196078;
 	break;
 	default :
-		Standard_OutOfRange::Raise ("Bad name");
+		throw Standard_OutOfRange("Bad name");
 	break;
 }
 	if (AType == Quantity_TOC_HLS)
@@ -3598,7 +3597,7 @@ switch (AName) {
 	break;
 	default :
 		TheName = "UNDEFINED";
-		Standard_OutOfRange::Raise ("Bad name");
+		throw Standard_OutOfRange("Bad name");
 	break;
 }
 return (TheName);
@@ -3618,18 +3617,17 @@ void TestOfColor ();
 		TestOfColor ();
 	}
 
-	catch (Standard_Failure) {
-		Handle(Standard_Failure) E = Standard_Failure::Caught();
-		cout << E << endl;
+	catch (Standard_Failure const& anException) {
+		cout << anException << endl;
 	}
 
 }
 
 void TestOfColor () {
 
-Quantity_Parameter H, L, S;
-Quantity_Parameter R, G, B;
-Quantity_Parameter DC, DI;
+Standard_Real H, L, S;
+Standard_Real R, G, B;
+Standard_Real DC, DI;
 Standard_Integer i;
 
 cout << "definition color tests\n----------------------\n";
@@ -3644,7 +3642,7 @@ const char *const cyan = "YELLOW";
 const char *const blue = "ROYALBLUE2";
 const char *const brown = "SANDYBROWN";
 
-Quantity_Parameter RR, GG, BB;
+Standard_Real RR, GG, BB;
 
 const Standard_Real DELTA = 1.0e-4;
 

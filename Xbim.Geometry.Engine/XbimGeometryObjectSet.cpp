@@ -1,3 +1,5 @@
+#include <windows.h>
+
 #include "XbimGeometryObjectSet.h"
 #include "XbimSolidSet.h"
 #include "XbimShellSet.h"
@@ -408,7 +410,7 @@ namespace Xbim
 				{
 					XbimGeometryCreator::logger->ErrorFormat("E001: Boolean operation timed out after {0} seconds. Operation ignored",aPI->ElapsedTime());
 				}
-				if (pBuilder->ErrorStatus() == 0 && !pBuilder->Shape().IsNull())
+				if (!pBuilder->HasErrors() && !pBuilder->Shape().IsNull())
 				{
 			   //	BRepTools::Write(pBuilder->Shape(), "c:\\tmp\\r");
 					TopoDS_Compound occCompound;

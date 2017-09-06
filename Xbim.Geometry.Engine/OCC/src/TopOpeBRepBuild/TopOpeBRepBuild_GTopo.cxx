@@ -213,8 +213,7 @@ Standard_Integer TopOpeBRepBuild_GTopo::GIndex(const TopAbs_State s) const
   if      (s == TopAbs_IN ) return 0;
   else if (s == TopAbs_ON ) return 1;
   else if (s == TopAbs_OUT) return 2;
-  else Standard_ProgramError::Raise("GIndex : bad input");
-  return 0;
+  else throw Standard_ProgramError("GIndex : bad input");
 }
 
 //=======================================================================
@@ -227,8 +226,7 @@ TopAbs_State TopOpeBRepBuild_GTopo::GState(const Standard_Integer i) const
   if      (i == 0) return TopAbs_IN;
   else if (i == 1) return TopAbs_ON; 
   else if (i == 2) return TopAbs_OUT;
-  else Standard_ProgramError::Raise("GState : bad input");
-  return TopAbs_UNKNOWN;
+  else throw Standard_ProgramError("GState : bad input");
 }
 
 //=======================================================================
@@ -290,11 +288,11 @@ void TopOpeBRepBuild_GTopo::DumpSSB(Standard_OStream& OS,
 
 //=======================================================================
 //function : Dump
-//purpose  : 
+//purpose  :
 //=======================================================================
 
 void TopOpeBRepBuild_GTopo::Dump(Standard_OStream& OS,
-				 const Standard_Address a) const 
+				 const Standard_Address a) const
 {
   char* s = (char*)a;
 
@@ -305,22 +303,26 @@ void TopOpeBRepBuild_GTopo::Dump(Standard_OStream& OS,
 
   if (myReverseForce) OS<<"reverse value : "<<myReverseValue<<endl;
 
-  if(s) OS<<s; OS<<"\\ I N O"; 
+  if(s) OS<<s;
+  OS<<"\\ I N O";
   OS<<endl;
 
-  if(s) OS<<s; OS<<"I ";
-  DumpVal(OS,TopAbs_IN,TopAbs_IN); OS<<" "; 
-  DumpVal(OS,TopAbs_IN,TopAbs_ON); OS<<" "; 
+  if(s) OS<<s;
+  OS<<"I ";
+  DumpVal(OS,TopAbs_IN,TopAbs_IN); OS<<" ";
+  DumpVal(OS,TopAbs_IN,TopAbs_ON); OS<<" ";
   DumpVal(OS,TopAbs_IN,TopAbs_OUT); OS<<endl;
 
-  if(s) OS<<s; OS<<"N ";
-  DumpVal(OS,TopAbs_ON,TopAbs_IN); OS<<" "; 
-  DumpVal(OS,TopAbs_ON,TopAbs_ON); OS<<" "; 
+  if(s) OS<<s;
+  OS<<"N ";
+  DumpVal(OS,TopAbs_ON,TopAbs_IN); OS<<" ";
+  DumpVal(OS,TopAbs_ON,TopAbs_ON); OS<<" ";
   DumpVal(OS,TopAbs_ON,TopAbs_OUT); OS<<endl;
 
-  if(s) OS<<s; OS<<"O ";
-  DumpVal(OS,TopAbs_OUT,TopAbs_IN); OS<<" "; 
-  DumpVal(OS,TopAbs_OUT,TopAbs_ON); OS<<" "; 
+  if(s) OS<<s;
+  OS<<"O ";
+  DumpVal(OS,TopAbs_OUT,TopAbs_IN); OS<<" ";
+  DumpVal(OS,TopAbs_OUT,TopAbs_ON); OS<<" ";
   DumpVal(OS,TopAbs_OUT,TopAbs_OUT); OS<<endl;
 }
 
@@ -341,7 +343,7 @@ void TopOpeBRepBuild_GTopo::StatesON(TopAbs_State& s1,
   else if ( Value(TopAbs_OUT,TopAbs_ON)) s2 = TopAbs_OUT;
 
   if ( s1 == TopAbs_UNKNOWN || s2 == TopAbs_UNKNOWN ) {
-    Standard_ProgramError::Raise("Gtopo : StatesON incorrect");
+    throw Standard_ProgramError("Gtopo : StatesON incorrect");
   }
 }
 
@@ -362,7 +364,7 @@ Standard_Boolean TopOpeBRepBuild_GTopo::IsToReverse1() const
     else IsToRev = (s1 == TopAbs_IN);
     return IsToRev;
   }
-//  Standard_ProgramError::Raise("GTopo::IsToReverse1");
+//  throw Standard_ProgramError("GTopo::IsToReverse1");
 //  return Standard_False; // dummy
 }
 
@@ -406,8 +408,7 @@ void TopOpeBRepBuild_GTopo::SetReverse(const Standard_Boolean rev)
 Standard_Boolean TopOpeBRepBuild_GTopo::Reverse() const 
 {
   if (myReverseForce) return myReverseValue;
-  Standard_ProgramError::Raise("GTopo::ReverseValue undefined");
-  return Standard_False; // dummy
+  throw Standard_ProgramError("GTopo::ReverseValue undefined");
 }
 
 //=======================================================================

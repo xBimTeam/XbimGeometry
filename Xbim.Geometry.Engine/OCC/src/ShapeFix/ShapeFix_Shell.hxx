@@ -26,10 +26,12 @@
 #include <ShapeExtend_Status.hxx>
 
 class ShapeFix_Face;
-class TopoDS_Shell;
-class TopoDS_Shape;
-class TopoDS_Compound;
 class ShapeExtend_BasicMsgRegistrator;
+
+// resolve name collisions with X11 headers
+#ifdef Status
+  #undef Status
+#endif
 
 class ShapeFix_Shell;
 DEFINE_STANDARD_HANDLE(ShapeFix_Shell, ShapeFix_Root)
@@ -71,7 +73,10 @@ public:
   //! If this mode is equal to Standard_True one non-manifold will be created from shell
   //! contains multishared edges. Else if this mode is equal to Standard_False only
   //! manifold shells will be created. By default - Standard_False.
-  Standard_EXPORT Standard_Boolean FixFaceOrientation (const TopoDS_Shell& shell, const Standard_Boolean isAccountMultiConex = Standard_True, const Standard_Boolean NonManifold = Standard_False);
+  Standard_EXPORT Standard_Boolean FixFaceOrientation (
+      const TopoDS_Shell& shell,
+      const Standard_Boolean isAccountMultiConex = Standard_True,
+      const Standard_Boolean NonManifold = Standard_False);
   
   //! Returns fixed shell (or subset of oriented faces).
   Standard_EXPORT TopoDS_Shell Shell();
@@ -112,7 +117,8 @@ public:
   //! FixFaceOrientation, by default True.
     Standard_Integer& FixOrientationMode();
 
-
+  //! Sets NonManifold flag
+  Standard_EXPORT virtual void SetNonManifoldFlag(const Standard_Boolean isNonManifold);
 
 
   DEFINE_STANDARD_RTTIEXT(ShapeFix_Shell,ShapeFix_Root)
@@ -127,7 +133,7 @@ protected:
   Standard_Integer myFixFaceMode;
   Standard_Integer myFixOrientationMode;
   Standard_Integer myNbShells;
-
+  Standard_Boolean myNonManifold;
 
 private:
 

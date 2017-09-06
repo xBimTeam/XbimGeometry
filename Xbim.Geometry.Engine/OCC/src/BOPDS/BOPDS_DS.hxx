@@ -30,7 +30,7 @@
 #include <BOPDS_VectorOfFaceInfo.hxx>
 #include <BOPCol_DataMapOfIntegerInteger.hxx>
 #include <BOPCol_DataMapOfIntegerListOfInteger.hxx>
-#include <BOPDS_MapOfPassKey.hxx>
+#include <BOPDS_MapOfPair.hxx>
 #include <BOPDS_VectorOfInterfVV.hxx>
 #include <BOPDS_VectorOfInterfVE.hxx>
 #include <BOPDS_VectorOfInterfVF.hxx>
@@ -61,19 +61,20 @@ class Bnd_Box;
 
 
 //! The class BOPDS_DS provides the control
-//! the data structure for
-//! partition and  boolean operation algorithms
+//! of data structure for the algorithms in the
+//! Boolean Component such as General Fuse, Boolean operations,
+//! Section, Maker Volume, Splitter and Cells Builder.<br>
 //!
-//! The data structure has the  following contents:
-//! 1. the arguments of an operation [myArguments];
+//! The data structure has the  following contents:<br>
+//! 1. the arguments of an operation [myArguments];<br>
 //! 2  the information about arguments/new shapes
 //! and their sub-shapes (type of the shape,
-//! bounding box, etc) [myLines];
+//! bounding box, etc) [myLines];<br>
 //! 3. each argument shape(and its subshapes)
-//! has/have own range of indices (rank)
-//! 4. pave blocks on source edges [myPaveBlocksPool];
-//! 5. the state of source faces  [myFaceInfoPool]
-//! 6  the collection of same domain shapes [myShapesSD]
+//! has/have own range of indices (rank);<br>
+//! 4. pave blocks on source edges [myPaveBlocksPool];<br>
+//! 5. the state of source faces  [myFaceInfoPool];<br>
+//! 6  the collection of same domain shapes [myShapesSD];<br>
 //! 7  the collection of interferences  [myInterfTB,
 //! myInterfVV,..myInterfFF]
 class BOPDS_DS 
@@ -431,13 +432,9 @@ Standard_EXPORT virtual ~BOPDS_DS();
   //! Returns the table of interferences
   //!
   //! debug
-    const BOPDS_MapOfPassKey& Interferences() const;
+    const BOPDS_MapOfPair& Interferences() const;
   
   Standard_EXPORT void Dump() const;
-  
-  Standard_EXPORT void SortPaveBlocks (const Handle(BOPDS_CommonBlock)& theCB);
-  
-  Standard_EXPORT Standard_Boolean IsToSort (const Handle(BOPDS_CommonBlock)& theCB, Standard_Integer& theI);
   
   Standard_EXPORT Standard_Boolean IsSubShape (const Standard_Integer theI1, const Standard_Integer theI2);
   
@@ -454,10 +451,22 @@ Standard_EXPORT virtual ~BOPDS_DS();
   //! Update the pave blocks for all shapes in data structure
   Standard_EXPORT void UpdatePaveBlocksWithSDVertices();
 
+  //! Update the pave block for all shapes in data structure
+  Standard_EXPORT void UpdatePaveBlockWithSDVertices(const Handle(BOPDS_PaveBlock)& thePB);
+
   //! Update the pave block of the common block for all shapes in data structure
   Standard_EXPORT void UpdateCommonBlockWithSDVertices(const Handle(BOPDS_CommonBlock)& theCB);
 
   Standard_EXPORT void InitPaveBlocksForVertex(const Standard_Integer theNV);
+
+  //! Clears information about PaveBlocks for the untouched edges
+  Standard_EXPORT void ReleasePaveBlocks();
+
+  //! Checks if the existing shrunk data of the pave block is still valid.<br>
+  //! The shrunk data may become invalid if e.g. the vertices of the pave block
+  //! have been replaced with the new one with bigger tolerances, or the tolerances
+  //! of the existing vertices have been increased.
+  Standard_EXPORT Standard_Boolean IsValidShrunkData(const Handle(BOPDS_PaveBlock)& thePB);
 
 protected:
 
@@ -465,9 +474,6 @@ protected:
 
   //! Initializes the pave blocks for the shape with index theIndex
   Standard_EXPORT void InitPaveBlocks (const Standard_Integer theIndex);
-
-  //! Update the pave block for all shapes in data structure
-  Standard_EXPORT void UpdatePaveBlockWithSDVertices(const Handle(BOPDS_PaveBlock)& thePB);
 
   //! Initializes the state of face with index theIndex
   Standard_EXPORT void InitFaceInfo (const Standard_Integer theIndex);
@@ -477,7 +483,7 @@ protected:
   Standard_EXPORT Standard_Boolean CheckCoincidence (const Handle(BOPDS_PaveBlock)& thePB1,
                                                      const Handle(BOPDS_PaveBlock)& thePB2,
                                                      const Standard_Real theFuzz);
-  
+
 
   //! Computes bouding box <theBox> for the solid with DS-index <theIndex>
   Standard_EXPORT void BuildBndBoxSolid (const Standard_Integer theIndex, Bnd_Box& theBox);
@@ -495,7 +501,7 @@ protected:
   BOPDS_VectorOfFaceInfo myFaceInfoPool;
   BOPCol_DataMapOfIntegerInteger myShapesSD;
   BOPCol_DataMapOfIntegerListOfInteger myMapVE;
-  BOPDS_MapOfPassKey myInterfTB;
+  BOPDS_MapOfPair myInterfTB;
   BOPDS_VectorOfInterfVV myInterfVV;
   BOPDS_VectorOfInterfVE myInterfVE;
   BOPDS_VectorOfInterfVF myInterfVF;

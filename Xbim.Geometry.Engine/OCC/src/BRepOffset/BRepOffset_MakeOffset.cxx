@@ -264,10 +264,6 @@ static
                                 TopoDS_Shape& theResult);
 
 static 
-  Standard_Boolean CheckNormals(const TopoDS_Face& theFIm,
-                                const TopoDS_Face& theFOr);
-
-static 
   void UpdateInitOffset(BRepAlgo_Image&         myInitOffset,
                         BRepAlgo_Image&         myImageOffset,
                         const TopoDS_Shape&     myOffsetShape,
@@ -318,6 +314,10 @@ static BRepOffset_Error checkSinglePoint(const Standard_Real theUParam,
 //---------------------------------------------------------------------
 static void UpdateTolerance (      TopoDS_Shape&               myShape,
                              const TopTools_IndexedMapOfShape& myFaces);
+static Standard_Real ComputeMaxDist(const gp_Pln& thePlane, 
+                                    const Handle(Geom_Curve)& theCrv,
+                                    const Standard_Real theFirst,
+                                    const Standard_Real theLast);
 
 static void CorrectSolid(TopoDS_Solid& theSol, TopTools_ListOfShape& theSolList);
 //---------------------------------------------------------------------
@@ -451,7 +451,7 @@ static Standard_Boolean FindParameter(const TopoDS_Vertex& V,
     }
   }
   
-  //Standard_NoSuchObject::Raise("BRep_Tool:: no parameter on edge");
+  //throw Standard_NoSuchObject("BRep_Tool:: no parameter on edge");
   return Standard_False;
 }
 
@@ -680,13 +680,7 @@ static void RemoveCorks (TopoDS_Shape&               S,
       B.Add(SS,Cork);
     }
     else {
-      //Faces.Remove (Cork);
-      //begin instead of Remove//
-      TopoDS_Shape LastShape = Faces(Faces.Extent());
-      Faces.RemoveLast();
-      if (Faces.FindIndex(Cork) != 0)
-        Faces.Substitute(Faces.FindIndex(Cork), LastShape);
-      //end instead of Remove  //
+      Faces.RemoveKey(Cork);
       Faces.Add(Cork); // to reset it with proper orientation.
     }
   }
@@ -731,7 +725,10 @@ static void MakeList (TopTools_ListOfShape&             OffsetFaces,
     const TopoDS_Shape& Root = itLOF.Value();
     if (!myFaces.Contains(Root)) {
       if (myInitOffsetFace.HasImage(Root)) {
-        OffsetFaces.Append(myInitOffsetFace.Image(Root).First());
+        TopTools_ListIteratorOfListOfShape aItLS(myInitOffsetFace.Image(Root));
+        for (; aItLS.More(); aItLS.Next()) {
+          OffsetFaces.Append(aItLS.Value());
+        }
       }
     }
   }
@@ -1644,11 +1641,7 @@ void BRepOffset_MakeOffset::SelfInter(TopTools_MapOfShape& /*Modif*/)
   }    
 #endif  
 
-  Standard_NotImplemented::Raise();
-
-#ifdef OCCT_DEBUG
-  if ( ChronBuild) Clock.Show();
-#endif
+  throw Standard_NotImplemented();
 }
 
 
@@ -3350,15 +3343,39 @@ void BRepOffset_MakeOffset::EncodeRegularity ()
 #endif
 }
 
-
-
+//=======================================================================
+//function : ComputeMaxDist
+//purpose  : 
+//=======================================================================
+Standard_Real ComputeMaxDist(const gp_Pln& thePlane,
+                             const Handle(Geom_Curve)& theCrv,
+                             const Standard_Real theFirst,
+                             const Standard_Real theLast)
+{
+  Standard_Real aMaxDist = 0.;
+  Standard_Integer i, NCONTROL = 23;
+  Standard_Real aPrm, aDist2;
+  gp_Pnt aP;
+  for (i = 0; i< NCONTROL; i++) {
+    aPrm = ((NCONTROL - 1 - i)*theFirst + i*theLast) / (NCONTROL - 1);
+    aP = theCrv->Value(aPrm);
+    if (Precision::IsInfinite(aP.X()) || Precision::IsInfinite(aP.Y())
+      || Precision::IsInfinite(aP.Z()))
+    {
+      return Precision::Infinite();
+    }
+    aDist2 = thePlane.SquareDistance(aP);
+    if (aDist2 > aMaxDist) aMaxDist = aDist2;  
+  }
+  return sqrt(aMaxDist)*1.05;
+}
 //=======================================================================
 //function : UpDateTolerance
 //purpose  : 
 //=======================================================================
 
 void UpdateTolerance (TopoDS_Shape& S,
-                                        const TopTools_IndexedMapOfShape& Faces)
+                      const TopTools_IndexedMapOfShape& Faces)
 {
   BRep_Builder B;
   TopTools_MapOfShape View;
@@ -3374,27 +3391,55 @@ void UpdateTolerance (TopoDS_Shape& S,
     }
   }
   
-  TopExp_Explorer Exp;
-  for (Exp.Init(S,TopAbs_EDGE); Exp.More(); Exp.Next()) {
-    TopoDS_Edge E = TopoDS::Edge(Exp.Current());
-    if (View.Add(E)) {
-      Handle(BRepCheck_Edge) EdgeCorrector = new BRepCheck_Edge(E);
-      Standard_Real    Tol = EdgeCorrector->Tolerance();
-      B.UpdateEdge (E,Tol);
-      
-      // Update the vertices.
-      TopExp::Vertices(E,V[0],V[1]);
-     
-      for (Standard_Integer i = 0 ; i <=1 ; i++) {
-        if (View.Add(V[i])) {
-          Handle(BRep_TVertex) TV = Handle(BRep_TVertex)::DownCast(V[i].TShape());
-          TV->Tolerance(0.);
-          Handle(BRepCheck_Vertex) VertexCorrector = new BRepCheck_Vertex(V[i]);
-          B.UpdateVertex (V[i],VertexCorrector->Tolerance());
-          // use the occasion to clean the vertices.
-          (TV->ChangePoints()).Clear();
+  Standard_Real Tol;
+  TopExp_Explorer ExpF;
+  for (ExpF.Init(S, TopAbs_FACE); ExpF.More(); ExpF.Next())
+  {
+    const TopoDS_Shape& F = ExpF.Current();
+    if (Faces.Contains(F))
+    {
+      continue;
+    }
+    BRepAdaptor_Surface aBAS(TopoDS::Face(F), Standard_False);
+    TopExp_Explorer Exp;
+    for (Exp.Init(F, TopAbs_EDGE); Exp.More(); Exp.Next()) {
+      TopoDS_Edge E = TopoDS::Edge(Exp.Current());
+      Standard_Boolean isUpdated = Standard_False;
+      if (aBAS.GetType() == GeomAbs_Plane)
+      {
+        //Edge does not seem to have pcurve on plane,
+        //so EdgeCorrector does not include it in tolerance calculation
+        Standard_Real aFirst, aLast;
+        Handle(Geom_Curve) aCrv = BRep_Tool::Curve(E, aFirst, aLast);
+        Standard_Real aMaxDist = ComputeMaxDist(aBAS.Plane(), aCrv, aFirst, aLast);
+        B.UpdateEdge(E, aMaxDist);
+        isUpdated = Standard_True;
+      }
+      if (View.Add(E))
+      {
+
+        BRepCheck_Edge EdgeCorrector(E);
+        Tol = EdgeCorrector.Tolerance();
+        B.UpdateEdge(E, Tol);
+        isUpdated = Standard_True;
+      }
+      if (isUpdated)
+      {
+        Tol = BRep_Tool::Tolerance(E);
+        // Update the vertices.
+        TopExp::Vertices(E, V[0], V[1]);
+
+        for (Standard_Integer i = 0; i <= 1; i++) {
+          if (View.Add(V[i])) {
+            Handle(BRep_TVertex) TV = Handle(BRep_TVertex)::DownCast(V[i].TShape());
+            TV->Tolerance(0.);
+            BRepCheck_Vertex VertexCorrector(V[i]);
+            B.UpdateVertex(V[i], VertexCorrector.Tolerance());
+            // use the occasion to clean the vertices.
+            (TV->ChangePoints()).Clear();
+          }
+          B.UpdateVertex(V[i], Tol);
         }
-        B.UpdateVertex(V[i],Tol);
       }
     }
   }
@@ -3947,7 +3992,7 @@ void TrimEdge(TopoDS_Edge&                  NE,
         gp_Pnt thePoint = BRep_Tool::Pnt(V);
         GeomAPI_ProjectPointOnCurve Projector(thePoint, theCurve);
         if (Projector.NbPoints() == 0)
-          Standard_ConstructionError::Raise("BRepOffset_MakeOffset::TrimEdge no projection");
+          throw Standard_ConstructionError("BRepOffset_MakeOffset::TrimEdge no projection");
         U = Projector.LowerDistanceParameter();
       }
       if (U < UMin) {
@@ -3959,7 +4004,7 @@ void TrimEdge(TopoDS_Edge&                  NE,
     }
     //
     if (V1.IsNull() || V2.IsNull()) {
-      Standard_ConstructionError::Raise("BRepOffset_MakeOffset::TrimEdge");
+      throw Standard_ConstructionError("BRepOffset_MakeOffset::TrimEdge");
     }
     if (!V1.IsSame(V2)) {
       NE.Free( Standard_True );
@@ -4042,7 +4087,7 @@ Standard_Boolean BuildShellsCompleteInter(const BOPCol_ListOfShape& theLF,
   aMV1.SetAvoidInternalShapes(Standard_True);
   aMV1.Perform();
   //
-  Standard_Boolean bDone = (aMV1.ErrorStatus() == 0);
+  Standard_Boolean bDone = ! aMV1.HasErrors();
   if (!bDone) {
     return bDone;
   }
@@ -4085,7 +4130,7 @@ Standard_Boolean BuildShellsCompleteInter(const BOPCol_ListOfShape& theLF,
   aMV2.SetIntersect(Standard_False);
   aMV2.SetAvoidInternalShapes(Standard_True);
   aMV2.Perform();
-  bDone = (aMV2.ErrorStatus() == 0);
+  bDone = ! aMV2.HasErrors();
   if (!bDone) {
     return bDone;
   }
@@ -4117,7 +4162,7 @@ Standard_Boolean BuildShellsCompleteInter(const BOPCol_ListOfShape& theLF,
     TopTools_ListIteratorOfListOfShape aItLF(aLFOr);
     for (; aItLF.More(); aItLF.Next()) {
       const TopoDS_Face& aFOr = TopoDS::Face(aItLF.Value());
-      if (CheckNormals(aF, aFOr)) {
+      if (BRepOffset_Tool::CheckPlanesNormals(aF, aFOr)) {
         aLF3.Append(aF);
         break;
       }
@@ -4130,7 +4175,7 @@ Standard_Boolean BuildShellsCompleteInter(const BOPCol_ListOfShape& theLF,
   aMV3.SetIntersect(Standard_False);
   aMV3.SetAvoidInternalShapes(Standard_True);
   aMV3.Perform();
-  bDone = (aMV3.ErrorStatus() == 0);
+  bDone = ! aMV3.HasErrors();
   if (!bDone) {
     return bDone;
   }
@@ -4161,71 +4206,6 @@ Standard_Boolean GetSubShapes(const TopoDS_Shape& theShape,
   }
   theResult = aResult;
   return Standard_True;
-}
-
-//=======================================================================
-//function : CheckNormals
-//purpose  : Comparing normal directions of the faces
-//=======================================================================
-Standard_Boolean CheckNormals(const TopoDS_Face& theFIm,
-                              const TopoDS_Face& theFOr)
-{
-  
-  Standard_Real aUMin, aUMax, aVMin, aVMax, aU, aV, anAngle;
-  gp_Pnt aP;
-  gp_Vec aVecU, aVecV, aVNIm, aVNOr;
-  Standard_Boolean bIsCollinear;
-  //
-  BRepAdaptor_Surface aSFIm(theFIm), aSFOr(theFOr);
-  //
-  aUMin = aSFIm.FirstUParameter();
-  aUMax = aSFIm.LastUParameter();
-  aVMin = aSFIm.FirstVParameter();
-  aVMax = aSFIm.LastVParameter();
-  //
-  aU = (aUMin + aUMax) * 0.5;
-  if (Precision::IsInfinite(aUMin) && 
-      Precision::IsInfinite(aUMax)) {
-    aU = 0.;
-  }
-  else if (Precision::IsInfinite(aUMin) && 
-           !Precision::IsInfinite(aUMax)) {
-    aU = aUMax;
-  }
-  else if (!Precision::IsInfinite(aUMin) && 
-           Precision::IsInfinite(aUMax)) {
-    aU = aUMin;
-  }
-  //
-  aV = (aVMin + aVMax) * 0.5;
-  if (Precision::IsInfinite(aVMin) && 
-      Precision::IsInfinite(aVMax)) {
-    aV = 0.;
-  }
-  else if (Precision::IsInfinite(aVMin) && 
-           !Precision::IsInfinite(aVMax)) {
-    aV = aVMax;
-  }
-  else if (!Precision::IsInfinite(aVMin) && 
-           Precision::IsInfinite(aVMax)) {
-    aV = aVMin;
-  }
-  //
-  aSFIm.D1(aU, aV, aP, aVecU, aVecV);
-  aVNIm = aVecU.Crossed(aVecV);
-  if (theFIm.Orientation() == TopAbs_REVERSED) {
-    aVNIm.Reverse();
-  }
-  //
-  aSFOr.D1(aU, aV, aP, aVecU, aVecV);
-  aVNOr = aVecU.Crossed(aVecV);
-  if (theFOr.Orientation() == TopAbs_REVERSED) {
-    aVNOr.Reverse();
-  }
-  //
-  anAngle = aVNIm.Angle(aVNOr);
-  bIsCollinear = (anAngle < Precision::Confusion());
-  return bIsCollinear;
 }
 
 //=======================================================================

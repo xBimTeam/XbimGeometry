@@ -38,10 +38,8 @@
 //function : FillImagesVertices
 //purpose  : 
 //=======================================================================
-  void BOPAlgo_Builder::FillImagesVertices()
+void BOPAlgo_Builder::FillImagesVertices()
 {
-  myErrorStatus=0;
-  //
   Standard_Integer nV, nVSD;
   BOPCol_DataMapIteratorOfDataMapOfIntegerInteger aIt;
   //
@@ -59,6 +57,12 @@
     myImages.Bind(aV, aLVSD);
     //
     myShapesSD.Bind(aV, aVSD);
+    //
+    BOPCol_ListOfShape* pLOr = myOrigins.ChangeSeek(aVSD);
+    if (!pLOr) {
+      pLOr = myOrigins.Bound(aVSD, BOPCol_ListOfShape());
+    }
+    pLOr->Append(aV);
   }
 }
 //=======================================================================
@@ -67,39 +71,46 @@
 //=======================================================================
   void BOPAlgo_Builder::FillImagesEdges()
 {
-  myErrorStatus=0;
-  //
-  Standard_Integer i, aNbPBP, nE, nSp, nSpR;
-  BOPDS_ListIteratorOfListOfPaveBlock aItPB;
-  //
-  const BOPDS_VectorOfListOfPaveBlock& aPBP=myDS->PaveBlocksPool();
-  aNbPBP=aPBP.Extent();
-  for (i=0; i<aNbPBP; ++i) {
-    const BOPDS_ListOfPaveBlock& aLPB=aPBP(i);
-    if (aLPB.Extent()) {
-      BOPCol_ListOfShape aLS(myAllocator);
+  Standard_Integer i, aNbS = myDS->NbSourceShapes();
+  for (i = 0; i < aNbS; ++i) {
+    const BOPDS_ShapeInfo& aSI = myDS->ShapeInfo(i);
+    if (aSI.ShapeType() != TopAbs_EDGE) {
+      continue;
+    }
+    //
+    // Check if the pave blocks for the edge have been initialized
+    if (!aSI.HasReference()) {
+      continue;
+    }
+    //
+    const TopoDS_Shape& aE = aSI.Shape();
+    const BOPDS_ListOfPaveBlock& aLPB = myDS->PaveBlocks(i);
+    //
+    // Fill the images of the edge from the list of its pave blocks.
+    // The small edges, having no pave blocks, will have the empty list
+    // of images and, thus, will be avoided in the result.
+    BOPCol_ListOfShape *pLS = myImages.Bound(aE, BOPCol_ListOfShape());
+    //
+    BOPDS_ListIteratorOfListOfPaveBlock aItPB(aLPB);
+    for (; aItPB.More(); aItPB.Next()) {
+      const Handle(BOPDS_PaveBlock)& aPB = aItPB.Value();
+      Handle(BOPDS_PaveBlock) aPBR = myDS->RealPaveBlock(aPB);
       //
-      const Handle(BOPDS_PaveBlock)& aPB1=aLPB.First();
-      nE=aPB1->OriginalEdge();
-      const TopoDS_Shape& aE=myDS->Shape(nE);
+      Standard_Integer nSpR = aPBR->Edge();
+      const TopoDS_Shape& aSpR = myDS->Shape(nSpR);
+      pLS->Append(aSpR);
       //
-      aItPB.Initialize(aLPB);
-      for (; aItPB.More(); aItPB.Next()) {
-        const Handle(BOPDS_PaveBlock)& aPB=aItPB.Value();
-        Handle(BOPDS_PaveBlock) aPBR=myDS->RealPaveBlock(aPB);
-        //
-        nSpR=aPBR->Edge();
-        const TopoDS_Shape& aSpR=myDS->Shape(nSpR);
-        aLS.Append(aSpR);
-        myOrigins.Bind(aSpR, aE);
-        //
-        if (myDS->IsCommonBlockOnEdge(aPB)) {
-          nSp=aPB->Edge();
-          const TopoDS_Shape& aSp=myDS->Shape(nSp);
-          myShapesSD.Bind(aSp, aSpR);
-        }
+      BOPCol_ListOfShape* pLOr = myOrigins.ChangeSeek(aSpR);
+      if (!pLOr) {
+        pLOr = myOrigins.Bound(aSpR, BOPCol_ListOfShape());
       }
-      myImages.Bind(aE, aLS);
+      pLOr->Append(aE);
+      //
+      if (myDS->IsCommonBlockOnEdge(aPB)) {
+        Standard_Integer nSp = aPB->Edge();
+        const TopoDS_Shape& aSp = myDS->Shape(nSp);
+        myShapesSD.Bind(aSp, aSpR);
+      }
     }
   }
 }
@@ -129,8 +140,6 @@
 //=======================================================================
   void BOPAlgo_Builder::BuildResult(const TopAbs_ShapeEnum theType)
 {
-  myErrorStatus=0;
-  //
   TopAbs_ShapeEnum aType;
   BRep_Builder aBB;
   BOPCol_MapOfShape aM;
@@ -165,8 +174,6 @@
 //=======================================================================
   void BOPAlgo_Builder::FillImagesContainers(const TopAbs_ShapeEnum theType)
 {
-  myErrorStatus=0;
-  //
   Standard_Integer i, aNbS;
   BOPCol_MapOfShape aMFP(100, myAllocator);
   //
@@ -185,8 +192,6 @@
 //=======================================================================
   void BOPAlgo_Builder::FillImagesCompounds()
 {
-  myErrorStatus=0;
-  //
   Standard_Integer i, aNbS;
   BOPCol_MapOfShape aMFP(100, myAllocator);
   //

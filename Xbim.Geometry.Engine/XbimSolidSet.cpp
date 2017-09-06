@@ -1,3 +1,4 @@
+#include <windows.h>
 #include "XbimSolidSet.h"
 #include "XbimFacetedSolid.h"
 #include "XbimCompound.h"
@@ -361,9 +362,9 @@ namespace Xbim
 				boolOp.SetFuzzyValue(0);
 				boolOp.Build();
 				
-				if (boolOp.ErrorStatus() == 0)
+				if (!boolOp.HasErrors() )
 					return gcnew XbimSolidSet(boolOp.Shape());
-				err = "Error = " + boolOp.ErrorStatus();
+				err = "Error (improve reporting)";
 				GC::KeepAlive(solids);
 				GC::KeepAlive(this);
 			}

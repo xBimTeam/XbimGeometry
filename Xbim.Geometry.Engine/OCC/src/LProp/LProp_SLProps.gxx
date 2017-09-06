@@ -29,7 +29,7 @@ static Standard_Boolean IsTangentDefined (LProp_SLProps& SProp,
                                           const Standard_Real linTol,
                                           const Standard_Integer  Derivative, 
                                           Standard_Integer&       Order,
-                                          LProp_Status&  Status) 
+                                          LProp_Status&  theStatus)
 {
   Standard_Real Tol = linTol * linTol;
   gp_Vec V[2];
@@ -54,13 +54,13 @@ static Standard_Boolean IsTangentDefined (LProp_SLProps& SProp,
 
       if(V[Derivative].SquareMagnitude() > Tol)
       {
-        Status = LProp_Defined;
+        theStatus = LProp_Defined;
         return Standard_True;
       }
     }//if(cn >= Order)
     else
     {
-      Status = LProp_Undefined;
+      theStatus = LProp_Undefined;
       return Standard_False;
     }
   }
@@ -216,7 +216,7 @@ Standard_Boolean LProp_SLProps::IsTangentUDefined ()
 void LProp_SLProps::TangentU (gp_Dir& D) 
 {
   if(!IsTangentUDefined())
-    LProp_NotDefined::Raise();
+    throw LProp_NotDefined();
 
   if(mySignificantFirstDerivativeOrderU == 1)
     D = gp_Dir(myD1u);
@@ -273,7 +273,7 @@ Standard_Boolean LProp_SLProps::IsTangentVDefined ()
 void LProp_SLProps::TangentV (gp_Dir& D)
 {
   if(!IsTangentVDefined())
-    LProp_NotDefined::Raise();
+    throw LProp_NotDefined();
   
   if(mySignificantFirstDerivativeOrderV == 1)
     D = gp_Dir(myD1v);
@@ -324,9 +324,9 @@ Standard_Boolean LProp_SLProps::IsNormalDefined()
 
   // status = UnDecided 
   // first try the standard computation of the normal.
-  CSLib_DerivativeStatus Status;
-  CSLib::Normal(myD1u, myD1v, myLinTol, Status, myNormal);
-  if (Status  == CSLib_Done ) 
+  CSLib_DerivativeStatus aStatus = CSLib_Done;
+  CSLib::Normal(myD1u, myD1v, myLinTol, aStatus, myNormal);
+  if (aStatus == CSLib_Done)
   {
     myNormalStatus = LProp_Computed;
     return Standard_True;
@@ -342,7 +342,7 @@ const gp_Dir& LProp_SLProps::Normal ()
 {
   if(!IsNormalDefined())
   {
-    LProp_NotDefined::Raise();
+    throw LProp_NotDefined();
   }
 
   return myNormal;
@@ -491,7 +491,7 @@ Standard_Boolean LProp_SLProps::IsCurvatureDefined ()
 Standard_Boolean LProp_SLProps::IsUmbilic ()
 {
   if(!IsCurvatureDefined())
-    LProp_NotDefined::Raise();
+    throw LProp_NotDefined();
   
   return Abs(myMaxCurv - myMinCurv) < Abs(Epsilon(myMaxCurv));
 }
@@ -499,7 +499,7 @@ Standard_Boolean LProp_SLProps::IsUmbilic ()
 Standard_Real LProp_SLProps::MaxCurvature ()
 {
   if(!IsCurvatureDefined())
-    LProp_NotDefined::Raise();
+    throw LProp_NotDefined();
 
   return myMaxCurv;
 }
@@ -507,7 +507,7 @@ Standard_Real LProp_SLProps::MaxCurvature ()
 Standard_Real LProp_SLProps::MinCurvature ()
 {
   if(!IsCurvatureDefined())
-    LProp_NotDefined::Raise();
+    throw LProp_NotDefined();
   
   return myMinCurv;
 }
@@ -515,7 +515,7 @@ Standard_Real LProp_SLProps::MinCurvature ()
 void LProp_SLProps::CurvatureDirections(gp_Dir& Max, gp_Dir& Min)
 {
   if(!IsCurvatureDefined())
-    LProp_NotDefined::Raise();
+    throw LProp_NotDefined();
 
   Max = myDirMaxCurv;
   Min = myDirMinCurv;
@@ -524,7 +524,7 @@ void LProp_SLProps::CurvatureDirections(gp_Dir& Max, gp_Dir& Min)
 Standard_Real LProp_SLProps::MeanCurvature ()
 {
   if(!IsCurvatureDefined())
-    LProp_NotDefined::Raise();
+    throw LProp_NotDefined();
 
   return myMeanCurv;
 }
@@ -532,7 +532,7 @@ Standard_Real LProp_SLProps::MeanCurvature ()
 Standard_Real LProp_SLProps::GaussianCurvature ()
 {
   if(!IsCurvatureDefined())
-    LProp_NotDefined::Raise();
+    throw LProp_NotDefined();
 
   return myGausCurv;
 }

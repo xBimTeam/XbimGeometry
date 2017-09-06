@@ -58,13 +58,28 @@ static void deallocate_message(Standard_CString aMessage)
   }
 }
 
+// Define Standard_THREADLOCAL modifier as C++11 thread_local keyword where it is available.
+#if defined(__clang__)
+  // CLang version: standard CLang > 3.3 or XCode >= 8 (but excluding 32-bit ARM)
+  // Note: this has to be in separate #if to avoid failure of preprocessor on other platforms
+  #if __has_feature(cxx_thread_local)
+    #define Standard_THREADLOCAL thread_local
+  #else
+    #define Standard_THREADLOCAL
+  #endif
+#elif (defined(__INTEL_COMPILER) && __INTEL_COMPILER > 1400) || \
+      (defined(_MSC_VER) && _MSC_VER >= 1900) /* MSVC++ >= 14 */ || \
+      (defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 8))) /* GCC >= 4.8 */
+  #define Standard_THREADLOCAL thread_local
+#else
+  #define Standard_THREADLOCAL
+#endif
 
 // ******************************************************************
 //                           Standard_Failure                       *
 // ******************************************************************
-#ifndef NO_CXX_EXCEPTION
-static Handle(Standard_Failure) RaisedError;
-#endif
+static Standard_THREADLOCAL Handle(Standard_Failure) RaisedError;
+
 // ------------------------------------------------------------------
 //
 // ------------------------------------------------------------------
@@ -105,11 +120,7 @@ void Standard_Failure::SetMessageString(const Standard_CString AString)
 // ------------------------------------------------------------------
 Handle(Standard_Failure) Standard_Failure::Caught() 
 {
-#ifdef NO_CXX_EXCEPTION
-  return Standard_ErrorHandler::LastCaughtError();
-#else
   return RaisedError ;
-#endif
 }
 
 // ------------------------------------------------------------------
@@ -147,18 +158,13 @@ void Standard_Failure::Reraise (const Standard_SStream& AReason)
 
 void Standard_Failure::Reraise () 
 {
-#ifdef NO_CXX_EXCEPTION
-  Standard_ErrorHandler::Error (this);
-  Standard_ErrorHandler::Abort (this);
-#else
   RaisedError = this;
   Throw();
-#endif
 }
 
 void Standard_Failure::Jump()
 {
-#if defined (NO_CXX_EXCEPTION) || defined (OCC_CONVERT_SIGNALS)
+#if defined (OCC_CONVERT_SIGNALS)
   Standard_ErrorHandler::Error (this);
   Standard_ErrorHandler::Abort (this);
 #else
@@ -173,9 +179,7 @@ void Standard_Failure::Jump()
 // ------------------------------------------------------------------
 void Standard_Failure::Throw() const
 {
-#ifndef NO_CXX_EXCEPTION
   throw *this;
-#endif
 }
 
 // ------------------------------------------------------------------

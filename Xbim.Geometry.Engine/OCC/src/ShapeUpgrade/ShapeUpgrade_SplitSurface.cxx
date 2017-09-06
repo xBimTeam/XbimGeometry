@@ -38,7 +38,7 @@
 #include <TColStd_Array1OfReal.hxx>
 #include <TColStd_HSequenceOfReal.hxx>
 
-IMPLEMENT_STANDARD_RTTIEXT(ShapeUpgrade_SplitSurface,MMgt_TShared)
+IMPLEMENT_STANDARD_RTTIEXT(ShapeUpgrade_SplitSurface,Standard_Transient)
 
 //=======================================================================
 //function : ShapeUpgrade_SplitSurface
@@ -437,11 +437,12 @@ void ShapeUpgrade_SplitSurface::Build(const Standard_Boolean Segment)
 	  }
 	  myStatus |= ShapeExtend::EncodeStatus ( ShapeExtend_DONE3 );
 	}
-	catch (Standard_Failure) {
+	catch (Standard_Failure const& anException) {
 #ifdef OCCT_DEBUG
 	  cout << "Warning: ShapeUpgrade_SplitSurface::Build(): Exception in Segment      :";
-	  Standard_Failure::Caught()->Print(cout); cout << endl;
+	  anException.Print(cout); cout << endl;
 #endif
+	  (void)anException;
 	  Handle(Geom_Surface) theNewSurf = theNew;
 	  theNew = new Geom_RectangularTrimmedSurface(theNewSurf,U1,U2,V1,V2);
 	}

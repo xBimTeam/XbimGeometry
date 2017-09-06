@@ -452,13 +452,7 @@ const TopTools_ListOfShape& BRepFill_OffsetWire::GeneratedShapes
           }
           if ( !it.Value().IsSame(it.Key())) {
             myMap.ChangeFromKey(it.Value()).Append(myMap.ChangeFromKey(it.Key()));
-            //myMap.UnBind(it.Key());
-            TopoDS_Shape LastShape = myMap.FindKey(myMap.Extent());
-            TopTools_ListOfShape LastList;
-            LastList.Append(myMap(myMap.Extent()));
-            myMap.RemoveLast();
-            if (myMap.FindIndex(it.Key()) != 0)
-              myMap.Substitute(myMap.FindIndex(it.Key()), LastShape, LastList);
+            myMap.RemoveKey(it.Key());
           }
         }
         if (myMap.Contains(it.Key().Reversed())) {
@@ -468,13 +462,7 @@ const TopTools_ListOfShape& BRepFill_OffsetWire::GeneratedShapes
           }
           if ( !it.Value().IsSame(it.Key())) {
             myMap.ChangeFromKey(it.Value().Reversed()).Append(myMap.ChangeFromKey(it.Key().Reversed()));
-            //myMap.UnBind(it.Key().Reversed());
-            TopoDS_Shape LastShape = myMap.FindKey(myMap.Extent());
-            TopTools_ListOfShape LastList;
-            LastList.Append(myMap(myMap.Extent()));
-            myMap.RemoveLast();
-            if (myMap.FindIndex(it.Key().Reversed()) != 0)
-              myMap.Substitute(myMap.FindIndex(it.Key().Reversed()), LastShape, LastList);
+            myMap.RemoveKey(it.Key().Reversed());
           }
         }
       }
@@ -644,15 +632,15 @@ void BRepFill_OffsetWire::Perform (const Standard_Real Offset,
       PerformWithBiLo(myWorkSpine,Offset,myBilo,myLink,myJoinType,Alt);
     }
   }
-  catch (Standard_Failure)//Every exception was caught.
-  {
-    myShape.Nullify();
-    myIsDone = Standard_False;
+  catch (Standard_Failure const& anException) {
 #ifdef OCCT_DEBUG
     cout<<"An exception was caught in BRepFill_OffsetWire::Perform : ";
-    Standard_Failure::Caught()->Print(cout);
+    anException.Print(cout);
     cout<<endl;
 #endif
+    (void)anException;
+    myShape.Nullify();
+    myIsDone = Standard_False;
 
     return;
   }
@@ -669,7 +657,7 @@ void BRepFill_OffsetWire::Perform (const Standard_Real Offset,
       if (!aWire.Closed()) {
         myShape.Nullify();
         myIsDone = Standard_False;
-        Standard_ConstructionError::Raise("Offset wire is not closed.");
+        throw Standard_ConstructionError("Offset wire is not closed.");
       }
     }
   }
@@ -821,13 +809,7 @@ void BRepFill_OffsetWire::PerformWithBiLo
     if (!myMap.IsEmpty() &&
         myMap.FindKey(1).ShapeType() == TopAbs_VERTEX)
     {
-      //myMap.RemoveFirst();
-      TopoDS_Shape LastShape = myMap.FindKey(myMap.Extent());
-      TopTools_ListOfShape LastList;
-      LastList.Append(myMap(myMap.Extent()));
-      myMap.RemoveLast();
-      if (!myMap.IsEmpty())
-        myMap.Substitute(1, LastShape, LastList);
+      myMap.RemoveFromIndex(1);
     }
     if (!myMap.IsEmpty() &&
         myMap.FindKey(myMap.Extent()).ShapeType() == TopAbs_VERTEX)
@@ -1447,13 +1429,7 @@ void BRepFill_OffsetWire::MakeWires()
 
     if (myIsOpenResult && MVE.FindFromKey(CV).IsEmpty())
     {
-      //MVE.UnBind(CV);
-      TopoDS_Shape LastShape = MVE.FindKey(MVE.Extent());
-      TopTools_ListOfShape LastList;
-      LastList.Append(MVE(MVE.Extent()));
-      MVE.RemoveLast();
-      if (MVE.FindIndex(CV) != 0)
-        MVE.Substitute(MVE.FindIndex(CV), LastShape, LastList);
+      MVE.RemoveKey(CV);
     }
       
 
@@ -1476,13 +1452,7 @@ void BRepFill_OffsetWire::MakeWires()
         isClosed = VF.IsSame(CV);
         //  Modified by Sergey KHROMOV - Thu Mar 14 11:30:15 2002 End
         End = Standard_True;
-        //MVE.UnBind(VF);
-        TopoDS_Shape LastShape = MVE.FindKey(MVE.Extent());
-        TopTools_ListOfShape LastList;
-        LastList.Append(MVE(MVE.Extent()));
-        MVE.RemoveLast();
-        if (MVE.FindIndex(VF) != 0)
-          MVE.Substitute(MVE.FindIndex(VF), LastShape, LastList);
+        MVE.RemoveKey(VF);
       }
 
       if (!End) {
@@ -1504,13 +1474,7 @@ void BRepFill_OffsetWire::MakeWires()
         
         if (MVE.FindFromKey(CV).IsEmpty())
         {
-          //MVE.UnBind(CV);
-          TopoDS_Shape LastShape = MVE.FindKey(MVE.Extent());
-          TopTools_ListOfShape LastList;
-          LastList.Append(MVE(MVE.Extent()));
-          MVE.RemoveLast();
-          if (MVE.FindIndex(CV) != 0)
-            MVE.Substitute(MVE.FindIndex(CV), LastShape, LastList);
+          MVE.RemoveKey(CV);
         }
       }
     }
@@ -1602,10 +1566,7 @@ void BRepFill_OffsetWire::FixHoles()
     TopExp::Vertices( Base, Vf, Vl );
     if(Vf.IsNull() || Vl.IsNull())
     {
-      Standard_Failure::Raise("BRepFill_OffsetWire::FixHoles(): Wrong wire.");
-#ifdef OCCT_DEBUG
-      BRepTools::Write(Base, "Base");
-#endif
+      throw Standard_Failure("BRepFill_OffsetWire::FixHoles(): Wrong wire.");
     }
     gp_Pnt Pf, Pl;
     Pf = BRep_Tool::Pnt(Vf);
@@ -1621,13 +1582,7 @@ void BRepFill_OffsetWire::FixHoles()
 
       if(V1.IsNull() || V2.IsNull())
       {
-        Standard_Failure::Raise("BRepFill_OffsetWire::FixHoles(): Wrong wire.");
-#ifdef OCCT_DEBUG
-        BRepTools::Write(Base, "Base");
-        char name[128];
-        sprintf(name,"Wire_%d",i);
-        BRepTools::Write(aWire, name);
-#endif
+        throw Standard_Failure("BRepFill_OffsetWire::FixHoles(): Wrong wire.");
       }
 
       gp_Pnt P1, P2;

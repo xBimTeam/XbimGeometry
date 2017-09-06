@@ -1,3 +1,4 @@
+#include <windows.h>
 #include "XbimCompound.h"
 #include "XbimGeometryCreator.h"
 #include "XbimGeometryObjectSet.h"
@@ -624,7 +625,7 @@ namespace Xbim
 						try
 						{
 							BRepAlgoAPI_Fuse boolOp(unionedShape, toConnect);
-							if (boolOp.ErrorStatus() == 0)
+							if (!boolOp.HasErrors())
 								unionedShape = boolOp.Shape();
 							else
 								XbimGeometryCreator::logger->WarnFormat("WC004: Boolean Union operation failed." );
@@ -726,7 +727,7 @@ namespace Xbim
 				GC::KeepAlive(this);
 				GC::KeepAlive(solids);
 				
-				if (boolOp.ErrorStatus() == 0)
+				if (!boolOp.HasErrors())
 				{
 					XbimCompound^ result = gcnew XbimCompound(TopoDS::Compound(boolOp.Shape()), true, tolerance);
 					if (result->BoundingBox.Length() - this->BoundingBox.Length() > tolerance) //nonsense result forget it
@@ -755,7 +756,7 @@ namespace Xbim
 				BRepAlgoAPI_Fuse boolOp(this, solids);
 				GC::KeepAlive(this);
 				GC::KeepAlive(solids);
-				if (boolOp.ErrorStatus() == 0)
+				if (!boolOp.HasErrors())
 					return gcnew XbimCompound(TopoDS::Compound(boolOp.Shape()),true,tolerance);
 			}
 			catch (Standard_Failure e)
@@ -779,7 +780,7 @@ namespace Xbim
 				BRepAlgoAPI_Common boolOp(this, solids);
 				GC::KeepAlive(this);
 				GC::KeepAlive(solids);
-				if (boolOp.ErrorStatus() == 0)
+				if (!boolOp.HasErrors())
 					return gcnew XbimCompound(TopoDS::Compound(boolOp.Shape()),true,tolerance);
 			}
 			catch (Standard_Failure e)

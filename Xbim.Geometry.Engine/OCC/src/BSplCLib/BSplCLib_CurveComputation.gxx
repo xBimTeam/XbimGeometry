@@ -1363,7 +1363,7 @@ void BSplCLib::MovePointAndTangent (const Standard_Real      U,
   num_poles = Poles.Length() ;
   
   if (NewPoles.Length() != num_poles) {
-    Standard_ConstructionError::Raise(); 
+    throw Standard_ConstructionError();
   }
   delta_array = (Standard_Real *)  &Delta ;
   delta_derivative_array = (Standard_Real *)&DeltaDerivatives ;
@@ -1424,7 +1424,7 @@ void BSplCLib::FunctionMultiply
  const TColStd_Array1OfReal &        FlatKnots,
  const Standard_Integer              NewDegree,
  Array1OfPoints &                   NewPoles,
- Standard_Integer &                  Status) 
+ Standard_Integer &                  theStatus)
 { 
   Standard_Integer num_bspline_poles =
     BSplineFlatKnots.Length() - BSplineDegree - 1 ;
@@ -1433,7 +1433,7 @@ void BSplCLib::FunctionMultiply
   
   if (Poles.Length() != num_bspline_poles ||
       NewPoles.Length() != num_new_poles) {
-    Standard_ConstructionError::Raise();  
+    throw Standard_ConstructionError();
   }
   Standard_Real  * array_of_poles =
     (Standard_Real *) &Poles(Poles.Lower()) ;
@@ -1447,7 +1447,7 @@ void BSplCLib::FunctionMultiply
 			     FlatKnots,
 			     NewDegree,
 			     array_of_new_poles[0],
-			     Status) ;
+			     theStatus);
 }
 
 //=======================================================================
@@ -1463,7 +1463,7 @@ void BSplCLib::FunctionReparameterise
  const TColStd_Array1OfReal &        FlatKnots,
  const Standard_Integer              NewDegree,
  Array1OfPoints &                   NewPoles,
- Standard_Integer &                  Status) 
+ Standard_Integer &                  theStatus)
 { 
   Standard_Integer num_bspline_poles =
     BSplineFlatKnots.Length() - BSplineDegree - 1 ;
@@ -1472,7 +1472,7 @@ void BSplCLib::FunctionReparameterise
   
   if (Poles.Length() != num_bspline_poles ||
       NewPoles.Length() != num_new_poles) {
-    Standard_ConstructionError::Raise();  
+    throw Standard_ConstructionError();
   }
   Standard_Real  * array_of_poles =
     (Standard_Real *) &Poles(Poles.Lower()) ;
@@ -1486,5 +1486,5 @@ void BSplCLib::FunctionReparameterise
 				   FlatKnots,
 				   NewDegree,
 				   array_of_new_poles[0],
-				   Status) ;
+				   theStatus);
 }
