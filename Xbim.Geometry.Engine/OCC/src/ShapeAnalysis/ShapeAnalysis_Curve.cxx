@@ -256,12 +256,14 @@ Standard_Real ShapeAnalysis_Curve::ProjectAct(const Adaptor3d_Curve& C3D,
       }
     }
   }
-  catch(Standard_Failure) {
-    OK = Standard_False;
-#ifdef OCCT_DEBUG //:s5
+  catch(Standard_Failure const& anException) {
+#ifdef OCCT_DEBUG
+ //:s5
     cout << "\nWarning: ShapeAnalysis_Curve::ProjectAct(): Exception in Extrema_ExtPC: "; 
-    Standard_Failure::Caught()->Print(cout); cout << endl;
+    anException.Print(cout); cout << endl;
 #endif
+    (void)anException;
+    OK = Standard_False;
   }
   
   //szv#4:S4163:12Mar99 moved
@@ -635,7 +637,8 @@ static Standard_Integer SearchForExtremum (const Handle(Geom2d_Curve)& C2d,
 					   gp_Pnt2d &res)
 {
   Standard_Real prevpar;
-  for ( Standard_Integer i=0; i <10; i++ ) {
+  Standard_Integer nbOut = 0;
+  for (Standard_Integer i = 0; i <10; i++) {
     prevpar = par;
       
     gp_Vec2d D1, D2;
@@ -645,9 +648,19 @@ static Standard_Integer SearchForExtremum (const Handle(Geom2d_Curve)& C2d,
     
     par -= ( D1 * dir ) / Det;
     if ( Abs ( par - prevpar ) < Precision::PConfusion() ) return Standard_True;
-    
-    if ( First - par >= Precision::PConfusion() || 
-	 par - Last  >= Precision::PConfusion() ) return Standard_False;
+
+    if (par < First)
+    {
+      if (nbOut++ > 2 || prevpar == First)
+        return Standard_False;
+      par = First;
+    }
+    if (par > Last)
+    {
+      if (nbOut++ > 2 || prevpar == Last)
+        return Standard_False;
+      par = Last;
+    }
   }
   return Standard_True;
 }
@@ -659,24 +672,46 @@ void ShapeAnalysis_Curve::FillBndBox (const Handle(Geom2d_Curve)& C2d,
 				      const Standard_Boolean Exact,
 				      Bnd_Box2d &Box) const
 {
-  Standard_Integer nseg = ( NPoints <2 ? 1 : NPoints-1 );
-  Standard_Real step = ( Last - First ) / nseg;
-  for ( Standard_Integer i=0; i <= nseg; i++ ) {
-    Standard_Real par = First + i * step;
-    gp_Pnt2d pnt = C2d->Value ( par );
-    Box.Add ( pnt );
-    if ( ! Exact ) continue;
-    
-    gp_Pnt2d pextr;
-    Standard_Real parextr = par;
-    if ( SearchForExtremum ( C2d, Max(First,par-2.*step), Min(Last,par+2.*step),
-			     gp_Vec2d(1,0), parextr, pextr ) ) {
-      Box.Add ( pextr );
+  if (!Exact) {
+    Standard_Integer nseg = (NPoints < 2 ? 1 : NPoints - 1);
+    Standard_Real step = (Last - First) / nseg;
+    for (Standard_Integer i = 0; i <= nseg; i++) {
+      Standard_Real par = First + i * step;
+      gp_Pnt2d pnt = C2d->Value(par);
+      Box.Add(pnt);
     }
-    parextr = par;
-    if ( SearchForExtremum ( C2d, Max(First,par-2.*step), Min(Last,par+2.*step),
-			     gp_Vec2d(0,1), parextr, pextr ) ) {
-      Box.Add ( pextr );
+    return;
+  }
+
+  // We should solve the task on intervals of C2 continuity.
+  Geom2dAdaptor_Curve anAC(C2d, First, Last);
+  Standard_Integer nbInt = anAC.NbIntervals(GeomAbs_C2);
+  // If we have only 1 interval then use input NPoints parameter to get samples.
+  Standard_Integer nbSamples = (nbInt < 2 ? NPoints - 1 : nbInt);
+  TColStd_Array1OfReal aParams(1, nbSamples + 1);
+  if (nbSamples == nbInt)
+    anAC.Intervals(aParams, GeomAbs_C2);
+  else {
+    Standard_Real step = (Last - First) / nbSamples;
+    for (Standard_Integer i = 0; i <= nbSamples; i++)
+      aParams(i+1) = First + i * step;
+  }
+  for (Standard_Integer i = 1; i <= nbSamples + 1; i++) {
+    Standard_Real aPar1 = aParams(i);
+    gp_Pnt2d aPnt = C2d->Value(aPar1);
+    Box.Add(aPnt);
+    if (i <= nbSamples) {
+      Standard_Real aPar2 = aParams(i + 1);
+      Standard_Real par = (aPar1 + aPar2) * 0.5;
+      gp_Pnt2d pextr;
+      Standard_Real parextr = par;
+      if (SearchForExtremum(C2d, aPar1, aPar2, gp_Vec2d(1, 0), parextr, pextr)) {
+        Box.Add(pextr);
+      }
+      parextr = par;
+      if (SearchForExtremum(C2d, aPar1, aPar2, gp_Vec2d(0, 1), parextr, pextr)) {
+        Box.Add(pextr);
+      }
     }
   }
 }
@@ -702,6 +737,7 @@ Standard_Integer ShapeAnalysis_Curve::SelectForwardSeam(const Handle(Geom2d_Curv
     gp_Pnt2d StartBC1 = BC1->StartPoint();
     gp_Pnt2d EndBC1   = BC1->EndPoint();
     gp_Vec2d VecBC1(StartBC1, EndBC1);
+    if (VecBC1.SquareMagnitude() < gp::Resolution()) return theCurveIndice;
     L1 = new Geom2d_Line(StartBC1, VecBC1);
   }
 
@@ -713,6 +749,7 @@ Standard_Integer ShapeAnalysis_Curve::SelectForwardSeam(const Handle(Geom2d_Curv
     gp_Pnt2d StartBC2 = BC2->StartPoint();
     gp_Pnt2d EndBC2   = BC2->EndPoint();
     gp_Vec2d VecBC2(StartBC2, EndBC2);
+    if (VecBC2.SquareMagnitude() < gp::Resolution()) return theCurveIndice;
     L2 = new Geom2d_Line(StartBC2, VecBC2);
   }
 
@@ -1033,9 +1070,8 @@ Standard_Boolean ShapeAnalysis_Curve::GetSamplePoints (const Handle(Geom_Curve)&
 
   GeomAdaptor_Curve GAC(curve);
   Standard_Real step = ( last - first ) / (Standard_Real)( nbp - 1 );
-  Standard_Real par = first, stop = last - 0.5 * step;
-  for ( ; par < stop; par += step )
-    seq.Append(GAC.Value(par));
+  for (Standard_Integer i = 0; i < nbp - 1; ++i)
+    seq.Append(GAC.Value(first + step * i));
   seq.Append(GAC.Value(last));
   return Standard_True;
 }
@@ -1056,9 +1092,8 @@ Standard_Boolean ShapeAnalysis_Curve::GetSamplePoints (const Handle(Geom2d_Curve
   //-- Attention aux bsplines rationnelles de degree 3. (bouts de cercles entre autres)
   if (nbs > 2) nbs*=4;
   Standard_Real step = ( last - first ) / (Standard_Real)( nbs - 1 );
-  Standard_Real par = first, stop = last - 0.5 * step;
-  for ( ; par < stop; par += step )
-    seq.Append(C.Value(par));
+  for (Standard_Integer i = 0; i < nbs - 1; ++i)
+    seq.Append(C.Value(first + step * i));
   seq.Append(C.Value(last));
   return Standard_True;
 /*

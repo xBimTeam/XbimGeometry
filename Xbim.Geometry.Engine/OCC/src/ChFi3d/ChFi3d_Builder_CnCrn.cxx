@@ -93,7 +93,7 @@
 #include <GeomLib.hxx>
 #include <GeomPlate_BuildPlateSurface.hxx>
 #include <GeomPlate_CurveConstraint.hxx>
-#include <GeomPlate_HArray1OfHCurveOnSurface.hxx>
+#include <GeomPlate_HArray1OfHCurve.hxx>
 #include <GeomPlate_MakeApprox.hxx>
 #include <GeomPlate_PlateG0Criterion.hxx>
 #include <GeomPlate_Surface.hxx>
@@ -1138,8 +1138,7 @@ void  ChFi3d_Builder::PerformMoreThreeCorner(const Standard_Integer Jndex,
       nbcouture++;
     }
     else ChFi3d_cherche_edge(V1,Evive,Fcur,Enext,VV);
-    if (Enext.IsNull())Standard_Failure::Raise
-    ("PerformMoreThreeCorner: pb in the parsing of edges and faces"); 
+    if (Enext.IsNull())throw Standard_Failure("PerformMoreThreeCorner: pb in the parsing of edges and faces");
     if (Enext.IsSame(edgelibre1)|| Enext.IsSame(edgelibre2)) {
       CD.SetValue(ii, cdbid);
       Index.SetValue(ii, 0);

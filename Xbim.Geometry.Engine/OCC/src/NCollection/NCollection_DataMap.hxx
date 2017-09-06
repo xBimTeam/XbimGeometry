@@ -47,8 +47,14 @@ template < class TheKeyType,
            class Hasher = NCollection_DefaultHasher<TheKeyType> >
 class NCollection_DataMap : public NCollection_BaseMap
 {
+public:
+  //! STL-compliant typedef for key type
+  typedef TheKeyType key_type;
+  //! STL-compliant typedef for value type
+  typedef TheItemType value_type;
+
+public:
   // **************** Adaptation of the TListNode to the DATAmap
- public:
   class DataMapNode : public NCollection_TListNode<TheItemType>
   {
   public:
@@ -301,7 +307,7 @@ class NCollection_DataMap : public NCollection_BaseMap
   {
     DataMapNode* p = 0;
     if (!lookup(theKey, p))
-      Standard_NoSuchObject::Raise("NCollection_DataMap::Find");
+      throw Standard_NoSuchObject("NCollection_DataMap::Find");
     return p->Value();
   }
 
@@ -337,7 +343,7 @@ class NCollection_DataMap : public NCollection_BaseMap
   {
     DataMapNode* p = 0;
     if (!lookup(theKey, p))
-      Standard_NoSuchObject::Raise("NCollection_DataMap::Find");
+      throw Standard_NoSuchObject("NCollection_DataMap::Find");
     return p->ChangeValue();
   }
 

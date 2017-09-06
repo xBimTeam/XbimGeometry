@@ -583,12 +583,14 @@ BSplCLib_KnotDistribution BSplCLib::KnotForm
    Standard_Real DU0,DU1,Ui,Uj,Eps0,val;
    BSplCLib_KnotDistribution  KForm = BSplCLib_Uniform;
 
-   Standard_Integer KLower = Knots.Lower();
-   const Standard_Real * pkn = &Knots(KLower);
-   pkn -= KLower;
-   Ui  = pkn[FromK1];
+   if (FromK1 + 1 > Knots.Upper())
+   {
+     return BSplCLib_Uniform;
+   }
+
+   Ui  = Knots(FromK1);
    if (Ui < 0) Ui = - Ui;
-   Uj  = pkn[FromK1 + 1];
+   Uj  = Knots(FromK1 + 1);
    if (Uj < 0) Uj = - Uj;
    DU0 = Uj - Ui;
    if (DU0 < 0) DU0 = - DU0;
@@ -596,10 +598,10 @@ BSplCLib_KnotDistribution BSplCLib::KnotForm
    Standard_Integer i = FromK1 + 1;
 
    while (KForm != BSplCLib_NonUniform && i < ToK2) {
-     Ui = pkn[i];      
+     Ui = Knots(i);
      if (Ui < 0) Ui = - Ui;
      i++;
-     Uj = pkn[i];
+     Uj = Knots(i);
      if (Uj < 0) Uj = - Uj;
      DU1 = Uj - Ui;
      if (DU1 < 0) DU1 = - DU1;
@@ -631,13 +633,15 @@ BSplCLib_MultDistribution BSplCLib::MultForm
     First = ToK2;
     Last  = FromK1;
   }
-  Standard_Integer MLower = Mults.Lower();
-  const Standard_Integer *pmu = &Mults(MLower);
-  pmu -= MLower;
-  Standard_Integer FirstMult = pmu[First];
+  if (First + 1 > Mults.Upper())
+  {
+    return BSplCLib_Constant;
+  }
+
+  Standard_Integer FirstMult = Mults(First);
   BSplCLib_MultDistribution MForm = BSplCLib_Constant;
   Standard_Integer i    = First + 1;
-  Standard_Integer Mult = pmu[i];
+  Standard_Integer Mult = Mults(i);
   
 //  while (MForm != BSplCLib_NonUniform && i <= Last) { ???????????JR????????
   while (MForm != BSplCLib_NonConstant && i <= Last) {
@@ -646,15 +650,15 @@ BSplCLib_MultDistribution BSplCLib::MultForm
     }
     else if (i == Last)  {
       if (MForm == BSplCLib_QuasiConstant) {
-	if (FirstMult != pmu[i])  MForm = BSplCLib_NonConstant;
+        if (FirstMult != Mults(i))  MForm = BSplCLib_NonConstant;
       }
       else {
-	if (Mult != pmu[i])       MForm = BSplCLib_NonConstant;
+        if (Mult != Mults(i))       MForm = BSplCLib_NonConstant;
       }
     }
     else {
-      if (Mult != pmu[i])         MForm = BSplCLib_NonConstant;
-      Mult = pmu[i];
+      if (Mult != Mults(i))         MForm = BSplCLib_NonConstant;
+      Mult = Mults(i);
     }
     i++;
   }
@@ -2810,7 +2814,7 @@ void BSplCLib::Trimming(const Standard_Integer         Degree,
   mm[0] = mm[1] = Degree;
   if (!PrepareInsertKnots( Degree, Periodic, Knots, Mults, K, &M, 
 			  nbpoles, nbknots, Epsilon( U1), 0))
-    Standard_OutOfRange::Raise();
+    throw Standard_OutOfRange();
 
   TColStd_Array1OfReal    TempPoles(1, nbpoles*Dimension);
   TColStd_Array1OfReal    TempKnots(1, nbknots);
@@ -3040,7 +3044,7 @@ void  BSplCLib::Interpolate(const Standard_Integer         Degree,
                            UpperBandWidth,
                            LowerBandWidth) ;
   if(ErrorCode)
-    Standard_OutOfRange::Raise("BSplCLib::Interpolate");
+    throw Standard_OutOfRange("BSplCLib::Interpolate");
 
   ErrorCode =
   BSplCLib::FactorBandedMatrix(InterpolationMatrix,
@@ -3048,7 +3052,7 @@ void  BSplCLib::Interpolate(const Standard_Integer         Degree,
                            LowerBandWidth,
                            InversionProblem) ;
   if(ErrorCode)
-    Standard_OutOfRange::Raise("BSplCLib::Interpolate");
+    throw Standard_OutOfRange("BSplCLib::Interpolate");
 
   ErrorCode  =
   BSplCLib::SolveBandedSystem(InterpolationMatrix,
@@ -3057,7 +3061,7 @@ void  BSplCLib::Interpolate(const Standard_Integer         Degree,
 			      ArrayDimension,
                               Poles) ;
   if(ErrorCode)
-    Standard_OutOfRange::Raise("BSplCLib::Interpolate");
+    throw Standard_OutOfRange("BSplCLib::Interpolate");
 }
 
 //=======================================================================
@@ -3089,7 +3093,7 @@ void  BSplCLib::Interpolate(const Standard_Integer         Degree,
                            UpperBandWidth,
                            LowerBandWidth) ;
   if(ErrorCode)
-    Standard_OutOfRange::Raise("BSplCLib::Interpolate");
+    throw Standard_OutOfRange("BSplCLib::Interpolate");
 
   ErrorCode =
   BSplCLib::FactorBandedMatrix(InterpolationMatrix,
@@ -3097,7 +3101,7 @@ void  BSplCLib::Interpolate(const Standard_Integer         Degree,
                            LowerBandWidth,
                            InversionProblem) ;
   if(ErrorCode)
-    Standard_OutOfRange::Raise("BSplCLib::Interpolate");
+    throw Standard_OutOfRange("BSplCLib::Interpolate");
 
   ErrorCode  =
   BSplCLib::SolveBandedSystem(InterpolationMatrix,
@@ -3108,7 +3112,7 @@ void  BSplCLib::Interpolate(const Standard_Integer         Degree,
                               Poles,
 			      Weights) ;
   if(ErrorCode)
-    Standard_OutOfRange::Raise("BSplCLib::Interpolate");
+    throw Standard_OutOfRange("BSplCLib::Interpolate");
 }
 
 //=======================================================================

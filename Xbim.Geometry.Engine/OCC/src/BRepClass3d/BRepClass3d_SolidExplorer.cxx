@@ -603,17 +603,20 @@ Standard_Integer BRepClass3d_SolidExplorer::OtherSegment(const gp_Pnt& P,
           {
             gp_Vec Norm = aVecD1U.Crossed (aVecD1V);
             Standard_Real tt = Norm.Magnitude();
-            tt = Abs (Norm.Dot (V)) / (tt * Par);
-            if (tt > maxscal)
+            if (tt > gp::Resolution())
             {
-              maxscal = tt;
-              L = gp_Lin (P, V);
-              _Par = Par;
-              ptfound = Standard_True;
-              if (maxscal>0.2)
+              tt = Abs (Norm.Dot (V)) / (tt * Par);
+              if (tt > maxscal)
               {
-                myParamOnEdge=svmyparam;
-                return 0;
+                maxscal = tt;
+                L = gp_Lin (P, V);
+                _Par = Par;
+                ptfound = Standard_True;
+                if (maxscal>0.2)
+                {
+                  myParamOnEdge=svmyparam;
+                  return 0;
+                }
               }
             }
           }
@@ -770,18 +773,6 @@ Standard_Boolean BRepClass3d_SolidExplorer::FindAPointInTheFace
 
 BRepClass3d_SolidExplorer::BRepClass3d_SolidExplorer() 
 {
-}
-#include <Standard_ConstructionError.hxx>
-
-//=======================================================================
-//function : BRepClass3d_SolidExplorer
-//purpose  : Raise if called.
-//=======================================================================
-
-//BRepClass3d_SolidExplorer::BRepClass3d_SolidExplorer(const BRepClass3d_SolidExplorer& Oth) 
-BRepClass3d_SolidExplorer::BRepClass3d_SolidExplorer(const BRepClass3d_SolidExplorer& ) 
-{
-  Standard_ConstructionError::Raise("Magic constructor not allowed");
 }
 
 //=======================================================================

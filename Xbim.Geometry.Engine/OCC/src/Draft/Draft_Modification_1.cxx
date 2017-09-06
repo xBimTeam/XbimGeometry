@@ -380,30 +380,11 @@ Standard_Boolean Draft_Modification::InternalAdd(const TopoDS_Face& F,
               typS == STANDARD_TYPE(Geom_SurfaceOfLinearExtrusion)) {
             if ( myFMap.Contains(F)) {
               if ( Flag == Standard_False && !postponed) {
-                Standard_Integer IndToReplace = myFMap.FindIndex(F);
-                if (IndToReplace) {
-                  Standard_Integer LInd = myFMap.Extent();
-                  TopoDS_Face LF = myFMap.FindKey(LInd);
-                  Draft_FaceInfo LFInfo = myFMap.FindFromIndex(LInd);
-                  myFMap.RemoveLast();
-
-                  if (IndToReplace != LInd)
-                    myFMap.Substitute(IndToReplace, LF, LFInfo);
-                }
+                myFMap.RemoveKey(F);
                 TopTools_MapIteratorOfMapOfShape itm(MapOfE);
                 for ( ; itm.More(); itm.Next())
                 {
-                  IndToReplace = myEMap.FindIndex(TopoDS::Edge(itm.Key()));
-                  if ( IndToReplace )
-                  {
-                    Standard_Integer LInd = myEMap.Extent();
-                    TopoDS_Edge LE = myEMap.FindKey(LInd);
-                    Draft_EdgeInfo LEInfo = myEMap.FindFromIndex(LInd);
-                    myEMap.RemoveLast();
-
-                    if (IndToReplace != LInd)
-                      myEMap.Substitute(IndToReplace, LE, LEInfo);
-                  }
+                  myEMap.RemoveKey(TopoDS::Edge(itm.Key()));
                 }
               }
             }
@@ -691,7 +672,7 @@ Standard_Boolean Draft_Modification::Propagate ()
 
 void Draft_Modification::Perform ()
 {
-  if (!badShape.IsNull())  Standard_ConstructionError::Raise();
+  if (!badShape.IsNull())  throw Standard_ConstructionError();
 
   if (!myComp) {
     myComp = Standard_True;
@@ -2066,7 +2047,7 @@ static Standard_Real Parameter(const Handle(Geom_Curve)& C,
     GeomAdaptor_Curve TheCurve(C);
     Extrema_ExtPC myExtPC(P,TheCurve);
     if (!myExtPC.IsDone()) {
-      Standard_Failure::Raise("Draft_Modification_1::Parameter: ExtremaPC not done.");
+      throw Standard_Failure("Draft_Modification_1::Parameter: ExtremaPC not done.");
     }
     if (myExtPC.NbExt() >= 1) {
       Standard_Real Dist2, Dist2Min = myExtPC.SquareDistance(1);

@@ -17,20 +17,25 @@
 #ifndef _BRepTools_ReShape_HeaderFile
 #define _BRepTools_ReShape_HeaderFile
 
-#include <Standard.hxx>
-#include <Standard_Type.hxx>
+#include <BRepTools_History.hxx>
 
 #include <TopTools_DataMapOfShapeShape.hxx>
+#include <TopTools_MapOfShape.hxx>
 #include <Standard_Integer.hxx>
 #include <Standard_Boolean.hxx>
-#include <MMgt_TShared.hxx>
+#include <Standard_Transient.hxx>
 #include <TopAbs_ShapeEnum.hxx>
+
 class TopoDS_Shape;
 class TopoDS_Vertex;
 
+// resolve name collisions with X11 headers
+#ifdef Status
+  #undef Status
+#endif
 
 class BRepTools_ReShape;
-DEFINE_STANDARD_HANDLE(BRepTools_ReShape, MMgt_TShared)
+DEFINE_STANDARD_HANDLE(BRepTools_ReShape, Standard_Transient)
 
 //! Rebuilds a Shape by making pre-defined substitutions on some
 //! of its components
@@ -44,30 +49,49 @@ DEFINE_STANDARD_HANDLE(BRepTools_ReShape, MMgt_TShared)
 //!
 //! Then, these requests may be applied to any shape which may
 //! contain one or more of these individual shapes
-class BRepTools_ReShape : public MMgt_TShared
+//!
+//! Supports the 'BRepTools_History' history by method 'History'.
+class BRepTools_ReShape : public Standard_Transient
 {
-
 public:
-
-  
   //! Returns an empty Reshape
   Standard_EXPORT BRepTools_ReShape();
   
   //! Clears all substitutions requests
   Standard_EXPORT virtual void Clear();
   
-  //! Sets a request to Remove a Shape
-  //! If <oriented> is True, only for a shape with the SAME
-  //! orientation. Else, whatever the orientation
-  Standard_EXPORT virtual void Remove (const TopoDS_Shape& shape, const Standard_Boolean oriented = Standard_False);
+  //! Sets a request to Remove a Shape whatever the orientation
+  Standard_EXPORT virtual void Remove (const TopoDS_Shape& shape);
   
-  //! Sets a request to Replace a Shape by a new one
-  //! If <oriented> is True, only if the orientation is the same
-  //! Else, whatever the orientation, and the new shape takes the
-  //! same orientation as <newshape> if the replaced one has the
-  //! same as <shape>, else it is reversed
-  Standard_EXPORT virtual void Replace (const TopoDS_Shape& shape, const TopoDS_Shape& newshape, const Standard_Boolean oriented = Standard_False);
+  //! Sets a request to Replace a Shape by a new one.
+  virtual void Replace (const TopoDS_Shape& shape, const TopoDS_Shape& newshape)
+  {
+    replace (shape, newshape, TReplacementKind_Modify);
+  }
   
+  //! Merges the parts to the single product.
+  //! The first part is replaced by the product.
+  //! The other parts are removed.
+  //! The history of the merged shapes is presented by equal ways.
+  template<typename TCollection> void Merge(
+    const TCollection& theParts, const TopoDS_Shape& theProduct)
+  {
+    typename TCollection::Iterator aPIt(theParts);
+
+    if (aPIt.More())
+    {
+      replace(aPIt.Value(), theProduct, TReplacementKind_Merge_Main);
+
+      aPIt.Next();
+    }
+
+    const TReplacementKind aKind = TReplacementKind_Merge_Ordinary;
+    for (; aPIt.More(); aPIt.Next())
+    {
+      replace(aPIt.Value(), theProduct, aKind);
+    }
+  }
+
   //! Tells if a shape is recorded for Replace/Remove
   Standard_EXPORT virtual Standard_Boolean IsRecorded (const TopoDS_Shape& shape) const;
   
@@ -85,23 +109,7 @@ public:
   //! the map directly for the shape, if True and status > 0 then
   //! recursively searches for the last status and new shape.
   Standard_EXPORT virtual Standard_Integer Status (const TopoDS_Shape& shape, TopoDS_Shape& newsh, const Standard_Boolean last = Standard_False);
-  
-  //! Applies the substitutions requests to a shape
-  //!
-  //! <until> gives the level of type until which requests are taken
-  //! into account. For subshapes of the type <until> no rebuild
-  //! and futher exploring are done.
-  //! ACTUALLY, NOT IMPLEMENTED BELOW  TopAbs_FACE
-  //!
-  //! <buildmode> says how to do on a SOLID,SHELL ... if one of its
-  //! sub-shapes has been changed:
-  //! 0: at least one Replace or Remove -> COMPOUND, else as such
-  //! 1: at least one Remove (Replace are ignored) -> COMPOUND
-  //! 2: Replace and Remove are both ignored
-  //! If Replace/Remove are ignored or absent, the result as same
-  //! type as the starting shape
-  Standard_EXPORT virtual TopoDS_Shape Apply (const TopoDS_Shape& shape, const TopAbs_ShapeEnum until, const Standard_Integer buildmode);
-  
+
   //! Applies the substitutions requests to a shape.
   //!
   //! <until> gives the level of type until which requests are taken
@@ -115,14 +123,13 @@ public:
   //! If incompatible shape type is encountered, it is ignored
   //! and flag FAIL1 is set in Status.
   Standard_EXPORT virtual TopoDS_Shape Apply (const TopoDS_Shape& shape, const TopAbs_ShapeEnum until = TopAbs_SHAPE);
-  
+
   //! Returns (modifiable) the flag which defines whether Location of shape take into account
   //! during replacing shapes.
-  Standard_EXPORT virtual Standard_Boolean& ModeConsiderLocation();
-  
-  //! Returns (modifiable) the flag which defines whether Orientation of shape take into account
-  //! during replacing shapes.
-  Standard_EXPORT virtual Standard_Boolean& ModeConsiderOrientation();
+  virtual Standard_Boolean& ModeConsiderLocation()
+  {
+    return myConsiderLocation;
+  }
 
   //! Returns modified copy of vertex if original one is not recorded or returns modified original vertex otherwise.
   //@param theV - original vertex.
@@ -138,14 +145,99 @@ public:
                                            const gp_Pnt& theNewPos,
                                            const Standard_Real aTol);
 
+  //! Checks if shape has been recorded by reshaper as a value
+  //@param theShape is the given shape
+  Standard_EXPORT Standard_Boolean IsNewShape(const TopoDS_Shape& theShape) const;
 
-  DEFINE_STANDARD_RTTIEXT(BRepTools_ReShape,MMgt_TShared)
+  //! Returns the history of the substituted shapes.
+  Standard_EXPORT Handle(BRepTools_History) History() const;
+
+  DEFINE_STANDARD_RTTIEXT(BRepTools_ReShape,Standard_Transient)
 
 protected:
+  //! The kinds of the replacements.
+  enum TReplacementKind
+  {
+    TReplacementKind_Remove = 1,
+    TReplacementKind_Modify = 2,
+    TReplacementKind_Merge_Main = 4,
+    TReplacementKind_Merge_Ordinary = 8
+  };
 
+  //! Replaces the first shape by the second one
+  //! after the following reorientation.
+  //!
+  //! If the first shape has the reversed orientation
+  //! then the both shapes are reversed.
+  //! If the first shape has the internal or external orientation then: <br>
+  //! - the second shape is oriented forward (reversed) if it's orientation
+  //!   is equal (not equal) to the orientation of the first shape; <br>
+  //! - the first shape is oriented forward.
+  Standard_EXPORT virtual void replace (
+    const TopoDS_Shape& shape,
+    const TopoDS_Shape& newshape,
+    const TReplacementKind theKind);
 
-  TopTools_DataMapOfShapeShape myNMap;
-  TopTools_DataMapOfShapeShape myRMap;
+private:
+  //! Returns 'true' if the kind of a replacement is an ordinary merging.
+  static Standard_Boolean isOrdinaryMerged(const TReplacementKind theKind)
+  {
+    return (theKind == TReplacementKind_Merge_Ordinary);
+  }
+
+  //! A replacement of an initial shape.
+  struct TReplacement
+  {
+  public:
+    //! The default constructor.
+    TReplacement() : myKind(TReplacementKind_Remove)
+    {
+    }
+
+    //! The initializing constructor.
+    TReplacement(
+        const TopoDS_Shape& theResult, const TReplacementKind theKind) :
+      myResult(theResult), myKind(theKind)
+    {
+    }
+
+    //! Returns the result of the replacement.
+    TopoDS_Shape Result() const
+    {
+      return (myKind != TReplacementKind_Merge_Ordinary) ?
+        myResult : TopoDS_Shape();
+    }
+
+    //! Returns the result of the relation.
+    const TopoDS_Shape& RelationResult() const
+    {
+      return myResult;
+    }
+
+    //! Returns the kind of the relation
+    //! between an initial shape and the result of the replacement.
+    BRepTools_History::TRelationType RelationKind() const
+    {
+      return (myKind == TReplacementKind_Remove) ?
+        BRepTools_History::TRelationType_Removed :
+        BRepTools_History::TRelationType_Modified;
+    }
+
+  private:
+    TopoDS_Shape myResult; //!< The result of the replacement.
+    TReplacementKind myKind; //!< The kind of the replacement.
+  };
+
+  typedef NCollection_DataMap<TopoDS_Shape, TReplacement,
+    TopTools_ShapeMapHasher> TShapeToReplacement;
+
+private:
+  //! Maps each shape to its replacement.
+  //! If a shape is not bound to the map then the shape is replaced by itself.
+  TShapeToReplacement myShapeToReplacement;
+
+protected:
+  TopTools_MapOfShape myNewShapes;
   Standard_Integer myStatus;
 
 
@@ -153,7 +245,6 @@ private:
 
 
   Standard_Boolean myConsiderLocation;
-  Standard_Boolean myConsiderOrientation;
 
 
 };

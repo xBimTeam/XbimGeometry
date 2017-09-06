@@ -17,13 +17,13 @@
 #define _BRepExtrema_TriangleSet_HeaderFile
 
 #include <TopoDS_Face.hxx>
-#include <BVH_PrimitiveSet.hxx>
+#include <BVH_PrimitiveSet3d.hxx>
 
 //! List of shapes and their IDs for collision detection.
 typedef NCollection_Vector<TopoDS_Face> BRepExtrema_ShapeList;
 
 //! Triangle set corresponding to specific face.
-class BRepExtrema_TriangleSet : public BVH_PrimitiveSet<Standard_Real, 3>, public Standard_Transient
+class BRepExtrema_TriangleSet : public BVH_PrimitiveSet3d
 {
 public:
 
@@ -39,19 +39,19 @@ public:
 public: //! @name methods implementing BVH set interface
 
   //! Returns total number of triangles.
-  Standard_Integer Size() const Standard_OVERRIDE;
+  Standard_EXPORT Standard_Integer Size() const Standard_OVERRIDE;
 
   //! Returns AABB of the given triangle.
-  BVH_Box<Standard_Real, 3> Box (const Standard_Integer theIndex) const Standard_OVERRIDE;
+  Standard_EXPORT BVH_Box<Standard_Real, 3> Box (const Standard_Integer theIndex) const Standard_OVERRIDE;
 
   //! Make inherited method Box() visible to avoid CLang warning
-  using BVH_PrimitiveSet<Standard_Real, 3>::Box;
+  using BVH_PrimitiveSet3d::Box;
 
   //! Returns centroid position along specified axis.
-  Standard_Real Center (const Standard_Integer theIndex, const Standard_Integer theAxis) const Standard_OVERRIDE;
+  Standard_EXPORT Standard_Real Center (const Standard_Integer theIndex, const Standard_Integer theAxis) const Standard_OVERRIDE;
 
   //! Swaps indices of two specified triangles.
-  void Swap (const Standard_Integer theIndex1, const Standard_Integer theIndex2) Standard_OVERRIDE;
+  Standard_EXPORT void Swap (const Standard_Integer theIndex1, const Standard_Integer theIndex2) Standard_OVERRIDE;
 
 public:
 
@@ -83,10 +83,10 @@ protected:
 
 public:
 
-  DEFINE_STANDARD_RTTIEXT(BRepExtrema_TriangleSet,Standard_Transient)
+  DEFINE_STANDARD_RTTIEXT(BRepExtrema_TriangleSet, BVH_PrimitiveSet3d)
 
 };
 
-DEFINE_STANDARD_HANDLE (BRepExtrema_TriangleSet, Standard_Transient)
+DEFINE_STANDARD_HANDLE(BRepExtrema_TriangleSet, BVH_PrimitiveSet3d)
 
 #endif // _BRepExtrema_TriangleSet_HeaderFile

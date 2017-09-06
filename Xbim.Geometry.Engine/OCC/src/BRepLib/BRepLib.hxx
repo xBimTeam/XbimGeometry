@@ -27,6 +27,8 @@
 #include <Standard_Integer.hxx>
 #include <TopTools_ListOfShape.hxx>
 #include <NCollection_List.hxx>
+
+class Adaptor3d_Curve;
 class Geom_Plane;
 class TopoDS_Edge;
 class TopoDS_Shape;
@@ -45,6 +47,7 @@ class BRepLib_MakeSolid;
 class BRepLib_FindSurface;
 class BRepLib_FuseEdges;
 class BRepLib_CheckCurveOnSurface;
+class BRepTools_ReShape;
 
 
 //! The BRepLib package provides general utilities for
@@ -130,23 +133,58 @@ public:
   //! Use  only  in interfaces or  processing assimilate batch
   Standard_EXPORT static Standard_Boolean UpdateEdgeTolerance (const TopoDS_Shape& S, const Standard_Real MinToleranceRequest, const Standard_Real MaxToleranceToCheck);
   
-  //! Computes new 2d curve(s)  for the edge <E> to have
+  //! Computes new 2d curve(s)  for the edge <theEdge> to have
   //! the same parameter  as  the  3d curve.
   //! The algorithm is not done if the flag SameParameter
   //! was True  on the  Edge.
-  Standard_EXPORT static void SameParameter (const TopoDS_Edge& E, const Standard_Real Tolerance = 1.0e-5);
+  Standard_EXPORT static void SameParameter (const TopoDS_Edge& theEdge, const Standard_Real Tolerance = 1.0e-5);
+
+  //! Computes new 2d curve(s)  for the edge <theEdge> to have
+  //! the same parameter  as  the  3d curve.
+  //! The algorithm is not done if the flag SameParameter
+  //! was True  on the  Edge.<br>
+  //! theNewTol is a new tolerance of vertices of the input edge
+  //! (not applied inside the algorithm, but pre-computed).
+  //! If IsUseOldEdge is true then the input edge will be modified,
+  //! otherwise the new copy of input edge will be created.
+  //! Returns the new edge as a result, can be ignored if IsUseOldEdge is true.
+  Standard_EXPORT static TopoDS_Edge SameParameter(const TopoDS_Edge& theEdge,
+  const Standard_Real theTolerance, Standard_Real& theNewTol, const Standard_Boolean IsUseOldEdge);
   
   //! Computes new 2d curve(s) for all the edges of  <S>
   //! to have the same parameter  as  the  3d curve.
   //! The algorithm is not done if the flag SameParameter
   //! was True  on an  Edge.
-  Standard_EXPORT static void SameParameter (const TopoDS_Shape& S, const Standard_Real Tolerance = 1.0e-5, const Standard_Boolean forced = Standard_False);
-  
+  Standard_EXPORT static void SameParameter(const TopoDS_Shape& S,
+    const Standard_Real Tolerance = 1.0e-5, const Standard_Boolean forced = Standard_False);
+
+  //! Computes new 2d curve(s) for all the edges of  <S>
+  //! to have the same parameter  as  the  3d curve.
+  //! The algorithm is not done if the flag SameParameter
+  //! was True  on an  Edge.<br>
+  //! theReshaper is used to record the modifications of input shape <S> to prevent any 
+  //! modifications on the shape itself.
+  //! Thus the input shape (and its subshapes) will not be modified, instead the reshaper will 
+  //! contain a modified empty-copies of original subshapes as substitutions.
+  Standard_EXPORT static void SameParameter(const TopoDS_Shape& S, BRepTools_ReShape& theReshaper,
+    const Standard_Real Tolerance = 1.0e-5, const Standard_Boolean forced = Standard_False );
+ 
   //! Replaces tolerance   of  FACE EDGE VERTEX  by  the
   //! tolerance Max of their connected handling shapes.
   //! It is not necessary to use this call after
   //! SameParameter. (called in)
   Standard_EXPORT static void UpdateTolerances (const TopoDS_Shape& S, const Standard_Boolean verifyFaceTolerance = Standard_False);
+
+  //! Replaces tolerance   of  FACE EDGE VERTEX  by  the
+  //! tolerance Max of their connected handling shapes.
+  //! It is not necessary to use this call after
+  //! SameParameter. (called in)<br>
+  //! theReshaper is used to record the modifications of input shape <S> to prevent any 
+  //! modifications on the shape itself.
+  //! Thus the input shape (and its subshapes) will not be modified, instead the reshaper will 
+  //! contain a modified empty-copies of original subshapes as substitutions.
+  Standard_EXPORT static void UpdateTolerances (const TopoDS_Shape& S, BRepTools_ReShape& theReshaper, 
+    const Standard_Boolean verifyFaceTolerance = Standard_False );
   
   //! Checks tolerances of edges (including inner points) and vertices
   //! of a shape and updates them to satisfy "SameParameter" condition
@@ -162,12 +200,18 @@ public:
   //! Warning: If the edges's regularity are coded before, nothing
   //! is done.
   Standard_EXPORT static void EncodeRegularity (const TopoDS_Shape& S, const Standard_Real TolAng = 1.0e-10);
+
+  //! Encodes the Regularity of edges in list <LE> on the shape <S>
+  //! Warning: <TolAng> is an angular tolerance, expressed in Rad.
+  //! Warning: If the edges's regularity are coded before, nothing
+  //! is done.
+  Standard_EXPORT static void EncodeRegularity(const TopoDS_Shape& S, const TopTools_ListOfShape& LE, const Standard_Real TolAng = 1.0e-10);
   
   //! Encodes the Regularity beetween <F1> and <F2> by <E>
   //! Warning: <TolAng> is an angular tolerance, expressed in Rad.
   //! Warning: If the edge's regularity is coded before, nothing
   //! is done.
-  Standard_EXPORT static void EncodeRegularity (TopoDS_Edge& S, const TopoDS_Face& F1, const TopoDS_Face& F2, const Standard_Real TolAng = 1.0e-10);
+  Standard_EXPORT static void EncodeRegularity (TopoDS_Edge& E, const TopoDS_Face& F1, const TopoDS_Face& F2, const Standard_Real TolAng = 1.0e-10);
   
   //! Sorts in  LF the Faces of   S on the  complexity of
   //! their                  surfaces
@@ -191,6 +235,23 @@ public:
   //! other vertices.
   Standard_EXPORT static  void BoundingVertex(const NCollection_List<TopoDS_Shape>& theLV,
                                               gp_Pnt& theNewCenter, Standard_Real& theNewTol);
+
+  //! For an edge defined by 3d curve and tolerance and vertices defined by points,
+  //! parameters on curve and tolerances,
+  //! finds a range of curve between vertices not covered by vertices tolerances.
+  //! Returns false if there is no such range. Otherwise, sets theFirst and 
+  //! theLast as its bounds.
+  Standard_EXPORT static Standard_Boolean FindValidRange
+    (const Adaptor3d_Curve& theCurve, const Standard_Real theTolE,
+     const Standard_Real theParV1, const gp_Pnt& thePntV1, const Standard_Real theTolV1,
+     const Standard_Real theParV2, const gp_Pnt& thePntV2, const Standard_Real theTolV2,
+     Standard_Real& theFirst, Standard_Real& theLast);
+
+  //! Finds a range of 3d curve of the edge not covered by vertices tolerances.
+  //! Returns false if there is no such range. Otherwise, sets theFirst and 
+  //! theLast as its bounds.
+  Standard_EXPORT static Standard_Boolean FindValidRange
+    (const TopoDS_Edge& theEdge, Standard_Real& theFirst, Standard_Real& theLast);
 
 protected:
 

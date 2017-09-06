@@ -71,23 +71,10 @@ GC_MakeTrimmedCylinder::GC_MakeTrimmedCylinder(const gp_Ax1&       A1     ,
   }
 }
 
-GC_MakeTrimmedCylinder::GC_MakeTrimmedCylinder(const gp_Cylinder& , // Cyl,
-						 const gp_Pnt&      , // P,
-						 const Standard_Real )//Height)
-{
-  Standard_NotImplemented::Raise("GC_MakeTrimmedCylinder");
-}
-
-GC_MakeTrimmedCylinder::GC_MakeTrimmedCylinder(const gp_Cylinder& , // Cyl,
-						 const gp_Pnt&      , // P1,
-						 const gp_Pnt&      ) // P2)
-{
-  Standard_NotImplemented::Raise("GC_MakeTrimmedCylinder");
-}
-
 const Handle(Geom_RectangularTrimmedSurface)& GC_MakeTrimmedCylinder::
        Value() const
 { 
-  StdFail_NotDone_Raise_if(TheError != gce_Done,"");
+  StdFail_NotDone_Raise_if (TheError != gce_Done,
+                            "GC_MakeTrimmedCylinder::Value() - no result");
   return TheCyl;
 }
