@@ -55,6 +55,9 @@ namespace Xbim
 				if (ifcEntity!=nullptr)
 					LoggerExtensions::LogInformation(logger,"GeomEngine: #{0}={1} [{2}]", ifcEntity->EntityLabel, ifcEntity->GetType()->Name, msg);
 				else
+					if (entity == nullptr)
+						LoggerExtensions::LogInformation(logger, "GeomEngine: [{0}]", msg);
+					else
 					LoggerExtensions::LogInformation(logger,"GeomEngine: {0} [{1}]", entity->GetType()->Name, msg);
 			}
 		}
@@ -68,7 +71,10 @@ namespace Xbim
 				if (ifcEntity != nullptr)
 					LoggerExtensions::LogWarning(logger, "GeomEngine: #{0}={1} [{2}]", ifcEntity->EntityLabel, ifcEntity->GetType()->Name, msg);
 				else
-					LoggerExtensions::LogWarning(logger, "GeomEngine: {0} [{1}]", entity->GetType()->Name, msg);
+					if (entity == nullptr)
+						LoggerExtensions::LogWarning(logger, "GeomEngine: [{0}]", msg);
+					else
+						LoggerExtensions::LogWarning(logger, "GeomEngine: {0} [{1}]", entity->GetType()->Name, msg);
 			}
 		}
 
@@ -81,7 +87,10 @@ namespace Xbim
 				if (ifcEntity != nullptr)
 					LoggerExtensions::LogDebug(logger, "GeomEngine: #{0}={1} [{2}]", ifcEntity->EntityLabel, ifcEntity->GetType()->Name, msg);
 				else
-					LoggerExtensions::LogDebug(logger, "GeomEngine: {0} [{1}]", entity->GetType()->Name, msg);
+					if (entity == nullptr)
+						LoggerExtensions::LogDebug(logger, "GeomEngine: [{0}]", msg);
+					else
+						LoggerExtensions::LogDebug(logger, "GeomEngine: {0} [{1}]", entity->GetType()->Name, msg);
 			}
 		}
 
@@ -93,8 +102,11 @@ namespace Xbim
 			{
 				if (ifcEntity != nullptr)
 					LoggerExtensions::LogError(logger,"GeomEngine: #{0}={1} [{2}]", ifcEntity->EntityLabel, ifcEntity->GetType()->Name, msg);
-				else
-					LoggerExtensions::LogError(logger, "GeomEngine: {0} [{1}]", entity->GetType()->Name, msg);
+				else 
+					if(entity==nullptr) 
+						LoggerExtensions::LogError(logger, "GeomEngine: [{0}]",  msg);
+					else	
+						LoggerExtensions::LogError(logger, "GeomEngine: {0} [{1}]", entity->GetType()->Name, msg);
 			}
 		}
 #pragma warning( pop)
