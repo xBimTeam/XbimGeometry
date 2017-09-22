@@ -23,10 +23,9 @@ namespace Xbim
 		public ref class XbimGeometryCreator : IXbimGeometryEngine
 		{
 			
-			static Assembly^  ResolveHandler(Object^ Sender, ResolveEventArgs^ args)
+			static Assembly^  ResolveHandler(Object^ /*Sender*/, ResolveEventArgs^ /*args*/)
 			{
-				Console::WriteLine(Sender->ToString());
-				Console::WriteLine(args->Name);
+				
 				// Warning: this should check the args for the assembly name!
 				return nullptr;
 			}
@@ -38,7 +37,11 @@ namespace Xbim
 			IXbimGeometryObject ^ Trim(XbimSetObject ^geometryObject);
 			static XbimGeometryCreator()
 			{
-			//	AppDomain::CurrentDomain->AssemblyResolve += gcnew ResolveEventHandler(ResolveHandler);
+				//AppDomain::CurrentDomain->AssemblyResolve += gcnew ResolveEventHandler(ResolveHandler);
+				Assembly::Load("Xbim.Ifc4");
+				Assembly::Load("Xbim.Common");
+				Assembly::Load("Xbim.Tessellator");
+				
 				String^ timeOut = ConfigurationManager::AppSettings["BooleanTimeOut"];
 				if (!double::TryParse(timeOut, BooleanTimeOut))
 					BooleanTimeOut = 60;

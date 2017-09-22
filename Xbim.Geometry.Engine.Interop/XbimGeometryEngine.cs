@@ -18,7 +18,7 @@ namespace Xbim.Geometry.Engine.Interop
 
         static XbimGeometryEngine()
         {
-            var ifc4Obj = new Xbim.Ifc4.MeasureResource.IfcAreaMeasure(0);
+           
             // We need to wire in a custom assembly resolver since Xbim.Geometry.Engine is 
             // not located using standard probing rules (due to way we deploy processor specific binaries)
             AppDomain.CurrentDomain.AssemblyResolve += XbimCustomAssemblyResolver.ResolverHandler;
@@ -35,12 +35,15 @@ namespace Xbim.Geometry.Engine.Interop
             try
             {               
                 var ass =  Assembly.Load(assemblyName);
-                var t = ass.GetType("Xbim.Geometry.XbimGeometryCreator");                       
-                _engine = Activator.CreateInstance(t) as IXbimGeometryEngine; 
+                var t = ass.GetType("Xbim.Geometry.XbimGeometryCreator");
+                var obj = Activator.CreateInstance(t);
+                if (obj == null) throw new Exception("Failed to create Geometry Engine");
+                _engine = obj as IXbimGeometryEngine;
+                if (_engine == null) throw new Exception("Failed to cast Geometry Engine to IXbimGeometryEngine");
             }
             catch (Exception e)
             {
-                throw new FileLoadException("Failed to load Xbim.Geometry.Engine.dll",e);
+                throw new FileLoadException($"Failed to load Xbim.Geometry.Engine{conventions.Suffix}.dll",e);
             }
              
         }
@@ -356,7 +359,15 @@ namespace Xbim.Geometry.Engine.Interop
 
         public IXbimSolidSet CreateSolidSet()
         {
-            return _engine.CreateSolidSet();
+            try
+            {
+                return _engine.CreateSolidSet();
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Engine is not valid", e);
+            }
+            
         }
 
         public IXbimSolidSet CreateSolidSet(IIfcBooleanResult boolOp, ILogger logger)

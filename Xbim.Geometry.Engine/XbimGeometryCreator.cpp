@@ -134,6 +134,11 @@ namespace Xbim
 
 		IXbimGeometryObject^ XbimGeometryCreator::Create(IIfcGeometricRepresentationItem^ geomRep, IIfcAxis2Placement3D^ objectLocation, ILogger^ logger)
 		{
+			if (geomRep == nullptr)
+			{
+				LogError(logger, geomRep, "Argument error: XbimGeometryCreator::Create,  Geometry Representation Item cannot be null");
+				return nullptr;
+			}
 			try
 			{
 				IIfcSweptAreaSolid^ sweptAreaSolid = dynamic_cast<IIfcSweptAreaSolid^>(geomRep);
