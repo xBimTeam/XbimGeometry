@@ -12,6 +12,7 @@ using namespace Xbim::Ifc4::Interfaces;
 using namespace Xbim::Ifc4;
 
 
+__declspec(dllexport) double __cdecl Load(void);
 
 using namespace System::Reflection;
 
@@ -38,9 +39,9 @@ namespace Xbim
 			static XbimGeometryCreator()
 			{
 				//AppDomain::CurrentDomain->AssemblyResolve += gcnew ResolveEventHandler(ResolveHandler);
-				Assembly::Load("Xbim.Ifc4");
+				/*Assembly::Load("Xbim.Ifc4");
 				Assembly::Load("Xbim.Common");
-				Assembly::Load("Xbim.Tessellator");
+				Assembly::Load("Xbim.Tessellator");*/
 				
 				String^ timeOut = ConfigurationManager::AppSettings["BooleanTimeOut"];
 				if (!double::TryParse(timeOut, BooleanTimeOut))

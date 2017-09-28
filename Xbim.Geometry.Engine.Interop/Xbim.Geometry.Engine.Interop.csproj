@@ -35,10 +35,10 @@
 
   <ItemGroup>
     <PackageReference Include="Xbim.Common" Version="5.0.0-Beta-387" />
-    <PackageReference Include="Xbim.Ifc2x3" Version="5.0.0-Beta-349" />
-    <PackageReference Include="Xbim.Ifc2x3.Extensions" Version="5.0.0-Beta-350" />
-    <PackageReference Include="Xbim.Ifc4" Version="5.0.0-Beta-348" />
-    <PackageReference Include="Xbim.Tessellator" Version="5.0.0-Beta-352" />
+    <PackageReference Include="Xbim.Ifc2x3" Version="5.0.0-Beta-417" />
+    <PackageReference Include="Xbim.Ifc2x3.Extensions" Version="5.0.0-Beta-418" />
+    <PackageReference Include="Xbim.Ifc4" Version="5.0.0-Beta-416" />
+    <PackageReference Include="Xbim.Tessellator" Version="5.0.0-Beta-420" />
   </ItemGroup>
  
 
@@ -46,6 +46,10 @@
     <Content Include="bin\$(Configuration)\net47\Xbim.Geometry.Engine32.dll">
       <Pack>true</Pack>
       <PackagePath>build\net47;</PackagePath>
+    </Content>
+    <Content Include="bin\$(Configuration)\net47\Xbim.Geometry.Engine32.dll">
+      <Pack>true</Pack>
+      <PackagePath>lib\net47;</PackagePath>
     </Content>
     <Content Include="bin\$(Configuration)\net47\Xbim.Geometry.Engine64.dll">
       <Pack>true</Pack>

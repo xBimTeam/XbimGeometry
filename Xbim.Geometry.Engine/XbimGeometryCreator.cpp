@@ -37,7 +37,11 @@ using System::Runtime::InteropServices::Marshal;
 using namespace  System::Threading;
 using namespace  System::Linq;
 
-
+double __cdecl Load(void)
+{
+	Xbim::Geometry::XbimGeometryCreator^ gc = gcnew Xbim::Geometry::XbimGeometryCreator();
+	return gc->BooleanTimeOut;
+};
 namespace Xbim
 {
 	namespace Geometry
