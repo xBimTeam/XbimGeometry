@@ -4,10 +4,11 @@ option csharp_namespace = "Xbim.Geometry.ProtoBuffer";
 
 message WexBimShapeDTO
 {
-	int32 GeometryId = 1;
-	int32 EntityVariantId = 2;
-	int32 MaterialId = 3;
-	bytes BoundingBox = 4;
-    bytes Triangulation = 5;
+	int32 AssetModelId = 1;
+	int32 ShapeGeometryId = 2;
+	int32 EntityVariantId = 3;
+	bytes Triangulation = 4;
+	bytes BoundingBox = 5;
     double Volume = 6;
+	int32 MaterialId = 7;
 }

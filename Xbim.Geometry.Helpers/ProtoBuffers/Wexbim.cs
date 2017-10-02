@@ -22,15 +22,16 @@ namespace Xbim.Geometry.ProtoBuffer {
     static WexBimReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "CgxXZXhCaW0ucHJvdG8SBndleGJpbSKNAQoOV2V4QmltU2hhcGVEVE8SEgoK",
-            "R2VvbWV0cnlJZBgBIAEoBRIXCg9FbnRpdHlWYXJpYW50SWQYAiABKAUSEgoK",
-            "TWF0ZXJpYWxJZBgDIAEoBRITCgtCb3VuZGluZ0JveBgEIAEoDBIVCg1Ucmlh",
-            "bmd1bGF0aW9uGAUgASgMEg4KBlZvbHVtZRgGIAEoAUIcqgIZWGJpbS5HZW9t",
-            "ZXRyeS5Qcm90b0J1ZmZlcmIGcHJvdG8z"));
+            "CgxXZXhCaW0ucHJvdG8SBndleGJpbSKoAQoOV2V4QmltU2hhcGVEVE8SFAoM",
+            "QXNzZXRNb2RlbElkGAEgASgFEhcKD1NoYXBlR2VvbWV0cnlJZBgCIAEoBRIX",
+            "Cg9FbnRpdHlWYXJpYW50SWQYAyABKAUSFQoNVHJpYW5ndWxhdGlvbhgEIAEo",
+            "DBITCgtCb3VuZGluZ0JveBgFIAEoDBIOCgZWb2x1bWUYBiABKAESEgoKTWF0",
+            "ZXJpYWxJZBgHIAEoBUIcqgIZWGJpbS5HZW9tZXRyeS5Qcm90b0J1ZmZlcmIG",
+            "cHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Xbim.Geometry.ProtoBuffer.WexBimShapeDTO), global::Xbim.Geometry.ProtoBuffer.WexBimShapeDTO.Parser, new[]{ "GeometryId", "EntityVariantId", "MaterialId", "BoundingBox", "Triangulation", "Volume" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Xbim.Geometry.ProtoBuffer.WexBimShapeDTO), global::Xbim.Geometry.ProtoBuffer.WexBimShapeDTO.Parser, new[]{ "AssetModelId", "ShapeGeometryId", "EntityVariantId", "Triangulation", "BoundingBox", "Volume", "MaterialId" }, null, null, null)
           }));
     }
     #endregion
@@ -61,12 +62,13 @@ namespace Xbim.Geometry.ProtoBuffer {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public WexBimShapeDTO(WexBimShapeDTO other) : this() {
-      geometryId_ = other.geometryId_;
+      assetModelId_ = other.assetModelId_;
+      shapeGeometryId_ = other.shapeGeometryId_;
       entityVariantId_ = other.entityVariantId_;
-      materialId_ = other.materialId_;
-      boundingBox_ = other.boundingBox_;
       triangulation_ = other.triangulation_;
+      boundingBox_ = other.boundingBox_;
       volume_ = other.volume_;
+      materialId_ = other.materialId_;
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -74,19 +76,30 @@ namespace Xbim.Geometry.ProtoBuffer {
       return new WexBimShapeDTO(this);
     }
 
-    /// <summary>Field number for the "GeometryId" field.</summary>
-    public const int GeometryIdFieldNumber = 1;
-    private int geometryId_;
+    /// <summary>Field number for the "AssetModelId" field.</summary>
+    public const int AssetModelIdFieldNumber = 1;
+    private int assetModelId_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int GeometryId {
-      get { return geometryId_; }
+    public int AssetModelId {
+      get { return assetModelId_; }
       set {
-        geometryId_ = value;
+        assetModelId_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "ShapeGeometryId" field.</summary>
+    public const int ShapeGeometryIdFieldNumber = 2;
+    private int shapeGeometryId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int ShapeGeometryId {
+      get { return shapeGeometryId_; }
+      set {
+        shapeGeometryId_ = value;
       }
     }
 
     /// <summary>Field number for the "EntityVariantId" field.</summary>
-    public const int EntityVariantIdFieldNumber = 2;
+    public const int EntityVariantIdFieldNumber = 3;
     private int entityVariantId_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int EntityVariantId {
@@ -96,36 +109,25 @@ namespace Xbim.Geometry.ProtoBuffer {
       }
     }
 
-    /// <summary>Field number for the "MaterialId" field.</summary>
-    public const int MaterialIdFieldNumber = 3;
-    private int materialId_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int MaterialId {
-      get { return materialId_; }
-      set {
-        materialId_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "BoundingBox" field.</summary>
-    public const int BoundingBoxFieldNumber = 4;
-    private pb::ByteString boundingBox_ = pb::ByteString.Empty;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pb::ByteString BoundingBox {
-      get { return boundingBox_; }
-      set {
-        boundingBox_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
-      }
-    }
-
     /// <summary>Field number for the "Triangulation" field.</summary>
-    public const int TriangulationFieldNumber = 5;
+    public const int TriangulationFieldNumber = 4;
     private pb::ByteString triangulation_ = pb::ByteString.Empty;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public pb::ByteString Triangulation {
       get { return triangulation_; }
       set {
         triangulation_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    /// <summary>Field number for the "BoundingBox" field.</summary>
+    public const int BoundingBoxFieldNumber = 5;
+    private pb::ByteString boundingBox_ = pb::ByteString.Empty;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pb::ByteString BoundingBox {
+      get { return boundingBox_; }
+      set {
+        boundingBox_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
       }
     }
 
@@ -137,6 +139,17 @@ namespace Xbim.Geometry.ProtoBuffer {
       get { return volume_; }
       set {
         volume_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "MaterialId" field.</summary>
+    public const int MaterialIdFieldNumber = 7;
+    private int materialId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int MaterialId {
+      get { return materialId_; }
+      set {
+        materialId_ = value;
       }
     }
 
@@ -153,24 +166,26 @@ namespace Xbim.Geometry.ProtoBuffer {
       if (ReferenceEquals(other, this)) {
         return true;
       }
-      if (GeometryId != other.GeometryId) return false;
+      if (AssetModelId != other.AssetModelId) return false;
+      if (ShapeGeometryId != other.ShapeGeometryId) return false;
       if (EntityVariantId != other.EntityVariantId) return false;
-      if (MaterialId != other.MaterialId) return false;
-      if (BoundingBox != other.BoundingBox) return false;
       if (Triangulation != other.Triangulation) return false;
+      if (BoundingBox != other.BoundingBox) return false;
       if (Volume != other.Volume) return false;
+      if (MaterialId != other.MaterialId) return false;
       return true;
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override int GetHashCode() {
       int hash = 1;
-      if (GeometryId != 0) hash ^= GeometryId.GetHashCode();
+      if (AssetModelId != 0) hash ^= AssetModelId.GetHashCode();
+      if (ShapeGeometryId != 0) hash ^= ShapeGeometryId.GetHashCode();
       if (EntityVariantId != 0) hash ^= EntityVariantId.GetHashCode();
-      if (MaterialId != 0) hash ^= MaterialId.GetHashCode();
-      if (BoundingBox.Length != 0) hash ^= BoundingBox.GetHashCode();
       if (Triangulation.Length != 0) hash ^= Triangulation.GetHashCode();
+      if (BoundingBox.Length != 0) hash ^= BoundingBox.GetHashCode();
       if (Volume != 0D) hash ^= Volume.GetHashCode();
+      if (MaterialId != 0) hash ^= MaterialId.GetHashCode();
       return hash;
     }
 
@@ -181,52 +196,59 @@ namespace Xbim.Geometry.ProtoBuffer {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void WriteTo(pb::CodedOutputStream output) {
-      if (GeometryId != 0) {
+      if (AssetModelId != 0) {
         output.WriteRawTag(8);
-        output.WriteInt32(GeometryId);
+        output.WriteInt32(AssetModelId);
+      }
+      if (ShapeGeometryId != 0) {
+        output.WriteRawTag(16);
+        output.WriteInt32(ShapeGeometryId);
       }
       if (EntityVariantId != 0) {
-        output.WriteRawTag(16);
+        output.WriteRawTag(24);
         output.WriteInt32(EntityVariantId);
       }
-      if (MaterialId != 0) {
-        output.WriteRawTag(24);
-        output.WriteInt32(MaterialId);
+      if (Triangulation.Length != 0) {
+        output.WriteRawTag(34);
+        output.WriteBytes(Triangulation);
       }
       if (BoundingBox.Length != 0) {
-        output.WriteRawTag(34);
-        output.WriteBytes(BoundingBox);
-      }
-      if (Triangulation.Length != 0) {
         output.WriteRawTag(42);
-        output.WriteBytes(Triangulation);
+        output.WriteBytes(BoundingBox);
       }
       if (Volume != 0D) {
         output.WriteRawTag(49);
         output.WriteDouble(Volume);
+      }
+      if (MaterialId != 0) {
+        output.WriteRawTag(56);
+        output.WriteInt32(MaterialId);
       }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int CalculateSize() {
       int size = 0;
-      if (GeometryId != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(GeometryId);
+      if (AssetModelId != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(AssetModelId);
+      }
+      if (ShapeGeometryId != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(ShapeGeometryId);
       }
       if (EntityVariantId != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(EntityVariantId);
       }
-      if (MaterialId != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(MaterialId);
+      if (Triangulation.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeBytesSize(Triangulation);
       }
       if (BoundingBox.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeBytesSize(BoundingBox);
       }
-      if (Triangulation.Length != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeBytesSize(Triangulation);
-      }
       if (Volume != 0D) {
         size += 1 + 8;
+      }
+      if (MaterialId != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(MaterialId);
       }
       return size;
     }
@@ -236,23 +258,26 @@ namespace Xbim.Geometry.ProtoBuffer {
       if (other == null) {
         return;
       }
-      if (other.GeometryId != 0) {
-        GeometryId = other.GeometryId;
+      if (other.AssetModelId != 0) {
+        AssetModelId = other.AssetModelId;
+      }
+      if (other.ShapeGeometryId != 0) {
+        ShapeGeometryId = other.ShapeGeometryId;
       }
       if (other.EntityVariantId != 0) {
         EntityVariantId = other.EntityVariantId;
       }
-      if (other.MaterialId != 0) {
-        MaterialId = other.MaterialId;
+      if (other.Triangulation.Length != 0) {
+        Triangulation = other.Triangulation;
       }
       if (other.BoundingBox.Length != 0) {
         BoundingBox = other.BoundingBox;
       }
-      if (other.Triangulation.Length != 0) {
-        Triangulation = other.Triangulation;
-      }
       if (other.Volume != 0D) {
         Volume = other.Volume;
+      }
+      if (other.MaterialId != 0) {
+        MaterialId = other.MaterialId;
       }
     }
 
@@ -265,27 +290,31 @@ namespace Xbim.Geometry.ProtoBuffer {
             input.SkipLastField();
             break;
           case 8: {
-            GeometryId = input.ReadInt32();
+            AssetModelId = input.ReadInt32();
             break;
           }
           case 16: {
-            EntityVariantId = input.ReadInt32();
+            ShapeGeometryId = input.ReadInt32();
             break;
           }
           case 24: {
-            MaterialId = input.ReadInt32();
+            EntityVariantId = input.ReadInt32();
             break;
           }
           case 34: {
-            BoundingBox = input.ReadBytes();
+            Triangulation = input.ReadBytes();
             break;
           }
           case 42: {
-            Triangulation = input.ReadBytes();
+            BoundingBox = input.ReadBytes();
             break;
           }
           case 49: {
             Volume = input.ReadDouble();
+            break;
+          }
+          case 56: {
+            MaterialId = input.ReadInt32();
             break;
           }
         }
