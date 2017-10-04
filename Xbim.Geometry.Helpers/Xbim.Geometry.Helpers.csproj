@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net47</TargetFrameworks>
+    <TargetFrameworks>net47</TargetFrameworks>
     <Version>5.0.0-Beta</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>General support class library for Geometry, NET Standard and Ifc aware</Description>
