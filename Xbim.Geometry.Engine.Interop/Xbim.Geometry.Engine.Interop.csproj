@@ -11,7 +11,7 @@
     <AssemblyFileVersionAttribute>[assembly:System.Reflection.AssemblyVersionAttribute("5.0.$(Year)$(Month).$(Day)$(HalfMinuteOfDay)")];</AssemblyFileVersionAttribute>
   </PropertyGroup>
   <PropertyGroup>
-    <TargetFramework>net47</TargetFramework>
+    <TargetFrameworks>net47</TargetFrameworks>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>aimkey.snk</AssemblyOriginatorKeyFile>
     <Title>Xbim Geometry Engine</Title>
@@ -37,7 +37,7 @@
     <PackageReference Include="Xbim.Common" Version="5.0.0-Beta-387" />
     <PackageReference Include="Xbim.Ifc2x3" Version="5.0.0-Beta-417" />
     <PackageReference Include="Xbim.Ifc2x3.Extensions" Version="5.0.0-Beta-418" />
-    <PackageReference Include="Xbim.Ifc4" Version="5.0.0-Beta-416" />
+    <PackageReference Include="Xbim.Ifc4" Version="5.0.0-Beta-454" />
     <PackageReference Include="Xbim.Tessellator" Version="5.0.0-Beta-420" />
   </ItemGroup>
  
@@ -46,11 +46,7 @@
     <Content Include="bin\$(Configuration)\net47\Xbim.Geometry.Engine32.dll">
       <Pack>true</Pack>
       <PackagePath>build\net47;</PackagePath>
-    </Content>
-    <Content Include="bin\$(Configuration)\net47\Xbim.Geometry.Engine32.dll">
-      <Pack>true</Pack>
-      <PackagePath>lib\net47;</PackagePath>
-    </Content>
+    </Content>   
     <Content Include="bin\$(Configuration)\net47\Xbim.Geometry.Engine64.dll">
       <Pack>true</Pack>
       <PackagePath>build\net47;</PackagePath>
@@ -66,15 +62,17 @@
 
   
   <Target Name=" CleanNativeCodeEngine" BeforeTargets="Clean">
-    <Message Text="Cleaning Xbim.Geometry.Engine Native Dlls" Importance="High" />
+    <Message Text="Cleaning Xbim.Geometry.Engine x32 Native Dlls" Importance="High" />
     <MSBuild Projects="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj" Properties="Configuration=$(Configuration);Platform=Win32;OutDir=..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\" Targets="Clean">      
     </MSBuild>
+    <Message Text="Cleaning Xbim.Geometry.Engine x64 Native Dlls" Importance="High" />
     <MSBuild Projects="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj" Properties="Configuration=$(Configuration);Platform=x64;OutDir=..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\" Targets="Clean">      
     </MSBuild>
   </Target>
   <Target Name="BuildNativeCodeEngine" BeforeTargets="Build">
-    <Message Text="Building Xbim.Geometry.Engine Native Dlls, version $(AssemblyFileVersionAttribute)" Importance="High" />
+    <Message Text="Building Xbim.Geometry.Engine x32 Native Dlls, version $(AssemblyFileVersionAttribute)" Importance="High" />
     <WriteLinesToFile File="..\SharedFileVersionInfo.cs" Lines="$(AssemblyFileVersionAttribute)" Overwrite="true" Encoding="Unicode" />
+    <Message Text="Building Xbim.Geometry.Engine x64 Native Dlls, version $(AssemblyFileVersionAttribute)" Importance="High" />
     <MSBuild Projects="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj" Properties="Configuration=$(Configuration);Platform=Win32;OutDir=..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\" Targets="Build">
       <Output ItemName="AssembliesBuiltByChildProjects" TaskParameter="TargetOutputs" />
     </MSBuild>

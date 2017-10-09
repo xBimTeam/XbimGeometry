@@ -522,6 +522,9 @@ namespace Xbim.Geometry.Engine.Interop
             return _engine.ToBrep(geometryObject);
         }
 
-       
+        public IXbimSolidSet CreateSolidSet(IIfcSweptAreaSolid ifcSolid, ILogger logger = null)
+        {
+            return _engine.CreateSolidSet(ifcSolid, logger);
+        }
     }
 }
