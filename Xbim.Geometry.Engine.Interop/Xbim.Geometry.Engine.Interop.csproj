@@ -11,7 +11,7 @@
     <AssemblyFileVersionAttribute>[assembly:System.Reflection.AssemblyVersionAttribute("5.0.$(Year)$(Month).$(Day)$(HalfMinuteOfDay)")];</AssemblyFileVersionAttribute>
   </PropertyGroup>
   <PropertyGroup>
-    <TargetFrameworks>net47</TargetFrameworks>
+    <TargetFramework>net47</TargetFramework>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>aimkey.snk</AssemblyOriginatorKeyFile>
     <Title>Xbim Geometry Engine</Title>
@@ -30,10 +30,12 @@
     <ProductVersion>5.0.$(Year)$(Month).$(Day)$(HalfMinuteOfDay)</ProductVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageIconUrl>https://avatars1.githubusercontent.com/u/2284875?v=3&amp;amp;s=240</PackageIconUrl>
+    <DelaySign>false</DelaySign>
   </PropertyGroup>
 
 
   <ItemGroup>
+    <PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
     <PackageReference Include="Xbim.Common" Version="5.0.0-Beta-387" />
     <PackageReference Include="Xbim.Ifc2x3" Version="5.0.0-Beta-417" />
     <PackageReference Include="Xbim.Ifc2x3.Extensions" Version="5.0.0-Beta-418" />

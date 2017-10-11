@@ -8,6 +8,9 @@ using System.Diagnostics;
 using System;
 using Xbim.Ifc4.GeometricModelResource;
 using Xbim.Ifc4.GeometryResource;
+using System.IO;
+using Xbim.Geometry.ProtoBuffer;
+using Google.Protobuf;
 
 namespace Xbim.Geometry.Engine.Interop.Tests
 {
@@ -97,6 +100,20 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
         }
 
+        [TestMethod]
+        public void CompositeProfileWithCutsTimeoutsTest()
+        {
+            var path = Path.GetFullPath($@"TestFiles\{nameof(CompositeProfileWithCutsTimeoutsTest)}.proto");
+            using (var input = File.Open(path,FileMode.Open))
+            {
+                var shapeGeometryDtoCopy = new ShapeGeometryDTO();
+                shapeGeometryDtoCopy.MergeDelimitedFrom(input);
+                var time = HelperFunctions.ConvertGeometryAllCompositesAtOnce(geomEngine, shapeGeometryDtoCopy,logger);
+                Assert.IsTrue(time < 60000);//the default engine timeout
+                Assert.IsTrue(time < 5000);//this is what we expect
+            }
+        }
+        
         /// <summary>
         /// Cuts one cylinder from another and returns a valid solid
         /// </summary>

@@ -15,11 +15,12 @@
 #include "ShapeUpgrade_UnifySameDomain.hxx"
 using namespace System;
 using namespace System::Linq;
-
+using namespace System::Threading;
 namespace Xbim
 {
 	namespace Geometry
 	{
+
 
 		String^ XbimSolidSet::ToBRep::get()
 		{
@@ -360,66 +361,51 @@ namespace Xbim
 			return true;
 		}
 
-		IXbimSolidSet^ XbimSolidSet::Cut(IXbimSolidSet^ solidsToCut, double tolerance, ILogger^ logger)
-		{			
-			if (!IsValid) return this;
-			String^ err = "";
+		static void ThreadProc(Object^ params)
+		{
+			XbimSolidSetBoolOpParams^ boolParams = dynamic_cast<XbimSolidSetBoolOpParams^>(params);
+			ShapeFix_ShapeTolerance FTol;
+			TopTools_ListOfShape shapeObjects;
+			shapeObjects.Append(boolParams->Body);
+
+			TopTools_ListOfShape shapeTools;
+			for each (IXbimSolid^ iSolid in boolParams->Ops)
+			{
+				XbimSolid^ solid = dynamic_cast<XbimSolid^>(iSolid);
+				if (solid != nullptr && solid->IsValid)
+				{
+					shapeTools.Append(solid);
+				}
+			}
+
+			BRepAlgoAPI_Cut boolOp;
+			boolOp.SetArguments(shapeObjects);
+			boolOp.SetTools(shapeTools);
+			//boolOp.SetNonDestructive(Standard_True);
+			//boolOp.SetFuzzyValue(tolerance);
+			Handle(XbimProgressIndicator) aPI = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);
+			boolOp.SetProgressIndicator(aPI);
+			//boolOp.SetRunParallel(Standard_True);
+			boolOp.Build();
+			aPI->StopTimer();
+			//Console::Write("ThreadProc: ");
+			//Console::WriteLine(aPI->ElapsedTime());
+			if (aPI->TimedOut())
+			{
+				XbimGeometryCreator::LogError(boolParams->Logger, boolParams->Body, "Boolean operation timed out after {0} seconds. Try increasing the timeout in the App.config file", (int)aPI->ElapsedTime());
+				boolParams->Result = gcnew XbimSolidSet(boolParams->Body);
+				return;
+			}
+
 			try
-			{			
-				ShapeFix_ShapeTolerance FTol;
-				TopTools_ListOfShape shapeTools;
-				for each (IXbimSolid^ iSolid in solidsToCut)
-				{
-					XbimSolid^ solid = dynamic_cast<XbimSolid^>(iSolid);
-					if (solid!=nullptr && solid->IsValid)
-					{					
-						FTol.LimitTolerance(solid, tolerance);
-						shapeTools.Append(solid);							
-					}
-					else
-					{
-						XbimGeometryCreator::LogWarning(logger, this, "Invalid shape found in Boolean Cut operation. It has been ignored");
-					}
-				}
-				TopTools_ListOfShape shapeObjects;
-				for each (IXbimSolid^ iSolid in this)
-				{
-					XbimSolid^ solid = dynamic_cast<XbimSolid^>(iSolid);
-					if (solid != nullptr && solid->IsValid)
-					{	
-						FTol.LimitTolerance(solid, tolerance);
-						shapeObjects.Append(solid);
-					}
-					else
-					{
-						XbimGeometryCreator::LogWarning(logger, this, "Invalid shape found in Boolean Cut operation. It has been ignored");
-					}
-				}
-				
-				BRepAlgoAPI_Cut boolOp;
-				boolOp.SetArguments(shapeObjects);
-				boolOp.SetTools(shapeTools);	
-				boolOp.SetNonDestructive(Standard_True);
-				//boolOp.SetFuzzyValue(tolerance);
-				Handle(XbimProgressIndicator) aPI = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);
-				boolOp.SetProgressIndicator(aPI);
-				boolOp.Build();
-				aPI->StopTimer();
-
-				if (aPI->TimedOut())
-				{
-					XbimGeometryCreator::LogError(logger, solidsToCut, "Boolean operation timed out after {0} seconds. Try increasing the timeout in the App.config file", (int)aPI->ElapsedTime());
-					//throw gcnew XbimException(String::Format("Boolean operation timed out after {0} secs. Try increasing the timeout in the App.config file", (int)aPI->ElapsedTime()));
-					return XbimSolidSet::Empty;
-				}
-
+			{
 				if (boolOp.ErrorStatus() == 0)
 				{
 					if (BRepCheck_Analyzer(boolOp.Shape(), Standard_False).IsValid() == Standard_False)
 					{
 						ShapeFix_Shape shapeFixer(boolOp.Shape());
-						shapeFixer.SetPrecision(tolerance);
-						shapeFixer.SetMinTolerance(tolerance);
+						shapeFixer.SetPrecision(boolParams->Tolerance);
+						shapeFixer.SetMinTolerance(boolParams->Tolerance);
 						shapeFixer.FixSolidMode() = Standard_True;
 						shapeFixer.FixFaceTool()->FixIntersectingWiresMode() = Standard_True;
 						shapeFixer.FixFaceTool()->FixOrientationMode() = Standard_True;
@@ -429,40 +415,112 @@ namespace Xbim
 						{
 							ShapeUpgrade_UnifySameDomain unifier(shapeFixer.Shape());
 							unifier.SetAngularTolerance(0.00174533); //1 tenth of a degree
-							unifier.SetLinearTolerance(tolerance);
+							unifier.SetLinearTolerance(boolParams->Tolerance);
 							try
 							{
 								//sometimes unifier crashes
 								unifier.Build();
-								return gcnew XbimSolidSet(unifier.Shape());
+								boolParams->Result = gcnew XbimSolidSet(unifier.Shape());
 							}
 							catch (...)
 							{
 								//default to what we had
-								return gcnew XbimSolidSet(shapeFixer.Shape());
+								boolParams->Result = gcnew XbimSolidSet(shapeFixer.Shape());
 							}
 						}
-
 					}
-					return gcnew XbimSolidSet(boolOp.Shape());
+					else
+						boolParams->Result = gcnew XbimSolidSet(boolOp.Shape());
 				}
-
-				err = "Error = " + boolOp.ErrorStatus();
-				GC::KeepAlive(solidsToCut);
-				GC::KeepAlive(this);
+				else
+				{
+					XbimGeometryCreator::LogError(boolParams->Logger, boolParams->Body, "Boolean Cut operation failed, no holes have been cut.");
+					boolParams->Result = gcnew XbimSolidSet(boolParams->Body);
+				}
 			}
 			catch (Standard_Failure e)
 			{
-				err = gcnew String(Standard_Failure::Caught()->GetMessageString());
-				throw gcnew Exception(String::Format("Boolean Cut operation failed. {0}" , err));
+				String^ err = gcnew String(Standard_Failure::Caught()->GetMessageString());
+				XbimGeometryCreator::LogError(boolParams->Logger, boolParams->Body, "Boolean Cut operation failed, no holes have been cut. {0}", err);
+				boolParams->Result = gcnew XbimSolidSet(boolParams->Body);
 			}
 			catch (...)
 			{
-				throw gcnew Exception("General boolean cutting failure");
+				XbimGeometryCreator::LogError(boolParams->Logger, boolParams->Body, "General boolean cutting failure, no holes have been cut.");
+				boolParams->Result = gcnew XbimSolidSet(boolParams->Body);
 			}
-			
-			return XbimSolidSet::Empty;
+		}
 
+		IXbimSolidSet^ XbimSolidSet::Cut(IXbimSolidSet^ solidsToCut, double tolerance, ILogger^ logger)
+		{			
+			if (!IsValid) return this;
+			
+			//set all the tolerances first
+			ShapeFix_ShapeTolerance FTol;			
+			for each (IXbimSolid^ iSolid in solidsToCut)
+			{
+				XbimSolid^ solid = dynamic_cast<XbimSolid^>(iSolid);
+				if (solid != nullptr && solid->IsValid)
+				{
+					FTol.LimitTolerance(solid, tolerance);					
+				}
+				else
+				{
+					XbimGeometryCreator::LogWarning(logger, this, "Invalid shape found in Boolean Cut operation. Attempting to correct and process");
+				}
+			}
+			TopTools_ListOfShape shapeObjects;
+			for each (IXbimSolid^ iSolid in this)
+			{
+				XbimSolid^ solid = dynamic_cast<XbimSolid^>(iSolid);
+				if (solid != nullptr && solid->IsValid)
+				{
+					FTol.LimitTolerance(solid, tolerance);					
+				}
+				else
+				{
+					XbimGeometryCreator::LogWarning(logger, this, "Invalid shape found in Boolean Cut operation. Attempting to correct and process");
+				}
+			}
+
+
+			List<Thread^>^ threads = gcnew List<Thread^>(this->Count);
+			List<XbimSolidSetBoolOpParams^>^ params = gcnew List<XbimSolidSetBoolOpParams^>(this->Count);
+			for (int i = 0; i < this->Count; i++)
+			{
+				Thread^ oThread = gcnew Thread(gcnew ParameterizedThreadStart(Xbim::Geometry::ThreadProc));
+				threads->Add(oThread);
+				
+				XbimSolidSet^ copyOfCuts = gcnew XbimSolidSet();
+				for each (IXbimSolid^ iSolid in solidsToCut)
+				{
+					XbimSolid^ solid = dynamic_cast<XbimSolid^>(iSolid);
+					if (solid != nullptr && solid->IsValid)
+					{
+						//FTol.LimitTolerance(solid, tolerance);
+						BRepBuilderAPI_Copy cutCopier(solid);
+						copyOfCuts->Add(gcnew XbimSolid(TopoDS::Solid(cutCopier.Shape())));
+					}
+					else
+					{
+						XbimGeometryCreator::LogWarning(logger, this, "Invalid shape found in Boolean Cut operation. It has been ignored");
+					}
+				}
+				BRepBuilderAPI_Copy bodyCopier(dynamic_cast<XbimSolid^>(solids[i]));
+				XbimSolidSetBoolOpParams^ param = gcnew XbimSolidSetBoolOpParams(gcnew XbimSolid(TopoDS::Solid(bodyCopier.Shape())), copyOfCuts, tolerance, logger);
+				params->Add(param);
+				oThread->Start(param);
+			}
+			for each (Thread^ oThread in threads)
+			{
+				oThread->Join();
+			}
+			XbimSolidSet^ result = gcnew XbimSolidSet();
+			for each (XbimSolidSetBoolOpParams^ param in params)
+			{
+				if(param->Result->IsValid) result->Add( param->Result);
+			}
+			return result;			
 		}
 
 		IXbimSolidSet^ XbimSolidSet::Union(IXbimSolidSet^ solidSet, double tolerance, ILogger^ logger)

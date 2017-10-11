@@ -10,6 +10,8 @@ namespace Xbim
 {
 	namespace Geometry
 	{
+		
+		
 		private ref class VolumeComparer : IComparer<Tuple<double, XbimSolid^>^>
 		{
 		public:
@@ -20,6 +22,7 @@ namespace Xbim
 			}
 		};
 
+		
 
 		ref class XbimSolidSet :XbimSetObject, IXbimSolidSet
 		{
@@ -115,6 +118,29 @@ namespace Xbim
 			// Inherited via XbimSetObject
 			virtual void Mesh(IXbimMeshReceiver ^ mesh, double precision, double deflection, double angle) override;
 
+		};
+
+		ref class XbimSolidSetBoolOpParams
+		{
+		private:
+			XbimSolid^ _body;
+			XbimSolidSet^ _ops;
+			double _tolerance;
+			ILogger^ _logger;
+			XbimSolidSet^ _result;
+		public:
+			virtual property XbimSolid^ Body {XbimSolid^ get() { return _body; }}
+			virtual property XbimSolidSet^ Ops {XbimSolidSet^ get() { return _ops; }}
+			virtual property double Tolerance {double get() { return _tolerance; }}
+			virtual property ILogger^ Logger {ILogger^ get() { return _logger; }}
+			virtual property XbimSolidSet^ Result {XbimSolidSet^ get() { return _result; } void set(XbimSolidSet^ value) { _result = value; }}
+			XbimSolidSetBoolOpParams(XbimSolid^ body, XbimSolidSet^ ops, double tolerance, ILogger^ logger)
+			{
+				_body = body;
+				_ops = ops;
+				_tolerance = tolerance;
+				_logger = logger;
+			}
 		};
 
 	}

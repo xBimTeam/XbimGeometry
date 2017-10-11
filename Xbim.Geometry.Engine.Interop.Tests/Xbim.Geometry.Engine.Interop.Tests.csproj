@@ -3,6 +3,11 @@
   <PropertyGroup>
     <TargetFramework>net47</TargetFramework>
     <IsPackable>false</IsPackable>
+    <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,6 +25,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="1.1.18" />
     <PackageReference Include="MSTest.TestFramework" Version="1.1.18" />
+    <PackageReference Include="Xbim.Aim" Version="5.0.0-Beta-449" />
     <PackageReference Include="Xbim.IO.MemoryModel" Version="5.0.0-Beta-419" />
   </ItemGroup>
 
@@ -28,6 +34,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="TestFiles\CompositeProfileWithCutsTimeoutsTest.proto">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="TestFiles\CuttingOpeningInIfcFaceBasedSurfaceModelBodyTest.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

@@ -318,7 +318,8 @@ void BRepAlgoAPI_BooleanOperation::Build()
       myErrorStatus=100+iErr;
       return;
     }
-  }// if (myEntryType) {
+  }
+  // if (myEntryType) {
   //
   //XXXX
   const TopoDS_Shape& aS1 = myArguments.First();
