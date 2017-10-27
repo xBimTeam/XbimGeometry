@@ -1012,7 +1012,7 @@ namespace Xbim.ModelGeometry.Scene
                 //only want solid representations for this context, but rep type is optional so just filter identified 2d elements
                 //we can only handle one representation in a context and this is in an implementers agreement
                 var rep =
-                    product.Representation.Representations.FirstOrDefault(r => IsInContext(r) &&
+                    product.Representation?.Representations?.FirstOrDefault(r => IsInContext(r) &&
                                                                                r.IsBodyRepresentation());
                 //write out the representation if it has one
                 if (rep != null)
@@ -1044,7 +1044,7 @@ namespace Xbim.ModelGeometry.Scene
         {
             //_maxXyz = _model.ModelFactors.OneMetre * 100; //elements bigger than 100 metres should not be considered in region
             var shapesInstances = new List<XbimShapeInstance>();
-            var rep = element.Representation.Representations
+            var rep = element.Representation?.Representations?
                 .FirstOrDefault(r => IsInContext(r)
                                      && r.IsBodyRepresentation());
             if (rep == null)
