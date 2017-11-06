@@ -342,16 +342,16 @@ namespace Xbim.ModelGeometry.Scene
                     {
                         compoundElementsDictionary.Add(aggRel.RelatingObject, relObj);
                     }
-                    
+
                 }
-                
+
                 // openings
                 var elementsWithFeatures = new List<ElementWithFeature>();
                 var openingRelations = Model.Instances.OfType<IIfcRelVoidsElement>()
                     .Where(
                         r =>
-                            r.RelatingBuildingElement!=null && r.RelatingBuildingElement.Representation != null &&
-                            r.RelatedOpeningElement!=null && r.RelatedOpeningElement.Representation != null).ToList();
+                            r.RelatingBuildingElement != null && r.RelatingBuildingElement.Representation != null &&
+                            r.RelatedOpeningElement != null && r.RelatedOpeningElement.Representation != null).ToList();
                 foreach (var openingRelation in openingRelations)
                 {
                     // process parts
@@ -488,7 +488,7 @@ namespace Xbim.ModelGeometry.Scene
                     {
                         var mappedItemLabel = item.EntityLabel;
                         //if not already processed add it
-                       
+
                         ProductShapeIds.Add(mappedItemLabel);
                         if (isFeatureElementShape) FeatureElementShapeIds.Add(mappedItemLabel);
                         if (isVoidedProductShape) VoidedShapeIds.Add(mappedItemLabel);
@@ -552,6 +552,7 @@ namespace Xbim.ModelGeometry.Scene
             else
                 Logger.WarnFormat("GeomScene: {0} [{1}]", entity.GetType().Name, msg);
         }
+
         public static void LogInfo(object entity, string format, params object[] args)
         {
             var msg = String.Format(format, args);
@@ -561,6 +562,7 @@ namespace Xbim.ModelGeometry.Scene
             else
                 Logger.InfoFormat("GeomScene: {0} [{1}]", entity.GetType().Name, msg);
         }
+
         public static void LogError(object entity, string format, params object[] args)
         {
             var msg = String.Format(format, args);
@@ -570,11 +572,12 @@ namespace Xbim.ModelGeometry.Scene
             else
                 Logger.ErrorFormat("GeomScene: {0} [{1}]", entity.GetType().Name, msg);
         }
+
         //The maximum extent for any dimension of any products bouding box 
         //private double _maxXyz;
 
         /// <summary>
-        ///     Initialises a model context from the model
+        /// Initialises a model context from the model
         /// </summary>
         /// <param name="model"></param>
         /// <param name="contextType"></param>
@@ -594,8 +597,8 @@ namespace Xbim.ModelGeometry.Scene
             builtContextList.AddRange(
                 model.Instances.OfType<IIfcGeometricRepresentationSubContext>()
                 );
-            
-            var parentContexts = builtContextList.OfType<IIfcGeometricRepresentationSubContext>().Select(x=>x.ParentContext).Distinct().ToList(); // tolist is needed to prevent collection change.
+
+            var parentContexts = builtContextList.OfType<IIfcGeometricRepresentationSubContext>().Select(x => x.ParentContext).Distinct().ToList(); // tolist is needed to prevent collection change.
             builtContextList.AddRange(parentContexts);
 
 
@@ -611,8 +614,8 @@ namespace Xbim.ModelGeometry.Scene
             if (requiredContextIdentifier != null && contexts.Any())
             //filter on the identifier if defined and we have more than one model context
             {
-                var subContexts = 
-                    contexts.Where(c => c.ContextIdentifier.HasValue 
+                var subContexts =
+                    contexts.Where(c => c.ContextIdentifier.HasValue
                         && requiredContextIdentifier.ToLower().Contains(c.ContextIdentifier.Value.ToString().ToLower())).ToList();
                 if (subContexts.Any())
                     contexts = subContexts;
@@ -689,12 +692,12 @@ namespace Xbim.ModelGeometry.Scene
             //NB we no longer support creation of  geometry storage other than binary, other code remains for reading but not writing 
             var geomStorageType = XbimGeometryType.PolyhedronBinary;
             if (_contexts == null || Engine == null) return false;
-            
+
             var geometryStore = _model.GeometryStore;
 
             if (geometryStore == null)
                 return false;
-           
+
             using (var geometryTransaction = geometryStore.BeginInit())
             {
                 if (geometryTransaction == null) return false;
@@ -780,8 +783,8 @@ namespace Xbim.ModelGeometry.Scene
             var allIds = new ConcurrentDictionary<int, bool>();
             var booleanOps = new ConcurrentBag<XbimBooleanDefinition>();
             var precision = Math.Max(_model.ModelFactors.OneMilliMeter / 50, _model.ModelFactors.Precision); //set the precision to 100th mm but never less than precision
-                                                                                                                //make sure all the geometries we have cached are sewn
-                                                                                                                //   contextHelper.SewGeometries(Engine);
+                                                                                                             //make sure all the geometries we have cached are sewn
+                                                                                                             //   contextHelper.SewGeometries(Engine);
             Parallel.ForEach(contextHelper.OpeningsAndProjections, contextHelper.ParallelOptions, pair =>
             //         foreach (IGrouping<IIfcElement, IIfcFeatureElement> pair in contextHelper.OpeningsAndProjections)
             // foreach (IGrouping<IIfcElement, IIfcFeatureElement> pair in contextHelper.OpeningsAndProjections)
@@ -789,7 +792,7 @@ namespace Xbim.ModelGeometry.Scene
                 int context = 0;
                 int styleId = 0; //take the style of any part of the main shape
                 var element = pair.Key;
-                
+
                 var elementShapes = WriteProductShape(contextHelper, element, false, txn);
                 var arguments = new List<XbimShapeInstance>();
                 foreach (var elemShape in elementShapes)
@@ -862,7 +865,7 @@ namespace Xbim.ModelGeometry.Scene
                         //Get all the parts of this element into a set of solid geometries
                         var elementGeom = bop.ArgumentGeometries;
                         //make the finished shape
-                        if (behaviour.HasFlag(MeshingBehaviourResult.PerformAdditions) &&  bop.ProjectGeometries.Any())
+                        if (behaviour.HasFlag(MeshingBehaviourResult.PerformAdditions) && bop.ProjectGeometries.Any())
                         {
                             var nextGeom = elementGeom.Union(bop.ProjectGeometries, precision);
                             if (nextGeom.IsValid)
@@ -917,7 +920,7 @@ namespace Xbim.ModelGeometry.Scene
                             {
                                 using (var bw = new BinaryWriter(memStream))
                                 {
-                                    Engine.WriteTriangulation(bw, geom, mf.Precision, 
+                                    Engine.WriteTriangulation(bw, geom, mf.Precision,
                                         thisDeflectionDistance, thisDeflectionAngle);
                                 }
                             }
@@ -1005,8 +1008,8 @@ namespace Xbim.ModelGeometry.Scene
                 }
             }
 
-             Parallel.ForEach(products, contextHelper.ParallelOptions, product =>
-           // foreach (var product in products)
+            Parallel.ForEach(products, contextHelper.ParallelOptions, product =>
+            // foreach (var product in products)
             {
                 //select representations that are in the required context
                 //only want solid representations for this context, but rep type is optional so just filter identified 2d elements
@@ -1144,7 +1147,7 @@ namespace Xbim.ModelGeometry.Scene
                                 new XbimBBoxClusterElement(instance.GeometryId,
                                     transproductBounds));
                         }
-                    }    
+                    }
                 }
             }
         }
@@ -1198,7 +1201,7 @@ namespace Xbim.ModelGeometry.Scene
         /// Defines the maximum number of threads to use in parallel operations  any value less then 1 is not used..
         /// </summary>
         public int MaxThreads { get; set; }
-        
+
         private void WriteShapeGeometries(XbimCreateContextHelper contextHelper, ReportProgressDelegate progDelegate, IGeometryStoreInitialiser geometryStore, XbimGeometryType geomStorageType)
         {
             var localPercentageParsed = contextHelper.PercentageParsed;
@@ -1260,7 +1263,7 @@ namespace Xbim.ModelGeometry.Scene
                     // the following line needs to be retur; when parallel
                     return;
                 }
-                
+
                 //  var key = new RepresentationItemGeometricHashKey(shape);
                 var isFeatureElementShape = contextHelper.FeatureElementShapeIds.Contains(shapeId);
                 var isVoidedProductShape = contextHelper.VoidedShapeIds.Contains(shapeId);
@@ -1478,7 +1481,7 @@ namespace Xbim.ModelGeometry.Scene
         {
             return ShapeGeometry(shapeInstance.ShapeGeometryLabel);
         }
-        
+
         public IEnumerable<XbimRegion> GetRegions()
         {
             var contextIds = _contexts.Select(c => c.EntityLabel).ToList();
@@ -1587,11 +1590,7 @@ namespace Xbim.ModelGeometry.Scene
                 }
             }
         }
-
-
-
-
-
+        
         /// <summary>
         ///     Returns a triangulated mesh geometry fopr the specified shape
         /// </summary>
@@ -1629,4 +1628,3 @@ namespace Xbim.ModelGeometry.Scene
         }
     }
 }
-
