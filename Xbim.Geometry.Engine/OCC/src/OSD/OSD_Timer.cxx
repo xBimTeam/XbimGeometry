@@ -44,7 +44,6 @@ static inline Standard_Real GetWallClockTime ()
 #else
 //-------------------  Windows NT  ------------------
 
-#define STRICT
 #include <windows.h>
 
 //=======================================================================
@@ -123,6 +122,18 @@ void OSD_Timer::Reset ()
 {
   TimeStart = TimeCumul = 0.;
   OSD_Chronometer::Reset();
+}
+
+//=======================================================================
+//function : Restart
+//purpose  :
+//=======================================================================
+
+void OSD_Timer::Restart ()
+{
+  TimeStart = GetWallClockTime();
+  TimeCumul = 0.;
+  OSD_Chronometer::Restart();
 }
 
 //=======================================================================

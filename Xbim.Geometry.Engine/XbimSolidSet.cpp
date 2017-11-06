@@ -404,7 +404,7 @@ namespace Xbim
 					return XbimSolidSet::Empty;
 				}
 
-				if (boolOp.ErrorStatus() == 0)
+				if (boolOp.HasErrors() == Standard_False)
 				{
 					if (BRepCheck_Analyzer(boolOp.Shape(), Standard_False).IsValid() == Standard_False)
 					{
@@ -438,7 +438,8 @@ namespace Xbim
 					return gcnew XbimSolidSet(boolOp.Shape());
 				}
 
-				err = "Error = " + boolOp.ErrorStatus();
+				// todo
+				err = "An Error Occurred";
 				GC::KeepAlive(solids);
 				GC::KeepAlive(this);
 			}

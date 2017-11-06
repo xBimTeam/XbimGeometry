@@ -22,7 +22,6 @@
 #include <NCollection_StlIterator.hxx>
 #include <NCollection_DefaultHasher.hxx>
 
-#include <Standard_ImmutableObject.hxx>
 #include <Standard_NoSuchObject.hxx>
 
 /**
@@ -57,9 +56,12 @@ template < class TheKeyType,
            class Hasher = NCollection_DefaultHasher<TheKeyType> >
 class NCollection_Map : public NCollection_BaseMap
 {
-  //!   Adaptation of the TListNode to the map notations
- public:
+public:
+  //! STL-compliant typedef for key type
+  typedef TheKeyType key_type;
 
+public:
+  //!   Adaptation of the TListNode to the map notations
   class MapNode : public NCollection_TListNode<TheKeyType>
   {
   public:
@@ -96,12 +98,7 @@ class NCollection_Map : public NCollection_BaseMap
       Standard_NoSuchObject_Raise_if (!More(), "NCollection_Map::Iterator::Value");  
       return ((MapNode *) myNode)->Value();
     }
-    //! Value change access - denied
-    TheKeyType& ChangeValue(void) const
-    {  
-      Standard_ImmutableObject::Raise("NCollection_Map::Iterator::ChangeValue");
-      return * (TheKeyType *) NULL; // For compiler
-    }
+
     //! Key
     const TheKeyType& Key (void) const
     { 

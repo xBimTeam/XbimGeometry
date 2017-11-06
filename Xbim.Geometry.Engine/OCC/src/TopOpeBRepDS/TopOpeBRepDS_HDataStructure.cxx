@@ -46,7 +46,7 @@
 #include <TopOpeBRepTool_ShapeExplorer.hxx>
 #include <TopTools_ListOfShape.hxx>
 
-IMPLEMENT_STANDARD_RTTIEXT(TopOpeBRepDS_HDataStructure,MMgt_TShared)
+IMPLEMENT_STANDARD_RTTIEXT(TopOpeBRepDS_HDataStructure,Standard_Transient)
 
 static void FUN_HDS_data(const Handle(TopOpeBRepDS_Interference)& I,
 			 TopOpeBRepDS_Kind& GT1,Standard_Integer& G1,
@@ -729,7 +729,7 @@ void TopOpeBRepDS_HDataStructure::StoreInterference
 {
   Standard_Boolean h = myDS.HasShape(S);
   if ( !h ) {
-    Standard_ProgramError::Raise("StoreInterference on shape out of DS");
+    throw Standard_ProgramError("StoreInterference on shape out of DS");
     return;
   }
   StoreInterference(I,myDS.ChangeShapeInterferences(S));
@@ -746,7 +746,7 @@ void TopOpeBRepDS_HDataStructure::StoreInterference
 {
   Standard_Integer n = myDS.NbShapes();
   if ( IS < 1 || IS > n ) {
-    Standard_ProgramError::Raise("StoreInterference on index out of DS");
+    throw Standard_ProgramError("StoreInterference on index out of DS");
     return;
   }
 

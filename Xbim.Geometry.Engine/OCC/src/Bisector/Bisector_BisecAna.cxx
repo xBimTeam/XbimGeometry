@@ -789,7 +789,7 @@ void Bisector_BisecAna::Perform(const Handle(Geom2d_Curve)& afirstcurve   ,
     break;
 
     default :
-      StdFail_NotDone::Raise();
+      throw StdFail_NotDone();
     break;
   }
 }
@@ -839,11 +839,8 @@ void Bisector_BisecAna::Perform(const Handle(Geom2d_Curve)& afirstcurve  ,
   }
 
   aFirstCurveType = curve->DynamicType();
-#ifdef OCCT_DEBUG
-  gp_Pnt2d Point(asecondpoint->Pnt2d());
-#else
-  asecondpoint->Pnt2d();
-#endif
+  const gp_Pnt2d aPoint(asecondpoint->Pnt2d());
+  (void )aPoint;
   if (aFirstCurveType == STANDARD_TYPE(Geom2d_Circle)) {
     cas = 1;
     Handle(Geom2d_Circle) C1 = Handle(Geom2d_Circle)::DownCast(curve);
@@ -1222,7 +1219,7 @@ void Bisector_BisecAna::SetTrim(const Handle(Geom2d_Curve)& )
     }
   }
   else {
-    Standard_NotImplemented::Raise();
+    throw Standard_NotImplemented();
   }
     
   // Determination domaine d intersection de la Bissectrice.
@@ -1542,7 +1539,7 @@ Standard_Integer Bisector_BisecAna::NbIntervals() const
 //=============================================================================
 Standard_Real Bisector_BisecAna::IntervalFirst(const Standard_Integer I) const
 {
-  if (I != 1) Standard_OutOfRange::Raise();
+  if (I != 1) throw Standard_OutOfRange();
   return FirstParameter();
 }
 
@@ -1552,7 +1549,7 @@ Standard_Real Bisector_BisecAna::IntervalFirst(const Standard_Integer I) const
 //=============================================================================
 Standard_Real Bisector_BisecAna::IntervalLast(const Standard_Integer I) const
 {  
-  if (I != 1) Standard_OutOfRange::Raise();
+  if (I != 1) throw Standard_OutOfRange();
   return LastParameter();
 }
 

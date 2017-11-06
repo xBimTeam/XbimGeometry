@@ -16,6 +16,7 @@
 
 
 #include <BRepOffset.hxx>
+#include <BRep_Tool.hxx>
 #include <Geom_BSplineSurface.hxx>
 #include <Geom_ConicalSurface.hxx>
 #include <Geom_CylindricalSurface.hxx>
@@ -31,19 +32,28 @@
 #include <gp_Ax3.hxx>
 #include <gp_Dir.hxx>
 #include <gp_Vec.hxx>
+#include <NCollection_LocalArray.hxx>
 #include <Precision.hxx>
+#include <TopExp.hxx>
+#include <TopExp_Explorer.hxx>
+#include <TopoDS.hxx>
+#include <TopoDS_Edge.hxx>
+#include <TopoDS_Face.hxx>
+#include <TopoDS_ListOfShape.hxx>
+#include <TopoDS_Vertex.hxx>
 
 //=======================================================================
 //function : Surface
 //purpose  : 
 //=======================================================================
 Handle(Geom_Surface) BRepOffset::Surface(const Handle(Geom_Surface)& Surface,
-					 const Standard_Real Offset,
-					       BRepOffset_Status& Status)
+					                     const Standard_Real Offset,
+                                         BRepOffset_Status& theStatus,
+                                         Standard_Boolean allowC0)
 {
   Standard_Real Tol = Precision::Confusion();
 
-  Status = BRepOffset_Good;
+  theStatus = BRepOffset_Good;
   Handle(Geom_Surface) Result;
   
   Handle(Standard_Type) TheType = Surface->DynamicType();
@@ -70,10 +80,10 @@ Handle(Geom_Surface) BRepOffset::Surface(const Handle(Geom_Surface)& Surface,
     else if ( Radius <= -Tol ){
       Axis.Rotate(gp_Ax1(Axis.Location(),Axis.Direction()),M_PI);
       Result = new Geom_CylindricalSurface( Axis, Abs(Radius));
-      Status = BRepOffset_Reversed;
+      theStatus = BRepOffset_Reversed;
     }
     else {
-      Status = BRepOffset_Degenerated;
+      theStatus = BRepOffset_Degenerated;
     }
   }
   else if (TheType == STANDARD_TYPE(Geom_ConicalSurface)) {
@@ -113,10 +123,10 @@ Handle(Geom_Surface) BRepOffset::Surface(const Handle(Geom_Surface)& Surface,
       Axis.Rotate(gp_Ax1(Axis.Location(),Axis.Direction()),M_PI);
       Axis.ZReverse();
       Result = new Geom_SphericalSurface(Axis, -Radius);
-      Status = BRepOffset_Reversed;
+      theStatus = BRepOffset_Reversed;
     }
     else {
-      Status = BRepOffset_Degenerated;
+      theStatus = BRepOffset_Degenerated;
     }
   }
   else if (TheType == STANDARD_TYPE(Geom_ToroidalSurface)) {
@@ -134,10 +144,10 @@ Handle(Geom_Surface) BRepOffset::Surface(const Handle(Geom_Surface)& Surface,
 	Result = new Geom_ToroidalSurface(Axis,MajorRadius,MinorRadius);
       }
       else if (MinorRadius <= -Tol) {
-	Status = BRepOffset_Reversed;
+	theStatus = BRepOffset_Reversed;
       }
       else {
-	Status = BRepOffset_Degenerated;
+	theStatus = BRepOffset_Degenerated;
       }
     }
   }
@@ -152,18 +162,158 @@ Handle(Geom_Surface) BRepOffset::Surface(const Handle(Geom_Surface)& Surface,
       Handle(Geom_RectangularTrimmedSurface)::DownCast(Surface);
     Standard_Real U1,U2,V1,V2;
     S->Bounds(U1,U2,V1,V2);
-    Handle(Geom_Surface) Off = 
-      BRepOffset::Surface(S->BasisSurface(),Offset,Status);
+    Handle(Geom_Surface) Off = BRepOffset::Surface (S->BasisSurface(), Offset, theStatus, allowC0);
     Result = new Geom_RectangularTrimmedSurface (Off,U1,U2,V1,V2);
   }
   else if (TheType == STANDARD_TYPE(Geom_OffsetSurface)) {
   }
 
   if ( Result.IsNull()) {
-    Result = new Geom_OffsetSurface( Surface, Offset);
+    Result = new Geom_OffsetSurface( Surface, Offset, allowC0);
   }
   
   return Result;
 }
 
+//=======================================================================
+//function : CollapseSingularities
+//purpose  : 
+//=======================================================================
+Handle(Geom_Surface) BRepOffset::CollapseSingularities (const Handle(Geom_Surface)& theSurface,
+                                                        const TopoDS_Face& theFace,
+                                                        Standard_Real thePrecision)
+{
+  // check surface type to see if it can be processed
+  Handle(Standard_Type) aType = theSurface->DynamicType();
+  if (aType != STANDARD_TYPE(Geom_BSplineSurface))
+  {
+    // for the moment, only bspline surfaces are treated;
+    // in the future, bezier surfaces and surfaces of revolution can be also handled
+    return theSurface;
+  }
 
+  // find singularities (vertices of degenerated edges)
+  NCollection_List<gp_Pnt> aDegenPnt;
+  NCollection_List<Standard_Real> aDegenTol;
+  for (TopExp_Explorer anExp (theFace, TopAbs_EDGE); anExp.More(); anExp.Next())
+  {
+    TopoDS_Edge anEdge = TopoDS::Edge (anExp.Current());
+    if (! BRep_Tool::Degenerated (anEdge))
+    {
+      continue;
+    }
+    TopoDS_Vertex aV1, aV2;
+    TopExp::Vertices (anEdge, aV1, aV2);
+    if (! aV1.IsSame (aV2))
+    {
+      continue;
+    }
+
+    aDegenPnt.Append (BRep_Tool::Pnt (aV1));
+    aDegenTol.Append (BRep_Tool::Tolerance (aV1));
+  }
+
+  // iterate by sides of the surface
+  if (aType == STANDARD_TYPE(Geom_BSplineSurface))
+  {
+    Handle(Geom_BSplineSurface) aBSpline = Handle(Geom_BSplineSurface)::DownCast (theSurface);
+    const TColgp_Array2OfPnt& aPoles = aBSpline->Poles();
+    
+    Handle(Geom_BSplineSurface) aCopy;
+
+    // iterate by sides: {U=0; V=0; U=1; V=1}
+    Standard_Integer RowStart[4] = {aPoles.LowerRow(), aPoles.LowerRow(), aPoles.UpperRow(), aPoles.LowerRow()};
+    Standard_Integer ColStart[4] = {aPoles.LowerCol(), aPoles.LowerCol(), aPoles.LowerCol(), aPoles.UpperCol()};
+    Standard_Integer RowStep[4]  = {0, 1, 0, 1};
+    Standard_Integer ColStep[4]  = {1, 0, 1, 0};
+    Standard_Integer NbSteps[4]  = {aPoles.RowLength(), aPoles.ColLength(), aPoles.RowLength(), aPoles.ColLength()};
+    for (Standard_Integer iSide = 0; iSide < 4; iSide++)
+    {
+      // compute center of gravity of side poles
+      gp_XYZ aSum;
+      for (int iPole = 0; iPole < NbSteps[iSide]; iPole++)
+      {
+        aSum += aPoles (RowStart[iSide] + iPole * RowStep[iSide], ColStart[iSide] + iPole * ColStep[iSide]).XYZ();
+      }
+      gp_Pnt aCenter (aSum / NbSteps[iSide]);
+
+      // determine if all poles of the side fit into:
+      Standard_Boolean isCollapsed = Standard_True; // aCenter precisely (with gp::Resolution())
+      Standard_Boolean isSingular = Standard_True;  // aCenter with thePrecision
+      NCollection_LocalArray<Standard_Boolean,4> isDegenerated (aDegenPnt.Extent()); // degenerated vertex
+      for (size_t iDegen = 0; iDegen < isDegenerated.Size(); ++iDegen) isDegenerated[iDegen] = Standard_True;
+      for (int iPole = 0; iPole < NbSteps[iSide]; iPole++)
+      {
+        const gp_Pnt& aPole = aPoles (RowStart[iSide] + iPole * RowStep[iSide], ColStart[iSide] + iPole * ColStep[iSide]);
+
+        // distance from CG
+        Standard_Real aDistCG = aCenter.Distance (aPole);
+        if (aDistCG > gp::Resolution())
+          isCollapsed = Standard_False;
+        if (aDistCG > thePrecision)
+          isSingular = Standard_False;
+
+        // distances from degenerated points
+        NCollection_List<gp_Pnt>::Iterator aDegPntIt (aDegenPnt);
+        NCollection_List<Standard_Real>::Iterator aDegTolIt(aDegenTol);
+        for (size_t iDegen = 0; iDegen < isDegenerated.Size(); aDegPntIt.Next(), aDegTolIt.Next(), ++iDegen)
+        {
+          if (isDegenerated[iDegen] && aDegPntIt.Value().Distance (aPole) >= aDegTolIt.Value())
+          {
+            isDegenerated[iDegen] = Standard_False;
+          }
+        }
+      }
+      if (isCollapsed)
+      {
+        continue; // already Ok, nothing to be done
+      }
+
+      // decide to collapse the side: either if it is singular with thePrecision,
+      // or if it fits into one (and only one) degenerated point
+      if (! isSingular)
+      {
+        Standard_Integer aNbFit = 0;
+        NCollection_List<gp_Pnt>::Iterator aDegPntIt (aDegenPnt);
+        NCollection_List<Standard_Real>::Iterator aDegTolIt(aDegenTol);
+        for (size_t iDegen = 0; iDegen < isDegenerated.Size(); ++iDegen)
+        {
+          if (isDegenerated[iDegen])
+          {
+            // remove degenerated point as soon as it fits at least one side, to prevent total collapse
+            aDegenPnt.Remove (aDegPntIt);
+            aDegenTol.Remove (aDegTolIt);
+            aNbFit++;
+          }
+          else
+          {
+            aDegPntIt.Next();
+            aDegTolIt.Next();
+          }
+        }
+
+        // if side fits more than one degenerated vertex, do not collapse it
+        // to be on the safe side
+        isSingular = (aNbFit == 1);
+      }
+      
+      // do collapse
+      if (isSingular)
+      {
+        if (aCopy.IsNull())
+        {
+          aCopy = Handle(Geom_BSplineSurface)::DownCast (theSurface->Copy());
+        }
+        for (int iPole = 0; iPole < NbSteps[iSide]; iPole++)
+        {
+          aCopy->SetPole (RowStart[iSide] + iPole * RowStep[iSide], ColStart[iSide] + iPole * ColStep[iSide], aCenter);
+        }
+      }
+    }
+
+    if (! aCopy.IsNull())
+      return aCopy;
+  }
+
+  return theSurface;
+}

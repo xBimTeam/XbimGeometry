@@ -1,8 +1,5 @@
-// Created by: Peter KURNEV
-// Copyright (c) 2010-2014 OPEN CASCADE SAS
-// Copyright (c) 2007-2010 CEA/DEN, EDF R&D, OPEN CASCADE
-// Copyright (c) 2003-2007 OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN, CEDRAT,
-//                         EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
+// Created by: Eugeny MALTCHIKOV
+// Copyright (c) 2017 OPEN CASCADE SAS
 //
 // This file is part of Open CASCADE Technology software library.
 //
@@ -15,256 +12,173 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
+
 #include <BOPAlgo_PaveFiller.hxx>
+#include <BOPAlgo_Alerts.hxx>
 
-#include <Precision.hxx>
-
-#include <gp_Pnt.hxx>
-#include <Bnd_Box.hxx>
-
-#include <TopoDS_Iterator.hxx>
-#include <TopoDS_Vertex.hxx>
-#include <TopoDS_Edge.hxx>
-
-#include <BRep_Tool.hxx>
-#include <BRep_Builder.hxx>
-#include <BRepBndLib.hxx>
-
-#include <BOPDS_ShapeInfo.hxx>
-#include <BOPDS_VectorOfListOfPaveBlock.hxx>
-#include <BOPDS_MapOfCommonBlock.hxx>
-#include <BOPDS_ListOfPaveBlock.hxx>
-#include <BOPDS_CommonBlock.hxx>
 #include <BOPDS_DS.hxx>
+#include <BOPDS_MapOfCommonBlock.hxx>
+
+#include <BRep_Builder.hxx>
+
+#include <TopoDS_Compound.hxx>
 
 //=======================================================================
-//function : SetNonDestructive
+//function : CheckSelfInterference
 //purpose  : 
 //=======================================================================
-void BOPAlgo_PaveFiller::SetNonDestructive() 
+void BOPAlgo_PaveFiller::CheckSelfInterference()
 {
-  if (!myIsPrimary || myNonDestructive) {
+  if (myArguments.Extent() == 1) {
+    // Self-interference mode
     return;
   }
   //
-  Standard_Boolean bFlag;
-  BOPCol_ListIteratorOfListOfShape aItLS;
-  //
-  bFlag=Standard_False;
-  aItLS.Initialize(myArguments);
-  for(; aItLS.More() && (!bFlag); aItLS.Next()) {
-    const TopoDS_Shape& aS=aItLS.Value();
-    bFlag=aS.Locked();
-  }
-  myNonDestructive=bFlag;
-}
-//=======================================================================
-//function : UpdateEdgeTolerance
-//purpose  : 
-//=======================================================================
-void BOPAlgo_PaveFiller::UpdateEdgeTolerance (const Standard_Integer nE,
-                                              const Standard_Real aTol)
-{
-  Standard_Boolean bIsNewShape, bHasShapeSD;
-  Standard_Integer nV, nVx;
-  Standard_Real aTolV;
   BRep_Builder aBB;
-  BOPCol_ListIteratorOfListOfInteger aIt;
   //
-  BOPDS_ShapeInfo& aSIE=myDS->ChangeShapeInfo(nE);
-  const BOPCol_ListOfInteger& aLI=aSIE.SubShapes();
-  //
-  if (myNonDestructive) {
-    bIsNewShape=myDS->IsNewShape(nE);
-    if (!bIsNewShape) {
-      return;
-    }
+  Standard_Integer i, aNbR = myDS->NbRanges();
+  for (i = 0; i < aNbR; ++i) {
+    const BOPDS_IndexRange& aR = myDS->Range(i);
     //
-    aIt.Initialize(aLI);
-    for (; aIt.More(); aIt.Next()) {
-      nV = aIt.Value();
-      bHasShapeSD=myDS->HasShapeSD(nV, nVx);
-      if (bHasShapeSD) {
-        continue;
-      }
-      bIsNewShape=myDS->IsNewShape(nV);
-      if (!bIsNewShape) {
-        return;
-      }
-    }
-  }
-  //
-  const TopoDS_Edge& aE = *(TopoDS_Edge*)&myDS->Shape(nE);
-  aBB.UpdateEdge(aE, aTol);
-  Bnd_Box& aBoxE=aSIE.ChangeBox();
-  BRepBndLib::Add(aE, aBoxE);
-  aBoxE.SetGap(aBoxE.GetGap() + Precision::Confusion());
-  //
-  aIt.Initialize(aLI);
-  for (; aIt.More(); aIt.Next()) {
-    nV = aIt.Value();
-    bHasShapeSD=myDS->HasShapeSD(nV, nVx);
-    if (bHasShapeSD) {
-      nV=nVx;
-    }
-    const TopoDS_Vertex& aV = *(TopoDS_Vertex*)&myDS->Shape(nV);
-    aTolV = BRep_Tool::Tolerance(aV);
-    if (aTolV < aTol) {
-      aBB.UpdateVertex(aV, aTol);
-      BOPDS_ShapeInfo& aSIV = myDS->ChangeShapeInfo(nV);
-      Bnd_Box& aBoxV = aSIV.ChangeBox();
-      BRepBndLib::Add(aV, aBoxV);
-      aBoxV.SetGap(aBoxV.GetGap() + Precision::Confusion());
-    }
-  }
-}
-//=======================================================================
-//function : UpdateVertex
-//purpose  : 
-//=======================================================================
-Standard_Integer BOPAlgo_PaveFiller::UpdateVertex
-  (const Standard_Integer nV,
-   const Standard_Real aTolNew)
-{
-  Standard_Integer nVNew;
-  Standard_Real aTolV;
-  BRep_Builder aBB;
-  
-  nVNew = nV;
-  if (myDS->IsNewShape(nVNew) || 
-      myDS->HasShapeSD(nV, nVNew) ||
-      !myNonDestructive) {
-    // nV is a new vertex, it has SD or non-destructive mode is not in force
-    const TopoDS_Vertex& aVSD = *(TopoDS_Vertex*)&myDS->Shape(nVNew);
-    aTolV = BRep_Tool::Tolerance(aVSD);
-    if (aTolV < aTolNew) {
-      aBB.UpdateVertex(aVSD, aTolNew);
-      BOPDS_ShapeInfo& aSIV = myDS->ChangeShapeInfo(nVNew);
-      Bnd_Box& aBoxV = aSIV.ChangeBox();
-      BRepBndLib::Add(aVSD, aBoxV);
-      aBoxV.SetGap(aBoxV.GetGap() + Precision::Confusion());
-    }
-    return nVNew;
-  }
-  //
-  // nV is old vertex
-  const TopoDS_Vertex& aV = *(TopoDS_Vertex*)&myDS->Shape(nV);
-  aTolV = BRep_Tool::Tolerance(aV);
-  //
-  // create new vertex
-  TopoDS_Vertex aVNew;
-  gp_Pnt aPV = BRep_Tool::Pnt(aV);
-  aBB.MakeVertex(aVNew, aPV, Max(aTolV, aTolNew));
-  //
-  // append new vertex to DS
-  BOPDS_ShapeInfo aSIV;
-  aSIV.SetShapeType(TopAbs_VERTEX);
-  aSIV.SetShape(aVNew);
-  nVNew = myDS->Append(aSIV);
-  //
-  // bounding box for the new vertex
-  BOPDS_ShapeInfo& aSIDS = myDS->ChangeShapeInfo(nVNew);
-  Bnd_Box& aBoxDS = aSIDS.ChangeBox();
-  BRepBndLib::Add(aVNew, aBoxDS);
-  aBoxDS.SetGap(aBoxDS.GetGap() + Precision::Confusion());
-  //
-  // add vertex to SD map
-  myDS->AddShapeSD(nV, nVNew);
-  //
-  myDS->InitPaveBlocksForVertex(nV);
-  //
-  return nVNew;
-}
-//=======================================================================
-//function : UpdatePaveBlocksWithSDVertices
-//purpose  : 
-//=======================================================================
-void BOPAlgo_PaveFiller::UpdatePaveBlocksWithSDVertices()
-{
-  myDS->UpdatePaveBlocksWithSDVertices();
-}
-//=======================================================================
-//function : UpdateCommonBlocksWithSDVertices
-//purpose  : 
-//=======================================================================
-void BOPAlgo_PaveFiller::UpdateCommonBlocksWithSDVertices()
-{
-  if (!myNonDestructive) {
-    UpdatePaveBlocksWithSDVertices();
-    return;
-  }
-  Standard_Integer aNbPBP;
-  //
-  BOPDS_VectorOfListOfPaveBlock& aPBP=myDS->ChangePaveBlocksPool();
-  aNbPBP=aPBP.Extent();
-  if(!aNbPBP) {
-    return;
-  }
-  //
-  Standard_Integer i, nV1, nV2;
-  Standard_Real aTolV;
-  BOPDS_MapOfCommonBlock aMCB;
-  BOPDS_ListIteratorOfListOfPaveBlock aItPB;
-  Handle(BOPDS_PaveBlock) aPB;
-  // 
-  aTolV = Precision::Confusion();
-  //
-  for (i=0; i<aNbPBP; ++i) {
-    BOPDS_ListOfPaveBlock& aLPB=aPBP(i);
-    aItPB.Initialize(aLPB);
-    for (; aItPB.More(); aItPB.Next()) {
-      aPB=aItPB.Value();
-      const Handle(BOPDS_CommonBlock)& aCB=myDS->CommonBlock(aPB);
-      if (aCB.IsNull()) {
+    // Map of connections of interfering shapes
+    NCollection_IndexedDataMap<TopoDS_Shape,
+                               BOPCol_IndexedMapOfShape,
+                               TopTools_ShapeMapHasher> aMCSI;
+    BOPDS_MapOfCommonBlock aMCBFence;
+    //
+    Standard_Integer j = aR.First(), aRLast = aR.Last();
+    for (; j <= aRLast; ++j) {
+      const BOPDS_ShapeInfo& aSI = myDS->ShapeInfo(j);
+      if (!aSI.HasReference()) {
+        // No pave blocks and no face info
         continue;
       }
       //
-      if (aMCB.Add(aCB)) {
-        myDS->SortPaveBlocks(aCB);
-        aPB->Indices(nV1, nV2);
-        UpdateVertex(nV1, aTolV);
-        UpdateVertex(nV2, aTolV);
-        myDS->UpdateCommonBlockWithSDVertices(aCB);
+      const TopoDS_Shape& aS = aSI.Shape();
+      //
+      if (aSI.ShapeType() == TopAbs_EDGE) {
+        if (aSI.HasFlag()) {
+          continue;
+        }
+        //
+        // Analyze the shared vertices and common blocks
+        //
+        BOPCol_MapOfInteger aMSubS;
+        BOPCol_ListIteratorOfListOfInteger aItLI(aSI.SubShapes());
+        for (; aItLI.More(); aItLI.Next()) {
+          Standard_Integer nV = aItLI.Value();
+          myDS->HasShapeSD(nV, nV);
+          aMSubS.Add(nV);
+        }
+        //
+        const BOPDS_ListOfPaveBlock& aLPB = myDS->PaveBlocks(j);
+        Standard_Boolean bAnalyzeV = aLPB.Extent() > 1;
+        //
+        BOPDS_ListIteratorOfListOfPaveBlock aIt(aLPB);
+        for (; aIt.More(); aIt.Next()) {
+          const Handle(BOPDS_PaveBlock)& aPB = aIt.Value();
+          //
+          // Check the vertices
+          if (bAnalyzeV) {
+            Standard_Integer nV[2];
+            aPB->Indices(nV[0], nV[1]);
+            for (Standard_Integer k = 0; k < 2; ++k) {
+              if (!aR.Contains(nV[k]) && !aMSubS.Contains(nV[k])) {
+                // Add connection
+                const TopoDS_Shape& aV = myDS->Shape(nV[k]);
+                BOPCol_IndexedMapOfShape* pMSOr = aMCSI.ChangeSeek(aV);
+                if (!pMSOr) {
+                  pMSOr = &aMCSI(aMCSI.Add(aV, BOPCol_IndexedMapOfShape()));
+                }
+                pMSOr->Add(aS);
+              }
+            }
+          }
+          //
+          // Check common blocks
+          if (myDS->IsCommonBlock(aPB)) {
+            const Handle(BOPDS_CommonBlock)& aCB = myDS->CommonBlock(aPB);
+            if (aMCBFence.Add(aCB)) {
+              const BOPDS_ListOfPaveBlock& aLPBCB = aCB->PaveBlocks();
+              //
+              BOPCol_ListOfInteger aLE;
+              BOPDS_ListIteratorOfListOfPaveBlock aItCB(aLPBCB);
+              for (; aItCB.More(); aItCB.Next()) {
+                const Handle(BOPDS_PaveBlock)& aPBCB = aItCB.Value();
+                Standard_Integer nEOr = aPBCB->OriginalEdge();
+                if (aR.Contains(nEOr)) {
+                  aLE.Append(nEOr);
+                }
+              }
+              //
+              if (aLE.Extent() > 1) {
+                // Add warning
+                TopoDS_Compound aWC;
+                aBB.MakeCompound(aWC);
+                //
+                BOPCol_ListIteratorOfListOfInteger aItLE(aLE);
+                for (; aItLE.More(); aItLE.Next()) {
+                  const TopoDS_Shape& aE1 = myDS->Shape(aItLE.Value());
+                  aBB.Add(aWC, aE1);
+                }
+                //
+                AddWarning (new BOPAlgo_AlertSelfInterferingShape (aWC));
+              }
+            }
+          }
+        }
       }
-    }
-  }
-  UpdatePaveBlocksWithSDVertices();
-}
-
-namespace
-{
-  //=======================================================================
-  //function : UpdateInterfsWithSDVertices
-  //purpose  : 
-  //=======================================================================
-  template <class InterfType>
-  void UpdateIntfsWithSDVertices(BOPDS_PDS theDS, BOPCol_NCVector<InterfType>& theInterfs)
-  {
-    for (Standard_Integer i = 0; i < theInterfs.Length(); i++)
-    {
-      InterfType& anIntf = theInterfs(i);
-      Standard_Integer anInd;
-      if (anIntf.HasIndexNew(anInd))
-      {
-        Standard_Integer anIndSD;
-        if (theDS->HasShapeSD(anInd, anIndSD))
-        {
-          anIntf.SetIndexNew(anIndSD);
+      else if(aSI.ShapeType() == TopAbs_FACE) {
+        // Analyze IN and Section vertices and edges of the faces
+        const BOPDS_FaceInfo& aFI = myDS->FaceInfo(j);
+        //
+        for (Standard_Integer k = 0; k < 2; ++k) {
+          const BOPCol_MapOfInteger& aMVF = !k ? aFI.VerticesIn() : aFI.VerticesSc();
+          BOPCol_MapIteratorOfMapOfInteger aItM(aMVF);
+          for (; aItM.More(); aItM.Next()) {
+            const TopoDS_Shape& aV = myDS->Shape(aItM.Value());
+            // add connection
+            BOPCol_IndexedMapOfShape* pMSOr = aMCSI.ChangeSeek(aV);
+            if (!pMSOr) {
+              pMSOr = &aMCSI(aMCSI.Add(aV, BOPCol_IndexedMapOfShape()));
+            }
+            pMSOr->Add(aS);
+          }
+        }
+        //
+        for (Standard_Integer k = 0; k < 2; ++k) {
+          const BOPDS_IndexedMapOfPaveBlock& aMPBF = !k ? aFI.PaveBlocksIn() : aFI.PaveBlocksSc();
+          Standard_Integer iPB, aNbPB = aMPBF.Extent();
+          for (iPB = 1; iPB <= aNbPB; ++iPB) {
+            const Handle(BOPDS_PaveBlock)& aPB = aMPBF(iPB);
+            const TopoDS_Shape& aE = myDS->Shape(aPB->Edge());
+            // add connection
+            BOPCol_IndexedMapOfShape* pMSOr = aMCSI.ChangeSeek(aE);
+            if (!pMSOr) {
+              pMSOr = &aMCSI(aMCSI.Add(aE, BOPCol_IndexedMapOfShape()));
+            }
+            pMSOr->Add(aS);
+          }
         }
       }
     }
+    //
+    // Analyze connections
+    Standard_Integer aNbC = aMCSI.Extent();
+    for (j = 1; j <= aNbC; ++j) {
+      const BOPCol_IndexedMapOfShape& aMCS = aMCSI(j);
+      if (aMCS.Extent() > 1) {
+        // Add self-interference warning
+        TopoDS_Compound aWC;
+        aBB.MakeCompound(aWC);
+        //
+        Standard_Integer iS, aNbS = aMCS.Extent();
+        for (iS = 1; iS <= aNbS; ++iS) {
+          const TopoDS_Shape& aSx = aMCS(iS);
+          aBB.Add(aWC, aSx);
+        }
+        AddWarning (new BOPAlgo_AlertSelfInterferingShape (aWC));
+      }
+    }
   }
-}
-
-//=======================================================================
-//function : UpdateInterfsWithSDVertices
-//purpose  : 
-//=======================================================================
-void BOPAlgo_PaveFiller::UpdateInterfsWithSDVertices()
-{
-  UpdateIntfsWithSDVertices(myDS, myDS->InterfVV());
-  UpdateIntfsWithSDVertices(myDS, myDS->InterfVE());
-  UpdateIntfsWithSDVertices(myDS, myDS->InterfVF());
-  UpdateIntfsWithSDVertices(myDS, myDS->InterfEE());
-  UpdateIntfsWithSDVertices(myDS, myDS->InterfEF());
 }

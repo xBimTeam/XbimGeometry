@@ -356,12 +356,8 @@ typedef BOPCol_Cnt
 //=======================================================================
 void BOPAlgo_PaveFiller::MakeSplitEdges()
 {
-  Standard_Integer aNbPBP;
-  //
-  myErrorStatus=0;
-  //
   BOPDS_VectorOfListOfPaveBlock& aPBP=myDS->ChangePaveBlocksPool();
-  aNbPBP=aPBP.Extent();
+  Standard_Integer aNbPBP = aPBP.Extent();
   if(!aNbPBP) {
     return;
   }
@@ -393,13 +389,20 @@ void BOPAlgo_PaveFiller::MakeSplitEdges()
       bCB=myDS->IsCommonBlock(aPB);
       //
       if (!(bV1 || bV2)) { // no new vertices here
-        if (!myNonDestructive || (myNonDestructive && !bCB)) {
-          nE = aPB->OriginalEdge();
-          aPB->SetEdge(nE);
-          if (!myNonDestructive && bCB) {
-            const Handle(BOPDS_CommonBlock)& aCB = myDS->CommonBlock(aPB);
-            Standard_Real aTol = BOPAlgo_Tools::ComputeToleranceOfCB(aCB, myDS, myContext);
-            myDS->UpdateEdgeTolerance(nE, aTol);
+        if (!myNonDestructive || !bCB) {
+          if (bCB) {
+            if (!aPB->HasEdge()) {
+              const Handle(BOPDS_CommonBlock)& aCB = myDS->CommonBlock(aPB);
+              nE = aCB->PaveBlock1()->OriginalEdge();
+              aCB->SetEdge(nE);
+              // Compute tolerance of the common block and update the edge
+              Standard_Real aTol = BOPAlgo_Tools::ComputeToleranceOfCB(aCB, myDS, myContext);
+              myDS->UpdateEdgeTolerance(nE, aTol);
+            }
+          }
+          else {
+            nE = aPB->OriginalEdge();
+            aPB->SetEdge(nE);
           }
           continue;
         }
@@ -418,7 +421,6 @@ void BOPAlgo_PaveFiller::MakeSplitEdges()
       const Handle(BOPDS_CommonBlock)& aCB=myDS->CommonBlock(aPB);
       bCB=!aCB.IsNull();
       if (bCB) {
-        myDS->SortPaveBlocks(aCB);
         aPB=aCB->PaveBlock1();
       }
       //
@@ -525,14 +527,15 @@ Standard_Integer BOPAlgo_PaveFiller::SplitEdge(const Standard_Integer nE,
 //=======================================================================
 void BOPAlgo_PaveFiller::MakePCurves()
 {
+  if (myAvoidBuildPCurve ||
+      (!mySectionAttribute.PCurveOnS1() && !mySectionAttribute.PCurveOnS2()))
+    return;
   Standard_Boolean bHasPC;
   Standard_Integer i, nF1, nF2, aNbC, k, nE, aNbFF, aNbFI, nEx;
   Standard_Integer j, aNbPBIn, aNbPBOn;
   BOPDS_ListIteratorOfListOfPaveBlock aItLPB;
   TopoDS_Face aF1F, aF2F;
   BOPAlgo_VectorOfMPC aVMPC;
-  //
-  myErrorStatus=0;
   //
   // 1. Process Common Blocks 
   const BOPDS_VectorOfFaceInfo& aFIP=myDS->FaceInfoPool();
@@ -675,51 +678,6 @@ void BOPAlgo_PaveFiller::MakePCurves()
   //======================================================
 }
 //=======================================================================
-// function: RefineFaceInfoOn
-// purpose: 
-//=======================================================================
-void BOPAlgo_PaveFiller::RefineFaceInfoOn() 
-{
-  Standard_Integer aNbPBP;
-  //
-  myErrorStatus=0;
-  //
-  BOPDS_VectorOfListOfPaveBlock& aPBP=myDS->ChangePaveBlocksPool();
-  aNbPBP=aPBP.Extent();
-  if(!aNbPBP) {
-    return;
-  }
-  //
-  Standard_Boolean bV1, bV2;
-  Standard_Integer i, nV1, nV2, aNbPB;
-  Handle(BOPDS_PaveBlock) aPB;
-  //
-  for (i=0; i<aNbPBP; ++i) {
-    BOPDS_ListOfPaveBlock& aLPB=aPBP(i);
-    //
-    aNbPB=aLPB.Extent();
-    if (aNbPB==1) {
-      aPB=aLPB.First();
-      aPB->Indices(nV1, nV2);
-      bV1=myDS->IsNewShape(nV1);
-      bV2=myDS->IsNewShape(nV2);
-      //
-      if (!(bV1 || bV2)) {
-        if (!myDS->IsCommonBlock(aPB)) {
-          // the PB seems to be untouced
-          aLPB.Clear();
-          Standard_Integer nE = aPB->OriginalEdge();
-          if (nE >= 0) {
-            myDS->ChangeShapeInfo(nE).SetReference(-1);
-          }
-          continue;
-        }
-      }//if (!(bV1 || bV2)) {
-    }//if (aNbPB==1) {
-  }//for (i=0; i<aNbPBP; ++i) {
-  myDS->RefineFaceInfoOn();
-}
-//=======================================================================
 //function : UpdateVertices
 //purpose  : update tolerances of vertices comparing extremities of
 //           3d and 2d curves
@@ -777,18 +735,16 @@ void BOPAlgo_PaveFiller::Prepare()
     TopAbs_EDGE,
     TopAbs_FACE
   };
-  Standard_Boolean bJustAdd, bIsBasedOnPlane;
+  Standard_Boolean bIsBasedOnPlane;
   Standard_Integer i, aNb, n1, nF, aNbF;
   TopExp_Explorer aExp;
   BOPCol_IndexedMapOfShape aMF;
-  //
-  myErrorStatus=0;
   //
   aNb=3;
   for(i=0; i<aNb; ++i) {
     myIterator->Initialize(aType[i], aType[2]);
     for (; myIterator->More(); myIterator->Next()) {
-      myIterator->Value(n1, nF, bJustAdd);
+      myIterator->Value(n1, nF);
       const TopoDS_Face& aF=(*(TopoDS_Face *)(&myDS->Shape(nF))); 
       //
       bIsBasedOnPlane=IsBasedOnPlane(aF);

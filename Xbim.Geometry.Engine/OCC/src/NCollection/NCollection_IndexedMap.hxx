@@ -20,7 +20,6 @@
 #include <NCollection_TListNode.hxx>
 #include <NCollection_StlIterator.hxx>
 #include <Standard_NoSuchObject.hxx>
-#include <Standard_ImmutableObject.hxx>
 
 #include <NCollection_DefaultHasher.hxx>
 
@@ -41,9 +40,13 @@ template < class TheKeyType,
            class Hasher = NCollection_DefaultHasher<TheKeyType> > 
 class NCollection_IndexedMap : public NCollection_BaseMap
 {
-  // **************** Adaptation of the TListNode to the INDEXEDmap
+public:
+  //! STL-compliant typedef for key type
+  typedef TheKeyType key_type;
+
  private:
-  class IndexedMapNode : public NCollection_TListNode<TheKeyType>
+   // **************** Adaptation of the TListNode to the INDEXEDmap
+   class IndexedMapNode : public NCollection_TListNode<TheKeyType>
   {
   public:
     //! Constructor with 'Next'
@@ -104,12 +107,7 @@ class NCollection_IndexedMap : public NCollection_BaseMap
       Standard_NoSuchObject_Raise_if(!More(), "NCollection_IndexedMap::Iterator::Value");
       return myMap->FindKey(myIndex);
     }
-    //! Value change access denied - use Substitute
-    TheKeyType& ChangeValue(void) const
-    {  
-      Standard_ImmutableObject::Raise ("impossible to ChangeValue");
-      return * (TheKeyType *) NULL; // This for compiler
-    }
+
     //! Performs comparison of two iterators.
     Standard_Boolean IsEqual (const Iterator& theOther) const
     {
@@ -277,8 +275,8 @@ class NCollection_IndexedMap : public NCollection_BaseMap
       {
         if (p->Key2() != theIndex)
         {
-          Standard_DomainError::Raise ("NCollection_IndexedMap::Substitute : "
-                                       "Attempt to substitute existing key");
+          throw Standard_DomainError ("NCollection_IndexedMap::Substitute : "
+                                      "Attempt to substitute existing key");
         }
         p->Key1() = theKey1;
         return;
@@ -404,6 +402,31 @@ class NCollection_IndexedMap : public NCollection_BaseMap
     Decrement();
   }
 
+  //! Remove the key of the given index.
+  //! Caution! The index of the last key can be changed.
+  void RemoveFromIndex(const Standard_Integer theKey2)
+  {
+    Standard_OutOfRange_Raise_if(theKey2 < 1 || theKey2 > Extent(), "NCollection_IndexedMap::Remove");
+    Standard_Integer aLastInd = Extent();
+    if (theKey2 != aLastInd)
+      Swap(theKey2, aLastInd);
+    RemoveLast();
+  }
+
+  //! Remove the given key.
+  //! Caution! The index of the last key can be changed.
+  Standard_Boolean RemoveKey (const TheKeyType& theKey1)
+  {
+    Standard_Integer anIndToRemove = FindIndex(theKey1);
+    if (anIndToRemove < 1)
+    {
+      return Standard_False;
+    }
+
+    RemoveFromIndex (anIndToRemove);
+    return Standard_True;
+  }
+
   //! FindKey
   const TheKeyType& FindKey (const Standard_Integer theKey2) const
   {
@@ -417,8 +440,7 @@ class NCollection_IndexedMap : public NCollection_BaseMap
         return pNode2->Key1();
       pNode2 = (IndexedMapNode*) pNode2->Next2();
     }
-    Standard_NoSuchObject::Raise("NCollection_IndexedMap::FindKey");
-    return pNode2->Key1(); // This for compiler
+    throw Standard_NoSuchObject("NCollection_IndexedMap::FindKey");
   }
 
   //! operator ()

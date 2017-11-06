@@ -148,7 +148,7 @@ static void BuildPeriodicTangent(
   gp_Vec2d a_vector ;
   
   if (PointsArray.Length() < 3) {
-    Standard_ConstructionError::Raise(); 
+    throw Standard_ConstructionError();
     }   
  
   if (!TangentFlags.Value(1)) {
@@ -194,7 +194,7 @@ static void BuildTangents(const TColgp_Array1OfPnt2d&      PointsArray,
  degree = 3 ;
 
  if ( PointsArray.Length() < 3) {
-   Standard_ConstructionError::Raise(); 
+   throw Standard_ConstructionError();
    }   
  if (PointsArray.Length() == 3) {
    degree = 2 ;
@@ -333,7 +333,7 @@ myTangentRequest(Standard_False)
 				   myPoints->Upper()) ;
 
  if (!result) {
-   Standard_ConstructionError::Raise();
+   throw Standard_ConstructionError();
    }
  BuildParameters(PeriodicFlag,
 		 PointsPtr->Array1(),
@@ -373,7 +373,7 @@ myTangentRequest(Standard_False)
 
  if (PeriodicFlag) {
    if ((PointsPtr->Length()) + 1 != ParametersPtr->Length()) {
-     Standard_ConstructionError::Raise();
+     throw Standard_ConstructionError();
    }
  }
  myTangents = 
@@ -384,13 +384,13 @@ myTangentRequest(Standard_False)
 				    myPoints->Upper()) ;
  
  if (!result) {
-   Standard_ConstructionError::Raise();
+   throw Standard_ConstructionError();
    }
  		
  result =
  CheckParameters(ParametersPtr->Array1()) ;
  if (!result) {
-   Standard_ConstructionError::Raise();
+   throw Standard_ConstructionError();
    }
 	
  for (ii = myPoints->Lower() ; ii <= myPoints->Upper() ; ii++) {
@@ -405,7 +405,8 @@ myTangentRequest(Standard_False)
 
 void Geom2dAPI_Interpolate::Load( 
    const TColgp_Array1OfVec2d&              Tangents,
-   const Handle(TColStd_HArray1OfBoolean)& TangentFlagsPtr) 
+   const Handle(TColStd_HArray1OfBoolean)& TangentFlagsPtr,
+   const Standard_Boolean Scale)
 
 {
  Standard_Boolean result ;
@@ -414,7 +415,7 @@ void Geom2dAPI_Interpolate::Load(
  myTangentFlags = TangentFlagsPtr ;
  if (Tangents.Length() != myPoints->Length() ||
      TangentFlagsPtr->Length() != myPoints->Length()) {
-   Standard_ConstructionError::Raise();
+   throw Standard_ConstructionError();
    }
  result  = 
    CheckTangents(Tangents,
@@ -426,13 +427,15 @@ void Geom2dAPI_Interpolate::Load(
     for (ii = Tangents.Lower() ; ii <= Tangents.Upper() ; ii++ ) {
       myTangents->SetValue(ii,Tangents.Value(ii)) ;
     }
-    ScaleTangents(myPoints->Array1(),
-		  myTangents->ChangeArray1(),
-		  TangentFlagsPtr->Array1(),
-		  myParameters->Array1()) ; 
+    if (Scale) {
+      ScaleTangents(myPoints->Array1(),
+		    myTangents->ChangeArray1(),
+		    TangentFlagsPtr->Array1(),
+		    myParameters->Array1()) ;
+    } 
   }
  else {
-   Standard_ConstructionError::Raise();
+   throw Standard_ConstructionError();
    }
  
   
@@ -444,7 +447,8 @@ void Geom2dAPI_Interpolate::Load(
 //=======================================================================
 
 void Geom2dAPI_Interpolate::Load(const gp_Vec2d& InitialTangent,
-			       const gp_Vec2d& FinalTangent) 
+			       const gp_Vec2d& FinalTangent,
+             const Standard_Boolean Scale)
 {
   Standard_Boolean result ;
   myTangentRequest = Standard_True ;
@@ -457,12 +461,14 @@ void Geom2dAPI_Interpolate::Load(const gp_Vec2d& InitialTangent,
 		  myTangentFlags->Array1(),
 		  myTolerance) ;
   if (!result) {
-    Standard_ConstructionError::Raise();
+    throw Standard_ConstructionError();
     }
-  ScaleTangents(myPoints->Array1(),
-		myTangents->ChangeArray1(),
-		myTangentFlags->Array1(),
-		myParameters->Array1()) ;
+  if (Scale) {
+    ScaleTangents(myPoints->Array1(),
+		  myTangents->ChangeArray1(),
+		  myTangentFlags->Array1(),
+		  myParameters->Array1()) ;
+  }
  
 }
 //=======================================================================
@@ -899,7 +905,7 @@ void Geom2dAPI_Interpolate::PerformNonPeriodic()
 const Handle(Geom2d_BSplineCurve)& Geom2dAPI_Interpolate::Curve() const 
 {
   if ( !myIsDone) 
-    StdFail_NotDone::Raise(" ");
+    throw StdFail_NotDone(" ");
   return myCurve;
 }
 

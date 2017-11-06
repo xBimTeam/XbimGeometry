@@ -27,7 +27,7 @@
         <language>en-GB</language>
         <tags>BIM, IFC, IfcXml, IfcZip, Ifc4, COBie, .Net, C#, BuildingSmart, Geometry, Brep</tags>
       <dependencies>
-        <dependency id="Xbim.Essentials" version="4.0.29-V006" />
+        <dependency id="Xbim.Essentials" version="4.0.29-V009" />
       </dependencies>
     </metadata>
     <files>

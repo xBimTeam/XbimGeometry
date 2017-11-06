@@ -61,7 +61,7 @@
 #include <TopoDS_Vertex.hxx>
 #include <ShapeBuild_ReShape.hxx>
 
-IMPLEMENT_STANDARD_RTTIEXT(ShapeFix_Edge,MMgt_TShared)
+IMPLEMENT_STANDARD_RTTIEXT(ShapeFix_Edge,Standard_Transient)
 
 //=======================================================================
 //function : ShapeFix_Edge
@@ -489,8 +489,16 @@ Standard_Boolean ShapeFix_Edge::FixAddPCurve (const TopoDS_Edge& edge,
     Handle(Geom2d_Curve) c2d;
     Standard_Real a1, b1;
     if ( ! sae.HasPCurve (edge, surf, location)) {
+      Standard_Real TolFirst = -1, TolLast = -1;
+      TopoDS_Vertex V1, V2;
+      TopExp::Vertices(edge, V1, V2);
+      if (!V1.IsNull())
+        TolFirst = BRep_Tool::Tolerance(V1);
+      if (!V2.IsNull())
+        TolLast = BRep_Tool::Tolerance(V2);
+      
       myProjector->Init ( sas, preci );
-      myProjector->Perform (c3d,First,Last,c2d);
+      myProjector->Perform (c3d,First,Last,c2d,TolFirst,TolLast);
       //  stat = 2 : reinterpoler la c3d ?
       if ( myProjector->Status ( ShapeExtend_DONE4 ) )
 	myStatus |= ShapeExtend::EncodeStatus (ShapeExtend_DONE2);
@@ -547,12 +555,14 @@ Standard_Boolean ShapeFix_Edge::FixAddPCurve (const TopoDS_Edge& edge,
       B.Range(edge, G3dCFirst, G3dCLast, Standard_True);
     }
   }   // end try
-  catch(Standard_Failure) {
-    myStatus |= ShapeExtend::EncodeStatus (ShapeExtend_FAIL2);
-#ifdef OCCT_DEBUG //:s5
+  catch(Standard_Failure const& anException) {
+#ifdef OCCT_DEBUG
+//:s5
     cout << "Warning: ShapeFix_Edge::FixAddPCurve(): Exception: ";
-    Standard_Failure::Caught()->Print(cout); cout << endl;
+    anException.Print(cout); cout << endl;
 #endif
+    (void)anException;
+    myStatus |= ShapeExtend::EncodeStatus (ShapeExtend_FAIL2);
   }
   myStatus |= ShapeExtend::EncodeStatus (ShapeExtend_DONE1);
   return Standard_True;
@@ -775,12 +785,12 @@ Standard_Boolean ShapeFix_Edge::FixSameParameter(const TopoDS_Edge& edge,
         if ( ! SP ) myStatus |= ShapeExtend::EncodeStatus ( ShapeExtend_FAIL2 );
       }
     }
-    catch(Standard_Failure)
-    {
+    catch(Standard_Failure const& anException) {
 #ifdef OCCT_DEBUG
       cout << "\nWarning: ShapeFix_Edge: Exception in SameParameter: "; 
-      Standard_Failure::Caught()->Print(cout); cout << endl;
+      anException.Print(cout); cout << endl;
 #endif
+      (void)anException;
       myStatus |= ShapeExtend::EncodeStatus ( ShapeExtend_FAIL2 );
     }
   }
