@@ -108,6 +108,8 @@ namespace Xbim
 			return (rep->Dim == Xbim::Ifc4::GeometryResource::IfcDimensionCount(3));
 		}
 
+		// this is the entry point that determines the call to the right underlying primitive.
+		//
 		IXbimGeometryObject^ XbimGeometryCreator::Create(IIfcGeometricRepresentationItem^ geomRep, IIfcAxis2Placement3D^ objectLocation)
 		{
 			try
@@ -203,6 +205,12 @@ namespace Xbim
 				else if (dynamic_cast<IIfcCsgSolid^>(geomRep))
 				{
 					XbimSolid^ solid = (XbimSolid^)CreateSolid((IIfcCsgSolid^)geomRep);
+					if (objectLocation != nullptr) solid->Move(objectLocation);
+					return solid;
+				}
+				else if (dynamic_cast<IIfcSphere^>(geomRep))
+				{
+					XbimSolid^ solid = (XbimSolid^)CreateSolid((IIfcSphere^)geomRep);
 					if (objectLocation != nullptr) solid->Move(objectLocation);
 					return solid;
 				}
