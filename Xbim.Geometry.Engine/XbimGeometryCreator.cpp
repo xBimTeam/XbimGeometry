@@ -54,7 +54,8 @@ namespace Xbim
 			return Create(geomRep, nullptr);
 		}
 
-
+		// this is the entry point that determines the call to the right underlying primitive.
+		//
 		IXbimGeometryObject^ XbimGeometryCreator::Create(IfcGeometricRepresentationItem^ geomRep, IfcAxis2Placement3D^ objectLocation)
 		{
 			try
@@ -153,6 +154,12 @@ namespace Xbim
 				{
 					if (objectLocation != nullptr) Logger->Error("Move is not implemented for IfcGeometricSet");
 					return CreateGeometricSet((IfcGeometricSet^)geomRep);
+				}
+				else if (dynamic_cast<IfcSphere^>(geomRep))
+				{
+					XbimSolid^ solid = (XbimSolid^)CreateSolid((IfcSphere^)geomRep);
+					if (objectLocation != nullptr) solid->Move(objectLocation);
+					return solid;
 				}
 			}
 			catch (...)
