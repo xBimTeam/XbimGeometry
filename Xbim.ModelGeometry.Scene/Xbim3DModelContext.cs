@@ -24,8 +24,8 @@ using Xbim.Tessellator;
 namespace Xbim.ModelGeometry.Scene
 {
     /// <summary>
-    ///     Represents a gemetric representation context, i.e. a 'Body' and 'Model'Representation
-    ///     Note a 3DModelContext may contain multiple IIfcGeometricRepresentationContexts
+    /// Represents a gemetric representation context, i.e. a 'Body' and 'Model'Representation
+    /// Note a 3DModelContext may contain multiple IIfcGeometricRepresentationContexts
     /// </summary>
     public class Xbim3DModelContext
     {
@@ -430,7 +430,7 @@ namespace Xbim.ModelGeometry.Scene
 
 
             /// <summary>
-            ///     populates the  hash sets with the identities of the representation items used in the model
+            /// populates the  hash sets with the identities of the representation items used in the model
             /// </summary>
             private void GetProductShapeIds()
             {
@@ -495,9 +495,7 @@ namespace Xbim.ModelGeometry.Scene
                     }
                 }
             }
-
-
-
+            
             public void Dispose()
             {
                 if (_disposed) return;
@@ -512,23 +510,6 @@ namespace Xbim.ModelGeometry.Scene
                 }
                 GC.SuppressFinalize(this);
             }
-
-            // todo: should the SewGeometries function be brought back?
-            // at the moment it's never used
-
-            //internal void SewGeometries(XbimGeometryEngine engine)
-            //{
-            //    Parallel.ForEach(CachedGeometries, ParallelOptions, geom =>
-            //        {
-            //            var geomSet = geom.Value as IXbimGeometryObjectSet;
-            //            if (geomSet == null)
-            //                return;
-            //            var solidSet = engine.CreateSolidSet();
-            //            solidSet.Add(geom.Value);
-            //            CachedGeometries.TryUpdate(geom.Key, solidSet, geom.Value);
-            //        }
-            //    );
-            //}
         }
 
         #endregion
@@ -592,7 +573,6 @@ namespace Xbim.ModelGeometry.Scene
             // build a list starting from subcontexts to speed up the lookup, this is a workaround so that the method
             // is fast on xbimModels that have been already generated.
             //
-
             var builtContextList = new List<IIfcGeometricRepresentationContext>();
             builtContextList.AddRange(
                 model.Instances.OfType<IIfcGeometricRepresentationSubContext>()
@@ -600,7 +580,6 @@ namespace Xbim.ModelGeometry.Scene
 
             var parentContexts = builtContextList.OfType<IIfcGeometricRepresentationSubContext>().Select(x => x.ParentContext).Distinct().ToList(); // tolist is needed to prevent collection change.
             builtContextList.AddRange(parentContexts);
-
 
             // from this moment we are using the same code we were using before on the prepared builtContextList
             // 
@@ -683,8 +662,6 @@ namespace Xbim.ModelGeometry.Scene
         }
 
 
-        /// <summary>
-        /// </summary>
         /// <param name="progDelegate"></param>       
         /// <returns></returns>
         public bool CreateContext(ReportProgressDelegate progDelegate = null, bool adjustWcs = true)
@@ -1036,7 +1013,7 @@ namespace Xbim.ModelGeometry.Scene
 
 
         /// <summary>
-        ///     Process the products shape and writes the instances of shape geometries to the Database
+        /// Process the products shape and writes the instances of shape geometries to the Database
         /// </summary>
         /// <param name="contextHelper"></param>
         /// <param name="element">Element to write</param>
@@ -1406,7 +1383,7 @@ namespace Xbim.ModelGeometry.Scene
         }
 
         /// <summary>
-        ///     Writes the geometry as a string into the database
+        /// Writes the geometry as a string into the database
         /// </summary>
         /// <returns></returns>
         private XbimShapeInstance WriteShapeInstanceToStore(int shapeLabel, int styleLabel, int ctxtId,
@@ -1441,8 +1418,8 @@ namespace Xbim.ModelGeometry.Scene
 
 
         /// <summary>
-        ///     Returns an enumerable of all XbimShape Instances in the model in this context, retrieveAllData will ensure that
-        ///     bounding box and transformation data are also retrieved
+        /// Returns an enumerable of all XbimShape Instances in the model in this context, retrieveAllData will ensure that
+        /// bounding box and transformation data are also retrieved
         /// </summary>
         /// <returns></returns>
         public IEnumerable<XbimShapeInstance> ShapeInstances()
@@ -1501,7 +1478,7 @@ namespace Xbim.ModelGeometry.Scene
         }
 
         /// <summary>
-        ///     Get the region with the greates population
+        /// Get the region with the greates population
         /// </summary>
         /// <returns></returns>
         public XbimRegion GetLargestRegion()
@@ -1516,7 +1493,7 @@ namespace Xbim.ModelGeometry.Scene
 
 
         /// <summary>
-        ///     Returns all instances of the specified shape geometry
+        /// Returns all instances of the specified shape geometry
         /// </summary>
         /// <param name="geometry"></param>
         /// <param name="ignoreFeatures">if true any instances of this geometry that are openings or projects are ignored</param>
@@ -1570,7 +1547,7 @@ namespace Xbim.ModelGeometry.Scene
         }
 
         /// <summary>
-        ///     Returns the shape instances of the specified product in this context
+        /// Returns the shape instances of the specified product in this context
         /// </summary>
         /// <param name="product"></param>
         /// <returns></returns>
@@ -1592,7 +1569,7 @@ namespace Xbim.ModelGeometry.Scene
         }
         
         /// <summary>
-        ///     Returns a triangulated mesh geometry fopr the specified shape
+        /// Returns a triangulated mesh geometry fopr the specified shape
         /// </summary>
         /// <returns></returns>
         public IXbimMeshGeometry3D ShapeGeometryMeshOf(int shapeGeometryLabel)
@@ -1604,7 +1581,7 @@ namespace Xbim.ModelGeometry.Scene
         }
 
         /// <summary>
-        ///     Returns a triangulated mesh geometry fopr the specified shape geometry
+        /// Returns a triangulated mesh geometry fopr the specified shape geometry
         /// </summary>
         /// <returns></returns>
         public IXbimMeshGeometry3D ShapeGeometryMeshOf(XbimShapeGeometry shapeGeometry)
@@ -1615,7 +1592,7 @@ namespace Xbim.ModelGeometry.Scene
         }
 
         /// <summary>
-        ///     Returns a triangulated mesh geometry fopr the specified shape instance, all transformations are applied
+        /// Returns a triangulated mesh geometry fopr the specified shape instance, all transformations are applied
         /// </summary>
         /// <returns></returns>
         public IXbimMeshGeometry3D ShapeGeometryMeshOf(XbimShapeInstance shapeInstance)
