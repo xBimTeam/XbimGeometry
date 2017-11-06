@@ -68,7 +68,7 @@ namespace Xbim.OccTool.Commands
             }
             if (!entities.Any())
             {
-                Log.Error($"Not enough parameters: No entities specified.");
+                Log.Error("Not enough parameters: No entities specified.");
                 return 100;
             }
             
@@ -79,14 +79,14 @@ namespace Xbim.OccTool.Commands
                 IfcFile = new FileInfo(args[index]);
                 if (!IfcFile.Exists)
                 {
-                    Log.Error($"File {IfcFile.FullName} not found.");
+                    Log.Error(string.Format("File {0} not found.", IfcFile.FullName));
                     return 100;
                 }
             }
 
             if (IfcFile == null)
             {
-                Log.Error($"Not enough parameters: No file specified.");
+                Log.Error("Not enough parameters: No file specified.");
                 return 100;
             }
 
@@ -106,27 +106,27 @@ namespace Xbim.OccTool.Commands
                     if (ent == null)
                     {
 
-                        Log.Error($"Entity #{entityLabel} not found in the model.");
+                        Log.Error(string.Format("Entity #{0} not found in the model.", entityLabel));
                         continue;
                     }
                     var geomEntity = ent as IIfcGeometricRepresentationItem;
                     if (geomEntity == null)
                     {
-                        Log.Error($"Entity #{entityLabel} is not a valid IIfcGeometricRepresentationItem.");
+                        Log.Error(string.Format("Entity #{0} is not a valid IIfcGeometricRepresentationItem.", entityLabel));
                         continue;
                     }
 
                     var geometryObject = geomEngine.Create(geomEntity);
                     if (geometryObject == null)
                     {
-                        Log.Error($"Geometry object creation failed for #{entityLabel}.");
+                        Log.Error(string.Format("Geometry object creation failed for #{0}.", entityLabel));
                         continue;
                     }
 
                     var brep = geomEngine.ToBrep(geometryObject);
                     if (string.IsNullOrEmpty(brep))
                     {
-                        Log.Error($"Empty BREP for #{entityLabel}.");
+                        Log.Error(string.Format("Empty BREP for #{0}.", entityLabel));
                         continue;
                     }
 
@@ -136,7 +136,9 @@ namespace Xbim.OccTool.Commands
                         localFileName = iProgressive.ToString();
                     }
 
-                    var wFileName = Path.Combine(dOut.FullName , $"{localFileName}.brep");
+                    var wFileName = Path.Combine(dOut.FullName,
+                        string.Format("{0}.brep", localFileName)
+                        );
                     dOut.Create();
                     var wFileInfo = new FileInfo(wFileName);
                     using (var wFileStream = wFileInfo.CreateText())
@@ -144,7 +146,7 @@ namespace Xbim.OccTool.Commands
                         wFileStream.WriteLine("DBRep_DrawableShape"); // required in brep file for occ
                         wFileStream.Write(brep);
                         wFileStream.Close();
-                        Console.WriteLine($"Element #{entityLabel} saved.");
+                        Console.WriteLine(string.Format("Element #{0} saved.", entityLabel));
                     }
                 }
             }

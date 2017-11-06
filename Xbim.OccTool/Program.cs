@@ -45,7 +45,7 @@ namespace Xbim.OccTool
                 }
                 if (!processed)
                 {
-                    Log.Warn($"Parameter '{args[index]}' ignored.");
+                    Log.Warn(string.Format("Parameter '{0}' ignored.", args[index]));
                     index++;
                 }
             }
@@ -63,7 +63,7 @@ namespace Xbim.OccTool
             Console.WriteLine("Available commands are:");
             foreach (var command in commands)
             {
-                Console.WriteLine($"- {command.GetSyntax()}");
+                Console.WriteLine(string.Format("- {0}", command.GetSyntax()));
             }
             Console.WriteLine("use 'help CommandName' for more.");
         }

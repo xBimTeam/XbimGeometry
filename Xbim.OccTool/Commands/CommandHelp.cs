@@ -35,10 +35,10 @@ namespace Xbim.OccTool.Commands
             switch (helptopic)
             {
                 case "brep":
-                    Console.WriteLine($"Use '{CommandHelp.Syntax}' for instructions on a specific command.");
+                    Console.WriteLine(string.Format("Use '{0}' for instructions on a specific command.", CommandHelp.Syntax));
                     break;
                 default:
-                    Console.WriteLine($"Syntax is: {CommandBrep.Syntax}");
+                    Console.WriteLine(string.Format("Syntax is: {0}", CommandBrep.Syntax));
                     break;
             }
             return consumed;           
