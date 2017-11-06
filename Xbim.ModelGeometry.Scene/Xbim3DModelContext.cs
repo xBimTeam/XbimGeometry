@@ -224,7 +224,6 @@ namespace Xbim.ModelGeometry.Scene
             {
                 Model = model;
                 Contexts = contexts;
-
             }
 
             /// <summary>
@@ -464,7 +463,6 @@ namespace Xbim.ModelGeometry.Scene
                                 }
                                 else
                                 {
-
                                     //if not already processed add it
                                     ProductShapeIds.Add(shape.EntityLabel);
                                     if (isFeatureElementShape) FeatureElementShapeIds.Add(shape.EntityLabel);
@@ -571,7 +569,7 @@ namespace Xbim.ModelGeometry.Scene
 
             // because IfcGeometricRepresentationSubContext is indexed but IIfcGeometricRepresentationContext is not we 
             // build a list starting from subcontexts to speed up the lookup, this is a workaround so that the method
-            // is fast on xbimModels that have been already generated.
+            // is fast on xbimModels that have been already generated (without the index).
             //
             var builtContextList = new List<IIfcGeometricRepresentationContext>();
             builtContextList.AddRange(
@@ -1310,7 +1308,6 @@ namespace Xbim.ModelGeometry.Scene
                                 {
                                     BoundingBox = (shapeGeom).BoundingBox,
                                     GeometryId = geometryStore.AddShapeGeometry(shapeGeom)
-
                                 };
                                 int styleLabel;
                                 contextHelper.SurfaceStyles.TryGetValue(shapeGeom.IfcShapeLabel, out styleLabel);
