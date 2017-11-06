@@ -193,7 +193,8 @@ namespace Xbim.ModelGeometry.Scene
             internal HashSet<int> MappedShapeIds { get; private set; }
             internal HashSet<int> FeatureElementShapeIds { get; private set; }
             internal List<IGrouping<IfcElement, IfcFeatureElement>> OpeningsAndProjections { get; private set; }
-            private HashSet<int> VoidedShapeIds { get; set; }
+            private HashSet<int> VoidedProductIds { get; set; }
+            internal HashSet<int> VoidedShapeIds { get; set; }
             
             internal ConcurrentDictionary<int, IXbimGeometryObject> CachedGeometries { get; private set; }
             internal int Total { get; private set; }
@@ -243,12 +244,13 @@ namespace Xbim.ModelGeometry.Scene
                     MapsWritten = new ConcurrentDictionary<int, List<GeometryReference>>();
                     MapTransforms = new ConcurrentDictionary<int, XbimMatrix3D>();
                     GetOpeningsAndProjections();
+                    VoidedProductIds = new HashSet<int>();
                     VoidedShapeIds = new HashSet<int>();
                     ParallelOptions = new ParallelOptions();
                     //ParallelOptions.MaxDegreeOfParallelism = 8;
                     CachedGeometries = new ConcurrentDictionary<int, IXbimGeometryObject>();
                     foreach (var voidedShapeId in OpeningsAndProjections.Select(op => op.Key.EntityLabel))
-                        VoidedShapeIds.Add(voidedShapeId);
+                        VoidedProductIds.Add(voidedShapeId);
                     GetProductShapeIds();
                     ShapeLookup = new ConcurrentDictionary<int, GeometryReference>();
                     //Get the surface styles
@@ -377,7 +379,7 @@ namespace Xbim.ModelGeometry.Scene
 
 
             /// <summary>
-            ///     populates the  hash sets with the identities of the representation items used in the model
+            /// Populates the  hash sets with the identities of the representation items used in the model
             /// </summary>
             private void GetProductShapeIds()
             {
@@ -387,8 +389,9 @@ namespace Xbim.ModelGeometry.Scene
                 foreach (
                     var product in Model.InstancesLocal.OfType<IfcProduct>(true).Where(p => p.Representation != null))
                 {
-                    var isFeatureElementShape = product is IfcFeatureElement ||
-                                                VoidedShapeIds.Contains(product.EntityLabel);
+                    var isFeatureElementShape = product is IfcFeatureElement;
+                    var isVoidedProductShape = VoidedProductIds.Contains(product.EntityLabel);
+                    
                     //select representations that are in the required context
                     //only want solid representations for this context, but rep type is optional so just filter identified 2d elements
                     //we can only handle one representation in a context and this is in an implementers agreement
@@ -407,27 +410,36 @@ namespace Xbim.ModelGeometry.Scene
                                 var mappedItem = shape as IfcMappedItem;
                                 if (mappedItem != null)
                                 {
-                                    MappedShapeIds.Add(mappedItem.EntityLabel);
-                                    //make sure any shapes mapped are in the set to process as well
-                                    foreach (var item in mappedItem.MappingSource.MappedRepresentation.Items)
-                                    {
-                                        if (item != null && !(item is IfcGeometricSet))
-                                        {
-                                            var mappedItemLabel = item.EntityLabel;
-                                            //if not already processed add it
-                                            ProductShapeIdsAdd(mappedItemLabel, product);
-                                            if (isFeatureElementShape) FeatureElementShapeIds.Add(mappedItemLabel);
-                                        }
-                                    }
+                                    ProcessMappedItem(isFeatureElementShape, isVoidedProductShape, mappedItem, product);
                                 }
                                 else
                                 {
                                     //if not already processed add it
                                     ProductShapeIdsAdd(shape.EntityLabel, product);
                                     if (isFeatureElementShape) FeatureElementShapeIds.Add(shape.EntityLabel);
+                                    if (isVoidedProductShape) VoidedShapeIds.Add(shape.EntityLabel);
                                 }
                             }
                         }
+                    }
+                }
+            }
+
+            private void ProcessMappedItem(bool isFeatureElementShape, bool isVoidedProductShape, IfcMappedItem mappedItem, IfcProduct product)
+            {
+                MappedShapeIds.Add(mappedItem.EntityLabel);
+                //make sure any shapes mapped are in the set to process as well
+                foreach (var item in mappedItem.MappingSource.MappedRepresentation.Items)
+                {
+                    if (item is IfcMappedItem)
+                        ProcessMappedItem(isFeatureElementShape, isVoidedProductShape, item as IfcMappedItem, product);
+                    else if (item != null && !(item is IfcGeometricSet))
+                    {
+                        var mappedItemLabel = item.EntityLabel;
+                        //if not already processed add it
+                        ProductShapeIdsAdd(mappedItemLabel, product);
+                        if (isFeatureElementShape) FeatureElementShapeIds.Add(mappedItemLabel);
+                        if (isVoidedProductShape) VoidedShapeIds.Add(mappedItemLabel);
                     }
                 }
             }
@@ -1354,6 +1366,7 @@ namespace Xbim.ModelGeometry.Scene
                 
                 //  var key = new RepresentationItemGeometricHashKey(shape);
                 var isFeatureElementShape = contextHelper.FeatureElementShapeIds.Contains(shapeId);
+                var isVoidedProductShape = contextHelper.VoidedShapeIds.Contains(shapeId);
                 //this can be used to remove duplicate shapes but has a memory overhead as large nimber so objects need to be cached
 
                 //var mappedEntityLabel = geomHash.GetOrAdd(key, shapeId);
@@ -1379,21 +1392,21 @@ namespace Xbim.ModelGeometry.Scene
                         {
                             IXbimShapeGeometryData shapeGeom = null;
                             IXbimGeometryObject geomModel = null;
-                            if (!isFeatureElementShape && xbimTessellator.CanMesh(shape))
-                                //if we can mesh the shape directly just do it
+                            if (!isFeatureElementShape && !isVoidedProductShape && xbimTessellator.CanMesh(shape)) //if we can mesh the shape directly just do it
                             {
                                 shapeGeom = xbimTessellator.Mesh(shape);
                             }
                             else //we need to create a geometry object
                             {
-
                                 geomModel = Engine.Create(shape);
                                 if (geomModel != null && geomModel.IsValid)
                                 {
-                                    shapeGeom = Engine.CreateShapeGeometry(geomModel, thisPrecision, thisDeflectionDistance,
-                                        thisDeflectionAngle, geomStorageType);
-                                    if (isFeatureElementShape)
+                                    shapeGeom = Engine.CreateShapeGeometry(geomModel, thisPrecision, thisDeflectionDistance, thisDeflectionAngle, geomStorageType);
+                                    if (isFeatureElementShape) {
                                         //we need for boolean operations later, add the polyhedron if the face is planar
+                                        contextHelper.CachedGeometries.TryAdd(shapeId, geomModel);
+				                    }
+                                    else if (isVoidedProductShape)
                                         contextHelper.CachedGeometries.TryAdd(shapeId, geomModel);
                                 }
                             }

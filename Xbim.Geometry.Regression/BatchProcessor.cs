@@ -92,7 +92,6 @@ namespace XbimRegression
                 ProcessResult result = new ProcessResult() { Errors = -1 };
                 try
                 {
-
                     Stopwatch watch = new Stopwatch();
                     watch.Start();
                     using (XbimModel model = ParseModelFile(ifcFile, Params.Caching))
