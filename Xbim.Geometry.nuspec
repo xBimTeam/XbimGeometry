@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
     <metadata>
         <id>Xbim.Geometry</id>
-        <version>3.1.31</version>
+        <version>3.1.34</version>
         <title>xBIM Geometry</title>
         <authors>xBIM team</authors>
         <owners>Steve Lockley</owners>
@@ -18,6 +18,7 @@ The xBIM project provides packages to convert IFC models to COBie spreadsheets i
 IOS and Android versions are under development.</description>
         <summary>The .Net toolkit for developing BIM applications based on the IFC standard. Essential support for the Ifc data model</summary>
         <releaseNotes>
+          3.1.32 Now moved to occ72, more on maps and contexts.
           3.1.31 Moved to occ7.1.0 + fix on consteel.
           3.1.24 Better management of IfcDerivedProfileDef and IfcRectangleHollowProfileDef now meshed with fillet radiuses (if defined).
           3.1.21 IfcPolygonalBoundedHalfSpace tolerates open PolyLines.

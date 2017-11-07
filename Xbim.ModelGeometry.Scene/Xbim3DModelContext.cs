@@ -1720,30 +1720,30 @@ namespace Xbim.ModelGeometry.Scene
         ///     Returns an enumerable of all the unique surface styles used in this context, optionally pass in a colour map to
         ///     obtain styles defaulted by type where they have no definition in the model
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A set of XbimTexture; the DefinedObjectId is an integer that is positive for Styles and negative for IfcTypes</returns>
         public IEnumerable<XbimTexture> SurfaceStyles(XbimColourMap colourMap = null)
         {
             if (colourMap == null) colourMap = new XbimColourMap();
-            var productTypes = new HashSet<short>();
-
+            var doneIds = new HashSet<int>();
             using (var shapeInstanceTable = _model.GetShapeInstanceTable())
             {
-
                 using (shapeInstanceTable.BeginReadOnlyTransaction())
                 {
                     foreach (var context in _contexts)
                     {
                         int surfaceStyle;
                         short productType;
-                        if (shapeInstanceTable.TryMoveFirstSurfaceStyle(context.EntityLabel, out surfaceStyle,
-                            out productType))
+                        if (shapeInstanceTable.TryMoveFirstSurfaceStyle(context.EntityLabel, out surfaceStyle, out productType))
                         {
                             do
                             {
                                 if (surfaceStyle > 0) //we have a surface style
                                 {
-                                    var ss = (IfcSurfaceStyle) _model.InstancesLocal[surfaceStyle];
-                                    yield return new XbimTexture().CreateTexture(ss);
+                                    if (doneIds.Add(surfaceStyle)) //if we have not seen this yet then add it
+                                    {
+                                        var ss = (IfcSurfaceStyle)_model.InstancesLocal[surfaceStyle];
+                                        yield return new XbimTexture().CreateTexture(ss);
+                                    }
                                     surfaceStyle = shapeInstanceTable.SkipSurfaceStyes(surfaceStyle);
                                 }
                                 else //then we use the product type for the surface style
@@ -1751,17 +1751,19 @@ namespace Xbim.ModelGeometry.Scene
                                     //read all shape instance of style 0 and get their product texture
                                     do
                                     {
-                                        if (productTypes.Add(productType)) //if we have not seen this yet then add it
+                                        // negative codes represent product types
+                                        var thisCode = productType * -1;
+                                        if (doneIds.Add(thisCode)) //if we have not seen this yet then add it
                                         {
                                             var theType = IfcMetaData.GetType(productType);
                                             var texture = new XbimTexture().CreateTexture(colourMap[theType.Name]);
-                                            //get the colour to use
-                                            texture.DefinedObjectId = productType*-1;
+                                            // get the colour to use
+                                            texture.DefinedObjectId = thisCode;
                                             yield return texture;
                                         }
                                     } while (
                                         shapeInstanceTable.TryMoveNextSurfaceStyle(out surfaceStyle, out productType) &&
-                                        surfaceStyle == 0); //skip over all the zero entriesand get theeir style
+                                        surfaceStyle == 0); //skip over all the zero entries and get their style
                                 }
                             } while (surfaceStyle != -1);
                             //now get all the undefined styles and use their product type to create the texture
