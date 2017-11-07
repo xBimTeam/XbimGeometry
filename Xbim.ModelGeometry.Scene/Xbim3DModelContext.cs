@@ -1096,12 +1096,18 @@ namespace Xbim.ModelGeometry.Scene
             var localTally = contextHelper.Tally;
             var localPercentageParsed = contextHelper.PercentageParsed;
 
+            // todo: add grid management here...
+
             Parallel.ForEach(products, contextHelper.ParallelOptions, product =>
                     //    foreach (var product in products)
                     {
                         //select representations that are in the required context
                         //only want solid representations for this context, but rep type is optional so just filter identified 2d elements
                         //we can only handle one representation in a context and this is in an implementers agreement
+                        if (product.Representation == null)
+                            return;
+                        if (product.Representation.Representations == null)
+                            return;
                         var rep =
                             product.Representation.Representations.FirstOrDefault(
                                 r => _contexts.Contains(r.ContextOfItems) &&
@@ -1129,6 +1135,10 @@ namespace Xbim.ModelGeometry.Scene
         {
             //_maxXyz = _model.ModelFactors.OneMetre * 100; //elements bigger than 100 metres should not be considered in region
             var shapesInstances = new List<XbimShapeInstance>();
+            if (element.Representation == null)
+                return Enumerable.Empty<XbimShapeInstance>();
+            if (element.Representation.Representations == null)
+                return Enumerable.Empty<XbimShapeInstance>();
             var rep = element.Representation.Representations
                 .FirstOrDefault(r => _contexts.Contains(r.ContextOfItems)
                                      && r.IsBodyRepresentation());
@@ -1149,8 +1159,16 @@ namespace Xbim.ModelGeometry.Scene
             var placementTransform = contextHelper.PlacementTree[element.ObjectPlacement.EntityLabel];
             var contextId = rep.ContextOfItems.EntityLabel;
 
-            //write out any shapes it has                   
-            foreach (var shape in rep.Items)
+            //write out any shapes it has      
+
+            var topLevelItems = rep.Items;
+            ConvertMaps(contextHelper, element, shapesInstances, rep, repType, placementTransform, contextId, topLevelItems);
+            return shapesInstances;
+        }
+
+        private void ConvertMaps(XbimCreateContextHelper contextHelper, IfcProduct element, List<XbimShapeInstance> shapesInstances, IfcRepresentation rep, XbimGeometryRepresentationType repType, XbimMatrix3D placementTransform, int contextId, XbimSet<IfcRepresentationItem> topLevelItems)
+        {
+            foreach (var shape in topLevelItems)
             {
                 if (shape is IfcMappedItem)
                 {
@@ -1204,7 +1222,6 @@ namespace Xbim.ModelGeometry.Scene
                     }
                 }
             }
-            return shapesInstances;
         }
 
         private void WriteMappedItems(XbimCreateContextHelper contextHelper, ReportProgressDelegate progDelegate)
@@ -1239,11 +1256,11 @@ namespace Xbim.ModelGeometry.Scene
                             if (mapShapes.Any()) //if we have something to write
                             {
                                 contextHelper.MapsWritten.TryAdd(map.EntityLabel, mapShapes);
-                                var cartesianTransform = map.MappingTarget.ToMatrix3D();
-                                var localTransform = map.MappingSource.MappingOrigin.ToMatrix3D();
-                                contextHelper.MapTransforms.TryAdd(map.EntityLabel,
-                                    XbimMatrix3D.Multiply(cartesianTransform, localTransform));
                             }
+                            var cartesianTransform = map.MappingTarget.ToMatrix3D();
+                            var localTransform = map.MappingSource.MappingOrigin.ToMatrix3D();
+                            contextHelper.MapTransforms.TryAdd(map.EntityLabel, 
+                                XbimMatrix3D.Multiply(cartesianTransform, localTransform));
                         }
                         else
                             Logger.ErrorFormat("Illegal entity found in maps collection #{0}, type {1}",
@@ -1428,7 +1445,7 @@ namespace Xbim.ModelGeometry.Scene
                                 shapeGeom.IfcShapeLabel = shapeId;
                                 shapeGeometries.Add(shapeGeom);
                             }
-                            if (geomModel != null && geomModel.IsValid && !isFeatureElementShape)
+                            if (geomModel != null && geomModel.IsValid && !isFeatureElementShape && !isVoidedProductShape)
                             {
                                 geomModel.Dispose();
                             }
@@ -1756,7 +1773,8 @@ namespace Xbim.ModelGeometry.Scene
 
         public IEnumerable<XbimRegion> GetRegions()
         {
-            if (_contexts == null) return null; //nothing to do
+            if (_contexts == null)
+                return null; //nothing to do
             var regionDataColl = new List<XbimGeometryData>();
             foreach (var context in _contexts)
             {
