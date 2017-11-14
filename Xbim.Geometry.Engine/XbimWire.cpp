@@ -190,14 +190,43 @@ namespace Xbim
 			else
 			{
 
-				XbimWire^ loop = gcnew XbimWire(profile->OuterCurve);
+				XbimWire^ loop;
+				if (dynamic_cast<IfcPolyline^>(profile->OuterCurve))
+				{
+					loop = gcnew XbimWire((IfcPolyline^)profile->OuterCurve, true);
+				}
+				else
+				{
+					loop = gcnew XbimWire(profile->OuterCurve);
+				}
 				if (!loop->IsValid)
 				{
 					XbimGeometryCreator::logger->WarnFormat("WW025: IfcArbitraryClosedProfileDef #{0} has an invalid outer bound. Discarded", profile->EntityLabel);
 					return;
 				}
 				pWire = new TopoDS_Wire();
-				*pWire = loop;
+				if (!loop->IsClosed && loop->Edges->Count>1) //we need to close it if we have more thn one edge
+				{
+					// todo: this code is not quite robust, it did not manage to close fairly simple polylines.
+					//
+					double oneMilli = profile->ModelOf->ModelFactors->OneMilliMeter;
+					XbimFace^ face = gcnew XbimFace(loop);
+					ShapeFix_Wire wireFixer(loop, face, profile->ModelOf->ModelFactors->Precision);
+					wireFixer.ClosedWireMode() = Standard_True;
+					wireFixer.FixGaps2dMode() = Standard_True;
+					wireFixer.FixGaps3dMode() = Standard_True;
+					wireFixer.ModifyGeometryMode() = Standard_True;
+					wireFixer.SetMinTolerance(profile->ModelOf->ModelFactors->Precision);
+					wireFixer.SetPrecision(oneMilli);
+					wireFixer.SetMaxTolerance(oneMilli * 10);
+					Standard_Boolean closed = wireFixer.Perform();
+					if (closed)
+						*pWire = wireFixer.Wire();
+					else
+						*pWire = loop;
+				}
+				else
+					*pWire = loop;
 			}
 		}
 
