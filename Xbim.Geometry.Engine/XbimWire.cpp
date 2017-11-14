@@ -208,8 +208,17 @@ namespace Xbim
 			}
 			else
 			{
-
-				XbimWire^ loop = gcnew XbimWire(profile->OuterCurve);
+				XbimWire^ loop;
+				if (dynamic_cast<IIfcPolyline^>(profile->OuterCurve))
+				{
+					loop = gcnew XbimWire((IIfcPolyline^)profile->OuterCurve, true);
+				}
+				else
+				{
+					loop = gcnew XbimWire(profile->OuterCurve);
+				}
+				
+				
 				if (!loop->IsValid)
 				{
 					XbimGeometryCreator::LogWarning(profile, "Invalid outer bound. Wire discarded");
@@ -218,6 +227,8 @@ namespace Xbim
 				pWire = new TopoDS_Wire();
 				if (!loop->IsClosed && loop->Edges->Count>1) //we need to close it if we have more thn one edge
 				{
+					// todo: this code is not quite robust, it did not manage to close fairly simple polylines.
+					//
 					double oneMilli = profile->Model->ModelFactors->OneMilliMeter;
 					XbimFace^ face = gcnew XbimFace(loop);
 					ShapeFix_Wire wireFixer(loop,face, profile->Model->ModelFactors->Precision);

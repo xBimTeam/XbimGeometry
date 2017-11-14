@@ -79,7 +79,7 @@ namespace Xbim.OccTool.Commands
                 IfcFile = new FileInfo(args[index]);
                 if (!IfcFile.Exists)
                 {
-                    Log.Error(string.Format("File {0} not found.", IfcFile.FullName));
+                    Log.Error(string.Format("File '{0}' not found.", IfcFile.FullName));
                     return 100;
                 }
             }

@@ -23,7 +23,7 @@ namespace Xbim.OccTool
             Console.WriteLine("Xbim.OccTool");
             if (args.Length == 0)
             {
-                Console.WriteLine("- warning: rguments missing.");
+                Console.WriteLine("- warning: arguments missing.");
                 DisplayHelp(commands);
                 return;
             }
