@@ -50,6 +50,8 @@ using namespace System;
 using namespace System::Linq;
 using namespace Xbim::Common;
 using namespace Xbim::Common::XbimExtensions;
+using namespace Xbim::Ifc4::Interfaces;
+
 namespace Xbim
 {
 	namespace Geometry
@@ -894,7 +896,6 @@ namespace Xbim
 				builder.Add(*pCompound, shell);
 		}
 
-
 		void XbimCompound::Init(IEnumerable<IIfcFace^>^ faces, bool close, IIfcRepresentationItem^ theItem)
 		{						
 			double tolerance = theItem->Model->ModelFactors->Precision;			
@@ -914,7 +915,8 @@ namespace Xbim
 				List<Tuple<XbimWire^, IIfcPolyLoop^, bool>^>^ loops = gcnew List<Tuple<XbimWire^, IIfcPolyLoop^, bool>^>();
 				for each (IIfcFaceBound^ bound in fc->Bounds) //build all the loops
 				{
-					if (!dynamic_cast<IIfcPolyLoop^>(bound->Bound) || !XbimConvert::IsPolygon((IIfcPolyLoop^)bound->Bound)) continue;//skip non-polygonal faces
+					if (!dynamic_cast<IIfcPolyLoop^>(bound->Bound) || !XbimConvert::IsPolygon((IIfcPolyLoop^)bound->Bound)) 
+						continue;//skip non-polygonal faces
 					IIfcPolyLoop^ polyLoop = (IIfcPolyLoop^)(bound->Bound);
 					bool is3D = XbimConvert::Is3D(polyLoop);					
 					int totalPoints = polyLoop->Polygon->Count;
@@ -950,15 +952,18 @@ namespace Xbim
 
 							XbimEdge^ edge = linearEdge->TakeEdge(currentPoint, nextPoint);
 							linearEdges->Add(linearEdge);
-							if (edge != nullptr && edge->IsValid)builder.Add(wire, edge);
+							if (edge != nullptr && edge->IsValid)
+								builder.Add(wire, edge);
 						}
 						currentVertex = nextVertex;
 						currentPoint = nextPoint;						
 					}
-
 					
 					wire.Closed(Standard_True); //need to check this
 					XbimWire^ loop = gcnew XbimWire(wire);
+					
+					// face definition is used to attempt fixing the loop
+					//
 					XbimFace^ xFace = nullptr;
 					if (is3D)
 					{						
@@ -967,7 +972,12 @@ namespace Xbim
 							xFace = gcnew XbimFace(norm);
 					}
 					else
+					{
+						// assume x-y plane face
 						xFace = gcnew XbimFace(XbimVector3D(0, 0, 1));
+					}
+
+
 					if (xFace != nullptr)
 					{
 						ShapeAnalysis_Wire wireChecker(wire, xFace, tolerance);
@@ -985,6 +995,8 @@ namespace Xbim
 						}
 					}
 										
+					// process the loop
+					//
 					if (loop->IsValid && loop->Area)
 					{
 						if (!bound->Orientation)
@@ -994,8 +1006,8 @@ namespace Xbim
 				}
 				XbimFace^ face = BuildFace(loops, fc);
 				face->Tag = linearEdges;
-				for each (Tuple<XbimWire^, IIfcPolyLoop^, bool>^ loop in loops) delete loop->Item1; //force removal of wires
-				if (face->IsValid )
+				for each (Tuple<XbimWire^, IIfcPolyLoop^, bool>^ loopToClear in loops) delete loopToClear->Item1; //force removal of wires
+				if (face->IsValid)
 				{
 					FTol.LimitTolerance(face, tolerance);					
 					allFaces->Add(face);
@@ -1006,11 +1018,11 @@ namespace Xbim
 					{
 						linEdge->ReleaseEdge();
 					}
-					XbimGeometryCreator::LogInfo(fc, "Incorrectly defined face. It has been ignored");
+					XbimGeometryCreator::LogWarning(fc, "Incorrectly defined face. It has been ignored");
 				}
 			}
 			
-			//see if we have any multiconnected edges and faces that are totally multi-connected
+			// see if we have any multiconnected edges and faces that are totally multi-connected
 			List<XbimFace^>^ facesToDelete = gcnew List<XbimFace^>();
 			List<XbimFace^>^ facesToRecheck = gcnew List<XbimFace^>();
 			for each (XbimFace^ f in allFaces)
@@ -1020,8 +1032,10 @@ namespace Xbim
 				bool someEdgesMultiConnected = false;
 				for each (XbimBiPolarLinearEdge^ linEdge in linearEdges)
 				{
-					if (linEdge->ReferenceCount < 3) allEdgesMultiConnected = false;
-					if (linEdge->ReferenceCount > 2) someEdgesMultiConnected = true;
+					if (linEdge->ReferenceCount < 3) 
+						allEdgesMultiConnected = false;
+					if (linEdge->ReferenceCount > 2) 
+						someEdgesMultiConnected = true;
 				}
 				if (allEdgesMultiConnected)
 				{
@@ -1040,41 +1054,44 @@ namespace Xbim
 						facesToRecheck->Add(f);
 					}
 				}
-				
 			}
-			bool closedShape = true;
 			
-			for each (XbimFace^ f in facesToRecheck)
-			{
-				List<XbimBiPolarLinearEdge^>^ linearEdges = (List<XbimBiPolarLinearEdge^>^)(f->Tag);			
-				for each (XbimBiPolarLinearEdge^ linEdge in linearEdges)
-				{
-					if (linEdge->ReferenceCount != 2) closedShape = false;					
-				}
-			}
 
-			//in theory we have a topologically valid shell but face orientation may be wrong as some exporters don't care about this
+			// in theory we have a topologically valid shell but face orientation may be wrong as some exporters don't care about this
+			//
 			ShapeAnalysis_Shell shellAnalyser;
 			bool needsReorienting = shellAnalyser.CheckOrientedShells(shell);
 			if (needsReorienting)
 			{
 				ShapeFix_Shell shellFixer;
 				bool fixed = shellFixer.FixFaceOrientation(shell);
-				if(fixed) shell = shellFixer.Shell();
+				if (fixed) 
+					shell = shellFixer.Shell();
 			}
 			//XbimShell^ s = gcnew XbimShell(shell);
 			TopoDS_Shape result;
 			if (close) //we want it closed
 			{
+				bool closedShape = true;
+				for each (XbimFace^ f in facesToRecheck)
+				{
+					List<XbimBiPolarLinearEdge^>^ linearEdges = (List<XbimBiPolarLinearEdge^>^)(f->Tag);
+					for each (XbimBiPolarLinearEdge^ linEdge in linearEdges)
+					{
+						if (linEdge->ReferenceCount != 2)
+							closedShape = false;
+					}
+				}
 				if (!closedShape) //we think it is closed, we cannot really do much more if it is not, shape healing will not heal a shell that is not closed
 				{
-					XbimGeometryCreator::LogInfo(theItem, "Incorrectly defined closed shell. It has been processed but is declared closed and is not defined as closed");
+					XbimGeometryCreator::LogWarning(theItem, "Incorrectly defined closed shell. It has been processed but is declared closed and is not defined as closed");
 				}
 				ShapeFix_Solid solidFixer;
 				solidFixer.SetPrecision(tolerance);
 				solidFixer.SetMinTolerance(tolerance);
 				result = solidFixer.SolidFromShell(shell);
-				if (result.IsNull()) result = shell; //give in
+				if (result.IsNull()) 
+					result = shell; //give in
 			}
 			else
 				result = shell;
@@ -1113,7 +1130,6 @@ namespace Xbim
 
 		XbimFace^ XbimCompound::BuildFace(List<Tuple<XbimWire^, IIfcPolyLoop^, bool>^>^ wires, IIfcFace^ owningFace)
 		{
-
 			if (wires->Count == 0) 
 				return gcnew XbimFace();
 			IIfcCartesianPoint^ first = Enumerable::First(wires[0]->Item2->Polygon);

@@ -743,6 +743,16 @@ namespace Xbim
 			}
 		}
 
+		double VolumeOf(IXbimSolidSet^ set) {
+			double ret = -1;
+			XbimSolidSet^ basic = dynamic_cast<XbimSolidSet^>(set);
+			if (basic != nullptr)
+			{
+				return basic->Volume;
+			}
+			return ret;
+		}
+
 
 
 		void XbimSolidSet::Init(IIfcBooleanResult^ boolOp)
@@ -766,6 +776,8 @@ namespace Xbim
 				return;
 			}
 
+			double vL, vR, vDelta, vRes;
+			
 			IModelFactors^ mf = boolOp->Model->ModelFactors;
 			IXbimSolidSet^ result;
 			try
@@ -780,6 +792,20 @@ namespace Xbim
 					break;
 				case IfcBooleanOperator::DIFFERENCE:
 					result = left->Cut(right, mf->Precision);
+					vRes = VolumeOf(result);
+					if (vRes != -1)
+					{
+						vL = left->Volume;
+						vR = right->Volume;
+						vDelta = vL - vR;
+						if (vDelta > vR)
+						{ 
+							// the boolean had a problem
+							XbimGeometryCreator::LogError(boolOp, "Boolean operation silent failure, the operation has been ignored");
+							solids->Add(left);
+							return;
+						}
+					}
 					break;
 				}
 			}
