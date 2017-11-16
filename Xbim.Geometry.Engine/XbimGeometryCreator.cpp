@@ -872,6 +872,18 @@ namespace Xbim
 		}
 #endif // USE_CARVE_CSG
 
+
+		double VolumeOf(IXbimSolidSet^ set) {
+			double ret = -1;
+			XbimSolidSet^ basic = dynamic_cast<XbimSolidSet^>(set);
+			if (basic != nullptr)
+			{
+				return basic->Volume;
+			}
+			return ret;
+		}
+
+
 		IXbimSolidSet^ XbimGeometryCreator::CreateBooleanResult(IfcBooleanResult^ clip)
 		{
 			XbimModelFactors^ mf = clip->ModelOf->ModelFactors;
@@ -910,9 +922,22 @@ namespace Xbim
 			}
 			else
 			{
+				
 				IXbimSolidSet^ r = gcnew XbimSolidSet(body);
-				for each (XbimSolid^ s in solidSet)	r = r->Cut(s, precision);
-
+				double minVol = body->Volume;
+				for each (XbimSolid^ s in solidSet)
+				{
+					minVol -= s->Volume;
+					r = r->Cut(s, precision);
+				}
+				double outVol = VolumeOf(r);
+				if (outVol != -1) {
+					if (outVol < minVol)
+					{
+						XbimGeometryCreator::LogWarning(clip, "Boolean operation silent failure, the operation has been ignored");
+						return gcnew XbimSolidSet(body);
+					}
+				}
 				//BRepTools::Write((XbimSolid^)(r->First), "d:\\tmp\\r");			
 				return r;
 			}
