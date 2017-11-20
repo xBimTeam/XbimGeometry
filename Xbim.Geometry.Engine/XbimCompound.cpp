@@ -51,6 +51,7 @@ using namespace System::Linq;
 using namespace Xbim::Common;
 using namespace Xbim::Common::XbimExtensions;
 using namespace Xbim::Ifc4::Interfaces;
+using namespace System::Diagnostics;
 
 namespace Xbim
 {
@@ -896,67 +897,87 @@ namespace Xbim
 				builder.Add(*pCompound, shell);
 		}
 
-		void XbimCompound::Init(IEnumerable<IIfcFace^>^ faces, bool close, IIfcRepresentationItem^ theItem)
+		void XbimCompound::Init(IEnumerable<IIfcFace^>^ ifcFaces, bool close, IIfcRepresentationItem^ theItem)
 		{						
 			double tolerance = theItem->Model->ModelFactors->Precision;			
 			_sewingTolerance = tolerance;
 
 			ShapeFix_ShapeTolerance FTol;
+
+			// init shell
 			BRep_Builder builder;
 			TopoDS_Shell shell;
-			builder.MakeShell(shell);			
-			Dictionary<XbimPoint3DWithTolerance^, XbimVertex^>^ pointMap = gcnew Dictionary<XbimPoint3DWithTolerance^, XbimVertex^>();
-			Dictionary<XbimBiPolarLinearEdge^, XbimBiPolarLinearEdge^>^ edgeMap = gcnew Dictionary<XbimBiPolarLinearEdge^, XbimBiPolarLinearEdge^>();
+			builder.MakeShell(shell);
+
+			// Unique dictionary of points for the whole mesh
+			Dictionary<XbimPoint3DWithTolerance^, XbimVertex^>^ uniquePoints = gcnew Dictionary<XbimPoint3DWithTolerance^, XbimVertex^>();
+			Dictionary<XbimBiPolarLinearEdge^, XbimBiPolarLinearEdge^>^ uniqueEdges = gcnew Dictionary<XbimBiPolarLinearEdge^, XbimBiPolarLinearEdge^>();
 			List<XbimFace^>^ allFaces = gcnew List<XbimFace^>();
 			
-			for each (IIfcFace^ fc in  faces)
+			for each (IIfcFace^ ifcFace in ifcFaces)
 			{
 				List<XbimBiPolarLinearEdge^>^ linearEdges = gcnew List<XbimBiPolarLinearEdge^>(2);
-				List<Tuple<XbimWire^, IIfcPolyLoop^, bool>^>^ loops = gcnew List<Tuple<XbimWire^, IIfcPolyLoop^, bool>^>();
-				for each (IIfcFaceBound^ bound in fc->Bounds) //build all the loops
+				List<Tuple<XbimWire^, IIfcPolyLoop^, bool>^>^ thisFaceLoops = gcnew List<Tuple<XbimWire^, IIfcPolyLoop^, bool>^>(); // the bool is an orientation flag
+				
+				// build all the thisFaceLoops
+				for each (IIfcFaceBound^ bound in ifcFace->Bounds) 
 				{
 					if (!dynamic_cast<IIfcPolyLoop^>(bound->Bound) || !XbimConvert::IsPolygon((IIfcPolyLoop^)bound->Bound)) 
-						continue;//skip non-polygonal faces
-					IIfcPolyLoop^ polyLoop = (IIfcPolyLoop^)(bound->Bound);
-					bool is3D = XbimConvert::Is3D(polyLoop);					
-					int totalPoints = polyLoop->Polygon->Count;
-					IIfcCartesianPoint^ last = polyLoop->Polygon[totalPoints-1];
-					XbimPoint3DWithTolerance^ currentPoint = gcnew XbimPoint3DWithTolerance(last->X, last->Y, is3D ? last->Z : 0.0, tolerance);
-					XbimVertex^ currentVertex;
+						continue; //skip non-polygonal faces
+
+					// init wire
 					TopoDS_Wire wire;
 					builder.MakeWire(wire);
-					if (!pointMap->TryGetValue(currentPoint, currentVertex))
+
+					// nature of the loop
+					IIfcPolyLoop^ polyLoop = (IIfcPolyLoop^)(bound->Bound);
+					if (polyLoop->EntityLabel == 774642)
 					{
-						currentVertex = gcnew XbimVertex(currentPoint);
-						pointMap->Add(currentPoint, currentVertex);
+						Debug::WriteLine("Found");
+					}
+					bool is3D = XbimConvert::Is3D(polyLoop);					
+					int totalPoints = polyLoop->Polygon->Count;
+
+					// starting from the last point
+					IIfcCartesianPoint^ last = polyLoop->Polygon[totalPoints-1];
+					XbimPoint3DWithTolerance^ prevPoint = gcnew XbimPoint3DWithTolerance(last->X, last->Y, is3D ? last->Z : 0.0, tolerance);
+					XbimVertex^ prevVertex;
+					
+					if (!uniquePoints->TryGetValue(prevPoint, prevVertex))
+					{
+						prevVertex = gcnew XbimVertex(prevPoint);  // if prevVertex is not set by the TryGetValue we'll set it here
+						uniquePoints->Add(prevPoint, prevVertex);
 					}
 					for each (IIfcCartesianPoint^ p in polyLoop->Polygon) //add all the points into unique collection
 					{
-						XbimPoint3DWithTolerance^ nextPoint = gcnew XbimPoint3DWithTolerance(p->X, p->Y, is3D ? p->Z : 0.0, tolerance);
-						XbimVertex^ nextVertex;
-						if (!pointMap->TryGetValue(nextPoint, nextVertex))
+						XbimPoint3DWithTolerance^ thisPoint = gcnew XbimPoint3DWithTolerance(p->X, p->Y, is3D ? p->Z : 0.0, tolerance);
+						XbimVertex^ thisVertex;
+						if (!uniquePoints->TryGetValue(thisPoint, thisVertex))
 						{
-							nextVertex = gcnew XbimVertex(nextPoint);
-							pointMap->Add(nextPoint, nextVertex);
+							thisVertex = gcnew XbimVertex(thisPoint);
+							uniquePoints->Add(thisPoint, thisVertex); // we want to be able to find the vertex from the coordinates
 						}
 
-						XbimBiPolarLinearEdge^ edgeLookup = gcnew XbimBiPolarLinearEdge(currentPoint, currentVertex, nextPoint, nextVertex);
-						if (!edgeLookup->IsEmptyLine)
+						XbimBiPolarLinearEdge^ edgeToFind = gcnew XbimBiPolarLinearEdge(prevPoint, prevVertex, thisPoint, thisVertex);
+						if (!edgeToFind->IsEmptyLine)
 						{
+							// skip if the edge is empty
 							XbimBiPolarLinearEdge^ linearEdge;
-							if (!edgeMap->TryGetValue(edgeLookup, linearEdge))
+							if (!uniqueEdges->TryGetValue(edgeToFind, linearEdge))
 							{
-								linearEdge = edgeLookup;
-								edgeMap->Add(linearEdge, linearEdge);
+								linearEdge = edgeToFind;  // if linearEdge is not set by the TryGetValue we'll set it here
+								uniqueEdges->Add(linearEdge, linearEdge); // then add the edge to the unique list for future searches
 							}
 
-							XbimEdge^ edge = linearEdge->TakeEdge(currentPoint, nextPoint);
+							// todo: ensure we undestand what takeEdge does
+							XbimEdge^ edge = linearEdge->TakeEdge(prevPoint, thisPoint);
 							linearEdges->Add(linearEdge);
+							// TODO: should there be more consequences if not valid?
 							if (edge != nullptr && edge->IsValid)
 								builder.Add(wire, edge);
 						}
-						currentVertex = nextVertex;
-						currentPoint = nextPoint;						
+						prevVertex = thisVertex;
+						prevPoint = thisPoint;						
 					}
 					
 					wire.Closed(Standard_True); //need to check this
@@ -1001,14 +1022,18 @@ namespace Xbim
 					{
 						if (!bound->Orientation)
 							loop->Reverse();
-						loops->Add(gcnew Tuple<XbimWire^, IIfcPolyLoop^, bool>(loop, polyLoop, bound->Orientation));
+						thisFaceLoops->Add(
+							gcnew Tuple<XbimWire^, IIfcPolyLoop^, bool>(loop, polyLoop, bound->Orientation)
+						);
 					}					
 				}
-				XbimFace^ face = BuildFace(loops, fc);
-				face->Tag = linearEdges;
-				for each (Tuple<XbimWire^, IIfcPolyLoop^, bool>^ loopToClear in loops) delete loopToClear->Item1; //force removal of wires
+				
+				// if the face is valid then add it to the allFaces set
+				XbimFace^ face = BuildFace(thisFaceLoops, ifcFace);
+				for each (Tuple<XbimWire^, IIfcPolyLoop^, bool>^ loopToClear in thisFaceLoops) delete loopToClear->Item1; //force removal of wires
 				if (face->IsValid)
 				{
+					face->Tag = linearEdges;
 					FTol.LimitTolerance(face, tolerance);					
 					allFaces->Add(face);
 				}
@@ -1018,20 +1043,26 @@ namespace Xbim
 					{
 						linEdge->ReleaseEdge();
 					}
-					XbimGeometryCreator::LogWarning(fc, "Incorrectly defined face. It has been ignored");
+					XbimGeometryCreator::LogWarning(ifcFace, "Incorrectly defined face. It has been ignored");
 				}
 			}
 			
 			// see if we have any multiconnected edges and faces that are totally multi-connected
+			// 
 			List<XbimFace^>^ facesToDelete = gcnew List<XbimFace^>();
 			List<XbimFace^>^ facesToRecheck = gcnew List<XbimFace^>();
+			int iFace = 0;
 			for each (XbimFace^ f in allFaces)
 			{
 				List<XbimBiPolarLinearEdge^>^ linearEdges = (List<XbimBiPolarLinearEdge^>^)(f->Tag);
+				Debug::WriteLine(String::Format("Face {0}: {1} edges.", iFace++, linearEdges->Count));
 				bool allEdgesMultiConnected = true;
 				bool someEdgesMultiConnected = false;
+
 				for each (XbimBiPolarLinearEdge^ linEdge in linearEdges)
-				{
+				{	
+					Debug::WriteLine(String::Format(" RefCount: {0}", linEdge->ReferenceCount));
+					
 					if (linEdge->ReferenceCount < 3) 
 						allEdgesMultiConnected = false;
 					if (linEdge->ReferenceCount > 2) 

@@ -25,7 +25,7 @@ namespace Xbim
 			{
 			}
 			bool Is3D(IIfcCurve^ rep);
-			static ILogger^ logger = LoggerFactory::GetLogger(); ;
+			static ILogger^ logger = LoggerFactory::GetLogger(); 
 		public:
 
 			static XbimGeometryCreator()

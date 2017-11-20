@@ -152,7 +152,8 @@ namespace Xbim
 			}
 			XbimEdge^ TakeEdge(XbimPoint3DWithTolerance^ pA, XbimPoint3DWithTolerance^ pB)
 			{
-				if (IsEmptyLine) return nullptr;
+				if (IsEmptyLine) 
+					return nullptr;
 				refCount++;
 				if (pA == pointA)
 					return edgeAB;
@@ -193,7 +194,5 @@ namespace Xbim
 
 #pragma endregion
 		};
-
 	}
-
 }
