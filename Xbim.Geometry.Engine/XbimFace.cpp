@@ -469,7 +469,8 @@ namespace Xbim
 					wireFixer.SetPrecision(oneMilli);
 					wireFixer.SetMaxTolerance(oneMilli * 10);
 					Standard_Boolean closed = wireFixer.Perform();
-					if (closed) loop = gcnew XbimWire(wireFixer.Wire());					
+					if (closed) 
+						loop = gcnew XbimWire(wireFixer.Wire());					
 				}				
 				double currentFaceTolerance = tolerance;
 			TryBuildFace:
@@ -507,7 +508,8 @@ namespace Xbim
 						wireFixer.SetPrecision(oneMilli);
 						wireFixer.SetMaxTolerance(oneMilli * 10);
 						Standard_Boolean closed = wireFixer.Perform();
-						if (closed) innerWire = gcnew XbimWire(wireFixer.Wire());
+						if (closed) 
+							innerWire = gcnew XbimWire(wireFixer.Wire());
 					}
 					if (innerWire->IsClosed) //if the loop is not closed it is not a bound
 					{
