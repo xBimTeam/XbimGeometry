@@ -659,9 +659,7 @@ namespace Xbim
 								{
 									throw gcnew XbimException("Incorrectly defined Edge, must be a valid edge curve");
 								}
-
 							}
-
 						} // we have a wire		
 
 						TopoDS_Wire loopWire = wireMaker.Wire();
@@ -931,10 +929,6 @@ namespace Xbim
 
 					// nature of the loop
 					IIfcPolyLoop^ polyLoop = (IIfcPolyLoop^)(bound->Bound);
-					if (polyLoop->EntityLabel == 774642)
-					{
-						Debug::WriteLine("Found");
-					}
 					bool is3D = XbimConvert::Is3D(polyLoop);					
 					int totalPoints = polyLoop->Polygon->Count;
 
