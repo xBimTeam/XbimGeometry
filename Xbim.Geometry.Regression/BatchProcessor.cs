@@ -212,9 +212,9 @@ namespace XbimRegression
 
         private void RemoveFiles(string ifcFile)
         {
-            DeleteFile(BuildFileName(ifcFile, ".xbim"));
+            DeleteFile(BuildFileName(ifcFile, ".v31.xbim"));
             DeleteFile(BuildFileName(ifcFile, ".xbimScene"));
-            DeleteFile(BuildFileName(ifcFile, ".log"));
+            DeleteFile(BuildFileName(ifcFile, ".v31.log"));
         }
 
         private void DeleteFile(string file)
@@ -245,7 +245,7 @@ namespace XbimRegression
         {
             try
             {
-                string logfile = String.Concat(ifcFile, ".log");
+                string logfile = String.Concat(ifcFile, ".v31.log");
                 using (StreamWriter writer = new StreamWriter(logfile, false))
                 {
                     foreach (Event logEvent in events)
