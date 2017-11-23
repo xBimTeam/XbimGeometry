@@ -930,6 +930,7 @@ namespace Xbim
 					minVol -= s->Volume;
 					r = r->Cut(s, precision);
 				}
+				minVol *= 0.98; // we reduce the minimum a little to compensate for geoemtry engine quirckyness
 				double outVol = VolumeOf(r);
 				if (outVol != -1) {
 					if (outVol < minVol)

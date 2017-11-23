@@ -45,8 +45,7 @@ namespace XbimRegression
             Logger = LoggerFactory.GetLogger();
             DirectoryInfo di = new DirectoryInfo(Params.TestFileRoot);
 
-            String resultsFile = Path.Combine(Params.TestFileRoot,
-                String.Format("XbimRegression_{0:yyyyMMdd-hhmmss}.csv", DateTime.Now));
+            String resultsFile = Path.Combine(Params.TestFileRoot, String.Format("XbimRegression_v3x_{0:yyyyMMdd-hhmmss}.csv", DateTime.Now));
             // We need to use the logger early to initialise before we use EventTrace
             Logger.Debug("Conversion starting...");
             using (StreamWriter writer = new StreamWriter(resultsFile))
@@ -94,27 +93,19 @@ namespace XbimRegression
                 {
                     Stopwatch watch = new Stopwatch();
                     watch.Start();
-                    using (XbimModel model = ParseModelFile(ifcFile, Params.Caching))
+                    string xbimFilename = BuildFileName(ifcFile, ".v31.xbim");
+                    using (XbimModel model = ParseModelFile(ifcFile, Params.Caching, xbimFilename))
                     {
                         parseTime = watch.ElapsedMilliseconds;
-                        string xbimFilename = BuildFileName(ifcFile, ".xbim");
-                        //model.Open(xbimFilename, XbimDBAccess.ReadWrite);
-                        //if (_params.GeometryV1)
-                        //    XbimMesher.GenerateGeometry(model, Logger, null);
-                        //else
-                        //{
                         Xbim3DModelContext context = new Xbim3DModelContext(model);
                         if (_params.MaxThreads > 0)
                             context.MaxThreads = _params.MaxThreads;
                         context.CustomMeshingBehaviour = CustomMeshingBehaviour;
 
-                        context.CreateContext(XbimGeometryType.PolyhedronBinary);
-                        //}
+                        // this is where the meshing happens.
+                        context.CreateContext(XbimGeometryType.PolyhedronBinary);                      
                         geomTime = watch.ElapsedMilliseconds - parseTime;
-                        //XbimSceneBuilder sb = new XbimSceneBuilder();
-                        //string xbimSceneName = BuildFileName(ifcFile, ".xbimScene");
-                        //sb.BuildGlobalScene(model, xbimSceneName);
-                        // sceneTime = watch.ElapsedMilliseconds - geomTime;
+
                         IIfcFileHeader header = model.Header;
                         watch.Stop();
                         IfcOwnerHistory ohs = model.Instances.OfType<IfcOwnerHistory>().FirstOrDefault();
@@ -196,19 +187,19 @@ namespace XbimRegression
             return Xbim3DModelContext.MeshingSimplification.None;
         }
 
-        private static XbimModel ParseModelFile(string ifcFileName,bool caching)
+        private static XbimModel ParseModelFile(string ifcFileNameIn, bool caching, string fileNameOut)
         {
             XbimModel model = new XbimModel();
             //create a callback for progress
-            switch (Path.GetExtension(ifcFileName).ToLowerInvariant())
+            switch (Path.GetExtension(ifcFileNameIn).ToLowerInvariant())
             {
                 case ".ifc":
                 case ".ifczip":
                 case ".ifcxml":
-                    model.CreateFrom(ifcFileName, BuildFileName(ifcFileName, ".xBIM"), null, true, caching);
+                    model.CreateFrom(ifcFileNameIn, fileNameOut, null, true, caching);
                     break;
                 default:
-                    throw new NotImplementedException(String.Format("XbimConvert does not support converting {0} file formats currently", Path.GetExtension(ifcFileName)));
+                    throw new NotImplementedException(String.Format("XbimRegression does not support converting {0} file formats currently", Path.GetExtension(ifcFileNameIn)));
             }
             return model;
         }
