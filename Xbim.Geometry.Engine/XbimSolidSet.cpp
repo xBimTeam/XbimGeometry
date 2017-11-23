@@ -776,7 +776,7 @@ namespace Xbim
 				return;
 			}
 
-			double vL, vR, vDelta, vRes;
+			double vL, vR, vMin, vRes;
 			
 			IModelFactors^ mf = boolOp->Model->ModelFactors;
 			IXbimSolidSet^ result;
@@ -797,8 +797,10 @@ namespace Xbim
 					{
 						vL = left->Volume;
 						vR = right->Volume;
-						vDelta = vL - vR;
-						if (vDelta > vR)
+						// the minimum is if we take away all of the right; 
+						// but then reduce a bit to compensate for tolerances.
+						vMin = (vL - vR) * .98; 
+						if (vRes < vMin )
 						{ 
 							// the boolean had a problem
 							XbimGeometryCreator::LogError(boolOp, "Boolean operation silent failure, the operation has been ignored");
