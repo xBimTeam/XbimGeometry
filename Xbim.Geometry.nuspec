@@ -2,8 +2,8 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
     <metadata>
         <id>Xbim.Geometry</id>
-        <version>3.1.36</version>
-        <title>xBIM Geometry</title>
+        <version>3.1.37</version>
+        <title>xBIM Geometry, Claudio Benghi</title>
         <authors>xBIM team</authors>
         <owners>Steve Lockley</owners>
         <licenseUrl>http://xbim.codeplex.com/license</licenseUrl>

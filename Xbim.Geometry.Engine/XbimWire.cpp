@@ -1055,7 +1055,6 @@ namespace Xbim
 
 			for (BRepTools_WireExplorer wEx(*pWire); wEx.More(); wEx.Next())
 			{
-				
 				const TopoDS_Vertex& v = wEx.CurrentVertex();
 				currentStart = BRep_Tool::Pnt(v);
 				Handle(Geom_Curve) c3d = BRep_Tool::Curve(wEx.Current(), loc, start, end);
@@ -1087,26 +1086,52 @@ namespace Xbim
 						(cType == STANDARD_TYPE(Geom_BezierCurve)) ||
 						(cType == STANDARD_TYPE(Geom_BSplineCurve)))
 					{		
+						// we identify the Us of quadrant points along the curve to compute the normal
+						//
 						BRepAdaptor_Curve curve(wEx.Current());
-						double us = curve.FirstParameter();
-						double ue = curve.LastParameter();
-						double umiddle = (us + ue) / 2;
-						gp_Pnt mid;
-						gp_Vec V;
-						curve.D1(umiddle, mid, V);
-						if (count > 0)
+						TopAbs_Orientation or = wEx.Current().Orientation();
+						double uStart = curve.FirstParameter();
+						double uEnd = curve.LastParameter();
+						double u0, u1, u2, u3;
+						double delta;
+						if (or != TopAbs_REVERSED)
 						{
-							AddNewellPoint(previousEnd, currentStart, x, y, z);
-							AddNewellPoint(currentStart, mid, x, y, z);
-							previousEnd = mid;
+							u0 = uStart; // start from the start
+							delta = (uEnd - uStart) / 4; // and go forward a bit for each step
 						}
 						else
 						{
-							first = currentStart;
-							AddNewellPoint(first, mid, x, y, z);
-							previousEnd = mid;
+							u0 = uEnd; // start from the end
+							delta = (uEnd - uStart) / -4; // and go back a bit for each step
 						}
+						u1 = u0 + delta;
+						u2 = u1 + delta;
+						u3 = u2 + delta;
 
+						// then we get the points
+						gp_Pnt p0; gp_Pnt p1; gp_Pnt p2; gp_Pnt p3;
+						curve.D0(u0, p0);
+						curve.D0(u1, p1);
+						curve.D0(u2, p2);
+						curve.D0(u3, p3);
+
+						// then add the points to the newell evaluation
+						if (count > 0)
+						{
+							AddNewellPoint(previousEnd, p0, x, y, z);
+							AddNewellPoint(p0, p1, x, y, z);
+							AddNewellPoint(p1, p2, x, y, z);
+							AddNewellPoint(p2, p3, x, y, z);
+							previousEnd = p3;
+						}
+						else
+						{
+							first = p0;
+							AddNewellPoint(first, p1, x, y, z);
+							AddNewellPoint(p1, p2, x, y, z);
+							AddNewellPoint(p2, p3, x, y, z);
+							previousEnd = p3;
+						}
 					}
 					else //throw AN EXCEPTION
 					{
