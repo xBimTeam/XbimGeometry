@@ -1049,13 +1049,13 @@ namespace Xbim
 			for each (XbimFace^ f in allFaces)
 			{
 				List<XbimBiPolarLinearEdge^>^ linearEdges = (List<XbimBiPolarLinearEdge^>^)(f->Tag);
-				Debug::WriteLine(String::Format("Face {0}: {1} edges.", iFace++, linearEdges->Count));
+				//Debug::WriteLine(String::Format("Face {0}: {1} edges.", iFace++, linearEdges->Count));
 				bool allEdgesMultiConnected = true;
 				bool someEdgesMultiConnected = false;
 
 				for each (XbimBiPolarLinearEdge^ linEdge in linearEdges)
 				{	
-					Debug::WriteLine(String::Format(" RefCount: {0}", linEdge->ReferenceCount));
+					//Debug::WriteLine(String::Format(" RefCount: {0}", linEdge->ReferenceCount));
 					
 					if (linEdge->ReferenceCount < 3) 
 						allEdgesMultiConnected = false;

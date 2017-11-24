@@ -514,7 +514,8 @@ namespace Xbim
 					if (innerWire->IsClosed) //if the loop is not closed it is not a bound
 					{
 						XbimVector3D n = innerWire->Normal;
-						if (n.DotProduct(tn) > 0) //inner wire should be reverse of outer wire
+						bool needInvert = n.DotProduct(tn) > 0;
+						if (needInvert) //inner wire should be reverse of outer wire
 							innerWire->Reverse();
 						double currentloopTolerance = tolerance;
 					TryBuildLoop:
