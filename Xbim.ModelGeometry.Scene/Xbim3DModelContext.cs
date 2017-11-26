@@ -33,37 +33,44 @@ namespace Xbim.ModelGeometry.Scene
 
         #region Helper classes
 
-        private class XbimBooleanDefinition
+        /// <summary>
+        /// Contains all the information needed to perform the meshing of a product with openings and projections
+        /// </summary>
+        private class XbimProductBooleanInfo
         {
-
             private readonly int _contextId;
             private readonly int _styleId;
             private readonly int _productLabel;
             private readonly int _productType;
-            private IXbimGeometryObjectSet _argumentGeometries;
+            private IXbimGeometryObjectSet _productGeometries;
             private IXbimSolidSet _cutGeometries;
             private IXbimSolidSet _projectGeometries;
-            public XbimBooleanDefinition(XbimCreateContextHelper contextHelper, XbimGeometryEngine engine, IModel model, ConcurrentDictionary<int, bool> dupIds, IList<XbimShapeInstance> argumentIds, IList<XbimShapeInstance> cutToolIds, IList<XbimShapeInstance> projectToolIds, int context, int styleId)
+            
+            public XbimProductBooleanInfo(XbimCreateContextHelper contextHelper, XbimGeometryEngine engine, IModel model, ConcurrentDictionary<int, bool> shapeIdsUsedMoreThanOnce, IList<XbimShapeInstance> productShapes, IList<XbimShapeInstance> cutToolIds, IList<XbimShapeInstance> projectToolIds, int context, int styleId)
             {
                 _contextId = context;
                 _styleId = styleId;
-                XbimShapeInstance shape = argumentIds.FirstOrDefault();
+
+                // all the productShapes belong to the same product, take the first to identify it.
+                XbimShapeInstance shape = productShapes.FirstOrDefault();
                 _productLabel = shape != null ? shape.IfcProductLabel : 0;
                 _productType = shape != null ? shape.IfcTypeId : 0;
-                AddGeometries(contextHelper, engine, model, dupIds, argumentIds, cutToolIds, projectToolIds);
+                AddGeometries(contextHelper, engine, model, shapeIdsUsedMoreThanOnce, productShapes, cutToolIds, projectToolIds);
             }
 
-
-            private void AddGeometries(XbimCreateContextHelper contextHelper, XbimGeometryEngine engine, IModel model, ConcurrentDictionary<int, bool> dupIds, IList<XbimShapeInstance> argumentIds, IList<XbimShapeInstance> cutToolIds, IList<XbimShapeInstance> projectToolIds)
+            private void AddGeometries(XbimCreateContextHelper contextHelper, XbimGeometryEngine engine, IModel model, ConcurrentDictionary<int, bool> shapeIdsUsedMoreThanOnce, IList<XbimShapeInstance> productShapes, IList<XbimShapeInstance> cutToolIds, IList<XbimShapeInstance> projectToolIds)
             {
-                bool placebo;
-                _argumentGeometries = engine.CreateGeometryObjectSet();
-                foreach (var argument in argumentIds)
-                {
+                // todo: memory: I suppose that the memory footprint grows during meshing because all the shapes are retained in the XbimBooleanDefinition fields
+                // this should be investigated and moved.
 
-                    var geom = contextHelper.GetGeometryFromCache(argument, dupIds.TryGetValue(argument.ShapeGeometryLabel, out placebo));
+                bool placebo;
+                _productGeometries = engine.CreateGeometryObjectSet();
+                foreach (var argument in productShapes)
+                {
+                    // makes copy if used more than once
+                    var geom = contextHelper.GetGeometryFromCache(argument, shapeIdsUsedMoreThanOnce.TryGetValue(argument.ShapeGeometryLabel, out placebo));
                     if (geom != null)
-                        _argumentGeometries.Add(geom);
+                        _productGeometries.Add(geom);
                     else
                         LogWarning(model.Instances[argument.IfcProductLabel],
                        "Some 3D geometric form definition is missing"
@@ -74,7 +81,9 @@ namespace Xbim.ModelGeometry.Scene
                 _cutGeometries = engine.CreateSolidSet();
                 foreach (var openingShape in cutToolIds)
                 {
-                    var openingGeom = contextHelper.GetGeometryFromCache(openingShape, dupIds.TryGetValue(openingShape.ShapeGeometryLabel, out placebo));
+                    // makes copy if used more than once
+                    bool makeCopy = shapeIdsUsedMoreThanOnce.TryGetValue(openingShape.ShapeGeometryLabel, out placebo);
+                    var openingGeom = contextHelper.GetGeometryFromCache(openingShape, makeCopy);
                     if (openingGeom != null)
                         _cutGeometries.Add(openingGeom);
                     else
@@ -84,10 +93,9 @@ namespace Xbim.ModelGeometry.Scene
 
                 //now all the projections
                 _projectGeometries = engine.CreateSolidSet();
-
                 foreach (var projectionShape in projectToolIds)
                 {
-                    var projGeom = contextHelper.GetGeometryFromCache(projectionShape, dupIds.TryGetValue(projectionShape.ShapeGeometryLabel, out placebo));
+                    var projGeom = contextHelper.GetGeometryFromCache(projectionShape, shapeIdsUsedMoreThanOnce.TryGetValue(projectionShape.ShapeGeometryLabel, out placebo));
                     if (projGeom != null)
                         _projectGeometries.Add(projGeom);
                     else
@@ -124,9 +132,9 @@ namespace Xbim.ModelGeometry.Scene
                 get { return _projectGeometries; }
             }
 
-            public IXbimGeometryObjectSet ArgumentGeometries
+            public IXbimGeometryObjectSet ProductGeometries
             {
-                get { return _argumentGeometries; }
+                get { return _productGeometries; }
             }
 
             public int ProductLabel
@@ -155,65 +163,7 @@ namespace Xbim.ModelGeometry.Scene
                 return item.EntityLabel;
             }
         }
-
-        /*
-                private struct RepresentationItemGeometricHashKey
-                {
-                    private readonly int _hash;
-                    private readonly int _item;
-                    private readonly IModel _model;
-
-                    public RepresentationItemGeometricHashKey(IIfcRepresentationItem item)
-                    {
-                        _item = item.EntityLabel;
-                        _model = item.ModelOf;
-                        try
-                        {
-                            _hash = item.GetGeometryHashCode();
-                        }
-                        catch (XbimGeometryException eg)
-                        {
-                            Logger.WarnFormat("HashCode error in representation of type {0}, err = {1}", item.GetType().Name,
-                                eg.Message);
-                            _hash = 0;
-                        }
-                    }
-
-                    public IIfcRepresentationItem RepresentationItem 
-                    {
-                        get { return _model.InstancesLocal[_item] as IIfcRepresentationItem; }
-                    }
-
-                    public override int GetHashCode()
-                    {
-                        return _hash;
-                    }
-
-           
-                    public override bool Equals(object obj)
-                    {
-                        if (!(obj is RepresentationItemGeometricHashKey)) return false;
-                        try
-                        {
-                   
-                            return RepresentationItem.GeometricEquals(((RepresentationItemGeometricHashKey)obj).RepresentationItem);
-                        }
-                        catch (XbimGeometryException eg)
-                        {
-                            Logger.WarnFormat("Equality error in representation of type {0}, err = {1}",
-                                _item.GetType().Name,
-                                eg.Message);
-                            return false;
-                        }
-                    }
-
-                    public override string ToString()
-                    {
-                        return string.Format("{0} Hash[{1}]", _item, _hash);
-                    }
-                }
-        */
-
+        
         private class XbimCreateContextHelper : IDisposable
         {
             internal String InitialiseError;
@@ -692,7 +642,7 @@ namespace Xbim.ModelGeometry.Scene
                     WriteMappedItems(contextHelper, progDelegate);
 
                     //start a new task to process features
-                    var processed = WriteFeatureElements(contextHelper, progDelegate, geomStorageType, geometryTransaction);
+                    var processed = WriteProductsWithFeatures(contextHelper, progDelegate, geomStorageType, geometryTransaction);
 
                     if (progDelegate != null) progDelegate(-1, "WriteProductShapes");
                     var productsRemaining = _model.Instances.OfType<IIfcProduct>()
@@ -740,7 +690,12 @@ namespace Xbim.ModelGeometry.Scene
         /// </summary>
         public MeshingBehaviourSetter CustomMeshingBehaviour;
 
-        private ICollection<int> WriteFeatureElements(XbimCreateContextHelper contextHelper,
+
+        /// <summary>
+        /// Computes and writes to the DB all shapes of products considering their features (openings and extensions).
+        /// The process starts from listing all OpeningsAndProjections (from the context) then performs the solid operations.
+        /// </summary>
+        private ICollection<int> WriteProductsWithFeatures(XbimCreateContextHelper contextHelper,
             ReportProgressDelegate progDelegate, XbimGeometryType geomType, IGeometryStoreInitialiser txn
             )
         {
@@ -754,12 +709,14 @@ namespace Xbim.ModelGeometry.Scene
             var featureCount = contextHelper.OpeningsAndProjections.Count;
             if (progDelegate != null) progDelegate(-1, "WriteFeatureElements (" + contextHelper.OpeningsAndProjections.Count + " elements)");
 
-            var dupIds = new ConcurrentDictionary<int, bool>();
-            var allIds = new ConcurrentDictionary<int, bool>();
-            var booleanOps = new ConcurrentBag<XbimBooleanDefinition>();
+            var shapeIdsUsedMoreThanOnce = new ConcurrentDictionary<int, bool>();
+            var allShapeIds = new ConcurrentDictionary<int, bool>();
+
+            var openingAndProjectionOps = new ConcurrentBag<XbimProductBooleanInfo>(); // prepares the information to perform the openings and projections
             var precision = Math.Max(_model.ModelFactors.OneMilliMeter / 50, _model.ModelFactors.Precision); //set the precision to 100th mm but never less than precision
-                                                                                                             //make sure all the geometries we have cached are sewn
-                                                                                                             //   contextHelper.SewGeometries(Engine);
+
+            // make sure all the geometries we have cached are sewn
+            // contextHelper.SewGeometries(Engine);
             Parallel.ForEach(contextHelper.OpeningsAndProjections, contextHelper.ParallelOptions, pair =>
             //         foreach (IGrouping<IIfcElement, IIfcFeatureElement> pair in contextHelper.OpeningsAndProjections)
             // foreach (IGrouping<IIfcElement, IIfcFeatureElement> pair in contextHelper.OpeningsAndProjections)
@@ -772,11 +729,12 @@ namespace Xbim.ModelGeometry.Scene
                 var arguments = new List<XbimShapeInstance>();
                 foreach (var elemShape in elementShapes)
                 {
-                    if (!allIds.TryAdd(elemShape.ShapeGeometryLabel, true))
-                        dupIds.TryAdd(elemShape.ShapeGeometryLabel, true);
+                    if (!allShapeIds.TryAdd(elemShape.ShapeGeometryLabel, true))
+                        shapeIdsUsedMoreThanOnce.TryAdd(elemShape.ShapeGeometryLabel, true);
                     arguments.Add(elemShape);
                     context = elemShape.RepresentationContext;
-                    if (elemShape.StyleLabel > 0) styleId = elemShape.StyleLabel;
+                    if (elemShape.StyleLabel > 0)
+                        styleId = elemShape.StyleLabel;
                 }
 
                 if (arguments.Count == 0)
@@ -790,12 +748,11 @@ namespace Xbim.ModelGeometry.Scene
                     foreach (var feature in pair)
                     {
                         var isCut = feature is IIfcFeatureElementSubtraction;
-
                         var featureShapes = WriteProductShape(contextHelper, feature, false, txn);
                         foreach (var featureShape in featureShapes)
                         {
-                            if (!allIds.TryAdd(featureShape.ShapeGeometryLabel, true))
-                                dupIds.TryAdd(featureShape.ShapeGeometryLabel, true);
+                            if (!allShapeIds.TryAdd(featureShape.ShapeGeometryLabel, true))
+                                shapeIdsUsedMoreThanOnce.TryAdd(featureShape.ShapeGeometryLabel, true);
                             if (isCut)
                                 cutTools.Add(featureShape);
                             else
@@ -804,131 +761,19 @@ namespace Xbim.ModelGeometry.Scene
                         processed.TryAdd(feature.EntityLabel, 0);
 
                     }
-                    var boolOp = new XbimBooleanDefinition(contextHelper, Engine, Model, dupIds, arguments, cutTools, projectTools, context, styleId);
-                    booleanOps.Add(boolOp);
+                    var boolOp = new XbimProductBooleanInfo(contextHelper, Engine, Model, shapeIdsUsedMoreThanOnce, arguments, cutTools, projectTools, context, styleId);
+                    openingAndProjectionOps.Add(boolOp);
                 }
             });
-            //process all the large ones first
-            Parallel.ForEach(booleanOps.OrderByDescending(b => b.CutGeometries.Count + b.ProjectGeometries.Count), contextHelper.ParallelOptions, bop =>
-            //  foreach (var bop in booleanOps.OrderByDescending(b => b.CutGeometries.Count + b.ProjectGeometries.Count))
+            
+            // process all the openings and projections starting with the most operations first
+            //
+            Parallel.ForEach(openingAndProjectionOps.OrderByDescending(b => b.CutGeometries.Count + b.ProjectGeometries.Count), contextHelper.ParallelOptions, openingAndProjectionOp =>
             {
-                //  Console.WriteLine("{0} - {1}", bop.CutGeometries.Count, bop.ArgumentGeometries.Count);
                 Interlocked.Increment(ref localTally);
                 var elementLabel = 0;
                 try
                 {
-                    if (bop.ArgumentGeometries.Any())
-                    {
-                        elementLabel = bop.ProductLabel;
-                        var typeId = bop.ProductType;
-
-                        // determine quality and behaviour for specific geometry
-                        //
-                        var mf = _model.ModelFactors;
-                        var thisDeflectionDistance = mf.DeflectionTolerance;
-                        var thisDeflectionAngle = mf.DeflectionAngle;
-                        var behaviour = MeshingBehaviourResult.Default;
-
-                        if (CustomMeshingBehaviour != null)
-                        {
-                            behaviour = CustomMeshingBehaviour(elementLabel, typeId, ref thisDeflectionDistance,
-                                ref thisDeflectionAngle);
-                            if (behaviour == MeshingBehaviourResult.Skip)
-                                return; // we are in a parallel loop, this continues to the next
-                        }
-
-                        //Get all the parts of this element into a set of solid geometries
-                        var elementGeom = bop.ArgumentGeometries;
-                        //make the finished shape
-                        if (behaviour.HasFlag(MeshingBehaviourResult.PerformAdditions) && bop.ProjectGeometries.Any())
-                        {
-                            var nextGeom = elementGeom.Union(bop.ProjectGeometries, precision);
-                            if (nextGeom.IsValid)
-                            {
-                                if (nextGeom.First != null && nextGeom.First.IsValid)
-                                    elementGeom = nextGeom;
-                                else
-                                    LogWarning(_model.Instances[elementLabel], "Projections are an empty shape");
-                            }
-                            else
-                                LogWarning(_model.Instances[elementLabel],
-                               "Joining of projections has failed. Projections have been ignored");
-                        }
-
-
-                        if (behaviour.HasFlag(MeshingBehaviourResult.PerformSubtractions) && bop.CutGeometries.Any())
-                        {
-                            //do them in batches of 100
-                            //for (int i = 0; i < bop.CutGeometries.Count; i += 50)
-                            //{
-
-                            var nextGeom = elementGeom.Cut(bop.CutGeometries, precision);
-                            if (nextGeom.IsValid)
-                            {
-                                if (nextGeom.First != null && nextGeom.First.IsValid)
-                                    elementGeom = nextGeom;
-                                else
-                                    LogWarning(_model.Instances[elementLabel],
-                                        "Cutting openings has resulted in an empty shape");
-                            }
-                            else
-                                LogWarning(_model.Instances[elementLabel],
-                                    "Cutting openings has failed. Openings have been ignored");
-                            // }
-                        }
-
-                        // now add to the DB     
-                        //
-                        foreach (var geom in elementGeom)
-                        {
-                            XbimShapeGeometry shapeGeometry = new XbimShapeGeometry
-                            {
-                                IfcShapeLabel = elementLabel,
-                                GeometryHash = 0,
-                                LOD = XbimLOD.LOD_Unspecified,
-                                Format = geomType,
-                                BoundingBox = elementGeom.BoundingBox
-                            };
-                            var memStream = new MemoryStream(0x4000);
-
-                            if (geomType == XbimGeometryType.PolyhedronBinary)
-                            {
-                                using (var bw = new BinaryWriter(memStream))
-                                {
-                                    Engine.WriteTriangulation(bw, geom, mf.Precision,
-                                        thisDeflectionDistance, thisDeflectionAngle);
-                                }
-                            }
-                            else
-                            {
-                                using (var tw = new StreamWriter(memStream))
-                                {
-                                    Engine.WriteTriangulation(tw, geom, mf.Precision,
-                                        thisDeflectionDistance, thisDeflectionAngle);
-                                }
-                            }
-                            ((IXbimShapeGeometryData)shapeGeometry).ShapeData = memStream.ToArray();
-                            if (shapeGeometry.ShapeData.Length > 0)
-                            {
-                                var shapeInstance = new XbimShapeInstance
-                                {
-                                    IfcProductLabel = elementLabel,
-                                    ShapeGeometryLabel = 0, /* This gets Set to appropriate value a few lines below */
-                                    StyleLabel = bop.StyleId,
-                                    RepresentationType = XbimGeometryRepresentationType.OpeningsAndAdditionsIncluded,
-                                    RepresentationContext = bop.ContextId,
-                                    IfcTypeId = (short)typeId,
-                                    Transformation = XbimMatrix3D.Identity,
-                                    BoundingBox = elementGeom.BoundingBox
-                                };
-
-                                shapeInstance.ShapeGeometryLabel = txn.AddShapeGeometry(shapeGeometry);
-                                txn.AddShapeInstance(shapeInstance, shapeInstance.ShapeGeometryLabel);
-                            }
-                        }
-                        processed.TryAdd(elementLabel, 0);
-                    }
-
                     if (progDelegate != null)
                     {
                         var newPercentage = Convert.ToInt32((double)localTally / featureCount * 100.0);
@@ -938,6 +783,117 @@ namespace Xbim.ModelGeometry.Scene
                             progDelegate(localPercentageParsed, "Building Elements");
                         }
                     }
+                    if (!openingAndProjectionOp.ProductGeometries.Any())
+                        return;
+
+                    elementLabel = openingAndProjectionOp.ProductLabel;
+                    var typeId = openingAndProjectionOp.ProductType;
+
+                    // determine quality and behaviour for specific geometry
+                    //
+                    var mf = _model.ModelFactors;
+                    var thisDeflectionDistance = mf.DeflectionTolerance;
+                    var thisDeflectionAngle = mf.DeflectionAngle;
+                    var behaviour = MeshingBehaviourResult.Default;
+
+                    if (CustomMeshingBehaviour != null)
+                    {
+                        behaviour = CustomMeshingBehaviour(elementLabel, typeId, ref thisDeflectionDistance,
+                            ref thisDeflectionAngle);
+                        if (behaviour == MeshingBehaviourResult.Skip)
+                            return; // we are in a parallel loop, this continues to the next
+                    }
+
+                    // Get all the parts of this element into a set of solid geometries
+                    var elementGeom = openingAndProjectionOp.ProductGeometries;
+                    // make the finished shape
+                    if (behaviour.HasFlag(MeshingBehaviourResult.PerformAdditions) && openingAndProjectionOp.ProjectGeometries.Any())
+                    {
+                        var nextGeom = elementGeom.Union(openingAndProjectionOp.ProjectGeometries, precision);
+                        if (nextGeom.IsValid)
+                        {
+                            if (nextGeom.First != null && nextGeom.First.IsValid)
+                                elementGeom = nextGeom;
+                            else
+                                LogWarning(_model.Instances[elementLabel], "Projections are an empty shape");
+                        }
+                        else
+                            LogWarning(_model.Instances[elementLabel],
+                           "Joining of projections has failed. Projections have been ignored");
+                    }
+
+
+                    if (behaviour.HasFlag(MeshingBehaviourResult.PerformSubtractions) && openingAndProjectionOp.CutGeometries.Any())
+                    {
+                        //do them in batches of 100
+                        //for (int i = 0; i < bop.CutGeometries.Count; i += 50)
+                        //{
+
+                        var nextGeom = elementGeom.Cut(openingAndProjectionOp.CutGeometries, precision);
+                        if (nextGeom.IsValid)
+                        {
+                            if (nextGeom.First != null && nextGeom.First.IsValid)
+                                elementGeom = nextGeom;
+                            else
+                                LogWarning(_model.Instances[elementLabel],
+                                    "Cutting openings has resulted in an empty shape");
+                        }
+                        else
+                            LogWarning(_model.Instances[elementLabel],
+                                "Cutting openings has failed. Openings have been ignored");
+                        // }
+                    }
+
+                    // now add to the DB     
+                    //
+                    foreach (var geom in elementGeom)
+                    {
+                        XbimShapeGeometry shapeGeometry = new XbimShapeGeometry
+                        {
+                            IfcShapeLabel = elementLabel,
+                            GeometryHash = 0,
+                            LOD = XbimLOD.LOD_Unspecified,
+                            Format = geomType,
+                            BoundingBox = elementGeom.BoundingBox
+                        };
+                        var memStream = new MemoryStream(0x4000);
+
+                        if (geomType == XbimGeometryType.PolyhedronBinary)
+                        {
+                            using (var bw = new BinaryWriter(memStream))
+                            {
+                                Engine.WriteTriangulation(bw, geom, mf.Precision,
+                                    thisDeflectionDistance, thisDeflectionAngle);
+                            }
+                        }
+                        else
+                        {
+                            using (var tw = new StreamWriter(memStream))
+                            {
+                                Engine.WriteTriangulation(tw, geom, mf.Precision,
+                                    thisDeflectionDistance, thisDeflectionAngle);
+                            }
+                        }
+                        ((IXbimShapeGeometryData)shapeGeometry).ShapeData = memStream.ToArray();
+                        if (shapeGeometry.ShapeData.Length > 0)
+                        {
+                            var shapeInstance = new XbimShapeInstance
+                            {
+                                IfcProductLabel = elementLabel,
+                                ShapeGeometryLabel = 0, /* This gets Set to appropriate value a few lines below */
+                                StyleLabel = openingAndProjectionOp.StyleId,
+                                RepresentationType = XbimGeometryRepresentationType.OpeningsAndAdditionsIncluded,
+                                RepresentationContext = openingAndProjectionOp.ContextId,
+                                IfcTypeId = (short)typeId,
+                                Transformation = XbimMatrix3D.Identity,
+                                BoundingBox = elementGeom.BoundingBox
+                            };
+
+                            shapeInstance.ShapeGeometryLabel = txn.AddShapeGeometry(shapeGeometry);
+                            txn.AddShapeInstance(shapeInstance, shapeInstance.ShapeGeometryLabel);
+                        }
+                    }
+                    processed.TryAdd(elementLabel, 0);
                 }
                 catch (Exception e)
                 {
@@ -945,8 +901,7 @@ namespace Xbim.ModelGeometry.Scene
                         "Contains openings but  its basic geometry can not be built, {0}", e.Message);
                 }
                 //if (progDelegate != null) progDelegate(101, "FeatureElement, (#" + element.EntityLabel + " ended)");
-            }
-            );
+            });
             contextHelper.PercentageParsed = localPercentageParsed;
             contextHelper.Tally = localTally;
             if (progDelegate != null) progDelegate(101, "WriteFeatureElements, (" + localTally + " written)");

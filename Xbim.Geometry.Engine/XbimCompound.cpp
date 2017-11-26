@@ -38,6 +38,7 @@
 #include <BRepCheck_Analyzer.hxx>
 #include <ShapeFix_Edge.hxx>
 #include <ShapeFix_Face.hxx>
+#include <ShapeFix_FixSmallSolid.hxx>
 #include <ShapeUpgrade_UnifySameDomain.hxx>
 #include <BOPAlgo_MakerVolume.hxx>
 #include <ShapeAnalysis_Shell.hxx>
@@ -46,6 +47,7 @@
 #include <BRepCheck_Shell.hxx>
 #include <BRepBuilderAPI_CellFilter.hxx>
 #include <BRepBuilderAPI_VertexInspector.hxx>
+
 using namespace System;
 using namespace System::Linq;
 using namespace Xbim::Common;
@@ -1093,6 +1095,11 @@ namespace Xbim
 				if (fixed) 
 					shell = shellFixer.Shell();
 			}
+
+			//ShapeFix_FixSmallSolid fss;
+			//fss.SetPrecision(theItem->Model->ModelFactors->Precision);
+			//fss.Remove(shell, )
+
 			//XbimShell^ s = gcnew XbimShell(shell);
 			TopoDS_Shape result;
 			if (close) //we want it closed

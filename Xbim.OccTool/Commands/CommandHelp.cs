@@ -8,9 +8,9 @@ namespace Xbim.OccTool.Commands
 {
     class CommandHelp : Command
     {
-        internal static string Name = "help";
+        internal static new string Name = "help";
 
-        internal static string Syntax = "help [command]";
+        internal static new string Syntax = "help [command]";
 
         internal override string GetName()
         {
