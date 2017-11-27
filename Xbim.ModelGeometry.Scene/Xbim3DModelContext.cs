@@ -641,7 +641,7 @@ namespace Xbim.ModelGeometry.Scene
                     WriteShapeGeometries(contextHelper, progDelegate, geometryTransaction, geomStorageType);
                     WriteMappedItems(contextHelper, progDelegate);
 
-                    //start a new task to process features
+                    // process features
                     var processed = WriteProductsWithFeatures(contextHelper, progDelegate, geomStorageType, geometryTransaction);
 
                     if (progDelegate != null) progDelegate(-1, "WriteProductShapes");
@@ -717,36 +717,40 @@ namespace Xbim.ModelGeometry.Scene
 
             // make sure all the geometries we have cached are sewn
             // contextHelper.SewGeometries(Engine);
-            Parallel.ForEach(contextHelper.OpeningsAndProjections, contextHelper.ParallelOptions, pair =>
+            Parallel.ForEach(contextHelper.OpeningsAndProjections, contextHelper.ParallelOptions, elementToFeatureGroup =>
             //         foreach (IGrouping<IIfcElement, IIfcFeatureElement> pair in contextHelper.OpeningsAndProjections)
             // foreach (IGrouping<IIfcElement, IIfcFeatureElement> pair in contextHelper.OpeningsAndProjections)
             {
                 int context = 0;
                 int styleId = 0; //take the style of any part of the main shape
-                var element = pair.Key;
+                var element = elementToFeatureGroup.Key;
 
+                // here is where the feature's geometry are calculated
+                //
                 var elementShapes = WriteProductShape(contextHelper, element, false, txn);
-                var arguments = new List<XbimShapeInstance>();
+                var productShapes = new List<XbimShapeInstance>();
                 foreach (var elemShape in elementShapes)
                 {
                     if (!allShapeIds.TryAdd(elemShape.ShapeGeometryLabel, true))
                         shapeIdsUsedMoreThanOnce.TryAdd(elemShape.ShapeGeometryLabel, true);
-                    arguments.Add(elemShape);
+                    productShapes.Add(elemShape);
                     context = elemShape.RepresentationContext;
                     if (elemShape.StyleLabel > 0)
                         styleId = elemShape.StyleLabel;
                 }
 
-                if (arguments.Count == 0)
+                if (productShapes.Count == 0)
                 {
                     processed.TryAdd(element.EntityLabel, 0);
                 }
-                if (arguments.Count > 0)
+                if (productShapes.Count > 0)
                 {
                     var cutTools = new List<XbimShapeInstance>();
                     var projectTools = new List<XbimShapeInstance>();
-                    foreach (var feature in pair)
+                    foreach (var feature in elementToFeatureGroup)
                     {
+                        // here is where the feature's geometry are calculated
+                        //
                         var isCut = feature is IIfcFeatureElementSubtraction;
                         var featureShapes = WriteProductShape(contextHelper, feature, false, txn);
                         foreach (var featureShape in featureShapes)
@@ -761,7 +765,7 @@ namespace Xbim.ModelGeometry.Scene
                         processed.TryAdd(feature.EntityLabel, 0);
 
                     }
-                    var boolOp = new XbimProductBooleanInfo(contextHelper, Engine, Model, shapeIdsUsedMoreThanOnce, arguments, cutTools, projectTools, context, styleId);
+                    var boolOp = new XbimProductBooleanInfo(contextHelper, Engine, Model, shapeIdsUsedMoreThanOnce, productShapes, cutTools, projectTools, context, styleId);
                     openingAndProjectionOps.Add(boolOp);
                 }
             });
@@ -825,10 +829,6 @@ namespace Xbim.ModelGeometry.Scene
 
                     if (behaviour.HasFlag(MeshingBehaviourResult.PerformSubtractions) && openingAndProjectionOp.CutGeometries.Any())
                     {
-                        //do them in batches of 100
-                        //for (int i = 0; i < bop.CutGeometries.Count; i += 50)
-                        //{
-
                         var nextGeom = elementGeom.Cut(openingAndProjectionOp.CutGeometries, precision);
                         if (nextGeom.IsValid)
                         {
@@ -841,7 +841,6 @@ namespace Xbim.ModelGeometry.Scene
                         else
                             LogWarning(_model.Instances[elementLabel],
                                 "Cutting openings has failed. Openings have been ignored");
-                        // }
                     }
 
                     // now add to the DB     
@@ -972,20 +971,18 @@ namespace Xbim.ModelGeometry.Scene
         /// Process the products shape and writes the instances of shape geometries to the Database
         /// </summary>
         /// <param name="contextHelper"></param>
-        /// <param name="element">Element to write</param>
+        /// <param name="product">the product to write</param>
         /// <param name="includesOpenings"></param>
         /// <returns>IEnumerable of XbimShapeInstance that have been written</returns>
-        private IEnumerable<XbimShapeInstance> WriteProductShape(XbimCreateContextHelper contextHelper,
-            IIfcProduct element, bool includesOpenings, IGeometryStoreInitialiser txn)
+        private IEnumerable<XbimShapeInstance> WriteProductShape(XbimCreateContextHelper contextHelper, IIfcProduct product, bool includesOpenings, IGeometryStoreInitialiser txn)
         {
-            //_maxXyz = _model.ModelFactors.OneMetre * 100; //elements bigger than 100 metres should not be considered in region
-            var shapesInstances = new List<XbimShapeInstance>();
-            if (element.Representation == null)
+            
+            if (product.Representation == null)
                 return Enumerable.Empty<XbimShapeInstance>();
-            if (element.Representation.Representations == null)
+            if (product.Representation.Representations == null)
                 return Enumerable.Empty<XbimShapeInstance>();
 
-            var rep = element.Representation.Representations.FirstOrDefault(r => IsInContext(r) && r.IsBodyRepresentation());
+            var rep = product.Representation.Representations.FirstOrDefault(r => IsInContext(r) && r.IsBodyRepresentation());
             if (rep == null)
                 return Enumerable.Empty<XbimShapeInstance>();
 
@@ -993,7 +990,7 @@ namespace Xbim.ModelGeometry.Scene
             var repType = includesOpenings
                 ? XbimGeometryRepresentationType.OpeningsAndAdditionsIncluded
                 : XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded;
-            if (element is IIfcFeatureElement)
+            if (product is IIfcFeatureElement)
             {
                 //  might come in here from direct meshing or from meshing of remaining objects; either way mark as appropriate
                 repType = XbimGeometryRepresentationType.OpeningsAndAdditionsOnly;
@@ -1001,31 +998,30 @@ namespace Xbim.ModelGeometry.Scene
 
             // other setup
             XbimMatrix3D placementTransform = XbimMatrix3D.Identity;
-            if (element.ObjectPlacement is IIfcLocalPlacement)
-                placementTransform = contextHelper.PlacementTree[element.ObjectPlacement.EntityLabel];
-            else if (element.ObjectPlacement is IIfcGridPlacement)
-                placementTransform = Engine.ToMatrix3D((IIfcGridPlacement)element.ObjectPlacement);
-            var contextId = rep.ContextOfItems.EntityLabel;
-
-            //write out any shapes it has   
-
-            var topLevelItems = rep.Items;
-
-            ConvertMaps(contextHelper, element, txn, shapesInstances, rep, repType, placementTransform, contextId, topLevelItems);
+            if (product.ObjectPlacement is IIfcLocalPlacement)
+                placementTransform = contextHelper.PlacementTree[product.ObjectPlacement.EntityLabel];
+            else if (product.ObjectPlacement is IIfcGridPlacement)
+                placementTransform = Engine.ToMatrix3D((IIfcGridPlacement)product.ObjectPlacement);
+            
+            // process the items
+            var shapesInstances = WriteProductShapeRepresentationItems(contextHelper, product, txn, rep, repType, placementTransform, rep.Items);
             return shapesInstances;
         }
 
-        private void ConvertMaps(XbimCreateContextHelper contextHelper, IIfcProduct element, IGeometryStoreInitialiser txn, List<XbimShapeInstance> shapesInstances, IIfcRepresentation rep, XbimGeometryRepresentationType repType, XbimMatrix3D placementTransform, int contextId, IItemSet<IIfcRepresentationItem> topLevelItems)
+        private List<XbimShapeInstance> WriteProductShapeRepresentationItems(XbimCreateContextHelper contextHelper, IIfcProduct product, IGeometryStoreInitialiser txn, IIfcRepresentation rep, XbimGeometryRepresentationType repType, XbimMatrix3D placementTransform, IItemSet<IIfcRepresentationItem> representationItems)
         {
-            foreach (var shape in topLevelItems)
+            var shapesInstances = new List<XbimShapeInstance>();
+            var contextId = rep.ContextOfItems.EntityLabel;
+            foreach (var representationItem in representationItems)
             {
-                var theMap = shape as IIfcMappedItem;
+                var theMap = representationItem as IIfcMappedItem;
                 if (theMap != null)
                 {
-
                     List<GeometryReference> mapGeomIds;
-                    var mapId = shape.EntityLabel;
+                    var mapId = representationItem.EntityLabel;
 
+                    // todo: we need to describe what is that the MapsWritten field contains.
+                    //
                     if (contextHelper.MapsWritten.TryGetValue(mapId, out mapGeomIds))
                     //if we have something to write                           
                     {
@@ -1036,22 +1032,20 @@ namespace Xbim.ModelGeometry.Scene
 
                             shapesInstances.Add(
                                 WriteShapeInstanceToStore(instance.GeometryId, instance.StyleLabel, contextId,
-                                    element,
-                                    trans, instance.BoundingBox /*productBounds*/,
+                                    product,
+                                    trans, instance.BoundingBox,
                                     repType, txn)
                                 );
 
-                            if (!(element is IIfcOpeningElement))
+                            // do not include opening elements in the clusters (to determine the regions)
+                            //
+                            if (!(product is IIfcOpeningElement))
                             {
-
-                                var transproductBounds =
-                                    instance.BoundingBox /*productBounds*/.Transform(placementTransform);
                                 //transform the bounds
-
-                                //if (transproductBounds.SizeX < _maxXyz && transproductBounds.SizeY < _maxXyz && transproductBounds.SizeZ < _maxXyz)
+                                var transproductBounds = instance.BoundingBox.Transform(placementTransform);
                                 contextHelper.Clusters[rep.ContextOfItems].Enqueue(
-                                    new XbimBBoxClusterElement(instance.GeometryId,
-                                        transproductBounds));
+                                    new XbimBBoxClusterElement(instance.GeometryId,transproductBounds)
+                                    );
                             }
                         }
                     }
@@ -1059,26 +1053,27 @@ namespace Xbim.ModelGeometry.Scene
                     {
                         var mapTransform = contextHelper.MapTransforms[mapId];
                         var trans = XbimMatrix3D.Multiply(mapTransform, placementTransform);
-                        ConvertMaps(contextHelper, element, txn, shapesInstances, rep, repType, trans, contextId, theMap.MappingSource.MappedRepresentation.Items);
+                        shapesInstances.AddRange(
+                            WriteProductShapeRepresentationItems(contextHelper, product, txn, rep, repType, trans, theMap.MappingSource.MappedRepresentation.Items)
+                            );
                     }
                 }
                 else //it is a direct reference to geometry shape
                 {
                     GeometryReference instance;
-                    if (contextHelper.ShapeLookup.TryGetValue(shape.EntityLabel, out instance))
+                    if (contextHelper.ShapeLookup.TryGetValue(representationItem.EntityLabel, out instance))
                     {
                         shapesInstances.Add(
-                            WriteShapeInstanceToStore(instance.GeometryId, instance.StyleLabel, contextId, element,
+                            WriteShapeInstanceToStore(instance.GeometryId, instance.StyleLabel, contextId, product,
                                 placementTransform, instance.BoundingBox /*productBounds*/,
                                 repType, txn)
                             );
-                        // add to cluster if not an opening
+                        // do not include opening elements in the clusters (to determine the regions)
                         //
-                        if (!(element is IIfcOpeningElement))
+                        if (!(product is IIfcOpeningElement))
                         {
-                            var transproductBounds =
-                                instance.BoundingBox /*productBounds*/.Transform(placementTransform);
-                            //transform the bounds
+                            // transform the bounds
+                            var transproductBounds = instance.BoundingBox.Transform(placementTransform);
                             contextHelper.Clusters[rep.ContextOfItems].Enqueue(
                                 new XbimBBoxClusterElement(instance.GeometryId,
                                     transproductBounds));
@@ -1086,6 +1081,7 @@ namespace Xbim.ModelGeometry.Scene
                     }
                 }
             }
+            return shapesInstances;
         }
 
         private void WriteMappedItems(XbimCreateContextHelper contextHelper, ReportProgressDelegate progDelegate)
