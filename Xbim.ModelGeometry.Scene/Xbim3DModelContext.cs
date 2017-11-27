@@ -914,31 +914,26 @@ namespace Xbim.ModelGeometry.Scene
         {
             var localTally = contextHelper.Tally;
             var localPercentageParsed = contextHelper.PercentageParsed;
-            //write any grids we have converted
+
+            // todo: grids are written here, but maybe they should be out of this function? Why are they treated differently?
+            //
+
+            // write any grids we have converted
+            //
             foreach (var grid in Model.Instances.OfType<IIfcGrid>())
             {
                 GeometryReference instance;
                 if (contextHelper.ShapeLookup.TryGetValue(grid.EntityLabel, out instance))
                 {
-                    XbimMatrix3D placementTransform = XbimMatrix3D.Identity;
-                    if (grid.ObjectPlacement is IIfcLocalPlacement)
-                        placementTransform = contextHelper.PlacementTree[grid.ObjectPlacement.EntityLabel];
-                    else if (grid.ObjectPlacement is IIfcGridPlacement)
-                        placementTransform = Engine.ToMatrix3D((IIfcGridPlacement)grid.ObjectPlacement);
-
+                    XbimMatrix3D placementTransform = XbimPlacementTree.GetTransform(grid, contextHelper.PlacementTree, Engine);
                     WriteShapeInstanceToStore(instance.GeometryId, instance.StyleLabel, 0, grid,
-                        placementTransform, instance.BoundingBox /*productBounds*/,
+                        placementTransform, instance.BoundingBox,
                         XbimGeometryRepresentationType.OpeningsAndAdditionsIncluded, txn);
-                    instance.BoundingBox /*productBounds*/.Transform(placementTransform);
-                    //transform the bounds
-                    //contextHelper.Clusters.First().Enqueue(
-                    //    new XbimBBoxClusterElement(instance.GeometryId,
-                    //        transproductBounds));
+                    instance.BoundingBox.Transform(placementTransform);
                 }
             }
 
             Parallel.ForEach(products, contextHelper.ParallelOptions, product =>
-            // foreach (var product in products)
             {
                 //select representations that are in the required context
                 //only want solid representations for this context, but rep type is optional so just filter identified 2d elements
@@ -996,12 +991,8 @@ namespace Xbim.ModelGeometry.Scene
                 repType = XbimGeometryRepresentationType.OpeningsAndAdditionsOnly;
             }
 
-            // other setup
-            XbimMatrix3D placementTransform = XbimMatrix3D.Identity;
-            if (product.ObjectPlacement is IIfcLocalPlacement)
-                placementTransform = contextHelper.PlacementTree[product.ObjectPlacement.EntityLabel];
-            else if (product.ObjectPlacement is IIfcGridPlacement)
-                placementTransform = Engine.ToMatrix3D((IIfcGridPlacement)product.ObjectPlacement);
+            // transform setup
+            var placementTransform = XbimPlacementTree.GetTransform(product, contextHelper.PlacementTree, Engine);
             
             // process the items
             var shapesInstances = WriteProductShapeRepresentationItems(contextHelper, product, txn, rep, repType, placementTransform, rep.Items);
@@ -1020,7 +1011,7 @@ namespace Xbim.ModelGeometry.Scene
                     List<GeometryReference> mapGeomIds;
                     var mapId = representationItem.EntityLabel;
 
-                    // todo: we need to describe what is that the MapsWritten field contains.
+                    // todo: we need to clarify the content of MapsWritten
                     //
                     if (contextHelper.MapsWritten.TryGetValue(mapId, out mapGeomIds))
                     //if we have something to write                           
