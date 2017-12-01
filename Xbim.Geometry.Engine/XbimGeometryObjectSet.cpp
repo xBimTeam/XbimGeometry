@@ -297,30 +297,28 @@ namespace Xbim
 		{
 			ShapeFix_ShapeTolerance FTol;
 			BRep_Builder builder;
-			TopoDS_Shell facesToBeCut;
-			builder.MakeShell(facesToBeCut);
+			TopoDS_Shell shellBeingBuilt;
+			builder.MakeShell(shellBeingBuilt);
 			bool hasFacesToProcess = false;
-			bool hasObjectsToProcess = false;
+			bool hasContent = false;
 			for each (IXbimGeometryObject^ iGeom in geomObjects)
 			{			
+				// four types of geometry are found in the geomObjects
 				XbimShell^ shell = dynamic_cast<XbimShell^>(iGeom);
 				XbimSolid^ solid = dynamic_cast<XbimSolid^>(iGeom);
 				IEnumerable<IXbimGeometryObject^>^ geomSet = dynamic_cast<IEnumerable<IXbimGeometryObject^>^>(iGeom);
 				XbimFace^ face = dynamic_cast<XbimFace^>(iGeom);
 				
+				// type 1
 				if (solid != nullptr)
 				{
-				
 					FTol.LimitTolerance(solid, tolerance); 			
 					toBeProcessed.Append(solid);
-					hasObjectsToProcess = true;
-					
-			//	BRepTools::Write((XbimOccShape^)solid, "c:\\tmp\\b");
-					
+					hasContent = true;
 				}
+				// type 2
 				else if (shell != nullptr)
 				{
-				//	BRepTools::Write((XbimOccShape^)solid, "c:\\tmp\\s");
 					for (TopExp_Explorer expl(shell, TopAbs_FACE); expl.More(); expl.Next())
 					{
 						Bnd_Box bbFace;
@@ -330,7 +328,7 @@ namespace Xbim
 							if (!bbFace.IsOut(aBoxes(i)))
 							{
 								//check if the face is not sitting on the cut
-								builder.Add(facesToBeCut, expl.Current());
+								builder.Add(shellBeingBuilt, expl.Current());
 								hasFacesToProcess = true;
 							}
 							else
@@ -338,13 +336,16 @@ namespace Xbim
 						}
 					}
 				}
+				// type 3
 				else if (geomSet != nullptr)
 				{
-					if (ParseGeometry(geomSet, toBeProcessed, aBoxes, passThrough, tolerance)) //nothing to do so just return what we had
+					// iteratively trying again
+					if (ParseGeometry(geomSet, toBeProcessed, aBoxes, passThrough, tolerance)) 
 					{
-						hasObjectsToProcess = true;
+						hasContent = true;
 					}
 				}
+				// type 4
 				else if (face != nullptr)
 				{
 					Bnd_Box bbFace;
@@ -354,7 +355,7 @@ namespace Xbim
 						if (!bbFace.IsOut(aBoxes(i)))
 						{
 							//check if the face is not sitting on the cut
-							builder.Add(facesToBeCut, face);
+							builder.Add(shellBeingBuilt, face);
 							hasFacesToProcess = true;
 						}
 						else
@@ -364,16 +365,16 @@ namespace Xbim
 			}
 			if (hasFacesToProcess)
 			{
-				hasObjectsToProcess = true;
+				hasContent = true;
 				//sew the bits we are going to cut
 				BRepBuilderAPI_Sewing seamstress(tolerance);
-				seamstress.Add(facesToBeCut);
+				seamstress.Add(shellBeingBuilt);
 				seamstress.Perform();
 				TopoDS_Shape shape = seamstress.SewedShape();
 			    FTol.LimitTolerance(shape, tolerance);
 				toBeProcessed.Append(shape);
 			}
-			return hasObjectsToProcess;
+			return hasContent;
 		}
 
 		IXbimGeometryObjectSet^ XbimGeometryObjectSet::PerformBoolean(BOPAlgo_Operation bop, IXbimGeometryObject^ geomObject, IXbimSolidSet^ solids, double tolerance)
@@ -497,10 +498,8 @@ namespace Xbim
 					XbimGeometryCreator::LogError(solids, "Boolean operation timed out after {0} seconds. Operation failed, increase timout time in the config file", (int)aPI->ElapsedTime());
 					return XbimGeometryObjectSet::Empty;
 				}
-				if (pBuilder->ErrorStatus() == 0 && !pBuilder->Shape().IsNull())
+				if (pBuilder->HasErrors() == Standard_False && !pBuilder->Shape().IsNull())
 				{
-
-
 					TopoDS_Compound occCompound;
 					builder.MakeCompound(occCompound);
 
@@ -554,11 +553,10 @@ namespace Xbim
 
 				}
 				else
-					err = "Boolean Operation error status #" + pBuilder->ErrorStatus();
+					err = "Unspecified Boolean Error";
 				GC::KeepAlive(solids);
 				GC::KeepAlive(geomObjects);
-				err = "Error = " + pBuilder->ErrorStatus();
-
+				err = "Unspecified Error";
 			}
 			catch (Standard_Failure e)
 			{				

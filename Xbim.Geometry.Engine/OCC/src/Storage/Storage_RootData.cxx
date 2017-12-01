@@ -23,7 +23,7 @@
 #include <Storage_DataMapIteratorOfMapOfPers.hxx>
 #include <TCollection_AsciiString.hxx>
 
-IMPLEMENT_STANDARD_RTTIEXT(Storage_RootData,MMgt_TShared)
+IMPLEMENT_STANDARD_RTTIEXT(Storage_RootData,Standard_Transient)
 
 Storage_RootData::Storage_RootData() : myErrorStatus(Storage_VSOk)
 {
@@ -131,7 +131,7 @@ void Storage_RootData::UpdateRoot(const TCollection_AsciiString& aName,const Han
     myObjects.ChangeFind(aName)->SetObject(aPers);
   }
   else {
-    Standard_NoSuchObject::Raise();
+    throw Standard_NoSuchObject();
   }
 }
 

@@ -36,7 +36,7 @@
 #include <Units_UnitsSequence.hxx>
 #include <Units_UnitsSystem.hxx>
 
-IMPLEMENT_STANDARD_RTTIEXT(Units_UnitsSystem,MMgt_TShared)
+IMPLEMENT_STANDARD_RTTIEXT(Units_UnitsSystem,Standard_Transient)
 
 //=======================================================================
 //function : Units_UnitsSystem
@@ -186,12 +186,12 @@ void Units_UnitsSystem::Remove(const Standard_CString aquantity,
 	}
       }
       
-      Units_NoSuchUnit::Raise(aunit);
+      throw Units_NoSuchUnit(aunit);
       
     }
   }
   
-  Units_NoSuchType::Raise(aquantity);
+  throw Units_NoSuchType(aquantity);
 }
 
 
@@ -219,11 +219,11 @@ void Units_UnitsSystem::Activate(const Standard_CString aquantity,
           return;
         }
       }
-      Units_NoSuchUnit::Raise(aunit);
+      throw Units_NoSuchUnit(aunit);
     }
   }
 
-  Units_NoSuchType::Raise(aquantity);
+  throw Units_NoSuchType(aquantity);
 }
 
 
@@ -276,8 +276,7 @@ TCollection_AsciiString Units_UnitsSystem::ActiveUnit(const Standard_CString aqu
     }
   }
 
-  Units_NoSuchType::Raise(aquantity);
-  return TCollection_AsciiString() ;
+  throw Units_NoSuchType(aquantity);
 }
 
 

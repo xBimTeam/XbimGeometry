@@ -2,10 +2,10 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
     <metadata>
         <id>Xbim.Geometry</id>
-        <version>4.0.15-V0018</version>
+        <version>4.0.15-V0027</version>
         <title>xBIM Geometry</title>
         <authors>xBIM Team</authors>
-        <owners>Steve Lockley</owners>
+        <owners>Steve Lockley, Claudio Benghi</owners>
         <licenseUrl>http://xbim.codeplex.com/license</licenseUrl>
         <projectUrl>http://xbim.codeplex.com/</projectUrl>
         <iconUrl>http://download-codeplex.sec.s-msft.com/Download?ProjectName=xbim&amp;DownloadId=373774&amp;Build=20335</iconUrl>
@@ -27,7 +27,7 @@
         <language>en-GB</language>
         <tags>BIM, IFC, IfcXml, IfcZip, Ifc4, COBie, .Net, C#, BuildingSmart, Geometry, Brep</tags>
       <dependencies>
-        <dependency id="Xbim.Essentials" version="4.0.29-V002" />
+        <dependency id="Xbim.Essentials" version="4.0.29-V011" />
       </dependencies>
     </metadata>
     <files>

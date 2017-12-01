@@ -16,20 +16,16 @@
 // commercial license or contractual agreement.
 
 
-#include <Precision.hxx>
-
 #include <Bnd_Box.hxx>
 #include <BOPAlgo_PaveFiller.hxx>
-#include <BOPAlgo_SectionAttribute.hxx>
+#include <BOPAlgo_Alerts.hxx>
 #include <BOPAlgo_Tools.hxx>
 #include <BOPCol_MapOfInteger.hxx>
 #include <BOPCol_NCVector.hxx>
 #include <BOPCol_Parallel.hxx>
-#include <BOPCol_DataMapOfShapeReal.hxx>
 #include <BOPDS_CommonBlock.hxx>
 #include <BOPDS_CoupleOfPaveBlocks.hxx>
 #include <BOPDS_Curve.hxx>
-#include <BOPDS_DataMapOfPaveBlockListOfInteger.hxx>
 #include <BOPDS_DS.hxx>
 #include <BOPDS_Interf.hxx>
 #include <BOPDS_Iterator.hxx>
@@ -37,12 +33,9 @@
 #include <BOPDS_Pave.hxx>
 #include <BOPDS_PaveBlock.hxx>
 #include <BOPTools_AlgoTools.hxx>
-#include <BndLib_Add3dCurve.hxx>
 #include <BRep_Builder.hxx>
 #include <BRep_Tool.hxx>
 #include <BRepAdaptor_Curve.hxx>
-#include <BRepBndLib.hxx>
-#include <GeomAPI_ProjectPointOnSurf.hxx>
 #include <gp_Pnt.hxx>
 #include <IntTools_CommonPrt.hxx>
 #include <IntTools_Context.hxx>
@@ -50,6 +43,7 @@
 #include <IntTools_Range.hxx>
 #include <IntTools_SequenceOfCommonPrts.hxx>
 #include <IntTools_Tools.hxx>
+#include <Precision.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Face.hxx>
@@ -139,8 +133,6 @@ typedef BOPCol_ContextCnt
 //=======================================================================
 void BOPAlgo_PaveFiller::PerformEF()
 {
-  myErrorStatus=0;
-  //
   FillShrunkData(TopAbs_EDGE, TopAbs_FACE);
   //
   myIterator->Initialize(TopAbs_EDGE, TopAbs_FACE);
@@ -149,15 +141,14 @@ void BOPAlgo_PaveFiller::PerformEF()
     return; 
   }
   //
-  Standard_Boolean bJustAdd;
   Standard_Integer nE, nF;
   //
   if (myGlue == BOPAlgo_GlueFull) {
     // there is no need to intersect edges with faces in this mode
     // just initialize FaceInfo for faces
     for (; myIterator->More(); myIterator->Next()) {
-      myIterator->Value(nE, nF, bJustAdd);
-      if (!bJustAdd && !myDS->ShapeInfo(nE).HasFlag()) {
+      myIterator->Value(nE, nF);
+      if (!myDS->ShapeInfo(nE).HasFlag()) {
         myDS->ChangeFaceInfo(nF);
       }
     }
@@ -190,10 +181,7 @@ void BOPAlgo_PaveFiller::PerformEF()
   aEFs.SetIncrement(iSize);
   //
   for (; myIterator->More(); myIterator->Next()) {
-    myIterator->Value(nE, nF, bJustAdd);
-    if(bJustAdd) {
-      continue;
-    }
+    myIterator->Value(nE, nF);
     //
     const BOPDS_ShapeInfo& aSIE=myDS->ShapeInfo(nE);
     if (aSIE.HasFlag()){//degenerated 
@@ -460,7 +448,7 @@ void BOPAlgo_PaveFiller::PerformEF()
   // post treatment
   //=========================================
   BOPAlgo_Tools::PerformCommonBlocks(aMPBLI, aAllocator, myDS);
-  PerformVerticesEF(aMVCPB, aAllocator);
+  PerformNewVertices(aMVCPB, aAllocator, Standard_False);
   //
   // Update FaceInfoIn for all faces having EF common parts
   BOPCol_MapIteratorOfMapOfInteger aItMI;
@@ -469,187 +457,11 @@ void BOPAlgo_PaveFiller::PerformEF()
     nF=aItMI.Value();
     myDS->UpdateFaceInfoIn(nF);
   }
-  // Refine FaceInfoOn to remove all formal pave blocks 
-  // made during EF processing 
-  //myDS->RefineFaceInfoOn();
   //-----------------------------------------------------scope t
   aMIEFC.Clear();
   aMVCPB.Clear();
   aMPBLI.Clear();
   ////aAllocator.Nullify();
-}
-//=======================================================================
-//function : PerformVerticesEF
-//purpose  : 
-//=======================================================================
-Standard_Integer BOPAlgo_PaveFiller::PerformVerticesEF
-  (BOPDS_IndexedDataMapOfShapeCoupleOfPaveBlocks& theMVCPB,
-   const Handle(NCollection_BaseAllocator)& theAllocator)
-{
-  Standard_Integer aNbV, iRet;
-  //
-  iRet=0;
-  aNbV=theMVCPB.Extent();
-  if (!aNbV) {
-    return iRet;
-  }
-  //
-  Standard_Integer nVx, nVSD, iV, iErr, nE, iFlag, iX, i, aNbPBLI;
-  Standard_Real aT, dummy;
-  BOPCol_ListIteratorOfListOfShape aItLS;
-  BOPCol_ListIteratorOfListOfInteger aItLI;
-  BOPDS_PDS aPDS;
-  BOPDS_ShapeInfo aSI;
-  BOPDS_Pave aPave;
-  //
-  BOPCol_ListOfShape aLS(theAllocator);
-  BOPCol_DataMapOfShapeInteger aMVI(100, theAllocator);
-  BOPDS_IndexedDataMapOfPaveBlockListOfInteger aMPBLI(100, theAllocator);
-  BOPAlgo_PaveFiller aPF(theAllocator); 
-  BOPCol_DataMapOfShapeReal aMVIniTol;
-  //
-  aSI.SetShapeType(TopAbs_VERTEX);
-  BOPDS_VectorOfInterfEF& aEFs=myDS->InterfEF();
-  //
-  // 1 prepare arguments
-  for (i=1; i<=aNbV; ++i) {
-    const TopoDS_Vertex& aV = TopoDS::Vertex(theMVCPB.FindKey(i));
-    aLS.Append(aV);
-    // if an enlarged tolerance is associated with the vertex then update it 
-    // remembering its initial tolerance
-    Standard_Real aTolEnlarged = theMVCPB.FindFromIndex(i).Tolerance();
-    Standard_Real aIniTol = BRep_Tool::Tolerance(aV);
-    if (aTolEnlarged > aIniTol) {
-      aMVIniTol.Bind(aV, aIniTol);
-      BRep_Builder().UpdateVertex(aV, aTolEnlarged);
-    }
-  }
-  //
-  // 2 Fuse vertices
-  aPF.SetIsPrimary(Standard_False);
-  aPF.SetNonDestructive(myNonDestructive);
-  aPF.SetArguments(aLS);
-  aPF.Perform();
-  iErr=aPF.ErrorStatus();
-  if (iErr) {
-    iRet=1;
-    return iRet;
-  }
-  aPDS=aPF.PDS();
-  //
-  // Recompute common vertex for each SD group containing enlarged vertex;
-  // for that first fill in the map of SD vertex -> its counterparts
-  BOPCol_IndexedDataMapOfShapeListOfShape aImages;
-  aItLS.Initialize(aLS);
-  for (; aItLS.More(); aItLS.Next()) {
-    const TopoDS_Shape& aVx = aItLS.Value();
-    nVx = aPDS->Index(aVx);
-    //
-    const TopoDS_Shape& aV = (aPDS->HasShapeSD(nVx, nVSD) ? aPDS->Shape(nVSD) : aVx);
-    BOPCol_ListOfShape* pLst = aImages.ChangeSeek(aV);
-    if (!pLst) {
-      pLst = &aImages.ChangeFromIndex(aImages.Add(aV, BOPCol_ListOfShape()));
-    }
-    pLst->Append(aVx);
-  }
-  // 3 Add new vertices to theDS; 
-  for (i = 1; i <= aImages.Extent(); i++) {
-    TopoDS_Vertex aV = TopoDS::Vertex(aImages.FindKey(i));
-    const BOPCol_ListOfShape& aLVSD = aImages.FindFromIndex(i);
-    Standard_Boolean isReset = Standard_False;
-    BOPCol_ListIteratorOfListOfShape it(aLVSD);
-    for (; it.More(); it.Next()) {
-      const TopoDS_Vertex& aVx = TopoDS::Vertex(it.Value());
-      const Standard_Real* pTolIni = aMVIniTol.Seek(aVx);
-      if (pTolIni) {
-        // reset enlarged vertex tolerance to the initial value
-        reinterpret_cast<BRep_TVertex*>(aVx.TShape().operator->())->Tolerance(*pTolIni);
-        isReset = Standard_True;
-      }
-    }
-    TopoDS_Vertex aVnew = aV;
-    if (isReset && aLVSD.Extent() > 1) {
-      // make new vertex again
-      BOPTools_AlgoTools::MakeVertex(aLVSD, aVnew);
-    }
-    // index of new vertex in theDS -> iV
-    aSI.SetShape(aVnew);
-    iV = myDS->Append(aSI);
-    //
-    BOPDS_ShapeInfo& aSIDS = myDS->ChangeShapeInfo(iV);
-    Bnd_Box& aBox = aSIDS.ChangeBox();
-    BRepBndLib::Add(aVnew, aBox);
-    aBox.SetGap(aBox.GetGap() + Precision::Confusion());
-    //
-    aMVI.Bind(aV, iV);
-  }
-  //
-  // 4 Map PaveBlock/ListOfVertices to add to this PaveBlock ->aMPBLI
-  aItLS.Initialize(aLS);
-  for (; aItLS.More(); aItLS.Next()) {
-    const TopoDS_Shape& aVx=aItLS.Value();
-    nVx=aPDS->Index(aVx);
-    //
-    const TopoDS_Shape& aV = (aPDS->HasShapeSD(nVx, nVSD) ? aPDS->Shape(nVSD) : aVx);
-    iV = aMVI.Find(aV);
-    //
-    BOPDS_CoupleOfPaveBlocks &aCPB=theMVCPB.ChangeFromKey(aVx);
-    aCPB.SetIndex(iV);
-    // update EF interference
-    iX=aCPB.IndexInterf();
-    BOPDS_InterfEF& aEF=aEFs(iX);
-    aEF.SetIndexNew(iV);
-    // map aMPBLI
-    const Handle(BOPDS_PaveBlock)& aPB=aCPB.PaveBlock1();
-    if (aMPBLI.Contains(aPB)) {
-      BOPCol_ListOfInteger& aLI=aMPBLI.ChangeFromKey(aPB);
-      aLI.Append(iV);
-    }
-    else {
-      BOPCol_ListOfInteger aLI(theAllocator);
-      aLI.Append(iV);
-      aMPBLI.Add(aPB, aLI);
-    }
-  }
-  //
-  // 5 
-  // 5.1  Compute Extra Paves and 
-  // 5.2. Add Extra Paves to the PaveBlocks
-  aNbPBLI=aMPBLI.Extent();
-  for (i=1; i<=aNbPBLI; ++i) {
-    Handle(BOPDS_PaveBlock) aPB=aMPBLI.FindKey(i);
-    const BOPCol_ListOfInteger& aLI=aMPBLI.FindFromIndex(i);
-    nE=aPB->OriginalEdge();
-    const TopoDS_Edge& aE=(*(TopoDS_Edge *)(&myDS->Shape(nE)));
-    // 
-    aItLI.Initialize(aLI);
-    for (; aItLI.More(); aItLI.Next()) {
-      nVx=aItLI.Value();
-      const TopoDS_Vertex& aVx=(*(TopoDS_Vertex *)(&myDS->Shape(nVx)));
-      //
-      iFlag=myContext->ComputeVE (aVx, aE, aT, dummy, myFuzzyValue);
-      if (!iFlag) {
-        aPave.SetIndex(nVx);
-        aPave.SetParameter(aT);
-        aPB->AppendExtPave(aPave);
-      }
-    }
-  }
-  // 6  Split PaveBlocks
-  for (i=1; i<=aNbPBLI; ++i) {
-    Handle(BOPDS_PaveBlock) aPB=aMPBLI.FindKey(i);
-    nE=aPB->OriginalEdge();
-    // 3
-    if (!myDS->IsCommonBlock(aPB)) {
-      myDS->UpdatePaveBlock(aPB);
-    }
-    else {
-      const Handle(BOPDS_CommonBlock)& aCB=myDS->CommonBlock(aPB);
-      myDS->UpdateCommonBlock(aCB, myFuzzyValue);
-    }    
-  }//for (; aItMPBLI.More(); aItMPBLI.Next()) {
-  // 
-  return iRet;
 }
 //=======================================================================
 // function: CheckFacePaves
@@ -751,6 +563,18 @@ Standard_Boolean BOPAlgo_PaveFiller::ForceInterfVF
     BOPDS_FaceInfo& aFI=myDS->ChangeFaceInfo(nF);
     BOPCol_MapOfInteger& aMVIn=aFI.ChangeVerticesIn();
     aMVIn.Add(nVx);
+    //
+    // check for self-interference
+    Standard_Integer iRV = myDS->Rank(nV);
+    if (iRV >= 0 && iRV == myDS->Rank(nF)) {
+      // add warning status
+      TopoDS_Compound aWC;
+      BRep_Builder().MakeCompound(aWC);
+      BRep_Builder().Add(aWC, aV);
+      BRep_Builder().Add(aWC, aF);
+      AddWarning (new BOPAlgo_AlertSelfInterferingShape (aWC));
+    }
+
   }
   return bRet;
 }

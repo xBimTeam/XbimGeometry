@@ -404,7 +404,7 @@ namespace Xbim
 					return XbimSolidSet::Empty;
 				}
 
-				if (boolOp.ErrorStatus() == 0)
+				if (boolOp.HasErrors() == Standard_False)
 				{
 					if (BRepCheck_Analyzer(boolOp.Shape(), Standard_False).IsValid() == Standard_False)
 					{
@@ -438,7 +438,8 @@ namespace Xbim
 					return gcnew XbimSolidSet(boolOp.Shape());
 				}
 
-				err = "Error = " + boolOp.ErrorStatus();
+				// todo
+				err = "An Error Occurred";
 				GC::KeepAlive(solids);
 				GC::KeepAlive(this);
 			}
@@ -742,6 +743,16 @@ namespace Xbim
 			}
 		}
 
+		double VolumeOf(IXbimSolidSet^ set) {
+			double ret = -1;
+			XbimSolidSet^ basic = dynamic_cast<XbimSolidSet^>(set);
+			if (basic != nullptr)
+			{
+				return basic->Volume;
+			}
+			return ret;
+		}
+
 
 
 		void XbimSolidSet::Init(IIfcBooleanResult^ boolOp)
@@ -765,6 +776,8 @@ namespace Xbim
 				return;
 			}
 
+			double vL, vR, vMin, vRes;
+			
 			IModelFactors^ mf = boolOp->Model->ModelFactors;
 			IXbimSolidSet^ result;
 			try
@@ -779,6 +792,22 @@ namespace Xbim
 					break;
 				case IfcBooleanOperator::DIFFERENCE:
 					result = left->Cut(right, mf->Precision);
+					vRes = VolumeOf(result);
+					if (vRes != -1)
+					{
+						vL = left->Volume;
+						vR = right->Volume;
+						// the minimum is if we take away all of the right; 
+						// but then reduce a bit to compensate for tolerances.
+						vMin = (vL - vR) * .98; 
+						if (vRes < vMin )
+						{ 
+							// the boolean had a problem
+							XbimGeometryCreator::LogError(boolOp, "Boolean operation silent failure, the operation has been ignored");
+							solids->Add(left);
+							return;
+						}
+					}
 					break;
 				}
 			}

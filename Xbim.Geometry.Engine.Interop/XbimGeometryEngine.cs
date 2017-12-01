@@ -476,9 +476,7 @@ namespace Xbim.Geometry.Engine.Interop
         public IXbimGeometryObject FromBrep(string brepStr)
         {
             return _engine.FromBrep(brepStr);
-        }
-
-       
+        }     
 
         public string ToBrep(IXbimGeometryObject geometryObject)
         {

@@ -62,7 +62,7 @@ Standard_EXPORT Standard_Boolean DEBTEFOR(const TopOpeBRepBuild_Builder& B,const
 
 #ifdef OCCT_DEBUG
 Standard_EXPORT void FUN_RaiseON()
-{Standard_Failure::Raise("BuilderON");}
+{throw Standard_Failure("BuilderON");}
 static void FUN_cout(const TopoDS_Shape& eON)
 {
   TopAbs_Orientation oE = eON.Orientation();
@@ -896,15 +896,12 @@ void TopOpeBRepBuild_BuilderON::GFillONPartsWES2(const Handle(TopOpeBRepDS_Inter
 
     if (addFORREV) { 
       newE.Orientation(TopAbs_FORWARD);  
-//      Standard_Boolean ok = FUN_tool_correctCLO(TopoDS::Edge(newE),FOR); // xpu201198 cto016*
       myPWES->AddStartElement(newE);
 
       newE.Orientation(TopAbs_REVERSED); 
-//      ok = FUN_tool_correctCLO(TopoDS::Edge(newE),FOR); // xpu201198 cto016*
       myPWES->AddStartElement(newE); 
     }
     else {
-//      Standard_Boolean ok = FUN_tool_correctCLO(TopoDS::Edge(newE),FOR); // xpu201198 cto016*
       myPWES->AddStartElement(newE);
     }
     return;
