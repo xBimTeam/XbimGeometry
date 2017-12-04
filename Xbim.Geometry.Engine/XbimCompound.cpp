@@ -47,6 +47,7 @@
 #include <BRepCheck_Shell.hxx>
 #include <BRepBuilderAPI_CellFilter.hxx>
 #include <BRepBuilderAPI_VertexInspector.hxx>
+#include <ShapeBuild_ReShape.hxx>
 
 using namespace System;
 using namespace System::Linq;
@@ -697,6 +698,7 @@ namespace Xbim
 					{
 
 						ShapeFix_Face faceFix(xbimAdvancedFace);
+						faceFix.SetContext(new ShapeBuild_ReShape);
 						faceFix.Perform();
 						ShapeExtend_Status status;
 						faceFix.Status(status);
