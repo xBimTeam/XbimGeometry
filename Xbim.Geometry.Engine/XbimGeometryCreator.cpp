@@ -18,7 +18,6 @@
 #include <BRep_Tool.hxx>
 #include <TColgp_Array1OfPnt.hxx>
 #include <BRepTools.hxx>
-#include <ShapeFix_ShapeTolerance.hxx>
 #include <BRep_Builder.hxx>
 #include <BRepOffsetAPI_MakePipe.hxx>
 #include <BRepOffsetAPI_MakePipeShell.hxx>
@@ -867,7 +866,6 @@ namespace Xbim
 			double precision = mf->Precision;
 		    return body->Cut(solidSet, precision);					
 #endif		
-			ShapeFix_ShapeTolerance FTol;
 			IIfcBooleanOperand^ fOp = clip->FirstOperand;
 			IIfcBooleanOperand^ sOp = clip->SecondOperand;
 			IXbimSolidSet^ left;
