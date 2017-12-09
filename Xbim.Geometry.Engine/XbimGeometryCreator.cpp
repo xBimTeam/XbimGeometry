@@ -18,6 +18,8 @@
 #include <BRepTools.hxx>
 #include <ShapeFix_ShapeTolerance.hxx>
 #include <BRep_Builder.hxx>
+#include <BOPAlgo_BOP.hxx>
+
 using namespace  System::Threading;
 using namespace Xbim::Common;
 using namespace Xbim::XbimExtensions::Interfaces;
@@ -881,14 +883,18 @@ namespace Xbim
 				return basic->Volume;
 			}
 			return ret;
-		}
+		}
+
 
 
 		IXbimSolidSet^ XbimGeometryCreator::CreateBooleanResult(IfcBooleanResult^ clip)
 		{
+
+			// todo: clip->Operator can be IfcBooleanOperator::Union, IfcBooleanOperator::Intersection, IfcBooleanOperator::Difference:
+				
 			XbimModelFactors^ mf = clip->ModelOf->ModelFactors;
 			
-#ifdef OCC_6_9_SUPPORTED			
+
 			
 			List<IfcBooleanOperand^>^ clips = gcnew List<IfcBooleanOperand^>();
 			
@@ -904,12 +910,14 @@ namespace Xbim
 				{
 					XbimPoint3D^ ctrd = body->BoundingBox.Centroid();
 					XbimSolid^ s = gcnew XbimSolid(hs, maxLen, ctrd);
-				    if (s->IsValid) solidSet->Add(s); 
+				    if (s->IsValid) 
+						solidSet->Add(s); 
 				}
 				else
 				{
 					XbimSolid^ s = gcnew XbimSolid(bOp);
-					if (s->IsValid) solidSet->Add(s);
+					if (s->IsValid) 
+						solidSet->Add(s);
 				}
 			}
 			//BRepTools::Write(body, "d:\\tmp\\b");
@@ -922,13 +930,26 @@ namespace Xbim
 			}
 			else
 			{
-				
+				// todo: cb: attempt the use of new booleans
+				//
 				IXbimSolidSet^ r = gcnew XbimSolidSet(body);
+				// r->s
 				double minVol = body->Volume;
 				for each (XbimSolid^ s in solidSet)
 				{
 					minVol -= s->Volume;
-					r = r->Cut(s, precision);
+					if (false) {
+						/*BOPAlgo_BOP aBOP;
+						aBOP.AddArgument(r);
+						aBOP.AddTool(s);
+						aBOP.SetOperation(BOPAlgo_CUT);
+						aBOP.Perform();
+						r = aBOP.Shape();*/
+					}
+					else
+					{
+						r = r->Cut(s, precision);
+					}
 				}
 				minVol *= 0.98; // we reduce the minimum a little to compensate for geoemtry engine quirckyness
 				double outVol = VolumeOf(r);
@@ -942,71 +963,7 @@ namespace Xbim
 				//BRepTools::Write((XbimSolid^)(r->First), "d:\\tmp\\r");			
 				return r;
 			}
-			
-#endif
-			IfcBooleanOperand^ fOp = clip->FirstOperand;
-			IfcBooleanOperand^ sOp = clip->SecondOperand;
-			IXbimSolidSet^ left;
-			IXbimSolidSet^ right;
-			if (dynamic_cast<IfcBooleanResult^>(fOp))
-				left = CreateBooleanResult((IfcBooleanResult^)fOp);
-			else
-			{
-				left = gcnew XbimSolidSet(); 
-				XbimSolid^ l = gcnew XbimSolid(fOp);
-				if (l->IsValid)	left->Add(l);
-			}
-			if (dynamic_cast<IfcBooleanResult^>(sOp))
-				right = CreateBooleanResult((IfcBooleanResult^)sOp);
-			else
-			{
-				right = gcnew XbimSolidSet();
-				XbimSolid^ r = gcnew XbimSolid(sOp);
-				if (r->IsValid)	right->Add(r);
-			}
 
-			if (!left->IsValid)
-			{
-				//XbimGeometryCreator::logger->WarnFormat("WS006: IfcBooleanResult #{0} with invalid first operand", clip->EntityLabel);
-				return XbimSolidSet::Empty;
-			}
-
-			if (!right->IsValid)
-			{
-				XbimGeometryCreator::logger->WarnFormat("WS007: IfcBooleanResult #{0} has an empty shape in the second operand", clip->EntityLabel);
-				return left;
-			}
-
-			IXbimGeometryObject^ result;
-			try
-			{
-				switch (clip->Operator)
-				{
-				case IfcBooleanOperator::Union:
-					result = left->Union(right, mf->PrecisionBoolean);
-					break;
-				case IfcBooleanOperator::Intersection:
-					result = left->Intersection(right, mf->PrecisionBoolean);
-					break;
-				case IfcBooleanOperator::Difference:
-					result = left->Cut(right, mf->PrecisionBoolean);
-					break;
-				}
-			}
-			catch (Exception^ xbimE)
-			{
-				XbimGeometryCreator::logger->ErrorFormat("ES001: Error performing boolean operation for entity #{0}={1}\n{2}. The first operand has been used, the operation has been ignored", clip->EntityLabel, clip->GetType()->Name, xbimE->Message);
-				return left;
-			}
-
-			XbimSolidSet^ xbimSolidSet = dynamic_cast<XbimSolidSet^>(result);
-			if (xbimSolidSet == nullptr)
-			{
-				XbimGeometryCreator::logger->ErrorFormat("ES002: Error performing boolean operation for entity #{0}={1}. The first operand has been used, the operation has been ignored", clip->EntityLabel, clip->GetType()->Name);	
-				return left;
-			}
-			else
-				return xbimSolidSet;
 		}
 	
 #pragma endregion

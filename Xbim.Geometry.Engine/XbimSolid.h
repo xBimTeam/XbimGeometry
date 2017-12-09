@@ -16,7 +16,6 @@ namespace Xbim
 {
 	namespace Geometry
 	{
-
 		ref class XbimSolid :IXbimSolid, XbimOccShape
 		{
 		private:

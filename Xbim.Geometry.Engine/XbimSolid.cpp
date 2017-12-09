@@ -540,30 +540,6 @@ namespace Xbim
 					XbimGeometryCreator::logger->WarnFormat("WS011: Non-Planar half spaces are not supported in Entity #{0}, it has been ignored", hs->EntityLabel);
 					return;
 				}
-//#ifdef OCC_6_9_SUPPORTED
-//
-//
-//				gp_Ax3 ax3 = XbimGeomPrim::ToAx3(ifcPlane->Position);
-//				gp_Pln pln(ax3);
-//				gp_Vec zVec = hs->AgreementFlag ? -pln.Axis().Direction() : pln.Axis().Direction();
-//
-//				gp_Pnt pnt = ax3.Location();
-//				pnt.Translate(zVec);
-//				BRepBuilderAPI_MakeFace  faceMaker(pln);
-//				if (faceMaker.IsDone())
-//				{
-//					BRepPrimAPI_MakeHalfSpace halfSpaceBulder(faceMaker.Face(), pnt);
-//					if (halfSpaceBulder.IsDone())
-//					{
-//						pSolid = new TopoDS_Solid();
-//						*pSolid = TopoDS::Solid(halfSpaceBulder.Solid());
-//						BRepTools::Write(halfSpaceBulder.Solid(), "d:\\tmp\\hs");
-//					}
-//					else
-//						XbimGeometryCreator::logger->WarnFormat("WS012: Half space solid could not be formed in Entity #{0}, it has been ignored", hs->EntityLabel);
-//				}
-//
-//#else
 
 				double bounds = 2 * maxExtrusion;
 				double z = hs->AgreementFlag ? -bounds : 0;
@@ -851,7 +827,7 @@ namespace Xbim
 		{
 			XbimModelFactors^ mf = solid->ModelOf->ModelFactors;
 			IfcBooleanOperand^ fOp = solid->FirstOperand;
-#ifdef OCC_6_9_SUPPORTED			
+		
 			IfcBooleanResult^ boolClip = dynamic_cast<IfcBooleanResult^>(fOp);
 			if (boolClip != nullptr)
 			{
@@ -884,9 +860,7 @@ namespace Xbim
 				}
 				return;
 			}
-
-#endif
-			
+						
 			IfcBooleanOperand^ sOp = solid->SecondOperand;
 			XbimSolid^ left = gcnew XbimSolid(fOp);
 			XbimSolid^ right = gcnew XbimSolid(sOp);
@@ -933,22 +907,11 @@ namespace Xbim
 			}
 
 			XbimSolidSet^ xbimSolidSet = dynamic_cast<XbimSolidSet^>(result);
-#ifdef OCC_6_9_SUPPORTED //Later versions of OCC has fuzzy boolean which gives better results
+
 			if (xbimSolidSet != nullptr && xbimSolidSet->First != nullptr)
 			{
 				*pSolid = (XbimSolid^)(xbimSolidSet->First); //just take the first as that is what is intended by IFC schema
 			}
-#else // otherwise we have to make sure we get a solid when an error occurs
-			if (xbimSolidSet == nullptr || xbimSolidSet->First==nullptr)
-			{
-				XbimGeometryCreator::logger->ErrorFormat("ES002: Error performing boolean operation for entity #{0}={1}. The operation has been ignored", solid->EntityLabel, solid->GetType()->Name);
-				*pSolid = left; //return the left operand
-			}
-			else //Ifc requires just one solid as a result so just take the first
-			{
-				*pSolid = (XbimSolid^)(xbimSolidSet->First);
-			}
-#endif
 		}
 
 		void XbimSolid::Init(IfcBooleanOperand^ solid)
@@ -1309,7 +1272,6 @@ namespace Xbim
 			String^ err="";
 			try
 			{
-#ifdef OCC_6_9_SUPPORTED
 				ShapeFix_ShapeTolerance FTol;
 				TopTools_ListOfShape shapeTools;
 				FTol.SetTolerance(solidCut, tolerance);
@@ -1322,12 +1284,7 @@ namespace Xbim
 				boolOp.SetTools(shapeTools);
 				boolOp.SetFuzzyValue(0);
 				boolOp.Build();
-#else
-				ShapeFix_ShapeTolerance fixTol;
-				fixTol.SetTolerance(solidCut, tolerance);
-				fixTol.SetTolerance(this, tolerance);
-				BRepAlgoAPI_Cut boolOp(this, solidCut);
-#endif
+
 				if (!boolOp.HasErrors())
 					return gcnew XbimSolidSet(boolOp.Shape());
 				err = "Error (improve reporting)";

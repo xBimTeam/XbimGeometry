@@ -130,10 +130,6 @@ namespace Xbim
 					if (!compound->Sew())
 					{
 						_isSimplified = true; //set flag true to say the solid set has been simplified and the user should be warned
-#ifndef OCC_6_9_SUPPORTED		
-						
-						return; //don't add it we cannot really make it into a solid and will cause boolean operation errors,
-#endif
 					}
 	
 				for each (IXbimGeometryObject^ geom in geomSet)
@@ -244,92 +240,6 @@ namespace Xbim
 		{
 			IXbimSolidSet^ toCutSolidSet = solids; //just to sort out carve exclusion, they must be all OCC solids if no carve
 			IXbimSolidSet^ thisSolidSet = this;
-#ifdef USE_CARVE_CSG
-			if (this->IsPolyhedron && solids->IsPolyhedron) //downgrade everything to faceted representation
-			{
-				IXbimSolidSet^ thisFacetationSet = gcnew XbimSolidSet();
-				for each (IXbimSolid^ thisSolid in this)
-				{
-					XbimFacetedSolid^ fSolid = dynamic_cast<XbimFacetedSolid^>(thisSolid);
-					if (fSolid != nullptr)
-						thisFacetationSet->Add(fSolid);
-					else
-					{
-						XbimSolid^ occSolid = dynamic_cast<XbimSolid^>(thisSolid);
-						if (occSolid != nullptr)
-							thisFacetationSet->Add(gcnew XbimFacetedSolid(occSolid, tolerance)); //convert it
-						else
-							XbimGeometryCreator::logger->WarnFormat("WSS01: Invalid operation. Only solid shapes can be cut from another solid");
-					}
-				}
-				IXbimSolidSet^ toCutFacetationSet = gcnew XbimSolidSet();
-				for each (IXbimSolid^ solid in solids)
-				{
-					XbimFacetedSolid^ fSolid = dynamic_cast<XbimFacetedSolid^>(solid);
-					if (fSolid != nullptr)
-						toCutFacetationSet->Add(fSolid);
-					else
-					{
-						XbimSolid^ occSolid = dynamic_cast<XbimSolid^>(solid);
-						if (occSolid != nullptr)
-							toCutFacetationSet->Add(gcnew XbimFacetedSolid(occSolid, tolerance)); //convert it
-						else
-							XbimGeometryCreator::logger->WarnFormat("WSS02: Invalid operation. Only solid shapes can be cut from another solid");
-					}
-				}
-				XbimFacetedSolid^ thisFacetation = XbimFacetedSolid::Merge(thisFacetationSet, tolerance);
-				XbimFacetedSolid^ toCutFacetation = XbimFacetedSolid::Merge(toCutFacetationSet, tolerance);
-				if (thisFacetation == nullptr) return XbimSolidSet::Empty;
-				if (toCutFacetation == nullptr) return this;
-
-				if ((thisFacetation == nullptr || !thisFacetation->IsValid) && (toCutFacetation == nullptr || !toCutFacetation->IsValid))
-					return XbimSolidSet::Empty;
-				if (thisFacetation != nullptr && thisFacetation->IsValid  && toCutFacetation != nullptr && toCutFacetation->IsValid)
-				{
-					return (IXbimSolidSet^)thisFacetation->Cut(toCutFacetation, tolerance);
-				}
-				if (toCutFacetation != nullptr && toCutFacetation->IsValid)
-					return solids;
-				return this;
-			}
-			else //upgrade everything to OCC  
-			{
-				thisSolidSet = gcnew XbimSolidSet();
-				for each (IXbimSolid^ thisSolid in this)
-				{
-
-					XbimSolid^ solid = dynamic_cast<XbimSolid^>(thisSolid);
-					if (solid != nullptr)
-						thisSolidSet->Add(solid);
-					else
-					{
-						XbimFacetedSolid^ fSolid = dynamic_cast<XbimFacetedSolid^>(thisSolid);
-						if (fSolid != nullptr)
-							thisSolidSet->Add(fSolid->ConvertToXbimSolid()); //convert it
-						else
-							XbimGeometryCreator::logger->WarnFormat("WSS03: Invalid operation. Only solid shapes can be cut from another solid");
-					}
-				}
-				toCutSolidSet = gcnew XbimSolidSet();
-				for each (IXbimSolid^ isolid in solids)
-				{
-					XbimSolid^ solid = dynamic_cast<XbimSolid^>(isolid);
-					if (solid != nullptr)
-						toCutSolidSet->Add(solid);
-					else
-					{
-						XbimFacetedSolid^ fSolid = dynamic_cast<XbimFacetedSolid^>(isolid);
-						if (fSolid != nullptr)
-							toCutSolidSet->Add(fSolid->ConvertToXbimSolid()); //convert it
-						else
-							XbimGeometryCreator::logger->WarnFormat("WSS04: Invalid operation. Only solid shapes can be cut from another solid");
-					}
-				}
-		}
-
-#endif // USE_CARVE_CSG
-
-#ifdef OCC_6_9_SUPPORTED
 			
 			String^ err = "";
 			try
@@ -374,56 +284,7 @@ namespace Xbim
 			}
 			XbimGeometryCreator::logger->WarnFormat("WS032: Boolean Cut operation failed. " + err);
 			return XbimSolidSet::Empty;
-#else
 
-			if (thisSolidSet->Count >_maxOpeningsToCut) //if the base shape is really complicate just give up trying
-			{
-				IsSimplified = true;
-				return this;
-			}
-			XbimCompound^ thisSolid = XbimCompound::Merge(thisSolidSet, tolerance);
-			
-			XbimCompound^ toCutSolid;
-			if (thisSolid == nullptr) return XbimSolidSet::Empty;
-			bool isSimplified = false;
-			if (toCutSolidSet->Count > _maxOpeningsToCut)
-			{
-				isSimplified = true;
-				List<Tuple<double, XbimSolid^>^>^ solidsList = gcnew List<Tuple<double, XbimSolid^>^>(toCutSolidSet->Count);
-				for each (XbimSolid^ solid in toCutSolidSet)
-				{
-					solidsList->Add(gcnew Tuple<double, XbimSolid^>(solid->Volume, solid));
-				}
-				solidsList->Sort(_volumeComparer);
-				TopoDS_Compound subsetToCut;
-				BRep_Builder b;
-				b.MakeCompound(subsetToCut);
-				//int i = 0;
-				double totalVolume = this->Volume;
-				double minVolume = totalVolume * _maxOpeningVolumePercentage;
-
-				for (int i = 0; i < _maxOpeningsToCut; i++)
-				{
-					if (solidsList[i]->Item1 < minVolume) break; //give up for small things
-					b.Add(subsetToCut, solidsList[i]->Item2);
-				}
-				
-				toCutSolid = gcnew XbimCompound(subsetToCut,true, tolerance);
-				
-			}
-			else
-			{
-				toCutSolid = XbimCompound::Merge(toCutSolidSet, tolerance);
-			}
-
-			if (toCutSolid == nullptr) return this;
-			XbimCompound^ result = thisSolid->Cut(toCutSolid, tolerance);
-			XbimSolidSet^ ss = gcnew XbimSolidSet(result);
-			//BRepTools::Write(result, "d:\\c");
-			GC::KeepAlive(result);
-			ss->IsSimplified = isSimplified;
-			return ss;
-#endif
 		}
 
 		IXbimSolidSet^ XbimSolidSet::Union(IXbimSolidSet^ solids, double tolerance)

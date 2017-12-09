@@ -37,13 +37,8 @@ namespace Xbim
 {
 	namespace Geometry
 	{
-		
-
 		ref class XbimOccShape abstract : XbimGeometryObject
 		{
-		
-		
-			
 		public:
 			static void WriteIndex(BinaryWriter^ bw, UInt32 index, UInt32 maxInt);
 			XbimOccShape();
@@ -52,7 +47,6 @@ namespace Xbim
 			void WriteTriangulation(TextWriter^ textWriter, double tolerance, double deflection, double angle);
 			void WriteTriangulation(BinaryWriter^ binaryWriter, double tolerance, double deflection, double angle);
 			virtual property bool IsSet{bool get() override { return false; }; }
-			
 		};
 	}
 }
