@@ -47,6 +47,7 @@
 #include <BRepCheck_Shell.hxx>
 #include <BRepBuilderAPI_CellFilter.hxx>
 #include <BRepBuilderAPI_VertexInspector.hxx>
+// #include <ShapeBuild_ReShape.hxx> // this was suggeste in PR79 - but it does not seem to make the difference with OCC72
 
 using namespace System;
 using namespace System::Linq;
@@ -59,7 +60,6 @@ namespace Xbim
 {
 	namespace Geometry
 	{
-
 		XbimCompound::XbimCompound(double sewingTolerance)
 		{
 			_sewingTolerance = sewingTolerance;
@@ -337,9 +337,9 @@ namespace Xbim
 					for each (XbimShell^ s in occShell->Shells)
 					{
 						XbimShell^ occShell = (XbimShell^)s;
-						if(occShell->IsValid && !occShell->IsEmpty) shells->Add((XbimShell^)s);
+						if(occShell->IsValid && !occShell->IsEmpty) 
+							shells->Add((XbimShell^)s);
 					}
-					
 				}
 			}
 			if (shells->Count > 0)
@@ -356,14 +356,12 @@ namespace Xbim
 
 		void XbimCompound::Init(IIfcConnectedFaceSet^ faceSet, bool close)
 		{
-
 			if (!Enumerable::Any(faceSet->CfsFaces))
 			{
-				XbimGeometryCreator::LogWarning(faceSet, "Emty face set");
+				XbimGeometryCreator::LogWarning(faceSet, "Empty face set.");
 				return;
 			}
 			Init(faceSet->CfsFaces, close, faceSet);
-
 		}
 
 
@@ -695,8 +693,8 @@ namespace Xbim
 
 					if (!analyser.IsValid())
 					{
-
 						ShapeFix_Face faceFix(xbimAdvancedFace);
+						// faceFix.SetContext(new ShapeBuild_ReShape); // this was suggeste in PR79 - but it does not seem to make the difference with OCC72
 						faceFix.Perform();
 						ShapeExtend_Status status;
 						faceFix.Status(status);
@@ -1123,7 +1121,7 @@ namespace Xbim
 				solidFixer.SetMinTolerance(tolerance);
 				result = solidFixer.SolidFromShell(shell);
 				if (result.IsNull()) 
-					result = shell; //give in
+					result = shell; //give in and use previous shell
 			}
 			else
 				result = shell;
