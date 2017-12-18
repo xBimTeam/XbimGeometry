@@ -1194,7 +1194,7 @@ namespace Xbim.ModelGeometry.Scene
                             if (!(element is IfcOpeningElement))
                             {
                                 //transform the bounds
-                                var transproductBounds = instance.BoundingBox.Transform(placementTransform);
+                                var transproductBounds = instance.BoundingBox.Transform(trans);
                                 contextHelper.Clusters[rep.ContextOfItems].Enqueue(
                                     new XbimBBoxClusterElement(instance.GeometryId, transproductBounds));
                             }

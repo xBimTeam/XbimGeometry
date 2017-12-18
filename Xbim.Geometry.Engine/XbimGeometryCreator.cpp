@@ -941,23 +941,17 @@ namespace Xbim
 				// todo: cb: attempt the use of new booleans
 				//
 				IXbimSolidSet^ r = gcnew XbimSolidSet(body);
-				// r->s
 				double minVol = body->Volume;
 				for each (XbimSolid^ s in solidSet)
 				{
 					minVol -= s->Volume;
-					if (false) {
-						/*BOPAlgo_BOP aBOP;
-						aBOP.AddArgument(r);
-						aBOP.AddTool(s);
-						aBOP.SetOperation(BOPAlgo_CUT);
-						aBOP.Perform();
-						r = aBOP.Shape();*/
-					}
-					else
-					{
-						r = r->Cut(s, precision);
-					}
+					/*BOPAlgo_BOP aBOP;
+					aBOP.AddArgument(r);
+					aBOP.AddTool(s);
+					aBOP.SetOperation(BOPAlgo_CUT);
+					aBOP.Perform();
+					r = aBOP.Shape();*/
+					r = r->Cut(s, precision);
 				}
 				minVol *= 0.98; // we reduce the minimum a little to compensate for geoemtry engine quirckyness
 				double outVol = VolumeOf(r);
