@@ -206,7 +206,26 @@ namespace Xbim
 			}
 		}
 
+		void XbimSolidSet::SaveBrep(String ^ destFolder)
+		{
+			int i = 1;
+			for each (IXbimSolid^ Isolid in solids)
+			{
+				XbimSolid^ solid = dynamic_cast<XbimSolid^>(Isolid);
+				if (solid == nullptr/* && shell->IsClosed*/)
+					continue;
 
+				String^ fname = String::Format("{0}\\{1}.brep", destFolder, i++);
+				FileInfo^ fi = gcnew FileInfo(fname);
+				{ // equivalent of c# using don't remove StreamWriter
+					StreamWriter^ tw = fi->CreateText();
+					tw->WriteLine("DBRep_DrawableShape");
+					tw->WriteLine(solid->ToBRep);
+					tw->Close();				
+					// tw->Dispose();
+				}
+			}
+		}
 
 		XbimRect3D XbimSolidSet::BoundingBox::get()
 		{

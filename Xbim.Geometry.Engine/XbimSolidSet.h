@@ -93,6 +93,7 @@ namespace Xbim
 			virtual property double Volume{double get(); }
 			//moves the solid set to the new position
 			void Move(IfcAxis2Placement3D^ position);
+			void SaveBrep(String^ destFolder);
 			
 		};
 
