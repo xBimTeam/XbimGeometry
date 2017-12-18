@@ -19,6 +19,8 @@
 #include <ShapeFix_ShapeTolerance.hxx>
 #include <BRep_Builder.hxx>
 #include <BOPAlgo_BOP.hxx>
+#include <GProp_GProps.hxx>
+#include <BRepGProp.hxx>
 
 using namespace  System::Threading;
 using namespace Xbim::Common;
@@ -885,6 +887,12 @@ namespace Xbim
 			return ret;
 		}
 
+		double VolumeOf(TopoDS_Shape occShape) {
+			GProp_GProps gProps;
+			BRepGProp::VolumeProperties(occShape, gProps, Standard_True);
+			double startVol = gProps.Mass();
+			return startVol;
+		}
 
 
 		IXbimSolidSet^ XbimGeometryCreator::CreateBooleanResult(IfcBooleanResult^ clip)
