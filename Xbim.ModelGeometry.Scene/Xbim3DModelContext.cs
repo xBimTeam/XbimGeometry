@@ -321,31 +321,31 @@ namespace Xbim.ModelGeometry.Scene
 
 
                 // projections
-                var projectingRelations = Model.InstancesLocal.OfType<IfcRelVoidsElement>()
+                var projectingRelations = Model.InstancesLocal.OfType<IfcRelProjectsElement>()
                     .Where(
                         r =>
-                            r.RelatingBuildingElement.Representation != null &&
-                            r.RelatedOpeningElement.Representation != null).ToList();
+                            r.RelatedFeatureElement.Representation != null &&
+                            r.RelatedFeatureElement.Representation != null).ToList();
                 foreach (var projectionRelation in projectingRelations)
                 {
                     // process parts
                     ObjectDefinitionSet childrenElements;
-                    if (compoundElementsDictionary.TryGetValue(projectionRelation.RelatingBuildingElement,
+                    if (compoundElementsDictionary.TryGetValue(projectionRelation.RelatingElement,
                         out childrenElements))
                     {
                         elementsWithFeatures.AddRange(
                             childrenElements.OfType<IfcElement>().Select(childElement => new ElementWithFeature()
                             {
                                 Element = childElement,
-                                Feature = projectionRelation.RelatedOpeningElement
+                                Feature = projectionRelation.RelatedFeatureElement
                             }));
                     }
 
                     // process parent
                     elementsWithFeatures.Add(new ElementWithFeature()
                     {
-                        Element = projectionRelation.RelatingBuildingElement,
-                        Feature = projectionRelation.RelatedOpeningElement
+                        Element = projectionRelation.RelatingElement,
+                        Feature = projectionRelation.RelatedFeatureElement
                     });
                 }
 
