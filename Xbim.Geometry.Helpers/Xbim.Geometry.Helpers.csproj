@@ -15,8 +15,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Google.Protobuf" Version="3.4.1" />
-    <PackageReference Include="Xbim.Ifc2x3.Extensions" Version="5.0.0-Beta-418" />
+    <PackageReference Include="Google.Protobuf" Version="3.5.1" />
+    <PackageReference Include="Xbim.Ifc2x3" Version="5.0.0-Beta1-1082" />
   </ItemGroup>
 
 </Project>
