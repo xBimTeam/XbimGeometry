@@ -25,8 +25,8 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="1.2.0" />
     <PackageReference Include="MSTest.TestFramework" Version="1.2.0" />
-    <PackageReference Include="Xbim.Aim" Version="5.0.0-Beta-449" />
-    <PackageReference Include="Xbim.IO.MemoryModel" Version="5.0.0-Beta-419" />
+    <PackageReference Include="Xbim.Aim" Version="5.0.0-Beta1-1088" />
+    <PackageReference Include="Xbim.IO.MemoryModel" Version="5.0.0-Beta1-1085" />
   </ItemGroup>
 
   <ItemGroup>

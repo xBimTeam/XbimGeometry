@@ -147,9 +147,6 @@
     <Reference Include="Xbim.Ifc4">
       <HintPath>..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\Xbim.Ifc4.dll</HintPath>
     </Reference>
-    <Reference Include="Xbim.Ifc2x3.Extensions">
-      <HintPath>..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\Xbim.Ifc2x3.Extensions.dll</HintPath>
-    </Reference>
     <Reference Include="Xbim.Ifc2x3">
       <HintPath>..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\Xbim.Ifc2x3.dll</HintPath>
     </Reference>

@@ -179,19 +179,19 @@
       <HintPath>..\packages\Xbim.Aim.Edm.1.0.1-ci-20171005-135102\lib\net47\Xbim.Aim.Edm.dll</HintPath>
     </Reference>
     <Reference Include="Xbim.Common, Version=5.0.0.0, Culture=neutral, PublicKeyToken=cb55c3cec6e68f1b, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xbim.Common.5.0.0-Beta-387\lib\net47\Xbim.Common.dll</HintPath>
+      <HintPath>..\packages\Xbim.Common.5.0.0-Beta1-1080\lib\net47\Xbim.Common.dll</HintPath>
     </Reference>
     <Reference Include="Xbim.Geometry.Helpers, Version=5.0.0.0, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
       <HintPath>..\packages\Xbim.Geometry.Helpers.5.0.0-Beta-437\lib\net47\Xbim.Geometry.Helpers.dll</HintPath>
     </Reference>
     <Reference Include="Xbim.Ifc2x3, Version=5.0.0.0, Culture=neutral, PublicKeyToken=cb55c3cec6e68f1b, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xbim.Ifc2x3.5.0.0-Beta-417\lib\net47\Xbim.Ifc2x3.dll</HintPath>
+      <HintPath>..\packages\Xbim.Ifc2x3.5.0.0-Beta1-1082\lib\net47\Xbim.Ifc2x3.dll</HintPath>
     </Reference>
     <Reference Include="Xbim.Ifc2x3.Extensions, Version=5.0.0.0, Culture=neutral, PublicKeyToken=cb55c3cec6e68f1b, processorArchitecture=MSIL">
       <HintPath>..\packages\Xbim.Ifc2x3.Extensions.5.0.0-Beta-418\lib\net47\Xbim.Ifc2x3.Extensions.dll</HintPath>
     </Reference>
     <Reference Include="Xbim.Ifc4, Version=5.0.0.0, Culture=neutral, PublicKeyToken=cb55c3cec6e68f1b, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xbim.Ifc4.5.0.0-Beta-454\lib\net47\Xbim.Ifc4.dll</HintPath>
+      <HintPath>..\packages\Xbim.Ifc4.5.0.0-Beta1-1081\lib\net47\Xbim.Ifc4.dll</HintPath>
     </Reference>
     <Reference Include="Xbim.IO.FileModel, Version=5.0.0.0, Culture=neutral, PublicKeyToken=dec47e03f0f494c0, processorArchitecture=MSIL">
       <HintPath>..\packages\Xbim.IO.FileModel.5.0.0-Beta-421\lib\net47\Xbim.IO.FileModel.dll</HintPath>
@@ -200,7 +200,7 @@
       <HintPath>..\packages\Xbim.IO.MemoryModel.5.0.0-Beta-419\lib\net47\Xbim.IO.MemoryModel.dll</HintPath>
     </Reference>
     <Reference Include="Xbim.Tessellator, Version=5.0.0.0, Culture=neutral, PublicKeyToken=cb55c3cec6e68f1b, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xbim.Tessellator.5.0.0-Beta-420\lib\net47\Xbim.Tessellator.dll</HintPath>
+      <HintPath>..\packages\Xbim.Tessellator.5.0.0-Beta1-1089\lib\net47\Xbim.Tessellator.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

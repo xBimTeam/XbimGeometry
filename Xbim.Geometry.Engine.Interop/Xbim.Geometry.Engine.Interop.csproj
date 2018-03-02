@@ -36,11 +36,7 @@
 
   <ItemGroup>
     <PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
-    <PackageReference Include="Xbim.Common" Version="5.0.0-Beta-387" />
-    <PackageReference Include="Xbim.Ifc2x3" Version="5.0.0-Beta-417" />
-    <PackageReference Include="Xbim.Ifc2x3.Extensions" Version="5.0.0-Beta-418" />
-    <PackageReference Include="Xbim.Ifc4" Version="5.0.0-Beta-454" />
-    <PackageReference Include="Xbim.Tessellator" Version="5.0.0-Beta-420" />
+    <PackageReference Include="Xbim.Tessellator" Version="5.0.0-Beta1-1089" />
   </ItemGroup>
  
 
@@ -74,13 +70,13 @@
   <Target Name="BuildNativeCodeEngine" BeforeTargets="Build">
     <Message Text="Building Xbim.Geometry.Engine x32 Native Dlls, version $(AssemblyFileVersionAttribute)" Importance="High" />
     <WriteLinesToFile File="..\SharedFileVersionInfo.cs" Lines="$(AssemblyFileVersionAttribute)" Overwrite="true" Encoding="Unicode" />
-    <Message Text="Building Xbim.Geometry.Engine x64 Native Dlls, version $(AssemblyFileVersionAttribute)" Importance="High" />
+    <!--<Message Text="Building Xbim.Geometry.Engine x64 Native Dlls, version $(AssemblyFileVersionAttribute)" Importance="High" />-->
     <MSBuild Projects="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj" Properties="Configuration=$(Configuration);Platform=Win32;OutDir=..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\" Targets="Build">
       <Output ItemName="AssembliesBuiltByChildProjects" TaskParameter="TargetOutputs" />
     </MSBuild>
-    <MSBuild Projects="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj" Properties="Configuration=$(Configuration);Platform=x64;OutDir=..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\" Targets="Build">
+    <!--<MSBuild Projects="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj" Properties="Configuration=$(Configuration);Platform=x64;OutDir=..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\" Targets="Build">
       <Output ItemName="AssembliesBuiltByChildProjects" TaskParameter="TargetOutputs" />
-    </MSBuild>  
+    </MSBuild>-->  
   </Target>
   <Target Name="PublishBimpGet" DependsOnTargets="Pack">
     <Message Text="Publishing package to BimpGet from $(MSBuildProjectDirectory)\bin\$(Configuration)\net47" Importance="High" />
