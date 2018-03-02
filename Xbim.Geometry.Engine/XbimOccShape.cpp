@@ -516,9 +516,9 @@ namespace Xbim
 						for (exp.Init(ccWire); exp.More(); exp.Next())
 						{
 							gp_Pnt p = BRep_Tool::Pnt(exp.CurrentVertex());
-							contour[j].Position.X = (float)p.X();
-							contour[j].Position.Y = (float)p.Y();
-							contour[j].Position.Z = (float)p.Z();
+							contour[j].Position.X = p.X();
+							contour[j].Position.Y = p.Y();
+							contour[j].Position.Z = p.Z();
 							j++;
 						}
 						if (contour->Length > 0)

@@ -36,7 +36,7 @@
 
   <ItemGroup>
     <PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
-    <PackageReference Include="Xbim.Tessellator" Version="5.0.0-Beta1-1089" />
+    <PackageReference Include="Xbim.Tessellator" Version="5.0.0-Beta1-1094" />
   </ItemGroup>
  
 
