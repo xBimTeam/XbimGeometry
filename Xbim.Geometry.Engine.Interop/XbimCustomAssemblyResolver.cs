@@ -26,12 +26,16 @@ namespace Xbim.Geometry.Engine.Interop
         // As a result we need to overide the default probing rules to locate the assembly, based whether we are 32-bit or 64-bit process.
         private static Assembly ProbeForAssembly(string moduleName)
         {
-            Assembly assembly = Assembly.GetExecutingAssembly(); // The Xbim.Geometry.Engine.Interop assembly
-            // code base always points to the deployed DLL, which may be different to the executing Location because of Shadow Copying in the AppDomain (e.g. ASP.NET)
-            var codepath = new Uri(assembly.CodeBase); 
+            var appDir = Environment.GetEnvironmentVariable("GeometryEngineLocation");
 
-            // Unlike Assembly.Location, CodeBase is a URI [file:\\c:\wwwroot\etc\WebApp\bin\Xbim.Geometry.Engine.Interop.dll]
-            var appDir = Path.GetDirectoryName(codepath.LocalPath);
+            if (string.IsNullOrWhiteSpace(appDir) || !Directory.Exists(appDir))
+            {
+                Assembly assembly = Assembly.GetExecutingAssembly(); // The Xbim.Geometry.Engine.Interop assembly
+                                                                     // code base always points to the deployed DLL, which may be different to the executing Location because of Shadow Copying in the AppDomain (e.g. ASP.NET)
+                var codepath = new Uri(assembly.CodeBase);
+                // Unlike Assembly.Location, CodeBase is a URI [file:\\c:\wwwroot\etc\WebApp\bin\Xbim.Geometry.Engine.Interop.dll]
+                appDir = Path.GetDirectoryName(codepath.LocalPath);
+            }
 
             if (appDir == null)
             {
