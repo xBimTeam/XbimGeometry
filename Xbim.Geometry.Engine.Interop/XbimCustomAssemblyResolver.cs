@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.IO;
 using System.Reflection;
 
@@ -10,7 +11,13 @@ namespace Xbim.Geometry.Engine.Interop
 
         const string GeometryModuleName = "Xbim.Geometry.Engine";
         const string XbimModulePrefix = "Xbim.";
-        
+        static readonly ILogger<XbimCustomAssemblyResolver> _logger;
+
+
+        static XbimCustomAssemblyResolver()
+        {
+            _logger = new LoggerFactory().CreateLogger<XbimCustomAssemblyResolver>();
+        }
 
         internal static Assembly ResolverHandler(object sender, ResolveEventArgs args)
         {
@@ -30,13 +37,14 @@ namespace Xbim.Geometry.Engine.Interop
 
             if (string.IsNullOrWhiteSpace(appDir) || !Directory.Exists(appDir))
             {
+                _logger.LogDebug("Getting probing path from executing assembly");
                 Assembly assembly = Assembly.GetExecutingAssembly(); // The Xbim.Geometry.Engine.Interop assembly
                                                                      // code base always points to the deployed DLL, which may be different to the executing Location because of Shadow Copying in the AppDomain (e.g. ASP.NET)
                 var codepath = new Uri(assembly.CodeBase);
                 // Unlike Assembly.Location, CodeBase is a URI [file:\\c:\wwwroot\etc\WebApp\bin\Xbim.Geometry.Engine.Interop.dll]
                 appDir = Path.GetDirectoryName(codepath.LocalPath);
             }
-
+            _logger.LogDebug("Probing path {appDir}", appDir);
             if (appDir == null)
             {
 
@@ -47,6 +55,7 @@ namespace Xbim.Geometry.Engine.Interop
 
             if (moduleName.StartsWith(GeometryModuleName))
             {
+
                 // Get conventions used by this process architecture
                 var conventions = new XbimArchitectureConventions();
 
@@ -57,10 +66,12 @@ namespace Xbim.Geometry.Engine.Interop
                 // Look in relevant Architecture subfolder off the main application deployment
                 libraryPath = Path.Combine(appDir, filename);
 
+                _logger.LogDebug("Probing for GeometryEngine in {path}", libraryPath);
+
                 // Try a relative folder to CWD.
                 if (!File.Exists(libraryPath))
                 {
-                    
+                    _logger.LogDebug("Not found - falling back to search for {filename} instead", filename);
                     libraryPath = filename;
                 }
             }
@@ -91,15 +102,18 @@ namespace Xbim.Geometry.Engine.Interop
             
             if (!File.Exists(assemblyPath))
             {
-               
+                _logger.LogTrace("File {assemblyPath} did not exist", assemblyPath);
                
                 return null;
             }
             else
             {
-               
+                _logger.LogTrace("Loading {assemblyPath}", assemblyPath);
                 // Failures can occur at Load if a dependent assembly cannot be found.
+
+                // AW: This should probably be LoadFrom not LoadFile
                 Assembly geomLoaded = Assembly.LoadFile(assemblyPath);
+                _logger.LogDebug("Loaded {assemblyPath} successfully", assemblyPath);
                 return geomLoaded;
             }
         }
