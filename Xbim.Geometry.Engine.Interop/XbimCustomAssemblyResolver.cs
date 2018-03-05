@@ -110,9 +110,7 @@ namespace Xbim.Geometry.Engine.Interop
             {
                 _logger.LogTrace("Loading {assemblyPath}", assemblyPath);
                 // Failures can occur at Load if a dependent assembly cannot be found.
-
-                // AW: This should probably be LoadFrom not LoadFile
-                Assembly geomLoaded = Assembly.LoadFile(assemblyPath);
+                Assembly geomLoaded = Assembly.LoadFrom(assemblyPath);
                 _logger.LogDebug("Loaded {assemblyPath} successfully", assemblyPath);
                 return geomLoaded;
             }
