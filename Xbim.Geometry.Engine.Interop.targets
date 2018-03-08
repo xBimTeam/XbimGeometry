@@ -18,7 +18,7 @@
   <ItemGroup>
     <XbimInteropFiles Condition="'$(MSBuildThisFileDirectory)' != '' And
                                    HasTrailingSlash('$(MSBuildThisFileDirectory)')"
-        Include="$(MSBuildThisFileDirectory)**\Xbim.Geometry.Engine32.dll;$(MSBuildThisFileDirectory)**\Xbim.Geometry.Engine64.dll" >
+        Include="$(MSBuildThisFileDirectory)\Xbim.Geometry.Engine32.dll;$(MSBuildThisFileDirectory)\Xbim.Geometry.Engine64.dll" >
       <Visible>True</Visible>
       <Group></Group>
       <PublishState>Include</PublishState>
@@ -38,14 +38,19 @@
                      HasTrailingSlash('$(OutputPath)') And
                      Exists('$(OutputPath)')"
           Inputs="@(XbimInteropFiles)"
-          Outputs="@(XbimInteropFiles -> '$(OutputPath)%(RecursiveDir)%(Filename)%(Extension)')">
+          Outputs="@(XbimInteropFiles -> '$(OutputPath)$(XbimCustomBinPath)%(Filename)%(Extension)')">
     <!--
         NOTE: Copy "Xbim.Geometry.Enginexx.dll" and all related files, for every
               architecture that we support, to the build output directory.
     -->
+    <Message Text="Copying Geometry Engine files @(XbimInteropFiles)" Importance="high" />
+    <Message Text="Copying Geometry Engines to bin directory $(OutputPath)$(CustomBinPath)" Importance="high" />
+
+    <!-- Consumers can over-ride the bin output folder by setting XbimCustomBinPath -->
     <Copy SourceFiles="@(XbimInteropFiles)"
-          DestinationFiles="@(XbimInteropFiles -> '$(OutputPath)%(RecursiveDir)%(Filename)%(Extension)')" />
+          DestinationFiles="@(XbimInteropFiles -> '$(OutputPath)$(XbimCustomBinPath)%(Filename)%(Extension)')" />
   </Target>
+
 
   <!--
   ******************************************************************************
