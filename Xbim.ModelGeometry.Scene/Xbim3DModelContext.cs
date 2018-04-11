@@ -229,11 +229,11 @@ namespace Xbim.ModelGeometry.Scene
                 return null;
             }
 
-            internal bool Initialise()
+            internal bool Initialise(bool adjustWcs)
             {
                 try
                 {
-                    PlacementTree = new XbimPlacementTree(Model);
+                    PlacementTree = new XbimPlacementTree(Model, adjustWcs);
                     GeometryShapeLookup = new ConcurrentDictionary<int, int>();
                     MapGeometryReferences = new ConcurrentDictionary<int, List<GeometryReference>>();
                     MapTransforms = new ConcurrentDictionary<int, XbimMatrix3D>();
@@ -629,7 +629,7 @@ namespace Xbim.ModelGeometry.Scene
                 using (var contextHelper = new XbimCreateContextHelper(_model, _contexts))
                 {
                     if (progDelegate != null) progDelegate(-1, "Initialise");
-                    if (!contextHelper.Initialise())
+                    if (!contextHelper.Initialise(adjustWcs))
                         throw new Exception("Failed to initialise geometric context, " + contextHelper.InitialiseError);
                     if (progDelegate != null) progDelegate(101, "Initialise");
 
