@@ -37,7 +37,7 @@ namespace Ifc4GeometryTests
                 m.Close();
             }
 
-            using (var store = IfcStore.Open(@"GConv\Monolith_v10.xBIM"))
+            using (var store = IfcStore.Open(@"GConv\Monolith_v10.xBIM", accessMode: XbimDBAccess.Exclusive))
             {
                 var geomContext = new Xbim3DModelContext(store);
                 geomContext.CreateContext();
