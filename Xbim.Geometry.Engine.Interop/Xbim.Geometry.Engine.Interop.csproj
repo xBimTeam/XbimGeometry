@@ -37,7 +37,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging" Version="1.1.1" />
     <PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
-    <PackageReference Include="Xbim.Tessellator" Version="5.0.0-Beta1-1094" />
+    <PackageReference Include="Xbim.Tessellator" Version="5.0.0-Beta1-1318" />
   </ItemGroup>
  
 
@@ -50,8 +50,8 @@
       <Pack>true</Pack>
       <PackagePath>build\net47;</PackagePath>
     </Content>
-    <Content Include="..\Xbim.Geometry.Engine.Interop.targets">
-      <Link>Xbim.Geometry.Interop.targets</Link>
+    <Content Include="C:\Users\Steve\Source\Repos\Xbim.Geometry\Xbim.Geometry.Engine.Interop.targets">
+      <Link>Xbim.Geometry.Engine.Interop.targets</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <PackagePath>build\net47;</PackagePath>
       <Pack>true</Pack>
