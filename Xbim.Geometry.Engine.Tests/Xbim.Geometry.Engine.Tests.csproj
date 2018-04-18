@@ -58,6 +58,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="AdvBrepRecursionTests.cs" />
+    <Compile Include="CustomMeshingBehaviourTest.cs" />
     <Compile Include="Diff.cs" />
     <Compile Include="EnvironmentTests.cs" />
     <Compile Include="Ifc2x3GeometryTests.cs" />
@@ -379,6 +380,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="SolidTestFiles\NonManifoldFacetedBrep.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="SolidTestFiles\OneWallTwoWindows.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="SolidTestFiles\ShellBasedSurfaceModel.ifc">

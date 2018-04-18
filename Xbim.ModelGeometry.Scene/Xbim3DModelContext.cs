@@ -206,6 +206,11 @@ namespace Xbim.ModelGeometry.Scene
             internal ConcurrentDictionary<int, List<GeometryReference>> MapGeometryReferences { get; private set; }
             internal ConcurrentDictionary<int, XbimMatrix3D> MapTransforms { get; private set; }
 
+            // todo: the custom meshing behaviour needs to be unified.
+            // todo: the whole helper needs to be restructured
+
+            public MeshingBehaviourSetter customMeshBehaviour { get; internal set; }
+
             internal IXbimGeometryObject GetGeometryFromCache(XbimShapeInstance shapeInstance, bool makeCopy)
             {
 
@@ -389,6 +394,15 @@ namespace Xbim.ModelGeometry.Scene
 
                 foreach (var product in Model.Instances.OfType<IIfcProduct>(true).Where(p => p.Representation != null))
                 {
+
+                    if (customMeshBehaviour != null)
+                    {
+                        double v1 = 0, v2 = 0; // v1 and v2 are ignored in this case
+                        var behaviour = customMeshBehaviour(product.EntityLabel, product.ExpressType.TypeId, ref v1, ref v2);
+                        if (behaviour == MeshingBehaviourResult.Skip)
+                            continue;
+                    }
+
                     var isFeatureElementShape = product is IIfcFeatureElement;
                     var isVoidedProductShape = VoidedProductIds.Contains(product.EntityLabel);
                     //select representations that are in the required context
@@ -628,6 +642,7 @@ namespace Xbim.ModelGeometry.Scene
                 if (geometryTransaction == null) return false;
                 using (var contextHelper = new XbimCreateContextHelper(_model, _contexts))
                 {
+                    contextHelper.customMeshBehaviour = CustomMeshingBehaviour;
                     if (progDelegate != null) progDelegate(-1, "Initialise");
                     if (!contextHelper.Initialise(adjustWcs))
                         throw new Exception("Failed to initialise geometric context, " + contextHelper.InitialiseError);
@@ -683,14 +698,13 @@ namespace Xbim.ModelGeometry.Scene
 
         public delegate MeshingBehaviourResult MeshingBehaviourSetter(int elementId, int typeId, ref double linearDeflection,
             ref double angularDeflection);
-
+        
         /// <summary>
         /// A custom function to determine the behaviour and deflection associated with individual items in the mesher.
         /// Default properties can set in the Model.Modelfactors if the same deflection applies to all elements.
         /// </summary>
         public MeshingBehaviourSetter CustomMeshingBehaviour;
-
-
+        
         /// <summary>
         /// Computes and writes to the DB all shapes of products considering their features (openings and extensions).
         /// The process starts from listing all OpeningsAndProjections (from the context) then performs the solid operations.
@@ -802,8 +816,7 @@ namespace Xbim.ModelGeometry.Scene
 
                     if (CustomMeshingBehaviour != null)
                     {
-                        behaviour = CustomMeshingBehaviour(elementLabel, typeId, ref thisDeflectionDistance,
-                            ref thisDeflectionAngle);
+                        behaviour = CustomMeshingBehaviour(elementLabel, typeId, ref thisDeflectionDistance, ref thisDeflectionAngle);
                         if (behaviour == MeshingBehaviourResult.Skip)
                             return; // we are in a parallel loop, this continues to the next
                     }
@@ -822,8 +835,7 @@ namespace Xbim.ModelGeometry.Scene
                                 LogWarning(_model.Instances[elementLabel], "Projections are an empty shape");
                         }
                         else
-                            LogWarning(_model.Instances[elementLabel],
-                           "Joining of projections has failed. Projections have been ignored");
+                            LogWarning(_model.Instances[elementLabel], "Joining of projections has failed. Projections have been ignored");
                     }
 
 
@@ -971,7 +983,14 @@ namespace Xbim.ModelGeometry.Scene
         /// <returns>IEnumerable of XbimShapeInstance that have been written</returns>
         private IEnumerable<XbimShapeInstance> WriteProductShape(XbimCreateContextHelper contextHelper, IIfcProduct product, bool includesOpenings, IGeometryStoreInitialiser txn)
         {
-            
+            if (CustomMeshingBehaviour != null)
+            {
+                double v1 = 0, v2 = 0; // v1 and v2 are ignored in this case
+                var behaviour = CustomMeshingBehaviour(product.EntityLabel, product.ExpressType.TypeId, ref v1, ref v2);
+                if (behaviour == MeshingBehaviourResult.Skip)
+                    return Enumerable.Empty<XbimShapeInstance>();
+            }
+
             if (product.Representation == null)
                 return Enumerable.Empty<XbimShapeInstance>();
             if (product.Representation.Representations == null)
@@ -1043,11 +1062,17 @@ namespace Xbim.ModelGeometry.Scene
                     }
                     else
                     {
-                        var mapTransform = contextHelper.MapTransforms[mapId];
-                        var trans = XbimMatrix3D.Multiply(mapTransform, placementTransform);
-                        shapesInstances.AddRange(
-                            WriteProductShapeRepresentationItems(contextHelper, product, txn, rep, repType, trans, theMap.MappingSource.MappedRepresentation.Items)
-                            );
+                        // maps might not be meshed if they were excluded by the custom meshing behaviour
+                        //
+                        XbimMatrix3D trs;
+                        if (contextHelper.MapTransforms.TryGetValue(mapId, out trs))
+                        {
+                            var mapTransform = contextHelper.MapTransforms[mapId];
+                            var trans = XbimMatrix3D.Multiply(mapTransform, placementTransform);
+                            shapesInstances.AddRange(
+                                WriteProductShapeRepresentationItems(contextHelper, product, txn, rep, repType, trans, theMap.MappingSource.MappedRepresentation.Items)
+                                );
+                        }
                     }
                 }
                 else //it is a direct reference to geometry shape
@@ -1181,12 +1206,6 @@ namespace Xbim.ModelGeometry.Scene
                 }
                 var isFeatureElementShape = contextHelper.FeatureElementShapeIds.Contains(shapeId);
                 var isVoidedProductShape = contextHelper.VoidedShapeIds.Contains(shapeId);
-                
-
-                if (shape.EntityLabel == 1192)
-                {
-
-                }
                 {
                     try
                     {
@@ -1247,7 +1266,6 @@ namespace Xbim.ModelGeometry.Scene
                             {
                                 geomModel.Dispose();
                             }
-
                         }
                     }
                     catch (Exception e)
