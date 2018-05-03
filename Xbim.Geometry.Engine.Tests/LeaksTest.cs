@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -10,6 +11,8 @@ using Xbim.ModelGeometry.Scene;
 
 namespace XbimInstanceLeakTest
 {
+    [DeploymentItem(@"x64\", "x64")]
+    [DeploymentItem(@"x86\", "x86")]
     [TestClass]
     public class LeakageTest
     {
@@ -22,9 +25,16 @@ namespace XbimInstanceLeakTest
         static ConcurrentBag<string> allFiles = new ConcurrentBag<string>();
         static ConcurrentBag<string> results = new ConcurrentBag<string>();        
 
+        // this test tries to mesh files 5000 times to spot cross thread leaks
+        //
+
         [TestMethod]
         public void Exec()
         {
+            // this test is based on private files.
+            // it will just pass if the files are not available.
+            //
+
             var dir = @"C:\Users\sgmk2\OneDrive\CloudIfcArchive\VP";
             if (!Directory.Exists(dir))
                 return;
@@ -74,7 +84,7 @@ namespace XbimInstanceLeakTest
 
                     lock (locker)
                     {
-                        Console.WriteLine($"[{processed++}/{numTasks}]{result}");
+                        Debug.WriteLine($"[{processed++}/{numTasks}]{result}");
                     }
                 }
             });
@@ -86,12 +96,13 @@ namespace XbimInstanceLeakTest
         {
             var tempFolder = $@"Temp\{Guid.NewGuid()}";
             Directory.CreateDirectory(tempFolder);
+            Debug.WriteLine("Folder: " + tempFolder);
 
             var ifcFile = $@"{tempFolder}\{Path.GetFileName(sourceFile)}";
 
             File.Copy(sourceFile, ifcFile);
 
-            Console.WriteLine($"Processing {ifcFile} [ {sourceFile} ]");
+            Debug.WriteLine($"Processing {ifcFile} [ {sourceFile} ]");
 
 
             string ex = "";
@@ -110,6 +121,9 @@ namespace XbimInstanceLeakTest
                     }
                     catch (Exception e)
                     {
+                        // we know of a permission denied Esent issue with the firestation that needs to be
+                        // investigated separately
+                        //
                         ex = $"EXCEPTION: " + e.Message;
                     }
 
@@ -130,15 +144,20 @@ namespace XbimInstanceLeakTest
                 ex = $"EXCEPTION: " + e.Message;
             }
 
+            // Are we using the hashcode to identify problems?
+            // Can this be coded in the test explicitly?
+            // 
             var result = $"{prefix},{ifcFile},{sc},{hc},{ex}";
 
             results.Add(result);
 
-            Console.WriteLine($"Finished processing {ifcFile} [ {sourceFile} ]");
+            Debug.WriteLine($"Finished processing {ifcFile} [ {sourceFile} ]");
             Directory.Delete(tempFolder, true);
 
             lock (locker)
             {
+                // why are we writing all the results every time rather than appending?
+                //
                 File.WriteAllLines("Result.csv", results.ToArray());
             }
 
