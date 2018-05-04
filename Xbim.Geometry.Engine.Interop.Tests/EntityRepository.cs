@@ -15,6 +15,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             var path = Path.GetFullPath($@"TestFiles\{name}.ifc");
             Assert.IsTrue(File.Exists(path), path);
             model = MemoryModel.OpenRead(path);
+            model.ModelFactors.Initialise(Math.PI / 180, 1e-3, 1e-5);
             Entity = (T)model.Instances[1];
         }        
 

@@ -8,9 +8,6 @@ using System.Diagnostics;
 using System;
 using Xbim.Ifc4.GeometricModelResource;
 using Xbim.Ifc4.GeometryResource;
-using System.IO;
-using Xbim.Geometry.ProtoBuffer;
-using Google.Protobuf;
 
 namespace Xbim.Geometry.Engine.Interop.Tests
 {
@@ -100,19 +97,19 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
         }
 
-        [TestMethod]
-        public void CompositeProfileWithCutsTimeoutsTest()
-        {
-            var path = Path.GetFullPath($@"TestFiles\{nameof(CompositeProfileWithCutsTimeoutsTest)}.proto");
-            using (var input = File.Open(path,FileMode.Open))
-            {
-                var shapeGeometryDtoCopy = new ShapeGeometryDTO();
-                shapeGeometryDtoCopy.MergeDelimitedFrom(input);
-                var time = HelperFunctions.ConvertGeometryAllCompositesAtOnce(geomEngine, shapeGeometryDtoCopy,logger);
-                Assert.IsTrue(time < 60000);//the default engine timeout
-                Assert.IsTrue(time < 5000);//this is what we expect
-            }
-        }
+        //[TestMethod]
+        //public void CompositeProfileWithCutsTimeoutsTest()
+        //{
+        //    var path = Path.GetFullPath($@"TestFiles\{nameof(CompositeProfileWithCutsTimeoutsTest)}.proto");
+        //    using (var input = File.Open(path,FileMode.Open))
+        //    {
+        //        var shapeGeometryDtoCopy = new ShapeGeometryDTO();
+        //        shapeGeometryDtoCopy.MergeDelimitedFrom(input);
+        //        var time = HelperFunctions.ConvertGeometryAllCompositesAtOnce(geomEngine, shapeGeometryDtoCopy,logger);
+        //        Assert.IsTrue(time < 60000);//the default engine timeout
+        //        Assert.IsTrue(time < 5000);//this is what we expect
+        //    }
+        //}
         
         /// <summary>
         /// Cuts one cylinder from another and returns a valid solid
@@ -120,7 +117,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void CutTwoCylindersTest()
         {
-            using (var m = new MemoryModel(new Ifc4.EntityFactory()))
+            using (var m = new MemoryModel(new Ifc4.EntityFactoryIfc4()))
             {
                 using (var txn = m.BeginTransaction(""))
                 {
@@ -145,7 +142,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void BooleanUnionSolidTest()
         {
-            using (var m = new MemoryModel(new Ifc4.EntityFactory()))
+            using (var m = new MemoryModel(new Ifc4.EntityFactoryIfc4()))
             {
                 using (var txn = m.BeginTransaction(""))
                 {
@@ -167,7 +164,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void BooleanIntersectSolidTest()
         {
-            using (var m = new MemoryModel(new Ifc4.EntityFactory()))
+            using (var m = new MemoryModel(new Ifc4.EntityFactoryIfc4()))
             {
                 using (var txn = m.BeginTransaction(""))
                 {
@@ -186,7 +183,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void SectionOfCylinderTest()
         {
-            using (var m = new MemoryModel(new Ifc4.EntityFactory()))
+            using (var m = new MemoryModel(new Ifc4.EntityFactoryIfc4()))
             {
                 using (var txn = m.BeginTransaction(""))
                 {
@@ -212,7 +209,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void SectionWithInnerWireTest()
         {
-            using (var m = new MemoryModel(new Ifc4.EntityFactory()))
+            using (var m = new MemoryModel(new Ifc4.EntityFactoryIfc4()))
             {
                 using (var txn = m.BeginTransaction(""))
                 {
@@ -241,7 +238,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void SectionOfBlockTest()
         {
-            using (var m = new MemoryModel(new Ifc4.EntityFactory()))
+            using (var m = new MemoryModel(new Ifc4.EntityFactoryIfc4()))
             {
                 using (var txn = m.BeginTransaction(""))
                 {
@@ -265,7 +262,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void IfcCsgDifferenceTest()
         {
-            using (var m = new MemoryModel(new Ifc4.EntityFactory()))
+            using (var m = new MemoryModel(new Ifc4.EntityFactoryIfc4()))
             {
                 using (var txn = m.BeginTransaction(""))
                 {
@@ -290,7 +287,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void IfcCsgUnionTest()
         {
-            using (var m = new MemoryModel(new Ifc4.EntityFactory()))
+            using (var m = new MemoryModel(new Ifc4.EntityFactoryIfc4()))
             {
                 using (var txn = m.BeginTransaction(""))
                 {
@@ -315,7 +312,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void IfcCsgIntersectionTest()
         {
-            using (var m = new MemoryModel(new Ifc4.EntityFactory()))
+            using (var m = new MemoryModel(new Ifc4.EntityFactoryIfc4()))
             {
                 using (var txn = m.BeginTransaction(""))
                 {
@@ -340,7 +337,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void IfcHalfspace_Test()
         {
-            using (var m = new MemoryModel(new Ifc4.EntityFactory()))
+            using (var m = new MemoryModel(new Ifc4.EntityFactoryIfc4()))
             {
                 using (var txn = m.BeginTransaction(""))
                 {
@@ -379,7 +376,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void IfcPolygonalBoundedHalfspace_Test()
         {
-            using (var m = new MemoryModel(new Ifc4.EntityFactory()))
+            using (var m = new MemoryModel(new Ifc4.EntityFactoryIfc4()))
             {
                 using (var txn = m.BeginTransaction(""))
                 {
