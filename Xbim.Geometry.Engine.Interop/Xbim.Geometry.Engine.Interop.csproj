@@ -37,7 +37,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging" Version="1.1.1" />
     <PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
-    <PackageReference Include="Xbim.Tessellator" Version="5.0.0-Beta1-1401" />
+    <PackageReference Include="Xbim.Tessellator" Version="5.0.0-Beta1-1423" />
   </ItemGroup>
  
 
