@@ -15,7 +15,7 @@
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>aimkey.snk</AssemblyOriginatorKeyFile>
     <Title>Xbim Geometry Engine</Title>
-    <Version>5.0.0-Beta-$(Year)$(Month)-$(Day)$(HalfMinuteOfDay)</Version>
+    <Version>5.0.0-Beta1-$(Year)$(Month)-$(Day)$(HalfMinuteOfDay)</Version>
     <Copyright>Copyright Xbim Ltd.</Copyright>
     <Description>.net library that provides support for the  Ifc4 and Ifc2x3 Geometry conversion.</Description>
     <Authors>Steve Lockley</Authors>
