@@ -1123,7 +1123,7 @@ namespace Xbim.ModelGeometry.Scene
                     if (contextHelper.ShapeLookup.TryGetValue(mapShapeLabel, out counter))
                     {
                         int style;
-                        if (contextHelper.SurfaceStyles.TryGetValue(mapShapeLabel, out style))
+                        if (GetStyleId(contextHelper,mapShapeLabel, out style))
                             counter.StyleLabel = style;
                         mapShapes.Add(counter);
                     }
@@ -1144,6 +1144,46 @@ namespace Xbim.ModelGeometry.Scene
             });
             if (progDelegate != null)
                 progDelegate(101, "WriteMappedItems, (" + contextHelper.MappedShapeIds.Count + " written)");
+        }
+
+        private bool GetStyleId(XbimCreateContextHelper contextHelper, int shapeId, out int styleId)
+        {
+            if (contextHelper.SurfaceStyles.TryGetValue(shapeId, out styleId))
+                return true;
+
+            var item = Model.Instances[shapeId] as IIfcBooleanResult;
+            if (item == null)
+            {
+                styleId = 0;
+                return false;
+            }
+
+            var operands = new[] { item.FirstOperand, item.SecondOperand }.Where(o => o != null);
+            var stack = new Stack<IIfcBooleanOperand>(operands);
+            while (stack.Count != 0)
+            {
+                var o = stack.Pop();
+                // use nested style definition if it is defined
+                if (contextHelper.SurfaceStyles.TryGetValue(o.EntityLabel, out styleId))
+                {
+                    return true;
+                }
+
+                // check for nested booleans
+                item = o as IIfcBooleanResult;
+                if (item == null)
+                    continue;
+
+                // dig deeper
+                if (item.FirstOperand != null)
+                    stack.Push(item.FirstOperand);
+                if (item.SecondOperand != null)
+                    stack.Push(item.SecondOperand);
+            }
+
+            // no nested styling found
+            styleId = 0;
+            return false;
         }
 
         /// <summary>
@@ -1251,7 +1291,7 @@ namespace Xbim.ModelGeometry.Scene
                                     GeometryId = geometryStore.AddShapeGeometry(shapeGeom)
                                 };
                                 int styleLabel;
-                                contextHelper.SurfaceStyles.TryGetValue(shapeGeom.IfcShapeLabel, out styleLabel);
+                                GetStyleId(contextHelper, shapeGeom.IfcShapeLabel, out styleLabel);
                                 reference.StyleLabel = styleLabel;
                                 contextHelper.ShapeLookup.TryAdd(shapeGeom.IfcShapeLabel, reference);
                                 if (contextHelper.CachedGeometries.ContainsKey(shapeGeom.IfcShapeLabel))
