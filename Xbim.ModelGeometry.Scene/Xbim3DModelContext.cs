@@ -927,10 +927,9 @@ namespace Xbim.ModelGeometry.Scene
             var localTally = contextHelper.Tally;
             var localPercentageParsed = contextHelper.PercentageParsed;
 
-            // todo: grids are written here, but maybe they should be out of this function? Why are they treated differently?
-            //
-
-            // write any grids we have converted
+            // write any grids we have converted 
+            // grids are written here, they are products (parallel loop  below) 
+            // but they are not processed there because their representation is (likely) not body (IsBodyRepresentation())
             //
             foreach (var grid in Model.Instances.OfType<IIfcGrid>())
             {
@@ -938,7 +937,11 @@ namespace Xbim.ModelGeometry.Scene
                 if (contextHelper.ShapeLookup.TryGetValue(grid.EntityLabel, out instance))
                 {
                     XbimMatrix3D placementTransform = XbimPlacementTree.GetTransform(grid, contextHelper.PlacementTree, Engine);
-                    WriteShapeInstanceToStore(instance.GeometryId, instance.StyleLabel, 0, grid,
+                    // int context = 0;
+                    var context = grid.Representation?.Representations?.FirstOrDefault().ContextOfItems;
+                    var intContext = (context == null) ? 0 : context.EntityLabel;
+
+                    WriteShapeInstanceToStore(instance.GeometryId, instance.StyleLabel, intContext, grid,
                         placementTransform, instance.BoundingBox,
                         XbimGeometryRepresentationType.OpeningsAndAdditionsIncluded, txn);
                     instance.BoundingBox.Transform(placementTransform);
@@ -947,9 +950,9 @@ namespace Xbim.ModelGeometry.Scene
 
             Parallel.ForEach(products, contextHelper.ParallelOptions, product =>
             {
-                //select representations that are in the required context
-                //only want solid representations for this context, but rep type is optional so just filter identified 2d elements
-                //we can only handle one representation in a context and this is in an implementers agreement
+                // select representations that are in the required context
+                // only want solid representations for this context, but rep type is optional so just filter identified 2d elements
+                // we can only handle one representation in a context and this is in an implementers agreement
                 if (product.Representation == null)
                     return;
                 if (product.Representation.Representations == null)
@@ -1348,6 +1351,10 @@ namespace Xbim.ModelGeometry.Scene
             regions.ContextLabel = context.EntityLabel;
             txn.AddRegions(regions);
         }
+
+        // todo: is xbimShapeInstance the right place for the context id? should it be in the shape instead? 
+        // I undestand there's an implementor agreement on the number of contexts, but we know they are not as strict as in the past.
+        //
 
         /// <summary>
         /// Writes the geometry as a string into the database
