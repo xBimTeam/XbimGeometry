@@ -25,7 +25,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="1.2.0" />
     <PackageReference Include="MSTest.TestFramework" Version="1.2.0" />
-    <PackageReference Include="Xbim.IO.MemoryModel" Version="5.0.0-Beta1-1606" />
+    <PackageReference Include="Xbim.IO.MemoryModel" Version="5.0.0-Beta1-1638" />
   </ItemGroup>
 
   <ItemGroup>
@@ -34,6 +34,9 @@
 
   <ItemGroup>
     <None Update="TestFiles\CompositeProfileWithCutsTimeoutsTest.proto">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestFiles\CuttingOpeningInCompositeProfileDefTest.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="TestFiles\CuttingOpeningInIfcFaceBasedSurfaceModelBodyTest.ifc">

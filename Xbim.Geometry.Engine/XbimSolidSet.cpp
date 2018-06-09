@@ -600,9 +600,10 @@ namespace Xbim
 		void XbimSolidSet::Init(IIfcSweptAreaSolid^ repItem, ILogger^ logger)
 		{
 			IIfcCompositeProfileDef^ compProfile = dynamic_cast<IIfcCompositeProfileDef^>(repItem->SweptArea);
-			int profileCount = Enumerable::Count(compProfile->Profiles);
+			
 			if (compProfile != nullptr) //handle these as composite solids
 			{
+				int profileCount = Enumerable::Count(compProfile->Profiles);
 				if (profileCount == 0)
 				{
 					XbimGeometryCreator::LogWarning(logger,repItem, "Invalid number of profiles. It must be 2 or more. Profile discarded");
@@ -640,9 +641,10 @@ namespace Xbim
 		void XbimSolidSet::Init(IIfcRevolvedAreaSolid^ repItem, ILogger^ logger)
 		{
 			IIfcCompositeProfileDef^ compProfile = dynamic_cast<IIfcCompositeProfileDef^>(repItem->SweptArea);
-			int profileCount = Enumerable::Count(compProfile->Profiles);
+			
 			if (compProfile != nullptr) //handle these as composite solids
 			{
+				int profileCount = Enumerable::Count(compProfile->Profiles);
 				if (profileCount == 0)
 				{
 					XbimGeometryCreator::LogWarning(logger,compProfile,"Invalid number of profiles. It must be 2 or more. Profile discarded");
@@ -714,9 +716,10 @@ namespace Xbim
 		void XbimSolidSet::Init(IIfcExtrudedAreaSolid^ repItem, ILogger^ logger)
 		{
 			IIfcCompositeProfileDef^ compProfile = dynamic_cast<IIfcCompositeProfileDef^>(repItem->SweptArea);
-			int profileCount = Enumerable::Count(compProfile->Profiles);
+			
 			if (compProfile!=nullptr) //handle these as composite solids
 			{
+				int profileCount = Enumerable::Count(compProfile->Profiles);
 				if (profileCount == 0)
 				{
 					XbimGeometryCreator::LogWarning(logger,repItem,"Invalid number of profiles. It must be 2 or more. Profile discarded");
@@ -755,9 +758,10 @@ namespace Xbim
 		void XbimSolidSet::Init(IIfcSurfaceCurveSweptAreaSolid^ repItem, ILogger^ logger)
 		{
 			IIfcCompositeProfileDef^ compProfile = dynamic_cast<IIfcCompositeProfileDef^>(repItem->SweptArea);
-			int profileCount = Enumerable::Count(compProfile->Profiles);
+			
 			if (compProfile != nullptr) //handle these as composite solids
 			{
+				int profileCount = Enumerable::Count(compProfile->Profiles);
 				if (profileCount == 0)
 				{
 					XbimGeometryCreator::LogWarning(logger,compProfile,"Invalid number of profiles. It must be 2 or more. Profile discarded");

@@ -8,6 +8,8 @@ using System.Diagnostics;
 using System;
 using Xbim.Ifc4.GeometricModelResource;
 using Xbim.Ifc4.GeometryResource;
+using System.Collections.Generic;
+using Xbim.Ifc.Extensions;
 
 namespace Xbim.Geometry.Engine.Interop.Tests
 {
@@ -513,6 +515,54 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.IsFalse(solid.Faces.Any(), "This solid should have 0 faces");
             }
         }
+
+
+
+        [TestMethod]
+        public void CuttingOpeningInCompositeProfileDefTest()
+        {
+            using (var repos = new EntityRepository<IIfcRelVoidsElement>("CuttingOpeningInCompositeProfileDefTest"))
+            {
+                var relVoids =  repos.Entity;
+                var wall = relVoids.RelatingBuildingElement;
+                var wallPlacement = wall.ObjectPlacement as IIfcLocalPlacement;
+                var wallTransform = wallPlacement.ToMatrix3D();
+                var wallGeom = wall.Representation.Representations.FirstOrDefault().Items.FirstOrDefault()  as IIfcExtrudedAreaSolid;
+                var opening = relVoids.RelatedOpeningElement;
+                var openingPlacement = opening.ObjectPlacement as IIfcLocalPlacement;
+                var openingGeoms = opening.Representation.Representations.FirstOrDefault().Items.OfType<IIfcExtrudedAreaSolid>().ToList();
+                var openingTransform = openingPlacement.ToMatrix3D(); ;
+                var wallBrep = geomEngine.CreateSolidSet(wallGeom);
+                var wallBrepPlaced = wallBrep.Transform(wallTransform) as IXbimSolidSet;
+
+                var openingBReps = geomEngine.CreateSolidSet();
+                foreach (var og in openingGeoms)
+                {
+                    var brep = geomEngine.CreateSolid(og);
+                    openingBReps.Add(brep.Transform(openingTransform) as IXbimSolid);
+                }
+                foreach (var item in wallBrepPlaced)
+              
+                {
+                    var result = item.Cut(openingBReps, 1e-5);
+                }
+                
+                //using (var holeEntity = new EntityRepository<IIfcExtrudedAreaSolid>("CuttingOpeningInCompositeProfileDefTest"))
+                //{
+                //    var body = geomEngine.CreateSolidSet(bodyEntity.Entity, logger);
+                //    var hole = geomEngine.CreateSolid(holeEntity.Entity, logger);
+                //    var result = body.Cut(hole, bodyEntity.Entity.Model.ModelFactors.Precision);
+                //    Assert.IsTrue(result.Count == 2, "Two solids should be returned");
+                //    foreach (var solid in result)
+                //    {
+                //        IsSolidTest(solid);
+                //    }
+
+                //}
+
+            }
+        }
+
         [TestMethod]
         public void CuttingOpeningInIfcFaceBasedSurfaceModelTest()
         {
