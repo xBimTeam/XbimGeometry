@@ -497,13 +497,13 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             }
         }
         [TestMethod]
-        public void FailingBooleanClippingResultsTest()
+        public void TotalVoidResultBooleanClippingResultsTest()
         {
-            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(FailingBooleanClippingResultsTest)))
+            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(TotalVoidResultBooleanClippingResultsTest)))
             {
                 var solid = geomEngine.CreateSolid(er.Entity, logger);
-                IsSolidTest(solid);
-                Assert.IsTrue(solid.Faces.Count() == 7, "This solid should have 7 faces");
+                
+                Assert.IsTrue(solid.Volume==0, "This solid should have no volume");
             }
         }
         [TestMethod]

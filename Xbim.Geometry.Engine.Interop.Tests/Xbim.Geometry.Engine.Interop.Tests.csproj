@@ -51,7 +51,7 @@
     <None Update="TestFiles\EmptyBooleanResultTest.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestFiles\FailingBooleanClippingResultsTest.ifc">
+    <None Update="TestFiles\TotalVoidResultBooleanClippingResultsTest.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="TestFiles\IfcHalfspaceCutFromIfcExtrudedAreaSolidTest.ifc">
