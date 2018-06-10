@@ -540,7 +540,7 @@ namespace Xbim
 					XbimMatrix3D ucsTowcs =ToMatrix3D((IIfcAxis2Placement3D^)(locPlacement->RelativePlacement));
 					if (locPlacement->PlacementRelTo != nullptr)
 					{
-						return XbimMatrix3D::Multiply(ConvertMatrix3D(locPlacement->PlacementRelTo,logger), ucsTowcs);
+						return XbimMatrix3D::Multiply(ucsTowcs, ConvertMatrix3D(locPlacement->PlacementRelTo,logger));
 					}
 					else
 						return ucsTowcs;

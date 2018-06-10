@@ -527,6 +527,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var wall = relVoids.RelatingBuildingElement;
                 var wallPlacement = wall.ObjectPlacement as IIfcLocalPlacement;
                 var wallTransform = wallPlacement.ToMatrix3D();
+                var wallTransform2 = geomEngine.ToMatrix3D(wallPlacement);
+                Assert.AreEqual(wallTransform, wallTransform2);
                 var wallGeom = wall.Representation.Representations.FirstOrDefault().Items.FirstOrDefault()  as IIfcExtrudedAreaSolid;
                 var opening = relVoids.RelatedOpeningElement;
                 var openingPlacement = opening.ObjectPlacement as IIfcLocalPlacement;
@@ -541,12 +543,18 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     var brep = geomEngine.CreateSolid(og);
                     openingBReps.Add(brep.Transform(openingTransform) as IXbimSolid);
                 }
-                foreach (var item in wallBrepPlaced)
-              
+                int uncut = 0;
+                foreach (var uncutItem in wallBrepPlaced) 
                 {
-                    var result = item.Cut(openingBReps, 1e-5);
+                    var result = uncutItem.Cut(openingBReps, 1e-5);
+                    Assert.IsTrue(result.Count == 1);
+                    var cutSolid = result.First as IXbimSolid;
+                    Assert.IsNotNull(cutSolid);
+                    Assert.IsTrue(cutSolid.IsValid);
+                    if (uncutItem.Volume <= cutSolid.Volume) uncut++;
+                    Assert.IsTrue(uncut<=3, "More than three solids are uncut, there should only be three");
                 }
-                
+                Assert.IsTrue(uncut == 3);
                 //using (var holeEntity = new EntityRepository<IIfcExtrudedAreaSolid>("CuttingOpeningInCompositeProfileDefTest"))
                 //{
                 //    var body = geomEngine.CreateSolidSet(bodyEntity.Entity, logger);
