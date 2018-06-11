@@ -523,7 +523,10 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         {
             using (var repos = new EntityRepository<IIfcRelVoidsElement>("CuttingOpeningInCompositeProfileDefTest"))
             {
+                
                 var relVoids =  repos.Entity;
+                var oneMilli = relVoids.Model.ModelFactors.OneMilliMetre;
+                var precision = relVoids.Model.ModelFactors.Precision + (oneMilli * 2e-6);
                 var wall = relVoids.RelatingBuildingElement;
                 var wallPlacement = wall.ObjectPlacement as IIfcLocalPlacement;
                 var wallTransform = wallPlacement.ToMatrix3D();
@@ -544,29 +547,23 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     openingBReps.Add(brep.Transform(openingTransform) as IXbimSolid);
                 }
                 int uncut = 0;
+                var singleCut = wallBrepPlaced.Cut(openingBReps, precision);
+                var vol = 0.0;
                 foreach (var uncutItem in wallBrepPlaced) 
                 {
-                    var result = uncutItem.Cut(openingBReps, 1e-5);
+                    var result = uncutItem.Cut(openingBReps, precision);
                     Assert.IsTrue(result.Count == 1);
                     var cutSolid = result.First as IXbimSolid;
                     Assert.IsNotNull(cutSolid);
                     Assert.IsTrue(cutSolid.IsValid);
                     if (uncutItem.Volume <= cutSolid.Volume) uncut++;
-                    Assert.IsTrue(uncut<=3, "More than three solids are uncut, there should only be three");
+                    Assert.IsTrue(uncut<=3, "More than two solids are uncut, there should only be two");
+                    vol += cutSolid.Volume;
                 }
-                Assert.IsTrue(uncut == 3);
-                //using (var holeEntity = new EntityRepository<IIfcExtrudedAreaSolid>("CuttingOpeningInCompositeProfileDefTest"))
-                //{
-                //    var body = geomEngine.CreateSolidSet(bodyEntity.Entity, logger);
-                //    var hole = geomEngine.CreateSolid(holeEntity.Entity, logger);
-                //    var result = body.Cut(hole, bodyEntity.Entity.Model.ModelFactors.Precision);
-                //    Assert.IsTrue(result.Count == 2, "Two solids should be returned");
-                //    foreach (var solid in result)
-                //    {
-                //        IsSolidTest(solid);
-                //    }
-
-                //}
+                Assert.IsTrue(uncut == 2);
+                var scutVol = singleCut.Sum(s => s.Volume);
+                Assert.IsTrue(Math.Abs(vol- scutVol) <1e-5);
+                
 
             }
         }
