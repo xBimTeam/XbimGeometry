@@ -919,9 +919,6 @@ namespace Xbim.ModelGeometry.Scene
             return processed.Keys;
         }
 
-
-
-
         private void WriteProductShapes(XbimCreateContextHelper contextHelper, IEnumerable<IIfcProduct> products, IGeometryStoreInitialiser txn)
         {
             var localTally = contextHelper.Tally;
