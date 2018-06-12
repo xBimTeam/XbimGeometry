@@ -15,21 +15,17 @@
 
 #include <BOPAlgo_CellsBuilder.hxx>
 
-#include <TopoDS_Compound.hxx>
-
-#include <BRep_Builder.hxx>
-
-#include <TopExp_Explorer.hxx>
-
-#include <BOPTools.hxx>
-#include <BOPTools_AlgoTools.hxx>
-
-#include <BOPAlgo_BuilderSolid.hxx>
 #include <BOPAlgo_Alerts.hxx>
-
-#include <BOPCol_MapOfInteger.hxx>
-
+#include <BOPAlgo_BuilderSolid.hxx>
+#include <BOPDS_DS.hxx>
+#include <BOPTools_AlgoTools.hxx>
+#include <BOPTools_AlgoTools3D.hxx>
+#include <BRep_Builder.hxx>
 #include <ShapeUpgrade_UnifySameDomain.hxx>
+#include <TColStd_MapOfInteger.hxx>
+#include <TopExp.hxx>
+#include <TopExp_Explorer.hxx>
+#include <TopoDS_Compound.hxx>
 
 
 static
@@ -38,6 +34,9 @@ static
 static
   void MakeTypedContainers(const TopoDS_Shape& theSC,
                            TopoDS_Shape& theResult);
+
+static void CollectMaterialBoundaries(const TopTools_ListOfShape& theLS,
+                                      TopTools_MapOfShape& theMapKeepBnd);
 
 //=======================================================================
 //function : empty constructor
@@ -142,10 +141,10 @@ void BOPAlgo_CellsBuilder::IndexParts()
   TopoDS_Compound anAllParts;
   aBB.MakeCompound(anAllParts);
   //
-  BOPCol_MapOfShape aMFence;
-  BOPCol_MapOfInteger aMDims;
+  TopTools_MapOfShape aMFence;
+  TColStd_MapOfInteger aMDims;
   //
-  BOPCol_ListIteratorOfListOfShape aIt(myArguments);
+  TopTools_ListIteratorOfListOfShape aIt(myArguments);
   for (; aIt.More(); aIt.Next()) {
     const TopoDS_Shape& aS = aIt.Value();
     //
@@ -156,11 +155,11 @@ void BOPAlgo_CellsBuilder::IndexParts()
     TopExp_Explorer aExp(aS, aType);
     for (; aExp.More(); aExp.Next()) {
       const TopoDS_Shape& aST = aExp.Current();
-      const BOPCol_ListOfShape* pLSIm = myImages.Seek(aST);
+      const TopTools_ListOfShape* pLSIm = myImages.Seek(aST);
       if (!pLSIm) {
-        BOPCol_ListOfShape* pLS = myIndex.ChangeSeek(aST);
+        TopTools_ListOfShape* pLS = myIndex.ChangeSeek(aST);
         if (!pLS) {
-          pLS = &myIndex(myIndex.Add(aST, BOPCol_ListOfShape()));
+          pLS = &myIndex(myIndex.Add(aST, TopTools_ListOfShape()));
         }
         pLS->Append(aS);
         //
@@ -171,13 +170,13 @@ void BOPAlgo_CellsBuilder::IndexParts()
         continue;
       }
       //
-      BOPCol_ListIteratorOfListOfShape aItIm(*pLSIm);
+      TopTools_ListIteratorOfListOfShape aItIm(*pLSIm);
       for (; aItIm.More(); aItIm.Next()) {
         const TopoDS_Shape& aSTIm = aItIm.Value();
         //
-        BOPCol_ListOfShape* pLS = myIndex.ChangeSeek(aSTIm);
+        TopTools_ListOfShape* pLS = myIndex.ChangeSeek(aSTIm);
         if (!pLS) {
-          pLS = &myIndex(myIndex.Add(aSTIm, BOPCol_ListOfShape()));
+          pLS = &myIndex(myIndex.Add(aSTIm, TopTools_ListOfShape()));
         }
         pLS->Append(aS);
         //
@@ -203,7 +202,7 @@ void BOPAlgo_CellsBuilder::IndexParts()
     const TopTools_ListOfShape& aLSOr = myIndex(i);
     //
     Standard_Integer iType = BOPTools_AlgoTools::Dimension(aSP);
-    BOPCol_MapIteratorOfMapOfInteger aItM(aMDims);
+    TColStd_MapIteratorOfMapOfInteger aItM(aMDims);
     for (; aItM.More(); aItM.Next()) {
       Standard_Integer k = aItM.Value();
       if (k >= iType) {
@@ -213,17 +212,17 @@ void BOPAlgo_CellsBuilder::IndexParts()
       TopExp_Explorer aExp(aSP, TypeToExplore(k));
       for (; aExp.More(); aExp.Next()) {
         const TopoDS_Shape& aSS = aExp.Current();
-        BOPCol_ListOfShape* pLSSOr = myIndex.ChangeSeek(aSS);
+        TopTools_ListOfShape* pLSSOr = myIndex.ChangeSeek(aSS);
         if (!pLSSOr) {
           myIndex.Add(aSS, aLSOr);
           continue;
         }
         // add ancestors of the shape to the ancestors of the sub-shape
-        BOPCol_ListIteratorOfListOfShape aItLS(aLSOr);
+        TopTools_ListIteratorOfListOfShape aItLS(aLSOr);
         for (; aItLS.More(); aItLS.Next()) {
           const TopoDS_Shape& aSOr = aItLS.Value();
           // provide uniqueness of the ancestors
-          BOPCol_ListIteratorOfListOfShape aItLSS(*pLSSOr);
+          TopTools_ListIteratorOfListOfShape aItLSS(*pLSSOr);
           for (; aItLSS.More(); aItLSS.Next()) {
             if (aSOr.IsSame(aItLSS.Value())) {
               break;
@@ -243,20 +242,20 @@ void BOPAlgo_CellsBuilder::IndexParts()
 //function : AddToResult
 //purpose  : 
 //=======================================================================
-void BOPAlgo_CellsBuilder::AddToResult(const BOPCol_ListOfShape& theLSToTake,
-                                       const BOPCol_ListOfShape& theLSToAvoid,
+void BOPAlgo_CellsBuilder::AddToResult(const TopTools_ListOfShape& theLSToTake,
+                                       const TopTools_ListOfShape& theLSToAvoid,
                                        const Standard_Integer theMaterial,
                                        const Standard_Boolean theUpdate)
 {
   // find parts
-  BOPCol_ListOfShape aParts;
+  TopTools_ListOfShape aParts;
   FindParts(theLSToTake, theLSToAvoid, aParts);
   if (aParts.IsEmpty()) {
     return;
   }
   //
   // collect result parts to avoid multiple adding of the same parts
-  BOPCol_MapOfShape aResParts;
+  TopTools_MapOfShape aResParts;
   TopoDS_Iterator aIt(myShape);
   for (; aIt.More(); aIt.Next()) {
     aResParts.Add(aIt.Value());
@@ -264,10 +263,11 @@ void BOPAlgo_CellsBuilder::AddToResult(const BOPCol_ListOfShape& theLSToTake,
   //
   Standard_Boolean bChanged = Standard_False;
   // add parts to result
-  BOPCol_ListIteratorOfListOfShape aItLP(aParts);
+  TopTools_ListIteratorOfListOfShape aItLP(aParts);
   for (; aItLP.More(); aItLP.Next()) {
     const TopoDS_Shape& aPart = aItLP.Value();
-    if (aResParts.Add(aPart)) {
+    // provide uniqueness of the parts 
+    if (aResParts.Add(aPart) && !myShapeMaterial.IsBound(aPart)) {
       BRep_Builder().Add(myShape, aPart);
       bChanged = Standard_True;
     }
@@ -275,7 +275,7 @@ void BOPAlgo_CellsBuilder::AddToResult(const BOPCol_ListOfShape& theLSToTake,
   //
   // update the material
   if (theMaterial != 0) {
-    BOPCol_ListOfShape aLSP;
+    TopTools_ListOfShape aLSP;
     aItLP.Initialize(aParts);
     for (; aItLP.More(); aItLP.Next()) {
       const TopoDS_Shape& aPart = aItLP.Value();
@@ -286,9 +286,9 @@ void BOPAlgo_CellsBuilder::AddToResult(const BOPCol_ListOfShape& theLSToTake,
     } // for (; aIt.More(); aIt.Next()) {
     //
     if (aLSP.Extent()) {
-      BOPCol_ListOfShape* pLS = myMaterials.ChangeSeek(theMaterial);
+      TopTools_ListOfShape* pLS = myMaterials.ChangeSeek(theMaterial);
       if (!pLS) {
-        pLS = myMaterials.Bound(theMaterial, BOPCol_ListOfShape());
+        pLS = myMaterials.Bound(theMaterial, TopTools_ListOfShape());
       }
       pLS->Append(aLSP);
     } // if (aLSP.Extent()) {
@@ -318,7 +318,7 @@ void BOPAlgo_CellsBuilder::AddAllToResult(const Standard_Integer theMaterial,
   myShape = myAllParts;
   //
   if (theMaterial != 0) {
-    BOPCol_ListOfShape* pLSM = myMaterials.Bound(theMaterial, BOPCol_ListOfShape());
+    TopTools_ListOfShape* pLSM = myMaterials.Bound(theMaterial, TopTools_ListOfShape());
     //
     TopoDS_Iterator aIt(myAllParts);
     for (; aIt.More(); aIt.Next()) {
@@ -340,28 +340,28 @@ void BOPAlgo_CellsBuilder::AddAllToResult(const Standard_Integer theMaterial,
 //function : RemoveFromResult
 //purpose  : 
 //=======================================================================
-void BOPAlgo_CellsBuilder::RemoveFromResult(const BOPCol_ListOfShape& theLSToTake,
-                                            const BOPCol_ListOfShape& theLSToAvoid)
+void BOPAlgo_CellsBuilder::RemoveFromResult(const TopTools_ListOfShape& theLSToTake,
+                                            const TopTools_ListOfShape& theLSToAvoid)
 {
   // find parts
-  BOPCol_ListOfShape aParts;
+  TopTools_ListOfShape aParts;
   FindParts(theLSToTake, theLSToAvoid, aParts);
   if (aParts.IsEmpty()) {
     return;
   }
   //
   // collect parts into the map and remove parts from materials
-  BOPCol_MapOfShape aPartsToRemove;
-  BOPCol_ListIteratorOfListOfShape aItP(aParts);
+  TopTools_MapOfShape aPartsToRemove;
+  TopTools_ListIteratorOfListOfShape aItP(aParts);
   for (; aItP.More(); aItP.Next()) {
     const TopoDS_Shape& aPart = aItP.Value();
     aPartsToRemove.Add(aPart);
     //
     const Standard_Integer* pMaterial = myShapeMaterial.Seek(aPart);
     if (pMaterial) {
-      BOPCol_ListOfShape* pLSM = myMaterials.ChangeSeek(*pMaterial);
+      TopTools_ListOfShape* pLSM = myMaterials.ChangeSeek(*pMaterial);
       if (pLSM) {
-        BOPCol_ListIteratorOfListOfShape aItM(*pLSM);
+        TopTools_ListIteratorOfListOfShape aItM(*pLSM);
         for (; aItM.More(); aItM.Next()) {
           if (aPart.IsSame(aItM.Value())) {
             pLSM->Remove(aItM);
@@ -458,10 +458,12 @@ void BOPAlgo_CellsBuilder::RemoveInternalBoundaries()
   Standard_Boolean bChanged = Standard_False;
   // try to remove the internal boundaries between the
   // shapes of the same material
-  BOPCol_DataMapIteratorOfDataMapOfIntegerListOfShape aItM(myMaterials);
+  TopTools_DataMapIteratorOfDataMapOfIntegerListOfShape aItM(myMaterials);
+  TopTools_ListOfShape aLSUnify[2];
+  TopTools_MapOfShape aKeepMap[2];
   for (; aItM.More(); aItM.Next()) {
     Standard_Integer iMaterial = aItM.Key();
-    BOPCol_ListOfShape& aLS = aItM.ChangeValue();
+    TopTools_ListOfShape& aLS = aItM.ChangeValue();
     //
     if (aLS.IsEmpty()) {
       continue;
@@ -478,41 +480,72 @@ void BOPAlgo_CellsBuilder::RemoveInternalBoundaries()
     }
     //
     // check the shapes of the same material to be of the same type
-    BOPCol_ListIteratorOfListOfShape aItLS(aLS);
+    TopTools_ListIteratorOfListOfShape aItLS(aLS);
     TopAbs_ShapeEnum aType = aItLS.Value().ShapeType();
     for (aItLS.Next(); aItLS.More(); aItLS.Next()) {
       if (aType != aItLS.Value().ShapeType()) {
         break;
       }
     }
-    //
-    BOPCol_ListOfShape aLSNew;
-    if (aItLS.More()) {
+
+    if (aItLS.More())
+    {
       // add the warning
+      TopoDS_Compound aMultiDimS;
+      aBB.MakeCompound(aMultiDimS);
+      aBB.Add(aMultiDimS, aLS.First());
+      aBB.Add(aMultiDimS, aItLS.Value());
+      AddWarning(new BOPAlgo_AlertRemovalOfIBForMDimShapes(aMultiDimS));
+    }
+    else
+    {
+      if (aType == TopAbs_EDGE || aType == TopAbs_FACE)
       {
-        TopoDS_Compound aMultiDimS;
-        aBB.MakeCompound(aMultiDimS);
-        aBB.Add(aMultiDimS, aLS.First());
-        aBB.Add(aMultiDimS, aItLS.Value());
-        //
-        AddWarning (new BOPAlgo_AlertRemovalOfIBForMDimShapes (aMultiDimS));
+        // for edges and faces, just collect shapes to unify them later after exiting the loop;
+        // collect boundaries of shapes of current material in the keep map
+        Standard_Integer iType = (aType == TopAbs_EDGE ? 0 : 1);
+        CollectMaterialBoundaries(aLS, aKeepMap[iType]);
+        // save shapes to unify later
+        TopTools_ListOfShape aCopy(aLS);
+        aLSUnify[iType].Append(aCopy);
+        continue;
       }
-      aLSNew.Assign(aLS);
-    }
-    else {
-      if (RemoveInternals(aLS, aLSNew)) {
-        bChanged = Standard_True;
+      else
+      {
+        // aType is Solid;
+        // remove internal faces between solids of the same material just now
+        TopTools_ListOfShape aLSNew;
+        if (RemoveInternals(aLS, aLSNew))
+        {
+          bChanged = Standard_True;
+          // update materials maps
+          for (aItLS.Initialize(aLSNew); aItLS.More(); aItLS.Next()) {
+            const TopoDS_Shape& aS = aItLS.Value();
+            myShapeMaterial.Bind(aS, iMaterial);
+          }
+          aLS.Assign(aLSNew);
+        }
       }
     }
-    //
-    // update materials maps and add new shapes to result
-    aItLS.Initialize(aLSNew);
-    for (; aItLS.More(); aItLS.Next()) {
+    // add shapes to result (multidimensional and solids)
+    for (aItLS.Initialize(aLS); aItLS.More(); aItLS.Next()) {
       const TopoDS_Shape& aS = aItLS.Value();
       aBB.Add(aResult, aS);
-      if (!myShapeMaterial.IsBound(aS)) {
-        myShapeMaterial.Bind(aS, iMaterial);
-      }
+    }
+  }
+
+  // remove internal boundaries for edges and faces
+  for (Standard_Integer iType = 0; iType < 2; ++iType)
+  {
+    if (aLSUnify[iType].IsEmpty())
+      continue;
+    TopTools_ListOfShape aLSN;
+    if (RemoveInternals(aLSUnify[iType], aLSN, aKeepMap[iType]))
+      bChanged = Standard_True;
+    // add shapes to result ([unified] edges or faces)
+    for (TopTools_ListIteratorOfListOfShape aItLS(aLSN); aItLS.More(); aItLS.Next()) {
+      const TopoDS_Shape& aS = aItLS.Value();
+      aBB.Add(aResult, aS);
     }
   }
   //
@@ -573,24 +606,24 @@ void BOPAlgo_CellsBuilder::RemoveInternalBoundaries()
 //function : FindPart
 //purpose  : 
 //=======================================================================
-void BOPAlgo_CellsBuilder::FindParts(const BOPCol_ListOfShape& theLSToTake,
-                                     const BOPCol_ListOfShape& theLSToAvoid,
-                                     BOPCol_ListOfShape& theParts)
+void BOPAlgo_CellsBuilder::FindParts(const TopTools_ListOfShape& theLSToTake,
+                                     const TopTools_ListOfShape& theLSToAvoid,
+                                     TopTools_ListOfShape& theParts)
 {
   if (theLSToTake.IsEmpty()) {
     return;
   }
   //
   // map shapes to avoid
-  BOPCol_MapOfShape aMSToAvoid;
-  BOPCol_ListIteratorOfListOfShape aItArgs(theLSToAvoid);
+  TopTools_MapOfShape aMSToAvoid;
+  TopTools_ListIteratorOfListOfShape aItArgs(theLSToAvoid);
   for (; aItArgs.More(); aItArgs.Next()) {
     const TopoDS_Shape& aS = aItArgs.Value();
     aMSToAvoid.Add(aS);
   }
   //
   // map shapes to be taken
-  BOPCol_MapOfShape aMSToTake;
+  TopTools_MapOfShape aMSToTake;
   aItArgs.Initialize(theLSToTake);
   for (; aItArgs.More(); aItArgs.Next()) {
     const TopoDS_Shape& aS = aItArgs.Value();
@@ -621,14 +654,14 @@ void BOPAlgo_CellsBuilder::FindParts(const BOPCol_ListOfShape& theLSToTake,
   for (; aExp.More(); aExp.Next()) {
     const TopoDS_Shape& aST = aExp.Current();
     // get split parts of the shape
-    BOPCol_ListOfShape aLSTIm;
+    TopTools_ListOfShape aLSTIm;
     if (!myImages.IsBound(aST)) {
       aLSTIm.Append(aST);
     } else {
       aLSTIm = myImages.Find(aST);
     }
     //
-    BOPCol_ListIteratorOfListOfShape aItIm(aLSTIm);
+    TopTools_ListIteratorOfListOfShape aItIm(aLSTIm);
     for (; aItIm.More(); aItIm.Next()) {
       const TopoDS_Shape& aPart = aItIm.Value();
       //
@@ -637,13 +670,13 @@ void BOPAlgo_CellsBuilder::FindParts(const BOPCol_ListOfShape& theLSToTake,
       }
       //
       // get input shapes in which the split part is contained
-      const BOPCol_ListOfShape& aLS = myIndex.FindFromKey(aPart);
+      const TopTools_ListOfShape& aLS = myIndex.FindFromKey(aPart);
       if (aLS.Extent() < aNbS) {
         continue;
       }
       //
       // check that input shapes containing the part should not be avoided
-      BOPCol_MapOfShape aMS;
+      TopTools_MapOfShape aMS;
       aItArgs.Initialize(aLS);
       for (; aItArgs.More(); aItArgs.Next()) {
         const TopoDS_Shape& aS = aItArgs.Value();
@@ -683,7 +716,7 @@ void BOPAlgo_CellsBuilder::MakeContainers()
   aBB.MakeCompound(aResult);
   //
   // basic elements of type EDGE, FACE and SOLID added into result
-  BOPCol_ListOfShape aLS[3];
+  TopTools_ListOfShape aLS[3];
   //
   TopoDS_Iterator aIt(myShape);
   for (; aIt.More(); aIt.Next()) {
@@ -705,7 +738,7 @@ void BOPAlgo_CellsBuilder::MakeContainers()
     //
     TopoDS_Compound aC;
     aBB.MakeCompound(aC);
-    BOPCol_ListIteratorOfListOfShape aItLS(aLS[i]);
+    TopTools_ListIteratorOfListOfShape aItLS(aLS[i]);
     for (; aItLS.More(); aItLS.Next()) {
       aBB.Add(aC, aItLS.Value());
     }
@@ -719,8 +752,9 @@ void BOPAlgo_CellsBuilder::MakeContainers()
 //function : RemoveInternals
 //purpose  : 
 //=======================================================================
-Standard_Boolean BOPAlgo_CellsBuilder::RemoveInternals(const BOPCol_ListOfShape& theLS,
-                                                       BOPCol_ListOfShape& theLSNew)
+Standard_Boolean BOPAlgo_CellsBuilder::RemoveInternals(const TopTools_ListOfShape& theLS,
+                                                       TopTools_ListOfShape& theLSNew,
+                                                       const TopTools_MapOfShape& theMapKeepBnd)
 {
   Standard_Boolean bRemoved = Standard_False;
   if (theLS.Extent() < 2) {
@@ -740,7 +774,7 @@ Standard_Boolean BOPAlgo_CellsBuilder::RemoveInternals(const BOPCol_ListOfShape&
     BOPTools_AlgoTools::MakeContainer
       ((aType == TopAbs_FACE) ? TopAbs_SHELL : TopAbs_WIRE, aShape);
     //
-    for (BOPCol_ListIteratorOfListOfShape aIt(theLS); aIt.More(); aIt.Next()) {
+    for (TopTools_ListIteratorOfListOfShape aIt(theLS); aIt.More(); aIt.Next()) {
       const TopoDS_Shape& aS = aIt.Value();
       aBB.Add(aShape, aS);
     }
@@ -750,8 +784,8 @@ Standard_Boolean BOPAlgo_CellsBuilder::RemoveInternals(const BOPCol_ListOfShape&
     //
     bFaces = (aType == TopAbs_FACE);
     bEdges = (aType == TopAbs_EDGE);
-    //
     ShapeUpgrade_UnifySameDomain anUnify (aShape, bEdges, bFaces);
+    anUnify.KeepShapes(theMapKeepBnd);
     anUnify.Build();
     const TopoDS_Shape& aSNew = anUnify.Shape();
     //
@@ -773,24 +807,25 @@ Standard_Boolean BOPAlgo_CellsBuilder::RemoveInternals(const BOPCol_ListOfShape&
     }
     //
     // fill map of modified shapes
-    BOPCol_IndexedMapOfShape aMG;
+    TopTools_IndexedMapOfShape aMG;
     Standard_Integer i, aNb;
     //
-    BOPTools::MapShapes(aShape, TopAbs_VERTEX, aMG);
-    BOPTools::MapShapes(aShape, TopAbs_EDGE,   aMG);
-    BOPTools::MapShapes(aShape, TopAbs_FACE,   aMG);
+    TopExp::MapShapes(aShape, TopAbs_VERTEX, aMG);
+    TopExp::MapShapes(aShape, TopAbs_EDGE,   aMG);
+    TopExp::MapShapes(aShape, TopAbs_FACE,   aMG);
     //
     aNb = aMG.Extent();
     for (i = 1; i <= aNb; ++i) {
       const TopoDS_Shape& aSS = aMG(i);
+      const Standard_Integer* pMaterial = myShapeMaterial.Seek(aSS);
       const TopTools_ListOfShape& aLSMod = anUnify.History()->Modified(aSS);
       TopTools_ListIteratorOfListOfShape aIt(aLSMod);
       for (; aIt.More(); aIt.Next()) {
         const TopoDS_Shape& aSU = aIt.Value();
-        if (!aSU.IsNull() && !aSS.IsSame(aSU)) {
-          myMapModified.Bind(aSS, aSU);
-          bRemoved = Standard_True;
-        }
+        myMapModified.Bind(aSS, aSU);
+        bRemoved = Standard_True;
+        if (pMaterial && !myShapeMaterial.IsBound(aSU))
+          myShapeMaterial.Bind(aSU, *pMaterial);
       }
     }
   }
@@ -799,7 +834,7 @@ Standard_Boolean BOPAlgo_CellsBuilder::RemoveInternals(const BOPCol_ListOfShape&
     TopoDS_Compound aSolids;
     aBB.MakeCompound(aSolids);
     //
-    BOPCol_ListIteratorOfListOfShape aItLS(theLS);
+    TopTools_ListIteratorOfListOfShape aItLS(theLS);
     for (; aItLS.More(); aItLS.Next()) {
       const TopoDS_Shape& aSol = aItLS.Value();
       aBB.Add(aSolids, aSol);
@@ -807,18 +842,18 @@ Standard_Boolean BOPAlgo_CellsBuilder::RemoveInternals(const BOPCol_ListOfShape&
     //
     // Make connexity blocks of solids to create from each isolated block one solid.
     // It will allow attaching internal entities of the solids to new solid.
-    BOPCol_ListOfShape aLCB;
+    TopTools_ListOfShape aLCB;
     BOPTools_AlgoTools::MakeConnexityBlocks(aSolids, TopAbs_FACE, TopAbs_SOLID, aLCB);
     //
     // for each block remove internal faces
-    BOPCol_ListIteratorOfListOfShape aItLCB(aLCB);
+    TopTools_ListIteratorOfListOfShape aItLCB(aLCB);
     for (; aItLCB.More(); aItLCB.Next()) {
       const TopoDS_Shape& aCB = aItLCB.Value();
       //
       // Map faces and solids to find boundary faces that can be removed
-      BOPCol_IndexedDataMapOfShapeListOfShape aDMFS;
+      TopTools_IndexedDataMapOfShapeListOfShape aDMFS;
       // internal entities
-      BOPCol_ListOfShape aLSInt;
+      TopTools_ListOfShape aLSInt;
       //
       TopoDS_Iterator aItS(aCB);
       for (; aItS.More(); aItS.Next()) {
@@ -834,9 +869,9 @@ Standard_Boolean BOPAlgo_CellsBuilder::RemoveInternals(const BOPCol_ListOfShape&
             TopoDS_Iterator aItF(aSI);
             for (; aItF.More(); aItF.Next()) {
               const TopoDS_Shape& aF = aItF.Value();
-              BOPCol_ListOfShape *pLSols = aDMFS.ChangeSeek(aF);
+              TopTools_ListOfShape *pLSols = aDMFS.ChangeSeek(aF);
               if (!pLSols) {
-                pLSols = &aDMFS(aDMFS.Add(aF, BOPCol_ListOfShape()));
+                pLSols = &aDMFS(aDMFS.Add(aF, TopTools_ListOfShape()));
               }
               pLSols->Append(aSol);
             }
@@ -845,7 +880,7 @@ Standard_Boolean BOPAlgo_CellsBuilder::RemoveInternals(const BOPCol_ListOfShape&
       }
       //
       // to build unified solid, select only faces attached to only one solid
-      BOPCol_ListOfShape aLFUnique;
+      TopTools_ListOfShape aLFUnique;
       Standard_Integer i, aNb = aDMFS.Extent();
       for (i = 1; i <= aNb; ++i) {
         if (aDMFS(i).Extent() == 1) {
@@ -872,7 +907,7 @@ Standard_Boolean BOPAlgo_CellsBuilder::RemoveInternals(const BOPCol_ListOfShape&
         {
           TopoDS_Compound aUniqeFaces;
           aBB.MakeCompound(aUniqeFaces);
-          BOPCol_ListIteratorOfListOfShape aItLFUniqe(aLFUnique);
+          TopTools_ListIteratorOfListOfShape aItLFUniqe(aLFUnique);
           for (; aItLFUniqe.More(); aItLFUniqe.Next()) {
             aBB.Add(aUniqeFaces, aItLFUniqe.Value());
           }
@@ -887,11 +922,13 @@ Standard_Boolean BOPAlgo_CellsBuilder::RemoveInternals(const BOPCol_ListOfShape&
         continue;
       }
       //
+      myReport->Merge(aBS.GetReport());
+      //
       TopoDS_Solid& aSNew = *(TopoDS_Solid*)&aBS.Areas().First();
       //
       // put all internal parts into new solid
       aSNew.Free(Standard_True);
-      BOPCol_ListIteratorOfListOfShape aItLSI(aLSInt);
+      TopTools_ListIteratorOfListOfShape aItLSI(aLSInt);
       for (; aItLSI.More(); aItLSI.Next()) {
         aBB.Add(aSNew, aItLSI.Value());
       }
@@ -899,118 +936,56 @@ Standard_Boolean BOPAlgo_CellsBuilder::RemoveInternals(const BOPCol_ListOfShape&
       //
       theLSNew.Append(aSNew);
       bRemoved = Standard_True;
+
+      // Save information about the fuse of the solids into a history map
+      aItS.Initialize(aCB);
+      for (; aItS.More(); aItS.Next())
+        myMapModified.Bind(aItS.Value(), aSNew);
     }
   }
   return bRemoved;
 }
 
 //=======================================================================
-//function : IsDeleted
+//function : LocModified
 //purpose  : 
 //=======================================================================
-Standard_Boolean BOPAlgo_CellsBuilder::IsDeleted(const TopoDS_Shape& theS)
+const TopTools_ListOfShape* BOPAlgo_CellsBuilder::LocModified(const TopoDS_Shape& theS)
 {
-  Standard_Boolean bRet = Standard_True;
-  if (theS.IsNull()) {
-    return bRet;
-  }
-  //
-  TopAbs_ShapeEnum aType = theS.ShapeType();
-  if (!(aType==TopAbs_EDGE || aType==TopAbs_FACE || 
-      aType==TopAbs_VERTEX || aType==TopAbs_SOLID)) {
-    return bRet;
-  }
-  //
-  Standard_Boolean bHasImage, bHasModified;
-  //
-  bHasImage = myImages.IsBound(theS);
-  bHasModified = myMapModified.IsBound(theS);
-  if (!bHasImage && !bHasModified) {
-    bRet = !myMapShape.Contains(theS);
-    return bRet;
-  }
-  //
-  if (bHasModified) {
-    const TopoDS_Shape& aSG = myMapModified.Find(theS);
-    if (myMapShape.Contains(aSG)) {
-      bRet = Standard_False;
-      return bRet;
-    }
-  }
-  //
-  if (bHasImage) {
-    const BOPCol_ListOfShape& aLSp = myImages.Find(theS);
-    BOPCol_ListIteratorOfListOfShape aIt(aLSp);
-    for (; aIt.More(); aIt.Next()) {
-      const TopoDS_Shape& aSp = aIt.Value();
-      const TopoDS_Shape& aSpR = myShapesSD.IsBound(aSp) ? 
-        myShapesSD.Find(aSp) : aSp;
-      //
-      const TopoDS_Shape& aSpRG = myMapModified.IsBound(aSpR) ?
-        myMapModified.Find(aSpR) : aSpR;
-      if (myMapShape.Contains(aSpRG)) {
-        bRet = Standard_False;
-        break;
-      }
-    }
-  }
-  //
-  return bRet;
-}
+  // Get shape's modification coming from GF operation
+  const TopTools_ListOfShape* pLSp = BOPAlgo_Builder::LocModified(theS);
+  if (myMapModified.IsEmpty())
+    // No local modifications
+    return pLSp;
 
-//=======================================================================
-//function : Modified
-//purpose  : 
-//=======================================================================
-const TopTools_ListOfShape& BOPAlgo_CellsBuilder::Modified(const TopoDS_Shape& theS)
-{
   myHistShapes.Clear();
-  if (theS.IsNull()) {
-    return myHistShapes;
+
+  // Check if the shape (or its splits) has participated in unification
+  if (!pLSp)
+  {
+    // No splits from GF operation.
+    // Check if the shape has been unified with other shapes
+    const TopoDS_Shape* pSU = myMapModified.Seek(theS);
+    if (!pSU)
+      return NULL;
+
+    myHistShapes.Append(*pSU);
   }
-  //
-  TopAbs_ShapeEnum aType = theS.ShapeType();
-  if (!(aType==TopAbs_EDGE || aType==TopAbs_FACE || aType==TopAbs_VERTEX)) {
-    return myHistShapes;
-  }
-  //
-  Standard_Boolean bHasModified = myMapModified.IsBound(theS);
-  if (bHasModified) {
-    const TopoDS_Shape& aSG = myMapModified.Find(theS);
-    if (myMapShape.Contains(aSG)) {
-      myHistShapes.Append(aSG);
-    }
-    return myHistShapes;
-  }
-  //
-  Standard_Boolean bHasImage = myImages.IsBound(theS);
-  if (!bHasImage) {
-    return myHistShapes;
-  }
-  //
-  BOPCol_MapOfShape aMFence;
-  const BOPCol_ListOfShape& aLSp = myImages.Find(theS);
-  BOPCol_ListIteratorOfListOfShape aIt(aLSp);
-  for (; aIt.More(); aIt.Next()) {
-    const TopoDS_Shape aSp = aIt.Value();
-    const TopoDS_Shape& aSpR = myShapesSD.IsBound(aSp) ? 
-      myShapesSD.Find(aSp) : aSp;
-    //
-    if (myMapModified.IsBound(aSpR)) {
-      const TopoDS_Shape& aSG = myMapModified.Find(aSpR);
-      if (myMapShape.Contains(aSG)) {
-        if (aMFence.Add(aSG)) {
-          myHistShapes.Append(aSG);
-        }
-      }
-    }
-    else if (aMFence.Add(aSpR))
+  else
+  {
+    TopTools_MapOfShape aMFence;
+    // Process all GF splits and check them for local unification with other shapes
+    TopTools_ListIteratorOfListOfShape aIt(*pLSp);
+    for (; aIt.More(); aIt.Next())
     {
-      myHistShapes.Append(aSpR);
+      const TopoDS_Shape* pSp = &aIt.Value();
+      const TopoDS_Shape* pSU = myMapModified.Seek(*pSp);
+      if (pSU) pSp = pSU;
+      if (aMFence.Add(*pSp))
+        myHistShapes.Append(*pSp);
     }
   }
-  //
-  return myHistShapes;
+  return &myHistShapes;
 }
 
 //=======================================================================
@@ -1043,7 +1018,7 @@ void MakeTypedContainers(const TopoDS_Shape& theSC,
       return;
   }
   //
-  BOPCol_ListOfShape aLCB;
+  TopTools_ListOfShape aLCB;
   BOPTools_AlgoTools::MakeConnexityBlocks(theSC, aConnexityType, aPartType, aLCB);
   if (aLCB.IsEmpty()) {
     return;
@@ -1051,7 +1026,7 @@ void MakeTypedContainers(const TopoDS_Shape& theSC,
   //
   BRep_Builder aBB;
   TopExp_Explorer aExp;
-  BOPCol_ListIteratorOfListOfShape aItCB;
+  TopTools_ListIteratorOfListOfShape aItCB;
   //
   aItCB.Initialize(aLCB);
   for (; aItCB.More(); aItCB.Next()) {
@@ -1070,6 +1045,33 @@ void MakeTypedContainers(const TopoDS_Shape& theSC,
     }
     //
     aBB.Add(theResult, aRCB);
+  }
+}
+
+//=======================================================================
+//function : CollectMaterialBoundaries
+//purpose  : Add to theMapKeepBnd the boundary shapes of the area defined by shapes from the list
+//=======================================================================
+static void CollectMaterialBoundaries(const TopTools_ListOfShape& theLS,
+                                      TopTools_MapOfShape& theMapKeepBnd)
+{
+  TopAbs_ShapeEnum aType = theLS.First().ShapeType();
+  TopAbs_ShapeEnum aTypeSubsh = (aType == TopAbs_FACE ? TopAbs_EDGE : TopAbs_VERTEX);
+  TopTools_IndexedDataMapOfShapeListOfShape aMapSubSh;
+  TopTools_ListIteratorOfListOfShape anIt(theLS);
+  for (; anIt.More(); anIt.Next())
+  {
+    const TopoDS_Shape& aS = anIt.Value();
+    TopExp::MapShapesAndAncestors(aS, aTypeSubsh, aType, aMapSubSh);
+  }
+  for (int i = 1; i <= aMapSubSh.Extent(); i++)
+  {
+    // check if the subshape belongs to boundary of the area
+    if (aMapSubSh(i).Extent() == 1)
+    {
+      // add to theMapKeepBnd
+      theMapKeepBnd.Add(aMapSubSh.FindKey(i));
+    }
   }
 }
 

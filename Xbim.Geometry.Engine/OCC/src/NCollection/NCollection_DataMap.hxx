@@ -140,10 +140,13 @@ public:
  public:
   // ---------- PUBLIC METHODS ------------
 
+  //! Empty Constructor.
+  NCollection_DataMap() : NCollection_BaseMap (1, Standard_True, Handle(NCollection_BaseAllocator)()) {}
+
   //! Constructor
-  NCollection_DataMap (const Standard_Integer NbBuckets=1,
-                     const Handle(NCollection_BaseAllocator)& theAllocator = 0L)
-    : NCollection_BaseMap (NbBuckets, Standard_True, theAllocator) {}
+  explicit NCollection_DataMap (const Standard_Integer theNbBuckets,
+                                const Handle(NCollection_BaseAllocator)& theAllocator = 0L)
+  : NCollection_BaseMap (theNbBuckets, Standard_True, theAllocator) {}
 
   //! Copy constructor
   NCollection_DataMap (const NCollection_DataMap& theOther)
@@ -165,10 +168,14 @@ public:
       return *this;
 
     Clear();
-    ReSize (theOther.Extent()-1);
-    Iterator anIter(theOther);
-    for (; anIter.More(); anIter.Next())
-      Bind (anIter.Key(), anIter.Value());
+    Standard_Integer anExt = theOther.Extent();
+    if (anExt)
+    {
+      ReSize (anExt-1);
+      Iterator anIter(theOther);
+      for (; anIter.More(); anIter.Next())
+        Bind (anIter.Key(), anIter.Value());
+    }
     return *this;
   }
 
@@ -211,9 +218,10 @@ public:
     }
   }
 
-  //! Bind binds Item to Key in map. Returns Standard_True if Key was not
-  //! exist in the map. If the Key was already bound, the Item will be rebinded
-  //! and Standard_False will be returned.
+  //! Bind binds Item to Key in map.
+  //! @param theKey  key to add/update
+  //! @param theItem new item; overrides value previously bound to the key, if any
+  //! @return Standard_True if Key was not bound already
   Standard_Boolean Bind (const TheKeyType& theKey, const TheItemType& theItem)
   {
     if (Resizable()) 

@@ -211,13 +211,16 @@ OSD_Host :: OSD_Host () {
  if ( !fInit ) {
 
   nSize                         = MAX_COMPUTERNAME_LENGTH + 1;
-  osVerInfo.dwOSVersionInfoSize = sizeof ( OSVERSIONINFO );
+  ZeroMemory (&osVerInfo, sizeof(OSVERSIONINFOW));
+  osVerInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFOW);
 
   ZeroMemory (&ms, sizeof(ms));
   ZeroMemory (szHostName, sizeof(char) * (MAX_COMPUTERNAME_LENGTH + 1));
 
-#ifdef _MSC_VER
   // suppress GetVersionEx() deprecation warning
+#if defined(__INTEL_COMPILER)
+  #pragma warning(disable : 1478)
+#elif defined(_MSC_VER)
   #pragma warning(disable : 4996)
 #endif
   if (!GetVersionExW (&osVerInfo))
@@ -262,12 +265,12 @@ OSD_Host :: OSD_Host () {
   
    hostName  = szHostName;
    interAddr = Standard_CString ( hostAddr );
-   /*wsprintf (
-    osVerInfo.szCSDVersion, TEXT( "Windows NT Version %d.%d" ),
-    osVerInfo.dwMajorVersion, osVerInfo.dwMinorVersion
-   );
-   */
-   version = osVerInfo.szCSDVersion;
+   TCollection_AsciiString aVersion = TCollection_AsciiString("Windows NT Version ") + (int )osVerInfo.dwMajorVersion + "." + (int )osVerInfo.dwMinorVersion;
+   if (*osVerInfo.szCSDVersion != L'\0')
+   {
+     aVersion += TCollection_AsciiString(" ") + TCollection_AsciiString (osVerInfo.szCSDVersion);
+   }
+   version = aVersion;
 
    fInit = TRUE;
   

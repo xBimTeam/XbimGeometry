@@ -23,7 +23,7 @@
 #include <Standard_Handle.hxx>
 
 #include <BOPDS_Iterator.hxx>
-#include <BOPCol_BaseAllocator.hxx>
+#include <NCollection_BaseAllocator.hxx>
 #include <Standard_Integer.hxx>
 
 
@@ -49,7 +49,7 @@ Standard_EXPORT virtual ~BOPDS_IteratorSI();
 
   //! Contructor
   //! theAllocator - the allocator to manage the memory
-  Standard_EXPORT BOPDS_IteratorSI(const BOPCol_BaseAllocator& theAllocator);
+  Standard_EXPORT BOPDS_IteratorSI(const Handle(NCollection_BaseAllocator)& theAllocator);
   
   //! Updates the lists of possible intersections
   //! according to the value of <theLevel>.
@@ -68,7 +68,9 @@ Standard_EXPORT virtual ~BOPDS_IteratorSI();
 protected:
 
   
-  Standard_EXPORT virtual void Intersect() Standard_OVERRIDE;
+  Standard_EXPORT virtual void Intersect(const Handle(IntTools_Context)& theCtx = Handle(IntTools_Context)(),
+                                         const Standard_Boolean theCheckOBB = Standard_False,
+                                         const Standard_Real theFuzzyValue = Precision::Confusion()) Standard_OVERRIDE;
 
 
 

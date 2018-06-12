@@ -23,14 +23,14 @@
 #include <TopoDS_Shape.hxx>
 
 #include <TopAbs_ShapeEnum.hxx>
-
+#include <TopTools_MapOfShape.hxx>
 #include <BOPAlgo_Builder.hxx>
 
-#include <BOPCol_ListOfShape.hxx>
-#include <BOPCol_IndexedDataMapOfShapeListOfShape.hxx>
-#include <BOPCol_DataMapOfIntegerListOfShape.hxx>
-#include <BOPCol_DataMapOfShapeInteger.hxx>
-#include <BOPCol_DataMapOfShapeShape.hxx>
+#include <TopTools_ListOfShape.hxx>
+#include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
+#include <TopTools_DataMapOfIntegerListOfShape.hxx>
+#include <TopTools_DataMapOfShapeInteger.hxx>
+#include <TopTools_DataMapOfShapeShape.hxx>
 
 //!
 //! The algorithm is based on the General Fuse algorithm (GFA). The result of
@@ -90,8 +90,6 @@
 //! IsDeleted() and Modified().<br>
 //! In DRAW Test Harness it is available through the same
 //! commands as for Boolean Operations (bmodified, bgenerated and bisdeleted).<br>
-//! There could be Generated shapes only after removing of the internal boundaries
-//! between faces and edges, i.e. after using ShapeUpgrade_UnifySameDomain tool.<br>
 //!
 //! The algorithm can return the following Error Statuses:
 //! - Error status acquired in the General Fuse algorithm.
@@ -112,7 +110,7 @@
 //! Examples:<br>
 //! 1. API<br>
 //! BOPAlgo_CellsBuilder aCBuilder;<br>
-//! BOPCol_ListOfShape aLS = ...; // arguments<br>
+//! TopTools_ListOfShape aLS = ...; // arguments<br>
 //! /* parallel or single mode (the default value is FALSE)*/<br>
 //! Standard_Boolean bRunParallel = Standard_False;<br>
 //! /* fuzzy option (default value is 0)*/<br>
@@ -131,8 +129,8 @@
 //! /* all split parts */<br>
 //! const TopoDS_Shape& aRes = aCBuilder.GetAllParts();<br>
 //! //<br>
-//! BOPCol_ListOfShape aLSToTake = ...; // parts of these arguments will be taken into result<br>
-//! BOPCol_ListOfShape aLSToAvoid = ...; // parts of these arguments will not be taken into result<br>
+//! TopTools_ListOfShape aLSToTake = ...; // parts of these arguments will be taken into result<br>
+//! TopTools_ListOfShape aLSToAvoid = ...; // parts of these arguments will not be taken into result<br>
 //! //<br>
 //! /* defines the material common for the cells, i.e. 
 //!    the boundaries between cells with the same material
@@ -202,8 +200,8 @@ class BOPAlgo_CellsBuilder : public BOPAlgo_Builder
   //! cells with the same material will be removed. Default value is 0.<br>
   //! Thus, to remove any boundary the value of this variable should not be equal to 0.<br>
   //! <theUpdate> parameter defines whether to remove boundaries now or not.
-  Standard_EXPORT void AddToResult(const BOPCol_ListOfShape& theLSToTake,
-                                   const BOPCol_ListOfShape& theLSToAvoid,
+  Standard_EXPORT void AddToResult(const TopTools_ListOfShape& theLSToTake,
+                                   const TopTools_ListOfShape& theLSToAvoid,
                                    const Standard_Integer theMaterial = 0,
                                    const Standard_Boolean theUpdate = Standard_False);
 
@@ -219,8 +217,8 @@ class BOPAlgo_CellsBuilder : public BOPAlgo_Builder
   //! <theLSToAvoid> defines the arguments which parts should not be removed from result.<br>
   //! To be removed from the result the part must be IN for all shapes from the list
   //! <theLSToTake> and must be OUT of all shapes from the list <theLSToAvoid>.
-  Standard_EXPORT void RemoveFromResult(const BOPCol_ListOfShape& theLSToTake,
-                                        const BOPCol_ListOfShape& theLSToAvoid);
+  Standard_EXPORT void RemoveFromResult(const TopTools_ListOfShape& theLSToTake,
+                                        const TopTools_ListOfShape& theLSToAvoid);
 
   //! Remove all parts from result.
   Standard_EXPORT void RemoveAllFromResult();
@@ -238,15 +236,13 @@ class BOPAlgo_CellsBuilder : public BOPAlgo_Builder
   //! Makes the Containers of proper type from the parts added to result.
   Standard_EXPORT void MakeContainers();
 
-  //! Returns the list of shapes generated from the shape theS.
-  Standard_EXPORT virtual const TopTools_ListOfShape& Modified(const TopoDS_Shape& theS) Standard_OVERRIDE;
-  
-  //! Returns true if the shape theS has been deleted.
-  Standard_EXPORT virtual Standard_Boolean IsDeleted (const TopoDS_Shape& theS) Standard_OVERRIDE;
-
  protected:
 
-   //! Redefined method Prepare - no need to prepare history
+  //! Prepare information for history support taking into account
+  //! local modification map of unified elements - myMapModified.
+  Standard_EXPORT virtual const TopTools_ListOfShape* LocModified(const TopoDS_Shape& theS) Standard_OVERRIDE;
+
+  //! Redefined method Prepare - no need to prepare history
   //! information on the default result as it is empty compound.
   Standard_EXPORT virtual void Prepare() Standard_OVERRIDE;
 
@@ -258,24 +254,22 @@ class BOPAlgo_CellsBuilder : public BOPAlgo_Builder
   Standard_EXPORT void IndexParts();
 
   //! Looking for the parts defined by two lists.
-  Standard_EXPORT void FindParts(const BOPCol_ListOfShape& theLSToTake,
-                                 const BOPCol_ListOfShape& theLSToAvoid,
-                                 BOPCol_ListOfShape& theParts);
+  Standard_EXPORT void FindParts(const TopTools_ListOfShape& theLSToTake,
+                                 const TopTools_ListOfShape& theLSToAvoid,
+                                 TopTools_ListOfShape& theParts);
 
   //! Removes internal boundaries between cells with the same material.<br>
   //! Returns TRUE if any internal boundaries have been removed.
-  Standard_EXPORT Standard_Boolean RemoveInternals(const BOPCol_ListOfShape& theLS,
-                                                   BOPCol_ListOfShape& theLSNew);
+  Standard_EXPORT Standard_Boolean RemoveInternals(const TopTools_ListOfShape& theLS,
+                                                   TopTools_ListOfShape& theLSNew,
+                                                   const TopTools_MapOfShape& theMapKeepBnd = TopTools_MapOfShape());
 
   // fields
-  TopoDS_Shape myAllParts;
-  BOPCol_IndexedDataMapOfShapeListOfShape myIndex;
-  BOPCol_DataMapOfIntegerListOfShape myMaterials;
-  BOPCol_DataMapOfShapeInteger myShapeMaterial;
-  BOPCol_DataMapOfShapeShape myMapModified;
-
- private:
-
+  TopoDS_Shape myAllParts;                           //!< All split parts of the arguments
+  TopTools_IndexedDataMapOfShapeListOfShape myIndex; //!< Connection map from all splits parts to the argument shapes from which they were created
+  TopTools_DataMapOfIntegerListOfShape myMaterials;  //!< Map of assigned materials (material -> list of shape)
+  TopTools_DataMapOfShapeInteger myShapeMaterial;    //!< Map of assigned materials (shape -> material)
+  TopTools_DataMapOfShapeShape myMapModified;        //!< Local modification map to track unification of the splits
 };
 
 #endif //_BOPAlgo_CellsBuilder_HeaderFile
