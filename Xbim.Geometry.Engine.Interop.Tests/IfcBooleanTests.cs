@@ -29,6 +29,29 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             geomEngine = new XbimGeometryEngine();
             logger = loggerFactory.CreateLogger<IfcBooleanTests>();
         }
+        [TestMethod]
+        public void CoordinationTest()
+        {
+            using (var erArch = new EntityRepository<IIfcSpace>("CoordinationTestArchitectureSpace"))
+            {
+                using (var erElec = new EntityRepository<IIfcSpace>("CoordinationTestElectricalSpace"))
+                {
+                    var archMatrix = erArch.Entity.ObjectPlacement.ToMatrix3D();
+                    var elecMatrix = erElec.Entity.ObjectPlacement.ToMatrix3D();
+                    var archRepItem = erArch.Entity.Representation.Representations.FirstOrDefault()?.Items.FirstOrDefault() as IIfcExtrudedAreaSolid;
+                    var elecRepItem = erElec.Entity.Representation.Representations.FirstOrDefault()?.Items.FirstOrDefault() as IIfcExtrudedAreaSolid;
+                    Assert.IsNotNull(archRepItem); Assert.IsNotNull(elecRepItem);
+                    var archGeom = geomEngine.CreateSolid(archRepItem).Transform(archMatrix) ;
+                    var elecGeom = geomEngine.CreateSolid(elecRepItem).Transform(elecMatrix) ;
+                    var archBB = archGeom.BoundingBox;
+                    var elecBB = elecGeom.BoundingBox;
+                    var diff = archBB.Centroid() - elecBB.Centroid();
+                    Assert.IsTrue(diff.Length<1e-5);
+                }
+            }
+
+        }
+
 
         public void IsSolidTest(IXbimSolid solid, bool ignoreVolume = false, bool isHalfSpace = false, int entityLabel = 0)
         {
