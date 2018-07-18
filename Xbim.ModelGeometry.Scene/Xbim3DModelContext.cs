@@ -931,11 +931,12 @@ namespace Xbim.ModelGeometry.Scene
             foreach (var grid in Model.Instances.OfType<IIfcGrid>())
             {
                 GeometryReference instance;
-                if (contextHelper.ShapeLookup.TryGetValue(grid.EntityLabel, out instance))
+                if (contextHelper.ShapeLookup.TryGetValue(grid.EntityLabel, out instance) && grid.Representation != null && grid.Representation.Representations.Count > 0)
                 {
                     XbimMatrix3D placementTransform = XbimPlacementTree.GetTransform(grid, contextHelper.PlacementTree, Engine);
                     // int context = 0;
-                    var context = grid.Representation?.Representations?.FirstOrDefault().ContextOfItems;
+                    var gRep= grid.Representation.Representations.FirstOrDefault();
+                    var context = gRep.ContextOfItems;
                     var intContext = (context == null) ? 0 : context.EntityLabel;
 
                     WriteShapeInstanceToStore(instance.GeometryId, instance.StyleLabel, intContext, grid,
