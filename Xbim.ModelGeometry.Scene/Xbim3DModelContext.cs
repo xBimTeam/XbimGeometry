@@ -1123,7 +1123,11 @@ namespace Xbim.ModelGeometry.Scene
                     if (contextHelper.ShapeLookup.TryGetValue(mapShapeLabel, out counter))
                     {
                         int style;
-                        if (GetStyleId(contextHelper,mapShapeLabel, out style))
+                        // try to get style for map first as that would override lower level style
+                        if (GetStyleId(contextHelper, map.EntityLabel, out style))
+                            counter.StyleLabel = style;
+                        // get actual shape style
+                        else if (GetStyleId(contextHelper,mapShapeLabel, out style))
                             counter.StyleLabel = style;
                         mapShapes.Add(counter);
                     }
