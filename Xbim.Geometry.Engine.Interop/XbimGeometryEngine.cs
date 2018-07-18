@@ -12,36 +12,34 @@ namespace Xbim.Geometry.Engine.Interop
 {  
     public class XbimGeometryEngine : IXbimGeometryEngine
     {
-
         private readonly IXbimGeometryEngine _engine;
-
-        static XbimGeometryEngine()
-        {
-            // We need to wire in a custom assembly resolver since Xbim.Geometry.Engine is 
-            // not located using standard probing rules (due to way we deploy processor specific binaries)
-            AppDomain.CurrentDomain.AssemblyResolve += XbimCustomAssemblyResolver.ResolverHandler;
-        }
-
+        
         public XbimGeometryEngine()
         {
-
             // Warn if runtime for Engine is not present
             XbimPrerequisitesValidator.Validate();
 
+            // We need to wire in a custom assembly resolver since Xbim.Geometry.Engine is 
+            // not located using standard probing rules (due to way we deploy processor specific binaries)
+            AppDomain.CurrentDomain.AssemblyResolve += XbimCustomAssemblyResolver.ResolverHandler;
+
             var conventions = new XbimArchitectureConventions();    // understands the process we run under
-            string assemblyName = conventions.ModuleName + conventions.Suffix;
             try
-            {               
-                var ass =  Assembly.Load(assemblyName);
+            {
+                var ass =  Assembly.Load(conventions.AssemblyName);
                 var oh = Activator.CreateInstance(ass.FullName, "Xbim.Geometry.XbimGeometryCreator");           
                 _engine = oh.Unwrap() as IXbimGeometryEngine; 
             }
             catch (Exception e)
             {
+                // reset resolution mode
+                AppDomain.CurrentDomain.AssemblyResolve -= XbimCustomAssemblyResolver.ResolverHandler;
                 throw e;
             }
-             
+            // reset resolution mode
+            AppDomain.CurrentDomain.AssemblyResolve -= XbimCustomAssemblyResolver.ResolverHandler;
         }
+
         public IXbimGeometryObject Create(IIfcGeometricRepresentationItem ifcRepresentation)
         {
             return Create(ifcRepresentation, null);
