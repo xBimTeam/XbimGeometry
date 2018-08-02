@@ -237,6 +237,9 @@
     <None Include="Ifc4TestFiles\Wall.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Ifc4TestFiles\WirePolycurve.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
     <None Include="SolidTestFiles\1- IfcExtrudedAreaSolid-IfcProfileDef-Parameterised.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
