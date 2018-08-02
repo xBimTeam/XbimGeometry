@@ -601,6 +601,20 @@ namespace Ifc4GeometryTests
             }
         }
 
+        [TestMethod]
+        public void WireInitFromIfcIndexedPolyCurveTest()
+        {
+            using (var model = IfcStore.Open(@"Ifc4TestFiles\WirePolycurve.ifc"))
+            {
+                using (var eventTrace = LoggerFactory.CreateEventTrace())
+                {
+                    var shape = model.Instances[185] as IIfcGeometricRepresentationItem;
+                    IXbimGeometryObject geomObject = _xbimGeometryCreator.Create(shape);
+                    Assert.IsTrue(eventTrace.Events.Count == 0); //no events should have been raised from this call
+                    Assert.IsTrue(geomObject.IsValid);
+                }
+            }
+        }
 
     }
 }
