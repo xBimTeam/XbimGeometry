@@ -951,29 +951,57 @@ namespace Xbim
 			}
 
 			BRepBuilderAPI_MakeWire wireMaker;
-
-			for each (IIfcSegmentIndexSelect^ segment in  polyCurve->Segments)
+			if (polyCurve->Segments->Count > 0)
 			{
-				Ifc4::GeometryResource::IfcArcIndex^ arcIndex = dynamic_cast<Ifc4::GeometryResource::IfcArcIndex^>(segment);
-				Ifc4::GeometryResource::IfcLineIndex^ lineIndex = dynamic_cast<Ifc4::GeometryResource::IfcLineIndex^>(segment);
-				if (arcIndex != nullptr)
+				for each (IIfcSegmentIndexSelect^ segment in  polyCurve->Segments)
 				{
-					List<Ifc4::MeasureResource::IfcPositiveInteger>^ indices = (List<Ifc4::MeasureResource::IfcPositiveInteger>^)arcIndex->Value;
-					XbimEdge^ e = gcnew XbimEdge(vertices[(int)indices[0] - 1], vertices[(int)indices[1] - 1], vertices[(int)indices[2] - 1]);
-					wireMaker.Add(e);
-				}
-				else if (lineIndex != nullptr)
-				{
-					List<Ifc4::MeasureResource::IfcPositiveInteger>^ indices = (List<Ifc4::MeasureResource::IfcPositiveInteger>^)lineIndex->Value;
-					for (int i = 0; i < indices->Count - 1; i++)
+					Ifc4::GeometryResource::IfcArcIndex^ arcIndex = dynamic_cast<Ifc4::GeometryResource::IfcArcIndex^>(segment);
+					Ifc4::GeometryResource::IfcLineIndex^ lineIndex = dynamic_cast<Ifc4::GeometryResource::IfcLineIndex^>(segment);
+					if (arcIndex != nullptr)
 					{
-						XbimVertex^ start = vertices[(int)indices[i] - 1];
-						XbimVertex^ end = vertices[(int)indices[i + 1] - 1];
-						if (start != end)
+						List<Ifc4::MeasureResource::IfcPositiveInteger>^ indices = (List<Ifc4::MeasureResource::IfcPositiveInteger>^)arcIndex->Value;
+						XbimEdge^ e = gcnew XbimEdge(vertices[(int)indices[0] - 1], vertices[(int)indices[1] - 1], vertices[(int)indices[2] - 1]);
+						wireMaker.Add(e);
+					}
+					else if (lineIndex != nullptr)
+					{
+						List<Ifc4::MeasureResource::IfcPositiveInteger>^ indices = (List<Ifc4::MeasureResource::IfcPositiveInteger>^)lineIndex->Value;
+						for (int i = 0; i < indices->Count - 1; i++)
 						{
-							XbimEdge^ e = gcnew XbimEdge(start,end);
-							wireMaker.Add(e);
+							XbimVertex^ start = vertices[(int)indices[i] - 1];
+							XbimVertex^ end = vertices[(int)indices[i + 1] - 1];
+							if (start != end)
+							{
+								XbimEdge^ e = gcnew XbimEdge(start,end);
+								wireMaker.Add(e);
+							}
 						}
+					}
+				}
+			}
+			else
+			{
+				// To be compliant with:
+				// "In the case that the list of Segments is not provided, all points in the IfcCartesianPointList are connected by straight line segments in the order they appear in the IfcCartesianPointList."
+				// http://www.buildingsmart-tech.org/ifc/IFC4/Add1/html/schema/ifcgeometryresource/lexical/ifcindexedpolycurve.htm
+				int count = 0;
+				if (points3D != nullptr)
+				{
+					count = points3D->CoordList->Count;
+				}
+				else if (points2D != nullptr)
+				{
+					count = points2D->CoordList->Count;
+				}
+
+				for (int i = 0; i < count - 1; i++)
+				{
+					XbimVertex^ start = vertices[i];
+					XbimVertex^ end = vertices[i + 1];
+					if (start != end)
+					{
+						XbimEdge^ e = gcnew XbimEdge(start, end);
+						wireMaker.Add(e);
 					}
 				}
 			}
