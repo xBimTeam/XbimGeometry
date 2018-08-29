@@ -47,7 +47,7 @@ namespace XbimInstanceLeakTest
             foreach (var file in files)
             {
                 allFiles.Add(file);
-                ProcessIFC(file, $"INITIAL");
+                ProcessIFC(file, "INITIAL");
             }
 
             List<Thread> threads = new List<Thread>();
@@ -84,7 +84,7 @@ namespace XbimInstanceLeakTest
 
                     lock (locker)
                     {
-                        Debug.WriteLine($"[{processed++}/{numTasks}]{result}");
+                        Debug.WriteLine(string.Format("[{0}/{1}]{2}", processed++, numTasks, result));
                     }
                 }
             });
@@ -94,15 +94,15 @@ namespace XbimInstanceLeakTest
 
         private static string ProcessIFC(string sourceFile, string prefix)
         {
-            var tempFolder = $@"Temp\{Guid.NewGuid()}";
+            var tempFolder = string.Format(@"Temp\{0}", Guid.NewGuid());
             Directory.CreateDirectory(tempFolder);
             Debug.WriteLine("Folder: " + tempFolder);
 
-            var ifcFile = $@"{tempFolder}\{Path.GetFileName(sourceFile)}";
+            var ifcFile = string.Format(@"{0}\{1}", tempFolder, Path.GetFileName(sourceFile));
 
             File.Copy(sourceFile, ifcFile);
 
-            Debug.WriteLine($"Processing {ifcFile} [ {sourceFile} ]");
+            Debug.WriteLine(string.Format("Processing {0} [ {1} ]", ifcFile, sourceFile));
 
 
             string ex = "";
@@ -124,7 +124,7 @@ namespace XbimInstanceLeakTest
                         // we know of a permission denied Esent issue with the firestation that needs to be
                         // investigated separately
                         //
-                        ex = $"EXCEPTION: " + e.Message;
+                        ex = "EXCEPTION: " + e.Message;
                     }
 
                     var shapes = m3D.ShapeGeometries();
@@ -141,17 +141,17 @@ namespace XbimInstanceLeakTest
             }
             catch (Exception e)
             {
-                ex = $"EXCEPTION: " + e.Message;
+                ex = "EXCEPTION: " + e.Message;
             }
 
             // Are we using the hashcode to identify problems?
             // Can this be coded in the test explicitly?
             // 
-            var result = $"{prefix},{ifcFile},{sc},{hc},{ex}";
+            var result = string.Format("{0},{1},{2},{3},{4}", prefix, ifcFile, sc, hc, ex);
 
             results.Add(result);
 
-            Debug.WriteLine($"Finished processing {ifcFile} [ {sourceFile} ]");
+            Debug.WriteLine(string.Format("Finished processing {0} [ {1} ]", ifcFile, sourceFile));
             Directory.Delete(tempFolder, true);
 
             lock (locker)
