@@ -1431,80 +1431,19 @@ namespace Xbim
 		{
 			IIfcBooleanOperand^ fOp = solid->FirstOperand;
 			IIfcBooleanOperand^ sOp = solid->SecondOperand;
-			
+
 			IIfcBooleanClippingResult^ boolClip = dynamic_cast<IIfcBooleanClippingResult^>(fOp);
-			if (boolClip!=nullptr)
-			{				
+			if (boolClip != nullptr)
+			{
 				clipList->Add(sOp);
 				return XbimSolid::BuildClippingList(boolClip, clipList);
 			}
 			else //we need to build the solid
-			{				
+			{
 				clipList->Add(sOp);
 				XbimSolidSet^ solidSet = dynamic_cast<XbimSolidSet^>(clipList);
-				if (solidSet!=nullptr) solidSet->Reverse();
+				//if (solidSet!=nullptr) solidSet->Reverse(); // TODO Remove. What's the reason?
 				return gcnew XbimSolid(fOp);
-			}
-		}
-
-		void XbimSolid::Init(IIfcBooleanResult^ solid)
-		{
-			if (dynamic_cast<IIfcBooleanClippingResult^>(solid))
-				Init((IIfcBooleanClippingResult^)solid);
-			//else do BooleanResult
-			double precision = solid->Model->ModelFactors->Precision;
-		
-			XbimSolid^ left = gcnew XbimSolid(solid->FirstOperand);
-			XbimSolid^ right = gcnew XbimSolid(solid->SecondOperand);
-
-			if (!left->IsValid)
-			{
-				if(solid->Operator != IfcBooleanOperator::UNION)
-					//XbimGeometryCreator::LogWarning(solid, "Invalid first operand");
-					return; //ths is not a valid solid, we cannot do anything
-			}
-
-			if (!right->IsValid)
-			{
-				if (!left->IsValid) return;
-				//XbimGeometryCreator::LogWarning(solid, "Invalid second operand");
-				pSolid = new TopoDS_Solid();
-				*pSolid = left; //return the left operand as it is valid
-				return;
-			}
-
-			IXbimSolidSet^ result;
-			try
-			{
-				switch (solid->Operator)
-				{
-				case IfcBooleanOperator::UNION:
-					result = left->Union(right, precision);
-					break;
-				case IfcBooleanOperator::INTERSECTION:
-					result = left->Intersection(right, precision);
-					break;
-				case IfcBooleanOperator::DIFFERENCE:
-					result = left->Cut(right, precision);
-					break;
-				}
-			}
-			catch (...)
-			{
-				XbimGeometryCreator::LogError(solid, "Error performing boolean operation, {0}. The operation has been ignored");
-				pSolid = new TopoDS_Solid(); //make sure this is deleted if not used
-				*pSolid = left; //return the left operand
-				return;
-			}
-			XbimSolidSet^ xbimSolidSet = dynamic_cast<XbimSolidSet^>(result);
-			if (xbimSolidSet != nullptr && xbimSolidSet->Count>0 && xbimSolidSet->First != nullptr)
-			{
-			    TopoDS_Solid  shape = (XbimSolid^)(xbimSolidSet->First);
-				if (!shape.IsNull())
-				{
-					pSolid = new TopoDS_Solid(); //make sure this is deleted if not used
-					*pSolid = shape; //just take the first as that is what is intended by IIfc schema
-				}
 			}
 		}
 
@@ -1512,106 +1451,37 @@ namespace Xbim
 		void XbimSolid::Init(IIfcBooleanClippingResult^ solid)
 		{
 			IModelFactors^ mf = solid->Model->ModelFactors;
-			IIfcBooleanOperand^ fOp = solid->FirstOperand;
-		
-			IIfcBooleanClippingResult^ boolClip = dynamic_cast<IIfcBooleanClippingResult^>(fOp);
-			if (boolClip != nullptr)
+			List<IIfcBooleanOperand^>^ clips = gcnew List<IIfcBooleanOperand^>();
+
+			IXbimSolidSet^ solidSet = gcnew XbimSolidSet();			
+			XbimSolid^ body = XbimSolid::BuildClippingList(solid, clips);
+
+			double maxLen = body->BoundingBox.Length();
+			for each (IIfcBooleanOperand^ bOp in clips)
 			{
-				List<IIfcBooleanOperand^>^ clips = gcnew List<IIfcBooleanOperand^>();
-
-				IXbimSolidSet^ solidSet = gcnew XbimSolidSet();			
-				XbimSolid^ body = XbimSolid::BuildClippingList(boolClip, clips);
-
-				double maxLen = body->BoundingBox.Length();
-				for each (IIfcBooleanOperand^ bOp in clips)
+				IIfcPolygonalBoundedHalfSpace^ pbhs = dynamic_cast<IIfcPolygonalBoundedHalfSpace^>(bOp);
+				if (pbhs != nullptr) //special case for IIfcPolygonalBoundedHalfSpace to keep extrusion to the minimum
 				{
-					IIfcPolygonalBoundedHalfSpace^ pbhs = dynamic_cast<IIfcPolygonalBoundedHalfSpace^>(bOp);
-					if (pbhs != nullptr) //special case for IIfcPolygonalBoundedHalfSpace to keep extrusion to the minimum
-					{
-						XbimSolid^ s = gcnew XbimSolid(pbhs, maxLen);
-						if (s->IsValid) solidSet->Add(s);
-					}
-					else
-					{
-						XbimSolid^ s = gcnew XbimSolid(bOp);
-						if (s->IsValid) solidSet->Add(s);
-					}
+					XbimSolid^ s = gcnew XbimSolid(pbhs, maxLen);
+					if (s->IsValid) solidSet->Add(s);
 				}
-					
-				IXbimSolidSet^ xbimSolidSet = body->Cut(solidSet, mf->Precision);
-				if (xbimSolidSet != nullptr && xbimSolidSet->First != nullptr)
-				{ 
-					const TopoDS_Solid&  shape = (XbimSolid^) (xbimSolidSet->First);
-					if (!shape.IsNull())
-					{
-						pSolid = new TopoDS_Solid();
-						*pSolid = shape; //just take the first as that is what is intended by IIfc schema	
-					}
-					
-				}
-				return;
-			}
-
-			
-			IIfcBooleanOperand^ sOp = solid->SecondOperand;
-			XbimSolid^ left = gcnew XbimSolid(fOp);
-			XbimSolid^ right = gcnew XbimSolid(sOp);
-
-			if (!left->IsValid)
-			{
-				if (solid->Operator != IfcBooleanOperator::UNION)
-					//XbimGeometryCreator::LogWarning(solid, "Invalid first operand");
-					return;
-			}
-
-
-			if (!right->IsValid)
-			{
-				if (!left->IsValid) return;
-				//XbimGeometryCreator::LogWarning(solid, "Invalid second operand");
-				pSolid = new TopoDS_Solid(); //make sure this is deleted if not used
-				*pSolid = left; //return the left operand
-				return;
-			}
-
-			
-			IXbimGeometryObject^ result;
-			try
-			{
-				
-				switch (solid->Operator)
+				else
 				{
-				case IfcBooleanOperator::UNION:
-					result = left->Union(right, mf->Precision);
-					break;
-				case IfcBooleanOperator::INTERSECTION:
-					result = left->Intersection(right, mf->Precision);
-					break;
-				case IfcBooleanOperator::DIFFERENCE:
-					result = left->Cut(right, mf->Precision);
-					break;
+					XbimSolid^ s = gcnew XbimSolid(bOp);
+					if (s->IsValid) solidSet->Add(s);
 				}
 			}
-			catch (...)
-			{
-				XbimGeometryCreator::LogError(solid, "Error performing boolean operation, {0}. The operation has been ignored");
-				pSolid = new TopoDS_Solid(); //make sure this is deleted if not used
-				*pSolid = left; //return the left operand
-				return;
-			}
-
-			XbimSolidSet^ xbimSolidSet = dynamic_cast<XbimSolidSet^>(result);
-
+					
+			IXbimSolidSet^ xbimSolidSet = body->Cut(solidSet, mf->Precision);
 			if (xbimSolidSet != nullptr && xbimSolidSet->First != nullptr)
-			{
-			    TopoDS_Shape  shape = (XbimSolid^)(xbimSolidSet->First);
+			{ 
+				const TopoDS_Solid&  shape = (XbimSolid^) (xbimSolidSet->First);
 				if (!shape.IsNull())
 				{
-					pSolid = new TopoDS_Solid(); //make sure this is deleted if not used
-					*pSolid = (XbimSolid^)(xbimSolidSet->First); //just take the first as that is what is intended by IIfc schema
-				}				
+					pSolid = new TopoDS_Solid();
+					*pSolid = shape; //just take the first as that is what is intended by IIfc schema	
+				}					
 			}
-
 		}
 
 		void XbimSolid::Init(IIfcBooleanOperand^ solid)
@@ -1621,8 +1491,8 @@ namespace Xbim
 			IIfcHalfSpaceSolid^ hs = dynamic_cast<IIfcHalfSpaceSolid^>(solid);
 			//TODO use a real halfspace when fixed in opencascade
 			if (hs != nullptr) return Init(hs, hs->Model->ModelFactors->OneMetre * 100, XbimPoint3D(0,0,0)); //take 100 metres as the largest extrusion and 0,0,0 as centre this is arbitrary due to bug in opencascade
-			IIfcBooleanResult^ br = dynamic_cast<IIfcBooleanResult^>(solid);
-			if (br != nullptr) return Init(br); //treat IIfcBooleanResult and IIfcBooleanClippingResult the same			
+			IIfcBooleanClippingResult^ bcr = dynamic_cast<IIfcBooleanClippingResult^>(solid);
+			if (bcr != nullptr) return Init(bcr);
 			IIfcCsgPrimitive3D^ csg = dynamic_cast<IIfcCsgPrimitive3D^>(solid);
 			if (csg != nullptr) return Init(csg);
 			throw gcnew NotImplementedException("Sub-Type of IIfcBooleanOperand is not implemented");
@@ -1642,15 +1512,6 @@ namespace Xbim
 			IIfcRectangularPyramid^ pyramid = dynamic_cast<IIfcRectangularPyramid^>(IIfcSolid);
 			if (pyramid != nullptr) return Init(pyramid);
 			throw gcnew NotImplementedException(String::Format("IIfcCsgPrimitive3D of Type {0} in entity #{1} is not implemented", IIfcSolid->GetType()->Name, IIfcSolid->EntityLabel));
-		}
-
-		void XbimSolid::Init(IIfcCsgSolid^ IIfcSolid)
-		{
-			IIfcCsgPrimitive3D^ csgPrim = dynamic_cast<IIfcCsgPrimitive3D^>(IIfcSolid->TreeRootExpression);
-			if (csgPrim != nullptr) return Init(csgPrim);
-			IIfcBooleanResult^ booleanResult = dynamic_cast<IIfcBooleanResult^>(IIfcSolid->TreeRootExpression);
-			if (booleanResult != nullptr) return Init(booleanResult);
-			throw gcnew NotImplementedException(String::Format("IIfcCsgSolid of Type {0} in entity #{1} is not implemented", IIfcSolid->GetType()->Name, IIfcSolid->EntityLabel));
 		}
 
 		void XbimSolid::Init(IIfcSphere^ IIfcSolid)

@@ -26,13 +26,14 @@ namespace Xbim
 		private:
 			List<IXbimSolid^>^ solids;
 			static XbimSolidSet^ empty = gcnew XbimSolidSet();
+			void Init(IIfcBooleanOperand^ boolOp);
 			void Init(IIfcBooleanResult^ boolOp);
 			void Init(XbimCompound^ comp, IPersistEntity^ ent);
 			void Init(IIfcSweptAreaSolid^ solid);
 			void Init(IIfcExtrudedAreaSolid^ solid);
 			void Init(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid);
 			void Init(IIfcRevolvedAreaSolid^ solid);
-			
+			void Init(IIfcCsgSolid^ IIfcSolid);
 
 			static VolumeComparer^ _volumeComparer = gcnew VolumeComparer();
 			static int _maxOpeningsToCut = 100;
@@ -57,7 +58,8 @@ namespace Xbim
 			XbimSolidSet(XbimCompound^ shape);
 			XbimSolidSet(IXbimSolid^ solid);
 			XbimSolidSet(IEnumerable<IXbimSolid^>^ solids);
-			XbimSolidSet(IIfcBooleanResult^ boolOp);
+			XbimSolidSet(IIfcBooleanOperand^ boolOp);
+			XbimSolidSet(IIfcCsgSolid^ csgSolid);
 			XbimSolidSet(IIfcManifoldSolidBrep^ solid);
 			XbimSolidSet(IIfcFacetedBrep^ solid);
 			XbimSolidSet(IIfcFacetedBrepWithVoids^ solid);
@@ -68,7 +70,6 @@ namespace Xbim
 			XbimSolidSet(IIfcExtrudedAreaSolid^ solid);
 			XbimSolidSet(IIfcRevolvedAreaSolid^ solid);
 			
-
 			virtual property bool IsValid {bool get() { return solids != nullptr && this != XbimSolidSet::Empty; }; }
 			virtual property bool IsSimplified{bool get(){ return _isSimplified; }; void set(bool val){ _isSimplified = val; } }
 			virtual property bool IsSet{bool get()  { return true; }; }

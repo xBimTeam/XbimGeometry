@@ -45,14 +45,12 @@ namespace Xbim
 			void Init(IIfcHalfSpaceSolid^ solid, double maxExtrusion, XbimPoint3D centroid);
 			void Init(IIfcBoxedHalfSpace^ solid);
 			void Init(IIfcPolygonalBoundedHalfSpace^ solid, double maxExtrusion);
-			void Init(IIfcBooleanResult^ solid);
 			void Init(IIfcBooleanClippingResult^ solid);
 			void Init(IIfcBooleanOperand^ solid);
 			void Init(XbimRect3D rect3D, double tolerance);
 
 			void Init(IIfcFixedReferenceSweptAreaSolid^ IIfcSolid, IIfcProfileDef^ overrideProfileDef);
 			void Init(IIfcCsgPrimitive3D^ IIfcSolid);
-			void Init(IIfcCsgSolid^ IIfcSolid);
 			void Init(IIfcSphere^ IIfcSolid);
 			void Init(IIfcBlock^ IIfcSolid);
 			void Init(IIfcRightCircularCylinder^ IIfcSolid);

@@ -203,9 +203,9 @@ namespace Xbim
 				}				
 				else if (dynamic_cast<IIfcCsgSolid^>(geomRep))
 				{
-					XbimSolid^ solid = (XbimSolid^)CreateSolid((IIfcCsgSolid^)geomRep);
-					if (objectLocation != nullptr) solid->Move(objectLocation);
-					return solid;
+					XbimSolidSet^ solidSet = (XbimSolidSet^)CreateSolidSet((IIfcCsgSolid^)geomRep);
+					if (objectLocation != nullptr) solidSet->Move(objectLocation);
+					return Trim(solidSet);
 				}
 				else if (dynamic_cast<IIfcSphere^>(geomRep))
 				{
@@ -504,25 +504,25 @@ namespace Xbim
 			return gcnew XbimSolid(IIfcSolid);
 		};
 
-		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcBooleanResult^ IIfcSolid)
+		IXbimSolidSet^ XbimGeometryCreator::CreateSolidSet(IIfcBooleanResult^ IIfcSolid)
 		{
-			return gcnew XbimSolid(IIfcSolid);
+			return gcnew XbimSolidSet(IIfcSolid);
 		};
 
-		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcBooleanOperand^ IIfcSolid)
+		IXbimSolidSet^ XbimGeometryCreator::CreateSolidSet(IIfcBooleanOperand^ IIfcSolid)
 		{
 			//ensure operands get treated correctly
 			if (dynamic_cast<IIfcBooleanClippingResult^>(IIfcSolid))
-				return gcnew XbimSolid((IIfcBooleanClippingResult^)IIfcSolid);
+				return gcnew XbimSolidSet((IIfcBooleanClippingResult^)IIfcSolid);
 			else if(dynamic_cast<IIfcBooleanResult^>(IIfcSolid))
-				return gcnew XbimSolid((IIfcBooleanResult^)IIfcSolid);
+				return gcnew XbimSolidSet((IIfcBooleanResult^)IIfcSolid);
 			else if (dynamic_cast<IIfcSolidModel^>(IIfcSolid))
-				return gcnew XbimSolid((IIfcSolidModel^)IIfcSolid);
+				return gcnew XbimSolidSet(gcnew XbimSolid((IIfcSolidModel^)IIfcSolid));
 			else if (dynamic_cast<IIfcHalfSpaceSolid^>(IIfcSolid))
-				return gcnew XbimSolid((IIfcHalfSpaceSolid^)IIfcSolid);
+				return gcnew XbimSolidSet(gcnew XbimSolid((IIfcHalfSpaceSolid^)IIfcSolid));
 			else if (dynamic_cast<IIfcCsgPrimitive3D^>(IIfcSolid))
-				return gcnew XbimSolid((IIfcCsgPrimitive3D^)IIfcSolid);
-			return gcnew XbimSolid(IIfcSolid);
+				return gcnew XbimSolidSet(gcnew XbimSolid((IIfcCsgPrimitive3D^)IIfcSolid));
+			return gcnew XbimSolidSet(IIfcSolid);
 		};
 		
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcBooleanClippingResult^ IIfcSolid)
@@ -530,7 +530,10 @@ namespace Xbim
 			return gcnew XbimSolid(IIfcSolid);
 		};
 
-		
+		IXbimSolidSet^ XbimGeometryCreator::CreateSolidSet(IIfcBooleanClippingResult^ IIfcSolid)
+		{
+			return gcnew XbimSolidSet(IIfcSolid);
+		};
 
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcHalfSpaceSolid^ IIfcSolid)
 		{
@@ -573,9 +576,9 @@ namespace Xbim
 			return gcnew XbimSolid(IIfcSolid);
 		};
 
-		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcCsgSolid^ IIfcSolid)
+		IXbimSolidSet^ XbimGeometryCreator::CreateSolidSet(IIfcCsgSolid^ IIfcSolid)
 		{
-			return gcnew XbimSolid(IIfcSolid);
+			return gcnew XbimSolidSet(IIfcSolid);
 		};
 
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcSphere^ IIfcSolid)
@@ -647,11 +650,6 @@ namespace Xbim
 		{
 			return gcnew XbimShell(linExt);
 		}
-
-		IXbimSolidSet^ XbimGeometryCreator::CreateSolidSet(IIfcBooleanResult^ boolOp)
-		{
-			return gcnew XbimSolidSet(boolOp);
-		};
 
 #pragma endregion
 
@@ -834,7 +832,8 @@ namespace Xbim
 				return;
 			}
 		}
-
+		// TODO Remove?
+		/*
 		IXbimSolidSet^ XbimGeometryCreator::CreateBooleanResult(IIfcBooleanClippingResult^ clip)
 		{
 			IModelFactors^ mf = clip->Model->ModelFactors;
@@ -933,7 +932,7 @@ namespace Xbim
 				return xbimSolidSet;
 		}
 
-#pragma endregion
+#pragma endregion */
 #pragma region Support for curves
 		IXbimCurve^ XbimGeometryCreator::CreateCurve(IIfcCurve^ curve)
 		{

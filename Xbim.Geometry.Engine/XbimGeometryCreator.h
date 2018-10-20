@@ -107,12 +107,15 @@ namespace Xbim
 			virtual IXbimSolid^ CreateSolid(IIfcBoundingBox^ ifcSolid);
 			virtual IXbimSolid^ CreateSolid(IIfcSurfaceCurveSweptAreaSolid^ ifcSolid);
 
-			virtual IXbimSolid^ CreateSolid(IIfcBooleanResult^ ifcSolid);
 			virtual IXbimSolid^ CreateSolid(IIfcBooleanClippingResult^ ifcSolid);
-			virtual IXbimSolid^ CreateSolid(IIfcBooleanOperand^ ifcSolid);
 			virtual IXbimSolid^ CreateSolid(IIfcHalfSpaceSolid^ ifcSolid);
 			virtual IXbimSolid^ CreateSolid(IIfcPolygonalBoundedHalfSpace^ ifcSolid);
 			virtual IXbimSolid^ CreateSolid(IIfcBoxedHalfSpace^ ifcSolid);
+
+			virtual IXbimSolidSet^ CreateSolidSet(IIfcBooleanOperand^ ifcSolid);
+			virtual IXbimSolidSet^ CreateSolidSet(IIfcBooleanResult^ ifcSolid);
+			virtual IXbimSolidSet^ CreateSolidSet(IIfcBooleanClippingResult^ ifcSolid);
+			virtual IXbimSolidSet^ CreateSolidSet(IIfcCsgSolid^ ifcSolid);
 
 			virtual IXbimSolidSet^ CreateSolidSet(IIfcManifoldSolidBrep^ ifcSolid);
 			virtual IXbimSolidSet^ CreateSolidSet(IIfcFacetedBrep^ ifcSolid);
@@ -123,7 +126,6 @@ namespace Xbim
 			virtual IXbimSolidSet^ CreateSolidSet(IIfcRevolvedAreaSolid^ ifcSolid);
 			virtual IXbimSolidSet^ CreateSolidSet(IIfcSurfaceCurveSweptAreaSolid^ ifcSolid);
 			virtual IXbimSolid^ CreateSolid(IIfcCsgPrimitive3D^ ifcSolid);
-			virtual IXbimSolid^ CreateSolid(IIfcCsgSolid^ ifcSolid);
 			virtual IXbimSolid^ CreateSolid(IIfcSphere^ ifcSolid);
 			virtual IXbimSolid^ CreateSolid(IIfcBlock^ ifcSolid);
 			virtual IXbimSolid^ CreateSolid(IIfcRightCircularCylinder^ ifcSolid);
@@ -140,10 +142,9 @@ namespace Xbim
 			virtual void WriteTriangulation(BinaryWriter^ bw, IXbimGeometryObject^ shape, double tolerance, double deflection, double angle);
 
 			virtual IIfcFacetedBrep^ CreateFacetedBrep(Xbim::Common::IModel^ model, IXbimSolid^ solid);
+		
 			//Creates collections of objects
 			virtual IXbimSolidSet^ CreateSolidSet();
-			virtual IXbimSolidSet^ CreateSolidSet(IIfcBooleanResult^ boolOp);
-			virtual IXbimSolidSet^ CreateBooleanResult(IIfcBooleanClippingResult^ clip);
 			virtual IXbimGeometryObjectSet^ CreateGeometryObjectSet();
 
 			//Ifc4 interfaces

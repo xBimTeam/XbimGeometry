@@ -73,9 +73,15 @@ namespace Xbim
 			solids = gcnew  List<IXbimSolid^>(1);
 			solids->Add(solid);
 		}
-		XbimSolidSet::XbimSolidSet(IIfcBooleanResult^ boolOp)
+
+		XbimSolidSet::XbimSolidSet(IIfcBooleanOperand^ boolOp)
 		{
 			Init(boolOp);
+		}
+
+		XbimSolidSet::XbimSolidSet(IIfcCsgSolid^ csgSolid)
+		{
+			Init(csgSolid);
 		}
 
 		XbimSolidSet::XbimSolidSet(IIfcManifoldSolidBrep^ solid)
@@ -753,26 +759,73 @@ namespace Xbim
 			return ret;
 		}
 
+		void XbimSolidSet::Init(IIfcBooleanOperand^ boolOp)
+		{
+			IIfcBooleanResult^ boolRes = dynamic_cast<IIfcBooleanResult^>(boolOp);
+			if (boolRes != nullptr)
+			{
+				Init(boolRes); // dispatch for boolean result
+			}
+			else
+			{
+				solids = gcnew List<IXbimSolid^>();
+				solids->Add(gcnew XbimSolid(boolOp)); // otherwise create a simple solid
+			}
 
+			if (IsValid)
+			{
+				for each (XbimSolid^ solid in solids)
+				{
+					if (!solid->IsValid)
+						XbimGeometryCreator::LogWarning(boolOp, "Partially invalid boolean operand result (solid volume {0})", solid->Volume);
+				}
+			}
+			else
+			{
+				XbimGeometryCreator::LogWarning(boolOp, "Invalid boolean operand result");
+			}
+		}
+
+		void XbimSolidSet::Init(IIfcCsgSolid^ IIfcSolid)
+		{
+			solids = gcnew List<IXbimSolid^>();
+			IIfcCsgPrimitive3D^ csgPrim = dynamic_cast<IIfcCsgPrimitive3D^>(IIfcSolid->TreeRootExpression);
+			if (csgPrim != nullptr)
+			{
+				solids->Add(gcnew XbimSolid(csgPrim));
+			}
+			else 
+			{
+				IIfcBooleanResult^ booleanResult = dynamic_cast<IIfcBooleanResult^>(IIfcSolid->TreeRootExpression);
+				if (booleanResult != nullptr) return Init(booleanResult);
+				throw gcnew NotImplementedException(String::Format("IIfcCsgSolid of Type {0} in entity #{1} is not implemented", IIfcSolid->GetType()->Name, IIfcSolid->EntityLabel));
+			}
+		}
 
 		void XbimSolidSet::Init(IIfcBooleanResult^ boolOp)
 		{
 			solids = gcnew List<IXbimSolid^>();
-			IIfcBooleanOperand^ fOp = boolOp->FirstOperand; //thse must be solids according to the schema
+
+			if (dynamic_cast<IIfcBooleanClippingResult^>(boolOp))
+			{
+				solids->Add(gcnew XbimSolid(boolOp));
+				return;
+			}
+
+			IIfcBooleanOperand^ fOp = boolOp->FirstOperand;
 			IIfcBooleanOperand^ sOp = boolOp->SecondOperand;
-			XbimSolid^ left = gcnew XbimSolid(fOp);
-			XbimSolid^ right = gcnew XbimSolid(sOp);
+			XbimSolidSet^ left = gcnew XbimSolidSet(fOp);
+			XbimSolidSet^ right = gcnew XbimSolidSet(sOp);
+
 			if (!left->IsValid)
 			{
-				if (boolOp->Operator != IfcBooleanOperator::UNION)
-				//XbimGeometryCreator::LogWarning(boolOp, "Boolean result has invalid first operand");
+				XbimGeometryCreator::LogWarning(boolOp, "Boolean result has invalid first operand {0}", fOp->EntityLabel);
 				return;
 			}
 
 			if (!right->IsValid)
 			{
-				//XbimGeometryCreator::LogWarning(boolOp, "Boolean result has invalid second operand");
-				if(left->IsValid) solids->Add(left); //return the left operand
+				XbimGeometryCreator::LogWarning(boolOp, "Boolean result has invalid second operand {0}", fOp->EntityLabel);
 				return;
 			}
 
@@ -792,6 +845,7 @@ namespace Xbim
 					break;
 				case IfcBooleanOperator::DIFFERENCE:
 					result = left->Cut(right, mf->Precision);
+					XbimGeometryCreator::LogDebug(boolOp, "XbimXolidSet boolean operation result => {0} solids ({1},{2})", result->Count, fOp->EntityLabel, sOp->EntityLabel);
 					vRes = VolumeOf(result);
 					if (vRes != -1)
 					{
@@ -803,8 +857,8 @@ namespace Xbim
 						if (vRes < vMin )
 						{ 
 							// the boolean had a problem
-							XbimGeometryCreator::LogError(boolOp, "Boolean operation silent failure, the operation has been ignored");
-							solids->Add(left);
+							XbimGeometryCreator::LogError(boolOp, "Boolean operation silent failure. Operation skipped using 1st operand only");
+							solids->AddRange(left);
 							return;
 						}
 					}
@@ -813,8 +867,8 @@ namespace Xbim
 			}
 			catch (Exception^ xbimE)
 			{
-				XbimGeometryCreator::LogError(boolOp, "Boolean operation failure, {0}. The operation has been ignored", xbimE->Message);
-				solids->Add(left);; //return the left operand
+				XbimGeometryCreator::LogError(boolOp, "Boolean operation failure, {0}. Operation skipped using 1st operand only", xbimE->Message);
+				solids->AddRange(left); //return the left operand
 				return;
 			}
 			solids->AddRange(result);
