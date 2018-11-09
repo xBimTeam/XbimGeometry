@@ -222,7 +222,11 @@ namespace Xbim
 
 		TopLoc_Location XbimConvert::ToLocation(IIfcAxis2Placement2D^ axis2D)
 		{
-			gp_Pnt2d loc(axis2D->Location->X, axis2D->Location->Y);
+			// Default behaviour changed to use 0,0 when location is null
+			gp_Pnt2d loc(
+				axis2D->Location ? axis2D->Location->X : 0,
+				axis2D->Location ? axis2D->Location->Y : 0
+			);
 
 			// If problems with creation of direction occur default direction is used
 			gp_Dir2d Vxgp = gp_Dir2d(1., 0.);

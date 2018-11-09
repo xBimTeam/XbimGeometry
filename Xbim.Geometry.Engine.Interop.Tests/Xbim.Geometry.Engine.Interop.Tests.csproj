@@ -60,6 +60,12 @@
     <None Update="TestFiles\IfcAdvancedBrepTrimmedCurveTest.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="TestFiles\IfcExtrudedAreaSolidInvalidPlacementTest.ifc">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="TestFiles\IfcExtrudedAreaSolidTest.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="TestFiles\TotalVoidResultBooleanClippingResultsTest.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
