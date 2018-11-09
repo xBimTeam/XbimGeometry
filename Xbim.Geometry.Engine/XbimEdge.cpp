@@ -993,6 +993,8 @@ namespace Xbim
 			if (bspline != nullptr) return Init(bspline, logger);
 			IIfcPcurve^ pcurve = dynamic_cast<IIfcPcurve^>(curve);
 			if (pcurve != nullptr) return Init(pcurve, logger);
+			IIfcTrimmedCurve^ tcurve = dynamic_cast<IIfcTrimmedCurve^>(curve);
+			if (tcurve != nullptr) return Init(tcurve, logger);
 			throw gcnew NotImplementedException(String::Format("Curve of Type {0} in entity #{1} is not implemented", curve->GetType()->Name, curve->EntityLabel));
 		}
 
@@ -1129,6 +1131,19 @@ namespace Xbim
 				*pEdge = edgeMaker.Edge();
 				ShapeFix_ShapeTolerance FTol;
 				FTol.SetTolerance(*pEdge, ellipse->Model->ModelFactors->Precision, TopAbs_EDGE);
+			}
+		}
+
+		void XbimEdge::Init(IIfcTrimmedCurve^ trimmedCurve, ILogger^ logger)
+		{
+			XbimCurve^ curve = gcnew XbimCurve(trimmedCurve, logger);
+			if (curve->IsValid)
+			{
+				BRepBuilderAPI_MakeEdge edgeMaker(curve);
+				pEdge = new TopoDS_Edge();
+				*pEdge = edgeMaker.Edge();
+				ShapeFix_ShapeTolerance FTol;
+				FTol.SetTolerance(*pEdge, trimmedCurve->Model->ModelFactors->Precision, TopAbs_EDGE);
 			}
 		}
 
