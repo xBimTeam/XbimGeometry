@@ -519,14 +519,37 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.IsTrue(solid.Faces.Count() == 7, "This solid should have 7 faces");
             }
         }
+
+        //this test is 2 boolean clipping on efffectivel a beam, but the second cut is an illegal solid with coincidental faces
+        //this test checks that the booleans do the right thing
         [TestMethod]
-        public void TotalVoidResultBooleanClippingResultsTest()
+        public void SmallBooleanClippingResultsTest()
         {
-            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(TotalVoidResultBooleanClippingResultsTest)))
+            IXbimSolid solidBody, solidCut1, solidCut2, solidResult;
+            // this is a simple cuboid / beam
+            using (var er = new EntityRepository<IIfcExtrudedAreaSolid>("SmallBooleanClippingResultsTestBodyShape"))
             {
-                var solid = geomEngine.CreateSolid(er.Entity, logger);
-                
-                Assert.IsTrue(solid.Volume==0, "This solid should have no volume");
+                solidBody = geomEngine.CreateSolid(er.Entity, logger);
+                Assert.IsTrue(solidBody.Faces.Count==6, "This solid should have 6 faces");
+            }
+            //this is a triangular fillet (prism) to cut off the sort side face
+            using (var er = new EntityRepository<IIfcFacetedBrep>("SmallBooleanClippingResultsTestCutShape1"))
+            {
+                solidCut1 = geomEngine.CreateSolid(er.Entity, logger);
+                Assert.IsTrue(solidCut1.Faces.Count == 5, "This solid should have 5 faces");
+            }
+            // this shape is a faulty solid
+            using (var er = new EntityRepository<IIfcFacetedBrep>("SmallBooleanClippingResultsTestCutShape2"))
+            {
+                solidCut2 = geomEngine.CreateSolid(er.Entity, logger);
+                Assert.IsTrue(solidCut2.Faces.Count == 10, "This solid should have 10 faces");
+            }
+            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(SmallBooleanClippingResultsTest)))
+            {
+                solidResult = geomEngine.CreateSolid(er.Entity, logger);
+                var actualVolume = solidResult.Volume;
+                Assert.IsTrue(solidBody.Volume > actualVolume, "This cut solid should have less volume than the body shape");
+                Assert.IsTrue(solidResult.Faces.Count == 9, "This solid should have 9 faces");
             }
         }
         [TestMethod]

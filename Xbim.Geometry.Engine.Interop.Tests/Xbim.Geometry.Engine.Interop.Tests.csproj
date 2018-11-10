@@ -66,7 +66,13 @@
     <None Update="TestFiles\IfcExtrudedAreaSolidTest.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestFiles\TotalVoidResultBooleanClippingResultsTest.ifc">
+    <None Update="TestFiles\SmallBooleanClippingResultsTestBodyShape.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestFiles\SmallBooleanClippingResultsTestCutShape1.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestFiles\SmallBooleanClippingResultsTest.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="TestFiles\IfcHalfspaceCutFromIfcExtrudedAreaSolidTest.ifc">
@@ -82,6 +88,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="TestFiles\SimpleBooleanClipResultTest.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestFiles\SmallBooleanClippingResultsTestCutShape2.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
