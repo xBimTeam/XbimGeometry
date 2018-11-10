@@ -64,10 +64,13 @@
 #include <GProp_GProps.hxx>
 #include <GC_MakeSegment.hxx>
 #include <ShapeAnalysis_Wire.hxx>
+#include <msclr\lock.h>
 #include <ShapeAnalysis_WireOrder.hxx>
 
 using namespace Xbim::Common;
 using namespace System::Linq;
+// using namespace System::Diagnostics;
+
 namespace Xbim
 { 
 	namespace Geometry
@@ -206,8 +209,17 @@ namespace Xbim
 			}
 			else
 			{
-
-				XbimWire^ loop = gcnew XbimWire(profile->OuterCurve, logger);
+				XbimWire^ loop;
+				if (dynamic_cast<IIfcPolyline^>(profile->OuterCurve))
+				{
+					loop = gcnew XbimWire((IIfcPolyline^)(profile->OuterCurve), true, logger);
+				}
+				else
+				{
+					loop = gcnew XbimWire(profile->OuterCurve, logger);
+				}
+				
+				
 				if (!loop->IsValid)
 				{
 					XbimGeometryCreator::LogWarning(logger,profile, "Invalid outer bound. Wire discarded");
@@ -216,6 +228,8 @@ namespace Xbim
 				pWire = new TopoDS_Wire();
 				if (!loop->IsClosed && loop->Edges->Count>1) //we need to close it if we have more thn one edge
 				{
+					// todo: this code is not quite robust, it did not manage to close fairly simple polylines.
+					//
 					double oneMilli = profile->Model->ModelFactors->OneMilliMeter;
 					XbimFace^ face = gcnew XbimFace(loop, logger);
 					ShapeFix_Wire wireFixer(loop,face, profile->Model->ModelFactors->Precision);
@@ -273,7 +287,15 @@ namespace Xbim
 
 			BRepOffsetAPI_MakeOffset offseter(centreWire);
 			Standard_Real offset = profile->Thickness / 2;
-			offseter.Perform(offset);
+			// Pyatkov 15.06.2017. (Artoymyp on Github)
+			// Somewhere in the BRepOffsetAPI_MakeOffset.Perform() a static variable is used:
+			// static BRepMAT2d_Explorer Exp;
+			// That is why calls to this function in a multi-threaded mode 
+			// lead to an unpredictable behavior.
+			{
+				msclr::lock l(_makeOffsetLock);
+				offseter.Perform(offset);
+			} // local scope ends, destructor of lock is called (lock is released).
 			
 			double precision = profile->Model->ModelFactors->Precision;
 			if (offseter.IsDone() && offseter.Shape().ShapeType() == TopAbs_WIRE)
@@ -571,7 +593,8 @@ namespace Xbim
 				if (seg->Transition == IfcTransitionCode::DISCONTINUOUS) isContinuous = false;
 				if (wireSegManaged->IsValid)
 				{
-					if (!seg->SameSense) wireSegManaged->Reverse();
+					if (!seg->SameSense) 
+						wireSegManaged->Reverse();
 					for each (XbimEdge^ edge in wireSegManaged->Edges)
 					{
 						FTol.LimitTolerance(edge, precision);											
@@ -1113,8 +1136,8 @@ namespace Xbim
 
 		XbimVector3D XbimWire::Normal::get()
 		{
-			if (!IsValid) return XbimVector3D();
-
+			if (!IsValid) 
+				return XbimVector3D();
 			double x = 0, y = 0, z = 0;
 			gp_Pnt currentStart, previousEnd, first;
 			int count = 0;
@@ -1154,34 +1177,52 @@ namespace Xbim
 						(cType == STANDARD_TYPE(Geom_BezierCurve)) ||
 						(cType == STANDARD_TYPE(Geom_BSplineCurve)))
 					{
+						// we identify the Us of quadrant points along the curve to compute the normal
+						//
 						BRepAdaptor_Curve curve(wEx.Current());
-						double us = curve.FirstParameter();
-						double ue = curve.LastParameter();
-						double u1 = us + ((ue - us) / 4);
-						double u2 = us + (((ue - us) / 4) * 2);
-						double u3 = us + (((ue - us) / 4) * 3);
-						gp_Pnt p1;gp_Pnt p2;gp_Pnt p3;
-						gp_Vec v1; gp_Vec v2; gp_Vec v3;
-						curve.D1(u1, p1, v1);
-						curve.D1(u2, p2, v2);
-						curve.D1(u3, p3, v3);
+						TopAbs_Orientation or = wEx.Current().Orientation();
+						double uStart = curve.FirstParameter();
+						double uEnd = curve.LastParameter();
+						double u0, u1, u2, u3;
+						double delta;
+						if (or != TopAbs_REVERSED)
+						{
+							u0 = uStart; // start from the start
+							delta = (uEnd - uStart) / 4; // and go forward a bit for each step
+						}
+						else
+						{
+							u0 = uEnd; // start from the end
+							delta = (uEnd - uStart) / -4; // and go back a bit for each step
+						}
+						u1 = u0 + delta;
+						u2 = u1 + delta;
+						u3 = u2 + delta;
+						
+						// then we get the points
+						gp_Pnt p0; gp_Pnt p1; gp_Pnt p2; gp_Pnt p3;
+						curve.D0(u0, p0);
+						curve.D0(u1, p1);
+						curve.D0(u2, p2);
+						curve.D0(u3, p3);
+
+						// then add the points to the newell evaluation
 						if (count > 0)
 						{
-							AddNewellPoint(previousEnd, currentStart, x, y, z);
-							AddNewellPoint(currentStart, p1, x, y, z);
+							AddNewellPoint(previousEnd, p0, x, y, z);
+							AddNewellPoint(p0, p1, x, y, z);
 							AddNewellPoint(p1, p2, x, y, z);
 							AddNewellPoint(p2, p3, x, y, z);
 							previousEnd = p3;
 						}
 						else
 						{
-							first = currentStart;
+							first = p0;
 							AddNewellPoint(first, p1, x, y, z);
 							AddNewellPoint(p1, p2, x, y, z);
 							AddNewellPoint(p2, p3, x, y, z);
 							previousEnd = p3;
 						}
-
 					}
 					else //throw AN EXCEPTION
 					{
@@ -1193,7 +1234,18 @@ namespace Xbim
 			//do the last one
 			AddNewellPoint(previousEnd, first, x, y, z);
 			XbimVector3D vec(x, y, z);
+			/*
+			// this can be used to look at the wire points in autocad for debugging
+			Debug::WriteLine("_.CIRCLE");
+			Debug::WriteLine("{0},{1},{2}", previousEnd.X(), previousEnd.Y(), previousEnd.Z());
+			Debug::WriteLine("7");
+			Debug::WriteLine("_.CIRCLE");
+			Debug::WriteLine("{0},{1},{2}", first.X(), first.Y(), first.Z());
+			Debug::WriteLine("15");
+			*/
+			
 			GC::KeepAlive(this);
+			// XbimVector3D
 			return vec.Normalized();
 		}
 
@@ -2691,9 +2743,21 @@ namespace Xbim
 			const double& xn1 = current.X();
 			const double& yn1 = current.Y();
 			const double& zn1 = current.Z();
+			/*
+			Debug::WriteLine("_.LINE");
+			Debug::WriteLine("{0},{1},{2}", xn, yn, zn);
+			Debug::WriteLine("{0},{1},{2}", xn1, yn1, zn1);
+			Debug::WriteLine("");
+			*/
+
 			x += (yn - yn1)*(zn + zn1);
 			y += (xn + xn1)*(zn - zn1);
 			z += (xn - xn1)*(yn + yn1);
+			/*
+			Debug::WriteLine("-HYPERLINK I O l  {0},{1},{2}", x, y, z);
+			Debug::WriteLine("");
+			Debug::WriteLine("");
+			*/
 		}
 
 		bool IfcPolylineComparer::Equals(IIfcPolyline ^x, Xbim::Ifc4::Interfaces::IIfcPolyline ^y)

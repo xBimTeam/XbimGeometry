@@ -30,6 +30,9 @@ namespace Xbim
 				// Warning: this should check the args for the assembly name!
 				return nullptr;
 			}
+			bool Is3D(IIfcCurve^ rep);
+			
+		public:
 
 			
 
@@ -52,7 +55,7 @@ namespace Xbim
 			~XbimGeometryCreator()
 			{
 			}
-			bool Is3D(IIfcCurve^ rep);			
+				
 		public:
 
 			

@@ -16,7 +16,7 @@
 #include <Bnd_Box.hxx>
 #include <BRep_Builder.hxx>
 #include <BRep_Tool.hxx>
-#include <BRepAlgo_Section.hxx>
+#include <BRepAlgoAPI_Section.hxx>
 #include <BRepBndLib.hxx>
 #include <BRepFill_Generator.hxx>
 #include <BRepLib_MakeEdge.hxx>
@@ -123,17 +123,19 @@ void BRepProj_Projection::BuildSection (const TopoDS_Shape& theShape,
     aShape = C;
   }
   if ( aShape.IsNull() )
-    Standard_ConstructionError::Raise(__FILE__": target shape has no faces");
+    throw Standard_ConstructionError(__FILE__": target shape has no faces");
 
-  // build section computing pcurves on the shape
-//  BRepAlgoAPI_Section aSectionTool (aShape, theTool, Standard_False);
-  BRepAlgo_Section aSectionTool (aShape, theTool, Standard_False);
-  aSectionTool.Approximation (Standard_True);
-  aSectionTool.ComputePCurveOn1 (Standard_True);
+  // build section computing p-curves on both shapes to get higher precision
+  BRepAlgoAPI_Section aSectionTool(aShape, theTool, Standard_False);
+  aSectionTool.Approximation(Standard_True);
+  aSectionTool.ComputePCurveOn1(Standard_True);
+  aSectionTool.ComputePCurveOn2(Standard_True);
+  // Use Oriented Bounding Boxes inside Booleans to speed up calculation of the section
+  aSectionTool.SetUseOBB(Standard_True);
   aSectionTool.Build();
 
   // check for successful work of the section tool
-  if (! aSectionTool.IsDone()) 
+  if (!aSectionTool.IsDone())
     return;
 
   // get edges of the result
@@ -178,7 +180,7 @@ BRepProj_Projection::BRepProj_Projection(const TopoDS_Shape& Wire,
   Standard_NullObject_Raise_if((Wire.IsNull() || Shape.IsNull()),__FILE__": null input shape");
   if (Wire.ShapeType() != TopAbs_EDGE && 
       Wire.ShapeType() != TopAbs_WIRE ) 
-    Standard_ConstructionError::Raise(__FILE__": projected shape is neither wire nor edge");
+    throw Standard_ConstructionError(__FILE__": projected shape is neither wire nor edge");
 
   // compute the "length" of the cylindrical surface to build
   Standard_Real mdis = DistanceIn(Wire, Shape);
@@ -214,7 +216,7 @@ BRepProj_Projection::BRepProj_Projection (const TopoDS_Shape& Wire,
   Standard_NullObject_Raise_if((Wire.IsNull() || Shape.IsNull()),__FILE__": null input shape");
   if (Wire.ShapeType() != TopAbs_EDGE && 
       Wire.ShapeType() != TopAbs_WIRE ) 
-    Standard_ConstructionError::Raise(__FILE__": projected shape is neither wire nor edge");
+    throw Standard_ConstructionError(__FILE__": projected shape is neither wire nor edge");
 
   // if Wire is only an edge, transform it into a Wire
   TopoDS_Wire aWire;
@@ -240,7 +242,7 @@ BRepProj_Projection::BRepProj_Projection (const TopoDS_Shape& Wire,
   // compute the ratio of the scale transformation
   Standard_Real Scale = PC.Distance(P);
   if ( Abs (Scale) < Precision::Confusion() ) 
-    Standard_ConstructionError::Raise("Projection");
+    throw Standard_ConstructionError("Projection");
   Scale = 1. + mdis / Scale;
   
   // move the base of the conical surface by scaling it with ratio Scale

@@ -18,7 +18,7 @@ namespace Xbim
 			virtual int Compare(Tuple<double, XbimSolid^>^ x, Tuple<double, XbimSolid^>^ y)
 			{
 				// Compare y and x in reverse order. 
-				return y->Item1.CompareTo(x->Item1);
+				return y->Item1.CompareTo(x->Item1); 
 			}
 		};
 

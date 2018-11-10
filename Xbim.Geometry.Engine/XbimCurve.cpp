@@ -153,7 +153,7 @@ namespace Xbim
 				Standard_Real last = baseCurve->LastParameter;
 				Handle(Geom2d_Curve) c2d;
 				Handle(Geom_Curve) cBase = baseCurve;
-				if(projector.PerformAdvanced(cBase, first, last, c2d))
+				if (projector.Perform(cBase, first, last, c2d))
 				{
 					pCurve = new Handle(Geom_Curve);
 					*pCurve = cBase;					

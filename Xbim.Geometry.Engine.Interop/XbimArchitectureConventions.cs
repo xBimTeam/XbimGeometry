@@ -2,7 +2,6 @@
 
 namespace Xbim.Geometry.Engine.Interop
 {
-
     /// <summary>
     /// A class representing the conventions we use for processor specific Geometry Engine library
     /// </summary>
@@ -21,10 +20,16 @@ namespace Xbim.Geometry.Engine.Interop
                 Suffix = "32";
                 //SubFolder = "x86";
             }
-
-
         }
-           
+
+        public string AssemblyName
+        {
+            get
+            {
+                return ModuleName + Suffix; 
+            }
+        }
+            
 
         /// <summary>
         /// The suffix we apply to platform-specific assemblys in the current process architecture
@@ -47,8 +52,6 @@ namespace Xbim.Geometry.Engine.Interop
 #else
                 return "Xbim.Geometry.Engine";
 #endif
-
-
             }
         }
 

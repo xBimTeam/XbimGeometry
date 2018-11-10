@@ -22,7 +22,7 @@
 #include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <TopTools_MapOfOrientedShape.hxx>
 
-IMPLEMENT_STANDARD_RTTIEXT(BRepAlgo_AsDes,MMgt_TShared)
+IMPLEMENT_STANDARD_RTTIEXT(BRepAlgo_AsDes,Standard_Transient)
 
 //=======================================================================
 //function : BRepAlgo_AsDes
@@ -299,10 +299,10 @@ void BRepAlgo_AsDes::Replace(const TopoDS_Shape& OldS,
 void BRepAlgo_AsDes::Remove(const TopoDS_Shape& SS)
 {
   if (down.IsBound(SS)) {
-    Standard_ConstructionError::Raise(" BRepAlgo_AsDes::Remove");
+    throw Standard_ConstructionError(" BRepAlgo_AsDes::Remove");
   }
   if (!up.IsBound(SS)) {
-    Standard_ConstructionError::Raise(" BRepAlgo_AsDes::Remove");
+    throw Standard_ConstructionError(" BRepAlgo_AsDes::Remove");
   }
   TopTools_ListIteratorOfListOfShape it(up(SS));
   for (; it.More(); it.Next()) {

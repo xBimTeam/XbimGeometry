@@ -1,9 +1,0 @@
-Notes on the problem:
-=====================
-
-File comes from:
-https://github.com/xBimTeam/XbimGeometry/issues/48
-but it's been reduced to the minimum size that generates the problem.
-
-The engine cannot generate a shape for the rebar made of two segments.
-Solibri does show a shape.

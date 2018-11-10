@@ -17,10 +17,10 @@
 
 #include <math_SingleTab.hxx>
 
-class Standard_DimensionError;
-class Standard_DivideByZero;
-class Standard_RangeError;
-class math_Matrix;
+// resolve name collisions with X11 headers
+#ifdef Opposite
+  #undef Opposite
+#endif
 
 //! This class implements the real IntegerVector abstract data type.
 //! IntegerVectors can have an arbitrary range which must be define at
@@ -183,7 +183,7 @@ public:
     return Array(theNum);
   }
 
-  Standard_EXPORT Standard_Integer& operator()(const Standard_Integer theNum) const
+  Standard_Integer& operator()(const Standard_Integer theNum) const
   {
     return Value(theNum);
   }

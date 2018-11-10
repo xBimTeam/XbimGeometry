@@ -28,9 +28,9 @@ BRepAlgoAPI_BuilderAlgo::BRepAlgoAPI_BuilderAlgo()
   myEntryType(1),
   myDSFiller(NULL),
   myBuilder(NULL),
-  myFuzzyValue(0.),
   myNonDestructive(Standard_False),
-  myGlue(BOPAlgo_GlueOff)
+  myGlue(BOPAlgo_GlueOff),
+  myCheckInverted(Standard_True)
 {}
 //=======================================================================
 // function: 
@@ -42,9 +42,9 @@ BRepAlgoAPI_BuilderAlgo::BRepAlgoAPI_BuilderAlgo
   BRepAlgoAPI_Algo(),
   myEntryType(0),
   myBuilder(NULL),
-  myFuzzyValue(0.),
   myNonDestructive(Standard_False),
-  myGlue(BOPAlgo_GlueOff)
+  myGlue(BOPAlgo_GlueOff),
+  myCheckInverted(Standard_True)
 {
   BOPAlgo_PaveFiller* pPF=(BOPAlgo_PaveFiller*)&aPF;
   myDSFiller=pPF;
@@ -56,22 +56,6 @@ BRepAlgoAPI_BuilderAlgo::BRepAlgoAPI_BuilderAlgo
 BRepAlgoAPI_BuilderAlgo::~BRepAlgoAPI_BuilderAlgo()
 {
   Clear();
-}
-//=======================================================================
-//function : SetFuzzyValue
-//purpose  : 
-//=======================================================================
-void BRepAlgoAPI_BuilderAlgo::SetFuzzyValue(const Standard_Real theFuzz)
-{
-  myFuzzyValue = (theFuzz < 0.) ? 0. : theFuzz;
-}
-//=======================================================================
-//function : FuzzyValue
-//purpose  : 
-//=======================================================================
-Standard_Real BRepAlgoAPI_BuilderAlgo::FuzzyValue() const
-{
-  return myFuzzyValue;
 }
 //=======================================================================
 //function : SetNonDestructive
@@ -111,6 +95,7 @@ BOPAlgo_GlueEnum BRepAlgoAPI_BuilderAlgo::Glue() const
 //=======================================================================
 void BRepAlgoAPI_BuilderAlgo::Clear()
 {
+  BRepAlgoAPI_Algo::Clear();
   if (myDSFiller && myEntryType) {
     delete myDSFiller;
     myDSFiller=NULL;
@@ -143,10 +128,7 @@ const TopTools_ListOfShape& BRepAlgoAPI_BuilderAlgo::Arguments()const
 //=======================================================================
 void BRepAlgoAPI_BuilderAlgo::Build()
 {
-  Standard_Integer iErr;
-  //
   NotDone();
-  myErrorStatus=0;
   //
   Clear();
   //
@@ -163,16 +145,20 @@ void BRepAlgoAPI_BuilderAlgo::Build()
     myDSFiller->SetFuzzyValue(myFuzzyValue);
     myDSFiller->SetNonDestructive(myNonDestructive);
     myDSFiller->SetGlue(myGlue);
+    myDSFiller->SetUseOBB(myUseOBB);
     //
     myDSFiller->Perform();
-    iErr=myDSFiller->ErrorStatus();
-    if (iErr) {
-      myErrorStatus=100+iErr;
+    //
+    GetReport()->Merge (myDSFiller->GetReport());
+    if (HasErrors())
+    {
+      return;
     }
   }// if (myEntryType) {
   // 
   if (myBuilder) {
     delete myBuilder;
+    myBuilder = NULL;
   }
   myBuilder=new BOPAlgo_Builder(myAllocator);
   //
@@ -180,12 +166,11 @@ void BRepAlgoAPI_BuilderAlgo::Build()
   //
   myBuilder->SetRunParallel(myRunParallel);
   myBuilder->SetProgressIndicator(myProgressIndicator);
+  myBuilder->SetCheckInverted(myCheckInverted);
   //
   myBuilder->PerformWithFiller(*myDSFiller);
-  iErr=myBuilder->ErrorStatus();
-  if (iErr) {
-    myErrorStatus=200+iErr;
-  }
+  //
+  GetReport()->Merge (myBuilder->GetReport());
   //
   Done();
   myShape=myBuilder->Shape();

@@ -528,8 +528,8 @@ namespace Xbim
 			Handle(Geom_Surface) geomSurf = refSurface->GetSurface();
 			GeomAPI_ProjectPointOnSurf projector(startPoint, geomSurf);
 			projector.Perform(startPoint);
-			Quantity_Parameter u;
-			Quantity_Parameter v;
+			Standard_Real u;
+			Standard_Real v;
 			projector.Parameters(1, u, v);
 			XbimVector3D norm = refSurface->NormalAt(u, v);
 			//move the wire to the start point
@@ -2006,7 +2006,7 @@ namespace Xbim
 				fixTol.SetTolerance(this, tolerance);
 				BRepAlgoAPI_Cut boolOp(this, solidCut);
 #endif
-				if (boolOp.ErrorStatus() == 0)
+				if (boolOp.HasErrors() == Standard_False)
 					if (BRepCheck_Analyzer(boolOp.Shape(), Standard_False).IsValid() == Standard_False)
 					{
 						ShapeFix_Shape shapeFixer(boolOp.Shape());
@@ -2038,9 +2038,9 @@ namespace Xbim
 				return gcnew XbimSolidSet(boolOp.Shape());
 				
 			}
-			catch (Standard_Failure e)
+			catch (const std::exception &exc)
 			{
-				 err = gcnew String(Standard_Failure::Caught()->GetMessageString());			
+				 err = gcnew String(exc.what());
 			}
 			XbimGeometryCreator::LogWarning(logger, toCut, "Boolean Cut operation failed, {0}",err);
 			GC::KeepAlive(solidCut);
@@ -2072,12 +2072,12 @@ namespace Xbim
 			try
 			{
 				BRepAlgoAPI_Common boolOp(this, solidIntersect);
-				if (boolOp.ErrorStatus() == 0)
+				if (boolOp.HasErrors() == Standard_False)
 					return gcnew XbimSolidSet(boolOp.Shape());
 			}
-			catch (Standard_Failure e)
+			catch (const std::exception &exc)
 			{
-				err = gcnew String(Standard_Failure::Caught()->GetMessageString());
+				err = gcnew String(exc.what());
 			}
 			XbimGeometryCreator::LogWarning(logger, toIntersect, "Intersect operation failed,{0}", err);
 			return XbimSolidSet::Empty;
@@ -2111,12 +2111,12 @@ namespace Xbim
 			try
 			{
 				BRepAlgoAPI_Fuse boolOp(this, solidUnion);
-				if (boolOp.ErrorStatus() == 0)
+				if (boolOp.HasErrors() == Standard_False)
 					return gcnew XbimSolidSet(boolOp.Shape());
 			}
-			catch (Standard_Failure e)
+			catch (const std::exception &exc)
 			{
-				err = gcnew String(Standard_Failure::Caught()->GetMessageString());
+				err = gcnew String(exc.what());
 			}
 			XbimGeometryCreator::LogWarning(logger, toUnion, "Boolean Union operation failed, {0}",err);
 			return XbimSolidSet::Empty;

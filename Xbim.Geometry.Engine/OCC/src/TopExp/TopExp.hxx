@@ -24,6 +24,7 @@
 #include <TopAbs_ShapeEnum.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
+#include <TopTools_MapOfShape.hxx>
 #include <Standard_Boolean.hxx>
 class TopoDS_Shape;
 class TopoDS_Vertex;
@@ -58,7 +59,10 @@ public:
   
   //! Stores in the map <M> all  the sub-shapes of <S>.
   Standard_EXPORT static void MapShapes (const TopoDS_Shape& S, TopTools_IndexedMapOfShape& M);
-  
+
+  //! Stores in the map <M> all  the sub-shapes of <S>.
+  Standard_EXPORT static void MapShapes (const TopoDS_Shape& S, TopTools_MapOfShape& M);
+
   //! Stores in the map <M> all the subshape of <S> of
   //! type <TS>  for each one append  to  the list all
   //! the ancestors of type <TA>.  For example map all
@@ -66,6 +70,15 @@ public:
   //! Warning: The map is not cleared at first.
   Standard_EXPORT static void MapShapesAndAncestors (const TopoDS_Shape& S, const TopAbs_ShapeEnum TS, const TopAbs_ShapeEnum TA, TopTools_IndexedDataMapOfShapeListOfShape& M);
   
+  //! Stores in the map <M> all the subshape of <S> of
+  //! type <TS> for each one append to the list all
+  //! unique ancestors of type <TA>.  For example map all
+  //! the edges and bind the list of faces.
+  //! useOrientation = True : taking account the ancestor orientation
+  //! Warning: The map is not cleared at first.
+  Standard_EXPORT static void MapShapesAndUniqueAncestors (const TopoDS_Shape& S, const TopAbs_ShapeEnum TS, const TopAbs_ShapeEnum TA, TopTools_IndexedDataMapOfShapeListOfShape& M,
+                                                           const Standard_Boolean useOrientation = Standard_False);
+
   //! Returns the Vertex of orientation FORWARD in E. If
   //! there is none returns a Null Shape.
   //! CumOri = True : taking account the edge orientation

@@ -91,10 +91,11 @@ namespace Xbim
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D)override;
 			virtual property bool IsQuadOrTriangle{bool get(); }
 			virtual void SaveAsBrep(String^ fileName);
+			virtual property XbimPoint3D Location {XbimPoint3D get(); }
 #pragma endregion
 
 			property bool IsReversed{bool get(){ return IsValid && pFace->Orientation() == TopAbs_REVERSED; }; }
-			property XbimPoint3D Location{XbimPoint3D get(); }
+			
 #pragma region constructors
 			XbimFace(const TopoDS_Face& face);
 			XbimFace(const TopoDS_Face& face, Object^ tag);

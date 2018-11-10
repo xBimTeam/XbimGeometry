@@ -18,6 +18,7 @@
 
 #include <BOPAlgo_Builder.hxx>
 #include <BOPAlgo_PaveFiller.hxx>
+#include <BOPAlgo_Alerts.hxx>
 #include <BOPTools_AlgoTools.hxx>
 #include <BRep_Builder.hxx>
 #include <IntTools_Context.hxx>
@@ -26,12 +27,11 @@
 #include <TopoDS_Compound.hxx>
 #include <BRep_Builder.hxx>
 
-#include <BOPCol_IndexedMapOfShape.hxx>
-
 #include <BOPDS_ShapeInfo.hxx>
 #include <BOPDS_DS.hxx>
 
 #include <BOPTools_AlgoTools.hxx>
+#include <TopTools_IndexedMapOfShape.hxx>
 #include <TopTools_ListIteratorOfListOfShape.hxx>
 
 
@@ -49,10 +49,10 @@ BOPAlgo_Builder::BOPAlgo_Builder()
   myEntryPoint(0),
   myImages(100, myAllocator),
   myShapesSD(100, myAllocator),
-  mySplits(100, myAllocator),
   myOrigins(100, myAllocator),
   myNonDestructive(Standard_False),
-  myGlue(BOPAlgo_GlueOff)
+  myGlue(BOPAlgo_GlueOff),
+  myCheckInverted(Standard_True)
 {
 }
 //=======================================================================
@@ -70,10 +70,10 @@ BOPAlgo_Builder::BOPAlgo_Builder
   myEntryPoint(0),
   myImages(100, myAllocator), 
   myShapesSD(100, myAllocator),
-  mySplits(100, myAllocator),
   myOrigins(100, myAllocator),
   myNonDestructive(Standard_False),
-  myGlue(BOPAlgo_GlueOff)
+  myGlue(BOPAlgo_GlueOff),
+  myCheckInverted(Standard_True)
 {
 }
 //=======================================================================
@@ -95,11 +95,11 @@ BOPAlgo_Builder::~BOPAlgo_Builder()
 //=======================================================================
 void BOPAlgo_Builder::Clear()
 {
+  BOPAlgo_Algo::Clear();
   myArguments.Clear();
   myMapFence.Clear();
   myImages.Clear();
   myShapesSD.Clear();
-  mySplits.Clear();
   myOrigins.Clear();
 }
 //=======================================================================
@@ -116,9 +116,9 @@ void BOPAlgo_Builder::AddArgument(const TopoDS_Shape& theShape)
 //function : SetArguments
 //purpose  : 
 //=======================================================================
-void BOPAlgo_Builder::SetArguments(const BOPCol_ListOfShape& theShapes)
+void BOPAlgo_Builder::SetArguments(const TopTools_ListOfShape& theShapes)
 {
-  BOPCol_ListIteratorOfListOfShape aIt;
+  TopTools_ListIteratorOfListOfShape aIt;
   //
   myArguments.Clear();
   //
@@ -129,130 +129,38 @@ void BOPAlgo_Builder::SetArguments(const BOPCol_ListOfShape& theShapes)
   }
 }
 //=======================================================================
-//function : Arguments
-//purpose  : 
-//=======================================================================
-const BOPCol_ListOfShape& BOPAlgo_Builder::Arguments()const
-{
-  return myArguments;
-}
-//=======================================================================
-//function : Images
-//purpose  : 
-//=======================================================================
-const BOPCol_DataMapOfShapeListOfShape& BOPAlgo_Builder::Images()const
-{
-  return myImages;
-}
-//=======================================================================
-//function : Origins
-//purpose  : 
-//=======================================================================
-const BOPCol_DataMapOfShapeShape& BOPAlgo_Builder::Origins()const
-{
-  return myOrigins;
-}
-
-//=======================================================================
-//function : ShapesSd
-//purpose  : 
-//=======================================================================
-const BOPCol_DataMapOfShapeShape& BOPAlgo_Builder::ShapesSD()const
-{
-  return myShapesSD;
-}
-//=======================================================================
-//function : Splits
-//purpose  : 
-//=======================================================================
-const BOPCol_DataMapOfShapeListOfShape& BOPAlgo_Builder::Splits()const
-{
-  return mySplits;
-}
-//=======================================================================
-//function : PPaveFiller
-//purpose  : 
-//=======================================================================
-BOPAlgo_PPaveFiller BOPAlgo_Builder::PPaveFiller()
-{
-  return myPaveFiller;
-}
-//=======================================================================
-//function : PDS
-//purpose  : 
-//=======================================================================
-BOPDS_PDS BOPAlgo_Builder::PDS()
-{
-  return myDS;
-}
-//=======================================================================
-//function : SetNonDestructive
-//purpose  : 
-//=======================================================================
-void BOPAlgo_Builder::SetNonDestructive(const Standard_Boolean theFlag)
-{
-  myNonDestructive = theFlag;
-}
-//=======================================================================
-//function : NonDestructive
-//purpose  : 
-//=======================================================================
-Standard_Boolean BOPAlgo_Builder::NonDestructive() const
-{
-  return myNonDestructive;
-}
-//=======================================================================
-//function : SetGlue
-//purpose  : 
-//=======================================================================
-void BOPAlgo_Builder::SetGlue(const BOPAlgo_GlueEnum theGlue)
-{
-  myGlue=theGlue;
-}
-//=======================================================================
-//function : Glue
-//purpose  : 
-//=======================================================================
-BOPAlgo_GlueEnum BOPAlgo_Builder::Glue() const 
-{
-  return myGlue;
-}
-//=======================================================================
 // function: CheckData
 // purpose: 
 //=======================================================================
 void BOPAlgo_Builder::CheckData()
 {
-  Standard_Integer aNb;
-  //
-  myErrorStatus=0;
-  //
-  aNb=myArguments.Extent();
+  Standard_Integer aNb = myArguments.Extent();
   if (aNb<2) {
-    myErrorStatus=100; // too few arguments to process
+    AddError (new BOPAlgo_AlertTooFewArguments); // too few arguments to process
     return;
   }
   //
-  //  myPaveFiller
-  if (!myPaveFiller) {
-    myErrorStatus=101; 
-    return;
-  }
-  //
-  myErrorStatus=myPaveFiller->ErrorStatus();
-  if (myErrorStatus) {
-    myErrorStatus=102; // PaveFiller is failed
-    return;
-  }
+  CheckFiller();
 }
+//=======================================================================
+// function: CheckFiller
+// purpose: 
+//=======================================================================
+void BOPAlgo_Builder::CheckFiller()
+{
+  if (!myPaveFiller) {
+    AddError (new BOPAlgo_AlertNoFiller);
+    return;
+  }
+  GetReport()->Merge (myPaveFiller->GetReport());
+}
+
 //=======================================================================
 //function : Prepare
 //purpose  : 
 //=======================================================================
 void BOPAlgo_Builder::Prepare()
 {
-  myErrorStatus=0;
-  //
   BRep_Builder aBB;
   TopoDS_Compound aC;
   //
@@ -267,7 +175,7 @@ void BOPAlgo_Builder::Prepare()
 //=======================================================================
 void BOPAlgo_Builder::Perform()
 {
-  myErrorStatus=0;
+  GetReport()->Clear();
   //
   if (myEntryPoint==1) {
     if (myPaveFiller) {
@@ -287,6 +195,7 @@ void BOPAlgo_Builder::Perform()
   pPF->SetFuzzyValue(myFuzzyValue);
   pPF->SetNonDestructive(myNonDestructive);
   pPF->SetGlue(myGlue);
+  pPF->SetUseOBB(myUseOBB);
   //
   pPF->Perform();
   //
@@ -299,10 +208,12 @@ void BOPAlgo_Builder::Perform()
 //=======================================================================
 void BOPAlgo_Builder::PerformWithFiller(const BOPAlgo_PaveFiller& theFiller)
 {
+  GetReport()->Clear();
   myEntryPoint=0;
   myNonDestructive = theFiller.NonDestructive();
   myFuzzyValue = theFiller.FuzzyValue();
   myGlue = theFiller.Glue();
+  myUseOBB = theFiller.UseOBB();
   PerformInternal(theFiller);
 }
 //=======================================================================
@@ -311,14 +222,16 @@ void BOPAlgo_Builder::PerformWithFiller(const BOPAlgo_PaveFiller& theFiller)
 //=======================================================================
 void BOPAlgo_Builder::PerformInternal(const BOPAlgo_PaveFiller& theFiller)
 {
-  try { 
+  GetReport()->Clear();
+  //
+  try {
     OCC_CATCH_SIGNALS
     PerformInternal1(theFiller);
   }
   //
   catch (Standard_Failure) {
-    myErrorStatus=191;
-  }  
+    AddError (new BOPAlgo_AlertBuilderFailed);
+  }
 }
 //=======================================================================
 //function : PerformInternal1
@@ -326,8 +239,6 @@ void BOPAlgo_Builder::PerformInternal(const BOPAlgo_PaveFiller& theFiller)
 //=======================================================================
 void BOPAlgo_Builder::PerformInternal1(const BOPAlgo_PaveFiller& theFiller)
 {
-  myErrorStatus=0;
-  //
   myPaveFiller=(BOPAlgo_PaveFiller*)&theFiller;
   myDS=myPaveFiller->PDS();
   myContext=myPaveFiller->Context();
@@ -336,98 +247,98 @@ void BOPAlgo_Builder::PerformInternal1(const BOPAlgo_PaveFiller& theFiller)
   //
   // 1. CheckData
   CheckData();
-  if (myErrorStatus) {
+  if (HasErrors()) {
     return;
   }
   //
   // 2. Prepare
   Prepare();
-  if (myErrorStatus) {
+  if (HasErrors()) {
     return;
   }
   //
   // 3. Fill Images
   // 3.1 Vertice
   FillImagesVertices();
-  if (myErrorStatus) {
+  if (HasErrors()) {
     return;
   }
   //
   BuildResult(TopAbs_VERTEX);
-  if (myErrorStatus) {
+  if (HasErrors()) {
     return;
   }
   // 3.2 Edges
   FillImagesEdges();
-  if (myErrorStatus) {
+  if (HasErrors()) {
     return;
   }
   //
   BuildResult(TopAbs_EDGE);
-  if (myErrorStatus) {
+  if (HasErrors()) {
     return;
   }
   //
   // 3.3 Wires
   FillImagesContainers(TopAbs_WIRE);
-  if (myErrorStatus) {
+  if (HasErrors()) {
     return;
   }
   //
   BuildResult(TopAbs_WIRE);
-  if (myErrorStatus) {
+  if (HasErrors()) {
     return;
   }
   
   // 3.4 Faces
   FillImagesFaces();
-  if (myErrorStatus) {
+  if (HasErrors()) {
     return;
   }
   //
   BuildResult(TopAbs_FACE);
-  if (myErrorStatus) {
+  if (HasErrors()) {
     return;
   }
   // 3.5 Shells
   FillImagesContainers(TopAbs_SHELL);
-  if (myErrorStatus) {
+  if (HasErrors()) {
     return;
   }
   
   BuildResult(TopAbs_SHELL);
-  if (myErrorStatus) {
+  if (HasErrors()) {
     return;
   }
   // 3.6 Solids
   FillImagesSolids();
-  if (myErrorStatus) {
+  if (HasErrors()) {
     return;
   }
   
   BuildResult(TopAbs_SOLID);
-  if (myErrorStatus) {
+  if (HasErrors()) {
     return;
   }
   // 3.7 CompSolids
   FillImagesContainers(TopAbs_COMPSOLID);
-  if (myErrorStatus) {
+  if (HasErrors()) {
     return;
   }
   
   BuildResult(TopAbs_COMPSOLID);
-  if (myErrorStatus) {
+  if (HasErrors()) {
     return;
   }
   
   // 3.8 Compounds
   FillImagesCompounds();
-  if (myErrorStatus) {
+  if (HasErrors()) {
     return;
   }
   
   BuildResult(TopAbs_COMPOUND);
-  if (myErrorStatus) {
+  if (HasErrors()) {
     return;
   }
   //
@@ -447,7 +358,7 @@ void BOPAlgo_Builder::PostTreat()
 {
   Standard_Integer i, aNbS;
   TopAbs_ShapeEnum aType;
-  BOPCol_IndexedMapOfShape aMA;
+  TopTools_IndexedMapOfShape aMA;
   if (myPaveFiller->NonDestructive()) {
     // MapToAvoid
     aNbS=myDS->NbSourceShapes();

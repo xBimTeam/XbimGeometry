@@ -30,7 +30,7 @@
 #include <Standard_Integer.hxx>
 #include <TopTools_DataMapOfShapeListOfShape.hxx>
 #include <TopTools_MapOfShape.hxx>
-#include <MMgt_TShared.hxx>
+#include <Standard_Transient.hxx>
 #include <TopTools_ListOfShape.hxx>
 #include <TopTools_SequenceOfShape.hxx>
 #include <TColStd_IndexedMapOfInteger.hxx>
@@ -57,7 +57,7 @@ class Geom_Curve;
 
 
 class BRepBuilderAPI_Sewing;
-DEFINE_STANDARD_HANDLE(BRepBuilderAPI_Sewing, MMgt_TShared)
+DEFINE_STANDARD_HANDLE(BRepBuilderAPI_Sewing, Standard_Transient)
 
 //! Provides methods to
 //!
@@ -81,7 +81,7 @@ DEFINE_STANDARD_HANDLE(BRepBuilderAPI_Sewing, MMgt_TShared)
 //! - output free edges if necessary
 //! - output multiple edges if necessary
 //! - output the problems if any
-class BRepBuilderAPI_Sewing : public MMgt_TShared
+class BRepBuilderAPI_Sewing : public Standard_Transient
 {
 
 public:
@@ -242,7 +242,7 @@ public:
 
 
 
-  DEFINE_STANDARD_RTTIEXT(BRepBuilderAPI_Sewing,MMgt_TShared)
+  DEFINE_STANDARD_RTTIEXT(BRepBuilderAPI_Sewing,Standard_Transient)
 
 protected:
 
@@ -263,6 +263,9 @@ protected:
   Standard_EXPORT Standard_Boolean MergedNearestEdges (const TopoDS_Shape& edge, TopTools_SequenceOfShape& SeqMergedEdge, TColStd_SequenceOfBoolean& SeqMergedOri);
   
   Standard_EXPORT void EdgeProcessing (const Handle(Message_ProgressIndicator)& thePI = 0);
+
+  //! Recompute regularity on merged edges
+  Standard_EXPORT void EdgeRegularity (const Handle(Message_ProgressIndicator)& thePI = 0);
   
   Standard_EXPORT void CreateOutputInformations();
   
@@ -292,7 +295,8 @@ protected:
   
   //! Get wire from free edges.
   //! This method is called from EdgeProcessing only
-  Standard_EXPORT virtual void GetFreeWires (TopTools_MapOfShape& MapFreeEdges, TopTools_SequenceOfShape& seqWires);
+  Standard_EXPORT virtual void GetFreeWires (TopTools_IndexedMapOfShape& MapFreeEdges,
+                                             TopTools_SequenceOfShape& seqWires);
   
 
   //! This method is called from MergingOfSections only

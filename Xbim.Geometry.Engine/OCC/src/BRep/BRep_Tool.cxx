@@ -270,19 +270,16 @@ const Handle(Poly_Polygon3D)& BRep_Tool::Polygon3D(const TopoDS_Edge& E,
 Handle(Geom2d_Curve) BRep_Tool::CurveOnSurface(const TopoDS_Edge& E, 
                                                const TopoDS_Face& F,
                                                Standard_Real& First,
-                                               Standard_Real& Last)
+                                               Standard_Real& Last,
+                                               Standard_Boolean* theIsStored)
 {
   TopLoc_Location l;
   const Handle(Geom_Surface)& S = BRep_Tool::Surface(F,l);
   TopoDS_Edge aLocalEdge = E;
   if (F.Orientation() == TopAbs_REVERSED) {
     aLocalEdge.Reverse();
-//    return CurveOnSurface(E,S,l,First,Last);
   }
-//    return CurveOnSurface(TopoDS::Edge(E.Reversed()),S,l,First,Last);
-//  else
-//    return CurveOnSurface(E,S,l,First,Last);
-  return CurveOnSurface(aLocalEdge,S,l,First,Last);
+  return CurveOnSurface(aLocalEdge, S, l, First, Last, theIsStored);
 }
 
 //=======================================================================
@@ -299,10 +296,13 @@ Handle(Geom2d_Curve) BRep_Tool::CurveOnSurface(const TopoDS_Edge& E,
                                                const Handle(Geom_Surface)& S,
                                                const TopLoc_Location& L,
                                                Standard_Real& First,
-                                               Standard_Real& Last)
+                                               Standard_Real& Last,
+                                               Standard_Boolean* theIsStored)
 {
   TopLoc_Location loc = L.Predivided(E.Location());
   Standard_Boolean Eisreversed = (E.Orientation() == TopAbs_REVERSED);
+  if (theIsStored)
+    *theIsStored = Standard_True;
 
   // find the representation
   const BRep_TEdge* TE = static_cast<const BRep_TEdge*>(E.TShape().get());
@@ -321,8 +321,25 @@ Handle(Geom2d_Curve) BRep_Tool::CurveOnSurface(const TopoDS_Edge& E,
     itcr.Next();
   }
 
-  // for planar surface and 3d curve try a projection
-  // modif 21-05-97 : for RectangularTrimmedSurface, try a projection
+  // Curve is not found. Try projection on plane
+  if (theIsStored)
+    *theIsStored = Standard_False;
+  return CurveOnPlane(E, S, L, First, Last);
+}
+
+//=======================================================================
+//function : CurveOnPlane
+//purpose  : For planar surface returns projection of the edge on the plane
+//=======================================================================
+Handle(Geom2d_Curve) BRep_Tool::CurveOnPlane(const TopoDS_Edge& E,
+                                             const Handle(Geom_Surface)& S,
+                                             const TopLoc_Location& L,
+                                             Standard_Real& First,
+                                             Standard_Real& Last)
+{
+  First = Last = 0.;
+
+  // Check if the surface is planar
   Handle(Geom_Plane) GP;
   Handle(Geom_RectangularTrimmedSurface) GRTS;
   GRTS = Handle(Geom_RectangularTrimmedSurface)::DownCast(S);
@@ -330,64 +347,51 @@ Handle(Geom2d_Curve) BRep_Tool::CurveOnSurface(const TopoDS_Edge& E,
     GP = Handle(Geom_Plane)::DownCast(GRTS->BasisSurface());
   else
     GP = Handle(Geom_Plane)::DownCast(S);
-  //fin modif du 21-05-97
 
-  if (!GP.IsNull())
+  if (GP.IsNull())
+    // not a plane
+    return nullPCurve;
+
+  // Check existence of 3d curve in edge
+  Standard_Real f, l;
+  TopLoc_Location aCurveLocation;
+  Handle(Geom_Curve) C3D = BRep_Tool::Curve(E, aCurveLocation, f, l);
+
+  if (C3D.IsNull())
+    // no 3d curve
+    return nullPCurve;
+
+  aCurveLocation = aCurveLocation.Predivided(L);
+  First = f; Last = l;
+
+  // Transform curve and update parameters in account of scale factor
+  if (!aCurveLocation.IsIdentity())
   {
-    Handle(GeomAdaptor_HCurve) HC;
-    Handle(GeomAdaptor_HSurface) HS;
-
-    HC = new GeomAdaptor_HCurve();
-    HS = new GeomAdaptor_HSurface();
-
-    TopLoc_Location aCurveLocation;
-
-    Standard_Real f, l;// for those who call with (u,u).
-    Handle(Geom_Curve) C3d = BRep_Tool::Curve(E, aCurveLocation, f, l);
-
-    if (C3d.IsNull())
-    {
-      First = Last = 0.;
-      return nullPCurve;
-    }
-
-    aCurveLocation = aCurveLocation.Predivided(L);
-    First = f; Last = l; //Range of edge must not be modified
-
-    if (!aCurveLocation.IsIdentity())
-    {
-      const gp_Trsf& T = aCurveLocation.Transformation();
-      Handle(Geom_Geometry) GC3d = C3d->Transformed(T);
-      C3d = Handle(Geom_Curve)::DownCast (GC3d);
-      f = C3d->TransformedParameter(f, T);
-      l = C3d->TransformedParameter(l, T);
-    }
-    GeomAdaptor_Surface& GAS = HS->ChangeSurface();
-    GAS.Load(GP);
-
-    Handle(Geom_Curve) ProjOnPlane = 
-      GeomProjLib::ProjectOnPlane(new Geom_TrimmedCurve(C3d,f,l,Standard_True,Standard_False),
-                                  GP,
-                                  GP->Position().Direction(),
-                                  Standard_True);
-
-    GeomAdaptor_Curve& GAC = HC->ChangeCurve();
-    GAC.Load(ProjOnPlane);
-
-    ProjLib_ProjectedCurve Proj(HS,HC);
-    Handle(Geom2d_Curve) pc = Geom2dAdaptor::MakeCurve(Proj);
-
-    if (pc->DynamicType() == STANDARD_TYPE(Geom2d_TrimmedCurve)) {
-      Handle(Geom2d_TrimmedCurve) TC = 
-        Handle(Geom2d_TrimmedCurve)::DownCast (pc);
-      pc = TC->BasisCurve();
-    }
-
-    return pc;
+    const gp_Trsf& aTrsf = aCurveLocation.Transformation();
+    C3D = Handle(Geom_Curve)::DownCast(C3D->Transformed(aTrsf));
+    f = C3D->TransformedParameter(f, aTrsf);
+    l = C3D->TransformedParameter(l, aTrsf);
   }
-  
-  First = Last = 0.;
-  return nullPCurve;
+
+  // Perform projection
+  Handle(Geom_Curve) ProjOnPlane =
+    GeomProjLib::ProjectOnPlane(new Geom_TrimmedCurve(C3D, f, l, Standard_True, Standard_False),
+                                GP,
+                                GP->Position().Direction(),
+                                Standard_True);
+
+  Handle(GeomAdaptor_HSurface) HS = new GeomAdaptor_HSurface(GP);
+  Handle(GeomAdaptor_HCurve)   HC = new GeomAdaptor_HCurve(ProjOnPlane);
+
+  ProjLib_ProjectedCurve Proj(HS, HC);
+  Handle(Geom2d_Curve) pc = Geom2dAdaptor::MakeCurve(Proj);
+
+  if (pc->DynamicType() == STANDARD_TYPE(Geom2d_TrimmedCurve)) {
+    Handle(Geom2d_TrimmedCurve) TC = Handle(Geom2d_TrimmedCurve)::DownCast(pc);
+    pc = TC->BasisCurve();
+  }
+
+  return pc;
 }
 
 //=======================================================================
@@ -438,35 +442,34 @@ void  BRep_Tool::CurveOnSurface(const TopoDS_Edge& E,
                                 Standard_Real& Last,
                                 const Standard_Integer Index)
 {
-  Standard_Integer i = 0;
-  Standard_Boolean Eisreversed = (E.Orientation() == TopAbs_REVERSED);
+  if (Index < 1)
+    return;
 
+  Standard_Integer i = 0;
   // find the representation
   const BRep_TEdge* TE = static_cast<const BRep_TEdge*>(E.TShape().get());
   BRep_ListIteratorOfListOfCurveRepresentation itcr(TE->Curves());
-
-  while (itcr.More()) {
+  for (; itcr.More(); itcr.Next())
+  {
     const Handle(BRep_CurveRepresentation)& cr = itcr.Value();
-    if (cr->IsCurveOnSurface()) {
+    if (cr->IsCurveOnSurface())
+    {
       const BRep_GCurve* GC = static_cast<const BRep_GCurve*>(cr.get());
-      i++;
-      if (i > Index) break;
-      if (i == Index) {
-        // JMB le 21 Mai 1999
-        // it is done as in the other CurveOnSurface methods, ie. take into account
-        // the orientation in case of cut edges (return PCurve2)
-        // otherwise there is a risk to loop curves or to not get the prover one.
-        if (GC->IsCurveOnClosedSurface() && Eisreversed)
-          C = GC->PCurve2();
-        else
-          C = GC->PCurve();
-        S = GC->Surface();
-        L = E.Location() * GC->Location();
-        GC->Range(First,Last);
-        return;
-      }
+      ++i;
+      // Compare index taking into account the fact that for the curves on
+      // closed surfaces there are two PCurves
+      if (i == Index)
+        C = GC->PCurve();
+      else if (GC->IsCurveOnClosedSurface() && (++i == Index))
+        C = GC->PCurve2();
+      else
+        continue;
+
+      S = GC->Surface();
+      L = E.Location() * GC->Location();
+      GC->Range(First, Last);
+      return;
     }
-    itcr.Next();
   }
   
   C.Nullify();
@@ -1190,7 +1193,7 @@ gp_Pnt  BRep_Tool::Pnt(const TopoDS_Vertex& V)
   
   if (TV == 0)
   {
-    Standard_NullObject::Raise("BRep_Tool:: TopoDS_Vertex hasn't gp_Pnt");
+    throw Standard_NullObject("BRep_Tool:: TopoDS_Vertex hasn't gp_Pnt");
   }
 
   const gp_Pnt& P = TV->Pnt();
@@ -1213,7 +1216,7 @@ Standard_Real  BRep_Tool::Tolerance(const TopoDS_Vertex& V)
 
   if (aTVert == 0)
   {
-    Standard_NullObject::Raise("BRep_Tool:: TopoDS_Vertex hasn't gp_Pnt");
+    throw Standard_NullObject("BRep_Tool:: TopoDS_Vertex hasn't gp_Pnt");
   }
 
   Standard_Real p = aTVert->Tolerance();
@@ -1338,8 +1341,7 @@ Standard_Real  BRep_Tool::Parameter(const TopoDS_Vertex& V,
     }
   }
   
-  Standard_NoSuchObject::Raise("BRep_Tool:: no parameter on edge");
-  return 0;
+  throw Standard_NoSuchObject("BRep_Tool:: no parameter on edge");
 }
 
 //=======================================================================
@@ -1449,8 +1451,7 @@ Standard_Real BRep_Tool::Parameter(const TopoDS_Vertex& V,
   
 //----------------------------------------------------------   
  
-  Standard_NoSuchObject::Raise("BRep_Tool:: no parameter on edge");
-  return 0;
+  throw Standard_NoSuchObject("BRep_Tool:: no parameter on edge");
 }
 
 //=======================================================================
@@ -1491,8 +1492,7 @@ gp_Pnt2d  BRep_Tool::Parameters(const TopoDS_Vertex& V,
       else              return Pl;//Ambiguity (natural) for degenerated edges.
     }
   }
-  Standard_NoSuchObject::Raise("BRep_Tool:: no parameters on surface");
-  return gp_Pnt2d(0,0);
+  throw Standard_NoSuchObject("BRep_Tool:: no parameters on surface");
 }
 //=======================================================================
 //function : IsClosed

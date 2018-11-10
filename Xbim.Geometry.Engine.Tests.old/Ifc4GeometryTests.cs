@@ -221,8 +221,7 @@ namespace Ifc4GeometryTests
                 var triangulatedFaceSet = model.Instances.OfType<IfcTriangulatedFaceSet>().FirstOrDefault();
                 Assert.IsNotNull(triangulatedFaceSet);
                 var basin = _xbimGeometryCreator.CreateSurfaceModel(triangulatedFaceSet);
-                Assert.IsTrue((int)basin.BoundingBox.Volume == 23913891);
-
+                Assert.AreEqual(23960321, (int)basin.BoundingBox.Volume);
             }
         }
 

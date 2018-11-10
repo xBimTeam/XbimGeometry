@@ -14,6 +14,7 @@
 
 
 #include <Bnd_Box.hxx>
+#include <Bnd_OBB.hxx>
 #include <BRep_Tool.hxx>
 #include <BRepAdaptor_Surface.hxx>
 #include <BRepBndLib.hxx>
@@ -65,6 +66,7 @@ IntTools_Context::IntTools_Context()
   myProjSDataMap(100, myAllocator),
   myBndBoxDataMap(100, myAllocator),
   mySurfAdaptorMap(100, myAllocator),
+  myOBBMap(100, myAllocator),
   myCreateFlag(0),
   myPOnSTolerance(1.e-12)
 {
@@ -86,6 +88,7 @@ IntTools_Context::IntTools_Context
   myProjSDataMap(100, myAllocator),
   myBndBoxDataMap(100, myAllocator),
   mySurfAdaptorMap(100, myAllocator),
+  myOBBMap(100, myAllocator),
   myCreateFlag(1),
   myPOnSTolerance(1.e-12)
 {
@@ -97,8 +100,8 @@ IntTools_Context::IntTools_Context
 IntTools_Context::~IntTools_Context()
 {
   Standard_Address anAdr;
-  BOPCol_DataMapIteratorOfDataMapOfShapeAddress aIt;
-  BOPCol_DataMapIteratorOfDataMapOfTransientAddress aIt1;
+  DataMapOfShapeAddress::Iterator aIt;
+  DataMapOfTransientAddress::Iterator aIt1;
   //
   IntTools_FClass2d* pFClass2d;
   //
@@ -183,6 +186,16 @@ IntTools_Context::~IntTools_Context()
     myAllocator->Free(anAdr);
   }
   mySurfAdaptorMap.Clear();
+  //
+  Bnd_OBB* pOBB;
+  aIt.Initialize(myOBBMap);
+  for (; aIt.More(); aIt.Next()) {
+    anAdr=aIt.Value();
+    pOBB=(Bnd_OBB*)anAdr;
+    (*pOBB).~Bnd_OBB();
+    myAllocator->Free(anAdr);
+  }
+  myOBBMap.Clear();
 }
 //=======================================================================
 //function : BndBox
@@ -282,9 +295,8 @@ GeomAPI_ProjectPointOnSurf& IntTools_Context::ProjPS(const TopoDS_Face& aF)
     //
     pProjPS=(GeomAPI_ProjectPointOnSurf*)myAllocator->Allocate(sizeof(GeomAPI_ProjectPointOnSurf));
     new (pProjPS) GeomAPI_ProjectPointOnSurf();
-    pProjPS->Init(aS ,Umin, Usup, Vmin, Vsup, myPOnSTolerance/*, Extrema_ExtAlgo_Tree*/);
-    Extrema_ExtPS& anExtAlgo = const_cast<Extrema_ExtPS&>(pProjPS->Extrema());
-    anExtAlgo.SetFlag(Extrema_ExtFlag_MIN);
+    pProjPS->Init(aS ,Umin, Usup, Vmin, Vsup, myPOnSTolerance);
+    pProjPS->SetExtremaFlag(Extrema_ExtFlag_MIN);
     //
     anAdr=(Standard_Address)pProjPS;
     myProjPSMap.Bind(aF, anAdr);
@@ -471,6 +483,36 @@ Geom2dHatch_Hatcher& IntTools_Context::Hatcher(const TopoDS_Face& aF)
   }
 
   return *pHatcher;
+}
+
+//=======================================================================
+//function : OBB
+//purpose  : 
+//=======================================================================
+Bnd_OBB& IntTools_Context::OBB(const TopoDS_Shape& aS,
+                               const Standard_Real theGap)
+{
+  Standard_Address anAdr;
+  Bnd_OBB* pBox;
+  //
+  if (!myOBBMap.IsBound(aS))
+  {
+    pBox = (Bnd_OBB*)myAllocator->Allocate(sizeof(Bnd_OBB));
+    new (pBox) Bnd_OBB();
+    //
+    Bnd_OBB &aBox = *pBox;
+    BRepBndLib::AddOBB(aS, aBox);
+    aBox.Enlarge(theGap);
+    //
+    anAdr = (Standard_Address)pBox;
+    myOBBMap.Bind(aS, anAdr);
+  }
+  else
+  {
+    anAdr = myOBBMap.Find(aS);
+    pBox = (Bnd_OBB*)anAdr;
+  }
+  return *pBox;
 }
 
 //=======================================================================
@@ -803,41 +845,44 @@ Standard_Boolean IntTools_Context::IsValidBlockForFace
 //function : IsValidBlockForFaces
 //purpose  : 
 //=======================================================================
-Standard_Boolean IntTools_Context::IsValidBlockForFaces 
-  (const Standard_Real aT1,
-   const Standard_Real aT2,
-   const IntTools_Curve& aC, 
-   const TopoDS_Face& aF1,
-   const TopoDS_Face& aF2,
-   const Standard_Real aTol) 
+Standard_Boolean IntTools_Context::IsValidBlockForFaces(const Standard_Real theT1,
+                                                        const Standard_Real theT2,
+                                                        const IntTools_Curve& theC, 
+                                                        const TopoDS_Face& theF1,
+                                                        const TopoDS_Face& theF2,
+                                                        const Standard_Real theTol) 
 {
-  Standard_Boolean bFlag1, bFlag2;
-  //
-  Handle(Geom2d_Curve) aPC1 = aC.FirstCurve2d();
-  Handle(Geom2d_Curve) aPC2 = aC.SecondCurve2d();
-  if( !aPC1.IsNull() && !aPC2.IsNull() ) {
-    Standard_Real aMidPar = IntTools_Tools::IntermediatePoint(aT1, aT2);
-    gp_Pnt2d aPnt2D;
+  const Standard_Integer aNbElem = 2;
+  const Handle(Geom2d_Curve) &aPC1 = theC.FirstCurve2d();
+  const Handle(Geom2d_Curve) &aPC2 = theC.SecondCurve2d();
+  const Handle(Geom_Curve)   &aC3D = theC.Curve();
+  
+  const Handle(Geom2d_Curve)* anArrPC[aNbElem] = { &aPC1, &aPC2 };
+  const TopoDS_Face* anArrF[aNbElem] = { &theF1, &theF2 };
 
+  const Standard_Real aMidPar = IntTools_Tools::IntermediatePoint(theT1, theT2);
+  const gp_Pnt aP(aC3D->Value(aMidPar));
 
-    aPC1->D0(aMidPar, aPnt2D);
-    bFlag1 = IsPointInOnFace(aF1, aPnt2D);
+  Standard_Boolean bFlag = Standard_True;  
+  gp_Pnt2d aPnt2D;  
 
-    if( !bFlag1 )
-      return bFlag1;
+  for (Standard_Integer i = 0; (i < 2) && bFlag; ++i)
+  {
+    const Handle(Geom2d_Curve) &aPC = *anArrPC[i];
+    const TopoDS_Face &aF           = *anArrF[i];
 
-    aPC2->D0(aMidPar, aPnt2D);
-    bFlag2 = IsPointInOnFace(aF2, aPnt2D);
-    return bFlag2;
+    if (!aPC.IsNull())
+    {
+      aPC->D0(aMidPar, aPnt2D);
+      bFlag = IsPointInOnFace(aF, aPnt2D);
+    }
+    else
+    {
+      bFlag = IsValidPointForFace(aP, aF, theTol);
+    }
   }
-  //
 
-  bFlag1=IsValidBlockForFace (aT1, aT2, aC, aF1, aTol);
-  if (!bFlag1) {
-    return bFlag1;
-  }
-  bFlag2=IsValidBlockForFace (aT1, aT2, aC, aF2, aTol);
-  return bFlag2;
+  return bFlag;
 }
 //=======================================================================
 //function : IsVertexOnLine
@@ -1089,7 +1134,7 @@ void IntTools_Context::SetPOnSProjectionTolerance(const Standard_Real theValue)
 void IntTools_Context::clearCachedPOnSProjectors()
 {
   GeomAPI_ProjectPointOnSurf* pProjPS;
-  BOPCol_DataMapIteratorOfDataMapOfShapeAddress aIt(myProjPSMap);
+  DataMapOfShapeAddress::Iterator aIt(myProjPSMap);
   for (; aIt.More(); aIt.Next()) {
     Standard_Address anAdr=aIt.Value();
     pProjPS=(GeomAPI_ProjectPointOnSurf*)anAdr;

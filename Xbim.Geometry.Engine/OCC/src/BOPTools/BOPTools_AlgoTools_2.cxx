@@ -36,7 +36,7 @@
 
 static
   void TreatCompound(const TopoDS_Shape& theC1, 
-                     BOPCol_ListOfShape& theLSX);
+                     TopTools_ListOfShape& theLSX);
 
 //=======================================================================
 // function: UpdateVertex
@@ -133,6 +133,20 @@ void BOPTools_AlgoTools::MakeSectEdge(const IntTools_Curve& aIC,
 }
 
 //=======================================================================
+// function: CopyEdge
+// purpose: 
+//=======================================================================
+TopoDS_Edge BOPTools_AlgoTools::CopyEdge(const TopoDS_Edge& theEdge)
+{
+  TopoDS_Edge aNewEdge = TopoDS::Edge(theEdge.Oriented(TopAbs_FORWARD));
+  aNewEdge.EmptyCopy();
+  for (TopoDS_Iterator it(theEdge, Standard_False); it.More(); it.Next())
+    BRep_Builder().Add(aNewEdge, it.Value());
+  aNewEdge.Orientation(theEdge.Orientation());
+  return aNewEdge;
+}
+
+//=======================================================================
 // function: MakeSplitEdge
 // purpose: 
 //=======================================================================
@@ -143,10 +157,7 @@ void BOPTools_AlgoTools::MakeSplitEdge(const TopoDS_Edge&   aE,
                                        const Standard_Real  aP2,
                                        TopoDS_Edge& aNewEdge)
 {
-  Standard_Real aTol;//f, l, 
-  aTol=BRep_Tool::Tolerance(aE);
-  //
-  TopoDS_Edge E=aE;
+  TopoDS_Edge E = TopoDS::Edge(aE.Oriented(TopAbs_FORWARD));
   E.EmptyCopy();
   //
   BRep_Builder BB;
@@ -157,8 +168,8 @@ void BOPTools_AlgoTools::MakeSplitEdge(const TopoDS_Edge&   aE,
     BB.Add  (E, aV2);
   }
   BB.Range(E, aP1, aP2);
-  BB.UpdateEdge(E, aTol);
   aNewEdge=E;
+  aNewEdge.Orientation(aE.Orientation());
 }
 
 //=======================================================================
@@ -417,8 +428,8 @@ Standard_Integer BOPTools_AlgoTools::Dimension(const TopoDS_Shape& theS)
 {
   Standard_Integer i, iRet, iRx0 = 0, iRx = 0;
   TopAbs_ShapeEnum aTS;
-  BOPCol_ListOfShape aLS;
-  BOPCol_ListIteratorOfListOfShape aIt;
+  TopTools_ListOfShape aLS;
+  TopTools_ListIteratorOfListOfShape aIt;
   //
   aTS=theS.ShapeType();
   if (aTS!=TopAbs_COMPOUND) {
@@ -468,12 +479,12 @@ Standard_Integer BOPTools_AlgoTools::Dimension(const TopoDS_Shape& theS)
 //purpose  : 
 //=======================================================================
 void TreatCompound(const TopoDS_Shape& theC1, 
-                   BOPCol_ListOfShape& theLSX)
+                   TopTools_ListOfShape& theLSX)
 {
   Standard_Integer aNbC1;
   TopAbs_ShapeEnum aType;
-  BOPCol_ListOfShape aLC, aLC1;
-  BOPCol_ListIteratorOfListOfShape aIt, aIt1;
+  TopTools_ListOfShape aLC, aLC1;
+  TopTools_ListIteratorOfListOfShape aIt, aIt1;
   TopoDS_Iterator aItC;
   //
   aLC.Append (theC1);

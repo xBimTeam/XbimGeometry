@@ -26,14 +26,13 @@
 #include <TopAbs_Orientation.hxx>
 #include <HatchGen_ErrorStatus.hxx>
 
-class Standard_NoSuchObject;
-class Standard_OutOfRange;
-class StdFail_NotDone;
-class Geom2dHatch_Intersector;
-class Geom2dHatch_Element;
-class Geom2dHatch_Hatching;
 class HatchGen_PointOnHatching;
 class HatchGen_Domain;
+
+// resolve name collisions with X11 headers
+#ifdef Status
+  #undef Status
+#endif
 
 class Geom2dHatch_Hatcher 
 {
@@ -156,7 +155,7 @@ public:
   
   //! Returns the fact that the domains were computed
   //! for the IndH-th hatching.
-  Standard_EXPORT Standard_Boolean IsDone (const Standard_Integer IndH) const;
+  Standard_Boolean IsDone (const Standard_Integer IndH) const;
   
   //! Returns the status about the IndH-th hatching.
     HatchGen_ErrorStatus Status (const Standard_Integer IndH) const;

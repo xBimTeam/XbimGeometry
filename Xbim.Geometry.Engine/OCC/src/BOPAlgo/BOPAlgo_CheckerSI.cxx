@@ -18,25 +18,101 @@
 //
 
 #include <BOPAlgo_CheckerSI.hxx>
-#include <BOPCol_MapOfShape.hxx>
+#include <BOPAlgo_Alerts.hxx>
 #include <BOPDS_DS.hxx>
 #include <BOPDS_Interf.hxx>
 #include <BOPDS_IteratorSI.hxx>
-#include <BOPDS_MapOfPassKey.hxx>
-#include <BOPDS_PassKey.hxx>
+#include <BOPDS_MapOfPair.hxx>
+#include <BOPDS_Pair.hxx>
 #include <BOPDS_PIteratorSI.hxx>
 #include <BOPDS_VectorOfInterfEF.hxx>
 #include <BOPDS_VectorOfInterfFF.hxx>
 #include <BOPDS_VectorOfInterfVE.hxx>
 #include <BOPDS_VectorOfInterfVF.hxx>
 #include <BOPDS_VectorOfInterfVV.hxx>
-#include <BOPTools.hxx>
+#include <BRep_Tool.hxx>
+#include <gp_Torus.hxx>
+#include <TopExp.hxx>
 #include <BOPTools_AlgoTools.hxx>
+#include <BOPTools_Parallel.hxx>
 #include <BRepBuilderAPI_Copy.hxx>
 #include <IntTools_Context.hxx>
+#include <IntTools_Tools.hxx>
+#include <IntTools_FaceFace.hxx>
 #include <Standard_ErrorHandler.hxx>
 #include <Standard_Failure.hxx>
 #include <TopTools_ListOfShape.hxx>
+#include <TopTools_MapOfShape.hxx>
+
+//=======================================================================
+//class    : BOPAlgo_FaceSelfIntersect
+//purpose  : 
+//=======================================================================
+class BOPAlgo_FaceSelfIntersect : 
+  public IntTools_FaceFace,
+  public BOPAlgo_Algo {
+
+ public:
+  DEFINE_STANDARD_ALLOC
+
+  BOPAlgo_FaceSelfIntersect() : 
+    IntTools_FaceFace(),  
+    BOPAlgo_Algo(),
+    myIF(-1), myTolF(1.e-7) {
+  }
+  //
+  virtual ~BOPAlgo_FaceSelfIntersect() {
+  }
+  //
+  void SetIndex(const Standard_Integer nF) {
+    myIF = nF;
+  }
+  //
+  Standard_Integer IndexOfFace() const {
+    return myIF;
+  }
+  //
+  void SetFace(const TopoDS_Face& aF) {
+    myF = aF;
+  }
+  //
+  const TopoDS_Face& Face()const {
+    return myF;
+  }
+  //
+  void SetTolF(const Standard_Real aTolF) {
+    myTolF = aTolF;
+  }
+  //
+  Standard_Real TolF() const{
+    return myTolF;
+  }
+  //
+  virtual void Perform() {
+    BOPAlgo_Algo::UserBreak();
+    IntTools_FaceFace::Perform(myF, myF);
+  }
+  //
+ protected:
+  Standard_Integer myIF;
+  Standard_Real myTolF;
+  TopoDS_Face myF;
+};
+//end of definition of class BOPAlgo_FaceSelfIntersect
+
+//=======================================================================
+
+typedef NCollection_Vector
+  <BOPAlgo_FaceSelfIntersect> BOPAlgo_VectorOfFaceSelfIntersect; 
+//
+typedef BOPTools_Functor 
+  <BOPAlgo_FaceSelfIntersect,
+  BOPAlgo_VectorOfFaceSelfIntersect> BOPAlgo_FaceSelfIntersectFunctor;
+//
+typedef BOPTools_Cnt 
+  <BOPAlgo_FaceSelfIntersectFunctor,
+  BOPAlgo_VectorOfFaceSelfIntersect> BOPAlgo_FaceSelfIntersectCnt;
+
 
 //=======================================================================
 //function : 
@@ -48,6 +124,7 @@ BOPAlgo_CheckerSI::BOPAlgo_CheckerSI()
 {
   myLevelOfCheck=BOPDS_DS::NbInterfTypes()-1;
   myNonDestructive=Standard_True;
+  SetAvoidBuildPCurve(Standard_True);
 }
 //=======================================================================
 //function : ~
@@ -75,8 +152,6 @@ void BOPAlgo_CheckerSI::SetLevelOfCheck(const Standard_Integer theLevel)
 //=======================================================================
 void BOPAlgo_CheckerSI::Init()
 {
-  myErrorStatus=0;
-  //
   Clear();
   //
   // 1. myDS
@@ -84,18 +159,16 @@ void BOPAlgo_CheckerSI::Init()
   myDS->SetArguments(myArguments);
   myDS->Init(myFuzzyValue);
   //
-  // 2.myIterator 
+  // 2 myContext
+  myContext=new IntTools_Context;
+  //
+  // 3.myIterator 
   BOPDS_PIteratorSI theIterSI=new BOPDS_IteratorSI(myAllocator);
   theIterSI->SetDS(myDS);
-  theIterSI->Prepare();
+  theIterSI->Prepare(myContext, myUseOBB, myFuzzyValue);
   theIterSI->UpdateByLevelOfCheck(myLevelOfCheck);
   //
   myIterator=theIterSI;
-  //
-  // 3 myContext
-  myContext=new IntTools_Context;
-  //
-  myErrorStatus=0;
 }
 //=======================================================================
 //function : Perform
@@ -104,49 +177,37 @@ void BOPAlgo_CheckerSI::Init()
 void BOPAlgo_CheckerSI::Perform()
 {
   try {
-    Standard_Integer iErr;
-    //
     OCC_CATCH_SIGNALS
     //
-    myErrorStatus=0;
-    if (myArguments.Extent()!=1) {
-      myErrorStatus=10;
+    if (myArguments.Extent() != 1) {
+      AddError (new BOPAlgo_AlertMultipleArguments);
       return;
     }
     //
-    if (myNonDestructive) {
-      PrepareCopy();
-      if (myErrorStatus) {
-        return; 
-      }
-    }
-    //
+    // Perform intersection of sub shapes
     BOPAlgo_PaveFiller::Perform();
-    iErr=myErrorStatus; 
     //
+    CheckFaceSelfIntersection();
+    
+    // Perform intersection with solids
+    if (!HasErrors())
+      PerformVZ();
+    //
+    if (!HasErrors())
+      PerformEZ();
+    //
+    if (!HasErrors())
+      PerformFZ();
+    //
+    if (!HasErrors())
+      PerformZZ();
+    //
+    // Treat the intersection results
     PostTreat();
-    if (myErrorStatus) {
-      iErr=myErrorStatus; 
-    }
-    //
-    if (myNonDestructive) {
-      PostTreatCopy();
-      if (myErrorStatus) {
-        iErr=myErrorStatus; 
-      }
-    }
-    //
-    if (iErr) {
-      myErrorStatus=iErr;
-    }
   }
   //
   catch (Standard_Failure) {
-    if (myNonDestructive) { 
-      PostTreatCopy();
-    }
-    //
-    myErrorStatus=11;
+    AddError (new BOPAlgo_AlertIntersectionFailed);
   }
 }
 //=======================================================================
@@ -156,69 +217,66 @@ void BOPAlgo_CheckerSI::Perform()
 void BOPAlgo_CheckerSI::PostTreat()
 {
   Standard_Integer i, aNb, n1, n2; 
-  BOPDS_PassKey aPK;
+  BOPDS_Pair aPK;
   //
-  myErrorStatus=0;
-  //
-  BOPDS_MapOfPassKey& aMPK=
-    *((BOPDS_MapOfPassKey*)&myDS->Interferences());
-  aMPK.Clear();
-  //
+  BOPDS_MapOfPair& aMPK=
+    *((BOPDS_MapOfPair*)&myDS->Interferences());
+
   // 0
   BOPDS_VectorOfInterfVV& aVVs=myDS->InterfVV();
-  aNb=aVVs.Extent();
+  aNb=aVVs.Length();
   for (i=0; i!=aNb; ++i) {
     const BOPDS_InterfVV& aVV=aVVs(i);
     aVV.Indices(n1, n2);
     if (myDS->IsNewShape(n1) || myDS->IsNewShape(n2)) {
       continue;
     }
-    aPK.SetIds(n1, n2);
+    aPK.SetIndices(n1, n2);
     aMPK.Add(aPK);
   }
   //
   // 1
   BOPDS_VectorOfInterfVE& aVEs=myDS->InterfVE();
-  aNb=aVEs.Extent();
+  aNb=aVEs.Length();
   for (i=0; i!=aNb; ++i) {
     const BOPDS_InterfVE& aVE=aVEs(i);
     aVE.Indices(n1, n2);
     if (myDS->IsNewShape(n1) || myDS->IsNewShape(n2)) {
       continue;
     }
-    aPK.SetIds(n1, n2);
+    aPK.SetIndices(n1, n2);
     aMPK.Add(aPK);
   }
   //
   // 2
   BOPDS_VectorOfInterfEE& aEEs=myDS->InterfEE();
-  aNb=aEEs.Extent();
+  aNb=aEEs.Length();
   for (i=0; i!=aNb; ++i) {
     const BOPDS_InterfEE& aEE=aEEs(i);
     aEE.Indices(n1, n2);
     if (myDS->IsNewShape(n1) || myDS->IsNewShape(n2)) {
       continue;
     }
-    aPK.SetIds(n1, n2);
+    aPK.SetIndices(n1, n2);
     aMPK.Add(aPK);
   }
   //
   // 3
   BOPDS_VectorOfInterfVF& aVFs=myDS->InterfVF();
-  aNb=aVFs.Extent();
+  aNb=aVFs.Length();
   for (i=0; i!=aNb; ++i) {
     const BOPDS_InterfVF& aVF=aVFs(i);
     aVF.Indices(n1, n2);
     if (myDS->IsNewShape(n1) || myDS->IsNewShape(n2)) {
       continue;
     }
-    aPK.SetIds(n1, n2);
+    aPK.SetIndices(n1, n2);
     aMPK.Add(aPK);
   }
   //
   // 4
   BOPDS_VectorOfInterfEF& aEFs=myDS->InterfEF();
-  aNb=aEFs.Extent();
+  aNb=aEFs.Length();
   for (i=0; i!=aNb; ++i) {
     const BOPDS_InterfEF& aEF=aEFs(i);
     if (aEF.CommonPart().Type()==TopAbs_SHAPE) {
@@ -228,13 +286,13 @@ void BOPAlgo_CheckerSI::PostTreat()
     if (myDS->IsNewShape(n1) || myDS->IsNewShape(n2)) {
       continue;
     }
-    aPK.SetIds(n1, n2);
+    aPK.SetIndices(n1, n2);
     aMPK.Add(aPK);
   }
   //
   // 5
   BOPDS_VectorOfInterfFF& aFFs=myDS->InterfFF();
-  aNb=aFFs.Extent();
+  aNb=aFFs.Length();
   for (i=0; i!=aNb; ++i) {
     Standard_Boolean bTangentFaces, bFlag;
     Standard_Integer aNbC, aNbP, j, iFound;
@@ -243,30 +301,34 @@ void BOPAlgo_CheckerSI::PostTreat()
     aFF.Indices(n1, n2);
     //
     bTangentFaces=aFF.TangentFaces();
-    aNbP=aFF.Points().Extent();
+    aNbP=aFF.Points().Length();
     const BOPDS_VectorOfCurve& aVC=aFF.Curves();
-    aNbC=aVC.Extent();
+    aNbC=aVC.Length();
     if (!aNbP && !aNbC && !bTangentFaces) {
       continue;
     }
     //
-    iFound=0;
-    if (bTangentFaces) {
-      const TopoDS_Face& aF1=*((TopoDS_Face*)&myDS->Shape(n1));
-      const TopoDS_Face& aF2=*((TopoDS_Face*)&myDS->Shape(n2));
-      bFlag=BOPTools_AlgoTools::AreFacesSameDomain
-        (aF1, aF2, myContext, myFuzzyValue);
-      if (bFlag) {
-        ++iFound;
-      }
-    }
-    else {
-      for (j=0; j!=aNbC; ++j) {
-        const BOPDS_Curve& aNC=aVC(j);
-        const BOPDS_ListOfPaveBlock& aLPBC=aNC.PaveBlocks();
-        if (aLPBC.Extent()) {
+    iFound = (n1 == n2) ? 1 : 0;
+    //case of self-intersection inside one face
+    if (!iFound)
+    {
+      if (bTangentFaces) {
+        const TopoDS_Face& aF1=*((TopoDS_Face*)&myDS->Shape(n1));
+        const TopoDS_Face& aF2=*((TopoDS_Face*)&myDS->Shape(n2));
+        bFlag=BOPTools_AlgoTools::AreFacesSameDomain
+          (aF1, aF2, myContext, myFuzzyValue);
+        if (bFlag) {
           ++iFound;
-          break;
+        }
+      }
+      else {
+        for (j=0; j!=aNbC; ++j) {
+          const BOPDS_Curve& aNC=aVC(j);
+          const BOPDS_ListOfPaveBlock& aLPBC=aNC.PaveBlocks();
+          if (aLPBC.Extent()) {
+            ++iFound;
+            break;
+          }
         }
       }
     }
@@ -275,14 +337,14 @@ void BOPAlgo_CheckerSI::PostTreat()
       continue;
     }
     //
-    aPK.SetIds(n1, n2);
+    aPK.SetIndices(n1, n2);
     aMPK.Add(aPK);
   }
   //
   //
   // 6
   BOPDS_VectorOfInterfVZ& aVZs=myDS->InterfVZ();
-  aNb=aVZs.Extent();
+  aNb=aVZs.Length();
   for (i=0; i!=aNb; ++i) {
     //
     const BOPDS_InterfVZ& aVZ=aVZs(i);
@@ -290,109 +352,124 @@ void BOPAlgo_CheckerSI::PostTreat()
     if (myDS->IsNewShape(n1) || myDS->IsNewShape(n2)) {
       continue;
     }
-    aPK.SetIds(n1, n2);
+    aPK.SetIndices(n1, n2);
     aMPK.Add(aPK);
   }
   //
   // 7
   BOPDS_VectorOfInterfEZ& aEZs=myDS->InterfEZ();
-  aNb=aEZs.Extent();
+  aNb=aEZs.Length();
   for (i=0; i!=aNb; ++i) {
     //
     const BOPDS_InterfEZ& aEZ=aEZs(i);
     aEZ.Indices(n1, n2);
-    aPK.SetIds(n1, n2);
+    aPK.SetIndices(n1, n2);
     aMPK.Add(aPK);
   }
   //
   // 8
   BOPDS_VectorOfInterfFZ& aFZs=myDS->InterfFZ();
-  aNb=aFZs.Extent();
+  aNb=aFZs.Length();
   for (i=0; i!=aNb; ++i) {
     //
     const BOPDS_InterfFZ& aFZ=aFZs(i);
     aFZ.Indices(n1, n2);
-    aPK.SetIds(n1, n2);
+    aPK.SetIndices(n1, n2);
     aMPK.Add(aPK);
   }
   //
   // 9
   BOPDS_VectorOfInterfZZ& aZZs=myDS->InterfZZ();
-  aNb=aZZs.Extent();
+  aNb=aZZs.Length();
   for (i=0; i!=aNb; ++i) {
     //
     const BOPDS_InterfZZ& aZZ=aZZs(i);
     aZZ.Indices(n1, n2);
-    aPK.SetIds(n1, n2);
+    aPK.SetIndices(n1, n2);
     aMPK.Add(aPK);
   }
 }
-//=======================================================================
-//function : PrepareCopy
-//purpose  : 
-//=======================================================================
-void BOPAlgo_CheckerSI::PrepareCopy()
-{
-  Standard_Boolean bIsDone;
-  BRepBuilderAPI_Copy aCopier;
-  BOPCol_MapOfShape aMSA;
-  BOPCol_MapIteratorOfMapOfShape aItMS;
-  //
-  myErrorStatus=0;
-  //
-  myNewOldMap.Clear();
-  //
-  const TopoDS_Shape& aSA=myArguments.First();
-  //
-  BOPTools::MapShapes(aSA, aMSA);
-  //
-  aCopier.Perform(aSA, Standard_False);
-  bIsDone=aCopier.IsDone();
-  if (!bIsDone) {
-    myErrorStatus=12; 
-    return;
-  }
-  //
-  const TopoDS_Shape& aSC=aCopier.Shape();
-  //
-  aItMS.Initialize(aMSA);
-  for(; aItMS.More(); aItMS.Next()) {
-    const TopoDS_Shape& aSAx=aItMS.Value();
-    const TopoDS_Shape& aSCx=aCopier.Modified(aSAx).First();
-    myNewOldMap.Bind(aSCx, aSAx);
-  }
-  //
-  myArguments.Clear();
-  myArguments.Append(aSC);
-}
-//=======================================================================
-//function : PostTreatCopy
-//purpose  : 
-//=======================================================================
-void BOPAlgo_CheckerSI::PostTreatCopy() 
-{
-  Standard_Integer i, aNb;
-  //
-  myErrorStatus=0;
-  //
-  aNb=myDS->NbSourceShapes();
-  for (i=0; i!=aNb; ++i) {
-    BOPDS_ShapeInfo& aSI=myDS->ChangeShapeInfo(i);
-    const TopoDS_Shape& aSCi=aSI.Shape();
-    if (!myNewOldMap.IsBound(aSCi)) {
-      myErrorStatus=13;
-      return;
-    }
-    //
-    const TopoDS_Shape& aSAi=myNewOldMap.Find(aSCi);
-    aSI.SetShape(aSAi);
-  }
-}
-//
-// myErrorStatus:
-//
-// 10 - The number of the arguments is not 1
-// 11 - Exception is caught
-// 12 - BRepBuilderAPI_Copy is not done
-// 13 - myNewOldMap doe not contain DS shape 
 
+//=======================================================================
+//function : CheckFaceSelfIntersection
+//purpose  : 
+//=======================================================================
+void BOPAlgo_CheckerSI::CheckFaceSelfIntersection()
+{
+  if (myLevelOfCheck < 5)
+    return;
+  
+  BOPDS_Pair aPK;
+
+  BOPDS_MapOfPair& aMPK=
+    *((BOPDS_MapOfPair*)&myDS->Interferences());
+  aMPK.Clear();
+  
+  BOPAlgo_VectorOfFaceSelfIntersect aVFace;
+  
+  Standard_Integer aNbS=myDS->NbSourceShapes();
+  
+  //
+  for (Standard_Integer i = 0; i < aNbS; i++)
+  {
+    const BOPDS_ShapeInfo& aSI = myDS->ShapeInfo(i);
+    if (aSI.ShapeType() != TopAbs_FACE)
+      continue;
+    //
+    const TopoDS_Face& aF = (*(TopoDS_Face*)(&aSI.Shape()));
+    BRepAdaptor_Surface BAsurf(aF, Standard_False);
+    GeomAbs_SurfaceType aSurfType = BAsurf.GetType();
+    if (aSurfType == GeomAbs_Plane ||
+        aSurfType == GeomAbs_Cylinder ||
+        aSurfType == GeomAbs_Cone ||
+        aSurfType == GeomAbs_Sphere)
+      continue;
+
+    if (aSurfType == GeomAbs_Torus)
+    {
+      gp_Torus aTorus = BAsurf.Torus();
+      Standard_Real aMajorRadius = aTorus.MajorRadius();
+      Standard_Real aMinorRadius = aTorus.MinorRadius();
+      if (aMajorRadius > aMinorRadius + Precision::Confusion())
+        continue;
+    }
+
+    Standard_Real aTolF = BRep_Tool::Tolerance(aF);
+    
+    BOPAlgo_FaceSelfIntersect& aFaceSelfIntersect = aVFace.Appended();
+    //
+    aFaceSelfIntersect.SetIndex(i);
+    aFaceSelfIntersect.SetFace(aF);
+    aFaceSelfIntersect.SetTolF(aTolF);
+    //
+    aFaceSelfIntersect.SetProgressIndicator(myProgressIndicator);
+  }
+  
+  Standard_Integer aNbFace = aVFace.Length();
+  //======================================================
+  BOPAlgo_FaceSelfIntersectCnt::Perform(myRunParallel, aVFace);
+  //======================================================
+  //
+  for (Standard_Integer k = 0; k < aNbFace; k++)
+  {
+    BOPAlgo_FaceSelfIntersect& aFaceSelfIntersect = aVFace(k);
+    //
+    Standard_Integer nF = aFaceSelfIntersect.IndexOfFace();
+
+    Standard_Boolean bIsDone = aFaceSelfIntersect.IsDone();
+    if (bIsDone)
+    {
+      const IntTools_SequenceOfCurves& aCvsX = aFaceSelfIntersect.Lines();
+      const IntTools_SequenceOfPntOn2Faces& aPntsX = aFaceSelfIntersect.Points();
+      //
+      Standard_Integer aNbCurves = aCvsX.Length();
+      Standard_Integer aNbPoints = aPntsX.Length();
+      //
+      if (aNbCurves || aNbPoints)
+      {
+        aPK.SetIndices(nF, nF);
+        aMPK.Add(aPK);
+      }
+    }
+  }
+}

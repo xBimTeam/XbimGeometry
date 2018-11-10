@@ -1,4 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xbim.Ifc;
+using Xbim.IO.Esent;
+using Xbim.ModelGeometry.Scene;
 
 namespace Ifc4GeometryTests
 {
@@ -14,42 +17,42 @@ namespace Ifc4GeometryTests
     [TestClass]
     public class WholeModelTests
     {
-       // private readonly XbimGeometryEngine _xbimGeometryCreator = new XbimGeometryEngine();
+        // private readonly XbimGeometryEngine _xbimGeometryCreator = new XbimGeometryEngine();
 
-        //[DeploymentItem(@"EsentTestFiles\Monolith_v10.xBIM", @"GConv\")]
-        //[TestMethod]
-        //public void GeometryVersionUpgradeTest()
-        //{
-        //    using (var model= IfcStore.Open(@"GConv\Monolith_v10.xBIM", XbimDBAccess.Exclusive))
-        //    {
-        //        // start afresh
-               
-        //        Assert.AreEqual(1, model.GeometrySupportLevel);
+        [DeploymentItem(@"EsentTestFiles\Monolith_v10.xBIM", @"GConv\")]
+        [TestMethod]
+        public void GeometryVersionUpgradeTest()
+        {
+            using (var m = new Xbim.Ifc2x3.IO.XbimModel())
+            {
+                m.Open(@"GConv\Monolith_v10.xBIM", XbimDBAccess.Exclusive);
+                Assert.AreEqual(1, m.GeometrySupportLevel, "GeometrySupportLevel for Monolith_v10 should be 1");
 
-        //        // now remove the existing geometry
-        //        model.DeleteGeometryCache();
-        //        Assert.AreEqual(0, model.GeometrySupportLevel);
+                var updated = m.EnsureGeometryTables();
+                Assert.AreEqual(updated, true, "Should complete returning true");
 
-        //        // now create the geometry back
-        //        model.EnsureGeometryTables(); // update the database structure first
-        //        var context = new Xbim3DModelContext(model);
-        //        context.CreateContext(XbimGeometryType.PolyhedronBinary); // then populate it
+                m.DeleteGeometryCache();
+                Assert.AreEqual(0, m.GeometrySupportLevel, "GeometrySupportLevel for Monolith_v10 should be 0 after removing it.");
 
-        //        // final tests
-        //        Assert.AreEqual(2, model.GeometrySupportLevel);
-        //        // and tidy up
-        //        model.Close();
-        //    }
-        //}
+                m.Close();
+            }
+
+            using (var store = IfcStore.Open(@"GConv\Monolith_v10.xBIM", accessMode: XbimDBAccess.Exclusive))
+            {
+                var geomContext = new Xbim3DModelContext(store);
+                geomContext.CreateContext();
+                store.Close();
+            }
+        }
 
         //[TestMethod]
         //public void TestShapeGeometriesEnumerability()
         //{
         //    using (var model = IfcStore.Open(@"EsentTestFiles\TwoWalls.xbim"))
         //    {
-                
+
         //        var geomContext = new Xbim3DModelContext(model);
-                
+
         //        var lst = new Dictionary<int, int>();
 
         //        // ShapeGeometries does not have duplicates...
@@ -103,7 +106,7 @@ namespace Ifc4GeometryTests
         //                        binaryWriter.Flush();
         //                        wexBimFile.Close();
         //                    }
-                           
+
         //                }
         //            }
         //        }
@@ -183,7 +186,7 @@ namespace Ifc4GeometryTests
 
         //            using (var eventTrace = LoggerFactory.CreateEventTrace())
         //            {
-                       
+
         //                foreach (var rep in m.Instances.OfType<IfcGeometricRepresentationItem>())
         //                {
         //                    if (rep is IfcAxis2Placement ||
@@ -285,7 +288,7 @@ namespace Ifc4GeometryTests
         //                        {
         //                            foreach (var item in rep.Items.OfType<IfcGeometricRepresentationItem>())
         //                            {
-                                        
+
         //                                IXbimGeometryObject shape = _xbimGeometryCreator.Create(item);
         //                                if (!shape.IsValid)
         //                                    Assert.IsTrue(shape.IsValid, "Invalid shape found in #" + item.EntityLabel);

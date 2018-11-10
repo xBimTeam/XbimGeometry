@@ -17,7 +17,6 @@
 
 #include <BOPAlgo_PaveFiller.hxx>
 #include <BOPAlgo_SectionAttribute.hxx>
-#include <BOPCol_ListOfInteger.hxx>
 #include <BOPDS_Curve.hxx>
 #include <BOPDS_DS.hxx>
 #include <BOPDS_FaceInfo.hxx>
@@ -32,6 +31,7 @@
 #include <Geom2d_Line.hxx>
 #include <Geom2d_TrimmedCurve.hxx>
 #include <Geom2dAdaptor_Curve.hxx>
+#include <Geom2dAPI_ProjectPointOnCurve.hxx>
 #include <Geom2dInt_GInter.hxx>
 #include <gp_Lin2d.hxx>
 #include <gp_Pnt.hxx>
@@ -39,6 +39,7 @@
 #include <IntRes2d_IntersectionPoint.hxx>
 #include <IntTools_Context.hxx>
 #include <Precision.hxx>
+#include <TColStd_ListOfInteger.hxx>
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Face.hxx>
 #include <TopoDS_Vertex.hxx>
@@ -52,6 +53,11 @@ static
                        const Standard_Real  aP2,
                        TopoDS_Edge& aNewEdge);
 
+static
+  Standard_Boolean AddSplitPoint(const Handle(BOPDS_PaveBlock)& thePBD,
+                                 const BOPDS_Pave& thePave,
+                                 const Standard_Real theTol);
+
 //=======================================================================
 //function : ProcessDE
 //purpose  : 
@@ -61,9 +67,7 @@ void BOPAlgo_PaveFiller::ProcessDE()
   Standard_Integer nF, aNb, nE, nV, nVSD, aNbPB;
   Handle(NCollection_BaseAllocator) aAllocator;
   Handle(BOPDS_PaveBlock) aPBD;
-  BOPCol_ListIteratorOfListOfInteger aItLI;
-  //
-  myErrorStatus=0;
+  TColStd_ListIteratorOfListOfInteger aItLI;
   //
   // 1. Find degnerated edges
   //-----------------------------------------------------scope f
@@ -222,7 +226,7 @@ void BOPAlgo_PaveFiller::ProcessDE()
       aPB->SetEdge(nSp);
     }
     else {
-      //aPB->SetEdge(nDE);
+      myDS->ChangeShapeInfo(nDE).SetReference(-1);
       aLPB.Clear();
       break;
     }
@@ -231,7 +235,11 @@ void BOPAlgo_PaveFiller::ProcessDE()
 
 //=======================================================================
 //function : FillPaves
-//purpose  : 
+//purpose  : Find all pave blocks passing through the vertex <nVD> and
+//           intersecting the 2D curve of the degenerated edge
+//           somewhere in the middle. Save intersection points into
+//           Extra paves of the pave block of degenerated edge for future
+//           splitting.
 //=======================================================================
   void BOPAlgo_PaveFiller::FillPaves(const Standard_Integer nVD,
                                      const Standard_Integer nED,
@@ -239,102 +247,95 @@ void BOPAlgo_PaveFiller::ProcessDE()
                                      const BOPDS_ListOfPaveBlock& aLPBOut,
                                      const Handle(BOPDS_PaveBlock)& aPBD)
 {
-  Standard_Boolean bXDir, bIsDone;
-  Standard_Integer nE, aNbPoints, j, anInd;
-  Standard_Real aTD1, aTD2, aT1, aT2, aTolInter, aX, aDT;
-  Standard_Real aTolCmp;
-  gp_Pnt2d aP2d1, aP2d2, aP2D;
-  gp_Lin2d aLDE;
-  Handle(Geom2d_Line) aCLDE;
-  Handle(Geom2d_Curve) aC2DDE1, aC2D;
-  Handle(Geom2d_TrimmedCurve)aC2DDE;
-  BOPDS_ListIteratorOfListOfPaveBlock aItLPB;
+  // Prepare pave to put to pave block as an Extra pave
   BOPDS_Pave aPave;
-  //
-  aDT=Precision::PConfusion();
-  //
   aPave.SetIndex(nVD);
   //
-  const TopoDS_Edge& aDE=(*(TopoDS_Edge *)(&myDS->Shape(nED)));
-  const TopoDS_Face& aDF=(*(TopoDS_Face *)(&myDS->Shape(nFD)));
-  //aC2DDE
-  aC2DDE1=BRep_Tool::CurveOnSurface(aDE, aDF, aTD1, aTD2);
-  aC2DDE=new Geom2d_TrimmedCurve(aC2DDE1, aTD1, aTD2);
-  //aCLDE
-  Handle(Geom2d_TrimmedCurve) aCLDET1=Handle(Geom2d_TrimmedCurve)::DownCast(aC2DDE1);
-  if (aCLDET1.IsNull()) {
-    aCLDE=Handle(Geom2d_Line)::DownCast(aC2DDE1);
-  }
-  else {
-    Handle(Geom2d_Curve) aBasisCurve=aCLDET1->BasisCurve();
-    aCLDE=Handle(Geom2d_Line)::DownCast(aBasisCurve);
-  }
+  const TopoDS_Vertex& aDV = (*(TopoDS_Vertex *)(&myDS->Shape(nVD)));
+  const TopoDS_Edge& aDE = (*(TopoDS_Edge *)(&myDS->Shape(nED)));
+  const TopoDS_Face& aDF = (*(TopoDS_Face *)(&myDS->Shape(nFD)));
   //
-  // Choose direction for degenerated edge
-  aC2DDE->D0(aTD1, aP2d1);
-  aC2DDE->D0(aTD2, aP2d2);
+  Standard_Real aTolV = BRep_Tool::Tolerance(aDV);
+  const BRepAdaptor_Surface& aBAS = myContext->SurfaceAdaptor(aDF);
   //
-  bXDir=Standard_False;
-  if (fabs(aP2d1.Y()-aP2d2.Y()) < aDT){
-    bXDir=!bXDir;
-  }
+  // 2D intersection tolerance should be computed as a resolution
+  // from the tolerance of vertex to resolve the touching cases
+  Standard_Real aTolInt = Precision::PConfusion();
+  // UResolution from the tolerance of the vertex
+  Standard_Real aURes = aBAS.UResolution(aTolV);
+  // VResolution from the tolerance of the vertex
+  Standard_Real aVRes = aBAS.VResolution(aTolV);
   //
-  aItLPB.Initialize(aLPBOut);
+  aTolInt = Max(aTolInt, Max(aURes, aVRes));
+  //
+  // Parametric tolerance to compare intersection point with boundaries
+  // should be computed as a resolution from the tolerance of vertex
+  // in the direction of the 2D curve of degenerated edge
+  Standard_Real aTolCmp = Precision::PConfusion();
+  // Get 2D curve
+  Standard_Real aTD1, aTD2;
+  Handle(Geom2d_Curve) aC2DDE = BRep_Tool::CurveOnSurface(aDE, aDF, aTD1, aTD2);
+  // Get direction of the curve
+  Standard_Boolean bUDir = Abs(aC2DDE->Value(aTD1).Y() - aC2DDE->Value(aTD2).Y()) < Precision::PConfusion();
+  //
+  aTolCmp = Max(aTolCmp, (bUDir ? aURes : aVRes));
+  //
+  // Prepare adaptor for the degenerated edge for intersection
+  Geom2dAdaptor_Curve aGAC1;
+  aGAC1.Load(aC2DDE, aTD1, aTD2);
+  //
+  BOPDS_ListIteratorOfListOfPaveBlock aItLPB(aLPBOut);
   for (; aItLPB.More(); aItLPB.Next()) {
-    const Handle(BOPDS_PaveBlock)& aPB=aItLPB.Value();
-    nE=aPB->Edge();
+    const Handle(BOPDS_PaveBlock)& aPB = aItLPB.Value();
+    Standard_Integer nE = aPB->Edge();
     if (nE < 0) {
       continue;
     }
-    const TopoDS_Edge& aE=(*(TopoDS_Edge *)(&myDS->Shape(nE)));
-    aC2D=BRep_Tool::CurveOnSurface(aE, aDF, aT1, aT2);
+    const TopoDS_Edge& aE = (*(TopoDS_Edge *)(&myDS->Shape(nE)));
+    Standard_Real aT1, aT2;
+    Handle(Geom2d_Curve) aC2D = BRep_Tool::CurveOnSurface(aE, aDF, aT1, aT2);
     if (aC2D.IsNull()) {
       continue;
     }
     //
-    // Intersection
-    Geom2dAdaptor_Curve aGAC1, aGAC2;
-    aGAC1.Load(aC2DDE, aTD1, aTD2);
+    // Prepare adaptor for the passing edge for intersection
+    Geom2dAdaptor_Curve aGAC2;
     //
-    Handle(Geom2d_Line) aL2D= Handle(Geom2d_Line)::DownCast(aC2D);
+    Handle(Geom2d_Line) aL2D = Handle(Geom2d_Line)::DownCast(aC2D);
     if (!aL2D.IsNull()) {
       aGAC2.Load(aC2D);
     }
     else {
       aGAC2.Load(aC2D, aT1, aT2);
     }
-    //
-    aTolInter=0.001;
-    aTolCmp=1.414213562*aTolInter+aDT;
-    Geom2dInt_GInter aGInter(aGAC1, aGAC2, aTolInter, aTolInter);
-    bIsDone=aGInter.IsDone();
-    if(!bIsDone) {
-      continue;
-    }
-    //
-    aNbPoints=aGInter.NbPoints();
-    if (!aNbPoints){
-      continue;
-    }
-    //
-    for (j=1; j<=aNbPoints; ++j) {
-      aP2D=aGInter.Point(j).Value();
-      aX=aGInter.Point(j).ParamOnFirst();
-      //
-      if (fabs (aX-aTD1) < aTolCmp || fabs (aX-aTD2) < aTolCmp) {
-        continue; 
+    // Intersection
+    Geom2dInt_GInter aGInter(aGAC1, aGAC2, aTolInt, aTolInt);
+    if (aGInter.IsDone() && aGInter.NbPoints())
+    {
+      // Analyze intersection points
+      Standard_Integer i, aNbPoints = aGInter.NbPoints();
+      for (i = 1; i <= aNbPoints; ++i) {
+        Standard_Real aX = aGInter.Point(i).ParamOnFirst();
+        aPave.SetParameter(aX);
+        AddSplitPoint(aPBD, aPave, aTolCmp);
       }
-      if (aX < aTD1 || aX > aTD2) {
-        continue; 
-      }
-      //
-      if (aPBD->ContainsParameter(aX, aDT, anInd)) {
-        continue;
-      }
-      aPave.SetParameter(aX);
-      aPBD->AppendExtPave1(aPave);
     }
-  }//for (; aItLPB.More(); aItLPB.Next()) {
+    else
+    {
+      // If the intersection did not succeed, try the projection of the end point
+      // of the curve corresponding to the vertex of degenerated edge
+      Standard_Real aT = (nVD == aPB->Pave1().Index() ?
+        aPB->Pave1().Parameter() : aPB->Pave2().Parameter());
+      gp_Pnt2d aP2d = aC2D->Value(aT);
+      Geom2dAPI_ProjectPointOnCurve aProj2d(aP2d, aC2DDE, aTD1, aTD2);
+      if (aProj2d.NbPoints())
+      {
+        Standard_Real aX = aProj2d.LowerDistanceParameter();
+        aPave.SetParameter(aX);
+        AddSplitPoint(aPBD, aPave, aTolCmp);
+      }
+    }
+  }
 }
 //=======================================================================
 // function:  MakeSplitEdge1
@@ -363,4 +364,35 @@ void BOPAlgo_PaveFiller::ProcessDE()
 
   BB.UpdateEdge(E, aTol);
   aNewEdge=E;
+}
+
+//=======================================================================
+// function: AddSplitPoint
+// purpose: Validates the point represented by the pave <thePave>
+//          for the Pave Block <thePBD>.
+//          In case the point passes the checks it is added as an
+//          Extra Pave to the Pave Block for further splitting of the latter.
+//          Returns TRUE if the point is added, otherwise returns FALSE.
+//=======================================================================
+Standard_Boolean AddSplitPoint(const Handle(BOPDS_PaveBlock)& thePBD,
+                               const BOPDS_Pave& thePave,
+                               const Standard_Real theTol)
+{
+  Standard_Real aTD1, aTD2;
+  thePBD->Range(aTD1, aTD2);
+
+  Standard_Real aT = thePave.Parameter();
+  // Check that the parameter is inside the Pave Block
+  if (aT - aTD1 < theTol || aTD2 - aT < theTol)
+    return Standard_False;
+
+  // Check that the pave block does not contain the same parameter
+  Standard_Integer anInd;
+  if (thePBD->ContainsParameter(aT, theTol, anInd))
+    return Standard_False;
+
+  // Add the point as an Extra pave to the Pave Block for further
+  // splitting of the latter
+  thePBD->AppendExtPave1(thePave);
+  return Standard_True;
 }

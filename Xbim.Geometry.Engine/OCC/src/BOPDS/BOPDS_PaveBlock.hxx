@@ -18,28 +18,28 @@
 #include <Standard.hxx>
 #include <Standard_Type.hxx>
 
-#include <BOPCol_BaseAllocator.hxx>
-#include <Standard_Integer.hxx>
-#include <BOPDS_Pave.hxx>
-#include <BOPDS_ListOfPave.hxx>
-#include <Standard_Real.hxx>
 #include <Bnd_Box.hxx>
-#include <BOPCol_MapOfInteger.hxx>
-#include <MMgt_TShared.hxx>
-#include <Standard_Boolean.hxx>
+#include <BOPDS_ListOfPave.hxx>
 #include <BOPDS_ListOfPaveBlock.hxx>
+#include <BOPDS_Pave.hxx>
+#include <NCollection_BaseAllocator.hxx>
+#include <Standard_Boolean.hxx>
+#include <Standard_Integer.hxx>
+#include <Standard_Real.hxx>
+#include <Standard_Transient.hxx>
+#include <TColStd_MapOfInteger.hxx>
 class BOPDS_Pave;
 class Bnd_Box;
 
 
 class BOPDS_PaveBlock;
-DEFINE_STANDARD_HANDLE(BOPDS_PaveBlock, MMgt_TShared)
+DEFINE_STANDARD_HANDLE(BOPDS_PaveBlock, Standard_Transient)
 
 
 //! The class BOPDS_PaveBlock is to store
 //! the information about pave block on an edge.
 //! Two adjacent paves on edge make up pave block.
-class BOPDS_PaveBlock : public MMgt_TShared
+class BOPDS_PaveBlock : public Standard_Transient
 {
 
 public:
@@ -52,7 +52,7 @@ public:
 
   //! Contructor
   //! <theAllocator> - the allocator to manage the memory
-  Standard_EXPORT BOPDS_PaveBlock(const BOPCol_BaseAllocator& theAllocator);
+  Standard_EXPORT BOPDS_PaveBlock(const Handle(NCollection_BaseAllocator)& theAllocator);
   
 
   //! Modifier
@@ -219,12 +219,12 @@ public:
 
 
 
-  DEFINE_STANDARD_RTTIEXT(BOPDS_PaveBlock,MMgt_TShared)
+  DEFINE_STANDARD_RTTIEXT(BOPDS_PaveBlock,Standard_Transient)
 
 protected:
 
 
-  BOPCol_BaseAllocator myAllocator;
+  Handle(NCollection_BaseAllocator) myAllocator;
   Standard_Integer myEdge;
   Standard_Integer myOriginalEdge;
   BOPDS_Pave myPave1;
@@ -233,7 +233,7 @@ protected:
   Standard_Real myTS1;
   Standard_Real myTS2;
   Bnd_Box myShrunkBox;
-  BOPCol_MapOfInteger myMFence;
+  TColStd_MapOfInteger myMFence;
   Standard_Boolean myIsSplittable;
 
 private:

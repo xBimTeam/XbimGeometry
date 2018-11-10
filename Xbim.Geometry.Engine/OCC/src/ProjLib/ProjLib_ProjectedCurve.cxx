@@ -55,6 +55,39 @@
 #include <GeomLib.hxx>
 #include <Extrema_ExtPC.hxx>
 #include <NCollection_DataMap.hxx>
+//=======================================================================
+//function : ComputeTolU
+//purpose  : 
+//=======================================================================
+
+static Standard_Real ComputeTolU(const Handle(Adaptor3d_HSurface)& theSurf,
+                                 const Standard_Real theTolerance)
+{
+  Standard_Real aTolU = theSurf->UResolution(theTolerance);
+  if (theSurf->IsUPeriodic())
+  {
+    aTolU = Min(aTolU, 0.01*theSurf->UPeriod());
+  }
+
+  return aTolU;
+}
+
+//=======================================================================
+//function : ComputeTolV
+//purpose  : 
+//=======================================================================
+
+static Standard_Real ComputeTolV(const Handle(Adaptor3d_HSurface)& theSurf,
+                                 const Standard_Real theTolerance)
+{
+  Standard_Real aTolV = theSurf->VResolution(theTolerance);
+  if (theSurf->IsVPeriodic())
+  {
+    aTolV = Min(aTolV, 0.01*theSurf->VPeriod());
+  }
+
+  return aTolV;
+}
 
 //=======================================================================
 //function : IsoIsDeg
@@ -250,7 +283,7 @@ static void Project(ProjLib_Projector& P, Handle(Adaptor3d_HCurve)& C)
     case GeomAbs_OtherCurve:    // try the approximation
       break;
     default:
-      Standard_NoSuchObject::Raise(" ");
+      throw Standard_NoSuchObject(" ");
   }
 }
 
@@ -259,10 +292,13 @@ static void Project(ProjLib_Projector& P, Handle(Adaptor3d_HCurve)& C)
 //purpose  : 
 //=======================================================================
 
-ProjLib_ProjectedCurve::ProjLib_ProjectedCurve()
-
+ProjLib_ProjectedCurve::ProjLib_ProjectedCurve() :
+  myTolerance(Precision::Confusion()),
+  myDegMin(-1), myDegMax(-1),
+  myMaxSegments(-1),
+  myMaxDist(-1.),
+  myBndPnt(AppParCurves_TangencyPoint)
 {
-  myTolerance = Precision::Confusion();
 }
 
 
@@ -272,9 +308,13 @@ ProjLib_ProjectedCurve::ProjLib_ProjectedCurve()
 //=======================================================================
 
 ProjLib_ProjectedCurve::ProjLib_ProjectedCurve
-(const Handle(Adaptor3d_HSurface)& S)
+(const Handle(Adaptor3d_HSurface)& S) :
+  myTolerance(Precision::Confusion()),
+  myDegMin(-1), myDegMax(-1),
+  myMaxSegments(-1),
+  myMaxDist(-1.),
+  myBndPnt(AppParCurves_TangencyPoint)
 {
-  myTolerance = Precision::Confusion();
   Load(S);
 }
 
@@ -286,11 +326,15 @@ ProjLib_ProjectedCurve::ProjLib_ProjectedCurve
 
 ProjLib_ProjectedCurve::ProjLib_ProjectedCurve
 (const Handle(Adaptor3d_HSurface)& S,
- const Handle(Adaptor3d_HCurve)& C)
+ const Handle(Adaptor3d_HCurve)& C) :
+  myTolerance(Precision::Confusion()),
+  myDegMin(-1), myDegMax(-1),
+  myMaxSegments(-1),
+  myMaxDist(-1.),
+  myBndPnt(AppParCurves_TangencyPoint)
 {
-  myTolerance = Precision::Confusion();
   Load(S);
-  Load(C);
+  Perform(C);
 }
 
 
@@ -302,11 +346,15 @@ ProjLib_ProjectedCurve::ProjLib_ProjectedCurve
 ProjLib_ProjectedCurve::ProjLib_ProjectedCurve
 (const Handle(Adaptor3d_HSurface)& S,
  const Handle(Adaptor3d_HCurve)&   C,
- const Standard_Real             Tol)
+ const Standard_Real             Tol) :
+  myTolerance(Max(Tol, Precision::Confusion())),
+  myDegMin(-1), myDegMax(-1),
+  myMaxSegments(-1),
+  myMaxDist(-1.),
+  myBndPnt(AppParCurves_TangencyPoint)
 {
-  myTolerance = Max(Tol, Precision::Confusion());
   Load(S);
-  Load(C);
+  Perform(C);
 }
 
 
@@ -320,13 +368,22 @@ void ProjLib_ProjectedCurve::Load(const Handle(Adaptor3d_HSurface)& S)
   mySurface = S ;
 }
 
-
 //=======================================================================
 //function : Load
 //purpose  : 
 //=======================================================================
 
-void ProjLib_ProjectedCurve::Load(const Handle(Adaptor3d_HCurve)& C)
+void ProjLib_ProjectedCurve::Load(const Standard_Real theTol)
+{
+  myTolerance = theTol;
+}
+
+//=======================================================================
+//function : Perform
+//purpose  : 
+//=======================================================================
+
+void ProjLib_ProjectedCurve::Perform(const Handle(Adaptor3d_HCurve)& C)
 {
   myTolerance = Max(myTolerance, Precision::Confusion());
   myCurve = C;
@@ -431,12 +488,19 @@ void ProjLib_ProjectedCurve::Load(const Handle(Adaptor3d_HCurve)& C)
           TrimC3d(myCurve, IsTrimmed, dt, Pole, SingularCase, 4);
         }
 
-        ProjLib_ComputeApproxOnPolarSurface polar(myCurve, mySurface, myTolerance);
+        ProjLib_ComputeApproxOnPolarSurface polar;
+        polar.SetTolerance(myTolerance);
+        polar.SetDegree(myDegMin, myDegMax);
+        polar.SetMaxSegments(myMaxSegments);
+        polar.SetBndPnt(myBndPnt);
+        polar.SetMaxDist(myMaxDist);
+        polar.Perform(myCurve, mySurface); 
 
         Handle(Geom2d_BSplineCurve) aRes = polar.BSpline();
 
         if (!aRes.IsNull())
         {
+          myTolerance = polar.Tolerance();
           if( (IsTrimmed[0] || IsTrimmed[1]))
           {
             if(IsTrimmed[0])
@@ -538,7 +602,16 @@ void ProjLib_ProjectedCurve::Load(const Handle(Adaptor3d_HCurve)& C)
           }
         }
 
-        ProjLib_CompProjectedCurve Projector(mySurface,myCurve, myTolerance, myTolerance, 100 * myTolerance);
+        Standard_Real aTolU = Max(ComputeTolU(mySurface, myTolerance), Precision::Confusion());
+        Standard_Real aTolV = Max(ComputeTolV(mySurface, myTolerance), Precision::Confusion());
+        Standard_Real aTol2d = Sqrt(aTolU*aTolU + aTolV*aTolV);
+
+        Standard_Real aMaxDist = 100. * myTolerance;
+        if(myMaxDist > 0.)
+        {
+          aMaxDist = myMaxDist;
+        }
+        ProjLib_CompProjectedCurve Projector(mySurface,myCurve, aTolU, aTolV, aMaxDist);
         Handle(ProjLib_HCompProjectedCurve) HProjector = new ProjLib_HCompProjectedCurve();
         HProjector->Set(Projector);
 
@@ -559,8 +632,20 @@ void ProjLib_ProjectedCurve::Load(const Handle(Adaptor3d_HCurve)& C)
         Standard_Boolean Only3d = Standard_False;
         Standard_Boolean Only2d = Standard_True;
         GeomAbs_Shape Continuity = GeomAbs_C1;
+        if(myBndPnt == AppParCurves_PassPoint)
+        {
+          Continuity = GeomAbs_C0;
+        }
         Standard_Integer MaxDegree = 14;
+        if(myDegMax > 0)
+        {
+          MaxDegree = myDegMax;
+        }
         Standard_Integer MaxSeg    = 16;
+        if(myMaxSegments > 0)
+        {
+          MaxSeg = myMaxSegments;
+        }
 
         Approx_CurveOnSurface appr(HProjector, mySurface, Udeb, Ufin, 
                                    myTolerance, Continuity, MaxDegree, MaxSeg, 
@@ -570,6 +655,10 @@ void ProjLib_ProjectedCurve::Load(const Handle(Adaptor3d_HCurve)& C)
 
         if (!aRes.IsNull())
         {
+          aTolU = appr.MaxError2dU();
+          aTolV = appr.MaxError2dV();
+          Standard_Real aNewTol2d = Sqrt(aTolU*aTolU + aTolV*aTolV);
+          myTolerance *= (aNewTol2d / aTol2d);
           if(IsTrimmed[0] || IsTrimmed[1])
           {
             // Treatment only for surface of revolution
@@ -594,6 +683,16 @@ void ProjLib_ProjectedCurve::Load(const Handle(Adaptor3d_HCurve)& C)
               aRes->FirstParameter(), aRes->LastParameter(),
               FirstPar, LastPar, NewCurve2d);
             aRes = Handle(Geom2d_BSplineCurve)::DownCast(NewCurve2d);
+            if(Continuity == GeomAbs_C0)
+            {
+              // try to smoother the Curve GeomAbs_C1.
+              Standard_Integer aDeg = aRes->Degree();
+              Standard_Boolean OK = Standard_True;
+              Standard_Real aSmoothTol = Max(Precision::Confusion(), aNewTol2d);
+              for (Standard_Integer ij = 2; ij < aRes->NbKnots(); ij++) {
+                OK = OK && aRes->RemoveKnot(ij, aDeg-1, aSmoothTol);  
+              }
+            }
           }
 
           myResult.SetBSpline(aRes);
@@ -606,7 +705,12 @@ void ProjLib_ProjectedCurve::Load(const Handle(Adaptor3d_HCurve)& C)
   if ( !myResult.IsDone() && isAnalyticalSurf)
   {
     // Use advanced analytical projector if base analytical projection failed.
-    ProjLib_ComputeApprox Comp( myCurve, mySurface, myTolerance);
+    ProjLib_ComputeApprox Comp;
+    Comp.SetTolerance(myTolerance);
+    Comp.SetDegree(myDegMin, myDegMax);
+    Comp.SetMaxSegments(myMaxSegments);
+    Comp.SetBndPnt(myBndPnt);
+    Comp.Perform( myCurve, mySurface); 
     if (Comp.Bezier().IsNull() && Comp.BSpline().IsNull())
       return; // advanced projector has been failed too
     myResult.Done();
@@ -723,6 +827,42 @@ void ProjLib_ProjectedCurve::Load(const Handle(Adaptor3d_HCurve)& C)
   }
 }
 
+//=======================================================================
+//function : SetDegree
+//purpose  : 
+//=======================================================================
+void ProjLib_ProjectedCurve::SetDegree(const Standard_Integer theDegMin, 
+                                       const Standard_Integer theDegMax)
+{
+  myDegMin = theDegMin;
+  myDegMax = theDegMax;
+}
+//=======================================================================
+//function : SetMaxSegments
+//purpose  : 
+//=======================================================================
+void ProjLib_ProjectedCurve::SetMaxSegments(const Standard_Integer theMaxSegments)
+{
+  myMaxSegments = theMaxSegments;
+}
+
+//=======================================================================
+//function : SetBndPnt
+//purpose  : 
+//=======================================================================
+void ProjLib_ProjectedCurve::SetBndPnt(const AppParCurves_Constraint theBndPnt)
+{
+  myBndPnt = theBndPnt;
+}
+
+//=======================================================================
+//function : SetMaxDist
+//purpose  : 
+//=======================================================================
+void ProjLib_ProjectedCurve::SetMaxDist(const Standard_Real theMaxDist)
+{
+  myMaxDist = theMaxDist;
+}
 
 //=======================================================================
 //function : GetSurface
@@ -786,8 +926,7 @@ Standard_Real ProjLib_ProjectedCurve::LastParameter() const
 
 GeomAbs_Shape ProjLib_ProjectedCurve::Continuity() const
 {
-  Standard_NotImplemented::Raise("");
-  return GeomAbs_C0;
+  throw Standard_NotImplemented ("ProjLib_ProjectedCurve::Continuity() - method is not implemented");
 }
 
 
@@ -798,8 +937,7 @@ GeomAbs_Shape ProjLib_ProjectedCurve::Continuity() const
 
 Standard_Integer ProjLib_ProjectedCurve::NbIntervals(const GeomAbs_Shape ) const 
 {
-  Standard_NotImplemented::Raise("");
-  return 0;
+  throw Standard_NotImplemented ("ProjLib_ProjectedCurve::NbIntervals() - method is not implemented");
 }
 
 
@@ -812,7 +950,7 @@ Standard_Integer ProjLib_ProjectedCurve::NbIntervals(const GeomAbs_Shape ) const
 void ProjLib_ProjectedCurve::Intervals(TColStd_Array1OfReal&  ,
 				       const GeomAbs_Shape ) const 
 {
-  Standard_NotImplemented::Raise("");
+  throw Standard_NotImplemented ("ProjLib_ProjectedCurve::Intervals() - method is not implemented");
 }
 
 
@@ -823,8 +961,7 @@ void ProjLib_ProjectedCurve::Intervals(TColStd_Array1OfReal&  ,
 
 Standard_Boolean ProjLib_ProjectedCurve::IsClosed() const
 {
-  Standard_NotImplemented::Raise("");
-  return Standard_True;
+  throw Standard_NotImplemented ("ProjLib_ProjectedCurve::IsClosed() - method is not implemented");
 }
 
 
@@ -846,8 +983,7 @@ Standard_Boolean ProjLib_ProjectedCurve::IsPeriodic() const
 
 Standard_Real ProjLib_ProjectedCurve::Period() const
 {
-  Standard_NotImplemented::Raise("");
-  return 0.;
+  throw Standard_NotImplemented ("ProjLib_ProjectedCurve::Period() - method is not implemented");
 }
 
 
@@ -858,8 +994,7 @@ Standard_Real ProjLib_ProjectedCurve::Period() const
 
 gp_Pnt2d ProjLib_ProjectedCurve::Value(const Standard_Real ) const 
 {
-  Standard_NotImplemented::Raise("");
-  return gp_Pnt2d(0.,0.);
+  throw Standard_NotImplemented ("ProjLib_ProjectedCurve::Value() - method is not implemented");
 }
 
 
@@ -870,7 +1005,7 @@ gp_Pnt2d ProjLib_ProjectedCurve::Value(const Standard_Real ) const
 
 void ProjLib_ProjectedCurve::D0(const Standard_Real , gp_Pnt2d& ) const
 {
-  Standard_NotImplemented::Raise("");
+  throw Standard_NotImplemented ("ProjLib_ProjectedCurve::D0() - method is not implemented");
 }
 
 
@@ -883,7 +1018,7 @@ void ProjLib_ProjectedCurve::D1(const Standard_Real ,
 			              gp_Pnt2d&     , 
                                       gp_Vec2d&     ) const 
 {
-  Standard_NotImplemented::Raise("");
+  throw Standard_NotImplemented ("ProjLib_ProjectedCurve::D1() - method is not implemented");
 }
 
 
@@ -897,7 +1032,7 @@ void ProjLib_ProjectedCurve::D2(const Standard_Real ,
                                       gp_Vec2d&     , 
                                       gp_Vec2d&     ) const 
 {
-  Standard_NotImplemented::Raise("");
+  throw Standard_NotImplemented ("ProjLib_ProjectedCurve::D2() - method is not implemented");
 }
 
 
@@ -912,7 +1047,7 @@ void ProjLib_ProjectedCurve::D3(const Standard_Real,
 				      gp_Vec2d&, 
 			              gp_Vec2d&) const 
 {
-  Standard_NotImplemented::Raise("");
+  throw Standard_NotImplemented ("ProjLib_ProjectedCurve::D3() - method is not implemented");
 }
 
 
@@ -924,8 +1059,7 @@ void ProjLib_ProjectedCurve::D3(const Standard_Real,
 gp_Vec2d ProjLib_ProjectedCurve::DN(const Standard_Real, 
 				    const Standard_Integer) const 
 {
-  Standard_NotImplemented::Raise("");
-  return gp_Vec2d(0.,0.);
+  throw Standard_NotImplemented ("ProjLib_ProjectedCurve::DN() - method is not implemented");
 }
 
 
@@ -936,8 +1070,7 @@ gp_Vec2d ProjLib_ProjectedCurve::DN(const Standard_Real,
 
 Standard_Real ProjLib_ProjectedCurve::Resolution(const Standard_Real) const 
 {
-  Standard_NotImplemented::Raise("");
-  return 0.;
+  throw Standard_NotImplemented ("ProjLib_ProjectedCurve::Resolution() - method is not implemented");
 }
     
 
@@ -1117,7 +1250,5 @@ Handle(Adaptor2d_HCurve2d) ProjLib_ProjectedCurve::Trim
  const Standard_Real ,
  const Standard_Real ) const 
 {
-  Standard_NotImplemented::Raise("");
-  return NULL ;
+  throw Standard_NotImplemented ("ProjLib_ProjectedCurve::Trim() - method is not implemented");
 }
-

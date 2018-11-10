@@ -18,7 +18,6 @@
 #include <BRep_Tool.hxx>
 #include <TColgp_Array1OfPnt.hxx>
 #include <BRepTools.hxx>
-#include <ShapeFix_ShapeTolerance.hxx>
 #include <BRep_Builder.hxx>
 #include <BRepOffsetAPI_MakePipe.hxx>
 #include <BRepOffsetAPI_MakePipeShell.hxx>
@@ -251,15 +250,21 @@ namespace Xbim
 					if (objectLocation != nullptr) solid->Move(objectLocation);
 					return solid;
 				}
+				else if (dynamic_cast<IIfcSphere^>(geomRep))
+				{
+					XbimSolid^ solid = (XbimSolid^)CreateSolid((IIfcSphere^)geomRep, logger);
+					if (objectLocation != nullptr) solid->Move(objectLocation);
+					return solid;
+				}
 				else if (dynamic_cast<IIfcGeometricSet^>(geomRep))
 				{
 					if (objectLocation != nullptr) LogError(logger, geomRep, "Move is not implemented for IIfcGeometricSet");
 					return CreateGeometricSet((IIfcGeometricSet^)geomRep,logger);
 				}
 			}
-			catch (Standard_Failure e)
+			catch (const std::exception &exc)
 			{
-				String^ err = gcnew String(Standard_Failure::Caught()->GetMessageString());
+				String^ err = gcnew String(exc.what());
 				LogError(logger, geomRep, "Error creating geometry #{2} representation of type {0}, {1}", geomRep->GetType()->Name, err, geomRep->EntityLabel);
 				return XbimGeometryObjectSet::Empty;
 			}

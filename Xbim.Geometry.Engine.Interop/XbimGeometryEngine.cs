@@ -12,7 +12,6 @@ namespace Xbim.Geometry.Engine.Interop
 {  
     public class XbimGeometryEngine : IXbimGeometryEngine
     {
-
         private readonly IXbimGeometryEngine _engine;
 
         private readonly ILogger<XbimGeometryEngine> _logger;
@@ -524,9 +523,7 @@ namespace Xbim.Geometry.Engine.Interop
         public IXbimGeometryObject FromBrep(string brepStr)
         {
             return _engine.FromBrep(brepStr);
-        }
-
-       
+        }     
 
         public string ToBrep(IXbimGeometryObject geometryObject)
         {

@@ -1,1 +1,0 @@
-msbuild /Property:Configuration=Release /t:Xbim_Geometry_Engine_Interop:PublishBimpGet

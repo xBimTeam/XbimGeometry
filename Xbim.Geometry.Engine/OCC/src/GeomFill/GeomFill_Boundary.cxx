@@ -20,7 +20,7 @@
 #include <gp_Vec.hxx>
 #include <Standard_Type.hxx>
 
-IMPLEMENT_STANDARD_RTTIEXT(GeomFill_Boundary,MMgt_TShared)
+IMPLEMENT_STANDARD_RTTIEXT(GeomFill_Boundary,Standard_Transient)
 
 //=======================================================================
 //function : GeomFill_Boundary
@@ -51,8 +51,7 @@ Standard_Boolean GeomFill_Boundary::HasNormals() const
 
 gp_Vec GeomFill_Boundary::Norm(const Standard_Real ) const 
 {
-  Standard_Failure::Raise("GeomFill_Boundary::Norm : Undefined normals");
-  return gp_Vec();
+  throw Standard_Failure("GeomFill_Boundary::Norm : Undefined normals");
 }
 
 
@@ -63,7 +62,7 @@ gp_Vec GeomFill_Boundary::Norm(const Standard_Real ) const
 
 void GeomFill_Boundary::D1Norm(const Standard_Real , gp_Vec& , gp_Vec& ) const 
 {
-  Standard_Failure::Raise("GeomFill_Boundary::Norm : Undefined normals");
+  throw Standard_Failure("GeomFill_Boundary::Norm : Undefined normals");
 }
 
 

@@ -59,7 +59,33 @@
    
   </ItemGroup>
 
+  <ItemGroup>
+    <NativeGeometryEngine Include="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj">
+      <AdditionalProperties>
+        Platform=Win32
+      </AdditionalProperties>
+    </NativeGeometryEngine>
+    <NativeGeometryEngine Include="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj">
+      <AdditionalProperties>
+        Platform=x64   
+      </AdditionalProperties>
+    </NativeGeometryEngine>
+  </ItemGroup>
   
+  <Target Name="BuildNativeCodeEngine" BeforeTargets="Build">
+    <Message Text="Building Xbim.Geometry.Engine x32 and x64 Native Dlls, version $(AssemblyFileVersionAttribute)" Importance="High" />
+    <WriteLinesToFile File="..\SharedFileVersionInfo.cs" Lines="$(AssemblyFileVersionAttribute)" Overwrite="true" Encoding="Unicode" />
+    <MSBuild Projects="@(NativeGeometryEngine)"
+      Properties="Configuration=$(Configuration) ; OutDir=..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\"
+      Targets="Build"> 
+      <Output  
+                TaskParameter="TargetOutputs"  
+                ItemName="AssembliesBuiltByChildProjects" />  
+    
+     </MSBuild>
+  </Target>
+  
+
   <Target Name=" CleanNativeCodeEngine" BeforeTargets="Clean">
     <Message Text="Cleaning Xbim.Geometry.Engine x32 Native Dlls" Importance="High" />
     <MSBuild Projects="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj" Properties="Configuration=$(Configuration);Platform=Win32;OutDir=..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\" Targets="Clean">      
@@ -68,22 +94,16 @@
     <MSBuild Projects="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj" Properties="Configuration=$(Configuration);Platform=x64;OutDir=..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\" Targets="Clean">      
     </MSBuild>
   </Target>
-  <Target Name="BuildNativeCodeEngine" BeforeTargets="Build">
-    <Message Text="Building Xbim.Geometry.Engine x32 Native Dlls, version $(AssemblyFileVersionAttribute)" Importance="High" />
+  <!--<Target Name="BuildNativeCodeEngine" BeforeTargets="Build">
+    <Message Text="Building Xbim.Geometry.Engine x32 and x64 Native Dlls, version $(AssemblyFileVersionAttribute)" Importance="High" />
     <WriteLinesToFile File="..\SharedFileVersionInfo.cs" Lines="$(AssemblyFileVersionAttribute)" Overwrite="true" Encoding="Unicode" />
-    <!--<Message Text="Building Xbim.Geometry.Engine x64 Native Dlls, version $(AssemblyFileVersionAttribute)" Importance="High" />-->
+    --><!--<Message Text="Building Xbim.Geometry.Engine x64 Native Dlls, version $(AssemblyFileVersionAttribute)" Importance="High" />--><!--
     <MSBuild Projects="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj" Properties="Configuration=$(Configuration);Platform=Win32;OutDir=..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\" Targets="Build">
       <Output ItemName="AssembliesBuiltByChildProjects" TaskParameter="TargetOutputs" />
     </MSBuild>
     <MSBuild Projects="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj" Properties="Configuration=$(Configuration);Platform=x64;OutDir=..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\" Targets="Build">
       <Output ItemName="AssembliesBuiltByChildProjects" TaskParameter="TargetOutputs" />
     </MSBuild>  
-  </Target>
-  <Target Name="PublishBimpGet" DependsOnTargets="Pack">
-    <Message Text="Publishing package to BimpGet from $(MSBuildProjectDirectory)\bin\$(Configuration)\net47" Importance="High" />
-    
-    <!-- Publish the nupkg to the BimpGet server 
-          Note: "nuget setApiKey {put-your-api-key-here} -Source http://My_Nuget_Gallery_Service_Url/" must be run prior on the machine to ensure the api key is set correctly. -->
-    <Exec WorkingDirectory="$(MSBuildProjectDirectory)\bin\$(Configuration)\" Command="NuGet.exe push &quot;$(MSBuildProjectDirectory)\bin\$(Configuration)\$(AssemblyName).$(Version).nupkg&quot;  -ApiKey C7C8A900-FD5A-4351-A4D8-93CC245C6B2A -Source http://bimpnugetgallery.azurewebsites.net/nuget/" />
-  </Target>
+  </Target>-->
+  
 </Project>

@@ -70,6 +70,7 @@ ShapeFix_Solid::ShapeFix_Solid()
 {
   myStatus = ShapeExtend::EncodeStatus (ShapeExtend_OK);
   myFixShellMode = -1;
+  myFixShellOrientationMode = -1;
   myFixShell = new ShapeFix_Shell;
   myCreateOpenSolidMode = Standard_False;
 }
@@ -83,6 +84,7 @@ ShapeFix_Solid::ShapeFix_Solid(const TopoDS_Solid& solid)
 {
   myStatus = ShapeExtend::EncodeStatus (ShapeExtend_OK);
   myFixShellMode = -1;
+  myFixShellOrientationMode = -1;
   myFixShell = new ShapeFix_Shell;
   myCreateOpenSolidMode = Standard_False;
   Init(solid);
@@ -219,11 +221,12 @@ static void CollectSolids(const TopTools_SequenceOfShape& aSeqShells ,
         }
       }
     }
-    catch(Standard_Failure) {
+    catch(Standard_Failure const& anException) {
 #ifdef OCCT_DEBUG
       cout << "Warning: ShapeFix_Solid::SolidFromShell: Exception: ";
-      Standard_Failure::Caught()->Print(cout); cout << endl;
+      anException.Print(cout); cout << endl;
 #endif
+      (void)anException;
       continue;
     }
   }
@@ -296,11 +299,12 @@ static Standard_Boolean CreateSolids(const TopoDS_Shape theShape,TopTools_Indexe
       bsc3d.PerformInfinitePoint(Precision::Confusion());
       infinstatus = bsc3d.State();
       }
-    catch(Standard_Failure) {
+    catch(Standard_Failure const& anException) {
 #ifdef OCCT_DEBUG
       cout << "Warning: ShapeFix_Solid::SolidFromShell: Exception: ";
-      Standard_Failure::Caught()->Print(cout); cout << endl;
+      anException.Print(cout); cout << endl;
 #endif
+      (void)anException;
       ShellSolid.Add(aShell,aSolid);
       continue;
     } 
@@ -417,13 +421,13 @@ Standard_Boolean ShapeFix_Solid::Perform(const Handle(Message_ProgressIndicator)
         status = Standard_True;
         myStatus |= ShapeExtend::EncodeStatus ( ShapeExtend_DONE1 );
       }
-      NbShells+= myFixShell->NbShells();
+      NbShells += myFixShell->NbShells();
     }
 
     // Halt algorithm in case of user's abort
     if ( !aPSentryFixShell.More() )
       return Standard_False;
-  }
+    }
   else 
   {
     NbShells = aNbShells;
@@ -431,7 +435,13 @@ Standard_Boolean ShapeFix_Solid::Perform(const Handle(Message_ProgressIndicator)
 
   // Switch to the second stage
   aPSentry.Next();
-    
+
+  if (!NeedFix(myFixShellOrientationMode))
+  {
+    myShape = Context()->Apply(myShape);
+    return status;
+  }
+
   if(NbShells ==1) {
     TopoDS_Shape tmpShape = Context()->Apply(myShape);
     TopExp_Explorer aExp(tmpShape,TopAbs_SHELL);
@@ -572,11 +582,12 @@ TopoDS_Solid ShapeFix_Solid::SolidFromShell (const TopoDS_Shell& shell)
       myStatus |= ShapeExtend::EncodeStatus ( ShapeExtend_DONE2 );
     }
   }
-  catch(Standard_Failure) {
+  catch(Standard_Failure const& anException) {
 #ifdef OCCT_DEBUG
     cout << "Warning: ShapeFix_Solid::SolidFromShell: Exception: ";
-    Standard_Failure::Caught()->Print(cout); cout << endl;
+    anException.Print(cout); cout << endl;
 #endif
+    (void)anException;
     return solid;
   }
   return solid;

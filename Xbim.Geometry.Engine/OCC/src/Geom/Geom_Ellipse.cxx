@@ -31,7 +31,6 @@
 
 IMPLEMENT_STANDARD_RTTIEXT(Geom_Ellipse,Geom_Conic)
 
-typedef Geom_Ellipse         Ellipse;
 typedef gp_Ax1  Ax1;
 typedef gp_Ax2  Ax2;
 typedef gp_Pnt  Pnt;
@@ -47,7 +46,7 @@ typedef gp_XYZ  XYZ;
 Handle(Geom_Geometry) Geom_Ellipse::Copy() const
 {
   Handle(Geom_Ellipse) E;
-  E = new Ellipse (pos, majorRadius, minorRadius);
+  E = new Geom_Ellipse(pos, majorRadius, minorRadius);
   return E;
 }
 
@@ -77,7 +76,7 @@ Geom_Ellipse::Geom_Ellipse ( const Ax2& A,
   : majorRadius (MajorRadius), minorRadius (MinorRadius) {
 
    if (MajorRadius < MinorRadius || MinorRadius < 0.0 ) {
-     Standard_ConstructionError::Raise();
+     throw Standard_ConstructionError();
    }
    pos = A;
 }
@@ -145,7 +144,7 @@ void Geom_Ellipse::SetElips (const gp_Elips& E) {
 
 void Geom_Ellipse::SetMajorRadius (const Standard_Real MajorRadius) {
 
-  if (MajorRadius < minorRadius)  Standard_ConstructionError::Raise ();
+  if (MajorRadius < minorRadius)  throw Standard_ConstructionError();
   else                            majorRadius = MajorRadius; 
 }
 
@@ -158,7 +157,7 @@ void Geom_Ellipse::SetMajorRadius (const Standard_Real MajorRadius) {
 void Geom_Ellipse::SetMinorRadius (const Standard_Real MinorRadius) {
 
    if (MinorRadius < 0 || majorRadius < MinorRadius) {
-     Standard_ConstructionError::Raise();
+     throw Standard_ConstructionError();
    }
    else { minorRadius = MinorRadius; }
 }

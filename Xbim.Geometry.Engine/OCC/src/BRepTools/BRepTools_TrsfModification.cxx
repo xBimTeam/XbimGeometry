@@ -180,6 +180,17 @@ Standard_Boolean BRepTools_TrsfModification::NewCurve2d
   if(!NewC->IsPeriodic()) {
     if(fc - f > Precision::PConfusion()) f = fc;
     if(l - lc > Precision::PConfusion()) l = lc;
+    if(Abs(l - f) < Precision::PConfusion())
+    {
+      if(Abs(f - fc) < Precision::PConfusion())
+      {
+        l = lc;
+      }
+      else
+      {
+        f = fc;
+      }
+    }
   }
 
   newf = f;
@@ -192,8 +203,7 @@ Standard_Boolean BRepTools_TrsfModification::NewCurve2d
     if ( gtrsf.Form() != gp_Identity) {
       NewC = GeomLib::GTransform(NewC,gtrsf);
       if (NewC.IsNull()) {
-	Standard_DomainError::Raise("TrsfModification:Error in NewCurve2d");
-	  return Standard_False;
+	throw Standard_DomainError("TrsfModification:Error in NewCurve2d");
 	}
       newf = NewC->FirstParameter();
       newl = NewC->LastParameter();

@@ -703,7 +703,7 @@ Handle(Geom_Curve) GeomLib::To3d (const gp_Ax2&               Position,
     Curve3d = GeomH3d;
   }
   else {
-    Standard_NotImplemented::Raise();
+    throw Standard_NotImplemented();
   }
   
   return Curve3d;
@@ -886,7 +886,7 @@ void GeomLib::SameRange(const Standard_Real         Tolerance,
 			const Standard_Real         RequestedLast,
 			      Handle(Geom2d_Curve)& NewCurvePtr) 
 {
-  if(CurvePtr.IsNull()) Standard_Failure::Raise();
+  if(CurvePtr.IsNull()) throw Standard_Failure();
   if (Abs(LastOnCurve - RequestedLast) <= Tolerance &&
     Abs(FirstOnCurve - RequestedFirst) <= Tolerance)
   { 
@@ -971,14 +971,27 @@ void GeomLib::SameRange(const Standard_Real         Tolerance,
 
     if(aCCheck->IsPeriodic())
     {
-      TC = new Geom2d_TrimmedCurve( CurvePtr, FirstOnCurve, LastOnCurve );
+      if(Abs(LastOnCurve - FirstOnCurve) > Precision::PConfusion())
+      {
+        TC = new Geom2d_TrimmedCurve( CurvePtr, FirstOnCurve, LastOnCurve );
+      }
+      else
+      {
+        TC = new Geom2d_TrimmedCurve( CurvePtr, CurvePtr->FirstParameter(), CurvePtr->LastParameter() );
+      }
     }
     else
     {
       const Standard_Real Udeb = Max(CurvePtr->FirstParameter(), FirstOnCurve);
       const Standard_Real Ufin = Min(CurvePtr->LastParameter(), LastOnCurve);
-
-      TC = new Geom2d_TrimmedCurve( CurvePtr, Udeb, Ufin );
+      if(Abs(Ufin - Udeb) > Precision::PConfusion())
+      {
+        TC = new Geom2d_TrimmedCurve( CurvePtr, Udeb, Ufin );
+      }
+      else
+      {
+        TC = new Geom2d_TrimmedCurve( CurvePtr, CurvePtr->FirstParameter(), CurvePtr->LastParameter());
+      }
     }
 
     //
@@ -1222,7 +1235,7 @@ void GeomLib::AdjustExtremity(Handle(Geom_BoundedCurve)& Curve,
   // Interpolation des contraintes
   math_Matrix Mat(1, 4, 1, 4);
   if (!PLib::HermiteCoefficients(0., 1., 1, 1, Mat)) 
-    Standard_ConstructionError::Raise();
+    throw Standard_ConstructionError();
 
   for (jj=1; jj<=4; jj++) {
     gp_XYZ aux(0.,0.,0.);
@@ -1251,7 +1264,7 @@ void GeomLib::AdjustExtremity(Handle(Geom_BoundedCurve)& Curve,
   }
 
   if (aDef->NbPoles() != aIn->NbPoles()) 
-    Standard_ConstructionError::Raise("Inconsistent poles's number");
+    throw Standard_ConstructionError("Inconsistent poles's number");
 
   for (ii=1; ii<=aDef->NbPoles(); ii++) {
     P = aIn->Pole(ii);
@@ -1373,7 +1386,7 @@ void GeomLib::ExtendCurveToPoint(Handle(Geom_BoundedCurve)& Curve,
 
   // Concatenation
   Ok = Concat.Add(Bezier, Tol, After);
-  if (!Ok) Standard_ConstructionError::Raise("ExtendCurveToPoint");
+  if (!Ok) throw Standard_ConstructionError("ExtendCurveToPoint");
   
   Curve =  Concat.BSplineCurve();
 }
@@ -2232,7 +2245,7 @@ static void FunctionMultiply(Handle(Geom_BSplineSurface)&          BSurf,
 			    NewDenominator,
 			    status);
  if (status!=0)
-   Standard_ConstructionError::Raise("GeomLib Multiplication Error") ;
+   throw Standard_ConstructionError("GeomLib Multiplication Error") ;
  for (i = 1 ; i <= new_num_u_poles ; i++) {
       for (j = 1 ; j <= new_num_v_poles ; j++) {
 	for (k = 1 ; k <= 3 ; k++) {
@@ -2475,6 +2488,12 @@ void GeomLib::IsClosed (const Handle(Geom_Surface)& S,
   GeomAdaptor_Surface aGAS(S);
   GeomAbs_SurfaceType aSType = aGAS.GetType();
   //
+  Standard_Real u1, u2, v1, v2;
+  u1 = aGAS.FirstUParameter();
+  u2 = aGAS.LastUParameter();
+  v1 = aGAS.FirstVParameter();
+  v2 = aGAS.LastVParameter();
+  //
   Standard_Real Tol2 = Tol * Tol;
   switch (aSType)
   {
@@ -2482,11 +2501,16 @@ void GeomLib::IsClosed (const Handle(Geom_Surface)& S,
     {
       return;
     }
-    case GeomAbs_Cylinder:
     case GeomAbs_SurfaceOfExtrusion:
     {
-      Standard_Real u1 = aGAS.FirstUParameter(), u2 = aGAS.LastUParameter();
-      Standard_Real v1 = aGAS.FirstVParameter();
+      if (Precision::IsInfinite(u1) || Precision::IsInfinite(u2)) {
+        // not closed
+        return;
+      }
+    }
+    Standard_FALLTHROUGH
+    case GeomAbs_Cylinder:
+    {
       if(Precision::IsInfinite(v1))
         v1 = 0.;
       gp_Pnt p1 = aGAS.Value(u1, v1);
@@ -2496,8 +2520,6 @@ void GeomLib::IsClosed (const Handle(Geom_Surface)& S,
     }
     case GeomAbs_Cone:
     {
-      Standard_Real u1 = aGAS.FirstUParameter(), u2 = aGAS.LastUParameter();
-      Standard_Real v1 = aGAS.FirstVParameter(), v2 = aGAS.LastVParameter();
       //find v with maximal distance from axis
       if(!(Precision::IsInfinite(v1) || Precision::IsInfinite(v2)))
       {
@@ -2521,8 +2543,6 @@ void GeomLib::IsClosed (const Handle(Geom_Surface)& S,
     }
     case GeomAbs_Sphere:
     {
-      Standard_Real u1 = aGAS.FirstUParameter(), u2 = aGAS.LastUParameter();
-      Standard_Real v1 = aGAS.FirstVParameter(), v2 = aGAS.LastVParameter();
       //find v with maximal distance from axis
       if(v1*v2 <= 0.)
       {
@@ -2544,8 +2564,6 @@ void GeomLib::IsClosed (const Handle(Geom_Surface)& S,
     {
       Standard_Real ures = aGAS.UResolution(Tol);
       Standard_Real vres = aGAS.VResolution(Tol);
-      Standard_Real u1 = aGAS.FirstUParameter(), u2 = aGAS.LastUParameter();
-      Standard_Real v1 = aGAS.FirstVParameter(), v2 = aGAS.LastVParameter();
       //
       isUClosed = (u2 - u1) >= aGAS.UPeriod() - ures;
       isVClosed = (v2 - v1) >= aGAS.VPeriod() - vres;
@@ -2553,8 +2571,6 @@ void GeomLib::IsClosed (const Handle(Geom_Surface)& S,
     }
     case GeomAbs_BSplineSurface:
     {
-      Standard_Real u1 = aGAS.FirstUParameter(), u2 = aGAS.LastUParameter();
-      Standard_Real v1 = aGAS.FirstVParameter(), v2 = aGAS.LastVParameter();
       Handle(Geom_BSplineSurface) aBSpl = aGAS.BSpline();
       isUClosed = GeomLib::IsBSplUClosed(aBSpl, u1, u2, Tol);
       isVClosed = GeomLib::IsBSplVClosed(aBSpl, v1, v2, Tol);
@@ -2562,8 +2578,6 @@ void GeomLib::IsClosed (const Handle(Geom_Surface)& S,
     }
     case GeomAbs_BezierSurface:
     {
-      Standard_Real u1 = aGAS.FirstUParameter(), u2 = aGAS.LastUParameter();
-      Standard_Real v1 = aGAS.FirstVParameter(), v2 = aGAS.LastVParameter();
       Handle(Geom_BezierSurface) aBz = aGAS.Bezier();
       isUClosed = GeomLib::IsBzUClosed(aBz, u1, u2, Tol);
       isVClosed = GeomLib::IsBzVClosed(aBz, v1, v2, Tol);
@@ -2574,8 +2588,6 @@ void GeomLib::IsClosed (const Handle(Geom_Surface)& S,
     case GeomAbs_OtherSurface:
     {
       Standard_Integer nbp = 23;
-      Standard_Real u1 = aGAS.FirstUParameter(), u2 = aGAS.LastUParameter();
-      Standard_Real v1 = aGAS.FirstVParameter(), v2 = aGAS.LastVParameter();
       if(Precision::IsInfinite(v1))
       {
         v1 = Sign(1., v1);

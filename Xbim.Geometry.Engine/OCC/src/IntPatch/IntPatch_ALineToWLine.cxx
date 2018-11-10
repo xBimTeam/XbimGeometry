@@ -101,6 +101,7 @@ static IntPatch_SpecPntType IsPoleOrSeam(const Handle(Adaptor3d_HSurface)& theS1
           break;
         }
       }
+      Standard_FALLTHROUGH
     case GeomAbs_Torus:
       if(aType == GeomAbs_Torus)
       {
@@ -113,6 +114,7 @@ static IntPatch_SpecPntType IsPoleOrSeam(const Handle(Adaptor3d_HSurface)& theS1
           break;
         }
       }
+      Standard_FALLTHROUGH
     case GeomAbs_Cylinder:
       theSingularSurfaceID = i + 1;
       AddVertexPoint(theLine, theVertex, theArrPeriods);
@@ -280,6 +282,9 @@ void IntPatch_ALineToWLine::MakeWLine(const Handle(IntPatch_ALine)& theALine,
                                       IntPatch_SequenceOfLine& theLines) const 
 {
   const Standard_Integer aNbVert = theALine->NbVertex();
+  if (!aNbVert) {
+    return;
+  }
   const Standard_Real aTol = 2.0*myTol3D+Precision::Confusion();
   IntPatch_SpecPntType aPrePointExist = IntPatch_SPntNone;
   
@@ -558,7 +563,7 @@ void IntPatch_ALineToWLine::MakeWLine(const Handle(IntPatch_ALine)& theALine,
                                   theALine->SituationS1(),
                                   theALine->SituationS2());
     }
-    if(theALine->TransitionOnS1() == IntSurf_Undecided)  { 
+    else if(theALine->TransitionOnS1() == IntSurf_Undecided)  { 
       aWLine = new IntPatch_WLine(aLinOn2S, theALine->IsTangent());
     }
     else { 
@@ -575,10 +580,14 @@ void IntPatch_ALineToWLine::MakeWLine(const Handle(IntPatch_ALine)& theALine,
 
     aWLine->SetPeriod(anArrPeriods[0],anArrPeriods[1],anArrPeriods[2],anArrPeriods[3]);
 
+    //the method ComputeVertexParameters can reduce the number of points in <aWLine>
     aWLine->ComputeVertexParameters(myTol3D);
 
-    aWLine->EnablePurging(Standard_False);
-    theLines.Append(aWLine);
+    if (aWLine->NbPnts() > 1)
+    {
+      aWLine->EnablePurging(Standard_False);
+      theLines.Append(aWLine);
+    }
   }//while(aParameter < theLPar)
 }
 

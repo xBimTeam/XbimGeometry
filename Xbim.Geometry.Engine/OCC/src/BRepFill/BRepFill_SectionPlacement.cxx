@@ -196,7 +196,7 @@ BRepFill_SectionPlacement(const Handle(BRepFill_LocationLaw)& Law,
 //     BRepExtrema_DistShapeShape Ext(mySection, myLaw->Wire());
     
 //     if (! Ext.IsDone()) 
-//        Standard_ConstructionError::Raise("Distance Vertex/Spine");
+//        throw Standard_ConstructionError("Distance Vertex/Spine");
 
 //     if (Ext.SupportTypeShape2(1) == BRepExtrema_IsOnEdge) {
 //       TopoDS_Shape sbis = Ext.SupportOnShape2(1);
@@ -283,9 +283,8 @@ BRepFill_SectionPlacement(const Handle(BRepFill_LocationLaw)& Law,
 
   // In the general case : Localisation via concatenation of the spine
   TColStd_Array1OfReal SuperKnot(1, myLaw->NbLaw()+1); 
-  TColStd_Array1OfInteger Index(1, myLaw->NbLaw()); 
   for (ii=1; ii<=myLaw->NbLaw(); ii++) {
-    SuperKnot(ii+1) = Index(ii) = ii;
+    SuperKnot(ii+1) = ii;
   }
   SuperKnot(1) = 0;
   
@@ -317,9 +316,18 @@ BRepFill_SectionPlacement(const Handle(BRepFill_LocationLaw)& Law,
     }
   }
   
-  if (Bof) Standard_ConstructionError::Raise("Interval non trouve !!");
-  Ind1 = Index(Ind1);
-  if (Ind2) Ind2 = Index(Ind2);
+  if (Bof) throw Standard_ConstructionError("Interval non trouve !!");
+  //Search of the <Ind1> by vertex <TheV>
+  if (!TheV.IsNull())
+    for (Ind1 = 1; Ind1 <= myLaw->NbLaw(); Ind1++)
+    {
+      TopoDS_Edge anEdge = myLaw->Edge(Ind1);
+      TopoDS_Vertex V1, V2;
+      TopExp::Vertices(anEdge, V1, V2);
+      if (V1.IsSame(TheV) || V2.IsSame(TheV))
+        break;
+    }
+  ////////////////////
   
   // Positioning on the localized edge (or 2 Edges)
   Standard_Real Angle;

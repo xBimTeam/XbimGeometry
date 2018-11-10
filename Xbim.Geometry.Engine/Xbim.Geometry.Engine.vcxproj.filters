@@ -9674,9 +9674,6 @@
     <ClCompile Include="OCC\src\BRepApprox\BRepApprox_TheMultiLineOfApprox_0.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="OCC\src\BRepApprox\BRepApprox_TheMultiLineToolOfApprox_0.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="OCC\src\BRepApprox\BRepApprox_ThePrmPrmSvSurfacesOfApprox_0.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -10356,24 +10353,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="OCC\src\Convert\Convert_TorusToBSplineSurface.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\Dico\Dico_DictionaryOfInteger_0.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\Dico\Dico_DictionaryOfTransient_0.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\Dico\Dico_IteratorOfDictionaryOfInteger_0.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\Dico\Dico_IteratorOfDictionaryOfTransient_0.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\Dico\Dico_StackItemOfDictionaryOfInteger_0.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\Dico\Dico_StackItemOfDictionaryOfTransient_0.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="OCC\src\Draft\Draft.cxx">
@@ -11495,9 +11474,6 @@
     <ClCompile Include="OCC\src\IntPolyh\IntPolyh_Intersection.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="OCC\src\IntPolyh\IntPolyh_Intersection_1.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="OCC\src\IntPolyh\IntPolyh_MaillageAffinage.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -11697,9 +11673,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="OCC\src\MAT2d\MAT2d_MiniPath.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\MAT2d\MAT2d_SketchExplorer.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="OCC\src\MAT2d\MAT2d_Tool2d.cxx">
@@ -12119,9 +12092,6 @@
     <ClCompile Include="OCC\src\Quantity\Quantity_Color.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="OCC\src\Quantity\Quantity_Convert.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="OCC\src\Quantity\Quantity_Date.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -12326,12 +12296,6 @@
     <ClCompile Include="OCC\src\ShapeProcess\ShapeProcess_Context.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="OCC\src\ShapeProcess\ShapeProcess_DictionaryOfOperator_0.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\ShapeProcess\ShapeProcess_IteratorOfDictionaryOfOperator_0.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="OCC\src\ShapeProcess\ShapeProcess_Operator.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -12339,9 +12303,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="OCC\src\ShapeProcess\ShapeProcess_ShapeContext.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\ShapeProcess\ShapeProcess_StackItemOfDictionaryOfOperator_0.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="OCC\src\ShapeProcess\ShapeProcess_UOperator.cxx">
@@ -12398,16 +12359,10 @@
     <ClCompile Include="OCC\src\Standard\Standard_ShortReal.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="OCC\src\Standard\Standard_SStream.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="OCC\src\Standard\Standard_Transient.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="OCC\src\Standard\Standard_Type.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\Standard\Standard_UUID.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="OCC\src\Storage\Storage.cxx">
@@ -12438,9 +12393,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="OCC\src\Storage\Storage_Schema.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\Storage\Storage_stCONSTclCOM.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="OCC\src\Storage\Storage_TypeData.cxx">
@@ -12480,9 +12432,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="OCC\src\TColStd\TColStd_HPackedMapOfInteger.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\TColStd\TColStd_MapIteratorOfPackedMapOfInteger.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="OCC\src\TColStd\TColStd_PackedMapOfInteger.cxx">
@@ -12941,9 +12890,6 @@
     <ClCompile Include="OCC\src\TopOpeBRepTool\TopOpeBRepTool_CLASSI.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="OCC\src\TopOpeBRepTool\TopOpeBRepTool_closing.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="OCC\src\TopOpeBRepTool\TopOpeBRepTool_connexity.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -13299,9 +13245,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include=".\OCC\src\FSD\FSD_File.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include=".\OCC\src\MMgt\MMgt_TShared.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include=".\OCC\src\NCollection\NCollection_BaseAllocator.cxx">
@@ -14375,9 +14318,6 @@
     <ClCompile Include=".\OCC\src\GeomAPI\GeomAPI_IntCS.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include=".\OCC\src\GeomAPI\GeomAPI_IntSS.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include=".\OCC\src\GeomAPI\GeomAPI_Interpolate.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -14442,9 +14382,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include=".\OCC\src\TopClass\TopClass.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include=".\OCC\src\TopClass\TopClass_Intersection3d.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include=".\OCC\src\TopClass\TopClass_SolidExplorer.cxx">
@@ -14738,12 +14675,6 @@
     <ClCompile Include=".\OCC\src\BRepAlgoAPI\BRepAlgoAPI_Section.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include=".\OCC\src\BOPCol\BOPCol_Box2DBndTree.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include=".\OCC\src\BOPCol\BOPCol_BoxBndTree.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include=".\OCC\src\BOPDS\BOPDS_CommonBlock.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -14757,9 +14688,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include=".\OCC\src\BOPDS\BOPDS_IteratorSI.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include=".\OCC\src\BOPDS\BOPDS_PassKey.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include=".\OCC\src\BOPDS\BOPDS_Pave.cxx">
@@ -14846,9 +14774,6 @@
     <ClCompile Include=".\OCC\src\BOPAlgo\BOPAlgo_PaveFiller_9.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include=".\OCC\src\BOPAlgo\BOPAlgo_SectionAttribute.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include=".\OCC\src\BOPAlgo\BOPAlgo_ShellSplitter.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -14859,9 +14784,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include=".\OCC\src\BOPAlgo\BOPAlgo_WireSplitter_1.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include=".\OCC\src\BOPTools\BOPTools.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include=".\OCC\src\BOPTools\BOPTools_AlgoTools.cxx">
@@ -14879,13 +14801,7 @@
     <ClCompile Include=".\OCC\src\BOPTools\BOPTools_AlgoTools_2.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include=".\OCC\src\BOPTools\BOPTools_EdgeSet.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include=".\OCC\src\BOPTools\BOPTools_Set.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include=".\OCC\src\BOPTools\BOPTools_ShapeSet.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include=".\OCC\src\ChFi2d\ChFi2d.cxx">

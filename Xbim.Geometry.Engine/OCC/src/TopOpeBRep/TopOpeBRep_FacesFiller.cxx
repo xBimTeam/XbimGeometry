@@ -279,35 +279,8 @@ Standard_Boolean TopOpeBRep_FacesFiller::CheckLine(TopOpeBRep_LineInter& L) cons
 	  Standard_Real parB = B.ParameterOnLine();    
 	  Standard_Boolean conf = (fabs(parA-parB) < tol1);
 	  if (conf) {
-	    //modified by NIZHNY-MZV  Wed Dec  1 09:53:08 1999
-	    check = Msf;
-//modified by NIZHNY-MZV  Wed Dec  1 09:53:18 1999	    Standard_Boolean isp = L.IsPeriodic();
-//modified by NIZHNY-MZV  Wed Dec  1 09:53:20 1999	    if (isp) {
-//modified by NIZHNY-MZV  Wed Dec  1 09:53:21 1999	      Handle(Geom_Circle) C = Handle(Geom_Circle)::DownCast(L.Curve());
-//modified by NIZHNY-MZV  Wed Dec  1 09:53:22 1999	      Standard_Real per = C->Period();
-//modified by NIZHNY-MZV  Wed Dec  1 09:53:23 1999	      parB = parA + per;
-//modified by NIZHNY-MZV  Wed Dec  1 09:53:25 1999	    }
-	  }
-	  
-//modified by NIZHNY-MZV  Wed Dec  1 09:53:32 1999	  Standard_Real t = 0.2567899311;
-//modified by NIZHNY-MZV  Wed Dec  1 09:53:33 1999	  Standard_Real p = (1-t)*parA + t*parB;
-//modified by NIZHNY-MZV  Wed Dec  1 09:53:34 1999	  Handle(Geom_Curve) GC = myLine->Curve();
-//modified by NIZHNY-MZV  Wed Dec  1 09:53:34 1999	  const TopoDS_Face& F1 = TopoDS::Face(myF1);
-//modified by NIZHNY-MZV  Wed Dec  1 09:53:35 1999	  const TopoDS_Face& F2 = TopoDS::Face(myF2);
-//modified by NIZHNY-MZV  Wed Dec  1 09:53:36 1999	  Handle(Geom_Surface) GS1 = BRep_Tool::Surface(F1);
-//modified by NIZHNY-MZV  Wed Dec  1 09:53:36 1999	  Handle(Geom_Surface) GS2 = BRep_Tool::Surface(F2);
-//modified by NIZHNY-MZV  Wed Dec  1 09:53:37 1999	  Handle(Geom2d_Curve) C1 = GeomProjLib::Curve2d(GC,parA,parB,GS1);
-//modified by NIZHNY-MZV  Wed Dec  1 09:53:38 1999	  Handle(Geom2d_Curve) C2 = GeomProjLib::Curve2d(GC,parA,parB,GS2);	  
-	  
-//modified by NIZHNY-MZV  Wed Dec  1 09:53:39 1999	  gp_Pnt2d P1 = C1->Value(p);
-//modified by NIZHNY-MZV  Wed Dec  1 09:53:44 1999	  gp_Pnt2d P2 = C2->Value(p);
-//modified by NIZHNY-MZV  Wed Dec  1 09:53:45 1999	  TopOpeBRep_PointClassifier* pcl = (TopOpeBRep_PointClassifier*)((void*)&myPointClassifier);
-//modified by NIZHNY-MZV  Wed Dec  1 09:53:46 1999	  TopAbs_State staP1 = pcl->Classify(F1,P1,tol1);
-//modified by NIZHNY-MZV  Wed Dec  1 09:53:47 1999	  TopAbs_State staP2 = pcl->Classify(F2,P2,tol1);
-//modified by NIZHNY-MZV  Wed Dec  1 09:53:48 1999Standard_Boolean ok1 = (staP1 == TopAbs_IN || staP1 == TopAbs_ON);
-//modified by NIZHNY-MZV  Wed Dec  1 09:53:49 1999	  Standard_Boolean ok2 = (staP2 == TopAbs_IN || staP2 == TopAbs_ON);
-//modified by NIZHNY-MZV  Wed Dec  1 09:53:50 1999	  check = (ok1 && ok2);
-	  
+	    check = Standard_False;
+	  }	  
 	}
       } // CIRCLE
       else if (t == TopOpeBRep_HYPERBOLA) {
@@ -466,7 +439,7 @@ void TopOpeBRep_FacesFiller::VP_PositionOnR(TopOpeBRep_LineInter& L)
 	VP.EdgeON(E,paramC,Esi);
       }
       else {
-//	Standard_ProgramError::Raise("VP_Position projection failed on E");
+//	throw Standard_ProgramError("VP_Position projection failed on E");
 	VP.ChangeKeep(Standard_False); // xpu051198
       }
     }
@@ -479,7 +452,7 @@ void TopOpeBRep_FacesFiller::VP_PositionOnR(TopOpeBRep_LineInter& L)
 	VP.EdgeON(OOE,paramC,OOEsi);
       }
       else {
-//	Standard_ProgramError::Raise("VP_Position projection failed on OOE");
+//	throw Standard_ProgramError("VP_Position projection failed on OOE");
 	VP.ChangeKeep(Standard_False); // xpu051198
       }
     }
@@ -593,8 +566,7 @@ const TopoDS_Face& TopOpeBRep_FacesFiller::Face(const Standard_Integer I) const
 {
   if      (I == 1) return myF1;
   else if (I == 2) return myF2;
-  Standard_ProgramError::Raise("FacesFiller::Face");
-  return myF1;
+  throw Standard_ProgramError("FacesFiller::Face");
 }
 
 //=======================================================================

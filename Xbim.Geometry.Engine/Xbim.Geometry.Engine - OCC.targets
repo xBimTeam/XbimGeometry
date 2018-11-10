@@ -316,9 +316,11 @@
     <ClInclude Include="OCC\src\Bnd\Bnd_HArray1OfBox.hxx" />
     <ClInclude Include="OCC\src\Bnd\Bnd_HArray1OfBox2d.hxx" />
     <ClInclude Include="OCC\src\Bnd\Bnd_HArray1OfSphere.hxx" />
+    <ClInclude Include="OCC\src\Bnd\Bnd_OBB.hxx" />
     <ClInclude Include="OCC\src\Bnd\Bnd_Range.hxx" />
     <ClInclude Include="OCC\src\Bnd\Bnd_SeqOfBox.hxx" />
     <ClInclude Include="OCC\src\Bnd\Bnd_Sphere.hxx" />
+    <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_Alerts.hxx" />
     <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_Algo.hxx" />
     <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_ArgumentAnalyzer.hxx" />
     <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_BOP.hxx" />
@@ -334,6 +336,7 @@
     <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_ListOfCheckResult.hxx" />
     <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_MakerVolume.hxx" />
     <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_Operation.hxx" />
+    <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_Options.hxx" />
     <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_PArgumentAnalyzer.hxx" />
     <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_PaveFiller.hxx" />
     <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_PBOP.hxx" />
@@ -341,9 +344,11 @@
     <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_PPaveFiller.hxx" />
     <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_PSection.hxx" />
     <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_PWireEdgeSet.hxx" />
+    <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_RemoveFeatures.hxx" />
     <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_Section.hxx" />
     <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_SectionAttribute.hxx" />
     <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_ShellSplitter.hxx" />
+    <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_Splitter.hxx" />
     <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_Tools.hxx" />
     <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_WireEdgeSet.hxx" />
     <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_WireSplitter.hxx" />
@@ -713,6 +718,7 @@
     <ClInclude Include="OCC\src\BRepGProp\BRepGProp_VinertGK.hxx" />
     <ClInclude Include="OCC\src\BRepIntCurveSurface\BRepIntCurveSurface_Inter.hxx" />
     <ClInclude Include="OCC\src\BRepLib\BRepLib.hxx" />
+
     <ClInclude Include="OCC\src\BRepLib\BRepLib_CheckCurveOnSurface.hxx" />
     <ClInclude Include="OCC\src\BRepLib\BRepLib_Command.hxx" />
     <ClInclude Include="OCC\src\BRepLib\BRepLib_EdgeError.hxx" />
@@ -853,6 +859,7 @@
     <ClInclude Include="OCC\src\BRepTools\BRepTools.hxx" />
     <ClInclude Include="OCC\src\BRepTools\BRepTools_DataMapIteratorOfMapOfVertexPnt2d.hxx" />
     <ClInclude Include="OCC\src\BRepTools\BRepTools_GTrsfModification.hxx" />
+    <ClInclude Include="OCC\src\BRepTools\BRepTools_History.hxx" />
     <ClInclude Include="OCC\src\BRepTools\BRepTools_MapOfVertexPnt2d.hxx" />
     <ClInclude Include="OCC\src\BRepTools\BRepTools_Modification.hxx" />
     <ClInclude Include="OCC\src\BRepTools\BRepTools_Modifier.hxx" />
@@ -1785,6 +1792,7 @@
     <ClInclude Include="OCC\src\IntPolyh\IntPolyh_SectionLine.hxx" />
     <ClInclude Include="OCC\src\IntPolyh\IntPolyh_SeqOfStartPoints.hxx" />
     <ClInclude Include="OCC\src\IntPolyh\IntPolyh_StartPoint.hxx" />
+    <ClInclude Include="OCC\src\IntPolyh\IntPolyh_Tools.hxx" />
     <ClInclude Include="OCC\src\IntPolyh\IntPolyh_Triangle.hxx" />
     <ClInclude Include="OCC\src\IntRes2d\IntRes2d_Domain.hxx" />
     <ClInclude Include="OCC\src\IntRes2d\IntRes2d_Intersection.hxx" />
@@ -2007,9 +2015,11 @@
     <ClInclude Include="OCC\src\MAT\MAT_Zone.hxx" />
     <ClInclude Include="OCC\src\Message\Message.hxx" />
     <ClInclude Include="OCC\src\Message\Message_Algorithm.hxx" />
+    <ClInclude Include="OCC\src\Message\Message_Alert.hxx" />
     <ClInclude Include="OCC\src\Message\Message_ExecStatus.hxx" />
     <ClInclude Include="OCC\src\Message\Message_Gravity.hxx" />
     <ClInclude Include="OCC\src\Message\Message_HArrayOfMsg.hxx" />
+    <ClInclude Include="OCC\src\Message\Message_ListOfAlert.hxx" />
     <ClInclude Include="OCC\src\Message\Message_ListIteratorOfListOfMsg.hxx" />
     <ClInclude Include="OCC\src\Message\Message_ListOfMsg.hxx" />
     <ClInclude Include="OCC\src\Message\Message_Messenger.hxx" />
@@ -2020,6 +2030,7 @@
     <ClInclude Include="OCC\src\Message\Message_ProgressIndicator.hxx" />
     <ClInclude Include="OCC\src\Message\Message_ProgressScale.hxx" />
     <ClInclude Include="OCC\src\Message\Message_ProgressSentry.hxx" />
+    <ClInclude Include="OCC\src\Message\Message_Report.hxx" />
     <ClInclude Include="OCC\src\Message\Message_SequenceOfPrinters.hxx" />
     <ClInclude Include="OCC\src\Message\Message_SequenceOfProgressScale.hxx" />
     <ClInclude Include="OCC\src\Message\Message_Status.hxx" />
@@ -2796,6 +2807,7 @@
     <ClInclude Include="OCC\src\TopLoc\TopLoc_SListOfItemLocation.hxx" />
     <ClInclude Include="OCC\src\TopoDS\TopoDS.hxx" />
     <ClInclude Include="OCC\src\TopoDS\TopoDS_Builder.hxx" />
+    <ClInclude Include="OCC\src\TopoDS\TopoDS_AlertWithShape.hxx" />
     <ClInclude Include="OCC\src\TopoDS\TopoDS_Compound.hxx" />
     <ClInclude Include="OCC\src\TopoDS\TopoDS_CompSolid.hxx" />
     <ClInclude Include="OCC\src\TopoDS\TopoDS_Edge.hxx" />
@@ -3288,13 +3300,20 @@
     <ClCompile Include="OCC\src\Bnd\Bnd_BoundSortBox2d.cxx" />
     <ClCompile Include="OCC\src\Bnd\Bnd_Box.cxx" />
     <ClCompile Include="OCC\src\Bnd\Bnd_Box2d.cxx" />
+    <ClCompile Include="OCC\src\Bnd\Bnd_OBB.cxx" />
     <ClCompile Include="OCC\src\Bnd\Bnd_Range.cxx" />
     <ClCompile Include="OCC\src\Bnd\Bnd_Sphere.cxx" />
     <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_CellsBuilder.cxx" />
+    <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_CheckerSI.cxx" />
+    <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_CheckerSI_1.cxx" />
     <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_MakerVolume.cxx" />
+    <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_Options.cxx" />
     <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_PaveFiller_10.cxx" />
     <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_PaveFiller_11.cxx" />
+    <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_RemoveFeatures.cxx" />
     <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_Section.cxx" />
+    <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_Splitter.cxx" />
+    <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_ToolsProvider.cxx" />
     <ClCompile Include="OCC\src\BOPTools\BOPTools_AlgoTools2D_1.cxx" />
     <ClCompile Include="OCC\src\BRepAdaptor\BRepAdaptor_CompCurve.cxx" />
     <ClCompile Include="OCC\src\BRepAdaptor\BRepAdaptor_Curve.cxx" />
@@ -3345,7 +3364,6 @@
     <ClCompile Include="OCC\src\BRepApprox\BRepApprox_TheImpPrmSvSurfacesOfApprox_0.cxx" />
     <ClCompile Include="OCC\src\BRepApprox\BRepApprox_TheInt2SOfThePrmPrmSvSurfacesOfApprox_0.cxx" />
     <ClCompile Include="OCC\src\BRepApprox\BRepApprox_TheMultiLineOfApprox_0.cxx" />
-    <ClCompile Include="OCC\src\BRepApprox\BRepApprox_TheMultiLineToolOfApprox_0.cxx" />
     <ClCompile Include="OCC\src\BRepApprox\BRepApprox_ThePrmPrmSvSurfacesOfApprox_0.cxx" />
     <ClCompile Include="OCC\src\BRepApprox\BRepApprox_TheZerImpFuncOfTheImpPrmSvSurfacesOfApprox_0.cxx" />
     <ClCompile Include="OCC\src\BRepBlend\BRepBlend_AppFunc.cxx" />
@@ -3490,7 +3508,9 @@
     <ClCompile Include="OCC\src\BRepPrim\BRepPrim_OneAxis.cxx" />
     <ClCompile Include="OCC\src\BRepSweep\BRepSweep_NumLinearRegularSweep.cxx" />
     <ClCompile Include="OCC\src\BRepTools\BRepTools.cxx" />
+    <ClCompile Include="OCC\src\BRepTools\BRepTools_Debug.cxx" />
     <ClCompile Include="OCC\src\BRepTools\BRepTools_GTrsfModification.cxx" />
+    <ClCompile Include="OCC\src\BRepTools\BRepTools_History.cxx" />
     <ClCompile Include="OCC\src\BRepTools\BRepTools_Modification.cxx" />
     <ClCompile Include="OCC\src\BRepTools\BRepTools_Modifier.cxx" />
     <ClCompile Include="OCC\src\BRepTools\BRepTools_NurbsConvertModification.cxx" />
@@ -3573,12 +3593,6 @@
     <ClCompile Include="OCC\src\Convert\Convert_PolynomialCosAndSin.cxx" />
     <ClCompile Include="OCC\src\Convert\Convert_SphereToBSplineSurface.cxx" />
     <ClCompile Include="OCC\src\Convert\Convert_TorusToBSplineSurface.cxx" />
-    <ClCompile Include="OCC\src\Dico\Dico_DictionaryOfInteger_0.cxx" />
-    <ClCompile Include="OCC\src\Dico\Dico_DictionaryOfTransient_0.cxx" />
-    <ClCompile Include="OCC\src\Dico\Dico_IteratorOfDictionaryOfInteger_0.cxx" />
-    <ClCompile Include="OCC\src\Dico\Dico_IteratorOfDictionaryOfTransient_0.cxx" />
-    <ClCompile Include="OCC\src\Dico\Dico_StackItemOfDictionaryOfInteger_0.cxx" />
-    <ClCompile Include="OCC\src\Dico\Dico_StackItemOfDictionaryOfTransient_0.cxx" />
     <ClCompile Include="OCC\src\Draft\Draft.cxx" />
     <ClCompile Include="OCC\src\Draft\Draft_EdgeInfo.cxx" />
     <ClCompile Include="OCC\src\Draft\Draft_FaceInfo.cxx" />
@@ -3587,6 +3601,7 @@
     <ClCompile Include="OCC\src\Draft\Draft_VertexInfo.cxx" />
     <ClCompile Include="OCC\src\Extrema\Extrema_CCLocFOfLocECC2d_0.cxx" />
     <ClCompile Include="OCC\src\Extrema\Extrema_CCLocFOfLocECC_0.cxx" />
+    <ClCompile Include="OCC\src\Extrema\Extrema_Curve2dTool.cxx" />
     <ClCompile Include="OCC\src\Extrema\Extrema_CurveTool.cxx" />
     <ClCompile Include="OCC\src\Extrema\Extrema_ECC2d_0.cxx" />
     <ClCompile Include="OCC\src\Extrema\Extrema_ECC_0.cxx" />
@@ -3952,11 +3967,11 @@
     <ClCompile Include="OCC\src\IntPolyh\IntPolyh_Couple.cxx" />
     <ClCompile Include="OCC\src\IntPolyh\IntPolyh_Edge.cxx" />
     <ClCompile Include="OCC\src\IntPolyh\IntPolyh_Intersection.cxx" />
-    <ClCompile Include="OCC\src\IntPolyh\IntPolyh_Intersection_1.cxx" />
     <ClCompile Include="OCC\src\IntPolyh\IntPolyh_MaillageAffinage.cxx" />
     <ClCompile Include="OCC\src\IntPolyh\IntPolyh_Point.cxx" />
     <ClCompile Include="OCC\src\IntPolyh\IntPolyh_SectionLine.cxx" />
     <ClCompile Include="OCC\src\IntPolyh\IntPolyh_StartPoint.cxx" />
+    <ClCompile Include="OCC\src\IntPolyh\IntPolyh_Tools.cxx" />
     <ClCompile Include="OCC\src\IntPolyh\IntPolyh_Triangle.cxx" />
     <ClCompile Include="OCC\src\IntRes2d\IntRes2d_Domain.cxx" />
     <ClCompile Include="OCC\src\IntRes2d\IntRes2d_Intersection.cxx" />
@@ -4020,7 +4035,6 @@
     <ClCompile Include="OCC\src\MAT2d\MAT2d_CutCurve.cxx" />
     <ClCompile Include="OCC\src\MAT2d\MAT2d_Mat2d.cxx" />
     <ClCompile Include="OCC\src\MAT2d\MAT2d_MiniPath.cxx" />
-    <ClCompile Include="OCC\src\MAT2d\MAT2d_SketchExplorer.cxx" />
     <ClCompile Include="OCC\src\MAT2d\MAT2d_Tool2d.cxx" />
     <ClCompile Include="OCC\src\math\math.cxx" />
     <ClCompile Include="OCC\src\math\math_BFGS.cxx" />
@@ -4106,6 +4120,8 @@
     <ClCompile Include="OCC\src\OSD\OSD_MemInfo.cxx" />
     <ClCompile Include="OCC\src\OSD\OSD_OpenFile.cxx" />
     <ClCompile Include="OCC\src\OSD\OSD_Parallel.cxx" />
+    <ClCompile Include="OCC\src\OSD\OSD_Parallel_TBB.cxx" />
+    <ClCompile Include="OCC\src\OSD\OSD_Parallel_Threads.cxx" />
     <ClCompile Include="OCC\src\OSD\OSD_Path.cxx" />
     <ClCompile Include="OCC\src\OSD\OSD_PerfMeter.cxx" />
     <ClCompile Include="OCC\src\OSD\OSD_Process.cxx" />
@@ -4160,7 +4176,6 @@
     <ClCompile Include="OCC\src\ProjLib\ProjLib_Sphere.cxx" />
     <ClCompile Include="OCC\src\ProjLib\ProjLib_Torus.cxx" />
     <ClCompile Include="OCC\src\Quantity\Quantity_Color.cxx" />
-    <ClCompile Include="OCC\src\Quantity\Quantity_Convert.cxx" />
     <ClCompile Include="OCC\src\Quantity\Quantity_Date.cxx" />
     <ClCompile Include="OCC\src\Quantity\Quantity_Period.cxx" />
     <ClCompile Include="OCC\src\Resource\Resource_ConvertUnicode.c" />
@@ -4229,16 +4244,14 @@
     <ClCompile Include="OCC\src\ShapeFix\ShapeFix_Wire_1.cxx" />
     <ClCompile Include="OCC\src\ShapeProcess\ShapeProcess.cxx" />
     <ClCompile Include="OCC\src\ShapeProcess\ShapeProcess_Context.cxx" />
-    <ClCompile Include="OCC\src\ShapeProcess\ShapeProcess_DictionaryOfOperator_0.cxx" />
-    <ClCompile Include="OCC\src\ShapeProcess\ShapeProcess_IteratorOfDictionaryOfOperator_0.cxx" />
     <ClCompile Include="OCC\src\ShapeProcess\ShapeProcess_Operator.cxx" />
     <ClCompile Include="OCC\src\ShapeProcess\ShapeProcess_OperLibrary.cxx" />
     <ClCompile Include="OCC\src\ShapeProcess\ShapeProcess_ShapeContext.cxx" />
-    <ClCompile Include="OCC\src\ShapeProcess\ShapeProcess_StackItemOfDictionaryOfOperator_0.cxx" />
     <ClCompile Include="OCC\src\ShapeProcess\ShapeProcess_UOperator.cxx" />
     <ClCompile Include="OCC\src\Standard\Standard.cxx" />
     <ClCompile Include="OCC\src\Standard\Standard_CLocaleSentry.cxx" />
     <ClCompile Include="OCC\src\Standard\Standard_CString.cxx" />
+    <ClCompile Include="OCC\src\Standard\Standard_Strtod.cxx" />
     <ClCompile Include="OCC\src\Standard\Standard_ErrorHandler.cxx" />
     <ClCompile Include="OCC\src\Standard\Standard_ExtString.cxx" />
     <ClCompile Include="OCC\src\Standard\Standard_Failure.cxx" />
@@ -4253,10 +4266,8 @@
     <ClCompile Include="OCC\src\Standard\Standard_Persistent.cxx" />
     <ClCompile Include="OCC\src\Standard\Standard_Real.cxx" />
     <ClCompile Include="OCC\src\Standard\Standard_ShortReal.cxx" />
-    <ClCompile Include="OCC\src\Standard\Standard_SStream.cxx" />
     <ClCompile Include="OCC\src\Standard\Standard_Transient.cxx" />
     <ClCompile Include="OCC\src\Standard\Standard_Type.cxx" />
-    <ClCompile Include="OCC\src\Standard\Standard_UUID.cxx" />
     <ClCompile Include="OCC\src\Storage\Storage.cxx" />
     <ClCompile Include="OCC\src\Storage\Storage_BaseDriver.cxx" />
     <ClCompile Include="OCC\src\Storage\Storage_CallBack.cxx" />
@@ -4267,7 +4278,6 @@
     <ClCompile Include="OCC\src\Storage\Storage_Root.cxx" />
     <ClCompile Include="OCC\src\Storage\Storage_RootData.cxx" />
     <ClCompile Include="OCC\src\Storage\Storage_Schema.cxx" />
-    <ClCompile Include="OCC\src\Storage\Storage_stCONSTclCOM.cxx" />
     <ClCompile Include="OCC\src\Storage\Storage_TypeData.cxx" />
     <ClCompile Include="OCC\src\Storage\Storage_TypedCallBack.cxx" />
     <ClCompile Include="OCC\src\TCollection\TCollection.cxx" />
@@ -4281,7 +4291,6 @@
     <ClCompile Include="OCC\src\TCollection\TCollection_MapNode.cxx" />
     <ClCompile Include="OCC\src\TCollection\TCollection_SeqNode.cxx" />
     <ClCompile Include="OCC\src\TColStd\TColStd_HPackedMapOfInteger.cxx" />
-    <ClCompile Include="OCC\src\TColStd\TColStd_MapIteratorOfPackedMapOfInteger.cxx" />
     <ClCompile Include="OCC\src\TColStd\TColStd_PackedMapOfInteger.cxx" />
     <ClCompile Include="OCC\src\TopLoc\TopLoc_Datum3D.cxx" />
     <ClCompile Include="OCC\src\TopLoc\TopLoc_ItemLocation.cxx" />
@@ -4289,6 +4298,7 @@
     <ClCompile Include="OCC\src\TopLoc\TopLoc_SListNodeOfItemLocation.cxx" />
     <ClCompile Include="OCC\src\TopLoc\TopLoc_SListOfItemLocation.cxx" />
     <ClCompile Include="OCC\src\TopoDS\TopoDS_Builder.cxx" />
+    <ClCompile Include="OCC\src\TopoDS\TopoDS_AlertWithShape.cxx" />
     <ClCompile Include="OCC\src\TopoDS\TopoDS_HShape.cxx" />
     <ClCompile Include="OCC\src\TopoDS\TopoDS_Iterator.cxx" />
     <ClCompile Include="OCC\src\TopoDS\TopoDS_Shape.cxx" />
@@ -4434,7 +4444,6 @@
     <ClCompile Include="OCC\src\TopOpeBRepTool\TopOpeBRepTool_BoxSort.cxx" />
     <ClCompile Include="OCC\src\TopOpeBRepTool\TopOpeBRepTool_C2DF.cxx" />
     <ClCompile Include="OCC\src\TopOpeBRepTool\TopOpeBRepTool_CLASSI.cxx" />
-    <ClCompile Include="OCC\src\TopOpeBRepTool\TopOpeBRepTool_closing.cxx" />
     <ClCompile Include="OCC\src\TopOpeBRepTool\TopOpeBRepTool_connexity.cxx" />
     <ClCompile Include="OCC\src\TopOpeBRepTool\TopOpeBRepTool_CORRISO.cxx" />
     <ClCompile Include="OCC\src\TopOpeBRepTool\TopOpeBRepTool_CurveTool.cxx" />
@@ -4600,7 +4609,6 @@
     <ClCompile Include=".\OCC\src\FSD\FSD_BinaryFile.cxx" />
     <ClCompile Include=".\OCC\src\FSD\FSD_CmpFile.cxx" />
     <ClCompile Include=".\OCC\src\FSD\FSD_File.cxx" />
-    <ClCompile Include=".\OCC\src\MMgt\MMgt_TShared.cxx" />
     <ClCompile Include=".\OCC\src\NCollection\NCollection_BaseAllocator.cxx" />
     <ClCompile Include=".\OCC\src\UnitsAPI\UnitsAPI.cxx" />
     <ClCompile Include=".\OCC\src\NCollection\NCollection_BaseList.cxx" />
@@ -4612,6 +4620,7 @@
     <ClCompile Include=".\OCC\src\NCollection\NCollection_SparseArrayBase.cxx" />
     <ClCompile Include=".\OCC\src\Message\Message.cxx" />
     <ClCompile Include=".\OCC\src\Message\Message_Algorithm.cxx" />
+    <ClCompile Include=".\OCC\src\Message\Message_Alert.cxx" />
     <ClCompile Include=".\OCC\src\Message\Message_Messenger.cxx" />
     <ClCompile Include=".\OCC\src\Message\Message_Msg.cxx" />
     <ClCompile Include=".\OCC\src\Message\Message_MsgFile.cxx" />
@@ -4620,6 +4629,7 @@
     <ClCompile Include=".\OCC\src\Message\Message_ProgressIndicator.cxx" />
     <ClCompile Include=".\OCC\src\Message\Message_ProgressScale.cxx" />
     <ClCompile Include=".\OCC\src\Message\Message_ProgressSentry.cxx" />
+    <ClCompile Include=".\OCC\src\Message\Message_Report.cxx" />
   </ItemGroup>
   <ItemGroup Label="TKMath">
     <ClCompile Include=".\OCC\src\ElCLib\ElCLib.cxx" />
@@ -4866,7 +4876,9 @@
     <ClCompile Include=".\OCC\src\Bisector\Bisector_PointOnBis.cxx" />
     <ClCompile Include=".\OCC\src\Bisector\Bisector_PolyBis.cxx" />
     <ClCompile Include=".\OCC\src\BRepBndLib\BRepBndLib.cxx" />
+    <ClCompile Include=".\OCC\src\BRepBndLib\BRepBndLib_1.cxx" />
     <ClCompile Include=".\OCC\src\BRepLib\BRepLib.cxx" />
+    <ClCompile Include=".\OCC\src\BRepLib\BRepLib_1.cxx" />
     <ClCompile Include=".\OCC\src\BRepLib\BRepLib_Command.cxx" />
     <ClCompile Include=".\OCC\src\BRepLib\BRepLib_FindSurface.cxx" />
     <ClCompile Include=".\OCC\src\BRepLib\BRepLib_FuseEdges.cxx" />
@@ -4973,7 +4985,6 @@
     <ClCompile Include=".\OCC\src\GeomAPI\GeomAPI_ExtremaCurveSurface.cxx" />
     <ClCompile Include=".\OCC\src\GeomAPI\GeomAPI_ExtremaSurfaceSurface.cxx" />
     <ClCompile Include=".\OCC\src\GeomAPI\GeomAPI_IntCS.cxx" />
-    <ClCompile Include=".\OCC\src\GeomAPI\GeomAPI_IntSS.cxx" />
     <ClCompile Include=".\OCC\src\GeomAPI\GeomAPI_Interpolate.cxx" />
     <ClCompile Include=".\OCC\src\GeomAPI\GeomAPI_PointsToBSpline.cxx" />
     <ClCompile Include=".\OCC\src\GeomAPI\GeomAPI_PointsToBSplineSurface.cxx" />
@@ -4996,7 +5007,6 @@
     <ClCompile Include=".\OCC\src\FairCurve\FairCurve_MinimalVariation.cxx" />
     <ClCompile Include=".\OCC\src\FairCurve\FairCurve_Newton.cxx" />
     <ClCompile Include=".\OCC\src\TopClass\TopClass.cxx" />
-    <ClCompile Include=".\OCC\src\TopClass\TopClass_Intersection3d.cxx" />
     <ClCompile Include=".\OCC\src\TopClass\TopClass_SolidExplorer.cxx" />
   </ItemGroup>
   <ItemGroup Label="TKPrim">
@@ -5104,14 +5114,11 @@
     <ClCompile Include=".\OCC\src\BRepAlgoAPI\BRepAlgoAPI_Cut.cxx" />
     <ClCompile Include=".\OCC\src\BRepAlgoAPI\BRepAlgoAPI_Fuse.cxx" />
     <ClCompile Include=".\OCC\src\BRepAlgoAPI\BRepAlgoAPI_Section.cxx" />
-    <ClCompile Include=".\OCC\src\BOPCol\BOPCol_Box2DBndTree.cxx" />
-    <ClCompile Include=".\OCC\src\BOPCol\BOPCol_BoxBndTree.cxx" />
     <ClCompile Include=".\OCC\src\BOPDS\BOPDS_CommonBlock.cxx" />
     <ClCompile Include=".\OCC\src\BOPDS\BOPDS_DS.cxx" />
     <ClCompile Include=".\OCC\src\BOPDS\BOPDS_IndexRange.cxx" />
     <ClCompile Include=".\OCC\src\BOPDS\BOPDS_Iterator.cxx" />
     <ClCompile Include=".\OCC\src\BOPDS\BOPDS_IteratorSI.cxx" />
-    <ClCompile Include=".\OCC\src\BOPDS\BOPDS_PassKey.cxx" />
     <ClCompile Include=".\OCC\src\BOPDS\BOPDS_Pave.cxx" />
     <ClCompile Include=".\OCC\src\BOPDS\BOPDS_PaveBlock.cxx" />
     <ClCompile Include=".\OCC\src\BOPDS\BOPDS_ShapeInfo.cxx" />
@@ -5129,7 +5136,6 @@
     <ClCompile Include=".\OCC\src\BOPAlgo\BOPAlgo_Builder_3.cxx" />
     <ClCompile Include=".\OCC\src\BOPAlgo\BOPAlgo_Builder_4.cxx" />
     <ClCompile Include=".\OCC\src\BOPAlgo\BOPAlgo_CheckResult.cxx" />
-    <ClCompile Include=".\OCC\src\BOPAlgo\BOPAlgo_CheckerSI.cxx" />
     <ClCompile Include=".\OCC\src\BOPAlgo\BOPAlgo_PaveFiller.cxx" />
     <ClCompile Include=".\OCC\src\BOPAlgo\BOPAlgo_PaveFiller_1.cxx" />
     <ClCompile Include=".\OCC\src\BOPAlgo\BOPAlgo_PaveFiller_2.cxx" />
@@ -5140,20 +5146,16 @@
     <ClCompile Include=".\OCC\src\BOPAlgo\BOPAlgo_PaveFiller_7.cxx" />
     <ClCompile Include=".\OCC\src\BOPAlgo\BOPAlgo_PaveFiller_8.cxx" />
     <ClCompile Include=".\OCC\src\BOPAlgo\BOPAlgo_PaveFiller_9.cxx" />
-    <ClCompile Include=".\OCC\src\BOPAlgo\BOPAlgo_SectionAttribute.cxx" />
     <ClCompile Include=".\OCC\src\BOPAlgo\BOPAlgo_ShellSplitter.cxx" />
     <ClCompile Include=".\OCC\src\BOPAlgo\BOPAlgo_Tools.cxx" />
     <ClCompile Include=".\OCC\src\BOPAlgo\BOPAlgo_WireSplitter.cxx" />
     <ClCompile Include=".\OCC\src\BOPAlgo\BOPAlgo_WireSplitter_1.cxx" />
-    <ClCompile Include=".\OCC\src\BOPTools\BOPTools.cxx" />
     <ClCompile Include=".\OCC\src\BOPTools\BOPTools_AlgoTools.cxx" />
     <ClCompile Include=".\OCC\src\BOPTools\BOPTools_AlgoTools2D.cxx" />
     <ClCompile Include=".\OCC\src\BOPTools\BOPTools_AlgoTools3D.cxx" />
     <ClCompile Include=".\OCC\src\BOPTools\BOPTools_AlgoTools_1.cxx" />
     <ClCompile Include=".\OCC\src\BOPTools\BOPTools_AlgoTools_2.cxx" />
-    <ClCompile Include=".\OCC\src\BOPTools\BOPTools_EdgeSet.cxx" />
     <ClCompile Include=".\OCC\src\BOPTools\BOPTools_Set.cxx" />
-    <ClCompile Include=".\OCC\src\BOPTools\BOPTools_ShapeSet.cxx" />
   </ItemGroup>
   <ItemGroup Label="TKFillet">
     <ClCompile Include=".\OCC\src\ChFi2d\ChFi2d.cxx" />

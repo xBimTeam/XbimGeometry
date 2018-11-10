@@ -23,17 +23,8 @@
 #include <TopAbs_State.hxx>
 #include <TopTrans_SurfaceTransition.hxx>
 
-#define Msr Standard_Real
-#define Msi Standard_Integer
-#define Msb Standard_Boolean
-#define Msf Standard_False
-#define Mst Standard_True
-#define MTAo TopAbs_Orientation
-#define MTAs TopAbs_State
-
 static Standard_Boolean STATIC_DEFINED = Standard_False;
 
-//#include <TopOpeBRepTool_EXPORT.hxx>
 static gp_Dir FUN_nCinsideS(const gp_Dir& tgC, const gp_Dir& ngS)
 {
   // Give us a curve C on suface S, <parOnC>, a parameter

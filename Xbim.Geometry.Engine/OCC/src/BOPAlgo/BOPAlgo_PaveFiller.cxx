@@ -18,6 +18,7 @@
 
 #include <BOPAlgo_PaveFiller.hxx>
 #include <BOPAlgo_SectionAttribute.hxx>
+#include <BOPAlgo_Alerts.hxx>
 #include <BOPDS_Curve.hxx>
 #include <BOPDS_DS.hxx>
 #include <BOPDS_Iterator.hxx>
@@ -39,11 +40,12 @@ BOPAlgo_PaveFiller::BOPAlgo_PaveFiller()
 :
   BOPAlgo_Algo()
 {
-  myDS=NULL;
-  myIterator=NULL;
-  myNonDestructive=Standard_False;
-  myIsPrimary=Standard_True;
-  myGlue=BOPAlgo_GlueOff;
+  myDS = NULL;
+  myIterator = NULL;
+  myNonDestructive = Standard_False;
+  myIsPrimary = Standard_True;
+  myAvoidBuildPCurve = Standard_False;
+  myGlue = BOPAlgo_GlueOff;
 }
 //=======================================================================
 //function : 
@@ -54,11 +56,12 @@ BOPAlgo_PaveFiller::BOPAlgo_PaveFiller
 :
   BOPAlgo_Algo(theAllocator)
 {
-  myDS=NULL;
-  myIterator=NULL;
-  myNonDestructive=Standard_False;
-  myIsPrimary=Standard_True;
-  myGlue=BOPAlgo_GlueOff;
+  myDS = NULL;
+  myIterator = NULL;
+  myNonDestructive = Standard_False;
+  myIsPrimary = Standard_True;
+  myAvoidBuildPCurve = Standard_False;
+  myGlue = BOPAlgo_GlueOff;
 }
 //=======================================================================
 //function : ~
@@ -122,6 +125,7 @@ Standard_Boolean BOPAlgo_PaveFiller::IsPrimary()const
 //=======================================================================
 void BOPAlgo_PaveFiller::Clear()
 {
+  BOPAlgo_Algo::Clear();
   if (myIterator) {
     delete myIterator;
     myIterator=NULL;
@@ -168,7 +172,7 @@ void BOPAlgo_PaveFiller::SetSectionAttribute
 //function : SetArguments
 //purpose  : 
 //=======================================================================
-void BOPAlgo_PaveFiller::SetArguments(const BOPCol_ListOfShape& theLS)
+void BOPAlgo_PaveFiller::SetArguments(const TopTools_ListOfShape& theLS)
 {
   myArguments=theLS;
 }
@@ -176,7 +180,7 @@ void BOPAlgo_PaveFiller::SetArguments(const BOPCol_ListOfShape& theLS)
 //function : Arguments
 //purpose  : 
 //=======================================================================
-const BOPCol_ListOfShape& BOPAlgo_PaveFiller::Arguments()const
+const TopTools_ListOfShape& BOPAlgo_PaveFiller::Arguments()const
 {
   return myArguments;
 }
@@ -186,11 +190,17 @@ const BOPCol_ListOfShape& BOPAlgo_PaveFiller::Arguments()const
 //=======================================================================
 void BOPAlgo_PaveFiller::Init()
 {
-  myErrorStatus=0;
-  //
   if (!myArguments.Extent()) {
-    myErrorStatus=10;
+    AddError (new BOPAlgo_AlertTooFewArguments);
     return;
+  }
+  //
+  TopTools_ListIteratorOfListOfShape aIt(myArguments);
+  for (; aIt.More(); aIt.Next()) {
+    if (aIt.Value().IsNull()) {
+      AddError (new BOPAlgo_AlertNullInputShapes);
+      return;
+    }
   }
   //
   // 0 Clear
@@ -201,19 +211,17 @@ void BOPAlgo_PaveFiller::Init()
   myDS->SetArguments(myArguments);
   myDS->Init(myFuzzyValue);
   //
-  // 2.myIterator 
+  // 2 myContext
+  myContext=new IntTools_Context;
+  //
+  // 3.myIterator 
   myIterator=new BOPDS_Iterator(myAllocator);
   myIterator->SetRunParallel(myRunParallel);
   myIterator->SetDS(myDS);
-  myIterator->Prepare();
-  //
-  // 3 myContext
-  myContext=new IntTools_Context;
+  myIterator->Prepare(myContext, myUseOBB, myFuzzyValue);
   //
   // 4 NonDestructive flag
   SetNonDestructive();
-  //
-  myErrorStatus=0;
 }
 //=======================================================================
 // function: Perform
@@ -221,15 +229,14 @@ void BOPAlgo_PaveFiller::Init()
 //=======================================================================
 void BOPAlgo_PaveFiller::Perform()
 {
-  myErrorStatus=0;
-  try { 
+  try {
     OCC_CATCH_SIGNALS
     //
     PerformInternal();
   }
   //
   catch (Standard_Failure) {
-    myErrorStatus=11;
+    AddError (new BOPAlgo_AlertIntersectionFailed);
   } 
 }
 //=======================================================================
@@ -238,103 +245,84 @@ void BOPAlgo_PaveFiller::Perform()
 //=======================================================================
 void BOPAlgo_PaveFiller::PerformInternal()
 {
-  myErrorStatus=0;
-  //
   Init();
-  if (myErrorStatus) {
+  if (HasErrors()) {
     return; 
   }
   //
   Prepare();
-  if (myErrorStatus) {
+  if (HasErrors()) {
     return; 
   }
   // 00
   PerformVV();
-  if (myErrorStatus) {
+  if (HasErrors()) {
     return; 
   }
   // 01
   PerformVE();
-  if (myErrorStatus) {
+  if (HasErrors()) {
     return; 
   }
   //
   UpdatePaveBlocksWithSDVertices();
-  myDS->UpdatePaveBlocks();
   // 11
   PerformEE();
-  if (myErrorStatus) {
+  if (HasErrors()) {
     return; 
   }
   UpdatePaveBlocksWithSDVertices();
   // 02
   PerformVF();
-  if (myErrorStatus) {
+  if (HasErrors()) {
     return; 
   }
   UpdatePaveBlocksWithSDVertices();
   // 12
   PerformEF();
-  if (myErrorStatus) {
+  if (HasErrors()) {
     return; 
   }
   UpdatePaveBlocksWithSDVertices();
+  UpdateInterfsWithSDVertices();
+
+  // Force intersection of edges after increase
+  // of the tolerance values of their vertices
+  ForceInterfEE();
   //
   // 22
   PerformFF();
-  if (myErrorStatus) {
+  if (HasErrors()) {
     return; 
   }
   //
   UpdateBlocksWithSharedVertices();
   //
   MakeSplitEdges();
-  if (myErrorStatus) {
+  if (HasErrors()) {
     return; 
   }
   //
   UpdatePaveBlocksWithSDVertices();
   //
   MakeBlocks();
-  if (myErrorStatus) {
+  if (HasErrors()) {
     return; 
   }
   //
+  CheckSelfInterference();
+  //
   UpdateInterfsWithSDVertices();
-  RefineFaceInfoOn();
+  myDS->ReleasePaveBlocks();
+  myDS->RefineFaceInfoOn();
   //
   MakePCurves();
-  if (myErrorStatus) {
+  if (HasErrors()) {
     return; 
   }
   //
   ProcessDE();
-  if (myErrorStatus) {
+  if (HasErrors()) {
     return; 
   }
-  //
-  if (myGlue != BOPAlgo_GlueOff) {
-    return;
-  }
-  // 03
-  PerformVZ();
-  if (myErrorStatus) {
-    return;
-  }
-  // 13
-  PerformEZ();
-  if (myErrorStatus) {
-    return;
-  }
-  // 23
-  PerformFZ();
-  if (myErrorStatus) {
-    return;
-  }
-  // 33
-  PerformZZ();
-  if (myErrorStatus) {
-    return;
-  }
-} 
+}

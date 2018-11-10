@@ -43,6 +43,75 @@
 #include <BRep_Tool.hxx>
 #include <TopoDS.hxx>
 #include <Geom2dAPI_ProjectPointOnCurve.hxx>
+//
+static void ComputeSamplePars(const Handle(Adaptor3d_HSurface)& Hsurface, 
+                              const Standard_Integer nbsu,
+                              const Standard_Integer nbsv,
+                              Handle(TColStd_HArray1OfReal)& UPars, 
+                              Handle(TColStd_HArray1OfReal)& VPars)
+{
+  Standard_Integer NbUInts = Hsurface->NbUIntervals(GeomAbs_C2);
+  Standard_Integer NbVInts = Hsurface->NbVIntervals(GeomAbs_C2);
+  TColStd_Array1OfReal UInts(1, NbUInts + 1);
+  TColStd_Array1OfReal VInts(1, NbVInts + 1);
+  Hsurface->UIntervals(UInts, GeomAbs_C2);
+  Hsurface->VIntervals(VInts, GeomAbs_C2);
+  //
+  TColStd_Array1OfInteger NbUSubInts(1, NbUInts);
+  TColStd_Array1OfInteger NbVSubInts(1, NbVInts);
+  //
+  Standard_Integer i, j, ind, NbU, NbV;
+  Standard_Real t, dt;
+  t = UInts(NbUInts + 1) - UInts(1);
+  t = 1. / t;
+  NbU = 0;
+  for(i = 1; i <= NbUInts; ++i)
+  {
+    dt = (UInts(i+1) - UInts(i));
+    NbUSubInts(i) = RealToInt(nbsu * dt * t) + 1;
+    NbU += NbUSubInts(i);
+  }
+  t = VInts(NbVInts + 1) - VInts(1);
+  t = 1. / t;
+  NbV = 0;
+  for(i = 1; i <= NbVInts; ++i)
+  {
+    dt = (VInts(i+1) - VInts(i));
+    NbVSubInts(i) = RealToInt(nbsv * dt * t) + 1;
+    NbV += NbVSubInts(i);
+  }
+  UPars = new TColStd_HArray1OfReal(1, NbU + 1);
+  VPars = new TColStd_HArray1OfReal(1, NbV + 1);
+  //
+  ind = 1;
+  for(i = 1; i <= NbUInts; ++i)
+  {
+    UPars->SetValue(ind++, UInts(i));
+    dt = (UInts(i+1) - UInts(i)) / NbUSubInts(i);
+    t = UInts(i);
+    for(j = 1; j < NbUSubInts(i); ++j)
+    {
+      t += dt;
+      UPars->SetValue(ind++, t);
+    }
+  }
+  UPars->SetValue(ind, UInts(NbUInts + 1));
+  //
+  ind = 1;
+  for(i = 1; i <= NbVInts; ++i)
+  {
+    VPars->SetValue(ind++, VInts(i));
+    dt = (VInts(i+1) - VInts(i)) / NbVSubInts(i);
+    t = VInts(i);
+    for(j = 1; j < NbVSubInts(i); ++j)
+    {
+      t += dt;
+      VPars->SetValue(ind++, t);
+    }
+  }
+  VPars->SetValue(ind, VInts(NbVInts + 1));
+}
+//
 //=======================================================================
 //function : SurfaceType
 //purpose  : 
@@ -66,7 +135,8 @@ IntCurvesFace_Intersector::IntCurvesFace_Intersector(const TopoDS_Face& Face,
   nbpnt(0),
   PtrOnPolyhedron(NULL),
   PtrOnBndBounding(NULL),
-  myUseBoundTol (UseBToler)
+  myUseBoundTol (UseBToler),
+  myIsParallel(Standard_False)
 { 
   BRepAdaptor_Surface surface;
   face = Face;
@@ -86,35 +156,64 @@ IntCurvesFace_Intersector::IntCurvesFace_Intersector(const TopoDS_Face& Face,
     U1 = Hsurface->LastUParameter();
     V0 = Hsurface->FirstVParameter();
     V1 = Hsurface->LastVParameter();
-
+    //
+    nbsu = myTopolTool->NbSamplesU();
+    nbsv = myTopolTool->NbSamplesV();
+    //
     Standard_Real aURes = Hsurface->UResolution(1.0);
     Standard_Real aVRes = Hsurface->VResolution(1.0);
 
     // Checking correlation between number of samples and length of the face along each axis
     const Standard_Real aTresh = 100.0;
-    const Standard_Integer aMinSamples = 10;
+    Standard_Integer aMinSamples = 20;
     const Standard_Integer aMaxSamples = 40;
     const Standard_Integer aMaxSamples2 = aMaxSamples * aMaxSamples;
     Standard_Real dU = (U1 - U0) / aURes;
     Standard_Real dV = (V1 - V0) / aVRes;
-    nbsu = myTopolTool->NbSamplesU();
-    nbsv = myTopolTool->NbSamplesV();
+    if (nbsu < aMinSamples) nbsu = aMinSamples;
+    if (nbsv < aMinSamples) nbsv = aMinSamples;
     if (nbsu > aMaxSamples) nbsu = aMaxSamples;
     if (nbsv > aMaxSamples) nbsv = aMaxSamples;
 
-    if (Max(dU, dV) > Min(dU, dV) * aTresh)
-    {
-      nbsu = (Standard_Integer)(Sqrt(dU / dV) * aMaxSamples);
-      if (nbsu < aMinSamples) nbsu = aMinSamples;
-      nbsv = aMaxSamples2 / nbsu;
-      if (nbsv < aMinSamples)
+    if (dU > gp::Resolution() && dV > gp::Resolution()) {
+      if (Max(dU, dV) > Min(dU, dV) * aTresh)
       {
-        nbsv = aMinSamples;
-        nbsu = aMaxSamples2 / aMinSamples;
+        aMinSamples = 10;
+        nbsu = (Standard_Integer)(Sqrt(dU / dV) * aMaxSamples);
+        if (nbsu < aMinSamples) nbsu = aMinSamples;
+        nbsv = aMaxSamples2 / nbsu;
+        if (nbsv < aMinSamples)
+        {
+          nbsv = aMinSamples;
+          nbsu = aMaxSamples2 / aMinSamples;
+        }
       }
     }
-    PtrOnPolyhedron = (IntCurveSurface_ThePolyhedronOfHInter *)
+    else {
+      if (dU < gp::Resolution()) {
+        nbsu = 1;
+      }
+      if (dV < gp::Resolution()) {
+        nbsv = 1;
+      }
+    }
+
+    Standard_Integer NbUOnS = Hsurface->NbUIntervals(GeomAbs_C2);
+    Standard_Integer NbVOnS = Hsurface->NbVIntervals(GeomAbs_C2);
+
+    if(NbUOnS > 1 || NbVOnS > 1)
+    {
+      Handle(TColStd_HArray1OfReal) UPars, VPars;
+      ComputeSamplePars(Hsurface, nbsu, nbsv, UPars, VPars);
+      PtrOnPolyhedron = (IntCurveSurface_ThePolyhedronOfHInter *)
+        new IntCurveSurface_ThePolyhedronOfHInter(Hsurface, UPars->ChangeArray1(), 
+                                                            VPars->ChangeArray1());
+    }
+    else 
+    {
+      PtrOnPolyhedron = (IntCurveSurface_ThePolyhedronOfHInter *)
         new IntCurveSurface_ThePolyhedronOfHInter(Hsurface,nbsu,nbsv,U0,V0,U1,V1);
+    }
   }
 }
 //=======================================================================
@@ -238,6 +337,10 @@ void IntCurvesFace_Intersector::InternalCall(const IntCurveSurface_HInter &HICS,
       } //-- classifier state is IN or ON
     } //-- Loop on Intersection points.
   } //-- HICS.IsDone()
+  else if (HICS.IsDone())
+  {
+    myIsParallel = HICS.IsParallel();
+  }
 }
 //=======================================================================
 //function : Perform

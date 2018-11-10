@@ -15,6 +15,20 @@ namespace Xbim.Geometry.Helpers
     public class XbimPlacementTree
     {
         /// <summary>
+        /// This function centralises the extraction of a product placement, but it needs the support of XbimPlacementTree and an XbimGeometryEngine
+        /// We should probably find a conceptual place for it somewhere in the scene, where these are cached.
+        /// </summary>
+        public static XbimMatrix3D GetTransform(IIfcProduct product, XbimPlacementTree tree, XbimGeometryEngine engine)
+        {
+            XbimMatrix3D placementTransform = XbimMatrix3D.Identity;
+            if (product.ObjectPlacement is IIfcLocalPlacement)
+                placementTransform = tree[product.ObjectPlacement.EntityLabel];
+            else if (product.ObjectPlacement is IIfcGridPlacement)
+                placementTransform = engine.ToMatrix3D((IIfcGridPlacement)product.ObjectPlacement);
+            return placementTransform;
+        }
+
+        /// <summary>
         ///     Builds a placement tree of all ifcLocalPlacements
         /// </summary>
         /// <param name="model"></param>

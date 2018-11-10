@@ -81,7 +81,7 @@
 #include <TopTools_SequenceOfShape.hxx>
 
 #include <stdio.h>
-IMPLEMENT_STANDARD_RTTIEXT(BRepFill_PipeShell,MMgt_TShared)
+IMPLEMENT_STANDARD_RTTIEXT(BRepFill_PipeShell,Standard_Transient)
 
 //Specification Guide
 #ifdef DRAW
@@ -124,7 +124,7 @@ static Standard_Boolean ComputeSection(const TopoDS_Wire& W1,
   BRepFill_CompatibleWires CW(SSh);
   CW.SetPercent(0.1);
   CW.Perform();
-  if (!CW.IsDone()) StdFail_NotDone::Raise("Uncompatible wires");
+  if (!CW.IsDone()) throw StdFail_NotDone("Uncompatible wires");
   GeomFill_SequenceOfTrsf EmptyTrsfs;
   Handle(BRepFill_NSections) SL = new (BRepFill_NSections) (CW.Shape(),EmptyTrsfs,SR,0.,1.);
   Standard_Real US = p1/(p1+p2);
@@ -356,7 +356,7 @@ BRepFill_PipeShell::BRepFill_PipeShell(const TopoDS_Wire& Spine)
     BRepFill_CompatibleWires CW(Seq);
     CW.SetPercent(0.1);
     CW.Perform();
-    if (!CW.IsDone()) StdFail_NotDone::Raise("Uncompatible wires");
+    if (!CW.IsDone()) throw StdFail_NotDone("Uncompatible wires");
     TheGuide = TopoDS::Wire(CW.Shape().Value(2));
   }
   else if (GuideClose) {
@@ -385,10 +385,8 @@ BRepFill_PipeShell::BRepFill_PipeShell(const TopoDS_Wire& Spine)
   if (Affich)
     DBRep::Set("theguide", TheGuide);
 #endif
-  // transform the guide in a single curve (periodic if posssible)
-  Handle(BRepAdaptor_HCompCurve) Guide  = 
-    new (BRepAdaptor_HCompCurve) (TheGuide);
-  Guide->ChangeCurve().SetPeriodic(Standard_True);
+  // transform the guide in a single curve
+  Handle(BRepAdaptor_HCompCurve) Guide = new (BRepAdaptor_HCompCurve) (TheGuide);
 
   if (CurvilinearEquivalence) { // trihedron by curvilinear reduced abscissa
     if (KeepContact == BRepFill_Contact ||
@@ -583,28 +581,15 @@ void BRepFill_PipeShell::SetForceApproxC1(const Standard_Boolean ForceApproxC1)
 //=======================================================================
  void BRepFill_PipeShell::DeleteProfile(const TopoDS_Shape&  Profile)
 {
-  Standard_Boolean isVertex = (Profile.ShapeType() == TopAbs_VERTEX);
-
   Standard_Boolean Trouve=Standard_False;
   Standard_Integer ii;
   for (ii=1; ii<=mySeq.Length() && !Trouve; ii++) {
-    Standard_Boolean found = Standard_False;
-    const TopoDS_Wire& aWire = mySeq.Value(ii).Wire();
-    if (isVertex)
-      {
-	TopExp_Explorer Explo(aWire, TopAbs_VERTEX);
-	for (; Explo.More(); Explo.Next())
-	  if (Profile.IsSame(Explo.Current()))
-	    found = Standard_True;
-      }
-    else if (Profile.IsSame(aWire))
-      found = Standard_True;
-    
-    if (found)
-      {
-	Trouve = Standard_True;
-	mySeq.Remove(ii);
-      }
+    const TopoDS_Shape& aSection = mySeq.Value(ii).OriginalShape();
+    if (Profile.IsSame(aSection))
+    {
+      Trouve = Standard_True;
+      mySeq.Remove(ii);
+    }
   }
 
   if (Trouve) mySection.Nullify();
@@ -825,7 +810,7 @@ void BRepFill_PipeShell::SetForceApproxC1(const Standard_Boolean ForceApproxC1)
  Standard_Boolean BRepFill_PipeShell::MakeSolid() 
 { 
   if (myShape.IsNull()) 
-    StdFail_NotDone::Raise("PipeShell is not built");
+    throw StdFail_NotDone("PipeShell is not built");
   Standard_Boolean B = myShape.Closed();
   BRep_Builder BS;
 
@@ -914,13 +899,9 @@ const TopoDS_Shape& BRepFill_PipeShell::LastShape() const
 //function : Generated
 //purpose  : 
 //=======================================================================
-//  void BRepFill_PipeShell::Generated(const TopoDS_Shape& ,
-// 				    TopTools_ListOfShape& ) 
 void BRepFill_PipeShell::Generated(const TopoDS_Shape&   theShape,
 				   TopTools_ListOfShape& theList) 
 {
-  //   Standard_NotImplemented::Raise("Generated:Pas Fait");
-  
   theList.Clear();
 
   if(myGenMap.IsBound(theShape)) {
@@ -937,8 +918,11 @@ void BRepFill_PipeShell::Generated(const TopoDS_Shape&   theShape,
 //=======================================================================
  void BRepFill_PipeShell::Prepare() 
 {
+  WSeq.Clear();
+  myEdgeNewEdges.Clear();
+  
   TopoDS_Wire theSect;
-  if (!IsReady()) StdFail_NotDone::Raise("PipeShell");
+  if (!IsReady()) throw StdFail_NotDone("PipeShell");
   if (!myLocation.IsNull() && !mySection.IsNull()) return; // It is ready
  
   //Check set of section for right configuration of punctual sections
@@ -953,7 +937,7 @@ void BRepFill_PipeShell::Generated(const TopoDS_Shape&   theShape,
 	  wdeg = wdeg && (BRep_Tool::Degenerated(anEdge));
 	}
       if (wdeg)
-	Standard_Failure::Raise("Wrong usage of punctual sections");
+	throw Standard_Failure("Wrong usage of punctual sections");
     }
   if (mySeq.Length() <= 2)
     {
@@ -965,7 +949,7 @@ void BRepFill_PipeShell::Generated(const TopoDS_Shape&   theShape,
 	    wdeg = wdeg && (BRep_Tool::Degenerated(anEdge));
 	  }
       if (wdeg)
-	Standard_Failure::Raise("Wrong usage of punctual sections");
+	throw Standard_Failure("Wrong usage of punctual sections");
     }
 
   // Construction of the law of location  
@@ -984,7 +968,7 @@ void BRepFill_PipeShell::Generated(const TopoDS_Shape&   theShape,
 	  } 
 	  default :
 	    { // Not planned!
-	      Standard_ConstructionError::Raise("PipeShell");
+	      throw Standard_ConstructionError("PipeShell");
 	    }
 	}
     }  
@@ -1146,7 +1130,7 @@ void BRepFill_PipeShell::Generated(const TopoDS_Shape&   theShape,
       }
     }
     else {
-      Standard_ConstructionError::Raise("PipeShell : uncompatible wires");
+      throw Standard_ConstructionError("PipeShell : uncompatible wires");
     }
     mySection = new (BRepFill_NSections) (WorkingSections,Transformations,Param,V1,V2);
     
@@ -1194,9 +1178,6 @@ void BRepFill_PipeShell::Place(const BRepFill_Section& Sec,
 				  Sec.WithCorrection());
   TopoDS_Wire TmpWire =  Sec.Wire();
   aTrsf = Place.Transformation();
-  //TopLoc_Location Loc2(Place.Transformation()), Loc1;
-  //Loc1 = TmpWire.Location();
-  //W.Location(Loc2.Multiplied(Loc1));
   //Transform the copy
   W = TopoDS::Wire(BRepBuilderAPI_Transform(TmpWire, aTrsf, Standard_True));
   ////////////////////////////////////
@@ -1237,37 +1218,40 @@ void BRepFill_PipeShell::BuildHistory(const BRepFill_Sweep& theSweep)
   TopoDS_Iterator itw;
   for (indw = 1; indw <= mySeq.Length(); indw++)
   {
-    const TopoDS_Wire& aSection = mySeq(indw).Wire();
+    const TopoDS_Shape& Section = mySeq(indw).OriginalShape();
+    TopoDS_Wire aSection;
     Standard_Boolean IsPunctual = mySeq(indw).IsPunctual();
     if (IsPunctual)
     {
       //for punctual sections (first or last)
       //we take all the wires generated along the path
-      TopExp_Explorer Explo(aSection, TopAbs_VERTEX);
-      const TopoDS_Shape& VerSection = Explo.Current();
+      
       TopTools_ListOfShape Elist;
       for (Standard_Integer i = 1; i <= anUEdges->UpperRow(); i++)
         for (Standard_Integer j = 1; j <= anUEdges->UpperCol(); j++)
           Elist.Append(anUEdges->Value(i,j));
-      myGenMap.Bind(VerSection, Elist);
+      myGenMap.Bind(Section, Elist);
       continue;
     }
+    else
+      aSection = TopoDS::Wire(Section);
     //Take the real index of section on the path
     Standard_Integer IndOfW = myIndOfSec(indw);
     const TopoDS_Wire& theWire = TopoDS::Wire(WSeq(IndOfW));
     BRepTools_WireExplorer wexp_sec(aSection);
     for (inde = 1; wexp_sec.More(); wexp_sec.Next())
     {
-      const TopoDS_Edge& anEdge = TopoDS::Edge(wexp_sec.Current());
+      const TopoDS_Edge& anOriginalEdge = TopoDS::Edge(wexp_sec.Current());
+      TopoDS_Edge anEdge = TopoDS::Edge(mySeq(indw).ModifiedShape(anOriginalEdge));
       if (BRep_Tool::Degenerated(anEdge))
         continue;
 
       TopoDS_Shell aShell;
       BB.MakeShell(aShell);
       TopoDS_Vertex aVertex [2];
-      TopExp::Vertices(anEdge, aVertex[0], aVertex[1]);
+      TopExp::Vertices(anOriginalEdge, aVertex[0], aVertex[1]);
       Standard_Integer SignOfAnEdge =
-        (anEdge.Orientation() == TopAbs_FORWARD)? 1 : -1;
+        (anOriginalEdge.Orientation() == TopAbs_FORWARD)? 1 : -1;
       
       //For each non-degenerated inde-th edge of <aSection>
       //we find inde-th edge in <theWire>
@@ -1419,7 +1403,7 @@ void BRepFill_PipeShell::BuildHistory(const BRepFill_Sweep& theSweep)
       
       TopTools_ListOfShape ListShell;
       ListShell.Append(aShell);
-      myGenMap.Bind(anEdge, ListShell);
+      myGenMap.Bind(anOriginalEdge, ListShell);
       ////////////////////////
 
       inde++;

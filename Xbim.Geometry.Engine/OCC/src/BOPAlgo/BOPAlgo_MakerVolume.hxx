@@ -18,14 +18,14 @@
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
-
 #include <Standard_Boolean.hxx>
-#include <Bnd_Box.hxx>
-#include <TopoDS_Solid.hxx>
-#include <BOPCol_ListOfShape.hxx>
+
 #include <BOPAlgo_Builder.hxx>
-#include <BOPCol_BaseAllocator.hxx>
-#include <BOPCol_MapOfShape.hxx>
+#include <Bnd_Box.hxx>
+#include <NCollection_BaseAllocator.hxx>
+#include <TopoDS_Solid.hxx>
+#include <TopTools_ListOfShape.hxx>
+#include <TopTools_MapOfShape.hxx>
 class TopoDS_Solid;
 class BOPAlgo_PaveFiller;
 
@@ -89,11 +89,9 @@ class BOPAlgo_PaveFiller;
 //!
 //! <myRunParallel> - Defines whether the parallel processing is
 //! switched on or not.
-//! <myErrorStatus> - Error status of the operation:
-//! 0   - operation successful;
-//! 100 - no shapes to process;
-//! 102 - BOPAlgo_PaveFiller algorithm has failed;
-//! 103 - BOPAlgo_BuilderSolid algorithm has failed.
+//! <myReport> - Error status of the operation. Additionally to the
+//! errors of the parent algorithm it can have the following values:
+//! - *BOPAlgo_AlertSolidBuilderFailed* - BOPAlgo_BuilderSolid algorithm has failed.
 //!
 //! Example:
 //!
@@ -104,8 +102,8 @@ class BOPAlgo_PaveFiller;
 //! aMV.SetIntersect(bIntersect); //intersect or not the shapes from <aLS>
 //! //
 //! aMV.Perform(); //perform the operation
-//! if (aMV.ErrorStatus()) { //check error status
-//! return;
+//! if (aMV.HasErrors()) { //check error status
+//!   return;
 //! }
 //! //
 //! const TopoDS_Shape& aResult = aMV.Shape();  //result of the operation
@@ -122,7 +120,7 @@ public:
   virtual ~BOPAlgo_MakerVolume();
 
   //! Empty contructor.
-  BOPAlgo_MakerVolume(const BOPCol_BaseAllocator& theAllocator);
+  BOPAlgo_MakerVolume(const Handle(NCollection_BaseAllocator)& theAllocator);
 
   //! Clears the data.
   virtual void Clear() Standard_OVERRIDE;
@@ -139,16 +137,16 @@ public:
   const TopoDS_Solid& Box() const;
 
   //! Returns the processed faces <myFaces>.
-  const BOPCol_ListOfShape& Faces() const;
+  const TopTools_ListOfShape& Faces() const;
 
   //! Defines the preventing of addition of internal for solid parts into the result.
   //! By default the internal parts are added into result.
-  Standard_EXPORT void SetAvoidInternalShapes(const Standard_Boolean theAvoidInternal) {
+  void SetAvoidInternalShapes(const Standard_Boolean theAvoidInternal) {
     myAvoidInternalShapes = theAvoidInternal;
   }
 
   //! Returns the AvoidInternalShapes flag
-  Standard_EXPORT Standard_Boolean IsAvoidInternalShapes() const {
+  Standard_Boolean IsAvoidInternalShapes() const {
     return myAvoidInternalShapes;
   }
 
@@ -167,24 +165,25 @@ protected:
   Standard_EXPORT void CollectFaces();
 
   //! Makes solid box.
-  Standard_EXPORT void MakeBox (BOPCol_MapOfShape& theBoxFaces);
+  Standard_EXPORT void MakeBox (TopTools_MapOfShape& theBoxFaces);
 
   //! Builds solids.
-  Standard_EXPORT void BuildSolids (BOPCol_ListOfShape& theLSR);
+  Standard_EXPORT void BuildSolids (TopTools_ListOfShape& theLSR);
 
   //! Removes the covering box.
-  Standard_EXPORT void RemoveBox (BOPCol_ListOfShape& theLSR, const BOPCol_MapOfShape& theBoxFaces);
+  Standard_EXPORT void RemoveBox (TopTools_ListOfShape& theLSR, const TopTools_MapOfShape& theBoxFaces);
 
   //! Fills the solids with internal shapes.
-  Standard_EXPORT void FillInternalShapes (const BOPCol_ListOfShape& theLSR);
+  Standard_EXPORT void FillInternalShapes (const TopTools_ListOfShape& theLSR);
 
   //! Builds the result.
-  Standard_EXPORT void BuildShape (const BOPCol_ListOfShape& theLSR);
+  Standard_EXPORT void BuildShape (const TopTools_ListOfShape& theLSR);
+
 
   Standard_Boolean myIntersect;
   Bnd_Box myBBox;
   TopoDS_Solid mySBox;
-  BOPCol_ListOfShape myFaces;
+  TopTools_ListOfShape myFaces;
   Standard_Boolean myAvoidInternalShapes;
 
 private:

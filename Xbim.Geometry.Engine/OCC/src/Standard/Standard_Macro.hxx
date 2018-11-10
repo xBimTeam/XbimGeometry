@@ -12,13 +12,21 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-// Purpose:   This file is intended to be the first file #included to any
-//            Open CASCADE source. It defines platform-specific pre-processor 
-//            macros necessary for correct compilation of Open CASCADE code
+//! @file
+//! This file is intended to be the first file included to any
+//! Open CASCADE source. It defines platform-specific pre-processor 
+//! macros necessary for correct compilation of Open CASCADE code.
 
 #ifndef _Standard_Macro_HeaderFile
 # define _Standard_Macro_HeaderFile
 
+//! @def Standard_OVERRIDE
+//! Should be used in declarations of virtual methods overriden in the
+//! derived classes, to cause compilation error in the case if that virtual 
+//! function disappears or changes its signature in the base class.
+//!
+//! Expands to C++11 keyword "override" on compilers that are known to
+//! suppot it; empty in other cases.
 #if defined(__cplusplus) && (__cplusplus >= 201100L)
   // part of C++11 standard
   #define Standard_OVERRIDE override
@@ -29,16 +37,42 @@
   #define Standard_OVERRIDE
 #endif
 
-// Macro for marking variables / functions as possibly unused
-// so that compiler will not emit redundant "unused" warnings.
+//! @def Standard_FALLTHROUGH
+//! Should be used in a switch statement immediately before a case label,
+//! if code associated with the previous case label may fall through to that
+//! next label (i.e. does not end with "break" or "return" etc.). 
+//! This macro indicates that the fall through is intentional and should not be 
+//! diagnosed by a compiler that warns on fallthrough.
+//!
+//! Expands to C++17 attribute statement "[[fallthrough]];" on compilers that 
+//! declare support of C++17, or to "__attribute__((fallthrough));" on 
+//! GCC 7+.
+#if defined(__cplusplus) && (__cplusplus >= 201703L)
+  // part of C++17 standard
+  #define Standard_FALLTHROUGH [[fallthrough]];
+#elif defined(__GNUC__) && (__GNUC__ >= 7)
+  // gcc 7+
+  #define Standard_FALLTHROUGH __attribute__((fallthrough));
+#else
+  #define Standard_FALLTHROUGH
+#endif
+
+//! @def Standard_UNUSED
+//! Macro for marking variables / functions as possibly unused
+//! so that compiler will not emit redundant "unused" warnings.
+//!
+//! Expands to "__attribute__((unused))" on GCC and CLang.
 #if defined(__GNUC__) || defined(__clang__)
   #define Standard_UNUSED __attribute__((unused))
 #else
   #define Standard_UNUSED
 #endif
 
-// Macro Standard_DEPRECATED("message") can be used to declare a method deprecated.
-// If OCCT_NO_DEPRECATED is defined, Standard_DEPRECATED is defined empty.
+//! @def Standard_DEPRECATED("message")
+//! Can be used in declaration of a method or a class to mark it as deprecated.
+//! Use of such method or class will cause compiler warning (if supported by 
+//! compiler and unless disabled).
+//! If macro OCCT_NO_DEPRECATED is defined, Standard_DEPRECATED is defined empty.
 #ifdef OCCT_NO_DEPRECATED
   #define Standard_DEPRECATED(theMsg)
 #else
@@ -53,9 +87,14 @@
 #endif
 #endif
 
-// Disable warnings about deprecated features.
-// This is useful for sections of code kept for backward compatibility and scheduled for removal.
-
+//! @def Standard_DISABLE_DEPRECATION_WARNINGS
+//! Disables warnings on use of deprecated features (see Standard_DEPRECATED),
+//! from the current point till appearance of Standard_ENABLE_DEPRECATION_WARNINGS macro.
+//! This is useful for sections of code kept for backward compatibility and scheduled for removal.
+//!
+//! @def Standard_ENABLE_DEPRECATION_WARNINGS
+//! Enables warnings on use of deprecated features previously disabled by
+//! Standard_DISABLE_DEPRECATION_WARNINGS.
 #if defined(__ICL) || defined (__INTEL_COMPILER)
   #define Standard_DISABLE_DEPRECATION_WARNINGS __pragma(warning(push)) __pragma(warning(disable:1478))
   #define Standard_ENABLE_DEPRECATION_WARNINGS  __pragma(warning(pop))
@@ -72,23 +111,14 @@
   #define Standard_ENABLE_DEPRECATION_WARNINGS
 #endif
 
-//======================================================
-// Windows-specific definitions
-//======================================================
+//! @def OCCT_NO_RVALUE_REFERENCE
+//! Disables methods and constructors that use rvalue references
+//! (C++11 move semantics) not supported by obsolete compilers.
+#if (defined(_MSC_VER) && (_MSC_VER < 1600))
+  #define OCCT_NO_RVALUE_REFERENCE
+#endif
 
-# if defined(_WIN32) && !defined(HAVE_NO_DLL)
-
-#  ifndef Standard_EXPORT
-#   define Standard_EXPORT __declspec( dllexport )
-// For global variables :
-#   define Standard_EXPORTEXTERN __declspec( dllexport ) extern
-#   define Standard_EXPORTEXTERNC extern "C" __declspec( dllexport )
-#  endif  /* Standard_EXPORT */
-
-#  ifndef Standard_IMPORT
-#   define Standard_IMPORT __declspec( dllimport ) extern
-#   define Standard_IMPORTC extern "C" __declspec( dllimport )
-#  endif  /* Standard_IMPORT */
+# ifdef _WIN32
 
 // We must be careful including windows.h: it is really poisonous stuff!
 // The most annoying are #defines of many identifiers that you could use in 
@@ -132,10 +162,38 @@
 #define NOIME NOIME
 #endif
 
+#endif
+
+//! @def Standard_EXPORT
+//! This macro should be used in declarations of public methods 
+//! to ensure that they are exported from DLL on Windows and thus
+//! can be called from other (dependent) libraries or applications.
+//!
+//! If macro OCCT_STATIC_BUILD is defined, then Standard_EXPORT
+//! is set to empty. 
+
+# if defined(_WIN32) && !defined(OCCT_STATIC_BUILD) && !defined(HAVE_NO_DLL)
+
+//======================================================
+// Windows-specific definitions
+//======================================================
+
+#  ifndef Standard_EXPORT
+#   define Standard_EXPORT __declspec( dllexport )
+// For global variables :
+#   define Standard_EXPORTEXTERN __declspec( dllexport ) extern
+#   define Standard_EXPORTEXTERNC extern "C" __declspec( dllexport )
+#  endif  /* Standard_EXPORT */
+
+#  ifndef Standard_IMPORT
+#   define Standard_IMPORT __declspec( dllimport ) extern
+#   define Standard_IMPORTC extern "C" __declspec( dllimport )
+#  endif  /* Standard_IMPORT */
+
 # else  /* UNIX */
 
 //======================================================
-// UNIX definitions
+// UNIX / static library definitions
 //======================================================
 
 #  ifndef Standard_EXPORT
@@ -163,21 +221,9 @@
 
 # endif  /* _WIN32 */
 
-//======================================================
-// Other
-//======================================================
-
-# ifndef __Standard_API
-#   if !defined(_WIN32) || defined(__Standard_DLL) || defined(__FSD_DLL) || defined(__MMgt_DLL) || defined(__OSD_DLL) || defined(__Plugin_DLL) || defined(__Quantity_DLL) || defined(__Resource_DLL) || defined(__SortTools_DLL) || defined(__StdFail_DLL) || defined(__Storage_DLL) || defined(__TColStd_DLL) || defined(__TCollection_DLL) || defined(__TShort_DLL) || defined(__Units_DLL) || defined(__UnitsAPI_DLL) || defined(__Dico_DLL)
-#    define __Standard_API Standard_EXPORT
-#    define __Standard_APIEXTERN Standard_EXPORTEXTERN
-#   else
-#    define __Standard_API Standard_IMPORT
-#    define __Standard_APIEXTERN Standard_IMPORT
-#   endif  // __Standard_DLL
-# endif  // __Standard_API
-
-// Support of Universal Windows Platform
+//! @def OCCT_UWP
+//! This macro is defined on Windows platform in the case if the code
+//! is being compiled for UWP (Universal Windows Platform).
 #if defined(WINAPI_FAMILY) && WINAPI_FAMILY == WINAPI_FAMILY_APP
  #define OCCT_UWP
 #else
