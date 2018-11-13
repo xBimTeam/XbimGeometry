@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Year>$([System.DateTime]::Now.ToString("yy"))</Year>
+    <Year>$([System.DateTime]::Now.ToString("yy"))</Year> 
     <Month>$([System.DateTime]::Now.ToString("MM"))</Month>
     <Day>$([System.DateTime]::Now.ToString("dd"))</Day>
     <Minute>$([System.Int32]::Parse($([System.DateTime]::Now.ToString("mm"))))</Minute>
@@ -12,6 +12,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <TargetFramework>net47</TargetFramework>
+    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>aimkey.snk</AssemblyOriginatorKeyFile>
     <Title>Xbim Geometry Engine</Title>
@@ -28,7 +29,7 @@
     <AssemblyVersion>5.0.0.0</AssemblyVersion>    
     <FileVersion>5.0.$(Year)$(Month).$(Day)$(HalfMinuteOfDay)</FileVersion>
     <ProductVersion>5.0.$(Year)$(Month).$(Day)$(HalfMinuteOfDay)</ProductVersion>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <PackageIconUrl>https://avatars1.githubusercontent.com/u/2284875?v=3&amp;amp;s=240</PackageIconUrl>
     <DelaySign>false</DelaySign>
   </PropertyGroup>
@@ -37,51 +38,39 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.0" />
     <PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
-    <PackageReference Include="Xbim.Tessellator" Version="5.0.0-Beta1-1687" />
+    <PackageReference Include="Xbim.Tessellator" Version="5.0.0-Beta1-1990" />
   </ItemGroup>
  
 
   <ItemGroup>
-    <Content Include="bin\$(Configuration)\net47\Xbim.Geometry.Engine32.dll">
-      <Pack>true</Pack>
-      <PackagePath>build\net47;</PackagePath>
-    </Content>   
-    <Content Include="bin\$(Configuration)\net47\Xbim.Geometry.Engine64.dll">
-      <Pack>true</Pack>
-      <PackagePath>build\net47;</PackagePath>
-    </Content>
     <Content Include="..\Xbim.Geometry.Engine.Interop.targets">
       <Link>Xbim.Geometry.Interop.targets</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <PackagePath>build\net47;</PackagePath>
-      <Pack>true</Pack>
     </Content>
-   
+    
   </ItemGroup>
-
+  
+  
+  
   <ItemGroup>
     <NativeGeometryEngine Include="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj">
       <AdditionalProperties>
         Platform=Win32
       </AdditionalProperties>
     </NativeGeometryEngine>
-    <NativeGeometryEngine Include="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj">
+    <!--<NativeGeometryEngine Include="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj">
       <AdditionalProperties>
         Platform=x64   
       </AdditionalProperties>
-    </NativeGeometryEngine>
+    </NativeGeometryEngine>-->
   </ItemGroup>
   
-  <Target Name="BuildNativeCodeEngine" BeforeTargets="Build">
+  <!--We need to execute this after a build to ensure the nuget packages are in the correct place for the c++ binding-->
+  <Target Name="BuildNativeCodeEngine" AfterTargets="Build" >
     <Message Text="Building Xbim.Geometry.Engine x32 and x64 Native Dlls, version $(AssemblyFileVersionAttribute)" Importance="High" />
     <WriteLinesToFile File="..\SharedFileVersionInfo.cs" Lines="$(AssemblyFileVersionAttribute)" Overwrite="true" Encoding="Unicode" />
-    <MSBuild Projects="@(NativeGeometryEngine)"
-      Properties="Configuration=$(Configuration) ; OutDir=..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\"
-      Targets="Build"> 
-      <Output  
-                TaskParameter="TargetOutputs"  
-                ItemName="AssembliesBuiltByChildProjects" />  
-    
+    <MSBuild Projects="@(NativeGeometryEngine)" Properties="Configuration=$(Configuration) ; OutDir=..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\" Targets="Build"> 
+      <Output TaskParameter="TargetOutputs" ItemName="AssembliesBuiltByChildProjects" />    
      </MSBuild>
   </Target>
   
@@ -105,5 +94,5 @@
       <Output ItemName="AssembliesBuiltByChildProjects" TaskParameter="TargetOutputs" />
     </MSBuild>  
   </Target>-->
-  
+ 
 </Project>

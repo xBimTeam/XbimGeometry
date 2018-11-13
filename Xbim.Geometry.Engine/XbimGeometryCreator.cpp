@@ -1220,30 +1220,61 @@ namespace Xbim
 				XbimEdge^ edge = gcnew XbimEdge(xCurve, logger);
 				TopoDS_Wire spine = BRepBuilderAPI_MakeWire(edge);
 				//XbimWire^ w = gcnew XbimWire(spine);
-				BRepOffsetAPI_MakePipeShell pipeMaker(spine);
-				pipeMaker.Add(profile->OuterWire, Standard_True, Standard_True);
-				pipeMaker.Build();
-				BRep_Builder b;
-				TopoDS_Shell shell;
-				b.MakeShell(shell);
-				if (pipeMaker.IsDone())
+				try
 				{
-					//add the other faces to the shell
-					for (TopExp_Explorer explr(pipeMaker.Shape(), TopAbs_FACE); explr.More(); explr.Next())
-					{
-						b.Add(shell, TopoDS::Face(explr.Current()));
+					BRep_Builder b;
+					BRepOffsetAPI_MakePipeShell pipeMaker(spine);
+					TopoDS_Face face = profile; // hang on to the face
+					pipeMaker.Add(rect, Standard_True, Standard_True);
+					pipeMaker.Build();
+					if (pipeMaker.IsDone() && pipeMaker.MakeSolid() && pipeMaker.Shape().ShapeType()==TopAbs_ShapeEnum::TopAbs_SOLID) //a solid is OK
+					{						
+						solids->Add(gcnew XbimSolid(TopoDS::Solid(pipeMaker.Shape())));
 					}
-					TopoDS_Solid solid;
-					b.MakeSolid(solid);
-					b.Add(solid, shell);
-					solids->Add(gcnew XbimSolid(solid));
+					else if (pipeMaker.IsDone()) //fix up from a shell
+					{		
+						TopoDS_Shell shell;
+						b.MakeShell(shell);
+						{
+							//add the other faces to the shell
+							for (TopExp_Explorer explr(pipeMaker.Shape(), TopAbs_FACE); explr.More(); explr.Next())
+							{
+								b.Add(shell, TopoDS::Face(explr.Current()));
+							}
+							//visit wires not in a face
+							for (TopExp_Explorer explr(pipeMaker.Shape(), TopAbs_WIRE, TopAbs_FACE); explr.More(); explr.Next())
+							{
+								BRepBuilderAPI_MakeFace faceMaker(TopoDS::Wire(explr.Current()), Standard_True);
+								b.Add(shell, faceMaker.Face());
+							}
+							TopoDS_Solid solid;
+							b.MakeSolid(solid);
+							b.Add(solid, shell);
+							solids->Add(gcnew XbimSolid(solid));
+						}
+
+					}
+					else
+						failedGridLines = true;
+
 				}
-				else
+				catch (const std::exception& ex)
+				{
 					failedGridLines = true;
+					String^ err = gcnew String(ex.what());
+					LogWarning(logger, grid, "One or more grid lines has failed to convert successfully. " + err);
+					return solids;
+				}
+				catch (...)
+				{
+					LogWarning(logger, grid, "One or more grid lines has failed to convert successfully. ");
+					return solids;
+				}
 					
 			}
 			if(failedGridLines) 
 				LogWarning(logger, grid, "One or more grid lines has failed to convert successfully");
+			
 			return solids;
 		}
 

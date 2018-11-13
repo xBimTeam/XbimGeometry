@@ -9162,6 +9162,39 @@
     <ClInclude Include="XbimWireSet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="OCC\src\Bnd\Bnd_OBB.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_Alerts.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_Options.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_RemoveFeatures.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_Splitter.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepTools\BRepTools_History.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IntPolyh\IntPolyh_Tools.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\Message\Message_Alert.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\Message\Message_ListOfAlert.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\Message\Message_Report.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\TopoDS\TopoDS_AlertWithShape.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Stdafx.cpp">
@@ -14741,9 +14774,6 @@
     <ClCompile Include=".\OCC\src\BOPAlgo\BOPAlgo_CheckResult.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include=".\OCC\src\BOPAlgo\BOPAlgo_CheckerSI.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include=".\OCC\src\BOPAlgo\BOPAlgo_PaveFiller.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -14895,6 +14925,63 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include=".\OCC\src\AppBlend\AppBlend_Debug.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\Bnd\Bnd_OBB.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_CheckerSI.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_CheckerSI_1.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_Options.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_RemoveFeatures.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_Splitter.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_ToolsProvider.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepTools\BRepTools_Debug.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepTools\BRepTools_History.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\Extrema\Extrema_Curve2dTool.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\IntPolyh\IntPolyh_Tools.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\OSD\OSD_Parallel_TBB.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\OSD\OSD_Parallel_Threads.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\Standard\Standard_Strtod.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\TopoDS\TopoDS_AlertWithShape.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include=".\OCC\src\Message\Message_Alert.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include=".\OCC\src\Message\Message_Report.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include=".\OCC\src\BRepBndLib\BRepBndLib_1.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include=".\OCC\src\BRepLib\BRepLib_1.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

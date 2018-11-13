@@ -5,7 +5,7 @@
 #include <TopExp.hxx>
 using namespace System;
 namespace Xbim
-{
+{ 
 	namespace Geometry
 	{
 		XbimEdgeSet::XbimEdgeSet(IEnumerable<IXbimEdge^>^ edges)

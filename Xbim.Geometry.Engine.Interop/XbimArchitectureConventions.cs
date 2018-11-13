@@ -4,21 +4,21 @@ namespace Xbim.Geometry.Engine.Interop
 {
     /// <summary>
     /// A class representing the conventions we use for processor specific Geometry Engine library
-    /// </summary>
+    /// </summary> 
     internal class XbimArchitectureConventions
-    {
+    { 
         public XbimArchitectureConventions()
         {
             if (Is64BitProcess())
             {
                 Suffix = "64";
-                //SubFolder = "x64";
+             
                 
-            }
+            } 
             else
             {
                 Suffix = "32";
-                //SubFolder = "x86";
+               
             }
         }
 

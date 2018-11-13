@@ -18,7 +18,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             model.ModelFactors.Initialise(Math.PI / 180, 1e-3, 1e-5);
             Entity = (T)model.Instances[1];
         }        
-
+         
         public void Dispose()
         {
             model.Dispose();
