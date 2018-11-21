@@ -429,8 +429,10 @@ namespace Xbim
 			Init(profile->ParentProfile,  logger);
 			if (IsValid && !dynamic_cast<IIfcMirroredProfileDef^>(profile))
 			{
-				gp_Trsf trsf = XbimConvert::ToTransform(profile->Operator);
-				pFace->Move(TopLoc_Location(trsf));
+				gp_Trsf aTrsf = XbimConvert::ToTransform(profile->Operator);
+				// pFace->Move(TopLoc_Location(trsf));
+				BRepBuilderAPI_Transform aBrepTrsf(*pFace, aTrsf);
+				*pFace = TopoDS::Face(aBrepTrsf.Shape());
 			}
 			if (IsValid && dynamic_cast<IIfcMirroredProfileDef^>(profile))
 			{

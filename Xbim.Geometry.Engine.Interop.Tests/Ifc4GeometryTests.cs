@@ -192,13 +192,13 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void AdvancedBrepComplexCurvesandSurfacesTest()
         {
-            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\Axis2PlacementError"))
+            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\Axis2PlacementError.ifc"))
             {
                 var advancedBrep = model.Instances.OfType<IfcAdvancedBrep>().FirstOrDefault(i => i.EntityLabel== 27743);
                 bool wa = model.ModelFactors.ApplyWorkAround("#SurfaceOfLinearExtrusion");
                 Assert.IsNotNull(advancedBrep);
                 var basin = geomEngine.CreateSolid(advancedBrep);
-                Assert.IsTrue((int)basin.Volume == 44025929);
+                Assert.IsTrue((int)basin.Volume == 43947334);
             }
         }
         [TestMethod]

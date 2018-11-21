@@ -36,9 +36,10 @@
 
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
     <PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
-    <PackageReference Include="Xbim.Tessellator" Version="5.0.0-Beta1-1990" />
+    <PackageReference Include="Xbim.Tessellator" Version="5.0.142-prerelease" />
   </ItemGroup>
  
 
@@ -66,7 +67,7 @@
   </ItemGroup>
   
   <!--We need to execute this after a build to ensure the nuget packages are in the correct place for the c++ binding-->
-  <Target Name="BuildNativeCodeEngine" AfterTargets="Build" >
+  <Target Name="BuildNativeCodeEngine" AfterTargets="Build">
     <Message Text="Building Xbim.Geometry.Engine x32 and x64 Native Dlls, version $(AssemblyFileVersionAttribute)" Importance="High" />
     <WriteLinesToFile File="..\SharedFileVersionInfo.cs" Lines="$(AssemblyFileVersionAttribute)" Overwrite="true" Encoding="Unicode" />
     <MSBuild Projects="@(NativeGeometryEngine)" Properties="Configuration=$(Configuration) ; OutDir=..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\" Targets="Build"> 

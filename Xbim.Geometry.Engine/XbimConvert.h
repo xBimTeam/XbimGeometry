@@ -10,7 +10,7 @@ using namespace Xbim::Common::Exceptions;
 using namespace Xbim::Common::Geometry;
 using namespace Xbim::Ifc4::MeasureResource;
 
-
+ 
 namespace Xbim
 {
 	namespace Geometry

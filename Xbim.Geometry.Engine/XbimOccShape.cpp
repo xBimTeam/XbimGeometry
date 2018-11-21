@@ -8,7 +8,7 @@
 #include <BRepCheck_Analyzer.hxx>
 #include <BRepMesh_IncrementalMesh.hxx>
 #include <Poly_Triangulation.hxx>
-#include <TShort_Array1OfShortReal.hxx>
+#include <TShort_Array1OfShortReal.hxx> 
 #include <BRep_Tool.hxx>
 #include <Poly.hxx>
 #include <BRepBuilderAPI_Transform.hxx>

@@ -10,7 +10,7 @@ using namespace Xbim::Common::Geometry;
 using namespace Xbim::Ifc4::Interfaces;
 #ifndef XBIMPROGRESSINDICATOR_H
 #define XBIMPROGRESSINDICATOR_H
-
+ 
 # include <Standard_DefineHandle.hxx>
 # include <Standard_Macro.hxx>
 # include <Message_ProgressIndicator.hxx>

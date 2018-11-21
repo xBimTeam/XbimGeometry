@@ -1228,7 +1228,8 @@ namespace Xbim
 			pEdge = new TopoDS_Edge();
 			*pEdge = edgeMaker.Edge();
 			ShapeFix_ShapeTolerance FTol;
-			FTol.SetTolerance(*pEdge, bspline->Model->ModelFactors->Precision, TopAbs_EDGE);
+			FTol.SetTolerance(*pEdge, bspline->Model->ModelFactors->Precision);
+			
 		}
 		
 #pragma endregion
