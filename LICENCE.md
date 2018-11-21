@@ -1,5 +1,7 @@
 XBIM Licence
 
+For the Geometry Engine library please also consult the documents in the Xbim.Geometry.Engine\OCC folder.
+
 Common Development and Distribution License (CDDL)
 ==================================================
 

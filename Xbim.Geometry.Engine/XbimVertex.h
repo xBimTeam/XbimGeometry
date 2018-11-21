@@ -83,7 +83,7 @@ namespace Xbim
 			virtual void Move(TopLoc_Location loc);
 
 			// Inherited via XbimOccShape
-			virtual XbimGeometryObject ^ Moved(IIfcObjectPlacement ^ objectPlacement) override;
+			virtual XbimGeometryObject ^ Moved(IIfcObjectPlacement ^ objectPlacement, ILogger^ logger) override;
 
 
 			// Inherited via XbimOccShape

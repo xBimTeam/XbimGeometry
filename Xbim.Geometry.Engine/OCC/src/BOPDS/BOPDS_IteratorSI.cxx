@@ -13,12 +13,7 @@
 // commercial license or contractual agreement.
 
 #include <Bnd_Box.hxx>
-#include <BOPCol_BoxBndTree.hxx>
-#include <BOPCol_DataMapOfIntegerInteger.hxx>
-#include <BOPCol_DataMapOfIntegerListOfInteger.hxx>
-#include <BOPCol_DataMapOfShapeInteger.hxx>
-#include <BOPCol_IndexedDataMapOfShapeBox.hxx>
-#include <BOPCol_ListOfInteger.hxx>
+#include <Bnd_OBB.hxx>
 #include <BOPDS_DS.hxx>
 #include <BOPDS_IndexRange.hxx>
 #include <BOPDS_IteratorSI.hxx>
@@ -26,13 +21,19 @@
 #include <BOPDS_Pair.hxx>
 #include <BOPDS_ShapeInfo.hxx>
 #include <BOPDS_Tools.hxx>
+#include <BOPTools_BoxBndTree.hxx>
 #include <BRep_Tool.hxx>
 #include <gp_Pnt.hxx>
+#include <IntTools_Context.hxx>
 #include <NCollection_UBTreeFiller.hxx>
 #include <TopAbs_ShapeEnum.hxx>
+#include <TColStd_DataMapOfIntegerInteger.hxx>
+#include <TColStd_DataMapOfIntegerListOfInteger.hxx>
+#include <TColStd_ListOfInteger.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Vertex.hxx>
+#include <TopTools_DataMapOfShapeInteger.hxx>
 
 //
 //=======================================================================
@@ -78,14 +79,16 @@ void BOPDS_IteratorSI::UpdateByLevelOfCheck(const Standard_Integer theLevel)
 // function: Intersect
 // purpose: 
 //=======================================================================
-void BOPDS_IteratorSI::Intersect()
+void BOPDS_IteratorSI::Intersect(const Handle(IntTools_Context)& theCtx,
+                                 const Standard_Boolean theCheckOBB,
+                                 const Standard_Real theFuzzyValue)
 {
   Standard_Integer i, j, iX, aNbS;
   Standard_Integer iTi, iTj;
   TopAbs_ShapeEnum aTi, aTj;
   //
-  BOPCol_BoxBndTreeSelector aSelector;
-  BOPCol_BoxBndTree aBBTree;
+  BOPTools_BoxBndTreeSelector aSelector;
+  BOPTools_BoxBndTree aBBTree;
   NCollection_UBTreeFiller <Standard_Integer, Bnd_Box> aTreeFiller(aBBTree);
   //
   aNbS = myDS->NbSourceShapes();
@@ -122,8 +125,8 @@ void BOPDS_IteratorSI::Intersect()
     aTi = aSI.ShapeType();
     iTi = BOPDS_Tools::TypeToInteger(aTi);
     //
-    const BOPCol_ListOfInteger& aLI = aSelector.Indices();
-    BOPCol_ListIteratorOfListOfInteger aIt(aLI);
+    const TColStd_ListOfInteger& aLI = aSelector.Indices();
+    TColStd_ListIteratorOfListOfInteger aIt(aLI);
     for (; aIt.More(); aIt.Next()) {
       j = aIt.Value();
       const BOPDS_ShapeInfo& aSJ = myDS->ShapeInfo(j);
@@ -138,6 +141,16 @@ void BOPDS_IteratorSI::Intersect()
       //
       BOPDS_Pair aPair(i, j);
       if (aMPFence.Add(aPair)) {
+        if (theCheckOBB)
+        {
+          // Check intersection of Oriented bounding boxes of the shapes
+          Bnd_OBB& anOBBi = theCtx->OBB(aSI.Shape(), theFuzzyValue);
+          Bnd_OBB& anOBBj = theCtx->OBB(aSJ.Shape(), theFuzzyValue);
+
+          if (anOBBi.IsOut(anOBBj))
+            continue;
+        }
+
         iX = BOPDS_Tools::TypeToInteger(aTi, aTj);
         myLists(iX).Append(aPair);
       }// if (aMPKXB.Add(aPKXB)) {

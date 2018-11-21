@@ -935,7 +935,7 @@ namespace Xbim.ModelGeometry.Scene
                 {
                     XbimMatrix3D placementTransform = XbimPlacementTree.GetTransform(grid, contextHelper.PlacementTree, Engine);
                     // int context = 0;
-                    var gRep= grid.Representation.Representations.FirstOrDefault();
+                    var gRep= grid.Representation?.Representations?.FirstOrDefault();
                     var context = gRep.ContextOfItems;
                     var intContext = (context == null) ? 0 : context.EntityLabel;
 

@@ -3,7 +3,7 @@
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <TopExp.hxx>
-using namespace System;
+
 namespace Xbim
 {
 	namespace Geometry
@@ -78,11 +78,11 @@ namespace Xbim
 			return result;
 		}
 
-		IXbimGeometryObject ^ XbimWireSet::Moved(IIfcObjectPlacement ^ objectPlacement)
+		IXbimGeometryObject ^ XbimWireSet::Moved(IIfcObjectPlacement ^ objectPlacement, ILogger^ logger)
 		{
 			if (!IsValid) return this;
 			XbimWireSet^ result = gcnew XbimWireSet();
-			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
+			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement,logger);
 			for each (IXbimFace^ wire in wires)
 			{
 				XbimWire^ copy = gcnew XbimWire((XbimWire^)wire, Tag);
@@ -92,9 +92,9 @@ namespace Xbim
 			return result;
 		}
 
-		void XbimWireSet::Mesh(IXbimMeshReceiver ^ mesh, double precision, double deflection, double angle)
+		void XbimWireSet::Mesh(IXbimMeshReceiver ^ /*mesh*/, double /*precision*/, double /*deflection*/, double /*angle*/)
 		{
-			return;//maybe add an implementation for this
+			throw gcnew NotImplementedException("XbimWireSet::Mesh");
 		}
 
 		XbimRect3D XbimWireSet::BoundingBox::get()

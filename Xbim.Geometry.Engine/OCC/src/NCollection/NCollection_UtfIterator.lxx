@@ -79,10 +79,15 @@ inline void NCollection_UtfIterator<Type>::readUTF8()
   switch (aBytesToRead)
   {
     case 5: myCharUtf32 += *aPos++; myCharUtf32 <<= 6; // remember, illegal UTF-8
+      Standard_FALLTHROUGH
     case 4: myCharUtf32 += *aPos++; myCharUtf32 <<= 6; // remember, illegal UTF-8
+      Standard_FALLTHROUGH
     case 3: myCharUtf32 += *aPos++; myCharUtf32 <<= 6;
+      Standard_FALLTHROUGH
     case 2: myCharUtf32 += *aPos++; myCharUtf32 <<= 6;
+      Standard_FALLTHROUGH
     case 1: myCharUtf32 += *aPos++; myCharUtf32 <<= 6;
+      Standard_FALLTHROUGH
     case 0: myCharUtf32 += *aPos++;
   }
   myCharUtf32 -= offsetsFromUTF8[aBytesToRead];
@@ -311,36 +316,4 @@ Standard_Utf32Char* NCollection_UtfIterator<Type>::GetUtf32 (Standard_Utf32Char*
 {
   *theBuffer++ = myCharUtf32;
   return theBuffer;
-}
-
-// =======================================================================
-// function : AdvanceBytesUtf
-// purpose  :
-// =======================================================================
-template<typename Type> template<typename TypeWrite> inline
-Standard_Integer NCollection_UtfIterator<Type>::AdvanceBytesUtf() const
-{
-  switch (sizeof(TypeWrite))
-  {
-    case sizeof(Standard_Utf8Char):  return AdvanceBytesUtf8();
-    case sizeof(Standard_Utf16Char): return AdvanceBytesUtf16();
-    case sizeof(Standard_Utf32Char): return AdvanceBytesUtf32();
-    default:                         return 0; // invalid case
-  }
-}
-
-// =======================================================================
-// function : GetUtf
-// purpose  :
-// =======================================================================
-template<typename Type> template<typename TypeWrite> inline
-TypeWrite* NCollection_UtfIterator<Type>::GetUtf (TypeWrite* theBuffer) const
-{
-  switch (sizeof(TypeWrite))
-  {
-    case sizeof(Standard_Utf8Char):  return (TypeWrite* )GetUtf8 ((Standard_Utf8UChar* )theBuffer);
-    case sizeof(Standard_Utf16Char): return (TypeWrite* )GetUtf16((Standard_Utf16Char* )theBuffer);
-    case sizeof(Standard_Utf32Char): return (TypeWrite* )GetUtf32((Standard_Utf32Char* )theBuffer);
-    default:                         return NULL; // invalid case
-  }
 }

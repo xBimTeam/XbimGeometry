@@ -18,9 +18,9 @@
 #include <Standard.hxx>
 #include <Standard_Type.hxx>
 
-#include <BOPCol_BaseAllocator.hxx>
-#include <BOPCol_DataMapOfShapeAddress.hxx>
-#include <BOPCol_DataMapOfTransientAddress.hxx>
+#include <NCollection_BaseAllocator.hxx>
+#include <NCollection_DataMap.hxx>
+#include <TopTools_ShapeMapHasher.hxx>
 #include <Standard_Integer.hxx>
 #include <Standard_Real.hxx>
 #include <Precision.hxx>
@@ -28,6 +28,7 @@
 #include <TopAbs_State.hxx>
 #include <Standard_Boolean.hxx>
 #include <BRepAdaptor_Surface.hxx>
+#include <TColStd_MapTransientHasher.hxx>
 class IntTools_FClass2d;
 class TopoDS_Face;
 class GeomAPI_ProjectPointOnSurf;
@@ -44,7 +45,7 @@ class gp_Pnt2d;
 class IntTools_Curve;
 class Bnd_Box;
 class TopoDS_Shape;
-
+class Bnd_OBB;
 
 //! The intersection Context contains geometrical
 //! and topological toolkit (classifiers, projectors, etc).
@@ -58,7 +59,7 @@ public:
   Standard_EXPORT IntTools_Context();
 Standard_EXPORT virtual  ~IntTools_Context();
   
-  Standard_EXPORT IntTools_Context(const BOPCol_BaseAllocator& theAllocator);
+  Standard_EXPORT IntTools_Context(const Handle(NCollection_BaseAllocator)& theAllocator);
   
 
   //! Returns a reference to point classifier
@@ -97,6 +98,11 @@ Standard_EXPORT virtual  ~IntTools_Context();
   
   //! Returns a reference to surface adaptor for given face
   Standard_EXPORT BRepAdaptor_Surface& SurfaceAdaptor (const TopoDS_Face& theFace);
+
+  //! Builds and stores an Oriented Bounding Box for the shape.
+  //! Returns a reference to OBB.
+  Standard_EXPORT Bnd_OBB& OBB(const TopoDS_Shape& theShape,
+                               const Standard_Real theFuzzyValue = Precision::Confusion());
 
   //! Computes the boundaries of the face using surface adaptor
   Standard_EXPORT void UVBounds (const TopoDS_Face& theFace,
@@ -239,17 +245,24 @@ Standard_EXPORT virtual  ~IntTools_Context();
 
 protected:
 
+  typedef NCollection_DataMap<TopoDS_Shape,
+                              Standard_Address,
+                              TopTools_ShapeMapHasher> DataMapOfShapeAddress;
+  typedef NCollection_DataMap<Handle(Standard_Transient),
+                              Standard_Address,
+                              TColStd_MapTransientHasher> DataMapOfTransientAddress;
 
-  BOPCol_BaseAllocator myAllocator;
-  BOPCol_DataMapOfShapeAddress myFClass2dMap;
-  BOPCol_DataMapOfShapeAddress myProjPSMap;
-  BOPCol_DataMapOfShapeAddress myProjPCMap;
-  BOPCol_DataMapOfShapeAddress mySClassMap;
-  BOPCol_DataMapOfTransientAddress myProjPTMap;
-  BOPCol_DataMapOfShapeAddress myHatcherMap;
-  BOPCol_DataMapOfShapeAddress myProjSDataMap;
-  BOPCol_DataMapOfShapeAddress myBndBoxDataMap;
-  BOPCol_DataMapOfShapeAddress mySurfAdaptorMap;
+  Handle(NCollection_BaseAllocator) myAllocator;
+  DataMapOfShapeAddress myFClass2dMap;
+  DataMapOfShapeAddress myProjPSMap;
+  DataMapOfShapeAddress myProjPCMap;
+  DataMapOfShapeAddress mySClassMap;
+  DataMapOfTransientAddress myProjPTMap;
+  DataMapOfShapeAddress myHatcherMap;
+  DataMapOfShapeAddress myProjSDataMap;
+  DataMapOfShapeAddress myBndBoxDataMap;
+  DataMapOfShapeAddress mySurfAdaptorMap;
+  DataMapOfShapeAddress myOBBMap; // Map of oriented bounding boxes
   Standard_Integer myCreateFlag;
   Standard_Real myPOnSTolerance;
 

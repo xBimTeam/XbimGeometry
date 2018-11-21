@@ -17,24 +17,127 @@
 
 
 #include <BOPAlgo_Builder.hxx>
-#include <BOPAlgo_PaveFiller.hxx>
-#include <BOPCol_ListOfShape.hxx>
-#include <BOPCol_MapOfShape.hxx>
 #include <BOPDS_DS.hxx>
-#include <BOPTools.hxx>
 #include <BOPTools_AlgoTools.hxx>
+#include <BOPTools_AlgoTools3D.hxx>
 #include <IntTools_Context.hxx>
+#include <TopExp.hxx>
 #include <TopoDS_Iterator.hxx>
 #include <TopoDS_Shape.hxx>
+#include <TopTools_ListOfShape.hxx>
+#include <TopTools_MapOfShape.hxx>
 
 //=======================================================================
 //function : Generated
 //purpose  : 
 //=======================================================================
 const TopTools_ListOfShape& BOPAlgo_Builder::Generated
-  (const TopoDS_Shape&)
+  (const TopoDS_Shape& theS)
 {
+  // The rules for Generated shapes are these:
+  // 1. The EDGE may be generated from the FACES as an intersection edge;
+  // 2. The VERTEX may be generated from the EDGES and FACES as an intersection vertex.
+  //
+  // The list of generated elements will contain only those which are contained
+  // in the result of the operation.
+
   myHistShapes.Clear();
+
+  if (!myHasGenerated)
+    return myHistShapes;
+
+  if (theS.IsNull())
+    return myHistShapes;
+
+  // Only EDGES and FACES should be considered
+  TopAbs_ShapeEnum aType = theS.ShapeType();
+  if (aType != TopAbs_EDGE && aType != TopAbs_FACE)
+    // Wrong type
+    return myHistShapes;
+
+  // Check that DS contains the shape, i.e. it is from the arguments of the operation
+  Standard_Integer nS = myDS->Index(theS);
+  if (nS < 0)
+    // Unknown shape
+    return myHistShapes;
+
+  // Check that the shape has participated in any intersections
+  const BOPDS_ShapeInfo& aSI = myDS->ShapeInfo(nS);
+  if (!aSI.HasReference())
+    // Untouched shape
+    return myHistShapes;
+
+  // Analyze all types of Interferences which can produce
+  // new vertices - Edge/Edge and Edge/Face
+  BOPDS_VectorOfInterfEE& aEEs = myDS->InterfEE();
+  BOPDS_VectorOfInterfEF& aEFs = myDS->InterfEF();
+
+  // Fence map to avoid duplicates in the list of Generated;
+  TColStd_MapOfInteger aMFence;
+
+  // Analyze each interference and find those in which the given shape has participated
+
+  // No need to analyze Edge/Edge interferences for the shapes of type FACE
+  Standard_Boolean isFace = (aType == TopAbs_FACE);
+
+  for (Standard_Integer k = (isFace ? 1 : 0); k < 2; ++k)
+  {
+    Standard_Integer aNbLines = !k ? aEEs.Length() : aEFs.Length();
+    for (Standard_Integer i = 0; i < aNbLines; ++i)
+    {
+      BOPDS_Interf *aInt = !k ? (BOPDS_Interf*)(&aEEs(i)) : (BOPDS_Interf*)(&aEFs(i));
+      if (!aInt->HasIndexNew())
+        // No new vertices created
+        continue;
+
+      if (!aInt->Contains(nS))
+        continue;
+
+      Standard_Integer nVNew = aInt->IndexNew();
+      myDS->HasShapeSD(nVNew, nVNew);
+      if (!aMFence.Add(nVNew))
+        continue;
+
+      // Get the new vertex
+      const TopoDS_Shape& aVNew = myDS->Shape(nVNew);
+
+      // Check that the result shape contains vertex
+      if (myMapShape.Contains(aVNew))
+        // Save the vertex as generated
+        myHistShapes.Append(aVNew);
+    }
+  }
+
+  if (!isFace)
+    return myHistShapes;
+
+  // For the FACE it is also necessary to collect all
+  // section elements created in FACE/FACE interferences.
+  // This information is available in the FaceInfo structure.
+  const BOPDS_FaceInfo& aFI = myDS->FaceInfo(nS);
+
+  // Section edges of the face
+  const BOPDS_IndexedMapOfPaveBlock& aMPBSc = aFI.PaveBlocksSc();
+  // Save section edges contained in the result shape
+  Standard_Integer aNb = aMPBSc.Extent();
+  for (Standard_Integer i = 1; i <= aNb; ++i)
+  {
+    const TopoDS_Shape& aENew = myDS->Shape(aMPBSc(i)->Edge());
+    if (myMapShape.Contains(aENew))
+      myHistShapes.Append(aENew);
+  }
+
+  // Section vertices of the face
+  const TColStd_MapOfInteger& aMVSc = aFI.VerticesSc();
+  // Save section vertices contained in the result shape
+  TColStd_MapOfInteger::Iterator aItM(aMVSc);
+  for (; aItM.More(); aItM.Next())
+  {
+    const TopoDS_Shape& aVNew = myDS->Shape(aItM.Value());
+    if (myMapShape.Contains(aVNew))
+      myHistShapes.Append(aVNew);
+  }
+
   return myHistShapes;
 }
 //=======================================================================
@@ -44,99 +147,72 @@ const TopTools_ListOfShape& BOPAlgo_Builder::Generated
 const TopTools_ListOfShape& BOPAlgo_Builder::Modified
   (const TopoDS_Shape& theS)
 {
-  Standard_Boolean bHasImage, bToReverse;
-  TopAbs_ShapeEnum aType;
-  BOPCol_ListIteratorOfListOfShape aIt;
-  //
   myHistShapes.Clear();
-  //
-  if (theS.IsNull()) {
+
+  if (!myHasModified)
+    // No modified elements
     return myHistShapes;
-  }
-  //
-  bHasImage=myImages.IsBound(theS);
-  if (!bHasImage) {
+
+  const TopTools_ListOfShape* pLSp = myImagesResult.Seek(theS);
+  if (!pLSp || pLSp->IsEmpty())
+    // No track in the result -> no modified
     return myHistShapes;
+
+  // For modification check if the shape is not linked to itself
+  if (pLSp->Extent() == 1)
+  {
+    if (theS.IsSame(pLSp->First()) && !myImages.IsBound(theS))
+      // Shape is not modified
+      return myHistShapes;
   }
-  //
-  aType=theS.ShapeType();
-  //
-  if (!(aType==TopAbs_EDGE   || aType==TopAbs_FACE || 
-      aType==TopAbs_VERTEX || aType==TopAbs_SOLID)) {
-    return myHistShapes;
-  } 
-  //
-  //PrepareHistory();
-  //
-  const BOPCol_ListOfShape& aLSp=myImages.Find(theS);
-  aIt.Initialize(aLSp);
-  for (; aIt.More(); aIt.Next()) {
-    TopoDS_Shape aSp=aIt.Value();
-    if (myShapesSD.IsBound(aSp)) {
-      aSp = myShapesSD.Find(aSp);
-    }
-    //
-    if (myMapShape.Contains(aSp)) {
-      //
-      if (aType==TopAbs_VERTEX || aType==TopAbs_SOLID) {
-        aSp.Orientation(theS.Orientation());
-      }
-      else {
-        bToReverse=
-          BOPTools_AlgoTools::IsSplitToReverse(aSp, theS, myContext);
-        if (bToReverse) {
-          aSp.Reverse();
-        }
-      }
-      //
-      myHistShapes.Append(aSp);
-    }
+
+  // Iterate on all splits and save them with proper orientation into the result list
+  TopTools_ListIteratorOfListOfShape aIt(*pLSp);
+  for (; aIt.More(); aIt.Next())
+  {
+    TopoDS_Shape aSp = aIt.Value();
+    // Use the orientation of the input shape
+    TopAbs_ShapeEnum aType = aSp.ShapeType();
+    if (aType == TopAbs_VERTEX || aType == TopAbs_SOLID)
+      aSp.Orientation(theS.Orientation());
+    else if (BOPTools_AlgoTools::IsSplitToReverse(aSp, theS, myContext))
+      aSp.Reverse();
+
+    myHistShapes.Append(aSp);
   }
-  //
+
   return myHistShapes;
 }
 //=======================================================================
 //function : IsDeleted
 //purpose  : 
 //=======================================================================
-Standard_Boolean BOPAlgo_Builder::IsDeleted
-  (const TopoDS_Shape& theS)
+Standard_Boolean BOPAlgo_Builder::IsDeleted(const TopoDS_Shape& theS)
 {
-  Standard_Boolean bRet;
-  TopAbs_ShapeEnum aType;
-  BOPCol_ListIteratorOfListOfShape aIt;
-  //
-  bRet = Standard_True;
-  //
-  if (theS.IsNull()) {
-    return bRet;
-  }
-  //
-  aType = theS.ShapeType();
-  if (!(aType==TopAbs_EDGE || aType==TopAbs_FACE || 
-      aType==TopAbs_VERTEX || aType==TopAbs_SOLID)) {
-    return bRet;
-  }
-  //
-  if (!myImages.IsBound(theS)) {
-    bRet = !myMapShape.Contains(theS);
-    return bRet;
-  }
-  //
-  const BOPCol_ListOfShape& aLSp = myImages.Find(theS);
-  aIt.Initialize(aLSp);
-  for (; aIt.More(); aIt.Next()) {
-    const TopoDS_Shape& aSp = aIt.Value();
-    const TopoDS_Shape& aSpR = myShapesSD.IsBound(aSp) ? 
-      myShapesSD.Find(aSp) : aSp;
-    //
-    if (myMapShape.Contains(aSpR)) {                   
-      bRet = Standard_False;
-      break;
-    }
-  }
-  //
-  return bRet;
+  // The shape is considered as Deleted if it has participated in the
+  // operation and the result shape does not contain the shape itself
+  // and none of its splits.
+
+  if (!myHasDeleted)
+    // Non of the shapes have been deleted during the operation
+    return Standard_False;
+
+  const TopTools_ListOfShape *pImages = myImagesResult.Seek(theS);
+  if (!pImages)
+    // No track about the shape, i.e. the shape has not participated
+    // in operation -> Not deleted
+    return Standard_False;
+
+  // Check if any parts of the shape has been kept in the result
+  return pImages->IsEmpty();
+}
+//=======================================================================
+//function : LocModified
+//purpose  : 
+//=======================================================================
+const TopTools_ListOfShape* BOPAlgo_Builder::LocModified(const TopoDS_Shape& theS)
+{
+  return myImages.Seek(theS);
 }
 //=======================================================================
 //function : PrepareHistory
@@ -144,85 +220,91 @@ Standard_Boolean BOPAlgo_Builder::IsDeleted
 //=======================================================================
 void BOPAlgo_Builder::PrepareHistory()
 {
-  if (!myFlagHistory) {
+  if (!myFlagHistory)
+  {
+    // Clearing
+    BOPAlgo_BuilderShape::PrepareHistory();
     return;
   }
-  //
-  if(myShape.IsNull()) {
-    return;
-  }
-  //
-  Standard_Boolean bHasImage;
-  TopAbs_ShapeEnum aType;
-  BOPCol_MapOfShape aMS;
-  BOPCol_ListIteratorOfListOfShape aIt;
-  BOPCol_MapIteratorOfMapOfShape aItM;
-  //
-  // 1. Clearing 
+
+  // Clearing from previous operations
   BOPAlgo_BuilderShape::PrepareHistory();
+  myFlagHistory = Standard_True;
+
+  // Map the result shape
+  TopExp::MapShapes(myShape, myMapShape);
+
+  // Among all input shapes find those that have any trace in the result
+  // and save them into myImagesResult map with connection to parts
+  // kept in the result shape. If the input shape has no trace in the
+  // result shape, link it to the empty list in myImagesResult meaning
+  // that the shape has been removed.
   //
-  // 2. myMapShape - all shapes of result with theirs sub-shapes 
-  BOPTools::MapShapes(myShape, myMapShape);
-  //
-  // 3. MS - all argument shapes with theirs sub-shapes
-  const BOPCol_ListOfShape& aArguments=myDS->Arguments();
-  aIt.Initialize(aArguments);
-  for (; aIt.More(); aIt.Next()) {
-    const TopoDS_Shape& aSx=aIt.Value();
-    BOPTools::MapShapes(aSx, aMS);
-  }
-  //
-  // 4. Treatment
-  aItM.Initialize(aMS);
-  for (; aItM.More(); aItM.Next()) {
-    const TopoDS_Shape& aSx=aItM.Key();
-    aType = aSx.ShapeType();
-    if (!(aType == TopAbs_VERTEX || aType == TopAbs_EDGE || 
-          aType == TopAbs_FACE   || aType == TopAbs_SOLID)) {
+  // Also, set the proper values to the history flags:
+  // - myHasDeleted for Deleted shapes;
+  // - myHasModified for Modified shapes;
+  // - myHasGenerated for Generated shapes.
+  Standard_Integer aNbS = myDS->NbSourceShapes();
+  for (Standard_Integer i = 0; i < aNbS; ++i)
+  {
+    const TopoDS_Shape& aS = myDS->Shape(i);
+
+    // History information is only available for the shapes of type
+    // VERTEX, EDGE, FACE and SOLID. Skip all shapes of different type.
+    TopAbs_ShapeEnum aType = aS.ShapeType();
+    if (!(aType == TopAbs_VERTEX ||
+          aType == TopAbs_EDGE   ||
+          aType == TopAbs_FACE   ||
+          aType == TopAbs_SOLID))
       continue;
+
+    // Track the modification of the shape
+    TopTools_ListOfShape* pImages = &myImagesResult(myImagesResult.Add(aS, TopTools_ListOfShape()));
+
+    // Check if the shape has any splits
+    const TopTools_ListOfShape* pLSp = LocModified(aS);
+    if (!pLSp)
+    {
+      // No splits, check if the result shape contains the shape itself
+      if (myMapShape.Contains(aS))
+        // Shape has passed into result without modifications -> link the shape to itself
+        pImages->Append(aS);
+      else
+        // No trace of the shape in the result -> Deleted element is found
+        myHasDeleted = Standard_True;
     }
-    //
-    // 4.1 .myImagesResult
-    bHasImage=myImages.IsBound(aSx); 
-    //
-    BOPCol_ListOfShape aLSx;
-    if (!bHasImage) {
-      if (myMapShape.Contains(aSx)) {
-        aLSx.Append(aSx);
-        myImagesResult.Add(aSx, aLSx);
-      }
-    }
-    else {
-      const BOPCol_ListOfShape& aLSp=myImages.Find(aSx);
-      aIt.Initialize(aLSp);
-      for (; aIt.More(); aIt.Next()) {
-        const TopoDS_Shape& aSp=aIt.Value();
-        if (myMapShape.Contains(aSp)) {
-          aLSx.Append(aSp);
+    else
+    {
+      // Find all splits of the shape which are kept in the result
+      TopTools_ListIteratorOfListOfShape aIt(*pLSp);
+      for (; aIt.More(); aIt.Next())
+      {
+        const TopoDS_Shape& aSp = aIt.Value();
+
+        // Check if the result shape contains the split
+        if (myMapShape.Contains(aSp))
+        {
+          // Link the shape to the split
+          pImages->Append(aSp);
         }
       }
-      myImagesResult.Add(aSx, aLSx);
-    }
-    // <- A
-    //
-    // 4.2 As it was 
-    if (!myHasDeleted) {
-      myHasDeleted=IsDeleted(aSx);
-    }
-    //
-    if (!myHasModified && bHasImage) {
-      if (aType==TopAbs_EDGE   || aType==TopAbs_FACE || 
-          aType==TopAbs_VERTEX || aType==TopAbs_SOLID) {
+
+      if (!pImages->IsEmpty())
+        // Modified element is found
         myHasModified = Standard_True;
-      } 
+      else
+        // Deleted element is found
+        myHasDeleted = Standard_True;
     }
-    //
-    if (!myHasGenerated) {
-      if (aType==TopAbs_FACE) {
-        const TopTools_ListOfShape& aLG = Generated(aSx);
-        myHasGenerated = aLG.Extent() > 0;
-      }
+
+    // Until first found, check if the shape has Generated elements
+    if (!myHasGenerated)
+    {
+      // Temporarily set the HasGenerated flag to TRUE to look for the shapes generated from aS.
+      // Otherwise, the method Generated will always be returning an empty list, assuming that the
+      // operation has no generated elements at all.
+      myHasGenerated = Standard_True;
+      myHasGenerated = (Generated(aS).Extent() > 0);
     }
   }
-  myFlagHistory=Standard_True;
 }

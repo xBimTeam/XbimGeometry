@@ -22,10 +22,10 @@
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
 
-#include <BOPCol_ListOfShape.hxx>
-#include <BOPCol_IndexedMapOfOrientedShape.hxx>
 #include <BOPAlgo_Algo.hxx>
-#include <BOPCol_BaseAllocator.hxx>
+#include <NCollection_BaseAllocator.hxx>
+#include <TopTools_ListOfShape.hxx>
+#include <TopTools_IndexedMapOfOrientedShape.hxx>
 class IntTools_Context;
 
 
@@ -38,38 +38,38 @@ public:
   DEFINE_STANDARD_ALLOC
 
   //! Sets the context for the algorithms
-  Standard_EXPORT void SetContext (const Handle(IntTools_Context)& theContext) {
+  void SetContext (const Handle(IntTools_Context)& theContext) {
     myContext = theContext;
   }
 
   //! Returns the input shapes
-  Standard_EXPORT const BOPCol_ListOfShape& Shapes() const {
+  const TopTools_ListOfShape& Shapes() const {
     return myShapes;
   }
 
   //! Sets the shapes for building areas
-  Standard_EXPORT void SetShapes(const BOPCol_ListOfShape& theLS) {
+  void SetShapes(const TopTools_ListOfShape& theLS) {
     myShapes = theLS;
   }
 
   //! Returns the found loops
-  Standard_EXPORT const BOPCol_ListOfShape& Loops() const {
+  const TopTools_ListOfShape& Loops() const {
     return myLoops;
   }
 
   //! Returns the found areas
-  Standard_EXPORT const BOPCol_ListOfShape& Areas() const {
+  const TopTools_ListOfShape& Areas() const {
     return myAreas;
   }
 
   //! Defines the preventing of addition of internal parts into result.
   //! The default value is FALSE, i.e. the internal parts are added into result.
-  Standard_EXPORT void SetAvoidInternalShapes(const Standard_Boolean theAvoidInternal) {
+  void SetAvoidInternalShapes(const Standard_Boolean theAvoidInternal) {
     myAvoidInternalShapes = theAvoidInternal;
   }
 
   //! Returns the AvoidInternalShapes flag
-  Standard_EXPORT Standard_Boolean IsAvoidInternalShapes() const {
+  Standard_Boolean IsAvoidInternalShapes() const {
     return myAvoidInternalShapes;
   }
 
@@ -78,23 +78,23 @@ protected:
   Standard_EXPORT BOPAlgo_BuilderArea();
   Standard_EXPORT virtual ~BOPAlgo_BuilderArea();
   
-  Standard_EXPORT BOPAlgo_BuilderArea(const BOPCol_BaseAllocator& theAllocator);
+  Standard_EXPORT BOPAlgo_BuilderArea(const Handle(NCollection_BaseAllocator)& theAllocator);
   
-  Standard_EXPORT virtual void PerformShapesToAvoid() = 0;
+  virtual void PerformShapesToAvoid() = 0;
   
-  Standard_EXPORT virtual void PerformLoops() = 0;
+  virtual void PerformLoops() = 0;
   
-  Standard_EXPORT virtual void PerformAreas() = 0;
+  virtual void PerformAreas() = 0;
   
-  Standard_EXPORT virtual void PerformInternalShapes() = 0;
+  virtual void PerformInternalShapes() = 0;
 
 
   Handle(IntTools_Context) myContext;
-  BOPCol_ListOfShape myShapes;
-  BOPCol_ListOfShape myLoops;
-  BOPCol_ListOfShape myLoopsInternal;
-  BOPCol_ListOfShape myAreas;
-  BOPCol_IndexedMapOfOrientedShape myShapesToAvoid;
+  TopTools_ListOfShape myShapes;
+  TopTools_ListOfShape myLoops;
+  TopTools_ListOfShape myLoopsInternal;
+  TopTools_ListOfShape myAreas;
+  TopTools_IndexedMapOfOrientedShape myShapesToAvoid;
   Standard_Boolean myAvoidInternalShapes;
 
 private:

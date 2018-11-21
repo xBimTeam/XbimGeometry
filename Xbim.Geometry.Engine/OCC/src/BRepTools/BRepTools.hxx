@@ -73,10 +73,8 @@ class Geom_Surface;
 //! *  Update : Methods  to call when   a topology has
 //! been created to compute all missing data.
 //!
-//! * UpdateFaceUVPoints  :  Method to  update  the UV
-//! points stored   with  the edges   on a face.  This
-//! method ensure that connected  edges  have the same
-//! UV point on their common extremity.
+//! * UpdateFaceUVPoints: Method to update the UV points
+//! stored with the edges on a face.
 //!
 //! * Compare : Method to compare two vertices.
 //!
@@ -147,10 +145,10 @@ public:
   //! Update a shape, call the corect update.
   Standard_EXPORT static void Update (const TopoDS_Shape& S);
   
-  //! For  all the edges  of the face  <F> reset  the UV
-  //! points to  ensure that  connected  faces  have the
-  //! same point at there common extremity.
-  Standard_EXPORT static void UpdateFaceUVPoints (const TopoDS_Face& F);
+  //! For each edge of the face <F> reset the UV points
+  //! to the bounding points of the parametric curve of the
+  //! edge on the face.
+  Standard_EXPORT static void UpdateFaceUVPoints (const TopoDS_Face& theF);
   
   //! Removes all the triangulations of the faces of <S>
   //! and removes all polygons on triangulations of the
@@ -185,6 +183,11 @@ public:
   //! Verifies that the edge  <E> is found two  times on
   //! the face <F> before calling BRep_Tool::IsClosed.
   Standard_EXPORT static Standard_Boolean IsReallyClosed (const TopoDS_Edge& E, const TopoDS_Face& F);
+  
+  //! Detect closedness of face in U and V directions
+  Standard_EXPORT static void DetectClosedness (const TopoDS_Face& theFace,
+                                                Standard_Boolean&  theUclosed,
+                                                Standard_Boolean&  theVclosed);
   
   //! Dumps the topological structure and the geometry
   //! of <Sh> on the stream <S>.

@@ -16,23 +16,19 @@
 #include <BOPAlgo_BuilderSolid.hxx>
 #include <BOPAlgo_MakerVolume.hxx>
 #include <BOPAlgo_PaveFiller.hxx>
+#include <BOPAlgo_Tools.hxx>
 #include <BOPAlgo_Alerts.hxx>
-#include <BOPCol_DataMapOfShapeListOfShape.hxx>
-#include <BOPCol_ListOfShape.hxx>
 #include <BOPDS_DS.hxx>
-#include <BOPTools.hxx>
 #include <BOPTools_AlgoTools.hxx>
 #include <BRepPrimAPI_MakeBox.hxx>
+#include <TopExp.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopoDS_Solid.hxx>
+#include <TopTools_ListOfShape.hxx>
 
 static
   void AddFace(const TopoDS_Shape& theF,
-               BOPCol_ListOfShape& theLF);
-static
-  void TreatCompound(const TopoDS_Shape& theS,
-                     BOPCol_MapOfShape& aMFence,
-                     BOPCol_ListOfShape& theLS);
+               TopTools_ListOfShape& theLF);
 
 //=======================================================================
 //function : CheckData
@@ -72,8 +68,8 @@ void BOPAlgo_MakerVolume::Perform()
     //to create the compound of them and use it as one argument
     TopoDS_Compound anArgs;
     BRep_Builder aBB;
-    BOPCol_ListIteratorOfListOfShape aIt;
-    BOPCol_ListOfShape aLS;
+    TopTools_ListIteratorOfListOfShape aIt;
+    TopTools_ListOfShape aLS;
     //
     aBB.MakeCompound(anArgs);
     aIt.Initialize(myArguments);
@@ -94,6 +90,7 @@ void BOPAlgo_MakerVolume::Perform()
   pPF->SetFuzzyValue(myFuzzyValue);
   pPF->SetNonDestructive(myNonDestructive);
   pPF->SetGlue(myGlue);
+  pPF->SetUseOBB(myUseOBB);
   pPF->Perform();
   //
   myEntryPoint = 1;
@@ -153,8 +150,8 @@ void BOPAlgo_MakerVolume::PerformInternal1
     return;
   }
   //
-  BOPCol_MapOfShape aBoxFaces;
-  BOPCol_ListOfShape aLSR;
+  TopTools_MapOfShape aBoxFaces;
+  TopTools_ListOfShape aLSR;
   //
   // 5. Create bounding box
   MakeBox(aBoxFaces);
@@ -190,8 +187,8 @@ void BOPAlgo_MakerVolume::CollectFaces()
   UserBreak();
   //
   Standard_Integer i, aNbShapes;
-  BOPCol_ListIteratorOfListOfShape aIt;
-  BOPCol_MapOfShape aMFence;
+  TopTools_ListIteratorOfListOfShape aIt;
+  TopTools_MapOfShape aMFence;
   //
   aNbShapes = myDS->NbSourceShapes();
   for (i = 0; i < aNbShapes; ++i) {
@@ -205,7 +202,7 @@ void BOPAlgo_MakerVolume::CollectFaces()
     //
     const TopoDS_Shape& aF = aSI.Shape();
     if (myImages.IsBound(aF)) {
-      const BOPCol_ListOfShape& aLFIm = myImages.Find(aF);
+      const TopTools_ListOfShape& aLFIm = myImages.Find(aF);
       aIt.Initialize(aLFIm);
       for (; aIt.More(); aIt.Next()) {
         const TopoDS_Shape& aFIm = aIt.Value();
@@ -224,7 +221,7 @@ void BOPAlgo_MakerVolume::CollectFaces()
 //function : MakeBox
 //purpose  : 
 //=======================================================================
-void BOPAlgo_MakerVolume::MakeBox(BOPCol_MapOfShape& theBoxFaces)
+void BOPAlgo_MakerVolume::MakeBox(TopTools_MapOfShape& theBoxFaces)
 {
   UserBreak();
   //
@@ -251,13 +248,12 @@ void BOPAlgo_MakerVolume::MakeBox(BOPCol_MapOfShape& theBoxFaces)
 //function : BuildSolids
 //purpose  : 
 //=======================================================================
-void BOPAlgo_MakerVolume::BuildSolids(BOPCol_ListOfShape& theLSR)
+void BOPAlgo_MakerVolume::BuildSolids(TopTools_ListOfShape& theLSR)
 {
   UserBreak();
   //
   BOPAlgo_BuilderSolid aBS;
   //
-  aBS.SetSolid(mySBox);
   aBS.SetShapes(myFaces);
   aBS.SetRunParallel(myRunParallel);
   aBS.SetAvoidInternalShapes(myAvoidInternalShapes);
@@ -268,6 +264,8 @@ void BOPAlgo_MakerVolume::BuildSolids(BOPCol_ListOfShape& theLSR)
     return;
   }
   //
+  myReport->Merge(aBS.GetReport());
+  //
   theLSR = aBS.Areas();
 }
 
@@ -275,12 +273,12 @@ void BOPAlgo_MakerVolume::BuildSolids(BOPCol_ListOfShape& theLSR)
 //function : TreatResult
 //purpose  : 
 //=======================================================================
-void BOPAlgo_MakerVolume::RemoveBox(BOPCol_ListOfShape&      theLSR,
-                                    const BOPCol_MapOfShape& theBoxFaces)
+void BOPAlgo_MakerVolume::RemoveBox(TopTools_ListOfShape&      theLSR,
+                                    const TopTools_MapOfShape& theBoxFaces)
 {
   UserBreak();
   //
-  BOPCol_ListIteratorOfListOfShape aIt;
+  TopTools_ListIteratorOfListOfShape aIt;
   TopExp_Explorer aExp;
   Standard_Boolean bFound;
   //
@@ -308,14 +306,14 @@ void BOPAlgo_MakerVolume::RemoveBox(BOPCol_ListOfShape&      theLSR,
 //function : BuildShape
 //purpose  : 
 //=======================================================================
-void BOPAlgo_MakerVolume::BuildShape(const BOPCol_ListOfShape& theLSR)
+void BOPAlgo_MakerVolume::BuildShape(const TopTools_ListOfShape& theLSR)
 { 
   if (theLSR.Extent() == 1) {
     myShape = theLSR.First();
   }
   else {
     BRep_Builder aBB;
-    BOPCol_ListIteratorOfListOfShape aIt;
+    TopTools_ListIteratorOfListOfShape aIt;
     //
     aIt.Initialize(theLSR);
     for (; aIt.More(); aIt.Next()) {
@@ -329,7 +327,7 @@ void BOPAlgo_MakerVolume::BuildShape(const BOPCol_ListOfShape& theLSR)
 //function : FillInternalShapes 
 //purpose  : 
 //=======================================================================
-void BOPAlgo_MakerVolume::FillInternalShapes(const BOPCol_ListOfShape& theLSR)
+void BOPAlgo_MakerVolume::FillInternalShapes(const TopTools_ListOfShape& theLSR)
 {
   if (myAvoidInternalShapes) {
     return;
@@ -342,17 +340,17 @@ void BOPAlgo_MakerVolume::FillInternalShapes(const BOPCol_ListOfShape& theLSR)
   TopAbs_State aState; 
   TopoDS_Iterator aItS;
   BRep_Builder aBB;
-  BOPCol_MapOfShape aMFence;
-  BOPCol_IndexedMapOfShape aMSS;
-  BOPCol_ListOfShape aLVE, aLSC, aLSIn;
-  BOPCol_ListIteratorOfListOfShape aIt, aIt1;
+  TopTools_MapOfShape aMFence;
+  TopTools_IndexedMapOfShape aMSS;
+  TopTools_ListOfShape aLVE, aLSC, aLSIn;
+  TopTools_ListIteratorOfListOfShape aIt, aIt1;
   //
   // 1. Collect shapes to process: vertices, edges, wires
-  const BOPCol_ListOfShape& anArguments = myDS->Arguments();
+  const TopTools_ListOfShape& anArguments = myDS->Arguments();
   aIt.Initialize(anArguments);
   for (; aIt.More(); aIt.Next()) {
     const TopoDS_Shape& aS = aIt.Value();
-    TreatCompound(aS, aMFence, aLSC);
+    BOPAlgo_Tools::TreatCompound(aS, aMFence, aLSC);
   }
   //
   aIt.Initialize(aLSC);
@@ -376,15 +374,15 @@ void BOPAlgo_MakerVolume::FillInternalShapes(const BOPCol_ListOfShape& theLSR)
   aIt.Initialize(theLSR);
   for (; aIt.More(); aIt.Next()) {
     const TopoDS_Shape& aS = aIt.Value();
-    BOPTools::MapShapes(aS, TopAbs_EDGE, aMSS);
-    BOPTools::MapShapes(aS, TopAbs_VERTEX, aMSS);
+    TopExp::MapShapes(aS, TopAbs_EDGE, aMSS);
+    TopExp::MapShapes(aS, TopAbs_VERTEX, aMSS);
   }
   //
   aIt.Initialize(aLVE);
   for (; aIt.More(); aIt.Next()) {
     const TopoDS_Shape& aS = aIt.Value();
     if (myImages.IsBound(aS)) {
-      const BOPCol_ListOfShape &aLSp = myImages.Find(aS);
+      const TopTools_ListOfShape &aLSp = myImages.Find(aS);
       aIt1.Initialize(aLSp);
       for (; aIt1.More(); aIt1.Next()) {
         const TopoDS_Shape& aSp = aIt1.Value();
@@ -432,34 +430,11 @@ void BOPAlgo_MakerVolume::FillInternalShapes(const BOPCol_ListOfShape& theLSR)
 //purpose  : 
 //=======================================================================
 void AddFace(const TopoDS_Shape& theF,
-             BOPCol_ListOfShape& theLF)
+             TopTools_ListOfShape& theLF)
 {
   TopoDS_Shape aFF = theF;
   aFF.Orientation(TopAbs_FORWARD);
   theLF.Append(aFF);
   aFF.Orientation(TopAbs_REVERSED);
   theLF.Append(aFF);
-}
-
-//=======================================================================
-//function : TreatCompound
-//purpose  : 
-//=======================================================================
-void TreatCompound(const TopoDS_Shape& theS,
-                   BOPCol_MapOfShape& aMFence,
-                   BOPCol_ListOfShape& theLS)
-{
-  TopAbs_ShapeEnum aType = theS.ShapeType();
-  if (aType != TopAbs_COMPOUND) {
-    if (aMFence.Add(theS)) {
-      theLS.Append(theS);
-    }
-    return;
-  }
-  //
-  TopoDS_Iterator aIt(theS);
-  for (; aIt.More(); aIt.Next()) {
-    const TopoDS_Shape& aS = aIt.Value();
-    TreatCompound(aS, aMFence, theLS);
-  }
 }

@@ -33,21 +33,21 @@ namespace Xbim
 			double _sewingTolerance;
 			void InstanceCleanup();
 			//Initialisers
-			void Init(IIfcConnectedFaceSet^ faceSet, bool close);
-			void Init(IEnumerable<IIfcFace^>^ faces, bool close, IIfcRepresentationItem^ theItem);
-			XbimShell^ InitAdvancedFaces(IEnumerable<IIfcFace^>^ faces);
-			void Init(IIfcShellBasedSurfaceModel^ sbsm);
-			void Init(IIfcFaceBasedSurfaceModel^ fbsm);
-			void Init(IIfcManifoldSolidBrep^ solid);
-			void Init(IIfcFacetedBrep^ solid);
-			void Init(IIfcFacetedBrepWithVoids^ solid);
-			void Init(IIfcAdvancedBrep^ solid);
-			void Init(IIfcAdvancedBrepWithVoids^ solid);
-			void Init(IIfcClosedShell^ solid);
-			void Init(IIfcOpenShell^ solid);
-			void Init(IIfcTriangulatedFaceSet^ faceSet);
+			void Init(IIfcConnectedFaceSet^ faceSet, bool close, ILogger^ logger);
+			void Init(IEnumerable<IIfcFace^>^ faces, bool close, IIfcRepresentationItem^ theItem, ILogger^ logger);
+			XbimShell^ InitAdvancedFaces(IEnumerable<IIfcFace^>^ faces, ILogger^ logger);
+			void Init(IIfcShellBasedSurfaceModel^ sbsm, ILogger^ logger);
+			void Init(IIfcFaceBasedSurfaceModel^ fbsm, ILogger^ logger);
+			void Init(IIfcManifoldSolidBrep^ solid, ILogger^ logger);
+			void Init(IIfcFacetedBrep^ solid, ILogger^ logger);
+			void Init(IIfcFacetedBrepWithVoids^ solid, ILogger^ logger);
+			void Init(IIfcAdvancedBrep^ solid, ILogger^ logger);
+			void Init(IIfcAdvancedBrepWithVoids^ solid, ILogger^ logger);
+			void Init(IIfcClosedShell^ solid, ILogger^ logger);
+			void Init(IIfcOpenShell^ solid, ILogger^ logger);
+			void Init(IIfcTriangulatedFaceSet^ faceSet, ILogger^ logger);
 			//Helpers
-			XbimFace^ BuildFace(List<Tuple<XbimWire^, IIfcPolyLoop^, bool>^>^ wires, IIfcFace^ face);
+			XbimFace^ BuildFace(List<Tuple<XbimWire^, IIfcPolyLoop^, bool>^>^ wires, IIfcFace^ face, ILogger^ logger);
 			static void  GetConnected(HashSet<XbimSolid^>^ connected, Dictionary<XbimSolid^, HashSet<XbimSolid^>^>^ clusters, XbimSolid^ clusterAround);
 			
 			
@@ -57,19 +57,19 @@ namespace Xbim
 			XbimCompound(double sewingTolerance);
 			XbimCompound(const TopoDS_Compound& compound, bool sewn, double tolerance);
 			XbimCompound(const TopoDS_Compound& compound, bool sewn, double tolerance, Object^ tag);
-			XbimCompound(IIfcConnectedFaceSet^ faceSet);
-			XbimCompound(IIfcShellBasedSurfaceModel^ sbsm);
-			XbimCompound(IIfcFaceBasedSurfaceModel^ fbsm);
-			XbimCompound(IIfcManifoldSolidBrep^ solid);
-			XbimCompound(IIfcFacetedBrep^ solid);
-			XbimCompound(IIfcFacetedBrepWithVoids^ solid);
-			XbimCompound(IIfcAdvancedBrep^ solid);
-			XbimCompound(IIfcAdvancedBrepWithVoids^ solid);
-			XbimCompound(IIfcClosedShell^ solid);
-			XbimCompound(IIfcTriangulatedFaceSet^ faceSet);
+			XbimCompound(IIfcConnectedFaceSet^ faceSet, ILogger^ logger);
+			XbimCompound(IIfcShellBasedSurfaceModel^ sbsm, ILogger^ logger);
+			XbimCompound(IIfcFaceBasedSurfaceModel^ fbsm, ILogger^ logger);
+			XbimCompound(IIfcManifoldSolidBrep^ solid, ILogger^ logger);
+			XbimCompound(IIfcFacetedBrep^ solid, ILogger^ logger);
+			XbimCompound(IIfcFacetedBrepWithVoids^ solid, ILogger^ logger);
+			XbimCompound(IIfcAdvancedBrep^ solid, ILogger^ logger);
+			XbimCompound(IIfcAdvancedBrepWithVoids^ solid, ILogger^ logger);
+			XbimCompound(IIfcClosedShell^ solid, ILogger^ logger);
+			XbimCompound(IIfcTriangulatedFaceSet^ faceSet, ILogger^ logger);
 			static property XbimCompound^ Empty{XbimCompound^ get(){ return empty; }};
 #pragma region IXbimCompound Interface
-			virtual property bool IsValid {bool get()override{ return ptrContainer != IntPtr::Zero && Count > 0; }; }
+			virtual property bool IsValid {bool get() override { return ptrContainer != IntPtr::Zero && Count > 0; }; }
 			virtual property bool IsSet{bool get() override { return true; }; }
 			virtual property  XbimGeometryObjectType GeometryType  {XbimGeometryObjectType  get()override { return XbimGeometryObjectType::XbimCompoundType; }}
 			virtual property int Count{int get(); }
@@ -83,12 +83,12 @@ namespace Xbim
 			virtual property IXbimEdgeSet^ Edges{IXbimEdgeSet^ get(); }
 			virtual property IXbimVertexSet^ Vertices{IXbimVertexSet^ get(); }
 			virtual void Add(IXbimGeometryObject^ geomObj);
-			virtual IXbimGeometryObjectSet^ Cut(IXbimSolidSet^ solids, double tolerance);
-			virtual IXbimGeometryObjectSet^ Cut(IXbimSolid^ solid, double tolerance);
-			virtual IXbimGeometryObjectSet^ Union(IXbimSolidSet^ solids, double tolerance);
-			virtual IXbimGeometryObjectSet^ Union(IXbimSolid^ solid, double tolerance);
-			virtual IXbimGeometryObjectSet^ Intersection(IXbimSolidSet^ solids, double tolerance);
-			virtual IXbimGeometryObjectSet^ Intersection(IXbimSolid^ solid, double tolerance);
+			virtual IXbimGeometryObjectSet^ Cut(IXbimSolidSet^ solids, double tolerance, ILogger^ logger);
+			virtual IXbimGeometryObjectSet^ Cut(IXbimSolid^ solid, double tolerance, ILogger^ logger);
+			virtual IXbimGeometryObjectSet^ Union(IXbimSolidSet^ solids, double tolerance, ILogger^ logger);
+			virtual IXbimGeometryObjectSet^ Union(IXbimSolid^ solid, double tolerance, ILogger^ logger);
+			virtual IXbimGeometryObjectSet^ Intersection(IXbimSolidSet^ solids, double tolerance, ILogger^ logger);
+			virtual IXbimGeometryObjectSet^ Intersection(IXbimSolid^ solid, double tolerance, ILogger^ logger);
 			virtual bool Sew();
 #ifdef OCC_6_9_SUPPORTED //OCC 6.9.0. is better with complex booleans
 			static int MaxFacesToSew = 3000;
@@ -105,10 +105,10 @@ namespace Xbim
 			//Upgrades the result to the highest level and simplest object without loss of representation
 			IXbimGeometryObject^ Upgrade();
 			IXbimShell^ MakeShell();
-			static XbimCompound^ Merge(IXbimSolidSet^ solids, double tolerance);
-			XbimCompound^ Cut(XbimCompound^ solids, double tolerance);
-			XbimCompound^ Union(XbimCompound^ solids, double tolerance);
-			XbimCompound^ Intersection(XbimCompound^ solids, double tolerance);
+			static XbimCompound^ Merge(IXbimSolidSet^ solids, double tolerance, ILogger^ logger);
+			XbimCompound^ Cut(XbimCompound^ solids, double tolerance, ILogger^ logger);
+			XbimCompound^ Union(XbimCompound^ solids, double tolerance, ILogger^ logger);
+			XbimCompound^ Intersection(XbimCompound^ solids, double tolerance, ILogger^ logger);
 			virtual property XbimRect3D BoundingBox {XbimRect3D get()override ; }
 			virtual property double Volume{double get(); }
 			virtual property double SewingTolerance {double get() {return _sewingTolerance;}}
@@ -122,7 +122,7 @@ namespace Xbim
 			// Inherited via XbimOccShape
 			virtual void Move(TopLoc_Location loc);
 			virtual XbimGeometryObject ^ Moved(IIfcPlacement ^ placement) override;
-			virtual XbimGeometryObject ^ Moved(IIfcObjectPlacement ^ objectPlacement) override;
+			virtual XbimGeometryObject ^ Moved(IIfcObjectPlacement ^ objectPlacement, ILogger^ logger) override;
 };
 
 	}
