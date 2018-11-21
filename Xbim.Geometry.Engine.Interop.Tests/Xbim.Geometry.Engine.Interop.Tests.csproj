@@ -173,6 +173,9 @@
     <None Update="TestFiles\Ifc4TestFiles\TrimmedEllipseTest.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="TestFiles\Ifc4TestFiles\WirePolycurve.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="TestFiles\IfcAdvancedBrepTrimmedCurveTest.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

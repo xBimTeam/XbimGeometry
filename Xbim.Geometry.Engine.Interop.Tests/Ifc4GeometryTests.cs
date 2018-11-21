@@ -370,6 +370,18 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.IsTrue(bar.Volume > 0);
             }
         }
+        [TestMethod]
+        public void WireInitFromIfcIndexedPolyCurveTest()
+        {
+            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\WirePolycurve.ifc"))
+            {
+              
+                    var shape = model.Instances[185] as IIfcGeometricRepresentationItem;
+                    IXbimGeometryObject geomObject = geomEngine.Create(shape);
+                    Assert.IsTrue(geomObject.IsValid);
+                
+            }
+        }
 
         [TestMethod]
         public void SectionedSpineTest()

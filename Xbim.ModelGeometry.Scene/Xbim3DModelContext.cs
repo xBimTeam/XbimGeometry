@@ -931,11 +931,12 @@ namespace Xbim.ModelGeometry.Scene
             foreach (var grid in Model.Instances.OfType<IIfcGrid>())
             {
                 GeometryReference instance;
-                if (contextHelper.ShapeLookup.TryGetValue(grid.EntityLabel, out instance))
+                if (contextHelper.ShapeLookup.TryGetValue(grid.EntityLabel, out instance) && grid.Representation != null && grid.Representation.Representations.Count > 0)
                 {
                     XbimMatrix3D placementTransform = XbimPlacementTree.GetTransform(grid, contextHelper.PlacementTree, Engine);
                     // int context = 0;
-                    var context = grid.Representation?.Representations?.FirstOrDefault().ContextOfItems;
+                    var gRep= grid.Representation?.Representations?.FirstOrDefault();
+                    var context = gRep.ContextOfItems;
                     var intContext = (context == null) ? 0 : context.EntityLabel;
 
                     WriteShapeInstanceToStore(instance.GeometryId, instance.StyleLabel, intContext, grid,
@@ -1123,7 +1124,11 @@ namespace Xbim.ModelGeometry.Scene
                     if (contextHelper.ShapeLookup.TryGetValue(mapShapeLabel, out counter))
                     {
                         int style;
-                        if (GetStyleId(contextHelper,mapShapeLabel, out style))
+                        // try to get style for map first as that would override lower level style
+                        if (GetStyleId(contextHelper, map.EntityLabel, out style))
+                            counter.StyleLabel = style;
+                        // get actual shape style
+                        else if (GetStyleId(contextHelper,mapShapeLabel, out style))
                             counter.StyleLabel = style;
                         mapShapes.Add(counter);
                     }
