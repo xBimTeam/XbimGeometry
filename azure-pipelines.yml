@@ -1,0 +1,95 @@
+resources:
+- repo: self
+queue:
+  name: Default
+  demands: 
+  - msbuild
+  - visualstudio
+  - vstest
+
+steps:
+- task: DeleteFiles@1
+  displayName: 'Delete old *.nupkg files from $(build.sourcesdirectory)'
+  inputs:
+    SourceFolder: '$(build.sourcesdirectory)'
+    Contents: '**\bin\$(BuildConfiguration)\**\*.nupkg'
+
+
+#Task group has not been exported, task groups are not supported yet
+
+- task: NuGetToolInstaller@0
+  displayName: 'Use NuGet 4.3.0'
+
+
+- task: NuGetCommand@2
+  displayName: 'NuGet restore Xbim.Geometry.Engine.sln'
+  inputs:
+    restoreSolution: '$(Parameters.solution)'
+    feedsToUse: config
+    nugetConfigPath: nuget.config
+
+
+- task: VSBuild@1
+  displayName: 'Build solution Xbim.Geometry.Engine.sln'
+  inputs:
+    solution: '$(Parameters.solution)'
+    msbuildArgs: '/t:build'
+    platform: '$(BuildPlatform)'
+    configuration: '$(BuildConfiguration)'
+
+
+- task: VSTest@2
+  displayName: 'VsTest - testAssemblies'
+  inputs:
+    testAssemblyVer2: |
+     **\bin\$(BuildConfiguration)\**\Xbim.Geometry.Engine.Interop.Tests.dll
+    codeCoverageEnabled: true
+    platform: '$(BuildPlatform)'
+    configuration: '$(BuildConfiguration)'
+
+  continueOnError: true
+
+- task: PublishSymbols@1
+  displayName: 'Publish symbols path: '
+  inputs:
+    SearchPattern: '**\bin\**\*.pdb'
+  enabled: false
+  continueOnError: true
+
+- task: CopyFiles@2
+  displayName: 'Copy Files to: $(build.artifactstagingdirectory)'
+  inputs:
+    SourceFolder: '$(build.sourcesdirectory)'
+    Contents: '**\bin\$(BuildConfiguration)\**'
+    TargetFolder: '$(build.artifactstagingdirectory)'
+  condition: succeededOrFailed()
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: drop'
+  inputs:
+    PathtoPublish: '$(build.artifactstagingdirectory)'
+  condition: succeededOrFailed()
+
+# Publish to master or develop MyGet feed based on the source branch
+- task: NuGetCommand@2
+  name: 'MyGetPublishing_Master'
+  condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
+  inputs:
+    command: push
+    nuGetFeedType: external
+    publishFeedCredentials: 'MyGetMaster'
+    versioningScheme: byEnvVar
+    versionEnvVar: version
+
+- task: NuGetCommand@2
+  name: 'MyGetPublishing_Develop'
+  condition: eq(variables['Build.SourceBranch'], 'refs/heads/develop')
+  inputs:
+    command: push
+    nuGetFeedType: external
+    publishFeedCredentials: 'MyGetDev'
+    versioningScheme: byEnvVar
+    versionEnvVar: version
+
+# - task: PublishBuildArtifacts@1
+#   displayName: 'publish artifacts'
