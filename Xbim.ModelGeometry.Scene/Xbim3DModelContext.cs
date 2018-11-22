@@ -1,5 +1,6 @@
 ﻿#region Directives
 
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xbim.Common;
 using Xbim.Common.Geometry;
-using Xbim.Common.Logging;
+
 using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc4.Interfaces;
 using Xbim.ModelGeometry.Scene.Clustering;
@@ -476,7 +477,8 @@ namespace Xbim.ModelGeometry.Scene
 
         #endregion
 
-        private static readonly ILogger Logger = LoggerFactory.GetLogger();
+    
+        static private ILogger _logger;
         private readonly IfcRepresentationContextCollection _contexts;
         private XbimGeometryEngine _engine;
 
@@ -484,36 +486,71 @@ namespace Xbim.ModelGeometry.Scene
         {
             get { return _engine ?? (_engine = new XbimGeometryEngine()); }
         }
+
+        private static ILogger Logger
+        {       
+            set
+            {
+                _logger = value;
+            }
+        }
+
         private readonly IModel _model;
 
-        public static void LogWarning(object entity, string format, params object[] args)
+        internal static void LogWarning(object entity, string format, params object[] args)
         {
-            var msg = String.Format(format, args);
-            var ifcEntity = entity as IPersistEntity;
-            if (ifcEntity != null)
-                Logger.WarnFormat("GeomScene: #{0}={1} [{2}]", ifcEntity.EntityLabel, ifcEntity.GetType().Name, msg);
-            else
-                Logger.WarnFormat("GeomScene: {0} [{1}]", entity.GetType().Name, msg);
+            if (_logger != null)
+            {
+                var msg = String.Format(format, args);
+                var ifcEntity = entity as IPersistEntity;
+                if (ifcEntity != null)
+                    _logger.LogWarning("GeomScene: #{0}={1} [{2}]", ifcEntity.EntityLabel, ifcEntity.GetType().Name, msg);
+                else
+                    _logger.LogWarning("GeomScene: {0} [{1}]", entity.GetType().Name, msg);
+            }
         }
 
-        public static void LogInfo(object entity, string format, params object[] args)
+        internal static void LogInfo(object entity, string format, params object[] args)
         {
-            var msg = String.Format(format, args);
-            var ifcEntity = entity as IPersistEntity;
-            if (ifcEntity != null)
-                Logger.InfoFormat("GeomScene: #{0}={1} [{2}]", ifcEntity.EntityLabel, ifcEntity.GetType().Name, msg);
-            else
-                Logger.InfoFormat("GeomScene: {0} [{1}]", entity.GetType().Name, msg);
+            
+            if (_logger != null)
+            {
+                var msg = String.Format(format, args);
+                var ifcEntity = entity as IPersistEntity;
+                if (ifcEntity != null)
+                    _logger.LogInformation("GeomScene: #{0}={1} [{2}]", ifcEntity.EntityLabel, ifcEntity.GetType().Name, msg);
+                else
+                    _logger.LogInformation("GeomScene: {0} [{1}]", entity.GetType().Name, msg);
+            }
         }
 
-        public static void LogError(object entity, string format, params object[] args)
+        internal static void LogError(object entity, string format, params object[] args)
         {
-            var msg = String.Format(format, args);
-            var ifcEntity = entity as IPersistEntity;
-            if (ifcEntity != null)
-                Logger.ErrorFormat("GeomScene: #{0}={1} [{2}]", ifcEntity.EntityLabel, ifcEntity.GetType().Name, msg);
-            else
-                Logger.ErrorFormat("GeomScene: {0} [{1}]", entity.GetType().Name, msg);
+            if (_logger != null)
+            {
+                var msg = String.Format(format, args);
+                var ifcEntity = entity as IPersistEntity;
+                if (ifcEntity != null)
+                    _logger.LogError("GeomScene: #{0}={1} [{2}]", ifcEntity.EntityLabel, ifcEntity.GetType().Name, msg);
+                else
+                    _logger.LogError("GeomScene: {0} [{1}]", entity.GetType().Name, msg);
+            }
+        }
+
+        internal static void LogError(string msg, Exception ex = null)
+        {
+            if (_logger != null)
+            {
+                if (ex == null)
+                {
+                    _logger.LogError(msg);
+                }
+                else
+                {
+                    _logger.LogError(ex, msg);
+                }
+                
+            }
         }
 
         //The maximum extent for any dimension of any products bouding box 
@@ -1213,11 +1250,11 @@ namespace Xbim.ModelGeometry.Scene
             //if we have any grids turn them in to geometry
             foreach (var grid in Model.Instances.OfType<IIfcGrid>())
             {
-                using (var geomModel = Engine.CreateGrid(grid))
+                using (var geomModel = Engine.CreateGrid(grid,_logger))
                 {
                     if (geomModel != null && geomModel.IsValid)
                     {
-                        var shapeGeom = Engine.CreateShapeGeometry(geomModel, precision, deflection, deflectionAngle, geomStorageType);
+                        var shapeGeom = Engine.CreateShapeGeometry(geomModel, precision, deflection, deflectionAngle, geomStorageType,_logger);
                         shapeGeom.IfcShapeLabel = grid.EntityLabel;
 
                         var refCounter = new GeometryReference
@@ -1240,13 +1277,13 @@ namespace Xbim.ModelGeometry.Scene
                 catch (Exception ex)
                 {
                     var errmsg = string.Format("Error getting IIfcGeometricRepresentationItem for EntityLabel #{0}. Geometry Ignored.", shapeId);
-                    Logger.Error(errmsg, ex);
+                    LogError(errmsg, ex);
                     return;
                 }
                 if (shape == null)
                 {
                     var errmsg = string.Format("IIfcGeometricRepresentationItem for EntityLabel #{0} not found. Geometry Ignored.", shapeId);
-                    Logger.Error(errmsg);
+                    LogError(errmsg);
                     return;
                 }
                 var isFeatureElementShape = contextHelper.FeatureElementShapeIds.Contains(shapeId);
@@ -1264,10 +1301,10 @@ namespace Xbim.ModelGeometry.Scene
                             }
                             else //we need to create a geometry object
                             {
-                                geomModel = Engine.Create(shape);
+                                geomModel = Engine.Create(shape, _logger);
                                 if (geomModel != null && geomModel.IsValid)
                                 {
-                                    shapeGeom = Engine.CreateShapeGeometry(geomModel, precision, deflection, deflectionAngle, geomStorageType);
+                                    shapeGeom = Engine.CreateShapeGeometry(geomModel, precision, deflection, deflectionAngle, geomStorageType, _logger);
                                     if (isFeatureElementShape)
                                     {
                                         var geomSet = geomModel as IXbimGeometryObjectSet;

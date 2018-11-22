@@ -13,7 +13,7 @@
   <PropertyGroup>
     <TargetFramework>net47</TargetFramework>
     <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
-    <SignAssembly>True</SignAssembly>
+    <SignAssembly>false</SignAssembly>
     <AssemblyOriginatorKeyFile>aimkey.snk</AssemblyOriginatorKeyFile>
     <Title>Xbim Geometry Engine</Title>
     <Version>5.0.0-Beta1-$(Year)$(Month)-$(Day)$(HalfMinuteOfDay)</Version>
@@ -39,7 +39,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
     <PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
-    <PackageReference Include="Xbim.Tessellator" Version="5.0.142-prerelease" />
+    <PackageReference Include="Xbim.Tessellator" Version="5.0.164" />
   </ItemGroup>
  
 
@@ -59,11 +59,11 @@
         Platform=Win32
       </AdditionalProperties>
     </NativeGeometryEngine>
-    <!--<NativeGeometryEngine Include="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj">
+    <NativeGeometryEngine Include="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj">
       <AdditionalProperties>
         Platform=x64   
       </AdditionalProperties>
-    </NativeGeometryEngine>-->
+    </NativeGeometryEngine>
   </ItemGroup>
   
   <!--We need to execute this after a build to ensure the nuget packages are in the correct place for the c++ binding-->
