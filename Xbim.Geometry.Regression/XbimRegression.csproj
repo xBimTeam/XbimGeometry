@@ -9,7 +9,15 @@
     <PackageReference Include="Xbim.Ifc" Version="5.0.164" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Xbim.Geometry.Engine.Interop\Xbim.Geometry.Engine.Interop.csproj" />
     <ProjectReference Include="..\Xbim.ModelGeometry.Scene\Xbim.ModelGeometry.Scene.csproj" />
   </ItemGroup>
-
+  <ItemGroup>
+    <None Include="..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\Xbim.Geometry.Engine32.dll" Link="Xbim.Geometry.Engine32.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\Xbim.Geometry.Engine64.dll" Link="Xbim.Geometry.Engine64.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>
