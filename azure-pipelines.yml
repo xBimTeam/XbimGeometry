@@ -1,11 +1,3 @@
-resources:
-- repo: self
-queue:
-  name: Default
-  demands: 
-  - msbuild
-  - visualstudio
-  - vstest
 
 steps:
 - task: DeleteFiles@1
