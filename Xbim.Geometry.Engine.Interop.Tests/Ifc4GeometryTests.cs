@@ -608,6 +608,56 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 
             }
         }
+        [TestMethod]
+        public void IfcCenterLineProfileDefTest()
+        {
+
+            using (var m = new MemoryModel(new Xbim.Ifc4.EntityFactoryIfc4()))
+            {
+                using (var txn = m.BeginTransaction("Test"))
+                {
+                    var semiCircle = IfcModelBuilder.MakeSemiCircle(m, 20);
+                    var cl = IfcModelBuilder.MakeCenterLineProfileDef(m, semiCircle, 5);
+                    var face = geomEngine.CreateFace(cl);
+                    Assert.IsNotNull(face as IXbimFace, "Wrong type returned");
+                    Assert.IsTrue(((IXbimFace)face).IsValid, "Invalid face returned");
+                }
+            }
+        }
+
+        [TestMethod]
+        public void IfcSurfaceOfLinearExtrusionTest()
+        {
+            using (var m = new MemoryModel(new Xbim.Ifc4.EntityFactoryIfc4()))
+            {
+                using (var txn = m.BeginTransaction("Test"))
+                {
+                    var semiCircle = IfcModelBuilder.MakeSemiCircle(m, 20);
+                    var def = IfcModelBuilder.MakeArbitraryOpenProfileDef(m, semiCircle);
+                    var cl = IfcModelBuilder.MakeSurfaceOfLinearExtrusion(m, def, 50, new XbimVector3D(0, 0, 1));
+                    var face = geomEngine.CreateFace(cl);
+                    Assert.IsNotNull(face as IXbimFace, "Wrong type returned");
+                    Assert.IsTrue(((IXbimFace)face).IsValid, "Invalid face returned");
+                }
+            }
+        }
+
+        [TestMethod]
+        public void IfcSurfaceOfRevolutionTest()
+        {
+            using (var m = new MemoryModel(new Xbim.Ifc4.EntityFactoryIfc4()))
+            {
+                using (var txn = m.BeginTransaction("Test"))
+                {
+                    var cc = IfcModelBuilder.MakeRationalBSplineCurveWithKnots(m);
+                    var def = IfcModelBuilder.MakeArbitraryOpenProfileDef(m, cc);
+                    var rev = IfcModelBuilder.MakeSurfaceOfRevolution(m, def);
+                    var face = geomEngine.CreateFace(rev);
+                    Assert.IsNotNull(face as IXbimFace, "Wrong type returned");
+                    Assert.IsTrue(((IXbimFace)face).IsValid, "Invalid face returned");
+                }
+            }
+        }
 
 
     }

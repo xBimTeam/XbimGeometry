@@ -1,11 +1,14 @@
 ﻿using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using Xbim.Common;
 using Xbim.Ifc;
 using Xbim.Ifc4.Interfaces;
+using Xbim.IO.Memory;
 using Xbim.ModelGeometry.Scene;
 
 namespace XbimRegression
@@ -15,8 +18,6 @@ namespace XbimRegression
     /// </summary>
     public class BatchProcessor
     {
-        private ILoggerFactory _loggerFactory;
-        private ILogger _logger;
 
         readonly Params _params;
 
@@ -32,15 +33,10 @@ namespace XbimRegression
 
         public void Run()
         {
-            _loggerFactory = new LoggerFactory().AddConsole(LogLevel.Trace);
-           
-            _logger = _loggerFactory.CreateLogger<BatchProcessor>();
-            
+            var resultsFile = Path.Combine(Params.TestFileRoot, string.Format("XbimRegression_{0:yyyyMMdd-hhmmss}.csv", DateTime.Now));
+
             var di = new DirectoryInfo(Params.TestFileRoot);
 
-            var resultsFile = Path.Combine(Params.TestFileRoot, string.Format("XbimRegression_{0:yyyyMMdd-hhmmss}.csv", DateTime.Now));
-            // We need to use the logger early to initialise before we use EventTrace
-            _logger.LogDebug("Conversion starting...");
             using (var writer = new StreamWriter(resultsFile))
             {
                 writer.WriteLine(ProcessResult.CsvHeader);
@@ -49,38 +45,80 @@ namespace XbimRegression
                 // Parallel.ForEach<FileInfo>(toProcess, opts, file =>
                 foreach (var file in toProcess)
                 {
-                    Console.WriteLine("Processing {0}", file);
-                    var result = ProcessFile(file.FullName, writer);
-                    if (!result.Failed)
+                    //set up a  log file for this file run                 
+                    var logFile = Path.ChangeExtension(file.FullName, "log");
+                    ProcessResult result;
+                    using (var loggerFactory = new LoggerFactory())
                     {
-                        Console.WriteLine("Processed {0} : {1} errors, {2} Warnings in {3}ms. {4} IFC Elements & {5} Geometry Nodes.",
-                            file, result.Errors, result.Warnings, result.TotalTime, result.Entities, result.GeometryEntries);
+                        loggerFactory.AddConsole(LogLevel.Error);
+                        loggerFactory.AddProvider(new NReco.Logging.File.FileLoggerProvider(logFile, false)
+                        {
+                            FormatLogEntry = (msg) =>
+                            {
+                                var sb = new System.Text.StringBuilder();
+                                StringWriter sw = new StringWriter(sb);
+                                var jsonWriter = new Newtonsoft.Json.JsonTextWriter(sw);
+                                jsonWriter.WriteStartArray();
+                                jsonWriter.WriteValue(DateTime.Now.ToString("o"));
+                                jsonWriter.WriteValue(msg.LogLevel.ToString());
+                                jsonWriter.WriteValue(msg.EventId.Id);
+                                jsonWriter.WriteValue(msg.Message);
+                                jsonWriter.WriteValue(msg.Exception?.ToString());
+                                jsonWriter.WriteEndArray();
+                                return sb.ToString();
+                            }
+                        });
+                        var logger = loggerFactory.CreateLogger<BatchProcessor>();
+                        Console.WriteLine($"Processing {file}");
+                        result = ProcessFile(file.FullName, writer, logger);
+
+                    }
+
+                    var txt = File.ReadAllText(logFile);
+                    if (string.IsNullOrEmpty(txt))
+                    {
+                        File.Delete(logFile);
+                        result.Errors = 0;
+                        result.Warnings = 0;
+                    }
+                    else
+                    {
+
+                        var tokens = txt.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                        result.Errors = tokens.Count(t => t == "\"Error\"");
+                        result.Warnings = tokens.Count(t => t == "\"Warning\"");
+                    }
+                    if (result!=null && !result.Failed)
+                    {
+                        Console.WriteLine($"Processed {file} : {result.Errors} errors, {result.Warnings} Warnings in {result.TotalTime}ms. {result.Entities} IFC Elements & {result.GeometryEntries} Geometry Nodes." );
                     }
                     else
                     {
                         Console.WriteLine("Processing failed for {0} after {1}ms.", file, result.TotalTime);
                     }
+                    result.FileName = file.Name;                 
+                    writer.WriteLine(result.ToCsv());
+                    writer.Flush();
                 }
-                //);
+               
                 writer.Close();
             }
             Console.WriteLine("Finished. Press Enter to continue...");
-            // LogManager.Shutdown();
-            _logger = null;
+           
             Console.ReadLine();
         }
 
-        private ProcessResult ProcessFile(string ifcFile, StreamWriter writer)
+        private ProcessResult ProcessFile(string ifcFile, StreamWriter writer, ILogger<BatchProcessor> logger)
         {
             RemoveFiles(ifcFile);
-           // using (var eventTrace = LoggerFactory.CreateEventTrace())
+            // using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
                 var result = new ProcessResult() { Errors = -1 };
                 try
                 {
                     var watch = new Stopwatch();
                     watch.Start();
-                    using (var model = ParseModelFile(ifcFile, Params.Caching))
+                    using (var model = ParseModelFile(ifcFile, Params.Caching, logger))
                     {
                         var parseTime = watch.ElapsedMilliseconds;
                         var xbimFilename = BuildFileName(ifcFile, ".xbim");
@@ -122,40 +160,23 @@ namespace XbimRegression
                                 BReps = model.Instances.OfType<IIfcFaceBasedSurfaceModel>().Count() +
                                         model.Instances.OfType<IIfcShellBasedSurfaceModel>().Count() + model.Instances
                                             .OfType<IIfcManifoldSolidBrep>().Count(),
-                                Application = ohs == null ? "Unknown" : ohs.OwningApplication.ToString(),
+                                Application = ohs == null ? "Unknown" : ohs.OwningApplication?.ApplicationFullName.ToString()
                             };
+
                         }
-                        var xbim = Path.ChangeExtension(ifcFile, "xbim");
-                        model.SaveAs(xbim);
-                        model.Close();
                     }
                 }
 
                 catch (Exception ex)
                 {
-                    _logger.LogError(string.Format("Problem converting file: {0}", ifcFile), ex);
+                    logger.LogError(string.Format("Problem converting file: {0}", ifcFile), ex);
                     result.Failed = true;
                 }
-                finally
-                {
-                    //result.Errors = (from e in eventTrace.Events
-                    //    where (e.EventLevel == EventLevel.ERROR)
-                    //    select e).Count();
-                    //result.Warnings = (from e in eventTrace.Events
-                    //    where (e.EventLevel == EventLevel.WARN)
-                    //    select e).Count();
-                    result.FileName = ifcFile.Remove(0, Params.TestFileRoot.Length).TrimStart('\\');
-                    //if (eventTrace.Events.Count > 0)
-                    //{
-                    //    CreateLogFile(ifcFile, eventTrace.Events);
-                    //}
-                    writer.WriteLine(result.ToCsv());
-                    writer.Flush();
-                }
+               
                 return result;
             }
         }
-        
+
         private Xbim3DModelContext.MeshingBehaviourResult CustomMeshingBehaviour(int elementId, int typeId, ref double linearDeflection, ref double angularDeflection)
         {
             if (typeId == 571) // = reinforcingbar
@@ -163,12 +184,12 @@ namespace XbimRegression
                 linearDeflection *= 10;
                 angularDeflection = 2.5;
             }
-            return  Xbim3DModelContext.MeshingBehaviourResult.Default;
+            return Xbim3DModelContext.MeshingBehaviourResult.Default;
         }
 
         // todo: is caching going to come back?
         // ReSharper disable once UnusedParameter.Local
-        private static IfcStore ParseModelFile(string ifcFileName, bool caching)
+        private IModel ParseModelFile(string ifcFileName, bool caching, ILogger<BatchProcessor> logger)
         {
             if (string.IsNullOrWhiteSpace(ifcFileName))
                 return null;
@@ -178,7 +199,7 @@ namespace XbimRegression
                 case ".ifc":
                 case ".ifczip":
                 case ".ifcxml":
-                    return IfcStore.Open(ifcFileName, null, 0);
+                    return MemoryModel.OpenRead(ifcFileName, logger);
                 default:
                     throw new NotImplementedException(
                         string.Format("XbimRegression does not support {0} file formats currently",

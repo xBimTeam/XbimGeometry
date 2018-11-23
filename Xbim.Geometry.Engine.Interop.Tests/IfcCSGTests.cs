@@ -13,8 +13,7 @@ using Xbim.IO.Memory;
 
 namespace Xbim.Geometry.Engine.Interop.Tests
 {
-    [DeploymentItem(@"x64\", "x64")]
-    [DeploymentItem(@"x86\", "x86")]
+    
     [TestClass]
     
     public class IfcCsgTests
