@@ -22,7 +22,6 @@ steps:
   condition: and(ne(variables['Build.SourceBranch'], 'refs/heads/master'),ne(variables['Build.SourceBranch'], 'refs/heads/develop'))
 
 
-
 - task: DeleteFiles@1
   displayName: 'Delete old *.nupkg files from $(build.sourcesdirectory)'
   inputs:
@@ -53,8 +52,8 @@ steps:
     configuration: '$(BuildConfiguration)'
 
 # Pack GeometryEngine.Interop
-- script: dotnet pack Xbim.Geometry.Engine.Interop/Xbim.Geometry.Engine.Interop.csproj -c $(BuildConfiguration) -o $(Build.BinariesDirectory) /p:PackageVersion=$(version)
-  name: 'Geometry_Interop_Pack'
+#- script: dotnet pack Xbim.Geometry.Engine.Interop/Xbim.Geometry.Engine.Interop.csproj -c $(BuildConfiguration) -o $(Build.BinariesDirectory) /p:PackageVersion=$(version)
+#  name: 'Geometry_Interop_Pack'
 
 # xBIM Common
 - script: dotnet pack Xbim.ModelGeometry.Scene/Xbim.ModelGeometry.Scene.csproj -c $(BuildConfiguration) -o $(Build.BinariesDirectory) /p:PackageVersion=$(version)

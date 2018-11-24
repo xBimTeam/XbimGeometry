@@ -29,7 +29,7 @@
     <AssemblyVersion>5.0.0.0</AssemblyVersion>    
     <FileVersion>5.0.$(Year)$(Month).$(Day)$(HalfMinuteOfDay)</FileVersion>
     <ProductVersion>5.0.$(Year)$(Month).$(Day)$(HalfMinuteOfDay)</ProductVersion>
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageIconUrl>https://avatars1.githubusercontent.com/u/2284875?v=3&amp;amp;s=240</PackageIconUrl>
     <DelaySign>false</DelaySign>
     <PackageId>Xbim.Geometry.Engine.Interop</PackageId>
