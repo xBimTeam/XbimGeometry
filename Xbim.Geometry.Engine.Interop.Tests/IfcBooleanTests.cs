@@ -25,10 +25,41 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [ClassInitialize]
         static public void Initialise(TestContext context)
         {
-            loggerFactory = new LoggerFactory().AddConsole(LogLevel.Trace);
+            loggerFactory = new LoggerFactory().AddDebug(LogLevel.Trace);
             geomEngine = new XbimGeometryEngine();
             logger = loggerFactory.CreateLogger<IfcBooleanTests>();
         }
+
+        [TestMethod]
+        public void SubtractionResultsInClosedWindow()
+        {
+            using (var model = MemoryModel.OpenRead(@".\TestFiles\SubtractionResultsInClosedWindow.ifc"))
+            {
+                logger.LogInformation("Running SubtractionResultsInClosedWindow");
+                var wallBrep = model.Instances[12752] as IIfcFacetedBrep;
+                var wallPlacement = model.Instances[12562] as IIfcLocalPlacement;
+                var wallTransform = wallPlacement.ToMatrix3D();
+                var openingExtrudeArea = model.Instances[286479] as IIfcExtrudedAreaSolid;
+                var openingPlacement = model.Instances[286487] as IIfcLocalPlacement;
+                var openingTransform = openingPlacement.ToMatrix3D();
+
+                var wallSolid = geomEngine.CreateSolid(wallBrep, logger);
+                var transformedWall = wallSolid.Transform(wallTransform) as IXbimSolid;
+
+                var openingSolid = geomEngine.CreateSolid(openingExtrudeArea, logger);
+                var transformedOpening = openingSolid.Transform(openingTransform) as IXbimSolid;
+                var cutWall = transformedWall.Cut(transformedOpening, model.ModelFactors.Precision, logger).FirstOrDefault();
+                Assert.IsNotNull(cutWall, "Cut wall should not be null");
+                // note this faceted brep already has the openings cut out and we are cutting them again so the volume should not change
+                var volDiff = cutWall.Volume - transformedWall.Volume;
+                Assert.IsTrue(Math.Abs(volDiff) < 1e-5);
+               // Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
+               //  var solid = geomEngine.CreateSolid(er.Entity, logger);
+               //  Assert.IsFalse(solid.Faces.Any(), "This solid should have 0 faces");
+            }
+
+        }
+
         [TestMethod]
         public void CoordinationTest()
         {
@@ -122,20 +153,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
         }
 
-        //[TestMethod]
-        //public void CompositeProfileWithCutsTimeoutsTest()
-        //{
-        //    var path = Path.GetFullPath($@"TestFiles\{nameof(CompositeProfileWithCutsTimeoutsTest)}.proto");
-        //    using (var input = File.Open(path,FileMode.Open))
-        //    {
-        //        var shapeGeometryDtoCopy = new ShapeGeometryDTO();
-        //        shapeGeometryDtoCopy.MergeDelimitedFrom(input);
-        //        var time = HelperFunctions.ConvertGeometryAllCompositesAtOnce(geomEngine, shapeGeometryDtoCopy,logger);
-        //        Assert.IsTrue(time < 60000);//the default engine timeout
-        //        Assert.IsTrue(time < 5000);//this is what we expect
-        //    }
-        //}
-        
+     
+
         /// <summary>
         /// Cuts one cylinder from another and returns a valid solid
         /// </summary>

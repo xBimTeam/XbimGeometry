@@ -1184,7 +1184,7 @@ namespace Xbim
 
 			face = gcnew XbimFace(outerBound, p, faceNormal, logger); //create  a face with the right bound and direction
 
-			for (int i = 1; i < wires->Count; i++)
+			for (int i = 0; i < wires->Count; i++)
 			{
 				XbimWire^ wire = wires[i]->Item1;
 				if (!wire->Equals(outerBound))
