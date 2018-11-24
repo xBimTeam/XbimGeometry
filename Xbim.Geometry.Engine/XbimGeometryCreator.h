@@ -49,7 +49,10 @@ namespace Xbim
 				String^ timeOut = ConfigurationManager::AppSettings["BooleanTimeOut"];
 				if (!double::TryParse(timeOut, BooleanTimeOut))
 					BooleanTimeOut = 60;
-
+				String^ ignoreIfcSweptDiskSolidParamsString = ConfigurationManager::AppSettings["IgnoreIfcSweptDiskSolidParams"];
+				if(!bool::TryParse(ignoreIfcSweptDiskSolidParamsString,IgnoreIfcSweptDiskSolidParams))
+					IgnoreIfcSweptDiskSolidParams = false;
+				
 			}
 		protected:
 			~XbimGeometryCreator()
@@ -66,7 +69,7 @@ namespace Xbim
 			static void LogDebug(ILogger^ logger, Object^ entity, String^ format, ... array<Object^>^ arg);
 
 			static double BooleanTimeOut;
-			
+			static bool IgnoreIfcSweptDiskSolidParams;
 			virtual XbimShapeGeometry^ CreateShapeGeometry(IXbimGeometryObject^ geometryObject, double precision, double deflection, double angle, XbimGeometryType storageType, ILogger^ logger);
 			virtual XbimShapeGeometry^ CreateShapeGeometry(IXbimGeometryObject^ geometryObject, double precision, double deflection, ILogger^ logger/*, double angle = 0.5, XbimGeometryType storageType = XbimGeometryType::Polyhedron*/)
 			{

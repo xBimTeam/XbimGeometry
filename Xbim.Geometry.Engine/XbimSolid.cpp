@@ -1261,7 +1261,7 @@ namespace Xbim
 			//else Build the directrix
 			IModelFactors^ mf = swdSolid->Model->ModelFactors;
 			XbimWire^ sweep = gcnew XbimWire(swdSolid->Directrix, logger);
-			if (swdSolid->StartParam.HasValue && swdSolid->EndParam.HasValue)
+			if (!XbimGeometryCreator::IgnoreIfcSweptDiskSolidParams && swdSolid->StartParam.HasValue && swdSolid->EndParam.HasValue)
 			{
 				// if the last parameter is about 1, use the lenght
 				double last  = Math::Abs(swdSolid->EndParam.Value - 1.0) < Precision::Confusion() 
@@ -1308,8 +1308,9 @@ namespace Xbim
 			BRepOffsetAPI_MakePipeShell pipeMaker1(sweep);
 			
 			// SetTransitionMode makes for a step alignement of the profile along the outerWire, 
-			// two adjacent segments of the spine are extended and intersected at a fracture of the spine
-			pipeMaker1.SetTransitionMode(BRepBuilderAPI_RightCorner); 
+			// in a swept disk the transition mode must be tangental, this is best supported with BRepBuilderAPI_Transformed
+			// see swt disk solid polygonal for non-contunuous scenarios
+			pipeMaker1.SetTransitionMode(BRepBuilderAPI_Transformed);
 
 			pipeMaker1.Add(outerWire.Wire(), Standard_False, Standard_True);
 			
@@ -1333,7 +1334,7 @@ namespace Xbim
 					BRepBuilderAPI_MakeWire innerWire;
 					innerWire.Add(innerEdge);
 					BRepOffsetAPI_MakePipeShell pipeMaker2(sweep);
-					pipeMaker2.SetTransitionMode(BRepBuilderAPI_RightCorner);
+					pipeMaker2.SetTransitionMode(BRepBuilderAPI_Transformed);
 					pipeMaker2.Add(innerWire.Wire(), Standard_False, Standard_True);
 					pipeMaker2.Build();
 					if (pipeMaker2.IsDone() )
@@ -1359,6 +1360,7 @@ namespace Xbim
 					b.AddShellFace(shell, TopoDS::Face(explr.Current()));
 				}
 				b.CompleteShell(shell);
+				
 				TopoDS_Solid solid;
 				BRep_Builder bs;
 				bs.MakeSolid(solid);

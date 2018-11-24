@@ -35,5 +35,18 @@ namespace Xbim.Geometry.Engine.Interop.Tests.TestFiles
             }
 
         }
+
+        [TestMethod]
+        public void IfcSweptDiskSolidWithPolylineTest()
+        {
+            using (var er = new EntityRepository<IIfcSweptDiskSolid>(nameof(IfcSweptDiskSolidWithPolylineTest)))
+            {
+                Assert.IsTrue(er.Entity != null, "No IIfcSweptDiskSolid found");
+                
+                var solid = geomEngine.CreateSolid(er.Entity, logger);
+                Assert.IsTrue(solid.Faces.Count == 5, "This solid should have 5 faces");
+            }
+
+        }
     }
 }
