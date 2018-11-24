@@ -16,7 +16,7 @@
     <SignAssembly>false</SignAssembly>
     <AssemblyOriginatorKeyFile>aimkey.snk</AssemblyOriginatorKeyFile>
     <Title>Xbim ModelGeometry Scene</Title>
-    <Version>5.0.0-Beta1-$(Year)$(Month)-$(Day)$(HalfMinuteOfDay)</Version>
+    <Version>5.0.0-Beta1-1811-2410</Version>
     <Copyright>Copyright Xbim Ltd.</Copyright>
     <Description>.net library that provides support for the  Geometry Scene creation.</Description>
     <Authors>Steve Lockley</Authors>
@@ -29,7 +29,7 @@
     <AssemblyVersion>5.0.0.0</AssemblyVersion>
     <FileVersion>5.0.$(Year)$(Month).$(Day)$(HalfMinuteOfDay)</FileVersion>
     <ProductVersion>5.0.$(Year)$(Month).$(Day)$(HalfMinuteOfDay)</ProductVersion>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <PackageIconUrl>https://avatars1.githubusercontent.com/u/2284875?v=3&amp;amp;s=240</PackageIconUrl>
     <DelaySign>false</DelaySign>
   </PropertyGroup>
