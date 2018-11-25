@@ -34,8 +34,8 @@
     <DelaySign>false</DelaySign>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Xbim.Ifc" Version="5.0.164" />
-    <PackageReference Include="Xbim.Tessellator" Version="5.0.164" />
+    <PackageReference Include="Xbim.Ifc" Version="5.0.166-prerelease" />
+    <PackageReference Include="Xbim.Tessellator" Version="5.0.166-prerelease" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Xbim.Geometry.Engine.Interop\Xbim.Geometry.Engine.Interop.csproj" />

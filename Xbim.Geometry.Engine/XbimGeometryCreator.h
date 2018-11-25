@@ -137,7 +137,7 @@ namespace Xbim
 
 			virtual IXbimSolid^ CreateSolid(IIfcBooleanResult^ ifcSolid, ILogger^ logger);
 			virtual IXbimSolid^ CreateSolid(IIfcBooleanClippingResult^ ifcSolid, ILogger^ logger);
-			virtual IXbimSolid^ CreateSolid(IIfcBooleanOperand^ ifcSolid, ILogger^ logger);
+			
 			virtual IXbimSolid^ CreateSolid(IIfcHalfSpaceSolid^ ifcSolid, ILogger^ logger);
 			virtual IXbimSolid^ CreateSolid(IIfcPolygonalBoundedHalfSpace^ ifcSolid, ILogger^ logger);
 			virtual IXbimSolid^ CreateSolid(IIfcBoxedHalfSpace^ ifcSolid, ILogger^ logger);
@@ -160,7 +160,7 @@ namespace Xbim
 			virtual IXbimSolid^ CreateSolid(IIfcFaceBasedSurfaceModel^ ifcSurface, ILogger^ logger);
 
 			virtual IXbimSolid^ CreateSolid(IIfcCsgPrimitive3D^ ifcSolid, ILogger^ logger);
-			virtual IXbimSolid^ CreateSolid(IIfcCsgSolid^ ifcSolid, ILogger^ logger);
+			
 			virtual IXbimSolid^ CreateSolid(IIfcSphere^ ifcSolid, ILogger^ logger);
 			virtual IXbimSolid^ CreateSolid(IIfcBlock^ ifcSolid, ILogger^ logger);
 			virtual IXbimSolid^ CreateSolid(IIfcRightCircularCylinder^ ifcSolid, ILogger^ logger);
@@ -181,6 +181,9 @@ namespace Xbim
 			virtual IXbimSolidSet^ CreateSolidSet();
 			virtual IXbimSolidSet^ CreateSolidSet(IIfcBooleanResult^ boolOp, ILogger^ logger);
 			virtual IXbimSolidSet^ CreateBooleanResult(IIfcBooleanClippingResult^ clip, ILogger^ logger);
+			virtual IXbimSolidSet^ CreateSolidSet(IIfcCsgSolid^ ifcSolid, ILogger^ logger);
+			virtual IXbimSolidSet^ CreateSolidSet(IIfcBooleanOperand^ ifcSolid, ILogger^ logger);
+			virtual IXbimSolidSet^ CreateSolidSet(IIfcBooleanClippingResult^ ifcSolid, ILogger^ logger);
 			virtual IXbimGeometryObjectSet^ CreateGeometryObjectSet();
 
 			//Ifc4 interfaces

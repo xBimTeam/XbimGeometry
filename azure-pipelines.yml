@@ -56,7 +56,7 @@ steps:
 - script: dotnet pack Xbim.Geometry.Engine.Interop/Xbim.Geometry.Engine.Interop.csproj -c $(BuildConfiguration) -o $(Build.BinariesDirectory) /p:PackageVersion=$(version)
   name: 'Geometry_Interop_Pack'
 
-# xBIM Common
+# Pack ModelGeometry.Scene
 - script: dotnet pack Xbim.ModelGeometry.Scene/Xbim.ModelGeometry.Scene.csproj -c $(BuildConfiguration) -o $(Build.BinariesDirectory) /p:PackageVersion=$(version)
   name: 'ModelScene_Pack'
 

@@ -149,17 +149,25 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         private static IXbimSolidSet CreateSolids(this IIfcGeometricRepresentationItem repItem, IXbimGeometryEngine engine, ILogger logger)
         {
             var sSet = engine.CreateSolidSet();
-
-            if (repItem is IIfcSolidModel)
+            var sweptArea = repItem as IIfcSweptAreaSolid;
+            if (sweptArea != null && (sweptArea.SweptArea is IIfcCompositeProfileDef))
             {
-                var sweptArea = repItem as IIfcSweptAreaSolid;
-                //this is necessary as composite profile definitions produce multiple solids
-                if (sweptArea != null && sweptArea.SweptArea is IIfcCompositeProfileDef)
-                    return engine.CreateSolidSet(sweptArea, logger);
-                else
-                    sSet.Add(engine.CreateSolid(repItem as IIfcSolidModel, logger)); return sSet;
+                //this is necessary as composite profile definitions produce multiple solid            
+                return engine.CreateSolidSet(sweptArea, logger);
             }
-            else if (repItem is IIfcBooleanResult) { sSet.Add(engine.CreateSolid(repItem as IIfcBooleanResult, logger)); return sSet; }
+            else if( repItem is IIfcSweptAreaSolid)
+            {
+                sSet.Add(engine.CreateSolid(repItem as IIfcSweptAreaSolid, logger));
+                return sSet;
+            }
+            else if (repItem is IIfcSweptDiskSolid)
+            {
+                sSet.Add(engine.CreateSolid(repItem as IIfcSweptDiskSolid, logger));
+                return sSet;
+            }
+            else if (repItem is IIfcBooleanResult) { return engine.CreateSolidSet(repItem as IIfcBooleanResult, logger); }
+            else if (repItem is IIfcBooleanClippingResult) { return engine.CreateSolidSet(repItem as IIfcBooleanClippingResult, logger); }
+            else if (repItem is IIfcCsgSolid) { return engine.CreateSolidSet(repItem as IIfcCsgSolid, logger); }
             else if (repItem is IIfcFacetedBrep) return engine.CreateSolidSet(repItem as IIfcFacetedBrep, logger);
             else if (repItem is IIfcTriangulatedFaceSet) return engine.CreateSolidSet(repItem as IIfcTriangulatedFaceSet);
             else if (repItem is IIfcShellBasedSurfaceModel) return engine.CreateSolidSet(repItem as IIfcShellBasedSurfaceModel);
@@ -167,7 +175,10 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             else if (repItem is IIfcBoundingBox) { sSet.Add(engine.CreateSolid(repItem as IIfcBoundingBox, logger)); return sSet; }
             else if (repItem is IIfcSectionedSpine) { sSet.Add(engine.CreateSolid(repItem as IIfcSectionedSpine, logger)); return sSet; }
             else if (repItem is IIfcCsgPrimitive3D) { sSet.Add(engine.CreateSolid(repItem as IIfcCsgPrimitive3D, logger)); return sSet; }
+            else if (repItem is IIfcAdvancedBrep) { sSet.Add(engine.CreateSolid(repItem as IIfcAdvancedBrep, logger)); return sSet; }
             else return null;
+
+            
         }
     }
 }

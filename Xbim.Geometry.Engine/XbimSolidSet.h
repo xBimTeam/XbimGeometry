@@ -29,6 +29,7 @@ namespace Xbim
 		private:
 			List<IXbimSolid^>^ solids;
 			static XbimSolidSet^ empty = gcnew XbimSolidSet();
+			void Init(IIfcBooleanOperand^ boolOp, ILogger^ logger);
 			void Init(IIfcBooleanResult^ boolOp, ILogger^ logger);
 			void Init(XbimCompound^ comp, IPersistEntity^ ent, ILogger^ logger);
 			void Init(IIfcSweptAreaSolid^ solid, ILogger^ logger);
@@ -38,7 +39,7 @@ namespace Xbim
 			void Init(IIfcTriangulatedFaceSet^ IIfcSolid, ILogger^ logger);
 			void Init(IIfcFaceBasedSurfaceModel^ solid, ILogger^ logger);
 			void Init(IIfcShellBasedSurfaceModel^ solid, ILogger^ logger);
-
+			void Init(IIfcCsgSolid^ IIfcSolid, ILogger^ logger);
 			static VolumeComparer^ _volumeComparer = gcnew VolumeComparer();
 			static int _maxOpeningsToCut = 100;
 			static double _maxOpeningVolumePercentage = 0.0002;
@@ -63,11 +64,12 @@ namespace Xbim
 			XbimSolidSet(IXbimSolid^ solid);
 			XbimSolidSet(IEnumerable<IXbimSolid^>^ solids);
 			XbimSolidSet(IIfcBooleanResult^ boolOp, ILogger^ logger);
+			XbimSolidSet(IIfcBooleanOperand^ boolOp, ILogger^ logger);
 			XbimSolidSet(IIfcManifoldSolidBrep^ solid, ILogger^ logger);
 			XbimSolidSet(IIfcFacetedBrep^ solid, ILogger^ logger);
 			XbimSolidSet(IIfcFacetedBrepWithVoids^ solid, ILogger^ logger);
 			XbimSolidSet(IIfcClosedShell^ solid, ILogger^ logger);
-
+			XbimSolidSet(IIfcCsgSolid^ IIfcSolid, ILogger^ logger);
 			XbimSolidSet(IIfcSweptAreaSolid^ solid, ILogger^ logger);
 			XbimSolidSet(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid, ILogger^ logger);
 			XbimSolidSet(IIfcExtrudedAreaSolid^ solid, ILogger^ logger);

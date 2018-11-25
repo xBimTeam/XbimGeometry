@@ -109,14 +109,14 @@ namespace Xbim.Geometry.Engine.Interop
             return _engine.CreateSolid(ifcSolid, logger);
         }
 
-        public IXbimSolid CreateSolid(IIfcBooleanClippingResult ifcSolid, ILogger logger)
+        public IXbimSolidSet CreateSolidSet(IIfcBooleanClippingResult ifcSolid, ILogger logger)
         {
-            return _engine.CreateSolid(ifcSolid, logger);
+            return _engine.CreateSolidSet(ifcSolid, logger);
         }
 
-        public IXbimSolid CreateSolid(IIfcBooleanOperand ifcSolid, ILogger logger)
+        public IXbimSolidSet CreateSolidSet(IIfcBooleanOperand ifcSolid, ILogger logger)
         {
-            return _engine.CreateSolid(ifcSolid, logger);
+            return _engine.CreateSolidSet(ifcSolid, logger);
         }
 
         public IXbimSolid CreateSolid(IIfcHalfSpaceSolid ifcSolid, ILogger logger)
@@ -159,9 +159,9 @@ namespace Xbim.Geometry.Engine.Interop
             return _engine.CreateSolid(ifcSolid, logger);
         }
 
-        public IXbimSolid CreateSolid(IIfcCsgSolid ifcSolid, ILogger logger)
+        public IXbimSolidSet CreateSolidSet(IIfcCsgSolid ifcSolid, ILogger logger)
         {
-            return _engine.CreateSolid(ifcSolid, logger);
+            return _engine.CreateSolidSet(ifcSolid, logger);
         }
 
         public IXbimSolid CreateSolid(IIfcSphere ifcSolid, ILogger logger)

@@ -44,7 +44,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var er = new EntityRepository<IIfcFacetedBrep>(nameof(FacetedBrepIsValidSolidTest)))
             {
                 Assert.IsTrue(er.Entity != null, "No IIfcFacetedBrep found");
-                var solid = geomEngine.CreateSolid(er.Entity, logger);
+                var solid = geomEngine.CreateSolidSet(er.Entity, logger).FirstOrDefault();
                 HelperFunctions.IsValidSolid(solid);
 
             }
@@ -56,7 +56,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var er = new EntityRepository<IIfcCsgSolid>(nameof(CsgSolidIsValidSolidTest)))
             {
                 Assert.IsTrue(er.Entity != null, "No IIfcCsgSolid found");
-                var solid = geomEngine.CreateSolid(er.Entity, logger);
+                var solid = geomEngine.CreateSolidSet(er.Entity, logger).FirstOrDefault();
                 HelperFunctions.IsValidSolid(solid);
 
             }
@@ -90,7 +90,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var er = new EntityRepository<IfcCsgSolid>(nameof(CsgSolidBoundingBoxTest)))
             {
                 Assert.IsTrue(er.Entity != null, "No IfcCsgSolid found");
-                var solid = geomEngine.CreateSolid(er.Entity, logger);
+                var solid = geomEngine.CreateSolidSet(er.Entity, logger).FirstOrDefault();
                 Assert.IsTrue(Math.Abs(solid.Volume - solid.BoundingBox.Volume) < 1e-5);
 
             }          
@@ -130,7 +130,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 var shape = model.Instances.OfType<IfcFacetedBrep>().FirstOrDefault();
                 Assert.IsNotNull(shape);
-                var geom = geomEngine.CreateSolid(shape);
+                var geom = geomEngine.CreateSolidSet(shape).FirstOrDefault();
                 Assert.IsTrue(Math.Abs(geom.Volume - geom.BoundingBox.Volume) < 1e-5);
             }
         }
@@ -520,7 +520,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                
                     //try building the polygonally bounded half space that has the faulty curve, which is now a seam
                     var pbhs = model.Instances[3942238] as IIfcBooleanClippingResult;
-                    var solid = geomEngine.CreateSolid(pbhs);
+                    var solid = geomEngine.CreateSolidSet(pbhs).FirstOrDefault();
                     Assert.IsTrue(solid.Volume > 0);
                    
             }

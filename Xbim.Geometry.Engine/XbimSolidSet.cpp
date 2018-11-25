@@ -68,6 +68,10 @@ namespace Xbim
 		{
 			solids = gcnew  List<IXbimSolid^>();	
 		}
+		XbimSolidSet::XbimSolidSet(IIfcCsgSolid^ repItem, ILogger^ logger)
+		{
+			Init(repItem, logger);
+		}
 
 		XbimSolidSet::XbimSolidSet(IXbimSolid^ solid)
 		{
@@ -75,6 +79,11 @@ namespace Xbim
 			solids->Add(solid);
 		}
 		XbimSolidSet::XbimSolidSet(IIfcBooleanResult^ boolOp, ILogger^ logger)
+		{
+			Init(boolOp, logger);
+		}
+
+		XbimSolidSet::XbimSolidSet(IIfcBooleanOperand ^ boolOp, ILogger ^ logger)
 		{
 			Init(boolOp, logger);
 		}
@@ -807,26 +816,80 @@ namespace Xbim
 			return ret;
 		}
 
+		void XbimSolidSet::Init(IIfcCsgSolid^ IIfcSolid, ILogger^ logger)
+		{
+			solids = gcnew List<IXbimSolid^>();
+			IIfcCsgPrimitive3D^ csgPrim = dynamic_cast<IIfcCsgPrimitive3D^>(IIfcSolid->TreeRootExpression);
+			if (csgPrim != nullptr)
+			{
+				solids->Add(gcnew XbimSolid(csgPrim, logger));
+			}
+			else
+			{
+				IIfcBooleanResult^ booleanResult = dynamic_cast<IIfcBooleanResult^>(IIfcSolid->TreeRootExpression);
+				if (booleanResult != nullptr) return Init(booleanResult, logger);
+				throw gcnew NotImplementedException(String::Format("IIfcCsgSolid of Type {0} in entity #{1} is not implemented", IIfcSolid->GetType()->Name, IIfcSolid->EntityLabel));
 
+			}
+		}
+
+
+
+		void XbimSolidSet::Init(IIfcBooleanOperand ^ boolOp, ILogger ^ logger)
+		{
+			IIfcBooleanResult^ boolRes = dynamic_cast<IIfcBooleanResult^>(boolOp);
+			IIfcCsgSolid^ csgOp = dynamic_cast<IIfcCsgSolid^>(boolOp);
+			if (boolRes != nullptr)
+			{
+				Init(boolRes, logger); // dispatch for boolean result
+			}
+			else if (csgOp != nullptr)
+			{
+				Init(csgOp, logger); // dispatch for IIfcCsgSolid result
+			}
+			else
+			{
+				solids = gcnew List<IXbimSolid^>();
+				solids->Add(gcnew XbimSolid(boolOp, logger)); // otherwise create a simple solid
+			}
+			if (IsValid)
+			{
+				for each (XbimSolid^ solid in solids)
+				{
+					if (!solid->IsValid)
+						XbimGeometryCreator::LogWarning(logger, boolOp, "Partially invalid boolean operand result (solid volume {0})", solid->Volume);
+				}
+			}
+			else
+			{
+				XbimGeometryCreator::LogWarning(logger, boolOp, "Invalid boolean operand result");
+			}
+		}
 
 		void XbimSolidSet::Init(IIfcBooleanResult^ boolOp, ILogger^ logger)
 		{
 			solids = gcnew List<IXbimSolid^>();
+			if (dynamic_cast<IIfcBooleanClippingResult^>(boolOp))
+			{
+				solids->Add(gcnew XbimSolid((IIfcBooleanClippingResult^)boolOp, logger));
+				return;
+			}
 			IIfcBooleanOperand^ fOp = boolOp->FirstOperand; //thse must be solids according to the schema
 			IIfcBooleanOperand^ sOp = boolOp->SecondOperand;
-			XbimSolid^ left = gcnew XbimSolid(fOp, logger);
-			XbimSolid^ right = gcnew XbimSolid(sOp, logger);
+			XbimSolidSet^ left = gcnew XbimSolidSet(fOp, logger);
+			XbimSolidSet^ right = gcnew XbimSolidSet(sOp, logger);
+
+			
 			if (!left->IsValid)
 			{
 				if (boolOp->Operator != IfcBooleanOperator::UNION)
-				//XbimGeometryCreator::LogWarning(boolOp, "Boolean result has invalid first operand");
+				XbimGeometryCreator::LogWarning(logger, boolOp, "Boolean result has invalid first operand");
 				return;
 			}
 
 			if (!right->IsValid)
 			{
-				//XbimGeometryCreator::LogWarning(boolOp, "Boolean result has invalid second operand");
-				if(left->IsValid) solids->Add(left); //return the left operand
+				XbimGeometryCreator::LogWarning(logger, boolOp, "Boolean result has invalid second operand");				
 				return;
 			}
 
@@ -858,7 +921,7 @@ namespace Xbim
 						{ 
 							// the boolean had a problem
 							XbimGeometryCreator::LogError(logger, boolOp, "Boolean operation silent failure, the operation has been ignored");
-							solids->Add(left);
+							solids->AddRange(left);
 							return;
 						}
 					}
@@ -868,7 +931,7 @@ namespace Xbim
 			catch (Exception^ xbimE)
 			{
 				XbimGeometryCreator::LogError(logger,boolOp, "Boolean operation failure, {0}. The operation has been ignored", xbimE->Message);
-				solids->Add(left);; //return the left operand
+				solids->AddRange(left);; //return the left operand
 				return;
 			}
 			solids->AddRange(result);
