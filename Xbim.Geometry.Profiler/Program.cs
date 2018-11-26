@@ -32,23 +32,28 @@ namespace Xbim.Geometry.Profiler
             }
 
             var writeXbim = args.Any(t => t.ToLowerInvariant() == "/keepxbim");
-
+            var singleThread = args.Any(t => t.ToLowerInvariant() == "/singlethread");
             var writeInInputFolder = args.Any(t => t.ToLowerInvariant() == "/samefolder");
 
-
-
-            // ReSharper disable once LoopCanBePartlyConvertedToQuery
             foreach (var arg in args)
             {
                 if (!arg.StartsWith("/"))
-                    Profile(arg, writeXbim, writeInInputFolder);
+                    Profile(arg, writeXbim, writeInInputFolder, singleThread);
             }
             
             Console.WriteLine("Press any key to exit");
             Console.Read();
         }
 
-        private static void Profile(string fileNameInput, bool writeXbim, bool writeInInputFolder)
+        private static Xbim3DModelContext.MeshingBehaviourResult SkipRebar(int elementId, int typeId, ref double linearDeflection, ref double angularDeflection)
+        {
+            var shortTypeId = Convert.ToInt16(typeId);
+            if (shortTypeId == 571) // skip IfcReinforcingbar
+                return Xbim3DModelContext.MeshingBehaviourResult.Skip;
+            return Xbim3DModelContext.MeshingBehaviourResult.Default;
+        }
+
+        private static void Profile(string fileNameInput, bool writeXbim, bool writeInInputFolder, bool singleThread)
         {
             var mainStopWatch = new Stopwatch();
             mainStopWatch.Start();
@@ -74,6 +79,7 @@ namespace Xbim.Geometry.Profiler
                     Logger.InfoFormat("Parse Time \t{0:0.0} ms", mainStopWatch.ElapsedMilliseconds);
                     if (model != null)
                     {
+                        int prevProgress = -1;
                         var functionStack = new ConcurrentStack<Tuple<string, double>>();
                         ReportProgressDelegate progDelegate = delegate (int percentProgress, object userState)
                         {
@@ -90,8 +96,27 @@ namespace Xbim.Geometry.Profiler
                                     Logger.InfoFormat("Complete in \t{0:0.0} ms",
                                         DateTime.Now.TimeOfDay.TotalMilliseconds - func.Item2);
                             }
+                            else
+                            {
+                                if (prevProgress != percentProgress)
+                                {
+                                    Tuple<string, double> func;
+                                    if (functionStack.TryPeek(out func))
+                                    {
+                                        Logger.InfoFormat("{1}% in \t{0:0.0} ms",
+                                            DateTime.Now.TimeOfDay.TotalMilliseconds - func.Item2,
+                                            percentProgress
+                                            );
+                                    }
+                                    prevProgress = percentProgress;
+                                }
+                            }
                         };
                         var context = new Xbim3DModelContext(model);
+                        if (singleThread)
+                            context.MaxThreads = 1;
+
+                        // context.CustomMeshingBehaviour += SkipRebar;
                         context.CreateContext(progDelegate: progDelegate);
 
                         mainStopWatch.Stop();

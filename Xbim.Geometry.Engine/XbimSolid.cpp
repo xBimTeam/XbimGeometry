@@ -80,10 +80,14 @@
 #include <Geom_SurfaceOfLinearExtrusion.hxx>
 #include <GeomLib_IsPlanarSurface.hxx>
 #include <ShapeUpgrade_UnifySameDomain.hxx>
+#include <BRepBuilderAPI_MakePolygon.hxx>
+
+
 using namespace System;
 using namespace System::Linq;
 using namespace System::Threading;
 using namespace Xbim::Common;
+using namespace System::Diagnostics;
 
 namespace Xbim
 {
@@ -459,7 +463,6 @@ namespace Xbim
 			else
 			{
 				XbimGeometryCreator::LogWarning(swdSolid, "Could not be constructed");
-
 			}
 		}
 
@@ -1283,33 +1286,48 @@ namespace Xbim
 		}
 
 
-		void XbimSolid::Init(IIfcSweptDiskSolid^ swdSolid)
+				
+		XbimWire^ XbimSolid::GetSweep(IIfcSweptDiskSolid^ swdSolid)
 		{
-			if (dynamic_cast<IIfcSweptDiskSolidPolygonal^>(swdSolid))
-				return Init((IIfcSweptDiskSolidPolygonal^)swdSolid);
-			//else Build the directrix
 			IModelFactors^ mf = swdSolid->Model->ModelFactors;
 			XbimWire^ sweep = gcnew XbimWire(swdSolid->Directrix);
 			if (swdSolid->StartParam.HasValue && swdSolid->EndParam.HasValue)
 			{
 				// if the last parameter is about 1, use the lenght
-				double last  = Math::Abs(swdSolid->EndParam.Value - 1.0) < Precision::Confusion() 
-					? sweep->Length 
+				double last = Math::Abs(swdSolid->EndParam.Value - 1.0) < Precision::Confusion()
+					? sweep->Length
 					: swdSolid->EndParam.Value;
 				sweep = (XbimWire^)sweep->Trim(
 					swdSolid->StartParam.Value,
-					last, 
+					last,
 					mf->Precision);
 			}
 			else if (swdSolid->StartParam.HasValue && !swdSolid->EndParam.HasValue)
 				sweep = (XbimWire^)sweep->Trim(swdSolid->StartParam.Value, sweep->Length, mf->Precision);
 			else if (!swdSolid->StartParam.HasValue && swdSolid->EndParam.HasValue)
-				sweep = (XbimWire^)sweep->Trim(0, Math::Abs(swdSolid->EndParam.Value - 1.0)<Precision::Confusion() ? sweep->Length : swdSolid->EndParam.Value, mf->Precision);
+				sweep = (XbimWire^)sweep->Trim(0, Math::Abs(swdSolid->EndParam.Value - 1.0) < Precision::Confusion() ? sweep->Length : swdSolid->EndParam.Value, mf->Precision);
 			if (!sweep->IsValid)
 			{
 				XbimGeometryCreator::LogWarning(swdSolid, "Could not build Directrix");
-				return;
+				return nullptr;
 			}
+			return sweep;
+		}
+
+		List<XbimPoint3D>^ XbimSolid::GetDiscretisedDirectrix(IIfcSweptDiskSolid^ saSolid, int numberOfPoints)
+		{
+			XbimWire^ sweep = XbimSolid::GetSweep(saSolid);
+			return XbimWire::GetDiscretisedWire(sweep, numberOfPoints);
+		}
+
+		void XbimSolid::Init(IIfcSweptDiskSolid^ swdSolid)
+		{
+			if (dynamic_cast<IIfcSweptDiskSolidPolygonal^>(swdSolid))
+				return Init((IIfcSweptDiskSolidPolygonal^)swdSolid);
+			//else Build the directrix
+			XbimWire^ sweep = XbimSolid::GetSweep(swdSolid);
+			if (sweep == nullptr)
+				return;
 
 			// todo: should we have a test case with an inner radius as well?
 
@@ -1325,24 +1343,38 @@ namespace Xbim
 			gp_Vec tangent;
 			gp_Vec xDir;
 			curve->D1(0, p1, tangent);
+
+			double p1x = p1.X();
+			double p1y = p1.Y();
+			double p1z = p1.Z();
+
 		
-			//make the outer wire
+			// make the outer wire
+			//
 			XbimPoint3D s = sweep->Start;
 			gp_Ax2 axCircle(gp_Pnt(s.X, s.Y, s.Z), gp_Dir(tangent.X(), tangent.Y(), tangent.Z())); 
 			gp_Circ outer(axCircle, swdSolid->Radius);
 			Handle(Geom_Circle) hOuter = GC_MakeCircle(outer);
 			TopoDS_Edge outerEdge = BRepBuilderAPI_MakeEdge(hOuter);
-			BRepBuilderAPI_MakeWire outerWire;
-			outerWire.Add(outerEdge);
+			BRepBuilderAPI_MakeWire outerWireMaker;
+			outerWireMaker.Add(outerEdge);
+
+		/*	BRepBuilderAPI_MakePolygon PolyMaker(
+				gp_Pnt(s.X + swdSolid->Radius, s.Y, s.Z),
+				gp_Pnt(s.X - swdSolid->Radius, s.Y, s.Z),
+				gp_Pnt(s.X, s.Y + swdSolid->Radius, s.Z),
+				Standard_True
+			);*/
+			
 			BRepOffsetAPI_MakePipeShell pipeMaker1(sweep);
 			
 			// SetTransitionMode makes for a step alignement of the profile along the outerWire, 
 			// two adjacent segments of the spine are extended and intersected at a fracture of the spine
 			pipeMaker1.SetTransitionMode(BRepBuilderAPI_RightCorner); 
 
-			pipeMaker1.Add(outerWire.Wire(), Standard_False, Standard_True);
-			
+			pipeMaker1.Add(outerWireMaker.Wire(), Standard_False, Standard_True);
 			pipeMaker1.Build();
+			
 			if (pipeMaker1.IsDone())
 			{	
 				BRepPrim_Builder b;
@@ -1408,7 +1440,6 @@ namespace Xbim
 			else
 			{
 				XbimGeometryCreator::LogWarning(swdSolid, "Could not be constructed. It has been ignored");
-				
 			}
 		}
 

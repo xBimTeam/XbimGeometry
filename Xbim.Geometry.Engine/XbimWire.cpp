@@ -66,15 +66,18 @@
 #include <ShapeAnalysis_Wire.hxx>
 #include <msclr\lock.h>
 #include <ShapeAnalysis_WireOrder.hxx>
+#include <GCPnts_UniformAbscissa.hxx>
 
 using namespace Xbim::Common;
 using namespace System::Linq;
-// using namespace System::Diagnostics;
+using namespace System::Diagnostics;
 
 namespace Xbim
 {
 	namespace Geometry
 	{
+
+
 
 #pragma region Destructors and cleanup 
 
@@ -2758,7 +2761,43 @@ namespace Xbim
 
 #pragma endregion
 
+		List<XbimPoint3D>^ XbimWire::GetDiscretisedWire(XbimWire^ sweep, int numberOfPoints)
+		{
+			List<XbimPoint3D>^ pnts = gcnew List<XbimPoint3D>();
+			int iEdge = 1;
+			gp_Pnt lastP;
+			for each (XbimEdge^ edge in sweep->Edges)
+			{
+				// joining points are omitted in loop by skipping the edge start, but the start of the first edge one must be provided
+				if (iEdge++ == 1)
+				{
+					pnts->Add(edge->EdgeStartPoint);
+				}
+				if (edge->IsLinear)
+				{
+					// just add the end point
+					pnts->Add(edge->EdgeEndPoint);
+				}
+				else
+				{
+					BRepAdaptor_Curve curve_adaptator(edge);
+					GCPnts_UniformAbscissa discretizer;
+					discretizer.Initialize(curve_adaptator, numberOfPoints);
+					int count = discretizer.NbPoints();
+					// check(discretizer.IsDone());//computation_ok
+					// check(discretizer.NbPoints() > 0);//positive_count_of_points
 
+					// discretizer is 1 based, but we skip the start, so we want to stat at 2
+					for (int i = 2; i <= count; i++) 
+					{
+						gp_Pnt p = curve_adaptator.Value(discretizer.Parameter(i));
+						XbimPoint3D pnt = XbimPoint3D(p.X(), p.Y(), p.Z());
+						pnts->Add(pnt);
+					}
+				}
+			}
+			return pnts;
+		}
 
 #pragma region Helper functions
 

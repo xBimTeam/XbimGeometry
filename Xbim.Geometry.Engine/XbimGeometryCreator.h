@@ -183,6 +183,9 @@ namespace Xbim
 			virtual IXbimGeometryObject ^ Moved(IXbimGeometryObject ^geometryObject, IIfcObjectPlacement ^objectPlacement);
 			virtual IXbimGeometryObject^ FromBrep(String^ brepStr);
 			virtual String^ ToBrep(IXbimGeometryObject^ geometryObject);
-		};
+
+			// Inherited via IXbimGeometryEngine
+			virtual System::Collections::Generic::IList<Xbim::Common::Geometry::XbimPoint3D> ^ GetDiscretisedDirectrix(Xbim::Ifc4::Interfaces::IIfcSweptDiskSolid ^saSolid, int numberOfPoints);
+};
 	}
 }

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Remoting;
@@ -279,9 +281,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             return _engine.CreateWire(compCurveSeg);
         }
-
-       
-
+        
         public IXbimPoint CreatePoint(double x, double y, double z, double tolerance)
         {
             return _engine.CreatePoint(x, y, z, tolerance);
@@ -316,8 +316,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             return _engine.CreateVertexPoint(point, precision);
         }
-
-
+        
         public IXbimSolidSet CreateSolidSet()
         {
             return _engine.CreateSolidSet();
@@ -352,22 +351,17 @@ namespace Xbim.Geometry.Engine.Interop
         {
             _engine.Mesh(receiver, geometryObject, precision, deflection, angle);
         }
-
-       
+               
         public void WriteTriangulation(BinaryWriter bw, IXbimGeometryObject shape, double tolerance, double deflection)
         {
             WriteTriangulation(bw, shape, tolerance, deflection: deflection, angle: 0.5);
         }
-
-       
-
+             
         public ILogger Logger
         {
             get { return _engine.Logger; }
         }
-
-
-
+        
         public IXbimGeometryObject Create(IIfcGeometricRepresentationItem ifcRepresentation, IIfcAxis2Placement3D objectLocation)
         {
             try
@@ -379,7 +373,6 @@ namespace Xbim.Geometry.Engine.Interop
                 Logger.ErrorFormat("EE001: Failed to create geometry #{0} of type {1}, {2}", ifcRepresentation.EntityLabel, ifcRepresentation.GetType().Name, e.Message);
                 return null;
             }
-
         }
 
         public IXbimGeometryObjectSet CreateGeometryObjectSet()
@@ -451,16 +444,17 @@ namespace Xbim.Geometry.Engine.Interop
         {
            return _engine.Transformed(geometry, cartesianTransform);
         }
-
-
+        
         public IXbimGeometryObject Moved(IXbimGeometryObject geometryObject, IIfcAxis2Placement3D placement)
         { 
             return _engine.Moved(geometryObject, placement);
         }
+
         public IXbimGeometryObject Moved(IXbimGeometryObject geometryObject, IIfcAxis2Placement2D placement)
         {
             return _engine.Moved(geometryObject, placement);
         }
+
         public IXbimGeometryObject Moved(IXbimGeometryObject geometryObject, IIfcPlacement placement)
         {
             return _engine.Moved(geometryObject, placement);
@@ -479,6 +473,11 @@ namespace Xbim.Geometry.Engine.Interop
         public string ToBrep(IXbimGeometryObject geometryObject)
         {
             return _engine.ToBrep(geometryObject);
+        }
+
+        public IList<XbimPoint3D> GetDiscretisedDirectrix(IIfcSweptDiskSolid saSolid, int numberOfPoints)
+        {
+            return _engine.GetDiscretisedDirectrix(saSolid, numberOfPoints);
         }
     }
 }

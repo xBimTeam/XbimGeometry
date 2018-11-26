@@ -26,8 +26,15 @@ namespace Xbim
 				void set(TopoDS_Solid* val)sealed { ptrContainer = IntPtr(val); }
 			}
 			void InstanceCleanup();
+
+#pragma region reusable
+			static XbimWire^ GetSweep(IIfcSweptDiskSolid^ swdSolid);
+#pragma endregion
+
 			
 #pragma region Initialisers
+
+			
 
 			void Init(IIfcSolidModel^ solid);
 			void Init(IIfcManifoldSolidBrep^ solid);
@@ -40,6 +47,7 @@ namespace Xbim
 			void Init(IIfcRevolvedAreaSolidTapered^ solid, IIfcProfileDef^ overrideProfileDef);
 			void Init(IIfcSectionedSpine^ solid);
 			void Init(IIfcSweptDiskSolid^ solid);
+			
 			void Init(IIfcSweptDiskSolidPolygonal^ solid);
 			void Init(IIfcBoundingBox^ solid);
 			void Init(IIfcHalfSpaceSolid^ solid, double maxExtrusion, XbimPoint3D centroid);
@@ -61,6 +69,9 @@ namespace Xbim
 #pragma endregion
 
 		public:
+			
+			static List<XbimPoint3D>^ GetDiscretisedDirectrix(IIfcSweptDiskSolid^ saSolid, int numberOfPoints);
+			
 			static XbimSolid^ BuildClippingList(IIfcBooleanClippingResult^ solid, List<IIfcBooleanOperand^>^ clipList);
 #pragma region Equality Overrides
 			virtual bool Equals(Object^ v) override;
@@ -147,9 +158,7 @@ namespace Xbim
 			operator const TopoDS_Solid& () { return *pSolid; }
 			virtual operator const TopoDS_Shape& () override { return *pSolid; }
 #pragma endregion
-
-		
-		
+					
 #pragma region Methods
 			//moves the solid to the new position
 			void Move(IIfcAxis2Placement3D^ position);
@@ -159,18 +168,15 @@ namespace Xbim
 			void FixTopology();
 #pragma endregion
 
-			
-
 			// Inherited via XbimOccShape
 			virtual XbimGeometryObject ^ Transformed(IIfcCartesianTransformationOperator ^ transformation) override;
-
 
 			// Inherited via XbimOccShape
 			virtual XbimGeometryObject ^ Moved(IIfcPlacement ^ placement) override;
 
 			virtual XbimGeometryObject ^ Moved(IIfcObjectPlacement ^ objectPlacement) override;
 			virtual void Move(TopLoc_Location loc);
-};
+		};
 
 	}
 }

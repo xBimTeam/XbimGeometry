@@ -1249,8 +1249,6 @@ namespace Xbim
 			}
 		}
 
-		
-
 		String ^ XbimGeometryCreator::ToBrep(IXbimGeometryObject ^ geometryObject)
 		{
 			XbimGeometryObject^ geom = dynamic_cast<XbimGeometryObject^>(geometryObject);
@@ -1258,6 +1256,11 @@ namespace Xbim
 				return geom->ToBRep;
 			else
 				return nullptr;
+		}
+
+		System::Collections::Generic::IList<Xbim::Common::Geometry::XbimPoint3D> ^ XbimGeometryCreator::GetDiscretisedDirectrix(Xbim::Ifc4::Interfaces::IIfcSweptDiskSolid ^saSolid, int numberOfPoints)
+		{
+			return XbimSolid::GetDiscretisedDirectrix(saSolid, numberOfPoints);
 		}
 
 		IXbimGeometryObject ^ XbimGeometryCreator::Trim(XbimSetObject ^geometryObject)

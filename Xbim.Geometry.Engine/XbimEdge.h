@@ -37,8 +37,8 @@ namespace Xbim
 			void Init(IIfcRationalBSplineCurveWithKnots^ bSpline);
 			void Init(IIfcPcurve^ curve);
 #pragma endregion
-
-			XbimEdge(){};
+			bool _isLinear;
+			XbimEdge() { _isLinear = false; };
 		public:
 			//error messages
 			static String^ GetBuildEdgeErrorMessage(BRepBuilderAPI_EdgeError edgeErr);
@@ -97,6 +97,7 @@ namespace Xbim
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) override;
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D)override;
 			virtual property bool IsClosed{bool get(){ return IsValid && pEdge->Closed() == Standard_True; }; }
+			virtual property bool IsLinear {bool get(); }
 #pragma endregion	
 
 #pragma region Properties
@@ -115,7 +116,9 @@ namespace Xbim
 
 			// Inherited via XbimOccShape
 			virtual void Mesh(IXbimMeshReceiver ^ mesh, double precision, double deflection, double angle) override;
-		};
+
+			
+};
 	 
 		ref class XbimBiPolarLinearEdge
 		{

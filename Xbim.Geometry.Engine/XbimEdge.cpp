@@ -79,6 +79,13 @@ namespace Xbim
 			return gcnew XbimCurve(curve);
 		}
 
+		bool XbimEdge::IsLinear::get()
+		{
+			BRepAdaptor_Curve theCrv(*pEdge);
+			GeomAbs_CurveType theTyp = theCrv.GetType();
+			return (theTyp == GeomAbs_Line);
+		}
+
 		double XbimEdge::Length::get()
 		{
 			if (IsValid)
@@ -1115,6 +1122,7 @@ namespace Xbim
 				// set the tolerance for this shape.
 				ShapeFix_ShapeTolerance FTol;
 				FTol.SetTolerance(*pEdge, line->Model->ModelFactors->Precision, TopAbs_EDGE);
+				_isLinear = true;
 			}
 		}
 
@@ -1144,7 +1152,6 @@ namespace Xbim
 				Init(ratBez);
 			else
 			{
-
 				TColgp_Array1OfPnt poles(1, Enumerable::Count(bspline->ControlPointsList));
 				int i = 1;
 				for each (IIfcCartesianPoint^ cp in bspline->ControlPointsList)

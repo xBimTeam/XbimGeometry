@@ -124,6 +124,7 @@ namespace Xbim
 
 #pragma endregion
 
+			static List<XbimPoint3D>^ GetDiscretisedWire(XbimWire^ sweep, int numberOfPoints);
 
 #pragma region operators
 			operator const TopoDS_Wire& () { return *pWire; }

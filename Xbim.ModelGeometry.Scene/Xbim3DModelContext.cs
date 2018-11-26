@@ -4,6 +4,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -1196,6 +1197,8 @@ namespace Xbim.ModelGeometry.Scene
         /// </summary>
         public int MaxThreads { get; set; }
 
+        public bool UseSimplifiedFastExtruder { get; set; } = false;
+
         private void WriteShapeGeometries(XbimCreateContextHelper contextHelper, ReportProgressDelegate progDelegate, IGeometryStoreInitialiser geometryStore, XbimGeometryType geomStorageType)
         {
             var localPercentageParsed = contextHelper.PercentageParsed;
@@ -1231,6 +1234,10 @@ namespace Xbim.ModelGeometry.Scene
             }
             Parallel.ForEach(contextHelper.ProductShapeIds, contextHelper.ParallelOptions, shapeId =>
             {
+#if DEBUG
+                Stopwatch s = new Stopwatch();
+                s.Start();
+#endif
                 Interlocked.Increment(ref localTally);
                 IIfcGeometricRepresentationItem shape;
                 try
@@ -1258,6 +1265,27 @@ namespace Xbim.ModelGeometry.Scene
                         {
                             XbimShapeGeometry shapeGeom = null;
                             IXbimGeometryObject geomModel = null;
+
+                            if (UseSimplifiedFastExtruder && shape is IIfcSweptDiskSolid)
+                            {
+                                // work out the sweeping profile and then extrude in simplified form
+
+                                var swDisk = shape as IIfcSweptDiskSolid;
+                                var pts = Engine.GetDiscretisedDirectrix(swDisk, 3);
+
+                                // ProfileExtruder.Debug(pts);
+                                var r = (double)swDisk.Radius.Value;
+                                const int pointsOnProfile = 5;
+                                var silhou = new List<XbimPoint3D>(pointsOnProfile);
+                                double deltaAngle = 2 * Math.PI / pointsOnProfile;
+                                for (int i = 0; i< pointsOnProfile; i++)
+                                {
+                                    var ang = deltaAngle * i;
+                                    silhou.Add(new XbimPoint3D(r * Math.Sin(ang), r * Math.Cos(ang), 0));
+                                }
+                                shapeGeom = ProfileExtruder.Extrude(pts, silhou, true);
+                            }
+                            else
                             if (!isFeatureElementShape && !isVoidedProductShape && xbimTessellator.CanMesh(shape)) // if we can mesh the shape directly just do it
                             {
                                 shapeGeom = xbimTessellator.Mesh(shape);
@@ -1328,6 +1356,9 @@ namespace Xbim.ModelGeometry.Scene
                         progDelegate(localPercentageParsed, "Creating Geometry");
                     }
                 }
+#if DEBUG
+                Debug.WriteLine($"{shape.GetType()}: {s.ElapsedMilliseconds}");
+#endif
             }
             );
 
