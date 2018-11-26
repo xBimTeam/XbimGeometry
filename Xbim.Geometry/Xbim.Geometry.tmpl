@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
+  <metadata>
+    <id>Xbim.Geometry</id>
+    <version>{{version}}</version>
+    <title>xBIM Geometry</title>
+    <authors>xBIM Team</authors>
+    <owners>Steve Lockley, Martin Cerny</owners>
+    <licenseUrl>https://raw.githubusercontent.com/xBimTeam/XbimGeometry/master/LICENCE.md</licenseUrl>
+    <projectUrl>https://github.com/xBimTeam/XbimGeometry</projectUrl>
+    <iconUrl>https://avatars1.githubusercontent.com/u/2284875?v=3&amp;s=240</iconUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <description>
+      xBIM Geometry is an optional component of the XBIM Toolkit 
+	  providing support for generation of 3D Geometry from Ifc4 and Ifc2x3 representations.
+	  Use this package to update your XBim IModels to contain geometry that can be visualised in 3D.
+	  Currently supports IFC2x2, IFC2x3, IFC4 Addendum 2 and IFC Alignment (IFC4x1) schema. 
+      Note: Due to the use of the native Open Cascade geometry library this package only supports Windows platforms.
+    </description>
+    <summary>Meta package for xBIM toolkit geometry libraries to work with 3D / graphical IFC data.</summary>
+    <releaseNotes>
+	  This release is now a 'meta-package' which replaces Xbim.Geometry v4.x. 
+	  For more granular control you can include the individual Nuget packages in the dependencies.
+	  V5 of Essentials now targets .net47 as a minimum.
+    </releaseNotes>
+    <language>en-GB</language>
+    <tags>BIM IFC IfcXml IfcZip Ifc4 Geometry 3D CSG Tessellation XBIM WexBIM BuildingSmart</tags>
+    <dependencies>
+      <dependency id="Xbim.Geometry.Engine.Interop" version="{{version}}" />
+      <dependency id="Xbim.ModelGeometry.Scene" version="{{version}}" />
+    </dependencies>
+  </metadata>
+</package>

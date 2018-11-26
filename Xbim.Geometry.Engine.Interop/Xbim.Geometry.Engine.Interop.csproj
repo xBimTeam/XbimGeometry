@@ -21,7 +21,7 @@
     <Description>.net library that provides support for the  Ifc4 and Ifc2x3 Geometry conversion.</Description>
     <Authors>Steve Lockley</Authors>
     <Company>Xbim Ltd.</Company>
-    <PackageLicenseUrl>https://raw.githubusercontent.com/xBimTeam/XbimEssentials/master/LICENCE.md</PackageLicenseUrl>
+    <PackageLicenseExpression>CDDL-1.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/xBimTeam/</PackageProjectUrl>
     <RepositoryUrl></RepositoryUrl>
     <PackageTags>BIM, IFC, IfcXml, IfcZip, Ifc4,  COBie, .Net, C#, BuildingSmart</PackageTags>

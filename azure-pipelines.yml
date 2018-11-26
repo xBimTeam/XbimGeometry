@@ -61,6 +61,14 @@ steps:
 - script: dotnet pack Xbim.ModelGeometry.Scene/Xbim.ModelGeometry.Scene.csproj -c $(BuildConfiguration) -o Xbim.ModelGeometry.Scene/bin/$(BuildConfiguration) /p:PackageVersion=$(version)
   name: 'ModelScene_Pack'
 
+  
+# Xbim.Geometry meta package
+- powershell: |
+    ((Get-Content -path Xbim.Geometry\Xbim.Geometry.tmpl -Raw) -replace '{{version}}','$(version)') | Set-Content -Path Xbim.Geometry\Xbim.Geometry.nuspec
+  name: Geometry_metapackage_Update
+- script: nuget pack Xbim.Geometry\Xbim.Geometry.nuspec -o Xbim.Geometry/bin/$(BuildConfiguration)
+  name: Geometry_metapackage_Pack
+
 # - task: VSTest@2
 #   displayName: 'VsTest - testAssemblies'
 #   inputs:
