@@ -11,7 +11,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xbim.Common;
 using Xbim.Common.Geometry;
-
 using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc4.Interfaces;
 using Xbim.ModelGeometry.Scene.Clustering;
@@ -487,14 +486,6 @@ namespace Xbim.ModelGeometry.Scene
             get { return _engine ?? (_engine = new XbimGeometryEngine()); }
         }
 
-        private static ILogger Logger
-        {       
-            set
-            {
-                _logger = value;
-            }
-        }
-
         private readonly IModel _model;
 
         internal static void LogWarning(object entity, string format, params object[] args)
@@ -565,6 +556,7 @@ namespace Xbim.ModelGeometry.Scene
         public Xbim3DModelContext(IModel model, string contextType = "model", string requiredContextIdentifier = null)
         {
             _model = model;
+            _logger = XbimLogging.CreateLogger<Xbim3DModelContext>();
 
             // Get the required context
 

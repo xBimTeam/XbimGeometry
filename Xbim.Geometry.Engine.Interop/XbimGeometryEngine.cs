@@ -34,7 +34,7 @@ namespace Xbim.Geometry.Engine.Interop
             //XbimPrerequisitesValidator.Validate();
 
             
-            _logger = logger ?? new LoggerFactory().CreateLogger<XbimGeometryEngine>();
+            _logger = logger ?? XbimLogging.CreateLogger<XbimGeometryEngine>();
             
             var conventions = new XbimArchitectureConventions();    // understands the process we run under
             string assemblyName = $"{conventions.ModuleName}.dll";// + conventions.Suffix; dropping the use of a suffix
