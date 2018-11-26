@@ -82,7 +82,7 @@ steps:
   displayName: 'Copy Files to: $(build.artifactstagingdirectory)'
   inputs:
     SourceFolder: '$(build.sourcesdirectory)'
-    Contents: '**\bin\$(BuildConfiguration)\**'
+    Contents: '**\bin\$(BuildConfiguration)\*.nupkg'
     TargetFolder: '$(build.artifactstagingdirectory)'
   condition: succeededOrFailed()
 
