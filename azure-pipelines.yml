@@ -22,18 +22,34 @@ steps:
   condition: and(ne(variables['Build.SourceBranch'], 'refs/heads/master'),ne(variables['Build.SourceBranch'], 'refs/heads/develop'))
 
 
-- task: DeleteFiles@1
-  displayName: 'Delete old *.nupkg files from $(build.sourcesdirectory)'
-  inputs:
-    SourceFolder: '$(build.sourcesdirectory)'
-    Contents: '**\bin\$(BuildConfiguration)\**\*.nupkg'
-
+# Windows script setting up $(fileversion) used to stamp AssemblyFileVersions. 
+# By convention we use 'Major.Minor.BuildNo.0' on Master and 'Major.Minor.0.BuildNo' on other branches
+- script: | 
+    echo ##vso[task.setvariable variable=fileversion]$(major).$(minor).$(patch).0
+  name: 'SettingFileVersionMaster'
+  condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
+- script: | 
+    echo ##vso[task.setvariable variable=fileversion]$(major).$(minor).0.$(patch)
+  name: 'SettingFileVersionNonMaster'
+  condition: ne(variables['Build.SourceBranch'], 'refs/heads/master')
 
 #Task group has not been exported, task groups are not supported yet
 
 - task: NuGetToolInstaller@0
   displayName: 'Use NuGet 4.3.0'
 
+# Version .NET Core project files
+# Description - Applies a version to a .NET Core assembly via the .csproj files based on the build number. 
+# Based on https://github.com/rfennell/AzurePipelines/wiki/Version-Assemblies-and-Packages-Tasks-YAML#versiondotnetcoreassembliestask
+- task: VersionDotNetCoreAssemblies@2
+  inputs: 
+    # Required arguments
+    Path: $(Build.SourcesDirectory)
+    VersionNumber: $(fileversion)
+    VersionRegex: \d+\.\d+\.\d+\.\d+
+    FilenamePattern: .csproj
+    Field: FileVersion
+    OutputVersion: OutputedVersion
 
 - task: NuGetCommand@2
   displayName: 'NuGet restore Xbim.Geometry.Engine.sln'
@@ -51,23 +67,40 @@ steps:
     platform: '$(BuildPlatform)'
     configuration: '$(BuildConfiguration)'
 
+# Delete all Package(s) including newly built - we're going to regenerate with the current build version
+# We need to msbuild pack to complete however before we can run 'dotnet pack' on Geometry Engine
+- task: DeleteFiles@1
+  displayName: 'Delete old *.nupkg files from $(build.sourcesdirectory)'
+  inputs:
+    SourceFolder: '$(build.sourcesdirectory)'
+    Contents: '**\bin\$(BuildConfiguration)\**\*.nupkg'
+
+
 # Pack GeometryEngine.Interop
-#- script: dotnet pack Xbim.Geometry.Engine.Interop/Xbim.Geometry.Engine.Interop.csproj -c $(BuildConfiguration) -o $(Build.BinariesDirectory) /p:PackageVersion=$(version)
-#  name: 'Geometry_Interop_Pack'
+- script: dotnet pack Xbim.Geometry.Engine.Interop/Xbim.Geometry.Engine.Interop.csproj -c $(BuildConfiguration) -o Xbim.Geometry.Engine.Interop/bin/$(BuildConfiguration) /p:PackageVersion=$(version)
+  name: 'Geometry_Interop_Pack'
 
 # Pack ModelGeometry.Scene
-- script: dotnet pack Xbim.ModelGeometry.Scene/Xbim.ModelGeometry.Scene.csproj -c $(BuildConfiguration) -o $(Build.BinariesDirectory) /p:PackageVersion=$(version)
+- script: dotnet pack Xbim.ModelGeometry.Scene/Xbim.ModelGeometry.Scene.csproj -c $(BuildConfiguration) -o Xbim.ModelGeometry.Scene/bin/$(BuildConfiguration) /p:PackageVersion=$(version)
   name: 'ModelScene_Pack'
 
-# - task: VSTest@2
-#   displayName: 'VsTest - testAssemblies'
-#   inputs:
-#     testAssemblyVer2: |
-#      **\bin\$(BuildConfiguration)\**\Xbim.Geometry.Engine.Interop.Tests.dll
-#     codeCoverageEnabled: true
-#     platform: '$(BuildPlatform)'
-#     configuration: '$(BuildConfiguration)'
-#   continueOnError: true
+  
+# Xbim.Geometry meta package
+- powershell: |
+    ((Get-Content -path Xbim.Geometry\Xbim.Geometry.tmpl -Raw) -replace '{{version}}','$(version)') | Set-Content -Path Xbim.Geometry\Xbim.Geometry.nuspec
+  name: Geometry_metapackage_Update
+- script: nuget pack Xbim.Geometry\Xbim.Geometry.nuspec -o Xbim.Geometry/bin/$(BuildConfiguration)
+  name: Geometry_metapackage_Pack
+
+- task: VSTest@2
+  displayName: 'VsTest - testAssemblies'
+  inputs:
+    testAssemblyVer2: |
+     **\bin\$(BuildConfiguration)\**\Xbim.Geometry.Engine.Interop.Tests.dll
+    codeCoverageEnabled: true
+    platform: '$(BuildPlatform)'
+    configuration: '$(BuildConfiguration)'
+  continueOnError: true
 
 - task: PublishSymbols@1
   displayName: 'Publish symbols path: '
@@ -80,7 +113,7 @@ steps:
   displayName: 'Copy Files to: $(build.artifactstagingdirectory)'
   inputs:
     SourceFolder: '$(build.sourcesdirectory)'
-    Contents: '**\bin\$(BuildConfiguration)\**'
+    Contents: '**\bin\$(BuildConfiguration)\*.nupkg'
     TargetFolder: '$(build.artifactstagingdirectory)'
   condition: succeededOrFailed()
 

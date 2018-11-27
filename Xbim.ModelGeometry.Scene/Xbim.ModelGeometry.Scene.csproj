@@ -1,42 +1,35 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Year>$([System.DateTime]::Now.ToString("yy"))</Year>
-    <Month>$([System.DateTime]::Now.ToString("MM"))</Month>
-    <Day>$([System.DateTime]::Now.ToString("dd"))</Day>
-    <Minute>$([System.Int32]::Parse($([System.DateTime]::Now.ToString("mm"))))</Minute>
-    <Hour>$([System.Int32]::Parse($([System.DateTime]::Now.ToString("HH"))))</Hour>
-    <MinuteOfDay>$([MSBuild]::Add($(Minute),$([MSBuild]::Multiply($(Hour),60))))</MinuteOfDay>
-    <HalfMinuteOfDay>$([System.Convert]::ToInt16($([MSBuild]::Divide($(MinuteOfDay), 2))))</HalfMinuteOfDay>
-    <AssemblyFileVersionAttribute>[assembly:System.Reflection.AssemblyVersionAttribute("5.0.$(Year)$(Month).$(Day)$(HalfMinuteOfDay)")];</AssemblyFileVersionAttribute>
-  </PropertyGroup>
-  <PropertyGroup>
-    <TargetFramework>net47</TargetFramework>
-    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
-    <SignAssembly>false</SignAssembly>
-    <AssemblyOriginatorKeyFile>aimkey.snk</AssemblyOriginatorKeyFile>
+    <TargetFrameworks>net47</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
     <Title>Xbim ModelGeometry Scene</Title>
-    <Version>5.0.0-Beta1-1811-2410</Version>
+    <Version>5.0.0.0-beta</Version>
     <Copyright>Copyright Xbim Ltd.</Copyright>
-    <Description>.net library that provides support for the  Geometry Scene creation.</Description>
+    <Description>.net library that provides support for the Geometry Scene creation.</Description>
     <Authors>Steve Lockley</Authors>
     <Company>Xbim Ltd.</Company>
-    <PackageLicenseUrl>https://raw.githubusercontent.com/xBimTeam/XbimEssentials/master/LICENCE.md</PackageLicenseUrl>
+    <PackageLicenseExpression>CDDL-1.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/xBimTeam/</PackageProjectUrl>
-    <RepositoryUrl></RepositoryUrl>
-    <PackageTags>BIM, IFC, IfcXml, IfcZip, Ifc4,  COBie, .Net, C#, BuildingSmart</PackageTags>
-    <PackageReleaseNotes>migrated to .net47</PackageReleaseNotes>
+    <RepositoryUrl>https://github.com/xBimTeam/XbimGeometry/</RepositoryUrl>
+    <PackageTags>BIM IFC IfcXml IfcZip Ifc4 COBie BuildingSmart</PackageTags>
+    <PackageReleaseNotes>Updated to version 5</PackageReleaseNotes>
     <AssemblyVersion>5.0.0.0</AssemblyVersion>
-    <FileVersion>5.0.$(Year)$(Month).$(Day)$(HalfMinuteOfDay)</FileVersion>
-    <ProductVersion>5.0.$(Year)$(Month).$(Day)$(HalfMinuteOfDay)</ProductVersion>
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <FileVersion>5.0.0.0</FileVersion>
     <PackageIconUrl>https://avatars1.githubusercontent.com/u/2284875?v=3&amp;amp;s=240</PackageIconUrl>
-    <DelaySign>false</DelaySign>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+  </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="Xbim.Ifc" Version="5.0.166-prerelease" />
-    <PackageReference Include="Xbim.Tessellator" Version="5.0.166-prerelease" />
+    <PackageReference Include="Xbim.Ifc" Version="5.0.177" />
+    <PackageReference Include="Xbim.Tessellator" Version="5.0.177" />
   </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Xbim.Geometry.Engine.Interop\Xbim.Geometry.Engine.Interop.csproj" />
   </ItemGroup>
