@@ -33,27 +33,27 @@ namespace Xbim.Geometry.Engine.Interop
             // Warn if runtime for Engine is not present, this is not necessary any more as we are net47
             //XbimPrerequisitesValidator.Validate();
 
-            
-            _logger = logger ?? XbimLogging.CreateLogger<XbimGeometryEngine>();
+
+            _logger = logger;
             
             var conventions = new XbimArchitectureConventions();    // understands the process we run under
             string assemblyName = $"{conventions.ModuleName}.dll";// + conventions.Suffix; dropping the use of a suffix
-            _logger.LogDebug("Loading {assemblyName}", assemblyName);
+            _logger?.LogDebug("Loading {assemblyName}", assemblyName);
             try
             {               
                 var ass =  Assembly.Load(assemblyName);
-                _logger.LogTrace("Loaded {fullName} from {codebase}", ass.GetName().FullName, ass.CodeBase);
+                _logger?.LogTrace("Loaded {fullName} from {codebase}", ass.GetName().FullName, ass.CodeBase);
                 var t = ass.GetType("Xbim.Geometry.XbimGeometryCreator");
                 var obj = Activator.CreateInstance(t);
-                _logger.LogTrace("Created Instance of {fullName}", obj.GetType().FullName);
+                _logger?.LogTrace("Created Instance of {fullName}", obj.GetType().FullName);
                 if (obj == null) throw new Exception("Failed to create Geometry Engine");
                 _engine = obj as IXbimGeometryEngine;
                 if (_engine == null) throw new Exception("Failed to cast Geometry Engine to IXbimGeometryEngine");
-                _logger.LogDebug("XbimGeometryEngine constructed succesfully");
+                _logger?.LogDebug("XbimGeometryEngine constructed succesfully");
             }
             catch (Exception e)
             {
-                _logger.LogError(0, e, "Failed to construct XbimGeometryEngine");
+                _logger?.LogError(0, e, "Failed to construct XbimGeometryEngine");
                 throw new FileLoadException($"Failed to load Xbim.Geometry.Engine{conventions.Suffix}.dll",e);
             }
              

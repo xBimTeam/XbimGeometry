@@ -198,7 +198,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 bool wa = model.ModelFactors.ApplyWorkAround("#SurfaceOfLinearExtrusion");
                 Assert.IsNotNull(advancedBrep);
                 var basin = geomEngine.CreateSolid(advancedBrep);
-                Assert.IsTrue((int)basin.Volume == 43947334);
+                Assert.IsTrue((int)basin.Volume == 44025929);
             }
         }
         [TestMethod]

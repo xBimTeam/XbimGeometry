@@ -564,7 +564,7 @@ namespace Xbim.ModelGeometry.Scene
         public Xbim3DModelContext(IModel model, string contextType = "model", string requiredContextIdentifier = null)
         {
             _model = model;
-            _logger = XbimLogging.CreateLogger<Xbim3DModelContext>();
+            
 
             // Get the required context
 

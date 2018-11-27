@@ -114,9 +114,10 @@ namespace XbimRegression
             // using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
                 var result = new ProcessResult() { Errors = -1 };
+                var watch = new Stopwatch();
                 try
                 {
-                    var watch = new Stopwatch();
+                    
                     watch.Start();
                     using (var model = ParseModelFile(ifcFile, Params.Caching, logger))
                     {
@@ -172,6 +173,7 @@ namespace XbimRegression
                 {
                     logger.LogError(string.Format("Problem converting file: {0}", ifcFile), ex);
                     result.Failed = true;
+                    result.GeometryDuration = watch.ElapsedMilliseconds / 1000;
                 }
                
                 return result;
