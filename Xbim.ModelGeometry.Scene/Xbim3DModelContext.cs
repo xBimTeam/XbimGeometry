@@ -487,7 +487,7 @@ namespace Xbim.ModelGeometry.Scene
             get { return _engine ?? (_engine = new XbimGeometryEngine()); }
         }
 
-        private static ILogger Logger
+        public static ILogger Logger
         {       
             set
             {

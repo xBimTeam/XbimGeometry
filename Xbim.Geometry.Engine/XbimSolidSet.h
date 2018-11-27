@@ -44,6 +44,7 @@ namespace Xbim
 			static int _maxOpeningsToCut = 100;
 			static double _maxOpeningVolumePercentage = 0.0002;
 			bool _isSimplified = false;
+			int _ifcEntityLabel = 0;
 			void InstanceCleanup()
 			{
 				solids = nullptr;
@@ -78,10 +79,22 @@ namespace Xbim
 			XbimSolidSet(IIfcFaceBasedSurfaceModel^ solid, ILogger^ logger);
 			XbimSolidSet(IIfcShellBasedSurfaceModel^ solid, ILogger^ logger);
 
-			virtual property bool IsValid {bool get() { return solids != nullptr && this != XbimSolidSet::Empty; }; }
-			virtual property bool IsSimplified{bool get(){ return _isSimplified; }; void set(bool val){ _isSimplified = val; } }
-			virtual property bool IsSet{bool get()  { return true; }; }
-			virtual property IXbimSolid^ First{IXbimSolid^ get(); }
+			virtual property bool IsValid
+			{ 
+				bool get()
+				{
+					if (solids == nullptr) return false;
+					for each (IXbimSolid^ solid in solids)
+					{
+						if (solid->IsValid) return true; //we have at least one valid solid
+					}
+					return false;
+				}
+			}
+			virtual property bool IsSimplified {bool get() { return _isSimplified; }; void set(bool val) { _isSimplified = val; } }
+			virtual property int IfcEntityLabel {int get() { return _ifcEntityLabel; }; void set(int val) { _ifcEntityLabel = val; } }
+			virtual property bool IsSet {bool get() { return true; }; }
+			virtual property IXbimSolid^ First {IXbimSolid^ get(); }
 			virtual property int Count {int get() override; }
 			virtual IXbimGeometryObject^ Trim()  override { if (Count == 1) return First; else if (Count == 0) return nullptr; else return this; };
 			virtual property XbimRect3D BoundingBox {XbimRect3D get(); }

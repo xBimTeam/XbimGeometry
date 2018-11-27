@@ -703,27 +703,27 @@ namespace Xbim
 					TopoDS_Wire lastOuter = TopoDS::Wire(pipeMaker1.LastShape().Reversed());
 					BRepBuilderAPI_MakeFace firstMaker(firstOuter);
 					BRepBuilderAPI_MakeFace lastMaker(lastOuter);
-					//for (int i = 0; i < faceStart->InnerBounds->Count; i++)					
-					//{
-					//	//it is a hollow section so we need to build the inside
-					//	BRepOffsetAPI_MakePipeShell pipeMaker2(sweep);
-					//	TopoDS_Wire innerBoundStart = faceStart->InnerWires->Wire[i];
-					//	TopoDS_Wire innerBoundEnd = faceEnd->InnerWires->Wire[i];
-					//
-					//	pipeMaker2.SetTransitionMode(BRepBuilderAPI_Transformed);
-					//	pipeMaker2.Add(innerBoundStart);
-					//	pipeMaker2.Add(innerBoundEnd);
-					//	pipeMaker2.Build();
-					//	if (pipeMaker2.IsDone())
-					//	{
-					//		for (TopExp_Explorer explr(pipeMaker2.Shape(), TopAbs_FACE); explr.More(); explr.Next())
-					//		{
-					//			b.AddShellFace(shell, TopoDS::Face(explr.Current().Reversed()));
-					//		}
-					//	}
-					//	firstMaker.Add(TopoDS::Wire(pipeMaker2.FirstShape()));
-					//	lastMaker.Add(TopoDS::Wire(pipeMaker2.LastShape()));
-					//}
+					for (int i = 0; i < faceStart->InnerBounds->Count; i++)					
+					{
+						//it is a hollow section so we need to build the inside
+						BRepOffsetAPI_MakePipeShell pipeMaker2(sweep);
+						TopoDS_Wire innerBoundStart = faceStart->InnerWires->Wire[i];
+						TopoDS_Wire innerBoundEnd = faceEnd->InnerWires->Wire[i];
+					
+						pipeMaker2.SetTransitionMode(BRepBuilderAPI_Transformed);
+						pipeMaker2.Add(innerBoundStart);
+						pipeMaker2.Add(innerBoundEnd);
+						pipeMaker2.Build();
+						if (pipeMaker2.IsDone())
+						{
+							for (TopExp_Explorer explr(pipeMaker2.Shape(), TopAbs_FACE); explr.More(); explr.Next())
+							{
+								b.AddShellFace(shell, TopoDS::Face(explr.Current().Reversed()));
+							}
+						}
+						firstMaker.Add(TopoDS::Wire(pipeMaker2.FirstShape()));
+						lastMaker.Add(TopoDS::Wire(pipeMaker2.LastShape()));
+					}
 					b.AddShellFace(shell, firstMaker.Face());
 					b.AddShellFace(shell, lastMaker.Face());
 					for (TopExp_Explorer explr(pipeMaker1.Shape(), TopAbs_FACE); explr.More(); explr.Next())
@@ -1436,9 +1436,10 @@ namespace Xbim
 			{
 				List<IIfcBooleanOperand^>^ clips = gcnew List<IIfcBooleanOperand^>();
 
-				IXbimSolidSet^ solidSet = gcnew XbimSolidSet();			
+				XbimSolidSet^ solidSet = gcnew XbimSolidSet();	
+				solidSet->IfcEntityLabel = solid->EntityLabel;
 				XbimSolid^ body = XbimSolid::BuildClippingList(boolClip, clips,logger);
-
+				
 				double maxLen = body->BoundingBox.Length();
 				for each (IIfcBooleanOperand^ bOp in clips)
 				{
@@ -1454,8 +1455,9 @@ namespace Xbim
 						if (s->IsValid) solidSet->Add(s);
 					}
 				}
-					
-				IXbimSolidSet^ xbimSolidSet = body->Cut(solidSet, mf->Precision,logger);
+				XbimSolidSet^ bodySet = gcnew XbimSolidSet(body);
+				bodySet->IfcEntityLabel = boolClip->EntityLabel;
+				IXbimSolidSet^ xbimSolidSet = bodySet->Cut(solidSet, mf->Precision,logger);
 				if (xbimSolidSet != nullptr && xbimSolidSet->First != nullptr)
 				{ 
 					const TopoDS_Solid&  shape = (XbimSolid^) (xbimSolidSet->First);
@@ -1473,9 +1475,10 @@ namespace Xbim
 
 
 				IIfcBooleanOperand^ sOp = solid->SecondOperand;
-				XbimSolid^ left = gcnew XbimSolid(fOp, logger);
-				XbimSolid^ right = gcnew XbimSolid(sOp, logger);
-
+				XbimSolidSet^ left = gcnew XbimSolidSet(gcnew XbimSolid(fOp, logger));
+				left->IfcEntityLabel = fOp->EntityLabel;
+				XbimSolidSet^ right = gcnew XbimSolidSet(gcnew XbimSolid(sOp, logger));
+				right->IfcEntityLabel = sOp->EntityLabel;
 				if (!left->IsValid)
 				{
 					if (solid->Operator != IfcBooleanOperator::UNION)
@@ -1489,7 +1492,7 @@ namespace Xbim
 					if (!left->IsValid) return;
 					//XbimGeometryCreator::LogWarning(solid, "Invalid second operand");
 					pSolid = new TopoDS_Solid(); //make sure this is deleted if not used
-					*pSolid = left; //return the left operand
+					*pSolid = (XbimSolid^)(left->First); //return the left operand
 					return;
 				}
 
@@ -1504,7 +1507,7 @@ namespace Xbim
 				{
 					XbimGeometryCreator::LogError(logger, solid, "Error performing boolean operation, {0}. The operation has been ignored");
 					pSolid = new TopoDS_Solid(); //make sure this is deleted if not used
-					*pSolid = left; //return the left operand
+					*pSolid = (XbimSolid^)(left->First); //return the left operand
 					return;
 				}
 
@@ -1874,94 +1877,15 @@ namespace Xbim
 		IXbimSolidSet^ XbimSolid::Cut(IXbimSolidSet^ toCut, double tolerance, ILogger^ logger)
 		{
 			if (toCut->Count == 0) return gcnew XbimSolidSet(this);
-			if (toCut->Count == 1) return this->Cut(toCut->First, tolerance, logger);
 			XbimSolidSet^ thisSolidSet = gcnew XbimSolidSet(this);
-			GC::KeepAlive(this);
 			return thisSolidSet->Cut(toCut, tolerance,logger);
 		}
 
 
 		IXbimSolidSet^ XbimSolid::Cut(IXbimSolid^ toCut, double tolerance, ILogger^logger)
 		{			
-			if (!IsValid || !toCut->IsValid) return XbimSolidSet::Empty;
-			XbimSolid^ solidCut = dynamic_cast<XbimSolid^>(toCut);
-			if (solidCut == nullptr || !solidCut->IsValid)
-			{
-				XbimGeometryCreator::LogWarning(logger, toCut, "Invalid operation. Only solid shapes can be cut from another solid");
-				return gcnew XbimSolidSet(this); // the result would be no change so return this		
-			}
-			
-			String^ err="";
-			try
-			{
-#ifdef OCC_6_9_SUPPORTED
-				ShapeFix_ShapeTolerance FTol;				
-				TopTools_ListOfShape shapeTools;
-				FTol.LimitTolerance(solidCut, tolerance);
-				shapeTools.Append(solidCut);
-				TopTools_ListOfShape shapeObjects;
-				FTol.LimitTolerance(this, tolerance);
-				shapeObjects.Append(this);
-				BRepAlgoAPI_Cut boolOp;
-				boolOp.SetArguments(shapeObjects);
-				boolOp.SetTools(shapeTools);
-				boolOp.SetNonDestructive(Standard_True);
-				Handle(XbimProgressIndicator) aPI = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);
-				boolOp.SetProgressIndicator(aPI);
-				boolOp.Build();
-				aPI->StopTimer();
-
-				if (aPI->TimedOut())
-				{
-					XbimGeometryCreator::LogError(logger, this, "Boolean operation timed out after {0} seconds. Operation failed", (int)aPI->ElapsedTime());
-					return XbimSolidSet::Empty;
-				}
-#else
-				ShapeFix_ShapeTolerance fixTol;
-				fixTol.SetTolerance(solidCut, tolerance);
-				fixTol.SetTolerance(this, tolerance);
-				BRepAlgoAPI_Cut boolOp(this, solidCut);
-#endif
-				if (boolOp.HasErrors() == Standard_False)
-					if (BRepCheck_Analyzer(boolOp.Shape(), Standard_False).IsValid() == Standard_False)
-					{
-						ShapeFix_Shape shapeFixer(boolOp.Shape());
-						shapeFixer.SetPrecision(tolerance);
-						shapeFixer.SetMinTolerance(tolerance);
-						shapeFixer.FixFaceTool()->FixIntersectingWiresMode() = Standard_True;
-						shapeFixer.FixFaceTool()->FixOrientationMode() = Standard_True;
-						shapeFixer.FixFaceTool()->FixWireTool()->FixAddCurve3dMode() = Standard_True;
-						shapeFixer.FixFaceTool()->FixWireTool()->FixIntersectingEdgesMode() = Standard_True;
-						if (shapeFixer.Perform())
-						{
-							ShapeUpgrade_UnifySameDomain unifier(shapeFixer.Shape());
-							unifier.SetAngularTolerance(0.00174533); //1 tenth of a degree
-							unifier.SetLinearTolerance(tolerance);
-							try
-							{
-								//sometimes unifier crashes
-								unifier.Build();
-								return gcnew XbimSolidSet(unifier.Shape());
-							}
-							catch (...)
-							{
-								//default to what we had
-								return gcnew XbimSolidSet(shapeFixer.Shape());
-							}
-						}
-					}
-
-				return gcnew XbimSolidSet(boolOp.Shape());
-				
-			}
-			catch (const std::exception &exc)
-			{
-				 err = gcnew String(exc.what());
-			}
-			XbimGeometryCreator::LogWarning(logger, toCut, "Boolean Cut operation failed, {0}",err);
-			GC::KeepAlive(solidCut);
-			GC::KeepAlive(this);
-			return XbimSolidSet::Empty;
+			XbimSolidSet^ thisSolidSet = gcnew XbimSolidSet(this);
+			return thisSolidSet->Cut(gcnew XbimSolidSet(toCut), tolerance, logger);
 		}
 
 		IXbimSolidSet^ XbimSolid::Intersection(IXbimSolidSet^ toIntersect, double tolerance, ILogger^ logger)

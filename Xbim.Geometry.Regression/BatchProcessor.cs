@@ -123,6 +123,7 @@ namespace XbimRegression
                         var parseTime = watch.ElapsedMilliseconds;
                         var xbimFilename = BuildFileName(ifcFile, ".xbim");
                         var context = new Xbim3DModelContext(model);
+                        Xbim3DModelContext.Logger = logger;
                         if (_params.MaxThreads > 0)
                             context.MaxThreads = _params.MaxThreads;
                         // context.CustomMeshingBehaviour = CustomMeshingBehaviour;

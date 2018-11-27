@@ -390,24 +390,10 @@ namespace Xbim
 			BRepAlgoAPI_Cut boolOp;
 			boolOp.SetArguments(shapeObjects);
 			boolOp.SetTools(shapeTools);
-			//boolOp.SetNonDestructive(Standard_True);
-			//boolOp.SetFuzzyValue(tolerance);
-			Handle(XbimProgressIndicator) aPI = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);
-			boolOp.SetProgressIndicator(aPI);
-			//boolOp.SetRunParallel(Standard_True);
-			boolOp.Build();
-			aPI->StopTimer();
-			//Console::Write("ThreadProc: ");
-			//Console::WriteLine(aPI->ElapsedTime());
-			if (aPI->TimedOut())
-			{
-				XbimGeometryCreator::LogError(boolParams->Logger, boolParams->Body, "Boolean operation timed out after {0} seconds. Try increasing the timeout in the App.config file", (int)aPI->ElapsedTime());
-				boolParams->Result = gcnew XbimSolidSet(boolParams->Body);
-				return;
-			}
 
 			try
 			{
+				boolOp.Build();						
 				if (boolOp.HasErrors() == Standard_False)
 				{
 					if (BRepCheck_Analyzer(boolOp.Shape(), Standard_False).IsValid() == Standard_False)
@@ -497,6 +483,7 @@ namespace Xbim
 			List<XbimSolidSetBoolOpParams^>^ params = gcnew List<XbimSolidSetBoolOpParams^>(this->Count);
 			for (int i = 0; i < this->Count; i++)
 			{
+				if (!solids[i]->IsValid) continue;
 				Thread^ oThread = gcnew Thread(gcnew ParameterizedThreadStart(Xbim::Geometry::ThreadProc));
 				threads->Add(oThread);
 				
@@ -522,12 +509,21 @@ namespace Xbim
 			}
 			for each (Thread^ oThread in threads)
 			{
-				oThread->Join();
+				if (!oThread->Join((int)(XbimGeometryCreator::BooleanTimeOut * 1000)))
+				{
+					XbimGeometryCreator::LogError(logger, nullptr, 
+						"Boolean operation timed out after {0} seconds.\nCutting Entity #{1} from #{2}.\nTry increasing the timeout in the App.config file", 
+						XbimGeometryCreator::BooleanTimeOut,
+						((XbimSolidSet^)solidsToCut)->IfcEntityLabel,
+						this->IfcEntityLabel);
+
+				}
 			}
+			
 			XbimSolidSet^ result = gcnew XbimSolidSet();
 			for each (XbimSolidSetBoolOpParams^ param in params)
 			{
-				if(param->Result->IsValid) result->Add( param->Result);
+				if(param->Result!=nullptr && param->Result->IsValid) result->Add( param->Result);
 			}
 			return result;			
 		}
@@ -877,8 +873,9 @@ namespace Xbim
 			IIfcBooleanOperand^ fOp = boolOp->FirstOperand; //thse must be solids according to the schema
 			IIfcBooleanOperand^ sOp = boolOp->SecondOperand;
 			XbimSolidSet^ left = gcnew XbimSolidSet(fOp, logger);
+			left->IfcEntityLabel = fOp->EntityLabel;
 			XbimSolidSet^ right = gcnew XbimSolidSet(sOp, logger);
-
+			right->IfcEntityLabel = sOp->EntityLabel;
 			
 			if (!left->IsValid)
 			{
