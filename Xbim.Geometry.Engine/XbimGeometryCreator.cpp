@@ -572,9 +572,11 @@ namespace Xbim
 			return gcnew XbimSolid(IIfcSolid, logger);
 		};
 
+		[[deprecated("Please use CreateSolidSet")]]
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcBooleanResult^ IIfcSolid, ILogger^ logger)
 		{
-			return gcnew XbimSolid(IIfcSolid, logger);
+			XbimSolidSet^ ss =  gcnew XbimSolidSet(IIfcSolid, logger);
+			return Enumerable::FirstOrDefault(ss);
 		};
 
 		IXbimSolidSet^ XbimGeometryCreator::CreateSolidSet(IIfcBooleanOperand^ IIfcSolid, ILogger^ logger)
@@ -599,10 +601,12 @@ namespace Xbim
 			 throw gcnew Exception(String::Format("Boolean Operand with Type {0} is not implemented", IIfcSolid->GetType()->Name));
 		};
 		
+		[[deprecated("Please use CreateSolidSet")]]
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcBooleanClippingResult^ IIfcSolid, ILogger^ logger)
 		{
-			return gcnew XbimSolid(IIfcSolid, logger);
+			return Enumerable::FirstOrDefault( gcnew XbimSolidSet(IIfcSolid, logger));
 		};
+
 		IXbimSolidSet^ XbimGeometryCreator::CreateSolidSet(IIfcBooleanClippingResult^ IIfcSolid, ILogger^ logger)
 		{
 			return gcnew XbimSolidSet(IIfcSolid, logger);
@@ -680,23 +684,7 @@ namespace Xbim
 			return gcnew XbimSolid(IIfcSolid, logger);
 		};
 
-#ifdef USE_CARVE_CSG
 
-		IXbimSolid^ XbimGeometryCreator::CreateSolid(IXbimSolid^ from)
-		{
-			XbimFacetedSolid^ faceted = dynamic_cast<XbimFacetedSolid^>(from);
-			if (faceted != nullptr) return faceted->ConvertToXbimSolid();
-			XbimSolid^ solid = dynamic_cast<XbimSolid^>(from);
-			if (faceted != nullptr) return solid;
-			throw gcnew NotImplementedException(String::Format("Solid conversion of Type {0} is not implemented", from->GetType()->Name));
-
-		}
-
-		IXbimSolid^ XbimGeometryCreator::CreateFacetedSolid(IIfcBooleanClippingResult^ IIfcSolid)
-		{
-			return gcnew XbimFacetedSolid(IIfcSolid);
-		};
-#endif // USE_CARVE_CSG
 
 
 		//Surface Models containing one or more shells or solids
@@ -912,38 +900,7 @@ namespace Xbim
 			}
 		}
 
-		IXbimSolidSet^ XbimGeometryCreator::CreateBooleanResult(IIfcBooleanClippingResult^ clip, ILogger^ logger)
-		{
-			IModelFactors^ mf = clip->Model->ModelFactors;
-					
-			
-			List<IIfcBooleanOperand^>^ clips = gcnew List<IIfcBooleanOperand^>();
-			
-			IXbimSolidSet^ solidSet = gcnew XbimSolidSet();
-			XbimSolidSet^ body = XbimSolidSet::BuildClippingList(clip, clips, logger);
-			double maxLen = body->BoundingBox.Length();
-			XbimPoint3D centroid = body->BoundingBox.Centroid();
-			for each (IIfcBooleanOperand^ bOp in clips)
-			{
-				IIfcPolygonalBoundedHalfSpace^ hs = dynamic_cast<IIfcPolygonalBoundedHalfSpace^>(bOp);
-				
-				if (hs!=nullptr) //special case for IIfcHalfSpaceSolid to keep extrusion to the minimum
-				{
-					XbimSolid^ s = gcnew XbimSolid(hs, maxLen, centroid, logger);
-				    if (s->IsValid) solidSet->Add(s); 
-				}
-				else
-				{
-					XbimSolidSet^ s = gcnew XbimSolidSet(bOp, logger);
-					if (s->IsValid) solidSet->Add(s);
-				}
-			}
-
-			double precision = mf->Precision;
-		    return body->Cut(solidSet, precision, logger);
-
-		}
-
+		
 #pragma endregion
 #pragma region Support for curves
 		IXbimCurve^ XbimGeometryCreator::CreateCurve(IIfcCurve^ curve, ILogger^ logger)

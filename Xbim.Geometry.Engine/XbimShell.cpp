@@ -104,6 +104,8 @@ namespace Xbim
 			shapes->Sew();
 			pShell = new TopoDS_Shell();
 			*pShell = (XbimShell^)shapes->MakeShell();
+			ShapeFix_ShapeTolerance tolFixer;
+			tolFixer.LimitTolerance(*pShell, openShell->Model->ModelFactors->Precision);
 		}
 
 		void XbimShell::Init(IIfcConnectedFaceSet^ connectedFaceSet, ILogger^ logger)
@@ -112,6 +114,8 @@ namespace Xbim
 			shapes->Sew();
 			pShell = new TopoDS_Shell();
 			*pShell = (XbimShell^)shapes->MakeShell();
+			ShapeFix_ShapeTolerance tolFixer;
+			tolFixer.LimitTolerance(*pShell, connectedFaceSet->Model->ModelFactors->Precision);
 		}
 
 		void XbimShell::Init(IIfcSurfaceOfLinearExtrusion ^ linExt, ILogger^ logger)
@@ -130,6 +134,8 @@ namespace Xbim
 					*pShell = TopoDS::Shell(shellMaker.Shape());
 					if (linExt->Position!=nullptr)
 						pShell->Move(XbimConvert::ToLocation(linExt->Position));
+					ShapeFix_ShapeTolerance tolFixer;
+					tolFixer.LimitTolerance(*pShell, linExt->Model->ModelFactors->Precision);
 				}
 				else
 					XbimGeometryCreator::LogWarning(logger, linExt, "Invalid Surface Extrusion, could not create shell");

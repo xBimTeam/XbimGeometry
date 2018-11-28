@@ -123,7 +123,18 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 }
             }
         }
+        [TestMethod]
+        public void BooleanSilentFailTest()
+        {
+            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(BooleanSilentFailTest)))
+            {
+                Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
+                var solids = geomEngine.CreateSolidSet(er.Entity, logger);
+                HelperFunctions.IsValidSolid(solids.FirstOrDefault());
+                
+            }
 
+        }
         /// <summary>
         /// This test subtracts a cuboid formed from a closed shell from a cuboid formed from and extruded area solid, the two are identical
         /// </summary>

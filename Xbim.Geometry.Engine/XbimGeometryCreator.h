@@ -180,7 +180,6 @@ namespace Xbim
 			//Creates collections of objects
 			virtual IXbimSolidSet^ CreateSolidSet();
 			virtual IXbimSolidSet^ CreateSolidSet(IIfcBooleanResult^ boolOp, ILogger^ logger);
-			virtual IXbimSolidSet^ CreateBooleanResult(IIfcBooleanClippingResult^ clip, ILogger^ logger);
 			virtual IXbimSolidSet^ CreateSolidSet(IIfcCsgSolid^ ifcSolid, ILogger^ logger);
 			virtual IXbimSolidSet^ CreateSolidSet(IIfcBooleanOperand^ ifcSolid, ILogger^ logger);
 			virtual IXbimSolidSet^ CreateSolidSet(IIfcBooleanClippingResult^ ifcSolid, ILogger^ logger);

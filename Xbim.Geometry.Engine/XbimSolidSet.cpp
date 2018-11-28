@@ -897,9 +897,9 @@ namespace Xbim
 			{
 
 				IIfcBooleanOperand^ sOp = solid->SecondOperand;
-				XbimSolidSet^ left = gcnew XbimSolidSet(gcnew XbimSolid(fOp, logger));
+				XbimSolidSet^ left = gcnew XbimSolidSet(fOp, logger);
 				left->IfcEntityLabel = fOp->EntityLabel;
-				XbimSolidSet^ right = gcnew XbimSolidSet(gcnew XbimSolid(sOp, logger));
+				XbimSolidSet^ right = gcnew XbimSolidSet(sOp, logger);
 				right->IfcEntityLabel = sOp->EntityLabel;
 				if (!left->IsValid)
 				{
@@ -908,7 +908,7 @@ namespace Xbim
 
 				if (!right->IsValid)
 				{
-					XbimGeometryCreator::LogError(logger, sOp, "Error performing boolean operation, Invalid Second Operand in IfcBooleanClippingResult #{0}", solid->EntityLabel);
+					// XbimGeometryCreator::LogError(logger, sOp, "Error performing boolean operation, Invalid Second Operand in IfcBooleanClippingResult #{0}", solid->EntityLabel);
 					solids->AddRange(left); // no change
 					return;
 				}
@@ -928,11 +928,16 @@ namespace Xbim
 				
 			}
 		}
+	
 
 		void XbimSolidSet::Init(IIfcBooleanOperand ^ boolOp, ILogger ^ logger)
 		{
 			IIfcBooleanResult^ boolRes = dynamic_cast<IIfcBooleanResult^>(boolOp);
 			IIfcCsgSolid^ csgOp = dynamic_cast<IIfcCsgSolid^>(boolOp);
+			IIfcHalfSpaceSolid^ hs = dynamic_cast<IIfcHalfSpaceSolid^>(boolOp);
+			IIfcCsgPrimitive3D^ csgPrim = dynamic_cast<IIfcCsgPrimitive3D^>(boolOp);
+			IIfcSolidModel^ sm = dynamic_cast<IIfcSolidModel^>(boolOp);
+			solids = gcnew List<IXbimSolid^>();
 			if (boolRes != nullptr)
 			{
 				Init(boolRes, logger); // dispatch for boolean result
@@ -941,12 +946,23 @@ namespace Xbim
 			{
 				Init(csgOp, logger); // dispatch for IIfcCsgSolid result
 			}
+			else if (hs != nullptr)
+			{				
+				solids->Add(gcnew XbimSolid(hs, logger));
+			}
+			else if(csgPrim!=nullptr)
+			{
+				solids->Add(gcnew XbimSolid(csgPrim, logger)); 
+			}
+			else if (sm != nullptr)
+			{
+				solids->Add(gcnew XbimSolid(sm, logger)); // otherwise create a  solid model
+			}
 			else
 			{
-				solids = gcnew List<IXbimSolid^>();
-				solids->Add(gcnew XbimSolid(boolOp, logger)); // otherwise create a simple solid
+				XbimGeometryCreator::LogError(logger, boolOp, "Not Implemented boolean operand {0})", boolOp->GetType()->Name);
 			}
-			if (IsValid)
+			/*if (IsValid)
 			{
 				for each (XbimSolid^ solid in solids)
 				{
@@ -957,17 +973,18 @@ namespace Xbim
 			else
 			{
 				XbimGeometryCreator::LogWarning(logger, boolOp, "Invalid boolean operand result");
-			}
+			}*/
 		}
 
 		void XbimSolidSet::Init(IIfcBooleanResult^ boolOp, ILogger^ logger)
 		{
-			solids = gcnew List<IXbimSolid^>();
+			
 			if (dynamic_cast<IIfcBooleanClippingResult^>(boolOp))
 			{
-				solids->Add(gcnew XbimSolid((IIfcBooleanClippingResult^)boolOp, logger));
+				Init((IIfcBooleanClippingResult^)boolOp, logger);
 				return;
 			}
+			solids = gcnew List<IXbimSolid^>();
 			IIfcBooleanOperand^ fOp = boolOp->FirstOperand; //thse must be solids according to the schema
 			IIfcBooleanOperand^ sOp = boolOp->SecondOperand;
 			XbimSolidSet^ left = gcnew XbimSolidSet(fOp, logger);

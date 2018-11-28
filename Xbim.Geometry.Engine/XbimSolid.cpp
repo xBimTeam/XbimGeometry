@@ -211,6 +211,11 @@ namespace Xbim
 			Init(repItem, maxExtrusion,centroid, logger);
 		}
 
+		XbimSolid::XbimSolid(IIfcHalfSpaceSolid^ repItem, ILogger^ logger)
+		{
+			Init(repItem, repItem->Model->ModelFactors->OneMetre * 100, XbimPoint3D(0, 0, 0), logger);
+		}
+
 		XbimSolid::XbimSolid(IIfcBoxedHalfSpace^ repItem, ILogger^ logger)
 		{
 			Init(repItem, logger);
@@ -243,10 +248,7 @@ namespace Xbim
 
 		
 
-		XbimSolid::XbimSolid(IIfcBooleanOperand^ repItem, ILogger^ logger)
-		{
-			Init(repItem, logger);
-		}
+		
 
 		
 
@@ -379,6 +381,8 @@ namespace Xbim
 				XbimShell^ shell = (XbimShell^)comp->MakeShell();
 				pSolid = new TopoDS_Solid();
 				*pSolid = (XbimSolid^)(shell->CreateSolid());
+				ShapeFix_ShapeTolerance tolFixer;
+				tolFixer.LimitTolerance(*pSolid, bRep->Model->ModelFactors->Precision);
 			}
 		}
 		void XbimSolid::Init(IIfcSweptDiskSolidPolygonal^ swdSolid, ILogger^ logger)
@@ -468,7 +472,9 @@ namespace Xbim
 				}
 				pSolid = new TopoDS_Solid();
 				*pSolid = solid;
-				pSolid->Closed(Standard_True);				
+				pSolid->Closed(Standard_True);	
+				ShapeFix_ShapeTolerance tolFixer;
+				tolFixer.LimitTolerance(*pSolid, swdSolid->Model->ModelFactors->Precision);
 				return;
 			}
 			else
@@ -745,6 +751,8 @@ namespace Xbim
 					pSolid->Closed(Standard_True);
 					if (repItem->Position != nullptr) //In Ifc4 this is now optional
 						pSolid->Move(XbimConvert::ToLocation(repItem->Position));
+					ShapeFix_ShapeTolerance tolFixer;
+					tolFixer.LimitTolerance(*pSolid, repItem->Model->ModelFactors->Precision);
 					return;
 				}
 				else if (repItem->Angle <= 0)
@@ -763,6 +771,7 @@ namespace Xbim
 				}
 				GC::KeepAlive(faceStart);
 				GC::KeepAlive(faceEnd);
+				
 			}
 		}
 
@@ -807,6 +816,8 @@ namespace Xbim
 						pSolid->Closed(Standard_True);
 						if (repItem->Position != nullptr) //In Ifc4 this is now optional
 							pSolid->Move(XbimConvert::ToLocation(repItem->Position));
+						ShapeFix_ShapeTolerance tolFixer;
+						tolFixer.LimitTolerance(*pSolid, repItem->Model->ModelFactors->Precision);
 						return;
 					}
 					else
@@ -941,6 +952,8 @@ namespace Xbim
 					pSolid->Closed(Standard_True);
 					if (repItem->Position != nullptr) //In Ifc4 this is now optional
 						pSolid->Move(XbimConvert::ToLocation(repItem->Position));
+					ShapeFix_ShapeTolerance tolFixer;
+					tolFixer.LimitTolerance(*pSolid, repItem->Model->ModelFactors->Precision);
 					return;
 				}
 				GC::KeepAlive(faceStart);
@@ -1034,6 +1047,8 @@ namespace Xbim
 					*pSolid = solid;
 					pSolid->Closed(Standard_True);	
 					GC::KeepAlive(crossSections);
+					ShapeFix_ShapeTolerance tolFixer;
+					tolFixer.LimitTolerance(*pSolid, repItem->Model->ModelFactors->Precision);
 					return;
 				}				
 			}
@@ -1070,7 +1085,7 @@ namespace Xbim
 					face = gcnew XbimFace(repItem->SweptArea, logger);
 				else
 					face = gcnew XbimFace(overrideProfileDef, logger);
-				if (face->IsValid)
+				if (!face->BoundingBox.IsEmpty)
 				{
 
 					BRepPrimAPI_MakePrism prism(face, vec);
@@ -1081,10 +1096,12 @@ namespace Xbim
 						*pSolid = TopoDS::Solid(prism.Shape());
 						if (repItem->Position != nullptr) //In Ifc4 this is now optional
 							pSolid->Move(XbimConvert::ToLocation(repItem->Position));
+						ShapeFix_ShapeTolerance tolFixer;
+						tolFixer.LimitTolerance(*pSolid, repItem->Model->ModelFactors->Precision);
 						return;
 					}
 				}
-				XbimGeometryCreator::LogWarning(logger, repItem, "Invalid extrusion, could not create solid");
+				// XbimGeometryCreator::LogWarning(logger, repItem, "Invalid extrusion, could not create solid");
 
 			}
 			else if (repItem->Depth <= 0)
@@ -1122,6 +1139,8 @@ namespace Xbim
 					if (repItem->Position!=nullptr)
 						*pSolid = TopoDS::Solid(revol.Shape());
 					pSolid->Move(XbimConvert::ToLocation(repItem->Position));
+					ShapeFix_ShapeTolerance tolFixer;
+					tolFixer.LimitTolerance(*pSolid, repItem->Model->ModelFactors->Precision);
 				}
 				else
 					XbimGeometryCreator::LogWarning(logger, repItem, "Invalidextrusion, could not create solid");
@@ -1174,8 +1193,8 @@ namespace Xbim
 			BRepPrimAPI_MakeBox box(gp_Pnt(l.X, l.Y, l.Z), rect3D.SizeX, rect3D.SizeY, rect3D.SizeZ);
 			pSolid = new TopoDS_Solid();
 			*pSolid = TopoDS::Solid(box.Shape());
-			ShapeFix_ShapeTolerance FTol;
-			FTol.LimitTolerance(*pSolid,tolerance, TopAbs_VERTEX);
+			ShapeFix_ShapeTolerance tolFixer;
+			tolFixer.LimitTolerance(*pSolid, tolerance);
 		}
 
 		void XbimSolid::Init(IIfcBoxedHalfSpace^ bhs, ILogger^ logger)
@@ -1382,6 +1401,8 @@ namespace Xbim
 				pSolid = new TopoDS_Solid();
 				*pSolid = solid;
 				pSolid->Closed(Standard_True);
+				ShapeFix_ShapeTolerance tolFixer;
+				tolFixer.LimitTolerance(*pSolid, swdSolid->Model->ModelFactors->Precision);
 				return;
 			}
 			else
@@ -1402,28 +1423,9 @@ namespace Xbim
 			pSolid = new TopoDS_Solid();
 			*pSolid = TopoDS::Solid(boxMaker.Shape());
 			ShapeFix_ShapeTolerance FTol;
-			FTol.SetTolerance(*pSolid, box->Model->ModelFactors->Precision, TopAbs_VERTEX);
+			FTol.LimitTolerance(*pSolid, box->Model->ModelFactors->Precision);
 		}
 
-
-		
-
-		
-
-		void XbimSolid::Init(IIfcBooleanOperand^ solid, ILogger^ logger)
-		{
-			
-			IIfcSolidModel^ sol = dynamic_cast<IIfcSolidModel^>(solid);
-			if (sol != nullptr) return Init(sol, logger);
-			IIfcHalfSpaceSolid^ hs = dynamic_cast<IIfcHalfSpaceSolid^>(solid);
-			//TODO use a real halfspace when fixed in opencascade
-			if (hs != nullptr) return Init(hs, hs->Model->ModelFactors->OneMetre * 100, XbimPoint3D(0,0,0), logger); //take 100 metres as the largest extrusion and 0,0,0 as centre this is arbitrary due to bug in opencascade
-			IIfcBooleanResult^ br = dynamic_cast<IIfcBooleanResult^>(solid);
-			if (br != nullptr) return Init(br, logger); //treat IIfcBooleanResult and IIfcBooleanClippingResult the same			
-			IIfcCsgPrimitive3D^ csg = dynamic_cast<IIfcCsgPrimitive3D^>(solid);
-			if (csg != nullptr) return Init(csg, logger);
-			throw gcnew NotImplementedException("Sub-Type of IIfcBooleanOperand is not implemented");
-		}
 
 
 		void XbimSolid::Init(IIfcCsgPrimitive3D^ IIfcSolid, ILogger^ logger)
@@ -1449,6 +1451,8 @@ namespace Xbim
 			BRepPrimAPI_MakeSphere sphereMaker(gpax3.Ax2(), IIfcSolid->Radius);
 			pSolid = new TopoDS_Solid();
 			*pSolid = TopoDS::Solid(sphereMaker.Shape());
+			ShapeFix_ShapeTolerance tolFixer;
+			tolFixer.LimitTolerance(*pSolid, IIfcSolid->Model->ModelFactors->Precision);
 		}
 
 		void XbimSolid::Init(IIfcBlock^ IIfcSolid, ILogger^ /*logger*/)
@@ -1457,6 +1461,8 @@ namespace Xbim
 			BRepPrimAPI_MakeBox boxMaker(gpax3.Ax2(), IIfcSolid->XLength, IIfcSolid->YLength, IIfcSolid->ZLength);
 			pSolid = new TopoDS_Solid();
 			*pSolid = TopoDS::Solid(boxMaker.Shape());
+			ShapeFix_ShapeTolerance tolFixer;
+			tolFixer.LimitTolerance(*pSolid, IIfcSolid->Model->ModelFactors->Precision);
 		}
 
 		void XbimSolid::Init(IIfcRightCircularCylinder^ IIfcSolid, ILogger^ /*logger*/)
@@ -1465,6 +1471,8 @@ namespace Xbim
 			BRepPrimAPI_MakeCylinder cylinderMaker(gpax3.Ax2(), IIfcSolid->Radius, IIfcSolid->Height);
 			pSolid = new TopoDS_Solid();
 			*pSolid = TopoDS::Solid(cylinderMaker.Shape());
+			ShapeFix_ShapeTolerance tolFixer;
+			tolFixer.LimitTolerance(*pSolid, IIfcSolid->Model->ModelFactors->Precision);
 		}
 
 		void XbimSolid::Init(IIfcRightCircularCone^ IIfcSolid, ILogger^ /*logger*/)
@@ -1473,6 +1481,8 @@ namespace Xbim
 			BRepPrimAPI_MakeCone coneMaker(gpax3.Ax2(), IIfcSolid->BottomRadius, 0., IIfcSolid->Height);
 			pSolid = new TopoDS_Solid();
 			*pSolid = TopoDS::Solid(coneMaker.Shape());
+			ShapeFix_ShapeTolerance tolFixer;
+			tolFixer.LimitTolerance(*pSolid, IIfcSolid->Model->ModelFactors->Precision);
 		}
 
 		void XbimSolid::Init(IIfcRectangularPyramid^ IIfcSolid, ILogger^ /*logger*/)
@@ -1552,6 +1562,8 @@ namespace Xbim
 			pSolid = new TopoDS_Solid();
 			*pSolid = TopoDS::Solid(solidMaker.Shape());
 			Move(IIfcSolid->Position);		
+			ShapeFix_ShapeTolerance tolFixer;
+			tolFixer.LimitTolerance(*pSolid, IIfcSolid->Model->ModelFactors->Precision);
 		}
 
 		void XbimSolid::Init(IIfcTriangulatedFaceSet ^ IIfcSolid, ILogger ^ logger)
@@ -1569,6 +1581,8 @@ namespace Xbim
 				XbimShell^ shell = (XbimShell^)comp->MakeShell();
 				pSolid = new TopoDS_Solid();
 				*pSolid = (XbimSolid^)(shell->CreateSolid());
+				ShapeFix_ShapeTolerance tolFixer;
+				tolFixer.LimitTolerance(*pSolid, IIfcSolid->Model->ModelFactors->Precision);
 			}
 		}
 
@@ -1587,6 +1601,8 @@ namespace Xbim
 				XbimShell^ shell = (XbimShell^)comp->MakeShell();
 				pSolid = new TopoDS_Solid();
 				*pSolid = (XbimSolid^)(shell->CreateSolid());
+				ShapeFix_ShapeTolerance tolFixer;
+				tolFixer.LimitTolerance(*pSolid, solid->Model->ModelFactors->Precision);
 			}
 		}
 
@@ -1605,6 +1621,8 @@ namespace Xbim
 				XbimShell^ shell = (XbimShell^)comp->MakeShell();
 				pSolid = new TopoDS_Solid();
 				*pSolid = (XbimSolid^)(shell->CreateSolid());
+				ShapeFix_ShapeTolerance tolFixer;
+				tolFixer.LimitTolerance(*pSolid, solid->Model->ModelFactors->Precision);
 			}
 		}
 

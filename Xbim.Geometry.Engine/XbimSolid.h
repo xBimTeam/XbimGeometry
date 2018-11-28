@@ -47,7 +47,7 @@ namespace Xbim
 			void Init(IIfcPolygonalBoundedHalfSpace^ solid, double maxExtrusion, ILogger^ logger);
 			
 			
-			void Init(IIfcBooleanOperand^ solid, ILogger^ logger);
+			
 			void Init(XbimRect3D rect3D, double tolerance, ILogger^ logger);
 
 			void Init(IIfcFixedReferenceSweptAreaSolid^ IIfcSolid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger);
@@ -117,6 +117,7 @@ namespace Xbim
 			XbimSolid(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger); //support for composite profiles
 			XbimSolid(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid, ILogger^ logger);
 			XbimSolid(IIfcHalfSpaceSolid^ solid, double maxExtrusion, XbimPoint3D centroid, ILogger^ logger);
+			XbimSolid(IIfcHalfSpaceSolid^ solid,  ILogger^ logger);
 			XbimSolid(IIfcBoxedHalfSpace^ solid, ILogger^ logger);
 			XbimSolid(IIfcPolygonalBoundedHalfSpace^ solid, double maxExtrusion, ILogger^ logger);
 			XbimSolid(IIfcExtrudedAreaSolid^ solid, ILogger^ logger);
@@ -132,7 +133,7 @@ namespace Xbim
 			XbimSolid(IIfcSectionedSpine^ solid, ILogger^ logger);
 			XbimSolid(IIfcBoundingBox^ solid, ILogger^ logger);
 			
-			XbimSolid(IIfcBooleanOperand^ solid, ILogger^ logger);
+			
 			XbimSolid(IIfcFixedReferenceSweptAreaSolid^ solid, ILogger^ logger);
 			XbimSolid(IIfcFixedReferenceSweptAreaSolid^ IIfcSolid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger); //support for composite profiles
 			XbimSolid(IIfcCsgPrimitive3D^ IIfcSolid, ILogger^ logger);
