@@ -1008,9 +1008,12 @@ namespace Xbim
 			double vL, vR, vMin, vRes;
 			
 			IModelFactors^ mf = boolOp->Model->ModelFactors;
+			bool inRetry = false;
+			RetryBoolean:
 			IXbimSolidSet^ result;
 			try
 			{
+
 				switch (boolOp->Operator)
 				{
 				case IfcBooleanOperator::UNION:
@@ -1031,6 +1034,18 @@ namespace Xbim
 						vMin = (vL - vR) * .98; 
 						if (vRes < vMin )
 						{ 
+							if (!inRetry)
+							{// this is most likely a tolerance issue, up the tolerance of the body shape and try again
+								for each (IXbimSolid^ iSolid in left)
+								{
+									XbimSolid^ solid = (XbimSolid^)iSolid;
+									ShapeFix_ShapeTolerance tolFixer;
+									tolFixer.LimitTolerance(solid, mf->Precision * 10);
+
+								}
+								inRetry = true;
+								goto RetryBoolean;
+							}
 							// the boolean had a problem
 							XbimGeometryCreator::LogError(logger, boolOp, "Boolean operation silent failure, the operation has been ignored");
 							solids->AddRange(left);

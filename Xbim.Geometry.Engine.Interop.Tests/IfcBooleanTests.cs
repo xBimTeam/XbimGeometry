@@ -123,12 +123,29 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 }
             }
         }
+        /// <summary>
+        /// Tests if a boolean processes correctly if not it will silent fail and the test should fail
+        /// </summary>
         [TestMethod]
         public void BooleanSilentFailTest()
         {
             using (var er = new EntityRepository<IIfcBooleanResult>(nameof(BooleanSilentFailTest)))
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
+                var solids = geomEngine.CreateSolidSet(er.Entity, logger);
+                HelperFunctions.IsValidSolid(solids.FirstOrDefault());
+                
+            }
+
+        }
+
+        [TestMethod]
+        public void BooleanSilentFail2Test()
+        {
+            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(BooleanSilentFail2Test)))
+            {
+                Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
+                
                 var solids = geomEngine.CreateSolidSet(er.Entity, logger);
                 HelperFunctions.IsValidSolid(solids.FirstOrDefault());
                 

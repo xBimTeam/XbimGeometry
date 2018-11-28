@@ -1063,8 +1063,7 @@ namespace Xbim
 			IIfcExtrudedAreaSolidTapered^ extrudeTaperedArea = dynamic_cast<IIfcExtrudedAreaSolidTapered^>(repItem);
 			if (extrudeTaperedArea != nullptr) return Init(extrudeTaperedArea, overrideProfileDef, logger);
 			IIfcCompositeProfileDef^ compProf = dynamic_cast<IIfcCompositeProfileDef^>(repItem->SweptArea);
-//			IIfcCompositeProfileDef^ compProfOverride = dynamic_cast<IIfcCompositeProfileDef^>(overrideProfileDef);
-			//if (compProf != nullptr || compProfOverride!=nullptr) return InitCompositeProfileExtrusion(repItem,overrideProfileDef);
+
 	
 			IIfcDirection^ dir = repItem->ExtrudedDirection;
 			gp_Vec vec(dir->X, dir->Y, dir->Z);
@@ -1078,8 +1077,7 @@ namespace Xbim
 					XbimGeometryCreator::LogError(logger, repItem, "Composite profiles with more than 1 profile cannot create a solid, use the CreateSolidSet method");
 				}
 				else if (compProf != nullptr && compProf->Profiles->Count == 1) overrideProfileDef = compProf->Profiles->GetAt(0);
-				//if (compProf != nullptr && overrideProfileDef != nullptr) // we are being called by solid set to build one of the compisites elements, it will favour the override below
-
+				
 				XbimFace^ face;
 				if (overrideProfileDef == nullptr)
 					face = gcnew XbimFace(repItem->SweptArea, logger);
