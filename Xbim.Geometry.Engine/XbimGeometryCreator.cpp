@@ -915,18 +915,17 @@ namespace Xbim
 		IXbimSolidSet^ XbimGeometryCreator::CreateBooleanResult(IIfcBooleanClippingResult^ clip, ILogger^ logger)
 		{
 			IModelFactors^ mf = clip->Model->ModelFactors;
-			
-#ifdef OCC_6_9_SUPPORTED			
+					
 			
 			List<IIfcBooleanOperand^>^ clips = gcnew List<IIfcBooleanOperand^>();
 			
 			IXbimSolidSet^ solidSet = gcnew XbimSolidSet();
-			XbimSolid^ body = XbimSolid::BuildClippingList(clip, clips, logger);
+			XbimSolidSet^ body = XbimSolidSet::BuildClippingList(clip, clips, logger);
 			double maxLen = body->BoundingBox.Length();
 			XbimPoint3D centroid = body->BoundingBox.Centroid();
 			for each (IIfcBooleanOperand^ bOp in clips)
 			{
-				IIfcHalfSpaceSolid^ hs = dynamic_cast<IIfcHalfSpaceSolid^>(bOp);
+				IIfcPolygonalBoundedHalfSpace^ hs = dynamic_cast<IIfcPolygonalBoundedHalfSpace^>(bOp);
 				
 				if (hs!=nullptr) //special case for IIfcHalfSpaceSolid to keep extrusion to the minimum
 				{
@@ -935,81 +934,14 @@ namespace Xbim
 				}
 				else
 				{
-					XbimSolid^ s = gcnew XbimSolid(bOp, logger);
+					XbimSolidSet^ s = gcnew XbimSolidSet(bOp, logger);
 					if (s->IsValid) solidSet->Add(s);
 				}
 			}
 
 			double precision = mf->Precision;
 		    return body->Cut(solidSet, precision, logger);
-#else		
-			ShapeFix_ShapeTolerance FTol;
-			IIfcBooleanOperand^ fOp = clip->FirstOperand;
-			IIfcBooleanOperand^ sOp = clip->SecondOperand;
-			IXbimSolidSet^ left;
-			IXbimSolidSet^ right;
-			if (dynamic_cast<IIfcBooleanClippingResult^>(fOp))
-				left = CreateBooleanResult((IIfcBooleanClippingResult^)fOp);
-			else
-			{
-				left = gcnew XbimSolidSet(); 
-				XbimSolid^ l = gcnew XbimSolid(fOp);
-				if (l->IsValid)	left->Add(l);
-			}
-			if (dynamic_cast<IIfcBooleanClippingResult^>(sOp))
-				right = CreateBooleanResult((IIfcBooleanClippingResult^)sOp);
-			else
-			{
-				right = gcnew XbimSolidSet();
-				XbimSolid^ r = gcnew XbimSolid(sOp);
-				if (r->IsValid)	right->Add(r);
-			}
 
-			if (!left->IsValid)
-			{
-				if (clip->Operator != IfcBooleanOperator::UNION)
-				//LogWarning(fOp, "Boolean result has an empty shape in the first operand");
-					return XbimSolidSet::Empty;
-			}
-
-			if (!right->IsValid)
-			{
-				if(!left->IsValid)
-				//LogWarning(sOp, "Boolean result has an empty shape in the second operand");
-				return left;
-			}
-
-			IXbimGeometryObject^ result;
-			try
-			{
-				switch (clip->Operator)
-				{
-				case IfcBooleanOperator::UNION:
-					result = left->Union(right, mf->Precision);
-					break;
-				case IfcBooleanOperator::INTERSECTION:
-					result = left->Intersection(right, mf->Precision);
-					break;
-				case IfcBooleanOperator::DIFFERENCE:
-					result = left->Cut(right, mf->Precision);
-					break;
-				}
-			}
-			catch (Exception^ xbimE)
-			{
-				LogWarning(clip,"Error performing boolean operation, {0}. The second operand has been ignored", xbimE->Message);
-				return left;
-			}
-
-			XbimSolidSet^ xbimSolidSet = dynamic_cast<XbimSolidSet^>(result);
-			if (xbimSolidSet == nullptr)
-			{
-				LogWarning(clip, "Error performing boolean operation. The second operand has been ignored");
-				return left;
-			}
-			else
-				return xbimSolidSet;
-#endif
 		}
 
 #pragma endregion

@@ -194,10 +194,7 @@ namespace Xbim
 			Init(repItem, logger);
 		}
 
-		XbimSolid::XbimSolid(IIfcBooleanClippingResult ^ solid, ILogger ^ logger)
-		{
-			Init(solid, logger);
-		}
+		
 		
 		XbimSolid::XbimSolid(IIfcSurfaceCurveSweptAreaSolid^ repItem, ILogger^ logger)
 		{
@@ -1165,6 +1162,8 @@ namespace Xbim
 				IIfcCartesianPoint^ cp = ifcPlane->Position->Location;
 				XbimVector3D vec = XbimPoint3D(nearest.X(), nearest.Y(), nearest.Z()) - XbimPoint3D(cp->X,cp->Y,cp->Z);
 				Translate(vec);
+				ShapeFix_ShapeTolerance tolFixer;
+				tolFixer.LimitTolerance(*pSolid, hs->Model->ModelFactors->Precision);
 			}
 		}
 
@@ -1176,7 +1175,7 @@ namespace Xbim
 			pSolid = new TopoDS_Solid();
 			*pSolid = TopoDS::Solid(box.Shape());
 			ShapeFix_ShapeTolerance FTol;
-			FTol.SetTolerance(*pSolid,tolerance, TopAbs_VERTEX);
+			FTol.LimitTolerance(*pSolid,tolerance, TopAbs_VERTEX);
 		}
 
 		void XbimSolid::Init(IIfcBoxedHalfSpace^ bhs, ILogger^ logger)
@@ -1193,6 +1192,8 @@ namespace Xbim
 			if (bhs->AgreementFlag)
 				Translate(XbimVector3D(0, 0, -bhs->Enclosure->ZDim));
 			Move(ifcPlane->Position);
+			ShapeFix_ShapeTolerance tolFixer;
+			tolFixer.LimitTolerance(*pSolid, bhs->Model->ModelFactors->Precision);
 		}
 
 		void XbimSolid::Init(IIfcPolygonalBoundedHalfSpace^ pbhs, double extrusionMax, ILogger^ logger)
@@ -1236,7 +1237,8 @@ namespace Xbim
 				XbimGeometryCreator::LogWarning(logger, pbhs, "Incorrectly defined Face with PolygonalBoundary #{0}. It has been ignored", pbhs->PolygonalBoundary->EntityLabel);
 				return;
 			}
-			TopoDS_Shape boundedHalfSpace = BRepPrimAPI_MakePrism(polyFace, gp_Vec(0, 0, extrusionMax*4));
+			TopoDS_Face occFace = polyFace; //take a reference
+			TopoDS_Shape boundedHalfSpace = BRepPrimAPI_MakePrism(occFace, gp_Vec(0, 0, extrusionMax*4));
 			gp_Trsf trsf = XbimConvert::ToTransform(pbhs->Position);
 			gp_Trsf offset; 
 			offset.SetTranslation(gp_Vec(0, 0, -(extrusionMax/2 )));
@@ -1249,11 +1251,12 @@ namespace Xbim
 			{
 				pSolid = new TopoDS_Solid();
 				*pSolid = TopoDS::Solid(explr.Current()); //just take the first solid
-				//BRepTools::Write(*pSolid, "d:\\tmp\\r");
+				ShapeFix_ShapeTolerance tolFixer;
+				tolFixer.LimitTolerance(*pSolid, pbhs->Model->ModelFactors->Precision);	
 				return;
 			}
-			GC::KeepAlive(polyFace);
-			XbimGeometryCreator::LogWarning(logger, pbhs, "Failed to create half space");
+			
+			XbimGeometryCreator::LogError(logger, pbhs, "Failed to create half space");
 		}
 
 
@@ -1403,127 +1406,9 @@ namespace Xbim
 		}
 
 
-		XbimSolid^ XbimSolid::BuildClippingList(IIfcBooleanClippingResult^ solid, List<IIfcBooleanOperand^>^ clipList, ILogger^ logger)
-		{
-			IIfcBooleanOperand^ fOp = solid->FirstOperand;
-			IIfcBooleanOperand^ sOp = solid->SecondOperand;
-			
-			IIfcBooleanClippingResult^ boolClip = dynamic_cast<IIfcBooleanClippingResult^>(fOp);
-			if (boolClip!=nullptr)
-			{				
-				clipList->Add(sOp);
-				return XbimSolid::BuildClippingList(boolClip, clipList,logger);
-			}
-			else //we need to build the solid
-			{				
-				clipList->Add(sOp);
-				XbimSolidSet^ solidSet = dynamic_cast<XbimSolidSet^>(clipList);
-				if (solidSet!=nullptr) solidSet->Reverse();
-				return gcnew XbimSolid(fOp,logger);
-			}
-		}
-
 		
 
-		//Booleans
-		void XbimSolid::Init(IIfcBooleanClippingResult^ solid, ILogger^ logger)
-		{
-			IModelFactors^ mf = solid->Model->ModelFactors;
-			IIfcBooleanOperand^ fOp = solid->FirstOperand;
 		
-			IIfcBooleanClippingResult^ boolClip = dynamic_cast<IIfcBooleanClippingResult^>(fOp);
-			if (boolClip != nullptr)
-			{
-				List<IIfcBooleanOperand^>^ clips = gcnew List<IIfcBooleanOperand^>();
-
-				XbimSolidSet^ solidSet = gcnew XbimSolidSet();	
-				solidSet->IfcEntityLabel = solid->EntityLabel;
-				XbimSolid^ body = XbimSolid::BuildClippingList(boolClip, clips,logger);
-				
-				double maxLen = body->BoundingBox.Length();
-				for each (IIfcBooleanOperand^ bOp in clips)
-				{
-					IIfcPolygonalBoundedHalfSpace^ pbhs = dynamic_cast<IIfcPolygonalBoundedHalfSpace^>(bOp);
-					if (pbhs != nullptr) //special case for IIfcPolygonalBoundedHalfSpace to keep extrusion to the minimum
-					{
-						XbimSolid^ s = gcnew XbimSolid(pbhs, maxLen,logger);
-						if (s->IsValid) solidSet->Add(s);
-					}
-					else
-					{
-						XbimSolid^ s = gcnew XbimSolid(bOp,logger);
-						if (s->IsValid) solidSet->Add(s);
-					}
-				}
-				XbimSolidSet^ bodySet = gcnew XbimSolidSet(body);
-				bodySet->IfcEntityLabel = boolClip->EntityLabel;
-				IXbimSolidSet^ xbimSolidSet = bodySet->Cut(solidSet, mf->Precision,logger);
-				if (xbimSolidSet != nullptr && xbimSolidSet->First != nullptr)
-				{ 
-					const TopoDS_Solid&  shape = (XbimSolid^) (xbimSolidSet->First);
-					if (!shape.IsNull())
-					{
-						pSolid = new TopoDS_Solid();
-						*pSolid = shape; //just take the first as that is what is intended by IIfc schema	
-					}
-					
-				}
-				
-			}
-			else
-			{
-
-
-				IIfcBooleanOperand^ sOp = solid->SecondOperand;
-				XbimSolidSet^ left = gcnew XbimSolidSet(gcnew XbimSolid(fOp, logger));
-				left->IfcEntityLabel = fOp->EntityLabel;
-				XbimSolidSet^ right = gcnew XbimSolidSet(gcnew XbimSolid(sOp, logger));
-				right->IfcEntityLabel = sOp->EntityLabel;
-				if (!left->IsValid)
-				{
-					if (solid->Operator != IfcBooleanOperator::UNION)
-						//XbimGeometryCreator::LogWarning(solid, "Invalid first operand");
-						return;
-				}
-
-
-				if (!right->IsValid)
-				{
-					if (!left->IsValid) return;
-					//XbimGeometryCreator::LogWarning(solid, "Invalid second operand");
-					pSolid = new TopoDS_Solid(); //make sure this is deleted if not used
-					*pSolid = (XbimSolid^)(left->First); //return the left operand
-					return;
-				}
-
-
-				IXbimGeometryObject^ result;
-				try
-				{
-					result = left->Cut(right, mf->Precision, logger);
-					
-				}
-				catch (...)
-				{
-					XbimGeometryCreator::LogError(logger, solid, "Error performing boolean operation, {0}. The operation has been ignored");
-					pSolid = new TopoDS_Solid(); //make sure this is deleted if not used
-					*pSolid = (XbimSolid^)(left->First); //return the left operand
-					return;
-				}
-
-				XbimSolidSet^ xbimSolidSet = dynamic_cast<XbimSolidSet^>(result);
-
-				if (xbimSolidSet != nullptr && xbimSolidSet->First != nullptr)
-				{
-					TopoDS_Shape  shape = (XbimSolid^)(xbimSolidSet->First);
-					if (!shape.IsNull())
-					{
-						pSolid = new TopoDS_Solid(); //make sure this is deleted if not used
-						*pSolid = (XbimSolid^)(xbimSolidSet->First); //just take the first as that is what is intended by IIfc schema
-					}
-				}
-			}
-		}
 
 		void XbimSolid::Init(IIfcBooleanOperand^ solid, ILogger^ logger)
 		{

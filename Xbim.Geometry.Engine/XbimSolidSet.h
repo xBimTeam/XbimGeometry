@@ -31,6 +31,7 @@ namespace Xbim
 			static XbimSolidSet^ empty = gcnew XbimSolidSet();
 			void Init(IIfcBooleanOperand^ boolOp, ILogger^ logger);
 			void Init(IIfcBooleanResult^ boolOp, ILogger^ logger);
+			void Init(IIfcBooleanClippingResult^ solid, ILogger^ logger);
 			void Init(XbimCompound^ comp, IPersistEntity^ ent, ILogger^ logger);
 			void Init(IIfcSweptAreaSolid^ solid, ILogger^ logger);
 			void Init(IIfcExtrudedAreaSolid^ solid, ILogger^ logger);
@@ -59,12 +60,14 @@ namespace Xbim
 #pragma endregion
 
 			static property XbimSolidSet^ Empty{XbimSolidSet^ get(){ return empty; }};
+			static XbimSolidSet^ BuildClippingList(IIfcBooleanClippingResult^ solid, List<IIfcBooleanOperand^>^ clipList, ILogger^ logger);
 			XbimSolidSet();
 			XbimSolidSet(const TopoDS_Shape& shape);
 			XbimSolidSet(XbimCompound^ shape);
 			XbimSolidSet(IXbimSolid^ solid);
 			XbimSolidSet(IEnumerable<IXbimSolid^>^ solids);
 			XbimSolidSet(IIfcBooleanResult^ boolOp, ILogger^ logger);
+			XbimSolidSet(IIfcBooleanClippingResult^ solid, ILogger^ logger);
 			XbimSolidSet(IIfcBooleanOperand^ boolOp, ILogger^ logger);
 			XbimSolidSet(IIfcManifoldSolidBrep^ solid, ILogger^ logger);
 			XbimSolidSet(IIfcFacetedBrep^ solid, ILogger^ logger);

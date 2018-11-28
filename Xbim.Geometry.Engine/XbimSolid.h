@@ -46,7 +46,7 @@ namespace Xbim
 			void Init(IIfcBoxedHalfSpace^ solid, ILogger^ logger);
 			void Init(IIfcPolygonalBoundedHalfSpace^ solid, double maxExtrusion, ILogger^ logger);
 			
-			void Init(IIfcBooleanClippingResult^ solid, ILogger^ logger);
+			
 			void Init(IIfcBooleanOperand^ solid, ILogger^ logger);
 			void Init(XbimRect3D rect3D, double tolerance, ILogger^ logger);
 
@@ -64,7 +64,7 @@ namespace Xbim
 #pragma endregion
 
 		public:
-			static XbimSolid^ BuildClippingList(IIfcBooleanClippingResult^ solid, List<IIfcBooleanOperand^>^ clipList, ILogger^ logger);
+			
 #pragma region Equality Overrides
 			virtual bool Equals(Object^ v) override;
 			virtual int GetHashCode() override;
@@ -131,7 +131,7 @@ namespace Xbim
 			XbimSolid(IIfcSweptDiskSolidPolygonal^ solid, ILogger^ logger);
 			XbimSolid(IIfcSectionedSpine^ solid, ILogger^ logger);
 			XbimSolid(IIfcBoundingBox^ solid, ILogger^ logger);
-			XbimSolid(IIfcBooleanClippingResult^ solid, ILogger^ logger);
+			
 			XbimSolid(IIfcBooleanOperand^ solid, ILogger^ logger);
 			XbimSolid(IIfcFixedReferenceSweptAreaSolid^ solid, ILogger^ logger);
 			XbimSolid(IIfcFixedReferenceSweptAreaSolid^ IIfcSolid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger); //support for composite profiles

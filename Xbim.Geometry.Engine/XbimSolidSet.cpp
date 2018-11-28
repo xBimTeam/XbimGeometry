@@ -78,6 +78,11 @@ namespace Xbim
 			solids = gcnew  List<IXbimSolid^>(1);
 			solids->Add(solid);
 		}
+		XbimSolidSet::XbimSolidSet(IIfcBooleanClippingResult ^ solid, ILogger ^ logger)
+		{
+			Init(solid, logger);
+		}
+
 		XbimSolidSet::XbimSolidSet(IIfcBooleanResult^ boolOp, ILogger^ logger)
 		{
 			Init(boolOp, logger);
@@ -158,6 +163,24 @@ namespace Xbim
 			this->solids->Reverse();
 		}
 
+		XbimSolidSet^ XbimSolidSet::BuildClippingList(IIfcBooleanClippingResult^ solid, List<IIfcBooleanOperand^>^ clipList, ILogger^ logger)
+		{
+			IIfcBooleanOperand^ fOp = solid->FirstOperand;
+			IIfcBooleanOperand^ sOp = solid->SecondOperand;
+
+			IIfcBooleanClippingResult^ boolClip = dynamic_cast<IIfcBooleanClippingResult^>(fOp);
+			if (boolClip != nullptr)
+			{
+				clipList->Add(sOp);
+				return XbimSolidSet::BuildClippingList(boolClip, clipList, logger);
+			}
+			else //we need to build the solid
+			{
+				clipList->Add(sOp);
+				clipList->Reverse();
+				return gcnew XbimSolidSet(fOp, logger);
+			}
+		}
 
 		///If the shape contains one or more solids these are added to the collection
 		void XbimSolidSet::Add(IXbimGeometryObject^ shape)
@@ -372,8 +395,7 @@ namespace Xbim
 
 		static void ThreadProc(Object^ params)
 		{
-			XbimSolidSetBoolOpParams^ boolParams = dynamic_cast<XbimSolidSetBoolOpParams^>(params);
-			ShapeFix_ShapeTolerance FTol;
+			XbimSolidSetBoolOpParams^ boolParams = dynamic_cast<XbimSolidSetBoolOpParams^>(params);			
 			TopTools_ListOfShape shapeObjects;
 			shapeObjects.Append(boolParams->Body);
 
@@ -451,7 +473,7 @@ namespace Xbim
 			if (!IsValid) return this;
 			
 			//set all the tolerances first
-			ShapeFix_ShapeTolerance FTol;			
+			/*ShapeFix_ShapeTolerance FTol;			
 			for each (IXbimSolid^ iSolid in solidsToCut)
 			{
 				XbimSolid^ solid = dynamic_cast<XbimSolid^>(iSolid);
@@ -463,8 +485,8 @@ namespace Xbim
 				{
 					XbimGeometryCreator::LogWarning(logger, this, "Invalid shape found in Boolean Cut operation. Attempting to correct and process");
 				}
-			}
-			TopTools_ListOfShape shapeObjects;
+			}*/
+			/*TopTools_ListOfShape shapeObjects;
 			for each (IXbimSolid^ iSolid in this)
 			{
 				XbimSolid^ solid = dynamic_cast<XbimSolid^>(iSolid);
@@ -476,7 +498,7 @@ namespace Xbim
 				{
 					XbimGeometryCreator::LogWarning(logger, this, "Invalid shape found in Boolean Cut operation. Attempting to correct and process");
 				}
-			}
+			}*/
 
 
 			List<Thread^>^ threads = gcnew List<Thread^>(this->Count);
@@ -830,6 +852,82 @@ namespace Xbim
 		}
 
 
+
+		//Booleans
+		void XbimSolidSet::Init(IIfcBooleanClippingResult^ solid, ILogger^ logger)
+		{
+			solids = gcnew List<IXbimSolid^>();
+			IModelFactors^ mf = solid->Model->ModelFactors;
+			IIfcBooleanOperand^ fOp = solid->FirstOperand;
+
+			IIfcBooleanClippingResult^ boolClip = dynamic_cast<IIfcBooleanClippingResult^>(fOp);
+			if (boolClip != nullptr)
+			{
+				List<IIfcBooleanOperand^>^ clips = gcnew List<IIfcBooleanOperand^>();
+
+				XbimSolidSet^ solidSet = gcnew XbimSolidSet();
+				solidSet->IfcEntityLabel = solid->EntityLabel;
+				XbimSolidSet^ bodySet = XbimSolidSet::BuildClippingList(boolClip, clips, logger);
+				bodySet->IfcEntityLabel = boolClip->EntityLabel;
+				double maxLen = bodySet->BoundingBox.Length();
+				for each (IIfcBooleanOperand^ bOp in clips)
+				{
+					IIfcPolygonalBoundedHalfSpace^ pbhs = dynamic_cast<IIfcPolygonalBoundedHalfSpace^>(bOp);
+					if (pbhs != nullptr) //special case for IIfcPolygonalBoundedHalfSpace to keep extrusion to the minimum
+					{
+						XbimSolid^ s = gcnew XbimSolid(pbhs, maxLen, logger);
+						if (s->IsValid) solidSet->Add(s);
+					}
+					else
+					{
+						XbimSolidSet^ s = gcnew XbimSolidSet(bOp, logger);
+						if (s->IsValid) solidSet->Add(s);
+					}
+				}
+
+
+				IXbimSolidSet^ xbimSolidSet = bodySet->Cut(solidSet, mf->Precision, logger);
+				if (xbimSolidSet != nullptr && xbimSolidSet->IsValid)
+				{
+					solids->AddRange(xbimSolidSet);
+				}
+
+			}
+			else
+			{
+
+				IIfcBooleanOperand^ sOp = solid->SecondOperand;
+				XbimSolidSet^ left = gcnew XbimSolidSet(gcnew XbimSolid(fOp, logger));
+				left->IfcEntityLabel = fOp->EntityLabel;
+				XbimSolidSet^ right = gcnew XbimSolidSet(gcnew XbimSolid(sOp, logger));
+				right->IfcEntityLabel = sOp->EntityLabel;
+				if (!left->IsValid)
+				{
+					return; //nothing happening here
+				}
+
+				if (!right->IsValid)
+				{
+					XbimGeometryCreator::LogError(logger, sOp, "Error performing boolean operation, Invalid Second Operand in IfcBooleanClippingResult #{0}", solid->EntityLabel);
+					solids->AddRange(left); // no change
+					return;
+				}
+
+				
+				try
+				{
+					IXbimSolidSet^ result = left->Cut(right, mf->Precision, logger);
+					if (result->IsValid) solids->AddRange(result);
+				}
+				catch (...)
+				{
+					XbimGeometryCreator::LogError(logger, solid, "Error performing boolean operation, {0}. The operation has been ignored", solid->EntityLabel);
+					solids->AddRange(left); // no change
+					return;
+				}
+				
+			}
+		}
 
 		void XbimSolidSet::Init(IIfcBooleanOperand ^ boolOp, ILogger ^ logger)
 		{

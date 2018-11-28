@@ -576,8 +576,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         {
             using (var er = new EntityRepository<IIfcBooleanClippingResult>(nameof(EmptyBooleanClippingResultTest)))
             {
-                var solid = geomEngine.CreateSolidSet(er.Entity, logger).FirstOrDefault();
-                Assert.IsFalse(solid.Faces.Any(), "This solid should have 0 faces");
+                var solidSet = geomEngine.CreateSolidSet(er.Entity, logger);
+                Assert.IsTrue(solidSet.Count==0, "This solid should be empty");
             }
         }
 
