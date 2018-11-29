@@ -139,6 +139,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
         }
 
+        /// <summary>
+        /// This problem is a boolean where the tolerance needs to be made courser by 10 fold
+        /// </summary>
         [TestMethod]
         public void BooleanSilentFail2Test()
         {
@@ -149,6 +152,35 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var solids = geomEngine.CreateSolidSet(er.Entity, logger);
                 HelperFunctions.IsValidSolid(solids.FirstOrDefault());
                 
+            }
+
+        }
+
+        [TestMethod]
+        public void UnorderdedCompositeCurveTest()
+        {
+            using (var er = new EntityRepository<IIfcCompositeCurve>(nameof(UnorderdedCompositeCurveTest),true))
+            {
+                Assert.IsTrue(er.Entity != null, "No IIfcCompositeCurve found");
+
+                var wire = geomEngine.CreateWire(er.Entity, logger);
+                Assert.IsNotNull(wire);
+                Assert.IsTrue(wire.IsValid);
+
+            }
+
+        }
+
+        [TestMethod]
+        public void BooleanSilentFail3Test()
+        {
+            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(BooleanSilentFail3Test), true))
+            {
+                Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
+
+                var solids = geomEngine.CreateSolidSet(er.Entity, logger);
+                HelperFunctions.IsValidSolid(solids.FirstOrDefault());
+
             }
 
         }

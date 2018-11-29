@@ -587,18 +587,24 @@ namespace Xbim
 						
 			bool isContinuous = true;
 			TopTools_ListOfShape topoEdgeList;
+			BRep_Builder b;
+			TopoDS_Wire degenWire;
+			b.MakeWire(degenWire);
 			for each(IIfcCompositeCurveSegment^ seg in cCurve->Segments)
 			{				
 				XbimWire^ wireSegManaged = gcnew XbimWire(seg->ParentCurve, logger);
 				if (seg->Transition == IfcTransitionCode::DISCONTINUOUS) isContinuous = false;
 				if (wireSegManaged->IsValid)
 				{
+					
 					if (!seg->SameSense) 
 						wireSegManaged->Reverse();
 					for each (XbimEdge^ edge in wireSegManaged->Edges)
 					{
-						FTol.LimitTolerance(edge, precision);											
-						topoEdgeList.Append(edge);
+						TopoDS_Edge ed = edge;
+						FTol.LimitTolerance(ed, precision);						
+						topoEdgeList.Append(ed);
+						b.Add(degenWire, ed);
 					}			
 				}				
 			}
@@ -613,14 +619,14 @@ namespace Xbim
 				return;
 			}
 			else //coursen the precision to 1 mm 
-			{
-				TopTools_ListIteratorOfListOfShape anItL;
-				for (anItL.Initialize(topoEdgeList); anItL.More(); anItL.Next())
-				{
-					FTol.LimitTolerance(anItL.Value(), oneMilli);
-				}
-				BRepBuilderAPI_MakeWire wireMaker2;
-				wireMaker2.Add(topoEdgeList);
+			{	
+				BRepBuilderAPI_MakeFace faceMaker(degenWire, Standard_False);
+				ShapeFix_Wire wireFixer(degenWire, faceMaker.Face(), precision);
+				wireFixer.SetPrecision(oneMilli);
+				wireFixer.FixConnected();
+				wireFixer.FixLacking();
+				
+				BRepBuilderAPI_MakeWire wireMaker2(wireFixer.Wire());			
 				if (wireMaker2.IsDone())
 				{
 					pWire = new TopoDS_Wire();
@@ -629,13 +635,11 @@ namespace Xbim
 				}
 				else //coursen the precision to 5 mm
 				{
-					TopTools_ListIteratorOfListOfShape anItL2;
-					for (anItL2.Initialize(topoEdgeList); anItL2.More(); anItL2.Next())
-					{
-						FTol.LimitTolerance(anItL2.Value(), oneMilli * 5);
-					}
-					BRepBuilderAPI_MakeWire wireMaker3;
-					wireMaker3.Add(topoEdgeList);
+					ShapeFix_Wire wireFixer2(degenWire, faceMaker.Face(), precision);
+					wireFixer2.SetPrecision(oneMilli * 5);
+					wireFixer2.FixConnected();
+					wireFixer2.FixLacking();
+					BRepBuilderAPI_MakeWire wireMaker3(wireFixer2.Wire());					
 					if (wireMaker3.IsDone())
 					{
 						pWire = new TopoDS_Wire();

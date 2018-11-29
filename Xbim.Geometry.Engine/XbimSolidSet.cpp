@@ -447,6 +447,7 @@ namespace Xbim
 						}
 					}
 					else
+
 						boolParams->Result = gcnew XbimSolidSet(boolOp.Shape());
 				}
 				else
@@ -472,33 +473,6 @@ namespace Xbim
 		{			
 			if (!IsValid) return this;
 			
-			//set all the tolerances first
-			/*ShapeFix_ShapeTolerance FTol;			
-			for each (IXbimSolid^ iSolid in solidsToCut)
-			{
-				XbimSolid^ solid = dynamic_cast<XbimSolid^>(iSolid);
-				if (solid != nullptr && solid->IsValid)
-				{
-					FTol.LimitTolerance(solid, tolerance);					
-				}
-				else
-				{
-					XbimGeometryCreator::LogWarning(logger, this, "Invalid shape found in Boolean Cut operation. Attempting to correct and process");
-				}
-			}*/
-			/*TopTools_ListOfShape shapeObjects;
-			for each (IXbimSolid^ iSolid in this)
-			{
-				XbimSolid^ solid = dynamic_cast<XbimSolid^>(iSolid);
-				if (solid != nullptr && solid->IsValid)
-				{
-					FTol.LimitTolerance(solid, tolerance);					
-				}
-				else
-				{
-					XbimGeometryCreator::LogWarning(logger, this, "Invalid shape found in Boolean Cut operation. Attempting to correct and process");
-				}
-			}*/
 
 
 			List<Thread^>^ threads = gcnew List<Thread^>(this->Count);
@@ -1023,6 +997,7 @@ namespace Xbim
 					result = left->Intersection(right, mf->Precision, logger);
 					break;
 				case IfcBooleanOperator::DIFFERENCE:
+
 					result = left->Cut(right, mf->Precision, logger);
 					vRes = VolumeOf(result);
 					if (vRes != -1)
