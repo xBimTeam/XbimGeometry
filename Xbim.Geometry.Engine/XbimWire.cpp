@@ -619,12 +619,16 @@ namespace Xbim
 				return;
 			}
 			else //coursen the precision to 1 mm 
-			{	
+			{
+				XbimWire^ dw = gcnew XbimWire(degenWire);
 				BRepBuilderAPI_MakeFace faceMaker(degenWire, Standard_False);
 				ShapeFix_Wire wireFixer(degenWire, faceMaker.Face(), precision);
+				if (cCurve->ClosedCurve.Value != nullptr && cCurve->ClosedCurve.Value)
+					wireFixer.ClosedWireMode() = Standard_True;
 				wireFixer.SetPrecision(oneMilli);
 				wireFixer.FixConnected();
 				wireFixer.FixLacking();
+				
 				
 				BRepBuilderAPI_MakeWire wireMaker2(wireFixer.Wire());			
 				if (wireMaker2.IsDone())
@@ -636,6 +640,8 @@ namespace Xbim
 				else //coursen the precision to 5 mm
 				{
 					ShapeFix_Wire wireFixer2(degenWire, faceMaker.Face(), precision);
+					if (cCurve->ClosedCurve.Value != nullptr && cCurve->ClosedCurve.Value)
+						wireFixer.ClosedWireMode() = Standard_True;;
 					wireFixer2.SetPrecision(oneMilli * 5);
 					wireFixer2.FixConnected();
 					wireFixer2.FixLacking();
@@ -677,8 +683,10 @@ namespace Xbim
 				rotateElipse = ellipse->SemiAxis1 < ellipse->SemiAxis2;				
 			}
 			else if (dynamic_cast<IIfcLine^>(tCurve->BasisCurve))
-			{			
-				curve = gcnew XbimCurve((IIfcLine^)tCurve->BasisCurve, logger);
+			{	
+				IIfcLine^ line = (IIfcLine^)tCurve->BasisCurve;
+				curve = gcnew XbimCurve(line, logger);
+				parameterFactor *= line->Dir->Magnitude; //adjust the trim value for lines magnitude
 			}
 			else if (dynamic_cast<IIfcBSplineCurveWithKnots^>(tCurve->BasisCurve))
 			{			
@@ -759,6 +767,7 @@ namespace Xbim
 						{
 
 						TryMakeEdge:
+							
 							BRepBuilderAPI_MakeEdge e(curve, sense_agreement ? v1 : v2, sense_agreement ? v2 : v1);
 							BRepBuilderAPI_EdgeError err = e.Error();
 							if (err != BRepBuilderAPI_EdgeDone)
@@ -798,8 +807,12 @@ namespace Xbim
 						}
 						else
 						{
-							wireMaker.Add(edgeMaker.Edge());
+							if (sense_agreement)
+								wireMaker.Add(edgeMaker.Edge());
+							else
+								wireMaker.Add(TopoDS::Edge(edgeMaker.Edge().Reversed()));
 						}
+
 					}
 					else
 					{
@@ -809,7 +822,9 @@ namespace Xbim
 							flt2 -= Math::PI / 2;
 						}
 
-						BRepBuilderAPI_MakeEdge edgeMaker(curve, sense_agreement ? flt1 : flt2, sense_agreement ? flt2 : flt1);
+						Handle(Geom_TrimmedCurve) tc = new Geom_TrimmedCurve(curve, sense_agreement ? flt1 : flt2, sense_agreement ? flt2 : flt1);
+						
+						BRepBuilderAPI_MakeEdge edgeMaker(tc);
 						
 						BRepBuilderAPI_EdgeError edgeErr = edgeMaker.Error();
 						if (edgeErr != BRepBuilderAPI_EdgeDone)
@@ -819,7 +834,7 @@ namespace Xbim
 							return;
 						}
 						else
-						{
+						{						
 							if(sense_agreement)
 								wireMaker.Add(edgeMaker.Edge());
 							else

@@ -264,9 +264,9 @@ namespace Xbim
 		{
 			IIfcCartesianPoint^ cp = line->Pnt;
 			IIfcVector^ ifcVec = line->Dir;
-			IIfcDirection^ dir = ifcVec->Orientation;
-			gp_Pnt pnt(cp->X, cp->Y, cp->Z);			
-			gp_Dir vec(dir->X, dir->Y, dir->Z);			
+			IIfcDirection^ dir = ifcVec->Orientation;		
+			gp_Pnt pnt(cp->X, cp->Y, XbimConvert::GetZValueOrZero(cp));
+			gp_Dir vec(dir->X, dir->Y, XbimConvert::GetZValueOrZero(dir));
 			GC_MakeLine maker(pnt, vec);
 			pCurve = new Handle(Geom_Curve)(maker.Value());
 		}
@@ -328,7 +328,7 @@ namespace Xbim
 					if (!u2Found)  GeomLib_Tool::Parameter(*pCurve, p2, precision, u2);
 				}
 				//now just go with
-				*pCurve = new Geom_TrimmedCurve(*pCurve, u1, u2, curve->SenseAgreement);
+				*pCurve = new Geom_TrimmedCurve(*pCurve, curve->SenseAgreement ? u1 : u2, curve->SenseAgreement ? u2 : u1);
 			}
 		}
 

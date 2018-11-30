@@ -2,7 +2,7 @@
   "profiles": {
     "XbimRegression": {
       "commandName": "Project",
-      "commandLineArgs": "C:\\Users\\Steve\\Documents\\ifcmodels"
+      "commandLineArgs": "C:\\Users\\Steve\\Documents\\testModel"
     }
   }
 }

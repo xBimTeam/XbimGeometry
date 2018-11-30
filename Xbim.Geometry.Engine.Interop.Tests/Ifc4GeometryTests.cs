@@ -472,6 +472,24 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 }
             }
         }
+        /// <summary>
+        /// This test checks a composite curve that has trimmed IfcLine segments
+        /// </summary>
+        [TestMethod]
+        public void CompositeCurveWithIfcLineTest()
+        {
+            using (var er = new EntityRepository<IIfcCompositeCurve>(nameof(CompositeCurveWithIfcLineTest)))
+            {
+                Assert.IsTrue(er.Entity != null, "No IIfcCompositeCurve found");
+
+                var curve = geomEngine.CreateWire(er.Entity, logger);
+                Assert.IsNotNull(curve);
+                Assert.IsTrue(curve.IsValid);
+                Assert.IsTrue(curve.IsClosed);
+                Assert.IsTrue(curve.IsPlanar);
+                Assert.IsTrue(curve.Points.Count()==16);
+            }
+        }
 
         /// <summary>
         /// This test checks a compsite curve that has incorrect defintions for the sense of its segments

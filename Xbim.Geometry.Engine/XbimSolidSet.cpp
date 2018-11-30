@@ -473,8 +473,6 @@ namespace Xbim
 		{			
 			if (!IsValid) return this;
 			
-
-
 			List<Thread^>^ threads = gcnew List<Thread^>(this->Count);
 			List<XbimSolidSetBoolOpParams^>^ params = gcnew List<XbimSolidSetBoolOpParams^>(this->Count);
 			for (int i = 0; i < this->Count; i++)
@@ -1004,9 +1002,14 @@ namespace Xbim
 					{
 						vL = left->Volume;
 						vR = right->Volume;
+						double vLeftMinusRight = vL - vR;
+						//if the subtraction leaves a volume of virtual zero and the result has a volume of virtual 0 then its a total cut
+						bool totalCut = Math::Abs(vRes) <= Precision::Confusion();
+					    totalCut = totalCut && Math::Abs(vLeftMinusRight) <= Precision::Confusion();
+						if (totalCut) return;
 						// the minimum is if we take away all of the right; 
 						// but then reduce a bit to compensate for tolerances.
-						vMin = (vL - vR) * .98; 
+						vMin = vLeftMinusRight * .98;
 						if (vRes < vMin )
 						{ 
 							if (!inRetry)

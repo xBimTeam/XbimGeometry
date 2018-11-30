@@ -123,6 +123,23 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 }
             }
         }
+
+        /// <summary>
+        /// Tests iIIfcBooleanResult that cuts two shape and leaves nothing
+        /// </summary>
+        [TestMethod]
+        public void BooleanResultCompleteVoidCutTest()
+        {
+            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(BooleanResultCompleteVoidCutTest)))
+            {
+                Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
+                var solids = geomEngine.CreateSolidSet(er.Entity, logger);
+                Assert.IsTrue(solids.Count == 0);
+
+            }
+
+        }
+
         /// <summary>
         /// Tests if a boolean processes correctly if not it will silent fail and the test should fail
         /// </summary>
