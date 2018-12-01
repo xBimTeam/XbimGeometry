@@ -156,6 +156,22 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
         }
 
+ /// <summary>
+        /// This problem is a boolean where the tolerance needs to be made courser by 10 fold
+        /// </summary>
+        [TestMethod]
+        public void BadlyOrientedBrepFacesTest()
+        {
+            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(BadlyOrientedBrepFacesTest)))
+            {
+                Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
+                
+                var solids = geomEngine.CreateSolidSet(er.Entity, logger);
+                HelperFunctions.IsValidSolid(solids.FirstOrDefault());
+                
+            }
+
+        }
         /// <summary>
         /// This problem is a boolean where the tolerance needs to be made courser by 10 fold
         /// </summary>

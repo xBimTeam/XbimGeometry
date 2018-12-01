@@ -509,13 +509,13 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void CompositeCurveBadPrecisionTest()
         {
-            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\composite-curve2.ifc"))
+            using (var er = new EntityRepository<IIfcCompositeCurve>(nameof(CompositeCurveBadPrecisionTest)))
             {
-                var eas = model.Instances[3205] as IIfcExtrudedAreaSolid;
-                Assert.IsNotNull(eas);
-                var geom = geomEngine.CreateSolid(eas);
-                Assert.IsTrue((geom.Volume>0));
+                Assert.IsTrue(er.Entity != null, "No IIfcCompositeProfileDef found");
+                var wire = geomEngine.CreateWire(er.Entity, logger);
+                Assert.IsTrue(wire.Edges.Count == 12, "This wire should have 12 edges");
             }
+            
         }
 
         [TestMethod]

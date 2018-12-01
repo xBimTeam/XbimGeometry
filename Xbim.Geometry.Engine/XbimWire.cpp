@@ -583,35 +583,38 @@ namespace Xbim
 			ShapeFix_ShapeTolerance FTol;
 			double precision = cCurve->Model->ModelFactors->Precision; //use a courser precision for trimmed curves	
 			
-			TopoDS_Wire w;
+			
 						
 			bool isContinuous = true;
-			TopTools_ListOfShape topoEdgeList;
-			BRep_Builder b;
+			
+			TopoDS_Builder b;		
 			TopoDS_Wire degenWire;
 			b.MakeWire(degenWire);
+			TopTools_ListOfShape edgesList;
 			for each(IIfcCompositeCurveSegment^ seg in cCurve->Segments)
 			{				
 				XbimWire^ wireSegManaged = gcnew XbimWire(seg->ParentCurve, logger);
 				if (seg->Transition == IfcTransitionCode::DISCONTINUOUS) isContinuous = false;
 				if (wireSegManaged->IsValid)
-				{
-					
+				{					
 					if (!seg->SameSense) 
 						wireSegManaged->Reverse();
 					for each (XbimEdge^ edge in wireSegManaged->Edges)
 					{
 						TopoDS_Edge ed = edge;
-						FTol.LimitTolerance(ed, precision);						
-						topoEdgeList.Append(ed);
-						b.Add(degenWire, ed);
+						FTol.LimitTolerance(ed, precision);															
+						edgesList.Append(ed);
+						b.Add(degenWire,ed);
 					}			
 				}				
-			}
-			//we are going to use one millimeter for the precision when edges don't join
-			double oneMilli = cCurve->Model->ModelFactors->OneMilliMeter;
+			}		
+			//int edgeCount = 0;
+			//for (TopExp_Explorer exp(degenWire, TopAbs_EDGE); exp.More(); exp.Next()) //just take the first wire
+			//{
+			//	edgeCount++;
+			//}
 			BRepBuilderAPI_MakeWire wireMaker1;
-			wireMaker1.Add(topoEdgeList);
+			wireMaker1.Add(edgesList);
 			if (wireMaker1.IsDone())
 			{
 				pWire = new TopoDS_Wire();
@@ -620,9 +623,11 @@ namespace Xbim
 			}
 			else //coursen the precision to 1 mm 
 			{
-				XbimWire^ dw = gcnew XbimWire(degenWire);
-				BRepBuilderAPI_MakeFace faceMaker(degenWire, Standard_False);
-				ShapeFix_Wire wireFixer(degenWire, faceMaker.Face(), precision);
+				//we are going to use one millimeter for the precision when edges don't join
+				double oneMilli = cCurve->Model->ModelFactors->OneMilliMeter;
+
+				TopoDS_Face	face = BRepBuilderAPI_MakeFace(degenWire, Standard_True);
+				ShapeFix_Wire wireFixer(degenWire, face, precision);
 				if (cCurve->ClosedCurve.Value != nullptr && cCurve->ClosedCurve.Value)
 					wireFixer.ClosedWireMode() = Standard_True;
 				wireFixer.SetPrecision(oneMilli);
@@ -639,7 +644,7 @@ namespace Xbim
 				}
 				else //coursen the precision to 5 mm
 				{
-					ShapeFix_Wire wireFixer2(degenWire, faceMaker.Face(), precision);
+					ShapeFix_Wire wireFixer2(degenWire, face, precision);
 					if (cCurve->ClosedCurve.Value != nullptr && cCurve->ClosedCurve.Value)
 						wireFixer.ClosedWireMode() = Standard_True;;
 					wireFixer2.SetPrecision(oneMilli * 5);

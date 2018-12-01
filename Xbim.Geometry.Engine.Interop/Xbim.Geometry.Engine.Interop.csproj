@@ -60,11 +60,11 @@
         Platform=Win32
       </AdditionalProperties>
     </NativeGeometryEngine>
-    <!--<NativeGeometryEngine Include="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj">
+    <NativeGeometryEngine Include="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj">
       <AdditionalProperties>
         Platform=x64   
       </AdditionalProperties>
-    </NativeGeometryEngine>-->
+    </NativeGeometryEngine>
   </ItemGroup>
   
   <!--We need to execute this after a build to ensure the nuget packages are in the correct place for the c++ binding-->

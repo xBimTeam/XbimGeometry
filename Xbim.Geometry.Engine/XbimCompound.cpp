@@ -1024,6 +1024,10 @@ namespace Xbim
 				}
 				XbimFace^ face = BuildFace(thisFaceLoops, ifcFace, logger);
 				
+				if (BRepCheck_Analyzer(face, Standard_True).IsValid() == Standard_False)
+				{
+					int i = 2;
+				}
 				for each (Tuple<XbimWire^, IIfcPolyLoop^, bool>^ loop in thisFaceLoops) delete loop->Item1; //force removal of wires
 				if (face->IsValid )
 				{
@@ -1116,9 +1120,17 @@ namespace Xbim
 				{
 					XbimGeometryCreator::LogInfo(logger,theItem, "Incorrectly defined closed shell. It has been processed but is declared closed and is not defined as closed");
 				}
+				if (BRepCheck_Analyzer(shell, Standard_True).IsValid() == Standard_False)
+				{
+					ShapeFix_Shell sFixer(shell);
+					sFixer.LimitTolerance(tolerance);
+					if (sFixer.Perform())
+					{
+						shell = sFixer.Shell();
+					}					
+				}
 				ShapeFix_Solid solidFixer;
-				solidFixer.SetPrecision(tolerance);
-				solidFixer.SetMinTolerance(tolerance);
+				solidFixer.LimitTolerance(tolerance);
 				result = solidFixer.SolidFromShell(shell);
 				if (result.IsNull()) 
 					result = shell; //give in and use previous shell
@@ -1145,10 +1157,15 @@ namespace Xbim
 					//default to what we had
 					builder.Add(*pCompound, result);
 				}
-			}
+			}			
 			else
+			{
 				builder.Add(*pCompound, result);
+			}
+			
+				
 			_isSewn = true; //effectively further sewing will yield no advantage
+			
 		}
 
 #pragma endregion
