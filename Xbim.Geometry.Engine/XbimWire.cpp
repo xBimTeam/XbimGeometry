@@ -507,32 +507,8 @@ namespace Xbim
 			}
 			pWire = new TopoDS_Wire();
 			*pWire = wire;
-			//if (BRepCheck_Analyzer(wire, Standard_True).IsValid() == Standard_True)
-			//{
-			//	pWire = new TopoDS_Wire();
-			//	*pWire = wire;
-			//}
-			//else
-			//{
-
-			//	double toleranceMax = pLine->Model->ModelFactors->PrecisionMax;
-			//	ShapeFix_Shape sfs(wire);
-			//	sfs.SetPrecision(tolerance);
-			//	sfs.SetMinTolerance(tolerance);
-			//	sfs.SetMaxTolerance(toleranceMax);
-			//	sfs.Perform();
-
-			//	if (BRepCheck_Analyzer(sfs.Shape(), Standard_True).IsValid() == Standard_True && sfs.Shape().ShapeType() == TopAbs_WIRE) //in release builds except the geometry is not compliant
-			//	{
-			//		pWire = new TopoDS_Wire();
-			//		*pWire = TopoDS::Wire(sfs.Shape());
-			//	}
-			//	else
-			//	{
-			//		XbimGeometryCreator::LogWarning(pLine, "Invalid polyline. Wire discarded");
-			//		return;
-			//	}
-			//}
+			ShapeFix_ShapeTolerance fixTol;
+			fixTol.LimitTolerance(*pWire, tolerance);
 		}
 
 		void XbimWire::Init(IIfcBSplineCurve^ bspline, ILogger^ logger)
@@ -619,6 +595,7 @@ namespace Xbim
 			{
 				pWire = new TopoDS_Wire();
 				*pWire = wireMaker1.Wire();
+				FTol.LimitTolerance(*pWire, precision);
 				return;
 			}
 			else //coursen the precision to 1 mm 
@@ -640,6 +617,7 @@ namespace Xbim
 				{
 					pWire = new TopoDS_Wire();
 					*pWire = wireMaker2.Wire();
+					FTol.LimitTolerance(*pWire, precision);
 					return;
 				}
 				else //coursen the precision to 5 mm
@@ -655,6 +633,7 @@ namespace Xbim
 					{
 						pWire = new TopoDS_Wire();
 						*pWire = wireMaker3.Wire();
+						FTol.LimitTolerance(*pWire, precision);
 						return;
 					}
 					

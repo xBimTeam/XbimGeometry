@@ -163,7 +163,7 @@ namespace Xbim
 			void Translate(XbimVector3D translation);
 			void Reverse();
 			void CorrectOrientation();
-			void FixTopology();
+			bool FixTopology(double tolerance);
 #pragma endregion
 
 			

@@ -1024,10 +1024,7 @@ namespace Xbim
 				}
 				XbimFace^ face = BuildFace(thisFaceLoops, ifcFace, logger);
 				
-				if (BRepCheck_Analyzer(face, Standard_True).IsValid() == Standard_False)
-				{
-					int i = 2;
-				}
+				
 				for each (Tuple<XbimWire^, IIfcPolyLoop^, bool>^ loop in thisFaceLoops) delete loop->Item1; //force removal of wires
 				if (face->IsValid )
 				{
@@ -1085,11 +1082,12 @@ namespace Xbim
 				}
 			}
 			
-
+			XbimShell^ s = gcnew XbimShell(shell);
 			// in theory we have a topologically valid shell but face orientation may be wrong as some exporters don't care about this
 			//
 			ShapeAnalysis_Shell shellAnalyser;
 			bool needsReorienting = shellAnalyser.CheckOrientedShells(shell);
+
 			if (needsReorienting)
 			{
 				ShapeFix_Shell shellFixer;
@@ -1106,20 +1104,6 @@ namespace Xbim
 			TopoDS_Shape result;
 			if (close) //we want it closed
 			{
-				bool closedShape = true;
-				for each (XbimFace^ f in facesToRecheck)
-				{
-					List<XbimBiPolarLinearEdge^>^ linearEdges = (List<XbimBiPolarLinearEdge^>^)(f->Tag);
-					for each (XbimBiPolarLinearEdge^ linEdge in linearEdges)
-					{
-						if (linEdge->ReferenceCount != 2)
-							closedShape = false;
-					}
-				}
-				if (!closedShape) //we think it is closed, we cannot really do much more if it is not, shape healing will not heal a shell that is not closed
-				{
-					XbimGeometryCreator::LogInfo(logger,theItem, "Incorrectly defined closed shell. It has been processed but is declared closed and is not defined as closed");
-				}
 				if (BRepCheck_Analyzer(shell, Standard_True).IsValid() == Standard_False)
 				{
 					ShapeFix_Shell sFixer(shell);
@@ -1127,8 +1111,9 @@ namespace Xbim
 					if (sFixer.Perform())
 					{
 						shell = sFixer.Shell();
-					}					
+					}
 				}
+				
 				ShapeFix_Solid solidFixer;
 				solidFixer.LimitTolerance(tolerance);
 				result = solidFixer.SolidFromShell(shell);
@@ -1160,10 +1145,12 @@ namespace Xbim
 			}			
 			else
 			{
+
 				builder.Add(*pCompound, result);
 			}
 			
-				
+			//check if we are closed?
+
 			_isSewn = true; //effectively further sewing will yield no advantage
 			
 		}

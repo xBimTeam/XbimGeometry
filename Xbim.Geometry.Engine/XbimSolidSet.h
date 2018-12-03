@@ -1,8 +1,10 @@
 #pragma once
 #include "XbimSolid.h"
 #include "XbimCompound.h"
+#include "XbimGeometryObjectSet.h"
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
+using namespace System;
 using namespace Xbim::Common;
 using namespace System::Collections::Generic;
 
@@ -61,6 +63,7 @@ namespace Xbim
 
 			static property XbimSolidSet^ Empty{XbimSolidSet^ get(){ return empty; }};
 			static XbimSolidSet^ BuildClippingList(IIfcBooleanClippingResult^ solid, List<IIfcBooleanOperand^>^ clipList, ILogger^ logger);
+			static XbimSolidSet^ BuildBooleanResult(IIfcBooleanResult^ solid, XbimSolidSet^ ops, ILogger^ logger);
 			XbimSolidSet();
 			XbimSolidSet(const TopoDS_Shape& shape);
 			XbimSolidSet(XbimCompound^ shape);
@@ -146,7 +149,11 @@ namespace Xbim
 			double _tolerance;
 			ILogger^ _logger;
 			XbimSolidSet^ _result;
+			bool _success = false;
+			bool _useBody = false;
 		public:
+			virtual property bool Success {bool get() { return _success; } void set(bool val) { _success = val; } }
+			virtual property bool UseBody {bool get() { return _useBody; } void set(bool val) { _useBody = val; } }
 			virtual property XbimSolid^ Body {XbimSolid^ get() { return _body; }}
 			virtual property XbimSolidSet^ Ops {XbimSolidSet^ get() { return _ops; }}
 			virtual property double Tolerance {double get() { return _tolerance; }}

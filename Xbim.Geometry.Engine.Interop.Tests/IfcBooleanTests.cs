@@ -203,11 +203,49 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             }
 
         }
-
         [TestMethod]
-        public void BooleanSilentFail3Test()
+        public void BooleanResultTimoutTest()
         {
-            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(BooleanSilentFail3Test), true))
+            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(BooleanResultTimoutTest), true))
+            {
+                Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
+
+                var solids = geomEngine.CreateSolidSet(er.Entity, logger);
+                HelperFunctions.IsValidSolid(solids.FirstOrDefault());
+
+            }
+
+        }
+        [TestMethod]
+        public void ComplexNestedBooleanResult()
+        {
+            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(ComplexNestedBooleanResult), true))
+            {
+                Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
+
+                var solids = geomEngine.CreateSolidSet(er.Entity, logger);
+                HelperFunctions.IsValidSolid(solids.FirstOrDefault());
+
+            }
+
+        }
+        [TestMethod]
+        public void VerySmallBooleanCutTest()
+        {
+            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(VerySmallBooleanCutTest), true))
+            {
+                Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
+
+                var solids = geomEngine.CreateSolidSet(er.Entity, logger);
+                HelperFunctions.IsValidSolid(solids.FirstOrDefault());
+
+            }
+
+        }
+        [TestMethod]
+        public void FailingBooleanBrepWithZeroVolumeTest()
+        {
+            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(FailingBooleanBrepWithZeroVolumeTest), true))
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
 

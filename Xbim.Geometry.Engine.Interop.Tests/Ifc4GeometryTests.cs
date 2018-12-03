@@ -50,6 +50,19 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             }
 
         }
+
+        [TestMethod]
+        public void FacetedBrepWithCoincidentalFacesTest()
+        {
+            using (var er = new EntityRepository<IIfcFacetedBrep>(nameof(FacetedBrepWithCoincidentalFacesTest)))
+            {
+                Assert.IsTrue(er.Entity != null, "No IIfcFacetedBrep found");
+                var solid = geomEngine.CreateSolidSet(er.Entity, logger).FirstOrDefault();
+                HelperFunctions.IsValidSolid(solid);
+
+            }
+
+        }
         [TestMethod]
         public void CsgSolidIsValidSolidTest()
         {
@@ -470,6 +483,19 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     }
                     Assert.IsTrue(geom.Volume > 0);
                 }
+            }
+        }
+        [TestMethod]
+        public void NotClosedShellTest()
+        {
+            using (var er = new EntityRepository<IIfcClosedShell>(nameof(NotClosedShellTest)))
+            {
+                Assert.IsTrue(er.Entity != null, "No IIfcClosedShell found");
+
+                var solid = geomEngine.CreateSolidSet(er.Entity, logger);
+
+                Assert.IsTrue(solid.IsValid);
+               
             }
         }
         /// <summary>
