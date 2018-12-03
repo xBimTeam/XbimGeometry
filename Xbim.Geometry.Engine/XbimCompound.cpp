@@ -1082,7 +1082,7 @@ namespace Xbim
 				}
 			}
 			
-			XbimShell^ s = gcnew XbimShell(shell);
+			
 			// in theory we have a topologically valid shell but face orientation may be wrong as some exporters don't care about this
 			//
 			ShapeAnalysis_Shell shellAnalyser;
