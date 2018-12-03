@@ -195,10 +195,11 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\Axis2PlacementError.ifc"))
             {
                 var advancedBrep = model.Instances.OfType<IfcAdvancedBrep>().FirstOrDefault(i => i.EntityLabel== 27743);
-                bool wa = model.ModelFactors.ApplyWorkAround("#SurfaceOfLinearExtrusion");
                 Assert.IsNotNull(advancedBrep);
+                bool wasApplied = model.ModelFactors.ApplyWorkAround("#SurfaceOfLinearExtrusion");
+                Assert.IsTrue(wasApplied);
                 var basin = geomEngine.CreateSolid(advancedBrep);
-                Assert.IsTrue((int)basin.Volume == 43947334);
+                Assert.AreEqual(43947334, (int)basin.Volume);   // TODO: SRL Investigating
             }
         }
         [TestMethod]
