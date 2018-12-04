@@ -486,6 +486,7 @@ namespace Xbim.ModelGeometry.Scene
             get { return _engine ?? (_engine = new XbimGeometryEngine()); }
         }
 
+        [Obsolete("Supply ILogger on constructor instead")]
         public static ILogger Logger
         {       
             set
@@ -561,10 +562,11 @@ namespace Xbim.ModelGeometry.Scene
         /// <param name="model"></param>
         /// <param name="contextType"></param>
         /// <param name="requiredContextIdentifier"></param>
-        public Xbim3DModelContext(IModel model, string contextType = "model", string requiredContextIdentifier = null)
+        public Xbim3DModelContext(IModel model, string contextType = "model", string requiredContextIdentifier = null,
+            ILogger logger = null)
         {
             _model = model;
-            
+            _logger = logger ?? XbimLogging.CreateLogger<Xbim3DModelContext>();
 
             // Get the required context
 

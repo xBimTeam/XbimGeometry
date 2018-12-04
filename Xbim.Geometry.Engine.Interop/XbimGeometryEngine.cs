@@ -9,7 +9,7 @@ using Xbim.Ifc4.Interfaces;
 
 
 namespace Xbim.Geometry.Engine.Interop
-{  
+{
     public class XbimGeometryEngine : IXbimGeometryEngine
     {
         private readonly IXbimGeometryEngine _engine;
@@ -18,7 +18,7 @@ namespace Xbim.Geometry.Engine.Interop
 
         static XbimGeometryEngine()
         {
-           
+
             // We need to wire in a custom assembly resolver since Xbim.Geometry.Engine is 
             // not located using standard probing rules (due to way we deploy processor specific binaries)
             AppDomain.CurrentDomain.AssemblyResolve += XbimCustomAssemblyResolver.ResolverHandler;
@@ -34,49 +34,49 @@ namespace Xbim.Geometry.Engine.Interop
             //XbimPrerequisitesValidator.Validate();
 
 
-            _logger = logger;
-            
+            _logger = logger ?? XbimLogging.CreateLogger<XbimGeometryEngine>();
+
             var conventions = new XbimArchitectureConventions();    // understands the process we run under
             string assemblyName = $"{conventions.ModuleName}.dll";// + conventions.Suffix; dropping the use of a suffix
-            _logger?.LogDebug("Loading {assemblyName}", assemblyName);
+            _logger.LogDebug("Loading {assemblyName}", assemblyName);
             try
-            {               
-                var ass =  Assembly.Load(assemblyName);
-                _logger?.LogTrace("Loaded {fullName} from {codebase}", ass.GetName().FullName, ass.CodeBase);
+            {
+                var ass = Assembly.Load(assemblyName);
+                _logger.LogTrace("Loaded {fullName} from {codebase}", ass.GetName().FullName, ass.CodeBase);
                 var t = ass.GetType("Xbim.Geometry.XbimGeometryCreator");
                 var obj = Activator.CreateInstance(t);
-                _logger?.LogTrace("Created Instance of {fullName}", obj.GetType().FullName);
+                _logger.LogTrace("Created Instance of {fullName}", obj.GetType().FullName);
                 if (obj == null) throw new Exception("Failed to create Geometry Engine");
                 _engine = obj as IXbimGeometryEngine;
                 if (_engine == null) throw new Exception("Failed to cast Geometry Engine to IXbimGeometryEngine");
-                _logger?.LogDebug("XbimGeometryEngine constructed succesfully");
+                _logger.LogDebug("XbimGeometryEngine constructed succesfully");
             }
             catch (Exception e)
             {
-                _logger?.LogError(0, e, "Failed to construct XbimGeometryEngine");
-                throw new FileLoadException($"Failed to load Xbim.Geometry.Engine{conventions.Suffix}.dll",e);
+                _logger.LogError(0, e, "Failed to construct XbimGeometryEngine");
+                throw new FileLoadException($"Failed to load Xbim.Geometry.Engine{conventions.Suffix}.dll", e);
             }
-             
+
         }
 
         public IXbimGeometryObject Create(IIfcGeometricRepresentationItem ifcRepresentation, ILogger logger)
         {
-            return _engine.Create(ifcRepresentation, null,logger);
+            return _engine.Create(ifcRepresentation, null, logger);
         }
 
         public XbimShapeGeometry CreateShapeGeometry(IXbimGeometryObject geometryObject, double precision, double deflection,
             double angle, XbimGeometryType storageType, ILogger logger)
         {
-            return _engine.CreateShapeGeometry(geometryObject, precision, deflection, angle, storageType,logger);
+            return _engine.CreateShapeGeometry(geometryObject, precision, deflection, angle, storageType, logger);
         }
 
         public XbimShapeGeometry CreateShapeGeometry(IXbimGeometryObject geometryObject, double precision, double deflection, double angle, ILogger logger)
         {
-            return _engine.CreateShapeGeometry(geometryObject,  precision,  deflection,  angle, XbimGeometryType.Polyhedron,logger);
+            return _engine.CreateShapeGeometry(geometryObject, precision, deflection, angle, XbimGeometryType.Polyhedron, logger);
         }
         public XbimShapeGeometry CreateShapeGeometry(IXbimGeometryObject geometryObject, double precision, double deflection, ILogger logger /*, angle = 0.5*/)
         {
-            return _engine.CreateShapeGeometry(geometryObject, precision, deflection, 0.5, XbimGeometryType.Polyhedron,logger);
+            return _engine.CreateShapeGeometry(geometryObject, precision, deflection, 0.5, XbimGeometryType.Polyhedron, logger);
         }
 
         public IXbimSolid CreateSolid(IIfcSweptAreaSolid ifcSolid, ILogger logger)
@@ -136,7 +136,7 @@ namespace Xbim.Geometry.Engine.Interop
 
         public IXbimSolidSet CreateSolidSet(IIfcManifoldSolidBrep ifcSolid, ILogger logger)
         {
-            return _engine.CreateSolidSet(ifcSolid,logger);
+            return _engine.CreateSolidSet(ifcSolid, logger);
         }
 
         public IXbimSolidSet CreateSolidSet(IIfcFacetedBrep ifcSolid, ILogger logger)
@@ -284,7 +284,7 @@ namespace Xbim.Geometry.Engine.Interop
             return _engine.CreateFace(profileDef, logger);
         }
 
-       
+
         public IXbimFace CreateFace(IIfcCompositeCurve cCurve, ILogger logger)
         {
             return _engine.CreateFace(cCurve, logger);
@@ -329,7 +329,7 @@ namespace Xbim.Geometry.Engine.Interop
             return _engine.CreateWire(compCurveSeg, logger);
         }
 
-       
+
 
         public IXbimPoint CreatePoint(double x, double y, double z, double tolerance)
         {
@@ -377,12 +377,12 @@ namespace Xbim.Geometry.Engine.Interop
             {
                 throw new Exception("Engine is not valid", e);
             }
-            
+
         }
 
         public IXbimSolidSet CreateSolidSet(IIfcBooleanResult boolOp, ILogger logger)
         {
-            return _engine.CreateSolidSet(boolOp,logger);
+            return _engine.CreateSolidSet(boolOp, logger);
         }
 
         public IXbimSolidSet CreateGrid(IIfcGrid grid, ILogger logger)
@@ -410,7 +410,7 @@ namespace Xbim.Geometry.Engine.Interop
             _engine.Mesh(receiver, geometryObject, precision, deflection, angle);
         }
 
-       
+
         public void WriteTriangulation(BinaryWriter bw, IXbimGeometryObject shape, double tolerance, double deflection)
         {
             WriteTriangulation(bw, shape, tolerance, deflection: deflection, angle: 0.5);
@@ -421,7 +421,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             try
             {
-                return _engine.Create(ifcRepresentation, objectLocation,logger);
+                return _engine.Create(ifcRepresentation, objectLocation, logger);
             }
             catch (Exception e)
             {
@@ -498,12 +498,12 @@ namespace Xbim.Geometry.Engine.Interop
         /// <returns></returns>
         public IXbimGeometryObject Transformed(IXbimGeometryObject geometry, IIfcCartesianTransformationOperator cartesianTransform)
         {
-           return _engine.Transformed(geometry, cartesianTransform);
+            return _engine.Transformed(geometry, cartesianTransform);
         }
 
 
         public IXbimGeometryObject Moved(IXbimGeometryObject geometryObject, IIfcAxis2Placement3D placement)
-        { 
+        {
             return _engine.Moved(geometryObject, placement);
         }
         public IXbimGeometryObject Moved(IXbimGeometryObject geometryObject, IIfcAxis2Placement2D placement)
@@ -523,7 +523,7 @@ namespace Xbim.Geometry.Engine.Interop
         public IXbimGeometryObject FromBrep(string brepStr)
         {
             return _engine.FromBrep(brepStr);
-        }     
+        }
 
         public string ToBrep(IXbimGeometryObject geometryObject)
         {
