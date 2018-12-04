@@ -50,6 +50,7 @@ namespace XbimRegression
                     ProcessResult result;
                     using (var loggerFactory = new LoggerFactory())
                     {
+                        XbimLogging.LoggerFactory = loggerFactory;
                         loggerFactory.AddConsole(LogLevel.Error);
                         loggerFactory.AddProvider(new NReco.Logging.File.FileLoggerProvider(logFile, false)
                         {
@@ -73,6 +74,7 @@ namespace XbimRegression
                         result = ProcessFile(file.FullName, writer, logger);
 
                     }
+                    XbimLogging.LoggerFactory = null; // uses a default loggerFactory
 
                     var txt = File.ReadAllText(logFile);
                     if (string.IsNullOrEmpty(txt))
