@@ -11,20 +11,20 @@ variables:
   # creates a counter called versioncounter and seeds it at 100 and then assigns the value to a variable named buildNo.
   buildNo: $[counter('geomversioncounter', 100)]
   
-name: $(BuildDefinitionName)_$(SourceBranchName)_$(buildNo)
+name: $(BuildDefinitionName)_$(packageversion)
 
 steps:
-# Windows script setting up  $(version) of the nuget package based on branch
+# Windows script setting up  $(packageversion) of the nuget package based on branch
 - script: |
-    echo ##vso[task.setvariable variable=version]$(major).$(minor).$(buildNo)-prerelease
+    echo ##vso[task.setvariable variable=packageversion]$(major).$(minor).$(buildNo)-prerelease
   name: 'SettingPrereleaseNugetPackageVersion'
   condition: eq(variables['Build.SourceBranch'], 'refs/heads/develop')
 - script: | 
-    echo ##vso[task.setvariable variable=version]$(major).$(minor).$(buildNo)
+    echo ##vso[task.setvariable variable=packageversion]$(major).$(minor).$(buildNo)
   name: 'SettingNugetPackageVersion'
   condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
 - script: | 
-    echo ##vso[task.setvariable variable=version]$(major).$(minor).$(buildNo)-ignore
+    echo ##vso[task.setvariable variable=packageversion]$(major).$(minor).$(buildNo)-ignore
   name: 'SettingOtherBranchNugetPackageVersion'
   condition: and(ne(variables['Build.SourceBranch'], 'refs/heads/master'),ne(variables['Build.SourceBranch'], 'refs/heads/develop'))
 
@@ -96,9 +96,9 @@ steps:
   
 # Xbim.Geometry meta package
 - powershell: |
-    ((Get-Content -path Xbim.Geometry\Xbim.Geometry.tmpl -Raw) -replace '{{version}}','$(version)') | Set-Content -Path Xbim.Geometry\Xbim.Geometry.nuspec
+    ((Get-Content -path Xbim.Geometry\Xbim.Geometry.tmpl -Raw) -replace '{{version}}','$(packageversion)') | Set-Content -Path Xbim.Geometry\Xbim.Geometry.nuspec
   name: Geometry_metapackage_Update
-- script: nuget pack Xbim.Geometry\Xbim.Geometry.nuspec -o Xbim.Geometry/bin/$(BuildConfiguration)
+- script: nuget pack Xbim.Geometry\Xbim.Geometry.nuspec -OutputDirectory Xbim.Geometry/bin/$(BuildConfiguration)
   name: Geometry_metapackage_Pack
 
 - task: VSTest@2
@@ -141,7 +141,7 @@ steps:
     nuGetFeedType: external
     publishFeedCredentials: 'MyGetMaster'
     versioningScheme: byEnvVar
-    versionEnvVar: version
+    versionEnvVar: packageversion
 
 - task: NuGetCommand@2
   name: 'MyGetPublishing_Develop'
@@ -151,7 +151,4 @@ steps:
     nuGetFeedType: external
     publishFeedCredentials: 'MyGetDev'
     versioningScheme: byEnvVar
-    versionEnvVar: version
-
-# - task: PublishBuildArtifacts@1
-#   displayName: 'publish artifacts'
+    versionEnvVar: packageversion
