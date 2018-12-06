@@ -1,23 +1,30 @@
+
+trigger:
+- master
+- develop
+
 variables:
   BuildConfiguration: 'Release'
   BuildPlatform: 'Any CPU'
   major: 5
   minor: 0
-  # creates a counter called versioncounter and seeds it at 100 and then assigns the value to a variable named patch.
-  patch: $[counter('geomversioncounter', 100)]
+  # creates a counter called versioncounter and seeds it at 100 and then assigns the value to a variable named buildNo.
+  buildNo: $[counter('geomversioncounter', 100)]
   
+name: $(BuildDefinitionName)_$(SourceBranchName)_$(buildNo)
+
 steps:
 # Windows script setting up  $(version) of the nuget package based on branch
 - script: |
-    echo ##vso[task.setvariable variable=version]$(major).$(minor).$(patch)-prerelease
+    echo ##vso[task.setvariable variable=version]$(major).$(minor).$(buildNo)-prerelease
   name: 'SettingPrereleaseNugetPackageVersion'
   condition: eq(variables['Build.SourceBranch'], 'refs/heads/develop')
 - script: | 
-    echo ##vso[task.setvariable variable=version]$(major).$(minor).$(patch)
+    echo ##vso[task.setvariable variable=version]$(major).$(minor).$(buildNo)
   name: 'SettingNugetPackageVersion'
   condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
 - script: | 
-    echo ##vso[task.setvariable variable=version]$(major).$(minor).$(patch)-ignore
+    echo ##vso[task.setvariable variable=version]$(major).$(minor).$(buildNo)-ignore
   name: 'SettingOtherBranchNugetPackageVersion'
   condition: and(ne(variables['Build.SourceBranch'], 'refs/heads/master'),ne(variables['Build.SourceBranch'], 'refs/heads/develop'))
 
@@ -25,18 +32,19 @@ steps:
 # Windows script setting up $(fileversion) used to stamp AssemblyFileVersions. 
 # By convention we use 'Major.Minor.BuildNo.0' on Master and 'Major.Minor.0.BuildNo' on other branches
 - script: | 
-    echo ##vso[task.setvariable variable=fileversion]$(major).$(minor).$(patch).0
+    echo ##vso[task.setvariable variable=fileversion]$(major).$(minor).$(buildNo).0
   name: 'SettingFileVersionMaster'
   condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
 - script: | 
-    echo ##vso[task.setvariable variable=fileversion]$(major).$(minor).0.$(patch)
+    echo ##vso[task.setvariable variable=fileversion]$(major).$(minor).0.$(buildNo)
   name: 'SettingFileVersionNonMaster'
   condition: ne(variables['Build.SourceBranch'], 'refs/heads/master')
 
 #Task group has not been exported, task groups are not supported yet
 
 - task: NuGetToolInstaller@0
-  displayName: 'Use NuGet 4.3.0'
+  displayName: 'Use a new NuGet'
+  versionSpec: '4.6.2'
 
 # Version .NET Core project files
 # Description - Applies a version to a .NET Core assembly via the .csproj files based on the build number. 
