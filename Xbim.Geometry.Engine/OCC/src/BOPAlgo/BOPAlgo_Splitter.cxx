@@ -22,22 +22,15 @@
 //purpose  : 
 //=======================================================================
 BOPAlgo_Splitter::BOPAlgo_Splitter()
-:
-  BOPAlgo_Builder(),
-  myTools(myAllocator),
-  myMapTools(100, myAllocator)
+: BOPAlgo_ToolsProvider()
 {
 }
 //=======================================================================
 //function : 
 //purpose  : 
 //=======================================================================
-BOPAlgo_Splitter::BOPAlgo_Splitter
-  (const Handle(NCollection_BaseAllocator)& theAllocator)
-:
-  BOPAlgo_Builder(theAllocator),
-  myTools(myAllocator),
-  myMapTools(100, myAllocator)
+BOPAlgo_Splitter::BOPAlgo_Splitter(const Handle(NCollection_BaseAllocator)& theAllocator)
+: BOPAlgo_ToolsProvider(theAllocator)
 {
 }
 //=======================================================================
@@ -47,39 +40,6 @@ BOPAlgo_Splitter::BOPAlgo_Splitter
 BOPAlgo_Splitter::~BOPAlgo_Splitter()
 {
 }
-//=======================================================================
-//function : Clear
-//purpose  : 
-//=======================================================================
-void BOPAlgo_Splitter::Clear()
-{
-  BOPAlgo_Builder::Clear();
-  myTools.Clear();
-  myMapTools.Clear();
-}
-//=======================================================================
-//function : AddTool
-//purpose  : 
-//=======================================================================
-void BOPAlgo_Splitter::AddTool(const TopoDS_Shape& theShape)
-{
-  if (myMapTools.Add(theShape)) {
-    myTools.Append(theShape);
-  }
-}
-//=======================================================================
-//function : SetTools
-//purpose  : 
-//=======================================================================
-void BOPAlgo_Splitter::SetTools(const BOPCol_ListOfShape& theShapes)
-{
-  myTools.Clear();
-  BOPCol_ListIteratorOfListOfShape aIt(theShapes);
-  for (; aIt.More(); aIt.Next()) {
-    AddTool(aIt.Value());
-  }
-}
-
 //=======================================================================
 // function: CheckData
 // purpose: 
@@ -112,9 +72,9 @@ void BOPAlgo_Splitter::Perform()
   }
   //
   // prepare shapes for intersection
-  BOPCol_ListOfShape aLS;
+  TopTools_ListOfShape aLS;
   //
-  BOPCol_ListIteratorOfListOfShape aItLS(myArguments);
+  TopTools_ListIteratorOfListOfShape aItLS(myArguments);
   for (; aItLS.More(); aItLS.Next()) {
     aLS.Append(aItLS.Value());
   }
@@ -131,6 +91,7 @@ void BOPAlgo_Splitter::Perform()
   pPF->SetFuzzyValue(myFuzzyValue);
   pPF->SetNonDestructive(myNonDestructive);
   pPF->SetGlue(myGlue);
+  pPF->SetUseOBB(myUseOBB);
   //
   pPF->Perform();
   //

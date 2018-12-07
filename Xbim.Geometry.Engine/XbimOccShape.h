@@ -3,14 +3,14 @@
 #include <TopoDS_Shape.hxx>
 #include <BRepBuilderAPI_Copy.hxx>
 #include <OSD_Timer.hxx>
+
 using namespace System::IO;
 using namespace System::Collections::Generic;
 using namespace Xbim::Common::Geometry;
 using namespace Xbim::Ifc4::Interfaces;
-using namespace Xbim::Ifc4;
 #ifndef XBIMPROGRESSINDICATOR_H
 #define XBIMPROGRESSINDICATOR_H
-
+ 
 # include <Standard_DefineHandle.hxx>
 # include <Standard_Macro.hxx>
 # include <Message_ProgressIndicator.hxx>
@@ -24,7 +24,7 @@ private:
 	bool timedOut;
 public:
 	XbimProgressIndicator(Standard_Real maxDurationSeconds, bool startTimer=true);
-	virtual Standard_Boolean Show(const Standard_Boolean force) { return true; }
+	virtual Standard_Boolean Show(const Standard_Boolean ) { return true; }
 	virtual Standard_Boolean UserBreak();
 	void StartTimer() { timedOut = false;  aTimer.Start(); }
 	void StopTimer() { aTimer.Stop(); }
@@ -56,7 +56,7 @@ namespace Xbim
 			virtual property bool IsSet{bool get() override { return false; }; }
 			virtual XbimGeometryObject^ Transformed(IIfcCartesianTransformationOperator ^transformation) abstract;
 			virtual XbimGeometryObject^ Moved(IIfcPlacement ^placement) abstract;
-			virtual XbimGeometryObject^ Moved(IIfcObjectPlacement ^objectPlacement) abstract;
+			virtual XbimGeometryObject^ Moved(IIfcObjectPlacement ^objectPlacement, ILogger^ logger) abstract;
 			virtual void Mesh(IXbimMeshReceiver^ mesh, double precision, double deflection, double angle)
 			{
 				WriteTriangulation(mesh, precision, deflection, angle);

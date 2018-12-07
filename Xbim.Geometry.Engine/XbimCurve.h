@@ -19,16 +19,16 @@ namespace Xbim
 			}
 			
 			void InstanceCleanup();
-			void Init(IIfcCurve^ curve);
-			void Init(IIfcPolyline^ curve);
-			void Init(IIfcCircle^ curve);
-			void Init(IIfcEllipse^ curve);
-			void Init(IIfcLine^ curve);
-			void Init(IIfcTrimmedCurve^ curve);
-			void Init(IIfcRationalBSplineCurveWithKnots^ curve);
-			void Init(IIfcBSplineCurveWithKnots^ curve);
-			void Init(IIfcOffsetCurve3D^ offset);
-			void Init(IIfcPcurve^ curve);
+			void Init(IIfcCurve^ curve, ILogger^ logger);
+			void Init(IIfcPolyline^ curve, ILogger^ logger);
+			void Init(IIfcCircle^ curve, ILogger^ logger);
+			void Init(IIfcEllipse^ curve, ILogger^ logger);
+			void Init(IIfcLine^ curve, ILogger^ logger);
+			void Init(IIfcTrimmedCurve^ curve, ILogger^ logger);
+			void Init(IIfcRationalBSplineCurveWithKnots^ curve, ILogger^ logger);
+			void Init(IIfcBSplineCurveWithKnots^ curve, ILogger^ logger);
+			void Init(IIfcOffsetCurve3D^ offset, ILogger^ logger);
+			void Init(IIfcPcurve^ curve, ILogger^ logger);
 
 		public:
 			//destructors
@@ -36,16 +36,16 @@ namespace Xbim
 			!XbimCurve(){ InstanceCleanup(); }
 			//constructors
 			XbimCurve(const Handle(Geom_Curve)& curve);
-			XbimCurve(IIfcCurve^ curve) { Init(curve); }
-			XbimCurve(IIfcPolyline^ curve) {  Init(curve); }
-			XbimCurve(IIfcCircle^ curve) {  Init(curve); }
-			XbimCurve(IIfcEllipse^ curve) {  Init(curve); }
-			XbimCurve(IIfcLine^ curve) {  Init(curve); }
-			XbimCurve(IIfcTrimmedCurve^ curve) {  Init(curve); }
-			XbimCurve(IIfcBSplineCurve^ curve) {  Init(curve); }
-			XbimCurve(IIfcBSplineCurveWithKnots^ curve) {  Init(curve); }		
-			XbimCurve(IIfcOffsetCurve3D^ curve){ Init(curve); }
-			XbimCurve(IIfcPcurve^ curve){ Init(curve); }
+			XbimCurve(IIfcCurve^ curve, ILogger^ logger) { Init(curve, logger); }
+			XbimCurve(IIfcPolyline^ curve, ILogger^ logger) {  Init(curve, logger); }
+			XbimCurve(IIfcCircle^ curve, ILogger^ logger) {  Init(curve, logger); }
+			XbimCurve(IIfcEllipse^ curve, ILogger^ logger) {  Init(curve, logger); }
+			XbimCurve(IIfcLine^ curve, ILogger^ logger) {  Init(curve, logger); }
+			XbimCurve(IIfcTrimmedCurve^ curve, ILogger^ logger) {  Init(curve, logger); }
+			XbimCurve(IIfcBSplineCurve^ curve, ILogger^ logger) {  Init(curve, logger); }
+			XbimCurve(IIfcBSplineCurveWithKnots^ curve, ILogger^ logger) {  Init(curve, logger); }
+			XbimCurve(IIfcOffsetCurve3D^ curve, ILogger^ logger){ Init(curve, logger); }
+			XbimCurve(IIfcPcurve^ curve, ILogger^ logger){ Init(curve, logger); }
 
 #pragma region operators
 			operator const Handle(Geom_Curve)& () { return *pCurve; }
@@ -57,7 +57,7 @@ namespace Xbim
 			virtual property  XbimGeometryObjectType GeometryType{XbimGeometryObjectType  get() override { return XbimGeometryObjectType::XbimCurveType; }; }
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) override;
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D)override;
-			virtual IEnumerable<XbimPoint3D>^ Intersections(IXbimCurve^ intersector, double tolerance);
+			virtual IEnumerable<XbimPoint3D>^ Intersections(IXbimCurve^ intersector, double tolerance, ILogger^ logger);
 			virtual property XbimPoint3D Start{XbimPoint3D get(); }
 			virtual property XbimPoint3D End{XbimPoint3D get(); }
 			virtual property double Length{double get(); }

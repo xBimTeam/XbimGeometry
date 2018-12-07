@@ -1308,12 +1308,24 @@ Standard_Real ElCLib::LineParameter (const gp_Ax1& L, const gp_Pnt& P)
 //function : CircleParameter
 //purpose  : 
 //=======================================================================
-
-Standard_Real ElCLib::CircleParameter (const gp_Ax2& Pos,
-				       const gp_Pnt& P)
+Standard_Real ElCLib::CircleParameter(const gp_Ax2& Pos,
+                                      const gp_Pnt& P)
 {
-  Standard_Real Teta = (Pos.XDirection()) .AngleWithRef
-    (gp_Vec (Pos.Location(), P), Pos.Direction());
+  gp_Vec aVec(Pos.Location(), P);
+  if (aVec.SquareMagnitude() < gp::Resolution())
+    // coinciding points -> infinite number of parameters
+    return 0.0;
+
+  const gp_Dir& dir = Pos.Direction();
+  // Project vector on circle's plane
+  gp_XYZ aVProj = dir.XYZ().CrossCrossed(aVec.XYZ(), dir.XYZ());
+
+  if (aVProj.SquareModulus() < gp::Resolution())
+    return 0.0;
+
+  // Angle between X direction and projected vector
+  Standard_Real Teta = (Pos.XDirection()).AngleWithRef(aVProj, dir);
+
   if      (Teta < -1.e-16)  Teta += PIPI;
   else if (Teta < 0)        Teta = 0;
   return Teta;

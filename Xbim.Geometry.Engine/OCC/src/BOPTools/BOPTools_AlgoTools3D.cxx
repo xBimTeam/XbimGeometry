@@ -14,8 +14,6 @@
 
 
 #include <Bnd_Box.hxx>
-#include <BOPCol_IndexedDataMapOfShapeListOfShape.hxx>
-#include <BOPCol_IndexedMapOfShape.hxx>
 #include <BOPTools_AlgoTools2D.hxx>
 #include <BOPTools_AlgoTools3D.hxx>
 #include <BRep_Builder.hxx>
@@ -62,9 +60,10 @@
 #include <TopoDS_Face.hxx>
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Vertex.hxx>
+#include <TopTools_IndexedMapOfShape.hxx>
 
 static void Add(const TopoDS_Shape& aS,
-                BOPCol_IndexedMapOfShape& myShapes, 
+                TopTools_IndexedMapOfShape& myShapes, 
                 Standard_Boolean& bHasGeometry);
 static 
   Standard_Boolean HasGeometry(const TopoDS_Shape& aS);
@@ -309,22 +308,27 @@ Standard_Boolean BOPTools_AlgoTools3D::GetNormalToSurface
    const Standard_Real V,
    gp_Dir& aDNS)
 {
-  Standard_Boolean bFlag;
-  
   gp_Pnt aP;
   gp_Vec aD1U, aD1V;
 
   aS->D1(U, V, aP, aD1U, aD1V);
-  
-  gp_Dir aDD1U(aD1U); 
-  gp_Dir aDD1V(aD1V); 
-  
-  bFlag=IntTools_Tools::IsDirsCoinside(aDD1U, aDD1U);
-  if (!bFlag) {
+
+  Standard_Real aLenU = aD1U.SquareMagnitude();
+  if (aLenU < gp::Resolution())
+    return Standard_False;
+
+  Standard_Real aLenV = aD1V.SquareMagnitude();
+  if (aLenV < gp::Resolution())
+    return Standard_False;
+
+  gp_Dir aDD1U(aD1U);
+  gp_Dir aDD1V(aD1V);
+
+  Standard_Boolean bFlag = IntTools_Tools::IsDirsCoinside(aDD1U, aDD1U);
+  if (!bFlag)
     return bFlag;
-  }
-  
-  aDNS=aDD1U^aDD1V;
+
+  aDNS = aDD1U^aDD1V;
   return bFlag;
 }
 //=======================================================================
@@ -365,7 +369,7 @@ Standard_Boolean BOPTools_AlgoTools3D::GetApproxNormalToFaceOnEdge
    const Standard_Real aT,
    gp_Pnt& aPNear,
    gp_Dir& aDNF,
-   Handle(IntTools_Context)& theContext)
+   const Handle(IntTools_Context)& theContext)
 {
   gp_Pnt2d aPx2DNear;
   Standard_Integer iErr = BOPTools_AlgoTools3D::PointNearEdge 
@@ -394,7 +398,7 @@ Standard_Boolean BOPTools_AlgoTools3D::GetApproxNormalToFaceOnEdge
    const Standard_Real theStep,
    gp_Pnt& aPNear,
    gp_Dir& aDNF,
-   Handle(IntTools_Context)& theContext)
+   const Handle(IntTools_Context)& theContext)
 {
   gp_Pnt2d aPx2DNear;
   Standard_Integer iErr = BOPTools_AlgoTools3D::PointNearEdge 
@@ -506,7 +510,7 @@ Standard_Integer BOPTools_AlgoTools3D::PointNearEdge
    const Standard_Real aT, 
    gp_Pnt2d& aPx2DNear,
    gp_Pnt& aPxNear,
-   Handle(IntTools_Context)& theContext)
+   const Handle(IntTools_Context)& theContext)
 {
   Standard_Real aTolE, aTolF, dTx, dT2D;
   Handle(Geom_Surface) aS;
@@ -559,7 +563,7 @@ Standard_Integer BOPTools_AlgoTools3D::PointNearEdge
    const Standard_Real theStep,
    gp_Pnt2d& aPx2DNear,
    gp_Pnt& aPxNear,
-   Handle(IntTools_Context)& theContext)
+   const Handle(IntTools_Context)& theContext)
 {
   Standard_Integer iErr = BOPTools_AlgoTools3D::PointNearEdge 
     (aE, aF, aT, theStep, aPx2DNear, aPxNear);
@@ -589,7 +593,7 @@ Standard_Integer BOPTools_AlgoTools3D::PointNearEdge
    const TopoDS_Face& aF, 
    gp_Pnt2d& aPInFace2D, 
    gp_Pnt& aPInFace,
-   Handle(IntTools_Context)& theContext)
+   const Handle(IntTools_Context)& theContext)
 {
   Standard_Real aT, aT1, aT2;
   //
@@ -626,7 +630,7 @@ Standard_Boolean BOPTools_AlgoTools3D::IsEmptyShape
 {
   Standard_Boolean bHasGeometry=Standard_False;
   //
-  BOPCol_IndexedMapOfShape myShapes;
+  TopTools_IndexedMapOfShape myShapes;
   //
   Add(aS, myShapes, bHasGeometry);
 
@@ -637,7 +641,7 @@ Standard_Boolean BOPTools_AlgoTools3D::IsEmptyShape
 //purpose  : 
 //=======================================================================
 void Add(const TopoDS_Shape& aS,
-         BOPCol_IndexedMapOfShape& myShapes, 
+         TopTools_IndexedMapOfShape& myShapes, 
          Standard_Boolean& bHasGeometry)
 {
   Standard_Integer anIndex; 
@@ -779,7 +783,7 @@ Standard_Integer BOPTools_AlgoTools3D::PointInFace
   (const TopoDS_Face& theF,
    gp_Pnt& theP,
    gp_Pnt2d& theP2D,
-   Handle(IntTools_Context)& theContext)
+   const Handle(IntTools_Context)& theContext)
 {
   Standard_Integer i, iErr = 1;
   Standard_Real aUMin, aUMax, aVMin, aVMax, aUx;
@@ -818,7 +822,7 @@ Standard_Integer BOPTools_AlgoTools3D::PointInFace
    const Standard_Real theDt2D,
    gp_Pnt& theP,
    gp_Pnt2d& theP2D,
-   Handle(IntTools_Context)& theContext)
+   const Handle(IntTools_Context)& theContext)
 {
   Standard_Integer iErr;
   Standard_Real f, l;
@@ -866,7 +870,7 @@ Standard_Integer BOPTools_AlgoTools3D::PointInFace
    const Handle(Geom2d_Curve)& theL2D,
    gp_Pnt& theP,
    gp_Pnt2d& theP2D,
-   Handle(IntTools_Context)& theContext,
+   const Handle(IntTools_Context)& theContext,
    const Standard_Real theDt2D)
 {
   Standard_Boolean bIsDone, bHasFirstPoint, bHasSecondPoint;

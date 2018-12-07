@@ -26,17 +26,17 @@ namespace Xbim
 				void set(TopoDS_Shell* val)sealed { ptrContainer = IntPtr(val); }
 			}
 			void InstanceCleanup();
-			void Init(IIfcOpenShell^ openShell);
-			void Init(IIfcConnectedFaceSet^ faceset);
-			void Init(IIfcSurfaceOfLinearExtrusion^ linExt);
+			void Init(IIfcOpenShell^ openShell, ILogger^ logger);
+			void Init(IIfcConnectedFaceSet^ faceset, ILogger^ logger);
+			void Init(IIfcSurfaceOfLinearExtrusion^ linExt, ILogger^ logger);
 		public:
 			//Constructors
 			XbimShell();
 			XbimShell(const TopoDS_Shell& shell);
 			XbimShell(const TopoDS_Shell& shell, Object^ tag);
-			XbimShell(IIfcOpenShell^ openShell);
-			XbimShell(IIfcConnectedFaceSet^ faceset);
-			XbimShell(IIfcSurfaceOfLinearExtrusion^ linExt);
+			XbimShell(IIfcOpenShell^ openShell, ILogger^ logger);
+			XbimShell(IIfcConnectedFaceSet^ faceset, ILogger^ logger);
+			XbimShell(IIfcSurfaceOfLinearExtrusion^ linExt, ILogger^ logger);
 			//destructors
 			~XbimShell(){ InstanceCleanup(); }
 			!XbimShell(){ InstanceCleanup(); }
@@ -60,13 +60,13 @@ namespace Xbim
 			virtual property bool IsClosed{bool get(); }
 			virtual property double SurfaceArea { double get(); }
 			virtual property bool IsPolyhedron { bool get(); }
-			virtual IXbimGeometryObjectSet^ Cut(IXbimSolidSet^ solids, double tolerance);
-			virtual IXbimGeometryObjectSet^ Cut(IXbimSolid^ solid, double tolerance);
-			virtual IXbimGeometryObjectSet^ Union(IXbimSolidSet^ solids, double tolerance);
-			virtual IXbimGeometryObjectSet^ Union(IXbimSolid^ solid, double tolerance);
-			virtual IXbimGeometryObjectSet^ Intersection(IXbimSolidSet^ solids, double tolerance);
-			virtual IXbimGeometryObjectSet^ Intersection(IXbimSolid^ solid, double tolerance);
-			virtual IXbimFaceSet^ Section(IXbimFace^ face, double tolerance);
+			virtual IXbimGeometryObjectSet^ Cut(IXbimSolidSet^ solids, double tolerance, ILogger^ logger);
+			virtual IXbimGeometryObjectSet^ Cut(IXbimSolid^ solid, double tolerance, ILogger^ logger);
+			virtual IXbimGeometryObjectSet^ Union(IXbimSolidSet^ solids, double tolerance, ILogger^ logger);
+			virtual IXbimGeometryObjectSet^ Union(IXbimSolid^ solid, double tolerance, ILogger^ logger);
+			virtual IXbimGeometryObjectSet^ Intersection(IXbimSolidSet^ solids, double tolerance, ILogger^ logger);
+			virtual IXbimGeometryObjectSet^ Intersection(IXbimSolid^ solid, double tolerance, ILogger^ logger);
+			virtual IXbimFaceSet^ Section(IXbimFace^ face, double tolerance, ILogger^ logger);
 			
 			virtual IXbimSolid^ MakeSolid();
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) override;
@@ -93,7 +93,7 @@ namespace Xbim
 
 			// Inherited via XbimOccShape
 			virtual XbimGeometryObject ^ Moved(IIfcPlacement ^ placement) override;
-			virtual XbimGeometryObject ^ Moved(IIfcObjectPlacement ^ objectPlacement) override;
+			virtual XbimGeometryObject ^ Moved(IIfcObjectPlacement ^ objectPlacement, ILogger^ logger) override;
 				virtual void Move(TopLoc_Location loc);
 		};
 	}

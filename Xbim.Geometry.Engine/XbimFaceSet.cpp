@@ -3,7 +3,7 @@
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <TopExp.hxx>
-using namespace System;
+
 namespace Xbim
 {
 	namespace Geometry
@@ -26,7 +26,7 @@ namespace Xbim
 				faces->Add(gcnew XbimFace(TopoDS::Face(faceIter.Value())));
 		}
 
-		XbimFaceSet::XbimFaceSet(List<IXbimFace^>^ faces)
+		XbimFaceSet::XbimFaceSet(List<IXbimFace^>^ faces) 
 		{
 			this->faces = faces;
 		}
@@ -80,21 +80,21 @@ namespace Xbim
 			TopLoc_Location loc = XbimConvert::ToLocation(placement);
 			for each (IXbimFace^ face in faces)
 			{
-				XbimFace^ copy = gcnew XbimFace((XbimFace^)face, Tag);
+				XbimFace^ copy = gcnew XbimFace((const TopoDS_Face&)((XbimFace^)face), Tag);
 				copy->Move(loc);
 				result->Add(copy);
 			}
 			return result;
 		}
 
-		IXbimGeometryObject ^ XbimFaceSet::Moved(IIfcObjectPlacement ^ objectPlacement)
+		IXbimGeometryObject ^ XbimFaceSet::Moved(IIfcObjectPlacement ^ objectPlacement, ILogger^ logger)
 		{
 			if (!IsValid) return this;
 			XbimFaceSet^ result = gcnew XbimFaceSet();
-			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
+			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement,logger);
 			for each (IXbimFace^ face in faces)
 			{
-				XbimFace^ copy = gcnew XbimFace((XbimFace^)face, Tag);
+				XbimFace^ copy = gcnew XbimFace((const TopoDS_Face&)((XbimFace^)face), Tag);
 				copy->Move(loc);
 				result->Add(copy);
 			}

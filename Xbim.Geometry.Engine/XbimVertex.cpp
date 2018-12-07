@@ -130,18 +130,18 @@ namespace Xbim
 			return copy;
 		}
 
-		XbimGeometryObject ^ XbimVertex::Moved(IIfcObjectPlacement ^ objectPlacement)
+		XbimGeometryObject ^ XbimVertex::Moved(IIfcObjectPlacement ^ objectPlacement, ILogger^ logger)
 		{
 			if (!IsValid) return this;			
 			XbimVertex^ copy = gcnew XbimVertex(this, Tag); //take a copy of the shape
-			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
+			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement,logger);
 			copy->Move(loc);
 			return copy;
 		}
 
-		void XbimVertex::Mesh(IXbimMeshReceiver ^ mesh, double precision, double deflection, double angle)
+		void XbimVertex::Mesh(IXbimMeshReceiver ^ /*mesh*/, double /*precision*/ , double /*deflection*/ , double /*angle*/  )
 		{
-			return;//maybe add an implementation for this
+			throw gcnew NotImplementedException("XbimVertex::Mesh");
 		}
 
 #pragma endregion

@@ -112,17 +112,17 @@ namespace Xbim
 			return XbimVector3D(v.X(), v.Y(), 0.);
 		}
 
-		IXbimGeometryObject^ XbimCurve2D::Transform(XbimMatrix3D matrix3D)
+		IXbimGeometryObject^ XbimCurve2D::Transform(XbimMatrix3D /*matrix3D*/)
 		{
 			throw gcnew Exception("Tranformation of curves is not currently supported");
 		}
 
-		IXbimGeometryObject^ XbimCurve2D::TransformShallow(XbimMatrix3D matrix3D)
+		IXbimGeometryObject^ XbimCurve2D::TransformShallow(XbimMatrix3D /*matrix3D*/)
 		{
 			throw gcnew Exception("TransformShallow of curves is not currently supported");
 		}
 
-		IEnumerable<XbimPoint3D>^ XbimCurve2D::Intersections(IXbimCurve^ intersector, double tolerance)
+		IEnumerable<XbimPoint3D>^ XbimCurve2D::Intersections(IXbimCurve^ intersector, double tolerance, ILogger^ /*logger*/)
 		{
 			Geom2dAPI_InterCurveCurve extrema(*pCurve2D, *((XbimCurve2D^)intersector)->pCurve2D, tolerance);
 			List<XbimPoint3D>^ intersects = gcnew List<XbimPoint3D>();
@@ -134,39 +134,43 @@ namespace Xbim
 			return intersects;
 		}
 
-		void XbimCurve2D::Init(IIfcGridAxis^ axis)
+		void XbimCurve2D::Init(IIfcGridAxis^ axis, ILogger^ logger)
 		{
-			Init(axis->AxisCurve);
+			Init(axis->AxisCurve,logger);
 			if (IsValid && !axis->SameSense) (*pCurve2D)->Reverse();
 		}
 
-		void XbimCurve2D::Init(IIfcCurve^ curve)
+		void XbimCurve2D::Init(IIfcCurve^ curve, ILogger^ logger)
 		{
-			if (dynamic_cast<IIfcPolyline^>(curve)) Init((IIfcPolyline^)curve);
-			else if (dynamic_cast<IIfcCircle^>(curve)) Init((IIfcCircle^)curve);
-			else if (dynamic_cast<IIfcEllipse^>(curve)) Init((IIfcEllipse^)curve);
-			else if (dynamic_cast<IIfcTrimmedCurve^>(curve)) Init((IIfcTrimmedCurve^)curve);
-			else if (dynamic_cast<IIfcLine^>(curve)) Init((IIfcLine^)curve);
-			else if (dynamic_cast<IIfcRationalBSplineCurveWithKnots^>(curve)) Init((IIfcRationalBSplineCurveWithKnots^)curve);
-			else if (dynamic_cast<IIfcBSplineCurveWithKnots^>(curve)) Init((IIfcBSplineCurveWithKnots^)curve);
-			else if (dynamic_cast<IIfcOffsetCurve2D^>(curve)) Init((IIfcOffsetCurve2D^)curve);
+			if (dynamic_cast<IIfcPolyline^>(curve)) Init((IIfcPolyline^)curve, logger);
+			else if (dynamic_cast<IIfcCircle^>(curve)) Init((IIfcCircle^)curve, logger);
+			else if (dynamic_cast<IIfcEllipse^>(curve)) Init((IIfcEllipse^)curve, logger);
+			else if (dynamic_cast<IIfcTrimmedCurve^>(curve)) Init((IIfcTrimmedCurve^)curve, logger);
+			else if (dynamic_cast<IIfcLine^>(curve)) Init((IIfcLine^)curve, logger);
+			else if (dynamic_cast<IIfcRationalBSplineCurveWithKnots^>(curve)) Init((IIfcRationalBSplineCurveWithKnots^)curve, logger);
+			else if (dynamic_cast<IIfcBSplineCurveWithKnots^>(curve)) Init((IIfcBSplineCurveWithKnots^)curve, logger);
+			else if (dynamic_cast<IIfcOffsetCurve2D^>(curve)) Init((IIfcOffsetCurve2D^)curve, logger);
 			else throw gcnew Exception(String::Format("Unsupported Curve Type {0}", curve->GetType()->Name));
 		}
 
-		void XbimCurve2D::Init(IIfcOffsetCurve2D^ offset)
+		void XbimCurve2D::Init(IIfcOffsetCurve2D^ offset, ILogger^ logger)
 		{
-			Init(offset->BasisCurve);
+			Init(offset->BasisCurve,logger);
 			if (IsValid )
 			{
 				*pCurve2D = new Geom2d_OffsetCurve(*pCurve2D, offset->Distance);
 			}
 		}
 
-		void XbimCurve2D::Init(IIfcPolyline^ curve)
+		void XbimCurve2D::Init(IIfcPolyline^ curve, ILogger^ logger)
 		{
 			//only deal with the first two points of a polyline, should really use wire for more than one segment
 			List<IIfcCartesianPoint^>^ pts = Enumerable::ToList(curve->Points);
-			if (pts->Count != 2) throw gcnew Exception("XbimCurves can only be created with polylines that have a single segment");
+			if (pts->Count != 2)
+			{
+				XbimGeometryCreator::LogWarning(logger, curve, "XbimCurves can only be created with polylines that have a single segment, consider creating a wire");
+				return;
+			}
 
 			gp_Pnt2d start = XbimConvert::GetPoint2d(pts[0]);
 			gp_Pnt2d end = XbimConvert::GetPoint2d(pts[1]);
@@ -181,12 +185,12 @@ namespace Xbim
 				*pCurve2D = new Geom2d_TrimmedCurve(lineMaker.Value(), u1, u2);
 			}
 		}
-		void XbimCurve2D::Init(IIfcCircle^ circle)
+		void XbimCurve2D::Init(IIfcCircle^ circle, ILogger^ logger)
 		{
 			double radius = circle->Radius;
 			if (radius <= 0)
 			{
-				XbimGeometryCreator::LogInfo(this, "Illegal circle : The radius is less than or equal to zero");
+				XbimGeometryCreator::LogInfo(logger, this, "Illegal circle : The radius is less than or equal to zero");
 				return;
 			}
 
@@ -214,7 +218,7 @@ namespace Xbim
 			}
 
 		}
-		void XbimCurve2D::Init(IIfcEllipse^ ellipse)
+		void XbimCurve2D::Init(IIfcEllipse^ ellipse, ILogger^ logger)
 		{
 			IIfcAxis2Placement2D^ ax2 = (IIfcAxis2Placement2D^)ellipse->Position;
 			double semiAx1 = ellipse->SemiAxis1;
@@ -222,13 +226,15 @@ namespace Xbim
 			
 			if (semiAx1 <= 0)
 			{
-				throw gcnew Exception(String::Format("WC002: Illegal Ellipse Semi Axis 1, must be greater than 0, in entity #{0}", ellipse->EntityLabel));
+				XbimGeometryCreator::LogError(logger, ellipse,"WC002: Illegal Ellipse Semi Axis 1, must be greater than 0, in entity #{0}", ellipse->EntityLabel);
+				return;
 			}
 			if (semiAx2 <= 0)
 			{
-				throw gcnew Exception(String::Format("WE005: Illegal Ellipse Semi Axis 2, must be greater than 0, in entity #{0}", ellipse->EntityLabel));
+				XbimGeometryCreator::LogError(logger, ellipse, "WE005: Illegal Ellipse Semi Axis 2, must be greater than 0, in entity #{0}", ellipse->EntityLabel);
+				return;
 			}
-			bool rotateElipse;
+			bool rotateElipse = false;
 			if (semiAx1 < semiAx2)//either same or two is larger than 1			 
 			{
 				semiAx1 = ellipse->SemiAxis2;
@@ -242,7 +248,7 @@ namespace Xbim
 			pCurve2D = new Handle(Geom2d_Curve)(maker.Value());			
 		}
 
-		void XbimCurve2D::Init(IIfcLine^ line)
+		void XbimCurve2D::Init(IIfcLine^ line, ILogger^ /*logger*/)
 		{
 			IIfcCartesianPoint^ cp = line->Pnt;
 			IIfcVector^ ifcVec = line->Dir;
@@ -253,9 +259,9 @@ namespace Xbim
 			pCurve2D = new Handle(Geom2d_Curve)(maker.Value());			
 		}
 
-		void XbimCurve2D::Init(IIfcTrimmedCurve^ curve)
+		void XbimCurve2D::Init(IIfcTrimmedCurve^ curve, ILogger^ logger)
 		{
-			Init(curve->BasisCurve);
+			Init(curve->BasisCurve,logger);
 			if (IsValid)
 			{
 				//check if we have an ellipse in case we have to correct axis
@@ -325,7 +331,7 @@ namespace Xbim
 			}
 		}
 
-		void XbimCurve2D::Init(IIfcRationalBSplineCurveWithKnots^ bspline)
+		void XbimCurve2D::Init(IIfcRationalBSplineCurveWithKnots^ bspline, ILogger^ /*logger*/)
 		{
 			TColgp_Array1OfPnt2d poles(1, Enumerable::Count(bspline->ControlPointsList));
 			int i = 1;
@@ -361,7 +367,7 @@ namespace Xbim
 
 		}
 
-		void XbimCurve2D::Init(IIfcBSplineCurveWithKnots^ bspline)
+		void XbimCurve2D::Init(IIfcBSplineCurveWithKnots^ bspline, ILogger^ /*logger*/)
 		{
 			TColgp_Array1OfPnt2d poles(1, Enumerable::Count(bspline->ControlPointsList));
 			int i = 1;

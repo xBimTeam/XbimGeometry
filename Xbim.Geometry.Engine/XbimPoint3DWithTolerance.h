@@ -23,8 +23,8 @@ namespace Xbim
 			XbimPoint3DWithTolerance(double x, double y, double z, double tolerance);
 			XbimPoint3DWithTolerance(XbimPoint3D point, double t);
 			XbimPoint3DWithTolerance(IXbimPoint^ point);
-			XbimPoint3DWithTolerance(IIfcPointOnCurve^ point);
-			XbimPoint3DWithTolerance(IIfcPointOnSurface^ point);
+			XbimPoint3DWithTolerance(IIfcPointOnCurve^ point, ILogger^ logger);
+			XbimPoint3DWithTolerance(IIfcPointOnSurface^ point, ILogger^ logger);
 #pragma region Interface Overrides
 			virtual property bool IsValid{bool get() { return true; }; }
 			virtual property bool IsSet{bool get() { return false; }; }
@@ -52,7 +52,7 @@ namespace Xbim
 #pragma endregion
 
 			// Inherited via IXbimPoint
-			virtual property Object^  Tag {Object^ get() { return nullptr; }; void set(Object^ value) { throw gcnew Exception("XbimPoint3DWithTolerance does not support Tag setting"); }; }
+			virtual property Object^  Tag {Object^ get() { return nullptr; }; void set(Object^ ) { throw gcnew Exception("XbimPoint3DWithTolerance does not support Tag setting"); }; }
 		};
 	}
 }

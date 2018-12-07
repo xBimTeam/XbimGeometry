@@ -10,7 +10,7 @@ using namespace Xbim::Common::Exceptions;
 using namespace Xbim::Common::Geometry;
 using namespace Xbim::Ifc4::MeasureResource;
 
-
+ 
 namespace Xbim
 {
 	namespace Geometry
@@ -24,11 +24,11 @@ namespace Xbim
 		public:
 			XbimConvert(void);
 			// Converts a Local Placement into a TopLoc_Location
-			static TopLoc_Location ToLocation(IIfcObjectPlacement^ placement);
+			static TopLoc_Location ToLocation(IIfcObjectPlacement^ placement, ILogger^ logger);
 			// Converts a Placement into a TopLoc_Location
 			static TopLoc_Location ToLocation(IIfcPlacement^ placement);
 			// Converts a IfcAxis2Placement into a TopLoc_Location
-			static TopLoc_Location ToLocation(Xbim::Ifc4::GeometryResource::IfcAxis2Placement^ placement);
+			static TopLoc_Location ToLocation(IIfcAxis2Placement^ placement);
 			// Converts an Axis2Placement3D into a TopLoc_Location
 			static TopLoc_Location ToLocation(IIfcAxis2Placement3D^ axis3D);
 			// Converts an Axis2Placement3D into a gp_Ax3
@@ -53,7 +53,7 @@ namespace Xbim
 			static XbimMatrix3D ToMatrix3D(IIfcAxis2Placement3D^ axis3);
 			// Builds a windows Matrix3D from a CartesianTransformationOperator3D
 			static XbimMatrix3D ConvertMatrix3D(IIfcCartesianTransformationOperator3D ^ stepTransform);
-			static XbimMatrix3D ConvertMatrix3D(IIfcObjectPlacement ^ placement);
+			static XbimMatrix3D ConvertMatrix3D(IIfcObjectPlacement ^ placement, ILogger^ logger);
 			static bool IsEqual(IIfcCartesianPoint^ ptA, IIfcCartesianPoint^ ptB, double tolerance);
 			static double DistanceSquared(IIfcCartesianPoint^ pt1, IIfcCartesianPoint^ pt2);
 			static bool Is3D(IIfcPolyline^ pline);

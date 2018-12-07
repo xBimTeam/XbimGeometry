@@ -1,6 +1,4 @@
 #include "XbimFace.h"
-#include "XbimWire.h"
-#include "XbimWireSet.h"
 #include "XbimOccWriter.h"
 
 #include <BRepBuilderAPI_Transform.hxx>
@@ -10,7 +8,7 @@
 #include <ShapeFix_ShapeTolerance.hxx>
 #include <BRepCheck_Analyzer.hxx>
 #include "XbimGeometryCreator.h"
-#include "XbimConvert.h"
+#include "XbimConvert.h" 
 #include <TopExp_Explorer.hxx>
 #include <BRep_Builder.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
@@ -48,6 +46,7 @@
 #include <BRepClass_FaceClassifier.hxx>
 #include <BRepTopAdaptor_FClass2d.hxx>
 using namespace System::Linq;
+ 
 namespace Xbim
 {
 	namespace Geometry
@@ -60,7 +59,7 @@ namespace Xbim
 				delete (TopoDS_Face*)(temp.ToPointer());
 			System::GC::SuppressFinalize(this);
 		}
-
+		 
 		String^ XbimFace::GetBuildFaceErrorMessage(BRepBuilderAPI_FaceError err)
 		{
 			switch (err)
@@ -80,7 +79,7 @@ namespace Xbim
 			}
 		}
 
-		XbimFace::XbimFace(XbimPoint3D l, XbimVector3D n)
+		XbimFace::XbimFace(XbimPoint3D l, XbimVector3D n, ILogger^ /*logger*/)
 		{
 			gp_Pln plane(gp_Pnt(l.X, l.Y, l.Z), gp_Dir(n.X, n.Y, n.Z));
 			BRepBuilderAPI_MakeFace faceMaker(plane);
@@ -88,7 +87,7 @@ namespace Xbim
 			*pFace = faceMaker.Face();
 		}
 
-		XbimFace::XbimFace(XbimVector3D n)
+		XbimFace::XbimFace(XbimVector3D n, ILogger^ /*logger*/)
 		{
 			gp_Pln plane(gp_Pnt(0, 0, 0), gp_Dir(n.X, n.Y, n.Z));
 			BRepBuilderAPI_MakeFace faceMaker(plane);
@@ -107,84 +106,84 @@ namespace Xbim
 			Tag = tag;
 		}
 
-		XbimFace::XbimFace(IIfcProfileDef^ profile)
+		XbimFace::XbimFace(IIfcProfileDef^ profile, ILogger^ logger)
 		{
-			Init(profile);
+			Init(profile, logger);
 		}
 
 
-		XbimFace::XbimFace(IIfcSurface^ surface)
+		XbimFace::XbimFace(IIfcSurface^ surface, ILogger^ logger)
 		{
-			Init(surface);
+			Init(surface,  logger);
 		}
 
-		XbimFace::XbimFace(IIfcCurveBoundedPlane^ def)
+		XbimFace::XbimFace(IIfcCurveBoundedPlane^ def, ILogger^ logger)
 		{
-			Init(def);
+			Init(def,  logger);
 		}
 
-		XbimFace::XbimFace(IIfcRectangularTrimmedSurface^ def)
+		XbimFace::XbimFace(IIfcRectangularTrimmedSurface^ def, ILogger^ logger)
 		{
-			Init(def);
+			Init(def,  logger);
 		}
 
-		XbimFace::XbimFace(IIfcPlane^ plane)
+		XbimFace::XbimFace(IIfcPlane^ plane, ILogger^ logger)
 		{
-			Init(plane);
+			Init(plane,  logger);
 		}
 
-		XbimFace::XbimFace(IIfcCylindricalSurface^ cylinder)
+		XbimFace::XbimFace(IIfcCylindricalSurface^ cylinder, ILogger^ logger)
 		{
-			Init(cylinder);
+			Init(cylinder,  logger);
 		}
 
-		XbimFace::XbimFace(IIfcSurfaceOfLinearExtrusion^ sLin)
+		XbimFace::XbimFace(IIfcSurfaceOfLinearExtrusion^ sLin, ILogger^ logger)
 		{
-			Init(sLin);
+			Init(sLin,  logger);
 		}
 
-		XbimFace::XbimFace(IIfcSurfaceOfRevolution^ sRev)
+		XbimFace::XbimFace(IIfcSurfaceOfRevolution^ sRev, ILogger^ logger)
 		{
-			Init(sRev);
+			Init(sRev,  logger);
 		}
-		XbimFace::XbimFace(IIfcCompositeCurve ^ cCurve)
+		XbimFace::XbimFace(IIfcCompositeCurve ^ cCurve, ILogger^ logger)
 		{
-			Init(cCurve);
-		}
-
-		XbimFace::XbimFace(IIfcPolyline ^ pline)
-		{
-			Init(pline);
+			Init(cCurve,  logger);
 		}
 
-		XbimFace::XbimFace(IIfcPolyLoop ^ loop)
+		XbimFace::XbimFace(IIfcPolyline ^ pline, ILogger^ logger)
 		{
-			Init(loop);
+			Init(pline,  logger);
 		}
 
-		XbimFace::XbimFace(IXbimWire^ wire)
+		XbimFace::XbimFace(IIfcPolyLoop ^ loop, ILogger^ logger)
 		{
-			Init(wire);
+			Init(loop,  logger);
 		}
 
-		XbimFace::XbimFace(IXbimWire^ wire, XbimPoint3D pointOnFace, XbimVector3D faceNormal)
+		XbimFace::XbimFace(IXbimWire^ wire, ILogger^ logger)
 		{
-			Init(wire, pointOnFace, faceNormal);
+			Init(wire,  logger);
 		}
 
-		XbimFace::XbimFace(IXbimFace^ face)
+		XbimFace::XbimFace(IXbimWire^ wire, XbimPoint3D pointOnFace, XbimVector3D faceNormal, ILogger^ logger)
 		{
-			Init(face);
+			Init(wire, pointOnFace, faceNormal,  logger);
 		}
 
-		XbimFace::XbimFace(double x, double y, double tolerance)
+		XbimFace::XbimFace(IXbimFace^ face, ILogger^ logger)
 		{
-			Init(x, y, tolerance);
+			Init(face,  logger);
 		}
 
-		XbimFace::XbimFace(IIfcSurface^ surface, XbimWire^ outerBound, IEnumerable<XbimWire^>^ innerBounds)
+		XbimFace::XbimFace(double x, double y, double tolerance, ILogger^ logger)
 		{
-			Init(surface);
+			Init(x, y, tolerance,  logger);
+		}
+
+		XbimFace::XbimFace(IIfcSurface^ surface, XbimWire^ outerBound, IEnumerable<XbimWire^>^ innerBounds, ILogger^ logger)
+		{
+			Init(surface,  logger);
 			if (!IsValid) return;
 
 			Handle(Geom_Surface) geomSurface = BRep_Tool::Surface(this);
@@ -213,9 +212,9 @@ namespace Xbim
 		}
 
 		//NB the wires defined in the facesurface are ignored
-		XbimFace::XbimFace(IIfcFaceSurface^ surface, XbimWire^ outerBound, IEnumerable<XbimWire^>^ innerBounds, double tolerance)
+		XbimFace::XbimFace(IIfcFaceSurface^ surface, XbimWire^ outerBound, IEnumerable<XbimWire^>^ innerBounds, double tolerance, ILogger^ logger)
 		{
-			Init(surface->FaceSurface);
+			Init(surface->FaceSurface,  logger);
 			if (!IsValid) return;
 			//make sure all the pcurves are built	
 			ShapeFix_Wire wFix(outerBound,this, tolerance);
@@ -287,9 +286,9 @@ namespace Xbim
 			}
 		}
 
-		void XbimFace::Init(IIfcCompositeCurve ^ cCurve)
+		void XbimFace::Init(IIfcCompositeCurve ^ cCurve, ILogger^ logger)
 		{
-			XbimWire^ wire = gcnew XbimWire(cCurve);
+			XbimWire^ wire = gcnew XbimWire(cCurve, logger);
 			if (wire->IsValid)
 			{
 				BRepBuilderAPI_MakeFace faceMaker(wire);
@@ -298,9 +297,9 @@ namespace Xbim
 			}
 		}
 
-		void XbimFace::Init(IIfcPolyline ^ pline)
+		void XbimFace::Init(IIfcPolyline ^ pline, ILogger^ logger)
 		{
-			XbimWire^ wire = gcnew XbimWire(pline);
+			XbimWire^ wire = gcnew XbimWire(pline, logger);
 			if (wire->IsValid)
 			{
 				BRepBuilderAPI_MakeFace faceMaker(wire);
@@ -309,9 +308,9 @@ namespace Xbim
 			}
 		}
 
-		void XbimFace::Init(IIfcPolyLoop ^ loop)
+		void XbimFace::Init(IIfcPolyLoop ^ loop, ILogger^ logger)
 		{
-			XbimWire^ wire = gcnew XbimWire(loop);
+			XbimWire^ wire = gcnew XbimWire(loop, logger);
 			if (wire->IsValid)
 			{
 				BRepBuilderAPI_MakeFace faceMaker(wire);
@@ -320,7 +319,7 @@ namespace Xbim
 			}
 		}
 
-		void XbimFace::Init(IXbimWire^ xbimWire, XbimPoint3D pointOnFace, XbimVector3D faceNormal)
+		void XbimFace::Init(IXbimWire^ xbimWire, XbimPoint3D pointOnFace, XbimVector3D faceNormal, ILogger^ /*logger*/)
 		{
 			if (!dynamic_cast<XbimWire^>(xbimWire))
 				throw gcnew ArgumentException("Only IXbimWires created by Xbim.OCC modules are supported", "xbimWire");
@@ -335,7 +334,7 @@ namespace Xbim
 			GC::KeepAlive(xbimWire);
 		}
 
-		void XbimFace::Init(IXbimWire^ xbimWire)
+		void XbimFace::Init(IXbimWire^ xbimWire, ILogger^ /*logger*/)
 		{
 			if (!dynamic_cast<XbimWire^>(xbimWire))
 				throw gcnew ArgumentException("Only IXbimWires created by Xbim.OCC modules are supported", "xbimWire");
@@ -355,7 +354,7 @@ namespace Xbim
 
 
 
-		void XbimFace::Init(IXbimFace^ face)
+		void XbimFace::Init(IXbimFace^ face, ILogger^ /*logger*/)
 		{
 			IXbimWire^ outerBound = face->OuterBound;
 			XbimWire^ outerWire = dynamic_cast<XbimWire^>(outerBound);
@@ -374,26 +373,26 @@ namespace Xbim
 			*pFace = faceMaker.Face();
 		}
 
-		void XbimFace::Init(IIfcProfileDef^ profile)
+		void XbimFace::Init(IIfcProfileDef^ profile, ILogger^ logger)
 		{
 			IIfcArbitraryProfileDefWithVoids^ arbProfDefVoids = dynamic_cast<IIfcArbitraryProfileDefWithVoids^>(profile);
 			if (arbProfDefVoids != nullptr) //this is a compound wire so we need to build it at face level
-				return Init(arbProfDefVoids);
+				return Init(arbProfDefVoids,  logger);
 			IIfcCircleHollowProfileDef^ circHollow = dynamic_cast<IIfcCircleHollowProfileDef^>(profile);
 			if (circHollow != nullptr) //this is a compound wire so we need to build it at face level
-				return Init(circHollow);
+				return Init(circHollow,  logger);
 			IIfcRectangleHollowProfileDef^ rectHollow = dynamic_cast<IIfcRectangleHollowProfileDef^>(profile);
 			if (rectHollow != nullptr) //this is a compound wire so we need to build it at face level
-				return Init(rectHollow);
+				return Init(rectHollow,  logger);
 			if (dynamic_cast<IIfcCompositeProfileDef^>(profile))
-				return Init((IIfcCompositeProfileDef^)profile);
+				return Init((IIfcCompositeProfileDef^)profile,  logger);
 			if (dynamic_cast<IIfcDerivedProfileDef^>(profile))
-				return Init((IIfcDerivedProfileDef^)profile);
+				return Init((IIfcDerivedProfileDef^)profile,  logger);
 			if (dynamic_cast<IIfcArbitraryOpenProfileDef^>(profile) && !dynamic_cast<IIfcCenterLineProfileDef^>(profile))
-				XbimGeometryCreator::LogError(profile, "Faces cannot be built with IIfcArbitraryOpenProfileDef, a face requires a closed loop");
+				XbimGeometryCreator::LogError(logger, profile, "Faces cannot be built with IIfcArbitraryOpenProfileDef, a face requires a closed loop");
 			else //it is a standard profile that can be built as a single wire
 			{
-				XbimWire^ wire = gcnew XbimWire(profile);
+				XbimWire^ wire = gcnew XbimWire(profile, logger);
 				if (wire->IsValid)
 				{
 					double tolerance = profile->Model->ModelFactors->Precision;
@@ -412,7 +411,7 @@ namespace Xbim
 							goto TryBuildFace;
 						}
 						String^ errMsg = XbimFace::GetBuildFaceErrorMessage(err);
-						XbimGeometryCreator::LogWarning(profile, "Invalid bound, {0}. Face discarded", errMsg);
+						XbimGeometryCreator::LogWarning(logger, profile, "Invalid bound, {0}. Face discarded", errMsg);
 						return;
 					}
 					else
@@ -425,13 +424,15 @@ namespace Xbim
 			}
 		}
 
-		void XbimFace::Init(IIfcDerivedProfileDef^ profile)
+		void XbimFace::Init(IIfcDerivedProfileDef^ profile, ILogger^ logger)
 		{
-			Init(profile->ParentProfile);
+			Init(profile->ParentProfile,  logger);
 			if (IsValid && !dynamic_cast<IIfcMirroredProfileDef^>(profile))
 			{
-				gp_Trsf trsf = XbimConvert::ToTransform(profile->Operator);
-				pFace->Move(TopLoc_Location(trsf));
+				gp_Trsf aTrsf = XbimConvert::ToTransform(profile->Operator);
+				// pFace->Move(TopLoc_Location(trsf));
+				BRepBuilderAPI_Transform aBrepTrsf(*pFace, aTrsf);
+				*pFace = TopoDS::Face(aBrepTrsf.Shape());
 			}
 			if (IsValid && dynamic_cast<IIfcMirroredProfileDef^>(profile))
 			{
@@ -447,20 +448,20 @@ namespace Xbim
 			}
 		}
 
-		void XbimFace::Init(IIfcArbitraryProfileDefWithVoids^ profile)
+		void XbimFace::Init(IIfcArbitraryProfileDefWithVoids^ profile, ILogger^ logger)
 		{
 			double tolerance = profile->Model->ModelFactors->Precision;
 			double toleranceMax = profile->Model->ModelFactors->PrecisionMax;
 			ShapeFix_ShapeTolerance FTol;
 			TopoDS_Face face;
-			XbimWire^ loop = gcnew XbimWire(profile->OuterCurve);
+			XbimWire^ loop = gcnew XbimWire(profile->OuterCurve, logger);
 			if (loop->IsValid)
 			{				
 				if (!loop->IsClosed && loop->Edges->Count>1) //we need to close it if we have more thn one edge
 				{
 					double oneMilli = profile->Model->ModelFactors->OneMilliMeter;
-					XbimFace^ face = gcnew XbimFace(loop);
-					ShapeFix_Wire wireFixer(loop, face, profile->Model->ModelFactors->Precision);
+					XbimFace^ xface = gcnew XbimFace(loop,logger);
+					ShapeFix_Wire wireFixer(loop, xface, profile->Model->ModelFactors->Precision);
 					wireFixer.ClosedWireMode() = Standard_True;
 					wireFixer.FixGaps2dMode() = Standard_True;
 					wireFixer.FixGaps3dMode() = Standard_True;
@@ -485,7 +486,7 @@ namespace Xbim
 						goto TryBuildFace;
 					}
 					String^ errMsg = XbimFace::GetBuildFaceErrorMessage(err);
-					XbimGeometryCreator::LogWarning(profile, "Invalid bound, {0}. Face discarded", errMsg);
+					XbimGeometryCreator::LogWarning(logger, profile, "Invalid bound, {0}. Face discarded", errMsg);
 					return;
 				}
 				pFace = new TopoDS_Face();
@@ -494,12 +495,12 @@ namespace Xbim
 
 				for each(IIfcCurve^ curve in profile->InnerCurves)
 				{
-					XbimWire^ innerWire = gcnew XbimWire(curve);
+					XbimWire^ innerWire = gcnew XbimWire(curve, logger);
 					if (!innerWire->IsClosed && innerWire->Edges->Count>1) //we need to close it if we have more thn one edge
 					{
 						double oneMilli = profile->Model->ModelFactors->OneMilliMeter;
-						XbimFace^ face = gcnew XbimFace(innerWire);
-						ShapeFix_Wire wireFixer(innerWire, face, profile->Model->ModelFactors->Precision);
+						XbimFace^ xface = gcnew XbimFace(innerWire,logger);
+						ShapeFix_Wire wireFixer(innerWire, xface, profile->Model->ModelFactors->Precision);
 						wireFixer.ClosedWireMode() = Standard_True;
 						wireFixer.FixGaps2dMode() = Standard_True;
 						wireFixer.FixGaps3dMode() = Standard_True;
@@ -531,39 +532,39 @@ namespace Xbim
 							}
 
 							String^ errMsg = XbimFace::GetBuildFaceErrorMessage(loopErr);
-							XbimGeometryCreator::LogWarning(profile, "Invalid void, {0}. IfcCurve #{1} could not be added. Inner bound ignored", errMsg, curve->EntityLabel);
+							XbimGeometryCreator::LogWarning(logger, profile, "Invalid void, {0}. IfcCurve #{1} could not be added. Inner bound ignored", errMsg, curve->EntityLabel);
 						}
 						*pFace = faceMaker.Face();
 					}
 					else
 					{
-						XbimGeometryCreator::LogWarning(profile, "Invalid void. IfcCurve #{0} is not closed. Inner bound ignored", curve->EntityLabel);
+						XbimGeometryCreator::LogWarning(logger, profile, "Invalid void. IfcCurve #{0} is not closed. Inner bound ignored", curve->EntityLabel);
 					}
 				}
 			}
 		}
-		void XbimFace::Init(IIfcCompositeProfileDef ^ compProfile)
+		void XbimFace::Init(IIfcCompositeProfileDef ^ compProfile, ILogger^ logger)
 		{
 			int profileCount = Enumerable::Count(compProfile->Profiles);
 			if (profileCount == 0)
 			{
-				XbimGeometryCreator::LogInfo(compProfile, "A composite profile must have 2 or more profiles, 0 were found. Profile discarded");
+				XbimGeometryCreator::LogInfo(logger, compProfile, "A composite profile must have 2 or more profiles, 0 were found. Profile discarded");
 				return;
 			}
 			if (profileCount == 1)
 			{
-				XbimGeometryCreator::LogInfo(compProfile, "A composite profile must have 2 or more profiles, 1 was found. A prilfe with a single segment has been used");
-				Init(Enumerable::First(compProfile->Profiles));
+				XbimGeometryCreator::LogInfo(logger, compProfile, "A composite profile must have 2 or more profiles, 1 was found. A prilfe with a single segment has been used");
+				Init(Enumerable::First(compProfile->Profiles),  logger);
 				return;
 			}
-			XbimFace^ firstFace = gcnew XbimFace(Enumerable::First(compProfile->Profiles));
+			XbimFace^ firstFace = gcnew XbimFace(Enumerable::First(compProfile->Profiles),logger);
 			BRepBuilderAPI_MakeFace faceBlder(firstFace);
 			bool first = true;
 			for each (IIfcProfileDef^ profile in compProfile->Profiles)
 			{
 				if (!first)
 				{
-					XbimFace^ face = gcnew XbimFace(profile);
+					XbimFace^ face = gcnew XbimFace(profile,logger);
 					faceBlder.Add((XbimWire^)face->OuterBound);
 					for each (IXbimWire^ inner in face->InnerBounds)
 					{
@@ -579,17 +580,17 @@ namespace Xbim
 				*pFace = faceBlder.Face();
 			}
 			else
-				XbimGeometryCreator::LogInfo(compProfile, "Profile could not be built.It has been omitted");
+				XbimGeometryCreator::LogInfo(logger, compProfile, "Profile could not be built.It has been omitted");
 
 		}
 
 
 		//Builds a face from a CircleProfileDef
-		void XbimFace::Init(IIfcCircleHollowProfileDef ^ circProfile)
+		void XbimFace::Init(IIfcCircleHollowProfileDef ^ circProfile, ILogger^ logger)
 		{
 			if (circProfile->Radius <= 0)
 			{
-				XbimGeometryCreator::LogInfo(circProfile, "Circular profile has a radius <= 0. Face discarded");
+				XbimGeometryCreator::LogInfo(logger, circProfile, "Circular profile has a radius <= 0. Face discarded");
 				return;
 			}
 			gp_Ax2 gpax2;
@@ -626,11 +627,11 @@ namespace Xbim
 		}
 
 
-		void XbimFace::Init(IIfcRectangleHollowProfileDef^ rectProfile)
+		void XbimFace::Init(IIfcRectangleHollowProfileDef^ rectProfile, ILogger^ logger)
 		{
 			if (rectProfile->XDim <= 0 || rectProfile->YDim <= 0)
 			{
-				XbimGeometryCreator::LogInfo(rectProfile, "Profile has a dimension <= 0,  XDim = {0}, YDim = {1}. Face ignored", rectProfile->XDim, rectProfile->YDim);
+				XbimGeometryCreator::LogInfo(logger, rectProfile, "Profile has a dimension <= 0,  XDim = {0}, YDim = {1}. Face ignored", rectProfile->XDim, rectProfile->YDim);
 			}
 			else
 			{
@@ -669,7 +670,7 @@ namespace Xbim
 					if (filleter.IsDone())
 					{
 						TopoDS_Shape shape = filleter.Shape();
-						for (TopExp_Explorer exp(shape, TopAbs_WIRE); exp.More(); exp.Next()) //just take the first wire
+						for (TopExp_Explorer exp(shape, TopAbs_WIRE); exp.More();) //just take the first wire
 						{
 							wire = TopoDS::Wire(exp.Current());
 							break;
@@ -680,7 +681,7 @@ namespace Xbim
 				BRepBuilderAPI_MakeFace faceBlder(wire);
 				//calculate hole
 				if (rectProfile->WallThickness <= 0)
-					XbimGeometryCreator::LogInfo(rectProfile, "Wall thickness of a rectangle hollow profile must be greater than 0, a solid rectangular profile has been used.");
+					XbimGeometryCreator::LogInfo(logger, rectProfile, "Wall thickness of a rectangle hollow profile must be greater than 0, a solid rectangular profile has been used.");
 				else
 				{
 					TopoDS_Wire innerWire;
@@ -713,7 +714,7 @@ namespace Xbim
 						if (filleter.IsDone())
 						{
 							TopoDS_Shape shape = filleter.Shape();
-							for (TopExp_Explorer exp(shape, TopAbs_WIRE); exp.More(); exp.Next()) //just take the first wire
+							for (TopExp_Explorer exp(shape, TopAbs_WIRE); exp.More();) //just take the first wire
 							{
 								innerWire = TopoDS::Wire(exp.Current());
 								break;
@@ -736,22 +737,22 @@ namespace Xbim
 		}
 
 		//Builds a face from a Surface
-		void XbimFace::Init(IIfcSurface ^ surface)
+		void XbimFace::Init(IIfcSurface ^ surface, ILogger^ logger)
 		{
 			if (dynamic_cast<IIfcPlane^>(surface))
-				return Init((IIfcPlane^)surface);
+				return Init((IIfcPlane^)surface,  logger);
 			else if (dynamic_cast<IIfcSurfaceOfRevolution^>(surface))
-				return Init((IIfcSurfaceOfRevolution^)surface);
+				return Init((IIfcSurfaceOfRevolution^)surface,  logger);
 			else if (dynamic_cast<IIfcSurfaceOfLinearExtrusion^>(surface))
-				return Init((IIfcSurfaceOfLinearExtrusion^)surface);
+				return Init((IIfcSurfaceOfLinearExtrusion^)surface,  logger);
 			else if (dynamic_cast<IIfcCurveBoundedPlane^>(surface))
-				return Init((IIfcCurveBoundedPlane^)surface);
+				return Init((IIfcCurveBoundedPlane^)surface,  logger);
 			else if (dynamic_cast<IIfcRectangularTrimmedSurface^>(surface))
-				return Init((IIfcRectangularTrimmedSurface^)surface);
+				return Init((IIfcRectangularTrimmedSurface^)surface,  logger);
 			else if (dynamic_cast<IIfcBSplineSurface^>(surface))
-				return Init((IIfcBSplineSurface^)surface);
+				return Init((IIfcBSplineSurface^)surface,  logger);
 			else if (dynamic_cast<IIfcCylindricalSurface^>(surface))
-				return Init((IIfcCylindricalSurface^)surface);
+				return Init((IIfcCylindricalSurface^)surface,  logger);
 			else
 			{
 				Type ^ type = surface->GetType();
@@ -760,7 +761,7 @@ namespace Xbim
 
 		}
 
-		void XbimFace::Init(IIfcCylindricalSurface ^ surface)
+		void XbimFace::Init(IIfcCylindricalSurface ^ surface, ILogger^ /*logger*/)
 		{
 			gp_Ax3 ax3 = XbimConvert::ToAx3(surface->Position);
 			Handle(Geom_CylindricalSurface)   gcs = new Geom_CylindricalSurface(ax3, surface->Radius);
@@ -772,23 +773,23 @@ namespace Xbim
 		}
 
 
-		void XbimFace::Init(IIfcBSplineSurface ^ surface)
+		void XbimFace::Init(IIfcBSplineSurface ^ surface, ILogger^ logger)
 		{
 			if (dynamic_cast<IIfcBSplineSurfaceWithKnots^>(surface))
-				return Init((IIfcBSplineSurfaceWithKnots^)surface);
-			Type ^ type = surface->GetType();
+				return Init((IIfcBSplineSurfaceWithKnots^)surface, logger);
+			Type^ type = surface->GetType();
 			throw(gcnew NotImplementedException(String::Format("XbimFace. BuildFace of type {0} is not implemented", type->Name)));
 		}
 
-		void XbimFace::Init(IIfcBSplineSurfaceWithKnots ^ surface)
+		void XbimFace::Init(IIfcBSplineSurfaceWithKnots ^ surface, ILogger^ logger)
 		{
 			if (dynamic_cast<IIfcRationalBSplineSurfaceWithKnots^>(surface))
-				return Init((IIfcRationalBSplineSurfaceWithKnots^)surface);
+				return Init((IIfcRationalBSplineSurfaceWithKnots^)surface, logger);
 
 			List<List<XbimPoint3D>^>^ ifcControlPoints = surface->ControlPoints;
 			if (surface->ControlPoints->Count < 2)
 			{
-				XbimGeometryCreator::LogWarning(surface, "Incorrect number of poles for Bspline surface, it must be at least 2");
+				XbimGeometryCreator::LogWarning(logger, surface, "Incorrect number of poles for Bspline surface, it must be at least 2");
 				return;
 			}
 			TColgp_Array2OfPnt poles(1, (Standard_Integer)surface->UUpper + 1, 1, (Standard_Integer)surface->VUpper + 1);
@@ -842,7 +843,7 @@ namespace Xbim
 			/*ShapeFix_ShapeTolerance FTol;
 			FTol.SetTolerance(*pFace, bspline->Model->ModelFactors->Precision, TopAbs_VERTEX);*/
 		}
-		void XbimFace::Init(IIfcRationalBSplineSurfaceWithKnots ^ surface)
+		void XbimFace::Init(IIfcRationalBSplineSurfaceWithKnots ^ surface, ILogger^ /*logger*/)
 		{
 			List<List<XbimPoint3D>^>^ ifcControlPoints = surface->ControlPoints;
 			if (surface->ControlPoints->Count < 2) throw gcnew XbimException("Incorrect number of poles for Bspline surface, must be at least 2");
@@ -911,7 +912,7 @@ namespace Xbim
 		}
 
 		//Builds a face from a Plane
-		void XbimFace::Init(IIfcPlane ^ plane)
+		void XbimFace::Init(IIfcPlane ^ plane, ILogger^ /*logger*/)
 		{
 			gp_Ax3 ax3 = XbimConvert::ToAx3(plane->Position);
 			gp_Pln pln(ax3);
@@ -919,12 +920,12 @@ namespace Xbim
 			pFace = new TopoDS_Face();
 			*pFace = builder.Face();
 		}
-		void XbimFace::Init(IIfcSurfaceOfRevolution ^ sRev)
+		void XbimFace::Init(IIfcSurfaceOfRevolution ^ sRev, ILogger^ logger)
 		{
-			XbimWire^ curve = gcnew XbimWire(sRev->SweptCurve);
+			XbimWire^ curve = gcnew XbimWire(sRev->SweptCurve, logger);
 			if (!curve->IsValid || curve->Edges->Count > 1)
 			{
-				XbimGeometryCreator::LogWarning(sRev, "Invalid swept curve = #{0} in surface of revolution = #{1}, face discarded", sRev->SweptCurve->EntityLabel);
+				XbimGeometryCreator::LogWarning(logger, sRev, "Invalid swept curve = #{0} in surface of revolution = #{1}, face discarded", sRev->SweptCurve->EntityLabel);
 				return;
 			}
 			XbimEdge^ edge = (XbimEdge^)curve->Edges->First;
@@ -960,9 +961,9 @@ namespace Xbim
 
 		}
 
-		void XbimFace::Init(IIfcRectangularTrimmedSurface^ def)
+		void XbimFace::Init(IIfcRectangularTrimmedSurface^ def, ILogger^ logger)
 		{
-			Init(def->BasisSurface); //initialise the plane
+			Init(def->BasisSurface, logger); //initialise the plane
 			if (IsValid)
 			{
 				TopLoc_Location loc;
@@ -976,25 +977,25 @@ namespace Xbim
 					*pFace = faceMaker.Face();
 				}
 				else
-					XbimGeometryCreator::LogWarning(def, "Invalid trimed surface = #{0} in rectangular trimmed surface. Face discarded", def->BasisSurface->EntityLabel);
+					XbimGeometryCreator::LogWarning(logger, def, "Invalid trimed surface = #{0} in rectangular trimmed surface. Face discarded", def->BasisSurface->EntityLabel);
 			}
 		}
 
-		void XbimFace::Init(IIfcCurveBoundedPlane^ def)
+		void XbimFace::Init(IIfcCurveBoundedPlane^ def, ILogger^ logger)
 		{
-			Init(def->BasisSurface); //initialise the plane
+			Init(def->BasisSurface, logger); //initialise the plane
 			if (IsValid)
 			{
-				XbimWire^ outerBound = gcnew XbimWire(def->OuterBoundary);
+				XbimWire^ outerBound = gcnew XbimWire(def->OuterBoundary, logger);
 				BRepBuilderAPI_MakeFace  builder(this);
 				builder.Add(outerBound);
 				for each (IIfcCurve^ innerCurve in def->InnerBoundaries)
 				{
-					XbimWire^ innerBound = gcnew XbimWire(innerCurve);
+					XbimWire^ innerBound = gcnew XbimWire(innerCurve, logger);
 					if (innerBound->IsValid)
 						builder.Add(innerBound);
 					else
-						XbimGeometryCreator::LogWarning(def, "Invalid inner bound = #{0} found in curve bounded plane. Inner bound ignored", innerCurve->EntityLabel);
+						XbimGeometryCreator::LogWarning(logger, def, "Invalid inner bound = #{0} found in curve bounded plane. Inner bound ignored", innerCurve->EntityLabel);
 
 				}
 				if (builder.IsDone())
@@ -1003,21 +1004,21 @@ namespace Xbim
 					*pFace = builder.Face();
 				}
 				else
-					XbimGeometryCreator::LogWarning(def, "Invalid outer bound = #{0} found in curve bounded plane. Face discarded", def->OuterBoundary->EntityLabel);
+					XbimGeometryCreator::LogWarning(logger, def, "Invalid outer bound = #{0} found in curve bounded plane. Face discarded", def->OuterBoundary->EntityLabel);
 			}
 		}
 
-		void XbimFace::Init(IIfcSurfaceOfLinearExtrusion ^ sLin)
+		void XbimFace::Init(IIfcSurfaceOfLinearExtrusion ^ sLin, ILogger^ logger)
 		{
 			
 			
 			if (sLin->SweptCurve->ProfileType!=IfcProfileTypeEnum::CURVE)
 			{
-				XbimGeometryCreator::LogWarning(sLin, "Only profiles of type curve are valid in a surface of linearExtrusion {0}. Face discarded", sLin->SweptCurve->EntityLabel);
+				XbimGeometryCreator::LogWarning(logger, sLin, "Only profiles of type curve are valid in a surface of linearExtrusion {0}. Face discarded", sLin->SweptCurve->EntityLabel);
 				return;
 			}
 
-			XbimWire^ curve = gcnew XbimWire(sLin->SweptCurve);
+			XbimWire^ curve = gcnew XbimWire(sLin->SweptCurve, logger);
 
 			TopoDS_Edge edge = (XbimEdge^)curve->Edges->First;
 			TopLoc_Location loc;
@@ -1042,12 +1043,12 @@ namespace Xbim
 				}
 			}
 			else
-				XbimGeometryCreator::LogWarning(sLin, "Invalid swept curve = #{0} found in surface of linearExtrusion. Face discarded", sLin->SweptCurve->EntityLabel);
+				XbimGeometryCreator::LogWarning(logger, sLin, "Invalid swept curve = #{0} found in surface of linearExtrusion. Face discarded", sLin->SweptCurve->EntityLabel);
 
 
 		}
 
-		void  XbimFace::Init(double x, double y, double tolerance)
+		void  XbimFace::Init(double x, double y, double tolerance, ILogger^ /*logger*/)
 		{
 			XbimWire^ bounds = gcnew XbimWire(x, y, tolerance, false);
 			if (bounds->IsValid)
@@ -1391,17 +1392,17 @@ namespace Xbim
 		XbimGeometryObject ^ XbimFace::Moved(IIfcPlacement ^ placement)
 		{
 			if (!IsValid) return this;
-			XbimFace^ copy = gcnew XbimFace(this, Tag); //take a copy of the shape
+			XbimFace^ copy = gcnew XbimFace(*pFace, Tag); //take a copy of the shape
 			TopLoc_Location loc = XbimConvert::ToLocation(placement);
 			copy->Move(loc);
 			return copy;
 		}
 
-		XbimGeometryObject ^ XbimFace::Moved(IIfcObjectPlacement ^ objectPlacement)
+		XbimGeometryObject ^ XbimFace::Moved(IIfcObjectPlacement ^ objectPlacement, ILogger^ logger)
 		{
 			if (!IsValid) return this;
-			XbimFace^ copy = gcnew XbimFace(this, Tag); //take a copy of the shape
-			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
+			XbimFace^ copy = gcnew XbimFace(*pFace, Tag); //take a copy of the shape
+			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement,logger);
 			copy->Move(loc);
 			return copy;
 		}

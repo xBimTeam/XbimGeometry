@@ -1,1 +1,0 @@
-Opening is not correctly computed in wall.

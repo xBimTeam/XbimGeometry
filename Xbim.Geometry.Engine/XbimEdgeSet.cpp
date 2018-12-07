@@ -5,7 +5,7 @@
 #include <TopExp.hxx>
 using namespace System;
 namespace Xbim
-{
+{ 
 	namespace Geometry
 	{
 		XbimEdgeSet::XbimEdgeSet(IEnumerable<IXbimEdge^>^ edges)
@@ -116,11 +116,11 @@ namespace Xbim
 			return result;
 		}
 
-		IXbimGeometryObject ^ XbimEdgeSet::Moved(IIfcObjectPlacement ^ objectPlacement)
+		IXbimGeometryObject ^ XbimEdgeSet::Moved(IIfcObjectPlacement ^ objectPlacement, ILogger^ logger)
 		{
 			if (!IsValid) return this;
 			XbimEdgeSet^ result = gcnew XbimEdgeSet();
-			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
+			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement,logger);
 			for each (IXbimEdge^ edge in edges)
 			{
 				XbimEdge^ copy = gcnew XbimEdge((XbimEdge^)edge, Tag);
@@ -130,7 +130,7 @@ namespace Xbim
 			return result;
 		}
 
-		void XbimEdgeSet::Mesh(IXbimMeshReceiver ^ mesh, double precision, double deflection, double angle)
+		void XbimEdgeSet::Mesh(IXbimMeshReceiver ^ /*mesh*/, double /*precision*/, double /*deflection*/, double /*angle*/)
 		{
 			return;//maybe add an implementation for this
 		}
