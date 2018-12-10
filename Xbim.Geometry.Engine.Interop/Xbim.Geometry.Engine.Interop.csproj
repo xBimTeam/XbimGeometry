@@ -13,8 +13,8 @@
   <PropertyGroup>
     <TargetFramework>net47</TargetFramework>
     <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
-    <SignAssembly>false</SignAssembly>
-    <AssemblyOriginatorKeyFile>aimkey.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\XbimOpenSourceKeyFile.snk</AssemblyOriginatorKeyFile>
     <Title>Xbim Geometry Engine</Title>
     <Version>5.0.0-Beta1-$(Year)$(Month)-$(Day)</Version>
     <Copyright>Copyright Xbim Ltd.</Copyright>
@@ -40,7 +40,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
     <PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
-    <PackageReference Include="Xbim.Tessellator" Version="5.0.191" />
+    <PackageReference Include="Xbim.Tessellator" Version="5.0.200" />
   </ItemGroup>
  
 

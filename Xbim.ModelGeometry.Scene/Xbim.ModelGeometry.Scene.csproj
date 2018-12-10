@@ -19,6 +19,8 @@
     <FileVersion>5.0.0.0</FileVersion>
     <PackageIconUrl>https://avatars1.githubusercontent.com/u/2284875?v=3&amp;amp;s=240</PackageIconUrl>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\XbimOpenSourceKeyFile.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -26,8 +28,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Xbim.Ifc" Version="5.0.191" />
-    <PackageReference Include="Xbim.Tessellator" Version="5.0.191" />
+    <PackageReference Include="Xbim.Ifc" Version="5.0.200" />
+    <PackageReference Include="Xbim.Tessellator" Version="5.0.200" />
   </ItemGroup>
 
   <ItemGroup>

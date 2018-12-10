@@ -78,29 +78,25 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <LinkKeyFile>
-    </LinkKeyFile>
+    <LinkKeyFile>$(ProjectDir)..\XbimOpenSourceKeyFile.snk</LinkKeyFile>
     <TargetName>$(ProjectName)32</TargetName>
     <EnableManagedIncrementalBuild>false</EnableManagedIncrementalBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <LinkKeyFile>
-    </LinkKeyFile>
+    <LinkKeyFile>$(ProjectDir)..\XbimOpenSourceKeyFile.snk</LinkKeyFile>
     <TargetName>$(ProjectName)64</TargetName>
     <EnableManagedIncrementalBuild>false</EnableManagedIncrementalBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <LinkKeyFile>
-    </LinkKeyFile>
+    <LinkKeyFile>$(ProjectDir)..\XbimOpenSourceKeyFile.snk</LinkKeyFile>
     <TargetName>$(ProjectName)32</TargetName>
     <EnableManagedIncrementalBuild>false</EnableManagedIncrementalBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <LinkKeyFile>
-    </LinkKeyFile>
+    <LinkKeyFile>$(ProjectDir)..\XbimOpenSourceKeyFile.snk</LinkKeyFile>
     <TargetName>$(ProjectName)64</TargetName>
     <EnableManagedIncrementalBuild>false</EnableManagedIncrementalBuild>
   </PropertyGroup>
