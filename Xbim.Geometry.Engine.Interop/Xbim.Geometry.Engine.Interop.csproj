@@ -4,40 +4,12 @@
   <PropertyGroup>
     <TargetFramework>net47</TargetFramework>
     <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\XbimOpenSourceKeyFile.snk</AssemblyOriginatorKeyFile>
     <Title>Xbim Geometry Engine</Title>
-    <Version>5.0.0-Beta1</Version>
-    <Copyright>Copyright Xbim Ltd.</Copyright>
-    <Description>.net library that provides support for the  Ifc4 and Ifc2x3 Geometry conversion.</Description>
-    <Authors>Steve Lockley</Authors>
-    <Company>Xbim Ltd.</Company>
-    <PackageLicenseExpression>CDDL-1.0</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/xBimTeam/</PackageProjectUrl>
-    <RepositoryUrl></RepositoryUrl>
-    <PackageTags>BIM, IFC, IfcXml, IfcZip, Ifc4,  COBie, .Net, C#, BuildingSmart</PackageTags>
-    <PackageReleaseNotes>migrated Xbim.Geometry.Interop to .net47</PackageReleaseNotes>
-    <AssemblyVersion>5.0.0.0</AssemblyVersion>    
-    <FileVersion>5.0.0.0</FileVersion>
-    <ProductVersion>5.0.$(Year)$(Month).$(Day)</ProductVersion>
+    <Description>Provides support for the  Ifc4 and Ifc2x3 Geometry conversion.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageIconUrl>https://avatars1.githubusercontent.com/u/2284875?v=3&amp;amp;s=240</PackageIconUrl>
-    <DelaySign>false</DelaySign>
     <PackageId>Xbim.Geometry.Engine.Interop</PackageId>
-    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-    <DocumentationFile>bin\$(Configuration)\Xbim.GeometryEngine.Interop.xml</DocumentationFile>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <NoWarn>CS1591</NoWarn>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn>CS1591</NoWarn>
-  </PropertyGroup>
-  <ItemGroup>
-    <Compile Remove="bin\**" />
-    <EmbeddedResource Remove="bin\**" />
-    <None Remove="bin\**" />
-  </ItemGroup>
+  
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />

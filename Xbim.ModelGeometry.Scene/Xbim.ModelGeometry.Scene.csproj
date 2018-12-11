@@ -2,39 +2,15 @@
 
   <PropertyGroup>
     <TargetFrameworks>net47</TargetFrameworks>
-    <IsPackable>true</IsPackable>
-    <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
     <Title>Xbim ModelGeometry Scene</Title>
-    <Version>5.0.0.0-beta</Version>
-    <Copyright>Copyright Xbim Ltd.</Copyright>
-    <Description>.net library that provides support for the Geometry Scene creation.</Description>
-    <Authors>Steve Lockley</Authors>
-    <Company>Xbim Ltd.</Company>
-    <PackageLicenseExpression>CDDL-1.0</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/xBimTeam/</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/xBimTeam/XbimGeometry/</RepositoryUrl>
-    <PackageTags>BIM IFC IfcXml IfcZip Ifc4 COBie BuildingSmart</PackageTags>
-    <PackageReleaseNotes>Updated to version 5</PackageReleaseNotes>
-    <AssemblyVersion>5.0.0.0</AssemblyVersion>
-    <FileVersion>5.0.0.0</FileVersion>
-    <PackageIconUrl>https://avatars1.githubusercontent.com/u/2284875?v=3&amp;amp;s=240</PackageIconUrl>
+    <IsPackable>true</IsPackable>
+    <Description>Provides support for the Geometry Scene creation.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\XbimOpenSourceKeyFile.snk</AssemblyOriginatorKeyFile>
-    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-    <DocumentationFile>bin\$(Configuration)\Xbim.ModelGeometry.Scene.xml</DocumentationFile>
+    <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net47|AnyCPU'">
-    <NoWarn>CS1591;CS1572;CS1573</NoWarn>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net47|AnyCPU'">
-    <NoWarn>CS1591;CS1572;CS1573</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
