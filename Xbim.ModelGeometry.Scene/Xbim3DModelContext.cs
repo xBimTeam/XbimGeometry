@@ -1272,18 +1272,14 @@ namespace Xbim.ModelGeometry.Scene
 
                                 var swDisk = shape as IIfcSweptDiskSolid;
                                 var pts = Engine.GetDiscretisedDirectrix(swDisk, 3);
-
-                                // ProfileExtruder.Debug(pts);
+                                if (pts.Count < 2)
+                                {
+                                    LogInfo(_model.Instances[shapeId], "Is an empty shape");
+                                    return; // we are inside a lambda, equivalent to a continue.
+                                }
                                 var r = (double)swDisk.Radius.Value;
                                 const int pointsOnProfile = 5;
-                                var silhou = new List<XbimPoint3D>(pointsOnProfile);
-                                double deltaAngle = 2 * Math.PI / pointsOnProfile;
-                                for (int i = 0; i< pointsOnProfile; i++)
-                                {
-                                    var ang = deltaAngle * i;
-                                    silhou.Add(new XbimPoint3D(r * Math.Sin(ang), r * Math.Cos(ang), 0));
-                                }
-                                shapeGeom = ProfileExtruder.Extrude(pts, silhou, true);
+                                shapeGeom = ProfileExtruder.ExtrudeCircle(pts, r, pointsOnProfile);
                             }
                             else
                             if (!isFeatureElementShape && !isVoidedProductShape && xbimTessellator.CanMesh(shape)) // if we can mesh the shape directly just do it

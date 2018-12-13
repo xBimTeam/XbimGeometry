@@ -115,6 +115,7 @@ namespace Xbim.Geometry.Profiler
                         var context = new Xbim3DModelContext(model);
                         if (singleThread)
                             context.MaxThreads = 1;
+                        context.UseSimplifiedFastExtruder = true;
 
                         // context.CustomMeshingBehaviour += SkipRebar;
                         context.CreateContext(progDelegate: progDelegate);
@@ -158,7 +159,6 @@ namespace Xbim.Geometry.Profiler
                 }
             }
         }
-
 
         private static IfcStore GetModel(string fileName, bool writeXbim)
         {
