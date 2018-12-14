@@ -65,6 +65,9 @@
     <None Update="TestFiles\BadlyOrientedBrepFacesTest.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="TestFiles\CompoundBooleanUnionTest.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="TestFiles\FacetedBrepWithCoincidentalFacesTest.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

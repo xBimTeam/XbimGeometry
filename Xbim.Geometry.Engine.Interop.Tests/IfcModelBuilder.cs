@@ -307,6 +307,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         public static IfcTrimmedCurve MakeSemiCircle(MemoryModel m, int radius)
         {
             var circle = m.Instances.New<IfcCircle>();
+          
             circle.Position = MakeAxis2Placement2D(m);
             circle.Radius = radius;
             var semiCircle = m.Instances.New<IfcTrimmedCurve>();

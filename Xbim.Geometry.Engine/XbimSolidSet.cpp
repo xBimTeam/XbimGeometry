@@ -447,7 +447,7 @@ namespace Xbim
 				//
 				aBOP.AddArgument(boolParams->Body);
 				aBOP.AddTool(cutCompound);
-				aBOP.SetOperation(BOPAlgo_CUT);
+				aBOP.SetOperation(boolParams->Operation);
 				aBOP.SetRunParallel(false);
 				aBOP.PerformWithFiller(aPF);
 				const TopoDS_Shape& aR = aBOP.Shape();
@@ -481,8 +481,7 @@ namespace Xbim
 				boolParams->Success = false;
 			}
 		}
-
-		IXbimSolidSet^ XbimSolidSet::Cut(IXbimSolidSet^ solidsToCut, double tolerance, ILogger^ logger)
+		IXbimSolidSet^ XbimSolidSet::DoBoolean(IXbimSolidSet^ arguments, BOPAlgo_Operation operation,  double tolerance, ILogger^ logger)
 		{
 			if (!IsValid) return this;
 
@@ -495,7 +494,7 @@ namespace Xbim
 				threads->Add(oThread);
 
 				XbimSolidSet^ copyOfCuts = gcnew XbimSolidSet();
-				for each (IXbimSolid^ iSolid in solidsToCut)
+				for each (IXbimSolid^ iSolid in arguments)
 				{
 					XbimSolid^ solid = dynamic_cast<XbimSolid^>(iSolid);
 					if (solid != nullptr && solid->IsValid)
@@ -511,19 +510,20 @@ namespace Xbim
 				}
 				BRepBuilderAPI_Copy bodyCopier(dynamic_cast<XbimSolid^>(solids[i]));
 				XbimSolidSetBoolOpParams^ param = gcnew XbimSolidSetBoolOpParams(gcnew XbimSolid(TopoDS::Solid(bodyCopier.Shape())), copyOfCuts, tolerance, logger);
-				params->Add(param);	
+				param->Operation = operation;
+				params->Add(param);
 				oThread->Start(param);
 			}
 			for (int i = 0; i < threads->Count; i++)
 			{
 				Thread^ oThread = threads[i];
-			
+
 				if (!oThread->Join((int)(XbimGeometryCreator::BooleanTimeOut * 1000)))
 				{
 					XbimGeometryCreator::LogError(logger, nullptr,
 						"Boolean operation timed out after {0} seconds.\nCutting Entity #{1} from #{2}.\nTry increasing the timeout in the App.config file\nUncut shape is used",
 						XbimGeometryCreator::BooleanTimeOut,
-						((XbimSolidSet^)solidsToCut)->IfcEntityLabel,
+						((XbimSolidSet^)arguments)->IfcEntityLabel,
 						this->IfcEntityLabel);
 					// we have identified now continue with the uncut  left operand
 					params[i]->UseBody = true; //stop further error reporting
@@ -536,14 +536,14 @@ namespace Xbim
 				if (!param->Success)
 				{
 					if (param->UseBody)
-					{						
+					{
 						result->Add(param->Body);
 					}
 					else
 					{
 						XbimGeometryCreator::LogError(logger, nullptr,
 							"Boolean operation failed.\nCutting Entity #{0} from #{1}.",
-							((XbimSolidSet^)solidsToCut)->IfcEntityLabel,
+							((XbimSolidSet^)arguments)->IfcEntityLabel,
 							this->IfcEntityLabel);
 					}
 				}
@@ -558,24 +558,15 @@ namespace Xbim
 			return result;
 		}
 
-		IXbimSolidSet^ XbimSolidSet::Union(IXbimSolidSet^ solidSet, double tolerance, ILogger^ logger)
+		IXbimSolidSet^ XbimSolidSet::Cut(IXbimSolidSet^ solidsToCut, double tolerance, ILogger^ logger)
 		{
-			if (!IsValid) return this;
-			IXbimSolidSet^ toUnionSolidSet = solidSet; //just to sort out carve exclusion, they must be all OCC solids if no carve
-			IXbimSolidSet^ thisSolidSet = this;
+			
+			return DoBoolean(solidsToCut,BOPAlgo_CUT,tolerance,logger);
+		}
 
-			XbimCompound^ thisSolid = XbimCompound::Merge(thisSolidSet, tolerance, logger);
-			XbimCompound^ toUnionSolid = XbimCompound::Merge(toUnionSolidSet, tolerance, logger);
-			if (thisSolid == nullptr && toUnionSolid == nullptr) return XbimSolidSet::Empty;
-			if (thisSolid != nullptr && toUnionSolid != nullptr)
-			{
-				XbimCompound^ result = thisSolid->Union(toUnionSolid, tolerance, logger);
-				XbimSolidSet^ss = gcnew XbimSolidSet();
-				ss->Add(result);
-				return ss;
-			}
-			if (toUnionSolid != nullptr) return solidSet;
-			return this;
+		IXbimSolidSet^ XbimSolidSet::Union(IXbimSolidSet^ solidsToUnion, double tolerance, ILogger^ logger)
+		{
+			return DoBoolean(solidsToUnion, BOPAlgo_FUSE, tolerance, logger);
 		}
 
 
@@ -983,7 +974,7 @@ namespace Xbim
 				XbimGeometryCreator::LogWarning(logger, boolOp, "Invalid boolean operand result");
 			}*/
 		}
-		XbimSolidSet^ XbimSolidSet::BuildBooleanResult(IIfcBooleanResult^ boolRes, XbimSolidSet^ ops, ILogger^ logger)
+		XbimSolidSet^ XbimSolidSet::BuildBooleanResult(IIfcBooleanResult^ boolRes, IfcBooleanOperator operatorType,  XbimSolidSet^ ops, ILogger^ logger)
 		{
 			XbimSolidSet^ right = gcnew XbimSolidSet(boolRes->SecondOperand, logger);
 			if (Math::Abs(right->Volume) > Precision::Confusion())
@@ -991,9 +982,10 @@ namespace Xbim
 				right->IfcEntityLabel = boolRes->SecondOperand->EntityLabel;
 				ops->Add(right);
 			}
-			if (boolRes->Operator == IfcBooleanOperator::DIFFERENCE && dynamic_cast<IIfcBooleanResult^>(boolRes->FirstOperand))
+			//if we are the same operator type just aggregate them into a single solid set
+			if (boolRes->Operator == operatorType && dynamic_cast<IIfcBooleanResult^>(boolRes->FirstOperand) && !dynamic_cast<IIfcBooleanClippingResult^>(boolRes->FirstOperand))
 			{								
-				return BuildBooleanResult((IIfcBooleanResult^)(boolRes->FirstOperand),ops, logger);
+				return BuildBooleanResult((IIfcBooleanResult^)(boolRes->FirstOperand), operatorType, ops, logger);
 			}
 			else
 			{
@@ -1015,7 +1007,7 @@ namespace Xbim
 			}
 			XbimSolidSet^ right = gcnew XbimSolidSet();
 			right->IfcEntityLabel = boolOp->SecondOperand->EntityLabel;
-			XbimSolidSet^ left = BuildBooleanResult(boolOp, right, logger);
+			XbimSolidSet^ left = BuildBooleanResult(boolOp, boolOp->Operator, right, logger);
 			solids = gcnew List<IXbimSolid^>();
 
 			if (!left->IsValid)

@@ -273,11 +273,11 @@ namespace Xbim
 
 		void XbimWire::Init(IIfcCenterLineProfileDef^ profile, ILogger^ logger)
 		{
-			if ((int)(profile->Curve->Dim) != 2)
+			/*if ((int)(profile->Curve->Dim) != 2)
 			{
 				XbimGeometryCreator::LogError(logger, profile, "IfcCenterLineProfileDef must have a dimensionality of 2");
 				return;
-			}
+			}*/
 			double precision = profile->Model->ModelFactors->Precision;
 			XbimWire^ centreWire = gcnew XbimWire(profile->Curve, logger);
 			TopoDS_Wire spine = centreWire;
