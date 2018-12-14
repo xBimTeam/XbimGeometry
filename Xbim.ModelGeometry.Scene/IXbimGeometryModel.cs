@@ -30,6 +30,7 @@ namespace Xbim.ModelGeometry.Scene
         /// <param name="product">The product that the geometry represents</param>
         /// <param name="transform">Tranforms all point before writing to the meshs</param>
         /// <param name="deflection">The tangental deflection to use for curved surfaces</param>
+        /// <param name="modelId">An optional modelId</param>
         /// <returns>The fragment of the mesh that has been added</returns>
         XbimMeshFragment MeshTo(IXbimMeshGeometry3D mesh3D, IIfcProduct product, XbimMatrix3D transform, double deflection, short modelId=0);
         /// <summary>
@@ -43,18 +44,19 @@ namespace Xbim.ModelGeometry.Scene
         /// <summary>
         /// Cuts the toCut shape from this and returns the result
         /// </summary>
-        /// <param name="openingGeom"></param>
+        /// <param name="toCut"></param>
         /// <param name="modelFactors">Specifies the precision, and deflection factors for boolean operations, normally obtained from XbimModel.ModelFactors</param>
         /// <returns></returns>
         IXbimGeometryModel Cut(IXbimGeometryModel toCut, XbimModelFactors modelFactors);
         IXbimGeometryModel Union(IXbimGeometryModel toUnion, XbimModelFactors modelFactors);
         IXbimGeometryModel Intersection(IXbimGeometryModel toIntersect, XbimModelFactors modelFactors);
         IXbimGeometryModel Combine(IXbimGeometryModel toCombine, XbimModelFactors modelFactors);
-       
+
         /// <summary>
         /// Writes the geometry in the XBIM mesh format in a text file
         /// </summary>
         /// <param name="fileName"></param>
+        /// <param name="modelFactors"></param>
         /// <returns></returns>
         bool Write(string fileName, XbimModelFactors modelFactors);
 

@@ -50,6 +50,7 @@ namespace XbimRegression
                     ProcessResult result;
                     using (var loggerFactory = new LoggerFactory())
                     {
+                        XbimLogging.LoggerFactory = loggerFactory;
                         loggerFactory.AddConsole(LogLevel.Error);
                         loggerFactory.AddProvider(new NReco.Logging.File.FileLoggerProvider(logFile, false)
                         {
@@ -73,6 +74,7 @@ namespace XbimRegression
                         result = ProcessFile(file.FullName, writer, logger);
 
                     }
+                    XbimLogging.LoggerFactory = null; // uses a default loggerFactory
 
                     var txt = File.ReadAllText(logFile);
                     if (string.IsNullOrEmpty(txt))
@@ -123,8 +125,7 @@ namespace XbimRegression
                     {
                         var parseTime = watch.ElapsedMilliseconds;
                         var xbimFilename = BuildFileName(ifcFile, ".xbim");
-                        var context = new Xbim3DModelContext(model);
-                        Xbim3DModelContext.Logger = logger;
+                        var context = new Xbim3DModelContext(model, logger: logger);
                         if (_params.MaxThreads > 0)
                             context.MaxThreads = _params.MaxThreads;
                         // context.CustomMeshingBehaviour = CustomMeshingBehaviour;

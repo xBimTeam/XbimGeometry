@@ -486,6 +486,7 @@ namespace Xbim.ModelGeometry.Scene
             get { return _engine ?? (_engine = new XbimGeometryEngine()); }
         }
 
+        [Obsolete("Supply ILogger on constructor instead")]
         public static ILogger Logger
         {       
             set
@@ -503,9 +504,10 @@ namespace Xbim.ModelGeometry.Scene
                 var msg = String.Format(format, args);
                 var ifcEntity = entity as IPersistEntity;
                 if (ifcEntity != null)
-                    _logger.LogWarning("GeomScene: #{0}={1} [{2}]", ifcEntity.EntityLabel, ifcEntity.GetType().Name, msg);
+                    _logger.LogWarning("GeomScene: #{entityLabel}={entityType} [{message}]", 
+                        ifcEntity.EntityLabel, ifcEntity.GetType().Name, msg);
                 else
-                    _logger.LogWarning("GeomScene: {0} [{1}]", entity.GetType().Name, msg);
+                    _logger.LogWarning("GeomScene: {entityType} [{message}]", entity.GetType().Name, msg);
             }
         }
 
@@ -517,9 +519,10 @@ namespace Xbim.ModelGeometry.Scene
                 var msg = String.Format(format, args);
                 var ifcEntity = entity as IPersistEntity;
                 if (ifcEntity != null)
-                    _logger.LogInformation("GeomScene: #{0}={1} [{2}]", ifcEntity.EntityLabel, ifcEntity.GetType().Name, msg);
+                    _logger.LogInformation("GeomScene: #{entityLabel}={entityType} [{message}]", 
+                        ifcEntity.EntityLabel, ifcEntity.GetType().Name, msg);
                 else
-                    _logger.LogInformation("GeomScene: {0} [{1}]", entity.GetType().Name, msg);
+                    _logger.LogInformation("GeomScene: {entityType} [{message}]", entity.GetType().Name, msg);
             }
         }
 
@@ -530,9 +533,10 @@ namespace Xbim.ModelGeometry.Scene
                 var msg = String.Format(format, args);
                 var ifcEntity = entity as IPersistEntity;
                 if (ifcEntity != null)
-                    _logger.LogError("GeomScene: #{0}={1} [{2}]", ifcEntity.EntityLabel, ifcEntity.GetType().Name, msg);
+                    _logger.LogError("GeomScene: #{entityLabel}={entityType} [{message}]", 
+                        ifcEntity.EntityLabel, ifcEntity.GetType().Name, msg);
                 else
-                    _logger.LogError("GeomScene: {0} [{1}]", entity.GetType().Name, msg);
+                    _logger.LogError("GeomScene: {entityType} [{message}]", entity.GetType().Name, msg);
             }
         }
 
@@ -561,10 +565,12 @@ namespace Xbim.ModelGeometry.Scene
         /// <param name="model"></param>
         /// <param name="contextType"></param>
         /// <param name="requiredContextIdentifier"></param>
-        public Xbim3DModelContext(IModel model, string contextType = "model", string requiredContextIdentifier = null)
+        /// <param name="logger"></param>
+        public Xbim3DModelContext(IModel model, string contextType = "model", string requiredContextIdentifier = null,
+            ILogger logger = null)
         {
             _model = model;
-            
+            _logger = logger ?? XbimLogging.CreateLogger<Xbim3DModelContext>();
 
             // Get the required context
 
@@ -661,22 +667,35 @@ namespace Xbim.ModelGeometry.Scene
         }
 
 
-        /// <param name="progDelegate"></param>       
+        /// <param name="progDelegate"></param>
+        /// <param name="adjustWcs"></param>       
         /// <returns></returns>
         public bool CreateContext(ReportProgressDelegate progDelegate = null, bool adjustWcs = true)
         {
+            _logger.LogInformation("Starting creation of model scene");
             //NB we no longer support creation of  geometry storage other than binary, other code remains for reading but not writing 
             var geomStorageType = XbimGeometryType.PolyhedronBinary;
-            if (_contexts == null || Engine == null) return false;
+            if (_contexts == null || Engine == null)
+            {
+                _logger.LogWarning("No model context instance or model engine found. Finishing...");
+                return false;
+            }
 
             var geometryStore = _model.GeometryStore;
 
             if (geometryStore == null)
+            {
+                _logger.LogWarning("No GeometryStore in model. Finishing...");
                 return false;
+            }
 
             using (var geometryTransaction = geometryStore.BeginInit())
             {
-                if (geometryTransaction == null) return false;
+                if (geometryTransaction == null)
+                {
+                    _logger.LogWarning("No Transaction created. Finishing...");
+                    return false;
+                }
                 using (var contextHelper = new XbimCreateContextHelper(_model, _contexts))
                 {
                     contextHelper.customMeshBehaviour = CustomMeshingBehaviour;
@@ -720,6 +739,7 @@ namespace Xbim.ModelGeometry.Scene
                 }
                 geometryTransaction.Commit();
             }
+            _logger.LogInformation("Finished creation of model scene");
             return true;
         }
 
@@ -1018,8 +1038,10 @@ namespace Xbim.ModelGeometry.Scene
         /// <param name="contextHelper"></param>
         /// <param name="product">the product to write</param>
         /// <param name="includesOpenings"></param>
+        /// <param name="txn"></param>
         /// <returns>IEnumerable of XbimShapeInstance that have been written</returns>
-        private IEnumerable<XbimShapeInstance> WriteProductShape(XbimCreateContextHelper contextHelper, IIfcProduct product, bool includesOpenings, IGeometryStoreInitialiser txn)
+        private IEnumerable<XbimShapeInstance> WriteProductShape(XbimCreateContextHelper contextHelper, IIfcProduct product, 
+            bool includesOpenings, IGeometryStoreInitialiser txn)
         {
             if (CustomMeshingBehaviour != null)
             {

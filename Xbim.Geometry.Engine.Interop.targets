@@ -44,7 +44,7 @@
               architecture that we support, to the build output directory.
     -->
     <Message Text="Copying Geometry Engine files @(XbimInteropFiles)" Importance="high" />
-    <Message Text="Copying Geometry Engines to bin directory $(OutputPath)$(CustomBinPath)" Importance="high" />
+    <Message Text="Copying Geometry Engines to bin directory $(OutputPath)$(XBimCustomBinPath)" Importance="high" />
 
     <!-- Consumers can over-ride the bin output folder by setting XbimCustomBinPath -->
     <Copy SourceFiles="@(XbimInteropFiles)"

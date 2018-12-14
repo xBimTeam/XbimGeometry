@@ -22,7 +22,8 @@ namespace Xbim.ModelGeometry.Scene.Extensions
         /// <summary>
         ///   Builds a windows XbimMatrix3D from a CartesianTransformationOperator3D
         /// </summary>
-        /// <param name = "ct3D"></param>
+        /// <param name="ct3D"></param>
+        /// <param name="maps">An optional mapping dictionary</param>
         /// <returns></returns>
         public static XbimMatrix3D ToMatrix3D(this IIfcCartesianTransformationOperator3D ct3D, ConcurrentDictionary<int, Object> maps = null)
         {
@@ -51,7 +52,8 @@ namespace Xbim.ModelGeometry.Scene.Extensions
         /// <summary>
         ///   Builds a windows XbimMatrix3D from a CartesianTransformationOperator3DnonUniform
         /// </summary>
-        /// <param name = "ct3D"></param>
+        /// <param name="ct3D"></param>
+        /// <param name="maps"></param>
         /// <returns></returns>
         public static XbimMatrix3D ToMatrix3D(this IIfcCartesianTransformationOperator3DnonUniform ct3D, ConcurrentDictionary<int, Object> maps = null)
         {

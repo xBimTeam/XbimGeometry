@@ -29,6 +29,7 @@ namespace Xbim.ModelGeometry.Scene
         /// <summary>
         /// Called after EndNormal
         /// </summary>
+        /// <param name="totalNumberTriangles">The total number of triangles in the face</param>
         /// <param name="numPolygons">Number of polygons which make the face</param>
         void BeginPolygons(uint totalNumberTriangles, uint numPolygons);
         /// <summary>

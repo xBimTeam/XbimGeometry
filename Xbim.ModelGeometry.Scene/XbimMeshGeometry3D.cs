@@ -73,6 +73,7 @@ namespace Xbim.ModelGeometry.Scene
         /// Reads an ascii string of Xbim mesh geometry data
         /// </summary>
         /// <param name="data"></param>
+        /// <param name="trans">An optional transformation</param>
         /// <returns></returns>
         public bool Read(String data, XbimMatrix3D? trans = null)
         {
@@ -502,6 +503,7 @@ namespace Xbim.ModelGeometry.Scene
         /// Appends a geometry data object to the Mesh, returns false if the mesh would become too big and needs splitting
         /// </summary>
         /// <param name="geometryMeshData"></param>
+        /// <param name="modelId"></param>
         public bool Add(XbimGeometryData geometryMeshData, short modelId = 0)
         {
             var transform = XbimMatrix3D.FromArray(geometryMeshData.DataArray2);
@@ -647,7 +649,9 @@ namespace Xbim.ModelGeometry.Scene
         /// <param name="product">The product the geometry represents (this may be a partial representation)</param>
         /// <param name="transform">Transform the geometry to a new location or rotation</param>
         /// <param name="deflection">Deflection for triangulating curves, if null default defelction for the model is used</param>
-        public XbimMeshFragment Add(IXbimGeometryModel geometryModel, IIfcProduct product, XbimMatrix3D transform, double? deflection = null, short modelId = 0)
+        /// <param name="modelId">An optional model ID</param>
+        public XbimMeshFragment Add(IXbimGeometryModel geometryModel, IIfcProduct product, XbimMatrix3D transform, 
+            double? deflection = null, short modelId = 0)
         {
             return geometryModel.MeshTo(this, product, transform, deflection ?? product.Model.ModelFactors.DeflectionTolerance);
         }
