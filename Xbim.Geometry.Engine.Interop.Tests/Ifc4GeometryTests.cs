@@ -28,6 +28,17 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         }
 
         [TestMethod]
+        public void CentreLineProfileTest()
+        {
+            using (var er = new EntityRepository<IIfcExtrudedAreaSolid>(nameof(CentreLineProfileTest)))
+            {
+                Assert.IsTrue(er.Entity != null, "No IIfcExtrudedAreaSolid found");
+                var extrudedSolid = geomEngine.CreateSolid(er.Entity, logger);
+                HelperFunctions.IsValidSolid(extrudedSolid);
+                
+            }
+        }
+        [TestMethod]
         public void ExtrudedSolidWithNullPositionTest()
         {
             using (var er = new EntityRepository<IIfcExtrudedAreaSolid>(nameof(ExtrudedSolidWithNullPositionTest)))
