@@ -123,7 +123,6 @@ steps:
     codeCoverageEnabled: true
     platform: '$(BuildPlatform)'
     configuration: '$(BuildConfiguration)'
-  continueOnError: true
 
 - task: PublishSymbols@1
   displayName: 'Publish symbols path: '
