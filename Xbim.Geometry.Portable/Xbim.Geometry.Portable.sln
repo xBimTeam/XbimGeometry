@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2050
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Xbim.Geometry.Portable", "Xbim.Geometry.Portable\Xbim.Geometry.Portable.vcxproj", "{B1A52DB3-DE57-4B19-ABB1-80EE05C16F29}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B1A52DB3-DE57-4B19-ABB1-80EE05C16F29}.Debug|x64.ActiveCfg = Debug|x64
+		{B1A52DB3-DE57-4B19-ABB1-80EE05C16F29}.Debug|x64.Build.0 = Debug|x64
+		{B1A52DB3-DE57-4B19-ABB1-80EE05C16F29}.Debug|x86.ActiveCfg = Debug|Win32
+		{B1A52DB3-DE57-4B19-ABB1-80EE05C16F29}.Debug|x86.Build.0 = Debug|Win32
+		{B1A52DB3-DE57-4B19-ABB1-80EE05C16F29}.Release|x64.ActiveCfg = Release|x64
+		{B1A52DB3-DE57-4B19-ABB1-80EE05C16F29}.Release|x64.Build.0 = Release|x64
+		{B1A52DB3-DE57-4B19-ABB1-80EE05C16F29}.Release|x86.ActiveCfg = Release|Win32
+		{B1A52DB3-DE57-4B19-ABB1-80EE05C16F29}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0CE62408-140E-4CC3-A8DE-109FA6738FB5}
+	EndGlobalSection
+EndGlobal

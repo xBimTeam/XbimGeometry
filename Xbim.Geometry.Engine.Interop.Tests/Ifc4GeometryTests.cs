@@ -38,6 +38,20 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 
             }
         }
+
+        [TestMethod]
+        public void TrimmedCurveWithLargeRadianValueTest()
+        {
+            using (var er = new EntityRepository<IIfcExtrudedAreaSolid>(nameof(TrimmedCurveWithLargeRadianValueTest), true))
+            {
+                Assert.IsTrue(er.Entity != null, "No IIfcExtrudedAreaSolid found");
+                var extrudedSolid = geomEngine.CreateSolid(er.Entity, logger);
+                HelperFunctions.IsValidSolid(extrudedSolid);
+                Assert.AreEqual<long>((long)extrudedSolid.Volume , 14999524619);
+            }
+        }
+
+
         [TestMethod]
         public void ExtrudedSolidWithNullPositionTest()
         {
