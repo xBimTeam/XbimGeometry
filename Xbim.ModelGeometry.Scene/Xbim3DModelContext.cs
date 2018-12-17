@@ -410,13 +410,12 @@ namespace Xbim.ModelGeometry.Scene
                     //we can only handle one representation in a context and this is in an implementers agreement
                     if (product.Representation != null)
                     {
-                        if (product.Representation.Representations == null) continue;
-                        var rep =
-                            product.Representation.Representations.FirstOrDefault(
-                                r => Contexts.Contains(r.ContextOfItems) &&
-                                     r.IsBodyRepresentation());
-                        //write out the representation if it has one
-                        if (rep != null)
+                        if (product.Representation.Representations == null)
+                            continue;
+
+                        // Write product representations of context
+                        foreach (var rep in product.Representation.Representations.Where(
+                                    r => (!Contexts.Any() || Contexts.Contains(r.ContextOfItems)) && r.IsBodyRepresentation()))
                         {
                             foreach (var shape in rep.Items.Where(i => !(i is IIfcGeometricSet)))
                             {
@@ -956,9 +955,8 @@ namespace Xbim.ModelGeometry.Scene
                 if (product.Representation.Representations == null)
                     return;
 
-                var rep = product.Representation.Representations.FirstOrDefault(r => IsInContext(r) && r.IsBodyRepresentation());
-                //write out the representation if it has one
-                if (rep != null)
+                // Write product representations of context
+                foreach (var rep in product.Representation.Representations.Where(r => IsInContext(r) && r.IsBodyRepresentation()))
                 {
                     WriteProductShape(contextHelper, product, true, txn);
                 }
@@ -997,9 +995,7 @@ namespace Xbim.ModelGeometry.Scene
             if (product.Representation.Representations == null)
                 return Enumerable.Empty<XbimShapeInstance>();
 
-            var rep = product.Representation.Representations.FirstOrDefault(r => IsInContext(r) && r.IsBodyRepresentation());
-            if (rep == null)
-                return Enumerable.Empty<XbimShapeInstance>();
+            var reps = product.Representation.Representations.Where(r => IsInContext(r) && r.IsBodyRepresentation());
 
             // logic to classify feature tagging
             var repType = includesOpenings
@@ -1013,10 +1009,9 @@ namespace Xbim.ModelGeometry.Scene
 
             // transform setup
             var placementTransform = XbimPlacementTree.GetTransform(product, contextHelper.PlacementTree, Engine);
-            
+
             // process the items
-            var shapesInstances = WriteProductShapeRepresentationItems(contextHelper, product, txn, rep, repType, placementTransform, rep.Items);
-            return shapesInstances;
+            return reps.SelectMany(r => WriteProductShapeRepresentationItems(contextHelper, product, txn, r, repType, placementTransform, r.Items));
         }
 
         private List<XbimShapeInstance> WriteProductShapeRepresentationItems(XbimCreateContextHelper contextHelper, IIfcProduct product, IGeometryStoreInitialiser txn, IIfcRepresentation rep, XbimGeometryRepresentationType repType, XbimMatrix3D placementTransform, IItemSet<IIfcRepresentationItem> representationItems)
