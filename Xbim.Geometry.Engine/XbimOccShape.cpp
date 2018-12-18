@@ -354,15 +354,15 @@ namespace Xbim
 				bw->Write(index);
 		}
 
-		void XbimOccShape::WriteTriangulation(BinaryWriter^ binaryWriter, double tolerance, double deflection, double angle)
+		XbimPoint3D XbimOccShape::WriteTriangulation(BinaryWriter^ binaryWriter, double tolerance, double deflection, double angle)
 		{
-
-			if (!IsValid) return;
+			XbimPoint3D retVal = XbimPoint3D(0, 0, 0);
+			if (!IsValid) return retVal;
 			TopTools_IndexedMapOfShape faceMap;
 			TopoDS_Shape shape = this; //hold on to it
 			TopExp::MapShapes(shape, TopAbs_FACE, faceMap);			
 			int faceCount = faceMap.Extent();
-			if (faceCount == 0) return;
+			if (faceCount == 0) return retVal;
 			
 			Dictionary<XbimPoint3DWithTolerance^, int>^ pointMap = gcnew Dictionary<XbimPoint3DWithTolerance^, int>();
 			List<List<int>^>^ pointLookup = gcnew List<List<int>^>(faceCount);
@@ -567,6 +567,20 @@ namespace Xbim
 					}
 				}
 			}
+			// compute min coords
+			//
+			double minX = double::PositiveInfinity;
+			double minY = double::PositiveInfinity;
+			double minZ = double::PositiveInfinity;
+			for each (XbimPoint3D var in points)
+			{
+				minX = Math::Min(minX, var.X);
+				minY = Math::Min(minY, var.Y);
+				minZ = Math::Min(minZ, var.Z);
+			}
+			retVal = XbimPoint3D(minX, minY, minZ);
+			System::Diagnostics::Debug::WriteLine("WriteTriangulation " + retVal);
+
 			// Write out header
 			binaryWriter->Write((unsigned char)1); //stream format version
 			int numVertices = points->Count;
@@ -575,9 +589,9 @@ namespace Xbim
 			//write out vertices 
 			for each (XbimPoint3D p in points)
 			{
-				binaryWriter->Write((float)p.X);
-				binaryWriter->Write((float)p.Y);
-				binaryWriter->Write((float)p.Z);
+				binaryWriter->Write((float)(p.X - minX));
+				binaryWriter->Write((float)(p.Y - minY));
+				binaryWriter->Write((float)(p.Z - minZ));
 			}
 
 			//now write out the faces
@@ -611,6 +625,7 @@ namespace Xbim
 			}
 			GC::KeepAlive(this);
 			binaryWriter->Flush();
+			return retVal;
 		}	
 	}
 }

@@ -258,7 +258,7 @@ namespace Xbim
 							}							
 						}
 						XbimCompound^ compound = gcnew XbimCompound(occCompound, false, precision);
-						WriteTriangulation(bw, compound, precision, deflection, angle);
+						shapeGeom->TempOriginDisplacement = WriteTriangulation(bw, compound, precision, deflection, angle);
 						bw->Close();
 						delete bw;
 					}
@@ -278,7 +278,15 @@ namespace Xbim
 
 					if (shapeGeom->ShapeData->Length > 0)
 					{
-						((XbimShapeGeometry^)shapeGeom)->BoundingBox = geometryObject->BoundingBox;
+						XbimRect3D bb = geometryObject->BoundingBox;
+						XbimRect3D nb = XbimRect3D(
+							bb.Location.X - shapeGeom->TempOriginDisplacement.X,
+							bb.Location.Y - shapeGeom->TempOriginDisplacement.Y,
+							bb.Location.Z - shapeGeom->TempOriginDisplacement.Z,
+							bb.SizeX,
+							bb.SizeY,
+							bb.SizeZ);
+						((XbimShapeGeometry^)shapeGeom)->BoundingBox = nb;
 						((XbimShapeGeometry^)shapeGeom)->LOD = XbimLOD::LOD_Unspecified,
 						((XbimShapeGeometry^)shapeGeom)->Format = storageType;
 						return shapeGeom;
@@ -291,7 +299,7 @@ namespace Xbim
 				if (storageType == XbimGeometryType::PolyhedronBinary)
 				{
 					BinaryWriter^ bw = gcnew BinaryWriter(memStream);
-					WriteTriangulation(bw, geometryObject, precision, deflection, angle);
+					shapeGeom->TempOriginDisplacement = WriteTriangulation(bw, geometryObject, precision, deflection, angle);
 					bw->Close();
 					delete bw;
 				}
@@ -306,14 +314,21 @@ namespace Xbim
 				((IXbimShapeGeometryData^)shapeGeom)->ShapeData = memStream->ToArray();
 				delete memStream;
 				if (shapeGeom->ShapeData->Length > 0)
-				{					
-					((XbimShapeGeometry^)shapeGeom)->BoundingBox = geometryObject->BoundingBox;
+				{
+					XbimRect3D bb = geometryObject->BoundingBox;
+					XbimRect3D nb = XbimRect3D(
+						bb.Location.X - shapeGeom->TempOriginDisplacement.X,
+						bb.Location.Y - shapeGeom->TempOriginDisplacement.Y,
+						bb.Location.Z - shapeGeom->TempOriginDisplacement.Z,
+						bb.SizeX,
+						bb.SizeY,
+						bb.SizeZ);
+					((XbimShapeGeometry^)shapeGeom)->BoundingBox = nb;
 					((XbimShapeGeometry^)shapeGeom)->LOD = XbimLOD::LOD_Unspecified,
 					((XbimShapeGeometry^)shapeGeom)->Format = storageType;
 				}
 			}
 			return shapeGeom;
-
 		}
 
 		IXbimGeometryObjectSet^ XbimGeometryCreator::CreateGeometricSet(IIfcGeometricSet^ geomSet)
@@ -824,15 +839,15 @@ namespace Xbim
 			
 		}
 
-		void XbimGeometryCreator::WriteTriangulation(BinaryWriter^ bw, IXbimGeometryObject^ shape, double tolerance, double deflection, double angle)
+		XbimPoint3D XbimGeometryCreator::WriteTriangulation(BinaryWriter^ bw, IXbimGeometryObject^ shape, double tolerance, double deflection, double angle)
 		{
-
 			XbimOccShape^ xShape = dynamic_cast<XbimOccShape^>(shape);
 			if (xShape != nullptr)
 			{
-				xShape->WriteTriangulation(bw, tolerance, deflection, angle);
-				return;
+				return xShape->WriteTriangulation(bw, tolerance, deflection, angle);
+				return XbimPoint3D(0, 0, 0);
 			}
+			return XbimPoint3D(0, 0, 0);
 		}
 
 		IXbimSolidSet^ XbimGeometryCreator::CreateBooleanResult(IIfcBooleanClippingResult^ clip)

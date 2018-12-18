@@ -34,11 +34,14 @@ namespace Xbim.Geometry.Profiler
             var writeXbim = args.Any(t => t.ToLowerInvariant() == "/keepxbim");
             var singleThread = args.Any(t => t.ToLowerInvariant() == "/singlethread");
             var writeInInputFolder = args.Any(t => t.ToLowerInvariant() == "/samefolder");
+            var adjustwcs = !args.Any(t => t.ToLowerInvariant() == "/adjustwcs:false");
+            var fastextruder = args.Any(t => t.ToLowerInvariant() == "/fastextruder");
+
 
             foreach (var arg in args)
             {
                 if (!arg.StartsWith("/"))
-                    Profile(arg, writeXbim, writeInInputFolder, singleThread);
+                    Profile(arg, writeXbim, writeInInputFolder, singleThread, adjustwcs, fastextruder);
             }
             
             Console.WriteLine("Press any key to exit");
@@ -53,7 +56,7 @@ namespace Xbim.Geometry.Profiler
             return Xbim3DModelContext.MeshingBehaviourResult.Default;
         }
 
-        private static void Profile(string fileNameInput, bool writeXbim, bool writeInInputFolder, bool singleThread)
+        private static void Profile(string fileNameInput, bool writeXbim, bool writeInInputFolder, bool singleThread, bool adjustWcs, bool fastextruder)
         {
             var mainStopWatch = new Stopwatch();
             mainStopWatch.Start();
@@ -115,10 +118,10 @@ namespace Xbim.Geometry.Profiler
                         var context = new Xbim3DModelContext(model);
                         if (singleThread)
                             context.MaxThreads = 1;
-                        context.UseSimplifiedFastExtruder = true;
+                        context.UseSimplifiedFastExtruder = fastextruder;
 
                         // context.CustomMeshingBehaviour += SkipRebar;
-                        context.CreateContext(progDelegate: progDelegate);
+                        context.CreateContext(progDelegate, adjustWcs);
 
                         mainStopWatch.Stop();
                         Logger.InfoFormat("Xbim total Compile Time \t{0:0.0} ms", mainStopWatch.ElapsedMilliseconds);
