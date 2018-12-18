@@ -315,11 +315,17 @@ namespace Xbim.ModelGeometry.Scene
                 var compoundElementsDictionary = XbimMultiValueDictionary<IIfcObjectDefinition, IIfcObjectDefinition>.Create<HashSet<IIfcObjectDefinition>>();
                 foreach (var aggRel in Model.Instances.OfType<IIfcRelAggregates>())
                 {
-                    foreach (var relObj in aggRel.RelatedObjects)
+                    try
                     {
-                        compoundElementsDictionary.Add(aggRel.RelatingObject, relObj);
+                        foreach (var relObj in aggRel.RelatedObjects)
+                        {
+                            compoundElementsDictionary.Add(aggRel.RelatingObject, relObj);
+                        }
                     }
-
+                    catch (Exception e)
+                    {
+                        Logger.Error($"Problem in aggregates definition for #{aggRel.EntityLabel}", e);
+                    }
                 }
 
                 // openings
@@ -1070,9 +1076,9 @@ namespace Xbim.ModelGeometry.Scene
                             // trans = XbimMatrix3D.Multiply(mapTransform, placementTransform);
                             // trans = XbimMatrix3D.Multiply(mapTransform, placementTransform);
                             trans = XbimMatrix3D.Multiply(
-                               placementTransform,
-                               XbimMatrix3D.CreateTranslation((XbimVector3D)mappedGeometryReference.TempOriginDisplacement));
-                            trans = XbimMatrix3D.Multiply(trans, mapTransform);
+                               XbimMatrix3D.CreateTranslation((XbimVector3D)mappedGeometryReference.TempOriginDisplacement),
+                               mapTransform);
+                            trans = XbimMatrix3D.Multiply(trans, placementTransform);
 
                             shapesInstances.Add(
                                 WriteShapeInstanceToStore(mappedGeometryReference.GeometryId, mappedGeometryReference.StyleLabel, contextId,
@@ -1116,8 +1122,9 @@ namespace Xbim.ModelGeometry.Scene
                     {
                         var movedTransform =
                             XbimMatrix3D.Multiply(
-                                placementTransform,
-                                XbimMatrix3D.CreateTranslation((XbimVector3D)instance.TempOriginDisplacement));
+                                XbimMatrix3D.CreateTranslation((XbimVector3D)instance.TempOriginDisplacement),
+                                placementTransform
+                                );
 
                         //XbimPoint3D shapeTranslation = new XbimPoint3D(0, 0, 0);
                         
@@ -1253,6 +1260,7 @@ namespace Xbim.ModelGeometry.Scene
             var localTally = contextHelper.Tally;
             // var dedupCount = 0;
             var xbimTessellator = new XbimTessellator(Model, geomStorageType);
+            xbimTessellator.MoveMinToOrigin = true;
             //var geomHash = new ConcurrentDictionary<RepresentationItemGeometricHashKey, int>();
 
             //var mapLookup = new ConcurrentDictionary<int, int>();
@@ -1327,7 +1335,7 @@ namespace Xbim.ModelGeometry.Scene
                                 }
                                 var r = (double)swDisk.Radius.Value;
                                 const int pointsOnProfile = 5;
-                                shapeGeom = ProfileExtruder.ExtrudeCircle(pts, r, pointsOnProfile);
+                                shapeGeom = ProfileExtruder.ExtrudeCircle(pts, r, pointsOnProfile, true);
                             }
                             else
                             if (!isFeatureElementShape && !isVoidedProductShape && xbimTessellator.CanMesh(shape)) // if we can mesh the shape directly just do it

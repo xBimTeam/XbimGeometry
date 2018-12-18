@@ -29,7 +29,7 @@ namespace Xbim.ModelGeometry.Scene
             );
         }
 
-        public static XbimShapeGeometry ExtrudeCircle(IList<XbimPoint3D> positionPath, double radius, int pointsOnCircle)
+        public static XbimShapeGeometry ExtrudeCircle(IList<XbimPoint3D> positionPath, double radius, int pointsOnCircle, bool moveMinShapeToOrigin = false)
         {
             double deltaAngle = 2 * Math.PI / pointsOnCircle;
 
@@ -104,13 +104,32 @@ namespace Xbim.ModelGeometry.Scene
                 }
             }
 
-            return MeshPolyhedronBinary(positions, normals, indices);
+            return MeshPolyhedronBinary(positions, normals, indices, moveMinShapeToOrigin);
         }
 
-        private static XbimShapeGeometry MeshPolyhedronBinary(IList<XbimPoint3D> positions, IList<XbimPoint3D> normals, IList<int> indices)
+        private static XbimShapeGeometry MeshPolyhedronBinary(IList<XbimPoint3D> positions, IList<XbimPoint3D> normals, IList<int> indices, bool moveMinShapeToOrigin = false)
         {
             XbimShapeGeometry shapeGeometry = new XbimShapeGeometry();
             shapeGeometry.Format = XbimGeometryType.PolyhedronBinary;
+
+            XbimPoint3D displacement = new XbimPoint3D(0, 0, 0);
+            if (moveMinShapeToOrigin)
+            {
+                // compute min coords
+                //
+                double minX = double.PositiveInfinity;
+                double minY = double.PositiveInfinity;
+                double minZ = double.PositiveInfinity;
+                foreach (var v in positions)
+
+                {
+                    minX = Math.Min(minX, v.X);
+                    minY = Math.Min(minY, v.Y);
+                    minZ = Math.Min(minZ, v.Z);
+                }
+                displacement = new XbimPoint3D(minX, minY, minZ);
+            }
+            shapeGeometry.TempOriginDisplacement = displacement;
 
             using (var ms = new MemoryStream(0x4000))
             using (var binaryWriter = new BinaryWriter(ms))
@@ -133,9 +152,9 @@ namespace Xbim.ModelGeometry.Scene
 
                 foreach (var v in positions)
                 {
-                    binaryWriter.Write((float)v.X);
-                    binaryWriter.Write((float)v.Y);
-                    binaryWriter.Write((float)v.Z);
+                    binaryWriter.Write((float)(v.X - displacement.X));
+                    binaryWriter.Write((float)(v.Y - displacement.Y));
+                    binaryWriter.Write((float)(v.Z - displacement.Z));
                 }
                 shapeGeometry.BoundingBox = boundingBox;
                 //now write out the faces
