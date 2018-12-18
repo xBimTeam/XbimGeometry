@@ -614,6 +614,7 @@ namespace Xbim
 			}
 			else //coursen the precision to 1 mm 
 			{
+				XbimWire^ dg = gcnew XbimWire(degenWire);
 				//we are going to use one millimeter for the precision when edges don't join
 				double oneMilli = cCurve->Model->ModelFactors->OneMilliMeter;
 
