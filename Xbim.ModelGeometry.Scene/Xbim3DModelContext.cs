@@ -419,8 +419,7 @@ namespace Xbim.ModelGeometry.Scene
                         {
                             foreach (var shape in rep.Items.Where(i => !(i is IIfcGeometricSet)))
                             {
-                                var mappedItem = shape as IIfcMappedItem;
-                                if (mappedItem != null)
+                                if (shape is IIfcMappedItem mappedItem)
                                 {
                                     ProcessMappedItem(isFeatureElementShape, isVoidedProductShape, mappedItem);
                                 }
@@ -956,7 +955,7 @@ namespace Xbim.ModelGeometry.Scene
                     return;
 
                 // Write product representations of context
-                foreach (var rep in product.Representation.Representations.Where(r => IsInContext(r) && r.IsBodyRepresentation()))
+                if(product.Representation.Representations.Any(r => IsInContext(r) && r.IsBodyRepresentation()))
                 {
                     WriteProductShape(contextHelper, product, true, txn);
                 }
@@ -1010,8 +1009,8 @@ namespace Xbim.ModelGeometry.Scene
             // transform setup
             var placementTransform = XbimPlacementTree.GetTransform(product, contextHelper.PlacementTree, Engine);
 
-            // process the items
-            return reps.SelectMany(r => WriteProductShapeRepresentationItems(contextHelper, product, txn, r, repType, placementTransform, r.Items));
+            // process the items and evaluate here
+            return reps.SelectMany(r => WriteProductShapeRepresentationItems(contextHelper, product, txn, r, repType, placementTransform, r.Items)).ToList();
         }
 
         private List<XbimShapeInstance> WriteProductShapeRepresentationItems(XbimCreateContextHelper contextHelper, IIfcProduct product, IGeometryStoreInitialiser txn, IIfcRepresentation rep, XbimGeometryRepresentationType repType, XbimMatrix3D placementTransform, IItemSet<IIfcRepresentationItem> representationItems)
