@@ -424,7 +424,8 @@ namespace Xbim
 #pragma region Face creation
 		IXbimFace^ XbimGeometryCreator::CreateFace(IXbimWire ^ wire, ILogger^ logger)
 		{
-			return gcnew XbimFace(wire, logger);
+			XbimWire^ w = (XbimWire^)wire;
+			return gcnew XbimFace(wire, wire->IsPlanar,w->MaxTolerance,0, logger);
 		};
 
 		IXbimFace^ XbimGeometryCreator::CreateFace(IIfcProfileDef ^ profile, ILogger^ logger)

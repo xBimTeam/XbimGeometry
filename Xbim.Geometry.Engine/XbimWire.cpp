@@ -231,7 +231,7 @@ namespace Xbim
 					// todo: this code is not quite robust, it did not manage to close fairly simple polylines.
 					//
 					double oneMilli = profile->Model->ModelFactors->OneMilliMeter;
-					XbimFace^ face = gcnew XbimFace(loop, logger);
+					XbimFace^ face = gcnew XbimFace(loop, true, oneMilli, profile->OuterCurve->EntityLabel, logger);
 					ShapeFix_Wire wireFixer(loop,face, profile->Model->ModelFactors->Precision);
 					wireFixer.ClosedWireMode() = Standard_True;
 					wireFixer.FixGaps2dMode() = Standard_True;
@@ -614,7 +614,7 @@ namespace Xbim
 			}
 			else //coursen the precision to 1 mm 
 			{
-				XbimWire^ dg = gcnew XbimWire(degenWire);
+				//XbimWire^ dg = gcnew XbimWire(degenWire);
 				//we are going to use one millimeter for the precision when edges don't join
 				double oneMilli = cCurve->Model->ModelFactors->OneMilliMeter;
 

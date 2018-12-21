@@ -152,6 +152,7 @@ namespace Xbim
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D)override;
 			void FuseColinearSegments(double tolerance, double angleTolerance, ILogger^ logger);
 			virtual property double Area {double get(); }
+			virtual property double MaxTolerance {double get() {return IsValid ? BRep_Tool::MaxTolerance(*pWire, TopAbs_EDGE) : 0; } }
 #pragma endregion
 
 #pragma region Equality Overrides

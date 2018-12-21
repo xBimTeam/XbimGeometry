@@ -41,7 +41,7 @@ namespace Xbim
 			void Init(IIfcCompositeCurve ^ cCurve, ILogger^ logger);
 			void Init(IIfcPolyline ^ pline, ILogger^ logger);
 			void Init(IIfcPolyLoop ^ loop, ILogger^ logger);
-			void Init(IXbimWire^ wire, ILogger^ logger);
+			void Init(IXbimWire^ wire, bool isPlanar, double precision, int entityLabel, ILogger^ logger);
 			void Init(IXbimWire^ wire, XbimPoint3D pointOnFace, XbimVector3D faceNormal, ILogger^ logger);
 			void Init(IXbimFace^ face, ILogger^ logger);
 			void Init(IIfcBSplineSurface ^ surface, ILogger^ logger);
@@ -115,9 +115,8 @@ namespace Xbim
 			XbimFace(IIfcCompositeCurve ^ cCurve, ILogger^ logger);
 			XbimFace(IIfcPolyline ^ pline, ILogger^ logger);
 			XbimFace(IIfcPolyLoop ^ loop, ILogger^ logger);
-			XbimFace(IXbimWire^ wire, ILogger^ logger);
+			XbimFace(IXbimWire^ wire, bool isPlanar, double precision, int entityLabel,  ILogger^ logger);
 			XbimFace(IXbimWire^ wire, XbimPoint3D pointOnface,  XbimVector3D faceNormal, ILogger^ logger);
-			XbimFace(IXbimFace^ face, ILogger^ logger);
 			XbimFace(IIfcSurface^ surface, XbimWire^ outerBound, IEnumerable<XbimWire^>^ innerBounds, ILogger^ logger);
 			XbimFace(IIfcFaceSurface^ surface, XbimWire^ outerBound, IEnumerable<XbimWire^>^ innerBounds, double tolerance, ILogger^ logger);
 			XbimFace(IIfcCylindricalSurface ^ surface, ILogger^ logger);

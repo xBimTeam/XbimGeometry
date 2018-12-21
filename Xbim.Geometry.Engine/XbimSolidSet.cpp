@@ -414,12 +414,13 @@ namespace Xbim
 			// new approach
 			TopTools_ListOfShape aLC;
 			aLC.Append(boolParams->Body);
-
+			double maxTol = boolParams->Tolerance;
 			for each (IXbimSolid^ iSolid in boolParams->Ops)
 			{
 				XbimSolid^ solid = dynamic_cast<XbimSolid^>(iSolid);
 				if (solid != nullptr && solid->IsValid)
 				{
+					maxTol = Math::Max(BRep_Tool::MaxTolerance(solid,TopAbs_EDGE),maxTol);
 					aLC.Append(solid);
 					shapeTools.Append(solid);
 					builder.Add(cutCompound, solid);
@@ -433,7 +434,7 @@ namespace Xbim
 				BOPAlgo_PaveFiller aPF(aAL);
 
 				aPF.SetArguments(aLC);
-				aPF.SetFuzzyValue(5 * boolParams->Tolerance); //this seems about right
+				aPF.SetFuzzyValue(Math::Max(maxTol - boolParams->Tolerance, 5 * boolParams->Tolerance)); //this seems about right
 				aPF.SetRunParallel(false);
 				aPF.SetNonDestructive(false);
 				aPF.Perform();

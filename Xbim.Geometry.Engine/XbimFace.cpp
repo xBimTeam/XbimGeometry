@@ -45,6 +45,8 @@
 #include <GeomAPI_ProjectPointOnSurf.hxx>
 #include <BRepClass_FaceClassifier.hxx>
 #include <BRepTopAdaptor_FClass2d.hxx>
+#include <BRepBuilderAPI_FindPlane.hxx>
+#include <Geom_Plane.hxx>
 using namespace System::Linq;
  
 namespace Xbim
@@ -161,20 +163,19 @@ namespace Xbim
 			Init(loop,  logger);
 		}
 
-		XbimFace::XbimFace(IXbimWire^ wire, ILogger^ logger)
+		
+		XbimFace::XbimFace(IXbimWire^ wire, bool isPlanar, double precision, int entityLabel, ILogger^ logger)
 		{
-			Init(wire,  logger);
+			
+			Init(wire, isPlanar,precision,entityLabel, logger);
 		}
 
 		XbimFace::XbimFace(IXbimWire^ wire, XbimPoint3D pointOnFace, XbimVector3D faceNormal, ILogger^ logger)
 		{
 			Init(wire, pointOnFace, faceNormal,  logger);
 		}
-
-		XbimFace::XbimFace(IXbimFace^ face, ILogger^ logger)
-		{
-			Init(face,  logger);
-		}
+		
+		
 
 		XbimFace::XbimFace(double x, double y, double tolerance, ILogger^ logger)
 		{
@@ -328,26 +329,61 @@ namespace Xbim
 			{
 				gp_Pln plane(gp_Pnt(pointOnFace.X, pointOnFace.Y, pointOnFace.Z), gp_Dir(faceNormal.X, faceNormal.Y, faceNormal.Z));
 				BRepBuilderAPI_MakeFace faceMaker(plane, wire, Standard_False);
+				TopoDS_Face resultFace = faceMaker.Face();
+				if (BRepCheck_Analyzer(resultFace, Standard_True).IsValid() == Standard_False)
+				{
+					ShapeFix_Face faceFixer(faceMaker.Face());
+					faceFixer.Perform();				    
+					resultFace = faceFixer.Face();
+				}			
 				pFace = new TopoDS_Face();
-				*pFace = faceMaker.Face();
+				*pFace = resultFace;
 			}
 			GC::KeepAlive(xbimWire);
 		}
 
-		void XbimFace::Init(IXbimWire^ xbimWire, ILogger^ /*logger*/)
+		void XbimFace::Init(IXbimWire^ xbimWire, bool isPlanar, double precision, int entityLabel, ILogger^ logger)
 		{
 			if (!dynamic_cast<XbimWire^>(xbimWire))
 				throw gcnew ArgumentException("Only IXbimWires created by Xbim.OCC modules are supported", "xbimWire");
 			XbimWire^ wire = (XbimWire^)xbimWire;
+			double currentPrecision = precision;
 			if (wire->IsValid)
 			{
-				XbimPoint3D pw = wire->Vertices->First->VertexGeometry;
-				XbimVector3D n = wire->Normal;
-				if (n.IsInvalid()) return;
-				gp_Pln plane(gp_Pnt(pw.X, pw.Y, pw.Z), gp_Dir(n.X, n.Y, n.Z));
-				BRepBuilderAPI_MakeFace faceMaker(plane, wire, Standard_False);
-				pFace = new TopoDS_Face();
-				*pFace = faceMaker.Face();
+				if (isPlanar)
+				{
+					int retriedMakePlaneCount = 0;
+					//we need to find the correct plane
+					makePlane:
+					BRepBuilderAPI_FindPlane planeMaker(wire, currentPrecision);
+					if (retriedMakePlaneCount < 20 && !planeMaker.Found())
+					{
+						retriedMakePlaneCount++;
+						currentPrecision=10* precision * retriedMakePlaneCount;
+						goto makePlane;
+					}
+					if(!planeMaker.Found())
+						XbimGeometryCreator::LogError(logger, nullptr, "Failure to build planar face due to a non-planar wire, entity #{0}", entityLabel);
+					else
+					{
+						BRepBuilderAPI_MakeFace faceMaker(planeMaker.Plane()->Pln(), wire, Standard_True);
+						pFace = new TopoDS_Face();
+						*pFace = faceMaker.Face();
+					}
+				}
+				else
+				{
+					BRepBuilderAPI_MakeFace faceMaker(wire, Standard_False);
+					if (faceMaker.IsDone())
+					{
+						pFace = new TopoDS_Face();
+						*pFace = faceMaker.Face();
+					}
+					else
+					{
+						XbimGeometryCreator::LogError(logger, nullptr, "Failure to build non-planar face, entity #{0}", entityLabel);
+					}
+				}
 			}
 			GC::KeepAlive(xbimWire);
 		}
@@ -460,7 +496,7 @@ namespace Xbim
 				if (!loop->IsClosed && loop->Edges->Count>1) //we need to close it if we have more thn one edge
 				{
 					double oneMilli = profile->Model->ModelFactors->OneMilliMeter;
-					XbimFace^ xface = gcnew XbimFace(loop,logger);
+					XbimFace^ xface = gcnew XbimFace(loop,true, oneMilli, profile->OuterCurve->EntityLabel, logger);
 					ShapeFix_Wire wireFixer(loop, xface, profile->Model->ModelFactors->Precision);
 					wireFixer.ClosedWireMode() = Standard_True;
 					wireFixer.FixGaps2dMode() = Standard_True;
@@ -499,7 +535,7 @@ namespace Xbim
 					if (!innerWire->IsClosed && innerWire->Edges->Count>1) //we need to close it if we have more thn one edge
 					{
 						double oneMilli = profile->Model->ModelFactors->OneMilliMeter;
-						XbimFace^ xface = gcnew XbimFace(innerWire,logger);
+						XbimFace^ xface = gcnew XbimFace(innerWire, true, oneMilli, curve->EntityLabel, logger);
 						ShapeFix_Wire wireFixer(innerWire, xface, profile->Model->ModelFactors->Precision);
 						wireFixer.ClosedWireMode() = Standard_True;
 						wireFixer.FixGaps2dMode() = Standard_True;
