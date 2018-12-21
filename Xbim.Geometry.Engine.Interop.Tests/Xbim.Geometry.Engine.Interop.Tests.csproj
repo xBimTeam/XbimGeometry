@@ -41,7 +41,7 @@
     <None Update="TestFiles\BooleanResultTimoutTest.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestFiles\BooleanSilentFail2Test.ifc">
+    <None Update="TestFiles\FaceWithBoundsOutsideDeclaredPrecisionTest.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="TestFiles\CentreLineProfileTest.ifc">
@@ -68,7 +68,10 @@
     <None Update="TestFiles\CompoundBooleanUnionTest.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestFiles\FacetedBrepWithCoincidentalFacesTest.ifc">
+    <None Update="TestFiles\CsgBooleanResultTest.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestFiles\FacetedBrepWithFacesOutsideNorlamTolerancesTest.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="TestFiles\FailingBooleanBrepWithZeroVolumeTest.ifc">

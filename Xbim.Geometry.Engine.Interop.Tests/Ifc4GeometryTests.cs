@@ -77,9 +77,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         }
 
         [TestMethod]
-        public void FacetedBrepWithCoincidentalFacesTest()
+        public void FacetedBrepWithFacesOutsideNorlamTolerancesTest()
         {
-            using (var er = new EntityRepository<IIfcFacetedBrep>(nameof(FacetedBrepWithCoincidentalFacesTest)))
+            using (var er = new EntityRepository<IIfcFacetedBrep>(nameof(FacetedBrepWithFacesOutsideNorlamTolerancesTest)))
             {
                 Assert.IsTrue(er.Entity != null, "No IIfcFacetedBrep found");
                 var solid = geomEngine.CreateSolidSet(er.Entity, logger).FirstOrDefault();
