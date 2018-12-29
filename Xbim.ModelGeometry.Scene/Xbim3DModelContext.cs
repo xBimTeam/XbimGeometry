@@ -966,7 +966,11 @@ namespace Xbim.ModelGeometry.Scene
                 GeometryReference instance;
                 if (contextHelper.ShapeLookup.TryGetValue(grid.EntityLabel, out instance) && grid.Representation != null && grid.Representation.Representations.Count > 0)
                 {
-                    XbimMatrix3D placementTransform = XbimPlacementTree.GetTransform(grid, contextHelper.PlacementTree, Engine);
+                    XbimMatrix3D placementTransform =
+                        XbimMatrix3D.Multiply(
+                            XbimMatrix3D.CreateTranslation((XbimVector3D)instance.TempOriginDisplacement),
+                            XbimPlacementTree.GetTransform(grid, contextHelper.PlacementTree, Engine)
+                        );
                     // int context = 0;
                     var gRep= grid.Representation.Representations.FirstOrDefault();
                     var context = gRep.ContextOfItems;
@@ -1282,7 +1286,8 @@ namespace Xbim.ModelGeometry.Scene
                         var refCounter = new GeometryReference
                         {
                             BoundingBox = (shapeGeom).BoundingBox,
-                            GeometryId = geometryStore.AddShapeGeometry(shapeGeom)
+                            GeometryId = geometryStore.AddShapeGeometry(shapeGeom),
+                            TempOriginDisplacement = shapeGeom.TempOriginDisplacement
                         };
                         contextHelper.ShapeLookup.TryAdd(shapeGeom.IfcShapeLabel, refCounter);
                     }
