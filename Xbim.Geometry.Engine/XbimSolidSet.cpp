@@ -718,6 +718,8 @@ namespace Xbim
 			}
 		}
 
+
+
 		void XbimSolidSet::Init(IIfcFaceBasedSurfaceModel ^ solid, ILogger ^ logger)
 		{
 			XbimCompound^ comp = gcnew XbimCompound(solid, logger);
@@ -936,6 +938,9 @@ namespace Xbim
 			IIfcCsgSolid^ csgOp = dynamic_cast<IIfcCsgSolid^>(boolOp);
 			IIfcHalfSpaceSolid^ hs = dynamic_cast<IIfcHalfSpaceSolid^>(boolOp);
 			IIfcCsgPrimitive3D^ csgPrim = dynamic_cast<IIfcCsgPrimitive3D^>(boolOp);
+			
+			IIfcSweptAreaSolid^ sa = dynamic_cast<IIfcSweptAreaSolid^>(boolOp);
+			IIfcManifoldSolidBrep^ ms = dynamic_cast<IIfcManifoldSolidBrep^>(boolOp);
 			IIfcSolidModel^ sm = dynamic_cast<IIfcSolidModel^>(boolOp);
 			solids = gcnew List<IXbimSolid^>();
 			if (boolRes != nullptr)
@@ -945,6 +950,15 @@ namespace Xbim
 			else if (csgOp != nullptr)
 			{
 				Init(csgOp, logger); // dispatch for IIfcCsgSolid result
+			}
+			else if (sa != nullptr)
+			{
+				Init(sa, logger); 
+			}
+			else if (ms != nullptr)
+			{
+				XbimCompound^ comp = gcnew XbimCompound(ms, logger);
+				Init(comp, ms, logger);
 			}
 			else if (hs != nullptr)
 			{
