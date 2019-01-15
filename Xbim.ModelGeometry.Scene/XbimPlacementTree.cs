@@ -28,6 +28,8 @@ namespace Xbim.ModelGeometry.Scene
             return placementTransform;
         }
 
+        public List<XbimPlacementNode> RootNodes;
+
         /// <summary>
         ///     Builds a placement tree of all ifcLocalPlacements
         /// </summary>
@@ -38,7 +40,7 @@ namespace Xbim.ModelGeometry.Scene
         /// </param>
         public XbimPlacementTree(IModel model, bool adjustWcs = true)
         {
-            var rootNodes = new List<XbimPlacementNode>();
+            RootNodes = new List<XbimPlacementNode>();
             var localPlacements = model.Instances.OfType<IIfcLocalPlacement>(true).ToList();
             Nodes = new Dictionary<int, XbimPlacementNode>();
             foreach (var placement in localPlacements)
@@ -53,11 +55,11 @@ namespace Xbim.ModelGeometry.Scene
                     xbimPlacementParent.Children.Add(xbimPlacement);
                 }
                 else
-                    rootNodes.Add(Nodes[localPlacement.EntityLabel]);
+                    RootNodes.Add(Nodes[localPlacement.EntityLabel]);
             }
-            if (adjustWcs && rootNodes.Count == 1)
+            if (adjustWcs && RootNodes.Count == 1)
             {
-                var root = rootNodes[0];
+                var root = RootNodes[0];
                 WorldCoordinateSystem = root.Matrix;
                 //make the children parentless
                 foreach (var node in Nodes.Values.Where(node => node.Parent == root)) node.Parent = null;

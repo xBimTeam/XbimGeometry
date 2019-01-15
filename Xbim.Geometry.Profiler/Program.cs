@@ -36,12 +36,12 @@ namespace Xbim.Geometry.Profiler
             var writeInInputFolder = args.Any(t => t.ToLowerInvariant() == "/samefolder");
             var adjustwcs = !args.Any(t => t.ToLowerInvariant() == "/adjustwcs:false");
             var fastextruder = args.Any(t => t.ToLowerInvariant() == "/fastextruder");
-
+            var noWexbim = args.Any(t => t.ToLowerInvariant() == "/nowexbim");
 
             foreach (var arg in args)
             {
                 if (!arg.StartsWith("/"))
-                    Profile(arg, writeXbim, writeInInputFolder, singleThread, adjustwcs, fastextruder);
+                    Profile(arg, writeXbim, writeInInputFolder, singleThread, adjustwcs, fastextruder, noWexbim);
             }
             
             Console.WriteLine("Press any key to exit");
@@ -56,7 +56,7 @@ namespace Xbim.Geometry.Profiler
             return Xbim3DModelContext.MeshingBehaviourResult.Default;
         }
 
-        private static void Profile(string fileNameInput, bool writeXbim, bool writeInInputFolder, bool singleThread, bool adjustWcs, bool fastextruder)
+        private static void Profile(string fileNameInput, bool writeXbim, bool writeInInputFolder, bool singleThread, bool adjustWcs, bool fastextruder, bool noWexbim)
         {
             var mainStopWatch = new Stopwatch();
             mainStopWatch.Start();
@@ -126,21 +126,24 @@ namespace Xbim.Geometry.Profiler
                         mainStopWatch.Stop();
                         Logger.InfoFormat("Xbim total Compile Time \t{0:0.0} ms", mainStopWatch.ElapsedMilliseconds);
 
-                        var wexBimFilename = Path.ChangeExtension(fileName, "wexBIM");
-                        using (var wexBiMfile = new FileStream(wexBimFilename, FileMode.Create, FileAccess.Write))
+                        if (!noWexbim)
                         {
-                            using (var wexBimBinaryWriter = new BinaryWriter(wexBiMfile))
+                            var wexBimFilename = Path.ChangeExtension(fileName, "wexBIM");
+                            using (var wexBiMfile = new FileStream(wexBimFilename, FileMode.Create, FileAccess.Write))
                             {
-                                var stopWatch = new Stopwatch();
-                                Logger.InfoFormat("Entering -  Create wexBIM");
-                                stopWatch.Start();
-                                model.SaveAsWexBim(wexBimBinaryWriter);
+                                using (var wexBimBinaryWriter = new BinaryWriter(wexBiMfile))
+                                {
+                                    var stopWatch = new Stopwatch();
+                                    Logger.InfoFormat("Entering -  Create wexBIM");
+                                    stopWatch.Start();
+                                    model.SaveAsWexBim(wexBimBinaryWriter);
 
-                                stopWatch.Stop();
-                                Logger.InfoFormat("Complete - in \t{0:0.0} ms", stopWatch.ElapsedMilliseconds);
-                                wexBimBinaryWriter.Close();
+                                    stopWatch.Stop();
+                                    Logger.InfoFormat("Complete - in \t{0:0.0} ms", stopWatch.ElapsedMilliseconds);
+                                    wexBimBinaryWriter.Close();
+                                }
+                                wexBiMfile.Close();
                             }
-                            wexBiMfile.Close();
                         }
                         if (writeXbim)
                         {
