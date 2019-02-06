@@ -354,7 +354,7 @@ namespace Xbim.Geometry.Engine.Interop
         
         public void WriteTriangulation(BinaryWriter bw, IXbimGeometryObject shape, double tolerance, double deflection)
         {
-            WriteTriangulation(bw, shape, tolerance, deflection: deflection, angle: 0.5);
+            WriteTriangulation(bw, shape, tolerance, deflection: deflection, angle: 0.5);   
         }
              
         public ILogger Logger

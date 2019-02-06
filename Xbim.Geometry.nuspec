@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
   <metadata>
     <id>Xbim.Geometry</id>
-    <version>4.0.15-V0048</version>
+    <version>4.0.15-V0051</version>
     <title>xBIM Geometry</title>
     <authors>xBIM Team</authors>
     <owners>Steve Lockley, Claudio Benghi</owners>
@@ -28,7 +28,7 @@
     <language>en-GB</language>
     <tags>BIM, IFC, IfcXml, IfcZip, Ifc4, COBie, .Net, C#, BuildingSmart, Geometry, Brep</tags>
     <dependencies>
-      <dependency id="Xbim.Essentials" version="4.0.30-V047" />
+      <dependency id="Xbim.Essentials" version="4.0.30-V049" />
     </dependencies>
   </metadata>
   <files>

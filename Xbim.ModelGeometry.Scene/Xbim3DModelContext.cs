@@ -294,7 +294,8 @@ namespace Xbim.ModelGeometry.Scene
             private void GetClusters()
             {
                 Clusters = new Dictionary<IIfcRepresentationContext, ConcurrentQueue<XbimBBoxClusterElement>>();
-                foreach (var context in Contexts) Clusters.Add(context, new ConcurrentQueue<XbimBBoxClusterElement>());
+                foreach (var context in Contexts)
+                    Clusters.Add(context, new ConcurrentQueue<XbimBBoxClusterElement>());
             }
 
             private struct ElementWithFeature
@@ -580,6 +581,17 @@ namespace Xbim.ModelGeometry.Scene
                             string.Compare(c.ContextType, "design", true) == 0).ToList();
             //allow for incorrect older models
 
+            // further fix: the behaviour above would not work for models that have some of the context
+            // without a subcontext 
+            // In those circumstances just try to create the list from scratch
+            if (!contexts.Any())
+            {
+                contexts = model.Instances.OfType<IIfcGeometricRepresentationContext>().Where(
+                        c =>
+                            string.Compare(c.ContextType, contextType, true) == 0 ||
+                            string.Compare(c.ContextType, "design", true) == 0).ToList();
+            }
+
 
             if (requiredContextIdentifier != null && contexts.Any())
             //filter on the identifier if defined and we have more than one model context
@@ -675,7 +687,8 @@ namespace Xbim.ModelGeometry.Scene
                     if (progDelegate != null) progDelegate(-1, "Initialise");
                     if (!contextHelper.Initialise(adjustWcs))
                         throw new Exception("Failed to initialise geometric context, " + contextHelper.InitialiseError);
-                    if (progDelegate != null) progDelegate(101, "Initialise");
+                    if (progDelegate != null)
+                        progDelegate(101, "Initialise");
 
                     if (MaxThreads > 0)
                     {
@@ -688,26 +701,28 @@ namespace Xbim.ModelGeometry.Scene
                     // process features
                     var processed = WriteProductsWithFeatures(contextHelper, progDelegate, geomStorageType, geometryTransaction);
 
-                    if (progDelegate != null) progDelegate(-1, "WriteProductShapes");
                     var productsRemaining = _model.Instances.OfType<IIfcProduct>()
                         .Where(p =>
                             p.Representation != null
                             && !processed.Contains(p.EntityLabel)
                         ).ToList();
-
-
+                    if (progDelegate != null)
+                        progDelegate(-1, $"WriteProductShapes ({productsRemaining.Count} items)");
                     WriteProductShapes(contextHelper, productsRemaining, geometryTransaction);
-                    if (progDelegate != null) progDelegate(101, "WriteProductShapes");
+                    if (progDelegate != null)
+                        progDelegate(101, "WriteProductShapes");
                     //Write out the actual representation item reference count
 
 
                     //Write out the regions of the model
-                    if (progDelegate != null) progDelegate(-1, "WriteRegionsToDb");
+                    if (progDelegate != null)
+                        progDelegate(-1, $"WriteRegionsToDb ({contextHelper.Clusters.Count} clusters)");
                     foreach (var cluster in contextHelper.Clusters)
                     {
                         WriteRegionsToStore(cluster.Key, cluster.Value, geometryTransaction, contextHelper.PlacementTree.WorldCoordinateSystem);
                     }
-                    if (progDelegate != null) progDelegate(101, "WriteRegionsToDb");
+                    if (progDelegate != null)
+                        progDelegate(101, "WriteRegionsToDb");
 
                 }
                 geometryTransaction.Commit();
@@ -979,6 +994,8 @@ namespace Xbim.ModelGeometry.Scene
                     WriteShapeInstanceToStore(instance.GeometryId, instance.StyleLabel, intContext, grid,
                         placementTransform, instance.BoundingBox,
                         XbimGeometryRepresentationType.OpeningsAndAdditionsIncluded, txn);
+
+                    // todo: BUG: the following does some calcs that are not stored... the writing happens the line before.
                     instance.BoundingBox.Transform(placementTransform);
                 }
             }
@@ -1077,8 +1094,6 @@ namespace Xbim.ModelGeometry.Scene
                         foreach (var mappedGeometryReference in mapGeomIds)
                         {
                             XbimMatrix3D trans;
-                            // trans = XbimMatrix3D.Multiply(mapTransform, placementTransform);
-                            // trans = XbimMatrix3D.Multiply(mapTransform, placementTransform);
                             trans = XbimMatrix3D.Multiply(
                                XbimMatrix3D.CreateTranslation((XbimVector3D)mappedGeometryReference.TempOriginDisplacement),
                                mapTransform);
@@ -1099,7 +1114,7 @@ namespace Xbim.ModelGeometry.Scene
                                 //transform the bounds
                                 var transformedProductBounds = mappedGeometryReference.BoundingBox.Transform(trans);
                                 contextHelper.Clusters[rep.ContextOfItems].Enqueue(
-                                    new XbimBBoxClusterElement(mappedGeometryReference.GeometryId,transformedProductBounds)
+                                    new XbimBBoxClusterElement(mappedGeometryReference.GeometryId, transformedProductBounds)
                                     );
                             }
                         }
@@ -1130,17 +1145,6 @@ namespace Xbim.ModelGeometry.Scene
                                 placementTransform
                                 );
 
-                        //XbimPoint3D shapeTranslation = new XbimPoint3D(0, 0, 0);
-                        
-                        //trsf = XbimMatrix3D.Multiply(
-                        //    XbimMatrix3D.CreateTranslation(
-                        //                shapeTranslation.X,
-                        //                shapeTranslation.Y,
-                        //                shapeTranslation.Z
-                        //            ),
-                        //    instance.Transformation
-                        //            );
-
                         shapesInstances.Add(
                             WriteShapeInstanceToStore(instance.GeometryId, instance.StyleLabel, contextId, product,
                                 movedTransform, instance.BoundingBox /*productBounds*/,
@@ -1150,8 +1154,10 @@ namespace Xbim.ModelGeometry.Scene
                         //
                         if (!(product is IIfcOpeningElement))
                         {
+                            // todo: clarify if the boundingbox is affected by TempOriginDisplacement
                             // transform the bounds
                             var transproductBounds = instance.BoundingBox.Transform(movedTransform);
+                            // (don't)
                             contextHelper.Clusters[rep.ContextOfItems].Enqueue(
                                 new XbimBBoxClusterElement(instance.GeometryId,
                                     transproductBounds));
@@ -1347,7 +1353,7 @@ namespace Xbim.ModelGeometry.Scene
                             {
                                 shapeGeom = xbimTessellator.Mesh(shape);
                             }
-                            else //we need to create a geometry object
+                            else // we need to create a geometry object
                             {
                                 geomModel = Engine.Create(shape);
                                 if (geomModel != null && geomModel.IsValid)
@@ -1362,7 +1368,7 @@ namespace Xbim.ModelGeometry.Scene
                                             solidSet.Add(geomSet);
                                             contextHelper.CachedGeometries.TryAdd(shapeId, solidSet);
                                         }
-                                        //we need for boolean operations later, add the polyhedron if the face is planar
+                                        // we need for boolean operations later, add the polyhedron if the face is planar
                                         else contextHelper.CachedGeometries.TryAdd(shapeId, geomModel);
                                     }
                                     else if (isVoidedProductShape)
@@ -1379,6 +1385,7 @@ namespace Xbim.ModelGeometry.Scene
                                 {
                                     // bacuse we have shifted the geometry in the storage, we will need to 
                                     // adapt the translation of any references to it.
+                                    //
                                     TempOriginDisplacement = shapeGeom.TempOriginDisplacement,
                                     BoundingBox = shapeGeom.BoundingBox,
                                     GeometryId = geometryStore.AddShapeGeometry(shapeGeom)
@@ -1445,7 +1452,7 @@ namespace Xbim.ModelGeometry.Scene
             txn.AddRegions(regions);
         }
 
-        // todo: is xbimShapeInstance the right place for the context id? should it be in the shape instead? 
+        // TODO: is xbimShapeInstance the right place for the context id? should it be in the shape instead? 
         // I undestand there's an implementor agreement on the number of contexts, but we know they are not as strict as in the past.
         //
 
