@@ -23,9 +23,33 @@ namespace Xbim.Geometry.Profiler
         /// </summary>
         /// <param name="args"> file[.ifc, xbim]</param>
 
-        private static void Main(string[] args)
+        private static void Main(string[] origArgs)
         {
-            if (args.Length < 1)
+            var args = origArgs.ToList();
+            //int i = 0;
+            //while (i < args.Count)
+            //{
+            //    if (args[i].StartsWith("\"") && !args[i].EndsWith("\""))
+            //    {
+            //        args[i] = args[i].Substring(1);
+            //        var j = i + 1;
+            //        while(j < args.Count)
+            //        {
+            //            args[i] += " " + args[j];
+            //            var val = args[j];
+            //            args.RemoveAt(j);
+            //            if (val.EndsWith("\""))
+            //            {
+            //                args[i] = args[i].Substring(0, args[i].Length - 1);
+            //                break;
+            //            }
+            //        }
+            //        i = j;
+            //    }
+            //    i++;
+            //}
+
+            if (!args.Any())
             {
                 Console.WriteLine("No Ifc or xBim file specified");
                 return;
@@ -37,15 +61,35 @@ namespace Xbim.Geometry.Profiler
             var adjustwcs = !args.Any(t => t.ToLowerInvariant() == "/adjustwcs:false");
             var fastextruder = args.Any(t => t.ToLowerInvariant() == "/fastextruder");
             var noWexbim = args.Any(t => t.ToLowerInvariant() == "/nowexbim");
-
+            var outFolder = ArgFollowing(@"/outfolder", args);
+            DirectoryInfo outFold = null;
+            if (outFolder != "" && Directory.Exists(outFolder))
+            {
+                outFold = new DirectoryInfo(outFolder);
+            }
+            
             foreach (var arg in args)
             {
                 if (!arg.StartsWith("/"))
-                    Profile(arg, writeXbim, writeInInputFolder, singleThread, adjustwcs, fastextruder, noWexbim);
+                    Profile(arg, writeXbim, writeInInputFolder, singleThread, adjustwcs, fastextruder, noWexbim, outFold);
             }
             
             Console.WriteLine("Press any key to exit");
             Console.Read();
+        }
+
+        private static string ArgFollowing(string leadingString, List<string> args)
+        {
+            for (int i = 0; i < args.Count - 1; i++)
+            {
+                if (args[i].ToLowerInvariant() == leadingString)
+                {
+                    var ret = args[i + 1];
+                    args.RemoveAt(i + 1);
+                    return ret;
+                }
+            }
+            return "";
         }
 
         private static Xbim3DModelContext.MeshingBehaviourResult SkipRebar(int elementId, int typeId, ref double linearDeflection, ref double angularDeflection)
@@ -56,12 +100,13 @@ namespace Xbim.Geometry.Profiler
             return Xbim3DModelContext.MeshingBehaviourResult.Default;
         }
 
-        private static void Profile(string fileNameInput, bool writeXbim, bool writeInInputFolder, bool singleThread, bool adjustWcs, bool fastextruder, bool noWexbim)
+        private static void Profile(string fileNameInput, bool writeXbim, bool writeInInputFolder, bool singleThread, bool adjustWcs, bool fastextruder, bool noWexbim, DirectoryInfo outFold)
         {
             var mainStopWatch = new Stopwatch();
             mainStopWatch.Start();
 
             var todo = new List<string>();
+            Console.WriteLine("Looking at:" + fileNameInput);
 
             if (Directory.Exists(fileNameInput))
             {
@@ -148,7 +193,15 @@ namespace Xbim.Geometry.Profiler
                         if (writeXbim)
                         {
                             string fName;
-                            if (!writeInInputFolder)
+                            if (outFold != null)
+                            {
+                                fName = Path.GetFileNameWithoutExtension(fileName);
+                                fName = Path.ChangeExtension(fName, "xbim");
+
+                                fName = Path.Combine(outFold.FullName, fName);
+
+                            }
+                            else if (!writeInInputFolder)
                             {
                                 fName = Path.GetFileNameWithoutExtension(fileName);
                                 fName = Path.ChangeExtension(fName, "xbim");
