@@ -264,10 +264,6 @@ namespace Xbim.ModelGeometry.Scene
                     double t = V.DotProduct(N) != 0.0
                         ? (d - P.DotProduct(N)) / V.DotProduct(N)
                         : 0 /*error*/;
-                    if (t == 0)
-                    {
-                        string msg = "error";
-                    }
                     // project current projected_sil on next plane along p0.p1 vector
                     verts[j + silhouette.Count * (i - 1)] = projected_sil[j] = AsPoint(P + V * t);
                 }

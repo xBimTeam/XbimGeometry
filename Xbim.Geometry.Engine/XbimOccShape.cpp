@@ -579,7 +579,7 @@ namespace Xbim
 				minZ = Math::Min(minZ, var.Z);
 			}
 			retVal = XbimPoint3D(minX, minY, minZ);
-			System::Diagnostics::Debug::WriteLine("WriteTriangulation " + retVal);
+			// System::Diagnostics::Debug::WriteLine("WriteTriangulation " + retVal);
 
 			// Write out header
 			binaryWriter->Write((unsigned char)1); //stream format version

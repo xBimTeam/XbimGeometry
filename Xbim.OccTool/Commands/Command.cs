@@ -8,8 +8,8 @@ namespace Xbim.OccTool.Commands
 {
     abstract class Command
     {
-        internal static string Syntax;
-        internal static string Name;
+        internal static string Syntax = "Undefined";
+        internal static string Name = "Undefined";
         abstract internal string GetSyntax();
 
 
