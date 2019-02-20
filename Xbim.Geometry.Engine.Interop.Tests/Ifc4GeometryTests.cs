@@ -28,6 +28,31 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         }
 
         [TestMethod]
+        public void CentreLineProfileTest()
+        {
+            using (var er = new EntityRepository<IIfcExtrudedAreaSolid>(nameof(CentreLineProfileTest)))
+            {
+                Assert.IsTrue(er.Entity != null, "No IIfcExtrudedAreaSolid found");
+                var extrudedSolid = geomEngine.CreateSolid(er.Entity, logger);
+                HelperFunctions.IsValidSolid(extrudedSolid);
+                
+            }
+        }
+
+        [TestMethod]
+        public void TrimmedCurveWithLargeRadianValueTest()
+        {
+            using (var er = new EntityRepository<IIfcExtrudedAreaSolid>(nameof(TrimmedCurveWithLargeRadianValueTest), true))
+            {
+                Assert.IsTrue(er.Entity != null, "No IIfcExtrudedAreaSolid found");
+                var extrudedSolid = geomEngine.CreateSolid(er.Entity, logger);
+                HelperFunctions.IsValidSolid(extrudedSolid);
+                Assert.AreEqual<long>((long)extrudedSolid.Volume , 14999524619);
+            }
+        }
+
+
+        [TestMethod]
         public void ExtrudedSolidWithNullPositionTest()
         {
             using (var er = new EntityRepository<IIfcExtrudedAreaSolid>(nameof(ExtrudedSolidWithNullPositionTest)))
@@ -52,9 +77,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         }
 
         [TestMethod]
-        public void FacetedBrepWithCoincidentalFacesTest()
+        public void FacetedBrepWithFacesOutsideNorlamTolerancesTest()
         {
-            using (var er = new EntityRepository<IIfcFacetedBrep>(nameof(FacetedBrepWithCoincidentalFacesTest)))
+            using (var er = new EntityRepository<IIfcFacetedBrep>(nameof(FacetedBrepWithFacesOutsideNorlamTolerancesTest)))
             {
                 Assert.IsTrue(er.Entity != null, "No IIfcFacetedBrep found");
                 var solid = geomEngine.CreateSolidSet(er.Entity, logger).FirstOrDefault();

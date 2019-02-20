@@ -565,6 +565,7 @@ namespace Xbim.ModelGeometry.Scene
         /// <param name="model"></param>
         /// <param name="contextType"></param>
         /// <param name="requiredContextIdentifier"></param>
+        /// <param name="logger"></param>
         public Xbim3DModelContext(IModel model, string contextType = "model", string requiredContextIdentifier = null,
             ILogger logger = null)
         {
@@ -666,7 +667,8 @@ namespace Xbim.ModelGeometry.Scene
         }
 
 
-        /// <param name="progDelegate"></param>       
+        /// <param name="progDelegate"></param>
+        /// <param name="adjustWcs"></param>       
         /// <returns></returns>
         public bool CreateContext(ReportProgressDelegate progDelegate = null, bool adjustWcs = true)
         {
@@ -1036,8 +1038,10 @@ namespace Xbim.ModelGeometry.Scene
         /// <param name="contextHelper"></param>
         /// <param name="product">the product to write</param>
         /// <param name="includesOpenings"></param>
+        /// <param name="txn"></param>
         /// <returns>IEnumerable of XbimShapeInstance that have been written</returns>
-        private IEnumerable<XbimShapeInstance> WriteProductShape(XbimCreateContextHelper contextHelper, IIfcProduct product, bool includesOpenings, IGeometryStoreInitialiser txn)
+        private IEnumerable<XbimShapeInstance> WriteProductShape(XbimCreateContextHelper contextHelper, IIfcProduct product, 
+            bool includesOpenings, IGeometryStoreInitialiser txn)
         {
             if (CustomMeshingBehaviour != null)
             {

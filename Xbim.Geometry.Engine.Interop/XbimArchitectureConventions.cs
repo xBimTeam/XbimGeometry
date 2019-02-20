@@ -35,9 +35,9 @@ namespace Xbim.Geometry.Engine.Interop
         /// The suffix we apply to platform-specific assemblys in the current process architecture
         /// </summary>
         public string Suffix { get; private set; }
-        /// <summary>
-        /// The default subfolder to look for platform-specific assemblys in the current process architecture
-        /// </summary>
+        ///// <summary>
+        ///// The default subfolder to look for platform-specific assemblys in the current process architecture
+        ///// </summary>
         //public string SubFolder { get; private set; }
 
         /// <summary>

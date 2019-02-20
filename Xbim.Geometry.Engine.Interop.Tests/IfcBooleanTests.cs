@@ -123,7 +123,18 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 }
             }
         }
+        [TestMethod]
+        public void CompoundBooleanUnionTest()
+        {
+            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(CompoundBooleanUnionTest)))
+            {
+                Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
+                var solids = geomEngine.CreateSolidSet(er.Entity, logger);
+                Assert.IsTrue(solids.Count == 1);
 
+            }
+
+        }
         /// <summary>
         /// Tests iIIfcBooleanResult that cuts two shape and leaves nothing
         /// </summary>
@@ -139,7 +150,18 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             }
 
         }
+        [TestMethod]
+        public void CsgBooleanResultTest()
+        {
+            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(CsgBooleanResultTest)))
+            {
+                Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
+                var solids = geomEngine.CreateSolidSet(er.Entity, logger);
+                Assert.IsTrue(solids.Count == 2, "This should produce two solids");
 
+            }
+
+        }
         /// <summary>
         /// Tests if a boolean processes correctly if not it will silent fail and the test should fail
         /// </summary>
@@ -176,9 +198,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         /// This problem is a boolean where the tolerance needs to be made courser by 10 fold
         /// </summary>
         [TestMethod]
-        public void BooleanSilentFail2Test()
+        public void FaceWithBoundsOutsideDeclaredPrecisionTest()
         {
-            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(BooleanSilentFail2Test)))
+            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(FaceWithBoundsOutsideDeclaredPrecisionTest)))
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
                 
@@ -699,7 +721,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 solidResult = geomEngine.CreateSolidSet(er.Entity, logger).FirstOrDefault();
                 var actualVolume = solidResult.Volume;
                 Assert.IsTrue(solidBody.Volume > actualVolume, "This cut solid should have less volume than the body shape");
-                Assert.IsTrue(solidResult.Faces.Count == 9, "This solid should have 9 faces");
+                Assert.IsTrue(solidResult.Faces.Count == 10, "This solid should have 10 faces");
             }
         }
         [TestMethod]
@@ -772,14 +794,16 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 using (var holeEntity = new EntityRepository<IIfcExtrudedAreaSolid>("CuttingOpeningInIfcFaceBasedSurfaceModelVoidTest"))
                 {
                     var body = geomEngine.CreateSolidSet(bodyEntity.Entity, logger);
+                    Assert.IsTrue(body.Count == 8, "Eight solids should be returned");
                     var hole = geomEngine.CreateSolid(holeEntity.Entity, logger);
                     var result = body.Cut(hole,bodyEntity.Entity.Model.ModelFactors.Precision);
-                    Assert.IsTrue(result.Count == 2, "Two solids should be returned");
+
+                    Assert.IsTrue(result.Count == 8, "Eight solids should be returned");
                     foreach (var solid in result)
                     {
                         IsSolidTest(solid);
                     }
-                   
+
                 } 
                
             }

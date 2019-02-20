@@ -231,7 +231,7 @@ namespace Xbim
 					// todo: this code is not quite robust, it did not manage to close fairly simple polylines.
 					//
 					double oneMilli = profile->Model->ModelFactors->OneMilliMeter;
-					XbimFace^ face = gcnew XbimFace(loop, logger);
+					XbimFace^ face = gcnew XbimFace(loop, true, oneMilli, profile->OuterCurve->EntityLabel, logger);
 					ShapeFix_Wire wireFixer(loop,face, profile->Model->ModelFactors->Precision);
 					wireFixer.ClosedWireMode() = Standard_True;
 					wireFixer.FixGaps2dMode() = Standard_True;
@@ -273,32 +273,46 @@ namespace Xbim
 
 		void XbimWire::Init(IIfcCenterLineProfileDef^ profile, ILogger^ logger)
 		{
+			/*if ((int)(profile->Curve->Dim) != 2)
+			{
+				XbimGeometryCreator::LogError(logger, profile, "IfcCenterLineProfileDef must have a dimensionality of 2");
+				return;
+			}*/
+			double precision = profile->Model->ModelFactors->Precision;
 			XbimWire^ centreWire = gcnew XbimWire(profile->Curve, logger);
-			
+			TopoDS_Wire spine = centreWire;
+			//nb the curve must be 2d so place it on the Z plane so that the offseter can get the correct normal
+			XbimFace^ xFace = gcnew XbimFace(XbimVector3D(0, 0, 1), logger);
+			xFace->Add(centreWire);
+			TopoDS_Face spineFace = xFace;
 			if (!centreWire->IsValid)
 			{
 				XbimGeometryCreator::LogWarning(logger,profile, "Invalid curve. Wire discarded");
 				return;
 			}
 
-			BRepAdaptor_CompCurve cc(centreWire, Standard_True);
+			BRepAdaptor_CompCurve cc(spine, Standard_True);
 			gp_Pnt wStart = cc.Value(cc.FirstParameter());
 			gp_Pnt wEnd = cc.Value(cc.LastParameter());
 
-			BRepOffsetAPI_MakeOffset offseter(centreWire);
+			BRepOffsetAPI_MakeOffset offseter(spineFace);
 			Standard_Real offset = profile->Thickness / 2;
 			// Pyatkov 15.06.2017. (Artoymyp on Github)
 			// Somewhere in the BRepOffsetAPI_MakeOffset.Perform() a static variable is used:
 			// static BRepMAT2d_Explorer Exp;
 			// That is why calls to this function in a multi-threaded mode 
 			// lead to an unpredictable behavior.
+			// SRL it was probably the xbimwire going out of scope and causing a memory access violation, I am leaving the lock code in at present just in case
 			{
 				msclr::lock l(_makeOffsetLock);
 				offseter.Perform(offset);
 			} // local scope ends, destructor of lock is called (lock is released).
 			
-			double precision = profile->Model->ModelFactors->Precision;
-			if (offseter.IsDone() && offseter.Shape().ShapeType() == TopAbs_WIRE)
+			
+			bool done = offseter.IsDone();
+		
+			
+			if (done && offseter.Shape().ShapeType() == TopAbs_WIRE)
 			{
 				//need to change radiused ends to straight lines
 				BRepBuilderAPI_MakeWire wireMaker;
@@ -600,6 +614,7 @@ namespace Xbim
 			}
 			else //coursen the precision to 1 mm 
 			{
+				//XbimWire^ dg = gcnew XbimWire(degenWire);
 				//we are going to use one millimeter for the precision when edges don't join
 				double oneMilli = cCurve->Model->ModelFactors->OneMilliMeter;
 

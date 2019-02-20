@@ -1,59 +1,27 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <Year>$([System.DateTime]::Now.ToString("yy"))</Year> 
-    <Month>$([System.DateTime]::Now.ToString("MM"))</Month>
-    <Day>$([System.DateTime]::Now.ToString("dd"))</Day>
-    <Minute>$([System.Int32]::Parse($([System.DateTime]::Now.ToString("mm"))))</Minute>
-    <Hour>$([System.Int32]::Parse($([System.DateTime]::Now.ToString("HH"))))</Hour>
-    <MinuteOfDay>$([MSBuild]::Add($(Minute),$([MSBuild]::Multiply($(Hour),60))))</MinuteOfDay>
-    <HalfMinuteOfDay>$([System.Convert]::ToInt16($([MSBuild]::Divide($(MinuteOfDay), 2))))</HalfMinuteOfDay>
-    <AssemblyFileVersionAttribute>[assembly:System.Reflection.AssemblyVersionAttribute("5.0.$(Year)$(Month).$(Day)$(HalfMinuteOfDay)")];</AssemblyFileVersionAttribute>
-  </PropertyGroup>
+
   <PropertyGroup>
     <TargetFramework>net47</TargetFramework>
     <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
-    <SignAssembly>false</SignAssembly>
-    <AssemblyOriginatorKeyFile>aimkey.snk</AssemblyOriginatorKeyFile>
     <Title>Xbim Geometry Engine</Title>
-    <Version>5.0.0-Beta1-$(Year)$(Month)-$(Day)</Version>
-    <Copyright>Copyright Xbim Ltd.</Copyright>
-    <Description>.net library that provides support for the  Ifc4 and Ifc2x3 Geometry conversion.</Description>
-    <Authors>Steve Lockley</Authors>
-    <Company>Xbim Ltd.</Company>
-    <PackageLicenseExpression>CDDL-1.0</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/xBimTeam/</PackageProjectUrl>
-    <RepositoryUrl></RepositoryUrl>
-    <PackageTags>BIM, IFC, IfcXml, IfcZip, Ifc4,  COBie, .Net, C#, BuildingSmart</PackageTags>
-    <PackageReleaseNotes>migrated Xbim.Geometry.Interop to .net47</PackageReleaseNotes>
-    <AssemblyVersion>5.0.0.0</AssemblyVersion>    
-    <FileVersion>5.0.$(Year)$(Month).$(Day)$(HalfMinuteOfDay)</FileVersion>
-    <ProductVersion>5.0.$(Year)$(Month).$(Day)</ProductVersion>
+    <Description>Provides support for the  Ifc4 and Ifc2x3 Geometry conversion.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageIconUrl>https://avatars1.githubusercontent.com/u/2284875?v=3&amp;amp;s=240</PackageIconUrl>
-    <DelaySign>false</DelaySign>
     <PackageId>Xbim.Geometry.Engine.Interop</PackageId>
   </PropertyGroup>
-
-
+  
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
     <PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
-    <PackageReference Include="Xbim.Tessellator" Version="5.0.191" />
+    <PackageReference Include="Xbim.Tessellator" Version="5.0.215-develop" />
   </ItemGroup>
- 
-
   <ItemGroup>
     <Content Include="..\Xbim.Geometry.Engine.Interop.targets">
       <Link>Xbim.Geometry.Interop.targets</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    
   </ItemGroup>
-  
-  
-  
   <ItemGroup>
     <NativeGeometryEngine Include="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj">
       <AdditionalProperties>
@@ -69,13 +37,11 @@
   
   <!--We need to execute this after a build to ensure the nuget packages are in the correct place for the c++ binding-->
   <Target Name="BuildNativeCodeEngine" AfterTargets="Build">
-    <Message Text="Building Xbim.Geometry.Engine x32 and x64 Native Dlls, version $(AssemblyFileVersionAttribute)" Importance="High" />
-    <WriteLinesToFile File="..\SharedFileVersionInfo.cs" Lines="$(AssemblyFileVersionAttribute)" Overwrite="true" Encoding="Unicode" />
+    <Message Text="Building Xbim.Geometry.Engine x32 and x64 Native Dlls" Importance="High" />
     <MSBuild Projects="@(NativeGeometryEngine)" Properties="Configuration=$(Configuration) ; OutDir=..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\" Targets="Build"> 
       <Output TaskParameter="TargetOutputs" ItemName="AssembliesBuiltByChildProjects" />    
      </MSBuild>
   </Target>
-  
 
   <Target Name=" CleanNativeCodeEngine" BeforeTargets="Clean">
     <Message Text="Cleaning Xbim.Geometry.Engine x32 Native Dlls" Importance="High" />
@@ -85,6 +51,7 @@
     <MSBuild Projects="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj" Properties="Configuration=$(Configuration);Platform=x64;OutDir=..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\" Targets="Clean">      
     </MSBuild>
   </Target>
+  
   <ItemGroup>
     <Content Include="bin\$(Configuration)\net47\Xbim.Geometry.Engine32.dll">
       <Pack>true</Pack>

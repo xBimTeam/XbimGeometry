@@ -1241,13 +1241,8 @@ namespace Xbim
 				XbimGeometryCreator::LogWarning(logger, pbhs, "Incorrectly defined PolygonalBoundary #{0}. It has been ignored", pbhs->PolygonalBoundary->EntityLabel);
 				return;
 			}
-			//BRepTools::Write(polyBoundary, "d:\\tmp\\w1");
-			//removes any colinear edges that might generate unnecessary detail and confusion for boolean operations
-			//SRL building of the wire now checks for self intersection so the code below is redundant
-			//if (polyBoundary->Edges->Count>4) //may sure we remove an colinear edges
-			//	polyBoundary->FuseColinearSegments(pbhs->Model->ModelFactors->Precision, 0.05);
-			//BRepTools::Write(polyBoundary, "d:\\tmp\\w2");
-			XbimFace^ polyFace = gcnew XbimFace(polyBoundary, logger);
+
+			XbimFace^ polyFace = gcnew XbimFace(polyBoundary,true, pbhs->Model->ModelFactors->Precision, pbhs->PolygonalBoundary->EntityLabel,logger);
 
 			if (!polyFace->IsValid)
 			{
@@ -1260,8 +1255,7 @@ namespace Xbim
 			gp_Trsf offset;
 			offset.SetTranslation(gp_Vec(0, 0, -(extrusionMax / 2)));
 			boundedHalfSpace.Move(trsf*offset);
-			//BRepTools::Write(boundedHalfSpace, "d:\\tmp\\bh");
-			//BRepTools::Write(halfspace, "d:\\tmp\\hs");
+
 			TopoDS_Shape result = BRepAlgoAPI_Common(boundedHalfSpace, halfspace);
 
 			for (TopExp_Explorer explr(result, TopAbs_SOLID); explr.More();)

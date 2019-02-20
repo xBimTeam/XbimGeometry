@@ -974,7 +974,7 @@ namespace Xbim
 						prevVertex = thisVertex;
 						prevPoint = thisPoint;						
 					}
-					
+					FTol.LimitTolerance(wire, tolerance);
 					wire.Closed(Standard_True); //need to check this
 					XbimWire^ loop = gcnew XbimWire(wire);
 					
@@ -998,6 +998,7 @@ namespace Xbim
 					{
 						ShapeAnalysis_Wire wireChecker(wire, xFace, tolerance);
 						Standard_Boolean needsFixing = wireChecker.CheckSelfIntersection();
+						
 						if (needsFixing == Standard_True)
 						{
 							ShapeFix_Wire wireFixer(wire, xFace, tolerance);
@@ -1022,6 +1023,7 @@ namespace Xbim
 						);
 					}					
 				}
+
 				XbimFace^ face = BuildFace(thisFaceLoops, ifcFace, logger);
 				
 				
@@ -1083,11 +1085,31 @@ namespace Xbim
 			}
 			
 			
-			// in theory we have a topologically valid shell but face orientation may be wrong as some exporters don't care about this
-			//
+			// in theory we have a topologically valid shell or shells
+			// but face orientation may be wrong as some exporters don't care about this
+			// try and custer the faces into shells
+
+			/*XbimFace^ aValidFace = Enumerable::FirstOrDefault(allFaces);
+
+
+			List<XbimFace^>^ facesToProcess = gcnew List<XbimFace^>(allFaces);
+			facesToProcess->Remove(aValidFace);
+			if (aValidFace != nullptr)
+			{
+				List<List<XbimFace^>^>^ shellList = gcnew List<List<XbimFace^>^>();
+				List<XbimFace^>^ validShell = gcnew List<XbimFace^>();
+				List<XbimEdge^>^ edgesProcessed = gcnew List<XbimEdge^>(facesToProcess->Count * 4);
+				shellList->Add(validShell);
+				validShell->Add(aValidFace);
+				
+				
+				
+				
+			}*/
+
 			ShapeAnalysis_Shell shellAnalyser;
 			bool needsReorienting = shellAnalyser.CheckOrientedShells(shell);
-
+			
 			if (needsReorienting)
 			{
 				ShapeFix_Shell shellFixer;
@@ -1095,33 +1117,36 @@ namespace Xbim
 				if (fixed) 
 					shell = shellFixer.Shell();
 			}
-
+			
+			/*shellAnalyser.LoadShells(shell);
+			bool hasFreeEdges = shellAnalyser.HasFreeEdges(); 
+			bool hasBadEdges = shellAnalyser.HasBadEdges();*/
 			//ShapeFix_FixSmallSolid fss;
 			//fss.SetPrecision(theItem->Model->ModelFactors->Precision);
 			//fss.Remove(shell, )
 
-			//XbimShell^ s = gcnew XbimShell(shell);
-			TopoDS_Shape result;
-			if (close) //we want it closed
+			
+			TopoDS_Shape result = shell;
+			// if (close) //we want it closed, actually sometimes surface  based models are closed and used in booleans so try and do it anyway
 			{
-				if (BRepCheck_Analyzer(shell, Standard_True).IsValid() == Standard_False)
-				{
-					ShapeFix_Shell sFixer(shell);
-					sFixer.LimitTolerance(tolerance);
-					if (sFixer.Perform())
-					{
-						shell = sFixer.Shell();
-					}
-				}
-				
 				ShapeFix_Solid solidFixer;
 				solidFixer.LimitTolerance(tolerance);
-				result = solidFixer.SolidFromShell(shell);
-				if (result.IsNull()) 
+				result = solidFixer.SolidFromShell(shell); //nb this does not do any clever checking, just throws a sj
+				if (result.IsNull())
 					result = shell; //give in and use previous shell
+				else if (BRepCheck_Analyzer(result, Standard_True).IsValid() == Standard_False)
+				{
+					
+					ShapeFix_Shape sFixer(result);
+					sFixer.LimitTolerance(tolerance);
+					sFixer.Perform();
+					result = sFixer.Shape();
+				}
+				
+				
 			}
-			else
-				result = shell;
+			/*else
+				result = shell;*/
 			pCompound = new TopoDS_Compound();
 			builder.MakeCompound(*pCompound);
 			//remove unnecesary faces, normally caused by triangulation, this improves boolean quality
@@ -1166,11 +1191,15 @@ namespace Xbim
 		{
 			if (wires->Count == 0) 
 				return gcnew XbimFace();
-			IIfcCartesianPoint^ first = Enumerable::First(wires[0]->Item2->Polygon);
-			XbimPoint3D p(first->X, first->Y, first->Z);
+			//IIfcCartesianPoint^ first = Enumerable::First(wires[0]->Item2->Polygon);
+			//XbimPoint3D p(first->X, first->Y, first->Z);
 			XbimVector3D n = XbimConvert::NewellsNormal(wires[0]->Item2);
-			if (!wires[0]->Item3) n = n.Negated();
-			XbimFace^ face = gcnew XbimFace(wires[0]->Item1, p, n, logger);
+			
+			XbimFace^ face = gcnew XbimFace(wires[0]->Item1,true, owningFace->Model->ModelFactors->Precision ,owningFace->EntityLabel, logger);
+			if (n.DotProduct(face->Normal) <= 0) //they should be in the same direction
+				face->Reverse();
+			if (!wires[0]->Item3) 
+				face->Reverse();
 			if (wires->Count == 1) return face; //take the first one
 
 			for (int i = 1; i < wires->Count; i++) face->Add(wires[i]->Item1);
@@ -1186,7 +1215,7 @@ namespace Xbim
 				}
 			}
 
-			face = gcnew XbimFace(outerBound, p, faceNormal, logger); //create  a face with the right bound and direction
+			face = gcnew XbimFace(outerBound, true, owningFace->Model->ModelFactors->Precision, owningFace->EntityLabel, logger); //create  a face with the right bound and direction
 
 			for (int i = 0; i < wires->Count; i++)
 			{

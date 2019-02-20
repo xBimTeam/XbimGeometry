@@ -52,6 +52,7 @@ namespace Xbim
 			{
 				solids = nullptr;
 			};
+		    IXbimSolidSet^ DoBoolean(IXbimSolidSet^ arguments, BOPAlgo_Operation operation, double tolerance, ILogger^ logger);
 		public:
 
 #pragma region destructors
@@ -63,7 +64,7 @@ namespace Xbim
 
 			static property XbimSolidSet^ Empty{XbimSolidSet^ get(){ return empty; }};
 			static XbimSolidSet^ BuildClippingList(IIfcBooleanClippingResult^ solid, List<IIfcBooleanOperand^>^ clipList, ILogger^ logger);
-			static XbimSolidSet^ BuildBooleanResult(IIfcBooleanResult^ solid, XbimSolidSet^ ops, ILogger^ logger);
+			static XbimSolidSet^ BuildBooleanResult(IIfcBooleanResult^ solid, IfcBooleanOperator operatorType, XbimSolidSet^ ops, ILogger^ logger);
 			XbimSolidSet();
 			XbimSolidSet(const TopoDS_Shape& shape);
 			XbimSolidSet(XbimCompound^ shape);
@@ -109,7 +110,9 @@ namespace Xbim
 			virtual System::Collections::IEnumerator^ GetEnumerator2() = System::Collections::IEnumerable::GetEnumerator{ return GetEnumerator(); };
 			virtual void Add(IXbimGeometryObject^ solid);
 			virtual void Reverse();
+			
 			virtual IXbimSolidSet^ Cut(IXbimSolidSet^ solids, double tolerance, ILogger^ logger);
+
 			virtual IXbimSolidSet^ Cut(IXbimSolid^ solid, double tolerance, ILogger^ logger);
 			virtual IXbimSolidSet^ Union(IXbimSolidSet^ solids, double tolerance, ILogger^ logger);
 			virtual IXbimSolidSet^ Union(IXbimSolid^ solid, double tolerance, ILogger^ logger);
@@ -151,7 +154,9 @@ namespace Xbim
 			XbimSolidSet^ _result;
 			bool _success = false;
 			bool _useBody = false;
+			BOPAlgo_Operation _operation;
 		public:
+			virtual property BOPAlgo_Operation Operation {BOPAlgo_Operation get() { return _operation; } void set(BOPAlgo_Operation val) { _operation = val; } }
 			virtual property bool Success {bool get() { return _success; } void set(bool val) { _success = val; } }
 			virtual property bool UseBody {bool get() { return _useBody; } void set(bool val) { _useBody = val; } }
 			virtual property XbimSolid^ Body {XbimSolid^ get() { return _body; }}

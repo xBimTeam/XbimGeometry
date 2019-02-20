@@ -1,0 +1,34 @@
+<Project>
+  <PropertyGroup>
+    <IsTestProject Condition="$(MSBuildProjectName.EndsWith('Tests')) OR $(MSBuildProjectName.EndsWith('Regression'))">true</IsTestProject>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+    <GenerateDocumentationFile Condition=" '$(IsTestProject)' != 'true' ">true</GenerateDocumentationFile>
+    <NoWarn>CS1591</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Version>5.0.0.0</Version>
+    <AssemblyVersion>5.0.0.0</AssemblyVersion>
+    <FileVersion>5.0.0.0</FileVersion>
+    <Copyright>Copyright © XBIM Ltd</Copyright>
+    <Company>Xbim Ltd.</Company>
+    <Authors>Steve Lockley, Martin Cerny and XBIMTeam Contributors</Authors>
+    <Product>XBIM Geometry</Product>
+    <PackageLicenseExpression>CDDL-1.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/xBimTeam/XbimGeometry</PackageProjectUrl>
+    <PackageIconUrl>https://avatars1.githubusercontent.com/u/2284875?v=3&amp;amp;s=240</PackageIconUrl>
+    <PackageReleaseNotes>Version 5.0 update. See https://github.com/xBimTeam/XbimGeometry/blob/master/CHANGELOG.md
+    </PackageReleaseNotes>
+    <PackageTags>BIM, IFC, Geometry, Meshing, Tesselation</PackageTags>
+    <RepositoryUrl>https://github.com/xBimTeam/XbimEssentials/tree/master</RepositoryUrl>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
+    <SignAssembly>true</SignAssembly>   
+    <AssemblyOriginatorKeyFile>..\XbimOpenSourceKeyFile.snk</AssemblyOriginatorKeyFile>   
+    <DelaySign>false</DelaySign>
+  </PropertyGroup>
+
+</Project>

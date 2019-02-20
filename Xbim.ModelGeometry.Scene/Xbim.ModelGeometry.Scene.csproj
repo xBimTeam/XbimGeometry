@@ -2,23 +2,11 @@
 
   <PropertyGroup>
     <TargetFrameworks>net47</TargetFrameworks>
-    <IsPackable>true</IsPackable>
-    <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
     <Title>Xbim ModelGeometry Scene</Title>
-    <Version>5.0.0.0-beta</Version>
-    <Copyright>Copyright Xbim Ltd.</Copyright>
-    <Description>.net library that provides support for the Geometry Scene creation.</Description>
-    <Authors>Steve Lockley</Authors>
-    <Company>Xbim Ltd.</Company>
-    <PackageLicenseExpression>CDDL-1.0</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/xBimTeam/</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/xBimTeam/XbimGeometry/</RepositoryUrl>
-    <PackageTags>BIM IFC IfcXml IfcZip Ifc4 COBie BuildingSmart</PackageTags>
-    <PackageReleaseNotes>Updated to version 5</PackageReleaseNotes>
-    <AssemblyVersion>5.0.0.0</AssemblyVersion>
-    <FileVersion>5.0.0.0</FileVersion>
-    <PackageIconUrl>https://avatars1.githubusercontent.com/u/2284875?v=3&amp;amp;s=240</PackageIconUrl>
+    <IsPackable>true</IsPackable>
+    <Description>Provides support for the Geometry Scene creation.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -26,8 +14,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Xbim.Ifc" Version="5.0.191" />
-    <PackageReference Include="Xbim.Tessellator" Version="5.0.191" />
+    <PackageReference Include="Xbim.Ifc" Version="5.0.215-develop" />
+    <PackageReference Include="Xbim.Tessellator" Version="5.0.215-develop" />
   </ItemGroup>
 
   <ItemGroup>

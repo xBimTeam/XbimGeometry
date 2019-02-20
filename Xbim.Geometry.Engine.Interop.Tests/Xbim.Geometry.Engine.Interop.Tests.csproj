@@ -4,6 +4,8 @@
     <TargetFramework>net47</TargetFramework>
     <IsPackable>false</IsPackable>
     <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\XbimOpenSourceKeyFile.snk</AssemblyOriginatorKeyFile>
     
   </PropertyGroup>
 
@@ -28,7 +30,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="1.4.0" />
     <PackageReference Include="MSTest.TestFramework" Version="1.4.0" />
-    <PackageReference Include="Xbim.IO.MemoryModel" Version="5.0.191" />
+    <PackageReference Include="Xbim.IO.MemoryModel" Version="5.0.215-develop" />
   </ItemGroup>
 
   <ItemGroup>
@@ -39,7 +41,10 @@
     <None Update="TestFiles\BooleanResultTimoutTest.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestFiles\BooleanSilentFail2Test.ifc">
+    <None Update="TestFiles\FaceWithBoundsOutsideDeclaredPrecisionTest.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestFiles\CentreLineProfileTest.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="TestFiles\ComplexNestedBooleanResult.ifc">
@@ -60,13 +65,22 @@
     <None Update="TestFiles\BadlyOrientedBrepFacesTest.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestFiles\FacetedBrepWithCoincidentalFacesTest.ifc">
+    <None Update="TestFiles\CompoundBooleanUnionTest.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestFiles\CsgBooleanResultTest.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestFiles\FacetedBrepWithFacesOutsideNorlamTolerancesTest.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="TestFiles\FailingBooleanBrepWithZeroVolumeTest.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="TestFiles\NotClosedShellTest.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestFiles\TrimmedCurveWithLargeRadianValueTest.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="TestFiles\VerySmallBooleanCutTest.ifc">
