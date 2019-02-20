@@ -860,74 +860,35 @@ namespace Xbim
 		{
 			solids = gcnew List<IXbimSolid^>();
 			IModelFactors^ mf = solid->Model->ModelFactors;
-			IIfcBooleanOperand^ fOp = solid->FirstOperand;
 
-			IIfcBooleanClippingResult^ boolClip = dynamic_cast<IIfcBooleanClippingResult^>(fOp);
-			if (boolClip != nullptr)
+			List<IIfcBooleanOperand^>^ clips = gcnew List<IIfcBooleanOperand^>();
+			XbimSolidSet^ solidSet = gcnew XbimSolidSet();
+			solidSet->IfcEntityLabel = solid->EntityLabel;
+			XbimSolidSet^ bodySet = XbimSolidSet::BuildClippingList(solid, clips, logger);
+			bodySet->IfcEntityLabel = solid->EntityLabel;
+			
+			double maxLen = bodySet->BoundingBox.Length();
+
+			for each (IIfcBooleanOperand^ bOp in clips)
 			{
-				List<IIfcBooleanOperand^>^ clips = gcnew List<IIfcBooleanOperand^>();
-
-				XbimSolidSet^ solidSet = gcnew XbimSolidSet();
-				solidSet->IfcEntityLabel = solid->EntityLabel;
-				XbimSolidSet^ bodySet = XbimSolidSet::BuildClippingList(boolClip, clips, logger);
-				bodySet->IfcEntityLabel = boolClip->EntityLabel;
-				double maxLen = bodySet->BoundingBox.Length();
-				for each (IIfcBooleanOperand^ bOp in clips)
+				IIfcPolygonalBoundedHalfSpace^ pbhs = dynamic_cast<IIfcPolygonalBoundedHalfSpace^>(bOp);
+				if (pbhs != nullptr) //special case for IIfcPolygonalBoundedHalfSpace to keep extrusion to the minimum
 				{
-					IIfcPolygonalBoundedHalfSpace^ pbhs = dynamic_cast<IIfcPolygonalBoundedHalfSpace^>(bOp);
-					if (pbhs != nullptr) //special case for IIfcPolygonalBoundedHalfSpace to keep extrusion to the minimum
-					{
-						XbimSolid^ s = gcnew XbimSolid(pbhs, maxLen, logger);
-						if (s->IsValid) solidSet->Add(s);
-					}
-					else
-					{
-						XbimSolidSet^ s = gcnew XbimSolidSet(bOp, logger);
-						if (s->IsValid) solidSet->Add(s);
-					}
+					XbimSolid^ s = gcnew XbimSolid(pbhs, maxLen, logger);
+					if (s->IsValid) solidSet->Add(s);
 				}
-
-
-				IXbimSolidSet^ xbimSolidSet = bodySet->Cut(solidSet, mf->Precision, logger);
-				if (xbimSolidSet != nullptr && xbimSolidSet->IsValid)
+				else
 				{
-					solids->AddRange(xbimSolidSet);
+					XbimSolidSet^ s = gcnew XbimSolidSet(bOp, logger);
+					if (s->IsValid) solidSet->Add(s);
 				}
-
 			}
-			else
+
+
+			IXbimSolidSet^ xbimSolidSet = bodySet->Cut(solidSet, mf->Precision, logger);
+			if (xbimSolidSet != nullptr && xbimSolidSet->IsValid)
 			{
-
-				IIfcBooleanOperand^ sOp = solid->SecondOperand;
-				XbimSolidSet^ left = gcnew XbimSolidSet(fOp, logger);
-				left->IfcEntityLabel = fOp->EntityLabel;
-				XbimSolidSet^ right = gcnew XbimSolidSet(sOp, logger);
-				right->IfcEntityLabel = sOp->EntityLabel;
-				if (!left->IsValid)
-				{
-					return; //nothing happening here
-				}
-
-				if (!right->IsValid)
-				{
-					// XbimGeometryCreator::LogError(logger, sOp, "Error performing boolean operation, Invalid Second Operand in IfcBooleanClippingResult #{0}", solid->EntityLabel);
-					solids->AddRange(left); // no change
-					return;
-				}
-
-
-				try
-				{
-					IXbimSolidSet^ result = left->Cut(right, mf->Precision, logger);
-					if (result->IsValid) solids->AddRange(result);
-				}
-				catch (...)
-				{
-					XbimGeometryCreator::LogError(logger, solid, "Error performing boolean operation, {0}. The operation has been ignored", solid->EntityLabel);
-					solids->AddRange(left); // no change
-					return;
-				}
-
+				solids->AddRange(xbimSolidSet);
 			}
 		}
 
