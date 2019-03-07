@@ -1,7 +1,14 @@
 
 trigger:
-- master
-- develop
+  branches:
+    include:
+    - master
+    - develop
+  paths:
+    exclude:
+    - README.md
+    - CHANGELOG.md
+    - CONTRIBUTING.md
 
 variables:
   BuildConfiguration: 'Release'

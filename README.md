@@ -1,7 +1,7 @@
-Branch | Status
------- | -------
-Master | [![Build Status](https://dev.azure.com/xBIMTeam/xBIMToolkit/_apis/build/status/xBimTeam.XbimGeometry?branchName=master)](https://dev.azure.com/xBIMTeam/xBIMToolkit/_build/latest?definitionId=3&branchName=master)
-Develop | [![Build Status](https://dev.azure.com/xBIMTeam/xBIMToolkit/_apis/build/status/xBimTeam.XbimGeometry?branchName=develop)](https://dev.azure.com/xBIMTeam/xBIMToolkit/_build/latest?definitionId=3&branchName=develop)
+Branch | Build Status  | MyGet | NuGet
+------ | ------- | --- | --- |
+Master | [![Build Status](https://dev.azure.com/xBIMTeam/xBIMToolkit/_apis/build/status/xBimTeam.XbimGeometry?branchName=master)](https://dev.azure.com/xBIMTeam/xBIMToolkit/_build/latest?definitionId=3&branchName=master) | ![master](https://img.shields.io/myget/xbim-master/v/Xbim.Geometry.svg) | ![](https://img.shields.io/nuget/v/Xbim.Geometry.svg)
+Develop | [![Build Status](https://dev.azure.com/xBIMTeam/xBIMToolkit/_apis/build/status/xBimTeam.XbimGeometry?branchName=develop)](https://dev.azure.com/xBIMTeam/xBIMToolkit/_build/latest?definitionId=3&branchName=develop) | ![](https://img.shields.io/myget/xbim-develop/vpre/Xbim.Geometry.svg) | -
 
 
 # XbimGeometry
