@@ -10,15 +10,15 @@ namespace Xbim.Geometry.Engine.Interop.Tests
     {
         MemoryModel model;
         public T Entity;
-        public EntityRepository(string name, bool inRadians = false)
+        public EntityRepository(string name, bool inRadians = false, double precision = 1e-5, double meter = 1e-3)
         {
             var path = Path.GetFullPath($@"TestFiles\{name}.ifc");
             Assert.IsTrue(File.Exists(path), path);
             model = MemoryModel.OpenRead(path);
             if (inRadians)
-                model.ModelFactors.Initialise(1, 1e-3, 1e-5);
+                model.ModelFactors.Initialise(1, meter, precision);
             else
-                model.ModelFactors.Initialise(Math.PI / 180, 1e-3, 1e-5);
+                model.ModelFactors.Initialise(Math.PI / 180, meter, precision);
             Entity = (T)model.Instances[1];
         }
 

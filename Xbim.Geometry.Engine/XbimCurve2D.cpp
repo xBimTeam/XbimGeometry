@@ -16,6 +16,7 @@
 #include <BndLib_Add2dCurve.hxx>
 #include <Geom2dAdaptor_Curve.hxx>
 #include <Bnd_Box2d.hxx>
+#include <GCPnts_AbscissaPoint.hxx>
 using namespace System::Linq;
 namespace Xbim
 {
@@ -50,7 +51,7 @@ namespace Xbim
 			Bnd_Box2d b1;
 			BndLib_Add2dCurve::Add(*pCurve2D, fp, lp, 0., b1);
 			Standard_Real srXmin, srYmin, srXmax, srYmax;
-			b1.Get(srXmin, srYmin, srXmax, srYmax);						
+			b1.Get(srXmin, srYmin, srXmax, srYmax);
 			return XbimRect3D(srXmin, srYmin, 0., (srXmax - srXmin), (srYmax - srYmin), 0.);
 		}
 
@@ -77,7 +78,7 @@ namespace Xbim
 		bool XbimCurve2D::IsClosed::get()
 		{
 			if (!IsValid) return false;
-			return (*pCurve2D)->IsClosed()==Standard_True;
+			return (*pCurve2D)->IsClosed() == Standard_True;
 		}
 
 
@@ -94,11 +95,11 @@ namespace Xbim
 		{
 			if (!IsValid) return XbimPoint3D();
 			gp_Pnt2d pt = (*pCurve2D)->Value(parameter);
-			return XbimPoint3D(pt.X(), pt.Y(),0);
+			return XbimPoint3D(pt.X(), pt.Y(), 0);
 		}
 
 		IXbimCurve^ XbimCurve2D::ToCurve3D()
-		{	
+		{
 			if (!IsValid) return nullptr;
 			return gcnew XbimCurve(GeomLib::To3d(gp_Ax2(), *pCurve2D));
 		}
@@ -108,7 +109,7 @@ namespace Xbim
 			if (!IsValid) return XbimVector3D();
 			gp_Pnt2d p;
 			gp_Vec2d v;
-			(*pCurve2D)->D1(parameter,p,v);
+			(*pCurve2D)->D1(parameter, p, v);
 			return XbimVector3D(v.X(), v.Y(), 0.);
 		}
 
@@ -129,14 +130,14 @@ namespace Xbim
 			for (Standard_Integer i = 0; i < extrema.NbPoints(); i++)
 			{
 				gp_Pnt2d p1 = extrema.Point(i + 1);
-				intersects->Add(XbimPoint3D(p1.X(), p1.Y(),0));
+				intersects->Add(XbimPoint3D(p1.X(), p1.Y(), 0));
 			}
 			return intersects;
 		}
 
 		void XbimCurve2D::Init(IIfcGridAxis^ axis, ILogger^ logger)
 		{
-			Init(axis->AxisCurve,logger);
+			Init(axis->AxisCurve, logger);
 			if (IsValid && !axis->SameSense) (*pCurve2D)->Reverse();
 		}
 
@@ -155,8 +156,8 @@ namespace Xbim
 
 		void XbimCurve2D::Init(IIfcOffsetCurve2D^ offset, ILogger^ logger)
 		{
-			Init(offset->BasisCurve,logger);
-			if (IsValid )
+			Init(offset->BasisCurve, logger);
+			if (IsValid)
 			{
 				*pCurve2D = new Geom2d_OffsetCurve(*pCurve2D, offset->Distance);
 			}
@@ -194,13 +195,13 @@ namespace Xbim
 				return;
 			}
 
-			
+
 			if (dynamic_cast<IIfcAxis2Placement2D^>(circle->Position))
 			{
 				IIfcAxis2Placement2D^ ax2 = (IIfcAxis2Placement2D^)circle->Position;
 				gp_Ax2d gpax2(gp_Pnt2d(ax2->Location->X, ax2->Location->Y), gp_Dir2d(ax2->P[0].X, ax2->P[0].Y));
 				GCE2d_MakeCircle maker(gpax2, radius);
-				pCurve2D = new Handle(Geom2d_Curve)( maker.Value());				
+				pCurve2D = new Handle(Geom2d_Curve)(maker.Value());
 			}
 			else if (dynamic_cast<IIfcAxis2Placement3D^>(circle->Position))
 			{
@@ -211,7 +212,7 @@ namespace Xbim
 			}
 			else
 			{
-				
+
 				Type ^ type = circle->Position->GetType();
 				throw gcnew Exception(String::Format("WC001: Circle #{0} with Placement of type {1} is not implemented", circle->EntityLabel, type->Name));
 				return;
@@ -223,10 +224,10 @@ namespace Xbim
 			IIfcAxis2Placement2D^ ax2 = (IIfcAxis2Placement2D^)ellipse->Position;
 			double semiAx1 = ellipse->SemiAxis1;
 			double semiAx2 = ellipse->SemiAxis2;
-			
+
 			if (semiAx1 <= 0)
 			{
-				XbimGeometryCreator::LogError(logger, ellipse,"WC002: Illegal Ellipse Semi Axis 1, must be greater than 0, in entity #{0}", ellipse->EntityLabel);
+				XbimGeometryCreator::LogError(logger, ellipse, "WC002: Illegal Ellipse Semi Axis 1, must be greater than 0, in entity #{0}", ellipse->EntityLabel);
 				return;
 			}
 			if (semiAx2 <= 0)
@@ -243,9 +244,9 @@ namespace Xbim
 			}
 			gp_Pnt2d centre(ax2->Location->X, ax2->Location->Y);
 			gp_Ax2d gpax2(centre, gp_Dir2d(ax2->P[rotateElipse ? 1 : 0].X, ax2->P[rotateElipse ? 1 : 0].Y));
-			
-			GCE2d_MakeEllipse maker(gpax2, semiAx1, semiAx2); 
-			pCurve2D = new Handle(Geom2d_Curve)(maker.Value());			
+
+			GCE2d_MakeEllipse maker(gpax2, semiAx1, semiAx2);
+			pCurve2D = new Handle(Geom2d_Curve)(maker.Value());
 		}
 
 		void XbimCurve2D::Init(IIfcLine^ line, ILogger^ /*logger*/)
@@ -256,12 +257,12 @@ namespace Xbim
 			gp_Pnt2d pnt(cp->X, cp->Y);
 			gp_Dir2d vec(dir->X, dir->Y);
 			GCE2d_MakeLine maker(pnt, vec);
-			pCurve2D = new Handle(Geom2d_Curve)(maker.Value());			
+			pCurve2D = new Handle(Geom2d_Curve)(maker.Value());
 		}
 
 		void XbimCurve2D::Init(IIfcTrimmedCurve^ curve, ILogger^ logger)
 		{
-			Init(curve->BasisCurve,logger);
+			Init(curve->BasisCurve, logger);
 			if (IsValid)
 			{
 				//check if we have an ellipse in case we have to correct axis
@@ -393,5 +394,66 @@ namespace Xbim
 			pCurve2D = new Handle(Geom2d_Curve);
 			*pCurve2D = new Geom2d_BSplineCurve(poles, knots, knotMultiplicities, (Standard_Integer)bspline->Degree);
 		}
+		XbimCurve2D::XbimCurve2D(IIfcCurveSegment2D ^ arcSeg, ILogger ^ logger)
+		{
+			if (dynamic_cast<IIfcCircularArcSegment2D^>(arcSeg))
+				Init((IIfcCircularArcSegment2D^)arcSeg, logger);
+			else if (dynamic_cast<IIfcLineSegment2D^>(arcSeg))
+				Init((IIfcLineSegment2D^)arcSeg, logger);
+			else
+				throw gcnew NotImplementedException("Failed to build IIfcCurveSegment2D, unsupported segment type");
+		}
+		XbimCurve2D::XbimCurve2D(IIfcCircularArcSegment2D ^ arcSeg, ILogger ^ logger)
+		{
+			Init(arcSeg, logger);
+		}
+		XbimCurve2D::XbimCurve2D(IIfcLineSegment2D ^ arcSeg, ILogger ^ logger)
+		{
+			Init(arcSeg, logger);
+		}
+		void XbimCurve2D::Init(IIfcCircularArcSegment2D ^ arcSeg, ILogger ^ logger)
+		{
+			//ensure sensible radians
+			double sensibleAngle = std::fmod(arcSeg->StartDirection, (double)(M_PI * 2));
+			gp_Pnt2d pnt(arcSeg->StartPoint->X, arcSeg->StartPoint->Y);
+
+			double u = std::cos(sensibleAngle);
+			double v = std::sin(sensibleAngle);
+			gp_Vec2d dir(u, v);
+			dir.Normalize();
+			gp_Vec2d centreVec = dir.GetNormal();
+			centreVec.Multiply(arcSeg->Radius);
+			if (arcSeg->IsCCW) centreVec.Reverse();
+			gp_Pnt2d centre = pnt.Translated(centreVec);
+			gp_Ax22d ax2(centre, centreVec.Reversed(), dir);
+			gp_Circ2d circ2d(ax2, arcSeg->Radius);
+			Handle(Geom2d_Circle) circ = new Geom2d_Circle(circ2d);
+			Geom2dAdaptor_Curve adapter(circ);
+			GCPnts_AbscissaPoint absc(adapter, arcSeg->SegmentLength, 0);
+			if (!absc.IsDone())
+			{
+				XbimGeometryCreator::LogError(logger, arcSeg, "XbimCurve2d could not be built from the IfcCircularArcSegment2D");
+			}
+			else
+			{
+				double uEnd = absc.Parameter();
+				pCurve2D = new Handle(Geom2d_Curve);
+				*pCurve2D = new Geom2d_TrimmedCurve(circ, 0, uEnd);
+			}
+		}
+		void XbimCurve2D::Init(IIfcLineSegment2D ^ arcSeg, ILogger ^ /*logger*/)
+		{
+			double sensibleAngle = std::fmod(arcSeg->StartDirection, (double)(M_PI * 2));
+			gp_Pnt2d pnt(arcSeg->StartPoint->X, arcSeg->StartPoint->Y);
+			double u = std::cos(sensibleAngle);
+			double v = std::sin(sensibleAngle);
+			gp_Vec2d dir(u, v);
+			dir.Normalize();
+			Handle(Geom2d_Line) line = new Geom2d_Line(pnt, dir); //This never fails			
+			pCurve2D = new Handle(Geom2d_Curve);
+			*pCurve2D = new Geom2d_TrimmedCurve(line, 0, arcSeg->SegmentLength);			
+		}
+
 	}
+
 }

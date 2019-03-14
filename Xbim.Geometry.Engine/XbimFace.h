@@ -49,6 +49,8 @@ namespace Xbim
 			void Init(IIfcRationalBSplineSurfaceWithKnots ^ surface, ILogger^ logger);
 			void Init(IIfcCylindricalSurface ^ surface, ILogger^ logger);
 			void Init(double x, double y, double tolerance, ILogger^ logger); 
+			void Init(IIfcLinearPlacement^ linearPlacement, ILogger^ logger);
+			void Init(IIfcAlignment2DHorizontal ^ alignment, ILogger ^ logger);
 		public:
 			
 			//destructors
@@ -121,6 +123,8 @@ namespace Xbim
 			XbimFace(IIfcFaceSurface^ surface, XbimWire^ outerBound, IEnumerable<XbimWire^>^ innerBounds, double tolerance, ILogger^ logger);
 			XbimFace(IIfcCylindricalSurface ^ surface, ILogger^ logger);
 			XbimFace(double x, double y, double tolerance, ILogger^ logger);
+			XbimFace(IIfcLinearPlacement^ linearPlacement, ILogger^ logger);
+			XbimFace(IIfcAlignment2DHorizontal^ alignment, ILogger^ logger);
 #pragma endregion
 
 #pragma region Internal Properties
@@ -140,6 +144,7 @@ namespace Xbim
 			Handle(Geom_Surface) GetSurface();
 			XbimVector3D NormalAt(double u, double v);
 			void SetLocation(TopLoc_Location loc);
+			XbimMatrix3D LinearAlignmentPosition(double distanceAlong, double offsetLateral, double offsetVertical, double offsetLongitudinal, ILogger^ logger);
 #pragma endregion
 
 

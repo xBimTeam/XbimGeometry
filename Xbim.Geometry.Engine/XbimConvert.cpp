@@ -1,6 +1,7 @@
 #include "XbimConvert.h"
 #include "XbimCurve.h"
 #include "XbimCurve2d.h"
+#include "XbimFace.h"
 #include <gp_Dir2d.hxx>
 #include <gp_Dir.hxx>
 #include <gp_Dir2d.hxx>
@@ -533,7 +534,7 @@ namespace Xbim
 				LO.X, LO.Y, LO.Z, S);
 		}
 
-		// Builds a windows Matrix3D from an ObjectPlacement
+		// Builds a  Matrix3D from an ObjectPlacement
 		XbimMatrix3D XbimConvert::ConvertMatrix3D(IIfcObjectPlacement ^ objPlacement, ILogger^ logger)
 		{
 			if (dynamic_cast<IIfcLocalPlacement^>(objPlacement))
@@ -555,6 +556,20 @@ namespace Xbim
 					throw(gcnew System::NotImplementedException("Support for Placements other than 3D not implemented"));
 				}
 
+			}
+			//TODO: Linear placement needs to be optimised to cache the axis, at present it is being recreated for every placement instance
+			else if (dynamic_cast<IIfcLinearPlacement^>(objPlacement)) // a Linear Placement
+			{
+				IIfcLinearPlacement^ linearPlacement = (IIfcLinearPlacement^)objPlacement;
+				XbimFace^ alignmentCurve = gcnew XbimFace(linearPlacement, logger);
+				return alignmentCurve->LinearAlignmentPosition
+					(
+						linearPlacement->Distance->DistanceAlong, 
+						linearPlacement->Distance->OffsetLateral.HasValue? (double)linearPlacement->Distance->OffsetLateral.Value:0.0,
+						linearPlacement->Distance->OffsetVertical.HasValue ? (double)linearPlacement->Distance->OffsetVertical.Value : 0.0, 
+						linearPlacement->Distance->OffsetLongitudinal.HasValue ? (double)linearPlacement->Distance->OffsetLongitudinal.Value : 0.0,
+						logger
+					);
 			}
 			else if (dynamic_cast<IIfcGridPlacement^>(objPlacement)) // a Grid
 			{

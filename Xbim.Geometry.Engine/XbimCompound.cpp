@@ -896,7 +896,7 @@ namespace Xbim
 		}
 
 
-		void XbimCompound::Init(IEnumerable<IIfcFace^>^ ifcFaces, bool close, IIfcRepresentationItem^ theItem, ILogger^ logger)
+		void XbimCompound::Init(IEnumerable<IIfcFace^>^ ifcFaces, bool /*close*/, IIfcRepresentationItem^ theItem, ILogger^ logger)
 		{						
 			double tolerance = theItem->Model->ModelFactors->Precision;			
 			_sewingTolerance = tolerance;

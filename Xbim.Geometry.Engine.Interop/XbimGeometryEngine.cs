@@ -800,6 +800,16 @@ namespace Xbim.Geometry.Engine.Interop
                 return _engine.CreateSolidSet(ifcSolid, logger);
             }
         }
+
+        public IXbimSolid CreateAlignment(IIfcAlignment alignment, ILogger logger = null)
+        {
+            return _engine.CreateAlignment(alignment, logger);
+        }
+
+        public IXbimFace CreateFace(IIfcAlignment2DHorizontal alignment, ILogger logger = null)
+        {
+            return _engine.CreateFace(alignment, logger);
+        }
     }
 
     public static class LogHelper

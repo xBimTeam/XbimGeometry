@@ -114,7 +114,7 @@ namespace Xbim
 			virtual IXbimFace^ CreateFace(IIfcSurface ^ surface, ILogger^ logger);
 			virtual IXbimFace^ CreateFace(IIfcPlane ^ plane, ILogger^ logger);
 			virtual IXbimFace^ CreateFace(IXbimWire ^ wire, ILogger^ logger);
-
+			virtual IXbimFace^ CreateFace(IIfcAlignment2DHorizontal ^ alignment, ILogger^ logger);
 			//Shells creation
 			virtual IXbimShell^ CreateShell(IIfcOpenShell^ shell, ILogger^ logger);
 			virtual IXbimShell^ CreateShell(IIfcConnectedFaceSet^ shell, ILogger^ logger);
@@ -141,6 +141,7 @@ namespace Xbim
 			virtual IXbimSolid^ CreateSolid(IIfcHalfSpaceSolid^ ifcSolid, ILogger^ logger);
 			virtual IXbimSolid^ CreateSolid(IIfcPolygonalBoundedHalfSpace^ ifcSolid, ILogger^ logger);
 			virtual IXbimSolid^ CreateSolid(IIfcBoxedHalfSpace^ ifcSolid, ILogger^ logger);
+			virtual IXbimSolid^ CreateAlignment(IIfcAlignment^ alignment, ILogger^ logger);
 
 			virtual IXbimSolidSet^ CreateSolidSet(IIfcManifoldSolidBrep^ ifcSolid, ILogger^ logger);
 

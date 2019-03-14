@@ -14,8 +14,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Xbim.Ifc" Version="5.9999.232-ifcRail" />
-    <PackageReference Include="Xbim.Tessellator" Version="5.9999.232-ifcRail" />
+    <PackageReference Include="Xbim.Ifc" Version="5.9999.239-ifcRail" />
+    <PackageReference Include="Xbim.Tessellator" Version="5.9999.239-ifcRail" />
   </ItemGroup>
 
   <ItemGroup>
