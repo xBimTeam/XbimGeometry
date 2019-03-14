@@ -40,6 +40,12 @@ namespace Xbim
 			*pCurve = curve;
 		}
 
+		XbimCurve::XbimCurve(const Handle(Geom_Curve)& curve, double p1, double p2)
+		{
+			this->pCurve = new Handle(Geom_Curve);
+			*pCurve = new Geom_TrimmedCurve(curve, p1, p2, true);
+		}
+
 		XbimRect3D XbimCurve::BoundingBox::get()
 		{
 			if (!IsValid) return XbimRect3D::Empty;

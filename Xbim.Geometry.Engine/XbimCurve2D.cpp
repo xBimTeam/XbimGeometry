@@ -414,7 +414,8 @@ namespace Xbim
 		void XbimCurve2D::Init(IIfcCircularArcSegment2D ^ arcSeg, ILogger ^ logger)
 		{
 			//ensure sensible radians
-			double sensibleAngle = std::fmod(arcSeg->StartDirection, (double)(M_PI * 2));
+			double radians = arcSeg->StartDirection * arcSeg->Model->ModelFactors->AngleToRadiansConversionFactor;
+			double sensibleAngle = std::fmod(radians, (double)(M_PI * 2));
 			gp_Pnt2d pnt(arcSeg->StartPoint->X, arcSeg->StartPoint->Y);
 
 			double u = std::cos(sensibleAngle);
@@ -443,7 +444,8 @@ namespace Xbim
 		}
 		void XbimCurve2D::Init(IIfcLineSegment2D ^ arcSeg, ILogger ^ /*logger*/)
 		{
-			double sensibleAngle = std::fmod(arcSeg->StartDirection, (double)(M_PI * 2));
+			double radians = arcSeg->StartDirection * arcSeg->Model->ModelFactors->AngleToRadiansConversionFactor;
+			double sensibleAngle = std::fmod(radians, (double)(M_PI * 2));
 			gp_Pnt2d pnt(arcSeg->StartPoint->X, arcSeg->StartPoint->Y);
 			double u = std::cos(sensibleAngle);
 			double v = std::sin(sensibleAngle);

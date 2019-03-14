@@ -648,12 +648,24 @@ namespace Xbim
 					//extrude to a pipe
 					gp_Pnt origin;
 					gp_Vec curveMainDir;
-					gp_Vec curveVDir;
+					
 					Handle(Geom_Curve) hCurve = curve;
-					hCurve->D2(hCurve->FirstParameter(), origin, curveMainDir, curveVDir); //get the start point and line direction
+					double firstParam = hCurve->FirstParameter();
+					hCurve->D1(firstParam, origin, curveMainDir); //get the start point and line direction
 
+					Handle(Geom_Surface)surface = BRep_Tool::Surface(alignmentHoriz);
+
+					gp_Pnt point3d;
+					gp_Vec usTan, vsTan;
+					surface->D1(origin.X(), origin.Y(), point3d, usTan, vsTan);
+					vsTan.Normalize();
+					usTan.Normalize();
+					//get the normal of the surface
+					gp_Vec surfaceNormal = vsTan.Crossed(usTan);
+					gp_Vec curveVDir = curveMainDir.Crossed(surfaceNormal);
 					//gp_Dir v1 = gp::DX2d().IsParallel(normal, Precision::Angular()) ? gp::DY() : gp::DX();
-					gp_Ax2 centre(gp_Pnt(origin.X(), origin.Y(), 0), gp_Vec(curveMainDir.X(), curveMainDir.Y(), 0), gp_Vec(curveVDir.X(), curveVDir.Y(), 0)); //create the axis for the rectangular face
+					gp_Ax2 centre(origin, surfaceNormal, curveVDir); //create the axis for the rectangular face
+					
 					XbimWire^ xrect = gcnew XbimWire(75 * mm, mm / 10, precision, true);
 					TopoDS_Wire rect = xrect;
 					gp_Trsf trsf;
@@ -693,6 +705,10 @@ namespace Xbim
 								b.Add(solid, shell);
 								return gcnew XbimSolid(solid);
 							}
+						}
+						else
+						{
+							pipeMaker.Shape(); //make it throw an error
 						}
 					}
 					catch (const std::exception& ex)

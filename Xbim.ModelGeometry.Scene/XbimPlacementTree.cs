@@ -25,6 +25,8 @@ namespace Xbim.ModelGeometry.Scene
                 placementTransform = tree[product.ObjectPlacement.EntityLabel];
             else if (product.ObjectPlacement is IIfcGridPlacement)
                 placementTransform = engine.ToMatrix3D((IIfcGridPlacement)product.ObjectPlacement,null);
+            else if (product.ObjectPlacement is IIfcLinearPlacement)
+                placementTransform = engine.ToMatrix3D((IIfcLinearPlacement)product.ObjectPlacement, null);
             return placementTransform;
         }
 

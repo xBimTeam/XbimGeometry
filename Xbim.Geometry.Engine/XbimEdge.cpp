@@ -76,7 +76,7 @@ namespace Xbim
 			Standard_Real p1, p2;
 			Handle(Geom_Curve) curve = BRep_Tool::Curve(*pEdge, p1, p2);
 			GC::KeepAlive(this);
-			return gcnew XbimCurve(curve);
+			return gcnew XbimCurve(curve, p1, p2);
 		}
 
 		double XbimEdge::Length::get()

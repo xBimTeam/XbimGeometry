@@ -44,6 +44,14 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.IsTrue(alignment.IsValid);
             }
         }
-
+        [TestMethod]
+        public void can_get_matrix_transform_for_simple_linear_placement_test()
+        {
+            using (var er = new EntityRepository<IIfcAlignment2DHorizontal>("horizontal-alignment-without-transition-curve", meter: 1, precision: 1e-3, inRadians: true))
+            {
+                var alignmentFace = geomEngine.CreateFace(er.Entity, logger);
+                
+            }
+        }
     }
 }

@@ -334,6 +334,7 @@ namespace Xbim
 			}
 			BRepLib::BuildCurves3d(loop);
 			BRepBuilderAPI_MakeWire wireMaker(loop);
+			
 			if (wireMaker.IsDone())
 			{
 				TopTools_IndexedMapOfShape map;
