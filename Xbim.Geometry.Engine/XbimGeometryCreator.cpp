@@ -499,6 +499,8 @@ namespace Xbim
 			if (ras != nullptr) return CreateSolid(ras, logger);
 			IIfcSurfaceCurveSweptAreaSolid^ scas = dynamic_cast<IIfcSurfaceCurveSweptAreaSolid^>(IIfcSolid);
 			if (scas != nullptr) return CreateSolid(scas, logger);
+			IIfcFixedReferenceSweptAreaSolid^ fas = dynamic_cast<IIfcFixedReferenceSweptAreaSolid^>(IIfcSolid);
+			if (fas != nullptr) return CreateSolid(fas, logger);
 			throw gcnew NotImplementedException(String::Format("Swept Solid of Type {0} in entity #{1} is not implemented", IIfcSolid->GetType()->Name, IIfcSolid->EntityLabel));
 
 		};
@@ -511,6 +513,8 @@ namespace Xbim
 			if (ras != nullptr) return CreateSolidSet(ras, logger);
 			IIfcSurfaceCurveSweptAreaSolid^ scas = dynamic_cast<IIfcSurfaceCurveSweptAreaSolid^>(IIfcSolid);
 			if (scas != nullptr) return CreateSolidSet(scas, logger);
+			IIfcFixedReferenceSweptAreaSolid^ fas = dynamic_cast<IIfcFixedReferenceSweptAreaSolid^>(IIfcSolid);
+			if (fas != nullptr) return CreateSolidSet(fas, logger);
 			throw gcnew NotImplementedException(String::Format("Swept Solid of Type {0} in entity #{1} is not implemented", IIfcSolid->GetType()->Name, IIfcSolid->EntityLabel));
 
 		};
@@ -520,6 +524,11 @@ namespace Xbim
 		};
 
 		IXbimSolidSet^ XbimGeometryCreator::CreateSolidSet(IIfcRevolvedAreaSolid^ IIfcSolid, ILogger^ logger)
+		{
+			return gcnew XbimSolidSet(IIfcSolid, logger);
+		};
+
+		IXbimSolidSet^ XbimGeometryCreator::CreateSolidSet(IIfcFixedReferenceSweptAreaSolid^ IIfcSolid, ILogger^ logger)
 		{
 			return gcnew XbimSolidSet(IIfcSolid, logger);
 		};
@@ -577,6 +586,8 @@ namespace Xbim
 		{
 			return gcnew XbimSolid(IIfcSolid, logger);
 		};
+
+		
 
 		[[deprecated("Please use CreateSolidSet")]]
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcBooleanResult^ IIfcSolid, ILogger^ logger)
@@ -646,7 +657,7 @@ namespace Xbim
 					XbimEdge^ firstEdge = (XbimEdge^)spine->Edges->First;
 					XbimCurve^ curve = (XbimCurve^)firstEdge->EdgeGeometry;
 					//extrude to a pipe
-					gp_Pnt origin;
+ 					gp_Pnt origin;
 					gp_Vec curveMainDir;
 					
 					Handle(Geom_Curve) hCurve = curve;
@@ -682,7 +693,8 @@ namespace Xbim
 						pipeMaker.Build();
 						if (pipeMaker.IsDone() && pipeMaker.MakeSolid() && pipeMaker.Shape().ShapeType() == TopAbs_ShapeEnum::TopAbs_SOLID) //a solid is OK
 						{
-							return gcnew XbimSolid(TopoDS::Solid(pipeMaker.Shape()));
+							XbimSolid^ solid = gcnew XbimSolid(TopoDS::Solid(pipeMaker.Shape()));
+							return solid;
 						}
 						else if (pipeMaker.IsDone()) //fix up from a shell
 						{

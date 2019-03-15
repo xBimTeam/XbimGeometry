@@ -5,7 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Xbim.Ifc;
 using Xbim.Ifc4.Interfaces;
+using Xbim.ModelGeometry.Scene;
 
 namespace Xbim.Geometry.Engine.Interop.Tests
 {
@@ -44,13 +46,25 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.IsTrue(alignment.IsValid);
             }
         }
-        [TestMethod]
-        public void can_get_matrix_transform_for_simple_linear_placement_test()
+        //[TestMethod]
+        //public void can_get_matrix_transform_for_simple_linear_placement_test()
+        //{
+        //    using (var er = new EntityRepository<IIfcAlignment2DHorizontal>("horizontal-alignment-without-transition-curve", meter: 1, precision: 1e-3, inRadians: true))
+        //    {
+        //        var alignmentFace = geomEngine.CreateFace(er.Entity, logger);
+
+        //    }
+        //}
+        [DataTestMethod]
+        [DataRow(@"C:\Users\Steve\Documents\testModel\SBB_Mellingen_simple_lines.ifc")]
+
+        public void can_create_linear_placemen_using_ifcstore_test(string ifcFileName)
         {
-            using (var er = new EntityRepository<IIfcAlignment2DHorizontal>("horizontal-alignment-without-transition-curve", meter: 1, precision: 1e-3, inRadians: true))
+            using (var  model = IfcStore.Open(ifcFileName, null, null))
             {
-                var alignmentFace = geomEngine.CreateFace(er.Entity, logger);
-                
+                var context = new Xbim3DModelContext(model);
+
+                context.CreateContext(null,false);
             }
         }
     }
