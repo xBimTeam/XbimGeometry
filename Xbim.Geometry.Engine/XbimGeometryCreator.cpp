@@ -31,6 +31,7 @@
 #include <gp_Lin2d.hxx>
 #include <Geom2d_Line.hxx>
 #include <IntAna2d_AnaIntersection.hxx>
+#include <BRepTools_WireExplorer.hxx>
 using System::Runtime::InteropServices::Marshal;
 
 using namespace  System::Threading;
@@ -48,6 +49,121 @@ namespace Xbim
 #pragma warning( push )
 #pragma warning( disable : 4691)
 
+#pragma managed(push, off)
+		int CreateAlignmentNative(const TopoDS_Face& alignmentFace, TopoDS_Wire& rect, TopoDS_Solid& solid)
+		{
+			Handle(Geom_Surface)surface = BRep_Tool::Surface(alignmentFace);
+			TopoDS_Wire spineWire = BRepTools::OuterWire(alignmentFace);
+			BRepTools_WireExplorer wex(spineWire);
+			if (!wex.More())
+			{
+				//	LogWarning(logger, alignment, "Alignment does not have any segments.");
+
+				return -2;
+			}
+			TopoDS_Edge firstEdge = wex.Current();
+
+			Standard_Real firstParam, p2;
+			Handle(Geom_Curve) hCurve = BRep_Tool::Curve(firstEdge, firstParam, p2);
+			//extrude to a pipe
+			gp_Pnt origin;
+			gp_Vec curveMainDir;
+
+			hCurve->D1(firstParam, origin, curveMainDir); //get the start point and line direction
+
+			gp_Pnt point3d;
+			gp_Vec usTan, vsTan;
+			surface->D1(origin.X(), origin.Y(), point3d, usTan, vsTan);
+			vsTan.Normalize();
+			usTan.Normalize();
+			//get the normal of the surface
+			gp_Vec surfaceNormal = vsTan.Crossed(usTan);
+			gp_Vec curveVDir = curveMainDir.Crossed(surfaceNormal);
+
+			gp_Ax2 centre(origin, surfaceNormal, curveVDir); //create the axis for the rectangular face
+
+
+			gp_Trsf trsf;
+			trsf.SetTransformation(centre, gp_Ax3());
+			rect.Move(TopLoc_Location(trsf));
+			TopoDS_Face face = BRepBuilderAPI_MakeFace(rect, Standard_True);
+
+			try
+			{
+				BRep_Builder b;
+				BRepOffsetAPI_MakePipeShell pipeMaker(spineWire);
+
+				pipeMaker.Add(rect, Standard_True, Standard_True);
+
+
+				try
+				{
+					pipeMaker.Build();
+				}
+
+				// __except will only catch an exception here
+				catch (...)
+				{
+					if (!pipeMaker.IsDone())
+					{
+						//BRepBuilderAPI_PipeError err = pipeMaker.GetStatus();
+						return -9;
+						
+					}
+				}
+
+
+				if (pipeMaker.IsDone() && pipeMaker.MakeSolid() && pipeMaker.Shape().ShapeType() == TopAbs_ShapeEnum::TopAbs_SOLID) //a solid is OK
+				{
+					solid = TopoDS::Solid(pipeMaker.Shape());
+					return 0; 
+
+				}
+				else if (pipeMaker.IsDone()) //fix up from a shell
+				{
+					TopoDS_Shell shell;
+					b.MakeShell(shell);
+					{
+						//add the other faces to the shell
+						for (TopExp_Explorer explr(pipeMaker.Shape(), TopAbs_FACE); explr.More(); explr.Next())
+						{
+							b.Add(shell, TopoDS::Face(explr.Current()));
+						}
+						//visit wires not in a face
+						for (TopExp_Explorer explr(pipeMaker.Shape(), TopAbs_WIRE, TopAbs_FACE); explr.More(); explr.Next())
+						{
+							BRepBuilderAPI_MakeFace faceMaker(TopoDS::Wire(explr.Current()), Standard_True);
+							b.Add(shell, faceMaker.Face());
+						}
+						
+						b.MakeSolid(solid);
+						b.Add(solid, shell);
+						return  0;
+					}
+				}
+				else
+				{
+					pipeMaker.Shape(); //make it throw an error
+				}
+			}
+			catch (Standard_Failure exc)
+			{
+				return -4;
+				/*std::ostringstream s;
+				s << "Alignment failed to create graphical representation. Error " << exc.GetMessageString();
+				String^ msg = gcnew String(s.str().c_str());
+				LogError(logger, alignment, msg);
+				return nullptr;*/
+
+			}
+			catch (...)
+			{
+				return -5;
+				//LogError(logger, alignment, "Alignment failed to create graphical representation.");
+			}
+			return -3;
+		}
+#pragma managed(pop)
 		void XbimGeometryCreator::LogInfo(ILogger^ logger, Object^ entity, String^ format, ...array<Object^>^ arg)
 		{
 			String^ msg = String::Format(format, arg);
@@ -587,7 +703,7 @@ namespace Xbim
 			return gcnew XbimSolid(IIfcSolid, logger);
 		};
 
-		
+
 
 		[[deprecated("Please use CreateSolidSet")]]
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcBooleanResult^ IIfcSolid, ILogger^ logger)
@@ -645,101 +761,30 @@ namespace Xbim
 		{
 			double mm = alignment->Model->ModelFactors->OneMilliMeter;
 			double precision = alignment->Model->ModelFactors->Precision;
+			TopoDS_Wire rect = gcnew XbimWire(100 * mm, Math::Max( mm, precision), precision, true);
 			//make the horizontal face first
 			IIfcAlignmentCurve^ alignCurve = dynamic_cast<IIfcAlignmentCurve^>(alignment->Axis);
+
 			if (alignCurve != nullptr)
 			{
 				IIfcAlignment2DHorizontal^ alignHoriz = dynamic_cast<IIfcAlignment2DHorizontal^>(alignCurve->Horizontal);
 				if (alignHoriz != nullptr)
 				{
-					XbimFace^ alignmentHoriz = gcnew XbimFace(alignHoriz, logger);
-					XbimWire^ spine = alignmentHoriz->OuterWire;
-					XbimEdge^ firstEdge = (XbimEdge^)spine->Edges->First;
-					XbimCurve^ curve = (XbimCurve^)firstEdge->EdgeGeometry;
-					//extrude to a pipe
- 					gp_Pnt origin;
-					gp_Vec curveMainDir;
-					
-					Handle(Geom_Curve) hCurve = curve;
-					double firstParam = hCurve->FirstParameter();
-					hCurve->D1(firstParam, origin, curveMainDir); //get the start point and line direction
-
-					Handle(Geom_Surface)surface = BRep_Tool::Surface(alignmentHoriz);
-
-					gp_Pnt point3d;
-					gp_Vec usTan, vsTan;
-					surface->D1(origin.X(), origin.Y(), point3d, usTan, vsTan);
-					vsTan.Normalize();
-					usTan.Normalize();
-					//get the normal of the surface
-					gp_Vec surfaceNormal = vsTan.Crossed(usTan);
-					gp_Vec curveVDir = curveMainDir.Crossed(surfaceNormal);
-					//gp_Dir v1 = gp::DX2d().IsParallel(normal, Precision::Angular()) ? gp::DY() : gp::DX();
-					gp_Ax2 centre(origin, surfaceNormal, curveVDir); //create the axis for the rectangular face
-					
-					XbimWire^ xrect = gcnew XbimWire(75 * mm, mm / 10, precision, true);
-					TopoDS_Wire rect = xrect;
-					gp_Trsf trsf;
-					trsf.SetTransformation(centre, gp_Ax3());
-					rect.Move(TopLoc_Location(trsf));
-					XbimFace^ profile = gcnew XbimFace(BRepBuilderAPI_MakeFace(rect, Standard_True));
-
-					try
+					TopoDS_Face alignmentFace = gcnew XbimFace(alignHoriz, logger);
+					TopoDS_Solid solid;
+					int err =	CreateAlignmentNative(alignmentFace, rect, solid);
+					if (solid.IsNull())
 					{
-						BRep_Builder b;
-						BRepOffsetAPI_MakePipeShell pipeMaker(spine);
-						TopoDS_Face face = profile; // hang on to the face
-						pipeMaker.Add(rect, Standard_True, Standard_True);
-						pipeMaker.Build();
-						if (pipeMaker.IsDone() && pipeMaker.MakeSolid() && pipeMaker.Shape().ShapeType() == TopAbs_ShapeEnum::TopAbs_SOLID) //a solid is OK
-						{
-							XbimSolid^ solid = gcnew XbimSolid(TopoDS::Solid(pipeMaker.Shape()));
-							return solid;
-						}
-						else if (pipeMaker.IsDone()) //fix up from a shell
-						{
-							TopoDS_Shell shell;
-							b.MakeShell(shell);
-							{
-								//add the other faces to the shell
-								for (TopExp_Explorer explr(pipeMaker.Shape(), TopAbs_FACE); explr.More(); explr.Next())
-								{
-									b.Add(shell, TopoDS::Face(explr.Current()));
-								}
-								//visit wires not in a face
-								for (TopExp_Explorer explr(pipeMaker.Shape(), TopAbs_WIRE, TopAbs_FACE); explr.More(); explr.Next())
-								{
-									BRepBuilderAPI_MakeFace faceMaker(TopoDS::Wire(explr.Current()), Standard_True);
-									b.Add(shell, faceMaker.Face());
-								}
-								TopoDS_Solid solid;
-								b.MakeSolid(solid);
-								b.Add(solid, shell);
-								return gcnew XbimSolid(solid);
-							}
-						}
-						else
-						{
-							pipeMaker.Shape(); //make it throw an error
-						}
-					}
-					catch (const std::exception& ex)
-					{
-						String^ err = gcnew String(ex.what());
-						LogError(logger, alignment, "Alignment failed to create graphical representation. " + err);
+						LogError(logger, alignment, "Alignment: failed to create graphical representation.");
 						return nullptr;
 					}
-					catch (...)
-					{
-
-					}
+					else
+						return gcnew XbimSolid(solid);
 				}
 			}
 			LogError(logger, alignment->Axis, "Not implemented: XbimGeometryCreator::Create,  Alignment type {0} not supported yet", alignment->Axis->GetType()->Name);
 			return nullptr;
 		}
-
-
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcPolygonalBoundedHalfSpace^ IIfcSolid, ILogger^ logger)
 		{
 			return gcnew XbimSolid(IIfcSolid, logger);

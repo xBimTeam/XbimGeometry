@@ -37,15 +37,15 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.AreEqual(3, alignmentFace.OuterBound.Vertices.Count);
             }
         }
-        [TestMethod]
-        public void can_build_horizontal_alignment_solid_shape_test()
-        {
-            using (var er = new EntityRepository<IIfcAlignment>("alignment-without-vertical_component", meter: 1, precision: 1e-3, inRadians: true))
-            {
-                var alignment = geomEngine.CreateAlignment(er.Entity, logger);
-                Assert.IsTrue(alignment.IsValid);
-            }
-        }
+        //[TestMethod]
+        //public void can_build_horizontal_alignment_solid_shape_test()
+        //{
+        //    using (var er = new EntityRepository<IIfcAlignment>("alignment-without-vertical_component", meter: 1, precision: 1e-3, inRadians: true))
+        //    {
+        //        var alignment = geomEngine.CreateAlignment(er.Entity, logger);
+        //        Assert.IsTrue(alignment.IsValid);
+        //    }
+        //}
         //[TestMethod]
         //public void can_get_matrix_transform_for_simple_linear_placement_test()
         //{
@@ -56,6 +56,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         //    }
         //}
         [DataTestMethod]
+        [Ignore]
         [DataRow(@"C:\Users\Steve\Documents\testModel\SBB_Mellingen_simple_lines.ifc")]
 
         public void can_create_linear_placemen_using_ifcstore_test(string ifcFileName)
@@ -64,7 +65,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 var context = new Xbim3DModelContext(model);
 
-                context.CreateContext(null,false);
+                context.CreateContext(null,true);
             }
         }
     }

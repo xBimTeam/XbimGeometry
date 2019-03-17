@@ -2,6 +2,7 @@
 #include "XbimVertex.h"
 #include "XbimVertex.h"
 #include "XbimEdge.h"
+#include <TopoDS_Solid.hxx>
 using namespace System;
 using namespace System::IO;
 using namespace Xbim::Common;
@@ -142,6 +143,8 @@ namespace Xbim
 			virtual IXbimSolid^ CreateSolid(IIfcPolygonalBoundedHalfSpace^ ifcSolid, ILogger^ logger);
 			virtual IXbimSolid^ CreateSolid(IIfcBoxedHalfSpace^ ifcSolid, ILogger^ logger);
 			virtual IXbimSolid^ CreateAlignment(IIfcAlignment^ alignment, ILogger^ logger);
+
+			
 
 			virtual IXbimSolidSet^ CreateSolidSet(IIfcManifoldSolidBrep^ ifcSolid, ILogger^ logger);
 
