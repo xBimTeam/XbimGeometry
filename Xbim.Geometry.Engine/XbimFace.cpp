@@ -300,10 +300,10 @@ namespace Xbim
 		}
 		void XbimFace::Init(IIfcLinearPlacement^ linearPlacement, ILogger^ logger)
 		{
-			if (dynamic_cast<IIfcAlignment2DHorizontal^>(linearPlacement->PlacementRelTo))
+			if (dynamic_cast<IIfcAlignmentCurve^>(linearPlacement->PlacementRelTo))
 			{
-				IIfcAlignment2DHorizontal^ alignment = (IIfcAlignment2DHorizontal^)linearPlacement->PlacementRelTo;
-				Init(alignment, logger);
+				IIfcAlignmentCurve^ curve = (IIfcAlignmentCurve^)linearPlacement->PlacementRelTo;
+				Init(curve->Horizontal, logger);
 			}
 			else
 			{
@@ -334,7 +334,7 @@ namespace Xbim
 			}
 			BRepLib::BuildCurves3d(loop);
 			BRepBuilderAPI_MakeWire wireMaker(loop);
-			
+
 			if (wireMaker.IsDone())
 			{
 				TopTools_IndexedMapOfShape map;
