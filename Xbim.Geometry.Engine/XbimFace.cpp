@@ -317,6 +317,7 @@ namespace Xbim
 			BRep_Builder builder;
 			TopoDS_Wire loop;
 			builder.MakeWire(loop);
+			
 			gp_Ax2 xoy2 = gp::XOY();
 			gp_Ax3 xoy3(xoy2);
 			gp_Pln xypln(xoy3);
@@ -334,7 +335,7 @@ namespace Xbim
 			}
 			BRepLib::BuildCurves3d(loop);
 			BRepBuilderAPI_MakeWire wireMaker(loop);
-
+			
 			if (wireMaker.IsDone())
 			{
 				TopTools_IndexedMapOfShape map;
@@ -1485,6 +1486,7 @@ namespace Xbim
 			gp_Pnt startPoint3d;
 			gp_Vec uStartTan, vStartTan;
 			gp_Vec startSurfaceNormal;
+			
 			//walk the edges until we are in an edge that ends after the distanceAlong value
 			for (; wireExplorer.More(); wireExplorer.Next())
 			{
@@ -1498,7 +1500,7 @@ namespace Xbim
 					double firstParameter, lastParameter;
 					Handle(Geom2d_Curve) curve2d = BRep_Tool::CurveOnSurface(edge, *pFace, firstParameter, lastParameter);
 					gp_Pnt2d point2d = curve2d->Value(firstParameter);
-					surface->D1(point2d.X(), point2d.Y(), startPoint3d, uStartTan, vStartTan);
+					surface->D1(point2d.X(), point2d.Y(), startPoint3d, uStartTan, vStartTan);					
 					vStartTan.Normalize();
 					uStartTan.Normalize();
 					startSurfaceNormal = vStartTan.Crossed(uStartTan);
@@ -1588,9 +1590,10 @@ namespace Xbim
 					placementMatrix.OffsetY = t.Y();
 					placementMatrix.OffsetZ = t.Z();
 					placementMatrix.M44 = 1.0;
+					return placementMatrix;
 				}
 			}
-			return placementMatrix;
+			return XbimMatrix3D::Identity;
 		}
 
 		XbimGeometryObject ^ XbimFace::Transformed(IIfcCartesianTransformationOperator ^ transformation)
