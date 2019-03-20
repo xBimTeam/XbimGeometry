@@ -144,7 +144,7 @@ namespace Xbim
 			Handle(Geom_Surface) GetSurface();
 			XbimVector3D NormalAt(double u, double v);
 			void SetLocation(TopLoc_Location loc);
-			XbimMatrix3D LinearAlignmentPosition(double distanceAlong, double offsetLateral, double offsetVertical, double offsetLongitudinal, ILogger^ logger);
+			XbimMatrix3D LinearAlignmentPosition(double distanceAlong, double offsetLateral, double offsetVertical, double offsetLongitudinal, gp_Dir latAxis, gp_Dir vertAxis,  ILogger^ logger);
 #pragma endregion
 
 

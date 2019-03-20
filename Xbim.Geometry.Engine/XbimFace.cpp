@@ -1475,7 +1475,7 @@ namespace Xbim
 				pFace->Move(loc);
 		}
 
-		XbimMatrix3D XbimFace::LinearAlignmentPosition(double distanceAlong, double offsetLateral, double offsetVertical, double offsetLongitudinal, ILogger^ logger)
+		XbimMatrix3D XbimFace::LinearAlignmentPosition(double distanceAlong, double offsetLateral, double offsetVertical, double offsetLongitudinal, gp_Dir latAxis, gp_Dir vertAxis,  ILogger^ logger)
 		{
 			XbimMatrix3D placementMatrix;
 			TopTools_IndexedMapOfShape map;
@@ -1549,23 +1549,26 @@ namespace Xbim
 					surfaceNormal.Reverse(); //Z is in the reverse direction to vertical offset
 					surfaceNormal.Normalize();
 
-					//apply the verticla offset
+					//apply the vertical offset
 					gp_Ax3 axis(point3d, surfaceNormal, usTan);
 					gp_Vec vertVec = surfaceNormal.Multiplied(offsetVertical);
 					axis.Translate(vertVec);
 
-					//apply the roation to the direction of the segment
-					gp_Ax1 rotationAxis(point3d, surfaceNormal);
-					double rotationAngle = curveDirection.Angle(gp::DX2d());
-					axis.Rotate(rotationAxis, rotationAngle);
+					////apply the rotation to the direction of the segment
+					//gp_Ax1 rotationAxis(point3d, surfaceNormal);
+					//double rotationAngle = curveDirection.Angle(gp::DX2d());
+					//axis.Rotate(rotationAxis, rotationAngle);
+					//
 
 
 					// apply the longitudinal offset
 					gp_Vec longitudinalTranslation = usTan.Multiplied(offsetLongitudinal);
 					axis.Translate(longitudinalTranslation);
 
+					//apply vertical rotation
+					gp_Ax3 finalAxis(axis.Location(), vertAxis, latAxis);
 					gp_Trsf trsf;
-					trsf.SetTransformation(axis, gp_Ax3(startPoint3d, startSurfaceNormal, uStartTan));
+					trsf.SetTransformation(finalAxis, gp_Ax3(gp::Origin(), gp::DZ(), gp::DX()));
 					gp_Mat m = trsf.VectorialPart();
 					gp_XYZ t = trsf.TranslationPart();
 

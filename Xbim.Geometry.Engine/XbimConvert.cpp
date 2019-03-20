@@ -567,12 +567,22 @@ namespace Xbim
 			{
 				IIfcLinearPlacement^ linearPlacement = (IIfcLinearPlacement^)objPlacement;
 				XbimFace^ alignmentCurve = gcnew XbimFace(linearPlacement, logger);
+				gp_Dir latAxis = gp::DX();
+				gp_Dir vertAxis = gp::DZ();
+				IIfcOrientationExpression^ orientationExpr = linearPlacement->Orientation;
+				if (orientationExpr != nullptr)
+				{
+					latAxis = XbimConvert::GetDir3d(orientationExpr->LateralAxisDirection);
+					vertAxis = XbimConvert::GetDir3d(orientationExpr->VerticalAxisDirection);
+				}
 				return alignmentCurve->LinearAlignmentPosition
 				(
 					linearPlacement->Distance->DistanceAlong,
 					linearPlacement->Distance->OffsetLateral.HasValue ? (double)linearPlacement->Distance->OffsetLateral.Value : 0.0,
 					linearPlacement->Distance->OffsetVertical.HasValue ? (double)linearPlacement->Distance->OffsetVertical.Value : 0.0,
 					linearPlacement->Distance->OffsetLongitudinal.HasValue ? (double)linearPlacement->Distance->OffsetLongitudinal.Value : 0.0,
+					latAxis,
+					vertAxis,
 					logger
 				);
 			}
