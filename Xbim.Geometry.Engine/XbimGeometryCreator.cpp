@@ -771,8 +771,15 @@ namespace Xbim
 				if (alignHoriz != nullptr)
 				{
 					TopoDS_Face alignmentFace = gcnew XbimFace(alignHoriz, logger);
+					//srl temp fudge for dusseldorf demo
+					gp_Trsf trsf;
+					gp_Ax3 ax3;
+					ax3.SetLocation(gp_Pnt(0, 0, 395));
+					trsf.SetTransformation(ax3, gp_Ax3());
+					
+					alignmentFace.Move(TopLoc_Location(trsf));
 					TopoDS_Solid solid;
-					int err =	CreateAlignmentNative(alignmentFace, rect, solid);
+					CreateAlignmentNative(alignmentFace, rect, solid);
 					if (solid.IsNull())
 					{
 						LogError(logger, alignment, "Alignment: failed to create graphical representation.");
