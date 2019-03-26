@@ -9195,9 +9195,6 @@
     <ClInclude Include="OCC\src\TopoDS\TopoDS_AlertWithShape.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="targetver.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Stdafx.cpp">
