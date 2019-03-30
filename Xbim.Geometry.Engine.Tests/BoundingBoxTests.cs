@@ -17,7 +17,7 @@ namespace GeometryTests
     {
         [TestMethod]
         [DeploymentItem(@"Ifc2x3Files\PositionWithMappedItems.ifc", "Model")]
-        public void TestMethod()
+        public void TestMatchingGeometryPoints()
         {
             FileInfo f = new FileInfo(@"Model\PositionWithMappedItems.ifc");
             // var falseModel = CreateGeometry(f, false);
