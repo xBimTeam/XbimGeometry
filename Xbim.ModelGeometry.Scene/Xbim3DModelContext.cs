@@ -908,8 +908,7 @@ namespace Xbim.ModelGeometry.Scene
                             IfcShapeLabel = elementLabel,
                             GeometryHash = 0,
                             LOD = XbimLOD.LOD_Unspecified,
-                            Format = geomType,
-                            BoundingBox = elementGeom.BoundingBox
+                            Format = geomType
                         };
                         var memStream = new MemoryStream(0x4000);
 
@@ -929,6 +928,11 @@ namespace Xbim.ModelGeometry.Scene
                                     thisDeflectionDistance, thisDeflectionAngle);
                             }
                         }
+                        shapeGeometry.BoundingBox = elementGeom.BoundingBox.Transform(XbimMatrix3D.CreateTranslation(
+                            -shapeGeometry.TempOriginDisplacement.X,
+                            -shapeGeometry.TempOriginDisplacement.Y,
+                            -shapeGeometry.TempOriginDisplacement.Z
+                            ));
                         ((IXbimShapeGeometryData)shapeGeometry).ShapeData = memStream.ToArray();
                         if (shapeGeometry.ShapeData.Length > 0)
                         {

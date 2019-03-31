@@ -5,8 +5,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Xbim.Common.Geometry;
 using Xbim.Ifc;
 using Xbim.ModelGeometry.Scene;
+using Xbim.Temp.Scene;
 
 namespace GeometryTests
 {
@@ -63,6 +65,79 @@ namespace GeometryTests
                 m.SaveAs(newName);
                 return new FileInfo(newName);
             }
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"SolidTestFiles\OneWallTwoWindows.ifc")]
+        [DeploymentItem(@"SolidTestFiles\OneWallOneVoid.ifc")]
+        public void GeometryInstanceBoundingBoxesMatch()
+        {
+            DirectoryInfo d = new DirectoryInfo(".");
+            Debug.WriteLine(d.FullName);
+
+            FileInfo f = new FileInfo("OneWallOneVoid.ifc");
+            
+            var xbimName = CreateGeometry(f, true).FullName;
+
+            using (var model = IfcStore.Open(xbimName))
+            {
+                using (var geomStore = model.GeometryStore)
+                using (var geomReader = geomStore.BeginRead())
+                {
+
+                    var shapeInstances = geomReader.ShapeInstances;
+                    var FailedShapes= new List<string>();
+                    foreach (var shapeInstance in shapeInstances.OrderBy(x => x.IfcProductLabel))
+                    {
+                        IXbimShapeGeometryData shapeGeom = geomReader.ShapeGeometry(shapeInstance.ShapeGeometryLabel);
+                        if (shapeGeom.Format != (byte)XbimGeometryType.PolyhedronBinary)
+                            continue;
+
+                        var xbimMesher = new XbimMesher();
+                        xbimMesher.AddMesh(shapeGeom.ShapeData);
+                        
+                        XbimRect3D computedBox = new XbimRect3D();
+                        foreach (var pnt in xbimMesher.Positions)
+                        {
+                            computedBox.Union(pnt);
+                        }
+                        // Debug.WriteLine("Min: " + computedBox.Min);
+                        XbimRect3D storedBox = XbimRect3D.FromArray(shapeGeom.BoundingBox);
+                        
+                        if (!BoxesAreSame(computedBox, storedBox, model.ModelFactors.Precision))
+                        {
+                            FailedShapes.Add(shapeGeom.ToString());
+                            if (FailedShapes.Count > 10)
+                                continue; // exit the loop if many errors.
+                        }
+                    }
+
+                    Assert.AreEqual(0, FailedShapes.Count, "Shapes failing bounding box test: " + string.Join(",\r\n", FailedShapes));
+                }
+            }
+        }
+
+        private bool BoxesAreSame(XbimRect3D computedBox, XbimRect3D storedBox, double precision)
+        {
+            var minSame = pointIsSame(computedBox.Min, storedBox.Min, precision);
+            var maxSame = pointIsSame(computedBox.Max, storedBox.Max, precision);
+
+            return minSame & maxSame;
+        }
+
+        private bool pointIsSame(XbimPoint3D pt1, XbimPoint3D pt2, double precision)
+        {
+            var x = CoordIsSame(pt1.X, pt2.X, precision);
+            var y = CoordIsSame(pt1.Y, pt2.Y, precision);
+            var z = CoordIsSame(pt1.Z, pt2.Z, precision);
+
+            return x && y && z;
+        }
+
+        private bool CoordIsSame(double z1, double z2, double precision)
+        {
+            var delta = Math.Abs(z1 - z2);
+            return  delta < 10 * precision;
         }
     }
 }

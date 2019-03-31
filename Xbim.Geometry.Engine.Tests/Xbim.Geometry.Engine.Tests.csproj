@@ -76,7 +76,6 @@
     <Compile Include="IfcBooleanTests.cs" />
     <Compile Include="IfcFaceBasedModelTests.cs" />
     <Compile Include="RegionsCalcsAreTolerant.cs" />
-    <Compile Include="SceneBoundingBoxes.cs" />
     <Compile Include="Temp\XbimMesher.cs" />
     <Compile Include="TransformationTests.cs" />
     <Compile Include="IfcProfileDefTests.cs" />
@@ -398,6 +397,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="SolidTestFiles\NonManifoldFacetedBrep.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="SolidTestFiles\OneWallOneVoid.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="SolidTestFiles\OneWallTwoWindows.ifc">
