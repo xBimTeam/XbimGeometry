@@ -12,7 +12,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 {
     public class LocationAndPlacementTests
     {
-        static private IXbimGeometryEngine _geomEngine;
+        static private IXbimGeometryEngine geomEngine;
         static private ILoggerFactory loggerFactory;
         static private ILogger logger;
 
@@ -20,8 +20,15 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         static public void Initialise(TestContext context)
         {
             loggerFactory = new LoggerFactory().AddConsole(LogLevel.Trace);
-            _geomEngine = new XbimGeometryEngine();
+            geomEngine = new XbimGeometryEngine();
             logger = loggerFactory.CreateLogger<Ifc4GeometryTests>();
+        }
+        [ClassCleanup]
+        static public void Cleanup()
+        {
+            loggerFactory = null;
+            geomEngine = null;
+            logger = null;
         }
         [TestMethod]
         public void MoveAndCopyTest()
@@ -34,16 +41,16 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 {
                     {
                         var block = IfcModelBuilder.MakeBlock(m, 10, 10, 10);
-                        var solid = _geomEngine.CreateSolid(block);
+                        var solid = geomEngine.CreateSolid(block);
                         var ax3D = IfcModelBuilder.MakeAxis2Placement3D(m);
                         ax3D.Location.Y = 100;
-                        var solidA = _geomEngine.Moved(solid, ax3D) as IXbimSolid;
+                        var solidA = geomEngine.Moved(solid, ax3D) as IXbimSolid;
                         Assert.IsNotNull(solidA, "Should be the same type as the master");
                         Assert.IsTrue(Math.Abs(solidA.Volume - solid.Volume) < 1e-9, "Volume has changed");
                         var displacement = solidA.BoundingBox.Centroid() - solid.BoundingBox.Centroid();
                         Assert.IsTrue(displacement == new XbimVector3D(0, 100, 0));
                         var bbA = solidA.BoundingBox;
-                        var solidB = _geomEngine.Moved(solid, ax3D);
+                        var solidB = geomEngine.Moved(solid, ax3D);
                         Assert.IsTrue(bbA.Centroid() - solidB.BoundingBox.Centroid() == new XbimVector3D(0, 0, 0));
                     }
                 }
@@ -60,17 +67,17 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 using (var txn = m.BeginTransaction("Test"))
                 {
                     var block = IfcModelBuilder.MakeBlock(m, 10, 10, 10);
-                    var solid = _geomEngine.CreateSolid(block);
+                    var solid = geomEngine.CreateSolid(block);
                     var transform = IfcModelBuilder.MakeCartesianTransformationOperator3D(m);
                     transform.Scale = 2;
-                    var solidA = _geomEngine.Transformed(solid, transform);
+                    var solidA = geomEngine.Transformed(solid, transform);
                     var bb = solid.BoundingBox;
                     var bbA = solidA.BoundingBox;
                     Assert.IsTrue(Math.Abs(bb.Volume - 1000) < 1e-9, "Bounding box volume is incorrect in original shape");
                     Assert.IsTrue(Math.Abs(bbA.Volume - 8000) < 1e-9, "Bounding box volume is incorrect in scaled shape");
                     var transformNonUniform = IfcModelBuilder.MakeCartesianTransformationOperator3DnonUniform(m);
                     transformNonUniform.Scale3 = 100;
-                    var solidB = _geomEngine.Transformed(solid, transformNonUniform);
+                    var solidB = geomEngine.Transformed(solid, transformNonUniform);
                     Assert.IsTrue(Math.Abs(solidB.BoundingBox.Volume - 100000) < 1e-9, "Bounding box volume is incorrect in non uniform scaled shape");
                     Assert.IsTrue(Math.Abs(bb.Volume - 1000) < 1e-9, "Bounding box volume of original shape as been changed");
                 }
@@ -87,11 +94,11 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 using (var txn = m.BeginTransaction("Test"))
                 {
                     var block = IfcModelBuilder.MakeBlock(m, 50, 10, 10);
-                    var solid = _geomEngine.CreateSolid(block);
+                    var solid = geomEngine.CreateSolid(block);
                     var placement = IfcModelBuilder.MakeLocalPlacement(m);
                     ((IfcAxis2Placement3D)placement.RelativePlacement).Location.X = 100;
                     var bb = solid.BoundingBox;
-                    var solidA = _geomEngine.Moved(solid, placement) as IXbimSolid;
+                    var solidA = geomEngine.Moved(solid, placement) as IXbimSolid;
                     Assert.IsNotNull(solidA, "Should be the same type as the master");
                     var displacement = solidA.BoundingBox.Centroid() - solid.BoundingBox.Centroid();
                     Assert.IsTrue(displacement == new XbimVector3D(100, 0, 0));
@@ -102,10 +109,10 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     var yDir = m.Instances.New<IfcDirection>(d => d.SetXYZ(0, 1, 0));
                     ((IfcAxis2Placement3D)placementRelTo.RelativePlacement).RefDirection = yDir; //point in Y
                     ((IfcAxis2Placement3D)placementRelTo.RelativePlacement).Location.X = 2000;
-                    var solidB = _geomEngine.Moved(solid, placement) as IXbimSolid;
+                    var solidB = geomEngine.Moved(solid, placement) as IXbimSolid;
                     displacement = solidB.BoundingBox.Centroid() - solid.BoundingBox.Centroid();
                     var meshbuilder = new MeshHelper();
-                    _geomEngine.Mesh(meshbuilder, solidB, m.ModelFactors.Precision, m.ModelFactors.DeflectionTolerance);
+                    geomEngine.Mesh(meshbuilder, solidB, m.ModelFactors.Precision, m.ModelFactors.DeflectionTolerance);
                     var box = meshbuilder.BoundingBox;
                     Assert.IsTrue(displacement == new XbimVector3D(1970, 120, 0));
 
@@ -124,13 +131,13 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 using (var txn = m.BeginTransaction("Test"))
                 {
                     var block = IfcModelBuilder.MakeBlock(m, 10, 10, 10);
-                    var solid = _geomEngine.CreateSolid(block);
+                    var solid = geomEngine.CreateSolid(block);
                     var grid = IfcModelBuilder.MakeGrid(m, 3, 100);
                     var gridPlacement = m.Instances.New<IfcGridPlacement>();
                     gridPlacement.PlacementLocation = m.Instances.New<IfcVirtualGridIntersection>();
                     gridPlacement.PlacementLocation.IntersectingAxes.Add(grid.UAxes.Last());
                     gridPlacement.PlacementLocation.IntersectingAxes.Add(grid.VAxes.Last());
-                    var solidA = _geomEngine.Moved(solid, gridPlacement) as IXbimSolid;
+                    var solidA = geomEngine.Moved(solid, gridPlacement) as IXbimSolid;
                     Assert.IsNotNull(solidA, "Should be the same type as the master");
                     var displacement = solidA.BoundingBox.Centroid() - solid.BoundingBox.Centroid();
                     Assert.IsTrue(displacement == new XbimVector3D(200, 200, 0));
@@ -147,7 +154,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
                     var profile = IfcModelBuilder.MakeRectangleHollowProfileDef(m, 20, 10, 1);
                     var extrude = IfcModelBuilder.MakeExtrudedAreaSolid(m, profile, 40);
-                    var solid = _geomEngine.CreateSolid(extrude);
+                    var solid = geomEngine.CreateSolid(extrude);
                     var transform = new XbimMatrix3D(); //test first with identity
                     var solid2 = (IXbimSolid)solid.Transform(transform);
                     var s1Verts = solid.Vertices.ToList();

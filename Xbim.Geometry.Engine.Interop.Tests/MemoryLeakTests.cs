@@ -20,6 +20,13 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         {
             geomEngine = new XbimGeometryEngine();
         }
+        [ClassCleanup]
+        static public void Cleanup()
+        {
+           
+            geomEngine = null;
+           
+        }
         [TestMethod]
         public void simple_vertex_is_constructed_and_disposed()
         {

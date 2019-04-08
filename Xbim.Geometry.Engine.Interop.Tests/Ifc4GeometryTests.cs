@@ -2,8 +2,6 @@
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Xbim.Common.Geometry;
-using Xbim.Ifc;
-using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc4.GeometricModelResource;
 using Xbim.Ifc4.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -11,7 +9,7 @@ using Xbim.IO.Memory;
 
 namespace Xbim.Geometry.Engine.Interop.Tests
 {
-    
+
     [TestClass]
     public class Ifc4GeometryTests
     {
@@ -25,6 +23,13 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             loggerFactory = new LoggerFactory().AddConsole(LogLevel.Trace);
             geomEngine = new XbimGeometryEngine();
             logger = loggerFactory.CreateLogger<Ifc4GeometryTests>();
+        }
+        [ClassCleanup]
+        static public void Cleanup()
+        {
+            loggerFactory = null;
+            geomEngine = null;
+            logger = null;
         }
 
         [TestMethod]

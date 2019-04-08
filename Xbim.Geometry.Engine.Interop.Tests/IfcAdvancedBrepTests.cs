@@ -23,7 +23,13 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             geomEngine = new XbimGeometryEngine();
             logger = loggerFactory.CreateLogger<IfcAdvancedBrepTests>();
         }
-
+        [ClassCleanup]
+        static public void Cleanup()
+        {
+            loggerFactory = null;
+            geomEngine = null;
+            logger = null;
+        }
         [TestMethod]
         public void IfcAdvancedBrepTrimmedCurveTest()
         {
