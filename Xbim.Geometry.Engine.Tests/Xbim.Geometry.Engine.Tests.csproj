@@ -101,6 +101,9 @@
     <None Include="EsentTestFiles\TwoWalls.xbim">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Ifc2x3Files\AlternateRebarExtruder.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Ifc2x3Files\PositionWithMappedItems.ifc">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

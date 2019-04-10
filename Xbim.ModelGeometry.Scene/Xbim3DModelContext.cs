@@ -936,6 +936,11 @@ namespace Xbim.ModelGeometry.Scene
                         ((IXbimShapeGeometryData)shapeGeometry).ShapeData = memStream.ToArray();
                         if (shapeGeometry.ShapeData.Length > 0)
                         {
+                            var instanceTransform = XbimMatrix3D.CreateTranslation(
+                                    shapeGeometry.TempOriginDisplacement.X,
+                                    shapeGeometry.TempOriginDisplacement.Y,
+                                    shapeGeometry.TempOriginDisplacement.Z
+                                );
                             var shapeInstance = new XbimShapeInstance
                             {
                                 IfcProductLabel = elementLabel,
@@ -944,12 +949,8 @@ namespace Xbim.ModelGeometry.Scene
                                 RepresentationType = XbimGeometryRepresentationType.OpeningsAndAdditionsIncluded,
                                 RepresentationContext = openingAndProjectionOp.ContextId,
                                 IfcTypeId = (short)typeId,
-                                Transformation = XbimMatrix3D.CreateTranslation(
-                                    shapeGeometry.TempOriginDisplacement.X,
-                                    shapeGeometry.TempOriginDisplacement.Y,
-                                    shapeGeometry.TempOriginDisplacement.Z
-                                ),
-                                BoundingBox = elementGeom.BoundingBox
+                                Transformation = instanceTransform,
+                                BoundingBox = elementGeom.BoundingBox.Transform(instanceTransform)
                             };
 
                             shapeInstance.ShapeGeometryLabel = txn.AddShapeGeometry(shapeGeometry);
