@@ -145,16 +145,18 @@ namespace GeometryTests
 
                         var instanceBox = shapeInstance.BoundingBox;
                         var locatedBox = storedBox.Transform(shapeInstance.Transformation);
-                        if (!BoxesAreSame(instanceBox, locatedBox, model.ModelFactors.Precision))
+                        var delta = BoxesAreSame(instanceBox, locatedBox);
+                        if (delta > 0.01)
                         {
-                            FailedInstances.Add(shapeInstance.ToString());
+                            FailedInstances.Add("Delta: " + delta + " " + shapeInstance.ToString());
                             if (FailedInstances.Count > 10)
                                 continue; // exit the loop if many errors.
                         }
 
-                        if (!BoxesAreSame(computedBox, storedBox, model.ModelFactors.Precision))
+                        delta = BoxesAreSame(instanceBox, locatedBox);
+                        if (delta > 0.01)
                         {
-                            FailedShapes.Add(shapeGeom.ToString());
+                            FailedShapes.Add("Delta: " + delta + " " + shapeGeom.ToString());
                             if (FailedShapes.Count > 10)
                                 continue; // exit the loop if many errors.
                         }
@@ -167,30 +169,27 @@ namespace GeometryTests
             }
         }
 
-        private bool BoxesAreSame(XbimRect3D computedBox, XbimRect3D storedBox, double precision)
+        private double BoxesAreSame(XbimRect3D computedBox, XbimRect3D storedBox)
         {
-            var minSame = pointIsSame(computedBox.Min, storedBox.Min, precision);
-            var maxSame = pointIsSame(computedBox.Max, storedBox.Max, precision);
+            var minSame = pointIsSame(computedBox.Min, storedBox.Min);
+            var maxSame = pointIsSame(computedBox.Max, storedBox.Max);
 
-            return minSame & maxSame;
+            return Math.Max(minSame, maxSame);
         }
 
-        private bool pointIsSame(XbimPoint3D pt1, XbimPoint3D pt2, double precision)
+        private double pointIsSame(XbimPoint3D pt1, XbimPoint3D pt2)
         {
-            var x = CoordIsSame(pt1.X, pt2.X, precision);
-            var y = CoordIsSame(pt1.Y, pt2.Y, precision);
-            var z = CoordIsSame(pt1.Z, pt2.Z, precision);
+            var x = CoordIsSame(pt1.X, pt2.X);
+            var y = CoordIsSame(pt1.Y, pt2.Y);
+            var z = CoordIsSame(pt1.Z, pt2.Z);
 
-            return x && y && z;
+            return Math.Max(Math.Max(x, y), z);
         }
 
-        private bool CoordIsSame(double z1, double z2, double precision)
+        private double CoordIsSame(double z1, double z2)
         {
             var discrepancy = Math.Abs(z1 - z2);
-            var IsSame = discrepancy < 0.01;
-            if (!IsSame)
-                Debug.WriteLine("Discrepancy: " + discrepancy);
-            return IsSame;
+            return discrepancy;
         }
     }
 }
