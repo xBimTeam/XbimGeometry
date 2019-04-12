@@ -149,7 +149,7 @@ namespace Xbim.ModelGeometry.Scene
             }
         }
 
-        //private struct to hold details of references to geometries
+        //private struct to hold details of references to geometry shapes
         private struct GeometryReference
         {
             public XbimPoint3D TempOriginDisplacement;
@@ -944,13 +944,13 @@ namespace Xbim.ModelGeometry.Scene
                             var shapeInstance = new XbimShapeInstance
                             {
                                 IfcProductLabel = elementLabel,
-                                ShapeGeometryLabel = 0, /* This gets Set to appropriate value a few lines below */
+                                ShapeGeometryLabel = 0, /* This is set to appropriate value a few lines below */
                                 StyleLabel = openingAndProjectionOp.StyleId,
                                 RepresentationType = XbimGeometryRepresentationType.OpeningsAndAdditionsIncluded,
                                 RepresentationContext = openingAndProjectionOp.ContextId,
                                 IfcTypeId = (short)typeId,
                                 Transformation = instanceTransform,
-                                BoundingBox = elementGeom.BoundingBox.Transform(instanceTransform)
+                                BoundingBox = shapeGeometry.BoundingBox.Transform(instanceTransform)
                             };
 
                             shapeInstance.ShapeGeometryLabel = txn.AddShapeGeometry(shapeGeometry);
@@ -983,12 +983,12 @@ namespace Xbim.ModelGeometry.Scene
             //
             foreach (var grid in Model.Instances.OfType<IIfcGrid>())
             {
-                GeometryReference instance;
-                if (contextHelper.ShapeLookup.TryGetValue(grid.EntityLabel, out instance) && grid.Representation != null && grid.Representation.Representations.Count > 0)
+                GeometryReference geometryShapeReference;
+                if (contextHelper.ShapeLookup.TryGetValue(grid.EntityLabel, out geometryShapeReference) && grid.Representation != null && grid.Representation.Representations.Count > 0)
                 {
                     XbimMatrix3D placementTransform =
                         XbimMatrix3D.Multiply(
-                            XbimMatrix3D.CreateTranslation((XbimVector3D)instance.TempOriginDisplacement),
+                            XbimMatrix3D.CreateTranslation((XbimVector3D)geometryShapeReference.TempOriginDisplacement),
                             XbimPlacementTree.GetTransform(grid, contextHelper.PlacementTree, Engine)
                         );
                     // int context = 0;
@@ -996,12 +996,13 @@ namespace Xbim.ModelGeometry.Scene
                     var context = gRep.ContextOfItems;
                     var intContext = (context == null) ? 0 : context.EntityLabel;
 
-                    WriteShapeInstanceToStore(instance.GeometryId, instance.StyleLabel, intContext, grid,
-                        placementTransform, instance.BoundingBox,
+                    WriteShapeInstanceToStore(geometryShapeReference.GeometryId, geometryShapeReference.StyleLabel, intContext, grid,
+                        placementTransform, geometryShapeReference.BoundingBox,
                         XbimGeometryRepresentationType.OpeningsAndAdditionsIncluded, txn);
 
                     // todo: BUG: the following does some calcs that are not stored... the writing happens the line before.
-                    instance.BoundingBox.Transform(placementTransform);
+                    // geometryShapeReference.BoundingBox.Transform(placementTransform);
+                    // todo: do we need to enqueue this object for the scene bounding box (like it happens for other calls to WriteShapeInstanceToStore)?
                 }
             }
 
@@ -1104,22 +1105,21 @@ namespace Xbim.ModelGeometry.Scene
                                mapTransform);
                             trans = XbimMatrix3D.Multiply(trans, placementTransform);
 
-                            shapesInstances.Add(
-                                WriteShapeInstanceToStore(mappedGeometryReference.GeometryId, mappedGeometryReference.StyleLabel, contextId,
+                            var savedInstance = WriteShapeInstanceToStore(mappedGeometryReference.GeometryId, mappedGeometryReference.StyleLabel, contextId,
                                     product,
-                                    trans, 
+                                    trans,
                                     mappedGeometryReference.BoundingBox,
-                                    repType, txn)
-                                );
+                                    repType, txn);
+                            shapesInstances.Add(savedInstance);
 
-                            // do not include opening elements in the clusters (to determine the regions)
+                            // do not include opening elements in the clusters that determine the regions
                             //
                             if (!(product is IIfcOpeningElement))
                             {
                                 //transform the bounds
-                                var transformedProductBounds = mappedGeometryReference.BoundingBox.Transform(trans);
+                                // var transformedProductBounds = mappedGeometryReference.BoundingBox.Transform(trans);
                                 contextHelper.Clusters[rep.ContextOfItems].Enqueue(
-                                    new XbimBBoxClusterElement(mappedGeometryReference.GeometryId, transformedProductBounds)
+                                    new XbimBBoxClusterElement(mappedGeometryReference.GeometryId, savedInstance.BoundingBox)
                                     );
                             }
                         }
@@ -1150,22 +1150,21 @@ namespace Xbim.ModelGeometry.Scene
                                 placementTransform
                                 );
 
-                        shapesInstances.Add(
-                            WriteShapeInstanceToStore(instance.GeometryId, instance.StyleLabel, contextId, product,
+                        var savedInstance = WriteShapeInstanceToStore(instance.GeometryId, instance.StyleLabel, contextId, product,
                                 movedTransform, instance.BoundingBox /*productBounds*/,
-                                repType, txn)
-                            );
+                                repType, txn);
+                        shapesInstances.Add(savedInstance);
                         // do not include opening elements in the clusters (to determine the regions)
                         //
                         if (!(product is IIfcOpeningElement))
                         {
                             // todo: clarify if the boundingbox is affected by TempOriginDisplacement
                             // transform the bounds
-                            var transproductBounds = instance.BoundingBox.Transform(movedTransform);
+                            // var transproductBounds = instance.BoundingBox.Transform(movedTransform);
                             // (don't)
                             contextHelper.Clusters[rep.ContextOfItems].Enqueue(
                                 new XbimBBoxClusterElement(instance.GeometryId,
-                                    transproductBounds));
+                                    savedInstance.BoundingBox));
                         }
                     }
                 }
@@ -1478,7 +1477,7 @@ namespace Xbim.ModelGeometry.Scene
                 RepresentationContext = ctxtId,
                 IfcTypeId = _model.Metadata.ExpressTypeId(product),
                 Transformation = placementTransform,
-                BoundingBox = bounds
+                BoundingBox = bounds.Transform(placementTransform)
             };
 
             try

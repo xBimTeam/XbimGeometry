@@ -167,7 +167,7 @@ namespace GeometryTests
 
                     Assert.AreEqual(0, FailedShapes.Count, "Shapes failing bounding box test: " + string.Join(",\r\n", FailedShapes));
                     // todo: restore test, this is needed but does not pass yet.
-                    // Assert.AreEqual(0, FailedInstances.Count, "Instances failing bounding box test: " + string.Join(",\r\n", FailedInstances));
+                    Assert.AreEqual(0, FailedInstances.Count, "Instances failing bounding box test: " + string.Join(",\r\n", FailedInstances));
                 }
             }
         }
