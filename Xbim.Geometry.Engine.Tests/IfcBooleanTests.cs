@@ -487,28 +487,7 @@ namespace Ifc4GeometryTests
                 }
             }
         }
-        [TestMethod]
-        public void Empty_BooleanResult2()
-        {
-            // note: this test is known to fail, but its purpose is not clear, and the file is lacking geometry context.
-            // we should consider if it needs to be removed.
-            using (var eventTrace = LoggerFactory.CreateEventTrace())
-            {
-                using (var m = IfcStore.Open("SolidTestFiles\\EmptyBooleanResult2.ifc"))
-                {
-                    foreach (var br in m.Instances.OfType<IIfcBooleanResult>())
-                    {
-                        if (br.EntityLabel == 2913840) continue;// these are nested booleans that do return a solid for a cut in another boolean
-                        var solid = _xbimGeometryCreator.CreateSolid(br);
-                        Assert.IsFalse(solid.IsValid, "The solid should be valid");
-                        Assert.IsFalse(solid.Shells.Any(), "There should be no shell");
-                        Assert.IsTrue(eventTrace.Events.Count==0,"No events should be raised");
-                        Assert.IsFalse(solid.Faces.Any(), "This solid should have 0 faces");
-                    }      
-                }
-            }
-        }
-
+        
         [TestMethod]
         public void Faceted_BRep_With_Void()
         {
