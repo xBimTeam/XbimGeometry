@@ -60,6 +60,9 @@ namespace GeometryTests
             using (var m = IfcStore.Open(f.FullName))
             {
                 var c = new Xbim3DModelContext(m);
+#if DEBUG
+                c.MaxThreads = 1;
+#endif
                 if (useAlternativeExtruder)
                     c.UseSimplifiedFastExtruder = true;
                 c.CreateContext(null, mode);
@@ -146,15 +149,15 @@ namespace GeometryTests
                         var instanceBox = shapeInstance.BoundingBox;
                         var locatedBox = storedBox.Transform(shapeInstance.Transformation);
                         var delta = BoxesAreSame(instanceBox, locatedBox);
-                        if (delta > 0.01)
+                        if (delta > 0.03)
                         {
                             FailedInstances.Add("Delta: " + delta + " " + shapeInstance.ToString());
                             if (FailedInstances.Count > 10)
                                 continue; // exit the loop if many errors.
                         }
 
-                        delta = BoxesAreSame(instanceBox, locatedBox);
-                        if (delta > 0.01)
+                        delta = BoxesAreSame(computedBox, storedBox);
+                        if (delta > 0.03)
                         {
                             FailedShapes.Add("Delta: " + delta + " " + shapeGeom.ToString());
                             if (FailedShapes.Count > 10)

@@ -112,7 +112,7 @@ namespace Xbim.ModelGeometry.Scene
             XbimShapeGeometry shapeGeometry = new XbimShapeGeometry();
             shapeGeometry.Format = XbimGeometryType.PolyhedronBinary;
 
-            XbimPoint3D displacement = new XbimPoint3D(0, 0, 0);
+            XbimVector3D displacement = new XbimVector3D(0, 0, 0);
             if (moveMinShapeToOrigin)
             {
                 // compute min coords
@@ -127,9 +127,9 @@ namespace Xbim.ModelGeometry.Scene
                     minY = Math.Min(minY, v.Y);
                     minZ = Math.Min(minZ, v.Z);
                 }
-                displacement = new XbimPoint3D(minX, minY, minZ);
+                displacement = new XbimVector3D(minX, minY, minZ);
             }
-            shapeGeometry.TempOriginDisplacement = displacement;
+            shapeGeometry.TempOriginDisplacement = new XbimPoint3D(displacement.X, displacement.Y, displacement.Z);
 
             using (var ms = new MemoryStream(0x4000))
             using (var binaryWriter = new BinaryWriter(ms))
@@ -140,21 +140,18 @@ namespace Xbim.ModelGeometry.Scene
                 uint facesCount = 1;
                 var boundingBox = XbimRect3D.Empty;
  
-                foreach (var pos in positions)
-                {
-                    boundingBox.Union(pos);
-                }
-
                 binaryWriter.Write((byte)1); //stream format version			
                 // ReSharper disable once RedundantCast
                 binaryWriter.Write((UInt32)verticesCount); //number of vertices
                 binaryWriter.Write(triangleCount); //number of triangles
 
-                foreach (var v in positions)
+                foreach (var pos in positions)
                 {
-                    binaryWriter.Write((float)(v.X - displacement.X));
-                    binaryWriter.Write((float)(v.Y - displacement.Y));
-                    binaryWriter.Write((float)(v.Z - displacement.Z));
+                    var Corrected = (pos - displacement);
+                    boundingBox.Union(Corrected);
+                    binaryWriter.Write((float)(Corrected.X));
+                    binaryWriter.Write((float)(Corrected.Y));
+                    binaryWriter.Write((float)(Corrected.Z));
                 }
                 shapeGeometry.BoundingBox = boundingBox;
                 //now write out the faces
