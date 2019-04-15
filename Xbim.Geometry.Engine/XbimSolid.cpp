@@ -1068,7 +1068,14 @@ namespace Xbim
 			IIfcDirection^ dir = repItem->ExtrudedDirection;
 			gp_Vec vec(dir->X, dir->Y, dir->Z);
 			vec.Normalize();
-			vec *= repItem->Depth;
+			double depth = repItem->Depth;
+			if (depth > 1e36) //SRL 1e36 is as big as we can go without booleans failing, it should be big enough for most sensible cases
+			{
+				XbimGeometryCreator::LogInfo(logger, repItem, "Extrusion is too large, it has been truncated to avoid boolean errors");
+				depth = 1e36;
+			}
+
+			vec *= depth;
 
 			if (repItem->Depth > 0) //we have a valid face and extrusion
 			{
