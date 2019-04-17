@@ -4,7 +4,7 @@
 #include <gp_GTrsf.hxx> 
 #include <gp_Trsf.hxx> 
 #include <gp_Pln.hxx> 
- 
+#include <TColgp_Array1OfPnt.hxx>
 using namespace Xbim::Ifc4::Interfaces;
 using namespace Xbim::Common::Exceptions;
 using namespace Xbim::Common::Geometry;
@@ -74,6 +74,7 @@ namespace Xbim
 			static gp_Vec GetAxisDir3d(IIfcAxis2Placement^ placement);
 			static gp_Ax3 ToAx3(IIfcAxis2Placement2D^ axis2D);
 			static gp_Ax3 ToAx3(IIfcAxis2Placement^ axis2);
+			static gp_Vec NewellsNormal(const TColgp_Array1OfPnt& loop, bool& isPlanar);
 		};
 
 	}

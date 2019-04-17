@@ -4,8 +4,8 @@
 #include "XbimWireSet.h"
 #include <TopoDS_Face.hxx>
 #include <BRepBuilderAPI_FaceError.hxx>
-#include "OCC/src/Geom/Geom_Surface.hxx"
- 
+#include <Geom_Surface.hxx>
+#include <TColgp_SequenceOfPnt.hxx>
 using namespace System::Collections::Generic;
 using namespace Xbim::Ifc4::Interfaces;
 using namespace Xbim::Common::Geometry;
@@ -140,6 +140,7 @@ namespace Xbim
 			Handle(Geom_Surface) GetSurface();
 			XbimVector3D NormalAt(double u, double v);
 			void SetLocation(TopLoc_Location loc);
+			static void RemoveDuplicatePoints(TColgp_SequenceOfPnt& polygon, bool closed, double tol);
 #pragma endregion
 
 

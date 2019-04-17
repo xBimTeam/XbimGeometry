@@ -782,6 +782,46 @@ namespace Xbim
 			return v.Normalized();
 			
 		}
+		gp_Vec XbimConvert::NewellsNormal(const TColgp_Array1OfPnt& loop, bool& isPlanar)
+		{
+			double x = 0, y = 0, z = 0;
+			gp_Pnt previous;
+			int count = 0;
+
+			int total = loop.Length();
+			for (int i = 0; i <= total; i++)
+			{
+				gp_Pnt current = i < total ? loop.Value(i + 1) : loop.Value(1);
+				if (count > 0)
+				{
+					double xn = previous.X();
+					double yn = previous.Y();
+					double zn = previous.Z();
+					double xn1 = current.X();
+					double yn1 = current.Y();
+					double zn1 = current.Z();
+					x += (yn - yn1) * (zn + zn1);
+					y += (xn + xn1) * (zn - zn1);
+					z += (xn - xn1) * (yn + yn1);
+				}
+				previous = current;
+				count++;
+			}
+			gp_Vec v(x, y, z);
+			if (v.Magnitude() >= gp::Resolution())
+			{
+				isPlanar = true;
+				return v.Normalized();
+			}
+			else
+			{
+				isPlanar = false;
+				return v;
+			}
+
+
+		}
+
 
 		gp_Dir XbimConvert::GetDir3d(IIfcDirection^ dir)
 		{

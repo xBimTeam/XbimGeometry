@@ -32,7 +32,7 @@ using namespace System::Security::Permissions;
 // by using the '*' as shown below:
 
 //[assembly:AssemblyVersionAttribute("1.0.*")];
-[assembly:System.Reflection.AssemblyVersionAttribute("5.0.1708.05490")];
+[assembly:System.Reflection.AssemblyVersionAttribute("5.0.1708.1")];
 [assembly:ComVisible(false)];
 
 [assembly:CLSCompliantAttribute(true)];

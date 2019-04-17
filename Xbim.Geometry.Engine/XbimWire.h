@@ -7,6 +7,7 @@
 #include <TopoDS_Edge.hxx>
 #include <vector>
 #include <NCollection_Vector.hxx>
+
 using namespace System;
 using namespace System::Collections::Generic;
 using namespace Xbim::Ifc4::Interfaces;
@@ -71,7 +72,7 @@ namespace Xbim
 			bool AreEdgesC1(const TopoDS_Edge& e1, const TopoDS_Edge& e2, double precision, double angularTolerance);
 			bool SortEdgesForWire(const NCollection_Vector<TopoDS_Edge>& oldedges, NCollection_Vector<TopoDS_Edge>& newedges, NCollection_Vector<TopoDS_Edge>& notTaken, double tol, bool *pClosed, double* pMaxGap);
 			int  GetMatchTwoPntsPair(const gp_Pnt& b1, const gp_Pnt& e1, const gp_Pnt& b2, const gp_Pnt& e2, double& minDis, double& otherDis);
-		
+			
 			
 		public:
 
@@ -84,7 +85,7 @@ namespace Xbim
 #pragma region constructors
 
 			XbimWire() {}; //an empty invalid wire
-			XbimWire(XbimEdge^ edge);
+			XbimWire(XbimEdge^ edge); 
 
 			XbimWire(double x, double y, double tolerance, bool centre);
 			XbimWire(double precision);
@@ -152,7 +153,7 @@ namespace Xbim
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D)override;
 			void FuseColinearSegments(double tolerance, double angleTolerance, ILogger^ logger);
 			virtual property double Area {double get(); }
-			virtual property double MaxTolerance {double get() {return IsValid ? BRep_Tool::MaxTolerance(*pWire, TopAbs_EDGE) : 0; } }
+			virtual property double MaxTolerance {double get() {return IsValid ? BRep_Tool::MaxTolerance(*pWire, TopAbs_VERTEX) : 0; } }
 #pragma endregion
 
 #pragma region Equality Overrides
@@ -205,6 +206,7 @@ namespace Xbim
 
 			// Inherited via XbimOccShape
 			virtual void Mesh(IXbimMeshReceiver ^ mesh, double precision, double deflection, double angle) override;
+			
 		};
 
 		public ref class IfcPolylineComparer :IEqualityComparer<IIfcPolyline^>
