@@ -726,7 +726,7 @@ namespace Xbim
 			
 		}
 
-
+		//srl need to review this to use the normals provided in the ifc file
 		void  XbimCompound::Init(IIfcTriangulatedFaceSet^ faceSet, ILogger^ logger)
 		{
 			BRep_Builder builder;
