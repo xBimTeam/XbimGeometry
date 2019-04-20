@@ -495,6 +495,25 @@ namespace Xbim
 		void XbimCompound::Init(IIfcClosedShell^ closedShell, ILogger^ logger)
 		{
 			Init((IIfcConnectedFaceSet^)closedShell,true, logger);
+			if (IsValid) //make it a closed solid if we can
+			{
+				BRepBuilderAPI_MakeSolid solidmaker;
+				TopTools_IndexedMapOfShape shellMap;
+				TopExp::MapShapes(*pCompound, TopAbs_SHELL, shellMap);
+				for (int ishell = 1; ishell <= shellMap.Extent(); ++ishell) {
+					const TopoDS_Shell& shell = TopoDS::Shell(shellMap(ishell));
+					solidmaker.Add(shell);
+				}
+
+				TopoDS_Shape solid = solidmaker.Solid();
+				if (!solid.IsNull())
+				{
+					BRep_Builder b;
+					b.MakeCompound(*pCompound);
+					b.Add(*pCompound, solid);
+				}
+
+			}
 		}
 		void XbimCompound::Init(IIfcOpenShell^ openShell, ILogger^ logger)
 		{
@@ -895,290 +914,30 @@ namespace Xbim
 				builder.Add(*pCompound, shell);
 		}
 
-
 		void XbimCompound::Init(IEnumerable<IIfcFace^>^ ifcFaces, bool /*close*/, IIfcRepresentationItem^ theItem, ILogger^ logger)
-		{						
-			double tolerance = theItem->Model->ModelFactors->Precision;			
-			_sewingTolerance = tolerance;
-
-			ShapeFix_ShapeTolerance FTol;
-
-			// init shell
+		{
+			_sewingTolerance = theItem->Model->ModelFactors->Precision;
 			BRep_Builder builder;
-			TopoDS_Shell shell;
-			builder.MakeShell(shell);
-
-			// Unique dictionary of points for the whole mesh
-			Dictionary<XbimPoint3DWithTolerance^, XbimVertex^>^ uniquePoints = gcnew Dictionary<XbimPoint3DWithTolerance^, XbimVertex^>();
-			Dictionary<XbimBiPolarLinearEdge^, XbimBiPolarLinearEdge^>^ uniqueEdges = gcnew Dictionary<XbimBiPolarLinearEdge^, XbimBiPolarLinearEdge^>();
-			List<XbimFace^>^ allFaces = gcnew List<XbimFace^>();
-			
+			/*TopoDS_Shell shell;
+			builder.MakeShell(shell);*/
+			BRepBuilderAPI_Sewing seamstress(_sewingTolerance);
 			for each (IIfcFace^ ifcFace in ifcFaces)
 			{
-				List<XbimBiPolarLinearEdge^>^ linearEdges = gcnew List<XbimBiPolarLinearEdge^>(2);
-				List<Tuple<XbimWire^, IIfcPolyLoop^, bool>^>^ thisFaceLoops = gcnew List<Tuple<XbimWire^, IIfcPolyLoop^, bool>^>(); // the bool is an orientation flag
-				
-				// build all the thisFaceLoops
-				for each (IIfcFaceBound^ bound in ifcFace->Bounds) 
-				{
-					if (!dynamic_cast<IIfcPolyLoop^>(bound->Bound) || !XbimConvert::IsPolygon((IIfcPolyLoop^)bound->Bound)) 
-						continue; //skip non-polygonal faces
-
-					// init wire
-					TopoDS_Wire wire;
-					builder.MakeWire(wire);
-
-					// nature of the loop
-					IIfcPolyLoop^ polyLoop = (IIfcPolyLoop^)(bound->Bound);
-					bool is3D = XbimConvert::Is3D(polyLoop);					
-					int totalPoints = polyLoop->Polygon->Count;
-
-					// starting from the last point
-					IIfcCartesianPoint^ last = polyLoop->Polygon[totalPoints-1];
-					XbimPoint3DWithTolerance^ prevPoint = gcnew XbimPoint3DWithTolerance(last->X, last->Y, is3D ? last->Z : 0.0, tolerance);
-					XbimVertex^ prevVertex;
-					
-					if (!uniquePoints->TryGetValue(prevPoint, prevVertex))
-					{
-						prevVertex = gcnew XbimVertex(prevPoint);  // if prevVertex is not set by the TryGetValue we'll set it here
-						uniquePoints->Add(prevPoint, prevVertex);
-					}
-					for each (IIfcCartesianPoint^ p in polyLoop->Polygon) //add all the points into unique collection
-					{
-						XbimPoint3DWithTolerance^ thisPoint = gcnew XbimPoint3DWithTolerance(p->X, p->Y, is3D ? p->Z : 0.0, tolerance);
-						XbimVertex^ thisVertex;
-						if (!uniquePoints->TryGetValue(thisPoint, thisVertex))
-						{
-							thisVertex = gcnew XbimVertex(thisPoint);
-							uniquePoints->Add(thisPoint, thisVertex); // we want to be able to find the vertex from the coordinates
-						}
-
-						XbimBiPolarLinearEdge^ edgeToFind = gcnew XbimBiPolarLinearEdge(prevPoint, prevVertex, thisPoint, thisVertex);
-						if (!edgeToFind->IsEmptyLine)
-						{
-							// skip if the edge is empty
-							XbimBiPolarLinearEdge^ linearEdge;
-							if (!uniqueEdges->TryGetValue(edgeToFind, linearEdge))
-							{
-								linearEdge = edgeToFind;  // if linearEdge is not set by the TryGetValue we'll set it here
-								uniqueEdges->Add(linearEdge, linearEdge); // then add the edge to the unique list for future searches
-							}
-
-							
-							XbimEdge^ edge = linearEdge->TakeEdge(prevPoint);
-							linearEdges->Add(linearEdge);
-							// TODO: should there be more consequences if not valid?
-							if (edge != nullptr && edge->IsValid)
-								builder.Add(wire, edge);
-						}
-						prevVertex = thisVertex;
-						prevPoint = thisPoint;						
-					}
-					FTol.LimitTolerance(wire, tolerance);
-					wire.Closed(Standard_True); //need to check this
-					XbimWire^ loop = gcnew XbimWire(wire);
-					
-					// face definition is used to attempt fixing the loop
-					//
-					XbimFace^ xFace = nullptr;
-					if (is3D)
-					{						
-						XbimVector3D norm = loop->Normal;
-						if (!norm.IsInvalid()) //this is not a polyline on a face so we cannot fix any problems just go with it.
-							xFace = gcnew XbimFace(norm, logger);
-					}
-					else
-					{
-						// assume x-y plane face
-						xFace = gcnew XbimFace(XbimVector3D(0, 0, 1), logger);
-					}
-
-
-					if (xFace != nullptr)
-					{
-						ShapeAnalysis_Wire wireChecker(wire, xFace, tolerance);
-						Standard_Boolean needsFixing = wireChecker.CheckSelfIntersection();
-						
-						if (needsFixing == Standard_True)
-						{
-							ShapeFix_Wire wireFixer(wire, xFace, tolerance);
-							wireFixer.ModifyGeometryMode() = Standard_True;
-							wireFixer.ModifyTopologyMode() = Standard_True;
-							wireFixer.ClosedWireMode() = Standard_True;
-							wireFixer.FixSelfIntersectionMode() = Standard_True;
-							wireFixer.FixSelfIntersectingEdgeMode() = Standard_True;
-							if (wireFixer.FixSelfIntersection())
-								loop = gcnew XbimWire(wireFixer.Wire());
-						}
-					}
-										
-					// process the loop
-					//
-					if (loop->IsValid && loop->Area)
-					{
-						if (!bound->Orientation)
-							loop->Reverse();
-						thisFaceLoops->Add(
-							gcnew Tuple<XbimWire^, IIfcPolyLoop^, bool>(loop, polyLoop, bound->Orientation)
-						);
-					}					
-				}
-
-				XbimFace^ face = BuildFace(thisFaceLoops, ifcFace, logger);
-				
-				
-				for each (Tuple<XbimWire^, IIfcPolyLoop^, bool>^ loop in thisFaceLoops) delete loop->Item1; //force removal of wires
-				if (face->IsValid )
-				{
-					face->Tag = linearEdges;
-					FTol.LimitTolerance(face, tolerance);					
-					allFaces->Add(face);
-				}
-				else
-				{
-					for each (XbimBiPolarLinearEdge^ linEdge in linearEdges) //release any linear edges this was referencing
-					{
-						linEdge->ReleaseEdge();
-					}
-					XbimGeometryCreator::LogInfo(logger,ifcFace, "Incorrectly defined face. It has been ignored");
-				}
+				XbimFace^ face = gcnew XbimFace(ifcFace, logger);
+				seamstress.Add(face);
 			}
+			seamstress.Perform();			
+			TopoDS_Shape result = seamstress.SewedShape();
 			
-			// see if we have any multiconnected edges and faces that are totally multi-connected
-			// 
-			List<XbimFace^>^ facesToDelete = gcnew List<XbimFace^>();
-			List<XbimFace^>^ facesToRecheck = gcnew List<XbimFace^>();
-			
-			for each (XbimFace^ f in allFaces)
-			{
-				List<XbimBiPolarLinearEdge^>^ linearEdges = (List<XbimBiPolarLinearEdge^>^)(f->Tag);
-				//Debug::WriteLine(String::Format("Face {0}: {1} edges.", iFace++, linearEdges->Count));
-				bool allEdgesMultiConnected = true;
-				bool someEdgesMultiConnected = false;
-
-				for each (XbimBiPolarLinearEdge^ linEdge in linearEdges)
-				{	
-					//Debug::WriteLine(String::Format(" RefCount: {0}", linEdge->ReferenceCount));
-					
-					if (linEdge->ReferenceCount < 3) 
-						allEdgesMultiConnected = false;
-					if (linEdge->ReferenceCount > 2) 
-						someEdgesMultiConnected = true;
-				}
-				if (allEdgesMultiConnected)
-				{
-					for each (XbimBiPolarLinearEdge^ linEdge in linearEdges) //release any linear edges this was referencing
-					{
-						linEdge->ReleaseEdge();
-					}
-					facesToDelete->Add(f);
-					XbimGeometryCreator::LogInfo(logger,f, "Incorrectly defined face, it is connected to more than one other face at every edge. It has been ignored");
-				}
-				else
-				{
-					builder.Add(shell, f); //add it to the shell
-					if (someEdgesMultiConnected) //if some of the edges are multi connected they might not be when we have deleted the offending faces so we will look again
-					{
-						facesToRecheck->Add(f);
-					}
-				}
-			}
-			
-			
-			// in theory we have a topologically valid shell or shells
-			// but face orientation may be wrong as some exporters don't care about this
-			// try and custer the faces into shells
-
-			/*XbimFace^ aValidFace = Enumerable::FirstOrDefault(allFaces);
-
-
-			List<XbimFace^>^ facesToProcess = gcnew List<XbimFace^>(allFaces);
-			facesToProcess->Remove(aValidFace);
-			if (aValidFace != nullptr)
-			{
-				List<List<XbimFace^>^>^ shellList = gcnew List<List<XbimFace^>^>();
-				List<XbimFace^>^ validShell = gcnew List<XbimFace^>();
-				List<XbimEdge^>^ edgesProcessed = gcnew List<XbimEdge^>(facesToProcess->Count * 4);
-				shellList->Add(validShell);
-				validShell->Add(aValidFace);
-				
-				
-				
-				
-			}*/
-
-			ShapeAnalysis_Shell shellAnalyser;
-			bool needsReorienting = shellAnalyser.CheckOrientedShells(shell);
-			
-			if (needsReorienting)
-			{
-				ShapeFix_Shell shellFixer;
-				bool fixed = shellFixer.FixFaceOrientation(shell);
-				if (fixed) 
-					shell = shellFixer.Shell();
-			}
-			
-			/*shellAnalyser.LoadShells(shell);
-			bool hasFreeEdges = shellAnalyser.HasFreeEdges(); 
-			bool hasBadEdges = shellAnalyser.HasBadEdges();*/
-			//ShapeFix_FixSmallSolid fss;
-			//fss.SetPrecision(theItem->Model->ModelFactors->Precision);
-			//fss.Remove(shell, )
-
-			
-			TopoDS_Shape result = shell;
-			// if (close) //we want it closed, actually sometimes surface  based models are closed and used in booleans so try and do it anyway
-			{
-				ShapeFix_Solid solidFixer;
-				solidFixer.LimitTolerance(tolerance);
-				result = solidFixer.SolidFromShell(shell); //nb this does not do any clever checking, just throws a sj
-				if (result.IsNull())
-					result = shell; //give in and use previous shell
-				else if (BRepCheck_Analyzer(result, Standard_True).IsValid() == Standard_False)
-				{
-					
-					ShapeFix_Shape sFixer(result);
-					sFixer.LimitTolerance(tolerance);
-					sFixer.Perform();
-					result = sFixer.Shape();
-				}
-				
-				
-			}
-			/*else
-				result = shell;*/
+			TopoDS_Compound compound;
+			builder.MakeCompound(compound);
+			builder.Add(compound, result);
 			pCompound = new TopoDS_Compound();
-			builder.MakeCompound(*pCompound);
-			//remove unnecesary faces, normally caused by triangulation, this improves boolean quality
-			if (allFaces->Count > 6 && allFaces->Count < MaxFacesToSew) //six is a cuboid no point in simplify that
-			{
-				ShapeUpgrade_UnifySameDomain unifier(result);
-				unifier.SetAngularTolerance(0.00174533); //1 tenth of a degree
-				unifier.SetLinearTolerance(tolerance);
-				
-				try
-				{
-					//sometimes unifier crashes
-					unifier.Build();
-					builder.Add(*pCompound, unifier.Shape());
-				}
-				catch (...) //any failure
-				{
-					//default to what we had
-					builder.Add(*pCompound, result);
-				}
-			}			
-			else
-			{
-
-				builder.Add(*pCompound, result);
-			}
-			
-			//check if we are closed?
-
-			_isSewn = true; //effectively further sewing will yield no advantage
-			
+			*pCompound = compound;
+			_isSewn = true;
 		}
+		
+		
 
 #pragma endregion
 

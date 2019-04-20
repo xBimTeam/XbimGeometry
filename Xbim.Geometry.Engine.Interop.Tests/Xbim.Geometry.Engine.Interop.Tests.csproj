@@ -30,7 +30,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="1.4.0" />
     <PackageReference Include="MSTest.TestFramework" Version="1.4.0" />
-    <PackageReference Include="Xbim.IO.MemoryModel" Version="5.0.245-develop" />
+    <PackageReference Include="Xbim.IO.MemoryModel" Version="5.0.249-develop" />
   </ItemGroup>
 
   <ItemGroup>
@@ -39,6 +39,9 @@
 
   <ItemGroup>
     <None Update="TestFiles\BooleanResultTimoutTest.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestFiles\boolean_result_timing_out2.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="TestFiles\FaceWithBoundsOutsideDeclaredPrecisionTest.ifc">

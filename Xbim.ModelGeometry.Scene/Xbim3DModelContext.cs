@@ -246,7 +246,7 @@ namespace Xbim.ModelGeometry.Scene
                     VoidedProductIds = new HashSet<int>();
                     VoidedShapeIds = new HashSet<int>();
                     ParallelOptions = new ParallelOptions();
-                    //ParallelOptions.MaxDegreeOfParallelism = 8;
+                    ParallelOptions.MaxDegreeOfParallelism = 6;
                     CachedGeometries = new ConcurrentDictionary<int, IXbimGeometryObject>();
                     foreach (var voidedShapeId in OpeningsAndProjections.Select(op => op.Key.EntityLabel))
                         VoidedProductIds.Add(voidedShapeId);
@@ -1283,8 +1283,12 @@ namespace Xbim.ModelGeometry.Scene
                     }
                 }
             }
-            Parallel.ForEach(contextHelper.ProductShapeIds, contextHelper.ParallelOptions, shapeId =>
+            var geomCache = new ConcurrentDictionary<int, IXbimGeometryObject>();
+            Model.Tag = geomCache;
+             Parallel.ForEach(contextHelper.ProductShapeIds, contextHelper.ParallelOptions, shapeId =>
+            //foreach (var shapeId in contextHelper.ProductShapeIds)
             {
+
                 Interlocked.Increment(ref localTally);
                 IIfcGeometricRepresentationItem shape;
                 try

@@ -49,6 +49,7 @@ namespace Xbim
 			void Init(IIfcRationalBSplineSurfaceWithKnots ^ surface, ILogger^ logger);
 			void Init(IIfcCylindricalSurface ^ surface, ILogger^ logger);
 			void Init(double x, double y, double tolerance, ILogger^ logger); 
+			void Init(IIfcFace^ face, ILogger^ logger);
 		public:
 			
 			//destructors
@@ -121,6 +122,7 @@ namespace Xbim
 			XbimFace(IIfcFaceSurface^ surface, XbimWire^ outerBound, IEnumerable<XbimWire^>^ innerBounds, double tolerance, ILogger^ logger);
 			XbimFace(IIfcCylindricalSurface ^ surface, ILogger^ logger);
 			XbimFace(double x, double y, double tolerance, ILogger^ logger);
+			XbimFace(IIfcFace ^ face, ILogger^ logger);
 #pragma endregion
 
 #pragma region Internal Properties

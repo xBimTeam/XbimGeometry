@@ -232,6 +232,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             }
 
         }
+
         [TestMethod]
         public void BooleanResultTimoutTest()
         {
@@ -239,6 +240,19 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
 
+                var solids = geomEngine.CreateSolidSet(er.Entity, logger);
+                HelperFunctions.IsValidSolid(solids.FirstOrDefault());
+
+            }
+
+        }
+        [TestMethod]
+        public void BooleanResultTimout2Test()
+        {
+            using (var er = new EntityRepository<IIfcBooleanResult>("boolean_result_timing_out2", true))
+            {
+                Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
+               
                 var solids = geomEngine.CreateSolidSet(er.Entity, logger);
                 HelperFunctions.IsValidSolid(solids.FirstOrDefault());
 
@@ -728,7 +742,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 solidResult = geomEngine.CreateSolidSet(er.Entity, logger).FirstOrDefault();
                 var actualVolume = solidResult.Volume;
                 Assert.IsTrue(solidBody.Volume > actualVolume, "This cut solid should have less volume than the body shape");
-                Assert.IsTrue(solidResult.Faces.Count == 10, "This solid should have 10 faces");
+                Assert.IsTrue(solidResult.Faces.Count == 9, "This solid should have 9 faces");
             }
         }
         [TestMethod]
