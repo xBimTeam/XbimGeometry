@@ -174,7 +174,7 @@ namespace XbimRegression
                 {
                     logger.LogError(string.Format("Problem converting file: {0}", ifcFile), ex);
                     result.Failed = true;
-                    result.GeometryDuration = watch.ElapsedMilliseconds / 1000;
+                    result.GeometryDuration = watch.ElapsedMilliseconds;
                 }
                
                 return result;

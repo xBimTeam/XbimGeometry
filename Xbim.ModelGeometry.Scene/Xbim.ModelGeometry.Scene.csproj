@@ -21,4 +21,8 @@
   <ItemGroup>
     <ProjectReference Include="..\Xbim.Geometry.Engine.Interop\Xbim.Geometry.Engine.Interop.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Configuration" />
+  </ItemGroup>
 </Project>
