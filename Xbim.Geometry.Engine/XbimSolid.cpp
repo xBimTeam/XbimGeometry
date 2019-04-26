@@ -860,12 +860,26 @@ namespace Xbim
 			IModelFactors^ mf = repItem->Model->ModelFactors;
 			XbimWire^ sweep = gcnew XbimWire(repItem->Directrix, logger);
 
-			if (repItem->StartParam.HasValue && repItem->EndParam.HasValue)
-				sweep = (XbimWire^)sweep->Trim(repItem->StartParam.Value, Math::Abs(repItem->EndParam.Value - 1.0) < Precision::Confusion() ? sweep->Length : repItem->EndParam.Value, mf->Precision, logger);
-			else if (repItem->StartParam.HasValue && !repItem->EndParam.HasValue)
-				sweep = (XbimWire^)sweep->Trim(repItem->StartParam.Value, sweep->Length, mf->Precision, logger);
-			else if (!repItem->StartParam.HasValue && repItem->EndParam.HasValue)
-				sweep = (XbimWire^)sweep->Trim(0, Math::Abs(repItem->EndParam.Value - 1.0) < Precision::Confusion() ? sweep->Length : repItem->EndParam.Value, mf->Precision, logger);
+			if (dynamic_cast<IIfcLine^>(repItem->Directrix)) //params are different
+			{
+				IIfcLine ^  line = (IIfcLine^)(repItem->Directrix);
+				double mag = line->Dir->Magnitude;
+				if (repItem->StartParam.HasValue && repItem->EndParam.HasValue)
+					sweep = (XbimWire^)sweep->Trim(repItem->StartParam.Value *mag,  repItem->EndParam.Value * mag, mf->Precision, logger);
+				else if (repItem->StartParam.HasValue && !repItem->EndParam.HasValue)
+					sweep = (XbimWire^)sweep->Trim(repItem->StartParam.Value*mag, sweep->Length, mf->Precision, logger);
+				else if (!repItem->StartParam.HasValue && repItem->EndParam.HasValue)
+					sweep = (XbimWire^)sweep->Trim(0, repItem->EndParam.Value * mag, mf->Precision, logger);
+			}
+			else
+			{
+				if (repItem->StartParam.HasValue && repItem->EndParam.HasValue)
+					sweep = (XbimWire^)sweep->Trim(repItem->StartParam.Value, repItem->EndParam.Value, mf->Precision, logger);
+				else if (repItem->StartParam.HasValue && !repItem->EndParam.HasValue)
+					sweep = (XbimWire^)sweep->Trim(repItem->StartParam.Value, sweep->Length, mf->Precision, logger);
+				else if (!repItem->StartParam.HasValue && repItem->EndParam.HasValue)
+					sweep = (XbimWire^)sweep->Trim(0, repItem->EndParam.Value, mf->Precision, logger);
+			}
 			if (!sweep->IsValid)
 			{
 				XbimGeometryCreator::LogWarning(logger, repItem, "Could not build directrix");
@@ -893,8 +907,8 @@ namespace Xbim
 				gp_Trsf trsf;
 				trsf.SetTransformation(toAx3, gp_Ax3());
 				TopLoc_Location topLoc(trsf);
-				faceStart->SetLocation(topLoc);
-				XbimWire^ outerBound = (XbimWire^)(faceStart->OuterBound);
+				faceStart->SetLocation(topLoc);	
+				XbimWire^ outerBound = (XbimWire^)(faceStart->OuterBound);		
 				BRepOffsetAPI_MakePipeShell pipeMaker1(sweep);
 				//pipeMaker1.SetMode(Standard_True);
 				pipeMaker1.SetTransitionMode(BRepBuilderAPI_Transformed);
@@ -902,8 +916,9 @@ namespace Xbim
 				pipeMaker1.Build();
 				if (pipeMaker1.IsDone())
 				{
-					TopoDS_Wire firstOuter = TopoDS::Wire(pipeMaker1.FirstShape().Reversed());
+					TopoDS_Wire firstOuter = TopoDS::Wire(pipeMaker1.FirstShape());
 					TopoDS_Wire lastOuter = TopoDS::Wire(pipeMaker1.LastShape().Reversed());
+					
 					BRepBuilderAPI_MakeFace firstMaker(firstOuter);
 					BRepBuilderAPI_MakeFace lastMaker(lastOuter);
 					for (int i = 0; i < faceStart->InnerBounds->Count; i++)
@@ -924,7 +939,7 @@ namespace Xbim
 							}
 						}
 						firstMaker.Add(TopoDS::Wire(pipeMaker2.FirstShape()));
-						lastMaker.Add(TopoDS::Wire(pipeMaker2.LastShape()));
+						lastMaker.Add(TopoDS::Wire(pipeMaker2.LastShape().Reversed()));
 					}
 					b.AddShellFace(shell, firstMaker.Face());
 					b.AddShellFace(shell, lastMaker.Face());
@@ -934,6 +949,11 @@ namespace Xbim
 						b.AddShellFace(shell, TopoDS::Face(explr.Current()));
 					}
 					b.CompleteShell(shell);
+					ShapeFix_Shell sf(shell);
+					if (sf.FixFaceOrientation(shell))
+					{
+						shell = sf.Shell();
+					}
 					TopoDS_Solid solid;
 					BRep_Builder bs;
 					bs.MakeSolid(solid);

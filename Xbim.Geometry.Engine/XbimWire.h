@@ -147,6 +147,7 @@ namespace Xbim
 			virtual property XbimPoint3D End {XbimPoint3D get(); }
 			virtual IXbimWire^ Trim(double first, double last, double tolerance,ILogger^ logger);
 
+			virtual property XbimPoint3D BaryCentre {XbimPoint3D get(); }
 			virtual property double Length {double get(); }
 			virtual property XbimRect3D BoundingBox {XbimRect3D get() override; }
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) override;

@@ -52,6 +52,9 @@
 #include <GeomLib.hxx>
 #include <gce_MakeElips.hxx>
 #include <ShapeFix_Edge.hxx>
+#include <Geom2d_BSplineCurve.hxx>
+#include <BRepBuilderAPI_MakeEdge2d.hxx>
+
 using namespace Xbim::Common;
 using namespace System::Linq;
 namespace Xbim
@@ -84,8 +87,9 @@ namespace Xbim
 			if (IsValid)
 			{
 				GProp_GProps gProps;
-				BRepGProp::LinearProperties(*pEdge, gProps);
-				GC::KeepAlive(this);
+				TopoDS_Edge e = *pEdge;
+				BRepGProp::LinearProperties(e, gProps);
+				
 				return gProps.Mass();
 			}
 			else
@@ -228,8 +232,8 @@ namespace Xbim
 					currentTolerance *= 10;
 					if (currentTolerance <= maxTolerance)
 					{
-						FTol.SetTolerance(start, currentTolerance);
-						FTol.SetTolerance(end, currentTolerance);
+						FTol.LimitTolerance(start, currentTolerance);
+						FTol.LimitTolerance(end, currentTolerance);
 						goto TryMakeEdge;
 					}
 				}
@@ -277,8 +281,8 @@ namespace Xbim
 					currentTolerance *= 10;
 					if (currentTolerance <= toleranceMax)
 					{
-						FTol.SetTolerance(start, currentTolerance);
-						FTol.SetTolerance(end, currentTolerance);
+						FTol.LimitTolerance(start, currentTolerance);
+						FTol.LimitTolerance(end, currentTolerance);
 						goto TryMakeEdge;
 					}
 				}
@@ -1010,16 +1014,25 @@ namespace Xbim
 				pEdge = new TopoDS_Edge();
 				*pEdge = edge;
 				ShapeFix_ShapeTolerance FTol;
-				FTol.SetTolerance(*pEdge, curve->Model->ModelFactors->Precision, TopAbs_EDGE);
+				FTol.LimitTolerance(*pEdge, curve->Model->ModelFactors->Precision);
 			}
 		}
 
 		void XbimEdge::Init(IIfcPolyline^ pline, ILogger^ logger)
 		{
-			if (Enumerable::Count(pline->Points) == 2)
+			int pointCount = pline->Points->Count;
+			
+			double tolerance = pline->Model->ModelFactors->Precision;
+			if (pointCount < 2)
 			{
-				IIfcCartesianPoint^ start= Enumerable::First(pline->Points);
-				IIfcCartesianPoint^ end = Enumerable::Last(pline->Points);						
+				XbimGeometryCreator::LogError(logger, pline, "Polyline with less than 2 points is not a line. It has been ignored");
+				return;
+			}
+
+			if (pointCount == 2) //its a line
+			{
+				IIfcCartesianPoint^ start = Enumerable::First(pline->Points);
+				IIfcCartesianPoint^ end = Enumerable::Last(pline->Points);
 				BRepBuilderAPI_MakeEdge edgeMaker(XbimConvert::GetPoint3d(start), XbimConvert::GetPoint3d(end));
 				BRepBuilderAPI_EdgeError edgeErr = edgeMaker.Error();
 				if (edgeErr != BRepBuilderAPI_EdgeDone)
@@ -1033,19 +1046,45 @@ namespace Xbim
 					*pEdge = edgeMaker.Edge();
 					// set the tolerance for this shape.
 					ShapeFix_ShapeTolerance FTol;
-					FTol.SetTolerance(*pEdge, pline->Model->ModelFactors->Precision, TopAbs_EDGE);
+					FTol.LimitTolerance(*pEdge, tolerance);
 				}
 			}
-			else
+			else 
 			{
-				TopoDS_Wire wire = gcnew XbimWire(pline, logger);
-				IModelFactors^ mf = pline->Model->ModelFactors;
-				XbimEdge^ edge = gcnew XbimEdge(wire, mf->Precision, 0.05, logger);
-				pEdge = new TopoDS_Edge();
-				*pEdge = edge;
-				ShapeFix_ShapeTolerance FTol;
-				FTol.SetTolerance(*pEdge, pline->Model->ModelFactors->Precision, TopAbs_EDGE);
+				TColgp_Array1OfPnt poles(1, pointCount);
+				TColStd_Array1OfReal knots(1, pointCount);
+				TColStd_Array1OfInteger mults(1, pointCount);
+
+				for (Standard_Integer i = 1; i <= pointCount; i++)
+				{
+					IIfcCartesianPoint^ cp = pline->Points[i - 1];
+					gp_Pnt pnt(cp->X, cp->Y,XbimConvert::GetZValueOrZero(cp));
+					poles.SetValue(i, pnt);
+					knots.SetValue(i, Standard_Real(i - 1));
+					mults.SetValue(i, 1);
+				}
+				mults.SetValue(1, 2);
+				mults.SetValue(pointCount, 2);
+
+				Handle(Geom_BSplineCurve) hBez(new Geom_BSplineCurve(poles, knots, mults, 1));
+				BRepBuilderAPI_MakeEdge edgeMaker(hBez);
+				BRepBuilderAPI_EdgeError edgeErr = edgeMaker.Error();
+				if (edgeErr != BRepBuilderAPI_EdgeDone)
+				{
+					XbimGeometryCreator::LogError(logger, pline, GetBuildEdgeErrorMessage(edgeErr));
+					
+				}
+				else
+				{
+					pEdge = new TopoDS_Edge();
+					*pEdge = edgeMaker.Edge();
+					// set the tolerance for this shape.
+					ShapeFix_ShapeTolerance tolFixer;
+					tolFixer.LimitTolerance(*pEdge, tolerance);
+					
+				}
 			}
+
 		}
 
 		void XbimEdge::Init(IIfcConic^ conic, ILogger^ logger)
@@ -1092,7 +1131,7 @@ namespace Xbim
 				*pEdge = edgeMaker.Edge();
 				// set the tolerance for this shape.
 				ShapeFix_ShapeTolerance FTol;
-				FTol.SetTolerance(*pEdge, circle->Model->ModelFactors->Precision, TopAbs_EDGE);
+				FTol.LimitTolerance(*pEdge, circle->Model->ModelFactors->Precision);
 			}
 		}
 
@@ -1104,7 +1143,7 @@ namespace Xbim
 			gp_Pnt pnt(cp->X, cp->Y, cp->Z);
 			XbimVector3D v3d(dir->X, dir->Y, dir->Z);
 			gp_Vec vec(v3d.X, v3d.Y, v3d.Z);
-			BRepBuilderAPI_MakeEdge edgeMaker(GC_MakeLine(pnt, vec).Value(), 0, ifcVec->Magnitude);
+			BRepBuilderAPI_MakeEdge edgeMaker(GC_MakeLine(pnt, vec).Value());
 			BRepBuilderAPI_EdgeError edgeErr = edgeMaker.Error();
 			if (edgeErr != BRepBuilderAPI_EdgeDone)
 			{
@@ -1117,7 +1156,7 @@ namespace Xbim
 				*pEdge = edgeMaker.Edge();
 				// set the tolerance for this shape.
 				ShapeFix_ShapeTolerance FTol;
-				FTol.SetTolerance(*pEdge, line->Model->ModelFactors->Precision, TopAbs_EDGE);
+				FTol.LimitTolerance(*pEdge, line->Model->ModelFactors->Precision);
 			}
 		}
 
@@ -1130,7 +1169,7 @@ namespace Xbim
 				pEdge = new TopoDS_Edge();
 				*pEdge = edgeMaker.Edge();
 				ShapeFix_ShapeTolerance FTol;
-				FTol.SetTolerance(*pEdge, ellipse->Model->ModelFactors->Precision, TopAbs_EDGE);
+				FTol.LimitTolerance(*pEdge, ellipse->Model->ModelFactors->Precision);
 			}
 		}
 
@@ -1143,7 +1182,7 @@ namespace Xbim
 				pEdge = new TopoDS_Edge();
 				*pEdge = edgeMaker.Edge();
 				ShapeFix_ShapeTolerance FTol;
-				FTol.SetTolerance(*pEdge, trimmedCurve->Model->ModelFactors->Precision, TopAbs_EDGE);
+				FTol.LimitTolerance(*pEdge, trimmedCurve->Model->ModelFactors->Precision);
 			}
 		}
 
@@ -1187,7 +1226,7 @@ namespace Xbim
 				pEdge = new TopoDS_Edge();
 				*pEdge = edgeMaker.Edge();
 				ShapeFix_ShapeTolerance FTol;
-				FTol.SetTolerance(*pEdge, bspline->Model->ModelFactors->Precision, TopAbs_EDGE);
+				FTol.LimitTolerance(*pEdge, bspline->Model->ModelFactors->Precision);
 			}
 		}
 
@@ -1228,7 +1267,7 @@ namespace Xbim
 			pEdge = new TopoDS_Edge();
 			*pEdge = edgeMaker.Edge();
 			ShapeFix_ShapeTolerance FTol;
-			FTol.SetTolerance(*pEdge, bspline->Model->ModelFactors->Precision);
+			FTol.LimitTolerance(*pEdge, bspline->Model->ModelFactors->Precision);
 			
 		}
 		

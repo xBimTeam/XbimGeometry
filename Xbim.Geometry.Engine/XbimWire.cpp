@@ -68,7 +68,7 @@
 #include <ShapeAnalysis_WireOrder.hxx>
 #include <GProp_PGProps.hxx>
 #include <ShapeFix_Edge.hxx>
-
+#include <BOPAlgo_Tools.hxx>
 using namespace Xbim::Common;
 using namespace System::Linq;
 // using namespace System::Diagnostics;
@@ -121,7 +121,7 @@ namespace Xbim
 			pWire = new TopoDS_Wire();
 			*pWire = polyMaker.Wire();
 			ShapeFix_ShapeTolerance fixer;
-			fixer.SetTolerance(*pWire, tolerance, TopAbs_VERTEX);
+			fixer.LimitTolerance(*pWire, tolerance);
 		}
 		XbimWire::XbimWire(double precision) { Init(precision); }
 		XbimWire::XbimWire(IIfcPolyline^ profile, ILogger^ logger) { Init(profile, false, logger); }
@@ -569,95 +569,70 @@ namespace Xbim
 			if (IsValid && !compCurveSeg->SameSense) this->Reverse();
 		}
 
+
 		void XbimWire::Init(IIfcCompositeCurve^ cCurve, ILogger^ logger)
 		{
 
 			ShapeFix_ShapeTolerance FTol;
 			double precision = cCurve->Model->ModelFactors->Precision; //use a courser precision for trimmed curves	
-
-
-
-			bool isContinuous = true;
-
-			TopoDS_Builder b;
-			TopoDS_Wire degenWire;
-			b.MakeWire(degenWire);
-			TopTools_ListOfShape edgesList;
+			
+			BRepBuilderAPI_MakeWire w;
+			XbimPoint3D lastVertex;
+			bool firstPass = true;
 			for each(IIfcCompositeCurveSegment^ seg in cCurve->Segments)
 			{
-				XbimWire^ wireSegManaged = gcnew XbimWire(seg->ParentCurve, logger);
-				if (seg->Transition == IfcTransitionCode::DISCONTINUOUS) isContinuous = false;
-				if (wireSegManaged->IsValid)
+				XbimEdge^ segEdge = gcnew XbimEdge(seg->ParentCurve, logger);
+				//	if (seg->Transition == IfcTransitionCode::DISCONTINUOUS) isContinuous = false;
+				if (segEdge->IsValid)
 				{
-					if (!seg->SameSense)
-						wireSegManaged->Reverse();
-					for each (XbimEdge^ edge in wireSegManaged->Edges)
+					if (dynamic_cast<IIfcTrimmedCurve^>(seg->ParentCurve)) //we have to treat sense agreement differently
 					{
-						TopoDS_Edge ed = edge;
-						FTol.LimitTolerance(ed, precision);
-						edgesList.Append(ed);
-						b.Add(degenWire, ed);
+						IIfcTrimmedCurve^ trim = (IIfcTrimmedCurve^)seg->ParentCurve;
+						XbimCurve^  tc = ((XbimCurve^)segEdge->EdgeGeometry);
+						bool senseAgree = trim->SenseAgreement;
+						if (!senseAgree) segEdge->Reverse(); //undo any reversal, now we can override
+						//if SameSense is false, the point with highest parameter value is taken as the first point of the segment.
+						
+						if (!seg->SameSense) //make sure the largest parameter is the first
+						{		
+							if (tc->FirstParameter > tc->LastParameter)
+								segEdge->Reverse();
+						}	
+						
 					}
-				}
-			}
-			//int edgeCount = 0;
-			//for (TopExp_Explorer exp(degenWire, TopAbs_EDGE); exp.More(); exp.Next()) //just take the first wire
-			//{
-			//	edgeCount++;
-			//}
-			BRepBuilderAPI_MakeWire wireMaker1;
-			wireMaker1.Add(edgesList);
-			if (wireMaker1.IsDone())
-			{
-				pWire = new TopoDS_Wire();
-				*pWire = wireMaker1.Wire();
-				FTol.LimitTolerance(*pWire, precision);
-				return;
-			}
-			else //coursen the precision to 1 mm 
-			{
-				//XbimWire^ dg = gcnew XbimWire(degenWire);
-				//we are going to use one millimeter for the precision when edges don't join
-				double oneMilli = cCurve->Model->ModelFactors->OneMilliMeter;
-
-				TopoDS_Face	face = BRepBuilderAPI_MakeFace(degenWire, Standard_True);
-				ShapeFix_Wire wireFixer(degenWire, face, precision);
-				if (cCurve->ClosedCurve.Value != nullptr && cCurve->ClosedCurve.Value)
-					wireFixer.ClosedWireMode() = Standard_True;
-				wireFixer.SetPrecision(oneMilli);
-				wireFixer.FixConnected();
-				wireFixer.FixLacking();
-
-
-				BRepBuilderAPI_MakeWire wireMaker2(wireFixer.Wire());
-				if (wireMaker2.IsDone())
-				{
-					pWire = new TopoDS_Wire();
-					*pWire = wireMaker2.Wire();
-					FTol.LimitTolerance(*pWire, precision);
-					return;
-				}
-				else //coursen the precision to 5 mm
-				{
-					ShapeFix_Wire wireFixer2(degenWire, face, precision);
-					if (cCurve->ClosedCurve.Value != nullptr && cCurve->ClosedCurve.Value)
-						wireFixer.ClosedWireMode() = Standard_True;;
-					wireFixer2.SetPrecision(oneMilli * 5);
-					wireFixer2.FixConnected();
-					wireFixer2.FixLacking();
-					BRepBuilderAPI_MakeWire wireMaker3(wireFixer2.Wire());
-					if (wireMaker3.IsDone())
+					else if (!seg->SameSense) segEdge->Reverse();		
+					XbimPoint3D nextVertex = segEdge->EdgeStartPoint;
+					if (!firstPass)
+					{	
+						double actualGap = (nextVertex - lastVertex).Length;
+						if (actualGap > precision)
+						{
+							double fiveMilli = 5 * cCurve->Model->ModelFactors->OneMilliMeter; //we are going to accept that a gap of 5mm is not a gap
+							if (actualGap > fiveMilli)
+							{
+								XbimGeometryCreator::LogError(logger, seg, "Failed to join composite curve segment. It has been ignored");
+								return;
+							}
+							FTol.LimitTolerance(segEdge, actualGap+precision, TopAbs_VERTEX);
+						}
+					}
+					firstPass = false;
+					w.Add(segEdge);
+					if (w.Error() != BRepBuilderAPI_WireDone)
 					{
-						pWire = new TopoDS_Wire();
-						*pWire = wireMaker3.Wire();
-						FTol.LimitTolerance(*pWire, precision);
+						XbimGeometryCreator::LogError(logger, seg, "Failed to join composite curve segment. It has been ignored");
 						return;
 					}
-
+					lastVertex = segEdge->EdgeEndPoint;
+				}
+				else
+				{
+					XbimGeometryCreator::LogWarning(logger, seg, "Invalid edge of a composite curve found. It could not be created");
 				}
 			}
-			//give up bad shape
-			XbimGeometryCreator::LogWarning(logger, cCurve, "Invalid part of a composite curve found. It has been discarded");
+			pWire = new TopoDS_Wire();
+			*pWire = w.Wire();			
+			FTol.LimitTolerance(*pWire, precision);
 		}
 
 		void XbimWire::Init(IIfcTrimmedCurve^ tCurve, ILogger^ logger)
@@ -776,8 +751,8 @@ namespace Xbim
 								currentTolerance *= 10;
 								if (currentTolerance <= toleranceMax)
 								{
-									FTol.SetTolerance(v1, currentTolerance);
-									FTol.SetTolerance(v2, currentTolerance);
+									FTol.LimitTolerance(v1, currentTolerance);
+									FTol.LimitTolerance(v2, currentTolerance);
 									goto TryMakeEdge;
 								}
 								String^ errMsg = XbimEdge::GetBuildEdgeErrorMessage(err);
@@ -1034,7 +1009,7 @@ namespace Xbim
 
 		}
 
-		
+
 
 		void XbimWire::Init(IIfcPolyLoop ^ polyloop, ILogger^ logger)
 		{
@@ -1141,7 +1116,7 @@ namespace Xbim
 				}
 				pWire = new TopoDS_Wire();
 				*pWire = theWire;
-				
+
 			}
 			else
 			{
@@ -1367,6 +1342,20 @@ namespace Xbim
 		{
 			return ShapeAnalysis::ContourArea(this);
 		}
+		XbimPoint3D XbimWire::BaryCentre::get()
+		{
+			if (!IsValid) return XbimPoint3D();
+			TopTools_IndexedMapOfShape map;
+			TopExp::MapShapes(*pWire, TopAbs_VERTEX, map);
+
+			TColgp_Array1OfPnt pointArray(1, map.Extent());
+			for (int i = 1; i <= map.Extent(); i++)
+			{
+				pointArray.SetValue(i, BRep_Tool::Pnt(TopoDS::Vertex(map(i))));
+			}
+			gp_Pnt centre = GProp_PGProps::Barycentre(pointArray);
+			return XbimPoint3D(centre.X(), centre.Y(), centre.Z());
+		}
 
 		double XbimWire::Length::get()
 		{
@@ -1532,7 +1521,7 @@ namespace Xbim
 			b.MakeWire(wire);
 			b.Add(wire, edge);
 			ShapeFix_ShapeTolerance FTol;
-			FTol.SetTolerance(wire, circProfile->Model->ModelFactors->Precision, TopAbs_VERTEX);
+			FTol.LimitTolerance(wire, circProfile->Model->ModelFactors->Precision);
 			pWire = new TopoDS_Wire();
 			*pWire = wire;
 		}
@@ -1627,7 +1616,7 @@ namespace Xbim
 					TopoDS_Wire wire = BRepBuilderAPI_MakeWire(e1, e2, e3, e4);
 					ShapeFix_ShapeTolerance tol;
 					//set the correct precision
-					tol.SetTolerance(wire, precision, TopAbs_VERTEX);
+					tol.LimitTolerance(wire, precision);
 					//apply the position transformation
 					if (rectProfile->Position != nullptr)
 						wire.Move(XbimConvert::ToLocation(rectProfile->Position));
@@ -1739,7 +1728,7 @@ namespace Xbim
 				wire.Move(t);
 			}*/
 			ShapeFix_ShapeTolerance FTol;
-			FTol.SetTolerance(wire, profile->Model->ModelFactors->Precision, TopAbs_VERTEX);
+			FTol.LimitTolerance(wire, profile->Model->ModelFactors->Precision);
 			pWire = new TopoDS_Wire();
 			*pWire = wire;
 		}
@@ -1818,7 +1807,7 @@ namespace Xbim
 				wire.Move(t);
 			}*/
 			ShapeFix_ShapeTolerance FTol;
-			FTol.SetTolerance(wire, profile->Model->ModelFactors->Precision, TopAbs_VERTEX);
+			FTol.LimitTolerance(wire, profile->Model->ModelFactors->Precision);
 			pWire = new TopoDS_Wire();
 			*pWire = wire;
 		}
@@ -1867,7 +1856,7 @@ namespace Xbim
 		//	TopoDS_Wire wire = wireMaker.Wire();
 		//	wire.Move(XbimConvert::ToLocation(profile->Position));
 		//	ShapeFix_ShapeTolerance FTol;
-		//	FTol.SetTolerance(wire, profile->Model->ModelFactors->Precision, TopAbs_VERTEX);
+		//	FTol.LimitTolerance(wire, profile->Model->ModelFactors->Precision, TopAbs_VERTEX);
 		//	pWire = new TopoDS_Wire();
 		//	*pWire = wire;
 		//}
@@ -1923,7 +1912,7 @@ namespace Xbim
 		//	TopoDS_Wire wire = wireMaker.Wire();
 		//	wire.Move(XbimConvert::ToLocation(profile->Position));
 		//	ShapeFix_ShapeTolerance FTol;
-		//	FTol.SetTolerance(wire, profile->Model->ModelFactors->Precision, TopAbs_VERTEX);
+		//	FTol.LimitTolerance(wire, profile->Model->ModelFactors->Precision, TopAbs_VERTEX);
 		//	pWire = new TopoDS_Wire();
 		//	*pWire = wire;
 		//}
@@ -1964,7 +1953,7 @@ namespace Xbim
 			b.MakeWire(wire);
 			b.Add(wire, edge);
 			ShapeFix_ShapeTolerance FTol;
-			FTol.SetTolerance(wire, profile->Model->ModelFactors->Precision, TopAbs_VERTEX);
+			FTol.LimitTolerance(wire, profile->Model->ModelFactors->Precision);
 			pWire = new TopoDS_Wire();
 			*pWire = wire;
 		}
@@ -2116,7 +2105,7 @@ namespace Xbim
 			if (profile->Position != nullptr)
 				wire.Move(XbimConvert::ToLocation(profile->Position));
 			ShapeFix_ShapeTolerance FTol;
-			FTol.SetTolerance(wire, profile->Model->ModelFactors->Precision, TopAbs_VERTEX);
+			FTol.LimitTolerance(wire, profile->Model->ModelFactors->Precision);
 			pWire = new TopoDS_Wire();
 			*pWire = wire;
 		}
@@ -2228,7 +2217,7 @@ namespace Xbim
 				wire.Move(t);
 			}*/
 			ShapeFix_ShapeTolerance FTol;
-			FTol.SetTolerance(wire, profile->Model->ModelFactors->Precision, TopAbs_VERTEX);
+			FTol.LimitTolerance(wire, profile->Model->ModelFactors->Precision);
 			pWire = new TopoDS_Wire();
 			*pWire = wire;
 		}
@@ -2328,7 +2317,7 @@ namespace Xbim
 				wire.Move(t);
 			}*/
 			ShapeFix_ShapeTolerance FTol;
-			FTol.SetTolerance(wire, profile->Model->ModelFactors->Precision, TopAbs_VERTEX);
+			FTol.LimitTolerance(wire, profile->Model->ModelFactors->Precision);
 			pWire = new TopoDS_Wire();
 			*pWire = wire;
 		}

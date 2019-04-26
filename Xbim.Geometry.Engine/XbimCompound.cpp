@@ -921,17 +921,44 @@ namespace Xbim
 			/*TopoDS_Shell shell;
 			builder.MakeShell(shell);*/
 			BRepBuilderAPI_Sewing seamstress(_sewingTolerance);
+			int allFaces = 0;
 			for each (IIfcFace^ ifcFace in ifcFaces)
 			{
 				XbimFace^ face = gcnew XbimFace(ifcFace, logger);
 				seamstress.Add(face);
+				allFaces++;
 			}
 			seamstress.Perform();			
 			TopoDS_Shape result = seamstress.SewedShape();
 			
 			TopoDS_Compound compound;
 			builder.MakeCompound(compound);
-			builder.Add(compound, result);
+			//remove unnecesary faces, normally caused by triangulation, this improves boolean quality
+			if (allFaces > 6 && allFaces < MaxFacesToSew) //six is a cuboid no point in simplify that
+			{
+				ShapeUpgrade_UnifySameDomain unifier(result);
+				unifier.SetAngularTolerance(0.00174533); //1 tenth of a degree
+				unifier.SetLinearTolerance(_sewingTolerance);
+
+				try
+				{
+					//sometimes unifier crashes
+					unifier.Build();
+					builder.Add(compound, unifier.Shape());
+				}
+				catch (...) //any failure
+				{
+					//default to what we had
+					builder.Add(compound, result);
+				}
+			}
+			else
+			{
+
+				builder.Add(compound, result);
+			}
+
+			
 			pCompound = new TopoDS_Compound();
 			*pCompound = compound;
 			_isSewn = true;

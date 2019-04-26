@@ -19,6 +19,8 @@
 #include <ShapeFix_Edge.hxx>
 #include <BndLib_Add3dCurve.hxx>
 #include <Bnd_Box.hxx>
+#include <Extrema_ExtPC.hxx>
+
 using namespace System;
 using namespace System::Linq;
 namespace Xbim
@@ -75,14 +77,14 @@ namespace Xbim
 		}
 		bool XbimCurve::IsClosed::get()
 		{
-			if(!IsValid) return false;
+			if (!IsValid) return false;
 			return (*pCurve)->IsClosed() == Standard_True;
 		}
 
-		
+
 		double XbimCurve::GetParameter(XbimPoint3D point, double tolerance)
 		{
-			if(!IsValid) return 0;
+			if (!IsValid) return 0;
 			double u1;
 			gp_Pnt p1(point.X, point.Y, point.Z);
 			GeomLib_Tool::Parameter(*pCurve, p1, tolerance, u1);
@@ -93,16 +95,16 @@ namespace Xbim
 		{
 			if (!IsValid) return XbimPoint3D();
 			gp_Pnt pt = (*pCurve)->Value(parameter);
-			return XbimPoint3D(pt.X(),pt.Y(), pt.Z());
+			return XbimPoint3D(pt.X(), pt.Y(), pt.Z());
 		}
-		
+
 
 
 		IXbimGeometryObject^ XbimCurve::Transform(XbimMatrix3D /*matrix3D*/)
 		{
 			throw gcnew Exception("Tranformation of curves is not currently supported");
 		}
-		
+
 		IXbimGeometryObject^ XbimCurve::TransformShallow(XbimMatrix3D /*matrix3D*/)
 		{
 			throw gcnew Exception("TransformShallow of curves is not currently supported");
@@ -140,15 +142,15 @@ namespace Xbim
 			else if (dynamic_cast<IIfcPcurve^>(curve)) Init((IIfcPcurve^)curve, logger);
 			else throw gcnew Exception(String::Format("Unsupported Curve Type {0}", curve->GetType()->Name));
 		}
-			
+
 		void XbimCurve::Init(IIfcPcurve^ curve, ILogger^ logger)
 		{
-			XbimFace^ face = gcnew XbimFace(curve->BasisSurface,logger);
+			XbimFace^ face = gcnew XbimFace(curve->BasisSurface, logger);
 			if (face->IsValid)
 			{
 				ShapeConstruct_ProjectCurveOnSurface projector;
 				projector.Init(face->GetSurface(), curve->Model->ModelFactors->Precision);
-				XbimCurve^ baseCurve = gcnew XbimCurve(curve->ReferenceCurve,logger);
+				XbimCurve^ baseCurve = gcnew XbimCurve(curve->ReferenceCurve, logger);
 				Standard_Real first = baseCurve->FirstParameter;
 				Standard_Real last = baseCurve->LastParameter;
 				Handle(Geom2d_Curve) c2d;
@@ -156,9 +158,9 @@ namespace Xbim
 				if (projector.Perform(cBase, first, last, c2d))
 				{
 					pCurve = new Handle(Geom_Curve);
-					*pCurve = cBase;					
+					*pCurve = cBase;
 				}
-			}		
+			}
 		}
 
 		void XbimCurve::Init(IIfcOffsetCurve3D^ offset, ILogger^ logger)
@@ -184,10 +186,10 @@ namespace Xbim
 
 			gp_Pnt start = XbimConvert::GetPoint3d(pts[0]);
 			gp_Pnt end = XbimConvert::GetPoint3d(pts[lastPt]);
-			
-			GC_MakeLine lineMaker(start, end);			
-			if(lineMaker.IsDone())
-			{	
+
+			GC_MakeLine lineMaker(start, end);
+			if (lineMaker.IsDone())
+			{
 				double u1; double u2;
 				GeomLib_Tool::Parameter(lineMaker.Value(), start, Precision::Confusion(), u1);
 				GeomLib_Tool::Parameter(lineMaker.Value(), end, Precision::Confusion(), u2);
@@ -198,12 +200,12 @@ namespace Xbim
 		void XbimCurve::Init(IIfcCircle^ circle, ILogger^ logger)
 		{
 			double radius = circle->Radius;
-			
+
 			if (dynamic_cast<IIfcAxis2Placement2D^>(circle->Position))
 			{
 				IIfcAxis2Placement2D^ ax2 = (IIfcAxis2Placement2D^)circle->Position;
-				gp_Ax2 gpax2(gp_Pnt(ax2->Location->X, ax2->Location->Y, 0), gp_Dir(0, 0, 1), gp_Dir(ax2->P[0].X, ax2->P[0].Y, 0.));				
-				GC_MakeCircle maker(gpax2,radius);
+				gp_Ax2 gpax2(gp_Pnt(ax2->Location->X, ax2->Location->Y, 0), gp_Dir(0, 0, 1), gp_Dir(ax2->P[0].X, ax2->P[0].Y, 0.));
+				GC_MakeCircle maker(gpax2, radius);
 				pCurve = new Handle(Geom_Curve)(maker.Value());
 			}
 			else if (dynamic_cast<IIfcAxis2Placement3D^>(circle->Position))
@@ -214,20 +216,20 @@ namespace Xbim
 				pCurve = new Handle(Geom_Curve)(maker.Value());
 			}
 			else
-			{				
-				Type ^ type = circle->Position->GetType();						
+			{
+				Type ^ type = circle->Position->GetType();
 				XbimGeometryCreator::LogError(logger, circle, "Placement of type {0} is not implemented", type->Name);
 				return;
 			}
-			
+
 		}
 		void XbimCurve::Init(IIfcEllipse^ ellipse, ILogger^ logger)
-		{				
+		{
 			double semiAx1 = ellipse->SemiAxis1;
 			double semiAx2 = ellipse->SemiAxis2;
 			if (semiAx1 <= 0)
 			{
-				XbimGeometryCreator::LogError(logger, ellipse,"Illegal Ellipse Semi Axis 1, must be greater than 0");
+				XbimGeometryCreator::LogError(logger, ellipse, "Illegal Ellipse Semi Axis 1, must be greater than 0");
 				return;
 			}
 			if (semiAx2 <= 0)
@@ -243,7 +245,7 @@ namespace Xbim
 			}
 			else //it really is an ellipse
 			{
-				gp_Trsf trsf;			
+				gp_Trsf trsf;
 				trsf.SetTransformation(ax3, gp::XOY());
 				gp_Ax2 ax = gp_Ax2();
 
@@ -264,7 +266,7 @@ namespace Xbim
 		{
 			IIfcCartesianPoint^ cp = line->Pnt;
 			IIfcVector^ ifcVec = line->Dir;
-			IIfcDirection^ dir = ifcVec->Orientation;		
+			IIfcDirection^ dir = ifcVec->Orientation;
 			gp_Pnt pnt(cp->X, cp->Y, XbimConvert::GetZValueOrZero(cp));
 			gp_Dir vec(dir->X, dir->Y, XbimConvert::GetZValueOrZero(dir));
 			GC_MakeLine maker(pnt, vec);
@@ -274,16 +276,19 @@ namespace Xbim
 		void XbimCurve::Init(IIfcTrimmedCurve^ curve, ILogger^ logger)
 		{
 			Init(curve->BasisCurve, logger);
-			if(IsValid)
+			if (IsValid)
 			{
 				//check if we have an ellipse in case we have to correct axis
 				/*IIfcEllipse^ ellipse = dynamic_cast<IIfcEllipse^>(curve->BasisCurve);*/
-				
-				bool isConic = (dynamic_cast<IIfcConic^>(curve->BasisCurve) != nullptr);					
+
+				bool isConic = (dynamic_cast<IIfcConic^>(curve->BasisCurve) != nullptr);
+				bool isLine = (dynamic_cast<IIfcLine^>(curve->BasisCurve) != nullptr);
+				bool isEllipse = (dynamic_cast<IIfcEllipse^>(curve->BasisCurve) != nullptr);
+
 				double parameterFactor = isConic ? curve->Model->ModelFactors->AngleToRadiansConversionFactor : 1;
 				double precision = curve->Model->ModelFactors->Precision;
 				bool trim_cartesian = (curve->MasterRepresentation == IfcTrimmingPreference::CARTESIAN);
-						
+
 				double u1;
 				gp_Pnt p1;
 				bool u1Found, u2Found, p1Found, p2Found;
@@ -292,14 +297,15 @@ namespace Xbim
 				for each (IIfcTrimmingSelect^ trim in curve->Trim1)
 				{
 					if (dynamic_cast<IIfcCartesianPoint^>(trim))
-					{						
-						p1=XbimConvert::GetPoint3d((IIfcCartesianPoint^)trim);						
+					{
+						p1 = XbimConvert::GetPoint3d((IIfcCartesianPoint^)trim);
 						p1Found = true;
 					}
 					else if (dynamic_cast<Xbim::Ifc4::MeasureResource::IfcParameterValue^>(trim))
-					{					
+					{
 						u1 = (Xbim::Ifc4::MeasureResource::IfcParameterValue)trim;
 						if (isConic) u1 *= parameterFactor; //correct to radians
+						else if (isLine) u1 *= ((IIfcLine^)curve->BasisCurve)->Dir->Magnitude;
 						u1Found = true;
 					}
 				}
@@ -314,18 +320,44 @@ namespace Xbim
 					{
 						u2 = (Xbim::Ifc4::MeasureResource::IfcParameterValue)trim;
 						if (isConic) u2 *= parameterFactor; //correct to radians
+						else if (isLine) u2 *= ((IIfcLine^)curve->BasisCurve)->Dir->Magnitude;
 						u2Found = true;
 					}
 				}
-				if(trim_cartesian) //if we prefer cartesian and we have the points override the parameters
+				
+				
+
+				if (trim_cartesian) //if we prefer cartesian and we have the points override the parameters
 				{
-					if(p1Found)	 GeomLib_Tool::Parameter(*pCurve, p1, precision,u1);
-					if(p2Found)  GeomLib_Tool::Parameter(*pCurve, p2, precision, u2);
+					
+					double u;
+					if (p1Found)					
+						if (GeomLib_Tool::Parameter(*pCurve, p1, precision * 10, u)) 
+							u1 = u ;
+					if (p2Found)
+						if (GeomLib_Tool::Parameter(*pCurve, p2, precision * 10, u)) 
+							u2 = u;
+
 				}
 				else //if we prefer parameters or don't care, use u1 nad u2 unless we don't have them
 				{
-					if (!u1Found)  GeomLib_Tool::Parameter(*pCurve, p1, precision, u1);
-					if (!u2Found)  GeomLib_Tool::Parameter(*pCurve, p2, precision, u2);
+					if (!u1Found)  GeomLib_Tool::Parameter(*pCurve, p1, precision * 10, u1);
+					if (!u2Found)  GeomLib_Tool::Parameter(*pCurve, p2, precision * 10, u2);
+				}
+				if (u1 == u2)
+				{
+					pCurve->Nullify();
+					pCurve = nullptr;
+					return;// zero length curve;
+				}
+				if (isEllipse)
+				{
+					IIfcEllipse^ ellipse = (IIfcEllipse^)curve->BasisCurve;
+					if (ellipse->SemiAxis1 < ellipse->SemiAxis2)
+					{
+						u1 -= Math::PI / 2;
+						u2 -= Math::PI / 2;
+					}
 				}
 				//now just go with
 				*pCurve = new Geom_TrimmedCurve(*pCurve, curve->SenseAgreement ? u1 : u2, curve->SenseAgreement ? u2 : u1);
@@ -392,7 +424,7 @@ namespace Xbim
 				i++;
 			}
 			pCurve = new Handle(Geom_Curve);
-			*pCurve = new Geom_BSplineCurve(poles, knots, knotMultiplicities, (Standard_Integer)bspline->Degree);		
+			*pCurve = new Geom_BSplineCurve(poles, knots, knotMultiplicities, (Standard_Integer)bspline->Degree);
 		}
 	}
 }

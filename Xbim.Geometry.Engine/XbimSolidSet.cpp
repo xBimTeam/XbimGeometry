@@ -419,10 +419,11 @@ namespace Xbim
 			BRepBndLib::Add(tsBody, tsBodyBox);
 
 			double maxTol = boolParams->Tolerance;
-
+			int argCount = 0;
 			for each (IXbimSolid^ iSolid in boolParams->Ops)
 			{
 				XbimSolid^ solid = dynamic_cast<XbimSolid^>(iSolid);
+				
 				if (solid != nullptr && solid->IsValid)
 				{
 					//screen out things that don't intersect when we are cutting
@@ -437,6 +438,7 @@ namespace Xbim
 							aLC.Append(tsArg);
 							shapeTools.Append(tsArg);
 							builder.Add(cutCompound, tsArg);
+							argCount++;
 						}
 					}
 					else
@@ -445,10 +447,16 @@ namespace Xbim
 						aLC.Append(solid);
 						shapeTools.Append(solid);
 						builder.Add(cutCompound, solid);
+						argCount++;
 					}
 				}
 			}
-
+			if(argCount == 0) 
+			{
+				boolParams->Success = true;
+				boolParams->UseBody = true;
+				return;
+			}
 			try
 			{
 				Handle(NCollection_BaseAllocator)aAL =
@@ -464,7 +472,7 @@ namespace Xbim
 				if (iErr)
 				{
 					boolParams->Success = false;
-					return;
+				    return;
 				}
 				BOPAlgo_BOP aBOP(aAL);
 				//
@@ -1015,6 +1023,7 @@ namespace Xbim
 					XbimGeometryCreator::LogWarning(logger, boolOp, "Boolean result has invalid first operand");
 				return;
 			}
+			
 			if (Math::Abs(left->Volume) <= Precision::Confusion()) //nothing to do						
 				return;
 			if (!right->IsValid)

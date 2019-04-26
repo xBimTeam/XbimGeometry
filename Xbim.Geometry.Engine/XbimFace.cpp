@@ -757,14 +757,17 @@ namespace Xbim
 					ShapeFix_ShapeTolerance FTol;
 					double currentFaceTolerance = tolerance;
 				TryBuildFace:
-					BRepBuilderAPI_MakeFace faceMaker(wire, true);
+					XbimVector3D n = wire->Normal;
+					XbimPoint3D centre = wire->BaryCentre;
+					gp_Pln thePlane(gp_Pnt(centre.X, centre.Y,centre.Z), gp_Vec(n.X,n.Y,n.Z));
+					BRepBuilderAPI_MakeFace faceMaker(thePlane,wire, true);
 					BRepBuilderAPI_FaceError err = faceMaker.Error();
 					if (err == BRepBuilderAPI_NotPlanar)
 					{
 						currentFaceTolerance *= 10;
 						if (currentFaceTolerance <= toleranceMax)
 						{
-							FTol.SetTolerance(wire, currentFaceTolerance, TopAbs_WIRE);
+							FTol.LimitTolerance(wire, currentFaceTolerance);
 							goto TryBuildFace;
 						}
 						String^ errMsg = XbimFace::GetBuildFaceErrorMessage(err);

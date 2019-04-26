@@ -247,7 +247,7 @@ namespace Xbim.ModelGeometry.Scene
                     VoidedProductIds = new HashSet<int>();
                     VoidedShapeIds = new HashSet<int>();
                     ParallelOptions = new ParallelOptions();
-                    //ParallelOptions.MaxDegreeOfParallelism = 4;
+                    ParallelOptions.MaxDegreeOfParallelism = 8;
 
                     CachedGeometries = new ConcurrentDictionary<int, IXbimGeometryObject>();
                     foreach (var voidedShapeId in OpeningsAndProjections.Select(op => op.Key.EntityLabel))
@@ -1333,7 +1333,10 @@ namespace Xbim.ModelGeometry.Scene
 
                     try
                     {
-                        geomModel = CallWithTimeout(shape, _logger, BooleanTimeOutMilliSeconds);
+                        if (shape is IIfcBooleanResult)
+                            geomModel = CallWithTimeout(shape, _logger, BooleanTimeOutMilliSeconds);
+                        else
+                            geomModel = Engine.Create(shape, _logger);
                     }
                     catch (TimeoutException)
                     {
