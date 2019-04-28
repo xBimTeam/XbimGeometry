@@ -1,6 +1,6 @@
 #include "XbimFace.h"
 #include "XbimOccWriter.h"
-
+#include "XbimCurve.h"
 #include <BRepBuilderAPI_Transform.hxx>
 #include <BRepBuilderAPI_GTransform.hxx>
 #include <BRepTools_WireExplorer.hxx>

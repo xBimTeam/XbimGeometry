@@ -1255,12 +1255,7 @@ namespace Xbim
 			const gp_Pnt pnt = pln.Location().Translated(pbhs->AgreementFlag ? -pln.Axis().Direction() : pln.Axis().Direction());
 			TopoDS_Shape halfspace = BRepPrimAPI_MakeHalfSpace(BRepBuilderAPI_MakeFace(pln), pnt).Solid();
 
-			XbimWire^ polyBoundary;
-			if (dynamic_cast<IIfcPolyline^>(pbhs->PolygonalBoundary))
-				// we can attempt to close a polyline if it was open
-				polyBoundary = gcnew XbimWire((IIfcPolyline^)pbhs->PolygonalBoundary, true, logger);
-			else
-				polyBoundary = gcnew XbimWire(pbhs->PolygonalBoundary, logger);
+			XbimWire^ polyBoundary = gcnew XbimWire(pbhs->PolygonalBoundary, logger);
 
 
 			if (!polyBoundary->IsValid)

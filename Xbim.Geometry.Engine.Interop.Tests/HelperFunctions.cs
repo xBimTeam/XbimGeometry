@@ -124,7 +124,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
                     Assert.IsTrue(face.OuterBound.IsValid, "Face has no outer bound in #" + entityLabel);
                     double faceArea = face.Area;
-                   // Assert.IsTrue(face.Area > 0, "Face area should be greater than 0 in #" + entityLabel);
+                    Assert.IsTrue(face.Area > 0, "Face area should be greater than 0 in #" + entityLabel);
                     Assert.IsTrue(face.Perimeter > 0, "Face perimeter should be breater than 0 in #" + entityLabel);
                     //srl this is not a valid test with spline surfaces
                     //if (face.IsPlanar)

@@ -569,7 +569,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 Assert.IsTrue(er.Entity != null, "No IIfcCompositeProfileDef found");
                 var wire = geomEngine.CreateWire(er.Entity, logger);
-                Assert.IsTrue(wire.Edges.Count == 12, "This wire should have 12 edges");
+                Assert.IsTrue(wire.Edges.Count == 1, "This wire should have 1 edge");
             }
             
         }

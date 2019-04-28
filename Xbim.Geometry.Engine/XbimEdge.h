@@ -36,7 +36,7 @@ namespace Xbim
 			void Init(IIfcBSplineCurveWithKnots^ bSpline, ILogger^ logger);
 			void Init(IIfcRationalBSplineCurveWithKnots^ bSpline, ILogger^ logger);
 			void Init(IIfcPcurve^ curve, ILogger^ logger);
-			void Init(IIfcTrimmedCurve^ trimmedCurve, ILogger^ logger);
+			void Init(IIfcTrimmedCurve^ trimmedCurve, ILogger^ logger, bool sameSense);
 #pragma endregion
 
 			XbimEdge(){};
@@ -66,6 +66,7 @@ namespace Xbim
 			XbimEdge(XbimVertex^ start, XbimVertex^ midPoint, XbimVertex^ end);
 			XbimEdge(XbimCurve^ curve3D);
 			XbimEdge(XbimCurve2D^ curve2D, ILogger^ logger);
+			XbimEdge(IIfcTrimmedCurve^ edge, ILogger^ logger, bool sameSense);
 #pragma endregion
 
 
