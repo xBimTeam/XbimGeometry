@@ -423,7 +423,7 @@ namespace Xbim
 			for each (IXbimSolid^ iSolid in boolParams->Ops)
 			{
 				XbimSolid^ solid = dynamic_cast<XbimSolid^>(iSolid);
-				
+
 				if (solid != nullptr && solid->IsValid)
 				{
 					//screen out things that don't intersect when we are cutting
@@ -451,7 +451,7 @@ namespace Xbim
 					}
 				}
 			}
-			if(argCount == 0) 
+			if (argCount == 0)
 			{
 				boolParams->Success = true;
 				boolParams->UseBody = true;
@@ -462,9 +462,9 @@ namespace Xbim
 				Handle(NCollection_BaseAllocator)aAL =
 					NCollection_BaseAllocator::CommonBaseAllocator();
 				BOPAlgo_PaveFiller aPF(aAL);
-
+				double fuzzyTol = Math::Max(maxTol - boolParams->Tolerance, 5 * boolParams->Tolerance);//this seems about right
 				aPF.SetArguments(aLC);
-				aPF.SetFuzzyValue(Math::Max(maxTol - boolParams->Tolerance, 5 * boolParams->Tolerance)); //this seems about right
+				aPF.SetFuzzyValue(fuzzyTol);
 				aPF.SetRunParallel(false);
 				aPF.SetNonDestructive(false);
 				aPF.Perform();
@@ -472,7 +472,7 @@ namespace Xbim
 				if (iErr)
 				{
 					boolParams->Success = false;
-				    return;
+					return;
 				}
 				BOPAlgo_BOP aBOP(aAL);
 				//
@@ -480,6 +480,7 @@ namespace Xbim
 				aBOP.AddTool(cutCompound);
 				aBOP.SetOperation(boolParams->Operation);
 				aBOP.SetRunParallel(false);
+				aBOP.SetFuzzyValue(fuzzyTol);
 				aBOP.PerformWithFiller(aPF);
 				const TopoDS_Shape& aR = aBOP.Shape();
 				if (aR.IsNull()) {
@@ -487,13 +488,49 @@ namespace Xbim
 					return;
 				}
 				boolParams->Success = true;
+				BRep_Builder b;
+				TopoDS_Compound unifiedCompound;
+				b.MakeCompound(unifiedCompound);
+
+				/*TopoDS_Compound compound;
+				b.MakeCompound(compound);
+				b.Add(compound, aR);
+				XbimCompound^c0 = gcnew XbimCompound(compound, true, boolParams->Tolerance);*/
+
+				ShapeUpgrade_UnifySameDomain unifier(aR);
+				unifier.SetAngularTolerance(0.00174533); //1 tenth of a degree
+				unifier.SetLinearTolerance(fuzzyTol);
+
+
+				try
+				{
+					//sometimes unifier crashes
+					unifier.Build();
+					builder.Add(unifiedCompound, unifier.Shape());
+
+				}
+				catch (...) //any failure
+				{
+					//default to what we had
+					builder.Add(unifiedCompound, aR);
+				}
+				//XbimCompound^c1 = gcnew XbimCompound(unifiedCompound, true, boolParams->Tolerance);
 				//have one go at fixing if it is not right
-				if (BRepCheck_Analyzer(aR, Standard_True).IsValid() == Standard_False)
+				if (BRepCheck_Analyzer(unifiedCompound, Standard_True).IsValid() == Standard_False)
 				{
 					//try and fix if we can
-					ShapeFix_Shape fixer(aR);
-					fixer.Perform();
-					boolParams->Result = gcnew XbimSolidSet(fixer.Shape());
+					ShapeFix_Shape fixer(unifiedCompound);
+					fixer.SetMaxTolerance(fuzzyTol);
+					fixer.SetMinTolerance(boolParams->Tolerance);
+					fixer.SetPrecision(boolParams->Tolerance);
+					if (fixer.Perform())
+						boolParams->Result = gcnew XbimSolidSet(fixer.Shape());
+					else
+					{
+						XbimGeometryCreator::LogWarning(boolParams->Logger, boolParams->Body, "Failed to fix shape after boolean operation.");
+						boolParams->Result = gcnew XbimSolidSet(unifiedCompound);
+					}
+
 				}
 				else
 				{
@@ -516,7 +553,6 @@ namespace Xbim
 		{
 			if (!IsValid) return this;
 
-			//List<Thread^>^ threads = gcnew List<Thread^>(this->Count);
 			List<XbimSolidSetBoolOpParams^>^ params = gcnew List<XbimSolidSetBoolOpParams^>(this->Count);
 			for (int i = 0; i < this->Count; i++)
 			{
@@ -543,24 +579,9 @@ namespace Xbim
 				XbimSolidSetBoolOpParams^ param = gcnew XbimSolidSetBoolOpParams(gcnew XbimSolid(TopoDS::Solid(bodyCopier.Shape())), copyOfCuts, tolerance, logger);
 				param->Operation = operation;
 				params->Add(param);
-				//oThread->Start(param);
+
 				ThreadProc(param);
 			}
-			//for (int i = 0; i < threads->Count; i++)
-			//{
-			//	Thread^ oThread = threads[i];
-
-			//	if (!oThread->Join((int)(XbimGeometryCreator::BooleanTimeOut * 1000)))
-			//	{
-			//		XbimGeometryCreator::LogError(logger, nullptr,
-			//			"Boolean operation timed out after {0} seconds.\nCutting Entity #{1} from #{2}.\nTry increasing the timeout in the App.config file\nUncut shape is used",
-			//			XbimGeometryCreator::BooleanTimeOut,
-			//			((XbimSolidSet^)arguments)->IfcEntityLabel,
-			//			this->IfcEntityLabel);
-			//		// we have identified now continue with the uncut  left operand
-			//		params[i]->UseBody = true; //stop further error reporting
-			//	}
-			//}
 
 			XbimSolidSet^ result = gcnew XbimSolidSet();
 			for each (XbimSolidSetBoolOpParams^ param in params)
@@ -984,11 +1005,12 @@ namespace Xbim
 		XbimSolidSet^ XbimSolidSet::BuildBooleanResult(IIfcBooleanResult^ boolRes, IfcBooleanOperator operatorType, XbimSolidSet^ ops, ILogger^ logger)
 		{
 			XbimSolidSet^ right = gcnew XbimSolidSet(boolRes->SecondOperand, logger);
-			if (Math::Abs(right->Volume) > Precision::Confusion())
+			if (right->IsValid)
 			{
 				right->IfcEntityLabel = boolRes->SecondOperand->EntityLabel;
 				ops->Add(right);
 			}
+
 			//if we are the same operator type just aggregate them into a single solid set
 			if (boolRes->Operator == operatorType && dynamic_cast<IIfcBooleanResult^>(boolRes->FirstOperand) && !dynamic_cast<IIfcBooleanClippingResult^>(boolRes->FirstOperand))
 			{
@@ -997,7 +1019,6 @@ namespace Xbim
 			else
 			{
 				XbimSolidSet^ left = gcnew XbimSolidSet(boolRes->FirstOperand, logger);
-
 				left->IfcEntityLabel = boolRes->FirstOperand->EntityLabel;
 				ops->Reverse();
 				return left;
@@ -1015,6 +1036,7 @@ namespace Xbim
 			XbimSolidSet^ right = gcnew XbimSolidSet();
 			right->IfcEntityLabel = boolOp->SecondOperand->EntityLabel;
 			XbimSolidSet^ left = BuildBooleanResult(boolOp, boolOp->Operator, right, logger);
+
 			solids = gcnew List<IXbimSolid^>();
 
 			if (!left->IsValid)
@@ -1023,22 +1045,13 @@ namespace Xbim
 					XbimGeometryCreator::LogWarning(logger, boolOp, "Boolean result has invalid first operand");
 				return;
 			}
-			
-			if (Math::Abs(left->Volume) <= Precision::Confusion()) //nothing to do						
-				return;
+
 			if (!right->IsValid)
 			{
 				solids->AddRange(left);
 				XbimGeometryCreator::LogWarning(logger, boolOp, "Boolean result has invalid second operand");
 				return;
 			}
-
-			if (Math::Abs(right->Volume) <= Precision::Confusion()) //nothing to do
-			{
-				solids->AddRange(left);
-				return;
-			}
-
 
 			IModelFactors^ mf = boolOp->Model->ModelFactors;
 
@@ -1056,7 +1069,6 @@ namespace Xbim
 					break;
 				case IfcBooleanOperator::DIFFERENCE:
 					result = left->Cut(right, mf->Precision, logger);
-
 					break;
 				}
 			}
@@ -1066,6 +1078,7 @@ namespace Xbim
 				solids->AddRange(left);; //return the left operand
 				return;
 			}
+
 			solids->AddRange(result);
 		}
 	}

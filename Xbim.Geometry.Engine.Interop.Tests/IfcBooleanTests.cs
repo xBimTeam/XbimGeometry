@@ -134,7 +134,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         public void CompoundBooleanUnionTest()
         {
             using (var er = new EntityRepository<IIfcBooleanResult>(nameof(CompoundBooleanUnionTest)))
-            {
+            { 
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
                 var solids = geomEngine.CreateSolidSet(er.Entity, logger);
                 Assert.IsTrue(solids.Count == 1);

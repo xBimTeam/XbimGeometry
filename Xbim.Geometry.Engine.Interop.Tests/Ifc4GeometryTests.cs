@@ -178,6 +178,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             }
         }
 
+        
         [TestMethod]
         public void MultipleProfileBasicTest()
         {
@@ -205,7 +206,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var shape = model.Instances.OfType<IfcAdvancedBrep>().FirstOrDefault();
                 Assert.IsNotNull(shape);
                 var geom = geomEngine.CreateSolid(shape);
-                Assert.IsTrue(Math.Abs(geom.Volume -72765) < 1);
+                Assert.IsTrue(Math.Abs(geom.Volume -72767) < 1);
             }
         }
         
@@ -265,7 +266,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var advancedSweep = model.Instances.OfType<IfcSweptDiskSolid>().FirstOrDefault();
                 Assert.IsNotNull(advancedSweep);
                 var bar = geomEngine.CreateSolid(advancedSweep);
-                Assert.IsTrue((int)bar.Volume == 131934);
+                Assert.IsTrue((int)bar.Volume == 131385);
             }
         }
 

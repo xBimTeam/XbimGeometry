@@ -29,7 +29,7 @@ namespace Xbim
 			void Init(IIfcCompositeCurve ^ curve, ILogger ^);
 			void Init(IIfcIndexedPolyCurve ^ curve, ILogger ^);
 			void Init(IIfcPolyline^ curve, ILogger^ logger);
-			void Init(IIfcTrimmedCurve^ curve, ILogger^ logger, bool sameSense);
+			void Init(IIfcTrimmedCurve^ curve, ILogger^ logger);
 #pragma endregion
 
 #pragma region IfcConic
@@ -54,7 +54,7 @@ namespace Xbim
 			XbimCurve(IIfcCircle^ curve, ILogger^ logger) { Init(curve, logger); }
 			XbimCurve(IIfcEllipse^ curve, ILogger^ logger) { Init(curve, logger); }
 			XbimCurve(IIfcLine^ curve, ILogger^ logger) { Init(curve, logger); }
-			XbimCurve(IIfcTrimmedCurve^ trimmedCurve, ILogger^ logger, bool sameSense) { Init(trimmedCurve, logger, sameSense); }
+			XbimCurve(IIfcTrimmedCurve^ trimmedCurve, ILogger^ logger) { Init(trimmedCurve, logger); }
 			XbimCurve(IIfcBSplineCurve^ curve, ILogger^ logger) { Init(curve, logger); }
 			XbimCurve(IIfcBSplineCurveWithKnots^ curve, ILogger^ logger) { Init(curve, logger); }
 			XbimCurve(IIfcOffsetCurve3D^ curve, ILogger^ logger) { Init(curve, logger); }

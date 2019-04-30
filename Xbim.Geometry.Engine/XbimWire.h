@@ -35,15 +35,7 @@ namespace Xbim
 
 			void Init(double precision);
 			void Init(IIfcCurve^ loop, ILogger^ logger);
-			/*void Init(IIfcPolyline^ loop, bool attemptClosing, ILogger^ logger);
-			void Init(IIfcPolyline^ loop,  ILogger^ logger);
-			void Init(IIfcCompositeCurve^ loop, ILogger^ logger);
-			void Init(IIfcTrimmedCurve^ loop, ILogger^ logger);
 			
-			void Init(IIfcIndexedPolyCurve^ pcurve, ILogger^ logger);
-			void Init(IIfcBSplineCurve^ bspline, ILogger^ logger);
-			void Init(IIfcBSplineCurveWithKnots^ bSpline, ILogger^ logger);
-			void Init(IIfcRationalBSplineCurveWithKnots^ bSpline, ILogger^ logger);*/
 			void Init(IIfcCompositeCurveSegment^ compCurveSeg, ILogger^ logger);
 			
 			void Init(IIfcPolyLoop^ loop, ILogger^ logger);
@@ -97,16 +89,7 @@ namespace Xbim
 			//srl need to revisit this, the sense is wrong for trimmed curves, really it should not be supported at all as the segment is not a curve
 			XbimWire(IIfcCompositeCurveSegment^ compCurveSeg, ILogger^ logger);
 
-			/*XbimWire(IIfcPolyline^ loop, ILogger^ logger);
-			XbimWire(IIfcPolyline^ loop, bool attemptClosing, ILogger^ logger);
-			XbimWire(IIfcBSplineCurve^ bspline, ILogger^ logger);
-			XbimWire(IIfcBSplineCurveWithKnots^ bSpline, ILogger^ logger);
-			XbimWire(IIfcRationalBSplineCurveWithKnots^ bSpline, ILogger^ logger);
-			XbimWire(IIfcCompositeCurve^ loop, ILogger^ logger);
-			XbimWire(IIfcTrimmedCurve^ loop, ILogger^ logger);
-			
-			XbimWire(IIfcIndexedPolyCurve^ pcurve, ILogger^ logger);
-			*/
+
 			
 			XbimWire(IIfcPolyLoop^ loop, ILogger^ logger);
 			XbimWire(IIfcArbitraryClosedProfileDef^ profile, ILogger^ logger);

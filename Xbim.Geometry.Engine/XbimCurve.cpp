@@ -137,7 +137,7 @@ namespace Xbim
 			else if (dynamic_cast<IIfcCompositeCurve^>(curve)) Init((IIfcCompositeCurve^)curve, logger);
 			else if (dynamic_cast<IIfcCircle^>(curve)) Init((IIfcCircle^)curve, logger);
 			else if (dynamic_cast<IIfcEllipse^>(curve)) Init((IIfcEllipse^)curve, logger);
-			else if (dynamic_cast<IIfcTrimmedCurve^>(curve)) Init((IIfcTrimmedCurve^)curve, logger, ((IIfcTrimmedCurve^)curve)->SenseAgreement);
+			else if (dynamic_cast<IIfcTrimmedCurve^>(curve)) Init((IIfcTrimmedCurve^)curve, logger);
 			else if (dynamic_cast<IIfcLine^>(curve)) Init((IIfcLine^)curve, logger);
 			else if (dynamic_cast<IIfcRationalBSplineCurveWithKnots^>(curve)) Init((IIfcRationalBSplineCurveWithKnots^)curve, logger);
 			else if (dynamic_cast<IIfcBSplineCurveWithKnots^>(curve)) Init((IIfcBSplineCurveWithKnots^)curve, logger);
@@ -221,29 +221,58 @@ namespace Xbim
 			GeomConvert_CompCurveToBSplineCurve converter;
 
 			gp_Pnt lastVertex;
+			gp_Pnt startVertex;
 			bool firstPass = true;
+			bool isContinuous = true; //assume continuous or clsoed unless last segment is discontinuous
+			int segCount = cCurve->Segments->Count;
+			int segIdx = 1;
+
 			for each(IIfcCompositeCurveSegment^ seg in cCurve->Segments) //every segment shall be a bounded curve
 			{
+				bool lastSeg = (segIdx == segCount);
+
 				if (!dynamic_cast<IIfcBoundedCurve^>(seg->ParentCurve))
 				{
 					XbimGeometryCreator::LogError(logger, seg, "Composite curve contains a segment whih is not a bounded curve. It has been ignored");
 					return;
 				}
-				XbimCurve^ curve;
-				if (dynamic_cast<IIfcTrimmedCurve^>(seg->ParentCurve)) //we have to treat sense agreement differently
-					curve = gcnew XbimCurve((IIfcTrimmedCurve^)seg->ParentCurve, logger, seg->SameSense);
-				else
-				{
-					curve = gcnew XbimCurve(seg->ParentCurve, logger);
-					if (!seg->SameSense && curve->IsValid) curve->Reverse();
-				}
+				XbimCurve^ curve = gcnew XbimCurve(seg->ParentCurve, logger);
+				//if (dynamic_cast<IIfcTrimmedCurve^>(seg->ParentCurve)) //we have to treat sense agreement differently
+				//{
+				//	if (!seg->SameSense && curve->IsValid)
+				//	{
 
-				//	if (seg->Transition == IfcTransitionCode::DISCONTINUOUS) isContinuous = false;
+				//	}
+				//}
+				//else
+				//{
+				if (!seg->SameSense && curve->IsValid)
+					curve->Reverse();
+				//}
+
+				if (lastSeg && seg->Transition == IfcTransitionCode::DISCONTINUOUS) isContinuous = false;
 				if (curve->IsValid)
 				{
-					double actualTolerance = tolerance; //reset for each segment
 					gp_Pnt nextVertex = curve->StartPoint();
-					if (!firstPass)
+					if (firstPass)
+					{
+						startVertex = nextVertex;
+					}
+					double actualTolerance = tolerance; //reset for each segment
+
+					if (isContinuous && lastSeg) //we need to close it, check the start and end points match
+					{
+						gp_Pnt endVertex = curve->EndPoint();
+						double actualGap = startVertex.Distance(endVertex);
+						if (actualGap > tolerance)
+						{
+							double fiveMilli = 5 * cCurve->Model->ModelFactors->OneMilliMeter; //we are going to accept that a gap of 5mm is not a gap
+							if (actualGap > fiveMilli)
+								XbimGeometryCreator::LogWarning(logger, seg, "Failed to close composite curve segment");
+							actualTolerance = actualGap + tolerance;
+						}
+					}
+					else if (!firstPass)
 					{
 						double actualGap = nextVertex.Distance(lastVertex);
 						if (actualGap > tolerance)
@@ -278,9 +307,11 @@ namespace Xbim
 				{
 					XbimGeometryCreator::LogWarning(logger, seg, "Invalid edge of a composite curve found. It could not be created");
 				}
+				segIdx++;
 			}
+			Handle(Geom_BSplineCurve) bspline = converter.BSplineCurve();
 			pCurve = new Handle(Geom_Curve);
-			*pCurve = converter.BSplineCurve();
+			*pCurve = bspline;
 		}
 
 		void  XbimCurve::Init(IIfcIndexedPolyCurve ^ polyCurve, ILogger ^ logger)
@@ -475,7 +506,7 @@ namespace Xbim
 
 		}
 
-		void XbimCurve::Init(IIfcTrimmedCurve^ curve, ILogger^ logger, bool sameSense)
+		void XbimCurve::Init(IIfcTrimmedCurve^ curve, ILogger^ logger)
 		{
 			Init(curve->BasisCurve, logger);
 			if (IsValid)
@@ -562,6 +593,7 @@ namespace Xbim
 					}
 				}
 				//now just go with
+				bool sameSense = curve->SenseAgreement;
 				*pCurve = new Geom_TrimmedCurve(*pCurve, sameSense ? u1 : u2, sameSense ? u2 : u1);
 			}
 		}
@@ -658,7 +690,15 @@ namespace Xbim
 			}
 		}
 
-		void XbimCurve::Init(IIfcOffsetCurve2D^ offset, ILogger^ logger) {}
+		void XbimCurve::Init(IIfcOffsetCurve2D^ offset, ILogger^ logger)
+		{
+			XbimCurve2D^ c2d = gcnew XbimCurve2D(offset, logger);
+			if (c2d->IsValid)
+			{
+				pCurve = new Handle(Geom_Curve)();
+				*pCurve = (XbimCurve^)(c2d->ToCurve3D());
+			}
+		}
 
 		void XbimCurve::Init(IIfcPcurve^ curve, ILogger^ logger)
 		{
@@ -682,6 +722,7 @@ namespace Xbim
 
 		void XbimCurve::Init(IIfcSurfaceCurve ^ curve, ILogger ^ logger)
 		{
+			throw gcnew NotImplementedException("IIfcSurfaceCurve is not yet implemented");
 		}
 
 		void XbimCurve::Reverse()

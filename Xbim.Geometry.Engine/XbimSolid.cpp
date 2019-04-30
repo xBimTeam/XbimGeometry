@@ -1257,14 +1257,18 @@ namespace Xbim
 
 			XbimWire^ polyBoundary = gcnew XbimWire(pbhs->PolygonalBoundary, logger);
 
-
+			XbimFace^ polyFace;
 			if (!polyBoundary->IsValid)
 			{
-				XbimGeometryCreator::LogWarning(logger, pbhs, "Incorrectly defined PolygonalBoundary #{0}. It has been ignored", pbhs->PolygonalBoundary->EntityLabel);
+				XbimGeometryCreator::LogWarning(logger, pbhs, "Incorrectly defined PolygonalBoundary #{0}. The bound has been ignored", pbhs->PolygonalBoundary->EntityLabel);
+				pSolid = new TopoDS_Solid();
+				*pSolid = TopoDS::Solid(halfspace); //just take the half space
+				ShapeFix_ShapeTolerance tolFixer;
+				tolFixer.LimitTolerance(*pSolid, pbhs->Model->ModelFactors->Precision);
 				return;
 			}
-
-			XbimFace^ polyFace = gcnew XbimFace(polyBoundary,true, pbhs->Model->ModelFactors->Precision, pbhs->PolygonalBoundary->EntityLabel,logger);
+			else 
+				polyFace = gcnew XbimFace(polyBoundary,true, pbhs->Model->ModelFactors->Precision, pbhs->PolygonalBoundary->EntityLabel,logger);
 
 			if (!polyFace->IsValid)
 			{

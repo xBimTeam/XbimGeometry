@@ -43,5 +43,17 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.IsNotNull(face.OuterBound);
             }
         }
+        [TestMethod]
+        public void can_build_ifc_faceted_brep()
+        {
+            using (var model = MemoryModel.OpenRead(@".\TestFiles\Primitives\ifc_faceted_brep.ifc"))
+            {
+                var shape = model.Instances.OfType<IIfcFacetedBrep>().FirstOrDefault();
+                Assert.IsNotNull(shape);
+                var geom = geomEngine.CreateSolidSet(shape).FirstOrDefault();
+                Assert.IsTrue(geom.Volume > 1e-5);
+            }
+        }
+
     }
 }

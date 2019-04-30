@@ -398,7 +398,7 @@ namespace Xbim
 				gp_Pnt centre = GProp_PGProps::Barycentre(pointArray);
 				gp_Pln thePlane(centre, normal);
 				TopoDS_Wire theWire = polyMaker.Wire();
-				TopoDS_Face theFace = BRepBuilderAPI_MakeFace(thePlane, theWire);
+				TopoDS_Face theFace = BRepBuilderAPI_MakeFace(thePlane, theWire, false);
 
 				//limit the tolerances for the vertices and edges
 				ShapeFix_ShapeTolerance tolFixer;
@@ -439,7 +439,7 @@ namespace Xbim
 					else
 					{
 						theWire = wf.Wire();
-						theFace = BRepBuilderAPI_MakeFace(thePlane, theWire);
+						theFace = BRepBuilderAPI_MakeFace(thePlane, theWire, false);
 					}
 
 				}
@@ -525,6 +525,7 @@ namespace Xbim
 		void XbimFace::Init(IIfcFace^ ifcFace, ILogger^ logger)
 		{
 			double tolerance = ifcFace->Model->ModelFactors->Precision;
+			double angularTolerance = 0.00174533; //1 tenth of a degree
 			double outerLoopArea = 0;
 			ShapeFix_ShapeTolerance tolFixer;
 			TopoDS_Face theFace;
@@ -606,7 +607,8 @@ namespace Xbim
 					gp_Pln thePlane(centre, normal);
 					TopoDS_Wire theWire = polyMaker.Wire();
 					tolFixer.LimitTolerance(theWire, tolerance); //set all tolerances
-					TopoDS_Face aFace = BRepBuilderAPI_MakeFace(thePlane, theWire);
+					
+					TopoDS_Face aFace = BRepBuilderAPI_MakeFace(thePlane, theWire,false);
 					//need to check for self intersecting edges to comply with Ifc rules
 					TopTools_IndexedMapOfShape map;
 					TopExp::MapShapes(aFace, TopAbs_EDGE, map);
@@ -636,7 +638,7 @@ namespace Xbim
 						else
 						{
 							theWire = wf.Wire();
-							aFace = BRepBuilderAPI_MakeFace(thePlane, theWire);
+							aFace = BRepBuilderAPI_MakeFace(thePlane, theWire, false);
 						}
 
 					}
@@ -665,23 +667,28 @@ namespace Xbim
 			{
 				//add the other wires to the face
 				BRepBuilderAPI_MakeFace faceMaker(theFace);
-		
+				
 				TopoDS_ListIteratorOfListOfShape wireIter(innerBounds);
 				BRepGProp_Face prop(theFace);
 				gp_Pnt centre;
 				gp_Vec theFaceNormal;
 				double u1, u2, v1, v2;
 				prop.Bounds(u1, u2, v1, v2);
-				prop.Normal((u1 + u2) / 2.0, (v1 + v2) / 2.0, centre, theFaceNormal);				
+				prop.Normal((u1 + u2) / 2.0, (v1 + v2) / 2.0, centre, theFaceNormal);	
+				
 				while (wireIter.More()) 
 				{
 					TopoDS_Face face = TopoDS::Face(wireIter.Value());					
 					BRepGProp_Face fprop(face);				
 					gp_Vec innerBoundNormalDir;
 					fprop.Bounds(u1, u2, v1, v2);
-					fprop.Normal((u1 + u2) / 2.0, (v1 + v2) / 2.0, centre, innerBoundNormalDir);					
-					if (!theFaceNormal.IsOpposite(innerBoundNormalDir,Precision::Angular()))
-						face.Reverse();					
+					fprop.Normal((u1 + u2) / 2.0, (v1 + v2) / 2.0, centre, innerBoundNormalDir);	
+					
+					if (!theFaceNormal.IsOpposite(innerBoundNormalDir, angularTolerance))
+					{
+						
+						face.Reverse();
+					}
 					faceMaker.Add(BRepTools::OuterWire(face));
 					wireIter.Next();
 				}
@@ -707,8 +714,12 @@ namespace Xbim
 
 				
 			}
+			else
+			{
+				tolFixer.LimitTolerance(theFace, tolerance); //set all tolerances
+			}
 			pFace = new TopoDS_Face();
-				*pFace = theFace;
+			*pFace = theFace;
 		}
 
 		void XbimFace::Init(IXbimFace^ face, ILogger^ /*logger*/)
@@ -753,34 +764,26 @@ namespace Xbim
 				if (wire->IsValid)
 				{
 					double tolerance = profile->Model->ModelFactors->Precision;
-					double toleranceMax = profile->Model->ModelFactors->PrecisionMax;
-					ShapeFix_ShapeTolerance FTol;
-					double currentFaceTolerance = tolerance;
-				TryBuildFace:
+					
 					XbimVector3D n = wire->Normal;
 					XbimPoint3D centre = wire->BaryCentre;
 					gp_Pln thePlane(gp_Pnt(centre.X, centre.Y,centre.Z), gp_Vec(n.X,n.Y,n.Z));
-					BRepBuilderAPI_MakeFace faceMaker(thePlane,wire, true);
-					BRepBuilderAPI_FaceError err = faceMaker.Error();
-					if (err == BRepBuilderAPI_NotPlanar)
+					pFace = new TopoDS_Face();
+					*pFace = BRepBuilderAPI_MakeFace(thePlane, wire, false);
+					//need to check for self intersecting edges to comply with Ifc rules
+					TopTools_IndexedMapOfShape map;
+					TopExp::MapShapes(*pFace, TopAbs_EDGE, map);
+					ShapeFix_Edge ef;
+					
+					for (int i = 1; i <= map.Extent(); i++)
 					{
-						currentFaceTolerance *= 10;
-						if (currentFaceTolerance <= toleranceMax)
-						{
-							FTol.LimitTolerance(wire, currentFaceTolerance);
-							goto TryBuildFace;
-						}
-						String^ errMsg = XbimFace::GetBuildFaceErrorMessage(err);
-						XbimGeometryCreator::LogWarning(logger, profile, "Invalid bound, {0}. Face discarded", errMsg);
-						return;
+						const TopoDS_Edge edge = TopoDS::Edge(map(i));
+						ef.FixVertexTolerance(edge, *pFace);
 					}
-					else
-					{
-						pFace = new TopoDS_Face();
-						*pFace = faceMaker.Face();
-					}
+					ShapeFix_ShapeTolerance fTol;
+					fTol.LimitTolerance(*pFace, tolerance);
 				}
-				GC::KeepAlive(wire);
+				
 			}
 		}
 
@@ -817,7 +820,7 @@ namespace Xbim
 			XbimWire^ loop = gcnew XbimWire(profile->OuterCurve, logger);
 			if (loop->IsValid)
 			{
-				if (!loop->IsClosed && loop->Edges->Count > 1) //we need to close it if we have more thn one edge
+				if (!loop->IsClosed ) //we need to close it i
 				{
 					double oneMilli = profile->Model->ModelFactors->OneMilliMeter;
 					XbimFace^ xface = gcnew XbimFace(loop, true, oneMilli, profile->OuterCurve->EntityLabel, logger);
@@ -835,7 +838,7 @@ namespace Xbim
 				}
 				double currentFaceTolerance = tolerance;
 			TryBuildFace:
-				BRepBuilderAPI_MakeFace faceMaker(loop, false);
+				BRepBuilderAPI_MakeFace faceMaker(loop, true);
 				BRepBuilderAPI_FaceError err = faceMaker.Error();
 				if (err == BRepBuilderAPI_NotPlanar)
 				{
@@ -856,7 +859,7 @@ namespace Xbim
 				for each(IIfcCurve^ curve in profile->InnerCurves)
 				{
 					XbimWire^ innerWire = gcnew XbimWire(curve, logger);
-					if (!innerWire->IsClosed && innerWire->Edges->Count > 1) //we need to close it if we have more thn one edge
+					if (!innerWire->IsClosed ) //we need to close it if we have more thn one edge
 					{
 						double oneMilli = profile->Model->ModelFactors->OneMilliMeter;
 						XbimFace^ xface = gcnew XbimFace(innerWire, true, oneMilli, curve->EntityLabel, logger);

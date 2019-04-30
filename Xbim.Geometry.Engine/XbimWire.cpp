@@ -69,6 +69,7 @@
 #include <GProp_PGProps.hxx>
 #include <ShapeFix_Edge.hxx>
 #include <BOPAlgo_Tools.hxx>
+#include <Geom_OffsetCurve.hxx>
 using namespace Xbim::Common;
 using namespace System::Linq;
 // using namespace System::Diagnostics;
@@ -221,7 +222,7 @@ namespace Xbim
 					return;
 				}
 				pWire = new TopoDS_Wire();
-				if (!loop->IsClosed && loop->Edges->Count > 1) //we need to close it if we have more thn one edge
+				if (!loop->IsClosed ) //we need to close it if we have more thn one edge
 				{
 					// todo: this code is not quite robust, it did not manage to close fairly simple polylines.
 					//
@@ -350,211 +351,6 @@ namespace Xbim
 			}
 		}
 
-		//void XbimWire::Init(IIfcPolyline^ pLine, ILogger^ logger)
-		//{
-		//	Init(pLine, false, logger);
-		//}
-
-		//void XbimWire::Init(IIfcPolyline^ pLine, bool attemptClosing, ILogger^ logger)
-		//{
-		//	List<IIfcCartesianPoint^>^ pointList = Enumerable::ToList(pLine->Points);
-		//	int total = pointList->Count;
-		//	if (total < 2)
-		//	{
-		//		XbimGeometryCreator::LogWarning(logger, pLine, "Polyline with less than 2 points found. Wire discarded");
-		//		return;
-		//	}
-
-		//	// prepare tolerance for geometry fixes 
-		//	double tolerance = pLine->Model->ModelFactors->Precision;
-
-		//	// check for contiguous point tolerance
-		//	for (int i = 1; i < total;)
-		//	{
-		//		if (XbimConvert::IsEqual(pointList[i - 1], pointList[i], tolerance))
-		//		{
-		//			// remove the redundant point
-		//			XbimGeometryCreator::LogDebug(logger, pLine, "Polyline with redundant points simplified. Point {0} discarded.", pointList[i]->EntityLabel);
-		//			pointList->RemoveAt(i);
-		//			total--;
-		//		}
-		//		else
-		//		{
-		//			// check next
-		//			i++;
-		//		}
-		//	}
-
-		//	// check for closing point
-		//	Standard_Boolean closed = Standard_False;
-		//	if (attemptClosing)
-		//		closed = Standard_True;
-		//	do
-		//	{
-		//		if (XbimConvert::IsEqual(pointList[0], pointList[total - 1], tolerance))
-		//		{
-		//			total--; //skip the last point
-		//			closed = Standard_True;
-		//		}
-		//		else
-		//			break;
-		//	} while (total > 1);
-
-		//	if (total < 2)
-		//	{
-		//		XbimGeometryCreator::LogWarning(logger, pLine, "Polyline with less than 2 points found. Wire discarded");
-		//		return;
-		//	}
-
-		//	//Make all the vertices
-		//	TopTools_Array1OfShape vertexStore(1, total + 1);
-		//	BRep_Builder builder;
-		//	TopoDS_Wire wire;
-		//	builder.MakeWire(wire);
-		//	bool is3D = XbimConvert::Is3D(pLine);
-		//	gp_Pnt first;
-		//	gp_Pnt previous;
-
-		//	for (int i = 0; i < total; i++) //add all the points into unique collection
-		//	{
-		//		IIfcCartesianPoint^ p = pointList[i];
-		//		gp_Pnt current(p->X, p->Y, is3D ? p->Z : 0);
-		//		TopoDS_Vertex v;
-		//		builder.MakeVertex(v, current, tolerance);
-		//		vertexStore.SetValue(i + 1, v);
-		//	}
-
-		//	int firstIdx = 1;
-		//	bool edgeAdded = false;
-		//	for (int pt = 1; pt <= total; pt++)
-		//	{
-		//		int next = pt + 1;
-		//		if (pt == total) //we are at the last point
-		//		{
-		//			if (closed == Standard_True) //add the last edge in
-		//				next = firstIdx;
-		//			else
-		//				break; //stop
-		//		}
-		//		const TopoDS_Vertex& v1 = TopoDS::Vertex(vertexStore.Value(pt));
-		//		const TopoDS_Vertex& v2 = TopoDS::Vertex(vertexStore.Value(next));
-
-		//		try
-		//		{
-		//			BRepBuilderAPI_MakeEdge edgeMaker(v1, v2);
-		//			BRepBuilderAPI_EdgeError edgeErr = edgeMaker.Error();
-		//			if (edgeErr != BRepBuilderAPI_EdgeDone)
-		//			{
-		//				gp_Pnt p1 = BRep_Tool::Pnt(v1);
-		//				gp_Pnt p2 = BRep_Tool::Pnt(v2);
-
-		//				String^ errMsg = XbimEdge::GetBuildEdgeErrorMessage(edgeErr);
-		//				XbimGeometryCreator::LogWarning(logger, pLine, "Invalid edge found in polyline, {6}.Start = {0}, {1}, {2} End = {3}, {4}, {5}. Edge discarded.",
-		//					p1.X(), p1.Y(), p1.Z(), p2.X(), p2.Y(), p2.Z(), errMsg);
-		//			}
-		//			else
-		//			{
-		//				builder.Add(wire, edgeMaker.Edge());
-		//				if (!edgeAdded) firstIdx = pt; //we need this in case the first edge is invalid and we need to close properly
-		//				edgeAdded = true;
-		//			}
-		//		}
-		//		catch (System::Runtime::InteropServices::SEHException^)
-		//		{
-		//			gp_Pnt p1 = BRep_Tool::Pnt(v1);
-		//			gp_Pnt p2 = BRep_Tool::Pnt(v2);
-		//			XbimGeometryCreator::LogInfo(logger, pLine, "Invalid edge, Start = {0}, {1}, {2} End = {3}, {4}, {5}. Edge discarded",
-		//				p1.X(), p1.Y(), p1.Z(), p2.X(), p2.Y(), p2.Z());
-		//		}
-		//	}
-		//	wire.Closed(closed);
-		//	if (total > 2) //if we have more than a line segment check it is ok and fix if self interecting
-		//	{
-		//		XbimFace^ xFace = nullptr;
-		//		if (is3D)
-		//		{
-		//			XbimWire^ xWire = gcnew XbimWire(wire);
-		//			XbimVector3D norm = xWire->Normal;
-		//			if (!norm.IsInvalid()) //this is not a polyline on a face so we cannot fix any problems just go with it.
-		//				xFace = gcnew XbimFace(norm, logger);
-		//		}
-		//		else
-		//			xFace = gcnew XbimFace(XbimVector3D(0, 0, 1), logger);
-		//		if (xFace != nullptr)
-		//		{
-		//			ShapeAnalysis_Wire wireChecker(wire, xFace, tolerance);
-		//			Standard_Boolean needsFixing = wireChecker.CheckSelfIntersection();
-		//			if (needsFixing == Standard_True)
-		//			{
-		//				ShapeFix_Wire wireFixer(wire, xFace, tolerance);
-		//				/*wireFixer.FixAddCurve3dMode();
-		//				wireFixer.FixConnectedMode();
-		//				wireFixer.FixDegeneratedMode();
-		//				wireFixer.FixGaps3dMode();
-		//				wireFixer.FixGaps2dMode();
-		//				wireFixer.FixIntersectingEdgesMode();
-		//				wireFixer.FixLackingMode();
-		//				wireFixer.FixNotchedEdgesMode();
-		//				wireFixer.FixReorderMode();
-		//				wireFixer.FixSeamMode();
-		//				wireFixer.FixTailMode();
-		//				wireFixer.FixVertexToleranceMode();*/
-		//				wireFixer.FixTailMode() = Standard_True;
-		//				wireFixer.SetMaxTailWidth(tolerance * 10000);
-		//				wireFixer.ModifyGeometryMode() = Standard_True;
-		//				wireFixer.ModifyTopologyMode() = Standard_True;
-		//				wireFixer.SetMaxTailAngle(0.0174533); //1 degree
-		//				wireFixer.ClosedWireMode() = closed;
-		//				wireFixer.FixSelfIntersectionMode() = Standard_True;
-		//				wireFixer.FixSelfIntersectingEdgeMode() = Standard_True;
-		//				wireFixer.FixIntersectingEdgesMode() = Standard_True;
-		//				wireFixer.FixVertexToleranceMode() = Standard_True;
-		//				wireFixer.Perform();
-		//				wire = wireFixer.Wire();
-		//			}
-		//		}
-		//	}
-		//	pWire = new TopoDS_Wire();
-		//	*pWire = wire;
-		//	ShapeFix_ShapeTolerance fixTol;
-		//	fixTol.LimitTolerance(*pWire, tolerance);
-		//}
-
-		//void XbimWire::Init(IIfcBSplineCurve^ bspline, ILogger^ logger)
-		//{
-		//	IIfcBSplineCurveWithKnots^ bez = dynamic_cast<IIfcBSplineCurveWithKnots^>(bspline);
-		//	if (bez != nullptr) Init(bez, logger);
-		//	else throw gcnew NotImplementedException("Unsupported IfcBSplineCurve type found.");
-		//}
-
-		//void XbimWire::Init(IIfcBSplineCurveWithKnots^ bSpline, ILogger^ logger)
-		//{
-		//	IIfcRationalBSplineCurveWithKnots^ ratBez = dynamic_cast<IIfcRationalBSplineCurveWithKnots^>(bSpline);
-		//	if (ratBez != nullptr)
-		//		Init(ratBez, logger);
-		//	else
-		//	{
-		//		XbimEdge^ edge = gcnew XbimEdge(bSpline, logger);
-		//		if (edge->IsValid)
-		//		{
-		//			BRepBuilderAPI_MakeWire b(edge);
-		//			pWire = new TopoDS_Wire();
-		//			*pWire = b.Wire();
-		//		}
-		//	}
-		//}
-
-		//void XbimWire::Init(IIfcRationalBSplineCurveWithKnots^ bSpline, ILogger^ logger)
-		//{
-		//	XbimEdge^ edge = gcnew XbimEdge(bSpline, logger);
-		//	if (edge->IsValid)
-		//	{
-		//		BRepBuilderAPI_MakeWire b(edge);
-		//		pWire = new TopoDS_Wire();
-		//		*pWire = b.Wire();
-		//	}
-		//}
-
 
 		void XbimWire::Init(IIfcCompositeCurveSegment^ compCurveSeg, ILogger^ logger)
 		{
@@ -564,103 +360,12 @@ namespace Xbim
 		}
 
 
-		//void XbimWire::Init(IIfcCompositeCurve^ cCurve, ILogger^ logger)
-		//{
-
-		//	ShapeFix_ShapeTolerance FTol;
-		//	double precision = cCurve->Model->ModelFactors->Precision; //use a courser precision for trimmed curves	
-		//	
-		//	BRepBuilderAPI_MakeWire w;
-		//	XbimPoint3D lastVertex;
-		//	bool firstPass = true;
-		//	for each(IIfcCompositeCurveSegment^ seg in cCurve->Segments)
-		//	{
-		//		XbimEdge^ segEdge;
-		//		if (dynamic_cast<IIfcTrimmedCurve^>(seg->ParentCurve)) //we have to treat sense agreement differently
-		//			segEdge = gcnew XbimEdge((IIfcTrimmedCurve^)seg->ParentCurve, logger, seg->SameSense);
-		//		else
-		//		{
-		//			segEdge = gcnew XbimEdge(seg->ParentCurve, logger);
-		//			if (!seg->SameSense && segEdge->IsValid) segEdge->Reverse();
-		//		}
-		//		
-		//		//	if (seg->Transition == IfcTransitionCode::DISCONTINUOUS) isContinuous = false;
-		//		if (segEdge->IsValid)
-		//		{
-		//					
-		//			XbimPoint3D nextVertex = segEdge->EdgeStartPoint;
-		//			if (!firstPass)
-		//			{	
-		//				double actualGap = (nextVertex - lastVertex).Length;
-		//				if (actualGap > precision)
-		//				{
-		//					double fiveMilli = 5 * cCurve->Model->ModelFactors->OneMilliMeter; //we are going to accept that a gap of 5mm is not a gap
-		//					if (actualGap > fiveMilli)
-		//					{
-		//						XbimGeometryCreator::LogError(logger, seg, "Failed to join composite curve segment. It has been ignored");
-		//						return;
-		//					}
-		//					FTol.LimitTolerance(segEdge, actualGap+precision, TopAbs_VERTEX);
-		//				}
-		//			}
-		//			firstPass = false;
-		//			w.Add(segEdge);
-		//			if (w.Error() != BRepBuilderAPI_WireDone)
-		//			{
-		//				XbimGeometryCreator::LogError(logger, seg, "Failed to join composite curve segment. It has been ignored");
-		//				return;
-		//			}
-		//			lastVertex = segEdge->EdgeEndPoint;
-		//		}
-		//		else
-		//		{
-		//			XbimGeometryCreator::LogWarning(logger, seg, "Invalid edge of a composite curve found. It could not be created");
-		//		}
-		//	}
-		//	pWire = new TopoDS_Wire();
-		//	*pWire = w.Wire();			
-		//	FTol.LimitTolerance(*pWire, precision);
-		//	XbimCurve^ cc = gcnew XbimCurve(cCurve, logger);
-		//}
-
-		//void XbimWire::Init(IIfcTrimmedCurve^ tCurve, ILogger^ logger)
-		//{
-		//	XbimCurve^ geomCurve = gcnew XbimCurve(tCurve, logger);
-		//	BRepBuilderAPI_MakeEdge edgeMaker(geomCurve);
-		//	BRepBuilderAPI_EdgeError edgeErr = edgeMaker.Error();
-		//	if (edgeErr != BRepBuilderAPI_EdgeDone)
-		//	{
-		//		String^ errMsg = XbimEdge::GetBuildEdgeErrorMessage(edgeErr);
-		//		XbimGeometryCreator::LogError(logger, tCurve, "Invalid edge found in trimmed curve, {0} .It has been ignored", errMsg);
-		//		return;
-		//	}
-		//	BRepLib_MakeWire wireMaker(edgeMaker.Edge());
-		//	if (wireMaker.IsDone())
-		//	{
-		//		pWire = new TopoDS_Wire();
-		//		*pWire = wireMaker.Wire();
-		//		ShapeFix_ShapeTolerance FTol;
-		//		FTol.LimitTolerance(*pWire, tCurve->Model->ModelFactors->Precision);
-		//	}
-		//	else
-		//	{
-		//		XbimGeometryCreator::LogError(logger, tCurve, "Failed to build wire from trimmed curve .It has been ignored");
-		//	}
-		//}
 
 		void XbimWire::Init(IIfcCurve^ curve, ILogger^ logger)
 		{
-			XbimCurve^ geomCurve = gcnew XbimCurve(curve, logger);
-			if (!geomCurve->IsValid) return; //errors handled below in curve
-			BRepBuilderAPI_MakeEdge edgeMaker(geomCurve);
-			BRepBuilderAPI_EdgeError edgeErr = edgeMaker.Error();
-			if (edgeErr != BRepBuilderAPI_EdgeDone)
-			{
-				String^ errMsg = XbimEdge::GetBuildEdgeErrorMessage(edgeErr);
-				XbimGeometryCreator::LogError(logger, curve, "Invalid edge found in trimmed curve, {0} .It has been ignored", errMsg);
-				return;
-			}
-			BRepLib_MakeWire wireMaker(edgeMaker.Edge());
+			XbimEdge^ edge = gcnew XbimEdge(curve, logger);
+			if (!edge->IsValid) return; //errors handled below in curve
+			BRepLib_MakeWire wireMaker(edge);
 			if (wireMaker.IsDone())
 			{
 				pWire = new TopoDS_Wire();
@@ -670,122 +375,10 @@ namespace Xbim
 			}
 			else
 			{
-				XbimGeometryCreator::LogError(logger, curve, "Failed to build wire from  curve .It has been ignored");
+				XbimGeometryCreator::LogError(logger, curve, "Failed to build wire from curve .It has been ignored");
 			}
 
 		}
-
-		//void XbimWire::Init(IIfcIndexedPolyCurve^ polyCurve, ILogger^ /*logger*/)
-		//{
-		//	double precision = polyCurve->Model->ModelFactors->Precision;
-		//	IIfcCartesianPointList3D^ points3D = dynamic_cast<IIfcCartesianPointList3D^>(polyCurve->Points);
-		//	IIfcCartesianPointList2D^ points2D = dynamic_cast<IIfcCartesianPointList2D^>(polyCurve->Points);
-		//	List<XbimVertex^>^ vertices;
-		//	Dictionary<XbimPoint3DWithTolerance^, XbimVertex^>^ uniqueVertices = gcnew	Dictionary<XbimPoint3DWithTolerance^, XbimVertex^>();
-		//	if (points3D != nullptr)
-		//	{
-		//		vertices = gcnew List<XbimVertex^>();
-		//		for each (IEnumerable<Ifc4::MeasureResource::IfcLengthMeasure>^ coll in points3D->CoordList)
-		//		{
-		//			IEnumerator<Ifc4::MeasureResource::IfcLengthMeasure>^ enumer = coll->GetEnumerator();
-		//			enumer->MoveNext();
-		//			double x = (double)enumer->Current;
-		//			enumer->MoveNext();
-		//			double y = (double)enumer->Current;
-		//			enumer->MoveNext();
-		//			double z = (double)enumer->Current;
-		//			XbimPoint3DWithTolerance^ p3d = gcnew XbimPoint3DWithTolerance(x, y, z, precision);
-		//			XbimVertex^ vertex;
-		//			if (!uniqueVertices->TryGetValue(p3d, vertex))
-		//			{
-		//				vertex = gcnew XbimVertex(p3d);
-		//				uniqueVertices->Add(p3d, vertex);
-		//			}
-		//			vertices->Add(vertex);
-		//		}
-		//	}
-		//	else if (points2D != nullptr) //it is 2D
-		//	{
-		//		vertices = gcnew List<XbimVertex^>();
-		//		for each (IEnumerable<Ifc4::MeasureResource::IfcLengthMeasure>^ coll in points2D->CoordList)
-		//		{
-		//			IEnumerator<Ifc4::MeasureResource::IfcLengthMeasure>^ enumer = coll->GetEnumerator();
-		//			enumer->MoveNext();
-		//			double x = (double)enumer->Current;
-		//			enumer->MoveNext();
-		//			double y = (double)enumer->Current;
-		//			XbimPoint3DWithTolerance^ p3d = gcnew XbimPoint3DWithTolerance(x, y, 0, precision);
-		//			XbimVertex^ vertex;
-		//			if (!uniqueVertices->TryGetValue(p3d, vertex))
-		//			{
-		//				vertex = gcnew XbimVertex(p3d);
-		//				uniqueVertices->Add(p3d, vertex);
-		//			}
-		//			vertices->Add(vertex);
-		//		}
-		//	}
-
-		//	BRepBuilderAPI_MakeWire wireMaker;
-		//	if (polyCurve->Segments->Count > 0)
-		//	{
-		//		for each (IIfcSegmentIndexSelect^ segment in  polyCurve->Segments)
-		//		{
-		//			Ifc4::GeometryResource::IfcArcIndex^ arcIndex = dynamic_cast<Ifc4::GeometryResource::IfcArcIndex^>(segment);
-		//			Ifc4::GeometryResource::IfcLineIndex^ lineIndex = dynamic_cast<Ifc4::GeometryResource::IfcLineIndex^>(segment);
-		//			if (arcIndex != nullptr)
-		//			{
-		//				List<Ifc4::MeasureResource::IfcPositiveInteger>^ indices = (List<Ifc4::MeasureResource::IfcPositiveInteger>^)arcIndex->Value;
-		//				XbimEdge^ e = gcnew XbimEdge(vertices[(int)indices[0] - 1], vertices[(int)indices[1] - 1], vertices[(int)indices[2] - 1]);
-		//				wireMaker.Add(e);
-		//			}
-		//			else if (lineIndex != nullptr)
-		//			{
-		//				List<Ifc4::MeasureResource::IfcPositiveInteger>^ indices = (List<Ifc4::MeasureResource::IfcPositiveInteger>^)lineIndex->Value;
-		//				for (int i = 0; i < indices->Count - 1; i++)
-		//				{
-		//					XbimVertex^ start = vertices[(int)indices[i] - 1];
-		//					XbimVertex^ end = vertices[(int)indices[i + 1] - 1];
-		//					if (start != end)
-		//					{
-		//						XbimEdge^ e = gcnew XbimEdge(start, end);
-		//						wireMaker.Add(e);
-		//					}
-		//				}
-		//			}
-		//		}
-		//	}
-		//	else
-		//	{
-		//		// To be compliant with:
-		//		// "In the case that the list of Segments is not provided, all points in the IfcCartesianPointList are connected by straight line segments in the order they appear in the IfcCartesianPointList."
-		//		// http://www.buildingsmart-tech.org/ifc/IFC4/Add1/html/schema/ifcgeometryresource/lexical/ifcindexedpolycurve.htm
-		//		int count = 0;
-		//		if (points3D != nullptr)
-		//		{
-		//			count = points3D->CoordList->Count;
-		//		}
-		//		else if (points2D != nullptr)
-		//		{
-		//			count = points2D->CoordList->Count;
-		//		}
-
-		//		for (int i = 0; i < count - 1; i++)
-		//		{
-		//			XbimVertex^ start = vertices[i];
-		//			XbimVertex^ end = vertices[i + 1];
-		//			if (start != end)
-		//			{
-		//				XbimEdge^ e = gcnew XbimEdge(start, end);
-		//				wireMaker.Add(e);
-		//			}
-		//		}
-		//	}
-
-		//	pWire = new TopoDS_Wire();
-		//	*pWire = wireMaker.Wire();
-
-		//}
-
 
 
 		void XbimWire::Init(IIfcPolyLoop ^ polyloop, ILogger^ logger)
@@ -992,6 +585,8 @@ namespace Xbim
 						(cType == STANDARD_TYPE(Geom_Ellipse)) ||
 						(cType == STANDARD_TYPE(Geom_Parabola)) ||
 						(cType == STANDARD_TYPE(Geom_Hyperbola)) ||
+						(cType == STANDARD_TYPE(Geom_TrimmedCurve)) ||
+						(cType == STANDARD_TYPE(Geom_OffsetCurve)) ||
 						(cType == STANDARD_TYPE(Geom_BezierCurve)) ||
 						(cType == STANDARD_TYPE(Geom_BSplineCurve)))
 					{
@@ -1044,6 +639,7 @@ namespace Xbim
 					}
 					else //throw AN EXCEPTION
 					{
+
 						throw gcnew XbimGeometryException("Unsupported Edge type");
 					}
 				}

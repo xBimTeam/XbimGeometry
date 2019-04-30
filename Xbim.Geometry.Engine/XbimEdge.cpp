@@ -119,55 +119,13 @@ namespace Xbim
 
 #pragma region Constructors
 
-		XbimEdge::XbimEdge(IIfcPcurve^ edge, ILogger^ logger)
-		{
-			Init(edge, logger);
-		}
-
-		XbimEdge::XbimEdge(IIfcConic^ edge, ILogger^ logger)
-		{
-			Init(edge, logger);
-		}
 
 		XbimEdge::XbimEdge(IIfcCurve^ edge, ILogger^ logger)
 		{
 			Init(edge, logger);
 		}
-		XbimEdge::XbimEdge(IIfcTrimmedCurve^ edge, ILogger^ logger, bool sameSense)
-		{
-			Init(edge, logger, sameSense);
-		}
-		XbimEdge::XbimEdge(IIfcCircle^ edge, ILogger^ logger)
-		{
-			Init(edge, logger);
-		}
-
-		XbimEdge::XbimEdge(IIfcLine^ edge, ILogger^ logger)
-		{
-			Init(edge, logger);
-		}
-
-		XbimEdge::XbimEdge(IIfcEllipse^ edge, ILogger^ logger)
-		{
-			Init(edge, logger);
-		}
-
-		XbimEdge::XbimEdge(IIfcBSplineCurve^ edge, ILogger^ logger)
-		{
-			Init(edge, logger);
-		}
-
-		XbimEdge::XbimEdge(IIfcBSplineCurveWithKnots^ edge, ILogger^ logger)
-		{
-			Init(edge, logger);
-		}
-		XbimEdge::XbimEdge(IIfcRationalBSplineCurveWithKnots^ edge, ILogger^ logger)
-		{
-			Init(edge, logger);
-		}
-
-
-
+		
+		
 		XbimEdge::XbimEdge(XbimVertex^ start, XbimVertex^ midPoint, XbimVertex^ end)
 		{
 
@@ -990,241 +948,24 @@ namespace Xbim
 
 		void XbimEdge::Init(IIfcCurve^ curve, ILogger^ logger)
 		{
-			IIfcLine^ line = dynamic_cast<IIfcLine^>(curve);
-			if (line != nullptr) return Init(line, logger);
-			IIfcConic^ conic = dynamic_cast<IIfcConic^>(curve);
-			if (conic != nullptr) return Init(conic, logger);
-			IIfcPolyline^ pline = dynamic_cast<IIfcPolyline^>(curve);
-			if (pline != nullptr) return Init(pline, logger);
-			IIfcBSplineCurve^ bspline = dynamic_cast<IIfcBSplineCurve^>(curve);
-			if (bspline != nullptr) return Init(bspline, logger);
-			IIfcPcurve^ pcurve = dynamic_cast<IIfcPcurve^>(curve);
-			if (pcurve != nullptr) return Init(pcurve, logger);
-			IIfcTrimmedCurve^ tcurve = dynamic_cast<IIfcTrimmedCurve^>(curve);
-			if (tcurve != nullptr) return Init(tcurve, logger, tcurve->SenseAgreement);
-			throw gcnew NotImplementedException(String::Format("Curve of Type {0} in entity #{1} is not implemented", curve->GetType()->Name, curve->EntityLabel));
-		}
-
-		void XbimEdge::Init(IIfcPcurve^ curve, ILogger^ logger)
-		{
-			XbimCurve^ occCurve = gcnew XbimCurve(curve, logger);
-			if (occCurve->IsValid)
+			XbimCurve^ xbimCurve = gcnew XbimCurve(curve, logger); //if this fails it will record the error
+			if (xbimCurve->IsValid)
 			{
-				XbimFace^ faceSurface = gcnew XbimFace(curve->BasisSurface, logger);
-				ShapeFix_Edge eFix;
-				XbimEdge^ edge = gcnew XbimEdge(occCurve);
-				eFix.FixAddPCurve(edge, faceSurface, Standard_False, curve->Model->ModelFactors->Precision);
+				BRepBuilderAPI_MakeEdge edgeMaker(xbimCurve);
+				BRepBuilderAPI_EdgeError edgeErr = edgeMaker.Error();
+				if (edgeErr != BRepBuilderAPI_EdgeDone)
+				{
+					String^ errMsg = GetBuildEdgeErrorMessage(edgeErr);
+					XbimGeometryCreator::LogError(logger, curve, "Could not build edge from curve, {0} .It has been ignored", errMsg);
+					return;
+				}
 				pEdge = new TopoDS_Edge();
-				*pEdge = edge;
+				*pEdge = edgeMaker.Edge();
 				ShapeFix_ShapeTolerance FTol;
 				FTol.LimitTolerance(*pEdge, curve->Model->ModelFactors->Precision);
 			}
 		}
 
-		void XbimEdge::Init(IIfcPolyline^ pline, ILogger^ logger)
-		{
-			XbimCurve^ curve = gcnew XbimCurve(pline, logger);
-
-			BRepBuilderAPI_MakeEdge edgeMaker(curve);
-			BRepBuilderAPI_EdgeError edgeErr = edgeMaker.Error();
-			if (edgeErr != BRepBuilderAPI_EdgeDone)
-			{
-				String^ errMsg = XbimEdge::GetBuildEdgeErrorMessage(edgeErr);
-				XbimGeometryCreator::LogWarning(logger, pline, "Invalid edge found, {0}. It has been ignored", errMsg);
-			}
-			else
-			{
-				pEdge = new TopoDS_Edge();
-				*pEdge = edgeMaker.Edge();
-				// set the tolerance for this shape.
-				ShapeFix_ShapeTolerance FTol;
-				FTol.LimitTolerance(*pEdge, pline->Model->ModelFactors->Precision);
-			}
-		}
-
-		void XbimEdge::Init(IIfcConic^ conic, ILogger^ logger)
-		{
-			IIfcCircle^ circle = dynamic_cast<IIfcCircle^>(conic);
-			if (circle != nullptr) return Init(circle, logger);
-			IIfcEllipse^ ellipse = dynamic_cast<IIfcEllipse^>(conic);
-			if (ellipse != nullptr) return Init(ellipse, logger);
-		}
-
-		void XbimEdge::Init(IIfcCircle^ circle, ILogger^ logger)
-		{
-			Handle(Geom_Curve) curve;
-			if (dynamic_cast<IIfcAxis2Placement2D^>(circle->Position))
-			{
-				IIfcAxis2Placement2D^ ax2 = (IIfcAxis2Placement2D^)circle->Position;
-				gp_Ax2 gpax2(gp_Pnt(ax2->Location->X, ax2->Location->Y, 0), gp_Dir(0, 0, 1), gp_Dir(ax2->P[0].X, ax2->P[0].Y, 0.));
-				gp_Circ gc(gpax2, circle->Radius);
-				curve = GC_MakeCircle(gc).Value();
-			}
-			else if (dynamic_cast<IIfcAxis2Placement3D^>(circle->Position))
-			{
-				IIfcAxis2Placement3D^ ax2 = (IIfcAxis2Placement3D^)circle->Position;
-				gp_Ax3 	gpax3 = XbimConvert::ToAx3(ax2);
-				gp_Circ gc(gpax3.Ax2(), circle->Radius);
-				curve = GC_MakeCircle(gc).Value();
-			}
-			else
-			{
-				Type ^ type = circle->Position->GetType();
-				XbimGeometryCreator::LogError(logger, circle, "Circle with placement of type {0} is not implemented", type->Name);
-				return;
-			}
-			BRepBuilderAPI_MakeEdge edgeMaker(curve);
-			BRepBuilderAPI_EdgeError edgeErr = edgeMaker.Error();
-			if (edgeErr != BRepBuilderAPI_EdgeDone)
-			{
-				String^ errMsg = XbimEdge::GetBuildEdgeErrorMessage(edgeErr);
-				XbimGeometryCreator::LogWarning(logger, "Invalid edge found in circle, {0}. It has been ignored", errMsg);
-			}
-			else
-			{
-				pEdge = new TopoDS_Edge();
-				*pEdge = edgeMaker.Edge();
-				// set the tolerance for this shape.
-				ShapeFix_ShapeTolerance FTol;
-				FTol.LimitTolerance(*pEdge, circle->Model->ModelFactors->Precision);
-			}
-		}
-
-		void XbimEdge::Init(IIfcLine^ line, ILogger^ logger)
-		{
-			IIfcCartesianPoint^ cp = line->Pnt;
-			IIfcVector^ ifcVec = line->Dir;
-			IIfcDirection^ dir = ifcVec->Orientation;
-			gp_Pnt pnt(cp->X, cp->Y, cp->Z);
-			XbimVector3D v3d(dir->X, dir->Y, dir->Z);
-			gp_Vec vec(v3d.X, v3d.Y, v3d.Z);
-			BRepBuilderAPI_MakeEdge edgeMaker(GC_MakeLine(pnt, vec).Value());
-			BRepBuilderAPI_EdgeError edgeErr = edgeMaker.Error();
-			if (edgeErr != BRepBuilderAPI_EdgeDone)
-			{
-				String^ errMsg = XbimEdge::GetBuildEdgeErrorMessage(edgeErr);
-				XbimGeometryCreator::LogWarning(logger, line, "Invalid edge found, {0}. It has been ignored", errMsg);
-			}
-			else
-			{
-				pEdge = new TopoDS_Edge();
-				*pEdge = edgeMaker.Edge();
-				// set the tolerance for this shape.
-				ShapeFix_ShapeTolerance FTol;
-				FTol.LimitTolerance(*pEdge, line->Model->ModelFactors->Precision);
-			}
-		}
-
-		void XbimEdge::Init(IIfcEllipse^ ellipse, ILogger^ logger)
-		{
-			XbimCurve^ curve = gcnew XbimCurve(ellipse, logger);
-			if (curve->IsValid)
-			{
-				BRepBuilderAPI_MakeEdge edgeMaker(curve);
-				pEdge = new TopoDS_Edge();
-				*pEdge = edgeMaker.Edge();
-				ShapeFix_ShapeTolerance FTol;
-				FTol.LimitTolerance(*pEdge, ellipse->Model->ModelFactors->Precision);
-			}
-		}
-
-		void XbimEdge::Init(IIfcTrimmedCurve^ trimmedCurve, ILogger^ logger, bool sameSense)
-		{
-			XbimCurve^ curve = gcnew XbimCurve(trimmedCurve, logger, sameSense);
-			if (curve->IsValid)
-			{
-				BRepBuilderAPI_MakeEdge edgeMaker(curve);
-				pEdge = new TopoDS_Edge();
-				*pEdge = edgeMaker.Edge();
-				ShapeFix_ShapeTolerance FTol;
-				FTol.LimitTolerance(*pEdge, trimmedCurve->Model->ModelFactors->Precision);
-			}
-		}
-
-		void XbimEdge::Init(IIfcBSplineCurve^ bspline, ILogger^ logger)
-		{
-			IIfcBSplineCurveWithKnots^ bsplineWithKnots = dynamic_cast<IIfcBSplineCurveWithKnots^>(bspline);
-			if (bsplineWithKnots != nullptr) return Init(bsplineWithKnots, logger);
-			XbimGeometryCreator::LogError(logger, bspline, "Unsupported IfcBSplineCurve type #{0} found. It has been ignored", bspline->GetType()->Name);
-		}
-		void XbimEdge::Init(IIfcBSplineCurveWithKnots^ bspline, ILogger^ logger)
-		{
-			IIfcRationalBSplineCurveWithKnots^ ratBez = dynamic_cast<IIfcRationalBSplineCurveWithKnots^>(bspline);
-			if (ratBez != nullptr)
-				Init(ratBez, logger);
-			else
-			{
-
-				TColgp_Array1OfPnt poles(1, Enumerable::Count(bspline->ControlPointsList));
-				int i = 1;
-				for each (IIfcCartesianPoint^ cp in bspline->ControlPointsList)
-				{
-					poles.SetValue(i, gp_Pnt(cp->X, cp->Y, XbimConvert::GetZValueOrZero(cp)));
-					i++;
-				}
-				TColStd_Array1OfReal knots(1, Enumerable::Count(bspline->Knots));
-				TColStd_Array1OfInteger knotMultiplicities(1, Enumerable::Count(bspline->Knots));
-				i = 1;
-				for each (double knot in bspline->Knots)
-				{
-					knots.SetValue(i, knot);
-					i++;
-				}
-				i = 1;
-				for each (int multiplicity in bspline->KnotMultiplicities)
-				{
-					knotMultiplicities.SetValue(i, multiplicity);
-					i++;
-				}
-				Handle(Geom_BSplineCurve) hBez(new Geom_BSplineCurve(poles, knots, knotMultiplicities, (Standard_Integer)bspline->Degree));
-				BRepBuilderAPI_MakeEdge edgeMaker(hBez);
-				pEdge = new TopoDS_Edge();
-				*pEdge = edgeMaker.Edge();
-				ShapeFix_ShapeTolerance FTol;
-				FTol.LimitTolerance(*pEdge, bspline->Model->ModelFactors->Precision);
-			}
-		}
-
-
-		void XbimEdge::Init(IIfcRationalBSplineCurveWithKnots^ bspline, ILogger^ /*logger*/)
-		{
-			TColgp_Array1OfPnt poles(1, Enumerable::Count(bspline->ControlPointsList));
-			int i = 1;
-			for each (IIfcCartesianPoint^ cp in bspline->ControlPointsList)
-			{
-				poles.SetValue(i, gp_Pnt(cp->X, cp->Y, XbimConvert::GetZValueOrZero(cp)));
-				i++;
-			}
-			TColStd_Array1OfReal weights(1, Enumerable::Count(bspline->Weights));
-			i = 1;
-			for each (double weight in bspline->WeightsData)
-			{
-				weights.SetValue(i, weight);
-				i++;
-			}
-
-			TColStd_Array1OfReal knots(1, Enumerable::Count(bspline->Knots));
-			TColStd_Array1OfInteger knotMultiplicities(1, Enumerable::Count(bspline->Knots));
-			i = 1;
-			for each (double knot in bspline->Knots)
-			{
-				knots.SetValue(i, knot);
-				i++;
-			}
-			i = 1;
-			for each (int multiplicity in bspline->KnotMultiplicities)
-			{
-				knotMultiplicities.SetValue(i, multiplicity);
-				i++;
-			}
-			Handle(Geom_BSplineCurve) hBez(new Geom_BSplineCurve(poles, weights, knots, knotMultiplicities, (Standard_Integer)bspline->Degree));
-			BRepBuilderAPI_MakeEdge edgeMaker(hBez);
-			pEdge = new TopoDS_Edge();
-			*pEdge = edgeMaker.Edge();
-			ShapeFix_ShapeTolerance FTol;
-			FTol.LimitTolerance(*pEdge, bspline->Model->ModelFactors->Precision);
-
-		}
 
 #pragma endregion
 		XbimEdge::XbimEdge(XbimCurve2D^ curve2D, ILogger^ /*logger*/)

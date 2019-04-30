@@ -27,16 +27,7 @@ namespace Xbim
 			void InstanceCleanup();
 #pragma region Initialisation
 			void Init(IIfcCurve^ edge, ILogger^ logger);
-			void Init(IIfcConic^ edge, ILogger^ logger);
-			void Init(IIfcCircle^ edge, ILogger^ logger);
-			void Init(IIfcPolyline^ pline, ILogger^ logger);
-			void Init(IIfcLine^ edge, ILogger^ logger);
-			void Init(IIfcEllipse^ edge, ILogger^ logger);
-			void Init(IIfcBSplineCurve^ bSpline, ILogger^ logger);
-			void Init(IIfcBSplineCurveWithKnots^ bSpline, ILogger^ logger);
-			void Init(IIfcRationalBSplineCurveWithKnots^ bSpline, ILogger^ logger);
-			void Init(IIfcPcurve^ curve, ILogger^ logger);
-			void Init(IIfcTrimmedCurve^ trimmedCurve, ILogger^ logger, bool sameSense);
+			
 #pragma endregion
 
 			XbimEdge(){};
@@ -52,21 +43,14 @@ namespace Xbim
 			XbimEdge(const TopoDS_Edge& edge);
 			XbimEdge(const TopoDS_Edge& edge, Object^ tag);
 			XbimEdge(IIfcCurve^ edge, ILogger^ logger);
-			XbimEdge(IIfcConic^ edge, ILogger^ logger);
-			XbimEdge(IIfcCircle^ edge, ILogger^ logger);
-			XbimEdge(IIfcLine^ edge, ILogger^ logger);
-			XbimEdge(IIfcEllipse^ edge, ILogger^ logger);
-			XbimEdge(IIfcBSplineCurve^ bSpline, ILogger^ logger);
-			XbimEdge(IIfcBSplineCurveWithKnots^ bSpline, ILogger^ logger);
-			XbimEdge(IIfcRationalBSplineCurveWithKnots^ bSpline, ILogger^ logger);
-			XbimEdge(IIfcPcurve^ pCurve, ILogger^ logger);
+			
 			XbimEdge(XbimEdge^ edgeCurve, XbimVertex^ start, XbimVertex^ end, double maxTolerance);
 			XbimEdge(const TopoDS_Wire& wire, double tolerance, double angleTolerance, ILogger^ logger);
 			XbimEdge(IIfcCurve^ edgeCurve, XbimVertex^ start, XbimVertex^ end, ILogger^ logger);
 			XbimEdge(XbimVertex^ start, XbimVertex^ midPoint, XbimVertex^ end);
 			XbimEdge(XbimCurve^ curve3D);
 			XbimEdge(XbimCurve2D^ curve2D, ILogger^ logger);
-			XbimEdge(IIfcTrimmedCurve^ edge, ILogger^ logger, bool sameSense);
+			
 #pragma endregion
 
 
