@@ -226,7 +226,8 @@ namespace Xbim
 			bool isContinuous = true; //assume continuous or clsoed unless last segment is discontinuous
 			int segCount = cCurve->Segments->Count;
 			int segIdx = 1;
-
+			XbimPoint3D startPnt;
+			XbimPoint3D lastPnt;
 			for each(IIfcCompositeCurveSegment^ seg in cCurve->Segments) //every segment shall be a bounded curve
 			{
 				bool lastSeg = (segIdx == segCount);
@@ -237,23 +238,39 @@ namespace Xbim
 					return;
 				}
 				XbimCurve^ curve = gcnew XbimCurve(seg->ParentCurve, logger);
-				//if (dynamic_cast<IIfcTrimmedCurve^>(seg->ParentCurve)) //we have to treat sense agreement differently
-				//{
-				//	if (!seg->SameSense && curve->IsValid)
-				//	{
-
-				//	}
-				//}
-				//else
-				//{
+				if (dynamic_cast<IIfcTrimmedCurve^>(seg->ParentCurve)) //we have to treat sense agreement differently
+				{
+					IIfcTrimmedCurve^ tc = ((IIfcTrimmedCurve^)seg->ParentCurve);
+					if (curve->IsValid)
+					{
+						if (!seg->SameSense)
+						{
+							if (tc->SenseAgreement)
+							{
+								curve->Reverse();
+							}
+						}
+						else
+						{
+							if (!tc->SenseAgreement)
+							{
+								curve->Reverse();
+							}
+						}
+					}
+					
+				}
+				else
+				{
 				if (!seg->SameSense && curve->IsValid)
 					curve->Reverse();
-				//}
+				}
 
 				if (lastSeg && seg->Transition == IfcTransitionCode::DISCONTINUOUS) isContinuous = false;
 				if (curve->IsValid)
 				{
 					gp_Pnt nextVertex = curve->StartPoint();
+					startPnt = curve->Start;
 					if (firstPass)
 					{
 						startVertex = nextVertex;
@@ -302,6 +319,7 @@ namespace Xbim
 						return;
 					}
 					lastVertex = curve->EndPoint();
+					lastPnt = curve->End;
 				}
 				else
 				{

@@ -85,9 +85,10 @@ namespace Xbim
 				return "Unknown Error";
 			}
 		}
-		void XbimFace::RemoveDuplicatePoints(TColgp_SequenceOfPnt& polygon, bool closed, double tol)
+		bool XbimFace::RemoveDuplicatePoints(TColgp_SequenceOfPnt& polygon, bool closed, double tol)
 		{
 			tol *= tol;
+			bool isClosed = false;
 			while (true) {
 				bool removed = false;
 				int n = polygon.Length() - (closed ? 0 : 1);
@@ -96,6 +97,7 @@ namespace Xbim
 					int j = (i % polygon.Length()) + 1;
 					double dist = polygon.Value(i).SquareDistance(polygon.Value(j));
 					if (dist < tol) {
+						if(j==1 && i==n) //the first and last point are the same
 						// do not remove the first or last point to
 						// maintain connectivity with other wires
 						if ((closed && j == 1) || (!closed && j == n)) polygon.Remove(i);
@@ -106,6 +108,7 @@ namespace Xbim
 				}
 				if (!removed) break;
 			}
+			return isClosed;
 		}
 
 		XbimFace::XbimFace(XbimPoint3D l, XbimVector3D n, ILogger^ /*logger*/)

@@ -142,7 +142,7 @@ namespace Xbim
 			Handle(Geom_Surface) GetSurface();
 			XbimVector3D NormalAt(double u, double v);
 			void SetLocation(TopLoc_Location loc);
-			static void RemoveDuplicatePoints(TColgp_SequenceOfPnt& polygon, bool closed, double tol);
+			static bool RemoveDuplicatePoints(TColgp_SequenceOfPnt& polygon, bool closed, double tol);
 #pragma endregion
 
 

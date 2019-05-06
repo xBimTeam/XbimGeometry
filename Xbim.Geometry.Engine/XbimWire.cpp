@@ -70,6 +70,7 @@
 #include <ShapeFix_Edge.hxx>
 #include <BOPAlgo_Tools.hxx>
 #include <Geom_OffsetCurve.hxx>
+#include <Adaptor3d_HCurve.hxx>
 using namespace Xbim::Common;
 using namespace System::Linq;
 // using namespace System::Diagnostics;
@@ -127,17 +128,10 @@ namespace Xbim
 		XbimWire::XbimWire(double precision) { Init(precision); }
 		XbimWire::XbimWire(IIfcCurve^ profile, ILogger^ logger) { Init(profile, logger); }
 		XbimWire::XbimWire(IIfcCompositeCurveSegment^ profile, ILogger^ logger) { Init(profile, logger); };
-		/*XbimWire::XbimWire(IIfcPolyline^ profile, ILogger^ logger) { Init(profile, false, logger); }
-		XbimWire::XbimWire(IIfcPolyline^ profile, bool attemptClosing, ILogger^ logger) { Init(profile, attemptClosing, logger); }
-		XbimWire::XbimWire(IIfcCompositeCurve^ profile, ILogger^ logger) { Init(profile, logger); }
-		
-		XbimWire::XbimWire(IIfcTrimmedCurve^ profile, ILogger^ logger) { Init(profile, logger); }
-		XbimWire::XbimWire(IIfcBSplineCurve^ bspline, ILogger^ logger) { Init(bspline, logger); }
-		XbimWire::XbimWire(IIfcBSplineCurveWithKnots^ bSpline, ILogger^ logger) { Init(bSpline, logger); }
-		XbimWire::XbimWire(IIfcRationalBSplineCurveWithKnots^ bSpline, ILogger^ logger) { Init(bSpline, logger); }
-		
-		XbimWire::XbimWire(IIfcIndexedPolyCurve^ pcurve, ILogger^ logger) { Init(pcurve, logger); };
-		XbimWire::XbimWire(IIfcBoundedCurve^ profile, ILogger^ logger) { Init(profile, logger); }*/
+		XbimWire::XbimWire(IIfcPolyline^ profile, ILogger^ logger) { Init(profile, logger); }
+
+		XbimWire::XbimWire(IIfcIndexedPolyCurve ^ profile, ILogger ^ logger) { Init(profile, logger); }
+
 		XbimWire::XbimWire(IIfcPolyLoop ^ profile, ILogger^ logger) { Init(profile, logger); }
 		XbimWire::XbimWire(IIfcArbitraryClosedProfileDef^ profile, ILogger^ logger) { Init(profile, logger); }
 		XbimWire::XbimWire(IIfcArbitraryOpenProfileDef^ profile, ILogger^ logger) { Init(profile, logger); }
@@ -215,14 +209,14 @@ namespace Xbim
 			else
 			{
 				XbimWire^ loop = gcnew XbimWire(profile->OuterCurve, logger);
-				
+
 				if (!loop->IsValid)
 				{
 					XbimGeometryCreator::LogWarning(logger, profile, "Invalid outer bound. Wire discarded");
 					return;
 				}
 				pWire = new TopoDS_Wire();
-				if (!loop->IsClosed ) //we need to close it if we have more thn one edge
+				if (!loop->IsClosed) //we need to close it if we have more thn one edge
 				{
 					// todo: this code is not quite robust, it did not manage to close fairly simple polylines.
 					//
@@ -269,11 +263,7 @@ namespace Xbim
 
 		void XbimWire::Init(IIfcCenterLineProfileDef^ profile, ILogger^ logger)
 		{
-			/*if ((int)(profile->Curve->Dim) != 2)
-			{
-				XbimGeometryCreator::LogError(logger, profile, "IfcCenterLineProfileDef must have a dimensionality of 2");
-				return;
-			}*/
+
 			double precision = profile->Model->ModelFactors->Precision;
 			XbimWire^ centreWire = gcnew XbimWire(profile->Curve, logger);
 			TopoDS_Wire spine = centreWire;
@@ -347,6 +337,8 @@ namespace Xbim
 
 				pWire = new TopoDS_Wire();
 				*pWire = wireMaker.Wire();
+				ShapeFix_ShapeTolerance tFixer;
+				tFixer.LimitTolerance(*pWire, precision);
 
 			}
 		}
@@ -358,8 +350,356 @@ namespace Xbim
 			Init(compCurveSeg->ParentCurve, logger);
 			if (IsValid && !compCurveSeg->SameSense) this->Reverse();
 		}
+		///Special case to allow polylines to be create as compound edges not as a single bpline
+		// In this case the pline may or ma not be closed it may or may not lie on a surface, it may be self intersecting
+		void XbimWire::Init(IIfcPolyline^ pline, ILogger^ logger)
+		{
+			List<IIfcCartesianPoint^>^ polygon = Enumerable::ToList(pline->Points);
+			int originalCount = polygon->Count;
+			double tolerance = pline->Model->ModelFactors->Precision;
+			if (originalCount < 2)
+			{
+				XbimGeometryCreator::LogWarning(logger, pline, "Invalid loop, it has less than two points. Wire discarded");
+				return;
+			}
+
+			TColgp_SequenceOfPnt pointSeq;
+			BRepBuilderAPI_MakeWire wireMaker;
+			for (int i = 0; i < originalCount; i++)
+			{
+				pointSeq.Append(XbimConvert::GetPoint3d(polygon[i]));
+			}
+
+			bool isClosed = XbimFace::RemoveDuplicatePoints(pointSeq, false, tolerance); //don't assume it is closed
+
+			if (pointSeq.Length() != originalCount)
+			{
+				XbimGeometryCreator::LogInfo(logger, pline, "Polyline with duplicate points. It has been removed");
+			}
+
+			if (pointSeq.Length() < 2)
+			{
+				XbimGeometryCreator::LogWarning(logger, pline, "Polyline with less than 2 points is an empty line. It has been ignored");
+				return;
+			}
+			//get the basic properties
+			TColgp_Array1OfPnt pointArray(1, pointSeq.Length());
+			for (int i = 1; i <= pointSeq.Length(); i++)
+			{
+				pointArray.SetValue(i, pointSeq.Value(i));
+			}
+
+			BRepBuilderAPI_MakePolygon polyMaker;
+			for (int i = 1; i <= pointSeq.Length(); ++i)
+			{
+				polyMaker.Add(pointSeq.Value(i));
+
+			}
+			if (isClosed)
+				polyMaker.Close();
+
+			if (polyMaker.IsDone())
+			{
+				pWire = new TopoDS_Wire();
+				*pWire = polyMaker.Wire();
+			}
+		}
+
+		void XbimWire::Init(IIfcIndexedPolyCurve^ polyCurve, ILogger^ logger)
+		{
+			double tolerance = polyCurve->Model->ModelFactors->Precision;
+			ShapeFix_ShapeTolerance tFixer;
+
+			IItemSet<IItemSet<Ifc4::MeasureResource::IfcLengthMeasure>^>^ coordList;
+			IIfcCartesianPointList3D^ points3D = dynamic_cast<IIfcCartesianPointList3D^>(polyCurve->Points);
+			IIfcCartesianPointList2D^ points2D = dynamic_cast<IIfcCartesianPointList2D^>(polyCurve->Points);
+			int dim;
+			if (points3D != nullptr)
+			{
+				coordList = points3D->CoordList;
+				dim = 3;
+			}
+			else if (points2D != nullptr)
+			{
+				coordList = points2D->CoordList;
+				dim = 2;
+			}
+			else
+			{
+				XbimGeometryCreator::LogError(logger, polyCurve, "Unsupported type of Coordinate List");
+				return;
+			}
+
+			//get a index of all the points
+			int pointCount = coordList->Count;
+			TColgp_Array1OfPnt poles(1, pointCount);
+			int n = 1;
+			for each (IItemSet<Ifc4::MeasureResource::IfcLengthMeasure>^ coll in coordList)
+			{
+				IEnumerator<Ifc4::MeasureResource::IfcLengthMeasure>^ enumer = coll->GetEnumerator();
+				enumer->MoveNext();
+				gp_Pnt p;
+				p.SetX((double)enumer->Current);
+				enumer->MoveNext();
+				p.SetY((double)enumer->Current);
+				if (dim == 3)
+				{
+					enumer->MoveNext();
+					p.SetZ((double)enumer->Current);
+
+				}
+				else
+					p.SetZ(0);
+				poles.SetValue(n, p);
+				n++;
+			}
+
+			if (Enumerable::Any(polyCurve->Segments))
+			{
+				BRepLib_MakeWire wireMaker;
+				gp_Pnt wireEndPoint;
+				bool wireHasSegment = false;
+				for each (IIfcSegmentIndexSelect^ segment in  polyCurve->Segments)
+				{
+					Ifc4::GeometryResource::IfcArcIndex^ arcIndex = dynamic_cast<Ifc4::GeometryResource::IfcArcIndex^>(segment);
+					Ifc4::GeometryResource::IfcLineIndex^ lineIndex = dynamic_cast<Ifc4::GeometryResource::IfcLineIndex^>(segment);
+					if (arcIndex != nullptr)
+					{
+
+						List<Ifc4::MeasureResource::IfcPositiveInteger>^ indices = (List<Ifc4::MeasureResource::IfcPositiveInteger>^)arcIndex->Value;
+						if (indices->Count != 3)
+						{
+							XbimGeometryCreator::LogError(logger, segment, "There should be three indices in an arc segment");
+							return;
+						}
+						gp_Pnt start = poles.Value((int)indices[0]);
+						gp_Pnt mid = poles.Value((int)indices[1]);
+						gp_Pnt end = poles.Value((int)indices[2]);
+						GC_MakeCircle circleMaker(start, mid, end);
+						if (circleMaker.IsDone()) //it is a valid arc
+						{
+							const Handle(Geom_Circle)& curve = circleMaker.Value();
+							double u1, u2;
+							GeomLib_Tool::Parameter(curve, start, tolerance, u1);
+							GeomLib_Tool::Parameter(curve, end, tolerance, u2);
+							Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(curve, u1, u2);
+							BRepBuilderAPI_MakeEdge edgeMaker(trimmed);
+							TopoDS_Edge edge = edgeMaker.Edge();
+							gp_Pnt nextStartPoint = start;
+
+							if (wireHasSegment)
+							{
+								double actualGap = wireEndPoint.Distance(nextStartPoint);
+								if (actualGap > tolerance)
+								{
+									double fiveMilli = 5 * polyCurve->Model->ModelFactors->OneMilliMeter; //we are going to accept that a gap of 5mm is not a gap
+									if (actualGap > fiveMilli)
+									{
+										XbimGeometryCreator::LogError(logger, segment, "Failed to join IfcArcIndex segment. It has been ignored");
+										return;
+									}
+									tFixer.LimitTolerance(edgeMaker.Vertex1(), actualGap + tolerance);
+								}
+							}
+
+							tFixer.LimitTolerance(edge, tolerance);
+							wireMaker.Add(edge);
+							if (!wireMaker.IsDone())
+							{
+								XbimGeometryCreator::LogError(logger, segment, "Could not add arc segment to IfcIndexedPolyCurve");
+								return;
+							}
+							wireEndPoint = end;
+						}
+						else //most likley the three points are in a line it should be treated as a polyline segment according the the docs
+						{
+							GC_MakeLine lineMaker(start, end);
+							if (lineMaker.IsDone()) //it is a valid line
+							{
+								const Handle(Geom_Line)& line = lineMaker.Value();
+								double u1, u2;
+								GeomLib_Tool::Parameter(line, start, tolerance, u1);
+								GeomLib_Tool::Parameter(line, end, tolerance, u2);
+								Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(line, u1, u2);
+								BRepBuilderAPI_MakeEdge edgeMaker(trimmed);
+								TopoDS_Edge edge = edgeMaker.Edge();
+								gp_Pnt nextStartPoint = start;
+
+								if (wireHasSegment)
+								{
+									double actualGap = wireEndPoint.Distance(nextStartPoint);
+									if (actualGap > tolerance)
+									{
+										double fiveMilli = 5 * polyCurve->Model->ModelFactors->OneMilliMeter; //we are going to accept that a gap of 5mm is not a gap
+										if (actualGap > fiveMilli)
+										{
+											XbimGeometryCreator::LogError(logger, segment, "Failed to join IfcArcIndex as polyline segment. It has been ignored");
+											return;
+										}
+										tFixer.LimitTolerance(edgeMaker.Vertex1(), actualGap + tolerance);
+									}
+								}
+								tFixer.LimitTolerance(edge, tolerance);
+								wireMaker.Add(edge);
+								if (!wireMaker.IsDone())
+								{
+									XbimGeometryCreator::LogError(logger, segment, "Could not add arc segment as polyline to IfcIndexedPolyCurve");
+									return;
+								}
+								wireEndPoint = end;
+							}
+							else
+							{
+								//most probably the start and end are the same point
+								XbimGeometryCreator::LogWarning(logger, segment, "Could not create arc segment as a polyline to IfcIndexedPolyCurve");
+							}
+						}
+					}
+					else if (lineIndex != nullptr)
+					{
+						List<Ifc4::MeasureResource::IfcPositiveInteger>^ indices = (List<Ifc4::MeasureResource::IfcPositiveInteger>^)lineIndex->Value;
+						if (indices->Count < 2)
+						{
+							XbimGeometryCreator::LogError(logger, segment, "There should be at least two indices in an line index segment");
+							return;
+						}
+						int originalCount = indices->Count;
+						TColgp_SequenceOfPnt pointSeq;
+
+						for (Standard_Integer p = 1; p <= originalCount; p++)
+						{
+							pointSeq.Append(poles.Value((int)indices[p - 1]));
+						}
 
 
+						bool isClosed = XbimFace::RemoveDuplicatePoints(pointSeq, false, tolerance); //don't assume it is closed
+
+						if (pointSeq.Length() != originalCount)
+						{
+							XbimGeometryCreator::LogInfo(logger, lineIndex, "IfcLineIndex with duplicate points. Duplicate has been removed");
+						}
+
+						if (pointSeq.Length() < 2)
+						{
+							XbimGeometryCreator::LogWarning(logger, lineIndex, "IfcLineIndex with less than 2 points is an empty line. It has been ignored");
+							return;
+						}
+
+
+						BRepBuilderAPI_MakePolygon polyMaker;
+						for (int i = 1; i <= pointSeq.Length(); ++i)
+						{
+							polyMaker.Add(pointSeq.Value(i));
+
+						}
+						if (isClosed)
+							polyMaker.Close();
+
+						if (polyMaker.IsDone())
+						{
+
+							gp_Pnt nextStartPoint = pointSeq.Value(1);
+
+							if (wireHasSegment)
+							{
+								double actualGap = wireEndPoint.Distance(nextStartPoint);
+								if (actualGap > tolerance)
+								{
+									double fiveMilli = 5 * polyCurve->Model->ModelFactors->OneMilliMeter; //we are going to accept that a gap of 5mm is not a gap
+									if (actualGap > fiveMilli)
+									{
+										XbimGeometryCreator::LogError(logger, segment, "Failed to join IfcLineIndex as polyline segment. It has been ignored");
+										return;
+									}
+									tFixer.LimitTolerance(polyMaker.FirstVertex(), actualGap + tolerance);
+								}
+							}
+							const TopoDS_Wire & wire = polyMaker.Wire();
+							tFixer.LimitTolerance(wire, tolerance);
+							wireMaker.Add(wire);
+							if (!wireMaker.IsDone())
+							{
+								XbimGeometryCreator::LogError(logger, segment, "Could not add arc segment as polyline to IfcIndexedPolyCurve");
+								return;
+							}
+							wireHasSegment = true;
+							wireEndPoint = pointSeq.Value(pointSeq.Length());
+
+						}
+					}
+					else
+					{
+						//most probably the start and end are the same point
+						XbimGeometryCreator::LogWarning(logger, segment, "Could not create line index segment as a polyline to IfcIndexedPolyCurve");
+					}
+				}
+				if (wireMaker.IsDone())
+				{
+					pWire = new TopoDS_Wire();
+					*pWire = wireMaker.Wire();
+				}
+			}
+			else
+			{
+				// To be compliant with:
+				// "In the case that the list of Segments is not provided, all points in the IfcCartesianPointList are connected by straight line segments in the order they appear in the IfcCartesianPointList."
+				// http://www.buildingsmart-tech.org/ifc/IFC4/Add1/html/schema/ifcgeometryresource/lexical/ifcindexedpolycurve.htm
+
+				if (pointCount < 2)
+				{
+					XbimGeometryCreator::LogError(logger, polyCurve, "There should be at least two indices in an IfcIndexedPolyCurve");
+					return;
+				}
+				int originalCount = pointCount;
+				TColgp_SequenceOfPnt pointSeq;
+
+				for (Standard_Integer p = 1; p <= originalCount; p++)
+				{
+					pointSeq.Append(poles.Value(p - 1));
+				}
+
+
+				bool isClosed = XbimFace::RemoveDuplicatePoints(pointSeq, false, tolerance); //don't assume it is closed
+
+				if (pointSeq.Length() != originalCount)
+				{
+					XbimGeometryCreator::LogInfo(logger, polyCurve, "IfcIndexedPolyCurve with duplicate points. Duplicate has been removed");
+				}
+
+				if (pointSeq.Length() < 2)
+				{
+					XbimGeometryCreator::LogWarning(logger, polyCurve, "IfcIndexedPolyCurve with less than 2 points is an empty line. It has been ignored");
+					return;
+				}
+				//get the basic properties
+				TColgp_Array1OfPnt pointArray(1, pointSeq.Length());
+				for (int i = 1; i <= pointSeq.Length(); i++)
+				{
+					pointArray.SetValue(i, pointSeq.Value(i));
+				}
+
+				BRepBuilderAPI_MakePolygon polyMaker;
+				for (int i = 1; i <= pointSeq.Length(); ++i)
+				{
+					polyMaker.Add(pointSeq.Value(i));
+
+				}
+				if (isClosed)
+					polyMaker.Close();
+
+				if (polyMaker.IsDone())
+				{
+					pWire = new TopoDS_Wire();
+					*pWire = polyMaker.Wire();
+					tFixer.LimitTolerance(*pWire, tolerance);
+				}
+				else
+				{
+					XbimGeometryCreator::LogError(logger, polyCurve, "Could not build IfcIndexedPolyCurve");
+					return;
+				}
+			}
+		}
 
 		void XbimWire::Init(IIfcCurve^ curve, ILogger^ logger)
 		{
@@ -495,7 +835,7 @@ namespace Xbim
 
 		}
 
-		
+
 
 #pragma endregion
 
@@ -1755,7 +2095,7 @@ namespace Xbim
 			return (XbimWire^)Trim(startParam, endParam, tolerance, logger);
 		}
 
-		IXbimWire^ XbimWire::Trim(double first, double last, double /*tolerance*/, ILogger^ logger)
+		IXbimWire^ XbimWire::Trim(double first, double last, double tolerance, ILogger^ logger)
 		{
 			if (!IsValid)
 				return this;
@@ -1778,32 +2118,58 @@ namespace Xbim
 			}
 			else
 			{
+
 				BRepBuilderAPI_MakeWire wm;
 				TColStd_Array1OfReal res(1, numIntervals + 1);
 				cc.Intervals(res, GeomAbs_C0);
-				for (Standard_Integer i = 2; i <= numIntervals + 1; i++)
+				for (Standard_Integer i = 1; i < numIntervals; i++)
 				{
-					Standard_Real fp = res.Value(i - 1);
-					Standard_Real lp = res.Value(i);
-					if (lp > first  && fp < last)
+					Standard_Real fp = res.Value(i);
+					Standard_Real lp = res.Value(i + 1);
+
+
+
+					TopoDS_Edge edge; // the edge we are interested in
+					Standard_Real uoe; // parameter U on the edge (not used)
+					cc.Edge(fp, edge, uoe);
+					Standard_Real l, f; // the parameter range is returned in f and l
+					Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, f, l);
+
+					double adjFirstParam = f + fp;
+					double adjLastParam = l + fp;
+					if (first > adjFirstParam  && first < adjLastParam) // first trim is in the range of this edge
 					{
-						TopoDS_Edge edge; // the edge we are interested in
-						Standard_Real uoe; // parameter U on the edge (not used)
-						cc.Edge(fp, edge, uoe);
-						Standard_Real l, f; // the parameter range is returned in f and l
-						Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, f, l);
-						Standard_Real a = Math::Max(f, first);
-						Standard_Real b = Math::Min(l, last);
-						wm.Add(BRepBuilderAPI_MakeEdge(new Geom_TrimmedCurve(curve, a, b)));
+						double startTrim = first - adjFirstParam;
+						if (last < adjLastParam) //the last is also in this range, trim start and end
+						{
+							double endTrim = last - adjFirstParam;
+							wm.Add(BRepBuilderAPI_MakeEdge(new Geom_TrimmedCurve(curve, startTrim, endTrim)));
+						}
+						else //we only need to trim the start
+						{
+
+							wm.Add(BRepBuilderAPI_MakeEdge(new Geom_TrimmedCurve(curve, startTrim, l)));
+						}
 					}
+					else if (last > adjFirstParam && last < adjLastParam ) // last trim is in range, we have already dealt with the forst so it is out of range
+					{
+						double endTrim = last - adjFirstParam;
+						wm.Add(BRepBuilderAPI_MakeEdge(new Geom_TrimmedCurve(curve, f, endTrim)));
+					}
+					else //just add the whole edge
+					{
+						wm.Add(edge);
+					}
+
+					if (!wm.IsDone())
+					{
+						BRepBuilderAPI_WireError err = wm.Error();
+						XbimGeometryCreator::LogError(logger, this, "Error trimming. Trim discarded");
+						return this;
+					}
+
 				}
-				if (wm.Error() != BRepBuilderAPI_WireDone)
-				{
-					// todo: for SRL, what is the correct way to handle this?
-					XbimGeometryCreator::LogError(logger, this, "Error trimming. Trim discarded");
-					return this;
-				}
-				return gcnew XbimWire(wm.Wire());
+				return gcnew XbimWire(wm.Wire());	
 			}
 		}
 
@@ -2043,6 +2409,7 @@ namespace Xbim
 		//Fillets all points on a spine, not intended for closed shapes mostly for spines
 		bool XbimWire::FilletAll(double radius)
 		{
+			if (!IsValid) return false;
 			TopoDS_Wire thisWire = *pWire;
 
 			//collect the edges

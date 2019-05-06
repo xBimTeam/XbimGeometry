@@ -467,9 +467,18 @@ namespace Xbim
 				aPF.SetFuzzyValue(fuzzyTol);
 				aPF.SetRunParallel(false);
 				aPF.SetNonDestructive(false);
-				aPF.Perform();
+				bool failed = false;
+				try
+				{
+					aPF.Perform();
+				}
+				catch (...)
+				{
+					failed = true;
+				}
+				
 				int iErr = aPF.HasErrors();
-				if (iErr)
+				if (failed || iErr)
 				{
 					boolParams->Success = false;
 					return;
@@ -481,9 +490,18 @@ namespace Xbim
 				aBOP.SetOperation(boolParams->Operation);
 				aBOP.SetRunParallel(false);
 				aBOP.SetFuzzyValue(fuzzyTol);
-				aBOP.PerformWithFiller(aPF);
+			
+				try
+				{
+					aBOP.PerformWithFiller(aPF);
+				}
+				catch (...)
+				{
+					failed = true;
+				}
+				
 				const TopoDS_Shape& aR = aBOP.Shape();
-				if (aR.IsNull()) {
+				if (failed || aBOP.HasErrors() || aR.IsNull()) {
 					boolParams->Success = false;
 					return;
 				}

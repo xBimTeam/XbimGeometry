@@ -37,7 +37,8 @@ namespace Xbim
 			void Init(IIfcCurve^ loop, ILogger^ logger);
 			
 			void Init(IIfcCompositeCurveSegment^ compCurveSeg, ILogger^ logger);
-			
+			void Init(IIfcPolyline^ profile,  ILogger^ logger);
+			void Init(IIfcIndexedPolyCurve ^ pCurve, ILogger ^ logger);
 			void Init(IIfcPolyLoop^ loop, ILogger^ logger);
 			void Init(IIfcArbitraryClosedProfileDef^ profile, ILogger^ logger);
 			void Init(IIfcArbitraryOpenProfileDef^ profile, ILogger^ logger);
@@ -89,8 +90,11 @@ namespace Xbim
 			//srl need to revisit this, the sense is wrong for trimmed curves, really it should not be supported at all as the segment is not a curve
 			XbimWire(IIfcCompositeCurveSegment^ compCurveSeg, ILogger^ logger);
 
+			//Creates a wire of individual edges for each IfcPolyline segment, use XbimCurve for a single bspline edge
+			XbimWire(IIfcPolyline^ profile, ILogger^ logger);
+			//Creates a wire of individual edges for each IfcIndexedPolyCurve segment, use XbimCurve for a single bspline edge
+			XbimWire(IIfcIndexedPolyCurve^ profile, ILogger^ logger);
 
-			
 			XbimWire(IIfcPolyLoop^ loop, ILogger^ logger);
 			XbimWire(IIfcArbitraryClosedProfileDef^ profile, ILogger^ logger);
 			XbimWire(IIfcArbitraryOpenProfileDef^ profile, ILogger^ logger);
