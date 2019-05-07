@@ -35,7 +35,7 @@ namespace Xbim
 
 			void Init(double precision);
 			void Init(IIfcCurve^ loop, ILogger^ logger);
-			
+			void Init(IIfcCompositeCurve^ compCurve, ILogger^ logger);
 			void Init(IIfcCompositeCurveSegment^ compCurveSeg, ILogger^ logger);
 			void Init(IIfcPolyline^ profile,  ILogger^ logger);
 			void Init(IIfcIndexedPolyCurve ^ pCurve, ILogger ^ logger);
@@ -87,6 +87,8 @@ namespace Xbim
 			XbimWire(const TopoDS_Wire& wire);
 			XbimWire(const TopoDS_Wire& wire, Object^ tag);
 			XbimWire(IIfcCurve^ loop, ILogger^ logger);
+			//special case for building a composite curve as a wire and not a single edge
+			XbimWire(IIfcCompositeCurve^ compCurve, ILogger^ logger);
 			//srl need to revisit this, the sense is wrong for trimmed curves, really it should not be supported at all as the segment is not a curve
 			XbimWire(IIfcCompositeCurveSegment^ compCurveSeg, ILogger^ logger);
 

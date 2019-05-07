@@ -217,7 +217,7 @@ namespace Xbim
 		void XbimCurve::Init(IIfcCompositeCurve^ cCurve, ILogger^ logger)
 		{
 
-			double tolerance = cCurve->Model->ModelFactors->Precision; //use a courser precision for trimmed curves	
+			double tolerance = cCurve->Model->ModelFactors->Precision; 
 			GeomConvert_CompCurveToBSplineCurve converter;
 
 			gp_Pnt lastVertex;
@@ -227,7 +227,7 @@ namespace Xbim
 			int segCount = cCurve->Segments->Count;
 			int segIdx = 1;
 			XbimPoint3D startPnt;
-			XbimPoint3D lastPnt;
+			
 			for each(IIfcCompositeCurveSegment^ seg in cCurve->Segments) //every segment shall be a bounded curve
 			{
 				bool lastSeg = (segIdx == segCount);
@@ -319,7 +319,6 @@ namespace Xbim
 						return;
 					}
 					lastVertex = curve->EndPoint();
-					lastPnt = curve->End;
 				}
 				else
 				{

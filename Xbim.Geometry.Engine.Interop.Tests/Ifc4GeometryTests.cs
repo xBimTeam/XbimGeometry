@@ -544,7 +544,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.IsTrue(curve.IsValid);
                 
                 Assert.IsTrue(curve.IsPlanar);
-                Assert.IsTrue(curve.Points.Count()==1);
+                Assert.IsTrue(curve.Points.Count()==16);
             }
         }
 
@@ -570,7 +570,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 Assert.IsTrue(er.Entity != null, "No IIfcCompositeProfileDef found");
                 var wire = geomEngine.CreateWire(er.Entity, logger);
-                Assert.IsTrue(wire.Edges.Count == 1, "This wire should have 1 edge");
+                Assert.IsTrue(wire.Edges.Count == 12, "This wire should have 12 edges");
+                var curve = geomEngine.CreateCurve(er.Entity, logger);
+                Assert.AreEqual(curve.Length, wire.Length, 0.999);
             }
             
         }

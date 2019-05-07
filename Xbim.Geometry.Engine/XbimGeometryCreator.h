@@ -105,6 +105,7 @@ namespace Xbim
 
 			//Create Wire
 			virtual IXbimWire^ CreateWire(IIfcCurve^ curve, ILogger^ logger);
+			
 			virtual IXbimWire^ CreateWire(IIfcCompositeCurveSegment^ compCurveSeg, ILogger^ logger);
 			//Face creation 
 			virtual IXbimFace^ CreateFace(IIfcProfileDef ^ profile, ILogger^ logger);

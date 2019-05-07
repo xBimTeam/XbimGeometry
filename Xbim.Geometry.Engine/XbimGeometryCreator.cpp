@@ -410,7 +410,14 @@ namespace Xbim
 #pragma region Wire Creation
 		IXbimWire^ XbimGeometryCreator::CreateWire(IIfcCurve^ curve, ILogger^ logger)
 		{
-			return gcnew XbimWire(curve, logger);
+			IIfcCompositeCurve^ composite = dynamic_cast<IIfcCompositeCurve^>(curve);
+			IIfcIndexedPolyCurve^ poly = dynamic_cast<IIfcIndexedPolyCurve^>(curve);
+			if(composite!=nullptr)
+				return gcnew XbimWire(composite, logger);
+			else if (poly != nullptr)
+				return gcnew XbimWire(poly, logger);
+			else
+				return gcnew XbimWire(curve, logger);
 		}
 
 		IXbimWire^ XbimGeometryCreator::CreateWire(IIfcCompositeCurveSegment^ compCurveSeg, ILogger^ logger)
@@ -906,10 +913,10 @@ namespace Xbim
 #pragma region Support for curves
 		IXbimCurve^ XbimGeometryCreator::CreateCurve(IIfcCurve^ curve, ILogger^ logger)
 		{
-			if (Is3D(curve))
+			//if (Is3D(curve))
 				return gcnew XbimCurve(curve, logger);
-			else
-				return gcnew XbimCurve2D(curve, logger);
+			//else
+			//	return gcnew XbimCurve2D(curve, logger);
 		}
 		IXbimCurve^ XbimGeometryCreator::CreateCurve(IIfcPolyline^ curve, ILogger^ logger)
 		{

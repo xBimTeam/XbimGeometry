@@ -127,6 +127,10 @@ namespace Xbim
 		}
 		XbimWire::XbimWire(double precision) { Init(precision); }
 		XbimWire::XbimWire(IIfcCurve^ profile, ILogger^ logger) { Init(profile, logger); }
+		XbimWire::XbimWire(IIfcCompositeCurve ^ compCurve, ILogger ^ logger)
+		{
+			Init(compCurve, logger);
+		}
 		XbimWire::XbimWire(IIfcCompositeCurveSegment^ profile, ILogger^ logger) { Init(profile, logger); };
 		XbimWire::XbimWire(IIfcPolyline^ profile, ILogger^ logger) { Init(profile, logger); }
 
@@ -703,21 +707,156 @@ namespace Xbim
 
 		void XbimWire::Init(IIfcCurve^ curve, ILogger^ logger)
 		{
-			XbimEdge^ edge = gcnew XbimEdge(curve, logger);
-			if (!edge->IsValid) return; //errors handled below in curve
-			BRepLib_MakeWire wireMaker(edge);
-			if (wireMaker.IsDone())
-			{
-				pWire = new TopoDS_Wire();
-				*pWire = wireMaker.Wire();
-				ShapeFix_ShapeTolerance FTol;
-				FTol.LimitTolerance(*pWire, curve->Model->ModelFactors->Precision);
-			}
+			//this method defaults for create compund edges for the curves below, they could be created as single curves but it creates problems with booleans
+			IIfcPolyline^ pline = dynamic_cast<IIfcPolyline^>(curve);
+			IIfcCompositeCurve^ compCurve = dynamic_cast<IIfcCompositeCurve^>(curve);
+			IIfcIndexedPolyCurve^ polyCurve = dynamic_cast<IIfcIndexedPolyCurve^>(curve);
+			if (pline != nullptr)
+				Init(pline, logger);
+			else if (compCurve != nullptr)
+				Init(compCurve, logger);
+			else if (polyCurve != nullptr)
+				Init(polyCurve, logger);
 			else
 			{
-				XbimGeometryCreator::LogError(logger, curve, "Failed to build wire from curve .It has been ignored");
+				XbimEdge^ edge = gcnew XbimEdge(curve, logger);
+				if (!edge->IsValid) return; //errors handled below in curve
+				BRepLib_MakeWire wireMaker(edge);
+				if (wireMaker.IsDone())
+				{
+					pWire = new TopoDS_Wire();
+					*pWire = wireMaker.Wire();
+					ShapeFix_ShapeTolerance FTol;
+					FTol.LimitTolerance(*pWire, curve->Model->ModelFactors->Precision);
+				}
+				else
+				{
+					XbimGeometryCreator::LogError(logger, curve, "Failed to build wire from curve .It has been ignored");
+				}
 			}
+		}
 
+		void XbimWire::Init(IIfcCompositeCurve ^ cCurve, ILogger ^ logger)
+		{
+			double tolerance = cCurve->Model->ModelFactors->Precision;
+			BRepBuilderAPI_MakeWire converter;
+			ShapeFix_ShapeTolerance fTol;
+			gp_Pnt lastVertex;
+			gp_Pnt startVertex;
+			bool firstPass = true;
+			bool isContinuous = true; //assume continuous or clsoed unless last segment is discontinuous
+			int segCount = cCurve->Segments->Count;
+			int segIdx = 1;
+			XbimPoint3D startPnt;
+
+			for each(IIfcCompositeCurveSegment^ seg in cCurve->Segments) //every segment shall be a bounded curve
+			{
+				bool lastSeg = (segIdx == segCount);
+
+				if (!dynamic_cast<IIfcBoundedCurve^>(seg->ParentCurve))
+				{
+					XbimGeometryCreator::LogError(logger, seg, "Composite curve contains a segment whih is not a bounded curve. It has been ignored");
+					return;
+				}
+				XbimCurve^ curve = gcnew XbimCurve(seg->ParentCurve, logger);
+				if (dynamic_cast<IIfcTrimmedCurve^>(seg->ParentCurve)) //we have to treat sense agreement differently
+				{
+					IIfcTrimmedCurve^ tc = ((IIfcTrimmedCurve^)seg->ParentCurve);
+					if (curve->IsValid)
+					{
+						if (!seg->SameSense)
+						{
+							if (tc->SenseAgreement)
+							{
+								curve->Reverse();
+							}
+						}
+						else
+						{
+							if (!tc->SenseAgreement)
+							{
+								curve->Reverse();
+							}
+						}
+					}
+
+				}
+				else
+				{
+					if (!seg->SameSense && curve->IsValid)
+						curve->Reverse();
+				}
+
+				if (lastSeg && seg->Transition == IfcTransitionCode::DISCONTINUOUS) isContinuous = false;
+				if (curve->IsValid)
+				{
+					gp_Pnt nextVertex = curve->StartPoint();
+					startPnt = curve->Start;
+					if (firstPass)
+					{
+						startVertex = nextVertex;
+					}
+					double actualTolerance = tolerance; //reset for each segment
+
+					if (isContinuous && lastSeg) //we need to close it, check the start and end points match
+					{
+						gp_Pnt endVertex = curve->EndPoint();
+						double actualGap = startVertex.Distance(endVertex);
+						if (actualGap > tolerance)
+						{
+							double fiveMilli = 5 * cCurve->Model->ModelFactors->OneMilliMeter; //we are going to accept that a gap of 5mm is not a gap
+							if (actualGap > fiveMilli)
+								XbimGeometryCreator::LogWarning(logger, seg, "Failed to close composite curve segment");
+							actualTolerance = actualGap + tolerance;
+						}
+					}
+					else if (!firstPass)
+					{
+						double actualGap = nextVertex.Distance(lastVertex);
+						if (actualGap > tolerance)
+						{
+							double fiveMilli = 5 * cCurve->Model->ModelFactors->OneMilliMeter; //we are going to accept that a gap of 5mm is not a gap
+							if (actualGap > fiveMilli)
+							{
+								XbimGeometryCreator::LogError(logger, seg, "Failed to join composite curve segment. It has been ignored");
+								return;
+							}
+							actualTolerance = actualGap + tolerance;
+
+
+						}
+					}
+					firstPass = false;
+					bool ok = false;
+					try
+					{
+						//set the tolerance of the vertex
+						BRepBuilderAPI_MakeEdge edgeMaker(curve);
+						fTol.LimitTolerance(edgeMaker.Vertex1(), actualTolerance);
+						converter.Add(edgeMaker.Edge());
+						ok = converter.IsDone();
+					}
+					catch (const std::exception&)
+					{
+						ok = false;
+					}
+					if (!ok)
+					{
+						XbimGeometryCreator::LogError(logger, seg, "Failed to join composite curve segment. It has been ignored");
+						return;
+					}
+					lastVertex = curve->EndPoint();
+
+				}
+				else
+				{
+					XbimGeometryCreator::LogWarning(logger, seg, "Invalid edge of a composite curve found. It could not be created");
+				}
+				segIdx++;
+			}
+			pWire = new TopoDS_Wire();
+			*pWire = converter.Wire();
+			fTol.LimitTolerance(*pWire, tolerance);
 		}
 
 
@@ -2095,7 +2234,7 @@ namespace Xbim
 			return (XbimWire^)Trim(startParam, endParam, tolerance, logger);
 		}
 
-		IXbimWire^ XbimWire::Trim(double first, double last, double tolerance, ILogger^ logger)
+		IXbimWire^ XbimWire::Trim(double first, double last, double /*tolerance*/, ILogger^ logger)
 		{
 			if (!IsValid)
 				return this;
@@ -2151,7 +2290,7 @@ namespace Xbim
 							wm.Add(BRepBuilderAPI_MakeEdge(new Geom_TrimmedCurve(curve, startTrim, l)));
 						}
 					}
-					else if (last > adjFirstParam && last < adjLastParam ) // last trim is in range, we have already dealt with the forst so it is out of range
+					else if (last > adjFirstParam && last < adjLastParam) // last trim is in range, we have already dealt with the forst so it is out of range
 					{
 						double endTrim = last - adjFirstParam;
 						wm.Add(BRepBuilderAPI_MakeEdge(new Geom_TrimmedCurve(curve, f, endTrim)));
@@ -2169,7 +2308,7 @@ namespace Xbim
 					}
 
 				}
-				return gcnew XbimWire(wm.Wire());	
+				return gcnew XbimWire(wm.Wire());
 			}
 		}
 
