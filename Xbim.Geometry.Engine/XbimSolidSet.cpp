@@ -453,7 +453,7 @@ namespace Xbim
 			}
 			if (argCount == 0)
 			{
-				boolParams->Success = true;
+				boolParams->Success = false;
 				boolParams->UseBody = true;
 				return;
 			}
