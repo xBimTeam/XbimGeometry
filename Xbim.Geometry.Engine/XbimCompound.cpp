@@ -504,14 +504,50 @@ namespace Xbim
 					const TopoDS_Shell& shell = TopoDS::Shell(shellMap(ishell));
 					solidmaker.Add(shell);
 				}
-
-				TopoDS_Shape solid = solidmaker.Solid();
-				if (!solid.IsNull())
+				if (solidmaker.IsDone())
 				{
+					TopoDS_Solid solid = solidmaker.Solid();
+
+					if (!solid.IsNull())
+					{
+						pCompound->Nullify();
+						BRep_Builder b;
+						b.MakeCompound(*pCompound);
+						
+						if (BRepCheck_Analyzer(solid, Standard_True).IsValid() == Standard_False)
+						{
+							//try and fix if we can
+							ShapeFix_Shape fixer(solid);
+							fixer.SetMaxTolerance(closedShell->Model->ModelFactors->OneMilliMeter);
+							fixer.SetMinTolerance(closedShell->Model->ModelFactors->Precision);
+							fixer.SetPrecision(closedShell->Model->ModelFactors->Precision);
+							if (fixer.Perform())
+								b.Add(*pCompound, fixer.Shape());
+							else 
+								XbimGeometryCreator::LogError(logger, closedShell, "Failed to create a valid solid from an IfcClosedShell");
+						}
+						else
+						{
+							b.Add(*pCompound, solid);
+						}
+						//we with
+						GProp_GProps gProps;
+						BRepGProp::VolumeProperties(*pCompound, gProps, Standard_True);
+						double volume = gProps.Mass();
+						double oneCubicMillimetre = Math::Pow(closedShell->Model->ModelFactors->OneMilliMeter, 3);
+						if (volume < oneCubicMillimetre)
+						{
+							XbimGeometryCreator::LogWarning(logger, closedShell, "Very small closed IfcClosedShell has been ignored");
+							pCompound->Nullify();
+							pCompound = nullptr;
+						}
+					}
+				}
+				else
+				{
+					XbimGeometryCreator::LogWarning(logger, closedShell, "Failed to create a valid solid from an IfcClosedShell");
 					pCompound->Nullify();
-					BRep_Builder b;
-					b.MakeCompound(*pCompound);
-					b.Add(*pCompound, solid);
+					pCompound = nullptr;
 				}
 			}
 		}
@@ -897,6 +933,7 @@ namespace Xbim
 				allFaces++;
 			}
 			seamstress.Perform();
+			
 			TopoDS_Shape result = seamstress.SewedShape();
 			TopoDS_Compound unifiedCompound;
 			builder.MakeCompound(unifiedCompound);

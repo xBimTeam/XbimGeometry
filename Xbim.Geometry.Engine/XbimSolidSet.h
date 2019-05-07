@@ -53,6 +53,7 @@ namespace Xbim
 				solids = nullptr;
 			};
 		    IXbimSolidSet^ DoBoolean(IXbimSolidSet^ arguments, BOPAlgo_Operation operation, double tolerance, ILogger^ logger);
+			void DoBoolean(Object^ param);
 		public:
 
 #pragma region destructors

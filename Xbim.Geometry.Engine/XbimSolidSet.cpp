@@ -396,7 +396,7 @@ namespace Xbim
 			return true;
 		}
 
-		static void ThreadProc(Object^ params)
+		 void XbimSolidSet::DoBoolean(Object^ params)
 		{
 
 			ShapeAnalysis_Wire tolFixer;
@@ -417,7 +417,7 @@ namespace Xbim
 			aLC.Append(tsBody);
 			Bnd_Box tsBodyBox;
 			BRepBndLib::Add(tsBody, tsBodyBox);
-
+			
 			double maxTol = boolParams->Tolerance;
 			int argCount = 0;
 			for each (IXbimSolid^ iSolid in boolParams->Ops)
@@ -433,7 +433,7 @@ namespace Xbim
 						Bnd_Box tsCutBox;
 						BRepBndLib::Add(tsArg, tsCutBox);
 						if (!tsBodyBox.IsOut(tsCutBox))
-						{
+						{							
 							maxTol = Math::Max(BRep_Tool::MaxTolerance(solid, TopAbs_EDGE), maxTol);
 							aLC.Append(tsArg);
 							shapeTools.Append(tsArg);
@@ -489,7 +489,7 @@ namespace Xbim
 				aBOP.AddTool(cutCompound);
 				aBOP.SetOperation(boolParams->Operation);
 				aBOP.SetRunParallel(false);
-				aBOP.SetFuzzyValue(fuzzyTol);
+				//aBOP.SetFuzzyValue(fuzzyTol);
 			
 				try
 				{
@@ -598,7 +598,7 @@ namespace Xbim
 				param->Operation = operation;
 				params->Add(param);
 
-				ThreadProc(param);
+				DoBoolean(param);
 			}
 
 			XbimSolidSet^ result = gcnew XbimSolidSet();
