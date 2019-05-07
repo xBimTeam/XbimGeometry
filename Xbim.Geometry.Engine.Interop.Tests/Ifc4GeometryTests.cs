@@ -266,7 +266,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var advancedSweep = model.Instances.OfType<IfcSweptDiskSolid>().FirstOrDefault();
                 Assert.IsNotNull(advancedSweep);
                 var bar = geomEngine.CreateSolid(advancedSweep);
-                Assert.IsTrue((int)bar.Volume == 131385);
+                Assert.IsTrue((int)bar.Volume == 129879);
             }
         }
 

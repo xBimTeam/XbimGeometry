@@ -659,7 +659,7 @@ namespace Xbim
 
 				for (Standard_Integer p = 1; p <= originalCount; p++)
 				{
-					pointSeq.Append(poles.Value(p - 1));
+					pointSeq.Append(poles.Value(p));
 				}
 
 
@@ -798,19 +798,7 @@ namespace Xbim
 					}
 					double actualTolerance = tolerance; //reset for each segment
 
-					if (isContinuous && lastSeg) //we need to close it, check the start and end points match
-					{
-						gp_Pnt endVertex = curve->EndPoint();
-						double actualGap = startVertex.Distance(endVertex);
-						if (actualGap > tolerance)
-						{
-							double fiveMilli = 5 * cCurve->Model->ModelFactors->OneMilliMeter; //we are going to accept that a gap of 5mm is not a gap
-							if (actualGap > fiveMilli)
-								XbimGeometryCreator::LogWarning(logger, seg, "Failed to close composite curve segment");
-							actualTolerance = actualGap + tolerance;
-						}
-					}
-					else if (!firstPass)
+					if (!firstPass)
 					{
 						double actualGap = nextVertex.Distance(lastVertex);
 						if (actualGap > tolerance)

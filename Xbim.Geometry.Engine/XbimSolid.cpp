@@ -900,7 +900,8 @@ namespace Xbim
 			List<XbimFace^>^ crossSections = gcnew List<XbimFace^>();
 			for each (IIfcProfileDef^ profile in repItem->CrossSections)
 			{
-				crossSections->Add(gcnew XbimFace(profile, logger));
+				XbimFace^ f = gcnew XbimFace(profile, logger);
+				crossSections->Add(f);
 			}
 			List<IIfcAxis2Placement3D^>^ positions = Enumerable::ToList<IIfcAxis2Placement3D^>(repItem->CrossSectionPositions);
 
@@ -918,14 +919,30 @@ namespace Xbim
 					TopoDS_Wire outerBound = (XbimWire^)(crossSections[i]->OuterBound);
 					pipeMaker1.Add(outerBound);
 				}
-
-				pipeMaker1.Build();
+				bool ok = false;
+				try
+				{
+					pipeMaker1.Build();
+					ok = true;
+				}
+				catch (...)
+				{
+				}
+				if (!ok)
+				{
+					BRepBuilderAPI_PipeError err = pipeMaker1.GetStatus();
+					XbimGeometryCreator::LogError(logger, repItem, "Failed to build outer shell of sectioned spine {0}", (int)err);
+					return;
+				}
 				if (pipeMaker1.IsDone())
 				{
-					TopoDS_Wire firstOuter = TopoDS::Wire(pipeMaker1.FirstShape().Reversed());
-					TopoDS_Wire lastOuter = TopoDS::Wire(pipeMaker1.LastShape().Reversed());
-					BRepBuilderAPI_MakeFace firstMaker(firstOuter);
-					BRepBuilderAPI_MakeFace lastMaker(lastOuter);
+					if (!pipeMaker1.MakeSolid())
+					{
+						XbimGeometryCreator::LogWarning(logger, repItem, "Could not construct IfcSectionedSpine");
+						return;
+					}
+					TopoDS_Solid outerShell = TopoDS::Solid(pipeMaker1.Shape());
+					
 					for (int i = 0; i < crossSections[0]->InnerBounds->Count; i++) //assume all sections have same topology
 					{
 						//it is a hollow section so we need to build the inside
@@ -936,49 +953,112 @@ namespace Xbim
 							TopoDS_Wire innerBound = (XbimWire^)(crossSections[j]->InnerWires->Wire[i]);
 							pipeMaker2.Add(innerBound);
 						}
-						pipeMaker2.Build();
+						ok = false;
+						try
+						{
+							pipeMaker2.Build();
+							ok = true;
+						}
+						catch (...)
+						{
+
+						}
+						if (!ok)
+						{
+							BRepBuilderAPI_PipeError err = pipeMaker2.GetStatus();
+							XbimGeometryCreator::LogError(logger, repItem, "Failed to build inner shell of sectioned spine {0}", (int)err);
+							return;
+						}
 						if (pipeMaker2.IsDone())
 						{
-							for (TopExp_Explorer explr(pipeMaker2.Shape(), TopAbs_FACE); explr.More(); explr.Next())
+							if (!pipeMaker2.MakeSolid()) //we cannot make a solid
 							{
-								b.AddShellFace(shell, TopoDS::Face(explr.Current()));
+								XbimGeometryCreator::LogWarning(logger, repItem, "Could not construct inner sweep of IfcSectionedSpine");
+							}
+							else
+							{
+								TopoDS_Solid innerShell = TopoDS::Solid(pipeMaker2.Shape());
+								TopTools_IndexedMapOfShape outerShellMap;
+								TopExp::MapShapes(outerShell, TopAbs_FACE, outerShellMap);
+								TopoDS_Face firstFace;
+								TopoDS_Face lastFace;
+								for (int k = 1; k <= outerShellMap.Extent(); k++)
+								{
+									const TopoDS_Face & f = TopoDS::Face(outerShellMap(k));
+									if (f.IsSame(pipeMaker1.FirstShape()))
+										firstFace = f;
+									else if (f.IsSame(pipeMaker1.LastShape()))
+										lastFace = f;
+									else
+										b.AddShellFace(shell, f);
+								}
+								TopTools_IndexedMapOfShape innerShellMap;
+								TopExp::MapShapes(innerShell, TopAbs_FACE, innerShellMap);
+								for (int k = 1; k <= innerShellMap.Extent(); k++)
+								{
+									const TopoDS_Face & f = TopoDS::Face(innerShellMap(k));
+
+									if (f.IsEqual(pipeMaker2.FirstShape()))
+									{
+										BRepBuilderAPI_MakeFace firstMaker(firstFace);
+										TopoDS_Wire w = BRepTools::OuterWire(f);
+										w.Reverse();
+										firstMaker.Add(w);
+										firstFace = firstMaker.Face();
+									}
+									else if (f.IsEqual(pipeMaker2.LastShape()))
+									{
+										BRepBuilderAPI_MakeFace lastMaker(lastFace);
+										TopoDS_Wire w = BRepTools::OuterWire(f);
+										w.Reverse();
+										lastMaker.Add(w);
+										lastFace = lastMaker.Face();
+									}
+									else
+										b.AddShellFace(shell, TopoDS::Face(f.Reversed()));
+
+								}
+								TopoDS_Solid solid;
+								BRep_Builder bs;
+								bs.MakeSolid(solid);
+
+								bs.Add(shell, firstFace);
+								bs.Add(shell, lastFace);
+								bs.Add(solid, shell);
+
+								BRepClass3d_SolidClassifier SC(solid);
+								SC.PerformInfinitePoint(Precision::Confusion());
+								if (SC.State() == TopAbs_IN) {
+									bs.MakeSolid(solid);
+									shell.Reverse();
+									bs.Add(solid, shell);
+								}
+								solid.Closed(Standard_True);
+								outerShell = solid;								
 							}
 						}
-						firstMaker.Add(TopoDS::Wire(pipeMaker2.FirstShape()));
-						lastMaker.Add(TopoDS::Wire(pipeMaker2.LastShape()));
+						else
+						{
+							XbimGeometryCreator::LogWarning(logger, repItem, "Inner loop of IfcSectionedSpine could not be constructed");
+						}
 
 					}
-					b.AddShellFace(shell, firstMaker.Face());
-					b.AddShellFace(shell, lastMaker.Face());
-
-					for (TopExp_Explorer explr(pipeMaker1.Shape(), TopAbs_FACE); explr.More(); explr.Next())
-					{
-						b.AddShellFace(shell, TopoDS::Face(explr.Current()));
-					}
-					b.CompleteShell(shell);
-					TopoDS_Solid solid;
-					BRep_Builder bs;
-					bs.MakeSolid(solid);
-					bs.Add(solid, shell);
-					BRepClass3d_SolidClassifier sc(solid);
-					sc.PerformInfinitePoint(Precision::Confusion());
-					if (sc.State() == TopAbs_IN)
-					{
-						bs.MakeSolid(solid);
-						shell.Reverse();
-						bs.Add(solid, shell);
-
-					}
+					
 					pSolid = new TopoDS_Solid();
-					*pSolid = solid;
+					*pSolid = outerShell;
 					pSolid->Closed(Standard_True);
 					GC::KeepAlive(crossSections);
 					ShapeFix_ShapeTolerance tolFixer;
 					tolFixer.LimitTolerance(*pSolid, repItem->Model->ModelFactors->Precision);
 					return;
 				}
+				else
+				{
+					XbimGeometryCreator::LogWarning(logger, repItem, "IfcSectionedSpine ould not be constructed");
+
+				}
 			}
-			XbimGeometryCreator::LogInfo(logger, repItem, "Invalid extrusion, depth must be >0 and faces must be correctly defined");
+			XbimGeometryCreator::LogInfo(logger, repItem, "Invalid IfcSectionedSpine, sections must be 2 or more and faces must be correctly defined");
 			//if it has failed we will have a null solid
 		}
 
@@ -1374,7 +1454,6 @@ namespace Xbim
 			else
 			{
 				XbimGeometryCreator::LogWarning(logger, repItem, "Could not be constructed");
-
 			}
 		}
 

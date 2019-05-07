@@ -97,17 +97,21 @@ namespace Xbim
 					int j = (i % polygon.Length()) + 1;
 					double dist = polygon.Value(i).SquareDistance(polygon.Value(j));
 					if (dist < tol) {
-						if(j==1 && i==n) //the first and last point are the same
+						if (j == 1 && i == n) //the first and last point are the same
+							isClosed = true;
 						// do not remove the first or last point to
 						// maintain connectivity with other wires
-						if ((closed && j == 1) || (!closed && j == n)) polygon.Remove(i);
-						else polygon.Remove(j);
+						if ((closed && j == 1) || (!closed && j == n)) 
+							polygon.Remove(i);
+						else 
+							polygon.Remove(j);
 						removed = true;
 						break;
 					}
 				}
 				if (!removed) break;
 			}
+			
 			return isClosed;
 		}
 
