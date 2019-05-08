@@ -32,17 +32,17 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             logger = null;
         }
 
-        [TestMethod]
-        public void can_build_composite_curve()
-        {
-            using (var model = MemoryModel.OpenRead(@".\\TestFiles\Primitives\\composite_curve.ifc"))
-            {
-                var compCurve = model.Instances.OfType<IIfcCompositeCurve>().FirstOrDefault();
-                Assert.IsNotNull(compCurve);
-                var face = geomEngine.CreateFace(compCurve);
-                Assert.IsNotNull(face.OuterBound);
-            }
-        }
+        //[TestMethod]
+        //public void can_build_composite_curve()
+        //{
+        //    using (var model = MemoryModel.OpenRead(@".\\TestFiles\Primitives\\composite_curve.ifc"))
+        //    {
+        //        var compCurve = model.Instances.OfType<IIfcCompositeCurve>().FirstOrDefault();
+        //        Assert.IsNotNull(compCurve);
+        //        var face = geomEngine.CreateFace(compCurve);
+        //        Assert.IsNotNull(face.OuterBound);
+        //    }
+        //}
         [TestMethod]
         public void can_build_ifc_faceted_brep()
         {

@@ -50,7 +50,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests.TestFiles
                 Assert.IsTrue(er.Entity != null, "No IIfcSweptDiskSolid found");
                 
                 var solid = geomEngine.CreateSolid(er.Entity, logger);
-                Assert.IsTrue(solid.Faces.Count == 5, "This solid should have 5 faces");
+                Assert.AreEqual(5, solid.Faces.Count , "This solid has the wrong number of faces");
             }
 
         }

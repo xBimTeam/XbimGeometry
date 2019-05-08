@@ -71,6 +71,8 @@
 #include <BOPAlgo_Tools.hxx>
 #include <Geom_OffsetCurve.hxx>
 #include <Adaptor3d_HCurve.hxx>
+#include <BRepAdaptor_HCurve.hxx>
+
 using namespace Xbim::Common;
 using namespace System::Linq;
 // using namespace System::Diagnostics;
@@ -2222,13 +2224,15 @@ namespace Xbim
 			return (XbimWire^)Trim(startParam, endParam, tolerance, logger);
 		}
 
-		IXbimWire^ XbimWire::Trim(double first, double last, double /*tolerance*/, ILogger^ logger)
+		IXbimWire^ XbimWire::Trim(double first, double last, double tolerance, ILogger^ logger)
 		{
 			if (!IsValid)
 				return this;
 			BRepAdaptor_CompCurve cc(*pWire, Standard_True);
 			GeomAbs_Shape continuity = cc.Continuity();
 			int numIntervals = cc.NbIntervals(continuity);
+
+
 			if (numIntervals == 1)
 			{
 				TopoDS_Edge edge; // the edge we are interested in
@@ -2253,40 +2257,61 @@ namespace Xbim
 				{
 					Standard_Real fp = res.Value(i);
 					Standard_Real lp = res.Value(i + 1);
+					//if the first point is > lp then we do not want this edge at all
+					if ( first > lp) 
+						continue;
+					//if the last point is < fp then we do not want it
+					if (last < fp) 
+						continue;
 
-
-
+					//we are going to need an edge
 					TopoDS_Edge edge; // the edge we are interested in
 					Standard_Real uoe; // parameter U on the edge (not used)
 					cc.Edge(fp, edge, uoe);
-					Standard_Real l, f; // the parameter range is returned in f and l
-					Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, f, l);
-
-					double adjFirstParam = f + fp;
-					double adjLastParam = l + fp;
-					if (first > adjFirstParam  && first < adjLastParam) // first trim is in the range of this edge
+					Standard_Real lEdge, fEdge; // the parameter range is returned in f and l
+					Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, fEdge, lEdge);
+					
+					// if first is < lp and last < lp then we need to do both trims on this edge
+					if (first > fp && first < lp && last < lp)
 					{
-						double startTrim = first - adjFirstParam;
-						if (last < adjLastParam) //the last is also in this range, trim start and end
-						{
-							double endTrim = last - adjFirstParam;
-							wm.Add(BRepBuilderAPI_MakeEdge(new Geom_TrimmedCurve(curve, startTrim, endTrim)));
-						}
-						else //we only need to trim the start
-						{
-
-							wm.Add(BRepBuilderAPI_MakeEdge(new Geom_TrimmedCurve(curve, startTrim, l)));
-						}
+						gp_Pnt pFirst = cc.Value(first);
+						double uOnEdgeFirst;
+						gp_Pnt pLast = cc.Value(last);
+						double uOnEdgeLast;
+						double maxTolerance = BRep_Tool::MaxTolerance(edge, TopAbs_VERTEX);
+						GeomLib_Tool::Parameter(curve, pFirst, maxTolerance, uOnEdgeFirst);
+						GeomLib_Tool::Parameter(curve, pLast, maxTolerance, uOnEdgeLast);
+						Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(curve, uOnEdgeFirst, uOnEdgeLast);
+						wm.Add(BRepBuilderAPI_MakeEdge(trimmed));
 					}
-					else if (last > adjFirstParam && last < adjLastParam) // last trim is in range, we have already dealt with the forst so it is out of range
+					// if first is < lp  then we need to trim to end of this edge unless first is zero or has already been used
+					else if (first > 0 && first < lp)
 					{
-						double endTrim = last - adjFirstParam;
-						wm.Add(BRepBuilderAPI_MakeEdge(new Geom_TrimmedCurve(curve, f, endTrim)));
+						gp_Pnt pFirst = cc.Value(first);
+						double uOnEdgeFirst;
+						double maxTolerance = BRep_Tool::MaxTolerance(edge, TopAbs_VERTEX);
+						GeomLib_Tool::Parameter(curve, pFirst, maxTolerance, uOnEdgeFirst);		
+						Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(curve, uOnEdgeFirst, lEdge);
+						wm.Add(BRepBuilderAPI_MakeEdge(trimmed));
+						first = -1; //it has been done
 					}
-					else //just add the whole edge
+					//if last  < lp need to trim from beginning to last
+					else if (last < lp)
+					{
+						//get the point required
+						
+						gp_Pnt pLast = cc.Value(last);
+						double uOnEdgeLast;
+						double maxTolerance = BRep_Tool::MaxTolerance(edge,TopAbs_VERTEX);
+						GeomLib_Tool::Parameter(curve, pLast, maxTolerance, uOnEdgeLast);
+						Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(curve, fEdge, uOnEdgeLast);
+						wm.Add(BRepBuilderAPI_MakeEdge(trimmed));
+					}
+					else //we want the whole edge
 					{
 						wm.Add(edge);
 					}
+
 
 					if (!wm.IsDone())
 					{

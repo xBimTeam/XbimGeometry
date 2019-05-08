@@ -1291,7 +1291,8 @@ namespace Xbim
 			//the directrix must be an IfcPolyline or IfcIndexedPolyCurve
 			IIfcPolyline^ pline = dynamic_cast<IIfcPolyline^>(repItem->Directrix);
 			IIfcIndexedPolyCurve^ pCurve = dynamic_cast<IIfcIndexedPolyCurve^>(repItem->Directrix);
-			if (pline == nullptr && pCurve == nullptr)
+			IIfcCompositeCurve^ cCurve = dynamic_cast<IIfcCompositeCurve^>(repItem->Directrix); //allowing composite curves despite the schema documentation
+			if (pline == nullptr && pCurve == nullptr && cCurve == nullptr)
 			{
 				XbimGeometryCreator::LogError(logger, repItem, "The directrix of the sweep must be an IfcPolyline or IfcIndexedPolyCurve.");
 				return;
@@ -1299,6 +1300,8 @@ namespace Xbim
 			XbimWire^ sweep;
 			if (pline != nullptr)
 				sweep = gcnew XbimWire(pline, logger);
+			else if (cCurve != nullptr)
+				sweep = gcnew XbimWire(cCurve, logger);
 			else //it must be an IfcIndexedPolyCurve
 				sweep = gcnew XbimWire(pCurve, logger);
 			if (!sweep->IsValid) return;
