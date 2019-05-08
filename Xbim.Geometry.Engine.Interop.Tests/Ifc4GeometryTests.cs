@@ -33,6 +33,21 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         }
 
         [TestMethod]
+        public void Can_build_polygonal_face_tessellation()
+        {
+            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\polygonal-face-tessellation.ifc"))
+            {
+                var pfs = model.Instances.OfType<IIfcPolygonalFaceSet>().FirstOrDefault();
+                Assert.IsTrue(pfs != null, "No IIfcPolygonalFaceSet found");
+                var faceModel = geomEngine.CreateSurfaceModel(pfs, logger);
+
+               // HelperFunctions.IsValidSolid(faceModel);
+
+            }
+        }
+
+
+        [TestMethod]
         public void CentreLineProfileTest()
         {
             using (var er = new EntityRepository<IIfcExtrudedAreaSolid>(nameof(CentreLineProfileTest)))

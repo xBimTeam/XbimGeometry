@@ -193,7 +193,7 @@ namespace Xbim
 			virtual IXbimSolid^ CreateSolid(IIfcAdvancedBrep^ ifcSolid, ILogger^ logger);
 			virtual IXbimSolid^ CreateSolid(IIfcAdvancedBrepWithVoids^ ifcSolid, ILogger^ logger);
 			virtual IXbimSolid^ CreateSolid(IIfcSectionedSpine^ ifcSolid, ILogger^ logger);
-			virtual IXbimGeometryObjectSet^ CreateSurfaceModel(IIfcTriangulatedFaceSet^ shell, ILogger^ logger);
+			virtual IXbimGeometryObjectSet^ CreateSurfaceModel(IIfcTessellatedFaceSet^ shell, ILogger^ logger);
 
 			//Curves
 			virtual IXbimCurve^ CreateCurve(IIfcCurve^ curve, ILogger^ logger);

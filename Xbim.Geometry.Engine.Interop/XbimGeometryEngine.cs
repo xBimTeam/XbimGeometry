@@ -800,6 +800,14 @@ namespace Xbim.Geometry.Engine.Interop
                 return _engine.CreateSolidSet(ifcSolid, logger);
             }
         }
+
+        public IXbimGeometryObjectSet CreateSurfaceModel(IIfcTessellatedFaceSet shell, ILogger logger = null)
+        {
+            using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, shell))
+            {
+                return _engine.CreateSurfaceModel(shell, logger);
+            }
+        }
     }
 
     public static class LogHelper

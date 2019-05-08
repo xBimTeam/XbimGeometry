@@ -284,6 +284,11 @@ namespace Xbim
 			Init(faceSet, logger);
 		}
 
+		XbimCompound::XbimCompound(IIfcPolygonalFaceSet^ faceSet, ILogger^ logger)
+		{
+			_sewingTolerance = faceSet->Model->ModelFactors->Precision;
+			Init(faceSet, logger);
+		}
 
 #pragma region Initialisers
 
@@ -916,6 +921,12 @@ namespace Xbim
 			}
 			else
 				builder.Add(*pCompound, shell);
+		}
+
+
+		void  XbimCompound::Init(IIfcPolygonalFaceSet^ faceSet, ILogger^ logger)
+		{
+			throw gcnew NotImplementedException("IIfcPolygonalFaceSet is not implemented");
 		}
 
 		void XbimCompound::Init(IEnumerable<IIfcFace^>^ ifcFaces, bool /*close*/, IIfcRepresentationItem^ theItem, ILogger^ logger)

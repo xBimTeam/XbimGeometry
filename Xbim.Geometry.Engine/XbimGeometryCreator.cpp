@@ -1012,11 +1012,18 @@ namespace Xbim
 		{
 			return gcnew XbimSolid(ifcSolid, logger);
 		}
-		IXbimGeometryObjectSet^ XbimGeometryCreator::CreateSurfaceModel(IIfcTriangulatedFaceSet^ faceSet, ILogger^ logger)
+
+		IXbimGeometryObjectSet^ XbimGeometryCreator::CreateSurfaceModel(IIfcTessellatedFaceSet^ faceSet, ILogger^ logger)
 		{
-			return gcnew XbimCompound(faceSet, logger);
-			
+			IIfcTriangulatedFaceSet^ tfs = dynamic_cast<IIfcTriangulatedFaceSet^>(faceSet);
+			if(tfs!=nullptr)  return gcnew XbimCompound(tfs, logger);
+			IIfcPolygonalFaceSet^ pfs = dynamic_cast<IIfcPolygonalFaceSet^>(faceSet);
+			if (pfs != nullptr)  return gcnew XbimCompound(pfs, logger);
+			throw gcnew Exception(String::Format("IIfcTessellatedFaceSet of Type {0} is not implemented", faceSet->GetType()->Name));
 		}
+
+		
+
 		XbimMatrix3D XbimGeometryCreator::ToMatrix3D(IIfcObjectPlacement ^ objPlacement, ILogger^ logger)
 		{
 			return XbimConvert::ConvertMatrix3D(objPlacement,logger);
