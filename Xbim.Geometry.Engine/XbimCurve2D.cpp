@@ -162,28 +162,30 @@ namespace Xbim
 			}
 		}
 
-		void XbimCurve2D::Init(IIfcPolyline^ curve, ILogger^ logger)
+		void XbimCurve2D::Init(IIfcPolyline^ pline, ILogger^ logger)
 		{
-			//only deal with the first two points of a polyline, should really use wire for more than one segment
-			List<IIfcCartesianPoint^>^ pts = Enumerable::ToList(curve->Points);
-			if (pts->Count != 2)
+			int pointCount = pline->Points->Count;
+			if (pointCount < 2)
 			{
-				XbimGeometryCreator::LogWarning(logger, curve, "XbimCurves can only be created with polylines that have a single segment, consider creating a wire");
+				XbimGeometryCreator::LogError(logger, pline, "Polyline with less than 2 points is not a line. It has been ignored");
 				return;
 			}
+			TColgp_Array1OfPnt2d poles(1, pointCount);
+			TColStd_Array1OfReal knots(1, pointCount);
+			TColStd_Array1OfInteger mults(1, pointCount);
 
-			gp_Pnt2d start = XbimConvert::GetPoint2d(pts[0]);
-			gp_Pnt2d end = XbimConvert::GetPoint2d(pts[1]);
-
-			GCE2d_MakeLine lineMaker(start, end);
-			if (lineMaker.IsDone())
+			for (Standard_Integer i = 1; i <= pointCount; i++)
 			{
-				double u1; double u2;
-				GeomLib_Tool::Parameter(lineMaker.Value(), start, Precision::Confusion(), u1);
-				GeomLib_Tool::Parameter(lineMaker.Value(), end, Precision::Confusion(), u2);
-				pCurve2D = new Handle(Geom2d_Curve);
-				*pCurve2D = new Geom2d_TrimmedCurve(lineMaker.Value(), u1, u2);
+				IIfcCartesianPoint^ cp = pline->Points[i - 1];
+				gp_Pnt2d pnt(cp->X, cp->Y);
+				poles.SetValue(i, pnt);
+				knots.SetValue(i, Standard_Real(i - 1));
+				mults.SetValue(i, 1);
 			}
+			mults.SetValue(1, 2);
+			mults.SetValue(pointCount, 2);
+			pCurve2D = new Handle(Geom2d_Curve);
+			*pCurve2D = new Geom2d_BSplineCurve(poles, knots, mults, 1);
 		}
 		void XbimCurve2D::Init(IIfcCircle^ circle, ILogger^ logger)
 		{
