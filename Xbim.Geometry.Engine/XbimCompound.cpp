@@ -545,7 +545,7 @@ namespace Xbim
 						if (volume < 0) pCompound->Reverse();
 						double oneCubicMillimetre = Math::Pow(closedShell->Model->ModelFactors->OneMilliMeter, 3);
 						volume = Math::Abs(volume);
-						if (volume != 0 && volume < oneCubicMillimetre) //sometimes zero volume is just a badly defined shape so let it through
+						if (/*volume != 0 && */volume < oneCubicMillimetre) //sometimes zero volume is just a badly defined shape so let it through maybe
 						{
 							XbimGeometryCreator::LogWarning(logger, closedShell, "Very small closed IfcClosedShell has been ignored");
 							pCompound->Nullify();
