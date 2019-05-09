@@ -54,6 +54,27 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.IsTrue(geom.Volume > 1e-5);
             }
         }
-
+        [TestMethod]
+        public void can_build_closed_shell()
+        {
+            using (var model = MemoryModel.OpenRead(@".\TestFiles\Primitives\faulty_closed_shell.ifc"))
+            {
+                var shape = model.Instances.OfType<IIfcClosedShell>().FirstOrDefault();
+                Assert.IsNotNull(shape);
+                var geom = geomEngine.CreateSolidSet(shape).FirstOrDefault();
+                Assert.IsTrue(geom.Volume > 1e-5);
+            }
+        }
+        [TestMethod]
+        public void can_build_poorly_aligned_planar_faces()
+        {
+            using (var model = MemoryModel.OpenRead(@".\TestFiles\Primitives\poor_face_planar_fidelity.ifc"))
+            {
+                var shape = model.Instances.OfType<IIfcClosedShell>().FirstOrDefault();
+                Assert.IsNotNull(shape);
+                var geom = geomEngine.CreateSolidSet(shape).FirstOrDefault();
+                Assert.IsTrue(geom.Volume == 0);
+            }
+        }
     }
 }

@@ -47,6 +47,9 @@
 #include <BRepCheck_Shell.hxx>
 #include <BRepBuilderAPI_CellFilter.hxx>
 #include <BRepBuilderAPI_VertexInspector.hxx>
+
+
+
 // #include <ShapeBuild_ReShape.hxx> // this was suggeste in PR79 - but it does not seem to make the difference with OCC72
 
 using namespace System;
@@ -518,7 +521,7 @@ namespace Xbim
 						pCompound->Nullify();
 						BRep_Builder b;
 						b.MakeCompound(*pCompound);
-						
+
 						if (BRepCheck_Analyzer(solid, Standard_True).IsValid() == Standard_False)
 						{
 							//try and fix if we can
@@ -528,19 +531,21 @@ namespace Xbim
 							fixer.SetPrecision(closedShell->Model->ModelFactors->Precision);
 							if (fixer.Perform())
 								b.Add(*pCompound, fixer.Shape());
-							else 
+							else
 								XbimGeometryCreator::LogError(logger, closedShell, "Failed to create a valid solid from an IfcClosedShell");
 						}
 						else
 						{
 							b.Add(*pCompound, solid);
 						}
-						//we with
+
 						GProp_GProps gProps;
 						BRepGProp::VolumeProperties(*pCompound, gProps, Standard_True);
 						double volume = gProps.Mass();
+						if (volume < 0) pCompound->Reverse();
 						double oneCubicMillimetre = Math::Pow(closedShell->Model->ModelFactors->OneMilliMeter, 3);
-						if (volume < oneCubicMillimetre)
+						volume = Math::Abs(volume);
+						if (volume != 0 && volume < oneCubicMillimetre) //sometimes zero volume is just a badly defined shape so let it through
 						{
 							XbimGeometryCreator::LogWarning(logger, closedShell, "Very small closed IfcClosedShell has been ignored");
 							pCompound->Nullify();
@@ -944,7 +949,7 @@ namespace Xbim
 				allFaces++;
 			}
 			seamstress.Perform();
-			
+
 			TopoDS_Shape result = seamstress.SewedShape();
 			TopoDS_Compound unifiedCompound;
 			builder.MakeCompound(unifiedCompound);
@@ -960,13 +965,13 @@ namespace Xbim
 					//sometimes unifier crashes
 					unifier.Build();
 					builder.Add(unifiedCompound, unifier.Shape());
-					
+
 				}
 				catch (...) //any failure
 				{
 					//default to what we had
 					builder.Add(unifiedCompound, result);
-				}		
+				}
 			}
 			else
 			{
