@@ -1341,14 +1341,38 @@ namespace Xbim
 			Handle(Geom_Circle) hOuter = GC_MakeCircle(outer);
 			TopoDS_Edge outerEdge = BRepBuilderAPI_MakeEdge(hOuter);
 			const TopoDS_Wire & outerWire = BRepBuilderAPI_MakeWire(outerEdge);
+			bool closedSweep = outerWire.Closed();
+			
 			BRepOffsetAPI_MakePipeShell pipeMaker1(sweep);
 			pipeMaker1.Add(outerWire, Standard_False, Standard_True);
-			pipeMaker1.SetTransitionMode(BRepBuilderAPI_RightCorner);
-
+			pipeMaker1.SetTransitionMode(BRepBuilderAPI_Transformed);
+			
 			pipeMaker1.Build();
 			if (pipeMaker1.IsDone())
 			{
-				if (!pipeMaker1.MakeSolid()) //we cannot make a solid
+				TopAbs_ShapeEnum st = pipeMaker1.Shape().ShapeType();
+				/*if (closedSweep && st == TopAbs_ShapeEnum::TopAbs_SHELL)
+				{
+					BRep_Builder bs;
+					TopoDS_Solid solid;
+					bs.MakeSolid(solid);
+					TopoDS_Shell sh = TopoDS::Shell(pipeMaker1.Shape());
+					bs.Add(solid, sh);
+					BRepClass3d_SolidClassifier SC(solid);
+					SC.PerformInfinitePoint(Precision::Confusion());
+					if (SC.State() == TopAbs_IN) {
+						bs.MakeSolid(solid);
+						sh.Reverse();
+						bs.Add(solid, sh);
+					}
+					pSolid = new TopoDS_Solid();
+					*pSolid = solid;
+					pSolid->Closed(Standard_True);
+					ShapeFix_ShapeTolerance tolFixer;
+					tolFixer.LimitTolerance(*pSolid, repItem->Model->ModelFactors->Precision);
+					return;
+				}*/
+				if (!pipeMaker1.MakeSolid()) //we cannot make a solid or it is already a solid
 				{
 					XbimGeometryCreator::LogWarning(logger, repItem, "Could not construct IfcSweptDiskSolidPolygonal");
 					return;
@@ -1356,7 +1380,7 @@ namespace Xbim
 
 				TopoDS_Solid pipe = TopoDS::Solid(pipeMaker1.Shape());
 
-				if (repItem->InnerRadius.HasValue && repItem->InnerRadius.Value > 0 && repItem->InnerRadius.Value < repItem->Radius)
+				if (!closedSweep && repItem->InnerRadius.HasValue && repItem->InnerRadius.Value > 0 && repItem->InnerRadius.Value < repItem->Radius)
 				{
 					bool isClosed = pipeMaker1.FirstShape().ShapeType() == TopAbs_WIRE; //if the first is stil a wire the shape is closed, it should be a face to make a valid solid that is open
 

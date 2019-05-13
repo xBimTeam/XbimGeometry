@@ -33,6 +33,21 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         }
 
         [TestMethod]
+        public void Can_build_solid_swept_disk_pipe()
+        {
+            using (var model = MemoryModel.OpenRead(@".\TestFiles\Solid_swept_disk_pipe.ifc"))
+            {
+                var pfs = model.Instances.OfType<IIfcSweptDiskSolid>().FirstOrDefault();
+                Assert.IsTrue(pfs != null, "No IIfcPolygonalFaceSet found");
+                var pipe = geomEngine.CreateSolid(pfs, logger);
+                
+                Assert.AreEqual(129879, pipe.Volume, 0.99);
+                Assert.AreEqual(15, pipe.Faces.Count);
+
+            }
+        }
+
+        [TestMethod]
         public void Can_build_polygonal_face_tessellation()
         {
             using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\polygonal-face-tessellation.ifc"))
