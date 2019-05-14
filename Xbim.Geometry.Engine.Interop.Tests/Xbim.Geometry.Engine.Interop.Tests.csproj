@@ -83,9 +83,6 @@
     <None Update="TestFiles\FailingBooleanBrepWithZeroVolumeTest.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestFiles\large_surface_model_mesh_with_boolean_op.ifc">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Update="TestFiles\Primitives\faulty_closed_shell.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

@@ -90,26 +90,6 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             }
 
         }
-        [TestMethod]
-        public void Controlled_failure_with_large_surface_mesh_in_occ()
-        {
-            using (var model = MemoryModel.OpenRead(@".\TestFiles\large_surface_model_mesh_with_boolean_op.ifc"))
-            {
-                var ifcMesh = model.Instances[60] as IIfcFaceBasedSurfaceModel;
-                try
-                {
-                    var mesh = geomEngine.CreateSurfaceModel(ifcMesh, logger);
-                    Assert.Fail("An exception should have been thrown");
-                }
-                catch (XbimGeometryFaceSetTooLargeException fse)
-                {
-                    var entityLabel = fse.Data["LargeFaceSetLabel"];
-                    Assert.AreEqual(61, entityLabel);
-                }
-               
-
-            }
-        }
 
         public void IsSolidTest(IXbimSolid solid, bool ignoreVolume = false, bool isHalfSpace = false, int entityLabel = 0)
         {
