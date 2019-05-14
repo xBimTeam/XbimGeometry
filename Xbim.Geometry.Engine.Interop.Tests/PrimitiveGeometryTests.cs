@@ -73,7 +73,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var shape = model.Instances.OfType<IIfcClosedShell>().FirstOrDefault();
                 Assert.IsNotNull(shape);
                 var geom = geomEngine.CreateSolidSet(shape).FirstOrDefault();
-                Assert.IsTrue(geom.Volume == 0);
+                Assert.IsNull(geom, "This should fail");
             }
         }
     }

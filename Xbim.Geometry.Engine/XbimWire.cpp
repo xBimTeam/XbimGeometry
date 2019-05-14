@@ -2224,7 +2224,7 @@ namespace Xbim
 			return (XbimWire^)Trim(startParam, endParam, tolerance, logger);
 		}
 
-		IXbimWire^ XbimWire::Trim(double first, double last, double tolerance, ILogger^ logger)
+		IXbimWire^ XbimWire::Trim(double first, double last, double /*tolerance*/, ILogger^ logger)
 		{
 			if (!IsValid)
 				return this;
@@ -2316,7 +2316,7 @@ namespace Xbim
 					if (!wm.IsDone())
 					{
 						BRepBuilderAPI_WireError err = wm.Error();
-						XbimGeometryCreator::LogError(logger, this, "Error trimming. Trim discarded");
+						XbimGeometryCreator::LogError(logger, this, "Error trimming. Trim discarded. Error {0}", (int)err);
 						return this;
 					}
 

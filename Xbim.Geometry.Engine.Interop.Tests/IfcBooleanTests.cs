@@ -10,6 +10,7 @@ using Xbim.Ifc4.GeometricModelResource;
 using Xbim.Ifc4.GeometryResource;
 using System.Collections.Generic;
 using Xbim.Ifc.Extensions;
+using Xbim.Common.Exceptions;
 
 namespace Xbim.Geometry.Engine.Interop.Tests
 {
@@ -60,9 +61,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 // note this faceted brep already has the openings cut out and we are cutting them again so the volume should not change
                 var volDiff = cutWall.Volume - transformedWall.Volume;
                 Assert.IsTrue(Math.Abs(volDiff) < 1e-5);
-               // Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
-               //  var solid = geomEngine.CreateSolid(er.Entity, logger);
-               //  Assert.IsFalse(solid.Faces.Any(), "This solid should have 0 faces");
+                // Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
+                //  var solid = geomEngine.CreateSolid(er.Entity, logger);
+                //  Assert.IsFalse(solid.Faces.Any(), "This solid should have 0 faces");
             }
 
         }
@@ -79,17 +80,36 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     var archRepItem = erArch.Entity.Representation.Representations.FirstOrDefault()?.Items.FirstOrDefault() as IIfcExtrudedAreaSolid;
                     var elecRepItem = erElec.Entity.Representation.Representations.FirstOrDefault()?.Items.FirstOrDefault() as IIfcExtrudedAreaSolid;
                     Assert.IsNotNull(archRepItem); Assert.IsNotNull(elecRepItem);
-                    var archGeom = geomEngine.CreateSolid(archRepItem).Transform(archMatrix) ;
-                    var elecGeom = geomEngine.CreateSolid(elecRepItem).Transform(elecMatrix) ;
+                    var archGeom = geomEngine.CreateSolid(archRepItem).Transform(archMatrix);
+                    var elecGeom = geomEngine.CreateSolid(elecRepItem).Transform(elecMatrix);
                     var archBB = archGeom.BoundingBox;
                     var elecBB = elecGeom.BoundingBox;
                     var diff = archBB.Centroid() - elecBB.Centroid();
-                    Assert.IsTrue(diff.Length<1e-5);
+                    Assert.IsTrue(diff.Length < 1e-5);
                 }
             }
 
         }
+        [TestMethod]
+        public void Controlled_failure_with_large_surface_mesh_in_occ()
+        {
+            using (var model = MemoryModel.OpenRead(@".\TestFiles\large_surface_model_mesh_with_boolean_op.ifc"))
+            {
+                var ifcMesh = model.Instances[60] as IIfcFaceBasedSurfaceModel;
+                try
+                {
+                    var mesh = geomEngine.CreateSurfaceModel(ifcMesh, logger);
+                    Assert.Fail("An exception should have been thrown");
+                }
+                catch (XbimGeometryFaceSetTooLargeException fse)
+                {
+                    var entityLabel = fse.Data["LargeFaceSetLabel"];
+                    Assert.AreEqual(61, entityLabel);
+                }
+               
 
+            }
+        }
 
         public void IsSolidTest(IXbimSolid solid, bool ignoreVolume = false, bool isHalfSpace = false, int entityLabel = 0)
         {
@@ -134,7 +154,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         public void CompoundBooleanUnionTest()
         {
             using (var er = new EntityRepository<IIfcBooleanResult>(nameof(CompoundBooleanUnionTest)))
-            { 
+            {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
                 var solids = geomEngine.CreateSolidSet(er.Entity, logger);
                 Assert.IsTrue(solids.Count == 1);
@@ -180,12 +200,12 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
                 var solids = geomEngine.CreateSolidSet(er.Entity, logger);
                 HelperFunctions.IsValidSolid(solids.FirstOrDefault());
-                
+
             }
 
         }
 
- /// <summary>
+        /// <summary>
         /// This problem is a boolean where the tolerance needs to be made courser by 10 fold
         /// </summary>
         [TestMethod]
@@ -194,10 +214,10 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var er = new EntityRepository<IIfcBooleanResult>(nameof(BadlyOrientedBrepFacesTest)))
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
-                
+
                 var solids = geomEngine.CreateSolidSet(er.Entity, logger);
                 HelperFunctions.IsValidSolid(solids.FirstOrDefault());
-                
+
             }
 
         }
@@ -210,10 +230,10 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var er = new EntityRepository<IIfcBooleanResult>(nameof(FaceWithBoundsOutsideDeclaredPrecisionTest)))
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
-                
+
                 var solids = geomEngine.CreateSolidSet(er.Entity, logger);
                 HelperFunctions.IsValidSolid(solids.FirstOrDefault());
-                
+
             }
 
         }
@@ -221,7 +241,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void UnorderdedCompositeCurveTest()
         {
-            using (var er = new EntityRepository<IIfcCompositeCurve>(nameof(UnorderdedCompositeCurveTest),true))
+            using (var er = new EntityRepository<IIfcCompositeCurve>(nameof(UnorderdedCompositeCurveTest), true))
             {
                 Assert.IsTrue(er.Entity != null, "No IIfcCompositeCurve found");
 
@@ -252,7 +272,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var er = new EntityRepository<IIfcBooleanResult>("boolean_result_timing_out2", true))
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
-               
+
                 var solids = geomEngine.CreateSolidSet(er.Entity, logger);
                 HelperFunctions.IsValidSolid(solids.FirstOrDefault());
 
@@ -308,7 +328,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
                 var solids = geomEngine.CreateSolidSet(er.Entity, logger);
-                Assert.IsTrue(solids.Count==0, "No solids should be produced");
+                Assert.IsTrue(solids.Count == 0, "No solids should be produced");
             }
 
         }
@@ -322,12 +342,12 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 Assert.IsTrue(er.Entity != null, "No IIfcBooleanClippingResult found");
                 var solid = geomEngine.CreateSolidSet(er.Entity, logger).FirstOrDefault();
-                Assert.IsTrue(solid.Faces.Count==6, "This solid should have 6 faces");
+                Assert.IsTrue(solid.Faces.Count == 6, "This solid should have 6 faces");
             }
 
         }
 
-     
+
 
         /// <summary>
         /// Cuts one cylinder from another and returns a valid solid
@@ -371,7 +391,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     var b = geomEngine.CreateSolid(cylinder, logger);
                     var solidSet = a.Union(b, m.ModelFactors.PrecisionBoolean);
                     Assert.IsTrue(solidSet.Count == 1, "unioning these two solids should return a single solid");
-                    IsSolidTest(solidSet.First);                   
+                    IsSolidTest(solidSet.First);
                 }
             }
         }
@@ -419,7 +439,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     Assert.IsTrue(section.First != null, "Result should be a face");
                     Assert.IsTrue(section.First.OuterBound.Edges.Count == 1, "1 edge is required for this section of a cylinder");
                     Assert.IsTrue(section.First.InnerBounds.Count == 0, "0 inner wires are required for this section of a cylinder");
-                  
+
                 }
             }
         }
@@ -441,14 +461,14 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     bresult.Operator = IfcBooleanOperator.DIFFERENCE;
                     csgTree.TreeRootExpression = bresult;
 
-                    var solid = geomEngine.CreateSolidSet(csgTree,logger).FirstOrDefault();
+                    var solid = geomEngine.CreateSolidSet(csgTree, logger).FirstOrDefault();
                     var plane = IfcModelBuilder.MakePlane(m, new XbimPoint3D(cylinderInner.Position.Location.X + 1, cylinderInner.Position.Location.Y, cylinderInner.Position.Location.Z), new XbimVector3D(0, 0, 1), new XbimVector3D(0, 1, 0));
-                    var cutPlane = geomEngine.CreateFace(plane,logger);
+                    var cutPlane = geomEngine.CreateFace(plane, logger);
                     var section = solid.Section(cutPlane, m.ModelFactors.PrecisionBoolean);
                     Assert.IsTrue(section.First != null, "Result should be a face");
                     Assert.IsTrue(section.First.OuterBound.Edges.Count == 1, "1 edge is required for this section of a cylinder");
                     Assert.IsTrue(section.First.InnerBounds.Count == 1, "1 inner wire is required for this section of a cylinder");
-                   
+
                 }
             }
         }
@@ -471,7 +491,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                         Assert.IsTrue(section.First != null, "Result should be a single face");
                         Assert.IsTrue(section.First.OuterBound.Edges.Count == 4, "4 edges are required of a section of a block");
                     }
-                    
+
                 }
             }
         }
@@ -494,10 +514,10 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     bresult.Operator = IfcBooleanOperator.DIFFERENCE;
                     csgTree.TreeRootExpression = bresult;
 
-                    var solid = geomEngine.CreateSolidSet(csgTree,logger).FirstOrDefault();
+                    var solid = geomEngine.CreateSolidSet(csgTree, logger).FirstOrDefault();
                     Assert.IsTrue(solid.Faces.Count == 4, "4 faces are required of this csg solid");
                     Assert.IsTrue(solid.Vertices.Count == 4, "4 vertices are required of this csg solid");
-                   
+
                 }
             }
         }
@@ -519,10 +539,10 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     bresult.Operator = IfcBooleanOperator.UNION;
                     csgTree.TreeRootExpression = bresult;
 
-                    var solid = geomEngine.CreateSolidSet(csgTree,logger).FirstOrDefault();
+                    var solid = geomEngine.CreateSolidSet(csgTree, logger).FirstOrDefault();
                     Assert.IsTrue(solid.Faces.Count == 3, "3 faces are required of this csg solid");
                     Assert.IsTrue(solid.Vertices.Count == 3, "3 vertices are required of this csg solid");
-                    
+
                 }
             }
         }
@@ -547,7 +567,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     var solid = geomEngine.CreateSolidSet(csgTree, logger).FirstOrDefault();
                     Assert.IsTrue(solid.Faces.Count == 3, "3 faces are required of this csg solid");
                     Assert.IsTrue(solid.Vertices.Count == 3, "3 vertices are required of this csg solid");
-                    
+
                 }
             }
         }
@@ -586,7 +606,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     halfSpaceSolid = geomEngine.CreateSolid(halfSpace, logger);
                     cut = solid.Cut(halfSpaceSolid, 1e-5);
                     Assert.IsTrue(Math.Abs((solid.Volume * .25) - cut.First.Volume) < 1e-5);
-                   
+
                 }
             }
         }
@@ -662,7 +682,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
                     cut = solid.Cut(halfSpaceSolid, 1e-5); //everything should be cut
                     Assert.IsTrue(cut.Count == 0);
-                   
+
                 }
             }
         }
@@ -673,7 +693,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         {
             using (var er = new EntityRepository<IIfcBooleanClippingResult>(nameof(IfcHalfspaceCutFromIfcExtrudedAreaSolidTest)))
             {
-                var solid = geomEngine.CreateSolidSet(er.Entity,logger).FirstOrDefault();
+                var solid = geomEngine.CreateSolidSet(er.Entity, logger).FirstOrDefault();
                 IsSolidTest(solid);
                 Assert.IsTrue(solid.Faces.Count() == 6, "Rectangular profiles should have six faces");
             }
@@ -685,7 +705,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         {
             using (var er = new EntityRepository<IIfcBooleanClippingResult>(nameof(IfcPolygonalBoundedHalfspaceCutFromIfcExtrudedAreaSolidTest)))
             {
-                var solid = geomEngine.CreateSolidSet(er.Entity,logger).FirstOrDefault();
+                var solid = geomEngine.CreateSolidSet(er.Entity, logger).FirstOrDefault();
                 IsSolidTest(solid);
                 Assert.IsTrue(solid.Faces.Count() == 6, "Rectangular profiles should have six faces");
             }
@@ -723,7 +743,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var er = new EntityRepository<IIfcExtrudedAreaSolid>("SmallBooleanClippingResultsTestBodyShape"))
             {
                 solidBody = geomEngine.CreateSolid(er.Entity, logger);
-                Assert.IsTrue(solidBody.Faces.Count==6, "This solid should have 6 faces");
+                Assert.IsTrue(solidBody.Faces.Count == 6, "This solid should have 6 faces");
             }
             //this is a triangular fillet (prism) to cut off the sort side face
             using (var er = new EntityRepository<IIfcFacetedBrep>("SmallBooleanClippingResultsTestCutShape1"))
@@ -751,7 +771,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var er = new EntityRepository<IIfcBooleanClippingResult>(nameof(EmptyBooleanClippingResultTest)))
             {
                 var solidSet = geomEngine.CreateSolidSet(er.Entity, logger);
-                Assert.IsTrue(solidSet.Count==0, "This solid should be empty");
+                Assert.IsTrue(solidSet.Count == 0, "This solid should be empty");
             }
         }
 
@@ -762,8 +782,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         {
             using (var repos = new EntityRepository<IIfcRelVoidsElement>("CuttingOpeningInCompositeProfileDefTest"))
             {
-                
-                var relVoids =  repos.Entity;
+
+                var relVoids = repos.Entity;
                 var oneMilli = relVoids.Model.ModelFactors.OneMilliMetre;
                 var precision = relVoids.Model.ModelFactors.Precision + (oneMilli * 2e-6);
                 var wall = relVoids.RelatingBuildingElement;
@@ -771,7 +791,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var wallTransform = wallPlacement.ToMatrix3D();
                 var wallTransform2 = geomEngine.ToMatrix3D(wallPlacement);
                 Assert.AreEqual(wallTransform, wallTransform2);
-                var wallGeom = wall.Representation.Representations.FirstOrDefault().Items.FirstOrDefault()  as IIfcExtrudedAreaSolid;
+                var wallGeom = wall.Representation.Representations.FirstOrDefault().Items.FirstOrDefault() as IIfcExtrudedAreaSolid;
                 var opening = relVoids.RelatedOpeningElement;
                 var openingPlacement = opening.ObjectPlacement as IIfcLocalPlacement;
                 var openingGeoms = opening.Representation.Representations.FirstOrDefault().Items.OfType<IIfcExtrudedAreaSolid>().ToList();
@@ -788,7 +808,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 int uncut = 0;
                 var singleCut = wallBrepPlaced.Cut(openingBReps, precision);
                 var vol = 0.0;
-                foreach (var uncutItem in wallBrepPlaced) 
+                foreach (var uncutItem in wallBrepPlaced)
                 {
                     var result = uncutItem.Cut(openingBReps, precision);
                     Assert.IsTrue(result.Count == 1);
@@ -796,13 +816,13 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     Assert.IsNotNull(cutSolid);
                     Assert.IsTrue(cutSolid.IsValid);
                     if (uncutItem.Volume <= cutSolid.Volume) uncut++;
-                    Assert.IsTrue(uncut<=3, "More than two solids are uncut, there should only be two");
+                    Assert.IsTrue(uncut <= 3, "More than two solids are uncut, there should only be two");
                     vol += cutSolid.Volume;
                 }
                 Assert.IsTrue(uncut == 2);
                 var scutVol = singleCut.Sum(s => s.Volume);
-                Assert.IsTrue(Math.Abs(vol- scutVol) <1e-5);
-                
+                Assert.IsTrue(Math.Abs(vol - scutVol) < 1e-5);
+
 
             }
         }
@@ -817,7 +837,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     var body = geomEngine.CreateSolidSet(bodyEntity.Entity, logger);
                     Assert.IsTrue(body.Count == 8, "Eight solids should be returned");
                     var hole = geomEngine.CreateSolid(holeEntity.Entity, logger);
-                    var result = body.Cut(hole,bodyEntity.Entity.Model.ModelFactors.Precision);
+                    var result = body.Cut(hole, bodyEntity.Entity.Model.ModelFactors.Precision);
 
                     Assert.IsTrue(result.Count == 8, "Eight solids should be returned");
                     foreach (var solid in result)
@@ -825,8 +845,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                         IsSolidTest(solid);
                     }
 
-                } 
-               
+                }
+
             }
         }
 

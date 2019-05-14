@@ -290,7 +290,9 @@ namespace Xbim
 		XbimCompound::XbimCompound(IIfcPolygonalFaceSet^ faceSet, ILogger^ logger)
 		{
 			_sewingTolerance = faceSet->Model->ModelFactors->Precision;
-			Init(faceSet, logger);
+			IList<IIfcFace^>^ faceList = gcnew XbimPolygonalFaceSet(faceSet);
+			bool isClosed = faceSet->Closed.HasValue ? (bool)faceSet->Closed.Value : false;
+			Init(faceList, isClosed, faceSet, logger);
 		}
 
 #pragma region Initialisers
@@ -929,13 +931,19 @@ namespace Xbim
 		}
 
 
-		void  XbimCompound::Init(IIfcPolygonalFaceSet^ faceSet, ILogger^ logger)
-		{
-			throw gcnew NotImplementedException("IIfcPolygonalFaceSet is not implemented");
-		}
+		
 
 		void XbimCompound::Init(IEnumerable<IIfcFace^>^ ifcFaces, bool /*close*/, IIfcRepresentationItem^ theItem, ILogger^ logger)
 		{
+			int maxFaces = theItem->Model->ModelFactors->SimplifyFaceCountThreshHold;
+			//if the face set has more than max faces just abandon and try and mesh
+			if (Enumerable::Count(ifcFaces) > maxFaces)
+			{
+				XbimGeometryFaceSetTooLargeException^ except =  gcnew XbimGeometryFaceSetTooLargeException();
+				except->Data->Add("LargeFaceSetLabel", theItem->EntityLabel);
+				except->Data->Add("LargeFaceSetType", theItem->GetType()->Name);
+				throw except;
+			}
 			_sewingTolerance = theItem->Model->ModelFactors->Precision;
 			BRep_Builder builder;
 			/*TopoDS_Shell shell;

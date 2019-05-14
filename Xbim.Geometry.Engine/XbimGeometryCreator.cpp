@@ -154,8 +154,8 @@ namespace Xbim
 				LogError(logger, geomRep, "Argument error: XbimGeometryCreator::Create,  Geometry Representation Item cannot be null");
 				return nullptr;
 			}
-			try
-			{
+			//try
+			//{
 				IIfcSweptAreaSolid^ sweptAreaSolid = dynamic_cast<IIfcSweptAreaSolid^>(geomRep);
 				if (sweptAreaSolid != nullptr)
 				{
@@ -261,17 +261,18 @@ namespace Xbim
 					if (objectLocation != nullptr) LogError(logger, geomRep, "Move is not implemented for IIfcGeometricSet");
 					return CreateGeometricSet((IIfcGeometricSet^)geomRep,logger);
 				}
-			}
+			/*}
 			catch (const std::exception &exc)
 			{
 				String^ err = gcnew String(exc.what());
 				LogError(logger, geomRep, "Error creating geometry #{2} representation of type {0}, {1}", geomRep->GetType()->Name, err, geomRep->EntityLabel);
 				return XbimGeometryObjectSet::Empty;
 			}
+			catch ()
 			catch (...)
 			{
 				throw gcnew Exception(String::Format("General Error Creating {0}, #{1}", geomRep->GetType()->Name, geomRep->EntityLabel));
-			}
+			}*/
 			LogError(logger, geomRep,"Geometry Representation of Type {0} is not implemented", geomRep->GetType()->Name);
 			return XbimGeometryObjectSet::Empty;
 		}
@@ -1018,7 +1019,11 @@ namespace Xbim
 			IIfcTriangulatedFaceSet^ tfs = dynamic_cast<IIfcTriangulatedFaceSet^>(faceSet);
 			if(tfs!=nullptr)  return gcnew XbimCompound(tfs, logger);
 			IIfcPolygonalFaceSet^ pfs = dynamic_cast<IIfcPolygonalFaceSet^>(faceSet);
-			if (pfs != nullptr)  return gcnew XbimCompound(pfs, logger);
+			if (pfs != nullptr)
+			{
+				
+				return gcnew XbimCompound(pfs, logger);
+			}
 			throw gcnew Exception(String::Format("IIfcTessellatedFaceSet of Type {0} is not implemented", faceSet->GetType()->Name));
 		}
 

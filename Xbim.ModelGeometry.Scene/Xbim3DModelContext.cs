@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Xbim.Common;
+using Xbim.Common.Exceptions;
 using Xbim.Common.Geometry;
 using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc4.Interfaces;
@@ -1321,15 +1322,15 @@ namespace Xbim.ModelGeometry.Scene
                 var isVoidedProductShape = contextHelper.VoidedShapeIds.Contains(shapeId);
 
 
-                    // Console.WriteLine(shape.GetType().Name);
-                    XbimShapeGeometry shapeGeom = null;
+                // Console.WriteLine(shape.GetType().Name);
+                XbimShapeGeometry shapeGeom = null;
                 IXbimGeometryObject geomModel = null;
                 if (!isFeatureElementShape && !isVoidedProductShape && xbimTessellator.CanMesh(shape)) // if we can mesh the shape directly just do it
-                    {
+                {
                     shapeGeom = xbimTessellator.Mesh(shape);
                 }
                 else //we need to create a geometry object
-                    {
+                {
 
                     try
                     {
@@ -1338,6 +1339,17 @@ namespace Xbim.ModelGeometry.Scene
                         else
                             geomModel = Engine.Create(shape, _logger);
                     }
+
+                    catch (XbimGeometryFaceSetTooLargeException fse)
+                    {
+                        int faceSetEntityLabel = (int)fse.Data["LargeFaceSetLabel"];
+                        string faceSetEntityType = (string)fse.Data["LargeFaceSetType"];
+                        _logger.LogWarning("Large Face Set #{0} {1} detected and handled as Mesh", faceSetEntityLabel, faceSetEntityType);
+                        
+                        //just mesh the big shape as we have no idea what we shoudl have               
+                        shapeGeom = xbimTessellator.Mesh((IIfcRepresentationItem)Model.Instances[faceSetEntityLabel]);
+                    }
+
                     catch (TimeoutException)
                     {
                         LogError(shape, "Failed to create shape geometry: operation timed out after {0} ms", BooleanTimeOutMilliSeconds);
@@ -1357,8 +1369,8 @@ namespace Xbim.ModelGeometry.Scene
                                 solidSet.Add(geomSet);
                                 contextHelper.CachedGeometries.TryAdd(shapeId, solidSet);
                             }
-                                //we need for boolean operations later, add the polyhedron if the face is planar
-                                else contextHelper.CachedGeometries.TryAdd(shapeId, geomModel);
+                            //we need for boolean operations later, add the polyhedron if the face is planar
+                            else contextHelper.CachedGeometries.TryAdd(shapeId, geomModel);
                         }
                         else if (isVoidedProductShape)
                             contextHelper.CachedGeometries.TryAdd(shapeId, geomModel);
@@ -1381,12 +1393,12 @@ namespace Xbim.ModelGeometry.Scene
                     contextHelper.ShapeLookup.TryAdd(shapeGeom.IfcShapeLabel, reference);
                     if (contextHelper.CachedGeometries.ContainsKey(shapeGeom.IfcShapeLabel))
                     {
-                            //keep a record of the IFC label and database record mapping
-                            contextHelper.GeometryShapeLookup.TryAdd(shapeGeom.ShapeLabel, shapeGeom.IfcShapeLabel);
+                        //keep a record of the IFC label and database record mapping
+                        contextHelper.GeometryShapeLookup.TryAdd(shapeGeom.ShapeLabel, shapeGeom.IfcShapeLabel);
                     }
 
-                        //   shapeGeometries.Add(shapeGeom);
-                    }
+                    //   shapeGeometries.Add(shapeGeom);
+                }
                 if (geomModel != null && geomModel.IsValid && !isFeatureElementShape && !isVoidedProductShape)
                 {
                     geomModel.Dispose();

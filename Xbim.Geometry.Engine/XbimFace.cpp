@@ -546,8 +546,8 @@ namespace Xbim
 					XbimGeometryCreator::LogInfo(logger, bound, "Polyloop bound is not a polygon and has been ignored");
 					continue; //skip non-polygonal faces
 				}
-				List<IIfcCartesianPoint^>^ polygon = Enumerable::ToList(polyloop->Polygon);
-				int originalCount = polygon->Count;
+				//List<IIfcCartesianPoint^>^ polygon = Enumerable::ToList(polyloop->Polygon);
+				int originalCount = polyloop->Polygon->Count;
 
 				if (originalCount < 3)
 				{
@@ -559,7 +559,7 @@ namespace Xbim
 				BRepBuilderAPI_MakeWire wireMaker;
 				for (int i = 0; i < originalCount; i++)
 				{
-					pointSeq.Append(XbimConvert::GetPoint3d(polygon[i]));
+					pointSeq.Append(XbimConvert::GetPoint3d(polyloop->Polygon[i]));
 				}
 
 				XbimFace::RemoveDuplicatePoints(pointSeq, true, tolerance);

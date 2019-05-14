@@ -39,9 +39,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 var pfs = model.Instances.OfType<IIfcPolygonalFaceSet>().FirstOrDefault();
                 Assert.IsTrue(pfs != null, "No IIfcPolygonalFaceSet found");
-                var faceModel = geomEngine.CreateSurfaceModel(pfs, logger);
-
-               // HelperFunctions.IsValidSolid(faceModel);
+                var faceModel = geomEngine.CreateSurfaceModel(pfs, logger).OfType<IXbimShell>().FirstOrDefault();
+                Assert.IsNotNull(faceModel);
+                Assert.AreEqual(11, faceModel.Faces.Count);
 
             }
         }

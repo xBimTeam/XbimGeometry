@@ -30,7 +30,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="1.4.0" />
     <PackageReference Include="MSTest.TestFramework" Version="1.4.0" />
-    <PackageReference Include="Xbim.IO.MemoryModel" Version="5.0.250-develop" />
+    <PackageReference Include="Xbim.IO.MemoryModel" Version="5.0.254-develop" />
   </ItemGroup>
 
   <ItemGroup>
@@ -78,6 +78,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="TestFiles\FailingBooleanBrepWithZeroVolumeTest.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestFiles\large_surface_model_mesh_with_boolean_op.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="TestFiles\Primitives\faulty_closed_shell.ifc">
