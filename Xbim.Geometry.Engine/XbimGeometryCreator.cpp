@@ -1041,34 +1041,36 @@ namespace Xbim
 			XbimSolidSet^ solids = gcnew XbimSolidSet();
 			
 			gp_Vec normal;
-			List<XbimCurve2D^>^ UCurves = gcnew List<XbimCurve2D^>();
-			List<XbimCurve2D^>^ VCurves = gcnew List<XbimCurve2D^>();
-			List<XbimCurve2D^>^ WCurves = gcnew List<XbimCurve2D^>();
+			List<Tuple<Nullable<IfcLabel>, XbimCurve2D^>^>^ UCurves = gcnew List<Tuple<Nullable<IfcLabel>, XbimCurve2D^>^>();
+			List<Tuple<Nullable<IfcLabel>, XbimCurve2D^>^>^ VCurves = gcnew List<Tuple<Nullable<IfcLabel>, XbimCurve2D^>^>();
+			List<Tuple<Nullable<IfcLabel>, XbimCurve2D^>^>^ WCurves = gcnew List<Tuple<Nullable<IfcLabel>, XbimCurve2D^>^>();
 			List<XbimPoint3D>^ intersections = gcnew List<XbimPoint3D>();
 
 			for each (IIfcGridAxis^ axis in grid->UAxes)
 			{
 				XbimCurve2D^ c = gcnew XbimCurve2D(axis->AxisCurve, logger);
-				
-				UCurves->Add(c);					
+				Tuple<Nullable<IfcLabel>, XbimCurve2D^>^ curveWithTag = Tuple::Create<Nullable<IfcLabel>, XbimCurve2D^>(axis->AxisTag, c);
+				UCurves->Add(curveWithTag);
 			}			
 			for each (IIfcGridAxis^ axis in grid->VAxes)
 			{				
 				XbimCurve2D^ c = gcnew XbimCurve2D(axis->AxisCurve, logger);
-				VCurves->Add(c);
-				for each (XbimCurve2D^ u in UCurves)
-					intersections->AddRange(u->Intersections(c, precision,logger));	
+				Tuple<Nullable<IfcLabel>, XbimCurve2D^>^ curveWithTag = Tuple::Create<Nullable<IfcLabel>, XbimCurve2D^>(axis->AxisTag, c);
+				VCurves->Add(curveWithTag);
+				for each (Tuple<Nullable<IfcLabel>, XbimCurve2D^>^ u in UCurves)
+					intersections->AddRange(u->Item2->Intersections(c, precision,logger));	
 				
 			}
 			
 			for each (IIfcGridAxis^ axis in grid->WAxes)
 			{
 				XbimCurve2D^ c = gcnew XbimCurve2D(axis->AxisCurve, logger);
-				WCurves->Add(c);
-				for each (XbimCurve2D^ u in UCurves)
-					intersections->AddRange(u->Intersections(c, precision, logger));
-				for each (XbimCurve2D^ v in VCurves)
-					intersections->AddRange(v->Intersections(c, precision, logger));
+				Tuple<Nullable<IfcLabel>, XbimCurve2D^>^ curveWithTag = Tuple::Create<Nullable<IfcLabel>, XbimCurve2D^>(axis->AxisTag, c);
+				WCurves->Add(curveWithTag);
+				for each (Tuple<Nullable<IfcLabel>, XbimCurve2D^>^ u in UCurves)
+					intersections->AddRange(u->Item2->Intersections(c, precision, logger));
+				for each (Tuple<Nullable<IfcLabel>, XbimCurve2D^>^ v in VCurves)
+					intersections->AddRange(v->Item2->Intersections(c, precision, logger));
 			}
 
 			XbimRect3D bb = XbimRect3D::Empty;
@@ -1089,9 +1091,10 @@ namespace Xbim
 			gp_Lin2d right(gp_Pnt2d(bb.X+bb.SizeX, bb.Y), gp_Dir2d(0, 1));
 			
 			bool failedGridLines = false;
-			IEnumerable<XbimCurve2D^>^ curves = Enumerable::Concat(Enumerable::Concat(UCurves, VCurves), WCurves);			
-			for each (XbimCurve2D^ curve in curves)
+			IEnumerable<Tuple<Nullable<IfcLabel>, XbimCurve2D^>^>^ curves = Enumerable::Concat(Enumerable::Concat(UCurves, VCurves), WCurves);
+			for each (Tuple<Nullable<IfcLabel>, XbimCurve2D^>^ curveWithTag in curves)
 			{
+				XbimCurve2D^ curve = curveWithTag->Item2;
 			    Handle(Geom2d_Curve) hcurve = curve;
 				IntAna2d_AnaIntersection its;
 				if (hcurve->IsKind(STANDARD_TYPE(Geom2d_Line))) //trim the infinite lines
@@ -1180,12 +1183,14 @@ namespace Xbim
 				{
 					failedGridLines = true;
 					String^ err = gcnew String(ex.what());
-					LogWarning(logger, grid, "One or more grid lines has failed to convert successfully. " + err);
+					String^ axisTag = curveWithTag->Item1.HasValue ? curveWithTag->Item1.ToString() : gcnew String("Unknown");
+					LogWarning(logger, grid, "Grid line ("+ axisTag +") caused exception. " + err);
 					return solids;
 				}
 				catch (...)
 				{
-					LogWarning(logger, grid, "One or more grid lines has failed to convert successfully. ");
+					String^ axisTag = curveWithTag->Item1.HasValue ? curveWithTag->Item1.ToString() : gcnew String("Unknown");
+					LogWarning(logger, grid, "Grid line ("+ axisTag + ") caused internal exception. ");
 					return solids;
 				}
 					
