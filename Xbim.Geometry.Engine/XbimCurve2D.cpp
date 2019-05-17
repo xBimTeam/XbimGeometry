@@ -1,6 +1,7 @@
 #include "XbimCurve2D.h"
 #include "XbimCurve.h"
 #include "XbimConvert.h"
+#include "XbimFace.h"
 #include "XbimGeometryCreator.h"
 #include <gp_Pnt2d.hxx>
 #include <gp_Ax2.hxx>
@@ -16,6 +17,9 @@
 #include <BndLib_Add2dCurve.hxx>
 #include <Geom2dAdaptor_Curve.hxx>
 #include <Bnd_Box2d.hxx>
+#include <Geom2dConvert_CompCurveToBSplineCurve.hxx>
+#include <ShapeConstruct_ProjectCurveOnSurface.hxx>
+
 using namespace System::Linq;
 namespace Xbim
 {
@@ -150,7 +154,180 @@ namespace Xbim
 			else if (dynamic_cast<IIfcRationalBSplineCurveWithKnots^>(curve)) Init((IIfcRationalBSplineCurveWithKnots^)curve, logger);
 			else if (dynamic_cast<IIfcBSplineCurveWithKnots^>(curve)) Init((IIfcBSplineCurveWithKnots^)curve, logger);
 			else if (dynamic_cast<IIfcOffsetCurve2D^>(curve)) Init((IIfcOffsetCurve2D^)curve, logger);
+			else if (dynamic_cast<IIfcIndexedPolyCurve^>(curve)) Init((IIfcIndexedPolyCurve^)curve, logger);
+			else if (dynamic_cast<IIfcPcurve^>(curve)) Init((IIfcPcurve^)curve, logger);
 			else throw gcnew Exception(String::Format("Unsupported Curve Type {0}", curve->GetType()->Name));
+		}
+
+		void XbimCurve2D::Init(IIfcPcurve^ curve, ILogger^ logger)
+		{
+			XbimFace^ face = gcnew XbimFace(curve->BasisSurface, logger);
+
+			if (face->IsValid)
+			{
+				ShapeConstruct_ProjectCurveOnSurface projector;
+				projector.Init(face->GetSurface(), curve->Model->ModelFactors->Precision);
+				XbimCurve^ baseCurve = gcnew XbimCurve(curve->ReferenceCurve, logger);
+				Standard_Real first = baseCurve->FirstParameter;
+				Standard_Real last = baseCurve->LastParameter;
+				Handle(Geom2d_Curve) c2d;
+				Handle(Geom_Curve) cBase = baseCurve;
+				if (projector.Perform(cBase, first, last, c2d))
+				{
+					pCurve2D = new Handle(Geom2d_Curve);
+					*pCurve2D = c2d;
+				}
+			}
+		}
+		void XbimCurve2D::Init(IIfcIndexedPolyCurve ^ polyCurve, ILogger ^ logger)
+		{
+			double tolerance = polyCurve->Model->ModelFactors->Precision;
+
+			IItemSet<IItemSet<Ifc4::MeasureResource::IfcLengthMeasure>^>^ coordList;
+			
+			IIfcCartesianPointList2D^ points2D = dynamic_cast<IIfcCartesianPointList2D^>(polyCurve->Points);
+			int dim;
+		    if (points2D != nullptr)
+			{
+				coordList = points2D->CoordList;
+				dim = 2;
+			}
+			else
+			{
+				XbimGeometryCreator::LogError(logger, polyCurve, "Unsupported type of 2d Coordinate List");
+				return;
+			}
+
+			//get a index of all the points
+			int pointCount = coordList->Count;
+			TColgp_Array1OfPnt2d poles(1, pointCount);
+			int i = 1;
+			for each (IItemSet<Ifc4::MeasureResource::IfcLengthMeasure>^ coll in coordList)
+			{
+				IEnumerator<Ifc4::MeasureResource::IfcLengthMeasure>^ enumer = coll->GetEnumerator();
+				enumer->MoveNext();
+				gp_Pnt2d p;
+				p.SetX((double)enumer->Current);
+				enumer->MoveNext();
+				p.SetY((double)enumer->Current);			
+				poles.SetValue(i, p);
+				i++;
+			}
+
+			if (Enumerable::Any(polyCurve->Segments))
+			{
+				Geom2dConvert_CompCurveToBSplineCurve converter;
+				for each (IIfcSegmentIndexSelect^ segment in  polyCurve->Segments)
+				{
+					Ifc4::GeometryResource::IfcArcIndex^ arcIndex = dynamic_cast<Ifc4::GeometryResource::IfcArcIndex^>(segment);
+					Ifc4::GeometryResource::IfcLineIndex^ lineIndex = dynamic_cast<Ifc4::GeometryResource::IfcLineIndex^>(segment);
+					if (arcIndex != nullptr)
+					{
+
+						List<Ifc4::MeasureResource::IfcPositiveInteger>^ indices = (List<Ifc4::MeasureResource::IfcPositiveInteger>^)arcIndex->Value;
+						if (indices->Count != 3)
+						{
+							XbimGeometryCreator::LogError(logger, segment, "There should be three indices in an arc segment");
+							return;
+						}
+						gp_Pnt2d start = poles.Value((int)indices[0]);
+						gp_Pnt2d mid = poles.Value((int)indices[1]);
+						gp_Pnt2d end = poles.Value((int)indices[2]);
+						GCE2d_MakeCircle circleMaker(start, mid, end);
+						if (circleMaker.IsDone()) //it is a valid arc
+						{
+							const Handle(Geom2d_Circle)& curve = circleMaker.Value();
+							double u1, u2;
+							GeomLib_Tool::Parameter(curve, start, tolerance, u1);
+							GeomLib_Tool::Parameter(curve, end, tolerance, u2);
+							Handle(Geom2d_TrimmedCurve) trimmed = new Geom2d_TrimmedCurve(curve, u1, u2);
+							if (!converter.Add(trimmed, tolerance))
+							{
+								XbimGeometryCreator::LogError(logger, segment, "Could not add arc segment to IfcIndexedPolyCurve");
+								return;
+							}
+						}
+						else //most likley the three points are in a line it should be treated as a polyline segment according the the docs
+						{
+							GCE2d_MakeLine lineMaker(start, end);
+							if (lineMaker.IsDone()) //it is a valid line
+							{
+								const Handle(Geom2d_Line)& line = lineMaker.Value();
+								double u1, u2;
+								GeomLib_Tool::Parameter(line, start, tolerance, u1);
+								GeomLib_Tool::Parameter(line, end, tolerance, u2);
+								Handle(Geom2d_TrimmedCurve) trimmed = new Geom2d_TrimmedCurve(line, u1, u2);
+								if (!converter.Add(trimmed, tolerance))
+								{
+									XbimGeometryCreator::LogError(logger, segment, "Could not add arc segment as polyline to IfcIndexedPolyCurve");
+									return;
+								}
+							}
+							else
+							{
+								//most probably the start and end are the same point
+								XbimGeometryCreator::LogWarning(logger, segment, "Could not create arc segment as a polyline to IfcIndexedPolyCurve");
+							}
+						}
+					}
+					else if (lineIndex != nullptr)
+					{
+						List<Ifc4::MeasureResource::IfcPositiveInteger>^ indices = (List<Ifc4::MeasureResource::IfcPositiveInteger>^)lineIndex->Value;
+						if (indices->Count < 2)
+						{
+							XbimGeometryCreator::LogError(logger, segment, "There should be at least two indices in an line index segment");
+							return;
+						}
+						int linePointCount = indices->Count;
+						TColgp_Array1OfPnt2d linePoles(1, linePointCount);
+						TColStd_Array1OfReal lineKnots(1, linePointCount);
+						TColStd_Array1OfInteger lineMults(1, linePointCount);
+
+						for (Standard_Integer p = 1; p <= linePointCount; p++)
+						{
+							linePoles.SetValue(p, poles.Value((int)indices[p - 1]));
+							lineKnots.SetValue(p, Standard_Real(p - 1));
+							lineMults.SetValue(p, 1);
+						}
+						lineMults.SetValue(1, 2);
+						lineMults.SetValue(linePointCount, 2);
+
+						Handle(Geom2d_BSplineCurve) spline = new Geom2d_BSplineCurve(linePoles, lineKnots, lineMults, 1);
+
+						if (!converter.Add(spline, tolerance))
+						{
+							XbimGeometryCreator::LogError(logger, segment, "Could not add line index segment as polyline to IfcIndexedPolyCurve");
+							return;
+						}
+					}
+					else
+					{
+						//most probably the start and end are the same point
+						XbimGeometryCreator::LogWarning(logger, segment, "Could not create line index segment as a polyline to IfcIndexedPolyCurve");
+					}
+				}
+				pCurve2D = new Handle(Geom2d_Curve);
+				*pCurve2D = converter.BSplineCurve();
+			}
+			else
+			{
+				// To be compliant with:
+				// "In the case that the list of Segments is not provided, all points in the IfcCartesianPointList are connected by straight line segments in the order they appear in the IfcCartesianPointList."
+				// http://www.buildingsmart-tech.org/ifc/IFC4/Add1/html/schema/ifcgeometryresource/lexical/ifcindexedpolycurve.htm
+				TColStd_Array1OfReal knots(1, pointCount);
+				TColStd_Array1OfInteger mults(1, pointCount);
+
+				for (Standard_Integer p = 1; p <= pointCount; p++)
+				{
+					knots.SetValue(p, Standard_Real(p - 1));
+					mults.SetValue(p, 1);
+				}
+				mults.SetValue(1, 2);
+				mults.SetValue(pointCount, 2);
+				pCurve2D = new Handle(Geom2d_Curve);
+				*pCurve2D = new Geom2d_BSplineCurve(poles, knots, mults, 1);
+			}
+
 		}
 
 		void XbimCurve2D::Init(IIfcOffsetCurve2D^ offset, ILogger^ logger)

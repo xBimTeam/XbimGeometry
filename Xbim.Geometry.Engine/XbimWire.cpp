@@ -222,7 +222,7 @@ namespace Xbim
 					return;
 				}
 				pWire = new TopoDS_Wire();
-				if (!loop->IsClosed) //we need to close it if we have more thn one edge
+				if (profile->ProfileType==IfcProfileTypeEnum::AREA && !loop->IsClosed) //we need to close it if we need an area
 				{
 					// todo: this code is not quite robust, it did not manage to close fairly simple polylines.
 					//

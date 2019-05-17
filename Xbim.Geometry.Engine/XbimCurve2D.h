@@ -23,10 +23,12 @@ namespace Xbim
 			void Init(IIfcCircle^ curve, ILogger^ logger);
 			void Init(IIfcEllipse^ curve, ILogger^ logger);
 			void Init(IIfcLine^ curve, ILogger^ logger);
+			void Init(IIfcIndexedPolyCurve ^ curve, ILogger ^);
 			void Init(IIfcTrimmedCurve^ curve, ILogger^ logger);
 			void Init(IIfcRationalBSplineCurveWithKnots^ curve, ILogger^ logger);
 			void Init(IIfcBSplineCurveWithKnots^ curve, ILogger^ logger);
 			void Init(IIfcOffsetCurve2D^ offset, ILogger^ logger);
+			void Init(IIfcPcurve^ curve, ILogger^ logger);
 		public:
 			XbimCurve2D(const Handle(Geom2d_Curve)& curve2d);
 			XbimCurve2D(const Handle(Geom2d_Curve)& curve2d, double p1, double p2);

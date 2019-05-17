@@ -208,6 +208,12 @@ namespace Xbim
 					if (objectLocation != nullptr) comp->Move(objectLocation);
 					return comp;
 				}
+				else if (dynamic_cast<IIfcPolygonalFaceSet^>(geomRep))
+				{
+					XbimCompound^ comp = (XbimCompound^)CreateSurfaceModel((IIfcPolygonalFaceSet^)geomRep, logger);
+					if (objectLocation != nullptr) comp->Move(objectLocation);
+					return comp;
+				}
 				else if (dynamic_cast<IIfcSectionedSpine^>(geomRep))
 				{
 					XbimSolid^ solid = (XbimSolid^)CreateSolid((IIfcSectionedSpine^)geomRep, logger);

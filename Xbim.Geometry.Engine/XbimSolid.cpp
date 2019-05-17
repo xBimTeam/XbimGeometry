@@ -1350,28 +1350,7 @@ namespace Xbim
 			pipeMaker1.Build();
 			if (pipeMaker1.IsDone())
 			{
-				TopAbs_ShapeEnum st = pipeMaker1.Shape().ShapeType();
-				/*if (closedSweep && st == TopAbs_ShapeEnum::TopAbs_SHELL)
-				{
-					BRep_Builder bs;
-					TopoDS_Solid solid;
-					bs.MakeSolid(solid);
-					TopoDS_Shell sh = TopoDS::Shell(pipeMaker1.Shape());
-					bs.Add(solid, sh);
-					BRepClass3d_SolidClassifier SC(solid);
-					SC.PerformInfinitePoint(Precision::Confusion());
-					if (SC.State() == TopAbs_IN) {
-						bs.MakeSolid(solid);
-						sh.Reverse();
-						bs.Add(solid, sh);
-					}
-					pSolid = new TopoDS_Solid();
-					*pSolid = solid;
-					pSolid->Closed(Standard_True);
-					ShapeFix_ShapeTolerance tolFixer;
-					tolFixer.LimitTolerance(*pSolid, repItem->Model->ModelFactors->Precision);
-					return;
-				}*/
+				
 				if (!pipeMaker1.MakeSolid()) //we cannot make a solid or it is already a solid
 				{
 					XbimGeometryCreator::LogWarning(logger, repItem, "Could not construct IfcSweptDiskSolidPolygonal");
