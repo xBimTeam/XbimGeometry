@@ -808,8 +808,13 @@ namespace Xbim
 							double fiveMilli = 5 * cCurve->Model->ModelFactors->OneMilliMeter; //we are going to accept that a gap of 5mm is not a gap
 							if (actualGap > fiveMilli)
 							{
-								XbimGeometryCreator::LogError(logger, seg, "Failed to join composite curve segment. It has been ignored");
-								return;
+#ifdef _DEBUG
+								XbimWire^ currentWire = gcnew XbimWire(converter.Wire()); 
+								XbimEdge^ currentEdge = gcnew XbimEdge(BRepBuilderAPI_MakeEdge(curve));
+#endif // _DEBUG
+
+								XbimGeometryCreator::LogWarning(logger, seg, "Unconnected composite curve segment. Curve is incomplete");
+								continue;
 							}
 							actualTolerance = actualGap + tolerance;
 
@@ -1227,12 +1232,13 @@ namespace Xbim
 			int numIntervals = cc.NbIntervals(continuity);
 			TColStd_Array1OfReal res(1, numIntervals + 1);
 			cc.Intervals(res, GeomAbs_C0);
-			List<XbimPoint3D>^ intervals = gcnew List<XbimPoint3D>(numIntervals);
+			List<XbimPoint3D>^ intervals = gcnew List<XbimPoint3D>(numIntervals+1);
 			for (Standard_Integer i = 1; i <= numIntervals; i++)
 			{
 				gp_Pnt p = cc.Value(res.Value(i));
 				intervals->Add(XbimPoint3D(p.X(), p.Y(), p.Z()));
 			}
+			intervals->Add(this->End); //add the last point in
 			/*if (!IsClosed)
 			{
 				gp_Pnt l = cc.Value(cc.LastParameter());

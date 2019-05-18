@@ -253,6 +253,18 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         }
 
         [TestMethod]
+        public void can_handle_discontinuous_composite_curve()
+        {
+            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\discontinuous_composite_curve.ifc"))
+            {
+                var cc = model.Instances.OfType<IIfcCompositeCurve>().FirstOrDefault();
+                Assert.IsNotNull(cc);
+                var wire = geomEngine.CreateWire(cc);
+                Assert.IsNotNull(wire);
+            }
+        }
+
+        [TestMethod]
         public void AdvancedBrepTest()
         {
             using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\BasinAdvancedBrep.ifc"))
@@ -574,7 +586,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.IsTrue(curve.IsValid);
                 
                 Assert.IsTrue(curve.IsPlanar);
-                Assert.IsTrue(curve.Points.Count()==16);
+                Assert.IsTrue(curve.Points.Count()==17);
             }
         }
 
