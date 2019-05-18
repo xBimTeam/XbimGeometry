@@ -1288,22 +1288,8 @@ namespace Xbim
 			
 			//Build the directrix
 			IModelFactors^ mf = repItem->Model->ModelFactors;
-			//the directrix must be an IfcPolyline or IfcIndexedPolyCurve
-			IIfcPolyline^ pline = dynamic_cast<IIfcPolyline^>(repItem->Directrix);
-			IIfcIndexedPolyCurve^ pCurve = dynamic_cast<IIfcIndexedPolyCurve^>(repItem->Directrix);
-			IIfcCompositeCurve^ cCurve = dynamic_cast<IIfcCompositeCurve^>(repItem->Directrix); //allowing composite curves despite the schema documentation
-			if (pline == nullptr && pCurve == nullptr && cCurve == nullptr)
-			{
-				XbimGeometryCreator::LogError(logger, repItem, "The directrix of the sweep must be an IfcPolyline or IfcIndexedPolyCurve.");
-				return;
-			}
-			XbimWire^ sweep;
-			if (pline != nullptr)
-				sweep = gcnew XbimWire(pline, logger);
-			else if (cCurve != nullptr)
-				sweep = gcnew XbimWire(cCurve, logger);
-			else //it must be an IfcIndexedPolyCurve
-				sweep = gcnew XbimWire(pCurve, logger);
+			
+			XbimWire^ sweep = gcnew XbimWire(repItem->Directrix, logger);
 			if (!sweep->IsValid) return;
 			
 			if (dynamic_cast<IIfcLine^>(repItem->Directrix)) //params are different
@@ -1336,18 +1322,42 @@ namespace Xbim
 
 			//make the outer wire
 			XbimPoint3D s = sweep->Start;
-			gp_Ax2 axCircle(gp_Pnt(s.X, s.Y, s.Z), gp_Dir(0., 0., 1.));
+			gp_Pnt startPnt(s.X, s.Y, s.Z);
+
+			TopoDS_Edge edge;
+			Standard_Real uoe;
+			BRepAdaptor_CompCurve cc(sweep);
+			cc.Edge(0, edge, uoe);
+			Standard_Real lp, fp;
+			Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, fp, lp);
+			gp_Pnt p1;
+			gp_Vec tangent;
+			curve->D1(0, p1, tangent);
+			
+			gp_Ax2 axCircle(startPnt, tangent);
 			gp_Circ outer(axCircle, repItem->Radius);
 			Handle(Geom_Circle) hOuter = GC_MakeCircle(outer);
 			TopoDS_Edge outerEdge = BRepBuilderAPI_MakeEdge(hOuter);
-			const TopoDS_Wire & outerWire = BRepBuilderAPI_MakeWire(outerEdge);
-			bool closedSweep = outerWire.Closed();
+			
+			TopoDS_Wire outerWire = BRepBuilderAPI_MakeWire(outerEdge);
+	
+			
+			
 			
 			BRepOffsetAPI_MakePipeShell pipeMaker1(sweep);
 			pipeMaker1.Add(outerWire, Standard_False, Standard_True);
 			pipeMaker1.SetTransitionMode(BRepBuilderAPI_Transformed);
+			try
+			{
+				pipeMaker1.Build();
+			}
+			catch (...) //if transformed mode fails try 
+			{
+				XbimGeometryCreator::LogError(logger, repItem, "Could not construct IfcSweptDiskSolid");
+				return;
+			}
 			
-			pipeMaker1.Build();
+
 			if (pipeMaker1.IsDone())
 			{
 				
@@ -1359,7 +1369,7 @@ namespace Xbim
 
 				TopoDS_Solid pipe = TopoDS::Solid(pipeMaker1.Shape());
 
-				if (!closedSweep && repItem->InnerRadius.HasValue && repItem->InnerRadius.Value > 0 && repItem->InnerRadius.Value < repItem->Radius)
+				if (!sweep->IsClosed && repItem->InnerRadius.HasValue && repItem->InnerRadius.Value > 0 && repItem->InnerRadius.Value < repItem->Radius)
 				{
 					bool isClosed = pipeMaker1.FirstShape().ShapeType() == TopAbs_WIRE; //if the first is stil a wire the shape is closed, it should be a face to make a valid solid that is open
 
