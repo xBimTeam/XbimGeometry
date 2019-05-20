@@ -163,8 +163,10 @@ namespace Xbim
 			property bool IsReversed {bool get() { return IsValid && pWire->Orientation() == TopAbs_REVERSED; }; }
 
 			XbimWire^ Trim(XbimVertex^ first, XbimVertex^ last, double tolerance, ILogger^ logger);
-
-
+			virtual property gp_Pnt StartPoint {gp_Pnt get(); }
+			virtual property gp_Pnt EndPoint {gp_Pnt get(); }
+			virtual property  TopoDS_Vertex StartVertex { TopoDS_Vertex get(); }
+			virtual property  TopoDS_Vertex EndVertex { TopoDS_Vertex get(); }
 
 			//Returns the start parameter of each segment/interval of the wire
 			virtual property List<double>^ IntervalParameters {List<double>^ get(); }

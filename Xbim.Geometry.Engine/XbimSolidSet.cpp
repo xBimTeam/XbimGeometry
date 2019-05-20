@@ -491,17 +491,21 @@ namespace Xbim
 				aBOP.SetRunParallel(false);
 				//aBOP.SetFuzzyValue(fuzzyTol);
 			
+				TopoDS_Shape aR;
 				try
 				{
 					aBOP.PerformWithFiller(aPF);
+					aR = aBOP.Shape();
 				}
 				catch (...)
 				{
 					failed = true;
 				}
 				
-				const TopoDS_Shape& aR = aBOP.Shape();
-				if (failed || aBOP.HasErrors() || aR.IsNull()) {
+				bool bopErr = aBOP.HasErrors();
+				
+				if (failed || bopErr || aR.IsNull()) {
+
 					boolParams->Success = false;
 					return;
 				}

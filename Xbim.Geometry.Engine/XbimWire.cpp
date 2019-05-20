@@ -222,7 +222,7 @@ namespace Xbim
 					return;
 				}
 				pWire = new TopoDS_Wire();
-				if (profile->ProfileType==IfcProfileTypeEnum::AREA && !loop->IsClosed) //we need to close it if we need an area
+				if (profile->ProfileType == IfcProfileTypeEnum::AREA && !loop->IsClosed) //we need to close it if we need an area
 				{
 					// todo: this code is not quite robust, it did not manage to close fairly simple polylines.
 					//
@@ -349,12 +349,40 @@ namespace Xbim
 			}
 		}
 
+		///We need to create a composite curve segment that is a wire representation of a bounded curve
 
-		void XbimWire::Init(IIfcCompositeCurveSegment^ compCurveSeg, ILogger^ logger)
+		void XbimWire::Init(IIfcCompositeCurveSegment^ seg, ILogger^ logger)
 		{
 
-			Init(compCurveSeg->ParentCurve, logger);
-			if (IsValid && !compCurveSeg->SameSense) this->Reverse();
+			IIfcTrimmedCurve^ tc = dynamic_cast<IIfcTrimmedCurve^>(seg->ParentCurve);
+			XbimWire^ segWire = gcnew XbimWire(seg->ParentCurve, logger);
+			if (segWire->IsValid)
+			{
+				if (tc != nullptr)
+				{					
+						if (!seg->SameSense)
+						{
+							if (tc->SenseAgreement)
+							{
+								segWire->Reverse();
+							}
+						}
+						else
+						{
+							if (!tc->SenseAgreement)
+							{
+								segWire->Reverse();
+							}
+						}				
+				}
+				else
+				{
+					if (!seg->SameSense && segWire->IsValid)
+						segWire->Reverse();
+				}
+				pWire = new TopoDS_Wire();
+				*pWire = segWire;
+			}
 		}
 		///Special case to allow polylines to be create as compound edges not as a single bpline
 		// In this case the pline may or ma not be closed it may or may not lie on a surface, it may be self intersecting
@@ -387,12 +415,6 @@ namespace Xbim
 			{
 				XbimGeometryCreator::LogWarning(logger, pline, "Polyline with less than 2 points is an empty line. It has been ignored");
 				return;
-			}
-			//get the basic properties
-			TColgp_Array1OfPnt pointArray(1, pointSeq.Length());
-			for (int i = 1; i <= pointSeq.Length(); i++)
-			{
-				pointArray.SetValue(i, pointSeq.Value(i));
 			}
 
 			BRepBuilderAPI_MakePolygon polyMaker;
@@ -760,40 +782,13 @@ namespace Xbim
 					XbimGeometryCreator::LogError(logger, seg, "Composite curve contains a segment whih is not a bounded curve. It has been ignored");
 					return;
 				}
-				XbimCurve^ curve = gcnew XbimCurve(seg->ParentCurve, logger);
-				if (dynamic_cast<IIfcTrimmedCurve^>(seg->ParentCurve)) //we have to treat sense agreement differently
-				{
-					IIfcTrimmedCurve^ tc = ((IIfcTrimmedCurve^)seg->ParentCurve);
-					if (curve->IsValid)
-					{
-						if (!seg->SameSense)
-						{
-							if (tc->SenseAgreement)
-							{
-								curve->Reverse();
-							}
-						}
-						else
-						{
-							if (!tc->SenseAgreement)
-							{
-								curve->Reverse();
-							}
-						}
-					}
-
-				}
-				else
-				{
-					if (!seg->SameSense && curve->IsValid)
-						curve->Reverse();
-				}
+				XbimWire^ segWire = gcnew XbimWire(seg, logger);
 
 				if (lastSeg && seg->Transition == IfcTransitionCode::DISCONTINUOUS) isContinuous = false;
-				if (curve->IsValid)
+				if (segWire->IsValid)
 				{
-					gp_Pnt nextVertex = curve->StartPoint();
-					startPnt = curve->Start;
+					gp_Pnt nextVertex = segWire->StartPoint;
+					startPnt = segWire->Start;
 					if (firstPass)
 					{
 						startVertex = nextVertex;
@@ -809,10 +804,9 @@ namespace Xbim
 							if (actualGap > fiveMilli)
 							{
 #ifdef _DEBUG
-								XbimWire^ currentWire = gcnew XbimWire(converter.Wire()); 
-								XbimEdge^ currentEdge = gcnew XbimEdge(BRepBuilderAPI_MakeEdge(curve));
-#endif // _DEBUG
+								XbimWire^ currentWire = gcnew XbimWire(converter.Wire());
 
+#endif // _DEBUG
 								XbimGeometryCreator::LogWarning(logger, seg, "Unconnected composite curve segment. Curve is incomplete");
 								continue;
 							}
@@ -826,9 +820,9 @@ namespace Xbim
 					try
 					{
 						//set the tolerance of the vertex
-						BRepBuilderAPI_MakeEdge edgeMaker(curve);
-						fTol.LimitTolerance(edgeMaker.Vertex1(), actualTolerance);
-						converter.Add(edgeMaker.Edge());
+
+						fTol.LimitTolerance(segWire->StartVertex, actualTolerance);
+						converter.Add(segWire);
 						ok = converter.IsDone();
 					}
 					catch (const std::exception&)
@@ -840,7 +834,7 @@ namespace Xbim
 						XbimGeometryCreator::LogError(logger, seg, "Failed to join composite curve segment. It has been ignored");
 						return;
 					}
-					lastVertex = curve->EndPoint();
+					lastVertex = segWire->EndPoint;
 
 				}
 				else
@@ -1153,6 +1147,23 @@ namespace Xbim
 			GC::KeepAlive(this);
 			return XbimPoint3D(p.X(), p.Y(), p.Z());
 		}
+		gp_Pnt XbimWire::StartPoint::get()
+		{
+			if (!IsValid) return gp_Pnt();
+			BRepAdaptor_CompCurve cc(*pWire, Standard_True);
+			gp_Pnt p = cc.Value(cc.FirstParameter());
+			return p;
+		}
+
+		TopoDS_Vertex XbimWire::StartVertex::get()
+		{
+			if (!IsValid) return TopoDS_Vertex();
+			BRepAdaptor_CompCurve cc(*pWire, Standard_True);
+			TopoDS_Vertex v1, v2;
+			TopExp::Vertices(*pWire, v1, v2);
+			return v1;
+		}
+
 
 		XbimPoint3D XbimWire::End::get()
 		{
@@ -1161,6 +1172,23 @@ namespace Xbim
 			gp_Pnt p = cc.Value(cc.LastParameter());
 			return XbimPoint3D(p.X(), p.Y(), p.Z());
 		}
+		gp_Pnt XbimWire::EndPoint::get()
+		{
+			if (!IsValid) return gp_Pnt();
+			BRepAdaptor_CompCurve cc(*pWire, Standard_True);
+			gp_Pnt p = cc.Value(cc.LastParameter());
+			return p;
+		}
+
+		TopoDS_Vertex XbimWire::EndVertex::get()
+		{
+			if (!IsValid) return TopoDS_Vertex();
+			BRepAdaptor_CompCurve cc(*pWire, Standard_True);
+			TopoDS_Vertex v1, v2;
+			TopExp::Vertices(*pWire, v1, v2);
+			return v2;
+		}
+
 		double XbimWire::Area::get()
 		{
 			return ShapeAnalysis::ContourArea(this);
@@ -1232,7 +1260,7 @@ namespace Xbim
 			int numIntervals = cc.NbIntervals(continuity);
 			TColStd_Array1OfReal res(1, numIntervals + 1);
 			cc.Intervals(res, GeomAbs_C0);
-			List<XbimPoint3D>^ intervals = gcnew List<XbimPoint3D>(numIntervals+1);
+			List<XbimPoint3D>^ intervals = gcnew List<XbimPoint3D>(numIntervals + 1);
 			for (Standard_Integer i = 1; i <= numIntervals; i++)
 			{
 				gp_Pnt p = cc.Value(res.Value(i));
@@ -2264,10 +2292,10 @@ namespace Xbim
 					Standard_Real fp = res.Value(i);
 					Standard_Real lp = res.Value(i + 1);
 					//if the first point is > lp then we do not want this edge at all
-					if ( first > lp) 
+					if (first > lp)
 						continue;
 					//if the last point is < fp then we do not want it
-					if (last < fp) 
+					if (last < fp)
 						continue;
 
 					//we are going to need an edge
@@ -2276,7 +2304,7 @@ namespace Xbim
 					cc.Edge(fp, edge, uoe);
 					Standard_Real lEdge, fEdge; // the parameter range is returned in f and l
 					Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, fEdge, lEdge);
-					
+
 					// if first is < lp and last < lp then we need to do both trims on this edge
 					if (first > fp && first < lp && last < lp)
 					{
@@ -2296,7 +2324,7 @@ namespace Xbim
 						gp_Pnt pFirst = cc.Value(first);
 						double uOnEdgeFirst;
 						double maxTolerance = BRep_Tool::MaxTolerance(edge, TopAbs_VERTEX);
-						GeomLib_Tool::Parameter(curve, pFirst, maxTolerance, uOnEdgeFirst);		
+						GeomLib_Tool::Parameter(curve, pFirst, maxTolerance, uOnEdgeFirst);
 						Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(curve, uOnEdgeFirst, lEdge);
 						wm.Add(BRepBuilderAPI_MakeEdge(trimmed));
 						first = -1; //it has been done
@@ -2305,10 +2333,10 @@ namespace Xbim
 					else if (last < lp)
 					{
 						//get the point required
-						
+
 						gp_Pnt pLast = cc.Value(last);
 						double uOnEdgeLast;
-						double maxTolerance = BRep_Tool::MaxTolerance(edge,TopAbs_VERTEX);
+						double maxTolerance = BRep_Tool::MaxTolerance(edge, TopAbs_VERTEX);
 						GeomLib_Tool::Parameter(curve, pLast, maxTolerance, uOnEdgeLast);
 						Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(curve, fEdge, uOnEdgeLast);
 						wm.Add(BRepBuilderAPI_MakeEdge(trimmed));

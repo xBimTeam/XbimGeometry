@@ -39,6 +39,21 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         }
 
         [TestMethod]
+        public void boolean_cut_failure()
+        {
+            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(boolean_cut_failure),true)) //model is in radians
+            {
+                Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
+                var ss = geomEngine.CreateSolidSet(er.Entity, logger);
+                foreach (var s in ss)
+                {
+                    HelperFunctions.IsValidSolid(s);
+                }
+                
+            }
+        }
+
+        [TestMethod]
         public void SubtractionResultsInClosedWindow()
         {
             using (var model = MemoryModel.OpenRead(@".\TestFiles\SubtractionResultsInClosedWindow.ifc"))
