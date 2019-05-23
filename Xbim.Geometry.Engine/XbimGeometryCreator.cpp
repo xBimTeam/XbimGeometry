@@ -1193,12 +1193,12 @@ namespace Xbim
 					failedGridLines = true;
 					String^ err = gcnew String(ex.what());
 					LogWarning(logger, grid, "Grid axis #"+ curveWithTag->Item1.ToString() +" caused exception. " + err);
-					return solids;
+					failedGridLines = true;
 				}
 				catch (...)
 				{
 					LogWarning(logger, grid, "Grid axis "+ curveWithTag->Item1.ToString() + " caused internal exception. ");
-					return solids;
+					failedGridLines = true;
 				}
 					
 			}
