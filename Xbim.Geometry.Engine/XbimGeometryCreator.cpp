@@ -1150,13 +1150,18 @@ namespace Xbim
 				XbimEdge^ edge = gcnew XbimEdge(xCurve, logger);
 				TopoDS_Wire spine = BRepBuilderAPI_MakeWire(edge);
 				//XbimWire^ w = gcnew XbimWire(spine);
+				BRepBuilderAPI_PipeError pipeMakerStatus;
 				try
 				{
-					BRep_Builder b;
 					BRepOffsetAPI_MakePipeShell pipeMaker(spine);
+					pipeMaker.SetTolerance(precision, precision, 1.0e-2);
+
+					BRep_Builder b;					
 					TopoDS_Face face = profile; // hang on to the face
 					pipeMaker.Add(rect, Standard_True, Standard_True);
 					pipeMaker.Build();
+					pipeMakerStatus = pipeMaker.GetStatus();
+
 					if (pipeMaker.IsDone() && pipeMaker.MakeSolid() && pipeMaker.Shape().ShapeType()==TopAbs_ShapeEnum::TopAbs_SOLID) //a solid is OK
 					{						
 						solids->Add(gcnew XbimSolid(TopoDS::Solid(pipeMaker.Shape())));
@@ -1191,13 +1196,12 @@ namespace Xbim
 				catch (const std::exception& ex)
 				{
 					failedGridLines = true;
-					String^ err = gcnew String(ex.what());
-					LogWarning(logger, grid, "Grid axis #"+ curveWithTag->Item1.ToString() +" caused exception. " + err);
+					LogWarning(logger, grid, "Grid axis #{0} caused exception. Status={1}, {2}", curveWithTag->Item1.ToString(), gcnew Int32(pipeMakerStatus), gcnew String(ex.what()));
 					failedGridLines = true;
 				}
 				catch (...)
 				{
-					LogWarning(logger, grid, "Grid axis "+ curveWithTag->Item1.ToString() + " caused internal exception. ");
+					LogWarning(logger, grid, "Grid axis #{0} caused internal exception. Status={1}", curveWithTag->Item1.ToString(), gcnew Int32(pipeMakerStatus));
 					failedGridLines = true;
 				}
 					
