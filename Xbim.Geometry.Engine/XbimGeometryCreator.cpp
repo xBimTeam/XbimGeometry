@@ -1042,7 +1042,7 @@ namespace Xbim
 
 		IXbimSolidSet^ XbimGeometryCreator::CreateGrid(IIfcGrid^ grid, ILogger^ logger)
 		{
-			double mm = grid->Model->ModelFactors->OneMilliMeter;
+			double mm = Math::Max(grid->Model->ModelFactors->OneMilliMeter, grid->Model->ModelFactors->Precision * 10);
 			double precision = grid->Model->ModelFactors->Precision;
 			XbimSolidSet^ solids = gcnew XbimSolidSet();
 			
@@ -1131,10 +1131,12 @@ namespace Xbim
 				gp_Vec2d curveMainDir;
 				
 				hcurve->D1(hcurve->FirstParameter(), origin, curveMainDir); //get the start point and line direction
-				gp_Vec2d curveTangent = curveMainDir.GetNormal();
-				//gp_Dir v1 = gp::DX2d().IsParallel(normal, Precision::Angular()) ? gp::DY() : gp::DX();
+				gp_Vec2d curveTangent = curveMainDir.GetNormal().Normalized();
+				curveMainDir.Normalize();
+				XbimPoint3D t(curveMainDir.X(), curveMainDir.Y(), 0);
+				XbimPoint3D m(curveTangent.X(), curveTangent.Y(), 0);
 				gp_Ax2 centre(gp_Pnt(origin.X(), origin.Y(), 0), gp_Vec(curveMainDir.X(), curveMainDir.Y(), 0), gp_Vec(curveTangent.X(), curveTangent.Y(), 0)); //create the axis for the rectangular face
-				XbimWire^ xrect = gcnew XbimWire(75 * mm, mm / 10, precision, true);
+				XbimWire^ xrect = gcnew XbimWire(75 * mm, mm , precision, true);
 				TopoDS_Wire rect = xrect;
 				gp_Trsf trsf;
 				trsf.SetTransformation(centre, gp_Ax3());
@@ -1143,17 +1145,18 @@ namespace Xbim
 				XbimCurve2D^ xCurve = gcnew XbimCurve2D(hcurve);
 				XbimEdge^ edge = gcnew XbimEdge(xCurve, logger);
 				TopoDS_Wire spine = BRepBuilderAPI_MakeWire(edge);
-				//XbimWire^ w = gcnew XbimWire(spine);
+				
 				try
 				{
 					BRep_Builder b;
 					BRepOffsetAPI_MakePipeShell pipeMaker(spine);
 					TopoDS_Face face = profile; // hang on to the face
-					pipeMaker.Add(rect, Standard_True, Standard_True);
+					pipeMaker.Add(rect, Standard_False, Standard_True);
 					pipeMaker.Build();
 					if (pipeMaker.IsDone() && pipeMaker.MakeSolid() && pipeMaker.Shape().ShapeType()==TopAbs_ShapeEnum::TopAbs_SOLID) //a solid is OK
-					{						
-						solids->Add(gcnew XbimSolid(TopoDS::Solid(pipeMaker.Shape())));
+					{	
+						XbimSolid^ s = gcnew XbimSolid(TopoDS::Solid(pipeMaker.Shape()));
+						solids->Add(s);
 					}
 					else if (pipeMaker.IsDone()) //fix up from a shell
 					{		
