@@ -7,7 +7,7 @@
 #include <Bnd_Array1OfBox.hxx>
 #include <TopTools_ListOfShape.hxx>
 #include <BOPAlgo_Operation.hxx>
-
+#include <BRepAlgoAPI_BooleanOperation.hxx>
 using namespace System::Collections::Generic;
 using namespace Xbim::Common::Geometry;
 namespace Xbim
@@ -15,10 +15,10 @@ namespace Xbim
 	namespace Geometry
 	{
 
-
+		static bool PerformBoolean(BRepAlgoAPI_BooleanOperation& boolOp);
 		ref class XbimGeometryObjectSet : XbimSetObject, IXbimGeometryObjectSet
 		{
-
+			
 		private:
 			List<IXbimGeometryObject^>^ geometryObjects;
 			static XbimGeometryObjectSet^ empty = gcnew XbimGeometryObjectSet();

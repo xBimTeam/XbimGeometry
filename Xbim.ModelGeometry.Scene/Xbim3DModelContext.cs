@@ -907,18 +907,29 @@ namespace Xbim.ModelGeometry.Scene
 
                     if (behaviour.HasFlag(MeshingBehaviourResult.PerformSubtractions) && openingAndProjectionOp.CutGeometries.Any())
                     {
-                        var nextGeom = elementGeom.Cut(openingAndProjectionOp.CutGeometries, precision);
-                        if (nextGeom.IsValid)
+                        IXbimGeometryObjectSet nextGeom;
+                        try
                         {
-                            if (nextGeom.First != null && nextGeom.First.IsValid)
-                                elementGeom = nextGeom;
+                            nextGeom = CutWithTimeOut(elementGeom, openingAndProjectionOp.CutGeometries, precision, BooleanTimeOutMilliSeconds);
+                            if (nextGeom.IsValid)
+                            {
+                                if (nextGeom.First != null && nextGeom.First.IsValid)
+                                    elementGeom = nextGeom;
+                                else
+                                    LogWarning(_model.Instances[elementLabel],
+                                        "Cutting openings has resulted in an empty shape");
+                            }
                             else
                                 LogWarning(_model.Instances[elementLabel],
-                                    "Cutting openings has resulted in an empty shape");
+                                    "Cutting openings has failed. Openings have been ignored");
                         }
-                        else
-                            LogWarning(_model.Instances[elementLabel],
-                                "Cutting openings has failed. Openings have been ignored");
+                        catch (TimeoutException)
+                        {
+                            LogWarning(_model.Instances[elementLabel], "Cutting openings has failed. Openings have been ignored. Operation timed out after {0} seconds", BooleanTimeOutMilliSeconds / 1000);
+
+                        }
+
+
                     }
 
                     // now add to the DB     
@@ -984,6 +995,8 @@ namespace Xbim.ModelGeometry.Scene
             if (progDelegate != null) progDelegate(101, "WriteFeatureElements, (" + localTally + " written)");
             return processed.Keys;
         }
+
+
 
         private void WriteProductShapes(XbimCreateContextHelper contextHelper, IEnumerable<IIfcProduct> products, IGeometryStoreInitialiser txn)
         {
@@ -1345,14 +1358,14 @@ namespace Xbim.ModelGeometry.Scene
                         int faceSetEntityLabel = (int)fse.Data["LargeFaceSetLabel"];
                         string faceSetEntityType = (string)fse.Data["LargeFaceSetType"];
                         _logger.LogWarning("Large Face Set #{0} {1} detected and handled as Mesh", faceSetEntityLabel, faceSetEntityType);
-                        
+
                         //just mesh the big shape as we have no idea what we shoudl have               
                         shapeGeom = xbimTessellator.Mesh((IIfcRepresentationItem)Model.Instances[faceSetEntityLabel]);
                     }
 
                     catch (TimeoutException)
                     {
-                        LogError(shape, "Failed to create shape geometry: operation timed out after {0} ms", BooleanTimeOutMilliSeconds);
+                        LogError(shape, "Failed to create shape geometry: operation timed out after {0} seconds", BooleanTimeOutMilliSeconds / 1000);
                         return;
                     }
 
@@ -1426,20 +1439,62 @@ namespace Xbim.ModelGeometry.Scene
 
         private IXbimGeometryObject CallWithTimeout(IIfcGeometricRepresentationItem shape, ILogger logger, int booleanTimeOutMilliSeconds)
         {
-            //Thread threadToKill = null;
+            Thread threadToKill = null;
             Func<IXbimGeometryObject> wrappedAction = () =>
             {
-                return Engine.Create(shape, logger);
+                threadToKill = Thread.CurrentThread;
+                try
+                {
+                    return Engine.Create(shape, logger);
+                }
+                catch (ThreadAbortException)
+                {
+                    Thread.ResetAbort();// cancel hard aborting, lets to finish it nicely.
+                    return null;
+                }
+
             };
 
             IAsyncResult result = wrappedAction.BeginInvoke(null, null);
             if (result.AsyncWaitHandle.WaitOne(booleanTimeOutMilliSeconds))
             {
-                return wrappedAction.EndInvoke(result);
+                var res = wrappedAction.EndInvoke(result);
+                result.AsyncWaitHandle.Close();
+                return res;
             }
             else
             {
-                // threadToKill.Abort();
+                threadToKill?.Abort();
+                throw new TimeoutException();
+            }
+        }
+        private IXbimGeometryObjectSet CutWithTimeOut(IXbimGeometryObjectSet elementGeom, IXbimSolidSet cutGeometries, double precision, int booleanTimeOutMilliSeconds)
+        {
+            Thread threadToKill = null;
+            Func<IXbimGeometryObjectSet> wrappedAction = () =>
+            {
+                try
+                {
+                    threadToKill = Thread.CurrentThread;
+                    return elementGeom.Cut(cutGeometries, precision);
+                }
+                catch (ThreadAbortException)
+                {
+                    Thread.ResetAbort();// cancel hard aborting, lets to finish it nicely.
+                    return null;
+                }
+            };
+
+            IAsyncResult result = wrappedAction.BeginInvoke(null, null);
+            if (result.AsyncWaitHandle.WaitOne(booleanTimeOutMilliSeconds))
+            {
+                var res = wrappedAction.EndInvoke(result);
+                result.AsyncWaitHandle.Close();
+                return res;
+            }
+            else
+            {
+                threadToKill?.Abort();
                 throw new TimeoutException();
             }
         }

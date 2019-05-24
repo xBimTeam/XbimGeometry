@@ -13,7 +13,8 @@ namespace Xbim
 	namespace Geometry
 	{
 		
-		
+		static bool DoBoolean(const TopoDS_Shape& body, const TopTools_ListOfShape& tools, BOPAlgo_Operation op, double tolerance, TopoDS_Shape& result);
+
 		private ref class VolumeComparer : IComparer<Tuple<double, XbimSolid^>^>
 		{
 		public:
@@ -53,7 +54,7 @@ namespace Xbim
 				solids = nullptr;
 			};
 		    IXbimSolidSet^ DoBoolean(IXbimSolidSet^ arguments, BOPAlgo_Operation operation, double tolerance, ILogger^ logger);
-			void DoBoolean(Object^ param);
+			
 		public:
 
 #pragma region destructors

@@ -627,7 +627,7 @@ namespace Xbim
 						if (ef.FixVertexTolerance(edge, aFace)) fixed = true;
 					}
 					if (fixed)
-						XbimGeometryCreator::LogInfo(logger, ifcFace, "Face bounds are slightly mis-aligned to a plane. It has been adjusted");
+						XbimGeometryCreator::LogDebug(logger, ifcFace, "Face bounds are slightly mis-aligned to a plane. It has been adjusted");
 					double maxTol = BRep_Tool::MaxTolerance(theWire, TopAbs_VERTEX);
 					Handle(ShapeAnalysis_Wire) wa = new ShapeAnalysis_Wire(theWire, aFace, maxTol);
 
@@ -717,7 +717,7 @@ namespace Xbim
 
 				}
 				if (fixed)
-					XbimGeometryCreator::LogInfo(logger, ifcFace, "Face bounds are slightly mis-aligned to a plane. It has been adjusted");
+					XbimGeometryCreator::LogDebug(logger, ifcFace, "Face bounds are slightly mis-aligned to a plane. It has been adjusted");
 
 				
 			}
@@ -1101,7 +1101,8 @@ namespace Xbim
 				//apply the position transformation
 				if (rectProfile->Position != nullptr)
 					pFace->Move(XbimConvert::ToLocation(rectProfile->Position));
-
+				ShapeFix_ShapeTolerance fTol;
+				fTol.LimitTolerance(*pFace, rectProfile->Model->ModelFactors->Precision);
 			}
 
 		}

@@ -69,6 +69,7 @@ namespace Xbim
 			static void LogDebug(ILogger^ logger, Object^ entity, String^ format, ... array<Object^>^ arg);
 
 			static double BooleanTimeOut;
+			
 			static bool IgnoreIfcSweptDiskSolidParams;
 			virtual XbimShapeGeometry^ CreateShapeGeometry(IXbimGeometryObject^ geometryObject, double precision, double deflection, double angle, XbimGeometryType storageType, ILogger^ logger);
 			virtual XbimShapeGeometry^ CreateShapeGeometry(IXbimGeometryObject^ geometryObject, double precision, double deflection, ILogger^ logger/*, double angle = 0.5, XbimGeometryType storageType = XbimGeometryType::Polyhedron*/)

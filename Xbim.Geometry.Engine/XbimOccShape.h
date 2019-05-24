@@ -38,7 +38,16 @@ namespace Xbim
 {
 	namespace Geometry
 	{
-		
+#pragma managed(push,off)
+		struct Error
+		{
+			explicit Error(std::string const& message) : message_(message) { }
+			char const* what() const throw() { return message_.c_str(); }
+
+		private:
+			std::string message_;
+		};
+#pragma managed(pop)
 
 		ref class XbimOccShape abstract : XbimGeometryObject
 		{

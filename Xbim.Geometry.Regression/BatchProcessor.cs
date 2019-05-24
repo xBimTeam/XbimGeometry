@@ -82,6 +82,7 @@ namespace XbimRegression
                         File.Delete(logFile);
                         result.Errors = 0;
                         result.Warnings = 0;
+                        result.Information = 0;
                     }
                     else
                     {
@@ -89,24 +90,25 @@ namespace XbimRegression
                         var tokens = txt.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                         result.Errors = tokens.Count(t => t == "\"Error\"");
                         result.Warnings = tokens.Count(t => t == "\"Warning\"");
+                        result.Information = Math.Max(0, tokens.Count(t => t == "\"Information\"") - 2); //we always get 2
                     }
-                    if (result!=null && !result.Failed)
+                    if (result != null && !result.Failed)
                     {
-                        Console.WriteLine($"Processed {file} : {result.Errors} errors, {result.Warnings} Warnings in {result.TotalTime}ms. {result.Entities} IFC Elements & {result.GeometryEntries} Geometry Nodes." );
+                        Console.WriteLine($"Processed {file} : {result.Errors} Errors, {result.Warnings} Warnings, {result.Information} Informational in {result.TotalTime}ms. {result.Entities} IFC Elements & {result.GeometryEntries} Geometry Nodes.");
                     }
                     else
                     {
                         Console.WriteLine("Processing failed for {0} after {1}ms.", file, result.TotalTime);
                     }
-                    result.FileName = file.Name;                 
+                    result.FileName = file.Name;
                     writer.WriteLine(result.ToCsv());
                     writer.Flush();
                 }
-               
+
                 writer.Close();
             }
             Console.WriteLine("Finished. Press Enter to continue...");
-           
+
             Console.ReadLine();
         }
 
@@ -119,7 +121,7 @@ namespace XbimRegression
                 var watch = new Stopwatch();
                 try
                 {
-                    
+
                     watch.Start();
                     using (var model = ParseModelFile(ifcFile, Params.Caching, logger))
                     {
@@ -176,7 +178,7 @@ namespace XbimRegression
                     result.Failed = true;
                     result.GeometryDuration = watch.ElapsedMilliseconds;
                 }
-               
+
                 return result;
             }
         }

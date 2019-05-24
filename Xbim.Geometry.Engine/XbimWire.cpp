@@ -393,7 +393,7 @@ namespace Xbim
 			double tolerance = pline->Model->ModelFactors->Precision;
 			if (originalCount < 2)
 			{
-				XbimGeometryCreator::LogWarning(logger, pline, "Invalid loop, it has less than two points. Wire discarded");
+				XbimGeometryCreator::LogWarning(logger, pline, "Polyline with less than 2 points is an empty line. It has been ignored");
 				return;
 			}
 
@@ -408,7 +408,7 @@ namespace Xbim
 
 			if (pointSeq.Length() != originalCount)
 			{
-				XbimGeometryCreator::LogInfo(logger, pline, "Polyline with duplicate points. It has been removed");
+				XbimGeometryCreator::LogDebug(logger, pline, "Polyline with duplicate points. Duplicate has been removed");
 			}
 
 			if (pointSeq.Length() < 2)

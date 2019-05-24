@@ -41,7 +41,13 @@
     <None Update="TestFiles\boolean_cut_failure.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="TestFiles\cut_planes_within_fuzzy_tolerance.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="TestFiles\Ifc4TestFiles\discontinuous_composite_curve.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestFiles\polygonally_bounded_half_space_clip.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="TestFiles\Solid_swept_disk_pipe.ifc">

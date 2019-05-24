@@ -169,7 +169,7 @@ namespace Xbim
 		XbimCompound::XbimCompound(IIfcConnectedFaceSet^ faceSet, ILogger^ logger)
 		{
 			_sewingTolerance = faceSet->Model->ModelFactors->Precision;
-			Init(faceSet, false, logger);
+			Init(faceSet, logger);
 		}
 
 		XbimCompound::XbimCompound(IIfcShellBasedSurfaceModel^ sbsm, ILogger^ logger)
@@ -290,9 +290,16 @@ namespace Xbim
 		XbimCompound::XbimCompound(IIfcPolygonalFaceSet^ faceSet, ILogger^ logger)
 		{
 			_sewingTolerance = faceSet->Model->ModelFactors->Precision;
-			IList<IIfcFace^>^ faceList = gcnew XbimPolygonalFaceSet(faceSet);
-			bool isClosed = faceSet->Closed.HasValue ? (bool)faceSet->Closed.Value : false;
-			Init(faceList, isClosed, faceSet, logger);
+			IList<IIfcFace^>^ faceList = gcnew XbimPolygonalFaceSet(faceSet);			
+			//if the face set has more than max faces just abandon and try and mesh
+			if (faceList->Count > MaxFacesToSew)
+			{
+				XbimGeometryFaceSetTooLargeException^ except = gcnew XbimGeometryFaceSetTooLargeException();
+				except->Data->Add("LargeFaceSetLabel", faceSet->EntityLabel);
+				except->Data->Add("LargeFaceSetType", faceSet->GetType()->Name);
+				throw except;
+			}
+			Init(faceList, faceSet, logger);
 		}
 
 #pragma region Initialisers
@@ -363,14 +370,22 @@ namespace Xbim
 			}
 		}
 
-		void XbimCompound::Init(IIfcConnectedFaceSet^ faceSet, bool close, ILogger^ logger)
+		void XbimCompound::Init(IIfcConnectedFaceSet^ faceSet,  ILogger^ logger)
 		{
 			if (!Enumerable::Any(faceSet->CfsFaces))
 			{
 				XbimGeometryCreator::LogWarning(logger, faceSet, "Empty face set");
 				return;
 			}
-			Init(faceSet->CfsFaces, close, faceSet, logger);
+			//if the face set has more than max faces just abandon and try and mesh
+			if (faceSet->CfsFaces->Count > MaxFacesToSew)
+			{
+				XbimGeometryFaceSetTooLargeException^ except = gcnew XbimGeometryFaceSetTooLargeException();
+				except->Data->Add("LargeFaceSetLabel", faceSet->EntityLabel);
+				except->Data->Add("LargeFaceSetType", faceSet->GetType()->Name);
+				throw except;
+			}
+			Init(faceSet->CfsFaces, faceSet, logger);
 
 		}
 
@@ -504,7 +519,7 @@ namespace Xbim
 
 		void XbimCompound::Init(IIfcClosedShell^ closedShell, ILogger^ logger)
 		{
-			Init((IIfcConnectedFaceSet^)closedShell, true, logger);
+			Init((IIfcConnectedFaceSet^)closedShell, logger);
 			if (IsValid) //make it a closed solid if we can
 			{
 				BRepBuilderAPI_MakeSolid solidmaker;
@@ -565,7 +580,7 @@ namespace Xbim
 		}
 		void XbimCompound::Init(IIfcOpenShell^ openShell, ILogger^ logger)
 		{
-			Init((IIfcConnectedFaceSet^)openShell, false, logger);
+			Init((IIfcConnectedFaceSet^)openShell, logger);
 		}
 		bool XbimCompound::Sew()
 		{
@@ -933,17 +948,10 @@ namespace Xbim
 
 		
 
-		void XbimCompound::Init(IEnumerable<IIfcFace^>^ ifcFaces, bool /*close*/, IIfcRepresentationItem^ theItem, ILogger^ logger)
+		void XbimCompound::Init(IEnumerable<IIfcFace^>^ ifcFaces, IIfcRepresentationItem^ theItem, ILogger^ logger)
 		{
-			int maxFaces = theItem->Model->ModelFactors->SimplifyFaceCountThreshHold;
-			//if the face set has more than max faces just abandon and try and mesh
-			if (Enumerable::Count(ifcFaces) > maxFaces)
-			{
-				XbimGeometryFaceSetTooLargeException^ except =  gcnew XbimGeometryFaceSetTooLargeException();
-				except->Data->Add("LargeFaceSetLabel", theItem->EntityLabel);
-				except->Data->Add("LargeFaceSetType", theItem->GetType()->Name);
-				throw except;
-			}
+			
+			
 			_sewingTolerance = theItem->Model->ModelFactors->Precision;
 			BRep_Builder builder;
 			/*TopoDS_Shell shell;

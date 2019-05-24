@@ -38,6 +38,21 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             logger = null;
         }
 
+        /// <summary>
+        /// Checks that clipping planes that fall on a solids face do not remove that face if it is within the fuzzy tolerance (currently 6 * tolerance)
+        /// </summary>
+        [TestMethod]
+        public void cut_planes_within_fuzzy_tolerance()
+        {
+            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(cut_planes_within_fuzzy_tolerance), true)) //model is in radians
+            {
+                Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
+                var s = geomEngine.CreateSolidSet(er.Entity, logger).FirstOrDefault();
+                HelperFunctions.IsValidSolid(s);
+            }
+        }
+
+
         [TestMethod]
         public void boolean_cut_failure()
         {
@@ -194,6 +209,20 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
                 var solids = geomEngine.CreateSolidSet(er.Entity, logger);
+                HelperFunctions.IsValidSolid(solids.FirstOrDefault());
+
+            }
+
+        }
+
+        [TestMethod]
+        public void polygonally_bounded_half_space_clip()
+        {
+            using (var er = new EntityRepository<IIfcBooleanClippingResult>(nameof(polygonally_bounded_half_space_clip)))
+            {
+                Assert.IsTrue(er.Entity != null, "No IIfcBooleanClippingResult found");
+
+               var solids = geomEngine.CreateSolidSet(er.Entity, logger);
                 HelperFunctions.IsValidSolid(solids.FirstOrDefault());
 
             }

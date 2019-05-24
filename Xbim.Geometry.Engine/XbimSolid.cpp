@@ -81,6 +81,9 @@
 #include <Geom_SurfaceOfLinearExtrusion.hxx>
 #include <GeomLib_IsPlanarSurface.hxx>
 #include <ShapeUpgrade_UnifySameDomain.hxx>
+#include <BRepGProp_Face.hxx>
+#include <BRepAlgo_Section.hxx>
+
 using namespace System::Linq;
 using namespace Xbim::Common;
 
@@ -180,7 +183,7 @@ namespace Xbim
 			Init(repItem, logger);
 		}
 
-		
+
 		//Handled by IIfcSweptDiskSolid
 		/*XbimSolid::XbimSolid(IIfcSweptDiskSolidPolygonal^ repItem, ILogger^ logger)
 		{
@@ -209,14 +212,14 @@ namespace Xbim
 			Init(repItem, overrideProfileDef, logger);
 		}
 
-		XbimSolid::XbimSolid(IIfcHalfSpaceSolid^ repItem, double maxExtrusion, XbimPoint3D centroid, ILogger^ logger)
-		{
-			Init(repItem, maxExtrusion, centroid, logger);
-		}
-
 		XbimSolid::XbimSolid(IIfcHalfSpaceSolid^ repItem, ILogger^ logger)
 		{
-			Init(repItem, repItem->Model->ModelFactors->OneMetre * 100, XbimPoint3D(0, 0, 0), logger);
+			Init(repItem, logger);
+		}
+
+		XbimSolid::XbimSolid(IIfcPolygonalBoundedHalfSpace^ repItem, ILogger^ logger)
+		{
+			Init(repItem, logger);
 		}
 
 		XbimSolid::XbimSolid(IIfcBoxedHalfSpace^ repItem, ILogger^ logger)
@@ -243,15 +246,6 @@ namespace Xbim
 		{
 			Init(solid, logger);
 		}
-
-		XbimSolid::XbimSolid(IIfcPolygonalBoundedHalfSpace^ repItem, double maxExtrusion, ILogger^ logger)
-		{
-			Init(repItem, maxExtrusion, logger);
-		}
-
-
-
-
 
 
 
@@ -388,7 +382,7 @@ namespace Xbim
 				tolFixer.LimitTolerance(*pSolid, bRep->Model->ModelFactors->Precision);
 			}
 		}
-		
+
 
 		void XbimSolid::Init(IIfcSweptAreaSolid^ solid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger)
 		{
@@ -942,7 +936,7 @@ namespace Xbim
 						return;
 					}
 					TopoDS_Solid outerShell = TopoDS::Solid(pipeMaker1.Shape());
-					
+
 					for (int i = 0; i < crossSections[0]->InnerBounds->Count; i++) //assume all sections have same topology
 					{
 						//it is a hollow section so we need to build the inside
@@ -1034,7 +1028,7 @@ namespace Xbim
 									bs.Add(solid, shell);
 								}
 								solid.Closed(Standard_True);
-								outerShell = solid;								
+								outerShell = solid;
 							}
 						}
 						else
@@ -1043,7 +1037,7 @@ namespace Xbim
 						}
 
 					}
-					
+
 					pSolid = new TopoDS_Solid();
 					*pSolid = outerShell;
 					pSolid->Closed(Standard_True);
@@ -1162,36 +1156,31 @@ namespace Xbim
 			}
 		}
 
-		void XbimSolid::Init(IIfcHalfSpaceSolid^ hs, double maxExtrusion, XbimPoint3D centroid, ILogger^ logger)
+		void XbimSolid::Init(IIfcHalfSpaceSolid^ hs, ILogger^ logger)
 		{
 			if (dynamic_cast<IIfcPolygonalBoundedHalfSpace^>(hs))
-				Init((IIfcPolygonalBoundedHalfSpace^)hs, maxExtrusion, logger);
+				Init((IIfcPolygonalBoundedHalfSpace^)hs, logger);
 			else if (dynamic_cast<IIfcBoxedHalfSpace^>(hs))
 				Init((IIfcBoxedHalfSpace^)hs, logger);
 			else //it is a simple Half space
 			{
+
 				IIfcSurface^ surface = (IIfcSurface^)hs->BaseSurface;
-				IIfcPlane^ ifcPlane = dynamic_cast<IIfcPlane^>(surface);
-				if (ifcPlane == nullptr)
-				{
-					XbimGeometryCreator::LogWarning(logger, hs, "Non-planar half spaces are not supported it has been ignored");
-					return;
-				}
-				gp_Pln plane = XbimConvert::ToPlane(ifcPlane->Position);
-				Handle(Geom_Surface) hsPlane = new Geom_Plane(plane);
-				gp_Pnt centre(centroid.X, centroid.Y, centroid.Z);
-				GeomAPI_ProjectPointOnSurf projector(centre, hsPlane, hs->Model->ModelFactors->Precision);
-				gp_Pnt nearest = projector.NearestPoint();
-				double bounds = 2 * maxExtrusion;
-				double z = hs->AgreementFlag ? -bounds : 0;
-				XbimPoint3D corner(-maxExtrusion, -maxExtrusion, z);
-				XbimVector3D size(bounds, bounds, bounds);
-				XbimRect3D rect3D(corner, size);
-				Init(rect3D, hs->Model->ModelFactors->Precision, logger);
-				Move(ifcPlane->Position);
-				IIfcCartesianPoint^ cp = ifcPlane->Position->Location;
-				XbimVector3D vec = XbimPoint3D(nearest.X(), nearest.Y(), nearest.Z()) - XbimPoint3D(cp->X, cp->Y, cp->Z);
-				Translate(vec);
+				XbimFace^ face = gcnew XbimFace(surface, logger);
+
+				BRepGProp_Face prop(face);
+				gp_Pnt c;
+				gp_Vec normalDir;
+				double u1, u2, v1, v2;
+				prop.Bounds(u1, u2, v1, v2);
+				prop.Normal((u1 + u2) / 2.0, (v1 + v2) / 2.0, c, normalDir);
+				if (hs->AgreementFlag)
+					normalDir.Reverse();
+				gp_Pnt pointInMaterial = c.Translated(normalDir);
+				BRepPrimAPI_MakeHalfSpace hsMaker(face, pointInMaterial);
+				pSolid = new TopoDS_Solid();
+				*pSolid = hsMaker.Solid();
+
 				ShapeFix_ShapeTolerance tolFixer;
 				tolFixer.LimitTolerance(*pSolid, hs->Model->ModelFactors->Precision);
 			}
@@ -1226,72 +1215,82 @@ namespace Xbim
 			tolFixer.LimitTolerance(*pSolid, bhs->Model->ModelFactors->Precision);
 		}
 
-		void XbimSolid::Init(IIfcPolygonalBoundedHalfSpace^ pbhs, double extrusionMax, ILogger^ logger)
+		void XbimSolid::Init(IIfcPolygonalBoundedHalfSpace^ pbhs, ILogger^ logger)
 		{
 
+			//build the half space
 			IIfcSurface^ surface = (IIfcSurface^)pbhs->BaseSurface;
-			if (!dynamic_cast<IIfcPlane^>(surface))
-			{
-				XbimGeometryCreator::LogWarning(logger, pbhs, "Non-Planar half spaces are not supported. It has been ignored");
-				return;
-			}
-			IIfcPlane^ ifcPlane = (IIfcPlane^)surface;
-			gp_Ax3 ax3 = XbimConvert::ToAx3(ifcPlane->Position);
-			gp_Pln pln(ax3);
-			const gp_Pnt pnt = pln.Location().Translated(pbhs->AgreementFlag ? -pln.Axis().Direction() : pln.Axis().Direction());
-			TopoDS_Shape halfspace = BRepPrimAPI_MakeHalfSpace(BRepBuilderAPI_MakeFace(pln), pnt).Solid();
-
+			XbimFace^ face = gcnew XbimFace(surface, logger);
+			Handle(Geom_Surface) geomSurface = face->GetSurface();
+			//build the substraction body
+			TopLoc_Location location = XbimConvert::ToLocation(pbhs->Position);
 			XbimWire^ polyBoundary = gcnew XbimWire(pbhs->PolygonalBoundary, logger);
-
-			XbimFace^ polyFace;
 			if (!polyBoundary->IsValid)
 			{
-				XbimGeometryCreator::LogWarning(logger, pbhs, "Incorrectly defined PolygonalBoundary #{0}. The bound has been ignored", pbhs->PolygonalBoundary->EntityLabel);
-				pSolid = new TopoDS_Solid();
-				*pSolid = TopoDS::Solid(halfspace); //just take the half space
-				ShapeFix_ShapeTolerance tolFixer;
-				tolFixer.LimitTolerance(*pSolid, pbhs->Model->ModelFactors->Precision);
+				XbimGeometryCreator::LogWarning(logger, pbhs, "Polygonal boundary of half space is invalid or empty. It has been ignored");
 				return;
+			}
+			polyBoundary->Move(location);
+			
+			XbimVector3D normal = polyBoundary->Normal;
+			if (normal.IsInvalid()) //check we have a valid wire
+			{
+				XbimGeometryCreator::LogWarning(logger, pbhs, "Polygonal boundary of half space is not an area. It has been ignored");
+				return;
+			}
+			gp_Dir dir(pbhs->Position->P[2].X, pbhs->Position->P[2].Y, pbhs->Position->P[2].Z);
+
+
+			TopoDS_Shape substractionBody = BRepPrimAPI_MakePrism(polyBoundary, dir, true);
+			BRepAlgoAPI_Section sectioner(substractionBody, geomSurface);
+
+			if (sectioner.IsDone())
+			{
+				Handle(TopTools_HSequenceOfShape) edges = new TopTools_HSequenceOfShape();
+				Handle(TopTools_HSequenceOfShape) wires = new TopTools_HSequenceOfShape();
+				for (TopExp_Explorer expl(sectioner.Shape(), TopAbs_EDGE); expl.More(); expl.Next())
+					edges->Append(TopoDS::Edge(expl.Current()));
+
+				TopoDS_Compound open;
+				TopoDS_Compound closed;
+				BRep_Builder b;
+				b.MakeCompound(open);
+				b.MakeCompound(closed);
+
+				ShapeAnalysis_FreeBounds::ConnectEdgesToWires(edges, pbhs->Model->ModelFactors->Precision, false, wires);
+				ShapeAnalysis_FreeBounds::DispatchWires(wires, closed, open);
+				TopExp_Explorer exp(closed, TopAbs_WIRE);
+				if (!exp.More()) //this should not fail, we started with a valid wire
+				{
+					XbimGeometryCreator::LogWarning(logger, pbhs, "Polygonal boundary of half space is not a closed wire. It has been ignored");
+					return;
+				}
+				else
+				{
+					TopoDS_Wire w = TopoDS::Wire(exp.Current());
+					TopoDS_Shape polygonalHalfSpace = BRepPrimAPI_MakePrism(BRepBuilderAPI_MakeFace(face, w), dir, false);
+					pSolid = new TopoDS_Solid();
+					*pSolid = TopoDS::Solid(polygonalHalfSpace);
+					ShapeFix_ShapeTolerance tolFixer;
+					tolFixer.LimitTolerance(*pSolid, pbhs->Model->ModelFactors->Precision);
+				}
 			}
 			else
-				polyFace = gcnew XbimFace(polyBoundary, true, pbhs->Model->ModelFactors->Precision, pbhs->PolygonalBoundary->EntityLabel, logger);
-
-			if (!polyFace->IsValid)
 			{
-				XbimGeometryCreator::LogWarning(logger, pbhs, "Incorrectly defined Face with PolygonalBoundary #{0}. It has been ignored", pbhs->PolygonalBoundary->EntityLabel);
+				XbimGeometryCreator::LogWarning(logger, pbhs, "Polygonal boundary of half space could not be calculated. It has been ignored");
 				return;
 			}
-			TopoDS_Face occFace = polyFace; //take a reference
-			TopoDS_Shape boundedHalfSpace = BRepPrimAPI_MakePrism(occFace, gp_Vec(0, 0, extrusionMax * 4));
-			gp_Trsf trsf = XbimConvert::ToTransform(pbhs->Position);
-			gp_Trsf offset;
-			offset.SetTranslation(gp_Vec(0, 0, -(extrusionMax / 2)));
-			boundedHalfSpace.Move(trsf*offset);
-
-			TopoDS_Shape result = BRepAlgoAPI_Common(boundedHalfSpace, halfspace);
-
-			for (TopExp_Explorer explr(result, TopAbs_SOLID); explr.More();)
-			{
-				pSolid = new TopoDS_Solid();
-				*pSolid = TopoDS::Solid(explr.Current()); //just take the first solid
-				ShapeFix_ShapeTolerance tolFixer;
-				tolFixer.LimitTolerance(*pSolid, pbhs->Model->ModelFactors->Precision);
-				return;
-			}
-
-			XbimGeometryCreator::LogError(logger, pbhs, "Failed to create half space");
 		}
-
 
 		void XbimSolid::Init(IIfcSweptDiskSolid^ repItem, ILogger^ logger)
 		{
-			
+
 			//Build the directrix
 			IModelFactors^ mf = repItem->Model->ModelFactors;
-			
+
 			XbimWire^ sweep = gcnew XbimWire(repItem->Directrix, logger);
 			if (!sweep->IsValid) return;
-			
+
 			if (dynamic_cast<IIfcLine^>(repItem->Directrix)) //params are different
 			{
 				IIfcLine ^  line = (IIfcLine^)(repItem->Directrix);
@@ -1333,17 +1332,17 @@ namespace Xbim
 			gp_Pnt p1;
 			gp_Vec tangent;
 			curve->D1(0, p1, tangent);
-			
+
 			gp_Ax2 axCircle(startPnt, tangent);
 			gp_Circ outer(axCircle, repItem->Radius);
 			Handle(Geom_Circle) hOuter = GC_MakeCircle(outer);
 			TopoDS_Edge outerEdge = BRepBuilderAPI_MakeEdge(hOuter);
-			
+
 			TopoDS_Wire outerWire = BRepBuilderAPI_MakeWire(outerEdge);
-	
-			
-			
-			
+
+
+
+
 			BRepOffsetAPI_MakePipeShell pipeMaker1(sweep);
 			pipeMaker1.Add(outerWire, Standard_False, Standard_True);
 			pipeMaker1.SetTransitionMode(BRepBuilderAPI_Transformed);
@@ -1356,11 +1355,11 @@ namespace Xbim
 				XbimGeometryCreator::LogError(logger, repItem, "Could not construct IfcSweptDiskSolid");
 				return;
 			}
-			
+
 
 			if (pipeMaker1.IsDone())
 			{
-				
+
 				if (!pipeMaker1.MakeSolid()) //we cannot make a solid or it is already a solid
 				{
 					XbimGeometryCreator::LogWarning(logger, repItem, "Could not construct IfcSweptDiskSolidPolygonal");
