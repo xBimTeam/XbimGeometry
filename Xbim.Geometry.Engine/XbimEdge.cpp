@@ -124,8 +124,8 @@ namespace Xbim
 		{
 			Init(edge, logger);
 		}
-		
-		
+
+
 		XbimEdge::XbimEdge(XbimVertex^ start, XbimVertex^ midPoint, XbimVertex^ end)
 		{
 
@@ -868,28 +868,49 @@ namespace Xbim
 		IXbimVertex^ XbimEdge::EdgeStart::get()
 		{
 			if (!IsValid) return nullptr;
-			return gcnew XbimVertex(TopExp::FirstVertex(*pEdge, Standard_True));
+			TopoDS_Vertex sv = TopExp::FirstVertex(*pEdge, Standard_True);
+			if (!sv.IsNull())
+				return gcnew XbimVertex(sv);
+			else
+				return nullptr;
 		}
 
 		IXbimVertex^ XbimEdge::EdgeEnd::get()
 		{
 			if (!IsValid) return nullptr;
 			TopoDS_Edge edge = *pEdge;
-			return gcnew XbimVertex(TopExp::LastVertex(edge, Standard_True));
+			TopoDS_Vertex ev = TopExp::LastVertex(edge, Standard_True);
+			if (!ev.IsNull())
+				return gcnew XbimVertex(ev);
+			else
+				return nullptr;
 		}
 		XbimPoint3D XbimEdge::EdgeStartPoint::get()
 		{
 			if (!IsValid) return XbimPoint3D();
 			TopoDS_Edge edge = *pEdge;
-			gp_Pnt p = BRep_Tool::Pnt(TopExp::FirstVertex(*pEdge, Standard_True));
-			return XbimPoint3D(p.X(), p.Y(), p.Z());
+			TopoDS_Vertex sv = TopExp::FirstVertex(*pEdge, Standard_True);
+			if (!sv.IsNull())
+			{
+				gp_Pnt p = BRep_Tool::Pnt(sv);
+				return XbimPoint3D(p.X(), p.Y(), p.Z());
+			}
+			else
+				return XbimPoint3D();
+
 		}
 
 		XbimPoint3D XbimEdge::EdgeEndPoint::get()
 		{
 			if (!IsValid) return XbimPoint3D();
-			gp_Pnt p = BRep_Tool::Pnt(TopExp::LastVertex(*pEdge, Standard_True));
-			return XbimPoint3D(p.X(), p.Y(), p.Z());
+			TopoDS_Vertex ev = TopExp::LastVertex(*pEdge, Standard_True);
+			if (!ev.IsNull())
+			{
+				gp_Pnt p = BRep_Tool::Pnt(ev);
+				return XbimPoint3D(p.X(), p.Y(), p.Z());
+			}
+			else
+				return XbimPoint3D();
 		}
 
 

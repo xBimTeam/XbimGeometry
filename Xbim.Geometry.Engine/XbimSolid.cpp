@@ -1219,67 +1219,57 @@ namespace Xbim
 		{
 
 			//build the half space
-			IIfcSurface^ surface = (IIfcSurface^)pbhs->BaseSurface;
-			XbimFace^ face = gcnew XbimFace(surface, logger);
-			Handle(Geom_Surface) geomSurface = face->GetSurface();
+			IIfcPlane^ surface = dynamic_cast<IIfcPlane^>(pbhs->BaseSurface);
+			if (surface == nullptr)
+			{
+				XbimGeometryCreator::LogWarning(logger, pbhs, "Polygonal bounded of half space must have a planar surface. It has been ignored");
+				return;
+			}
+			//get the surface of the half space
+			gp_Ax3 ax3 = XbimConvert::ToAx3(surface->Position);
+			gp_Pln pln(ax3);
+			
 			//build the substraction body
-			TopLoc_Location location = XbimConvert::ToLocation(pbhs->Position);
+			gp_Dir dir(pbhs->Position->P[2].X, pbhs->Position->P[2].Y, pbhs->Position->P[2].Z);
 			XbimWire^ polyBoundary = gcnew XbimWire(pbhs->PolygonalBoundary, logger);
+
 			if (!polyBoundary->IsValid)
 			{
 				XbimGeometryCreator::LogWarning(logger, pbhs, "Polygonal boundary of half space is invalid or empty. It has been ignored");
 				return;
 			}
-			polyBoundary->Move(location);
-			
+
+			//just simple check to see if the wire is sensible
 			XbimVector3D normal = polyBoundary->Normal;
 			if (normal.IsInvalid()) //check we have a valid wire
 			{
 				XbimGeometryCreator::LogWarning(logger, pbhs, "Polygonal boundary of half space is not an area. It has been ignored");
 				return;
 			}
-			gp_Dir dir(pbhs->Position->P[2].X, pbhs->Position->P[2].Y, pbhs->Position->P[2].Z);
+			ShapeFix_ShapeTolerance tolFixer;
+			tolFixer.LimitTolerance(polyBoundary, pbhs->Model->ModelFactors->Precision);
+			// we have to use 1e9 as the max extrusion as the common boolean op times out on values greater than this, probably an extrema issue in booleans
+			TopoDS_Shape substractionBody = BRepPrimAPI_MakePrism(BRepBuilderAPI_MakeFace(polyBoundary), gp_Vec(0, 0, 1e9));
+			//find point inside the material
+			gp_Pnt pnt = pln.Location().Translated(pbhs->AgreementFlag ? -pln.Axis().Direction() : pln.Axis().Direction());
 
-
-			TopoDS_Shape substractionBody = BRepPrimAPI_MakePrism(polyBoundary, dir, true);
-			BRepAlgoAPI_Section sectioner(substractionBody, geomSurface);
-
-			if (sectioner.IsDone())
+			TopoDS_Shape halfspace = BRepPrimAPI_MakeHalfSpace(BRepBuilderAPI_MakeFace(pln), pnt).Solid();
+			gp_Trsf location = XbimConvert::ToTransform(pbhs->Position);
+			gp_Trsf shift;
+			shift.SetTranslation(gp_Vec(0, 0, -1e9/2));
+			substractionBody.Move(location*shift);
+			TopoDS_Shape bounded_halfspace = BRepAlgoAPI_Common(substractionBody, halfspace);			 
+			
+			TopTools_IndexedMapOfShape map;
+			TopExp::MapShapes(bounded_halfspace, TopAbs_SOLID, map);
+			if (map.Extent() != 1)
 			{
-				Handle(TopTools_HSequenceOfShape) edges = new TopTools_HSequenceOfShape();
-				Handle(TopTools_HSequenceOfShape) wires = new TopTools_HSequenceOfShape();
-				for (TopExp_Explorer expl(sectioner.Shape(), TopAbs_EDGE); expl.More(); expl.Next())
-					edges->Append(TopoDS::Edge(expl.Current()));
-
-				TopoDS_Compound open;
-				TopoDS_Compound closed;
-				BRep_Builder b;
-				b.MakeCompound(open);
-				b.MakeCompound(closed);
-
-				ShapeAnalysis_FreeBounds::ConnectEdgesToWires(edges, pbhs->Model->ModelFactors->Precision, false, wires);
-				ShapeAnalysis_FreeBounds::DispatchWires(wires, closed, open);
-				TopExp_Explorer exp(closed, TopAbs_WIRE);
-				if (!exp.More()) //this should not fail, we started with a valid wire
-				{
-					XbimGeometryCreator::LogWarning(logger, pbhs, "Polygonal boundary of half space is not a closed wire. It has been ignored");
-					return;
-				}
-				else
-				{
-					TopoDS_Wire w = TopoDS::Wire(exp.Current());
-					TopoDS_Shape polygonalHalfSpace = BRepPrimAPI_MakePrism(BRepBuilderAPI_MakeFace(face, w), dir, false);
-					pSolid = new TopoDS_Solid();
-					*pSolid = TopoDS::Solid(polygonalHalfSpace);
-					ShapeFix_ShapeTolerance tolFixer;
-					tolFixer.LimitTolerance(*pSolid, pbhs->Model->ModelFactors->Precision);
-				}
-			}
-			else
-			{
-				XbimGeometryCreator::LogWarning(logger, pbhs, "Polygonal boundary of half space could not be calculated. It has been ignored");
+				XbimGeometryCreator::LogWarning(logger, pbhs, "A single solid should be created for a Polygonal boundary of half space. It has been ignored");
 				return;
 			}
+			pSolid = new TopoDS_Solid();
+			*pSolid = TopoDS::Solid(map(1));
+			tolFixer.LimitTolerance(*pSolid, pbhs->Model->ModelFactors->Precision);
 		}
 
 		void XbimSolid::Init(IIfcSweptDiskSolid^ repItem, ILogger^ logger)
