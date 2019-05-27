@@ -1047,34 +1047,36 @@ namespace Xbim
 			XbimSolidSet^ solids = gcnew XbimSolidSet();
 			
 			gp_Vec normal;
-			List<XbimCurve2D^>^ UCurves = gcnew List<XbimCurve2D^>();
-			List<XbimCurve2D^>^ VCurves = gcnew List<XbimCurve2D^>();
-			List<XbimCurve2D^>^ WCurves = gcnew List<XbimCurve2D^>();
+			List<Tuple<int, XbimCurve2D^>^>^ UCurves = gcnew List<Tuple<int, XbimCurve2D^>^>();
+			List<Tuple<int, XbimCurve2D^>^>^ VCurves = gcnew List<Tuple<int, XbimCurve2D^>^>();
+			List<Tuple<int, XbimCurve2D^>^>^ WCurves = gcnew List<Tuple<int, XbimCurve2D^>^>();
 			List<XbimPoint3D>^ intersections = gcnew List<XbimPoint3D>();
 
 			for each (IIfcGridAxis^ axis in grid->UAxes)
 			{
 				XbimCurve2D^ c = gcnew XbimCurve2D(axis->AxisCurve, logger);
-				
-				UCurves->Add(c);					
+				Tuple<int, XbimCurve2D^>^ curveWithTag = Tuple::Create<int, XbimCurve2D^>(axis->EntityLabel, c);
+				UCurves->Add(curveWithTag);
 			}			
 			for each (IIfcGridAxis^ axis in grid->VAxes)
 			{				
 				XbimCurve2D^ c = gcnew XbimCurve2D(axis->AxisCurve, logger);
-				VCurves->Add(c);
-				for each (XbimCurve2D^ u in UCurves)
-					intersections->AddRange(u->Intersections(c, precision,logger));	
+				Tuple<int, XbimCurve2D^>^ curveWithTag = Tuple::Create<int, XbimCurve2D^>(axis->EntityLabel, c);
+				VCurves->Add(curveWithTag);
+				for each (Tuple<int, XbimCurve2D^>^ u in UCurves)
+					intersections->AddRange(u->Item2->Intersections(c, precision,logger));	
 				
 			}
 			
 			for each (IIfcGridAxis^ axis in grid->WAxes)
 			{
 				XbimCurve2D^ c = gcnew XbimCurve2D(axis->AxisCurve, logger);
-				WCurves->Add(c);
-				for each (XbimCurve2D^ u in UCurves)
-					intersections->AddRange(u->Intersections(c, precision, logger));
-				for each (XbimCurve2D^ v in VCurves)
-					intersections->AddRange(v->Intersections(c, precision, logger));
+				Tuple<int, XbimCurve2D^>^ curveWithTag = Tuple::Create<int, XbimCurve2D^>(axis->EntityLabel, c);
+				WCurves->Add(curveWithTag);
+				for each (Tuple<int, XbimCurve2D^>^ u in UCurves)
+					intersections->AddRange(u->Item2->Intersections(c, precision, logger));
+				for each (Tuple<int, XbimCurve2D^>^ v in VCurves)
+					intersections->AddRange(v->Item2->Intersections(c, precision, logger));
 			}
 
 			XbimRect3D bb = XbimRect3D::Empty;
@@ -1084,8 +1086,17 @@ namespace Xbim
 				if (bb.IsEmpty) bb = XbimRect3D(pt);
 				else bb.Union(pt);
 			}
-			//the box should have a Z of zero so inflate it a bit
-			bb = XbimRect3D::Inflate(bb, bb.SizeX*0.2, bb.SizeY*0.2, 0);
+			
+			if (bb.SizeX < precision || bb.SizeY < precision)
+			{
+				LogWarning(logger, grid, "Extent of grid is near zero. Found " 
+					+ intersections->Count + " axis intersections having " + (UCurves->Count + VCurves->Count + WCurves->Count) + " grid axis.");
+				XbimPoint3D c = bb.Centroid();
+				bb = XbimRect3D(c.X - 75 * mm, c.Y - 75 * mm, c.Z - 75 * mm, 150 * mm, 150 * mm, 150 * mm);
+			}
+			else
+				//the box should have a Z of zero so inflate it a bit
+				bb = XbimRect3D::Inflate(bb, bb.SizeX*0.2, bb.SizeY*0.2, 0);
 
 			//create a bounded planar 
 
@@ -1095,9 +1106,10 @@ namespace Xbim
 			gp_Lin2d right(gp_Pnt2d(bb.X+bb.SizeX, bb.Y), gp_Dir2d(0, 1));
 			
 			bool failedGridLines = false;
-			IEnumerable<XbimCurve2D^>^ curves = Enumerable::Concat(Enumerable::Concat(UCurves, VCurves), WCurves);			
-			for each (XbimCurve2D^ curve in curves)
+			IEnumerable<Tuple<int, XbimCurve2D^>^>^ curves = Enumerable::Concat(Enumerable::Concat(UCurves, VCurves), WCurves);
+			for each (Tuple<int, XbimCurve2D^>^ curveWithTag in curves)
 			{
+				XbimCurve2D^ curve = curveWithTag->Item2;
 			    Handle(Geom2d_Curve) hcurve = curve;
 				IntAna2d_AnaIntersection its;
 				if (hcurve->IsKind(STANDARD_TYPE(Geom2d_Line))) //trim the infinite lines
@@ -1144,13 +1156,18 @@ namespace Xbim
 				XbimEdge^ edge = gcnew XbimEdge(xCurve, logger);
 				TopoDS_Wire spine = BRepBuilderAPI_MakeWire(edge);
 				//XbimWire^ w = gcnew XbimWire(spine);
+				BRepBuilderAPI_PipeError pipeMakerStatus;
 				try
 				{
-					BRep_Builder b;
 					BRepOffsetAPI_MakePipeShell pipeMaker(spine);
+					pipeMaker.SetTolerance(precision, precision, 1.0e-2);
+
+					BRep_Builder b;					
 					TopoDS_Face face = profile; // hang on to the face
 					pipeMaker.Add(rect, Standard_True, Standard_True);
 					pipeMaker.Build();
+					pipeMakerStatus = pipeMaker.GetStatus();
+
 					if (pipeMaker.IsDone() && pipeMaker.MakeSolid() && pipeMaker.Shape().ShapeType()==TopAbs_ShapeEnum::TopAbs_SOLID) //a solid is OK
 					{						
 						solids->Add(gcnew XbimSolid(TopoDS::Solid(pipeMaker.Shape())));
@@ -1185,14 +1202,13 @@ namespace Xbim
 				catch (const std::exception& ex)
 				{
 					failedGridLines = true;
-					String^ err = gcnew String(ex.what());
-					LogWarning(logger, grid, "One or more grid lines has failed to convert successfully. " + err);
-					return solids;
+					LogWarning(logger, grid, "Grid axis #{0} caused exception. Status={1}, {2}", curveWithTag->Item1.ToString(), gcnew Int32(pipeMakerStatus), gcnew String(ex.what()));
+					failedGridLines = true;
 				}
 				catch (...)
 				{
-					LogWarning(logger, grid, "One or more grid lines has failed to convert successfully. ");
-					return solids;
+					LogWarning(logger, grid, "Grid axis #{0} caused internal exception. Status={1}", curveWithTag->Item1.ToString(), gcnew Int32(pipeMakerStatus));
+					failedGridLines = true;
 				}
 					
 			}
