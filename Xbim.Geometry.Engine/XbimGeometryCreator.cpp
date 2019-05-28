@@ -1066,36 +1066,38 @@ namespace Xbim
 			double mm = grid->Model->ModelFactors->OneMilliMeter;
 			double precision = grid->Model->ModelFactors->Precision;
 			XbimSolidSet^ solids = gcnew XbimSolidSet();
-			gp_Pnt origin;
+			
 			gp_Vec normal;
-			List<XbimCurve2D^>^ UCurves = gcnew List<XbimCurve2D^>();
-			List<XbimCurve2D^>^ VCurves = gcnew List<XbimCurve2D^>();
-			List<XbimCurve2D^>^ WCurves = gcnew List<XbimCurve2D^>();
+			List<Tuple<int, XbimCurve2D^>^>^ UCurves = gcnew List<Tuple<int, XbimCurve2D^>^>();
+			List<Tuple<int, XbimCurve2D^>^>^ VCurves = gcnew List<Tuple<int, XbimCurve2D^>^>();
+			List<Tuple<int, XbimCurve2D^>^>^ WCurves = gcnew List<Tuple<int, XbimCurve2D^>^>();
 			List<XbimPoint3D>^ intersections = gcnew List<XbimPoint3D>();
 
 			for each (IIfcGridAxis^ axis in grid->UAxes)
 			{
 				XbimCurve2D^ c = gcnew XbimCurve2D(axis->AxisCurve);
-				
-				UCurves->Add(c);					
+				Tuple<int, XbimCurve2D^>^ curveWithTag = Tuple::Create<int, XbimCurve2D^>(axis->EntityLabel, c);
+				UCurves->Add(curveWithTag);
 			}			
 			for each (IIfcGridAxis^ axis in grid->VAxes)
 			{				
 				XbimCurve2D^ c = gcnew XbimCurve2D(axis->AxisCurve);
-				VCurves->Add(c);
-				for each (XbimCurve2D^ u in UCurves)
-					intersections->AddRange(u->Intersections(c, precision));	
+				Tuple<int, XbimCurve2D^>^ curveWithTag = Tuple::Create<int, XbimCurve2D^>(axis->EntityLabel, c);
+				VCurves->Add(curveWithTag);
+				for each (Tuple<int, XbimCurve2D^>^ u in UCurves)
+					intersections->AddRange(u->Item2->Intersections(c, precision));	
 				
 			}
 			
 			for each (IIfcGridAxis^ axis in grid->WAxes)
 			{
 				XbimCurve2D^ c = gcnew XbimCurve2D(axis->AxisCurve);
-				WCurves->Add(c);
-				for each (XbimCurve2D^ u in UCurves)
-					intersections->AddRange(u->Intersections(c, precision));
-				for each (XbimCurve2D^ v in VCurves)
-					intersections->AddRange(v->Intersections(c, precision));
+				Tuple<int, XbimCurve2D^>^ curveWithTag = Tuple::Create<int, XbimCurve2D^>(axis->EntityLabel, c);
+				WCurves->Add(curveWithTag);
+				for each (Tuple<int, XbimCurve2D^>^ u in UCurves)
+					intersections->AddRange(u->Item2->Intersections(c, precision));
+				for each (Tuple<int, XbimCurve2D^>^ v in VCurves)
+					intersections->AddRange(v->Item2->Intersections(c, precision));
 			}
 
 			XbimRect3D bb = XbimRect3D::Empty;
@@ -1105,8 +1107,17 @@ namespace Xbim
 				if (bb.IsEmpty) bb = XbimRect3D(pt);
 				else bb.Union(pt);
 			}
-			//the box should have a Z of zero so inflate it a bit
-			bb = XbimRect3D::Inflate(bb, bb.SizeX*0.2, bb.SizeY*0.2, 0);
+			
+			if (bb.SizeX < precision || bb.SizeY < precision)
+			{
+				LogWarning(grid, "Extent of grid is near zero. Found " 
+					+ intersections->Count + " axis intersections having " + (UCurves->Count + VCurves->Count + WCurves->Count) + " grid axis.");
+				XbimPoint3D c = bb.Centroid();
+				bb = XbimRect3D(c.X - 75 * mm, c.Y - 75 * mm, c.Z - 75 * mm, 150 * mm, 150 * mm, 150 * mm);
+			}
+			else
+				//the box should have a Z of zero so inflate it a bit
+				bb = XbimRect3D::Inflate(bb, bb.SizeX*0.2, bb.SizeY*0.2, 0);
 
 			//create a bounded planar 
 
@@ -1116,9 +1127,10 @@ namespace Xbim
 			gp_Lin2d right(gp_Pnt2d(bb.X+bb.SizeX, bb.Y), gp_Dir2d(0, 1));
 			
 			bool failedGridLines = false;
-			IEnumerable<XbimCurve2D^>^ curves = Enumerable::Concat(Enumerable::Concat(UCurves, VCurves), WCurves);			
-			for each (XbimCurve2D^ curve in curves)
+			IEnumerable<Tuple<int, XbimCurve2D^>^>^ curves = Enumerable::Concat(Enumerable::Concat(UCurves, VCurves), WCurves);
+			for each (Tuple<int, XbimCurve2D^>^ curveWithTag in curves)
 			{
+				XbimCurve2D^ curve = curveWithTag->Item2;
 			    Handle(Geom2d_Curve) hcurve = curve;
 				IntAna2d_AnaIntersection its;
 				if (hcurve->IsKind(STANDARD_TYPE(Geom2d_Line))) //trim the infinite lines
@@ -1165,26 +1177,60 @@ namespace Xbim
 				XbimEdge^ edge = gcnew XbimEdge(xCurve);			
 				TopoDS_Wire spine = BRepBuilderAPI_MakeWire(edge);
 				//XbimWire^ w = gcnew XbimWire(spine);
-				BRepOffsetAPI_MakePipeShell pipeMaker(spine);
-				pipeMaker.Add(profile->OuterWire, Standard_True, Standard_True);
-				pipeMaker.Build();
-				BRep_Builder b;
-				TopoDS_Shell shell;
-				b.MakeShell(shell);
-				if (pipeMaker.IsDone())
+				BRepBuilderAPI_PipeError pipeMakerStatus;
+				try
 				{
-					//add the other faces to the shell
-					for (TopExp_Explorer explr(pipeMaker.Shape(), TopAbs_FACE); explr.More(); explr.Next())
-					{
-						b.Add(shell, TopoDS::Face(explr.Current()));
+					BRepOffsetAPI_MakePipeShell pipeMaker(spine);
+					pipeMaker.SetTolerance(precision, precision, 1.0e-2);
+
+					BRep_Builder b;					
+					TopoDS_Face face = profile; // hang on to the face
+					pipeMaker.Add(rect, Standard_True, Standard_True);
+					pipeMaker.Build();
+					pipeMakerStatus = pipeMaker.GetStatus();
+
+					if (pipeMaker.IsDone() && pipeMaker.MakeSolid() && pipeMaker.Shape().ShapeType()==TopAbs_ShapeEnum::TopAbs_SOLID) //a solid is OK
+					{						
+						solids->Add(gcnew XbimSolid(TopoDS::Solid(pipeMaker.Shape())));
 					}
-					TopoDS_Solid solid;
-					b.MakeSolid(solid);
-					b.Add(solid, shell);
-					solids->Add(gcnew XbimSolid(solid));
+					else if (pipeMaker.IsDone()) //fix up from a shell
+					{		
+						TopoDS_Shell shell;
+						b.MakeShell(shell);
+						{
+							//add the other faces to the shell
+							for (TopExp_Explorer explr(pipeMaker.Shape(), TopAbs_FACE); explr.More(); explr.Next())
+							{
+								b.Add(shell, TopoDS::Face(explr.Current()));
+							}
+							//visit wires not in a face
+							for (TopExp_Explorer explr(pipeMaker.Shape(), TopAbs_WIRE, TopAbs_FACE); explr.More(); explr.Next())
+							{
+								BRepBuilderAPI_MakeFace faceMaker(TopoDS::Wire(explr.Current()), Standard_True);
+								b.Add(shell, faceMaker.Face());
+							}
+							TopoDS_Solid solid;
+							b.MakeSolid(solid);
+							b.Add(solid, shell);
+							solids->Add(gcnew XbimSolid(solid));
+						}
+
+					}
+					else
+						failedGridLines = true;
+
 				}
-				else
+				catch (const std::exception& ex)
+				{
 					failedGridLines = true;
+					LogWarning(grid, "Grid axis #{0} caused exception. Status={1}, {2}", curveWithTag->Item1.ToString(), gcnew Int32(pipeMakerStatus), gcnew String(ex.what()));
+					failedGridLines = true;
+				}
+				catch (...)
+				{
+					LogWarning(grid, "Grid axis #{0} caused internal exception. Status={1}", curveWithTag->Item1.ToString(), gcnew Int32(pipeMakerStatus));
+					failedGridLines = true;
+				}
 					
 			}
 			if(failedGridLines) 
