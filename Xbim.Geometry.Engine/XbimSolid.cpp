@@ -1248,15 +1248,15 @@ namespace Xbim
 			}
 			ShapeFix_ShapeTolerance tolFixer;
 			tolFixer.LimitTolerance(polyBoundary, pbhs->Model->ModelFactors->Precision);
-			// we have to use 1e9 as the max extrusion as the common boolean op times out on values greater than this, probably an extrema issue in booleans
-			TopoDS_Shape substractionBody = BRepPrimAPI_MakePrism(BRepBuilderAPI_MakeFace(polyBoundary), gp_Vec(0, 0, 1e9));
+			// we have to use 1e8 as the max extrusion as the common boolean op times out on values greater than this, probably an extrema issue in booleans
+			TopoDS_Shape substractionBody = BRepPrimAPI_MakePrism(BRepBuilderAPI_MakeFace(polyBoundary), gp_Vec(0, 0, 1e8));
 			//find point inside the material
 			gp_Pnt pnt = pln.Location().Translated(pbhs->AgreementFlag ? -pln.Axis().Direction() : pln.Axis().Direction());
 
 			TopoDS_Shape halfspace = BRepPrimAPI_MakeHalfSpace(BRepBuilderAPI_MakeFace(pln), pnt).Solid();
 			gp_Trsf location = XbimConvert::ToTransform(pbhs->Position);
 			gp_Trsf shift;
-			shift.SetTranslation(gp_Vec(0, 0, -1e9/2));
+			shift.SetTranslation(gp_Vec(0, 0, -1e8/2));
 			substractionBody.Move(location*shift);
 			TopoDS_Shape bounded_halfspace = BRepAlgoAPI_Common(substractionBody, halfspace);			 
 			

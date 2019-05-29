@@ -359,21 +359,21 @@ namespace Xbim
 			if (segWire->IsValid)
 			{
 				if (tc != nullptr)
-				{					
-						if (!seg->SameSense)
+				{
+					if (!seg->SameSense)
+					{
+						if (tc->SenseAgreement)
 						{
-							if (tc->SenseAgreement)
-							{
-								segWire->Reverse();
-							}
+							segWire->Reverse();
 						}
-						else
+					}
+					else
+					{
+						if (!tc->SenseAgreement)
 						{
-							if (!tc->SenseAgreement)
-							{
-								segWire->Reverse();
-							}
-						}				
+							segWire->Reverse();
+						}
+					}
 				}
 				else
 				{
@@ -765,13 +765,13 @@ namespace Xbim
 			double tolerance = cCurve->Model->ModelFactors->Precision;
 			BRepBuilderAPI_MakeWire converter;
 			ShapeFix_ShapeTolerance fTol;
-			gp_Pnt lastVertex;
-			gp_Pnt startVertex;
+			double fiveMilli = 5 * cCurve->Model->ModelFactors->OneMilliMeter; //we are going to accept that a gap of 5mm is not a gap
+			gp_Pnt resultWireFirst;
+			gp_Pnt resultWireLast;
 			bool firstPass = true;
-			bool isContinuous = true; //assume continuous or clsoed unless last segment is discontinuous
+			bool isContinuous = true; //assume continuous or closed unless last segment is discontinuous
 			int segCount = cCurve->Segments->Count;
 			int segIdx = 1;
-			XbimPoint3D startPnt;
 
 			for each(IIfcCompositeCurveSegment^ seg in cCurve->Segments) //every segment shall be a bounded curve
 			{
@@ -787,43 +787,73 @@ namespace Xbim
 				if (lastSeg && seg->Transition == IfcTransitionCode::DISCONTINUOUS) isContinuous = false;
 				if (segWire->IsValid)
 				{
-					gp_Pnt nextVertex = segWire->StartPoint;
-					startPnt = segWire->Start;
-					if (firstPass)
-					{
-						startVertex = nextVertex;
-					}
-					double actualTolerance = tolerance; //reset for each segment
+					gp_Pnt segWireFirst = segWire->StartPoint;
+					gp_Pnt segWireLast = segWire->EndPoint;
+
 
 					if (!firstPass)
 					{
-						double actualGap = nextVertex.Distance(lastVertex);
-						if (actualGap > tolerance)
+						//simple clockwise end of last wire to start of first
+						double distFirstToLast = segWireFirst.Distance(resultWireLast);
+						double distLastToLast = segWireLast.Distance(resultWireLast);
+						if (!(distFirstToLast <= tolerance || distLastToLast <= tolerance))
 						{
-							double fiveMilli = 5 * cCurve->Model->ModelFactors->OneMilliMeter; //we are going to accept that a gap of 5mm is not a gap
-							if (actualGap > fiveMilli)
+							//see if the nearest is within 5mm
+
+							if (distFirstToLast <= fiveMilli)
 							{
+								fTol.LimitTolerance(segWire->StartVertex, distFirstToLast + tolerance);
+							}
+							else if (distLastToLast <= fiveMilli)
+							{
+								fTol.LimitTolerance(segWire->EndVertex, distLastToLast + tolerance);
+							}
+							else // it will not join
+							{
+								//see if we can reverse the segment to fit
+								double distLastToFirst = segWireLast.Distance(resultWireFirst);
+								double distFirstToFirst = segWireFirst.Distance(resultWireFirst);
+								if (distFirstToFirst <= tolerance || distLastToFirst <= tolerance)
+								{
+									segWire->Reverse(); //just reverse it and add it, it was topologivally incorrect
+								}
+								else
+								{
+									if (distFirstToFirst <= fiveMilli)
+									{
+										fTol.LimitTolerance(segWire->StartVertex, distFirstToFirst + tolerance);
+										segWire->Reverse();
+									}
+									else if (distLastToFirst <= fiveMilli)
+									{
+										fTol.LimitTolerance(segWire->EndVertex, distLastToFirst + tolerance);
+										segWire->Reverse();
+									}
+									else
+									{
 #ifdef _DEBUG
-								XbimWire^ currentWire = gcnew XbimWire(converter.Wire());
+										XbimWire^ currentWire = gcnew XbimWire(converter.Wire());
 
 #endif // _DEBUG
-								XbimGeometryCreator::LogWarning(logger, seg, "Unconnected composite curve segment. Curve is incomplete");
-								continue;
+										XbimGeometryCreator::LogWarning(logger, seg, "Unconnected composite curve segment. Curve is incomplete");
+										continue;
+									}
+								}
 							}
-							actualTolerance = actualGap + tolerance;
-
-
 						}
 					}
 					firstPass = false;
 					bool ok = false;
 					try
 					{
-						//set the tolerance of the vertex
-
-						fTol.LimitTolerance(segWire->StartVertex, actualTolerance);
 						converter.Add(segWire);
 						ok = converter.IsDone();
+						if (ok)
+						{
+							BRepAdaptor_CompCurve cc(converter.Wire(), Standard_True);
+							resultWireFirst = cc.Value(cc.FirstParameter());
+							resultWireLast = cc.Value(cc.LastParameter());
+						}
 					}
 					catch (const std::exception&)
 					{
@@ -834,7 +864,7 @@ namespace Xbim
 						XbimGeometryCreator::LogError(logger, seg, "Failed to join composite curve segment. It has been ignored");
 						return;
 					}
-					lastVertex = segWire->EndPoint;
+
 
 				}
 				else

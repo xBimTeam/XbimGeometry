@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -1308,132 +1309,166 @@ namespace Xbim.ModelGeometry.Scene
             }
             var geomCache = new ConcurrentDictionary<int, IXbimGeometryObject>();
             Model.Tag = geomCache;
-
-            Parallel.ForEach(contextHelper.ProductShapeIds, contextHelper.ParallelOptions, shapeId =>
-            //foreach (var shapeId in contextHelper.ProductShapeIds)
+            ConcurrentDictionary<int, byte> processed = new ConcurrentDictionary<int, byte>();
+            try
             {
 
-                Interlocked.Increment(ref localTally);
-                IIfcGeometricRepresentationItem shape;
-                try
-                {
-                    shape = (IIfcGeometricRepresentationItem)Model.Instances[shapeId];
-                }
-                catch (Exception ex)
-                {
-                    var errmsg = string.Format("Error getting IIfcGeometricRepresentationItem for EntityLabel #{0}. Geometry Ignored.", shapeId);
-                    LogError(errmsg, ex);
-                    return;
-                }
-                if (shape == null)
-                {
-                    var errmsg = string.Format("IIfcGeometricRepresentationItem for EntityLabel #{0} not found. Geometry Ignored.", shapeId);
-                    LogError(errmsg);
-                    return;
-                }
-                var isFeatureElementShape = contextHelper.FeatureElementShapeIds.Contains(shapeId);
-                var isVoidedProductShape = contextHelper.VoidedShapeIds.Contains(shapeId);
 
-
-                // Console.WriteLine(shape.GetType().Name);
-                XbimShapeGeometry shapeGeom = null;
-                IXbimGeometryObject geomModel = null;
-                if (!isFeatureElementShape && !isVoidedProductShape && xbimTessellator.CanMesh(shape)) // if we can mesh the shape directly just do it
+                processRemaining:
+                if (!Parallel.ForEach(contextHelper.ProductShapeIds, contextHelper.ParallelOptions, (shapeId, loopState) =>
+                // foreach (var shapeId in contextHelper.ProductShapeIds)
                 {
-                    shapeGeom = xbimTessellator.Mesh(shape);
-                }
-                else //we need to create a geometry object
-                {
-
+                    if (processed.TryGetValue(shapeId, out byte b)) return; //skip it
+                    processed.TryAdd(shapeId, 0); //we are only going to try once
+                    Interlocked.Increment(ref localTally);
+                    IIfcGeometricRepresentationItem shape;
                     try
                     {
-                        if (shape is IIfcBooleanResult)
-                            geomModel = CallWithTimeout(shape, _logger, BooleanTimeOutMilliSeconds);
-                        else
-                            geomModel = Engine.Create(shape, _logger);
+                        shape = (IIfcGeometricRepresentationItem)Model.Instances[shapeId];
                     }
-
-                    catch (XbimGeometryFaceSetTooLargeException fse)
+                    catch (Exception ex)
                     {
-                        int faceSetEntityLabel = (int)fse.Data["LargeFaceSetLabel"];
-                        string faceSetEntityType = (string)fse.Data["LargeFaceSetType"];
-                        _logger.LogWarning("Large Face Set #{0} {1} detected and handled as Mesh", faceSetEntityLabel, faceSetEntityType);
-
-                        //just mesh the big shape as we have no idea what we shoudl have               
-                        shapeGeom = xbimTessellator.Mesh((IIfcRepresentationItem)Model.Instances[faceSetEntityLabel]);
-                    }
-
-                    catch (TimeoutException)
-                    {
-                        LogError(shape, "Failed to create shape geometry: operation timed out after {0} seconds", BooleanTimeOutMilliSeconds / 1000);
+                        var errmsg = string.Format("Error getting IIfcGeometricRepresentationItem for EntityLabel #{0}. Geometry Ignored.", shapeId);
+                        LogError(errmsg, ex);
                         return;
                     }
+                    if (shape == null)
+                    {
+                        var errmsg = string.Format("IIfcGeometricRepresentationItem for EntityLabel #{0} not found. Geometry Ignored.", shapeId);
+                        LogError(errmsg);
+                        return;
+                    }
+                    var isFeatureElementShape = contextHelper.FeatureElementShapeIds.Contains(shapeId);
+                    var isVoidedProductShape = contextHelper.VoidedShapeIds.Contains(shapeId);
 
-                    if (geomModel != null && geomModel.IsValid)
+
+                    // Console.WriteLine(shape.GetType().Name);
+                    XbimShapeGeometry shapeGeom = null;
+                    IXbimGeometryObject geomModel = null;
+                    if (!isFeatureElementShape && !isVoidedProductShape && xbimTessellator.CanMesh(shape)) // if we can mesh the shape directly just do it
+                    {
+                        shapeGeom = xbimTessellator.Mesh(shape);
+                    }
+                    else //we need to create a geometry object
                     {
 
-                        shapeGeom = Engine.CreateShapeGeometry(geomModel, precision, deflection, deflectionAngle, geomStorageType, _logger);
-                        if (isFeatureElementShape)
+                        try
                         {
-                            var geomSet = geomModel as IXbimGeometryObjectSet;
-                            if (geomSet != null)
+                            if (shape is IIfcBooleanResult)
                             {
-                                var solidSet = Engine.CreateSolidSet();
-                                solidSet.Add(geomSet);
-                                contextHelper.CachedGeometries.TryAdd(shapeId, solidSet);
+                                Timer timer = new Timer(callback =>
+                                {
+                                    _logger.LogError("Failed to build Boolean Result for  #{0}. Operation timed out at {1} secs", (int)shapeId,BooleanTimeOutMilliSeconds/1000 );
+                                    loopState.Stop();
+                                }
+                                , null, BooleanTimeOutMilliSeconds, Timeout.Infinite);
+
+                                try
+                                {
+                                    if (loopState.ShouldExitCurrentIteration || loopState.IsExceptional)
+                                        loopState.Stop();
+                                    geomModel = Engine.Create(shape, _logger);
+                                    if (loopState.ShouldExitCurrentIteration || loopState.IsExceptional)
+                                        loopState.Stop();
+                                }
+                                catch (Exception)
+                                {
+                                    loopState.Stop();
+                                    throw;
+                                }
+                                finally
+                                {
+                                    timer.Dispose();
+                                }
                             }
-                            //we need for boolean operations later, add the polyhedron if the face is planar
-                            else contextHelper.CachedGeometries.TryAdd(shapeId, geomModel);
+                            else
+                            {
+                                geomModel = Engine.Create(shape, _logger);
+
+                            }
                         }
-                        else if (isVoidedProductShape)
-                            contextHelper.CachedGeometries.TryAdd(shapeId, geomModel);
+
+                        catch (XbimGeometryFaceSetTooLargeException fse)
+                        {
+                            int faceSetEntityLabel = (int)fse.Data["LargeFaceSetLabel"];
+                            string faceSetEntityType = (string)fse.Data["LargeFaceSetType"];
+                            _logger.LogWarning("Large Face Set #{0} {1} detected and handled as Mesh", faceSetEntityLabel, faceSetEntityType);
+
+                            //just mesh the big shape as we have no idea what we shoudl have               
+                            shapeGeom = xbimTessellator.Mesh((IIfcRepresentationItem)Model.Instances[faceSetEntityLabel]);
+                        }
+
+
+                        if (geomModel != null && geomModel.IsValid)
+                        {
+
+                            shapeGeom = Engine.CreateShapeGeometry(geomModel, precision, deflection, deflectionAngle, geomStorageType, _logger);
+                            if (isFeatureElementShape)
+                            {
+                                var geomSet = geomModel as IXbimGeometryObjectSet;
+                                if (geomSet != null)
+                                {
+                                    var solidSet = Engine.CreateSolidSet();
+                                    solidSet.Add(geomSet);
+                                    contextHelper.CachedGeometries.TryAdd(shapeId, solidSet);
+                                }
+                                //we need for boolean operations later, add the polyhedron if the face is planar
+                                else contextHelper.CachedGeometries.TryAdd(shapeId, geomModel);
+                            }
+                            else if (isVoidedProductShape)
+                                contextHelper.CachedGeometries.TryAdd(shapeId, geomModel);
+                        }
+                    }
+
+                    if (shapeGeom == null || shapeGeom.ShapeData == null || shapeGeom.ShapeData.Length == 0)
+                        LogInfo(_model.Instances[shapeId], "Is an empty shape");
+                    else
+                    {
+                        shapeGeom.IfcShapeLabel = shapeId;
+                        var reference = new GeometryReference
+                        {
+                            BoundingBox = shapeGeom.BoundingBox,
+                            GeometryId = geometryStore.AddShapeGeometry(shapeGeom)
+                        };
+                        int styleLabel;
+                        GetStyleId(contextHelper, shapeGeom.IfcShapeLabel, out styleLabel);
+                        reference.StyleLabel = styleLabel;
+                        contextHelper.ShapeLookup.TryAdd(shapeGeom.IfcShapeLabel, reference);
+                        if (contextHelper.CachedGeometries.ContainsKey(shapeGeom.IfcShapeLabel))
+                        {
+                            //keep a record of the IFC label and database record mapping
+                            contextHelper.GeometryShapeLookup.TryAdd(shapeGeom.ShapeLabel, shapeGeom.IfcShapeLabel);
+                        }
+
+                        //   shapeGeometries.Add(shapeGeom);
+                    }
+                    if (geomModel != null && geomModel.IsValid && !isFeatureElementShape && !isVoidedProductShape)
+                    {
+                        geomModel.Dispose();
+                    }
+                    if (progDelegate != null)
+                    {
+                        var newPercentage = Convert.ToInt32((double)localTally / contextHelper.Total * 100.0);
+                        if (newPercentage > localPercentageParsed)
+                        {
+                            Interlocked.Exchange(ref localPercentageParsed, newPercentage);
+                            progDelegate(localPercentageParsed, "Creating Geometry");
+                        }
                     }
                 }
-
-                if (shapeGeom == null || shapeGeom.ShapeData == null || shapeGeom.ShapeData.Length == 0)
-                    LogInfo(_model.Instances[shapeId], "Is an empty shape");
-                else
+            ).IsCompleted)
                 {
-                    shapeGeom.IfcShapeLabel = shapeId;
-                    var reference = new GeometryReference
-                    {
-                        BoundingBox = shapeGeom.BoundingBox,
-                        GeometryId = geometryStore.AddShapeGeometry(shapeGeom)
-                    };
-                    int styleLabel;
-                    GetStyleId(contextHelper, shapeGeom.IfcShapeLabel, out styleLabel);
-                    reference.StyleLabel = styleLabel;
-                    contextHelper.ShapeLookup.TryAdd(shapeGeom.IfcShapeLabel, reference);
-                    if (contextHelper.CachedGeometries.ContainsKey(shapeGeom.IfcShapeLabel))
-                    {
-                        //keep a record of the IFC label and database record mapping
-                        contextHelper.GeometryShapeLookup.TryAdd(shapeGeom.ShapeLabel, shapeGeom.IfcShapeLabel);
-                    }
-
-                    //   shapeGeometries.Add(shapeGeom);
-                }
-                if (geomModel != null && geomModel.IsValid && !isFeatureElementShape && !isVoidedProductShape)
-                {
-                    geomModel.Dispose();
-                }
-
-
-
-                if (progDelegate != null)
-                {
-                    var newPercentage = Convert.ToInt32((double)localTally / contextHelper.Total * 100.0);
-                    if (newPercentage > localPercentageParsed)
-                    {
-                        Interlocked.Exchange(ref localPercentageParsed, newPercentage);
-                        progDelegate(localPercentageParsed, "Creating Geometry");
-                    }
+                    goto processRemaining;
                 }
             }
-        );
+            catch (AggregateException)
+            {
 
+                throw;
+            }
             contextHelper.PercentageParsed = localPercentageParsed;
             contextHelper.Tally = localTally;
-
+            Debug.Assert(contextHelper.ProductShapeIds.Count == processed.Count);
             if (progDelegate != null) progDelegate(101, "WriteShapeGeometries, (" + localTally + " written)");
         }
 

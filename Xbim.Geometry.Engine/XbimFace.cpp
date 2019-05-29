@@ -773,22 +773,30 @@ namespace Xbim
 					double tolerance = profile->Model->ModelFactors->Precision;
 					
 					XbimVector3D n = wire->Normal;
-					XbimPoint3D centre = wire->BaryCentre;
-					gp_Pln thePlane(gp_Pnt(centre.X, centre.Y,centre.Z), gp_Vec(n.X,n.Y,n.Z));
-					pFace = new TopoDS_Face();
-					*pFace = BRepBuilderAPI_MakeFace(thePlane, wire, false);
-					//need to check for self intersecting edges to comply with Ifc rules
-					TopTools_IndexedMapOfShape map;
-					TopExp::MapShapes(*pFace, TopAbs_EDGE, map);
-					ShapeFix_Edge ef;
-					
-					for (int i = 1; i <= map.Extent(); i++)
+					if (n.IsInvalid()) //it is not an area
 					{
-						const TopoDS_Edge edge = TopoDS::Edge(map(i));
-						ef.FixVertexTolerance(edge, *pFace);
+						XbimGeometryCreator::LogWarning(logger, profile, "Face cannot be built with a profile that has no area.");
+						return;
 					}
-					ShapeFix_ShapeTolerance fTol;
-					fTol.LimitTolerance(*pFace, tolerance);
+					else
+					{
+						XbimPoint3D centre = wire->BaryCentre;
+						gp_Pln thePlane(gp_Pnt(centre.X, centre.Y, centre.Z), gp_Vec(n.X, n.Y, n.Z));
+						pFace = new TopoDS_Face();
+						*pFace = BRepBuilderAPI_MakeFace(thePlane, wire, false);
+						//need to check for self intersecting edges to comply with Ifc rules
+						TopTools_IndexedMapOfShape map;
+						TopExp::MapShapes(*pFace, TopAbs_EDGE, map);
+						ShapeFix_Edge ef;
+
+						for (int i = 1; i <= map.Extent(); i++)
+						{
+							const TopoDS_Edge edge = TopoDS::Edge(map(i));
+							ef.FixVertexTolerance(edge, *pFace);
+						}
+						ShapeFix_ShapeTolerance fTol;
+						fTol.LimitTolerance(*pFace, tolerance);
+					}
 				}
 				
 			}

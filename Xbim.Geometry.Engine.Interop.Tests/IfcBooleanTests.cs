@@ -38,6 +38,33 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             logger = null;
         }
 
+        [TestMethod]
+        public void very_slow_boolean_clipping()
+        {
+            using (var er = new EntityRepository<IIfcBooleanClippingResult>(nameof(very_slow_boolean_clipping), true)) //model is in radians
+            {
+                Assert.IsTrue(er.Entity != null, "No IfcBooleanClippingResult found");
+
+                var s = geomEngine.CreateSolidSet(er.Entity, logger);
+                HelperFunctions.IsValidSolid(s.FirstOrDefault());
+
+            }
+        }
+
+
+
+        [TestMethod]
+        public void grid_with_polylines()
+        {
+            using (var er = new EntityRepository<IIfcGrid>(nameof(grid_with_polylines), true)) //model is in radians
+            {
+                Assert.IsTrue(er.Entity != null, "No IfcGrid found");
+                var s = geomEngine.CreateGrid(er.Entity, logger);
+                Assert.AreEqual(10, s.Count);
+                
+            }
+        }
+
         /// <summary>
         /// Checks that clipping planes that fall on a solids face do not remove that face if it is within the fuzzy tolerance (currently 6 * tolerance)
         /// </summary>
