@@ -725,7 +725,7 @@ namespace Xbim
 			}
 		}
 
-		void XbimCurve::Init(IIfcSurfaceCurve ^ curve, ILogger ^ logger)
+		void XbimCurve::Init(IIfcSurfaceCurve ^ /*curve*/, ILogger ^ /*logger*/)
 		{
 			throw gcnew NotImplementedException("IIfcSurfaceCurve is not yet implemented");
 		}
