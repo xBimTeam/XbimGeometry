@@ -45,7 +45,7 @@ Candidate release for 5.1
 - Edge start and end points fixed to handle null vertices
 - Empty profile definition handled
 - Polygonally bounded half-space extrusion limited to prevent boolean hangs
-- Compositve curve creation handles incorrect reverse segment definition
+- Composite curve creation handles incorrect reverse segment definition
 
 ## [v5.0.163] 2018-12-17 Nuget Release
 
