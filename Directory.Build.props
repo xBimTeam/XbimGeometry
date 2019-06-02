@@ -19,7 +19,7 @@
     <PackageLicenseExpression>CDDL-1.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/xBimTeam/XbimGeometry</PackageProjectUrl>
     <PackageIconUrl>https://avatars1.githubusercontent.com/u/2284875?v=3&amp;amp;s=240</PackageIconUrl>
-    <PackageReleaseNotes>Version 5.0 update. See https://github.com/xBimTeam/XbimGeometry/blob/master/CHANGELOG.md
+    <PackageReleaseNotes>Version 5.1 update. See https://github.com/xBimTeam/XbimGeometry/blob/master/CHANGELOG.md
     </PackageReleaseNotes>
     <PackageTags>BIM, IFC, Geometry, Meshing, Tesselation</PackageTags>
     <RepositoryUrl>https://github.com/xBimTeam/XbimEssentials/tree/master</RepositoryUrl>
