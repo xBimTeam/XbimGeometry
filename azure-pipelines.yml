@@ -14,7 +14,7 @@ variables:
   BuildConfiguration: 'Release'
   BuildPlatform: 'Any CPU'
   major: 5
-  minor: 0
+  minor: 1
   # creates a counter called versioncounter and seeds it at 100 and then assigns the value to a variable named buildNo.
   buildNo: $[counter('geomversioncounter', 100)]
   
