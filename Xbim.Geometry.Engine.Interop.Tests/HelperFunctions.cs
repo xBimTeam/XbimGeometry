@@ -113,6 +113,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 Trace.WriteLine(String.Format("Entity  #{0} has zero volume>", entityLabel));
             }
+            Assert.IsNotNull(solid, $"Solid should not be null for entity #{entityLabel}");
             if (!ignoreVolume) Assert.IsTrue(solid.Volume > 0, "Volume should be greater than 0");
             Assert.IsTrue(solid.SurfaceArea > 0, "Surface Area should be greater than 0");
             Assert.IsTrue(solid.IsValid);
