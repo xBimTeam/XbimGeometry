@@ -2,11 +2,12 @@
 
 All notable changes to this project should be documented in this file
 
-## [Latest] 2019-06-02
+## [v5.1.239] 2019-06-03
 
 Candidate release for 5.1
 
 ### Changed
+- AssemblyVersion changed to 5.1.0.0
 - Faceted FaceSet re-implemented for better tolerances
 - Threading model changed to avoid race conditions. Boolean Cut operations optimised
 - Composite curve reimplemented to correctly handle polylines as edges
