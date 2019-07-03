@@ -1247,8 +1247,11 @@ static void putIntWires(TopoDS_Shape& theFace, TopTools_SequenceOfShape& theWire
       const TopoDS_Edge& anEdge = TopoDS::Edge(it.Value());
       Standard_Real aFirst, aLast;
       Handle(Geom2d_Curve) aC2d = BRep_Tool::CurveOnSurface(anEdge, aFace, aFirst, aLast);
-      aC2d->D0((aFirst + aLast) * 0.5, aP2d);
-      isP2d = Standard_True;
+	  if (!aC2d.IsNull())
+	  {
+		  aC2d->D0((aFirst + aLast) * 0.5, aP2d);
+		  isP2d = Standard_True;
+	  }
     }
     BRepClass_FaceClassifier aClass(aFace, aP2d, Precision::PConfusion());
     if (aClass.State() == TopAbs_IN)
