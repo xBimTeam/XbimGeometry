@@ -568,16 +568,16 @@ namespace Xbim
 				}
 			}
 			// Write out header
-			binaryWriter->Write((unsigned char)1); //stream format version
+			binaryWriter->Write((unsigned char)2); //stream format version
 			int numVertices = points->Count;
 			binaryWriter->Write((UInt32)numVertices); //number of vertices
 			binaryWriter->Write((UInt32)triangleCount); //number of triangles
 			//write out vertices 
 			for each (XbimPoint3D p in points)
 			{
-				binaryWriter->Write((float)p.X);
-				binaryWriter->Write((float)p.Y);
-				binaryWriter->Write((float)p.Z);
+				binaryWriter->Write(p.X);
+				binaryWriter->Write(p.Y);
+				binaryWriter->Write(p.Z);
 			}
 
 			//now write out the faces

@@ -83,7 +83,8 @@ namespace Xbim.ModelGeometry.Scene
         {
             _size = (int) (
                 2 * sizeof(uint) + // number of points and number of triangles
-                sizeof(float) * 6 * PointsCount +  // space for points (3 * position + 3 * normal) for each point
+                sizeof(double) * 3 * PointsCount +  // space for 3 * position for each point
+                sizeof(float) * 3 * PointsCount +  // space for 3 * normal for each point
                 sizeof(uint) * 3 * TrianglesCount // space for triangle indices 
                 );
             Stream = new MemoryStream(_size);
@@ -97,7 +98,7 @@ namespace Xbim.ModelGeometry.Scene
             // purposely empty 
         }
 
-        void IXbimTriangulatesToSimplePositionsNormalsIndices.AddPoint(float px, float py, float pz, float nx, float ny, float nz)
+        void IXbimTriangulatesToSimplePositionsNormalsIndices.AddPoint(double px, double py, double pz, float nx, float ny, float nz)
         {
             _bw.Write(px);
             _bw.Write(py);

@@ -577,7 +577,7 @@ namespace Xbim.ModelGeometry.Scene
 			IndexReader NormalsReader = new IndexReader(numNormals, br);
 			IndexReader UniquesReader = new IndexReader(numUniques, br);
 
-			float[,] pos = new float[numPositions, 3];
+			double[,] pos = new double[numPositions, 3];
 			float[,] nrm = new float[numNormals, 3];
 			uint[,] uniques = new uint[numUniques, 2];
 			
@@ -585,9 +585,9 @@ namespace Xbim.ModelGeometry.Scene
 			//
 			for (uint i = 0; i < numPositions; i++)
 			{
-				pos[i, 0] = br.ReadSingle();
-				pos[i, 1] = br.ReadSingle();
-				pos[i, 2] = br.ReadSingle();
+				pos[i, 0] = br.ReadDouble();
+				pos[i, 1] = br.ReadDouble();
+				pos[i, 2] = br.ReadDouble();
 			}
 			// dimensions of normals
 			//
