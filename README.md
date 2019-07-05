@@ -1,70 +1,52 @@
-Subproject of https://github.com/xBimTeam/xBimToolkit
-
-Relates to Nuget Package Xbim.Geometry
-
-Build Status (master branch): [ ![Build Status](http://xbimbuilds.cloudapp.net/app/rest/builds/buildType:(id:Xbim_XbimGeometry_XbimGeometry),branch:(name:master)/statusIcon "Build Status") ](http://xbimbuilds.cloudapp.net/project.html?projectId=Xbim_XbimGeometry&tab=projectOverview "Build Status")
-
-Build Status (develop branch): [ ![Build Status](http://xbimbuilds.cloudapp.net/app/rest/builds/buildType:(id:Xbim_XbimGeometry_XbimGeometry),branch:(name:develop)/statusIcon "Build Status") ](http://xbimbuilds.cloudapp.net/project.html?projectId=Xbim_XbimGeometry&tab=projectOverview "Build Status")
-
-# XBIM - the eXtensible Building Information Modelling (BIM) Toolkit
-
-## What is it?
-
-The xBIM Tookit (eXtensible Building Information Modelling) is an open-source, software development BIM toolkit that 
-supports the BuildingSmart Data Model (aka the [Industry Foundation Classes IFC](http://en.wikipedia.org/wiki/Industry_Foundation_Classes)).
-
-xBIM allows developers to read, create and view [Building Information (BIM)](http://en.wikipedia.org/wiki/Building_information_modeling) Models in the IFC format. 
-There is full support for geometric, topological operations and visualisation. In addition xBIM supports 
-bi-directional translation between IFC and COBie formats
-
-## Getting Started
-
-You will need Visual Studio 2010 SP1 or newer to compile the Solution. To compile the SceneJSWebViewer sample
-project you will require ASP.NET MVC 3.0 to be installed. All solutions target .NET 4.0. The 4.0 Client profile
-may be supported for some projects.
+Branch | Build Status  | MyGet | NuGet
+------ | ------- | --- | --- |
+Master | [![Build Status](https://dev.azure.com/xBIMTeam/xBIMToolkit/_apis/build/status/xBimTeam.XbimGeometry?branchName=master)](https://dev.azure.com/xBIMTeam/xBIMToolkit/_build/latest?definitionId=3&branchName=master) | ![master](https://img.shields.io/myget/xbim-master/v/Xbim.Geometry.svg) | ![](https://img.shields.io/nuget/v/Xbim.Geometry.svg)
+Develop | [![Build Status](https://dev.azure.com/xBIMTeam/xBIMToolkit/_apis/build/status/xBimTeam.XbimGeometry?branchName=develop)](https://dev.azure.com/xBIMTeam/xBIMToolkit/_build/latest?definitionId=3&branchName=develop) | ![](https://img.shields.io/myget/xbim-develop/vpre/Xbim.Geometry.svg) | -
 
 
-Xbim is a software library, and is currently deployed with a number of sample applications to demonstrate its capabilities
+# XbimGeometry
 
-* XbimXplorer - a Windows WPF sample application that can open and render 3D IFC models (and native XBIM models ) as well as displaying semantic data.
-* Xbim.SceneJSWebViewer - a MVC web application that can open and render 3D IFC models (previously converted to XBIM) using a WebGL compatible browser. 
-* XbimConvert - a sample console application to generate native XBIM model and geometry files from an IFC file.
-* Xbim.COBie.Client - A sample windows application demonstrating how a COBie spreadsheet can be generated from an IFC model.
-* CodeExamples - a sample console application demonstrating how to undertake a number of BIM processes using XBIM
+XbimGeometry is part of the [Xbim Toolkit](https://github.com/xBimTeam/XbimEssentials). 
 
-Please note: all the samples in this solution are examples of how to use the Xbim library, and not intended to be used in a 
-production environment without further development.
+It contains the the Geometry Engine and Scene processing, which provide geometric and topological operations 
+to enable users to visualise models in 3D models, typically as a Tesselated scene or mesh.
 
-## Licence
+The native Geometry Engine is built around the open source [Open Cascade 7.3 library](https://www.opencascade.com/content/overview)
+which performs much of the boolean operations involve in generating 3D solids. 
+This technology is included under a licence which permits the use as part of a larger work, compatible with our open source CDDL licence.
 
-The XBIM library is made available under the CDDL Open Source licence.  See the licences folder for a full text.
+## Compilation
 
-All licences should support the commercial usage of the XBIM system within a 'Larger Work', as long as you honour 
-the licence agreements.
+**Visual Studio 2017 or 2019 is recommended.**
+Prior versions of Visual Studio are unlikely to work on this solution.
 
-## Third Party Licences
+The [free VS 2019 Community Edition](https://visualstudio.microsoft.com/downloads/) will be fine. 
 
-The core XBIM library makes use of the following 3rd party software packages, under their associated licences:
+In order to compile this solution which includes C++ projects you'll need the following additional 
+components installed:
 
-* 'OpenCASCADE' Geometry Engine : http://www.opencascade.org/ - OPEN CASCADE Public License 
-* 'Gardens Point Parser Generator' http://gppg.codeplex.com/ - New BSD Licence
-* Elements of '3D Tools' WPF library http://3dtools.codeplex.com/ - MS Permissive Licence
-* Log4net : http://logging.apache.org/log4net/ - Apache 2.0 Licence
-* NPOI : http://npoi.codeplex.com - Apache 2.0 Licence
-* NewtonSoft JSON : http://json.codeplex.com/ - MIT Licence
+- Visual C++ Core desktop features
+- VC++ 2017 v141 tools
+- Windows 10 SDK (10.0.17134.0) 
 
-Additionally the Samples also make use of the following libraries
+You'll also need patience as it can take up to 30 minutes to compile the C++ libraries.
 
-* SceneJS: https://github.com/xeolabs/scenejs - joint MIT and GPL Licence
-* SignalR : https://github.com/SignalR/SignalR - Apache 2.0 Licence
+The XBIM toolkit [uses the NuGet](https://www.nuget.org/packages/Xbim.Geometry/) for the management of our published packages.
+We have custom MyGet feeds for the *master* and *develop* branches of the solution which are automatically
+updated during our CI builds. The [nuget.config](nuget.config) file should automatically add these feeds for you.
 
-All licences are included in full under the Licences\3rd Party solution folder. 
 
-## Support & Help
+## Acknowledgements
+We'd like to acknowledge OpenCascade for the use of their library, which is permitted under clause 6 of [their
+Licence](https://www.opencascade.com/content/licensing). 
 
-Please use the Discussion forum at http://xbim.codeplex.com/discussions to ask any questions.
-Alternatively use the Issue Tracker to raise any bugs relating to Xbim.
+The XbimTeam wishes to thank [JetBrains](https://www.jetbrains.com/) for supporting the XbimToolkit project 
+with free open source [Resharper](https://www.jetbrains.com/resharper/) licenses.
+
+Thanks also to Microsoft Azure DevOps for the use of [Azure Pipelines](https://azure.microsoft.com/en-us/services/devops/pipelines/) 
+to automate our builds.
 
 ## Getting Involved
 
-If you'd like to get involved and contribute to this project, please contact the Project Coordinator, [Steve Lockley](https://www.codeplex.com/site/users/view/SteveLockley).
+If you'd like to get involved and contribute to this project, please read the [CONTRIBUTING ](https://github.com/xBimTeam/XbimEssentials/blob/master/CONTRIBUTING.md)
+page or contact the Project Coordinators @CBenghi and @martin1cerny.

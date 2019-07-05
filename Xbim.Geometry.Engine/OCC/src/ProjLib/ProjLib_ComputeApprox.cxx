@@ -17,6 +17,7 @@
 // modified by NIZHNY-OFV  Thu Jan 20 11:04:19 2005
 
 #include <ProjLib_ComputeApprox.hxx>
+#include <ProjLib.hxx>
 
 #include <GeomAbs_SurfaceType.hxx>
 #include <GeomAbs_CurveType.hxx>
@@ -42,6 +43,7 @@
 #include <Geom_BezierCurve.hxx>
 #include <Geom2d_BSplineCurve.hxx>
 #include <Geom2d_BezierCurve.hxx>
+#include <GCPnts_AbscissaPoint.hxx>
 
 //#define DRAW
 #ifdef DRAW
@@ -115,7 +117,7 @@ static gp_Pnt2d Function_Value(const Standard_Real U,
       break;
     }
   default:
-    Standard_NoSuchObject::Raise("ProjLib_ComputeApprox::Value");
+    throw Standard_NoSuchObject("ProjLib_ComputeApprox::Value");
   }
 
   if ( UCouture) {
@@ -195,7 +197,33 @@ static Standard_Boolean Function_D1( const Standard_Real U,
   
   return Standard_True;
 }
+//=======================================================================
+//function : Function_ComputeStep
+//purpose  : 
+//=======================================================================
+static Standard_Real Function_ComputeStep(
+  const Handle(Adaptor3d_HCurve)&   myCurve,
+  const Standard_Real R)
+{
+  Standard_Real Step0 = .1;
+  Standard_Real W1, W2;
+  W1 = myCurve->FirstParameter();
+  W2 = myCurve->LastParameter();
+  Standard_Real L = GCPnts_AbscissaPoint::Length(myCurve->Curve());
+  Standard_Integer nbp = RealToInt(L / (R*M_PI_4)) + 1;
+  nbp = Max(nbp, 3);
+  Standard_Real Step = (W2 - W1) / (nbp - 1);
+  if (Step > Step0)
+  {
+    Step = Step0;
+    nbp = RealToInt((W2 - W1) / Step) + 1;
+    nbp = Max(nbp, 3);
+    Step = (W2 - W1) / (nbp - 1);
+  }
 
+  return Step;
+
+}
 //=======================================================================
 //function : Function_SetUVBounds
 //purpose  : 
@@ -272,15 +300,21 @@ static void Function_SetUVBounds(Standard_Real& myU1,
         Standard_Real U1, V1, U , V, Delta = 0., d = 0., pmin = W1, pmax = W1, dmax = 0., Uf, Ul;
         ElSLib::Parameters( Cone, P1, U1, V1);
         ElSLib::Parameters( Cone, P2, Ul, V1);
-        myU1 = U1; myU2 = U1; Uf = U1; 
-        Standard_Real Step = .1;
-        Standard_Integer nbp = (Standard_Integer)((W2 - W1) / Step + 1);
-        if(myCurve->GetType() == GeomAbs_Line)
+        const gp_Ax1& anAx1 = Cone.Axis();
+        gp_Lin aLin(anAx1);
+        Standard_Real R = (aLin.Distance(P1) + aLin.Distance(P2) + aLin.Distance(P)) / 3.;
+        Standard_Real Step;
+        myU1 = U1; myU2 = U1; Uf = U1;
+        if (myCurve->GetType() == GeomAbs_Line)
         {
-          nbp = 3;
+          Standard_Integer nbp = 3;
+          Step = (W2 - W1) / (nbp - 1);
         }
-        nbp = Max(nbp, 3);
-        Step = (W2 - W1) / (nbp - 1);
+        else
+        {
+          Step = Function_ComputeStep(myCurve, R);
+        }
+        //
         Standard_Boolean isclandper = (!(myCurve->IsClosed()) && !(myCurve->IsPeriodic()));
         Standard_Boolean isFirst = Standard_True;
         for(Standard_Real par = W1 + Step; par <= W2; par += Step)
@@ -402,11 +436,10 @@ static void Function_SetUVBounds(Standard_Real& myU1,
     else {
       Standard_Real U1, V1, U , V;
       ElSLib::Parameters( Cylinder, P1, U1, V1);
-      Standard_Real Step = .1, Delta = 0.;
+      Standard_Real R = Cylinder.Radius();
+      Standard_Real Delta = 0., Step;
       Standard_Real eps = M_PI, dmax = 0., d = 0.;
-      Standard_Integer nbp = (Standard_Integer)((W2 - W1) / Step + 1);
-      nbp = Max(nbp, 3);
-      Step = (W2 - W1) / (nbp - 1);
+      Step = Function_ComputeStep(myCurve, R);
       myU1 = U1; myU2 = U1;
       Standard_Real pmin = W1, pmax = W1, plim = W2+.1*Step;
       for(Standard_Real par = W1 + Step; par <= plim; par += Step) {
@@ -655,11 +688,10 @@ static void Function_SetUVBounds(Standard_Real& myU1,
     else {
       Standard_Real U1, V1, U , V;
       ElSLib::Parameters( SP, P1, U1, V1);
-      Standard_Real Step = .1, Delta = 0.;
+      Standard_Real R = SP.Radius();
+      Standard_Real Delta = 0., Step;
       Standard_Real eps = M_PI, dmax = 0., d = 0.;
-      Standard_Integer nbp = (Standard_Integer)((W2 - W1) / Step + 1);
-      nbp = Max(nbp, 3);
-      Step = (W2 - W1) / (nbp - 1);
+      Step = Function_ComputeStep(myCurve, R);
       myU1 = U1; myU2 = U1;
       Standard_Real pmin = W1, pmax = W1, plim = W2+.1*Step;
       for(Standard_Real par = W1 + Step; par <= plim; par += Step) {
@@ -710,13 +742,12 @@ static void Function_SetUVBounds(Standard_Real& myU1,
   //     
   case GeomAbs_Torus:{
     gp_Torus TR = mySurface->Torus();
-    Standard_Real U1, V1, U , V;
+    Standard_Real U1, V1, U , V, dU, dV;
     ElSLib::Parameters( TR, P1, U1, V1);
-    Standard_Real Step = .1, DeltaU = 0., DeltaV = 0.;
-    Standard_Real eps = M_PI, dmaxU = 0., dU = 0., dmaxV = 0., dV = 0.;
-    Standard_Integer nbp = (Standard_Integer)((W2 - W1) / Step + 1);
-    nbp = Max(nbp, 3);
-    Step = (W2 - W1) / (nbp - 1);
+    Standard_Real R = TR.MinorRadius();
+    Standard_Real DeltaU = 0., DeltaV = 0., Step;
+    Standard_Real eps = M_PI, dmaxU = 0., dmaxV = 0.;
+    Step = Function_ComputeStep(myCurve, R);
     myU1 = U1; myU2 = U1;
     myV1 = V1; myV2 = V1;
     Standard_Real pminU = W1, pmaxU = W1, pminV = W1, pmaxV = W1,
@@ -926,6 +957,18 @@ static Standard_Real ComputeTolV(const Handle(Adaptor3d_HSurface)& theSurf,
 
   return aTolV;
 }
+//=======================================================================
+//function : ProjLib_ComputeApprox
+//purpose  : 
+//=======================================================================
+
+ProjLib_ComputeApprox::ProjLib_ComputeApprox():
+  myTolerance(Precision::PApproximation()),
+  myDegMin(-1), myDegMax(-1),
+  myMaxSegments(-1),
+  myBndPnt(AppParCurves_TangencyPoint)
+{
+}
 
 //=======================================================================
 //function : ProjLib_ComputeApprox
@@ -935,19 +978,32 @@ static Standard_Real ComputeTolV(const Handle(Adaptor3d_HSurface)& theSurf,
 ProjLib_ComputeApprox::ProjLib_ComputeApprox
   (const Handle(Adaptor3d_HCurve)   & C,
    const Handle(Adaptor3d_HSurface) & S,
-   const Standard_Real              Tol )
+   const Standard_Real              Tol):
+  myTolerance(Max(Tol, Precision::PApproximation())),
+  myDegMin(-1), myDegMax(-1),
+  myMaxSegments(-1),
+  myBndPnt(AppParCurves_TangencyPoint)
+{
+  Perform(C,  S);
+}
+
+//=======================================================================
+//function : Perform
+//purpose  : 
+//=======================================================================
+
+void ProjLib_ComputeApprox::Perform
+  (const Handle(Adaptor3d_HCurve)   & C,
+   const Handle(Adaptor3d_HSurface) & S )
 {
   // if the surface is a plane and the curve a BSpline or a BezierCurve,
   // don`t make an Approx but only the projection of the poles.
 
-  myTolerance = Max(Precision::PApproximation(),Tol);
   Standard_Integer NbKnots, NbPoles ;
   GeomAbs_CurveType   CType = C->GetType();
   GeomAbs_SurfaceType SType = S->GetType();
 
-  Standard_Boolean SurfIsAnal = (SType != GeomAbs_BSplineSurface) &&
-                                (SType != GeomAbs_BezierSurface)  &&
-                                (SType != GeomAbs_OtherSurface)     ;
+  Standard_Boolean SurfIsAnal = ProjLib::IsAnaSurf(S);
 
   Standard_Boolean CurvIsAnal = (CType != GeomAbs_BSplineCurve) &&
                                 (CType != GeomAbs_BezierCurve)  &&
@@ -1055,21 +1111,43 @@ ProjLib_ComputeApprox::ProjLib_ComputeApprox
 #endif    
 
 //-----------
-    Standard_Integer Deg1, Deg2;
+    Standard_Integer Deg1 = 8, Deg2;
     if(simplecase) {
-      Deg1 = 8; 
       Deg2 = 10; 
     }
     else {
-      Deg1 = 8; 
       Deg2 = 12; 
     }
+    if(myDegMin > 0)
+    {
+      Deg1 = myDegMin; 
+    }
+    //
+    if(myDegMax > 0)
+    {
+      Deg2 = myDegMax; 
+    }
+    //
+    Standard_Integer aMaxSegments = 1000;
+    if(myMaxSegments > 0)
+    {
+      aMaxSegments = myMaxSegments;
+    }
+    AppParCurves_Constraint aFistC = AppParCurves_TangencyPoint, aLastC = AppParCurves_TangencyPoint;
+    if(myBndPnt != AppParCurves_TangencyPoint)
+    {
+      aFistC = myBndPnt; 
+      aLastC = myBndPnt;
+    }
+  
 //-------------
     const Standard_Real aTolU = ComputeTolU(S, myTolerance);
     const Standard_Real aTolV = ComputeTolV(S, myTolerance);
     const Standard_Real aTol2d = Max(Sqrt(aTolU*aTolU + aTolV*aTolV), Precision::PConfusion());
 
-    Approx_FitAndDivide2d Fit(F, Deg1, Deg2, myTolerance, aTol2d, Standard_True);
+    Approx_FitAndDivide2d Fit(Deg1, Deg2, myTolerance, aTol2d, Standard_True, aFistC, aLastC);
+    Fit.SetMaxSegments(aMaxSegments);
+    Fit.Perform(F);
 
     Standard_Real aNewTol2d = 0;
     if(Fit.IsAllApproximated()) {
@@ -1085,8 +1163,7 @@ ProjLib_ComputeApprox::ProjLib_ComputeApprox
               aNewTol2d = Max(aNewTol2d, Tol2d);
 	      AppParCurves_MultiCurve MC = Fit.Value( i);       //Charge la Ieme Curve
 	      TColgp_Array1OfPnt2d Poles2d( 1, MC.Degree() + 1);//Recupere les poles
-	      MC.Curve(1, Poles2d);
-            
+	      MC.Curve(1, Poles2d);        
 	      Conv.AddCurve(Poles2d);
       }
 
@@ -1111,13 +1188,6 @@ ProjLib_ComputeApprox::ProjLib_ComputeApprox
                               C->LastParameter(),
                               NewKnots);
 
-      /*cout << endl;
-      for (int i = 1; i <= NbPoles; i++)
-      {
-        cout << NewPoles.Value(i).X() << " " << NewPoles.Value(i).Y() << endl;
-      }
-      cout << endl; */
-
       // il faut recadrer les poles de debut et de fin:
       // ( Car pour les problemes de couture, on a du ouvrir l`intervalle
       // de definition de la courbe.)
@@ -1127,6 +1197,17 @@ ProjLib_ComputeApprox::ProjLib_ComputeApprox
                                            NewKnots,
                                            NewMults,
                                            Conv.Degree());
+
+      if(aFistC == AppParCurves_PassPoint || aLastC == AppParCurves_PassPoint)
+      {
+        // try to smoother the Curve GeomAbs_C1.
+        Standard_Integer aDeg = myBSpline->Degree();
+        Standard_Boolean OK = Standard_True;
+        Standard_Real aSmoothTol = Max(Precision::Confusion(), aNewTol2d);
+        for (Standard_Integer ij = 2; ij < NbKnots; ij++) {
+          OK = OK && myBSpline->RemoveKnot(ij, aDeg-1, aSmoothTol);  
+        }
+      }
     }
     else {
       Standard_Integer NbCurves = Fit.NbMultiCurves();
@@ -1183,7 +1264,7 @@ ProjLib_ComputeApprox::ProjLib_ComputeApprox
         break;
       }
     default:
-      Standard_NoSuchObject::Raise("ProjLib_ComputeApprox::Value");
+      throw Standard_NoSuchObject("ProjLib_ComputeApprox::Value");
     }
     Standard_Boolean ToMirror = Standard_False;
     Standard_Real du = 0., dv = 0.;
@@ -1223,6 +1304,42 @@ ProjLib_ComputeApprox::ProjLib_ComputeApprox
       }
     }
   }
+}
+//=======================================================================
+//function : SetTolerance
+//purpose  : 
+//=======================================================================
+void ProjLib_ComputeApprox::SetTolerance(const Standard_Real theTolerance)
+{
+  myTolerance = theTolerance;
+}
+
+//=======================================================================
+//function : SetDegree
+//purpose  : 
+//=======================================================================
+void ProjLib_ComputeApprox::SetDegree(const Standard_Integer theDegMin, 
+                                       const Standard_Integer theDegMax)
+{
+  myDegMin = theDegMin;
+  myDegMax = theDegMax;
+}
+//=======================================================================
+//function : SetMaxSegments
+//purpose  : 
+//=======================================================================
+void ProjLib_ComputeApprox::SetMaxSegments(const Standard_Integer theMaxSegments)
+{
+  myMaxSegments = theMaxSegments;
+}
+
+//=======================================================================
+//function : SetBndPnt
+//purpose  : 
+//=======================================================================
+void ProjLib_ComputeApprox::SetBndPnt(const AppParCurves_Constraint theBndPnt)
+{
+  myBndPnt = theBndPnt;
 }
 
 //=======================================================================

@@ -15,10 +15,22 @@
 // commercial license or contractual agreement.
 
 #ifdef DRAW
-#include <TestTopOpeDraw_TTOT.hxx>
-#include <TopOpeBRepTool_DRAW.hxx>
+static void CurveToString(const GeomAbs_CurveType t, TCollection_AsciiString& N)
+{
+  switch(t) {
+  case GeomAbs_Line                : N = "LINE";              break;
+  case GeomAbs_Circle              : N = "CIRCLE";            break;
+  case GeomAbs_Ellipse             : N = "ELLIPSE";           break;
+  case GeomAbs_Hyperbola           : N = "HYPERBOLA";         break;
+  case GeomAbs_Parabola            : N = "PARABOLA";          break;
+  case GeomAbs_BezierCurve         : N = "BEZIER";       break;
+  case GeomAbs_BSplineCurve        : N = "BSPLINE";      break;
+  case GeomAbs_OffsetCurve         : N = "OFFSET";       break;
+  case GeomAbs_OtherCurve          : N = "OTHER";        break;
+  default                          : N = "UNKNOWN";           break;  
+  }
+}
 #endif
-
 
 #include <Bnd_Box.hxx>
 #include <BRep_Tool.hxx>
@@ -317,7 +329,7 @@ Standard_Boolean EdgesIntersector_checkT1D(const TopoDS_Edge& E1,const TopoDS_Ed
   //modified by NIZNHY-PKV Thu Nov  4 15:44:13 1999 to
 
   if (PC1.IsNull()) 
-    Standard_Failure::Raise("EdgesIntersector::Perform : no 2d curve");
+    throw Standard_Failure("EdgesIntersector::Perform : no 2d curve");
   
   myCurve1.Load(PC1);
   BRep_Tool::UVPoints(myEdge1,myFace1,pfirst,plast);
@@ -454,8 +466,8 @@ Standard_Boolean EdgesIntersector_checkT1D(const TopoDS_Edge& E1,const TopoDS_Ed
 #ifdef DRAW
     GeomAbs_CurveType t1 = myCurve1.GetType();
     GeomAbs_CurveType t2 = myCurve2.GetType();
-    TCollection_AsciiString s1;TestTopOpeDraw_TTOT::CurveToString(t1,s1);cout<<" "<<s1;
-    TCollection_AsciiString s2;TestTopOpeDraw_TTOT::CurveToString(t2,s2);cout<<" "<<s2;
+    TCollection_AsciiString s1;CurveToString(t1,s1);cout<<" "<<s1;
+    TCollection_AsciiString s2;CurveToString(t2,s2);cout<<" "<<s2;
 #endif
     cout<<endl;
     cout<<"                   tol1 = "<<tol1<<endl;
@@ -844,9 +856,7 @@ const TopoDS_Shape& TopOpeBRep_EdgesIntersector::Edge(const Standard_Integer Ind
 {
   if      ( Index == 1 ) return myEdge1;
   else if ( Index == 2 ) return myEdge2;
-  else Standard_Failure::Raise("TopOpeBRep_EdgesIntersector::Edge");
-  
-  return myEdge1;
+  else throw Standard_Failure("TopOpeBRep_EdgesIntersector::Edge");
 }
 
 //=======================================================================
@@ -857,9 +867,7 @@ const Geom2dAdaptor_Curve& TopOpeBRep_EdgesIntersector::Curve(const Standard_Int
 {
   if      ( Index == 1 ) return myCurve1;
   else if ( Index == 2 ) return myCurve2;
-  else Standard_Failure::Raise("TopOpeBRep_EdgesIntersector::Curve");
-  
-  return myCurve1;
+  else throw Standard_Failure("TopOpeBRep_EdgesIntersector::Curve");
 }
 
 //=======================================================================
@@ -870,9 +878,7 @@ const TopoDS_Shape& TopOpeBRep_EdgesIntersector::Face(const Standard_Integer Ind
 {
   if      ( Index == 1 ) return myFace1;
   else if ( Index == 2 ) return myFace2;
-  else Standard_Failure::Raise("TopOpeBRep_EdgesIntersector::Face");
-  
-  return myFace1;
+  else throw Standard_Failure("TopOpeBRep_EdgesIntersector::Face");
 }
 
 //=======================================================================
@@ -883,9 +889,7 @@ const BRepAdaptor_Surface& TopOpeBRep_EdgesIntersector::Surface(const Standard_I
 {
   if      ( Index == 1 ) return mySurface1->ChangeSurface();
   else if ( Index == 2 ) return mySurface2->ChangeSurface();
-  else Standard_Failure::Raise("TopOpeBRep_EdgesIntersector::Surface");
-  
-  return mySurface1->ChangeSurface();
+  else throw Standard_Failure("TopOpeBRep_EdgesIntersector::Surface");
 }
 
 //=======================================================================
@@ -979,7 +983,7 @@ const TopOpeBRep_Point2d& TopOpeBRep_EdgesIntersector::Point() const
 //=======================================================================
 const TopOpeBRep_Point2d& TopOpeBRep_EdgesIntersector::Point(const Standard_Integer I) const
 {
-  if (I<1 || I>mysp2d.Length()) Standard_Failure::Raise("TopOpeBRep_EdgesIntersector::Point(I)");
+  if (I<1 || I>mysp2d.Length()) throw Standard_Failure("TopOpeBRep_EdgesIntersector::Point(I)");
   return mysp2d(I);
 }
 

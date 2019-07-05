@@ -40,8 +40,14 @@ template < class TheKey1Type,
            class Hasher2 = NCollection_DefaultHasher<TheKey2Type> >
 class NCollection_DoubleMap : public NCollection_BaseMap
 {
+public:
+  //! STL-compliant typedef for key1 type
+  typedef TheKey1Type key1_type;
+  //! STL-compliant typedef for key2 type
+  typedef TheKey2Type key2_type;
+
+public:
   // **************** Adaptation of the TListNode to the DOUBLEmap
- public:
   class DoubleMapNode : public NCollection_TListNode<TheKey2Type>
   {
   public:
@@ -112,21 +118,18 @@ class NCollection_DoubleMap : public NCollection_BaseMap
       Standard_NoSuchObject_Raise_if (!More(), "NCollection_DoubleMap::Iterator::Value");
       return ((DoubleMapNode *) myNode)->Value();
     }
-    //! Value change access - denied
-    TheKey2Type& ChangeValue(void) const
-    {  
-      Standard_ImmutableObject::Raise("NCollection_DoubleMap::Iterator::ChangeValue");
-      return * (TheKey2Type *) NULL; // For compiler
-    }
   };
 
  public:
   // ---------- PUBLIC METHODS ------------
 
+  //! Empty constructor.
+  NCollection_DoubleMap() : NCollection_BaseMap (1, Standard_False, Handle(NCollection_BaseAllocator)()) {}
+
   //! Constructor
-  NCollection_DoubleMap (const Standard_Integer NbBuckets=1,
-                     const Handle(NCollection_BaseAllocator)& theAllocator = 0L)
-    : NCollection_BaseMap (NbBuckets, Standard_False, theAllocator) {}
+  explicit NCollection_DoubleMap (const Standard_Integer theNbBuckets,
+                                  const Handle(NCollection_BaseAllocator)& theAllocator = 0L)
+  : NCollection_BaseMap (theNbBuckets, Standard_False, theAllocator) {}
 
   //! Copy constructor
   NCollection_DoubleMap (const NCollection_DoubleMap& theOther)
@@ -148,20 +151,24 @@ class NCollection_DoubleMap : public NCollection_BaseMap
       return *this;
 
     Clear();
-    ReSize (theOther.Extent()-1);
-    Iterator anIter(theOther);
-    for (; anIter.More(); anIter.Next())
+    Standard_Integer anExt = theOther.Extent();
+    if (anExt)
     {
-      TheKey1Type aKey1 = anIter.Key1();
-      TheKey2Type aKey2 = anIter.Key2();
-      Standard_Integer iK1 = Hasher1::HashCode (aKey1, NbBuckets());
-      Standard_Integer iK2 = Hasher2::HashCode (aKey2, NbBuckets());
-      DoubleMapNode * pNode = new (this->myAllocator) DoubleMapNode (aKey1, aKey2, 
-                                                                     myData1[iK1], 
-                                                                     myData2[iK2]);
-      myData1[iK1] = pNode;
-      myData2[iK2] = pNode;
-      Increment();
+      ReSize (anExt-1);
+      Iterator anIter(theOther);
+      for (; anIter.More(); anIter.Next())
+      {
+        TheKey1Type aKey1 = anIter.Key1();
+        TheKey2Type aKey2 = anIter.Key2();
+        Standard_Integer iK1 = Hasher1::HashCode (aKey1, NbBuckets());
+        Standard_Integer iK2 = Hasher2::HashCode (aKey2, NbBuckets());
+        DoubleMapNode * pNode = new (this->myAllocator) DoubleMapNode (aKey1, aKey2, 
+          myData1[iK1], 
+          myData2[iK2]);
+        myData1[iK1] = pNode;
+        myData2[iK2] = pNode;
+        Increment();
+      }
     }
     return *this;
   }
@@ -219,14 +226,14 @@ class NCollection_DoubleMap : public NCollection_BaseMap
     while (pNode) 
     {
       if (Hasher1::IsEqual (pNode->Key1(), theKey1))
-        Standard_MultiplyDefined::Raise("NCollection_DoubleMap:Bind");
+        throw Standard_MultiplyDefined("NCollection_DoubleMap:Bind");
       pNode = (DoubleMapNode *) pNode->Next();
     }
     pNode = (DoubleMapNode *) myData2[iK2];
     while (pNode) 
     {
       if (Hasher2::IsEqual (pNode->Key2(), theKey2))
-        Standard_MultiplyDefined::Raise("NCollection_DoubleMap:Bind");
+        throw Standard_MultiplyDefined("NCollection_DoubleMap:Bind");
       pNode = (DoubleMapNode *) pNode->Next();
     }
     pNode = new (this->myAllocator) DoubleMapNode (theKey1, theKey2, 
@@ -403,8 +410,7 @@ class NCollection_DoubleMap : public NCollection_BaseMap
         return pNode1->Key2();
       pNode1 = (DoubleMapNode*) pNode1->Next();
     }
-    Standard_NoSuchObject::Raise("NCollection_DoubleMap::Find1");
-    return pNode1->Key2(); // This for compiler
+    throw Standard_NoSuchObject("NCollection_DoubleMap::Find1");
   }
 
   //! Find2
@@ -419,8 +425,7 @@ class NCollection_DoubleMap : public NCollection_BaseMap
         return pNode2->Key1();
       pNode2 = (DoubleMapNode*) pNode2->Next2();
     }
-    Standard_NoSuchObject::Raise("NCollection_DoubleMap::Find2");
-    return pNode2->Key1(); // This for compiler
+    throw Standard_NoSuchObject("NCollection_DoubleMap::Find2");
   }
 
   //! Clear data. If doReleaseMemory is false then the table of

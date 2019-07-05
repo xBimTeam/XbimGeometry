@@ -47,11 +47,17 @@ void GeomFill_SnglrFunc::SetRatio(const Standard_Real Ratio)
  Standard_Integer GeomFill_SnglrFunc::NbIntervals(const GeomAbs_Shape S) const
 {
   GeomAbs_Shape HCS=GeomAbs_C0;
-  switch(S) {
-  case GeomAbs_C0: HCS = GeomAbs_C2; break;
-  case GeomAbs_C1: HCS = GeomAbs_C3; break;
-  case GeomAbs_C2: HCS = GeomAbs_CN; break;
-  default: Standard_DomainError::Raise();
+  if (S == GeomAbs_C0)
+  {
+    HCS = GeomAbs_C2;
+  }
+  else if (S == GeomAbs_C1)
+  {
+    HCS = GeomAbs_C3;
+  }
+  else if (S >= GeomAbs_C2)
+  {
+    HCS = GeomAbs_CN;
   }
   return myHCurve->NbIntervals(HCS);
 }
@@ -59,11 +65,17 @@ void GeomFill_SnglrFunc::SetRatio(const Standard_Real Ratio)
  void GeomFill_SnglrFunc::Intervals(TColStd_Array1OfReal& T,const GeomAbs_Shape S) const
 {
   GeomAbs_Shape HCS=GeomAbs_C0;
-  switch(S) {
-  case GeomAbs_C0: HCS = GeomAbs_C2; break;
-  case GeomAbs_C1: HCS = GeomAbs_C3; break;
-  case GeomAbs_C2: HCS = GeomAbs_CN; break;
-  default: Standard_DomainError::Raise();
+  if (S == GeomAbs_C0)
+  {
+    HCS = GeomAbs_C2;
+  }
+  else if (S == GeomAbs_C1)
+  {
+    HCS = GeomAbs_C3;
+  }
+  else if (S >= GeomAbs_C2)
+  {
+    HCS = GeomAbs_CN;
   }
   myHCurve->Intervals(T, HCS);
 }
@@ -153,12 +165,9 @@ gp_Vec GeomFill_SnglrFunc::DN(const Standard_Real U,const Standard_Integer N) co
       D3(U,C,D1C,D2C,D3C);
       return D3C;
     default:
-      Standard_NotImplemented::Raise("Exception: Derivative order is greater than 3. "
+      throw Standard_NotImplemented("Exception: Derivative order is greater than 3. "
         "Cannot compute of derivative.");
     }
-   
-  return gp_Vec();
-
   }
 
  Standard_Real GeomFill_SnglrFunc::Resolution(const Standard_Real R3D) const

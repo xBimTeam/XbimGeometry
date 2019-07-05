@@ -25,6 +25,7 @@
 #include <NCollection_Vec2.hxx>
 #include <NCollection_Vec3.hxx>
 #include <NCollection_Vector.hxx>
+#include <Standard_Type.hxx>
 
 // GCC supports shrink function only in C++11 mode
 #if defined(_BVH_USE_STD_VECTOR_) && defined(_MSC_VER) && !defined(__INTEL_COMPILER)
@@ -246,7 +247,14 @@ namespace BVH
       if (Size (theArray) == theCount)
       {
 #ifdef _STD_VECTOR_SHRINK
+
+#if(defined(_MSC_VER) && (_MSC_VER < 1600))
+        BVH_ArrayNt aTmpArray(theArray);
+        theArray.swap(aTmpArray);
+#else
         theArray.shrink_to_fit();
+#endif
+
 #endif
       }
       else

@@ -25,11 +25,16 @@
 #include <TopoDS_Face.hxx>
 #include <TopAbs_Orientation.hxx>
 #include <BOPAlgo_BuilderArea.hxx>
-#include <BOPCol_BaseAllocator.hxx>
+#include <NCollection_BaseAllocator.hxx>
 class TopoDS_Face;
 
 
-//! The algorithm to build faces from set of edges
+//! The algorithm to build new faces from the given faces and
+//! set of edges lying on this face.
+//!
+//! The algorithm returns the following Error statuses:
+//! - *BOPAlgo_AlertNullInputShapes* - in case the given face is a null shape.
+//!
 class BOPAlgo_BuilderFace  : public BOPAlgo_BuilderArea
 {
 public:
@@ -40,7 +45,7 @@ public:
   Standard_EXPORT BOPAlgo_BuilderFace();
 Standard_EXPORT virtual ~BOPAlgo_BuilderFace();
   
-  Standard_EXPORT BOPAlgo_BuilderFace(const BOPCol_BaseAllocator& theAllocator);
+  Standard_EXPORT BOPAlgo_BuilderFace(const Handle(NCollection_BaseAllocator)& theAllocator);
   
   //! Sets the face generatix
   Standard_EXPORT void SetFace (const TopoDS_Face& theFace);
@@ -53,11 +58,7 @@ Standard_EXPORT virtual ~BOPAlgo_BuilderFace();
   
   Standard_EXPORT TopAbs_Orientation Orientation() const;
 
-
-
-
 protected:
-
   
   //! Collect the edges that
   //! a) are internal

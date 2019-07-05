@@ -58,9 +58,11 @@ public:
  public:
   // ---------- PUBLIC METHODS ------------
 
+  //! Empty constructor.
+  NCollection_List() : NCollection_BaseList(Handle(NCollection_BaseAllocator)()) {}
+
   //! Constructor
-  NCollection_List(const Handle(NCollection_BaseAllocator)& theAllocator=0L) :
-    NCollection_BaseList(theAllocator) {}
+  explicit NCollection_List(const Handle(NCollection_BaseAllocator)& theAllocator) : NCollection_BaseList(theAllocator) {}
 
   //! Copy constructor
   NCollection_List (const NCollection_List& theOther) :
@@ -193,7 +195,8 @@ public:
   void RemoveFirst (void) 
   { PRemoveFirst (ListNode::delNode); }
 
-  //! Remove item
+  //! Remove item pointed by iterator theIter; 
+  //! theIter is then set to the next item
   void Remove (Iterator& theIter) 
   { 
     PRemove (theIter, ListNode::delNode); 

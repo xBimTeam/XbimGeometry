@@ -591,8 +591,13 @@ void IntPatch_PrmPrmIntersection::Perform (const Handle(Adaptor3d_HSurface)&    
 
                     Standard_Real TolTang = TolTangency;
                     Handle(IntPatch_WLine) wline = new IntPatch_WLine(PW.Line(),Standard_False,trans1,trans2);
+                    //the method PutVertexOnLine can reduce the number of points in <wline>
                     IntPatch_RstInt::PutVertexOnLine(wline,Surf1,D1,Surf2,Standard_True,TolTang);
+                    if (wline->NbPnts() < 2)
+                      continue;
                     IntPatch_RstInt::PutVertexOnLine(wline,Surf2,D2,Surf1,Standard_False,TolTang);
+                    if (wline->NbPnts() < 2)
+                      continue;
 
                     if(wline->NbVertex() == 0) {
                       IntPatch_Point vtx;
@@ -735,8 +740,13 @@ void IntPatch_PrmPrmIntersection::Perform (const Handle(Adaptor3d_HSurface)&    
 
                 Standard_Real TolTang = TolTangency;
                 Handle(IntPatch_WLine) wline = new IntPatch_WLine(PW.Line(),Standard_False,trans1,trans2);
+                //the method PutVertexOnLine can reduce the number of points in <wline>
                 IntPatch_RstInt::PutVertexOnLine(wline,Surf1,D1,Surf2,Standard_True,TolTang);
+                if (wline->NbPnts() < 2)
+                  continue;
                 IntPatch_RstInt::PutVertexOnLine(wline,Surf2,D2,Surf1,Standard_False,TolTang);
+                if (wline->NbPnts() < 2)
+                  continue;
 
                 if(wline->NbVertex() == 0) {
                   IntPatch_Point vtx;
@@ -999,7 +1009,10 @@ void IntPatch_PrmPrmIntersection::Perform (const Handle(Adaptor3d_HSurface)&    
                         vtx.SetParameter(wline->NbPnts());
                         wline->SetPoint(wline->NbPnts(),vtx);
                       }
+                      //the method PutVertexOnLine can reduce the number of points in <wline>
                       IntPatch_RstInt::PutVertexOnLine(wline,Surf1,D1,Surf1,Standard_True,TolTang);
+                      if (wline->NbPnts() < 2)
+                        continue;
                       if(wline->NbVertex() == 0) {
                         IntPatch_Point vtx;
                         IntSurf_PntOn2S POn2S = PW.Line()->Value(1);
@@ -1173,7 +1186,10 @@ void IntPatch_PrmPrmIntersection::Perform (const Handle(Adaptor3d_HSurface)&    
                       wline->SetPoint(wline->NbPnts(),vtx);
                     }
 
+                    //the method PutVertexOnLine can reduce the number of points in <wline>
                     IntPatch_RstInt::PutVertexOnLine(wline,Surf1,D1,Surf1,Standard_True,TolTang);
+                    if (wline->NbPnts() < 2)
+                      continue;
 
                     if(wline->NbVertex() == 0) {
                       IntPatch_Point vtx;
@@ -1218,7 +1234,7 @@ Handle(IntPatch_Line) IntPatch_PrmPrmIntersection::NewLine (const Handle(Adaptor
 { 
   Standard_Integer NbPnts = NbPntsToInsert + High - Low;
   if(NumLine>NbLines() || NumLine<1  || Low>=High ) 
-    Standard_OutOfRange::Raise(" IntPatch_PrmPrmIntersection NewLine "); 
+    throw Standard_OutOfRange(" IntPatch_PrmPrmIntersection NewLine ");
   //------------------------------------------------------------------
   //--  Indice     :   Low       Low+1     I    I+1         High    --
   //--                                                              --
@@ -1535,8 +1551,7 @@ void IntPatch_PrmPrmIntersection::Perform (const Handle(Adaptor3d_HSurface)&    
                                            const Standard_Real   Epsilon,
                                            const Standard_Real   Deflection,
                                            const Standard_Real   Increment,
-                                           IntSurf_ListOfPntOn2S& LOfPnts,
-                                           const Standard_Boolean RestrictLine)
+                                           IntSurf_ListOfPntOn2S& LOfPnts)
 {
   if (LOfPnts.IsEmpty()){
     done = Standard_True;
@@ -1772,10 +1787,13 @@ void IntPatch_PrmPrmIntersection::Perform (const Handle(Adaptor3d_HSurface)&    
 
               Standard_Real TolTang = TolTangency;
               Handle(IntPatch_WLine) wline = new IntPatch_WLine(PW.Line(),Standard_False,trans1,trans2);
-              if (RestrictLine){
-                IntPatch_RstInt::PutVertexOnLine(wline,Surf1,D1,Surf2,Standard_True,TolTang);
-                IntPatch_RstInt::PutVertexOnLine(wline,Surf2,D2,Surf1,Standard_False,TolTang);
-              }
+              //the method PutVertexOnLine can reduce the number of points in <wline>
+              IntPatch_RstInt::PutVertexOnLine(wline, Surf1, D1, Surf2, Standard_True, TolTang);
+              if (wline->NbPnts() < 2)
+                continue;
+              IntPatch_RstInt::PutVertexOnLine(wline, Surf2, D2, Surf1, Standard_False, TolTang);
+              if (wline->NbPnts() < 2)
+                continue;
 
               if(wline->NbVertex() == 0) {
                 IntPatch_Point vtx;
@@ -1921,8 +1939,13 @@ void IntPatch_PrmPrmIntersection::Perform(const Handle(Adaptor3d_HSurface)&    S
 
         Standard_Real TolTang = TolTangency;
         Handle(IntPatch_WLine) wline = new IntPatch_WLine(PW.Line(),Standard_False,trans1,trans2);
+        //the method PutVertexOnLine can reduce the number of points in <wline>
         IntPatch_RstInt::PutVertexOnLine(wline,Surf1,D1,Surf2,Standard_True,TolTang);
+        if (wline->NbPnts() < 2)
+          return;
         IntPatch_RstInt::PutVertexOnLine(wline,Surf2,D2,Surf1,Standard_False,TolTang);
+        if (wline->NbPnts() < 2)
+          return;
 
         //---------------
         if(wline->NbVertex() == 0) {
@@ -1945,9 +1968,9 @@ void IntPatch_PrmPrmIntersection::Perform(const Handle(Adaptor3d_HSurface)&    S
         //---------------
         SLin.Append(wline);
         empt = Standard_False;
-      }
-    }
-  }
+      } //if(PW.NbPoints()>2)
+    } //if(PW.IsDone())
+  } //if(HasStartPoint)
 }
 //==================================================================================
 // function : AdjustOnPeriodic
@@ -2072,6 +2095,7 @@ IntSurf_PntOn2S MakeNewPoint(const IntSurf_PntOn2S& replacePnt,
 
   Standard_Integer i;
   for (i = 0; i < 4; i++)
+  {
     if (Periods[i] != 0.)
     {
       if (Abs(NewParams[i] - OldParams[i]) >= 0.5*Periods[i])
@@ -2082,9 +2106,10 @@ IntSurf_PntOn2S MakeNewPoint(const IntSurf_PntOn2S& replacePnt,
           NewParams[i] -= Periods[i];
       }
     }
+  }
 
-    NewPoint.SetValue(NewParams[0], NewParams[1], NewParams[2], NewParams[3]);
-    return NewPoint;
+  NewPoint.SetValue(NewParams[0], NewParams[1], NewParams[2], NewParams[3]);
+  return NewPoint;
 }
 
 //==================================================================================
@@ -2450,8 +2475,13 @@ void IntPatch_PrmPrmIntersection::Perform (const Handle(Adaptor3d_HSurface)& Sur
                       Standard_Real TolTang = TolTangency;
                       Handle(IntPatch_WLine) wline = new IntPatch_WLine(PW.Line(),Standard_False,trans1,trans2);
                       wline->EnablePurging(!hasBeenAdded);
+                      //the method PutVertexOnLine can reduce the number of points in <wline>
                       IntPatch_RstInt::PutVertexOnLine(wline,Surf1,D1,Surf2,Standard_True,TolTang);
+                      if (wline->NbPnts() < 2)
+                        continue;
                       IntPatch_RstInt::PutVertexOnLine(wline,Surf2,D2,Surf1,Standard_False,TolTang);
+                      if (wline->NbPnts() < 2)
+                        continue;
                       if(wline->NbVertex() == 0)
                       {
                         IntPatch_Point vtx;
@@ -2659,8 +2689,13 @@ void IntPatch_PrmPrmIntersection::Perform (const Handle(Adaptor3d_HSurface)& Sur
                 Standard_Real TolTang = TolTangency;
                 Handle(IntPatch_WLine) wline = new IntPatch_WLine(PW.Line(),Standard_False,trans1,trans2);
                 wline->EnablePurging(!hasBeenAdded);
+                //the method PutVertexOnLine can reduce the number of points in <wline>
                 IntPatch_RstInt::PutVertexOnLine(wline,Surf1,D1,Surf2,Standard_True,TolTang);
+                if (wline->NbPnts() < 2)
+                  continue;
                 IntPatch_RstInt::PutVertexOnLine(wline,Surf2,D2,Surf1,Standard_False,TolTang);
+                if (wline->NbPnts() < 2)
+                  continue;
 
                 //---------------
                 if(wline->NbVertex() == 0)
@@ -2850,8 +2885,13 @@ void IntPatch_PrmPrmIntersection::Perform (const Handle(Adaptor3d_HSurface)& Sur
 
               Standard_Real TolTang = TolTangency;
               Handle(IntPatch_WLine) wline = new IntPatch_WLine(PW.Line(),Standard_False,trans1,trans2);
+              //the method PutVertexOnLine can reduce the number of points in <wline>
               IntPatch_RstInt::PutVertexOnLine(wline,Surf1,D1,Surf2,Standard_True,TolTang);
+              if (wline->NbPnts() < 2)
+                continue;
               IntPatch_RstInt::PutVertexOnLine(wline,Surf2,D2,Surf1,Standard_False,TolTang);
+              if (wline->NbPnts() < 2)
+                continue;
 
               //---------------
               if(wline->NbVertex() == 0)

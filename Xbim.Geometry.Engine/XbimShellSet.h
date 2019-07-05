@@ -48,12 +48,12 @@ namespace Xbim
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) ;
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D);
 			virtual void Add(IXbimGeometryObject^ solid);
-			virtual IXbimGeometryObjectSet^ Cut(IXbimSolidSet^ solids, double tolerance);
-			virtual IXbimGeometryObjectSet^ Cut(IXbimSolid^ solid, double tolerance);
-			virtual IXbimGeometryObjectSet^ Union(IXbimSolidSet^ solids, double tolerance);
-			virtual IXbimGeometryObjectSet^ Union(IXbimSolid^ solid, double tolerance);
-			virtual IXbimGeometryObjectSet^ Intersection(IXbimSolidSet^ solids, double tolerance);
-			virtual IXbimGeometryObjectSet^ Intersection(IXbimSolid^ solid, double tolerance);
+			virtual IXbimGeometryObjectSet^ Cut(IXbimSolidSet^ solids, double tolerance, ILogger^ logger);
+			virtual IXbimGeometryObjectSet^ Cut(IXbimSolid^ solid, double tolerance, ILogger^ logger);
+			virtual IXbimGeometryObjectSet^ Union(IXbimSolidSet^ solids, double tolerance, ILogger^ logger);
+			virtual IXbimGeometryObjectSet^ Union(IXbimSolid^ solid, double tolerance, ILogger^ logger);
+			virtual IXbimGeometryObjectSet^ Intersection(IXbimSolidSet^ solids, double tolerance, ILogger^ logger);
+			virtual IXbimGeometryObjectSet^ Intersection(IXbimSolid^ solid, double tolerance, ILogger^ logger);
 			virtual property bool IsPolyhedron{ bool get(); }
 			virtual void Union(double tolerance);
 #pragma endregion
@@ -66,7 +66,7 @@ namespace Xbim
 			// Inherited via XbimSetObject
 			virtual IXbimGeometryObject ^ Moved(IIfcPlacement ^ placement) override;
 
-			virtual IXbimGeometryObject ^ Moved(IIfcObjectPlacement ^ objectPlacement) override;
+			virtual IXbimGeometryObject ^ Moved(IIfcObjectPlacement ^ objectPlacement, ILogger^ logger) override;
 
 
 			// Inherited via XbimSetObject

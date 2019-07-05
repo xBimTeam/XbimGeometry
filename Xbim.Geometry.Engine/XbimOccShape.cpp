@@ -8,7 +8,7 @@
 #include <BRepCheck_Analyzer.hxx>
 #include <BRepMesh_IncrementalMesh.hxx>
 #include <Poly_Triangulation.hxx>
-#include <TShort_Array1OfShortReal.hxx>
+#include <TShort_Array1OfShortReal.hxx> 
 #include <BRep_Tool.hxx>
 #include <Poly.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
@@ -177,7 +177,7 @@ namespace Xbim
 				List<size_t>^ nodeLookup = pointLookup[faceIndex];
 				TopLoc_Location loc;
 				const Handle(Poly_Triangulation)& mesh = BRep_Tool::Triangulation(face, loc);
-				const TColgp_Array1OfPnt & nodes = mesh->Nodes();
+				/*const TColgp_Array1OfPnt & nodes = mesh->Nodes();*/
 				const Poly_Array1OfTriangle& triangles = mesh->Triangles();
 				Standard_Integer nbTriangles = mesh->NbTriangles();
 				bool faceReversed = face->IsReversed;
@@ -368,7 +368,7 @@ namespace Xbim
 			List<List<int>^>^ pointLookup = gcnew List<List<int>^>(faceCount);
 			List<XbimPoint3D>^ points = gcnew List<XbimPoint3D>(faceCount * 3);;
 
-			Dictionary<int, int>^ normalMap = gcnew Dictionary<int, int>();
+			/*Dictionary<int, int>^ normalMap = gcnew Dictionary<int, int>();*/
 			List<List<XbimPackedNormal>^>^ normalLookup = gcnew List<List<XbimPackedNormal>^>(faceCount);
 			
 			//First write out all the vertices
@@ -516,9 +516,9 @@ namespace Xbim
 						for (exp.Init(ccWire); exp.More(); exp.Next())
 						{
 							gp_Pnt p = BRep_Tool::Pnt(exp.CurrentVertex());
-							contour[j].Position.X = (float)p.X();
-							contour[j].Position.Y = (float)p.Y();
-							contour[j].Position.Z = (float)p.Z();
+							contour[j].Position.X = p.X();
+							contour[j].Position.Y = p.Y();
+							contour[j].Position.Z = p.Z();
 							j++;
 						}
 						if (contour->Length > 0)

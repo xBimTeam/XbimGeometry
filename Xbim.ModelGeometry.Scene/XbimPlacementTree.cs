@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Xbim.Common;
 using Xbim.Common.Geometry;
+using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc4.Interfaces;
 using Xbim.ModelGeometry.Scene.Extensions;
 
@@ -13,6 +14,20 @@ namespace Xbim.ModelGeometry.Scene
 {
     public class XbimPlacementTree
     {
+        /// <summary>
+        /// This function centralises the extraction of a product placement, but it needs the support of XbimPlacementTree and an XbimGeometryEngine
+        /// We should probably find a conceptual place for it somewhere in the scene, where these are cached.
+        /// </summary>
+        public static XbimMatrix3D GetTransform(IIfcProduct product, XbimPlacementTree tree, XbimGeometryEngine engine)
+        {
+            XbimMatrix3D placementTransform = XbimMatrix3D.Identity;
+            if (product.ObjectPlacement is IIfcLocalPlacement)
+                placementTransform = tree[product.ObjectPlacement.EntityLabel];
+            else if (product.ObjectPlacement is IIfcGridPlacement)
+                placementTransform = engine.ToMatrix3D((IIfcGridPlacement)product.ObjectPlacement,null);
+            return placementTransform;
+        }
+
         /// <summary>
         ///     Builds a placement tree of all ifcLocalPlacements
         /// </summary>

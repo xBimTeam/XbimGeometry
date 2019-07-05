@@ -10,7 +10,7 @@
 #include <BRep_Builder.hxx>
 using System::Runtime::InteropServices::Marshal;
 using namespace System::Threading;
-namespace Xbim
+namespace Xbim 
 {
 	namespace Geometry
 	{

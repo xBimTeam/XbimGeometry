@@ -19,24 +19,26 @@
 #include <Standard_Type.hxx>
 
 #include <BOPDS_ListOfPaveBlock.hxx>
-#include <BOPCol_ListOfInteger.hxx>
-#include <MMgt_TShared.hxx>
-#include <BOPCol_BaseAllocator.hxx>
-#include <Standard_Integer.hxx>
+#include <NCollection_BaseAllocator.hxx>
 #include <Standard_Boolean.hxx>
+#include <Standard_Integer.hxx>
+#include <Standard_Transient.hxx>
+#include <TColStd_ListOfInteger.hxx>
 class BOPDS_PaveBlock;
 
 
 class BOPDS_CommonBlock;
-DEFINE_STANDARD_HANDLE(BOPDS_CommonBlock, MMgt_TShared)
+DEFINE_STANDARD_HANDLE(BOPDS_CommonBlock, Standard_Transient)
 
 
-//! The class BOPDS_CommonBlock is to store
-//! the information about pave blocks that have
-//! geometry coincidence (in  terms of a tolerance)  with
-//! a) other pave block(s)
-//! b) face(s)
-class BOPDS_CommonBlock : public MMgt_TShared
+//! The class BOPDS_CommonBlock is to store the information
+//! about pave blocks that have geometrical coincidence
+//! (in terms of a tolerance) with:<br>
+//! a) other pave block(s);<br>
+//! b) face(s).<br>
+//! First pave block in the common block (real pave block)
+//! is always a pave block with the minimal index of the original edge.
+class BOPDS_CommonBlock : public Standard_Transient
 {
 
 public:
@@ -49,7 +51,7 @@ public:
 
   //! Contructor
   //! <theAllocator> - the allocator to manage the memory
-  Standard_EXPORT BOPDS_CommonBlock(const BOPCol_BaseAllocator& theAllocator);
+  Standard_EXPORT BOPDS_CommonBlock(const Handle(NCollection_BaseAllocator)& theAllocator);
   
 
   //! Modifier
@@ -62,7 +64,7 @@ public:
   //! Adds the list of pave blocks <aLPB>
   //! to the list of pave blocks
   //! of the common block
-  Standard_EXPORT void AddPaveBlocks (const BOPDS_ListOfPaveBlock& aLPB);
+  Standard_EXPORT void SetPaveBlocks (const BOPDS_ListOfPaveBlock& aLPB);
   
 
   //! Modifier
@@ -75,13 +77,13 @@ public:
   //! Modifier
   //! Sets the list of indices of faces <aLF>
   //! of the common block
-  Standard_EXPORT void SetFaces (const BOPCol_ListOfInteger& aLF);
+  Standard_EXPORT void SetFaces (const TColStd_ListOfInteger& aLF);
 
   //! Modifier
   //! Appends the list of indices of faces <aLF>
   //! to the list of indices of faces
   //! of the common block (the input list is emptied)
-  Standard_EXPORT void AppendFaces(BOPCol_ListOfInteger& aLF);
+  Standard_EXPORT void AppendFaces(TColStd_ListOfInteger& aLF);
 
 
   //! Selector
@@ -93,7 +95,7 @@ public:
   //! Selector
   //! Returns the list of indices of faces
   //! of the common block
-  Standard_EXPORT const BOPCol_ListOfInteger& Faces() const;
+  Standard_EXPORT const TColStd_ListOfInteger& Faces() const;
   
 
   //! Selector
@@ -147,29 +149,21 @@ public:
   
   Standard_EXPORT void Dump() const;
 
+  //! Moves the pave blocks in the list to make the given
+  //! pave block to be the first.
+  //! It will be representative for the whole group.
+  Standard_EXPORT void SetRealPaveBlock(const Handle(BOPDS_PaveBlock)& thePB);
 
 
-
-  DEFINE_STANDARD_RTTIEXT(BOPDS_CommonBlock,MMgt_TShared)
+  DEFINE_STANDARD_RTTIEXT(BOPDS_CommonBlock,Standard_Transient)
 
 protected:
 
-
   BOPDS_ListOfPaveBlock myPaveBlocks;
-  BOPCol_ListOfInteger myFaces;
-
+  TColStd_ListOfInteger myFaces;
 
 private:
 
-
-
-
 };
-
-
-
-
-
-
 
 #endif // _BOPDS_CommonBlock_HeaderFile

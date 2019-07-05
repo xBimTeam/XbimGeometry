@@ -63,7 +63,7 @@ Standard_Integer HashCodes (const Standard_CString Value,
 #ifdef __APPLE__
   // There are a lot of *_l functions availalbe on Mac OS X - we use them
   #define SAVE_TL()
-#elif defined(_WIN32) && !defined(__MINGW32__)
+#elif defined(_MSC_VER)
   // MSVCRT has equivalents with slightly different syntax
   #define SAVE_TL()
   #define strtod_l(thePtr, theNextPtr, theLocale)                _strtod_l(thePtr, theNextPtr, theLocale)
@@ -76,7 +76,7 @@ Standard_Integer HashCodes (const Standard_CString Value,
   // and newlocale/uselocale/freelocale to switch locale within current thread only.
   // So we switch to C locale temporarily
   #define SAVE_TL() Standard_CLocaleSentry aLocaleSentry;
-  #ifndef HAVE_XLOCALE_H
+  #ifndef OCCT_CLOCALE_POSIX2008
     // glibc version for android platform use locale-independent implementation of
     // strtod, strtol, strtoll functions. For other system with locale-depended
     // implementations problems may appear if "C" locale is not set explicitly.
@@ -90,10 +90,12 @@ Standard_Integer HashCodes (const Standard_CString Value,
   #define vfprintf_l(theFile,   theLocale, theFormat, theArgPtr) vfprintf(theFile,   theFormat, theArgPtr)
 #endif
 
+/*
 double Strtod (const char* theStr, char** theNextPtr)
 {
   return strtod_l (theStr, theNextPtr, Standard_CLocaleSentry::GetCLocale());
 }
+*/
 
 double Atof (const char* theStr)
 {

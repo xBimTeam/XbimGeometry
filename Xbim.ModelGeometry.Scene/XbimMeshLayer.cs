@@ -147,6 +147,7 @@ namespace Xbim.ModelGeometry.Scene
         /// Create a new layer that will display meshes in the specified colour
         /// If the mesh geometry item has a style specified in the IFC definition sub layers will be created for each style
         /// </summary>
+        /// <param name="m">a Model</param>
         /// <param name="colour"></param>
         public XbimMeshLayer(IModel m, XbimColour colour)
         {
@@ -231,7 +232,9 @@ namespace Xbim.ModelGeometry.Scene
         /// <param name="product">The product the geometry represents (this may be a partial representation)</param>
         /// <param name="transform">Transform the geometry to a new location or rotation</param>
         /// <param name="deflection">Deflection for triangulating curves, if null default defelction for the model is used</param>
-        public XbimMeshFragment Add(IXbimGeometryModel geometryModel, IfcProduct product, XbimMatrix3D transform, double? deflection = null, short modelId=0)
+        /// <param name="modelId">An optional model ID</param>
+        public XbimMeshFragment Add(IXbimGeometryModel geometryModel, IfcProduct product, XbimMatrix3D transform, 
+            double? deflection = null, short modelId=0)
         {
             return Hidden.Add(geometryModel, product, transform, deflection, modelId);
         }
@@ -243,6 +246,7 @@ namespace Xbim.ModelGeometry.Scene
         /// </summary>
         /// <param name="geomData"></param>
         /// <param name="model"></param>
+        /// <param name="modelId"></param>
         public void AddToHidden(XbimGeometryData geomData, IModel model, short modelId)
         {
             var addingSuccessfull = Hidden.Add(geomData, modelId); // this is where the geometry is added to the main layer.

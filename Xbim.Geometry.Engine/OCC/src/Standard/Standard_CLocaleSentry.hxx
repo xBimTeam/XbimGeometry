@@ -20,23 +20,25 @@
 
 #include <locale.h>
 
-#ifndef HAVE_XLOCALE_H
-  //! "xlocale.h" available in Mac OS X and glibc (Linux) for a long time as an extension
-  //! and become part of POSIX since '2008.
-  //! Notice that this is impossible to test (_POSIX_C_SOURCE >= 200809L)
-  //! since POSIX didn't declared such identifier.
+#if defined(__APPLE__)
+  #include <xlocale.h>
+#endif
+
+#ifndef OCCT_CLOCALE_POSIX2008
+  //! @def OCCT_CLOCALE_POSIX2008
+  //!
+  //! POSIX.1-2008 extends C locale API by providing methods like newlocale/freelocale/uselocale.
+  //! Presence of this extension cannot be checked in straightforward way (like (_POSIX_C_SOURCE >= 200809L))
+  //! due to missing such declarations in standard.
+  //! On macOS new functions are declared within "xlocale.h" header (the same is for glibc, but this header has been removed since glibc 2.26).
   #if defined(__APPLE__)
-    #define HAVE_XLOCALE_H
+    #define OCCT_CLOCALE_POSIX2008
   #endif
 
   //! We check _GNU_SOURCE for glibc extensions here and it is always defined by g++ compiler.
   #if defined(_GNU_SOURCE) && !defined(__ANDROID__)
-    #define HAVE_XLOCALE_H
+    #define OCCT_CLOCALE_POSIX2008
   #endif
-#endif // ifndef HAVE_LOCALE_H
-
-#ifdef HAVE_XLOCALE_H
-  #include <xlocale.h>
 #endif
 
 #if !defined(__ANDROID__)
@@ -63,9 +65,9 @@ public:
 
 public:
 
-#ifdef HAVE_XLOCALE_H
+#ifdef OCCT_CLOCALE_POSIX2008
   typedef  locale_t clocale_t;
-#elif defined(_WIN32) && !defined(__MINGW32__)
+#elif defined(_MSC_VER)
   typedef _locale_t clocale_t;
 #else
   typedef void*     clocale_t;
@@ -78,7 +80,7 @@ public:
 private:
 
   void* myPrevLocale;       //!< previous locale, platform-dependent pointer!
-#ifdef _WIN32
+#ifdef _MSC_VER
   int   myPrevTLocaleState; //!< previous thread-locale state, MSVCRT-specific
 #endif
 

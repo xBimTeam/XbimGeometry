@@ -238,17 +238,15 @@ public:
   // ---------- PUBLIC METHODS ----------
 
   /**
+   * Empty constructor.
+   */
+  NCollection_UBTree() : myRoot(0L), myLastNode(0L), myAlloc (NCollection_BaseAllocator::CommonBaseAllocator()) {}
+
+  /**
    * Constructor.
    */
-  NCollection_UBTree
-    (const Handle(NCollection_BaseAllocator)& theAllocator=0L)
-      : myRoot(0L), myLastNode(0L)
-  {
-    if (theAllocator.IsNull())
-      myAlloc = NCollection_BaseAllocator::CommonBaseAllocator();
-    else
-      myAlloc = theAllocator;
-  }
+  explicit NCollection_UBTree (const Handle(NCollection_BaseAllocator)& theAllocator)
+  : myRoot(0L), myLastNode(0L), myAlloc (!theAllocator.IsNull() ? theAllocator : NCollection_BaseAllocator::CommonBaseAllocator()) {}
 
   /**
    * Update the tree with a new object and its bounding box.
@@ -259,8 +257,7 @@ public:
    * @return
    *   always True
    */
-  Standard_EXPORT virtual Standard_Boolean Add (const TheObjType& theObj,
-                                                const TheBndType& theBnd);
+  virtual Standard_Boolean Add (const TheObjType& theObj, const TheBndType& theBnd);
 
   /**
    * Searches in the tree all objects conforming to the given selector.
@@ -325,8 +322,7 @@ public:
    * @return
    *   the number of objects accepted
    */
-  Standard_EXPORT Standard_Integer Select (const TreeNode& theBranch,
-                                           Selector& theSelector) const;
+  Standard_Integer Select (const TreeNode& theBranch, Selector& theSelector) const;
 
  private:
   // ---------- PRIVATE METHODS ----------
@@ -444,7 +440,7 @@ Standard_Integer NCollection_UBTree<TheObjType,TheBndType>::Select
  * _HUBTREE      - the desired name of handled class
  * _OBJTYPE      - the name of the object type
  * _BNDTYPE      - the name of the bounding box type
- * _HPARENT      - the name of parent class (usually MMgt_TShared)
+ * _HPARENT      - the name of parent class (usually Standard_Transient)
  */
 #define DEFINE_HUBTREE(_HUBTREE, _OBJTYPE, _BNDTYPE, _HPARENT)          \
 class _HUBTREE : public _HPARENT                                        \

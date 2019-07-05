@@ -14,7 +14,6 @@
 
 #ifndef _WIN32
 
-
 #include <OSD_Environment.hxx>
 #include <OSD_OSDError.hxx>
 #include <OSD_WhoAmI.hxx>
@@ -55,7 +54,7 @@ OSD_Environment::OSD_Environment(const TCollection_AsciiString& Name)
 {
 
  if (!Name.IsAscii() || Name.Search("$") != -1 ) 
-   Standard_ConstructionError::Raise("OSD_Environment::OSD_Environment: bad argument");
+   throw Standard_ConstructionError("OSD_Environment::OSD_Environment: bad argument");
 
  myName = Name; 
 }
@@ -72,7 +71,7 @@ OSD_Environment::OSD_Environment(const TCollection_AsciiString& Name,
  if (!Name.IsAscii() || !Value.IsAscii() || 
 // JPT : Dec-7-1992     Name.Search("$") != -1 || Value.Search("$") != -1) 
      Name.Search("$") != -1 ) 
-   Standard_ConstructionError::Raise("OSD_Environment::OSD_Environment: bad argument");
+   throw Standard_ConstructionError("OSD_Environment::OSD_Environment: bad argument");
 
  myName = Name; 
  myValue = Value;
@@ -96,7 +95,7 @@ void OSD_Environment::SetName (const TCollection_AsciiString& Name)
 {
  myError.Reset();
  if (!Name.IsAscii() || Name.Search("$") != -1 ) 
-   Standard_ConstructionError::Raise("OSD_Environment::SetName: bad argument");
+   throw Standard_ConstructionError("OSD_Environment::SetName: bad argument");
 
  myName = Name;
 }
@@ -108,7 +107,7 @@ void OSD_Environment::SetName (const TCollection_AsciiString& Name)
 void OSD_Environment::SetValue (const TCollection_AsciiString& Value)
 {
  if (!Value.IsAscii() || Value.Search("$") != -1) 
-   Standard_ConstructionError::Raise("OSD_Environment::Change: bad argument");
+   throw Standard_ConstructionError("OSD_Environment::Change: bad argument");
 
  myValue = Value;
 }
@@ -233,20 +232,15 @@ Standard_Integer OSD_Environment::Error() const
 //-------------------  WNT Sources of OSD_Environment --------------------
 //------------------------------------------------------------------------
 
-#define STRICT
+#include <windows.h>
+
 #include <OSD_Environment.hxx>
 
 #include <OSD_WNT.hxx>
 
-#include <windows.h>
-
 #include <NCollection_DataMap.hxx>
 #include <NCollection_UtfString.hxx>
 #include <Standard_Mutex.hxx>
-
-#if defined(_MSC_VER)
-  #pragma warning( disable : 4700 )
-#endif
 
 #ifdef OCCT_UWP
 namespace
@@ -292,32 +286,36 @@ TCollection_AsciiString OSD_Environment::Value()
   Standard_Mutex::Sentry aLock (THE_ENV_LOCK);
   THE_ENV_MAP.Find (myName, myValue);
 #else
+
+  // msvc C-runtime (_wputenv()) puts variable using WinAPI internally (calls SetEnvironmentVariableW())
+  // and also caches its value in its own map,
+  // so that _wgetenv() ignores WinAPI and retieves variable from this cache.
+  //
+  // Using _wgetenv() might lead to awkward results in context when several C-runtimes are used
+  // at once within application or WinAPI is used directly for setting environment variable.
+  //
+  // Using _wputenv() + GetEnvironmentVariableW() pair should provide most robust behavior in tricky scenarios.
+  // So that  _wgetenv() users will retrieve proper value set by OSD_Environment if used C-runtime library is the same as used by OCCT,
+  // and OSD_Environment will retreieve most up-to-date value of environment variable nevertheless C-runtime version used (or not used at all) for setting value externally,
+  // considering msvc C-runtime implementation details.
   SetLastError (ERROR_SUCCESS);
-  wchar_t* anEnvVal = NULL;
   NCollection_UtfWideString aNameWide (myName.ToCString());
   DWORD aSize = GetEnvironmentVariableW (aNameWide.ToCString(), NULL, 0);
-  if ((aSize == 0 && GetLastError() != ERROR_SUCCESS)
-   || (anEnvVal = _wgetenv (aNameWide.ToCString())) == NULL)
+  if (aSize == 0 && GetLastError() != ERROR_SUCCESS)
   {
     _set_error (myError, ERROR_ENVVAR_NOT_FOUND);
     return myValue;
   }
 
   NCollection_Utf8String aValue;
-  if (anEnvVal != NULL)
-  {
-    aValue.FromUnicode (anEnvVal);
-  }
-  else
-  {
-    aSize += 1; // NULL-terminator
-    wchar_t* aBuff = new wchar_t[aSize];
-    GetEnvironmentVariableW (aNameWide.ToCString(), aBuff, aSize);
-    aBuff[aSize - 1] = L'\0';
-    aValue.FromUnicode (aBuff);
-    delete[] aBuff;
-    Reset();
-  }
+  aSize += 1; // NULL-terminator
+  wchar_t* aBuff = new wchar_t[aSize];
+  GetEnvironmentVariableW (aNameWide.ToCString(), aBuff, aSize);
+  aBuff[aSize - 1] = L'\0';
+  aValue.FromUnicode (aBuff);
+  delete[] aBuff;
+  Reset();
+
   myValue = aValue.ToCString();
 #endif
   return myValue;
@@ -381,28 +379,22 @@ Standard_Integer OSD_Environment :: Error () const {
 }  // end OSD_Environment :: Error
 
 #ifndef OCCT_UWP
-static void __fastcall _set_error ( OSD_Error& err, DWORD code ) {
-
- DWORD              errCode;
- Standard_Character buffer[ 2048 ];
-
- errCode = code ? code : GetLastError ();
-
- if (  !FormatMessage (
-         FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ARGUMENT_ARRAY,
-         0, errCode, MAKELANGID( LANG_NEUTRAL, SUBLANG_NEUTRAL ),
-         buffer, 2048, NULL
-        )
- ) {
- 
-  sprintf ( buffer, "error code %d", (Standard_Integer)errCode );
-  SetLastError ( errCode );
-
- }  // end if
-
- err.SetValue ( errCode, OSD_WEnvironment, buffer );
-
-}  // end _set_error
+static void __fastcall _set_error (OSD_Error& theErr, DWORD theCode)
+{
+  wchar_t aBuffer[2048];
+  const DWORD anErrCode = theCode != 0 ? theCode : GetLastError();
+  if (!FormatMessageW (FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ARGUMENT_ARRAY,
+                       0, anErrCode, MAKELANGID( LANG_NEUTRAL, SUBLANG_NEUTRAL ),
+                       aBuffer, 2048, NULL))
+  {
+    theErr.SetValue (anErrCode, OSD_WEnvironment, TCollection_AsciiString ("error code ") + (Standard_Integer)anErrCode);
+    SetLastError (anErrCode);
+  }
+  else
+  {
+    theErr.SetValue (anErrCode, OSD_WEnvironment, TCollection_AsciiString (aBuffer));
+  }
+}
 #endif
 
 #endif

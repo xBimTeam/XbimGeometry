@@ -16,18 +16,18 @@
 #include <Bnd_Box.hxx>
 #include <BOPAlgo_PaveFiller.hxx>
 #include <BOPAlgo_SectionAttribute.hxx>
-#include <BOPCol_MapOfInteger.hxx>
-#include <BOPCol_NCVector.hxx>
-#include <BOPCol_Parallel.hxx>
 #include <BOPDS_Curve.hxx>
 #include <BOPDS_DS.hxx>
 #include <BOPDS_Iterator.hxx>
 #include <BOPDS_ListOfPaveBlock.hxx>
 #include <BOPDS_PaveBlock.hxx>
 #include <BOPDS_ShapeInfo.hxx>
+#include <BOPTools_Parallel.hxx>
 #include <gp_Pnt.hxx>
 #include <IntTools_Context.hxx>
 #include <IntTools_ShrunkRange.hxx>
+#include <NCollection_Vector.hxx>
+#include <TColStd_MapOfInteger.hxx>
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Face.hxx>
 #include <TopoDS_Vertex.hxx>
@@ -63,16 +63,16 @@ class BOPAlgo_ShrunkRange : public IntTools_ShrunkRange {
 };
 //
 //=======================================================================
-typedef BOPCol_NCVector
+typedef NCollection_Vector
   <BOPAlgo_ShrunkRange> BOPAlgo_VectorOfShrunkRange; 
 //
-typedef BOPCol_ContextFunctor 
+typedef BOPTools_ContextFunctor 
   <BOPAlgo_ShrunkRange,
   BOPAlgo_VectorOfShrunkRange,
   Handle(IntTools_Context), 
   IntTools_Context> BOPAlgo_ShrunkRangeFunctor;
 //
-typedef BOPCol_ContextCnt 
+typedef BOPTools_ContextCnt 
   <BOPAlgo_ShrunkRangeFunctor,
   BOPAlgo_VectorOfShrunkRange,
   Handle(IntTools_Context)> BOPAlgo_ShrunkRangeCnt;
@@ -84,30 +84,21 @@ typedef BOPCol_ContextCnt
 void BOPAlgo_PaveFiller::FillShrunkData(const TopAbs_ShapeEnum aType1,
                                         const TopAbs_ShapeEnum aType2)
 {
-  Standard_Integer iSize;
-  
-  //
-  myErrorStatus=0;
-  //
   myIterator->Initialize(aType1, aType2);
-  iSize=myIterator->ExpectedLength();
+  Standard_Integer iSize = myIterator->ExpectedLength();
   if (!iSize) {
     return; 
   }
   //
-  Standard_Boolean bJustAdd;
   Standard_Integer i, nS[2], nE, nV1, nV2, aNbVSD, k;
-  Standard_Real aT1, aT2, aTS1, aTS2;
+  Standard_Real aT1, aT2;
   BOPDS_ListIteratorOfListOfPaveBlock aItLPB;
-  BOPCol_MapOfInteger aMI; 
+  TColStd_MapOfInteger aMI; 
   BOPAlgo_VectorOfShrunkRange aVSD;
   TopAbs_ShapeEnum aType[2] = { aType1, aType2 };
   //
   for (; myIterator->More(); myIterator->Next()) {
-    myIterator->Value(nS[0], nS[1], bJustAdd);
-    if(bJustAdd) {
-      continue;
-    }
+    myIterator->Value(nS[0], nS[1]);
     //
     for (i=0; i < 2; ++i) {
       nE=nS[i];
@@ -124,7 +115,7 @@ void BOPAlgo_PaveFiller::FillShrunkData(const TopAbs_ShapeEnum aType1,
       aItLPB.Initialize(aLPB);
       for (; aItLPB.More(); aItLPB.Next()) {
         const Handle(BOPDS_PaveBlock)& aPB=aItLPB.ChangeValue();
-        if (aPB->HasShrunkData()) {
+        if (aPB->HasShrunkData() && myDS->IsValidShrunkData(aPB)) {
           continue;
         }
         //
@@ -140,7 +131,7 @@ void BOPAlgo_PaveFiller::FillShrunkData(const TopAbs_ShapeEnum aType1,
         const TopoDS_Vertex& aV2=
           (*(TopoDS_Vertex *)(&myDS->Shape(nV2))); 
         //
-        BOPAlgo_ShrunkRange& aSD=aVSD.Append1();
+        BOPAlgo_ShrunkRange& aSD=aVSD.Appended();
         //
         aSD.SetPaveBlock(aPB);
         aSD.SetData(aE, aT1, aT2, aV1, aV2); 
@@ -148,24 +139,13 @@ void BOPAlgo_PaveFiller::FillShrunkData(const TopAbs_ShapeEnum aType1,
     }
   }
   //
-  aNbVSD=aVSD.Extent();
+  aNbVSD=aVSD.Length();
   //=============================================================
   BOPAlgo_ShrunkRangeCnt::Perform(myRunParallel, aVSD, myContext);
   //=============================================================
   //
-  Standard_Real aFuzz = myFuzzyValue / 2.;
   for (k=0; k < aNbVSD; ++k) {
-    BOPAlgo_ShrunkRange& aSD=aVSD(k);
-    if (!aSD.IsDone()) {
-      continue;
-    }
-    //
-    Handle(BOPDS_PaveBlock)& aPB=aSD.PaveBlock();
-    aSD.ShrunkRange(aTS1, aTS2);
-    Bnd_Box aBox=aSD.BndBox();
-    aBox.SetGap(aBox.GetGap() + aFuzz);
-    Standard_Boolean bIsSplittable = aSD.IsSplittable();
-    //
-    aPB->SetShrunkData(aTS1, aTS2, aBox, bIsSplittable);
+    BOPAlgo_ShrunkRange& aSD = aVSD(k);
+    AnalyzeShrunkData(aSD.PaveBlock(), aSD);
   }
 }

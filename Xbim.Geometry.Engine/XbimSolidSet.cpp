@@ -1,5 +1,5 @@
 #include "XbimSolidSet.h"
-
+#include "XbimShellSet.h"
 #include "XbimCompound.h"
 #include "XbimGeometryCreator.h"
 #include <TopTools_IndexedMapOfShape.hxx>
@@ -13,13 +13,17 @@
 #include "BRepCheck_Analyzer.hxx"
 #include "ShapeFix_Shape.hxx"
 #include "ShapeUpgrade_UnifySameDomain.hxx"
-using namespace System;
+#include "BRepBuilderAPI_MakeSolid.hxx"
+#include "BOPAlgo_PaveFiller.hxx"
+#include "BOPAlgo_BOP.hxx"
+#include <algorithm>
 using namespace System::Linq;
-
+using namespace System::Threading;
 namespace Xbim
 {
 	namespace Geometry
 	{
+
 
 		String^ XbimSolidSet::ToBRep::get()
 		{
@@ -51,7 +55,7 @@ namespace Xbim
 
 		XbimSolidSet::XbimSolidSet(XbimCompound^ shape)
 		{
-			
+
 			if (shape->IsValid)
 			{
 				TopTools_IndexedMapOfShape map;
@@ -59,13 +63,17 @@ namespace Xbim
 				solids = gcnew  List<IXbimSolid^>(map.Extent());
 				for (int i = 1; i <= map.Extent(); i++)
 					solids->Add(gcnew XbimSolid(TopoDS::Solid(map(i))));
-			}			
+			}
 			GC::KeepAlive(shape);
 		}
 
 		XbimSolidSet::XbimSolidSet()
 		{
-			solids = gcnew  List<IXbimSolid^>();	
+			solids = gcnew  List<IXbimSolid^>();
+		}
+		XbimSolidSet::XbimSolidSet(IIfcCsgSolid^ repItem, ILogger^ logger)
+		{
+			Init(repItem, logger);
 		}
 
 		XbimSolidSet::XbimSolidSet(IXbimSolid^ solid)
@@ -73,59 +81,84 @@ namespace Xbim
 			solids = gcnew  List<IXbimSolid^>(1);
 			solids->Add(solid);
 		}
-		XbimSolidSet::XbimSolidSet(IIfcBooleanResult^ boolOp)
+		XbimSolidSet::XbimSolidSet(IIfcBooleanClippingResult ^ solid, ILogger ^ logger)
 		{
-			Init(boolOp);
+			Init(solid, logger);
 		}
 
-		XbimSolidSet::XbimSolidSet(IIfcManifoldSolidBrep^ solid)
+		XbimSolidSet::XbimSolidSet(IIfcBooleanResult^ boolOp, ILogger^ logger)
 		{
-			XbimCompound^ comp = gcnew XbimCompound(solid);
-			Init(comp, solid);
-			
-		}
-		XbimSolidSet::XbimSolidSet(IIfcFacetedBrep^ solid)
-		{
-			XbimCompound^ comp = gcnew XbimCompound(solid);
-			Init(comp, solid);
+			Init(boolOp, logger);
 		}
 
-		XbimSolidSet::XbimSolidSet(IIfcFacetedBrepWithVoids^ solid)
+		XbimSolidSet::XbimSolidSet(IIfcBooleanOperand ^ boolOp, ILogger ^ logger)
 		{
-			XbimCompound^ comp = gcnew XbimCompound(solid);
-			Init(comp, solid);
+			Init(boolOp, logger);
 		}
 
-		XbimSolidSet::XbimSolidSet(IIfcClosedShell^ solid)
+		XbimSolidSet::XbimSolidSet(IIfcManifoldSolidBrep^ solid, ILogger^ logger)
 		{
-			XbimCompound^ comp = gcnew XbimCompound(solid);
-			Init(comp, solid);
+			XbimCompound^ comp = gcnew XbimCompound(solid, logger);
+			Init(comp, solid, logger);
+
+		}
+		XbimSolidSet::XbimSolidSet(IIfcFacetedBrep^ solid, ILogger^ logger)
+		{
+			XbimCompound^ comp = gcnew XbimCompound(solid, logger);
+			Init(comp, solid, logger);
+		}
+
+		XbimSolidSet::XbimSolidSet(IIfcFacetedBrepWithVoids^ solid, ILogger^ logger)
+		{
+			XbimCompound^ comp = gcnew XbimCompound(solid, logger);
+			Init(comp, solid, logger);
+		}
+
+		XbimSolidSet::XbimSolidSet(IIfcClosedShell^ solid, ILogger^ logger)
+		{
+			XbimCompound^ comp = gcnew XbimCompound(solid, logger);
+			Init(comp, solid, logger);
 		}
 
 		XbimSolidSet::XbimSolidSet(IEnumerable<IXbimSolid^>^ solids)
 		{
-			this->solids =  gcnew  List<IXbimSolid^>(solids);;
-		}
-		
-
-		XbimSolidSet::XbimSolidSet(IIfcSweptAreaSolid^ repItem)
-		{
-			Init(repItem);
-		}
-		XbimSolidSet::XbimSolidSet(IIfcRevolvedAreaSolid^ solid)
-		{
-			Init(solid);
+			this->solids = gcnew  List<IXbimSolid^>(solids);;
 		}
 
-		XbimSolidSet::XbimSolidSet(IIfcExtrudedAreaSolid^ repItem)
+
+		XbimSolidSet::XbimSolidSet(IIfcSweptAreaSolid^ repItem, ILogger^ logger)
 		{
-			Init(repItem);
+			Init(repItem, logger);
+		}
+		XbimSolidSet::XbimSolidSet(IIfcRevolvedAreaSolid^ solid, ILogger^ logger)
+		{
+			Init(solid, logger);
+		}
+
+		XbimSolidSet::XbimSolidSet(IIfcTriangulatedFaceSet ^ IIfcSolid, ILogger ^ logger)
+		{
+			Init(IIfcSolid, logger);
+		}
+
+		XbimSolidSet::XbimSolidSet(IIfcFaceBasedSurfaceModel ^ solid, ILogger ^ logger)
+		{
+			Init(solid, logger);
+		}
+
+		XbimSolidSet::XbimSolidSet(IIfcShellBasedSurfaceModel ^ solid, ILogger ^ logger)
+		{
+			Init(solid, logger);
+		}
+
+		XbimSolidSet::XbimSolidSet(IIfcExtrudedAreaSolid^ repItem, ILogger^ logger)
+		{
+			Init(repItem, logger);
 
 		}
 
-		XbimSolidSet::XbimSolidSet(IIfcSurfaceCurveSweptAreaSolid^ repItem)
+		XbimSolidSet::XbimSolidSet(IIfcSurfaceCurveSweptAreaSolid^ repItem, ILogger^ logger)
 		{
-			Init(repItem);
+			Init(repItem, logger);
 		}
 
 		void XbimSolidSet::Reverse()
@@ -133,6 +166,24 @@ namespace Xbim
 			this->solids->Reverse();
 		}
 
+		XbimSolidSet^ XbimSolidSet::BuildClippingList(IIfcBooleanClippingResult^ solid, List<IIfcBooleanOperand^>^ clipList, ILogger^ logger)
+		{
+			IIfcBooleanOperand^ fOp = solid->FirstOperand;
+			IIfcBooleanOperand^ sOp = solid->SecondOperand;
+
+			IIfcBooleanClippingResult^ boolClip = dynamic_cast<IIfcBooleanClippingResult^>(fOp);
+			if (boolClip != nullptr)
+			{
+				clipList->Add(sOp);
+				return XbimSolidSet::BuildClippingList(boolClip, clipList, logger);
+			}
+			else //we need to build the solid
+			{
+				clipList->Add(sOp);
+				clipList->Reverse();
+				return gcnew XbimSolidSet(fOp, logger);
+			}
+		}
 
 		///If the shape contains one or more solids these are added to the collection
 		void XbimSolidSet::Add(IXbimGeometryObject^ shape)
@@ -143,7 +194,7 @@ namespace Xbim
 			{
 				return solids->Add(solid);
 			}
-			
+
 			IXbimSolidSet^ solidSet = dynamic_cast<IXbimSolidSet^>(shape);
 			if (solidSet != nullptr) return solids->AddRange(solidSet);
 			IXbimGeometryObjectSet^ geomSet = dynamic_cast<IXbimGeometryObjectSet^>(shape);
@@ -151,54 +202,54 @@ namespace Xbim
 			{
 				//make sure any sewing has been performed if the set is a compound object
 				XbimCompound^ compound = dynamic_cast<XbimCompound^>(geomSet);
-				
+
 				if (compound != nullptr)
 					if (!compound->Sew())
 					{
 						_isSimplified = true; //set flag true to say the solid set has been simplified and the user should be warned
 #ifndef OCC_6_9_SUPPORTED		
-						
+
 						return; //don't add it we cannot really make it into a solid and will cause boolean operation errors,
 #endif
 					}
-	
+
 				for each (IXbimGeometryObject^ geom in geomSet)
 				{
-					
+
 					XbimSolid^ nestedSolid = dynamic_cast<XbimSolid^>(geom);
 					XbimCompound^ nestedCompound = dynamic_cast<XbimCompound^>(geom);
 					XbimShell^ shell = dynamic_cast<XbimShell^>(geom);
 					if (nestedSolid != nullptr && !nestedSolid->IsEmpty)
-						solids->Add(nestedSolid );
+						solids->Add(nestedSolid);
 					else if (nestedCompound != nullptr)
 					{
 						nestedCompound->Sew();
 						for each (IXbimGeometryObject^ nestedGeom in nestedCompound)
 						{
-							XbimSolid^ nestedSolid = dynamic_cast<XbimSolid^>(nestedGeom);
-							XbimShell^ nestedShell = dynamic_cast<XbimShell^>(nestedGeom);
-							if(nestedSolid!=nullptr && !nestedSolid->IsEmpty)
-								solids->Add(nestedSolid );
-							else if (nestedShell != nullptr && nestedShell->IsValid)
-							    solids->Add(nestedShell->MakeSolid());
+							XbimSolid^ subSolid = dynamic_cast<XbimSolid^>(nestedGeom);
+							XbimShell^ subShell = dynamic_cast<XbimShell^>(nestedGeom);
+							if (subSolid != nullptr && !subSolid->IsEmpty)
+								solids->Add(subSolid);
+							else if (subShell != nullptr && subShell->IsValid)
+								solids->Add(subShell->MakeSolid());
 						}
 					}
 					else if (shell != nullptr && shell->IsValid)
-					{							
-						XbimSolid^ s = (XbimSolid^)shell->MakeSolid();								
+					{
+						XbimSolid^ s = (XbimSolid^)shell->MakeSolid();
 						solids->Add(s);
-					}					
-					
+					}
+
 				}
-				
+
 				return;
 			}
 			XbimShell^ shell = dynamic_cast<XbimShell^>(shape);
 			if (shell != nullptr && shell->IsValid/* && shell->IsClosed*/)
-				return solids->Add(shell->MakeSolid());	
-			
+				return solids->Add(shell->MakeSolid());
+
 		}
-		
+
 		IXbimSolidSet^ XbimSolidSet::Range(int start, int count)
 		{
 			XbimSolidSet^ ss = gcnew XbimSolidSet();
@@ -218,7 +269,7 @@ namespace Xbim
 
 		int XbimSolidSet::Count::get()
 		{
-			return solids==nullptr?0:solids->Count;
+			return solids == nullptr ? 0 : solids->Count;
 		}
 
 		double XbimSolidSet::Volume::get()
@@ -259,7 +310,7 @@ namespace Xbim
 
 		void XbimSolidSet::Move(IIfcAxis2Placement3D^ position)
 		{
-			if (!IsValid) return;			
+			if (!IsValid) return;
 			for each (IXbimSolid^ solid in solids)
 			{
 				((XbimSolid^)solid)->Move(position);
@@ -289,11 +340,11 @@ namespace Xbim
 			return result;
 		}
 
-		IXbimGeometryObject ^ XbimSolidSet::Moved(IIfcObjectPlacement ^ objectPlacement)
+		IXbimGeometryObject ^ XbimSolidSet::Moved(IIfcObjectPlacement ^ objectPlacement, ILogger^ logger)
 		{
 			if (!IsValid) return this;
 			XbimSolidSet^ result = gcnew XbimSolidSet();
-			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement);
+			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement, logger);
 			for each (IXbimSolid^ solid in solids)
 			{
 				XbimSolid^ copy = gcnew XbimSolid((XbimSolid^)solid, Tag);
@@ -345,233 +396,286 @@ namespace Xbim
 			return true;
 		}
 
-		IXbimSolidSet^ XbimSolidSet::Cut(IXbimSolidSet^ solids, double tolerance)
+#pragma managed(push, off)
+
+		bool DoBoolean(const TopoDS_Shape& body, const TopTools_ListOfShape& tools, BOPAlgo_Operation op, double tolerance, TopoDS_Shape& result)
 		{
-			IXbimSolidSet^ toCutSolidSet = solids; //just to sort out carve exclusion, they must be all OCC solids if no carve
-			IXbimSolidSet^ thisSolidSet = this;
 
+			ShapeAnalysis_Wire tolFixer;
 
-#ifdef OCC_6_9_SUPPORTED
-			if (!IsValid) return this;
-			String^ err = "";
-			try
-			{			
-				ShapeFix_ShapeTolerance FTol;
-				TopTools_ListOfShape shapeTools;
-				for each (IXbimSolid^ iSolid in solids)
-				{
-					XbimSolid^ solid = dynamic_cast<XbimSolid^>(iSolid);
-					if (solid!=nullptr && solid->IsValid)
-					{
-						
-						FTol.LimitTolerance(solid, tolerance);
-						shapeTools.Append(solid);							
-					}
-					else
-					{
-						XbimGeometryCreator::LogWarning(this, "Invalid shape found in Boolean Cut operation. It has been ignored");
-					}
-				}
-				TopTools_ListOfShape shapeObjects;
-				for each (IXbimSolid^ iSolid in this)
-				{
-					XbimSolid^ solid = dynamic_cast<XbimSolid^>(iSolid);
-					if (solid != nullptr && solid->IsValid)
-					{	
-						FTol.LimitTolerance(solid, tolerance);
-						shapeObjects.Append(solid);
-					}
-					else
-					{
-						XbimGeometryCreator::LogWarning(this, "Invalid shape found in Boolean Cut operation. It has been ignored");
-					}
-				}
-				
-				BRepAlgoAPI_Cut boolOp;
-				boolOp.SetArguments(shapeObjects);
-				boolOp.SetTools(shapeTools);	
-				boolOp.SetNonDestructive(Standard_True);
-				//boolOp.SetFuzzyValue(tolerance);
-				Handle(XbimProgressIndicator) aPI = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);
-				boolOp.SetProgressIndicator(aPI);
-				boolOp.Build();
-				aPI->StopTimer();
+			BRep_Builder builder;
 
-				if (aPI->TimedOut())
-				{
-					XbimGeometryCreator::LogError(solids, "Boolean operation timed out after {0} seconds. Try increasing the timeout in the App.config file", (int)aPI->ElapsedTime());
-					//throw gcnew XbimException(String::Format("Boolean operation timed out after {0} secs. Try increasing the timeout in the App.config file", (int)aPI->ElapsedTime()));
-					return XbimSolidSet::Empty;
-				}
+			TopTools_ListOfShape shapeObjects;
+			shapeObjects.Append(body);
 
-				if (boolOp.ErrorStatus() == 0)
-				{
-					if (BRepCheck_Analyzer(boolOp.Shape(), Standard_False).IsValid() == Standard_False)
-					{
-						ShapeFix_Shape shapeFixer(boolOp.Shape());
-						shapeFixer.SetPrecision(tolerance);
-						shapeFixer.SetMinTolerance(tolerance);
-						shapeFixer.FixSolidMode() = Standard_True;
-						shapeFixer.FixFaceTool()->FixIntersectingWiresMode() = Standard_True;
-						shapeFixer.FixFaceTool()->FixOrientationMode() = Standard_True;
-						shapeFixer.FixFaceTool()->FixWireTool()->FixAddCurve3dMode() = Standard_True;
-						shapeFixer.FixFaceTool()->FixWireTool()->FixIntersectingEdgesMode() = Standard_True;
-						if (shapeFixer.Perform())
-						{
-							ShapeUpgrade_UnifySameDomain unifier(shapeFixer.Shape());
-							unifier.SetAngularTolerance(0.00174533); //1 tenth of a degree
-							unifier.SetLinearTolerance(tolerance);
-							try
-							{
-								//sometimes unifier crashes
-								unifier.Build();
-								return gcnew XbimSolidSet(unifier.Shape());
-							}
-							catch (...)
-							{
-								//default to what we had
-								return gcnew XbimSolidSet(shapeFixer.Shape());
-							}
-						}
+			TopTools_ListOfShape shapeTools;
 
-					}
-					return gcnew XbimSolidSet(boolOp.Shape());
-				}
+			Bnd_Box tsBodyBox;
+			BRepBndLib::Add(body, tsBodyBox);
 
-				err = "Error = " + boolOp.ErrorStatus();
-				GC::KeepAlive(solids);
-				GC::KeepAlive(this);
-			}
-			catch (Standard_Failure e)
+			double maxTol = tolerance;
+			int argCount = 0;
+			TopTools_ListIteratorOfListOfShape it(tools);
+			for (; it.More(); it.Next())
 			{
-				err = gcnew String(Standard_Failure::Caught()->GetMessageString());
-				throw gcnew Exception(String::Format("Boolean Cut operation failed. {0}" , err));
+				TopoDS_Shape tsArg = it.Value();
+				//screen out things that don't intersect when we are cutting
+				if (op == BOPAlgo_Operation::BOPAlgo_CUT || op == BOPAlgo_Operation::BOPAlgo_CUT21)
+				{
+
+					Bnd_Box tsCutBox;
+					BRepBndLib::Add(tsArg, tsCutBox);
+					if (!tsBodyBox.IsOut(tsCutBox))
+					{
+						maxTol = std::max(BRep_Tool::MaxTolerance(tsArg, TopAbs_EDGE), maxTol);
+						shapeTools.Append(tsArg);
+						argCount++;
+					}
+				}
+				else
+				{
+					maxTol = std::max(BRep_Tool::MaxTolerance(tsArg, TopAbs_EDGE), maxTol);
+					shapeTools.Append(tsArg);
+					argCount++;
+				}
+
+			}
+			if (argCount == 0)
+			{
+				result = body;
+				return true;
+			}
+
+
+			double fuzzyTol = std::max(maxTol - tolerance, 6 * tolerance);//this seems about right				
+			BOPAlgo_BOP aBOP;
+			bool failed = false;
+
+			aBOP.AddArgument(body);
+			aBOP.SetTools(shapeTools);
+			aBOP.SetOperation(op);
+			aBOP.SetRunParallel(false);
+			//aBOP.SetCheckInverted(true);
+			aBOP.SetNonDestructive(true);
+			aBOP.SetFuzzyValue(fuzzyTol);
+
+			TopoDS_Shape aR;
+
+			try
+			{
+				aBOP.Perform();
+				aR = aBOP.Shape();
 			}
 			catch (...)
 			{
-				throw gcnew Exception("General boolean cutting failure");
+				failed = true;
 			}
-			
-			return XbimSolidSet::Empty;
-#else
 
-			if (thisSolidSet->Count >_maxOpeningsToCut) //if the base shape is really complicate just give up trying
-			{
-				IsSimplified = true;
-				return this;
+			bool bopErr = aBOP.HasErrors();
+			if (failed || bopErr || aR.IsNull()) {
+				return false;
 			}
-			XbimCompound^ thisSolid = XbimCompound::Merge(thisSolidSet, tolerance);
-			
-			XbimCompound^ toCutSolid;
-			if (thisSolid == nullptr) return XbimSolidSet::Empty;
-			bool isSimplified = false;
-			if (toCutSolidSet->Count > _maxOpeningsToCut)
-			{
-				isSimplified = true;
-				List<Tuple<double, XbimSolid^>^>^ solidsList = gcnew List<Tuple<double, XbimSolid^>^>(toCutSolidSet->Count);
-				for each (XbimSolid^ solid in toCutSolidSet)
-				{
-					solidsList->Add(gcnew Tuple<double, XbimSolid^>(solid->Volume, solid));
-				}
-				solidsList->Sort(_volumeComparer);
-				TopoDS_Compound subsetToCut;
-				BRep_Builder b;
-				b.MakeCompound(subsetToCut);
-				//int i = 0;
-				double totalVolume = this->Volume;
-				double minVolume = totalVolume * _maxOpeningVolumePercentage;
 
-				for (int i = 0; i < _maxOpeningsToCut; i++)
+			bool bopWarn = aBOP.HasWarnings();
+
+			if (bopWarn) //often a sign of failure do them individually
+			{
+				//check if the shape is empty
+				TopTools_IndexedMapOfShape map;
+				TopExp::MapShapes(aR, TopAbs_FACE, map);
+				if (map.Extent() == 0) //if there are no faces we probably failed completely, tried the pedestrian slower way
 				{
-					if (solidsList[i]->Item1 < minVolume) break; //give up for small things
-					b.Add(subsetToCut, solidsList[i]->Item2);
+					aR = body;
+
+					TopTools_ListIteratorOfListOfShape it2(shapeTools);
+					for (; it2.More(); it2.Next())
+					{
+						BOPAlgo_BOP anoBOP;
+						failed = false;
+						anoBOP.AddArgument(aR);
+						anoBOP.AddTool(it2.Value());
+						anoBOP.SetOperation(op);
+						anoBOP.SetRunParallel(false);
+						anoBOP.SetCheckInverted(true);
+						anoBOP.SetNonDestructive(true);
+						aBOP.SetFuzzyValue(fuzzyTol);
+
+						try
+						{
+							anoBOP.Perform();
+							aR = anoBOP.Shape();
+						}
+						catch (...)
+						{
+							failed = true;
+						}
+
+						bopErr = aBOP.HasErrors();
+						if (bopErr || failed) break; //give up if it fails
+					}
 				}
-				
-				toCutSolid = gcnew XbimCompound(subsetToCut,true, tolerance);
-				
+				if (failed || bopErr || aR.IsNull())
+				{
+					return false;
+				}
+			}
+
+
+
+			BRep_Builder b;
+			TopoDS_Compound unifiedCompound;
+			b.MakeCompound(unifiedCompound);
+
+			ShapeUpgrade_UnifySameDomain unifier(aR);
+			unifier.SetAngularTolerance(0.00174533); //1 tenth of a degree
+			unifier.SetLinearTolerance(fuzzyTol);
+			try
+			{
+				//sometimes unifier crashes
+				unifier.Build();
+				builder.Add(unifiedCompound, unifier.Shape());
+
+			}
+			catch (...) //any failure
+			{
+				//default to what we had
+				builder.Add(unifiedCompound, aR);
+			}
+
+			//have one go at fixing if it is not right
+			if (BRepCheck_Analyzer(unifiedCompound, Standard_True).IsValid() == Standard_False)
+			{
+				//try and fix if we can
+				ShapeFix_Shape fixer(unifiedCompound);
+				fixer.SetMaxTolerance(fuzzyTol);
+				fixer.SetMinTolerance(tolerance);
+				fixer.SetPrecision(tolerance);
+				if (fixer.Perform())
+					result = fixer.Shape();
+				else
+				{
+					result = unifiedCompound;
+				}
+
 			}
 			else
 			{
-				toCutSolid = XbimCompound::Merge(toCutSolidSet, tolerance);
+				result = aR;
 			}
-
-			if (toCutSolid == nullptr) return this;
-			XbimCompound^ result = thisSolid->Cut(toCutSolid, tolerance);
-			XbimSolidSet^ ss = gcnew XbimSolidSet(result);
-			//BRepTools::Write(result, "d:\\c");
-			GC::KeepAlive(result);
-			ss->IsSimplified = isSimplified;
-			return ss;
-#endif
+			return true;
 		}
 
-		IXbimSolidSet^ XbimSolidSet::Union(IXbimSolidSet^ solids, double tolerance)
+#pragma managed(pop)
+
+		IXbimSolidSet^ XbimSolidSet::DoBoolean(IXbimSolidSet^ arguments, BOPAlgo_Operation operation, double tolerance, ILogger^ logger)
 		{
 			if (!IsValid) return this;
-			IXbimSolidSet^ toUnionSolidSet = solids; //just to sort out carve exclusion, they must be all OCC solids if no carve
-			IXbimSolidSet^ thisSolidSet = this;
 
-			XbimCompound^ thisSolid = XbimCompound::Merge(thisSolidSet, tolerance);
-			XbimCompound^ toUnionSolid = XbimCompound::Merge(toUnionSolidSet, tolerance);
-			if (thisSolid == nullptr && toUnionSolid == nullptr) return XbimSolidSet::Empty;
-			if (thisSolid != nullptr && toUnionSolid != nullptr)
+
+			XbimSolidSet^ solidResults = gcnew XbimSolidSet();
+			for (int i = 0; i < this->Count; i++)
 			{
-				XbimCompound^ result = thisSolid->Union(toUnionSolid, tolerance);
-				XbimSolidSet^ss = gcnew XbimSolidSet();
-				ss->Add(result);
-				return ss;
+				TopTools_ListOfShape tools;
+				if (!solids[i]->IsValid) continue;
+				for each (IXbimSolid^ tool in arguments)
+				{
+					tools.Append((XbimSolid^)tool);
+				}
+				TopoDS_Shape result;
+				bool success = false;
+				try
+				{
+					success = Xbim::Geometry::DoBoolean((XbimSolid^)solids[i], tools, operation, tolerance, result);
+				}
+				catch (const std::exception& exc)
+				{
+					String^ err = gcnew String(exc.what());
+					XbimGeometryCreator::LogError(logger, nullptr,
+						"Boolean operation failed.On Entity #{0} with #{1}. {2}",
+						((XbimSolidSet^)arguments)->IfcEntityLabel,
+						this->IfcEntityLabel, err);
+				}
+				catch (...)
+				{
+					success = false;
+				}
+
+				if (success)
+				{
+					XbimSolidSet^ resultSolids = gcnew XbimSolidSet(result); //extract all solids retuned
+					solidResults->Add(resultSolids);
+				}
+				else
+				{
+					XbimGeometryCreator::LogError(logger, nullptr,
+						"Boolean operation failed.On Entity #{0} with #{1}.",
+						((XbimSolidSet^)arguments)->IfcEntityLabel,
+						this->IfcEntityLabel);
+				}
+
 			}
-			if (toUnionSolid != nullptr) return solids;
-			return this;
+
+			return solidResults;
 		}
 
-		
+		IXbimSolidSet^ XbimSolidSet::Cut(IXbimSolidSet^ solidsToCut, double tolerance, ILogger^ logger)
+		{
 
-		IXbimSolidSet^ XbimSolidSet::Intersection(IXbimSolidSet^ solids, double tolerance)
+			return DoBoolean(solidsToCut, BOPAlgo_CUT, tolerance, logger);
+		}
+
+		IXbimSolidSet^ XbimSolidSet::Union(IXbimSolidSet^ solidsToUnion, double tolerance, ILogger^ logger)
+		{
+			return DoBoolean(solidsToUnion, BOPAlgo_FUSE, tolerance, logger);
+		}
+
+
+
+		IXbimSolidSet^ XbimSolidSet::Intersection(IXbimSolidSet^ solidSet, double tolerance, ILogger^ logger)
 		{
 			if (!IsValid) return this;
-			IXbimSolidSet^ toIntersectSolidSet = solids; //just to sort out carve exclusion, they must be all OCC solids if no carve
+			IXbimSolidSet^ toIntersectSolidSet = solidSet; //just to sort out carve exclusion, they must be all OCC solids if no carve
 			IXbimSolidSet^ thisSolidSet = this;
 
-			XbimCompound^ thisSolid = XbimCompound::Merge(thisSolidSet, tolerance);
-			XbimCompound^ toIntersectSolid = XbimCompound::Merge(toIntersectSolidSet, tolerance);
+			XbimCompound^ thisSolid = XbimCompound::Merge(thisSolidSet, tolerance, logger);
+			XbimCompound^ toIntersectSolid = XbimCompound::Merge(toIntersectSolidSet, tolerance, logger);
 			if (thisSolid == nullptr || toIntersectSolid == nullptr) return XbimSolidSet::Empty;
-			XbimCompound^ result = thisSolid->Intersection(toIntersectSolid, tolerance);
+			XbimCompound^ result = thisSolid->Intersection(toIntersectSolid, tolerance, logger);
 			return gcnew XbimSolidSet(result);
 		}
 
 
-		IXbimSolidSet^ XbimSolidSet::Cut(IXbimSolid^ solid, double tolerance)
+		IXbimSolidSet^ XbimSolidSet::Cut(IXbimSolid^ solid, double tolerance, ILogger^ logger)
 		{
 			if (Count == 0) return XbimSolidSet::Empty;
-			if (Count == 1) return First->Cut(solid, tolerance);
-			return Cut(gcnew XbimSolidSet(solid), tolerance);
+			if (Count == 1) return First->Cut(solid, tolerance, logger);
+			return Cut(gcnew XbimSolidSet(solid), tolerance, logger);
 
 		}
 
-		IXbimSolidSet^ XbimSolidSet::Union(IXbimSolid^ solid, double tolerance)
+		IXbimSolidSet^ XbimSolidSet::Union(IXbimSolid^ solid, double tolerance, ILogger^ logger)
 		{
 			if (Count == 0) return gcnew XbimSolidSet(solid);
-			if (Count == 1) return First->Union(solid, tolerance);
-			return Union(gcnew XbimSolidSet(solid), tolerance);
+			if (Count == 1) return First->Union(solid, tolerance, logger);
+			return Union(gcnew XbimSolidSet(solid), tolerance, logger);
 		}
 
 
-		
 
-		IXbimSolidSet^ XbimSolidSet::Intersection(IXbimSolid^ solid, double tolerance)
+
+		IXbimSolidSet^ XbimSolidSet::Intersection(IXbimSolid^ solid, double tolerance, ILogger^ logger)
 		{
 			if (Count == 0) return XbimSolidSet::Empty;
-			if (Count == 1) return First->Intersection(solid, tolerance);
-			return Intersection(gcnew XbimSolidSet(solid), tolerance);
+			if (Count == 1) return First->Intersection(solid, tolerance, logger);
+			return Intersection(gcnew XbimSolidSet(solid), tolerance, logger);
 		}
 
-		void XbimSolidSet::Init(XbimCompound^ comp, IPersistEntity^ entity)
+		void XbimSolidSet::Init(XbimCompound^ comp, IPersistEntity^ entity, ILogger^ logger)
 		{
 			solids = gcnew  List<IXbimSolid^>();
 			if (!comp->IsValid)
 			{
-				XbimGeometryCreator::LogWarning(entity, "Empty or invalid solid");
+				XbimGeometryCreator::LogWarning(logger, entity, "Empty or invalid solid");
 			}
 			else
 			{
@@ -579,21 +683,22 @@ namespace Xbim
 			}
 		}
 
-		void XbimSolidSet::Init(IIfcSweptAreaSolid^ repItem)
+		void XbimSolidSet::Init(IIfcSweptAreaSolid^ repItem, ILogger^ logger)
 		{
 			IIfcCompositeProfileDef^ compProfile = dynamic_cast<IIfcCompositeProfileDef^>(repItem->SweptArea);
-			int profileCount = Enumerable::Count(compProfile->Profiles);
+
 			if (compProfile != nullptr) //handle these as composite solids
 			{
+				int profileCount = Enumerable::Count(compProfile->Profiles);
 				if (profileCount == 0)
 				{
-					XbimGeometryCreator::LogWarning(repItem, "Invalid number of profiles. It must be 2 or more. Profile discarded");
+					XbimGeometryCreator::LogWarning(logger, repItem, "Invalid number of profiles. It must be 2 or more. Profile discarded");
 					return;
 				}
 				if (profileCount == 1)
 				{
-					XbimGeometryCreator::LogInfo(compProfile, "Invalid number of profiles. It must be 2 or more. A single Profile has been used");
-					XbimSolid^ s = gcnew XbimSolid(repItem);
+					XbimGeometryCreator::LogInfo(logger, compProfile, "Invalid number of profiles. It must be 2 or more. A single Profile has been used");
+					XbimSolid^ s = gcnew XbimSolid(repItem, logger);
 					if (s->IsValid)
 					{
 						solids = gcnew List<IXbimSolid^>();
@@ -604,14 +709,14 @@ namespace Xbim
 				solids = gcnew List<IXbimSolid^>();
 				for each (IIfcProfileDef^ profile in compProfile->Profiles)
 				{
-					XbimSolid^ aSolid = gcnew XbimSolid(repItem, profile);
+					XbimSolid^ aSolid = gcnew XbimSolid(repItem, profile, logger);
 					if (aSolid->IsValid)
 						solids->Add(aSolid);
 				}
 			}
 			else
 			{
-				XbimSolid^ s = gcnew XbimSolid(repItem);
+				XbimSolid^ s = gcnew XbimSolid(repItem, logger);
 				if (s->IsValid)
 				{
 					solids = gcnew List<IXbimSolid^>();
@@ -619,21 +724,22 @@ namespace Xbim
 				}
 			}
 		}
-		void XbimSolidSet::Init(IIfcRevolvedAreaSolid^ repItem)
+		void XbimSolidSet::Init(IIfcRevolvedAreaSolid^ repItem, ILogger^ logger)
 		{
 			IIfcCompositeProfileDef^ compProfile = dynamic_cast<IIfcCompositeProfileDef^>(repItem->SweptArea);
-			int profileCount = Enumerable::Count(compProfile->Profiles);
+
 			if (compProfile != nullptr) //handle these as composite solids
 			{
+				int profileCount = Enumerable::Count(compProfile->Profiles);
 				if (profileCount == 0)
 				{
-					XbimGeometryCreator::LogWarning(compProfile,"Invalid number of profiles. It must be 2 or more. Profile discarded");
+					XbimGeometryCreator::LogWarning(logger, compProfile, "Invalid number of profiles. It must be 2 or more. Profile discarded");
 					return;
 				}
 				if (profileCount == 1)
 				{
-					XbimGeometryCreator::LogInfo(compProfile,"Invalid number of profiles. It must be 2 or more. A single Profile has been used");
-					XbimSolid^ s = gcnew XbimSolid(repItem);
+					XbimGeometryCreator::LogInfo(logger, compProfile, "Invalid number of profiles. It must be 2 or more. A single Profile has been used");
+					XbimSolid^ s = gcnew XbimSolid(repItem, logger);
 					if (s->IsValid)
 					{
 						solids = gcnew List<IXbimSolid^>();
@@ -644,96 +750,14 @@ namespace Xbim
 				solids = gcnew List<IXbimSolid^>();
 				for each (IIfcProfileDef^ profile in compProfile->Profiles)
 				{
-					XbimSolid^ aSolid = gcnew XbimSolid(repItem, profile);
+					XbimSolid^ aSolid = gcnew XbimSolid(repItem, profile, logger);
 					if (aSolid->IsValid)
 						solids->Add(aSolid);
 				}
 			}
 			else
 			{
-				XbimSolid^ s = gcnew XbimSolid(repItem);
-				if (s->IsValid)
-				{
-					solids = gcnew List<IXbimSolid^>();
-					solids->Add(s);
-				}
-			}
-		}
-
-		void XbimSolidSet::Init(IIfcExtrudedAreaSolid^ repItem)
-		{
-			IIfcCompositeProfileDef^ compProfile = dynamic_cast<IIfcCompositeProfileDef^>(repItem->SweptArea);
-			int profileCount = Enumerable::Count(compProfile->Profiles);
-			if (compProfile!=nullptr) //handle these as composite solids
-			{
-				if (profileCount == 0)
-				{
-					XbimGeometryCreator::LogWarning(repItem,"Invalid number of profiles. It must be 2 or more. Profile discarded");
-					return;
-				}
-				if (profileCount == 1)
-				{
-					XbimGeometryCreator::LogInfo(repItem, "Invalid number of profiles in IIfcCompositeProfileDef #{0}. It must be 2 or more. A single Profile has been used");
-					XbimSolid^ s = gcnew XbimSolid(repItem);
-					if (s->IsValid)
-					{
-						solids = gcnew List<IXbimSolid^>();
-						solids->Add(s);
-					}
-					return;
-				}				
-				solids = gcnew List<IXbimSolid^>();
-				for each (IIfcProfileDef^ profile in compProfile->Profiles)
-				{
-					XbimSolid^ aSolid = gcnew XbimSolid(repItem, profile);
-					if (aSolid->IsValid)
-						solids->Add(aSolid);
-				}
-			}
-			else
-			{
-				XbimSolid^ s = gcnew XbimSolid(repItem);
-				if (s->IsValid) 
-				{
-					solids = gcnew List<IXbimSolid^>();
-					solids->Add(s);
-				}
-			}
-		}
-
-		void XbimSolidSet::Init(IIfcSurfaceCurveSweptAreaSolid^ repItem)
-		{
-			IIfcCompositeProfileDef^ compProfile = dynamic_cast<IIfcCompositeProfileDef^>(repItem->SweptArea);
-			int profileCount = Enumerable::Count(compProfile->Profiles);
-			if (compProfile != nullptr) //handle these as composite solids
-			{
-				if (profileCount == 0)
-				{
-					XbimGeometryCreator::LogWarning(compProfile,"Invalid number of profiles. It must be 2 or more. Profile discarded");
-					return;
-				}
-				if (profileCount == 1)
-				{
-					XbimGeometryCreator::LogInfo(compProfile,"Invalid number of profiles. It must be 2 or more. A single Profile has been used");
-					XbimSolid^ s = gcnew XbimSolid(repItem);
-					if (s->IsValid)
-					{
-						solids = gcnew List<IXbimSolid^>();
-						solids->Add(s);
-					}
-					return;
-				}
-				solids = gcnew List<IXbimSolid^>();
-				for each (IIfcProfileDef^ profile in compProfile->Profiles)
-				{
-					XbimSolid^ aSolid = gcnew XbimSolid(repItem, profile);
-					if (aSolid->IsValid)
-						solids->Add(aSolid);
-				}
-			}
-			else
-			{
-				XbimSolid^ s = gcnew XbimSolid(repItem);
+				XbimSolid^ s = gcnew XbimSolid(repItem, logger);
 				if (s->IsValid)
 				{
 					solids = gcnew List<IXbimSolid^>();
@@ -742,52 +766,306 @@ namespace Xbim
 			}
 		}
 
+		void XbimSolidSet::Init(IIfcTriangulatedFaceSet ^ IIfcSolid, ILogger ^ logger)
+		{
+			XbimCompound^ comp = gcnew XbimCompound(IIfcSolid, logger);
+			solids = gcnew List<IXbimSolid^>();
+			for each (IXbimSolid^ xbimSolid in comp->Solids)
+			{
+				if (xbimSolid->IsValid)
+					solids->Add(xbimSolid);
+			}
+		}
 
 
-		void XbimSolidSet::Init(IIfcBooleanResult^ boolOp)
+
+		void XbimSolidSet::Init(IIfcFaceBasedSurfaceModel ^ solid, ILogger ^ logger)
+		{
+			XbimCompound^ comp = gcnew XbimCompound(solid, logger);
+			solids = gcnew List<IXbimSolid^>();
+			for each (IXbimSolid^ xbimSolid in comp->Solids)
+			{
+				if (xbimSolid->IsValid)
+					solids->Add(xbimSolid);
+			}
+		}
+
+		void XbimSolidSet::Init(IIfcShellBasedSurfaceModel ^ solid, ILogger ^ logger)
+		{
+			XbimCompound^ comp = gcnew XbimCompound(solid, logger);
+			solids = gcnew List<IXbimSolid^>();
+			for each (IXbimSolid^ xbimSolid in comp->Solids)
+			{
+				if (xbimSolid->IsValid)
+					solids->Add(xbimSolid);
+			}
+		}
+
+		void XbimSolidSet::Init(IIfcExtrudedAreaSolid^ repItem, ILogger^ logger)
+		{
+			IIfcCompositeProfileDef^ compProfile = dynamic_cast<IIfcCompositeProfileDef^>(repItem->SweptArea);
+
+			if (compProfile != nullptr) //handle these as composite solids
+			{
+				int profileCount = Enumerable::Count(compProfile->Profiles);
+				if (profileCount == 0)
+				{
+					XbimGeometryCreator::LogWarning(logger, repItem, "Invalid number of profiles. It must be 2 or more. Profile discarded");
+					return;
+				}
+				if (profileCount == 1)
+				{
+					XbimGeometryCreator::LogInfo(logger, repItem, "Invalid number of profiles in IIfcCompositeProfileDef #{0}. It must be 2 or more. A single Profile has been used");
+					XbimSolid^ s = gcnew XbimSolid(repItem, logger);
+					if (s->IsValid)
+					{
+						solids = gcnew List<IXbimSolid^>();
+						solids->Add(s);
+					}
+					return;
+				}
+				solids = gcnew List<IXbimSolid^>();
+				for each (IIfcProfileDef^ profile in compProfile->Profiles)
+				{
+					XbimSolid^ aSolid = gcnew XbimSolid(repItem, profile, logger);
+					if (aSolid->IsValid)
+						solids->Add(aSolid);
+				}
+			}
+			else
+			{
+				XbimSolid^ s = gcnew XbimSolid(repItem, logger);
+				if (s->IsValid)
+				{
+					solids = gcnew List<IXbimSolid^>();
+					solids->Add(s);
+				}
+			}
+		}
+
+		void XbimSolidSet::Init(IIfcSurfaceCurveSweptAreaSolid^ repItem, ILogger^ logger)
+		{
+			IIfcCompositeProfileDef^ compProfile = dynamic_cast<IIfcCompositeProfileDef^>(repItem->SweptArea);
+
+			if (compProfile != nullptr) //handle these as composite solids
+			{
+				int profileCount = Enumerable::Count(compProfile->Profiles);
+				if (profileCount == 0)
+				{
+					XbimGeometryCreator::LogWarning(logger, compProfile, "Invalid number of profiles. It must be 2 or more. Profile discarded");
+					return;
+				}
+				if (profileCount == 1)
+				{
+					XbimGeometryCreator::LogInfo(logger, compProfile, "Invalid number of profiles. It must be 2 or more. A single Profile has been used");
+					XbimSolid^ s = gcnew XbimSolid(repItem, logger);
+					if (s->IsValid)
+					{
+						solids = gcnew List<IXbimSolid^>();
+						solids->Add(s);
+					}
+					return;
+				}
+				solids = gcnew List<IXbimSolid^>();
+				for each (IIfcProfileDef^ profile in compProfile->Profiles)
+				{
+					XbimSolid^ aSolid = gcnew XbimSolid(repItem, profile, logger);
+					if (aSolid->IsValid)
+						solids->Add(aSolid);
+				}
+			}
+			else
+			{
+				XbimSolid^ s = gcnew XbimSolid(repItem, logger);
+				if (s->IsValid)
+				{
+					solids = gcnew List<IXbimSolid^>();
+					solids->Add(s);
+				}
+			}
+		}
+
+		double VolumeOf(IXbimSolidSet^ set) {
+			double ret = -1;
+			XbimSolidSet^ basic = dynamic_cast<XbimSolidSet^>(set);
+			if (basic != nullptr)
+			{
+				return basic->Volume;
+			}
+			return ret;
+		}
+
+		void XbimSolidSet::Init(IIfcCsgSolid^ IIfcSolid, ILogger^ logger)
 		{
 			solids = gcnew List<IXbimSolid^>();
-			IIfcBooleanOperand^ fOp = boolOp->FirstOperand; //thse must be solids according to the schema
-			IIfcBooleanOperand^ sOp = boolOp->SecondOperand;
-			XbimSolid^ left = gcnew XbimSolid(fOp);
-			XbimSolid^ right = gcnew XbimSolid(sOp);
+			IIfcCsgPrimitive3D^ csgPrim = dynamic_cast<IIfcCsgPrimitive3D^>(IIfcSolid->TreeRootExpression);
+			if (csgPrim != nullptr)
+			{
+				solids->Add(gcnew XbimSolid(csgPrim, logger));
+			}
+			else
+			{
+				IIfcBooleanResult^ booleanResult = dynamic_cast<IIfcBooleanResult^>(IIfcSolid->TreeRootExpression);
+				if (booleanResult != nullptr) return Init(booleanResult, logger);
+				throw gcnew NotImplementedException(String::Format("IIfcCsgSolid of Type {0} in entity #{1} is not implemented", IIfcSolid->GetType()->Name, IIfcSolid->EntityLabel));
+
+			}
+		}
+
+
+
+		//Booleans
+		void XbimSolidSet::Init(IIfcBooleanClippingResult^ solid, ILogger^ logger)
+		{
+			solids = gcnew List<IXbimSolid^>();
+			IModelFactors^ mf = solid->Model->ModelFactors;
+
+			List<IIfcBooleanOperand^>^ clips = gcnew List<IIfcBooleanOperand^>();
+			XbimSolidSet^ solidSet = gcnew XbimSolidSet();
+			solidSet->IfcEntityLabel = solid->EntityLabel;
+			XbimSolidSet^ bodySet = XbimSolidSet::BuildClippingList(solid, clips, logger);
+			bodySet->IfcEntityLabel = solid->EntityLabel;
+
+			for each (IIfcBooleanOperand^ bOp in clips)
+			{
+				XbimSolidSet^ s = gcnew XbimSolidSet(bOp, logger);
+				if (s->IsValid) solidSet->Add(s);
+			}
+
+
+			IXbimSolidSet^ xbimSolidSet = bodySet->Cut(solidSet, mf->Precision, logger);
+			if (xbimSolidSet != nullptr && xbimSolidSet->IsValid)
+			{
+				solids->AddRange(xbimSolidSet);
+			}
+		}
+
+
+		void XbimSolidSet::Init(IIfcBooleanOperand ^ boolOp, ILogger ^ logger)
+		{
+			IIfcBooleanResult^ boolRes = dynamic_cast<IIfcBooleanResult^>(boolOp);
+			IIfcCsgSolid^ csgOp = dynamic_cast<IIfcCsgSolid^>(boolOp);
+			IIfcHalfSpaceSolid^ hs = dynamic_cast<IIfcHalfSpaceSolid^>(boolOp);
+			IIfcCsgPrimitive3D^ csgPrim = dynamic_cast<IIfcCsgPrimitive3D^>(boolOp);
+
+			IIfcSweptAreaSolid^ sa = dynamic_cast<IIfcSweptAreaSolid^>(boolOp);
+			IIfcManifoldSolidBrep^ ms = dynamic_cast<IIfcManifoldSolidBrep^>(boolOp);
+			IIfcSolidModel^ sm = dynamic_cast<IIfcSolidModel^>(boolOp);
+			solids = gcnew List<IXbimSolid^>();
+			if (boolRes != nullptr)
+			{
+				Init(boolRes, logger); // dispatch for boolean result
+			}
+			else if (csgOp != nullptr)
+			{
+				Init(csgOp, logger); // dispatch for IIfcCsgSolid result
+			}
+			else if (sa != nullptr)
+			{
+				Init(sa, logger);
+			}
+			else if (ms != nullptr)
+			{
+				XbimCompound^ comp = gcnew XbimCompound(ms, logger);
+				Init(comp, ms, logger);
+			}
+			else if (hs != nullptr)
+			{
+				XbimSolid^ s = gcnew XbimSolid(hs, logger);
+				if (s->IsValid) solids->Add(s);
+			}
+			else if (csgPrim != nullptr)
+			{
+				XbimSolid^ s = gcnew XbimSolid(csgPrim, logger);
+				if (s->IsValid)solids->Add(s);
+			}
+			else if (sm != nullptr)
+			{
+				XbimSolid^ s = gcnew XbimSolid(sm, logger);
+				if (s->IsValid)solids->Add(s); // otherwise create a  solid model
+			}
+			else
+			{
+				XbimGeometryCreator::LogError(logger, boolOp, "Not Implemented boolean operand {0})", boolOp->GetType()->Name);
+			}
+		}
+		XbimSolidSet^ XbimSolidSet::BuildBooleanResult(IIfcBooleanResult^ boolRes, IfcBooleanOperator operatorType, XbimSolidSet^ ops, ILogger^ logger)
+		{
+			XbimSolidSet^ right = gcnew XbimSolidSet(boolRes->SecondOperand, logger);
+			if (right->IsValid)
+			{
+				right->IfcEntityLabel = boolRes->SecondOperand->EntityLabel;
+				ops->Add(right);
+			}
+
+			//if we are the same operator type just aggregate them into a single solid set
+			if (boolRes->Operator == operatorType && dynamic_cast<IIfcBooleanResult^>(boolRes->FirstOperand) && !dynamic_cast<IIfcBooleanClippingResult^>(boolRes->FirstOperand))
+			{
+				return BuildBooleanResult((IIfcBooleanResult^)(boolRes->FirstOperand), operatorType, ops, logger);
+			}
+			else
+			{
+				XbimSolidSet^ left = gcnew XbimSolidSet(boolRes->FirstOperand, logger);
+				left->IfcEntityLabel = boolRes->FirstOperand->EntityLabel;
+				ops->Reverse();
+				return left;
+			}
+		}
+
+		void XbimSolidSet::Init(IIfcBooleanResult^ boolOp, ILogger^ logger)
+		{
+
+			if (dynamic_cast<IIfcBooleanClippingResult^>(boolOp))
+			{
+				Init((IIfcBooleanClippingResult^)boolOp, logger);
+				return;
+			}
+			XbimSolidSet^ right = gcnew XbimSolidSet();
+			right->IfcEntityLabel = boolOp->SecondOperand->EntityLabel;
+			XbimSolidSet^ left = BuildBooleanResult(boolOp, boolOp->Operator, right, logger);
+
+			solids = gcnew List<IXbimSolid^>();
+
 			if (!left->IsValid)
 			{
 				if (boolOp->Operator != IfcBooleanOperator::UNION)
-				//XbimGeometryCreator::LogWarning(boolOp, "Boolean result has invalid first operand");
+					XbimGeometryCreator::LogWarning(logger, boolOp, "Boolean result has invalid first operand");
 				return;
 			}
 
 			if (!right->IsValid)
 			{
-				//XbimGeometryCreator::LogWarning(boolOp, "Boolean result has invalid second operand");
-				if(left->IsValid) solids->Add(left); //return the left operand
+				solids->AddRange(left);
+				XbimGeometryCreator::LogWarning(logger, boolOp, "Boolean result has invalid second operand");
 				return;
 			}
 
 			IModelFactors^ mf = boolOp->Model->ModelFactors;
+
 			IXbimSolidSet^ result;
 			try
 			{
+
 				switch (boolOp->Operator)
 				{
 				case IfcBooleanOperator::UNION:
-					result = left->Union(right, mf->Precision);
+					result = left->Union(right, mf->Precision, logger);
 					break;
 				case IfcBooleanOperator::INTERSECTION:
-					result = left->Intersection(right, mf->Precision);
+					result = left->Intersection(right, mf->Precision, logger);
 					break;
 				case IfcBooleanOperator::DIFFERENCE:
-					result = left->Cut(right, mf->Precision);
+					result = left->Cut(right, mf->Precision, logger);
 					break;
 				}
 			}
 			catch (Exception^ xbimE)
 			{
-				XbimGeometryCreator::LogError(boolOp, "Boolean operation failure, {0}. The operation has been ignored", xbimE->Message);
-				solids->Add(left);; //return the left operand
+				XbimGeometryCreator::LogError(logger, boolOp, "Boolean operation failure, {0}. The operation has been ignored", xbimE->Message);
+				solids->AddRange(left);; //return the left operand
 				return;
 			}
+
 			solids->AddRange(result);
 		}
 	}

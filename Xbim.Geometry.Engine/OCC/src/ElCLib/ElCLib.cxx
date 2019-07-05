@@ -49,6 +49,22 @@ static Standard_Real PIPI = M_PI + M_PI;
 //=======================================================================
 //function : InPeriod
 //purpose  : Value theULast is never returned.
+//          Example of some case (checked on WIN64 platform)
+//          with some surface having period 2*PI = 6.2831853071795862.
+//            Let theUFirst be equal to 6.1645624650899675. Then,
+//          theULast must be equal to
+//              6.1645624650899675+6.2831853071795862=12.4477477722695537.
+//
+//          However, real result is 12.447747772269555.
+//          Therefore, new period value to adjust will be equal to
+//              12.447747772269555-6.1645624650899675=6.2831853071795871.
+//
+//          As we can see, (6.2831853071795871 != 6.2831853071795862).
+//
+//          According to above said, this method should be used carefully.
+//          In order to increase reliability of this method, input arguments
+//          needs to be replaced with following: 
+//            (theU, theUFirst, thePeriod). theULast parameter is excess.
 //=======================================================================
 Standard_Real  ElCLib::InPeriod(const Standard_Real theU, 
                                 const Standard_Real theUFirst, 
@@ -1292,12 +1308,24 @@ Standard_Real ElCLib::LineParameter (const gp_Ax1& L, const gp_Pnt& P)
 //function : CircleParameter
 //purpose  : 
 //=======================================================================
-
-Standard_Real ElCLib::CircleParameter (const gp_Ax2& Pos,
-				       const gp_Pnt& P)
+Standard_Real ElCLib::CircleParameter(const gp_Ax2& Pos,
+                                      const gp_Pnt& P)
 {
-  Standard_Real Teta = (Pos.XDirection()) .AngleWithRef
-    (gp_Vec (Pos.Location(), P), Pos.Direction());
+  gp_Vec aVec(Pos.Location(), P);
+  if (aVec.SquareMagnitude() < gp::Resolution())
+    // coinciding points -> infinite number of parameters
+    return 0.0;
+
+  const gp_Dir& dir = Pos.Direction();
+  // Project vector on circle's plane
+  gp_XYZ aVProj = dir.XYZ().CrossCrossed(aVec.XYZ(), dir.XYZ());
+
+  if (aVProj.SquareModulus() < gp::Resolution())
+    return 0.0;
+
+  // Angle between X direction and projected vector
+  Standard_Real Teta = (Pos.XDirection()).AngleWithRef(aVProj, dir);
+
   if      (Teta < -1.e-16)  Teta += PIPI;
   else if (Teta < 0)        Teta = 0;
   return Teta;

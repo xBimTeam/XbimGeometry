@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "XbimRegression": {
+      "commandName": "Project",
+      "commandLineArgs": "C:\\Users\\Steve\\Downloads\\IFCTestModels"
+    }
+  }
+}

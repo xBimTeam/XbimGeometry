@@ -154,6 +154,17 @@ public:
  public:
   // ---------- PUBLIC METHODS ------------
 
+  //! Empty constructor; should be used with caution.
+  //! @sa methods Resize() and Move().
+  NCollection_Array1()
+  : myLowerBound (1),
+    myUpperBound (0),
+    myDeletable  (Standard_False),
+    myData (NULL)
+  {
+    //
+  }
+
   //! Constructor
   NCollection_Array1(const Standard_Integer theLower,
                      const Standard_Integer theUpper) :
@@ -178,10 +189,36 @@ public:
     Standard_OutOfMemory_Raise_if (!pBegin, "NCollection_Array1 : Allocation failed");
     myData = pBegin - myLowerBound;
 
-    *this = theOther;
+    Assign (theOther);
   }
 
-  //! C array-based constructor
+#ifndef OCCT_NO_RVALUE_REFERENCE
+  //! Move constructor
+  NCollection_Array1 (NCollection_Array1&& theOther)
+  : myLowerBound (theOther.myLowerBound),
+    myUpperBound (theOther.myUpperBound),
+    myDeletable  (theOther.myDeletable),
+    myData       (theOther.myData)
+  {
+    theOther.myDeletable  = false;
+  }
+#endif
+
+  //! C array-based constructor.
+  //!
+  //! Makes this array to use the buffer pointed by theBegin
+  //! instead of allocating it dynamically.
+  //! Argument theBegin should be a reference to the first element
+  //! of the pre-allocated buffer (usually local C array buffer),
+  //! with size at least theUpper - theLower + 1 items.
+  //!
+  //! Warning: returning array object created using this constructor
+  //! from function by value will result in undefined behavior
+  //! if compiler performs return value optimization (this is likely
+  //! to be true for all modern compilers in release mode).
+  //! The same happens if array is copied using Move() function
+  //! or move constructor and target object's lifespan is longer
+  //! than that of the buffer.
   NCollection_Array1 (const TheItemType& theBegin,
                       const Standard_Integer theLower,
                       const Standard_Integer theUpper) :
@@ -190,7 +227,18 @@ public:
     myDeletable                                 (Standard_False)
   {
     Standard_RangeError_Raise_if (theUpper < theLower, "NCollection_Array1::Create");
-    myData = (TheItemType *) &theBegin - theLower; 
+  #if (defined(__GNUC__) && __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6))
+    // gcc emits -Warray-bounds warning when NCollection_Array1 is initialized
+    // from local array with lower index 1 (so that (&theBegin - 1) points out of array bounds).
+    // NCollection_Array1 initializes myData with a shift to avoid this shift within per-element access.
+    // It is undesired changing this logic, and -Warray-bounds is not useful here.
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Warray-bounds"
+  #endif
+    myData = (TheItemType *) &theBegin - theLower;
+  #if (defined(__GNUC__) && __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6))
+    #pragma GCC diagnostic pop
+  #endif
   }
 
   //! Initialise the items with theValue
@@ -208,6 +256,9 @@ public:
   Standard_Integer Length (void) const
   { return (myUpperBound-myLowerBound+1); }
 
+  //! Return TRUE if array has zero length.
+  Standard_Boolean IsEmpty() const { return myUpperBound < myLowerBound; }
+
   //! Lower bound
   Standard_Integer Lower (void) const
   { return myLowerBound; }
@@ -223,24 +274,66 @@ public:
   Standard_Boolean IsAllocated (void) const
   { return myDeletable; }
 
-  //! Assignment
+  //! Copies data of theOther array to this.
+  //! This array should be pre-allocated and have the same length as theOther;
+  //! otherwise exception Standard_DimensionMismatch is thrown.
   NCollection_Array1& Assign (const NCollection_Array1& theOther)
   {
     if (&theOther == this)
       return *this;
+
     Standard_DimensionMismatch_Raise_if (Length() != theOther.Length(), "NCollection_Array1::operator=");
+    if (myData == NULL)
+    {
+      return *this;
+    }
+
     TheItemType * pMyItem        = &myData[myLowerBound];
     TheItemType * const pEndItem = &(theOther.myData)[theOther.myUpperBound];
     TheItemType * pItem          = &(theOther.myData)[theOther.myLowerBound];
     while (pItem <= pEndItem) * pMyItem ++ = * pItem ++;
-    return *this; 
+    return *this;
   }
 
-  //! Assignment operator
+  //! Move assignment.
+  //! This array will borrow all the data from theOther.
+  //! The moved object will keep pointer to the memory buffer and
+  //! range, but it will not free the buffer on destruction.
+  NCollection_Array1& Move (NCollection_Array1& theOther)
+  {
+    if (&theOther == this)
+    {
+      return *this;
+    }
+
+    if (myDeletable)
+    {
+      delete[] &myData[myLowerBound];
+    }
+
+    myLowerBound = theOther.myLowerBound;
+    myUpperBound = theOther.myUpperBound;
+    myDeletable  = theOther.myDeletable;
+    myData       = theOther.myData;
+
+    theOther.myDeletable = Standard_False;
+
+    return *this;
+  }
+
+  //! Assignment operator; @sa Assign()
   NCollection_Array1& operator= (const NCollection_Array1& theOther)
   { 
     return Assign (theOther);
   }
+
+#ifndef OCCT_NO_RVALUE_REFERENCE
+  //! Move assignment operator; @sa Move()
+  NCollection_Array1& operator= (NCollection_Array1&& theOther)
+  {
+    return Move (theOther);
+  }
+#endif
 
   //! @return first element
   const TheItemType& First() const
@@ -296,9 +389,61 @@ public:
     myData[theIndex] = theItem;
   }
 
+  //! Resizes the array to specified bounds.
+  //! No re-allocation will be done if length of array does not change,
+  //! but existing values will not be discarded if theToCopyData set to FALSE.
+  //! @param theLower new lower bound of array
+  //! @param theUpper new upper bound of array
+  //! @param theToCopyData flag to copy existing data into new array
+  void Resize (const Standard_Integer theLower,
+               const Standard_Integer theUpper,
+               const Standard_Boolean theToCopyData)
+  {
+    Standard_RangeError_Raise_if (theUpper < theLower, "NCollection_Array1::Resize");
+    const Standard_Integer anOldLen   = Length();
+    const Standard_Integer aNewLen    = theUpper - theLower + 1;
+    const Standard_Integer aLowerOld  = myLowerBound;
+
+    TheItemType* aBeginOld = &myData[aLowerOld];
+    myLowerBound = theLower;
+    myUpperBound = theUpper;
+    if (aNewLen == anOldLen)
+    {
+      myData = aBeginOld - theLower;
+      return;
+    }
+
+    if (!theToCopyData && myDeletable)
+    {
+      delete[] aBeginOld;
+    }
+    TheItemType* aBeginNew = new TheItemType[aNewLen];
+    Standard_OutOfMemory_Raise_if (aBeginNew == NULL, "NCollection_Array1 : Allocation failed");
+    myData = aBeginNew - theLower;
+    if (!theToCopyData)
+    {
+      myDeletable = Standard_True;
+      return;
+    }
+
+    const Standard_Integer aLenCopy = Min (anOldLen, aNewLen);
+    for (Standard_Integer anIter = 0; anIter < aLenCopy; ++anIter)
+    {
+      aBeginNew[anIter] = aBeginOld[anIter];
+    }
+    if (myDeletable)
+    {
+      delete[] aBeginOld;
+    }
+    myDeletable = Standard_True;
+  }
+
   //! Destructor - releases the memory
   ~NCollection_Array1 (void)
-  { if (myDeletable) delete [] &(myData[myLowerBound]); }
+  { 
+    if (myDeletable) 
+      delete [] &(myData[myLowerBound]);
+  }
 
  protected:
   // ---------- PROTECTED FIELDS -----------

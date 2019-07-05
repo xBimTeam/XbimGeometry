@@ -25,28 +25,36 @@
 #define PARAMEQUAL(a,b) (Abs((a)-(b))< (1e-8))
 
 //================================================================================
-IntCurveSurface_Intersection::IntCurveSurface_Intersection(): done(Standard_False) { 
+IntCurveSurface_Intersection::IntCurveSurface_Intersection(): 
+done(Standard_False),
+myIsParallel(Standard_False)
+{ 
 }
 //================================================================================
 Standard_Boolean IntCurveSurface_Intersection::IsDone() const { return(done); } 
 //================================================================================
+Standard_Boolean IntCurveSurface_Intersection::IsParallel() const 
+{ 
+  return(myIsParallel); 
+}
+//================================================================================
 Standard_Integer IntCurveSurface_Intersection::NbPoints() const { 
-  if (!done) {StdFail_NotDone::Raise();}
+  if (!done) {throw StdFail_NotDone();}
   return lpnt.Length();
 }
 //================================================================================
 Standard_Integer IntCurveSurface_Intersection::NbSegments() const { 
-  if (!done) {StdFail_NotDone::Raise();}
+  if (!done) {throw StdFail_NotDone();}
   return lseg.Length();
 }
 //================================================================================
 const IntCurveSurface_IntersectionPoint& IntCurveSurface_Intersection::Point( const Standard_Integer N) const {
-  if (!done) {StdFail_NotDone::Raise();}
+  if (!done) {throw StdFail_NotDone();}
   return lpnt.Value(N);
 }
 //================================================================================
 const IntCurveSurface_IntersectionSegment& IntCurveSurface_Intersection::Segment( const Standard_Integer N) const {
-  if (!done) {StdFail_NotDone::Raise();}
+  if (!done) {throw StdFail_NotDone();}
   return lseg.Value(N);
 }
 //================================================================================
@@ -116,6 +124,7 @@ void IntCurveSurface_Intersection::ResetFields() {
     lseg.Clear();
     lpnt.Clear();
     done=Standard_False;
+    myIsParallel = Standard_False;
   }
 }
 //================================================================================

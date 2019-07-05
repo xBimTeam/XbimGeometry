@@ -39,6 +39,16 @@
 #include <ProjLib_Plane.hxx>
 #include <ProjLib_Sphere.hxx>
 #include <ProjLib_Torus.hxx>
+#include <ProjLib_ProjectedCurve.hxx>
+#include <Geom2d_Line.hxx>
+#include <Geom2d_Circle.hxx>
+#include <Geom2d_Ellipse.hxx>
+#include <Geom2d_Parabola.hxx>
+#include <Geom2d_Hyperbola.hxx>
+#include <Geom2d_BSplineCurve.hxx>
+#include <Geom2d_BezierCurve.hxx>
+#include <Standard_NotImplemented.hxx>
+#include <Adaptor3d_HSurface.hxx>
 
 //=======================================================================
 //function : Project
@@ -233,4 +243,64 @@ gp_Lin2d  ProjLib::Project(const gp_Torus& To, const gp_Circ& Ci)
 {
   ProjLib_Torus Proj( To, Ci);
   return Proj.Line();
+}
+
+//=======================================================================
+//function : MakePCurveOfType
+//purpose  : 
+//=======================================================================
+void  ProjLib::MakePCurveOfType
+  (const ProjLib_ProjectedCurve& PC, 
+   Handle(Geom2d_Curve)& C2D)
+{
+  
+  switch (PC.GetType()) {
+
+  case GeomAbs_Line : 
+    C2D = new Geom2d_Line(PC.Line()); 
+    break;
+  case GeomAbs_Circle : 
+    C2D = new Geom2d_Circle(PC.Circle());
+    break;
+  case GeomAbs_Ellipse :
+    C2D = new Geom2d_Ellipse(PC.Ellipse());
+    break;
+  case GeomAbs_Parabola : 
+    C2D = new Geom2d_Parabola(PC.Parabola()); 
+    break;
+  case GeomAbs_Hyperbola : 
+    C2D = new Geom2d_Hyperbola(PC.Hyperbola()); 
+    break;
+  case GeomAbs_BSplineCurve :
+    C2D = PC.BSpline(); 
+    break;
+  case GeomAbs_BezierCurve : 
+  case GeomAbs_OtherCurve : 
+    default :
+    Standard_NotImplemented::Raise
+      ("ProjLib::MakePCurveOfType");
+    break;
+  }
+}
+//=======================================================================
+//function : IsAnaSurf
+//purpose  : 
+//=======================================================================
+Standard_Boolean  ProjLib::IsAnaSurf
+  (const Handle(Adaptor3d_HSurface)& theAS) 
+{ 
+  switch (theAS->GetType()) 
+  {
+
+  case GeomAbs_Plane:
+  case GeomAbs_Cylinder:
+  case GeomAbs_Cone:
+  case GeomAbs_Sphere:
+  case GeomAbs_Torus:
+    return Standard_True;
+    break;
+  default :
+    return Standard_False;
+    break;
+  }
 }

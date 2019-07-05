@@ -4,6 +4,8 @@ using namespace Xbim::Common::Geometry;
 using namespace System::Collections::Generic;
 using namespace Xbim::Ifc4::Interfaces;
 using namespace Xbim::Ifc4;
+using namespace Microsoft::Extensions::Logging;
+
 namespace Xbim
 {
 	namespace Geometry
@@ -64,7 +66,7 @@ namespace Xbim
 		public:
 			virtual IXbimGeometryObject^ Transformed(IIfcCartesianTransformationOperator ^transformation) abstract;
 			virtual IXbimGeometryObject^ Moved(IIfcPlacement ^placement) abstract;
-			virtual IXbimGeometryObject^ Moved(IIfcObjectPlacement ^objectPlacement) abstract;
+			virtual IXbimGeometryObject^ Moved(IIfcObjectPlacement ^objectPlacement, ILogger^ logger) abstract;
 			virtual property Object^  Tag {Object^ get() { return tag; }; void set(Object^ value) { tag = value; }; }
 			virtual property int Count {int get() abstract; }
 			virtual IXbimGeometryObject^ Trim() abstract; 
@@ -86,8 +88,8 @@ namespace Xbim
 			virtual property  bool IsValid{bool  get() abstract; }
 			virtual property bool IsSet{bool get() abstract; }
 			virtual property  XbimGeometryObjectType GeometryType{XbimGeometryObjectType  get() abstract;}
-			virtual bool Equals(IXbimGeometryObject^ geom, double tolerance){ throw gcnew NotImplementedException("Function not implemented"); }
-			virtual bool Intersects(IXbimGeometryObject^ geom, double tolerance){ throw gcnew NotImplementedException("Function not implemented"); }
+			virtual bool Equals(IXbimGeometryObject^ , double ){ throw gcnew NotImplementedException("Function not implemented"); }
+			virtual bool Intersects(IXbimGeometryObject^ , double ){ throw gcnew NotImplementedException("Function not implemented"); }
 			virtual property XbimRect3D BoundingBox {XbimRect3D get() abstract; };
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) abstract;
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D) abstract;

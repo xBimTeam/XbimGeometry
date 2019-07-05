@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using Xbim.Common.Logging;
+
 
 
 namespace XbimRegression

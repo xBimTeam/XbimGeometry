@@ -129,13 +129,14 @@ Handle(GeomFill_TrihedronLaw) GeomFill_Frenet::Copy() const
     case GeomAbs_Parabola:
     case GeomAbs_Line:
       {
-	// No probleme
-	isSngl = Standard_False;
+        // No probleme
+        isSngl = Standard_False;
+        break;
       }
      default :
        { 
-	 // We have to search singulaties
-	 Init(); 
+         // We have to search singulaties
+         Init();
        }
     }
   }
@@ -679,7 +680,7 @@ Standard_Boolean
   case GeomAbs_C2:
   case GeomAbs_C3:
   case GeomAbs_CN: tmpS = GeomAbs_CN; break;
-  default: Standard_OutOfRange::Raise();
+  default: throw Standard_OutOfRange();
   }
   
   NbTrimmed = myCurve->NbIntervals(tmpS);
@@ -711,7 +712,7 @@ Standard_Boolean
   case GeomAbs_C2:
   case GeomAbs_C3:
   case GeomAbs_CN: tmpS = GeomAbs_CN; break;
-  default: Standard_OutOfRange::Raise();
+  default: throw Standard_OutOfRange();
   }
 
   if (!isSngl) {

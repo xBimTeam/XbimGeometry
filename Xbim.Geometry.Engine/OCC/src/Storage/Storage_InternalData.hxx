@@ -24,20 +24,20 @@
 #include <Standard_Integer.hxx>
 #include <Storage_HPArray.hxx>
 #include <Storage_MapOfCallBack.hxx>
-#include <MMgt_TShared.hxx>
+#include <Standard_Transient.hxx>
 class Storage_Schema;
 
 
 class Storage_InternalData;
-DEFINE_STANDARD_HANDLE(Storage_InternalData, MMgt_TShared)
+DEFINE_STANDARD_HANDLE(Storage_InternalData, Standard_Transient)
 
 
-class Storage_InternalData : public MMgt_TShared
+class Storage_InternalData : public Standard_Transient
 {
 
 public:
 
-  Standard_EXPORT Handle(Storage_HPArray) ReadArray() {return myReadArray;}
+  Handle(Storage_HPArray) ReadArray() { return myReadArray; }
   
   Standard_EXPORT Storage_InternalData();
   
@@ -47,7 +47,7 @@ public:
 friend class Storage_Schema;
 
 
-  DEFINE_STANDARD_RTTIEXT(Storage_InternalData,MMgt_TShared)
+  DEFINE_STANDARD_RTTIEXT(Storage_InternalData,Standard_Transient)
 
 protected:
 

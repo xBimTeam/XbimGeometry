@@ -21,6 +21,7 @@
 #include <Adaptor3d_HSurface.hxx>
 #include <Bnd_Box.hxx>
 #include <BndLib_Add3dCurve.hxx>
+#include <BOPTools_AlgoTools.hxx>
 #include <BRep_Builder.hxx>
 #include <BRep_CurveRepresentation.hxx>
 #include <BRep_GCurve.hxx>
@@ -76,8 +77,6 @@
 #include <TopTools_DataMapIteratorOfDataMapOfShapeListOfShape.hxx>
 #include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <TopTools_ListOfShape.hxx>
-#include <BOPCol_ListOfShape.hxx>
-#include <BOPTools_AlgoTools.hxx>
 
 #include <stdio.h>
 #ifdef DRAW 
@@ -112,6 +111,28 @@ static TopoDS_Vertex CommonVertex(TopoDS_Edge& E1,
   //
   return V;
 }
+
+static Standard_Boolean IsOrientationChanged(TopTools_IndexedMapOfShape& theMap,
+                                             const TopoDS_Edge& theEdge)
+{
+  Standard_Boolean IsOrChanged = Standard_False;
+  
+  if (!theMap.Contains(theEdge))
+    theMap.Add(theEdge);
+  else
+  {
+    Standard_Integer anInd = theMap.FindIndex(theEdge);
+    const TopoDS_Shape& anEdge = theMap(anInd);
+    if (theEdge.Orientation() != anEdge.Orientation())
+    {
+      theMap.Substitute( anInd, theEdge );
+      IsOrChanged = Standard_True;
+    }
+  }
+
+  return IsOrChanged;
+}
+
 
 //=======================================================================
 //function : Store
@@ -1480,7 +1501,10 @@ void BRepOffset_Inter2d::ConnexIntByInt
     wexp.Init(TopoDS::Wire(aLocalWire),TopoDS::Face(aLocalFace));
     if (!wexp.More())
       continue; // Protection from case when explorer does not contain edges.
-    CurE = FirstE  = wexp.Current(); 
+    CurE = FirstE  = wexp.Current();
+    TopTools_IndexedMapOfShape Edges;
+    Standard_Boolean ToReverse1, ToReverse2;
+    ToReverse1 = IsOrientationChanged(Edges, CurE);
     while (!end) {
       wexp.Next();
       if (wexp.More()) {
@@ -1490,6 +1514,8 @@ void BRepOffset_Inter2d::ConnexIntByInt
         NextE = FirstE; end = Standard_True;
       }
       if (CurE.IsSame(NextE)) continue;
+
+      ToReverse2 = IsOrientationChanged(Edges, NextE);
 
       TopoDS_Vertex Vref = CommonVertex(CurE, NextE); 
       gp_Pnt Pref = BRep_Tool::Pnt(Vref);
@@ -1516,6 +1542,9 @@ void BRepOffset_Inter2d::ConnexIntByInt
       else if (Build.IsBound(NextE) && MES.IsBound(CEO)) {
         NE1 = Build(NextE);
         NE2 = MES(CEO);
+        Standard_Boolean Tmp = ToReverse1;
+        ToReverse1 = ToReverse2;
+        ToReverse2 = Tmp;
       }
       else {
         DoInter = 0;
@@ -1527,9 +1556,17 @@ void BRepOffset_Inter2d::ConnexIntByInt
         Standard_Boolean bCoincide;
         TopExp_Explorer Exp1, Exp2;
         for (Exp1.Init(NE1, TopAbs_EDGE); Exp1.More(); Exp1.Next()) {
-          const TopoDS_Edge& aE1 = TopoDS::Edge(Exp1.Current());
+          TopoDS_Edge aE1 = TopoDS::Edge(Exp1.Current());
           for (Exp2.Init(NE2, TopAbs_EDGE); Exp2.More(); Exp2.Next()) {
-            const TopoDS_Edge& aE2 = TopoDS::Edge(Exp2.Current());
+            TopoDS_Edge aE2 = TopoDS::Edge(Exp2.Current());
+
+            //Correct orientation of edges
+            if (ToReverse1)
+              aE1.Reverse();
+            if (ToReverse2)
+              aE2.Reverse();
+            //////////////////////////////
+            
             RefEdgeInter(FIO, BAsurf, aE1, aE2, AsDes2d,
                          Tol, Standard_True, Pref, theDMVV, bCoincide);
           }
@@ -1554,6 +1591,7 @@ void BRepOffset_Inter2d::ConnexIntByInt
         }
       }
       CurE = NextE;
+      ToReverse1 = ToReverse2;
     }
   }
 }
@@ -1702,7 +1740,7 @@ void BRepOffset_Inter2d::ConnexIntByIntInVert
 static void MakeChain(const TopoDS_Shape& theV,
                       const TopTools_IndexedDataMapOfShapeListOfShape& theDMVV,
                       TopTools_MapOfShape& theMDone,
-                      BOPCol_ListOfShape& theChain)
+                      TopTools_ListOfShape& theChain)
 {
   if (theMDone.Add(theV)) {
     theChain.Append(theV);
@@ -1730,7 +1768,7 @@ void BRepOffset_Inter2d::FuseVertices(const TopTools_IndexedDataMapOfShapeListOf
     const TopoDS_Vertex& aV = TopoDS::Vertex(theDMVV.FindKey(i));
     //
     // find chain of vertices
-    BOPCol_ListOfShape aLVChain;
+    TopTools_ListOfShape aLVChain;
     MakeChain(aV, theDMVV, aMVDone, aLVChain);
     //
     if (aLVChain.Extent() < 2) {
@@ -1743,7 +1781,7 @@ void BRepOffset_Inter2d::FuseVertices(const TopTools_IndexedDataMapOfShapeListOf
     //
     TopoDS_Vertex aVNewInt = TopoDS::Vertex(aVNew.Oriented(TopAbs_INTERNAL));
     //
-    BOPCol_ListIteratorOfListOfShape aIt(aLVChain);
+    TopTools_ListIteratorOfListOfShape aIt(aLVChain);
     for (; aIt.More(); aIt.Next()) {
       const TopoDS_Shape& aVOld = aIt.Value();
       // update the parameters on edges

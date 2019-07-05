@@ -78,7 +78,7 @@ int status;
 
 
 // if (myPath.Name().Length()==0)  A directory can have a null name field (ex: root)
-//  OSD_OSDError::Raise("OSD_FileNode::Exists : no name was given"); (LD)
+//  throw OSD_OSDError("OSD_FileNode::Exists : no name was given"); (LD)
 
 // if (Failed()) Perror();
 
@@ -98,7 +98,7 @@ int status;
 void  OSD_FileNode::Remove(){
 
 // if (myPath.Name().Length()==0) A directory can have a null name field (ex: root)
-//  OSD_OSDError::Raise("OSD_FileNode::Remove : no name was given"); (LD)
+//  throw OSD_OSDError("OSD_FileNode::Remove : no name was given"); (LD)
 
 // if (Failed()) Perror();
 
@@ -151,7 +151,7 @@ int status;
 TCollection_AsciiString thisPath;
 
 // if (myPath.Name().Length()==0)
-//  OSD_OSDError::Raise("OSD_FileNode::Move : no name was given");
+//  throw OSD_OSDError("OSD_FileNode::Move : no name was given");
 
 // if (Failed()) Perror();
 
@@ -206,7 +206,7 @@ int status;
 TCollection_AsciiString second_name;
 
 // if (myPath.Name().Length()==0)   Copy .login would raise !!
-//  OSD_OSDError::Raise("OSD_FileNode::Copy : no name was given");
+//  throw OSD_OSDError("OSD_FileNode::Copy : no name was given");
 // if (Failed()) Perror();
 
  ToPath.SystemName (second_name);
@@ -233,7 +233,7 @@ int status;
 int s,u,g,w;
 
 // if (myPath.Name().Length()==0)
-//  OSD_OSDError::Raise("OSD_FileNode::Protection : no name was given");
+//  throw OSD_OSDError("OSD_FileNode::Protection : no name was given");
 
 // if (Failed()) Perror();
 
@@ -272,7 +272,7 @@ void  OSD_FileNode::SetProtection(const OSD_Protection& Prot){
 int status;
 
 //  if (myPath.Name().Length()==0)
-//  OSD_OSDError::Raise("OSD_FileNode::SetProtection : no name was given");
+//  throw OSD_OSDError("OSD_FileNode::SetProtection : no name was given");
 
 // if (Failed()) Perror();
 
@@ -291,7 +291,7 @@ Quantity_Date  OSD_FileNode::CreationMoment(){
  struct stat buffer;
 
 // if (myPath.Name().Length()==0)
-//  OSD_OSDError::Raise("OSD_FileNode::CreationMoment : no name was given");
+//  throw OSD_OSDError("OSD_FileNode::CreationMoment : no name was given");
 
 // if (Failed()) Perror();
 
@@ -319,7 +319,7 @@ Quantity_Date  OSD_FileNode::AccessMoment(){
  struct stat buffer;
 
 // if (myPath.Name().Length()==0)
-//  OSD_OSDError::Raise("OSD_FileNode::AccessMoment : no name was given");
+//  throw OSD_OSDError("OSD_FileNode::AccessMoment : no name was given");
 
 // if (Failed()) Perror();
 
@@ -362,7 +362,6 @@ Standard_Integer OSD_FileNode::Error()const{
 //-------------------  WNT Sources of OSD_FileNode ---------------------------
 //----------------------------------------------------------------------------
 
-#define STRICT
 #ifdef NONLS
 #undef NONLS
 #endif
@@ -374,7 +373,7 @@ Standard_Integer OSD_FileNode::Error()const{
 #include <Standard_ProgramError.hxx>
 #include <TCollection_ExtendedString.hxx>
 
-#include <OSD_WNT_1.hxx>
+#include <OSD_WNT.hxx>
 
 #ifndef _INC_TCHAR
 # include <tchar.h>
@@ -383,7 +382,7 @@ Standard_Integer OSD_FileNode::Error()const{
 #include <Strsafe.h>
 
 #define TEST_RAISE( arg ) _test_raise (  fName, ( arg )  )
-#define RAISE( arg ) Standard_ProgramError :: Raise (  ( arg )  )
+#define RAISE( arg ) throw Standard_ProgramError (  ( arg )  )
 
 #ifndef OCCT_UWP
 // None of the existing security APIs are supported in a UWP applications
@@ -859,6 +858,9 @@ void _osd_wnt_set_error ( OSD_Error& err, OSD_WhoAmI who, ... ) {
 }  // end _set_error
 
 #if defined(__CYGWIN32__) || defined(__MINGW32__)
+#ifdef __try /* is defined on MinGw as either "try" or "if (true)" */
+#undef __try
+#endif
 #define __try
 #define __finally
 #define __leave return retVal
@@ -905,10 +907,6 @@ static BOOL __fastcall _get_file_time (const wchar_t* fName, LPSYSTEMTIME lpSysT
  
  }  // end __finally
 
-#ifdef VAC
-leave: ;      // added for VisualAge
-#endif
-
  return retVal;
 
 }  // end _get_file_time
@@ -925,7 +923,7 @@ static void __fastcall _test_raise ( TCollection_AsciiString fName, Standard_CSt
    buff += str;
    buff += " (): wrong access";
 
-   Standard_ProgramError::Raise(buff.ToCString());
+   throw Standard_ProgramError(buff.ToCString());
  }  // end if
 
 }  // end _test_raise

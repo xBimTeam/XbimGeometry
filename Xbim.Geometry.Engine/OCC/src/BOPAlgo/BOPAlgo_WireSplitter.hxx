@@ -22,15 +22,20 @@
 #include <BOPAlgo_PWireEdgeSet.hxx>
 #include <BOPTools_ListOfConnexityBlock.hxx>
 #include <BOPAlgo_Algo.hxx>
-#include <BOPCol_BaseAllocator.hxx>
-#include <BOPCol_ListOfShape.hxx>
 #include <BOPTools_ConnexityBlock.hxx>
 #include <IntTools_Context.hxx>
+#include <NCollection_BaseAllocator.hxx>
+#include <TopTools_ListOfShape.hxx>
 class BOPAlgo_WireEdgeSet;
 class TopoDS_Wire;
 class TopoDS_Face;
 
 
+//! The class is to build loops from the given set of edges.
+//!
+//! It returns the following Error statuses
+//! - *BOPAlgo_AlertNullInputShapes* - in case there no input edges to build the loops.
+//!
 class BOPAlgo_WireSplitter  : public BOPAlgo_Algo
 {
 public:
@@ -41,7 +46,7 @@ public:
   Standard_EXPORT BOPAlgo_WireSplitter();
   Standard_EXPORT virtual ~BOPAlgo_WireSplitter();
   
-  Standard_EXPORT BOPAlgo_WireSplitter(const BOPCol_BaseAllocator& theAllocator);
+  Standard_EXPORT BOPAlgo_WireSplitter(const Handle(NCollection_BaseAllocator)& theAllocator);
   
   Standard_EXPORT void SetWES (const BOPAlgo_WireEdgeSet& theWES);
   
@@ -55,7 +60,7 @@ public:
 
   Standard_EXPORT virtual void Perform() Standard_OVERRIDE;
   
-  static void MakeWire(BOPCol_ListOfShape& theLE, TopoDS_Wire& theW);
+  static void MakeWire(TopTools_ListOfShape& theLE, TopoDS_Wire& theW);
   
   Standard_EXPORT static void SplitBlock (const TopoDS_Face& theF,
                                           BOPTools_ConnexityBlock& theCB,
@@ -65,15 +70,11 @@ protected:
 
   Standard_EXPORT virtual void CheckData() Standard_OVERRIDE;
   
-  Standard_EXPORT void MakeConnexityBlocks();
-  
   Standard_EXPORT void MakeWires();
 
   BOPAlgo_PWireEdgeSet myWES;
   BOPTools_ListOfConnexityBlock myLCB;
   Handle(IntTools_Context) myContext;
-
-private:
 
 };
 

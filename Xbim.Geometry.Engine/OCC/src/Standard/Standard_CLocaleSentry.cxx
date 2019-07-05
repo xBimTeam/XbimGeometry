@@ -30,9 +30,9 @@ namespace
   public:
 
     CLocalePtr()
-    #ifdef HAVE_XLOCALE_H
+    #ifdef OCCT_CLOCALE_POSIX2008
     : myLocale (newlocale (LC_ALL_MASK, "C", NULL))
-    #elif defined(_WIN32) && !defined(__MINGW32__)
+    #elif defined(_MSC_VER)
     : myLocale (_create_locale (LC_ALL, "C"))
     #else
     : myLocale (NULL)
@@ -41,9 +41,9 @@ namespace
 
     ~CLocalePtr()
     {
-    #ifdef HAVE_XLOCALE_H
+    #ifdef OCCT_CLOCALE_POSIX2008
       freelocale (myLocale);
-    #elif defined(_WIN32) && !defined(__MINGW32__)
+    #elif defined(_MSC_VER)
       _free_locale (myLocale);
     #endif
     }
@@ -72,7 +72,7 @@ Standard_CLocaleSentry::clocale_t Standard_CLocaleSentry::GetCLocale()
 // purpose  :
 // =======================================================================
 Standard_CLocaleSentry::Standard_CLocaleSentry()
-#ifdef HAVE_XLOCALE_H
+#ifdef OCCT_CLOCALE_POSIX2008
 : myPrevLocale (uselocale (theCLocale.myLocale)) // switch to C locale within this thread only using xlocale API
 #else
 : myPrevLocale (setlocale (LC_ALL, 0))
@@ -81,7 +81,7 @@ Standard_CLocaleSentry::Standard_CLocaleSentry()
 #endif
 #endif
 {
-#if !defined(HAVE_XLOCALE_H)
+#if !defined(OCCT_CLOCALE_POSIX2008)
   const char* aPrevLocale = (const char* )myPrevLocale;
   if (myPrevLocale == NULL
    || (aPrevLocale[0] == 'C' && aPrevLocale[1] == '\0'))
@@ -104,7 +104,7 @@ Standard_CLocaleSentry::Standard_CLocaleSentry()
 // =======================================================================
 Standard_CLocaleSentry::~Standard_CLocaleSentry()
 {
-#if defined(HAVE_XLOCALE_H)
+#if defined(OCCT_CLOCALE_POSIX2008)
   uselocale ((locale_t )myPrevLocale);
 #else
   if (myPrevLocale != NULL)

@@ -26,11 +26,22 @@
 #ifdef DRAW
 #include <DBRep.hxx>
 #include <DBRep_DrawableShape.hxx>
-#include <TestTopOpeDraw_DrawableSHA.hxx>
-#include <TestTopOpeDraw_TTOT.hxx>
 #include <TopoDS_Iterator.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
 static TCollection_AsciiString PRODINS("dins ");
+
+static void ShapeEnumToString(const TopAbs_ShapeEnum T, TCollection_AsciiString& N)
+{
+  if      (T == TopAbs_SHAPE)  N = "s"; 
+  else if (T == TopAbs_COMPOUND)  N = "co";
+  else if (T == TopAbs_COMPSOLID)  N = "cs";
+  else if (T == TopAbs_SOLID)  N = "so";
+  else if (T == TopAbs_SHELL)  N = "sh";  
+  else if (T == TopAbs_FACE)   N = "f"; 
+  else if (T == TopAbs_WIRE)   N = "w"; 
+  else if (T == TopAbs_EDGE)   N = "e"; 
+  else if (T == TopAbs_VERTEX) N = "v"; 
+}
 #endif
 
 #ifdef OCCT_DEBUG
@@ -50,7 +61,7 @@ TopOpeBRepBuild_ShapeSet::TopOpeBRepBuild_ShapeSet(const TopAbs_ShapeEnum SubSha
 {
   if      (SubShapeType == TopAbs_EDGE)   myShapeType = TopAbs_FACE;
   else if (SubShapeType == TopAbs_VERTEX) myShapeType = TopAbs_EDGE;
-  else Standard_ProgramError::Raise("ShapeSet : bad ShapeType");
+  else throw Standard_ProgramError("ShapeSet : bad ShapeType");
   myDEBNumber = 0;
 
   myCheckShape = Standard_False; // temporary NYI
@@ -522,7 +533,7 @@ void TopOpeBRepBuild_ShapeSet::DumpBB()
     TopoDS_Iterator ShapIter(e);
     for(ne = 1;ShapIter.More();ShapIter.Next(), ne++) {
       const TopoDS_Shape& subsha = ShapIter.Value();
-      TestTopOpeDraw_TTOT::ShapeEnumToString(subsha.ShapeType(),stt);
+      ShapeEnumToString(subsha.ShapeType(),stt);
       enam = stt+ne+"ShaB"+nb;
       DBRep::Set(enam.ToCString(),subsha); 
       cout<<"clear; "<<PRODINS<<enam<<"; #draw"<<endl;
@@ -542,11 +553,7 @@ void TopOpeBRepBuild_ShapeSet::DumpBB()
       enam = "";
       enam = enam+"ste"+ne+"newB"+nb;
       DBRep::Set(enam.ToCString(),e); 
-//      char* name = enam.ToCString();
-//      Handle(TestTopOpeDraw_DrawableSHA) D = new TestTopOpeDraw_DrawableSHA
-//	(e, Draw_blanc, Draw_blanc, Draw_blanc, Draw_blanc, 100., 2, 30, name, Draw_blanc);
-//      Draw::Set(name,D);
-//      cout<<"wclick; clear; "<<PRODINS<<enam<<"; #draw"<<endl;
+
       while(curr < mos.Extent()) {
 	curr = mos.Extent();
 	currloc = curr;
@@ -566,14 +573,7 @@ void TopOpeBRepBuild_ShapeSet::DumpBB()
 	    enam = "";
 	    if(it.More()) {
 	      enam = enam+"ste"+ne+"newB"+nb;
-//	      name = enam.ToCString();
-//	      Handle(TestTopOpeDraw_DrawableSHA) Dloc = 
-//		new TestTopOpeDraw_DrawableSHA
-//		  (N, Draw_blanc, Draw_blanc, Draw_blanc, Draw_blanc,
-//		   100., 2, 30, name, Draw_blanc);
-//	      Draw::Set(name,Dloc);
 	      DBRep::Set(enam.ToCString(),N); 
-//	      cout<<PRODINS<<enam<<"; #draw"<<endl;
 	    } else {
 	      enam = enam+"ele"+ne+"newB"+nb;
 	      DBRep::Set(enam.ToCString(),N); 
@@ -638,7 +638,7 @@ TCollection_AsciiString TopOpeBRepBuild_ShapeSet::SName(const TopoDS_Shape& /*S*
   TCollection_AsciiString WESi=myDEBName.SubString(1,1)+myDEBNumber;
   str=str+WESi;
   TopAbs_ShapeEnum t = S.ShapeType();
-  TCollection_AsciiString sts;TestTopOpeDraw_TTOT::ShapeEnumToString(t,sts);
+  TCollection_AsciiString sts;ShapeEnumToString(t,sts);
   sts.UpperCase();str=str+sts.SubString(1,1);
   Standard_Integer isub = mySubShapeMap.FindIndex(S);
   Standard_Integer ista = myOMSS.FindIndex(S);
@@ -673,8 +673,7 @@ TCollection_AsciiString TopOpeBRepBuild_ShapeSet::SNameori(const TopoDS_Shape& S
 {
   TCollection_AsciiString str;
   str=sb+SName(S);
-  TopAbs_Orientation o = S.Orientation();
-  TCollection_AsciiString sto;TestTopOpeDraw_TTOT::OrientationToString(o,sto);
+  TCollection_AsciiString sto = TopAbs::ShapeOrientationToString (S.Orientation());
   str=str+sto.SubString(1,1);
   str=str+sa;
   return str;
