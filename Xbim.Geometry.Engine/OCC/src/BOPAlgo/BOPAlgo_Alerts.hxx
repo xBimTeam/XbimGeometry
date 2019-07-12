@@ -78,4 +78,33 @@ DEFINE_ALERT_WITH_SHAPE(BOPAlgo_AlertShellSplitterFailed)
 //! Some edges are too small and have no valid range
 DEFINE_ALERT_WITH_SHAPE(BOPAlgo_AlertTooSmallEdge)
 
+//! Intersection of pair of shapes has failed
+DEFINE_ALERT_WITH_SHAPE(BOPAlgo_AlertIntersectionOfPairOfShapesFailed)
+
+//! Building 2D curve of edge on face has failed
+DEFINE_ALERT_WITH_SHAPE(BOPAlgo_AlertBuildingPCurveFailed)
+
+//! Some sub-shapes of some of the argument become connected through
+//! other shapes and the argument became self-interfered
+DEFINE_ALERT_WITH_SHAPE(BOPAlgo_AlertAcquiredSelfIntersection)
+
+//! Unsupported type of input shape
+DEFINE_ALERT_WITH_SHAPE(BOPAlgo_AlertUnsupportedType)
+
+//! No faces have been found for removal
+DEFINE_SIMPLE_ALERT(BOPAlgo_AlertNoFacesToRemove)
+
+//! Unable to remove the feature
+DEFINE_ALERT_WITH_SHAPE(BOPAlgo_AlertUnableToRemoveTheFeature)
+
+//! The Feature Removal algorithm has failed
+DEFINE_SIMPLE_ALERT(BOPAlgo_AlertRemoveFeaturesFailed)
+
+//! Some of the faces passed to the Solid Builder algorithm have not been classified
+//! and not used for solids creation
+DEFINE_ALERT_WITH_SHAPE(BOPAlgo_AlertSolidBuilderUnusedFaces)
+
+//! Unable to orient the shape correctly
+DEFINE_ALERT_WITH_SHAPE(BOPAlgo_AlertUnableToOrientTheShape)
+
 #endif // _BOPAlgo_Alerts_HeaderFile

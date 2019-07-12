@@ -42,6 +42,7 @@
 #include <Geom_RectangularTrimmedSurface.hxx>
 #include <Geom_Surface.hxx>
 #include <Geom_TrimmedCurve.hxx>
+#include <Geom2d_TrimmedCurve.hxx>
 #include <GeomAdaptor_Curve.hxx>
 #include <GeomAdaptor_HCurve.hxx>
 #include <GeomAdaptor_HSurface.hxx>
@@ -76,10 +77,6 @@ static
 static
   Standard_Real Prec(const Adaptor3d_Curve& aAC3D,
   const Adaptor3d_CurveOnSurface& aACS);
-static
-  Standard_Real PrecCurve(const Adaptor3d_Curve& aAC3D);
-static
-  Standard_Real PrecSurface(const Adaptor3d_CurveOnSurface& aACS);
 
 //static Standard_Boolean Validate(const Adaptor3d_Curve&,
 //				 const Adaptor3d_Curve&,
@@ -171,6 +168,7 @@ void BRepCheck_Edge::Minimum()
 
     if (!myCref.IsNull()) {
       Handle(BRep_GCurve) GCref (Handle(BRep_GCurve)::DownCast (myCref));
+      Standard_Real eps = Precision::PConfusion();
       Standard_Real First,Last;
       GCref->Range(First,Last);
       if (Last<=First) {
@@ -186,20 +184,82 @@ void BRepCheck_Edge::Minimum()
           Handle(Geom_Curve) C3d = Handle(Geom_Curve)::DownCast
             (myCref->Curve3D()->Transformed
             (/*myCref->Location()*/L.Transformation()));
-          GeomAdaptor_Curve GAC3d(C3d, C3d->TransformedParameter(First, L.Transformation()),
+          Standard_Boolean IsPeriodic = C3d->IsPeriodic();
+          Standard_Real aPeriod = RealLast();
+          if(IsPeriodic)
+          {
+            aPeriod = C3d->Period();
+          }
+          Standard_Real f = C3d->FirstParameter(), l = C3d->LastParameter();
+          if (C3d->DynamicType() == STANDARD_TYPE(Geom_TrimmedCurve))
+          {
+            const Handle(Geom_Curve)& aC = Handle(Geom_TrimmedCurve)::DownCast (C3d)->BasisCurve(); 
+            f = aC->FirstParameter();
+            l = aC->LastParameter();
+            IsPeriodic = aC->IsPeriodic();
+            if(IsPeriodic)
+            {
+              aPeriod = aC->Period();
+            }
+          }
+          if(IsPeriodic && (Last - First > aPeriod + eps))
+          {
+            myCref.Nullify();
+            BRepCheck::Add(lst,BRepCheck_InvalidRange);
+          }
+          else if(!IsPeriodic && (First < f - eps || Last > l + eps))
+          {
+            myCref.Nullify();
+            BRepCheck::Add(lst,BRepCheck_InvalidRange);
+          }
+          else
+          {
+            GeomAdaptor_Curve GAC3d(C3d, C3d->TransformedParameter(First, L.Transformation()),
                                        C3d->TransformedParameter(Last, L.Transformation()));
-          myHCurve = new GeomAdaptor_HCurve(GAC3d);
+            myHCurve = new GeomAdaptor_HCurve(GAC3d);
+          }
         }
         else { // curve on surface
           Handle(Geom_Surface) Sref = myCref->Surface();
           Sref = Handle(Geom_Surface)::DownCast
             (Sref->Transformed(myCref->Location().Transformation()));
           const Handle(Geom2d_Curve)& PCref = myCref->PCurve();
-          Handle(GeomAdaptor_HSurface) GAHSref = new GeomAdaptor_HSurface(Sref);
-          Handle(Geom2dAdaptor_HCurve) GHPCref = 
-            new Geom2dAdaptor_HCurve(PCref,First,Last);
-          Adaptor3d_CurveOnSurface ACSref(GHPCref,GAHSref);
-          myHCurve = new Adaptor3d_HCurveOnSurface(ACSref);
+          Standard_Boolean IsPeriodic = PCref->IsPeriodic();
+          Standard_Real aPeriod = RealLast();
+          if(IsPeriodic)
+          {
+            aPeriod = PCref->Period();
+          }
+          Standard_Real f = PCref->FirstParameter(), l = PCref->LastParameter();
+          if (PCref->DynamicType() == STANDARD_TYPE(Geom2d_TrimmedCurve))
+          {
+            const Handle(Geom2d_Curve)& aC = Handle(Geom2d_TrimmedCurve)::DownCast (PCref)->BasisCurve(); 
+            f = aC->FirstParameter();
+            l = aC->LastParameter();
+            IsPeriodic = aC->IsPeriodic();
+            if(IsPeriodic)
+            {
+              aPeriod = aC->Period();
+            }
+          }
+          if(IsPeriodic && (Last - First > aPeriod + eps))
+          {
+            myCref.Nullify();
+            BRepCheck::Add(lst,BRepCheck_InvalidRange);
+          }
+          else if(!IsPeriodic && (First < f - eps || Last > l + eps))
+          {
+            myCref.Nullify();
+            BRepCheck::Add(lst,BRepCheck_InvalidRange);
+          }
+          else
+          {
+            Handle(GeomAdaptor_HSurface) GAHSref = new GeomAdaptor_HSurface(Sref);
+            Handle(Geom2dAdaptor_HCurve) GHPCref = 
+              new Geom2dAdaptor_HCurve(PCref,First,Last);
+            Adaptor3d_CurveOnSurface ACSref(GHPCref,GAHSref);
+            myHCurve = new Adaptor3d_HCurveOnSurface(ACSref);
+          }
         }
       }
     }
@@ -276,6 +336,7 @@ void BRepCheck_Edge::InContext(const TopoDS_Shape& S)
       Standard_Boolean pcurvefound = Standard_False;
 
       BRep_ListIteratorOfListOfCurveRepresentation itcr(TE->Curves());
+      Standard_Real eps = Precision::PConfusion();
       while (itcr.More()) {
         const Handle(BRep_CurveRepresentation)& cr = itcr.Value();
         if (cr != myCref && cr->IsCurveOnSurface(Su,L)) {
@@ -291,12 +352,43 @@ void BRepCheck_Edge::InContext(const TopoDS_Shape& S)
           }
           // gka OCC
           //  Modified by skv - Tue Apr 27 11:50:35 2004 Begin
-          if (Abs(ff-First) > Precision::PConfusion() ||
-              Abs(ll-Last)  > Precision::PConfusion()) {
+          if (Abs(ff-First) > eps ||
+              Abs(ll-Last)  > eps) {
               BRepCheck::Add(lst,BRepCheck_InvalidSameRangeFlag);
               BRepCheck::Add(lst,BRepCheck_InvalidSameParameterFlag);
           }
           //  Modified by skv - Tue Apr 27 11:50:37 2004 End
+          //
+          const Handle(Geom2d_Curve)& pc = cr->PCurve();
+          Standard_Boolean IsPeriodic = pc->IsPeriodic();
+          Standard_Real aPeriod = RealLast();
+          if(IsPeriodic)
+          {
+            aPeriod = pc->Period();
+          }
+          Standard_Real fp = pc->FirstParameter(), lp = pc->LastParameter();
+          if (pc->DynamicType() == STANDARD_TYPE(Geom2d_TrimmedCurve))
+          {
+            const Handle(Geom2d_Curve)& aC = Handle(Geom2d_TrimmedCurve)::DownCast (pc)->BasisCurve(); 
+            fp = aC->FirstParameter();
+            lp = aC->LastParameter();
+            IsPeriodic = aC->IsPeriodic();
+            if(IsPeriodic)
+            {
+              aPeriod = aC->Period();
+            }
+          }
+          if(IsPeriodic && (l - f > aPeriod + eps))
+          {
+            BRepCheck::Add(lst,BRepCheck_InvalidRange);
+            return;
+          }
+          else if(!IsPeriodic && (f < fp - eps || l > lp + eps))
+          {
+            BRepCheck::Add(lst,BRepCheck_InvalidRange);
+            return;
+          }
+
           if (myGctrl) {
             Handle(Geom_Surface) Sb = cr->Surface();
             Sb = Handle(Geom_Surface)::DownCast
@@ -802,87 +894,23 @@ Standard_Boolean Validate(const Adaptor3d_Curve& CRef,
   return Status ;
 
 }
+
 //=======================================================================
 //function : Prec
 //purpose  : 
 //=======================================================================
 Standard_Real Prec(const Adaptor3d_Curve& aAC3D,
-  const Adaptor3d_CurveOnSurface& aACS)
+                   const Adaptor3d_CurveOnSurface& aACS)
 {
   Standard_Real aXEmax, aXC, aXS;
+  const Handle(Adaptor3d_HSurface)& aAHS = aACS.GetSurface();
   //
-  aXC=PrecCurve(aAC3D);
-  aXS=PrecSurface(aACS);
-  aXEmax=(aXC>aXS) ? aXC: aXS;
+  aXC = BRepCheck::PrecCurve(aAC3D);
+  aXS = BRepCheck::PrecSurface(aAHS);
+  aXEmax = (aXC>aXS) ? aXC: aXS;
   return aXEmax;
 }
-//=======================================================================
-//function : PrecCurve
-//purpose  : 
-//=======================================================================
-Standard_Real PrecCurve(const Adaptor3d_Curve& aAC3D)
-{
-  Standard_Real aXEmax;
-  GeomAbs_CurveType aCT;
-  //
-  aXEmax=RealEpsilon(); 
-  //
-  aCT=aAC3D.GetType();
-  if (aCT==GeomAbs_Ellipse) {
-    Standard_Integer i;
-    Standard_Real aX[5], aXE;
-    //
-    gp_Elips aEL3D=aAC3D.Ellipse();
-    aEL3D.Location().Coord(aX[0], aX[1], aX[2]);
-    aX[3]=aEL3D.MajorRadius();
-    aX[4]=aEL3D.MinorRadius();
-    aXEmax=-1.;
-    for (i=0; i<5; ++i) {
-      if (aX[i]<0.) {
-        aX[i]=-aX[i];
-      }
-      aXE=Epsilon(aX[i]);
-      if (aXE>aXEmax) {
-        aXEmax=aXE;
-      }
-    }
-  }//if (aCT=GeomAbs_Ellipse) {
-  //
-  return aXEmax;
-}
-//=======================================================================
-//function : PrecSurface
-//purpose  : 
-//=======================================================================
-Standard_Real PrecSurface(const Adaptor3d_CurveOnSurface& aACS)
-{
-  Standard_Real aXEmax;
-  GeomAbs_SurfaceType aST;
-  //
-  aXEmax=RealEpsilon(); 
-  //
-  const Handle(Adaptor3d_HSurface)& aAHS=aACS.GetSurface();
-  aST=aAHS->GetType();
-  if (aST==GeomAbs_Cone) {
-    gp_Cone aCone=aAHS->Cone();
-    Standard_Integer i;
-    Standard_Real aX[4], aXE;
-    //
-    aCone.Location().Coord(aX[0], aX[1], aX[2]);
-    aX[3]=aCone.RefRadius();
-    aXEmax=-1.;
-    for (i=0; i<4; ++i) {
-      if (aX[i]<0.) {
-        aX[i]=-aX[i];
-      }
-      aXE=Epsilon(aX[i]);
-      if (aXE>aXEmax) {
-        aXEmax=aXE;
-      }
-    }
-  }//if (aST==GeomAbs_Cone) {
-  return aXEmax;
-}
+
 //=======================================================================
 //function : PrintProblematicPoint
 //purpose  : 

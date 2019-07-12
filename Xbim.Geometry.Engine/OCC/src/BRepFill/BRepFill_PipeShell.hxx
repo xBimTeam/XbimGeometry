@@ -185,6 +185,19 @@ public:
   //! Returns the TopoDS Shape of the top of the sweep.
   Standard_EXPORT const TopoDS_Shape& LastShape() const;
   
+  //! Returns the list of original profiles
+  void Profiles(TopTools_ListOfShape& theProfiles)
+  {
+    for (Standard_Integer i = 1; i <= mySeq.Length(); ++i)
+      theProfiles.Append(mySeq(i).OriginalShape());
+  }
+
+  //! Returns the spine
+  const TopoDS_Wire& Spine()
+  {
+    return mySpine;
+  }
+
   //! Returns the  list   of shapes generated   from the
   //! shape <S>.
   Standard_EXPORT void Generated (const TopoDS_Shape& S, TopTools_ListOfShape& L);

@@ -42,7 +42,7 @@ void BOPAlgo_PaveFiller::CheckSelfInterference()
     //
     // Map of connections of interfering shapes
     NCollection_IndexedDataMap<TopoDS_Shape,
-                               BOPCol_IndexedMapOfShape,
+                               TopTools_IndexedMapOfShape,
                                TopTools_ShapeMapHasher> aMCSI;
     BOPDS_MapOfCommonBlock aMCBFence;
     //
@@ -63,8 +63,8 @@ void BOPAlgo_PaveFiller::CheckSelfInterference()
         //
         // Analyze the shared vertices and common blocks
         //
-        BOPCol_MapOfInteger aMSubS;
-        BOPCol_ListIteratorOfListOfInteger aItLI(aSI.SubShapes());
+        TColStd_MapOfInteger aMSubS;
+        TColStd_ListIteratorOfListOfInteger aItLI(aSI.SubShapes());
         for (; aItLI.More(); aItLI.Next()) {
           Standard_Integer nV = aItLI.Value();
           myDS->HasShapeSD(nV, nV);
@@ -86,9 +86,9 @@ void BOPAlgo_PaveFiller::CheckSelfInterference()
               if (!aR.Contains(nV[k]) && !aMSubS.Contains(nV[k])) {
                 // Add connection
                 const TopoDS_Shape& aV = myDS->Shape(nV[k]);
-                BOPCol_IndexedMapOfShape* pMSOr = aMCSI.ChangeSeek(aV);
+                TopTools_IndexedMapOfShape* pMSOr = aMCSI.ChangeSeek(aV);
                 if (!pMSOr) {
-                  pMSOr = &aMCSI(aMCSI.Add(aV, BOPCol_IndexedMapOfShape()));
+                  pMSOr = &aMCSI(aMCSI.Add(aV, TopTools_IndexedMapOfShape()));
                 }
                 pMSOr->Add(aS);
               }
@@ -101,7 +101,7 @@ void BOPAlgo_PaveFiller::CheckSelfInterference()
             if (aMCBFence.Add(aCB)) {
               const BOPDS_ListOfPaveBlock& aLPBCB = aCB->PaveBlocks();
               //
-              BOPCol_ListOfInteger aLE;
+              TColStd_ListOfInteger aLE;
               BOPDS_ListIteratorOfListOfPaveBlock aItCB(aLPBCB);
               for (; aItCB.More(); aItCB.Next()) {
                 const Handle(BOPDS_PaveBlock)& aPBCB = aItCB.Value();
@@ -112,17 +112,18 @@ void BOPAlgo_PaveFiller::CheckSelfInterference()
               }
               //
               if (aLE.Extent() > 1) {
-                // Add warning
+                // Add the acquired self-interference warning:
+                // The same common block contains several edges from one argument
                 TopoDS_Compound aWC;
                 aBB.MakeCompound(aWC);
                 //
-                BOPCol_ListIteratorOfListOfInteger aItLE(aLE);
+                TColStd_ListIteratorOfListOfInteger aItLE(aLE);
                 for (; aItLE.More(); aItLE.Next()) {
                   const TopoDS_Shape& aE1 = myDS->Shape(aItLE.Value());
                   aBB.Add(aWC, aE1);
                 }
                 //
-                AddWarning (new BOPAlgo_AlertSelfInterferingShape (aWC));
+                AddWarning (new BOPAlgo_AlertAcquiredSelfIntersection (aWC));
               }
             }
           }
@@ -133,14 +134,14 @@ void BOPAlgo_PaveFiller::CheckSelfInterference()
         const BOPDS_FaceInfo& aFI = myDS->FaceInfo(j);
         //
         for (Standard_Integer k = 0; k < 2; ++k) {
-          const BOPCol_MapOfInteger& aMVF = !k ? aFI.VerticesIn() : aFI.VerticesSc();
-          BOPCol_MapIteratorOfMapOfInteger aItM(aMVF);
+          const TColStd_MapOfInteger& aMVF = !k ? aFI.VerticesIn() : aFI.VerticesSc();
+          TColStd_MapIteratorOfMapOfInteger aItM(aMVF);
           for (; aItM.More(); aItM.Next()) {
             const TopoDS_Shape& aV = myDS->Shape(aItM.Value());
             // add connection
-            BOPCol_IndexedMapOfShape* pMSOr = aMCSI.ChangeSeek(aV);
+            TopTools_IndexedMapOfShape* pMSOr = aMCSI.ChangeSeek(aV);
             if (!pMSOr) {
-              pMSOr = &aMCSI(aMCSI.Add(aV, BOPCol_IndexedMapOfShape()));
+              pMSOr = &aMCSI(aMCSI.Add(aV, TopTools_IndexedMapOfShape()));
             }
             pMSOr->Add(aS);
           }
@@ -153,9 +154,9 @@ void BOPAlgo_PaveFiller::CheckSelfInterference()
             const Handle(BOPDS_PaveBlock)& aPB = aMPBF(iPB);
             const TopoDS_Shape& aE = myDS->Shape(aPB->Edge());
             // add connection
-            BOPCol_IndexedMapOfShape* pMSOr = aMCSI.ChangeSeek(aE);
+            TopTools_IndexedMapOfShape* pMSOr = aMCSI.ChangeSeek(aE);
             if (!pMSOr) {
-              pMSOr = &aMCSI(aMCSI.Add(aE, BOPCol_IndexedMapOfShape()));
+              pMSOr = &aMCSI(aMCSI.Add(aE, TopTools_IndexedMapOfShape()));
             }
             pMSOr->Add(aS);
           }
@@ -166,9 +167,10 @@ void BOPAlgo_PaveFiller::CheckSelfInterference()
     // Analyze connections
     Standard_Integer aNbC = aMCSI.Extent();
     for (j = 1; j <= aNbC; ++j) {
-      const BOPCol_IndexedMapOfShape& aMCS = aMCSI(j);
+      const TopTools_IndexedMapOfShape& aMCS = aMCSI(j);
       if (aMCS.Extent() > 1) {
-        // Add self-interference warning
+        // Add acquired self-interference warning:
+        // Several faces from one argument contain the same vertex or edge
         TopoDS_Compound aWC;
         aBB.MakeCompound(aWC);
         //
@@ -177,7 +179,7 @@ void BOPAlgo_PaveFiller::CheckSelfInterference()
           const TopoDS_Shape& aSx = aMCS(iS);
           aBB.Add(aWC, aSx);
         }
-        AddWarning (new BOPAlgo_AlertSelfInterferingShape (aWC));
+        AddWarning (new BOPAlgo_AlertAcquiredSelfIntersection (aWC));
       }
     }
   }

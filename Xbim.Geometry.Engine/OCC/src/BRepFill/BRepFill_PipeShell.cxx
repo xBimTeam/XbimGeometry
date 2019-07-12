@@ -385,10 +385,8 @@ BRepFill_PipeShell::BRepFill_PipeShell(const TopoDS_Wire& Spine)
   if (Affich)
     DBRep::Set("theguide", TheGuide);
 #endif
-  // transform the guide in a single curve (periodic if posssible)
-  Handle(BRepAdaptor_HCompCurve) Guide  = 
-    new (BRepAdaptor_HCompCurve) (TheGuide);
-  Guide->ChangeCurve().SetPeriodic(Standard_True);
+  // transform the guide in a single curve
+  Handle(BRepAdaptor_HCompCurve) Guide = new (BRepAdaptor_HCompCurve) (TheGuide);
 
   if (CurvilinearEquivalence) { // trihedron by curvilinear reduced abscissa
     if (KeepContact == BRepFill_Contact ||
@@ -583,28 +581,15 @@ void BRepFill_PipeShell::SetForceApproxC1(const Standard_Boolean ForceApproxC1)
 //=======================================================================
  void BRepFill_PipeShell::DeleteProfile(const TopoDS_Shape&  Profile)
 {
-  Standard_Boolean isVertex = (Profile.ShapeType() == TopAbs_VERTEX);
-
   Standard_Boolean Trouve=Standard_False;
   Standard_Integer ii;
   for (ii=1; ii<=mySeq.Length() && !Trouve; ii++) {
-    Standard_Boolean found = Standard_False;
-    const TopoDS_Wire& aWire = mySeq.Value(ii).Wire();
-    if (isVertex)
-      {
-	TopExp_Explorer Explo(aWire, TopAbs_VERTEX);
-	for (; Explo.More(); Explo.Next())
-	  if (Profile.IsSame(Explo.Current()))
-	    found = Standard_True;
-      }
-    else if (Profile.IsSame(aWire))
-      found = Standard_True;
-    
-    if (found)
-      {
-	Trouve = Standard_True;
-	mySeq.Remove(ii);
-      }
+    const TopoDS_Shape& aSection = mySeq.Value(ii).OriginalShape();
+    if (Profile.IsSame(aSection))
+    {
+      Trouve = Standard_True;
+      mySeq.Remove(ii);
+    }
   }
 
   if (Trouve) mySection.Nullify();
@@ -914,13 +899,9 @@ const TopoDS_Shape& BRepFill_PipeShell::LastShape() const
 //function : Generated
 //purpose  : 
 //=======================================================================
-//  void BRepFill_PipeShell::Generated(const TopoDS_Shape& ,
-// 				    TopTools_ListOfShape& ) 
 void BRepFill_PipeShell::Generated(const TopoDS_Shape&   theShape,
 				   TopTools_ListOfShape& theList) 
 {
-  //   throw Standard_NotImplemented("Generated:Pas Fait");
-  
   theList.Clear();
 
   if(myGenMap.IsBound(theShape)) {
@@ -1197,9 +1178,6 @@ void BRepFill_PipeShell::Place(const BRepFill_Section& Sec,
 				  Sec.WithCorrection());
   TopoDS_Wire TmpWire =  Sec.Wire();
   aTrsf = Place.Transformation();
-  //TopLoc_Location Loc2(Place.Transformation()), Loc1;
-  //Loc1 = TmpWire.Location();
-  //W.Location(Loc2.Multiplied(Loc1));
   //Transform the copy
   W = TopoDS::Wire(BRepBuilderAPI_Transform(TmpWire, aTrsf, Standard_True));
   ////////////////////////////////////
@@ -1225,8 +1203,8 @@ void BRepFill_PipeShell::Place(const BRepFill_Section& Sec,
 
 //=======================================================================
 //function : BuildHistory
-//purpose  : Builds history for edges and vertices 
-//           of sections
+//purpose  : Builds history for edges and vertices of sections,
+//           for edges and vertices of spine
 //=======================================================================
 void BRepFill_PipeShell::BuildHistory(const BRepFill_Sweep& theSweep) 
 {
@@ -1240,37 +1218,40 @@ void BRepFill_PipeShell::BuildHistory(const BRepFill_Sweep& theSweep)
   TopoDS_Iterator itw;
   for (indw = 1; indw <= mySeq.Length(); indw++)
   {
-    const TopoDS_Wire& aSection = mySeq(indw).Wire();
+    const TopoDS_Shape& Section = mySeq(indw).OriginalShape();
+    TopoDS_Wire aSection;
     Standard_Boolean IsPunctual = mySeq(indw).IsPunctual();
     if (IsPunctual)
     {
       //for punctual sections (first or last)
       //we take all the wires generated along the path
-      TopExp_Explorer Explo(aSection, TopAbs_VERTEX);
-      const TopoDS_Shape& VerSection = Explo.Current();
-      TopTools_ListOfShape Elist;
+      
+      TopTools_ListOfShape* Elist = myGenMap.Bound(Section, TopTools_ListOfShape());
       for (Standard_Integer i = 1; i <= anUEdges->UpperRow(); i++)
         for (Standard_Integer j = 1; j <= anUEdges->UpperCol(); j++)
-          Elist.Append(anUEdges->Value(i,j));
-      myGenMap.Bind(VerSection, Elist);
+          Elist->Append(anUEdges->Value(i,j));
+
       continue;
     }
+    else
+      aSection = TopoDS::Wire(Section);
     //Take the real index of section on the path
     Standard_Integer IndOfW = myIndOfSec(indw);
     const TopoDS_Wire& theWire = TopoDS::Wire(WSeq(IndOfW));
     BRepTools_WireExplorer wexp_sec(aSection);
     for (inde = 1; wexp_sec.More(); wexp_sec.Next())
     {
-      const TopoDS_Edge& anEdge = TopoDS::Edge(wexp_sec.Current());
+      const TopoDS_Edge& anOriginalEdge = TopoDS::Edge(wexp_sec.Current());
+      TopoDS_Edge anEdge = TopoDS::Edge(mySeq(indw).ModifiedShape(anOriginalEdge));
       if (BRep_Tool::Degenerated(anEdge))
         continue;
 
       TopoDS_Shell aShell;
       BB.MakeShell(aShell);
       TopoDS_Vertex aVertex [2];
-      TopExp::Vertices(anEdge, aVertex[0], aVertex[1]);
+      TopExp::Vertices(anOriginalEdge, aVertex[0], aVertex[1]);
       Standard_Integer SignOfAnEdge =
-        (anEdge.Orientation() == TopAbs_FORWARD)? 1 : -1;
+        (anOriginalEdge.Orientation() == TopAbs_FORWARD)? 1 : -1;
       
       //For each non-degenerated inde-th edge of <aSection>
       //we find inde-th edge in <theWire>
@@ -1338,9 +1319,11 @@ void BRepFill_PipeShell::BuildHistory(const BRepFill_Sweep& theSweep)
           continue;
         if (IndWireMap.IsBound(UIndex[kk]))
         {
-          TopTools_ListOfShape Wlist;
-          Wlist.Append(IndWireMap(UIndex[kk]));
-          myGenMap.Bind(aVertex[kk], Wlist);
+          TopTools_ListOfShape* Elist = myGenMap.Bound(aVertex[kk], TopTools_ListOfShape());
+          
+          for (itw.Initialize( IndWireMap(UIndex[kk]) ); itw.More(); itw.Next())
+            Elist->Append(itw.Value());
+          
           continue;
         }
         
@@ -1412,21 +1395,87 @@ void BRepFill_PipeShell::BuildHistory(const BRepFill_Sweep& theSweep)
             }
           }
         }
-        TopTools_ListOfShape Wlist;
-        Wlist.Append(aWire);
-        myGenMap.Bind(aVertex[kk], Wlist);
+
+        TopTools_ListOfShape* Elist = myGenMap.Bound(aVertex[kk], TopTools_ListOfShape());
+
+        for (itw.Initialize(aWire); itw.More(); itw.Next())
+          Elist->Append(itw.Value());
+        
         //Save already built wire with its index
         IndWireMap.Bind(UIndex[kk], aWire);
       } //for (Standard_Integer kk = 0; kk < 2; kk++)
       ////////////////////////////////////
       
-      TopTools_ListOfShape ListShell;
-      ListShell.Append(aShell);
-      myGenMap.Bind(anEdge, ListShell);
+      TopTools_ListOfShape* Flist = myGenMap.Bound(anOriginalEdge, TopTools_ListOfShape());
+      TopoDS_Iterator itsh(aShell);
+      for (; itsh.More(); itsh.Next())
+        Flist->Append(itsh.Value());
       ////////////////////////
 
       inde++;
     }
+  }
+
+  //For subshapes of spine
+  const Handle(TopTools_HArray2OfShape)& aFaces  = theSweep.SubShape();
+  const Handle(TopTools_HArray2OfShape)& aVEdges = theSweep.Sections();
+  
+  BRepTools_WireExplorer wexp(mySpine);
+  inde = 0;
+  Standard_Boolean ToExit = Standard_False;
+  for (;;)
+  {
+    if (!wexp.More())
+      ToExit = Standard_True;
+    
+    inde++;
+
+    if (!ToExit)
+    {
+      const TopoDS_Edge& anEdgeOfSpine = wexp.Current();
+      
+      TopTools_ListOfShape* Flist = myGenMap.Bound(anEdgeOfSpine, TopTools_ListOfShape());
+      
+      for (Standard_Integer i = 1; i <= aFaces->UpperRow(); i++)
+      {
+        const TopoDS_Shape& aFace = aFaces->Value(i, inde);
+        if (aFace.ShapeType() == TopAbs_FACE)
+          Flist->Append(aFace);
+      }
+    }
+    
+    const TopoDS_Vertex& aVertexOfSpine = wexp.CurrentVertex();
+    TopTools_ListOfShape* ListVshapes = myGenMap.Bound(aVertexOfSpine, TopTools_ListOfShape());
+    for (Standard_Integer i = 1; i <= aVEdges->UpperRow(); i++)
+    {
+      const TopoDS_Shape& aVshape = aVEdges->Value(i, inde);
+      if (aVshape.ShapeType() == TopAbs_EDGE ||
+          aVshape.ShapeType() == TopAbs_FACE)
+        ListVshapes->Append(aVshape);
+      else
+      {
+        TopoDS_Iterator itvshape(aVshape);
+        for (; itvshape.More(); itvshape.Next())
+        {
+          const TopoDS_Shape& aSubshape = itvshape.Value();
+          if (aSubshape.ShapeType() == TopAbs_EDGE ||
+              aSubshape.ShapeType() == TopAbs_FACE)
+            ListVshapes->Append(aSubshape);
+          else
+          {
+            //it is wire
+            for (itw.Initialize(aSubshape); itw.More(); itw.Next())
+              ListVshapes->Append(itw.Value());
+          }
+        }
+      }
+    }
+
+    if (ToExit)
+      break;
+
+    if (wexp.More())
+      wexp.Next();
   }
 }
 

@@ -23,13 +23,13 @@
 
 #include <BRepPrimAPI_MakeSweep.hxx>
 #include <Standard_Boolean.hxx>
+#include <BRepFill_PipeShell.hxx>
 #include <BRepFill_TypeOfContact.hxx>
 #include <BRepBuilderAPI_PipeError.hxx>
 #include <Standard_Real.hxx>
 #include <Standard_Integer.hxx>
 #include <BRepBuilderAPI_TransitionMode.hxx>
 #include <TopTools_ListOfShape.hxx>
-class BRepFill_PipeShell;
 class Standard_DomainError;
 class StdFail_NotDone;
 class TopoDS_Wire;
@@ -261,8 +261,17 @@ public:
   
   Standard_EXPORT Standard_Real ErrorOnSurface() const;
 
+  //! Returns the list of original profiles
+  void Profiles(TopTools_ListOfShape& theProfiles)
+  {
+    myPipe->Profiles(theProfiles);
+  }
 
-
+  //! Returns the spine
+  const TopoDS_Wire& Spine()
+  {
+    return myPipe->Spine();
+  }
 
 protected:
 

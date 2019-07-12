@@ -225,11 +225,21 @@ public: //! @name public methods
     return anAppended;
   }
 
+  //! Appends an empty value and returns the reference to it
+  TheItemType& Appended ()
+  {
+    TheItemType& anAppended = *(TheItemType* )expandV (myLength);
+    return anAppended;
+  }
+
   //! Operator() - query the const value
   const TheItemType& operator() (const Standard_Integer theIndex) const
   {
     return Value (theIndex);
   }
+
+  //! Operator[] - query the const value
+  const TheItemType& operator[] (Standard_Integer theIndex) const { return Value (theIndex); }
 
   const TheItemType& Value (const Standard_Integer theIndex) const
   {
@@ -265,6 +275,9 @@ public: //! @name public methods
   {
     return ChangeValue (theIndex);
   }
+
+  //! Operator[] - query the value
+  TheItemType& operator[] ( Standard_Integer theIndex) { return ChangeValue (theIndex); }
 
   TheItemType& ChangeValue (const Standard_Integer theIndex)
   {

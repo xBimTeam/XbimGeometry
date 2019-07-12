@@ -20,21 +20,24 @@
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
 
+#include <BRepFill_TransitionStyle.hxx>
 #include <gp_Ax2.hxx>
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Wire.hxx>
 #include <TopoDS_Face.hxx>
 #include <TopTools_HArray2OfShape.hxx>
+#include <TopTools_HArray1OfShape.hxx>
 #include <Standard_Boolean.hxx>
 #include <TopTools_DataMapOfShapeListOfShape.hxx>
 #include <TopTools_ListOfShape.hxx>
+#include <BOPDS_PDS.hxx>
 class gp_Ax2;
 class TopoDS_Face;
 class TopoDS_Wire;
 class TopoDS_Shape;
 
 
-
+//! Trims sets of faces in the corner to make proper parts of pipe
 class BRepFill_TrimShellCorner 
 {
 public:
@@ -42,15 +45,19 @@ public:
   DEFINE_STANDARD_ALLOC
 
   
-  Standard_EXPORT BRepFill_TrimShellCorner(const Handle(TopTools_HArray2OfShape)& theFaces, const gp_Ax2& theAxeOfBisPlane, const TopoDS_Face& theSecPlane);
-  
-  Standard_EXPORT BRepFill_TrimShellCorner(const Handle(TopTools_HArray2OfShape)& theFaces, const gp_Ax2& theAxeOfBisPlane, const TopoDS_Wire& theSpine, const TopoDS_Face& theSecPlane);
-  
-  Standard_EXPORT void SetSpine (const TopoDS_Wire& theSpine);
-  
+  //! Constructor: takes faces to intersect,
+  //! type of transition (it can be RightCorner or RoundCorner)
+  //! and axis of bisector plane
+  Standard_EXPORT BRepFill_TrimShellCorner(const Handle(TopTools_HArray2OfShape)& theFaces,
+                                           const BRepFill_TransitionStyle         theTransition,
+                                           const gp_Ax2&                          theAxeOfBisPlane);
+
   Standard_EXPORT void AddBounds (const Handle(TopTools_HArray2OfShape)& Bounds);
   
   Standard_EXPORT void AddUEdges (const Handle(TopTools_HArray2OfShape)& theUEdges);
+  
+  Standard_EXPORT void AddVEdges (const Handle(TopTools_HArray2OfShape)& theVEdges,
+                                  const Standard_Integer theIndex);
   
   Standard_EXPORT void Perform();
   
@@ -71,15 +78,32 @@ protected:
 
 private:
 
+  Standard_Boolean MakeFacesSec(const Standard_Integer                     theIndex,
+                                const BOPDS_PDS&                           theDS,
+                                const Standard_Integer                     theFaceIndex1, 
+                                const Standard_Integer                     theFaceIndex2, 
+                                const Standard_Integer                     theSSInterfIndex);
+  
+  Standard_Boolean MakeFacesNonSec(const Standard_Integer                     theIndex,
+                                   const BOPDS_PDS&                           theDS,
+                                   const Standard_Integer                     theFaceIndex1, 
+                                   const Standard_Integer                     theFaceIndex2);
+  
+  Standard_Boolean ChooseSection(const TopoDS_Shape& Comp,
+                                 const TopoDS_Vertex& theFirstVertex,
+                                 const TopoDS_Vertex& theLastVertex,
+                                 TopoDS_Shape& resWire,
+                                 gp_Pln& resPlane,
+                                 Standard_Boolean& IsSingular);
 
 
+  BRepFill_TransitionStyle myTransition;
   gp_Ax2 myAxeOfBisPlane;
   TopoDS_Shape myShape1;
   TopoDS_Shape myShape2;
-  TopoDS_Wire mySpine;
-  TopoDS_Face mySecPln;
   Handle(TopTools_HArray2OfShape) myBounds;
   Handle(TopTools_HArray2OfShape) myUEdges;
+  Handle(TopTools_HArray1OfShape) myVEdges;
   Handle(TopTools_HArray2OfShape) myFaces;
   Standard_Boolean myDone;
   Standard_Boolean myHasSection;

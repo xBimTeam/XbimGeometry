@@ -26,6 +26,7 @@
 #include <Geom2dInt_Geom2dCurveTool.hxx>
 #include <GeomAbs_SurfaceType.hxx>
 #include <GeomInt.hxx>
+#include <GCPnts_QuasiUniformDeflection.hxx>
 #include <gp_Pnt.hxx>
 #include <gp_Pnt2d.hxx>
 #include <IntTools_FClass2d.hxx>
@@ -42,8 +43,17 @@
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Face.hxx>
 #include <TopoDS_Wire.hxx>
+#include <GeomLib.hxx>
+#include <Poly.hxx>
 
 #include <stdio.h>
+
+//#define DEBUG_PCLASS_POLYGON
+#ifdef DEBUG_PCLASS_POLYGON
+#include <DrawTrSurf.hxx>
+#include <Geom2d_BSplineCurve.hxx>
+#endif
+
 //=======================================================================
 //function : IntTools_FClass2d:IntTools:_FClass2d
 //purpose  : 
@@ -77,7 +87,7 @@ void IntTools_FClass2d::Init(const TopoDS_Face& aFace,
 			     const Standard_Real TolUV) 
 {
   Standard_Boolean WireIsNotEmpty, Ancienpnt3dinitialise, degenerated;
-  Standard_Integer nbpnts, firstpoint, NbEdges;
+  Standard_Integer firstpoint, NbEdges;
   Standard_Integer iX, aNbs1, nbs, Avant, BadWire;
   Standard_Real u, du, Tole, Tol, pfbid, plbid;
   Standard_Real FlecheU, FlecheV, TolVertex1, TolVertex;
@@ -120,7 +130,6 @@ void IntTools_FClass2d::Init(const TopoDS_Face& aFace,
   for(; aExpF.More();  aExpF.Next()) {
     const TopoDS_Wire& aW=*((TopoDS_Wire*)&aExpF.Current());
     //
-    nbpnts = 0;
     firstpoint =1;
     FlecheU = 0.;
     FlecheV = 0.;
@@ -256,7 +265,7 @@ void IntTools_FClass2d::Init(const TopoDS_Face& aFace,
       //-- and the last point saved in SeqPnt2d
       //-- To to set the first point of the current 
       //-- afar from the last saved point
-      Avant = nbpnts;
+      Avant = SeqPnt2d.Length();
       for(iX=firstpoint; iX<=aNbs1; iX++) {
         Standard_Boolean IsRealCurve3d;
         Standard_Integer ii;
@@ -274,7 +283,7 @@ void IntTools_FClass2d::Init(const TopoDS_Face& aFace,
         aDstX=RealLast();        
         if(degenerated==Standard_False) { 
           P3d=C3d.Value(u);
-          if(nbpnts>1) {
+          if(!SeqPnt2d.IsEmpty()) {
             if(Ancienpnt3dinitialise) { 
               aDstX=P3d.SquareDistance(Ancienpnt3d);
             }
@@ -300,11 +309,10 @@ void IntTools_FClass2d::Init(const TopoDS_Face& aFace,
             Ancienpnt3d=P3d;
             Ancienpnt3dinitialise=Standard_True;
           }
-          nbpnts++;
           SeqPnt2d.Append(P2d);
         }
         //
-        ii=nbpnts;
+        ii= SeqPnt2d.Length();
         if(ii>(Avant+4)) { 
           Standard_Real ul, dU, dV;
           gp_Pnt2d Pp;
@@ -378,85 +386,91 @@ void IntTools_FClass2d::Init(const TopoDS_Face& aFace,
     }
     //
     else if(WireIsNotEmpty) { 
-      TColgp_Array1OfPnt2d PClass(1,nbpnts);
-      gp_Pnt2d anInitPnt(0., 0.);
-      //
-      PClass.Init(anInitPnt);
-      if(nbpnts>3) { 
-        Standard_Integer im2=nbpnts-2;
-        Standard_Integer im1=nbpnts-1;
-        Standard_Integer im0=1;
-        Standard_Integer ii;
-        Standard_Real    angle = 0.0;
-        Standard_Real aX0, aY0, aX1, aY1, aS;
-        //
-        aS=0.;
-        //
-        Standard_Integer iFlag=1;
-	//
-        PClass(im2)=SeqPnt2d.Value(im2);
-        PClass(im1)=SeqPnt2d.Value(im1);
-        PClass(nbpnts)=SeqPnt2d.Value(nbpnts);
-        for(ii=1; ii<nbpnts; ii++,im0++,im1++,im2++) { 
-          if(im2>=nbpnts) im2=1;
-          if(im1>=nbpnts) im1=1;
-          PClass(ii)=SeqPnt2d.Value(ii);
-          //
-          const gp_Pnt2d& aP2D1=PClass(im1);
-          const gp_Pnt2d& aP2D0=PClass(im0);
-          //aP2D0 is next to aP2D1
-          aP2D0.Coord(aX0, aY0);
-          aP2D1.Coord(aX1, aY1);
-          aS=aS+(aY0+aY1)*(aX1-aX0); 
-
-          gp_Vec2d A(PClass(im2),PClass(im1));
-          gp_Vec2d B(PClass(im1),PClass(im0));
-
-          Standard_Real N = A.Magnitude() * B.Magnitude();
-          if(N>1e-16) { 
-            Standard_Real a=A.Angle(B);
-            //  
-            if (anIndexMap.IsBound(im1)) {
-              Standard_Integer  anInd  = anIndexMap.Find(im1);
-              const gp_Vec2d   &aVPrev = aD1Prev.Value(anInd);
-              const gp_Vec2d   &aVNext = aD1Next.Value(anInd);
-
-              Standard_Real aN = aVPrev.Magnitude() * aVNext.Magnitude();
-              if(aN > 1e-16) { 
-                Standard_Real aDerivAngle, aAbsDA, aProduct, aPA;
-                //ifv 23.08.06
-		aPA=Precision::Angular();
-		aDerivAngle = aVPrev.Angle(aVNext);
-		aAbsDA=Abs(aDerivAngle);
-                if(aAbsDA <= aPA) {
-		  aDerivAngle = 0.; 
-		}
-		//
-		aProduct=aDerivAngle * a;
-		//
-	        if(Abs(aAbsDA - M_PI) <= aPA) {
-		  if (aProduct > 0.) {
-		    aProduct=-aProduct; 
-		  }
-		}
-                //ifv 23.08.06 : if edges continuity > G1, |aDerivAngle| ~0,
-                //but can has wrong sign and causes condition aDerivAngle * a < 0.
-                //that is wrong in such situation
-                if (iFlag && aProduct < 0.) {
-                  iFlag=0;
-                  // Bad case.
-                  angle = 0.;
-                }
-              }
-            }
-            angle+=a;
-          }
-        }//for(ii=1; ii<nbpnts; ii++,im0++,im1++,im2++) { 
-        if (!iFlag) {
-          angle = 0.; 
+      if (SeqPnt2d.Length() > 3)
+      {
+#ifdef DEBUG_PCLASS_POLYGON
+        TColgp_Array1OfPnt2d PClass(1, nbpnts);
+        TColStd_Array1OfReal aKnots(1, nbpnts);
+        TColStd_Array1OfInteger aMults(1, nbpnts);
+        for (int i = 1; i <= nbpnts; i++)
+        {
+          aKnots(i) = i;
+          aMults(i) = 1;
+          PClass(ii) = SeqPnt2d.Value(ii);
         }
-        if(aS>0.){
-          myIsHole=Standard_False;
+        aMults(1) = aMults(nbpnts) = 2;
+        Handle(Geom2d_BSplineCurve) aPol = new Geom2d_BSplineCurve(PClass, aKnots, aMults, 1);
+        DrawTrSurf::Set("pol", aPol);
+#endif
+
+        Standard_Real aS = 0.;
+        Standard_Real aPer = 0.;
+        Poly::PolygonProperties(SeqPnt2d, aS, aPer);
+
+        Standard_Real anExpThick = Max(2. * Abs(aS) / aPer, 1e-7);
+        Standard_Real aDefl = Max(FlecheU, FlecheV);
+        Standard_Real aDiscrDefl = Min(aDefl*0.1, anExpThick * 10.);
+        Standard_Boolean isChanged = Standard_False;
+        while (aDefl > anExpThick && aDiscrDefl > 1e-7)
+        {
+          // Deflection of the polygon is too much for this ratio of area and perimeter,
+          // and this might lead to self-intersections.
+          // Discretize the wire more tightly to eliminate the error.
+          firstpoint = 1;
+          isChanged = Standard_True;
+          SeqPnt2d.Clear();
+          FlecheU = 0.0;
+          FlecheV = 0.0;
+          for (aWExp.Init(TopoDS::Wire(aExpF.Current()), Face);
+            aWExp.More(); aWExp.Next())
+          {
+            edge = aWExp.Current();
+            Or = edge.Orientation();
+            if (Or == TopAbs_FORWARD || Or == TopAbs_REVERSED)
+            {
+              BRep_Tool::Range(edge, Face, pfbid, plbid);
+              if (Abs(plbid - pfbid) < 1.e-9) continue;
+              BRepAdaptor_Curve2d C(edge, Face);
+              GCPnts_QuasiUniformDeflection aDiscr(C, aDiscrDefl);
+              if (!aDiscr.IsDone())
+                break;
+              Standard_Integer nbp = aDiscr.NbPoints();
+              Standard_Integer iStep = 1, i = 1, iEnd = nbp + 1;
+              if (Or == TopAbs_REVERSED)
+              {
+                iStep = -1;
+                i = nbp;
+                iEnd = 0;
+              }
+              if (firstpoint == 2)
+                i += iStep;
+              for (; i != iEnd; i += iStep)
+              {
+                gp_Pnt2d aP2d = C.Value(aDiscr.Parameter(i));
+                SeqPnt2d.Append(aP2d);
+              }
+              if (nbp > 2)
+              {
+                Standard_Integer ii = SeqPnt2d.Length();
+                gp_Lin2d Lin(SeqPnt2d(ii - 2), gp_Dir2d(gp_Vec2d(SeqPnt2d(ii - 2), SeqPnt2d(ii))));
+                Standard_Real ul = ElCLib::Parameter(Lin, SeqPnt2d(ii - 1));
+                gp_Pnt2d Pp = ElCLib::Value(ul, Lin);
+                Standard_Real dU = Abs(Pp.X() - SeqPnt2d(ii - 1).X());
+                Standard_Real dV = Abs(Pp.Y() - SeqPnt2d(ii - 1).Y());
+                if (dU > FlecheU) FlecheU = dU;
+                if (dV > FlecheV) FlecheV = dV;
+              }
+              firstpoint = 2;
+            }
+          }
+          anExpThick = Max(2. * Abs(aS) / aPer, 1e-7);
+          aDefl = Max(FlecheU, FlecheV);
+          aDiscrDefl = Min(aDiscrDefl * 0.1, anExpThick * 10.);
+        }
+
+        if (isChanged)
+        {
+          Poly::PolygonProperties(SeqPnt2d, aS, aPer);
         }
         //
         if(FlecheU<Toluv)
@@ -465,25 +479,35 @@ void IntTools_FClass2d::Init(const TopoDS_Face& aFace,
         if(FlecheV<Toluv)
           FlecheV = Toluv;
 
-        TabClass.Append((void *)new CSLib_Class2d(PClass,
+        TabClass.Append((void *)new CSLib_Class2d(SeqPnt2d,
 						  FlecheU,
 						  FlecheV,
 						  Umin,Vmin,Umax,Vmax));
         //
-        if((angle<2 && angle>-2)||(angle>10)||(angle<-10)) { 
+        if(Abs(aS) < Precision::SquareConfusion()) { 
           BadWire=1;
           TabOrien.Append(-1);
         } 
-        else {         
-          TabOrien.Append((angle>0.0)? 1 : 0);
+        else
+        {
+          if (aS > 0.0)
+          {
+            myIsHole = Standard_False;
+            TabOrien.Append(1);
+          }
+          else
+          {
+            myIsHole = Standard_True;
+            TabOrien.Append(0);
+          }
         }
       } 
       else { 
         BadWire=1;
         TabOrien.Append(-1);
         TColgp_Array1OfPnt2d PPClass(1,2);
-        PPClass.Init(anInitPnt);
-        TabClass.Append((void *)new CSLib_Class2d(PPClass,
+        SeqPnt2d.Clear();
+        TabClass.Append((void *)new CSLib_Class2d(SeqPnt2d,
 						  FlecheU,
 						  FlecheV,
 						  Umin,Vmin,Umax,Vmax));

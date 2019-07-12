@@ -159,6 +159,35 @@ static void IsParallel(const Handle(IntSurf_LineOn2S)& theLine,
   theIsUparallel = ((aVmax - aVmin) < theToler);
 }
 
+//=======================================================================
+//function : AdjustToDomain
+//purpose  : Returns TRUE if theP has been changed (i.e. initial value
+//            was out of the domain)
+//=======================================================================
+static Standard_Boolean AdjustToDomain(const Standard_Integer theNbElem,
+                                       Standard_Real* theParam,
+                                       const Standard_Real* const theLowBorder,
+                                       const Standard_Real* const theUppBorder)
+{
+  Standard_Boolean aRetVal = Standard_False;
+  for (Standard_Integer i = 0; i < theNbElem; i++)
+  {
+    if ((theParam[i] - theLowBorder[i]) < -Precision::PConfusion())
+    {
+      theParam[i] = theLowBorder[i];
+      aRetVal = Standard_True;
+    }
+
+    if ((theParam[i] - theUppBorder[i]) > Precision::PConfusion())
+    {
+      theParam[i] = theUppBorder[i];
+      aRetVal = Standard_True;
+    }
+  }
+
+  return aRetVal;
+}
+
 //==================================================================================
 // function : IntWalk_PWalking::IntWalk_PWalking
 // purpose  : 
@@ -700,7 +729,7 @@ void IntWalk_PWalking::Perform(const TColStd_Array1OfReal& ParDep,
   previousd  = myIntersectionOn2S.Direction();
   previousd1 = myIntersectionOn2S.DirectionOnS1();
   previousd2 = myIntersectionOn2S.DirectionOnS2();
-  indextg = 1;
+  myTangentIdx = 1;
   tgdir   = previousd;
   firstd1 = previousd1;
   firstd2 = previousd2;
@@ -719,7 +748,7 @@ void IntWalk_PWalking::Perform(const TColStd_Array1OfReal& ParDep,
   if(IsTangentExtCheck(Caro1, Caro2, Param(1), Param(2), Param(3), Param(4), myTolTang, pasuv))
     return;
 
-  AddAPoint(line,previousPoint);
+  AddAPoint(previousPoint);
   //
   IntWalk_StatusDeflection aStatus = IntWalk_OK, aPrevStatus = IntWalk_OK;
   Standard_Boolean NoTestDeflection = Standard_False;
@@ -807,7 +836,7 @@ void IntWalk_PWalking::Perform(const TColStd_Array1OfReal& ParDep,
     SvParam[3]=Param(4);
     //
     Standard_Integer aTryNumber = 0;
-    Standard_Real    isBadPoint = Standard_False;
+    Standard_Boolean isBadPoint = Standard_False;
     IntImp_ConstIsoparametric aBestIso = ChoixIso;
     do
     {
@@ -934,10 +963,21 @@ void IntWalk_PWalking::Perform(const TColStd_Array1OfReal& ParDep,
             }			
             else
             {
-              pasuv[0]*=0.5; 
-              pasuv[1]*=0.5; 
-              pasuv[2]*=0.5; 
-              pasuv[3]*=0.5;
+              if (aStatus != IntWalk_StepTooSmall)
+              {
+                // Bug #0029682 (Boolean intersection with
+                // fuzzy-option hangs). 
+                // If aStatus == IntWalk_StepTooSmall then
+                // the counter "LevelOfIterWithoutAppend" will
+                // be nulified in the future if the step is smaller
+                // (see "case IntWalk_StepTooSmall:" below).
+                // Here, we forbid this nulification and thereby provide out from
+                // the algorithm.
+                pasuv[0] *= 0.5;
+                pasuv[1] *= 0.5;
+                pasuv[2] *= 0.5;
+                pasuv[3] *= 0.5;
+              }
             }
           }
         }
@@ -1139,6 +1179,7 @@ void IntWalk_PWalking::Perform(const TColStd_Array1OfReal& ParDep,
               break;
             }
           }
+          Standard_FALLTHROUGH
         case IntWalk_OK:
         case IntWalk_ArretSurPoint://006
           {
@@ -1222,7 +1263,7 @@ void IntWalk_PWalking::Perform(const TColStd_Array1OfReal& ParDep,
                       }
                     }
                     //
-                    AddAPoint(line,previousPoint);
+                    AddAPoint(previousPoint);
                     RejectIndex++;
 
                     if(RejectIndex >= RejectIndexMAX)
@@ -1250,6 +1291,15 @@ void IntWalk_PWalking::Perform(const TColStd_Array1OfReal& ParDep,
                   pasSav[1] = pasuv[1];
                   pasSav[2] = pasuv[2];
                   pasSav[3] = pasuv[3];
+                  
+                  if ((aPrevStatus == IntWalk_PasTropGrand) &&
+                      (LevelOfIterWithoutAppend > 0))
+                  {
+                    pasInit[0] = pasuv[0];
+                    pasInit[1] = pasuv[1];
+                    pasInit[2] = pasuv[2];
+                    pasInit[3] = pasuv[3];
+                  }
                 }
               }
             }//005 if(!Arrive)
@@ -1258,7 +1308,7 @@ void IntWalk_PWalking::Perform(const TColStd_Array1OfReal& ParDep,
               if(close)
               {
                 //================= la ligne est fermee ===============
-                AddAPoint(line,line->Value(1)); //ligne fermee
+                AddAPoint(line->Value(1)); //ligne fermee
                 LevelOfIterWithoutAppend=0;
               }
               else    //$$$
@@ -1310,7 +1360,7 @@ void IntWalk_PWalking::Perform(const TColStd_Array1OfReal& ParDep,
                         }
                       }
                       //
-                      AddAPoint(line,previousPoint);
+                      AddAPoint(previousPoint);
                       RejectIndex++;
 
                       if(RejectIndex >= RejectIndexMAX)
@@ -1544,7 +1594,7 @@ void IntWalk_PWalking::Perform(const TColStd_Array1OfReal& ParDep,
                         }//if (previoustg) cond.
 
                         ////////////////////////////////////////
-                        AddAPoint(line,previousPoint);
+                        AddAPoint(previousPoint);
                         RejectIndex++;
 
                         if(RejectIndex >= RejectIndexMAX)
@@ -2002,7 +2052,7 @@ Standard_Boolean IntWalk_PWalking::ExtendLineInCommonZone(const IntImp_ConstIsop
   Standard_Integer i = 0;
 
   for(i = 1; i <= aSeqOfNewPoint.Length(); i++) {
-    AddAPoint(line, aSeqOfNewPoint.Value(i));
+    AddAPoint(aSeqOfNewPoint.Value(i));
   }
 
   return bOutOfTangentZone;
@@ -2247,7 +2297,19 @@ Standard_Boolean IntWalk_PWalking::HandleSingleSingularPoint(const Handle(Adapto
         continue;
 
       anInt.Point().Parameters(thePnt(1), thePnt(2), thePnt(3), thePnt(4));
-      return Standard_True;
+
+      Standard_Boolean isInDomain = Standard_True;
+      for (Standard_Integer j = 1; isInDomain && (j <= 4); ++j)
+      {
+        if ((thePnt(j) - aLowBorder[j - 1] + Precision::PConfusion())*
+            (thePnt(j) - aUppBorder[j - 1] - Precision::PConfusion()) > 0.0)
+        {
+          isInDomain = Standard_False;
+        }
+      }
+
+      if (isInDomain)
+        return Standard_True;
     }
   }
 
@@ -2259,15 +2321,25 @@ Standard_Boolean IntWalk_PWalking::HandleSingleSingularPoint(const Handle(Adapto
 //purpose  : 
 //=======================================================================
 Standard_Boolean IntWalk_PWalking::
-SeekPointOnBoundary(const Handle(Adaptor3d_HSurface)& theASurf1,
-                    const Handle(Adaptor3d_HSurface)& theASurf2,
-                    const Standard_Real theU1,
-                    const Standard_Real theV1,
-                    const Standard_Real theU2,
-                    const Standard_Real theV2,
-                    const Standard_Boolean isTheFirst)
+        SeekPointOnBoundary(const Handle(Adaptor3d_HSurface)& theASurf1,
+                            const Handle(Adaptor3d_HSurface)& theASurf2,
+                            const Standard_Real theU1,
+                            const Standard_Real theV1,
+                            const Standard_Real theU2,
+                            const Standard_Real theV2,
+                            const Standard_Boolean isTheFirst)
 {
   Standard_Boolean isOK = Standard_False;
+
+  // u1, v1, u2, v2 order is used.
+  const Standard_Real aLowBorder[4] = {theASurf1->FirstUParameter(),
+                                       theASurf1->FirstVParameter(),
+                                       theASurf2->FirstUParameter(),
+                                       theASurf2->FirstVParameter()};
+  const Standard_Real aUppBorder[4] = {theASurf1->LastUParameter(),
+                                       theASurf1->LastVParameter(),
+                                       theASurf2->LastUParameter(),
+                                       theASurf2->LastVParameter()};
 
   // Tune solution tolerance according with object size.
   const Standard_Real aRes1 = Max(Precision::PConfusion() / theASurf1->UResolution(1.0),
@@ -2288,21 +2360,26 @@ SeekPointOnBoundary(const Handle(Adaptor3d_HSurface)& theASurf1,
   {
     aNbIter--;
     aStatus = DistanceMinimizeByGradient(theASurf1, theASurf2, aPnt);
-    if(aStatus)
+    if (aStatus && !AdjustToDomain(4, &aPnt(1), &aLowBorder[0], &aUppBorder[0]))
       break;
 
-    aStatus = DistanceMinimizeByExtrema(theASurf1, theASurf2->Value(aPnt(3), aPnt(4)), aPnt(1), aPnt(2));
-    if(aStatus)
+    aStatus = DistanceMinimizeByExtrema(theASurf1, theASurf2->Value(aPnt(3), aPnt(4)),
+                                        aPnt(1), aPnt(2));
+    if (aStatus && !AdjustToDomain(2, &aPnt(1), &aLowBorder[0], &aUppBorder[0]))
       break;
 
-    aStatus = DistanceMinimizeByExtrema(theASurf2, theASurf1->Value(aPnt(1), aPnt(2)), aPnt(3), aPnt(4));
-    if(aStatus)
+    aStatus = DistanceMinimizeByExtrema(theASurf2, theASurf1->Value(aPnt(1), aPnt(2)),
+                                        aPnt(3), aPnt(4));
+    if (aStatus && !AdjustToDomain(2, &aPnt(3), &aLowBorder[2], &aUppBorder[2]))
       break;
   }
   while(!aStatus && (aNbIter > 0));
 
   // Handle singular points.
-  Standard_Boolean aSingularStatus = HandleSingleSingularPoint(theASurf1, theASurf2, aTol, aSingularPnt);
+  Standard_Boolean aSingularStatus = HandleSingleSingularPoint(theASurf1,
+                                                               theASurf2,
+                                                               aTol,
+                                                               aSingularPnt);
   if (aSingularStatus)
     aPnt = aSingularPnt;
 
@@ -2361,7 +2438,16 @@ SeekPointOnBoundary(const Handle(Adaptor3d_HSurface)& theASurf1,
       {
         aP1.SetXYZ(line->Value(aPInd).Value().XYZ());
         if (aP1.SquareDistance(aPInt) > Precision::SquareConfusion())
+        {
           break;
+        }
+        else if (aPInd == 1)
+        {
+          // After insertion, we will obtain
+          // two coincident points in the line.
+          // Therefore, insertion is forbidden.
+          return isOK;
+        }
       }
 
       for (++aPInd; aPInd <= aNbPnts; aPInd++)
@@ -2384,7 +2470,7 @@ SeekPointOnBoundary(const Handle(Adaptor3d_HSurface)& theASurf1,
         break;
       }
 
-      line->RemovePoint(1);
+      RemoveAPoint(1);
     }
 
     line->InsertBefore(1, anIP);
@@ -2402,7 +2488,16 @@ SeekPointOnBoundary(const Handle(Adaptor3d_HSurface)& theASurf1,
       {
         aPCurr.SetXYZ(line->Value(aPInd).Value().XYZ());
         if (aPCurr.SquareDistance(aPInt) > Precision::SquareConfusion())
+        {
           break;
+        }
+        else if (aPInd == aNbPnts)
+        {
+          // After insertion, we will obtain
+          // two coincident points in the line.
+          // Therefore, insertion is forbidden.
+          return isOK;
+        }
       }
 
       for (--aPInd; aPInd > 0; aPInd--)
@@ -2425,7 +2520,7 @@ SeekPointOnBoundary(const Handle(Adaptor3d_HSurface)& theASurf1,
         break;
       }
 
-      line->RemovePoint(aNbPnts);
+      RemoveAPoint(aNbPnts);
     }
 
     line->Add(anIP);
@@ -2783,14 +2878,14 @@ RepartirOuDiviser(Standard_Boolean& DejaReparti,
   //  Standard_Integer i;
   if (Arrive) {    //restart in the other direction
     if (!DejaReparti ) {
-      Arrive        = Standard_False; 
-      DejaReparti   = Standard_True;
+      Arrive = Standard_False;
+      DejaReparti = Standard_True;
       previousPoint = line->Value(1);
-      previoustg    = Standard_False;
-      previousd1    = firstd1;
-      previousd2    = firstd2;
-      previousd     = tgdir;
-      indextg       = line->NbPoints();
+      previoustg = Standard_False;
+      previousd1 = firstd1;
+      previousd2 = firstd2;
+      previousd = tgdir;
+      myTangentIdx = line->NbPoints();
       tgdir.Reverse();
       line->Reverse();
 
@@ -2830,14 +2925,15 @@ RepartirOuDiviser(Standard_Boolean& DejaReparti,
           tglast = Standard_True;      // IS IT ENOUGH ????
         }
 
-        if (!DejaReparti) {  //restart in the other direction
-          DejaReparti       = Standard_True;
-          previousPoint     = line->Value(1);
-          previoustg        = Standard_False;
-          previousd1        = firstd1;
-          previousd2        = firstd2;
-          previousd         = tgdir;
-          indextg           = line->NbPoints();
+        if (!DejaReparti)
+        {  //restart in the other direction
+          DejaReparti = Standard_True;
+          previousPoint = line->Value(1);
+          previoustg = Standard_False;
+          previousd1 = firstd1;
+          previousd2 = firstd2;
+          previousd = tgdir;
+          myTangentIdx = line->NbPoints();
           tgdir.Reverse();
           line->Reverse();
 
@@ -3412,7 +3508,7 @@ TestArret(const Standard_Boolean DejaReparti,
       }
     }
     if(k!=-1) { 
-      ChoixIso   = ChoixRef[k];
+      ChoixIso = ChoixRef(k);
     }
     else { 
       if((ParC[0]<=Uvd[0]+Epsuv[0]) || (ParC[0]>=Uvf[0]-Epsuv[0])) {

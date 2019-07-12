@@ -311,6 +311,7 @@ void BRepAlgoAPI_BooleanOperation::Build()
     myDSFiller->SetFuzzyValue(myFuzzyValue);
     myDSFiller->SetNonDestructive(myNonDestructive);
     myDSFiller->SetGlue(myGlue);
+    myDSFiller->SetUseOBB(myUseOBB);
     //
     SetAttributes();
     //
@@ -353,6 +354,7 @@ void BRepAlgoAPI_BooleanOperation::Build()
   //
   myBuilder->SetRunParallel(myRunParallel);
   myBuilder->SetProgressIndicator(myProgressIndicator);
+  myBuilder->SetCheckInverted(myCheckInverted);
   //
   myBuilder->PerformWithFiller(*myDSFiller);
   //
@@ -499,12 +501,12 @@ const TopTools_ListOfShape& BRepAlgoAPI_BooleanOperation::SectionEdges()
   BOPDS_VectorOfInterfFF& aFFs=pDS->InterfFF();
   myGenerated.Clear();
   //
-  aNb=aFFs.Extent();
+  aNb=aFFs.Length();
   for (i = 0; i < aNb; i++) {
     BOPDS_InterfFF& aFFi=aFFs(i);
     const BOPDS_VectorOfCurve& aSeqOfCurve=aFFi.Curves();
     //
-    aNbCurves=aSeqOfCurve.Extent();
+    aNbCurves=aSeqOfCurve.Length();
     for (j=0; j<aNbCurves; j++) {
       const BOPDS_Curve& aCurve=aSeqOfCurve(j);
       const BOPDS_ListOfPaveBlock& aSectEdges = aCurve.PaveBlocks();

@@ -68,7 +68,7 @@ public:
   //! Performs the intersection between <Caro1>  and
   //! <Caro2>. The method computes the polyhedron on
   //! each surface.
-  Standard_EXPORT void Perform (const Handle(Adaptor3d_HSurface)& Caro1, const Handle(Adaptor3d_TopolTool)& Domain1, const Handle(Adaptor3d_HSurface)& Caro2, const Handle(Adaptor3d_TopolTool)& Domain2, const Standard_Real TolTangency, const Standard_Real Epsilon, const Standard_Real Deflection, const Standard_Real Increment, IntSurf_ListOfPntOn2S& ListOfPnts, const Standard_Boolean RestrictLine);
+  Standard_EXPORT void Perform (const Handle(Adaptor3d_HSurface)& Caro1, const Handle(Adaptor3d_TopolTool)& Domain1, const Handle(Adaptor3d_HSurface)& Caro2, const Handle(Adaptor3d_TopolTool)& Domain2, const Standard_Real TolTangency, const Standard_Real Epsilon, const Standard_Real Deflection, const Standard_Real Increment, IntSurf_ListOfPntOn2S& ListOfPnts);
   
   //! Performs the intersection between <Caro1>  and
   //! <Caro2>. The method computes the polyhedron on
@@ -137,7 +137,7 @@ public:
   
   Standard_EXPORT void Remplit (const Standard_Integer a, const Standard_Integer b, const Standard_Integer c, IntPatch_PrmPrmIntersection_T3Bits& Map) const;
   
-  Standard_EXPORT Standard_Integer CodeReject (const Standard_Real x1, const Standard_Real y1, const Standard_Real z1, const Standard_Real x2, const Standard_Real y2, const Standard_Real z2, const Standard_Real x3, const Standard_Real y3, const Standard_Real z3) const;
+  Standard_Integer CodeReject (const Standard_Real x1, const Standard_Real y1, const Standard_Real z1, const Standard_Real x2, const Standard_Real y2, const Standard_Real z2, const Standard_Real x3, const Standard_Real y3, const Standard_Real z3) const;
   
   Standard_EXPORT void PointDepart (Handle(IntSurf_LineOn2S)& LineOn2S, const Handle(Adaptor3d_HSurface)& S1, const Standard_Integer SU1, const Standard_Integer SV1, const Handle(Adaptor3d_HSurface)& S2, const Standard_Integer SU2, const Standard_Integer SV2) const;
 

@@ -65,6 +65,7 @@
     <Compile Include="Ifc2x3GeometryTests.cs" />
     <Compile Include="IfcExtrudedAreaSolidTests.cs" />
     <Compile Include="IfcModelBuilder.cs" />
+    <Compile Include="IoTests.cs" />
     <Compile Include="LeaksTest.cs" />
     <Compile Include="LocationAndTransformationTests.cs" />
     <Compile Include="IfcPolygonalBoundedHalfSpaceTests.cs" />
