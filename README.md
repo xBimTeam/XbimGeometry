@@ -17,10 +17,10 @@ This technology is included under a licence which permits the use as part of a l
 
 ## Compilation
 
-**Visual Studio 2017 is recommended.**
+**Visual Studio 2017 or 2019 is recommended.**
 Prior versions of Visual Studio are unlikely to work on this solution.
 
-The [free VS 2017 Community Edition](https://visualstudio.microsoft.com/downloads/) will be fine. 
+The [free VS 2019 Community Edition](https://visualstudio.microsoft.com/downloads/) will be fine. 
 
 In order to compile this solution which includes C++ projects you'll need the following additional 
 components installed:

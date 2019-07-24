@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" Sdk="Microsoft.NET.Sdk">
+﻿<Project DefaultTargets="Build" Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net47</TargetFramework>
@@ -14,7 +13,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
     <PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
-    <PackageReference Include="Xbim.Tessellator" Version="5.0.255" />
+    <PackageReference Include="Xbim.Tessellator" Version="5.1.259" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\Xbim.Geometry.Engine.Interop.targets">
