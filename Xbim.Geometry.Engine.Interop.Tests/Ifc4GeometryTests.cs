@@ -454,17 +454,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.IsTrue(bar.Volume > 0);
             }
         }
-        //[TestMethod]
-        //public void SweptAreaCurveTest()
-        //{
-        //    using (var model = MemoryModel.OpenRead(@".\TestFiles\failing_swept_area_curve.ifc"))
-        //    {
-        //        var sweptSolid = model.Instances.OfType<IIfcSurfaceCurveSweptAreaSolid>().FirstOrDefault();
-        //        Assert.IsNotNull(sweptSolid);
-        //        var bar = geomEngine.CreateSolid(sweptSolid);
-        //        Assert.IsTrue(bar.Volume > 0);
-        //    }
-        //}
+
+        
 
         
         [TestMethod]

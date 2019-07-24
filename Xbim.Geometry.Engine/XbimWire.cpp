@@ -2319,7 +2319,7 @@ namespace Xbim
 				BRepBuilderAPI_MakeWire wm;
 				TColStd_Array1OfReal res(1, numIntervals + 1);
 				cc.Intervals(res, GeomAbs_C0);
-				for (Standard_Integer i = 1; i <= numIntervals; i++)
+				for (Standard_Integer i = 1; i <= numIntervals; i++) //process all but the end interval point
 				{
 					Standard_Real fp = res.Value(i);
 					Standard_Real lp = res.Value(i + 1);

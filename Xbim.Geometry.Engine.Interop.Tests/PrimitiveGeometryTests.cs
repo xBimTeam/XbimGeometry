@@ -80,12 +80,13 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void can_trim_composite_curve()
         {
-            using (var er = new EntityRepository<IIfcCompositeCurve>("trimming_composite_curves", inRadians: true))
+            using (var er = new EntityRepository<IIfcSurfaceCurveSweptAreaSolid>("failing_swept_area_curve", inRadians: true))
             {
-                Assert.IsTrue(er.Entity != null, "No IfcCompositeCurve found");
+                Assert.IsTrue(er.Entity != null, "No IfcSurfaceCurveSweptAreaSolid found");
 
-                var wire = geomEngine.CreateWire(er.Entity, logger);
-
+                var solid = geomEngine.CreateSolidSet(er.Entity, logger);
+                Assert.AreEqual(1, solid.Count);
+                Assert.AreEqual(solid.First().Volume, 12.6, 0.1);
             }
         }
     }
