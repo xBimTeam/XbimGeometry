@@ -430,6 +430,8 @@ namespace Xbim
 			{
 				pWire = new TopoDS_Wire();
 				*pWire = polyMaker.Wire();
+				ShapeFix_ShapeTolerance tFixer;
+				tFixer.LimitTolerance(*pWire, tolerance);
 			}
 		}
 
@@ -2317,7 +2319,7 @@ namespace Xbim
 				BRepBuilderAPI_MakeWire wm;
 				TColStd_Array1OfReal res(1, numIntervals + 1);
 				cc.Intervals(res, GeomAbs_C0);
-				for (Standard_Integer i = 1; i < numIntervals; i++)
+				for (Standard_Integer i = 1; i <= numIntervals; i++)
 				{
 					Standard_Real fp = res.Value(i);
 					Standard_Real lp = res.Value(i + 1);

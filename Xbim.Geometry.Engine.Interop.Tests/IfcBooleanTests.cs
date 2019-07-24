@@ -256,6 +256,20 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
         }
 
+        [TestMethod]
+        public void unstable_boolean_clipping_result()
+        {
+            using (var er = new EntityRepository<IIfcBooleanClippingResult>(nameof(unstable_boolean_clipping_result)))
+            {
+                Assert.IsTrue(er.Entity != null, "No IfcBooleanClippingResult found");
+
+                var solids = geomEngine.CreateSolidSet(er.Entity, logger);
+                HelperFunctions.IsValidSolid(solids.FirstOrDefault());
+
+            }
+
+        }
+
         /// <summary>
         /// This problem is a boolean where the tolerance needs to be made courser by 10 fold
         /// </summary>

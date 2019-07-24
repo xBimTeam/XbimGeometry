@@ -925,18 +925,36 @@ namespace Xbim
 			solidSet->IfcEntityLabel = solid->EntityLabel;
 			XbimSolidSet^ bodySet = XbimSolidSet::BuildClippingList(solid, clips, logger);
 			bodySet->IfcEntityLabel = solid->EntityLabel;
-
+			//SRL it appears that release 7.3 of OCC does correctly cut multiple half space solids
+			// we therefore do them one at a time until there is a fix
 			for each (IIfcBooleanOperand^ bOp in clips)
 			{
 				XbimSolidSet^ s = gcnew XbimSolidSet(bOp, logger);
-				if (s->IsValid) solidSet->Add(s);
+
+				if (s->IsValid)
+				{
+					//only dodge IIfcHalfSpaceSolid
+					if (dynamic_cast<IIfcHalfSpaceSolid^>(bOp) && bOp->GetType()->Name->Contains("IfcHalfSpaceSolid"))
+					{
+
+						bodySet = (XbimSolidSet^)bodySet->Cut(s, mf->Precision, logger);
+					}
+					else
+						solidSet->Add(s);
+				}
 			}
 
-
-			IXbimSolidSet^ xbimSolidSet = bodySet->Cut(solidSet, mf->Precision, logger);
-			if (xbimSolidSet != nullptr && xbimSolidSet->IsValid)
+			if (solidSet->Count > 0)
 			{
-				solids->AddRange(xbimSolidSet);
+				IXbimSolidSet^ xbimSolidSet = bodySet->Cut(solidSet, mf->Precision, logger);
+				if (xbimSolidSet != nullptr && xbimSolidSet->IsValid)
+				{
+					solids->AddRange(xbimSolidSet);
+				}
+			}
+			else
+			{
+				solids->AddRange(bodySet);
 			}
 		}
 

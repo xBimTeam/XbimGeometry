@@ -76,5 +76,17 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.IsNull(geom, "This should fail");
             }
         }
+
+        [TestMethod]
+        public void can_trim_composite_curve()
+        {
+            using (var er = new EntityRepository<IIfcCompositeCurve>("trimming_composite_curves", inRadians: true))
+            {
+                Assert.IsTrue(er.Entity != null, "No IfcCompositeCurve found");
+
+                var wire = geomEngine.CreateWire(er.Entity, logger);
+
+            }
+        }
     }
 }
