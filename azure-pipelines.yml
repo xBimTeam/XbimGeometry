@@ -1,3 +1,4 @@
+job: XbimGeometryBuild
 timeoutInMinutes: 120
 
 trigger:
