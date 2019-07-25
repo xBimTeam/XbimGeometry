@@ -47,4 +47,4 @@ to automate our builds.
 ## Getting Involved
 
 If you'd like to get involved and contribute to this project, please read the [CONTRIBUTING ](https://github.com/xBimTeam/XbimEssentials/blob/master/CONTRIBUTING.md)
-page or contact any member of the Team (https://github.com/xBimTeam).
+page or contact any member of the Team (https://github.com/orgs/xBimTeam/people).
