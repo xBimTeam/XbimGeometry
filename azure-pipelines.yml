@@ -1,6 +1,3 @@
-job: XbimGeometryBuild
-timeoutInMinutes: 120
-
 trigger:
   branches:
     include:
@@ -22,6 +19,8 @@ variables:
   
 name: $(BuildDefinitionName)_$(SourceBranchName)_$(major).$(minor).$(buildNo)
 
+job: XbimGeometryBuild
+timeoutInMinutes: 120
 steps:
 # Windows script setting up  $(packageversion) of the nuget package based on branch
 # Master branch
