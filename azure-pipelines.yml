@@ -1,3 +1,4 @@
+timeoutInMinutes: 120
 
 trigger:
   branches:
