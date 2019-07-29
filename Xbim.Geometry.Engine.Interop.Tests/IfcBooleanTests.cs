@@ -914,7 +914,42 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
             }
         }
+        //[TestMethod]
+        //public void Can_cut_polygonal_faceset_solids()
+        //{
+        //    using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\Can_cut_polygonal_faceset_solids.ifc"))
+        //    {
+        //        //get the geometry of the wall, it is made of 4 items
+        //        var partTransform = (model.Instances[18] as IIfcLocalPlacement).ToMatrix3D();
+        //        var part1 = geomEngine.Create(model.Instances[47] as IIfcPolygonalFaceSet, logger)
+        //            .Transform(partTransform);
+        //        var part2 = geomEngine.Create(model.Instances[59] as IIfcPolygonalFaceSet, logger)
+        //            .Transform(partTransform); ;
+        //        var part3 = geomEngine.Create(model.Instances[71] as IIfcPolygonalFaceSet, logger)
+        //            .Transform(partTransform); ;
+        //        var part4 = geomEngine.Create(model.Instances[83] as IIfcPolygonalFaceSet, logger)
+        //            .Transform(partTransform); ;
 
+        //        var opening1 = geomEngine.Create(model.Instances[105] as IIfcPolygonalFaceSet, logger)
+        //            .Transform((model.Instances[98] as IIfcLocalPlacement).ToMatrix3D());
+        //        var opening2 = geomEngine.Create(model.Instances[130] as IIfcPolygonalFaceSet, logger)
+        //            .Transform((model.Instances[123] as IIfcLocalPlacement).ToMatrix3D());
+        //        var opening3 = geomEngine.Create(model.Instances[155] as IIfcPolygonalFaceSet, logger)
+        //            .Transform((model.Instances[148] as IIfcLocalPlacement).ToMatrix3D());
+
+        //        var body = geomEngine.CreateSolidSet();
+        //        body.Add(part1);
+        //        body.Add(part2);
+        //       // body.Add(part3);
+        //       // body.Add(part4);
+        //        var openings = geomEngine.CreateSolidSet();
+        //        openings.Add(opening1);
+        //        //openings.Add(opening2);
+        //        //openings.Add(opening3);
+        //        var result = body.Cut(openings,model.ModelFactors.Precision,logger);
+        //    }
+
+        //}
         #region Solid with voids test
         [TestMethod]
         public void BooleanCutSolidWithVoidPlanarTest()

@@ -53,6 +53,9 @@
     <None Update="TestFiles\grid_with_polylines.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="TestFiles\Ifc4TestFiles\Can_cut_polygonal_faceset_solids.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="TestFiles\Ifc4TestFiles\discontinuous_composite_curve.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
