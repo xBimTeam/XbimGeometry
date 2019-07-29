@@ -139,6 +139,10 @@ namespace Xbim
 		{
 			Init(IIfcSolid, logger);
 		}
+		XbimSolidSet::XbimSolidSet(IIfcPolygonalFaceSet ^ IIfcSolid, ILogger ^ logger)
+		{
+			Init(IIfcSolid, logger);
+		}
 
 		XbimSolidSet::XbimSolidSet(IIfcFaceBasedSurfaceModel ^ solid, ILogger ^ logger)
 		{
@@ -776,7 +780,31 @@ namespace Xbim
 					solids->Add(xbimSolid);
 			}
 		}
-
+		void XbimSolidSet::Init(IIfcPolygonalFaceSet ^ IIfcSolid, ILogger ^ logger)
+		{
+			XbimCompound^ comp = gcnew XbimCompound(IIfcSolid, logger);
+			solids = gcnew List<IXbimSolid^>();
+			for each (IXbimSolid^ xbimSolid in comp->Solids)
+			{
+				if (xbimSolid->IsValid)
+					solids->Add(xbimSolid);
+			}			
+			//upgrade any shells that are closed to solids
+			TopExp_Explorer te(comp, TopAbs_SHELL, TopAbs_SOLID);
+			while (te.More())
+			{
+				const TopoDS_Shell& shell = TopoDS::Shell(te.Current());
+				if (shell.Closed())
+				{
+					BRepBuilderAPI_MakeSolid solidMaker(shell);
+					if (solidMaker.IsDone())
+					{
+						solids->Add(gcnew XbimSolid(solidMaker.Solid()));
+					}
+				}
+				te.Next();
+			}
+		}
 
 
 		void XbimSolidSet::Init(IIfcFaceBasedSurfaceModel ^ solid, ILogger ^ logger)
@@ -788,6 +816,22 @@ namespace Xbim
 				if (xbimSolid->IsValid)
 					solids->Add(xbimSolid);
 			}
+			//upgrade any shells that are closed to solids
+			TopExp_Explorer te(comp, TopAbs_SHELL, TopAbs_SOLID);
+			while (te.More())
+			{
+				const TopoDS_Shell& shell = TopoDS::Shell(te.Current());
+				if (shell.Closed())
+				{
+					BRepBuilderAPI_MakeSolid solidMaker(shell);
+					if (solidMaker.IsDone())
+					{
+						solids->Add(gcnew XbimSolid(solidMaker.Solid()));
+					}
+				}
+				te.Next();
+			}
+			
 		}
 
 		void XbimSolidSet::Init(IIfcShellBasedSurfaceModel ^ solid, ILogger ^ logger)
@@ -798,6 +842,21 @@ namespace Xbim
 			{
 				if (xbimSolid->IsValid)
 					solids->Add(xbimSolid);
+			}
+			//upgrade any shells that are closed to solids
+			TopExp_Explorer te(comp, TopAbs_SHELL, TopAbs_SOLID);
+			while (te.More())
+			{
+				const TopoDS_Shell& shell = TopoDS::Shell(te.Current());
+				if (shell.Closed())
+				{
+					BRepBuilderAPI_MakeSolid solidMaker(shell);
+					if (solidMaker.IsDone())
+					{
+						solids->Add(gcnew XbimSolid(solidMaker.Solid()));
+					}
+				}
+				te.Next();
 			}
 		}
 

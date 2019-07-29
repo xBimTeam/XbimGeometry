@@ -541,6 +541,11 @@ namespace Xbim
 		{
 			return gcnew XbimSolidSet(shell, logger);
 		}
+		IXbimSolidSet ^ XbimGeometryCreator::CreateSolidSet(IIfcPolygonalFaceSet ^ shell, ILogger ^ logger)
+		{
+			return gcnew XbimSolidSet(shell, logger);
+		}
+
 		IXbimSolidSet ^ XbimGeometryCreator::CreateSolidSet(IIfcShellBasedSurfaceModel ^ ifcSurface, ILogger ^ logger)
 		{
 			return gcnew XbimSolidSet(ifcSurface, logger);

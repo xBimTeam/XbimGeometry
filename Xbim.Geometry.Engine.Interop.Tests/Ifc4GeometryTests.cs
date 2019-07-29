@@ -60,6 +60,21 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
             }
         }
+
+        [TestMethod]
+        public void Can_build_polygonal_faceset_as_solid()
+        {
+            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\polygonal-face-tessellation.ifc"))
+            {
+                var pfs = model.Instances.OfType<IIfcPolygonalFaceSet>().FirstOrDefault();
+                Assert.IsTrue(pfs != null, "No IIfcPolygonalFaceSet found");
+                var solidModel = geomEngine.CreateSolidSet(pfs, logger).FirstOrDefault();
+                Assert.IsNotNull(solidModel);
+                Assert.AreEqual(11, solidModel.Faces.Count);
+
+            }
+        }
+
         [TestMethod]
         public void Composite_curve_with_disconnection()
         {

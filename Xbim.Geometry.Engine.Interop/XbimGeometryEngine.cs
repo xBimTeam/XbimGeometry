@@ -378,6 +378,13 @@ namespace Xbim.Geometry.Engine.Interop
                 return _engine.CreateSolidSet(shell, logger);
             }
         }
+        public IXbimSolidSet CreateSolidSet(IIfcPolygonalFaceSet shell, ILogger logger)
+        {
+            using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, shell))
+            {
+                return _engine.CreateSolidSet(shell, logger);
+            }
+        }
 
         public IXbimSolidSet CreateSolidSet(IIfcShellBasedSurfaceModel ifcSurface, ILogger logger)
         {
@@ -808,6 +815,15 @@ namespace Xbim.Geometry.Engine.Interop
                 return _engine.CreateSurfaceModel(shell, logger);
             }
         }
+        public IXbimGeometryObjectSet CreateSurfaceModel(IIfcPolygonalFaceSet shell, ILogger logger = null)
+        {
+            using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, shell))
+            {
+                return _engine.CreateSurfaceModel(shell, logger);
+            }
+        }
+
+        
     }
 
     public static class LogHelper
