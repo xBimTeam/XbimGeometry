@@ -6,7 +6,7 @@ Develop | [![Build Status](https://dev.azure.com/xBIMTeam/xBIMToolkit/_apis/buil
 
 # XbimGeometry
 
-XbimGeometry is part of the [Xbim Toolkit](https://github.com/xBimTeam/XbimEssentials). 
+XbimGeometry is part of the [Xbim Toolkit](https://github.com/xBimTeam). 
 
 It contains the the Geometry Engine and Scene processing, which provide geometric and topological operations 
 to enable users to visualise models in 3D models, typically as a Tesselated scene or mesh.
@@ -29,8 +29,6 @@ components installed:
 - VC++ 2017 v141 tools
 - Windows 10 SDK (10.0.17134.0) 
 
-You'll also need patience as it can take up to 30 minutes to compile the C++ libraries.
-
 The XBIM toolkit [uses the NuGet](https://www.nuget.org/packages/Xbim.Geometry/) for the management of our published packages.
 We have custom MyGet feeds for the *master* and *develop* branches of the solution which are automatically
 updated during our CI builds. The [nuget.config](nuget.config) file should automatically add these feeds for you.
@@ -49,4 +47,4 @@ to automate our builds.
 ## Getting Involved
 
 If you'd like to get involved and contribute to this project, please read the [CONTRIBUTING ](https://github.com/xBimTeam/XbimEssentials/blob/master/CONTRIBUTING.md)
-page or contact the Project Coordinators @CBenghi and @martin1cerny.
+page or contact any member of the @xbimTeam
