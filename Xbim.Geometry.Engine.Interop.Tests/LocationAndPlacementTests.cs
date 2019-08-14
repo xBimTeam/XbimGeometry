@@ -1,15 +1,19 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.IO;
 using System.Linq;
 using Xbim.Common.Geometry;
+using Xbim.Common.XbimExtensions;
 using Xbim.Ifc4.GeometricConstraintResource;
 using Xbim.Ifc4.GeometryResource;
 using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Memory;
+using Xbim.ModelGeometry.Scene;
 
 namespace Xbim.Geometry.Engine.Interop.Tests
 {
+    [TestClass]
     public class LocationAndPlacementTests
     {
         static private IXbimGeometryEngine geomEngine;
@@ -30,6 +34,53 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             geomEngine = null;
             logger = null;
         }
+
+        [TestMethod]
+        [DeploymentItem("TestFiles\\LargeTriangulatedCoordinates.ifc")]
+        public void LargeCoordinatesDisplacementTest()
+        {
+            using (var m = new MemoryModel(new Ifc2x3.EntityFactoryIfc2x3()))
+            {
+                m.LoadStep21("LargeTriangulatedCoordinates.ifc");
+                var c = new Xbim3DModelContext(m);
+                c.CreateContext(null, false);
+
+                using (var store = m.GeometryStore.BeginRead())
+                {
+                    var product = m.Instances.FirstOrDefault<IIfcBuildingElementProxy>();
+
+                    Assert.IsNotNull(product.Representation);
+
+                    var instances = store.ShapeInstancesOfEntity(product);
+                    Assert.AreEqual(1, instances.Count());
+
+                    var instance = instances.First();
+                    var geometry = store.ShapeGeometryOfInstance(instance);
+
+                    // this should be a large displacement
+                    var transform = instance.Transformation;
+                    var length = transform.Translation.Length;
+                    Assert.IsTrue(length > 6200000);
+
+                    // geometry thould be in small numbers
+                    var ms = new MemoryStream(((IXbimShapeGeometryData)geometry).ShapeData);
+                    var br = new BinaryReader(ms);
+                    var tr = br.ReadShapeTriangulation();
+
+                    var point = tr.Vertices.FirstOrDefault();
+                    Assert.IsTrue(point.X < 1000);
+                    Assert.IsTrue(point.Y < 1000);
+                    Assert.IsTrue(point.Z < 1000);
+
+                    // when transformation is applied to the geometry it should be large
+                    tr = tr.Transform(transform);
+                    point = tr.Vertices.FirstOrDefault();
+                    Assert.IsTrue(point.X > 300000);
+                    Assert.IsTrue(point.Y > 6200000);
+                }
+            }
+        }
+
         [TestMethod]
         public void MoveAndCopyTest()
         {
