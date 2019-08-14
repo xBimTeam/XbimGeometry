@@ -14,7 +14,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Xbim.Ifc" Version="5.1.269" />
+    <PackageReference Include="Xbim.Ifc" Version="5.1.271" />
     <PackageReference Include="Xbim.Tessellator" Version="5.1.269" />
   </ItemGroup>
 
