@@ -1032,9 +1032,6 @@ namespace Xbim.ModelGeometry.Scene
                     WriteShapeInstanceToStore(instance.GeometryId, instance.StyleLabel, intContext, grid,
                         placementTransform, instance.BoundingBox,
                         XbimGeometryRepresentationType.OpeningsAndAdditionsIncluded, txn);
-
-                    // TODO: Check if this is doing anything
-                    instance.BoundingBox.Transform(placementTransform);
                 }
             }
 
@@ -1182,7 +1179,7 @@ namespace Xbim.ModelGeometry.Scene
                         if (!(product is IIfcOpeningElement))
                         {
                             // transform the bounds
-                            var transproductBounds = instance.BoundingBox.Transform(placementTransform);
+                            var transproductBounds = instance.BoundingBox.Transform(trans);
                             contextHelper.Clusters[rep.ContextOfItems].Enqueue(
                                 new XbimBBoxClusterElement(instance.GeometryId,
                                     transproductBounds));

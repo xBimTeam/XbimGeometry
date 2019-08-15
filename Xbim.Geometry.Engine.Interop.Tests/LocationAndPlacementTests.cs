@@ -47,6 +47,12 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
                 using (var store = m.GeometryStore.BeginRead())
                 {
+                    // region should be placed far away from origin
+                    var region = store.ContextRegions.FirstOrDefault().MostPopulated();
+                    var centre = region.Centre;
+                    Assert.IsTrue(centre.X > 300000);
+                    Assert.IsTrue(centre.X > 6200000);
+
                     var product = m.Instances.FirstOrDefault<IIfcBuildingElementProxy>();
 
                     Assert.IsNotNull(product.Representation);
