@@ -44,9 +44,10 @@ namespace Xbim.ModelGeometry.Scene.Extensions
                     var normals = new List<XbimVector3D>(numVertices * 4);
                     for (var i = 0; i < numVertices; i++)
                     {
-                        double x = br.ReadSingle();
-                        double y = br.ReadSingle();
-                        double z = br.ReadSingle();
+                        // Version 2 introduces positions as double
+                        double x = version > 1 ? br.ReadDouble() : br.ReadSingle();
+                        double y = version > 1 ? br.ReadDouble() : br.ReadSingle();
+                        double z = version > 1 ? br.ReadDouble() : br.ReadSingle();
                         var p = new XbimPoint3D(x, y, z);
                         if (matrix3D.HasValue)
                             p = matrix3D.Value.Transform(p);
