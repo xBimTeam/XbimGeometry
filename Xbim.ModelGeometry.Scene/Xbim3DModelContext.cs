@@ -1011,18 +1011,26 @@ namespace Xbim.ModelGeometry.Scene
             foreach (var grid in Model.Instances.OfType<IIfcGrid>())
             {
                 GeometryReference instance;
-                if (contextHelper.ShapeLookup.TryGetValue(grid.EntityLabel, out instance) && grid.Representation != null && grid.Representation.Representations.Count > 0)
+                if (contextHelper.ShapeLookup.TryGetValue(grid.EntityLabel, out instance))
                 {
                     XbimMatrix3D placementTransform = XbimPlacementTree.GetTransform(grid, contextHelper.PlacementTree, Engine);
-                    // int context = 0;
-                    var gRep = grid.Representation?.Representations?.FirstOrDefault();
-                    var context = gRep.ContextOfItems;
-                    var intContext = (context == null) ? 0 : context.EntityLabel;
+                    var transproductBounds = instance.BoundingBox.Transform(placementTransform);
 
-                    WriteShapeInstanceToStore(instance.GeometryId, instance.StyleLabel, intContext, grid,
-                        placementTransform, instance.BoundingBox,
-                        XbimGeometryRepresentationType.OpeningsAndAdditionsIncluded, txn);
-                    instance.BoundingBox.Transform(placementTransform);
+                    foreach (var c in Contexts)
+                    {
+                        // Add grid to all contexts
+                        WriteShapeInstanceToStore(
+                            instance.GeometryId,
+                            instance.StyleLabel,
+                            c.EntityLabel,
+                            grid,
+                            placementTransform,
+                            instance.BoundingBox,
+                            XbimGeometryRepresentationType.OpeningsAndAdditionsIncluded,
+                            txn);
+
+                        contextHelper.Clusters[c].Enqueue(new XbimBBoxClusterElement(instance.GeometryId, transproductBounds));
+                    }
                 }
             }
 
