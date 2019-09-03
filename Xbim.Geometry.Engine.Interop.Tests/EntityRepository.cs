@@ -12,7 +12,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         public T Entity;
         public EntityRepository(string name, bool inRadians = false)
         {
-            var path = Path.GetFullPath($@"TestFiles\{name}.ifc");
+            var path = Path.GetFullPath($@"{name}.ifc");
             Assert.IsTrue(File.Exists(path), path);
             model = MemoryModel.OpenRead(path);
             if (inRadians)
