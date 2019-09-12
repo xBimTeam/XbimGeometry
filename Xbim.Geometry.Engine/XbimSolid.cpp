@@ -1285,27 +1285,97 @@ namespace Xbim
 			XbimGeometryCreator::LogWarning(pbhs, "Failed to create half space");
 		}
 
-
+		// params depend on segment type
+		double XbimSolid::SegLenght(IIfcCompositeCurveSegment^ segment)
+		{
+			if (dynamic_cast<IIfcLine^>(segment->ParentCurve))
+			{
+				return 1;
+			}
+			else if (dynamic_cast<IIfcTrimmedCurve^>(segment->ParentCurve))
+			{
+				IIfcTrimmedCurve^ tc = dynamic_cast<IIfcTrimmedCurve^>(segment->ParentCurve);
+				Xbim::Ifc4::MeasureResource::IfcParameterValue^ t1 = dynamic_cast<Xbim::Ifc4::MeasureResource::IfcParameterValue^>(tc->Trim1[0]);
+				Xbim::Ifc4::MeasureResource::IfcParameterValue^ t2 = dynamic_cast<Xbim::Ifc4::MeasureResource::IfcParameterValue^>(tc->Trim2[0]);
+				return (double)t2->Value - (double)t1->Value;
+			}
+			return 1;
+		}
 				
 		XbimWire^ XbimSolid::GetSweep(IIfcSweptDiskSolid^ swdSolid)
 		{
 			IModelFactors^ mf = swdSolid->Model->ModelFactors;
 			XbimWire^ sweep = gcnew XbimWire(swdSolid->Directrix);
-			if (swdSolid->StartParam.HasValue && swdSolid->EndParam.HasValue)
+			if (!sweep->IsValid)
 			{
-				// if the last parameter is about 1, use the lenght
-				double last = Math::Abs(swdSolid->EndParam.Value - 1.0) < Precision::Confusion()
-					? sweep->Length
-					: swdSolid->EndParam.Value;
-				sweep = (XbimWire^)sweep->Trim(
-					swdSolid->StartParam.Value,
-					last,
-					mf->Precision);
+				XbimGeometryCreator::LogWarning(swdSolid, "Could not build Directrix");
+				return nullptr;
 			}
-			else if (swdSolid->StartParam.HasValue && !swdSolid->EndParam.HasValue)
-				sweep = (XbimWire^)sweep->Trim(swdSolid->StartParam.Value, sweep->Length, mf->Precision);
-			else if (!swdSolid->StartParam.HasValue && swdSolid->EndParam.HasValue)
-				sweep = (XbimWire^)sweep->Trim(0, Math::Abs(swdSolid->EndParam.Value - 1.0) < Precision::Confusion() ? sweep->Length : swdSolid->EndParam.Value, mf->Precision);
+			
+			// trims
+
+			if (dynamic_cast<IIfcLine^>(swdSolid->Directrix)) //params are different
+			{
+				IIfcLine ^  line = (IIfcLine^)(swdSolid->Directrix);
+				double mag = line->Dir->Magnitude;
+				if (swdSolid->StartParam.HasValue && swdSolid->EndParam.HasValue)
+					sweep = (XbimWire^)sweep->Trim(swdSolid->StartParam.Value *mag, swdSolid->EndParam.Value * mag, mf->Precision);
+				else if (swdSolid->StartParam.HasValue && !swdSolid->EndParam.HasValue)
+					sweep = (XbimWire^)sweep->Trim(swdSolid->StartParam.Value*mag, sweep->Length, mf->Precision);
+				else if (!swdSolid->StartParam.HasValue && swdSolid->EndParam.HasValue)
+					sweep = (XbimWire^)sweep->Trim(0, swdSolid->EndParam.Value * mag, mf->Precision);
+			}
+			else if (dynamic_cast<IIfcCompositeCurve^>(swdSolid->Directrix)) //params are different
+			{
+
+				double startPar = 0;
+				double endPar = double::PositiveInfinity;
+				if (swdSolid->StartParam.HasValue)
+					startPar = swdSolid->StartParam.Value;
+				if (swdSolid->EndParam.HasValue)
+					endPar = swdSolid->EndParam.Value;
+				double occStart = 0;
+				double occEnd = 0;
+
+
+				// for each segment we encounter, we will see if the threshold falls within its lenght
+				//
+				IIfcCompositeCurve ^  curve = (IIfcCompositeCurve^)(swdSolid->Directrix);
+				for each (IIfcCompositeCurveSegment^ segment in curve->Segments)
+				{
+					XbimWire^ segWire = gcnew XbimWire(segment);
+					double wireLen = segWire->Length;       // this is the lenght to add to the OCC command if we use all of the segment
+					double segValue = SegLenght(segment);   // this is the IFC size of the segment
+
+					if (startPar > 0)
+					{
+						double ratio = Math::Min(startPar / segValue, 1.0);
+						startPar -= ratio * segValue; // reduce the outstanding amount (since it's been accounted for in the segment just processed)
+						occStart += ratio * wireLen; // progress the occ amount by the ratio of the lenght
+					}
+
+					if (endPar > 0)
+					{
+						double ratio = Math::Min(endPar / segValue, 1.0);
+						endPar -= ratio * segValue; // reduce the outstanding amount (since it's been accounted for in the segment just processed)
+						occEnd += ratio * wireLen; // progress the occ amount by the ratio of the lenght
+					}
+				}
+				sweep = (XbimWire^)sweep->Trim(occStart, occEnd, mf->Precision);
+			}
+			else
+			{
+				if (swdSolid->StartParam.HasValue && swdSolid->EndParam.HasValue)
+					sweep = (XbimWire^)sweep->Trim(swdSolid->StartParam.Value, swdSolid->EndParam.Value, mf->Precision);
+				else if (swdSolid->StartParam.HasValue && !swdSolid->EndParam.HasValue)
+					sweep = (XbimWire^)sweep->Trim(swdSolid->StartParam.Value, sweep->Length, mf->Precision);
+				else if (!swdSolid->StartParam.HasValue && swdSolid->EndParam.HasValue)
+					sweep = (XbimWire^)sweep->Trim(0, swdSolid->EndParam.Value, mf->Precision);
+			}
+
+			// end evaluate trims
+
+
 			if (!sweep->IsValid)
 			{
 				XbimGeometryCreator::LogWarning(swdSolid, "Could not build Directrix");

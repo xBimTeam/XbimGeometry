@@ -29,6 +29,7 @@ namespace Xbim
 
 #pragma region reusable
 			static XbimWire^ GetSweep(IIfcSweptDiskSolid^ swdSolid);
+			static double SegLenght(IIfcCompositeCurveSegment^ segment);
 #pragma endregion
 
 			
