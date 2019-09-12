@@ -1272,6 +1272,23 @@ namespace Xbim
 			tolFixer.LimitTolerance(*pSolid, pbhs->Model->ModelFactors->Precision);
 		}
 
+		// params depend on segment type
+		double XbimSolid::SegLenght(IIfcCompositeCurveSegment^ segment)
+		{
+			if (dynamic_cast<IIfcLine^>(segment->ParentCurve)) 
+			{
+				return 1;
+			}
+			else if (dynamic_cast<IIfcTrimmedCurve^>(segment->ParentCurve))
+			{
+				IIfcTrimmedCurve^ tc = dynamic_cast<IIfcTrimmedCurve^>(segment->ParentCurve);
+				Xbim::Ifc4::MeasureResource::IfcParameterValue^ t1 = dynamic_cast<Xbim::Ifc4::MeasureResource::IfcParameterValue^>(tc->Trim1[0]);
+				Xbim::Ifc4::MeasureResource::IfcParameterValue^ t2 = dynamic_cast<Xbim::Ifc4::MeasureResource::IfcParameterValue^>(tc->Trim2[0]);
+				return (double)t2->Value - (double)t1->Value;
+			}
+			return 1;
+		}
+
 		void XbimSolid::Init(IIfcSweptDiskSolid^ repItem, ILogger^ logger)
 		{
 
@@ -1280,6 +1297,15 @@ namespace Xbim
 
 			XbimWire^ sweep = gcnew XbimWire(repItem->Directrix, logger);
 			if (!sweep->IsValid) return;
+
+			// comments on the interpretation of the params are found here:
+			// https://sourceforge.net/p/ifcexporter/discussion/general/thread/7cc44b69/?limit=25
+			// if the directix is:
+			// - a line, just use the lenght
+			// - a IFCCOMPOSITECURVE then the parameter 
+			//   for each line add 0 to 1
+			//   for each arc add the angle
+			//
 
 			if (dynamic_cast<IIfcLine^>(repItem->Directrix)) //params are different
 			{
@@ -1292,7 +1318,45 @@ namespace Xbim
 				else if (!repItem->StartParam.HasValue && repItem->EndParam.HasValue)
 					sweep = (XbimWire^)sweep->Trim(0, repItem->EndParam.Value * mag, mf->Precision, logger);
 			}
-			else
+			else if (dynamic_cast<IIfcCompositeCurve^>(repItem->Directrix)) //params are different
+			{
+
+				double startPar = 0;
+				double endPar = double::PositiveInfinity;
+				if (repItem->StartParam.HasValue)
+					startPar = repItem->StartParam.Value;
+				if (repItem->EndParam.HasValue)
+					endPar = repItem->EndParam.Value;
+				double occStart = 0;
+				double occEnd = 0;
+
+
+				// for each segment we encounter, we will see if the threshold falls within its lenght
+				//
+				IIfcCompositeCurve ^  curve = (IIfcCompositeCurve^)(repItem->Directrix);
+				for each (IIfcCompositeCurveSegment^ segment in curve->Segments)
+				{
+					XbimWire^ segWire = gcnew XbimWire(segment, logger);
+					double wireLen = segWire->Length;       // this is the lenght to add to the OCC command if we use all of the segment
+					double segValue = SegLenght(segment);   // this is the IFC size of the segment
+
+					if (startPar > 0)
+					{
+						double ratio = Math::Min(startPar / segValue, 1.0);
+						startPar -= ratio * segValue; // reduce the outstanding amount (since it's been accounted for in the segment just processed)
+						occStart += ratio * wireLen; // progress the occ amount by the ratio of the lenght
+					}
+
+					if (endPar > 0)
+					{
+						double ratio = Math::Min(endPar / segValue, 1.0);
+						endPar -= ratio * segValue; // reduce the outstanding amount (since it's been accounted for in the segment just processed)
+						occEnd += ratio * wireLen; // progress the occ amount by the ratio of the lenght
+					}
+				}							
+				sweep = (XbimWire^)sweep->Trim(occStart, occEnd, mf->Precision, logger);
+			}
+			else 
 			{
 				if (repItem->StartParam.HasValue && repItem->EndParam.HasValue)
 					sweep = (XbimWire^)sweep->Trim(repItem->StartParam.Value, repItem->EndParam.Value, mf->Precision, logger);
@@ -1461,6 +1525,8 @@ namespace Xbim
 				XbimGeometryCreator::LogWarning(logger, repItem, "Could not be constructed");
 			}
 		}
+
+
 
 		void XbimSolid::Init(IIfcBoundingBox^ box, ILogger^ /*logger*/)
 		{
