@@ -15,10 +15,22 @@
   ******************************************************************************
   -->
 
-  <ItemGroup>
+  <ItemGroup Condition=" '$(Platform)' == 'x86'">
     <XbimInteropFiles Condition="'$(MSBuildThisFileDirectory)' != '' And
                                    HasTrailingSlash('$(MSBuildThisFileDirectory)')"
-        Include="$(MSBuildThisFileDirectory)\Xbim.Geometry.Engine32.dll;$(MSBuildThisFileDirectory)\Xbim.Geometry.Engine64.dll" >
+        Include="$(MSBuildThisFileDirectory)\Xbim.Geometry.Engine32.dll" >
+      <Visible>True</Visible>
+      <Group></Group>
+      <PublishState>Include</PublishState>
+      <TargetPath></TargetPath>
+      <FileType>Assembly</FileType>
+    </XbimInteropFiles>
+  </ItemGroup>
+  
+  <ItemGroup Condition=" '$(Platform)' == 'x64'">
+    <XbimInteropFiles Condition="'$(MSBuildThisFileDirectory)' != '' And
+                                   HasTrailingSlash('$(MSBuildThisFileDirectory)')"
+        Include="$(MSBuildThisFileDirectory)\Xbim.Geometry.Engine64.dll" >
       <Visible>True</Visible>
       <Group></Group>
       <PublishState>Include</PublishState>
