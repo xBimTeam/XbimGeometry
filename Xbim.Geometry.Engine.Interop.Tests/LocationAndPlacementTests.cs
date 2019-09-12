@@ -51,7 +51,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     var region = store.ContextRegions.FirstOrDefault().MostPopulated();
                     var centre = region.Centre;
                     Assert.IsTrue(centre.X > 300000);
-                    Assert.IsTrue(centre.X > 6200000);
+                    Assert.IsTrue(centre.Y > 6200000);
 
                     var product = m.Instances.FirstOrDefault<IIfcBuildingElementProxy>();
 

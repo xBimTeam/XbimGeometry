@@ -10,6 +10,7 @@ using Xbim.Ifc4.Interfaces;
 namespace Xbim.Geometry.Engine.Interop.Tests
 {
     [TestClass]
+    [DeploymentItem("TestFiles")]
     public class IfcAdvancedBrepTests
     {
         static private IXbimGeometryEngine geomEngine;
