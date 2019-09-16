@@ -169,6 +169,12 @@ namespace XbimRegression
                             };
 
                         }
+                        if (_params.Caching)
+                        {
+                            IfcStore s = ((IfcStore)model);
+                            s.SaveAs(xbimFilename, Xbim.IO.StorageType.Xbim);
+                            s.Close();
+                        }
                     }
                 }
 
@@ -193,10 +199,9 @@ namespace XbimRegression
             return Xbim3DModelContext.MeshingBehaviourResult.Default;
         }
 
-        // todo: is caching going to come back?
-        // ReSharper disable once UnusedParameter.Local
         private IModel ParseModelFile(string ifcFileName, bool caching, ILogger<BatchProcessor> logger)
         {
+            IModel ret = null;
             if (string.IsNullOrWhiteSpace(ifcFileName))
                 return null;
             // create a callback for progress
@@ -205,7 +210,11 @@ namespace XbimRegression
                 case ".ifc":
                 case ".ifczip":
                 case ".ifcxml":
-                    return MemoryModel.OpenRead(ifcFileName, logger);
+                    if (caching)
+                        ret = IfcStore.Open(ifcFileName, null, 0);
+                    else
+                        ret = MemoryModel.OpenRead(ifcFileName, logger);
+                    return ret;
                 default:
                     throw new NotImplementedException(
                         string.Format("XbimRegression does not support {0} file formats currently",
