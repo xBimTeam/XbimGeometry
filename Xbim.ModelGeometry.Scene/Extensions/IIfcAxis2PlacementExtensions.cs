@@ -25,8 +25,12 @@ namespace Xbim.ModelGeometry.Scene.Extensions
                 v = v.Normalized();
                 return new XbimMatrix3D(v.X, v.Y, 0, 0, v.Y, v.X, 0, 0, 0, 0, 1, 0, axis2.Location.X, axis2.Location.Y, 0, 1);
             }
-            return new XbimMatrix3D(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, axis2.Location.X, axis2.Location.Y,
-                axis2.Location.Z, 1);
+            double LocationZ = axis2.Location.Z;
+            if (double.IsNaN( LocationZ ))
+            {
+                LocationZ = 0;
+            }
+            return new XbimMatrix3D(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, axis2.Location.X, axis2.Location.Y, LocationZ, 1);
         }
 
         public static XbimMatrix3D ToMatrix3D(this IIfcAxis2Placement3D axis3)
