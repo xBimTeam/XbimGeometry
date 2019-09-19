@@ -1329,7 +1329,7 @@ namespace Xbim
 					endPar = repItem->EndParam.Value;
 				double occStart = 0;
 				double occEnd = 0;
-
+				double totCurveLen = 0;
 
 				// for each segment we encounter, we will see if the threshold falls within its lenght
 				//
@@ -1339,6 +1339,12 @@ namespace Xbim
 					XbimWire^ segWire = gcnew XbimWire(segment, logger);
 					double wireLen = segWire->Length;       // this is the lenght to add to the OCC command if we use all of the segment
 					double segValue = SegLenght(segment);   // this is the IFC size of the segment
+					totCurveLen += wireLen;
+					//System::Diagnostics::Debug::Write("wireLen:\t");
+					//System::Diagnostics::Debug::Write(wireLen);
+					//System::Diagnostics::Debug::Write("\tsegValue:\t");
+					//System::Diagnostics::Debug::Write(segValue);
+					//System::Diagnostics::Debug::Write("\r\n");
 
 					if (startPar > 0)
 					{
@@ -1353,8 +1359,10 @@ namespace Xbim
 						endPar -= ratio * segValue; // reduce the outstanding amount (since it's been accounted for in the segment just processed)
 						occEnd += ratio * wireLen; // progress the occ amount by the ratio of the lenght
 					}
-				}							
-				sweep = (XbimWire^)sweep->Trim(occStart, occEnd, mf->Precision, logger);
+				}					
+				// only trim if needed either from start or end
+				if (occStart > 0 || occEnd < totCurveLen)
+					sweep = (XbimWire^)sweep->Trim(occStart, occEnd, mf->Precision, logger);
 			}
 			else 
 			{

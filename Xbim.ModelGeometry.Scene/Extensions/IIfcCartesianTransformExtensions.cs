@@ -16,7 +16,6 @@ namespace Xbim.ModelGeometry.Scene.Extensions
             else if (ct is IIfcCartesianTransformationOperator3D)
                 return ((IIfcCartesianTransformationOperator3D) ct).ToMatrix3D(maps);
             else throw new ArgumentException("ToMatrix3D", "ct");
-            
         }
 
         /// <summary>
@@ -44,7 +43,6 @@ namespace Xbim.ModelGeometry.Scene.Extensions
         private static XbimMatrix3D ConvertCartesianTranformOperator3D(IIfcCartesianTransformationOperator3D ct3D)
         {
             var m3D = ConvertCartesianTransform3D(ct3D);
-
             m3D.Scale(ct3D.Scl);
             return m3D;
         }
