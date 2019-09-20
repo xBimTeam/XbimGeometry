@@ -146,7 +146,10 @@ namespace Xbim
 			else if (dynamic_cast<IIfcIndexedPolyCurve^>(curve)) Init((IIfcIndexedPolyCurve^)curve, logger);
 			else if (dynamic_cast<IIfcPcurve^>(curve)) Init((IIfcPcurve^)curve, logger);
 			else if (dynamic_cast<IIfcSurfaceCurve^>(curve)) Init((IIfcSurfaceCurve^)curve, logger);
-			else throw gcnew Exception(String::Format("Unsupported Curve Type {0}", curve->GetType()->Name));
+			else if(curve == nullptr)
+				XbimGeometryCreator::LogWarning(logger, curve, "Curve is null");
+			else
+				throw gcnew Exception(String::Format("Unsupported Curve Type {0}", curve->GetType()->Name));
 		}
 
 #pragma region IfcBoundedCurve

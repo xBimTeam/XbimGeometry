@@ -208,6 +208,11 @@ namespace Xbim
 
 		void XbimWire::Init(IIfcArbitraryClosedProfileDef^ profile, ILogger^ logger)
 		{
+			if (profile->OuterCurve == nullptr)
+			{
+				XbimGeometryCreator::LogWarning(logger, profile, "Invalid outer bound. Wire discarded");
+				return;
+			}
 			if (dynamic_cast<IIfcArbitraryProfileDefWithVoids^>(profile))
 			{
 				throw gcnew Exception("IfcArbitraryProfileDefWithVoids cannot be created as a wire, call the XbimFace method");
