@@ -11,6 +11,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 {
 
     [TestClass]
+    [DeploymentItem("TestFiles")]
     public class Ifc4GeometryTests
     {
         static private IXbimGeometryEngine geomEngine;
@@ -35,7 +36,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void Can_build_solid_swept_disk_pipe()
         {
-            using (var model = MemoryModel.OpenRead(@".\TestFiles\Solid_swept_disk_pipe.ifc"))
+            using (var model = MemoryModel.OpenRead(@"Solid_swept_disk_pipe.ifc"))
             {
                 var pfs = model.Instances.OfType<IIfcSweptDiskSolid>().FirstOrDefault();
                 Assert.IsTrue(pfs != null, "No IIfcPolygonalFaceSet found");
@@ -50,7 +51,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void Can_build_polygonal_face_tessellation()
         {
-            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\polygonal-face-tessellation.ifc"))
+            using (var model = MemoryModel.OpenRead(@"Ifc4TestFiles\polygonal-face-tessellation.ifc"))
             {
                 var pfs = model.Instances.OfType<IIfcPolygonalFaceSet>().FirstOrDefault();
                 Assert.IsTrue(pfs != null, "No IIfcPolygonalFaceSet found");
@@ -64,7 +65,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void Can_build_polygonal_faceset_as_solid()
         {
-            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\polygonal-face-tessellation.ifc"))
+            using (var model = MemoryModel.OpenRead(@"Ifc4TestFiles\polygonal-face-tessellation.ifc"))
             {
                 var pfs = model.Instances.OfType<IIfcPolygonalFaceSet>().FirstOrDefault();
                 Assert.IsTrue(pfs != null, "No IIfcPolygonalFaceSet found");
@@ -196,7 +197,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void ExtrudedAreaSolidBasicTest()
         {
-            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\extruded-solid.ifc"))
+            using (var model = MemoryModel.OpenRead(@"Ifc4TestFiles\extruded-solid.ifc"))
             {
                 var eas = model.Instances.OfType<IfcExtrudedAreaSolid>().FirstOrDefault();
                 Assert.IsNotNull(eas);
@@ -208,7 +209,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void SurfaceModelBasicTest()
         {
-            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\surface-model.ifc"))
+            using (var model = MemoryModel.OpenRead(@"Ifc4TestFiles\surface-model.ifc"))
             {
                 var shape = model.Instances.OfType<IfcFaceBasedSurfaceModel>().FirstOrDefault();
                 Assert.IsNotNull(shape);
@@ -223,7 +224,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void BrepSolidModelBasicTest()
         {
-            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\brep-model.ifc"))
+            using (var model = MemoryModel.OpenRead(@"Ifc4TestFiles\brep-model.ifc"))
             {
                 var shape = model.Instances.OfType<IfcFacetedBrep>().FirstOrDefault();
                 Assert.IsNotNull(shape);
@@ -236,7 +237,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void MultipleProfileBasicTest()
         {
-            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\BeamUnitTestsVaryingProfile.ifc"))
+            using (var model = MemoryModel.OpenRead(@"Ifc4TestFiles\BeamUnitTestsVaryingProfile.ifc"))
             {
                 var profiles = model.Instances.OfType<IfcExtrudedAreaSolid>();
                 Assert.IsTrue(profiles.Count() == 2);
@@ -255,7 +256,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void AdvancedMultiSegmentPolylineTest()
         {
-            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\advanced-face-multisegment-polyline.ifc"))
+            using (var model = MemoryModel.OpenRead(@"Ifc4TestFiles\advanced-face-multisegment-polyline.ifc"))
             {
                 var shape = model.Instances.OfType<IfcAdvancedBrep>().FirstOrDefault();
                 Assert.IsNotNull(shape);
@@ -267,7 +268,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void BrepSolidModelAdvancedTest()
         {
-            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\cube-advanced-brep.ifc"))
+            using (var model = MemoryModel.OpenRead(@"Ifc4TestFiles\cube-advanced-brep.ifc"))
             {
                 var shape = model.Instances.OfType<IfcAdvancedBrep>().FirstOrDefault();
                 Assert.IsNotNull(shape);
@@ -279,7 +280,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void can_handle_discontinuous_composite_curve()
         {
-            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\discontinuous_composite_curve.ifc"))
+            using (var model = MemoryModel.OpenRead(@"Ifc4TestFiles\discontinuous_composite_curve.ifc"))
             {
                 var cc = model.Instances.OfType<IIfcCompositeCurve>().FirstOrDefault();
                 Assert.IsNotNull(cc);
@@ -291,7 +292,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void AdvancedBrepTest()
         {
-            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\BasinAdvancedBrep.ifc"))
+            using (var model = MemoryModel.OpenRead(@"Ifc4TestFiles\BasinAdvancedBrep.ifc"))
             {
                 var advancedBrep = model.Instances.OfType<IfcAdvancedBrep>().FirstOrDefault();
                 Assert.IsNotNull(advancedBrep);
@@ -302,7 +303,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void AdvancedBrepComplexCurvesandSurfacesTest()
         {
-            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\Axis2PlacementError.ifc"))
+            using (var model = MemoryModel.OpenRead(@"Ifc4TestFiles\Axis2PlacementError.ifc"))
             {
                 var advancedBrep = model.Instances.OfType<IfcAdvancedBrep>().FirstOrDefault(i => i.EntityLabel == 27743);
                 bool wa = model.ModelFactors.ApplyWorkAround("#SurfaceOfLinearExtrusion");
@@ -314,7 +315,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void TriangulatedFaceSetAdvancedTest()
         {
-            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\BasinTessellation.ifc"))
+            using (var model = MemoryModel.OpenRead(@"Ifc4TestFiles\BasinTessellation.ifc"))
             {
                 var triangulatedFaceSet = model.Instances.OfType<IfcTriangulatedFaceSet>().FirstOrDefault();
                 Assert.IsNotNull(triangulatedFaceSet);
@@ -327,7 +328,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void AdvancedSweptSolidTest()
         {
-            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\ReinforcingBar.ifc"))
+            using (var model = MemoryModel.OpenRead(@"Ifc4TestFiles\ReinforcingBar.ifc"))
             {
                 var advancedSweep = model.Instances.OfType<IfcSweptDiskSolid>().FirstOrDefault();
                 Assert.IsNotNull(advancedSweep);
@@ -344,7 +345,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void TriangulatedFaceSet1Test()
         {
-            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\beam-straight-i-shape-tessellated.ifc"))
+            using (var model = MemoryModel.OpenRead(@"Ifc4TestFiles\beam-straight-i-shape-tessellated.ifc"))
             {
                 var triangulatedFaceSet = model.Instances.OfType<IfcTriangulatedFaceSet>().FirstOrDefault();
                 Assert.IsNotNull(triangulatedFaceSet);
@@ -358,7 +359,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         //[TestMethod]
         //public void TriangulatedFaceSet4Test()
         //{
-        //    using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\beam-curved-i-shape-tessellated.ifc"))
+        //    using (var model = MemoryModel.OpenRead(@"Ifc4TestFiles\beam-curved-i-shape-tessellated.ifc"))
         //    {
         //        var triangulatedFaceSet = model.Instances.OfType<IfcTriangulatedFaceSet>().FirstOrDefault();
         //        Assert.IsNotNull(triangulatedFaceSet);
@@ -372,7 +373,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void TriangulatedFaceSet2Test()
         {
-            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\column-straight-rectangle-tessellation.ifc"))
+            using (var model = MemoryModel.OpenRead(@"Ifc4TestFiles\column-straight-rectangle-tessellation.ifc"))
             {
                 var triangulatedFaceSet = model.Instances.OfType<IfcTriangulatedFaceSet>().FirstOrDefault();
                 Assert.IsNotNull(triangulatedFaceSet);
@@ -385,7 +386,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void TriangulatedFaceSet3Test()
         {
-            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\slab-tessellated-unique-vertices.ifc"))
+            using (var model = MemoryModel.OpenRead(@"Ifc4TestFiles\slab-tessellated-unique-vertices.ifc"))
             {
                 var triangulatedFaceSet = model.Instances.OfType<IfcTriangulatedFaceSet>().FirstOrDefault();
                 Assert.IsNotNull(triangulatedFaceSet);
@@ -402,7 +403,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void GridTest()
         {
-            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\grid-placement.ifc"))
+            using (var model = MemoryModel.OpenRead(@"Ifc4TestFiles\grid-placement.ifc"))
             {
 
                 var placements = model.Instances.OfType<IIfcGridPlacement>();
@@ -427,7 +428,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void GridWithIfcLineTest()
         {
-            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\grid-lines.ifc"))
+            using (var model = MemoryModel.OpenRead(@"Ifc4TestFiles\grid-lines.ifc"))
             {
 
                 var ifcGrid = model.Instances.OfType<IIfcGrid>().FirstOrDefault();
@@ -449,7 +450,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void ExtrudedAreaSolidTaperedTest()
         {
-            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\air-terminal-element.ifc"))
+            using (var model = MemoryModel.OpenRead(@"Ifc4TestFiles\air-terminal-element.ifc"))
             {
                 var taperedSolid = model.Instances.OfType<IfcExtrudedAreaSolidTapered>().FirstOrDefault();
                 Assert.IsNotNull(taperedSolid);
@@ -461,7 +462,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void RevolvedAreaSolidTaperedTest()
         {
-            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\beam-revolved-solid-tapered.ifc"))
+            using (var model = MemoryModel.OpenRead(@"Ifc4TestFiles\beam-revolved-solid-tapered.ifc"))
             {
                 var taperedSolid = model.Instances.OfType<IfcRevolvedAreaSolidTapered>().FirstOrDefault();
                 Assert.IsNotNull(taperedSolid);
@@ -476,7 +477,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void SweptDiskSolidPolygonalTest()
         {
-            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\swept-disk-solid-polygonal.ifc"))
+            using (var model = MemoryModel.OpenRead(@"Ifc4TestFiles\swept-disk-solid-polygonal.ifc"))
             {
                 var sweptPolygonalSolid = model.Instances.OfType<IfcSweptDiskSolidPolygonal>().FirstOrDefault();
                 Assert.IsNotNull(sweptPolygonalSolid);
@@ -487,7 +488,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void WireInitFromIfcIndexedPolyCurveTest()
         {
-            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\WirePolycurve.ifc"))
+            using (var model = MemoryModel.OpenRead(@"Ifc4TestFiles\WirePolycurve.ifc"))
             {
 
                 var shape = model.Instances[185] as IIfcGeometricRepresentationItem;
@@ -500,7 +501,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void SectionedSpineTest()
         {
-            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\sectioned-spine.ifc"))
+            using (var model = MemoryModel.OpenRead(@"Ifc4TestFiles\sectioned-spine.ifc"))
             {
                 var sectionedSpine = model.Instances.OfType<IfcSectionedSpine>().FirstOrDefault();
                 Assert.IsNotNull(sectionedSpine);
@@ -520,7 +521,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void FixedReferenceSweptSolidTest()
         {
-            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\fixed-reference-sweptarea.ifc", logger))
+            using (var model = MemoryModel.OpenRead(@"Ifc4TestFiles\fixed-reference-sweptarea.ifc", logger))
             {
                 var sectionedSpine = model.Instances.OfType<IfcFixedReferenceSweptAreaSolid>().FirstOrDefault();
                 Assert.IsNotNull(sectionedSpine);
@@ -532,7 +533,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void SurfaceCurveSweptAreaSolidTest()
         {
-            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\surface-curve-swept-area.ifc"))
+            using (var model = MemoryModel.OpenRead(@"Ifc4TestFiles\surface-curve-swept-area.ifc"))
             {
                 var surfaceSweep = model.Instances.OfType<IfcSurfaceCurveSweptAreaSolid>().FirstOrDefault();
                 Assert.IsNotNull(surfaceSweep);
@@ -549,7 +550,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void MirroredProfileDefTest()
         {
-            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\IfcMirroredProfileDef.ifc"))
+            using (var model = MemoryModel.OpenRead(@"Ifc4TestFiles\IfcMirroredProfileDef.ifc"))
             {
                 var derived = model.Instances[50] as IIfcDerivedProfileDef; //derived profile, mirrored by transform
                 var mirrored = model.Instances[177] as IIfcMirroredProfileDef;//mirrored versio of above
@@ -573,7 +574,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void CylindricalSurfaceTest()
         {
-            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\cylindrical-surface.ifc"))
+            using (var model = MemoryModel.OpenRead(@"Ifc4TestFiles\cylindrical-surface.ifc"))
             {
                 foreach (var brep in model.Instances.OfType<IIfcAdvancedBrep>())
                 {
@@ -624,7 +625,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void CompositeCurveBadSenseTest()
         {
-            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\composite-curve.ifc"))
+            using (var model = MemoryModel.OpenRead(@"Ifc4TestFiles\composite-curve.ifc"))
             {
                 var comp = model.Instances[3268144] as IIfcCompositeCurve;
                 var geom = geomEngine.CreateWire(comp);
@@ -650,7 +651,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void CompositeCurveEmptySegmentTest()
         {
-            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\composite-curve4.ifc"))
+            using (var model = MemoryModel.OpenRead(@"Ifc4TestFiles\composite-curve4.ifc"))
             {
                 var eas = model.Instances[3676127] as IIfcExtrudedAreaSolid;
                 Assert.IsNotNull(eas);
@@ -662,7 +663,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void CompositeCurveSegmentsDoNotCloseTest()
         {
-            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\composite-curve5.ifc"))
+            using (var model = MemoryModel.OpenRead(@"Ifc4TestFiles\composite-curve5.ifc"))
             {
 
                 //try building the polygonally bounded half space that has the faulty curve, which is now a seam
@@ -676,7 +677,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void BooleanOpeningsTotalSubractionTest()
         {
-            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\boolean-complete-subtraction.ifc"))
+            using (var model = MemoryModel.OpenRead(@"Ifc4TestFiles\boolean-complete-subtraction.ifc"))
             {
                 var ifcWall = model.Instances.OfType<IIfcWall>().FirstOrDefault();
                 Assert.IsNotNull(ifcWall);
@@ -701,7 +702,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void CloseProfileWithVoidsTest()
         {
-            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\closed-profile-with-voids.ifc"))
+            using (var model = MemoryModel.OpenRead(@"Ifc4TestFiles\closed-profile-with-voids.ifc"))
             {
 
                 var eas = model.Instances[23512] as IIfcExtrudedAreaSolid;
@@ -716,7 +717,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void TrimmedEllipseTest()
         {
-            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\TrimmedEllipseTest.ifc"))
+            using (var model = MemoryModel.OpenRead(@"Ifc4TestFiles\TrimmedEllipseTest.ifc"))
             {
 
                 var eas = model.Instances[272261] as IIfcExtrudedAreaSolid;
@@ -730,7 +731,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void LongRunningBooleanTest()
         {
-            using (var model = MemoryModel.OpenRead(@".\TestFiles\Ifc4TestFiles\long-running-boolean.ifc"))
+            using (var model = MemoryModel.OpenRead(@"Ifc4TestFiles\long-running-boolean.ifc"))
             {
 
                 var ifcWall = model.Instances[39] as IIfcExtrudedAreaSolid;

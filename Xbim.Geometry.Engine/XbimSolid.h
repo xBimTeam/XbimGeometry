@@ -26,6 +26,10 @@ namespace Xbim
 				void set(TopoDS_Solid* val)sealed { ptrContainer = IntPtr(val); }
 			}
 			void InstanceCleanup();
+
+			double SegLenght(IIfcCompositeCurveSegment^ segment);
+			
+				
 			
 #pragma region Initialisers
 
@@ -39,6 +43,8 @@ namespace Xbim
 			void Init(IIfcExtrudedAreaSolidTapered^ solid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger);
 			void Init(IIfcRevolvedAreaSolidTapered^ solid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger);
 			void Init(IIfcSectionedSpine^ solid, ILogger^ logger);
+
+			 
 			void Init(IIfcSweptDiskSolid^ solid, ILogger^ logger);
 			// this is case handled by IIfcSweptDiskSolid 
 			// void Init(IIfcSweptDiskSolidPolygonal^ solid, ILogger^ logger);

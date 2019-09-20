@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Diagnostics;
 using System.IO;
 using Xbim.Common;
 using Xbim.IO.Memory;
@@ -12,8 +13,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         public T Entity;
         public EntityRepository(string name, bool inRadians = false)
         {
-            var path = Path.GetFullPath($@"TestFiles\{name}.ifc");
+            var path = Path.GetFullPath($@"{name}.ifc");
             Assert.IsTrue(File.Exists(path), path);
+            Debug.WriteLine($"Opening '{path}' for tests.");
             model = MemoryModel.OpenRead(path);
             if (inRadians)
                 model.ModelFactors.Initialise(1, 1e-3, 1e-5);

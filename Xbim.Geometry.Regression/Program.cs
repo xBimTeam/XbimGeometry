@@ -1,4 +1,6 @@
-﻿namespace XbimRegression
+﻿using Xbim.Ifc;
+
+namespace XbimRegression
 {
     class Program
     {
@@ -7,7 +9,7 @@
             // ContextTesting is a class that has been temporarily created to test multiple files
             // ContextTesting.Run();
             // return;
-
+            IfcStore.ModelProviderFactory.UseHeuristicModelProvider();
             var arguments = new Params(args);
             if (!arguments.IsValid)
                 return;
