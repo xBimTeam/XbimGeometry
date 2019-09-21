@@ -539,7 +539,8 @@ namespace Xbim
 						shapeFixer.FixFaceTool()->FixOrientationMode() = Standard_True;
 						shapeFixer.FixFaceTool()->FixWireTool()->FixAddCurve3dMode() = Standard_True;
 						shapeFixer.FixFaceTool()->FixWireTool()->FixIntersectingEdgesMode() = Standard_True;
-						if (shapeFixer.Perform())
+						Handle(XbimProgressIndicator) pi = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);
+						if (shapeFixer.Perform(pi))
 						{
 							ShapeUpgrade_UnifySameDomain unifier(shapeFixer.Shape());
 							unifier.SetAngularTolerance(0.00174533); //1 tenth of a degree

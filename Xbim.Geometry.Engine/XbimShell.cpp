@@ -403,7 +403,8 @@ namespace Xbim
 		void XbimShell::FixTopology()
 		{
 			ShapeFix_Shell fixer(this);
-			fixer.Perform();
+			Handle(XbimProgressIndicator) pi = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);
+			fixer.Perform(pi);
 			const TopoDS_Shape& fixed = fixer.Shape();
 			if (fixed.ShapeType() == TopAbs_SHELL)
 				*pShell = TopoDS::Shell(fixed);			

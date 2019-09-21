@@ -548,7 +548,8 @@ namespace Xbim
 							fixer.SetMaxTolerance(closedShell->Model->ModelFactors->OneMilliMeter);
 							fixer.SetMinTolerance(closedShell->Model->ModelFactors->Precision);
 							fixer.SetPrecision(closedShell->Model->ModelFactors->Precision);
-							if (fixer.Perform())
+							Handle(XbimProgressIndicator) pi = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);
+							if (fixer.Perform(pi))
 								b.Add(*pCompound, fixer.Shape());
 							else
 								XbimGeometryCreator::LogError(logger, closedShell, "Failed to create a valid solid from an IfcClosedShell");
@@ -764,7 +765,8 @@ namespace Xbim
 				builder.CompleteShell(shell);
 
 				ShapeFix_Shell sf(shell);
-				if (sf.Perform() == Standard_True)
+				Handle(XbimProgressIndicator) pi = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);
+				if (sf.Perform(pi) == Standard_True)
 					return gcnew XbimShell(sf.Shell());
 				else
 					return gcnew XbimShell(shell);
