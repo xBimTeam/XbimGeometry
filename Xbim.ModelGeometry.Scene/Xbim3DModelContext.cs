@@ -1018,7 +1018,7 @@ namespace Xbim.ModelGeometry.Scene
             foreach (var grid in Model.Instances.OfType<IIfcGrid>())
             {
                 if (contextHelper.ShapeLookup.TryGetValue(grid.EntityLabel, out GeometryReference instance) &&
-                    grid.Representation != null && 
+                    grid.Representation != null &&
                     grid.Representation.Representations.Count > 0)
                 {
                     XbimMatrix3D placementTransform = XbimPlacementTree.GetTransform(grid, contextHelper.PlacementTree, Engine);
@@ -1107,7 +1107,7 @@ namespace Xbim.ModelGeometry.Scene
             return reps.SelectMany(r => WriteProductShapeRepresentationItems(contextHelper, product, txn, r, repType, placementTransform, r.Items)).ToList();
         }
 
-        private List<XbimShapeInstance> WriteProductShapeRepresentationItems(XbimCreateContextHelper contextHelper, IIfcProduct product, IGeometryStoreInitialiser txn, 
+        private List<XbimShapeInstance> WriteProductShapeRepresentationItems(XbimCreateContextHelper contextHelper, IIfcProduct product, IGeometryStoreInitialiser txn,
             IIfcRepresentation rep, XbimGeometryRepresentationType repType, XbimMatrix3D placementTransform, IItemSet<IIfcRepresentationItem> representationItems)
         {
             var shapesInstances = new List<XbimShapeInstance>();
@@ -1323,9 +1323,8 @@ namespace Xbim.ModelGeometry.Scene
             {
 
 
-                processRemaining:
-                if (!Parallel.ForEach(contextHelper.ProductShapeIds, contextHelper.ParallelOptions, (shapeId, loopState) =>
-                // foreach (var shapeId in contextHelper.ProductShapeIds)
+            // contextHelper.ParallelOptions.MaxDegreeOfParallelism = 1;
+                Parallel.ForEach(contextHelper.ProductShapeIds, contextHelper.ParallelOptions, (shapeId) =>
                 {
                     if (processed.TryGetValue(shapeId, out byte b)) return; //skip it
                     processed.TryAdd(shapeId, 0); //we are only going to try once
@@ -1360,43 +1359,10 @@ namespace Xbim.ModelGeometry.Scene
                     }
                     else //we need to create a geometry object
                     {
-
                         try
                         {
-                            if (shape is IIfcBooleanResult)
-                            {
-                                Timer timer = new Timer(callback =>
-                                {
-                                    _logger.LogError("Failed to build Boolean Result for  #{0}. Operation timed out at {1} secs", (int)shapeId,BooleanTimeOutMilliSeconds/1000 );
-                                    loopState.Stop();
-                                }
-                                , null, BooleanTimeOutMilliSeconds, Timeout.Infinite);
-
-                                try
-                                {
-                                    if (loopState.ShouldExitCurrentIteration || loopState.IsExceptional)
-                                        loopState.Stop();
-                                    geomModel = Engine.Create(shape, _logger);
-                                    if (loopState.ShouldExitCurrentIteration || loopState.IsExceptional)
-                                        loopState.Stop();
-                                }
-                                catch (Exception)
-                                {
-                                    loopState.Stop();
-                                    throw;
-                                }
-                                finally
-                                {
-                                    timer.Dispose();
-                                }
-                            }
-                            else
-                            {
-                                geomModel = Engine.Create(shape, _logger);
-
-                            }
+                            geomModel = Engine.Create(shape, _logger);
                         }
-
                         catch (XbimGeometryFaceSetTooLargeException fse)
                         {
                             int faceSetEntityLabel = (int)fse.Data["LargeFaceSetLabel"];
@@ -1406,8 +1372,6 @@ namespace Xbim.ModelGeometry.Scene
                             //just mesh the big shape as we have no idea what we shoudl have               
                             shapeGeom = xbimTessellator.Mesh((IIfcRepresentationItem)Model.Instances[faceSetEntityLabel]);
                         }
-
-
                         if (geomModel != null && geomModel.IsValid)
                         {
 
@@ -1470,10 +1434,8 @@ namespace Xbim.ModelGeometry.Scene
                         }
                     }
                 }
-            ).IsCompleted)
-                {
-                    goto processRemaining;
-                }
+            );
+
             }
             catch (AggregateException)
             {

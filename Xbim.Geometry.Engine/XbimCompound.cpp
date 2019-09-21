@@ -414,7 +414,8 @@ namespace Xbim
 				//advanced breps are always solids, so to make sure we have highest form
 				BRepBuilderAPI_Sewing seamstress(_sewingTolerance);
 				seamstress.Add(outerShell);
-				seamstress.Perform();
+				Handle(XbimProgressIndicator) pi = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);
+				seamstress.Perform(pi);
 				// Build solid
 				BRepBuilderAPI_MakeSolid solidmaker;
 				TopTools_IndexedMapOfShape shellMap;
@@ -453,7 +454,8 @@ namespace Xbim
 				//advanced breps are always solids, so to make sure we have highest form
 				BRepBuilderAPI_Sewing seamstress(_sewingTolerance);
 				seamstress.Add(outerShell);
-				seamstress.Perform();
+				Handle(XbimProgressIndicator) pi = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);
+				seamstress.Perform(pi);
 				// Build solid
 				BRepBuilderAPI_MakeSolid solidmaker;
 				TopTools_IndexedMapOfShape shellMap;
@@ -602,8 +604,8 @@ namespace Xbim
 			{
 				BRepBuilderAPI_Sewing seamstress(_sewingTolerance);
 				seamstress.Add(expl.Current());
-
-				seamstress.Perform();
+				Handle(XbimProgressIndicator) pi = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);
+				seamstress.Perform(pi);
 				TopoDS_Shape result = seamstress.SewedShape();
 				builder.Add(newCompound, result);
 			}
@@ -964,7 +966,8 @@ namespace Xbim
 				seamstress.Add(face);
 				allFaces++;
 			}
-			seamstress.Perform();
+			Handle(XbimProgressIndicator) pi = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);
+			seamstress.Perform(pi);
 
 			TopoDS_Shape result = seamstress.SewedShape();
 			TopoDS_Compound unifiedCompound;

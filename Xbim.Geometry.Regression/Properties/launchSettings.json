@@ -2,7 +2,8 @@
   "profiles": {
     "XbimRegression": {
       "commandName": "Project",
-      "commandLineArgs": "C:\\Users\\Steve\\Documents\\testModel"
+      "commandLineArgs": "C:\\Users\\Steve\\Documents\\testModel",
+      "nativeDebugging": true
     }
   }
 }

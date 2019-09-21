@@ -390,9 +390,11 @@ namespace Xbim
 			{
 				hasContent = true;
 				//sew the bits we are going to cut
+				Handle(XbimProgressIndicator) pi = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);
 				BRepBuilderAPI_Sewing seamstress(tolerance);
+				
 				seamstress.Add(shellBeingBuilt);
-				seamstress.Perform();
+				seamstress.Perform(pi);
 				TopoDS_Shape shape = seamstress.SewedShape();
 				FTol.LimitTolerance(shape, tolerance);
 				toBeProcessed.Append(shape);

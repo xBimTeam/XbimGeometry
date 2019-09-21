@@ -402,7 +402,7 @@ namespace Xbim
 
 #pragma managed(push, off)
 
-		bool DoBoolean(const TopoDS_Shape& body, const TopTools_ListOfShape& tools, BOPAlgo_Operation op, double tolerance, TopoDS_Shape& result)
+		bool DoBoolean(const TopoDS_Shape& body, const TopTools_ListOfShape& tools, BOPAlgo_Operation op, double tolerance, TopoDS_Shape& result, int timeout)
 		{
 
 			ShapeAnalysis_Wire tolFixer;
@@ -463,6 +463,8 @@ namespace Xbim
 			aBOP.SetNonDestructive(true);
 			aBOP.SetFuzzyValue(fuzzyTol);
 
+			Handle(XbimProgressIndicator) pi = new XbimProgressIndicator(timeout);
+			aBOP.SetProgressIndicator(pi);
 			TopoDS_Shape aR;
 
 			try
@@ -502,8 +504,9 @@ namespace Xbim
 						anoBOP.SetRunParallel(false);
 						anoBOP.SetCheckInverted(true);
 						anoBOP.SetNonDestructive(true);
-						aBOP.SetFuzzyValue(fuzzyTol);
-
+						anoBOP.SetFuzzyValue(fuzzyTol);
+						Handle(XbimProgressIndicator) pi1 = new XbimProgressIndicator(timeout);
+						anoBOP.SetProgressIndicator(pi1);
 						try
 						{
 							anoBOP.Perform();
@@ -554,12 +557,11 @@ namespace Xbim
 				fixer.SetMaxTolerance(fuzzyTol);
 				fixer.SetMinTolerance(tolerance);
 				fixer.SetPrecision(tolerance);
-				if (fixer.Perform())
+				Handle(XbimProgressIndicator) pi2 = new XbimProgressIndicator(timeout);
+				if (fixer.Perform(pi2))
 					result = fixer.Shape();
 				else
-				{
 					result = unifiedCompound;
-				}
 
 			}
 			else
@@ -589,7 +591,8 @@ namespace Xbim
 				bool success = false;
 				try
 				{
-					success = Xbim::Geometry::DoBoolean((XbimSolid^)solids[i], tools, operation, tolerance, result);
+
+					success = Xbim::Geometry::DoBoolean((XbimSolid^)solids[i], tools, operation, tolerance, result, XbimGeometryCreator::BooleanTimeOut);
 				}
 				catch (const std::exception& exc)
 				{

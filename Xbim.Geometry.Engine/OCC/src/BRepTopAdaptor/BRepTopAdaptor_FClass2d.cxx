@@ -167,7 +167,10 @@ BRepTopAdaptor_FClass2d::BRepTopAdaptor_FClass2d(const TopoDS_Face& aFace,const 
 		      
 		      gp_Pnt P3db=C3d.Value(u);
 		      // 		      if(P3da.SquareDistance(P3db)) { degenerated=Standard_False; break; }
-		      if(P3da.SquareDistance(P3db) > Precision::Confusion()) { degenerated=Standard_False; break; }
+			  Standard_Real dist = P3da.SquareDistance(P3db);
+			  //need to check where the point is identical to avoid constant loop while condition
+			  if (dist == 0) break;
+		      if(dist > Precision::Confusion()) { degenerated=Standard_False; break; }
 		      u+=du;
 		    }
 		  while(u<plbid);
