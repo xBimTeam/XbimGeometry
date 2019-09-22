@@ -15,7 +15,7 @@
   ******************************************************************************
   -->
 
-  <ItemGroup Condition=" '$(Platform)' == 'x86'">
+  <ItemGroup Condition=" '$(Platform)' == 'x86' OR '$(Platform)' == 'AnyCPU'">
     <XbimInteropFiles Condition="'$(MSBuildThisFileDirectory)' != '' And
                                    HasTrailingSlash('$(MSBuildThisFileDirectory)')"
         Include="$(MSBuildThisFileDirectory)**\Xbim.Geometry.Engine32.dll" >
@@ -27,7 +27,7 @@
     </XbimInteropFiles>
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(Platform)' == 'x64'">
+  <ItemGroup Condition=" '$(Platform)' == 'x64' OR '$(Platform)' == 'AnyCPU'">
     <XbimInteropFiles Condition="'$(MSBuildThisFileDirectory)' != '' And
                                    HasTrailingSlash('$(MSBuildThisFileDirectory)')"
         Include="$(MSBuildThisFileDirectory)**\Xbim.Geometry.Engine64.dll" >
@@ -55,6 +55,9 @@
         NOTE: Copy "Xbim.Geometry.Enginexx.dll" and all related files, for every
               architecture that we support, to the build output directory.
     -->
+    <Message Text="Copying Geometry Engine files @(XbimInteropFiles)." Importance="high" />
+    <Message Text="Copying Geometry Engines to bin directory $(OutputPath)$(XBimCustomBinPath)." Importance="high" />
+    
     <Copy SourceFiles="@(XbimInteropFiles)"
           DestinationFiles="@(XbimInteropFiles -> '$(OutputPath)%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
