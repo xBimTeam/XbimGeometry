@@ -1341,10 +1341,12 @@ namespace Xbim
 				// for each segment we encounter, we will see if the threshold falls within its lenght
 				//
 				IIfcCompositeCurve ^  curve = (IIfcCompositeCurve^)(swdSolid->Directrix);
+				double totCurveLen = 0;
 				for each (IIfcCompositeCurveSegment^ segment in curve->Segments)
 				{
 					XbimWire^ segWire = gcnew XbimWire(segment);
 					double wireLen = segWire->Length;       // this is the lenght to add to the OCC command if we use all of the segment
+					totCurveLen += wireLen;
 					double segValue = SegLenght(segment);   // this is the IFC size of the segment
 
 					if (startPar > 0)
@@ -1361,7 +1363,8 @@ namespace Xbim
 						occEnd += ratio * wireLen; // progress the occ amount by the ratio of the lenght
 					}
 				}
-				sweep = (XbimWire^)sweep->Trim(occStart, occEnd, mf->Precision);
+				if (occStart > 0 || occEnd < totCurveLen)
+					sweep = (XbimWire^)sweep->Trim(occStart, occEnd, mf->Precision);
 			}
 			else
 			{
