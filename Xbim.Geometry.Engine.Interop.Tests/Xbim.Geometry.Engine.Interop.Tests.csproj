@@ -59,6 +59,9 @@
     <None Update="TestFiles\Ifc4TestFiles\discontinuous_composite_curve.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="TestFiles\ifcadvancedbrep_with_faulty_surface_orientation.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="TestFiles\LargeTriangulatedCoordinates.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

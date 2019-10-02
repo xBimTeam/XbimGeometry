@@ -34,6 +34,20 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         }
 
         [TestMethod]
+        public void Can_build_ifcadvancedbrep_with_faulty_surface_orientation()
+        {
+            using (var model = MemoryModel.OpenRead(@"ifcadvancedbrep_with_faulty_surface_orientation.ifc"))
+            {
+                var pfs = model.Instances.OfType<IIfcAdvancedBrep>().FirstOrDefault();
+                Assert.IsTrue(pfs != null, "No IIfcAdvancedBrep found");
+                var solid = geomEngine.CreateSolid(pfs, logger);
+
+                Assert.AreEqual(129879, solid.Volume, 0.99);
+                Assert.AreEqual(15, solid.Faces.Count);
+
+            }
+        }
+        [TestMethod]
         public void Can_build_solid_swept_disk_pipe()
         {
             using (var model = MemoryModel.OpenRead(@"Solid_swept_disk_pipe.ifc"))
