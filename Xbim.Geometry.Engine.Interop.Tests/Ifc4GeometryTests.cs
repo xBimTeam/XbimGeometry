@@ -42,8 +42,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.IsTrue(pfs != null, "No IIfcAdvancedBrep found");
                 var solid = geomEngine.CreateSolid(pfs, logger);
 
-                Assert.AreEqual(129879, solid.Volume, 0.99);
-                Assert.AreEqual(15, solid.Faces.Count);
+                Assert.AreEqual(102264692, solid.Volume, 0.99);
+                Assert.AreEqual(14, solid.Faces.Count);
 
             }
         }

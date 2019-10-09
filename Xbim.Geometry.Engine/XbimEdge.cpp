@@ -125,6 +125,11 @@ namespace Xbim
 			Init(edge, logger);
 		}
 
+		XbimEdge::XbimEdge(IIfcProfileDef^ profile, ILogger^ logger)
+		{
+			Init(profile, logger);
+		}
+
 
 		XbimEdge::XbimEdge(XbimVertex^ start, XbimVertex^ midPoint, XbimVertex^ end)
 		{
@@ -985,6 +990,79 @@ namespace Xbim
 				ShapeFix_ShapeTolerance FTol;
 				FTol.LimitTolerance(*pEdge, curve->Model->ModelFactors->Precision);
 			}
+		}
+
+		void XbimEdge::Init(IIfcProfileDef^ profile, ILogger^ logger)
+		{
+			if (dynamic_cast<IIfcArbitraryClosedProfileDef^>(profile))
+				return Init((IIfcArbitraryClosedProfileDef^)profile, logger);
+			else if (dynamic_cast<IIfcParameterizedProfileDef^>(profile))
+				return Init((IIfcParameterizedProfileDef^)profile, logger);
+			else if (dynamic_cast<IIfcDerivedProfileDef^>(profile))
+				return Init((IIfcDerivedProfileDef^)profile, logger);
+			else if (dynamic_cast<IIfcArbitraryOpenProfileDef^>(profile))
+				return Init((IIfcArbitraryOpenProfileDef^)profile, logger);
+			else
+				XbimGeometryCreator::LogError(logger, profile, "Profile definition {0} is not implemented", profile->GetType()->Name);
+		}
+
+		void XbimEdge::Init(IIfcArbitraryClosedProfileDef^ profile, ILogger^ logger)
+		{
+			if (profile->OuterCurve == nullptr)
+			{
+				XbimGeometryCreator::LogWarning(logger, profile, "Invalid outer bound. Edge discarded");
+				return;
+			}
+			if (dynamic_cast<IIfcArbitraryProfileDefWithVoids^>(profile))
+			{
+				throw gcnew Exception("IfcArbitraryProfileDefWithVoids cannot be created as an edge, call the XbimFace method");
+			}
+			
+			Init(profile->OuterCurve, logger);
+		}
+
+		void XbimEdge::Init(IIfcArbitraryOpenProfileDef^ profile, ILogger^ logger)
+		{
+			if (dynamic_cast<IIfcCenterLineProfileDef^>(profile))
+			{
+				Init((IIfcCenterLineProfileDef^)profile, logger);
+			}
+			else
+			{
+				Init(profile->Curve, logger);
+			}
+		}
+
+		void XbimEdge::Init(IIfcParameterizedProfileDef^ profile, ILogger^ logger)
+		{
+			throw gcnew Exception("IIfcParameterizedProfileDef is not currently supported as an edge description, call the XbimWire method");
+		}
+
+		void XbimEdge::Init(IIfcDerivedProfileDef^ profile, ILogger^ logger)
+		{
+			Init(profile->ParentProfile, logger);
+			if (IsValid && !dynamic_cast<IIfcMirroredProfileDef^>(profile))
+			{
+				gp_Trsf trsf = XbimConvert::ToTransform(profile->Operator);
+				pEdge->Move(TopLoc_Location(trsf));
+			}
+			if (IsValid && dynamic_cast<IIfcMirroredProfileDef^>(profile))
+			{
+				//we need to mirror about the Y axis
+				gp_Pnt origin(0, 0, 0);
+				gp_Dir xDir(0, 1, 0);
+				gp_Ax1 mirrorAxis(origin, xDir);
+				gp_Trsf aTrsf;
+				aTrsf.SetMirror(mirrorAxis);
+				BRepBuilderAPI_Transform aBrepTrsf(*pEdge, aTrsf);
+				*pEdge = TopoDS::Edge(aBrepTrsf.Shape());
+				Reverse();//correct the normal to be correct
+			}
+		}
+
+		void XbimEdge::Init(IIfcCenterLineProfileDef^ profile, ILogger^ logger)
+		{
+			throw gcnew Exception("IIfcCenterLineProfileDef is not currently supported as an edge description, call the XbimWire method");
 		}
 
 

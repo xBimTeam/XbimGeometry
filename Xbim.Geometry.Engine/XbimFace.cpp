@@ -1391,15 +1391,15 @@ namespace Xbim
 		{
 
 
-			if (sLin->SweptCurve->ProfileType != IfcProfileTypeEnum::CURVE)
+			if (sLin->SweptCurve->ProfileType != IfcProfileTypeEnum::CURVE )
 			{
 				XbimGeometryCreator::LogWarning(logger, sLin, "Only profiles of type curve are valid in a surface of linearExtrusion {0}. Face discarded", sLin->SweptCurve->EntityLabel);
 				return;
 			}
 
-			XbimWire^ curve = gcnew XbimWire(sLin->SweptCurve, logger);
+			
 
-			TopoDS_Edge edge = (XbimEdge^)curve->Edges->First;
+			XbimEdge^ edge = gcnew XbimEdge(sLin->SweptCurve, logger);
 			TopLoc_Location loc;
 			Standard_Real start, end;
 			Handle(Geom_Curve) c3d = BRep_Tool::Curve(edge, loc, start, end);
@@ -1415,11 +1415,11 @@ namespace Xbim
 				*pFace = faceMaker.Face();
 				//apply the position transformation unless from a model that has this incorrect
 				// versions of the IFC explorter on or before 17.0.416 for Revit duplicated the placement, ignore for a correct result
-				if (!sLin->Model->ModelFactors->ApplyWorkAround("#SurfaceOfLinearExtrusion"))
+				/*if (!sLin->Model->ModelFactors->ApplyWorkAround("#SurfaceOfLinearExtrusion"))
 				{
 					if (sLin->Position != nullptr)
 						pFace->Move(XbimConvert::ToLocation(sLin->Position));
-				}
+				}*/
 			}
 			else
 				XbimGeometryCreator::LogWarning(logger, sLin, "Invalid swept curve = #{0} found in surface of linearExtrusion. Face discarded", sLin->SweptCurve->EntityLabel);

@@ -27,6 +27,12 @@ namespace Xbim
 			void InstanceCleanup();
 #pragma region Initialisation
 			void Init(IIfcCurve^ edge, ILogger^ logger);
+			void Init(IIfcProfileDef^ profile, ILogger^ logger);
+			void Init(IIfcArbitraryClosedProfileDef^ profile, ILogger^ logger);
+			void Init(IIfcArbitraryOpenProfileDef^ profile, ILogger^ logger);
+			void Init(IIfcParameterizedProfileDef^ profile, ILogger^ logger);
+			void Init(IIfcDerivedProfileDef^ profile, ILogger^ logger);
+			void Init(IIfcCenterLineProfileDef^ profile, ILogger^ logger);
 			
 #pragma endregion
 
@@ -43,7 +49,7 @@ namespace Xbim
 			XbimEdge(const TopoDS_Edge& edge);
 			XbimEdge(const TopoDS_Edge& edge, Object^ tag);
 			XbimEdge(IIfcCurve^ edge, ILogger^ logger);
-			
+			XbimEdge(IIfcProfileDef^ profile, ILogger^ logger);
 			XbimEdge(XbimEdge^ edgeCurve, XbimVertex^ start, XbimVertex^ end, double maxTolerance);
 			XbimEdge(const TopoDS_Wire& wire, double tolerance, double angleTolerance, ILogger^ logger);
 			XbimEdge(IIfcCurve^ edgeCurve, XbimVertex^ start, XbimVertex^ end, ILogger^ logger);
