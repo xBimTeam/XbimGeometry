@@ -1294,10 +1294,25 @@ namespace Xbim
 			}
 			else if (dynamic_cast<IIfcTrimmedCurve^>(segment->ParentCurve))
 			{
-				IIfcTrimmedCurve^ tc = dynamic_cast<IIfcTrimmedCurve^>(segment->ParentCurve);
-				Xbim::Ifc4::MeasureResource::IfcParameterValue^ t1 = dynamic_cast<Xbim::Ifc4::MeasureResource::IfcParameterValue^>(tc->Trim1[0]);
-				Xbim::Ifc4::MeasureResource::IfcParameterValue^ t2 = dynamic_cast<Xbim::Ifc4::MeasureResource::IfcParameterValue^>(tc->Trim2[0]);
-				return (double)t2->Value - (double)t1->Value;
+				try {
+					IIfcTrimmedCurve^ tc = dynamic_cast<IIfcTrimmedCurve^>(segment->ParentCurve);
+					// search for parameter values
+					Xbim::Ifc4::MeasureResource::IfcParameterValue^ t1;
+					Xbim::Ifc4::MeasureResource::IfcParameterValue^ t2;
+					for (int i = 0; i < tc->Trim1->Count; i++)
+					{
+						t1 = dynamic_cast<Xbim::Ifc4::MeasureResource::IfcParameterValue^>(tc->Trim1[i]);
+					}
+					for (int i = 0; i < tc->Trim2->Count; i++)
+					{
+						t2 = dynamic_cast<Xbim::Ifc4::MeasureResource::IfcParameterValue^>(tc->Trim2[i]);
+					}
+					return (double)t2->Value - (double)t1->Value;
+				}
+				catch (UnauthorizedAccessException^ e) {
+					XbimGeometryCreator::LogError(segment, "Could not compute segment parametric lenght. Returned 1.");
+					return 1;
+				}
 			}
 			return 1;
 		}
