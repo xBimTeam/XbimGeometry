@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Xbim.Common.Geometry;
@@ -378,7 +380,6 @@ namespace Ifc4GeometryTests
             }
         }
 
-
         [TestMethod]
         public void IfcHalfspace_With_IfcExtrudedAreaSolid()
         {
@@ -403,27 +404,58 @@ namespace Ifc4GeometryTests
         }
 
 
+        [TestMethod]
+        public void IfcHalfspace_FailingGeom()
+        {
+            using (var eventTrace = LoggerFactory.CreateEventTrace())
+            using (var m = IfcStore.Open("SolidTestFiles\\FailingGeom.ifc"))
+            {
+                var extSolid = m.Instances.OfType<IIfcExtrudedAreaSolid>().FirstOrDefault(hs => hs.EntityLabel == 185025);
+                var solid = _xbimGeometryCreator.CreateSolid(extSolid);
+                IfcCsgTests.GeneralTest(solid);
+
+                var mlist = m.Instances.OfType<IIfcBooleanClippingResult>();
+                foreach (var eas in mlist)
+                {
+                    Debug.WriteLine("Todo: " + eas.EntityLabel);
+                }
+
+                foreach (var eas in mlist)
+                {
+                    // var eas = m.Instances.OfType<IIfcBooleanClippingResult>().FirstOrDefault(hs => hs.EntityLabel == 185249);
+                    Assert.IsTrue(eas != null, "No IfcBooleanClippingResult found");
+                    solid = _xbimGeometryCreator.CreateSolid(eas);
+                    Assert.IsTrue(eventTrace.Events.Count == 0); //no events should have been raised from this call
+                    IfcCsgTests.GeneralTest(solid);
+                    
+                    Debug.WriteLine(eas.EntityLabel + " ok");
+                    if (eas.EntityLabel == 185243)
+                    {
+                        File.WriteAllText("c:\\1.brep", solid.ToBRep);
+                    }
+                }
+            }
+        }
 
         [TestMethod]
         public void IfcPolygonalBoundedHalfspace_With_IfcExtrudedAreaSolid()
         {
             using (var eventTrace = LoggerFactory.CreateEventTrace())
+            using (var m = IfcStore.Open("SolidTestFiles\\8- Boolean_IfcPolygonalBoundedHalfspace_With_IfcExtrudedAreaSolid.ifc"))
             {
-                using (var m = IfcStore.Open("SolidTestFiles\\8- Boolean_IfcPolygonalBoundedHalfspace_With_IfcExtrudedAreaSolid.ifc"))
-                {
-                    var eas = m.Instances.OfType<IIfcBooleanClippingResult>().FirstOrDefault(hs => hs.FirstOperand is IIfcExtrudedAreaSolid && hs.SecondOperand is IIfcPolygonalBoundedHalfSpace);
-                    Assert.IsTrue(eas != null, "No IfcBooleanClippingResult found");
-                    Assert.IsTrue(eas.FirstOperand is IIfcExtrudedAreaSolid, "Incorrect first operand found");
-                    Assert.IsTrue(((IIfcExtrudedAreaSolid)eas.FirstOperand).SweptArea is IIfcRectangleProfileDef, "Incorrect profile definition for extrusion found");
-                    Assert.IsTrue(eas.SecondOperand is IIfcHalfSpaceSolid, "Incorrect second operand found");
+                var eas = m.Instances.OfType<IIfcBooleanClippingResult>().FirstOrDefault(hs => hs.FirstOperand is IIfcExtrudedAreaSolid && hs.SecondOperand is IIfcPolygonalBoundedHalfSpace);
+                Assert.IsTrue(eas != null, "No IfcBooleanClippingResult found");
+                Assert.IsTrue(eas.FirstOperand is IIfcExtrudedAreaSolid, "Incorrect first operand found");
+                Assert.IsTrue(((IIfcExtrudedAreaSolid)eas.FirstOperand).SweptArea is IIfcRectangleProfileDef, "Incorrect profile definition for extrusion found");
+                Assert.IsTrue(eas.SecondOperand is IIfcHalfSpaceSolid, "Incorrect second operand found");
 
-                    var solid = _xbimGeometryCreator.CreateSolid(eas);
-                    Assert.IsTrue(eventTrace.Events.Count == 0); //no events should have been raised from this call
-                    IfcCsgTests.GeneralTest(solid);
-                    Assert.IsTrue(solid.Faces.Count() == 6, "This solid should have 6 faces");
+                var solid = _xbimGeometryCreator.CreateSolid(eas);
+                Assert.IsTrue(eventTrace.Events.Count == 0); //no events should have been raised from this call
+                IfcCsgTests.GeneralTest(solid);
+                Assert.IsTrue(solid.Faces.Count() == 6, "This solid should have 6 faces");
 
-                }
             }
+
         }
 
 
