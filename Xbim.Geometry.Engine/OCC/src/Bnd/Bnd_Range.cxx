@@ -15,6 +15,7 @@
 
 
 #include <Bnd_Range.hxx>
+#include <Standard_Dump.hxx>
 
 //=======================================================================
 //function : Common
@@ -174,4 +175,16 @@ void Bnd_Range::Split(const Standard_Real theVal,
   {
     theList.Append(Bnd_Range(aValPrev, myLast));
   }
+}
+
+// =======================================================================
+// function : DumpJson
+// purpose  :
+// =======================================================================
+void Bnd_Range::DumpJson (Standard_OStream& theOStream, const Standard_Integer) const
+{
+  OCCT_DUMP_CLASS_BEGIN (theOStream, Bnd_Range);
+
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myFirst);
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myLast);
 }

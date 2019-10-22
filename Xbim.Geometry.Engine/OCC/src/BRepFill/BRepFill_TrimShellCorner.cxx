@@ -1437,16 +1437,13 @@ Standard_Boolean CheckAndOrientEdges(const TopTools_ListOfShape&  theOrderedList
   gp_Pnt2d ap = aCurve->Value(f);
   Standard_Boolean bFirstFound = Standard_False;
   Standard_Boolean bLastFound = Standard_False;
-  Standard_Boolean bforward = Standard_True;
 
   if(ap.Distance(theFirstPoint) < aTolerance1) {
-    bforward = Standard_True;
     if(theOrientedList.IsEmpty())
       theOrientedList.Append(aEPrev.Oriented(TopAbs_FORWARD));
     bFirstFound = Standard_True;
   }
   else if(ap.Distance(theLastPoint) < aTolerance1) {
-    bforward = Standard_False;
     if(theOrientedList.IsEmpty())
       theOrientedList.Append(aEPrev.Oriented(TopAbs_REVERSED));
     bLastFound = Standard_True;
@@ -1454,36 +1451,31 @@ Standard_Boolean CheckAndOrientEdges(const TopTools_ListOfShape&  theOrderedList
   ap = aCurve->Value(l);
 
   if(ap.Distance(theLastPoint) < aTolerance2) {
-    bforward = Standard_True;
-
     if(theOrientedList.IsEmpty())
       theOrientedList.Append(aEPrev.Oriented(TopAbs_FORWARD));
     bLastFound = Standard_True;
   }
   else if(ap.Distance(theFirstPoint) < aTolerance2) {
-    bforward = Standard_False;
-
     if(theOrientedList.IsEmpty())
       theOrientedList.Append(aEPrev.Oriented(TopAbs_REVERSED));
     bFirstFound = Standard_True;
   }
 
+  if (!theOrientedList.IsEmpty())
+    aEPrev = TopoDS::Edge (theOrientedList.Last());
+
   for(; anIt.More(); anIt.Next()) {
     const TopoDS_Edge& aE = TopoDS::Edge(anIt.Value());
     TopoDS_Vertex aV11, aV12;
-    TopExp::Vertices(aEPrev, aV11, aV12);
+    TopExp::Vertices(aEPrev, aV11, aV12, Standard_True);
     TopoDS_Vertex aV21, aV22;
-    TopExp::Vertices(aE, aV21, aV22);
-    TopAbs_Orientation anOri = TopAbs_FORWARD;
+    TopExp::Vertices(aE, aV21, aV22, Standard_False);
 
-    if(aV12.IsSame(aV21) || aV11.IsSame(aV22)) {
-      anOri = (bforward) ? TopAbs_FORWARD : TopAbs_REVERSED;
-    }
-    else {
-      anOri = (bforward) ? TopAbs_REVERSED : TopAbs_FORWARD;
-    }
+    TopAbs_Orientation anOri =
+      (aV12.IsSame (aV21) || aV11.IsSame (aV22)) ? TopAbs_FORWARD : TopAbs_REVERSED;
     theOrientedList.Append(aE.Oriented(anOri));
-    aEPrev = aE;
+    aEPrev = TopoDS::Edge (theOrientedList.Last());
+
     aTolerance1 = (aV21.IsNull()) ? Precision::Confusion() : BRep_Tool::Tolerance(aV21);
     aTolerance2 = (aV22.IsNull()) ? Precision::Confusion() : BRep_Tool::Tolerance(aV22);
     utol = aBAS.UResolution(aTolerance1);
@@ -1511,9 +1503,7 @@ Standard_Boolean CheckAndOrientEdges(const TopTools_ListOfShape&  theOrderedList
     }
   }
 
-  if(!bFirstFound || !bLastFound)
-    return Standard_False;
-  return Standard_True;
+  return bFirstFound && bLastFound;
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -2221,15 +2211,12 @@ static Standard_Real ComputeAveragePlaneAndMaxDeviation(const TopoDS_Shape& aWir
                                                         gp_Pln& thePlane,
                                                         Standard_Boolean& IsSingular)
 {
-  Standard_Integer N = 40, nedges = 0;
-
-  TopoDS_Iterator iter( aWire );
-  for (; iter.More(); iter.Next())
-    nedges++;
+  Standard_Integer N = 40;
+  Standard_Integer nedges = aWire.NbChildren();
 
   TColgp_Array1OfPnt Pnts( 1, nedges*N );
   Standard_Integer ind = 1, i;
-  for (iter.Initialize(aWire); iter.More(); iter.Next())
+  for (TopoDS_Iterator iter (aWire); iter.More(); iter.Next())
     {
       const TopoDS_Edge& anEdge = TopoDS::Edge( iter.Value() );
       BRepAdaptor_Curve aCurve(anEdge);

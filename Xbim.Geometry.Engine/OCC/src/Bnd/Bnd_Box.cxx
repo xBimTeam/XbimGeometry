@@ -21,6 +21,7 @@
 #include <gp_Pnt.hxx>
 #include <gp_Trsf.hxx>
 #include <Standard_ConstructionError.hxx>
+#include <Standard_Dump.hxx>
 
 // set the flag to one
 #define ClearVoidFlag() ( Flags &= ~VoidMask )
@@ -34,12 +35,26 @@
 //function : Bnd_Box
 //purpose  : 
 //=======================================================================
-
 Bnd_Box::Bnd_Box()
-     : Xmin(0.), Xmax(0.), Ymin(0.), Ymax(0.),  Zmin(0.), Zmax(0.), Gap(0.)
+: Xmin (RealLast()), Xmax (-RealLast()),
+  Ymin (RealLast()), Ymax (-RealLast()),
+  Zmin (RealLast()), Zmax (-RealLast()),
+  Gap (0.0)
 {
   SetVoid();
 }
+
+//=======================================================================
+//function : Bnd_Box
+//purpose  : 
+//=======================================================================
+Bnd_Box::Bnd_Box (const gp_Pnt theMin, const gp_Pnt theMax)
+: Gap (0.0)
+{
+  SetVoid();
+  Update (theMin.X(), theMin.Y(), theMin.Z(), theMax.X(), theMax.Y(), theMax.Z());
+}
+
 
 //=======================================================================
 //function : Set
@@ -86,13 +101,14 @@ void Bnd_Box::Update (const Standard_Real x,
     Zmax = Z;
     ClearVoidFlag();
   }
-  else {
-    if (!IsOpenXmin() && (x < Xmin)) Xmin = x;
-    if (!IsOpenXmax() && (X > Xmax)) Xmax = X;
-    if (!IsOpenYmin() && (y < Ymin)) Ymin = y;
-    if (!IsOpenYmax() && (Y > Ymax)) Ymax = Y;
-    if (!IsOpenZmin() && (z < Zmin)) Zmin = z;
-    if (!IsOpenZmax() && (Z > Zmax)) Zmax = Z;
+  else
+  {
+    if (x < Xmin) Xmin = x;
+    if (X > Xmax) Xmax = X;
+    if (y < Ymin) Ymin = y;
+    if (Y > Ymax) Ymax = Y;
+    if (z < Zmin) Zmin = z;
+    if (Z > Zmax) Zmax = Z;
   }
 }
 
@@ -116,12 +132,12 @@ void Bnd_Box::Update (const Standard_Real X,
     ClearVoidFlag();
   }
   else {
-    if      (!IsOpenXmin() && (X < Xmin)) Xmin = X;
-    else if (!IsOpenXmax() && (X > Xmax)) Xmax = X;
-    if      (!IsOpenYmin() && (Y < Ymin)) Ymin = Y;
-    else if (!IsOpenYmax() && (Y > Ymax)) Ymax = Y;
-    if      (!IsOpenZmin() && (Z < Zmin)) Zmin = Z;
-    else if (!IsOpenZmax() && (Z > Zmax)) Zmax = Z;
+    if      (X < Xmin) Xmin = X;
+    else if (X > Xmax) Xmax = X;
+    if      (Y < Ymin) Ymin = Y;
+    else if (Y > Ymax) Ymax = Y;
+    if      (Z < Zmin) Zmin = Z;
+    else if (Z > Zmax) Zmax = Z;
   }
 }
 
@@ -293,89 +309,92 @@ Standard_Boolean Bnd_Box::IsThin (const Standard_Real tol) const
 
 Bnd_Box Bnd_Box::Transformed (const gp_Trsf& T) const
 {
-  gp_TrsfForm F = T.Form();
-  Bnd_Box newb(*this);
-  if ( IsVoid() ) return newb;
-
-  if      (F == gp_Identity) {}
-  else if (F == gp_Translation) {
-    Standard_Real DX,DY,DZ;
-    (T.TranslationPart()).Coord(DX,DY,DZ);
-    if (!IsOpenXmin()) newb.Xmin += DX;
-    if (!IsOpenXmax()) newb.Xmax += DX;
-    if (!IsOpenYmin()) newb.Ymin += DY;
-    if (!IsOpenYmax()) newb.Ymax += DY;
-    if (!IsOpenZmin()) newb.Zmin += DZ;
-    if (!IsOpenZmax()) newb.Zmax += DZ;
+  if (IsVoid())
+  {
+    return Bnd_Box();
   }
-  else {
-    gp_Pnt P[8];
-    Standard_Boolean Vertex[8];
-    Standard_Integer i;
-    for (i=0;i<8;i++) Vertex[i] = Standard_True;
-    gp_Dir D[6];
-//    Standard_Integer vertices = 0;
-    Standard_Integer directions = 0;
-
-    if (IsOpenXmin())
-    {
-      directions++;
-      D[directions-1].SetCoord(-1., 0., 0.);
-      Vertex[0] = Vertex[2] = Vertex[4] = Vertex[6] = Standard_False;
-    }
-    if (IsOpenXmax())
-    {
-      directions++;
-      D[directions-1].SetCoord( 1., 0., 0.);
-      Vertex[1] = Vertex[3] = Vertex[5] = Vertex[7] = Standard_False;
-    }
-    if (IsOpenYmin())
-    {
-      directions++;
-      D[directions-1].SetCoord( 0.,-1., 0.);
-      Vertex[0] = Vertex[1] = Vertex[4] = Vertex[5] = Standard_False;
-    }
-    if (IsOpenYmax())
-    {
-      directions++;
-      D[directions-1].SetCoord( 0., 1., 0.);
-      Vertex[2] = Vertex[3] = Vertex[6] = Vertex[7] = Standard_False;
-    }
-    if (IsOpenZmin())
-    {
-      directions++;
-      D[directions-1].SetCoord( 0., 0.,-1.);
-      Vertex[0] = Vertex[1] = Vertex[2] = Vertex[3] = Standard_False;
-    }
-    if (IsOpenZmax())
-    {
-      directions++;
-      D[directions-1].SetCoord( 0., 0., 1.);
-      Vertex[4] = Vertex[5] = Vertex[6] = Vertex[7] = Standard_False;
-    }
-
-    newb.SetVoid();
-    for (i=0;i<directions;i++) {
-      D[i].Transform(T);
-      newb.Add(D[i]);
-    }
-    P[0].SetCoord(Xmin,Ymin,Zmin);
-    P[1].SetCoord(Xmax,Ymin,Zmin);
-    P[2].SetCoord(Xmin,Ymax,Zmin);
-    P[3].SetCoord(Xmax,Ymax,Zmin);
-    P[4].SetCoord(Xmin,Ymin,Zmax);
-    P[5].SetCoord(Xmax,Ymin,Zmax);
-    P[6].SetCoord(Xmin,Ymax,Zmax);
-    P[7].SetCoord(Xmax,Ymax,Zmax);
-    for (i=0;i<8;i++) {
-      if (Vertex[i]) {
-	P[i].Transform(T);
-	newb.Add(P[i]);
-      }
-    }
-    newb.Gap=Gap;
+  else if (T.Form() == gp_Identity)
+  {
+    return *this;
   }
-  return newb;
+  else if (T.Form() == gp_Translation)
+  {
+    if (!HasFinitePart())
+    {
+      return *this;
+    }
+
+    const gp_XYZ& aDelta = T.TranslationPart();
+    Bnd_Box aNewBox (*this);
+    aNewBox.Xmin += aDelta.X();
+    aNewBox.Xmax += aDelta.X();
+    aNewBox.Ymin += aDelta.Y();
+    aNewBox.Ymax += aDelta.Y();
+    aNewBox.Zmin += aDelta.Z();
+    aNewBox.Zmax += aDelta.Z();
+    return aNewBox;
+  }
+
+  Bnd_Box aNewBox;
+  if (HasFinitePart())
+  {
+    gp_Pnt aCorners[8] =
+    {
+      gp_Pnt (Xmin, Ymin, Zmin),
+      gp_Pnt (Xmax, Ymin, Zmin),
+      gp_Pnt (Xmin, Ymax, Zmin),
+      gp_Pnt (Xmax, Ymax, Zmin),
+      gp_Pnt (Xmin, Ymin, Zmax),
+      gp_Pnt (Xmax, Ymin, Zmax),
+      gp_Pnt (Xmin, Ymax, Zmax),
+      gp_Pnt (Xmax, Ymax, Zmax),
+    };
+    for (Standard_Integer aCornerIter = 0; aCornerIter < 8; ++aCornerIter)
+    {
+      aCorners[aCornerIter].Transform (T);
+      aNewBox.Add (aCorners[aCornerIter]);
+    }
+  }
+  aNewBox.Gap = Gap;
+  if (!IsOpen())
+  {
+    return aNewBox;
+  }
+
+  gp_Dir aDirs[6];
+  Standard_Integer aNbDirs = 0;
+  if (IsOpenXmin())
+  {
+    aDirs[aNbDirs++].SetCoord(-1., 0., 0.);
+  }
+  if (IsOpenXmax())
+  {
+    aDirs[aNbDirs++].SetCoord( 1., 0., 0.);
+  }
+  if (IsOpenYmin())
+  {
+    aDirs[aNbDirs++].SetCoord( 0.,-1., 0.);
+  }
+  if (IsOpenYmax())
+  {
+    aDirs[aNbDirs++].SetCoord( 0., 1., 0.);
+  }
+  if (IsOpenZmin())
+  {
+    aDirs[aNbDirs++].SetCoord( 0., 0.,-1.);
+  }
+  if (IsOpenZmax())
+  {
+    aDirs[aNbDirs++].SetCoord( 0., 0., 1.);
+  }
+
+  for (Standard_Integer aDirIter = 0; aDirIter < aNbDirs; ++aDirIter)
+  {
+    aDirs[aDirIter].Transform (T);
+    aNewBox.Add (aDirs[aDirIter]);
+  }
+
+  return aNewBox;
 }
 
 //=======================================================================
@@ -385,44 +404,40 @@ Bnd_Box Bnd_Box::Transformed (const gp_Trsf& T) const
 
 void Bnd_Box::Add (const Bnd_Box& Other)
 {
-  if (IsWhole()) return;
-  else if (Other.IsVoid()) return; 
-  else if (Other.IsWhole()) SetWhole();
-  else if (IsVoid()) (*this) = Other;
-  else
+  if (Other.IsVoid())
   {
-    if ( ! IsOpenXmin() )
-    {
-      if (Other.IsOpenXmin()) OpenXmin();
-      else if (Xmin > Other.Xmin) Xmin = Other.Xmin;
-    }
-    if ( ! IsOpenXmax() )
-    {
-      if (Other.IsOpenXmax()) OpenXmax();
-      else if (Xmax < Other.Xmax) Xmax = Other.Xmax;
-    }
-    if ( ! IsOpenYmin() )
-    {
-      if (Other.IsOpenYmin()) OpenYmin();
-      else if (Ymin > Other.Ymin) Ymin = Other.Ymin;
-    }
-    if ( ! IsOpenYmax() )
-    {
-      if (Other.IsOpenYmax()) OpenYmax();
-      else if (Ymax < Other.Ymax) Ymax = Other.Ymax;
-    }
-    if ( ! IsOpenZmin() )
-    {
-      if (Other.IsOpenZmin()) OpenZmin();
-      else if (Zmin > Other.Zmin) Zmin = Other.Zmin;
-    }
-    if ( ! IsOpenZmax() )
-    {
-      if (Other.IsOpenZmax()) OpenZmax();
-      else if (Zmax < Other.Zmax) Zmax = Other.Zmax;
-    }
-    Gap = Max (Gap, Other.Gap);
+    return;
   }
+  else if (IsVoid())
+  {
+    *this = Other;
+    return;
+  }
+
+  if (Xmin > Other.Xmin) Xmin = Other.Xmin;
+  if (Xmax < Other.Xmax) Xmax = Other.Xmax;
+  if (Ymin > Other.Ymin) Ymin = Other.Ymin;
+  if (Ymax < Other.Ymax) Ymax = Other.Ymax;
+  if (Zmin > Other.Zmin) Zmin = Other.Zmin;
+  if (Zmax < Other.Zmax) Zmax = Other.Zmax;
+  Gap = Max (Gap, Other.Gap);
+
+  if (IsWhole())
+  {
+    return;
+  }
+  else if (Other.IsWhole())
+  {
+    SetWhole();
+    return;
+  }
+
+  if (Other.IsOpenXmin()) OpenXmin();
+  if (Other.IsOpenXmax()) OpenXmax();
+  if (Other.IsOpenYmin()) OpenYmin();
+  if (Other.IsOpenYmax()) OpenYmax();
+  if (Other.IsOpenZmin()) OpenZmin();
+  if (Other.IsOpenZmax()) OpenZmax();
 }
 
 //=======================================================================
@@ -929,29 +944,44 @@ Standard_Real Bnd_Box::Distance(const Bnd_Box& Other) const
 
 void Bnd_Box::Dump () const
 {
-  cout << "Box3D : ";
-  if      (IsVoid())  cout << "Void";
-  else if (IsWhole()) cout << "Whole";
+  std::cout << "Box3D : ";
+  if      (IsVoid())  std::cout << "Void";
+  else if (IsWhole()) std::cout << "Whole";
   else {
-    cout << "\n Xmin : ";
-    if (IsOpenXmin()) cout << "Infinite";
-    else              cout << Xmin;
-    cout << "\n Xmax : ";
-    if (IsOpenXmax()) cout << "Infinite";
-    else              cout << Xmax;
-    cout << "\n Ymin : ";
-    if (IsOpenYmin()) cout << "Infinite";
-    else              cout << Ymin;
-    cout << "\n Ymax : ";
-    if (IsOpenYmax()) cout << "Infinite";
-    else              cout << Ymax;
-    cout << "\n Zmin : ";
-    if (IsOpenZmin()) cout << "Infinite";
-    else              cout << Zmin;
-    cout << "\n Zmax : ";
-    if (IsOpenZmax()) cout << "Infinite";
-    else              cout << Zmax;
+    std::cout << "\n Xmin : ";
+    if (IsOpenXmin()) std::cout << "Infinite";
+    else              std::cout << Xmin;
+    std::cout << "\n Xmax : ";
+    if (IsOpenXmax()) std::cout << "Infinite";
+    else              std::cout << Xmax;
+    std::cout << "\n Ymin : ";
+    if (IsOpenYmin()) std::cout << "Infinite";
+    else              std::cout << Ymin;
+    std::cout << "\n Ymax : ";
+    if (IsOpenYmax()) std::cout << "Infinite";
+    else              std::cout << Ymax;
+    std::cout << "\n Zmin : ";
+    if (IsOpenZmin()) std::cout << "Infinite";
+    else              std::cout << Zmin;
+    std::cout << "\n Zmax : ";
+    if (IsOpenZmax()) std::cout << "Infinite";
+    else              std::cout << Zmax;
   }
-  cout << "\n Gap : " << Gap;
-  cout << "\n";
+  std::cout << "\n Gap : " << Gap;
+  std::cout << "\n";
+}
+
+//=======================================================================
+//function : DumpJson
+//purpose  : 
+//=======================================================================
+void Bnd_Box::DumpJson (Standard_OStream& theOStream, const Standard_Integer) const
+{
+  OCCT_DUMP_CLASS_BEGIN (theOStream, Bnd_Box);
+
+  OCCT_DUMP_FIELD_VALUES_NUMERICAL (theOStream, "CornerMin", 3, Xmin, Ymin, Zmin)
+  OCCT_DUMP_FIELD_VALUES_NUMERICAL (theOStream, "CornerMax", 3, Xmax, Ymax, Zmax)
+
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, Gap);
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, Flags);
 }

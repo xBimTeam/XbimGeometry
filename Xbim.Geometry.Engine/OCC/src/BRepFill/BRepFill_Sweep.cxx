@@ -19,6 +19,7 @@
 #include <Approx_CurveOnSurface.hxx>
 #include <Approx_SameParameter.hxx>
 #include <Bnd_Box.hxx>
+#include <BOPTools_AlgoTools.hxx>
 #include <BRep_Builder.hxx>
 #include <BRep_CurveRepresentation.hxx>
 #include <BRep_GCurve.hxx>
@@ -346,7 +347,7 @@ static Standard_Boolean SameParameter(TopoDS_Edge&    E,
   if(sp.IsDone() && !sp.IsSameParameter()) Pcurv = sp.Curve2d();
   else if(!sp.IsDone() && !sp.IsSameParameter()){
 #ifdef OCCT_DEBUG
-    cout<<"echec SameParameter"<<endl;
+    std::cout<<"echec SameParameter"<<std::endl;
 #endif  
     return Standard_False;
   }
@@ -354,8 +355,8 @@ static Standard_Boolean SameParameter(TopoDS_Edge&    E,
   ResTol = sp.TolReached();
   if(ResTol > tolreached ){
 #ifdef OCCT_DEBUG
-    cout<<"SameParameter : Tolerance not reached!"<<endl;
-    cout<<"tol visee : "<<tol3d<<" tol obtained : "<<ResTol<<endl;
+    std::cout<<"SameParameter : Tolerance not reached!"<<std::endl;
+    std::cout<<"tol visee : "<<tol3d<<" tol obtained : "<<ResTol<<std::endl;
 #endif  
     return Standard_False;
   }
@@ -646,7 +647,7 @@ static void BuildFace(const Handle(Geom_Surface)& S,
     if (MkF.Error() != BRepLib_FaceDone) {
 #ifdef OCCT_DEBUG
       BRepLib_FaceError Err = MkF.Error();
-      cout << "Planar Face Error :" <<   Err << endl;
+      std::cout << "Planar Face Error :" <<   Err << std::endl;
 #endif
     }
     else {
@@ -702,7 +703,7 @@ static TopoDS_Edge BuildEdge(Handle(Geom_Curve)& C3d,
 			     const Standard_Real l,
 			     const Standard_Real Tol3d)
 {
-  gp_Pnt P1, P2, P;
+  gp_Pnt P;
   Standard_Real Tol1, Tol2, Tol, d;
 // Class BRep_Tool without fields and without Constructor :
 //  BRep_Tool BT;
@@ -710,11 +711,11 @@ static TopoDS_Edge BuildEdge(Handle(Geom_Curve)& C3d,
   TopoDS_Edge E;
 
 //  P1  = BT.Pnt(VF);
-  P1  = BRep_Tool::Pnt(VF);
+  const gp_Pnt P1  = BRep_Tool::Pnt(VF);
 //  Tol1 = BT.Tolerance(VF);
   Tol1 = BRep_Tool::Tolerance(VF);
 //  P2  = BT.Pnt(VL);
-  P2  = BRep_Tool::Pnt(VL);
+  const gp_Pnt P2  = BRep_Tool::Pnt(VL);
 //  Tol2 = BT.Tolerance(VF);
   Tol2 = BRep_Tool::Tolerance(VL);
   Tol = Max(Tol1, Tol2);
@@ -750,8 +751,6 @@ static TopoDS_Edge BuildEdge(Handle(Geom_Curve)& C3d,
   if (d > Tol1)
       B.UpdateVertex(VF, d);
 
-//  P1 = BT.Pnt(VL);
-  P1 = BRep_Tool::Pnt(VL);
   C3d->D0(l, P);
   d = P2.Distance(P);
   if (d > Tol2)
@@ -776,6 +775,19 @@ static TopoDS_Edge BuildEdge(Handle(Geom_Curve)& C3d,
   E = MkE.Edge();
   TopLoc_Location Loc;
   B.UpdateEdge(E, C2d, S, Loc, Tol3d);
+
+  const Handle(IntTools_Context) aNullCtx;
+  if (BOPTools_AlgoTools::IsMicroEdge(E, aNullCtx))
+  {
+    TopoDS_Vertex aV = VF;
+    B.UpdateVertex(aV, P1.Distance(P2));
+    B.MakeEdge(E);
+    B.UpdateEdge(E, C2d, S, TopLoc_Location(), Tol);
+    B.Add(E, TopoDS::Vertex(aV.Oriented(TopAbs_FORWARD)));
+    B.Add(E, TopoDS::Vertex(aV.Oriented(TopAbs_REVERSED)));
+    B.Range(E, f, l);
+    B.Degenerated(E, Standard_True);
+  }
 
   return E;
 }
@@ -914,7 +926,7 @@ static Standard_Boolean Filling(const TopoDS_Shape& EF,
   // Control the direction of the rotation
   Standard_Boolean ToReverseResult = Standard_False;
   gp_Vec d1u;
-  d1u = Surf->DN(0, (f1+l1)/2, 1, 0);
+  d1u = Surf->DN(0, aPrm[aMaxIdx], 1, 0);
   if (d1u.Angle(TangentOnPart1) > M_PI/2) { //Invert everything
     ToReverseResult = Standard_True;
     /*
@@ -1098,13 +1110,13 @@ static Standard_Boolean Filling(const TopoDS_Shape& EF,
 				  8, 8, 2*NbInt, 0);
     if (!App.HasResult()) {
 #ifdef OCCT_DEBUG
-      cout << "Filling_Approx : Pas de resultat" << endl;
+      std::cout << "Filling_Approx : Pas de resultat" << std::endl;
 #endif      
       return Standard_False;
     }
 #ifdef OCCT_DEBUG
-    cout <<  "Filling_Approx Error 3d = " << 
-      App.MaxError() << endl;
+    std::cout <<  "Filling_Approx Error 3d = " << 
+      App.MaxError() << std::endl;
 #endif
     Surf = App.Surface();
     Tol3d = App.MaxError();  
@@ -1319,7 +1331,7 @@ static void SetCommonEdgeInFace(BRepTools_Substitution& aSubstitute,
     }
   }
 #ifdef OCCT_DEBUG
-  if (!done) cout << "Substitution of Edge failed" << endl;
+  if (!done) std::cout << "Substitution of Edge failed" << std::endl;
 #endif  
 }
 */
@@ -1815,8 +1827,6 @@ BRepFill_Sweep::BRepFill_Sweep(const Handle(BRepFill_SectionLaw)& Section,
 			       const Standard_Boolean WithKPart) : 
 			       isDone(Standard_False),
 			       KPart(WithKPart)
-
-
 {
  mySec = Section;
  myLoc = Location;
@@ -1874,7 +1884,7 @@ BRepFill_Sweep::BRepFill_Sweep(const Handle(BRepFill_SectionLaw)& Section,
 
 #ifdef OCCT_DEBUG
   if (!issame) 
-    cout<<"Sweep Warning : Edge not SameRange in the limits"<<endl;
+    std::cout<<"Sweep Warning : Edge not SameRange in the limits"<<std::endl;
 #endif
 }
 
@@ -2092,11 +2102,11 @@ BRepFill_Sweep::BRepFill_Sweep(const Handle(BRepFill_SectionLaw)& Section,
   BRep_Builder B;
   Standard_Integer NbPath = ILast - IFirst;
   Standard_Integer NbLaw =  mySec->NbLaw();
-  Standard_Boolean uclose, vclose,  constSection, hasdegen = Standard_False;
+  Standard_Boolean uclose, vclose, global_vclose, constSection, hasdegen = Standard_False;
   constSection = mySec->IsConstant();
   uclose = mySec->IsUClosed();
-  vclose = (mySec->IsVClosed() && myLoc->IsClosed()) && 
-           (NbPath == myLoc->NbLaw()) && (myLoc->IsG1(0, myTol3d)>= 0);
+  global_vclose = (myLoc->IsClosed()) && (myLoc->IsG1(0, myTol3d)>= 0);
+  vclose = global_vclose && (mySec->IsVClosed()) && (NbPath == myLoc->NbLaw());
   Error = 0.;
 
   // (1) Construction of all surfaces
@@ -2554,7 +2564,7 @@ BRepFill_Sweep::BRepFill_Sweep(const Handle(BRepFill_SectionLaw)& Section,
       }
       if (Degenerated(isec, ipath)) { 
 #ifdef OCCT_DEBUG
-	cout << "Sweep : Degenerated case" << endl;
+	std::cout << "Sweep : Degenerated case" << std::endl;
 #endif
 	hasdegen = Standard_True;
         // Particular construction of edges
@@ -2675,7 +2685,10 @@ BRepFill_Sweep::BRepFill_Sweep(const Handle(BRepFill_SectionLaw)& Section,
 					   myTol3d);
 	else
         {
-          if (ipath != NbPath || vclose)
+          if (ipath != NbPath ||
+              vclose ||
+              (global_vclose && ILast == myLoc->NbLaw()+1))
+            
             UpdateEdge(TopoDS::Edge(VEdge(isec, ipath+1)), 
                        S, exuv, VLast);
           else //ipath == NbPath && !vclose => rebuild last edge
@@ -3210,7 +3223,7 @@ TopoDS_Shape BRepFill_Sweep::Tape(const Standard_Integer Index) const
 
     if (t1.Angle(t2) < myAngMin) {
 #ifdef OCCT_DEBUG
-      cout << "BRepFill_Sweep::PerformCorner : This is not a corner !" << endl;
+      std::cout << "BRepFill_Sweep::PerformCorner : This is not a corner !" << std::endl;
 #endif
       return;
     }
@@ -3320,7 +3333,7 @@ TopoDS_Shape BRepFill_Sweep::Tape(const Standard_Integer Index) const
   else if ((TheTransition == BRepFill_Right) ||
 	   aTrim.HasSection() ) { 
 #ifdef OCCT_DEBUG
-    cout << "Fail of TrimCorner" << endl;
+    std::cout << "Fail of TrimCorner" << std::endl;
 #endif
     return; // Nothing is touched
   }
@@ -3377,7 +3390,8 @@ TopoDS_Shape BRepFill_Sweep::Tape(const Standard_Integer Index) const
 	  // Filling
 	  B = Filling(It1.Value(), myFaces->Value(ii, I1),
 		      It2.Value(), myFaces->Value(ii, I2),
-		      myVEdgesModified, myTol3d, Axe, T1, Bord1, Bord2, FF);
+                      myVEdgesModified, myTol3d, Axe, T1,
+                      Bord1, Bord2, FF);
 	  
 	  if (B) {
 	    myAuxShape.Append(FF);
@@ -3397,7 +3411,7 @@ TopoDS_Shape BRepFill_Sweep::Tape(const Standard_Integer Index) const
 	}
       }
 #ifdef OCCT_DEBUG
-      else cout << "PerformCorner : Unsymmetry of free border" << endl;
+      else std::cout << "PerformCorner : Unsymmetry of free border" << std::endl;
 #endif
     }
   }

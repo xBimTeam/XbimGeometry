@@ -428,8 +428,10 @@ void IntAna_Curve::FindParameter(const gp_Pnt& theP,
                                  TColStd_ListOfReal& theParams) const
 {
   const Standard_Real aPIpPI = M_PI + M_PI,
-                      anEpsAng = 1.e-8,
-                      aSqTolPrecision=1.0e-8;
+    anEpsAng = 1.e-8,
+    InternalPrecision = 1.e-8, //precision of internal algorithm of values computation
+    aSqTolPrecision = Precision::SquareConfusion(); //for boundary points to check their coincidence with others
+  
   Standard_Real aTheta = 0.0;
   //
   switch (typequadric)
@@ -494,7 +496,15 @@ void IntAna_Curve::FindParameter(const gp_Pnt& theP,
     InternalUVValue(aParams[i], U, V, A, B, C, 
                     cost, sint, SigneSqrtDis);
     const gp_Pnt aP(InternalValue(U, V));
-    if (aP.SquareDistance(theP) < aSqTolPrecision)
+    
+    Standard_Real aSqTol;
+    if (aParams[i] == aTheta ||
+        (TwoCurves && aParams[i] == DomainSup + DomainSup - aTheta))
+      aSqTol = InternalPrecision;
+    else
+      aSqTol = aSqTolPrecision;
+    
+    if (aP.SquareDistance(theP) < aSqTol)
     {
       theParams.Append(aParams[i]);
     }
@@ -507,7 +517,7 @@ void IntAna_Curve::FindParameter(const gp_Pnt& theP,
 gp_Pnt IntAna_Curve::InternalValue(const Standard_Real U,
                                    const Standard_Real _V) const
 {
-  //-- cout<<" ["<<U<<","<<V<<"]";
+  //-- std::cout<<" ["<<U<<","<<V<<"]";
   Standard_Real V = _V;
   if(V > 100000.0 )   {   V= 100000.0; }       
   if(V < -100000.0 )  {   V=-100000.0; }      

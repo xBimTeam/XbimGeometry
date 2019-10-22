@@ -425,11 +425,9 @@ void IntTools_FaceFace::Perform(const TopoDS_Face& aF1,
     Standard_Real umin, umax, vmin, vmax;
     //
     myContext->UVBounds(myFace1, umin, umax, vmin, vmax);
-    CorrectPlaneBoundaries(umin, umax, vmin, vmax);
     myHS1->ChangeSurface().Load(S1, umin, umax, vmin, vmax);
     //
     myContext->UVBounds(myFace2, umin, umax, vmin, vmax);
-    CorrectPlaneBoundaries(umin, umax, vmin, vmax);
     myHS2->ChangeSurface().Load(S2, umin, umax, vmin, vmax);
     //
     Standard_Real TolAng = 1.e-8;
@@ -536,7 +534,7 @@ void IntTools_FaceFace::Perform(const TopoDS_Face& aF1,
         Sprintf(aBuff, "%s -p %+10.20f %+10.20f %+10.20f %+10.20f", aBuff, u1, v1, u2, v2);
       }
 
-      cout << aBuff << endl;
+      std::cout << aBuff << std::endl;
     }
 #endif
 
@@ -714,8 +712,8 @@ void IntTools_FaceFace::MakeCurve(const Standard_Integer Index,
   IntPatch_IType typl;
   Handle(Geom_Curve) newc;
   //
-  const Standard_Real TOLCHECK   =0.0000001;
-  const Standard_Real TOLANGCHECK=0.1;
+  const Standard_Real TOLCHECK    = 1.e-7;
+  const Standard_Real TOLANGCHECK = 1.e-6;
   //
   rejectSurface = Standard_False;
   reApprox = Standard_False;
@@ -818,11 +816,14 @@ void IntTools_FaceFace::MakeCurve(const Standard_Integer Index,
           aCurve.SetTolerance(aTolC);
         }
         //
-        aCurve.SetCurve(new Geom_TrimmedCurve(newc, fprm, lprm));
         if(myApprox1) { 
           Handle (Geom2d_Curve) C2d;
           GeomInt_IntSS::BuildPCurves(fprm, lprm, Tolpc,
                 myHS1->ChangeSurface().Surface(), newc, C2d);
+
+          if (C2d.IsNull())
+            continue;
+
           aCurve.SetFirstCurve2d(new Geom2d_TrimmedCurve(C2d, fprm, lprm));
         }
         //
@@ -830,6 +831,10 @@ void IntTools_FaceFace::MakeCurve(const Standard_Integer Index,
           Handle (Geom2d_Curve) C2d;
           GeomInt_IntSS::BuildPCurves(fprm, lprm, Tolpc,
                     myHS2->ChangeSurface().Surface(), newc, C2d);
+
+          if (C2d.IsNull())
+            continue;
+
           aCurve.SetSecondCurve2d(new Geom2d_TrimmedCurve(C2d, fprm, lprm));
         }
         //

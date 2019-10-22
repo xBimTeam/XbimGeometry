@@ -23,6 +23,7 @@
 #include <GeomAdaptor_HSurface.hxx>
 #include <gp_Vec.hxx>
 #include <Standard_RangeError.hxx>
+#include <Standard_NumericError.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(GeomEvaluator_OffsetSurface,GeomEvaluator_Surface)
 
@@ -191,16 +192,39 @@ static void derivatives(Standard_Integer theMaxOrder,
   else
   {
     for (i = 0; i <= theMaxOrder + theNU+ 1; i++)
+    {
       for (j = i; j <= theMaxOrder + theNV + 1; j++)
+      {
         if (i + j > theMinOrder)
         {
           theDerSurf.SetValue(i, j, theBasisSurf->DN(theU, theV, i, j));
-          if (i != j)
+          if (i != j
+           && j <= theDerSurf.UpperRow()
+           && i <= theDerSurf.UpperCol())
+          {
             theDerSurf.SetValue(j, i, theBasisSurf->DN(theU, theV, j, i));
+          }
         }
+      }
+    }
     for (i = 0; i <= theMaxOrder + theNU; i++)
       for (j = 0; j <= theMaxOrder + theNV; j++)
         theDerNUV.SetValue(i, j, CSLib::DNNUV(i, j, theDerSurf));
+  }
+}
+
+inline Standard_Boolean IsInfiniteCoord (const gp_Vec& theVec)
+{
+  return Precision::IsInfinite (theVec.X()) ||
+         Precision::IsInfinite (theVec.Y()) ||
+         Precision::IsInfinite (theVec.Z());
+}
+
+inline void CheckInfinite (const gp_Vec& theVecU, const gp_Vec& theVecV)
+{
+  if (IsInfiniteCoord (theVecU) || IsInfiniteCoord (theVecV))
+  {
+    throw Standard_NumericError ("GeomEvaluator_OffsetSurface: Evaluation of infinite parameters");
   }
 }
 
@@ -243,6 +267,9 @@ void GeomEvaluator_OffsetSurface::D0(
   {
     gp_Vec aD1U, aD1V;
     BaseD1 (aU, aV, theValue, aD1U, aD1V);
+
+    CheckInfinite (aD1U, aD1V);
+
     try 
     {
       CalculateD0(aU, aV, theValue, aD1U, aD1V);
@@ -268,6 +295,9 @@ void GeomEvaluator_OffsetSurface::D1(
   {
     gp_Vec aD2U, aD2V, aD2UV;
     BaseD2 (aU, aV, theValue, theD1U, theD1V, aD2U, aD2V, aD2UV);
+
+    CheckInfinite (theD1U, theD1V);
+
     try 
     {
       CalculateD1(aU, aV, theValue, theD1U, theD1V, aD2U, aD2V, aD2UV);
@@ -295,6 +325,9 @@ void GeomEvaluator_OffsetSurface::D2(
     gp_Vec aD3U, aD3V, aD3UUV, aD3UVV;
     BaseD3 (aU, aV, theValue, theD1U, theD1V,
             theD2U, theD2V, theD2UV, aD3U, aD3V, aD3UUV, aD3UVV);
+
+    CheckInfinite (theD1U, theD1V);
+
     try
     {
       CalculateD2 (aU, aV, theValue, theD1U, theD1V,
@@ -323,6 +356,9 @@ void GeomEvaluator_OffsetSurface::D3(
   {
     BaseD3 (aU, aV, theValue, theD1U, theD1V,
             theD2U, theD2V, theD2UV, theD3U, theD3V, theD3UUV, theD3UVV);
+
+    CheckInfinite (theD1U, theD1V);
+
     try
     {
       CalculateD3 (aU, aV, theValue, theD1U, theD1V,
@@ -355,6 +391,9 @@ gp_Vec GeomEvaluator_OffsetSurface::DN(
     gp_Pnt aP;
     gp_Vec aD1U, aD1V;
     BaseD1 (aU, aV, aP, aD1U, aD1V);
+
+    CheckInfinite (aD1U, aD1V);
+
     try
     {
       return CalculateDN (aU, aV, theDerU, theDerV, aD1U, aD1V);
@@ -466,7 +505,7 @@ void GeomEvaluator_OffsetSurface::CalculateD0(
       derivatives(MaxOrder, 1, theU, theV, myBaseAdaptor, 0, 0, AlongU, AlongV, L, DerNUV, DerSurf);
 
     gp_Dir Normal;
-    CSLib_NormalStatus NStatus;
+    CSLib_NormalStatus NStatus = CSLib_Singular;
     CSLib::Normal(MaxOrder, DerNUV, the_D1MagTol, theU, theV, Umin, Umax, Vmin, Vmax,
                   NStatus, Normal, OrderU, OrderV);
     if (NStatus == CSLib_InfinityOfSolutions)
@@ -776,7 +815,7 @@ gp_Vec GeomEvaluator_OffsetSurface::CalculateDN(
   CSLib::Normal(theD1U, theD1V, the_D1MagTol, NStatus, Normal);
   const Standard_Integer MaxOrder = (NStatus == CSLib_Defined) ? 0 : 3;
   Standard_Integer OrderU, OrderV;
-  TColgp_Array2OfVec DerNUV(0, MaxOrder + theNu, 0, MaxOrder + theNu);
+  TColgp_Array2OfVec DerNUV(0, MaxOrder + theNu, 0, MaxOrder + theNv);
   TColgp_Array2OfVec DerSurf(0, MaxOrder + theNu + 1, 0, MaxOrder + theNv + 1);
 
   Standard_Real Umin = 0, Umax = 0, Vmin = 0, Vmax = 0;

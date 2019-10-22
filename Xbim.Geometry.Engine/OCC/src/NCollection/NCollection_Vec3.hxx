@@ -65,12 +65,25 @@ public:
     v[2] = theZ;
   }
 
-  //! Constructor from 2-components vector.
-  explicit NCollection_Vec3 (const NCollection_Vec2<Element_t>& theVec2)
+  //! Constructor from 2-components vector + optional 3rd value.
+  explicit NCollection_Vec3 (const NCollection_Vec2<Element_t>& theVec2, Element_t theZ = Element_t(0))
   {
     v[0] = theVec2[0];
     v[1] = theVec2[1];
-    v[2] = Element_t(0);
+    v[2] = theZ;
+  }
+
+  //! Conversion constructor (explicitly converts some 3-component vector with other element type
+  //! to a new 3-component vector with the element type Element_t,
+  //! whose elements are static_cast'ed corresponding elements of theOtherVec3 vector)
+  //! @tparam OtherElement_t the element type of the other 3-component vector theOtherVec3
+  //! @param theOtherVec3 the 3-component vector that needs to be converted
+  template <typename OtherElement_t>
+  explicit NCollection_Vec3 (const NCollection_Vec3<OtherElement_t>& theOtherVec3)
+  {
+    v[0] = static_cast<Element_t> (theOtherVec3[0]);
+    v[1] = static_cast<Element_t> (theOtherVec3[1]);
+    v[2] = static_cast<Element_t> (theOtherVec3[2]);
   }
 
   //! Assign new values to the vector.
@@ -80,6 +93,14 @@ public:
   {
     v[0] = theX;
     v[1] = theY;
+    v[2] = theZ;
+  }
+
+  //! Assign new values to the vector.
+  void SetValues (const NCollection_Vec2<Element_t>& theVec2, Element_t theZ)
+  {
+    v[0] = theVec2.x();
+    v[1] = theVec2.y();
     v[2] = theZ;
   }
 
@@ -126,18 +147,6 @@ public:
 
   //! Alias to 3rd component as BLUE channel in RGB.
   Element_t& b() { return v[2]; }
-
-  //! @return XY-components modifiable vector
-  NCollection_Vec2<Element_t>& xy()
-  {
-    return *((NCollection_Vec2<Element_t>* )&v[0]);
-  }
-
-  //! @return YZ-components modifiable vector
-  NCollection_Vec2<Element_t>& yz()
-  {
-    return *((NCollection_Vec2<Element_t>* )&v[1]);
-  }
 
   //! Check this vector with another vector for equality (without tolerance!).
   bool IsEqual (const NCollection_Vec3& theOther) const
@@ -294,11 +303,28 @@ public:
     return *this;
   }
 
+  //! Compute per-component division.
+  NCollection_Vec3& operator/= (const NCollection_Vec3& theRight)
+  {
+    v[0] /= theRight.v[0];
+    v[1] /= theRight.v[1];
+    v[2] /= theRight.v[2];
+    return *this;
+  }
+
   //! Compute per-component division by scale factor.
-  NCollection_Vec3 operator/ (const Element_t theInvFactor)
+  NCollection_Vec3 operator/ (const Element_t theInvFactor) const
   {
     NCollection_Vec3 aResult (*this);
     return aResult /= theInvFactor;
+  }
+
+  //! Compute per-component division.
+  friend NCollection_Vec3 operator/ (const NCollection_Vec3& theLeft,
+                                     const NCollection_Vec3& theRight)
+  {
+    NCollection_Vec3 aResult = NCollection_Vec3 (theLeft);
+    return aResult /= theRight;
   }
 
   //! Computes the dot product.

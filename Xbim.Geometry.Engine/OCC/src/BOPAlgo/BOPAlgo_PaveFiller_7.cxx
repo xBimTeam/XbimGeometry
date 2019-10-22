@@ -169,20 +169,8 @@ class BOPAlgo_SplitEdge : public BOPAlgo_Algo  {
 };
 //
 //=======================================================================
-typedef NCollection_Vector
-  <BOPAlgo_SplitEdge> BOPAlgo_VectorOfSplitEdge; 
-//
-typedef BOPTools_ContextFunctor
-  <BOPAlgo_SplitEdge,
-  BOPAlgo_VectorOfSplitEdge,
-  Handle(IntTools_Context),
-  IntTools_Context> BOPAlgo_SplitEdgeFunctor;
-//
-typedef BOPTools_ContextCnt
-  <BOPAlgo_SplitEdgeFunctor,
-  BOPAlgo_VectorOfSplitEdge,
-  Handle(IntTools_Context)> BOPAlgo_SplitEdgeCnt;
-//
+typedef NCollection_Vector<BOPAlgo_SplitEdge> BOPAlgo_VectorOfSplitEdge;
+
 //=======================================================================
 //class    : BOPAlgo_MPC
 //purpose  : 
@@ -301,7 +289,7 @@ class BOPAlgo_MPC : public BOPAlgo_Algo  {
         UpdateVertices(aCopyE, myF);
       }
     }
-    catch (Standard_Failure)
+    catch (Standard_Failure const&)
     {
       AddError(new BOPAlgo_AlertBuildingPCurveFailed(TopoDS_Shape()));
     }
@@ -333,20 +321,8 @@ class BOPAlgo_MPC : public BOPAlgo_Algo  {
 };
 //
 //=======================================================================
-typedef NCollection_Vector
-  <BOPAlgo_MPC> BOPAlgo_VectorOfMPC; 
-//
-typedef BOPTools_ContextFunctor 
-  <BOPAlgo_MPC,
-  BOPAlgo_VectorOfMPC,
-  Handle(IntTools_Context), 
-  IntTools_Context> BOPAlgo_MPCFunctor;
-//
-typedef BOPTools_ContextCnt 
-  <BOPAlgo_MPCFunctor,
-  BOPAlgo_VectorOfMPC,
-  Handle(IntTools_Context)> BOPAlgo_MPCCnt;
-//
+typedef NCollection_Vector<BOPAlgo_MPC> BOPAlgo_VectorOfMPC;
+
 //=======================================================================
 //class    : BOPAlgo_BPC
 //purpose  : 
@@ -391,18 +367,8 @@ class BOPAlgo_BPC {
   Standard_Boolean myToUpdate;
 };
 //=======================================================================
-typedef NCollection_Vector
-  <BOPAlgo_BPC> BOPAlgo_VectorOfBPC; 
-//
-typedef BOPTools_Functor 
-  <BOPAlgo_BPC,
-  BOPAlgo_VectorOfBPC> BOPAlgo_BPCFunctor;
-//
-typedef BOPTools_Cnt 
-  <BOPAlgo_BPCFunctor,
-  BOPAlgo_VectorOfBPC> BOPAlgo_BPCCnt;
-//
-//
+typedef NCollection_Vector<BOPAlgo_BPC> BOPAlgo_VectorOfBPC;
+
 //=======================================================================
 // function: MakeSplitEdges
 // purpose: 
@@ -478,7 +444,7 @@ void BOPAlgo_PaveFiller::MakeSplitEdges()
                 aCB->SetEdge(nE);
                 // Compute tolerance of the common block and update the edge
                 Standard_Real aTol = BOPAlgo_Tools::ComputeToleranceOfCB(aCB, myDS, myContext);
-                myDS->UpdateEdgeTolerance(nE, aTol);
+                UpdateEdgeTolerance(nE, aTol);
               }
             }
             else if (aLPB.Extent() == 1)
@@ -524,12 +490,8 @@ void BOPAlgo_PaveFiller::MakeSplitEdges()
   //
   aNbVBSE=aVBSE.Length();
   //======================================================
-  BOPAlgo_SplitEdgeCnt::Perform(myRunParallel, aVBSE, myContext);
+  BOPTools_Parallel::Perform (myRunParallel, aVBSE, myContext);
   //======================================================
-  //
-  BOPDS_ShapeInfo aSI;
-  //
-  aSI.SetShapeType(TopAbs_EDGE);
   //
   for (k=0; k < aNbVBSE; ++k) {
     BOPAlgo_SplitEdge& aBSE=aVBSE(k);
@@ -540,13 +502,18 @@ void BOPAlgo_PaveFiller::MakeSplitEdges()
     Handle(BOPDS_PaveBlock) aPBk=aBSE.PaveBlock();
     Handle(BOPDS_CommonBlock)& aCBk=aBSE.CommonBlock();
     //
+    BOPDS_ShapeInfo aSI;
+    aSI.SetShapeType(TopAbs_EDGE);
     aSI.SetShape(aSp);
     aSI.ChangeBox()=aBox;
+    TColStd_ListOfInteger& aSubShapes = aSI.ChangeSubShapes();
+    aSubShapes.Append(aPBk->Pave1().Index());
+    aSubShapes.Append(aPBk->Pave2().Index());
     //
     nSp=myDS->Append(aSI);
     //
     if (!aCBk.IsNull()) {
-      myDS->UpdateEdgeTolerance(nSp, aBSE.Tolerance());
+      UpdateEdgeTolerance(nSp, aBSE.Tolerance());
       aCBk->SetEdge(nSp);
     }
     else {
@@ -644,54 +611,53 @@ void BOPAlgo_PaveFiller::MakePCurves()
         continue;
       }
       //
-      Handle(BOPDS_CommonBlock) aCB=myDS->CommonBlock(aPB);
-      if (aCB.IsNull()) {
-        continue;
-      }
-      //
-      const BOPDS_ListOfPaveBlock& aLPB=aCB->PaveBlocks();
-      if (aLPB.Extent()<2) {
-        continue;
-      }
-      //
-      BOPAlgo_MPC& aMPC=aVMPC.Appended();
-      //
-      aItLPB.Initialize(aLPB);
-      for(; aItLPB.More(); aItLPB.Next()) {
-        const Handle(BOPDS_PaveBlock)& aPBx=aItLPB.Value();
-        if (aPBx==aPB) {
-          continue;
+      BOPAlgo_MPC& aMPC = aVMPC.Appended();
+
+      Handle(BOPDS_CommonBlock) aCB = myDS->CommonBlock(aPB);
+
+      if (!aCB.IsNull())
+      {
+        const BOPDS_ListOfPaveBlock& aLPB = aCB->PaveBlocks();
+        if (aLPB.Extent() >= 2)
+        {
+          aItLPB.Initialize(aLPB);
+          for(; aItLPB.More(); aItLPB.Next()) {
+            const Handle(BOPDS_PaveBlock)& aPBx=aItLPB.Value();
+            if (aPBx==aPB) {
+              continue;
+            }
+            //
+            nEx=aPBx->OriginalEdge();
+            const TopoDS_Edge& aEx=(*(TopoDS_Edge *)(&myDS->Shape(nEx))); 
+            bHasPC=BOPTools_AlgoTools2D::HasCurveOnSurface (aEx, aF1F);
+            if (!bHasPC) {
+              continue;
+            }
+            //
+            Standard_Integer nV1x, nV2x;
+            Standard_Real aT1x, aT2x;
+            TopoDS_Vertex aV1x, aV2x;
+            TopoDS_Edge aEz;
+            //
+            aEz=aEx;
+            aEz.Orientation(TopAbs_FORWARD);
+            //
+            aPBx->Indices(nV1x, nV2x);
+            aPBx->Range(aT1x, aT2x);
+            //
+            aV1x=(*(TopoDS_Vertex *)(&myDS->Shape(nV1x)));
+            aV1x.Orientation(TopAbs_FORWARD); 
+            //
+            aV2x=(*(TopoDS_Vertex *)(&myDS->Shape(nV2x)));
+            aV2x.Orientation(TopAbs_REVERSED); 
+            //
+            aMPC.SetData(aEz, aV1x, aT1x, aV2x, aT2x);
+            //
+            break;
+          }
         }
-        //
-        nEx=aPBx->OriginalEdge();
-        const TopoDS_Edge& aEx=(*(TopoDS_Edge *)(&myDS->Shape(nEx))); 
-        bHasPC=BOPTools_AlgoTools2D::HasCurveOnSurface (aEx, aF1F);
-        if (!bHasPC) {
-          continue;
-        }
-        //
-        Standard_Integer nV1x, nV2x;
-        Standard_Real aT1x, aT2x;
-        TopoDS_Vertex aV1x, aV2x;
-        TopoDS_Edge aEz;
-        //
-        aEz=aEx;
-        aEz.Orientation(TopAbs_FORWARD);
-        //
-        aPBx->Indices(nV1x, nV2x);
-        aPBx->Range(aT1x, aT2x);
-        //
-        aV1x=(*(TopoDS_Vertex *)(&myDS->Shape(nV1x)));
-        aV1x.Orientation(TopAbs_FORWARD); 
-        //
-        aV2x=(*(TopoDS_Vertex *)(&myDS->Shape(nV2x)));
-        aV2x.Orientation(TopAbs_REVERSED); 
-        //
-        aMPC.SetData(aEz, aV1x, aT1x, aV2x, aT2x);
-        //
-        break;
       }
-      //
+
       aMPC.SetEdge(aE);
       aMPC.SetFace(aF1F);
       aMPC.SetProgressIndicator(myProgressIndicator);
@@ -753,7 +719,7 @@ void BOPAlgo_PaveFiller::MakePCurves()
   }//if (bPCurveOnS1 || bPCurveOnS2 ) {
   //
   //======================================================
-  BOPAlgo_MPCCnt::Perform(myRunParallel, aVMPC, myContext);
+  BOPTools_Parallel::Perform (myRunParallel, aVMPC, myContext);
   //======================================================
 
   // Add warnings of the failed projections and update edges with new pcurves
@@ -876,7 +842,7 @@ void BOPAlgo_PaveFiller::Prepare()
   }
   //
   //======================================================
-  BOPAlgo_BPCCnt::Perform(myRunParallel, aVBPC);
+  BOPTools_Parallel::Perform (myRunParallel, aVBPC);
   //======================================================
 
   // pcurves are built, and now update edges

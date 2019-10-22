@@ -15,7 +15,8 @@
 #ifndef _math_Vector_HeaderFile
 #define _math_Vector_HeaderFile
 
-#include <math_SingleTab.hxx>
+#include <NCollection_Array1.hxx>
+#include <NCollection_LocalArray.hxx>
 #include <gp_XY.hxx>
 #include <gp_XYZ.hxx>
 
@@ -70,7 +71,7 @@ public:
 
   //! Constructs a vector in the range [theLower..theUpper]
   //! with the "c array" theTab.
-  Standard_EXPORT math_Vector(const Standard_Address theTab, const Standard_Integer theLower, const Standard_Integer theUpper);
+  Standard_EXPORT math_Vector(const Standard_Real* theTab, const Standard_Integer theLower, const Standard_Integer theUpper);
 
   //! Constructor for converting gp_XY to math_Vector
   Standard_EXPORT math_Vector(const gp_XY& Other);
@@ -88,19 +89,19 @@ public:
   //! Returns the length of a vector
   inline Standard_Integer Length() const
   {
-    return UpperIndex - LowerIndex +1;
+    return Array.Length();
   }
 
   //! Returns the value of the theLower index of a vector.
   inline Standard_Integer Lower() const
   {
-    return LowerIndex;
+    return Array.Lower();
   }
 
   //! Returns the value of the theUpper index of a vector.
   inline Standard_Integer Upper() const
   {
-    return UpperIndex;
+    return Array.Upper();
   }
 
   //! Returns the value or the square  of the norm of this vector.
@@ -127,7 +128,7 @@ public:
   //! Exceptions
   //! Standard_NullValue if this vector is null (i.e. if its norm is
   //! less than or equal to Standard_Real::RealEpsilon().
-  Standard_EXPORT math_Vector Normalized() const;
+  Standard_EXPORT Standard_NODISCARD math_Vector Normalized() const;
 
   //! Inverts this vector and assigns the result to this vector.
   Standard_EXPORT void Invert();
@@ -156,15 +157,15 @@ public:
   }
 
   //! returns the product of a vector and a real value.
-  Standard_EXPORT math_Vector Multiplied(const Standard_Real theRight) const;
+  Standard_EXPORT Standard_NODISCARD math_Vector Multiplied(const Standard_Real theRight) const;
 
-  math_Vector operator*(const Standard_Real theRight) const
+  Standard_NODISCARD math_Vector operator*(const Standard_Real theRight) const
   {
     return Multiplied(theRight);
   }
 
   //! returns the product of a vector and a real value.
-  Standard_EXPORT math_Vector TMultiplied(const Standard_Real theRight) const;
+  Standard_EXPORT Standard_NODISCARD math_Vector TMultiplied(const Standard_Real theRight) const;
 
   friend inline math_Vector operator* (const Standard_Real theLeft, const math_Vector& theRight) 
   {
@@ -182,9 +183,9 @@ public:
 
   //! divides a vector by the value "theRight".
   //! An exception is raised if "theRight" = 0.
-  Standard_EXPORT math_Vector Divided(const Standard_Real theRight) const;
+  Standard_EXPORT Standard_NODISCARD math_Vector Divided(const Standard_Real theRight) const;
 
-  math_Vector operator/(const Standard_Real theRight) const
+  Standard_NODISCARD math_Vector operator/(const Standard_Real theRight) const
   {
     return Divided(theRight);
   }
@@ -204,9 +205,9 @@ public:
   //! adds the vector theRight to a vector.
   //! An exception is raised if the vectors have not the same length.
   //! An exception is raised if the lengths are not equal.
-  Standard_EXPORT math_Vector Added(const math_Vector& theRight) const;
+  Standard_EXPORT Standard_NODISCARD math_Vector Added(const math_Vector& theRight) const;
 
-  math_Vector operator+(const math_Vector& theRight) const
+  Standard_NODISCARD math_Vector operator+(const math_Vector& theRight) const
   {
     return Added(theRight);
   }
@@ -241,14 +242,24 @@ public:
   //! Subtract whenever possible.
   Standard_EXPORT void Subtract(const math_Vector& theLeft,const math_Vector& theRight);
 
-  //! accesses (in read or write mode) the value of index "theNum" of a vector.
-  inline Standard_Real& Value(const Standard_Integer theNum) const
+  //! accesses the value of index "theNum" of a vector.
+  const Standard_Real& Value (const Standard_Integer theNum) const
   {
-    Standard_RangeError_Raise_if(theNum < LowerIndex || theNum > UpperIndex, " ");
     return Array(theNum);
   }
 
-  Standard_Real& operator()(const Standard_Integer theNum) const
+  //! accesses (in read or write mode) the value of index "theNum" of a vector.
+  inline Standard_Real& Value (const Standard_Integer theNum)
+  {
+    return Array(theNum);
+  }
+
+  const Standard_Real& operator()(const Standard_Integer theNum) const
+  {
+    return Value(theNum);
+  }
+
+  Standard_Real& operator()(const Standard_Integer theNum)
   {
     return Value(theNum);
   }
@@ -264,16 +275,16 @@ public:
 
   //! returns the inner product of 2 vectors.
   //! An exception is raised if the lengths are not equal.
-  Standard_EXPORT Standard_Real Multiplied(const math_Vector& theRight) const;
-  Standard_Real operator*(const math_Vector& theRight) const
+  Standard_EXPORT Standard_NODISCARD Standard_Real Multiplied(const math_Vector& theRight) const;
+  Standard_NODISCARD Standard_Real operator*(const math_Vector& theRight) const
   {
     return Multiplied(theRight);
   }
 
   //! returns the product of a vector by a matrix.
-  Standard_EXPORT math_Vector Multiplied(const math_Matrix& theRight) const;
+  Standard_EXPORT Standard_NODISCARD math_Vector Multiplied(const math_Matrix& theRight) const;
 
-  math_Vector operator*(const math_Matrix& theRight) const
+  Standard_NODISCARD math_Vector operator*(const math_Matrix& theRight) const
   {
     return Multiplied(theRight);
   }
@@ -297,9 +308,9 @@ public:
 
   //! returns the subtraction of "theRight" from "me".
   //! An exception is raised if the vectors have not the same length.
-  Standard_EXPORT math_Vector Subtracted(const math_Vector& theRight) const;
+  Standard_EXPORT Standard_NODISCARD math_Vector Subtracted(const math_Vector& theRight) const;
 
-  math_Vector operator-(const math_Vector& theRight) const
+  Standard_NODISCARD math_Vector operator-(const math_Vector& theRight) const
   {
     return Subtracted(theRight);
   }
@@ -327,9 +338,9 @@ protected:
 
 private:
 
-  Standard_Integer LowerIndex;
-  Standard_Integer UpperIndex;
-  math_SingleTab<Standard_Real> Array;
+  NCollection_LocalArray<Standard_Real, 512> myLocArray;
+  NCollection_Array1<Standard_Real> Array;
+
 };
 
 #endif

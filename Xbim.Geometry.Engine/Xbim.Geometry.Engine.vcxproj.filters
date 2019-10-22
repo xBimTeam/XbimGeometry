@@ -3,565 +3,574 @@
   <!-- Filters -->
   <ItemGroup>
     <Filter Include="Source files">
-      <UniqueIdentifier>{51d147f0-5ccd-4ae2-b555-c3768de65c96}</UniqueIdentifier>
+      <UniqueIdentifier>{57e20155-797b-464a-bef1-412f3de82912}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\XbimGeometry">
-      <UniqueIdentifier>{d074d838-7542-4438-a7a9-6407f3b7e580}</UniqueIdentifier>
+      <UniqueIdentifier>{7ac0d283-a7e0-4d6e-98f6-a2c305c8dcaf}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKShHealing">
-      <UniqueIdentifier>{f1bfe10f-b865-4ea3-9de7-93189ba7f1b6}</UniqueIdentifier>
+      <UniqueIdentifier>{eb8f6a0e-cfdd-4694-a5d6-d4cad5c17906}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKShHealing\ShapeBuild">
-      <UniqueIdentifier>{cd4c7c08-4b86-4cd4-8d59-caebaeb0e0c6}</UniqueIdentifier>
+      <UniqueIdentifier>{5bfa27ed-593c-4710-9bf4-bf35747354b8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKShHealing\ShapeExtend">
-      <UniqueIdentifier>{1e59e229-8606-4c0b-a82c-ed53fd00b05b}</UniqueIdentifier>
+      <UniqueIdentifier>{6f9de460-9ea2-472a-8ed0-86069d4baad1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKShHealing\ShapeConstruct">
-      <UniqueIdentifier>{cfe34bfc-b12b-4be9-a5d1-c31451519313}</UniqueIdentifier>
+      <UniqueIdentifier>{9a812091-ab74-4658-a83c-fbcf412da1cb}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKShHealing\ShapeCustom">
-      <UniqueIdentifier>{2c44ac95-f2b3-4f2a-bdf1-b53272fdd553}</UniqueIdentifier>
+      <UniqueIdentifier>{316c867a-0d8d-4dbc-8a5f-82a889e2fe4c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKShHealing\ShapeAnalysis">
-      <UniqueIdentifier>{ad7b09fe-7ee4-4c36-b2cd-854a2b727e41}</UniqueIdentifier>
+      <UniqueIdentifier>{4462f54d-764a-4aee-8584-a9029ad2366a}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKShHealing\ShapeFix">
-      <UniqueIdentifier>{2818466f-bbc3-45c3-bb8b-b63f18786122}</UniqueIdentifier>
+      <UniqueIdentifier>{57c244a1-6ace-48e3-8f7e-1883e68589bc}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKShHealing\ShapeUpgrade">
-      <UniqueIdentifier>{9b7eecc3-ba9e-4a9f-b7fd-a383fc1b92d7}</UniqueIdentifier>
+      <UniqueIdentifier>{d08b455f-b110-4ec9-855e-85802ef0fb2d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKShHealing\ShapeAlgo">
-      <UniqueIdentifier>{a6a243e5-3e42-4367-98b1-4089e9100a68}</UniqueIdentifier>
+      <UniqueIdentifier>{c315e651-3f45-4f9b-9472-c3208648f864}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKShHealing\ShapeProcess">
-      <UniqueIdentifier>{28e469df-956b-4cd5-b032-bc6b2d14983c}</UniqueIdentifier>
+      <UniqueIdentifier>{f9ff77fd-60b0-43fa-bb8d-b1ea862a03ec}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKShHealing\ShapeProcessAPI">
-      <UniqueIdentifier>{293db7f8-92a0-4070-9dc1-3da459869ccf}</UniqueIdentifier>
+      <UniqueIdentifier>{ea4f7492-8aed-48a4-9d8a-ccba0c9ca65c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBRep">
-      <UniqueIdentifier>{aa04d1f5-c844-48ea-aa85-02b0a100a074}</UniqueIdentifier>
+      <UniqueIdentifier>{bba802ac-e71f-4676-bc89-978c25e0cde3}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBRep\TopoDS">
-      <UniqueIdentifier>{bd7c5d1c-5c2d-4971-b450-101341e3e7f1}</UniqueIdentifier>
+      <UniqueIdentifier>{068d45e7-c441-4b89-aa7e-51a2188265bf}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBRep\TopExp">
-      <UniqueIdentifier>{3f9e5b7f-ddab-47a4-965e-1435ad5111c4}</UniqueIdentifier>
+      <UniqueIdentifier>{7121fb34-78ea-4257-93f6-0bca925893d9}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBRep\TopTools">
-      <UniqueIdentifier>{f5b940a0-06ea-4521-b9d1-39f002c8db36}</UniqueIdentifier>
+      <UniqueIdentifier>{4af55c08-ad48-4d7c-b8cd-f8a0119f235a}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBRep\BRep">
-      <UniqueIdentifier>{b72befb3-4e3a-4c0f-86e1-b063a4b1bf65}</UniqueIdentifier>
+      <UniqueIdentifier>{978eec4c-a833-42c5-ab7c-782d21002788}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBRep\BRepLProp">
-      <UniqueIdentifier>{e99c2db4-80bb-4f0c-9821-3c49cb5af771}</UniqueIdentifier>
+      <UniqueIdentifier>{1ded2496-32ce-4733-97d3-5e06c01bb958}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBRep\BRepAdaptor">
-      <UniqueIdentifier>{75374dbb-acbc-4239-b694-eb735472f25e}</UniqueIdentifier>
+      <UniqueIdentifier>{4de456cf-3fc2-4801-b146-95036c60cd7f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBRep\BRepTools">
-      <UniqueIdentifier>{5b82b040-bdbc-4189-a2e0-f64f3a662af0}</UniqueIdentifier>
+      <UniqueIdentifier>{ac153f65-2bf6-4107-bd4c-fa3ff02da0a5}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBRep\BinTools">
-      <UniqueIdentifier>{1b4f4d8e-2eb5-4e2e-9efe-9770374237d4}</UniqueIdentifier>
+      <UniqueIdentifier>{04e06805-f40a-436a-a6e4-3f10247517fb}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMath">
-      <UniqueIdentifier>{3477d989-d726-46c5-a00b-191d3bb6b665}</UniqueIdentifier>
+      <UniqueIdentifier>{2f0dd029-f1ae-4f5e-a08a-d693aed73502}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMath\math">
-      <UniqueIdentifier>{9644ccda-5782-44ff-ade4-88712f5ba39e}</UniqueIdentifier>
+      <UniqueIdentifier>{5308df6e-ad2b-4218-970a-18fa3cb59021}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMath\ElCLib">
-      <UniqueIdentifier>{5051a733-3abf-4ba9-8cd4-ab27af800836}</UniqueIdentifier>
+      <UniqueIdentifier>{0bbd39d6-5a20-42d3-a0e7-6c55b2d95ccc}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMath\ElSLib">
-      <UniqueIdentifier>{6330be44-4815-45ef-bb0b-9cc48c6ec73d}</UniqueIdentifier>
+      <UniqueIdentifier>{f5cce39a-68ad-4b95-bd61-37ffc4abe1d8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMath\BSplCLib">
-      <UniqueIdentifier>{61ef6429-3786-4df1-ae4e-d461096590ab}</UniqueIdentifier>
+      <UniqueIdentifier>{9be95d70-4770-4eaf-a74b-538da618d24b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMath\BSplSLib">
-      <UniqueIdentifier>{87105de9-eed7-4c7c-a6cc-37e24f4c0e0b}</UniqueIdentifier>
+      <UniqueIdentifier>{4a160908-5622-4a49-8bf7-31023ff42951}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMath\PLib">
-      <UniqueIdentifier>{09e62003-6186-48a1-81fe-4b7c1ef2af0a}</UniqueIdentifier>
+      <UniqueIdentifier>{7db9a7e8-af54-4501-9b4b-d63cf74492a9}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMath\Precision">
-      <UniqueIdentifier>{6742484c-3c1a-479a-854d-13f69eb1a402}</UniqueIdentifier>
+      <UniqueIdentifier>{e5eda420-d1e0-4659-a0de-c4333b55af85}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMath\GeomAbs">
-      <UniqueIdentifier>{ba0eb83b-27e8-4537-8b16-7530939e8f59}</UniqueIdentifier>
+      <UniqueIdentifier>{f46ce961-c882-4457-ae99-3cf024bfb7fd}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMath\Poly">
-      <UniqueIdentifier>{16be8568-58c3-4a38-b02b-b9a3617841f8}</UniqueIdentifier>
+      <UniqueIdentifier>{c9e13046-48c7-42b3-bdec-840f435a597b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMath\CSLib">
-      <UniqueIdentifier>{7f3e689b-de00-4e44-b69c-a07f40c20ef5}</UniqueIdentifier>
+      <UniqueIdentifier>{070122ae-6fc2-4896-89ab-b974aa7e9563}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMath\Convert">
-      <UniqueIdentifier>{e2d83dd6-37da-43bd-b4f0-19accb116548}</UniqueIdentifier>
+      <UniqueIdentifier>{394972bd-ce2c-48eb-854d-f22f4e4b949c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMath\Bnd">
-      <UniqueIdentifier>{34673d88-6dc2-46a0-a533-fe7586f4f020}</UniqueIdentifier>
+      <UniqueIdentifier>{c8e5f4f8-6214-4ba8-8661-3eb8d0c530a5}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMath\BVH">
-      <UniqueIdentifier>{4c244d62-5dbe-4a9d-9e56-339fd03c3bbc}</UniqueIdentifier>
+      <UniqueIdentifier>{7c54c665-e3d2-4738-9e27-734f483b5cd0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMath\gp">
-      <UniqueIdentifier>{858148ce-0de3-4bb7-b92f-0515564a98ab}</UniqueIdentifier>
+      <UniqueIdentifier>{e4b1714c-9672-4b41-a7a2-69ff64149981}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMath\TColgp">
-      <UniqueIdentifier>{586eb72b-c91d-449a-9fde-c9a5487eba82}</UniqueIdentifier>
+      <UniqueIdentifier>{e772a2a1-9bc8-4a40-81ed-bed9a719fc8d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMath\TopLoc">
-      <UniqueIdentifier>{fce18153-4992-4c56-9d84-763e20c4fbff}</UniqueIdentifier>
+      <UniqueIdentifier>{2f72f984-f258-48d3-b717-3060e56942ce}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMath\Expr">
-      <UniqueIdentifier>{2eb0244f-d064-4ace-9869-ba6bd567bca1}</UniqueIdentifier>
+      <UniqueIdentifier>{676514ec-0d99-4b78-b31a-8116e59d6c70}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMath\ExprIntrp">
-      <UniqueIdentifier>{5cdbc9fe-10e0-49ee-b6eb-48f0098f24a5}</UniqueIdentifier>
+      <UniqueIdentifier>{34630d0b-b180-48eb-844d-a575521c6c20}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKernel">
-      <UniqueIdentifier>{4141e1ba-c736-4a51-acc9-b92ec22eba51}</UniqueIdentifier>
+      <UniqueIdentifier>{d1233309-5056-4b78-a14c-3e6d99db4d3c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKernel\FSD">
-      <UniqueIdentifier>{5f192dd7-7a3f-4a81-9af9-e38624baf6c3}</UniqueIdentifier>
+      <UniqueIdentifier>{19482118-9d0e-423d-9e3e-0506e1b3c519}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKernel\MMgt">
-      <UniqueIdentifier>{237135c6-ee3a-4680-90d5-1af1fc9e8173}</UniqueIdentifier>
+      <UniqueIdentifier>{d13e66ca-9302-49a1-8b46-b669bc863338}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKernel\OSD">
-      <UniqueIdentifier>{5ec9c933-f5a9-4e6a-a91f-6b08814b3eb2}</UniqueIdentifier>
+      <UniqueIdentifier>{0b6e8523-1eea-439d-9815-8cf2a66c0d62}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKernel\Plugin">
-      <UniqueIdentifier>{679f0762-877b-4476-bacc-0a207f098e7c}</UniqueIdentifier>
+      <UniqueIdentifier>{5beec23b-8d5b-4587-9305-6544146ac4d7}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKernel\Quantity">
-      <UniqueIdentifier>{fc73cd59-4da8-4d6b-8a34-9c7f6fb30a93}</UniqueIdentifier>
+      <UniqueIdentifier>{58405c9e-9ee4-4b1e-bb2e-c1f1de1d8d58}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKernel\Resource">
-      <UniqueIdentifier>{ce4ccdec-15df-4451-a0cc-f99d0f3aa93f}</UniqueIdentifier>
+      <UniqueIdentifier>{537bebbe-137e-40d1-9d43-3856a8f03806}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKernel\Standard">
-      <UniqueIdentifier>{0da9362a-5ab9-4256-bea5-1d99308213fb}</UniqueIdentifier>
+      <UniqueIdentifier>{7ce9ba3e-3aac-42fb-ba5d-089250d41f4c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKernel\StdFail">
-      <UniqueIdentifier>{715b2b11-f377-40e4-b135-6ea78b626bbd}</UniqueIdentifier>
+      <UniqueIdentifier>{61ed1437-92b1-45c2-a415-165795b1b9d1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKernel\Storage">
-      <UniqueIdentifier>{ed85efe8-a987-4e19-a1e9-a32a98e57301}</UniqueIdentifier>
+      <UniqueIdentifier>{bd8c41ab-b208-445b-84b3-23c1ee3a8e38}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKernel\TColStd">
-      <UniqueIdentifier>{31666e23-48b8-42d1-98fc-1153569f6e78}</UniqueIdentifier>
+      <UniqueIdentifier>{6337768e-a095-4aeb-a1d7-cae23f7c7d52}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKernel\TCollection">
-      <UniqueIdentifier>{0aa95ccd-9616-457a-96d5-428fd989730b}</UniqueIdentifier>
+      <UniqueIdentifier>{593195a1-bced-4ea5-bc86-7e86f57b3066}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKernel\TShort">
-      <UniqueIdentifier>{5d873811-a70f-4abe-a9b3-39f4e0de5f36}</UniqueIdentifier>
+      <UniqueIdentifier>{b8dd030c-d1f9-4537-9433-4e084ecf7561}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKernel\Units">
-      <UniqueIdentifier>{0f497c20-095a-49f9-b61b-cb99a12c8d34}</UniqueIdentifier>
+      <UniqueIdentifier>{19b034b2-1d7a-4d32-a739-034604058191}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKernel\UnitsAPI">
-      <UniqueIdentifier>{ff37d670-18c8-4017-be33-bf877c2eda4c}</UniqueIdentifier>
+      <UniqueIdentifier>{242604a7-966f-4f6a-9c34-ee5863f270a7}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKernel\NCollection">
-      <UniqueIdentifier>{944a07a3-ed17-479c-8f24-f6976d78318b}</UniqueIdentifier>
+      <UniqueIdentifier>{2f8672e7-9a7b-45d1-9051-84cc34dde407}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKernel\Message">
-      <UniqueIdentifier>{9bcb04c3-81a3-4c71-bd51-a06e568ceaef}</UniqueIdentifier>
+      <UniqueIdentifier>{1a637959-dfd1-4efc-9163-840bca5273b3}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKG2d">
-      <UniqueIdentifier>{63b1a2ec-fc4f-4642-802b-9e3df562f7d0}</UniqueIdentifier>
+      <UniqueIdentifier>{057b3c64-90c9-4cf0-a58b-38bdde9ee66b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKG2d\Geom2d">
-      <UniqueIdentifier>{ec90270f-9c24-4c96-b6b4-e44a23c02eea}</UniqueIdentifier>
+      <UniqueIdentifier>{8bcefc90-f573-4033-bf14-d0824fe83ee6}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKG2d\LProp">
-      <UniqueIdentifier>{26ee8af9-4d31-4c3d-8a75-35ddf2c6cb38}</UniqueIdentifier>
+      <UniqueIdentifier>{7b1ce35f-bfe4-408b-b18d-139238fb94a9}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKG2d\TColGeom2d">
-      <UniqueIdentifier>{68345d28-38a1-42ee-bd3b-3328cb95341c}</UniqueIdentifier>
+      <UniqueIdentifier>{074526e8-eb7b-4fff-87b4-75bdf6d6df1d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKG2d\Adaptor2d">
-      <UniqueIdentifier>{bc3d4132-f63b-40a2-9d7f-ab57e4839974}</UniqueIdentifier>
+      <UniqueIdentifier>{3310f8dc-b237-4279-8c76-975c2980c088}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKG2d\Geom2dLProp">
-      <UniqueIdentifier>{d1b09730-106a-4e5c-99cb-da0cfd2113be}</UniqueIdentifier>
+      <UniqueIdentifier>{56ddc065-2512-4efb-a8e9-e92ce153e7bc}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKG2d\Geom2dAdaptor">
-      <UniqueIdentifier>{c4829ffc-42f6-42f1-a7e2-39dd9c4713a6}</UniqueIdentifier>
+      <UniqueIdentifier>{1e90306b-a01c-4b7e-b4f8-e50204dc6954}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKG2d\Geom2dEvaluator">
-      <UniqueIdentifier>{5e63c6c6-095d-4be2-852a-3c9f23461424}</UniqueIdentifier>
+      <UniqueIdentifier>{82f8e355-6c10-470f-ade4-2af5ebcebac7}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKG3d">
-      <UniqueIdentifier>{4b9ba4d0-9878-4e94-a03d-8a774101c955}</UniqueIdentifier>
+      <UniqueIdentifier>{06d04f6a-4b2e-49da-a677-399812faa291}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKG3d\Geom">
-      <UniqueIdentifier>{3cba4c40-e13d-4bf6-b711-6f60c4d986da}</UniqueIdentifier>
+      <UniqueIdentifier>{c6b2e4ab-ecca-474c-8000-837c8c0ee8fe}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKG3d\TColGeom">
-      <UniqueIdentifier>{f8a4b089-097b-4532-9837-cfd29e057bd8}</UniqueIdentifier>
+      <UniqueIdentifier>{33a143ca-c277-40a6-8e09-98128aaee72a}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKG3d\GeomAdaptor">
-      <UniqueIdentifier>{a9a71183-ca90-426e-8971-1485829b7955}</UniqueIdentifier>
+      <UniqueIdentifier>{eff76e68-5069-428f-a37f-7c08c18b0027}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKG3d\AdvApprox">
-      <UniqueIdentifier>{adc2eaa0-ddf9-4159-9a69-eef70aab522b}</UniqueIdentifier>
+      <UniqueIdentifier>{90018aa0-6685-45a8-bde5-1a327672a4fa}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKG3d\GeomLProp">
-      <UniqueIdentifier>{12348a34-399a-4ecd-ada7-37f8ece6f121}</UniqueIdentifier>
+      <UniqueIdentifier>{eb002420-f837-4ee0-91dd-758e9fa24bf2}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKG3d\Adaptor3d">
-      <UniqueIdentifier>{8e4770a0-f828-4931-a143-f6fc426889d1}</UniqueIdentifier>
+      <UniqueIdentifier>{cda7bac4-28c7-4e55-be5b-9a71e6fc55e0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKG3d\LProp3d">
-      <UniqueIdentifier>{41aa94dd-be3f-495c-b280-bebc16dcd11c}</UniqueIdentifier>
+      <UniqueIdentifier>{478d46c7-d6b3-49d3-bc7c-a00d4a2be9aa}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKG3d\TopAbs">
-      <UniqueIdentifier>{d1b78928-75de-4411-8762-29e6044e72ce}</UniqueIdentifier>
+      <UniqueIdentifier>{71611f72-aa63-4bfe-8b87-c425c5c4f81d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKG3d\GeomEvaluator">
-      <UniqueIdentifier>{3f1c0c0a-e5b0-4688-9301-dae74cd6c0ad}</UniqueIdentifier>
+      <UniqueIdentifier>{9baa22aa-b318-430e-89ee-2acabf894196}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKG3d\GProp">
-      <UniqueIdentifier>{94b9b1bc-26e5-4b40-aadd-f2611bffd21b}</UniqueIdentifier>
+      <UniqueIdentifier>{dfe4da63-0f25-4184-a9d0-74c2faef4115}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase">
-      <UniqueIdentifier>{50ee9028-68ca-484d-a280-ac18e4b9f011}</UniqueIdentifier>
+      <UniqueIdentifier>{d8532989-9d19-4a93-a646-47a903d28f9b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\ProjLib">
-      <UniqueIdentifier>{ff5a441f-7706-43b4-984a-60b4dd6132f1}</UniqueIdentifier>
+      <UniqueIdentifier>{374c6199-65ac-4210-9493-4342512c72cc}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\GeomProjLib">
-      <UniqueIdentifier>{30f8bdbf-7973-4a94-93f3-1280ee3f89a5}</UniqueIdentifier>
+      <UniqueIdentifier>{205c5a5b-9522-440e-b6de-030fdda215ef}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\GCPnts">
-      <UniqueIdentifier>{251ac270-64c7-484a-9864-41953521a7bd}</UniqueIdentifier>
+      <UniqueIdentifier>{838cb57f-0af6-4ef2-950e-9afa3ebd363f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\CPnts">
-      <UniqueIdentifier>{a92546e5-9392-4d2c-95dc-8f2cad3760cc}</UniqueIdentifier>
+      <UniqueIdentifier>{33d26725-2805-4eee-af48-a9859a87b982}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\Approx">
-      <UniqueIdentifier>{b40b200a-8115-4507-93b3-19db32796760}</UniqueIdentifier>
+      <UniqueIdentifier>{6dea7495-4ef3-410b-9100-1a5e7fe6c59a}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\AppParCurves">
-      <UniqueIdentifier>{55099d0f-c418-4dd4-a632-2c6dccfeb5ee}</UniqueIdentifier>
+      <UniqueIdentifier>{0017606b-d1f0-4aec-9b81-007f1e665add}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\FEmTool">
-      <UniqueIdentifier>{8456ba80-22b0-4957-8973-8915bf26558c}</UniqueIdentifier>
+      <UniqueIdentifier>{f4ed40de-62e5-4db4-bbbb-685700a45f39}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\AppCont">
-      <UniqueIdentifier>{bcc0501e-9b6a-4181-8860-0b3b22a9158d}</UniqueIdentifier>
+      <UniqueIdentifier>{fa8e9951-7023-43c7-a390-371832ed05b7}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\Extrema">
-      <UniqueIdentifier>{0e4decfa-7e8f-4201-bbe2-903fb424e101}</UniqueIdentifier>
+      <UniqueIdentifier>{fcc37922-8504-41d2-bbef-28d0c3c632b6}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\IntAna">
-      <UniqueIdentifier>{d3634500-8aa6-45bd-922b-930ffd83dd73}</UniqueIdentifier>
+      <UniqueIdentifier>{14692f4a-3d9f-41c6-9a62-9d81afe3acc5}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\IntAna2d">
-      <UniqueIdentifier>{ed07157d-8a34-42a2-93d5-dac462bee23c}</UniqueIdentifier>
+      <UniqueIdentifier>{64100586-9ba5-47e8-9af7-6fab26d30a19}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\GeomConvert">
-      <UniqueIdentifier>{e53d8e2f-1de8-4499-bf7c-7bccb1938a9f}</UniqueIdentifier>
+      <UniqueIdentifier>{c5963d71-a293-447d-96aa-be0fd207a128}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\AdvApp2Var">
-      <UniqueIdentifier>{1c96f735-3d57-4dfb-a059-6215f4b1d3d2}</UniqueIdentifier>
+      <UniqueIdentifier>{08b8abe4-fe8f-4080-8928-c5c8d1ab07a3}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\GeomLib">
-      <UniqueIdentifier>{ec4a8fa5-55b2-4afe-8963-0d6598532b61}</UniqueIdentifier>
+      <UniqueIdentifier>{93179c39-f01d-4cf4-89af-117923742172}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\Geom2dConvert">
-      <UniqueIdentifier>{7181a45d-fe4c-49f8-81ea-990927d2762a}</UniqueIdentifier>
+      <UniqueIdentifier>{86d703af-4b68-4471-b8d4-54b81a9ab7eb}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\Hermit">
-      <UniqueIdentifier>{133a3da5-5004-4af5-b7bb-14015b5afef8}</UniqueIdentifier>
+      <UniqueIdentifier>{4f3f9575-cc04-493c-8f37-83a230f5872d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\BndLib">
-      <UniqueIdentifier>{1403dfd1-a36a-4575-9d61-140e37c2c71a}</UniqueIdentifier>
+      <UniqueIdentifier>{ccca6317-65f6-4ab3-ae9f-db6c05d8dedd}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\AppDef">
-      <UniqueIdentifier>{2440c865-6aae-4f3a-95d6-ca06cfc1dfe3}</UniqueIdentifier>
+      <UniqueIdentifier>{c6cd4d9d-6de8-4320-a5f7-febbb8be4361}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\GeomTools">
-      <UniqueIdentifier>{80e87a02-d944-41ed-9e50-9fe1f9f2e3f9}</UniqueIdentifier>
+      <UniqueIdentifier>{422f1e55-164f-4e87-b3cc-d53a6201ff1b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\GC">
-      <UniqueIdentifier>{17d14e8a-c105-4af5-90c3-6e19bce3aab9}</UniqueIdentifier>
+      <UniqueIdentifier>{49f33465-51fd-4908-8253-e1d7accb2f25}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\GCE2d">
-      <UniqueIdentifier>{2aae164a-d6ac-413c-8e55-0c94955b9cf7}</UniqueIdentifier>
+      <UniqueIdentifier>{9d758845-4410-4ad0-babd-1a349a1eb38a}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\gce">
-      <UniqueIdentifier>{a63d7a92-e84a-41fa-b36d-4196b304328a}</UniqueIdentifier>
+      <UniqueIdentifier>{dd6c7de3-c836-4b5b-b6b7-5fa8f51765f0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKTopAlgo">
-      <UniqueIdentifier>{b69b5d0d-ba08-4660-8ec2-64c0c3229aee}</UniqueIdentifier>
+      <UniqueIdentifier>{46a508e3-f62f-429b-a738-b0329cf64341}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKTopAlgo\IntCurvesFace">
-      <UniqueIdentifier>{df0278f7-4068-46b6-998f-cf5a6a464755}</UniqueIdentifier>
+      <UniqueIdentifier>{9adc7e25-8ad9-4a9c-8fe8-0209037c571b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKTopAlgo\MAT">
-      <UniqueIdentifier>{99c8e715-5afa-45ab-a4b8-2d89aac054c2}</UniqueIdentifier>
+      <UniqueIdentifier>{1c7d06e3-96f5-47d3-b795-e205d78d5853}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKTopAlgo\MAT2d">
-      <UniqueIdentifier>{343d4161-eaf1-4549-acb8-beee91a0c231}</UniqueIdentifier>
+      <UniqueIdentifier>{0313c53d-b088-4ba3-955f-e5597f4d33cd}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKTopAlgo\Bisector">
-      <UniqueIdentifier>{6bc16eaf-7689-4eba-b513-702f878e3afa}</UniqueIdentifier>
+      <UniqueIdentifier>{7936b6f2-e672-4b67-ba1c-2c25158f67cd}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKTopAlgo\BRepMAT2d">
-      <UniqueIdentifier>{ec4e757b-57af-4d19-86e6-639e73775c20}</UniqueIdentifier>
+      <UniqueIdentifier>{c0f2d534-9dcf-4625-9f25-ce979c1ab968}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKTopAlgo\BRepCheck">
-      <UniqueIdentifier>{88c59131-a774-4e8e-85a7-1936344d7575}</UniqueIdentifier>
+      <UniqueIdentifier>{dc859ae0-4202-44f5-b14a-79cb8b2972fc}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKTopAlgo\BRepBndLib">
-      <UniqueIdentifier>{4a4e9653-76bd-4156-a435-2e692176499f}</UniqueIdentifier>
+      <UniqueIdentifier>{c7856293-7008-42f3-a694-cb3c61584456}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKTopAlgo\BRepExtrema">
-      <UniqueIdentifier>{ebfddbdc-90c2-430b-87be-5130d52e7297}</UniqueIdentifier>
+      <UniqueIdentifier>{c484ec8a-8e6b-452c-9cbe-4de72d04cc1c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKTopAlgo\BRepClass">
-      <UniqueIdentifier>{d389d8ce-b8e6-457b-8f0f-8544109b21e0}</UniqueIdentifier>
+      <UniqueIdentifier>{43233390-b1d5-4f16-b774-9ffbaee1e90b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKTopAlgo\BRepClass3d">
-      <UniqueIdentifier>{555d4afe-9b81-4471-a41c-f77067052868}</UniqueIdentifier>
+      <UniqueIdentifier>{af9dc5e4-7f8c-4c38-96a3-70cad6115576}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKTopAlgo\BRepLib">
-      <UniqueIdentifier>{45d57089-82c3-4bd1-82f4-07599c4ec84d}</UniqueIdentifier>
+      <UniqueIdentifier>{714e9ec8-fcfa-408b-a4c0-533136121fd5}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKTopAlgo\BRepGProp">
-      <UniqueIdentifier>{3543d8d7-95f6-4ef5-9a15-6c10cf2f7ce4}</UniqueIdentifier>
+      <UniqueIdentifier>{83280329-a0d9-44ce-8a5e-1e8a051dcefe}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKTopAlgo\BRepIntCurveSurface">
-      <UniqueIdentifier>{36478f10-1cf0-41ae-b74c-6fd8f4b21054}</UniqueIdentifier>
+      <UniqueIdentifier>{a1e95125-cf23-40c4-87ad-b7357efdd492}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKTopAlgo\BRepTopAdaptor">
-      <UniqueIdentifier>{c5251653-a679-45f7-a880-ac46b030d20d}</UniqueIdentifier>
+      <UniqueIdentifier>{92d2c597-faa0-4f13-b332-fba426a53a61}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKTopAlgo\BRepBuilderAPI">
-      <UniqueIdentifier>{462dd3cf-75f8-4f43-82e7-becabe31b75b}</UniqueIdentifier>
+      <UniqueIdentifier>{e57bb655-edf8-491e-a318-d738139f79fc}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKTopAlgo\BRepApprox">
-      <UniqueIdentifier>{279050c8-7c3b-4649-84e6-2d71e31143b2}</UniqueIdentifier>
+      <UniqueIdentifier>{a167e76f-8ef3-49e0-9de4-b8aa0cfb1126}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo">
-      <UniqueIdentifier>{e949e26f-f413-4eac-b543-0d7f05a5461f}</UniqueIdentifier>
+      <UniqueIdentifier>{f69b7dce-f432-4f5e-9b22-70f059566753}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\Hatch">
-      <UniqueIdentifier>{8105ad6d-0c91-421b-aa71-fe39a46379fa}</UniqueIdentifier>
+      <UniqueIdentifier>{f0b9c8f0-1668-423b-9616-edc260259680}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\GeomInt">
-      <UniqueIdentifier>{a13cd7d1-7fb8-4094-9178-e7fe377b1b24}</UniqueIdentifier>
+      <UniqueIdentifier>{ab8618c1-fef7-42ca-a5e4-d5d416ccbad6}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\IntStart">
-      <UniqueIdentifier>{c4e60651-1466-417a-8ed4-41c5896a566f}</UniqueIdentifier>
+      <UniqueIdentifier>{d7bf0146-4e7b-472a-a2d4-e42b553293f2}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\IntWalk">
-      <UniqueIdentifier>{b717101a-854c-4f67-bc4a-b66a4f4f6bc9}</UniqueIdentifier>
+      <UniqueIdentifier>{e50e8314-5689-419d-8863-aa4c1bc396a3}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\IntImp">
-      <UniqueIdentifier>{9c68254d-2a5f-4f59-9f91-194f51575275}</UniqueIdentifier>
+      <UniqueIdentifier>{90a7dd46-39d6-4d9e-bcb7-45db48a47a82}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\IntCurveSurface">
-      <UniqueIdentifier>{3b9f1577-b1c7-4c66-ba75-13f93611d1c2}</UniqueIdentifier>
+      <UniqueIdentifier>{79b60da9-475d-48b3-88aa-0900302e67e0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\IntSurf">
-      <UniqueIdentifier>{207fd1d3-6462-4261-8b73-a4c7da4f5565}</UniqueIdentifier>
+      <UniqueIdentifier>{05a76151-fd4f-4a55-8d93-de22a5cb1b67}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\IntPatch">
-      <UniqueIdentifier>{90456210-1c48-4871-bc68-6c5d381caf38}</UniqueIdentifier>
+      <UniqueIdentifier>{4b08dd47-ecc6-43f9-a279-ad797a0aee61}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\Geom2dInt">
-      <UniqueIdentifier>{99f5b9ce-2c05-4bfc-a94b-e2b4b40883e7}</UniqueIdentifier>
+      <UniqueIdentifier>{719c2f8b-40b2-4e1c-ad9b-784fff2f19f7}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\IntImpParGen">
-      <UniqueIdentifier>{281beaf9-83f1-401f-9c04-cdd318a84508}</UniqueIdentifier>
+      <UniqueIdentifier>{7e8a82ae-ef19-4bf3-a398-b27ddb3a0e1a}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\IntRes2d">
-      <UniqueIdentifier>{2310a04e-3687-4ffa-889b-1f872455a630}</UniqueIdentifier>
+      <UniqueIdentifier>{99e18403-b8ed-47ce-a097-e2f46f4751d9}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\IntCurve">
-      <UniqueIdentifier>{8cafb2ae-77cf-4549-83de-c16b05a9af1f}</UniqueIdentifier>
+      <UniqueIdentifier>{b19a8f35-ceae-4843-8332-5c8a022722c9}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\TopTrans">
-      <UniqueIdentifier>{a093a534-8e42-4f67-853b-fae06d23a441}</UniqueIdentifier>
+      <UniqueIdentifier>{4889b9a2-136c-4e52-ae46-ee13f0fe5d8d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\Intf">
-      <UniqueIdentifier>{78c470d6-545a-4908-ba4b-e1590a8f41f8}</UniqueIdentifier>
+      <UniqueIdentifier>{766c8ef8-59d2-4c02-b19d-844c7bed31c9}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\ApproxInt">
-      <UniqueIdentifier>{ff99e091-6e91-463e-a5f9-a62274bc1d0c}</UniqueIdentifier>
+      <UniqueIdentifier>{fb79ed9d-eb12-4466-8d2c-853c8bdd955b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\GccAna">
-      <UniqueIdentifier>{d2bccc7e-84f4-42fd-9955-ac670fd9e6a7}</UniqueIdentifier>
+      <UniqueIdentifier>{4b79e32e-e627-43c1-bb2f-10b625a09ad7}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\GccEnt">
-      <UniqueIdentifier>{e702a45b-598b-4620-a129-6b9aa6febbc1}</UniqueIdentifier>
+      <UniqueIdentifier>{6cc19550-c767-4219-a100-3e890910476e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\GccInt">
-      <UniqueIdentifier>{58e57ecc-3a50-412c-8992-88480bab03c2}</UniqueIdentifier>
+      <UniqueIdentifier>{7b2be99a-8daa-4573-9a1d-3dfc94af2086}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\HatchGen">
-      <UniqueIdentifier>{7c646c00-9a7d-4180-b6c5-11040724cbce}</UniqueIdentifier>
+      <UniqueIdentifier>{137b4ddf-a1e9-41ff-abad-f28b34ce23e3}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\Geom2dHatch">
-      <UniqueIdentifier>{31147555-9231-4954-b2b3-f25f687a6bd8}</UniqueIdentifier>
+      <UniqueIdentifier>{8bc1b644-89d4-4a44-a81f-d7bf42a1f2fc}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\Law">
-      <UniqueIdentifier>{9601005d-c0ab-4f29-97c3-93e259cd09a7}</UniqueIdentifier>
+      <UniqueIdentifier>{ac1ee3e9-e64a-4988-bdc5-3c3180f6337c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\AppBlend">
-      <UniqueIdentifier>{68ac8d62-d009-4816-96d1-b86d7ebd7520}</UniqueIdentifier>
+      <UniqueIdentifier>{a26acc82-bad3-425f-b7cc-94aec101a197}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\Plate">
-      <UniqueIdentifier>{6d9e8507-33f0-4741-b708-8199527ed94a}</UniqueIdentifier>
+      <UniqueIdentifier>{7c18819b-7341-4334-aa83-78bdc9a32dca}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\GeomPlate">
-      <UniqueIdentifier>{ab417898-8cc8-4473-870a-deae68e93dba}</UniqueIdentifier>
+      <UniqueIdentifier>{d3061e3e-4cef-4129-afb5-d6056449d046}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\LocalAnalysis">
-      <UniqueIdentifier>{eb39f0c5-c522-4e16-b172-960793805120}</UniqueIdentifier>
+      <UniqueIdentifier>{0c1b6e50-881f-4d87-9393-bfe6709a1729}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\GeomAPI">
-      <UniqueIdentifier>{96f0e7d4-4e52-4acf-a09e-1ef970057494}</UniqueIdentifier>
+      <UniqueIdentifier>{9bcda7d0-f2b5-40cf-9ce9-658ffd723c56}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\GeomFill">
-      <UniqueIdentifier>{9450bfa3-51cf-4d23-b977-4158a2d41140}</UniqueIdentifier>
+      <UniqueIdentifier>{f10f49b0-b042-48ce-bd3b-8957512a7e58}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\Geom2dAPI">
-      <UniqueIdentifier>{502a50dd-935f-42a7-a57f-6443a7ca3e71}</UniqueIdentifier>
+      <UniqueIdentifier>{273e512d-e5b3-4c16-a244-1a3319a3cdda}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\Geom2dGcc">
-      <UniqueIdentifier>{5170ad92-3f27-4c6e-b9a0-10a1aa05012d}</UniqueIdentifier>
+      <UniqueIdentifier>{82076089-0a2f-4613-94b2-c86609b0865b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\FairCurve">
-      <UniqueIdentifier>{0603efd6-2128-468c-9275-ed63d5feda6c}</UniqueIdentifier>
+      <UniqueIdentifier>{c5fcdf34-6b55-4fd8-bee9-b513770f1f22}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\NLPlate">
-      <UniqueIdentifier>{7cebfa16-31c4-49c2-bd12-98e3dfa16807}</UniqueIdentifier>
+      <UniqueIdentifier>{0aab49fb-368b-4e89-8e30-7ab49e18ce9f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\IntPolyh">
-      <UniqueIdentifier>{399e819c-cc1e-417c-93a6-6ec73030fc0b}</UniqueIdentifier>
+      <UniqueIdentifier>{59abace8-f1a5-48c5-b7c8-93cfaba6b880}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\TopClass">
-      <UniqueIdentifier>{265871b6-0c14-4dbb-9517-78a6142fefd8}</UniqueIdentifier>
+      <UniqueIdentifier>{56f5ab41-b368-4646-b4ec-4b92771efd34}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBool">
-      <UniqueIdentifier>{c500f1b0-a889-404f-ad79-48b778c3f28d}</UniqueIdentifier>
+      <UniqueIdentifier>{16b5f70b-a60d-4408-9b41-d6b3a4658ccd}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBool\TopOpeBRep">
-      <UniqueIdentifier>{b34b3545-6eb5-43a6-838c-aeeaee137d3f}</UniqueIdentifier>
+      <UniqueIdentifier>{01d69a22-a9eb-4a85-842b-0ecdbc9d0807}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBool\TopOpeBRepDS">
-      <UniqueIdentifier>{96003fc2-b027-4359-9996-106c6c1e46c9}</UniqueIdentifier>
+      <UniqueIdentifier>{965dee2d-2f7e-4c77-9059-88bfbace2bef}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBool\TopOpeBRepBuild">
-      <UniqueIdentifier>{b2e47b63-6cd6-4272-acea-a33b1414d240}</UniqueIdentifier>
+      <UniqueIdentifier>{ce0b7954-00ac-46aa-8c3c-4c8e1191359d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBool\TopOpeBRepTool">
-      <UniqueIdentifier>{88c4f590-2302-4776-82d4-b414d07c43f3}</UniqueIdentifier>
+      <UniqueIdentifier>{2311e1c3-3cdc-438b-9fba-3c204f65724e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBool\BRepAlgo">
-      <UniqueIdentifier>{2c9d1cc2-f089-4224-9945-9ad498d6f7c8}</UniqueIdentifier>
+      <UniqueIdentifier>{90575a96-09ae-4869-887f-0e6d1d726a1e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBool\BRepFill">
-      <UniqueIdentifier>{9aa4e2bc-70ff-4765-916b-c6aca0c7d4aa}</UniqueIdentifier>
+      <UniqueIdentifier>{e7d064e0-da87-4330-af3f-870d74e3abfd}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBool\BRepProj">
-      <UniqueIdentifier>{f13cc061-a8a9-44ad-a868-7c69041cdf49}</UniqueIdentifier>
+      <UniqueIdentifier>{e6c2efc5-e158-4366-b76b-571b7141a08f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKPrim">
-      <UniqueIdentifier>{2b3e3da5-ffcd-4f88-9d4d-ae1a855a2159}</UniqueIdentifier>
+      <UniqueIdentifier>{da7174ae-129b-47d4-93d2-3640e26f35e8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKPrim\BRepPrim">
-      <UniqueIdentifier>{85a7381b-4032-4a94-add4-95aa8662c0ee}</UniqueIdentifier>
+      <UniqueIdentifier>{d134107e-7765-40cf-a1e0-41b07822266c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKPrim\BRepSweep">
-      <UniqueIdentifier>{2647c461-fa3d-40c4-a375-198d4d1c3f67}</UniqueIdentifier>
+      <UniqueIdentifier>{893347e7-e34e-42c1-a7a8-ec6b9cca53eb}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKPrim\Sweep">
-      <UniqueIdentifier>{198bab5a-ed2d-45ef-9bfe-9554a5ac6429}</UniqueIdentifier>
+      <UniqueIdentifier>{ee0b905d-797d-4abd-b7b1-6f59ba1da3f7}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKPrim\BRepPrimAPI">
-      <UniqueIdentifier>{7e4ea944-23a4-4f49-82bd-df03e5741004}</UniqueIdentifier>
+      <UniqueIdentifier>{5ac8c7b0-d361-4ae7-a1c6-26b13e3d9c08}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBO">
-      <UniqueIdentifier>{42f6c7e4-ee51-4a8b-9f3c-601cd59e8d7f}</UniqueIdentifier>
+      <UniqueIdentifier>{6223aaa9-c689-49e0-88e8-07d313f406e2}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBO\IntTools">
-      <UniqueIdentifier>{eb4a377f-59b7-4c42-909f-58f3fbc1f631}</UniqueIdentifier>
+      <UniqueIdentifier>{a27eb46d-aa9b-4f57-aeee-da10218e659d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBO\BRepAlgoAPI">
-      <UniqueIdentifier>{1d42a925-98d3-4700-a5ea-16910fdb5cf3}</UniqueIdentifier>
+      <UniqueIdentifier>{d9a83771-ffb6-4930-b1b0-600302912cc3}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBO\BOPDS">
-      <UniqueIdentifier>{89f7272d-e240-46b9-8830-4d17e2a38b5a}</UniqueIdentifier>
+      <UniqueIdentifier>{d7237488-f605-4c6e-a1ff-4b19b3212cca}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBO\BOPAlgo">
-      <UniqueIdentifier>{bf9a3a90-81c8-4e83-b890-e99e510d8003}</UniqueIdentifier>
+      <UniqueIdentifier>{91760eca-42ca-4f56-b2bb-c6858292e4e9}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBO\BOPTools">
-      <UniqueIdentifier>{080a979a-7e87-4857-bce7-f0f5f72876e1}</UniqueIdentifier>
+      <UniqueIdentifier>{b13653fc-90cb-49c6-a4d3-d073467aa627}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKFillet">
-      <UniqueIdentifier>{4de4b02e-7f64-49c5-945b-9c55068021b6}</UniqueIdentifier>
+      <UniqueIdentifier>{c88ad4c4-d87e-4fcc-8371-5af5752a211a}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKFillet\ChFiDS">
-      <UniqueIdentifier>{b3fc8b1d-1566-4233-8079-2beccf52139d}</UniqueIdentifier>
+      <UniqueIdentifier>{06388098-f665-4428-8ac0-052973b061ea}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKFillet\ChFi2d">
-      <UniqueIdentifier>{a407fe5b-a63e-4d14-9927-fdb3057eb803}</UniqueIdentifier>
+      <UniqueIdentifier>{c6c94892-e61a-4e9d-9e6f-77dde0a83158}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKFillet\ChFi3d">
-      <UniqueIdentifier>{3c275aaa-63d2-4b58-941a-d036a27dcc54}</UniqueIdentifier>
+      <UniqueIdentifier>{04fdbc44-0a1d-4766-aa87-499534385b56}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKFillet\ChFiKPart">
-      <UniqueIdentifier>{3ee6c5a1-9542-4e83-bb7f-5ff5e6ee210c}</UniqueIdentifier>
+      <UniqueIdentifier>{c36f9ace-8ff3-4d4f-a466-2f3a8b038248}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKFillet\Blend">
-      <UniqueIdentifier>{d2baacab-1991-4236-b513-d78f7c6eee34}</UniqueIdentifier>
+      <UniqueIdentifier>{a439e25e-5c81-4b9e-8781-c0a4175ca4a5}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKFillet\BRepBlend">
-      <UniqueIdentifier>{476314fc-1ac9-4b89-be01-351670ac7b7f}</UniqueIdentifier>
+      <UniqueIdentifier>{1cc34d62-a172-4217-8864-f78379aad036}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKFillet\BlendFunc">
-      <UniqueIdentifier>{601bee48-37f4-4004-a1fe-3303101591e8}</UniqueIdentifier>
+      <UniqueIdentifier>{e8b7a866-eb8b-460e-afdc-1f5eaa865a0f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKFillet\BRepFilletAPI">
-      <UniqueIdentifier>{70832e11-e802-4123-aa26-66832e46a183}</UniqueIdentifier>
+      <UniqueIdentifier>{b8438011-937a-41ab-9fc2-a15ddd7993b8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKFillet\FilletSurf">
-      <UniqueIdentifier>{ce0e1214-d714-4d11-a4da-aeafb8e2dede}</UniqueIdentifier>
+      <UniqueIdentifier>{99636b7c-700b-4302-8db3-cb225e887605}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMesh">
-      <UniqueIdentifier>{8f13b64f-4ef3-4ef9-bdff-e345798923aa}</UniqueIdentifier>
+      <UniqueIdentifier>{aa4a3b7f-7871-4015-964a-28c1b6f0761b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\TKMesh\IMeshData">
+      <UniqueIdentifier>{ee610922-91d0-4b94-94a7-00a49a0869eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\TKMesh\IMeshTools">
+      <UniqueIdentifier>{5ebedbf6-3b95-41bb-b930-a22f31a4cd04}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\TKMesh\BRepMeshData">
+      <UniqueIdentifier>{adbf5999-a411-4508-9a17-1de6f2dcf9fd}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMesh\BRepMesh">
-      <UniqueIdentifier>{05d0a47e-6a1b-4218-9f9b-8d190b396009}</UniqueIdentifier>
+      <UniqueIdentifier>{18775506-b576-4746-89d8-99a6b3fa6cbf}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKOffset">
-      <UniqueIdentifier>{cfc10706-f621-41cb-ad8d-5111be0bd484}</UniqueIdentifier>
+      <UniqueIdentifier>{a933f3a9-f87a-4eb5-9a88-5b39c2202bb9}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKOffset\BRepOffsetAPI">
-      <UniqueIdentifier>{9e45d31d-b5e3-4684-87c9-9c12fdc98144}</UniqueIdentifier>
+      <UniqueIdentifier>{dbf3851e-38a5-44be-b4e9-aee9f64692c3}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKOffset\Draft">
-      <UniqueIdentifier>{dec48a84-dba4-48c2-8004-368ecb3f36b3}</UniqueIdentifier>
+      <UniqueIdentifier>{c789414f-6157-441e-919c-9337c43c9380}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKOffset\BRepOffset">
-      <UniqueIdentifier>{7ca75d7c-88ff-4b9d-91ce-48e45f4e2efa}</UniqueIdentifier>
+      <UniqueIdentifier>{52ab40e3-13be-4b3d-87dc-10f0338b7d5f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKOffset\BiTgte">
-      <UniqueIdentifier>{7586db4a-6f65-4570-9a5e-77a1074850aa}</UniqueIdentifier>
+      <UniqueIdentifier>{fcf6b099-df6a-4ec0-819e-6bf211f65022}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <!-- OccFiles -->
@@ -1439,9 +1448,6 @@
     <ClInclude Include="OCC\src\TopoDS\TopoDS_Shape.hxx">
       <Filter>Source files\TKBRep\TopoDS</Filter>
     </ClInclude>
-    <None Include="OCC\src\TopoDS\TopoDS_Shape.lxx">
-      <Filter>Source files\TKBRep\TopoDS</Filter>
-    </None>
     <ClInclude Include="OCC\src\TopoDS\TopoDS_Shell.hxx">
       <Filter>Source files\TKBRep\TopoDS</Filter>
     </ClInclude>
@@ -1496,9 +1502,6 @@
     <ClInclude Include="OCC\src\TopoDS\TopoDS_TShape.hxx">
       <Filter>Source files\TKBRep\TopoDS</Filter>
     </ClInclude>
-    <None Include="OCC\src\TopoDS\TopoDS_TShape.lxx">
-      <Filter>Source files\TKBRep\TopoDS</Filter>
-    </None>
     <ClCompile Include="OCC\src\TopoDS\TopoDS_TShell.cxx">
       <Filter>Source files\TKBRep\TopoDS</Filter>
     </ClCompile>
@@ -2294,9 +2297,6 @@
     <ClInclude Include="OCC\src\math\math_Gauss.hxx">
       <Filter>Source files\TKMath\math</Filter>
     </ClInclude>
-    <None Include="OCC\src\math\math_Gauss.lxx">
-      <Filter>Source files\TKMath\math</Filter>
-    </None>
     <ClCompile Include="OCC\src\math\math_GaussLeastSquare.cxx">
       <Filter>Source files\TKMath\math</Filter>
     </ClCompile>
@@ -2456,9 +2456,6 @@
     <ClInclude Include="OCC\src\math\math_Recipes.hxx">
       <Filter>Source files\TKMath\math</Filter>
     </ClInclude>
-    <ClInclude Include="OCC\src\math\math_SingleTab.hxx">
-      <Filter>Source files\TKMath\math</Filter>
-    </ClInclude>
     <ClInclude Include="OCC\src\math\math_SingularMatrix.hxx">
       <Filter>Source files\TKMath\math</Filter>
     </ClInclude>
@@ -2547,6 +2544,9 @@
       <Filter>Source files\TKMath\BSplCLib</Filter>
     </ClCompile>
     <ClInclude Include="OCC\src\BSplCLib\BSplCLib_Cache.hxx">
+      <Filter>Source files\TKMath\BSplCLib</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BSplCLib\BSplCLib_CacheParams.hxx">
       <Filter>Source files\TKMath\BSplCLib</Filter>
     </ClInclude>
     <None Include="OCC\src\BSplCLib\BSplCLib_CurveComputation.gxx">
@@ -2981,6 +2981,9 @@
     <None Include="OCC\src\Bnd\Bnd_Sphere.lxx">
       <Filter>Source files\TKMath\Bnd</Filter>
     </None>
+    <ClInclude Include="OCC\src\Bnd\Bnd_Tools.hxx">
+      <Filter>Source files\TKMath\Bnd</Filter>
+    </ClInclude>
     <ClCompile Include="OCC\src\BVH\BVH.cxx">
       <Filter>Source files\TKMath\BVH</Filter>
     </ClCompile>
@@ -2988,6 +2991,9 @@
       <Filter>Source files\TKMath\BVH</Filter>
     </ClInclude>
     <ClInclude Include="OCC\src\BVH\BVH_Box.hxx">
+      <Filter>Source files\TKMath\BVH</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BVH\BVH_BoxSet.hxx">
       <Filter>Source files\TKMath\BVH</Filter>
     </ClInclude>
     <ClInclude Include="OCC\src\BVH\BVH_Builder.hxx">
@@ -3008,6 +3014,9 @@
     <ClInclude Include="OCC\src\BVH\BVH_Constants.hxx">
       <Filter>Source files\TKMath\BVH</Filter>
     </ClInclude>
+    <ClInclude Include="OCC\src\BVH\BVH_Distance.hxx">
+      <Filter>Source files\TKMath\BVH</Filter>
+    </ClInclude>
     <ClInclude Include="OCC\src\BVH\BVH_DistanceField.hxx">
       <Filter>Source files\TKMath\BVH</Filter>
     </ClInclude>
@@ -3017,6 +3026,9 @@
     <ClInclude Include="OCC\src\BVH\BVH_Geometry.hxx">
       <Filter>Source files\TKMath\BVH</Filter>
     </ClInclude>
+    <ClInclude Include="OCC\src\BVH\BVH_IndexedBoxSet.hxx">
+      <Filter>Source files\TKMath\BVH</Filter>
+    </ClInclude>
     <ClInclude Include="OCC\src\BVH\BVH_LinearBuilder.hxx">
       <Filter>Source files\TKMath\BVH</Filter>
     </ClInclude>
@@ -3024,6 +3036,9 @@
       <Filter>Source files\TKMath\BVH</Filter>
     </ClInclude>
     <ClInclude Include="OCC\src\BVH\BVH_ObjectSet.hxx">
+      <Filter>Source files\TKMath\BVH</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BVH\BVH_PairDistance.hxx">
       <Filter>Source files\TKMath\BVH</Filter>
     </ClInclude>
     <ClInclude Include="OCC\src\BVH\BVH_PrimitiveSet.hxx">
@@ -3059,6 +3074,15 @@
     <ClInclude Include="OCC\src\BVH\BVH_SweepPlaneBuilder.hxx">
       <Filter>Source files\TKMath\BVH</Filter>
     </ClInclude>
+    <ClInclude Include="OCC\src\BVH\BVH_Tools.hxx">
+      <Filter>Source files\TKMath\BVH</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BVH\BVH_Traverse.hxx">
+      <Filter>Source files\TKMath\BVH</Filter>
+    </ClInclude>
+    <None Include="OCC\src\BVH\BVH_Traverse.lxx">
+      <Filter>Source files\TKMath\BVH</Filter>
+    </None>
     <ClInclude Include="OCC\src\BVH\BVH_Tree.hxx">
       <Filter>Source files\TKMath\BVH</Filter>
     </ClInclude>
@@ -3641,9 +3665,6 @@
     <ClInclude Include="OCC\src\TopLoc\TopLoc_SListOfItemLocation.hxx">
       <Filter>Source files\TKMath\TopLoc</Filter>
     </ClInclude>
-    <None Include="OCC\src\TopLoc\TopLoc_SListOfItemLocation.lxx">
-      <Filter>Source files\TKMath\TopLoc</Filter>
-    </None>
     <ClCompile Include="OCC\src\Expr\Expr.cxx">
       <Filter>Source files\TKMath\Expr</Filter>
     </ClCompile>
@@ -4106,6 +4127,12 @@
     <None Include="OCC\src\FSD\FILES">
       <Filter>Source files\TKernel\FSD</Filter>
     </None>
+    <ClCompile Include="OCC\src\FSD\FSD_Base64Decoder.cxx">
+      <Filter>Source files\TKernel\FSD</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\FSD\FSD_Base64Decoder.hxx">
+      <Filter>Source files\TKernel\FSD</Filter>
+    </ClInclude>
     <ClCompile Include="OCC\src\FSD\FSD_BinaryFile.cxx">
       <Filter>Source files\TKernel\FSD</Filter>
     </ClCompile>
@@ -4397,6 +4424,12 @@
     <ClInclude Include="OCC\src\OSD\OSD_Thread.hxx">
       <Filter>Source files\TKernel\OSD</Filter>
     </ClInclude>
+    <ClCompile Include="OCC\src\OSD\OSD_ThreadPool.cxx">
+      <Filter>Source files\TKernel\OSD</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\OSD\OSD_ThreadPool.hxx">
+      <Filter>Source files\TKernel\OSD</Filter>
+    </ClInclude>
     <ClInclude Include="OCC\src\OSD\OSD_ThreadFunction.hxx">
       <Filter>Source files\TKernel\OSD</Filter>
     </ClInclude>
@@ -4413,6 +4446,9 @@
       <Filter>Source files\TKernel\OSD</Filter>
     </ClCompile>
     <ClInclude Include="OCC\src\OSD\OSD_WNT.hxx">
+      <Filter>Source files\TKernel\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\OSD\OSD_SignalMode.hxx">
       <Filter>Source files\TKernel\OSD</Filter>
     </ClInclude>
     <ClCompile Include="OCC\src\Plugin\Plugin.cxx">
@@ -4481,6 +4517,9 @@
     <ClInclude Include="OCC\src\Quantity\Quantity_ColorHasher.hxx">
       <Filter>Source files\TKernel\Quantity</Filter>
     </ClInclude>
+    <ClCompile Include="OCC\src\Quantity\Quantity_ColorRGBA.cxx">
+      <Filter>Source files\TKernel\Quantity</Filter>
+    </ClCompile>
     <ClInclude Include="OCC\src\Quantity\Quantity_ColorRGBA.hxx">
       <Filter>Source files\TKernel\Quantity</Filter>
     </ClInclude>
@@ -4817,6 +4856,12 @@
     <ClInclude Include="OCC\src\Standard\Standard_CLocaleSentry.hxx">
       <Filter>Source files\TKernel\Standard</Filter>
     </ClInclude>
+    <ClCompile Include="OCC\src\Standard\Standard_Condition.cxx">
+      <Filter>Source files\TKernel\Standard</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\Standard\Standard_Condition.hxx">
+      <Filter>Source files\TKernel\Standard</Filter>
+    </ClInclude>
     <ClInclude Include="OCC\src\Standard\Standard_ConstructionError.hxx">
       <Filter>Source files\TKernel\Standard</Filter>
     </ClInclude>
@@ -4848,6 +4893,12 @@
       <Filter>Source files\TKernel\Standard</Filter>
     </ClInclude>
     <ClInclude Include="OCC\src\Standard\Standard_DomainError.hxx">
+      <Filter>Source files\TKernel\Standard</Filter>
+    </ClInclude>
+    <ClCompile Include="OCC\src\Standard\Standard_Dump.cxx">
+      <Filter>Source files\TKernel\Standard</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\Standard\Standard_Dump.hxx">
       <Filter>Source files\TKernel\Standard</Filter>
     </ClInclude>
     <ClCompile Include="OCC\src\Standard\Standard_ErrorHandler.cxx">
@@ -5006,6 +5057,12 @@
     <ClInclude Include="OCC\src\Standard\Standard_RangeError.hxx">
       <Filter>Source files\TKernel\Standard</Filter>
     </ClInclude>
+    <ClInclude Include="OCC\src\Standard\Standard_ReadBuffer.hxx">
+      <Filter>Source files\TKernel\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\Standard\Standard_ReadLineBuffer.hxx">
+      <Filter>Source files\TKernel\Standard</Filter>
+    </ClInclude>
     <ClCompile Include="OCC\src\Standard\Standard_Real.cxx">
       <Filter>Source files\TKernel\Standard</Filter>
     </ClCompile>
@@ -5022,6 +5079,9 @@
       <Filter>Source files\TKernel\Standard</Filter>
     </ClInclude>
     <ClInclude Include="OCC\src\Standard\Standard_SStream.hxx">
+      <Filter>Source files\TKernel\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\Standard\Standard_Std.hxx">
       <Filter>Source files\TKernel\Standard</Filter>
     </ClInclude>
     <ClInclude Include="OCC\src\Standard\Standard_Stream.hxx">
@@ -6456,9 +6516,6 @@
       <Filter>Source files\TKG2d\Adaptor2d</Filter>
     </ClCompile>
     <ClInclude Include="OCC\src\Adaptor2d\Adaptor2d_Curve2d.hxx">
-      <Filter>Source files\TKG2d\Adaptor2d</Filter>
-    </ClInclude>
-    <ClInclude Include="OCC\src\Adaptor2d\Adaptor2d_Curve2dPtr.hxx">
       <Filter>Source files\TKG2d\Adaptor2d</Filter>
     </ClInclude>
     <None Include="OCC\src\Adaptor2d\Adaptor2d_GenHCurve2d.gxx">
@@ -10037,6 +10094,18 @@
     <ClInclude Include="OCC\src\BRepGProp\BRepGProp_VinertGK.hxx">
       <Filter>Source files\TKTopAlgo\BRepGProp</Filter>
     </ClInclude>
+    <ClInclude Include="OCC\src\BRepGProp\BRepGProp_MeshCinert.hxx">
+      <Filter>Source files\TKTopAlgo\BRepGProp</Filter>
+    </ClInclude>
+    <ClCompile Include="OCC\src\BRepGProp\BRepGProp_MeshCinert.cxx">
+      <Filter>Source files\TKTopAlgo\BRepGProp</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\BRepGProp\BRepGProp_MeshProps.hxx">
+      <Filter>Source files\TKTopAlgo\BRepGProp</Filter>
+    </ClInclude>
+    <ClCompile Include="OCC\src\BRepGProp\BRepGProp_MeshProps.cxx">
+      <Filter>Source files\TKTopAlgo\BRepGProp</Filter>
+    </ClCompile>
     <ClCompile Include="OCC\src\BRepIntCurveSurface\BRepIntCurveSurface_Inter.cxx">
       <Filter>Source files\TKTopAlgo\BRepIntCurveSurface</Filter>
     </ClCompile>
@@ -14654,12 +14723,6 @@
     <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_BooleanOperation.hxx">
       <Filter>Source files\TKBool\BRepAlgo</Filter>
     </ClInclude>
-    <ClCompile Include="OCC\src\BRepAlgo\BRepAlgo_BooleanOperations.cxx">
-      <Filter>Source files\TKBool\BRepAlgo</Filter>
-    </ClCompile>
-    <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_BooleanOperations.hxx">
-      <Filter>Source files\TKBool\BRepAlgo</Filter>
-    </ClInclude>
     <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_CheckStatus.hxx">
       <Filter>Source files\TKBool\BRepAlgo</Filter>
     </ClInclude>
@@ -14673,30 +14736,6 @@
       <Filter>Source files\TKBool\BRepAlgo</Filter>
     </ClCompile>
     <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_Cut.hxx">
-      <Filter>Source files\TKBool\BRepAlgo</Filter>
-    </ClInclude>
-    <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_DataMapIteratorOfDataMapOfShapeBoolean.hxx">
-      <Filter>Source files\TKBool\BRepAlgo</Filter>
-    </ClInclude>
-    <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_DataMapIteratorOfDataMapOfShapeInterference.hxx">
-      <Filter>Source files\TKBool\BRepAlgo</Filter>
-    </ClInclude>
-    <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_DataMapOfShapeBoolean.hxx">
-      <Filter>Source files\TKBool\BRepAlgo</Filter>
-    </ClInclude>
-    <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_DataMapOfShapeInterference.hxx">
-      <Filter>Source files\TKBool\BRepAlgo</Filter>
-    </ClInclude>
-    <ClCompile Include="OCC\src\BRepAlgo\BRepAlgo_DSAccess.cxx">
-      <Filter>Source files\TKBool\BRepAlgo</Filter>
-    </ClCompile>
-    <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_DSAccess.hxx">
-      <Filter>Source files\TKBool\BRepAlgo</Filter>
-    </ClInclude>
-    <ClCompile Include="OCC\src\BRepAlgo\BRepAlgo_EdgeConnector.cxx">
-      <Filter>Source files\TKBool\BRepAlgo</Filter>
-    </ClCompile>
-    <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_EdgeConnector.hxx">
       <Filter>Source files\TKBool\BRepAlgo</Filter>
     </ClInclude>
     <ClCompile Include="OCC\src\BRepAlgo\BRepAlgo_FaceRestrictor.cxx">
@@ -14735,9 +14774,6 @@
     <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_Section.hxx">
       <Filter>Source files\TKBool\BRepAlgo</Filter>
     </ClInclude>
-    <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_SequenceOfSequenceOfInteger.hxx">
-      <Filter>Source files\TKBool\BRepAlgo</Filter>
-    </ClInclude>
     <ClCompile Include="OCC\src\BRepAlgo\BRepAlgo_Tool.cxx">
       <Filter>Source files\TKBool\BRepAlgo</Filter>
     </ClCompile>
@@ -14754,6 +14790,12 @@
       <Filter>Source files\TKBool\BRepFill</Filter>
     </ClCompile>
     <ClInclude Include="OCC\src\BRepFill\BRepFill_ACRLaw.hxx">
+      <Filter>Source files\TKBool\BRepFill</Filter>
+    </ClInclude>
+    <ClCompile Include="OCC\src\BRepFill\BRepFill_AdvancedEvolved.cxx">
+      <Filter>Source files\TKBool\BRepFill</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\BRepFill\BRepFill_AdvancedEvolved.hxx">
       <Filter>Source files\TKBool\BRepFill</Filter>
     </ClInclude>
     <ClCompile Include="OCC\src\BRepFill\BRepFill_ApproxSeewing.cxx">
@@ -15815,9 +15857,6 @@
     <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_BuilderFace.hxx">
       <Filter>Source files\TKBO\BOPAlgo</Filter>
     </ClInclude>
-    <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_BuilderShape.cxx">
-      <Filter>Source files\TKBO\BOPAlgo</Filter>
-    </ClCompile>
     <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_BuilderShape.hxx">
       <Filter>Source files\TKBO\BOPAlgo</Filter>
     </ClInclude>
@@ -15846,6 +15885,18 @@
       <Filter>Source files\TKBO\BOPAlgo</Filter>
     </ClInclude>
     <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_ListOfCheckResult.hxx">
+      <Filter>Source files\TKBO\BOPAlgo</Filter>
+    </ClInclude>
+    <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_MakeConnected.cxx">
+      <Filter>Source files\TKBO\BOPAlgo</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_MakeConnected.hxx">
+      <Filter>Source files\TKBO\BOPAlgo</Filter>
+    </ClInclude>
+    <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_MakePeriodic.cxx">
+      <Filter>Source files\TKBO\BOPAlgo</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_MakePeriodic.hxx">
       <Filter>Source files\TKBO\BOPAlgo</Filter>
     </ClInclude>
     <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_MakerVolume.cxx">
@@ -16022,7 +16073,7 @@
     <ClInclude Include="OCC\src\BOPTools\BOPTools_BoxSelector.hxx">
       <Filter>Source files\TKBO\BOPTools</Filter>
     </ClInclude>
-    <ClInclude Include="OCC\src\BOPTools\BOPTools_BoxBndTree.hxx">
+    <ClInclude Include="OCC\src\BOPTools\BOPTools_BoxTree.hxx">
       <Filter>Source files\TKBO\BOPTools</Filter>
     </ClInclude>
     <ClInclude Include="OCC\src\BOPTools\BOPTools_ConnexityBlock.hxx">
@@ -16043,6 +16094,9 @@
     <ClInclude Include="OCC\src\BOPTools\BOPTools_MapOfSet.hxx">
       <Filter>Source files\TKBO\BOPTools</Filter>
     </ClInclude>
+    <ClInclude Include="OCC\src\BOPTools\BOPTools_PairSelector.hxx">
+      <Filter>Source files\TKBO\BOPTools</Filter>
+    </ClInclude>
     <ClInclude Include="OCC\src\BOPTools\BOPTools_Parallel.hxx">
       <Filter>Source files\TKBO\BOPTools</Filter>
     </ClInclude>
@@ -16059,6 +16113,9 @@
       <Filter>Source files\TKBO\BOPTools</Filter>
     </None>
     <ClInclude Include="OCC\src\ChFiDS\ChFiDS_ChamfMethod.hxx">
+      <Filter>Source files\TKFillet\ChFiDS</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\ChFiDS\ChFiDS_ChamfMode.hxx">
       <Filter>Source files\TKFillet\ChFiDS</Filter>
     </ClInclude>
     <ClCompile Include="OCC\src\ChFiDS\ChFiDS_ChamfSpine.cxx">
@@ -16079,9 +16136,6 @@
     <ClInclude Include="OCC\src\ChFiDS\ChFiDS_CommonPoint.hxx">
       <Filter>Source files\TKFillet\ChFiDS</Filter>
     </ClInclude>
-    <None Include="OCC\src\ChFiDS\ChFiDS_CommonPoint.lxx">
-      <Filter>Source files\TKFillet\ChFiDS</Filter>
-    </None>
     <ClCompile Include="OCC\src\ChFiDS\ChFiDS_ElSpine.cxx">
       <Filter>Source files\TKFillet\ChFiDS</Filter>
     </ClCompile>
@@ -16580,6 +16634,18 @@
     <ClInclude Include="OCC\src\BRepBlend\BRepBlend_ChamfInv.hxx">
       <Filter>Source files\TKFillet\BRepBlend</Filter>
     </ClInclude>
+    <ClInclude Include="OCC\src\BRepBlend\BRepBlend_ConstThroat.hxx">
+      <Filter>Source files\TKFillet\BRepBlend</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepBlend\BRepBlend_ConstThroatInv.hxx">
+      <Filter>Source files\TKFillet\BRepBlend</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepBlend\BRepBlend_ConstThroatWithPenetration.hxx">
+      <Filter>Source files\TKFillet\BRepBlend</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepBlend\BRepBlend_ConstThroatWithPenetrationInv.hxx">
+      <Filter>Source files\TKFillet\BRepBlend</Filter>
+    </ClInclude>
     <ClInclude Include="OCC\src\BRepBlend\BRepBlend_ChAsym.hxx">
       <Filter>Source files\TKFillet\BRepBlend</Filter>
     </ClInclude>
@@ -16751,6 +16817,18 @@
     <ClInclude Include="OCC\src\BlendFunc\BlendFunc.hxx">
       <Filter>Source files\TKFillet\BlendFunc</Filter>
     </ClInclude>
+    <ClCompile Include="OCC\src\BlendFunc\BlendFunc_GenChamfer.cxx">
+      <Filter>Source files\TKFillet\BlendFunc</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\BlendFunc\BlendFunc_GenChamfer.hxx">
+      <Filter>Source files\TKFillet\BlendFunc</Filter>
+    </ClInclude>
+    <ClCompile Include="OCC\src\BlendFunc\BlendFunc_GenChamfInv.cxx">
+      <Filter>Source files\TKFillet\BlendFunc</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\BlendFunc\BlendFunc_GenChamfInv.hxx">
+      <Filter>Source files\TKFillet\BlendFunc</Filter>
+    </ClInclude>
     <ClCompile Include="OCC\src\BlendFunc\BlendFunc_Chamfer.cxx">
       <Filter>Source files\TKFillet\BlendFunc</Filter>
     </ClCompile>
@@ -16841,6 +16919,30 @@
     <None Include="OCC\src\BlendFunc\BlendFunc_Tensor.lxx">
       <Filter>Source files\TKFillet\BlendFunc</Filter>
     </None>
+    <ClCompile Include="OCC\src\BlendFunc\BlendFunc_ConstThroat.cxx">
+      <Filter>Source files\TKFillet\BlendFunc</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\BlendFunc\BlendFunc_ConstThroat.hxx">
+      <Filter>Source files\TKFillet\BlendFunc</Filter>
+    </ClInclude>
+    <ClCompile Include="OCC\src\BlendFunc\BlendFunc_ConstThroatInv.cxx">
+      <Filter>Source files\TKFillet\BlendFunc</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\BlendFunc\BlendFunc_ConstThroatInv.hxx">
+      <Filter>Source files\TKFillet\BlendFunc</Filter>
+    </ClInclude>
+    <ClCompile Include="OCC\src\BlendFunc\BlendFunc_ConstThroatWithPenetration.cxx">
+      <Filter>Source files\TKFillet\BlendFunc</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\BlendFunc\BlendFunc_ConstThroatWithPenetration.hxx">
+      <Filter>Source files\TKFillet\BlendFunc</Filter>
+    </ClInclude>
+    <ClCompile Include="OCC\src\BlendFunc\BlendFunc_ConstThroatWithPenetrationInv.cxx">
+      <Filter>Source files\TKFillet\BlendFunc</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\BlendFunc\BlendFunc_ConstThroatWithPenetrationInv.hxx">
+      <Filter>Source files\TKFillet\BlendFunc</Filter>
+    </ClInclude>
     <ClInclude Include="OCC\src\BRepFilletAPI\BRepFilletAPI_LocalOperation.hxx">
       <Filter>Source files\TKFillet\BRepFilletAPI</Filter>
     </ClInclude>
@@ -16886,7 +16988,127 @@
     <ClInclude Include="OCC\src\FilletSurf\FilletSurf_StatusType.hxx">
       <Filter>Source files\TKFillet\FilletSurf</Filter>
     </ClInclude>
-    <ClInclude Include="OCC\src\BRepMesh\BRepMesh.hxx">
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_Curve.hxx">
+      <Filter>Source files\TKMesh\IMeshData</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_Edge.hxx">
+      <Filter>Source files\TKMesh\IMeshData</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_Face.hxx">
+      <Filter>Source files\TKMesh\IMeshData</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_Model.hxx">
+      <Filter>Source files\TKMesh\IMeshData</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_ParametersList.hxx">
+      <Filter>Source files\TKMesh\IMeshData</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_ParametersListArrayAdaptor.hxx">
+      <Filter>Source files\TKMesh\IMeshData</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_PCurve.hxx">
+      <Filter>Source files\TKMesh\IMeshData</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_Shape.hxx">
+      <Filter>Source files\TKMesh\IMeshData</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_Status.hxx">
+      <Filter>Source files\TKMesh\IMeshData</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_StatusOwner.hxx">
+      <Filter>Source files\TKMesh\IMeshData</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_TessellatedShape.hxx">
+      <Filter>Source files\TKMesh\IMeshData</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_Types.hxx">
+      <Filter>Source files\TKMesh\IMeshData</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_Wire.hxx">
+      <Filter>Source files\TKMesh\IMeshData</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshTools\IMeshTools_Context.hxx">
+      <Filter>Source files\TKMesh\IMeshTools</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshTools\IMeshTools_CurveTessellator.hxx">
+      <Filter>Source files\TKMesh\IMeshTools</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshTools\IMeshTools_MeshAlgo.hxx">
+      <Filter>Source files\TKMesh\IMeshTools</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshTools\IMeshTools_MeshAlgoFactory.hxx">
+      <Filter>Source files\TKMesh\IMeshTools</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshTools\IMeshTools_MeshBuilder.hxx">
+      <Filter>Source files\TKMesh\IMeshTools</Filter>
+    </ClInclude>
+    <ClCompile Include="OCC\src\IMeshTools\IMeshTools_MeshBuilder.cxx">
+      <Filter>Source files\TKMesh\IMeshTools</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\IMeshTools\IMeshTools_ModelAlgo.hxx">
+      <Filter>Source files\TKMesh\IMeshTools</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshTools\IMeshTools_ModelBuilder.hxx">
+      <Filter>Source files\TKMesh\IMeshTools</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshTools\IMeshTools_Parameters.hxx">
+      <Filter>Source files\TKMesh\IMeshTools</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshTools\IMeshTools_ShapeExplorer.hxx">
+      <Filter>Source files\TKMesh\IMeshTools</Filter>
+    </ClInclude>
+    <ClCompile Include="OCC\src\IMeshTools\IMeshTools_ShapeExplorer.cxx">
+      <Filter>Source files\TKMesh\IMeshTools</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\IMeshTools\IMeshTools_ShapeVisitor.hxx">
+      <Filter>Source files\TKMesh\IMeshTools</Filter>
+    </ClInclude>
+    <ClCompile Include="OCC\src\BRepMeshData\BRepMeshData_Curve.cxx">
+      <Filter>Source files\TKMesh\BRepMeshData</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\BRepMeshData\BRepMeshData_Curve.hxx">
+      <Filter>Source files\TKMesh\BRepMeshData</Filter>
+    </ClInclude>
+    <ClCompile Include="OCC\src\BRepMeshData\BRepMeshData_Edge.cxx">
+      <Filter>Source files\TKMesh\BRepMeshData</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\BRepMeshData\BRepMeshData_Edge.hxx">
+      <Filter>Source files\TKMesh\BRepMeshData</Filter>
+    </ClInclude>
+    <ClCompile Include="OCC\src\BRepMeshData\BRepMeshData_Face.cxx">
+      <Filter>Source files\TKMesh\BRepMeshData</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\BRepMeshData\BRepMeshData_Face.hxx">
+      <Filter>Source files\TKMesh\BRepMeshData</Filter>
+    </ClInclude>
+    <ClCompile Include="OCC\src\BRepMeshData\BRepMeshData_Model.cxx">
+      <Filter>Source files\TKMesh\BRepMeshData</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\BRepMeshData\BRepMeshData_Model.hxx">
+      <Filter>Source files\TKMesh\BRepMeshData</Filter>
+    </ClInclude>
+    <ClCompile Include="OCC\src\BRepMeshData\BRepMeshData_PCurve.cxx">
+      <Filter>Source files\TKMesh\BRepMeshData</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\BRepMeshData\BRepMeshData_PCurve.hxx">
+      <Filter>Source files\TKMesh\BRepMeshData</Filter>
+    </ClInclude>
+    <ClCompile Include="OCC\src\BRepMeshData\BRepMeshData_Wire.cxx">
+      <Filter>Source files\TKMesh\BRepMeshData</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\BRepMeshData\BRepMeshData_Wire.hxx">
+      <Filter>Source files\TKMesh\BRepMeshData</Filter>
+    </ClInclude>
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_BaseMeshAlgo.cxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_BaseMeshAlgo.hxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_ConstrainedBaseMeshAlgo.hxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_BoundaryParamsRangeSplitter.hxx">
       <Filter>Source files\TKMesh\BRepMesh</Filter>
     </ClInclude>
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_Circle.hxx">
@@ -16907,10 +17129,46 @@
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_Classifier.hxx">
       <Filter>Source files\TKMesh\BRepMesh</Filter>
     </ClInclude>
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_ConeRangeSplitter.cxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_ConeRangeSplitter.hxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClInclude>
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_Context.cxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_Context.hxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClInclude>
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_CurveTessellator.cxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_CurveTessellator.hxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClInclude>
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_CylinderRangeSplitter.cxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_CylinderRangeSplitter.hxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClInclude>
     <ClCompile Include="OCC\src\BRepMesh\BRepMesh_DataStructureOfDelaun.cxx">
       <Filter>Source files\TKMesh\BRepMesh</Filter>
     </ClCompile>
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_DataStructureOfDelaun.hxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClInclude>
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_DefaultRangeSplitter.cxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_DefaultRangeSplitter.hxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClInclude>
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_Deflection.cxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_Deflection.hxx">
       <Filter>Source files\TKMesh\BRepMesh</Filter>
     </ClInclude>
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_DegreeOfFreedom.hxx">
@@ -16920,6 +17178,18 @@
       <Filter>Source files\TKMesh\BRepMesh</Filter>
     </ClCompile>
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_Delaun.hxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClInclude>
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_DelaunayBaseMeshAlgo.cxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_DelaunayBaseMeshAlgo.hxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_DelaunayDeflectionControlMeshAlgo.hxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_DelaunayNodeInsertionMeshAlgo.hxx">
       <Filter>Source files\TKMesh\BRepMesh</Filter>
     </ClInclude>
     <ClCompile Include="OCC\src\BRepMesh\BRepMesh_DiscretFactory.cxx">
@@ -16937,9 +17207,12 @@
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_Edge.hxx">
       <Filter>Source files\TKMesh\BRepMesh</Filter>
     </ClInclude>
-    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_EdgeParameterProvider.cxx">
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_EdgeDiscret.cxx">
       <Filter>Source files\TKMesh\BRepMesh</Filter>
     </ClCompile>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_EdgeDiscret.hxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClInclude>
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_EdgeParameterProvider.hxx">
       <Filter>Source files\TKMesh\BRepMesh</Filter>
     </ClInclude>
@@ -16949,31 +17222,22 @@
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_EdgeTessellationExtractor.hxx">
       <Filter>Source files\TKMesh\BRepMesh</Filter>
     </ClInclude>
-    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_EdgeTessellator.cxx">
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_FaceChecker.cxx">
       <Filter>Source files\TKMesh\BRepMesh</Filter>
     </ClCompile>
-    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_EdgeTessellator.hxx">
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_FaceChecker.hxx">
       <Filter>Source files\TKMesh\BRepMesh</Filter>
     </ClInclude>
-    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_FaceAttribute.cxx">
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_FaceDiscret.cxx">
       <Filter>Source files\TKMesh\BRepMesh</Filter>
     </ClCompile>
-    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_FaceAttribute.hxx">
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_FaceDiscret.hxx">
       <Filter>Source files\TKMesh\BRepMesh</Filter>
     </ClInclude>
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_FactoryError.hxx">
       <Filter>Source files\TKMesh\BRepMesh</Filter>
     </ClInclude>
-    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_FastDiscret.cxx">
-      <Filter>Source files\TKMesh\BRepMesh</Filter>
-    </ClCompile>
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_FastDiscret.hxx">
-      <Filter>Source files\TKMesh\BRepMesh</Filter>
-    </ClInclude>
-    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_FastDiscretFace.cxx">
-      <Filter>Source files\TKMesh\BRepMesh</Filter>
-    </ClCompile>
-    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_FastDiscretFace.hxx">
       <Filter>Source files\TKMesh\BRepMesh</Filter>
     </ClInclude>
     <ClCompile Include="OCC\src\BRepMesh\BRepMesh_GeomTool.cxx">
@@ -16982,25 +17246,61 @@
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_GeomTool.hxx">
       <Filter>Source files\TKMesh\BRepMesh</Filter>
     </ClInclude>
-    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_IEdgeTool.cxx">
-      <Filter>Source files\TKMesh\BRepMesh</Filter>
-    </ClCompile>
-    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_IEdgeTool.hxx">
-      <Filter>Source files\TKMesh\BRepMesh</Filter>
-    </ClInclude>
     <ClCompile Include="OCC\src\BRepMesh\BRepMesh_IncrementalMesh.cxx">
       <Filter>Source files\TKMesh\BRepMesh</Filter>
     </ClCompile>
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_IncrementalMesh.hxx">
       <Filter>Source files\TKMesh\BRepMesh</Filter>
     </ClInclude>
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_MeshAlgoFactory.cxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_MeshAlgoFactory.hxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClInclude>
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_MeshTool.cxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_MeshTool.hxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClInclude>
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_ModelBuilder.cxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_ModelBuilder.hxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClInclude>
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_ModelHealer.cxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_ModelHealer.hxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClInclude>
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_ModelPostProcessor.cxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_ModelPostProcessor.hxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClInclude>
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_ModelPreProcessor.cxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_ModelPreProcessor.hxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClInclude>
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_NURBSRangeSplitter.cxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_NURBSRangeSplitter.hxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_NodeInsertionMeshAlgo.hxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClInclude>
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_OrientedEdge.hxx">
       <Filter>Source files\TKMesh\BRepMesh</Filter>
     </ClInclude>
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_PairOfIndex.hxx">
-      <Filter>Source files\TKMesh\BRepMesh</Filter>
-    </ClInclude>
-    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_PairOfPolygon.hxx">
       <Filter>Source files\TKMesh\BRepMesh</Filter>
     </ClInclude>
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_PluginEntryType.hxx">
@@ -17021,10 +17321,28 @@
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_ShapeTool.hxx">
       <Filter>Source files\TKMesh\BRepMesh</Filter>
     </ClInclude>
-    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_Status.hxx">
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_ShapeVisitor.cxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_ShapeVisitor.hxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClInclude>
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_SphereRangeSplitter.cxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_SphereRangeSplitter.hxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClInclude>
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_TorusRangeSplitter.cxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClCompile>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_TorusRangeSplitter.hxx">
       <Filter>Source files\TKMesh\BRepMesh</Filter>
     </ClInclude>
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_Triangle.hxx">
+      <Filter>Source files\TKMesh\BRepMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_UVParamRangeSplitter.hxx">
       <Filter>Source files\TKMesh\BRepMesh</Filter>
     </ClInclude>
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_Vertex.hxx">
@@ -17039,16 +17357,10 @@
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_VertexTool.hxx">
       <Filter>Source files\TKMesh\BRepMesh</Filter>
     </ClInclude>
-    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_WireChecker.cxx">
-      <Filter>Source files\TKMesh\BRepMesh</Filter>
-    </ClCompile>
-    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_WireChecker.hxx">
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_CustomBaseMeshAlgo.hxx">
       <Filter>Source files\TKMesh\BRepMesh</Filter>
     </ClInclude>
-    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_WireInterferenceChecker.cxx">
-      <Filter>Source files\TKMesh\BRepMesh</Filter>
-    </ClCompile>
-    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_WireInterferenceChecker.hxx">
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_CustomDelaunayBaseMeshAlgo.hxx">
       <Filter>Source files\TKMesh\BRepMesh</Filter>
     </ClInclude>
     <ClCompile Include="OCC\src\BRepOffsetAPI\BRepOffsetAPI_DraftAngle.cxx">

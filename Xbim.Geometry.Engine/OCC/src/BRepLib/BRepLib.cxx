@@ -2233,9 +2233,9 @@ static void EncodeRegularity(const TopoDS_Shape&        theShape,
   }
   catch (Standard_Failure const& anException) {
 #ifdef OCCT_DEBUG
-    cout << "Warning: Exception in BRepLib::EncodeRegularity(): ";
-    anException.Print(cout);
-    cout << endl;
+    std::cout << "Warning: Exception in BRepLib::EncodeRegularity(): ";
+    anException.Print(std::cout);
+    std::cout << std::endl;
 #endif
     (void)anException;
   }
@@ -2297,10 +2297,10 @@ void BRepLib::EncodeRegularity(TopoDS_Edge& E,
       B.Continuity(E,F1,F2,aCont);
       
     }
-    catch(Standard_Failure)
+    catch(Standard_Failure const&)
     {
 #ifdef OCCT_DEBUG
-      cout << "Failure: Exception in BRepLib::EncodeRegularity" << endl;
+      std::cout << "Failure: Exception in BRepLib::EncodeRegularity" << std::endl;
 #endif
     }
   }
@@ -2351,7 +2351,7 @@ Standard_Boolean BRepLib::
       if(!aSLP.IsNormalDefined())
       {
 #ifdef OCCT_DEBUG
-        cout << "BRepLib::EnsureNormalConsistency(): Cannot find normal!" << endl;
+        std::cout << "BRepLib::EnsureNormalConsistency(): Cannot find normal!" << std::endl;
 #endif
       }
       else
@@ -2711,18 +2711,23 @@ void BRepLib::ExtendFace(const TopoDS_Face& theF,
     Standard_Real aSUMin, aSUMax, aSVMin, aSVMax;
     aSurf->Bounds(aSUMin, aSUMax, aSVMin, aSVMax);
 
-    if (aBAS.IsUPeriodic())
+    Standard_Boolean isUPeriodic = aBAS.IsUPeriodic();
+    Standard_Real anUPeriod = isUPeriodic ? aBAS.UPeriod() : 0.0;
+    if (isUPeriodic)
     {
       // Adjust face bounds to first period
       Standard_Real aDelta = aFUMax - aFUMin;
-      aFUMin = Max(aSUMin, aFUMin + aBAS.UPeriod()*Ceiling((aSUMin - aFUMin)/aBAS.UPeriod()));
+      aFUMin = Max(aSUMin, aFUMin + anUPeriod*Ceiling((aSUMin - aFUMin) / anUPeriod));
       aFUMax = aFUMin + aDelta;
     }
-    if (aBAS.IsVPeriodic())
+
+    Standard_Boolean isVPeriodic = aBAS.IsVPeriodic();
+    Standard_Real aVPeriod = isVPeriodic ? aBAS.VPeriod() : 0.0;
+    if (isVPeriodic)
     {
       // Adjust face bounds to first period
       Standard_Real aDelta = aFVMax - aFVMin;
-      aFVMin = Max(aSVMin, aFVMin + aBAS.VPeriod()*Ceiling((aSVMin - aFVMin)/aBAS.VPeriod()));
+      aFVMin = Max(aSVMin, aFVMin + aVPeriod*Ceiling((aSVMin - aFVMin) / aVPeriod));
       aFVMax = aFVMin + aDelta;
     }
 
@@ -2734,9 +2739,23 @@ void BRepLib::ExtendFace(const TopoDS_Face& theF,
       aVRes = aBAS.VResolution(theExtVal);
 
     if (theExtUMin) aFUMin = Max(aSUMin, aFUMin - anURes);
-    if (theExtUMax) aFUMax = Min(aSUMax, aFUMax + anURes);
+    if (theExtUMax) aFUMax = Min(isUPeriodic ? aFUMin + anUPeriod : aSUMax, aFUMax + anURes);
     if (theExtVMin) aFVMin = Max(aSVMin, aFVMin - aVRes);
-    if (theExtVMax) aFVMax = Min(aSVMax, aFVMax + aVRes);
+    if (theExtVMax) aFVMax = Min(isVPeriodic ? aFVMin + aVPeriod : aSVMax, aFVMax + aVRes);
+
+    // Check if the periodic surface should become closed.
+    // In this case, use the basis surface with basis bounds.
+    const Standard_Real anEps = Precision::PConfusion();
+    if (isUPeriodic && Abs(aFUMax - aFUMin - anUPeriod) < anEps)
+    {
+      aFUMin = aSUMin;
+      aFUMax = aSUMax;
+    }
+    if (isVPeriodic && Abs(aFVMax - aFVMin - aVPeriod) < anEps)
+    {
+      aFVMin = aSVMin;
+      aFVMax = aSVMax;
+    }
 
     aS = aSurf;
   }

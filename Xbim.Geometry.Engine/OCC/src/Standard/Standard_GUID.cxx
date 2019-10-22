@@ -75,7 +75,7 @@ Standard_PCharacter Standard_GUID_GetValue16(Standard_PCharacter tmpBuffer,
     my32b = (Standard_ExtCharacter) strtoul(strtmp, (char **)NULL, 16);
   }
   else return NULL;
-//  cout << "V16 :" << hex(my32b) << endl;
+//  std::cout << "V16 :" << hex(my32b) << std::endl;
   return &tmpBuffer[pos+1];
 }
 //=======================================================================
@@ -90,7 +90,7 @@ Standard_PCharacter Standard_GUID_GetValue8(Standard_PCharacter tmpBuffer,
   strncpy(strtmp,tmpBuffer,2);
   strtmp[2] = '\0';
   my32b = (Standard_Byte) strtoul(strtmp, (char **)NULL, 16);
-//  cout << "V8 :" << hex(my32b) << endl;
+//  std::cout << "V8 :" << hex(my32b) << std::endl;
   return &tmpBuffer[2];
 }
 //=======================================================================
@@ -388,9 +388,13 @@ void Standard_GUID::ShallowDump(Standard_OStream& aStream) const
   aStream << sguid;
 }
 
-Standard_Integer Standard_GUID::HashCode(const Standard_GUID& aGuid,const Standard_Integer Upper)
+//============================================================================
+// function : HashCode
+// purpose  :
+//============================================================================
+Standard_Integer Standard_GUID::HashCode (const Standard_GUID& theGuid, const Standard_Integer theUpperBound)
 {
-  return aGuid.Hash(Upper);
+  return theGuid.Hash (theUpperBound);
 }
 
 Standard_Integer Standard_GUID::Hash(const Standard_Integer Upper) const

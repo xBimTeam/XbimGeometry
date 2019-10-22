@@ -1072,7 +1072,9 @@ void IntPatch_Intersection::Perform(const Handle(Adaptor3d_HSurface)&  theS1,
       bToCheck = aTor1.MajorRadius() > aTor1.MinorRadius();
       if (typs1 == typs2) {
         const gp_Torus aTor2 = aGeomSurf->Torus();
-        bToCheck = aTor2.MajorRadius() > aTor2.MinorRadius();
+        bToCheck = (bToCheck && (aTor2.MajorRadius() > aTor2.MinorRadius())) ||
+                   (Abs(aTor1.MajorRadius() - aTor2.MajorRadius()) < TolTang &&
+                    Abs(aTor1.MinorRadius() - aTor2.MinorRadius()) < TolTang);
       }
       //
       if (aCTType == GeomAbs_Torus) {
@@ -1560,15 +1562,15 @@ void IntPatch_Intersection::Perform(const Handle(Adaptor3d_HSurface)&  S1,
   myTolTang = TolTang;
   if(myFleche == 0.0) {
 #if DEBUG
-    //cout<<" -- IntPatch_Intersection::myFleche fixe par defaut a 0.01 --"<<endl;
-    //cout<<" -- Utiliser la Methode SetTolerances( ... ) "<<endl;
+    //std::cout<<" -- IntPatch_Intersection::myFleche fixe par defaut a 0.01 --"<<std::endl;
+    //std::cout<<" -- Utiliser la Methode SetTolerances( ... ) "<<std::endl;
 #endif
     myFleche = 0.01;
   }
   if(myUVMaxStep==0.0) {
 #if DEBUG
-    //cout<<" -- IntPatch_Intersection::myUVMaxStep fixe par defaut a 0.01 --"<<endl;
-    //cout<<" -- Utiliser la Methode SetTolerances( ... ) "<<endl;
+    //std::cout<<" -- IntPatch_Intersection::myUVMaxStep fixe par defaut a 0.01 --"<<std::endl;
+    //std::cout<<" -- Utiliser la Methode SetTolerances( ... ) "<<std::endl;
 #endif
     myUVMaxStep = 0.01;
   }

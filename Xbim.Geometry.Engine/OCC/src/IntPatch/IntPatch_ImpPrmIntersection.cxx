@@ -686,13 +686,9 @@ void IntPatch_ImpPrmIntersection::Perform (const Handle(Adaptor3d_HSurface)& Sur
   NbPointDep=seqpdep.Length();
   //
   if (NbPointDep || NbPointIns) {
-    IntPatch_TheIWalking iwalk(TolTang,Fleche,Pas);
-    if (!reversed) {
-      iwalk.Perform(seqpdep,seqpins,Func,Surf2);
-    }
-    else {
-      iwalk.Perform(seqpdep,seqpins,Func,Surf1,Standard_True);
-    }
+    IntPatch_TheIWalking iwalk(TolTang, Fleche, Pas);
+    iwalk.Perform(seqpdep, seqpins, Func, reversed ? Surf1 : Surf2, reversed);
+
     if(!iwalk.IsDone()) {
       return;
     }
@@ -856,6 +852,7 @@ void IntPatch_ImpPrmIntersection::Perform (const Handle(Adaptor3d_HSurface)& Sur
         }
         // <-A
         wline = new IntPatch_WLine(thelin,Standard_False,trans1,trans2);
+        wline->SetCreatingWayInfo(IntPatch_WLine::IntPatch_WLImpPrm);
 
 #ifdef INTPATCH_IMPPRMINTERSECTION_DEBUG
         wline->Dump(0);
@@ -1920,7 +1917,7 @@ static Standard_Boolean InsertSeamVertices(Handle(IntSurf_LineOn2S)&       Line,
               // Line->InsertBefore(ip,Line->Value(ipn));
               // Line->RemovePoint(ip+2);
               // result = Standard_True;
-              // cout << "swap vertex " << endl;
+              // std::cout << "swap vertex " << std::endl;
               // break;
             }
           }
@@ -2383,6 +2380,7 @@ static Handle(IntPatch_WLine) MakeSplitWLine (Handle(IntPatch_WLine)&        WLi
     sline->Add(SLine->Value(ip));
 
   Handle(IntPatch_WLine) wline = new IntPatch_WLine(sline,Tang,Trans1,Trans2);
+  wline->SetCreatingWayInfo(IntPatch_WLine::IntPatch_WLImpPrm);
 
   gp_Pnt aSPnt;
   IntPatch_Point TPntF,TPntL;
@@ -2962,6 +2960,7 @@ static Standard_Boolean DecomposeResult(const Handle(IntPatch_PointLine)& theLin
       Handle(IntPatch_WLine) wline = 
                           new IntPatch_WLine(sline,Standard_False,
                           theLine->TransitionOnS1(),theLine->TransitionOnS2());
+      wline->SetCreatingWayInfo(IntPatch_WLine::IntPatch_WLImpPrm);
 
       Standard_Real aU1 = 0.0, aV1 = 0.0, aU2 = 0.0, aV2 = 0.0;
       gp_Pnt aSPnt(sline->Value(1).Value());

@@ -35,8 +35,8 @@ public:
 
   //! Constructs a link between two vertices.
   BRepMesh_OrientedEdge(
-    const Standard_Integer         theFirstNode,
-    const Standard_Integer         theLastNode)
+    const Standard_Integer theFirstNode,
+    const Standard_Integer theLastNode)
     : myFirstNode(theFirstNode),
       myLastNode(theLastNode)
   {
@@ -54,12 +54,12 @@ public:
     return myLastNode;
   }
 
-  //! Returns hash code for this edge.
-  //! @param theUpper upper index in the container.
-  //! @return hash code.
-  Standard_Integer HashCode(const Standard_Integer theUpper) const
+  //! Computes a hash code for this oriented edge, in the range [1, theUpperBound]
+  //! @param theUpperBound the upper bound of the range a computing hash code must be within
+  //! @return a computed hash code, in the range [1, theUpperBound]
+  inline Standard_Integer HashCode (const Standard_Integer theUpperBound) const
   {
-    return ::HashCode(myFirstNode + myLastNode, theUpper);
+    return ::HashCode (myFirstNode + myLastNode, theUpperBound);
   }
 
   //! Checks this and other edge for equality.
@@ -71,7 +71,7 @@ public:
   }
 
   //! Alias for IsEqual.
-  Standard_Boolean operator ==(const BRepMesh_OrientedEdge& Other) const
+  inline Standard_Boolean operator ==(const BRepMesh_OrientedEdge& Other) const
   {
     return IsEqual(Other);
   }
@@ -82,10 +82,13 @@ private:
   Standard_Integer myLastNode;
 };
 
-inline Standard_Integer HashCode(const BRepMesh_OrientedEdge&   theEdge,
-                                 const Standard_Integer         theUpper)
+//! Computes a hash code for the given oriented edge, in the range [1, theUpperBound]
+//! @param theOrientedEdge the oriented edge which hash code is to be computed
+//! @param theUpperBound the upper bound of the range a computing hash code must be within
+//! @return a computed hash code, in the range [1, theUpperBound]
+inline Standard_Integer HashCode (const BRepMesh_OrientedEdge& theOrientedEdge, const Standard_Integer theUpperBound)
 {
-  return theEdge.HashCode(theUpper);
+  return theOrientedEdge.HashCode (theUpperBound);
 }
 
 #endif

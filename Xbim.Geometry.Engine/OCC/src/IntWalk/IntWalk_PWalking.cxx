@@ -758,10 +758,13 @@ void IntWalk_PWalking::Perform(const TColStd_Array1OfReal& ParDep,
   Standard_Integer LevelOfIterWithoutAppend = -1;
   //
 
-  const Standard_Real aTol[4] = { Epsilon(u1max - u1min),
-                                  Epsilon(v1max - v1min),
-                                  Epsilon(u2max - u2min),
-                                  Epsilon(v2max - v2min)};
+  const Standard_Real aTol[4] = { Epsilon(UM1 - Um1),
+                                  Epsilon(VM1 - Vm1),
+                                  Epsilon(UM2 - Um2),
+                                  Epsilon(VM2 - Vm2)};
+
+  Standard_Integer aPrevNbPoints = line->NbPoints();
+
   Arrive = Standard_False;
   while(!Arrive) //010
   {
@@ -853,8 +856,8 @@ void IntWalk_PWalking::Perform(const TColStd_Array1OfReal& ParDep,
 
         Standard_Real aNewPnt[4], anAbsParamDist[4];
         myIntersectionOn2S.Point().Parameters(aNewPnt[0], aNewPnt[1], aNewPnt[2], aNewPnt[3]);
-        const Standard_Real aParMin[4] = {u1min, v1min, u2min, v2min};
-        const Standard_Real aParMax[4] = {u1max, v1max, u2max, v2max};
+        const Standard_Real aParMin[4] = {Um1, Vm1, Um2, Vm2};
+        const Standard_Real aParMax[4] = {UM1, VM1, UM2, VM2};
 
         for(Standard_Integer i = 0; i < 4; i++)
         {
@@ -864,12 +867,13 @@ void IntWalk_PWalking::Perform(const TColStd_Array1OfReal& ParDep,
             aNewPnt[i] = aParMax[i];
         }
 
-        if (aNewPnt[0] < u1min || aNewPnt[0] > u1max ||
-            aNewPnt[1] < v1min || aNewPnt[1] > v1max ||
-            aNewPnt[2] < u2min || aNewPnt[2] > u2max ||
-            aNewPnt[3] < v2min || aNewPnt[3] > v2max)
+        if (aNewPnt[0] < Um1 || aNewPnt[0] > UM1 ||
+            aNewPnt[1] < Vm1 || aNewPnt[1] > VM1 ||
+            aNewPnt[2] < Um2 || aNewPnt[2] > UM2 ||
+            aNewPnt[3] < Vm2 || aNewPnt[3] > VM2)
         {
-          break; // Out of borders, handle this later.
+          // Out of borders, process it later.
+          break; 
         }
 
         myIntersectionOn2S.ChangePoint().SetValue(aNewPnt[0],
@@ -959,7 +963,7 @@ void IntWalk_PWalking::Perform(const TColStd_Array1OfReal& ParDep,
             LevelOfEmptyInmyIntersectionOn2S=0;
             if(LevelOfIterWithoutAppend < 10)
             {
-              aStatus = TestDeflection(ChoixIso);
+              aStatus = TestDeflection(ChoixIso, aStatus);
             }			
             else
             {
@@ -1098,7 +1102,13 @@ void IntWalk_PWalking::Perform(const TColStd_Array1OfReal& ParDep,
                 if(aDelta > Epsilon(pasInit[i]))
                 {
                   pasInit[i] -= aDelta;
-                  LevelOfIterWithoutAppend=0;
+                  if ((aPrevStatus != IntWalk_StepTooSmall) &&
+                      (line->NbPoints() != aPrevNbPoints))
+                  {
+                    LevelOfIterWithoutAppend = 0;
+                  }
+
+                  aPrevNbPoints = line->NbPoints();
                 }
               }
             }
@@ -1173,8 +1183,13 @@ void IntWalk_PWalking::Perform(const TColStd_Array1OfReal& ParDep,
               // StepTooSmall --> Increase step --> PasTropGrand...)
               // nullify LevelOfIterWithoutAppend only if the condition
               // is satisfied:
-              if (aPrevStatus != IntWalk_PasTropGrand)
+              if ((aPrevStatus != IntWalk_PasTropGrand) &&
+                  (line->NbPoints() != aPrevNbPoints))
+              {
                 LevelOfIterWithoutAppend = 0;
+              }
+
+              aPrevNbPoints = line->NbPoints();
 
               break;
             }
@@ -1195,7 +1210,7 @@ void IntWalk_PWalking::Perform(const TColStd_Array1OfReal& ParDep,
             {
               Arrive=Standard_True;
 #ifdef OCCT_DEBUG
-              cout << "IntWalk_PWalking_1.gxx: Problems with intersection"<<endl;
+              std::cout << "IntWalk_PWalking_1.gxx: Problems with intersection"<<std::endl;
 #endif
             }
 
@@ -1690,7 +1705,7 @@ Standard_Boolean IntWalk_PWalking::ExtendLineInCommonZone(const IntImp_ConstIsop
 
     if((nbIterWithoutAppend > 20) || (nbEqualPoints > 20)) {
 #ifdef OCCT_DEBUG
-      cout<<"Infinite loop detected. Stop iterations (IntWalk_PWalking_1.gxx)" << endl;
+      std::cout<<"Infinite loop detected. Stop iterations (IntWalk_PWalking_1.gxx)" << std::endl;
 #endif
       bStop = Standard_True;
       break;
@@ -1740,7 +1755,7 @@ Standard_Boolean IntWalk_PWalking::ExtendLineInCommonZone(const IntImp_ConstIsop
         return bOutOfTangentZone;
       }
 
-      aStatus = TestDeflection(ChoixIso);
+      aStatus = TestDeflection(ChoixIso, aStatus);
 
       if(aStatus == IntWalk_OK) {
 
@@ -2981,7 +2996,8 @@ namespace {
   static const Standard_Real d = 7.0;
 }
 
-IntWalk_StatusDeflection  IntWalk_PWalking::TestDeflection(const IntImp_ConstIsoparametric choixIso)
+IntWalk_StatusDeflection  IntWalk_PWalking::TestDeflection(const IntImp_ConstIsoparametric choixIso,
+                                                           const IntWalk_StatusDeflection  theStatus)
 
 // test if vector is observed by calculating an increase of vector 
 //     or the previous point and its tangent, the new calculated point and its  
@@ -3376,7 +3392,8 @@ IntWalk_StatusDeflection  IntWalk_PWalking::TestDeflection(const IntImp_ConstIso
       const Standard_Real anInvSqAbsArcDeflMin = 4.0*anInvSqAbsArcDeflMax;
       const Standard_Real aSinB2Min = 1.0 - 2.0/(1.0 + anInvSqAbsArcDeflMin);
 
-      if((aSinB2Min < 0.0) || (aCosBetweenTangent >= 2.0 * aSinB2Min * aSinB2Min - 1.0))
+      if (theStatus != IntWalk_PasTropGrand &&
+          ((aSinB2Min < 0.0) || (aCosBetweenTangent >= 2.0 * aSinB2Min * aSinB2Min - 1.0)))
       {//Real deflection is less than tolconf/2.0
         aStatus = IntWalk_StepTooSmall;
       }

@@ -398,34 +398,88 @@ public:
     return Standard_False;
   }
 
-  //! Find1
+  //! Find the Key1 and return Key2 value.
+  //! Raises an exception if Key1 was not bound.
   const TheKey2Type& Find1(const TheKey1Type& theKey1) const
   {
-    Standard_NoSuchObject_Raise_if (IsEmpty(), "NCollection_DoubleMap::Find1");
-    DoubleMapNode * pNode1 = 
-      (DoubleMapNode *) myData1[Hasher1::HashCode(theKey1,NbBuckets())];
-    while (pNode1)
+    if (const TheKey2Type* aKey2 = Seek1 (theKey1))
     {
-      if (Hasher1::IsEqual (pNode1->Key1(), theKey1)) 
-        return pNode1->Key2();
-      pNode1 = (DoubleMapNode*) pNode1->Next();
+      return *aKey2;
     }
     throw Standard_NoSuchObject("NCollection_DoubleMap::Find1");
   }
 
-  //! Find2
+  //! Find the Key1 and return Key2 value (by copying its value).
+  //! @param [in]  theKey1 Key1 to find
+  //! @param [out] theKey2 Key2 to return
+  //! @return TRUE if Key1 has been found
+  Standard_Boolean Find1 (const TheKey1Type& theKey1,
+                          TheKey2Type& theKey2) const
+  {
+    if (const TheKey2Type* aKey2 = Seek1 (theKey1))
+    {
+      theKey2 = *aKey2;
+      return true;
+    }
+    return false;
+  }
+
+  //! Find the Key1 and return pointer to Key2 or NULL if Key1 is not bound.
+  //! @param [in]  theKey1 Key1 to find
+  //! @return pointer to Key2 or NULL if Key1 is not found
+  const TheKey2Type* Seek1 (const TheKey1Type& theKey1) const
+  {
+    for (DoubleMapNode* aNode1 = !IsEmpty() ? (DoubleMapNode* )myData1[Hasher1::HashCode (theKey1, NbBuckets())] : NULL;
+         aNode1 != NULL; aNode1 = (DoubleMapNode* )aNode1->Next())
+    {
+      if (Hasher1::IsEqual (aNode1->Key1(), theKey1))
+      {
+        return &aNode1->Key2();
+      }
+    }
+    return NULL;
+  }
+
+  //! Find the Key2 and return Key1 value.
+  //! Raises an exception if Key2 was not bound.
   const TheKey1Type& Find2(const TheKey2Type& theKey2) const
   {
-    Standard_NoSuchObject_Raise_if (IsEmpty(), "NCollection_DoubleMap::Find2");
-    DoubleMapNode * pNode2 = 
-      (DoubleMapNode *) myData2[Hasher2::HashCode(theKey2,NbBuckets())];
-    while (pNode2)
+    if (const TheKey1Type* aVal1 = Seek2 (theKey2))
     {
-      if (Hasher2::IsEqual (pNode2->Key2(), theKey2)) 
-        return pNode2->Key1();
-      pNode2 = (DoubleMapNode*) pNode2->Next2();
+      return *aVal1;
     }
     throw Standard_NoSuchObject("NCollection_DoubleMap::Find2");
+  }
+
+  //! Find the Key2 and return Key1 value (by copying its value).
+  //! @param [in]  theKey2 Key2 to find
+  //! @param [out] theKey1 Key1 to return
+  //! @return TRUE if Key2 has been found
+  Standard_Boolean Find2 (const TheKey2Type& theKey2,
+                          TheKey1Type& theKey1) const
+  {
+    if (const TheKey1Type* aVal1 = Seek2 (theKey2))
+    {
+      theKey1 = *aVal1;
+      return Standard_True;
+    }
+    return Standard_False;
+  }
+
+  //! Find the Key2 and return pointer to Key1 or NULL if not bound.
+  //! @param [in] theKey2 Key2 to find
+  //! @return pointer to Key1 if Key2 has been found
+  const TheKey1Type* Seek2 (const TheKey2Type& theKey2) const
+  {
+    for (DoubleMapNode* aNode2 = !IsEmpty() ? (DoubleMapNode* )myData2[Hasher2::HashCode (theKey2, NbBuckets())] : NULL;
+         aNode2 != NULL; aNode2 = (DoubleMapNode* )aNode2->Next2())
+    {
+      if (Hasher2::IsEqual (aNode2->Key2(), theKey2))
+      {
+        return &aNode2->Key1();
+      }
+    }
+    return NULL;
   }
 
   //! Clear data. If doReleaseMemory is false then the table of

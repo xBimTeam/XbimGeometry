@@ -22,6 +22,9 @@
 #include <Standard_Real.hxx>
 #include <Standard_Integer.hxx>
 #include <Standard_Boolean.hxx>
+
+#include <Standard_OStream.hxx>
+
 class Standard_ConstructionError;
 class Standard_OutOfRange;
 class gp_Mat;
@@ -129,8 +132,8 @@ public:
   //! new.X() = <me>.X() + Other.X()
   //! new.Y() = <me>.Y() + Other.Y()
   //! new.Z() = <me>.Z() + Other.Z()
-    gp_XYZ Added (const gp_XYZ& Other) const;
-  gp_XYZ operator + (const gp_XYZ& Other) const
+  Standard_NODISCARD gp_XYZ Added (const gp_XYZ& Other) const;
+  Standard_NODISCARD gp_XYZ operator + (const gp_XYZ& Other) const
 {
   return Added(Other);
 }
@@ -149,8 +152,8 @@ public:
   //! new.X() = <me>.Y() * Other.Z() - <me>.Z() * Other.Y()
   //! new.Y() = <me>.Z() * Other.X() - <me>.X() * Other.Z()
   //! new.Z() = <me>.X() * Other.Y() - <me>.Y() * Other.X()
-    gp_XYZ Crossed (const gp_XYZ& Right) const;
-  gp_XYZ operator ^ (const gp_XYZ& Right) const
+  Standard_NODISCARD gp_XYZ Crossed (const gp_XYZ& Right) const;
+  Standard_NODISCARD gp_XYZ operator ^ (const gp_XYZ& Right) const
 {
   return Crossed(Right);
 }
@@ -171,7 +174,7 @@ public:
   
   //! Triple vector product
   //! computes New = <me>.Cross(Coord1.Cross(Coord2))
-    gp_XYZ CrossCrossed (const gp_XYZ& Coord1, const gp_XYZ& Coord2) const;
+    Standard_NODISCARD gp_XYZ CrossCrossed (const gp_XYZ& Coord1, const gp_XYZ& Coord2) const;
   
   //! divides <me> by a real.
     void Divide (const Standard_Real Scalar);
@@ -181,8 +184,8 @@ public:
 }
   
   //! divides <me> by a real.
-    gp_XYZ Divided (const Standard_Real Scalar) const;
-  gp_XYZ operator / (const Standard_Real Scalar) const
+  Standard_NODISCARD gp_XYZ Divided (const Standard_Real Scalar) const;
+  Standard_NODISCARD gp_XYZ operator / (const Standard_Real Scalar) const
 {
   return Divided(Scalar);
 }
@@ -228,8 +231,8 @@ public:
   //! New.X() = <me>.X() * Scalar;
   //! New.Y() = <me>.Y() * Scalar;
   //! New.Z() = <me>.Z() * Scalar;
-    gp_XYZ Multiplied (const Standard_Real Scalar) const;
-  gp_XYZ operator * (const Standard_Real Scalar) const
+  Standard_NODISCARD gp_XYZ Multiplied (const Standard_Real Scalar) const;
+  Standard_NODISCARD gp_XYZ operator * (const Standard_Real Scalar) const
 {
   return Multiplied(Scalar);
 }
@@ -238,11 +241,11 @@ public:
   //! new.X() = <me>.X() * Other.X();
   //! new.Y() = <me>.Y() * Other.Y();
   //! new.Z() = <me>.Z() * Other.Z();
-    gp_XYZ Multiplied (const gp_XYZ& Other) const;
+  Standard_NODISCARD gp_XYZ Multiplied (const gp_XYZ& Other) const;
   
   //! New = Matrix * <me>
-    gp_XYZ Multiplied (const gp_Mat& Matrix) const;
-  gp_XYZ operator * (const gp_Mat& Matrix) const
+  Standard_NODISCARD gp_XYZ Multiplied (const gp_Mat& Matrix) const;
+  Standard_NODISCARD gp_XYZ operator * (const gp_Mat& Matrix) const
 {
   return Multiplied(Matrix);
 }
@@ -259,7 +262,7 @@ public:
   //! New.Y() = <me>.Y()/ <me>.Modulus()
   //! New.Z() = <me>.Z()/ <me>.Modulus()
   //! Raised if <me>.Modulus() <= Resolution from gp
-    gp_XYZ Normalized() const;
+    Standard_NODISCARD gp_XYZ Normalized() const;
   
 
   //! <me>.X() = -<me>.X()
@@ -271,7 +274,7 @@ public:
   //! New.X() = -<me>.X()
   //! New.Y() = -<me>.Y()
   //! New.Z() = -<me>.Z()
-    gp_XYZ Reversed() const;
+    Standard_NODISCARD gp_XYZ Reversed() const;
   
 
   //! <me>.X() = <me>.X() - Other.X()
@@ -287,8 +290,8 @@ public:
   //! new.X() = <me>.X() - Other.X()
   //! new.Y() = <me>.Y() - Other.Y()
   //! new.Z() = <me>.Z() - Other.Z()
-    gp_XYZ Subtracted (const gp_XYZ& Right) const;
-  gp_XYZ operator - (const gp_XYZ& Right) const
+  Standard_NODISCARD gp_XYZ Subtracted (const gp_XYZ& Right) const;
+  Standard_NODISCARD gp_XYZ operator - (const gp_XYZ& Right) const
 {
   return Subtracted(Right);
 }
@@ -324,6 +327,8 @@ public:
     void SetLinearForm (const gp_XYZ& XYZ1, const gp_XYZ& XYZ2);
 
 
+  //! Dumps the content of me into the stream
+  Standard_EXPORT void DumpJson (Standard_OStream& theOStream, const Standard_Integer theDepth = -1) const;
 
 
 protected:

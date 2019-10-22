@@ -165,15 +165,19 @@ void math_NewtonMinimum::Perform(math_MultipleVarFunctionWithHessian& F,
       Standard_Real aMult = RealLast();
       for(Standard_Integer anIdx = 1; anIdx <= myLeft.Upper(); anIdx++)
       {
+        const Standard_Real anAbsStep = Abs(TheStep(anIdx));
+        if (anAbsStep < gp::Resolution())
+          continue;
+
         if (suivant->Value(anIdx) < myLeft(anIdx))
         {
-          Standard_Real aValue = Abs(precedent->Value(anIdx) - myLeft(anIdx)) / Abs(TheStep(anIdx));
+          Standard_Real aValue = Abs(precedent->Value(anIdx) - myLeft(anIdx)) / anAbsStep;
           aMult = Min (aValue, aMult);
         }
 
         if (suivant->Value(anIdx) > myRight(anIdx))
         {
-          Standard_Real aValue = Abs(precedent->Value(anIdx) - myRight(anIdx)) / Abs(TheStep(anIdx));
+          Standard_Real aValue = Abs(precedent->Value(anIdx) - myRight(anIdx)) / anAbsStep;
           aMult = Min (aValue, aMult);
         }
       }
@@ -191,8 +195,8 @@ void math_NewtonMinimum::Perform(math_MultipleVarFunctionWithHessian& F,
           // Nullify corresponding TheStep indexes.
           for(Standard_Integer anIdx = 1; anIdx <= myLeft.Upper(); anIdx++)
           {
-            if (Abs(precedent->Value(anIdx) - myRight(anIdx)) < Precision::PConfusion() ||
-                Abs(precedent->Value(anIdx) - myLeft(anIdx) ) < Precision::PConfusion())
+            if ((Abs(precedent->Value(anIdx) - myRight(anIdx)) < Precision::PConfusion() && TheStep(anIdx) < 0.0) ||
+                (Abs(precedent->Value(anIdx) - myLeft(anIdx) ) < Precision::PConfusion() && TheStep(anIdx) > 0.0) )
             {
               TheStep(anIdx) = 0.0;
             }
@@ -254,13 +258,13 @@ void math_NewtonMinimum::Perform(math_MultipleVarFunctionWithHessian& F,
 void math_NewtonMinimum::Dump(Standard_OStream& o) const 
 {
   o<< "math_Newton Optimisation: ";
-  o << " Done   ="  << Done << endl; 
-  o << " Status = " << (Standard_Integer)TheStatus << endl;
-  o << " Location Vector = " << Location() << endl;
-  o << " Minimum value = "<< Minimum()<< endl;
-  o << " Previous value = "<< PreviousMinimum << endl;
-  o << " Number of iterations = " <<NbIterations() << endl;
-  o << " Convexity = " << Convex << endl;
-  o << " Eigen Value = " << MinEigenValue << endl;
+  o << " Done   ="  << Done << std::endl; 
+  o << " Status = " << (Standard_Integer)TheStatus << std::endl;
+  o << " Location Vector = " << Location() << std::endl;
+  o << " Minimum value = "<< Minimum()<< std::endl;
+  o << " Previous value = "<< PreviousMinimum << std::endl;
+  o << " Number of iterations = " <<NbIterations() << std::endl;
+  o << " Convexity = " << Convex << std::endl;
+  o << " Eigen Value = " << MinEigenValue << std::endl;
 }
 
