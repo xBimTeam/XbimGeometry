@@ -3,574 +3,574 @@
   <!-- Filters -->
   <ItemGroup>
     <Filter Include="Source files">
-      <UniqueIdentifier>{57e20155-797b-464a-bef1-412f3de82912}</UniqueIdentifier>
+      <UniqueIdentifier>{373297ae-cd9d-4dcc-913b-30db6dc95588}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\XbimGeometry">
-      <UniqueIdentifier>{7ac0d283-a7e0-4d6e-98f6-a2c305c8dcaf}</UniqueIdentifier>
+      <UniqueIdentifier>{a18f5edc-513d-4b4d-8622-3a7ef4d8582c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKShHealing">
-      <UniqueIdentifier>{eb8f6a0e-cfdd-4694-a5d6-d4cad5c17906}</UniqueIdentifier>
+      <UniqueIdentifier>{35e95c08-0a09-4664-9685-08cad06b5388}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKShHealing\ShapeBuild">
-      <UniqueIdentifier>{5bfa27ed-593c-4710-9bf4-bf35747354b8}</UniqueIdentifier>
+      <UniqueIdentifier>{434d0a2f-9096-4762-9024-71179d2c4f09}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKShHealing\ShapeExtend">
-      <UniqueIdentifier>{6f9de460-9ea2-472a-8ed0-86069d4baad1}</UniqueIdentifier>
+      <UniqueIdentifier>{818ca748-54cf-4d6e-8192-9cae432c437f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKShHealing\ShapeConstruct">
-      <UniqueIdentifier>{9a812091-ab74-4658-a83c-fbcf412da1cb}</UniqueIdentifier>
+      <UniqueIdentifier>{e84c4c53-a8e7-44e5-ad9f-f5940adb09ad}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKShHealing\ShapeCustom">
-      <UniqueIdentifier>{316c867a-0d8d-4dbc-8a5f-82a889e2fe4c}</UniqueIdentifier>
+      <UniqueIdentifier>{cec4f3a8-82da-4816-8341-50b559262877}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKShHealing\ShapeAnalysis">
-      <UniqueIdentifier>{4462f54d-764a-4aee-8584-a9029ad2366a}</UniqueIdentifier>
+      <UniqueIdentifier>{c4f48a8c-3e04-417b-87c8-a47521b1187c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKShHealing\ShapeFix">
-      <UniqueIdentifier>{57c244a1-6ace-48e3-8f7e-1883e68589bc}</UniqueIdentifier>
+      <UniqueIdentifier>{a0108712-816a-46ab-b3ad-71fa6db7f967}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKShHealing\ShapeUpgrade">
-      <UniqueIdentifier>{d08b455f-b110-4ec9-855e-85802ef0fb2d}</UniqueIdentifier>
+      <UniqueIdentifier>{2451c609-29fd-47ad-b256-5d941c47f2dc}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKShHealing\ShapeAlgo">
-      <UniqueIdentifier>{c315e651-3f45-4f9b-9472-c3208648f864}</UniqueIdentifier>
+      <UniqueIdentifier>{25c3cd00-916d-442c-bdd0-fa4bda34f98f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKShHealing\ShapeProcess">
-      <UniqueIdentifier>{f9ff77fd-60b0-43fa-bb8d-b1ea862a03ec}</UniqueIdentifier>
+      <UniqueIdentifier>{6c108d05-9ec2-486e-a9bf-6d215b75467b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKShHealing\ShapeProcessAPI">
-      <UniqueIdentifier>{ea4f7492-8aed-48a4-9d8a-ccba0c9ca65c}</UniqueIdentifier>
+      <UniqueIdentifier>{efabc244-07aa-474c-9a3b-6a55fdf8db9d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBRep">
-      <UniqueIdentifier>{bba802ac-e71f-4676-bc89-978c25e0cde3}</UniqueIdentifier>
+      <UniqueIdentifier>{5fa2eddf-7457-44e8-a9b5-d8391639b5b5}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBRep\TopoDS">
-      <UniqueIdentifier>{068d45e7-c441-4b89-aa7e-51a2188265bf}</UniqueIdentifier>
+      <UniqueIdentifier>{ea4eefce-fb7f-4267-acce-266e99f6eabe}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBRep\TopExp">
-      <UniqueIdentifier>{7121fb34-78ea-4257-93f6-0bca925893d9}</UniqueIdentifier>
+      <UniqueIdentifier>{144dcae3-6e32-4137-a8dd-d72037dcb53c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBRep\TopTools">
-      <UniqueIdentifier>{4af55c08-ad48-4d7c-b8cd-f8a0119f235a}</UniqueIdentifier>
+      <UniqueIdentifier>{579f170e-7a6a-43f3-90a5-68f42dadf623}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBRep\BRep">
-      <UniqueIdentifier>{978eec4c-a833-42c5-ab7c-782d21002788}</UniqueIdentifier>
+      <UniqueIdentifier>{9a87394f-f272-4051-bc0c-df738867603a}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBRep\BRepLProp">
-      <UniqueIdentifier>{1ded2496-32ce-4733-97d3-5e06c01bb958}</UniqueIdentifier>
+      <UniqueIdentifier>{49b6c9c6-0cf1-42ab-be50-e9b8764ea47e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBRep\BRepAdaptor">
-      <UniqueIdentifier>{4de456cf-3fc2-4801-b146-95036c60cd7f}</UniqueIdentifier>
+      <UniqueIdentifier>{571f2118-6626-49e6-a406-b21655dc3f8d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBRep\BRepTools">
-      <UniqueIdentifier>{ac153f65-2bf6-4107-bd4c-fa3ff02da0a5}</UniqueIdentifier>
+      <UniqueIdentifier>{e889d7cd-6cfb-4de7-b513-555b325f29e1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBRep\BinTools">
-      <UniqueIdentifier>{04e06805-f40a-436a-a6e4-3f10247517fb}</UniqueIdentifier>
+      <UniqueIdentifier>{88f2e173-68da-4db0-9c08-366b371cef87}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMath">
-      <UniqueIdentifier>{2f0dd029-f1ae-4f5e-a08a-d693aed73502}</UniqueIdentifier>
+      <UniqueIdentifier>{7bbad071-279a-44f8-a065-98bc2b7232fb}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMath\math">
-      <UniqueIdentifier>{5308df6e-ad2b-4218-970a-18fa3cb59021}</UniqueIdentifier>
+      <UniqueIdentifier>{c12040e2-648a-4811-b2a4-224f4fe00188}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMath\ElCLib">
-      <UniqueIdentifier>{0bbd39d6-5a20-42d3-a0e7-6c55b2d95ccc}</UniqueIdentifier>
+      <UniqueIdentifier>{a8c2da71-7c35-4f57-8e0e-21ee15ae8692}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMath\ElSLib">
-      <UniqueIdentifier>{f5cce39a-68ad-4b95-bd61-37ffc4abe1d8}</UniqueIdentifier>
+      <UniqueIdentifier>{9994c4f5-65a6-49d5-87a4-65864a9af809}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMath\BSplCLib">
-      <UniqueIdentifier>{9be95d70-4770-4eaf-a74b-538da618d24b}</UniqueIdentifier>
+      <UniqueIdentifier>{e01c752d-a567-4921-8ede-3b291f503c8d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMath\BSplSLib">
-      <UniqueIdentifier>{4a160908-5622-4a49-8bf7-31023ff42951}</UniqueIdentifier>
+      <UniqueIdentifier>{e54c7904-6a3a-47fc-98c5-d5d02b9eaf89}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMath\PLib">
-      <UniqueIdentifier>{7db9a7e8-af54-4501-9b4b-d63cf74492a9}</UniqueIdentifier>
+      <UniqueIdentifier>{f661177d-b7e8-43e4-a774-a911214d83ab}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMath\Precision">
-      <UniqueIdentifier>{e5eda420-d1e0-4659-a0de-c4333b55af85}</UniqueIdentifier>
+      <UniqueIdentifier>{0aa547b6-591e-47d1-803a-5e9ee36bb162}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMath\GeomAbs">
-      <UniqueIdentifier>{f46ce961-c882-4457-ae99-3cf024bfb7fd}</UniqueIdentifier>
+      <UniqueIdentifier>{46ba0300-59da-4bb8-b567-931e1a7f11a7}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMath\Poly">
-      <UniqueIdentifier>{c9e13046-48c7-42b3-bdec-840f435a597b}</UniqueIdentifier>
+      <UniqueIdentifier>{00fc9a7a-7c7d-4a96-a413-301262dd0af7}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMath\CSLib">
-      <UniqueIdentifier>{070122ae-6fc2-4896-89ab-b974aa7e9563}</UniqueIdentifier>
+      <UniqueIdentifier>{45547045-34f4-4724-8ca1-d65a47e3fc88}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMath\Convert">
-      <UniqueIdentifier>{394972bd-ce2c-48eb-854d-f22f4e4b949c}</UniqueIdentifier>
+      <UniqueIdentifier>{a4b91e7a-8b64-4345-87d3-db8fdf6ceb41}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMath\Bnd">
-      <UniqueIdentifier>{c8e5f4f8-6214-4ba8-8661-3eb8d0c530a5}</UniqueIdentifier>
+      <UniqueIdentifier>{1dd4cb9c-dc01-44e3-9ce6-fa4a7b23301c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMath\BVH">
-      <UniqueIdentifier>{7c54c665-e3d2-4738-9e27-734f483b5cd0}</UniqueIdentifier>
+      <UniqueIdentifier>{8f359c42-b5d6-4cc2-b6a1-cbd813d631b9}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMath\gp">
-      <UniqueIdentifier>{e4b1714c-9672-4b41-a7a2-69ff64149981}</UniqueIdentifier>
+      <UniqueIdentifier>{57506701-6acc-434a-9f5a-bbddf3ca8dc7}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMath\TColgp">
-      <UniqueIdentifier>{e772a2a1-9bc8-4a40-81ed-bed9a719fc8d}</UniqueIdentifier>
+      <UniqueIdentifier>{28118ef4-3f4c-4c4e-a059-e53cf35cac4b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMath\TopLoc">
-      <UniqueIdentifier>{2f72f984-f258-48d3-b717-3060e56942ce}</UniqueIdentifier>
+      <UniqueIdentifier>{1d7d4756-3072-4f6c-b489-045cfd3306da}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMath\Expr">
-      <UniqueIdentifier>{676514ec-0d99-4b78-b31a-8116e59d6c70}</UniqueIdentifier>
+      <UniqueIdentifier>{923deae7-d7bb-4097-b599-5e18f3b074c7}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMath\ExprIntrp">
-      <UniqueIdentifier>{34630d0b-b180-48eb-844d-a575521c6c20}</UniqueIdentifier>
+      <UniqueIdentifier>{ddced3ad-6547-4c07-ae30-41fa3496bb00}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKernel">
-      <UniqueIdentifier>{d1233309-5056-4b78-a14c-3e6d99db4d3c}</UniqueIdentifier>
+      <UniqueIdentifier>{0f9329d3-c70b-4e9e-9636-ead7cfd2200d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKernel\FSD">
-      <UniqueIdentifier>{19482118-9d0e-423d-9e3e-0506e1b3c519}</UniqueIdentifier>
+      <UniqueIdentifier>{0e1c67a7-936d-4695-b3c5-974ec2ddccf5}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKernel\MMgt">
-      <UniqueIdentifier>{d13e66ca-9302-49a1-8b46-b669bc863338}</UniqueIdentifier>
+      <UniqueIdentifier>{211468fd-52da-49e8-9ce3-0af76cba6b58}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKernel\OSD">
-      <UniqueIdentifier>{0b6e8523-1eea-439d-9815-8cf2a66c0d62}</UniqueIdentifier>
+      <UniqueIdentifier>{8f9c3d14-97ec-4b03-bca3-dfef154e56d8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKernel\Plugin">
-      <UniqueIdentifier>{5beec23b-8d5b-4587-9305-6544146ac4d7}</UniqueIdentifier>
+      <UniqueIdentifier>{9cf3840d-04f1-4be4-9648-9d3386a5d499}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKernel\Quantity">
-      <UniqueIdentifier>{58405c9e-9ee4-4b1e-bb2e-c1f1de1d8d58}</UniqueIdentifier>
+      <UniqueIdentifier>{b301db1f-10ef-4126-b25f-9dc100161583}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKernel\Resource">
-      <UniqueIdentifier>{537bebbe-137e-40d1-9d43-3856a8f03806}</UniqueIdentifier>
+      <UniqueIdentifier>{e5bede24-e4ee-48da-aee6-61747d3dd2a8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKernel\Standard">
-      <UniqueIdentifier>{7ce9ba3e-3aac-42fb-ba5d-089250d41f4c}</UniqueIdentifier>
+      <UniqueIdentifier>{3d5a5016-47c2-473c-9455-efed464f5858}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKernel\StdFail">
-      <UniqueIdentifier>{61ed1437-92b1-45c2-a415-165795b1b9d1}</UniqueIdentifier>
+      <UniqueIdentifier>{d653a5ed-d41e-4208-9ffc-03114352be4c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKernel\Storage">
-      <UniqueIdentifier>{bd8c41ab-b208-445b-84b3-23c1ee3a8e38}</UniqueIdentifier>
+      <UniqueIdentifier>{f7b48aef-373d-43a5-8b5b-c151c1ced020}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKernel\TColStd">
-      <UniqueIdentifier>{6337768e-a095-4aeb-a1d7-cae23f7c7d52}</UniqueIdentifier>
+      <UniqueIdentifier>{c63cb583-2198-47dd-b4ec-e3004ebeefe6}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKernel\TCollection">
-      <UniqueIdentifier>{593195a1-bced-4ea5-bc86-7e86f57b3066}</UniqueIdentifier>
+      <UniqueIdentifier>{145b1531-8522-4fba-8da7-687f9c8a7523}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKernel\TShort">
-      <UniqueIdentifier>{b8dd030c-d1f9-4537-9433-4e084ecf7561}</UniqueIdentifier>
+      <UniqueIdentifier>{423793de-b022-4301-b0ac-e2deba819924}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKernel\Units">
-      <UniqueIdentifier>{19b034b2-1d7a-4d32-a739-034604058191}</UniqueIdentifier>
+      <UniqueIdentifier>{c73df945-7dc5-4ff6-89ce-53374fdaf024}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKernel\UnitsAPI">
-      <UniqueIdentifier>{242604a7-966f-4f6a-9c34-ee5863f270a7}</UniqueIdentifier>
+      <UniqueIdentifier>{c2b61e8e-6b67-495e-acc6-e6d946b78f58}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKernel\NCollection">
-      <UniqueIdentifier>{2f8672e7-9a7b-45d1-9051-84cc34dde407}</UniqueIdentifier>
+      <UniqueIdentifier>{01ac2fd7-b3fb-4d6d-890e-8be3980b6647}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKernel\Message">
-      <UniqueIdentifier>{1a637959-dfd1-4efc-9163-840bca5273b3}</UniqueIdentifier>
+      <UniqueIdentifier>{d04174f5-aa15-44a6-95c8-8f47e61f120b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKG2d">
-      <UniqueIdentifier>{057b3c64-90c9-4cf0-a58b-38bdde9ee66b}</UniqueIdentifier>
+      <UniqueIdentifier>{c23d87a2-a360-4149-a724-ab133707f021}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKG2d\Geom2d">
-      <UniqueIdentifier>{8bcefc90-f573-4033-bf14-d0824fe83ee6}</UniqueIdentifier>
+      <UniqueIdentifier>{6256b0d1-d2c0-487f-adde-a0fd06189359}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKG2d\LProp">
-      <UniqueIdentifier>{7b1ce35f-bfe4-408b-b18d-139238fb94a9}</UniqueIdentifier>
+      <UniqueIdentifier>{eca9721f-7a4e-4496-8945-d700711265d2}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKG2d\TColGeom2d">
-      <UniqueIdentifier>{074526e8-eb7b-4fff-87b4-75bdf6d6df1d}</UniqueIdentifier>
+      <UniqueIdentifier>{a5543b0b-9470-467e-8fba-19ba8a01ab2f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKG2d\Adaptor2d">
-      <UniqueIdentifier>{3310f8dc-b237-4279-8c76-975c2980c088}</UniqueIdentifier>
+      <UniqueIdentifier>{ea2ba7e3-c20e-49d9-8e7b-fd650f01a09d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKG2d\Geom2dLProp">
-      <UniqueIdentifier>{56ddc065-2512-4efb-a8e9-e92ce153e7bc}</UniqueIdentifier>
+      <UniqueIdentifier>{3ca013ea-16eb-49d4-9ca3-8423b433d7eb}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKG2d\Geom2dAdaptor">
-      <UniqueIdentifier>{1e90306b-a01c-4b7e-b4f8-e50204dc6954}</UniqueIdentifier>
+      <UniqueIdentifier>{ddfadd9f-ca50-4199-9758-3bd7c7c234d5}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKG2d\Geom2dEvaluator">
-      <UniqueIdentifier>{82f8e355-6c10-470f-ade4-2af5ebcebac7}</UniqueIdentifier>
+      <UniqueIdentifier>{9b0c700d-0aba-429c-af8a-bb786a85a1c7}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKG3d">
-      <UniqueIdentifier>{06d04f6a-4b2e-49da-a677-399812faa291}</UniqueIdentifier>
+      <UniqueIdentifier>{da293dcb-bcb9-4bf4-9958-b6e7a8327f86}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKG3d\Geom">
-      <UniqueIdentifier>{c6b2e4ab-ecca-474c-8000-837c8c0ee8fe}</UniqueIdentifier>
+      <UniqueIdentifier>{1925eebc-f83e-4e7b-8b37-c3a208d184c6}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKG3d\TColGeom">
-      <UniqueIdentifier>{33a143ca-c277-40a6-8e09-98128aaee72a}</UniqueIdentifier>
+      <UniqueIdentifier>{d644491b-bb4f-4953-89af-fb98257ddad0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKG3d\GeomAdaptor">
-      <UniqueIdentifier>{eff76e68-5069-428f-a37f-7c08c18b0027}</UniqueIdentifier>
+      <UniqueIdentifier>{d6f15de4-bc04-425e-85d1-a994656a9e7b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKG3d\AdvApprox">
-      <UniqueIdentifier>{90018aa0-6685-45a8-bde5-1a327672a4fa}</UniqueIdentifier>
+      <UniqueIdentifier>{b6034db5-3edd-43ec-8330-92985ccdd590}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKG3d\GeomLProp">
-      <UniqueIdentifier>{eb002420-f837-4ee0-91dd-758e9fa24bf2}</UniqueIdentifier>
+      <UniqueIdentifier>{15db57d8-945d-47ae-90d2-a55620b3cb67}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKG3d\Adaptor3d">
-      <UniqueIdentifier>{cda7bac4-28c7-4e55-be5b-9a71e6fc55e0}</UniqueIdentifier>
+      <UniqueIdentifier>{551db9a2-1c6a-4c4a-bdff-4f96600932aa}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKG3d\LProp3d">
-      <UniqueIdentifier>{478d46c7-d6b3-49d3-bc7c-a00d4a2be9aa}</UniqueIdentifier>
+      <UniqueIdentifier>{82860875-c760-4fd0-81c1-103b954a5a02}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKG3d\TopAbs">
-      <UniqueIdentifier>{71611f72-aa63-4bfe-8b87-c425c5c4f81d}</UniqueIdentifier>
+      <UniqueIdentifier>{469396b2-1477-4c44-8ace-10b2c6128ae1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKG3d\GeomEvaluator">
-      <UniqueIdentifier>{9baa22aa-b318-430e-89ee-2acabf894196}</UniqueIdentifier>
+      <UniqueIdentifier>{da383f7d-e6cd-4f68-8de0-df8d570d5242}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKG3d\GProp">
-      <UniqueIdentifier>{dfe4da63-0f25-4184-a9d0-74c2faef4115}</UniqueIdentifier>
+      <UniqueIdentifier>{bbb2d564-f15b-438d-8cf7-f6fbcf8799b2}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase">
-      <UniqueIdentifier>{d8532989-9d19-4a93-a646-47a903d28f9b}</UniqueIdentifier>
+      <UniqueIdentifier>{527e6611-3873-4bcc-bdaf-583a2684d732}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\ProjLib">
-      <UniqueIdentifier>{374c6199-65ac-4210-9493-4342512c72cc}</UniqueIdentifier>
+      <UniqueIdentifier>{6130dea4-0b30-4057-996b-6c7838d4f43c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\GeomProjLib">
-      <UniqueIdentifier>{205c5a5b-9522-440e-b6de-030fdda215ef}</UniqueIdentifier>
+      <UniqueIdentifier>{4192be3c-e4c4-4e4a-8329-19f425fae8ed}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\GCPnts">
-      <UniqueIdentifier>{838cb57f-0af6-4ef2-950e-9afa3ebd363f}</UniqueIdentifier>
+      <UniqueIdentifier>{c424a769-fb28-4cd0-a1f8-aa89973cb745}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\CPnts">
-      <UniqueIdentifier>{33d26725-2805-4eee-af48-a9859a87b982}</UniqueIdentifier>
+      <UniqueIdentifier>{2f687d71-44ca-42e0-b2e8-51021f9d7117}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\Approx">
-      <UniqueIdentifier>{6dea7495-4ef3-410b-9100-1a5e7fe6c59a}</UniqueIdentifier>
+      <UniqueIdentifier>{90f54d5e-2a75-4009-abec-eee653a7c21c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\AppParCurves">
-      <UniqueIdentifier>{0017606b-d1f0-4aec-9b81-007f1e665add}</UniqueIdentifier>
+      <UniqueIdentifier>{9bad50f5-e6d5-446c-982c-0002b04d51c3}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\FEmTool">
-      <UniqueIdentifier>{f4ed40de-62e5-4db4-bbbb-685700a45f39}</UniqueIdentifier>
+      <UniqueIdentifier>{742caff5-b3f6-42d2-81a9-3331af611fb7}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\AppCont">
-      <UniqueIdentifier>{fa8e9951-7023-43c7-a390-371832ed05b7}</UniqueIdentifier>
+      <UniqueIdentifier>{56cd3ee0-57a9-4b9b-ac21-9c56a8d268bf}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\Extrema">
-      <UniqueIdentifier>{fcc37922-8504-41d2-bbef-28d0c3c632b6}</UniqueIdentifier>
+      <UniqueIdentifier>{d2e12f76-0cdf-4ca5-9a2e-a999ae294043}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\IntAna">
-      <UniqueIdentifier>{14692f4a-3d9f-41c6-9a62-9d81afe3acc5}</UniqueIdentifier>
+      <UniqueIdentifier>{34e94e0f-e9e3-431b-9ea1-68cded78b9e2}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\IntAna2d">
-      <UniqueIdentifier>{64100586-9ba5-47e8-9af7-6fab26d30a19}</UniqueIdentifier>
+      <UniqueIdentifier>{db9a1785-fd4e-4e98-9fff-b8a687fb99dd}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\GeomConvert">
-      <UniqueIdentifier>{c5963d71-a293-447d-96aa-be0fd207a128}</UniqueIdentifier>
+      <UniqueIdentifier>{30a5ca23-12e9-42cd-9c20-4bdd2222dc64}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\AdvApp2Var">
-      <UniqueIdentifier>{08b8abe4-fe8f-4080-8928-c5c8d1ab07a3}</UniqueIdentifier>
+      <UniqueIdentifier>{e8bfa777-33e8-4618-ba6f-8c1f6eabed6f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\GeomLib">
-      <UniqueIdentifier>{93179c39-f01d-4cf4-89af-117923742172}</UniqueIdentifier>
+      <UniqueIdentifier>{dfca7e34-5c99-40cd-bc4a-edacbbf02469}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\Geom2dConvert">
-      <UniqueIdentifier>{86d703af-4b68-4471-b8d4-54b81a9ab7eb}</UniqueIdentifier>
+      <UniqueIdentifier>{f6c77290-e535-4618-adad-90d567810206}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\Hermit">
-      <UniqueIdentifier>{4f3f9575-cc04-493c-8f37-83a230f5872d}</UniqueIdentifier>
+      <UniqueIdentifier>{eb2f326e-5a42-44d2-b655-71c6abd4cc85}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\BndLib">
-      <UniqueIdentifier>{ccca6317-65f6-4ab3-ae9f-db6c05d8dedd}</UniqueIdentifier>
+      <UniqueIdentifier>{75ca1327-04fa-49a0-aa4a-c5bbda5a5ceb}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\AppDef">
-      <UniqueIdentifier>{c6cd4d9d-6de8-4320-a5f7-febbb8be4361}</UniqueIdentifier>
+      <UniqueIdentifier>{4c47adfb-9dac-441d-857f-807b6ba1a3f2}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\GeomTools">
-      <UniqueIdentifier>{422f1e55-164f-4e87-b3cc-d53a6201ff1b}</UniqueIdentifier>
+      <UniqueIdentifier>{430da110-d944-4f1e-90e7-afa4c183dcc2}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\GC">
-      <UniqueIdentifier>{49f33465-51fd-4908-8253-e1d7accb2f25}</UniqueIdentifier>
+      <UniqueIdentifier>{43327427-3100-4fef-880e-05fbdda1c92a}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\GCE2d">
-      <UniqueIdentifier>{9d758845-4410-4ad0-babd-1a349a1eb38a}</UniqueIdentifier>
+      <UniqueIdentifier>{b30f5a33-95b4-480b-8d71-86a53b3eb7af}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomBase\gce">
-      <UniqueIdentifier>{dd6c7de3-c836-4b5b-b6b7-5fa8f51765f0}</UniqueIdentifier>
+      <UniqueIdentifier>{c91baa53-fda9-4cc7-bd40-09eef3dde32d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKTopAlgo">
-      <UniqueIdentifier>{46a508e3-f62f-429b-a738-b0329cf64341}</UniqueIdentifier>
+      <UniqueIdentifier>{0c69ef5c-f234-440d-b6e7-97b7cb69b0c7}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKTopAlgo\IntCurvesFace">
-      <UniqueIdentifier>{9adc7e25-8ad9-4a9c-8fe8-0209037c571b}</UniqueIdentifier>
+      <UniqueIdentifier>{1c7637b6-8e7f-4979-8ff6-e0a638463112}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKTopAlgo\MAT">
-      <UniqueIdentifier>{1c7d06e3-96f5-47d3-b795-e205d78d5853}</UniqueIdentifier>
+      <UniqueIdentifier>{7b1e571f-3276-4eeb-a408-fd7be33a20d8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKTopAlgo\MAT2d">
-      <UniqueIdentifier>{0313c53d-b088-4ba3-955f-e5597f4d33cd}</UniqueIdentifier>
+      <UniqueIdentifier>{dfd38b1f-adca-488b-8f02-c55eaeefa554}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKTopAlgo\Bisector">
-      <UniqueIdentifier>{7936b6f2-e672-4b67-ba1c-2c25158f67cd}</UniqueIdentifier>
+      <UniqueIdentifier>{f49bcbba-86b0-472d-955d-7ed079c14c25}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKTopAlgo\BRepMAT2d">
-      <UniqueIdentifier>{c0f2d534-9dcf-4625-9f25-ce979c1ab968}</UniqueIdentifier>
+      <UniqueIdentifier>{3b54b71d-5767-4513-ad88-7c4fe321383c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKTopAlgo\BRepCheck">
-      <UniqueIdentifier>{dc859ae0-4202-44f5-b14a-79cb8b2972fc}</UniqueIdentifier>
+      <UniqueIdentifier>{8f6fb59e-fb24-4947-aeb9-a02fff6a67ed}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKTopAlgo\BRepBndLib">
-      <UniqueIdentifier>{c7856293-7008-42f3-a694-cb3c61584456}</UniqueIdentifier>
+      <UniqueIdentifier>{666394fb-155d-40f2-8bad-f3c533adac41}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKTopAlgo\BRepExtrema">
-      <UniqueIdentifier>{c484ec8a-8e6b-452c-9cbe-4de72d04cc1c}</UniqueIdentifier>
+      <UniqueIdentifier>{cc9329a5-cb9d-4313-9be0-bd876264ce44}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKTopAlgo\BRepClass">
-      <UniqueIdentifier>{43233390-b1d5-4f16-b774-9ffbaee1e90b}</UniqueIdentifier>
+      <UniqueIdentifier>{48e48f52-28d0-4d7c-b1f0-fa4a7f4ed386}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKTopAlgo\BRepClass3d">
-      <UniqueIdentifier>{af9dc5e4-7f8c-4c38-96a3-70cad6115576}</UniqueIdentifier>
+      <UniqueIdentifier>{0ab74666-7113-4cf8-8677-057d222e3c9a}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKTopAlgo\BRepLib">
-      <UniqueIdentifier>{714e9ec8-fcfa-408b-a4c0-533136121fd5}</UniqueIdentifier>
+      <UniqueIdentifier>{1800a92d-d4c7-404e-b264-df8027203864}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKTopAlgo\BRepGProp">
-      <UniqueIdentifier>{83280329-a0d9-44ce-8a5e-1e8a051dcefe}</UniqueIdentifier>
+      <UniqueIdentifier>{521d7333-68cd-4723-9a4c-54a10cde4bcf}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKTopAlgo\BRepIntCurveSurface">
-      <UniqueIdentifier>{a1e95125-cf23-40c4-87ad-b7357efdd492}</UniqueIdentifier>
+      <UniqueIdentifier>{6196a0bc-4ed4-4d2d-8178-c03c45c92f06}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKTopAlgo\BRepTopAdaptor">
-      <UniqueIdentifier>{92d2c597-faa0-4f13-b332-fba426a53a61}</UniqueIdentifier>
+      <UniqueIdentifier>{4f2eeaac-6040-40f3-ac4f-4f496811a1d1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKTopAlgo\BRepBuilderAPI">
-      <UniqueIdentifier>{e57bb655-edf8-491e-a318-d738139f79fc}</UniqueIdentifier>
+      <UniqueIdentifier>{2ecd41d4-6f99-41f0-a1b2-b6e7cf7678e7}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKTopAlgo\BRepApprox">
-      <UniqueIdentifier>{a167e76f-8ef3-49e0-9de4-b8aa0cfb1126}</UniqueIdentifier>
+      <UniqueIdentifier>{b2b98155-1de7-49ed-9b9f-15af7a97d379}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo">
-      <UniqueIdentifier>{f69b7dce-f432-4f5e-9b22-70f059566753}</UniqueIdentifier>
+      <UniqueIdentifier>{27daaf28-836d-4886-981b-805bbbd068df}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\Hatch">
-      <UniqueIdentifier>{f0b9c8f0-1668-423b-9616-edc260259680}</UniqueIdentifier>
+      <UniqueIdentifier>{fd136efd-d916-4633-9e8b-6da2772ac88d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\GeomInt">
-      <UniqueIdentifier>{ab8618c1-fef7-42ca-a5e4-d5d416ccbad6}</UniqueIdentifier>
+      <UniqueIdentifier>{4d5771cc-2f73-41d1-b36b-1539556f99ac}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\IntStart">
-      <UniqueIdentifier>{d7bf0146-4e7b-472a-a2d4-e42b553293f2}</UniqueIdentifier>
+      <UniqueIdentifier>{962647b2-2b42-4980-8051-a9ee2ae1e4c3}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\IntWalk">
-      <UniqueIdentifier>{e50e8314-5689-419d-8863-aa4c1bc396a3}</UniqueIdentifier>
+      <UniqueIdentifier>{59c35780-0fa7-4ae0-8e7f-a569fd9ed068}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\IntImp">
-      <UniqueIdentifier>{90a7dd46-39d6-4d9e-bcb7-45db48a47a82}</UniqueIdentifier>
+      <UniqueIdentifier>{e5093f2b-e4e0-46e1-9369-dc6f81adcee3}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\IntCurveSurface">
-      <UniqueIdentifier>{79b60da9-475d-48b3-88aa-0900302e67e0}</UniqueIdentifier>
+      <UniqueIdentifier>{b97f8931-3796-49d2-9262-7630e63079d7}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\IntSurf">
-      <UniqueIdentifier>{05a76151-fd4f-4a55-8d93-de22a5cb1b67}</UniqueIdentifier>
+      <UniqueIdentifier>{32bbd924-e0c7-4118-84bc-5fc54b05db86}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\IntPatch">
-      <UniqueIdentifier>{4b08dd47-ecc6-43f9-a279-ad797a0aee61}</UniqueIdentifier>
+      <UniqueIdentifier>{fb2573ab-7033-4c59-a5f0-c0719f969766}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\Geom2dInt">
-      <UniqueIdentifier>{719c2f8b-40b2-4e1c-ad9b-784fff2f19f7}</UniqueIdentifier>
+      <UniqueIdentifier>{aad050da-a1cf-4544-9849-8bcc6006c412}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\IntImpParGen">
-      <UniqueIdentifier>{7e8a82ae-ef19-4bf3-a398-b27ddb3a0e1a}</UniqueIdentifier>
+      <UniqueIdentifier>{83f2480d-f762-443f-b78b-2fc7b15fc88e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\IntRes2d">
-      <UniqueIdentifier>{99e18403-b8ed-47ce-a097-e2f46f4751d9}</UniqueIdentifier>
+      <UniqueIdentifier>{bbba4af2-3820-48fe-93d8-8682710ce713}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\IntCurve">
-      <UniqueIdentifier>{b19a8f35-ceae-4843-8332-5c8a022722c9}</UniqueIdentifier>
+      <UniqueIdentifier>{46a18215-0dae-4335-a25a-e55fa008e23b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\TopTrans">
-      <UniqueIdentifier>{4889b9a2-136c-4e52-ae46-ee13f0fe5d8d}</UniqueIdentifier>
+      <UniqueIdentifier>{cdb30ae2-7c1d-4e55-954d-96547922c48e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\Intf">
-      <UniqueIdentifier>{766c8ef8-59d2-4c02-b19d-844c7bed31c9}</UniqueIdentifier>
+      <UniqueIdentifier>{9f0eb09d-c689-4859-b10e-a097da78e09f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\ApproxInt">
-      <UniqueIdentifier>{fb79ed9d-eb12-4466-8d2c-853c8bdd955b}</UniqueIdentifier>
+      <UniqueIdentifier>{45242314-698b-4a8b-b2b4-b246f787b524}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\GccAna">
-      <UniqueIdentifier>{4b79e32e-e627-43c1-bb2f-10b625a09ad7}</UniqueIdentifier>
+      <UniqueIdentifier>{ad3a0ea3-2316-468f-b4ae-d591753f3af4}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\GccEnt">
-      <UniqueIdentifier>{6cc19550-c767-4219-a100-3e890910476e}</UniqueIdentifier>
+      <UniqueIdentifier>{55df1bc5-fbe3-4257-b8d0-eb5f0c5812fb}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\GccInt">
-      <UniqueIdentifier>{7b2be99a-8daa-4573-9a1d-3dfc94af2086}</UniqueIdentifier>
+      <UniqueIdentifier>{f93a25cf-f5cf-481c-bb00-765cb42eb40f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\HatchGen">
-      <UniqueIdentifier>{137b4ddf-a1e9-41ff-abad-f28b34ce23e3}</UniqueIdentifier>
+      <UniqueIdentifier>{c6e36da4-ba53-4899-a6e9-f9824ac2c000}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\Geom2dHatch">
-      <UniqueIdentifier>{8bc1b644-89d4-4a44-a81f-d7bf42a1f2fc}</UniqueIdentifier>
+      <UniqueIdentifier>{fa9d3bc7-0eef-4440-adc8-d573345b3db8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\Law">
-      <UniqueIdentifier>{ac1ee3e9-e64a-4988-bdc5-3c3180f6337c}</UniqueIdentifier>
+      <UniqueIdentifier>{5fa78423-7e43-40df-bdd0-2f8df4baf725}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\AppBlend">
-      <UniqueIdentifier>{a26acc82-bad3-425f-b7cc-94aec101a197}</UniqueIdentifier>
+      <UniqueIdentifier>{b36fbe2e-1846-4097-a70b-c474aa6831e6}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\Plate">
-      <UniqueIdentifier>{7c18819b-7341-4334-aa83-78bdc9a32dca}</UniqueIdentifier>
+      <UniqueIdentifier>{2e6e4ddb-869f-4693-8e0f-d4711e571b15}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\GeomPlate">
-      <UniqueIdentifier>{d3061e3e-4cef-4129-afb5-d6056449d046}</UniqueIdentifier>
+      <UniqueIdentifier>{76208980-9037-4f98-8b94-e1d1a23ae187}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\LocalAnalysis">
-      <UniqueIdentifier>{0c1b6e50-881f-4d87-9393-bfe6709a1729}</UniqueIdentifier>
+      <UniqueIdentifier>{699ac72d-f92f-4294-aea1-6fe75b1221f4}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\GeomAPI">
-      <UniqueIdentifier>{9bcda7d0-f2b5-40cf-9ce9-658ffd723c56}</UniqueIdentifier>
+      <UniqueIdentifier>{74913fb5-2d19-4607-a193-9af86962cbab}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\GeomFill">
-      <UniqueIdentifier>{f10f49b0-b042-48ce-bd3b-8957512a7e58}</UniqueIdentifier>
+      <UniqueIdentifier>{cd4e33a7-e808-4dec-bd53-985afe1bc062}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\Geom2dAPI">
-      <UniqueIdentifier>{273e512d-e5b3-4c16-a244-1a3319a3cdda}</UniqueIdentifier>
+      <UniqueIdentifier>{edcfa713-217c-4a62-bdec-559d7c7762e8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\Geom2dGcc">
-      <UniqueIdentifier>{82076089-0a2f-4613-94b2-c86609b0865b}</UniqueIdentifier>
+      <UniqueIdentifier>{8129cf84-cd4c-4d85-a393-e44127f1a299}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\FairCurve">
-      <UniqueIdentifier>{c5fcdf34-6b55-4fd8-bee9-b513770f1f22}</UniqueIdentifier>
+      <UniqueIdentifier>{367be118-ee48-4ca0-96d5-36b12fe21f88}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\NLPlate">
-      <UniqueIdentifier>{0aab49fb-368b-4e89-8e30-7ab49e18ce9f}</UniqueIdentifier>
+      <UniqueIdentifier>{4d30e24a-8241-4c95-a8b4-27afd32af2c7}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\IntPolyh">
-      <UniqueIdentifier>{59abace8-f1a5-48c5-b7c8-93cfaba6b880}</UniqueIdentifier>
+      <UniqueIdentifier>{08d091ca-2dc5-4087-af76-4ec5bb88b665}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKGeomAlgo\TopClass">
-      <UniqueIdentifier>{56f5ab41-b368-4646-b4ec-4b92771efd34}</UniqueIdentifier>
+      <UniqueIdentifier>{73524ae4-8377-4ed4-abf5-03575de3390d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBool">
-      <UniqueIdentifier>{16b5f70b-a60d-4408-9b41-d6b3a4658ccd}</UniqueIdentifier>
+      <UniqueIdentifier>{0c72dbc5-e5d6-4f77-9200-3c5af182a256}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBool\TopOpeBRep">
-      <UniqueIdentifier>{01d69a22-a9eb-4a85-842b-0ecdbc9d0807}</UniqueIdentifier>
+      <UniqueIdentifier>{57475365-a723-469f-a543-104b5e978ef8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBool\TopOpeBRepDS">
-      <UniqueIdentifier>{965dee2d-2f7e-4c77-9059-88bfbace2bef}</UniqueIdentifier>
+      <UniqueIdentifier>{786dc3df-adcf-4305-a004-73a52186269c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBool\TopOpeBRepBuild">
-      <UniqueIdentifier>{ce0b7954-00ac-46aa-8c3c-4c8e1191359d}</UniqueIdentifier>
+      <UniqueIdentifier>{20d360d9-5444-4b2c-a7bb-f12af3486801}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBool\TopOpeBRepTool">
-      <UniqueIdentifier>{2311e1c3-3cdc-438b-9fba-3c204f65724e}</UniqueIdentifier>
+      <UniqueIdentifier>{100bbf10-1e68-497e-87d4-601493197f18}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBool\BRepAlgo">
-      <UniqueIdentifier>{90575a96-09ae-4869-887f-0e6d1d726a1e}</UniqueIdentifier>
+      <UniqueIdentifier>{0eaab245-99c0-4afb-8f6e-7607c007065f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBool\BRepFill">
-      <UniqueIdentifier>{e7d064e0-da87-4330-af3f-870d74e3abfd}</UniqueIdentifier>
+      <UniqueIdentifier>{1cda2a6c-f7a0-43a2-b7c0-b8c0d5d8b705}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBool\BRepProj">
-      <UniqueIdentifier>{e6c2efc5-e158-4366-b76b-571b7141a08f}</UniqueIdentifier>
+      <UniqueIdentifier>{66812c94-5712-4d0d-801c-bc748d38e96c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKPrim">
-      <UniqueIdentifier>{da7174ae-129b-47d4-93d2-3640e26f35e8}</UniqueIdentifier>
+      <UniqueIdentifier>{533d5232-8e13-4b9c-85c8-b4c02478f20e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKPrim\BRepPrim">
-      <UniqueIdentifier>{d134107e-7765-40cf-a1e0-41b07822266c}</UniqueIdentifier>
+      <UniqueIdentifier>{75b902fb-bc14-446a-96cd-efebc635f892}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKPrim\BRepSweep">
-      <UniqueIdentifier>{893347e7-e34e-42c1-a7a8-ec6b9cca53eb}</UniqueIdentifier>
+      <UniqueIdentifier>{a81a680c-55c6-46ec-9bb5-ace76e935ba8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKPrim\Sweep">
-      <UniqueIdentifier>{ee0b905d-797d-4abd-b7b1-6f59ba1da3f7}</UniqueIdentifier>
+      <UniqueIdentifier>{ba988c79-7e9b-4c09-a5a3-30bd6617709c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKPrim\BRepPrimAPI">
-      <UniqueIdentifier>{5ac8c7b0-d361-4ae7-a1c6-26b13e3d9c08}</UniqueIdentifier>
+      <UniqueIdentifier>{dacb0f7f-2465-4bce-8e6d-bfcac3a489d6}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBO">
-      <UniqueIdentifier>{6223aaa9-c689-49e0-88e8-07d313f406e2}</UniqueIdentifier>
+      <UniqueIdentifier>{d9353445-b5c3-4447-a1d3-02dbd8be3a6a}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBO\IntTools">
-      <UniqueIdentifier>{a27eb46d-aa9b-4f57-aeee-da10218e659d}</UniqueIdentifier>
+      <UniqueIdentifier>{5314cea5-a667-4576-a4b4-4197437e7531}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBO\BRepAlgoAPI">
-      <UniqueIdentifier>{d9a83771-ffb6-4930-b1b0-600302912cc3}</UniqueIdentifier>
+      <UniqueIdentifier>{05ec9e6f-66e6-485c-bebd-6831aaa526bd}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBO\BOPDS">
-      <UniqueIdentifier>{d7237488-f605-4c6e-a1ff-4b19b3212cca}</UniqueIdentifier>
+      <UniqueIdentifier>{4be821de-80b1-4cf8-acc9-a3a8dce44646}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBO\BOPAlgo">
-      <UniqueIdentifier>{91760eca-42ca-4f56-b2bb-c6858292e4e9}</UniqueIdentifier>
+      <UniqueIdentifier>{73cbed61-8bc2-4bdc-9d6b-81afdf1d4ada}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKBO\BOPTools">
-      <UniqueIdentifier>{b13653fc-90cb-49c6-a4d3-d073467aa627}</UniqueIdentifier>
+      <UniqueIdentifier>{aa00bb0e-043c-4b18-af83-42b028e51a70}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKFillet">
-      <UniqueIdentifier>{c88ad4c4-d87e-4fcc-8371-5af5752a211a}</UniqueIdentifier>
+      <UniqueIdentifier>{37d40221-4674-4bca-87f3-15aa0ac4d883}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKFillet\ChFiDS">
-      <UniqueIdentifier>{06388098-f665-4428-8ac0-052973b061ea}</UniqueIdentifier>
+      <UniqueIdentifier>{45188b0d-c872-4ce6-a6f8-c859f7933211}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKFillet\ChFi2d">
-      <UniqueIdentifier>{c6c94892-e61a-4e9d-9e6f-77dde0a83158}</UniqueIdentifier>
+      <UniqueIdentifier>{807b6de5-4522-41df-a4e4-b353b41ee6d3}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKFillet\ChFi3d">
-      <UniqueIdentifier>{04fdbc44-0a1d-4766-aa87-499534385b56}</UniqueIdentifier>
+      <UniqueIdentifier>{c33e28a5-f978-44b6-9c0f-892006b9c5d9}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKFillet\ChFiKPart">
-      <UniqueIdentifier>{c36f9ace-8ff3-4d4f-a466-2f3a8b038248}</UniqueIdentifier>
+      <UniqueIdentifier>{b7af445b-95e9-4475-95f6-0f29011a4417}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKFillet\Blend">
-      <UniqueIdentifier>{a439e25e-5c81-4b9e-8781-c0a4175ca4a5}</UniqueIdentifier>
+      <UniqueIdentifier>{15615b8e-5bc1-4aea-ba1c-8a5d02a03a1d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKFillet\BRepBlend">
-      <UniqueIdentifier>{1cc34d62-a172-4217-8864-f78379aad036}</UniqueIdentifier>
+      <UniqueIdentifier>{df0c06a3-abd1-4563-a961-0cdac525195e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKFillet\BlendFunc">
-      <UniqueIdentifier>{e8b7a866-eb8b-460e-afdc-1f5eaa865a0f}</UniqueIdentifier>
+      <UniqueIdentifier>{e20ab1eb-de9d-42c9-a490-3069dff3a486}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKFillet\BRepFilletAPI">
-      <UniqueIdentifier>{b8438011-937a-41ab-9fc2-a15ddd7993b8}</UniqueIdentifier>
+      <UniqueIdentifier>{f3b4cc18-bff3-4529-bbb4-d5894c54ee14}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKFillet\FilletSurf">
-      <UniqueIdentifier>{99636b7c-700b-4302-8db3-cb225e887605}</UniqueIdentifier>
+      <UniqueIdentifier>{878ba153-dc4a-4455-bced-69d05b904ca7}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMesh">
-      <UniqueIdentifier>{aa4a3b7f-7871-4015-964a-28c1b6f0761b}</UniqueIdentifier>
+      <UniqueIdentifier>{5f6639ec-0741-4948-8f82-c989d52479b5}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMesh\IMeshData">
-      <UniqueIdentifier>{ee610922-91d0-4b94-94a7-00a49a0869eb}</UniqueIdentifier>
+      <UniqueIdentifier>{3158dcd0-b192-487c-82f2-e2d5ae286966}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMesh\IMeshTools">
-      <UniqueIdentifier>{5ebedbf6-3b95-41bb-b930-a22f31a4cd04}</UniqueIdentifier>
+      <UniqueIdentifier>{682228b3-e510-4015-8f59-71fab51ee59e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMesh\BRepMeshData">
-      <UniqueIdentifier>{adbf5999-a411-4508-9a17-1de6f2dcf9fd}</UniqueIdentifier>
+      <UniqueIdentifier>{2f517c7b-f3be-4eaf-bb74-013d99efc71e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKMesh\BRepMesh">
-      <UniqueIdentifier>{18775506-b576-4746-89d8-99a6b3fa6cbf}</UniqueIdentifier>
+      <UniqueIdentifier>{da6394f5-3548-42db-9859-780c91c5ccfe}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKOffset">
-      <UniqueIdentifier>{a933f3a9-f87a-4eb5-9a88-5b39c2202bb9}</UniqueIdentifier>
+      <UniqueIdentifier>{9f030335-6e17-4c84-b756-e8959f0080dc}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKOffset\BRepOffsetAPI">
-      <UniqueIdentifier>{dbf3851e-38a5-44be-b4e9-aee9f64692c3}</UniqueIdentifier>
+      <UniqueIdentifier>{cbba1e09-6243-4ef7-b830-d35f89735889}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKOffset\Draft">
-      <UniqueIdentifier>{c789414f-6157-441e-919c-9337c43c9380}</UniqueIdentifier>
+      <UniqueIdentifier>{d2fa3819-2493-4d70-8ae9-3f44611866b3}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKOffset\BRepOffset">
-      <UniqueIdentifier>{52ab40e3-13be-4b3d-87dc-10f0338b7d5f}</UniqueIdentifier>
+      <UniqueIdentifier>{0354fbec-0979-4758-b12d-ad530161d17e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\TKOffset\BiTgte">
-      <UniqueIdentifier>{fcf6b099-df6a-4ec0-819e-6bf211f65022}</UniqueIdentifier>
+      <UniqueIdentifier>{bafa014a-d681-49b6-9329-f255ae5b96c7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <!-- OccFiles -->
@@ -17775,6 +17775,9 @@
     </ClInclude>
     <ClInclude Include="XbimCurve2D.h">
       <Filter>Source files\XbimGeometry</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\Graphic3d\Graphic3d_Vec4.hxx">
+      <Filter>Source files\TKernel\Quantity</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
