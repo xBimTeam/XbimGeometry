@@ -751,7 +751,6 @@ namespace Xbim
 			
 			if (faceStart->IsValid && faceEnd->IsValid && repItem->Depth > 0) //we have valid faces and extrusion
 			{
-				
 				double precision = repItem->Model->ModelFactors->Precision;
 				IIfcDirection^ dir = repItem->ExtrudedDirection;
 				XbimVector3D vec(dir->X, dir->Y, dir->Z);

@@ -354,7 +354,7 @@ namespace Ifc4GeometryTests
                 var taperedSolid = model.Instances.OfType<IfcExtrudedAreaSolidTapered>().FirstOrDefault();
                 Assert.IsNotNull(taperedSolid);
                 var bar = _xbimGeometryCreator.CreateSolid(taperedSolid);
-                Assert.IsTrue((int)bar.Volume>0);
+                Assert.IsTrue((int)bar.Volume>0, "Volume is " + bar.Volume.ToString());
             }
         }
 

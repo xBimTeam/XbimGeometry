@@ -38,7 +38,7 @@ namespace Ifc4GeometryTests
                 var geom = _xbimGeometryCreator.CreateGrid(ifcGrid);
                 foreach (var solid in geom)
                 {
-                    Assert.IsTrue(solid.Faces.Count == 4, "Each grid line must have four faces");
+                    Assert.IsTrue(solid.Faces.Count == 6, "Each grid line must have six faces");
                 }
             }
         }
