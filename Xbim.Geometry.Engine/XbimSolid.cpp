@@ -1316,8 +1316,8 @@ namespace Xbim
 					}
 					return ret;
 				}
-				catch (UnauthorizedAccessException^ e) {
-					XbimGeometryCreator::LogError(segment, "Could not compute segment parametric lenght. Returned 1.");
+				catch (Exception^ e) {
+					XbimGeometryCreator::LogError(segment, "Could not compute segment parametric lenght. Returned 1." + e->Message);
 					return 1;
 				}
 			}
