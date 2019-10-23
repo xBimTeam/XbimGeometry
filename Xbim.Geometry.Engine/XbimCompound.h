@@ -99,6 +99,9 @@ namespace Xbim
 			//operators
 			operator const TopoDS_Compound& () { return *pCompound; }
 			virtual operator const TopoDS_Shape& () override { return *pCompound; }
+
+			virtual const TopoDS_Shape& AsShape() override { return *pCompound; };
+
 			virtual property bool IsSewn{bool get(){ return _isSewn; }}
 			virtual IEnumerator<IXbimGeometryObject^>^ GetEnumerator();
 			virtual System::Collections::IEnumerator^ GetEnumerator2() = System::Collections::IEnumerable::GetEnumerator{return GetEnumerator();}

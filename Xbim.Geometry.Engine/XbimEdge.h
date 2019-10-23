@@ -72,6 +72,8 @@ namespace Xbim
 #pragma region operators
 			operator const TopoDS_Edge& () { return *pEdge; }
 			virtual operator const TopoDS_Shape& () override { return *pEdge; }
+			virtual const TopoDS_Shape& AsShape() override { return *pEdge; };
+
 #pragma endregion
 
 #pragma region Equality Overrides

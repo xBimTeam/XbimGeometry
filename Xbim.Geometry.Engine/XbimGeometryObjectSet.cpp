@@ -404,7 +404,7 @@ namespace Xbim
 				IEnumerable<IXbimGeometryObject^>^ geomSet = dynamic_cast<IEnumerable<IXbimGeometryObject^>^>(gObj);
 				if (shape != nullptr)
 				{
-					builder.Add(bodyCompound, (XbimOccShape^)gObj);
+					builder.Add(bodyCompound, ((XbimOccShape^)gObj)->AsShape());
 				}
 				else if(geomSet!=nullptr)
 					builder.Add(bodyCompound, CreateCompound(geomSet));

@@ -64,6 +64,7 @@ namespace Xbim
 			
 			operator const TopoDS_Face& () { return *pFace; }
 			virtual operator const TopoDS_Shape& () override { return *pFace; }
+			virtual const TopoDS_Shape& AsShape() override { return *pFace; };
 
 #pragma endregion
 

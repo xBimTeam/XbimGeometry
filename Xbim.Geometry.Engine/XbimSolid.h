@@ -158,6 +158,7 @@ namespace Xbim
 #pragma region operators
 			operator const TopoDS_Solid& () { return *pSolid; }
 			virtual operator const TopoDS_Shape& () override { return *pSolid; }
+			virtual const TopoDS_Shape& AsShape() override { return *pSolid; };
 #pragma endregion
 					
 #pragma region Methods

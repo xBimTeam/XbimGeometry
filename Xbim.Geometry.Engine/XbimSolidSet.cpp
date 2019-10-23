@@ -33,7 +33,7 @@ namespace Xbim
 			{
 				if (dynamic_cast<XbimSolid^>(solid))
 				{
-					b.Add(comp, (XbimSolid^)solid);
+					b.Add(comp, ((XbimSolid^)solid)->AsShape());
 				}
 			}
 			BRepTools::Write(comp, oss);

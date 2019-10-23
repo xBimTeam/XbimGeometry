@@ -143,7 +143,9 @@ namespace Xbim
 				}
 				else if (dynamic_cast<IIfcBooleanResult^>(geomRep))
 				{
-					XbimSolidSet^ solidSet = gcnew XbimSolidSet((IIfcBooleanResult^)geomRep);
+					// todo: occ740
+					IIfcBooleanResult^ cast = (IIfcBooleanResult^)geomRep;
+					XbimSolidSet^ solidSet = gcnew XbimSolidSet(cast);
 					if (objectLocation != nullptr) solidSet->Move(objectLocation);
 					return Trim(solidSet);
 				}								

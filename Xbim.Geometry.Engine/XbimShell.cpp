@@ -272,7 +272,7 @@ namespace Xbim
 		{
 			if (!IsValid) return nullptr;
 			gp_Trsf trans = XbimConvert::ToTransform(matrix3D);
-			BRepBuilderAPI_Transform gTran(this, trans, Standard_True);
+			BRepBuilderAPI_Transform gTran(this->AsShape(), trans, Standard_True);
 			GC::KeepAlive(this);
 			return gcnew XbimSolid(TopoDS::Solid(gTran.Shape()));
 		}
@@ -281,7 +281,7 @@ namespace Xbim
 		{
 			if (!IsValid) return nullptr;
 			gp_Trsf trans = XbimConvert::ToTransform(matrix3D);
-			BRepBuilderAPI_Transform gTran(this, trans, Standard_False);
+			BRepBuilderAPI_Transform gTran(this->AsShape(), trans, Standard_False);
 			GC::KeepAlive(this);
 			return gcnew XbimSolid(TopoDS::Solid(gTran.Shape()));
 		}
@@ -332,8 +332,8 @@ namespace Xbim
 
 			ShapeFix_ShapeTolerance fixTol;
 			fixTol.SetTolerance(faceSection, tolerance);
-			fixTol.SetTolerance(this, tolerance);
-			BRepAlgoAPI_Section boolOp(this, faceSection, false);
+			fixTol.SetTolerance(this->AsShape(), tolerance);
+			BRepAlgoAPI_Section boolOp(this->AsShape(), faceSection, false);
 			boolOp.ComputePCurveOn2(Standard_True);
 			boolOp.Build();
 			if (boolOp.IsDone())
@@ -379,7 +379,7 @@ namespace Xbim
 		{
 			if (IsValid)
 			{
-				BRepClass3d_SolidClassifier class3d(this);
+				BRepClass3d_SolidClassifier class3d(this->AsShape());
 				class3d.PerformInfinitePoint(Precision::Confusion());
 				if (class3d.State() == TopAbs_IN)
 					this->Reverse();
@@ -409,14 +409,14 @@ namespace Xbim
 			if (nonUniform != nullptr)
 			{
 				gp_GTrsf trans = XbimConvert::ToTransform(nonUniform);
-				BRepBuilderAPI_GTransform tr(this, trans, Standard_True); //make a copy of underlying shape
+				BRepBuilderAPI_GTransform tr(this->AsShape(), trans, Standard_True); //make a copy of underlying shape
 				GC::KeepAlive(this);
 				return gcnew XbimShell(TopoDS::Shell(tr.Shape()), Tag);
 			}
 			else
 			{
 				gp_Trsf trans = XbimConvert::ToTransform(transformation);
-				BRepBuilderAPI_Transform tr(this, trans, Standard_False); //do not make a copy of underlying shape
+				BRepBuilderAPI_Transform tr(this->AsShape(), trans, Standard_False); //do not make a copy of underlying shape
 				GC::KeepAlive(this);
 				return gcnew XbimShell(TopoDS::Shell(tr.Shape()), Tag);
 			}
@@ -469,7 +469,7 @@ namespace Xbim
 			if (IsValid)
 			{
 				XbimOccWriter^ occWriter = gcnew XbimOccWriter();
-				occWriter->Write(this, fileName);
+				occWriter->Write(this->AsShape(), fileName);
 			}
 		}
 

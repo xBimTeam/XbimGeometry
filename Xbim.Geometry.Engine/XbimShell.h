@@ -80,6 +80,8 @@ namespace Xbim
 #pragma region operators
 			operator const TopoDS_Shell& () { return *pShell; }
 			virtual operator const TopoDS_Shape& () override { return *pShell; }
+			virtual const TopoDS_Shape& AsShape() override { return *pShell; };
+
 #pragma endregion
 
 			//change the direction of the loop

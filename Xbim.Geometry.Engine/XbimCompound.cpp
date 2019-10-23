@@ -123,7 +123,7 @@ namespace Xbim
 
 		IXbimGeometryObject^ XbimCompound::Transform(XbimMatrix3D matrix3D)
 		{
-			BRepBuilderAPI_Copy copier(this);
+			BRepBuilderAPI_Copy copier(this->AsShape());
 			BRepBuilderAPI_Transform gTran(copier.Shape(), XbimConvert::ToTransform(matrix3D));
 			TopoDS_Compound temp = TopoDS::Compound(gTran.Shape());
 			GC::KeepAlive(this);
@@ -247,14 +247,14 @@ namespace Xbim
 			if (nonUniform != nullptr)
 			{
 				gp_GTrsf trans = XbimConvert::ToTransform(nonUniform);
-				BRepBuilderAPI_GTransform tr(this, trans, Standard_True); //make a copy of underlying shape
+				BRepBuilderAPI_GTransform tr(this->AsShape(), trans, Standard_True); //make a copy of underlying shape
 				GC::KeepAlive(this);
 				return gcnew XbimCompound(TopoDS::Compound(tr.Shape()), _isSewn, _sewingTolerance);
 			}
 			else
 			{
 				gp_Trsf trans = XbimConvert::ToTransform(transformation);
-				BRepBuilderAPI_Transform tr(this, trans, Standard_False); //do not make a copy of underlying shape
+				BRepBuilderAPI_Transform tr(this->AsShape(), trans, Standard_False); //do not make a copy of underlying shape
 				GC::KeepAlive(this);
 				return gcnew XbimCompound(TopoDS::Compound(tr.Shape()), _isSewn, _sewingTolerance);
 			}
@@ -298,7 +298,7 @@ namespace Xbim
 				for each (IXbimGeometryObject^ geom in compound)
 				{
 					if (dynamic_cast<XbimSolid^>(geom))
-						builder.Add(*pCompound, (XbimSolid^)geom);
+						builder.Add(*pCompound, ((XbimSolid^)geom)->AsShape());
 					else if (dynamic_cast<XbimShell^>(geom))
 					{
 						XbimShell^ shell = (XbimShell^)geom;
@@ -314,7 +314,7 @@ namespace Xbim
 						builder.Add(*pCompound, shell);
 					}
 					else if (dynamic_cast<XbimFace^>(geom))
-						builder.Add(*pCompound, (XbimFace^)geom);
+						builder.Add(*pCompound, ((XbimFace^)geom)->AsShape());
 				}
 			}
 		}
@@ -1273,7 +1273,7 @@ namespace Xbim
 			TopoDS_Shell shell;
 			builder.MakeShell(shell);
 			TopTools_IndexedMapOfShape map;
-			TopExp::MapShapes(this, TopAbs_FACE, map);
+			TopExp::MapShapes(this->AsShape(), TopAbs_FACE, map);
 			for (int i = 1; i <= map.Extent(); i++)
 			{
 				builder.AddShellFace(shell, TopoDS::Face(map(i)));
@@ -1457,7 +1457,7 @@ namespace Xbim
 			String^ err = "";
 			try
 			{
-				BRepAlgoAPI_Cut boolOp(this, solids);
+				BRepAlgoAPI_Cut boolOp(this->AsShape(), solids);
 				GC::KeepAlive(this);
 				GC::KeepAlive(solids);
 
@@ -1487,7 +1487,7 @@ namespace Xbim
 			String^ err = "";
 			try
 			{
-				BRepAlgoAPI_Fuse boolOp(this, solids);
+				BRepAlgoAPI_Fuse boolOp(this->AsShape(), solids);
 				GC::KeepAlive(this);
 				GC::KeepAlive(solids);
 				if (boolOp.HasErrors() == Standard_False)
@@ -1511,7 +1511,7 @@ namespace Xbim
 			String^ err = "";
 			try
 			{
-				BRepAlgoAPI_Common boolOp(this, solids);
+				BRepAlgoAPI_Common boolOp(this->AsShape(), solids);
 				GC::KeepAlive(this);
 				GC::KeepAlive(solids);
 				if (boolOp.HasErrors() == Standard_False)

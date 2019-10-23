@@ -67,14 +67,14 @@ namespace Xbim
 		{
 
 			if (!IsValid) return;
-			XbimFaceSet^ faces = gcnew XbimFaceSet(this);
+			XbimFaceSet^ faces = gcnew XbimFaceSet(this->AsShape());
 
 			if (faces->Count == 0) return;
 
 			Monitor::Enter(this);
 			try
 			{
-				BRepMesh_IncrementalMesh incrementalMesh(this, deflection, Standard_False, angle); //triangulate the first time				
+				BRepMesh_IncrementalMesh incrementalMesh(this->AsShape(), deflection, Standard_False, angle); //triangulate the first time				
 			}
 			finally
 			{
@@ -211,7 +211,7 @@ namespace Xbim
 				try
 				{
 					Monitor::Enter(this);
-					BRepMesh_IncrementalMesh incrementalMesh(this, deflection, Standard_False, angle); //triangulate the first time	
+					BRepMesh_IncrementalMesh incrementalMesh(this->AsShape(), deflection, Standard_False, angle); //triangulate the first time	
 				}
 				finally
 				{
@@ -220,7 +220,7 @@ namespace Xbim
 				return;
 			}
 			TopTools_IndexedMapOfShape faceMap;
-			TopoDS_Shape shape = this; //hold on to it
+			TopoDS_Shape shape = this->AsShape(); //hold on to it
 			TopExp::MapShapes(shape, TopAbs_FACE, faceMap);
 			int faceCount = faceMap.Extent();
 			if (faceCount == 0) return;		
@@ -239,7 +239,7 @@ namespace Xbim
 				}
 			}
 			
-			BRepMesh_IncrementalMesh incrementalMesh(this, deflection, Standard_False, angle); //triangulate the first time		
+			BRepMesh_IncrementalMesh incrementalMesh(this->AsShape(), deflection, Standard_False, angle); //triangulate the first time		
 
 			
 			for (int f = 1; f <= faceMap.Extent(); f++)
@@ -359,7 +359,7 @@ namespace Xbim
 			XbimPoint3D retVal = XbimPoint3D(0, 0, 0);
 			if (!IsValid) return retVal;
 			TopTools_IndexedMapOfShape faceMap;
-			TopoDS_Shape shape = this; //hold on to it
+			TopoDS_Shape shape = this->AsShape(); //hold on to it
 			TopExp::MapShapes(shape, TopAbs_FACE, faceMap);			
 			int faceCount = faceMap.Extent();
 			if (faceCount == 0) return retVal;
@@ -412,7 +412,7 @@ namespace Xbim
 				}			
 			}
 			if (!isPolyhedron)				
-				BRepMesh_IncrementalMesh incrementalMesh(this, deflection, Standard_False, angle); //triangulate the first time							
+				BRepMesh_IncrementalMesh incrementalMesh(this->AsShape(), deflection, Standard_False, angle); //triangulate the first time							
 			for (int f = 1; f <= faceMap.Extent(); f++)
 			{
 				const TopoDS_Face& face = TopoDS::Face(faceMap(f));

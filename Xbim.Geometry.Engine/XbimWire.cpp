@@ -1121,7 +1121,7 @@ namespace Xbim
 
 		IXbimGeometryObject^ XbimWire::Transform(XbimMatrix3D matrix3D)
 		{
-			BRepBuilderAPI_Copy copier(this);
+			BRepBuilderAPI_Copy copier(this->AsShape());
 			BRepBuilderAPI_Transform gTran(copier.Shape(), XbimConvert::ToTransform(matrix3D));
 			TopoDS_Wire temp = TopoDS::Wire(gTran.Shape());
 			return gcnew XbimWire(temp);
@@ -1149,7 +1149,7 @@ namespace Xbim
 		IXbimEdgeSet^ XbimWire::Edges::get()
 		{
 			if (!IsValid) return XbimEdgeSet::Empty;
-			return gcnew XbimEdgeSet(this);
+			return gcnew XbimEdgeSet(this->AsShape());
 		}
 
 		IEnumerable<XbimPoint3D>^ XbimWire::Points::get()
@@ -2730,13 +2730,13 @@ namespace Xbim
 			if (nonUniform != nullptr)
 			{
 				gp_GTrsf trans = XbimConvert::ToTransform(nonUniform);
-				BRepBuilderAPI_GTransform tr(this, trans, Standard_True); //make a copy of underlying shape
+				BRepBuilderAPI_GTransform tr(this->AsShape(), trans, Standard_True); //make a copy of underlying shape
 				return gcnew XbimWire(TopoDS::Wire(tr.Shape()),Tag);
 			}
 			else
 			{
 				gp_Trsf trans = XbimConvert::ToTransform(transformation);
-				BRepBuilderAPI_Transform tr(this, trans, Standard_False); //do not make a copy of underlying shape
+				BRepBuilderAPI_Transform tr(this->AsShape(), trans, Standard_False); //do not make a copy of underlying shape
 				return gcnew XbimWire(TopoDS::Wire(tr.Shape()), Tag);
 			}
 		}

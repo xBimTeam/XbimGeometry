@@ -50,6 +50,7 @@ namespace Xbim
 			XbimOccShape();
 			//operators
 			virtual operator const TopoDS_Shape& () abstract;
+			virtual const TopoDS_Shape& AsShape() abstract;
 			void WriteTriangulation(TextWriter^ textWriter, double tolerance, double deflection, double angle);
 			XbimPoint3D WriteTriangulation(BinaryWriter^ binaryWriter, double tolerance, double deflection, double angle);
 			void WriteTriangulation(IXbimMeshReceiver^ mesh, double tolerance, double deflection, double angle);

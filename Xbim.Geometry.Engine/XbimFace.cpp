@@ -1079,7 +1079,7 @@ namespace Xbim
 		XbimWireSet^ XbimFace::Wires::get()
 		{
 			if (!IsValid) return XbimWireSet::Empty; //return an empty list, avoid using Enumberable::Empty to avoid LINQ dependencies			
-			return gcnew XbimWireSet(this);
+			return gcnew XbimWireSet(this->AsShape());
 		}
 
 		XbimWireSet^ XbimFace::InnerWires::get()
@@ -1112,7 +1112,7 @@ namespace Xbim
 
 		IXbimGeometryObject^ XbimFace::Transform(XbimMatrix3D matrix3D)
 		{
-			BRepBuilderAPI_Copy copier(this);
+			BRepBuilderAPI_Copy copier(this->AsShape());
 			BRepBuilderAPI_Transform gTran(copier.Shape(), XbimConvert::ToTransform(matrix3D));
 			TopoDS_Face temp = TopoDS::Face(gTran.Shape());
 			GC::KeepAlive(this);
@@ -1296,7 +1296,7 @@ namespace Xbim
 			if (IsValid)
 			{
 				XbimOccWriter^ occWriter = gcnew XbimOccWriter();
-				occWriter->Write(this, fileName);
+				occWriter->Write(this->AsShape(), fileName);
 			}
 		}
 
@@ -1375,14 +1375,14 @@ namespace Xbim
 			if (nonUniform != nullptr)
 			{
 				gp_GTrsf trans = XbimConvert::ToTransform(nonUniform);
-				BRepBuilderAPI_GTransform tr(this, trans, Standard_True); //make a copy of underlying shape
+				BRepBuilderAPI_GTransform tr(this->AsShape(), trans, Standard_True); //make a copy of underlying shape
 				GC::KeepAlive(this);
 				return gcnew XbimFace(TopoDS::Face(tr.Shape()), Tag);
 			}
 			else
 			{
 				gp_Trsf trans = XbimConvert::ToTransform(transformation);
-				BRepBuilderAPI_Transform tr(this, trans, Standard_False); //do not make a copy of underlying shape
+				BRepBuilderAPI_Transform tr(this->AsShape(), trans, Standard_False); //do not make a copy of underlying shape
 				GC::KeepAlive(this);
 				return gcnew XbimFace(TopoDS::Face(tr.Shape()), Tag);
 			}

@@ -14,7 +14,7 @@ namespace Xbim
 			std::ostringstream oss;
 			if (dynamic_cast<XbimOccShape^>(this))
 			{
-				BRepTools::Write((XbimOccShape^)this,oss);
+				BRepTools::Write(((XbimOccShape^)this)->AsShape(),oss);
 				return gcnew String(oss.str().c_str());
 			}
 		

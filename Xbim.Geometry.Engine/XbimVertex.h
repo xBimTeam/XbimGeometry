@@ -70,6 +70,8 @@ namespace Xbim
 
 			operator const TopoDS_Vertex& () { return *pVertex; }
 			virtual operator const TopoDS_Shape& () override { return *pVertex; }
+			virtual const TopoDS_Shape& AsShape() override { return *pVertex; }
+
 			property double Tolerance{double get(){ return IsValid ? BRep_Tool::Tolerance(*pVertex) : 0; }}
 #pragma endregion
 

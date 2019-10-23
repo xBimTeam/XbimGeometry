@@ -1723,7 +1723,7 @@ namespace Xbim
 
 			if (xbimSolidSet != nullptr && xbimSolidSet->First != nullptr)
 			{
-			    TopoDS_Shape  shape = (XbimSolid^)(xbimSolidSet->First);
+			    TopoDS_Shape  shape = ((XbimSolid^)(xbimSolidSet->First))->AsShape();
 				if (!shape.IsNull())
 				{
 					pSolid = new TopoDS_Solid(); //make sure this is deleted if not used
@@ -2020,7 +2020,7 @@ namespace Xbim
 		{
 			if (!IsValid) return nullptr;
 			gp_Trsf trans = XbimConvert::ToTransform(matrix3D);
-			BRepBuilderAPI_Transform gTran(this, trans, Standard_True);
+			BRepBuilderAPI_Transform gTran(this->AsShape(), trans, Standard_True);
 			GC::KeepAlive(this);
 			return gcnew XbimSolid(TopoDS::Solid(gTran.Shape()));
 		}
@@ -2029,16 +2029,18 @@ namespace Xbim
 		{
 			if (!IsValid) return nullptr;
 			gp_Trsf trans = XbimConvert::ToTransform(matrix3D);
-			BRepBuilderAPI_Transform gTran(this, trans, Standard_False);	
+			BRepBuilderAPI_Transform gTran(this->AsShape(), trans, Standard_False);
 			GC::KeepAlive(this);
 			return gcnew XbimSolid(TopoDS::Solid(gTran.Shape()));
 		}
 
 		IXbimSolidSet^ XbimSolid::Cut(IXbimSolidSet^ toCut, double tolerance)
 		{
-			if (toCut->Count == 0) return gcnew XbimSolidSet(this);
-			if (toCut->Count == 1) return this->Cut(toCut->First, tolerance);
-			XbimSolidSet^ thisSolidSet = gcnew XbimSolidSet(this);
+			if (toCut->Count == 0) 
+				return gcnew XbimSolidSet(this->AsShape());
+			if (toCut->Count == 1) 
+				return this->Cut(toCut->First, tolerance);
+			XbimSolidSet^ thisSolidSet = gcnew XbimSolidSet(this->AsShape());
 			GC::KeepAlive(this);
 			return thisSolidSet->Cut(toCut, tolerance);
 		}
@@ -2051,7 +2053,7 @@ namespace Xbim
 			if (solidCut == nullptr || !solidCut->IsValid)
 			{
 				XbimGeometryCreator::LogWarning(toCut, "Invalid operation. Only solid shapes can be cut from another solid");
-				return gcnew XbimSolidSet(this); // the result would be no change so return this		
+				return gcnew XbimSolidSet(this->AsShape()); // the result would be no change so return this		
 			}
 			
 			String^ err="";
@@ -2063,8 +2065,8 @@ namespace Xbim
 				FTol.LimitTolerance(solidCut, tolerance);
 				shapeTools.Append(solidCut);
 				TopTools_ListOfShape shapeObjects;
-				FTol.LimitTolerance(this, tolerance);
-				shapeObjects.Append(this);
+				FTol.LimitTolerance(this->AsShape(), tolerance);
+				shapeObjects.Append(this->AsShape());
 				BRepAlgoAPI_Cut boolOp;
 				boolOp.SetArguments(shapeObjects);
 				boolOp.SetTools(shapeTools);
@@ -2131,9 +2133,11 @@ namespace Xbim
 
 		IXbimSolidSet^ XbimSolid::Intersection(IXbimSolidSet^ toIntersect, double tolerance)
 		{
-			if (toIntersect->Count == 0) return gcnew XbimSolidSet(this);
-			if (toIntersect->Count == 1) return this->Intersection(toIntersect->First, tolerance);
-			XbimSolidSet^ thisSolidSet = gcnew XbimSolidSet(this);			
+			if (toIntersect->Count == 0) 
+				return gcnew XbimSolidSet(this->AsShape());
+			if (toIntersect->Count == 1) 
+				return this->Intersection(toIntersect->First, tolerance);
+			XbimSolidSet^ thisSolidSet = gcnew XbimSolidSet(this->AsShape());
 			return thisSolidSet->Intersection(toIntersect, tolerance);
 		}
 
@@ -2169,7 +2173,7 @@ namespace Xbim
 				{
 					
 					XbimGeometryCreator::LogWarning(toIntersect, "Invalid operation. Only solid shapes can be intersected with another solid");
-					return gcnew XbimSolidSet(this); // the result would be no change so return this
+					return gcnew XbimSolidSet(this->AsShape()); // the result would be no change so return this
 				}
 			}
 			/*ShapeFix_ShapeTolerance fixTol;
@@ -2178,7 +2182,7 @@ namespace Xbim
 			String^ err = "";
 			try
 			{
-				BRepAlgoAPI_Common boolOp(this, solidIntersect);
+				BRepAlgoAPI_Common boolOp(this->AsShape(), solidIntersect);
 				if (boolOp.HasErrors() == Standard_False)
 					return gcnew XbimSolidSet(boolOp.Shape());
 			}
@@ -2192,9 +2196,9 @@ namespace Xbim
 
 		IXbimSolidSet^ XbimSolid::Union(IXbimSolidSet^ toUnion, double tolerance)
 		{
-			if (toUnion->Count == 0) return gcnew XbimSolidSet(this);
+			if (toUnion->Count == 0) return gcnew XbimSolidSet(this->AsShape());
 			if (toUnion->Count == 1) return this->Union(toUnion->First, tolerance);
-			XbimSolidSet^ thisSolidSet = gcnew XbimSolidSet(this);
+			XbimSolidSet^ thisSolidSet = gcnew XbimSolidSet(this->AsShape());
 			return thisSolidSet->Union(toUnion, tolerance);
 		}
 
@@ -2229,7 +2233,7 @@ namespace Xbim
 
 				{
 					XbimGeometryCreator::LogWarning(toUnion, "Invalid operation. Only solid shapes can be unioned with another solid");
-					return gcnew XbimSolidSet(this); // the result would be no change so return this
+					return gcnew XbimSolidSet(this->AsShape()); // the result would be no change so return this
 				}
 			}
 			
@@ -2239,7 +2243,7 @@ namespace Xbim
 			String^ err = "";
 			try
 			{
-				BRepAlgoAPI_Fuse boolOp(this, solidUnion);
+				BRepAlgoAPI_Fuse boolOp(this->AsShape(), solidUnion);
 				if (boolOp.HasErrors() == Standard_False)
 					return gcnew XbimSolidSet(boolOp.Shape());
 			}
@@ -2260,8 +2264,8 @@ namespace Xbim
 			
 			ShapeFix_ShapeTolerance fixTol;
 			fixTol.SetTolerance(faceSection, tolerance);
-			fixTol.SetTolerance(this, tolerance);
-			BRepAlgoAPI_Section boolOp(this, faceSection, false);
+			fixTol.SetTolerance(this->AsShape(), tolerance);
+			BRepAlgoAPI_Section boolOp(this->AsShape(), faceSection, false);
 			boolOp.ComputePCurveOn2(Standard_True);
 			boolOp.Build();
 			
@@ -2330,7 +2334,7 @@ namespace Xbim
 			if (IsValid)
 			{
 				XbimOccWriter^ occWriter = gcnew XbimOccWriter();
-				occWriter->Write(this, fileName);
+				occWriter->Write(this->AsShape(), fileName);
 			}
 		}
 
@@ -2369,7 +2373,7 @@ namespace Xbim
 		{
 			if (IsValid)
 			{
-				BRepClass3d_SolidClassifier class3d(this);
+				BRepClass3d_SolidClassifier class3d(this->AsShape());
 				class3d.PerformInfinitePoint(Precision::Confusion());
 				if (class3d.State() == TopAbs_IN) this->Reverse();
 			}		
@@ -2394,14 +2398,14 @@ namespace Xbim
 			if (nonUniform != nullptr)
 			{
 				gp_GTrsf trans = XbimConvert::ToTransform(nonUniform);
-				BRepBuilderAPI_GTransform tr(this, trans, Standard_True); //make a copy of underlying shape
+				BRepBuilderAPI_GTransform tr(this->AsShape(), trans, Standard_True); //make a copy of underlying shape
 				GC::KeepAlive(this);
 				return gcnew XbimSolid(TopoDS::Solid(tr.Shape()), Tag);
 			}
 			else
 			{
 				gp_Trsf trans = XbimConvert::ToTransform(transformation);
-				BRepBuilderAPI_Transform tr(this, trans, Standard_False); //do not make a copy of underlying shape
+				BRepBuilderAPI_Transform tr(this->AsShape(), trans, Standard_False); //do not make a copy of underlying shape
 				GC::KeepAlive(this);
 				return gcnew XbimSolid(TopoDS::Solid(tr.Shape()), Tag);
 			}
