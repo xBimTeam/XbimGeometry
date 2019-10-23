@@ -1272,19 +1272,52 @@ namespace Xbim
 			tolFixer.LimitTolerance(*pSolid, pbhs->Model->ModelFactors->Precision);
 		}
 
-		// params depend on segment type
-		double XbimSolid::SegLenght(IIfcCompositeCurveSegment^ segment)
+		// params evaluation depends on segment type
+		double XbimSolid::SegLenght(IIfcCompositeCurveSegment^ segment, ILogger^ logger)
 		{
-			if (dynamic_cast<IIfcLine^>(segment->ParentCurve)) 
+			if (dynamic_cast<IIfcLine^>(segment->ParentCurve))
 			{
 				return 1;
 			}
 			else if (dynamic_cast<IIfcTrimmedCurve^>(segment->ParentCurve))
 			{
-				IIfcTrimmedCurve^ tc = dynamic_cast<IIfcTrimmedCurve^>(segment->ParentCurve);
-				Xbim::Ifc4::MeasureResource::IfcParameterValue^ t1 = dynamic_cast<Xbim::Ifc4::MeasureResource::IfcParameterValue^>(tc->Trim1[0]);
-				Xbim::Ifc4::MeasureResource::IfcParameterValue^ t2 = dynamic_cast<Xbim::Ifc4::MeasureResource::IfcParameterValue^>(tc->Trim2[0]);
-				return (double)t2->Value - (double)t1->Value;
+				try {
+					IIfcTrimmedCurve^ tc = dynamic_cast<IIfcTrimmedCurve^>(segment->ParentCurve);
+					double valTrim1 = 0;
+					double valTrim2 = 1;
+					// search for parameter values
+					Xbim::Ifc4::MeasureResource::IfcParameterValue^ t;
+
+					for (int i = 0; i < tc->Trim1->Count; i++)
+					{
+						t = dynamic_cast<Xbim::Ifc4::MeasureResource::IfcParameterValue^>(tc->Trim1[i]);
+						if (t && t->Value)
+						{
+							valTrim1 = (double)t->Value;
+							break;
+						}
+					}
+					for (int i = 0; i < tc->Trim2->Count; i++)
+					{
+						t = dynamic_cast<Xbim::Ifc4::MeasureResource::IfcParameterValue^>(tc->Trim2[i]);
+						if (t && t->Value)
+						{
+							valTrim2 = (double)t->Value;
+							break;
+						}
+					}
+					double ret = valTrim2 - valTrim1;
+					if (ret < 0)
+					{
+						XbimGeometryCreator::LogError(logger, segment, "Negative length value. Returned 1.");
+						return 1;
+					}
+					return ret;
+				}
+				catch (Exception^ e) {
+					XbimGeometryCreator::LogError(logger, segment, "Could not compute segment parametric lenght. Returned 1." + e->Message);
+					return 1;
+				}
 			}
 			return 1;
 		}
@@ -1338,7 +1371,7 @@ namespace Xbim
 				{
 					XbimWire^ segWire = gcnew XbimWire(segment, logger);
 					double wireLen = segWire->Length;       // this is the lenght to add to the OCC command if we use all of the segment
-					double segValue = SegLenght(segment);   // this is the IFC size of the segment
+					double segValue = SegLenght(segment, logger);   // this is the IFC size of the segment
 					totCurveLen += wireLen;
 					//System::Diagnostics::Debug::Write("wireLen:\t");
 					//System::Diagnostics::Debug::Write(wireLen);

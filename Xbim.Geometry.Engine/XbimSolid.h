@@ -27,7 +27,7 @@ namespace Xbim
 			}
 			void InstanceCleanup();
 
-			double SegLenght(IIfcCompositeCurveSegment^ segment);
+			double SegLenght(IIfcCompositeCurveSegment^ segment, ILogger^ logger);
 			
 				
 			
