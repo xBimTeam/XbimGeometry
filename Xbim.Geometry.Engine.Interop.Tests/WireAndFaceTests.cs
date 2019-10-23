@@ -11,7 +11,7 @@ using Xbim.IO.Memory;
 namespace Xbim.Geometry.Engine.Interop.Tests
 {
     [TestClass]
-    [DeploymentItem("TestFiles")]
+    // [DeploymentItem("TestFiles")]
     public class WireAndFaceTests
     {
         static private IXbimGeometryEngine geomEngine;
@@ -35,7 +35,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void TestIfFaceIsPlanar()
         {
-            using (var model = MemoryModel.OpenRead(@"non_planar_wire.ifc"))
+            using (var model = MemoryModel.OpenRead(@"TestFiles\non_planar_wire.ifc"))
             {
                 var polyloop = model.Instances.OfType<IIfcPolyLoop>().FirstOrDefault();
                 Assert.IsNotNull(polyloop);
