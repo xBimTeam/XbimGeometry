@@ -232,7 +232,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="OCC\src\Graphic3d\Graphic3d_Vec4.hxx" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="XbimCompound.h" />
     <ClInclude Include="XbimCurve.h" />
@@ -6370,6 +6369,9 @@
     <ClCompile Include="OCC\src\BiTgte\BiTgte_HCurveOnEdge_0.cxx" />
     <ClInclude Include="OCC\src\BiTgte\BiTgte_HCurveOnVertex.hxx" />
     <ClCompile Include="OCC\src\BiTgte\BiTgte_HCurveOnVertex_0.cxx" />
+  </ItemGroup>
+  <ItemGroup Label="Extra">
+    <ClInclude Include="OCC\src\Graphic3d\Graphic3d_Vec4.hxx" />
   </ItemGroup>
   <!-- occSource -->
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
