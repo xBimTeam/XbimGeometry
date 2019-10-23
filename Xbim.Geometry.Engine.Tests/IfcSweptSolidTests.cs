@@ -64,23 +64,21 @@ namespace Ifc4GeometryTests
         public void IfcSweptDisk_With_IfcComposite()
         {
             using (var eventTrace = LoggerFactory.CreateEventTrace())
+            using (var m = IfcStore.Open("SolidTestFiles\\6- IfcSweptDiskSolid_With_BooleanResult.ifc"))
             {
-                using (var m = IfcStore.Open("SolidTestFiles\\6- IfcSweptDiskSolid_With_BooleanResult.ifc"))
-                {
-                    var ss = m.Instances.OfType<IIfcSweptDiskSolid>().FirstOrDefault(e => e.Directrix is IIfcCompositeCurve);
-                    Assert.IsTrue(ss != null, "No Swept Disk found");
-                    Assert.IsTrue(ss.Directrix is IIfcCompositeCurve, "Incorrect sweep found");
+                var ss = m.Instances.OfType<IIfcSweptDiskSolid>().FirstOrDefault(e => e.Directrix is IIfcCompositeCurve);
+                Assert.IsTrue(ss != null, "No Swept Disk found");
+                Assert.IsTrue(ss.Directrix is IIfcCompositeCurve, "Incorrect sweep found");
 
-                    
-                    var solid = _xbimGeometryCreator.CreateSolid(ss);
-                   
-                    Assert.IsTrue(eventTrace.Events.Count == 0); //no events should have been raised from this call
+                var solid = _xbimGeometryCreator.CreateSolid(ss);
 
-                    IfcCsgTests.GeneralTest(solid);
-                    Assert.IsTrue(solid.Faces.Count() == 4, "Swept disk solids along this composite curve should have 4 faces");
-                }
+                Assert.IsTrue(eventTrace.Events.Count == 0); //no events should have been raised from this call
+
+                IfcCsgTests.GeneralTest(solid);
+                Assert.AreEqual(8, solid.Faces.Count(), "Swept disk solids along this composite curve should have 8 faces");
             }
         }
+
         [TestMethod]
         public void BIM_Logo_LetterM_Test()
         {

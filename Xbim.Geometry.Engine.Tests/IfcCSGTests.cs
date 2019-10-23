@@ -95,7 +95,7 @@ namespace Ifc4GeometryTests
                     var meshRec = new MeshHelper();
                     _xbimGeometryCreator.Mesh(meshRec, solid, m.ModelFactors.Precision, m.ModelFactors.DeflectionTolerance * 10);
                     Assert.IsTrue(meshRec.FaceCount == 2, "2 mesh faces are required of a cone");
-                    Assert.IsTrue(meshRec.PointCount == 141, "141 mesh points are required of a cone");
+                    Assert.AreEqual(153, meshRec.PointCount, "153 mesh points are required of a cone");
                    txn.Commit();
                 }
             }
@@ -124,35 +124,32 @@ namespace Ifc4GeometryTests
             }
         }
 
-       
 
-      
+
+
 
         [TestMethod]
         public void IfcSphereTest()
         {
             using (var m = IfcStore.Create(new XbimEditorCredentials(), IfcSchemaVersion.Ifc4, XbimStoreType.InMemoryModel))
+            using (var txn = m.BeginTransaction())
             {
-                using (var txn = m.BeginTransaction())
-                {
-                    const double r = 0.5;
-                    
-                    var sphere = IfcModelBuilder.MakeSphere(m, r);
-                    
-                    var solid = _xbimGeometryCreator.CreateSolid(sphere);
-                    Assert.IsTrue(solid.Faces.Count == 1, "1 face is required of a sphere");
-                    Assert.IsTrue(solid.Vertices.Count == 2, "2 vertices are required of a sphere");
-                    var meshRec = new MeshHelper();
-                    meshRec.BeginUpdate();
-                    _xbimGeometryCreator.Mesh(meshRec, solid, m.ModelFactors.Precision, m.ModelFactors.DeflectionTolerance * 10);
-                    meshRec.EndUpdate();
-                    Assert.IsTrue(meshRec.FaceCount == 1, "1 mesh face is required of a sphere");
-                    Assert.IsTrue(meshRec.PointCount == 195, "195 mesh points are required of a sphere");
-                    Assert.IsTrue(meshRec.TriangleCount == 360, "360 triangles are required of a sphere");
-                    Assert.IsTrue(meshRec.TriangleCount*3 == meshRec.TriangleIndicesCount,"Incorrect triangulation");
-                    txn.Commit();
-                }
+                const double r = 0.5;
+                var sphere = IfcModelBuilder.MakeSphere(m, r);
+                var solid = _xbimGeometryCreator.CreateSolid(sphere);
+                Assert.IsTrue(solid.Faces.Count == 1, "1 face is required of a sphere");
+                Assert.IsTrue(solid.Vertices.Count == 2, "2 vertices are required of a sphere");
+                var meshRec = new MeshHelper();
+                meshRec.BeginUpdate();
+                _xbimGeometryCreator.Mesh(meshRec, solid, m.ModelFactors.Precision, m.ModelFactors.DeflectionTolerance * 10);
+                meshRec.EndUpdate();
+                Assert.IsTrue(meshRec.FaceCount == 1, "1 mesh face is required of a sphere");
+                Assert.AreEqual<int>(168, meshRec.PointCount, "168 mesh points are required of a sphere");
+                Assert.AreEqual(306, meshRec.TriangleCount, "306 triangles are required of a sphere");
+                Assert.AreEqual(meshRec.TriangleCount * 3, meshRec.TriangleIndicesCount, "Incorrect triangulation");
+                txn.Commit();
             }
+
         }
 
         public static void GeneralTest(IXbimSolid solid, bool ignoreVolume = false, bool isHalfSpace = false, int entityLabel = 0)

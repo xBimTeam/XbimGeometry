@@ -1427,9 +1427,6 @@ namespace Xbim.ModelGeometry.Scene
                         progDelegate(localPercentageParsed, "Creating Geometry");
                     }
                 }
-#if DEBUG
-                Debug.WriteLine($"{shape.GetType()}: #{shape.EntityLabel} {s.ElapsedMilliseconds}ms");
-#endif
             }
             );
 

@@ -413,27 +413,11 @@ namespace Ifc4GeometryTests
                 var extSolid = m.Instances.OfType<IIfcExtrudedAreaSolid>().FirstOrDefault(hs => hs.EntityLabel == 185025);
                 var solid = _xbimGeometryCreator.CreateSolid(extSolid);
                 IfcCsgTests.GeneralTest(solid);
-
-                var mlist = m.Instances.OfType<IIfcBooleanClippingResult>();
-                foreach (var eas in mlist)
-                {
-                    Debug.WriteLine("Todo: " + eas.EntityLabel);
-                }
-
-                foreach (var eas in mlist)
-                {
-                    // var eas = m.Instances.OfType<IIfcBooleanClippingResult>().FirstOrDefault(hs => hs.EntityLabel == 185249);
-                    Assert.IsTrue(eas != null, "No IfcBooleanClippingResult found");
-                    solid = _xbimGeometryCreator.CreateSolid(eas);
-                    Assert.IsTrue(eventTrace.Events.Count == 0); //no events should have been raised from this call
-                    IfcCsgTests.GeneralTest(solid);
-                    
-                    Debug.WriteLine(eas.EntityLabel + " ok");
-                    if (eas.EntityLabel == 185243)
-                    {
-                        File.WriteAllText("c:\\1.brep", solid.ToBRep);
-                    }
-                }
+                var eas = m.Instances.OfType<IIfcBooleanClippingResult>().FirstOrDefault(hs => hs.EntityLabel == 185249);
+                Assert.IsTrue(eas != null, "No IfcBooleanClippingResult found");
+                solid = _xbimGeometryCreator.CreateSolid(eas);
+                Assert.IsTrue(eventTrace.Events.Count == 0); //no events should have been raised from this call
+                IfcCsgTests.GeneralTest(solid);
             }
         }
 

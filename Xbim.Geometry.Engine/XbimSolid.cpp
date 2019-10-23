@@ -32,6 +32,7 @@
 #include <gp_Elips.hxx>
 #include <gp_Lin.hxx>
 #include <BRepOffsetAPI_MakePipeShell.hxx>
+#include <BRepOffsetAPI_ThruSections.hxx>
 #include <ShapeFix_Shape.hxx>
 #include <ShapeFix_Wire.hxx>
 #include <ShapeFix_Wireframe.hxx>
@@ -647,8 +648,8 @@ namespace Xbim
 				//create a curve trimmed to the 
 				XbimPoint3D faceCentre = faceStart->Location;
 				XbimPoint3D rotCentre(origin.X(), origin.Y(), origin.Z());
-				XbimVector3D v = faceCentre-rotCentre ;
-				gp_Ax2 ax2(origin, vz,  gp_Vec(v.X,v.Y,v.Z));
+				XbimVector3D v = faceCentre - rotCentre;
+				gp_Ax2 ax2(origin, vz, gp_Vec(v.X, v.Y, v.Z));
 				gp_Circ circ(ax2, v.Length);
 				double angle = Math::Min(repItem->Angle*radianConvert, M_PI * 2);;
 				GC_MakeArcOfCircle arcMaker(circ, 0., angle, Standard_True);
@@ -659,78 +660,97 @@ namespace Xbim
 				//move the end face to the end position
 				gp_Pnt ep; gp_Vec tan; gp_Vec norm;
 				trimmed->D2(trimmed->LastParameter(), ep, tan, norm);
-				gp_Ax3 toAx3(ep,tan, norm );	//rotate so normal of profile is tangental and X axis 
+				gp_Ax3 toAx3(ep, tan, norm);	//rotate so normal of profile is tangental and X axis 
 				gp_Trsf trsf;
-				trsf.SetTransformation(toAx3, gp_Ax3());								
+				trsf.SetTransformation(toAx3, gp_Ax3());
 				faceEnd->Move(trsf);
-				BRepOffsetAPI_MakePipeShell pipeMaker1(sweep);
-				TopoDS_Wire outerBoundStart = (XbimWire^)(faceStart->OuterBound);
-				TopoDS_Wire outerBoundEnd = (XbimWire^)(faceEnd->OuterBound);
-				//pipeMaker1.SetMode(Standard_True);
-				
-				// todo: all usages of BRepBuilderAPI_Transformed should be reviewed
-				// it's possible that BRepBuilderAPI_RightCorner should be used in most cases
-				// 
-				pipeMaker1.SetTransitionMode(BRepBuilderAPI_Transformed);
-				pipeMaker1.Add(outerBoundStart);
-				pipeMaker1.Add(outerBoundEnd);
-				pipeMaker1.Build();
-				if (pipeMaker1.IsDone())
-				{
-					TopoDS_Wire firstOuter = TopoDS::Wire(pipeMaker1.FirstShape().Reversed());
-					TopoDS_Wire lastOuter = TopoDS::Wire(pipeMaker1.LastShape().Reversed());
-					BRepBuilderAPI_MakeFace firstMaker(firstOuter);
-					BRepBuilderAPI_MakeFace lastMaker(lastOuter);
-					for (int i = 0; i < faceStart->InnerBounds->Count; i++)					
-					{
-						//it is a hollow section so we need to build the inside
-						BRepOffsetAPI_MakePipeShell pipeMaker2(sweep);
-						TopoDS_Wire innerBoundStart = faceStart->InnerWires->Wire[i];
-						TopoDS_Wire innerBoundEnd = faceEnd->InnerWires->Wire[i];
-					
-						pipeMaker2.SetTransitionMode(BRepBuilderAPI_Transformed);
-						pipeMaker2.Add(innerBoundStart);
-						pipeMaker2.Add(innerBoundEnd);
-						pipeMaker2.Build();
-						if (pipeMaker2.IsDone())
-						{
-							for (TopExp_Explorer explr(pipeMaker2.Shape(), TopAbs_FACE); explr.More(); explr.Next())
-							{
-								b.AddShellFace(shell, TopoDS::Face(explr.Current().Reversed()));
-							}
-						}
-						firstMaker.Add(TopoDS::Wire(pipeMaker2.FirstShape()));
-						lastMaker.Add(TopoDS::Wire(pipeMaker2.LastShape()));
-					}
-					b.AddShellFace(shell, firstMaker.Face());
-					b.AddShellFace(shell, lastMaker.Face());
-					for (TopExp_Explorer explr(pipeMaker1.Shape(), TopAbs_FACE); explr.More(); explr.Next())
-					{
-						b.AddShellFace(shell, TopoDS::Face(explr.Current()));
-					}
-					TopoDS_Solid solid;
-					BRep_Builder bs;
-					bs.MakeSolid(solid);
-					bs.Add(solid, shell);
-					BRepClass3d_SolidClassifier sc(solid);
-					sc.PerformInfinitePoint(Precision::Confusion());
-					if (sc.State() == TopAbs_IN)
-					{
-						bs.MakeSolid(solid);
-						shell.Reverse();
-						bs.Add(solid, shell);
 
-					}
-					pSolid = new TopoDS_Solid();
-					*pSolid = solid;
-					pSolid->Closed(Standard_True);
-					if (repItem->Position != nullptr) //In Ifc4 this is now optional
-						pSolid->Move(XbimConvert::ToLocation(repItem->Position));
-					return;
-				}
-				else if (repItem->Angle <= 0)
+				try
 				{
-					XbimGeometryCreator::LogInfo(repItem, "Invalid extrusion,  angle must be >0 ");
+
+
+					BRepOffsetAPI_MakePipeShell pipeMaker1(sweep);
+					TopoDS_Wire outerBoundStart = (XbimWire^)(faceStart->OuterBound);
+					TopoDS_Wire outerBoundEnd = (XbimWire^)(faceEnd->OuterBound);
+
+					//pipeMaker1.SetMode(Standard_True);
+
+					// todo: all usages of BRepBuilderAPI_Transformed should be reviewed
+					// it's possible that BRepBuilderAPI_RightCorner should be used in most cases
+					// 
+					pipeMaker1.SetTransitionMode(BRepBuilderAPI_Transformed);
+					pipeMaker1.Add(outerBoundStart);
+					pipeMaker1.Add(outerBoundEnd);
+					pipeMaker1.Build();
+					if (pipeMaker1.IsDone())
+					{
+
+						TopoDS_Wire firstOuter = TopoDS::Wire(pipeMaker1.FirstShape().Reversed());
+						TopoDS_Wire lastOuter = TopoDS::Wire(pipeMaker1.LastShape().Reversed());
+						BRepBuilderAPI_MakeFace firstMaker(firstOuter);
+						BRepBuilderAPI_MakeFace lastMaker(lastOuter);
+						for (int i = 0; i < faceStart->InnerBounds->Count; i++)
+						{
+							//it is a hollow section so we need to build the inside
+							BRepOffsetAPI_MakePipeShell pipeMaker2(sweep);
+							TopoDS_Wire innerBoundStart = faceStart->InnerWires->Wire[i];
+							TopoDS_Wire innerBoundEnd = faceEnd->InnerWires->Wire[i];
+
+							pipeMaker2.SetTransitionMode(BRepBuilderAPI_Transformed);
+							pipeMaker2.Add(innerBoundStart);
+							pipeMaker2.Add(innerBoundEnd);
+							pipeMaker2.Build();
+							if (pipeMaker2.IsDone())
+							{
+								for (TopExp_Explorer explr(pipeMaker2.Shape(), TopAbs_FACE); explr.More(); explr.Next())
+								{
+									b.AddShellFace(shell, TopoDS::Face(explr.Current().Reversed()));
+								}
+							}
+							firstMaker.Add(TopoDS::Wire(pipeMaker2.FirstShape()));
+							lastMaker.Add(TopoDS::Wire(pipeMaker2.LastShape()));
+						}
+						b.AddShellFace(shell, firstMaker.Face());
+						b.AddShellFace(shell, lastMaker.Face());
+						for (TopExp_Explorer explr(pipeMaker1.Shape(), TopAbs_FACE); explr.More(); explr.Next())
+						{
+							b.AddShellFace(shell, TopoDS::Face(explr.Current()));
+						}
+						TopoDS_Solid solid;
+						BRep_Builder bs;
+						bs.MakeSolid(solid);
+						bs.Add(solid, shell);
+						BRepClass3d_SolidClassifier sc(solid);
+						sc.PerformInfinitePoint(Precision::Confusion());
+						if (sc.State() == TopAbs_IN)
+						{
+							bs.MakeSolid(solid);
+							shell.Reverse();
+							bs.Add(solid, shell);
+
+						}
+						pSolid = new TopoDS_Solid();
+						*pSolid = solid;
+						pSolid->Closed(Standard_True);
+						if (repItem->Position != nullptr) //In Ifc4 this is now optional
+							pSolid->Move(XbimConvert::ToLocation(repItem->Position));
+						ShapeFix_ShapeTolerance tolFixer;
+						tolFixer.LimitTolerance(*pSolid, repItem->Model->ModelFactors->Precision);
+						return;
+					}
+					else if (repItem->Angle <= 0)
+					{
+						XbimGeometryCreator::LogInfo(repItem, "Invalid extrusion,  angle must be >0 ");
+					}
+				}
+				catch (Standard_Failure sf)
+				{
+					String^ err = gcnew String(sf.GetMessageString());
+					XbimGeometryCreator::LogWarning(repItem, "Failed to create  IfcRevolvedAreaSolidTapered solid: " + err);
+				}
+				catch (...)
+				{
+					XbimGeometryCreator::LogWarning(repItem, "Failed to create  IfcRevolvedAreaSolidTapered solid");
 				}
 				GC::KeepAlive(faceStart);
 				GC::KeepAlive(faceEnd);
@@ -739,9 +759,6 @@ namespace Xbim
 
 		void XbimSolid::Init(IIfcExtrudedAreaSolidTapered^ repItem, IIfcProfileDef^ overrideProfileDef)
 		{
-			BRepPrim_Builder b;
-			TopoDS_Shell shell;
-			b.MakeShell(shell);
 			XbimFace^ faceStart;
 			if (overrideProfileDef == nullptr)
 				faceStart = gcnew XbimFace(repItem->SweptArea);
@@ -751,80 +768,53 @@ namespace Xbim
 			
 			if (faceStart->IsValid && faceEnd->IsValid && repItem->Depth > 0) //we have valid faces and extrusion
 			{
+
 				double precision = repItem->Model->ModelFactors->Precision;
 				IIfcDirection^ dir = repItem->ExtrudedDirection;
 				XbimVector3D vec(dir->X, dir->Y, dir->Z);
 				vec = vec.Normalized();
 				vec *= repItem->Depth;
 				faceEnd->Translate(vec);
-				XbimVertex^ start = gcnew XbimVertex(0, 0, 0, precision);
-				XbimVertex^ end = gcnew XbimVertex(vec.X, vec.Y, vec.Z, precision);
-				XbimEdge^ edge = gcnew XbimEdge(start, end);
-				XbimWire^ sweep = gcnew XbimWire(edge);
-				BRepOffsetAPI_MakePipeShell pipeMaker1(sweep);
+				try
+				{
+					BRepOffsetAPI_ThruSections pipeMaker(Standard_True, Standard_True, precision);
 				TopoDS_Wire outerBoundStart = (XbimWire^)(faceStart->OuterBound);
 				TopoDS_Wire outerBoundEnd = (XbimWire^)(faceEnd->OuterBound);
-				//pipeMaker1.SetMode(Standard_True);
-				pipeMaker1.SetTransitionMode(BRepBuilderAPI_Transformed);				
-				pipeMaker1.Add(outerBoundStart);
-				pipeMaker1.Add(outerBoundEnd);
-				pipeMaker1.Build();
-				if (pipeMaker1.IsDone() )
-				{
-					TopoDS_Wire firstOuter = TopoDS::Wire(pipeMaker1.FirstShape().Reversed());
-					TopoDS_Wire lastOuter = TopoDS::Wire(pipeMaker1.LastShape().Reversed());
-					BRepBuilderAPI_MakeFace firstMaker(firstOuter);
-					BRepBuilderAPI_MakeFace lastMaker(lastOuter);
+					pipeMaker.AddWire(outerBoundStart);
+					pipeMaker.AddWire(outerBoundEnd);
 					for (int i = 0; i < faceStart->InnerBounds->Count; i++)
 					{
-
-						//it is a hollow section so we need to build the inside
-						BRepOffsetAPI_MakePipeShell pipeMaker2(sweep);
-						TopoDS_Wire innerBoundStart =faceStart->InnerWires->Wire[i];
+						TopoDS_Wire innerBoundStart = faceStart->InnerWires->Wire[i];
+						faceEnd->InnerWires->Wire[i]->Translate(vec);
 						TopoDS_Wire innerBoundEnd = faceEnd->InnerWires->Wire[i];
-						//pipeMaker2.SetMode(Standard_True);
-						pipeMaker2.SetTransitionMode(BRepBuilderAPI_Transformed);
-						pipeMaker2.Add(innerBoundStart);
-						pipeMaker2.Add(innerBoundEnd);
-						pipeMaker2.Build();
-						if (pipeMaker2.IsDone())
-						{
-							for (TopExp_Explorer explr(pipeMaker2.Shape(), TopAbs_FACE); explr.More(); explr.Next())
-							{
-								b.AddShellFace(shell, TopoDS::Face(explr.Current()));
-							}
+						pipeMaker.AddWire(innerBoundStart);
+						pipeMaker.AddWire(innerBoundEnd);
 						}
-						firstMaker.Add(TopoDS::Wire(pipeMaker2.FirstShape()));
-						lastMaker.Add(TopoDS::Wire(pipeMaker2.LastShape()));
-
-					}
-					b.AddShellFace(shell, firstMaker.Face());
-					b.AddShellFace(shell, lastMaker.Face());
-					
-					for (TopExp_Explorer explr(pipeMaker1.Shape(), TopAbs_FACE); explr.More(); explr.Next())
+					pipeMaker.Build();
+					if (pipeMaker.IsDone() && pipeMaker.Shape().ShapeType() == TopAbs_ShapeEnum::TopAbs_SOLID)
 					{						
-						b.AddShellFace(shell, TopoDS::Face(explr.Current()));
-					}
-					b.CompleteShell(shell);
-					TopoDS_Solid solid;
-					BRep_Builder bs;
-					bs.MakeSolid(solid);					
-					bs.Add(solid, shell);					
-					BRepClass3d_SolidClassifier sc(solid);
-					sc.PerformInfinitePoint(Precision::Confusion());
-					if (sc.State() == TopAbs_IN) 
-					{
-						bs.MakeSolid(solid);
-						shell.Reverse();						 
-						bs.Add(solid, shell);
-						
-					}
 					pSolid = new TopoDS_Solid();
-					*pSolid = solid;
+						*pSolid = TopoDS::Solid(pipeMaker.Shape());
 					pSolid->Closed(Standard_True);
 					if (repItem->Position != nullptr) //In Ifc4 this is now optional
 						pSolid->Move(XbimConvert::ToLocation(repItem->Position));
+						ShapeFix_ShapeTolerance tolFixer;
+						tolFixer.LimitTolerance(*pSolid, repItem->Model->ModelFactors->Precision);
 					return;
+				}
+					else
+					{
+						XbimGeometryCreator::LogWarning(repItem, "Invalid tapered extrusion, not a solid.");
+					}
+				}
+				catch (Standard_Failure ex)
+				{
+					String^ err = gcnew String(ex.GetMessageString());
+					XbimGeometryCreator::LogWarning(repItem, "Invalid tapered extrusion: " + err);
+				}
+				catch (...) //catch the access exceptions if raised and return gracefully
+				{
+					XbimGeometryCreator::LogWarning(repItem, "Invalid tapered extrusion - ignored");
 				}
 				GC::KeepAlive(faceStart);
 				GC::KeepAlive(faceEnd);				
@@ -1295,18 +1285,36 @@ namespace Xbim
 			{
 				try {
 					IIfcTrimmedCurve^ tc = dynamic_cast<IIfcTrimmedCurve^>(segment->ParentCurve);
+					double valTrim1 = 0;
+					double valTrim2 = 1;
 					// search for parameter values
-					Xbim::Ifc4::MeasureResource::IfcParameterValue^ t1;
-					Xbim::Ifc4::MeasureResource::IfcParameterValue^ t2;
+					Xbim::Ifc4::MeasureResource::IfcParameterValue^ t;
+					
 					for (int i = 0; i < tc->Trim1->Count; i++)
 					{
-						t1 = dynamic_cast<Xbim::Ifc4::MeasureResource::IfcParameterValue^>(tc->Trim1[i]);
+						t = dynamic_cast<Xbim::Ifc4::MeasureResource::IfcParameterValue^>(tc->Trim1[i]);
+						if (t && t->Value)
+						{
+							valTrim1 = (double)t->Value;
+							break;
+						}
 					}
 					for (int i = 0; i < tc->Trim2->Count; i++)
 					{
-						t2 = dynamic_cast<Xbim::Ifc4::MeasureResource::IfcParameterValue^>(tc->Trim2[i]);
+						t = dynamic_cast<Xbim::Ifc4::MeasureResource::IfcParameterValue^>(tc->Trim2[i]);
+						if (t && t->Value)
+						{
+							valTrim2 = (double)t->Value;
+							break;
+						}
 					}
-					return (double)t2->Value - (double)t1->Value;
+					double ret = valTrim2 - valTrim1;
+					if (ret < 0)
+					{
+						XbimGeometryCreator::LogError(segment, "Negative length value. Returned 1.");
+						return 1;
+					}
+					return ret;
 				}
 				catch (UnauthorizedAccessException^ e) {
 					XbimGeometryCreator::LogError(segment, "Could not compute segment parametric lenght. Returned 1.");
