@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
   <metadata>
     <id>Xbim.Geometry</id>
-    <version>4.0.16-V0004</version>
+    <version>4.0.17-V001</version>
     <title>xBIM Geometry</title>
     <authors>xBIM Team</authors>
     <owners>Steve Lockley, Claudio Benghi</owners>
@@ -17,6 +17,7 @@
     </description>
     <summary>The .Net toolkit for developing BIM applications based on the IFC standard. Essential support for the Ifc2x4 and 4 data model.</summary>
     <releaseNotes>
+      This version is based on OpenCascade 7.4.
       Fix for use of multiple IfcRelAggregate realtionships per object
       Fix for IfcPolyline being used in a Swept sutface by Revit exporter 16.4
       4.0.0 The first release that fully supports all Ifc4 and Design Transfer View
