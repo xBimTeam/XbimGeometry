@@ -36,6 +36,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void Can_build_ifcadvancedbrep_with_faulty_surface_orientation()
         {
+            Assert.Inconclusive("Not implemented in master");
             using (var model = MemoryModel.OpenRead(@"ifcadvancedbrep_with_faulty_surface_orientation.ifc"))
             {
                 var pfs = model.Instances.OfType<IIfcAdvancedBrep>().FirstOrDefault();
