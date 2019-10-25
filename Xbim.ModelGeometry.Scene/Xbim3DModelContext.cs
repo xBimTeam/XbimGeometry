@@ -1111,6 +1111,11 @@ namespace Xbim.ModelGeometry.Scene
             IIfcRepresentation rep, XbimGeometryRepresentationType repType, XbimMatrix3D placementTransform, IItemSet<IIfcRepresentationItem> representationItems)
         {
             var shapesInstances = new List<XbimShapeInstance>();
+            if(rep.ContextOfItems == null)
+            {
+                LogWarning(product, "Unable to write representation because no ContextOfItems was provided for representation {0}", rep.EntityLabel);
+                return shapesInstances;
+            }
             var contextId = rep.ContextOfItems.EntityLabel;
             foreach (var representationItem in representationItems)
             {
