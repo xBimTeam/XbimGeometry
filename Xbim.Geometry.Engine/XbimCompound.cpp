@@ -1041,6 +1041,8 @@ namespace Xbim
 				}
 			}
 
+			if (face->OuterBound == nullptr) return face;
+
 			face = gcnew XbimFace(outerBound, true, owningFace->Model->ModelFactors->Precision, owningFace->EntityLabel, logger); //create  a face with the right bound and direction
 
 			for (int i = 0; i < wires->Count; i++)
