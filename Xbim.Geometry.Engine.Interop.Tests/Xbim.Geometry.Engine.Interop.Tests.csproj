@@ -63,6 +63,12 @@
     <None Update="TestFiles\ifcadvancedbrep_with_faulty_surface_orientation.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="TestFiles\IfcWallWithIfcBooleanClippingResult1.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestFiles\IfcWallWithIfcBooleanClippingResult2.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="TestFiles\LargeTriangulatedCoordinates.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

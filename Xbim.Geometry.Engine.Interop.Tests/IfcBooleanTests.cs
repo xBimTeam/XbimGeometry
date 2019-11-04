@@ -839,7 +839,23 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             }
         }
 
+        [TestMethod]
+        public void IfcBooleanClippingResult()
+        {
+            using (var model = MemoryModel.OpenRead(@".\TestFiles\IfcWallWithIfcBooleanClippingResult1.ifc"))
+            {
+                var wallBCR = model.Instances[34] as IIfcBooleanClippingResult;
+                var solidSet = geomEngine.CreateSolidSet(wallBCR, null);
+                Assert.IsTrue(solidSet.Sum(s => s.Faces.Count) == 14);
+            }
 
+            using (var model = MemoryModel.OpenRead(@".\TestFiles\IfcWallWithIfcBooleanClippingResult2.ifc"))
+            {
+                var wallBCR = model.Instances[40] as IIfcBooleanClippingResult;
+                var solidSet = geomEngine.CreateSolidSet(wallBCR, null);
+                Assert.IsTrue(solidSet.Sum(s => s.Faces.Count) == 8);
+            }
+        }
 
         [TestMethod]
         public void CuttingOpeningInCompositeProfileDefTest()
