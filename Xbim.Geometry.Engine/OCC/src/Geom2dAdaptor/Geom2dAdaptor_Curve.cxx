@@ -168,6 +168,19 @@ Geom2dAdaptor_Curve::Geom2dAdaptor_Curve(const Handle(Geom2d_Curve)& theCrv,
   Load(theCrv, theUFirst, theULast);
 }
 
+//=======================================================================
+//function : Reset
+//purpose  :
+//=======================================================================
+void Geom2dAdaptor_Curve::Reset()
+{
+  myTypeCurve = GeomAbs_OtherCurve;
+  myCurve.Nullify();
+  myCurveCache.Nullify();
+  myNestedEvaluator.Nullify();
+  myBSplineCurve.Nullify();
+  myFirst = myLast = 0.0;
+}
 
 //=======================================================================
 //function : Load
@@ -556,20 +569,18 @@ void Geom2dAdaptor_Curve::RebuildCache(const Standard_Real theParameter) const
     Standard_Integer aDeg = aBezier->Degree();
     TColStd_Array1OfReal aFlatKnots(BSplCLib::FlatBezierKnots(aDeg), 1, 2 * (aDeg + 1));
     if (myCurveCache.IsNull())
-      myCurveCache = new BSplCLib_Cache(aDeg, aBezier->IsPeriodic(), aFlatKnots,
-        aBezier->Poles(), aBezier->Weights());
-    myCurveCache->BuildCache(theParameter, aDeg, aBezier->IsPeriodic(), aFlatKnots,
-      aBezier->Poles(), aBezier->Weights());
+      myCurveCache = new BSplCLib_Cache (aDeg, aBezier->IsPeriodic(), aFlatKnots,
+                                         aBezier->Poles(), aBezier->Weights());
+    myCurveCache->BuildCache (theParameter, aFlatKnots, aBezier->Poles(), aBezier->Weights());
   }
   else if (myTypeCurve == GeomAbs_BSplineCurve)
   {
     // Create cache for B-spline
     if (myCurveCache.IsNull())
-      myCurveCache = new BSplCLib_Cache(myBSplineCurve->Degree(), myBSplineCurve->IsPeriodic(),
+      myCurveCache = new BSplCLib_Cache (myBSplineCurve->Degree(), myBSplineCurve->IsPeriodic(),
         myBSplineCurve->KnotSequence(), myBSplineCurve->Poles(), myBSplineCurve->Weights());
-    myCurveCache->BuildCache(theParameter, myBSplineCurve->Degree(),
-      myBSplineCurve->IsPeriodic(), myBSplineCurve->KnotSequence(),
-      myBSplineCurve->Poles(), myBSplineCurve->Weights());
+    myCurveCache->BuildCache (theParameter, myBSplineCurve->KnotSequence(),
+                              myBSplineCurve->Poles(), myBSplineCurve->Weights());
   }
 }
 

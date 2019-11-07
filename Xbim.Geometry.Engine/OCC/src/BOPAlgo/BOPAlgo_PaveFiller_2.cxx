@@ -118,7 +118,7 @@ class BOPAlgo_VertexEdge : public BOPAlgo_Algo {
 
       myFlag=myContext->ComputeVE (myV, myE, myT, myTolVNew, myFuzzyValue);
     }
-    catch (Standard_Failure)
+    catch (Standard_Failure const&)
     {
       AddError(new BOPAlgo_AlertIntersectionFailed);
     }
@@ -136,20 +136,8 @@ class BOPAlgo_VertexEdge : public BOPAlgo_Algo {
   Handle(BOPDS_PaveBlock) myPB;
 };
 //=======================================================================
-typedef NCollection_Vector
-  <BOPAlgo_VertexEdge> BOPAlgo_VectorOfVertexEdge; 
-//
-typedef BOPTools_ContextFunctor 
-  <BOPAlgo_VertexEdge,
-  BOPAlgo_VectorOfVertexEdge,
-  Handle(IntTools_Context), 
-  IntTools_Context> BOPAlgo_VertexEdgeFunctor;
-//
-typedef BOPTools_ContextCnt 
-  <BOPAlgo_VertexEdgeFunctor,
-  BOPAlgo_VectorOfVertexEdge,
-  Handle(IntTools_Context)> BOPAlgo_VertexEdgeCnt;
-//
+typedef NCollection_Vector<BOPAlgo_VertexEdge> BOPAlgo_VectorOfVertexEdge;
+
 //=======================================================================
 // function: PerformVE
 // purpose: 
@@ -176,6 +164,10 @@ void BOPAlgo_PaveFiller::PerformVE()
     }
     //
     if (aSIE.HasFlag()){
+      continue;
+    }
+    //
+    if (myDS->HasInterf(nV, nE)) {
       continue;
     }
     //
@@ -267,7 +259,7 @@ void BOPAlgo_PaveFiller::IntersectVE
   //
   // Perform intersection
   //=============================================================
-  BOPAlgo_VertexEdgeCnt::Perform(myRunParallel, aVVE, myContext);
+  BOPTools_Parallel::Perform (myRunParallel, aVVE, myContext);
   //=============================================================
   //
   // Keep the modified edges for further update
@@ -364,6 +356,9 @@ void BOPAlgo_PaveFiller::SplitPaveBlocks(const TColStd_MapOfInteger& theMEdges,
                              BOPDS_ListOfPaveBlock,
                              TColStd_MapTransientHasher> aMCBNewPB;
   //
+  // Map of vertices to init the pave blocks for them
+  TColStd_MapOfInteger aMVerticesToInitPB;
+
   TColStd_MapIteratorOfMapOfInteger aItM(theMEdges);
   for (; aItM.More(); aItM.Next()) {
     Standard_Integer nE = aItM.Value();
@@ -425,6 +420,10 @@ void BOPAlgo_PaveFiller::SplitPaveBlocks(const TColStd_MapOfInteger& theMEdges,
               aLV.Append(nV1);
               aLV.Append(nV2);
               MakeSDVertices(aLV, theAddInterfs);
+
+              // Save vertices to init pave blocks
+              aMVerticesToInitPB.Add(nV1);
+              aMVerticesToInitPB.Add(nV2);
             }
             continue;
           }
@@ -527,6 +526,11 @@ void BOPAlgo_PaveFiller::SplitPaveBlocks(const TColStd_MapOfInteger& theMEdges,
       }
     }
   }
+
+  // Init pave blocks for vertices which have acquired SD vertex
+  aItM.Initialize(aMVerticesToInitPB);
+  for (; aItM.More(); aItM.Next())
+    myDS->InitPaveBlocksForVertex(aItM.Value());
 }
 
 //=======================================================================

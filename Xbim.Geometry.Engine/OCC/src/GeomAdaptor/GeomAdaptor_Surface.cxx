@@ -438,7 +438,7 @@ void GeomAdaptor_Surface::UIntervals(TColStd_Array1OfReal& T, const GeomAbs_Shap
         (myBSplineSurface->VIso(myBSplineSurface->VKnot(myBSplineSurface->FirstVKnotIndex())),myUFirst,myULast);
       myNbUIntervals = myBasisCurve.NbIntervals(S);
       myBasisCurve.Intervals(T,S);
-      break;
+      return;
     }
     case GeomAbs_SurfaceOfExtrusion:
     {
@@ -448,6 +448,7 @@ void GeomAdaptor_Surface::UIntervals(TColStd_Array1OfReal& T, const GeomAbs_Shap
       {
         myNbUIntervals = myBasisCurve.NbIntervals(S);
         myBasisCurve.Intervals(T,S);
+        return;
       }
       break;
     }
@@ -468,6 +469,7 @@ void GeomAdaptor_Surface::UIntervals(TColStd_Array1OfReal& T, const GeomAbs_Shap
       GeomAdaptor_Surface Sur(myOffSurf->BasisSurface(), myUFirst, myULast, myVFirst, myVLast);
       myNbUIntervals = Sur.NbUIntervals(BaseS);
       Sur.UIntervals(T, BaseS);
+      return;
     }
     case GeomAbs_Plane:
     case GeomAbs_Cylinder:
@@ -500,7 +502,7 @@ void GeomAdaptor_Surface::VIntervals(TColStd_Array1OfReal& T, const GeomAbs_Shap
         (myBSplineSurface->UIso(myBSplineSurface->UKnot(myBSplineSurface->FirstUKnotIndex())),myVFirst,myVLast);
       myNbVIntervals = myBasisCurve.NbIntervals(S);
       myBasisCurve.Intervals(T,S);
-      break;
+      return;
     }
     case GeomAbs_SurfaceOfRevolution:
     {
@@ -511,6 +513,7 @@ void GeomAdaptor_Surface::VIntervals(TColStd_Array1OfReal& T, const GeomAbs_Shap
       {
         myNbVIntervals = myBasisCurve.NbIntervals(S);
         myBasisCurve.Intervals(T,S);
+        return;
       }
       break;
     }
@@ -531,6 +534,7 @@ void GeomAdaptor_Surface::VIntervals(TColStd_Array1OfReal& T, const GeomAbs_Shap
       GeomAdaptor_Surface Sur(myOffSurf->BasisSurface(), myUFirst, myULast, myVFirst, myVLast);
       myNbVIntervals = Sur.NbVIntervals(BaseS);
       Sur.VIntervals(T, BaseS);
+      return;
     }
     case GeomAbs_Plane:
     case GeomAbs_Cylinder:
@@ -670,12 +674,9 @@ void GeomAdaptor_Surface::RebuildCache(const Standard_Real theU,
     if (mySurfaceCache.IsNull())
       mySurfaceCache = new BSplSLib_Cache(
         aDegU, aBezier->IsUPeriodic(), aFlatKnotsU,
-        aDegV, aBezier->IsVPeriodic(), aFlatKnotsV,
-        aBezier->Poles(), aBezier->Weights());
-    mySurfaceCache->BuildCache(theU, theV,
-      aDegU, aBezier->IsUPeriodic(), aFlatKnotsU,
-      aDegV, aBezier->IsVPeriodic(), aFlatKnotsV,
-      aBezier->Poles(), aBezier->Weights());
+        aDegV, aBezier->IsVPeriodic(), aFlatKnotsV, aBezier->Weights());
+    mySurfaceCache->BuildCache (theU, theV, aFlatKnotsU, aFlatKnotsV,
+                                aBezier->Poles(), aBezier->Weights());
   }
   else if (mySurfaceType == GeomAbs_BSplineSurface)
   {
@@ -684,11 +685,9 @@ void GeomAdaptor_Surface::RebuildCache(const Standard_Real theU,
       mySurfaceCache = new BSplSLib_Cache(
         myBSplineSurface->UDegree(), myBSplineSurface->IsUPeriodic(), myBSplineSurface->UKnotSequence(),
         myBSplineSurface->VDegree(), myBSplineSurface->IsVPeriodic(), myBSplineSurface->VKnotSequence(),
-        myBSplineSurface->Poles(), myBSplineSurface->Weights());
-    mySurfaceCache->BuildCache(theU, theV,
-      myBSplineSurface->UDegree(), myBSplineSurface->IsUPeriodic(), myBSplineSurface->UKnotSequence(),
-      myBSplineSurface->VDegree(), myBSplineSurface->IsVPeriodic(), myBSplineSurface->VKnotSequence(),
-      myBSplineSurface->Poles(), myBSplineSurface->Weights());
+        myBSplineSurface->Weights());
+    mySurfaceCache->BuildCache (theU, theV, myBSplineSurface->UKnotSequence(), myBSplineSurface->VKnotSequence(),
+                                myBSplineSurface->Poles(), myBSplineSurface->Weights());
   }
 }
 

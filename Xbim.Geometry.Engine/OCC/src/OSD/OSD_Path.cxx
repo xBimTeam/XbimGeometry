@@ -44,11 +44,11 @@ static OSD_SysType whereAmI()
 #else
   struct utsname info;
   uname(&info);
-  cout << info.sysname << endl;
-  cout << info.nodename << endl;
-  cout << info.release << endl;
-  cout << info.version << endl;
-  cout << info.machine << endl;
+  std::cout << info.sysname << std::endl;
+  std::cout << info.nodename << std::endl;
+  std::cout << info.release << std::endl;
+  std::cout << info.version << std::endl;
+  std::cout << info.machine << std::endl;
   return OSD_Default;
 #endif
 }
@@ -356,7 +356,7 @@ OSD_Path::OSD_Path(const TCollection_AsciiString& aDependentName,
      break;
   default:
 #ifdef OCCT_DEBUG
-       cout << " WARNING WARNING : OSD Path for an Unknown SYSTEM : " << (Standard_Integer)todo << endl;
+       std::cout << " WARNING WARNING : OSD Path for an Unknown SYSTEM : " << (Standard_Integer)todo << std::endl;
 #endif 
      break ;
  } 
@@ -1634,4 +1634,41 @@ void OSD_Path::ExpandedName(TCollection_AsciiString& )
 Standard_Boolean LocateExecFile(OSD_Path& )
 {
   return Standard_False ;
+}
+
+// =======================================================================
+// function : FolderAndFileFromPath
+// purpose  :
+// =======================================================================
+void OSD_Path::FolderAndFileFromPath (const TCollection_AsciiString& theFilePath,
+                                      TCollection_AsciiString&       theFolder,
+                                      TCollection_AsciiString&       theFileName)
+{
+  Standard_Integer aLastSplit = -1;
+  Standard_CString aString = theFilePath.ToCString();
+  for (Standard_Integer anIter = 0; anIter < theFilePath.Length(); ++anIter)
+  {
+    if (aString[anIter] == '/'
+     || aString[anIter] == '\\')
+    {
+      aLastSplit = anIter;
+    }
+  }
+
+  if (aLastSplit == -1)
+  {
+    theFolder.Clear();
+    theFileName = theFilePath;
+    return;
+  }
+
+  theFolder = theFilePath.SubString (1, aLastSplit + 1);
+  if (aLastSplit + 2 <= theFilePath.Length())
+  {
+    theFileName = theFilePath.SubString (aLastSplit + 2, theFilePath.Length());
+  }
+  else
+  {
+    theFileName.Clear();
+  }
 }

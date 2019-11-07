@@ -91,35 +91,36 @@ Standard_EXPORT operator gp_Trsf() const;
   //! Returns the inverse of <me>.
   //!
   //! <me> * Inverted() is an Identity.
-  Standard_EXPORT TopLoc_Location Inverted() const;
+  Standard_EXPORT Standard_NODISCARD TopLoc_Location Inverted() const;
   
   //! Returns <me> * <Other>, the  elementary datums are
   //! concatenated.
-  Standard_EXPORT TopLoc_Location Multiplied (const TopLoc_Location& Other) const;
-TopLoc_Location operator* (const TopLoc_Location& Other) const
+  Standard_EXPORT Standard_NODISCARD TopLoc_Location Multiplied (const TopLoc_Location& Other) const;
+Standard_NODISCARD TopLoc_Location operator* (const TopLoc_Location& Other) const
 {
   return Multiplied(Other);
 }
   
   //! Returns  <me> / <Other>.
-  Standard_EXPORT TopLoc_Location Divided (const TopLoc_Location& Other) const;
-TopLoc_Location operator/ (const TopLoc_Location& Other) const
+  Standard_EXPORT Standard_NODISCARD TopLoc_Location Divided (const TopLoc_Location& Other) const;
+Standard_NODISCARD TopLoc_Location operator/ (const TopLoc_Location& Other) const
 {
   return Divided(Other);
 }
   
   //! Returns <Other>.Inverted() * <me>.
-  Standard_EXPORT TopLoc_Location Predivided (const TopLoc_Location& Other) const;
+  Standard_EXPORT Standard_NODISCARD TopLoc_Location Predivided (const TopLoc_Location& Other) const;
   
   //! Returns me at the power <pwr>.   If <pwr>  is zero
   //! returns  Identity.  <pwr> can  be lower  than zero
   //! (usual meaning for powers).
-  Standard_EXPORT TopLoc_Location Powered (const Standard_Integer pwr) const;
-  
-  //! Returns a hashed value for this local coordinate system.
-  //! This value is used, with map tables, to store and
-  //! retrieve the object easily, and is in the range [ 1..Upper ].
-  Standard_EXPORT Standard_Integer HashCode (const Standard_Integer Upper) const;
+  Standard_EXPORT Standard_NODISCARD TopLoc_Location Powered (const Standard_Integer pwr) const;
+
+  //! Returns a hashed value for this local coordinate system. This value is used, with map tables, to store and
+  //! retrieve the object easily, and is in the range [1, theUpperBound].
+  //! @param theUpperBound the upper bound of the range a computing hash code must be within
+  //! @return a computed hash code, in the range [1, theUpperBound]
+  Standard_EXPORT Standard_Integer HashCode (Standard_Integer theUpperBound) const;
   
   //! Returns true if this location and the location Other
   //! have the same elementary data, i.e. contain the same
@@ -141,6 +142,9 @@ Standard_Boolean operator != (const TopLoc_Location& Other) const
   return IsDifferent(Other);
 }
   
+  //! Dumps the content of me into the stream
+  Standard_EXPORT void DumpJson (Standard_OStream& theOStream, const Standard_Integer theDepth = -1) const;
+
   //! Prints the contents of <me> on the stream <s>.
   Standard_EXPORT void ShallowDump (Standard_OStream& S) const;
 
@@ -166,9 +170,13 @@ private:
 #include <TopLoc_Location.lxx>
 
 
-
-inline Standard_Integer HashCode(const TopLoc_Location& me,const Standard_Integer Upper) {
- return me.HashCode(Upper);
+//! Computes a hash code for the given location, in the range [1, theUpperBound]
+//! @param theLocation the location which hash code is to be computed
+//! @param theUpperBound the upper bound of the range a computing hash code must be within
+//! @return a computed hash code, in the range [1, theUpperBound]
+inline Standard_Integer HashCode (const TopLoc_Location& theLocation, const Standard_Integer theUpperBound)
+{
+  return theLocation.HashCode (theUpperBound);
 }
 
 inline void ShallowDump(const TopLoc_Location& me,Standard_OStream& S) {

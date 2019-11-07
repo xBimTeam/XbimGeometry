@@ -21,6 +21,7 @@
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
 
+#include <gp_Pnt.hxx>
 #include <Standard_Real.hxx>
 #include <Standard_Integer.hxx>
 #include <Standard_Boolean.hxx>
@@ -69,6 +70,11 @@ public:
   //! The constructed box is qualified Void. Its gap is null.
   Standard_EXPORT Bnd_Box();
 
+  //! Creates a bounding box, it contains:
+  //! -   minimum/maximum point of bouning box,
+  //! The constructed box is qualified Void. Its gap is null.
+  Standard_EXPORT Bnd_Box (const gp_Pnt theMin, const gp_Pnt theMax);
+
   //! Sets this bounding box so that it  covers the whole of 3D space.
   //! It is infinitely  long in all directions.
   void SetWhole() { Flags = WholeMask; }
@@ -76,6 +82,12 @@ public:
   //! Sets this bounding box so that it is empty. All points are outside a void box.
   void SetVoid()
   {
+    Xmin =  RealLast();
+    Xmax = -RealLast();
+    Ymin =  RealLast();
+    Ymax = -RealLast();
+    Zmin =  RealLast();
+    Zmax = -RealLast();
     Flags = VoidMask;
     Gap   = 0.0;
   }
@@ -161,6 +173,9 @@ public:
   //! direction.
   void OpenZmax() { Flags |= ZmaxMask; }
 
+  //! Returns true if this bounding box has at least one open direction.
+  Standard_Boolean IsOpen() const { return (Flags & WholeMask) != 0; }
+
   //! Returns true if this bounding box is open in the  Xmin direction.
   Standard_Boolean IsOpenXmin() const { return (Flags & XminMask) != 0; }
 
@@ -204,7 +219,7 @@ public:
   //! Applying a geometric transformation (for example, a
   //! rotation) to a bounding box generally increases its
   //! dimensions. This is not optimal for algorithms which use it.
-  Standard_EXPORT Bnd_Box Transformed (const gp_Trsf& T) const;
+  Standard_EXPORT Standard_NODISCARD Bnd_Box Transformed (const gp_Trsf& T) const;
   
   //! Adds the box <Other> to <me>.
   Standard_EXPORT void Add (const Bnd_Box& Other);
@@ -263,6 +278,32 @@ public:
     const Standard_Real aDz = Zmax - Zmin + Gap + Gap;
     return aDx * aDx + aDy * aDy + aDz * aDz;
   }
+
+  //! Returns a finite part of an infinite bounding box (returns self if this is already finite box).
+  //! This can be a Void box in case if its sides has been defined as infinite (Open) without adding any finite points.
+  //! WARNING! This method relies on Open flags, the infinite points added using Add() method will be returned as is.
+  Bnd_Box FinitePart() const
+  {
+    if (!HasFinitePart())
+    {
+      return Bnd_Box();
+    }
+
+    Bnd_Box aBox;
+    aBox.Update (Xmin, Ymin, Zmin, Xmax, Ymax, Zmax);
+    aBox.SetGap (Gap);
+    return aBox;
+  }
+
+  //! Returns TRUE if this box has finite part.
+  Standard_Boolean HasFinitePart() const
+  {
+    return !IsVoid()
+         && Xmax >= Xmin;
+  }
+
+  //! Dumps the content of me into the stream
+  Standard_EXPORT void DumpJson (Standard_OStream& theOStream, const Standard_Integer theDepth = -1) const;
 
 protected:
 

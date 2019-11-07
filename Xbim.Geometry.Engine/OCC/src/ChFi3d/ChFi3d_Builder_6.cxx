@@ -283,7 +283,7 @@ static void CompParam(Geom2dAdaptor_Curve  Carc,
   else {
     //(2) Intersection
 #ifdef OCCT_DEBUG
-    cout<< "CompParam : bad intersection parameters"<<endl; 
+    std::cout<< "CompParam : bad intersection parameters"<<std::endl; 
 #endif
     IntRes2d_IntersectionPoint int2d;
     Geom2dInt_GInter Intersection;
@@ -298,7 +298,7 @@ static void CompParam(Geom2dAdaptor_Curve  Carc,
 	nbseg = Intersection.NbSegments();
 	if ( nbseg > 0 ){ 
 #ifdef OCCT_DEBUG
-	  cout<< "segments of intersection on the restrictions"<<endl; 
+	  std::cout<< "segments of intersection on the restrictions"<<std::endl; 
 #endif  
 	}
 	nbpt = Intersection.NbPoints();
@@ -320,7 +320,7 @@ static void CompParam(Geom2dAdaptor_Curve  Carc,
   if(!found){
     // (3) Projection...
 #ifdef OCCT_DEBUG
-    cout<<"CompParam : failed intersection PC, projection is created."<<endl;
+    std::cout<<"CompParam : failed intersection PC, projection is created."<<std::endl;
 #endif
     parc = prefarc;
     Geom2dAPI_ProjectPointOnCurve projector(point,Ctg);
@@ -330,7 +330,7 @@ static void CompParam(Geom2dAdaptor_Curve  Carc,
       // at the end of spine...
       ptg = preftg; 
 #ifdef OCCT_DEBUG
-      cout<<"CompParam : failed proj p2d/c2d, the extremity is taken!" <<endl;
+      std::cout<<"CompParam : failed proj p2d/c2d, the extremity is taken!" <<std::endl;
 #endif
     }
     else  {
@@ -551,12 +551,12 @@ Standard_Boolean ChFi3d_Builder::CompleteData
 			       myConti, Degmax, Segmax);  
   if (!approx.IsDone()) {
 #ifdef OCCT_DEBUG
-    cout << "Approximation non faite !!!" << endl;
+    std::cout << "Approximation non faite !!!" << std::endl;
 #endif
     return Standard_False;
   }
 #ifdef OCCT_DEBUG
-  approx.Dump(cout);
+  approx.Dump(std::cout);
 #endif
   return StoreData( Data, approx, lin, S1, S2, Or1, Gd1, Gd2, Gf1, Gf2, Reversed);
 } 
@@ -587,12 +587,12 @@ Standard_Boolean ChFi3d_Builder::CompleteData
 			       myConti);  
  if (!approx.IsDone()) {
 #ifdef OCCT_DEBUG
-    cout << "Approximation is not done!" << endl;
+    std::cout << "Approximation is not done!" << std::endl;
 #endif  
     return Standard_False;
   }
 #ifdef OCCT_DEBUG
-  approx.Dump(cout);
+  approx.Dump(std::cout);
 #endif
 
   return StoreData(Data,approx,lin,S1,S2,Or,0,0,0,0,Reversed);
@@ -624,12 +624,12 @@ Standard_Boolean ChFi3d_Builder::CompleteData
 			       myConti);  
  if (!approx.IsDone()) {
 #ifdef OCCT_DEBUG
-    cout << "Approximation non faite !!!" << endl;
+    std::cout << "Approximation non faite !!!" << std::endl;
 #endif  
     return Standard_False;
   }
 #ifdef OCCT_DEBUG
-  approx.Dump(cout);
+  approx.Dump(std::cout);
 #endif
 
   return StoreData(Data,approx,lin,S1,S2,Or,0,0,0,0);
@@ -689,14 +689,36 @@ Standard_Boolean ChFi3d_Builder::StoreData(Handle(ChFiDS_SurfData)& Data,
   length2=Data->LastExtensionValue();
 
   Handle(Geom_BoundedSurface) aBndSurf = Surf;
-  if (length1 > Precision::Confusion())
-    GeomLib::ExtendSurfByLength(aBndSurf,length1,1,Standard_False,Standard_False);
-  if (length2 >  Precision::Confusion())
-    GeomLib::ExtendSurfByLength(aBndSurf,length2,1,Standard_False,Standard_True);
-  Surf = Handle(Geom_BSplineSurface)::DownCast (aBndSurf);
+  Standard_Boolean ext1 = Standard_False, ext2 = Standard_False;
+  Standard_Real eps = Max(tolget3d, 2. * Precision::Confusion());
+  if (length1 > eps)
+  {
+    gp_Pnt P11, P21;
+    P11 = Surf->Pole(1, 1);
+    P21 = Surf->Pole(Surf->NbUPoles(), 1);
+    if (P11.Distance(P21) > eps)
+    {
+      //to avoid extending surface with singular boundary
+      GeomLib::ExtendSurfByLength(aBndSurf, length1, 1, Standard_False, Standard_False);
+      ext1 = Standard_True;
+    }
+  }
+  if (length2 > eps)
+  {
+    gp_Pnt P12, P22;
+    P12 = Surf->Pole(1, Surf->NbVPoles());
+    P22 = Surf->Pole(Surf->NbUPoles(), Surf->NbVPoles());
+    if (P12.Distance(P22) > eps)
+    {
+      //to avoid extending surface with singular boundary
+      GeomLib::ExtendSurfByLength(aBndSurf, length2, 1, Standard_False, Standard_True);
+      ext2 = Standard_True;
+    }
+  }
+  Surf = Handle(Geom_BSplineSurface)::DownCast(aBndSurf);
 
   //Correction of surface on extremities
-  if (length1 <= Precision::Confusion())
+  if (!ext1)
   {
     gp_Pnt P11, P21;
     P11 = lin->StartPointOnFirst().Value();
@@ -704,7 +726,7 @@ Standard_Boolean ChFi3d_Builder::StoreData(Handle(ChFiDS_SurfData)& Data,
     Surf->SetPole(1, 1, P11);
     Surf->SetPole(Surf->NbUPoles(), 1, P21);
   }
-  if (length2 <= Precision::Confusion())
+  if (!ext2)
   {
     gp_Pnt P12, P22;
     P12 = lin->EndPointOnFirst().Value();
@@ -756,7 +778,7 @@ Standard_Boolean ChFi3d_Builder::StoreData(Handle(ChFiDS_SurfData)& Data,
    
  if(!ChFi3d_CheckSameParameter(checkcurve,PCurveOnFace,S1,tolC1,tolcheck)){
 #ifdef OCCT_DEBUG
-   cout<<"aaproximate tolerance under-valued : "<<tolC1<<" for "<<tolcheck<<endl;
+   std::cout<<"aaproximate tolerance under-valued : "<<tolC1<<" for "<<tolcheck<<std::endl;
 #endif 
     tolC1 = tolcheck;
   }
@@ -809,7 +831,7 @@ Standard_Boolean ChFi3d_Builder::StoreData(Handle(ChFiDS_SurfData)& Data,
     chc.Load(Crv3d2,par1,par2);
    if(!ChFi3d_CheckSameParameter(checkcurve,PCurveOnFace,S2,tolC2,tolcheck)){
 #ifdef OCCT_DEBUG
-      cout<<"approximate tolerance under-evaluated : "<<tolC2<<" for "<<tolcheck<<endl;
+      std::cout<<"approximate tolerance under-evaluated : "<<tolC2<<" for "<<tolcheck<<std::endl;
 #endif 
       tolC2 = tolcheck;
     }
@@ -989,7 +1011,7 @@ Standard_Boolean ChFi3d_Builder::ComputeData
 				    tolesp,TolGuide,RecRst,RecP,RecS,
 				    NewFirst,ParSol)){
 #ifdef OCCT_DEBUG
-      cout<<"ChFi3d_Builder::ComputeData : calculation fail first section"<<endl;
+      std::cout<<"ChFi3d_Builder::ComputeData : calculation fail first section"<<std::endl;
 #endif
       return Standard_False;
     }
@@ -1004,7 +1026,7 @@ Standard_Boolean ChFi3d_Builder::ComputeData
 
     if (!TheWalk.IsDone()) {
 #ifdef OCCT_DEBUG
-      cout << "Path not created" << endl;
+      std::cout << "Path not created" << std::endl;
 #endif  
       return Standard_False;
     }
@@ -1012,7 +1034,7 @@ Standard_Boolean ChFi3d_Builder::ComputeData
     if (reverse) {
       if (!TheWalk.Complete(Func,FInv,FInvP,FInvC,SpLast)) {
 #ifdef OCCT_DEBUG
-	cout << "Not completed" << endl;
+	std::cout << "Not completed" << std::endl;
 #endif
       }
     }  
@@ -1023,24 +1045,24 @@ Standard_Boolean ChFi3d_Builder::ComputeData
     if (Nbpnt <= 1 && again == 0)  {
       again++;
 #ifdef OCCT_DEBUG
-      cout <<"one point of the path MS/50 is attempted."<<endl;
+      std::cout <<"one point of the path MS/50 is attempted."<<std::endl;
 #endif  
       MS = MS/50.; Target = Targetsov;
     }
     else if (Nbpnt<=nbptmin && again == 0)  {
       again++;
 #ifdef OCCT_DEBUG
-      cout <<"Number of points is too small, the step is reduced"<<endl;
+      std::cout <<"Number of points is too small, the step is reduced"<<std::endl;
 #endif  
       Standard_Real u1 = Lin->Point(1).Parameter();
       Standard_Real u2 = Lin->Point(Nbpnt).Parameter();
       MS = (u2-u1)/(nbptmin+1.0);
-//      cout << " MS : " << MS << " u1 : " << u1 << " u2 : " << u2 << " nbptmin : " << nbptmin << endl;
+//      std::cout << " MS : " << MS << " u1 : " << u1 << " u2 : " << u2 << " nbptmin : " << nbptmin << std::endl;
       Target = Targetsov;
     }
     else if(Nbpnt<=nbptmin){
 #ifdef OCCT_DEBUG
-      cout <<"Number of points is still too small, quit"<<endl;
+      std::cout <<"Number of points is still too small, quit"<<std::endl;
 #endif  
       return Standard_False;
     }
@@ -1121,7 +1143,7 @@ Standard_Boolean ChFi3d_Builder::ComputeData
 	  			     tolesp, TolGuide, RecRst1, RecP1, RecRst2, RecP2,
 				     NewFirst, ParSol)){
 #ifdef OCCT_DEBUG
-      cout<<"ChFi3d_Builder::ComputeData : fail calculation first section"<<endl;
+      std::cout<<"ChFi3d_Builder::ComputeData : fail calculation first section"<<std::endl;
 #endif
       return Standard_False;
     }
@@ -1136,7 +1158,7 @@ Standard_Boolean ChFi3d_Builder::ComputeData
 
     if (!TheWalk.IsDone()) {
 #ifdef OCCT_DEBUG
-      cout << "Path not done" << endl;
+      std::cout << "Path not done" << std::endl;
 #endif  
       return Standard_False;
     }
@@ -1144,7 +1166,7 @@ Standard_Boolean ChFi3d_Builder::ComputeData
     if (reverse) {
       if (!TheWalk.Complete(Func, FInv1, FInvP1, FInv2, FInvP2, SpLast)) {
 #ifdef OCCT_DEBUG
-	cout << "Not completed" << endl;
+	std::cout << "Not completed" << std::endl;
 #endif
       }
     }  
@@ -1155,14 +1177,14 @@ Standard_Boolean ChFi3d_Builder::ComputeData
     if (Nbpnt <= 1 && again == 0)  {
       again++;
 #ifdef OCCT_DEBUG
-      cout <<"one point of path MS/50 is attempted."<<endl;
+      std::cout <<"one point of path MS/50 is attempted."<<std::endl;
 #endif  
       MS = MS/50.; Target = Targetsov;
     }
     else if (Nbpnt<=nbptmin && again == 0)  {
       again++;
 #ifdef OCCT_DEBUG
-      cout <<"Number of points is too small, the step is reduced"<<endl;
+      std::cout <<"Number of points is too small, the step is reduced"<<std::endl;
 #endif  
       Standard_Real u1 = Lin->Point(1).Parameter();
       Standard_Real u2 = Lin->Point(Nbpnt).Parameter();
@@ -1171,7 +1193,7 @@ Standard_Boolean ChFi3d_Builder::ComputeData
     }
     else if(Nbpnt<=nbptmin){
 #ifdef OCCT_DEBUG
-      cout <<"Number of points is still too small, quit"<<endl;
+      std::cout <<"Number of points is still too small, quit"<<std::endl;
 #endif  
       return Standard_False;
     }
@@ -1252,7 +1274,7 @@ Standard_Boolean ChFi3d_Builder::SimulData
 				    NewFirst,ParSol)){
 #ifdef OCCT_DEBUG
 
-      cout<<"ChFi3d_Builder::SimulData : fail calculate first section"<<endl;
+      std::cout<<"ChFi3d_Builder::SimulData : fail calculate first section"<<std::endl;
 #endif
       return Standard_False;
     }
@@ -1266,14 +1288,14 @@ Standard_Boolean ChFi3d_Builder::SimulData
 		     MS,TolGuide,ParSol,tolesp,Fleche,Appro);
     if (!TheWalk.IsDone()) {
 #ifdef OCCT_DEBUG
-      cout << "Path not done" << endl;
+      std::cout << "Path not done" << std::endl;
 #endif
       return Standard_False;
     }
     if (reverse) {
       if (!TheWalk.Complete(Func,FInv,FInvP,FInvC,SpLast)) {
 #ifdef OCCT_DEBUG
-	cout << "Not completed" << endl;
+	std::cout << "Not completed" << std::endl;
 #endif
       }
     }  
@@ -1282,14 +1304,14 @@ Standard_Boolean ChFi3d_Builder::SimulData
     if (Nbpnt <= 1 && again == 0)  {
       again++;
 #ifdef OCCT_DEBUG
-      cout <<"one point of path MS/50 is attempted."<<endl;
+      std::cout <<"one point of path MS/50 is attempted."<<std::endl;
 #endif
       MS = MS/50.; Target = Targetsov;
     }
     else if (Nbpnt <= NbSecMin && again == 0)  {
       again++;
 #ifdef OCCT_DEBUG
-      cout <<"Number of points is too small, the step is reduced"<<endl;
+      std::cout <<"Number of points is too small, the step is reduced"<<std::endl;
 #endif
       Standard_Real u1 = Lin->Point(1).Parameter();
       Standard_Real u2 = Lin->Point(Nbpnt).Parameter();
@@ -1298,7 +1320,7 @@ Standard_Boolean ChFi3d_Builder::SimulData
     }
     else if(Nbpnt<=NbSecMin){
 #ifdef OCCT_DEBUG
-      cout <<"Number of points is still too small, quit"<<endl;
+      std::cout <<"Number of points is still too small, quit"<<std::endl;
 #endif
       return Standard_False;
     }
@@ -1378,7 +1400,7 @@ Standard_Boolean ChFi3d_Builder::SimulData
 				    NewFirst,ParSol)){
 #ifdef OCCT_DEBUG
 
-      cout<<"ChFi3d_Builder::SimulData : calculation fail first section"<<endl;
+      std::cout<<"ChFi3d_Builder::SimulData : calculation fail first section"<<std::endl;
 #endif
       return Standard_False;
     }
@@ -1392,14 +1414,14 @@ Standard_Boolean ChFi3d_Builder::SimulData
 		     MS, TolGuide, ParSol, tolesp, Fleche, Appro);
     if (!TheWalk.IsDone()) {
 #ifdef OCCT_DEBUG
-      cout << "Path not created" << endl;
+      std::cout << "Path not created" << std::endl;
 #endif
       return Standard_False;
     }
     if (reverse) {
       if (!TheWalk.Complete(Func, FInv1, FInvP1, FInv2, FInvP2, SpLast)) {
 #ifdef OCCT_DEBUG
-	cout << "Not completed" << endl;
+	std::cout << "Not completed" << std::endl;
 #endif
       }
     }  
@@ -1408,14 +1430,14 @@ Standard_Boolean ChFi3d_Builder::SimulData
     if (Nbpnt <= 1 && again == 0)  {
       again++;
 #ifdef OCCT_DEBUG
-      cout <<"only one point of path MS/50 is attempted."<<endl;
+      std::cout <<"only one point of path MS/50 is attempted."<<std::endl;
 #endif
       MS = MS/50.; Target = Targetsov;
     }
     else if (Nbpnt <= NbSecMin && again == 0)  {
       again++;
 #ifdef OCCT_DEBUG
-      cout <<"Number of points is too small, the step is reduced"<<endl;
+      std::cout <<"Number of points is too small, the step is reduced"<<std::endl;
 #endif
       Standard_Real u1 = Lin->Point(1).Parameter();
       Standard_Real u2 = Lin->Point(Nbpnt).Parameter();
@@ -1424,7 +1446,7 @@ Standard_Boolean ChFi3d_Builder::SimulData
     }
     else if(Nbpnt<=NbSecMin){
 #ifdef OCCT_DEBUG
-      cout <<"Number of points is still too small, quit"<<endl;
+      std::cout <<"Number of points is still too small, quit"<<std::endl;
 #endif
       return Standard_False;
     }
@@ -1488,6 +1510,22 @@ Standard_Boolean ChFi3d_Builder::ComputeData
  const Standard_Boolean RecOnS1,
  const Standard_Boolean RecOnS2)
 {
+  //Get offset guide if exists
+  Handle(ChFiDS_HElSpine) OffsetHGuide;
+  if (!Spine.IsNull() &&
+      Spine->Mode() == ChFiDS_ConstThroatWithPenetrationChamfer)
+  {
+    ChFiDS_ListOfHElSpine& ll = Spine->ChangeElSpines();
+    ChFiDS_ListOfHElSpine& ll_offset = Spine->ChangeOffsetElSpines();
+    ChFiDS_ListIteratorOfListOfHElSpine ILES(ll), ILES_offset(ll_offset);
+    for ( ; ILES.More(); ILES.Next(),ILES_offset.Next())
+    {
+      const Handle(ChFiDS_HElSpine)& aHElSpine = ILES.Value();
+      if (aHElSpine == HGuide)
+        OffsetHGuide = ILES_offset.Value();
+    }
+  }
+  
   //The extrensions are created in case of output of two domains
   //directly and not by path ( too hasardous ).
   Data->FirstExtensionValue(0);
@@ -1573,7 +1611,7 @@ Standard_Boolean ChFi3d_Builder::ComputeData
 				    tolesp,TolGuide,RecOnS1,RecOnS2,
 				    NewFirst,ParSol)){
 #ifdef OCCT_DEBUG
-      cout<<"ChFi3d_Builder::ComputeData : calculation fail first section"<<endl;
+      std::cout<<"ChFi3d_Builder::ComputeData : calculation fail first section"<<std::endl;
 #endif
       return Standard_False;
     }
@@ -1606,7 +1644,7 @@ Standard_Boolean ChFi3d_Builder::ComputeData
 		    ParSol,TolEsp,Fleche,Appro);
     if (!TheWalk.IsDone()) {
 #ifdef OCCT_DEBUG
-      cout << "Path is not created" << endl;
+      std::cout << "Path is not created" << std::endl;
 #endif
       return Standard_False;
     }
@@ -1617,12 +1655,18 @@ Standard_Boolean ChFi3d_Builder::ComputeData
       HGuide->ChangeCurve().FirstParameter(SpFirst);
       HGuide->ChangeCurve().LastParameter (SpLast );
       HGuide->ChangeCurve().SetOrigin(SpFirst);
+      if (!OffsetHGuide.IsNull())
+      {
+        OffsetHGuide->ChangeCurve().FirstParameter(SpFirst);
+        OffsetHGuide->ChangeCurve().LastParameter (SpLast );
+        OffsetHGuide->ChangeCurve().SetOrigin(SpFirst);
+      }
     }
     Standard_Boolean complmnt = Standard_True;
     if (Inside)  complmnt = TheWalk.Complete(Func,FInv,SpLast);
     if(!complmnt){
 #ifdef OCCT_DEBUG
-      cout << "Not completed" << endl;
+      std::cout << "Not completed" << std::endl;
 #endif
       return Standard_False;
     }
@@ -1633,7 +1677,7 @@ Standard_Boolean ChFi3d_Builder::ComputeData
     Nbpnt = Lin->NbPoints();
     if (Nbpnt == 0){
 #ifdef OCCT_DEBUG
-      cout <<"0 point of path, quit."<<endl;
+      std::cout <<"0 point of path, quit."<<std::endl;
 #endif
       return Standard_False;
     }
@@ -1658,7 +1702,7 @@ Standard_Boolean ChFi3d_Builder::ComputeData
       //satisfactory maximum step. If it already done, quit.
       if(tchernobyl){
 #ifdef OCCT_DEBUG
-	cout <<"If it drags without control, quit."<<endl;
+	std::cout <<"If it drags without control, quit."<<std::endl;
 #endif
 	return Standard_False;
       }
@@ -1666,14 +1710,14 @@ Standard_Boolean ChFi3d_Builder::ComputeData
       TheWalk.Check(0);
       if (Nbpnt == 1){
 #ifdef OCCT_DEBUG
-	cout <<"only one point of path MS/100 is attempted"<<endl;
-	cout <<"and the controls are extended."<<endl;
+	std::cout <<"only one point of path MS/100 is attempted"<<std::endl;
+	std::cout <<"and the controls are extended."<<std::endl;
 #endif
 	MS *= 0.01;
       }
       else{
 #ifdef OCCT_DEBUG
-	cout <<"It drags, the controls are extended."<<endl;
+	std::cout <<"It drags, the controls are extended."<<std::endl;
 #endif
 	MS = (lpointpar-fpointpar)/Nbpnt; //EvalStep(Lin);
       }
@@ -1681,7 +1725,7 @@ Standard_Boolean ChFi3d_Builder::ComputeData
     else if (Nbpnt < nbptmin){
       if(again == 0){
 #ifdef OCCT_DEBUG
-	cout <<"Number of points is too small, the step is reduced"<<endl;
+	std::cout <<"Number of points is too small, the step is reduced"<<std::endl;
 #endif
 	u1sov = fpointpar;
 	u2sov = lpointpar;
@@ -1691,13 +1735,13 @@ Standard_Boolean ChFi3d_Builder::ComputeData
 	if(Abs(fpointpar-u1sov)>=TolGuide || 
 	   Abs(lpointpar-u2sov)>=TolGuide){
 #ifdef OCCT_DEBUG
-	  cout <<"Number of points is still too small, the step is reduced"<<endl;
+	  std::cout <<"Number of points is still too small, the step is reduced"<<std::endl;
 #endif  
 	  MS = (lpointpar - fpointpar) * factor;
 	}
 	else{
 #ifdef OCCT_DEBUG
-	  cout <<"Number of points is still too small, quit"<<endl;
+	  std::cout <<"Number of points is still too small, quit"<<std::endl;
 #endif  
 	  return Standard_False;
 	}
@@ -1712,13 +1756,13 @@ Standard_Boolean ChFi3d_Builder::ComputeData
   if(TheWalk.TwistOnS1()){
     Data->TwistOnS1(Standard_True);
 #ifdef OCCT_DEBUG
-    cout<<"Path completed, but TWIST on S1"<<endl;
+    std::cout<<"Path completed, but TWIST on S1"<<std::endl;
 #endif
   }
   if(TheWalk.TwistOnS2()){
     Data->TwistOnS2(Standard_True);
 #ifdef OCCT_DEBUG
-    cout<<"Parh completed, but TWIST on S2"<<endl;
+    std::cout<<"Parh completed, but TWIST on S2"<<std::endl;
 #endif
   }
 
@@ -2076,6 +2120,7 @@ Standard_Boolean ChFi3d_Builder::ComputeData
 Standard_Boolean ChFi3d_Builder::SimulData
 (Handle(ChFiDS_SurfData)& /*Data*/,
  const Handle(ChFiDS_HElSpine)& HGuide,
+ const Handle(ChFiDS_HElSpine)& AdditionalHGuide,
  Handle(BRepBlend_Line)& Lin,
  const Handle(Adaptor3d_HSurface)& S1,
  const Handle(Adaptor3d_TopolTool)& I1,
@@ -2124,7 +2169,7 @@ Standard_Boolean ChFi3d_Builder::SimulData
 				    tolesp,TolGuide,RecOnS1,RecOnS2,
 				    NewFirst,ParSol)){
 #ifdef OCCT_DEBUG
-      cout<<"ChFi3d_Builder::SimulData : calculation fail first section"<<endl;
+      std::cout<<"ChFi3d_Builder::SimulData : calculation fail first section"<<std::endl;
 #endif
       return Standard_False;
     }
@@ -2147,7 +2192,7 @@ Standard_Boolean ChFi3d_Builder::SimulData
     
     if (!TheWalk.IsDone()) {
 #ifdef OCCT_DEBUG
-      cout << "Path not created" << endl;
+      std::cout << "Path not created" << std::endl;
 #endif
       return Standard_False;
     }
@@ -2158,12 +2203,17 @@ Standard_Boolean ChFi3d_Builder::SimulData
 	SpLast  = SpFirst + HGuide->Period();
 	HGuide->ChangeCurve().FirstParameter(SpFirst);
 	HGuide->ChangeCurve().LastParameter (SpLast );
+        if (!AdditionalHGuide.IsNull())
+        {
+          AdditionalHGuide->ChangeCurve().FirstParameter(SpFirst);
+          AdditionalHGuide->ChangeCurve().LastParameter (SpLast );
+        }
       }
       Standard_Boolean complmnt = Standard_True;
       if (Inside)  complmnt = TheWalk.Complete(Func,FInv,SpLast);
       if(!complmnt){
 #ifdef OCCT_DEBUG
-	cout << "Not completed" << endl;
+	std::cout << "Not completed" << std::endl;
 #endif
 	return Standard_False;
       }
@@ -2172,14 +2222,14 @@ Standard_Boolean ChFi3d_Builder::SimulData
     Standard_Real factor =  1./(NbSecMin + 1);
     if (Nbpnt == 0){
 #ifdef OCCT_DEBUG
-      cout <<"0 point of path, quit."<<endl;
+      std::cout <<"0 point of path, quit."<<std::endl;
 #endif
       return Standard_False;
     }
     else if (Nbpnt == 1 && again == 0)  {
       again++;
 #ifdef OCCT_DEBUG
-      cout <<"only one point of path, MS/100 is attempted."<<endl;
+      std::cout <<"only one point of path, MS/100 is attempted."<<std::endl;
 #endif
       MS *= 0.01; Target = Targetsov;
       u1sov = u2sov = Lin->Point(1).Parameter();
@@ -2187,7 +2237,7 @@ Standard_Boolean ChFi3d_Builder::SimulData
     else if (Nbpnt< NbSecMin && again == 0)  {
       again++;
 #ifdef OCCT_DEBUG
-      cout <<"Number of points is too small, the step is reduced"<<endl;
+      std::cout <<"Number of points is too small, the step is reduced"<<std::endl;
 #endif
       Standard_Real u1 = u1sov = Lin->Point(1).Parameter();
       Standard_Real u2 = u2sov = Lin->Point(Nbpnt).Parameter();
@@ -2200,21 +2250,21 @@ Standard_Boolean ChFi3d_Builder::SimulData
       if(Abs(u1-u1sov)>=TolGuide || Abs(u2-u2sov)>=TolGuide){
 	again++;
 #ifdef OCCT_DEBUG
-	cout <<"Number of points is still too small, the step is reduced"<<endl;
+	std::cout <<"Number of points is still too small, the step is reduced"<<std::endl;
 #endif
 	MS /= 100;
 	Target = Targetsov;
       }
       else{
 #ifdef OCCT_DEBUG
-	cout <<"Number of points is still too small, quit"<<endl;
+	std::cout <<"Number of points is still too small, quit"<<std::endl;
 #endif
 	return Standard_False;
       }
     }
     else if(Nbpnt < NbSecMin){
 #ifdef OCCT_DEBUG
-      cout <<"Number of points is still too small, quit"<<endl;
+      std::cout <<"Number of points is still too small, quit"<<std::endl;
 #endif
       return Standard_False;
     }

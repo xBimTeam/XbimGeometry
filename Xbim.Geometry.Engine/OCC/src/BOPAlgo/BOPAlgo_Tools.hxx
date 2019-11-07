@@ -99,14 +99,19 @@ public:
                                       const Standard_Integer theF,
                                       BOPDS_IndexedDataMapOfPaveBlockListOfInteger& theMILI,
                                       const Handle(NCollection_BaseAllocator)& theAllocator);
-  
+
+  //! Create Common Blocks from the groups of pave blocks of <theMBlocks>
+  //! connection map.
   Standard_EXPORT static void PerformCommonBlocks(BOPDS_IndexedDataMapOfPaveBlockListOfPaveBlock& theMBlocks,
                                                   const Handle(NCollection_BaseAllocator)& theAllocator,
-                                                  BOPDS_PDS& theDS);
+                                                  BOPDS_PDS& theDS,
+                                                  const Handle(IntTools_Context)& theContext = Handle(IntTools_Context)());
 
+  //! Create Common Blocks on faces using the PB->Faces connection map <theMBlocks>.
   Standard_EXPORT static void PerformCommonBlocks(const BOPDS_IndexedDataMapOfPaveBlockListOfInteger& theMBlocks,
                                                   const Handle(NCollection_BaseAllocator)& theAllocator,
-                                                  BOPDS_PDS& pDS);
+                                                  BOPDS_PDS& pDS,
+                                                  const Handle(IntTools_Context)& theContext = Handle(IntTools_Context)());
 
   Standard_EXPORT static Standard_Real ComputeToleranceOfCB
                                         (const Handle(BOPDS_CommonBlock)& theCB,
@@ -157,7 +162,6 @@ public:
 
   //! Finds chains of intersecting vertices
   Standard_EXPORT static void IntersectVertices(const TopTools_IndexedDataMapOfShapeReal& theVertices,
-                                                const Standard_Boolean theRunParallel,
                                                 const Standard_Real theFuzzyValue,
                                                 TopTools_ListOfListOfShape& theChains);
 
@@ -188,6 +192,18 @@ public:
                                             TopTools_IndexedDataMapOfShapeListOfShape& theInParts,
                                             const TopTools_DataMapOfShapeBox& theShapeBoxMap = TopTools_DataMapOfShapeBox(),
                                             const TopTools_DataMapOfShapeListOfShape& theSolidsIF = TopTools_DataMapOfShapeListOfShape());
+
+  //! Classifies the given parts relatively the given solids and
+  //! fills the solids with the parts classified as INTERNAL.
+  //!
+  //! @param theSolids  - The solids to put internals to
+  //! @param theParts   - The parts to classify relatively solids
+  //! @param theImages  - Possible images of the parts that has to be classified
+  //! @param theContext - Cashed geometrical tools to speed-up classifications
+  Standard_EXPORT static void FillInternals(const TopTools_ListOfShape& theSolids,
+                                            const TopTools_ListOfShape& theParts,
+                                            const TopTools_DataMapOfShapeListOfShape& theImages,
+                                            const Handle(IntTools_Context)& theContext);
 
 };
 

@@ -42,13 +42,11 @@ IntPatch_WLine::IntPatch_WLine (const Handle(IntSurf_LineOn2S)& Line,
                                 const IntSurf_TypeTrans Trans2) :
   IntPatch_PointLine(Tang,Trans1,Trans2),fipt(Standard_False),lapt(Standard_False),
   hasArcOnS1(Standard_False),hasArcOnS2(Standard_False),
-  myIsPurgerAllowed(Standard_True)
+  myIsPurgerAllowed(Standard_True),
+  myCreationWay(IntPatch_WLUnknown)
 {
   typ = IntPatch_Walking;
   curv = Line;
-  Buv1.SetWhole();
-  Buv2.SetWhole();
-  Bxyz.SetWhole();
   u1period=v1period=u2period=v2period=0.0;
 }
 
@@ -59,13 +57,11 @@ IntPatch_WLine::IntPatch_WLine (const Handle(IntSurf_LineOn2S)& Line,
                                 const IntSurf_Situation Situ2) :
   IntPatch_PointLine(Tang,Situ1,Situ2),fipt(Standard_False),lapt(Standard_False),
   hasArcOnS1(Standard_False),hasArcOnS2(Standard_False),
-  myIsPurgerAllowed(Standard_True)
+  myIsPurgerAllowed(Standard_True),
+  myCreationWay(IntPatch_WLUnknown)
 {
   typ = IntPatch_Walking;
   curv = Line;
-  Buv1.SetWhole();
-  Buv2.SetWhole();
-  Bxyz.SetWhole();
   u1period=v1period=u2period=v2period=0.0;
 }
 
@@ -74,13 +70,11 @@ IntPatch_WLine::IntPatch_WLine (const Handle(IntSurf_LineOn2S)& Line,
                                 const Standard_Boolean Tang) :
   IntPatch_PointLine(Tang),fipt(Standard_False),lapt(Standard_False),
   hasArcOnS1(Standard_False),hasArcOnS2(Standard_False),
-  myIsPurgerAllowed(Standard_True)
+  myIsPurgerAllowed(Standard_True),
+  myCreationWay(IntPatch_WLUnknown)
 {
   typ = IntPatch_Walking;
   curv = Line;
-  Buv1.SetWhole();
-  Buv2.SetWhole();
-  Bxyz.SetWhole();
   u1period=v1period=u2period=v2period=0.0;
 }
 
@@ -275,18 +269,18 @@ void IntPatch_WLine::ComputeVertexParameters( const Standard_Real RTol)
   nbvtx = NbVertex();
 
 #if DEBUGV  
-  cout<<"\n----------- avant ComputeVertexParameters -------------"<<endl;
+  std::cout<<"\n----------- avant ComputeVertexParameters -------------"<<std::endl;
   for(i=1;i<=nbvtx;i++) { 
     Vertex(i).Dump();
     Standard_Real  polr = Vertex(i).ParameterOnLine();
     Standard_Real pol = (Standard_Integer)polr;
     if(pol>=1 && pol<=nbvtx) { 
-      cout<<"----> IntSurf_PntOn2S : "<<polr<<"  Pnt ("<<Vertex(pol).Value().X()
+      std::cout<<"----> IntSurf_PntOn2S : "<<polr<<"  Pnt ("<<Vertex(pol).Value().X()
 	<<","<<Vertex(pol).Value().Y()
-	  <<","<<Vertex(pol).Value().Z()<<")"<<endl;
+	  <<","<<Vertex(pol).Value().Z()<<")"<<std::endl;
     }
   }
-  cout<<"\n----------------------------------------------------------"<<endl;
+  std::cout<<"\n----------------------------------------------------------"<<std::endl;
 #endif  
 
   
@@ -930,103 +924,22 @@ void IntPatch_WLine::ComputeVertexParameters( const Standard_Real RTol)
   //-- Dump();
 
 #if DEBUGV  
-  cout<<"\n----------- apres ComputeVertexParameters -------------"<<endl;
+  std::cout<<"\n----------- apres ComputeVertexParameters -------------"<<std::endl;
   for(i=1;i<=nbvtx;i++) { 
     Vertex(i).Dump();
     Standard_Real  polr = Vertex(i).ParameterOnLine();
     Standard_Real pol = (Standard_Integer)polr;
     if(pol>=1 && pol<=nbvtx) { 
-      cout<<"----> IntSurf_PntOn2S : "<<polr<<"  Pnt ("<<Vertex(pol).Value().X()
+      std::cout<<"----> IntSurf_PntOn2S : "<<polr<<"  Pnt ("<<Vertex(pol).Value().X()
 	<<","<<Vertex(pol).Value().Y()
-	  <<","<<Vertex(pol).Value().Z()<<")"<<endl;
+	  <<","<<Vertex(pol).Value().Z()<<")"<<std::endl;
     }
   }
-  cout<<"\n----------------------------------------------------------"<<endl;
+  std::cout<<"\n----------------------------------------------------------"<<std::endl;
 #endif  
 
 
 }
-
-
-
-Standard_Boolean IntPatch_WLine::IsOutSurf1Box(const gp_Pnt2d& P1uv)  { 
-  if(Buv1.IsWhole()) {
-    Standard_Integer n=NbPnts();
-    Standard_Real pu1,pu2,pv1,pv2;
-    Buv1.SetVoid();
-    for(Standard_Integer i=1;i<=n;i++) { 
-      curv->Value(i).Parameters(pu1,pv1,pu2,pv2);
-      Buv1.Add(gp_Pnt2d(pu1,pv1));
-    }
-    Buv1.Get(pu1,pv1,pu2,pv2);
-    pu2-=pu1;
-    pv2-=pv1;
-    if(pu2>pv2) { 
-      Buv1.Enlarge(pu2*0.01);
-    }
-    else { 
-      Buv1.Enlarge(pv2*0.01);
-    }
-  }
-  Standard_Boolean out=Buv1.IsOut(P1uv);
-  return(out);
-}
-
-Standard_Boolean IntPatch_WLine::IsOutSurf2Box(const gp_Pnt2d& P2uv)  { 
-  if(Buv2.IsWhole()) { 
-    Standard_Integer n=NbPnts();
-    Standard_Real pu1,pu2,pv1,pv2;
-    Buv2.SetVoid();
-    for(Standard_Integer i=1;i<=n;i++) { 
-      curv->Value(i).Parameters(pu1,pv1,pu2,pv2);
-      Buv2.Add(gp_Pnt2d(pu2,pv2));
-    }
-    Buv2.Get(pu1,pv1,pu2,pv2);
-    pu2-=pu1;
-    pv2-=pv1;
-    if(pu2>pv2) { 
-      Buv2.Enlarge(pu2*0.01);
-    }
-    else { 
-      Buv2.Enlarge(pv2*0.01);
-    }    
-  }
-  Standard_Boolean out=Buv2.IsOut(P2uv);
-  return(out);
-}
-
-Standard_Boolean IntPatch_WLine::IsOutBox(const gp_Pnt& Pxyz)  { 
-  if(Bxyz.IsWhole()) { 
-    Standard_Integer n=NbPnts();
-    Bxyz.SetVoid();
-    for(Standard_Integer i=1;i<=n;i++) { 
-      gp_Pnt P=curv->Value(i).Value();
-      Bxyz.Add(P);
-    }
-    Standard_Real x0,y0,z0,x1,y1,z1;
-    Bxyz.Get(x0,y0,z0,x1,y1,z1);
-    x1-=x0; y1-=y0; z1-=z0;
-    if(x1>y1) {
-      if(x1>z1) {
-	Bxyz.Enlarge(x1*0.01);
-      }
-      else { 
-	Bxyz.Enlarge(z1*0.01);
-      }
-    }
-    else { 
-      if(y1>z1) { 
-	Bxyz.Enlarge(y1*0.01);
-      }
-      else { 
-	Bxyz.Enlarge(z1*0.01);
-      }
-    }
-  }
-  Standard_Boolean out=Bxyz.IsOut(Pxyz);
-  return(out);
-}
-
 
 Standard_Boolean IntPatch_WLine::HasArcOnS1() const  {
   return(hasArcOnS1);
@@ -1057,7 +970,7 @@ const Handle(Adaptor2d_HCurve2d)& IntPatch_WLine::GetArcOnS2() const  {
 
 void IntPatch_WLine::Dump(const Standard_Integer theMode) const
 { 
-  cout<<" ----------- D u m p    I n t P a t c h  _  W L i n e  -(begin)------"<<endl;
+  std::cout<<" ----------- D u m p    I n t P a t c h  _  W L i n e  -(begin)------"<<std::endl;
   const Standard_Integer aNbPoints = NbPnts();
   const Standard_Integer aNbVertex = NbVertex();
 
@@ -1082,10 +995,10 @@ void IntPatch_WLine::Dump(const Standard_Integer theMode) const
 
       if(pol>=1 && pol<=aNbVertex)
       {
-        cout<<"----> IntSurf_PntOn2S : "<<
+        std::cout<<"----> IntSurf_PntOn2S : "<<
                       polr <<", Pnt (" << Vertex(pol).Value().X() << "," <<
                                           Vertex(pol).Value().Y() << "," <<
-                                          Vertex(pol).Value().Z() <<")" <<endl;
+                                          Vertex(pol).Value().Z() <<")" <<std::endl;
       }
     }
 
@@ -1119,6 +1032,6 @@ void IntPatch_WLine::Dump(const Standard_Integer theMode) const
 
     break;
   }
-  cout<<"\n--------------------------------------------------- (end) -------"<<endl;  
+  std::cout<<"\n--------------------------------------------------- (end) -------"<<std::endl;  
 }
 

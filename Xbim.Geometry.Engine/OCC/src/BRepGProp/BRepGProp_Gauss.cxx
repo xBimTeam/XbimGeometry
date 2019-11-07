@@ -585,8 +585,7 @@ Standard_Real BRepGProp_Gauss::Compute(
   //
   const Standard_Integer NumSubs = SUBS_POWER;
   const TopoDS_Face& aF = theSurface.GetFace(); 
-  TopoDS_Iterator aWIter(aF);
-  const Standard_Boolean isNaturalRestriction = !aWIter.More(); //theSurface.NaturalRestriction();
+  const Standard_Boolean isNaturalRestriction = (aF.NbChildren () == 0); //theSurface.NaturalRestriction();
 
   Standard_Real CIx, CIy, CIz, CIxy, CIxz, CIyz;
   Standard_Real CDim[2], CIxx[2], CIyy[2], CIzz[2];
@@ -626,7 +625,10 @@ Standard_Real BRepGProp_Gauss::Compute(
     }
     else
     {
-      theSurface.Load(theDomain.Value());
+      if (!theSurface.Load(theDomain.Value()))
+      {
+        return Precision::Infinite();
+      }
       NbLGaussP[0] = theSurface.LIntOrder(anEpsilon);
     }
 
@@ -1117,9 +1119,12 @@ void BRepGProp_Gauss::Compute(BRepGProp_Face&   theSurface,
   math::GaussWeights(NbGaussgp_Pnts, GaussSWV);
 
   BRepGProp_Gauss::Inertia anInertia;
-  while (theDomain.More())
+  for (; theDomain.More(); theDomain.Next())
   {
-    theSurface.Load(theDomain.Value());
+    if (!theSurface.Load(theDomain.Value()))
+    {
+      return;
+    }
 
     Standard_Integer NbCGaussgp_Pnts =
       Min(theSurface.IntegrationOrder(), math::GaussPointsMax());
@@ -1172,8 +1177,6 @@ void BRepGProp_Gauss::Compute(BRepGProp_Face&   theSurface,
 
     multAndRestoreInertia(lr, aCInertia);
     addAndRestoreInertia (aCInertia, anInertia);
-
-    theDomain.Next();
   }
 
   convert(anInertia, theOutGravityCenter, theOutInertia, theOutMass);
@@ -1201,9 +1204,12 @@ void BRepGProp_Gauss::Compute(BRepGProp_Face&         theSurface,
   Standard_Real _u2 = u2;  //OCC104
 
   BRepGProp_Gauss::Inertia anInertia;
-  while (theDomain.More())
+  for (; theDomain.More(); theDomain.Next())
   {
-    theSurface.Load(theDomain.Value());
+    if (!theSurface.Load(theDomain.Value()))
+    {
+      return;
+    }
 
     const Standard_Integer aVNbCGaussgp_Pnts =
       theSurface.VIntegrationOrder();
@@ -1266,8 +1272,6 @@ void BRepGProp_Gauss::Compute(BRepGProp_Face&         theSurface,
 
     multAndRestoreInertia(lr,        aCInertia);
     addAndRestoreInertia (aCInertia, anInertia);
-
-    theDomain.Next();
   }
 
   convert(anInertia, theCoeff, theIsByPoint, theOutGravityCenter, theOutInertia, theOutMass);

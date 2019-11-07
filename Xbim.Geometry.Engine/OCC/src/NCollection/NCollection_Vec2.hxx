@@ -57,6 +57,18 @@ public:
     v[1] = theY;
   }
 
+  //! Conversion constructor (explicitly converts some 2-component vector with other element type
+  //! to a new 2-component vector with the element type Element_t,
+  //! whose elements are static_cast'ed corresponding elements of theOtherVec2 vector)
+  //! @tparam OtherElement_t the element type of the other 2-component vector theOtherVec2
+  //! @param theOtherVec2 the 2-component vector that needs to be converted
+  template <typename OtherElement_t>
+  explicit NCollection_Vec2 (const NCollection_Vec2<OtherElement_t>& theOtherVec2)
+  {
+    v[0] = static_cast<Element_t> (theOtherVec2[0]);
+    v[1] = static_cast<Element_t> (theOtherVec2[1]);
+  }
+
   //! Assign new values to the vector.
   void SetValues (const Element_t theX,
                   const Element_t theY)
@@ -217,6 +229,14 @@ public:
     return *this;
   }
 
+  //! Compute per-component division.
+  NCollection_Vec2& operator/= (const NCollection_Vec2& theRight)
+  {
+    v[0] /= theRight.v[0];
+    v[1] /= theRight.v[1];
+    return *this;
+  }
+
   //! Compute per-component multiplication by scale factor.
   NCollection_Vec2 operator* (const Element_t theFactor) const
   {
@@ -228,6 +248,14 @@ public:
   {
     return NCollection_Vec2(v[0] / theInvFactor,
             v[1] / theInvFactor);
+  }
+
+  //! Compute per-component division.
+  friend NCollection_Vec2 operator/ (const NCollection_Vec2& theLeft,
+                                     const NCollection_Vec2& theRight)
+  {
+    return NCollection_Vec2 (theLeft.v[0] / theRight.v[0],
+                             theLeft.v[1] / theRight.v[1]);
   }
 
   //! Computes the dot product.

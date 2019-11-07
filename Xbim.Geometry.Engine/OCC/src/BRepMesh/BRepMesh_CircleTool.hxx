@@ -24,7 +24,7 @@
 #include <gp_XYZ.hxx>
 #include <Standard_Integer.hxx>
 #include <Standard_Boolean.hxx>
-#include <BRepMesh.hxx>
+#include <IMeshData_Types.hxx>
 #include <NCollection_Array1.hxx>
 
 class gp_Circ2d;
@@ -52,7 +52,7 @@ public:
   //! @param theReservedSize size to be reserved for vector of circles.
   inline void Init(const Standard_Integer /*theReservedSize*/)
   {
-    myTolerance = Precision::PConfusion() * Precision::PConfusion();
+    myTolerance = Precision::PConfusion();
   }
 
   //! Sets new size for cell filter.
@@ -81,6 +81,12 @@ public:
   {
     myFaceMin = theMin;
     myFaceMax = theMax;
+  }
+
+  //! Retruns true if cell filter contains no circle.
+  inline Standard_Boolean IsEmpty () const
+  {
+    return mySelector.Circles ().IsEmpty ();
   }
 
   //! Binds the circle to the tool.
@@ -125,7 +131,7 @@ public:
 
   //! Select the circles shot by the given point.
   //! @param thePoint bullet point.
-  Standard_EXPORT BRepMesh::ListOfInteger& Select(const gp_XY& thePoint);
+  Standard_EXPORT IMeshData::ListOfInteger& Select(const gp_XY& thePoint);
 
 private:
 
@@ -141,7 +147,7 @@ private:
 
   Standard_Real                     myTolerance;
   Handle(NCollection_IncAllocator)  myAllocator;
-  BRepMesh::CircleCellFilter        myCellFilter;
+  IMeshData::CircleCellFilter       myCellFilter;
   BRepMesh_CircleInspector          mySelector;
   gp_XY                             myFaceMax;
   gp_XY                             myFaceMin;
