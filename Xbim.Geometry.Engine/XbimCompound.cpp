@@ -565,11 +565,18 @@ namespace Xbim
 						if (volume < 0) pCompound->Reverse();
 						double oneCubicMillimetre = Math::Pow(closedShell->Model->ModelFactors->OneMilliMeter, 3);
 						volume = Math::Abs(volume);
-						if (/*volume != 0 && */volume < oneCubicMillimetre) //sometimes zero volume is just a badly defined shape so let it through maybe
+						if (volume < oneCubicMillimetre) //sometimes zero volume is just a badly defined shape so let it through maybe
 						{
-							XbimGeometryCreator::LogWarning(logger, closedShell, "Very small closed IfcClosedShell has been ignored");
-							pCompound->Nullify();
-							pCompound = nullptr;
+							if (0 == volume)
+							{
+								XbimGeometryCreator::LogWarning(logger, closedShell, "Non-closed IfcClosedShell #{0} detected", closedShell->EntityLabel);
+							} 
+							else
+							{
+								XbimGeometryCreator::LogWarning(logger, closedShell, "Very small closed IfcClosedShell (#{0} mm3) has been ignored", volume);
+								pCompound->Nullify();
+								pCompound = nullptr;
+							}
 						}
 					}
 				}
@@ -581,10 +588,12 @@ namespace Xbim
 				}
 			}
 		}
+
 		void XbimCompound::Init(IIfcOpenShell^ openShell, ILogger^ logger)
 		{
 			Init((IIfcConnectedFaceSet^)openShell, logger);
 		}
+
 		bool XbimCompound::Sew()
 		{
 
