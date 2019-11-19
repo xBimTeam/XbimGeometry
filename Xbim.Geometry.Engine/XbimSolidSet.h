@@ -126,7 +126,8 @@ namespace Xbim
 			virtual property bool IsPolyhedron{ bool get(); }
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) ;
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D);
-			virtual property double Volume{double get(); }
+			virtual property Nullable<double> Volume { Nullable<double> get() override; }
+			virtual property double VolumeValid { double get(); }
 			virtual IXbimSolidSet^ Range(int start, int count);
 			//moves the solid set to the new position
 			void Move(IIfcAxis2Placement3D^ position);

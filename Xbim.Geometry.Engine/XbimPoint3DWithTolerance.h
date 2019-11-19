@@ -36,6 +36,8 @@ namespace Xbim
 			virtual property double Tolerance{double get(){ return tolerance; }; }
 			virtual property XbimPoint3D VertexGeometry {XbimPoint3D get() { return point; }; }
 			virtual property XbimRect3D BoundingBox {XbimRect3D get(); }
+			virtual property Nullable<double> Volume {Nullable<double> get() { return Nullable<double>(); }}
+
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D);
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D);
 			virtual property String^  ToBRep{String^ get(); }

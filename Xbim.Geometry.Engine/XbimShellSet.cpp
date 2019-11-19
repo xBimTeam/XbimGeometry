@@ -190,5 +190,38 @@ namespace Xbim
 			if (Count == 0) return XbimGeometryObjectSet::Empty;
 			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_COMMON, (IEnumerable<IXbimGeometryObject^>^)this, gcnew XbimSolidSet(solid), tolerance, logger);
 		}
+
+		Nullable<double> XbimShellSet::Volume::get()
+		{
+			double totalVol = 0;
+			if (IsValid)
+			{
+				for each (XbimShell ^ shell in shells)
+				{
+					Nullable<double> sVol = shell->Volume;
+					if (sVol.HasValue)
+						totalVol += sVol.Value;
+					else
+						// Prevent returning wrong partial values, better no value
+						return Nullable<double>();
+				}
+			}
+			return Nullable<double>(totalVol);
+		}
+
+		double XbimShellSet::VolumeValid::get()
+		{
+			double totalVol = 0;
+			if (IsValid)
+			{
+				for each (XbimShell ^ shell in shells)
+				{
+					Nullable<double> sVol = shell->Volume;
+					if (sVol.HasValue)
+						totalVol += sVol.Value;
+				}
+			}
+			return totalVol;
+		}
 	}
 }

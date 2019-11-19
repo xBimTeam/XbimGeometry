@@ -111,9 +111,10 @@ namespace Xbim
 			XbimCompound^ Cut(XbimCompound^ solids, double tolerance, ILogger^ logger);
 			XbimCompound^ Union(XbimCompound^ solids, double tolerance, ILogger^ logger);
 			XbimCompound^ Intersection(XbimCompound^ solids, double tolerance, ILogger^ logger);
-			virtual property XbimRect3D BoundingBox {XbimRect3D get()override ; }
-			virtual property double Volume{double get(); }
-			virtual property double SewingTolerance {double get() {return _sewingTolerance;}}
+			virtual property XbimRect3D BoundingBox { XbimRect3D get() override ; }
+			virtual property Nullable<double> Volume { Nullable<double> get() override; }
+			virtual property double VolumeValid { double get(); }
+			virtual property double SewingTolerance { double get() {return _sewingTolerance;}}
 			
 			//moves the compound to the new positio
 			void Move(IIfcAxis2Placement3D^ position);

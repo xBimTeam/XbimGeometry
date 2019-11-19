@@ -56,8 +56,11 @@ namespace Xbim
 			virtual IXbimGeometryObjectSet^ Intersection(IXbimSolid^ solid, double tolerance, ILogger^ logger);
 			virtual property bool IsPolyhedron{ bool get(); }
 			virtual void Union(double tolerance);
+			
+			virtual property double VolumeValid { double get(); }
 #pragma endregion
 
+			virtual property Nullable<double> Volume { Nullable<double> get() override; }
 
 			// Inherited via XbimSetObject
 			virtual IXbimGeometryObject ^ Transformed(IIfcCartesianTransformationOperator ^ transformation) override;

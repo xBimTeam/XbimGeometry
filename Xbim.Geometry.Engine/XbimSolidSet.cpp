@@ -276,17 +276,37 @@ namespace Xbim
 			return solids == nullptr ? 0 : solids->Count;
 		}
 
-		double XbimSolidSet::Volume::get()
+		Nullable<double> XbimSolidSet::Volume::get()
 		{
-			double vol = 0;
+			double totalVol = 0;
 			if (IsValid)
 			{
 				for each (XbimSolid^ solid in solids)
 				{
-					vol += solid->Volume;
+					Nullable<double> sVol = solid->Volume;
+					if (sVol.HasValue)
+						totalVol += sVol.Value;
+					else
+						// Prevent returning wrong partial values, better no value
+						return Nullable<double>();
 				}
 			}
-			return vol;
+			return Nullable<double>(totalVol);
+		}
+
+		double XbimSolidSet::VolumeValid::get()
+		{
+			double totalVol = 0;
+			if (IsValid)
+			{
+				for each (XbimSolid ^ solid in solids)
+				{
+					Nullable<double> sVol = solid->Volume;
+					if (sVol.HasValue)
+						totalVol += sVol.Value;
+				}
+			}
+			return totalVol;
 		}
 
 		IXbimGeometryObject^ XbimSolidSet::Transform(XbimMatrix3D matrix3D)
@@ -952,7 +972,8 @@ namespace Xbim
 			XbimSolidSet^ basic = dynamic_cast<XbimSolidSet^>(set);
 			if (basic != nullptr)
 			{
-				return basic->Volume;
+				Nullable<double> vol = basic->Volume;
+				return vol.HasValue ? vol.Value : 0;
 			}
 			return ret;
 		}

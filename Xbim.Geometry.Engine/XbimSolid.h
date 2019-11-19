@@ -90,7 +90,7 @@ namespace Xbim
 			virtual property IXbimVertexSet^ Vertices{IXbimVertexSet^ get(); }
 			virtual property XbimRect3D BoundingBox{XbimRect3D get() override;}
 			virtual property bool IsClosed{bool get(); }
-			virtual property double Volume{double get(); }
+			virtual property Nullable<double> Volume{ Nullable<double> get() override; }
 			virtual property double SurfaceArea { double get(); }
 			virtual property bool IsPolyhedron { bool get(); }
 			virtual property bool HasValidTopology{bool get(); }

@@ -629,18 +629,30 @@ namespace Xbim
 			return true;
 		}
 
-		double XbimCompound::Volume::get()
+		Nullable<double> XbimCompound::Volume::get()
 		{
 			if (IsValid)
 			{
 				GProp_GProps gProps;
 				BRepGProp::VolumeProperties(*pCompound, gProps, Standard_True);
 				GC::KeepAlive(this);
-				return gProps.Mass();
+				double mass = gProps.Mass();
+				if (0 != mass)
+					return Nullable<double>(mass);
 			}
-			else
-				return 0;
+			
+			return Nullable<double>();
 		}
+
+		double XbimCompound::VolumeValid::get()
+		{
+			if (IsValid)
+			{
+				return Solids->VolumeValid + Shells->VolumeValid;
+			}
+			return 0;
+		}
+
 		//This method copes with faces that may be advanced as well as ordinary
 		XbimShell^ XbimCompound::InitAdvancedFaces(IEnumerable<IIfcFace^>^ faces, ILogger^ logger)
 		{

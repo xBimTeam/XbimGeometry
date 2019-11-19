@@ -270,8 +270,21 @@ namespace Xbim
 			BRepCheck_Shell checker(*pShell);
 			BRepCheck_Status result = checker.Closed();	
 			GC::KeepAlive(this);
-			return result == BRepCheck_NoError;
-			
+			return result == BRepCheck_NoError;			
+		}
+
+		Nullable<double> XbimShell::Volume::get()
+		{
+			if (IsValid)
+			{
+				GProp_GProps gProps;
+				BRepGProp::VolumeProperties(*pShell, gProps, Standard_True);
+				GC::KeepAlive(this);
+				double mass = gProps.Mass();
+				if (0 != mass)
+					return Nullable<double>(mass);
+			}
+			return Nullable<double>();
 		}
 
 		IXbimGeometryObject^ XbimShell::Transform(XbimMatrix3D matrix3D)
