@@ -341,6 +341,7 @@ namespace Xbim
 						((XbimShapeGeometry^)shapeGeom)->BoundingBox = geometryObject->BoundingBox;
 						((XbimShapeGeometry^)shapeGeom)->LOD = XbimLOD::LOD_Unspecified,
 						((XbimShapeGeometry^)shapeGeom)->Format = storageType;
+						((XbimShapeGeometry^)shapeGeom)->Volume = geometryObject->Volume;
 						return shapeGeom;
 					}
 				}
@@ -370,6 +371,7 @@ namespace Xbim
 					((XbimShapeGeometry^)shapeGeom)->BoundingBox = geometryObject->BoundingBox;
 					((XbimShapeGeometry^)shapeGeom)->LOD = XbimLOD::LOD_Unspecified,
 					((XbimShapeGeometry^)shapeGeom)->Format = storageType;
+					((XbimShapeGeometry^)shapeGeom)->Volume = geometryObject->Volume;
 				}
 			}
 			return shapeGeom;
