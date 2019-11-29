@@ -61,8 +61,6 @@ namespace Xbim
 		{
 		}
 
-
-
 		void XbimOccShape::WriteTriangulation(TextWriter^ textWriter, double tolerance, double deflection, double angle)
 		{
 
@@ -338,12 +336,7 @@ namespace Xbim
 			GC::KeepAlive(this);
 			
 		}
-
-
-
-	
-
-
+			   		 
 		void XbimOccShape::WriteIndex(BinaryWriter^ bw, UInt32 index, UInt32 maxInt)
 		{
 			if (maxInt <= 0xFF)

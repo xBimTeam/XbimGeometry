@@ -306,7 +306,6 @@ namespace Xbim.ModelGeometry.Scene
 
             private void GetOpeningsAndProjections()
             {
-
                 //srl change the way we handle aggregation as some ifc models now send them in multiple relationships
                 //var compoundElementsDictionary =
                 //    Model.Instances.OfType<IIfcRelAggregates>()
@@ -340,8 +339,7 @@ namespace Xbim.ModelGeometry.Scene
                 {
                     // process parts
                     ICollection<IIfcObjectDefinition> childrenElements;
-                    if (compoundElementsDictionary.TryGetValue(openingRelation.RelatingBuildingElement,
-                        out childrenElements))
+                    if (compoundElementsDictionary.TryGetValue(openingRelation.RelatingBuildingElement, out childrenElements))
                     {
                         elementsWithFeatures.AddRange(
                             childrenElements.OfType<IIfcElement>().Select(childElement => new ElementWithFeature()
@@ -440,11 +438,11 @@ namespace Xbim.ModelGeometry.Scene
                     //we can only handle one representation in a context and this is in an implementers agreement
                     if (product.Representation != null)
                     {
-                        if (product.Representation.Representations == null) continue;
-                        var rep =
-                            product.Representation.Representations.FirstOrDefault(
-                                r => Contexts.Contains(r.ContextOfItems) &&
-                                     r.IsBodyRepresentation());
+                        if (product.Representation.Representations == null)
+                            continue;
+                        var rep = product.Representation.Representations.FirstOrDefault(
+                                r => Contexts.Contains(r.ContextOfItems) && r.IsBodyRepresentation()
+                                );
                         //write out the representation if it has one
                         if (rep != null)
                         {
@@ -457,8 +455,19 @@ namespace Xbim.ModelGeometry.Scene
                                 }
                                 else
                                 {
-                                    //if not already processed add it
+                                    //if not already processed, then add it
                                     ProductShapeIds.Add(shape.EntityLabel);
+                                    // according to https://github.com/BuildingSMART/IFC4-CV/issues/14 no need to punch holes in the shape if it's a tessellated body
+                                    if (rep.RepresentationType.ToString().ToLowerInvariant() == "tessellation" && rep.RepresentationIdentifier.ToString().ToLowerInvariant() == "body")
+                                    {
+                                        var groupsToRemove = OpeningsAndProjections.Where(x => x.Key.EntityLabel == product.EntityLabel).ToArray();
+                                        foreach (var rem in groupsToRemove)
+                                        {
+                                            OpeningsAndProjections.Remove(rem);
+                                        }
+                                        VoidedProductIds.Remove(product.EntityLabel);
+                                        continue;
+                                    }
                                     if (isFeatureElementShape) FeatureElementShapeIds.Add(shape.EntityLabel);
                                     if (isVoidedProductShape) VoidedShapeIds.Add(shape.EntityLabel);
                                 }

@@ -2,11 +2,11 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
   <metadata>
     <id>Xbim.Geometry</id>
-    <version>4.0.17-V001</version>
+    <version>4.0.17-V002</version>
     <title>xBIM Geometry</title>
     <authors>xBIM Team</authors>
     <owners>Steve Lockley, Claudio Benghi</owners>
-    <licenseUrl>https://raw.githubusercontent.com/xBimTeam/XbimEssentials/master/LICENCE.md</licenseUrl>
+    <license type="expression">CDDL-1.0</license>
     <projectUrl>https://github.com/xBimTeam/</projectUrl>
     <iconUrl>https://avatars1.githubusercontent.com/u/2284875?v=3&amp;s=240</iconUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
@@ -29,7 +29,7 @@
     <language>en-GB</language>
     <tags>BIM, IFC, IfcXml, IfcZip, Ifc4, COBie, .Net, C#, BuildingSmart, Geometry, Brep</tags>
     <dependencies>
-      <dependency id="Xbim.Essentials" version="4.0.30-V057" />
+      <dependency id="Xbim.Essentials" version="4.0.30-V058" />
     </dependencies>
   </metadata>
   <files>
