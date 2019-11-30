@@ -15,7 +15,7 @@ using Xbim.Common.Exceptions;
 namespace Xbim.Geometry.Engine.Interop.Tests
 {
     [TestClass]
-    [DeploymentItem("TestFiles")]
+    // [DeploymentItem("TestFiles")]
     public class IfcBooleanTests
     {
         static private IXbimGeometryEngine geomEngine;
@@ -97,7 +97,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void SubtractionResultsInClosedWindow()
         {
-            using (var model = MemoryModel.OpenRead(@"SubtractionResultsInClosedWindow.ifc"))
+            using (var model = MemoryModel.OpenRead(@"TestFiles\SubtractionResultsInClosedWindow.ifc"))
             {
                 logger.LogInformation("Running SubtractionResultsInClosedWindow");
                 var wallBrep = model.Instances[12752] as IIfcFacetedBrep;

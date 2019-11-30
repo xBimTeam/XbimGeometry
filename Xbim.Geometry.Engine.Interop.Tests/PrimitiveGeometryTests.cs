@@ -11,7 +11,7 @@ using Xbim.IO.Memory;
 namespace Xbim.Geometry.Engine.Interop.Tests
 {
     [TestClass]
-    [DeploymentItem("TestFiles")]
+    // [DeploymentItem("TestFiles")]
     public class PrimitiveGeometryTests
     {
         static private IXbimGeometryEngine geomEngine;
@@ -47,7 +47,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void can_build_ifc_faceted_brep()
         {
-            using (var model = MemoryModel.OpenRead(@"Primitives\ifc_faceted_brep.ifc"))
+            using (var model = MemoryModel.OpenRead(@"TestFiles\Primitives\ifc_faceted_brep.ifc"))
             {
                 var shape = model.Instances.OfType<IIfcFacetedBrep>().FirstOrDefault();
                 Assert.IsNotNull(shape);
@@ -58,7 +58,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void can_build_closed_shell()
         {
-            using (var model = MemoryModel.OpenRead(@"Primitives\faulty_closed_shell.ifc"))
+            using (var model = MemoryModel.OpenRead(@"TestFiles\Primitives\faulty_closed_shell.ifc"))
             {
                 var shape = model.Instances.OfType<IIfcClosedShell>().FirstOrDefault();
                 Assert.IsNotNull(shape);
@@ -69,7 +69,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void can_build_poorly_aligned_planar_faces()
         {
-            using (var model = MemoryModel.OpenRead(@"Primitives\poor_face_planar_fidelity.ifc"))
+            using (var model = MemoryModel.OpenRead(@"TestFiles\Primitives\poor_face_planar_fidelity.ifc"))
             {
                 var shape = model.Instances.OfType<IIfcClosedShell>().FirstOrDefault();
                 Assert.IsNotNull(shape);

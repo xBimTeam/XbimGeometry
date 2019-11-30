@@ -271,7 +271,7 @@ namespace Xbim
 				wFix.Init(inner, this, tolerance);
 				wFix.FixEdgeCurves();
 				XbimWire^ innerWire = gcnew XbimWire(wFix.Wire());
-				if (surface->SameSense) innerWire = innerWire->Reversed();
+				if (!surface->SameSense) innerWire = innerWire->Reversed();
 				//	faceMaker.Add(inner);
 				//TopoDS_Face newface = TopoDS::Face(faceMaker.Face().EmptyCopied().Oriented(TopAbs_FORWARD));
 				//BRep_Builder b;

@@ -36,12 +36,12 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         }
 
         [TestMethod]
-        [DeploymentItem("TestFiles\\LargeTriangulatedCoordinates.ifc")]
+        // [DeploymentItem("TestFiles\\LargeTriangulatedCoordinates.ifc")]
         public void LargeCoordinatesDisplacementTest()
         {
             using (var m = new MemoryModel(new Ifc2x3.EntityFactoryIfc2x3()))
             {
-                m.LoadStep21("LargeTriangulatedCoordinates.ifc");
+                m.LoadStep21("TestFiles\\LargeTriangulatedCoordinates.ifc");
                 var c = new Xbim3DModelContext(m);
                 c.CreateContext(null, false);
 

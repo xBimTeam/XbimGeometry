@@ -10,7 +10,7 @@ using Xbim.Ifc4.Interfaces;
 namespace Xbim.Geometry.Engine.Interop.Tests.TestFiles
 {
     [TestClass ]
-    [DeploymentItem("TestFiles")]
+    // [DeploymentItem("TestFiles")]
     public class IfcExtrudedAreaSolidTests
     {
         static private IXbimGeometryEngine geomEngine;

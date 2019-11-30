@@ -268,6 +268,7 @@ namespace Xbim.ModelGeometry.Scene
                 }
                 catch (Exception e)
                 {
+                    LogError("Unexpected failure during context initialisation", e);
                     InitialiseError = e.Message;
                     return false;
                 }
@@ -419,8 +420,7 @@ namespace Xbim.ModelGeometry.Scene
                             continue;
 
                         // Write product representations of context
-                        foreach (var rep in product.Representation.Representations.Where(
-                                    r => (!Contexts.Any() || Contexts.Contains(r.ContextOfItems.EntityLabel)) && r.IsBodyRepresentation()))
+                        foreach (var rep in product.Representation.Representations.Where(r => IsInContext(Contexts, r) && r.IsBodyRepresentation()))
                         {
                             foreach (var shape in rep.Items.Where(i => !(i is IIfcGeometricSet)))
                             {
@@ -1046,7 +1046,7 @@ namespace Xbim.ModelGeometry.Scene
                     return;
 
                 // Write product representations of context
-                if (product.Representation.Representations.Any(r => IsInContext(r) && r.IsBodyRepresentation()))
+                if (product.Representation.Representations.Any(r => IsInContext(_contexts, r) && r.IsBodyRepresentation()))
                 {
                     WriteProductShape(contextHelper, product, true, txn);
                 }
@@ -1056,11 +1056,17 @@ namespace Xbim.ModelGeometry.Scene
             contextHelper.PercentageParsed = localPercentageParsed;
         }
 
-        private bool IsInContext(IIfcRepresentation r)
+        private static bool IsInContext(IfcRepresentationContextCollection contexts, IIfcRepresentation r)
         {
-            if (!_contexts.Any()) return true; //if we have no context take everything
+            if (!contexts.Any()) return true; //if we have no context take everything
+
+            if(r.ContextOfItems == null)
+            {
+                LogWarning(r, "No Context found for this representation");
+                return false;
+            }
             // check for entity label to take advantage of keyed collection
-            return _contexts.Contains(r.ContextOfItems.EntityLabel);
+            return contexts.Contains(r.ContextOfItems.EntityLabel);
         }
 
 
@@ -1088,7 +1094,7 @@ namespace Xbim.ModelGeometry.Scene
             if (product.Representation.Representations == null)
                 return Enumerable.Empty<XbimShapeInstance>();
 
-            var reps = product.Representation.Representations.Where(r => IsInContext(r) && r.IsBodyRepresentation());
+            var reps = product.Representation.Representations.Where(r => IsInContext(_contexts, r) && r.IsBodyRepresentation());
 
             // logic to classify feature tagging
             var repType = includesOpenings
@@ -1111,6 +1117,11 @@ namespace Xbim.ModelGeometry.Scene
             IIfcRepresentation rep, XbimGeometryRepresentationType repType, XbimMatrix3D placementTransform, IItemSet<IIfcRepresentationItem> representationItems)
         {
             var shapesInstances = new List<XbimShapeInstance>();
+            if(rep.ContextOfItems == null)
+            {
+                LogWarning(product, "Unable to write representation because no ContextOfItems was provided for representation {0}", rep.EntityLabel);
+                return shapesInstances;
+            }
             var contextId = rep.ContextOfItems.EntityLabel;
             foreach (var representationItem in representationItems)
             {
@@ -1460,6 +1471,7 @@ namespace Xbim.ModelGeometry.Scene
                 }
                 catch (ThreadAbortException)
                 {
+                    _logger.LogWarning("Thread aborted due to timeout");
                     Thread.ResetAbort();// cancel hard aborting, lets to finish it nicely.
                     return null;
                 }
@@ -1491,6 +1503,7 @@ namespace Xbim.ModelGeometry.Scene
                 }
                 catch (ThreadAbortException)
                 {
+                    _logger.LogWarning("Thread aborted due to timeout");
                     Thread.ResetAbort();// cancel hard aborting, lets to finish it nicely.
                     return null;
                 }
