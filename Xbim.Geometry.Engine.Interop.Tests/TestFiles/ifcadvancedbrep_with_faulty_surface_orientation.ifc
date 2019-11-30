@@ -1,7 +1,7 @@
 ISO-10303-21;
 HEADER;
 FILE_DESCRIPTION ((''), '2;1');
-FILE_NAME ('', '2019-10-02T12:40:55', (''), (''), 'Processor version 5.0.0.0', 'Xbim.IO.MemoryModel', '');
+FILE_NAME ('', '2016-05-18T15:48:11', (''), (''), 'The EXPRESS Data Manager Version 5.02.0100.07 : 28 Aug 2013','20160225_1515(x64) - Exporter 17.0.416.0 - Default UI', '');
 FILE_SCHEMA (('IFC4'));
 ENDSEC;
 DATA;

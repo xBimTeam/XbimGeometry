@@ -83,7 +83,8 @@
 #include <ShapeUpgrade_UnifySameDomain.hxx>
 #include <BRepGProp_Face.hxx>
 #include <BRepAlgo_Section.hxx>
-
+#include <GeomProjLib.hxx>
+#include <BRepOffsetAPI_NormalProjection.hxx>
 using namespace System::Linq;
 using namespace Xbim::Common;
 
@@ -232,17 +233,17 @@ namespace Xbim
 			Init(rect3D, tolerance, logger);
 		}
 
-		XbimSolid::XbimSolid(IIfcTriangulatedFaceSet ^ IIfcSolid, ILogger ^ logger)
+		XbimSolid::XbimSolid(IIfcTriangulatedFaceSet^ IIfcSolid, ILogger^ logger)
 		{
 			Init(IIfcSolid, logger);
 		}
 
-		XbimSolid::XbimSolid(IIfcFaceBasedSurfaceModel ^ solid, ILogger ^ logger)
+		XbimSolid::XbimSolid(IIfcFaceBasedSurfaceModel^ solid, ILogger^ logger)
 		{
 			Init(solid, logger);
 		}
 
-		XbimSolid::XbimSolid(IIfcShellBasedSurfaceModel ^ solid, ILogger ^ logger)
+		XbimSolid::XbimSolid(IIfcShellBasedSurfaceModel^ solid, ILogger^ logger)
 		{
 			Init(solid, logger);
 		}
@@ -409,14 +410,7 @@ namespace Xbim
 			}
 
 			IModelFactors^ mf = repItem->Model->ModelFactors;
-			XbimWire^ sweep = gcnew XbimWire(repItem->Directrix, logger);
-
-			if (repItem->StartParam.HasValue && repItem->EndParam.HasValue)
-				sweep = (XbimWire^)sweep->Trim(repItem->StartParam.Value, Math::Abs(repItem->EndParam.Value - 1.0) < Precision::Confusion() ? sweep->Length : repItem->EndParam.Value, mf->Precision, logger);
-			else if (repItem->StartParam.HasValue && !repItem->EndParam.HasValue)
-				sweep = (XbimWire^)sweep->Trim(repItem->StartParam.Value, sweep->Length, mf->Precision, logger);
-			else if (!repItem->StartParam.HasValue && repItem->EndParam.HasValue)
-				sweep = (XbimWire^)sweep->Trim(0, Math::Abs(repItem->EndParam.Value - 1.0) < Precision::Confusion() ? sweep->Length : repItem->EndParam.Value, mf->Precision, logger);
+			XbimWire^ sweep = CreateDirectrix(repItem->Directrix, repItem->StartParam, repItem->EndParam, logger);
 
 			if (!sweep->IsValid)
 			{
@@ -427,14 +421,53 @@ namespace Xbim
 			BRepPrim_Builder b;
 			TopoDS_Shell shell;
 			b.MakeShell(shell);
-			//find the start point of the sweep
-			XbimPoint3D s = sweep->Start;
-			gp_Pnt startPoint(s.X, s.Y, s.Z);
+
+
 			//get where this is on the surface
 			XbimFace^ refSurface = gcnew XbimFace(repItem->ReferenceSurface, logger);
+
 			Handle(Geom_Surface) geomSurf = refSurface->GetSurface();
+
+			BRepOffsetAPI_NormalProjection nProjector(refSurface);
+
+			nProjector.Add(sweep);
+			nProjector.SetLimit(false); //do not intersect as we will loose
+			nProjector.Build();
+			if (!nProjector.IsDone())
+			{
+				XbimGeometryCreator::LogWarning(logger, repItem, "Could not project Directrix onto swept surface");
+				return;
+			}
+
+			TopoDS_Shape shape = nProjector.Projection();
+			//TopAbs_ShapeEnum st = shape.ShapeType();
+			TopTools_ListOfShape shapes;
+			bool built = nProjector.BuildWire(shapes);
+			if (!built || shapes.Size() == 0)
+			{
+				XbimGeometryCreator::LogWarning(logger, repItem, "Could not create wire from projected Directrix");
+				return;
+			}
+
+
+			TopoDS_Shape& firstShape = shapes.First();
+			if (firstShape.ShapeType() != TopAbs_ShapeEnum::TopAbs_WIRE)
+			{
+				XbimGeometryCreator::LogWarning(logger, repItem, "Could not create wire from projected Directrix");
+				return;
+			}
+			XbimWire^ directrix = gcnew XbimWire(TopoDS::Wire(firstShape));
+
+			//find the start point of the sweep
+			XbimPoint3D s = directrix->Start;
+			gp_Pnt startPoint(s.X, s.Y, s.Z);
 			GeomAPI_ProjectPointOnSurf projector(startPoint, geomSurf);
 			projector.Perform(startPoint);
+			if (!projector.IsDone())
+			{
+				XbimGeometryCreator::LogWarning(logger, repItem, "Could not project edge onto surface");
+				return;
+			}
 			Standard_Real u;
 			Standard_Real v;
 			projector.Parameters(1, u, v);
@@ -442,22 +475,22 @@ namespace Xbim
 			//move the wire to the start point
 			TopoDS_Edge edge;
 			Standard_Real uoe;
-			BRepAdaptor_CompCurve cc(sweep);
+			BRepAdaptor_CompCurve cc(directrix);
 			cc.Edge(0, edge, uoe);
 			Standard_Real l, f;
 			Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, f, l);
 			gp_Pnt p1;
 			gp_Vec tangent;
 			gp_Vec xDir;
-			curve->D1(0, p1, tangent);
-			gp_Ax3 toAx3(startPoint, tangent, gp_Vec(norm.X, norm.Y, norm.Z));	//rotate so normal of profile is tangental and X axis 
+			curve->D1(f, p1, tangent);
+			gp_Ax3 toAx3(p1, tangent, gp_Vec(norm.X, norm.Y, norm.Z));	//rotate so normal of profile is tangental and X axis 
 			gp_Trsf trsf;
 			trsf.SetTransformation(toAx3, gp_Ax3());
 			TopLoc_Location topLoc(trsf);
 			faceStart->SetLocation(topLoc);
 			XbimWire^ outerBound = (XbimWire^)(faceStart->OuterBound);
 
-			BRepOffsetAPI_MakePipeShell pipeMaker1(sweep);
+			BRepOffsetAPI_MakePipeShell pipeMaker1(directrix);
 			pipeMaker1.SetTransitionMode(BRepBuilderAPI_RightCorner);
 			pipeMaker1.Add(outerBound, Standard_False, Standard_False);
 			pipeMaker1.Build();
@@ -470,7 +503,7 @@ namespace Xbim
 				for (int i = 0; i < faceStart->InnerBounds->Count; i++)
 				{
 					//it is a hollow section so we need to build the inside
-					BRepOffsetAPI_MakePipeShell pipeMaker2(sweep);
+					BRepOffsetAPI_MakePipeShell pipeMaker2(directrix);
 					TopoDS_Wire innerBoundStart = faceStart->InnerWires->Wire[i];
 					pipeMaker2.SetTransitionMode(BRepBuilderAPI_RightCorner);
 					pipeMaker2.Add(innerBoundStart);
@@ -505,6 +538,7 @@ namespace Xbim
 
 				}
 				pSolid = new TopoDS_Solid();
+
 				if (BRepCheck_Analyzer(solid, Standard_False).IsValid() == Standard_False)
 				{
 					ShapeFix_Shape shapeFixer(solid);
@@ -534,6 +568,8 @@ namespace Xbim
 				pSolid->Closed(Standard_True);
 				if (repItem->Position != nullptr) //In Ifc4 this is now optional
 					pSolid->Move(XbimConvert::ToLocation(repItem->Position));
+				ShapeFix_ShapeTolerance fTol;
+				fTol.LimitTolerance(*pSolid, mf->Precision);
 				return;
 			}
 
@@ -568,7 +604,7 @@ namespace Xbim
 				XbimVector3D v = faceCentre - rotCentre;
 				gp_Ax2 ax2(origin, vz, gp_Vec(v.X, v.Y, v.Z));
 				gp_Circ circ(ax2, v.Length);
-				double angle = Math::Min(repItem->Angle*radianConvert, M_PI * 2);;
+				double angle = Math::Min(repItem->Angle * radianConvert, M_PI * 2);;
 				GC_MakeArcOfCircle arcMaker(circ, 0., angle, Standard_True);
 				Handle(Geom_TrimmedCurve) trimmed = arcMaker.Value();
 				XbimCurve^ curve = gcnew XbimCurve(trimmed);
@@ -762,12 +798,12 @@ namespace Xbim
 
 			if (dynamic_cast<IIfcLine^>(repItem->Directrix)) //params are different
 			{
-				IIfcLine ^  line = (IIfcLine^)(repItem->Directrix);
+				IIfcLine^ line = (IIfcLine^)(repItem->Directrix);
 				double mag = line->Dir->Magnitude;
 				if (repItem->StartParam.HasValue && repItem->EndParam.HasValue)
-					sweep = (XbimWire^)sweep->Trim(repItem->StartParam.Value *mag, repItem->EndParam.Value * mag, mf->Precision, logger);
+					sweep = (XbimWire^)sweep->Trim(repItem->StartParam.Value * mag, repItem->EndParam.Value * mag, mf->Precision, logger);
 				else if (repItem->StartParam.HasValue && !repItem->EndParam.HasValue)
-					sweep = (XbimWire^)sweep->Trim(repItem->StartParam.Value*mag, sweep->Length, mf->Precision, logger);
+					sweep = (XbimWire^)sweep->Trim(repItem->StartParam.Value * mag, sweep->Length, mf->Precision, logger);
 				else if (!repItem->StartParam.HasValue && repItem->EndParam.HasValue)
 					sweep = (XbimWire^)sweep->Trim(0, repItem->EndParam.Value * mag, mf->Precision, logger);
 			}
@@ -892,7 +928,7 @@ namespace Xbim
 
 			//make a list of faces for each cross section (wire is not good enough as there ay be holes to consider
 			List<XbimFace^>^ crossSections = gcnew List<XbimFace^>();
-			for each (IIfcProfileDef^ profile in repItem->CrossSections)
+			for each (IIfcProfileDef ^ profile in repItem->CrossSections)
 			{
 				XbimFace^ f = gcnew XbimFace(profile, logger);
 				crossSections->Add(f);
@@ -978,7 +1014,7 @@ namespace Xbim
 								TopoDS_Face lastFace;
 								for (int k = 1; k <= outerShellMap.Extent(); k++)
 								{
-									const TopoDS_Face & f = TopoDS::Face(outerShellMap(k));
+									const TopoDS_Face& f = TopoDS::Face(outerShellMap(k));
 									if (f.IsSame(pipeMaker1.FirstShape()))
 										firstFace = f;
 									else if (f.IsSame(pipeMaker1.LastShape()))
@@ -990,7 +1026,7 @@ namespace Xbim
 								TopExp::MapShapes(innerShell, TopAbs_FACE, innerShellMap);
 								for (int k = 1; k <= innerShellMap.Extent(); k++)
 								{
-									const TopoDS_Face & f = TopoDS::Face(innerShellMap(k));
+									const TopoDS_Face& f = TopoDS::Face(innerShellMap(k));
 
 									if (f.IsEqual(pipeMaker2.FirstShape()))
 									{
@@ -1134,7 +1170,7 @@ namespace Xbim
 				gp_Dir vx(zDir.X, zDir.Y, zDir.Z);
 				gp_Ax1 ax1(origin, vx);
 				double radianConvert = repItem->Model->ModelFactors->AngleToRadiansConversionFactor;
-				BRepPrimAPI_MakeRevol revol(face, ax1, repItem->Angle*radianConvert);
+				BRepPrimAPI_MakeRevol revol(face, ax1, repItem->Angle * radianConvert);
 
 				GC::KeepAlive(face);
 				if (revol.IsDone())
@@ -1228,7 +1264,7 @@ namespace Xbim
 			//get the surface of the half space
 			gp_Ax3 ax3 = XbimConvert::ToAx3(surface->Position);
 			gp_Pln pln(ax3);
-			
+
 			//build the substraction body
 			gp_Dir dir(pbhs->Position->P[2].X, pbhs->Position->P[2].Y, pbhs->Position->P[2].Z);
 			XbimWire^ polyBoundary = gcnew XbimWire(pbhs->PolygonalBoundary, logger);
@@ -1256,10 +1292,10 @@ namespace Xbim
 			TopoDS_Shape halfspace = BRepPrimAPI_MakeHalfSpace(BRepBuilderAPI_MakeFace(pln), pnt).Solid();
 			gp_Trsf location = XbimConvert::ToTransform(pbhs->Position);
 			gp_Trsf shift;
-			shift.SetTranslation(gp_Vec(0, 0, -1e8/2));
-			substractionBody.Move(location*shift);
-			TopoDS_Shape bounded_halfspace = BRepAlgoAPI_Common(substractionBody, halfspace);			 
-			
+			shift.SetTranslation(gp_Vec(0, 0, -1e8 / 2));
+			substractionBody.Move(location * shift);
+			TopoDS_Shape bounded_halfspace = BRepAlgoAPI_Common(substractionBody, halfspace);
+
 			TopTools_IndexedMapOfShape map;
 			TopExp::MapShapes(bounded_halfspace, TopAbs_SOLID, map);
 			if (map.Extent() != 1)
@@ -1273,9 +1309,9 @@ namespace Xbim
 		}
 
 		// params depend on segment type
-		double XbimSolid::SegLenght(IIfcCompositeCurveSegment^ segment)
+		double XbimSolid::SegLength(IIfcCompositeCurveSegment^ segment)
 		{
-			if (dynamic_cast<IIfcLine^>(segment->ParentCurve)) 
+			if (dynamic_cast<IIfcLine^>(segment->ParentCurve))
 			{
 				return 1;
 			}
@@ -1293,86 +1329,9 @@ namespace Xbim
 		{
 
 			//Build the directrix
-			IModelFactors^ mf = repItem->Model->ModelFactors;
 
-			XbimWire^ sweep = gcnew XbimWire(repItem->Directrix, logger);
+			XbimWire^ sweep = CreateDirectrix(repItem->Directrix, repItem->StartParam, repItem->EndParam, logger);
 			if (!sweep->IsValid) return;
-
-			// comments on the interpretation of the params are found here:
-			// https://sourceforge.net/p/ifcexporter/discussion/general/thread/7cc44b69/?limit=25
-			// if the directix is:
-			// - a line, just use the lenght
-			// - a IFCCOMPOSITECURVE then the parameter 
-			//   for each line add 0 to 1
-			//   for each arc add the angle
-			//
-
-			if (dynamic_cast<IIfcLine^>(repItem->Directrix)) //params are different
-			{
-				IIfcLine ^  line = (IIfcLine^)(repItem->Directrix);
-				double mag = line->Dir->Magnitude;
-				if (repItem->StartParam.HasValue && repItem->EndParam.HasValue)
-					sweep = (XbimWire^)sweep->Trim(repItem->StartParam.Value *mag, repItem->EndParam.Value * mag, mf->Precision, logger);
-				else if (repItem->StartParam.HasValue && !repItem->EndParam.HasValue)
-					sweep = (XbimWire^)sweep->Trim(repItem->StartParam.Value*mag, sweep->Length, mf->Precision, logger);
-				else if (!repItem->StartParam.HasValue && repItem->EndParam.HasValue)
-					sweep = (XbimWire^)sweep->Trim(0, repItem->EndParam.Value * mag, mf->Precision, logger);
-			}
-			else if (dynamic_cast<IIfcCompositeCurve^>(repItem->Directrix)) //params are different
-			{
-
-				double startPar = 0;
-				double endPar = double::PositiveInfinity;
-				if (repItem->StartParam.HasValue)
-					startPar = repItem->StartParam.Value;
-				if (repItem->EndParam.HasValue)
-					endPar = repItem->EndParam.Value;
-				double occStart = 0;
-				double occEnd = 0;
-				double totCurveLen = 0;
-
-				// for each segment we encounter, we will see if the threshold falls within its lenght
-				//
-				IIfcCompositeCurve ^  curve = (IIfcCompositeCurve^)(repItem->Directrix);
-				for each (IIfcCompositeCurveSegment^ segment in curve->Segments)
-				{
-					XbimWire^ segWire = gcnew XbimWire(segment, logger);
-					double wireLen = segWire->Length;       // this is the lenght to add to the OCC command if we use all of the segment
-					double segValue = SegLenght(segment);   // this is the IFC size of the segment
-					totCurveLen += wireLen;
-					//System::Diagnostics::Debug::Write("wireLen:\t");
-					//System::Diagnostics::Debug::Write(wireLen);
-					//System::Diagnostics::Debug::Write("\tsegValue:\t");
-					//System::Diagnostics::Debug::Write(segValue);
-					//System::Diagnostics::Debug::Write("\r\n");
-
-					if (startPar > 0)
-					{
-						double ratio = Math::Min(startPar / segValue, 1.0);
-						startPar -= ratio * segValue; // reduce the outstanding amount (since it's been accounted for in the segment just processed)
-						occStart += ratio * wireLen; // progress the occ amount by the ratio of the lenght
-					}
-
-					if (endPar > 0)
-					{
-						double ratio = Math::Min(endPar / segValue, 1.0);
-						endPar -= ratio * segValue; // reduce the outstanding amount (since it's been accounted for in the segment just processed)
-						occEnd += ratio * wireLen; // progress the occ amount by the ratio of the lenght
-					}
-				}					
-				// only trim if needed either from start or end
-				if (occStart > 0 || occEnd < totCurveLen)
-					sweep = (XbimWire^)sweep->Trim(occStart, occEnd, mf->Precision, logger);
-			}
-			else 
-			{
-				if (repItem->StartParam.HasValue && repItem->EndParam.HasValue)
-					sweep = (XbimWire^)sweep->Trim(repItem->StartParam.Value, repItem->EndParam.Value, mf->Precision, logger);
-				else if (repItem->StartParam.HasValue && !repItem->EndParam.HasValue)
-					sweep = (XbimWire^)sweep->Trim(repItem->StartParam.Value, sweep->Length, mf->Precision, logger);
-				else if (!repItem->StartParam.HasValue && repItem->EndParam.HasValue)
-					sweep = (XbimWire^)sweep->Trim(0, repItem->EndParam.Value, mf->Precision, logger);
-			}
 
 			IIfcSweptDiskSolidPolygonal^ polygonal = dynamic_cast<IIfcSweptDiskSolidPolygonal^>(repItem);
 			if (polygonal != nullptr && polygonal->FilletRadius.HasValue)
@@ -1401,7 +1360,6 @@ namespace Xbim
 			TopoDS_Edge outerEdge = BRepBuilderAPI_MakeEdge(hOuter);
 
 			TopoDS_Wire outerWire = BRepBuilderAPI_MakeWire(outerEdge);
-
 
 
 
@@ -1462,7 +1420,7 @@ namespace Xbim
 							TopoDS_Face lastFace;
 							for (int i = 1; i <= pipeMap.Extent(); i++)
 							{
-								const TopoDS_Face & f = TopoDS::Face(pipeMap(i));
+								const TopoDS_Face& f = TopoDS::Face(pipeMap(i));
 								if (f.IsSame(pipeMaker1.FirstShape()))
 									firstFace = f;
 								else if (f.IsSame(pipeMaker1.LastShape()))
@@ -1474,7 +1432,7 @@ namespace Xbim
 							TopExp::MapShapes(pipeInner, TopAbs_FACE, innerPipeMap);
 							for (int i = 1; i <= innerPipeMap.Extent(); i++)
 							{
-								const TopoDS_Face & f = TopoDS::Face(innerPipeMap(i));
+								const TopoDS_Face& f = TopoDS::Face(innerPipeMap(i));
 
 								if (f.IsEqual(pipeMaker2.FirstShape()))
 								{
@@ -1532,6 +1490,121 @@ namespace Xbim
 			{
 				XbimGeometryCreator::LogWarning(logger, repItem, "Could not be constructed");
 			}
+		}
+
+		// comments on the interpretation of the params are found here:
+			// https://sourceforge.net/p/ifcexporter/discussion/general/thread/7cc44b69/?limit=25
+			// if the directix is:
+			// - a line, just use the lenght
+			// - a IFCCOMPOSITECURVE then the parameter 
+			//   for each line add 0 to 1
+			//   for each arc add the angle
+			//
+		XbimWire^ XbimSolid::CreateDirectrix(IIfcCurve^ directrix, Nullable<IfcParameterValue> startParam, Nullable<IfcParameterValue> endParam, Microsoft::Extensions::Logging::ILogger^ logger)
+		{
+			XbimWire^ untrimmedWire = gcnew XbimWire(directrix, logger);
+			if (!startParam.HasValue && !endParam.HasValue) //no trim required
+			{
+				return untrimmedWire;
+			}
+
+			double startPar = 0;
+			double endPar = double::PositiveInfinity;
+
+			if (dynamic_cast<IIfcLine^>(directrix)) //params are different
+			{
+				IIfcLine^ line = (IIfcLine^)(directrix);
+				double mag = line->Dir->Magnitude;
+				if (startParam.HasValue && endParam.HasValue)
+				{
+					startPar = startParam.Value * mag;
+					endPar = endParam.Value * mag;
+				}
+				else if (startParam.HasValue && !endParam.HasValue)
+				{
+					startPar = startParam.Value * mag;
+					endPar = untrimmedWire->Length;
+				}
+				else if (!startParam.HasValue && endParam.HasValue)
+				{
+					startPar = 0;
+					endPar = endParam.Value * mag;
+				}
+			}
+			else if (dynamic_cast<IIfcCompositeCurve^>(directrix)) //params are different
+			{
+
+				if (startParam.HasValue)
+					startPar = startParam.Value;
+				if (endParam.HasValue)
+					endPar = endParam.Value;
+				double occStart = 0;
+				double occEnd = 0;
+				double totCurveLen = 0;
+
+				// for each segment we encounter, we will see if the threshold falls within its length
+				//
+				IIfcCompositeCurve^ curve = (IIfcCompositeCurve^)(directrix);
+				for each (IIfcCompositeCurveSegment ^ segment in curve->Segments)
+				{
+					XbimWire^ segWire = gcnew XbimWire(segment, logger);
+					double wireLen = segWire->Length;       // this is the lenght to add to the OCC command if we use all of the segment
+					double segValue = SegLength(segment);   // this is the IFC size of the segment
+					totCurveLen += wireLen;
+
+
+					if (startPar > 0)
+					{
+						double ratio = Math::Min(startPar / segValue, 1.0);
+						startPar -= ratio * segValue; // reduce the outstanding amount (since it's been accounted for in the segment just processed)
+						occStart += ratio * wireLen; // progress the occ amount by the ratio of the lenght
+					}
+
+					if (endPar > 0)
+					{
+						double ratio = Math::Min(endPar / segValue, 1.0);
+						endPar -= ratio * segValue; // reduce the outstanding amount (since it's been accounted for in the segment just processed)
+						occEnd += ratio * wireLen; // progress the occ amount by the ratio of the lenght
+					}
+				}
+				// only trim if needed either from start or end
+				if (occStart > 0 || occEnd < totCurveLen)
+				{
+					return (XbimWire^)untrimmedWire->Trim(occStart, occEnd, directrix->Model->ModelFactors->Precision, logger);
+				}
+			}
+			else if (dynamic_cast<IIfcPolyline^>(directrix) && 
+				(double)startParam.Value == 0. &&
+				(double)endParam.Value == 1. &&
+				directrix->Model->ModelFactors->ApplyWorkAround(XbimGeometryCreator::PolylineTrimLengthOneForEntireLine)) //consider work around for incorrectly set trims
+			{
+				startPar = startParam.Value;
+				endPar = untrimmedWire->Length;
+			}
+			else
+			{
+				if (startParam.HasValue && endParam.HasValue)
+				{
+					startPar = startParam.Value;
+					endPar = endParam.Value;
+				}
+				else if (startParam.HasValue && !endParam.HasValue)
+				{
+
+					startPar = startParam.Value;
+					endPar = untrimmedWire->Length;
+				}
+				else if (!startParam.HasValue && endParam.HasValue)
+				{
+					startPar = 0;
+					endPar = endParam.Value;
+				}
+
+			}
+
+			//need to trim the wore
+			return (XbimWire^)untrimmedWire->Trim(startPar, endPar, directrix->Model->ModelFactors->Precision, logger);
+
 		}
 
 
@@ -1690,7 +1763,7 @@ namespace Xbim
 			tolFixer.LimitTolerance(*pSolid, IIfcSolid->Model->ModelFactors->Precision);
 		}
 
-		void XbimSolid::Init(IIfcTriangulatedFaceSet ^ IIfcSolid, ILogger ^ logger)
+		void XbimSolid::Init(IIfcTriangulatedFaceSet^ IIfcSolid, ILogger^ logger)
 		{
 			XbimCompound^ comp = gcnew XbimCompound(IIfcSolid, logger);
 			if (comp->IsValid)
@@ -1710,7 +1783,7 @@ namespace Xbim
 			}
 		}
 
-		void XbimSolid::Init(IIfcFaceBasedSurfaceModel ^ solid, ILogger ^ logger)
+		void XbimSolid::Init(IIfcFaceBasedSurfaceModel^ solid, ILogger^ logger)
 		{
 			XbimCompound^ comp = gcnew XbimCompound(solid, logger);
 			if (comp->IsValid)
@@ -1730,7 +1803,7 @@ namespace Xbim
 			}
 		}
 
-		void XbimSolid::Init(IIfcShellBasedSurfaceModel ^ solid, ILogger ^ logger)
+		void XbimSolid::Init(IIfcShellBasedSurfaceModel^ solid, ILogger^ logger)
 		{
 			XbimCompound^ comp = gcnew XbimCompound(solid, logger);
 			if (comp->IsValid)
@@ -1810,7 +1883,7 @@ namespace Xbim
 		//returns true if the solid is a closed manifold typically with one shell, if there are more shells they are voids and should also be closed
 		bool XbimSolid::IsClosed::get()
 		{
-			for each (XbimShell^ shell in Shells)
+			for each (XbimShell ^ shell in Shells)
 				if (!shell->IsClosed) return false;
 			return true;
 		}
@@ -1909,7 +1982,7 @@ namespace Xbim
 		}
 
 
-		IXbimSolidSet^ XbimSolid::Cut(IXbimSolid^ toCut, double tolerance, ILogger^logger)
+		IXbimSolidSet^ XbimSolid::Cut(IXbimSolid^ toCut, double tolerance, ILogger^ logger)
 		{
 			XbimSolidSet^ thisSolidSet = gcnew XbimSolidSet(this);
 			return thisSolidSet->Cut(gcnew XbimSolidSet(toCut), tolerance, logger);
@@ -1942,7 +2015,7 @@ namespace Xbim
 				if (boolOp.HasErrors() == Standard_False)
 					return gcnew XbimSolidSet(boolOp.Shape());
 			}
-			catch (const std::exception &exc)
+			catch (const std::exception & exc)
 			{
 				err = gcnew String(exc.what());
 			}
@@ -1981,7 +2054,7 @@ namespace Xbim
 				if (boolOp.HasErrors() == Standard_False)
 					return gcnew XbimSolidSet(boolOp.Shape());
 			}
-			catch (const std::exception &exc)
+			catch (const std::exception & exc)
 			{
 				err = gcnew String(exc.what());
 			}
@@ -2166,7 +2239,7 @@ namespace Xbim
 			return false;
 		}
 
-		XbimGeometryObject ^ XbimSolid::Transformed(IIfcCartesianTransformationOperator ^ transformation)
+		XbimGeometryObject^ XbimSolid::Transformed(IIfcCartesianTransformationOperator^ transformation)
 		{
 			IIfcCartesianTransformationOperator3DnonUniform^ nonUniform = dynamic_cast<IIfcCartesianTransformationOperator3DnonUniform^>(transformation);
 			if (nonUniform != nullptr)
@@ -2185,7 +2258,7 @@ namespace Xbim
 			}
 		}
 
-		XbimGeometryObject ^ XbimSolid::Moved(IIfcPlacement ^ placement)
+		XbimGeometryObject^ XbimSolid::Moved(IIfcPlacement^ placement)
 		{
 			if (!IsValid) return this;
 			XbimSolid^ copy = gcnew XbimSolid(*pSolid, Tag); //take a copy of the shape
@@ -2194,7 +2267,7 @@ namespace Xbim
 			return copy;
 		}
 
-		XbimGeometryObject ^ XbimSolid::Moved(IIfcObjectPlacement ^ objectPlacement, ILogger^ logger)
+		XbimGeometryObject^ XbimSolid::Moved(IIfcObjectPlacement^ objectPlacement, ILogger^ logger)
 		{
 			if (!IsValid) return this;
 			XbimSolid^ copy = gcnew XbimSolid(*pSolid, Tag); //take a copy of the shape
