@@ -13,7 +13,7 @@ namespace Xbim.Geometry.Engine.Interop
         public const string SurfaceOfLinearExtrusion = "#SurfaceOfLinearExtrusion";
         public const string PolylineTrimLengthOneForEntireLine = "#PolylineTrimLengthOneForEntireLine";
         /// <summary>
-        /// Adds a work around for versions of the Revit exporter prior to and inclusing Version(17, 0, 416, 0);
+        /// Adds a work around for versions of the Revit exporter prior to and inclusing Version(17, 4, 0, 0);
         /// This did not correctly align linear extrusions bounds and surface due to a missing placement value
         /// </summary>
         /// <param name="model"></param>
@@ -33,8 +33,8 @@ namespace Xbim.Geometry.Engine.Interop
                 {
                     if (Version.TryParse(matches[0].Groups[1].Value, out Version modelVersion))
                     {
-                        //SurfaceOfLinearExtrusion bug found in version 17.2.0 and earlier
-                        var surfaceOfLinearExtrusionVersion = new Version(17, 2, 0, 0);
+                        //SurfaceOfLinearExtrusion bug found in version 17.4.0 and earlier
+                        var surfaceOfLinearExtrusionVersion = new Version(17, 4, 0, 0);
                         if (modelVersion <= surfaceOfLinearExtrusionVersion)
                         {
                             modelFactors.AddWorkAround(SurfaceOfLinearExtrusion);
