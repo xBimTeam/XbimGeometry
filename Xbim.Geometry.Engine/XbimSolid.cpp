@@ -1613,6 +1613,7 @@ namespace Xbim
 			{
 				startPar = startParam.Value;
 				endPar = untrimmedWire->Length;
+				XbimGeometryCreator::LogInfo(logger, directrix, "Polyline trim (0:1) does not comply with schema. {0}", directrix->Model->Header->FileName->OriginatingSystem);
 			}
 			else
 			{
