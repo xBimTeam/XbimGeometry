@@ -1100,21 +1100,19 @@ namespace Xbim
 			if (extrudeTaperedArea != nullptr) return Init(extrudeTaperedArea, overrideProfileDef, logger);
 			IIfcCompositeProfileDef^ compProf = dynamic_cast<IIfcCompositeProfileDef^>(repItem->SweptArea);
 
-
-			IIfcDirection^ dir = repItem->ExtrudedDirection;
-			gp_Vec vec(dir->X, dir->Y, dir->Z);
-			vec.Normalize();
-			double depth = repItem->Depth;
-			if (depth > 1e36) //SRL 1e36 is as big as we can go without booleans failing, it should be big enough for most sensible cases
+			if (repItem->Depth > 0) //we have a valid face and extrusion  
 			{
-				XbimGeometryCreator::LogInfo(logger, repItem, "Extrusion is too large, it has been truncated to avoid boolean errors");
-				depth = 1e36;
-			}
+				IIfcDirection^ dir = repItem->ExtrudedDirection;
+				gp_Vec vec(dir->X, dir->Y, dir->Z);
+				vec.Normalize();
+				double depth = repItem->Depth;
+				if (depth > 1e36) //SRL 1e36 is as big as we can go without booleans failing, it should be big enough for most sensible cases  
+				{
+					XbimGeometryCreator::LogInfo(logger, repItem, "Extrusion is too large, it has been truncated to avoid boolean errors");
+					depth = 1e36;
+				}
 
-			vec *= depth;
-
-			if (repItem->Depth > 0) //we have a valid face and extrusion
-			{
+				vec *= depth;
 				if (compProf != nullptr && compProf->Profiles->Count > 1 && overrideProfileDef == nullptr)
 				{
 					XbimGeometryCreator::LogError(logger, repItem, "Composite profiles with more than 1 profile cannot create a solid, use the CreateSolidSet method");

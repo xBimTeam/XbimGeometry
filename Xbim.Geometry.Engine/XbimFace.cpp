@@ -882,7 +882,12 @@ namespace Xbim
 				for each (IIfcCurve ^ curve in profile->InnerCurves)
 				{
 					XbimWire^ innerWire = gcnew XbimWire(curve, logger);
-					if (!innerWire->IsClosed) //we need to close it if we have more thn one edge
+					if (!innerWire->IsValid)
+					{
+						XbimGeometryCreator::LogWarning(logger, profile, "Invalid innerWire. Inner bound ignored", curve->EntityLabel);
+						continue;
+					}
+					if (!innerWire->IsClosed ) //we need to close it if we have more thn one edge
 					{
 						double oneMilli = profile->Model->ModelFactors->OneMilliMeter;
 						XbimFace^ xface = gcnew XbimFace(innerWire, true, oneMilli, curve->EntityLabel, logger);

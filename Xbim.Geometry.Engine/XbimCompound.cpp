@@ -949,61 +949,68 @@ namespace Xbim
 				builder.Add(*pCompound, shell);
 		}
 
-
-		
-
 		void XbimCompound::Init(IEnumerable<IIfcFace^>^ ifcFaces, IIfcRepresentationItem^ theItem, ILogger^ logger)
 		{
-			
-			
 			_sewingTolerance = theItem->Model->ModelFactors->Precision;
 			BRep_Builder builder;
-			/*TopoDS_Shell shell;
-			builder.MakeShell(shell);*/
-			BRepBuilderAPI_Sewing seamstress(_sewingTolerance);
-			int allFaces = 0;
-			for each (IIfcFace^ ifcFace in ifcFaces)
+
+			if (Enumerable::Count(ifcFaces) == 1)
 			{
-				XbimFace^ face = gcnew XbimFace(ifcFace, logger);
-				seamstress.Add(face);
-				allFaces++;
-			}
-			Handle(XbimProgressIndicator) pi = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);
-			seamstress.Perform(pi);
-
-			TopoDS_Shape result = seamstress.SewedShape();
-			TopoDS_Compound unifiedCompound;
-			builder.MakeCompound(unifiedCompound);
-			//remove unnecesary faces, normally caused by triangulation, this improves boolean quality
-			if (allFaces > 6 && allFaces < MaxFacesToSew) //six is a cuboid no point in simplify that
-			{
-				ShapeUpgrade_UnifySameDomain unifier(result);
-				unifier.SetAngularTolerance(0.00174533); //1 tenth of a degree
-				unifier.SetLinearTolerance(_sewingTolerance);
-
-				try
-				{
-					//sometimes unifier crashes
-					unifier.Build();
-					builder.Add(unifiedCompound, unifier.Shape());
-
-				}
-				catch (...) //any failure
-				{
-					//default to what we had
-					builder.Add(unifiedCompound, result);
-				}
+				TopoDS_Shell shell;
+				builder.MakeShell(shell);
+				XbimFace^ face = gcnew XbimFace(Enumerable::First(ifcFaces), logger);
+				builder.Add(shell, face);
+				pCompound = new TopoDS_Compound();
+				builder.MakeCompound(*pCompound);
+				builder.Add(*pCompound, shell);
 			}
 			else
 			{
-				builder.Add(unifiedCompound, result);
+				BRepBuilderAPI_Sewing seamstress(_sewingTolerance);
+				int allFaces = 0;
+				for each (IIfcFace ^ ifcFace in ifcFaces)
+				{
+					XbimFace^ face = gcnew XbimFace(ifcFace, logger);
+					seamstress.Add(face);
+					allFaces++;
+				}
+				Handle(XbimProgressIndicator) pi = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);
+				seamstress.Perform(pi);
+
+				TopoDS_Shape result = seamstress.SewedShape();
+				TopoDS_Compound unifiedCompound;
+				builder.MakeCompound(unifiedCompound);
+				//remove unnecesary faces, normally caused by triangulation, this improves boolean quality 
+				if (allFaces > 6 && allFaces < MaxFacesToSew) //six is a cuboid no point in simplify that 
+				{
+					ShapeUpgrade_UnifySameDomain unifier(result);
+					unifier.SetAngularTolerance(0.00174533); //1 tenth of a degree 
+					unifier.SetLinearTolerance(_sewingTolerance);
+
+					try
+					{
+						//sometimes unifier crashes 
+						unifier.Build();
+						builder.Add(unifiedCompound, unifier.Shape());
+
+					}
+					catch (...) //any failure 
+					{
+						//default to what we had 
+						builder.Add(unifiedCompound, result);
+					}
+				}
+				else
+				{
+					builder.Add(unifiedCompound, result);
+				}
+
+				pCompound = new TopoDS_Compound();
+				*pCompound = unifiedCompound;
 			}
 
-			pCompound = new TopoDS_Compound();
-			*pCompound = unifiedCompound;
 			_isSewn = true;
 		}
-
 
 
 #pragma endregion
@@ -1040,6 +1047,8 @@ namespace Xbim
 					break;
 				}
 			}
+
+			if (face->OuterBound == nullptr) return face;
 
 			face = gcnew XbimFace(outerBound, true, owningFace->Model->ModelFactors->Precision, owningFace->EntityLabel, logger); //create  a face with the right bound and direction
 

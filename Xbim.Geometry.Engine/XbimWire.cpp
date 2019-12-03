@@ -343,7 +343,8 @@ namespace Xbim
 						}
 
 					}
-					wireMaker.Add(e);
+					if (!e.IsNull())
+						wireMaker.Add(e);
 				}
 
 				pWire = new TopoDS_Wire();
@@ -2707,7 +2708,8 @@ namespace Xbim
 			BRepBuilderAPI_MakeWire wireMaker;
 			for (int i = 1; i <= totalEdges; i++)
 			{
-				wireMaker.Add(TopoDS::Edge(filleted(i)));
+				if (!TopoDS::Edge(filleted(i)).IsNull())
+					wireMaker.Add(TopoDS::Edge(filleted(i)));
 			}
 
 			if (wireMaker.IsDone())
