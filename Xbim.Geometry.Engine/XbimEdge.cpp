@@ -1033,7 +1033,7 @@ namespace Xbim
 			}
 		}
 
-		void XbimEdge::Init(IIfcParameterizedProfileDef^ profile, ILogger^ logger)
+		void XbimEdge::Init(IIfcParameterizedProfileDef^ , ILogger^ )
 		{
 			throw gcnew Exception("IIfcParameterizedProfileDef is not currently supported as an edge description, call the XbimWire method");
 		}
@@ -1060,7 +1060,7 @@ namespace Xbim
 			}
 		}
 
-		void XbimEdge::Init(IIfcCenterLineProfileDef^ profile, ILogger^ logger)
+		void XbimEdge::Init(IIfcCenterLineProfileDef^ , ILogger^ )
 		{
 			throw gcnew Exception("IIfcCenterLineProfileDef is not currently supported as an edge description, call the XbimWire method");
 		}

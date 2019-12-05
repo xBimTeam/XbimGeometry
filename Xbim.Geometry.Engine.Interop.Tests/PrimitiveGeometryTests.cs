@@ -84,10 +84,10 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var er = new EntityRepository<IIfcSurfaceCurveSweptAreaSolid>("failing_swept_area_curve", inRadians: true))
             {
                 Assert.IsTrue(er.Entity != null, "No IfcSurfaceCurveSweptAreaSolid found");
-
+                var workAroundTag = er.Entity.Model.AddWorkAroundTrimForPolylinesIncorrectlySetToOneForEntireCurve();
                 var solid = geomEngine.CreateSolidSet(er.Entity, logger);
                 Assert.AreEqual(1, solid.Count);
-                Assert.AreEqual(solid.First().Volume.Value, 12.6, 0.1);
+                Assert.AreEqual(12.6, solid.First().Volume.Value,  0.1);
             }
         }
     }

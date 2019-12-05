@@ -36,6 +36,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         }
 
         [TestMethod]
+        [Ignore]
         // // [DeploymentItem(@"TestFiles\Regression\FailingGeom.ifc", "FailingGeom.ifc")]
         public void IfcHalfspace_FailingGeom()
         {

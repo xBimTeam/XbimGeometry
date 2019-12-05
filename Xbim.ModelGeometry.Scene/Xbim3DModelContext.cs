@@ -578,7 +578,8 @@ namespace Xbim.ModelGeometry.Scene
         {
             _model = model;
             _logger = logger ?? XbimLogging.CreateLogger<Xbim3DModelContext>();
-
+            var wr1 = model.AddWorkAroundSurfaceofLinearExtrusionForRevit();
+            var wr2 = model.AddWorkAroundTrimForPolylinesIncorrectlySetToOneForEntireCurve();
             // Get the required context
 
             // because IfcGeometricRepresentationSubContext is indexed but IIfcGeometricRepresentationContext is not we 

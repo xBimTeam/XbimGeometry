@@ -34,7 +34,8 @@ namespace Xbim
 			
 		public:
 
-			
+			static String^ SurfaceOfLinearExtrusion = "#SurfaceOfLinearExtrusion";
+			static String^ PolylineTrimLengthOneForEntireLine = "#PolylineTrimLengthOneForEntireLine";
 
 		private:
 			

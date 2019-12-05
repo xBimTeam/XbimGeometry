@@ -6,6 +6,7 @@ using Xbim.Ifc4.GeometricModelResource;
 using Xbim.Ifc4.Interfaces;
 using Microsoft.Extensions.Logging;
 using Xbim.IO.Memory;
+using Xbim.Common;
 
 namespace Xbim.Geometry.Engine.Interop.Tests
 {
@@ -33,10 +34,26 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         }
 
         [TestMethod]
+        public void Can_build_swept_curve_with_trim_params()
+        {
+            using (var model = MemoryModel.OpenRead(@"TestFiles\swept_curve_with_trim_params.ifc"))
+            {
+                var pfs = model.Instances.OfType<IIfcSurfaceCurveSweptAreaSolid>().FirstOrDefault();
+                var positionWorkAround = model.AddWorkAroundSurfaceofLinearExtrusionForRevit();
+                Assert.IsTrue(pfs != null, "No IIfcSurfaceCurveSweptAreaSolid found");
+                var solid = geomEngine.CreateSolid(pfs, logger);
+
+                Assert.AreEqual(19.276571095877653, solid.Volume, 0.000001);
+                Assert.AreEqual(3, solid.Faces.Count);
+
+            }
+        }
+        [TestMethod]
         public void Can_build_ifcadvancedbrep_with_faulty_surface_orientation()
         {
             using (var model = MemoryModel.OpenRead(@"TestFiles\ifcadvancedbrep_with_faulty_surface_orientation.ifc"))
             {
+                MemoryModel.SetWorkArounds(model.Header, model.ModelFactors as XbimModelFactors);
                 var pfs = model.Instances.OfType<IIfcAdvancedBrep>().FirstOrDefault();
                 Assert.IsTrue(pfs != null, "No IIfcAdvancedBrep found");
                 var solid = geomEngine.CreateSolid(pfs, logger);

@@ -996,7 +996,6 @@ namespace Xbim
 		}
 
 
-
 		//Booleans
 		void XbimSolidSet::Init(IIfcBooleanClippingResult^ solid, ILogger^ logger)
 		{
@@ -1008,6 +1007,7 @@ namespace Xbim
 			solidSet->IfcEntityLabel = solid->EntityLabel;
 			XbimSolidSet^ bodySet = XbimSolidSet::BuildClippingList(solid, clips, logger);
 			bodySet->IfcEntityLabel = solid->EntityLabel;
+			
 			//SRL it appears that release 7.3 of OCC does correctly cut multiple half space solids
 			// we therefore do them one at a time until there is a fix
 			for each (IIfcBooleanOperand^ bOp in clips)
@@ -1016,10 +1016,10 @@ namespace Xbim
 
 				if (s->IsValid)
 				{
-					//only dodge IIfcHalfSpaceSolid
-					if (dynamic_cast<IIfcHalfSpaceSolid^>(bOp) && bOp->GetType()->Name->Contains("IfcHalfSpaceSolid"))
+					//only dodge IIfcHalfSpaceSolid and IfcPolygonalBoundedHalfSpace
+					if (dynamic_cast<IIfcHalfSpaceSolid^>(bOp) && bOp->GetType()->Name->Contains("IfcHalfSpaceSolid") ||
+						dynamic_cast<IIfcPolygonalBoundedHalfSpace^>(bOp) && bOp->GetType()->Name->Contains("IfcPolygonalBoundedHalfSpace"))
 					{
-
 						bodySet = (XbimSolidSet^)bodySet->Cut(s, mf->Precision, logger);
 					}
 					else
@@ -1090,6 +1090,7 @@ namespace Xbim
 				XbimGeometryCreator::LogError(logger, boolOp, "Not Implemented boolean operand {0})", boolOp->GetType()->Name);
 			}
 		}
+
 		XbimSolidSet^ XbimSolidSet::BuildBooleanResult(IIfcBooleanResult^ boolRes, IfcBooleanOperator operatorType, XbimSolidSet^ ops, ILogger^ logger)
 		{
 			XbimSolidSet^ right = gcnew XbimSolidSet(boolRes->SecondOperand, logger);

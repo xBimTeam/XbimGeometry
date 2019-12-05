@@ -343,7 +343,8 @@ namespace Xbim
 						}
 
 					}
-					wireMaker.Add(e);
+					if (!e.IsNull())
+						wireMaker.Add(e);
 				}
 
 				pWire = new TopoDS_Wire();
@@ -2302,7 +2303,7 @@ namespace Xbim
 			BRepAdaptor_CompCurve cc(*pWire, Standard_True);
 			GeomAbs_Shape continuity = cc.Continuity();
 			int numIntervals = cc.NbIntervals(continuity);
-
+			ShapeFix_ShapeTolerance fTol;
 
 			if (numIntervals == 1)
 			{
@@ -2316,7 +2317,9 @@ namespace Xbim
 				Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(curve, a, b);
 				BRepBuilderAPI_MakeWire wm;
 				wm.Add(BRepBuilderAPI_MakeEdge(trimmed));
-				return gcnew XbimWire(wm.Wire());
+				TopoDS_Wire trimmedWire = wm.Wire();
+				fTol.LimitTolerance(trimmedWire, this->MaxTolerance);
+				return gcnew XbimWire(trimmedWire);
 			}
 			else
 			{
@@ -2392,7 +2395,11 @@ namespace Xbim
 					}
 
 				}
-				return gcnew XbimWire(wm.Wire());
+				
+				TopoDS_Wire trimmedWire = wm.Wire();
+				
+				fTol.LimitTolerance(trimmedWire, this->MaxTolerance);
+				return gcnew XbimWire(trimmedWire);
 			}
 		}
 
@@ -2701,7 +2708,8 @@ namespace Xbim
 			BRepBuilderAPI_MakeWire wireMaker;
 			for (int i = 1; i <= totalEdges; i++)
 			{
-				wireMaker.Add(TopoDS::Edge(filleted(i)));
+				if (!TopoDS::Edge(filleted(i)).IsNull())
+					wireMaker.Add(TopoDS::Edge(filleted(i)));
 			}
 
 			if (wireMaker.IsDone())
