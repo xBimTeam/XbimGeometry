@@ -941,7 +941,8 @@ namespace Xbim.ModelGeometry.Scene
                             GeometryHash = 0,
                             LOD = XbimLOD.LOD_Unspecified,
                             Format = geomType,
-                            BoundingBox = elementGeom.BoundingBox
+                            BoundingBox = elementGeom.BoundingBox,
+                            Volume = geom.Volume
                         };
                         var memStream = new MemoryStream(0x4000);
 
@@ -1295,7 +1296,7 @@ namespace Xbim.ModelGeometry.Scene
             var localPercentageParsed = contextHelper.PercentageParsed;
             var localTally = contextHelper.Tally;
             // var dedupCount = 0;
-            var xbimTessellator = new XbimTessellator(Model, geomStorageType);
+            var xbimTessellator = new XbimTessellator(Model, geomStorageType, _logger);
             //var geomHash = new ConcurrentDictionary<RepresentationItemGeometricHashKey, int>();
 
             //var mapLookup = new ConcurrentDictionary<int, int>();
@@ -1385,7 +1386,6 @@ namespace Xbim.ModelGeometry.Scene
                         }
                         if (geomModel != null && geomModel.IsValid)
                         {
-
                             shapeGeom = Engine.CreateShapeGeometry(geomModel, precision, deflection, deflectionAngle, geomStorageType, _logger);
                             if (isFeatureElementShape)
                             {

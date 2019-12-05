@@ -562,7 +562,11 @@ namespace Xbim
 						GProp_GProps gProps;
 						BRepGProp::VolumeProperties(*pCompound, gProps, Standard_True);
 						double volume = gProps.Mass();
-						if (volume < 0) pCompound->Reverse();
+						if (volume < 0)
+						{
+							XbimGeometryCreator::LogWarning(logger, closedShell, "Inverted IfcClosedShell #{0} detected", closedShell->EntityLabel);
+							pCompound->Reverse();
+						}
 						double oneCubicMillimetre = Math::Pow(closedShell->Model->ModelFactors->OneMilliMeter, 3);
 						volume = Math::Abs(volume);
 						if (volume < oneCubicMillimetre) //sometimes zero volume is just a badly defined shape so let it through maybe
