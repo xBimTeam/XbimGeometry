@@ -115,7 +115,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var cutWall = transformedWall.Cut(transformedOpening, model.ModelFactors.Precision, logger).FirstOrDefault();
                 Assert.IsNotNull(cutWall, "Cut wall should not be null");
                 // note this faceted brep already has the openings cut out and we are cutting them again so the volume should not change
-                var volDiff = cutWall.Volume - transformedWall.Volume;
+                var volDiff = (cutWall.Volume - transformedWall.Volume) ?? 0;
                 Assert.IsTrue(Math.Abs(volDiff) < 1e-5);
                 // Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
                 //  var solid = geomEngine.CreateSolid(er.Entity, logger);
@@ -659,17 +659,23 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     var halfSpaceSolid = geomEngine.CreateSolid(halfSpace, logger);
                     var cut = solid.Cut(halfSpaceSolid, 1e-5);
                     Assert.IsTrue(cut.Count > 0);
-                    Assert.IsTrue(Math.Abs((solid.Volume * .25) - cut.First.Volume) < 1e-5);
+                    Assert.IsTrue(solid.Volume.HasValue);
+                    Assert.IsTrue(cut.First.Volume.HasValue);
+                    Assert.IsTrue(Math.Abs(((solid.Volume * .25) - cut.First.Volume) ?? double.NaN) < 1e-5);
                     //move the halfspace plane up
                     baseSurface.Position.Location.Z = 30;
                     halfSpaceSolid = geomEngine.CreateSolid(halfSpace, logger);
                     cut = solid.Cut(halfSpaceSolid, 1e-5);
-                    Assert.IsTrue(Math.Abs((solid.Volume * .75) - cut.First.Volume) < 1e-5);
+                    Assert.IsTrue(solid.Volume.HasValue);
+                    Assert.IsTrue(cut.First.Volume.HasValue);
+                    Assert.IsTrue(Math.Abs(((solid.Volume * .75) - cut.First.Volume) ?? double.NaN) < 1e-5);
                     //reverse halfspace agreement
                     halfSpace.AgreementFlag = true;
                     halfSpaceSolid = geomEngine.CreateSolid(halfSpace, logger);
                     cut = solid.Cut(halfSpaceSolid, 1e-5);
-                    Assert.IsTrue(Math.Abs((solid.Volume * .25) - cut.First.Volume) < 1e-5);
+                    Assert.IsTrue(solid.Volume.HasValue);
+                    Assert.IsTrue(cut.First.Volume.HasValue);
+                    Assert.IsTrue(Math.Abs(((solid.Volume * .25) - cut.First.Volume) ?? double.NaN) < 1e-5);
 
                 }
             }
@@ -708,20 +714,26 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     var halfSpaceSolid = geomEngine.CreateSolid(polygonalBoundedHalfspace, logger);
                     var cut = solid.Cut(halfSpaceSolid, 1e-5);
 
-                    Assert.IsTrue(cut.Count > 0);
-                    Assert.IsTrue(Math.Abs((solid.Volume) - cut.First.Volume - 1000) < 1e-5);
+                    Assert.IsTrue(cut.Count > 0); 
+                    Assert.IsTrue(solid.Volume.HasValue);
+                    Assert.IsTrue(cut.First.Volume.HasValue);
+                    Assert.IsTrue(Math.Abs((solid.Volume - cut.First.Volume - 1000) ?? double.NaN) < 1e-5);
 
                     //reverse halfspace agreement
                     polygonalBoundedHalfspace.AgreementFlag = true;
                     halfSpaceSolid = geomEngine.CreateSolid(polygonalBoundedHalfspace, logger);
                     cut = solid.Cut(halfSpaceSolid, 1e-5);
-                    Assert.IsTrue(Math.Abs(solid.Volume - cut.First.Volume) < 1e-5);
+                    Assert.IsTrue(solid.Volume.HasValue);
+                    Assert.IsTrue(cut.First.Volume.HasValue);
+                    Assert.IsTrue(Math.Abs((solid.Volume - cut.First.Volume) ?? double.NaN) < 1e-5);
 
                     //move the plane up
                     plane.Position.Location.Z = 20;
                     halfSpaceSolid = geomEngine.CreateSolid(polygonalBoundedHalfspace, logger);
-                    cut = solid.Cut(halfSpaceSolid, 1e-5);
-                    Assert.IsTrue(Math.Abs(solid.Volume - cut.First.Volume - 500) < 1e-5);
+                    cut = solid.Cut(halfSpaceSolid, 1e-5); 
+                    Assert.IsTrue(solid.Volume.HasValue);
+                    Assert.IsTrue(cut.First.Volume.HasValue);
+                    Assert.IsTrue(Math.Abs((solid.Volume - cut.First.Volume - 500) ?? double.NaN) < 1e-5);
 
                     //some realistic data
                     polyLine.Points[0].SetXY(0, 0);
@@ -881,11 +893,11 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     Assert.IsTrue(cutSolid.IsValid);
                     if (uncutItem.Volume <= cutSolid.Volume) uncut++;
                     Assert.IsTrue(uncut <= 3, "More than two solids are uncut, there should only be two");
-                    vol += cutSolid.Volume;
+                    vol += cutSolid.Volume ?? double.NaN;
                 }
                 Assert.IsTrue(uncut == 2);
                 var scutVol = singleCut.Sum(s => s.Volume);
-                Assert.IsTrue(Math.Abs(vol - scutVol) < 1e-5);
+                Assert.IsTrue(Math.Abs((vol - scutVol) ?? double.NaN) < 1e-5);
 
 
             }

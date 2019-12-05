@@ -87,7 +87,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
                 var solid = geomEngine.CreateSolidSet(er.Entity, logger);
                 Assert.AreEqual(1, solid.Count);
-                Assert.AreEqual(solid.First().Volume, 12.6, 0.1);
+                Assert.AreEqual(solid.First().Volume.Value, 12.6, 0.1);
             }
         }
     }
