@@ -1334,7 +1334,7 @@ namespace Xbim.ModelGeometry.Scene
             try
             {
 
-                int c = 0;
+               // int c = 0;
             // contextHelper.ParallelOptions.MaxDegreeOfParallelism = 1;
                 Parallel.ForEach(contextHelper.ProductShapeIds, contextHelper.ParallelOptions, (shapeId) =>
                 {
