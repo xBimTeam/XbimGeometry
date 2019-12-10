@@ -698,7 +698,12 @@ namespace Xbim
 									}
 
 									xBimOrientedEdge = gcnew XbimEdge(edgeCurve->EdgeGeometry, logger);
-									if (!xBimOrientedEdge->IsValid)throw gcnew XbimException("Incorrectly defined Edge, must be a valid edge curve");
+									if (!xBimOrientedEdge->IsValid)
+									{
+										XbimGeometryCreator::LogWarning(logger, edgeCurve, "Incorrectly defined edge #{0}, it has been ignored", edgeCurve->EntityLabel);
+										//nothing else to do
+										continue;
+									}
 									xBimOrientedEdge = gcnew XbimEdge(xBimOrientedEdge, edgeStart, edgeEnd, maxTolerance); //adjust start and end		
 									if (!edgeCurve->SameSense) xBimOrientedEdge->Reverse();
 									FTol.SetTolerance(xBimOrientedEdge, _sewingTolerance);
@@ -710,11 +715,19 @@ namespace Xbim
 
 								if (!wireMaker.IsDone())
 								{
-									throw gcnew XbimException("Incorrectly defined Edge, must be a valid edge curve");
+									XbimGeometryCreator::LogWarning(logger, edgeLoop, "Incorrectly defined EdgeLoop #{0}, it has been ignored", edgeLoop->EntityLabel);
+									//nothing else to do
+									break;
+									
 								}
 							}
 						} // we have a wire		
-
+						if (!wireMaker.IsDone())
+						{
+							XbimGeometryCreator::LogWarning(logger, advancedFace, "Incorrectly defined Face #{0}, it has been ignored", advancedFace->EntityLabel);
+							//nothing else to do
+							continue;
+						}
 						TopoDS_Wire loopWire = wireMaker.Wire();
 						loopWire.Closed(Standard_True);
 						if (!ifcBound->Orientation) loopWire.Reverse();
