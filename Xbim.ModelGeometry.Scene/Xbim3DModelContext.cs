@@ -250,7 +250,7 @@ namespace Xbim.ModelGeometry.Scene
                     VoidedProductIds = new HashSet<int>();
                     VoidedShapeIds = new HashSet<int>();
                     ParallelOptions = new ParallelOptions();
-                    ParallelOptions.MaxDegreeOfParallelism = 8;
+                    ParallelOptions.MaxDegreeOfParallelism = 16;
 
                     CachedGeometries = new ConcurrentDictionary<int, IXbimGeometryObject>();
                     foreach (var voidedShapeId in OpeningsAndProjections.Select(op => op.Key.EntityLabel))
@@ -1334,12 +1334,12 @@ namespace Xbim.ModelGeometry.Scene
             try
             {
 
-               // int c = 0;
+             //   int c = 0;
             // contextHelper.ParallelOptions.MaxDegreeOfParallelism = 1;
                 Parallel.ForEach(contextHelper.ProductShapeIds, contextHelper.ParallelOptions, (shapeId) =>
                 {
-                    //Console.WriteLine($"{c} - {shapeId}");
-                    //Interlocked.Increment(ref c);
+                  //  Console.WriteLine($"{c} - {shapeId}");
+                   // Interlocked.Increment(ref c);
                     if (processed.TryGetValue(shapeId, out byte b)) return; //skip it
                     processed.TryAdd(shapeId, 0); //we are only going to try once
                     Interlocked.Increment(ref localTally);
@@ -1447,6 +1447,9 @@ namespace Xbim.ModelGeometry.Scene
                             progDelegate(localPercentageParsed, "Creating Geometry");
                         }
                     }
+                    
+                  //  Interlocked.Decrement(ref c);
+                  //  Console.WriteLine($"->{c} - {shapeId}");
                 }
             );
 

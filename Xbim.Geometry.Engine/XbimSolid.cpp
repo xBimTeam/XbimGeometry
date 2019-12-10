@@ -1309,11 +1309,15 @@ namespace Xbim
 		// params depend on segment type
 		double XbimSolid::SegLength(IIfcCompositeCurveSegment^ segment, ILogger^ logger)
 		{
-			if (dynamic_cast<IIfcLine^>(segment->ParentCurve))
+			IIfcLine^ line = dynamic_cast<IIfcLine^>(segment->ParentCurve);
+			IIfcTrimmedCurve^ trimmedCurve = dynamic_cast<IIfcTrimmedCurve^>(segment->ParentCurve);
+			if (line!=nullptr)
 			{
+				//srl perhaps it should be this
+				//return line->Dir->Magnitude;
 				return 1;
 			}
-			else if (dynamic_cast<IIfcTrimmedCurve^>(segment->ParentCurve))
+			else if (trimmedCurve!=nullptr)
 			{
 				try {
 					IIfcTrimmedCurve^ tc = dynamic_cast<IIfcTrimmedCurve^>(segment->ParentCurve);
@@ -1341,6 +1345,9 @@ namespace Xbim
 						}
 					}
 					double ret = valTrim2 - valTrim1;
+					
+					if (ret < 0 && (dynamic_cast<IIfcConic^>(tc->BasisCurve) != nullptr)) //params will be periodic so take the abs length
+						ret = Math::Abs(ret);
 					if (ret < 0)
 					{
 						XbimGeometryCreator::LogError(logger, segment, "Negative length value. Returned 1.");
@@ -1602,6 +1609,7 @@ namespace Xbim
 				// only trim if needed either from start or end
 				if ((occStart > 0 && Math::Abs(occStart - 0.0) > precision) || (occEnd < totCurveLen && Math::Abs(occEnd - totCurveLen) > precision))
 				{
+
 					return (XbimWire^)untrimmedWire->Trim(occStart, occEnd, directrix->Model->ModelFactors->Precision, logger);
 				}
 				else
