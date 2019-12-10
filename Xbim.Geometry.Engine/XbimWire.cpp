@@ -2314,12 +2314,17 @@ namespace Xbim
 				Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, f, l);
 				Standard_Real a = Math::Max(f, first);
 				Standard_Real b = Math::Min(l, last);
-				Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(curve, a, b);
-				BRepBuilderAPI_MakeWire wm;
-				wm.Add(BRepBuilderAPI_MakeEdge(trimmed));
-				TopoDS_Wire trimmedWire = wm.Wire();
-				fTol.LimitTolerance(trimmedWire, this->MaxTolerance);
-				return gcnew XbimWire(trimmedWire);
+				if (Math::Abs(a - b) > Precision::Confusion())
+				{
+					Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(curve, a, b);
+					BRepBuilderAPI_MakeWire wm;
+					wm.Add(BRepBuilderAPI_MakeEdge(trimmed));
+					TopoDS_Wire trimmedWire = wm.Wire();
+					fTol.LimitTolerance(trimmedWire, this->MaxTolerance);
+					return gcnew XbimWire(trimmedWire);
+				}
+				else
+					return gcnew XbimWire(); //empty wire
 			}
 			else
 			{
@@ -2355,8 +2360,11 @@ namespace Xbim
 						double maxTolerance = BRep_Tool::MaxTolerance(edge, TopAbs_VERTEX);
 						GeomLib_Tool::Parameter(curve, pFirst, maxTolerance, uOnEdgeFirst);
 						GeomLib_Tool::Parameter(curve, pLast, maxTolerance, uOnEdgeLast);
-						Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(curve, uOnEdgeFirst, uOnEdgeLast);
-						wm.Add(BRepBuilderAPI_MakeEdge(trimmed));
+						if (Math::Abs(uOnEdgeFirst - uOnEdgeLast) > Precision::Confusion())
+						{
+							Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(curve, uOnEdgeFirst, uOnEdgeLast);
+							wm.Add(BRepBuilderAPI_MakeEdge(trimmed));
+						}
 					}
 					// if first is < lp  then we need to trim to end of this edge unless first is zero or has already been used
 					else if (first > 0 && first < lp)
@@ -2365,8 +2373,11 @@ namespace Xbim
 						double uOnEdgeFirst;
 						double maxTolerance = BRep_Tool::MaxTolerance(edge, TopAbs_VERTEX);
 						GeomLib_Tool::Parameter(curve, pFirst, maxTolerance, uOnEdgeFirst);
-						Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(curve, uOnEdgeFirst, lEdge);
-						wm.Add(BRepBuilderAPI_MakeEdge(trimmed));
+						if (Math::Abs(uOnEdgeFirst - lEdge) > Precision::Confusion())
+						{
+							Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(curve, uOnEdgeFirst, lEdge);
+							wm.Add(BRepBuilderAPI_MakeEdge(trimmed));
+						}
 						first = -1; //it has been done
 					}
 					//if last  < lp need to trim from beginning to last
@@ -2378,8 +2389,11 @@ namespace Xbim
 						double uOnEdgeLast;
 						double maxTolerance = BRep_Tool::MaxTolerance(edge, TopAbs_VERTEX);
 						GeomLib_Tool::Parameter(curve, pLast, maxTolerance, uOnEdgeLast);
-						Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(curve, fEdge, uOnEdgeLast);
-						wm.Add(BRepBuilderAPI_MakeEdge(trimmed));
+						if (Math::Abs(uOnEdgeLast - fEdge) > Precision::Confusion())
+						{
+							Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(curve, fEdge, uOnEdgeLast);
+							wm.Add(BRepBuilderAPI_MakeEdge(trimmed));
+						}
 					}
 					else //we want the whole edge
 					{
