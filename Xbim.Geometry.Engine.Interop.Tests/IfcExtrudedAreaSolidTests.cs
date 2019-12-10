@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xbim.Ifc4.Interfaces;
+using Xbim.IO.Memory;
 
 namespace Xbim.Geometry.Engine.Interop.Tests.TestFiles
 {
@@ -52,6 +53,18 @@ namespace Xbim.Geometry.Engine.Interop.Tests.TestFiles
                 
                 var solid = geomEngine.CreateSolid(er.Entity, logger);
                 Assert.AreEqual(39, solid.Faces.Count , "This solid has the wrong number of faces");
+            }
+        }
+        [TestMethod]
+        public void swept_disk_solid_with_trim_params_test()
+        {
+            using (var model = MemoryModel.OpenRead(@"TestFiles\swept_disk_solid_with_trim_params.ifc"))
+            {
+                var disk = model.Instances.OfType<IIfcSweptDiskSolid>().FirstOrDefault();
+                Assert.IsNotNull(disk, "No IIfcSweptDiskSolid found");
+
+                var solid = geomEngine.CreateSolid(disk, logger);
+                Assert.AreEqual(5, solid.Faces.Count, "This solid has the wrong number of faces");
             }
         }
     }

@@ -1334,10 +1334,12 @@ namespace Xbim.ModelGeometry.Scene
             try
             {
 
-
+                int c = 0;
             // contextHelper.ParallelOptions.MaxDegreeOfParallelism = 1;
                 Parallel.ForEach(contextHelper.ProductShapeIds, contextHelper.ParallelOptions, (shapeId) =>
                 {
+                    //Console.WriteLine($"{c} - {shapeId}");
+                    //Interlocked.Increment(ref c);
                     if (processed.TryGetValue(shapeId, out byte b)) return; //skip it
                     processed.TryAdd(shapeId, 0); //we are only going to try once
                     Interlocked.Increment(ref localTally);

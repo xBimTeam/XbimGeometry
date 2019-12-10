@@ -1598,11 +1598,14 @@ namespace Xbim
 						occEnd += ratio * wireLen; // progress the occ amount by the ratio of the lenght
 					}
 				}
+				double precision = directrix->Model->ModelFactors->Precision;
 				// only trim if needed either from start or end
-				if (occStart > 0 || occEnd < totCurveLen)
+				if ((occStart > 0 && Math::Abs(occStart - 0.0) > precision) || (occEnd < totCurveLen && Math::Abs(occEnd - totCurveLen) > precision))
 				{
 					return (XbimWire^)untrimmedWire->Trim(occStart, occEnd, directrix->Model->ModelFactors->Precision, logger);
 				}
+				else
+					return untrimmedWire;
 			}
 			else if (dynamic_cast<IIfcPolyline^>(directrix) && 
 				(double)startParam.Value == 0. &&

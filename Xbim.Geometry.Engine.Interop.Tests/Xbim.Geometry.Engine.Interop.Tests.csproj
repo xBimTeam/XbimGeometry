@@ -150,6 +150,9 @@
     <None Update="TestFiles\swept_curve_with_trim_params.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="TestFiles\swept_disk_solid_with_trim_params.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="TestFiles\TrimmedCurveWithLargeRadianValueTest.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
