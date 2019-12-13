@@ -72,14 +72,14 @@ jobs:
   
   # Version Native C++
   - powershell: |
-      ((Get-Content -path Xbim.Geometry.Engine\app.rc -Raw) -replace '"FileVersion", "5.0.0.0"','"FileVersion", "$(fileversion)"') | Set-Content -Path Xbim.Geometry.Engine\app.rc
+      ((Get-Content -path Xbim.Geometry.Engine\app.rc -Raw) -replace '"FileVersion", "5.1.0.0"','"FileVersion", "$(fileversion)"') | Set-Content -Path Xbim.Geometry.Engine\app.rc
     displayName: 'Update Native C++ FileVersion'
   - powershell: |
-      ((Get-Content -path Xbim.Geometry.Engine\app.rc -Raw) -replace 'FILEVERSION 5,0,0,0','FILEVERSION $(major),$(minor),$(buildNo),0') | Set-Content -Path Xbim.Geometry.Engine\app.rc
+      ((Get-Content -path Xbim.Geometry.Engine\app.rc -Raw) -replace 'FILEVERSION 5,1,0,0','FILEVERSION $(major),$(minor),$(buildNo),0') | Set-Content -Path Xbim.Geometry.Engine\app.rc
     displayName: 'Update Native C++ FILEVERSION - for Master'
     condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
   - powershell: |
-      ((Get-Content -path Xbim.Geometry.Engine\app.rc -Raw) -replace 'FILEVERSION 5,0,0,0','FILEVERSION $(major),$(minor),0,$(buildNo)') | Set-Content -Path Xbim.Geometry.Engine\app.rc
+      ((Get-Content -path Xbim.Geometry.Engine\app.rc -Raw) -replace 'FILEVERSION 5,1,0,0','FILEVERSION $(major),$(minor),0,$(buildNo)') | Set-Content -Path Xbim.Geometry.Engine\app.rc
     displayName: 'Update Native C++ FILEVERSION - for Pre-Release'
     condition: ne(variables['Build.SourceBranch'], 'refs/heads/master')
   
