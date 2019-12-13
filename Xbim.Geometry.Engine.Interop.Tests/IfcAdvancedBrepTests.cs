@@ -51,8 +51,27 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 var brep = model.Instances.OfType<IIfcAdvancedBrep>().FirstOrDefault();
                 Assert.IsNotNull(brep, "No IIfcAdvancedBrep found");
-                var solid = geomEngine.CreateSolid(brep, logger);
-                 Assert.IsTrue(solid.Faces.Count == 62, "This solid should have 62 faces");
+                var solids = geomEngine.CreateSolidSet(brep, logger);
+                Assert.IsTrue(solids.Count == 1, "This set should have 2 solids");
+
+               Assert.IsTrue(solids.First().Faces.Count == 62, "This solid should have 62 faces");
+            }
+
+        }
+
+        [TestMethod]
+        public void Incorrectly_defined_edge_curve_with_identical_points()
+        {
+            
+            using (var model = MemoryModel.OpenRead(@"TestFiles\incorrectly_defined_edge_curve_with_identical_points.ifc"))
+            {
+                //this model needs workarounds to be applied
+                model.AddWorkAroundSurfaceofLinearExtrusionForRevit();
+                var brep = model.Instances.OfType<IIfcAdvancedBrep>().FirstOrDefault();
+                Assert.IsNotNull(brep, "No IIfcAdvancedBrep found");
+                var solids = geomEngine.CreateSolidSet(brep, logger);
+                Assert.IsTrue(solids.Count == 2, "This set should have 2 solids");
+                Assert.IsTrue(solids.First().Faces.Count == 8, "Solid 0 should have 8 faces");
             }
 
         }

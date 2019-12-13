@@ -120,6 +120,7 @@ namespace Xbim
 			XbimFace(IXbimWire^ wire, XbimPoint3D pointOnface,  XbimVector3D faceNormal, ILogger^ logger);
 			XbimFace(IIfcSurface^ surface, XbimWire^ outerBound, IEnumerable<XbimWire^>^ innerBounds, ILogger^ logger);
 			XbimFace(IIfcFaceSurface^ surface, XbimWire^ outerBound, IEnumerable<XbimWire^>^ innerBounds, double tolerance, ILogger^ logger);
+			bool CheckInside();
 			XbimFace(IIfcCylindricalSurface ^ surface, ILogger^ logger);
 			XbimFace(double x, double y, double tolerance, ILogger^ logger);
 			XbimFace(IIfcFace ^ face, ILogger^ logger);

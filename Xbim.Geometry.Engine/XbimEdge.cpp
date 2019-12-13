@@ -982,7 +982,7 @@ namespace Xbim
 				if (edgeErr != BRepBuilderAPI_EdgeDone)
 				{
 					String^ errMsg = GetBuildEdgeErrorMessage(edgeErr);
-					XbimGeometryCreator::LogError(logger, curve, "Could not build edge from curve, {0} .It has been ignored", errMsg);
+					XbimGeometryCreator::LogWarning(logger, curve, "Could not build edge from curve, {0} .It has been ignored", errMsg);
 					return;
 				}
 				pEdge = new TopoDS_Edge();

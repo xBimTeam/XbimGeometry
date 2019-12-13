@@ -146,7 +146,7 @@ namespace Xbim
 			else if (dynamic_cast<IIfcIndexedPolyCurve^>(curve)) Init((IIfcIndexedPolyCurve^)curve, logger);
 			else if (dynamic_cast<IIfcPcurve^>(curve)) Init((IIfcPcurve^)curve, logger);
 			else if (dynamic_cast<IIfcSurfaceCurve^>(curve)) Init((IIfcSurfaceCurve^)curve, logger);
-			else if(curve == nullptr)
+			else if (curve == nullptr)
 				XbimGeometryCreator::LogWarning(logger, curve, "Curve is null");
 			else
 				throw gcnew Exception(String::Format("Unsupported Curve Type {0}", curve->GetType()->Name));
@@ -158,7 +158,7 @@ namespace Xbim
 		{
 			TColgp_Array1OfPnt poles(1, Enumerable::Count(bspline->ControlPointsList));
 			int i = 1;
-			for each (IIfcCartesianPoint^ cp in bspline->ControlPointsList)
+			for each (IIfcCartesianPoint ^ cp in bspline->ControlPointsList)
 			{
 				poles.SetValue(i, gp_Pnt(cp->X, cp->Y, XbimConvert::GetZValueOrZero(cp)));
 				i++;
@@ -185,7 +185,7 @@ namespace Xbim
 		{
 			TColgp_Array1OfPnt poles(1, Enumerable::Count(bspline->ControlPointsList));
 			int i = 1;
-			for each (IIfcCartesianPoint^ cp in bspline->ControlPointsList)
+			for each (IIfcCartesianPoint ^ cp in bspline->ControlPointsList)
 			{
 				poles.SetValue(i, gp_Pnt(cp->X, cp->Y, XbimConvert::GetZValueOrZero(cp)));
 				i++;
@@ -231,7 +231,7 @@ namespace Xbim
 			int segIdx = 1;
 			XbimPoint3D startPnt;
 
-			for each(IIfcCompositeCurveSegment^ seg in cCurve->Segments) //every segment shall be a bounded curve
+			for each (IIfcCompositeCurveSegment ^ seg in cCurve->Segments) //every segment shall be a bounded curve
 			{
 				bool lastSeg = (segIdx == segCount);
 
@@ -322,7 +322,7 @@ namespace Xbim
 			*pCurve = bspline;
 		}
 
-		void  XbimCurve::Init(IIfcIndexedPolyCurve ^ polyCurve, ILogger ^ logger)
+		void  XbimCurve::Init(IIfcIndexedPolyCurve^ polyCurve, ILogger^ logger)
 		{
 			double tolerance = polyCurve->Model->ModelFactors->Precision;
 
@@ -373,7 +373,7 @@ namespace Xbim
 			if (Enumerable::Any(polyCurve->Segments))
 			{
 				GeomConvert_CompCurveToBSplineCurve converter;
-				for each (IIfcSegmentIndexSelect^ segment in  polyCurve->Segments)
+				for each (IIfcSegmentIndexSelect ^ segment in  polyCurve->Segments)
 				{
 					Ifc4::GeometryResource::IfcArcIndex^ arcIndex = dynamic_cast<Ifc4::GeometryResource::IfcArcIndex^>(segment);
 					Ifc4::GeometryResource::IfcLineIndex^ lineIndex = dynamic_cast<Ifc4::GeometryResource::IfcLineIndex^>(segment);
@@ -535,7 +535,7 @@ namespace Xbim
 				bool u1Found, u2Found, p1Found, p2Found;
 				double u2;
 				gp_Pnt p2;
-				for each (IIfcTrimmingSelect^ trim in curve->Trim1)
+				for each (IIfcTrimmingSelect ^ trim in curve->Trim1)
 				{
 					if (dynamic_cast<IIfcCartesianPoint^>(trim))
 					{
@@ -550,7 +550,7 @@ namespace Xbim
 						u1Found = true;
 					}
 				}
-				for each (IIfcTrimmingSelect^ trim in curve->Trim2)
+				for each (IIfcTrimmingSelect ^ trim in curve->Trim2)
 				{
 					if (dynamic_cast<IIfcCartesianPoint^>(trim))
 					{
@@ -570,6 +570,12 @@ namespace Xbim
 
 				if (trim_cartesian) //if we prefer cartesian and we have the points override the parameters
 				{
+					if (isLine && !p1.IsEqual(p2, precision)) //just make a line of the two points
+					{
+						GC_MakeLine maker(p1, p2);
+						delete pCurve;
+						pCurve = new Handle(Geom_Curve)(maker.Value());
+					}
 
 					double u;
 					if (p1Found)
@@ -585,7 +591,7 @@ namespace Xbim
 					if (!u1Found)  GeomLib_Tool::Parameter(*pCurve, p1, precision * 10, u1);
 					if (!u2Found)  GeomLib_Tool::Parameter(*pCurve, p2, precision * 10, u2);
 				}
-				if (u1 == u2)
+				if (Math::Abs(u1 - u2) < Precision::Confusion())
 				{
 					pCurve->Nullify();
 					pCurve = nullptr;
@@ -630,7 +636,7 @@ namespace Xbim
 			}
 			else
 			{
-				Type ^ type = circle->Position->GetType();
+				Type^ type = circle->Position->GetType();
 				XbimGeometryCreator::LogError(logger, circle, "Placement of type {0} is not implemented", type->Name);
 				return;
 			}
@@ -728,7 +734,7 @@ namespace Xbim
 			}
 		}
 
-		void XbimCurve::Init(IIfcSurfaceCurve ^ /*curve*/, ILogger ^ /*logger*/)
+		void XbimCurve::Init(IIfcSurfaceCurve^ /*curve*/, ILogger^ /*logger*/)
 		{
 			throw gcnew NotImplementedException("IIfcSurfaceCurve is not yet implemented");
 		}

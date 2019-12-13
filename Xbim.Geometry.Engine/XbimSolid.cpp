@@ -1313,9 +1313,9 @@ namespace Xbim
 			IIfcTrimmedCurve^ trimmedCurve = dynamic_cast<IIfcTrimmedCurve^>(segment->ParentCurve);
 			if (line!=nullptr)
 			{
-				//srl perhaps it should be this
-				//return line->Dir->Magnitude;
-				return 1;
+				//srl perhaps it should be this to obey IFC parametric rules
+				return line->Dir->Magnitude;
+				//return 1;
 			}
 			else if (trimmedCurve!=nullptr)
 			{
