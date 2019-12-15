@@ -493,7 +493,20 @@ namespace Xbim
 			BRepOffsetAPI_MakePipeShell pipeMaker1(directrix);
 			pipeMaker1.SetTransitionMode(BRepBuilderAPI_RightCorner);
 			pipeMaker1.Add(outerBound, Standard_False, Standard_False);
-			pipeMaker1.Build();
+			try
+			{
+				pipeMaker1.Build();
+			}
+			catch (Standard_Failure sf)
+			{
+				String^ err = gcnew String(sf.GetMessageString());
+				XbimGeometryCreator::LogWarning(logger, repItem, "Failed to create  IfcSurfaceCurveSweptAreaSolid solid: " + err);
+			}
+			catch (...)
+			{
+				XbimGeometryCreator::LogWarning(logger, repItem, "Failed to create  IfcSurfaceCurveSweptAreaSolid solid");
+			}
+			
 			if (pipeMaker1.IsDone())
 			{
 				TopoDS_Wire firstOuter = TopoDS::Wire(pipeMaker1.FirstShape().Reversed());
@@ -574,9 +587,7 @@ namespace Xbim
 			}
 
 			GC::KeepAlive(faceStart);
-			//GC::KeepAlive(faceEnd);
-
-
+			
 		}
 		void XbimSolid::Init(IIfcRevolvedAreaSolidTapered^ repItem, IIfcProfileDef^ overrideProfileDef, ILogger^ logger)
 		{
@@ -1314,8 +1325,8 @@ namespace Xbim
 			if (line!=nullptr)
 			{
 				//srl perhaps it should be this to obey IFC parametric rules
-				return line->Dir->Magnitude;
-				//return 1;
+				//return line->Dir->Magnitude;
+				return 1;
 			}
 			else if (trimmedCurve!=nullptr)
 			{

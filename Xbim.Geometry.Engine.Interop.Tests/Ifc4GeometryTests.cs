@@ -58,7 +58,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.IsTrue(pfs != null, "No IIfcAdvancedBrep found");
                 var solid = geomEngine.CreateSolid(pfs, logger);
 
-                Assert.AreEqual(57065616, solid.Volume, 0.99);
+                Assert.AreEqual(102264692, solid.Volume, 0.99);
                 Assert.AreEqual(14, solid.Faces.Count);
 
             }
@@ -334,7 +334,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 bool wa = model.ModelFactors.ApplyWorkAround("#SurfaceOfLinearExtrusion");
                 Assert.IsNotNull(advancedBrep);
                 var basin = geomEngine.CreateSolid(advancedBrep);
-                Assert.IsTrue((int)basin.Volume == 44329533);
+                Assert.IsTrue((int)basin.Volume == 44472872);
             }
         }
         [TestMethod]
@@ -566,7 +566,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 XbimVector3D v = le.ExtrusionAxis;
 
                 var bar = geomEngine.CreateSolid(surfaceSweep);
-                Assert.IsTrue(bar.Volume > 0);
+                Assert.AreEqual(0.26112592541014312,bar.Volume,1e-9);
             }
         }
 

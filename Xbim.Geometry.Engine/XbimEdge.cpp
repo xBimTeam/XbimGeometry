@@ -177,6 +177,7 @@ namespace Xbim
 		{
 			double tolerance = Math::Min(start->Tolerance, end->Tolerance);
 			double currentTolerance = tolerance;
+			ShapeFix_ShapeTolerance FTol;
 			if (start->Equals(end))
 			{
 				//must be a closed loop or nothing
@@ -189,7 +190,7 @@ namespace Xbim
 			{
 				Standard_Real p1, p2;
 				Handle(Geom_Curve) curve = BRep_Tool::Curve(edgeCurve, p1, p2);
-				ShapeFix_ShapeTolerance FTol;
+				
 			TryMakeEdge:
 				BRepBuilderAPI_MakeEdge edgeMaker(curve, start, end);
 				BRepBuilderAPI_EdgeError edgeErr = edgeMaker.Error();
@@ -222,6 +223,7 @@ namespace Xbim
 
 				}
 			}
+			FTol.LimitTolerance(*pEdge, tolerance);
 		}
 
 		XbimEdge::XbimEdge(IIfcCurve^ edgeCurve, XbimVertex^ start, XbimVertex^ end, ILogger^ logger)
@@ -262,9 +264,8 @@ namespace Xbim
 				{
 					*pEdge = edgeMaker.Edge();
 				}
-
+				FTol.LimitTolerance(*pEdge, tolerance);
 			}
-
 		}
 
 #pragma warning( push )

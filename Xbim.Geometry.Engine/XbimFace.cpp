@@ -256,27 +256,22 @@ namespace Xbim
 			Init(surface->FaceSurface, logger);
 			if (!IsValid) return;
 
-
-			//make sure all the pcurves are built	
-			ShapeFix_Wire wFix(outerBound, this, tolerance);
-			wFix.FixEdgeCurves();
-			XbimWire^ w = gcnew XbimWire(wFix.Wire());
-			
 			Handle(Geom_Surface) geomSurface = BRep_Tool::Surface(this);
+			TopoDS_Wire outer = outerBound;
+			//make sure all the pcurves are built	
+			ShapeFix_Wire wFix(outer, this, tolerance);
+			if (wFix.FixEdgeCurves())
+				outer = wFix.Wire();
+
 			BRepBuilderAPI_MakeFace faceMaker;
 			faceMaker.Init(geomSurface, false, tolerance);
-			faceMaker.Add(w);
+			faceMaker.Add(outer);
 			faceMaker.Build();
 			bool reversed = false;
 			if (faceMaker.IsDone())
 			{
 				*pFace = faceMaker.Face();
 				reversed = CheckInside();
-				//check orientation
-				if (!surface->SameSense) Reverse();
-				ShapeFix_Face faceFixer(*pFace);
-				if (faceFixer.Perform())
-					*pFace = faceFixer.Face();
 			}
 			else
 			{
@@ -290,18 +285,17 @@ namespace Xbim
 				BRepBuilderAPI_MakeFace innerFaceMaker;
 				for each (XbimWire ^ inner in innerBounds)
 				{
+					TopoDS_Wire innerWire = inner;
 					innerFaceMaker.Init(geomSurface, false, tolerance);
 					wFix.Init(inner, this, tolerance);
-					wFix.FixEdgeCurves();
-					TopoDS_Wire innerWire = wFix.Wire();
-					if (!surface->SameSense) innerWire.Reverse();
+					if (wFix.FixEdgeCurves())
+						innerWire = wFix.Wire();
 					innerFaceMaker.Add(innerWire);
 					if (innerFaceMaker.IsDone())
 					{
-
 						TopoDS_Face F = TopoDS::Face(innerFaceMaker.Face());
 						BRepTopAdaptor_FClass2d FClass(F, 0.);
-						if (FClass.PerformInfinitePoint() != TopAbs_IN) //need to reverse things
+						if (FClass.PerformInfinitePoint() != TopAbs_IN) //need to reverse things, should be outside
 						{
 							BRep_Builder B;
 							TopoDS_Face S = TopoDS::Face(pFace->EmptyCopied());
@@ -310,16 +304,25 @@ namespace Xbim
 								B.Add(S, it.Value().Reversed());
 								it.Next();
 							}
-
-							faceMaker.Add(BRepTools::OuterWire(S));						
-						}						
+							faceMaker.Add(BRepTools::OuterWire(S));
+						}
 					}
 				}
 				*pFace = faceMaker.Face();
-				
 			}
-			
+			//check orientation
+			if (!surface->SameSense) Reverse();
+			BRepCheck_Analyzer analyser(this, Standard_True);
+
+			if (!analyser.IsValid())
+			{
+				analyser.IsValid();
+			}
+			ShapeFix_Face faceFixer(*pFace);
+			if (faceFixer.Perform())
+				*pFace = faceFixer.Face();
 		}
+
 		//Ensure the wire bounds a space inside
 		bool XbimFace::CheckInside()
 		{
@@ -1413,29 +1416,30 @@ namespace Xbim
 				XbimGeometryCreator::LogWarning(logger, sLin, "Only profiles of type curve are valid in a surface of linearExtrusion {0}. Face discarded", sLin->SweptCurve->EntityLabel);
 				return;
 			}
-
-			gp_Vec extrude = XbimConvert::GetDir3d(sLin->ExtrudedDirection);
-			extrude.Normalize();
-			extrude *= sLin->Depth;
-			gp_Trsf localTrans;
-			localTrans.SetTranslationPart(extrude);
-			TopLoc_Location endLoc(localTrans);
+			double start, end;
+			double tolerance = sLin->Model->ModelFactors->Precision;
 			TopoDS_Edge startEdge = gcnew XbimEdge(sLin->SweptCurve, logger);
-			TopoDS_Edge endEdge = TopoDS::Edge(startEdge.Moved(endLoc));
-			pFace = new TopoDS_Face();
-			if (sLin->Position == nullptr || sLin->Model->ModelFactors->ApplyWorkAround("#SurfaceOfLinearExtrusion")) //revit does not respect the local placement
-			{	
-				*pFace = BRepFill::Face(startEdge, endEdge);
-			}
-			else
+			gp_Dir extrude = XbimConvert::GetDir3d(sLin->ExtrudedDirection); //we are going to ignore magnitude as the surface should be infinite
+			bool doWorkAround = sLin->Model->ModelFactors->ApplyWorkAround("#SurfaceOfLinearExtrusion");
+			Handle(Geom_Curve) c3d = BRep_Tool::Curve(startEdge, start, end);
+			if (!c3d.IsNull())
 			{
-				TopLoc_Location newLoc = XbimConvert::ToLocation(sLin->Position);
-				TopoDS_Edge e1 = TopoDS::Edge(startEdge.Moved(newLoc));
-				TopoDS_Edge e2 = TopoDS::Edge(endEdge.Moved(newLoc));					
-				*pFace = BRepFill::Face(e1, e2);
-			}
-			ShapeFix_ShapeTolerance fTol;
-			fTol.LimitTolerance(*pFace, sLin->Model->ModelFactors->Precision);
+				Handle(Geom_SurfaceOfLinearExtrusion) surface = new Geom_SurfaceOfLinearExtrusion(c3d, extrude);
+				BRepBuilderAPI_MakeFace faceMaker(surface, tolerance);
+				if (faceMaker.IsDone())
+				{
+					pFace = new TopoDS_Face();
+					*pFace = faceMaker.Face();
+					if (!(sLin->Position == nullptr || doWorkAround)) //revit does not respect the local placement
+					{
+						TopLoc_Location newLoc = XbimConvert::ToLocation(sLin->Position);
+						pFace->Move(newLoc);
+					}
+					ShapeFix_ShapeTolerance fTol;
+					fTol.LimitTolerance(*pFace, sLin->Model->ModelFactors->Precision);
+				}
+
+			}						
 		}
 
 		void  XbimFace::Init(double x, double y, double tolerance, ILogger^ /*logger*/)

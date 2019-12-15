@@ -668,9 +668,7 @@ namespace Xbim
 
 				for each (IIfcFace ^ unloadedFace in  faces)
 				{
-					IIfcAdvancedFace^ advancedFace = dynamic_cast<IIfcAdvancedFace^>(model->Instances[unloadedFace->EntityLabel]); //improves performance and reduces memory load				
-
-
+					IIfcAdvancedFace^ advancedFace = dynamic_cast<IIfcAdvancedFace^>(model->Instances[unloadedFace->EntityLabel]); //improves performance and reduces memory load								
 					XbimWire^ outerLoop = nullptr;
 					List<XbimWire^>^ innerLoops = gcnew List<XbimWire^>();
 					for each (IIfcFaceBound ^ ifcBound in advancedFace->Bounds) //build all the loops
@@ -703,13 +701,6 @@ namespace Xbim
 									//get or create the two vertices
 									XbimVertex^ edgeStart;
 									XbimVertex^ edgeEnd;
-									for each (XbimVertex^ v in vertices->Values)
-									{
-										if (v->Tolerance > 100)
-										{
-											int r = 8;
-										}
-									}
 									if (!vertices->TryGetValue(orientedEdge->EdgeElement->EdgeStart->EntityLabel, edgeStart)) //orientation is already considered
 									{
 										IIfcCartesianPoint^ startPoint = ((IIfcCartesianPoint^)((IIfcVertexPoint^)orientedEdge->EdgeElement->EdgeStart)->VertexGeometry);
@@ -834,20 +825,23 @@ namespace Xbim
 					XbimFace^ xbimAdvancedFace = gcnew XbimFace(advancedFace, outerLoop, innerLoops, maxTolerance, logger);
 					if (!xbimAdvancedFace->IsValid)
 						continue;
-					BRepCheck_Analyzer analyser(xbimAdvancedFace, Standard_True);
+					//This check is unnecessary as the face is already fixed during creation
+					//BRepCheck_Analyzer analyser(xbimAdvancedFace, Standard_True);
 
-					if (!analyser.IsValid())
-					{
-						ShapeFix_Face faceFix(xbimAdvancedFace);
-						// faceFix.SetContext(new ShapeBuild_ReShape); // this was suggeste in PR79 - but it does not seem to make the difference with OCC72
-						faceFix.Perform();
-						ShapeExtend_Status status;
-						faceFix.Status(status);
-						if (status != ShapeExtend_OK)
-							XbimGeometryCreator::LogWarning(logger, advancedFace, "Incorrectly defined face #{0}, it has been accepted as it is defined", advancedFace->EntityLabel);
-						else
-							xbimAdvancedFace = gcnew XbimFace(faceFix.Face());
-					}
+					//if (!analyser.IsValid())
+					//{
+					//	Handle(BRepCheck_Result) res = analyser.Result();
+					//	res->Status()
+					//	ShapeFix_Face faceFix(xbimAdvancedFace);
+					//	// faceFix.SetContext(new ShapeBuild_ReShape); // this was suggeste in PR79 - but it does not seem to make the difference with OCC72
+					//	faceFix.Perform();
+					//	ShapeExtend_Status status;
+					//	faceFix.Status(status);
+					//	if (status != ShapeExtend_OK)
+					//		XbimGeometryCreator::LogWarning(logger, advancedFace, "Incorrectly defined face #{0}, it has been accepted as it is defined", advancedFace->EntityLabel);
+					//	else
+					//		xbimAdvancedFace = gcnew XbimFace(faceFix.Face());
+					//}
 					if (xbimAdvancedFace->IsValid)
 						builder.AddShellFace(shell, xbimAdvancedFace);
 					else
