@@ -144,24 +144,24 @@ namespace Xbim
 		{
 			if (pCompound == nullptr || pCompound->IsNull())
 				return XbimRect3D::Empty;
-			
+
 			const TopoDS_Compound& occComp = *pCompound;
 			Standard_Real srXmin, srYmin, srZmin, srXmax, srYmax, srZmax;
 			bool isVoid = false;
 			try
 			{
 				Bnd_Box pBox;
-				BRepBndLib::Add(occComp, pBox);	
+				BRepBndLib::Add(occComp, pBox);
 				isVoid = pBox.IsVoid();
-				if (!isVoid) 
-				   pBox.Get(srXmin, srYmin, srZmin, srXmax, srYmax, srZmax);				
+				if (!isVoid)
+					pBox.Get(srXmin, srYmin, srZmin, srXmax, srYmax, srZmax);
 			}
 			catch (Standard_Failure sf)
 			{
-				String^ err = gcnew String(sf.GetMessageString());				
+				String^ err = gcnew String(sf.GetMessageString());
 				return XbimRect3D::Empty;
 			}
-			if(isVoid)
+			if (isVoid)
 				return XbimRect3D::Empty;
 			else
 				return XbimRect3D(srXmin, srYmin, srZmin, (srXmax - srXmin), (srYmax - srYmin), (srZmax - srZmin));
@@ -428,26 +428,37 @@ namespace Xbim
 
 			if (!outerShell->IsClosed) //we need to close it
 			{
+				const TopoDS_Shell& occOuterShell = outerShell;
 				//advanced breps are always solids, so to make sure we have highest form
-				BRepBuilderAPI_Sewing seamstress(_sewingTolerance);
-				seamstress.Add(outerShell);
-				Handle(XbimProgressIndicator) pi = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);
-				seamstress.Perform(pi);
-
-				TopTools_IndexedMapOfShape shellMap;
-				TopExp::MapShapes(seamstress.SewedShape(), TopAbs_SHELL, shellMap);
-				for (int ishell = 1; ishell <= shellMap.Extent(); ++ishell)
+				try
 				{
-					// Build solid
-					BRepBuilderAPI_MakeSolid solidmaker;
-					const TopoDS_Shell& shell = TopoDS::Shell(shellMap(ishell));
-					solidmaker.Add(shell);
-					solidmaker.Build();
-					if (solidmaker.IsDone())
+					BRepBuilderAPI_Sewing seamstress(_sewingTolerance);
+					seamstress.Add(occOuterShell);
+					Handle(XbimProgressIndicator) pi = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);
+					seamstress.Perform(pi);
+					
+					TopTools_IndexedMapOfShape shellMap;
+					TopExp::MapShapes(seamstress.SewedShape(), TopAbs_SHELL, shellMap);
+					for (int ishell = 1; ishell <= shellMap.Extent(); ++ishell)
 					{
-						b.Add(*pCompound, solidmaker.Solid());
+						// Build solid
+						BRepBuilderAPI_MakeSolid solidmaker;
+						const TopoDS_Shell& shell = TopoDS::Shell(shellMap(ishell));
+						solidmaker.Add(shell);
+						solidmaker.Build();
+						if (solidmaker.IsDone())
+						{
+							b.Add(*pCompound, solidmaker.Solid());
+						}
 					}
 				}
+				catch (Standard_Failure sf)
+				{
+					String^ err = gcnew String(sf.GetMessageString());
+					XbimGeometryCreator::LogWarning(logger, solid, "Failed to create  IfcAdvancedBrep: " + err);
+					b.Add(*pCompound, occOuterShell); //just add what we have
+				}
+
 
 			}
 			else
@@ -676,7 +687,7 @@ namespace Xbim
 				IModel^ model = aFace->Model;
 				ShapeFix_ShapeTolerance FTol;
 				_sewingTolerance = model->ModelFactors->Precision;
-				double maxTolerance = Math::Max(model->ModelFactors->OneMilliMetre*2, model->ModelFactors->Precision * 100);
+				double maxTolerance = Math::Max(model->ModelFactors->OneMilliMetre * 2, model->ModelFactors->Precision * 100);
 				//collect all the geometry components
 				Dictionary<int, XbimEdge^>^ orientedEdges = gcnew Dictionary<int, XbimEdge^>();
 				Dictionary<int, XbimVertex^>^ vertices = gcnew Dictionary<int, XbimVertex^>();
@@ -721,18 +732,18 @@ namespace Xbim
 										IIfcCartesianPoint^ startPoint = ((IIfcCartesianPoint^)((IIfcVertexPoint^)orientedEdge->EdgeElement->EdgeStart)->VertexGeometry);
 										edgeStart = gcnew XbimVertex(XbimPoint3D(startPoint->X, startPoint->Y, startPoint->Z), _sewingTolerance);
 										vertices->Add(orientedEdge->EdgeElement->EdgeStart->EntityLabel, edgeStart);
-										
+
 									}
 									if (!vertices->TryGetValue(orientedEdge->EdgeElement->EdgeEnd->EntityLabel, edgeEnd)) //orientation is already considered
 									{
 										IIfcCartesianPoint^ endPoint = ((IIfcCartesianPoint^)((IIfcVertexPoint^)orientedEdge->EdgeElement->EdgeEnd)->VertexGeometry);
 										edgeEnd = gcnew XbimVertex(XbimPoint3D(endPoint->X, endPoint->Y, endPoint->Z), _sewingTolerance);
 										vertices->Add(orientedEdge->EdgeElement->EdgeEnd->EntityLabel, edgeEnd);
-										
+
 									}
 
 									xBimOrientedEdge = gcnew XbimEdge(edgeCurve->EdgeGeometry, logger);
-									if (xBimOrientedEdge->Length <= 0 )
+									if (xBimOrientedEdge->Length <= 0)
 									{
 										XbimGeometryCreator::LogWarning(logger, edgeCurve->EdgeGeometry, "Incorrectly defined edge geometry in #{0}, it has been ignored", edgeCurve->EntityLabel);
 										//nothing else to do
@@ -743,13 +754,13 @@ namespace Xbim
 										//sometimes these are invalif edges and the code throws an xbimgeometry exception
 										xBimOrientedEdge = gcnew XbimEdge(xBimOrientedEdge, edgeStart, edgeEnd, maxTolerance); //adjust start and end	
 									}
-									catch (Exception^ edgeException)
+									catch (Exception ^ edgeException)
 									{
 										XbimGeometryCreator::LogWarning(logger, edgeCurve, "Incorrectly defined edge: {0}, it has been ignored", edgeException->Message);
 										//nothing else can be done
 										continue;
 									}
-										
+
 									if (!edgeCurve->SameSense) xBimOrientedEdge->Reverse();
 									//FTol.SetTolerance(xBimOrientedEdge, _sewingTolerance);
 									//add the original before we orient t the oriented edge direction
@@ -785,7 +796,7 @@ namespace Xbim
 											break;
 										}
 									}
-								}								
+								}
 								firstSeg = false;
 								bool ok = false;
 								try
