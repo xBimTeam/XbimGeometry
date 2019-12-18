@@ -271,7 +271,20 @@ namespace Xbim
 			if (faceMaker.IsDone())
 			{
 				*pFace = faceMaker.Face();
-				reversed = CheckInside();
+				try
+				{
+					reversed = CheckInside();
+				}
+				catch (Standard_Failure sf)
+				{
+					String^ err = gcnew String(sf.GetMessageString());
+					XbimGeometryCreator::LogWarning(logger, surface, "Failed to create  IfcFaceSurface: " + err);
+
+					delete pFace;
+					pFace = nullptr;
+					return;
+				}
+				
 			}
 			else
 			{

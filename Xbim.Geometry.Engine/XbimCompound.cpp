@@ -142,14 +142,29 @@ namespace Xbim
 
 		XbimRect3D XbimCompound::BoundingBox::get()
 		{
-			if (pCompound == nullptr)return XbimRect3D::Empty;
-			Bnd_Box pBox;
-			BRepBndLib::Add(*pCompound, pBox);
+			if (pCompound == nullptr || pCompound->IsNull())
+				return XbimRect3D::Empty;
+			
+			const TopoDS_Compound& occComp = *pCompound;
 			Standard_Real srXmin, srYmin, srZmin, srXmax, srYmax, srZmax;
-			if (pBox.IsVoid()) return XbimRect3D::Empty;
-			pBox.Get(srXmin, srYmin, srZmin, srXmax, srYmax, srZmax);
-			GC::KeepAlive(this);
-			return XbimRect3D(srXmin, srYmin, srZmin, (srXmax - srXmin), (srYmax - srYmin), (srZmax - srZmin));
+			bool isVoid = false;
+			try
+			{
+				Bnd_Box pBox;
+				BRepBndLib::Add(occComp, pBox);	
+				isVoid = pBox.IsVoid();
+				if (!isVoid) 
+				   pBox.Get(srXmin, srYmin, srZmin, srXmax, srYmax, srZmax);				
+			}
+			catch (Standard_Failure sf)
+			{
+				String^ err = gcnew String(sf.GetMessageString());				
+				return XbimRect3D::Empty;
+			}
+			if(isVoid)
+				return XbimRect3D::Empty;
+			else
+				return XbimRect3D(srXmin, srYmin, srZmin, (srXmax - srXmin), (srYmax - srYmin), (srZmax - srZmin));
 		}
 
 		IXbimGeometryObject^ XbimCompound::First::get()
