@@ -719,7 +719,7 @@ namespace Xbim
 									xBimOrientedEdge = gcnew XbimEdge(edgeCurve->EdgeGeometry, logger);
 									if (xBimOrientedEdge->Length <= 0 )
 									{
-										XbimGeometryCreator::LogWarning(logger, edgeCurve, "Incorrectly defined edge #{0}, it has been ignored", edgeCurve->EntityLabel);
+										XbimGeometryCreator::LogWarning(logger, edgeCurve->EdgeGeometry, "Incorrectly defined edge geometry in #{0}, it has been ignored", edgeCurve->EntityLabel);
 										//nothing else to do
 										continue;
 									}
