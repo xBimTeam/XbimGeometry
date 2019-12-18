@@ -158,7 +158,7 @@ namespace Xbim
 			}
 			catch (Standard_Failure sf)
 			{
-				String^ err = gcnew String(sf.GetMessageString());
+				//String^ err = gcnew String(sf.GetMessageString());
 				return XbimRect3D::Empty;
 			}
 			if (isVoid)
@@ -421,14 +421,13 @@ namespace Xbim
 			IIfcAdvancedBrepWithVoids^ advancedBrepWithVoids = dynamic_cast<IIfcAdvancedBrepWithVoids^>(solid);
 			if (advancedBrepWithVoids != nullptr) return Init(advancedBrepWithVoids, logger);
 			BRep_Builder b;
-			XbimShell^ outerShell = InitAdvancedFaces(solid->Outer->CfsFaces, logger);
-			if (outerShell == nullptr || !outerShell->IsValid) return;
+			TopoDS_Shell occOuterShell = InitAdvancedFaces(solid->Outer->CfsFaces, logger);
+			if (occOuterShell.IsNull()) return;
 			pCompound = new TopoDS_Compound();
 			b.MakeCompound(*pCompound);
 
-			if (!outerShell->IsClosed) //we need to close it
+			if (!occOuterShell.Closed()) //we need to close it
 			{
-				const TopoDS_Shell& occOuterShell = outerShell;
 				//advanced breps are always solids, so to make sure we have highest form
 				try
 				{
@@ -464,7 +463,7 @@ namespace Xbim
 			else
 			{
 				BRepBuilderAPI_MakeSolid solidmaker;
-				solidmaker.Add(outerShell);
+				solidmaker.Add(occOuterShell);
 				solidmaker.Build();
 				if (solidmaker.IsDone())
 				{
@@ -472,7 +471,7 @@ namespace Xbim
 				}
 				else
 				{
-					b.Add(*pCompound, outerShell);
+					b.Add(*pCompound, occOuterShell);
 				}
 
 			}

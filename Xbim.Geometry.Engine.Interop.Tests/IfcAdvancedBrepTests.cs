@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Xbim.Common.Geometry;
 using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Memory;
 
@@ -72,6 +73,25 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var solids = geomEngine.CreateSolidSet(brep, logger);
                 Assert.IsTrue(solids.Count == 2, "This set should have 2 solids");
                 Assert.IsTrue(solids.First().Faces.Count == 8, "Solid 0 should have 8 faces");
+            }
+
+        }
+        [TestMethod]
+        public void Advanced_brep_with_sewing_issues()
+        {
+
+            using (var model = MemoryModel.OpenRead(@"TestFiles\advanced_brep_with_sewing_issues.ifc"))
+            {
+                //this model needs workarounds to be applied
+                model.AddWorkAroundSurfaceofLinearExtrusionForRevit();
+                var brep = model.Instances.OfType<IIfcAdvancedBrep>().FirstOrDefault();
+                Assert.IsNotNull(brep, "No IIfcAdvancedBrep found");
+                var solids = geomEngine.CreateSolidSet(brep, logger);
+                var shapeGeom = geomEngine.CreateShapeGeometry(solids,
+                    model.ModelFactors.Precision, model.ModelFactors.DeflectionTolerance, 
+                    model.ModelFactors.DeflectionAngle, XbimGeometryType.PolyhedronBinary, logger);
+                Assert.IsTrue(solids.Count == 2, "This set should have 2 solids");
+                Assert.IsTrue(solids.First().Faces.Count == 37, "Solid 0 should have 37 faces");
             }
 
         }
