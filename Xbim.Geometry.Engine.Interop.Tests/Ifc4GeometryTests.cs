@@ -333,8 +333,10 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var advancedBrep = model.Instances.OfType<IfcAdvancedBrep>().FirstOrDefault(i => i.EntityLabel == 27743);
                 bool wa = model.ModelFactors.ApplyWorkAround("#SurfaceOfLinearExtrusion");
                 Assert.IsNotNull(advancedBrep);
-                var basin = geomEngine.CreateSolid(advancedBrep);
-                Assert.IsTrue((int)basin.Volume == 44472872);
+                var basin = geomEngine.CreateSolidSet(advancedBrep);
+                Assert.AreEqual(2, basin.Count());
+                Assert.AreEqual(44472872, basin.First().Volume, 1);
+                Assert.AreEqual(446943, basin.Last().Volume, 1);
             }
         }
         [TestMethod]
