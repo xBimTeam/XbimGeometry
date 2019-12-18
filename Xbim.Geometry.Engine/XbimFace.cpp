@@ -1335,8 +1335,13 @@ namespace Xbim
 				XbimGeometryCreator::LogWarning(logger, sRev, "Only profiles of type curve are valid in a surface of revolution {0}. Face discarded", sRev->SweptCurve->EntityLabel);
 				return;
 			}
-
-			TopoDS_Edge startEdge = gcnew XbimEdge(sRev->SweptCurve, logger);
+			XbimEdge^ edge = gcnew XbimEdge(sRev->SweptCurve, logger);
+			if (!edge->IsValid)
+			{
+				XbimGeometryCreator::LogWarning(logger, sRev, "Invalid Swept Curve for IfcSurfaceOfRevolution, face discarded");
+				return;
+			}
+			TopoDS_Edge startEdge = edge;
 
 			gp_Pnt origin(sRev->AxisPosition->Location->X, sRev->AxisPosition->Location->Y, sRev->AxisPosition->Location->Z);
 			gp_Dir axisDir(0, 0, 1);
@@ -1354,7 +1359,7 @@ namespace Xbim
 			}
 			else
 			{
-				XbimGeometryCreator::LogError(logger, sRev, "Invalid IfcSurfaceOfRevolution, face discarded");
+				XbimGeometryCreator::LogWarning(logger, sRev, "Invalid IfcSurfaceOfRevolution, face discarded");
 			}
 		}
 

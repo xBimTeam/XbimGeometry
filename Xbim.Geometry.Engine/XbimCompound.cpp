@@ -717,13 +717,24 @@ namespace Xbim
 									}
 
 									xBimOrientedEdge = gcnew XbimEdge(edgeCurve->EdgeGeometry, logger);
-									if (!xBimOrientedEdge->IsValid)
+									if (xBimOrientedEdge->Length <= 0 )
 									{
 										XbimGeometryCreator::LogWarning(logger, edgeCurve, "Incorrectly defined edge #{0}, it has been ignored", edgeCurve->EntityLabel);
 										//nothing else to do
 										continue;
 									}
-									xBimOrientedEdge = gcnew XbimEdge(xBimOrientedEdge, edgeStart, edgeEnd, maxTolerance); //adjust start and end		
+									try
+									{
+										//sometimes these are invalif edges and the code throws an xbimgeometry exception
+										xBimOrientedEdge = gcnew XbimEdge(xBimOrientedEdge, edgeStart, edgeEnd, maxTolerance); //adjust start and end	
+									}
+									catch (Exception^ edgeException)
+									{
+										XbimGeometryCreator::LogWarning(logger, edgeCurve, "Incorrectly defined edge: {0}, it has been ignored", edgeException->Message);
+										//nothing else can be done
+										continue;
+									}
+										
 									if (!edgeCurve->SameSense) xBimOrientedEdge->Reverse();
 									//FTol.SetTolerance(xBimOrientedEdge, _sewingTolerance);
 									//add the original before we orient t the oriented edge direction

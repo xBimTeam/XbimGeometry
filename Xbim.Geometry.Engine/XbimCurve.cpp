@@ -595,6 +595,7 @@ namespace Xbim
 				{
 					pCurve->Nullify();
 					pCurve = nullptr;
+					XbimGeometryCreator::LogWarning(logger, curve, "The trimming points either result in a zero length curve or do not intersect the curve");
 					return;// zero length curve;
 				}
 				if (isEllipse)

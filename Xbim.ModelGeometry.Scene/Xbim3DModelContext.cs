@@ -250,7 +250,7 @@ namespace Xbim.ModelGeometry.Scene
                     VoidedProductIds = new HashSet<int>();
                     VoidedShapeIds = new HashSet<int>();
                     ParallelOptions = new ParallelOptions();
-                    ParallelOptions.MaxDegreeOfParallelism = 16;
+                   // ParallelOptions.MaxDegreeOfParallelism = 16;
 
                     CachedGeometries = new ConcurrentDictionary<int, IXbimGeometryObject>();
                     foreach (var voidedShapeId in OpeningsAndProjections.Select(op => op.Key.EntityLabel))
@@ -1335,7 +1335,7 @@ namespace Xbim.ModelGeometry.Scene
             {
 
              //   int c = 0;
-            // contextHelper.ParallelOptions.MaxDegreeOfParallelism = 1;
+             //contextHelper.ParallelOptions.MaxDegreeOfParallelism = 1;
                 Parallel.ForEach(contextHelper.ProductShapeIds, contextHelper.ParallelOptions, (shapeId) =>
                 {
                   //  Console.WriteLine($"{c} - {shapeId}");
@@ -1454,10 +1454,13 @@ namespace Xbim.ModelGeometry.Scene
             );
 
             }
-            catch (AggregateException)
+            catch (AggregateException e)
             {
-
-                throw;
+                foreach (var item in e.InnerExceptions)
+                {
+                    LogError("Processing failure", item);
+                }
+                throw new XbimException("Processing halted due to model error", e);
             }
             contextHelper.PercentageParsed = localPercentageParsed;
             contextHelper.Tally = localTally;
