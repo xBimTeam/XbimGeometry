@@ -76,6 +76,22 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             }
 
         }
+
+        [TestMethod]
+        public void Swept_curve_with_bad_trims()
+        {
+            using (var model = MemoryModel.OpenRead(@"TestFiles\swept_curve_with_bad_trims.ifc"))
+            {
+                var sweptSolid = model.Instances.OfType<IIfcSurfaceCurveSweptAreaSolid>().FirstOrDefault();
+                bool wa = model.ModelFactors.ApplyWorkAround("#SurfaceOfLinearExtrusion");
+                Assert.IsNotNull(sweptSolid);
+                var solid = geomEngine.CreateSolid(sweptSolid);
+                //this solid is invalid
+                Assert.IsFalse(solid.IsValid);
+              
+            }
+        }
+
         [TestMethod]
         public void Advanced_brep_with_sewing_issues()
         {

@@ -412,7 +412,7 @@ namespace Xbim
 			IModelFactors^ mf = repItem->Model->ModelFactors;
 			XbimWire^ sweep = CreateDirectrix(repItem->Directrix, repItem->StartParam, repItem->EndParam, logger);
 
-			if (!sweep->IsValid)
+			if (!sweep->IsValid || std::abs(sweep->Length) < Precision::Confusion())
 			{
 				XbimGeometryCreator::LogWarning(logger, repItem, "Could not build Directrix");
 				return;
@@ -421,8 +421,7 @@ namespace Xbim
 			BRepPrim_Builder b;
 			TopoDS_Shell shell;
 			b.MakeShell(shell);
-
-
+			
 			//get where this is on the surface
 			XbimFace^ refSurface = gcnew XbimFace(repItem->ReferenceSurface, logger);
 
@@ -457,7 +456,11 @@ namespace Xbim
 				return;
 			}
 			XbimWire^ directrix = gcnew XbimWire(TopoDS::Wire(firstShape));
-
+			if(!directrix->IsValid || std::abs(directrix->Length)<Precision::Confusion())
+			{
+				XbimGeometryCreator::LogWarning(logger, repItem, "Directrix is zero length or invalid");
+				return;
+			}
 			//find the start point of the sweep
 			XbimPoint3D s = directrix->Start;
 			gp_Pnt startPoint(s.X, s.Y, s.Z);
