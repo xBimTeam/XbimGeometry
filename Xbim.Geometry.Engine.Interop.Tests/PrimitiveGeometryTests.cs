@@ -87,7 +87,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var workAroundTag = er.Entity.Model.AddWorkAroundTrimForPolylinesIncorrectlySetToOneForEntireCurve();
                 var solid = geomEngine.CreateSolidSet(er.Entity, logger);
                 Assert.AreEqual(1, solid.Count);
-                Assert.AreEqual(12.6,solid.First().Volume,  0.1);
+                Assert.AreEqual(1.325, solid.First().Volume,  0.001);
             }
         }
     }

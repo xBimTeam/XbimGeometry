@@ -491,7 +491,7 @@ namespace Xbim
 			XbimWire^ outerBound = (XbimWire^)(faceStart->OuterBound);
 
 			BRepOffsetAPI_MakePipeShell pipeMaker1(directrix);
-			pipeMaker1.SetTransitionMode(BRepBuilderAPI_RightCorner);
+			pipeMaker1.SetTransitionMode(BRepBuilderAPI_Transformed);
 			pipeMaker1.Add(outerBound, Standard_False, Standard_False);
 			try
 			{
