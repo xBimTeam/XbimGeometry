@@ -495,6 +495,31 @@ namespace Xbim
 				XbimGeometryCreator::LogError(logger, pline, "Polyline with less than 2 points is not a line. It has been ignored");
 				return;
 			}
+			//optimisation for singl segment polyline
+			if (pointCount == 2) //just trim a line
+			{
+				gp_Pnt pnt1 = XbimConvert::GetPoint3d(pline->Points[0]);
+				gp_Pnt pnt2 = XbimConvert::GetPoint3d(pline->Points[1]);
+				double len = pnt1.Distance(pnt2);
+				if (std::abs(len) < Precision::Confusion())
+				{
+					XbimGeometryCreator::LogWarning(logger, pline, "Polyline segment has zero length. It has been ignored");
+					return;
+				}
+				GC_MakeLine maker(pnt1, pnt2);
+				if (!maker.IsDone())
+				{
+					XbimGeometryCreator::LogWarning(logger, pline, "Polyline does not define a valid line segment. It has been ignored");
+					return;
+
+				}
+				else
+				{
+					pCurve = new Handle(Geom_Curve);
+					*pCurve = new Geom_TrimmedCurve(maker.Value(), 0, len);
+					return;
+				}
+			}
 			TColgp_Array1OfPnt poles(1, pointCount);
 			TColStd_Array1OfReal knots(1, pointCount);
 			TColStd_Array1OfInteger mults(1, pointCount);

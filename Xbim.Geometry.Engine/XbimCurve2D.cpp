@@ -19,6 +19,7 @@
 #include <Bnd_Box2d.hxx>
 #include <Geom2dConvert_CompCurveToBSplineCurve.hxx>
 #include <ShapeConstruct_ProjectCurveOnSurface.hxx>
+#include <Precision.hxx>
 
 using namespace System::Linq;
 namespace Xbim
@@ -344,8 +345,34 @@ namespace Xbim
 			int pointCount = pline->Points->Count;
 			if (pointCount < 2)
 			{
-				XbimGeometryCreator::LogError(logger, pline, "Polyline with less than 2 points is not a line. It has been ignored");
+				XbimGeometryCreator::LogWarning(logger, pline, "Polyline with less than 2 points is not a line. It has been ignored");
 				return;
+			}
+			if (pointCount == 2) //just trim a line
+			{
+				IIfcCartesianPoint^ cp1 = pline->Points[0];
+				IIfcCartesianPoint^ cp2 = pline->Points[1];
+				gp_Pnt2d pnt1(cp1->X, cp1->Y);
+				gp_Pnt2d pnt2(cp2->X, cp2->Y);
+				double len = pnt1.Distance(pnt2);
+				if (std::abs(len) < Precision::Confusion())
+				{
+					XbimGeometryCreator::LogWarning(logger, pline, "Polyline segment has zero length. It has been ignored");
+					return;
+				}
+				GCE2d_MakeLine maker(pnt1, pnt2);
+				if (!maker.IsDone())
+				{
+					XbimGeometryCreator::LogWarning(logger, pline, "Polyline does not define a valid line segment. It has been ignored");
+					return;
+					
+				}
+				else
+				{
+					pCurve2D = new Handle(Geom2d_Curve);
+					*pCurve2D = new Geom2d_TrimmedCurve(maker.Value(), 0,len);
+					return;
+				}
 			}
 			TColgp_Array1OfPnt2d poles(1, pointCount);
 			TColStd_Array1OfReal knots(1, pointCount);
