@@ -458,8 +458,8 @@ namespace Xbim
 			XbimWire^ directrix = gcnew XbimWire(TopoDS::Wire(firstShape));
 			if(!directrix->IsValid || std::abs(directrix->Length)<Precision::Confusion())
 			{
-				XbimGeometryCreator::LogWarning(logger, repItem, "Directrix is zero length or invalid");
-				return;
+				XbimGeometryCreator::LogWarning(logger, repItem, "Projected Directrix is zero length or invalid, using none projected directrix instead");
+				directrix = sweep;
 			}
 			//find the start point of the sweep
 			XbimPoint3D s = directrix->Start;

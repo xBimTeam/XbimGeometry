@@ -86,9 +86,10 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 bool wa = model.ModelFactors.ApplyWorkAround("#SurfaceOfLinearExtrusion");
                 Assert.IsNotNull(sweptSolid);
                 var solid = geomEngine.CreateSolid(sweptSolid);
-                //this solid is invalid
-                Assert.IsFalse(solid.IsValid);
-              
+                //this projected directrix is invalid but we default to using the none projected directrix
+                Assert.AreEqual(0.00025657473102144062, solid.Volume, 1e-5);
+
+
             }
         }
 
