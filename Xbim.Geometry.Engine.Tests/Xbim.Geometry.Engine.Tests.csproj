@@ -57,6 +57,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="AAA_DebugTest.cs" />
     <Compile Include="AdvBrepRecursionTests.cs" />
     <Compile Include="BoundingBoxTests.cs" />
     <Compile Include="CustomMeshingBehaviourTest.cs" />

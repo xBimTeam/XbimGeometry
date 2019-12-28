@@ -465,10 +465,16 @@ namespace Xbim
 						sprintf(buff, "c:\\tmp\\O%d", i);
 						BRepTools::Write(solid, buff);*/
 						
+						System::Diagnostics::Debug::WriteLine(solid->Volume);
+						
 						Bnd_Box box;
 						BRepBndLib::Add(solid, box);
 						allBoxes(i).SetGap(-tolerance * 2); //reduce to only catch faces that are inside tolerance and not sitting on the opening
-						if (!bodyBox.IsOut(box)) //only try and cut it if it might intersect the body
+						if (solid->Volume <= 0)
+						{
+							XbimGeometryCreator::LogWarning(solids, "Boolean operand of zero volume has been ignored.");
+						}
+						else if (!bodyBox.IsOut(box)) //only try and cut it if it might intersect the body
 						{		
 							FTol.LimitTolerance(solid, tolerance);				
 							cuttingObjects.Append(solid);
@@ -486,7 +492,8 @@ namespace Xbim
 					return gcnew XbimGeometryObjectSet(geomObjects);
 			
 				pBuilder->SetArguments(toBeProcessed);
-				pBuilder->SetTools(cuttingObjects);				
+				pBuilder->SetTools(cuttingObjects);		
+				// System::Diagnostics::Debug::WriteLine(cuttingObjects);
 				pBuilder->SetNonDestructive(Standard_True);				
 				Handle(XbimProgressIndicator) aPI = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);				
 				pBuilder->SetProgressIndicator(aPI);
@@ -505,6 +512,7 @@ namespace Xbim
 
 					if (BRepCheck_Analyzer(pBuilder->Shape(), Standard_False).IsValid() == Standard_False)
 					{
+						XbimGeometryCreator::LogError(solids, "Boolean operation result needs fixing.");
 						ShapeFix_Shape shapeFixer(pBuilder->Shape());
 						shapeFixer.SetPrecision(tolerance);
 						shapeFixer.SetMinTolerance(tolerance);
