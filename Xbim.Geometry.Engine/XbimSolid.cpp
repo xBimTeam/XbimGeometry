@@ -1177,7 +1177,11 @@ namespace Xbim
 			if (face->IsValid && repItem->Angle > 0) //we have a valid face and angle
 			{
 				IIfcAxis1Placement^ revolaxis = repItem->Axis;
-				gp_Pnt origin(revolaxis->Location->X, revolaxis->Location->Y, revolaxis->Location->Z);
+				gp_Pnt origin(
+					revolaxis->Location->X,
+					revolaxis->Location->Y,
+					XbimConvert::GetZValueOrZero(revolaxis->Location)
+				);
 				XbimVector3D zDir = revolaxis->Z;
 				gp_Dir vx(zDir.X, zDir.Y, zDir.Z);
 				gp_Ax1 ax1(origin, vx);
