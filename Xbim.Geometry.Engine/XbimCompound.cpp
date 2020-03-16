@@ -574,7 +574,7 @@ namespace Xbim
 				if (solidmaker.IsDone())
 				{
 					TopoDS_Solid solid = solidmaker.Solid();
-
+					XbimSolid^ s = gcnew XbimSolid(solid);
 					if (!solid.IsNull())
 					{
 						pCompound->Nullify();
@@ -584,7 +584,7 @@ namespace Xbim
 						if (BRepCheck_Analyzer(solid, Standard_True).IsValid() == Standard_False)
 						{
 							//try and fix if we can
-							ShapeFix_Shape fixer(solid);
+							ShapeFix_Solid fixer(solid);
 							fixer.SetMaxTolerance(closedShell->Model->ModelFactors->OneMilliMeter);
 							fixer.SetMinTolerance(closedShell->Model->ModelFactors->Precision);
 							fixer.SetPrecision(closedShell->Model->ModelFactors->Precision);
@@ -605,7 +605,7 @@ namespace Xbim
 						if (volume < 0) pCompound->Reverse();
 						double oneCubicMillimetre = Math::Pow(closedShell->Model->ModelFactors->OneMilliMeter, 3);
 						volume = Math::Abs(volume);
-						if (/*volume != 0 && */volume < oneCubicMillimetre) //sometimes zero volume is just a badly defined shape so let it through maybe
+						if (volume != 0 && volume < oneCubicMillimetre) //sometimes zero volume is just a badly defined shape so let it through maybe
 						{
 							XbimGeometryCreator::LogWarning(logger, closedShell, "Very small closed IfcClosedShell has been ignored");
 							pCompound->Nullify();
