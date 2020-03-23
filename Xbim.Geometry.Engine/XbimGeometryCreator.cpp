@@ -428,19 +428,22 @@ namespace Xbim
 #pragma region Wire Creation
 		IXbimWire^ XbimGeometryCreator::CreateWire(IIfcCurve^ curve, ILogger^ logger)
 		{
+			IIfcPolyline^ pline = dynamic_cast<IIfcPolyline^>(curve);
 			IIfcCompositeCurve^ composite = dynamic_cast<IIfcCompositeCurve^>(curve);
 			IIfcIndexedPolyCurve^ poly = dynamic_cast<IIfcIndexedPolyCurve^>(curve);
 			if (composite != nullptr)
-				return gcnew XbimWire(composite, logger);
+				return gcnew XbimWire(composite, logger, XbimConstraints::None);
 			else if (poly != nullptr)
-				return gcnew XbimWire(poly, logger);
+				return gcnew XbimWire(poly, logger, XbimConstraints::None);
+			else if (pline != nullptr)
+				return gcnew XbimWire(pline, logger, XbimConstraints::None);
 			else
-				return gcnew XbimWire(curve, logger);
+				return gcnew XbimWire(curve, logger, XbimConstraints::None);
 		}
 
 		IXbimWire^ XbimGeometryCreator::CreateWire(IIfcCompositeCurveSegment^ compCurveSeg, ILogger^ logger)
 		{
-			return gcnew XbimWire(compCurveSeg, logger);
+			return gcnew XbimWire(compCurveSeg, logger, XbimConstraints::None);
 		}
 #pragma endregion
 
@@ -465,7 +468,7 @@ namespace Xbim
 
 		IXbimFace^ XbimGeometryCreator::CreateFace(IIfcPolyline^ pline, ILogger^ logger)
 		{
-			return gcnew XbimFace(pline, logger);
+			return gcnew XbimFace(pline,  logger);
 		};
 
 		IXbimFace^ XbimGeometryCreator::CreateFace(IIfcPolyLoop^ loop, ILogger^ logger)

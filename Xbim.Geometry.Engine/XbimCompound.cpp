@@ -9,6 +9,7 @@
 #include "XbimVertexSet.h"
 #include "XbimConvert.h"
 #include "XbimGeometryObjectSet.h"
+#include "XbimBRepBuilderAPI_Sewing.h"
 #include <BRep_Builder.hxx>
 #include <BRepBuilderAPI_Sewing.hxx>
 #include <BRepBuilderAPI_FastSewing.hxx>
@@ -48,7 +49,7 @@
 #include <BRepBuilderAPI_CellFilter.hxx>
 #include <BRepBuilderAPI_VertexInspector.hxx>
 #include <BRepAdaptor_CompCurve.hxx>
-
+#include <ShapeUpgrade_RemoveInternalWires.hxx>
 
 // #include <ShapeBuild_ReShape.hxx> // this was suggeste in PR79 - but it does not seem to make the difference with OCC72
 
@@ -435,7 +436,7 @@ namespace Xbim
 					seamstress.Add(occOuterShell);
 					Handle(XbimProgressIndicator) pi = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);
 					seamstress.Perform(pi);
-					
+
 					TopTools_IndexedMapOfShape shellMap;
 					TopExp::MapShapes(seamstress.SewedShape(), TopAbs_SHELL, shellMap);
 					for (int ishell = 1; ishell <= shellMap.Extent(); ++ishell)
@@ -565,6 +566,7 @@ namespace Xbim
 			if (IsValid) //make it a closed solid if we can
 			{
 				BRepBuilderAPI_MakeSolid solidmaker;
+
 				TopTools_IndexedMapOfShape shellMap;
 				TopExp::MapShapes(*pCompound, TopAbs_SHELL, shellMap);
 				for (int ishell = 1; ishell <= shellMap.Extent(); ++ishell) {
@@ -574,7 +576,7 @@ namespace Xbim
 				if (solidmaker.IsDone())
 				{
 					TopoDS_Solid solid = solidmaker.Solid();
-					XbimSolid^ s = gcnew XbimSolid(solid);
+
 					if (!solid.IsNull())
 					{
 						pCompound->Nullify();
@@ -585,22 +587,28 @@ namespace Xbim
 						{
 							//try and fix if we can
 							ShapeFix_Solid fixer(solid);
+							fixer.LimitTolerance(closedShell->Model->ModelFactors->Precision);
 							fixer.SetMaxTolerance(closedShell->Model->ModelFactors->OneMilliMeter);
 							fixer.SetMinTolerance(closedShell->Model->ModelFactors->Precision);
 							fixer.SetPrecision(closedShell->Model->ModelFactors->Precision);
+
+
 							Handle(XbimProgressIndicator) pi = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);
 							if (fixer.Perform(pi))
+							{
 								b.Add(*pCompound, fixer.Shape());
+							}
 							else
 								XbimGeometryCreator::LogError(logger, closedShell, "Failed to create a valid solid from an IfcClosedShell");
 						}
 						else
 						{
 							b.Add(*pCompound, solid);
+
 						}
 
 						GProp_GProps gProps;
-						BRepGProp::VolumeProperties(*pCompound, gProps, Standard_True);
+						BRepGProp::VolumeProperties(*pCompound, gProps);
 						double volume = gProps.Mass();
 						if (volume < 0) pCompound->Reverse();
 						double oneCubicMillimetre = Math::Pow(closedShell->Model->ModelFactors->OneMilliMeter, 3);
@@ -1074,13 +1082,15 @@ namespace Xbim
 		void XbimCompound::Init(IEnumerable<IIfcFace^>^ ifcFaces, IIfcRepresentationItem^ theItem, ILogger^ logger)
 		{
 			_sewingTolerance = theItem->Model->ModelFactors->Precision;
-			BRep_Builder builder;
 
+			bool useVertexMap = ifcFaces->GetType() != XbimPolygonalFaceSet::typeid;
+			BRep_Builder builder;
+			TopTools_DataMapOfIntegerShape vertexMap;
 			if (Enumerable::Count(ifcFaces) == 1)
 			{
 				TopoDS_Shell shell;
 				builder.MakeShell(shell);
-				XbimFace^ face = gcnew XbimFace(Enumerable::First(ifcFaces), logger);
+				XbimFace^ face = gcnew XbimFace(Enumerable::First(ifcFaces), logger, useVertexMap, vertexMap);
 				builder.Add(shell, face);
 				pCompound = new TopoDS_Compound();
 				builder.MakeCompound(*pCompound);
@@ -1088,17 +1098,26 @@ namespace Xbim
 			}
 			else
 			{
-				BRepBuilderAPI_Sewing seamstress(_sewingTolerance);
+				BRepBuilderAPI_Sewing seamstress(_sewingTolerance); 
 				int allFaces = 0;
+
 				for each (IIfcFace ^ ifcFace in ifcFaces)
 				{
-					XbimFace^ face = gcnew XbimFace(ifcFace, logger);
+					XbimFace^ face =  gcnew XbimFace(ifcFace, logger, useVertexMap, vertexMap) ;
 					seamstress.Add(face);
 					allFaces++;
 				}
 				Handle(XbimProgressIndicator) pi = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);
+				seamstress.SetMinTolerance(_sewingTolerance);
+				seamstress.SetMaxTolerance(theItem->Model->ModelFactors->OneMilliMeter / 10);
+
 				seamstress.Perform(pi);
 
+				if (pi->TimedOut())
+				{
+					XbimGeometryCreator::LogWarning(logger, theItem, "Sewing of the Shell has exceed the timeout period of " + XbimGeometryCreator::BooleanTimeOut.ToString());
+					throw gcnew TimeoutException();
+				}
 				TopoDS_Shape result = seamstress.SewedShape();
 				TopoDS_Compound unifiedCompound;
 				builder.MakeCompound(unifiedCompound);

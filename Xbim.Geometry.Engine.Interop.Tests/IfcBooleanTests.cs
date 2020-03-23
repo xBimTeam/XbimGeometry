@@ -60,7 +60,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.IsTrue(er.Entity != null, "No IfcGrid found");
                 var s = geomEngine.CreateGrid(er.Entity, logger);
                 Assert.AreEqual(10, s.Count);
-                
+
             }
         }
 
@@ -82,7 +82,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void boolean_cut_failure()
         {
-            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(boolean_cut_failure),true)) //model is in radians
+            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(boolean_cut_failure), true)) //model is in radians
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
                 var ss = geomEngine.CreateSolidSet(er.Entity, logger);
@@ -90,7 +90,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 {
                     HelperFunctions.IsValidSolid(s);
                 }
-                
+
             }
         }
 
@@ -248,7 +248,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 Assert.IsTrue(er.Entity != null, "No IIfcBooleanClippingResult found");
 
-               var solids = geomEngine.CreateSolidSet(er.Entity, logger);
+                var solids = geomEngine.CreateSolidSet(er.Entity, logger);
                 HelperFunctions.IsValidSolid(solids.FirstOrDefault());
 
             }
@@ -585,31 +585,17 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 }
             }
         }
-
         [TestMethod]
-        public void IfcCsgUnionTest()
+        public void CSG_with_self_intersecting_wire_test()
         {
-            using (var m = new MemoryModel(new Ifc4.EntityFactoryIfc4()))
+            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(CSG_with_self_intersecting_wire_test)))
             {
-                using (var txn = m.BeginTransaction(""))
-                {
-                    var csgTree = m.Instances.New<IfcCsgSolid>();
-                    var bresult = m.Instances.New<IfcBooleanResult>();
-
-                    var cylinder = IfcModelBuilder.MakeRightCircularCylinder(m, 10, 20);
-                    var sphere = IfcModelBuilder.MakeSphere(m, 15);
-                    bresult.FirstOperand = cylinder;
-                    bresult.SecondOperand = sphere;
-                    bresult.Operator = IfcBooleanOperator.UNION;
-                    csgTree.TreeRootExpression = bresult;
-
-                    var solid = geomEngine.CreateSolidSet(csgTree, logger).FirstOrDefault();
-                    Assert.IsTrue(solid.Faces.Count == 3, "3 faces are required of this csg solid");
-                    Assert.IsTrue(solid.Vertices.Count == 3, "3 vertices are required of this csg solid");
-
-                }
+                Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
+                var solids = geomEngine.CreateSolidSet(er.Entity, logger);
+                Assert.IsTrue(solids.Count == 1, "One solid should be produced");
             }
         }
+
 
         [TestMethod]
         public void IfcCsgIntersectionTest()

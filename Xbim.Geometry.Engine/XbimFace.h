@@ -6,6 +6,8 @@
 #include <BRepBuilderAPI_FaceError.hxx>
 #include <Geom_Surface.hxx>
 #include <TColgp_SequenceOfPnt.hxx>
+#include <TopTools_DataMapOfIntegerShape.hxx>
+#include <vector>
 using namespace System::Collections::Generic;
 using namespace Xbim::Ifc4::Interfaces;
 using namespace Xbim::Common::Geometry;
@@ -49,7 +51,8 @@ namespace Xbim
 			void Init(IIfcRationalBSplineSurfaceWithKnots ^ surface, ILogger^ logger);
 			void Init(IIfcCylindricalSurface ^ surface, ILogger^ logger);
 			void Init(double x, double y, double tolerance, ILogger^ logger); 
-			void Init(IIfcFace^ face, ILogger^ logger);
+			void Init(IIfcFace^ face, ILogger^ logger, bool userVertexMap,  TopTools_DataMapOfIntegerShape& vertexMap);
+			
 		public:
 			
 			//destructors
@@ -114,7 +117,7 @@ namespace Xbim
 			XbimFace(IIfcCurveBoundedPlane ^ def, ILogger^ logger);
 			XbimFace(IIfcRectangularTrimmedSurface ^ def, ILogger^ logger);
 			XbimFace(IIfcCompositeCurve ^ cCurve, ILogger^ logger);
-			XbimFace(IIfcPolyline ^ pline, ILogger^ logger);
+			XbimFace(IIfcPolyline ^ pline,  ILogger^ logger);
 			XbimFace(IIfcPolyLoop ^ loop, ILogger^ logger);
 			XbimFace(IXbimWire^ wire, bool isPlanar, double precision, int entityLabel,  ILogger^ logger);
 			XbimFace(IXbimWire^ wire, XbimPoint3D pointOnface,  XbimVector3D faceNormal, ILogger^ logger);
@@ -123,7 +126,8 @@ namespace Xbim
 			bool CheckInside();
 			XbimFace(IIfcCylindricalSurface ^ surface, ILogger^ logger);
 			XbimFace(double x, double y, double tolerance, ILogger^ logger);
-			XbimFace(IIfcFace ^ face, ILogger^ logger);
+			XbimFace(IIfcFace ^ face, ILogger^ logger, bool useVertexMap, TopTools_DataMapOfIntegerShape & vertexMap);
+			
 #pragma endregion
 
 #pragma region Internal Properties
@@ -143,7 +147,8 @@ namespace Xbim
 			Handle(Geom_Surface) GetSurface();
 			XbimVector3D NormalAt(double u, double v);
 			void SetLocation(TopLoc_Location loc);
-			static bool RemoveDuplicatePoints(TColgp_SequenceOfPnt& polygon, bool closed, double tol);
+			static bool RemoveDuplicatePoints(TColgp_SequenceOfPnt& polygon, std::vector<int> handles, bool closed, double tol);
+			static bool RemoveDuplicatePoints(TColgp_SequenceOfPnt& polygon,  bool closed, double tol);
 #pragma endregion
 
 

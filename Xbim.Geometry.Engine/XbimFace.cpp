@@ -53,6 +53,7 @@
 #include <ShapeAnalysis.hxx>
 #include <BRepFill.hxx>
 #include <BRepPrimAPI_MakeRevol.hxx>
+#include <ShapeAnalysis_Wire.hxx>
 using namespace System::Linq;
 
 namespace Xbim
@@ -86,6 +87,42 @@ namespace Xbim
 				return "Unknown Error";
 			}
 		}
+		bool XbimFace::RemoveDuplicatePoints(TColgp_SequenceOfPnt& polygon, std::vector<int> handles, bool closed, double tol)
+		{
+			tol *= tol;
+			bool isClosed = false;
+			while (true) {
+				bool removed = false;
+				int n = polygon.Length() - (closed ? 0 : 1);
+				for (int i = 1; i <= n; ++i) {
+					// wrap around to the first point in case of a closed loop
+					int j = (i % polygon.Length()) + 1;
+					double dist = polygon.Value(i).SquareDistance(polygon.Value(j));
+					if (dist < tol) {
+						if (j == 1 && i == n) //the first and last point are the same
+							isClosed = true;
+						// do not remove the first or last point to
+						// maintain connectivity with other wires
+						if ((closed && j == 1) || (!closed && j == n))
+						{
+							polygon.Remove(i);
+							handles.erase(handles.begin() + i - 1);
+						}
+						else
+						{
+							polygon.Remove(j);
+							handles.erase(handles.begin() + j - 1);
+						}
+						removed = true;
+						break;
+					}
+				}
+				if (!removed) break;
+			}
+
+			return isClosed;
+		}
+
 		bool XbimFace::RemoveDuplicatePoints(TColgp_SequenceOfPnt& polygon, bool closed, double tol)
 		{
 			tol *= tol;
@@ -103,9 +140,13 @@ namespace Xbim
 						// do not remove the first or last point to
 						// maintain connectivity with other wires
 						if ((closed && j == 1) || (!closed && j == n))
+						{
 							polygon.Remove(i);
+						}
 						else
+						{
 							polygon.Remove(j);
+						}
 						removed = true;
 						break;
 					}
@@ -115,7 +156,6 @@ namespace Xbim
 
 			return isClosed;
 		}
-
 		XbimFace::XbimFace(XbimPoint3D l, XbimVector3D n, ILogger^ /*logger*/)
 		{
 			gp_Pln plane(gp_Pnt(l.X, l.Y, l.Z), gp_Dir(n.X, n.Y, n.Z));
@@ -188,7 +228,7 @@ namespace Xbim
 			Init(cCurve, logger);
 		}
 
-		XbimFace::XbimFace(IIfcPolyline^ pline, ILogger^ logger)
+		XbimFace::XbimFace(IIfcPolyline^ pline,  ILogger^ logger)
 		{
 			Init(pline, logger);
 		}
@@ -209,10 +249,11 @@ namespace Xbim
 		{
 			Init(wire, pointOnFace, faceNormal, logger);
 		}
-		XbimFace::XbimFace(IIfcFace^ face, ILogger^ logger)
+		XbimFace::XbimFace(IIfcFace^ face, ILogger^ logger, bool useVertexMap, TopTools_DataMapOfIntegerShape& vertexMap)
 		{
-			Init(face, logger);
+			Init(face, logger, useVertexMap, vertexMap);
 		}
+
 
 
 		XbimFace::XbimFace(double x, double y, double tolerance, ILogger^ logger)
@@ -284,7 +325,7 @@ namespace Xbim
 					pFace = nullptr;
 					return;
 				}
-				
+
 			}
 			else
 			{
@@ -361,7 +402,7 @@ namespace Xbim
 
 		void XbimFace::Init(IIfcCompositeCurve^ cCurve, ILogger^ logger)
 		{
-			XbimWire^ wire = gcnew XbimWire(cCurve, logger);
+			XbimWire^ wire = gcnew XbimWire(cCurve, logger, XbimConstraints::Closed | XbimConstraints::NotSelfIntersecting);
 			if (wire->IsValid)
 			{
 				BRepBuilderAPI_MakeFace faceMaker(wire);
@@ -369,11 +410,11 @@ namespace Xbim
 				*pFace = faceMaker.Face();
 			}
 		}
-
+		
 		void XbimFace::Init(IIfcPolyline^ pline, ILogger^ logger)
 		{
 
-			XbimWire^ wire = gcnew XbimWire(pline, logger);
+			XbimWire^ wire = gcnew XbimWire(pline, logger, XbimConstraints::Closed | XbimConstraints::NotSelfIntersecting);
 			if (wire->IsValid)
 			{
 				BRepBuilderAPI_MakeFace faceMaker(wire);
@@ -394,10 +435,12 @@ namespace Xbim
 			}
 
 			TColgp_SequenceOfPnt pointSeq;
+
 			BRepBuilderAPI_MakeWire wireMaker;
 			for (int i = 0; i < originalCount; i++)
 			{
 				pointSeq.Append(XbimConvert::GetPoint3d(polygon[i]));
+
 			}
 
 			XbimFace::RemoveDuplicatePoints(pointSeq, true, tolerance);
@@ -564,7 +607,7 @@ namespace Xbim
 			GC::KeepAlive(xbimWire);
 		}
 
-		void XbimFace::Init(IIfcFace^ ifcFace, ILogger^ logger)
+		void XbimFace::Init(IIfcFace^ ifcFace, ILogger^ logger, bool useVertexMap, TopTools_DataMapOfIntegerShape& vertexMap)
 		{
 			double tolerance = ifcFace->Model->ModelFactors->Precision;
 			double angularTolerance = 0.00174533; //1 tenth of a degree
@@ -591,13 +634,17 @@ namespace Xbim
 				}
 
 				TColgp_SequenceOfPnt pointSeq;
+				std::vector<int> handles;
 				BRepBuilderAPI_MakeWire wireMaker;
 				for (int i = 0; i < originalCount; i++)
 				{
 					pointSeq.Append(XbimConvert::GetPoint3d(polyloop->Polygon[i]));
+					if (useVertexMap) handles.push_back(polyloop->Polygon[i]->EntityLabel);
 				}
-
-				XbimFace::RemoveDuplicatePoints(pointSeq, true, tolerance);
+				if (useVertexMap)
+					XbimFace::RemoveDuplicatePoints(pointSeq, handles, true, tolerance);
+				else
+					XbimFace::RemoveDuplicatePoints(pointSeq, true, tolerance);
 
 				if (pointSeq.Length() != originalCount)
 				{
@@ -616,19 +663,40 @@ namespace Xbim
 					pointArray.SetValue(i, pointSeq.Value(i));
 				}
 
-
+				BRep_Builder builder;
 				//limit the tolerances for the vertices and edges
 				BRepBuilderAPI_MakePolygon polyMaker;
 				if (!bound->Orientation) //reverse the points
 				{
-					for (int i = pointSeq.Length(); i > 0; i--) {
-						polyMaker.Add(pointSeq.Value(i));
+					for (int i = pointSeq.Length(); i > 0; i--)
+					{
+						TopoDS_Vertex vertex;
+						int entityLabel = handles.at(i - 1);
+						if (!vertexMap.Find(entityLabel, vertex))
+						{
+							builder.MakeVertex(vertex, pointSeq.Value(i), tolerance);
+							vertexMap.Bind(entityLabel, vertex);
+						}
+						polyMaker.Add(vertex);
 					}
 				}
 				else
 				{
-					for (int i = 1; i <= pointSeq.Length(); ++i) {
-						polyMaker.Add(pointSeq.Value(i));
+					for (int i = 1; i <= pointSeq.Length(); ++i)
+					{
+						TopoDS_Vertex vertex;
+						if (useVertexMap)
+						{
+							int entityLabel = handles.at(i - 1);
+							if (!vertexMap.Find(entityLabel, vertex))
+							{
+								builder.MakeVertex(vertex, pointSeq.Value(i), tolerance);
+								vertexMap.Bind(entityLabel, vertex);
+							}
+						}
+						else
+							builder.MakeVertex(vertex, pointSeq.Value(i), tolerance);
+						polyMaker.Add(vertex);
 					}
 				}
 
@@ -802,7 +870,10 @@ namespace Xbim
 				XbimGeometryCreator::LogError(logger, profile, "Faces cannot be built with IIfcArbitraryOpenProfileDef, a face requires a closed loop");
 			else //it is a standard profile that can be built as a single wire
 			{
-				XbimWire^ wire = gcnew XbimWire(profile, logger);
+				XbimWire^ wire = gcnew XbimWire(profile, logger, XbimConstraints::Closed | XbimConstraints::NotSelfIntersecting);
+				//need to make sure the wire is ok
+
+
 				if (wire->IsValid)
 				{
 					double tolerance = profile->Model->ModelFactors->Precision;
@@ -817,8 +888,12 @@ namespace Xbim
 					{
 						XbimPoint3D centre = wire->BaryCentre;
 						gp_Pln thePlane(gp_Pnt(centre.X, centre.Y, centre.Z), gp_Vec(n.X, n.Y, n.Z));
+
 						pFace = new TopoDS_Face();
 						*pFace = BRepBuilderAPI_MakeFace(thePlane, wire, false);
+
+
+
 						//need to check for self intersecting edges to comply with Ifc rules
 						TopTools_IndexedMapOfShape map;
 						TopExp::MapShapes(*pFace, TopAbs_EDGE, map);
@@ -867,7 +942,7 @@ namespace Xbim
 			double toleranceMax = profile->Model->ModelFactors->PrecisionMax;
 			ShapeFix_ShapeTolerance FTol;
 			TopoDS_Face face;
-			XbimWire^ loop = gcnew XbimWire(profile->OuterCurve, logger);
+			XbimWire^ loop = gcnew XbimWire(profile->OuterCurve, logger, XbimConstraints::Closed | XbimConstraints::NotSelfIntersecting);
 			if (loop->IsValid)
 			{
 				if (!loop->IsClosed) //we need to close it i
@@ -908,7 +983,7 @@ namespace Xbim
 
 				for each (IIfcCurve ^ curve in profile->InnerCurves)
 				{
-					XbimWire^ innerWire = gcnew XbimWire(curve, logger);
+					XbimWire^ innerWire = gcnew XbimWire(curve, logger, XbimConstraints::Closed | XbimConstraints::NotSelfIntersecting);
 					if (!innerWire->IsValid)
 					{
 						XbimGeometryCreator::LogWarning(logger, profile, "Invalid innerWire. Inner bound ignored", curve->EntityLabel);
@@ -1403,12 +1478,12 @@ namespace Xbim
 			Init(def->BasisSurface, logger); //initialise the plane
 			if (IsValid)
 			{
-				XbimWire^ outerBound = gcnew XbimWire(def->OuterBoundary, logger);
+				XbimWire^ outerBound = gcnew XbimWire(def->OuterBoundary, logger, XbimConstraints::Closed | XbimConstraints::NotSelfIntersecting);
 				BRepBuilderAPI_MakeFace  builder(this);
 				builder.Add(outerBound);
 				for each (IIfcCurve ^ innerCurve in def->InnerBoundaries)
 				{
-					XbimWire^ innerBound = gcnew XbimWire(innerCurve, logger);
+					XbimWire^ innerBound = gcnew XbimWire(innerCurve, logger, XbimConstraints::Closed | XbimConstraints::NotSelfIntersecting);
 					if (innerBound->IsValid)
 						builder.Add(innerBound);
 					else
@@ -1457,7 +1532,7 @@ namespace Xbim
 					fTol.LimitTolerance(*pFace, sLin->Model->ModelFactors->Precision);
 				}
 
-			}						
+			}
 		}
 
 		void  XbimFace::Init(double x, double y, double tolerance, ILogger^ /*logger*/)

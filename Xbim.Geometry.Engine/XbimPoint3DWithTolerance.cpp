@@ -43,7 +43,7 @@ namespace Xbim
 
 		XbimPoint3DWithTolerance::XbimPoint3DWithTolerance(IIfcPointOnCurve^ point, ILogger^ logger)
 		{
-			XbimWire^ w = gcnew XbimWire(point->BasisCurve, logger);
+			XbimWire^ w = gcnew XbimWire(point->BasisCurve, logger, XbimConstraints::None);
 			this->point = w->PointAtParameter(point->PointParameter);
 			this->tolerance = point->Model->ModelFactors->Precision;
 			CalculateHashCode();

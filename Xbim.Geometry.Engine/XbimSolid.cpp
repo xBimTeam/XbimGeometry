@@ -85,6 +85,7 @@
 #include <BRepAlgo_Section.hxx>
 #include <GeomProjLib.hxx>
 #include <BRepOffsetAPI_NormalProjection.hxx>
+#include <TopTools_Array1OfShape.hxx>
 using namespace System::Linq;
 using namespace Xbim::Common;
 
@@ -631,14 +632,22 @@ namespace Xbim
 				gp_Trsf trsf;
 				trsf.SetTransformation(toAx3, gp_Ax3());
 				faceEnd->Move(trsf);
-
+				TopoDS_Wire outerBoundStart = (XbimWire^)(faceStart->OuterBound);
+				TopoDS_Wire outerBoundEnd = (XbimWire^)(faceEnd->OuterBound);
+				int boundsCount = faceStart->InnerBounds->Count;
+				TopTools_Array1OfShape wireStarts(1, boundsCount+1);
+				TopTools_Array1OfShape wireEnds(1, boundsCount+1);
+				for (int i = 1; i <= boundsCount; i++)
+				{
+					wireStarts(i) = faceStart->InnerWires->Wire[i];
+					wireEnds(i) = faceEnd->InnerWires->Wire[i];
+				}
 				try
 				{
 
 
 					BRepOffsetAPI_MakePipeShell pipeMaker1(sweep);
-					TopoDS_Wire outerBoundStart = (XbimWire^)(faceStart->OuterBound);
-					TopoDS_Wire outerBoundEnd = (XbimWire^)(faceEnd->OuterBound);
+					
 
 					//pipeMaker1.SetMode(Standard_True);
 
@@ -656,12 +665,12 @@ namespace Xbim
 						TopoDS_Wire lastOuter = TopoDS::Wire(pipeMaker1.LastShape().Reversed());
 						BRepBuilderAPI_MakeFace firstMaker(firstOuter);
 						BRepBuilderAPI_MakeFace lastMaker(lastOuter);
-						for (int i = 0; i < faceStart->InnerBounds->Count; i++)
+						for (int i = 1; i <= boundsCount; i++)
 						{
 							//it is a hollow section so we need to build the inside
 							BRepOffsetAPI_MakePipeShell pipeMaker2(sweep);
-							TopoDS_Wire innerBoundStart = faceStart->InnerWires->Wire[i];
-							TopoDS_Wire innerBoundEnd = faceEnd->InnerWires->Wire[i];
+							TopoDS_Wire innerBoundStart = TopoDS::Wire(wireStarts(i));
+							TopoDS_Wire innerBoundEnd = TopoDS::Wire(wireEnds(i));
 
 							pipeMaker2.SetTransitionMode(BRepBuilderAPI_Transformed);
 							pipeMaker2.Add(innerBoundStart);
@@ -808,7 +817,7 @@ namespace Xbim
 			}
 
 			IModelFactors^ mf = repItem->Model->ModelFactors;
-			XbimWire^ sweep = gcnew XbimWire(repItem->Directrix, logger);
+			XbimWire^ sweep = gcnew XbimWire(repItem->Directrix, logger, XbimConstraints::None);
 
 			if (dynamic_cast<IIfcLine^>(repItem->Directrix)) //params are different
 			{
@@ -953,7 +962,7 @@ namespace Xbim
 			{
 
 				//build the spine
-				XbimWire^ sweep = gcnew XbimWire(repItem->SpineCurve, logger);
+				XbimWire^ sweep = gcnew XbimWire(repItem->SpineCurve, logger, XbimConstraints::None);
 				BRepOffsetAPI_MakePipeShell pipeMaker1(sweep);
 				pipeMaker1.SetTransitionMode(BRepBuilderAPI_Transformed);
 				//move the sections to the right position
@@ -1283,7 +1292,7 @@ namespace Xbim
 
 			//build the substraction body
 			gp_Dir dir(pbhs->Position->P[2].X, pbhs->Position->P[2].Y, pbhs->Position->P[2].Z);
-			XbimWire^ polyBoundary = gcnew XbimWire(pbhs->PolygonalBoundary, logger);
+			XbimWire^ polyBoundary = gcnew XbimWire(pbhs->PolygonalBoundary, logger, XbimConstraints::Closed| XbimConstraints::NotSelfIntersecting);
 
 			if (!polyBoundary->IsValid)
 			{
@@ -1558,7 +1567,7 @@ namespace Xbim
 			//
 		XbimWire^ XbimSolid::CreateDirectrix(IIfcCurve^ directrix, Nullable<IfcParameterValue> startParam, Nullable<IfcParameterValue> endParam, Microsoft::Extensions::Logging::ILogger^ logger)
 		{
-			XbimWire^ untrimmedWire = gcnew XbimWire(directrix, logger);
+			XbimWire^ untrimmedWire = gcnew XbimWire(directrix, logger, XbimConstraints::None);
 			if (!startParam.HasValue && !endParam.HasValue) //no trim required
 			{
 				return untrimmedWire;
@@ -1603,7 +1612,7 @@ namespace Xbim
 				IIfcCompositeCurve^ curve = (IIfcCompositeCurve^)(directrix);
 				for each (IIfcCompositeCurveSegment ^ segment in curve->Segments)
 				{
-					XbimWire^ segWire = gcnew XbimWire(segment, logger);
+					XbimWire^ segWire = gcnew XbimWire(segment, logger, XbimConstraints::None);
 					double wireLen = segWire->Length;       // this is the lenght to add to the OCC command if we use all of the segment
 					double segValue = SegLength(segment, logger);   // this is the IFC size of the segment
 					totCurveLen += wireLen;
@@ -1969,7 +1978,7 @@ namespace Xbim
 			if (IsValid)
 			{
 				GProp_GProps gProps;
-				BRepGProp::VolumeProperties(*pSolid, gProps, Standard_True);
+				BRepGProp::VolumeProperties(*pSolid, gProps);
 				GC::KeepAlive(this);
 				return gProps.Mass();
 			}

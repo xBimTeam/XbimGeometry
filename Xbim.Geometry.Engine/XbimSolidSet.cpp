@@ -476,9 +476,13 @@ namespace Xbim
 			{
 				failed = true;
 			}
-
+			if (pi->TimedOut())
+			{
+				throw new std::exception("Boolean operation timed out");
+				
+			}
 			bool bopErr = aBOP.HasErrors();
-			if (failed || bopErr || aR.IsNull()) {
+			if ( failed || bopErr || aR.IsNull()) {
 				return false;
 			}
 
