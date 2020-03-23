@@ -9,7 +9,6 @@
 #include "XbimVertexSet.h"
 #include "XbimConvert.h"
 #include "XbimGeometryObjectSet.h"
-#include "XbimBRepBuilderAPI_Sewing.h"
 #include <BRep_Builder.hxx>
 #include <BRepBuilderAPI_Sewing.hxx>
 #include <BRepBuilderAPI_FastSewing.hxx>
