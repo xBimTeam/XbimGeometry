@@ -1115,7 +1115,12 @@ namespace Xbim
 				if (pi->TimedOut())
 				{
 					XbimGeometryCreator::LogWarning(logger, theItem, "Sewing of the Shell has exceed the timeout period of " + XbimGeometryCreator::BooleanTimeOut.ToString());
-					throw gcnew TimeoutException();
+					return;
+				}
+				if (seamstress.SewedShape().IsNull())
+				{
+					XbimGeometryCreator::LogWarning(logger, theItem, "Sewing of the Shell has resulted in an empty shape " );
+					return;
 				}
 				TopoDS_Shape result = seamstress.SewedShape();
 				TopoDS_Compound unifiedCompound;
@@ -1126,11 +1131,11 @@ namespace Xbim
 					ShapeUpgrade_UnifySameDomain unifier(result);
 					unifier.SetAngularTolerance(0.00174533); //1 tenth of a degree 
 					unifier.SetLinearTolerance(_sewingTolerance);
-
+					
 					try
 					{
 						//sometimes unifier crashes 
-						unifier.Build();
+						unifier.Build();					
 						builder.Add(unifiedCompound, unifier.Shape());
 
 					}

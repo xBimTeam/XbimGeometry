@@ -17,7 +17,7 @@ namespace Xbim
 			
 		public:
 			XbimOccWriter();
-			bool Write(const TopoDS_Shape& shape, String^ fileName);
+			static bool Write(const TopoDS_Shape& shape, String^ fileName);
 			bool Write(IXbimGeometryObject^ obj, String^ filename);
 			bool Write(IXbimGeometryObjectSet^ objects, String^ filename);
 			bool Write(IXbimSolidSet^ solidSet, String^ filename);

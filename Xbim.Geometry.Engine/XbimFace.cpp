@@ -1678,8 +1678,8 @@ namespace Xbim
 			BRepGProp_Face prop(face);
 			gp_Pnt pos;
 			gp_Vec normalDir;
-			double u1, u2, v1, v2;
-			prop.Bounds(u1, u2, v1, v2);
+			/*double u1, u2, v1, v2;
+			prop.Bounds(u1, u2, v1, v2);*/
 			prop.Normal(u, v, pos, normalDir);
 			XbimVector3D vec(normalDir.X(), normalDir.Y(), normalDir.Z());
 			return vec.Normalized();

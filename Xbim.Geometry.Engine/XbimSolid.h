@@ -14,7 +14,7 @@ namespace Xbim
 {
 	namespace Geometry
 	{
-
+		static void BuildIfcSurfaceCurveSweptAreaSolid(TopoDS_Wire& sweepOcc, TopoDS_Face& refSurface, TopoDS_Face& faceStartOcc, double precision, TopoDS_Solid & result,  int& retflag);
 		ref class XbimSolid :IXbimSolid, XbimOccShape
 		{
 		private:
@@ -38,6 +38,7 @@ namespace Xbim
 			void Init(IIfcSweptAreaSolid^ solid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger);
 			void Init(IIfcExtrudedAreaSolid^ solid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger);
 			void Init(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger);
+			
 			void Init(IIfcRevolvedAreaSolid^ solid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger);
 
 			void Init(IIfcExtrudedAreaSolidTapered^ solid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger);
