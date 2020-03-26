@@ -561,26 +561,39 @@ namespace Xbim
 
 		void XbimCompound::Init(IIfcClosedShell^ closedShell, ILogger^ logger)
 		{
+			BRep_Builder b;
 			Init((IIfcConnectedFaceSet^)closedShell, logger);
 			if (IsValid) //make it a closed solid if we can
 			{
+				bool hasMultiShellSolid = false;
 				BRepBuilderAPI_MakeSolid solidmaker;
+				//we have some shells that are a bunch of solids and we have some that are a single solid but a bunch of shells
 
 				TopTools_IndexedMapOfShape shellMap;
+				TopTools_ListOfShape solids;
 				TopExp::MapShapes(*pCompound, TopAbs_SHELL, shellMap);
-				for (int ishell = 1; ishell <= shellMap.Extent(); ++ishell) {
+				for (int ishell = 1; ishell <= shellMap.Extent(); ++ishell)
+				{
 					const TopoDS_Shell& shell = TopoDS::Shell(shellMap(ishell));
-					solidmaker.Add(shell);
+					BRepBuilderAPI_MakeSolid singleSolidmaker;
+					singleSolidmaker.Add(shell);
+					if (singleSolidmaker.IsDone())
+					{
+						solids.Append(singleSolidmaker.Solid()); //just make a solid
+					}
+					else
+					{
+						solidmaker.Add(shell); //stick it into the one which will make a solid from a bunch of shells
+						hasMultiShellSolid = true;
+					}
 				}
-				if (solidmaker.IsDone())
+				if (hasMultiShellSolid && solidmaker.IsDone())
 				{
 					TopoDS_Solid solid = solidmaker.Solid();
 
 					if (!solid.IsNull())
 					{
-						pCompound->Nullify();
-						BRep_Builder b;
-						b.MakeCompound(*pCompound);
+
 
 						if (BRepCheck_Analyzer(solid, Standard_True).IsValid() == Standard_False)
 						{
@@ -595,30 +608,44 @@ namespace Xbim
 							Handle(XbimProgressIndicator) pi = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);
 							if (fixer.Perform(pi))
 							{
-								b.Add(*pCompound, fixer.Shape());
+								solids.Append(fixer.Solid());
+								//	b.Add(*pCompound, fixer.Shape());
 							}
 							else
 								XbimGeometryCreator::LogError(logger, closedShell, "Failed to create a valid solid from an IfcClosedShell");
 						}
 						else
 						{
-							b.Add(*pCompound, solid);
-
+							//b.Add(*pCompound, solid);
+							solids.Append(solid);
 						}
 
-						GProp_GProps gProps;
-						BRepGProp::VolumeProperties(*pCompound, gProps);
-						double volume = gProps.Mass();
-						if (volume < 0) pCompound->Reverse();
-						double oneCubicMillimetre = Math::Pow(closedShell->Model->ModelFactors->OneMilliMeter, 3);
-						volume = Math::Abs(volume);
-						if (volume != 0 && volume < oneCubicMillimetre) //sometimes zero volume is just a badly defined shape so let it through maybe
-						{
-							XbimGeometryCreator::LogWarning(logger, closedShell, "Very small closed IfcClosedShell has been ignored");
-							pCompound->Nullify();
-							pCompound = nullptr;
-						}
+
 					}
+				}
+				if (solids.Size() > 0)
+				{
+					//double oneCubicMillimetre = Math::Pow(closedShell->Model->ModelFactors->OneMilliMeter, 3);
+					pCompound->Nullify();
+					b.MakeCompound(*pCompound);
+					TopTools_ListIteratorOfListOfShape itl(solids);
+					for (; itl.More(); itl.Next())
+					{
+						TopoDS_Shape solid = itl.Value();
+						GProp_GProps gProps;
+						BRepGProp::VolumeProperties(solid, gProps);
+						double volume = gProps.Mass();
+						if (volume < 0) solid.Reverse();
+						b.Add(*pCompound, solid);
+					}
+					
+					//volume = Math::Abs(volume);
+					//if (volume != 0 && volume < oneCubicMillimetre) //sometimes zero volume is just a badly defined shape so let it through maybe
+					//{
+					//	XbimGeometryCreator::LogWarning(logger, closedShell, "Very small closed IfcClosedShell has been ignored");
+					//	pCompound->Nullify();
+					//	pCompound = nullptr;
+					//}
 				}
 				else
 				{
@@ -1097,12 +1124,12 @@ namespace Xbim
 			}
 			else
 			{
-				BRepBuilderAPI_Sewing seamstress(_sewingTolerance); 
+				BRepBuilderAPI_Sewing seamstress(_sewingTolerance);
 				int allFaces = 0;
 
 				for each (IIfcFace ^ ifcFace in ifcFaces)
 				{
-					XbimFace^ face =  gcnew XbimFace(ifcFace, logger, useVertexMap, vertexMap) ;
+					XbimFace^ face = gcnew XbimFace(ifcFace, logger, useVertexMap, vertexMap);
 					seamstress.Add(face);
 					allFaces++;
 				}
@@ -1119,7 +1146,7 @@ namespace Xbim
 				}
 				if (seamstress.SewedShape().IsNull())
 				{
-					XbimGeometryCreator::LogWarning(logger, theItem, "Sewing of the Shell has resulted in an empty shape " );
+					XbimGeometryCreator::LogWarning(logger, theItem, "Sewing of the Shell has resulted in an empty shape ");
 					return;
 				}
 				TopoDS_Shape result = seamstress.SewedShape();
@@ -1131,11 +1158,11 @@ namespace Xbim
 					ShapeUpgrade_UnifySameDomain unifier(result);
 					unifier.SetAngularTolerance(0.00174533); //1 tenth of a degree 
 					unifier.SetLinearTolerance(_sewingTolerance);
-					
+
 					try
 					{
 						//sometimes unifier crashes 
-						unifier.Build();					
+						unifier.Build();
 						builder.Add(unifiedCompound, unifier.Shape());
 
 					}

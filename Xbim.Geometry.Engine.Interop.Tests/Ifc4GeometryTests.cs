@@ -164,7 +164,18 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             }
 
         }
+        [TestMethod]
+        public void closed_shell_is_valid_test()
+        {
+            using (var er = new EntityRepository<IIfcFacetedBrep>(nameof(closed_shell_is_valid_test)))
+            {
+                Assert.IsTrue(er.Entity != null, "No IIfcFacetedBrep found");
+                var solids = geomEngine.CreateSolidSet(er.Entity, logger);
+                Assert.IsTrue(solids.Count==4, "Should return 4 solids");
 
+            }
+
+        }
         [TestMethod]
         public void FacetedBrepWithFacesOutsideNorlamTolerancesTest()
         {
@@ -339,7 +350,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.AreEqual(446943, basin.Last().Volume, 1);
             }
         }
-        
+
 
         [TestMethod]
         public void TriangulatedFaceSetAdvancedTest()
@@ -500,9 +511,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             }
         }
 
-        
 
-        
+
+
         [TestMethod]
         public void SweptDiskSolidPolygonalTest()
         {
@@ -570,7 +581,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 XbimVector3D v = le.ExtrusionAxis;
 
                 var bar = geomEngine.CreateSolid(surfaceSweep);
-                Assert.AreEqual(0.26112592541014312,bar.Volume,1e-9);
+                Assert.AreEqual(0.26112592541014312, bar.Volume, 1e-9);
             }
         }
 
