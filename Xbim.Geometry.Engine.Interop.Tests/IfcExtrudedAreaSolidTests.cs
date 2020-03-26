@@ -33,6 +33,19 @@ namespace Xbim.Geometry.Engine.Interop.Tests.TestFiles
             logger = null;
         }
         [TestMethod]
+        public void arbritary_closed_profile_with_intersecting_voids_test()
+        {
+            using (var er = new EntityRepository<IIfcBooleanClippingResult>(nameof(arbritary_closed_profile_with_intersecting_voids_test)))
+            {
+                Assert.IsTrue(er.Entity != null, "No IIfcBooleanClippingResult found");
+                var solidSet = geomEngine.CreateSolidSet(er.Entity, logger);
+                Assert.IsTrue(solidSet.Count == 1, "This solid set should have 1 solid");
+                Assert.IsTrue(solidSet.First().Faces.Count == 28, "This solid should have 28 faces");
+            }
+
+        }
+
+        [TestMethod]
         public void IfcExtrudedAreaSolidInvalidPlacementTest()
         {
             using (var er = new EntityRepository<IIfcExtrudedAreaSolid>(nameof(IfcExtrudedAreaSolidInvalidPlacementTest)))

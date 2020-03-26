@@ -938,6 +938,12 @@ namespace Xbim
 
 		void XbimFace::Init(IIfcArbitraryProfileDefWithVoids^ profile, ILogger^ logger)
 		{
+			//IfcArbitraryProfileDefWithVoids must be defined by a 2D wire
+			if (2 != (int)profile->OuterCurve->Dim)
+			{
+				XbimGeometryCreator::LogWarning(logger, profile, "Invalid bound. It should be 2D");
+			}
+			//Z must be up
 			double tolerance = profile->Model->ModelFactors->Precision;
 			double toleranceMax = profile->Model->ModelFactors->PrecisionMax;
 			ShapeFix_ShapeTolerance FTol;
@@ -964,6 +970,7 @@ namespace Xbim
 				double currentFaceTolerance = tolerance;
 			TryBuildFace:
 				BRepBuilderAPI_MakeFace faceMaker(loop, true);
+				
 				BRepBuilderAPI_FaceError err = faceMaker.Error();
 				if (err == BRepBuilderAPI_NotPlanar)
 				{
@@ -980,9 +987,10 @@ namespace Xbim
 				pFace = new TopoDS_Face();
 				*pFace = faceMaker.Face();
 				XbimVector3D tn = Normal;
-
+				//some models incorrectly output overlapping / intersecting wires, don't process them
 				for each (IIfcCurve ^ curve in profile->InnerCurves)
 				{
+					faceMaker.Init(*pFace); //reset the faceMaker
 					XbimWire^ innerWire = gcnew XbimWire(curve, logger, XbimConstraints::Closed | XbimConstraints::NotSelfIntersecting);
 					if (!innerWire->IsValid)
 					{
@@ -1014,6 +1022,12 @@ namespace Xbim
 						double currentloopTolerance = tolerance;
 					TryBuildLoop:
 						faceMaker.Add(innerWire);
+						//check the face is ok
+						if (BRepCheck_Analyzer(faceMaker.Face(), Standard_True).IsValid() == Standard_False)						
+						{
+							XbimGeometryCreator::LogWarning(logger, profile, "Invalid void. Inner bound ignored", curve->EntityLabel);
+							continue;
+						}
 						BRepBuilderAPI_FaceError loopErr = faceMaker.Error();
 						if (loopErr != BRepBuilderAPI_FaceDone)
 						{

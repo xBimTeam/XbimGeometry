@@ -1194,13 +1194,14 @@ namespace Xbim
 					face = gcnew XbimFace(overrideProfileDef, logger);
 				if (!face->BoundingBox.IsEmpty)
 				{
-
-					BRepPrimAPI_MakePrism prism(face, vec);
-					GC::KeepAlive(face);
+					TopoDS_Face occFace = face;
+					BRepPrimAPI_MakePrism prism(occFace, vec);
+					
 					if (prism.IsDone())
 					{
 						pSolid = new TopoDS_Solid();
 						*pSolid = TopoDS::Solid(prism.Shape());
+						
 						if (repItem->Position != nullptr) //In Ifc4 this is now optional
 							pSolid->Move(XbimConvert::ToLocation(repItem->Position));
 						ShapeFix_ShapeTolerance tolFixer;
