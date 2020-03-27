@@ -910,7 +910,8 @@ namespace Xbim.ModelGeometry.Scene
                         IXbimGeometryObjectSet nextGeom;
                         try
                         {
-                            nextGeom = CutWithTimeOut(elementGeom, openingAndProjectionOp.CutGeometries, precision, BooleanTimeOutMilliSeconds);
+                            //nextGeom = CutWithTimeOut(elementGeom, openingAndProjectionOp.CutGeometries, precision, BooleanTimeOutMilliSeconds);
+                            nextGeom = elementGeom.Cut(openingAndProjectionOp.CutGeometries, precision);
                             if (nextGeom.IsValid)
                             {
                                 if (nextGeom.First != null && nextGeom.First.IsValid)

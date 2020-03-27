@@ -49,6 +49,7 @@
 #include <BRepBuilderAPI_VertexInspector.hxx>
 #include <BRepAdaptor_CompCurve.hxx>
 #include <ShapeUpgrade_RemoveInternalWires.hxx>
+#include <BRepClass3d_SolidClassifier.hxx>
 
 // #include <ShapeBuild_ReShape.hxx> // this was suggeste in PR79 - but it does not seem to make the difference with OCC72
 
@@ -479,6 +480,12 @@ namespace Xbim
 
 		void XbimCompound::Init(IIfcFacetedBrep^ solid, ILogger^ logger)
 		{
+			if (solid->Outer->CfsFaces->Count < 4) // if we have 3 or less planar faces it cannot form a valid solid
+			{
+				XbimGeometryCreator::LogWarning(logger, solid, "IfcFacetedBrep has less than 4 planar faces it cannot be a correct closed shell");
+				return;
+			}
+
 			IIfcFacetedBrepWithVoids^ facetedBrepWithVoids = dynamic_cast<IIfcFacetedBrepWithVoids^>(solid);
 			if (facetedBrepWithVoids != nullptr) return Init(facetedBrepWithVoids, logger);
 			Init(solid->Outer, logger);
@@ -561,6 +568,7 @@ namespace Xbim
 
 		void XbimCompound::Init(IIfcClosedShell^ closedShell, ILogger^ logger)
 		{
+			
 			BRep_Builder b;
 			Init((IIfcConnectedFaceSet^)closedShell, logger);
 			if (IsValid) //make it a closed solid if we can
@@ -569,26 +577,65 @@ namespace Xbim
 				BRepBuilderAPI_MakeSolid solidmaker;
 				//we have some shells that are a bunch of solids and we have some that are a single solid but a bunch of shells
 
-				TopTools_IndexedMapOfShape shellMap;
-				TopTools_ListOfShape solids;
-				TopExp::MapShapes(*pCompound, TopAbs_SHELL, shellMap);
-				for (int ishell = 1; ishell <= shellMap.Extent(); ++ishell)
+				
+				TopTools_IndexedMapOfShape solidMap;
+				
+				TopExp::MapShapes(*pCompound, TopAbs_SOLID, solidMap);
+
+				TopExp_Explorer expShell(*pCompound,TopAbs_SHELL,TopAbs_SOLID);
+				for(; expShell.More(); expShell.Next())
 				{
-					const TopoDS_Shell& shell = TopoDS::Shell(shellMap(ishell));
-					BRepBuilderAPI_MakeSolid singleSolidmaker;
-					singleSolidmaker.Add(shell);
-					if (singleSolidmaker.IsDone())
+					TopoDS_Shell shell = TopoDS::Shell(expShell.Current());		
+					
+					ShapeAnalysis_Shell sa;
+					sa.LoadShells(shell);
+					if (sa.HasBadEdges())
 					{
-						solids.Append(singleSolidmaker.Solid()); //just make a solid
+						ShapeFix_Shell sf(shell);
+						if (sf.Perform())
+						{
+							shell = sf.Shell();
+						}
 					}
-					else
+					if (!sa.HasFreeEdges()) //it is most likely a solid
 					{
-						solidmaker.Add(shell); //stick it into the one which will make a solid from a bunch of shells
-						hasMultiShellSolid = true;
+						BRepBuilderAPI_MakeSolid sm;
+						sm.Add(shell); //adds and creates a solid
+						if (sm.IsDone())
+						{
+							bool failed = false;
+							TopoDS_Solid s = sm.Solid();
+							try
+							{
+								BRepClass3d_SolidClassifier class3d(s);
+								class3d.PerformInfinitePoint(Precision::Confusion());
+								if (class3d.State() == TopAbs_IN) s.Reverse();
+								solidMap.Add(s);
+							}
+							catch (...)
+							{
+								failed = true;
+							}
+							if (failed)
+							{
+								
+								BRepTools::Write(s,"c:/tmp/1");
+								BRepTools::Write(shell, "c:/tmp/2");
+							}
+							
+							continue;
+						}
 					}
+					solidmaker.Add(shell); //stick it into the one which will make a solid from a bunch of shells
+					hasMultiShellSolid = true;
+					
 				}
 				if (hasMultiShellSolid && solidmaker.IsDone())
 				{
+					//this is tricky we may have shells that dont make a solid, or we would have sorted them by now
+					//so we have a bunch of shells, that failed to be sewn and are not solids
+					//if we make them into a solid they will have free edges so will not be closed
+					//best we can is try and fix them
 					TopoDS_Solid solid = solidmaker.Solid();
 
 					if (!solid.IsNull())
@@ -608,37 +655,43 @@ namespace Xbim
 							Handle(XbimProgressIndicator) pi = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);
 							if (fixer.Perform(pi))
 							{
-								solids.Append(fixer.Solid());
-								//	b.Add(*pCompound, fixer.Shape());
+								solidMap.Add(fixer.Solid());								
 							}
 							else
-								XbimGeometryCreator::LogError(logger, closedShell, "Failed to create a valid solid from an IfcClosedShell");
+								XbimGeometryCreator::LogWarning(logger, closedShell, "Failed to create a valid solid from an IfcClosedShell");
 						}
 						else
-						{
-							//b.Add(*pCompound, solid);
-							solids.Append(solid);
+						{							
+							solidMap.Add(solid);
 						}
-
 
 					}
 				}
-				if (solids.Size() > 0)
+				if (solidMap.Size() > 0)
 				{
-					//double oneCubicMillimetre = Math::Pow(closedShell->Model->ModelFactors->OneMilliMeter, 3);
+					
 					pCompound->Nullify();
 					b.MakeCompound(*pCompound);
-					TopTools_ListIteratorOfListOfShape itl(solids);
-					for (; itl.More(); itl.Next())
-					{
-						TopoDS_Shape solid = itl.Value();
-						GProp_GProps gProps;
-						BRepGProp::VolumeProperties(solid, gProps);
-						double volume = gProps.Mass();
-						if (volume < 0) solid.Reverse();
-						b.Add(*pCompound, solid);
-					}
 					
+					for (int isolid = 1; isolid <= solidMap.Extent(); ++isolid)
+					{
+						TopoDS_Shape solid = solidMap.FindKey(isolid);
+						//double oneCubicMillimetre = Math::Pow(closedShell->Model->ModelFactors->OneMilliMeter, 3);
+						/*GProp_GProps gProps;
+						try
+						{
+							BRepGProp::VolumeProperties(solid, gProps);
+							double volume = gProps.Mass();
+							if (volume < 0) solid.Reverse();*/
+							b.Add(*pCompound, solid);
+						/*}
+						catch (...)
+						{
+							BRepTools::Write(solid, "c:/tmp/1");
+						}*/
+
+					}
+
 					//volume = Math::Abs(volume);
 					//if (volume != 0 && volume < oneCubicMillimetre) //sometimes zero volume is just a badly defined shape so let it through maybe
 					//{

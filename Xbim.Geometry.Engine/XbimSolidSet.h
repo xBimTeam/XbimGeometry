@@ -18,7 +18,8 @@ namespace Xbim
 		const int BOOLEAN_NOTBUILT = -2;
 		const int BOOLEAN_HASERRORS = -3;
 		const int BOOLEAN_FAILEDSINGLECUT = -4;
-		static int DoBoolean(const TopoDS_Shape& body, const TopTools_ListOfShape& tools, BOPAlgo_Operation op, double tolerance, TopoDS_Shape& result, int timeout);
+	
+	    int DoBoolean(const TopoDS_Shape& body, const TopTools_ListOfShape& tools, BOPAlgo_Operation op, double tolerance, TopoDS_Shape& result, int timeout);
 
 		private ref class VolumeComparer : IComparer<Tuple<double, XbimSolid^>^>
 		{

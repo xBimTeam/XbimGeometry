@@ -228,7 +228,7 @@ namespace Xbim
 						List<Ifc4::MeasureResource::IfcPositiveInteger>^ indices = (List<Ifc4::MeasureResource::IfcPositiveInteger>^)arcIndex->Value;
 						if (indices->Count != 3)
 						{
-							XbimGeometryCreator::LogError(logger, segment, "There should be three indices in an arc segment");
+							XbimGeometryCreator::LogWarning(logger, segment, "There should be three indices in an arc segment");
 							return;
 						}
 						gp_Pnt2d start = poles.Value((int)indices[0]);
@@ -244,7 +244,7 @@ namespace Xbim
 							Handle(Geom2d_TrimmedCurve) trimmed = new Geom2d_TrimmedCurve(curve, u1, u2);
 							if (!converter.Add(trimmed, tolerance))
 							{
-								XbimGeometryCreator::LogError(logger, segment, "Could not add arc segment to IfcIndexedPolyCurve");
+								XbimGeometryCreator::LogWarning(logger, segment, "Could not add arc segment to IfcIndexedPolyCurve");
 								return;
 							}
 						}
@@ -260,7 +260,7 @@ namespace Xbim
 								Handle(Geom2d_TrimmedCurve) trimmed = new Geom2d_TrimmedCurve(line, u1, u2);
 								if (!converter.Add(trimmed, tolerance))
 								{
-									XbimGeometryCreator::LogError(logger, segment, "Could not add arc segment as polyline to IfcIndexedPolyCurve");
+									XbimGeometryCreator::LogWarning(logger, segment, "Could not add arc segment as polyline to IfcIndexedPolyCurve");
 									return;
 								}
 							}
@@ -276,7 +276,7 @@ namespace Xbim
 						List<Ifc4::MeasureResource::IfcPositiveInteger>^ indices = (List<Ifc4::MeasureResource::IfcPositiveInteger>^)lineIndex->Value;
 						if (indices->Count < 2)
 						{
-							XbimGeometryCreator::LogError(logger, segment, "There should be at least two indices in an line index segment");
+							XbimGeometryCreator::LogWarning(logger, segment, "There should be at least two indices in an line index segment");
 							return;
 						}
 						int linePointCount = indices->Count;
@@ -297,7 +297,7 @@ namespace Xbim
 
 						if (!converter.Add(spline, tolerance))
 						{
-							XbimGeometryCreator::LogError(logger, segment, "Could not add line index segment as polyline to IfcIndexedPolyCurve");
+							XbimGeometryCreator::LogWarning(logger, segment, "Could not add line index segment as polyline to IfcIndexedPolyCurve");
 							return;
 						}
 					}
@@ -432,12 +432,12 @@ namespace Xbim
 			
 			if (semiAx1 <= 0)
 			{
-				XbimGeometryCreator::LogError(logger, ellipse,"WC002: Illegal Ellipse Semi Axis 1, must be greater than 0, in entity #{0}", ellipse->EntityLabel);
+				XbimGeometryCreator::LogWarning(logger, ellipse,"WC002: Illegal Ellipse Semi Axis 1, must be greater than 0, in entity #{0}", ellipse->EntityLabel);
 				return;
 			}
 			if (semiAx2 <= 0)
 			{
-				XbimGeometryCreator::LogError(logger, ellipse, "WE005: Illegal Ellipse Semi Axis 2, must be greater than 0, in entity #{0}", ellipse->EntityLabel);
+				XbimGeometryCreator::LogWarning(logger, ellipse, "WE005: Illegal Ellipse Semi Axis 2, must be greater than 0, in entity #{0}", ellipse->EntityLabel);
 				return;
 			}
 			bool rotateElipse = false;

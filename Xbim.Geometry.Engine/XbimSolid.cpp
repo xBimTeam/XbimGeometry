@@ -1029,7 +1029,7 @@ namespace Xbim
 				if (!ok)
 				{
 					BRepBuilderAPI_PipeError err = pipeMaker1.GetStatus();
-					XbimGeometryCreator::LogError(logger, repItem, "Failed to build outer shell of sectioned spine {0}", (int)err);
+					XbimGeometryCreator::LogWarning(logger, repItem, "Failed to build outer shell of sectioned spine {0}", (int)err);
 					return;
 				}
 				if (pipeMaker1.IsDone())
@@ -1064,7 +1064,7 @@ namespace Xbim
 						if (!ok)
 						{
 							BRepBuilderAPI_PipeError err = pipeMaker2.GetStatus();
-							XbimGeometryCreator::LogError(logger, repItem, "Failed to build inner shell of sectioned spine {0}", (int)err);
+							XbimGeometryCreator::LogWarning(logger, repItem, "Failed to build inner shell of sectioned spine {0}", (int)err);
 							return;
 						}
 						if (pipeMaker2.IsDone())
@@ -1183,7 +1183,7 @@ namespace Xbim
 				vec *= depth;
 				if (compProf != nullptr && compProf->Profiles->Count > 1 && overrideProfileDef == nullptr)
 				{
-					XbimGeometryCreator::LogError(logger, repItem, "Composite profiles with more than 1 profile cannot create a solid, use the CreateSolidSet method");
+					XbimGeometryCreator::LogWarning(logger, repItem, "Composite profiles with more than 1 profile cannot create a solid, use the CreateSolidSet method");
 				}
 				else if (compProf != nullptr && compProf->Profiles->Count == 1) overrideProfileDef = compProf->Profiles->GetAt(0);
 
@@ -1423,13 +1423,13 @@ namespace Xbim
 						ret = Math::Abs(ret);
 					if (ret < 0)
 					{
-						XbimGeometryCreator::LogError(logger, segment, "Negative length value. Returned 1.");
+						XbimGeometryCreator::LogWarning(logger, segment, "Negative length value. Returned 1.");
 						return 1;
 					}
 					return ret;
 				}
 				catch (Exception ^ e) {
-					XbimGeometryCreator::LogError(logger, segment, "Could not compute segment parametric lenght. Returned 1." + e->Message);
+					XbimGeometryCreator::LogWarning(logger, segment, "Could not compute segment parametric length. Returned 1." + e->Message);
 					return 1;
 				}
 			}
@@ -1483,7 +1483,7 @@ namespace Xbim
 			}
 			catch (...) //if transformed mode fails try 
 			{
-				XbimGeometryCreator::LogError(logger, repItem, "Could not construct IfcSweptDiskSolid");
+				XbimGeometryCreator::LogWarning(logger, repItem, "Could not construct IfcSweptDiskSolid");
 				return;
 			}
 

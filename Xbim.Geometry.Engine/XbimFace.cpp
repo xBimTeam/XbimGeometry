@@ -582,7 +582,7 @@ namespace Xbim
 						goto makePlane;
 					}
 					if (!planeMaker.Found())
-						XbimGeometryCreator::LogError(logger, nullptr, "Failure to build planar face due to a non-planar wire, entity #{0}", entityLabel);
+						XbimGeometryCreator::LogWarning(logger, nullptr, "Failure to build planar face due to a non-planar wire, entity #{0}", entityLabel);
 					else
 					{
 						BRepBuilderAPI_MakeFace faceMaker(planeMaker.Plane()->Pln(), wire, Standard_True);
@@ -600,7 +600,7 @@ namespace Xbim
 					}
 					else
 					{
-						XbimGeometryCreator::LogError(logger, nullptr, "Failure to build non-planar face, entity #{0}", entityLabel);
+						XbimGeometryCreator::LogWarning(logger, nullptr, "Failure to build non-planar face, entity #{0}", entityLabel);
 					}
 				}
 			}
@@ -867,7 +867,7 @@ namespace Xbim
 			if (dynamic_cast<IIfcDerivedProfileDef^>(profile))
 				return Init((IIfcDerivedProfileDef^)profile, logger);
 			if (dynamic_cast<IIfcArbitraryOpenProfileDef^>(profile) && !dynamic_cast<IIfcCenterLineProfileDef^>(profile))
-				XbimGeometryCreator::LogError(logger, profile, "Faces cannot be built with IIfcArbitraryOpenProfileDef, a face requires a closed loop");
+				XbimGeometryCreator::LogWarning(logger, profile, "Faces cannot be built with IIfcArbitraryOpenProfileDef, a face requires a closed loop");
 			else //it is a standard profile that can be built as a single wire
 			{
 				XbimWire^ wire = gcnew XbimWire(profile, logger, XbimConstraints::Closed | XbimConstraints::NotSelfIntersecting);

@@ -568,7 +568,7 @@ namespace Xbim
 						List<Ifc4::MeasureResource::IfcPositiveInteger>^ indices = (List<Ifc4::MeasureResource::IfcPositiveInteger>^)arcIndex->Value;
 						if (indices->Count != 3)
 						{
-							XbimGeometryCreator::LogError(logger, segment, "There should be three indices in an arc segment");
+							XbimGeometryCreator::LogWarning(logger, segment, "There should be three indices in an arc segment");
 							return;
 						}
 						gp_Pnt start = poles.Value((int)indices[0]);
@@ -594,7 +594,7 @@ namespace Xbim
 									double fiveMilli = 5 * polyCurve->Model->ModelFactors->OneMilliMeter; //we are going to accept that a gap of 5mm is not a gap
 									if (actualGap > fiveMilli)
 									{
-										XbimGeometryCreator::LogError(logger, segment, "Failed to join IfcArcIndex segment. It has been ignored");
+										XbimGeometryCreator::LogWarning(logger, segment, "Failed to join IfcArcIndex segment. It has been ignored");
 										return;
 									}
 									tFixer.LimitTolerance(edgeMaker.Vertex1(), actualGap + tolerance);
@@ -605,7 +605,7 @@ namespace Xbim
 							wireMaker.Add(edge);
 							if (!wireMaker.IsDone())
 							{
-								XbimGeometryCreator::LogError(logger, segment, "Could not add arc segment to IfcIndexedPolyCurve");
+								XbimGeometryCreator::LogWarning(logger, segment, "Could not add arc segment to IfcIndexedPolyCurve");
 								return;
 							}
 							wireEndPoint = end;
@@ -632,7 +632,7 @@ namespace Xbim
 										double fiveMilli = 5 * polyCurve->Model->ModelFactors->OneMilliMeter; //we are going to accept that a gap of 5mm is not a gap
 										if (actualGap > fiveMilli)
 										{
-											XbimGeometryCreator::LogError(logger, segment, "Failed to join IfcArcIndex as polyline segment. It has been ignored");
+											XbimGeometryCreator::LogWarning(logger, segment, "Failed to join IfcArcIndex as polyline segment. It has been ignored");
 											return;
 										}
 										tFixer.LimitTolerance(edgeMaker.Vertex1(), actualGap + tolerance);
@@ -642,7 +642,7 @@ namespace Xbim
 								wireMaker.Add(edge);
 								if (!wireMaker.IsDone())
 								{
-									XbimGeometryCreator::LogError(logger, segment, "Could not add arc segment as polyline to IfcIndexedPolyCurve");
+									XbimGeometryCreator::LogWarning(logger, segment, "Could not add arc segment as polyline to IfcIndexedPolyCurve");
 									return;
 								}
 								wireEndPoint = end;
@@ -659,7 +659,7 @@ namespace Xbim
 						List<Ifc4::MeasureResource::IfcPositiveInteger>^ indices = (List<Ifc4::MeasureResource::IfcPositiveInteger>^)lineIndex->Value;
 						if (indices->Count < 2)
 						{
-							XbimGeometryCreator::LogError(logger, segment, "There should be at least two indices in an line index segment");
+							XbimGeometryCreator::LogWarning(logger, segment, "There should be at least two indices in an line index segment");
 							return;
 						}
 						int originalCount = indices->Count;
@@ -707,7 +707,7 @@ namespace Xbim
 									double fiveMilli = 5 * polyCurve->Model->ModelFactors->OneMilliMeter; //we are going to accept that a gap of 5mm is not a gap
 									if (actualGap > fiveMilli)
 									{
-										XbimGeometryCreator::LogError(logger, segment, "Failed to join IfcLineIndex as polyline segment. It has been ignored");
+										XbimGeometryCreator::LogWarning(logger, segment, "Failed to join IfcLineIndex as polyline segment. It has been ignored");
 										return;
 									}
 									tFixer.LimitTolerance(polyMaker.FirstVertex(), actualGap + tolerance);
@@ -718,7 +718,7 @@ namespace Xbim
 							wireMaker.Add(wire);
 							if (!wireMaker.IsDone())
 							{
-								XbimGeometryCreator::LogError(logger, segment, "Could not add arc segment as polyline to IfcIndexedPolyCurve");
+								XbimGeometryCreator::LogWarning(logger, segment, "Could not add arc segment as polyline to IfcIndexedPolyCurve");
 								return;
 							}
 							wireHasSegment = true;
@@ -746,7 +746,7 @@ namespace Xbim
 
 				if (pointCount < 2)
 				{
-					XbimGeometryCreator::LogError(logger, polyCurve, "There should be at least two indices in an IfcIndexedPolyCurve");
+					XbimGeometryCreator::LogWarning(logger, polyCurve, "There should be at least two indices in an IfcIndexedPolyCurve");
 					return;
 				}
 				int originalCount = pointCount;
@@ -794,7 +794,7 @@ namespace Xbim
 				}
 				else
 				{
-					XbimGeometryCreator::LogError(logger, polyCurve, "Could not build IfcIndexedPolyCurve");
+					XbimGeometryCreator::LogWarning(logger, polyCurve, "Could not build IfcIndexedPolyCurve");
 					return;
 				}
 			}
@@ -827,7 +827,7 @@ namespace Xbim
 				}
 				else
 				{
-					XbimGeometryCreator::LogError(logger, curve, "Failed to build wire from curve .It has been ignored");
+					XbimGeometryCreator::LogWarning(logger, curve, "Failed to build wire from curve .It has been ignored");
 				}
 			}
 		}
@@ -851,7 +851,7 @@ namespace Xbim
 
 				if (!dynamic_cast<IIfcBoundedCurve^>(seg->ParentCurve))
 				{
-					XbimGeometryCreator::LogError(logger, seg, "Composite curve contains a segment with is not a bounded curve. It has been ignored");
+					XbimGeometryCreator::LogWarning(logger, seg, "Composite curve contains a segment with is not a bounded curve. It has been ignored");
 					return;
 				}
 				XbimWire^ segWire = gcnew XbimWire(seg, logger, constraints);
@@ -933,7 +933,7 @@ namespace Xbim
 					}
 					if (!ok)
 					{
-						XbimGeometryCreator::LogError(logger, seg, "Failed to join composite curve segment. It has been ignored");
+						XbimGeometryCreator::LogWarning(logger, seg, "Failed to join composite curve segment. It has been ignored");
 						return;
 					}
 
@@ -2468,7 +2468,7 @@ namespace Xbim
 					if (!wm.IsDone())
 					{
 						BRepBuilderAPI_WireError err = wm.Error();
-						XbimGeometryCreator::LogError(logger, this, "Error trimming. Trim discarded. Error {0}", (int)err);
+						XbimGeometryCreator::LogWarning(logger, this, "Error trimming. Trim discarded. Error {0}", (int)err);
 						return this;
 					}
 

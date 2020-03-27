@@ -6,6 +6,7 @@
 #include <TopExp.hxx>
 #include <BRepTools.hxx>
 #include <BRep_Builder.hxx>
+#include <Standard_NotImplemented.hxx>
 #include <BRepAlgoAPI_Cut.hxx>
 #include <ShapeFix_ShapeTolerance.hxx>
 #include <BRepPrimAPI_MakePrism.hxx>
@@ -404,73 +405,175 @@ namespace Xbim
 
 		int DoBoolean(const TopoDS_Shape& body, const TopTools_ListOfShape& tools, BOPAlgo_Operation op, double tolerance, TopoDS_Shape& result, int timeout)
 		{
-
-			ShapeAnalysis_Wire tolFixer;
-
-			BRep_Builder builder;
-
-			TopTools_ListOfShape shapeObjects;
-			shapeObjects.Append(body);
-
-			TopTools_ListOfShape shapeTools;
-
-			Bnd_Box tsBodyBox;
-			BRepBndLib::Add(body, tsBodyBox);
-
-			double maxTol = tolerance;
-			int argCount = 0;
-			TopTools_ListIteratorOfListOfShape it(tools);
-			for (; it.More(); it.Next())
+			try
 			{
-				TopoDS_Shape tsArg = it.Value();
-				//screen out things that don't intersect when we are cutting
-				if (op == BOPAlgo_Operation::BOPAlgo_CUT || op == BOPAlgo_Operation::BOPAlgo_CUT21)
-				{
+				ShapeAnalysis_Wire tolFixer;
 
-					Bnd_Box tsCutBox;
-					BRepBndLib::Add(tsArg, tsCutBox);
-					if (!tsBodyBox.IsOut(tsCutBox))
+				BRep_Builder builder;
+
+				TopTools_ListOfShape shapeObjects;
+				shapeObjects.Append(body);
+
+				TopTools_ListOfShape shapeTools;
+
+				Bnd_Box tsBodyBox;
+				BRepBndLib::Add(body, tsBodyBox);
+
+				double maxTol = tolerance;
+				int argCount = 0;
+				TopTools_ListIteratorOfListOfShape it(tools);
+				for (; it.More(); it.Next())
+				{
+					TopoDS_Shape tsArg = it.Value();
+					//screen out things that don't intersect when we are cutting
+					if (op == BOPAlgo_Operation::BOPAlgo_CUT || op == BOPAlgo_Operation::BOPAlgo_CUT21)
+					{
+
+						Bnd_Box tsCutBox;
+						BRepBndLib::Add(tsArg, tsCutBox);
+						if (!tsBodyBox.IsOut(tsCutBox))
+						{
+							maxTol = std::max(BRep_Tool::MaxTolerance(tsArg, TopAbs_EDGE), maxTol);
+							shapeTools.Append(tsArg);
+							argCount++;
+						}
+					}
+					else
 					{
 						maxTol = std::max(BRep_Tool::MaxTolerance(tsArg, TopAbs_EDGE), maxTol);
 						shapeTools.Append(tsArg);
 						argCount++;
 					}
+
+				}
+				if (argCount == 0)
+				{
+					result = body;
+					return true;
+				}
+
+
+				double fuzzyTol = std::max(maxTol - tolerance, 6 * tolerance);//this seems about right				
+				BOPAlgo_BOP aBOP;
+				bool failed = false;
+
+				aBOP.AddArgument(body);
+				aBOP.SetTools(shapeTools);
+				aBOP.SetOperation(op);
+				aBOP.SetRunParallel(false);
+				//aBOP.SetCheckInverted(true);
+				aBOP.SetNonDestructive(true);
+				aBOP.SetFuzzyValue(fuzzyTol);
+
+				Handle(XbimProgressIndicator) pi = new XbimProgressIndicator(timeout);
+				aBOP.SetProgressIndicator(pi);
+				TopoDS_Shape aR;
+
+
+				aBOP.Perform();
+				aR = aBOP.Shape();
+
+				if (pi->TimedOut())
+				{
+					return BOOLEAN_TIMEDOUT;
+
+				}
+				bool bopErr = aBOP.HasErrors();
+				if (bopErr || aR.IsNull()) {
+					return BOOLEAN_HASERRORS;
+				}
+
+				bool bopWarn = aBOP.HasWarnings();
+
+				if (bopWarn) //often a sign of failure do them individually
+				{
+					//check if the shape is empty
+					TopTools_IndexedMapOfShape map;
+					TopExp::MapShapes(aR, TopAbs_FACE, map);
+					if (map.Extent() == 0) //if there are no faces we probably failed completely, tried the pedestrian slower way
+					{
+						aR = body;
+
+						TopTools_ListIteratorOfListOfShape it2(shapeTools);
+						for (; it2.More(); it2.Next())
+						{
+							BOPAlgo_BOP anoBOP;
+							failed = false;
+							anoBOP.AddArgument(aR);
+							anoBOP.AddTool(it2.Value());
+							anoBOP.SetOperation(op);
+							anoBOP.SetRunParallel(false);
+							anoBOP.SetCheckInverted(true);
+							anoBOP.SetNonDestructive(true);
+							anoBOP.SetFuzzyValue(fuzzyTol);
+							Handle(XbimProgressIndicator) pi1 = new XbimProgressIndicator(timeout);
+							anoBOP.SetProgressIndicator(pi1);
+							try
+							{
+								anoBOP.Perform();
+								aR = anoBOP.Shape();
+							}
+							catch (...)
+							{
+								return BOOLEAN_FAILEDSINGLECUT;
+							}
+
+							bopErr = aBOP.HasErrors();
+							if (bopErr || failed) break; //give up if it fails
+						}
+					}
+					if (failed || bopErr || aR.IsNull())
+					{
+						return BOOLEAN_FAILEDSINGLECUT;
+					}
+				}
+
+
+
+				BRep_Builder b;
+				TopoDS_Compound unifiedCompound;
+				b.MakeCompound(unifiedCompound);
+
+				ShapeUpgrade_UnifySameDomain unifier(aR);
+				unifier.SetAngularTolerance(0.00174533); //1 tenth of a degree
+				unifier.SetLinearTolerance(fuzzyTol);
+				try
+				{
+					//sometimes unifier crashes
+					unifier.Build();
+					builder.Add(unifiedCompound, unifier.Shape());
+
+				}
+				catch (...) //any failure
+				{
+					//default to what we had
+					builder.Add(unifiedCompound, aR);
+				}
+
+				//have one go at fixing if it is not right
+				if (BRepCheck_Analyzer(unifiedCompound, Standard_True).IsValid() == Standard_False)
+				{
+					//try and fix if we can
+					ShapeFix_Shape fixer(unifiedCompound);
+					fixer.SetMaxTolerance(fuzzyTol);
+					fixer.SetMinTolerance(tolerance);
+					fixer.SetPrecision(tolerance);
+					Handle(XbimProgressIndicator) pi2 = new XbimProgressIndicator(timeout);
+					if (fixer.Perform(pi2))
+						result = fixer.Shape();
+					else
+						result = unifiedCompound;
+
 				}
 				else
 				{
-					maxTol = std::max(BRep_Tool::MaxTolerance(tsArg, TopAbs_EDGE), maxTol);
-					shapeTools.Append(tsArg);
-					argCount++;
+					result = aR;
 				}
-
+				return BOOLEAN_SUCCESS;
 			}
-			if (argCount == 0)
+			catch (Standard_NotImplemented) //User break most likely called
 			{
-				result = body;
-				return true;
-			}
-
-
-			double fuzzyTol = std::max(maxTol - tolerance, 6 * tolerance);//this seems about right				
-			BOPAlgo_BOP aBOP;
-			bool failed = false;
-
-			aBOP.AddArgument(body);
-			aBOP.SetTools(shapeTools);
-			aBOP.SetOperation(op);
-			aBOP.SetRunParallel(false);
-			//aBOP.SetCheckInverted(true);
-			aBOP.SetNonDestructive(true);
-			aBOP.SetFuzzyValue(fuzzyTol);
-
-			Handle(XbimProgressIndicator) pi = new XbimProgressIndicator(timeout);
-			aBOP.SetProgressIndicator(pi);
-			TopoDS_Shape aR;
-
-			try
-			{
-				aBOP.Perform();
-				aR = aBOP.Shape();
+				return BOOLEAN_TIMEDOUT;
 			}
 			catch (Standard_Failure sf)
 			{
@@ -480,103 +583,6 @@ namespace Xbim
 			{
 				return BOOLEAN_NOTBUILT;
 			}
-			if (pi->TimedOut())
-			{
-				return BOOLEAN_TIMEDOUT;
-
-			}
-			bool bopErr = aBOP.HasErrors();
-			if (bopErr || aR.IsNull()) {
-				return BOOLEAN_HASERRORS;
-			}
-
-			bool bopWarn = aBOP.HasWarnings();
-
-			if (bopWarn) //often a sign of failure do them individually
-			{
-				//check if the shape is empty
-				TopTools_IndexedMapOfShape map;
-				TopExp::MapShapes(aR, TopAbs_FACE, map);
-				if (map.Extent() == 0) //if there are no faces we probably failed completely, tried the pedestrian slower way
-				{
-					aR = body;
-
-					TopTools_ListIteratorOfListOfShape it2(shapeTools);
-					for (; it2.More(); it2.Next())
-					{
-						BOPAlgo_BOP anoBOP;
-						failed = false;
-						anoBOP.AddArgument(aR);
-						anoBOP.AddTool(it2.Value());
-						anoBOP.SetOperation(op);
-						anoBOP.SetRunParallel(false);
-						anoBOP.SetCheckInverted(true);
-						anoBOP.SetNonDestructive(true);
-						anoBOP.SetFuzzyValue(fuzzyTol);
-						Handle(XbimProgressIndicator) pi1 = new XbimProgressIndicator(timeout);
-						anoBOP.SetProgressIndicator(pi1);
-						try
-						{
-							anoBOP.Perform();
-							aR = anoBOP.Shape();
-						}
-						catch (...)
-						{
-							return BOOLEAN_FAILEDSINGLECUT;
-						}
-
-						bopErr = aBOP.HasErrors();
-						if (bopErr || failed) break; //give up if it fails
-					}
-				}
-				if (failed || bopErr || aR.IsNull())
-				{
-					return BOOLEAN_FAILEDSINGLECUT;
-				}
-			}
-
-
-
-			BRep_Builder b;
-			TopoDS_Compound unifiedCompound;
-			b.MakeCompound(unifiedCompound);
-
-			ShapeUpgrade_UnifySameDomain unifier(aR);
-			unifier.SetAngularTolerance(0.00174533); //1 tenth of a degree
-			unifier.SetLinearTolerance(fuzzyTol);
-			try
-			{
-				//sometimes unifier crashes
-				unifier.Build();
-				builder.Add(unifiedCompound, unifier.Shape());
-
-			}
-			catch (...) //any failure
-			{
-				//default to what we had
-				builder.Add(unifiedCompound, aR);
-			}
-
-			//have one go at fixing if it is not right
-			if (BRepCheck_Analyzer(unifiedCompound, Standard_True).IsValid() == Standard_False)
-			{
-				//try and fix if we can
-				ShapeFix_Shape fixer(unifiedCompound);
-				fixer.SetMaxTolerance(fuzzyTol);
-				fixer.SetMinTolerance(tolerance);
-				fixer.SetPrecision(tolerance);
-				Handle(XbimProgressIndicator) pi2 = new XbimProgressIndicator(timeout);
-				if (fixer.Perform(pi2))
-					result = fixer.Shape();
-				else
-					result = unifiedCompound;
-
-			}
-			else
-			{
-				result = aR;
-			}
-			return BOOLEAN_SUCCESS;
 		}
 
 #pragma managed(pop)
@@ -638,10 +644,9 @@ namespace Xbim
 					default:
 						break;
 					}
-					XbimGeometryCreator::LogError(logger, nullptr,
-						msg + ". Failed.On Entity #{0} with #{1}.",
-						((XbimSolidSet^)arguments)->IfcEntityLabel,
-						this->IfcEntityLabel);
+					XbimGeometryCreator::LogWarning(logger, nullptr,
+						msg + ". Failed.On Entity #{0} with {1}.",
+						this->IfcEntityLabel, msg);
 				}
 
 			}
@@ -1166,7 +1171,7 @@ namespace Xbim
 			}
 			catch (Exception ^ xbimE)
 			{
-				XbimGeometryCreator::LogError(logger, boolOp, "Boolean operation failure, {0}. The operation has been ignored", xbimE->Message);
+				XbimGeometryCreator::LogWarning(logger, boolOp, "Boolean operation failure, {0}. The operation has been ignored", xbimE->Message);
 				solids->AddRange(left);; //return the left operand
 				return;
 			}
