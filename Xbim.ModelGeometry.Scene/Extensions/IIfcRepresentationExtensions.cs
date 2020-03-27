@@ -13,8 +13,7 @@ namespace Xbim.ModelGeometry.Scene.Extensions
         /// <returns></returns>
         public static bool IsBodyRepresentation(this IIfcRepresentation rep)
         {
-            //in old models sometimes the representation is not defined so assume it is a candidate
-            if (string.IsNullOrEmpty(rep.RepresentationIdentifier)) return true;
+            if (string.IsNullOrEmpty(rep.RepresentationIdentifier)) return false;
             string repIdentifier = rep.RepresentationIdentifier.Value;
             //if it is defined as body then it is candidate but exclude if it is using a line base representation
             if (String.Compare(repIdentifier, "body", StringComparison.OrdinalIgnoreCase) == 0 || String.Compare(repIdentifier, "facetation", StringComparison.OrdinalIgnoreCase) == 0)
