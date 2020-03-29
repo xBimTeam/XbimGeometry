@@ -38,6 +38,53 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         }
 
         [TestMethod]
+        public void multi_boolean_opening_operations_test()
+        {
+            using (var model = MemoryModel.OpenRead(@"TestFiles\multi_boolean_opening_operations_test.ifc"))
+            {
+                var voidRels = model.Instances.OfType<IIfcRelVoidsElement>();
+                var op = voidRels.GroupBy(rv => rv.RelatingBuildingElement).FirstOrDefault();//just try the first one
+                var body = op.Key;
+                var openings = op.Select(v=> v.RelatedOpeningElement).Cast<IIfcOpeningElement>().ToList();
+
+                var bodyRep = body.Representation.Representations.SelectMany(r => r.Items.OfType<IIfcBooleanClippingResult>()).FirstOrDefault(); //it is a IIfcBooleanClippingResult               
+                var bodyGeom = geomEngine.CreateSolidSet(bodyRep);
+                // var faultWires = bodyGeom.First().Faces.Where(f => f.OuterBound.Edges.Count > 4).ToList();
+
+
+                var cutSolids = geomEngine.CreateSolidSet();
+                foreach (var opening in openings)
+                {
+                    var openingRep = opening.Representation.Representations.SelectMany(r => r.Items.OfType<IIfcExtrudedAreaSolid>()).FirstOrDefault();
+                    var openingGeom = geomEngine.CreateSolid(openingRep);
+                    cutSolids.Add(openingGeom);
+                }
+                ////try in a oner
+                var resultSetCut = bodyGeom.Cut(cutSolids, 1e-5);
+                var cutSingularCut = bodyGeom;
+                //get the openings, nb all placements are the same so we do not need to adjust
+                foreach (var opening in openings)
+                {
+                    var openingRep = opening.Representation.Representations.SelectMany(r => r.Items.OfType<IIfcExtrudedAreaSolid>()).FirstOrDefault();
+                    var openingGeom = geomEngine.CreateSolid(openingRep);
+                    try
+                    {
+                        var nextGeom = cutSingularCut.Cut(openingGeom, 1e-5);
+                        cutSingularCut = nextGeom; 
+                    }
+                    catch (XbimGeometryException ge)
+                    {
+                        Console.WriteLine(ge.Message);
+                    }
+                    
+                     
+                }
+                Assert.IsTrue(resultSetCut.Count == cutSingularCut.Count);
+                Assert.AreEqual(resultSetCut.First.Volume, cutSingularCut.First.Volume, 1e-5);
+            }
+        }
+
+        [TestMethod]
         public void very_slow_boolean_clipping()
         {
             using (var er = new EntityRepository<IIfcBooleanClippingResult>(nameof(very_slow_boolean_clipping), true)) //model is in radians

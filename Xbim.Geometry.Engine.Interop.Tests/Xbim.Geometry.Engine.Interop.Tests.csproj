@@ -90,6 +90,9 @@
     <None Update="TestFiles\LargeTriangulatedCoordinates.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="TestFiles\multi_boolean_opening_operations_test.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="TestFiles\polygonally_bounded_half_space_clip.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
