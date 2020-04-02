@@ -239,17 +239,22 @@ namespace Xbim
 					//
 					double oneMilli = profile->Model->ModelFactors->OneMilliMeter;
 					XbimFace^ face = gcnew XbimFace(loop, true, oneMilli, profile->OuterCurve->EntityLabel, logger);
-					ShapeFix_Wire wireFixer(loop, face, profile->Model->ModelFactors->Precision);
-					wireFixer.ClosedWireMode() = Standard_True;
-					wireFixer.FixGaps2dMode() = Standard_True;
-					wireFixer.FixGaps3dMode() = Standard_True;
-					wireFixer.ModifyGeometryMode() = Standard_True;
-					wireFixer.SetMinTolerance(profile->Model->ModelFactors->Precision);
-					wireFixer.SetPrecision(oneMilli);
-					wireFixer.SetMaxTolerance(oneMilli * 10);
-					Standard_Boolean closed = wireFixer.Perform();
-					if (closed)
-						*pWire = wireFixer.Wire();
+					if (face->IsValid)
+					{
+						ShapeFix_Wire wireFixer(loop, face, profile->Model->ModelFactors->Precision);
+						wireFixer.ClosedWireMode() = Standard_True;
+						wireFixer.FixGaps2dMode() = Standard_True;
+						wireFixer.FixGaps3dMode() = Standard_True;
+						wireFixer.ModifyGeometryMode() = Standard_True;
+						wireFixer.SetMinTolerance(profile->Model->ModelFactors->Precision);
+						wireFixer.SetPrecision(oneMilli);
+						wireFixer.SetMaxTolerance(oneMilli * 10);
+						Standard_Boolean closed = wireFixer.Perform();
+						if (closed)
+							*pWire = wireFixer.Wire();
+						else
+							*pWire = loop;
+					}
 					else
 						*pWire = loop;
 				}
