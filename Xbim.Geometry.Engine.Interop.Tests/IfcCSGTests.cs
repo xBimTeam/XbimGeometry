@@ -82,7 +82,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     var meshRec = new MeshHelper();
                     geomEngine.Mesh(meshRec, solid, m.ModelFactors.Precision, m.ModelFactors.DeflectionTolerance * 10);
                     Assert.IsTrue(meshRec.FaceCount == 3, "3 mesh faces are required of a cylinder");
-                    Assert.IsTrue(meshRec.PointCount == 106, "106 mesh points are required of a cylinder");
+                    Assert.IsTrue(meshRec.PointCount == 18, "18 mesh points are required of a cylinder");
                     txn.Commit();
                 }
             }
@@ -112,7 +112,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     var meshRec = new MeshHelper();
                     geomEngine.Mesh(meshRec, solid, m.ModelFactors.Precision, m.ModelFactors.DeflectionTolerance * 10);
                     Assert.IsTrue(meshRec.FaceCount == 2, "2 mesh faces are required of a cone");
-                    Assert.IsTrue(meshRec.PointCount == 55, "55 mesh points are required of a cone");
+                    Assert.IsTrue(meshRec.PointCount == 23, "23 mesh points are required of a cone");
                    txn.Commit();
                 }
             }
@@ -164,8 +164,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     geomEngine.Mesh(meshRec, solid, m.ModelFactors.Precision, m.ModelFactors.DeflectionTolerance * 10);
                     meshRec.EndUpdate();
                     Assert.IsTrue(meshRec.FaceCount == 1, "1 mesh face is required of a sphere");
-                    Assert.IsTrue(meshRec.PointCount == 168, "168 mesh points are required of a sphere");
-                    Assert.IsTrue(meshRec.TriangleCount == 306, "306 triangles are required of a sphere");
+                    Assert.IsTrue(meshRec.PointCount == 19, "19 mesh points are required of a sphere");
+                    Assert.IsTrue(meshRec.TriangleCount == 28, "28 triangles are required of a sphere");
                     Assert.IsTrue(meshRec.TriangleCount*3 == meshRec.TriangleIndicesCount,"Incorrect triangulation");
                     txn.Commit();
                 }

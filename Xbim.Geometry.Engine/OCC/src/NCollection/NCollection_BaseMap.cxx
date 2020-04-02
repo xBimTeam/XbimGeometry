@@ -29,8 +29,10 @@ Standard_Boolean  NCollection_BaseMap::BeginResize
    NCollection_ListNode**& data1,
    NCollection_ListNode**& data2) const 
 {
+  // get next size for the buckets array
   N = NextPrimeForMap(NbBuckets);
-  if (N <= myNbBuckets) {
+  if (N <= myNbBuckets)
+  {
     if (!myData1)
       N = myNbBuckets;
     else
@@ -42,7 +44,7 @@ Standard_Boolean  NCollection_BaseMap::BeginResize
   if (isDouble) 
   {
     data2 = (NCollection_ListNode **)
-    myAllocator->Allocate((N+1)*sizeof(NCollection_ListNode *));
+      myAllocator->Allocate((N+1)*sizeof(NCollection_ListNode *));
     memset(data2, 0, (N+1)*sizeof(NCollection_ListNode *));
   }
   else
@@ -155,7 +157,7 @@ void NCollection_BaseMap::Statistics(Standard_OStream& S) const
     if (sizes[i] > 0) 
     {
       l += sizes[i] * i;
-      S << setw(5) << sizes[i] <<" buckets of size "<<i<<"\n";
+      S << std::setw(5) << sizes[i] <<" buckets of size "<<i<<"\n";
     }
   }
 

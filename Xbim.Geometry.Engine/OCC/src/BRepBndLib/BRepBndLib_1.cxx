@@ -165,14 +165,17 @@ static Standard_Integer PointsForOBB(const TopoDS_Shape& theS,
       for(anExpE.Init(aF, TopAbs_EDGE); anExpE.More(); anExpE.Next())
       {
         const TopoDS_Edge &anE = TopoDS::Edge(anExpE.Current());
-        const BRepAdaptor_Curve anAC(anE);
-        if (!IsLinear(anAC))
+        if (BRep_Tool::IsGeometric (anE))
         {
-          if (!theIsTriangulationUsed)
-            // not linear and triangulation usage disabled
-            return 0;
+          const BRepAdaptor_Curve anAC(anE);
+          if (!IsLinear(anAC))
+          {
+            if (!theIsTriangulationUsed)
+              // not linear and triangulation usage disabled
+              return 0;
 
-          break;
+            break;
+          }
         }
       }
 
@@ -212,11 +215,15 @@ static Standard_Integer PointsForOBB(const TopoDS_Shape& theS,
   for(anExpE.Init(theS, TopAbs_EDGE, TopAbs_FACE); anExpE.More(); anExpE.Next())
   {
     const TopoDS_Edge &anE = TopoDS::Edge(anExpE.Current());
-    const BRepAdaptor_Curve anAC(anE);
-
-    if (IsLinear(anAC))
-      // skip linear edge as its vertices have already been added
-      continue;
+    if (BRep_Tool::IsGeometric (anE))
+    {
+      const BRepAdaptor_Curve anAC(anE);
+      if (IsLinear(anAC))
+      {
+        // skip linear edge as its vertices have already been added
+        continue;
+      }
+    }
 
     if (!theIsTriangulationUsed)
       // not linear and triangulation usage disabled
@@ -286,6 +293,7 @@ static Standard_Integer IsWCS(const gp_Dir& theDir)
 //=======================================================================
 static Standard_Boolean CheckPoints(const TopoDS_Shape& theS,
                                     const Standard_Boolean theIsTriangulationUsed,
+                                    const Standard_Boolean theIsOptimal,
                                     const Standard_Boolean theIsShapeToleranceUsed,
                                     Bnd_OBB& theOBB)
 {
@@ -322,7 +330,7 @@ static Standard_Boolean CheckPoints(const TopoDS_Shape& theS,
   }
 #endif
 
-  theOBB.ReBuild(anArrPnts, aPtrArrTol);
+  theOBB.ReBuild(anArrPnts, aPtrArrTol, theIsOptimal);
 
   return (!theOBB.IsVoid());
 }
@@ -407,6 +415,10 @@ static void ComputePCA(const TopoDS_Shape& theS,
   {
     BRepBndLib::Add(aST, aShapeBox);
   }
+  if (aShapeBox.IsVoid())
+  {
+    return;
+  }
 
   gp_Pnt aPMin = aShapeBox.CornerMin();
   gp_Pnt aPMax = aShapeBox.CornerMax();
@@ -487,7 +499,7 @@ void BRepBndLib::AddOBB(const TopoDS_Shape& theS,
                         const Standard_Boolean theIsOptimal,
                         const Standard_Boolean theIsShapeToleranceUsed)
 {
-  if(CheckPoints(theS, theIsTriangulationUsed, theIsShapeToleranceUsed, theOBB))
+  if (CheckPoints(theS, theIsTriangulationUsed, theIsOptimal, theIsShapeToleranceUsed, theOBB))
     return;
 
   ComputePCA(theS, theOBB, theIsTriangulationUsed, theIsOptimal, theIsShapeToleranceUsed);

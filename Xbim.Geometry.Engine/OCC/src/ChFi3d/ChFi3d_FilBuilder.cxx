@@ -199,6 +199,8 @@ ChFi3d_FilletShape ChFi3d_FilBuilder::GetFilletShape() const
 
 void  ChFi3d_FilBuilder::Add(const TopoDS_Edge& E)
 {
+  TopoDS_Face dummy;
+  
   if(!Contains(E) && myEFMap.Contains(E)){
     Handle(ChFiDS_Stripe) Stripe = new ChFiDS_Stripe();
     Handle(ChFiDS_Spine)& Sp = Stripe->ChangeSpine();
@@ -208,7 +210,7 @@ void  ChFi3d_FilBuilder::Add(const TopoDS_Edge& E)
     TopoDS_Edge E_wnt = E;
     E_wnt.Orientation(TopAbs_FORWARD);
     Spine->SetEdges(E_wnt);
-    if(PerformElement(Spine)){
+    if(PerformElement(Spine, -1, dummy)){
       PerformExtremity(Spine);
       Spine->Load();
       myListStripe.Append(Stripe);
@@ -464,11 +466,11 @@ void ChFi3d_FilBuilder::Simulate (const Standard_Integer IC)
 #ifdef OCCT_DEBUG
   if(ChFi3d_GettraceCHRON()){
     simul.Stop();
-    cout<<"Total simulation time : ";
+    std::cout<<"Total simulation time : ";
     simul.Show();
-    cout<<"Spine construction time : ";
+    std::cout<<"Spine construction time : ";
     elspine.Show();
-    cout<<"and process time : ";
+    std::cout<<"and process time : ";
     chemine.Show();
   }
 #endif
@@ -631,6 +633,8 @@ ChFi3d_FilBuilder::SimulSurf(Handle(ChFiDS_SurfData)&            Data,
   Handle(ChFiDS_SecHArray1) sec;
   gp_Pnt2d pf1,pl1,pf2,pl2;
 
+  Handle(ChFiDS_HElSpine) EmptyHGuide;
+
   Standard_Real PFirst = First;
   if(intf) First = fsp->FirstParameter(1);
   if(intl) Last = fsp->LastParameter(fsp->NbEdges());
@@ -640,7 +644,7 @@ ChFi3d_FilBuilder::SimulSurf(Handle(ChFiDS_SurfData)&            Data,
     Func.Set(fsp->Radius(),Choix);
     FInv.Set(fsp->Radius(),Choix);
     Func.Set(myShape);
-    done = SimulData(Data,HGuide,lin,S1,I1 ,
+    done = SimulData(Data,HGuide,EmptyHGuide,lin,S1,I1 ,
 		     S2,I2,Func,FInv,PFirst,MaxStep,locfleche,
 		     TolGuide,First,Last,Inside,Appro,Forward,
 		     Soldep,4,RecOnS1,RecOnS2);
@@ -667,7 +671,7 @@ ChFi3d_FilBuilder::SimulSurf(Handle(ChFiDS_SurfData)&            Data,
     Func.Set(Choix);
     FInv.Set(Choix);
     Func.Set(myShape);
-    done = SimulData(Data,HGuide,lin,S1,I1 ,
+    done = SimulData(Data,HGuide,EmptyHGuide,lin,S1,I1 ,
 		     S2,I2,Func,FInv,PFirst,MaxStep,locfleche,
 		     TolGuide,First,Last,Inside,Appro,Forward,
 		     Soldep,4,RecOnS1,RecOnS2);
@@ -1752,7 +1756,7 @@ void ChFi3d_FilBuilder::SplitSurf(ChFiDS_SequenceOfSurfData&    SeqData,
       }
       else {
 # if CHFI3D_DEB
-	cout << "Failed calculation of the minimum length" << endl;
+	std::cout << "Failed calculation of the minimum length" << std::endl;
 # endif
       }
     }

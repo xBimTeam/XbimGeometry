@@ -724,7 +724,11 @@ Standard_Boolean ChFi3d_Builder::StripeOrientations
   BRepAdaptor_Surface Sb1,Sb2;
   TopAbs_Orientation Of1,Of2;
   TopoDS_Face ff1,ff2;
-  ChFi3d_conexfaces(Spine->Edges(1),ff1,ff2,myEFMap);
+  TopoDS_Edge anEdge = Spine->Edges(1);
+  TopoDS_Face FirstFace = TopoDS::Face(myEdgeFirstFace(anEdge));
+  ChFi3d_conexfaces(anEdge,ff1,ff2,myEFMap);
+  if (ff2.IsSame(FirstFace))
+  { TopoDS_Face TmpFace = ff1; ff1 = ff2; ff2 = TmpFace; }
   Of1 = ff1.Orientation();
   ff1.Orientation(TopAbs_FORWARD);
   Sb1.Initialize(ff1);
@@ -747,7 +751,6 @@ Standard_Boolean ChFi3d_Builder::StripeOrientations
 
 void ChFi3d_Builder::ConexFaces (const Handle(ChFiDS_Spine)&   Spine,
 				 const Standard_Integer        IEdge,
-				 const Standard_Integer        RC,	
 				 Handle(BRepAdaptor_HSurface)& HS1,
 				 Handle(BRepAdaptor_HSurface)& HS2) const
 {
@@ -756,19 +759,16 @@ void ChFi3d_Builder::ConexFaces (const Handle(ChFiDS_Spine)&   Spine,
   BRepAdaptor_Surface& Sb1 = HS1->ChangeSurface();
   BRepAdaptor_Surface& Sb2 = HS2->ChangeSurface();
 
-  TopoDS_Face ff1,ff2;  
+  TopoDS_Face ff1,ff2;
+  TopoDS_Edge anEdge = Spine->Edges(IEdge);
   ChFi3d_conexfaces(Spine->Edges(IEdge),ff1,ff2,myEFMap);
+
+  TopoDS_Face FirstFace = TopoDS::Face(myEdgeFirstFace(anEdge));
+  if (ff2.IsSame(FirstFace))
+  { TopoDS_Face TmpFace = ff1; ff1 = ff2; ff2 = TmpFace; }
 
   Sb1.Initialize(ff1);
   Sb2.Initialize(ff2);
-  
-  TopAbs_Orientation Or1,Or2;
-  Standard_Integer Choix = ChFi3d::ConcaveSide(Sb1,Sb2,Spine->Edges(IEdge),
-					       Or1,Or2);  
-  if (RC%2 != Choix%2) {
-    Sb1.Initialize(ff2);
-    Sb2.Initialize(ff1);
-  }
 }
 
 //=======================================================================
@@ -829,7 +829,7 @@ void ChFi3d_Builder::StartSol(const Handle(ChFiDS_Stripe)&      Stripe,
       iedge = ie;
       cured = Spine->Edges(iedge);
       TolE = BRep_Tool::Tolerance(cured);
-      ConexFaces(Spine,iedge,RC,HS1,HS2);
+      ConexFaces(Spine,iedge,HS1,HS2);
       f1 = HS1->ChangeSurface().Face();
       f2 = HS2->ChangeSurface().Face();
       Or1 = f1.Orientation();
@@ -851,7 +851,7 @@ void ChFi3d_Builder::StartSol(const Handle(ChFiDS_Stripe)&      Stripe,
     PC->D1(woned, P1, derive);
     // There are ponts on the border, and internal points are found
     if (derive.Magnitude() > Precision::PConfusion()) {
-      derive.Normalized();
+      derive.Normalize();
       derive.Rotate(M_PI/2);
       AS.Initialize(f1);
       ResU = AS.UResolution(TolE);
@@ -896,7 +896,7 @@ void ChFi3d_Builder::StartSol(const Handle(ChFiDS_Stripe)&      Stripe,
     Standard_Real w = wf * (1. -t) + wl * t;
     iedge = Spine->Index(w);
     cured = Spine->Edges(iedge);
-    ConexFaces(Spine,iedge,RC,HS1,HS2);
+    ConexFaces(Spine,iedge,HS1,HS2);
     f1 = HS1->ChangeSurface().Face();
     f2 = HS2->ChangeSurface().Face();
     Or1 = f1.Orientation();
@@ -1336,7 +1336,7 @@ Standard_Boolean  ChFi3d_Builder::SearchFace
   if (Pc.IsVertex()){
     // attention it is necessary to analyze all faces that turn around of the vertex
 #ifdef OCCT_DEBUG
-    cout<<"Commonpoint on vertex, the process hangs up"<<endl;
+    std::cout<<"Commonpoint on vertex, the process hangs up"<<std::endl;
 #endif
     if (Pc.HasVector()) { //General processing
       TopoDS_Face Fbis;
@@ -1381,7 +1381,7 @@ Standard_Boolean  ChFi3d_Builder::SearchFace
 	  if (Spine.IsNull()) {
 	    //La Spine peut etre nulle (ThreeCorner)
 #ifdef OCCT_DEBUG
-	    cout << "FindFace sur vertex avec spine nulle! QUEZAKO ?" << endl;
+	    std::cout << "FindFace sur vertex avec spine nulle! QUEZAKO ?" << std::endl;
 #endif
 	    return Standard_False;
 	  }
@@ -1601,7 +1601,7 @@ static void ChFi3d_MakeExtremities(Handle(ChFiDS_Stripe)&      Stripe,
 	ChFi3d_SingularExtremity(Stripe, DStr, CV1.Vertex(), tol3d, tol2d);
       }
 # if CHFI3D_DEB
-      else { cout << "MakeExtremities : Singularity out of Vertex !!" << endl; }
+      else { std::cout << "MakeExtremities : Singularity out of Vertex !!" << std::endl; }
 # endif
     }
     return;
@@ -1666,7 +1666,7 @@ static void ChFi3d_MakeExtremities(Handle(ChFiDS_Stripe)&      Stripe,
 	ChFi3d_SingularExtremity(Stripe, DStr, cpdeb1.Vertex(), tol3d, tol2d);
       }
 # if CHFI3D_DEB
-      else { cout << "MakeExtremities : Singularity out of Vertex !!" << endl; }
+      else { std::cout << "MakeExtremities : Singularity out of Vertex !!" << std::endl; }
 # endif
     }
   }
@@ -1728,7 +1728,7 @@ static void ChFi3d_MakeExtremities(Handle(ChFiDS_Stripe)&      Stripe,
 	ChFi3d_SingularExtremity(Stripe, DStr, cpfin1.Vertex(), tol3d, tol2d);
       }
 # if CHFI3D_DEB
-      else { cout << "MakeExtremities : Singularity out of Vertex !!" << endl; }
+      else { std::cout << "MakeExtremities : Singularity out of Vertex !!" << std::endl; }
 # endif
     }
   }
@@ -1752,7 +1752,7 @@ static void ChFi3d_Purge (Handle(ChFiDS_Stripe)&    Stripe,
   if (!SD->Vertex(isfirst,opp).IsOnArc() || 
       SD->TwistOnS1() || SD->TwistOnS2() ) {
 #ifdef OCCT_DEBUG
-    cout<<"ChFi3d_Purge : No output on extension."<<endl;
+    std::cout<<"ChFi3d_Purge : No output on extension."<<std::endl;
 #endif
     ChFiDS_SequenceOfSurfData& Seq = 
       Stripe->ChangeSetOfSurfData()->ChangeSequence();
@@ -1864,8 +1864,29 @@ void ChFi3d_Builder::PerformSetOfSurfOnElSpine
 #ifdef OCCT_DEBUG
   OSD_Chronometer ch1;
 #endif 
+
+  //Temporary
+  //gp_Pnt ptgui;
+  //gp_Vec d1gui;
+  //( HGuide->Curve() ).D1(HGuide->FirstParameter(),ptgui,d1gui);
   
   ChFiDS_ElSpine& Guide = HGuide->ChangeCurve();
+
+  Handle(ChFiDS_HElSpine) OffsetHGuide;
+  Handle(ChFiDS_Spine)& Spine = Stripe->ChangeSpine();
+  if (Spine->Mode() == ChFiDS_ConstThroatWithPenetrationChamfer)
+  {
+    ChFiDS_ListOfHElSpine& ll = Spine->ChangeElSpines();
+    ChFiDS_ListOfHElSpine& ll_offset = Spine->ChangeOffsetElSpines();
+    ChFiDS_ListIteratorOfListOfHElSpine ILES(ll), ILES_offset(ll_offset);
+    for ( ; ILES.More(); ILES.Next(),ILES_offset.Next())
+    {
+      const Handle(ChFiDS_HElSpine)& aHElSpine = ILES.Value();
+      if (aHElSpine == HGuide)
+        OffsetHGuide = ILES_offset.Value();
+    }
+  }
+  
   Standard_Real wf = Guide.FirstParameter();
   Standard_Real wl = Guide.LastParameter();
   Standard_Real locfleche = (wl - wf) * fleche;
@@ -1876,8 +1897,13 @@ void ChFi3d_Builder::PerformSetOfSurfOnElSpine
     Standard_Real prab = 0.01;
     Guide.FirstParameter(wf-prab*(wl-wf));
     Guide.LastParameter (wl+prab*(wl-wf));
+    if (!OffsetHGuide.IsNull())
+    {
+      OffsetHGuide->ChangeCurve().FirstParameter(wf-prab*(wl-wf));
+      OffsetHGuide->ChangeCurve().LastParameter (wl+prab*(wl-wf));
+    }
   }
-  Handle(ChFiDS_Spine)&  Spine = Stripe->ChangeSpine();
+  //Handle(ChFiDS_Spine)&  Spine = Stripe->ChangeSpine();
   Standard_Integer ii, nbed = Spine->NbEdges();
   Standard_Real lastedlastp = Spine->LastParameter(nbed);
   
@@ -1935,6 +1961,13 @@ void ChFi3d_Builder::PerformSetOfSurfOnElSpine
       Guide.FirstParameter(Last);
       Guide.SaveLastParameter();
       Guide.LastParameter (First * 1.1);//Extension to help rsnld.
+      if (!OffsetHGuide.IsNull())
+      {
+        OffsetHGuide->ChangeCurve().SaveFirstParameter();
+        OffsetHGuide->ChangeCurve().FirstParameter(Last);
+        OffsetHGuide->ChangeCurve().SaveLastParameter();
+        OffsetHGuide->ChangeCurve().LastParameter (First * 1.1);//Extension to help rsnld.
+      }
     }
   }
   else{
@@ -1970,8 +2003,18 @@ void ChFi3d_Builder::PerformSetOfSurfOnElSpine
     
     
     if(Ok1 == 1 && Ok2 == 1) {
-      if(forward) Guide.FirstParameter(wf);
-      else Guide.LastParameter(wl);
+      if(forward)
+      {
+        Guide.FirstParameter(wf);
+        if (!OffsetHGuide.IsNull())
+          OffsetHGuide->ChangeCurve().FirstParameter(wf);
+      }
+      else
+      {
+        Guide.LastParameter(wl);
+        if (!OffsetHGuide.IsNull())
+          OffsetHGuide->ChangeCurve().LastParameter(wl);
+      }
     }
   }
   Standard_Boolean      fini     = Standard_False;
@@ -2009,6 +2052,8 @@ void ChFi3d_Builder::PerformSetOfSurfOnElSpine
       if(Spine->IsTangencyExtremity(Standard_True)){
 	intf = 4;
 	Guide.FirstParameter(wfsav);
+        if (!OffsetHGuide.IsNull())
+          OffsetHGuide->ChangeCurve().FirstParameter(wfsav);
       }
       if(wl - lastedlastp > -tolesp){
 	if(Spine->LastStatus() == ChFiDS_OnSame) intl = 2;
@@ -2017,6 +2062,8 @@ void ChFi3d_Builder::PerformSetOfSurfOnElSpine
       if(Spine->IsTangencyExtremity(Standard_False)){
 	intl = 4;
 	Guide.LastParameter(wlsav);
+        if (!OffsetHGuide.IsNull())
+          OffsetHGuide->ChangeCurve().LastParameter(wlsav);
       }
     }
     if(intf && !forward) Vref = Spine->FirstVertex();
@@ -2048,8 +2095,18 @@ void ChFi3d_Builder::PerformSetOfSurfOnElSpine
 	if (!Ok2) ChFi3d_BuildPlane (DStr,HS2,pp2,ref,!forward,2);	
 	if(intf) intf = 5;
 	else if(intl) intl = 5;
-	if(forward) Guide.FirstParameter(wf);
-	else Guide.LastParameter(wl);
+	if(forward)
+        {
+          Guide.FirstParameter(wf);
+          if (!OffsetHGuide.IsNull())
+            OffsetHGuide->ChangeCurve().FirstParameter(wf);
+        }
+	else
+        {
+          Guide.LastParameter(wl);
+          if (!OffsetHGuide.IsNull())
+            OffsetHGuide->ChangeCurve().LastParameter(wl);
+        }
       }
       else throw Standard_Failure("PerformSetOfSurfOnElSpine : Chaining is impossible.");
     }
@@ -2284,6 +2341,11 @@ void ChFi3d_Builder::PerformSetOfSurfOnElSpine
   if(!Guide.IsPeriodic()){
     Guide.FirstParameter(wfsav);
     Guide.LastParameter (wlsav);
+    if (!OffsetHGuide.IsNull())
+    {
+      OffsetHGuide->ChangeCurve().FirstParameter(wfsav);
+      OffsetHGuide->ChangeCurve().LastParameter (wlsav);
+    }
   }
 
 }
@@ -2321,10 +2383,14 @@ void ChFi3d_Builder::PerformSetOfKPart(Handle(ChFiDS_Stripe)& Stripe,
   gp_Pnt PFirst,PLast,PEndPeriodic;
   Standard_Boolean intf = Standard_False, intl = Standard_False;
   
-  Handle(ChFiDS_HElSpine) CurrentHE = new ChFiDS_HElSpine();
+  ChFiDS_ElSpine anElSpine, anOffsetElSpine;
+  Handle(ChFiDS_HElSpine) CurrentHE = new ChFiDS_HElSpine(anElSpine);
+  Handle(ChFiDS_HElSpine) CurrentOffsetHE = new ChFiDS_HElSpine(anOffsetElSpine);
   Spine->D1(Spine->FirstParameter(),PFirst,TFirst);
   CurrentHE->ChangeCurve().FirstParameter(Spine->FirstParameter());
   CurrentHE->ChangeCurve().SetFirstPointAndTgt(PFirst,TFirst);
+  CurrentOffsetHE->ChangeCurve().FirstParameter(Spine->FirstParameter());
+  CurrentOffsetHE->ChangeCurve().SetFirstPointAndTgt(PFirst,TFirst);
   
   Standard_Boolean YaKPart = Standard_False;
   Standard_Integer iedgelastkpart = 0;
@@ -2337,7 +2403,7 @@ void ChFi3d_Builder::PerformSetOfKPart(Handle(ChFiDS_Stripe)& Stripe,
   
   for (Standard_Integer iedge = 1; iedge <= Spine->NbEdges(); iedge++){
     
-    ConexFaces(Spine,iedge,RefChoix,HS1,HS2);
+    ConexFaces(Spine,iedge,HS1,HS2);
     
     if (ChFi3d_KParticular(Spine,iedge,HS1->ChangeSurface(),HS2->ChangeSurface())) {
       intf = ((iedge == 1) && !Spine->IsPeriodic());
@@ -2355,12 +2421,12 @@ void ChFi3d_Builder::PerformSetOfKPart(Handle(ChFiDS_Stripe)& Stripe,
       
       if(!ChFiKPart_ComputeData::Compute(DStr,SD,HS1,HS2,Or1,Or2,Spine,iedge)){
 #ifdef OCCT_DEBUG
-	cout<<"failed calculation KPart"<<endl;
+	std::cout<<"failed calculation KPart"<<std::endl;
 #endif
       }
       else if(!SplitKPart(SD,LSD,Spine,iedge,HS1,It1,HS2,It2,intf,intl)){
 #ifdef OCCT_DEBUG
-	cout<<"failed calculation KPart"<<endl;
+	std::cout<<"failed calculation KPart"<<std::endl;
 #endif
 	LSD.Clear();
       }
@@ -2434,10 +2500,19 @@ void ChFi3d_Builder::PerformSetOfKPart(Handle(ChFiDS_Stripe)& Stripe,
 	    Spine->AppendElSpine(CurrentHE);
 	    CurrentHE->ChangeCurve().ChangeNext() = LSD.Value(j);
 	    CurrentHE =  new ChFiDS_HElSpine();
+
+            CurrentOffsetHE->ChangeCurve().LastParameter (WFirst);
+	    CurrentOffsetHE->ChangeCurve().SetLastPointAndTgt(PFirst,TFirst);
+	    Spine->AppendOffsetElSpine(CurrentOffsetHE);
+	    CurrentOffsetHE->ChangeCurve().ChangeNext() = LSD.Value(j);
+	    CurrentOffsetHE =  new ChFiDS_HElSpine();
 	  }
 	  CurrentHE->ChangeCurve().FirstParameter(WLast);
 	  CurrentHE->ChangeCurve().SetFirstPointAndTgt(PLast,TLast);
 	  CurrentHE->ChangeCurve().ChangePrevious() = LSD.Value(j);
+	  CurrentOffsetHE->ChangeCurve().FirstParameter(WLast);
+	  CurrentOffsetHE->ChangeCurve().SetFirstPointAndTgt(PLast,TLast);
+	  CurrentOffsetHE->ChangeCurve().ChangePrevious() = LSD.Value(j);
 	  YaKPart = Standard_True;
 	}
 	else {
@@ -2448,10 +2523,19 @@ void ChFi3d_Builder::PerformSetOfKPart(Handle(ChFiDS_Stripe)& Stripe,
 	    Spine->AppendElSpine(CurrentHE);
 	    CurrentHE->ChangeCurve().ChangeNext() = LSD.Value(j);
 	    CurrentHE = new ChFiDS_HElSpine();
+            
+	    CurrentOffsetHE->ChangeCurve().LastParameter(WFirst);
+	    CurrentOffsetHE->ChangeCurve().SetLastPointAndTgt(PFirst,TFirst);
+	    Spine->AppendOffsetElSpine(CurrentOffsetHE);
+	    CurrentOffsetHE->ChangeCurve().ChangeNext() = LSD.Value(j);
+	    CurrentOffsetHE = new ChFiDS_HElSpine();
 	  }
 	  CurrentHE->ChangeCurve().FirstParameter(WLast);
 	  CurrentHE->ChangeCurve().SetFirstPointAndTgt(PLast,TLast);
 	  CurrentHE->ChangeCurve().ChangePrevious() = LSD.Value(j);
+	  CurrentOffsetHE->ChangeCurve().FirstParameter(WLast);
+	  CurrentOffsetHE->ChangeCurve().SetFirstPointAndTgt(PLast,TLast);
+	  CurrentOffsetHE->ChangeCurve().ChangePrevious() = LSD.Value(j);
 	}
       }
       if(!li.IsEmpty()) myEVIMap.Bind(Spine->Edges(iedge),li);
@@ -2468,6 +2552,11 @@ void ChFi3d_Builder::PerformSetOfKPart(Handle(ChFiDS_Stripe)& Stripe,
 	CurrentHE->ChangeCurve().SetLastPointAndTgt(PEndPeriodic,TEndPeriodic);
 	if(!YaKPart) CurrentHE->ChangeCurve().SetPeriodic(Standard_True);
 	Spine->AppendElSpine(CurrentHE);
+
+	CurrentOffsetHE->ChangeCurve().LastParameter(WEndPeriodic);
+	CurrentOffsetHE->ChangeCurve().SetLastPointAndTgt(PEndPeriodic,TEndPeriodic);
+	if(!YaKPart) CurrentOffsetHE->ChangeCurve().SetPeriodic(Standard_True);
+	Spine->AppendOffsetElSpine(CurrentOffsetHE);
       }
     }
     else{
@@ -2478,6 +2567,10 @@ void ChFi3d_Builder::PerformSetOfKPart(Handle(ChFiDS_Stripe)& Stripe,
 	CurrentHE->ChangeCurve().LastParameter(Spine->LastParameter());
 	CurrentHE->ChangeCurve().SetLastPointAndTgt(PLast,TLast);
 	Spine->AppendElSpine(CurrentHE);
+
+	CurrentOffsetHE->ChangeCurve().LastParameter(Spine->LastParameter());
+	CurrentOffsetHE->ChangeCurve().SetLastPointAndTgt(PLast,TLast);
+	Spine->AppendOffsetElSpine(CurrentOffsetHE);
       }
     }
   }
@@ -2492,6 +2585,12 @@ void ChFi3d_Builder::PerformSetOfKPart(Handle(ChFiDS_Stripe)& Stripe,
 #ifdef OCCT_DEBUG
     if(ChFi3d_GettraceCHRON()) { elspine.Stop(); }
 #endif
+  }
+  if (Spine->Mode() == ChFiDS_ConstThroatWithPenetrationChamfer)
+  {
+    ChFiDS_ListOfHElSpine& offsetll = Spine->ChangeOffsetElSpines();
+    for (ILES.Initialize(offsetll); ILES.More(); ILES.Next())
+      ChFi3d_PerformElSpine(ILES.Value(),Spine,myConti,tolesp,Standard_True);
   }
   Spine->SplitDone(Standard_True);
 }
@@ -2892,7 +2991,7 @@ void ChFi3d_Builder::PerformSetOfKGen(Handle(ChFiDS_Stripe)& Stripe,
       else if(IF < IL){
 	TColStd_Array1OfReal wv(IF,IL - 1);
 #ifdef OCCT_DEBUG
-	cout<<"length of the trajectory : "<<(WL-WF)<<endl;
+	std::cout<<"length of the trajectory : "<<(WL-WF)<<std::endl;
 #endif
 	for(i = IF; i < IL; i++){
 	  Standard_Integer iloc = i;
@@ -2903,7 +3002,7 @@ void ChFi3d_Builder::PerformSetOfKGen(Handle(ChFiDS_Stripe)& Stripe,
 #ifdef OCCT_DEBUG
 	  gp_Pnt pelsapp = curels.Value(wi);
 	  Standard_Real distinit = pv.Distance(pelsapp);
-	  cout<<"distance psp/papp : "<<distinit<<endl;
+	  std::cout<<"distance psp/papp : "<<distinit<<std::endl;
 #endif
 	  Extrema_LocateExtPC ext(pv,curels,wi,1.e-8);
 	  wv(i) = wi;
@@ -2912,7 +3011,7 @@ void ChFi3d_Builder::PerformSetOfKGen(Handle(ChFiDS_Stripe)& Stripe,
 	  }
 	  else {
 #ifdef OCCT_DEBUG
-	    cout<<"fail of projection vertex ElSpine!!!"<<endl;
+	    std::cout<<"fail of projection vertex ElSpine!!!"<<std::endl;
 #endif
 	  }
 	}

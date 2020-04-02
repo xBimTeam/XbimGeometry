@@ -360,7 +360,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var triangulatedFaceSet = model.Instances.OfType<IfcTriangulatedFaceSet>().FirstOrDefault();
                 Assert.IsNotNull(triangulatedFaceSet);
                 var basin = geomEngine.CreateSurfaceModel(triangulatedFaceSet);
-                Assert.IsTrue((int)basin.BoundingBox.Volume == 23960321);
+                Assert.AreEqual(23938449.816244926, basin.BoundingBox.Volume, 1e-5);
 
             }
         }

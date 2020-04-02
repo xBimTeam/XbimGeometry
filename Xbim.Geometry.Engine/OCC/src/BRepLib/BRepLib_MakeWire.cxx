@@ -131,10 +131,10 @@ BRepLib_MakeWire::BRepLib_MakeWire(const TopoDS_Wire& W,
 
 void  BRepLib_MakeWire::Add(const TopoDS_Wire& W)
 {
-  TopExp_Explorer ex(W,TopAbs_EDGE);
-  while (ex.More()) {
-    Add(TopoDS::Edge(ex.Current()));
-    ex.Next();
+  for (TopoDS_Iterator it(W); it.More(); it.Next()) {
+    Add(TopoDS::Edge(it.Value()));
+    if (myError != BRepLib_WireDone)
+      break;
   }
 }
 
@@ -357,7 +357,7 @@ void  BRepLib_MakeWire::Add(const TopoDS_Edge& E, Standard_Boolean IsCheckGeomet
       else if (V2.IsSame(myVertex)) VRef = V1;
       else {
 #ifdef OCCT_DEBUG
-	cout << "MakeWire : There is a PROBLEM !!" << endl;
+	std::cout << "MakeWire : There is a PROBLEM !!" << std::endl;
 #endif
 	myError = BRepLib_NonManifoldWire;
       }
@@ -366,7 +366,7 @@ void  BRepLib_MakeWire::Add(const TopoDS_Edge& E, Standard_Boolean IsCheckGeomet
 	// Particular case: it is required to control the orientation
 #ifdef OCCT_DEBUG
 	if (!VF.IsSame(myVertex))
-	  cout << "MakeWire : There is a PROBLEM !!" << endl;
+	  std::cout << "MakeWire : There is a PROBLEM !!" << std::endl;
 #endif
 	
       }
@@ -375,7 +375,7 @@ void  BRepLib_MakeWire::Add(const TopoDS_Edge& E, Standard_Boolean IsCheckGeomet
 	else if (VL.IsSame(myVertex)) VL = VRef;
 	else {
 #ifdef OCCT_DEBUG
-	  cout << "MakeWire : Y A UN PROBLEME !!" << endl;
+	  std::cout << "MakeWire : Y A UN PROBLEME !!" << std::endl;
 #endif
 	  myError = BRepLib_NonManifoldWire;
 	}

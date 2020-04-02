@@ -63,7 +63,7 @@ Standard_Boolean Standard_Type::SubType (const Standard_CString theName) const
 // ------------------------------------------------------------------
 void Standard_Type::Print (Standard_OStream& AStream) const
 {
-  AStream << hex << (Standard_Address)this << " : " << dec << myName ;
+  AStream << std::hex << (Standard_Address)this << " : " << std::dec << myName ;
 }
 
 //============================================================================
@@ -74,9 +74,13 @@ namespace {
   // Value-based hasher for plain C string (char*)
   struct CStringHasher 
   {
-    static Standard_Integer HashCode (const Standard_CString& theKey, const Standard_Integer Upper)
+    //! Computes a hash code of the given Standard_CString, in the range [1, theUpperBound]
+    //! @param theKey the key which hash code is to be computed
+    //! @param theUpperBound the upper bound of the range a computing hash code must be within
+    //! @return a computed hash code, in the range [1, theUpperBound]
+    static Standard_Integer HashCode (const Standard_CString& theKey, const Standard_Integer theUpperBound)
     {
-      return ::HashCode (theKey, Upper);
+      return ::HashCode (theKey, theUpperBound);
     }
     static bool IsEqual (const Standard_CString& theKey1, const Standard_CString& theKey2)
     {
@@ -116,7 +120,7 @@ Standard_Type* Standard_Type::Register (const char* theSystemName, const char* t
   // then add it to registry and return (the reference to the handle stored in the registry)
   aRegistry.Bind (aType->mySystemName, aType);
 
-//  cout << "Registering " << theSystemName << ": " << aRegistry.Extent() << endl;
+//  std::cout << "Registering " << theSystemName << ": " << aRegistry.Extent() << std::endl;
 
   return aType;
 }
@@ -127,7 +131,7 @@ Standard_Type::~Standard_Type ()
   registry_type& aRegistry = GetRegistry();
   Standard_ASSERT(aRegistry.UnBind (mySystemName), "Standard_Type::~Standard_Type() cannot find itself in registry",);
 
-//  cout << "Unregistering " << mySystemName << ": " << aRegistry.Extent() << endl;
+//  std::cout << "Unregistering " << mySystemName << ": " << aRegistry.Extent() << std::endl;
   Standard::Free (mySystemName);
   Standard::Free (myName);
 }

@@ -859,7 +859,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 solidResult = geomEngine.CreateSolidSet(er.Entity, logger).FirstOrDefault();
                 var actualVolume = solidResult.Volume;
                 Assert.IsTrue(solidBody.Volume > actualVolume, "This cut solid should have less volume than the body shape");
-                Assert.IsTrue(solidResult.Faces.Count == 9, "This solid should have 9 faces");
+                Assert.IsTrue(solidResult.Faces.Count == 8, "This solid should have 8 faces");
             }
         }
         [TestMethod]

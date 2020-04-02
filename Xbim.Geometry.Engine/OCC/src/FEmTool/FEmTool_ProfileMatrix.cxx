@@ -155,7 +155,7 @@ FEmTool_ProfileMatrix::FEmTool_ProfileMatrix(const TColStd_Array1OfInteger& Firs
 
   Standard_Real * x = &X(X.Lower());
   x--;
-  Standard_Real * b = &B(B.Lower());
+  const Standard_Real * b = &B(B.Lower());
   b--;
   const Standard_Real * SMA = &SMatrix->Value(1);
   SMA --;
@@ -207,7 +207,7 @@ FEmTool_ProfileMatrix::FEmTool_ProfileMatrix(const TColStd_Array1OfInteger& Firs
   Standard_Integer i, j, jj, DiagAddr, CurrAddr;
   Standard_Real * m = &MX(MX.Lower());
   m--;
-  Standard_Real * x = &X(X.Lower());
+  const Standard_Real * x = &X(X.Lower());
   x--;
   const Standard_Real * PM = &ProfileMatrix->Value(1);
   PM--;
@@ -254,32 +254,32 @@ Standard_Boolean FEmTool_ProfileMatrix::IsInProfile(const Standard_Integer i,
  void FEmTool_ProfileMatrix::OutM() const
 {
   Standard_Integer i, j;
-  cout<<"Matrix A"<<endl;
+  std::cout<<"Matrix A"<<std::endl;
   for(i = 1; i <= RowNumber(); i++) {
     for(j = 1; j < i - profile(1, i); j++) 
-      cout<<"0 ";
+      std::cout<<"0 ";
 
     for(j = profile(2, i) - profile(1, i); j <= profile(2, i); j++) 
-      cout<<ProfileMatrix->Value(j)<<" ";
-    cout<<endl;
+      std::cout<<ProfileMatrix->Value(j)<<" ";
+    std::cout<<std::endl;
   }
 
-  cout<<"NextCoeff"<<endl;
+  std::cout<<"NextCoeff"<<std::endl;
   for(i = 1; i <= profile(2, RowNumber()); i++)
-    cout<<NextCoeff->Value(i)<<" ";
-  cout<<endl;
+    std::cout<<NextCoeff->Value(i)<<" ";
+  std::cout<<std::endl;
 }
 
  void FEmTool_ProfileMatrix::OutS() const
 {
   Standard_Integer i, j;
-  cout<<"Matrix S"<<endl;
+  std::cout<<"Matrix S"<<std::endl;
   for(i = 1; i <= RowNumber(); i++) {
     for(j = 1; j < i - profile(1, i); j++) 
-      cout<<"0 ";
+      std::cout<<"0 ";
 
     for(j = profile(2, i) - profile(1, i); j <= profile(2, i); j++) 
-      cout<<SMatrix->Value(j)<<" ";
-    cout<<endl;
+      std::cout<<SMatrix->Value(j)<<" ";
+    std::cout<<std::endl;
   }
 }

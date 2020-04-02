@@ -30,7 +30,7 @@
 #include <Geom2dAdaptor_Curve.hxx>
 #include <Geom2dInt_GInter.hxx>
 #include <Geom_Curve.hxx>
-#include <Geom_Surface.hxx>
+#include <Geom_ElementarySurface.hxx>
 #include <GeomAdaptor_Surface.hxx>
 #include <gp_Dir2d.hxx>
 #include <gp_Lin2d.hxx>
@@ -118,26 +118,32 @@ void ShapeFix_ComposeShell::Init (const Handle(ShapeExtend_CompositeSurface) &Gr
 //  DTK-CKY 100531 : protection against very thin face
 //  Test "isclosed" should be filtered on the overall (non trimmed) surface, must be closed
   Handle(Geom_Surface) theSurface = BRep_Tool::Surface(Face,myLoc);
-  Standard_Real U0,U1,V0,V1,GU0 = 0.,GU1 = 0.,GV0 = 0.,GV1 = 0.;
-  theSurface->Bounds(U0,U1,V0,V1);
-  if (::Precision::IsInfinite (U0) || ::Precision::IsInfinite (U1) ||
-      ::Precision::IsInfinite (V0) || ::Precision::IsInfinite (V1))
-    BRepTools::UVBounds(Face, GU0, GU1, GV0, GV1);
-  if (myUClosed) {
-    if (::Precision::IsInfinite (V0)) V0 = GV0;
-    if (::Precision::IsInfinite (V1)) V1 = GV1;
-    gp_Pnt P0 = theSurface->Value(U0,(V0+V1)/2.);
-    gp_Pnt P1 = theSurface->Value(U1,(V0+V1)/2.);
-    if (P0.Distance(P1) > Precision::Confusion()*10)
-      myUClosed = Standard_False;
-  }
-  if (myVClosed) {
-    if (::Precision::IsInfinite (U0)) U0 = GU0;
-    if (::Precision::IsInfinite (U1)) U1 = GU1;
-    gp_Pnt P0 = theSurface->Value((U0+U1)/2.,V0);
-    gp_Pnt P1 = theSurface->Value((U0+U1)/2.,V1);
-    if (P0.Distance(P1) > Precision::Confusion()*10)
-      myVClosed = Standard_False;
+  // avoid false detection of 'Closed' on very thin faces
+  if (theSurface->IsKind(STANDARD_TYPE(Geom_ElementarySurface))) {
+    myUClosed = myUClosed && theSurface->IsUClosed();
+    myVClosed = myVClosed && theSurface->IsVClosed();
+  } else {
+    Standard_Real U0,U1,V0,V1,GU0 = 0.,GU1 = 0.,GV0 = 0.,GV1 = 0.;
+    theSurface->Bounds(U0,U1,V0,V1);
+    if (::Precision::IsInfinite (U0) || ::Precision::IsInfinite (U1) ||
+        ::Precision::IsInfinite (V0) || ::Precision::IsInfinite (V1))
+      BRepTools::UVBounds(Face, GU0, GU1, GV0, GV1);
+    if (myUClosed) {
+      if (::Precision::IsInfinite (V0)) V0 = GV0;
+      if (::Precision::IsInfinite (V1)) V1 = GV1;
+      gp_Pnt P0 = theSurface->Value(U0,(V0+V1)/2.);
+      gp_Pnt P1 = theSurface->Value(U1,(V0+V1)/2.);
+      if (P0.Distance(P1) > Precision::Confusion()*10)
+        myUClosed = Standard_False;
+    }
+    if (myVClosed) {
+      if (::Precision::IsInfinite (U0)) U0 = GU0;
+      if (::Precision::IsInfinite (U1)) U1 = GU1;
+      gp_Pnt P0 = theSurface->Value((U0+U1)/2.,V0);
+      gp_Pnt P1 = theSurface->Value((U0+U1)/2.,V1);
+      if (P0.Distance(P1) > Precision::Confusion()*10)
+        myVClosed = Standard_False;
+    }
   }
 //  DTK-CKY 100531 end
 
@@ -383,7 +389,7 @@ static Standard_Integer ApplyContext (ShapeFix_WireSegment &wire,
     TopoDS_Edge E = TopoDS::Edge ( it.Value() );
     if ( ! E.IsNull() ) segw->Add ( E );
 #ifdef OCCT_DEBUG
-    else cout << "Error: ShapeFix_ComposeShell, ApplyContext: wrong mapping of edge" << endl;
+    else std::cout << "Error: ShapeFix_ComposeShell, ApplyContext: wrong mapping of edge" << std::endl;
 #endif
   }
 
@@ -400,7 +406,7 @@ static Standard_Integer ApplyContext (ShapeFix_WireSegment &wire,
     }
   }
 #ifdef OCCT_DEBUG
-  else cout << "Warning: ShapeFix_ComposeShell, ApplyContext: edge is to remove - not implemented" << endl;
+  else std::cout << "Warning: ShapeFix_ComposeShell, ApplyContext: edge is to remove - not implemented" << std::endl;
 #endif
 
   return index - iedge;
@@ -707,7 +713,7 @@ Standard_Integer ShapeFix_ComposeShell::ComputeCode (const Handle(ShapeExtend_Wi
     code = IOR_LEFT;
     myStatus |= ShapeExtend::EncodeStatus ( ShapeExtend_FAIL2 );
 #ifdef OCCT_DEBUG
-    cout << "Warning: ShapeFix_ComposeShell::ComputeCode: lost intersection point" << endl;
+    std::cout << "Warning: ShapeFix_ComposeShell::ComputeCode: lost intersection point" << std::endl;
 #endif
   }
   return code;
@@ -828,7 +834,7 @@ ShapeFix_WireSegment ShapeFix_ComposeShell::SplitWire (ShapeFix_WireSegment &wir
       DistributeSplitPoints ( wire.WireData(), myFace, i, nsplit, indexes, values );
       if ( nsplit <=0 ) {
 #ifdef OCCT_DEBUG
-        cout << "Error: ShapeFix_ComposeShell::SplitWire: edge dismissed" << endl;
+        std::cout << "Error: ShapeFix_ComposeShell::SplitWire: edge dismissed" << std::endl;
 #endif
         i--;
         continue;
@@ -1612,7 +1618,7 @@ void ShapeFix_ComposeShell::SplitByLine (ShapeFix_SequenceOfWireSegment &wires,
     if ( tanglevel <0 ) {
 //      myStatus |= ShapeExtend::EncodeStatus ( ShapeExtend_FAIL4 );
 #ifdef OCCT_DEBUG
-      cout << "Warning: ShapeFix_ComposeShell::SplitByLine: tangency level <0 !" << endl;
+      std::cout << "Warning: ShapeFix_ComposeShell::SplitByLine: tangency level <0 !" << std::endl;
 #endif
     }
     if ( ! interior ) continue;
@@ -1627,7 +1633,7 @@ void ShapeFix_ComposeShell::SplitByLine (ShapeFix_SequenceOfWireSegment &wires,
     if ( SplitLinePar(i) - SplitLinePar(i-1) < ::Precision::PConfusion() ) {
 
 #ifdef OCCT_DEBUG
-      cout << "Info: ShapeFix_ComposeShell::SplitByLine: Short segment ignored" << endl;
+      std::cout << "Info: ShapeFix_ComposeShell::SplitByLine: Short segment ignored" << std::endl;
 #endif
       if ( ! V1.IsSame ( V2 ) ) { // merge coincident vertices
         ShapeBuild_Vertex sbv;
@@ -1636,7 +1642,7 @@ void ShapeFix_ComposeShell::SplitByLine (ShapeFix_SequenceOfWireSegment &wires,
         Context()->Replace ( V2, V.Oriented ( V2.Orientation() ) );
         V1 = V2 = V;
 #ifdef OCCT_DEBUG
-        cout << "Info: ShapeFix_ComposeShell::SplitByLine: Coincided vertices merged" << endl;
+        std::cout << "Info: ShapeFix_ComposeShell::SplitByLine: Coincided vertices merged" << std::endl;
 #endif
       }
       continue;
@@ -1680,7 +1686,7 @@ void ShapeFix_ComposeShell::SplitByLine (ShapeFix_SequenceOfWireSegment &wires,
   if ( parity % 2 ) {
     myStatus |= ShapeExtend::EncodeStatus ( ShapeExtend_FAIL4 );
 #ifdef OCCT_DEBUG
-    cout << "Error: ShapeFix_ComposeShell::SplitByLine: parity error" << endl;
+    std::cout << "Error: ShapeFix_ComposeShell::SplitByLine: parity error" << std::endl;
 #endif
   }
 
@@ -1918,7 +1924,7 @@ static Standard_Integer IsShortSegment (const ShapeFix_WireSegment &seg,
                                         const Standard_Real VResolution)
 {
   TopoDS_Vertex Vf = seg.FirstVertex();
-  if ( ! Vf.IsSame ( seg.LastVertex() ) ) return Standard_False;
+  if ( ! Vf.IsSame ( seg.LastVertex() ) ) return 0;
 
   gp_Pnt pnt = BRep_Tool::Pnt(Vf);
   Standard_Real tol = BRep_Tool::Tolerance(Vf);
@@ -1929,7 +1935,7 @@ static Standard_Integer IsShortSegment (const ShapeFix_WireSegment &seg,
   Handle(ShapeExtend_WireData) sbwd = seg.WireData();
   for ( Standard_Integer i=1; i <= sbwd->NbEdges(); i++ ) {
     TopoDS_Edge edge = sbwd->Edge ( i );
-    if ( ! Vf.IsSame ( sae.LastVertex ( edge ) ) ) return Standard_False;
+    if ( ! Vf.IsSame ( sae.LastVertex ( edge ) ) ) return 0;
     Handle(Geom2d_Curve) c2d;
     Standard_Real f, l;
     if ( ! sae.PCurve ( edge, myFace, c2d, f, l ) ) continue;
@@ -2006,7 +2012,7 @@ void ShapeFix_ComposeShell::CollectWires (ShapeFix_SequenceOfWireSegment &wires,
 #ifdef OCCT_DEBUG
     for ( Standard_Integer k=1; ! myClosedMode && k <= seqw(i).NbEdges(); k++ ) 
       if ( ! seqw(i).CheckPatchIndex ( k ) ) {
-        cout << "Warning: ShapeFix_ComposeShell::CollectWires: Wrong patch indices" << endl;
+        std::cout << "Warning: ShapeFix_ComposeShell::CollectWires: Wrong patch indices" << std::endl;
         break;
       }
 #endif
@@ -2018,7 +2024,7 @@ void ShapeFix_ComposeShell::CollectWires (ShapeFix_SequenceOfWireSegment &wires,
            ( seqw(i).NbEdges() == 1 && //:abv 13.05.02: OCC320 - remove if degenerated 
              BRep_Tool::Degenerated ( seqw(i).Edge(1) ) ) ) ) {
 #ifdef OCCT_DEBUG
-      cout << "Info: ShapeFix_ComposeShell::CollectWires: Short segment ignored" << endl;
+      std::cout << "Info: ShapeFix_ComposeShell::CollectWires: Short segment ignored" << std::endl;
 #endif
       seqw(i).Orientation ( TopAbs_INTERNAL );
     }
@@ -2225,7 +2231,7 @@ void ShapeFix_ComposeShell::CollectWires (ShapeFix_SequenceOfWireSegment &wires,
       if ( ! endV.IsSame ( sae.FirstVertex ( firstEdge ) ) ) {
         myStatus |= ShapeExtend::EncodeStatus ( ShapeExtend_FAIL5 );
 #ifdef OCCT_DEBUG
-        cout << "Warning: ShapeFix_ComposeShell::CollectWires: can't close wire" << endl;
+        std::cout << "Warning: ShapeFix_ComposeShell::CollectWires: can't close wire" << std::endl;
 #endif
       }
       ShapeFix_WireSegment s ( sbwd, TopAbs_FORWARD );
@@ -2285,7 +2291,7 @@ void ShapeFix_ComposeShell::CollectWires (ShapeFix_SequenceOfWireSegment &wires,
       ShapeFix_WireSegment s ( wd, TopAbs_FORWARD );
       wires.Append ( s );
 #ifdef OCCT_DEBUG
-      cout <<"Warning: Short segment processed as separate wire"<<endl;
+      std::cout <<"Warning: Short segment processed as separate wire"<<std::endl;
 #endif
       continue;
     }
@@ -2471,7 +2477,7 @@ void ShapeFix_ComposeShell::MakeFacesOnPatch (TopTools_SequenceOfShape &faces,
   // check for lost wires, and if they are, make them roots
   if ( roots.Length() <=0 && loops.Length() >0 ) {
 #ifdef OCCT_DEBUG
-    cout << "Error: ShapeFix_ComposeShell::MakeFacesOnPatch: can't dispatch wires" << endl;
+    std::cout << "Error: ShapeFix_ComposeShell::MakeFacesOnPatch: can't dispatch wires" << std::endl;
 #endif
     for ( Standard_Integer j=1; j <= loops.Length(); j++ ) {
       roots.Append ( loops(j) );
@@ -2490,7 +2496,7 @@ void ShapeFix_ComposeShell::MakeFacesOnPatch (TopTools_SequenceOfShape &faces,
     if ( clas.PerformInfinitePoint() == TopAbs_IN ) {
       reverse = Standard_True;
 #ifdef OCCT_DEBUG
-      cout << "Warning: ShapeFix_ComposeShell::MakeFacesOnPatch: badly oriented wire" << endl;
+      std::cout << "Warning: ShapeFix_ComposeShell::MakeFacesOnPatch: badly oriented wire" << std::endl;
 #endif
     }
 
@@ -2542,7 +2548,7 @@ void ShapeFix_ComposeShell::MakeFacesOnPatch (TopTools_SequenceOfShape &faces,
     // check for lost wires, and if they are, make them roots
     if ( i == roots.Length() && loops.Length() >0 ) {
 #ifdef OCCT_DEBUG
-      cout << "Error: ShapeFix_ComposeShell::MakeFacesOnPatch: can't dispatch wires" << endl;
+      std::cout << "Error: ShapeFix_ComposeShell::MakeFacesOnPatch: can't dispatch wires" << std::endl;
 #endif
       for ( j=1; j <= loops.Length(); j++ ) {
         TopoDS_Shape aSh = loops(j);

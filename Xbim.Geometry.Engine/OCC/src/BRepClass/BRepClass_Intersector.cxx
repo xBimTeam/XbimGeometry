@@ -37,7 +37,7 @@
 
 static 
 void RefineTolerance(const TopoDS_Face& aF,
-                     const BRepAdaptor_Curve2d& aC,
+                     const Geom2dAdaptor_Curve& aC,
                      const Standard_Real aT,
                      Standard_Real& aTolZ);
 
@@ -72,7 +72,7 @@ void  BRepClass_Intersector::Perform(const gp_Lin2d& L,
     return;
   }
   //
-  BRepAdaptor_Curve2d C(EE, F);
+  Geom2dAdaptor_Curve C(aC2D, deb, fin);
   //
   deb = C.FirstParameter();
   fin = C.LastParameter();
@@ -135,10 +135,10 @@ void  BRepClass_Intersector::Perform(const gp_Lin2d& L,
   IntRes2d_Domain DL;
   //
   if(P!=RealLast()) {
-    DL.SetValues(L.Location(),0.,aTolZ,ElCLib::Value(P,L),P,aTolZ);
+    DL.SetValues(L.Location(),0.,Precision::PConfusion(),ElCLib::Value(P,L),P,Precision::PConfusion());
   }
   else { 
-    DL.SetValues(L.Location(),0.,aTolZ,Standard_True);
+    DL.SetValues(L.Location(),0.,Precision::PConfusion(),Standard_True);
   }
 
   IntRes2d_Domain DE(pdeb,deb,toldeb,pfin,fin,tolfin);
@@ -185,7 +185,7 @@ void  BRepClass_Intersector::LocalGeometry(const BRepClass_Edge& E,
 //purpose  : 
 //=======================================================================
 void RefineTolerance(const TopoDS_Face& aF,
-                     const BRepAdaptor_Curve2d& aC,
+                     const Geom2dAdaptor_Curve& aC,
                      const Standard_Real aT,
                      Standard_Real& aTolZ)
 {

@@ -35,6 +35,7 @@
 #include <IntTools_Tools.hxx>
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Iterator.hxx>
+#include <BRepExtrema_DistShapeShape.hxx>
 
 static 
   void BndBuildBox(const BRepAdaptor_Curve& theBAC,
@@ -224,6 +225,24 @@ void IntTools_EdgeEdge::Perform()
     }
   }
   //
+  if ((myCurve1.GetType() <= GeomAbs_Parabola && myCurve2.GetType() <= GeomAbs_Parabola) &&
+      (myCurve1.GetType() == GeomAbs_Line || myCurve2.GetType() == GeomAbs_Line))
+  {
+    //Improvement of performance for cases of searching common parts between line  
+    //and analytical curve. This code allows to define that edges have no
+    //common parts more fast, then regular algorithm (FindSolution(...))
+    //Check minimal distance between edges
+    BRepExtrema_DistShapeShape  aMinDist(myEdge1, myEdge2, Extrema_ExtFlag_MIN);
+    if (aMinDist.IsDone())
+    {
+      Standard_Real d = aMinDist.Value();
+      if (d > 1.1 * myTol)
+      {
+        return;
+      }
+    }
+  }
+
   IntTools_SequenceOfRanges aRanges1, aRanges2;
   //
   //3.2. Find ranges containig solutions
@@ -285,7 +304,7 @@ void IntTools_EdgeEdge::FindSolutions(IntTools_SequenceOfRanges& theRanges1,
 {
   Standard_Boolean bIsClosed2;
   Standard_Real aT11, aT12, aT21, aT22;
-  Bnd_Box aB2;
+  Bnd_Box aB1, aB2;
   //
   bSplit2 = Standard_False;
   myRange1.Range(aT11, aT12);
@@ -294,7 +313,6 @@ void IntTools_EdgeEdge::FindSolutions(IntTools_SequenceOfRanges& theRanges1,
   bIsClosed2 = IsClosed(myGeom2, aT21, aT22, myTol2, myRes2);
   //
   if (bIsClosed2) {
-    Bnd_Box aB1;
     BndBuildBox(myCurve1, aT11, aT12, myTol1, aB1);
     //
     gp_Pnt aP = myGeom2->Value(aT21);
@@ -302,8 +320,9 @@ void IntTools_EdgeEdge::FindSolutions(IntTools_SequenceOfRanges& theRanges1,
   }
   //
   if (!bIsClosed2) {
+    BndBuildBox(myCurve1, aT11, aT12, myTol1, aB1);
     BndBuildBox(myCurve2, aT21, aT22, myTol2, aB2);
-    FindSolutions(myRange1, myRange2, aB2, theRanges1, theRanges2);
+    FindSolutions(myRange1, aB1, myRange2, aB2, theRanges1, theRanges2);
     return;
   }
   //
@@ -324,10 +343,11 @@ void IntTools_EdgeEdge::FindSolutions(IntTools_SequenceOfRanges& theRanges1,
   //
   for (i = 1; i <= aNb1; ++i) {
     const IntTools_Range& aR1 = aSegments1(i);
+    BndBuildBox(myCurve1, aR1.First(), aR1.Last(), myTol1, aB1);
     for (j = 1; j <= aNb2; ++j) {
       const IntTools_Range& aR2 = aSegments2(j);
       BndBuildBox(myCurve2, aR2.First(), aR2.Last(), myTol2, aB2);
-      FindSolutions(aR1, aR2, aB2, theRanges1, theRanges2);
+      FindSolutions(aR1, aB1, aR2, aB2, theRanges1, theRanges2);
     }
   }
   //
@@ -339,6 +359,7 @@ void IntTools_EdgeEdge::FindSolutions(IntTools_SequenceOfRanges& theRanges1,
 //purpose  : 
 //=======================================================================
 void IntTools_EdgeEdge::FindSolutions(const IntTools_Range& theR1,
+                                      const Bnd_Box& theBox1,
                                       const IntTools_Range& theR2,
                                       const Bnd_Box& theBox2,
                                       IntTools_SequenceOfRanges& theRanges1,
@@ -354,6 +375,7 @@ void IntTools_EdgeEdge::FindSolutions(const IntTools_Range& theR1,
   theR1.Range(aT11, aT12);
   theR2.Range(aT21, aT22);
   //
+  aB1 = theBox1;
   aB2 = theBox2;
   //
   bThin = Standard_False;
@@ -366,9 +388,7 @@ void IntTools_EdgeEdge::FindSolutions(const IntTools_Range& theR1,
     aTB21 = aT21;
     aTB22 = aT22;
     //
-    //1. Build box for first edge and find parameters 
-    //   of the second one in that box
-    BndBuildBox(myCurve1, aT11, aT12, myTol1, aB1);
+    //1. Find parameters of the second edge in the box of first one
     bOut = aB1.IsOut(aB2);
     if (bOut) {
       break;
@@ -416,7 +436,9 @@ void IntTools_EdgeEdge::FindSolutions(const IntTools_Range& theR1,
         ((aT21 - aTB21) < aSmallStep2) && ((aTB22 - aT22) < aSmallStep2)) {
       bStop = Standard_True;
     }
-    //
+    else
+      BndBuildBox (myCurve1, aT11, aT12, myTol1, aB1);
+
   } while (!bStop);
   //
   if (bOut) {
@@ -479,13 +501,20 @@ void IntTools_EdgeEdge::FindSolutions(const IntTools_Range& theR1,
   Standard_Integer i, aNb1;
   IntTools_SequenceOfRanges aSegments1;
   //
+  // Build box for first curve to compare
+  // the boxes of the splits with this one
+  BndBuildBox(myCurve1, aT11, aT12, myTol1, aB1);
+  const Standard_Real aB1SqExtent = aB1.SquareExtent();
+  //
   IntTools_Range aR2(aT21, aT22);
   BndBuildBox(myCurve2, aT21, aT22, myTol2, aB2);
   //
   aNb1 = SplitRangeOnSegments(aT11, aT12, myRes1, 3, aSegments1);
   for (i = 1; i <= aNb1; ++i) {
     const IntTools_Range& aR1 = aSegments1(i);
-    FindSolutions(aR1, aR2, aB2, theRanges1, theRanges2);
+    BndBuildBox(myCurve1, aR1.First(), aR1.Last(), myTol1, aB1);
+    if (!aB1.IsOut(aB2) && (aNb1 == 1 || aB1.SquareExtent() < aB1SqExtent))
+      FindSolutions(aR1, aB1, aR2, aB2, theRanges1, theRanges2);
   }
 }
 
@@ -808,141 +837,139 @@ void IntTools_EdgeEdge::FindBestSolution(const Standard_Real aT11,
 //=======================================================================
 void IntTools_EdgeEdge::ComputeLineLine()
 {
-  Standard_Boolean IsParallel, IsCoincide;
-  Standard_Real aSin, aCos, aAng, aTol;
-  Standard_Real aT1, aT2, aT11, aT12, aT21, aT22;
-  gp_Pnt aP11, aP12;
-  gp_Lin aL1, aL2;
-  gp_Dir aD1, aD2;
-  IntTools_CommonPrt aCommonPrt;
-  //
-  IsParallel = Standard_False;
-  IsCoincide = Standard_False;
-  aTol = myTol*myTol;
-  aL1 = myCurve1.Line();
-  aL2 = myCurve2.Line();
-  aD1 = aL1.Position().Direction();
-  aD2 = aL2.Position().Direction();
-  myRange1.Range(aT11, aT12);
-  myRange2.Range(aT21, aT22);
-  //
-  aCommonPrt.SetEdge1(myEdge1);
-  aCommonPrt.SetEdge2(myEdge2);
-  //
-  aCos = aD1.Dot(aD2);
-  aAng = (aCos >= 0.) ? 2.*(1. - aCos) : 2.*(1. + aCos);
-  //
-  if(aAng <= Precision::Angular()) {
-    IsParallel = Standard_True;
-    if(aL1.SquareDistance(aL2.Location()) <= aTol) {
-      IsCoincide = Standard_True;
-      aP11 = ElCLib::Value(aT11, aL1);
-      aP12 = ElCLib::Value(aT12, aL1);
-    }
-  }
-  else {
-    aP11 = ElCLib::Value(aT11, aL1);
-    aP12 = ElCLib::Value(aT12, aL1);
-    if(aL2.SquareDistance(aP11) <= aTol && aL2.SquareDistance(aP12) <= aTol) {
-      IsCoincide = Standard_True;
-    }
-  }
-  //
-  if (IsCoincide) {
-    Standard_Real t21, t22;
-    //
-    t21 = ElCLib::Parameter(aL2, aP11);
-    t22 = ElCLib::Parameter(aL2, aP12);
-    if((t21 > aT22 && t22 > aT22) || (t21 < aT21 && t22 < aT21)) {
-      return;
-    }
-    //
-    Standard_Real temp;
-    if(t21 > t22) {
-      temp = t21;
-      t21 = t22;
-      t22 = temp;
-    }
-    //
-    if(t21 >= aT21) {
-      if(t22 <= aT22) {
-        aCommonPrt.SetRange1(aT11, aT12);
-        aCommonPrt.SetAllNullFlag(Standard_True);
-        aCommonPrt.AppendRange2(t21, t22);
-      }
-      else {
-        aCommonPrt.SetRange1(aT11, aT12 - (t22 - aT22));
-        aCommonPrt.AppendRange2(t21, aT22);
-      }
-    }
-    else {
-      aCommonPrt.SetRange1(aT11 + (aT21 - t21), aT12);
-      aCommonPrt.AppendRange2(aT21, t22);
-    }
-    aCommonPrt.SetType(TopAbs_EDGE);  
-    myCommonParts.Append(aCommonPrt);
-    return;
-  }
-  //
-  if (IsParallel) {
-    return;
-  }
-  //
+  Standard_Real aTol = myTol * myTol;
+
+  gp_Lin aL1 = myCurve1.Line();
+  gp_Lin aL2 = myCurve2.Line();
+
+  gp_Dir aD1 = aL1.Direction();
+  gp_Dir aD2 = aL2.Direction();
+
+  Standard_Real anAngle = aD1.Angle (aD2);
+  Standard_Boolean IsCoincide = anAngle < Precision::Angular();
+  if (IsCoincide)
   {
-    TopoDS_Iterator aIt1, aIt2;
-    aIt1.Initialize(myEdge1);
-    for (; aIt1.More(); aIt1.Next()) {
-      const TopoDS_Shape& aV1 = aIt1.Value();
-      aIt2.Initialize(myEdge2);
-      for (; aIt2.More(); aIt2.Next()) {
-        const TopoDS_Shape& aV2 = aIt2.Value();
-        if (aV2.IsSame(aV1)) {
+    if (aL1.SquareDistance (aL2.Location()) > aTol)
+      return;
+  }
+
+  Standard_Real aT11, aT12, aT21, aT22;
+  myRange1.Range (aT11, aT12);
+  myRange2.Range (aT21, aT22);
+
+  gp_Pnt aP11 = ElCLib::Value (aT11, aL1);
+  gp_Pnt aP12 = ElCLib::Value (aT12, aL1);
+
+  if (!IsCoincide)
+  {
+    gp_Pnt O2 (aL2.Location());
+    if (!Precision::IsInfinite (aT21) && !Precision::IsInfinite (aT22))
+      O2 = ElCLib::Value ((aT21 + aT22) / 2., aL2);
+
+    gp_Vec aVec1 = gp_Vec (O2, aP11).Crossed (aD2);
+    gp_Vec aVec2 = gp_Vec (O2, aP12).Crossed (aD2);
+
+    Standard_Real aSqDist1 = aVec1.SquareMagnitude();
+    Standard_Real aSqDist2 = aVec2.SquareMagnitude();
+
+    IsCoincide = (aSqDist1 <= aTol && aSqDist2 <= aTol);
+
+    if (!IsCoincide && aVec1.Dot (aVec2) > 0)
+      // the lines do not intersect
+      return;
+  }
+
+  IntTools_CommonPrt aCommonPrt;
+  aCommonPrt.SetEdge1 (myEdge1);
+  aCommonPrt.SetEdge2 (myEdge2);
+
+  if (IsCoincide)
+  {
+    Standard_Real t21 = ElCLib::Parameter (aL2, aP11);
+    Standard_Real t22 = ElCLib::Parameter (aL2, aP12);
+
+    if ((t21 > aT22 && t22 > aT22) || (t21 < aT21 && t22 < aT21))
+      // projections are out of range
+      return;
+
+    if (t21 > t22)
+      std::swap (t21, t22);
+
+    if (t21 >= aT21)
+    {
+      if (t22 <= aT22)
+      {
+        aCommonPrt.SetRange1 (aT11, aT12);
+        aCommonPrt.SetAllNullFlag (Standard_True);
+        aCommonPrt.AppendRange2 (t21, t22);
+      }
+      else
+      {
+        aCommonPrt.SetRange1 (aT11, aT12 - (t22 - aT22));
+        aCommonPrt.AppendRange2 (t21, aT22);
+      }
+    }
+    else
+    {
+      aCommonPrt.SetRange1 (aT11 + (aT21 - t21), aT12);
+      aCommonPrt.AppendRange2 (aT21, t22);
+    }
+    aCommonPrt.SetType (TopAbs_EDGE);
+    myCommonParts.Append (aCommonPrt);
+    return;
+  }
+
+
+  gp_Vec O1O2 (aL1.Location(), aL2.Location());
+  gp_XYZ aCross = aD1.XYZ().Crossed (aD2.XYZ());
+  Standard_Real aDistLL = O1O2.Dot (gp_Vec (aCross.Normalized()));
+  if (Abs (aDistLL) > myTol)
+    return;
+
+  {
+    // Fast check that no intersection needs to be added
+    for (TopoDS_Iterator it1 (myEdge1); it1.More(); it1.Next())
+    {
+      for (TopoDS_Iterator it2 (myEdge2); it2.More(); it2.Next())
+      {
+        if (it1.Value().IsSame (it2.Value()))
           return;
-        }
       }
     }
   }
-  //
-  aSin = 1. - aCos*aCos;
-  gp_Pnt O1 = aL1.Location();
-  gp_Pnt O2 = aL2.Location();
-  gp_Vec O1O2 (O1, O2);
-  //
-  aT2 = (aD1.XYZ()*(O1O2.Dot(aD1))-(O1O2.XYZ())).Dot(aD2.XYZ());
-  aT2 /= aSin;
-  //
-  if(aT2 < aT21 || aT2 > aT22) {
+
+  Standard_Real aSqSin = aCross.SquareModulus();
+  Standard_Real aT2 = (aD1.XYZ() * (O1O2.Dot (aD1)) - (O1O2.XYZ())).Dot (aD2.XYZ());
+  aT2 /= aSqSin;
+
+  if (aT2 < aT21 || aT2 > aT22)
+    // out of range
     return;
-  }
-  //
-  gp_Pnt aP2(ElCLib::Value(aT2, aL2));
-  aT1 = (gp_Vec(O1, aP2)).Dot(aD1);
-  //
-  if(aT1 < aT11 || aT1 > aT12) {
+
+  gp_Pnt aP2 = ElCLib::Value (aT2, aL2);
+  Standard_Real aT1 = gp_Vec (aL1.Location(), aP2).Dot (aD1);
+
+  if (aT1 < aT11 || aT1 > aT12)
+    // out of range
     return;
-  }
-  //
-  gp_Pnt aP1(ElCLib::Value(aT1, aL1));
-  Standard_Real aDist = aP1.SquareDistance(aP2);
-  //
-  if (aDist > aTol) {
+
+  gp_Pnt aP1 = ElCLib::Value (aT1, aL1);
+  Standard_Real aDist = aP1.SquareDistance (aP2);
+
+  if (aDist > aTol)
+    // no intersection
     return;
-  }
-  //
+
   // compute correct range on the edges
-  Standard_Real anAngle, aDt1, aDt2;
-  //
-  anAngle = aD1.Angle(aD2);
-  //
-  aDt1 = IntTools_Tools::ComputeIntRange(myTol1, myTol2, anAngle);
-  aDt2 = IntTools_Tools::ComputeIntRange(myTol2, myTol1, anAngle);
-  //
-  aCommonPrt.SetRange1(aT1 - aDt1, aT1 + aDt1);
-  aCommonPrt.AppendRange2(aT2 - aDt2, aT2 + aDt2);
-  aCommonPrt.SetType(TopAbs_VERTEX);
-  aCommonPrt.SetVertexParameter1(aT1);
-  aCommonPrt.SetVertexParameter2(aT2);
-  myCommonParts.Append(aCommonPrt);
+  Standard_Real aDt1 = IntTools_Tools::ComputeIntRange (myTol1, myTol2, anAngle);
+  Standard_Real aDt2 = IntTools_Tools::ComputeIntRange (myTol2, myTol1, anAngle);
+
+  aCommonPrt.SetRange1 (aT1 - aDt1, aT1 + aDt1);
+  aCommonPrt.AppendRange2 (aT2 - aDt2, aT2 + aDt2);
+  aCommonPrt.SetType (TopAbs_VERTEX);
+  aCommonPrt.SetVertexParameter1 (aT1);
+  aCommonPrt.SetVertexParameter2 (aT2);
+  myCommonParts.Append (aCommonPrt);
 }
 
 //=======================================================================

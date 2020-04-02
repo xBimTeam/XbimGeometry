@@ -6,7 +6,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;HAVE_NO_DLL;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);OCC_6_9_SUPPORTED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
      <CompileAs>Default</CompileAs>
 	 
-      <AdditionalIncludeDirectories>.\OCC\src\Adaptor2d;.\OCC\src\Adaptor3d;.\OCC\src\AdvApp2Var;.\OCC\src\AdvApprox;.\OCC\src\AppBlend;.\OCC\src\AppCont;.\OCC\src\AppDef;.\OCC\src\AppParCurves;.\OCC\src\Approx;.\OCC\src\ApproxInt;.\OCC\src\Bisector;.\OCC\src\BiTgte;.\OCC\src\Blend;.\OCC\src\BlendFunc;.\OCC\src\Bnd;.\OCC\src\BndLib;.\OCC\src\BOPAlgo;.\OCC\src\BOPCol;.\OCC\src\BOPDS;.\OCC\src\BOPTools;.\OCC\src\BRep;.\OCC\src\BRepAdaptor;.\OCC\src\BRepAlgo;.\OCC\src\BRepAlgoAPI;.\OCC\src\BRepApprox;.\OCC\src\BRepBlend;.\OCC\src\BRepBndLib;.\OCC\src\BRepBuilderAPI;.\OCC\src\BRepCheck;.\OCC\src\BRepClass;.\OCC\src\BRepClass3d;.\OCC\src\BRepExtrema;.\OCC\src\BRepFill;.\OCC\src\BRepFilletAPI;.\OCC\src\BRepGProp;.\OCC\src\BRepIntCurveSurface;.\OCC\src\BRepLib;.\OCC\src\BRepLProp;.\OCC\src\BRepMAT2d;.\OCC\src\BRepMesh;.\OCC\src\BRepOffset;.\OCC\src\BRepOffsetAPI;.\OCC\src\BRepPrim;.\OCC\src\BRepPrimAPI;.\OCC\src\BRepProj;.\OCC\src\BRepSweep;.\OCC\src\BRepTools;.\OCC\src\BRepTopAdaptor;.\OCC\src\BSplCLib;.\OCC\src\BSplSLib;.\OCC\src\BVH;.\OCC\src\ChFi2d;.\OCC\src\ChFi3d;.\OCC\src\ChFiDS;.\OCC\src\ChFiKPart;.\OCC\src\Convert;.\OCC\src\CPnts;.\OCC\src\CSLib;.\OCC\src\Dico;.\OCC\src\Draft;.\OCC\src\ElCLib;.\OCC\src\ElSLib;.\OCC\src\Extrema;.\OCC\src\FairCurve;.\OCC\src\FEmTool;.\OCC\src\FilletSurf;.\OCC\src\FSD;.\OCC\src\GC;.\OCC\src\GccAna;.\OCC\src\GccEnt;.\OCC\src\GccInt;.\OCC\src\gce;.\OCC\src\GCE2d;.\OCC\src\GCPnts;.\OCC\src\Geom;.\OCC\src\Geom2d;.\OCC\src\Geom2dAdaptor;.\OCC\src\Geom2dAPI;.\OCC\src\Geom2dConvert;.\OCC\src\Geom2dEvaluator;.\OCC\src\Geom2dGcc;.\OCC\src\Geom2dHatch;.\OCC\src\Geom2dInt;.\OCC\src\Geom2dLProp;.\OCC\src\GeomAbs;.\OCC\src\GeomAdaptor;.\OCC\src\GeomAPI;.\OCC\src\GeomConvert;.\OCC\src\GeomEvaluator;.\OCC\src\GeomFill;.\OCC\src\GeomInt;.\OCC\src\GeomLib;.\OCC\src\GeomLProp;.\OCC\src\GeomPlate;.\OCC\src\GeomProjLib;.\OCC\src\GeomTools;.\OCC\src\gp;.\OCC\src\GProp;.\OCC\src\Hatch;.\OCC\src\HatchGen;.\OCC\src\Hermit;.\OCC\src\IntAna;.\OCC\src\IntAna2d;.\OCC\src\IntCurve;.\OCC\src\IntCurvesFace;.\OCC\src\IntCurveSurface;.\OCC\src\Intf;.\OCC\src\IntImp;.\OCC\src\IntImpParGen;.\OCC\src\IntPatch;.\OCC\src\IntPolyh;.\OCC\src\IntRes2d;.\OCC\src\IntStart;.\OCC\src\IntSurf;.\OCC\src\IntTools;.\OCC\src\IntWalk;.\OCC\src\Law;.\OCC\src\LocalAnalysis;.\OCC\src\LProp;.\OCC\src\LProp3d;.\OCC\src\MAT;.\OCC\src\MAT2d;.\OCC\src\math;.\OCC\src\MeshVS;.\OCC\src\Message;.\OCC\src\MMgt;.\OCC\src\NCollection;.\OCC\src\NLPlate;.\OCC\src\OSD;.\OCC\src\Plate;.\OCC\src\PLib;.\OCC\src\Plugin;.\OCC\src\Poly;.\OCC\src\Precision;.\OCC\src\ProjLib;.\OCC\src\Quantity;.\OCC\src\Resource;.\OCC\src\ShapeAlgo;.\OCC\src\ShapeAnalysis;.\OCC\src\ShapeBuild;.\OCC\src\ShapeConstruct;.\OCC\src\ShapeCustom;.\OCC\src\ShapeExtend;.\OCC\src\ShapeFix;.\OCC\src\ShapeProcess;.\OCC\src\ShapeProcessAPI;.\OCC\src\ShapeUpgrade;.\OCC\src\SortTools;.\OCC\src\Standard;.\OCC\src\StdFail;.\OCC\src\StdSelect;.\OCC\src\Storage;.\OCC\src\Sweep;.\OCC\src\TColGeom;.\OCC\src\TColGeom2d;.\OCC\src\TColgp;.\OCC\src\TCollection;.\OCC\src\TColStd;.\OCC\src\TopAbs;.\OCC\src\TopClass;.\OCC\src\TopExp;.\OCC\src\TopLoc;.\OCC\src\TopoDS;.\OCC\src\TopOpeBRep;.\OCC\src\TopOpeBRepBuild;.\OCC\src\TopOpeBRepDS;.\OCC\src\TopOpeBRepTool;.\OCC\src\TopTools;.\OCC\src\TopTrans;.\OCC\src\TShort;.\OCC\src\Units;.\OCC\src\UnitsAPI;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\OCC\src\Adaptor2d;.\OCC\src\Adaptor3d;.\OCC\src\AdvApp2Var;.\OCC\src\AdvApprox;.\OCC\src\AppBlend;.\OCC\src\AppCont;.\OCC\src\AppDef;.\OCC\src\AppParCurves;.\OCC\src\Approx;.\OCC\src\ApproxInt;.\OCC\src\Bisector;.\OCC\src\BiTgte;.\OCC\src\Blend;.\OCC\src\BlendFunc;.\OCC\src\Bnd;.\OCC\src\BndLib;.\OCC\src\BOPAlgo;.\OCC\src\BOPCol;.\OCC\src\BOPDS;.\OCC\src\BOPTools;.\OCC\src\BRep;.\OCC\src\BRepAdaptor;.\OCC\src\BRepAlgo;.\OCC\src\BRepAlgoAPI;.\OCC\src\BRepApprox;.\OCC\src\BRepBlend;.\OCC\src\BRepBndLib;.\OCC\src\BRepBuilderAPI;.\OCC\src\BRepCheck;.\OCC\src\BRepClass;.\OCC\src\BRepClass3d;.\OCC\src\BRepExtrema;.\OCC\src\BRepFill;.\OCC\src\BRepFilletAPI;.\OCC\src\BRepGProp;.\OCC\src\BRepIntCurveSurface;.\OCC\src\BRepLib;.\OCC\src\BRepLProp;.\OCC\src\BRepMAT2d;.\OCC\src\BRepMesh;.\OCC\src\BRepMeshData;.\OCC\src\BRepOffset;.\OCC\src\BRepOffsetAPI;.\OCC\src\BRepPrim;.\OCC\src\BRepPrimAPI;.\OCC\src\BRepProj;.\OCC\src\BRepSweep;.\OCC\src\BRepTools;.\OCC\src\BRepTopAdaptor;.\OCC\src\BSplCLib;.\OCC\src\BSplSLib;.\OCC\src\BVH;.\OCC\src\ChFi2d;.\OCC\src\ChFi3d;.\OCC\src\ChFiDS;.\OCC\src\ChFiKPart;.\OCC\src\Convert;.\OCC\src\CPnts;.\OCC\src\CSLib;.\OCC\src\Dico;.\OCC\src\Draft;.\OCC\src\ElCLib;.\OCC\src\ElSLib;.\OCC\src\Extrema;.\OCC\src\FairCurve;.\OCC\src\FEmTool;.\OCC\src\FilletSurf;.\OCC\src\FSD;.\OCC\src\GC;.\OCC\src\GccAna;.\OCC\src\GccEnt;.\OCC\src\GccInt;.\OCC\src\gce;.\OCC\src\GCE2d;.\OCC\src\GCPnts;.\OCC\src\Geom;.\OCC\src\Geom2d;.\OCC\src\Geom2dAdaptor;.\OCC\src\Geom2dAPI;.\OCC\src\Geom2dConvert;.\OCC\src\Geom2dEvaluator;.\OCC\src\Geom2dGcc;.\OCC\src\Geom2dHatch;.\OCC\src\Geom2dInt;.\OCC\src\Geom2dLProp;.\OCC\src\GeomAbs;.\OCC\src\GeomAdaptor;.\OCC\src\GeomAPI;.\OCC\src\GeomConvert;.\OCC\src\GeomEvaluator;.\OCC\src\GeomFill;.\OCC\src\GeomInt;.\OCC\src\GeomLib;.\OCC\src\GeomLProp;.\OCC\src\GeomPlate;.\OCC\src\GeomProjLib;.\OCC\src\Graphic3d;.\OCC\src\GeomTools;.\OCC\src\gp;.\OCC\src\GProp;.\OCC\src\Hatch;.\OCC\src\HatchGen;.\OCC\src\Hermit;.\OCC\src\IMeshTools;.\OCC\src\IMeshData;.\OCC\src\IntAna;.\OCC\src\IntAna2d;.\OCC\src\IntCurve;.\OCC\src\IntCurvesFace;.\OCC\src\IntCurveSurface;.\OCC\src\Intf;.\OCC\src\IntImp;.\OCC\src\IntImpParGen;.\OCC\src\IntPatch;.\OCC\src\IntPolyh;.\OCC\src\IntRes2d;.\OCC\src\IntStart;.\OCC\src\IntSurf;.\OCC\src\IntTools;.\OCC\src\IntWalk;.\OCC\src\Law;.\OCC\src\LocalAnalysis;.\OCC\src\LProp;.\OCC\src\LProp3d;.\OCC\src\MAT;.\OCC\src\MAT2d;.\OCC\src\math;.\OCC\src\MeshVS;.\OCC\src\Message;.\OCC\src\MMgt;.\OCC\src\NCollection;.\OCC\src\NLPlate;.\OCC\src\OSD;.\OCC\src\Plate;.\OCC\src\PLib;.\OCC\src\Plugin;.\OCC\src\Poly;.\OCC\src\Precision;.\OCC\src\ProjLib;.\OCC\src\Quantity;.\OCC\src\Resource;.\OCC\src\ShapeAlgo;.\OCC\src\ShapeAnalysis;.\OCC\src\ShapeBuild;.\OCC\src\ShapeConstruct;.\OCC\src\ShapeCustom;.\OCC\src\ShapeExtend;.\OCC\src\ShapeFix;.\OCC\src\ShapeProcess;.\OCC\src\ShapeProcessAPI;.\OCC\src\ShapeUpgrade;.\OCC\src\SortTools;.\OCC\src\Standard;.\OCC\src\StdFail;.\OCC\src\StdSelect;.\OCC\src\Storage;.\OCC\src\Sweep;.\OCC\src\TColGeom;.\OCC\src\TColGeom2d;.\OCC\src\TColgp;.\OCC\src\TCollection;.\OCC\src\TColStd;.\OCC\src\TopAbs;.\OCC\src\TopClass;.\OCC\src\TopExp;.\OCC\src\TopLoc;.\OCC\src\TopoDS;.\OCC\src\TopOpeBRep;.\OCC\src\TopOpeBRepBuild;.\OCC\src\TopOpeBRepDS;.\OCC\src\TopOpeBRepTool;.\OCC\src\TopTools;.\OCC\src\TopTrans;.\OCC\src\TShort;.\OCC\src\Units;.\OCC\src\UnitsAPI;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 
 	  <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>  
 	  <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
@@ -39,7 +39,7 @@
      <CompileAs>Default</CompileAs>
 	 <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <AdditionalIncludeDirectories>.\OCC\src\Adaptor2d;.\OCC\src\Adaptor3d;.\OCC\src\AdvApp2Var;.\OCC\src\AdvApprox;.\OCC\src\AppBlend;.\OCC\src\AppCont;.\OCC\src\AppDef;.\OCC\src\AppParCurves;.\OCC\src\Approx;.\OCC\src\ApproxInt;.\OCC\src\Bisector;.\OCC\src\BiTgte;.\OCC\src\Blend;.\OCC\src\BlendFunc;.\OCC\src\Bnd;.\OCC\src\BndLib;.\OCC\src\BOPAlgo;.\OCC\src\BOPCol;.\OCC\src\BOPDS;.\OCC\src\BOPTools;.\OCC\src\BRep;.\OCC\src\BRepAdaptor;.\OCC\src\BRepAlgo;.\OCC\src\BRepAlgoAPI;.\OCC\src\BRepApprox;.\OCC\src\BRepBlend;.\OCC\src\BRepBndLib;.\OCC\src\BRepBuilderAPI;.\OCC\src\BRepCheck;.\OCC\src\BRepClass;.\OCC\src\BRepClass3d;.\OCC\src\BRepExtrema;.\OCC\src\BRepFill;.\OCC\src\BRepFilletAPI;.\OCC\src\BRepGProp;.\OCC\src\BRepIntCurveSurface;.\OCC\src\BRepLib;.\OCC\src\BRepLProp;.\OCC\src\BRepMAT2d;.\OCC\src\BRepMesh;.\OCC\src\BRepOffset;.\OCC\src\BRepOffsetAPI;.\OCC\src\BRepPrim;.\OCC\src\BRepPrimAPI;.\OCC\src\BRepProj;.\OCC\src\BRepSweep;.\OCC\src\BRepTools;.\OCC\src\BRepTopAdaptor;.\OCC\src\BSplCLib;.\OCC\src\BSplSLib;.\OCC\src\BVH;.\OCC\src\ChFi2d;.\OCC\src\ChFi3d;.\OCC\src\ChFiDS;.\OCC\src\ChFiKPart;.\OCC\src\Convert;.\OCC\src\CPnts;.\OCC\src\CSLib;.\OCC\src\Dico;.\OCC\src\Draft;.\OCC\src\ElCLib;.\OCC\src\ElSLib;.\OCC\src\Extrema;.\OCC\src\FairCurve;.\OCC\src\FEmTool;.\OCC\src\FilletSurf;.\OCC\src\FSD;.\OCC\src\GC;.\OCC\src\GccAna;.\OCC\src\GccEnt;.\OCC\src\GccInt;.\OCC\src\gce;.\OCC\src\GCE2d;.\OCC\src\GCPnts;.\OCC\src\Geom;.\OCC\src\Geom2d;.\OCC\src\Geom2dAdaptor;.\OCC\src\Geom2dAPI;.\OCC\src\Geom2dConvert;.\OCC\src\Geom2dEvaluator;.\OCC\src\Geom2dGcc;.\OCC\src\Geom2dHatch;.\OCC\src\Geom2dInt;.\OCC\src\Geom2dLProp;.\OCC\src\GeomAbs;.\OCC\src\GeomAdaptor;.\OCC\src\GeomAPI;.\OCC\src\GeomConvert;.\OCC\src\GeomEvaluator;.\OCC\src\GeomFill;.\OCC\src\GeomInt;.\OCC\src\GeomLib;.\OCC\src\GeomLProp;.\OCC\src\GeomPlate;.\OCC\src\GeomProjLib;.\OCC\src\GeomTools;.\OCC\src\gp;.\OCC\src\GProp;.\OCC\src\Hatch;.\OCC\src\HatchGen;.\OCC\src\Hermit;.\OCC\src\IntAna;.\OCC\src\IntAna2d;.\OCC\src\IntCurve;.\OCC\src\IntCurvesFace;.\OCC\src\IntCurveSurface;.\OCC\src\Intf;.\OCC\src\IntImp;.\OCC\src\IntImpParGen;.\OCC\src\IntPatch;.\OCC\src\IntPolyh;.\OCC\src\IntRes2d;.\OCC\src\IntStart;.\OCC\src\IntSurf;.\OCC\src\IntTools;.\OCC\src\IntWalk;.\OCC\src\Law;.\OCC\src\LocalAnalysis;.\OCC\src\LProp;.\OCC\src\LProp3d;.\OCC\src\MAT;.\OCC\src\MAT2d;.\OCC\src\math;.\OCC\src\MeshVS;.\OCC\src\Message;.\OCC\src\MMgt;.\OCC\src\NCollection;.\OCC\src\NLPlate;.\OCC\src\OSD;.\OCC\src\Plate;.\OCC\src\PLib;.\OCC\src\Plugin;.\OCC\src\Poly;.\OCC\src\Precision;.\OCC\src\ProjLib;.\OCC\src\Quantity;.\OCC\src\Resource;.\OCC\src\ShapeAlgo;.\OCC\src\ShapeAnalysis;.\OCC\src\ShapeBuild;.\OCC\src\ShapeConstruct;.\OCC\src\ShapeCustom;.\OCC\src\ShapeExtend;.\OCC\src\ShapeFix;.\OCC\src\ShapeProcess;.\OCC\src\ShapeProcessAPI;.\OCC\src\ShapeUpgrade;.\OCC\src\SortTools;.\OCC\src\Standard;.\OCC\src\StdFail;.\OCC\src\StdSelect;.\OCC\src\Storage;.\OCC\src\Sweep;.\OCC\src\TColGeom;.\OCC\src\TColGeom2d;.\OCC\src\TColgp;.\OCC\src\TCollection;.\OCC\src\TColStd;.\OCC\src\TopAbs;.\OCC\src\TopClass;.\OCC\src\TopExp;.\OCC\src\TopLoc;.\OCC\src\TopoDS;.\OCC\src\TopOpeBRep;.\OCC\src\TopOpeBRepBuild;.\OCC\src\TopOpeBRepDS;.\OCC\src\TopOpeBRepTool;.\OCC\src\TopTools;.\OCC\src\TopTrans;.\OCC\src\TShort;.\OCC\src\Units;.\OCC\src\UnitsAPI;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\OCC\src\Adaptor2d;.\OCC\src\Adaptor3d;.\OCC\src\AdvApp2Var;.\OCC\src\AdvApprox;.\OCC\src\AppBlend;.\OCC\src\AppCont;.\OCC\src\AppDef;.\OCC\src\AppParCurves;.\OCC\src\Approx;.\OCC\src\ApproxInt;.\OCC\src\Bisector;.\OCC\src\BiTgte;.\OCC\src\Blend;.\OCC\src\BlendFunc;.\OCC\src\Bnd;.\OCC\src\BndLib;.\OCC\src\BOPAlgo;.\OCC\src\BOPCol;.\OCC\src\BOPDS;.\OCC\src\BOPTools;.\OCC\src\BRep;.\OCC\src\BRepAdaptor;.\OCC\src\BRepAlgo;.\OCC\src\BRepAlgoAPI;.\OCC\src\BRepApprox;.\OCC\src\BRepBlend;.\OCC\src\BRepBndLib;.\OCC\src\BRepBuilderAPI;.\OCC\src\BRepCheck;.\OCC\src\BRepClass;.\OCC\src\BRepClass3d;.\OCC\src\BRepExtrema;.\OCC\src\BRepFill;.\OCC\src\BRepFilletAPI;.\OCC\src\BRepGProp;.\OCC\src\BRepIntCurveSurface;.\OCC\src\BRepLib;.\OCC\src\BRepLProp;.\OCC\src\BRepMAT2d;.\OCC\src\BRepMesh;.\OCC\src\BRepMeshData;.\OCC\src\BRepOffset;.\OCC\src\BRepOffsetAPI;.\OCC\src\BRepPrim;.\OCC\src\BRepPrimAPI;.\OCC\src\BRepProj;.\OCC\src\BRepSweep;.\OCC\src\BRepTools;.\OCC\src\BRepTopAdaptor;.\OCC\src\BSplCLib;.\OCC\src\BSplSLib;.\OCC\src\BVH;.\OCC\src\ChFi2d;.\OCC\src\ChFi3d;.\OCC\src\ChFiDS;.\OCC\src\ChFiKPart;.\OCC\src\Convert;.\OCC\src\CPnts;.\OCC\src\CSLib;.\OCC\src\Dico;.\OCC\src\Draft;.\OCC\src\ElCLib;.\OCC\src\ElSLib;.\OCC\src\Extrema;.\OCC\src\FairCurve;.\OCC\src\FEmTool;.\OCC\src\FilletSurf;.\OCC\src\FSD;.\OCC\src\GC;.\OCC\src\GccAna;.\OCC\src\GccEnt;.\OCC\src\GccInt;.\OCC\src\gce;.\OCC\src\GCE2d;.\OCC\src\GCPnts;.\OCC\src\Geom;.\OCC\src\Geom2d;.\OCC\src\Geom2dAdaptor;.\OCC\src\Geom2dAPI;.\OCC\src\Geom2dConvert;.\OCC\src\Geom2dEvaluator;.\OCC\src\Geom2dGcc;.\OCC\src\Geom2dHatch;.\OCC\src\Geom2dInt;.\OCC\src\Geom2dLProp;.\OCC\src\GeomAbs;.\OCC\src\GeomAdaptor;.\OCC\src\GeomAPI;.\OCC\src\GeomConvert;.\OCC\src\GeomEvaluator;.\OCC\src\GeomFill;.\OCC\src\GeomInt;.\OCC\src\GeomLib;.\OCC\src\GeomLProp;.\OCC\src\GeomPlate;.\OCC\src\GeomProjLib;.\OCC\src\Graphic3d;.\OCC\src\GeomTools;.\OCC\src\gp;.\OCC\src\GProp;.\OCC\src\Hatch;.\OCC\src\HatchGen;.\OCC\src\Hermit;.\OCC\src\IMeshTools;.\OCC\src\IMeshData;.\OCC\src\IntAna;.\OCC\src\IntAna2d;.\OCC\src\IntCurve;.\OCC\src\IntCurvesFace;.\OCC\src\IntCurveSurface;.\OCC\src\Intf;.\OCC\src\IntImp;.\OCC\src\IntImpParGen;.\OCC\src\IntPatch;.\OCC\src\IntPolyh;.\OCC\src\IntRes2d;.\OCC\src\IntStart;.\OCC\src\IntSurf;.\OCC\src\IntTools;.\OCC\src\IntWalk;.\OCC\src\Law;.\OCC\src\LocalAnalysis;.\OCC\src\LProp;.\OCC\src\LProp3d;.\OCC\src\MAT;.\OCC\src\MAT2d;.\OCC\src\math;.\OCC\src\MeshVS;.\OCC\src\Message;.\OCC\src\MMgt;.\OCC\src\NCollection;.\OCC\src\NLPlate;.\OCC\src\OSD;.\OCC\src\Plate;.\OCC\src\PLib;.\OCC\src\Plugin;.\OCC\src\Poly;.\OCC\src\Precision;.\OCC\src\ProjLib;.\OCC\src\Quantity;.\OCC\src\Resource;.\OCC\src\ShapeAlgo;.\OCC\src\ShapeAnalysis;.\OCC\src\ShapeBuild;.\OCC\src\ShapeConstruct;.\OCC\src\ShapeCustom;.\OCC\src\ShapeExtend;.\OCC\src\ShapeFix;.\OCC\src\ShapeProcess;.\OCC\src\ShapeProcessAPI;.\OCC\src\ShapeUpgrade;.\OCC\src\SortTools;.\OCC\src\Standard;.\OCC\src\StdFail;.\OCC\src\StdSelect;.\OCC\src\Storage;.\OCC\src\Sweep;.\OCC\src\TColGeom;.\OCC\src\TColGeom2d;.\OCC\src\TColgp;.\OCC\src\TCollection;.\OCC\src\TColStd;.\OCC\src\TopAbs;.\OCC\src\TopClass;.\OCC\src\TopExp;.\OCC\src\TopLoc;.\OCC\src\TopoDS;.\OCC\src\TopOpeBRep;.\OCC\src\TopOpeBRepBuild;.\OCC\src\TopOpeBRepDS;.\OCC\src\TopOpeBRepTool;.\OCC\src\TopTools;.\OCC\src\TopTrans;.\OCC\src\TShort;.\OCC\src\Units;.\OCC\src\UnitsAPI;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>  
 	  <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
 
@@ -70,7 +70,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;HAVE_NO_DLL;No_Exception;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);OCC_6_9_SUPPORTED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>.\OCC\src\Adaptor2d;.\OCC\src\Adaptor3d;.\OCC\src\AdvApp2Var;.\OCC\src\AdvApprox;.\OCC\src\AppBlend;.\OCC\src\AppCont;.\OCC\src\AppDef;.\OCC\src\AppParCurves;.\OCC\src\Approx;.\OCC\src\ApproxInt;.\OCC\src\Bisector;.\OCC\src\BiTgte;.\OCC\src\Blend;.\OCC\src\BlendFunc;.\OCC\src\Bnd;.\OCC\src\BndLib;.\OCC\src\BOPAlgo;.\OCC\src\BOPCol;.\OCC\src\BOPDS;.\OCC\src\BOPTools;.\OCC\src\BRep;.\OCC\src\BRepAdaptor;.\OCC\src\BRepAlgo;.\OCC\src\BRepAlgoAPI;.\OCC\src\BRepApprox;.\OCC\src\BRepBlend;.\OCC\src\BRepBndLib;.\OCC\src\BRepBuilderAPI;.\OCC\src\BRepCheck;.\OCC\src\BRepClass;.\OCC\src\BRepClass3d;.\OCC\src\BRepExtrema;.\OCC\src\BRepFill;.\OCC\src\BRepFilletAPI;.\OCC\src\BRepGProp;.\OCC\src\BRepIntCurveSurface;.\OCC\src\BRepLib;.\OCC\src\BRepLProp;.\OCC\src\BRepMAT2d;.\OCC\src\BRepMesh;.\OCC\src\BRepOffset;.\OCC\src\BRepOffsetAPI;.\OCC\src\BRepPrim;.\OCC\src\BRepPrimAPI;.\OCC\src\BRepProj;.\OCC\src\BRepSweep;.\OCC\src\BRepTools;.\OCC\src\BRepTopAdaptor;.\OCC\src\BSplCLib;.\OCC\src\BSplSLib;.\OCC\src\BVH;.\OCC\src\ChFi2d;.\OCC\src\ChFi3d;.\OCC\src\ChFiDS;.\OCC\src\ChFiKPart;.\OCC\src\Convert;.\OCC\src\CPnts;.\OCC\src\CSLib;.\OCC\src\Dico;.\OCC\src\Draft;.\OCC\src\ElCLib;.\OCC\src\ElSLib;.\OCC\src\Extrema;.\OCC\src\FairCurve;.\OCC\src\FEmTool;.\OCC\src\FilletSurf;.\OCC\src\FSD;.\OCC\src\GC;.\OCC\src\GccAna;.\OCC\src\GccEnt;.\OCC\src\GccInt;.\OCC\src\gce;.\OCC\src\GCE2d;.\OCC\src\GCPnts;.\OCC\src\Geom;.\OCC\src\Geom2d;.\OCC\src\Geom2dAdaptor;.\OCC\src\Geom2dAPI;.\OCC\src\Geom2dConvert;.\OCC\src\Geom2dEvaluator;.\OCC\src\Geom2dGcc;.\OCC\src\Geom2dHatch;.\OCC\src\Geom2dInt;.\OCC\src\Geom2dLProp;.\OCC\src\GeomAbs;.\OCC\src\GeomAdaptor;.\OCC\src\GeomAPI;.\OCC\src\GeomConvert;.\OCC\src\GeomEvaluator;.\OCC\src\GeomFill;.\OCC\src\GeomInt;.\OCC\src\GeomLib;.\OCC\src\GeomLProp;.\OCC\src\GeomPlate;.\OCC\src\GeomProjLib;.\OCC\src\GeomTools;.\OCC\src\gp;.\OCC\src\GProp;.\OCC\src\Hatch;.\OCC\src\HatchGen;.\OCC\src\Hermit;.\OCC\src\IntAna;.\OCC\src\IntAna2d;.\OCC\src\IntCurve;.\OCC\src\IntCurvesFace;.\OCC\src\IntCurveSurface;.\OCC\src\Intf;.\OCC\src\IntImp;.\OCC\src\IntImpParGen;.\OCC\src\IntPatch;.\OCC\src\IntPolyh;.\OCC\src\IntRes2d;.\OCC\src\IntStart;.\OCC\src\IntSurf;.\OCC\src\IntTools;.\OCC\src\IntWalk;.\OCC\src\Law;.\OCC\src\LocalAnalysis;.\OCC\src\LProp;.\OCC\src\LProp3d;.\OCC\src\MAT;.\OCC\src\MAT2d;.\OCC\src\math;.\OCC\src\MeshVS;.\OCC\src\Message;.\OCC\src\MMgt;.\OCC\src\NCollection;.\OCC\src\NLPlate;.\OCC\src\OSD;.\OCC\src\Plate;.\OCC\src\PLib;.\OCC\src\Plugin;.\OCC\src\Poly;.\OCC\src\Precision;.\OCC\src\ProjLib;.\OCC\src\Quantity;.\OCC\src\Resource;.\OCC\src\ShapeAlgo;.\OCC\src\ShapeAnalysis;.\OCC\src\ShapeBuild;.\OCC\src\ShapeConstruct;.\OCC\src\ShapeCustom;.\OCC\src\ShapeExtend;.\OCC\src\ShapeFix;.\OCC\src\ShapeProcess;.\OCC\src\ShapeProcessAPI;.\OCC\src\ShapeUpgrade;.\OCC\src\SortTools;.\OCC\src\Standard;.\OCC\src\StdFail;.\OCC\src\StdSelect;.\OCC\src\Storage;.\OCC\src\Sweep;.\OCC\src\TColGeom;.\OCC\src\TColGeom2d;.\OCC\src\TColgp;.\OCC\src\TCollection;.\OCC\src\TColStd;.\OCC\src\TopAbs;.\OCC\src\TopClass;.\OCC\src\TopExp;.\OCC\src\TopLoc;.\OCC\src\TopoDS;.\OCC\src\TopOpeBRep;.\OCC\src\TopOpeBRepBuild;.\OCC\src\TopOpeBRepDS;.\OCC\src\TopOpeBRepTool;.\OCC\src\TopTools;.\OCC\src\TopTrans;.\OCC\src\TShort;.\OCC\src\Units;.\OCC\src\UnitsAPI;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\OCC\src\Adaptor2d;.\OCC\src\Adaptor3d;.\OCC\src\AdvApp2Var;.\OCC\src\AdvApprox;.\OCC\src\AppBlend;.\OCC\src\AppCont;.\OCC\src\AppDef;.\OCC\src\AppParCurves;.\OCC\src\Approx;.\OCC\src\ApproxInt;.\OCC\src\Bisector;.\OCC\src\BiTgte;.\OCC\src\Blend;.\OCC\src\BlendFunc;.\OCC\src\Bnd;.\OCC\src\BndLib;.\OCC\src\BOPAlgo;.\OCC\src\BOPCol;.\OCC\src\BOPDS;.\OCC\src\BOPTools;.\OCC\src\BRep;.\OCC\src\BRepAdaptor;.\OCC\src\BRepAlgo;.\OCC\src\BRepAlgoAPI;.\OCC\src\BRepApprox;.\OCC\src\BRepBlend;.\OCC\src\BRepBndLib;.\OCC\src\BRepBuilderAPI;.\OCC\src\BRepCheck;.\OCC\src\BRepClass;.\OCC\src\BRepClass3d;.\OCC\src\BRepExtrema;.\OCC\src\BRepFill;.\OCC\src\BRepFilletAPI;.\OCC\src\BRepGProp;.\OCC\src\BRepIntCurveSurface;.\OCC\src\BRepLib;.\OCC\src\BRepLProp;.\OCC\src\BRepMAT2d;.\OCC\src\BRepMesh;.\OCC\src\BRepMeshData;.\OCC\src\BRepOffset;.\OCC\src\BRepOffsetAPI;.\OCC\src\BRepPrim;.\OCC\src\BRepPrimAPI;.\OCC\src\BRepProj;.\OCC\src\BRepSweep;.\OCC\src\BRepTools;.\OCC\src\BRepTopAdaptor;.\OCC\src\BSplCLib;.\OCC\src\BSplSLib;.\OCC\src\BVH;.\OCC\src\ChFi2d;.\OCC\src\ChFi3d;.\OCC\src\ChFiDS;.\OCC\src\ChFiKPart;.\OCC\src\Convert;.\OCC\src\CPnts;.\OCC\src\CSLib;.\OCC\src\Dico;.\OCC\src\Draft;.\OCC\src\ElCLib;.\OCC\src\ElSLib;.\OCC\src\Extrema;.\OCC\src\FairCurve;.\OCC\src\FEmTool;.\OCC\src\FilletSurf;.\OCC\src\FSD;.\OCC\src\GC;.\OCC\src\GccAna;.\OCC\src\GccEnt;.\OCC\src\GccInt;.\OCC\src\gce;.\OCC\src\GCE2d;.\OCC\src\GCPnts;.\OCC\src\Geom;.\OCC\src\Geom2d;.\OCC\src\Geom2dAdaptor;.\OCC\src\Geom2dAPI;.\OCC\src\Geom2dConvert;.\OCC\src\Geom2dEvaluator;.\OCC\src\Geom2dGcc;.\OCC\src\Geom2dHatch;.\OCC\src\Geom2dInt;.\OCC\src\Geom2dLProp;.\OCC\src\GeomAbs;.\OCC\src\GeomAdaptor;.\OCC\src\GeomAPI;.\OCC\src\GeomConvert;.\OCC\src\GeomEvaluator;.\OCC\src\GeomFill;.\OCC\src\GeomInt;.\OCC\src\GeomLib;.\OCC\src\GeomLProp;.\OCC\src\GeomPlate;.\OCC\src\GeomProjLib;.\OCC\src\Graphic3d;.\OCC\src\GeomTools;.\OCC\src\gp;.\OCC\src\GProp;.\OCC\src\Hatch;.\OCC\src\HatchGen;.\OCC\src\Hermit;.\OCC\src\IMeshTools;.\OCC\src\IMeshData;.\OCC\src\IntAna;.\OCC\src\IntAna2d;.\OCC\src\IntCurve;.\OCC\src\IntCurvesFace;.\OCC\src\IntCurveSurface;.\OCC\src\Intf;.\OCC\src\IntImp;.\OCC\src\IntImpParGen;.\OCC\src\IntPatch;.\OCC\src\IntPolyh;.\OCC\src\IntRes2d;.\OCC\src\IntStart;.\OCC\src\IntSurf;.\OCC\src\IntTools;.\OCC\src\IntWalk;.\OCC\src\Law;.\OCC\src\LocalAnalysis;.\OCC\src\LProp;.\OCC\src\LProp3d;.\OCC\src\MAT;.\OCC\src\MAT2d;.\OCC\src\math;.\OCC\src\MeshVS;.\OCC\src\Message;.\OCC\src\MMgt;.\OCC\src\NCollection;.\OCC\src\NLPlate;.\OCC\src\OSD;.\OCC\src\Plate;.\OCC\src\PLib;.\OCC\src\Plugin;.\OCC\src\Poly;.\OCC\src\Precision;.\OCC\src\ProjLib;.\OCC\src\Quantity;.\OCC\src\Resource;.\OCC\src\ShapeAlgo;.\OCC\src\ShapeAnalysis;.\OCC\src\ShapeBuild;.\OCC\src\ShapeConstruct;.\OCC\src\ShapeCustom;.\OCC\src\ShapeExtend;.\OCC\src\ShapeFix;.\OCC\src\ShapeProcess;.\OCC\src\ShapeProcessAPI;.\OCC\src\ShapeUpgrade;.\OCC\src\SortTools;.\OCC\src\Standard;.\OCC\src\StdFail;.\OCC\src\StdSelect;.\OCC\src\Storage;.\OCC\src\Sweep;.\OCC\src\TColGeom;.\OCC\src\TColGeom2d;.\OCC\src\TColgp;.\OCC\src\TCollection;.\OCC\src\TColStd;.\OCC\src\TopAbs;.\OCC\src\TopClass;.\OCC\src\TopExp;.\OCC\src\TopLoc;.\OCC\src\TopoDS;.\OCC\src\TopOpeBRep;.\OCC\src\TopOpeBRepBuild;.\OCC\src\TopOpeBRepDS;.\OCC\src\TopOpeBRepTool;.\OCC\src\TopTools;.\OCC\src\TopTrans;.\OCC\src\TShort;.\OCC\src\Units;.\OCC\src\UnitsAPI;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 
 	  <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>  
 	  <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
@@ -100,7 +100,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
 	  <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
 	  <PreprocessorDefinitions>NDEBUG;HAVE_NO_DLL;No_Exception;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);OCC_6_9_SUPPORTED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\OCC\src\Adaptor2d;.\OCC\src\Adaptor3d;.\OCC\src\AdvApp2Var;.\OCC\src\AdvApprox;.\OCC\src\AppBlend;.\OCC\src\AppCont;.\OCC\src\AppDef;.\OCC\src\AppParCurves;.\OCC\src\Approx;.\OCC\src\ApproxInt;.\OCC\src\Bisector;.\OCC\src\BiTgte;.\OCC\src\Blend;.\OCC\src\BlendFunc;.\OCC\src\Bnd;.\OCC\src\BndLib;.\OCC\src\BOPAlgo;.\OCC\src\BOPCol;.\OCC\src\BOPDS;.\OCC\src\BOPTools;.\OCC\src\BRep;.\OCC\src\BRepAdaptor;.\OCC\src\BRepAlgo;.\OCC\src\BRepAlgoAPI;.\OCC\src\BRepApprox;.\OCC\src\BRepBlend;.\OCC\src\BRepBndLib;.\OCC\src\BRepBuilderAPI;.\OCC\src\BRepCheck;.\OCC\src\BRepClass;.\OCC\src\BRepClass3d;.\OCC\src\BRepExtrema;.\OCC\src\BRepFill;.\OCC\src\BRepFilletAPI;.\OCC\src\BRepGProp;.\OCC\src\BRepIntCurveSurface;.\OCC\src\BRepLib;.\OCC\src\BRepLProp;.\OCC\src\BRepMAT2d;.\OCC\src\BRepMesh;.\OCC\src\BRepOffset;.\OCC\src\BRepOffsetAPI;.\OCC\src\BRepPrim;.\OCC\src\BRepPrimAPI;.\OCC\src\BRepProj;.\OCC\src\BRepSweep;.\OCC\src\BRepTools;.\OCC\src\BRepTopAdaptor;.\OCC\src\BSplCLib;.\OCC\src\BSplSLib;.\OCC\src\BVH;.\OCC\src\ChFi2d;.\OCC\src\ChFi3d;.\OCC\src\ChFiDS;.\OCC\src\ChFiKPart;.\OCC\src\Convert;.\OCC\src\CPnts;.\OCC\src\CSLib;.\OCC\src\Dico;.\OCC\src\Draft;.\OCC\src\ElCLib;.\OCC\src\ElSLib;.\OCC\src\Extrema;.\OCC\src\FairCurve;.\OCC\src\FEmTool;.\OCC\src\FilletSurf;.\OCC\src\FSD;.\OCC\src\GC;.\OCC\src\GccAna;.\OCC\src\GccEnt;.\OCC\src\GccInt;.\OCC\src\gce;.\OCC\src\GCE2d;.\OCC\src\GCPnts;.\OCC\src\Geom;.\OCC\src\Geom2d;.\OCC\src\Geom2dAdaptor;.\OCC\src\Geom2dAPI;.\OCC\src\Geom2dConvert;.\OCC\src\Geom2dEvaluator;.\OCC\src\Geom2dGcc;.\OCC\src\Geom2dHatch;.\OCC\src\Geom2dInt;.\OCC\src\Geom2dLProp;.\OCC\src\GeomAbs;.\OCC\src\GeomAdaptor;.\OCC\src\GeomAPI;.\OCC\src\GeomConvert;.\OCC\src\GeomEvaluator;.\OCC\src\GeomFill;.\OCC\src\GeomInt;.\OCC\src\GeomLib;.\OCC\src\GeomLProp;.\OCC\src\GeomPlate;.\OCC\src\GeomProjLib;.\OCC\src\GeomTools;.\OCC\src\gp;.\OCC\src\GProp;.\OCC\src\Hatch;.\OCC\src\HatchGen;.\OCC\src\Hermit;.\OCC\src\IntAna;.\OCC\src\IntAna2d;.\OCC\src\IntCurve;.\OCC\src\IntCurvesFace;.\OCC\src\IntCurveSurface;.\OCC\src\Intf;.\OCC\src\IntImp;.\OCC\src\IntImpParGen;.\OCC\src\IntPatch;.\OCC\src\IntPolyh;.\OCC\src\IntRes2d;.\OCC\src\IntStart;.\OCC\src\IntSurf;.\OCC\src\IntTools;.\OCC\src\IntWalk;.\OCC\src\Law;.\OCC\src\LocalAnalysis;.\OCC\src\LProp;.\OCC\src\LProp3d;.\OCC\src\MAT;.\OCC\src\MAT2d;.\OCC\src\math;.\OCC\src\MeshVS;.\OCC\src\Message;.\OCC\src\MMgt;.\OCC\src\NCollection;.\OCC\src\NLPlate;.\OCC\src\OSD;.\OCC\src\Plate;.\OCC\src\PLib;.\OCC\src\Plugin;.\OCC\src\Poly;.\OCC\src\Precision;.\OCC\src\ProjLib;.\OCC\src\Quantity;.\OCC\src\Resource;.\OCC\src\ShapeAlgo;.\OCC\src\ShapeAnalysis;.\OCC\src\ShapeBuild;.\OCC\src\ShapeConstruct;.\OCC\src\ShapeCustom;.\OCC\src\ShapeExtend;.\OCC\src\ShapeFix;.\OCC\src\ShapeProcess;.\OCC\src\ShapeProcessAPI;.\OCC\src\ShapeUpgrade;.\OCC\src\SortTools;.\OCC\src\Standard;.\OCC\src\StdFail;.\OCC\src\StdSelect;.\OCC\src\Storage;.\OCC\src\Sweep;.\OCC\src\TColGeom;.\OCC\src\TColGeom2d;.\OCC\src\TColgp;.\OCC\src\TCollection;.\OCC\src\TColStd;.\OCC\src\TopAbs;.\OCC\src\TopClass;.\OCC\src\TopExp;.\OCC\src\TopLoc;.\OCC\src\TopoDS;.\OCC\src\TopOpeBRep;.\OCC\src\TopOpeBRepBuild;.\OCC\src\TopOpeBRepDS;.\OCC\src\TopOpeBRepTool;.\OCC\src\TopTools;.\OCC\src\TopTrans;.\OCC\src\TShort;.\OCC\src\Units;.\OCC\src\UnitsAPI;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\OCC\src\Adaptor2d;.\OCC\src\Adaptor3d;.\OCC\src\AdvApp2Var;.\OCC\src\AdvApprox;.\OCC\src\AppBlend;.\OCC\src\AppCont;.\OCC\src\AppDef;.\OCC\src\AppParCurves;.\OCC\src\Approx;.\OCC\src\ApproxInt;.\OCC\src\Bisector;.\OCC\src\BiTgte;.\OCC\src\Blend;.\OCC\src\BlendFunc;.\OCC\src\Bnd;.\OCC\src\BndLib;.\OCC\src\BOPAlgo;.\OCC\src\BOPCol;.\OCC\src\BOPDS;.\OCC\src\BOPTools;.\OCC\src\BRep;.\OCC\src\BRepAdaptor;.\OCC\src\BRepAlgo;.\OCC\src\BRepAlgoAPI;.\OCC\src\BRepApprox;.\OCC\src\BRepBlend;.\OCC\src\BRepBndLib;.\OCC\src\BRepBuilderAPI;.\OCC\src\BRepCheck;.\OCC\src\BRepClass;.\OCC\src\BRepClass3d;.\OCC\src\BRepExtrema;.\OCC\src\BRepFill;.\OCC\src\BRepFilletAPI;.\OCC\src\BRepGProp;.\OCC\src\BRepIntCurveSurface;.\OCC\src\BRepLib;.\OCC\src\BRepLProp;.\OCC\src\BRepMAT2d;.\OCC\src\BRepMesh;.\OCC\src\BRepMeshData;.\OCC\src\BRepOffset;.\OCC\src\BRepOffsetAPI;.\OCC\src\BRepPrim;.\OCC\src\BRepPrimAPI;.\OCC\src\BRepProj;.\OCC\src\BRepSweep;.\OCC\src\BRepTools;.\OCC\src\BRepTopAdaptor;.\OCC\src\BSplCLib;.\OCC\src\BSplSLib;.\OCC\src\BVH;.\OCC\src\ChFi2d;.\OCC\src\ChFi3d;.\OCC\src\ChFiDS;.\OCC\src\ChFiKPart;.\OCC\src\Convert;.\OCC\src\CPnts;.\OCC\src\CSLib;.\OCC\src\Dico;.\OCC\src\Draft;.\OCC\src\ElCLib;.\OCC\src\ElSLib;.\OCC\src\Extrema;.\OCC\src\FairCurve;.\OCC\src\FEmTool;.\OCC\src\FilletSurf;.\OCC\src\FSD;.\OCC\src\GC;.\OCC\src\GccAna;.\OCC\src\GccEnt;.\OCC\src\GccInt;.\OCC\src\gce;.\OCC\src\GCE2d;.\OCC\src\GCPnts;.\OCC\src\Geom;.\OCC\src\Geom2d;.\OCC\src\Geom2dAdaptor;.\OCC\src\Geom2dAPI;.\OCC\src\Geom2dConvert;.\OCC\src\Geom2dEvaluator;.\OCC\src\Geom2dGcc;.\OCC\src\Geom2dHatch;.\OCC\src\Geom2dInt;.\OCC\src\Geom2dLProp;.\OCC\src\GeomAbs;.\OCC\src\GeomAdaptor;.\OCC\src\GeomAPI;.\OCC\src\GeomConvert;.\OCC\src\GeomEvaluator;.\OCC\src\GeomFill;.\OCC\src\GeomInt;.\OCC\src\GeomLib;.\OCC\src\GeomLProp;.\OCC\src\GeomPlate;.\OCC\src\GeomProjLib;.\OCC\src\Graphic3d;.\OCC\src\GeomTools;.\OCC\src\gp;.\OCC\src\GProp;.\OCC\src\Hatch;.\OCC\src\HatchGen;.\OCC\src\Hermit;.\OCC\src\IMeshTools;.\OCC\src\IMeshData;.\OCC\src\IntAna;.\OCC\src\IntAna2d;.\OCC\src\IntCurve;.\OCC\src\IntCurvesFace;.\OCC\src\IntCurveSurface;.\OCC\src\Intf;.\OCC\src\IntImp;.\OCC\src\IntImpParGen;.\OCC\src\IntPatch;.\OCC\src\IntPolyh;.\OCC\src\IntRes2d;.\OCC\src\IntStart;.\OCC\src\IntSurf;.\OCC\src\IntTools;.\OCC\src\IntWalk;.\OCC\src\Law;.\OCC\src\LocalAnalysis;.\OCC\src\LProp;.\OCC\src\LProp3d;.\OCC\src\MAT;.\OCC\src\MAT2d;.\OCC\src\math;.\OCC\src\MeshVS;.\OCC\src\Message;.\OCC\src\MMgt;.\OCC\src\NCollection;.\OCC\src\NLPlate;.\OCC\src\OSD;.\OCC\src\Plate;.\OCC\src\PLib;.\OCC\src\Plugin;.\OCC\src\Poly;.\OCC\src\Precision;.\OCC\src\ProjLib;.\OCC\src\Quantity;.\OCC\src\Resource;.\OCC\src\ShapeAlgo;.\OCC\src\ShapeAnalysis;.\OCC\src\ShapeBuild;.\OCC\src\ShapeConstruct;.\OCC\src\ShapeCustom;.\OCC\src\ShapeExtend;.\OCC\src\ShapeFix;.\OCC\src\ShapeProcess;.\OCC\src\ShapeProcessAPI;.\OCC\src\ShapeUpgrade;.\OCC\src\SortTools;.\OCC\src\Standard;.\OCC\src\StdFail;.\OCC\src\StdSelect;.\OCC\src\Storage;.\OCC\src\Sweep;.\OCC\src\TColGeom;.\OCC\src\TColGeom2d;.\OCC\src\TColgp;.\OCC\src\TCollection;.\OCC\src\TColStd;.\OCC\src\TopAbs;.\OCC\src\TopClass;.\OCC\src\TopExp;.\OCC\src\TopLoc;.\OCC\src\TopoDS;.\OCC\src\TopOpeBRep;.\OCC\src\TopOpeBRepBuild;.\OCC\src\TopOpeBRepDS;.\OCC\src\TopOpeBRepTool;.\OCC\src\TopTools;.\OCC\src\TopTrans;.\OCC\src\TShort;.\OCC\src\Units;.\OCC\src\UnitsAPI;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
            
       <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>  
 	  
@@ -127,7 +127,6 @@
   
   <ItemGroup>
     <ClInclude Include="OCC\src\Adaptor2d\Adaptor2d_Curve2d.hxx" />
-    <ClInclude Include="OCC\src\Adaptor2d\Adaptor2d_Curve2dPtr.hxx" />
     <ClInclude Include="OCC\src\Adaptor2d\Adaptor2d_HCurve2d.hxx" />
     <ClInclude Include="OCC\src\Adaptor2d\Adaptor2d_HLine2d.hxx" />
     <ClInclude Include="OCC\src\Adaptor2d\Adaptor2d_HOffsetCurve.hxx" />
@@ -276,11 +275,17 @@
     <ClInclude Include="OCC\src\BlendFunc\BlendFunc_ChAsymInv.hxx" />
     <ClInclude Include="OCC\src\BlendFunc\BlendFunc_ConstRad.hxx" />
     <ClInclude Include="OCC\src\BlendFunc\BlendFunc_ConstRadInv.hxx" />
+    <ClInclude Include="OCC\src\BlendFunc\BlendFunc_ConstThroat.hxx" />
+    <ClInclude Include="OCC\src\BlendFunc\BlendFunc_ConstThroatInv.hxx" />
+    <ClInclude Include="OCC\src\BlendFunc\BlendFunc_ConstThroatWithPenetration.hxx" />
+    <ClInclude Include="OCC\src\BlendFunc\BlendFunc_ConstThroatWithPenetrationInv.hxx" />
     <ClInclude Include="OCC\src\BlendFunc\BlendFunc_Corde.hxx" />
     <ClInclude Include="OCC\src\BlendFunc\BlendFunc_CSCircular.hxx" />
     <ClInclude Include="OCC\src\BlendFunc\BlendFunc_CSConstRad.hxx" />
     <ClInclude Include="OCC\src\BlendFunc\BlendFunc_EvolRad.hxx" />
     <ClInclude Include="OCC\src\BlendFunc\BlendFunc_EvolRadInv.hxx" />
+    <ClInclude Include="OCC\src\BlendFunc\BlendFunc_GenChamfer.hxx" />
+    <ClInclude Include="OCC\src\BlendFunc\BlendFunc_GenChamfInv.hxx" />
     <ClInclude Include="OCC\src\BlendFunc\BlendFunc_Ruled.hxx" />
     <ClInclude Include="OCC\src\BlendFunc\BlendFunc_RuledInv.hxx" />
     <ClInclude Include="OCC\src\BlendFunc\BlendFunc_SectionShape.hxx" />
@@ -320,6 +325,7 @@
     <ClInclude Include="OCC\src\Bnd\Bnd_Range.hxx" />
     <ClInclude Include="OCC\src\Bnd\Bnd_SeqOfBox.hxx" />
     <ClInclude Include="OCC\src\Bnd\Bnd_Sphere.hxx" />
+    <ClInclude Include="OCC\src\Bnd\Bnd_Tools.hxx" />
     <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_Alerts.hxx" />
     <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_Algo.hxx" />
     <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_ArgumentAnalyzer.hxx" />
@@ -334,6 +340,7 @@
     <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_CheckResult.hxx" />
     <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_CheckStatus.hxx" />
     <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_ListOfCheckResult.hxx" />
+    <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_MakerConnected.hxx" />
     <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_MakerVolume.hxx" />
     <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_Operation.hxx" />
     <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_Options.hxx" />
@@ -341,6 +348,7 @@
     <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_PaveFiller.hxx" />
     <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_PBOP.hxx" />
     <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_PBuilder.hxx" />
+    <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_MakerPeriodic.hxx" />
     <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_PPaveFiller.hxx" />
     <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_PSection.hxx" />
     <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_PWireEdgeSet.hxx" />
@@ -464,7 +472,7 @@
     <ClInclude Include="OCC\src\BOPTools\BOPTools_Set.hxx" />
     <ClInclude Include="OCC\src\BOPTools\BOPTools_SetMapHasher.hxx" />
     <ClInclude Include="OCC\src\BOPTools\BOPTools_ShapeSet.hxx" />
-    <ClInclude Include="OCC\src\BRepAdaptor\BRepAdaptor_Array1OfCurve.hxx" />
+    <ClInclude Include="OCC\src\BRepAdaptor\BRepAdaptor_Array1OfCurve.hxx" />   
     <ClInclude Include="OCC\src\BRepAdaptor\BRepAdaptor_CompCurve.hxx" />
     <ClInclude Include="OCC\src\BRepAdaptor\BRepAdaptor_Curve.hxx" />
     <ClInclude Include="OCC\src\BRepAdaptor\BRepAdaptor_Curve2d.hxx" />
@@ -480,28 +488,22 @@
     <ClInclude Include="OCC\src\BRepAlgoAPI\BRepAlgoAPI_Check.hxx" />
     <ClInclude Include="OCC\src\BRepAlgoAPI\BRepAlgoAPI_Common.hxx" />
     <ClInclude Include="OCC\src\BRepAlgoAPI\BRepAlgoAPI_Cut.hxx" />
+    <ClInclude Include="OCC\src\BRepAlgoAPI\BRepAlgoAPI_Defeaturing.hxx" />
     <ClInclude Include="OCC\src\BRepAlgoAPI\BRepAlgoAPI_Fuse.hxx" />
     <ClInclude Include="OCC\src\BRepAlgoAPI\BRepAlgoAPI_Section.hxx" />
+    <ClInclude Include="OCC\src\BRepAlgoAPI\BRepAlgoAPI_Splitter.hxx" />
     <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo.hxx" />
     <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_AsDes.hxx" />
     <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_BooleanOperation.hxx" />
-    <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_BooleanOperations.hxx" />
     <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_CheckStatus.hxx" />
     <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_Common.hxx" />
     <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_Cut.hxx" />
-    <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_DataMapIteratorOfDataMapOfShapeBoolean.hxx" />
-    <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_DataMapIteratorOfDataMapOfShapeInterference.hxx" />
-    <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_DataMapOfShapeBoolean.hxx" />
-    <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_DataMapOfShapeInterference.hxx" />
-    <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_DSAccess.hxx" />
-    <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_EdgeConnector.hxx" />
     <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_FaceRestrictor.hxx" />
     <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_Fuse.hxx" />
     <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_Image.hxx" />
     <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_Loop.hxx" />
     <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_NormalProjection.hxx" />
     <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_Section.hxx" />
-    <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_SequenceOfSequenceOfInteger.hxx" />
     <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_Tool.hxx" />
     <ClInclude Include="OCC\src\BRepApprox\BRepApprox_Approx.hxx" />
     <ClInclude Include="OCC\src\BRepApprox\BRepApprox_ApproxLine.hxx" />
@@ -542,6 +544,10 @@
     <ClInclude Include="OCC\src\BRepBlend\BRepBlend_ChAsymInv.hxx" />
     <ClInclude Include="OCC\src\BRepBlend\BRepBlend_ConstRad.hxx" />
     <ClInclude Include="OCC\src\BRepBlend\BRepBlend_ConstRadInv.hxx" />
+    <ClInclude Include="OCC\src\BRepBlend\BRepBlend_ConstThroat.hxx" />
+    <ClInclude Include="OCC\src\BRepBlend\BRepBlend_ConstThroatInv.hxx" />
+    <ClInclude Include="OCC\src\BRepBlend\BRepBlend_ConstThroatWithPenetration.hxx" />
+    <ClInclude Include="OCC\src\BRepBlend\BRepBlend_ConstThroatWithPenetrationInv.hxx" />
     <ClInclude Include="OCC\src\BRepBlend\BRepBlend_CSCircular.hxx" />
     <ClInclude Include="OCC\src\BRepBlend\BRepBlend_CSConstRad.hxx" />
     <ClInclude Include="OCC\src\BRepBlend\BRepBlend_CSWalking.hxx" />
@@ -655,6 +661,7 @@
     <ClInclude Include="OCC\src\BRepFilletAPI\BRepFilletAPI_MakeFillet2d.hxx" />
     <ClInclude Include="OCC\src\BRepFill\BRepFill.hxx" />
     <ClInclude Include="OCC\src\BRepFill\BRepFill_ACRLaw.hxx" />
+    <ClInclude Include="OCC\src\BRepFill\BRepFill_AdvancedEvolved.hxx" />
     <ClInclude Include="OCC\src\BRepFill\BRepFill_ApproxSeewing.hxx" />
     <ClInclude Include="OCC\src\BRepFill\BRepFill_CompatibleWires.hxx" />
     <ClInclude Include="OCC\src\BRepFill\BRepFill_ComputeCLine.hxx" />
@@ -711,6 +718,8 @@
     <ClInclude Include="OCC\src\BRepGProp\BRepGProp_EdgeTool.hxx" />
     <ClInclude Include="OCC\src\BRepGProp\BRepGProp_Face.hxx" />
     <ClInclude Include="OCC\src\BRepGProp\BRepGProp_Gauss.hxx" />
+    <ClInclude Include="OCC\src\BRepGProp\BRepGProp_MeshCinert.hxx" />
+    <ClInclude Include="OCC\src\BRepGProp\BRepGProp_MeshProps.hxx" />
     <ClInclude Include="OCC\src\BRepGProp\BRepGProp_Sinert.hxx" />
     <ClInclude Include="OCC\src\BRepGProp\BRepGProp_TFunction.hxx" />
     <ClInclude Include="OCC\src\BRepGProp\BRepGProp_UFunction.hxx" />
@@ -749,41 +758,67 @@
     <ClInclude Include="OCC\src\BRepMAT2d\BRepMAT2d_DataMapOfShapeSequenceOfBasicElt.hxx" />
     <ClInclude Include="OCC\src\BRepMAT2d\BRepMAT2d_Explorer.hxx" />
     <ClInclude Include="OCC\src\BRepMAT2d\BRepMAT2d_LinkTopoBilo.hxx" />
-    <ClInclude Include="OCC\src\BRepMesh\BRepMesh.hxx" />
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_BaseMeshAlgo.hxx" />
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_BoundaryParamsRangeSplitter.hxx" />
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_Circle.hxx" />
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_CircleInspector.hxx" />
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_CircleTool.hxx" />
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_Classifier.hxx" />
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_ConeRangeSplitter.hxx" />
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_ConstrainedBaseMeshAlgo.hxx" />
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_Context.hxx" />
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_CurveTessellator.hxx" />
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_CustomBaseMeshAlgo.hxx" />
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_CustomDelaunayBaseMeshAlgo.hxx" />
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_CylinderRangeSplitter.hxx" />
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_DataStructureOfDelaun.hxx" />
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_DefaultRangeSplitter.hxx" />
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_Deflection.hxx" />
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_DegreeOfFreedom.hxx" />
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_Delaun.hxx" />
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_DelaunayBaseMeshAlgo.hxx" />
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_DelaunayDeflectionControlMeshAlgo.hxx" />
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_DelaunayNodeInsertionMeshAlgo.hxx" />
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_DiscretFactory.hxx" />
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_DiscretRoot.hxx" />
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_Edge.hxx" />
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_EdgeDiscret.hxx" />
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_EdgeParameterProvider.hxx" />
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_EdgeTessellationExtractor.hxx" />
-    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_EdgeTessellator.hxx" />
-    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_FaceAttribute.hxx" />
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_FaceChecker.hxx" />
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_FaceDiscret.hxx" />
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_FactoryError.hxx" />
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_FastDiscret.hxx" />
-    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_FastDiscretFace.hxx" />
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_GeomTool.hxx" />
-    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_IEdgeTool.hxx" />
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_IncrementalMesh.hxx" />
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_MeshAlgoFactory.hxx" />
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_MeshTool.hxx" />
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_ModelBuilder.hxx" />
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_ModelHealer.hxx" />
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_ModelPostProcessor.hxx" />
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_ModelPreProcessor.hxx" />
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_NodeInsertionMeshAlgo.hxx" />
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_NURBSRangeSplitter.hxx" />
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_OrientedEdge.hxx" />
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_PairOfIndex.hxx" />
-    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_PairOfPolygon.hxx" />
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_PluginEntryType.hxx" />
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_PluginMacro.hxx" />
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_SelectorOfDataStructureOfDelaun.hxx" />
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_ShapeTool.hxx" />
-    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_Status.hxx" />
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_ShapeVisitor.hxx" />
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_SphereRangeSplitter.hxx" />
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_TorusRangeSplitter.hxx" />
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_Triangle.hxx" />
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_UVParamRangeSplitter.hxx" />
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_Vertex.hxx" />
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_VertexInspector.hxx" />
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_VertexTool.hxx" />
-    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_WireChecker.hxx" />
-    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_WireInterferenceChecker.hxx" />
+    <ClInclude Include="OCC\src\BRepMeshData\BRepMeshData_Curve.hxx" />
+    <ClInclude Include="OCC\src\BRepMeshData\BRepMeshData_Edge.hxx" />
+    <ClInclude Include="OCC\src\BRepMeshData\BRepMeshData_Face.hxx" />
+    <ClInclude Include="OCC\src\BRepMeshData\BRepMeshData_Model.hxx" />
+    <ClInclude Include="OCC\src\BRepMesh\BRepMeshData_PCurve.hxx" />
+    <ClInclude Include="OCC\src\BRepMesh\BRepMeshData_Wire.hxx" />
     <ClInclude Include="OCC\src\BRepOffsetAPI\BRepOffsetAPI_DraftAngle.hxx" />
     <ClInclude Include="OCC\src\BRepOffsetAPI\BRepOffsetAPI_FindContigousEdges.hxx" />
     <ClInclude Include="OCC\src\BRepOffsetAPI\BRepOffsetAPI_MakeDraft.hxx" />
@@ -904,6 +939,7 @@
     <ClInclude Include="OCC\src\BRep\BRep_TVertex.hxx" />
     <ClInclude Include="OCC\src\BSplCLib\BSplCLib.hxx" />
     <ClInclude Include="OCC\src\BSplCLib\BSplCLib_Cache.hxx" />
+    <ClInclude Include="OCC\src\BSplCLib\BSplCLib_CacheParams.hxx" />
     <ClInclude Include="OCC\src\BSplCLib\BSplCLib_EvaluatorFunction.hxx" />
     <ClInclude Include="OCC\src\BSplCLib\BSplCLib_KnotDistribution.hxx" />
     <ClInclude Include="OCC\src\BSplCLib\BSplCLib_MultDistribution.hxx" />
@@ -912,15 +948,21 @@
     <ClInclude Include="OCC\src\BVH\BVH_BinaryTree.hxx" />
     <ClInclude Include="OCC\src\BVH\BVH_BinnedBuilder.hxx" />
     <ClInclude Include="OCC\src\BVH\BVH_Box.hxx" />
+    <ClInclude Include="OCC\src\BVH\BVH_BoxSet.hxx" />
     <ClInclude Include="OCC\src\BVH\BVH_Builder.hxx" />
     <ClInclude Include="OCC\src\BVH\BVH_BuildQueue.hxx" />
     <ClInclude Include="OCC\src\BVH\BVH_BuildThread.hxx" />
+    <ClInclude Include="OCC\src\BVH\BVH_Constants.hxx" />
+    <ClInclude Include="OCC\src\BVH\BVH_Distance.hxx" />
     <ClInclude Include="OCC\src\BVH\BVH_DistanceField.hxx" />
     <ClInclude Include="OCC\src\BVH\BVH_Geometry.hxx" />
+    <ClInclude Include="OCC\src\BVH\BVH_IndexedBoxSet.hxx" />
     <ClInclude Include="OCC\src\BVH\BVH_LinearBuilder.hxx" />
     <ClInclude Include="OCC\src\BVH\BVH_Object.hxx" />
     <ClInclude Include="OCC\src\BVH\BVH_ObjectSet.hxx" />
+    <ClInclude Include="OCC\src\BVH\BVH_PairDistance.hxx" />
     <ClInclude Include="OCC\src\BVH\BVH_PrimitiveSet.hxx" />
+    <ClInclude Include="OCC\src\BVH\BVH_PrimitiveSet3d.hxx" />
     <ClInclude Include="OCC\src\BVH\BVH_Properties.hxx" />
     <ClInclude Include="OCC\src\BVH\BVH_QuadTree.hxx" />
     <ClInclude Include="OCC\src\BVH\BVH_QueueBuilder.hxx" />
@@ -930,6 +972,8 @@
     <ClInclude Include="OCC\src\BVH\BVH_Sorter.hxx" />
     <ClInclude Include="OCC\src\BVH\BVH_SpatialMedianBuilder.hxx" />
     <ClInclude Include="OCC\src\BVH\BVH_SweepPlaneBuilder.hxx" />
+    <ClInclude Include="OCC\src\BVH\BVH_Tools.hxx" />
+    <ClInclude Include="OCC\src\BVH\BVH_Traverse.hxx" />
     <ClInclude Include="OCC\src\BVH\BVH_Tree.hxx" />
     <ClInclude Include="OCC\src\BVH\BVH_Triangulation.hxx" />
     <ClInclude Include="OCC\src\BVH\BVH_Types.hxx" />
@@ -1167,6 +1211,7 @@
     <ClInclude Include="OCC\src\FilletSurf\FilletSurf_InternalBuilder.hxx" />
     <ClInclude Include="OCC\src\FilletSurf\FilletSurf_StatusDone.hxx" />
     <ClInclude Include="OCC\src\FilletSurf\FilletSurf_StatusType.hxx" />
+    <ClInclude Include="OCC\src\FSD\FSD_Base64Decoder.hxx" />
     <ClInclude Include="OCC\src\FSD\FSD_BinaryFile.hxx" />
     <ClInclude Include="OCC\src\FSD\FSD_BStream.hxx" />
     <ClInclude Include="OCC\src\FSD\FSD_CmpFile.hxx" />
@@ -1653,6 +1698,7 @@
     <ClInclude Include="OCC\src\gp\gp_VectorWithNullMagnitude.hxx" />
     <ClInclude Include="OCC\src\gp\gp_XY.hxx" />
     <ClInclude Include="OCC\src\gp\gp_XYZ.hxx" />
+    <ClInclude Include="OCC\src\Graphic3d\Graphic3d_Vec4.hxx" />
     <ClInclude Include="OCC\src\HatchGen\HatchGen_Domain.hxx" />
     <ClInclude Include="OCC\src\HatchGen\HatchGen_Domains.hxx" />
     <ClInclude Include="OCC\src\HatchGen\HatchGen_ErrorStatus.hxx" />
@@ -1669,6 +1715,29 @@
     <ClInclude Include="OCC\src\Hatch\Hatch_SequenceOfLine.hxx" />
     <ClInclude Include="OCC\src\Hatch\Hatch_SequenceOfParameter.hxx" />
     <ClInclude Include="OCC\src\Hermit\Hermit.hxx" />
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_Curve.hxx" />
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_Edge.hxx" />
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_Face.hxx" />
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_Model.hxx" />
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_ParametersList.hxx" />
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_ParametersListArrayAdaptor.hxx" />
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_PCurve.hxx" />
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_Shape.hxx" />
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_Status.hxx" />
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_StatusOwner.hxx" />
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_TessellatedShape.hxx" />
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_Types.hxx" />
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_Wire.hxx" />
+    <ClInclude Include="OCC\src\IMeshTools\IMeshTools_Context.hxx" />
+    <ClInclude Include="OCC\src\IMeshTools\IMeshTools_CurveTessellator.hxx" />
+    <ClInclude Include="OCC\src\IMeshTools\IMeshTools_MeshAlgo.hxx" />
+    <ClInclude Include="OCC\src\IMeshTools\IMeshTools_MeshAlgoFactory.hxx" />
+    <ClInclude Include="OCC\src\IMeshTools\IMeshTools_MeshBuilder.hxx" />
+    <ClInclude Include="OCC\src\IMeshTools\IMeshTools_ModelAlgo.hxx" />
+    <ClInclude Include="OCC\src\IMeshTools\IMeshTools_ModelBuilder.hxx" />
+    <ClInclude Include="OCC\src\IMeshTools\IMeshTools_Parameters.hxx" />
+    <ClInclude Include="OCC\src\IMeshTools\IMeshTools_ShapeExplorer.hxx" />
+    <ClInclude Include="OCC\src\IMeshTools\IMeshTools_ShapeVisitor.hxx" />
     <ClInclude Include="OCC\src\IntAna2d\IntAna2d_AnaIntersection.hxx" />
     <ClInclude Include="OCC\src\IntAna2d\IntAna2d_Conic.hxx" />
     <ClInclude Include="OCC\src\IntAna2d\IntAna2d_IntPoint.hxx" />
@@ -2170,6 +2239,7 @@
     <ClInclude Include="OCC\src\OSD\OSD_SIGINT.hxx" />
     <ClInclude Include="OCC\src\OSD\OSD_SIGKILL.hxx" />
     <ClInclude Include="OCC\src\OSD\OSD_Signal.hxx" />
+    <ClInclude Include="OCC\src\OSD\OSD_SignalMode.hxx" />
     <ClInclude Include="OCC\src\OSD\OSD_SIGQUIT.hxx" />
     <ClInclude Include="OCC\src\OSD\OSD_SIGSEGV.hxx" />
     <ClInclude Include="OCC\src\OSD\OSD_SIGSYS.hxx" />
@@ -2177,6 +2247,7 @@
     <ClInclude Include="OCC\src\OSD\OSD_SysType.hxx" />
     <ClInclude Include="OCC\src\OSD\OSD_Thread.hxx" />
     <ClInclude Include="OCC\src\OSD\OSD_ThreadFunction.hxx" />
+    <ClInclude Include="OCC\src\OSD\OSD_ThreadPool.hxx" />
     <ClInclude Include="OCC\src\OSD\OSD_Timer.hxx" />
     <ClInclude Include="OCC\src\OSD\OSD_WhoAmI.hxx" />
     <ClInclude Include="OCC\src\OSD\OSD_WNT.hxx" />
@@ -2488,6 +2559,7 @@
     <ClInclude Include="OCC\src\Standard\Standard_Boolean.hxx" />
     <ClInclude Include="OCC\src\Standard\Standard_Byte.hxx" />
     <ClInclude Include="OCC\src\Standard\Standard_Character.hxx" />
+    <ClInclude Include="OCC\src\Standard\Standard_Condition.hxx" />
     <ClInclude Include="OCC\src\Standard\Standard_CLocaleSentry.hxx" />
     <ClInclude Include="OCC\src\Standard\Standard_ConstructionError.hxx" />
     <ClInclude Include="OCC\src\Standard\Standard_CString.hxx" />
@@ -2498,6 +2570,7 @@
     <ClInclude Include="OCC\src\Standard\Standard_DimensionMismatch.hxx" />
     <ClInclude Include="OCC\src\Standard\Standard_DivideByZero.hxx" />
     <ClInclude Include="OCC\src\Standard\Standard_DomainError.hxx" />
+    <ClInclude Include="OCC\src\Standard\Standard_Dump.hxx" />
     <ClInclude Include="OCC\src\Standard\Standard_ErrorHandler.hxx" />
     <ClInclude Include="OCC\src\Standard\Standard_ExtCharacter.hxx" />
     <ClInclude Include="OCC\src\Standard\Standard_ExtString.hxx" />
@@ -2539,6 +2612,8 @@
     <ClInclude Include="OCC\src\Standard\Standard_PrimitiveTypes.hxx" />
     <ClInclude Include="OCC\src\Standard\Standard_ProgramError.hxx" />
     <ClInclude Include="OCC\src\Standard\Standard_RangeError.hxx" />
+    <ClInclude Include="OCC\src\Standard\Standard_ReadBuffer.hxx" />
+    <ClInclude Include="OCC\src\Standard\Standard_ReadLineBuffer.hxx" />
     <ClInclude Include="OCC\src\Standard\Standard_Real.hxx" />
     <ClInclude Include="OCC\src\Standard\Standard_ShortReal.hxx" />
     <ClInclude Include="OCC\src\Standard\Standard_Size.hxx" />
@@ -3274,11 +3349,17 @@
     <ClCompile Include="OCC\src\BlendFunc\BlendFunc_ChAsymInv.cxx" />
     <ClCompile Include="OCC\src\BlendFunc\BlendFunc_ConstRad.cxx" />
     <ClCompile Include="OCC\src\BlendFunc\BlendFunc_ConstRadInv.cxx" />
+    <ClCompile Include="OCC\src\BlendFunc\BlendFunc_ConstThroat.cxx" />
+    <ClCompile Include="OCC\src\BlendFunc\BlendFunc_ConstThroatInv.cxx" />
+    <ClCompile Include="OCC\src\BlendFunc\BlendFunc_ConstThroatWithPenetration.cxx" />
+    <ClCompile Include="OCC\src\BlendFunc\BlendFunc_ConstThroatWithPenetrationInv.cxx" />
     <ClCompile Include="OCC\src\BlendFunc\BlendFunc_Corde.cxx" />
     <ClCompile Include="OCC\src\BlendFunc\BlendFunc_CSCircular.cxx" />
     <ClCompile Include="OCC\src\BlendFunc\BlendFunc_CSConstRad.cxx" />
     <ClCompile Include="OCC\src\BlendFunc\BlendFunc_EvolRad.cxx" />
     <ClCompile Include="OCC\src\BlendFunc\BlendFunc_EvolRadInv.cxx" />
+    <ClCompile Include="OCC\src\BlendFunc\BlendFunc_GenChamfer.cxx" />
+    <ClCompile Include="OCC\src\BlendFunc\BlendFunc_GenChamfInv.cxx" />
     <ClCompile Include="OCC\src\BlendFunc\BlendFunc_Ruled.cxx" />
     <ClCompile Include="OCC\src\BlendFunc\BlendFunc_RuledInv.cxx" />
     <ClCompile Include="OCC\src\BlendFunc\BlendFunc_Tensor.cxx" />
@@ -3306,10 +3387,12 @@
     <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_CellsBuilder.cxx" />
     <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_CheckerSI.cxx" />
     <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_CheckerSI_1.cxx" />
+    <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_MakeConnected.cxx" />
     <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_MakerVolume.cxx" />
     <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_Options.cxx" />
     <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_PaveFiller_10.cxx" />
     <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_PaveFiller_11.cxx" />
+    <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_MakePeriodic.cxx" />
     <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_RemoveFeatures.cxx" />
     <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_Section.cxx" />
     <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_Splitter.cxx" />
@@ -3329,11 +3412,8 @@
     <ClCompile Include="OCC\src\BRepAlgo\BRepAlgo_1.cxx" />
     <ClCompile Include="OCC\src\BRepAlgo\BRepAlgo_AsDes.cxx" />
     <ClCompile Include="OCC\src\BRepAlgo\BRepAlgo_BooleanOperation.cxx" />
-    <ClCompile Include="OCC\src\BRepAlgo\BRepAlgo_BooleanOperations.cxx" />
     <ClCompile Include="OCC\src\BRepAlgo\BRepAlgo_Common.cxx" />
     <ClCompile Include="OCC\src\BRepAlgo\BRepAlgo_Cut.cxx" />
-    <ClCompile Include="OCC\src\BRepAlgo\BRepAlgo_DSAccess.cxx" />
-    <ClCompile Include="OCC\src\BRepAlgo\BRepAlgo_EdgeConnector.cxx" />
     <ClCompile Include="OCC\src\BRepAlgo\BRepAlgo_FaceRestrictor.cxx" />
     <ClCompile Include="OCC\src\BRepAlgo\BRepAlgo_Fuse.cxx" />
     <ClCompile Include="OCC\src\BRepAlgo\BRepAlgo_Image.cxx" />
@@ -3429,6 +3509,7 @@
     <ClCompile Include="OCC\src\BRepExtrema\BRepExtrema_TriangleSet.cxx" />
     <ClCompile Include="OCC\src\BRepFill\BRepFill.cxx" />
     <ClCompile Include="OCC\src\BRepFill\BRepFill_ACRLaw.cxx" />
+    <ClCompile Include="OCC\src\BRepFill\BRepFill_AdvancedEvolved.cxx" />
     <ClCompile Include="OCC\src\BRepFill\BRepFill_ApproxSeewing.cxx" />
     <ClCompile Include="OCC\src\BRepFill\BRepFill_CompatibleWires.cxx" />
     <ClCompile Include="OCC\src\BRepFill\BRepFill_ComputeCLine_0.cxx" />
@@ -3459,6 +3540,8 @@
     <ClCompile Include="OCC\src\BRepFill\BRepFill_TrimSurfaceTool.cxx" />
     <ClCompile Include="OCC\src\BRepGProp\BRepGProp_Cinert.cxx" />
     <ClCompile Include="OCC\src\BRepGProp\BRepGProp_Gauss.cxx" />
+    <ClCompile Include="OCC\src\BRepGProp\BRepGProp_MeshCinert.cxx" />
+    <ClCompile Include="OCC\src\BRepGProp\BRepGProp_MeshProps.cxx" />
     <ClCompile Include="OCC\src\BRepGProp\BRepGProp_Sinert.cxx" />
     <ClCompile Include="OCC\src\BRepGProp\BRepGProp_TFunction.cxx" />
     <ClCompile Include="OCC\src\BRepGProp\BRepGProp_UFunction.cxx" />
@@ -3473,12 +3556,41 @@
     <ClCompile Include="OCC\src\BRepMAT2d\BRepMAT2d_BisectingLocus.cxx" />
     <ClCompile Include="OCC\src\BRepMAT2d\BRepMAT2d_Explorer.cxx" />
     <ClCompile Include="OCC\src\BRepMAT2d\BRepMAT2d_LinkTopoBilo.cxx" />
-    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_EdgeParameterProvider.cxx" />
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_BaseMeshAlgo.cxx" />
+
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_ConeRangeSplitter.cxx" />
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_Context.cxx" />
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_CurveTessellator.cxx" />
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_CylinderRangeSplitter.cxx" />
+                              
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_DefaultRangeSplitter.cxx" />
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_Deflection.cxx" />
+                             
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_DelaunayBaseMeshAlgo.cxx" />
+                              
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_EdgeDiscret.cxx" />
     <ClCompile Include="OCC\src\BRepMesh\BRepMesh_EdgeTessellationExtractor.cxx" />
-    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_EdgeTessellator.cxx" />
-    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_IEdgeTool.cxx" />
-    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_WireChecker.cxx" />
-    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_WireInterferenceChecker.cxx" />
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_FaceChecker.cxx" />
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_FaceDiscret.cxx" />
+                               
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_MeshAlgoFactory.cxx" />
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_MeshTool.cxx" />
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_ModelBuilder.cxx" />
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_ModelHealer.cxx" />
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_ModelPostProcessor.cxx" />
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_ModelPreProcessor.cxx" />
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_NURBSRangeSplitter.cxx" />
+                              
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_ShapeVisitor.cxx" />
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_SphereRangeSplitter.cxx" />
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_TorusRangeSplitter.cxx" />
+
+    <ClCompile Include="OCC\src\BRepMeshData\BRepMeshData_Curve.cxx" />
+    <ClCompile Include="OCC\src\BRepMeshData\BRepMeshData_Edge.cxx" />
+    <ClCompile Include="OCC\src\BRepMeshData\BRepMeshData_Face.cxx" />
+    <ClCompile Include="OCC\src\BRepMeshData\BRepMeshData_Model.cxx" />
+    <ClCompile Include="OCC\src\BRepMeshData\BRepMeshData_PCurve.cxx" />
+    <ClCompile Include="OCC\src\BRepMeshData\BRepMeshData_Wire.cxx" />
     <ClCompile Include="OCC\src\BRepOffsetAPI\BRepOffsetAPI_DraftAngle.cxx" />
     <ClCompile Include="OCC\src\BRepOffsetAPI\BRepOffsetAPI_FindContigousEdges.cxx" />
     <ClCompile Include="OCC\src\BRepOffsetAPI\BRepOffsetAPI_MakeDraft.cxx" />
@@ -4129,6 +4241,7 @@
     <ClCompile Include="OCC\src\OSD\OSD_SharedLibrary.cxx" />
     <ClCompile Include="OCC\src\OSD\OSD_signal.cxx" />
     <ClCompile Include="OCC\src\OSD\OSD_Thread.cxx" />
+    <ClCompile Include="OCC\src\OSD\OSD_ThreadPool.cxx" />
     <ClCompile Include="OCC\src\OSD\OSD_Timer.cxx" />
     <ClCompile Include="OCC\src\OSD\OSD_WNT.cxx" />
     <ClCompile Include="OCC\src\Plate\Plate_D1.cxx" />
@@ -4176,6 +4289,7 @@
     <ClCompile Include="OCC\src\ProjLib\ProjLib_Sphere.cxx" />
     <ClCompile Include="OCC\src\ProjLib\ProjLib_Torus.cxx" />
     <ClCompile Include="OCC\src\Quantity\Quantity_Color.cxx" />
+    <ClCompile Include="OCC\src\Quantity\Quantity_ColorRGBA.cxx" />
     <ClCompile Include="OCC\src\Quantity\Quantity_Date.cxx" />
     <ClCompile Include="OCC\src\Quantity\Quantity_Period.cxx" />
     <ClCompile Include="OCC\src\Resource\Resource_ConvertUnicode.c" />
@@ -4250,7 +4364,9 @@
     <ClCompile Include="OCC\src\ShapeProcess\ShapeProcess_UOperator.cxx" />
     <ClCompile Include="OCC\src\Standard\Standard.cxx" />
     <ClCompile Include="OCC\src\Standard\Standard_CLocaleSentry.cxx" />
+    <ClCompile Include="OCC\src\Standard\Standard_Condition.cxx" />
     <ClCompile Include="OCC\src\Standard\Standard_CString.cxx" />
+    <ClCompile Include="OCC\src\Standard\Standard_Dump.cxx" />
     <ClCompile Include="OCC\src\Standard\Standard_Strtod.cxx" />
     <ClCompile Include="OCC\src\Standard\Standard_ErrorHandler.cxx" />
     <ClCompile Include="OCC\src\Standard\Standard_ExtString.cxx" />
@@ -4606,6 +4722,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup Label="TKernel">
+    <ClCompile Include=".\OCC\src\FSD\FSD_Base64Decoder.cxx" />
     <ClCompile Include=".\OCC\src\FSD\FSD_BinaryFile.cxx" />
     <ClCompile Include=".\OCC\src\FSD\FSD_CmpFile.cxx" />
     <ClCompile Include=".\OCC\src\FSD\FSD_File.cxx" />
@@ -4763,6 +4880,7 @@
     <ClCompile Include=".\OCC\src\AppCont\AppCont_ContMatrices_2.cxx" />
     <ClCompile Include=".\OCC\src\AppCont\AppCont_ContMatrices_3.cxx" />
     <ClCompile Include=".\OCC\src\AppCont\AppCont_ContMatrices_4.cxx" />
+
     <ClCompile Include=".\OCC\src\IntAna2d\IntAna2d_AnaIntersection.cxx" />
     <ClCompile Include=".\OCC\src\IntAna2d\IntAna2d_AnaIntersection_1.cxx" />
     <ClCompile Include=".\OCC\src\IntAna2d\IntAna2d_AnaIntersection_2.cxx" />
@@ -5098,9 +5216,6 @@
     <ClCompile Include=".\OCC\src\BRepMesh\BRepMesh_Delaun.cxx" />
     <ClCompile Include=".\OCC\src\BRepMesh\BRepMesh_DiscretFactory.cxx" />
     <ClCompile Include=".\OCC\src\BRepMesh\BRepMesh_DiscretRoot.cxx" />
-    <ClCompile Include=".\OCC\src\BRepMesh\BRepMesh_FaceAttribute.cxx" />
-    <ClCompile Include=".\OCC\src\BRepMesh\BRepMesh_FastDiscret.cxx" />
-    <ClCompile Include=".\OCC\src\BRepMesh\BRepMesh_FastDiscretFace.cxx" />
     <ClCompile Include=".\OCC\src\BRepMesh\BRepMesh_GeomTool.cxx" />
     <ClCompile Include=".\OCC\src\BRepMesh\BRepMesh_IncrementalMesh.cxx" />
     <ClCompile Include=".\OCC\src\BRepMesh\BRepMesh_SelectorOfDataStructureOfDelaun.cxx" />
@@ -5112,8 +5227,10 @@
     <ClCompile Include=".\OCC\src\BRepAlgoAPI\BRepAlgoAPI_Check.cxx" />
     <ClCompile Include=".\OCC\src\BRepAlgoAPI\BRepAlgoAPI_Common.cxx" />
     <ClCompile Include=".\OCC\src\BRepAlgoAPI\BRepAlgoAPI_Cut.cxx" />
+    <ClCompile Include=".\OCC\src\BRepAlgoAPI\BRepAlgoAPI_Defeaturing.cxx" /> 
     <ClCompile Include=".\OCC\src\BRepAlgoAPI\BRepAlgoAPI_Fuse.cxx" />
     <ClCompile Include=".\OCC\src\BRepAlgoAPI\BRepAlgoAPI_Section.cxx" />
+    <ClCompile Include=".\OCC\src\BRepAlgoAPI\BRepAlgoAPI_Splitter.cxx" />
     <ClCompile Include=".\OCC\src\BOPDS\BOPDS_CommonBlock.cxx" />
     <ClCompile Include=".\OCC\src\BOPDS\BOPDS_DS.cxx" />
     <ClCompile Include=".\OCC\src\BOPDS\BOPDS_IndexRange.cxx" />
@@ -5129,7 +5246,6 @@
     <ClCompile Include=".\OCC\src\BOPAlgo\BOPAlgo_Builder.cxx" />
     <ClCompile Include=".\OCC\src\BOPAlgo\BOPAlgo_BuilderArea.cxx" />
     <ClCompile Include=".\OCC\src\BOPAlgo\BOPAlgo_BuilderFace.cxx" />
-    <ClCompile Include=".\OCC\src\BOPAlgo\BOPAlgo_BuilderShape.cxx" />
     <ClCompile Include=".\OCC\src\BOPAlgo\BOPAlgo_BuilderSolid.cxx" />
     <ClCompile Include=".\OCC\src\BOPAlgo\BOPAlgo_Builder_1.cxx" />
     <ClCompile Include=".\OCC\src\BOPAlgo\BOPAlgo_Builder_2.cxx" />
@@ -5156,6 +5272,10 @@
     <ClCompile Include=".\OCC\src\BOPTools\BOPTools_AlgoTools_1.cxx" />
     <ClCompile Include=".\OCC\src\BOPTools\BOPTools_AlgoTools_2.cxx" />
     <ClCompile Include=".\OCC\src\BOPTools\BOPTools_Set.cxx" />
+  </ItemGroup>
+  <ItemGroup Label="IMeshData">
+     <ClCompile Include=".\OCC\src\IMeshTools\IMeshTools_MeshBuilder.cxx" />
+     <ClCompile Include=".\OCC\src\IMeshTools\\IMeshTools_ShapeExplorer.cxx" />
   </ItemGroup>
   <ItemGroup Label="TKFillet">
     <ClCompile Include=".\OCC\src\ChFi2d\ChFi2d.cxx" />
@@ -5757,7 +5877,7 @@
     <None Include="OCC\src\TopLoc\TopLoc_Datum3D.lxx" />
     <None Include="OCC\src\TopLoc\TopLoc_Location.lxx" />
     <None Include="OCC\src\TopLoc\TopLoc_SListNodeOfItemLocation.lxx" />
-    <None Include="OCC\src\TopLoc\TopLoc_SListOfItemLocation.lxx" />
+
     <None Include="OCC\src\TopoDS\TopoDS.lxx" />
     <None Include="OCC\src\TopoDS\TopoDS_Builder.lxx" />
     <None Include="OCC\src\TopoDS\TopoDS_Compound.lxx" />
@@ -5766,14 +5886,13 @@
     <None Include="OCC\src\TopoDS\TopoDS_Face.lxx" />
     <None Include="OCC\src\TopoDS\TopoDS_HShape.lxx" />
     <None Include="OCC\src\TopoDS\TopoDS_Iterator.lxx" />
-    <None Include="OCC\src\TopoDS\TopoDS_Shape.lxx" />
     <None Include="OCC\src\TopoDS\TopoDS_Shell.lxx" />
     <None Include="OCC\src\TopoDS\TopoDS_Solid.lxx" />
     <None Include="OCC\src\TopoDS\TopoDS_TCompound.lxx" />
     <None Include="OCC\src\TopoDS\TopoDS_TCompSolid.lxx" />
     <None Include="OCC\src\TopoDS\TopoDS_TEdge.lxx" />
     <None Include="OCC\src\TopoDS\TopoDS_TFace.lxx" />
-    <None Include="OCC\src\TopoDS\TopoDS_TShape.lxx" />
+
     <None Include="OCC\src\TopoDS\TopoDS_TShell.lxx" />
     <None Include="OCC\src\TopoDS\TopoDS_TSolid.lxx" />
     <None Include="OCC\src\TopoDS\TopoDS_TVertex.lxx" />

@@ -163,12 +163,21 @@ void Approx_SweepApproximation::Perform(const Standard_Real First,
  myDWeigths = new (TColStd_HArray1OfReal)(1, Num3DSS);
  myD2Weigths = new (TColStd_HArray1OfReal)(1, Num3DSS);
  
- if (Num2DSS>0) {
+ if (Num2DSS>0)
+ {
    myPoles2d   = new (TColgp_HArray1OfPnt2d)(1, Num2DSS);
    myDPoles2d  = new (TColgp_HArray1OfVec2d)(1, Num2DSS);
    myD2Poles2d = new (TColgp_HArray1OfVec2d)(1, Num2DSS);  
    COnSurfErr  = new (TColStd_HArray1OfReal)(1, Num2DSS);
  }
+ else
+ {
+   myPoles2d   = new TColgp_HArray1OfPnt2d();
+   myDPoles2d  = new TColgp_HArray1OfVec2d();
+   myD2Poles2d = new TColgp_HArray1OfVec2d();
+   COnSurfErr  = new TColStd_HArray1OfReal();
+ }
+
 // Checks if myFunc->D2 is implemented
  if (continuity >= GeomAbs_C2) {
    Standard_Boolean B;
@@ -728,19 +737,19 @@ Standard_Real Approx_SweepApproximation::TolCurveOnSurf(const Standard_Integer I
 
  void Approx_SweepApproximation::Dump(Standard_OStream& o) const
 {
-  o << "Dump of SweepApproximation" << endl;
+  o << "Dump of SweepApproximation" << std::endl;
   if (done) { 
-    o << "Error 3d = " << MaxErrorOnSurf() << endl;
+    o << "Error 3d = " << MaxErrorOnSurf() << std::endl;
 
     if (Num2DSS>0) {
       o << "Error 2d = ";
       for (Standard_Integer ii=1; ii<=Num2DSS; ii++) 
 	{  o << Max2dError(ii);
-	   if (ii < Num2DSS) o << " , " << endl;
+	   if (ii < Num2DSS) o << " , " << std::endl;
 	 }
-      cout << endl;
+      std::cout << std::endl;
     }
-    o <<  tabVKnots->Length()-1 <<" Segment(s) of degree " << vdeg << endl;
+    o <<  tabVKnots->Length()-1 <<" Segment(s) of degree " << vdeg << std::endl;
   }
-  else cout << " Not Done " << endl;
+  else std::cout << " Not Done " << std::endl;
 }

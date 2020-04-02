@@ -57,6 +57,28 @@
   #define Standard_FALLTHROUGH
 #endif
 
+//! @def Standard_NODISCARD
+//! This attribute may appear in a function declaration,
+//! enumeration declaration or class declaration. It tells the compiler to
+//! issue a warning, if a return value marked by that attribute is discarded.
+//!
+//! Expands to C++17 attribute statement "[[nodiscard]]" on compilers that
+//! declare support of this attribute, or equivalent attribute on GCC.
+#if defined(__has_cpp_attribute)
+  #if __has_cpp_attribute(nodiscard)
+    #define Standard_NODISCARD [[nodiscard]]
+  #else
+    #define Standard_NODISCARD
+  #endif
+#elif defined(__GNUC__) && ! defined(INTEL_COMPILER)
+  // According to available documentation, GCC-style __attribute__ ((warn_unused_result))
+  // should be available in GCC since version 3.4, and in CLang since 3.9;
+  // Intel compiler does not seem to support this
+  #define Standard_NODISCARD __attribute__ ((warn_unused_result))
+#else
+  #define Standard_NODISCARD
+#endif
+
 //! @def Standard_UNUSED
 //! Macro for marking variables / functions as possibly unused
 //! so that compiler will not emit redundant "unused" warnings.
@@ -66,6 +88,33 @@
   #define Standard_UNUSED __attribute__((unused))
 #else
   #define Standard_UNUSED
+#endif
+
+//! @def Standard_THREADLOCAL
+//! Define Standard_THREADLOCAL modifier as C++11 thread_local keyword where it is available.
+#if defined(__clang__)
+  // CLang version: standard CLang > 3.3 or XCode >= 8 (but excluding 32-bit ARM)
+  // Note: this has to be in separate #if to avoid failure of preprocessor on other platforms
+  #if __has_feature(cxx_thread_local)
+    #define Standard_THREADLOCAL thread_local
+  #endif
+#elif defined(__INTEL_COMPILER)
+  #if (defined(_MSC_VER) && _MSC_VER >= 1900 && __INTEL_COMPILER > 1400)
+    // requires msvcrt vc14+ (Visual Studio 2015+)
+    #define Standard_THREADLOCAL thread_local
+  #elif (!defined(_MSC_VER) && __INTEL_COMPILER > 1500)
+    #define Standard_THREADLOCAL thread_local
+  #endif
+#elif (defined(_MSC_VER) && _MSC_VER >= 1900)
+  // msvcrt coming with vc14+ (VS2015+)
+  #define Standard_THREADLOCAL thread_local
+#elif (defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 8)))
+  // GCC >= 4.8
+  #define Standard_THREADLOCAL thread_local
+#endif
+
+#ifndef Standard_THREADLOCAL
+  #define Standard_THREADLOCAL
 #endif
 
 //! @def Standard_DEPRECATED("message")
