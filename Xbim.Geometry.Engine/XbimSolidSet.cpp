@@ -17,8 +17,9 @@
 #include "BRepBuilderAPI_MakeSolid.hxx"
 #include "BOPAlgo_PaveFiller.hxx"
 #include "BOPAlgo_BOP.hxx"
-//#include <OSD_OpenFile.hxx>
+#include <OSD_OpenFile.hxx>
 #include <algorithm>
+using namespace std;
 
 using namespace System::Linq;
 using namespace System::Threading;
@@ -407,7 +408,9 @@ namespace Xbim
 
 		int DoBoolean(const TopoDS_Shape& body, const TopTools_ListOfShape& tools, BOPAlgo_Operation op, double tolerance, TopoDS_Shape& result, int timeout)
 		{
-			
+			//ShapeFix_ShapeTolerance fTol;
+			//fTol.LimitTolerance(body, tolerance * 10, tolerance * 10, TopAbs_VERTEX); //adjust the tolerance of a face
+			//fTol.LimitTolerance(body, tolerance * 10, tolerance * 10, TopAbs_EDGE);
 			int  retVal = BOOLEAN_FAIL;
 			try
 			{
@@ -457,7 +460,7 @@ namespace Xbim
 				}
 
 
-				double fuzzyTol = std::max(maxTol - tolerance, 6 * tolerance);//this seems about right				
+				double fuzzyTol = std::max(maxTol - tolerance, 10 * tolerance);//this seems about right				
 				BOPAlgo_BOP aBOP;
 				
 
@@ -486,7 +489,7 @@ namespace Xbim
 
 				bool bopWarn = aBOP.HasWarnings();
 
-				if (bopWarn || bopErr) // a sign of failure do them individually
+				if (/*bopWarn || */bopErr) // a sign of failure do them individually
 				{
 					/*ofstream os;
 					OSD_OpenStream(os, "c:/tmp/warnings.txt", ios::out);

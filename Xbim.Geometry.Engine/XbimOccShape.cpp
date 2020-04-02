@@ -375,7 +375,7 @@ namespace Xbim
 			int faceIndex = 0;
 			int triangleCount = 0;
 			List<List<int>^>^ tessellations = gcnew List<List<int>^>(faceCount);
-			bool isPolyhedron = true;
+			
 			array<bool>^ hasSeams = gcnew array<bool>(faceCount);
 			for (int f = 1; f <= faceMap.Extent(); f++)
 			{
@@ -386,33 +386,11 @@ namespace Xbim
 				{
 					Standard_Real start, end;
 					//find any seams					
-					if (!hasSeams[f - 1]) hasSeams[f - 1] = (BRep_Tool::IsClosed(edgeMap(i))==Standard_True); //just check a seam once
-					Handle(Geom_Curve) c3d = BRep_Tool::Curve(TopoDS::Edge(edgeMap(i)), start, end);
-					if (!c3d.IsNull())
-					{
-						Handle(Standard_Type) cType = c3d->DynamicType();
-						if (cType != STANDARD_TYPE(Geom_Line))
-						{
-							if (cType != STANDARD_TYPE(Geom_TrimmedCurve)) 
-							{
-								isPolyhedron = false; 
-							//	isCurveFace[f - 1] = true;
-								continue;
-							}
-							Handle(Geom_TrimmedCurve) tc = Handle(Geom_TrimmedCurve)::DownCast(c3d);
-							Handle(Standard_Type) tcType = tc->DynamicType();
-							if (tcType != STANDARD_TYPE(Geom_Line)) 
-							{
-								isPolyhedron = false;
-								//isCurveFace[f - 1] = true;
-								continue;
-							}
-						}
-					}				
+					if (!hasSeams[f - 1]) hasSeams[f - 1] = (BRep_Tool::IsClosed(edgeMap(i))==Standard_True); //just check a seam once					
 				}			
 			}
-			if (!isPolyhedron)				
-				BRepMesh_IncrementalMesh incrementalMesh(this, deflection, Standard_False, angle); //triangulate the first time							
+						
+			BRepMesh_IncrementalMesh incrementalMesh(this, deflection, Standard_False, angle); //triangulate the first time							
 			for (int f = 1; f <= faceMap.Extent(); f++)
 			{
 				const TopoDS_Face& face = TopoDS::Face(faceMap(f));
@@ -420,8 +398,7 @@ namespace Xbim
 				//bool isFaceWithCurve = isCurveFace[f - 1];
 				List<XbimPackedNormal>^ norms;
 				Tess^ tess = gcnew Tess();
-				if (!isPolyhedron)
-				{								
+												
 					TopLoc_Location loc;
 					const Handle(Poly_Triangulation)& mesh = BRep_Tool::Triangulation(face, loc);
 					if (mesh.IsNull())
@@ -494,78 +471,6 @@ namespace Xbim
 					}
 					tessellations->Add(elems);
 					faceIndex++;
-					
-				}
-				else //it is planar we can use LibMeshDotNet
-				{
-					norms = gcnew List<XbimPackedNormal>(1);					
-					//IXbimWireSet^ bounds = gcnew XbimWireSet(face);
-					TopTools_IndexedMapOfShape wireMap;
-					TopExp::MapShapes(face, TopAbs_WIRE, wireMap);
-					List<array<ContourVertex>^>^ contours = gcnew List<array<ContourVertex>^>(wireMap.Extent());
-					for (int i = 1; i <= wireMap.Extent(); i++)
-					{
-						TopoDS_Wire ccWire = TopoDS::Wire(wireMap(i));
-						int t = 0;
-						BRepTools_WireExplorer exp(ccWire);
-						for (; exp.More(); exp.Next()) t++;
-						if (t <= 2) continue;
-
-						array<ContourVertex>^ contour = gcnew array<ContourVertex>(t);
-						int j = 0;
-						for (exp.Init(ccWire); exp.More(); exp.Next())
-						{
-							gp_Pnt p = BRep_Tool::Pnt(exp.CurrentVertex());
-							contour[j].Position.X = p.X();
-							contour[j].Position.Y = p.Y();
-							contour[j].Position.Z = p.Z();
-							j++;
-						}
-						if (contour->Length > 0)
-							contours->Add(contour);
-					}
-
-					if (contours->Count > 0)
-					{
-						tess->AddContours(contours, true);
-						tess->Tessellate(Xbim::Tessellator::WindingRule::EvenOdd, Xbim::Tessellator::ElementType::Polygons, 3);
-						int numTriangles = tess->ElementCount;
-						triangleCount += numTriangles;
-
-						array<ContourVertex>^ contourVerts = tess->Vertices;
-						array<int>^ elements = tess->Elements;
-						if (numTriangles > 0)
-						{
-							pointLookup->Add(gcnew List<int>(tess->VertexCount));
-							XbimVector3D fn(tess->Normal[0], tess->Normal[1], tess->Normal[2]);
-							XbimPackedNormal packedNormal = XbimPackedNormal(fn);							
-							norms->Add(packedNormal);
-							normalLookup->Add(norms);
-							for (int i = 0; i < tess->VertexCount; i++) //visit each node for vertices
-							{
-								Vec3 p = contourVerts[i].Position;
-								int index;
-								XbimPoint3DWithTolerance^ pt = gcnew XbimPoint3DWithTolerance(p.X, p.Y, p.Z, tolerance);
-								if (!pointMap->TryGetValue(pt, index))
-								{
-									index = points->Count;
-									pointMap->Add(pt, index);
-									points->Add(pt->VertexGeometry);
-								}
-								pointLookup[faceIndex]->Add(index);
-							}
-							List<int>^ elems = gcnew List<int>(numTriangles * 3);
-							for (int j = 0; j < numTriangles; j++)
-							{
-								elems->Add(elements[j * 3]);
-								elems->Add(elements[j * 3 + 1]);
-								elems->Add(elements[j * 3 + 2]);
-							}
-							tessellations->Add(elems);
-							faceIndex++;
-						}
-					}
-				}
 			}
 			// Write out header
 			binaryWriter->Write((unsigned char)1); //stream format version
