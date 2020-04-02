@@ -44,7 +44,6 @@
 #include <Geom_OffsetCurve.hxx>
 #include <BRepBuilderAPI_MakeSolid.hxx>
 #include <BRepPrimAPI_MakeHalfSpace.hxx>
-#include <BRepAlgo_NormalProjection.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
 #include <ShapeFix_ShapeTolerance.hxx>
 #include <BRepTools.hxx>

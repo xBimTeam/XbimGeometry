@@ -171,6 +171,7 @@ BRepTopAdaptor_FClass2d::BRepTopAdaptor_FClass2d(const TopoDS_Face& aFace,const 
 		      gp_Pnt P3db=C3d.Value(u);
 		      // 		      if(P3da.SquareDistance(P3db)) { degenerated=Standard_False; break; }
 		      if(P3da.SquareDistance(P3db) > Precision::Confusion()) { degenerated=Standard_False; break; }
+			  if (u + du == u) break; //SRL if adding the difference has no impact we will just go around in a loop
 		      u+=du;
 		    }
 		  while(u<plbid);
