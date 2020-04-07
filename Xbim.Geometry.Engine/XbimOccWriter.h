@@ -18,13 +18,13 @@ namespace Xbim
 		public:
 			XbimOccWriter();
 			static bool Write(const TopoDS_Shape& shape, String^ fileName);
-			bool Write(IXbimGeometryObject^ obj, String^ filename);
-			bool Write(IXbimGeometryObjectSet^ objects, String^ filename);
-			bool Write(IXbimSolidSet^ solidSet, String^ filename);
-			bool Write(IXbimSolid^ solid, String^ filename);
-			bool Write(IXbimShell^ shell, String^ filename);
-			bool Write(IXbimFace^ face, String^ filename);
-			bool Write(IXbimWire^ wire, String^ filename);
+			static bool Write(IXbimGeometryObject^ obj, String^ filename);
+			static bool Write(IXbimGeometryObjectSet^ objects, String^ filename);
+			static bool Write(IXbimSolidSet^ solidSet, String^ filename);
+			static bool Write(IXbimSolid^ solid, String^ filename);
+			static bool Write(IXbimShell^ shell, String^ filename);
+			static bool Write(IXbimFace^ face, String^ filename);
+			static bool Write(IXbimWire^ wire, String^ filename);
 		};
 	}
 }

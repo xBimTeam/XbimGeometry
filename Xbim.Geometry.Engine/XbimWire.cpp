@@ -72,7 +72,7 @@
 #include <Geom_OffsetCurve.hxx>
 #include <Adaptor3d_HCurve.hxx>
 #include <BRepAdaptor_HCurve.hxx>
-
+#include <ShapeAnalysis_WireOrder.hxx>
 using namespace Xbim::Common;
 using namespace System::Linq;
 // using namespace System::Diagnostics;
@@ -408,12 +408,18 @@ namespace Xbim
 				XbimGeometryCreator::LogWarning(logger, pline, "Polyline with less than 2 points is an empty line. It has been ignored");
 				return;
 			}
+			
+
 			bool done = false;
 			bool tryAgain = true;
 			while (!done)
 			{
+				
+
 				TColgp_SequenceOfPnt pointSeq;
 				BRepBuilderAPI_MakeWire wireMaker;
+
+
 				for (int i = 0; i < originalCount; i++)
 				{
 					pointSeq.Append(XbimConvert::GetPoint3d(polygon[i]));
@@ -421,17 +427,14 @@ namespace Xbim
 				bool close = (constraints & XbimConstraints::Closed) == XbimConstraints::Closed;
 				bool notSelfIntersecting = (constraints & XbimConstraints::NotSelfIntersecting) == XbimConstraints::NotSelfIntersecting;
 				bool isClosed = XbimFace::RemoveDuplicatePoints(pointSeq, close, tolerance);
-
-				/*if (pointSeq.Length() != originalCount)
-				{
-					XbimGeometryCreator::LogDebug(logger, pline, "Polyline with duplicate points. Duplicate has been removed");
-				}*/
+				
 
 				if (pointSeq.Length() < 2)
 				{
 					XbimGeometryCreator::LogWarning(logger, pline, "Polyline with less than 2 points is an empty line. It has been ignored");
 					return;
 				}
+				
 
 				BRepBuilderAPI_MakePolygon polyMaker;
 				for (int i = 1; i <= pointSeq.Length(); ++i)
@@ -447,6 +450,7 @@ namespace Xbim
 					if (notSelfIntersecting)
 					{//check for no self intersection
 						TopoDS_Wire wire = polyMaker.Wire(); //get a handle to the wire to avoid garbage collection
+						
 						//double tolerance = profile->Model->ModelFactors->Precision;
 						Handle(Geom_Plane) planeSurface = new Geom_Plane(gp_Pnt(0, 0, 0), gp_Vec(0, 0, 1));
 						ShapeAnalysis_Wire wireChecker;
@@ -469,9 +473,12 @@ namespace Xbim
 							wireFixer.FixIntersectingEdgesMode() = true;
 							wireFixer.FixNonAdjacentIntersectingEdgesMode() = true;
 							wireFixer.ModifyTopologyMode() = true;
+						
 							bool fixed = wireFixer.Perform();
 							if (!fixed) // we have a self intersection but the tools cannot fix it, normally means two points are too near
 							{
+								
+
 								tolerance = pline->Model->ModelFactors->OneMilliMeter / 10; //use a normal modelling precision
 
 								if (tryAgain)
@@ -482,7 +489,7 @@ namespace Xbim
 								else
 								{
 									XbimGeometryCreator::LogWarning(logger, pline, "Could not fix Self Intersecting Polyline. It has been ignored");
-									return;
+									//return;
 								}
 							}
 						}

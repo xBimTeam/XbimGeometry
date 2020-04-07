@@ -20,7 +20,7 @@ namespace Xbim
 		const int BOOLEAN_TIMEDOUT = -1;
 		
 	
-	    int DoBoolean(const TopoDS_Shape& body, const TopTools_ListOfShape& tools, BOPAlgo_Operation op, double tolerance, TopoDS_Shape& result, int timeout);
+	    int DoBoolean(const TopoDS_Shape& body, const TopTools_ListOfShape& tools, BOPAlgo_Operation op, double tolerance, double fuzzTolerance, TopoDS_Shape& result, int timeout);
 
 		private ref class VolumeComparer : IComparer<Tuple<double, XbimSolid^>^>
 		{

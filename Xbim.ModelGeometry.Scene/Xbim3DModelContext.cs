@@ -851,7 +851,7 @@ namespace Xbim.ModelGeometry.Scene
             });
 
             // process all the openings and projections starting with the most operations first
-            //
+            //contextHelper.ParallelOptions.MaxDegreeOfParallelism = 1;
             Parallel.ForEach(openingAndProjectionOps.OrderByDescending(b => b.CutGeometries.Count + b.ProjectGeometries.Count), contextHelper.ParallelOptions, openingAndProjectionOp =>
             {
                 Interlocked.Increment(ref localTally);
@@ -1420,7 +1420,7 @@ namespace Xbim.ModelGeometry.Scene
                             // if shape had large coordinates these might be reduced. This represents the
                             // local displacement of the shape. It needs to be applied to shape (and bounding box) placement in the product.
                             // This is often the case for already triangulated geometry from infrastructure tools like Bentley.
-                            // Large coordinates stored as floats loose numerical precission which is visible as distorted
+                            // Large coordinates stored as floats loose numerical precision which is visible as distorted
                             // geometry when visualised.
                             LocalShapeDisplacement = shapeGeom.LocalShapeDisplacement
                         };

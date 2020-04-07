@@ -507,7 +507,7 @@ namespace Xbim
 						TopoDS_Shape result;
 
 						const TopoDS_Shape& body = itl.Value();
-						success = Xbim::Geometry::DoBoolean(body, cuttingObjects, bop, tolerance, result, XbimGeometryCreator::BooleanTimeOut);
+						success = Xbim::Geometry::DoBoolean(body, cuttingObjects, bop, tolerance, XbimGeometryCreator::FuzzyFactor, result, XbimGeometryCreator::BooleanTimeOut);
 						if (success > 0)
 						{
 							builder.Add(occCompound, result);

@@ -25,7 +25,7 @@
 #include <BRepBuilderAPI_Transform.hxx>
 using namespace System::Threading;
 using namespace System::Collections::Generic;
-using namespace Xbim::Tessellator;
+
 //
 //IMPLEMENT_STANDARD_HANDLE(XbimProgressIndicator, Message_ProgressIndicator)
 //IMPLEMENT_STANDARD_RTTIEXT(XbimProgressIndicator, Message_ProgressIndicator)
@@ -358,6 +358,7 @@ namespace Xbim
 		{
 
 			if (!IsValid) return;
+		    const TopoDS_Shape & thisShape  = this;
 			TopTools_IndexedMapOfShape faceMap;
 			TopoDS_Shape shape = this; //hold on to it
 			TopExp::MapShapes(shape, TopAbs_FACE, faceMap);			
@@ -384,20 +385,27 @@ namespace Xbim
 				hasSeams[f - 1] = false;
 				for (Standard_Integer i = 1; i <= edgeMap.Extent(); i++)
 				{
-					Standard_Real start, end;
+					//Standard_Real start, end;
 					//find any seams					
 					if (!hasSeams[f - 1]) hasSeams[f - 1] = (BRep_Tool::IsClosed(edgeMap(i))==Standard_True); //just check a seam once					
 				}			
 			}
-						
-			BRepMesh_IncrementalMesh incrementalMesh(this, deflection, Standard_False, angle); //triangulate the first time							
+			try
+			{
+				BRepMesh_IncrementalMesh incrementalMesh(thisShape, deflection, Standard_False, angle); //triangulate the first time	
+			}
+			catch (...)
+			{
+
+			}
+									
 			for (int f = 1; f <= faceMap.Extent(); f++)
 			{
 				const TopoDS_Face& face = TopoDS::Face(faceMap(f));
 				bool faceReversed = (face.Orientation() == TopAbs_REVERSED);
 				//bool isFaceWithCurve = isCurveFace[f - 1];
 				List<XbimPackedNormal>^ norms;
-				Tess^ tess = gcnew Tess();
+				
 												
 					TopLoc_Location loc;
 					const Handle(Poly_Triangulation)& mesh = BRep_Tool::Triangulation(face, loc);
@@ -514,7 +522,7 @@ namespace Xbim
 				}	
 				faceIndex++;
 			}
-			GC::KeepAlive(this);
+			BRepTools::Clean(thisShape); //remove triangulation data
 			binaryWriter->Flush();
 		}	
 	}
