@@ -9,6 +9,7 @@ using System;
 using Xbim.Ifc4.GeometricModelResource;
 using Xbim.Ifc4.GeometryResource;
 using System.Collections.Generic;
+using System.IO;
 using Xbim.Ifc.Extensions;
 using Xbim.Common.Exceptions;
 
@@ -28,6 +29,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             loggerFactory = new LoggerFactory().AddDebug(LogLevel.Trace);
             geomEngine = new XbimGeometryEngine();
             logger = loggerFactory.CreateLogger<IfcBooleanTests>();
+            loggerFactory.AddConsole(LogLevel.Trace);
         }
         [ClassCleanup]
         static public void Cleanup()
@@ -35,6 +37,57 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             loggerFactory = null;
             geomEngine = null;
             logger = null;
+        }
+
+
+
+        [TestMethod]
+        public void multi_boolean_opening_operations_test()
+        {
+            using (var model = MemoryModel.OpenRead(@"TestFiles\complex.ifc"))
+            {
+                var voidRels = model.Instances.OfType<IIfcRelVoidsElement>();
+                var op = voidRels.GroupBy(rv => rv.RelatingBuildingElement).FirstOrDefault();//just try the first one
+                var body = op.Key;
+                var openings = op.Select(v => v.RelatedOpeningElement).Cast<IIfcOpeningElement>().ToList();
+
+                var bodyRep = body.Representation.Representations.SelectMany(r => r.Items.OfType<IIfcBooleanClippingResult>()).FirstOrDefault(); //it is a IIfcBooleanClippingResult               
+                var bodyGeom = geomEngine.CreateSolidSet(bodyRep);
+                // var faultWires = bodyGeom.First().Faces.Where(f => f.OuterBound.Edges.Count > 4).ToList();
+
+
+                var cutSolids = geomEngine.CreateSolidSet();
+                foreach (var opening in openings)
+                {
+                    var openingRep = opening.Representation.Representations.SelectMany(r => r.Items.OfType<IIfcExtrudedAreaSolid>()).FirstOrDefault();
+                    var openingGeom = geomEngine.CreateSolid(openingRep);
+                    cutSolids.Add(openingGeom);
+                }
+                ////try in a oner
+                var resultSetCut = bodyGeom.Cut(cutSolids, 1e-5);
+                var cutSingularCut = bodyGeom;
+                //get the openings, nb all placements are the same so we do not need to adjust
+                foreach (var opening in openings)
+                {
+                    var openingRep = opening.Representation.Representations.SelectMany(r => r.Items.OfType<IIfcExtrudedAreaSolid>()).FirstOrDefault();
+                    var openingGeom = geomEngine.CreateSolid(openingRep);
+                    try
+                    {
+                        var nextGeom = cutSingularCut.Cut(openingGeom, 1e-5);
+                        cutSingularCut = nextGeom;
+                    }
+                    catch (XbimGeometryException ge)
+                    {
+                        Console.WriteLine(ge.Message);
+                    }
+
+
+                }
+                
+                Assert.IsTrue(resultSetCut.Count == cutSingularCut.Count);
+                //when done in one go the fuzzy tolerance kicks in and removes very thin solids
+                Assert.AreEqual(resultSetCut.First.Volume, cutSingularCut.First.Volume, 500);
+            }
         }
 
         [TestMethod]
@@ -50,6 +103,56 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             }
         }
 
+        [TestMethod]
+        public void memory_hungry_boolean()
+        {
+            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(memory_hungry_boolean), true)) //model is in radians
+            {
+                Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
+
+                var s = geomEngine.CreateSolidSet(er.Entity, logger);
+                HelperFunctions.IsValidSolid(s.FirstOrDefault());
+
+            }
+        }
+        [TestMethod]
+        public void memory_hungry_boolean2()
+        {
+            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(memory_hungry_boolean2), true)) //model is in radians
+            {
+                Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
+
+                var s = geomEngine.CreateSolidSet(er.Entity, logger);
+                HelperFunctions.IsValidSolid(s.FirstOrDefault());
+
+            }
+        }
+        
+        [TestMethod]
+        public void memory_hungry_boolean3()
+        {
+            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(memory_hungry_boolean3), true)) //model is in radians
+            {
+                Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
+                
+                var s = geomEngine.CreateSolidSet(er.Entity, logger);
+                Assert.AreEqual(1, s.Count);
+            }
+        }
+        /// <summary>
+        /// This test does a lot of booleans with bad data and finally clips everything
+        /// </summary>
+        [TestMethod]
+        public void memory_hungry_boolean4()
+        {
+            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(memory_hungry_boolean4), true)) //model is in radians
+            {
+                Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
+                
+                var s = geomEngine.CreateSolidSet(er.Entity, logger);
+                Assert.AreEqual(0,s.Count);
+            }
+        }
 
 
         [TestMethod]

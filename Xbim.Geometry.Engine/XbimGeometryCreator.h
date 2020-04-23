@@ -50,6 +50,9 @@ namespace Xbim
 				String^ timeOut = ConfigurationManager::AppSettings["BooleanTimeOut"];
 				if (!int::TryParse(timeOut, BooleanTimeOut))
 					BooleanTimeOut = 60;
+				String^ fuzzyString = ConfigurationManager::AppSettings["FuzzyFactor"];
+				if (!double::TryParse(fuzzyString, FuzzyFactor))
+					FuzzyFactor = 10;
 				String^ ignoreIfcSweptDiskSolidParamsString = ConfigurationManager::AppSettings["IgnoreIfcSweptDiskSolidParams"];
 				if(!bool::TryParse(ignoreIfcSweptDiskSolidParamsString,IgnoreIfcSweptDiskSolidParams))
 					IgnoreIfcSweptDiskSolidParams = false;
@@ -70,7 +73,7 @@ namespace Xbim
 			static void LogDebug(ILogger^ logger, Object^ entity, String^ format, ... array<Object^>^ arg);
 
 			static int BooleanTimeOut;
-			
+			static double FuzzyFactor;
 			static bool IgnoreIfcSweptDiskSolidParams;
 			virtual XbimShapeGeometry^ CreateShapeGeometry(IXbimGeometryObject^ geometryObject, double precision, double deflection, double angle, XbimGeometryType storageType, ILogger^ logger);
 			virtual XbimShapeGeometry^ CreateShapeGeometry(IXbimGeometryObject^ geometryObject, double precision, double deflection, ILogger^ logger/*, double angle = 0.5, XbimGeometryType storageType = XbimGeometryType::Polyhedron*/)

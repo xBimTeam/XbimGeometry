@@ -54,6 +54,7 @@
 #include <BRepFill.hxx>
 #include <BRepPrimAPI_MakeRevol.hxx>
 #include <ShapeAnalysis_Wire.hxx>
+#include <ShapeFix_Shape.hxx>
 using namespace System::Linq;
 
 namespace Xbim
@@ -228,7 +229,7 @@ namespace Xbim
 			Init(cCurve, logger);
 		}
 
-		XbimFace::XbimFace(IIfcPolyline^ pline,  ILogger^ logger)
+		XbimFace::XbimFace(IIfcPolyline^ pline, ILogger^ logger)
 		{
 			Init(pline, logger);
 		}
@@ -410,7 +411,7 @@ namespace Xbim
 				*pFace = faceMaker.Face();
 			}
 		}
-		
+
 		void XbimFace::Init(IIfcPolyline^ pline, ILogger^ logger)
 		{
 
@@ -890,9 +891,51 @@ namespace Xbim
 						gp_Pln thePlane(gp_Pnt(centre.X, centre.Y, centre.Z), gp_Vec(n.X, n.Y, n.Z));
 
 						pFace = new TopoDS_Face();
-						*pFace = BRepBuilderAPI_MakeFace(thePlane, wire, false);
-
-
+						*pFace = BRepBuilderAPI_MakeFace(thePlane, wire, true);
+						Handle(Geom_Plane) planeSurface = new Geom_Plane(thePlane);
+						ShapeAnalysis_Wire wireChecker;
+						wireChecker.SetSurface(planeSurface);
+						wireChecker.Load(wire);
+						wireChecker.SetPrecision(tolerance);
+						if (wireChecker.CheckSelfIntersection())
+						{
+							ShapeFix_Shape faceFixer(*pFace);
+							faceFixer.SetPrecision(tolerance);							
+							if (faceFixer.Perform())
+							{
+								TopoDS_Shape shape = faceFixer.Shape();
+								TopTools_IndexedMapOfShape map;
+								TopExp::MapShapes(shape, TopAbs_FACE, map);
+								if (map.Extent() > 0)
+								{
+									BRepBuilderAPI_MakeFace faceBlder(TopoDS::Face(map(1)));
+									for (int i = 2; i <= map.Extent(); i++)
+									{										
+										faceBlder.Add(BRepTools::OuterWire(TopoDS::Face(map(i))));
+									}
+									if (faceBlder.IsDone())
+									{
+										pFace = new TopoDS_Face();
+										*pFace = faceBlder.Face();
+									}
+									else
+									{
+										XbimGeometryCreator::LogInfo(logger, profile, "Profile could not be built.It has been omitted");
+										return;
+									}
+								}
+								else
+								{
+									XbimGeometryCreator::LogInfo(logger, profile, "Profile could not be built.It has been omitted");
+									return;
+								}
+							}
+							else
+							{
+								XbimGeometryCreator::LogInfo(logger, profile, "Profile could not be built.It has been omitted");
+								return;
+							}
+						}
 
 						//need to check for self intersecting edges to comply with Ifc rules
 						TopTools_IndexedMapOfShape map;
@@ -970,7 +1013,7 @@ namespace Xbim
 				double currentFaceTolerance = tolerance;
 			TryBuildFace:
 				BRepBuilderAPI_MakeFace faceMaker(loop, true);
-				
+
 				BRepBuilderAPI_FaceError err = faceMaker.Error();
 				if (err == BRepBuilderAPI_NotPlanar)
 				{
@@ -1023,7 +1066,7 @@ namespace Xbim
 					TryBuildLoop:
 						faceMaker.Add(innerWire);
 						//check the face is ok
-						if (BRepCheck_Analyzer(faceMaker.Face(), Standard_True).IsValid() == Standard_False)						
+						if (BRepCheck_Analyzer(faceMaker.Face(), Standard_True).IsValid() == Standard_False)
 						{
 							XbimGeometryCreator::LogWarning(logger, profile, "Invalid void. Inner bound ignored", curve->EntityLabel);
 							continue;

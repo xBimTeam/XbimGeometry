@@ -35,7 +35,7 @@ class gp_Vec;
 
 
 //! Defines an infinite conical surface.
-//! A cone is defined by its half-angle at the apex and
+//! A cone is defined by its half-angle (can be negative) at the apex and
 //! positioned in space with a coordinate system (a gp_Ax3
 //! object) and a "reference radius" where:
 //! -   the "main Axis" of the coordinate system is the axis of   revolution of the cone,
@@ -76,12 +76,13 @@ public:
 
   //! Creates an infinite conical surface. A3 locates the cone
   //! in the space and defines the reference plane of the surface.
-  //! Ang is the conical surface semi-angle between 0 and PI/2 radians.
+  //! Ang is the conical surface semi-angle. Its absolute value is in range
+  //! ]0, PI/2[.
   //! Radius is the radius of the circle in the reference plane of
   //! the cone.
   //! Raises ConstructionError
-  //! . if Radius is lower than 0.0
-  //! . Ang < Resolution from gp  or Ang >= (PI/2) - Resolution.
+  //! * if Radius is lower than 0.0
+  //! * Abs(Ang) < Resolution from gp  or Abs(Ang) >= (PI/2) - Resolution.
     gp_Cone(const gp_Ax3& A3, const Standard_Real Ang, const Standard_Real Radius);
   
   //! Changes the symmetry axis of the cone.  Raises ConstructionError
@@ -105,8 +106,9 @@ public:
   
 
   //! Changes the semi-angle of the cone.
-  //! Ang is the conical surface semi-angle  ]0,PI/2[.
-  //! Raises ConstructionError if Ang < Resolution from gp or Ang >= PI/2 - Resolution
+  //! Semi-angle can be negative. Its absolute value
+  //! Abs(Ang) is in range ]0,PI/2[.
+  //! Raises ConstructionError if Abs(Ang) < Resolution from gp or Abs(Ang) >= PI/2 - Resolution
     void SetSemiAngle (const Standard_Real Ang);
   
 
@@ -146,6 +148,7 @@ public:
     Standard_Real RefRadius() const;
   
   //! Returns the half-angle at the apex of this cone.
+  //! Attention! Semi-angle can be negative.
     Standard_Real SemiAngle() const;
   
   //! Returns the XAxis of the reference plane.
@@ -160,7 +163,7 @@ public:
   //! Performs the symmetrical transformation of a cone
   //! with respect to the point P which is the center of the
   //! symmetry.
-  Standard_EXPORT gp_Cone Mirrored (const gp_Pnt& P) const;
+  Standard_EXPORT Standard_NODISCARD gp_Cone Mirrored (const gp_Pnt& P) const;
   
   Standard_EXPORT void Mirror (const gp_Ax1& A1);
   
@@ -168,7 +171,7 @@ public:
   //! Performs the symmetrical transformation of a cone with
   //! respect to an axis placement which is the axis of the
   //! symmetry.
-  Standard_EXPORT gp_Cone Mirrored (const gp_Ax1& A1) const;
+  Standard_EXPORT Standard_NODISCARD gp_Cone Mirrored (const gp_Ax1& A1) const;
   
   Standard_EXPORT void Mirror (const gp_Ax2& A2);
   
@@ -176,40 +179,40 @@ public:
   //! Performs the symmetrical transformation of a cone with respect
   //! to a plane. The axis placement A2 locates the plane of the
   //! of the symmetry : (Location, XDirection, YDirection).
-  Standard_EXPORT gp_Cone Mirrored (const gp_Ax2& A2) const;
+  Standard_EXPORT Standard_NODISCARD gp_Cone Mirrored (const gp_Ax2& A2) const;
   
     void Rotate (const gp_Ax1& A1, const Standard_Real Ang);
   
 
   //! Rotates a cone. A1 is the axis of the rotation.
   //! Ang is the angular value of the rotation in radians.
-    gp_Cone Rotated (const gp_Ax1& A1, const Standard_Real Ang) const;
+    Standard_NODISCARD gp_Cone Rotated (const gp_Ax1& A1, const Standard_Real Ang) const;
   
     void Scale (const gp_Pnt& P, const Standard_Real S);
   
 
   //! Scales a cone. S is the scaling value.
   //! The absolute value of S is used to scale the cone
-    gp_Cone Scaled (const gp_Pnt& P, const Standard_Real S) const;
+    Standard_NODISCARD gp_Cone Scaled (const gp_Pnt& P, const Standard_Real S) const;
   
     void Transform (const gp_Trsf& T);
   
 
   //! Transforms a cone with the transformation T from class Trsf.
-    gp_Cone Transformed (const gp_Trsf& T) const;
+    Standard_NODISCARD gp_Cone Transformed (const gp_Trsf& T) const;
   
     void Translate (const gp_Vec& V);
   
 
   //! Translates a cone in the direction of the vector V.
   //! The magnitude of the translation is the vector's magnitude.
-    gp_Cone Translated (const gp_Vec& V) const;
+    Standard_NODISCARD gp_Cone Translated (const gp_Vec& V) const;
   
     void Translate (const gp_Pnt& P1, const gp_Pnt& P2);
   
 
   //! Translates a cone from the point P1 to the point P2.
-    gp_Cone Translated (const gp_Pnt& P1, const gp_Pnt& P2) const;
+    Standard_NODISCARD gp_Cone Translated (const gp_Pnt& P1, const gp_Pnt& P2) const;
 
 
 

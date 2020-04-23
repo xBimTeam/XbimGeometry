@@ -2,6 +2,7 @@
 #include "XbimShellSet.h"
 #include "XbimCompound.h"
 #include "XbimGeometryCreator.h"
+#include "XbimOccWriter.h"
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <TopExp.hxx>
 #include <BRepTools.hxx>
@@ -17,7 +18,10 @@
 #include "BRepBuilderAPI_MakeSolid.hxx"
 #include "BOPAlgo_PaveFiller.hxx"
 #include "BOPAlgo_BOP.hxx"
+#include <OSD_OpenFile.hxx>
 #include <algorithm>
+using namespace std;
+
 using namespace System::Linq;
 using namespace System::Threading;
 namespace Xbim
@@ -50,8 +54,18 @@ namespace Xbim
 			TopTools_IndexedMapOfShape map;
 			TopExp::MapShapes(shape, TopAbs_SOLID, map);
 			solids = gcnew  List<IXbimSolid^>(map.Extent());
+			//int e = map.Extent();
 			for (int i = 1; i <= map.Extent(); i++)
 				solids->Add(gcnew XbimSolid(TopoDS::Solid(map(i))));
+			/*XbimOccWriter::Write(shape, "c:/tmp/dump.txt");
+			TopExp_Explorer te(shape, TopAbs_SHELL, TopAbs_SOLID);
+			while (te.More())
+			{
+				const TopoDS_Shell& shell = TopoDS::Shell(te.Current());
+				ShapeFix_Solid sf;
+				TopoDS_Solid s = sf.SolidFromShell(shell);
+				solids->Add(gcnew XbimSolid(s));
+			}*/
 		}
 
 		XbimSolidSet::XbimSolidSet(XbimCompound^ shape)
@@ -59,11 +73,21 @@ namespace Xbim
 
 			if (shape->IsValid)
 			{
-				TopTools_IndexedMapOfShape map;
-				TopExp::MapShapes(shape, TopAbs_SOLID, map);
-				solids = gcnew  List<IXbimSolid^>(map.Extent());
-				for (int i = 1; i <= map.Extent(); i++)
-					solids->Add(gcnew XbimSolid(TopoDS::Solid(map(i))));
+				TopTools_IndexedMapOfShape solidMap;
+				
+				TopExp::MapShapes(shape, TopAbs_SOLID, solidMap);
+				solids = gcnew  List<IXbimSolid^>(solidMap.Extent());
+				for (int i = 1; i <= solidMap.Extent(); i++)
+					solids->Add(gcnew XbimSolid(TopoDS::Solid(solidMap(i))));
+				//srl let shells through to improve final content as some geometries are badly formed and don't make a solid, even though they are supposed to
+				/*TopExp_Explorer te(shape, TopAbs_SHELL, TopAbs_SOLID);
+				while (te.More())
+				{
+					const TopoDS_Shell& shell = TopoDS::Shell(te.Current());
+					ShapeFix_Solid sf;
+					TopoDS_Solid s = sf.SolidFromShell(shell);
+					solids->Add(gcnew XbimSolid(s));
+				}*/
 			}
 			GC::KeepAlive(shape);
 		}
@@ -403,14 +427,15 @@ namespace Xbim
 
 #pragma managed(push, off)
 
-		int DoBoolean(const TopoDS_Shape& body, const TopTools_ListOfShape& tools, BOPAlgo_Operation op, double tolerance, TopoDS_Shape& result, int timeout)
+		int DoBoolean(const TopoDS_Shape& body, const TopTools_ListOfShape& tools, BOPAlgo_Operation op, double tolerance, double fuzzyFactor, TopoDS_Shape& result, int timeout)
 		{
+			
+			int  retVal = BOOLEAN_FAIL;
 			try
 			{
 				ShapeAnalysis_Wire tolFixer;
 
-				BRep_Builder builder;
-
+				
 				TopTools_ListOfShape shapeObjects;
 				shapeObjects.Append(body);
 
@@ -418,8 +443,8 @@ namespace Xbim
 
 				Bnd_Box tsBodyBox;
 				BRepBndLib::Add(body, tsBodyBox);
-
-				double maxTol = tolerance;
+				
+				double fuzzyTol =  fuzzyFactor * tolerance;
 				int argCount = 0;
 				TopTools_ListIteratorOfListOfShape it(tools);
 				for (; it.More(); it.Next())
@@ -433,29 +458,28 @@ namespace Xbim
 						BRepBndLib::Add(tsArg, tsCutBox);
 						if (!tsBodyBox.IsOut(tsCutBox))
 						{
-							maxTol = std::max(BRep_Tool::MaxTolerance(tsArg, TopAbs_EDGE), maxTol);
+							//maxTol = std::max(BRep_Tool::MaxTolerance(tsArg, TopAbs_EDGE), maxTol);
 							shapeTools.Append(tsArg);
 							argCount++;
 						}
 					}
 					else
 					{
-						maxTol = std::max(BRep_Tool::MaxTolerance(tsArg, TopAbs_EDGE), maxTol);
+						//maxTol = std::max(BRep_Tool::MaxTolerance(tsArg, TopAbs_EDGE), maxTol);
 						shapeTools.Append(tsArg);
 						argCount++;
 					}
-
 				}
 				if (argCount == 0)
 				{
 					result = body;
-					return true;
+					return BOOLEAN_SUCCESS;
 				}
 
 
-				double fuzzyTol = std::max(maxTol - tolerance, 6 * tolerance);//this seems about right				
+				//double fuzzyTol = std::max(maxTol - tolerance, 10 * tolerance);//this seems about right				
 				BOPAlgo_BOP aBOP;
-				bool failed = false;
+
 
 				aBOP.AddArgument(body);
 				aBOP.SetTools(shapeTools);
@@ -464,7 +488,7 @@ namespace Xbim
 				//aBOP.SetCheckInverted(true);
 				aBOP.SetNonDestructive(true);
 				aBOP.SetFuzzyValue(fuzzyTol);
-
+				
 				Handle(XbimProgressIndicator) pi = new XbimProgressIndicator(timeout);
 				aBOP.SetProgressIndicator(pi);
 				TopoDS_Shape aR;
@@ -479,97 +503,103 @@ namespace Xbim
 
 				}
 				bool bopErr = aBOP.HasErrors();
-				if (bopErr || aR.IsNull()) {
-					return BOOLEAN_HASERRORS;
-				}
+#ifdef _DEBUG
 
-				bool bopWarn = aBOP.HasWarnings();
-
-				if (bopWarn) //often a sign of failure do them individually
+				/*if (aBOP.HasWarnings())
 				{
+					ofstream os;
+					OSD_OpenStream(os, "c:/tmp/warnings.txt", ios::out);
+					aBOP.DumpWarnings(os);
+					os.flush();
+					os.close();
+				}*/
+#endif // DEBUG
+				if (bopErr) // a sign of failure do them individually
+				{
+
 					//check if the shape is empty
-					TopTools_IndexedMapOfShape map;
-					TopExp::MapShapes(aR, TopAbs_FACE, map);
-					if (map.Extent() == 0) //if there are no faces we probably failed completely, tried the pedestrian slower way
-					{
-						aR = body;
 
-						TopTools_ListIteratorOfListOfShape it2(shapeTools);
-						for (; it2.More(); it2.Next())
+					if (tools.Size() > 1)//do them one at a time if we are not already doing or have done that
+					{
+						TopoDS_Shape cutBody = body;
+
+						TopTools_ListIteratorOfListOfShape itl(tools);
+
+						bool noSuccess = true;
+						for (; itl.More(); itl.Next())
 						{
-							BOPAlgo_BOP anoBOP;
-							failed = false;
-							anoBOP.AddArgument(aR);
-							anoBOP.AddTool(it2.Value());
-							anoBOP.SetOperation(op);
-							anoBOP.SetRunParallel(false);
-							anoBOP.SetCheckInverted(true);
-							anoBOP.SetNonDestructive(true);
-							anoBOP.SetFuzzyValue(fuzzyTol);
-							Handle(XbimProgressIndicator) pi1 = new XbimProgressIndicator(timeout);
-							anoBOP.SetProgressIndicator(pi1);
-							try
+							TopTools_ListOfShape toCut;
+							toCut.Append(itl.Value());
+							TopoDS_Shape cutResult;
+							int success = DoBoolean(cutBody, toCut, op, tolerance, fuzzyFactor, cutResult, timeout);
+							if (success > 0)
 							{
-								anoBOP.Perform();
-								aR = anoBOP.Shape();
+								cutBody = cutResult;
+								aR = cutResult;
+								noSuccess = false;
 							}
-							catch (...)
+							else
 							{
-								return BOOLEAN_FAILEDSINGLECUT;
+								retVal = BOOLEAN_PARTIALSUCCESSSINGLECUT;
 							}
-
-							bopErr = aBOP.HasErrors();
-							if (bopErr || failed) break; //give up if it fails
 						}
-					}
-					if (failed || bopErr || aR.IsNull())
-					{
-						return BOOLEAN_FAILEDSINGLECUT;
+						if (noSuccess) return BOOLEAN_FAIL;
+						retVal = BOOLEAN_SUCCESSSINGLECUT;
 					}
 				}
 
-
-
-				BRep_Builder b;
-				TopoDS_Compound unifiedCompound;
-				b.MakeCompound(unifiedCompound);
-
-				ShapeUpgrade_UnifySameDomain unifier(aR);
-				unifier.SetAngularTolerance(0.00174533); //1 tenth of a degree
-				unifier.SetLinearTolerance(fuzzyTol);
-				try
-				{
-					//sometimes unifier crashes
-					unifier.Build();
-					builder.Add(unifiedCompound, unifier.Shape());
-
-				}
-				catch (...) //any failure
-				{
-					//default to what we had
-					builder.Add(unifiedCompound, aR);
-				}
 
 				//have one go at fixing if it is not right
-				if (BRepCheck_Analyzer(unifiedCompound, Standard_True).IsValid() == Standard_False)
+				if (BRepCheck_Analyzer(aR, Standard_True).IsValid() == Standard_False)
 				{
 					//try and fix if we can
-					ShapeFix_Shape fixer(unifiedCompound);
-					fixer.SetMaxTolerance(fuzzyTol);
+					ShapeFix_Shape fixer(aR);
+					fixer.SetMaxTolerance(tolerance);
 					fixer.SetMinTolerance(tolerance);
 					fixer.SetPrecision(tolerance);
-					Handle(XbimProgressIndicator) pi2 = new XbimProgressIndicator(timeout);
-					if (fixer.Perform(pi2))
-						result = fixer.Shape();
-					else
-						result = unifiedCompound;
-
+					try
+					{
+						Handle(XbimProgressIndicator) pi2 = new XbimProgressIndicator(timeout);
+						if (fixer.Perform(pi2))
+						{
+							result = fixer.Shape();
+							retVal = BOOLEAN_SUCCESS;
+						}
+						else
+						{
+							result = aR;
+							retVal = BOOLEAN_PARTIALSUCCESSBADTOPOLOGY;
+						}
+					}
+					catch (...) //if we cannot fix it return the unified shape
+					{
+						result = aR;
+						retVal = BOOLEAN_PARTIALSUCCESSBADTOPOLOGY;
+					}
 				}
 				else
 				{
 					result = aR;
+					retVal = BOOLEAN_SUCCESS;
 				}
-				return BOOLEAN_SUCCESS;
+				//unify the shape
+
+				
+				ShapeUpgrade_UnifySameDomain unifier(result);
+				//unifier.SetAngularTolerance(0.00174533); //1 tenth of a degree
+				unifier.SetLinearTolerance(tolerance);
+				
+				try
+				{
+					//sometimes unifier crashes
+					unifier.Build();
+					result =unifier.Shape();
+				}
+				catch (...) //any failure
+				{
+					//default to what we had					
+				}
+				return retVal;
 			}
 			catch (Standard_NotImplemented) //User break most likely called
 			{
@@ -577,11 +607,11 @@ namespace Xbim
 			}
 			catch (Standard_Failure sf)
 			{
-				return BOOLEAN_NOTBUILT;
+				return BOOLEAN_FAIL;
 			}
 			catch (...)
 			{
-				return BOOLEAN_NOTBUILT;
+				return BOOLEAN_FAIL;
 			}
 		}
 
@@ -605,17 +635,8 @@ namespace Xbim
 				int success = BOOLEAN_FAIL;
 				try
 				{
-
-					success = Xbim::Geometry::DoBoolean((XbimSolid^)solids[i], tools, operation, tolerance, result, XbimGeometryCreator::BooleanTimeOut);
+					success = Xbim::Geometry::DoBoolean((XbimSolid^)solids[i], tools, operation, tolerance, XbimGeometryCreator::FuzzyFactor, result, XbimGeometryCreator::BooleanTimeOut);
 				}
-				/*catch (const std::exception& exc)
-				{
-					String^ err = gcnew String(exc.what());
-					XbimGeometryCreator::LogError(logger, nullptr,
-						"Boolean operation failed.On Entity #{0} with #{1}. {2}",
-						((XbimSolidSet^)arguments)->IfcEntityLabel,
-						this->IfcEntityLabel, err);
-				}*/
 				catch (...)
 				{
 					success = BOOLEAN_FAIL;
@@ -623,43 +644,44 @@ namespace Xbim
 
 				if (success > 0)
 				{
-					XbimSolidSet^ resultSolids = gcnew XbimSolidSet(result); //extract all solids retuned
+					XbimSolidSet^ resultSolids = gcnew XbimSolidSet(result); //extract all solids retuned					
 					solidResults->Add(resultSolids);
 				}
-				else
+
+				String^ msg = "";
+				switch (success)
 				{
-					String^ msg = "General Boolean Failure";
-					switch (success)
-					{
-					case BOOLEAN_TIMEDOUT:
-						msg = "Boolean operation timed out";
-						break;
-					case BOOLEAN_NOTBUILT:
-
-					case BOOLEAN_HASERRORS:
-
-					case BOOLEAN_FAILEDSINGLECUT:
-						msg = "Could not build Boolean error " + success.ToString();
-						break;
-					default:
-						break;
-					}
-					XbimGeometryCreator::LogWarning(logger, nullptr,
-						msg + ". Failed.On Entity #{0} with {1}.",
-						this->IfcEntityLabel, msg);
+				case BOOLEAN_PARTIALSUCCESSBADTOPOLOGY:
+					msg = "Boolean operation has created a shape with invalid BREP Topology. The result may not be correct";
+					break;
+				case BOOLEAN_PARTIALSUCCESSSINGLECUT:
+					msg = "Boolean operation executed as one tool per operation with partial success. The result may not be correct";
+					break;
+				case BOOLEAN_TIMEDOUT:
+					msg = "Boolean operation timed out. No result whas been generated";
+					break;
+				case BOOLEAN_FAIL:
+					msg = "Boolean result could not be computed. Error undetermined";
+					break;
+				default:
+					break;
 				}
+				if (!String::IsNullOrWhiteSpace(msg))
+					XbimGeometryCreator::LogWarning(logger, nullptr, msg);
+				if (success <= 0)
+					throw gcnew XbimGeometryException(msg);
 
 			}
 
 			return solidResults;
 		}
-
+		//This will throw an XbimGeometryExcpetion if the operation is illegal
 		IXbimSolidSet^ XbimSolidSet::Cut(IXbimSolidSet^ solidsToCut, double tolerance, ILogger^ logger)
 		{
 
 			return DoBoolean(solidsToCut, BOPAlgo_CUT, tolerance, logger);
 		}
-
+		//This will throw an XbimGeometryExcpetion if the operation is illegal
 		IXbimSolidSet^ XbimSolidSet::Union(IXbimSolidSet^ solidsToUnion, double tolerance, ILogger^ logger)
 		{
 			return DoBoolean(solidsToUnion, BOPAlgo_FUSE, tolerance, logger);
@@ -1020,27 +1042,41 @@ namespace Xbim
 			// we therefore do them one at a time until there is a fix
 			for each (IIfcBooleanOperand ^ bOp in clips)
 			{
-				XbimSolidSet^ s = gcnew XbimSolidSet(bOp, logger);
-
-				if (s->IsValid)
+				try
 				{
-					//only dodge IIfcHalfSpaceSolid and IfcPolygonalBoundedHalfSpace
-					if (dynamic_cast<IIfcHalfSpaceSolid^>(bOp) && bOp->GetType()->Name->Contains("IfcHalfSpaceSolid") ||
-						dynamic_cast<IIfcPolygonalBoundedHalfSpace^>(bOp) && bOp->GetType()->Name->Contains("IfcPolygonalBoundedHalfSpace"))
+					XbimSolidSet^ s = gcnew XbimSolidSet(bOp, logger);
+
+					if (s->IsValid)
 					{
-						bodySet = (XbimSolidSet^)bodySet->Cut(s, mf->Precision, logger);
+						//only dodge IIfcHalfSpaceSolid and IfcPolygonalBoundedHalfSpace
+						if (dynamic_cast<IIfcHalfSpaceSolid^>(bOp) && bOp->GetType()->Name->Contains("IfcHalfSpaceSolid") ||
+							dynamic_cast<IIfcPolygonalBoundedHalfSpace^>(bOp) && bOp->GetType()->Name->Contains("IfcPolygonalBoundedHalfSpace"))
+						{
+							bodySet = (XbimSolidSet^)bodySet->Cut(s, mf->Precision, logger);
+						}
+						else
+							solidSet->Add(s);
 					}
-					else
-						solidSet->Add(s);
+				}
+				catch (Exception ^ e)
+				{
+					XbimGeometryCreator::LogError(logger, solid, "Failed to clip #{0} with #{1}. {2}", solid->EntityLabel, bOp->EntityLabel, e->Message);
 				}
 			}
 
 			if (solidSet->Count > 0)
 			{
-				IXbimSolidSet^ xbimSolidSet = bodySet->Cut(solidSet, mf->Precision, logger);
-				if (xbimSolidSet != nullptr && xbimSolidSet->IsValid)
+				try
 				{
-					solids->AddRange(xbimSolidSet);
+					IXbimSolidSet^ xbimSolidSet = bodySet->Cut(solidSet, mf->Precision, logger);
+					if (xbimSolidSet != nullptr && xbimSolidSet->IsValid)
+					{
+						solids->AddRange(xbimSolidSet);
+					}
+				}
+				catch (Exception ^ e)
+				{
+					XbimGeometryCreator::LogWarning(logger, solid, "Failed to clip #{0} with #{1}. {2}", solid->FirstOperand->EntityLabel, solid->SecondOperand->EntityLabel, e->Message);
 				}
 			}
 			else
@@ -1101,15 +1137,24 @@ namespace Xbim
 
 		XbimSolidSet^ XbimSolidSet::BuildBooleanResult(IIfcBooleanResult^ boolRes, IfcBooleanOperator operatorType, XbimSolidSet^ ops, ILogger^ logger)
 		{
+			
+
 			XbimSolidSet^ right = gcnew XbimSolidSet(boolRes->SecondOperand, logger);
+			
 			if (right->IsValid)
 			{
 				right->IfcEntityLabel = boolRes->SecondOperand->EntityLabel;
 				ops->Add(right);
 			}
 
-			//if we are the same operator type just aggregate them into a single solid set
-			if (boolRes->Operator == operatorType && dynamic_cast<IIfcBooleanResult^>(boolRes->FirstOperand) && !dynamic_cast<IIfcBooleanClippingResult^>(boolRes->FirstOperand))
+			//if we are the same operator type for the first operand just aggregate them into a single solid set, otherwise execute, 
+			//we cannot execute halfspace solid cuts in batch either as OCC blows
+			IIfcBooleanResult^ booleanResult = dynamic_cast<IIfcBooleanResult^>(boolRes->FirstOperand);
+			IIfcBooleanClippingResult^ clippingResult = dynamic_cast<IIfcBooleanClippingResult^>(boolRes->FirstOperand);
+			/*IIfcHalfSpaceSolid^ secondOpResult = nullptr;
+			if(booleanResult!=nullptr)
+				secondOpResult = dynamic_cast<IIfcHalfSpaceSolid^>(booleanResult->SecondOperand);*/
+			if (booleanResult!=nullptr && clippingResult==nullptr && booleanResult->Operator== operatorType /*&& secondOpResult==nullptr*/)
 			{
 				return BuildBooleanResult((IIfcBooleanResult^)(boolRes->FirstOperand), operatorType, ops, logger);
 			}
@@ -1130,6 +1175,11 @@ namespace Xbim
 				Init((IIfcBooleanClippingResult^)boolOp, logger);
 				return;
 			}
+			//XbimSolidSet^ right = gcnew XbimSolidSet(boolOp->SecondOperand,logger);
+			//right->IfcEntityLabel = boolOp->SecondOperand->EntityLabel;
+			////XbimSolidSet^ left = BuildBooleanResult(boolOp, boolOp->Operator, right, logger);
+			//XbimSolidSet^ left = gcnew XbimSolidSet(boolOp->FirstOperand, logger);
+			//left->IfcEntityLabel = boolOp->FirstOperand->EntityLabel;
 			XbimSolidSet^ right = gcnew XbimSolidSet();
 			right->IfcEntityLabel = boolOp->SecondOperand->EntityLabel;
 			XbimSolidSet^ left = BuildBooleanResult(boolOp, boolOp->Operator, right, logger);
@@ -1168,10 +1218,11 @@ namespace Xbim
 					result = left->Cut(right, mf->Precision, logger);
 					break;
 				}
+				//XbimOccWriter::Write(result, "c:/tmp/bop" + boolOp->ToString()->Replace(";","") +".txt");
 			}
-			catch (Exception ^ xbimE)
+			catch (Exception ^ e)
 			{
-				XbimGeometryCreator::LogWarning(logger, boolOp, "Boolean operation failure, {0}. The operation has been ignored", xbimE->Message);
+				XbimGeometryCreator::LogError(logger, boolOp, "Failed to perform boolean result from #{0} with #{1}. {2}", boolOp->FirstOperand->EntityLabel, boolOp->SecondOperand->EntityLabel, e->Message);
 				solids->AddRange(left);; //return the left operand
 				return;
 			}

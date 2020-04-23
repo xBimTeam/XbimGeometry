@@ -29,29 +29,29 @@ namespace Xbim
 {
 	namespace Geometry
 	{
-//
-//#pragma managed(push,off)
-//
-//		bool PerformBoolean(BRepAlgoAPI_BooleanOperation& boolOp)
-//		{
-//			bool failed = true;
-//
-//			try
-//			{
-//				boolOp.Build();
-//				//failed = pi->TimedOut();				
-//			}
-//			catch (const std::exception & exc)
-//			{
-//				throw Error(exc.what());
-//			}
-//			catch (...)
-//			{
-//				throw Error("Unspecified failure");
-//			}
-//			return failed;
-//		}
-//#pragma managed(pop)
+		//
+		//#pragma managed(push,off)
+		//
+		//		bool PerformBoolean(BRepAlgoAPI_BooleanOperation& boolOp)
+		//		{
+		//			bool failed = true;
+		//
+		//			try
+		//			{
+		//				boolOp.Build();
+		//				//failed = pi->TimedOut();				
+		//			}
+		//			catch (const std::exception & exc)
+		//			{
+		//				throw Error(exc.what());
+		//			}
+		//			catch (...)
+		//			{
+		//				throw Error("Unspecified failure");
+		//			}
+		//			return failed;
+		//		}
+		//#pragma managed(pop)
 		XbimGeometryObjectSet::XbimGeometryObjectSet(IEnumerable<IXbimGeometryObject^>^ objects)
 		{
 			geometryObjects = gcnew List<IXbimGeometryObject^>(objects);
@@ -465,24 +465,7 @@ namespace Xbim
 				Bnd_Array1OfBox allBoxes(1, solids->Count);
 				int i = 1;
 
-				/*switch (bop) {
-				case BOPAlgo_COMMON:
-					pBuilder = new BRepAlgoAPI_Common();
-					break;
-				case BOPAlgo_FUSE:
-					pBuilder = new BRepAlgoAPI_Fuse();
-					break;
-				case BOPAlgo_CUT:
-					pBuilder = new BRepAlgoAPI_Cut();
-					break;
-				case BOPAlgo_SECTION:
-					pBuilder = new BRepAlgoAPI_Section();
-					break;
-				default:
-					break;
-				}*/
-
-
+				
 				for each (XbimSolid ^ solid in solids)
 				{
 					if (solid != nullptr && solid->IsValid)
@@ -505,17 +488,12 @@ namespace Xbim
 
 				if (cuttingObjects.Extent() == 0)
 				{
-					//XbimGeometryCreator::LogInfo(solids, "Openings cannot be cut, none intersect with the body shape");
 					return gcnew XbimGeometryObjectSet(geomObjects);
 				}
 				if (!ParseGeometry(geomObjects, toBeProcessed, allBoxes, toBePassedThrough, tolerance)) //nothing to do so just return what we had
 					return gcnew XbimGeometryObjectSet(geomObjects);
 
-				/*pBuilder->SetArguments(toBeProcessed);
-				pBuilder->SetTools(cuttingObjects);
-				pBuilder->SetNonDestructive(Standard_True);
-				Handle(XbimProgressIndicator) pi = new XbimProgressIndicator(timeout);
-				boolOp.SetProgressIndicator(pi);*/
+				
 				TopoDS_Compound occCompound;
 				builder.MakeCompound(occCompound);
 
@@ -523,85 +501,49 @@ namespace Xbim
 
 				for (; itl.More(); itl.Next())
 				{
+					int success;
 					try
 					{
 						TopoDS_Shape result;
-						//Xbim::Geometry::PerformBoolean(*pBuilder,XbimGeometryCreator::BooleanTimeOut);
-						const TopoDS_Shape & body = itl.Value();
-						int success = Xbim::Geometry::DoBoolean(body, cuttingObjects, bop, tolerance, result, XbimGeometryCreator::BooleanTimeOut);
+
+						const TopoDS_Shape& body = itl.Value();
+						success = Xbim::Geometry::DoBoolean(body, cuttingObjects, bop, tolerance, XbimGeometryCreator::FuzzyFactor, result, XbimGeometryCreator::BooleanTimeOut);
 						if (success > 0)
 						{
 							builder.Add(occCompound, result);
 						}
-						else
-						{
-							String^ msg = "General Boolean Failure";
-							switch (success)
-							{
-							case BOOLEAN_TIMEDOUT:
-								msg = "Boolean operation timed out";
-								break;
-							case BOOLEAN_NOTBUILT:
 
-							case BOOLEAN_HASERRORS:
-
-							case BOOLEAN_FAILEDSINGLECUT:
-								msg = "Could not build Boolean error " + success.ToString();
-								break;
-							default:
-								break;
-							}
-							XbimGeometryCreator::LogWarning(logger, solids, "Boolean operation failed: {0}", msg);
-						}
 					}
-					catch (Error const& err)
+					catch (...)
 					{
-						String^ sErr = gcnew String(err.what());
-						XbimGeometryCreator::LogWarning(logger, solids, "Boolean operation failed: {0}", sErr);
+						success = BOOLEAN_FAIL;
 					}
+					String^ msg = "";
+					switch (success)
+					{
+					case BOOLEAN_PARTIALSUCCESSBADTOPOLOGY:
+						msg = "Boolean operation has created a shape with invalid BREP Topology. The result may not be correct";
+						break;
+					case BOOLEAN_PARTIALSUCCESSSINGLECUT:
+						msg = "Boolean operation executed as one tool per operation with partial success. The result may not be correct";
+						break;
+					case BOOLEAN_TIMEDOUT:
+						msg = "Boolean operation timed out. No result whas been generated";
+						break;
+					case BOOLEAN_FAIL:
+						msg = "Boolean result could not be computed. Error undetermined";
+						break;
+					default:
+						break;
+					}
+					if (!String::IsNullOrWhiteSpace(msg))
+						XbimGeometryCreator::LogWarning(logger, nullptr, msg);
+
 				}
 
 
 
-				/*if (!pBuilder->HasErrors() && !pBuilder->Shape().IsNull())
-				{
-					TopoDS_Compound occCompound;
-					builder.MakeCompound(occCompound);*/
-
-					//if (BRepCheck_Analyzer(pBuilder->Shape(), Standard_False).IsValid() == Standard_False)
-					//{
-					//	ShapeFix_Shape shapeFixer(pBuilder->Shape());
-					//	shapeFixer.SetPrecision(tolerance);
-					//	shapeFixer.SetMinTolerance(tolerance);
-					//	shapeFixer.FixFaceTool()->FixIntersectingWiresMode() = Standard_True;
-					//	shapeFixer.FixFaceTool()->FixOrientationMode() = Standard_True;
-					//	shapeFixer.FixFaceTool()->FixWireTool()->FixAddCurve3dMode() = Standard_True;
-					//	shapeFixer.FixFaceTool()->FixWireTool()->FixIntersectingEdgesMode() = Standard_True;
-					//	Handle(XbimProgressIndicator) pi = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);
-					//	if (shapeFixer.Perform(pi))
-					//	{
-					//		ShapeUpgrade_UnifySameDomain unifier(shapeFixer.Shape());
-					//		unifier.SetAngularTolerance(0.00174533); //1 tenth of a degree
-					//		unifier.SetLinearTolerance(tolerance);
-					//		try
-					//		{
-					//			//sometimes unifier crashes
-					//			unifier.Build();
-					//			builder.Add(occCompound, unifier.Shape());
-					//		}
-					//		catch (...)
-					//		{
-					//			//default to what we had
-					//			builder.Add(occCompound, shapeFixer.Shape());
-					//		}
-					//	}
-					//	else
-					//		builder.Add(occCompound, pBuilder->Shape());
-					//}
-					//else
-					//{
-					//	builder.Add(occCompound, pBuilder->Shape());
-					//}
+				
 				XbimCompound^ compound = gcnew XbimCompound(occCompound, false, tolerance);
 
 				if (bop != BOPAlgo_COMMON) //do not need to add these as they by definition do not intersect
@@ -614,7 +556,7 @@ namespace Xbim
 
 				XbimGeometryObjectSet^ geomObjs = gcnew XbimGeometryObjectSet();
 				geomObjs->Add(compound);
-				
+
 				return geomObjs;
 
 			}

@@ -88,7 +88,8 @@ BOPDS_DS::BOPDS_DS()
   myInterfVZ(0, myAllocator),
   myInterfEZ(0, myAllocator),
   myInterfFZ(0, myAllocator),
-  myInterfZZ(0, myAllocator)
+  myInterfZZ(0, myAllocator),
+  myInterfered(100, myAllocator)
 {
   myNbShapes=0;
   myNbSourceShapes=0;
@@ -119,7 +120,8 @@ BOPDS_DS::BOPDS_DS(const Handle(NCollection_BaseAllocator)& theAllocator)
   myInterfVZ(0, myAllocator),
   myInterfEZ(0, myAllocator),
   myInterfFZ(0, myAllocator),
-  myInterfZZ(0, myAllocator)
+  myInterfZZ(0, myAllocator),
+  myInterfered(100, myAllocator)
 {
   myNbShapes=0;
   myNbSourceShapes=0;
@@ -161,6 +163,7 @@ void BOPDS_DS::Clear()
   myInterfEZ.Clear();
   myInterfFZ.Clear();
   myInterfZZ.Clear();
+  myInterfered.Clear();
 }
 //=======================================================================
 //function : SetArguments
@@ -678,30 +681,6 @@ void BOPDS_DS::InitShape
   }
 }
 
-//=======================================================================
-//function : HasInterf
-//purpose  : 
-//=======================================================================
-Standard_Boolean BOPDS_DS::HasInterf(const Standard_Integer theI) const
-{
-  Standard_Integer n1, n2;
-  Standard_Boolean bRet;
-  BOPDS_MapIteratorOfMapOfPair aIt;
-  //
-  bRet = Standard_False;
-  //
-  aIt.Initialize(myInterfTB);
-  for (; aIt.More(); aIt.Next()) {
-    const BOPDS_Pair& aPK = aIt.Value();
-    aPK.Indices(n1, n2);
-    if (n1 == theI || n2 == theI) {
-      bRet = Standard_True;
-      break;
-    }
-  }
-  //
-  return bRet;
-}
 //=======================================================================
 //function : HasInterfShapeSubShapes
 //purpose  : 
@@ -1224,9 +1203,33 @@ void BOPDS_DS::InitFaceInfo(const Standard_Integer theI)
   aSI.SetReference(iRef);
   //
   aFI.SetIndex(theI);
-  UpdateFaceInfoIn(theI);
+  InitFaceInfoIn(theI);
   UpdateFaceInfoOn(theI);
 }
+//=======================================================================
+//function : InitFaceInfoIn
+//purpose  : 
+//=======================================================================
+void BOPDS_DS::InitFaceInfoIn (const Standard_Integer theI)
+{
+  BOPDS_ShapeInfo& aSI = ChangeShapeInfo (theI);
+  if (aSI.HasReference())
+  {
+    BOPDS_FaceInfo& aFI = myFaceInfoPool (aSI.Reference());
+    const TopoDS_Shape& aF = Shape (theI);
+    for (TopoDS_Iterator itS (aF); itS.More(); itS.Next())
+    {
+      const TopoDS_Shape& aV = itS.Value();
+      if (aV.ShapeType() == TopAbs_VERTEX)
+      {
+        Standard_Integer nV = Index (aV);
+        HasShapeSD (nV, nV);
+        aFI.ChangeVerticesIn().Add (nV);
+      }
+    }
+  }
+}
+
 //=======================================================================
 //function : UpdateFaceInfoIn
 //purpose  : 
@@ -1378,6 +1381,105 @@ void BOPDS_DS::FaceInfoIn(const Standard_Integer theF,
 }
 
 //=======================================================================
+//function : UpdateFaceInfoIn
+//purpose  : 
+//=======================================================================
+void BOPDS_DS::UpdateFaceInfoIn (const TColStd_MapOfInteger& theFaces)
+{
+  for (TColStd_MapOfInteger::Iterator itM (theFaces); itM.More(); itM.Next())
+  {
+    const Standard_Integer nF = itM.Value();
+    BOPDS_ShapeInfo& aSI = ChangeShapeInfo (nF);
+    if (!aSI.HasReference())
+    {
+      myFaceInfoPool.Appended().SetIndex (nF);
+      aSI.SetReference (myFaceInfoPool.Length() - 1);
+    }
+    BOPDS_FaceInfo& aFI = myFaceInfoPool (aSI.Reference());
+    aFI.ChangePaveBlocksIn().Clear();
+    aFI.ChangeVerticesIn().Clear();
+
+    // 1. Add pure internal vertices on the face
+    InitFaceInfoIn (nF);
+  }
+
+  // 2. Analyze Vertex-Face interferences
+  BOPDS_VectorOfInterfVF& aVFs = InterfVF();
+  const Standard_Integer aNbVF = aVFs.Length();
+  for (Standard_Integer iVF = 0; iVF < aNbVF; ++iVF)
+  {
+    BOPDS_InterfVF& aVF = aVFs (iVF);
+    const Standard_Integer nF = aVF.Index2();
+    if (theFaces.Contains (nF))
+    {
+      Standard_Integer nV = aVF.Index1();
+      HasShapeSD (nV, nV);
+      myFaceInfoPool (ShapeInfo (nF).Reference()).ChangeVerticesIn().Add (nV);
+    }
+  }
+  //
+  // 3. Analyze Edge-Face interferences
+  BOPDS_VectorOfInterfEF& aEFs = InterfEF();
+  const Standard_Integer aNbEF = aEFs.Length();
+  for (Standard_Integer iEF = 0; iEF < aNbEF; ++iEF)
+  {
+    BOPDS_InterfEF& aEF = aEFs (iEF);
+    const Standard_Integer nF = aEF.Index2();
+    if (theFaces.Contains (nF))
+    {
+      BOPDS_FaceInfo& aFI = myFaceInfoPool (ShapeInfo (nF).Reference());
+      Standard_Integer nVNew;
+      if (aEF.HasIndexNew (nVNew))
+      {
+        HasShapeSD (nVNew, nVNew);
+        aFI.ChangeVerticesIn().Add (nVNew);
+      }
+      else
+      {
+        const Standard_Integer nE = aEF.Index1();
+        const BOPDS_ListOfPaveBlock& aLPB = PaveBlocks (nE);
+        for (BOPDS_ListOfPaveBlock::Iterator itPB (aLPB); itPB.More(); itPB.Next())
+        {
+          const Handle(BOPDS_PaveBlock)& aPB = itPB.Value();
+          const Handle(BOPDS_CommonBlock)& aCB = CommonBlock (aPB);
+          if (!aCB.IsNull())
+          {
+            if (aCB->Contains (nF))
+            {
+              const Handle(BOPDS_PaveBlock)& aPBR = aCB->PaveBlock1();
+              aFI.ChangePaveBlocksIn().Add(aPBR);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+//=======================================================================
+//function : UpdateFaceInfoOn
+//purpose  : 
+//=======================================================================
+void BOPDS_DS::UpdateFaceInfoOn (const TColStd_MapOfInteger& theFaces)
+{
+  for (TColStd_MapOfInteger::Iterator itM (theFaces); itM.More(); itM.Next())
+  {
+    const Standard_Integer nF = itM.Value();
+    BOPDS_ShapeInfo& aSI = ChangeShapeInfo (nF);
+    if (!aSI.HasReference())
+    {
+      myFaceInfoPool.Appended().SetIndex (nF);
+      aSI.SetReference (myFaceInfoPool.Length() - 1);
+    }
+    BOPDS_FaceInfo& aFI = myFaceInfoPool (aSI.Reference());
+    aFI.ChangePaveBlocksOn().Clear();
+    aFI.ChangeVerticesOn().Clear();
+
+    FaceInfoOn (nF, aFI.ChangePaveBlocksOn(), aFI.ChangeVerticesOn());
+  }
+}
+
+//=======================================================================
 //function : RefineFaceInfoOn
 //purpose  : 
 //=======================================================================
@@ -1406,6 +1508,44 @@ void BOPDS_DS::RefineFaceInfoOn()
     }
   }
 }
+
+//=======================================================================
+//function : RefineFaceInfoIn
+//purpose  : 
+//=======================================================================
+void BOPDS_DS::RefineFaceInfoIn()
+{
+  for (Standard_Integer i = 0; i < myNbSourceShapes; ++i)
+  {
+    const BOPDS_ShapeInfo& aSI = ShapeInfo(i);
+    if (aSI.ShapeType() != TopAbs_FACE)
+      continue;
+
+    if (!aSI.HasReference())
+      continue;
+
+    BOPDS_FaceInfo& aFI = ChangeFaceInfo(i);
+
+    const BOPDS_IndexedMapOfPaveBlock& aMPBOn = aFI.PaveBlocksOn();
+    BOPDS_IndexedMapOfPaveBlock& aMPBIn = aFI.ChangePaveBlocksIn();
+
+    if (aMPBIn.IsEmpty() || aMPBOn.IsEmpty())
+      continue;
+
+    BOPDS_IndexedMapOfPaveBlock aMPBInNew;
+
+    const Standard_Integer aNbPBIn = aMPBIn.Extent();
+    for (Standard_Integer j = 1; j <= aNbPBIn; ++j)
+    {
+      if (!aMPBOn.Contains(aMPBIn(j)))
+        aMPBInNew.Add(aMPBIn(j));
+    }
+
+    if (aMPBInNew.Extent() < aNbPBIn)
+      aMPBIn = aMPBInNew;
+  }
+}
+
 //=======================================================================
 //function : AloneVertices
 //purpose  : 
@@ -1768,43 +1908,6 @@ void BOPDS_DS::Paves(const Standard_Integer theEdge,
   //
   for (i = 1; i <= aNb; ++i) {
     theLP.Append(pPaves(i));
-  }
-}
-//=======================================================================
-// function: UpdateTolerance
-// purpose:
-//=======================================================================
-void BOPDS_DS::UpdateEdgeTolerance(const Standard_Integer nE,
-                                   const Standard_Real aTol,
-                                   const Standard_Real theFuzz)
-{
-  Standard_Integer nV;
-  Standard_Real aTolV;
-  BRep_Builder aBB;
-  TColStd_ListIteratorOfListOfInteger aIt;
-  //
-  Standard_Real aTolAdd = Max(theFuzz, Precision::Confusion()) * 0.5;
-
-  const TopoDS_Edge& aE = *(TopoDS_Edge*)&Shape(nE);
-  aBB.UpdateEdge(aE, aTol);
-  BOPDS_ShapeInfo& aSIE=ChangeShapeInfo(nE);
-  Bnd_Box& aBoxE=aSIE.ChangeBox();
-  BRepBndLib::Add(aE, aBoxE);
-  aBoxE.SetGap(aBoxE.GetGap() + aTolAdd);
-  //
-  const TColStd_ListOfInteger& aLI = aSIE.SubShapes();
-  aIt.Initialize(aLI);
-  for (; aIt.More(); aIt.Next()) {
-    nV = aIt.Value();
-    const TopoDS_Vertex& aV = *(TopoDS_Vertex*)&Shape(nV);
-    aTolV = BRep_Tool::Tolerance(aV);
-    if (aTolV < aTol) {
-      aBB.UpdateVertex(aV, aTol);
-      BOPDS_ShapeInfo& aSIV = ChangeShapeInfo(nV);
-      Bnd_Box& aBoxV = aSIV.ChangeBox();
-      BRepBndLib::Add(aV, aBoxV);
-      aBoxV.SetGap(aBoxV.GetGap() + aTolAdd);
-    }
   }
 }
 //=======================================================================

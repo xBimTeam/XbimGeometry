@@ -145,6 +145,26 @@ public:
     theLastPar = myLast;
     return Standard_True;
   }
+
+  //! Obtain theParameter satisfied to the equation
+  //!     (theParameter-MIN)/(MAX-MIN) == theLambda.
+  //!   *  theLambda == 0 --> MIN boundary will be returned;
+  //!   *  theLambda == 0.5 --> Middle point will be returned;
+  //!   *  theLambda == 1 --> MAX boundary will be returned;
+  //!   *  theLambda < 0 --> the value less than MIN will be returned;
+  //!   *  theLambda > 1 --> the value greater than MAX will be returned.
+  //! If <this> is VOID the method returns false.
+  Standard_Boolean GetIntermediatePoint(const Standard_Real theLambda,
+                                        Standard_Real& theParameter) const
+  {
+    if (IsVoid())
+    {
+      return Standard_False;
+    }
+
+    theParameter = myFirst + theLambda*(myLast - myFirst);
+    return Standard_True;
+  }
   
   //! Returns range value (MAX-MIN). Returns negative value for VOID range.
   Standard_Real Delta() const
@@ -193,6 +213,26 @@ public:
     }
   }
 
+  //! Trims the First value in range by the given lower limit.
+  //! Marks range as Void if the given Lower value is greater than range Max.
+  void TrimFrom (const Standard_Real theValLower)
+  {
+    if (!IsVoid())
+    {
+      myFirst = Max (myFirst, theValLower);
+    }
+  }
+
+  //! Trim the Last value in range by the given Upper limit.
+  //! Marks range as Void if the given Upper value is smaller than range Max.
+  void TrimTo (const Standard_Real theValUpper)
+  {
+    if (!IsVoid())
+    {
+      myLast = Min (myLast, theValUpper);
+    }
+  }
+
   //! Returns True if the value is out of this range.
   Standard_Boolean IsOut (Standard_Real theValue) const
   {
@@ -215,6 +255,9 @@ public:
   {
     return ((myFirst == theOther.myFirst) && (myLast == theOther.myLast));
   }
+
+  //! Dumps the content of me into the stream
+  Standard_EXPORT void DumpJson (Standard_OStream& theOStream, const Standard_Integer theDepth = -1) const;
 
 private:
 

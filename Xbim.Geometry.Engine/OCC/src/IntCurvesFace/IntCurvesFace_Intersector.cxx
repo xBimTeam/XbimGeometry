@@ -42,7 +42,7 @@
 #include <TopoDS_Face.hxx>
 #include <BRep_Tool.hxx>
 #include <TopoDS.hxx>
-#include <Geom2dAPI_ProjectPointOnCurve.hxx>
+#include <GeomAPI_ProjectPointOnCurve.hxx>
 //
 static void ComputeSamplePars(const Handle(Adaptor3d_HSurface)& Hsurface, 
                               const Standard_Integer nbsu,
@@ -132,6 +132,7 @@ IntCurvesFace_Intersector::IntCurvesFace_Intersector(const TopoDS_Face& Face,
 : 
   Tol(aTol),
   done(Standard_False),
+  myReady(Standard_False),
   nbpnt(0),
   PtrOnPolyhedron(NULL),
   PtrOnBndBounding(NULL),
@@ -175,7 +176,7 @@ IntCurvesFace_Intersector::IntCurvesFace_Intersector(const TopoDS_Face& Face,
     if (nbsu > aMaxSamples) nbsu = aMaxSamples;
     if (nbsv > aMaxSamples) nbsv = aMaxSamples;
 
-    if (dU > gp::Resolution() && dV > gp::Resolution()) {
+    if (dU > Precision::Confusion() && dV > Precision::Confusion()) {
       if (Max(dU, dV) > Min(dU, dV) * aTresh)
       {
         aMinSamples = 10;
@@ -190,12 +191,7 @@ IntCurvesFace_Intersector::IntCurvesFace_Intersector(const TopoDS_Face& Face,
       }
     }
     else {
-      if (dU < gp::Resolution()) {
-        nbsu = 1;
-      }
-      if (dV < gp::Resolution()) {
-        nbsv = 1;
-      }
+      return; // surface has no extension along one of directions
     }
 
     Standard_Integer NbUOnS = Hsurface->NbUIntervals(GeomAbs_C2);
@@ -215,6 +211,7 @@ IntCurvesFace_Intersector::IntCurvesFace_Intersector(const TopoDS_Face& Face,
         new IntCurveSurface_ThePolyhedronOfHInter(Hsurface,nbsu,nbsv,U0,V0,U1,V1);
     }
   }
+  myReady = Standard_True;
 }
 //=======================================================================
 //function : InternalCall
@@ -262,16 +259,12 @@ void IntCurvesFace_Intersector::InternalCall(const IntCurveSurface_HInter &HICS,
           for(; anExp.More(); anExp.Next())
           {
             TopoDS_Edge anE = TopoDS::Edge(anExp.Current());
-            Standard_Real curtol = BRep_Tool::Tolerance(anE);
-            Standard_Real tol2d = Max(Hsurface->UResolution(curtol), Hsurface->VResolution(curtol));
-            tol2d = Max(tol2d, Tol);
             Standard_Real f, l;
-            Handle(Geom2d_Curve) aPC = BRep_Tool::CurveOnSurface(anE, face, f, l);
-            Geom2dAPI_ProjectPointOnCurve aProj(Puv, aPC, f, l);
-            if(aProj.NbPoints() > 0)
+            Handle(Geom_Curve) aPC = BRep_Tool::Curve (anE, f, l);
+            GeomAPI_ProjectPointOnCurve aProj (HICSPointindex.Pnt(), aPC, f, l);
+            if (aProj.NbPoints() > 0)
             {
-              Standard_Real d = aProj.LowerDistance();
-              if(d <= tol2d)
+              if (aProj.LowerDistance() <= maxtol3d)
               {
                 //Nearest edge is found, state is really ON
                 currentstate = TopAbs_ON;
@@ -350,6 +343,11 @@ void IntCurvesFace_Intersector::Perform(const gp_Lin& L,
 					const Standard_Real ParMin,
 					const Standard_Real ParMax)
 { 
+  done = Standard_False;
+  if (!myReady)
+  {
+    return;
+  }
   done = Standard_True;
   SeqPnt.Clear();
   mySeqState.Clear();
@@ -428,6 +426,11 @@ void IntCurvesFace_Intersector::Perform(const Handle(Adaptor3d_HCurve)& HCu,
 					const Standard_Real ParMin,
 					const Standard_Real ParMax) 
 { 
+  done = Standard_False;
+  if (!myReady)
+  {
+    return;
+  }
   done = Standard_True;
   SeqPnt.Clear();
   //  Modified by skv - Wed Sep  3 16:14:10 2003 OCC578 Begin

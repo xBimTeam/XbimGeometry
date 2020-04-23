@@ -116,33 +116,13 @@ class BOPAlgo_PairOfShapeBoolean : public BOPAlgo_Algo {
   Handle(IntTools_Context) myContext;
 };
 //
-typedef NCollection_Vector<BOPAlgo_PairOfShapeBoolean> \
-  BOPAlgo_VectorOfPairOfShapeBoolean;
-//
-typedef BOPTools_ContextFunctor 
-  <BOPAlgo_PairOfShapeBoolean,
-  BOPAlgo_VectorOfPairOfShapeBoolean,
-  Handle(IntTools_Context), 
-  IntTools_Context> BOPAlgo_BuilderSDFaceFunctor;
-//
-typedef BOPTools_ContextCnt 
-  <BOPAlgo_BuilderSDFaceFunctor,
-  BOPAlgo_VectorOfPairOfShapeBoolean,
-  Handle(IntTools_Context)> BOPAlgo_BuilderSDFaceCnt;
-//
+typedef NCollection_Vector<BOPAlgo_PairOfShapeBoolean> BOPAlgo_VectorOfPairOfShapeBoolean;
+
 //=======================================================================
 // BuilderFace
 //
 typedef NCollection_Vector<BOPAlgo_BuilderFace> BOPAlgo_VectorOfBuilderFace;
-//
-typedef BOPTools_Functor 
-  <BOPAlgo_BuilderFace,
-  BOPAlgo_VectorOfBuilderFace> BOPAlgo_BuilderFaceFunctor;
-//
-typedef BOPTools_Cnt 
-  <BOPAlgo_BuilderFaceFunctor,
-  BOPAlgo_VectorOfBuilderFace> BOPAlgo_BuilderFaceCnt;
-//
+
 //=======================================================================
 //class    : BOPAlgo_VFI
 //purpose  : 
@@ -205,18 +185,7 @@ class BOPAlgo_VFI : public BOPAlgo_Algo {
 };
 //
 typedef NCollection_Vector<BOPAlgo_VFI> BOPAlgo_VectorOfVFI; 
-//
-typedef BOPTools_ContextFunctor 
-  <BOPAlgo_VFI,
-  BOPAlgo_VectorOfVFI,
-  Handle(IntTools_Context), 
-  IntTools_Context> BOPAlgo_VFIFunctor;
-//
-typedef BOPTools_ContextCnt 
-  <BOPAlgo_VFIFunctor,
-  BOPAlgo_VectorOfVFI,
-  Handle(IntTools_Context)> BOPAlgo_VFICnt;
-//
+
 //=======================================================================
 //function : FillImagesFaces
 //purpose  : 
@@ -292,31 +261,52 @@ void BOPAlgo_Builder::BuildSplitFaces()
 
     if (!aNbPBIn && !aNbPBSc)
     {
+      // If there are any alone vertices to be put in the face,
+      // the new face has to be created even if the wires of the
+      // face have not been modified.
+
+      // It is also necessary to check if the face contains any internal edges,
+      // as such edges may split the face on parts and it is better
+      // to send the face be treated by the BuilderFace algorithm.
+      // In case of alone vertices the check for internals will be performed
+      // in the BuildDraftFace method.
+      Standard_Boolean hasInternals = Standard_False;
       if (!aNbAV)
       {
         // Check if any wires of the face have been modified.
-        // If not, there is no need to create the new face.
+        // If no modified and internal wires present in the face
+        // there is no need to create the new face.
+        Standard_Boolean hasModified = Standard_False;
+
         TopoDS_Iterator aItW(aF);
         for (; aItW.More(); aItW.Next())
         {
-          if (myImages.IsBound(aItW.Value()))
+          TopoDS_Iterator itE(aItW.Value());
+          hasInternals = (itE.More() && (itE.Value().Orientation() == TopAbs_INTERNAL));
+          if (hasInternals)
             break;
+
+          hasModified |= myImages.IsBound(aItW.Value());
         }
-        if (!aItW.More())
+
+        if (!hasInternals && !hasModified)
           continue;
       }
 
-      // No internal parts for the face, so just build the draft face
-      // and keep it to pass directly into result.
-      // If the original face has any internal edges or multi-connected vertices,
-      // the draft face will be null, as such sub-shapes may split the face on parts
-      // (as in the case "bugs modalg_5 bug25245_1").
-      // The BuilderFace algorithm will be called in this case.
-      TopoDS_Face aFD = BuildDraftFace(aF, myImages, myContext, myReport);
-      if (!aFD.IsNull())
+      if (!hasInternals)
       {
-        aFacesIm(aFacesIm.Add(i, TopTools_ListOfShape())).Append(aFD);
-        continue;
+        // No internal parts for the face, so just build the draft face
+        // and keep it to pass directly into result.
+        // If the original face has any internal edges or multi-connected vertices,
+        // the draft face will be null, as such sub-shapes may split the face on parts
+        // (as in the case "bugs modalg_5 bug25245_1").
+        // The BuilderFace algorithm will be called in this case.
+        TopoDS_Face aFD = BuildDraftFace(aF, myImages, myContext, myReport);
+        if (!aFD.IsNull())
+        {
+          aFacesIm(aFacesIm.Add(i, TopTools_ListOfShape())).Append(aFD);
+          continue;
+        }
       }
     }
 
@@ -453,7 +443,7 @@ void BOPAlgo_Builder::BuildSplitFaces()
   }// for (i=0; i<aNbS; ++i) {
   //
   //===================================================
-  BOPAlgo_BuilderFaceCnt::Perform(myRunParallel, aVBF);
+  BOPTools_Parallel::Perform (myRunParallel, aVBF);
   //===================================================
   //
   Standard_Integer aNbBF = aVBF.Length();
@@ -461,6 +451,7 @@ void BOPAlgo_Builder::BuildSplitFaces()
   {
     BOPAlgo_BuilderFace& aBF = aVBF(k);
     aFacesIm.Add(myDS->Index(aBF.Face()), aBF.Areas());
+    myReport->Merge(aBF.GetReport());
   }
 
   aNbBF = aFacesIm.Extent();
@@ -641,7 +632,7 @@ void BOPAlgo_Builder::FillSameDomainFaces()
 
   //================================================================
   // Perform analysis
-  BOPAlgo_BuilderSDFaceCnt::Perform(myRunParallel, aVPSB, myContext);
+  BOPTools_Parallel::Perform (myRunParallel, aVPSB, myContext);
   //================================================================
 
   NCollection_List<TopTools_ListOfShape> aMBlocks(aAllocator);
@@ -794,7 +785,7 @@ void BOPAlgo_Builder::FillInternalVertices()
 
   // Perform classification
   //================================================================
-  BOPAlgo_VFICnt::Perform(myRunParallel, aVVFI, myContext);
+  BOPTools_Parallel::Perform (myRunParallel, aVVFI, myContext);
   //================================================================
 
   Standard_Integer aNbVFI = aVVFI.Length();
@@ -865,6 +856,10 @@ TopoDS_Face BuildDraftFace(const TopoDS_Face& theFace,
   // possibility of split.
   TopTools_DataMapOfShapeListOfShape aVerticesCounter;
 
+  // Check that the edges of the initial face have not been unified during intersection.
+  // Otherwise, it will be necessary to check validity of the new wires.
+  TopTools_MapOfShape aMEdges;
+
   // Update wires of the original face and add them to draft face
   TopoDS_Iterator aItW(theFace.Oriented(TopAbs_FORWARD));
   for (; aItW.More(); aItW.Next())
@@ -895,6 +890,8 @@ TopoDS_Face BuildDraftFace(const TopoDS_Face& theFace,
 
       // Check if the original edge is degenerated
       Standard_Boolean bIsDegenerated = BRep_Tool::Degenerated(aE);
+      // Check if the original edge is closed on the face
+      Standard_Boolean bIsClosed = BRep_Tool::IsClosed(aE, theFace);
 
       // Check for the splits of the edge
       const TopTools_ListOfShape* pLEIm = theImages.Seek(aE);
@@ -904,12 +901,13 @@ TopoDS_Face BuildDraftFace(const TopoDS_Face& theFace,
         if (!bIsDegenerated && HasMultiConnected(aE, aVerticesCounter))
           return TopoDS_Face();
 
+        // Check edges unification
+        if (!bIsClosed && !aMEdges.Add(aE))
+          return TopoDS_Face();
+
         aBB.Add(aNewWire, aE);
         continue;
       }
-
-      // Check if the original edge is closed on the face
-      Standard_Boolean bIsClosed = BRep_Tool::IsClosed(aE, theFace);
 
       TopTools_ListIteratorOfListOfShape aItLEIm(*pLEIm);
       for (; aItLEIm.More(); aItLEIm.Next())
@@ -918,6 +916,10 @@ TopoDS_Face BuildDraftFace(const TopoDS_Face& theFace,
 
         // Check if the split has multi-connected vertices
         if (!bIsDegenerated && HasMultiConnected(aSp, aVerticesCounter))
+          return TopoDS_Face();
+
+        // Check edges unification
+        if (!bIsClosed && !aMEdges.Add(aSp))
           return TopoDS_Face();
 
         aSp.Orientation(anOriE);

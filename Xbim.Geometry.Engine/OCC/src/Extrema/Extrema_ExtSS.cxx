@@ -24,10 +24,7 @@
 #include <gp_Pln.hxx>
 #include <gp_Pnt.hxx>
 #include <Precision.hxx>
-#include <Standard_NotImplemented.hxx>
 #include <Standard_OutOfRange.hxx>
-#include <Standard_TypeMismatch.hxx>
-#include <StdFail_InfiniteSolutions.hxx>
 #include <StdFail_NotDone.hxx>
 
 Extrema_ExtSS::Extrema_ExtSS() 
@@ -235,22 +232,25 @@ Standard_Boolean Extrema_ExtSS::IsDone() const
 
 Standard_Boolean Extrema_ExtSS::IsParallel() const
 {
+  if (!IsDone()) throw StdFail_NotDone();
   return myIsPar;
 }
 
 
 Standard_Real Extrema_ExtSS::SquareDistance(const Standard_Integer N) const
 {
-  if(!myDone) throw StdFail_NotDone();
-  if (myIsPar && N != 1) throw StdFail_InfiniteSolutions();
-  if ((N < 1) || (N > mySqDist.Length())) throw Standard_OutOfRange();
+  if (N < 1 || N > NbExt())
+  {
+    throw Standard_OutOfRange();
+  }
+
   return mySqDist.Value(N);
 }
 
 
 Standard_Integer Extrema_ExtSS::NbExt() const
 {
-  if(!myDone) throw StdFail_NotDone();
+  if (!IsDone()) throw StdFail_NotDone();
   return mySqDist.Length();
 }
 
@@ -260,7 +260,11 @@ void Extrema_ExtSS::Points(const Standard_Integer N,
 			   Extrema_POnSurf&       P1,
 			   Extrema_POnSurf&       P2) const
 {
-  if(!myDone) throw StdFail_NotDone();
+  if (N < 1 || N > NbExt())
+  {
+    throw Standard_OutOfRange();
+  }
+
   P1 = myPOnS1.Value(N);
   P2 = myPOnS2.Value(N);
 }

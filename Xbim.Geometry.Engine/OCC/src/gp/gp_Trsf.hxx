@@ -24,6 +24,7 @@
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Integer.hxx>
 #include <Standard_Handle.hxx>
+#include <Standard_OStream.hxx>
 #include <Standard_Real.hxx>
 
 class Standard_ConstructionError;
@@ -282,10 +283,10 @@ public:
   //! Pnt P2 = P1.Transformed(Tcomp);    //using Tcomp
   //! Pnt P3 = P1.Transformed(T1);       //using T1 then T2
   //! P3.Transform(T2);                  // P3 = P2 !!!
-    gp_Trsf Inverted() const;
+  Standard_NODISCARD gp_Trsf Inverted() const;
   
-    gp_Trsf Multiplied (const gp_Trsf& T) const;
-  gp_Trsf operator * (const gp_Trsf& T) const
+  Standard_NODISCARD gp_Trsf Multiplied (const gp_Trsf& T) const;
+  Standard_NODISCARD gp_Trsf operator * (const gp_Trsf& T) const
 {
   return Multiplied(T);
 }
@@ -314,7 +315,7 @@ void operator *= (const gp_Trsf& T)
   //!
   //! Raises if N < 0 and if the matrix of the transformation not
   //! inversible.
-    gp_Trsf Powered (const Standard_Integer N) const;
+  Standard_NODISCARD gp_Trsf Powered (const Standard_Integer N) const;
   
     void Transforms (Standard_Real& X, Standard_Real& Y, Standard_Real& Z) const;
   
@@ -348,6 +349,9 @@ void operator *= (const gp_Trsf& T)
     theMat.SetValue (3, 2, static_cast<T> (0));
     theMat.SetValue (3, 3, static_cast<T> (1));
   }
+
+  //! Dumps the content of me into the stream
+  Standard_EXPORT void DumpJson (Standard_OStream& theOStream, const Standard_Integer theDepth = -1) const;
 
 friend class gp_GTrsf;
 

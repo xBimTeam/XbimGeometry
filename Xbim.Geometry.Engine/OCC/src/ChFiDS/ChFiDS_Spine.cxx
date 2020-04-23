@@ -40,29 +40,35 @@ IMPLEMENT_STANDARD_RTTIEXT(ChFiDS_Spine,Standard_Transient)
 //function : ChFiDS_Spine
 //purpose  : 
 //=======================================================================
-ChFiDS_Spine::ChFiDS_Spine():
-       splitdone(Standard_False),
-       tolesp(Precision::Confusion()),
-       firstprolon(Standard_False), 
-       lastprolon(Standard_False),
-       firstistgt(Standard_False), 
-       lastistgt(Standard_False),
-       hasfirsttgt(Standard_False), 
-       haslasttgt(Standard_False),
-       hasref(Standard_False)
+ChFiDS_Spine::ChFiDS_Spine()
+: splitdone(Standard_False),
+  myMode(ChFiDS_ClassicChamfer),
+  tolesp(Precision::Confusion()),
+  firstprolon(Standard_False), 
+  lastprolon(Standard_False),
+  firstistgt(Standard_False), 
+  lastistgt(Standard_False),
+  hasfirsttgt(Standard_False), 
+  haslasttgt(Standard_False),
+  hasref(Standard_False)
 {
 }
 
-ChFiDS_Spine::ChFiDS_Spine(const Standard_Real Tol):
-       splitdone(Standard_False),
-       tolesp(Tol),
-       firstprolon(Standard_False), 
-       lastprolon(Standard_False),
-       firstistgt(Standard_False), 
-       lastistgt(Standard_False),
-       hasfirsttgt(Standard_False), 
-       haslasttgt(Standard_False),
-       hasref(Standard_False)
+//=======================================================================
+//function : ChFiDS_Spine
+//purpose  : 
+//=======================================================================
+ChFiDS_Spine::ChFiDS_Spine(const Standard_Real Tol)
+  : splitdone(Standard_False),
+    myMode(ChFiDS_ClassicChamfer),
+    tolesp(Tol),
+    firstprolon(Standard_False), 
+    lastprolon(Standard_False),
+    firstistgt(Standard_False), 
+    lastistgt(Standard_False),
+    hasfirsttgt(Standard_False), 
+    haslasttgt(Standard_False),
+    hasref(Standard_False)
 {
 }
 
@@ -74,6 +80,16 @@ ChFiDS_Spine::ChFiDS_Spine(const Standard_Real Tol):
 void ChFiDS_Spine::AppendElSpine(const Handle(ChFiDS_HElSpine)& Els)
 {
   elspines.Append(Els);
+}
+
+//=======================================================================
+//function : AppendOffsetElSpine
+//purpose  : 
+//=======================================================================
+
+void ChFiDS_Spine::AppendOffsetElSpine(const Handle(ChFiDS_HElSpine)& Els)
+{
+  offset_elspines.Append(Els);
 }
 
 //=======================================================================
@@ -118,6 +134,16 @@ Handle(ChFiDS_HElSpine) ChFiDS_Spine::ElSpine(const Standard_Real W) const
 ChFiDS_ListOfHElSpine& ChFiDS_Spine::ChangeElSpines() 
 {
   return elspines;
+}
+
+//=======================================================================
+//function : ChangeOffsetElSpines
+//purpose  : 
+//=======================================================================
+
+ChFiDS_ListOfHElSpine& ChFiDS_Spine::ChangeOffsetElSpines() 
+{
+  return offset_elspines;
 }
 
 //=======================================================================
@@ -189,9 +215,9 @@ void ChFiDS_Spine::SetFirstParameter(const Standard_Real Par)
 {
 #ifdef OCCT_DEBUG
   if(Par >= Precision::Confusion()) 
-    cout<<"Interior extension at the start of guideline"<<endl;
+    std::cout<<"Interior extension at the start of guideline"<<std::endl;
   if(IsPeriodic())
-    cout<<"WARNING!!! Extension on periodic guideline."<<endl;
+    std::cout<<"WARNING!!! Extension on periodic guideline."<<std::endl;
 #endif
   firstprolon = Standard_True;
   firstparam = Par;
@@ -208,9 +234,9 @@ void ChFiDS_Spine::SetLastParameter(const Standard_Real Par)
 #ifdef OCCT_DEBUG
   Standard_Real lll = abscissa->Value(abscissa->Upper());
   if((Par - lll) <= -Precision::Confusion()) 
-    cout<<"Interior extension at the end of guideline"<<endl;
+    std::cout<<"Interior extension at the end of guideline"<<std::endl;
   if(IsPeriodic())
-    cout<<"WARNING!!! Extension on periodic guideline."<<endl;
+    std::cout<<"WARNING!!! Extension on periodic guideline."<<std::endl;
 #endif
   lastprolon = Standard_True;
   lastparam = Par;
@@ -361,7 +387,7 @@ void  ChFiDS_Spine::SetFirstTgt(const Standard_Real W)
   if(IsPeriodic()) throw Standard_Failure("No extension by tangent on periodic contours");
 #ifdef OCCT_DEBUG
   if(W >= Precision::Confusion()) 
-    cout<<"Interior extension at start of the guideline"<<endl;
+    std::cout<<"Interior extension at start of the guideline"<<std::endl;
 #endif
   //The flag is suspended if is already positioned to avoid  
   //stopping d1
@@ -385,7 +411,7 @@ void  ChFiDS_Spine::SetLastTgt(const Standard_Real W)
 #ifdef OCCT_DEBUG
   Standard_Real L = W - abscissa->Value(abscissa->Upper());
   if(L <= -Precision::Confusion()) 
-    cout<<"Interior extension at the end of guideline"<<endl;
+    std::cout<<"Interior extension at the end of guideline"<<std::endl;
 #endif
   //The flag is suspended if is already positioned to avoid  
   //stopping d1 
@@ -503,7 +529,7 @@ void  ChFiDS_Spine::Load()
 {
   if(!abscissa.IsNull()){
 #ifdef OCCT_DEBUG
-    cout<<"new load of CE"<<endl;
+    std::cout<<"new load of CE"<<std::endl;
 #endif
   }
   Standard_Integer len = spine.Length();

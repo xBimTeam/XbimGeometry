@@ -44,7 +44,6 @@
 #include <Geom_OffsetCurve.hxx>
 #include <BRepBuilderAPI_MakeSolid.hxx>
 #include <BRepPrimAPI_MakeHalfSpace.hxx>
-#include <BRepAlgo_NormalProjection.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
 #include <ShapeFix_ShapeTolerance.hxx>
 #include <BRepTools.hxx>
@@ -1287,9 +1286,9 @@ namespace Xbim
 				BRepPrimAPI_MakeHalfSpace hsMaker(face, pointInMaterial);
 				pSolid = new TopoDS_Solid();
 				*pSolid = hsMaker.Solid();
-
+				//half space solids are only used in booleans, set the face tolerance the millimeter precision we require
 				ShapeFix_ShapeTolerance tolFixer;
-				tolFixer.LimitTolerance(*pSolid, hs->Model->ModelFactors->Precision);
+				tolFixer.LimitTolerance(*pSolid, hs->Model->ModelFactors->Precision * XbimGeometryCreator::FuzzyFactor);
 			}
 		}
 
@@ -1319,7 +1318,7 @@ namespace Xbim
 				Translate(XbimVector3D(0, 0, -bhs->Enclosure->ZDim));
 			Move(ifcPlane->Position);
 			ShapeFix_ShapeTolerance tolFixer;
-			tolFixer.LimitTolerance(*pSolid, bhs->Model->ModelFactors->Precision);
+			tolFixer.LimitTolerance(*pSolid, bhs->Model->ModelFactors->Precision * XbimGeometryCreator::FuzzyFactor);
 		}
 
 		void XbimSolid::Init(IIfcPolygonalBoundedHalfSpace^ pbhs, ILogger^ logger)
@@ -1376,7 +1375,7 @@ namespace Xbim
 			}
 			pSolid = new TopoDS_Solid();
 			*pSolid = TopoDS::Solid(map(1));
-			tolFixer.LimitTolerance(*pSolid, pbhs->Model->ModelFactors->Precision);
+			tolFixer.LimitTolerance(*pSolid, pbhs->Model->ModelFactors->Precision * XbimGeometryCreator::FuzzyFactor);
 		}
 
 		// params depend on segment type

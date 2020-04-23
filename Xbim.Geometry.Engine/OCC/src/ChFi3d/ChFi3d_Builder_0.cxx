@@ -538,8 +538,8 @@ Standard_Boolean ChFi3d_KParticular (const Handle(ChFiDS_Spine)& Spine,
     }
   }
   else if (aST2==GeomAbs_Cylinder) {
-    const gp_Dir& aD1=aS1.Plane().Axis().Direction();
-    const gp_Dir& aD2=aS2.Cylinder().Axis().Direction();
+    const gp_Dir aD1=aS1.Plane().Axis().Direction();
+    const gp_Dir aD2=aS2.Cylinder().Axis().Direction();
     //
     if (aCT==GeomAbs_Line && aD1.IsNormal(aD2, aPA)) {
       return bRet;
@@ -549,8 +549,8 @@ Standard_Boolean ChFi3d_KParticular (const Handle(ChFiDS_Spine)& Spine,
     }
   }
   else if(aST2==GeomAbs_Cone) {
-    const gp_Dir& aD1=aS1.Plane().Axis().Direction();
-    const gp_Dir& aD2=aS2.Cone().Axis().Direction();
+    const gp_Dir aD1=aS1.Plane().Axis().Direction();
+    const gp_Dir aD2=aS2.Cone().Axis().Direction();
     if (aCT == GeomAbs_Circle && aD1.IsParallel(aD2, aPA)) {
       return bRet;
     }
@@ -1713,6 +1713,7 @@ void  ChFi3d_ComputeArete(const ChFiDS_CommonPoint&   P1,
       Standard_Real umin,umax,vmin,vmax;
       Surf->Bounds(umin,umax,vmin,vmax);
       bs.Update(umin,vmin,umax,vmax);
+      bs.SetGap(Precision::PConfusion());
       Standard_Boolean aIN = Standard_True;
       for(Standard_Integer ii = 1; ii <= 4 && aIN; ii++) {
 	if(bs.IsOut(Handle(Geom2d_BezierCurve)::DownCast (Pcurv)->Pole(ii))) {
@@ -3282,18 +3283,24 @@ Standard_Boolean ChFi3d_ComputeCurves(const Handle(Adaptor3d_HSurface)&   S1,
             Pc1 = new Geom2d_TrimmedCurve(Pc1,Uf,Ul);
             Pc2 = new Geom2d_TrimmedCurve(Pc2,Uf,Ul);
             //is it necesary to invert ?
-            Standard_Real distdeb = ptestdeb.Distance(pdeb);
-            Standard_Real distfin = ptestfin.Distance(pfin);
-            if(distdeb > distref || distfin > distref) {
+            Standard_Real DistDebToDeb = ptestdeb.Distance(pdeb);
+            Standard_Real DistDebToFin = ptestdeb.Distance(pfin);
+            Standard_Real DistFinToFin = ptestfin.Distance(pfin);
+            Standard_Real DistFinToDeb = ptestfin.Distance(pdeb);
+            
+            if (DistDebToDeb > DistDebToFin &&
+                DistFinToFin > DistFinToDeb)
+            {
               C3d->Reverse();
               Pc1->Reverse();
               Pc2->Reverse();
               ptestdeb = C3d->Value(C3d->FirstParameter());
               ptestfin = C3d->Value(C3d->LastParameter());
-              distdeb = ptestdeb.Distance(pdeb);
-              distfin = ptestfin.Distance(pfin);
+              DistDebToDeb = ptestdeb.Distance(pdeb);
+              DistFinToFin = ptestfin.Distance(pfin);
             }
-            if(distdeb < distref && distfin < distref) {
+            if(DistDebToDeb < distref && DistFinToFin < distref)
+            {
               Uf = C3d->FirstParameter();
               Ul = C3d->LastParameter();
               ChFi3d_ReparamPcurv(Uf,Ul,Pc1);
@@ -3910,10 +3917,11 @@ static Standard_Boolean GoodExt(const Handle(Geom_Curve)& C,
 //purpose  : 
 //=======================================================================
 Standard_EXPORT 
-  void ChFi3d_PerformElSpine(Handle(ChFiDS_HElSpine)& HES,
-  Handle(ChFiDS_Spine)&    Spine,
-  const GeomAbs_Shape      continuity,
-  const Standard_Real      tol) 
+void ChFi3d_PerformElSpine(Handle(ChFiDS_HElSpine)& HES,
+                           Handle(ChFiDS_Spine)&    Spine,
+                           const GeomAbs_Shape      continuity,
+                           const Standard_Real      tol,
+                           const Standard_Boolean   IsOffset)
 {
 
   Standard_Boolean periodic, Bof, checkdeb, cepadur,bIsSmooth;
@@ -3965,8 +3973,8 @@ Standard_EXPORT
   // derniere arete.
   // Traitment de la premiere arete
   cepadur = 0;
-  E=Spine->Edges(IF);
-  Bof=BRepLib::BuildCurve3d(E);
+  E = (IsOffset)? Spine->OffsetEdges(IF) : Spine->Edges(IF);
+  Bof = BRepLib::BuildCurve3d(E);
   const BRepAdaptor_Curve& edc = Spine->CurrentElementarySpine(IF);
   tolpared = edc.Resolution(tol);
   Cv = BRep_Tool::Curve(E, First, Last);
@@ -4089,7 +4097,7 @@ Standard_EXPORT
       iloc = (IEdge - 1)%nbed + 1;
     }
     //
-    E = Spine->Edges(iloc);
+    E = (IsOffset)? Spine->OffsetEdges(iloc) : Spine->Edges(iloc);
     if (BRep_Tool::Degenerated(E)) {
       continue;
     }
@@ -4265,7 +4273,7 @@ Standard_EXPORT
       BSpline = C1;
     }
     else {
-      //cout << "Attention : Echec de C0BSplineToC1 !" << endl;
+      //std::cout << "Attention : Echec de C0BSplineToC1 !" << std::endl;
     }
   }
   //
@@ -4362,6 +4370,11 @@ Standard_EXPORT
 
   // Le Resultat       
   ES.SetCurve(BSpline);
+
+  //Temporary
+  //gp_Pnt ptgui;
+  //gp_Vec d1gui;
+  //( HES->Curve() ).D1(HES->FirstParameter(),ptgui,d1gui);
 }
 
 //=======================================================================

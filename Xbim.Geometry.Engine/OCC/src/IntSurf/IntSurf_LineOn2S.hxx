@@ -20,6 +20,8 @@
 #include <Standard.hxx>
 #include <Standard_Type.hxx>
 
+#include <Bnd_Box.hxx>
+#include <Bnd_Box2d.hxx>
 #include <IntSurf_SequenceOfPntOn2S.hxx>
 #include <Standard_Transient.hxx>
 #include <IntSurf_Allocator.hxx>
@@ -43,7 +45,7 @@ public:
   Standard_EXPORT IntSurf_LineOn2S(const IntSurf_Allocator& theAllocator = 0);
   
   //! Adds a point in the line.
-    void Add (const IntSurf_PntOn2S& P);
+  Standard_EXPORT void Add(const IntSurf_PntOn2S& P);
   
   //! Returns the number of points in the line.
     Standard_Integer NbPoints() const;
@@ -63,7 +65,7 @@ public:
   
   //! Sets the parametric coordinates on one of the surfaces
   //! of the point of range Index in the line.
-    void SetUV (const Standard_Integer Index, const Standard_Boolean OnFirst, const Standard_Real U, const Standard_Real V);
+  Standard_EXPORT void SetUV(const Standard_Integer Index, const Standard_Boolean OnFirst, const Standard_Real U, const Standard_Real V);
   
     void Clear();
   
@@ -71,8 +73,16 @@ public:
   
   Standard_EXPORT void RemovePoint (const Standard_Integer I);
 
+  //! Returns TRUE if theP is out of the box built from
+  //! the points on 1st surface
+  Standard_EXPORT Standard_Boolean IsOutSurf1Box(const gp_Pnt2d& theP);
 
+  //! Returns TRUE if theP is out of the box built from
+  //! the points on 2nd surface
+  Standard_EXPORT Standard_Boolean IsOutSurf2Box(const gp_Pnt2d& theP);
 
+  //! Returns TRUE if theP is out of the box built from 3D-points.
+  Standard_EXPORT Standard_Boolean IsOutBox(const gp_Pnt& theP);
 
   DEFINE_STANDARD_RTTIEXT(IntSurf_LineOn2S,Standard_Transient)
 
@@ -85,7 +95,9 @@ private:
 
 
   IntSurf_SequenceOfPntOn2S mySeq;
-
+  Bnd_Box2d myBuv1;
+  Bnd_Box2d myBuv2;
+  Bnd_Box myBxyz;
 
 };
 

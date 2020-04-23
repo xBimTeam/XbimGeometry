@@ -211,92 +211,88 @@ namespace BVH
     return 0;
   }
 
-#ifdef HAVE_TBB
-
-  //! TBB task for parallel bounds updating.
   template<class T, int N>
-  class UpdateBoundTask: public tbb::task
+  struct BoundData
   {
-
-    BVH_Set<T, N>*    mySet;    //!< Set of geometric objects
+    BVH_Set <T, N>*   mySet;    //!< Set of geometric objects
     BVH_Tree<T, N>*   myBVH;    //!< BVH tree built over the set
     Standard_Integer  myNode;   //!< BVH node to update bounding box
     Standard_Integer  myLevel;  //!< Level of the processed BVH node
     Standard_Integer* myHeight; //!< Height of the processed BVH node
+  };
 
+  //! Task for parallel bounds updating.
+  template<class T, int N>
+  class UpdateBoundTask
+  {
   public:
 
-    //! Creates new TBB parallel bound update task.
-    UpdateBoundTask (BVH_Set<T, N>*    theSet,
-                     BVH_Tree<T, N>*   theBVH,
-                     Standard_Integer  theNode,
-                     Standard_Integer  theLevel,
-                     Standard_Integer* theHeight)
-    : mySet (theSet), myBVH (theBVH), myNode (theNode), myLevel (theLevel), myHeight (theHeight) {}
-
-    //! Executes the task.
-    tbb::task* execute()
+    UpdateBoundTask (const Standard_Boolean isParallel)
+    : myIsParallel (isParallel)
     {
-      if (myBVH->IsOuter (myNode) || myLevel > 2)
+    }
+    
+    //! Executes the task.
+    void operator()(const BoundData<T, N>& theData) const
+    {
+      if (theData.myBVH->IsOuter (theData.myNode) || theData.myLevel > 2)
       {
-        *myHeight = BVH::UpdateBounds (mySet, myBVH, myNode);
+        *theData.myHeight = BVH::UpdateBounds (theData.mySet, theData.myBVH, theData.myNode);
       }
       else
       {
         Standard_Integer aLftHeight = 0;
         Standard_Integer aRghHeight = 0;
 
-        const Standard_Integer aLftChild = myBVH->NodeInfoBuffer()[myNode].y();
-        const Standard_Integer aRghChild = myBVH->NodeInfoBuffer()[myNode].z();
+        const Standard_Integer aLftChild = theData.myBVH->NodeInfoBuffer()[theData.myNode].y();
+        const Standard_Integer aRghChild = theData.myBVH->NodeInfoBuffer()[theData.myNode].z();
 
-        Standard_Integer aCount = 1;
-        tbb::task_list aList;
-        if (!myBVH->IsOuter (aLftChild))
+        std::vector<BoundData<T, N> > aList;
+        aList.reserve (2);
+        if (!theData.myBVH->IsOuter (aLftChild))
         {
-          ++aCount;
-          aList.push_back (*new ( allocate_child() )
-            UpdateBoundTask (mySet, myBVH, aLftChild, myLevel + 1, &aLftHeight));
+          BoundData<T, N> aBoundData = {theData.mySet, theData.myBVH, aLftChild, theData.myLevel + 1, &aLftHeight};
+          aList.push_back (aBoundData);
         }
         else
         {
-          aLftHeight = BVH::UpdateBounds (mySet, myBVH, aLftChild);
+          aLftHeight = BVH::UpdateBounds (theData.mySet, theData.myBVH, aLftChild);
         }
 
-        if (!myBVH->IsOuter (aRghChild))
+        if (!theData.myBVH->IsOuter (aRghChild))
         {
-          ++aCount;
-          aList.push_back (*new( allocate_child() )
-            UpdateBoundTask (mySet, myBVH, aRghChild, myLevel + 1, &aRghHeight));
+          BoundData<T, N> aBoundData = {theData.mySet, theData.myBVH, aRghChild, theData.myLevel + 1, &aRghHeight};
+          aList.push_back (aBoundData);
         }
         else
         {
-          aRghHeight = BVH::UpdateBounds (mySet, myBVH, aRghChild);
+          aRghHeight = BVH::UpdateBounds (theData.mySet, theData.myBVH, aRghChild);
         }
 
-        if (aCount > 1)
+        if (!aList.empty())
         {
-          set_ref_count (aCount);
-          spawn_and_wait_for_all (aList);
+          OSD_Parallel::ForEach (aList.begin (), aList.end (), UpdateBoundTask<T, N> (myIsParallel), !myIsParallel);
         }
 
-        typename BVH_Box<T, N>::BVH_VecNt aLftMinPoint = myBVH->MinPointBuffer()[aLftChild];
-        typename BVH_Box<T, N>::BVH_VecNt aLftMaxPoint = myBVH->MaxPointBuffer()[aLftChild];
-        typename BVH_Box<T, N>::BVH_VecNt aRghMinPoint = myBVH->MinPointBuffer()[aRghChild];
-        typename BVH_Box<T, N>::BVH_VecNt aRghMaxPoint = myBVH->MaxPointBuffer()[aRghChild];
+        typename BVH_Box<T, N>::BVH_VecNt aLftMinPoint = theData.myBVH->MinPointBuffer()[aLftChild];
+        typename BVH_Box<T, N>::BVH_VecNt aLftMaxPoint = theData.myBVH->MaxPointBuffer()[aLftChild];
+        typename BVH_Box<T, N>::BVH_VecNt aRghMinPoint = theData.myBVH->MinPointBuffer()[aRghChild];
+        typename BVH_Box<T, N>::BVH_VecNt aRghMaxPoint = theData.myBVH->MaxPointBuffer()[aRghChild];
 
         BVH::BoxMinMax<T, N>::CwiseMin (aLftMinPoint, aRghMinPoint);
         BVH::BoxMinMax<T, N>::CwiseMax (aLftMaxPoint, aRghMaxPoint);
 
-        myBVH->MinPointBuffer()[myNode] = aLftMinPoint;
-        myBVH->MaxPointBuffer()[myNode] = aLftMaxPoint;
+        theData.myBVH->MinPointBuffer()[theData.myNode] = aLftMinPoint;
+        theData.myBVH->MaxPointBuffer()[theData.myNode] = aLftMaxPoint;
 
-        *myHeight = Max (aLftHeight, aRghHeight) + 1;
+        *theData.myHeight = Max (aLftHeight, aRghHeight) + 1;
       }
-      return NULL;
     }
+    
+  private:
+    
+    Standard_Boolean myIsParallel;
   };
-
-#endif
 }
 
 // =======================================================================
@@ -308,7 +304,7 @@ void BVH_LinearBuilder<T, N>::Build (BVH_Set<T, N>*       theSet,
                                      BVH_Tree<T, N>*      theBVH,
                                      const BVH_Box<T, N>& theBox) const
 {
-  Standard_STATIC_ASSERT (N == 3 || N == 4);
+  Standard_STATIC_ASSERT (N == 2 || N == 3 || N == 4);
   const Standard_Integer aSetSize = theSet->Size();
   if (theBVH == NULL || aSetSize == 0)
   {
@@ -319,6 +315,7 @@ void BVH_LinearBuilder<T, N>::Build (BVH_Set<T, N>*       theSet,
 
   // Step 0 -- Initialize parameter of virtual grid
   BVH_RadixSorter<T, N> aRadixSorter (theBox);
+  aRadixSorter.SetParallel (this->IsParallel());
 
   // Step 1 - Perform radix sorting of primitive set
   aRadixSorter.Perform (theSet);
@@ -331,21 +328,9 @@ void BVH_LinearBuilder<T, N>::Build (BVH_Set<T, N>*       theSet,
   theBVH->MaxPointBuffer().resize (theBVH->NodeInfoBuffer().size());
 
   Standard_Integer aHeight = 0;
-
-#ifdef HAVE_TBB
-
-  // Note: Although TBB tasks are allocated using placement
-  // new, we do not need to delete them explicitly
-  BVH::UpdateBoundTask<T, N>& aRootTask = *new ( tbb::task::allocate_root() )
-    BVH::UpdateBoundTask<T, N> (theSet, theBVH, 0, 0, &aHeight);
-
-  tbb::task::spawn_root_and_wait (aRootTask);
-
-#else
-
-  aHeight = BVH::UpdateBounds (theSet, theBVH, 0);
-
-#endif
+  BVH::BoundData<T, N> aBoundData = { theSet, theBVH, 0, 0, &aHeight };
+  BVH::UpdateBoundTask<T, N> aBoundTask (this->IsParallel());
+  aBoundTask (aBoundData);
 
   BVH_Builder<T, N>::updateDepth (theBVH, aHeight);
 }

@@ -1540,6 +1540,7 @@ namespace Xbim
 			}
 		}
 
+		///SRL Need to look at this and consider using DoBoolean framework
 		XbimCompound^ XbimCompound::Cut(XbimCompound^ solids, double tolerance, ILogger^ logger)
 		{
 			if (!IsSewn) Sew();

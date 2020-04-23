@@ -55,6 +55,8 @@ static Standard_Boolean findNearestValidPoint(
   //
   // the general step is computed using general curve resolution
   Standard_Real aStep = theCurve.Resolution(theTol) * 1.01;
+  if (aStep < theEps)
+    aStep = theEps;
   // aD1Mag is a threshold to consider local derivative magnitude too small
   // and to accelerate going out of sphere
   // (inverse of resolution is the maximal derivative);
@@ -101,7 +103,8 @@ static Standard_Boolean findNearestValidPoint(
         // cycle to go out of local singularity
         gp_Vec aD1;
         theCurve.D1(anUOut, aP, aD1);
-        if (aD1.SquareMagnitude() < aD1Mag)
+        isOut = (aP.SquareDistance(theVertPnt) > aSqTol);
+        if (!isOut && aD1.SquareMagnitude() < aD1Mag)
         {
           aStepLocal *= 2.;
           anUOut += aStepLocal;
@@ -157,10 +160,20 @@ Standard_Boolean BRepLib::FindValidRange
 {
   if (theParV2 - theParV1 < Precision::PConfusion())
     return Standard_False;
-  
-  Standard_Real anEps = Max(theCurve.Resolution(theTolE) * 0.1, Precision::PConfusion());
 
-  if (Precision::IsInfinite(theParV1))
+  Standard_Boolean isInfParV1 = Precision::IsInfinite (theParV1),
+                   isInfParV2 = Precision::IsInfinite (theParV2);
+
+  Standard_Real aMaxPar = 0.0;
+  if (!isInfParV1)
+    aMaxPar = Abs (theParV1);
+  if (!isInfParV2)
+    aMaxPar = Max (aMaxPar, Abs (theParV2));
+
+  Standard_Real anEps = Max (Max (theCurve.Resolution (theTolE) * 0.1, Epsilon (aMaxPar)),
+                             Precision::PConfusion());
+
+  if (isInfParV1)
     theFirst = theParV1;
   else
   {
@@ -171,7 +184,7 @@ Standard_Boolean BRepLib::FindValidRange
       return Standard_False;
   }
 
-  if (Precision::IsInfinite(theParV2))
+  if (isInfParV2)
     theLast = theParV2;
   else
   {

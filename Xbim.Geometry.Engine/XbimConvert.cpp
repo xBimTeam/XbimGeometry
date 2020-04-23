@@ -198,7 +198,7 @@ namespace Xbim
 			if (axis2D->RefDirection == nullptr)
 				return gp_Ax3(loc, gp_Dir(0, 0, 1), gp_Vec(1, 0, 0));
 			else
-				return gp_Ax3(loc, gp_Dir(0, 0, 1), gp_Vec(axis2D->RefDirection->X, axis2D->RefDirection->Y, 0));
+				return gp_Ax3(loc, gp_Dir(0, 0, 1), gp_Vec(axis2D->RefDirection->X, axis2D->RefDirection->Y, 0).Normalized());
 		}
 
 		gp_Ax3 XbimConvert::ToAx3(IIfcAxis2Placement3D^ axis3D)
@@ -206,8 +206,10 @@ namespace Xbim
 			gp_XYZ loc(axis3D->Location->X, axis3D->Location->Y, XbimConvert::GetZValueOrZero(axis3D->Location));
 			if (axis3D->Axis != nullptr && axis3D->RefDirection != nullptr) //if one or other is null then use default axis (Ifc Rule)
 			{
-				gp_Dir zDir(axis3D->Axis->X, axis3D->Axis->Y, XbimConvert::GetZValueOrZero(axis3D->Axis));
-				gp_Dir xDir(axis3D->RefDirection->X, axis3D->RefDirection->Y, XbimConvert::GetZValueOrZero(axis3D->RefDirection));
+				gp_Vec zDir(axis3D->Axis->X, axis3D->Axis->Y, XbimConvert::GetZValueOrZero(axis3D->Axis));
+				zDir.Normalize();
+				gp_Vec xDir(axis3D->RefDirection->X, axis3D->RefDirection->Y, XbimConvert::GetZValueOrZero(axis3D->RefDirection));
+				xDir.Normalize();
 				return gp_Ax3(loc, zDir, xDir);
 			}
 			else

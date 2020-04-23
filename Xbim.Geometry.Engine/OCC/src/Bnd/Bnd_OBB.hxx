@@ -20,8 +20,10 @@
 #include <Standard_Handle.hxx>
 #include <Standard_Real.hxx>
 #include <Standard_Boolean.hxx>
+#include <Standard_OStream.hxx>
 
 #include <Bnd_Box.hxx>
+#include <gp_Ax3.hxx>
 #include <gp_Dir.hxx>
 #include <gp_Pnt.hxx>
 #include <gp_XYZ.hxx>
@@ -73,6 +75,13 @@ public:
   //! Constructor to create OBB from AABB.
   Bnd_OBB(const Bnd_Box& theBox) : myIsAABox(Standard_True)
   {
+    if (theBox.IsVoid())
+    {
+      myHDims[0] = myHDims[1] = myHDims[2] = -1.0;
+      myIsAABox = Standard_False;
+      return;
+    }
+
     Standard_Real aX1, aY1, aZ1, aX2, aY2, aZ2;
     theBox.Get(aX1, aY1, aZ1, aX2, aY2, aZ2);
 
@@ -87,12 +96,17 @@ public:
     myCenter.SetCoord(0.5*(aX2 + aX1), 0.5*(aY2 + aY1), 0.5*(aZ2 + aZ1));
   }
 
-  //! Created new OBB covering every point in theListOfPoints.
+  //! Creates new OBB covering every point in theListOfPoints.
   //! Tolerance of every such point is set by *theListOfTolerances array.
   //! If this array is not void (not null-pointer) then the resulted Bnd_OBB
   //! will be enlarged using tolerances of points lying on the box surface.
+  //! <theIsOptimal> flag defines the mode in which the OBB will be built.
+  //! Constructing Optimal box takes more time, but the resulting box is usually
+  //! more tight. In case of construction of Optimal OBB more possible
+  //! axes are checked.
   Standard_EXPORT void ReBuild(const TColgp_Array1OfPnt& theListOfPoints,
-                               const TColStd_Array1OfReal *theListOfTolerances = 0);
+                               const TColStd_Array1OfReal *theListOfTolerances = 0,
+                               const Standard_Boolean theIsOptimal = Standard_False);
 
   //! Sets the center of OBB
   void SetCenter(const gp_Pnt& theCenter)
@@ -129,7 +143,15 @@ public:
     myAxes[2] = theZDirection.XYZ();
     myHDims[2] = theHZSize;
   }
-  
+
+  //! Returns the local coordinates system of this oriented box.
+  //! So that applying it to axis-aligned box ((-XHSize, -YHSize, -ZHSize), (XHSize, YHSize, ZHSize)) will produce this oriented box.
+  //! @code
+  //!   gp_Trsf aLoc;
+  //!   aLoc.SetTransformation (theOBB.Position(), gp::XOY());
+  //! @endcode
+  gp_Ax3 Position() const { return gp_Ax3 (myCenter, ZDirection(), XDirection()); }
+
   //! Returns the center of OBB
   const gp_XYZ& Center() const
   {
@@ -238,9 +260,9 @@ public:
   //! Returns square diagonal of this box
   Standard_Real SquareExtent() const
   {
-    return (4.0*myHDims[0] * myHDims[0] + 
-            myHDims[1] * myHDims[1] +
-            myHDims[1] * myHDims[1]);
+    return 4.0 * (myHDims[0] * myHDims[0] + 
+                  myHDims[1] * myHDims[1] +
+                  myHDims[2] * myHDims[2]);
   }
 
   //! Check if the box do not interfere the other box.
@@ -260,7 +282,11 @@ public:
   //! (which it was created from) and theP.
   Standard_EXPORT void Add(const gp_Pnt& theP);
 
-  protected:
+  //! Dumps the content of me into the stream
+  Standard_EXPORT void DumpJson (Standard_OStream& theOStream, const Standard_Integer theDepth = -1) const;
+
+protected:
+
     void ProcessOnePoint(const gp_Pnt& theP)
     {
       myIsAABox = Standard_True;
