@@ -3,6 +3,19 @@ Branch | Build Status  | MyGet | NuGet
 Master | [![Build Status](https://dev.azure.com/xBIMTeam/xBIMToolkit/_apis/build/status/xBimTeam.XbimGeometry?branchName=master)](https://dev.azure.com/xBIMTeam/xBIMToolkit/_build/latest?definitionId=3&branchName=master) | ![master](https://img.shields.io/myget/xbim-master/v/Xbim.Geometry.svg) | ![](https://img.shields.io/nuget/v/Xbim.Geometry.svg)
 Develop | [![Build Status](https://dev.azure.com/xBIMTeam/xBIMToolkit/_apis/build/status/xBimTeam.XbimGeometry?branchName=develop)](https://dev.azure.com/xBIMTeam/xBIMToolkit/_build/latest?definitionId=3&branchName=develop) | ![](https://img.shields.io/myget/xbim-develop/vpre/Xbim.Geometry.svg) | -
 
+# Version 6
+The key goal for version 6 of the geometry engine are to support net core 3
+
+The first pass will make a clear divide between the native code and the managed code.
+A factory pattern will be implemented for building each of the topological and geometric types these will include
+
+Vertex Factory for building points
+Edge Factory for converting Ifc Edge topologies to BRep edges
+Wire Factory for converting Ifc Wire geometries and topologies to BRep wires
+Face Factory for converting Ifc Face topologies to BRep faces
+Shell Factory for converting Ifc Shell topologies to BRep shells
+Solid Factory for converting Ifc Solids topologies to BRep solids
+
 
 # XbimGeometry
 

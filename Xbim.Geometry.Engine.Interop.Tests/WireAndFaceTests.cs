@@ -17,7 +17,11 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         static private IXbimGeometryEngine geomEngine;
         static private ILoggerFactory loggerFactory;
         static private ILogger logger;
-
+        static protected bool LoggingDelegate(LogLevel logLevel, int ifcLabel, string logMessage)
+        {
+            logger.Log(logLevel, $"Entity #{{IfcLabel}} {logMessage}", ifcLabel);
+            return true;
+        }
         [ClassInitialize]
         static public void Initialise(TestContext context)
         {
