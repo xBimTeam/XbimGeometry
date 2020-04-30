@@ -32,6 +32,17 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             geomEngine = null;
             logger = null;
         }
+
+        [TestMethod]
+        public void Composite_curve_issue_261()
+        {
+            using (var model = MemoryModel.OpenRead(@"TestFiles\Composite_curve_issue_261.ifc"))
+            {
+                var composite_curve = model.Instances.OfType<IIfcCompositeCurve>().FirstOrDefault();
+                var wire = geomEngine.CreateWire(composite_curve);
+            }
+        }
+
         [TestMethod]
         public void TestIfFaceIsPlanar()
         {

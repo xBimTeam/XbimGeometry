@@ -9423,6 +9423,9 @@
     <ClInclude Include="OCC\src\Standard\Standard_ReadLineBuffer.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Factories\WireFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Stdafx.cpp">
@@ -15315,6 +15318,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include=".\OCC\src\IMeshTools\\IMeshTools_ShapeExplorer.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Factories\WireFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
