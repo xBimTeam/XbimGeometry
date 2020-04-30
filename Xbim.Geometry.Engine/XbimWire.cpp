@@ -877,6 +877,7 @@ namespace Xbim
 							if (firstPass)
 							{
 								builder.Add(resultWire, TopoDS::Edge(wireEx.Current()));
+								firstPass = false;
 								continue;
 							}
 							else
