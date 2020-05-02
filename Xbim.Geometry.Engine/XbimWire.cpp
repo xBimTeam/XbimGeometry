@@ -73,6 +73,7 @@
 #include <Adaptor3d_HCurve.hxx>
 #include <BRepAdaptor_HCurve.hxx>
 #include <ShapeAnalysis_WireOrder.hxx>
+#include "Factories/WireFactory.h"
 using namespace Xbim::Common;
 using namespace System::Linq;
 // using namespace System::Diagnostics;
@@ -845,7 +846,7 @@ namespace Xbim
 			//BRepBuilderAPI_MakeWire converter;
 			ShapeFix_ShapeTolerance fTol;
 			double fiveMilli = 5 * cCurve->Model->ModelFactors->OneMilliMeter; //we are going to accept that a gap of 5mm is not a gap
-
+			TopTools_ListOfShape edges;
 
 			bool firstPass = true;
 			bool isContinuous = true; //assume continuous or closed unless last segment is discontinuous
@@ -872,8 +873,10 @@ namespace Xbim
 					if (xbimWire->IsValid )
 					{
 						TopoDS_Wire segWire = xbimWire;
+						
 						for (BRepTools_WireExplorer wireEx(segWire); wireEx.More(); wireEx.Next())
 						{
+							edges.Append(wireEx.Current());
 							if (firstPass)
 							{
 								builder.Add(resultWire, TopoDS::Edge(wireEx.Current()));
@@ -969,10 +972,14 @@ namespace Xbim
 					}
 					segIdx++;
 				}
+				TopoDS_Wire nativeWire;
+			
+				int status = WireFactory::Make(cCurve->EntityLabel,"IfcCompositeCurve", edges, cCurve->Model->ModelFactors->OneMilliMeter, nativeWire);
+				XbimWire^ nw = gcnew XbimWire(nativeWire);
 				pWire = new TopoDS_Wire();
 				*pWire = resultWire;
 				fTol.LimitTolerance(*pWire, tolerance);
-			
+				
 		}
 		//This is going to be added to to the selected vertex and the tolerances will be adjusted. the duplicate points will be removed
 		void XbimWire::ModifyWireAddEdge(TopoDS_Wire& resultWire, const TopoDS_Edge& edgeToAdd, const TopoDS_Vertex& edgeVertexToJoin, gp_Pnt edgePointToJoin, const TopoDS_Vertex&

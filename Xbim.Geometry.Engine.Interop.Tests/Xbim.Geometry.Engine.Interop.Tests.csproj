@@ -1,11 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net47</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <IsPackable>false</IsPackable>
     <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\XbimOpenSourceKeyFile.snk</AssemblyOriginatorKeyFile>
+    <Configurations>Debug;Release;x86Debug</Configurations>
+    <Platforms>AnyCPU;x86</Platforms>
     
     
   </PropertyGroup>
@@ -14,13 +16,25 @@
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='x86Debug|AnyCPU'">
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='x86Debug|x86'">
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Include="..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\Xbim.Geometry.Engine32.dll" Link="Xbim.Geometry.Engine32.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\Xbim.Geometry.Engine64.dll" Link="Xbim.Geometry.Engine64.dll">
+    <!--<None Include="..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\Xbim.Geometry.Engine64.dll" Link="Xbim.Geometry.Engine64.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </None>-->
   </ItemGroup>
 
   <ItemGroup>

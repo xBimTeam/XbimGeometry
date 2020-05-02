@@ -2,6 +2,7 @@
 #include "XbimVertex.h"
 #include "XbimVertex.h"
 #include "XbimEdge.h"
+#include "Services/Native/LoggingService.h"
 using namespace System;
 using namespace System::IO;
 using namespace Xbim::Common;
@@ -20,7 +21,7 @@ namespace Xbim
 {
 	namespace Geometry
 	{
-
+		public delegate void LogDelegate(int logLevel, int entityLabel, String^ ifcType, String^ str);
 		public ref class XbimGeometryCreator : IXbimGeometryEngine
 		{
 			
@@ -36,9 +37,33 @@ namespace Xbim
 
 			static String^ SurfaceOfLinearExtrusion = "#SurfaceOfLinearExtrusion";
 			static String^ PolylineTrimLengthOneForEntireLine = "#PolylineTrimLengthOneForEntireLine";
+			static void Log(int logLevel, int entityLabel, String^ ifcType, String ^ msg)
+			{
+				/*switch (logLevel)
+				{
+				case 5:
+				case 4:
+					LoggerExtensions::LogError(_logger, "GeomEngine: #{0}={1} [{2}]", entityLabel, ifcType, msg);
+					break;
+				case 3:
+					LoggerExtensions::LogWarning(_logger, "GeomEngine: #{0}={1} [{2}]", entityLabel, ifcType, msg);
+					break;
+				case 2:
+					LoggerExtensions::LogInformation(_logger, "GeomEngine: #{0}={1} [{2}]", entityLabel, ifcType, msg);
+					break;
+				case 1:
+					LoggerExtensions::LogDebug(_logger, "GeomEngine: #{0}={1} [{2}]", entityLabel, ifcType, msg);
+					break;
+				default:
+					break;
+				}*/
 
-		private:
+			}
 			
+		private:
+			static ILogger^ _logger;
+			static LogDelegate^ LogWriter;
+			static System::Runtime::InteropServices::GCHandle gchLogWriter;
 			IXbimGeometryObject ^ Trim(XbimSetObject ^geometryObject);
 			static XbimGeometryCreator()
 			{
@@ -56,16 +81,23 @@ namespace Xbim
 				String^ ignoreIfcSweptDiskSolidParamsString = ConfigurationManager::AppSettings["IgnoreIfcSweptDiskSolidParams"];
 				if(!bool::TryParse(ignoreIfcSweptDiskSolidParamsString,IgnoreIfcSweptDiskSolidParams))
 					IgnoreIfcSweptDiskSolidParams = false;
-				
+				//setup logging
+				_logger = XbimLogging::CreateLogger<XbimGeometryCreator^>();
+				//setup native logging service
+				LogWriter = gcnew LogDelegate(&XbimGeometryCreator::Log);
+				gchLogWriter = System::Runtime::InteropServices::GCHandle::Alloc(XbimGeometryCreator::LogWriter);
+				IntPtr ip = System::Runtime::InteropServices::Marshal::GetFunctionPointerForDelegate(XbimGeometryCreator::LogWriter);				
+				LoggingService::InitNativeLogging( static_cast<WriteLog>(ip.ToPointer()));
 			}
 		protected:
 			~XbimGeometryCreator()
 			{
+				gchLogWriter.Free();
 			}
 				
 		public:
-
 			
+				
 			//Central point for logging all errors
 			static void LogInfo(ILogger^ logger, Object^ entity, String^ format, ... array<Object^>^ arg);
 			static void LogWarning(ILogger^ logger, Object^ entity, String^ format, ... array<Object^>^ arg);

@@ -58,6 +58,7 @@ namespace Xbim.Geometry.Engine.Interop
                 }
 
                 _logger.LogDebug("XbimGeometryEngine constructed successfully");
+                
             }
             catch (Exception e)
             {

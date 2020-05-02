@@ -19,6 +19,7 @@ namespace Xbim
 {
 	namespace Geometry
 	{
+		
 		ref class XbimWire : IXbimWire, XbimOccShape
 		{
 		private:
@@ -78,7 +79,7 @@ namespace Xbim
 			
 			
 		public:
-
+			
 #pragma region destructors
 
 			~XbimWire() { InstanceCleanup(); }
