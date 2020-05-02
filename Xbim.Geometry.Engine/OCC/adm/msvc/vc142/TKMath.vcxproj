@@ -1,0 +1,934 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{7AEB42BE-0908-080B-0700-7EDE2329D6DB}</ProjectGuid>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\..\..\..\win32\vc14\bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\..\..\..\win32\vc14\obj\TKMath\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\..\..\..\win32\vc14\bind\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\..\..\..\win32\vc14\objd\TKMath\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\..\..\..\win64\vc14\bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\..\..\..\win64\vc14\obj\TKMath\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\..\..\..\win64\vc14\bind\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\..\..\..\win64\vc14\objd\TKMath\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\..\..\..\win32\vc14\bin\TKMath.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>OCCT_STATIC_BUILD;HAVE_NO_DLL;NDEBUG;No_Exception;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <AssemblerListingLocation>.\..\..\..\win32\vc14\obj\TKMath/</AssemblerListingLocation>
+      <ObjectFileName>.\..\..\..\win32\vc14\obj\TKMath/</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\..\..\win32\vc14\obj\TKMath/</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;No_Exception;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>TKernel.lib</AdditionalDependencies>
+      <OutputFile>.\..\..\..\win32\vc14\bin\TKMath.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\win32\vc14\lib;$(CSF_OPT_LIB32);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>no</GenerateDebugInformation>
+      <ProgramDatabaseFile>.\..\..\..\win32\vc14\bin\TKMath.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <ImportLibrary>..\..\..\win32\vc14\lib\TKMath.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\..\..\..\win32\vc14\bind\TKMath.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>Disabled</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>OCCT_STATIC_BUILD;HAVE_NO_DLL;_DEBUG;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <AssemblerListingLocation>.\..\..\..\win32\vc14\objd\TKMath/</AssemblerListingLocation>
+      <ObjectFileName>.\..\..\..\win32\vc14\objd\TKMath/</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\..\..\win32\vc14\objd\TKMath/</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>TKernel.lib</AdditionalDependencies>
+      <OutputFile>.\..\..\..\win32\vc14\bind\TKMath.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\win32\vc14\libd;$(CSF_OPT_LIB32D);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>..\..\..\win32\vc14\bind\TKMath.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <ImportLibrary>..\..\..\win32\vc14\libd\TKMath.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>x64</TargetEnvironment>
+      <TypeLibraryName>.\..\..\..\win64\vc14\bin\TKMath.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>NDEBUG;No_Exception;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <AssemblerListingLocation>.\..\..\..\win64\vc14\obj\TKMath/</AssemblerListingLocation>
+      <ObjectFileName>.\..\..\..\win64\vc14\obj\TKMath/</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\..\..\win64\vc14\obj\TKMath/</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;No_Exception;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>TKernel.lib</AdditionalDependencies>
+      <OutputFile>.\..\..\..\win64\vc14\bin\TKMath.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\win64\vc14\lib;$(CSF_OPT_LIB64);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>no</GenerateDebugInformation>
+      <ProgramDatabaseFile>.\..\..\..\win64\vc14\bin\TKMath.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <ImportLibrary>..\..\..\win64\vc14\lib\TKMath.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>x64</TargetEnvironment>
+      <TypeLibraryName>.\..\..\..\win64\vc14\bind\TKMath.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>Disabled</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>_DEBUG;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <AssemblerListingLocation>.\..\..\..\win64\vc14\objd\TKMath/</AssemblerListingLocation>
+      <ObjectFileName>.\..\..\..\win64\vc14\objd\TKMath/</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\..\..\win64\vc14\objd\TKMath/</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>TKernel.lib</AdditionalDependencies>
+      <OutputFile>.\..\..\..\win64\vc14\bind\TKMath.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\win64\vc14\libd;$(CSF_OPT_LIB64D);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>..\..\..\win64\vc14\bind\TKMath.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <ImportLibrary>..\..\..\win64\vc14\libd\TKMath.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\math\math.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_BFGS.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_BissecNewton.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_BracketMinimum.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_BracketedRoot.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_BrentMinimum.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_ComputeGaussPointsAndWeights.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_ComputeKronrodPointsAndWeights.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_Crout.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_DirectPolynomialRoots.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_DoubleTab.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_EigenValuesSearcher.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_FRPR.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_Function.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_FunctionAllRoots.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_FunctionRoot.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_FunctionRoots.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_FunctionSample.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_FunctionSet.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_FunctionSetRoot.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_FunctionWithDerivative.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_Gauss.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_GaussLeastSquare.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_GaussMultipleIntegration.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_GaussSetIntegration.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_GaussSingleIntegration.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_GlobOptMin.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_Householder.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_IntegerVector.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_Jacobi.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_Kronrod.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_KronrodSingleIntegration.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_Matrix.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_MultipleVarFunction.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_NewtonFunctionRoot.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_NewtonFunctionSetRoot.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_NewtonMinimum.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_PSO.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_PSOParticlesPool.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_Powell.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_Recipes.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_SVD.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_TrigonometricFunctionRoots.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_Uzawa.cxx" />
+    <ClCompile Include="..\..\..\src\math\math_Vector.cxx" />
+    <ClInclude Include="..\..\..\src\math\math.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_Array1OfValueAndWeight.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_BFGS.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_BFGS.lxx" />
+    <ClInclude Include="..\..\..\src\math\math_BissecNewton.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_BissecNewton.lxx" />
+    <ClInclude Include="..\..\..\src\math\math_BracketMinimum.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_BracketMinimum.lxx" />
+    <ClInclude Include="..\..\..\src\math\math_BracketedRoot.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_BracketedRoot.lxx" />
+    <ClInclude Include="..\..\..\src\math\math_BrentMinimum.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_BrentMinimum.lxx" />
+    <ClInclude Include="..\..\..\src\math\math_BullardGenerator.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_ComputeGaussPointsAndWeights.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_ComputeKronrodPointsAndWeights.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_Crout.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_Crout.lxx" />
+    <ClInclude Include="..\..\..\src\math\math_DirectPolynomialRoots.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_DirectPolynomialRoots.lxx" />
+    <ClInclude Include="..\..\..\src\math\math_DoubleTab.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_DoubleTab.lxx" />
+    <ClInclude Include="..\..\..\src\math\math_EigenValuesSearcher.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_FRPR.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_FRPR.lxx" />
+    <ClInclude Include="..\..\..\src\math\math_Function.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_FunctionAllRoots.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_FunctionAllRoots.lxx" />
+    <ClInclude Include="..\..\..\src\math\math_FunctionRoot.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_FunctionRoot.lxx" />
+    <ClInclude Include="..\..\..\src\math\math_FunctionRoots.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_FunctionRoots.lxx" />
+    <ClInclude Include="..\..\..\src\math\math_FunctionSample.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_FunctionSet.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_FunctionSetRoot.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_FunctionSetRoot.lxx" />
+    <ClInclude Include="..\..\..\src\math\math_FunctionSetWithDerivatives.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_FunctionWithDerivative.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_Gauss.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_GaussLeastSquare.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_GaussLeastSquare.lxx" />
+    <ClInclude Include="..\..\..\src\math\math_GaussMultipleIntegration.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_GaussMultipleIntegration.lxx" />
+    <ClInclude Include="..\..\..\src\math\math_GaussPoints.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_GaussSetIntegration.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_GaussSetIntegration.lxx" />
+    <ClInclude Include="..\..\..\src\math\math_GaussSingleIntegration.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_GaussSingleIntegration.lxx" />
+    <ClInclude Include="..\..\..\src\math\math_GlobOptMin.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_Householder.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_Householder.lxx" />
+    <ClInclude Include="..\..\..\src\math\math_IntegerVector.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_Jacobi.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_Jacobi.lxx" />
+    <ClInclude Include="..\..\..\src\math\math_KronrodSingleIntegration.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_KronrodSingleIntegration.lxx" />
+    <ClInclude Include="..\..\..\src\math\math_Matrix.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_Matrix.lxx" />
+    <ClInclude Include="..\..\..\src\math\math_MultipleVarFunction.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_MultipleVarFunctionWithGradient.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_MultipleVarFunctionWithHessian.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_NewtonFunctionRoot.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_NewtonFunctionRoot.lxx" />
+    <ClInclude Include="..\..\..\src\math\math_NewtonFunctionSetRoot.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_NewtonFunctionSetRoot.lxx" />
+    <ClInclude Include="..\..\..\src\math\math_NewtonMinimum.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_NewtonMinimum.lxx" />
+    <ClInclude Include="..\..\..\src\math\math_NotSquare.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_PSO.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_PSOParticlesPool.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_Powell.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_Powell.lxx" />
+    <ClInclude Include="..\..\..\src\math\math_Recipes.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_SVD.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_SVD.lxx" />
+    <ClInclude Include="..\..\..\src\math\math_SingularMatrix.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_Status.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_TrigonometricEquationFunction.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_TrigonometricFunctionRoots.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_TrigonometricFunctionRoots.lxx" />
+    <ClInclude Include="..\..\..\src\math\math_Uzawa.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_Uzawa.lxx" />
+    <ClInclude Include="..\..\..\src\math\math_ValueAndWeight.hxx" />
+    <ClInclude Include="..\..\..\src\math\math_Vector.hxx" />
+    <ClCompile Include="..\..\..\src\ElCLib\ElCLib.cxx" />
+    <ClInclude Include="..\..\..\src\ElCLib\ElCLib.hxx" />
+    <ClInclude Include="..\..\..\src\ElCLib\ElCLib.lxx" />
+    <ClCompile Include="..\..\..\src\ElSLib\ElSLib.cxx" />
+    <ClInclude Include="..\..\..\src\ElSLib\ElSLib.hxx" />
+    <ClInclude Include="..\..\..\src\ElSLib\ElSLib.lxx" />
+    <ClCompile Include="..\..\..\src\BSplCLib\BSplCLib.cxx" />
+    <ClCompile Include="..\..\..\src\BSplCLib\BSplCLib_1.cxx" />
+    <ClCompile Include="..\..\..\src\BSplCLib\BSplCLib_2.cxx" />
+    <ClCompile Include="..\..\..\src\BSplCLib\BSplCLib_3.cxx" />
+    <ClCompile Include="..\..\..\src\BSplCLib\BSplCLib_BzSyntaxes.cxx" />
+    <ClCompile Include="..\..\..\src\BSplCLib\BSplCLib_Cache.cxx" />
+    <ClInclude Include="..\..\..\src\BSplCLib\BSplCLib.hxx" />
+    <ClInclude Include="..\..\..\src\BSplCLib\BSplCLib.lxx" />
+    <ClInclude Include="..\..\..\src\BSplCLib\BSplCLib_Cache.hxx" />
+    <ClInclude Include="..\..\..\src\BSplCLib\BSplCLib_CacheParams.hxx" />
+    <ClInclude Include="..\..\..\src\BSplCLib\BSplCLib_CurveComputation.gxx" />
+    <ClInclude Include="..\..\..\src\BSplCLib\BSplCLib_EvaluatorFunction.hxx" />
+    <ClInclude Include="..\..\..\src\BSplCLib\BSplCLib_KnotDistribution.hxx" />
+    <ClInclude Include="..\..\..\src\BSplCLib\BSplCLib_MultDistribution.hxx" />
+    <ClCompile Include="..\..\..\src\BSplSLib\BSplSLib.cxx" />
+    <ClCompile Include="..\..\..\src\BSplSLib\BSplSLib_BzSyntaxes.cxx" />
+    <ClCompile Include="..\..\..\src\BSplSLib\BSplSLib_Cache.cxx" />
+    <ClInclude Include="..\..\..\src\BSplSLib\BSplSLib.hxx" />
+    <ClInclude Include="..\..\..\src\BSplSLib\BSplSLib.lxx" />
+    <ClInclude Include="..\..\..\src\BSplSLib\BSplSLib_Cache.hxx" />
+    <ClInclude Include="..\..\..\src\BSplSLib\BSplSLib_EvaluatorFunction.hxx" />
+    <ClCompile Include="..\..\..\src\PLib\PLib.cxx" />
+    <ClCompile Include="..\..\..\src\PLib\PLib_Base.cxx" />
+    <ClCompile Include="..\..\..\src\PLib\PLib_DoubleJacobiPolynomial.cxx" />
+    <ClCompile Include="..\..\..\src\PLib\PLib_HermitJacobi.cxx" />
+    <ClCompile Include="..\..\..\src\PLib\PLib_JacobiPolynomial.cxx" />
+    <ClInclude Include="..\..\..\src\PLib\PLib.hxx" />
+    <ClInclude Include="..\..\..\src\PLib\PLib_Base.hxx" />
+    <ClInclude Include="..\..\..\src\PLib\PLib_DoubleJacobiPolynomial.hxx" />
+    <ClInclude Include="..\..\..\src\PLib\PLib_DoubleJacobiPolynomial.lxx" />
+    <ClInclude Include="..\..\..\src\PLib\PLib_HermitJacobi.hxx" />
+    <ClInclude Include="..\..\..\src\PLib\PLib_HermitJacobi.lxx" />
+    <ClInclude Include="..\..\..\src\PLib\PLib_JacobiPolynomial.hxx" />
+    <ClInclude Include="..\..\..\src\PLib\PLib_JacobiPolynomial.lxx" />
+    <ClInclude Include="..\..\..\src\PLib\PLib_JacobiPolynomial_Data.pxx" />
+    <ClInclude Include="..\..\..\src\Precision\Precision.hxx" />
+    <ClInclude Include="..\..\..\src\GeomAbs\GeomAbs_BSplKnotDistribution.hxx" />
+    <ClInclude Include="..\..\..\src\GeomAbs\GeomAbs_CurveForm.hxx" />
+    <ClInclude Include="..\..\..\src\GeomAbs\GeomAbs_CurveType.hxx" />
+    <ClInclude Include="..\..\..\src\GeomAbs\GeomAbs_IsoType.hxx" />
+    <ClInclude Include="..\..\..\src\GeomAbs\GeomAbs_JoinType.hxx" />
+    <ClInclude Include="..\..\..\src\GeomAbs\GeomAbs_Shape.hxx" />
+    <ClInclude Include="..\..\..\src\GeomAbs\GeomAbs_SurfaceForm.hxx" />
+    <ClInclude Include="..\..\..\src\GeomAbs\GeomAbs_SurfaceType.hxx" />
+    <ClInclude Include="..\..\..\src\GeomAbs\GeomAbs_UVSense.hxx" />
+    <ClCompile Include="..\..\..\src\Poly\Poly.cxx" />
+    <ClCompile Include="..\..\..\src\Poly\Poly_CoherentLink.cxx" />
+    <ClCompile Include="..\..\..\src\Poly\Poly_CoherentNode.cxx" />
+    <ClCompile Include="..\..\..\src\Poly\Poly_CoherentTriPtr.cxx" />
+    <ClCompile Include="..\..\..\src\Poly\Poly_CoherentTriangle.cxx" />
+    <ClCompile Include="..\..\..\src\Poly\Poly_CoherentTriangulation.cxx" />
+    <ClCompile Include="..\..\..\src\Poly\Poly_Connect.cxx" />
+    <ClCompile Include="..\..\..\src\Poly\Poly_MakeLoops.cxx" />
+    <ClCompile Include="..\..\..\src\Poly\Poly_Polygon2D.cxx" />
+    <ClCompile Include="..\..\..\src\Poly\Poly_Polygon3D.cxx" />
+    <ClCompile Include="..\..\..\src\Poly\Poly_PolygonOnTriangulation.cxx" />
+    <ClCompile Include="..\..\..\src\Poly\Poly_Triangle.cxx" />
+    <ClCompile Include="..\..\..\src\Poly\Poly_Triangulation.cxx" />
+    <ClInclude Include="..\..\..\src\Poly\Poly.hxx" />
+    <ClInclude Include="..\..\..\src\Poly\Poly_Array1OfTriangle.hxx" />
+    <ClInclude Include="..\..\..\src\Poly\Poly_CoherentLink.hxx" />
+    <ClInclude Include="..\..\..\src\Poly\Poly_CoherentNode.hxx" />
+    <ClInclude Include="..\..\..\src\Poly\Poly_CoherentTriPtr.hxx" />
+    <ClInclude Include="..\..\..\src\Poly\Poly_CoherentTriangle.hxx" />
+    <ClInclude Include="..\..\..\src\Poly\Poly_CoherentTriangulation.hxx" />
+    <ClInclude Include="..\..\..\src\Poly\Poly_Connect.hxx" />
+    <ClInclude Include="..\..\..\src\Poly\Poly_HArray1OfTriangle.hxx" />
+    <ClInclude Include="..\..\..\src\Poly\Poly_ListOfTriangulation.hxx" />
+    <ClInclude Include="..\..\..\src\Poly\Poly_MakeLoops.hxx" />
+    <ClInclude Include="..\..\..\src\Poly\Poly_Polygon2D.hxx" />
+    <ClInclude Include="..\..\..\src\Poly\Poly_Polygon2D.lxx" />
+    <ClInclude Include="..\..\..\src\Poly\Poly_Polygon3D.hxx" />
+    <ClInclude Include="..\..\..\src\Poly\Poly_Polygon3D.lxx" />
+    <ClInclude Include="..\..\..\src\Poly\Poly_PolygonOnTriangulation.hxx" />
+    <ClInclude Include="..\..\..\src\Poly\Poly_PolygonOnTriangulation.lxx" />
+    <ClInclude Include="..\..\..\src\Poly\Poly_Triangle.hxx" />
+    <ClInclude Include="..\..\..\src\Poly\Poly_Triangle.lxx" />
+    <ClInclude Include="..\..\..\src\Poly\Poly_Triangulation.hxx" />
+    <ClCompile Include="..\..\..\src\CSLib\CSLib.cxx" />
+    <ClCompile Include="..\..\..\src\CSLib\CSLib_Class2d.cxx" />
+    <ClCompile Include="..\..\..\src\CSLib\CSLib_NormalPolyDef.cxx" />
+    <ClInclude Include="..\..\..\src\CSLib\CSLib.hxx" />
+    <ClInclude Include="..\..\..\src\CSLib\CSLib_Class2d.hxx" />
+    <ClInclude Include="..\..\..\src\CSLib\CSLib_DerivativeStatus.hxx" />
+    <ClInclude Include="..\..\..\src\CSLib\CSLib_NormalPolyDef.hxx" />
+    <ClInclude Include="..\..\..\src\CSLib\CSLib_NormalStatus.hxx" />
+    <ClCompile Include="..\..\..\src\Convert\Convert_CircleToBSplineCurve.cxx" />
+    <ClCompile Include="..\..\..\src\Convert\Convert_CompBezierCurves2dToBSplineCurve2d.cxx" />
+    <ClCompile Include="..\..\..\src\Convert\Convert_CompBezierCurvesToBSplineCurve.cxx" />
+    <ClCompile Include="..\..\..\src\Convert\Convert_CompPolynomialToPoles.cxx" />
+    <ClCompile Include="..\..\..\src\Convert\Convert_ConeToBSplineSurface.cxx" />
+    <ClCompile Include="..\..\..\src\Convert\Convert_ConicToBSplineCurve.cxx" />
+    <ClCompile Include="..\..\..\src\Convert\Convert_CylinderToBSplineSurface.cxx" />
+    <ClCompile Include="..\..\..\src\Convert\Convert_ElementarySurfaceToBSplineSurface.cxx" />
+    <ClCompile Include="..\..\..\src\Convert\Convert_EllipseToBSplineCurve.cxx" />
+    <ClCompile Include="..\..\..\src\Convert\Convert_GridPolynomialToPoles.cxx" />
+    <ClCompile Include="..\..\..\src\Convert\Convert_HyperbolaToBSplineCurve.cxx" />
+    <ClCompile Include="..\..\..\src\Convert\Convert_ParabolaToBSplineCurve.cxx" />
+    <ClCompile Include="..\..\..\src\Convert\Convert_PolynomialCosAndSin.cxx" />
+    <ClCompile Include="..\..\..\src\Convert\Convert_SphereToBSplineSurface.cxx" />
+    <ClCompile Include="..\..\..\src\Convert\Convert_TorusToBSplineSurface.cxx" />
+    <ClInclude Include="..\..\..\src\Convert\Convert_CircleToBSplineCurve.hxx" />
+    <ClInclude Include="..\..\..\src\Convert\Convert_CompBezierCurves2dToBSplineCurve2d.hxx" />
+    <ClInclude Include="..\..\..\src\Convert\Convert_CompBezierCurvesToBSplineCurve.hxx" />
+    <ClInclude Include="..\..\..\src\Convert\Convert_CompPolynomialToPoles.hxx" />
+    <ClInclude Include="..\..\..\src\Convert\Convert_ConeToBSplineSurface.hxx" />
+    <ClInclude Include="..\..\..\src\Convert\Convert_ConicToBSplineCurve.hxx" />
+    <ClInclude Include="..\..\..\src\Convert\Convert_CosAndSinEvalFunction.hxx" />
+    <ClInclude Include="..\..\..\src\Convert\Convert_CylinderToBSplineSurface.hxx" />
+    <ClInclude Include="..\..\..\src\Convert\Convert_ElementarySurfaceToBSplineSurface.hxx" />
+    <ClInclude Include="..\..\..\src\Convert\Convert_EllipseToBSplineCurve.hxx" />
+    <ClInclude Include="..\..\..\src\Convert\Convert_GridPolynomialToPoles.hxx" />
+    <ClInclude Include="..\..\..\src\Convert\Convert_HyperbolaToBSplineCurve.hxx" />
+    <ClInclude Include="..\..\..\src\Convert\Convert_ParabolaToBSplineCurve.hxx" />
+    <ClInclude Include="..\..\..\src\Convert\Convert_ParameterisationType.hxx" />
+    <ClInclude Include="..\..\..\src\Convert\Convert_PolynomialCosAndSin.hxx" />
+    <ClInclude Include="..\..\..\src\Convert\Convert_SequenceOfArray1OfPoles.hxx" />
+    <ClInclude Include="..\..\..\src\Convert\Convert_SequenceOfArray1OfPoles2d.hxx" />
+    <ClInclude Include="..\..\..\src\Convert\Convert_SphereToBSplineSurface.hxx" />
+    <ClInclude Include="..\..\..\src\Convert\Convert_TorusToBSplineSurface.hxx" />
+    <ClCompile Include="..\..\..\src\Bnd\Bnd_B2d_0.cxx" />
+    <ClCompile Include="..\..\..\src\Bnd\Bnd_B2f_0.cxx" />
+    <ClCompile Include="..\..\..\src\Bnd\Bnd_B3d_0.cxx" />
+    <ClCompile Include="..\..\..\src\Bnd\Bnd_B3f_0.cxx" />
+    <ClCompile Include="..\..\..\src\Bnd\Bnd_BoundSortBox.cxx" />
+    <ClCompile Include="..\..\..\src\Bnd\Bnd_BoundSortBox2d.cxx" />
+    <ClCompile Include="..\..\..\src\Bnd\Bnd_Box.cxx" />
+    <ClCompile Include="..\..\..\src\Bnd\Bnd_Box2d.cxx" />
+    <ClCompile Include="..\..\..\src\Bnd\Bnd_OBB.cxx" />
+    <ClCompile Include="..\..\..\src\Bnd\Bnd_Range.cxx" />
+    <ClCompile Include="..\..\..\src\Bnd\Bnd_Sphere.cxx" />
+    <ClInclude Include="..\..\..\src\Bnd\Bnd_Array1OfBox.hxx" />
+    <ClInclude Include="..\..\..\src\Bnd\Bnd_Array1OfBox2d.hxx" />
+    <ClInclude Include="..\..\..\src\Bnd\Bnd_Array1OfSphere.hxx" />
+    <ClInclude Include="..\..\..\src\Bnd\Bnd_B2d.hxx" />
+    <ClInclude Include="..\..\..\src\Bnd\Bnd_B2f.hxx" />
+    <ClInclude Include="..\..\..\src\Bnd\Bnd_B2x.gxx" />
+    <ClInclude Include="..\..\..\src\Bnd\Bnd_B2x.lxx" />
+    <ClInclude Include="..\..\..\src\Bnd\Bnd_B3d.hxx" />
+    <ClInclude Include="..\..\..\src\Bnd\Bnd_B3f.hxx" />
+    <ClInclude Include="..\..\..\src\Bnd\Bnd_B3x.gxx" />
+    <ClInclude Include="..\..\..\src\Bnd\Bnd_B3x.lxx" />
+    <ClInclude Include="..\..\..\src\Bnd\Bnd_BoundSortBox.hxx" />
+    <ClInclude Include="..\..\..\src\Bnd\Bnd_BoundSortBox2d.hxx" />
+    <ClInclude Include="..\..\..\src\Bnd\Bnd_Box.hxx" />
+    <ClInclude Include="..\..\..\src\Bnd\Bnd_Box2d.hxx" />
+    <ClInclude Include="..\..\..\src\Bnd\Bnd_HArray1OfBox.hxx" />
+    <ClInclude Include="..\..\..\src\Bnd\Bnd_HArray1OfBox2d.hxx" />
+    <ClInclude Include="..\..\..\src\Bnd\Bnd_HArray1OfSphere.hxx" />
+    <ClInclude Include="..\..\..\src\Bnd\Bnd_OBB.hxx" />
+    <ClInclude Include="..\..\..\src\Bnd\Bnd_Range.hxx" />
+    <ClInclude Include="..\..\..\src\Bnd\Bnd_SeqOfBox.hxx" />
+    <ClInclude Include="..\..\..\src\Bnd\Bnd_Sphere.hxx" />
+    <ClInclude Include="..\..\..\src\Bnd\Bnd_Sphere.lxx" />
+    <ClInclude Include="..\..\..\src\Bnd\Bnd_Tools.hxx" />
+    <ClCompile Include="..\..\..\src\BVH\BVH.cxx" />
+    <ClCompile Include="..\..\..\src\BVH\BVH_BuildQueue.cxx" />
+    <ClCompile Include="..\..\..\src\BVH\BVH_BuildThread.cxx" />
+    <ClCompile Include="..\..\..\src\BVH\BVH_Properties.cxx" />
+    <ClInclude Include="..\..\..\src\BVH\BVH_BinaryTree.hxx" />
+    <ClInclude Include="..\..\..\src\BVH\BVH_BinnedBuilder.hxx" />
+    <ClInclude Include="..\..\..\src\BVH\BVH_Box.hxx" />
+    <ClInclude Include="..\..\..\src\BVH\BVH_BoxSet.hxx" />
+    <ClInclude Include="..\..\..\src\BVH\BVH_BuildQueue.hxx" />
+    <ClInclude Include="..\..\..\src\BVH\BVH_BuildThread.hxx" />
+    <ClInclude Include="..\..\..\src\BVH\BVH_Builder.hxx" />
+    <ClInclude Include="..\..\..\src\BVH\BVH_Constants.hxx" />
+    <ClInclude Include="..\..\..\src\BVH\BVH_Distance.hxx" />
+    <ClInclude Include="..\..\..\src\BVH\BVH_DistanceField.hxx" />
+    <ClInclude Include="..\..\..\src\BVH\BVH_DistanceField.lxx" />
+    <ClInclude Include="..\..\..\src\BVH\BVH_Geometry.hxx" />
+    <ClInclude Include="..\..\..\src\BVH\BVH_IndexedBoxSet.hxx" />
+    <ClInclude Include="..\..\..\src\BVH\BVH_LinearBuilder.hxx" />
+    <ClInclude Include="..\..\..\src\BVH\BVH_Object.hxx" />
+    <ClInclude Include="..\..\..\src\BVH\BVH_ObjectSet.hxx" />
+    <ClInclude Include="..\..\..\src\BVH\BVH_PairDistance.hxx" />
+    <ClInclude Include="..\..\..\src\BVH\BVH_PrimitiveSet.hxx" />
+    <ClInclude Include="..\..\..\src\BVH\BVH_PrimitiveSet3d.hxx" />
+    <ClInclude Include="..\..\..\src\BVH\BVH_Properties.hxx" />
+    <ClInclude Include="..\..\..\src\BVH\BVH_QuadTree.hxx" />
+    <ClInclude Include="..\..\..\src\BVH\BVH_QueueBuilder.hxx" />
+    <ClInclude Include="..\..\..\src\BVH\BVH_QuickSorter.hxx" />
+    <ClInclude Include="..\..\..\src\BVH\BVH_RadixSorter.hxx" />
+    <ClInclude Include="..\..\..\src\BVH\BVH_Set.hxx" />
+    <ClInclude Include="..\..\..\src\BVH\BVH_Sorter.hxx" />
+    <ClInclude Include="..\..\..\src\BVH\BVH_SpatialMedianBuilder.hxx" />
+    <ClInclude Include="..\..\..\src\BVH\BVH_SweepPlaneBuilder.hxx" />
+    <ClInclude Include="..\..\..\src\BVH\BVH_Tools.hxx" />
+    <ClInclude Include="..\..\..\src\BVH\BVH_Traverse.hxx" />
+    <ClInclude Include="..\..\..\src\BVH\BVH_Traverse.lxx" />
+    <ClInclude Include="..\..\..\src\BVH\BVH_Tree.hxx" />
+    <ClInclude Include="..\..\..\src\BVH\BVH_Triangulation.hxx" />
+    <ClInclude Include="..\..\..\src\BVH\BVH_Types.hxx" />
+    <ClCompile Include="..\..\..\src\gp\gp.cxx" />
+    <ClCompile Include="..\..\..\src\gp\gp_Ax1.cxx" />
+    <ClCompile Include="..\..\..\src\gp\gp_Ax2.cxx" />
+    <ClCompile Include="..\..\..\src\gp\gp_Ax22d.cxx" />
+    <ClCompile Include="..\..\..\src\gp\gp_Ax2d.cxx" />
+    <ClCompile Include="..\..\..\src\gp\gp_Ax3.cxx" />
+    <ClCompile Include="..\..\..\src\gp\gp_Circ.cxx" />
+    <ClCompile Include="..\..\..\src\gp\gp_Circ2d.cxx" />
+    <ClCompile Include="..\..\..\src\gp\gp_Cone.cxx" />
+    <ClCompile Include="..\..\..\src\gp\gp_Cylinder.cxx" />
+    <ClCompile Include="..\..\..\src\gp\gp_Dir.cxx" />
+    <ClCompile Include="..\..\..\src\gp\gp_Dir2d.cxx" />
+    <ClCompile Include="..\..\..\src\gp\gp_Elips.cxx" />
+    <ClCompile Include="..\..\..\src\gp\gp_Elips2d.cxx" />
+    <ClCompile Include="..\..\..\src\gp\gp_GTrsf.cxx" />
+    <ClCompile Include="..\..\..\src\gp\gp_GTrsf2d.cxx" />
+    <ClCompile Include="..\..\..\src\gp\gp_Hypr.cxx" />
+    <ClCompile Include="..\..\..\src\gp\gp_Hypr2d.cxx" />
+    <ClCompile Include="..\..\..\src\gp\gp_Lin.cxx" />
+    <ClCompile Include="..\..\..\src\gp\gp_Lin2d.cxx" />
+    <ClCompile Include="..\..\..\src\gp\gp_Mat.cxx" />
+    <ClCompile Include="..\..\..\src\gp\gp_Mat2d.cxx" />
+    <ClCompile Include="..\..\..\src\gp\gp_Parab.cxx" />
+    <ClCompile Include="..\..\..\src\gp\gp_Parab2d.cxx" />
+    <ClCompile Include="..\..\..\src\gp\gp_Pln.cxx" />
+    <ClCompile Include="..\..\..\src\gp\gp_Pnt.cxx" />
+    <ClCompile Include="..\..\..\src\gp\gp_Pnt2d.cxx" />
+    <ClCompile Include="..\..\..\src\gp\gp_Quaternion.cxx" />
+    <ClCompile Include="..\..\..\src\gp\gp_Sphere.cxx" />
+    <ClCompile Include="..\..\..\src\gp\gp_Torus.cxx" />
+    <ClCompile Include="..\..\..\src\gp\gp_Trsf.cxx" />
+    <ClCompile Include="..\..\..\src\gp\gp_Trsf2d.cxx" />
+    <ClCompile Include="..\..\..\src\gp\gp_Vec.cxx" />
+    <ClCompile Include="..\..\..\src\gp\gp_Vec2d.cxx" />
+    <ClCompile Include="..\..\..\src\gp\gp_XY.cxx" />
+    <ClCompile Include="..\..\..\src\gp\gp_XYZ.cxx" />
+    <ClInclude Include="..\..\..\src\gp\gp.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp.lxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Ax1.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Ax1.lxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Ax2.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Ax2.lxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Ax22d.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Ax22d.lxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Ax2d.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Ax2d.lxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Ax3.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Ax3.lxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Circ.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Circ.lxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Circ2d.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Circ2d.lxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Cone.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Cone.lxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Cylinder.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Cylinder.lxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Dir.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Dir.lxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Dir2d.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Dir2d.lxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Elips.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Elips.lxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Elips2d.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Elips2d.lxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_EulerSequence.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_GTrsf.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_GTrsf.lxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_GTrsf2d.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_GTrsf2d.lxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Hypr.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Hypr.lxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Hypr2d.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Hypr2d.lxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Lin.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Lin.lxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Lin2d.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Lin2d.lxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Mat.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Mat.lxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Mat2d.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Mat2d.lxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Parab.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Parab.lxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Parab2d.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Parab2d.lxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Pln.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Pln.lxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Pnt.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Pnt.lxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Pnt2d.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Pnt2d.lxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Quaternion.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Quaternion.lxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_QuaternionNLerp.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_QuaternionSLerp.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Sphere.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Sphere.lxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Torus.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Torus.lxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Trsf.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Trsf.lxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Trsf2d.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Trsf2d.lxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_TrsfForm.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_TrsfNLerp.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Vec.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Vec.lxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Vec2d.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_Vec2d.lxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_VectorWithNullMagnitude.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_XY.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_XY.lxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_XYZ.hxx" />
+    <ClInclude Include="..\..\..\src\gp\gp_XYZ.lxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_Array1OfCirc2d.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_Array1OfDir.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_Array1OfDir2d.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_Array1OfLin2d.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_Array1OfPnt.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_Array1OfPnt2d.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_Array1OfVec.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_Array1OfVec2d.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_Array1OfXY.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_Array1OfXYZ.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_Array2OfCirc2d.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_Array2OfDir.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_Array2OfDir2d.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_Array2OfLin2d.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_Array2OfPnt.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_Array2OfPnt2d.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_Array2OfVec.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_Array2OfVec2d.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_Array2OfXY.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_Array2OfXYZ.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_HArray1OfCirc2d.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_HArray1OfDir.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_HArray1OfDir2d.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_HArray1OfLin2d.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_HArray1OfPnt.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_HArray1OfPnt2d.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_HArray1OfVec.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_HArray1OfVec2d.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_HArray1OfXY.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_HArray1OfXYZ.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_HArray2OfCirc2d.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_HArray2OfDir.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_HArray2OfDir2d.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_HArray2OfLin2d.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_HArray2OfPnt.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_HArray2OfPnt2d.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_HArray2OfVec.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_HArray2OfVec2d.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_HArray2OfXY.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_HArray2OfXYZ.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_HSequenceOfDir.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_HSequenceOfDir2d.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_HSequenceOfPnt.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_HSequenceOfPnt2d.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_HSequenceOfVec.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_HSequenceOfVec2d.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_HSequenceOfXY.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_HSequenceOfXYZ.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_SequenceOfArray1OfPnt2d.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_SequenceOfAx1.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_SequenceOfDir.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_SequenceOfDir2d.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_SequenceOfPnt.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_SequenceOfPnt2d.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_SequenceOfVec.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_SequenceOfVec2d.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_SequenceOfXY.hxx" />
+    <ClInclude Include="..\..\..\src\TColgp\TColgp_SequenceOfXYZ.hxx" />
+    <ClCompile Include="..\..\..\src\TopLoc\TopLoc_Datum3D.cxx" />
+    <ClCompile Include="..\..\..\src\TopLoc\TopLoc_ItemLocation.cxx" />
+    <ClCompile Include="..\..\..\src\TopLoc\TopLoc_Location.cxx" />
+    <ClCompile Include="..\..\..\src\TopLoc\TopLoc_SListNodeOfItemLocation.cxx" />
+    <ClCompile Include="..\..\..\src\TopLoc\TopLoc_SListOfItemLocation.cxx" />
+    <ClInclude Include="..\..\..\src\TopLoc\TopLoc_Datum3D.hxx" />
+    <ClInclude Include="..\..\..\src\TopLoc\TopLoc_Datum3D.lxx" />
+    <ClInclude Include="..\..\..\src\TopLoc\TopLoc_IndexedMapOfLocation.hxx" />
+    <ClInclude Include="..\..\..\src\TopLoc\TopLoc_ItemLocation.hxx" />
+    <ClInclude Include="..\..\..\src\TopLoc\TopLoc_Location.hxx" />
+    <ClInclude Include="..\..\..\src\TopLoc\TopLoc_Location.lxx" />
+    <ClInclude Include="..\..\..\src\TopLoc\TopLoc_MapIteratorOfMapOfLocation.hxx" />
+    <ClInclude Include="..\..\..\src\TopLoc\TopLoc_MapLocationHasher.hxx" />
+    <ClInclude Include="..\..\..\src\TopLoc\TopLoc_MapOfLocation.hxx" />
+    <ClInclude Include="..\..\..\src\TopLoc\TopLoc_SListNodeOfItemLocation.hxx" />
+    <ClInclude Include="..\..\..\src\TopLoc\TopLoc_SListNodeOfItemLocation.lxx" />
+    <ClInclude Include="..\..\..\src\TopLoc\TopLoc_SListOfItemLocation.hxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_Absolute.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_ArcCosine.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_ArcSine.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_ArcTangent.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_ArgCosh.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_ArgSinh.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_ArgTanh.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_BinaryExpression.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_BinaryFunction.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_Cosh.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_Cosine.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_Difference.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_Different.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_Division.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_Equal.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_Exponential.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_Exponentiate.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_FunctionDerivative.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_GeneralExpression.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_GeneralFunction.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_GeneralRelation.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_GreaterThan.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_GreaterThanOrEqual.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_LessThan.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_LessThanOrEqual.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_LogOf10.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_LogOfe.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_NamedConstant.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_NamedExpression.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_NamedFunction.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_NamedUnknown.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_NumericValue.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_Operators.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_PolyExpression.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_PolyFunction.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_Product.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_RUIterator.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_RelationIterator.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_Sign.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_Sine.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_SingleRelation.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_Sinh.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_Square.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_SquareRoot.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_Sum.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_SystemRelation.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_Tangent.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_Tanh.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_UnaryExpression.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_UnaryFunction.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_UnaryMinus.cxx" />
+    <ClCompile Include="..\..\..\src\Expr\Expr_UnknownIterator.cxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_Absolute.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_ArcCosine.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_ArcSine.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_ArcTangent.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_ArgCosh.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_ArgSinh.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_ArgTanh.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_Array1OfGeneralExpression.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_Array1OfNamedUnknown.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_Array1OfSingleRelation.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_BinaryExpression.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_BinaryExpression.lxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_BinaryFunction.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_Cosh.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_Cosine.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_Difference.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_Different.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_Division.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_Equal.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_Exponential.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_Exponentiate.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_ExprFailure.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_FunctionDerivative.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_GeneralExpression.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_GeneralFunction.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_GeneralRelation.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_GreaterThan.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_GreaterThanOrEqual.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_InvalidAssignment.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_InvalidFunction.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_InvalidOperand.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_LessThan.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_LessThanOrEqual.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_LogOf10.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_LogOfe.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_MapOfNamedUnknown.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_NamedConstant.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_NamedConstant.lxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_NamedExpression.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_NamedFunction.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_NamedUnknown.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_NamedUnknown.lxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_NotAssigned.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_NotEvaluable.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_NumericValue.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_Operators.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_PolyExpression.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_PolyExpression.lxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_PolyFunction.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_Product.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_RUIterator.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_RelationIterator.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_SequenceOfGeneralExpression.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_SequenceOfGeneralRelation.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_Sign.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_Sine.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_SingleRelation.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_Sinh.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_Square.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_SquareRoot.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_Sum.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_SystemRelation.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_Tangent.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_Tanh.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_UnaryExpression.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_UnaryExpression.lxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_UnaryFunction.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_UnaryMinus.hxx" />
+    <ClInclude Include="..\..\..\src\Expr\Expr_UnknownIterator.hxx" />
+    <ClCompile Include="..\..\..\src\ExprIntrp\ExprIntrp.cxx" />
+    <ClCompile Include="..\..\..\src\ExprIntrp\ExprIntrp.tab.c" />
+    <ClCompile Include="..\..\..\src\ExprIntrp\ExprIntrp_Analysis.cxx" />
+    <ClCompile Include="..\..\..\src\ExprIntrp\ExprIntrp_GenExp.cxx" />
+    <ClCompile Include="..\..\..\src\ExprIntrp\ExprIntrp_GenFct.cxx" />
+    <ClCompile Include="..\..\..\src\ExprIntrp\ExprIntrp_GenRel.cxx" />
+    <ClCompile Include="..\..\..\src\ExprIntrp\ExprIntrp_Generator.cxx" />
+    <ClCompile Include="..\..\..\src\ExprIntrp\ExprIntrp_yaccintrf.cxx" />
+    <ClCompile Include="..\..\..\src\ExprIntrp\ExprIntrp_yacclex.cxx" />
+    <ClCompile Include="..\..\..\src\ExprIntrp\lex.ExprIntrp.c" />
+    <ClInclude Include="..\..\..\src\ExprIntrp\ExprIntrp.hxx" />
+    <ClInclude Include="..\..\..\src\ExprIntrp\ExprIntrp.tab.h" />
+    <ClInclude Include="..\..\..\src\ExprIntrp\ExprIntrp_Analysis.hxx" />
+    <ClInclude Include="..\..\..\src\ExprIntrp\ExprIntrp_GenExp.hxx" />
+    <ClInclude Include="..\..\..\src\ExprIntrp\ExprIntrp_GenFct.hxx" />
+    <ClInclude Include="..\..\..\src\ExprIntrp\ExprIntrp_GenRel.hxx" />
+    <ClInclude Include="..\..\..\src\ExprIntrp\ExprIntrp_Generator.hxx" />
+    <ClInclude Include="..\..\..\src\ExprIntrp\ExprIntrp_ListIteratorOfStackOfGeneralExpression.hxx" />
+    <ClInclude Include="..\..\..\src\ExprIntrp\ExprIntrp_ListIteratorOfStackOfGeneralFunction.hxx" />
+    <ClInclude Include="..\..\..\src\ExprIntrp\ExprIntrp_ListIteratorOfStackOfGeneralRelation.hxx" />
+    <ClInclude Include="..\..\..\src\ExprIntrp\ExprIntrp_SequenceOfNamedExpression.hxx" />
+    <ClInclude Include="..\..\..\src\ExprIntrp\ExprIntrp_SequenceOfNamedFunction.hxx" />
+    <ClInclude Include="..\..\..\src\ExprIntrp\ExprIntrp_StackOfGeneralExpression.hxx" />
+    <ClInclude Include="..\..\..\src\ExprIntrp\ExprIntrp_StackOfGeneralFunction.hxx" />
+    <ClInclude Include="..\..\..\src\ExprIntrp\ExprIntrp_StackOfGeneralRelation.hxx" />
+    <ClInclude Include="..\..\..\src\ExprIntrp\ExprIntrp_SyntaxError.hxx" />
+    <ClInclude Include="..\..\..\src\ExprIntrp\ExprIntrp_yaccanal.hxx" />
+    <ClInclude Include="..\..\..\src\ExprIntrp\ExprIntrp_yaccintrf.hxx" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="TKMath.rc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

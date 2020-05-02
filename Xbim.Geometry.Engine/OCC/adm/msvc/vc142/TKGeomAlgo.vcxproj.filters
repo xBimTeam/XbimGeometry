@@ -1,0 +1,3099 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source files">
+      <UniqueIdentifier>{DF4F86CD-0006-120B-0DB7-816EA9884620}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files">
+      <UniqueIdentifier>{B4199EAF-0125-146B-0C1A-01FA7DE4476C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\Hatch">
+      <UniqueIdentifier>{0D339C6B-1042-05AF-112C-40BB2EC0F22B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\GeomInt">
+      <UniqueIdentifier>{5B0AE132-1285-0608-0FBE-1DF7AC6F6D7A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\IntStart">
+      <UniqueIdentifier>{7C65527E-07B8-0865-187D-73DEEF315406}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\IntWalk">
+      <UniqueIdentifier>{83581080-127A-0505-0CA5-25C48B8AB79B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\IntImp">
+      <UniqueIdentifier>{1C38FC2E-174C-07AF-03F8-8C454F1A6ABE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\IntCurveSurface">
+      <UniqueIdentifier>{5619F4FC-09FF-0DFF-08C6-C10658879A91}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\IntSurf">
+      <UniqueIdentifier>{B4B8538B-0140-1393-0E7F-F5D9E3B3C9A6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\IntPatch">
+      <UniqueIdentifier>{7BEE2C25-060C-135E-0BBC-0E951D5FCD01}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\Geom2dInt">
+      <UniqueIdentifier>{8C1B1B14-0D50-06C9-0079-7125995B9874}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\IntImpParGen">
+      <UniqueIdentifier>{760BC24F-03F8-0BB7-049E-81B0866C531D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\IntRes2d">
+      <UniqueIdentifier>{C4C6E31D-0032-15D4-165F-6A8A6FA68551}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\IntCurve">
+      <UniqueIdentifier>{7A9705A5-0D43-0D49-0279-930982556BF4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\TopTrans">
+      <UniqueIdentifier>{227B03AB-1719-0F25-0362-D79BB12EB4AC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\Intf">
+      <UniqueIdentifier>{57B98935-0F88-15D5-00E2-6EFC7C8236C1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\ApproxInt">
+      <UniqueIdentifier>{D8CB1D7F-1880-112D-032A-A7838EADE61F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\GccAna">
+      <UniqueIdentifier>{DF230367-15BE-00B8-196E-AE2AA471B5F5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\GccEnt">
+      <UniqueIdentifier>{61173D53-1009-149B-1884-C49C8C01C4DA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\GccInt">
+      <UniqueIdentifier>{22F6FE18-0A58-0188-0250-CD1EAE9965B8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\HatchGen">
+      <UniqueIdentifier>{E55373CC-148E-1034-12FE-466FDE5A882C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\Geom2dHatch">
+      <UniqueIdentifier>{A233264C-0000-0B9F-037B-40EC8467D0CD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\Law">
+      <UniqueIdentifier>{BD78CB34-0C26-02B1-098A-CC0CDC605470}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\AppBlend">
+      <UniqueIdentifier>{47BCA65B-08A2-10C2-0B97-8437BA66972A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\Plate">
+      <UniqueIdentifier>{4E5CA8BA-08BB-0D3A-0817-5CA0DE4588F6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\GeomPlate">
+      <UniqueIdentifier>{230C2A3F-11A9-177F-09AE-0E22FA1A7EEB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\LocalAnalysis">
+      <UniqueIdentifier>{8277E488-01AC-1643-14D0-F73BE77DD0BA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\GeomAPI">
+      <UniqueIdentifier>{128B14F6-0A37-0C20-191F-5D2151368C1D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\GeomFill">
+      <UniqueIdentifier>{28D3ED67-11A5-0899-00FE-71C336C73800}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\Geom2dAPI">
+      <UniqueIdentifier>{2D89F01B-08E8-0113-055C-27880B54C09F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\Geom2dGcc">
+      <UniqueIdentifier>{322C55BF-085D-1926-05FB-0659AAE8E054}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\FairCurve">
+      <UniqueIdentifier>{DFDD8744-170E-0C2F-09FB-9706AC3714DD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\NLPlate">
+      <UniqueIdentifier>{3AFA6AF0-14BF-0FB9-188F-D55B3E594B91}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\IntPolyh">
+      <UniqueIdentifier>{701CC4C7-09AB-1641-07BD-9610971B63C3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\TopClass">
+      <UniqueIdentifier>{32B16B91-0687-0C49-13CA-1CB8CDA8D74F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\Hatch">
+      <UniqueIdentifier>{CFB07F14-0C77-15CB-0C1F-4D1C908E352B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\GeomInt">
+      <UniqueIdentifier>{44B2F494-11AE-0CA6-0831-03DCE29A7C83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\IntStart">
+      <UniqueIdentifier>{64B1989C-0DAC-0830-1291-7A2BE7D87605}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\IntWalk">
+      <UniqueIdentifier>{2C531BC0-0460-1078-12F9-EB9202BEECDC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\IntImp">
+      <UniqueIdentifier>{B07B1516-15D4-0FED-0062-C908804D2A2A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\IntCurveSurface">
+      <UniqueIdentifier>{0B3131EC-07AF-0D25-09DA-A630F8D8FB0A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\IntSurf">
+      <UniqueIdentifier>{4960EF97-08A1-144B-124F-D021964D2CEA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\IntPatch">
+      <UniqueIdentifier>{BFEFBC61-18B8-06A7-09CE-65327ED624C4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\Geom2dInt">
+      <UniqueIdentifier>{07CD1C72-15CB-0742-07D6-DBDB5D1EE64B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\IntImpParGen">
+      <UniqueIdentifier>{A17A4DE6-11C8-129F-01F5-5E02F714CB3F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\IntRes2d">
+      <UniqueIdentifier>{2B9F65CE-09F9-11AA-0F77-320EFA7547E7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\IntCurve">
+      <UniqueIdentifier>{C3C6D553-0E47-038C-0C69-3C66C8800D02}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\TopTrans">
+      <UniqueIdentifier>{D61EDFD8-11B4-03FE-0DBC-1146F248D829}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\Intf">
+      <UniqueIdentifier>{67A2C5FE-0902-0718-0D35-6F781A36334C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\ApproxInt">
+      <UniqueIdentifier>{61D39CD8-153A-06BB-0B13-146DE73B6BB5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\GccAna">
+      <UniqueIdentifier>{1C696EB4-154C-1728-0218-746E3CF13D7B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\GccEnt">
+      <UniqueIdentifier>{FB58C5F8-0BA5-11AA-1014-C9CF4C489F9A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\GccInt">
+      <UniqueIdentifier>{E6405368-17F0-0542-10B2-0AA42BA03D8B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\HatchGen">
+      <UniqueIdentifier>{287D4E83-03CC-130D-0253-3ED1A8369BE8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\Geom2dHatch">
+      <UniqueIdentifier>{35ACDDCE-05B4-01DF-131A-EB08F99A3123}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\Law">
+      <UniqueIdentifier>{102D26B0-0F37-0745-13E7-E03854923519}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\AppBlend">
+      <UniqueIdentifier>{DC03C847-0C80-1551-132A-3788E7FD278E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\Plate">
+      <UniqueIdentifier>{2FDE311A-0B44-01E2-110E-E177FB8C391F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\GeomPlate">
+      <UniqueIdentifier>{FA40C3EB-0A0F-174B-11D4-F4E311678CC3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\LocalAnalysis">
+      <UniqueIdentifier>{4A87A750-0EFE-1134-16C5-71D6C4CAF8C2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\GeomAPI">
+      <UniqueIdentifier>{9197D5F8-0997-1425-16FA-798A6A6E4E86}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\GeomFill">
+      <UniqueIdentifier>{E55112E2-01AB-07F6-038D-B96DE2DD3F79}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\Geom2dAPI">
+      <UniqueIdentifier>{7257BECD-0B02-1564-14EB-22BF7146AEF7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\Geom2dGcc">
+      <UniqueIdentifier>{8919DF00-17FF-0B14-0B97-3724F95C580E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\FairCurve">
+      <UniqueIdentifier>{9925C937-09EA-12E7-110F-F4F35693A9A5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\NLPlate">
+      <UniqueIdentifier>{66C0256D-0E46-0582-05B6-6668975CB07B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\IntPolyh">
+      <UniqueIdentifier>{469040EA-044B-15BB-1555-366DB65CF705}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\TopClass">
+      <UniqueIdentifier>{5DA7828A-0128-00C0-0A53-AC13BC43D2DD}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\Hatch\Hatch_Hatcher.cxx">
+      <Filter>Source files\Hatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Hatch\Hatch_Line.cxx">
+      <Filter>Source files\Hatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Hatch\Hatch_Parameter.cxx">
+      <Filter>Source files\Hatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt.cxx">
+      <Filter>Source files\GeomInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_BSpGradient_BFGSOfMyBSplGradientOfTheComputeLineOfWLApprox_0.cxx">
+      <Filter>Source files\GeomInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_BSpParFunctionOfMyBSplGradientOfTheComputeLineOfWLApprox_0.cxx">
+      <Filter>Source files\GeomInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_BSpParLeastSquareOfMyBSplGradientOfTheComputeLineOfWLApprox_0.cxx">
+      <Filter>Source files\GeomInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_Gradient_BFGSOfMyGradientOfTheComputeLineBezierOfWLApprox_0.cxx">
+      <Filter>Source files\GeomInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_Gradient_BFGSOfMyGradientbisOfTheComputeLineOfWLApprox_0.cxx">
+      <Filter>Source files\GeomInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_IntSS.cxx">
+      <Filter>Source files\GeomInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_IntSS_1.cxx">
+      <Filter>Source files\GeomInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_LineConstructor.cxx">
+      <Filter>Source files\GeomInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_LineTool.cxx">
+      <Filter>Source files\GeomInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_MyBSplGradientOfTheComputeLineOfWLApprox_0.cxx">
+      <Filter>Source files\GeomInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_MyGradientOfTheComputeLineBezierOfWLApprox_0.cxx">
+      <Filter>Source files\GeomInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_MyGradientbisOfTheComputeLineOfWLApprox_0.cxx">
+      <Filter>Source files\GeomInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_ParFunctionOfMyGradientOfTheComputeLineBezierOfWLApprox_0.cxx">
+      <Filter>Source files\GeomInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_ParFunctionOfMyGradientbisOfTheComputeLineOfWLApprox_0.cxx">
+      <Filter>Source files\GeomInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_ParLeastSquareOfMyGradientOfTheComputeLineBezierOfWLApprox_0.cxx">
+      <Filter>Source files\GeomInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_ParLeastSquareOfMyGradientbisOfTheComputeLineOfWLApprox_0.cxx">
+      <Filter>Source files\GeomInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_ParameterAndOrientation.cxx">
+      <Filter>Source files\GeomInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_ResConstraintOfMyGradientOfTheComputeLineBezierOfWLApprox_0.cxx">
+      <Filter>Source files\GeomInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_ResConstraintOfMyGradientbisOfTheComputeLineOfWLApprox_0.cxx">
+      <Filter>Source files\GeomInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_TheComputeLineBezierOfWLApprox_0.cxx">
+      <Filter>Source files\GeomInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_TheComputeLineOfWLApprox_0.cxx">
+      <Filter>Source files\GeomInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_TheFunctionOfTheInt2SOfThePrmPrmSvSurfacesOfWLApprox_0.cxx">
+      <Filter>Source files\GeomInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_TheImpPrmSvSurfacesOfWLApprox_0.cxx">
+      <Filter>Source files\GeomInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_TheInt2SOfThePrmPrmSvSurfacesOfWLApprox_0.cxx">
+      <Filter>Source files\GeomInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_TheMultiLineOfWLApprox_0.cxx">
+      <Filter>Source files\GeomInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_ThePrmPrmSvSurfacesOfWLApprox_0.cxx">
+      <Filter>Source files\GeomInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_TheZerImpFuncOfTheImpPrmSvSurfacesOfWLApprox_0.cxx">
+      <Filter>Source files\GeomInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_WLApprox_0.cxx">
+      <Filter>Source files\GeomInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntStart\IntStart_SITopolTool.cxx">
+      <Filter>Source files\IntStart</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntWalk\IntWalk_PWalking.cxx">
+      <Filter>Source files\IntWalk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntWalk\IntWalk_TheFunctionOfTheInt2S_0.cxx">
+      <Filter>Source files\IntWalk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntWalk\IntWalk_TheInt2S_0.cxx">
+      <Filter>Source files\IntWalk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntImp\IntImp_ComputeTangence.cxx">
+      <Filter>Source files\IntImp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntCurveSurface\IntCurveSurface_HInter_0.cxx">
+      <Filter>Source files\IntCurveSurface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntCurveSurface\IntCurveSurface_Intersection.cxx">
+      <Filter>Source files\IntCurveSurface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntCurveSurface\IntCurveSurface_IntersectionPoint.cxx">
+      <Filter>Source files\IntCurveSurface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntCurveSurface\IntCurveSurface_IntersectionSegment.cxx">
+      <Filter>Source files\IntCurveSurface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntCurveSurface\IntCurveSurface_TheCSFunctionOfHInter_0.cxx">
+      <Filter>Source files\IntCurveSurface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntCurveSurface\IntCurveSurface_TheExactHInter_0.cxx">
+      <Filter>Source files\IntCurveSurface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntCurveSurface\IntCurveSurface_TheHCurveTool_0.cxx">
+      <Filter>Source files\IntCurveSurface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntCurveSurface\IntCurveSurface_TheInterferenceOfHInter_0.cxx">
+      <Filter>Source files\IntCurveSurface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntCurveSurface\IntCurveSurface_ThePolygonOfHInter_0.cxx">
+      <Filter>Source files\IntCurveSurface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntCurveSurface\IntCurveSurface_ThePolygonToolOfHInter_0.cxx">
+      <Filter>Source files\IntCurveSurface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntCurveSurface\IntCurveSurface_ThePolyhedronOfHInter_0.cxx">
+      <Filter>Source files\IntCurveSurface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntCurveSurface\IntCurveSurface_ThePolyhedronToolOfHInter_0.cxx">
+      <Filter>Source files\IntCurveSurface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntCurveSurface\IntCurveSurface_TheQuadCurvExactHInter_0.cxx">
+      <Filter>Source files\IntCurveSurface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntCurveSurface\IntCurveSurface_TheQuadCurvFuncOfTheQuadCurvExactHInter_0.cxx">
+      <Filter>Source files\IntCurveSurface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntSurf\IntSurf.cxx">
+      <Filter>Source files\IntSurf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntSurf\IntSurf_InteriorPoint.cxx">
+      <Filter>Source files\IntSurf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntSurf\IntSurf_LineOn2S.cxx">
+      <Filter>Source files\IntSurf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntSurf\IntSurf_PathPoint.cxx">
+      <Filter>Source files\IntSurf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntSurf\IntSurf_PntOn2S.cxx">
+      <Filter>Source files\IntSurf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntSurf\IntSurf_Quadric.cxx">
+      <Filter>Source files\IntSurf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntSurf\IntSurf_QuadricTool.cxx">
+      <Filter>Source files\IntSurf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntSurf\IntSurf_Transition.cxx">
+      <Filter>Source files\IntSurf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_ALine.cxx">
+      <Filter>Source files\IntPatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_ALineToWLine.cxx">
+      <Filter>Source files\IntPatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_ArcFunction.cxx">
+      <Filter>Source files\IntPatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_CSFunction.cxx">
+      <Filter>Source files\IntPatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_CurvIntSurf_0.cxx">
+      <Filter>Source files\IntPatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_GLine.cxx">
+      <Filter>Source files\IntPatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_HCurve2dTool.cxx">
+      <Filter>Source files\IntPatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_HInterTool.cxx">
+      <Filter>Source files\IntPatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_ImpImpIntersection.cxx">
+      <Filter>Source files\IntPatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_ImpPrmIntersection.cxx">
+      <Filter>Source files\IntPatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_InterferencePolyhedron.cxx">
+      <Filter>Source files\IntPatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_Intersection.cxx">
+      <Filter>Source files\IntPatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_Line.cxx">
+      <Filter>Source files\IntPatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_LineConstructor.cxx">
+      <Filter>Source files\IntPatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_Point.cxx">
+      <Filter>Source files\IntPatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_PointLine.cxx">
+      <Filter>Source files\IntPatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_PolyArc.cxx">
+      <Filter>Source files\IntPatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_PolyLine.cxx">
+      <Filter>Source files\IntPatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_Polygo.cxx">
+      <Filter>Source files\IntPatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_Polyhedron.cxx">
+      <Filter>Source files\IntPatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_PrmPrmIntersection.cxx">
+      <Filter>Source files\IntPatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_PrmPrmIntersection_T3Bits.cxx">
+      <Filter>Source files\IntPatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_RLine.cxx">
+      <Filter>Source files\IntPatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_RstInt.cxx">
+      <Filter>Source files\IntPatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_SpecialPoints.cxx">
+      <Filter>Source files\IntPatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_TheIWLineOfTheIWalking_0.cxx">
+      <Filter>Source files\IntPatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_TheIWalking_0.cxx">
+      <Filter>Source files\IntPatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_ThePathPointOfTheSOnBounds_0.cxx">
+      <Filter>Source files\IntPatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_TheSOnBounds_0.cxx">
+      <Filter>Source files\IntPatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_TheSearchInside_0.cxx">
+      <Filter>Source files\IntPatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_TheSegmentOfTheSOnBounds_0.cxx">
+      <Filter>Source files\IntPatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_TheSurfFunction_0.cxx">
+      <Filter>Source files\IntPatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_WLine.cxx">
+      <Filter>Source files\IntPatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_WLineTool.cxx">
+      <Filter>Source files\IntPatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dInt\Geom2dInt_ExactIntersectionPointOfTheIntPCurvePCurveOfGInter_0.cxx">
+      <Filter>Source files\Geom2dInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dInt\Geom2dInt_GInter_0.cxx">
+      <Filter>Source files\Geom2dInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dInt\Geom2dInt_Geom2dCurveTool.cxx">
+      <Filter>Source files\Geom2dInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dInt\Geom2dInt_IntConicCurveOfGInter_0.cxx">
+      <Filter>Source files\Geom2dInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dInt\Geom2dInt_MyImpParToolOfTheIntersectorOfTheIntConicCurveOfGInter_0.cxx">
+      <Filter>Source files\Geom2dInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dInt\Geom2dInt_PCLocFOfTheLocateExtPCOfTheProjPCurOfGInter_0.cxx">
+      <Filter>Source files\Geom2dInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dInt\Geom2dInt_TheCurveLocatorOfTheProjPCurOfGInter_0.cxx">
+      <Filter>Source files\Geom2dInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dInt\Geom2dInt_TheDistBetweenPCurvesOfTheIntPCurvePCurveOfGInter_0.cxx">
+      <Filter>Source files\Geom2dInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dInt\Geom2dInt_TheIntConicCurveOfGInter_0.cxx">
+      <Filter>Source files\Geom2dInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dInt\Geom2dInt_TheIntPCurvePCurveOfGInter_0.cxx">
+      <Filter>Source files\Geom2dInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dInt\Geom2dInt_TheIntersectorOfTheIntConicCurveOfGInter_0.cxx">
+      <Filter>Source files\Geom2dInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dInt\Geom2dInt_TheLocateExtPCOfTheProjPCurOfGInter_0.cxx">
+      <Filter>Source files\Geom2dInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dInt\Geom2dInt_ThePolygon2dOfTheIntPCurvePCurveOfGInter_0.cxx">
+      <Filter>Source files\Geom2dInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dInt\Geom2dInt_TheProjPCurOfGInter_0.cxx">
+      <Filter>Source files\Geom2dInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntImpParGen\IntImpParGen.cxx">
+      <Filter>Source files\IntImpParGen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntImpParGen\IntImpParGen_Tool.cxx">
+      <Filter>Source files\IntImpParGen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntRes2d\IntRes2d_Domain.cxx">
+      <Filter>Source files\IntRes2d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntRes2d\IntRes2d_Intersection.cxx">
+      <Filter>Source files\IntRes2d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntRes2d\IntRes2d_IntersectionPoint.cxx">
+      <Filter>Source files\IntRes2d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntRes2d\IntRes2d_IntersectionSegment.cxx">
+      <Filter>Source files\IntRes2d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntRes2d\IntRes2d_Transition.cxx">
+      <Filter>Source files\IntRes2d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntCurve\IntCurve_IConicTool.cxx">
+      <Filter>Source files\IntCurve</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntCurve\IntCurve_IntConicConic.cxx">
+      <Filter>Source files\IntCurve</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntCurve\IntCurve_IntConicConic_1.cxx">
+      <Filter>Source files\IntCurve</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntCurve\IntCurve_IntConicConic_Tool.cxx">
+      <Filter>Source files\IntCurve</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntCurve\IntCurve_IntImpConicParConic_0.cxx">
+      <Filter>Source files\IntCurve</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntCurve\IntCurve_MyImpParToolOfIntImpConicParConic_0.cxx">
+      <Filter>Source files\IntCurve</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntCurve\IntCurve_PConic.cxx">
+      <Filter>Source files\IntCurve</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntCurve\IntCurve_PConicTool.cxx">
+      <Filter>Source files\IntCurve</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntCurve\IntCurve_ProjectOnPConicTool.cxx">
+      <Filter>Source files\IntCurve</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\TopTrans\TopTrans_CurveTransition.cxx">
+      <Filter>Source files\TopTrans</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\TopTrans\TopTrans_SurfaceTransition.cxx">
+      <Filter>Source files\TopTrans</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Intf\Intf.cxx">
+      <Filter>Source files\Intf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Intf\Intf_Interference.cxx">
+      <Filter>Source files\Intf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Intf\Intf_InterferencePolygon2d.cxx">
+      <Filter>Source files\Intf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Intf\Intf_Polygon2d.cxx">
+      <Filter>Source files\Intf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Intf\Intf_SectionLine.cxx">
+      <Filter>Source files\Intf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Intf\Intf_SectionPoint.cxx">
+      <Filter>Source files\Intf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Intf\Intf_TangentZone.cxx">
+      <Filter>Source files\Intf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Intf\Intf_Tool.cxx">
+      <Filter>Source files\Intf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ApproxInt\ApproxInt_KnotTools.cxx">
+      <Filter>Source files\ApproxInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ApproxInt\ApproxInt_SvSurfaces.cxx">
+      <Filter>Source files\ApproxInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d2TanOn.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d2TanOn_1.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d2TanOn_10.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d2TanOn_11.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d2TanOn_2.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d2TanOn_3.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d2TanOn_4.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d2TanOn_5.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d2TanOn_6.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d2TanOn_7.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d2TanOn_8.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d2TanOn_9.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d2TanRad.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d2TanRad_1.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d2TanRad_2.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d2TanRad_3.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d2TanRad_4.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d2TanRad_5.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d3Tan.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d3Tan_1.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d3Tan_2.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d3Tan_3.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d3Tan_4.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d3Tan_5.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d3Tan_6.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d3Tan_7.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d3Tan_8.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d3Tan_9.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2dBisec.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2dTanCen.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2dTanOnRad.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2dTanOnRad_1.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2dTanOnRad_2.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2dTanOnRad_3.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2dTanOnRad_4.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2dTanOnRad_5.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_CircLin2dBisec.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_CircPnt2dBisec.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Lin2d2Tan.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Lin2dBisec.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Lin2dTanObl.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Lin2dTanPar.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Lin2dTanPer.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_LinPnt2dBisec.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Pnt2dBisec.cxx">
+      <Filter>Source files\GccAna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccEnt\GccEnt.cxx">
+      <Filter>Source files\GccEnt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccEnt\GccEnt_QualifiedCirc.cxx">
+      <Filter>Source files\GccEnt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccEnt\GccEnt_QualifiedLin.cxx">
+      <Filter>Source files\GccEnt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccInt\GccInt_BCirc.cxx">
+      <Filter>Source files\GccInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccInt\GccInt_BElips.cxx">
+      <Filter>Source files\GccInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccInt\GccInt_BHyper.cxx">
+      <Filter>Source files\GccInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccInt\GccInt_BLine.cxx">
+      <Filter>Source files\GccInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccInt\GccInt_BParab.cxx">
+      <Filter>Source files\GccInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccInt\GccInt_BPoint.cxx">
+      <Filter>Source files\GccInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GccInt\GccInt_Bisec.cxx">
+      <Filter>Source files\GccInt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HatchGen\HatchGen_Domain.cxx">
+      <Filter>Source files\HatchGen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HatchGen\HatchGen_IntersectionPoint.cxx">
+      <Filter>Source files\HatchGen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HatchGen\HatchGen_PointOnElement.cxx">
+      <Filter>Source files\HatchGen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HatchGen\HatchGen_PointOnHatching.cxx">
+      <Filter>Source files\HatchGen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dHatch\Geom2dHatch_Classifier_0.cxx">
+      <Filter>Source files\Geom2dHatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dHatch\Geom2dHatch_Element.cxx">
+      <Filter>Source files\Geom2dHatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dHatch\Geom2dHatch_Elements.cxx">
+      <Filter>Source files\Geom2dHatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dHatch\Geom2dHatch_FClass2dOfClassifier_0.cxx">
+      <Filter>Source files\Geom2dHatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dHatch\Geom2dHatch_Hatcher.cxx">
+      <Filter>Source files\Geom2dHatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dHatch\Geom2dHatch_Hatching.cxx">
+      <Filter>Source files\Geom2dHatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dHatch\Geom2dHatch_Intersector.cxx">
+      <Filter>Source files\Geom2dHatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Law\Law.cxx">
+      <Filter>Source files\Law</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Law\Law_BSpFunc.cxx">
+      <Filter>Source files\Law</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Law\Law_BSpline.cxx">
+      <Filter>Source files\Law</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Law\Law_BSplineKnotSplitting.cxx">
+      <Filter>Source files\Law</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Law\Law_Composite.cxx">
+      <Filter>Source files\Law</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Law\Law_Constant.cxx">
+      <Filter>Source files\Law</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Law\Law_Function.cxx">
+      <Filter>Source files\Law</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Law\Law_Interpol.cxx">
+      <Filter>Source files\Law</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Law\Law_Interpolate.cxx">
+      <Filter>Source files\Law</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Law\Law_Linear.cxx">
+      <Filter>Source files\Law</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Law\Law_S.cxx">
+      <Filter>Source files\Law</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\AppBlend\AppBlend_Approx.cxx">
+      <Filter>Source files\AppBlend</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\AppBlend\AppBlend_Debug.cxx">
+      <Filter>Source files\AppBlend</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Plate\Plate_D1.cxx">
+      <Filter>Source files\Plate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Plate\Plate_D2.cxx">
+      <Filter>Source files\Plate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Plate\Plate_D3.cxx">
+      <Filter>Source files\Plate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Plate\Plate_FreeGtoCConstraint.cxx">
+      <Filter>Source files\Plate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Plate\Plate_GlobalTranslationConstraint.cxx">
+      <Filter>Source files\Plate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Plate\Plate_GtoCConstraint.cxx">
+      <Filter>Source files\Plate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Plate\Plate_LineConstraint.cxx">
+      <Filter>Source files\Plate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Plate\Plate_LinearScalarConstraint.cxx">
+      <Filter>Source files\Plate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Plate\Plate_LinearXYZConstraint.cxx">
+      <Filter>Source files\Plate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Plate\Plate_PinpointConstraint.cxx">
+      <Filter>Source files\Plate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Plate\Plate_PlaneConstraint.cxx">
+      <Filter>Source files\Plate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Plate\Plate_Plate.cxx">
+      <Filter>Source files\Plate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Plate\Plate_SampledCurveConstraint.cxx">
+      <Filter>Source files\Plate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomPlate\GeomPlate_Aij.cxx">
+      <Filter>Source files\GeomPlate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomPlate\GeomPlate_BuildAveragePlane.cxx">
+      <Filter>Source files\GeomPlate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomPlate\GeomPlate_BuildPlateSurface.cxx">
+      <Filter>Source files\GeomPlate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomPlate\GeomPlate_CurveConstraint.cxx">
+      <Filter>Source files\GeomPlate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomPlate\GeomPlate_MakeApprox.cxx">
+      <Filter>Source files\GeomPlate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomPlate\GeomPlate_PlateG0Criterion.cxx">
+      <Filter>Source files\GeomPlate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomPlate\GeomPlate_PlateG1Criterion.cxx">
+      <Filter>Source files\GeomPlate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomPlate\GeomPlate_PointConstraint.cxx">
+      <Filter>Source files\GeomPlate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomPlate\GeomPlate_Surface.cxx">
+      <Filter>Source files\GeomPlate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\LocalAnalysis\LocalAnalysis.cxx">
+      <Filter>Source files\LocalAnalysis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\LocalAnalysis\LocalAnalysis_CurveContinuity.cxx">
+      <Filter>Source files\LocalAnalysis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\LocalAnalysis\LocalAnalysis_SurfaceContinuity.cxx">
+      <Filter>Source files\LocalAnalysis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomAPI\GeomAPI.cxx">
+      <Filter>Source files\GeomAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomAPI\GeomAPI_ExtremaCurveCurve.cxx">
+      <Filter>Source files\GeomAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomAPI\GeomAPI_ExtremaCurveSurface.cxx">
+      <Filter>Source files\GeomAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomAPI\GeomAPI_ExtremaSurfaceSurface.cxx">
+      <Filter>Source files\GeomAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomAPI\GeomAPI_IntCS.cxx">
+      <Filter>Source files\GeomAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomAPI\GeomAPI_Interpolate.cxx">
+      <Filter>Source files\GeomAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomAPI\GeomAPI_PointsToBSpline.cxx">
+      <Filter>Source files\GeomAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomAPI\GeomAPI_PointsToBSplineSurface.cxx">
+      <Filter>Source files\GeomAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomAPI\GeomAPI_ProjectPointOnCurve.cxx">
+      <Filter>Source files\GeomAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomAPI\GeomAPI_ProjectPointOnSurf.cxx">
+      <Filter>Source files\GeomAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_AppSurf_0.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_AppSweep_0.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_BSplineCurves.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_BezierCurves.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_BoundWithSurf.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_Boundary.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_CircularBlendFunc.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_ConstantBiNormal.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_ConstrainedFilling.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_Coons.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_CoonsAlgPatch.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_CornerState.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_CorrectedFrenet.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_CurveAndTrihedron.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_Curved.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_Darboux.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_DegeneratedBound.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_DiscreteTrihedron.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_DraftTrihedron.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_EvolvedSection.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_Filling.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_Fixed.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_Frenet.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_FunctionDraft.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_FunctionGuide.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_Generator.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_GuideTrihedronAC.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_GuideTrihedronPlan.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_Line.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_LocFunction.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_LocationDraft.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_LocationGuide.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_LocationLaw.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_NSections.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_Pipe.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_PlanFunc.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_PolynomialConvertor.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_Profiler.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_QuasiAngularConvertor.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_SectionGenerator.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_SectionLaw.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_SectionPlacement.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_SimpleBound.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_SnglrFunc.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_Stretch.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_Sweep.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_SweepFunction.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_SweepSectionGenerator.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_Tensor.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_TgtField.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_TgtOnCoons.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_TrihedronLaw.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_TrihedronWithGuide.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_UniformSection.cxx">
+      <Filter>Source files\GeomFill</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dAPI\Geom2dAPI_ExtremaCurveCurve.cxx">
+      <Filter>Source files\Geom2dAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dAPI\Geom2dAPI_InterCurveCurve.cxx">
+      <Filter>Source files\Geom2dAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dAPI\Geom2dAPI_Interpolate.cxx">
+      <Filter>Source files\Geom2dAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dAPI\Geom2dAPI_PointsToBSpline.cxx">
+      <Filter>Source files\Geom2dAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dAPI\Geom2dAPI_ProjectPointOnCurve.cxx">
+      <Filter>Source files\Geom2dAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc.cxx">
+      <Filter>Source files\Geom2dGcc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2d2TanOn.cxx">
+      <Filter>Source files\Geom2dGcc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2d2TanOnGeo.cxx">
+      <Filter>Source files\Geom2dGcc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2d2TanOnIter.cxx">
+      <Filter>Source files\Geom2dGcc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2d2TanRad.cxx">
+      <Filter>Source files\Geom2dGcc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2d2TanRadGeo.cxx">
+      <Filter>Source files\Geom2dGcc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2d3Tan.cxx">
+      <Filter>Source files\Geom2dGcc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2d3TanIter.cxx">
+      <Filter>Source files\Geom2dGcc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2dTanCen.cxx">
+      <Filter>Source files\Geom2dGcc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2dTanCenGeo.cxx">
+      <Filter>Source files\Geom2dGcc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2dTanOnRad.cxx">
+      <Filter>Source files\Geom2dGcc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2dTanOnRadGeo.cxx">
+      <Filter>Source files\Geom2dGcc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_CurveTool.cxx">
+      <Filter>Source files\Geom2dGcc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_FunctionTanCirCu.cxx">
+      <Filter>Source files\Geom2dGcc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_FunctionTanCuCu.cxx">
+      <Filter>Source files\Geom2dGcc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_FunctionTanCuCuCu.cxx">
+      <Filter>Source files\Geom2dGcc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_FunctionTanCuCuOnCu.cxx">
+      <Filter>Source files\Geom2dGcc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_FunctionTanCuPnt.cxx">
+      <Filter>Source files\Geom2dGcc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_FunctionTanObl.cxx">
+      <Filter>Source files\Geom2dGcc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Lin2d2Tan.cxx">
+      <Filter>Source files\Geom2dGcc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Lin2d2TanIter.cxx">
+      <Filter>Source files\Geom2dGcc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Lin2dTanObl.cxx">
+      <Filter>Source files\Geom2dGcc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Lin2dTanOblIter.cxx">
+      <Filter>Source files\Geom2dGcc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_QCurve.cxx">
+      <Filter>Source files\Geom2dGcc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_QualifiedCurve.cxx">
+      <Filter>Source files\Geom2dGcc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\FairCurve\FairCurve_Batten.cxx">
+      <Filter>Source files\FairCurve</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\FairCurve\FairCurve_BattenLaw.cxx">
+      <Filter>Source files\FairCurve</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\FairCurve\FairCurve_DistributionOfEnergy.cxx">
+      <Filter>Source files\FairCurve</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\FairCurve\FairCurve_DistributionOfJerk.cxx">
+      <Filter>Source files\FairCurve</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\FairCurve\FairCurve_DistributionOfSagging.cxx">
+      <Filter>Source files\FairCurve</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\FairCurve\FairCurve_DistributionOfTension.cxx">
+      <Filter>Source files\FairCurve</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\FairCurve\FairCurve_Energy.cxx">
+      <Filter>Source files\FairCurve</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\FairCurve\FairCurve_EnergyOfBatten.cxx">
+      <Filter>Source files\FairCurve</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\FairCurve\FairCurve_EnergyOfMVC.cxx">
+      <Filter>Source files\FairCurve</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\FairCurve\FairCurve_MinimalVariation.cxx">
+      <Filter>Source files\FairCurve</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\FairCurve\FairCurve_Newton.cxx">
+      <Filter>Source files\FairCurve</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\NLPlate\NLPlate_HGPPConstraint.cxx">
+      <Filter>Source files\NLPlate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\NLPlate\NLPlate_HPG0Constraint.cxx">
+      <Filter>Source files\NLPlate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\NLPlate\NLPlate_HPG0G1Constraint.cxx">
+      <Filter>Source files\NLPlate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\NLPlate\NLPlate_HPG0G2Constraint.cxx">
+      <Filter>Source files\NLPlate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\NLPlate\NLPlate_HPG0G3Constraint.cxx">
+      <Filter>Source files\NLPlate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\NLPlate\NLPlate_HPG1Constraint.cxx">
+      <Filter>Source files\NLPlate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\NLPlate\NLPlate_HPG2Constraint.cxx">
+      <Filter>Source files\NLPlate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\NLPlate\NLPlate_HPG3Constraint.cxx">
+      <Filter>Source files\NLPlate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\NLPlate\NLPlate_NLPlate.cxx">
+      <Filter>Source files\NLPlate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPolyh\IntPolyh_Couple.cxx">
+      <Filter>Source files\IntPolyh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPolyh\IntPolyh_Edge.cxx">
+      <Filter>Source files\IntPolyh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPolyh\IntPolyh_Intersection.cxx">
+      <Filter>Source files\IntPolyh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPolyh\IntPolyh_MaillageAffinage.cxx">
+      <Filter>Source files\IntPolyh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPolyh\IntPolyh_Point.cxx">
+      <Filter>Source files\IntPolyh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPolyh\IntPolyh_SectionLine.cxx">
+      <Filter>Source files\IntPolyh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPolyh\IntPolyh_StartPoint.cxx">
+      <Filter>Source files\IntPolyh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPolyh\IntPolyh_Tools.cxx">
+      <Filter>Source files\IntPolyh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntPolyh\IntPolyh_Triangle.cxx">
+      <Filter>Source files\IntPolyh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\TopClass\TopClass.cxx">
+      <Filter>Source files\TopClass</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\TopClass\TopClass_SolidExplorer.cxx">
+      <Filter>Source files\TopClass</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\Hatch\Hatch_Hatcher.hxx">
+      <Filter>Header files\Hatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Hatch\Hatch_Hatcher.lxx">
+      <Filter>Header files\Hatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Hatch\Hatch_Line.hxx">
+      <Filter>Header files\Hatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Hatch\Hatch_LineForm.hxx">
+      <Filter>Header files\Hatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Hatch\Hatch_Parameter.hxx">
+      <Filter>Header files\Hatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Hatch\Hatch_SequenceOfLine.hxx">
+      <Filter>Header files\Hatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Hatch\Hatch_SequenceOfParameter.hxx">
+      <Filter>Header files\Hatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt.hxx">
+      <Filter>Header files\GeomInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_BSpGradient_BFGSOfMyBSplGradientOfTheComputeLineOfWLApprox.hxx">
+      <Filter>Header files\GeomInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_BSpParFunctionOfMyBSplGradientOfTheComputeLineOfWLApprox.hxx">
+      <Filter>Header files\GeomInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_BSpParLeastSquareOfMyBSplGradientOfTheComputeLineOfWLApprox.hxx">
+      <Filter>Header files\GeomInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_Gradient_BFGSOfMyGradientOfTheComputeLineBezierOfWLApprox.hxx">
+      <Filter>Header files\GeomInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_Gradient_BFGSOfMyGradientbisOfTheComputeLineOfWLApprox.hxx">
+      <Filter>Header files\GeomInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_IntSS.hxx">
+      <Filter>Header files\GeomInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_IntSS.lxx">
+      <Filter>Header files\GeomInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_LineConstructor.hxx">
+      <Filter>Header files\GeomInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_LineConstructor.lxx">
+      <Filter>Header files\GeomInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_LineTool.hxx">
+      <Filter>Header files\GeomInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_MyBSplGradientOfTheComputeLineOfWLApprox.hxx">
+      <Filter>Header files\GeomInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_MyGradientOfTheComputeLineBezierOfWLApprox.hxx">
+      <Filter>Header files\GeomInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_MyGradientbisOfTheComputeLineOfWLApprox.hxx">
+      <Filter>Header files\GeomInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_ParFunctionOfMyGradientOfTheComputeLineBezierOfWLApprox.hxx">
+      <Filter>Header files\GeomInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_ParFunctionOfMyGradientbisOfTheComputeLineOfWLApprox.hxx">
+      <Filter>Header files\GeomInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_ParLeastSquareOfMyGradientOfTheComputeLineBezierOfWLApprox.hxx">
+      <Filter>Header files\GeomInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_ParLeastSquareOfMyGradientbisOfTheComputeLineOfWLApprox.hxx">
+      <Filter>Header files\GeomInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_ParameterAndOrientation.hxx">
+      <Filter>Header files\GeomInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_ResConstraintOfMyGradientOfTheComputeLineBezierOfWLApprox.hxx">
+      <Filter>Header files\GeomInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_ResConstraintOfMyGradientbisOfTheComputeLineOfWLApprox.hxx">
+      <Filter>Header files\GeomInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_SequenceOfParameterAndOrientation.hxx">
+      <Filter>Header files\GeomInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_TheComputeLineBezierOfWLApprox.hxx">
+      <Filter>Header files\GeomInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_TheComputeLineOfWLApprox.hxx">
+      <Filter>Header files\GeomInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_TheFunctionOfTheInt2SOfThePrmPrmSvSurfacesOfWLApprox.hxx">
+      <Filter>Header files\GeomInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_TheImpPrmSvSurfacesOfWLApprox.hxx">
+      <Filter>Header files\GeomInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_TheInt2SOfThePrmPrmSvSurfacesOfWLApprox.hxx">
+      <Filter>Header files\GeomInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_TheMultiLineOfWLApprox.hxx">
+      <Filter>Header files\GeomInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_TheMultiLineToolOfWLApprox.hxx">
+      <Filter>Header files\GeomInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_ThePrmPrmSvSurfacesOfWLApprox.hxx">
+      <Filter>Header files\GeomInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_TheZerImpFuncOfTheImpPrmSvSurfacesOfWLApprox.hxx">
+      <Filter>Header files\GeomInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_VectorOfReal.hxx">
+      <Filter>Header files\GeomInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_WLApprox.hxx">
+      <Filter>Header files\GeomInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntStart\IntStart_PathPoint.gxx">
+      <Filter>Header files\IntStart</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntStart\IntStart_PathPoint.lxx">
+      <Filter>Header files\IntStart</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntStart\IntStart_SITopolTool.hxx">
+      <Filter>Header files\IntStart</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntStart\IntStart_SearchInside.gxx">
+      <Filter>Header files\IntStart</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntStart\IntStart_SearchInside.lxx">
+      <Filter>Header files\IntStart</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntStart\IntStart_SearchOnBoundaries.gxx">
+      <Filter>Header files\IntStart</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntStart\IntStart_SearchOnBoundaries.lxx">
+      <Filter>Header files\IntStart</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntStart\IntStart_Segment.gxx">
+      <Filter>Header files\IntStart</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntStart\IntStart_Segment.lxx">
+      <Filter>Header files\IntStart</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntWalk\IntWalk_IWLine.gxx">
+      <Filter>Header files\IntWalk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntWalk\IntWalk_IWLine.lxx">
+      <Filter>Header files\IntWalk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntWalk\IntWalk_IWalking.gxx">
+      <Filter>Header files\IntWalk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntWalk\IntWalk_IWalking.lxx">
+      <Filter>Header files\IntWalk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntWalk\IntWalk_IWalking_1.gxx">
+      <Filter>Header files\IntWalk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntWalk\IntWalk_IWalking_2.gxx">
+      <Filter>Header files\IntWalk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntWalk\IntWalk_IWalking_3.gxx">
+      <Filter>Header files\IntWalk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntWalk\IntWalk_IWalking_4.gxx">
+      <Filter>Header files\IntWalk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntWalk\IntWalk_IWalking_5.gxx">
+      <Filter>Header files\IntWalk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntWalk\IntWalk_IWalking_6.gxx">
+      <Filter>Header files\IntWalk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntWalk\IntWalk_PWalking.hxx">
+      <Filter>Header files\IntWalk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntWalk\IntWalk_PWalking.lxx">
+      <Filter>Header files\IntWalk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntWalk\IntWalk_StatusDeflection.hxx">
+      <Filter>Header files\IntWalk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntWalk\IntWalk_TheFunctionOfTheInt2S.hxx">
+      <Filter>Header files\IntWalk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntWalk\IntWalk_TheInt2S.hxx">
+      <Filter>Header files\IntWalk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntWalk\IntWalk_VectorOfInteger.hxx">
+      <Filter>Header files\IntWalk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntWalk\IntWalk_VectorOfWalkingData.hxx">
+      <Filter>Header files\IntWalk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntImp\IntImp_ComputeTangence.hxx">
+      <Filter>Header files\IntImp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntImp\IntImp_ConstIsoparametric.hxx">
+      <Filter>Header files\IntImp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntImp\IntImp_Int2S.gxx">
+      <Filter>Header files\IntImp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntImp\IntImp_Int2S.lxx">
+      <Filter>Header files\IntImp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntImp\IntImp_IntCS.gxx">
+      <Filter>Header files\IntImp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntImp\IntImp_ZerCSParFunc.gxx">
+      <Filter>Header files\IntImp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntImp\IntImp_ZerImpFunc.gxx">
+      <Filter>Header files\IntImp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntImp\IntImp_ZerImpFunc.lxx">
+      <Filter>Header files\IntImp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntImp\IntImp_ZerParFunc.gxx">
+      <Filter>Header files\IntImp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntImp\IntImp_ZerParFunc.lxx">
+      <Filter>Header files\IntImp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_HCurveTool.gxx">
+      <Filter>Header files\IntCurveSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_HCurveTool.lxx">
+      <Filter>Header files\IntCurveSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_HInter.hxx">
+      <Filter>Header files\IntCurveSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_Inter.gxx">
+      <Filter>Header files\IntCurveSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_Intersection.hxx">
+      <Filter>Header files\IntCurveSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_IntersectionPoint.hxx">
+      <Filter>Header files\IntCurveSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_IntersectionPoint.lxx">
+      <Filter>Header files\IntCurveSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_IntersectionSegment.hxx">
+      <Filter>Header files\IntCurveSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_Polygon.gxx">
+      <Filter>Header files\IntCurveSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_Polygon.lxx">
+      <Filter>Header files\IntCurveSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_PolygonTool.gxx">
+      <Filter>Header files\IntCurveSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_PolygonTool.lxx">
+      <Filter>Header files\IntCurveSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_Polyhedron.gxx">
+      <Filter>Header files\IntCurveSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_Polyhedron.lxx">
+      <Filter>Header files\IntCurveSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_PolyhedronTool.gxx">
+      <Filter>Header files\IntCurveSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_PolyhedronTool.lxx">
+      <Filter>Header files\IntCurveSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_QuadricCurveExactInter.gxx">
+      <Filter>Header files\IntCurveSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_QuadricCurveFunc.gxx">
+      <Filter>Header files\IntCurveSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_SequenceOfPnt.hxx">
+      <Filter>Header files\IntCurveSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_SequenceOfSeg.hxx">
+      <Filter>Header files\IntCurveSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_TheCSFunctionOfHInter.hxx">
+      <Filter>Header files\IntCurveSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_TheExactHInter.hxx">
+      <Filter>Header files\IntCurveSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_TheHCurveTool.hxx">
+      <Filter>Header files\IntCurveSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_TheInterferenceOfHInter.hxx">
+      <Filter>Header files\IntCurveSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_ThePolygonOfHInter.hxx">
+      <Filter>Header files\IntCurveSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_ThePolygonToolOfHInter.hxx">
+      <Filter>Header files\IntCurveSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_ThePolyhedronOfHInter.hxx">
+      <Filter>Header files\IntCurveSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_ThePolyhedronToolOfHInter.hxx">
+      <Filter>Header files\IntCurveSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_TheQuadCurvExactHInter.hxx">
+      <Filter>Header files\IntCurveSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_TheQuadCurvFuncOfTheQuadCurvExactHInter.hxx">
+      <Filter>Header files\IntCurveSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_TransitionOnCurve.hxx">
+      <Filter>Header files\IntCurveSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf.hxx">
+      <Filter>Header files\IntSurf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_Allocator.hxx">
+      <Filter>Header files\IntSurf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_Couple.hxx">
+      <Filter>Header files\IntSurf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_Couple.lxx">
+      <Filter>Header files\IntSurf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_InteriorPoint.hxx">
+      <Filter>Header files\IntSurf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_InteriorPoint.lxx">
+      <Filter>Header files\IntSurf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_InteriorPointTool.hxx">
+      <Filter>Header files\IntSurf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_InteriorPointTool.lxx">
+      <Filter>Header files\IntSurf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_LineOn2S.hxx">
+      <Filter>Header files\IntSurf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_LineOn2S.lxx">
+      <Filter>Header files\IntSurf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_ListIteratorOfListOfPntOn2S.hxx">
+      <Filter>Header files\IntSurf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_ListOfPntOn2S.hxx">
+      <Filter>Header files\IntSurf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_PathPoint.hxx">
+      <Filter>Header files\IntSurf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_PathPoint.lxx">
+      <Filter>Header files\IntSurf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_PathPointTool.hxx">
+      <Filter>Header files\IntSurf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_PathPointTool.lxx">
+      <Filter>Header files\IntSurf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_PntOn2S.hxx">
+      <Filter>Header files\IntSurf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_PntOn2S.lxx">
+      <Filter>Header files\IntSurf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_Quadric.hxx">
+      <Filter>Header files\IntSurf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_Quadric.lxx">
+      <Filter>Header files\IntSurf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_QuadricTool.hxx">
+      <Filter>Header files\IntSurf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_QuadricTool.lxx">
+      <Filter>Header files\IntSurf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_SequenceOfCouple.hxx">
+      <Filter>Header files\IntSurf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_SequenceOfInteriorPoint.hxx">
+      <Filter>Header files\IntSurf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_SequenceOfPathPoint.hxx">
+      <Filter>Header files\IntSurf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_SequenceOfPntOn2S.hxx">
+      <Filter>Header files\IntSurf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_Situation.hxx">
+      <Filter>Header files\IntSurf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_Transition.hxx">
+      <Filter>Header files\IntSurf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_Transition.lxx">
+      <Filter>Header files\IntSurf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_TypeTrans.hxx">
+      <Filter>Header files\IntSurf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_ALine.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_ALine.lxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_ALineToWLine.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_ArcFunction.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_ArcFunction.lxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_CSFunction.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_CurvIntSurf.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_GLine.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_GLine.lxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_HCurve2dTool.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_HCurve2dTool.lxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_HInterTool.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_HInterTool.lxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_IType.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_ImpImpIntersection.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_ImpImpIntersection.lxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_ImpImpIntersection_0.gxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_ImpImpIntersection_1.gxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_ImpImpIntersection_2.gxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_ImpImpIntersection_3.gxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_ImpImpIntersection_4.gxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_ImpImpIntersection_5.gxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_ImpImpIntersection_6.gxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_ImpPrmIntersection.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_ImpPrmIntersection.lxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_InterferencePolyhedron.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_Intersection.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_Intersection.lxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_Line.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_Line.lxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_LineConstructor.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_Point.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_Point.lxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_PointLine.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_PolyArc.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_PolyLine.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_Polygo.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_Polygo.lxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_Polyhedron.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_PolyhedronTool.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_PolyhedronTool.lxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_PrmPrmIntersection.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_PrmPrmIntersection.lxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_PrmPrmIntersection_T3Bits.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_PrmPrmIntersection_T3Bits.lxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_RLine.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_RLine.lxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_RstInt.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_SearchPnt.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_SequenceOfIWLineOfTheIWalking.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_SequenceOfLine.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_SequenceOfPathPointOfTheSOnBounds.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_SequenceOfPoint.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_SequenceOfSegmentOfTheSOnBounds.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_SpecPntType.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_SpecialPoints.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_TheIWLineOfTheIWalking.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_TheIWalking.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_ThePathPointOfTheSOnBounds.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_TheSOnBounds.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_TheSearchInside.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_TheSegmentOfTheSOnBounds.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_TheSurfFunction.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_WLine.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_WLine.lxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_WLineTool.hxx">
+      <Filter>Header files\IntPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dInt\Geom2dInt_ExactIntersectionPointOfTheIntPCurvePCurveOfGInter.hxx">
+      <Filter>Header files\Geom2dInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dInt\Geom2dInt_GInter.hxx">
+      <Filter>Header files\Geom2dInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dInt\Geom2dInt_Geom2dCurveTool.hxx">
+      <Filter>Header files\Geom2dInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dInt\Geom2dInt_Geom2dCurveTool.lxx">
+      <Filter>Header files\Geom2dInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dInt\Geom2dInt_IntConicCurveOfGInter.hxx">
+      <Filter>Header files\Geom2dInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dInt\Geom2dInt_MyImpParToolOfTheIntersectorOfTheIntConicCurveOfGInter.hxx">
+      <Filter>Header files\Geom2dInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dInt\Geom2dInt_PCLocFOfTheLocateExtPCOfTheProjPCurOfGInter.hxx">
+      <Filter>Header files\Geom2dInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dInt\Geom2dInt_TheCurveLocatorOfTheProjPCurOfGInter.hxx">
+      <Filter>Header files\Geom2dInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dInt\Geom2dInt_TheDistBetweenPCurvesOfTheIntPCurvePCurveOfGInter.hxx">
+      <Filter>Header files\Geom2dInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dInt\Geom2dInt_TheIntConicCurveOfGInter.hxx">
+      <Filter>Header files\Geom2dInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dInt\Geom2dInt_TheIntPCurvePCurveOfGInter.hxx">
+      <Filter>Header files\Geom2dInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dInt\Geom2dInt_TheIntersectorOfTheIntConicCurveOfGInter.hxx">
+      <Filter>Header files\Geom2dInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dInt\Geom2dInt_TheLocateExtPCOfTheProjPCurOfGInter.hxx">
+      <Filter>Header files\Geom2dInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dInt\Geom2dInt_ThePolygon2dOfTheIntPCurvePCurveOfGInter.hxx">
+      <Filter>Header files\Geom2dInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dInt\Geom2dInt_TheProjPCurOfGInter.hxx">
+      <Filter>Header files\Geom2dInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntImpParGen\IntImpParGen.hxx">
+      <Filter>Header files\IntImpParGen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntImpParGen\IntImpParGen_ImpParTool.gxx">
+      <Filter>Header files\IntImpParGen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntImpParGen\IntImpParGen_ImpTool.hxx">
+      <Filter>Header files\IntImpParGen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntImpParGen\IntImpParGen_Intersector.gxx">
+      <Filter>Header files\IntImpParGen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntImpParGen\IntImpParGen_Tool.hxx">
+      <Filter>Header files\IntImpParGen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntRes2d\IntRes2d_Domain.hxx">
+      <Filter>Header files\IntRes2d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntRes2d\IntRes2d_Domain.lxx">
+      <Filter>Header files\IntRes2d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntRes2d\IntRes2d_Intersection.hxx">
+      <Filter>Header files\IntRes2d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntRes2d\IntRes2d_Intersection.lxx">
+      <Filter>Header files\IntRes2d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntRes2d\IntRes2d_IntersectionPoint.hxx">
+      <Filter>Header files\IntRes2d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntRes2d\IntRes2d_IntersectionPoint.lxx">
+      <Filter>Header files\IntRes2d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntRes2d\IntRes2d_IntersectionSegment.hxx">
+      <Filter>Header files\IntRes2d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntRes2d\IntRes2d_IntersectionSegment.lxx">
+      <Filter>Header files\IntRes2d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntRes2d\IntRes2d_Position.hxx">
+      <Filter>Header files\IntRes2d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntRes2d\IntRes2d_SequenceOfIntersectionPoint.hxx">
+      <Filter>Header files\IntRes2d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntRes2d\IntRes2d_SequenceOfIntersectionSegment.hxx">
+      <Filter>Header files\IntRes2d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntRes2d\IntRes2d_Situation.hxx">
+      <Filter>Header files\IntRes2d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntRes2d\IntRes2d_Transition.hxx">
+      <Filter>Header files\IntRes2d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntRes2d\IntRes2d_Transition.lxx">
+      <Filter>Header files\IntRes2d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntRes2d\IntRes2d_TypeTrans.hxx">
+      <Filter>Header files\IntRes2d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_DistBetweenPCurvesGen.gxx">
+      <Filter>Header files\IntCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_ExactIntersectionPoint.gxx">
+      <Filter>Header files\IntCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_IConicTool.hxx">
+      <Filter>Header files\IntCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_IntConicConic.hxx">
+      <Filter>Header files\IntCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_IntConicConic.lxx">
+      <Filter>Header files\IntCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_IntConicConic_Tool.hxx">
+      <Filter>Header files\IntCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_IntConicCurveGen.gxx">
+      <Filter>Header files\IntCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_IntConicCurveGen.lxx">
+      <Filter>Header files\IntCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_IntCurveCurveGen.gxx">
+      <Filter>Header files\IntCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_IntCurveCurveGen.lxx">
+      <Filter>Header files\IntCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_IntImpConicParConic.hxx">
+      <Filter>Header files\IntCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_IntPolyPolyGen.gxx">
+      <Filter>Header files\IntCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_MyImpParToolOfIntImpConicParConic.hxx">
+      <Filter>Header files\IntCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_PConic.hxx">
+      <Filter>Header files\IntCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_PConic.lxx">
+      <Filter>Header files\IntCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_PConicTool.hxx">
+      <Filter>Header files\IntCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_Polygon2dGen.gxx">
+      <Filter>Header files\IntCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_Polygon2dGen.lxx">
+      <Filter>Header files\IntCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_ProjPCurGen.gxx">
+      <Filter>Header files\IntCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_ProjectOnPConicTool.hxx">
+      <Filter>Header files\IntCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_UserIntConicCurveGen.gxx">
+      <Filter>Header files\IntCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TopTrans\TopTrans_Array2OfOrientation.hxx">
+      <Filter>Header files\TopTrans</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TopTrans\TopTrans_CurveTransition.hxx">
+      <Filter>Header files\TopTrans</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TopTrans\TopTrans_SurfaceTransition.hxx">
+      <Filter>Header files\TopTrans</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Intf\Intf.hxx">
+      <Filter>Header files\Intf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Intf\Intf_Array1OfLin.hxx">
+      <Filter>Header files\Intf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Intf\Intf_Interference.hxx">
+      <Filter>Header files\Intf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Intf\Intf_Interference.lxx">
+      <Filter>Header files\Intf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Intf\Intf_InterferencePolygon2d.hxx">
+      <Filter>Header files\Intf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Intf\Intf_InterferencePolygonPolyhedron.gxx">
+      <Filter>Header files\Intf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Intf\Intf_PIType.hxx">
+      <Filter>Header files\Intf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Intf\Intf_Polygon2d.hxx">
+      <Filter>Header files\Intf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Intf\Intf_Polygon2d.lxx">
+      <Filter>Header files\Intf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Intf\Intf_SectionLine.hxx">
+      <Filter>Header files\Intf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Intf\Intf_SectionLine.lxx">
+      <Filter>Header files\Intf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Intf\Intf_SectionPoint.hxx">
+      <Filter>Header files\Intf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Intf\Intf_SectionPoint.lxx">
+      <Filter>Header files\Intf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Intf\Intf_SeqOfSectionLine.hxx">
+      <Filter>Header files\Intf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Intf\Intf_SeqOfSectionPoint.hxx">
+      <Filter>Header files\Intf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Intf\Intf_SeqOfTangentZone.hxx">
+      <Filter>Header files\Intf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Intf\Intf_TangentZone.hxx">
+      <Filter>Header files\Intf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Intf\Intf_TangentZone.lxx">
+      <Filter>Header files\Intf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Intf\Intf_Tool.hxx">
+      <Filter>Header files\Intf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ApproxInt\ApproxInt_Approx.gxx">
+      <Filter>Header files\ApproxInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ApproxInt\ApproxInt_ImpPrmSvSurfaces.gxx">
+      <Filter>Header files\ApproxInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ApproxInt\ApproxInt_KnotTools.hxx">
+      <Filter>Header files\ApproxInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ApproxInt\ApproxInt_MultiLine.gxx">
+      <Filter>Header files\ApproxInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ApproxInt\ApproxInt_MultiLineTool.lxx">
+      <Filter>Header files\ApproxInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ApproxInt\ApproxInt_PrmPrmSvSurfaces.gxx">
+      <Filter>Header files\ApproxInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ApproxInt\ApproxInt_SvSurfaces.hxx">
+      <Filter>Header files\ApproxInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GccAna\GccAna_Circ2d2TanOn.hxx">
+      <Filter>Header files\GccAna</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GccAna\GccAna_Circ2d2TanRad.hxx">
+      <Filter>Header files\GccAna</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GccAna\GccAna_Circ2d3Tan.hxx">
+      <Filter>Header files\GccAna</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GccAna\GccAna_Circ2dBisec.hxx">
+      <Filter>Header files\GccAna</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GccAna\GccAna_Circ2dTanCen.hxx">
+      <Filter>Header files\GccAna</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GccAna\GccAna_Circ2dTanOnRad.hxx">
+      <Filter>Header files\GccAna</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GccAna\GccAna_CircLin2dBisec.hxx">
+      <Filter>Header files\GccAna</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GccAna\GccAna_CircPnt2dBisec.hxx">
+      <Filter>Header files\GccAna</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GccAna\GccAna_Lin2d2Tan.hxx">
+      <Filter>Header files\GccAna</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GccAna\GccAna_Lin2dBisec.hxx">
+      <Filter>Header files\GccAna</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GccAna\GccAna_Lin2dTanObl.hxx">
+      <Filter>Header files\GccAna</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GccAna\GccAna_Lin2dTanPar.hxx">
+      <Filter>Header files\GccAna</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GccAna\GccAna_Lin2dTanPer.hxx">
+      <Filter>Header files\GccAna</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GccAna\GccAna_LinPnt2dBisec.hxx">
+      <Filter>Header files\GccAna</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GccAna\GccAna_NoSolution.hxx">
+      <Filter>Header files\GccAna</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GccAna\GccAna_Pnt2dBisec.hxx">
+      <Filter>Header files\GccAna</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GccEnt\GccEnt.hxx">
+      <Filter>Header files\GccEnt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GccEnt\GccEnt_Array1OfPosition.hxx">
+      <Filter>Header files\GccEnt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GccEnt\GccEnt_BadQualifier.hxx">
+      <Filter>Header files\GccEnt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GccEnt\GccEnt_Position.hxx">
+      <Filter>Header files\GccEnt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GccEnt\GccEnt_QualifiedCirc.hxx">
+      <Filter>Header files\GccEnt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GccEnt\GccEnt_QualifiedLin.hxx">
+      <Filter>Header files\GccEnt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GccInt\GccInt_BCirc.hxx">
+      <Filter>Header files\GccInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GccInt\GccInt_BElips.hxx">
+      <Filter>Header files\GccInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GccInt\GccInt_BHyper.hxx">
+      <Filter>Header files\GccInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GccInt\GccInt_BLine.hxx">
+      <Filter>Header files\GccInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GccInt\GccInt_BParab.hxx">
+      <Filter>Header files\GccInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GccInt\GccInt_BPoint.hxx">
+      <Filter>Header files\GccInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GccInt\GccInt_Bisec.hxx">
+      <Filter>Header files\GccInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GccInt\GccInt_IType.hxx">
+      <Filter>Header files\GccInt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HatchGen\HatchGen_Domain.hxx">
+      <Filter>Header files\HatchGen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HatchGen\HatchGen_Domain.lxx">
+      <Filter>Header files\HatchGen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HatchGen\HatchGen_Domains.hxx">
+      <Filter>Header files\HatchGen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HatchGen\HatchGen_ErrorStatus.hxx">
+      <Filter>Header files\HatchGen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HatchGen\HatchGen_IntersectionPoint.hxx">
+      <Filter>Header files\HatchGen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HatchGen\HatchGen_IntersectionType.hxx">
+      <Filter>Header files\HatchGen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HatchGen\HatchGen_PointOnElement.hxx">
+      <Filter>Header files\HatchGen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HatchGen\HatchGen_PointOnElement.lxx">
+      <Filter>Header files\HatchGen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HatchGen\HatchGen_PointOnHatching.hxx">
+      <Filter>Header files\HatchGen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HatchGen\HatchGen_PointsOnElement.hxx">
+      <Filter>Header files\HatchGen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HatchGen\HatchGen_PointsOnHatching.hxx">
+      <Filter>Header files\HatchGen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dHatch\Geom2dHatch_Classifier.hxx">
+      <Filter>Header files\Geom2dHatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dHatch\Geom2dHatch_DataMapIteratorOfHatchings.hxx">
+      <Filter>Header files\Geom2dHatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dHatch\Geom2dHatch_DataMapIteratorOfMapOfElements.hxx">
+      <Filter>Header files\Geom2dHatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dHatch\Geom2dHatch_Element.hxx">
+      <Filter>Header files\Geom2dHatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dHatch\Geom2dHatch_Elements.hxx">
+      <Filter>Header files\Geom2dHatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dHatch\Geom2dHatch_FClass2dOfClassifier.hxx">
+      <Filter>Header files\Geom2dHatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dHatch\Geom2dHatch_Hatcher.hxx">
+      <Filter>Header files\Geom2dHatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dHatch\Geom2dHatch_Hatcher.lxx">
+      <Filter>Header files\Geom2dHatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dHatch\Geom2dHatch_Hatching.hxx">
+      <Filter>Header files\Geom2dHatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dHatch\Geom2dHatch_Hatchings.hxx">
+      <Filter>Header files\Geom2dHatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dHatch\Geom2dHatch_Intersector.hxx">
+      <Filter>Header files\Geom2dHatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dHatch\Geom2dHatch_Intersector.lxx">
+      <Filter>Header files\Geom2dHatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dHatch\Geom2dHatch_MapOfElements.hxx">
+      <Filter>Header files\Geom2dHatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Law\Law.hxx">
+      <Filter>Header files\Law</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Law\Law_BSpFunc.hxx">
+      <Filter>Header files\Law</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Law\Law_BSpline.hxx">
+      <Filter>Header files\Law</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Law\Law_BSplineKnotSplitting.hxx">
+      <Filter>Header files\Law</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Law\Law_Composite.hxx">
+      <Filter>Header files\Law</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Law\Law_Constant.hxx">
+      <Filter>Header files\Law</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Law\Law_Function.hxx">
+      <Filter>Header files\Law</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Law\Law_Interpol.hxx">
+      <Filter>Header files\Law</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Law\Law_Interpolate.hxx">
+      <Filter>Header files\Law</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Law\Law_Laws.hxx">
+      <Filter>Header files\Law</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Law\Law_Linear.hxx">
+      <Filter>Header files\Law</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Law\Law_ListIteratorOfLaws.hxx">
+      <Filter>Header files\Law</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Law\Law_S.hxx">
+      <Filter>Header files\Law</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\AppBlend\AppBlend_AppSurf.gxx">
+      <Filter>Header files\AppBlend</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\AppBlend\AppBlend_AppSurf.lxx">
+      <Filter>Header files\AppBlend</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\AppBlend\AppBlend_Approx.hxx">
+      <Filter>Header files\AppBlend</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Plate\Plate_Array1OfPinpointConstraint.hxx">
+      <Filter>Header files\Plate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Plate\Plate_D1.hxx">
+      <Filter>Header files\Plate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Plate\Plate_D1.lxx">
+      <Filter>Header files\Plate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Plate\Plate_D2.hxx">
+      <Filter>Header files\Plate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Plate\Plate_D3.hxx">
+      <Filter>Header files\Plate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Plate\Plate_FreeGtoCConstraint.hxx">
+      <Filter>Header files\Plate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Plate\Plate_FreeGtoCConstraint.lxx">
+      <Filter>Header files\Plate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Plate\Plate_GlobalTranslationConstraint.hxx">
+      <Filter>Header files\Plate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Plate\Plate_GlobalTranslationConstraint.lxx">
+      <Filter>Header files\Plate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Plate\Plate_GtoCConstraint.hxx">
+      <Filter>Header files\Plate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Plate\Plate_GtoCConstraint.lxx">
+      <Filter>Header files\Plate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Plate\Plate_HArray1OfPinpointConstraint.hxx">
+      <Filter>Header files\Plate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Plate\Plate_LineConstraint.hxx">
+      <Filter>Header files\Plate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Plate\Plate_LineConstraint.lxx">
+      <Filter>Header files\Plate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Plate\Plate_LinearScalarConstraint.hxx">
+      <Filter>Header files\Plate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Plate\Plate_LinearScalarConstraint.lxx">
+      <Filter>Header files\Plate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Plate\Plate_LinearXYZConstraint.hxx">
+      <Filter>Header files\Plate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Plate\Plate_LinearXYZConstraint.lxx">
+      <Filter>Header files\Plate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Plate\Plate_PinpointConstraint.hxx">
+      <Filter>Header files\Plate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Plate\Plate_PinpointConstraint.lxx">
+      <Filter>Header files\Plate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Plate\Plate_PlaneConstraint.hxx">
+      <Filter>Header files\Plate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Plate\Plate_PlaneConstraint.lxx">
+      <Filter>Header files\Plate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Plate\Plate_Plate.hxx">
+      <Filter>Header files\Plate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Plate\Plate_Plate.lxx">
+      <Filter>Header files\Plate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Plate\Plate_SampledCurveConstraint.hxx">
+      <Filter>Header files\Plate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Plate\Plate_SampledCurveConstraint.lxx">
+      <Filter>Header files\Plate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Plate\Plate_SequenceOfLinearScalarConstraint.hxx">
+      <Filter>Header files\Plate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Plate\Plate_SequenceOfLinearXYZConstraint.hxx">
+      <Filter>Header files\Plate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Plate\Plate_SequenceOfPinpointConstraint.hxx">
+      <Filter>Header files\Plate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomPlate\GeomPlate_Aij.hxx">
+      <Filter>Header files\GeomPlate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomPlate\GeomPlate_Array1OfHCurve.hxx">
+      <Filter>Header files\GeomPlate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomPlate\GeomPlate_Array1OfSequenceOfReal.hxx">
+      <Filter>Header files\GeomPlate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomPlate\GeomPlate_BuildAveragePlane.hxx">
+      <Filter>Header files\GeomPlate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomPlate\GeomPlate_BuildPlateSurface.hxx">
+      <Filter>Header files\GeomPlate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomPlate\GeomPlate_CurveConstraint.hxx">
+      <Filter>Header files\GeomPlate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomPlate\GeomPlate_HArray1OfHCurve.hxx">
+      <Filter>Header files\GeomPlate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomPlate\GeomPlate_HArray1OfSequenceOfReal.hxx">
+      <Filter>Header files\GeomPlate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomPlate\GeomPlate_HSequenceOfCurveConstraint.hxx">
+      <Filter>Header files\GeomPlate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomPlate\GeomPlate_HSequenceOfPointConstraint.hxx">
+      <Filter>Header files\GeomPlate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomPlate\GeomPlate_MakeApprox.hxx">
+      <Filter>Header files\GeomPlate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomPlate\GeomPlate_PlateG0Criterion.hxx">
+      <Filter>Header files\GeomPlate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomPlate\GeomPlate_PlateG1Criterion.hxx">
+      <Filter>Header files\GeomPlate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomPlate\GeomPlate_PointConstraint.hxx">
+      <Filter>Header files\GeomPlate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomPlate\GeomPlate_SequenceOfAij.hxx">
+      <Filter>Header files\GeomPlate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomPlate\GeomPlate_SequenceOfCurveConstraint.hxx">
+      <Filter>Header files\GeomPlate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomPlate\GeomPlate_SequenceOfPointConstraint.hxx">
+      <Filter>Header files\GeomPlate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomPlate\GeomPlate_Surface.hxx">
+      <Filter>Header files\GeomPlate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\LocalAnalysis\LocalAnalysis.hxx">
+      <Filter>Header files\LocalAnalysis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\LocalAnalysis\LocalAnalysis_CurveContinuity.hxx">
+      <Filter>Header files\LocalAnalysis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\LocalAnalysis\LocalAnalysis_StatusErrorType.hxx">
+      <Filter>Header files\LocalAnalysis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\LocalAnalysis\LocalAnalysis_SurfaceContinuity.hxx">
+      <Filter>Header files\LocalAnalysis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomAPI\GeomAPI.hxx">
+      <Filter>Header files\GeomAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomAPI\GeomAPI_ExtremaCurveCurve.hxx">
+      <Filter>Header files\GeomAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomAPI\GeomAPI_ExtremaCurveCurve.lxx">
+      <Filter>Header files\GeomAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomAPI\GeomAPI_ExtremaCurveSurface.hxx">
+      <Filter>Header files\GeomAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomAPI\GeomAPI_ExtremaCurveSurface.lxx">
+      <Filter>Header files\GeomAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomAPI\GeomAPI_ExtremaSurfaceSurface.hxx">
+      <Filter>Header files\GeomAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomAPI\GeomAPI_ExtremaSurfaceSurface.lxx">
+      <Filter>Header files\GeomAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomAPI\GeomAPI_IntCS.hxx">
+      <Filter>Header files\GeomAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomAPI\GeomAPI_IntSS.hxx">
+      <Filter>Header files\GeomAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomAPI\GeomAPI_IntSS.lxx">
+      <Filter>Header files\GeomAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomAPI\GeomAPI_Interpolate.hxx">
+      <Filter>Header files\GeomAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomAPI\GeomAPI_PointsToBSpline.hxx">
+      <Filter>Header files\GeomAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomAPI\GeomAPI_PointsToBSplineSurface.hxx">
+      <Filter>Header files\GeomAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomAPI\GeomAPI_ProjectPointOnCurve.hxx">
+      <Filter>Header files\GeomAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomAPI\GeomAPI_ProjectPointOnCurve.lxx">
+      <Filter>Header files\GeomAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomAPI\GeomAPI_ProjectPointOnSurf.hxx">
+      <Filter>Header files\GeomAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomAPI\GeomAPI_ProjectPointOnSurf.lxx">
+      <Filter>Header files\GeomAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_AppSurf.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_AppSweep.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_ApproxStyle.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Array1OfLocationLaw.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Array1OfSectionLaw.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_BSplineCurves.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_BSplineCurves.lxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_BezierCurves.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_BezierCurves.lxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_BoundWithSurf.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Boundary.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_CircularBlendFunc.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_ConstantBiNormal.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_ConstrainedFilling.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Coons.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_CoonsAlgPatch.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_CornerState.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_CorrectedFrenet.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_CurveAndTrihedron.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Curved.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Darboux.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_DegeneratedBound.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_DiscreteTrihedron.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_DraftTrihedron.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_EvolvedSection.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Filling.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_FillingStyle.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Fixed.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Frenet.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_FunctionDraft.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_FunctionGuide.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Generator.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Generator.lxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_GuideTrihedronAC.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_GuideTrihedronPlan.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_HArray1OfLocationLaw.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_HArray1OfSectionLaw.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_HSequenceOfAx2.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Line.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Line.lxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_LocFunction.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_LocationDraft.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_LocationGuide.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_LocationLaw.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_NSections.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Pipe.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Pipe.lxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_PipeError.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_PlanFunc.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_PolynomialConvertor.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Profiler.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Profiler.lxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_QuasiAngularConvertor.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_SectionGenerator.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_SectionLaw.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_SectionPlacement.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_SequenceOfAx2.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_SequenceOfTrsf.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_SimpleBound.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_SnglrFunc.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Stretch.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Sweep.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_SweepFunction.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_SweepSectionGenerator.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_SweepSectionGenerator.lxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Tensor.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Tensor.lxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_TgtField.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_TgtOnCoons.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Trihedron.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_TrihedronLaw.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_TrihedronWithGuide.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_UniformSection.hxx">
+      <Filter>Header files\GeomFill</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dAPI\Geom2dAPI_ExtremaCurveCurve.hxx">
+      <Filter>Header files\Geom2dAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dAPI\Geom2dAPI_ExtremaCurveCurve.lxx">
+      <Filter>Header files\Geom2dAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dAPI\Geom2dAPI_InterCurveCurve.hxx">
+      <Filter>Header files\Geom2dAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dAPI\Geom2dAPI_InterCurveCurve.lxx">
+      <Filter>Header files\Geom2dAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dAPI\Geom2dAPI_Interpolate.hxx">
+      <Filter>Header files\Geom2dAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dAPI\Geom2dAPI_PointsToBSpline.hxx">
+      <Filter>Header files\Geom2dAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dAPI\Geom2dAPI_ProjectPointOnCurve.hxx">
+      <Filter>Header files\Geom2dAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dAPI\Geom2dAPI_ProjectPointOnCurve.lxx">
+      <Filter>Header files\Geom2dAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc.hxx">
+      <Filter>Header files\Geom2dGcc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2d2TanOn.hxx">
+      <Filter>Header files\Geom2dGcc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2d2TanOnGeo.hxx">
+      <Filter>Header files\Geom2dGcc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2d2TanOnIter.hxx">
+      <Filter>Header files\Geom2dGcc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2d2TanRad.hxx">
+      <Filter>Header files\Geom2dGcc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2d2TanRadGeo.hxx">
+      <Filter>Header files\Geom2dGcc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2d3Tan.hxx">
+      <Filter>Header files\Geom2dGcc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2d3TanIter.hxx">
+      <Filter>Header files\Geom2dGcc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2dTanCen.hxx">
+      <Filter>Header files\Geom2dGcc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2dTanCenGeo.hxx">
+      <Filter>Header files\Geom2dGcc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2dTanOnRad.hxx">
+      <Filter>Header files\Geom2dGcc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2dTanOnRadGeo.hxx">
+      <Filter>Header files\Geom2dGcc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_CurveTool.hxx">
+      <Filter>Header files\Geom2dGcc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_FunctionTanCirCu.hxx">
+      <Filter>Header files\Geom2dGcc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_FunctionTanCuCu.hxx">
+      <Filter>Header files\Geom2dGcc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_FunctionTanCuCuCu.hxx">
+      <Filter>Header files\Geom2dGcc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_FunctionTanCuCuOnCu.hxx">
+      <Filter>Header files\Geom2dGcc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_FunctionTanCuPnt.hxx">
+      <Filter>Header files\Geom2dGcc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_FunctionTanObl.hxx">
+      <Filter>Header files\Geom2dGcc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_IsParallel.hxx">
+      <Filter>Header files\Geom2dGcc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Lin2d2Tan.hxx">
+      <Filter>Header files\Geom2dGcc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Lin2d2TanIter.hxx">
+      <Filter>Header files\Geom2dGcc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Lin2dTanObl.hxx">
+      <Filter>Header files\Geom2dGcc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Lin2dTanOblIter.hxx">
+      <Filter>Header files\Geom2dGcc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_QCurve.hxx">
+      <Filter>Header files\Geom2dGcc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_QualifiedCurve.hxx">
+      <Filter>Header files\Geom2dGcc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Type1.hxx">
+      <Filter>Header files\Geom2dGcc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Type2.hxx">
+      <Filter>Header files\Geom2dGcc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Type3.hxx">
+      <Filter>Header files\Geom2dGcc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\FairCurve\FairCurve_AnalysisCode.hxx">
+      <Filter>Header files\FairCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\FairCurve\FairCurve_Batten.hxx">
+      <Filter>Header files\FairCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\FairCurve\FairCurve_Batten.lxx">
+      <Filter>Header files\FairCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\FairCurve\FairCurve_BattenLaw.hxx">
+      <Filter>Header files\FairCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\FairCurve\FairCurve_BattenLaw.lxx">
+      <Filter>Header files\FairCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\FairCurve\FairCurve_DistributionOfEnergy.hxx">
+      <Filter>Header files\FairCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\FairCurve\FairCurve_DistributionOfJerk.hxx">
+      <Filter>Header files\FairCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\FairCurve\FairCurve_DistributionOfSagging.hxx">
+      <Filter>Header files\FairCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\FairCurve\FairCurve_DistributionOfTension.hxx">
+      <Filter>Header files\FairCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\FairCurve\FairCurve_DistributionOfTension.lxx">
+      <Filter>Header files\FairCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\FairCurve\FairCurve_Energy.hxx">
+      <Filter>Header files\FairCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\FairCurve\FairCurve_Energy.lxx">
+      <Filter>Header files\FairCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\FairCurve\FairCurve_EnergyOfBatten.hxx">
+      <Filter>Header files\FairCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\FairCurve\FairCurve_EnergyOfBatten.lxx">
+      <Filter>Header files\FairCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\FairCurve\FairCurve_EnergyOfMVC.hxx">
+      <Filter>Header files\FairCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\FairCurve\FairCurve_EnergyOfMVC.lxx">
+      <Filter>Header files\FairCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\FairCurve\FairCurve_MinimalVariation.hxx">
+      <Filter>Header files\FairCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\FairCurve\FairCurve_MinimalVariation.lxx">
+      <Filter>Header files\FairCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\FairCurve\FairCurve_Newton.hxx">
+      <Filter>Header files\FairCurve</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NLPlate\NLPlate_HGPPConstraint.hxx">
+      <Filter>Header files\NLPlate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NLPlate\NLPlate_HPG0Constraint.hxx">
+      <Filter>Header files\NLPlate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NLPlate\NLPlate_HPG0G1Constraint.hxx">
+      <Filter>Header files\NLPlate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NLPlate\NLPlate_HPG0G2Constraint.hxx">
+      <Filter>Header files\NLPlate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NLPlate\NLPlate_HPG0G3Constraint.hxx">
+      <Filter>Header files\NLPlate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NLPlate\NLPlate_HPG1Constraint.hxx">
+      <Filter>Header files\NLPlate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NLPlate\NLPlate_HPG2Constraint.hxx">
+      <Filter>Header files\NLPlate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NLPlate\NLPlate_HPG3Constraint.hxx">
+      <Filter>Header files\NLPlate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NLPlate\NLPlate_ListIteratorOfStackOfPlate.hxx">
+      <Filter>Header files\NLPlate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NLPlate\NLPlate_NLPlate.hxx">
+      <Filter>Header files\NLPlate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NLPlate\NLPlate_SequenceOfHGPPConstraint.hxx">
+      <Filter>Header files\NLPlate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NLPlate\NLPlate_StackOfPlate.hxx">
+      <Filter>Header files\NLPlate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_Array.hxx">
+      <Filter>Header files\IntPolyh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_ArrayOfEdges.hxx">
+      <Filter>Header files\IntPolyh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_ArrayOfPointNormal.hxx">
+      <Filter>Header files\IntPolyh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_ArrayOfPoints.hxx">
+      <Filter>Header files\IntPolyh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_ArrayOfSectionLines.hxx">
+      <Filter>Header files\IntPolyh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_ArrayOfTangentZones.hxx">
+      <Filter>Header files\IntPolyh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_ArrayOfTriangles.hxx">
+      <Filter>Header files\IntPolyh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_Couple.hxx">
+      <Filter>Header files\IntPolyh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_CoupleMapHasher.hxx">
+      <Filter>Header files\IntPolyh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_Edge.hxx">
+      <Filter>Header files\IntPolyh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_Intersection.hxx">
+      <Filter>Header files\IntPolyh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_ListOfCouples.hxx">
+      <Filter>Header files\IntPolyh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_MaillageAffinage.hxx">
+      <Filter>Header files\IntPolyh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_PMaillageAffinage.hxx">
+      <Filter>Header files\IntPolyh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_Point.hxx">
+      <Filter>Header files\IntPolyh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_SectionLine.hxx">
+      <Filter>Header files\IntPolyh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_SeqOfStartPoints.hxx">
+      <Filter>Header files\IntPolyh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_StartPoint.hxx">
+      <Filter>Header files\IntPolyh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_Tools.hxx">
+      <Filter>Header files\IntPolyh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_Triangle.hxx">
+      <Filter>Header files\IntPolyh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TopClass\TopClass_Classifier2d.gxx">
+      <Filter>Header files\TopClass</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TopClass\TopClass_Classifier2d.lxx">
+      <Filter>Header files\TopClass</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TopClass\TopClass_Classifier3d.gxx">
+      <Filter>Header files\TopClass</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TopClass\TopClass_Classifier3d.lxx">
+      <Filter>Header files\TopClass</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TopClass\TopClass_FaceClassifier.gxx">
+      <Filter>Header files\TopClass</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TopClass\TopClass_FaceClassifier.lxx">
+      <Filter>Header files\TopClass</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TopClass\TopClass_SolidClassifier.gxx">
+      <Filter>Header files\TopClass</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TopClass\TopClass_SolidExplorer.hxx">
+      <Filter>Header files\TopClass</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="TKGeomAlgo.rc" />
+  </ItemGroup>
+</Project>

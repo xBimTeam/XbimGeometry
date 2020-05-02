@@ -1,0 +1,533 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{75FC9041-01CF-1792-0912-D8DE6FF38A78}</ProjectGuid>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\..\..\..\win32\vc14\bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\..\..\..\win32\vc14\obj\TKShHealing\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\..\..\..\win32\vc14\bind\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\..\..\..\win32\vc14\objd\TKShHealing\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\..\..\..\win64\vc14\bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\..\..\..\win64\vc14\obj\TKShHealing\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\..\..\..\win64\vc14\bind\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\..\..\..\win64\vc14\objd\TKShHealing\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\..\..\..\win32\vc14\bin\TKShHealing.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>OCCT_STATIC_BUILD;HAVE_NO_DLL;NDEBUG;No_Exception;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <AssemblerListingLocation>.\..\..\..\win32\vc14\obj\TKShHealing/</AssemblerListingLocation>
+      <ObjectFileName>.\..\..\..\win32\vc14\obj\TKShHealing/</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\..\..\win32\vc14\obj\TKShHealing/</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;No_Exception;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>TKBRep.lib;TKernel.lib;TKMath.lib;TKG2d.lib;TKTopAlgo.lib;TKG3d.lib;TKGeomBase.lib;TKGeomAlgo.lib;wsock32.lib</AdditionalDependencies>
+      <OutputFile>.\..\..\..\win32\vc14\bin\TKShHealing.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\win32\vc14\lib;$(CSF_OPT_LIB32);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>no</GenerateDebugInformation>
+      <ProgramDatabaseFile>.\..\..\..\win32\vc14\bin\TKShHealing.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <ImportLibrary>..\..\..\win32\vc14\lib\TKShHealing.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\..\..\..\win32\vc14\bind\TKShHealing.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>Disabled</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>OCCT_STATIC_BUILD;HAVE_NO_DLL;_DEBUG;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <AssemblerListingLocation>.\..\..\..\win32\vc14\objd\TKShHealing/</AssemblerListingLocation>
+      <ObjectFileName>.\..\..\..\win32\vc14\objd\TKShHealing/</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\..\..\win32\vc14\objd\TKShHealing/</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>TKBRep.lib;TKernel.lib;TKMath.lib;TKG2d.lib;TKTopAlgo.lib;TKG3d.lib;TKGeomBase.lib;TKGeomAlgo.lib;wsock32.lib</AdditionalDependencies>
+      <OutputFile>.\..\..\..\win32\vc14\bind\TKShHealing.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\win32\vc14\libd;$(CSF_OPT_LIB32D);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>..\..\..\win32\vc14\bind\TKShHealing.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <ImportLibrary>..\..\..\win32\vc14\libd\TKShHealing.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>x64</TargetEnvironment>
+      <TypeLibraryName>.\..\..\..\win64\vc14\bin\TKShHealing.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>NDEBUG;No_Exception;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <AssemblerListingLocation>.\..\..\..\win64\vc14\obj\TKShHealing/</AssemblerListingLocation>
+      <ObjectFileName>.\..\..\..\win64\vc14\obj\TKShHealing/</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\..\..\win64\vc14\obj\TKShHealing/</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;No_Exception;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>TKBRep.lib;TKernel.lib;TKMath.lib;TKG2d.lib;TKTopAlgo.lib;TKG3d.lib;TKGeomBase.lib;TKGeomAlgo.lib;wsock32.lib</AdditionalDependencies>
+      <OutputFile>.\..\..\..\win64\vc14\bin\TKShHealing.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\win64\vc14\lib;$(CSF_OPT_LIB64);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>no</GenerateDebugInformation>
+      <ProgramDatabaseFile>.\..\..\..\win64\vc14\bin\TKShHealing.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <ImportLibrary>..\..\..\win64\vc14\lib\TKShHealing.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>x64</TargetEnvironment>
+      <TypeLibraryName>.\..\..\..\win64\vc14\bind\TKShHealing.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>Disabled</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>_DEBUG;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <AssemblerListingLocation>.\..\..\..\win64\vc14\objd\TKShHealing/</AssemblerListingLocation>
+      <ObjectFileName>.\..\..\..\win64\vc14\objd\TKShHealing/</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\..\..\win64\vc14\objd\TKShHealing/</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>TKBRep.lib;TKernel.lib;TKMath.lib;TKG2d.lib;TKTopAlgo.lib;TKG3d.lib;TKGeomBase.lib;TKGeomAlgo.lib;wsock32.lib</AdditionalDependencies>
+      <OutputFile>.\..\..\..\win64\vc14\bind\TKShHealing.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\win64\vc14\libd;$(CSF_OPT_LIB64D);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>..\..\..\win64\vc14\bind\TKShHealing.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <ImportLibrary>..\..\..\win64\vc14\libd\TKShHealing.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\ShapeBuild\ShapeBuild.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeBuild\ShapeBuild_Edge.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeBuild\ShapeBuild_ReShape.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeBuild\ShapeBuild_Vertex.cxx" />
+    <ClInclude Include="..\..\..\src\ShapeBuild\ShapeBuild.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeBuild\ShapeBuild_Edge.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeBuild\ShapeBuild_ReShape.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeBuild\ShapeBuild_Vertex.hxx" />
+    <ClCompile Include="..\..\..\src\ShapeExtend\ShapeExtend.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeExtend\ShapeExtend_BasicMsgRegistrator.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeExtend\ShapeExtend_ComplexCurve.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeExtend\ShapeExtend_CompositeSurface.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeExtend\ShapeExtend_Explorer.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeExtend\ShapeExtend_MsgRegistrator.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeExtend\ShapeExtend_WireData.cxx" />
+    <ClInclude Include="..\..\..\src\ShapeExtend\ShapeExtend.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeExtend\ShapeExtend_BasicMsgRegistrator.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeExtend\ShapeExtend_ComplexCurve.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeExtend\ShapeExtend_ComplexCurve.lxx" />
+    <ClInclude Include="..\..\..\src\ShapeExtend\ShapeExtend_CompositeSurface.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeExtend\ShapeExtend_DataMapIteratorOfDataMapOfShapeListOfMsg.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeExtend\ShapeExtend_DataMapIteratorOfDataMapOfTransientListOfMsg.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeExtend\ShapeExtend_DataMapOfShapeListOfMsg.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeExtend\ShapeExtend_DataMapOfTransientListOfMsg.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeExtend\ShapeExtend_Explorer.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeExtend\ShapeExtend_MsgRegistrator.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeExtend\ShapeExtend_MsgRegistrator.lxx" />
+    <ClInclude Include="..\..\..\src\ShapeExtend\ShapeExtend_Parametrisation.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeExtend\ShapeExtend_Status.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeExtend\ShapeExtend_WireData.hxx" />
+    <ClCompile Include="..\..\..\src\ShapeConstruct\ShapeConstruct.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeConstruct\ShapeConstruct_Curve.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeConstruct\ShapeConstruct_MakeTriangulation.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeConstruct\ShapeConstruct_ProjectCurveOnSurface.cxx" />
+    <ClInclude Include="..\..\..\src\ShapeConstruct\ShapeConstruct.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeConstruct\ShapeConstruct_Curve.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeConstruct\ShapeConstruct_MakeTriangulation.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeConstruct\ShapeConstruct_ProjectCurveOnSurface.hxx" />
+    <ClCompile Include="..\..\..\src\ShapeCustom\ShapeCustom.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeCustom\ShapeCustom_BSplineRestriction.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeCustom\ShapeCustom_ConvertToBSpline.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeCustom\ShapeCustom_ConvertToRevolution.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeCustom\ShapeCustom_Curve.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeCustom\ShapeCustom_Curve2d.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeCustom\ShapeCustom_DirectModification.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeCustom\ShapeCustom_Modification.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeCustom\ShapeCustom_RestrictionParameters.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeCustom\ShapeCustom_Surface.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeCustom\ShapeCustom_SweptToElementary.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeCustom\ShapeCustom_TrsfModification.cxx" />
+    <ClInclude Include="..\..\..\src\ShapeCustom\ShapeCustom.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeCustom\ShapeCustom_BSplineRestriction.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeCustom\ShapeCustom_BSplineRestriction.lxx" />
+    <ClInclude Include="..\..\..\src\ShapeCustom\ShapeCustom_ConvertToBSpline.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeCustom\ShapeCustom_ConvertToRevolution.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeCustom\ShapeCustom_Curve.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeCustom\ShapeCustom_Curve2d.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeCustom\ShapeCustom_DirectModification.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeCustom\ShapeCustom_Modification.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeCustom\ShapeCustom_RestrictionParameters.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeCustom\ShapeCustom_RestrictionParameters.lxx" />
+    <ClInclude Include="..\..\..\src\ShapeCustom\ShapeCustom_Surface.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeCustom\ShapeCustom_Surface.lxx" />
+    <ClInclude Include="..\..\..\src\ShapeCustom\ShapeCustom_SweptToElementary.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeCustom\ShapeCustom_TrsfModification.hxx" />
+    <ClCompile Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_BoxBndTree.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_CheckSmallFace.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_Curve.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_Edge.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_FreeBoundData.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_FreeBounds.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_FreeBoundsProperties.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_Geom.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_ShapeContents.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_ShapeTolerance.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_Shell.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_Surface.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_TransferParameters.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_TransferParametersProj.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_Wire.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_WireOrder.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_WireVertex.cxx" />
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_BoxBndTree.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_CheckSmallFace.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_CheckSmallFace.lxx" />
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_Curve.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_DataMapIteratorOfDataMapOfShapeListOfReal.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_DataMapOfShapeListOfReal.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_Edge.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_FreeBoundData.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_FreeBoundData.lxx" />
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_FreeBounds.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_FreeBounds.lxx" />
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_FreeBoundsProperties.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_FreeBoundsProperties.lxx" />
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_Geom.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_HSequenceOfFreeBounds.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_SequenceOfFreeBounds.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_ShapeContents.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_ShapeContents.lxx" />
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_ShapeTolerance.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_Shell.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_Surface.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_Surface.lxx" />
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_TransferParameters.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_TransferParametersProj.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_Wire.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_Wire.lxx" />
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_WireOrder.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_WireVertex.hxx" />
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_ComposeShell.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_Edge.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_EdgeConnect.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_EdgeProjAux.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_Face.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_FaceConnect.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_FixSmallFace.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_FixSmallSolid.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_FreeBounds.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_IntersectionTool.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_Root.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_Shape.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_ShapeTolerance.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_Shell.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_Solid.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_SplitCommonVertex.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_SplitTool.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_Wire.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_WireSegment.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_WireVertex.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_Wire_1.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_Wireframe.cxx" />
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_ComposeShell.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_DataMapIteratorOfDataMapOfShapeBox2d.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_DataMapOfShapeBox2d.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_Edge.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_EdgeConnect.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_EdgeProjAux.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_Face.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_Face.lxx" />
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_FaceConnect.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_FixSmallFace.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_FixSmallSolid.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_FreeBounds.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_FreeBounds.lxx" />
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_IntersectionTool.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_IntersectionTool.lxx" />
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_Root.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_Root.lxx" />
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_SequenceOfWireSegment.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_Shape.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_Shape.lxx" />
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_ShapeTolerance.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_Shell.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_Shell.lxx" />
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_Solid.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_SplitCommonVertex.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_SplitTool.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_Wire.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_Wire.lxx" />
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_WireSegment.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_WireVertex.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_Wireframe.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_Wireframe.lxx" />
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ClosedEdgeDivide.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ClosedFaceDivide.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ConvertCurve2dToBezier.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ConvertCurve3dToBezier.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ConvertSurfaceToBezierBasis.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_EdgeDivide.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_FaceDivide.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_FaceDivideArea.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_FixSmallBezierCurves.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_FixSmallCurves.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_RemoveInternalWires.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_RemoveLocations.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ShapeConvertToBezier.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ShapeDivide.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ShapeDivideAngle.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ShapeDivideArea.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ShapeDivideClosed.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ShapeDivideClosedEdges.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ShapeDivideContinuity.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ShellSewing.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_SplitCurve.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_SplitCurve2d.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_SplitCurve2dContinuity.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_SplitCurve3d.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_SplitCurve3dContinuity.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_SplitSurface.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_SplitSurfaceAngle.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_SplitSurfaceArea.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_SplitSurfaceContinuity.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_Tool.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_UnifySameDomain.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_WireDivide.cxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ClosedEdgeDivide.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ClosedFaceDivide.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ConvertCurve2dToBezier.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ConvertCurve3dToBezier.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ConvertCurve3dToBezier.lxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ConvertSurfaceToBezierBasis.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ConvertSurfaceToBezierBasis.lxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_EdgeDivide.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_EdgeDivide.lxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_FaceDivide.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_FaceDivideArea.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_FaceDivideArea.lxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_FixSmallBezierCurves.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_FixSmallCurves.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_RemoveInternalWires.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_RemoveInternalWires.lxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_RemoveLocations.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_RemoveLocations.lxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ShapeConvertToBezier.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ShapeConvertToBezier.lxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ShapeDivide.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ShapeDivideAngle.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ShapeDivideArea.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ShapeDivideArea.lxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ShapeDivideClosed.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ShapeDivideClosedEdges.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ShapeDivideContinuity.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ShellSewing.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_SplitCurve.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_SplitCurve2d.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_SplitCurve2dContinuity.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_SplitCurve3d.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_SplitCurve3dContinuity.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_SplitSurface.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_SplitSurfaceAngle.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_SplitSurfaceArea.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_SplitSurfaceArea.lxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_SplitSurfaceContinuity.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_Tool.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_Tool.lxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_UnifySameDomain.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_WireDivide.hxx" />
+    <ClCompile Include="..\..\..\src\ShapeAlgo\ShapeAlgo.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeAlgo\ShapeAlgo_AlgoContainer.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeAlgo\ShapeAlgo_ToolContainer.cxx" />
+    <ClInclude Include="..\..\..\src\ShapeAlgo\ShapeAlgo.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeAlgo\ShapeAlgo_AlgoContainer.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeAlgo\ShapeAlgo_AlgoContainer.lxx" />
+    <ClInclude Include="..\..\..\src\ShapeAlgo\ShapeAlgo_ToolContainer.hxx" />
+    <ClCompile Include="..\..\..\src\ShapeProcess\ShapeProcess.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeProcess\ShapeProcess_Context.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeProcess\ShapeProcess_OperLibrary.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeProcess\ShapeProcess_Operator.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeProcess\ShapeProcess_ShapeContext.cxx" />
+    <ClCompile Include="..\..\..\src\ShapeProcess\ShapeProcess_UOperator.cxx" />
+    <ClInclude Include="..\..\..\src\ShapeProcess\ShapeProcess.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeProcess\ShapeProcess_Context.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeProcess\ShapeProcess_OperFunc.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeProcess\ShapeProcess_OperLibrary.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeProcess\ShapeProcess_Operator.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeProcess\ShapeProcess_ShapeContext.hxx" />
+    <ClInclude Include="..\..\..\src\ShapeProcess\ShapeProcess_UOperator.hxx" />
+    <ClCompile Include="..\..\..\src\ShapeProcessAPI\ShapeProcessAPI_ApplySequence.cxx" />
+    <ClInclude Include="..\..\..\src\ShapeProcessAPI\ShapeProcessAPI_ApplySequence.hxx" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="TKShHealing.rc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

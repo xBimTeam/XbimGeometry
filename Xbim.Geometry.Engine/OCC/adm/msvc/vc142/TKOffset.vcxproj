@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{FF10C86A-183C-12E6-16A9-8130AAA200C0}</ProjectGuid>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\..\..\..\win32\vc14\bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\..\..\..\win32\vc14\obj\TKOffset\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\..\..\..\win32\vc14\bind\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\..\..\..\win32\vc14\objd\TKOffset\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\..\..\..\win64\vc14\bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\..\..\..\win64\vc14\obj\TKOffset\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\..\..\..\win64\vc14\bind\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\..\..\..\win64\vc14\objd\TKOffset\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\..\..\..\win32\vc14\bin\TKOffset.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>OCCT_STATIC_BUILD;HAVE_NO_DLL;NDEBUG;No_Exception;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <AssemblerListingLocation>.\..\..\..\win32\vc14\obj\TKOffset/</AssemblerListingLocation>
+      <ObjectFileName>.\..\..\..\win32\vc14\obj\TKOffset/</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\..\..\win32\vc14\obj\TKOffset/</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;No_Exception;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>TKFillet.lib;TKBRep.lib;TKTopAlgo.lib;TKMath.lib;TKernel.lib;TKGeomBase.lib;TKG2d.lib;TKG3d.lib;TKGeomAlgo.lib;TKShHealing.lib;TKBO.lib;TKPrim.lib;TKBool.lib</AdditionalDependencies>
+      <OutputFile>.\..\..\..\win32\vc14\bin\TKOffset.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\win32\vc14\lib;$(CSF_OPT_LIB32);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>no</GenerateDebugInformation>
+      <ProgramDatabaseFile>.\..\..\..\win32\vc14\bin\TKOffset.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <ImportLibrary>..\..\..\win32\vc14\lib\TKOffset.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\..\..\..\win32\vc14\bind\TKOffset.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>Disabled</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>OCCT_STATIC_BUILD;HAVE_NO_DLL;_DEBUG;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <AssemblerListingLocation>.\..\..\..\win32\vc14\objd\TKOffset/</AssemblerListingLocation>
+      <ObjectFileName>.\..\..\..\win32\vc14\objd\TKOffset/</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\..\..\win32\vc14\objd\TKOffset/</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>TKFillet.lib;TKBRep.lib;TKTopAlgo.lib;TKMath.lib;TKernel.lib;TKGeomBase.lib;TKG2d.lib;TKG3d.lib;TKGeomAlgo.lib;TKShHealing.lib;TKBO.lib;TKPrim.lib;TKBool.lib</AdditionalDependencies>
+      <OutputFile>.\..\..\..\win32\vc14\bind\TKOffset.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\win32\vc14\libd;$(CSF_OPT_LIB32D);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>..\..\..\win32\vc14\bind\TKOffset.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <ImportLibrary>..\..\..\win32\vc14\libd\TKOffset.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>x64</TargetEnvironment>
+      <TypeLibraryName>.\..\..\..\win64\vc14\bin\TKOffset.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>NDEBUG;No_Exception;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <AssemblerListingLocation>.\..\..\..\win64\vc14\obj\TKOffset/</AssemblerListingLocation>
+      <ObjectFileName>.\..\..\..\win64\vc14\obj\TKOffset/</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\..\..\win64\vc14\obj\TKOffset/</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;No_Exception;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>TKFillet.lib;TKBRep.lib;TKTopAlgo.lib;TKMath.lib;TKernel.lib;TKGeomBase.lib;TKG2d.lib;TKG3d.lib;TKGeomAlgo.lib;TKShHealing.lib;TKBO.lib;TKPrim.lib;TKBool.lib</AdditionalDependencies>
+      <OutputFile>.\..\..\..\win64\vc14\bin\TKOffset.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\win64\vc14\lib;$(CSF_OPT_LIB64);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>no</GenerateDebugInformation>
+      <ProgramDatabaseFile>.\..\..\..\win64\vc14\bin\TKOffset.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <ImportLibrary>..\..\..\win64\vc14\lib\TKOffset.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>x64</TargetEnvironment>
+      <TypeLibraryName>.\..\..\..\win64\vc14\bind\TKOffset.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>Disabled</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>_DEBUG;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <AssemblerListingLocation>.\..\..\..\win64\vc14\objd\TKOffset/</AssemblerListingLocation>
+      <ObjectFileName>.\..\..\..\win64\vc14\objd\TKOffset/</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\..\..\win64\vc14\objd\TKOffset/</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>TKFillet.lib;TKBRep.lib;TKTopAlgo.lib;TKMath.lib;TKernel.lib;TKGeomBase.lib;TKG2d.lib;TKG3d.lib;TKGeomAlgo.lib;TKShHealing.lib;TKBO.lib;TKPrim.lib;TKBool.lib</AdditionalDependencies>
+      <OutputFile>.\..\..\..\win64\vc14\bind\TKOffset.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\win64\vc14\libd;$(CSF_OPT_LIB64D);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>..\..\..\win64\vc14\bind\TKOffset.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <ImportLibrary>..\..\..\win64\vc14\libd\TKOffset.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\BRepOffsetAPI\BRepOffsetAPI_DraftAngle.cxx" />
+    <ClCompile Include="..\..\..\src\BRepOffsetAPI\BRepOffsetAPI_FindContigousEdges.cxx" />
+    <ClCompile Include="..\..\..\src\BRepOffsetAPI\BRepOffsetAPI_MakeDraft.cxx" />
+    <ClCompile Include="..\..\..\src\BRepOffsetAPI\BRepOffsetAPI_MakeEvolved.cxx" />
+    <ClCompile Include="..\..\..\src\BRepOffsetAPI\BRepOffsetAPI_MakeFilling.cxx" />
+    <ClCompile Include="..\..\..\src\BRepOffsetAPI\BRepOffsetAPI_MakeOffset.cxx" />
+    <ClCompile Include="..\..\..\src\BRepOffsetAPI\BRepOffsetAPI_MakeOffsetShape.cxx" />
+    <ClCompile Include="..\..\..\src\BRepOffsetAPI\BRepOffsetAPI_MakePipe.cxx" />
+    <ClCompile Include="..\..\..\src\BRepOffsetAPI\BRepOffsetAPI_MakePipeShell.cxx" />
+    <ClCompile Include="..\..\..\src\BRepOffsetAPI\BRepOffsetAPI_MakeThickSolid.cxx" />
+    <ClCompile Include="..\..\..\src\BRepOffsetAPI\BRepOffsetAPI_MiddlePath.cxx" />
+    <ClCompile Include="..\..\..\src\BRepOffsetAPI\BRepOffsetAPI_NormalProjection.cxx" />
+    <ClCompile Include="..\..\..\src\BRepOffsetAPI\BRepOffsetAPI_ThruSections.cxx" />
+    <ClInclude Include="..\..\..\src\BRepOffsetAPI\BRepOffsetAPI_DraftAngle.hxx" />
+    <ClInclude Include="..\..\..\src\BRepOffsetAPI\BRepOffsetAPI_FindContigousEdges.hxx" />
+    <ClInclude Include="..\..\..\src\BRepOffsetAPI\BRepOffsetAPI_MakeDraft.hxx" />
+    <ClInclude Include="..\..\..\src\BRepOffsetAPI\BRepOffsetAPI_MakeEvolved.hxx" />
+    <ClInclude Include="..\..\..\src\BRepOffsetAPI\BRepOffsetAPI_MakeFilling.hxx" />
+    <ClInclude Include="..\..\..\src\BRepOffsetAPI\BRepOffsetAPI_MakeOffset.hxx" />
+    <ClInclude Include="..\..\..\src\BRepOffsetAPI\BRepOffsetAPI_MakeOffsetShape.hxx" />
+    <ClInclude Include="..\..\..\src\BRepOffsetAPI\BRepOffsetAPI_MakePipe.hxx" />
+    <ClInclude Include="..\..\..\src\BRepOffsetAPI\BRepOffsetAPI_MakePipeShell.hxx" />
+    <ClInclude Include="..\..\..\src\BRepOffsetAPI\BRepOffsetAPI_MakeThickSolid.hxx" />
+    <ClInclude Include="..\..\..\src\BRepOffsetAPI\BRepOffsetAPI_MiddlePath.hxx" />
+    <ClInclude Include="..\..\..\src\BRepOffsetAPI\BRepOffsetAPI_NormalProjection.hxx" />
+    <ClInclude Include="..\..\..\src\BRepOffsetAPI\BRepOffsetAPI_SequenceOfSequenceOfReal.hxx" />
+    <ClInclude Include="..\..\..\src\BRepOffsetAPI\BRepOffsetAPI_SequenceOfSequenceOfShape.hxx" />
+    <ClInclude Include="..\..\..\src\BRepOffsetAPI\BRepOffsetAPI_Sewing.hxx" />
+    <ClInclude Include="..\..\..\src\BRepOffsetAPI\BRepOffsetAPI_ThruSections.hxx" />
+    <ClCompile Include="..\..\..\src\Draft\Draft.cxx" />
+    <ClCompile Include="..\..\..\src\Draft\Draft_EdgeInfo.cxx" />
+    <ClCompile Include="..\..\..\src\Draft\Draft_FaceInfo.cxx" />
+    <ClCompile Include="..\..\..\src\Draft\Draft_Modification.cxx" />
+    <ClCompile Include="..\..\..\src\Draft\Draft_Modification_1.cxx" />
+    <ClCompile Include="..\..\..\src\Draft\Draft_VertexInfo.cxx" />
+    <ClInclude Include="..\..\..\src\Draft\Draft.hxx" />
+    <ClInclude Include="..\..\..\src\Draft\Draft_EdgeInfo.hxx" />
+    <ClInclude Include="..\..\..\src\Draft\Draft_ErrorStatus.hxx" />
+    <ClInclude Include="..\..\..\src\Draft\Draft_FaceInfo.hxx" />
+    <ClInclude Include="..\..\..\src\Draft\Draft_IndexedDataMapOfEdgeEdgeInfo.hxx" />
+    <ClInclude Include="..\..\..\src\Draft\Draft_IndexedDataMapOfFaceFaceInfo.hxx" />
+    <ClInclude Include="..\..\..\src\Draft\Draft_IndexedDataMapOfVertexVertexInfo.hxx" />
+    <ClInclude Include="..\..\..\src\Draft\Draft_Modification.hxx" />
+    <ClInclude Include="..\..\..\src\Draft\Draft_VertexInfo.hxx" />
+    <ClCompile Include="..\..\..\src\BRepOffset\BRepOffset.cxx" />
+    <ClCompile Include="..\..\..\src\BRepOffset\BRepOffset_Analyse.cxx" />
+    <ClCompile Include="..\..\..\src\BRepOffset\BRepOffset_Inter2d.cxx" />
+    <ClCompile Include="..\..\..\src\BRepOffset\BRepOffset_Inter3d.cxx" />
+    <ClCompile Include="..\..\..\src\BRepOffset\BRepOffset_Interval.cxx" />
+    <ClCompile Include="..\..\..\src\BRepOffset\BRepOffset_MakeLoops.cxx" />
+    <ClCompile Include="..\..\..\src\BRepOffset\BRepOffset_MakeOffset.cxx" />
+    <ClCompile Include="..\..\..\src\BRepOffset\BRepOffset_MakeOffset_1.cxx" />
+    <ClCompile Include="..\..\..\src\BRepOffset\BRepOffset_MakeSimpleOffset.cxx" />
+    <ClCompile Include="..\..\..\src\BRepOffset\BRepOffset_Offset.cxx" />
+    <ClCompile Include="..\..\..\src\BRepOffset\BRepOffset_SimpleOffset.cxx" />
+    <ClCompile Include="..\..\..\src\BRepOffset\BRepOffset_Tool.cxx" />
+    <ClInclude Include="..\..\..\src\BRepOffset\BRepOffset.hxx" />
+    <ClInclude Include="..\..\..\src\BRepOffset\BRepOffset_Analyse.hxx" />
+    <ClInclude Include="..\..\..\src\BRepOffset\BRepOffset_DataMapIteratorOfDataMapOfShapeListOfInterval.hxx" />
+    <ClInclude Include="..\..\..\src\BRepOffset\BRepOffset_DataMapIteratorOfDataMapOfShapeMapOfShape.hxx" />
+    <ClInclude Include="..\..\..\src\BRepOffset\BRepOffset_DataMapIteratorOfDataMapOfShapeOffset.hxx" />
+    <ClInclude Include="..\..\..\src\BRepOffset\BRepOffset_DataMapOfShapeListOfInterval.hxx" />
+    <ClInclude Include="..\..\..\src\BRepOffset\BRepOffset_DataMapOfShapeMapOfShape.hxx" />
+    <ClInclude Include="..\..\..\src\BRepOffset\BRepOffset_DataMapOfShapeOffset.hxx" />
+    <ClInclude Include="..\..\..\src\BRepOffset\BRepOffset_Error.hxx" />
+    <ClInclude Include="..\..\..\src\BRepOffset\BRepOffset_Inter2d.hxx" />
+    <ClInclude Include="..\..\..\src\BRepOffset\BRepOffset_Inter3d.hxx" />
+    <ClInclude Include="..\..\..\src\BRepOffset\BRepOffset_Interval.hxx" />
+    <ClInclude Include="..\..\..\src\BRepOffset\BRepOffset_Interval.lxx" />
+    <ClInclude Include="..\..\..\src\BRepOffset\BRepOffset_ListIteratorOfListOfInterval.hxx" />
+    <ClInclude Include="..\..\..\src\BRepOffset\BRepOffset_ListOfInterval.hxx" />
+    <ClInclude Include="..\..\..\src\BRepOffset\BRepOffset_MakeLoops.hxx" />
+    <ClInclude Include="..\..\..\src\BRepOffset\BRepOffset_MakeOffset.hxx" />
+    <ClInclude Include="..\..\..\src\BRepOffset\BRepOffset_MakeSimpleOffset.hxx" />
+    <ClInclude Include="..\..\..\src\BRepOffset\BRepOffset_Mode.hxx" />
+    <ClInclude Include="..\..\..\src\BRepOffset\BRepOffset_Offset.hxx" />
+    <ClInclude Include="..\..\..\src\BRepOffset\BRepOffset_Offset.lxx" />
+    <ClInclude Include="..\..\..\src\BRepOffset\BRepOffset_SimpleOffset.hxx" />
+    <ClInclude Include="..\..\..\src\BRepOffset\BRepOffset_Status.hxx" />
+    <ClInclude Include="..\..\..\src\BRepOffset\BRepOffset_Tool.hxx" />
+    <ClInclude Include="..\..\..\src\BRepOffset\BRepOffset_Type.hxx" />
+    <ClCompile Include="..\..\..\src\BiTgte\BiTgte_Blend.cxx" />
+    <ClCompile Include="..\..\..\src\BiTgte\BiTgte_CurveOnEdge.cxx" />
+    <ClCompile Include="..\..\..\src\BiTgte\BiTgte_CurveOnVertex.cxx" />
+    <ClCompile Include="..\..\..\src\BiTgte\BiTgte_HCurveOnEdge_0.cxx" />
+    <ClCompile Include="..\..\..\src\BiTgte\BiTgte_HCurveOnVertex_0.cxx" />
+    <ClInclude Include="..\..\..\src\BiTgte\BiTgte_Blend.hxx" />
+    <ClInclude Include="..\..\..\src\BiTgte\BiTgte_ContactType.hxx" />
+    <ClInclude Include="..\..\..\src\BiTgte\BiTgte_CurveOnEdge.hxx" />
+    <ClInclude Include="..\..\..\src\BiTgte\BiTgte_CurveOnVertex.hxx" />
+    <ClInclude Include="..\..\..\src\BiTgte\BiTgte_HCurveOnEdge.hxx" />
+    <ClInclude Include="..\..\..\src\BiTgte\BiTgte_HCurveOnVertex.hxx" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="TKOffset.rc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -1,0 +1,651 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{EA9E8694-10C9-13EE-00A7-06077BD54A69}</ProjectGuid>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\..\..\..\win32\vc14\bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\..\..\..\win32\vc14\obj\TKTopAlgo\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\..\..\..\win32\vc14\bind\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\..\..\..\win32\vc14\objd\TKTopAlgo\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\..\..\..\win64\vc14\bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\..\..\..\win64\vc14\obj\TKTopAlgo\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\..\..\..\win64\vc14\bind\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\..\..\..\win64\vc14\objd\TKTopAlgo\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\..\..\..\win32\vc14\bin\TKTopAlgo.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>OCCT_STATIC_BUILD;HAVE_NO_DLL;NDEBUG;No_Exception;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <AssemblerListingLocation>.\..\..\..\win32\vc14\obj\TKTopAlgo/</AssemblerListingLocation>
+      <ObjectFileName>.\..\..\..\win32\vc14\obj\TKTopAlgo/</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\..\..\win32\vc14\obj\TKTopAlgo/</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;No_Exception;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>TKMath.lib;TKernel.lib;TKG2d.lib;TKG3d.lib;TKGeomBase.lib;TKBRep.lib;TKGeomAlgo.lib</AdditionalDependencies>
+      <OutputFile>.\..\..\..\win32\vc14\bin\TKTopAlgo.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\win32\vc14\lib;$(CSF_OPT_LIB32);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>no</GenerateDebugInformation>
+      <ProgramDatabaseFile>.\..\..\..\win32\vc14\bin\TKTopAlgo.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <ImportLibrary>..\..\..\win32\vc14\lib\TKTopAlgo.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\..\..\..\win32\vc14\bind\TKTopAlgo.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>Disabled</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>OCCT_STATIC_BUILD;HAVE_NO_DLL;_DEBUG;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <AssemblerListingLocation>.\..\..\..\win32\vc14\objd\TKTopAlgo/</AssemblerListingLocation>
+      <ObjectFileName>.\..\..\..\win32\vc14\objd\TKTopAlgo/</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\..\..\win32\vc14\objd\TKTopAlgo/</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>TKMath.lib;TKernel.lib;TKG2d.lib;TKG3d.lib;TKGeomBase.lib;TKBRep.lib;TKGeomAlgo.lib</AdditionalDependencies>
+      <OutputFile>.\..\..\..\win32\vc14\bind\TKTopAlgo.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\win32\vc14\libd;$(CSF_OPT_LIB32D);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>..\..\..\win32\vc14\bind\TKTopAlgo.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <ImportLibrary>..\..\..\win32\vc14\libd\TKTopAlgo.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>x64</TargetEnvironment>
+      <TypeLibraryName>.\..\..\..\win64\vc14\bin\TKTopAlgo.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>NDEBUG;No_Exception;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <AssemblerListingLocation>.\..\..\..\win64\vc14\obj\TKTopAlgo/</AssemblerListingLocation>
+      <ObjectFileName>.\..\..\..\win64\vc14\obj\TKTopAlgo/</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\..\..\win64\vc14\obj\TKTopAlgo/</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;No_Exception;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>TKMath.lib;TKernel.lib;TKG2d.lib;TKG3d.lib;TKGeomBase.lib;TKBRep.lib;TKGeomAlgo.lib</AdditionalDependencies>
+      <OutputFile>.\..\..\..\win64\vc14\bin\TKTopAlgo.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\win64\vc14\lib;$(CSF_OPT_LIB64);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>no</GenerateDebugInformation>
+      <ProgramDatabaseFile>.\..\..\..\win64\vc14\bin\TKTopAlgo.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <ImportLibrary>..\..\..\win64\vc14\lib\TKTopAlgo.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>x64</TargetEnvironment>
+      <TypeLibraryName>.\..\..\..\win64\vc14\bind\TKTopAlgo.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>Disabled</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>_DEBUG;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <AssemblerListingLocation>.\..\..\..\win64\vc14\objd\TKTopAlgo/</AssemblerListingLocation>
+      <ObjectFileName>.\..\..\..\win64\vc14\objd\TKTopAlgo/</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\..\..\win64\vc14\objd\TKTopAlgo/</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>TKMath.lib;TKernel.lib;TKG2d.lib;TKG3d.lib;TKGeomBase.lib;TKBRep.lib;TKGeomAlgo.lib</AdditionalDependencies>
+      <OutputFile>.\..\..\..\win64\vc14\bind\TKTopAlgo.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\win64\vc14\libd;$(CSF_OPT_LIB64D);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>..\..\..\win64\vc14\bind\TKTopAlgo.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <ImportLibrary>..\..\..\win64\vc14\libd\TKTopAlgo.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\IntCurvesFace\IntCurvesFace_Intersector.cxx" />
+    <ClCompile Include="..\..\..\src\IntCurvesFace\IntCurvesFace_ShapeIntersector.cxx" />
+    <ClInclude Include="..\..\..\src\IntCurvesFace\IntCurvesFace_Intersector.hxx" />
+    <ClInclude Include="..\..\..\src\IntCurvesFace\IntCurvesFace_Intersector.lxx" />
+    <ClInclude Include="..\..\..\src\IntCurvesFace\IntCurvesFace_ShapeIntersector.hxx" />
+    <ClInclude Include="..\..\..\src\IntCurvesFace\IntCurvesFace_ShapeIntersector.lxx" />
+    <ClCompile Include="..\..\..\src\MAT\MAT_Arc.cxx" />
+    <ClCompile Include="..\..\..\src\MAT\MAT_BasicElt.cxx" />
+    <ClCompile Include="..\..\..\src\MAT\MAT_Bisector.cxx" />
+    <ClCompile Include="..\..\..\src\MAT\MAT_Edge.cxx" />
+    <ClCompile Include="..\..\..\src\MAT\MAT_Graph.cxx" />
+    <ClCompile Include="..\..\..\src\MAT\MAT_ListOfBisector_0.cxx" />
+    <ClCompile Include="..\..\..\src\MAT\MAT_ListOfEdge_0.cxx" />
+    <ClCompile Include="..\..\..\src\MAT\MAT_Node.cxx" />
+    <ClCompile Include="..\..\..\src\MAT\MAT_TListNodeOfListOfBisector_0.cxx" />
+    <ClCompile Include="..\..\..\src\MAT\MAT_TListNodeOfListOfEdge_0.cxx" />
+    <ClCompile Include="..\..\..\src\MAT\MAT_Zone.cxx" />
+    <ClInclude Include="..\..\..\src\MAT\MAT_Arc.hxx" />
+    <ClInclude Include="..\..\..\src\MAT\MAT_BasicElt.hxx" />
+    <ClInclude Include="..\..\..\src\MAT\MAT_Bisector.hxx" />
+    <ClInclude Include="..\..\..\src\MAT\MAT_DataMapIteratorOfDataMapOfIntegerArc.hxx" />
+    <ClInclude Include="..\..\..\src\MAT\MAT_DataMapIteratorOfDataMapOfIntegerBasicElt.hxx" />
+    <ClInclude Include="..\..\..\src\MAT\MAT_DataMapIteratorOfDataMapOfIntegerBisector.hxx" />
+    <ClInclude Include="..\..\..\src\MAT\MAT_DataMapIteratorOfDataMapOfIntegerNode.hxx" />
+    <ClInclude Include="..\..\..\src\MAT\MAT_DataMapOfIntegerArc.hxx" />
+    <ClInclude Include="..\..\..\src\MAT\MAT_DataMapOfIntegerBasicElt.hxx" />
+    <ClInclude Include="..\..\..\src\MAT\MAT_DataMapOfIntegerBisector.hxx" />
+    <ClInclude Include="..\..\..\src\MAT\MAT_DataMapOfIntegerNode.hxx" />
+    <ClInclude Include="..\..\..\src\MAT\MAT_Edge.hxx" />
+    <ClInclude Include="..\..\..\src\MAT\MAT_Graph.hxx" />
+    <ClInclude Include="..\..\..\src\MAT\MAT_ListOfBisector.hxx" />
+    <ClInclude Include="..\..\..\src\MAT\MAT_ListOfEdge.hxx" />
+    <ClInclude Include="..\..\..\src\MAT\MAT_Node.hxx" />
+    <ClInclude Include="..\..\..\src\MAT\MAT_SequenceOfArc.hxx" />
+    <ClInclude Include="..\..\..\src\MAT\MAT_SequenceOfBasicElt.hxx" />
+    <ClInclude Include="..\..\..\src\MAT\MAT_Side.hxx" />
+    <ClInclude Include="..\..\..\src\MAT\MAT_TList.gxx" />
+    <ClInclude Include="..\..\..\src\MAT\MAT_TList.lxx" />
+    <ClInclude Include="..\..\..\src\MAT\MAT_TListNode.gxx" />
+    <ClInclude Include="..\..\..\src\MAT\MAT_TListNode.lxx" />
+    <ClInclude Include="..\..\..\src\MAT\MAT_TListNodeOfListOfBisector.hxx" />
+    <ClInclude Include="..\..\..\src\MAT\MAT_TListNodeOfListOfEdge.hxx" />
+    <ClInclude Include="..\..\..\src\MAT\MAT_Zone.hxx" />
+    <ClCompile Include="..\..\..\src\MAT2d\MAT2d_BiInt.cxx" />
+    <ClCompile Include="..\..\..\src\MAT2d\MAT2d_Circuit.cxx" />
+    <ClCompile Include="..\..\..\src\MAT2d\MAT2d_Connexion.cxx" />
+    <ClCompile Include="..\..\..\src\MAT2d\MAT2d_CutCurve.cxx" />
+    <ClCompile Include="..\..\..\src\MAT2d\MAT2d_Mat2d.cxx" />
+    <ClCompile Include="..\..\..\src\MAT2d\MAT2d_MiniPath.cxx" />
+    <ClCompile Include="..\..\..\src\MAT2d\MAT2d_Tool2d.cxx" />
+    <ClInclude Include="..\..\..\src\MAT2d\MAT2d_Array2OfConnexion.hxx" />
+    <ClInclude Include="..\..\..\src\MAT2d\MAT2d_BiInt.hxx" />
+    <ClInclude Include="..\..\..\src\MAT2d\MAT2d_Circuit.hxx" />
+    <ClInclude Include="..\..\..\src\MAT2d\MAT2d_Connexion.hxx" />
+    <ClInclude Include="..\..\..\src\MAT2d\MAT2d_CutCurve.hxx" />
+    <ClInclude Include="..\..\..\src\MAT2d\MAT2d_DataMapIteratorOfDataMapOfBiIntInteger.hxx" />
+    <ClInclude Include="..\..\..\src\MAT2d\MAT2d_DataMapIteratorOfDataMapOfBiIntSequenceOfInteger.hxx" />
+    <ClInclude Include="..\..\..\src\MAT2d\MAT2d_DataMapIteratorOfDataMapOfIntegerBisec.hxx" />
+    <ClInclude Include="..\..\..\src\MAT2d\MAT2d_DataMapIteratorOfDataMapOfIntegerConnexion.hxx" />
+    <ClInclude Include="..\..\..\src\MAT2d\MAT2d_DataMapIteratorOfDataMapOfIntegerPnt2d.hxx" />
+    <ClInclude Include="..\..\..\src\MAT2d\MAT2d_DataMapIteratorOfDataMapOfIntegerSequenceOfConnexion.hxx" />
+    <ClInclude Include="..\..\..\src\MAT2d\MAT2d_DataMapIteratorOfDataMapOfIntegerVec2d.hxx" />
+    <ClInclude Include="..\..\..\src\MAT2d\MAT2d_DataMapOfBiIntInteger.hxx" />
+    <ClInclude Include="..\..\..\src\MAT2d\MAT2d_DataMapOfBiIntSequenceOfInteger.hxx" />
+    <ClInclude Include="..\..\..\src\MAT2d\MAT2d_DataMapOfIntegerBisec.hxx" />
+    <ClInclude Include="..\..\..\src\MAT2d\MAT2d_DataMapOfIntegerConnexion.hxx" />
+    <ClInclude Include="..\..\..\src\MAT2d\MAT2d_DataMapOfIntegerPnt2d.hxx" />
+    <ClInclude Include="..\..\..\src\MAT2d\MAT2d_DataMapOfIntegerSequenceOfConnexion.hxx" />
+    <ClInclude Include="..\..\..\src\MAT2d\MAT2d_DataMapOfIntegerVec2d.hxx" />
+    <ClInclude Include="..\..\..\src\MAT2d\MAT2d_MapBiIntHasher.hxx" />
+    <ClInclude Include="..\..\..\src\MAT2d\MAT2d_MapBiIntHasher.lxx" />
+    <ClInclude Include="..\..\..\src\MAT2d\MAT2d_Mat2d.hxx" />
+    <ClInclude Include="..\..\..\src\MAT2d\MAT2d_MiniPath.hxx" />
+    <ClInclude Include="..\..\..\src\MAT2d\MAT2d_SequenceOfConnexion.hxx" />
+    <ClInclude Include="..\..\..\src\MAT2d\MAT2d_SequenceOfSequenceOfCurve.hxx" />
+    <ClInclude Include="..\..\..\src\MAT2d\MAT2d_SequenceOfSequenceOfGeometry.hxx" />
+    <ClInclude Include="..\..\..\src\MAT2d\MAT2d_Tool2d.hxx" />
+    <ClCompile Include="..\..\..\src\Bisector\Bisector.cxx" />
+    <ClCompile Include="..\..\..\src\Bisector\Bisector_Bisec.cxx" />
+    <ClCompile Include="..\..\..\src\Bisector\Bisector_BisecAna.cxx" />
+    <ClCompile Include="..\..\..\src\Bisector\Bisector_BisecCC.cxx" />
+    <ClCompile Include="..\..\..\src\Bisector\Bisector_BisecPC.cxx" />
+    <ClCompile Include="..\..\..\src\Bisector\Bisector_Curve.cxx" />
+    <ClCompile Include="..\..\..\src\Bisector\Bisector_FunctionH.cxx" />
+    <ClCompile Include="..\..\..\src\Bisector\Bisector_FunctionInter.cxx" />
+    <ClCompile Include="..\..\..\src\Bisector\Bisector_Inter.cxx" />
+    <ClCompile Include="..\..\..\src\Bisector\Bisector_PointOnBis.cxx" />
+    <ClCompile Include="..\..\..\src\Bisector\Bisector_PolyBis.cxx" />
+    <ClInclude Include="..\..\..\src\Bisector\Bisector.hxx" />
+    <ClInclude Include="..\..\..\src\Bisector\Bisector_Bisec.hxx" />
+    <ClInclude Include="..\..\..\src\Bisector\Bisector_BisecAna.hxx" />
+    <ClInclude Include="..\..\..\src\Bisector\Bisector_BisecCC.hxx" />
+    <ClInclude Include="..\..\..\src\Bisector\Bisector_BisecPC.hxx" />
+    <ClInclude Include="..\..\..\src\Bisector\Bisector_Curve.hxx" />
+    <ClInclude Include="..\..\..\src\Bisector\Bisector_FunctionH.hxx" />
+    <ClInclude Include="..\..\..\src\Bisector\Bisector_FunctionInter.hxx" />
+    <ClInclude Include="..\..\..\src\Bisector\Bisector_Inter.hxx" />
+    <ClInclude Include="..\..\..\src\Bisector\Bisector_PointOnBis.hxx" />
+    <ClInclude Include="..\..\..\src\Bisector\Bisector_PolyBis.hxx" />
+    <ClCompile Include="..\..\..\src\BRepMAT2d\BRepMAT2d_BisectingLocus.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMAT2d\BRepMAT2d_Explorer.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMAT2d\BRepMAT2d_LinkTopoBilo.cxx" />
+    <ClInclude Include="..\..\..\src\BRepMAT2d\BRepMAT2d_BisectingLocus.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMAT2d\BRepMAT2d_DataMapIteratorOfDataMapOfBasicEltShape.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMAT2d\BRepMAT2d_DataMapIteratorOfDataMapOfShapeSequenceOfBasicElt.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMAT2d\BRepMAT2d_DataMapOfBasicEltShape.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMAT2d\BRepMAT2d_DataMapOfShapeSequenceOfBasicElt.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMAT2d\BRepMAT2d_Explorer.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMAT2d\BRepMAT2d_LinkTopoBilo.hxx" />
+    <ClCompile Include="..\..\..\src\BRepCheck\BRepCheck.cxx" />
+    <ClCompile Include="..\..\..\src\BRepCheck\BRepCheck_Analyzer.cxx" />
+    <ClCompile Include="..\..\..\src\BRepCheck\BRepCheck_Edge.cxx" />
+    <ClCompile Include="..\..\..\src\BRepCheck\BRepCheck_Face.cxx" />
+    <ClCompile Include="..\..\..\src\BRepCheck\BRepCheck_Result.cxx" />
+    <ClCompile Include="..\..\..\src\BRepCheck\BRepCheck_Shell.cxx" />
+    <ClCompile Include="..\..\..\src\BRepCheck\BRepCheck_Solid.cxx" />
+    <ClCompile Include="..\..\..\src\BRepCheck\BRepCheck_Vertex.cxx" />
+    <ClCompile Include="..\..\..\src\BRepCheck\BRepCheck_Wire.cxx" />
+    <ClInclude Include="..\..\..\src\BRepCheck\BRepCheck.hxx" />
+    <ClInclude Include="..\..\..\src\BRepCheck\BRepCheck_Analyzer.hxx" />
+    <ClInclude Include="..\..\..\src\BRepCheck\BRepCheck_Analyzer.lxx" />
+    <ClInclude Include="..\..\..\src\BRepCheck\BRepCheck_DataMapIteratorOfDataMapOfShapeListOfStatus.hxx" />
+    <ClInclude Include="..\..\..\src\BRepCheck\BRepCheck_DataMapIteratorOfDataMapOfShapeResult.hxx" />
+    <ClInclude Include="..\..\..\src\BRepCheck\BRepCheck_DataMapOfShapeListOfStatus.hxx" />
+    <ClInclude Include="..\..\..\src\BRepCheck\BRepCheck_DataMapOfShapeResult.hxx" />
+    <ClInclude Include="..\..\..\src\BRepCheck\BRepCheck_Edge.hxx" />
+    <ClInclude Include="..\..\..\src\BRepCheck\BRepCheck_Face.hxx" />
+    <ClInclude Include="..\..\..\src\BRepCheck\BRepCheck_ListIteratorOfListOfStatus.hxx" />
+    <ClInclude Include="..\..\..\src\BRepCheck\BRepCheck_ListOfStatus.hxx" />
+    <ClInclude Include="..\..\..\src\BRepCheck\BRepCheck_Result.hxx" />
+    <ClInclude Include="..\..\..\src\BRepCheck\BRepCheck_Result.lxx" />
+    <ClInclude Include="..\..\..\src\BRepCheck\BRepCheck_Shell.hxx" />
+    <ClInclude Include="..\..\..\src\BRepCheck\BRepCheck_Solid.hxx" />
+    <ClInclude Include="..\..\..\src\BRepCheck\BRepCheck_Status.hxx" />
+    <ClInclude Include="..\..\..\src\BRepCheck\BRepCheck_Vertex.hxx" />
+    <ClInclude Include="..\..\..\src\BRepCheck\BRepCheck_Wire.hxx" />
+    <ClCompile Include="..\..\..\src\BRepBndLib\BRepBndLib.cxx" />
+    <ClCompile Include="..\..\..\src\BRepBndLib\BRepBndLib_1.cxx" />
+    <ClInclude Include="..\..\..\src\BRepBndLib\BRepBndLib.hxx" />
+    <ClCompile Include="..\..\..\src\BRepExtrema\BRepExtrema_DistShapeShape.cxx" />
+    <ClCompile Include="..\..\..\src\BRepExtrema\BRepExtrema_DistanceSS.cxx" />
+    <ClCompile Include="..\..\..\src\BRepExtrema\BRepExtrema_ExtCC.cxx" />
+    <ClCompile Include="..\..\..\src\BRepExtrema\BRepExtrema_ExtCF.cxx" />
+    <ClCompile Include="..\..\..\src\BRepExtrema\BRepExtrema_ExtFF.cxx" />
+    <ClCompile Include="..\..\..\src\BRepExtrema\BRepExtrema_ExtPC.cxx" />
+    <ClCompile Include="..\..\..\src\BRepExtrema\BRepExtrema_ExtPF.cxx" />
+    <ClCompile Include="..\..\..\src\BRepExtrema\BRepExtrema_OverlapTool.cxx" />
+    <ClCompile Include="..\..\..\src\BRepExtrema\BRepExtrema_Poly.cxx" />
+    <ClCompile Include="..\..\..\src\BRepExtrema\BRepExtrema_SelfIntersection.cxx" />
+    <ClCompile Include="..\..\..\src\BRepExtrema\BRepExtrema_ShapeProximity.cxx" />
+    <ClCompile Include="..\..\..\src\BRepExtrema\BRepExtrema_TriangleSet.cxx" />
+    <ClInclude Include="..\..\..\src\BRepExtrema\BRepExtrema_DistShapeShape.hxx" />
+    <ClInclude Include="..\..\..\src\BRepExtrema\BRepExtrema_DistanceSS.hxx" />
+    <ClInclude Include="..\..\..\src\BRepExtrema\BRepExtrema_ElementFilter.hxx" />
+    <ClInclude Include="..\..\..\src\BRepExtrema\BRepExtrema_ExtCC.hxx" />
+    <ClInclude Include="..\..\..\src\BRepExtrema\BRepExtrema_ExtCF.hxx" />
+    <ClInclude Include="..\..\..\src\BRepExtrema\BRepExtrema_ExtFF.hxx" />
+    <ClInclude Include="..\..\..\src\BRepExtrema\BRepExtrema_ExtPC.hxx" />
+    <ClInclude Include="..\..\..\src\BRepExtrema\BRepExtrema_ExtPF.hxx" />
+    <ClInclude Include="..\..\..\src\BRepExtrema\BRepExtrema_MapOfIntegerPackedMapOfInteger.hxx" />
+    <ClInclude Include="..\..\..\src\BRepExtrema\BRepExtrema_OverlapTool.hxx" />
+    <ClInclude Include="..\..\..\src\BRepExtrema\BRepExtrema_Poly.hxx" />
+    <ClInclude Include="..\..\..\src\BRepExtrema\BRepExtrema_SelfIntersection.hxx" />
+    <ClInclude Include="..\..\..\src\BRepExtrema\BRepExtrema_SeqOfSolution.hxx" />
+    <ClInclude Include="..\..\..\src\BRepExtrema\BRepExtrema_ShapeProximity.hxx" />
+    <ClInclude Include="..\..\..\src\BRepExtrema\BRepExtrema_SolutionElem.hxx" />
+    <ClInclude Include="..\..\..\src\BRepExtrema\BRepExtrema_SupportType.hxx" />
+    <ClInclude Include="..\..\..\src\BRepExtrema\BRepExtrema_TriangleSet.hxx" />
+    <ClInclude Include="..\..\..\src\BRepExtrema\BRepExtrema_UnCompatibleShape.hxx" />
+    <ClCompile Include="..\..\..\src\BRepClass\BRepClass_Edge.cxx" />
+    <ClCompile Include="..\..\..\src\BRepClass\BRepClass_FClass2dOfFClassifier_0.cxx" />
+    <ClCompile Include="..\..\..\src\BRepClass\BRepClass_FClassifier_0.cxx" />
+    <ClCompile Include="..\..\..\src\BRepClass\BRepClass_FaceClassifier.cxx" />
+    <ClCompile Include="..\..\..\src\BRepClass\BRepClass_FaceExplorer.cxx" />
+    <ClCompile Include="..\..\..\src\BRepClass\BRepClass_FacePassiveClassifier_0.cxx" />
+    <ClCompile Include="..\..\..\src\BRepClass\BRepClass_Intersector.cxx" />
+    <ClInclude Include="..\..\..\src\BRepClass\BRepClass_Edge.hxx" />
+    <ClInclude Include="..\..\..\src\BRepClass\BRepClass_Edge.lxx" />
+    <ClInclude Include="..\..\..\src\BRepClass\BRepClass_FClass2dOfFClassifier.hxx" />
+    <ClInclude Include="..\..\..\src\BRepClass\BRepClass_FClassifier.hxx" />
+    <ClInclude Include="..\..\..\src\BRepClass\BRepClass_FaceClassifier.hxx" />
+    <ClInclude Include="..\..\..\src\BRepClass\BRepClass_FaceExplorer.hxx" />
+    <ClInclude Include="..\..\..\src\BRepClass\BRepClass_FaceExplorer.lxx" />
+    <ClInclude Include="..\..\..\src\BRepClass\BRepClass_FacePassiveClassifier.hxx" />
+    <ClInclude Include="..\..\..\src\BRepClass\BRepClass_Intersector.hxx" />
+    <ClCompile Include="..\..\..\src\BRepClass3d\BRepClass3d.cxx" />
+    <ClCompile Include="..\..\..\src\BRepClass3d\BRepClass3d_BndBoxTree.cxx" />
+    <ClCompile Include="..\..\..\src\BRepClass3d\BRepClass3d_Intersector3d.cxx" />
+    <ClCompile Include="..\..\..\src\BRepClass3d\BRepClass3d_SClassifier.cxx" />
+    <ClCompile Include="..\..\..\src\BRepClass3d\BRepClass3d_SolidClassifier.cxx" />
+    <ClCompile Include="..\..\..\src\BRepClass3d\BRepClass3d_SolidExplorer.cxx" />
+    <ClCompile Include="..\..\..\src\BRepClass3d\BRepClass3d_SolidPassiveClassifier_0.cxx" />
+    <ClInclude Include="..\..\..\src\BRepClass3d\BRepClass3d.hxx" />
+    <ClInclude Include="..\..\..\src\BRepClass3d\BRepClass3d_BndBoxTree.hxx" />
+    <ClInclude Include="..\..\..\src\BRepClass3d\BRepClass3d_DataMapIteratorOfMapOfInter.hxx" />
+    <ClInclude Include="..\..\..\src\BRepClass3d\BRepClass3d_Intersector3d.hxx" />
+    <ClInclude Include="..\..\..\src\BRepClass3d\BRepClass3d_Intersector3d.lxx" />
+    <ClInclude Include="..\..\..\src\BRepClass3d\BRepClass3d_MapOfInter.hxx" />
+    <ClInclude Include="..\..\..\src\BRepClass3d\BRepClass3d_SClassifier.hxx" />
+    <ClInclude Include="..\..\..\src\BRepClass3d\BRepClass3d_SolidClassifier.hxx" />
+    <ClInclude Include="..\..\..\src\BRepClass3d\BRepClass3d_SolidExplorer.hxx" />
+    <ClInclude Include="..\..\..\src\BRepClass3d\BRepClass3d_SolidPassiveClassifier.hxx" />
+    <ClCompile Include="..\..\..\src\BRepLib\BRepLib.cxx" />
+    <ClCompile Include="..\..\..\src\BRepLib\BRepLib_1.cxx" />
+    <ClCompile Include="..\..\..\src\BRepLib\BRepLib_CheckCurveOnSurface.cxx" />
+    <ClCompile Include="..\..\..\src\BRepLib\BRepLib_Command.cxx" />
+    <ClCompile Include="..\..\..\src\BRepLib\BRepLib_FindSurface.cxx" />
+    <ClCompile Include="..\..\..\src\BRepLib\BRepLib_FuseEdges.cxx" />
+    <ClCompile Include="..\..\..\src\BRepLib\BRepLib_MakeEdge.cxx" />
+    <ClCompile Include="..\..\..\src\BRepLib\BRepLib_MakeEdge2d.cxx" />
+    <ClCompile Include="..\..\..\src\BRepLib\BRepLib_MakeFace.cxx" />
+    <ClCompile Include="..\..\..\src\BRepLib\BRepLib_MakePolygon.cxx" />
+    <ClCompile Include="..\..\..\src\BRepLib\BRepLib_MakeShape.cxx" />
+    <ClCompile Include="..\..\..\src\BRepLib\BRepLib_MakeShell.cxx" />
+    <ClCompile Include="..\..\..\src\BRepLib\BRepLib_MakeSolid.cxx" />
+    <ClCompile Include="..\..\..\src\BRepLib\BRepLib_MakeVertex.cxx" />
+    <ClCompile Include="..\..\..\src\BRepLib\BRepLib_MakeWire.cxx" />
+    <ClCompile Include="..\..\..\src\BRepLib\BRepLib_MakeWire_1.cxx" />
+    <ClInclude Include="..\..\..\src\BRepLib\BRepLib.hxx" />
+    <ClInclude Include="..\..\..\src\BRepLib\BRepLib_CheckCurveOnSurface.hxx" />
+    <ClInclude Include="..\..\..\src\BRepLib\BRepLib_Command.hxx" />
+    <ClInclude Include="..\..\..\src\BRepLib\BRepLib_EdgeError.hxx" />
+    <ClInclude Include="..\..\..\src\BRepLib\BRepLib_FaceError.hxx" />
+    <ClInclude Include="..\..\..\src\BRepLib\BRepLib_FindSurface.hxx" />
+    <ClInclude Include="..\..\..\src\BRepLib\BRepLib_FuseEdges.hxx" />
+    <ClInclude Include="..\..\..\src\BRepLib\BRepLib_MakeEdge.hxx" />
+    <ClInclude Include="..\..\..\src\BRepLib\BRepLib_MakeEdge2d.hxx" />
+    <ClInclude Include="..\..\..\src\BRepLib\BRepLib_MakeFace.hxx" />
+    <ClInclude Include="..\..\..\src\BRepLib\BRepLib_MakePolygon.hxx" />
+    <ClInclude Include="..\..\..\src\BRepLib\BRepLib_MakeShape.hxx" />
+    <ClInclude Include="..\..\..\src\BRepLib\BRepLib_MakeShell.hxx" />
+    <ClInclude Include="..\..\..\src\BRepLib\BRepLib_MakeSolid.hxx" />
+    <ClInclude Include="..\..\..\src\BRepLib\BRepLib_MakeVertex.hxx" />
+    <ClInclude Include="..\..\..\src\BRepLib\BRepLib_MakeWire.hxx" />
+    <ClInclude Include="..\..\..\src\BRepLib\BRepLib_ShapeModification.hxx" />
+    <ClInclude Include="..\..\..\src\BRepLib\BRepLib_ShellError.hxx" />
+    <ClInclude Include="..\..\..\src\BRepLib\BRepLib_WireError.hxx" />
+    <ClCompile Include="..\..\..\src\BRepGProp\BRepGProp.cxx" />
+    <ClCompile Include="..\..\..\src\BRepGProp\BRepGProp_Cinert.cxx" />
+    <ClCompile Include="..\..\..\src\BRepGProp\BRepGProp_Domain.cxx" />
+    <ClCompile Include="..\..\..\src\BRepGProp\BRepGProp_EdgeTool.cxx" />
+    <ClCompile Include="..\..\..\src\BRepGProp\BRepGProp_Face.cxx" />
+    <ClCompile Include="..\..\..\src\BRepGProp\BRepGProp_Gauss.cxx" />
+    <ClCompile Include="..\..\..\src\BRepGProp\BRepGProp_MeshCinert.cxx" />
+    <ClCompile Include="..\..\..\src\BRepGProp\BRepGProp_MeshProps.cxx" />
+    <ClCompile Include="..\..\..\src\BRepGProp\BRepGProp_Sinert.cxx" />
+    <ClCompile Include="..\..\..\src\BRepGProp\BRepGProp_TFunction.cxx" />
+    <ClCompile Include="..\..\..\src\BRepGProp\BRepGProp_UFunction.cxx" />
+    <ClCompile Include="..\..\..\src\BRepGProp\BRepGProp_Vinert.cxx" />
+    <ClCompile Include="..\..\..\src\BRepGProp\BRepGProp_VinertGK.cxx" />
+    <ClInclude Include="..\..\..\src\BRepGProp\BRepGProp.hxx" />
+    <ClInclude Include="..\..\..\src\BRepGProp\BRepGProp_Cinert.hxx" />
+    <ClInclude Include="..\..\..\src\BRepGProp\BRepGProp_Domain.hxx" />
+    <ClInclude Include="..\..\..\src\BRepGProp\BRepGProp_Domain.lxx" />
+    <ClInclude Include="..\..\..\src\BRepGProp\BRepGProp_EdgeTool.hxx" />
+    <ClInclude Include="..\..\..\src\BRepGProp\BRepGProp_Face.hxx" />
+    <ClInclude Include="..\..\..\src\BRepGProp\BRepGProp_Face.lxx" />
+    <ClInclude Include="..\..\..\src\BRepGProp\BRepGProp_Gauss.hxx" />
+    <ClInclude Include="..\..\..\src\BRepGProp\BRepGProp_MeshCinert.hxx" />
+    <ClInclude Include="..\..\..\src\BRepGProp\BRepGProp_MeshProps.hxx" />
+    <ClInclude Include="..\..\..\src\BRepGProp\BRepGProp_Sinert.hxx" />
+    <ClInclude Include="..\..\..\src\BRepGProp\BRepGProp_TFunction.hxx" />
+    <ClInclude Include="..\..\..\src\BRepGProp\BRepGProp_TFunction.lxx" />
+    <ClInclude Include="..\..\..\src\BRepGProp\BRepGProp_UFunction.hxx" />
+    <ClInclude Include="..\..\..\src\BRepGProp\BRepGProp_UFunction.lxx" />
+    <ClInclude Include="..\..\..\src\BRepGProp\BRepGProp_Vinert.hxx" />
+    <ClInclude Include="..\..\..\src\BRepGProp\BRepGProp_VinertGK.hxx" />
+    <ClCompile Include="..\..\..\src\BRepIntCurveSurface\BRepIntCurveSurface_Inter.cxx" />
+    <ClInclude Include="..\..\..\src\BRepIntCurveSurface\BRepIntCurveSurface_Inter.hxx" />
+    <ClCompile Include="..\..\..\src\BRepTopAdaptor\BRepTopAdaptor_FClass2d.cxx" />
+    <ClCompile Include="..\..\..\src\BRepTopAdaptor\BRepTopAdaptor_HVertex.cxx" />
+    <ClCompile Include="..\..\..\src\BRepTopAdaptor\BRepTopAdaptor_Tool.cxx" />
+    <ClCompile Include="..\..\..\src\BRepTopAdaptor\BRepTopAdaptor_TopolTool.cxx" />
+    <ClInclude Include="..\..\..\src\BRepTopAdaptor\BRepTopAdaptor_DataMapIteratorOfMapOfShapeTool.hxx" />
+    <ClInclude Include="..\..\..\src\BRepTopAdaptor\BRepTopAdaptor_FClass2d.hxx" />
+    <ClInclude Include="..\..\..\src\BRepTopAdaptor\BRepTopAdaptor_HVertex.hxx" />
+    <ClInclude Include="..\..\..\src\BRepTopAdaptor\BRepTopAdaptor_HVertex.lxx" />
+    <ClInclude Include="..\..\..\src\BRepTopAdaptor\BRepTopAdaptor_MapOfShapeTool.hxx" />
+    <ClInclude Include="..\..\..\src\BRepTopAdaptor\BRepTopAdaptor_SeqOfPtr.hxx" />
+    <ClInclude Include="..\..\..\src\BRepTopAdaptor\BRepTopAdaptor_Tool.hxx" />
+    <ClInclude Include="..\..\..\src\BRepTopAdaptor\BRepTopAdaptor_TopolTool.hxx" />
+    <ClCompile Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI.cxx" />
+    <ClCompile Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_Collect.cxx" />
+    <ClCompile Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_Command.cxx" />
+    <ClCompile Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_Copy.cxx" />
+    <ClCompile Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_FastSewing.cxx" />
+    <ClCompile Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_FindPlane.cxx" />
+    <ClCompile Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_GTransform.cxx" />
+    <ClCompile Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_MakeEdge.cxx" />
+    <ClCompile Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_MakeEdge2d.cxx" />
+    <ClCompile Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_MakeFace.cxx" />
+    <ClCompile Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_MakePolygon.cxx" />
+    <ClCompile Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_MakeShape.cxx" />
+    <ClCompile Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_MakeShell.cxx" />
+    <ClCompile Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_MakeSolid.cxx" />
+    <ClCompile Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_MakeVertex.cxx" />
+    <ClCompile Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_MakeWire.cxx" />
+    <ClCompile Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_ModifyShape.cxx" />
+    <ClCompile Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_NurbsConvert.cxx" />
+    <ClCompile Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_Sewing.cxx" />
+    <ClCompile Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_Transform.cxx" />
+    <ClInclude Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI.hxx" />
+    <ClInclude Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_BndBoxTreeSelector.hxx" />
+    <ClInclude Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_CellFilter.hxx" />
+    <ClInclude Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_Collect.hxx" />
+    <ClInclude Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_Command.hxx" />
+    <ClInclude Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_Copy.hxx" />
+    <ClInclude Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_EdgeError.hxx" />
+    <ClInclude Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_FaceError.hxx" />
+    <ClInclude Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_FastSewing.hxx" />
+    <ClInclude Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_FindPlane.hxx" />
+    <ClInclude Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_GTransform.hxx" />
+    <ClInclude Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_MakeEdge.hxx" />
+    <ClInclude Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_MakeEdge2d.hxx" />
+    <ClInclude Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_MakeFace.hxx" />
+    <ClInclude Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_MakePolygon.hxx" />
+    <ClInclude Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_MakeShape.hxx" />
+    <ClInclude Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_MakeShell.hxx" />
+    <ClInclude Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_MakeSolid.hxx" />
+    <ClInclude Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_MakeVertex.hxx" />
+    <ClInclude Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_MakeWire.hxx" />
+    <ClInclude Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_ModifyShape.hxx" />
+    <ClInclude Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_NurbsConvert.hxx" />
+    <ClInclude Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_PipeError.hxx" />
+    <ClInclude Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_Sewing.hxx" />
+    <ClInclude Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_Sewing.lxx" />
+    <ClInclude Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_ShapeModification.hxx" />
+    <ClInclude Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_ShellError.hxx" />
+    <ClInclude Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_Transform.hxx" />
+    <ClInclude Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_TransitionMode.hxx" />
+    <ClInclude Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_VertexInspector.hxx" />
+    <ClInclude Include="..\..\..\src\BRepBuilderAPI\BRepBuilderAPI_WireError.hxx" />
+    <ClCompile Include="..\..\..\src\BRepApprox\BRepApprox_ApproxLine.cxx" />
+    <ClCompile Include="..\..\..\src\BRepApprox\BRepApprox_Approx_0.cxx" />
+    <ClCompile Include="..\..\..\src\BRepApprox\BRepApprox_BSpGradient_BFGSOfMyBSplGradientOfTheComputeLineOfApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\BRepApprox\BRepApprox_BSpParFunctionOfMyBSplGradientOfTheComputeLineOfApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\BRepApprox\BRepApprox_BSpParLeastSquareOfMyBSplGradientOfTheComputeLineOfApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\BRepApprox\BRepApprox_Gradient_BFGSOfMyGradientOfTheComputeLineBezierOfApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\BRepApprox\BRepApprox_Gradient_BFGSOfMyGradientbisOfTheComputeLineOfApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\BRepApprox\BRepApprox_MyBSplGradientOfTheComputeLineOfApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\BRepApprox\BRepApprox_MyGradientOfTheComputeLineBezierOfApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\BRepApprox\BRepApprox_MyGradientbisOfTheComputeLineOfApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\BRepApprox\BRepApprox_ParFunctionOfMyGradientOfTheComputeLineBezierOfApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\BRepApprox\BRepApprox_ParFunctionOfMyGradientbisOfTheComputeLineOfApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\BRepApprox\BRepApprox_ParLeastSquareOfMyGradientOfTheComputeLineBezierOfApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\BRepApprox\BRepApprox_ParLeastSquareOfMyGradientbisOfTheComputeLineOfApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\BRepApprox\BRepApprox_ResConstraintOfMyGradientOfTheComputeLineBezierOfApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\BRepApprox\BRepApprox_ResConstraintOfMyGradientbisOfTheComputeLineOfApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\BRepApprox\BRepApprox_SurfaceTool.cxx" />
+    <ClCompile Include="..\..\..\src\BRepApprox\BRepApprox_TheComputeLineBezierOfApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\BRepApprox\BRepApprox_TheComputeLineOfApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\BRepApprox\BRepApprox_TheFunctionOfTheInt2SOfThePrmPrmSvSurfacesOfApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\BRepApprox\BRepApprox_TheImpPrmSvSurfacesOfApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\BRepApprox\BRepApprox_TheInt2SOfThePrmPrmSvSurfacesOfApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\BRepApprox\BRepApprox_TheMultiLineOfApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\BRepApprox\BRepApprox_ThePrmPrmSvSurfacesOfApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\BRepApprox\BRepApprox_TheZerImpFuncOfTheImpPrmSvSurfacesOfApprox_0.cxx" />
+    <ClInclude Include="..\..\..\src\BRepApprox\BRepApprox_Approx.hxx" />
+    <ClInclude Include="..\..\..\src\BRepApprox\BRepApprox_ApproxLine.hxx" />
+    <ClInclude Include="..\..\..\src\BRepApprox\BRepApprox_BSpGradient_BFGSOfMyBSplGradientOfTheComputeLineOfApprox.hxx" />
+    <ClInclude Include="..\..\..\src\BRepApprox\BRepApprox_BSpParFunctionOfMyBSplGradientOfTheComputeLineOfApprox.hxx" />
+    <ClInclude Include="..\..\..\src\BRepApprox\BRepApprox_BSpParLeastSquareOfMyBSplGradientOfTheComputeLineOfApprox.hxx" />
+    <ClInclude Include="..\..\..\src\BRepApprox\BRepApprox_Gradient_BFGSOfMyGradientOfTheComputeLineBezierOfApprox.hxx" />
+    <ClInclude Include="..\..\..\src\BRepApprox\BRepApprox_Gradient_BFGSOfMyGradientbisOfTheComputeLineOfApprox.hxx" />
+    <ClInclude Include="..\..\..\src\BRepApprox\BRepApprox_MyBSplGradientOfTheComputeLineOfApprox.hxx" />
+    <ClInclude Include="..\..\..\src\BRepApprox\BRepApprox_MyGradientOfTheComputeLineBezierOfApprox.hxx" />
+    <ClInclude Include="..\..\..\src\BRepApprox\BRepApprox_MyGradientbisOfTheComputeLineOfApprox.hxx" />
+    <ClInclude Include="..\..\..\src\BRepApprox\BRepApprox_ParFunctionOfMyGradientOfTheComputeLineBezierOfApprox.hxx" />
+    <ClInclude Include="..\..\..\src\BRepApprox\BRepApprox_ParFunctionOfMyGradientbisOfTheComputeLineOfApprox.hxx" />
+    <ClInclude Include="..\..\..\src\BRepApprox\BRepApprox_ParLeastSquareOfMyGradientOfTheComputeLineBezierOfApprox.hxx" />
+    <ClInclude Include="..\..\..\src\BRepApprox\BRepApprox_ParLeastSquareOfMyGradientbisOfTheComputeLineOfApprox.hxx" />
+    <ClInclude Include="..\..\..\src\BRepApprox\BRepApprox_ResConstraintOfMyGradientOfTheComputeLineBezierOfApprox.hxx" />
+    <ClInclude Include="..\..\..\src\BRepApprox\BRepApprox_ResConstraintOfMyGradientbisOfTheComputeLineOfApprox.hxx" />
+    <ClInclude Include="..\..\..\src\BRepApprox\BRepApprox_SurfaceTool.hxx" />
+    <ClInclude Include="..\..\..\src\BRepApprox\BRepApprox_SurfaceTool.lxx" />
+    <ClInclude Include="..\..\..\src\BRepApprox\BRepApprox_TheComputeLineBezierOfApprox.hxx" />
+    <ClInclude Include="..\..\..\src\BRepApprox\BRepApprox_TheComputeLineOfApprox.hxx" />
+    <ClInclude Include="..\..\..\src\BRepApprox\BRepApprox_TheFunctionOfTheInt2SOfThePrmPrmSvSurfacesOfApprox.hxx" />
+    <ClInclude Include="..\..\..\src\BRepApprox\BRepApprox_TheImpPrmSvSurfacesOfApprox.hxx" />
+    <ClInclude Include="..\..\..\src\BRepApprox\BRepApprox_TheInt2SOfThePrmPrmSvSurfacesOfApprox.hxx" />
+    <ClInclude Include="..\..\..\src\BRepApprox\BRepApprox_TheMultiLineOfApprox.hxx" />
+    <ClInclude Include="..\..\..\src\BRepApprox\BRepApprox_TheMultiLineToolOfApprox.hxx" />
+    <ClInclude Include="..\..\..\src\BRepApprox\BRepApprox_ThePrmPrmSvSurfacesOfApprox.hxx" />
+    <ClInclude Include="..\..\..\src\BRepApprox\BRepApprox_TheZerImpFuncOfTheImpPrmSvSurfacesOfApprox.hxx" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="TKTopAlgo.rc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

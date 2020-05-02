@@ -1,0 +1,888 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source files">
+      <UniqueIdentifier>{298645A2-10C3-0F32-162D-B66C3A7B6834}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files">
+      <UniqueIdentifier>{F64B67AD-05B7-06A8-12BF-F3C374A50BBA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\IntTools">
+      <UniqueIdentifier>{A4FCE06D-1419-10C4-0B4A-78A2B9033808}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\BRepAlgoAPI">
+      <UniqueIdentifier>{53A20C4B-1959-0738-0DEC-E4A16820F36A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\BOPDS">
+      <UniqueIdentifier>{4CCB4B9B-08E0-0BBC-01BC-640EBD03AE7F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\BOPAlgo">
+      <UniqueIdentifier>{B52130C9-147A-0CF8-13CA-24AC0699FA82}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\BOPTools">
+      <UniqueIdentifier>{0D9EDD83-0CFC-1174-03C6-09526700EE5D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\IntTools">
+      <UniqueIdentifier>{2138648F-12CF-138E-0CD7-269E90742E2D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\BRepAlgoAPI">
+      <UniqueIdentifier>{839B7665-17B6-0E0F-07F4-97630BE7A58A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\BOPDS">
+      <UniqueIdentifier>{2528D399-00A1-0E57-0C9A-9B0B8711F0CB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\BOPAlgo">
+      <UniqueIdentifier>{D7A9B84C-06DB-1896-141E-37FC699C7BAA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\BOPTools">
+      <UniqueIdentifier>{7B03DC63-18A2-1389-03B7-2A685D29DD59}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\IntTools\IntTools.cxx">
+      <Filter>Source files\IntTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntTools\IntTools_BaseRangeSample.cxx">
+      <Filter>Source files\IntTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntTools\IntTools_BeanFaceIntersector.cxx">
+      <Filter>Source files\IntTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntTools\IntTools_CArray1OfInteger_0.cxx">
+      <Filter>Source files\IntTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntTools\IntTools_CArray1OfReal_0.cxx">
+      <Filter>Source files\IntTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntTools\IntTools_CommonPrt.cxx">
+      <Filter>Source files\IntTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntTools\IntTools_Context.cxx">
+      <Filter>Source files\IntTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntTools\IntTools_Curve.cxx">
+      <Filter>Source files\IntTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntTools\IntTools_CurveRangeLocalizeData.cxx">
+      <Filter>Source files\IntTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntTools\IntTools_CurveRangeSample.cxx">
+      <Filter>Source files\IntTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntTools\IntTools_EdgeEdge.cxx">
+      <Filter>Source files\IntTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntTools\IntTools_EdgeFace.cxx">
+      <Filter>Source files\IntTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntTools\IntTools_FClass2d.cxx">
+      <Filter>Source files\IntTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntTools\IntTools_FaceFace.cxx">
+      <Filter>Source files\IntTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntTools\IntTools_MarkedRangeSet.cxx">
+      <Filter>Source files\IntTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntTools\IntTools_PntOn2Faces.cxx">
+      <Filter>Source files\IntTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntTools\IntTools_PntOnFace.cxx">
+      <Filter>Source files\IntTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntTools\IntTools_Range.cxx">
+      <Filter>Source files\IntTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntTools\IntTools_Root.cxx">
+      <Filter>Source files\IntTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntTools\IntTools_ShrunkRange.cxx">
+      <Filter>Source files\IntTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntTools\IntTools_SurfaceRangeLocalizeData.cxx">
+      <Filter>Source files\IntTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntTools\IntTools_SurfaceRangeSample.cxx">
+      <Filter>Source files\IntTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntTools\IntTools_Tools.cxx">
+      <Filter>Source files\IntTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntTools\IntTools_TopolTool.cxx">
+      <Filter>Source files\IntTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\IntTools\IntTools_WLineTool.cxx">
+      <Filter>Source files\IntTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BRepAlgoAPI\BRepAlgoAPI_Algo.cxx">
+      <Filter>Source files\BRepAlgoAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BRepAlgoAPI\BRepAlgoAPI_BooleanOperation.cxx">
+      <Filter>Source files\BRepAlgoAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BRepAlgoAPI\BRepAlgoAPI_BuilderAlgo.cxx">
+      <Filter>Source files\BRepAlgoAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BRepAlgoAPI\BRepAlgoAPI_Check.cxx">
+      <Filter>Source files\BRepAlgoAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BRepAlgoAPI\BRepAlgoAPI_Common.cxx">
+      <Filter>Source files\BRepAlgoAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BRepAlgoAPI\BRepAlgoAPI_Cut.cxx">
+      <Filter>Source files\BRepAlgoAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BRepAlgoAPI\BRepAlgoAPI_Defeaturing.cxx">
+      <Filter>Source files\BRepAlgoAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BRepAlgoAPI\BRepAlgoAPI_Fuse.cxx">
+      <Filter>Source files\BRepAlgoAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BRepAlgoAPI\BRepAlgoAPI_Section.cxx">
+      <Filter>Source files\BRepAlgoAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BRepAlgoAPI\BRepAlgoAPI_Splitter.cxx">
+      <Filter>Source files\BRepAlgoAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPDS\BOPDS_CommonBlock.cxx">
+      <Filter>Source files\BOPDS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPDS\BOPDS_DS.cxx">
+      <Filter>Source files\BOPDS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPDS\BOPDS_IndexRange.cxx">
+      <Filter>Source files\BOPDS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPDS\BOPDS_Iterator.cxx">
+      <Filter>Source files\BOPDS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPDS\BOPDS_IteratorSI.cxx">
+      <Filter>Source files\BOPDS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPDS\BOPDS_Pave.cxx">
+      <Filter>Source files\BOPDS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPDS\BOPDS_PaveBlock.cxx">
+      <Filter>Source files\BOPDS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPDS\BOPDS_ShapeInfo.cxx">
+      <Filter>Source files\BOPDS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPDS\BOPDS_SubIterator.cxx">
+      <Filter>Source files\BOPDS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_Algo.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_ArgumentAnalyzer.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_BOP.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_Builder.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_BuilderArea.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_BuilderFace.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_BuilderSolid.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_Builder_1.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_Builder_2.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_Builder_3.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_Builder_4.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_CellsBuilder.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_CheckResult.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_CheckerSI.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_CheckerSI_1.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_MakeConnected.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_MakePeriodic.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_MakerVolume.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_Options.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_PaveFiller.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_PaveFiller_1.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_PaveFiller_10.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_PaveFiller_11.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_PaveFiller_2.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_PaveFiller_3.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_PaveFiller_4.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_PaveFiller_5.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_PaveFiller_6.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_PaveFiller_7.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_PaveFiller_8.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_PaveFiller_9.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_RemoveFeatures.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_Section.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_ShellSplitter.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_Splitter.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_Tools.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_ToolsProvider.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_WireSplitter.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPAlgo\BOPAlgo_WireSplitter_1.cxx">
+      <Filter>Source files\BOPAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPTools\BOPTools_AlgoTools.cxx">
+      <Filter>Source files\BOPTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPTools\BOPTools_AlgoTools2D.cxx">
+      <Filter>Source files\BOPTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPTools\BOPTools_AlgoTools2D_1.cxx">
+      <Filter>Source files\BOPTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPTools\BOPTools_AlgoTools3D.cxx">
+      <Filter>Source files\BOPTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPTools\BOPTools_AlgoTools_1.cxx">
+      <Filter>Source files\BOPTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPTools\BOPTools_AlgoTools_2.cxx">
+      <Filter>Source files\BOPTools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\BOPTools\BOPTools_Set.cxx">
+      <Filter>Source files\BOPTools</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_Array1OfRange.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_Array1OfRoots.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_BaseRangeSample.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_BaseRangeSample.lxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_BeanFaceIntersector.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_CArray1.gxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_CArray1.lxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_CArray1OfInteger.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_CArray1OfReal.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_CommonPrt.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_Context.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_Curve.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_CurveRangeLocalizeData.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_CurveRangeLocalizeData.lxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_CurveRangeSample.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_CurveRangeSample.lxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_CurveRangeSampleMapHasher.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_CurveRangeSampleMapHasher.lxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_DataMapIteratorOfDataMapOfCurveSampleBox.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_DataMapIteratorOfDataMapOfSurfaceSampleBox.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_DataMapOfCurveSampleBox.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_DataMapOfSurfaceSampleBox.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_EdgeEdge.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_EdgeEdge.lxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_EdgeFace.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_FClass2d.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_FaceFace.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_ListIteratorOfListOfBox.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_ListIteratorOfListOfCurveRangeSample.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_ListIteratorOfListOfSurfaceRangeSample.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_ListOfBox.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_ListOfCurveRangeSample.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_ListOfSurfaceRangeSample.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_MapIteratorOfMapOfCurveSample.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_MapIteratorOfMapOfSurfaceSample.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_MapOfCurveSample.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_MapOfSurfaceSample.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_MarkedRangeSet.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_MarkedRangeSet.lxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_PntOn2Faces.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_PntOnFace.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_Range.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_Root.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_SequenceOfCommonPrts.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_SequenceOfCurves.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_SequenceOfPntOn2Faces.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_SequenceOfRanges.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_SequenceOfRoots.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_ShrunkRange.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_SurfaceRangeLocalizeData.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_SurfaceRangeLocalizeData.lxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_SurfaceRangeSample.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_SurfaceRangeSample.lxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_SurfaceRangeSampleMapHasher.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_SurfaceRangeSampleMapHasher.lxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_Tools.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_TopolTool.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\IntTools\IntTools_WLineTool.hxx">
+      <Filter>Header files\IntTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BRepAlgoAPI\BRepAlgoAPI_Algo.hxx">
+      <Filter>Header files\BRepAlgoAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BRepAlgoAPI\BRepAlgoAPI_BooleanOperation.hxx">
+      <Filter>Header files\BRepAlgoAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BRepAlgoAPI\BRepAlgoAPI_BuilderAlgo.hxx">
+      <Filter>Header files\BRepAlgoAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BRepAlgoAPI\BRepAlgoAPI_Check.hxx">
+      <Filter>Header files\BRepAlgoAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BRepAlgoAPI\BRepAlgoAPI_Common.hxx">
+      <Filter>Header files\BRepAlgoAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BRepAlgoAPI\BRepAlgoAPI_Cut.hxx">
+      <Filter>Header files\BRepAlgoAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BRepAlgoAPI\BRepAlgoAPI_Defeaturing.hxx">
+      <Filter>Header files\BRepAlgoAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BRepAlgoAPI\BRepAlgoAPI_Fuse.hxx">
+      <Filter>Header files\BRepAlgoAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BRepAlgoAPI\BRepAlgoAPI_Section.hxx">
+      <Filter>Header files\BRepAlgoAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BRepAlgoAPI\BRepAlgoAPI_Splitter.hxx">
+      <Filter>Header files\BRepAlgoAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_CommonBlock.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_CoupleOfPaveBlocks.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_Curve.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_Curve.lxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_DS.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_DS.lxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_DataMapOfIntegerListOfPaveBlock.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_DataMapOfPaveBlockCommonBlock.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_DataMapOfPaveBlockListOfInteger.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_DataMapOfPaveBlockListOfPaveBlock.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_DataMapOfShapeCoupleOfPaveBlocks.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_FaceInfo.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_FaceInfo.lxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_IndexRange.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_IndexRange.lxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_IndexedDataMapOfPaveBlockListOfInteger.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_IndexedDataMapOfPaveBlockListOfPaveBlock.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_IndexedDataMapOfShapeCoupleOfPaveBlocks.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_IndexedMapOfPaveBlock.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_Interf.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_Iterator.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_IteratorSI.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_ListOfPave.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_ListOfPaveBlock.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_MapOfCommonBlock.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_MapOfPair.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_MapOfPave.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_MapOfPaveBlock.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_PDS.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_PIterator.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_PIteratorSI.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_Pair.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_PairMapHasher.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_Pave.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_Pave.lxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_PaveBlock.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_PaveMapHasher.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_PaveMapHasher.lxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_Point.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_Point.lxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_ShapeInfo.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_ShapeInfo.lxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_SubIterator.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_Tools.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_Tools.lxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_VectorOfCurve.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_VectorOfFaceInfo.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_VectorOfIndexRange.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_VectorOfInterfEE.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_VectorOfInterfEF.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_VectorOfInterfEZ.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_VectorOfInterfFF.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_VectorOfInterfFZ.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_VectorOfInterfVE.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_VectorOfInterfVF.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_VectorOfInterfVV.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_VectorOfInterfVZ.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_VectorOfInterfZZ.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_VectorOfListOfPaveBlock.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_VectorOfPair.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_VectorOfPave.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_VectorOfPoint.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_VectorOfShapeInfo.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPDS\BOPDS_VectorOfVectorOfPair.hxx">
+      <Filter>Header files\BOPDS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_Alerts.hxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_Algo.hxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_ArgumentAnalyzer.hxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_ArgumentAnalyzer.lxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_BOP.hxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_BOPAlgo_msg.pxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_Builder.hxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_BuilderArea.hxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_BuilderFace.hxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_BuilderShape.hxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_BuilderSolid.hxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_CellsBuilder.hxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_CheckResult.hxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_CheckStatus.hxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_CheckerSI.hxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_GlueEnum.hxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_ListOfCheckResult.hxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_MakeConnected.hxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_MakePeriodic.hxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_MakerVolume.hxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_MakerVolume.lxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_Operation.hxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_Options.hxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_PArgumentAnalyzer.hxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_PBOP.hxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_PBuilder.hxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_PPaveFiller.hxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_PSection.hxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_PWireEdgeSet.hxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_PaveFiller.hxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_RemoveFeatures.hxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_Section.hxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_SectionAttribute.hxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_ShellSplitter.hxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_Splitter.hxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_Tools.hxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_ToolsProvider.hxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_WireEdgeSet.hxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_WireEdgeSet.lxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_WireSplitter.hxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPAlgo\BOPAlgo_WireSplitter.lxx">
+      <Filter>Header files\BOPAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPTools\BOPTools_AlgoTools.hxx">
+      <Filter>Header files\BOPTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPTools\BOPTools_AlgoTools2D.hxx">
+      <Filter>Header files\BOPTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPTools\BOPTools_AlgoTools3D.hxx">
+      <Filter>Header files\BOPTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPTools\BOPTools_BoxSelector.hxx">
+      <Filter>Header files\BOPTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPTools\BOPTools_BoxTree.hxx">
+      <Filter>Header files\BOPTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPTools\BOPTools_ConnexityBlock.hxx">
+      <Filter>Header files\BOPTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPTools\BOPTools_CoupleOfShape.hxx">
+      <Filter>Header files\BOPTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPTools\BOPTools_IndexedDataMapOfSetShape.hxx">
+      <Filter>Header files\BOPTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPTools\BOPTools_ListOfConnexityBlock.hxx">
+      <Filter>Header files\BOPTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPTools\BOPTools_ListOfCoupleOfShape.hxx">
+      <Filter>Header files\BOPTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPTools\BOPTools_MapOfSet.hxx">
+      <Filter>Header files\BOPTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPTools\BOPTools_PairSelector.hxx">
+      <Filter>Header files\BOPTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPTools\BOPTools_Parallel.hxx">
+      <Filter>Header files\BOPTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPTools\BOPTools_Set.hxx">
+      <Filter>Header files\BOPTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPTools\BOPTools_SetMapHasher.hxx">
+      <Filter>Header files\BOPTools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\BOPTools\BOPTools_SetMapHasher.lxx">
+      <Filter>Header files\BOPTools</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="TKBO.rc" />
+  </ItemGroup>
+</Project>

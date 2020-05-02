@@ -1,0 +1,835 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{036C536B-0315-01D1-1046-4DC00278E54F}</ProjectGuid>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\..\..\..\win32\vc14\bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\..\..\..\win32\vc14\obj\TKBool\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\..\..\..\win32\vc14\bind\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\..\..\..\win32\vc14\objd\TKBool\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\..\..\..\win64\vc14\bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\..\..\..\win64\vc14\obj\TKBool\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\..\..\..\win64\vc14\bind\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\..\..\..\win64\vc14\objd\TKBool\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\..\..\..\win32\vc14\bin\TKBool.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>OCCT_STATIC_BUILD;HAVE_NO_DLL;NDEBUG;No_Exception;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <AssemblerListingLocation>.\..\..\..\win32\vc14\obj\TKBool/</AssemblerListingLocation>
+      <ObjectFileName>.\..\..\..\win32\vc14\obj\TKBool/</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\..\..\win32\vc14\obj\TKBool/</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;No_Exception;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>TKBRep.lib;TKTopAlgo.lib;TKMath.lib;TKernel.lib;TKPrim.lib;TKG2d.lib;TKG3d.lib;TKShHealing.lib;TKGeomBase.lib;TKGeomAlgo.lib;TKBO.lib</AdditionalDependencies>
+      <OutputFile>.\..\..\..\win32\vc14\bin\TKBool.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\win32\vc14\lib;$(CSF_OPT_LIB32);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>no</GenerateDebugInformation>
+      <ProgramDatabaseFile>.\..\..\..\win32\vc14\bin\TKBool.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <ImportLibrary>..\..\..\win32\vc14\lib\TKBool.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\..\..\..\win32\vc14\bind\TKBool.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>Disabled</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>OCCT_STATIC_BUILD;HAVE_NO_DLL;_DEBUG;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <AssemblerListingLocation>.\..\..\..\win32\vc14\objd\TKBool/</AssemblerListingLocation>
+      <ObjectFileName>.\..\..\..\win32\vc14\objd\TKBool/</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\..\..\win32\vc14\objd\TKBool/</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>TKBRep.lib;TKTopAlgo.lib;TKMath.lib;TKernel.lib;TKPrim.lib;TKG2d.lib;TKG3d.lib;TKShHealing.lib;TKGeomBase.lib;TKGeomAlgo.lib;TKBO.lib</AdditionalDependencies>
+      <OutputFile>.\..\..\..\win32\vc14\bind\TKBool.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\win32\vc14\libd;$(CSF_OPT_LIB32D);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>..\..\..\win32\vc14\bind\TKBool.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <ImportLibrary>..\..\..\win32\vc14\libd\TKBool.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>x64</TargetEnvironment>
+      <TypeLibraryName>.\..\..\..\win64\vc14\bin\TKBool.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>NDEBUG;No_Exception;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <AssemblerListingLocation>.\..\..\..\win64\vc14\obj\TKBool/</AssemblerListingLocation>
+      <ObjectFileName>.\..\..\..\win64\vc14\obj\TKBool/</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\..\..\win64\vc14\obj\TKBool/</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;No_Exception;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>TKBRep.lib;TKTopAlgo.lib;TKMath.lib;TKernel.lib;TKPrim.lib;TKG2d.lib;TKG3d.lib;TKShHealing.lib;TKGeomBase.lib;TKGeomAlgo.lib;TKBO.lib</AdditionalDependencies>
+      <OutputFile>.\..\..\..\win64\vc14\bin\TKBool.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\win64\vc14\lib;$(CSF_OPT_LIB64);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>no</GenerateDebugInformation>
+      <ProgramDatabaseFile>.\..\..\..\win64\vc14\bin\TKBool.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <ImportLibrary>..\..\..\win64\vc14\lib\TKBool.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>x64</TargetEnvironment>
+      <TypeLibraryName>.\..\..\..\win64\vc14\bind\TKBool.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>Disabled</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>_DEBUG;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <AssemblerListingLocation>.\..\..\..\win64\vc14\objd\TKBool/</AssemblerListingLocation>
+      <ObjectFileName>.\..\..\..\win64\vc14\objd\TKBool/</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\..\..\win64\vc14\objd\TKBool/</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>TKBRep.lib;TKTopAlgo.lib;TKMath.lib;TKernel.lib;TKPrim.lib;TKG2d.lib;TKG3d.lib;TKShHealing.lib;TKGeomBase.lib;TKGeomAlgo.lib;TKBO.lib</AdditionalDependencies>
+      <OutputFile>.\..\..\..\win64\vc14\bind\TKBool.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\win64\vc14\libd;$(CSF_OPT_LIB64D);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>..\..\..\win64\vc14\bind\TKBool.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <ImportLibrary>..\..\..\win64\vc14\libd\TKBool.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_Bipoint.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_DRAW.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_DSFiller.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_EdgesFiller.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_EdgesIntersector.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_EdgesIntersector_1.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_FFDumper.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_FFTransitionTool.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_FaceEdgeFiller.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_FaceEdgeFiller_DEB.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_FaceEdgeIntersector.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_FacesFiller.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_FacesFiller_1.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_FacesIntersector.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_GeomTool.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_Hctxee2d.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_Hctxff2d.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_LineInter.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_Point2d.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_PointClassifier.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_PointGeomTool.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_ProcessGR.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_ProcessSectionEdges.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_ShapeIntersector.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_ShapeIntersector2d.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_ShapeScanner.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_VPointInter.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_VPointInterClassifier.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_VPointInterIterator.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_WPointInter.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_WPointInterIterator.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_kpart.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_mergePDS.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_sort.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_trace.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_traceALWL.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_traceBOOPNINT.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_traceSIFF.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_vpr.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_vprclo.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRep\TopOpeBRep_vprdeg.cxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_Array1OfLineInter.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_Array1OfVPointInter.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_Bipoint.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_DRAW.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_DSFiller.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_DataMapIteratorOfDataMapOfTopolTool.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_DataMapOfTopolTool.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_EdgesFiller.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_EdgesIntersector.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_FFDumper.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_FFTransitionTool.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_FaceEdgeFiller.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_FaceEdgeIntersector.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_FacesFiller.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_FacesIntersector.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_GeomTool.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_HArray1OfLineInter.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_HArray1OfVPointInter.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_Hctxee2d.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_Hctxff2d.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_LineInter.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_LineInter.lxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_ListIteratorOfListOfBipoint.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_ListOfBipoint.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_P2Dstatus.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_PEdgesIntersector.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_PFacesFiller.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_PFacesIntersector.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_PIntRes2d_IntersectionPoint.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_PLineInter.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_PPntOn2S.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_PThePointOfIntersection.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_Point2d.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_Point2d.lxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_PointClassifier.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_PointGeomTool.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_SequenceOfPoint2d.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_ShapeIntersector.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_ShapeIntersector2d.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_ShapeScanner.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_TypeLineCurve.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_VPointInter.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_VPointInter.lxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_VPointInterClassifier.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_VPointInterIterator.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_WPointInter.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_WPointInterIterator.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_define.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRep\TopOpeBRep_traceSIFF.hxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_Association.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_BuildTool.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_Check.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_Curve.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_CurveData.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_CurveExplorer.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_CurveIterator.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_CurvePointInterference.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_DRAW.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_DataStructure.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_Dumper.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_EIR.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_EXPORT.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_Edge3dInterferenceTool.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_EdgeInterferenceTool.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_EdgeVertexInterference.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_Explorer.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_FIR.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_FaceEdgeInterference.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_FaceInterferenceTool.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_Filter.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_FilterCurveInterferences.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_FilterEdgeInterferences.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_FilterFaceInterferences.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_GapFiller.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_GapTool.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_GeometryData.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_HDataStructure.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_Interference.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_InterferenceIterator.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_InterferenceTool.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_ListOfShapeOn1State.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_Marker.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_Point.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_PointData.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_PointExplorer.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_PointIterator.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_ProcessEdgeInterferences.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_ProcessFaceInterferences.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_ProcessInterferencesTool.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_Reducer.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_ShapeData.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_ShapeShapeInterference.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_ShapeWithState.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_SolidSurfaceInterference.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_Surface.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_SurfaceCurveInterference.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_SurfaceData.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_SurfaceExplorer.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_SurfaceIterator.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_TKI.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_TOOL.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_Transition.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_connex.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_funk.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_redu.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_repvg.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_samdom.cxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_Array1OfDataMapOfIntegerListOfInterference.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_Association.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_BuildTool.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_Check.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_CheckStatus.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_Config.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_Curve.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_CurveData.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_CurveExplorer.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_CurveIterator.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_CurvePointInterference.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_DRAW.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_DataMapIteratorOfDataMapOfCheckStatus.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_DataMapIteratorOfDataMapOfIntegerListOfInterference.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_DataMapIteratorOfDataMapOfInterferenceListOfInterference.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_DataMapIteratorOfDataMapOfInterferenceShape.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_DataMapIteratorOfDataMapOfShapeListOfShapeOn1State.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_DataMapIteratorOfDataMapOfShapeState.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_DataMapIteratorOfMapOfCurve.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_DataMapIteratorOfMapOfIntegerShapeData.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_DataMapIteratorOfMapOfPoint.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_DataMapIteratorOfMapOfSurface.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_DataMapIteratorOfShapeSurface.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_DataMapOfCheckStatus.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_DataMapOfIntegerListOfInterference.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_DataMapOfInterferenceListOfInterference.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_DataMapOfInterferenceShape.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_DataMapOfShapeListOfShapeOn1State.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_DataMapOfShapeState.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_DataStructure.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_DoubleMapIteratorOfDoubleMapOfIntegerShape.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_DoubleMapOfIntegerShape.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_Dumper.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_EIR.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_EXPORT.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_Edge3dInterferenceTool.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_EdgeInterferenceTool.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_EdgeVertexInterference.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_Explorer.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_FIR.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_FaceEdgeInterference.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_FaceInterferenceTool.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_Filter.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_GapFiller.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_GapTool.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_GeometryData.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_HArray1OfDataMapOfIntegerListOfInterference.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_HDataStructure.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_IndexedDataMapOfShapeWithState.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_IndexedDataMapOfVertexPoint.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_Interference.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_InterferenceIterator.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_InterferenceTool.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_Kind.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_ListIteratorOfListOfInterference.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_ListOfInterference.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_ListOfShapeOn1State.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_MapOfCurve.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_MapOfIntegerShapeData.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_MapOfPoint.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_MapOfShapeData.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_MapOfSurface.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_Marker.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_PDataStructure.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_Point.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_PointData.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_PointExplorer.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_PointIterator.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_ProcessInterferencesTool.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_Reducer.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_ShapeData.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_ShapeShapeInterference.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_ShapeSurface.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_ShapeWithState.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_SolidSurfaceInterference.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_Surface.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_SurfaceCurveInterference.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_SurfaceData.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_SurfaceExplorer.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_SurfaceIterator.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_TKI.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_TOOL.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_Transition.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_connex.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_define.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_repvg.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepDS\TopOpeBRepDS_samdom.hxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_Area1dBuilder.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_Area2dBuilder.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_Area3dBuilder.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_AreaBuilder.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_BlockBuilder.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_BlockIterator.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_BuildEdges.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_BuildFaces.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_BuildVertices.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_Builder.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_Builder1.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_Builder1_1.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_Builder1_2.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_BuilderON.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_BuilderON2d.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_CompositeClassifier.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_CorrectFace2d.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_EdgeBuilder.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_End.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_FREGU.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_FaceAreaBuilder.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_FaceBuilder.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_FuseFace.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_GIter.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_GTool.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_GTopo.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_Grid.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_GridEE.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_GridFF.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_GridSS.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_Griddump.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_HBuilder.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_KPart.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_Loop.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_LoopClassifier.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_LoopSet.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_Merge.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_Pave.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_PaveClassifier.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_PaveSet.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_SREGU.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_Section.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_ShapeListOfShape.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_ShapeSet.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_ShellFaceClassifier.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_ShellFaceSet.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_ShellToSolid.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_SolidAreaBuilder.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_SolidBuilder.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_Tools.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_Tools2d.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_Tools_1.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_VertexInfo.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_WireEdgeClassifier.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_WireEdgeSet.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_WireToFace.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_fctwes.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_ffsfs.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_ffwesk.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_keep.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_kpkole.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_makeedges.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_makefaces.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_makesolids.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_on.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_trace.cxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_Area1dBuilder.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_Area2dBuilder.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_Area3dBuilder.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_AreaBuilder.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_BlockBuilder.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_BlockIterator.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_BlockIterator.lxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_Builder.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_Builder1.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_BuilderON.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_CompositeClassifier.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_CorrectFace2d.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_DataMapIteratorOfDataMapOfShapeListOfShapeListOfShape.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_DataMapOfShapeListOfShapeListOfShape.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_EdgeBuilder.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_FaceAreaBuilder.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_FaceBuilder.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_FuseFace.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_FuseFace.lxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_GIter.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_GTool.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_GTopo.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_HBuilder.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_IndexedDataMapOfShapeVertexInfo.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_ListIteratorOfListOfListOfLoop.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_ListIteratorOfListOfLoop.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_ListIteratorOfListOfPave.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_ListIteratorOfListOfShapeListOfShape.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_ListOfListOfLoop.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_ListOfLoop.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_ListOfPave.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_ListOfShapeListOfShape.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_Loop.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_LoopClassifier.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_LoopEnum.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_LoopSet.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_PBuilder.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_PGTopo.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_PWireEdgeSet.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_Pave.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_PaveClassifier.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_PaveSet.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_ShapeListOfShape.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_ShapeSet.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_ShellFaceClassifier.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_ShellFaceSet.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_ShellToSolid.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_SolidAreaBuilder.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_SolidBuilder.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_Tools.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_Tools2d.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_VertexInfo.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_WireEdgeClassifier.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_WireEdgeSet.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_WireToFace.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_define.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepBuild\TopOpeBRepBuild_kpresu.hxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_2d.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_AncestorsTool.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_BoxSort.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_C2DF.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_CLASSI.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_CORRISO.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_CurveTool.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_DRAW.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_FuseEdges.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_GEOMETRY.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_GeomTool.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_HBoxTool.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_PROJECT.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_PURGE.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_PurgeInternalEdges.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_REGUS.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_REGUW.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_RegularizeS.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_RegularizeW.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_SC.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_STATE.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_ShapeClassifier.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_ShapeTool.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_SolidClassifier.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_TOOL.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_TOPOLOGY.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_box.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_connexity.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_face.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_faulty.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_makeTransition.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_matter.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_mkTondgE.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_tol.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_trace.cxx" />
+    <ClCompile Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_traceSTATE.cxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_2d.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_AncestorsTool.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_BoxSort.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_C2DF.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_CLASSI.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_CORRISO.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_CurveTool.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_DRAW.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_DataMapIteratorOfDataMapOfOrientedShapeC2DF.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_DataMapIteratorOfDataMapOfShapeListOfC2DF.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_DataMapIteratorOfDataMapOfShapeface.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_DataMapOfOrientedShapeC2DF.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_DataMapOfShapeListOfC2DF.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_DataMapOfShapeface.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_EXPORT.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_FuseEdges.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_GEOMETRY.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_GeomTool.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_HBoxTool.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_IndexedDataMapOfShapeBox.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_IndexedDataMapOfShapeBox2d.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_IndexedDataMapOfShapeconnexity.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_IndexedDataMapOfSolidClassifier.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_KRO.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_ListIteratorOfListOfC2DF.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_ListOfC2DF.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_OutCurveType.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_PROJECT.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_PShapeClassifier.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_PSoClassif.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_PURGE.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_Plos.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_PurgeInternalEdges.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_REGUS.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_REGUW.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_SC.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_STATE.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_ShapeClassifier.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_ShapeExplorer.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_ShapeTool.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_SolidClassifier.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_TOOL.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_TOPOLOGY.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_box.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_connexity.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_define.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_defineG.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_face.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_makeTransition.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_mkTondgE.hxx" />
+    <ClInclude Include="..\..\..\src\TopOpeBRepTool\TopOpeBRepTool_tol.hxx" />
+    <ClCompile Include="..\..\..\src\BRepAlgo\BRepAlgo.cxx" />
+    <ClCompile Include="..\..\..\src\BRepAlgo\BRepAlgo_1.cxx" />
+    <ClCompile Include="..\..\..\src\BRepAlgo\BRepAlgo_AsDes.cxx" />
+    <ClCompile Include="..\..\..\src\BRepAlgo\BRepAlgo_BooleanOperation.cxx" />
+    <ClCompile Include="..\..\..\src\BRepAlgo\BRepAlgo_Common.cxx" />
+    <ClCompile Include="..\..\..\src\BRepAlgo\BRepAlgo_Cut.cxx" />
+    <ClCompile Include="..\..\..\src\BRepAlgo\BRepAlgo_FaceRestrictor.cxx" />
+    <ClCompile Include="..\..\..\src\BRepAlgo\BRepAlgo_Fuse.cxx" />
+    <ClCompile Include="..\..\..\src\BRepAlgo\BRepAlgo_Image.cxx" />
+    <ClCompile Include="..\..\..\src\BRepAlgo\BRepAlgo_Loop.cxx" />
+    <ClCompile Include="..\..\..\src\BRepAlgo\BRepAlgo_NormalProjection.cxx" />
+    <ClCompile Include="..\..\..\src\BRepAlgo\BRepAlgo_Section.cxx" />
+    <ClCompile Include="..\..\..\src\BRepAlgo\BRepAlgo_Tool.cxx" />
+    <ClInclude Include="..\..\..\src\BRepAlgo\BRepAlgo.hxx" />
+    <ClInclude Include="..\..\..\src\BRepAlgo\BRepAlgo_AsDes.hxx" />
+    <ClInclude Include="..\..\..\src\BRepAlgo\BRepAlgo_BooleanOperation.hxx" />
+    <ClInclude Include="..\..\..\src\BRepAlgo\BRepAlgo_CheckStatus.hxx" />
+    <ClInclude Include="..\..\..\src\BRepAlgo\BRepAlgo_Common.hxx" />
+    <ClInclude Include="..\..\..\src\BRepAlgo\BRepAlgo_Cut.hxx" />
+    <ClInclude Include="..\..\..\src\BRepAlgo\BRepAlgo_FaceRestrictor.hxx" />
+    <ClInclude Include="..\..\..\src\BRepAlgo\BRepAlgo_Fuse.hxx" />
+    <ClInclude Include="..\..\..\src\BRepAlgo\BRepAlgo_Image.hxx" />
+    <ClInclude Include="..\..\..\src\BRepAlgo\BRepAlgo_Loop.hxx" />
+    <ClInclude Include="..\..\..\src\BRepAlgo\BRepAlgo_NormalProjection.hxx" />
+    <ClInclude Include="..\..\..\src\BRepAlgo\BRepAlgo_Section.hxx" />
+    <ClInclude Include="..\..\..\src\BRepAlgo\BRepAlgo_Tool.hxx" />
+    <ClCompile Include="..\..\..\src\BRepFill\BRepFill.cxx" />
+    <ClCompile Include="..\..\..\src\BRepFill\BRepFill_ACRLaw.cxx" />
+    <ClCompile Include="..\..\..\src\BRepFill\BRepFill_AdvancedEvolved.cxx" />
+    <ClCompile Include="..\..\..\src\BRepFill\BRepFill_ApproxSeewing.cxx" />
+    <ClCompile Include="..\..\..\src\BRepFill\BRepFill_CompatibleWires.cxx" />
+    <ClCompile Include="..\..\..\src\BRepFill\BRepFill_ComputeCLine_0.cxx" />
+    <ClCompile Include="..\..\..\src\BRepFill\BRepFill_CurveConstraint.cxx" />
+    <ClCompile Include="..\..\..\src\BRepFill\BRepFill_Draft.cxx" />
+    <ClCompile Include="..\..\..\src\BRepFill\BRepFill_DraftLaw.cxx" />
+    <ClCompile Include="..\..\..\src\BRepFill\BRepFill_Edge3DLaw.cxx" />
+    <ClCompile Include="..\..\..\src\BRepFill\BRepFill_EdgeFaceAndOrder.cxx" />
+    <ClCompile Include="..\..\..\src\BRepFill\BRepFill_EdgeOnSurfLaw.cxx" />
+    <ClCompile Include="..\..\..\src\BRepFill\BRepFill_Evolved.cxx" />
+    <ClCompile Include="..\..\..\src\BRepFill\BRepFill_FaceAndOrder.cxx" />
+    <ClCompile Include="..\..\..\src\BRepFill\BRepFill_Filling.cxx" />
+    <ClCompile Include="..\..\..\src\BRepFill\BRepFill_Generator.cxx" />
+    <ClCompile Include="..\..\..\src\BRepFill\BRepFill_LocationLaw.cxx" />
+    <ClCompile Include="..\..\..\src\BRepFill\BRepFill_MultiLine.cxx" />
+    <ClCompile Include="..\..\..\src\BRepFill\BRepFill_NSections.cxx" />
+    <ClCompile Include="..\..\..\src\BRepFill\BRepFill_OffsetAncestors.cxx" />
+    <ClCompile Include="..\..\..\src\BRepFill\BRepFill_OffsetWire.cxx" />
+    <ClCompile Include="..\..\..\src\BRepFill\BRepFill_Pipe.cxx" />
+    <ClCompile Include="..\..\..\src\BRepFill\BRepFill_PipeShell.cxx" />
+    <ClCompile Include="..\..\..\src\BRepFill\BRepFill_Section.cxx" />
+    <ClCompile Include="..\..\..\src\BRepFill\BRepFill_SectionLaw.cxx" />
+    <ClCompile Include="..\..\..\src\BRepFill\BRepFill_SectionPlacement.cxx" />
+    <ClCompile Include="..\..\..\src\BRepFill\BRepFill_ShapeLaw.cxx" />
+    <ClCompile Include="..\..\..\src\BRepFill\BRepFill_Sweep.cxx" />
+    <ClCompile Include="..\..\..\src\BRepFill\BRepFill_TrimEdgeTool.cxx" />
+    <ClCompile Include="..\..\..\src\BRepFill\BRepFill_TrimShellCorner.cxx" />
+    <ClCompile Include="..\..\..\src\BRepFill\BRepFill_TrimSurfaceTool.cxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_ACRLaw.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_AdvancedEvolved.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_ApproxSeewing.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_CompatibleWires.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_ComputeCLine.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_CurveConstraint.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_DataMapIteratorOfDataMapOfNodeDataMapOfShapeShape.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_DataMapIteratorOfDataMapOfNodeShape.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_DataMapIteratorOfDataMapOfOrientedShapeListOfShape.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_DataMapIteratorOfDataMapOfShapeDataMapOfShapeListOfShape.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_DataMapIteratorOfDataMapOfShapeHArray2OfShape.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_DataMapIteratorOfDataMapOfShapeSequenceOfPnt.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_DataMapIteratorOfDataMapOfShapeSequenceOfReal.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_DataMapOfNodeDataMapOfShapeShape.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_DataMapOfNodeShape.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_DataMapOfOrientedShapeListOfShape.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_DataMapOfShapeDataMapOfShapeListOfShape.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_DataMapOfShapeHArray2OfShape.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_DataMapOfShapeSequenceOfPnt.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_DataMapOfShapeSequenceOfReal.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_Draft.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_DraftLaw.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_Edge3DLaw.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_EdgeFaceAndOrder.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_EdgeOnSurfLaw.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_Evolved.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_FaceAndOrder.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_Filling.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_Generator.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_Generator.lxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_IndexedDataMapOfOrientedShapeListOfShape.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_ListIteratorOfListOfOffsetWire.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_ListOfOffsetWire.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_LocationLaw.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_MultiLine.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_NSections.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_OffsetAncestors.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_OffsetWire.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_Pipe.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_PipeShell.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_Section.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_Section.lxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_SectionLaw.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_SectionPlacement.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_SequenceOfEdgeFaceAndOrder.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_SequenceOfFaceAndOrder.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_SequenceOfSection.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_ShapeLaw.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_ShapeLaw.lxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_Sweep.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_TransitionStyle.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_TrimEdgeTool.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_TrimShellCorner.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_TrimSurfaceTool.hxx" />
+    <ClInclude Include="..\..\..\src\BRepFill\BRepFill_TypeOfContact.hxx" />
+    <ClCompile Include="..\..\..\src\BRepProj\BRepProj_Projection.cxx" />
+    <ClInclude Include="..\..\..\src\BRepProj\BRepProj_Projection.hxx" />
+    <ClInclude Include="..\..\..\src\BRepProj\BRepProj_Projection.lxx" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="TKBool.rc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

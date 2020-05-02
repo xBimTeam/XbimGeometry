@@ -1,0 +1,537 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{DB9FE7AD-02F5-025F-07FF-B9938D862B13}</ProjectGuid>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\..\..\..\win32\vc14\bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\..\..\..\win32\vc14\obj\TKHLR\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\..\..\..\win32\vc14\bind\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\..\..\..\win32\vc14\objd\TKHLR\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\..\..\..\win64\vc14\bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\..\..\..\win64\vc14\obj\TKHLR\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\..\..\..\win64\vc14\bind\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\..\..\..\win64\vc14\objd\TKHLR\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\..\..\..\win32\vc14\bin\TKHLR.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>OCCT_STATIC_BUILD;HAVE_NO_DLL;NDEBUG;No_Exception;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <AssemblerListingLocation>.\..\..\..\win32\vc14\obj\TKHLR/</AssemblerListingLocation>
+      <ObjectFileName>.\..\..\..\win32\vc14\obj\TKHLR/</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\..\..\win32\vc14\obj\TKHLR/</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;No_Exception;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>TKBRep.lib;TKernel.lib;TKMath.lib;TKGeomBase.lib;TKG2d.lib;TKG3d.lib;TKGeomAlgo.lib;TKTopAlgo.lib</AdditionalDependencies>
+      <OutputFile>.\..\..\..\win32\vc14\bin\TKHLR.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\win32\vc14\lib;$(CSF_OPT_LIB32);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>no</GenerateDebugInformation>
+      <ProgramDatabaseFile>.\..\..\..\win32\vc14\bin\TKHLR.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <ImportLibrary>..\..\..\win32\vc14\lib\TKHLR.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\..\..\..\win32\vc14\bind\TKHLR.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>Disabled</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>OCCT_STATIC_BUILD;HAVE_NO_DLL;_DEBUG;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <AssemblerListingLocation>.\..\..\..\win32\vc14\objd\TKHLR/</AssemblerListingLocation>
+      <ObjectFileName>.\..\..\..\win32\vc14\objd\TKHLR/</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\..\..\win32\vc14\objd\TKHLR/</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>TKBRep.lib;TKernel.lib;TKMath.lib;TKGeomBase.lib;TKG2d.lib;TKG3d.lib;TKGeomAlgo.lib;TKTopAlgo.lib</AdditionalDependencies>
+      <OutputFile>.\..\..\..\win32\vc14\bind\TKHLR.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\win32\vc14\libd;$(CSF_OPT_LIB32D);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>..\..\..\win32\vc14\bind\TKHLR.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <ImportLibrary>..\..\..\win32\vc14\libd\TKHLR.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>x64</TargetEnvironment>
+      <TypeLibraryName>.\..\..\..\win64\vc14\bin\TKHLR.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>NDEBUG;No_Exception;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <AssemblerListingLocation>.\..\..\..\win64\vc14\obj\TKHLR/</AssemblerListingLocation>
+      <ObjectFileName>.\..\..\..\win64\vc14\obj\TKHLR/</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\..\..\win64\vc14\obj\TKHLR/</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;No_Exception;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>TKBRep.lib;TKernel.lib;TKMath.lib;TKGeomBase.lib;TKG2d.lib;TKG3d.lib;TKGeomAlgo.lib;TKTopAlgo.lib</AdditionalDependencies>
+      <OutputFile>.\..\..\..\win64\vc14\bin\TKHLR.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\win64\vc14\lib;$(CSF_OPT_LIB64);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>no</GenerateDebugInformation>
+      <ProgramDatabaseFile>.\..\..\..\win64\vc14\bin\TKHLR.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <ImportLibrary>..\..\..\win64\vc14\lib\TKHLR.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>x64</TargetEnvironment>
+      <TypeLibraryName>.\..\..\..\win64\vc14\bind\TKHLR.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>Disabled</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>_DEBUG;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <AssemblerListingLocation>.\..\..\..\win64\vc14\objd\TKHLR/</AssemblerListingLocation>
+      <ObjectFileName>.\..\..\..\win64\vc14\objd\TKHLR/</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\..\..\win64\vc14\objd\TKHLR/</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>TKBRep.lib;TKernel.lib;TKMath.lib;TKGeomBase.lib;TKG2d.lib;TKG3d.lib;TKGeomAlgo.lib;TKTopAlgo.lib</AdditionalDependencies>
+      <OutputFile>.\..\..\..\win64\vc14\bind\TKHLR.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\win64\vc14\libd;$(CSF_OPT_LIB64D);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>..\..\..\win64\vc14\bind\TKHLR.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <ImportLibrary>..\..\..\win64\vc14\libd\TKHLR.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_DSFiller.cxx" />
+    <ClCompile Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_Data.cxx" />
+    <ClCompile Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_FaceData.cxx" />
+    <ClCompile Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_FaceIsoLiner.cxx" />
+    <ClCompile Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_OutLiner.cxx" />
+    <ClCompile Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_VData.cxx" />
+    <ClInclude Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_DSFiller.hxx" />
+    <ClInclude Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_Data.hxx" />
+    <ClInclude Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_Data.lxx" />
+    <ClInclude Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_DataMapIteratorOfDataMapOfShapeFaceData.hxx" />
+    <ClInclude Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_DataMapIteratorOfMapOfShapeListOfVData.hxx" />
+    <ClInclude Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_DataMapOfShapeFaceData.hxx" />
+    <ClInclude Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_FaceData.hxx" />
+    <ClInclude Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_FaceData.lxx" />
+    <ClInclude Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_FaceIsoLiner.hxx" />
+    <ClInclude Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_ListIteratorOfListOfVData.hxx" />
+    <ClInclude Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_ListOfVData.hxx" />
+    <ClInclude Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_MapOfShapeListOfVData.hxx" />
+    <ClInclude Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_OutLiner.hxx" />
+    <ClInclude Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_OutLiner.lxx" />
+    <ClInclude Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_VData.hxx" />
+    <ClInclude Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_VData.lxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_Algo.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_AreaLimit.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_BCurveTool.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_BSurfaceTool.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_CInter_0.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_CLProps_0.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_Curve.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_CurveTool.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_Data.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_EdgeBuilder.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_EdgeData.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_EdgeFaceTool.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_EdgeIList.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_EdgeInterferenceTool.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_ExactIntersectionPointOfTheIntPCurvePCurveOfCInter_0.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_FaceData.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_FaceIterator.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_HLRToShape.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_Hider.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_IntConicCurveOfCInter_0.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_InterCSurf_0.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_InternalAlgo.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_Intersector.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_MyImpParToolOfTheIntersectorOfTheIntConicCurveOfCInter_0.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_PCLocFOfTheLocateExtPCOfTheProjPCurOfCInter_0.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_PolyAlgo.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_PolyHLRToShape.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_SLProps_0.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_ShapeBounds.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_ShapeToHLR.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_Surface.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_SurfaceTool.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_TheCSFunctionOfInterCSurf_0.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_TheCurveLocatorOfTheProjPCurOfCInter_0.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_TheDistBetweenPCurvesOfTheIntPCurvePCurveOfCInter_0.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_TheExactInterCSurf_0.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_TheIntConicCurveOfCInter_0.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_TheIntPCurvePCurveOfCInter_0.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_TheInterferenceOfInterCSurf_0.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_TheIntersectorOfTheIntConicCurveOfCInter_0.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_TheLocateExtPCOfTheProjPCurOfCInter_0.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_ThePolygon2dOfTheIntPCurvePCurveOfCInter_0.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_ThePolygonOfInterCSurf_0.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_ThePolygonToolOfInterCSurf_0.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_ThePolyhedronOfInterCSurf_0.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_ThePolyhedronToolOfInterCSurf_0.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_TheProjPCurOfCInter_0.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_TheQuadCurvExactInterCSurf_0.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_TheQuadCurvFuncOfTheQuadCurvExactInterCSurf_0.cxx" />
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_VertexList.cxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_Algo.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_AreaLimit.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_Array1OfEData.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_Array1OfFData.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_BCurveTool.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_BCurveTool.lxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_BSurfaceTool.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_BSurfaceTool.lxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_BiPnt2D.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_BiPoint.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_CInter.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_CLProps.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_CLPropsATool.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_CLPropsATool.lxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_Curve.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_Curve.lxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_CurveTool.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_CurveTool.lxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_Data.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_Data.lxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_EdgeBuilder.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_EdgeData.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_EdgeData.lxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_EdgeFaceTool.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_EdgeIList.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_EdgeInterferenceTool.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_EdgeInterferenceTool.lxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_ExactIntersectionPointOfTheIntPCurvePCurveOfCInter.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_FaceData.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_FaceData.lxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_FaceIterator.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_FaceIterator.lxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_HLRToShape.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_HLRToShape.lxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_Hider.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_IntConicCurveOfCInter.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_InterCSurf.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_InternalAlgo.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_Intersector.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_LineTool.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_LineTool.lxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_ListIteratorOfListOfBPnt2D.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_ListIteratorOfListOfBPoint.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_ListOfBPnt2D.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_ListOfBPoint.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_MyImpParToolOfTheIntersectorOfTheIntConicCurveOfCInter.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_PCLocFOfTheLocateExtPCOfTheProjPCurOfCInter.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_PolyAlgo.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_PolyAlgo.lxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_PolyHLRToShape.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_PolyHLRToShape.lxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_SLProps.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_SLPropsATool.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_SLPropsATool.lxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_SeqOfShapeBounds.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_ShapeBounds.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_ShapeBounds.lxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_ShapeToHLR.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_Surface.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_Surface.lxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_SurfaceTool.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_SurfaceTool.lxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_TheCSFunctionOfInterCSurf.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_TheCurveLocatorOfTheProjPCurOfCInter.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_TheDistBetweenPCurvesOfTheIntPCurvePCurveOfCInter.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_TheExactInterCSurf.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_TheIntConicCurveOfCInter.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_TheIntPCurvePCurveOfCInter.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_TheInterferenceOfInterCSurf.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_TheIntersectorOfTheIntConicCurveOfCInter.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_TheLocateExtPCOfTheProjPCurOfCInter.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_ThePolygon2dOfTheIntPCurvePCurveOfCInter.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_ThePolygonOfInterCSurf.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_ThePolygonToolOfInterCSurf.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_ThePolyhedronOfInterCSurf.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_ThePolyhedronToolOfInterCSurf.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_TheProjPCurOfCInter.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_TheQuadCurvExactInterCSurf.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_TheQuadCurvFuncOfTheQuadCurvExactInterCSurf.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_TypeOfResultingEdge.hxx" />
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_VertexList.hxx" />
+    <ClCompile Include="..\..\..\src\HLRAlgo\HLRAlgo.cxx" />
+    <ClCompile Include="..\..\..\src\HLRAlgo\HLRAlgo_BiPoint.cxx" />
+    <ClCompile Include="..\..\..\src\HLRAlgo\HLRAlgo_EdgeIterator.cxx" />
+    <ClCompile Include="..\..\..\src\HLRAlgo\HLRAlgo_EdgeStatus.cxx" />
+    <ClCompile Include="..\..\..\src\HLRAlgo\HLRAlgo_EdgesBlock.cxx" />
+    <ClCompile Include="..\..\..\src\HLRAlgo\HLRAlgo_Interference_0.cxx" />
+    <ClCompile Include="..\..\..\src\HLRAlgo\HLRAlgo_Intersection.cxx" />
+    <ClCompile Include="..\..\..\src\HLRAlgo\HLRAlgo_PolyAlgo.cxx" />
+    <ClCompile Include="..\..\..\src\HLRAlgo\HLRAlgo_PolyData.cxx" />
+    <ClCompile Include="..\..\..\src\HLRAlgo\HLRAlgo_PolyInternalData.cxx" />
+    <ClCompile Include="..\..\..\src\HLRAlgo\HLRAlgo_PolyInternalNode.cxx" />
+    <ClCompile Include="..\..\..\src\HLRAlgo\HLRAlgo_PolyShellData.cxx" />
+    <ClCompile Include="..\..\..\src\HLRAlgo\HLRAlgo_Projector.cxx" />
+    <ClCompile Include="..\..\..\src\HLRAlgo\HLRAlgo_WiresBlock.cxx" />
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo.hxx" />
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_Array1OfPHDat.hxx" />
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_Array1OfPINod.hxx" />
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_Array1OfPISeg.hxx" />
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_Array1OfTData.hxx" />
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_BiPoint.hxx" />
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_Coincidence.hxx" />
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_EdgeIterator.hxx" />
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_EdgeIterator.lxx" />
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_EdgeStatus.hxx" />
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_EdgesBlock.hxx" />
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_HArray1OfPHDat.hxx" />
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_HArray1OfPINod.hxx" />
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_HArray1OfPISeg.hxx" />
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_HArray1OfTData.hxx" />
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_Interference.hxx" />
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_InterferenceList.hxx" />
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_Intersection.hxx" />
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_Intersection.lxx" />
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_ListIteratorOfInterferenceList.hxx" />
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_ListIteratorOfListOfBPoint.hxx" />
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_ListOfBPoint.hxx" />
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_PolyAlgo.hxx" />
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_PolyAlgo.lxx" />
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_PolyData.hxx" />
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_PolyData.lxx" />
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_PolyHidingData.hxx" />
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_PolyInternalData.hxx" />
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_PolyInternalData.lxx" />
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_PolyInternalNode.hxx" />
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_PolyInternalSegment.hxx" />
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_PolyMask.hxx" />
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_PolyShellData.hxx" />
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_PolyShellData.lxx" />
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_Projector.hxx" />
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_Projector.lxx" />
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_TriangleData.hxx" />
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_WiresBlock.hxx" />
+    <ClCompile Include="..\..\..\src\HLRAppli\HLRAppli_ReflectLines.cxx" />
+    <ClInclude Include="..\..\..\src\HLRAppli\HLRAppli_ReflectLines.hxx" />
+    <ClCompile Include="..\..\..\src\Intrv\Intrv_Interval.cxx" />
+    <ClCompile Include="..\..\..\src\Intrv\Intrv_Intervals.cxx" />
+    <ClInclude Include="..\..\..\src\Intrv\Intrv_Interval.hxx" />
+    <ClInclude Include="..\..\..\src\Intrv\Intrv_Interval.lxx" />
+    <ClInclude Include="..\..\..\src\Intrv\Intrv_Intervals.hxx" />
+    <ClInclude Include="..\..\..\src\Intrv\Intrv_Intervals.lxx" />
+    <ClInclude Include="..\..\..\src\Intrv\Intrv_Position.hxx" />
+    <ClInclude Include="..\..\..\src\Intrv\Intrv_SequenceOfInterval.hxx" />
+    <ClCompile Include="..\..\..\src\TopBas\TopBas_TestInterference_0.cxx" />
+    <ClInclude Include="..\..\..\src\TopBas\TopBas_Interference.gxx" />
+    <ClInclude Include="..\..\..\src\TopBas\TopBas_Interference.lxx" />
+    <ClInclude Include="..\..\..\src\TopBas\TopBas_ListIteratorOfListOfTestInterference.hxx" />
+    <ClInclude Include="..\..\..\src\TopBas\TopBas_ListOfTestInterference.hxx" />
+    <ClInclude Include="..\..\..\src\TopBas\TopBas_TestInterference.hxx" />
+    <ClCompile Include="..\..\..\src\TopCnx\TopCnx_EdgeFaceTransition.cxx" />
+    <ClInclude Include="..\..\..\src\TopCnx\TopCnx_EdgeFaceTransition.hxx" />
+    <ClCompile Include="..\..\..\src\Contap\Contap_ArcFunction.cxx" />
+    <ClCompile Include="..\..\..\src\Contap\Contap_ContAna.cxx" />
+    <ClCompile Include="..\..\..\src\Contap\Contap_Contour.cxx" />
+    <ClCompile Include="..\..\..\src\Contap\Contap_HContTool.cxx" />
+    <ClCompile Include="..\..\..\src\Contap\Contap_HCurve2dTool.cxx" />
+    <ClCompile Include="..\..\..\src\Contap\Contap_Line.cxx" />
+    <ClCompile Include="..\..\..\src\Contap\Contap_Point.cxx" />
+    <ClCompile Include="..\..\..\src\Contap\Contap_SurfFunction.cxx" />
+    <ClCompile Include="..\..\..\src\Contap\Contap_SurfProps.cxx" />
+    <ClCompile Include="..\..\..\src\Contap\Contap_TheIWLineOfTheIWalking_0.cxx" />
+    <ClCompile Include="..\..\..\src\Contap\Contap_TheIWalking_0.cxx" />
+    <ClCompile Include="..\..\..\src\Contap\Contap_ThePathPointOfTheSearch_0.cxx" />
+    <ClCompile Include="..\..\..\src\Contap\Contap_TheSearchInside_0.cxx" />
+    <ClCompile Include="..\..\..\src\Contap\Contap_TheSearch_0.cxx" />
+    <ClCompile Include="..\..\..\src\Contap\Contap_TheSegmentOfTheSearch_0.cxx" />
+    <ClInclude Include="..\..\..\src\Contap\Contap_ArcFunction.hxx" />
+    <ClInclude Include="..\..\..\src\Contap\Contap_ArcFunction.lxx" />
+    <ClInclude Include="..\..\..\src\Contap\Contap_ContAna.hxx" />
+    <ClInclude Include="..\..\..\src\Contap\Contap_ContAna.lxx" />
+    <ClInclude Include="..\..\..\src\Contap\Contap_Contour.hxx" />
+    <ClInclude Include="..\..\..\src\Contap\Contap_Contour.lxx" />
+    <ClInclude Include="..\..\..\src\Contap\Contap_HContTool.hxx" />
+    <ClInclude Include="..\..\..\src\Contap\Contap_HCurve2dTool.hxx" />
+    <ClInclude Include="..\..\..\src\Contap\Contap_HCurve2dTool.lxx" />
+    <ClInclude Include="..\..\..\src\Contap\Contap_IType.hxx" />
+    <ClInclude Include="..\..\..\src\Contap\Contap_Line.hxx" />
+    <ClInclude Include="..\..\..\src\Contap\Contap_Line.lxx" />
+    <ClInclude Include="..\..\..\src\Contap\Contap_Point.hxx" />
+    <ClInclude Include="..\..\..\src\Contap\Contap_Point.lxx" />
+    <ClInclude Include="..\..\..\src\Contap\Contap_SequenceOfIWLineOfTheIWalking.hxx" />
+    <ClInclude Include="..\..\..\src\Contap\Contap_SequenceOfPathPointOfTheSearch.hxx" />
+    <ClInclude Include="..\..\..\src\Contap\Contap_SequenceOfSegmentOfTheSearch.hxx" />
+    <ClInclude Include="..\..\..\src\Contap\Contap_SurfFunction.hxx" />
+    <ClInclude Include="..\..\..\src\Contap\Contap_SurfFunction.lxx" />
+    <ClInclude Include="..\..\..\src\Contap\Contap_SurfProps.hxx" />
+    <ClInclude Include="..\..\..\src\Contap\Contap_TFunction.hxx" />
+    <ClInclude Include="..\..\..\src\Contap\Contap_TheHSequenceOfPoint.hxx" />
+    <ClInclude Include="..\..\..\src\Contap\Contap_TheIWLineOfTheIWalking.hxx" />
+    <ClInclude Include="..\..\..\src\Contap\Contap_TheIWalking.hxx" />
+    <ClInclude Include="..\..\..\src\Contap\Contap_ThePathPointOfTheSearch.hxx" />
+    <ClInclude Include="..\..\..\src\Contap\Contap_TheSearch.hxx" />
+    <ClInclude Include="..\..\..\src\Contap\Contap_TheSearchInside.hxx" />
+    <ClInclude Include="..\..\..\src\Contap\Contap_TheSegmentOfTheSearch.hxx" />
+    <ClInclude Include="..\..\..\src\Contap\Contap_TheSequenceOfLine.hxx" />
+    <ClInclude Include="..\..\..\src\Contap\Contap_TheSequenceOfPoint.hxx" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="TKHLR.rc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

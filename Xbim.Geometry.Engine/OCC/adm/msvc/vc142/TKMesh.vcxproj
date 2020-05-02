@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{204C0C86-0089-1439-18C2-F3FAD4D88118}</ProjectGuid>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\..\..\..\win32\vc14\bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\..\..\..\win32\vc14\obj\TKMesh\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\..\..\..\win32\vc14\bind\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\..\..\..\win32\vc14\objd\TKMesh\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\..\..\..\win64\vc14\bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\..\..\..\win64\vc14\obj\TKMesh\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\..\..\..\win64\vc14\bind\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\..\..\..\win64\vc14\objd\TKMesh\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\..\..\..\win32\vc14\bin\TKMesh.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>OCCT_STATIC_BUILD;HAVE_NO_DLL;NDEBUG;No_Exception;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <AssemblerListingLocation>.\..\..\..\win32\vc14\obj\TKMesh/</AssemblerListingLocation>
+      <ObjectFileName>.\..\..\..\win32\vc14\obj\TKMesh/</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\..\..\win32\vc14\obj\TKMesh/</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;No_Exception;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>TKernel.lib;TKMath.lib;TKBRep.lib;TKTopAlgo.lib;TKShHealing.lib;TKGeomBase.lib;TKG3d.lib;TKG2d.lib</AdditionalDependencies>
+      <OutputFile>.\..\..\..\win32\vc14\bin\TKMesh.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\win32\vc14\lib;$(CSF_OPT_LIB32);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>no</GenerateDebugInformation>
+      <ProgramDatabaseFile>.\..\..\..\win32\vc14\bin\TKMesh.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <ImportLibrary>..\..\..\win32\vc14\lib\TKMesh.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\..\..\..\win32\vc14\bind\TKMesh.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>Disabled</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>OCCT_STATIC_BUILD;HAVE_NO_DLL;_DEBUG;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <AssemblerListingLocation>.\..\..\..\win32\vc14\objd\TKMesh/</AssemblerListingLocation>
+      <ObjectFileName>.\..\..\..\win32\vc14\objd\TKMesh/</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\..\..\win32\vc14\objd\TKMesh/</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>TKernel.lib;TKMath.lib;TKBRep.lib;TKTopAlgo.lib;TKShHealing.lib;TKGeomBase.lib;TKG3d.lib;TKG2d.lib</AdditionalDependencies>
+      <OutputFile>.\..\..\..\win32\vc14\bind\TKMesh.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\win32\vc14\libd;$(CSF_OPT_LIB32D);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>..\..\..\win32\vc14\bind\TKMesh.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <ImportLibrary>..\..\..\win32\vc14\libd\TKMesh.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>x64</TargetEnvironment>
+      <TypeLibraryName>.\..\..\..\win64\vc14\bin\TKMesh.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>NDEBUG;No_Exception;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <AssemblerListingLocation>.\..\..\..\win64\vc14\obj\TKMesh/</AssemblerListingLocation>
+      <ObjectFileName>.\..\..\..\win64\vc14\obj\TKMesh/</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\..\..\win64\vc14\obj\TKMesh/</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;No_Exception;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>TKernel.lib;TKMath.lib;TKBRep.lib;TKTopAlgo.lib;TKShHealing.lib;TKGeomBase.lib;TKG3d.lib;TKG2d.lib</AdditionalDependencies>
+      <OutputFile>.\..\..\..\win64\vc14\bin\TKMesh.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\win64\vc14\lib;$(CSF_OPT_LIB64);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>no</GenerateDebugInformation>
+      <ProgramDatabaseFile>.\..\..\..\win64\vc14\bin\TKMesh.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <ImportLibrary>..\..\..\win64\vc14\lib\TKMesh.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>x64</TargetEnvironment>
+      <TypeLibraryName>.\..\..\..\win64\vc14\bind\TKMesh.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>Disabled</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>_DEBUG;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <AssemblerListingLocation>.\..\..\..\win64\vc14\objd\TKMesh/</AssemblerListingLocation>
+      <ObjectFileName>.\..\..\..\win64\vc14\objd\TKMesh/</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\..\..\win64\vc14\objd\TKMesh/</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>TKernel.lib;TKMath.lib;TKBRep.lib;TKTopAlgo.lib;TKShHealing.lib;TKGeomBase.lib;TKG3d.lib;TKG2d.lib</AdditionalDependencies>
+      <OutputFile>.\..\..\..\win64\vc14\bind\TKMesh.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\win64\vc14\libd;$(CSF_OPT_LIB64D);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>..\..\..\win64\vc14\bind\TKMesh.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <ImportLibrary>..\..\..\win64\vc14\libd\TKMesh.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\IMeshData\IMeshData_Curve.hxx" />
+    <ClInclude Include="..\..\..\src\IMeshData\IMeshData_Edge.hxx" />
+    <ClInclude Include="..\..\..\src\IMeshData\IMeshData_Face.hxx" />
+    <ClInclude Include="..\..\..\src\IMeshData\IMeshData_Model.hxx" />
+    <ClInclude Include="..\..\..\src\IMeshData\IMeshData_PCurve.hxx" />
+    <ClInclude Include="..\..\..\src\IMeshData\IMeshData_ParametersList.hxx" />
+    <ClInclude Include="..\..\..\src\IMeshData\IMeshData_ParametersListArrayAdaptor.hxx" />
+    <ClInclude Include="..\..\..\src\IMeshData\IMeshData_Shape.hxx" />
+    <ClInclude Include="..\..\..\src\IMeshData\IMeshData_Status.hxx" />
+    <ClInclude Include="..\..\..\src\IMeshData\IMeshData_StatusOwner.hxx" />
+    <ClInclude Include="..\..\..\src\IMeshData\IMeshData_TessellatedShape.hxx" />
+    <ClInclude Include="..\..\..\src\IMeshData\IMeshData_Types.hxx" />
+    <ClInclude Include="..\..\..\src\IMeshData\IMeshData_Wire.hxx" />
+    <ClCompile Include="..\..\..\src\IMeshTools\IMeshTools_MeshBuilder.cxx" />
+    <ClCompile Include="..\..\..\src\IMeshTools\IMeshTools_ShapeExplorer.cxx" />
+    <ClInclude Include="..\..\..\src\IMeshTools\IMeshTools_Context.hxx" />
+    <ClInclude Include="..\..\..\src\IMeshTools\IMeshTools_CurveTessellator.hxx" />
+    <ClInclude Include="..\..\..\src\IMeshTools\IMeshTools_MeshAlgo.hxx" />
+    <ClInclude Include="..\..\..\src\IMeshTools\IMeshTools_MeshAlgoFactory.hxx" />
+    <ClInclude Include="..\..\..\src\IMeshTools\IMeshTools_MeshBuilder.hxx" />
+    <ClInclude Include="..\..\..\src\IMeshTools\IMeshTools_ModelAlgo.hxx" />
+    <ClInclude Include="..\..\..\src\IMeshTools\IMeshTools_ModelBuilder.hxx" />
+    <ClInclude Include="..\..\..\src\IMeshTools\IMeshTools_Parameters.hxx" />
+    <ClInclude Include="..\..\..\src\IMeshTools\IMeshTools_ShapeExplorer.hxx" />
+    <ClInclude Include="..\..\..\src\IMeshTools\IMeshTools_ShapeVisitor.hxx" />
+    <ClCompile Include="..\..\..\src\BRepMeshData\BRepMeshData_Curve.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMeshData\BRepMeshData_Edge.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMeshData\BRepMeshData_Face.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMeshData\BRepMeshData_Model.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMeshData\BRepMeshData_PCurve.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMeshData\BRepMeshData_Wire.cxx" />
+    <ClInclude Include="..\..\..\src\BRepMeshData\BRepMeshData_Curve.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMeshData\BRepMeshData_Edge.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMeshData\BRepMeshData_Face.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMeshData\BRepMeshData_Model.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMeshData\BRepMeshData_PCurve.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMeshData\BRepMeshData_Wire.hxx" />
+    <ClCompile Include="..\..\..\src\BRepMesh\BRepMesh_BaseMeshAlgo.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMesh\BRepMesh_CircleTool.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMesh\BRepMesh_Classifier.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMesh\BRepMesh_ConeRangeSplitter.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMesh\BRepMesh_Context.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMesh\BRepMesh_CurveTessellator.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMesh\BRepMesh_CylinderRangeSplitter.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMesh\BRepMesh_DataStructureOfDelaun.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMesh\BRepMesh_DefaultRangeSplitter.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMesh\BRepMesh_Deflection.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMesh\BRepMesh_Delaun.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMesh\BRepMesh_DelaunayBaseMeshAlgo.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMesh\BRepMesh_DiscretFactory.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMesh\BRepMesh_DiscretRoot.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMesh\BRepMesh_EdgeDiscret.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMesh\BRepMesh_EdgeTessellationExtractor.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMesh\BRepMesh_FaceChecker.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMesh\BRepMesh_FaceDiscret.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMesh\BRepMesh_GeomTool.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMesh\BRepMesh_IncrementalMesh.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMesh\BRepMesh_MeshAlgoFactory.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMesh\BRepMesh_MeshTool.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMesh\BRepMesh_ModelBuilder.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMesh\BRepMesh_ModelHealer.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMesh\BRepMesh_ModelPostProcessor.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMesh\BRepMesh_ModelPreProcessor.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMesh\BRepMesh_NURBSRangeSplitter.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMesh\BRepMesh_SelectorOfDataStructureOfDelaun.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMesh\BRepMesh_ShapeTool.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMesh\BRepMesh_ShapeVisitor.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMesh\BRepMesh_SphereRangeSplitter.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMesh\BRepMesh_TorusRangeSplitter.cxx" />
+    <ClCompile Include="..\..\..\src\BRepMesh\BRepMesh_VertexTool.cxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_BaseMeshAlgo.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_BoundaryParamsRangeSplitter.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_Circle.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_CircleInspector.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_CircleTool.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_Classifier.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_ConeRangeSplitter.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_ConstrainedBaseMeshAlgo.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_Context.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_CurveTessellator.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_CustomBaseMeshAlgo.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_CustomDelaunayBaseMeshAlgo.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_CylinderRangeSplitter.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_DataStructureOfDelaun.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_DefaultRangeSplitter.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_Deflection.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_DegreeOfFreedom.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_Delaun.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_DelaunayBaseMeshAlgo.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_DelaunayDeflectionControlMeshAlgo.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_DelaunayNodeInsertionMeshAlgo.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_DiscretFactory.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_DiscretRoot.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_Edge.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_EdgeDiscret.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_EdgeParameterProvider.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_EdgeTessellationExtractor.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_FaceChecker.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_FaceDiscret.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_FactoryError.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_FastDiscret.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_GeomTool.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_IncrementalMesh.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_MeshAlgoFactory.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_MeshTool.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_ModelBuilder.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_ModelHealer.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_ModelPostProcessor.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_ModelPreProcessor.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_NURBSRangeSplitter.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_NodeInsertionMeshAlgo.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_OrientedEdge.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_PairOfIndex.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_PluginEntryType.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_PluginMacro.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_SelectorOfDataStructureOfDelaun.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_ShapeTool.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_ShapeVisitor.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_SphereRangeSplitter.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_TorusRangeSplitter.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_Triangle.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_UVParamRangeSplitter.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_Vertex.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_VertexInspector.hxx" />
+    <ClInclude Include="..\..\..\src\BRepMesh\BRepMesh_VertexTool.hxx" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="TKMesh.rc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

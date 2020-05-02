@@ -1,0 +1,2 @@
+C:\Users\Steve\Source\Repos\xBimTeam\XbimGeometry\Xbim.Geometry.Engine\OCC\win32\vc14\bind\TKG2d.pdb
+C:\Users\Steve\Source\Repos\xBimTeam\XbimGeometry\Xbim.Geometry.Engine\OCC\win32\vc14\objd\TKG2d\TKG2d.pdb

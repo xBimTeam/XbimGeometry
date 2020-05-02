@@ -1,4 +1,5 @@
 #include "LoggingService.h"
+
 static WriteLog LoggerFunc;
 namespace Xbim
 {
@@ -11,6 +12,7 @@ namespace Xbim
 				{
 					LoggerFunc = lFunc;
 					LoggerFunc(2, -1, "", "Native Logging Initialised");
+					
 				};
 
 				void LoggingService::LogCritical(int label, const char* ifcType, const char* logMsg) { LoggerFunc(5, label, ifcType, logMsg); };

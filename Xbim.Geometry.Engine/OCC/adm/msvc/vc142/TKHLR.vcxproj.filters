@@ -1,0 +1,876 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source files">
+      <UniqueIdentifier>{FB17B3FD-022B-110A-02A8-5CB4A858ABD6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files">
+      <UniqueIdentifier>{7991A834-05FC-067D-0612-9589C086D05A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\HLRTopoBRep">
+      <UniqueIdentifier>{D8E3C165-087B-0717-1644-1C25A9ECAA84}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\HLRBRep">
+      <UniqueIdentifier>{AEC53321-00E4-11E5-1002-5DEC7B509DB0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\HLRAlgo">
+      <UniqueIdentifier>{A097B824-118F-1755-1047-9DBCC9D54A98}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\HLRAppli">
+      <UniqueIdentifier>{145E4E73-0D26-00A3-0031-296A34FBB780}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\Intrv">
+      <UniqueIdentifier>{CC5AF5A6-14D6-142B-0B6C-55701A32E21C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\TopBas">
+      <UniqueIdentifier>{9ADC7B20-10FB-043E-0D9C-5E53B7CA21ED}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\TopCnx">
+      <UniqueIdentifier>{798A8207-145C-1695-0C4E-EECBAC7DA1C9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\Contap">
+      <UniqueIdentifier>{08C7B086-0820-0810-0D67-12877D7D5676}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\HLRTopoBRep">
+      <UniqueIdentifier>{B763E53F-166E-05F1-05CA-442C08A6DD90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\HLRBRep">
+      <UniqueIdentifier>{1C48759D-0672-01C5-011A-B32F27DCA9CC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\HLRAlgo">
+      <UniqueIdentifier>{0FCB813F-0CD7-0DB1-0550-22D8E5CDCC00}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\HLRAppli">
+      <UniqueIdentifier>{0C3850E4-002F-146E-0170-002F4A20D89D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\Intrv">
+      <UniqueIdentifier>{6D5EC656-06D2-0C02-177E-B978B9A4BDA5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\TopBas">
+      <UniqueIdentifier>{9EACE486-0B03-0035-12A2-6E819EFFB816}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\TopCnx">
+      <UniqueIdentifier>{8ED97CA6-10F1-0CB9-0DE2-5333DA715562}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\Contap">
+      <UniqueIdentifier>{9CB1E136-0383-13B9-0AA0-E7F9068E2A1A}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_DSFiller.cxx">
+      <Filter>Source files\HLRTopoBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_Data.cxx">
+      <Filter>Source files\HLRTopoBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_FaceData.cxx">
+      <Filter>Source files\HLRTopoBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_FaceIsoLiner.cxx">
+      <Filter>Source files\HLRTopoBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_OutLiner.cxx">
+      <Filter>Source files\HLRTopoBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_VData.cxx">
+      <Filter>Source files\HLRTopoBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_Algo.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_AreaLimit.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_BCurveTool.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_BSurfaceTool.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_CInter_0.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_CLProps_0.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_Curve.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_CurveTool.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_Data.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_EdgeBuilder.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_EdgeData.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_EdgeFaceTool.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_EdgeIList.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_EdgeInterferenceTool.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_ExactIntersectionPointOfTheIntPCurvePCurveOfCInter_0.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_FaceData.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_FaceIterator.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_HLRToShape.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_Hider.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_IntConicCurveOfCInter_0.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_InterCSurf_0.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_InternalAlgo.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_Intersector.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_MyImpParToolOfTheIntersectorOfTheIntConicCurveOfCInter_0.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_PCLocFOfTheLocateExtPCOfTheProjPCurOfCInter_0.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_PolyAlgo.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_PolyHLRToShape.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_SLProps_0.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_ShapeBounds.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_ShapeToHLR.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_Surface.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_SurfaceTool.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_TheCSFunctionOfInterCSurf_0.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_TheCurveLocatorOfTheProjPCurOfCInter_0.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_TheDistBetweenPCurvesOfTheIntPCurvePCurveOfCInter_0.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_TheExactInterCSurf_0.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_TheIntConicCurveOfCInter_0.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_TheIntPCurvePCurveOfCInter_0.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_TheInterferenceOfInterCSurf_0.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_TheIntersectorOfTheIntConicCurveOfCInter_0.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_TheLocateExtPCOfTheProjPCurOfCInter_0.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_ThePolygon2dOfTheIntPCurvePCurveOfCInter_0.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_ThePolygonOfInterCSurf_0.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_ThePolygonToolOfInterCSurf_0.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_ThePolyhedronOfInterCSurf_0.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_ThePolyhedronToolOfInterCSurf_0.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_TheProjPCurOfCInter_0.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_TheQuadCurvExactInterCSurf_0.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_TheQuadCurvFuncOfTheQuadCurvExactInterCSurf_0.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRBRep\HLRBRep_VertexList.cxx">
+      <Filter>Source files\HLRBRep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRAlgo\HLRAlgo.cxx">
+      <Filter>Source files\HLRAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRAlgo\HLRAlgo_BiPoint.cxx">
+      <Filter>Source files\HLRAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRAlgo\HLRAlgo_EdgeIterator.cxx">
+      <Filter>Source files\HLRAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRAlgo\HLRAlgo_EdgeStatus.cxx">
+      <Filter>Source files\HLRAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRAlgo\HLRAlgo_EdgesBlock.cxx">
+      <Filter>Source files\HLRAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRAlgo\HLRAlgo_Interference_0.cxx">
+      <Filter>Source files\HLRAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRAlgo\HLRAlgo_Intersection.cxx">
+      <Filter>Source files\HLRAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRAlgo\HLRAlgo_PolyAlgo.cxx">
+      <Filter>Source files\HLRAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRAlgo\HLRAlgo_PolyData.cxx">
+      <Filter>Source files\HLRAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRAlgo\HLRAlgo_PolyInternalData.cxx">
+      <Filter>Source files\HLRAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRAlgo\HLRAlgo_PolyInternalNode.cxx">
+      <Filter>Source files\HLRAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRAlgo\HLRAlgo_PolyShellData.cxx">
+      <Filter>Source files\HLRAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRAlgo\HLRAlgo_Projector.cxx">
+      <Filter>Source files\HLRAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRAlgo\HLRAlgo_WiresBlock.cxx">
+      <Filter>Source files\HLRAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\HLRAppli\HLRAppli_ReflectLines.cxx">
+      <Filter>Source files\HLRAppli</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Intrv\Intrv_Interval.cxx">
+      <Filter>Source files\Intrv</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Intrv\Intrv_Intervals.cxx">
+      <Filter>Source files\Intrv</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\TopBas\TopBas_TestInterference_0.cxx">
+      <Filter>Source files\TopBas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\TopCnx\TopCnx_EdgeFaceTransition.cxx">
+      <Filter>Source files\TopCnx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Contap\Contap_ArcFunction.cxx">
+      <Filter>Source files\Contap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Contap\Contap_ContAna.cxx">
+      <Filter>Source files\Contap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Contap\Contap_Contour.cxx">
+      <Filter>Source files\Contap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Contap\Contap_HContTool.cxx">
+      <Filter>Source files\Contap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Contap\Contap_HCurve2dTool.cxx">
+      <Filter>Source files\Contap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Contap\Contap_Line.cxx">
+      <Filter>Source files\Contap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Contap\Contap_Point.cxx">
+      <Filter>Source files\Contap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Contap\Contap_SurfFunction.cxx">
+      <Filter>Source files\Contap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Contap\Contap_SurfProps.cxx">
+      <Filter>Source files\Contap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Contap\Contap_TheIWLineOfTheIWalking_0.cxx">
+      <Filter>Source files\Contap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Contap\Contap_TheIWalking_0.cxx">
+      <Filter>Source files\Contap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Contap\Contap_ThePathPointOfTheSearch_0.cxx">
+      <Filter>Source files\Contap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Contap\Contap_TheSearchInside_0.cxx">
+      <Filter>Source files\Contap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Contap\Contap_TheSearch_0.cxx">
+      <Filter>Source files\Contap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Contap\Contap_TheSegmentOfTheSearch_0.cxx">
+      <Filter>Source files\Contap</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_DSFiller.hxx">
+      <Filter>Header files\HLRTopoBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_Data.hxx">
+      <Filter>Header files\HLRTopoBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_Data.lxx">
+      <Filter>Header files\HLRTopoBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_DataMapIteratorOfDataMapOfShapeFaceData.hxx">
+      <Filter>Header files\HLRTopoBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_DataMapIteratorOfMapOfShapeListOfVData.hxx">
+      <Filter>Header files\HLRTopoBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_DataMapOfShapeFaceData.hxx">
+      <Filter>Header files\HLRTopoBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_FaceData.hxx">
+      <Filter>Header files\HLRTopoBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_FaceData.lxx">
+      <Filter>Header files\HLRTopoBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_FaceIsoLiner.hxx">
+      <Filter>Header files\HLRTopoBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_ListIteratorOfListOfVData.hxx">
+      <Filter>Header files\HLRTopoBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_ListOfVData.hxx">
+      <Filter>Header files\HLRTopoBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_MapOfShapeListOfVData.hxx">
+      <Filter>Header files\HLRTopoBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_OutLiner.hxx">
+      <Filter>Header files\HLRTopoBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_OutLiner.lxx">
+      <Filter>Header files\HLRTopoBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_VData.hxx">
+      <Filter>Header files\HLRTopoBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRTopoBRep\HLRTopoBRep_VData.lxx">
+      <Filter>Header files\HLRTopoBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_Algo.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_AreaLimit.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_Array1OfEData.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_Array1OfFData.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_BCurveTool.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_BCurveTool.lxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_BSurfaceTool.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_BSurfaceTool.lxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_BiPnt2D.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_BiPoint.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_CInter.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_CLProps.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_CLPropsATool.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_CLPropsATool.lxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_Curve.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_Curve.lxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_CurveTool.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_CurveTool.lxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_Data.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_Data.lxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_EdgeBuilder.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_EdgeData.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_EdgeData.lxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_EdgeFaceTool.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_EdgeIList.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_EdgeInterferenceTool.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_EdgeInterferenceTool.lxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_ExactIntersectionPointOfTheIntPCurvePCurveOfCInter.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_FaceData.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_FaceData.lxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_FaceIterator.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_FaceIterator.lxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_HLRToShape.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_HLRToShape.lxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_Hider.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_IntConicCurveOfCInter.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_InterCSurf.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_InternalAlgo.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_Intersector.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_LineTool.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_LineTool.lxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_ListIteratorOfListOfBPnt2D.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_ListIteratorOfListOfBPoint.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_ListOfBPnt2D.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_ListOfBPoint.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_MyImpParToolOfTheIntersectorOfTheIntConicCurveOfCInter.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_PCLocFOfTheLocateExtPCOfTheProjPCurOfCInter.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_PolyAlgo.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_PolyAlgo.lxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_PolyHLRToShape.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_PolyHLRToShape.lxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_SLProps.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_SLPropsATool.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_SLPropsATool.lxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_SeqOfShapeBounds.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_ShapeBounds.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_ShapeBounds.lxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_ShapeToHLR.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_Surface.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_Surface.lxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_SurfaceTool.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_SurfaceTool.lxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_TheCSFunctionOfInterCSurf.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_TheCurveLocatorOfTheProjPCurOfCInter.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_TheDistBetweenPCurvesOfTheIntPCurvePCurveOfCInter.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_TheExactInterCSurf.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_TheIntConicCurveOfCInter.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_TheIntPCurvePCurveOfCInter.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_TheInterferenceOfInterCSurf.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_TheIntersectorOfTheIntConicCurveOfCInter.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_TheLocateExtPCOfTheProjPCurOfCInter.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_ThePolygon2dOfTheIntPCurvePCurveOfCInter.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_ThePolygonOfInterCSurf.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_ThePolygonToolOfInterCSurf.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_ThePolyhedronOfInterCSurf.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_ThePolyhedronToolOfInterCSurf.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_TheProjPCurOfCInter.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_TheQuadCurvExactInterCSurf.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_TheQuadCurvFuncOfTheQuadCurvExactInterCSurf.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_TypeOfResultingEdge.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRBRep\HLRBRep_VertexList.hxx">
+      <Filter>Header files\HLRBRep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo.hxx">
+      <Filter>Header files\HLRAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_Array1OfPHDat.hxx">
+      <Filter>Header files\HLRAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_Array1OfPINod.hxx">
+      <Filter>Header files\HLRAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_Array1OfPISeg.hxx">
+      <Filter>Header files\HLRAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_Array1OfTData.hxx">
+      <Filter>Header files\HLRAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_BiPoint.hxx">
+      <Filter>Header files\HLRAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_Coincidence.hxx">
+      <Filter>Header files\HLRAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_EdgeIterator.hxx">
+      <Filter>Header files\HLRAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_EdgeIterator.lxx">
+      <Filter>Header files\HLRAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_EdgeStatus.hxx">
+      <Filter>Header files\HLRAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_EdgesBlock.hxx">
+      <Filter>Header files\HLRAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_HArray1OfPHDat.hxx">
+      <Filter>Header files\HLRAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_HArray1OfPINod.hxx">
+      <Filter>Header files\HLRAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_HArray1OfPISeg.hxx">
+      <Filter>Header files\HLRAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_HArray1OfTData.hxx">
+      <Filter>Header files\HLRAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_Interference.hxx">
+      <Filter>Header files\HLRAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_InterferenceList.hxx">
+      <Filter>Header files\HLRAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_Intersection.hxx">
+      <Filter>Header files\HLRAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_Intersection.lxx">
+      <Filter>Header files\HLRAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_ListIteratorOfInterferenceList.hxx">
+      <Filter>Header files\HLRAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_ListIteratorOfListOfBPoint.hxx">
+      <Filter>Header files\HLRAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_ListOfBPoint.hxx">
+      <Filter>Header files\HLRAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_PolyAlgo.hxx">
+      <Filter>Header files\HLRAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_PolyAlgo.lxx">
+      <Filter>Header files\HLRAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_PolyData.hxx">
+      <Filter>Header files\HLRAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_PolyData.lxx">
+      <Filter>Header files\HLRAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_PolyHidingData.hxx">
+      <Filter>Header files\HLRAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_PolyInternalData.hxx">
+      <Filter>Header files\HLRAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_PolyInternalData.lxx">
+      <Filter>Header files\HLRAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_PolyInternalNode.hxx">
+      <Filter>Header files\HLRAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_PolyInternalSegment.hxx">
+      <Filter>Header files\HLRAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_PolyMask.hxx">
+      <Filter>Header files\HLRAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_PolyShellData.hxx">
+      <Filter>Header files\HLRAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_PolyShellData.lxx">
+      <Filter>Header files\HLRAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_Projector.hxx">
+      <Filter>Header files\HLRAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_Projector.lxx">
+      <Filter>Header files\HLRAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_TriangleData.hxx">
+      <Filter>Header files\HLRAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAlgo\HLRAlgo_WiresBlock.hxx">
+      <Filter>Header files\HLRAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\HLRAppli\HLRAppli_ReflectLines.hxx">
+      <Filter>Header files\HLRAppli</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Intrv\Intrv_Interval.hxx">
+      <Filter>Header files\Intrv</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Intrv\Intrv_Interval.lxx">
+      <Filter>Header files\Intrv</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Intrv\Intrv_Intervals.hxx">
+      <Filter>Header files\Intrv</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Intrv\Intrv_Intervals.lxx">
+      <Filter>Header files\Intrv</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Intrv\Intrv_Position.hxx">
+      <Filter>Header files\Intrv</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Intrv\Intrv_SequenceOfInterval.hxx">
+      <Filter>Header files\Intrv</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TopBas\TopBas_Interference.gxx">
+      <Filter>Header files\TopBas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TopBas\TopBas_Interference.lxx">
+      <Filter>Header files\TopBas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TopBas\TopBas_ListIteratorOfListOfTestInterference.hxx">
+      <Filter>Header files\TopBas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TopBas\TopBas_ListOfTestInterference.hxx">
+      <Filter>Header files\TopBas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TopBas\TopBas_TestInterference.hxx">
+      <Filter>Header files\TopBas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TopCnx\TopCnx_EdgeFaceTransition.hxx">
+      <Filter>Header files\TopCnx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Contap\Contap_ArcFunction.hxx">
+      <Filter>Header files\Contap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Contap\Contap_ArcFunction.lxx">
+      <Filter>Header files\Contap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Contap\Contap_ContAna.hxx">
+      <Filter>Header files\Contap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Contap\Contap_ContAna.lxx">
+      <Filter>Header files\Contap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Contap\Contap_Contour.hxx">
+      <Filter>Header files\Contap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Contap\Contap_Contour.lxx">
+      <Filter>Header files\Contap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Contap\Contap_HContTool.hxx">
+      <Filter>Header files\Contap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Contap\Contap_HCurve2dTool.hxx">
+      <Filter>Header files\Contap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Contap\Contap_HCurve2dTool.lxx">
+      <Filter>Header files\Contap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Contap\Contap_IType.hxx">
+      <Filter>Header files\Contap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Contap\Contap_Line.hxx">
+      <Filter>Header files\Contap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Contap\Contap_Line.lxx">
+      <Filter>Header files\Contap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Contap\Contap_Point.hxx">
+      <Filter>Header files\Contap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Contap\Contap_Point.lxx">
+      <Filter>Header files\Contap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Contap\Contap_SequenceOfIWLineOfTheIWalking.hxx">
+      <Filter>Header files\Contap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Contap\Contap_SequenceOfPathPointOfTheSearch.hxx">
+      <Filter>Header files\Contap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Contap\Contap_SequenceOfSegmentOfTheSearch.hxx">
+      <Filter>Header files\Contap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Contap\Contap_SurfFunction.hxx">
+      <Filter>Header files\Contap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Contap\Contap_SurfFunction.lxx">
+      <Filter>Header files\Contap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Contap\Contap_SurfProps.hxx">
+      <Filter>Header files\Contap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Contap\Contap_TFunction.hxx">
+      <Filter>Header files\Contap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Contap\Contap_TheHSequenceOfPoint.hxx">
+      <Filter>Header files\Contap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Contap\Contap_TheIWLineOfTheIWalking.hxx">
+      <Filter>Header files\Contap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Contap\Contap_TheIWalking.hxx">
+      <Filter>Header files\Contap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Contap\Contap_ThePathPointOfTheSearch.hxx">
+      <Filter>Header files\Contap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Contap\Contap_TheSearch.hxx">
+      <Filter>Header files\Contap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Contap\Contap_TheSearchInside.hxx">
+      <Filter>Header files\Contap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Contap\Contap_TheSegmentOfTheSearch.hxx">
+      <Filter>Header files\Contap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Contap\Contap_TheSequenceOfLine.hxx">
+      <Filter>Header files\Contap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Contap\Contap_TheSequenceOfPoint.hxx">
+      <Filter>Header files\Contap</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="TKHLR.rc" />
+  </ItemGroup>
+</Project>
