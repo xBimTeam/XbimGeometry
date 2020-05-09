@@ -5,8 +5,9 @@
    
     <Title>Xbim Geometry Engine</Title>
     <Description>Provides support for the  Ifc4 and Ifc2x3 Geometry conversion.</Description>
-    <Configurations>Debug;Release;x86Debug</Configurations>
+    <Configurations>Debug;Release</Configurations>
     <Platforms>AnyCPU;x86</Platforms>
+    <SignAssembly>false</SignAssembly>
     
   </PropertyGroup>
 
@@ -15,20 +16,19 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='x86Debug|AnyCPU'">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='x86Debug|x86'">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-  </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="Xbim.Ifc" Version="5.1.297" />
-    <PackageReference Include="Xbim.Tessellator" Version="5.1.297" />
+    <PackageReference Include="Xbim.Ifc" Version="5.1.299-develop" />
+    <PackageReference Include="Xbim.Tessellator" Version="5.1.299-develop" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\TestConsole\Xbim.Geometry.Packages.csproj" />
+    <ProjectReference Include="..\Xbim.Geometry.Abstractions\Xbim.Geometry.Abstractions.csproj" />
+    <ProjectReference Include="..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj" />
   </ItemGroup>
  
  

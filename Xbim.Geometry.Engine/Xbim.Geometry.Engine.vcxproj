@@ -23,6 +23,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
+    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{DEFB2CD3-B35F-450A-A829-D3FE50CFC19A}</ProjectGuid>
     <Keyword>NetCoreCProj</Keyword>
@@ -112,8 +113,9 @@
       <AdditionalIncludeDirectories>.\OCC\inc</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>C:\Users\Steve\Source\Repos\xBimTeam\XbimGeometry\Xbim.Geometry.Engine\OCC\win32\vc14\bind\TKernel.lib</AdditionalDependencies>
+      <AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;comdlg32.lib;wsock32.lib;Psapi.lib;TKBO.lib;TKBOOL.lib;TKBRep.lib;TKernel.lib;TKFillet.lib;TKG2d.lib;TKG3d.lib;TKGeomAlgo.lib;TKGeomBase.lib;TKMath.lib;TKMesh.lib;TKOffset.lib;TKPrim.lib;TKShHealing.lib;TKTopAlgo.lib</AdditionalDependencies>
       <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
+      <AdditionalLibraryDirectories>.\OCC\win32\vc14\bind\</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -153,15 +155,31 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Services\BRepService.h" />
-    <ClInclude Include="Services\Native\LoggingService.h" />
+    <ClInclude Include="BRep\Xbim2dPoint.h" />
+    <ClInclude Include="BRep\Xbim2dVector.h" />
+    <ClInclude Include="BRep\XbimDirection.h" />
+    <ClInclude Include="BRep\XbimVector.h" />
+    <ClInclude Include="Exceptions\XbimGeometryFactoryException.h" />
+    <ClInclude Include="Factories\GeomProcFactory.h" />
+    <ClInclude Include="XbimHandle.h" />
+    <ClInclude Include="BRep\Xbim2dLine.h" />
+    <ClInclude Include="Factories\LineFactory.h" />
+    <ClInclude Include="Services\LoggingService.h" />
+    <ClInclude Include="Services\OperationStatus.h" />
+    <ClInclude Include="BRep\XbimVertex.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="BRep\Properties\VertexProperties.h" />
+    <ClInclude Include="BRep\XbimLine.h" />
+    <ClInclude Include="BRep\XbimPoint.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
-    <ClCompile Include="Services\BRepService_Wires.cpp" />
-    <ClCompile Include="Services\Native\LoggingService.cpp" />
+    <ClCompile Include="BRep\Xbim2dLine.cpp" />
+    <ClCompile Include="Factories\GeomProcFactory.cpp" />
+    <ClCompile Include="Factories\LineFactory.cpp" />
+    <ClCompile Include="Services\LoggingService.cpp" />
+    <ClCompile Include="BRep\XbimVertex.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='x86Debug|Win32'">Create</PrecompiledHeader>
@@ -170,6 +188,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="BRep\Properties\VertexProperties.cpp" />
+    <ClCompile Include="BRep\XbimLine.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="app.rc" />
@@ -178,6 +198,18 @@
     <Image Include="app.ico" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Extensions.Logging.Abstractions">
+      <HintPath>..\Output\$(ManagedPlatform)\$(Configuration)\$(TargetFramework)\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Logging">
+      <HintPath>..\Output\$(ManagedPlatform)\$(Configuration)\$(TargetFramework)\Microsoft.Extensions.Logging.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Hosting.Abstractions">
+      <HintPath>..\Output\$(ManagedPlatform)\$(Configuration)\$(TargetFramework)\Microsoft.Extensions.Hosting.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Hosting">
+      <HintPath>..\Output\$(ManagedPlatform)\$(Configuration)\$(TargetFramework)\Microsoft.Extensions.Hosting.dll</HintPath>
+    </Reference>
     <Reference Include="Xbim.Ifc4">
       <HintPath>..\Output\$(ManagedPlatform)\$(Configuration)\$(TargetFramework)\Xbim.Ifc4.dll</HintPath>
     </Reference>
@@ -190,9 +222,12 @@
     <Reference Include="Xbim.Common">
       <HintPath>..\Output\$(ManagedPlatform)\$(Configuration)\$(TargetFramework)\Xbim.Common.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Extensions.Logging.Abstractions">
-      <HintPath>..\Output\$(ManagedPlatform)\$(Configuration)\$(TargetFramework)\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
+    <Reference Include="Xbim.Geometry.Abstractions">
+      <HintPath>..\Output\$(ManagedPlatform)\$(Configuration)\$(TargetFramework)\Xbim.Geometry.Abstractions.dll</HintPath>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

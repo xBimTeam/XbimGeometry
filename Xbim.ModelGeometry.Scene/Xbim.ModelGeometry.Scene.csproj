@@ -9,6 +9,7 @@
     <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
     <Configurations>Debug;Release;x86Debug</Configurations>
     <Platforms>AnyCPU;x86</Platforms>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -29,8 +30,8 @@
 
   <ItemGroup>
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.7.0" />
-    <PackageReference Include="Xbim.Ifc" Version="5.1.297" />
-    <PackageReference Include="Xbim.Tessellator" Version="5.1.297" />
+    <PackageReference Include="Xbim.Ifc" Version="5.1.299-develop" />
+    <PackageReference Include="Xbim.Tessellator" Version="5.1.299-develop" />
   </ItemGroup>
 
   <ItemGroup>

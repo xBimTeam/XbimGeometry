@@ -48,10 +48,10 @@ namespace XbimRegression
                     //set up a  log file for this file run                 
                     var logFile = Path.ChangeExtension(file.FullName, "log");
                     ProcessResult result;
-                    using (var loggerFactory = new LoggerFactory())
+                    using (var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole()))
                     {
                         XbimLogging.LoggerFactory = loggerFactory;
-                        loggerFactory.AddConsole(LogLevel.Error);
+                        
                         loggerFactory.AddProvider(new NReco.Logging.File.FileLoggerProvider(logFile, false)
                         {
                             FormatLogEntry = (msg) =>
