@@ -16,6 +16,8 @@ using Xbim.Ifc2x3.GeometryResource;
 using Xbim.Ifc4.Interfaces;
 using Xbim.Geometry.Factories;
 using Xbim.Geometry.Abstractions;
+using Moq;
+using Xbim.Ifc4.MeasureResource;
 
 namespace Xbim.Geometry.NetCore.Tests
 {
@@ -56,7 +58,7 @@ namespace Xbim.Geometry.NetCore.Tests
             model = null;
             await serviceHost.StopAsync();
         }
-       
+
         [TestMethod]
         public void Can_raise_exception_with_bad_direction()
         {
@@ -71,71 +73,70 @@ namespace Xbim.Geometry.NetCore.Tests
         [TestMethod]
         public void Can_convert_ifc_line_3d()
         {
-            using (var txn = model.BeginTransaction("Make Line"))
+            var ifcLine = IfcMoq.IfcLine3dMock();
+            using (var lineFactory = new CurveFactory(LoggingService))
             {
-                var creator = new Create(model);
-                var dir = creator.Direction((d) => { d.DirectionRatios.Add(0); d.DirectionRatios.Add(0); d.DirectionRatios.Add(1); });
-                var vec = creator.Vector((v) => { v.Orientation = dir; v.Magnitude = 1000; });
-                var pos = creator.CartesianPoint((c) => { c.Coordinates.Add(4); c.Coordinates.Add(5); c.Coordinates.Add(6); });
-                var ifcLine = creator.Line((l) => { l.Dir = vec; l.Pnt = pos; });
-                using (var lineFactory = new LineFactory(LoggingService))
-                {
-                    var line = lineFactory.Build(ifcLine); //initialise the factory with the line
-                    Assert.AreEqual(4, line.Origin.X);
-                    Assert.AreEqual(5, line.Origin.Y);
-                    Assert.AreEqual(6, line.Origin.Z);
-                    Assert.AreEqual(1000, line.Direction.Magnitude);
-                    Assert.AreEqual(0, line.Direction.X);
-                    Assert.AreEqual(0, line.Direction.Y);
-                    Assert.AreEqual(1, line.Direction.Z);
-                    var p1 = line.GetPoint(500);
-                    Assert.AreEqual((500 * 1000) + 6, p1.Z); //The parametric unit (magnitude) is 1000, so 500 * 1000 is the distance
-                    var p2 = line.GetFirstDerivative(500,  out IXVector normal);
-                    Assert.AreEqual(p1.X, p2.X);
-                    Assert.AreEqual(p1.Y, p2.Y);
-                    Assert.AreEqual(p1.Z, p2.Z);
-                    Assert.AreEqual(line.Direction.X, normal.X);
-                    Assert.AreEqual(line.Direction.Y, normal.Y);
-                    Assert.AreEqual(line.Direction.Z, normal.Z);
-                    Assert.IsTrue(line.Is3d);
-                }
+                var line = lineFactory.Build3d(ifcLine); //initialise the factory with the line
+                Assert.AreEqual(ifcLine.Pnt.X, line.Origin.X);
+                Assert.AreEqual(ifcLine.Pnt.Y, line.Origin.Y);
+                Assert.AreEqual(ifcLine.Pnt.Z, line.Origin.Z);
+                Assert.AreEqual<double>(ifcLine.Dir.Magnitude, line.Direction.Magnitude);
+                Assert.AreEqual(ifcLine.Dir.Orientation.X, line.Direction.X);
+                Assert.AreEqual(ifcLine.Dir.Orientation.Y, line.Direction.Y);
+                Assert.AreEqual(ifcLine.Dir.Orientation.Z, line.Direction.Z);
+                var p1 = line.GetPoint(500);
+                Assert.AreEqual((500 * ifcLine.Dir.Magnitude) + ifcLine.Pnt.Z, p1.Z); //The parametric unit (magnitude) is 10, so 500 * 10 is the distance
+                var p2 = line.GetFirstDerivative(500, out IXVector normal);
+                Assert.AreEqual(p1.X, p2.X);
+                Assert.AreEqual(p1.Y, p2.Y);
+                Assert.AreEqual(p1.Z, p2.Z);
+                Assert.AreEqual(line.Direction.X, normal.X);
+                Assert.AreEqual(line.Direction.Y, normal.Y);
+                Assert.AreEqual(line.Direction.Z, normal.Z);
+                Assert.IsTrue(line.Is3d);
             }
+
         }
         [TestMethod]
         public void Can_convert_ifc_line_2d()
         {
-            using (var txn = model.BeginTransaction("Make Line"))
+
+            var ifcLine = IfcMoq.IfcLine2dMock();
+            using (var lineFactory = new CurveFactory(LoggingService))
             {
-                var creator = new Create(model);
-                var dir = creator.Direction((d) => { d.DirectionRatios.Add(0); d.DirectionRatios.Add(1); });
-                var vec = creator.Vector((v) => { v.Orientation = dir; v.Magnitude = 1000; });
-                var pos = creator.CartesianPoint((c) => { c.Coordinates.Add(4); c.Coordinates.Add(5); });
-                var ifcLine = creator.Line((l) => { l.Dir = vec; l.Pnt = pos; });
-                using (var lineFactory = new LineFactory(LoggingService))
-                {
-                    var line = lineFactory.Build(ifcLine); //initialise the factory with the line
-                    Assert.AreEqual(4, line.Origin.X);
-                    Assert.AreEqual(5, line.Origin.Y);                   
-                    Assert.AreEqual(1000, line.Direction.Magnitude);
-                    Assert.AreEqual(0, line.Direction.X);
-                    Assert.AreEqual(1, line.Direction.Y);
+                var line = lineFactory.Build2d(ifcLine); //initialise the factory with the line
+                Assert.AreEqual(ifcLine.Pnt.X, line.Origin.X);
+                Assert.AreEqual(ifcLine.Pnt.Y, line.Origin.Y);
+                Assert.AreEqual<double>(ifcLine.Dir.Magnitude, line.Direction.Magnitude);
+                Assert.AreEqual(ifcLine.Dir.Orientation.X, line.Direction.X);
+                Assert.AreEqual(ifcLine.Dir.Orientation.Y, line.Direction.Y);
 
-                    var p1 = line.GetPoint(500);
-                    Assert.AreEqual((500 * 1000) + 5, p1.Y); //The parametric unit (magnitude) is 1000, so 500 * 1000 is the distance
-                    var p2 = line.GetFirstDerivative(500, out IXVector normal);
-                    Assert.AreEqual(p1.X, p2.X);
-                    Assert.AreEqual(p1.Y, p2.Y);
-          
-                    Assert.AreEqual(line.Direction.X, normal.X);
-                    Assert.AreEqual(line.Direction.Y, normal.Y);
+                var p1 = line.GetPoint(500);
+                Assert.AreEqual((500 * ifcLine.Dir.Magnitude) + ifcLine.Pnt.Y, p1.Y); //The parametric unit (magnitude) is 10, so 500 * 10 is the distance
+                var p2 = line.GetFirstDerivative(500, out IXVector normal);
+                Assert.AreEqual(p1.X, p2.X);
+                Assert.AreEqual(p1.Y, p2.Y);
 
-                    Assert.IsFalse(line.Is3d);
-                    Assert.ThrowsException<XbimGeometryFactoryException>(() => p1.Z);
-                    Assert.ThrowsException<XbimGeometryFactoryException>(() => normal.Z);
-                }
+                Assert.AreEqual(line.Direction.X, normal.X);
+                Assert.AreEqual(line.Direction.Y, normal.Y);
+
+                Assert.IsFalse(line.Is3d);
+                Assert.ThrowsException<XbimGeometryFactoryException>(() => p1.Z);
+                Assert.ThrowsException<XbimGeometryFactoryException>(() => normal.Z);
             }
-        }
 
+        }
+        [TestMethod]
+        public void Cannot_build_2D_line_from_3D_IfcLine()
+        {
+            var lineMoq = IfcMoq.IfcLine3dMock();
+            using (var lineFactory = new CurveFactory(LoggingService))
+            {
+                var line = lineFactory.Build3d(lineMoq); //should be fine
+                Assert.ThrowsException<XbimGeometryFactoryException>(() => lineFactory.Build2d(lineMoq));
+            }
+
+        }
         //[TestMethod]
         //public void Can_build_vertex_from_ifc_cartesian_point()
         //{

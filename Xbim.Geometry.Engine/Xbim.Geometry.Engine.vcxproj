@@ -158,12 +158,14 @@
     <ClInclude Include="BRep\Xbim2dPoint.h" />
     <ClInclude Include="BRep\Xbim2dVector.h" />
     <ClInclude Include="BRep\XbimDirection.h" />
+    <ClInclude Include="BRep\XbimTrimmedCurve.h" />
     <ClInclude Include="BRep\XbimVector.h" />
     <ClInclude Include="Exceptions\XbimGeometryFactoryException.h" />
     <ClInclude Include="Factories\GeomProcFactory.h" />
+    <ClInclude Include="Factories\Unmanaged\NCurveFactory.h" />
     <ClInclude Include="XbimHandle.h" />
     <ClInclude Include="BRep\Xbim2dLine.h" />
-    <ClInclude Include="Factories\LineFactory.h" />
+    <ClInclude Include="Factories\CurveFactory.h" />
     <ClInclude Include="Services\LoggingService.h" />
     <ClInclude Include="Services\OperationStatus.h" />
     <ClInclude Include="BRep\XbimVertex.h" />
@@ -177,7 +179,8 @@
     <ClCompile Include="AssemblyInfo.cpp" />
     <ClCompile Include="BRep\Xbim2dLine.cpp" />
     <ClCompile Include="Factories\GeomProcFactory.cpp" />
-    <ClCompile Include="Factories\LineFactory.cpp" />
+    <ClCompile Include="Factories\CurveFactory.cpp" />
+    <ClCompile Include="Factories\Unmanaged\NCurveFactory.cpp" />
     <ClCompile Include="Services\LoggingService.cpp" />
     <ClCompile Include="BRep\XbimVertex.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -190,6 +193,7 @@
     </ClCompile>
     <ClCompile Include="BRep\Properties\VertexProperties.cpp" />
     <ClCompile Include="BRep\XbimLine.cpp" />
+    <ClCompile Include="BRep\XbimTrimmedCurve.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="app.rc" />

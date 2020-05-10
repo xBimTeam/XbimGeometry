@@ -8,6 +8,7 @@ struct DefDeleter
 {
 	void operator()(T* p) const { delete p; }
 };
+#define OccHandle() (*(this->Ptr()))
 
 
 template <typename T, typename D = DefDeleter<T>>

@@ -45,6 +45,7 @@ namespace Xbim
 					}
 				}
 				//builds a 2d direction, if the Ifc Direction is 3d an exception is thrown
+				//throws a XbimGeometryFactoryException if the normal of the vector is 0
 				gp_Dir2d BuildDirection2d(IIfcDirection^ ifcDir)
 				{
 					try
@@ -58,6 +59,7 @@ namespace Xbim
 					}
 				}
 				//builds a 3d vector, if the Ifc Vector is 2d the Z component is 0
+				//throws a XbimGeometryFactoryException if the normal of the vector is 0
 				gp_Vec BuildVector(IIfcVector^ ifcVec)
 				{
 					try

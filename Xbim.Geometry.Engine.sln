@@ -5,6 +5,7 @@ VisualStudioVersion = 16.0.28922.388
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Xbim.Geometry.Engine", "Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj", "{DEFB2CD3-B35F-450A-A829-D3FE50CFC19A}"
 	ProjectSection(ProjectDependencies) = postProject
+		{CDD0F32D-7072-4B3C-94BF-1859D824140D} = {CDD0F32D-7072-4B3C-94BF-1859D824140D}
 		{037B5F45-5081-4EB6-A300-B61B3D5E1925} = {037B5F45-5081-4EB6-A300-B61B3D5E1925}
 	EndProjectSection
 EndProject
@@ -137,7 +138,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TKTopAlgo", "Xbim.Geometry.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xbim.Geometry.NetCore.Tests", "Xbim.Geometry.NetCore.Tests\Xbim.Geometry.NetCore.Tests.csproj", "{7371A4AF-639E-4243-926D-49723FE4FCC1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xbim.Geometry.Abstractions", "Xbim.Geometry.Abstractions\Xbim.Geometry.Abstractions.csproj", "{CDD0F32D-7072-4B3C-94BF-1859D824140D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xbim.Geometry.Abstractions", "Xbim.Geometry.Abstractions\Xbim.Geometry.Abstractions.csproj", "{CDD0F32D-7072-4B3C-94BF-1859D824140D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -381,8 +382,8 @@ Global
 		{CDD0F32D-7072-4B3C-94BF-1859D824140D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CDD0F32D-7072-4B3C-94BF-1859D824140D}.Debug|x64.ActiveCfg = Debug|Any CPU
 		{CDD0F32D-7072-4B3C-94BF-1859D824140D}.Debug|x64.Build.0 = Debug|Any CPU
-		{CDD0F32D-7072-4B3C-94BF-1859D824140D}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{CDD0F32D-7072-4B3C-94BF-1859D824140D}.Debug|x86.Build.0 = Debug|Any CPU
+		{CDD0F32D-7072-4B3C-94BF-1859D824140D}.Debug|x86.ActiveCfg = Debug|x86
+		{CDD0F32D-7072-4B3C-94BF-1859D824140D}.Debug|x86.Build.0 = Debug|x86
 		{CDD0F32D-7072-4B3C-94BF-1859D824140D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CDD0F32D-7072-4B3C-94BF-1859D824140D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{CDD0F32D-7072-4B3C-94BF-1859D824140D}.Release|x64.ActiveCfg = Release|Any CPU

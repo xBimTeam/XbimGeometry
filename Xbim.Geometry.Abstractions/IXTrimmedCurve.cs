@@ -1,22 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace Xbim.Geometry.Abstractions
 {
-    public interface IXLine : IXCurve
+    public interface IXTrimmedCurve : IXCurve
     {
-        bool Is3d { get; }
-        /// <summary>
-        /// The multiplier for a parametric unit, if the parametric length is 2 the actual length is is 2 * ParametricUnit
-        /// </summary>
-        double ParametricUnit { get; }
-        /// <summary>
-        /// Start of the line
-        /// </summary>
-        IXPoint Origin { get; }
-        /// <summary>
-        /// Direction of the line
-        /// </summary>
-        IXVector Direction { get; }
+        IXCurve BasisCurve { get; }
+        IXPoint StartPoint { get; } 
+        IXPoint EndPoint { get; }
         /// <summary>
         /// Returns the point at parameter uParam, nb considers the parametric unit of the line
         /// </summary>
@@ -30,6 +22,5 @@ namespace Xbim.Geometry.Abstractions
         /// <param name="normal">Normal at param uParam</param>
         /// <returns></returns>
         IXPoint GetFirstDerivative(double uParam, out IXVector normal);
-
     }
 }
