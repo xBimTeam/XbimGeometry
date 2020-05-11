@@ -155,16 +155,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="BRep\OccExtensions\Geom2d_LineWithMagnitude.h" />
+    <ClInclude Include="BRep\OccExtensions\Geom_LineWithMagnitude.h" />
     <ClInclude Include="BRep\Xbim2dPoint.h" />
     <ClInclude Include="BRep\Xbim2dVector.h" />
+    <ClInclude Include="BRep\XbimAxis1Placement.h" />
+    <ClInclude Include="BRep\XbimCircle.h" />
     <ClInclude Include="BRep\XbimDirection.h" />
     <ClInclude Include="BRep\XbimTrimmedCurve.h" />
+    <ClInclude Include="BRep\XbimTrimmedCurve2d.h" />
     <ClInclude Include="BRep\XbimVector.h" />
     <ClInclude Include="Exceptions\XbimGeometryFactoryException.h" />
     <ClInclude Include="Factories\GeomProcFactory.h" />
     <ClInclude Include="Factories\Unmanaged\NCurveFactory.h" />
+    <ClInclude Include="BRep\XbimAxis2Placement.h" />
     <ClInclude Include="XbimHandle.h" />
-    <ClInclude Include="BRep\Xbim2dLine.h" />
+    <ClInclude Include="BRep\XbimLine2d.h" />
     <ClInclude Include="Factories\CurveFactory.h" />
     <ClInclude Include="Services\LoggingService.h" />
     <ClInclude Include="Services\OperationStatus.h" />
@@ -177,7 +183,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
-    <ClCompile Include="BRep\Xbim2dLine.cpp" />
+    <ClCompile Include="BRep\XbimLine2d.cpp" />
+    <ClCompile Include="BRep\XbimTrimmedCurve2d.cpp" />
     <ClCompile Include="Factories\GeomProcFactory.cpp" />
     <ClCompile Include="Factories\CurveFactory.cpp" />
     <ClCompile Include="Factories\Unmanaged\NCurveFactory.cpp" />

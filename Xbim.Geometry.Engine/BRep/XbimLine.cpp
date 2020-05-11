@@ -17,20 +17,19 @@ namespace Xbim
 			IXVector^ XbimLine::Direction::get()
 			{
 				
-				return gcnew XbimVector(OccHandle()->Lin().Direction(), parametricUnit);
+				return gcnew XbimVector(OccHandle()->Lin().Direction(), OccHandle()->Magnitude());
 			}
 
 			IXPoint^ XbimLine::GetPoint(double u)
 			{
-				gp_Pnt pnt;
-				OccHandle()->D0(u * ParametricUnit, pnt);
+				gp_Pnt pnt = OccHandle()->GetPoint(u);
 				return gcnew XbimPoint(pnt.X(), pnt.Y(), pnt.Z());
 			}
 			IXPoint^ XbimLine::GetFirstDerivative(double u, IXVector^ %normal)
 			{
 				gp_Pnt pnt;
 				gp_Vec vec;
-				OccHandle()->D1(u * ParametricUnit, pnt, vec);
+				OccHandle()->FirstDerivative(u , pnt, vec);
 				normal = gcnew XbimVector(vec);
 				return gcnew XbimPoint(pnt.X(), pnt.Y(), pnt.Z());
 			}

@@ -69,14 +69,16 @@ namespace Xbim.Geometry.NetCore.Tests
             //    Assert.ThrowsException<XbimGeometryFactoryException>(() => lineFactory.Direction = new XbimVector3D(0, 0, 0));
             //}
         }
+        #region Line Tests
 
         [TestMethod]
         public void Can_convert_ifc_line_3d()
         {
             var ifcLine = IfcMoq.IfcLine3dMock();
-            using (var lineFactory = new CurveFactory(LoggingService))
+            using (var lineFactory = new CurveFactory(LoggingService, IfcMoq.IfcModelMock()))
             {
-                var line = lineFactory.Build3d(ifcLine); //initialise the factory with the line
+                var line = lineFactory.Build(ifcLine) as IXLine; //initialise the factory with the line
+                Assert.IsNotNull(line);
                 Assert.AreEqual(ifcLine.Pnt.X, line.Origin.X);
                 Assert.AreEqual(ifcLine.Pnt.Y, line.Origin.Y);
                 Assert.AreEqual(ifcLine.Pnt.Z, line.Origin.Z);
@@ -97,14 +99,16 @@ namespace Xbim.Geometry.NetCore.Tests
             }
 
         }
+
         [TestMethod]
         public void Can_convert_ifc_line_2d()
         {
 
             var ifcLine = IfcMoq.IfcLine2dMock();
-            using (var lineFactory = new CurveFactory(LoggingService))
+            using (var lineFactory = new CurveFactory(LoggingService, IfcMoq.IfcModelMock()))
             {
-                var line = lineFactory.Build2d(ifcLine); //initialise the factory with the line
+                var line = lineFactory.Build(ifcLine) as IXLine; //initialise the factory with the line
+                Assert.IsNotNull(line);
                 Assert.AreEqual(ifcLine.Pnt.X, line.Origin.X);
                 Assert.AreEqual(ifcLine.Pnt.Y, line.Origin.Y);
                 Assert.AreEqual<double>(ifcLine.Dir.Magnitude, line.Direction.Magnitude);
@@ -126,17 +130,53 @@ namespace Xbim.Geometry.NetCore.Tests
             }
 
         }
+
+        #endregion
+        #region Circles
+
         [TestMethod]
-        public void Cannot_build_2D_line_from_3D_IfcLine()
+        public void Can_convert_ifc_circle_3d()
         {
-            var lineMoq = IfcMoq.IfcLine3dMock();
-            using (var lineFactory = new CurveFactory(LoggingService))
+            var ifcCircle = IfcMoq.IfcCircle3dMock();
+            using (var factory = new CurveFactory(LoggingService, IfcMoq.IfcModelMock()))
             {
-                var line = lineFactory.Build3d(lineMoq); //should be fine
-                Assert.ThrowsException<XbimGeometryFactoryException>(() => lineFactory.Build2d(lineMoq));
+                var circle = factory.Build(ifcCircle);
+                Assert.AreEqual(XCurveType.IfcCircle, circle.CurveType);
+                Assert.IsTrue(circle.Is3d);
+            }
+        }
+
+        #endregion
+
+
+        #region Trimmed Curve Tests
+
+        [TestMethod]
+        public void Can_convert_ifc_trimmed_line_3d()
+        {
+            var ifcTrimmedCurve = IfcMoq.IfcTrimmedCurve3dMock();
+            using (var factory = new CurveFactory(LoggingService, IfcMoq.IfcModelMock()))
+            {
+                var tc = factory.Build(ifcTrimmedCurve) as IXTrimmedCurve; //initialise the factory with the curve
+                Assert.AreEqual(XCurveType.IfcTrimmedCurve, tc.CurveType);
+                Assert.IsTrue(tc.Is3d);
             }
 
         }
+        [TestMethod]
+        public void Can_convert_ifc_trimmed_line_2d()
+        {
+            var ifcTrimmedCurve = IfcMoq.IfcTrimmedCurve2dMock();
+            using (var factory = new CurveFactory(LoggingService, IfcMoq.IfcModelMock()))
+            {
+                var tc = factory.Build(ifcTrimmedCurve) as IXTrimmedCurve; //initialise the factory with the curve
+                Assert.AreEqual(XCurveType.IfcTrimmedCurve, tc.CurveType);
+                Assert.IsFalse(tc.Is3d);
+            }
+
+        }
+        #endregion
+
         //[TestMethod]
         //public void Can_build_vertex_from_ifc_cartesian_point()
         //{

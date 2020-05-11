@@ -1,13 +1,19 @@
 ﻿using Moq;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using Xbim.Common;
+using Xbim.Common.Metadata;
+using Xbim.Ifc4;
 
 namespace Xbim.Geometry.NetCore.Tests
 {
     public class MoqDefaultBehaviourProvider: LookupOrFallbackDefaultValueProvider
     {
+        private static ExpressMetaData metaData = ExpressMetaData.GetMetadata(new EntityFactoryIfc4().GetType().GetTypeInfo().Module);
         public MoqDefaultBehaviourProvider()
         {
             //base.Register(typeof(string), (type, mock) => "?");
@@ -19,6 +25,13 @@ namespace Xbim.Geometry.NetCore.Tests
                 return Activator.CreateInstance(constructed);
             }
             );
+            //base.Register(typeof(ExpressType), (type, mock) =>
+            // {
+            //     Type t = mock.GetType().GetGenericArguments().First();
+            //     var ets = metaData.ExpressTypesImplementing(t).FirstOrDefault();
+            //     return metaData.ExpressType(ets.);
+            // }
+            //);
         }
     }
    

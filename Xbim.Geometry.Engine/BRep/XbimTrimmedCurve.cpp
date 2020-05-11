@@ -15,7 +15,7 @@ namespace Xbim
 			{				
 				Handle(Geom_Curve) curve = OccHandle()->BasisCurve();
 				
-				Handle(Geom_Line) line = Handle(Geom_Line)::DownCast(curve);
+				Handle(Geom_LineWithMagnitude) line = Handle(Geom_LineWithMagnitude)::DownCast(curve);
 				if (!line.IsNull())
 					return gcnew XbimLine(line);
 				throw gcnew XbimGeometryFactoryException("Unsupported Trimmed Curve Basis");

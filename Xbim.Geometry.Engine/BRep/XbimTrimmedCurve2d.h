@@ -1,5 +1,5 @@
 #pragma once
-#include <Geom_TrimmedCurve.hxx>
+#include <Geom2d_TrimmedCurve.hxx>
 #include "../XbimHandle.h"
 using namespace Xbim::Common::Geometry;
 using namespace Xbim::Geometry::Abstractions;
@@ -9,13 +9,13 @@ namespace Xbim
 	namespace Geometry
 	{
 		namespace BRep
-		{			
-			public ref class XbimTrimmedCurve : XbimHandle<Handle(Geom_TrimmedCurve)>, IXTrimmedCurve
+		{
+			public ref class XbimTrimmedCurve2d : XbimHandle<Handle(Geom2d_TrimmedCurve)>, IXTrimmedCurve
 			{
 			public:
-				XbimTrimmedCurve(Handle(Geom_TrimmedCurve) hTrimmedCurve) : XbimHandle(new Handle(Geom_TrimmedCurve)(hTrimmedCurve)) {};
+				XbimTrimmedCurve2d(Handle(Geom2d_TrimmedCurve) hTrimmedCurve) : XbimHandle(new Handle(Geom2d_TrimmedCurve)(hTrimmedCurve)) {};
 				virtual property XCurveType CurveType {XCurveType get() { return XCurveType::IfcTrimmedCurve; }; };
-				virtual property bool Is3d {bool get() { return true; }};
+				virtual property bool Is3d {bool get() { return false; }};
 				virtual property IXCurve^ BasisCurve {IXCurve^ get(); };
 				virtual property IXPoint^ StartPoint {IXPoint^ get(); };
 				virtual property IXPoint^ EndPoint {IXPoint^ get(); };

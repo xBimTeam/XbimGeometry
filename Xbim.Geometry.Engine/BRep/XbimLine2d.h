@@ -1,5 +1,5 @@
 #pragma once
-#include <Geom2d_Line.hxx>
+#include "../BRep/OccExtensions/Geom2d_LineWithMagnitude.h"	
 #include "../XbimHandle.h"
 using namespace Xbim::Common::Geometry;
 using namespace Xbim::Geometry::Abstractions;
@@ -11,18 +11,16 @@ namespace Xbim
 		namespace BRep
 		{
 
-			public ref class Xbim2dLine : XbimHandle<Handle(Geom2d_Line)>, IXLine
+			public ref class XbimLine2d : XbimHandle<Handle(Geom2d_LineWithMagnitude)>, IXLine
 			{
-			private:
-				double parametricUnit;				
+					
 			public:
 				
-				Xbim2dLine(Handle(Geom2d_Line) hLine, double pUnit) : XbimHandle(new Handle(Geom2d_Line)(hLine)), parametricUnit(pUnit) {};
-				Xbim2dLine(Handle(Geom2d_Line) hLine) : XbimHandle(new Handle(Geom2d_Line)(hLine)), parametricUnit(1.0) {};
-				virtual property XCurveType CurveType {XCurveType get() { return XCurveType::Line2D; }; };
+				XbimLine2d(Handle(Geom2d_LineWithMagnitude) hLine) : XbimHandle(new Handle(Geom2d_LineWithMagnitude)(hLine)) {};
+				virtual property XCurveType CurveType {XCurveType get() { return XCurveType::IfcLine; }; };
 				virtual property IXPoint^ Origin {IXPoint^ get(); };
 				virtual property IXVector^ Direction {IXVector^ get(); };
-				virtual property double ParametricUnit {double get() { return parametricUnit; }; };
+				virtual property double ParametricUnit {double get() { return OccHandle()->Magnitude(); }; };
 				virtual property bool Is3d {bool get() { return false; }};
 				//Get a Point at the parameter length from the origin
 				virtual IXPoint^ GetPoint(double uParam);

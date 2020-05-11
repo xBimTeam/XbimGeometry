@@ -1,4 +1,4 @@
-#include "Xbim2dLine.h"
+#include "XbimLine2d.h"
 #include "../BRep//Xbim2dPoint.h"
 #include "../BRep//Xbim2dVector.h"
 namespace Xbim
@@ -8,28 +8,27 @@ namespace Xbim
 		namespace BRep
 		{
 
-			IXPoint^ Xbim2dLine::Origin::get()
+			IXPoint^ XbimLine2d::Origin::get()
 			{
 				gp_Pnt2d pnt = OccHandle()->Location();
 				return gcnew Xbim2dPoint(pnt);
 			}
 
-			IXVector^ Xbim2dLine::Direction::get()
+			IXVector^ XbimLine2d::Direction::get()
 			{
 				gp_Dir2d dir = OccHandle()->Direction();
-				return gcnew Xbim2dVector(dir, parametricUnit);
+				return gcnew Xbim2dVector(dir, OccHandle()->Magnitude());
 			}
-			IXPoint^ Xbim2dLine::GetPoint(double u)
+			IXPoint^ XbimLine2d::GetPoint(double u)
 			{
-				gp_Pnt2d pnt;
-				OccHandle()->D0(u * ParametricUnit, pnt);
+				gp_Pnt2d pnt = OccHandle()->GetPoint(u);
 				return gcnew Xbim2dPoint(pnt);
 			}
-			IXPoint^ Xbim2dLine::GetFirstDerivative(double u, IXVector^% normal)
+			IXPoint^ XbimLine2d::GetFirstDerivative(double u, IXVector^% normal)
 			{
 				gp_Pnt2d pnt;
 				gp_Vec2d vec;
-				OccHandle()->D1(u * ParametricUnit, pnt, vec);
+				OccHandle()->FirstDerivative(u , pnt, vec);
 				normal = gcnew Xbim2dVector(vec);
 				return gcnew Xbim2dPoint(pnt);
 			}
