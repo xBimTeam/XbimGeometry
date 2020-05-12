@@ -3,6 +3,11 @@
 #include "XbimVector.h"
 #include "XbimLine.h"
 #include <Geom_Line.hxx>
+#include "XbimCircle.h"
+#include <Geom_Circle.hxx>
+#include "XbimEllipse.h"
+#include <Geom_Ellipse.hxx>
+
 #include "../Exceptions/XbimGeometryFactoryException.h"
 using namespace Xbim::Geometry::Exceptions;
 namespace Xbim
@@ -15,9 +20,15 @@ namespace Xbim
 			{				
 				Handle(Geom_Curve) curve = OccHandle()->BasisCurve();
 				
-				Handle(Geom_LineWithMagnitude) line = Handle(Geom_LineWithMagnitude)::DownCast(curve);
+				Handle(Geom_Line) line = Handle(Geom_Line)::DownCast(curve);
 				if (!line.IsNull())
 					return gcnew XbimLine(line);
+				Handle(Geom_Circle) circle = Handle(Geom_Circle)::DownCast(curve);
+				if (!circle.IsNull())
+					return gcnew XbimCircle(circle);
+				Handle(Geom_Ellipse) ellipse = Handle(Geom_Ellipse)::DownCast(curve);
+				if (!ellipse.IsNull())
+					return gcnew XbimEllipse(ellipse);
 				throw gcnew XbimGeometryFactoryException("Unsupported Trimmed Curve Basis");
 			}
 

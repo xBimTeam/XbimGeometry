@@ -11,6 +11,9 @@
 #include <Geom2d_Line.hxx>
 #include <Geom_Circle.hxx>
 #include <Geom2d_Circle.hxx>
+#include <Geom_Ellipse.hxx>
+#include <Geom2d_Ellipse.hxx>
+
 #include <Geom_TrimmedCurve.hxx>
 #include <Geom2d_TrimmedCurve.hxx>
 #include <Precision.hxx>
@@ -66,6 +69,9 @@ namespace Xbim
 				Handle(Geom_Circle) BuildGeom3d(IIfcCircle^ ifcCircle);
 				Handle(Geom2d_Circle) BuildGeom2d(IIfcCircle^ ifcCircle);
 				
+				Handle(Geom_Ellipse) BuildGeom3d(IIfcEllipse^ ifcEllipse);
+				Handle(Geom2d_Ellipse) BuildGeom2d(IIfcEllipse^ ifcEllipse);
+
 				Handle(Geom_TrimmedCurve) BuildGeom3d(IIfcTrimmedCurve^ ifcTrimmedCurve);
 				Handle(Geom2d_TrimmedCurve) BuildGeom2d(IIfcTrimmedCurve^ ifcTrimmedCurve);
 			};

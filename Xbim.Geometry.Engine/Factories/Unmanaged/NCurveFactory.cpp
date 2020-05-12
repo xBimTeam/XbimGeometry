@@ -47,11 +47,37 @@ namespace Xbim
 					}
 				}
 
+				Handle(Geom_Ellipse) NCurveFactory::BuildEllipse3d(gp_Ax2 axis, double major, double minor)
+				{
+					try
+					{
+						return new Geom_Ellipse(axis, major, minor);
+					}
+					catch (const std::exception& e)
+					{
+						pLoggingService->LogError(e.what());
+						return Handle(Geom_Ellipse)(); //return null handle for checking
+					}
+				}
+
+				Handle(Geom2d_Ellipse) NCurveFactory::BuildEllipse2d(gp_Ax2d axis, double major, double minor)
+				{
+					try
+					{
+						return new Geom2d_Ellipse(axis, major, minor);
+					}
+					catch (const std::exception& e)
+					{
+						pLoggingService->LogError(e.what());
+						return Handle(Geom2d_Ellipse)(); //return null handle for checking
+					}
+				}
+
 				Handle(Geom2d_LineWithMagnitude) NCurveFactory::BuildLine2d(gp_Pnt2d pnt, gp_Dir2d dir, double magnitude)
 				{
 					try
 					{
-						return new Geom2d_LineWithMagnitude(pnt, dir, magnitude);						
+						return new Geom2d_LineWithMagnitude(pnt, dir, magnitude);
 					}
 					catch (const std::exception& e)
 					{

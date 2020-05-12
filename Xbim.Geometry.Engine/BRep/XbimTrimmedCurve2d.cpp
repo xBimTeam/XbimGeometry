@@ -1,8 +1,13 @@
 #include "XbimTrimmedCurve2d.h"
 #include "Xbim2dPoint.h"
 #include "Xbim2dVector.h"
-#include "XbimLine2d.h"
 #include <Geom2d_Line.hxx>
+#include "XbimLine2d.h"
+#include <Geom2d_Circle.hxx>
+#include "XbimCircle2d.h"
+#include <Geom2d_Ellipse.hxx>
+#include "XbimEllipse2d.h"
+
 #include "../Exceptions/XbimGeometryFactoryException.h"
 using namespace Xbim::Geometry::Exceptions;
 namespace Xbim
@@ -18,6 +23,12 @@ namespace Xbim
 				Handle(Geom2d_LineWithMagnitude) line = Handle(Geom2d_LineWithMagnitude)::DownCast(curve);
 				if (!line.IsNull())
 					return gcnew XbimLine2d(line);
+				Handle(Geom2d_Circle) circle = Handle(Geom2d_Circle)::DownCast(curve);
+				if (!circle.IsNull())
+					return gcnew XbimCircle2d(circle);
+				Handle(Geom2d_Ellipse) ellipse = Handle(Geom2d_Ellipse)::DownCast(curve);
+				if (!ellipse.IsNull())
+					return gcnew XbimEllipse2d(ellipse);
 				throw gcnew XbimGeometryFactoryException("Unsupported Trimmed Curve Basis");
 			}
 

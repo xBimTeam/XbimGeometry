@@ -22,7 +22,7 @@ using Xbim.Ifc4.MeasureResource;
 namespace Xbim.Geometry.NetCore.Tests
 {
     [TestClass]
-    public class LineFactoryTests
+    public class CurveFactoryTests
     {
         static IHost serviceHost;
         static IModel model;
@@ -132,6 +132,7 @@ namespace Xbim.Geometry.NetCore.Tests
         }
 
         #endregion
+
         #region Circles
 
         [TestMethod]
@@ -145,9 +146,43 @@ namespace Xbim.Geometry.NetCore.Tests
                 Assert.IsTrue(circle.Is3d);
             }
         }
-
+        [TestMethod]
+        public void Can_convert_ifc_circle_2d()
+        {
+            var ifcCircle = IfcMoq.IfcCircle2dMock();
+            using (var factory = new CurveFactory(LoggingService, IfcMoq.IfcModelMock()))
+            {
+                var circle = factory.Build(ifcCircle);
+                Assert.AreEqual(XCurveType.IfcCircle, circle.CurveType);
+                Assert.IsFalse(circle.Is3d);
+            }
+        }
         #endregion
+        #region Ellipse
 
+        [TestMethod]
+        public void Can_convert_ifc_ellipse_3d()
+        {
+            var ifcEllipse = IfcMoq.IfcEllipse3dMock();
+            using (var factory = new CurveFactory(LoggingService, IfcMoq.IfcModelMock()))
+            {
+                var ellipse = factory.Build(ifcEllipse);
+                Assert.AreEqual(XCurveType.IfcEllipse, ellipse.CurveType);
+                Assert.IsTrue(ellipse.Is3d);
+            }
+        }
+        [TestMethod]
+        public void Can_convert_ifc_ellipse_2d()
+        {
+            var ifcEllipse = IfcMoq.IfcEllipse2dMock();
+            using (var factory = new CurveFactory(LoggingService, IfcMoq.IfcModelMock()))
+            {
+                var ellipse = factory.Build(ifcEllipse);
+                Assert.AreEqual(XCurveType.IfcEllipse, ellipse.CurveType);
+                Assert.IsFalse(ellipse.Is3d);
+            }
+        }
+        #endregion
 
         #region Trimmed Curve Tests
 
@@ -163,6 +198,7 @@ namespace Xbim.Geometry.NetCore.Tests
             }
 
         }
+
         [TestMethod]
         public void Can_convert_ifc_trimmed_line_2d()
         {
@@ -175,40 +211,58 @@ namespace Xbim.Geometry.NetCore.Tests
             }
 
         }
+
+        [TestMethod]
+        public void Can_convert_ifc_trimmed_circle_3d()
+        {
+            var ifcTrimmedCurve = IfcMoq.IfcTrimmedCurve3dMock(IfcMoq.IfcCircle3dMock());
+            using (var factory = new CurveFactory(LoggingService, IfcMoq.IfcModelMock()))
+            {
+                var tc = factory.Build(ifcTrimmedCurve) as IXTrimmedCurve; //initialise the factory with the curve
+                Assert.AreEqual(XCurveType.IfcTrimmedCurve, tc.CurveType);
+                Assert.AreEqual(XCurveType.IfcCircle, tc.BasisCurve.CurveType);
+                Assert.IsTrue(tc.Is3d);
+            }
+        }
+        [TestMethod]
+        public void Can_convert_ifc_trimmed_circle_2d()
+        {
+            var ifcTrimmedCurve = IfcMoq.IfcTrimmedCurve2dMock(IfcMoq.IfcCircle2dMock());
+            using (var factory = new CurveFactory(LoggingService, IfcMoq.IfcModelMock()))
+            {
+                var tc = factory.Build(ifcTrimmedCurve) as IXTrimmedCurve; //initialise the factory with the curve
+                Assert.AreEqual(XCurveType.IfcTrimmedCurve, tc.CurveType);
+                Assert.AreEqual(XCurveType.IfcCircle, tc.BasisCurve.CurveType);
+                Assert.IsFalse(tc.Is3d);
+            }
+        }
+
+        [TestMethod]
+        public void Can_convert_ifc_trimmed_ellipse_3d()
+        {
+            var ifcTrimmedCurve = IfcMoq.IfcTrimmedCurve3dMock(IfcMoq.IfcEllipse3dMock());
+            using (var factory = new CurveFactory(LoggingService, IfcMoq.IfcModelMock()))
+            {
+                var tc = factory.Build(ifcTrimmedCurve) as IXTrimmedCurve; //initialise the factory with the curve
+                Assert.AreEqual(XCurveType.IfcTrimmedCurve, tc.CurveType);
+                Assert.AreEqual(XCurveType.IfcEllipse, tc.BasisCurve.CurveType);
+                Assert.IsTrue(tc.Is3d);
+            }
+        }
+        [TestMethod]
+        public void Can_convert_ifc_trimmed_ellipse_2d()
+        {
+            var ifcTrimmedCurve = IfcMoq.IfcTrimmedCurve2dMock(IfcMoq.IfcEllipse2dMock());
+            using (var factory = new CurveFactory(LoggingService, IfcMoq.IfcModelMock()))
+            {
+                var tc = factory.Build(ifcTrimmedCurve) as IXTrimmedCurve; //initialise the factory with the curve
+                Assert.AreEqual(XCurveType.IfcTrimmedCurve, tc.CurveType);
+                Assert.AreEqual(XCurveType.IfcEllipse, tc.BasisCurve.CurveType);
+                Assert.IsFalse(tc.Is3d);
+            }
+        }
         #endregion
 
-        //[TestMethod]
-        //public void Can_build_vertex_from_ifc_cartesian_point()
-        //{
 
-        //    var logger = testService.Services.GetService<ILogger<TestService>>();
-        //    using (var memoryModel = new MemoryModel(new EntityFactoryIfc4()))
-        //    {
-        //        using (var vertexFactory = new VertexFactory(memoryModel, logger))
-        //        {
-        //            using (var txn = memoryModel.BeginTransaction("Create point"))
-        //            {
-
-        //                var creator = new Create(memoryModel);
-        //                var ifcPoint = creator.CartesianPoint((p) =>
-        //                {
-        //                    p.Coordinates.Add(1);
-        //                    p.Coordinates.Add(2);
-        //                    p.Coordinates.Add(3);
-        //                });
-        //                using (var entityScope = logger.BeginScope("Id: #{ifc_id}={ifc_type}", ifcPoint.EntityLabel, ifcPoint.GetType().Name))
-        //                {
-        //                    var vertex = vertexFactory.Create(1, 2, 3);
-        //                    Assert.AreEqual(ifcPoint.X, vertex.GeomProps.X);
-        //                    Assert.AreEqual(ifcPoint.Y, vertex.GeomProps.Y);
-        //                    Assert.AreEqual(ifcPoint.Z, vertex.GeomProps.Z);
-        //                    Assert.AreEqual(memoryModel.ModelFactors.Precision, vertex.GeomProps.Tolerance, 1e-9);
-
-        //                }
-        //            }
-        //        }
-        //    }
-
-        //}
     }
 }

@@ -107,9 +107,21 @@ namespace Xbim.Geometry.NetCore.Tests
             axis3d.Location = loc ?? IfcCartesianPoint3dMock();
             return axis3d;
         }
-            #endregion
-            #region Line Mocks
-            public static IIfcLine IfcLine2dMock(IIfcCartesianPoint origin = null, IIfcVector direction = null)
+
+        public static IIfcAxis2Placement2D IfcIfcAxis2Placement2DMock(IIfcDirection refDir = null, IIfcCartesianPoint loc = null)
+        {
+            var axis2dMoq = new Mock<IIfcAxis2Placement2D>()
+            { DefaultValue = DefaultValue.Mock, DefaultValueProvider = new MoqDefaultBehaviourProvider() }
+            .SetupAllProperties();
+            var axis2d = axis2dMoq.Object;         
+            axis2d.RefDirection = refDir;
+            axis2d.Location = loc ?? IfcCartesianPoint2dMock();
+            return axis2d;
+        }
+
+        #endregion
+        #region Line Mocks
+        public static IIfcLine IfcLine2dMock(IIfcCartesianPoint origin = null, IIfcVector direction = null)
         {
             var lineMoq = new Mock<IIfcLine>()
             { DefaultValue = DefaultValue.Mock, DefaultValueProvider = new MoqDefaultBehaviourProvider() }
@@ -148,8 +160,49 @@ namespace Xbim.Geometry.NetCore.Tests
             circleMoq.SetupGet(v => v.ExpressType).Returns(metaData.ExpressType(typeof(IfcCircle)));
             return circle;
         }
-
+        public static IIfcCircle IfcCircle2dMock(double radius = 100)
+        {
+            var circleMoq = new Mock<IIfcCircle>()
+            { DefaultValue = DefaultValue.Mock, DefaultValueProvider = new MoqDefaultBehaviourProvider() }
+            .SetupAllProperties();
+            circleMoq.SetupGet(v => v.Dim).Returns(new IfcDimensionCount(2));
+            var circle = circleMoq.Object;
+            circle.Radius = radius;
+            circle.Position = IfcIfcAxis2Placement2DMock();
+            circleMoq.SetupGet(v => v.ExpressType).Returns(metaData.ExpressType(typeof(IfcCircle)));
+            return circle;
+        }
         #endregion
+
+        #region Ellipse Mocks
+        public static IIfcEllipse IfcEllipse3dMock(double major = 100, double minor = 50)
+        {
+            var ellipseMoq = new Mock<IIfcEllipse>()
+            { DefaultValue = DefaultValue.Mock, DefaultValueProvider = new MoqDefaultBehaviourProvider() }
+            .SetupAllProperties();
+            ellipseMoq.SetupGet(v => v.Dim).Returns(new IfcDimensionCount(3));
+            var ellipse = ellipseMoq.Object;
+            ellipse.SemiAxis1 = major;
+            ellipse.SemiAxis2 = minor;
+            ellipse.Position = IfcIfcAxis2Placement3DMock();
+            ellipseMoq.SetupGet(v => v.ExpressType).Returns(metaData.ExpressType(typeof(IfcEllipse)));
+            return ellipse;
+        }
+        public static IIfcEllipse IfcEllipse2dMock(double major = 100, double minor = 50)
+        {
+            var ellipseMoq = new Mock<IIfcEllipse>()
+            { DefaultValue = DefaultValue.Mock, DefaultValueProvider = new MoqDefaultBehaviourProvider() }
+            .SetupAllProperties();
+            ellipseMoq.SetupGet(v => v.Dim).Returns(new IfcDimensionCount(2));
+            var ellipse = ellipseMoq.Object;
+            ellipse.SemiAxis1 = major;
+            ellipse.SemiAxis2 = minor;
+            ellipse.Position = IfcIfcAxis2Placement2DMock();
+            ellipseMoq.SetupGet(v => v.ExpressType).Returns(metaData.ExpressType(typeof(IfcEllipse)));
+            return ellipse;
+        }
+        #endregion
+
         #region trimmed curve mocks
         public static IIfcTrimmedCurve IfcTrimmedCurve3dMock(IIfcCurve basisCurve = null, double trimParam1 = 0, double trimParam2 = 1, bool sense = true)
         {

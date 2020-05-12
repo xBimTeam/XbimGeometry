@@ -4,7 +4,11 @@
 #include <GeomLib_Tool.hxx>
 
 #include "../BRep/XbimLine.h"
+#include "../BRep/XbimLine2d.h"
 #include "../BRep/XbimCircle.h"
+#include "../BRep/XbimCircle2d.h"
+#include "../BRep/XbimEllipse.h"
+#include "../BRep/XbimEllipse2d.h"
 #include "../BRep/XbimTrimmedCurve.h"
 #include "../BRep/XbimTrimmedCurve2d.h"
 /*
@@ -58,16 +62,16 @@ namespace Xbim
 					/*case Xbim::Geometry::Abstractions::XCurveType::BoundaryCurve:
 						return  Build2d(dynamic_cast<IIfcBoundedCurve^>(curve));
 					case Xbim::Geometry::Abstractions::XCurveType::BSplineCurveWithKnots:
-						return Build2d(dynamic_cast<IIfcBSplineCurveWithKnots^>(curve));
-					case Xbim::Geometry::Abstractions::XCurveType::Circle:
-						return Build2d(dynamic_cast<IIfcCircle^>(curve)));
-					case Xbim::Geometry::Abstractions::XCurveType::CompositeCurve:
+						return Build2d(dynamic_cast<IIfcBSplineCurveWithKnots^>(curve));*/
+					case Xbim::Geometry::Abstractions::XCurveType::IfcCircle:
+						return BuildGeom2d(dynamic_cast<IIfcCircle^>(curve));
+				/*	case Xbim::Geometry::Abstractions::XCurveType::CompositeCurve:
 						return Build2d(dynamic_cast<IIfcCompositeCurve^>(curve)));
 					case Xbim::Geometry::Abstractions::XCurveType::CompositeCurveOnSurface:
-						return Build2d(dynamic_cast<IIfcCompositeCurveOnSurface^>(curve)));
-					case Xbim::Geometry::Abstractions::XCurveType::Ellipse:
-						return Build2d(dynamic_cast<IIfcEllipse^>(curve)) );
-					case Xbim::Geometry::Abstractions::XCurveType::IndexedPolyCurve:
+						return Build2d(dynamic_cast<IIfcCompositeCurveOnSurface^>(curve)));*/
+					case Xbim::Geometry::Abstractions::XCurveType::IfcEllipse:
+						return BuildGeom2d(dynamic_cast<IIfcEllipse^>(curve));
+					/*case Xbim::Geometry::Abstractions::XCurveType::IndexedPolyCurve:
 						return Build2d(dynamic_cast<IIfcIndexedPolyCurve^>(curve)));*/
 				case Xbim::Geometry::Abstractions::XCurveType::IfcLine:
 					return BuildGeom2d(dynamic_cast<IIfcLine^>(curve));
@@ -109,10 +113,10 @@ namespace Xbim
 					/*case Xbim::Geometry::Abstractions::XCurveType::CompositeCurve:
 						return Build3d(dynamic_cast<IIfcCompositeCurve^>(curve));
 					case Xbim::Geometry::Abstractions::XCurveType::CompositeCurveOnSurface:
-						return Build3d(dynamic_cast<IIfcCompositeCurveOnSurface^>(curve));
-					case Xbim::Geometry::Abstractions::XCurveType::Ellipse:
-						return Build3d(dynamic_cast<IIfcEllipse^>(curve));
-					case Xbim::Geometry::Abstractions::XCurveType::IndexedPolyCurve:
+						return Build3d(dynamic_cast<IIfcCompositeCurveOnSurface^>(curve));*/
+					case Xbim::Geometry::Abstractions::XCurveType::IfcEllipse:
+						return BuildGeom3d(dynamic_cast<IIfcEllipse^>(curve));
+				/*	case Xbim::Geometry::Abstractions::XCurveType::IndexedPolyCurve:
 						return Build3d(dynamic_cast<IIfcIndexedPolyCurve^>(curve));*/
 				case Xbim::Geometry::Abstractions::XCurveType::IfcLine:
 					return BuildGeom3d(dynamic_cast<IIfcLine^>(curve));
@@ -149,10 +153,10 @@ namespace Xbim
 					/*case Xbim::Geometry::Abstractions::XCurveType::CompositeCurve:
 						return Build3d(dynamic_cast<IIfcCompositeCurve^>(curve));
 					case Xbim::Geometry::Abstractions::XCurveType::CompositeCurveOnSurface:
-						return Build3d(dynamic_cast<IIfcCompositeCurveOnSurface^>(curve));
-					case Xbim::Geometry::Abstractions::XCurveType::Ellipse:
-						return Build3d(dynamic_cast<IIfcEllipse^>(curve));
-					case Xbim::Geometry::Abstractions::XCurveType::IndexedPolyCurve:
+						return Build3d(dynamic_cast<IIfcCompositeCurveOnSurface^>(curve));*/
+					case Xbim::Geometry::Abstractions::XCurveType::IfcEllipse:
+						return gcnew XbimEllipse(Handle(Geom_Ellipse)::DownCast(curve));
+				/*	case Xbim::Geometry::Abstractions::XCurveType::IndexedPolyCurve:
 						return Build3d(dynamic_cast<IIfcIndexedPolyCurve^>(curve));*/
 				case Xbim::Geometry::Abstractions::XCurveType::IfcLine:
 					return gcnew Xbim::Geometry::BRep::XbimLine(Handle(Geom_LineWithMagnitude)::DownCast(curve));
@@ -183,16 +187,16 @@ namespace Xbim
 					/*case Xbim::Geometry::Abstractions::XCurveType::BoundaryCurve:
 						return  Build2d(dynamic_cast<IIfcBoundedCurve^>(curve));
 					case Xbim::Geometry::Abstractions::XCurveType::BSplineCurveWithKnots:
-						return Build2d(dynamic_cast<IIfcBSplineCurveWithKnots^>(curve));
-					case Xbim::Geometry::Abstractions::XCurveType::Circle:
-						return Build2d(dynamic_cast<IIfcCircle^>(curve)));
-					case Xbim::Geometry::Abstractions::XCurveType::CompositeCurve:
+						return Build2d(dynamic_cast<IIfcBSplineCurveWithKnots^>(curve));*/
+					case Xbim::Geometry::Abstractions::XCurveType::IfcCircle:
+						return gcnew XbimCircle2d(Handle(Geom2d_Circle)::DownCast(curve));
+				/*	case Xbim::Geometry::Abstractions::XCurveType::CompositeCurve:
 						return Build2d(dynamic_cast<IIfcCompositeCurve^>(curve)));
 					case Xbim::Geometry::Abstractions::XCurveType::CompositeCurveOnSurface:
-						return Build2d(dynamic_cast<IIfcCompositeCurveOnSurface^>(curve)));
-					case Xbim::Geometry::Abstractions::XCurveType::Ellipse:
-						return Build2d(dynamic_cast<IIfcEllipse^>(curve)) );
-					case Xbim::Geometry::Abstractions::XCurveType::IndexedPolyCurve:
+						return Build2d(dynamic_cast<IIfcCompositeCurveOnSurface^>(curve)));*/
+					case Xbim::Geometry::Abstractions::XCurveType::IfcEllipse:
+						return gcnew XbimEllipse2d(Handle(Geom2d_Ellipse)::DownCast(curve));
+				/*	case Xbim::Geometry::Abstractions::XCurveType::IndexedPolyCurve:
 						return Build2d(dynamic_cast<IIfcIndexedPolyCurve^>(curve)));*/
 				case Xbim::Geometry::Abstractions::XCurveType::IfcLine:
 					return gcnew XbimLine2d(Handle(Geom2d_LineWithMagnitude)::DownCast(curve));
@@ -259,6 +263,23 @@ namespace Xbim
 				return Ptr()->BuildCircle2d(pos, ifcCircle->Radius);
 			}
 
+			Handle(Geom_Ellipse) CurveFactory::BuildGeom3d(IIfcEllipse^ ifcEllipse)
+			{
+				IIfcAxis2Placement3D^ axis3d = dynamic_cast<IIfcAxis2Placement3D^>(ifcEllipse->Position);
+				if (axis3d == nullptr) throw gcnew XbimGeometryFactoryException("Cannot build a 3D curve with 2D placement");
+				gp_Ax2 pos = GpFactory->BuildAxis2Placement(axis3d);
+				return Ptr()->BuildEllipse3d(pos, ifcEllipse->SemiAxis1, ifcEllipse->SemiAxis2);
+
+			}
+
+			Handle(Geom2d_Ellipse) CurveFactory::BuildGeom2d(IIfcEllipse^ ifcEllipse)
+			{
+				if (2 != (int)ifcEllipse->Dim) throw gcnew XbimGeometryFactoryException("Cannot build a 2D curve from a 3D curve");
+				IIfcAxis2Placement2D^ axis2d = dynamic_cast<IIfcAxis2Placement2D^>(ifcEllipse->Position);
+				if (axis2d == nullptr) throw gcnew XbimGeometryFactoryException("Cannot build a 2D curve with 3D placement");
+				gp_Ax2d pos = GpFactory->BuildAxis2Placement2d(axis2d);
+				return Ptr()->BuildEllipse2d(pos, ifcEllipse->SemiAxis1, ifcEllipse->SemiAxis2);
+			}
 
 			Handle(Geom_TrimmedCurve) CurveFactory::BuildGeom3d(IIfcTrimmedCurve^ ifcTrimmedCurve)
 			{

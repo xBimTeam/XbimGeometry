@@ -12,15 +12,15 @@ namespace Xbim
 		{
 			
 
-			public ref class XbimLine : XbimHandle<Handle(Geom_LineWithMagnitude)>, IXLine
+			public ref class XbimLine : XbimHandle<Handle(Geom_Line)>, IXLine
 			{
 					
 			public:				
-				XbimLine(Handle(Geom_LineWithMagnitude) hLine) : XbimHandle(new Handle(Geom_LineWithMagnitude)(hLine)) {};
+				XbimLine(Handle(Geom_Line) hLine) : XbimHandle(new Handle(Geom_Line)(hLine)) {};
 				virtual property XCurveType CurveType {XCurveType get() {return XCurveType::IfcLine;}; };
 				virtual property IXPoint^ Origin {IXPoint^ get(); };
 				virtual property IXVector^ Direction {IXVector^ get(); };
-				virtual property double ParametricUnit {double get() { return OccHandle()->Magnitude(); };};
+				virtual property double ParametricUnit {double get(); };
 				virtual property bool Is3d {bool get() {return true; }};
 				//Get a Point at the parameter length from the origin
 				virtual IXPoint^ GetPoint(double uParam);

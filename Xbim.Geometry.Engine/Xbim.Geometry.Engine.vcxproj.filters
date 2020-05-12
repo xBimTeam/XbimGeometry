@@ -87,10 +87,31 @@
     <ClInclude Include="BRep\XbimCircle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BRep\XbimAxis2Placement.h">
+    <ClInclude Include="BRep\XbimCircle2d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BRep\XbimAxis2Placement3d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BRep\Xbim2dDirection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BRep\XbimAxis1Placement.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BRep\XbimAxisPlacement2d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BRep\XbimAxis2Placement2d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BRep\XbimEllipse.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BRep\XbimEllipse2d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BRep\XbimEdge.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -129,6 +150,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BRep\XbimTrimmedCurve2d.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BRep\XbimEllipse.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BRep\XbimEdge.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

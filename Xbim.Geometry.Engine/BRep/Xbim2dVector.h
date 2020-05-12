@@ -16,21 +16,7 @@ namespace Xbim
 				double y;
 				double magnitude;
 			public:
-				Xbim2dVector() : x(0.0), y(0.0), magnitude(1.0) {};
-				/*Xbim2dVector(double x, double y) : x(x), y(y) {
-					gp_Vec2d v(x, y);
-					magnitude = v.Magnitude();
-					v.Normalize();
-					x = v.X();
-					y = v.Y();
-				};
-				Xbim2dVector(double x, double y, double magnitide) : x(x), y(y), magnitude(magnitude) {
-					gp_Vec2d v(x, y);
-					v.Normalize();
-					x = v.X();
-					y = v.Y();
-				};*/
-
+				Xbim2dVector() : x(0.0), y(0.0), magnitude(1.0) {};				
 				// Create a normalised unit vector in the direction of d with magnitude 1.0
 				Xbim2dVector(const gp_Dir2d& d) : Xbim2dVector(gp_Vec2d(d), 1.0) { };
 				// Create a normalised unit vector in the direction of d with magnitude 1.0

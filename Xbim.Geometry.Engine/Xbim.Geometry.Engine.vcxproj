@@ -157,18 +157,25 @@
   <ItemGroup>
     <ClInclude Include="BRep\OccExtensions\Geom2d_LineWithMagnitude.h" />
     <ClInclude Include="BRep\OccExtensions\Geom_LineWithMagnitude.h" />
+    <ClInclude Include="BRep\Xbim2dDirection.h" />
     <ClInclude Include="BRep\Xbim2dPoint.h" />
     <ClInclude Include="BRep\Xbim2dVector.h" />
     <ClInclude Include="BRep\XbimAxis1Placement.h" />
+    <ClInclude Include="BRep\XbimAxisPlacement2d.h" />
     <ClInclude Include="BRep\XbimCircle.h" />
+    <ClInclude Include="BRep\XbimCircle2d.h" />
     <ClInclude Include="BRep\XbimDirection.h" />
+    <ClInclude Include="BRep\XbimEdge.h" />
+    <ClInclude Include="BRep\XbimEllipse.h" />
+    <ClInclude Include="BRep\XbimEllipse2d.h" />
     <ClInclude Include="BRep\XbimTrimmedCurve.h" />
     <ClInclude Include="BRep\XbimTrimmedCurve2d.h" />
     <ClInclude Include="BRep\XbimVector.h" />
     <ClInclude Include="Exceptions\XbimGeometryFactoryException.h" />
     <ClInclude Include="Factories\GeomProcFactory.h" />
     <ClInclude Include="Factories\Unmanaged\NCurveFactory.h" />
-    <ClInclude Include="BRep\XbimAxis2Placement.h" />
+    <ClInclude Include="BRep\XbimAxis2Placement3d.h" />
+    <ClInclude Include="BRep\XbimAxis2Placement2d.h" />
     <ClInclude Include="XbimHandle.h" />
     <ClInclude Include="BRep\XbimLine2d.h" />
     <ClInclude Include="Factories\CurveFactory.h" />
@@ -183,6 +190,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
+    <ClCompile Include="BRep\XbimEdge.cpp" />
+    <ClCompile Include="BRep\XbimEllipse.cpp" />
     <ClCompile Include="BRep\XbimLine2d.cpp" />
     <ClCompile Include="BRep\XbimTrimmedCurve2d.cpp" />
     <ClCompile Include="Factories\GeomProcFactory.cpp" />

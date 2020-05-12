@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
+﻿
 namespace Xbim.Geometry.Abstractions
 {
-    public interface IXAxis2Placement
+    public interface IXAxis2Placement3d: IXAxisPlacement
     {
         IXAxis1Placement Axis { get; }
         IXDirection XDirection { get; }

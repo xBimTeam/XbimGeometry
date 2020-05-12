@@ -2,9 +2,9 @@
 
 namespace Xbim.Geometry.Abstractions
 {
-    public interface IXCircle : IXCurve
+    public interface IXCircle : IXConic
     {
         double Radius { get; }
-        IXAxis2Placement Position { get; }
+       
     }
 }

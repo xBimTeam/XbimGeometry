@@ -13,7 +13,7 @@ private:
 	double z;
 
 public:
-	XbimDirection() {};
+	XbimDirection(): x(0), y(0), z(1){};
 	//Create a normalised unit vector in the direction of x, y, z 
 	XbimDirection(double x, double y, double z)
 	{
