@@ -51,7 +51,10 @@ namespace Xbim.Geometry.NetCore.Tests
         {
             get => serviceHost.Services.GetService<IHostedService>() as LoggingService;
         }
-
+        private ILogger Logger
+        {
+            get => serviceHost.Services.GetService<ILogger<LoggingService>>() as ILogger;
+        }
         [ClassCleanup]
         static public async System.Threading.Tasks.Task CleanupAsync()
         {
@@ -160,26 +163,51 @@ namespace Xbim.Geometry.NetCore.Tests
         #endregion
         #region Ellipse
 
-        [TestMethod]
-        public void Can_convert_ifc_ellipse_3d()
+        [DataTestMethod]
+        [DataRow(10, -1, true)]
+        [DataRow(4, 12)]
+        [DataRow(5, 5)]
+        [DataRow(15, 5)]
+        [DataRow(-1, 1, true)]
+        public void Can_convert_ifc_ellipse_3d(double major, double minor, bool checkException = false)
         {
-            var ifcEllipse = IfcMoq.IfcEllipse3dMock();
+            var ifcEllipse = IfcMoq.IfcEllipse3dMock(major: major, minor: minor);
             using (var factory = new CurveFactory(LoggingService, IfcMoq.IfcModelMock()))
             {
-                var ellipse = factory.Build(ifcEllipse);
-                Assert.AreEqual(XCurveType.IfcEllipse, ellipse.CurveType);
-                Assert.IsTrue(ellipse.Is3d);
+                if (checkException)
+                    Assert.ThrowsException<XbimGeometryFactoryException>(() => factory.Build(ifcEllipse));
+                else
+                {
+                    var ellipse = factory.Build(ifcEllipse);
+                    Assert.AreEqual(XCurveType.IfcEllipse, ellipse.CurveType);
+                    Assert.IsTrue(ellipse.Is3d);
+                }
             }
         }
-        [TestMethod]
-        public void Can_convert_ifc_ellipse_2d()
+        [DataTestMethod]
+        [DataRow(10, -1, true)]
+        [DataRow(4, 12)]
+        [DataRow(5, 5)]
+        [DataRow(15, 5)]
+        [DataRow(-1, 1, true)]
+        public void Can_convert_ifc_ellipse_2d(double major, double minor, bool checkException = false)
         {
-            var ifcEllipse = IfcMoq.IfcEllipse2dMock();
-            using (var factory = new CurveFactory(LoggingService, IfcMoq.IfcModelMock()))
+
+            var ifcEllipse = IfcMoq.IfcEllipse2dMock(major: major, minor: minor);
+            using (var scope = Logger.BeginScope($"Entity #5={ifcEllipse.ExpressType.ExpressNameUpper}"))
             {
-                var ellipse = factory.Build(ifcEllipse);
-                Assert.AreEqual(XCurveType.IfcEllipse, ellipse.CurveType);
-                Assert.IsFalse(ellipse.Is3d);
+
+                using (var factory = new CurveFactory(LoggingService, IfcMoq.IfcModelMock()))
+                {
+                    if (checkException)
+                        Assert.ThrowsException<XbimGeometryFactoryException>(() => factory.Build(ifcEllipse));
+                    else
+                    {
+                        var ellipse = factory.Build(ifcEllipse);
+                        Assert.AreEqual(XCurveType.IfcEllipse, ellipse.CurveType);
+                        Assert.IsFalse(ellipse.Is3d);
+                    }
+                }
             }
         }
         #endregion

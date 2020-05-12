@@ -114,6 +114,15 @@
     <ClInclude Include="BRep\XbimEdge.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BRep\OccExtensions\Geom_EllipseWithSemiAxes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BRep\OccExtensions\Geom2d_EllipseWithSemiAxes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Services\Unmanaged\NLoggingService.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Stdafx.cpp">
@@ -156,6 +165,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BRep\XbimEdge.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Services\Unmanaged\NLoggingService.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

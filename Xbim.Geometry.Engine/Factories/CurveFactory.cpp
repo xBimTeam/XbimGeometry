@@ -35,20 +35,23 @@ namespace Xbim
 
 			IXCurve^ CurveFactory::Build(IIfcCurve^ curve)
 			{
+				IDisposable^ scope = Logger->BeginScope(String::Format("Building #{0}={1}", curve->EntityLabel, curve->GetType()->Name));
 				int dim = (int)curve->Dim;
-
+				
 				XCurveType curveType;
 
 				if (dim == 2)
 				{
 					Handle(Geom2d_Curve) hCurve2d = BuildGeom2d(curve, curveType);
 					if (hCurve2d.IsNull()) throw gcnew XbimGeometryFactoryException("Failed to build curve");
+				
 					return BuildXCurve(hCurve2d, curveType);
 				}
 				else
 				{
 					Handle(Geom_Curve) hCurve = BuildGeom3d(curve, curveType);
-					if (hCurve.IsNull()) throw gcnew XbimGeometryFactoryException("Failed to build curve");
+					if (hCurve.IsNull()) 
+						throw gcnew XbimGeometryFactoryException("Failed to build curve");
 					return BuildXCurve(hCurve, curveType);
 				}
 			}
@@ -267,6 +270,18 @@ namespace Xbim
 			{
 				IIfcAxis2Placement3D^ axis3d = dynamic_cast<IIfcAxis2Placement3D^>(ifcEllipse->Position);
 				if (axis3d == nullptr) throw gcnew XbimGeometryFactoryException("Cannot build a 3D curve with 2D placement");
+
+				//resolve major and minor axis
+				if (ifcEllipse->SemiAxis1 >= ifcEllipse->SemiAxis2) //semi 1 is the major radius or they are the same
+				{
+					//SELF\IfcConic.Position.Position.P[1] is the direction of the SemiAxis1. 
+					gp_Ax2 pos = GpFactory->BuildAxis2Placement(axis3d);
+					return Ptr()->BuildEllipse3d(pos, ifcEllipse->SemiAxis1, ifcEllipse->SemiAxis2);
+				}
+				else //Semi2 is the major radius, need to rotate the axis
+				{
+
+				}
 				gp_Ax2 pos = GpFactory->BuildAxis2Placement(axis3d);
 				return Ptr()->BuildEllipse3d(pos, ifcEllipse->SemiAxis1, ifcEllipse->SemiAxis2);
 
@@ -277,7 +292,7 @@ namespace Xbim
 				if (2 != (int)ifcEllipse->Dim) throw gcnew XbimGeometryFactoryException("Cannot build a 2D curve from a 3D curve");
 				IIfcAxis2Placement2D^ axis2d = dynamic_cast<IIfcAxis2Placement2D^>(ifcEllipse->Position);
 				if (axis2d == nullptr) throw gcnew XbimGeometryFactoryException("Cannot build a 2D curve with 3D placement");
-				gp_Ax2d pos = GpFactory->BuildAxis2Placement2d(axis2d);
+				gp_Ax22d pos = GpFactory->BuildAxis2Placement2d(axis2d);
 				return Ptr()->BuildEllipse2d(pos, ifcEllipse->SemiAxis1, ifcEllipse->SemiAxis2);
 			}
 

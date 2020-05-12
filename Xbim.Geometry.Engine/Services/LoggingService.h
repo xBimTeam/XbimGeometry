@@ -1,6 +1,7 @@
 #pragma once
 #pragma warning( disable : 4691 )
 #include "../XbimHandle.h"
+#include "../Services/Unmanaged/NLoggingService.h"
 using namespace Microsoft::Extensions::Hosting;
 using namespace Microsoft::Extensions::Logging;
 using namespace Microsoft::Extensions::Logging::Abstractions;
@@ -8,30 +9,6 @@ using namespace System::Runtime::InteropServices;
 using namespace System::Threading::Tasks;
 using namespace System::Threading;
 using namespace System;
-
-typedef void(__stdcall* WriteLog)(int level, const char* msg);
-
-public class LoggingServiceNative
-{
-private:
-
-public:
-
-	LoggingServiceNative() {};
-
-	void SetLogger(WriteLog lFunc);
-
-
-	void LogCritical(const char* logMsg);
-
-	void LogError(const char* logMsg);
-
-	void LogWarning(const char* logMsg);
-
-	void LogInformation(const char* logMsg);
-
-	void LogDebug(const char* logMsg);
-};
 
 namespace Xbim
 {
@@ -42,7 +19,7 @@ namespace Xbim
 
 			public delegate void LogDelegate(int logLevel, String^ str);
 
-			public ref class LoggingService : XbimHandle<LoggingServiceNative>, public IHostedService
+			public ref class LoggingService : XbimHandle<NLoggingService>, public IHostedService
 			{
 			private:
 				ILogger^ _logger;
@@ -51,11 +28,13 @@ namespace Xbim
 				GCHandle gchLogWriter;
 
 			public:
-				LoggingService(ILogger<LoggingService^>^ logger, IHostApplicationLifetime^ appLifetime) : XbimHandle(new LoggingServiceNative())
+				LoggingService(ILogger<LoggingService^>^ logger, IHostApplicationLifetime^ appLifetime) : XbimHandle(new NLoggingService())
 				{
 					_logger = logger;
 					_appLifetime = appLifetime;
 				};
+				
+				virtual property ILogger^ Logger {ILogger^  get() { return _logger; }};
 				void LogCritical(String^ logMsg);
 
 				void LogError(String^ logMsg);
@@ -65,7 +44,7 @@ namespace Xbim
 				void LogInformation(String^ logMsg);
 
 				void LogDebug(String^ logMsg);
-				virtual operator LoggingServiceNative* ()  { return this->Ptr(); }
+				virtual operator NLoggingService* ()  { return this->Ptr(); }
 
 				virtual Task^ StartAsync(System::Threading::CancellationToken cancellationToken)
 				{
@@ -90,7 +69,7 @@ namespace Xbim
 					{
 					case 5:
 					case 4:
-						//Logger->Log(LogLevel::Error,gcnew EventId(0), msg,nullptr);
+						
 						LoggerExtensions::LogError(_logger, msg);
 						break;
 					case 3:

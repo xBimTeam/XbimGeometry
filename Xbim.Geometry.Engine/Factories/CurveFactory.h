@@ -22,7 +22,6 @@ using namespace Xbim::Common::Geometry;
 using namespace Xbim::Ifc4::Interfaces;
 using namespace Xbim::Geometry::Abstractions;
 using namespace Xbim::Geometry::Services;
-using namespace Xbim::Geometry::Factories::Unmanaged;
 using namespace Xbim::Common;
 namespace Xbim
 {
@@ -34,7 +33,8 @@ namespace Xbim
 			{
 			private:
 				GeomProcFactory^ GpFactory;
-				LoggingService^ Logger;
+				LoggingService^ LoggerService;
+				ILogger^ Logger;
 				IModel^ ifcModel;
 				//The distance between two points at which they are determined to be equal points
 				double _modelTolerance;
@@ -47,8 +47,8 @@ namespace Xbim
 				CurveFactory(LoggingService^ loggingService, IModel^ ifcModel) : XbimHandle(new NCurveFactory(loggingService))
 				{
 					GpFactory = gcnew GeomProcFactory();
-					Logger = loggingService;
-					
+					LoggerService = loggingService;
+					Logger = LoggerService->Logger;
 					_modelTolerance = ifcModel->ModelFactors->Precision;
 					_radiansFactor = ifcModel->ModelFactors->AngleToRadiansConversionFactor;
 					_pointOnCurveTolerance = _modelTolerance * 10;
