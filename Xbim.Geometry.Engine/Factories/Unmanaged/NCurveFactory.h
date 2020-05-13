@@ -1,4 +1,5 @@
 #pragma once
+#include "../../Services//Unmanaged/NLoggingService.h"
 #include <gp_Pnt.hxx>
 
 #include <Geom_Circle.hxx>
@@ -13,15 +14,17 @@
 #include "../../BRep/OccExtensions/Geom_LineWithMagnitude.h"
 #include "../../BRep/OccExtensions/Geom_EllipseWithSemiAxes.h"
 #include "../../BRep/OccExtensions/Geom2d_EllipseWithSemiAxes.h"
-#include "../../Services//Unmanaged/NLoggingService.h"
+
 #include <TopoDS_Edge.hxx>
 
 
 class NCurveFactory
 {
+private:
+	NLoggingService* pLoggingService;
 public:
 
-	NLoggingService* pLoggingService;
+	
 	NCurveFactory(NLoggingService* loggingService)
 	{
 		pLoggingService = loggingService;
@@ -45,11 +48,7 @@ public:
 
 #pragma endregion
 
-#pragma region Topological methods
 
-	//TopoDS_Edge BuildEdge(Handle(Geom_Curve) hCurve);
-
-#pragma endregion
 
 };
 			

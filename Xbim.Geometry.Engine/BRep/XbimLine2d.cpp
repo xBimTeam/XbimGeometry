@@ -28,7 +28,7 @@ namespace Xbim
 			{
 				gp_Pnt2d pnt;
 				gp_Vec2d vec;
-				OccHandle()->FirstDerivative(u , pnt, vec);
+				OccHandle()->D1(u , pnt, vec);
 				normal = gcnew Xbim2dVector(vec);
 				return gcnew Xbim2dPoint(pnt);
 			}

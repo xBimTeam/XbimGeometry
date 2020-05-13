@@ -54,7 +54,7 @@ Handle(Geom_EllipseWithSemiAxes) NCurveFactory::BuildEllipse3d(gp_Ax2 axis, doub
 	{
 		char msg[256];
 		sprintf_s(msg, "Non-Compliant Semi Axis values, %f , %f", semi1, semi2);
-		pLoggingService->LogInformation(msg);
+		pLoggingService->LogError(msg);
 		return Handle(Geom_EllipseWithSemiAxes)(); //return null handle for checking
 	}
 }
@@ -69,7 +69,7 @@ Handle(Geom2d_EllipseWithSemiAxes) NCurveFactory::BuildEllipse2d(gp_Ax22d axis, 
 	{
 		char msg[256];
 		sprintf_s(msg, "Non-Compliant Semi Axis values, %f , %f", semi1, semi2);
-		pLoggingService->LogInformation(msg);
+		pLoggingService->LogError(msg);
 		return Handle(Geom2d_EllipseWithSemiAxes)(); //return null handle for checking
 	}
 }

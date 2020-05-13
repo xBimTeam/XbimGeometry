@@ -25,14 +25,11 @@ public:
 	gp_Pnt2d GetPoint(const Standard_Real U) const
 	{
 		gp_Pnt2d P;
-		Geom2d_Line::D0(U * parameticMagnitude, P);
+		Geom2d_Line::D0(U, P);
 		return P;
 	};
 
-	void FirstDerivative(const Standard_Real U, gp_Pnt2d& P, gp_Vec2d& V1) const
-	{
-		return Geom2d_Line::D1(U * parameticMagnitude, P, V1);
-	}
+	
     Standard_EXPORT Standard_Real ReversedParameter(const Standard_Real U) const Standard_OVERRIDE { return Geom2d_Line::ReversedParameter(U * parameticMagnitude); };
 
 

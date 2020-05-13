@@ -27,23 +27,23 @@ namespace Xbim.Geometry.NetCore.Tests
             modelMoq.SetupGet(m => m.ModelFactors.AngleToRadiansConversionFactor).Returns(radianFactor);
             return model;
         }
-        public static IIfcVector IfcVector2dMock(double x = 0, double y = 1, double magnitude = 10)
+        public static IIfcVector IfcVector2dMock(IIfcDirection direction = null, double magnitude = 10)
         {
             var vecMoq = new Mock<IIfcVector>() { DefaultValue = DefaultValue.Mock, DefaultValueProvider = new MoqDefaultBehaviourProvider() }
             .SetupAllProperties();
             vecMoq.SetupGet(v => v.Dim).Returns(new IfcDimensionCount(2));
             var vec = vecMoq.Object;
-            vec.Orientation = IfcDirection2dMock(x, y);
+            vec.Orientation = direction ?? IfcDirection2dMock();
             vec.Magnitude = magnitude;
             return vec;
         }
-        public static IIfcVector IfcVector3dMock(double x = 0, double y = 0, double z = 1, double magnitude = 10)
+        public static IIfcVector IfcVector3dMock(IIfcDirection direction = null, double magnitude = 10)
         {
             var vecMoq = new Mock<IIfcVector>() { DefaultValue = DefaultValue.Mock, DefaultValueProvider = new MoqDefaultBehaviourProvider() }
             .SetupAllProperties();
             vecMoq.SetupGet(v => v.Dim).Returns(new IfcDimensionCount(3));
             var vec = vecMoq.Object;
-            vec.Orientation = IfcDirection3dMock(x, y, z);
+            vec.Orientation = direction ?? IfcDirection3dMock();
             vec.Magnitude = magnitude;
 
             return vec;
@@ -113,7 +113,7 @@ namespace Xbim.Geometry.NetCore.Tests
             var axis2dMoq = new Mock<IIfcAxis2Placement2D>()
             { DefaultValue = DefaultValue.Mock, DefaultValueProvider = new MoqDefaultBehaviourProvider() }
             .SetupAllProperties();
-            var axis2d = axis2dMoq.Object;         
+            var axis2d = axis2dMoq.Object;
             axis2d.RefDirection = refDir;
             axis2d.Location = loc ?? IfcCartesianPoint2dMock();
             return axis2d;
@@ -121,7 +121,7 @@ namespace Xbim.Geometry.NetCore.Tests
 
         #endregion
         #region Line Mocks
-        public static IIfcLine IfcLine2dMock(IIfcCartesianPoint origin = null, IIfcVector direction = null)
+        public static IIfcLine IfcLine2dMock(IIfcCartesianPoint origin = null, double magnitude = 1, IIfcDirection direction = null)
         {
             var lineMoq = new Mock<IIfcLine>()
             { DefaultValue = DefaultValue.Mock, DefaultValueProvider = new MoqDefaultBehaviourProvider() }
@@ -129,11 +129,11 @@ namespace Xbim.Geometry.NetCore.Tests
             lineMoq.SetupGet(v => v.Dim).Returns(new IfcDimensionCount(2));
             var line = lineMoq.Object;
             line.Pnt = origin ?? IfcCartesianPoint2dMock();
-            line.Dir = direction ?? IfcVector2dMock();
+            line.Dir = IfcVector2dMock(direction: direction, magnitude: magnitude);
             lineMoq.SetupGet(v => v.ExpressType).Returns(metaData.ExpressType(typeof(IfcLine)));
             return line;
         }
-        public static IIfcLine IfcLine3dMock(IIfcCartesianPoint origin = null, IIfcVector direction = null)
+        public static IIfcLine IfcLine3dMock(IIfcCartesianPoint origin = null, double magnitude = 1, IIfcDirection direction = null)
         {
             var lineMoq = new Mock<IIfcLine>()
             { DefaultValue = DefaultValue.Mock, DefaultValueProvider = new MoqDefaultBehaviourProvider() }
@@ -141,14 +141,14 @@ namespace Xbim.Geometry.NetCore.Tests
             lineMoq.SetupGet(v => v.Dim).Returns(new IfcDimensionCount(3));
             var line = lineMoq.Object;
             line.Pnt = origin ?? IfcCartesianPoint3dMock();
-            line.Dir = direction ?? IfcVector3dMock();
+            line.Dir = IfcVector3dMock(direction: direction, magnitude: magnitude);
             lineMoq.SetupGet(v => v.ExpressType).Returns(metaData.ExpressType(typeof(IfcLine)));
             return line;
         }
         #endregion
 
         #region Circle Mocks
-        public static IIfcCircle IfcCircle3dMock(double radius = 100)
+        public static IIfcCircle IfcCircle3dMock(double radius = 100, IIfcAxis2Placement location = null)
         {
             var circleMoq = new Mock<IIfcCircle>()
             { DefaultValue = DefaultValue.Mock, DefaultValueProvider = new MoqDefaultBehaviourProvider() }
@@ -156,11 +156,11 @@ namespace Xbim.Geometry.NetCore.Tests
             circleMoq.SetupGet(v => v.Dim).Returns(new IfcDimensionCount(3));
             var circle = circleMoq.Object;
             circle.Radius = radius;
-            circle.Position = IfcIfcAxis2Placement3DMock();
+            circle.Position = location ?? IfcIfcAxis2Placement3DMock();
             circleMoq.SetupGet(v => v.ExpressType).Returns(metaData.ExpressType(typeof(IfcCircle)));
             return circle;
         }
-        public static IIfcCircle IfcCircle2dMock(double radius = 100)
+        public static IIfcCircle IfcCircle2dMock(double radius = 100, IIfcAxis2Placement location = null)
         {
             var circleMoq = new Mock<IIfcCircle>()
             { DefaultValue = DefaultValue.Mock, DefaultValueProvider = new MoqDefaultBehaviourProvider() }
@@ -168,7 +168,7 @@ namespace Xbim.Geometry.NetCore.Tests
             circleMoq.SetupGet(v => v.Dim).Returns(new IfcDimensionCount(2));
             var circle = circleMoq.Object;
             circle.Radius = radius;
-            circle.Position = IfcIfcAxis2Placement2DMock();
+            circle.Position = location ?? IfcIfcAxis2Placement2DMock();
             circleMoq.SetupGet(v => v.ExpressType).Returns(metaData.ExpressType(typeof(IfcCircle)));
             return circle;
         }
@@ -206,7 +206,7 @@ namespace Xbim.Geometry.NetCore.Tests
         #region trimmed curve mocks
         public static IIfcTrimmedCurve IfcTrimmedCurve3dMock(IIfcCurve basisCurve = null, double trimParam1 = 0, double trimParam2 = 1, bool sense = true)
         {
-            
+
             var trimMoq = new Mock<IIfcTrimmedCurve>()
             { DefaultValue = DefaultValue.Mock, DefaultValueProvider = new MoqDefaultBehaviourProvider() }
             .SetupAllProperties();
@@ -218,8 +218,8 @@ namespace Xbim.Geometry.NetCore.Tests
             trim.MasterRepresentation = IfcTrimmingPreference.PARAMETER;
             trim.SenseAgreement = sense;
             trim.Trim1.Add(new IfcParameterValue(trimParam1));
-            trim.Trim2.Add(new IfcParameterValue(trimParam2));            
-            trimMoq.SetupGet(x => x.ExpressType).Returns(metaData.ExpressType(typeof(IfcTrimmedCurve)));           
+            trim.Trim2.Add(new IfcParameterValue(trimParam2));
+            trimMoq.SetupGet(x => x.ExpressType).Returns(metaData.ExpressType(typeof(IfcTrimmedCurve)));
             return trim;
         }
         public static IIfcTrimmedCurve IfcTrimmedCurve2dMock(IIfcCurve basisCurve = null, double trimParam1 = 0, double trimParam2 = 1, bool sense = true)

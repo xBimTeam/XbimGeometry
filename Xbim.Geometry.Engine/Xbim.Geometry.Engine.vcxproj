@@ -173,11 +173,15 @@
     <ClInclude Include="BRep\XbimTrimmedCurve2d.h" />
     <ClInclude Include="BRep\XbimVector.h" />
     <ClInclude Include="Exceptions\XbimGeometryFactoryException.h" />
+    <ClInclude Include="Factories\EdgeFactory.h" />
     <ClInclude Include="Factories\GeomProcFactory.h" />
     <ClInclude Include="Factories\Unmanaged\NCurveFactory.h" />
     <ClInclude Include="BRep\XbimAxis2Placement3d.h" />
     <ClInclude Include="BRep\XbimAxis2Placement2d.h" />
     <ClInclude Include="BRep\OccExtensions\Geom2d_EllipseWithSemiAxes.h" />
+    <ClInclude Include="Factories\Unmanaged\NEdgeFactory.h" />
+    <ClInclude Include="Factories\Unmanaged\NWireFactory.h" />
+    <ClInclude Include="Factories\WireFactory.h" />
     <ClInclude Include="Services\Unmanaged\NLoggingService.h" />
     <ClInclude Include="XbimHandle.h" />
     <ClInclude Include="BRep\XbimLine2d.h" />
@@ -197,11 +201,19 @@
     <ClCompile Include="BRep\XbimEllipse.cpp" />
     <ClCompile Include="BRep\XbimLine2d.cpp" />
     <ClCompile Include="BRep\XbimTrimmedCurve2d.cpp" />
+    <ClCompile Include="Factories\EdgeFactory.cpp" />
     <ClCompile Include="Factories\GeomProcFactory.cpp" />
     <ClCompile Include="Factories\CurveFactory.cpp" />
     <ClCompile Include="Factories\Unmanaged\NCurveFactory.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
     </ClCompile>
+    <ClCompile Include="Factories\Unmanaged\NEdgeFactory.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
+    </ClCompile>
+    <ClCompile Include="Factories\Unmanaged\NWireFactory.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
+    </ClCompile>
+    <ClCompile Include="Factories\WireFactory.cpp" />
     <ClCompile Include="Services\LoggingService.cpp" />
     <ClCompile Include="BRep\XbimVertex.cpp" />
     <ClCompile Include="Services\Unmanaged\NLoggingService.cpp" />

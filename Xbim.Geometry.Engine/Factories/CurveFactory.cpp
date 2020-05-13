@@ -250,6 +250,7 @@ namespace Xbim
 
 			Handle(Geom_Circle) CurveFactory::BuildGeom3d(IIfcCircle^ ifcCircle)
 			{
+				if (ifcCircle->Radius <= 0) throw gcnew XbimGeometryFactoryException("Circle radius cannot be <= 0.");
 				IIfcAxis2Placement3D^ axis3d = dynamic_cast<IIfcAxis2Placement3D^>(ifcCircle->Position);
 				if (axis3d == nullptr) throw gcnew XbimGeometryFactoryException("Cannot build a 3D curve with 2D placement");
 				gp_Ax2 pos = GpFactory->BuildAxis2Placement(axis3d);
@@ -259,6 +260,7 @@ namespace Xbim
 
 			Handle(Geom2d_Circle) CurveFactory::BuildGeom2d(IIfcCircle^ ifcCircle)
 			{
+				if (ifcCircle->Radius <= 0) throw gcnew XbimGeometryFactoryException("Circle radius cannot be <= 0.");
 				if (2 != (int)ifcCircle->Dim) throw gcnew XbimGeometryFactoryException("Cannot build a 2D curve from a 3D curve");
 				IIfcAxis2Placement2D^ axis2d = dynamic_cast<IIfcAxis2Placement2D^>(ifcCircle->Position);
 				if (axis2d == nullptr) throw gcnew XbimGeometryFactoryException("Cannot build a 2D curve with 3D placement");
@@ -410,12 +412,6 @@ namespace Xbim
 						{
 							u1 *= _radiansFactor; //correct to radians
 							u2 *= _radiansFactor; //correct to radians
-						}
-						else if (isLine) //need to consider the magnitude of a parametric unit
-						{
-							double magnitude = ((IIfcLine^)ifcTrimmedCurve->BasisCurve)->Dir->Magnitude;
-							u1 *= magnitude;
-							u2 *= magnitude;
 						}
 					}
 					if (double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)) //sanity check in case the logic has missed a situtation

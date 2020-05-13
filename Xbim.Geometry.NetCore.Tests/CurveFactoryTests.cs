@@ -74,10 +74,13 @@ namespace Xbim.Geometry.NetCore.Tests
         }
         #region Line Tests
 
-        [TestMethod]
-        public void Can_convert_ifc_line_3d()
+        [DataTestMethod]
+        [DataRow(1)]
+        [DataRow(10)]
+        [DataRow(-10)]
+        public void Can_convert_ifc_line_3d(double parametricLength)
         {
-            var ifcLine = IfcMoq.IfcLine3dMock();
+            var ifcLine = IfcMoq.IfcLine3dMock(magnitude: parametricLength);
             using (var lineFactory = new CurveFactory(LoggingService, IfcMoq.IfcModelMock()))
             {
                 var line = lineFactory.Build(ifcLine) as IXLine; //initialise the factory with the line
@@ -90,7 +93,7 @@ namespace Xbim.Geometry.NetCore.Tests
                 Assert.AreEqual(ifcLine.Dir.Orientation.Y, line.Direction.Y);
                 Assert.AreEqual(ifcLine.Dir.Orientation.Z, line.Direction.Z);
                 var p1 = line.GetPoint(500);
-                Assert.AreEqual((500 * ifcLine.Dir.Magnitude) + ifcLine.Pnt.Z, p1.Z); //The parametric unit (magnitude) is 10, so 500 * 10 is the distance
+                Assert.AreEqual((500 * ifcLine.Dir.Magnitude) + ifcLine.Pnt.Z, p1.Z); //The parametric unit (magnitude) is parametricLength, so 500 * parametricLength is the distance
                 var p2 = line.GetFirstDerivative(500, out IXVector normal);
                 Assert.AreEqual(p1.X, p2.X);
                 Assert.AreEqual(p1.Y, p2.Y);
@@ -103,11 +106,14 @@ namespace Xbim.Geometry.NetCore.Tests
 
         }
 
-        [TestMethod]
-        public void Can_convert_ifc_line_2d()
+        [DataTestMethod]
+        [DataRow(1)]
+        [DataRow(10)]
+        [DataRow(-10)]
+        public void Can_convert_ifc_line_2d(double parametricLength)
         {
 
-            var ifcLine = IfcMoq.IfcLine2dMock();
+            var ifcLine = IfcMoq.IfcLine2dMock(magnitude: parametricLength);
             using (var lineFactory = new CurveFactory(LoggingService, IfcMoq.IfcModelMock()))
             {
                 var line = lineFactory.Build(ifcLine) as IXLine; //initialise the factory with the line
@@ -119,7 +125,7 @@ namespace Xbim.Geometry.NetCore.Tests
                 Assert.AreEqual(ifcLine.Dir.Orientation.Y, line.Direction.Y);
 
                 var p1 = line.GetPoint(500);
-                Assert.AreEqual((500 * ifcLine.Dir.Magnitude) + ifcLine.Pnt.Y, p1.Y); //The parametric unit (magnitude) is 10, so 500 * 10 is the distance
+                Assert.AreEqual((500 * ifcLine.Dir.Magnitude) + ifcLine.Pnt.Y, p1.Y); //The parametric unit (magnitude) is parametricLength, so 500 * parametricLength is the distance
                 var p2 = line.GetFirstDerivative(500, out IXVector normal);
                 Assert.AreEqual(p1.X, p2.X);
                 Assert.AreEqual(p1.Y, p2.Y);
@@ -138,26 +144,44 @@ namespace Xbim.Geometry.NetCore.Tests
 
         #region Circles
 
-        [TestMethod]
-        public void Can_convert_ifc_circle_3d()
+        [DataTestMethod]
+        [DataRow(10)]
+        [DataRow(-10, false, true)]
+        [DataRow(0, false, true)]
+        [DataRow(10, true, true)]
+        public void Can_convert_ifc_circle_3d(double radius, bool location2d = false, bool checkException = false)
         {
-            var ifcCircle = IfcMoq.IfcCircle3dMock();
+            var ifcCircle = IfcMoq.IfcCircle3dMock(radius: radius, location: location2d ? IfcMoq.IfcIfcAxis2Placement2DMock() : null);
             using (var factory = new CurveFactory(LoggingService, IfcMoq.IfcModelMock()))
             {
-                var circle = factory.Build(ifcCircle);
-                Assert.AreEqual(XCurveType.IfcCircle, circle.CurveType);
-                Assert.IsTrue(circle.Is3d);
+                if (checkException)
+                    Assert.ThrowsException<XbimGeometryFactoryException>(() => factory.Build(ifcCircle));
+                else
+                {
+                    var circle = factory.Build(ifcCircle);
+                    Assert.AreEqual(XCurveType.IfcCircle, circle.CurveType);
+                    Assert.IsTrue(circle.Is3d);
+                }
             }
         }
-        [TestMethod]
-        public void Can_convert_ifc_circle_2d()
+        [DataTestMethod]
+        [DataRow(10)]
+        [DataRow(-10, null, true)]
+        [DataRow(0, null, true)]
+        [DataRow(10, true, true)]
+        public void Can_convert_ifc_circle_2d(double radius, bool location3d = false, bool checkException = false)
         {
-            var ifcCircle = IfcMoq.IfcCircle2dMock();
+            var ifcCircle = IfcMoq.IfcCircle2dMock(radius: radius, location: location3d ? IfcMoq.IfcIfcAxis2Placement3DMock() : null);
             using (var factory = new CurveFactory(LoggingService, IfcMoq.IfcModelMock()))
             {
-                var circle = factory.Build(ifcCircle);
-                Assert.AreEqual(XCurveType.IfcCircle, circle.CurveType);
-                Assert.IsFalse(circle.Is3d);
+                if (checkException)
+                    Assert.ThrowsException<XbimGeometryFactoryException>(() => factory.Build(ifcCircle));
+                else
+                {
+                    var circle = factory.Build(ifcCircle);
+                    Assert.AreEqual(XCurveType.IfcCircle, circle.CurveType);
+                    Assert.IsFalse(circle.Is3d);
+                }
             }
         }
         #endregion
@@ -178,9 +202,11 @@ namespace Xbim.Geometry.NetCore.Tests
                     Assert.ThrowsException<XbimGeometryFactoryException>(() => factory.Build(ifcEllipse));
                 else
                 {
-                    var ellipse = factory.Build(ifcEllipse);
+                    var ellipse = factory.Build(ifcEllipse) as IXEllipse;
+                    Assert.IsNotNull(ellipse);
                     Assert.AreEqual(XCurveType.IfcEllipse, ellipse.CurveType);
                     Assert.IsTrue(ellipse.Is3d);
+                    Assert.IsTrue(ellipse.MajorRadius >= ellipse.MinorRadius);
                 }
             }
         }
@@ -190,22 +216,22 @@ namespace Xbim.Geometry.NetCore.Tests
         [DataRow(5, 5)]
         [DataRow(15, 5)]
         [DataRow(-1, 1, true)]
-        public void Can_convert_ifc_ellipse_2d(double major, double minor, bool checkException = false)
+        public void Can_convert_ifc_ellipse_2d(double semi1, double semi2, bool checkException = false)
         {
-
-            var ifcEllipse = IfcMoq.IfcEllipse2dMock(major: major, minor: minor);
+            var ifcEllipse = IfcMoq.IfcEllipse2dMock(major: semi1, minor: semi2);
             using (var scope = Logger.BeginScope($"Entity #5={ifcEllipse.ExpressType.ExpressNameUpper}"))
             {
-
                 using (var factory = new CurveFactory(LoggingService, IfcMoq.IfcModelMock()))
                 {
                     if (checkException)
                         Assert.ThrowsException<XbimGeometryFactoryException>(() => factory.Build(ifcEllipse));
                     else
                     {
-                        var ellipse = factory.Build(ifcEllipse);
+                        var ellipse = factory.Build(ifcEllipse) as IXEllipse;
+                        Assert.IsNotNull(ellipse);
                         Assert.AreEqual(XCurveType.IfcEllipse, ellipse.CurveType);
                         Assert.IsFalse(ellipse.Is3d);
+                        Assert.IsTrue(ellipse.MajorRadius >= ellipse.MinorRadius);
                     }
                 }
             }
@@ -214,28 +240,49 @@ namespace Xbim.Geometry.NetCore.Tests
 
         #region Trimmed Curve Tests
 
-        [TestMethod]
-        public void Can_convert_ifc_trimmed_line_3d()
+        [DataTestMethod]
+        [DataRow(1,  0, 10)]
+        [DataRow(10, 0, 10)] //Magnitude 10, Length = 100
+        [DataRow(10, 10, 100)]
+        public void Can_convert_ifc_trimmed_line_3d(double parametricLength = 1, double trim1 = 0, double trim2 = 10)
         {
-            var ifcTrimmedCurve = IfcMoq.IfcTrimmedCurve3dMock();
+            var basisLine = IfcMoq.IfcLine3dMock(
+                magnitude: parametricLength,
+                origin: IfcMoq.IfcCartesianPoint3dMock(0, 0, 0),
+                direction: IfcMoq.IfcDirection3dMock(0, 0, 1));
+            var ifcTrimmedCurve = IfcMoq.IfcTrimmedCurve3dMock(basisCurve: basisLine, trimParam1: trim1, trimParam2: trim2);
             using (var factory = new CurveFactory(LoggingService, IfcMoq.IfcModelMock()))
             {
                 var tc = factory.Build(ifcTrimmedCurve) as IXTrimmedCurve; //initialise the factory with the curve
                 Assert.AreEqual(XCurveType.IfcTrimmedCurve, tc.CurveType);
+                Assert.AreEqual(XCurveType.IfcLine, tc.BasisCurve.CurveType);
                 Assert.IsTrue(tc.Is3d);
+                Assert.AreEqual(tc.EndPoint.Z, parametricLength * trim2);
+                Assert.AreEqual(tc.StartPoint.Z, parametricLength * trim1);
             }
 
         }
 
-        [TestMethod]
-        public void Can_convert_ifc_trimmed_line_2d()
+        [DataTestMethod]
+        [DataRow(1, 0, 10)]
+        [DataRow(10, 0, 10)] //Magnitude 10, Length = 100
+        [DataRow(10, 10, 100)]
+        public void Can_convert_ifc_trimmed_line_2d(double parametricLength = 1, double trim1 = 0, double trim2 = 10)
         {
-            var ifcTrimmedCurve = IfcMoq.IfcTrimmedCurve2dMock();
+            var basisLine = IfcMoq.IfcLine2dMock(
+                  magnitude: parametricLength,
+                  origin: IfcMoq.IfcCartesianPoint2dMock(0, 0),
+                  direction: IfcMoq.IfcDirection2dMock(1, 0));
+            var ifcTrimmedCurve = IfcMoq.IfcTrimmedCurve2dMock(basisCurve: basisLine, trimParam1: trim1, trimParam2: trim2);
             using (var factory = new CurveFactory(LoggingService, IfcMoq.IfcModelMock()))
             {
                 var tc = factory.Build(ifcTrimmedCurve) as IXTrimmedCurve; //initialise the factory with the curve
                 Assert.AreEqual(XCurveType.IfcTrimmedCurve, tc.CurveType);
+                Assert.AreEqual(XCurveType.IfcLine, tc.BasisCurve.CurveType);
                 Assert.IsFalse(tc.Is3d);
+                //the default trim params are 0, 1, the dwfaults for the model are radian so 1 rad for the trim
+                Assert.AreEqual(tc.EndPoint.X, parametricLength * trim2 );
+                Assert.AreEqual(tc.StartPoint.X, parametricLength * trim1);
             }
 
         }
@@ -243,13 +290,14 @@ namespace Xbim.Geometry.NetCore.Tests
         [TestMethod]
         public void Can_convert_ifc_trimmed_circle_3d()
         {
-            var ifcTrimmedCurve = IfcMoq.IfcTrimmedCurve3dMock(IfcMoq.IfcCircle3dMock());
+            var ifcTrimmedCurve = IfcMoq.IfcTrimmedCurve3dMock(IfcMoq.IfcCircle3dMock(), trimParam2: Math.PI / 2.0);
             using (var factory = new CurveFactory(LoggingService, IfcMoq.IfcModelMock()))
             {
                 var tc = factory.Build(ifcTrimmedCurve) as IXTrimmedCurve; //initialise the factory with the curve
                 Assert.AreEqual(XCurveType.IfcTrimmedCurve, tc.CurveType);
                 Assert.AreEqual(XCurveType.IfcCircle, tc.BasisCurve.CurveType);
                 Assert.IsTrue(tc.Is3d);
+
             }
         }
         [TestMethod]

@@ -23,14 +23,11 @@ public:
 	gp_Pnt GetPoint(const Standard_Real U) const
 	{
 		gp_Pnt P;
-		Geom_Line::D0(U * parameticMagnitude, P);
+		Geom_Line::D0(U, P);
 		return P;
 	};
 
-	void FirstDerivative(const Standard_Real U, gp_Pnt& P, gp_Vec& V1) const
-	{
-		return Geom_Line::D1(U * parameticMagnitude, P, V1);
-	}
+	
     Standard_EXPORT Standard_Real ReversedParameter(const Standard_Real U) const Standard_OVERRIDE { return Geom_Line::ReversedParameter(U * parameticMagnitude); };
 
 
