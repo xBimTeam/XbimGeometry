@@ -48,7 +48,7 @@ namespace Xbim.Geometry.NetCore.Tests
 
             return vec;
         }
-        public static IIfcDirection IfcDirection2dMock(double x = 0, double y = 1)
+        public static IIfcDirection IfcDirection2dMock(double x = 1, double y = 0)
         {
             var dirMoq = new Mock<IIfcDirection>() { DefaultValue = DefaultValue.Mock, DefaultValueProvider = new MoqDefaultBehaviourProvider() }
             .SetupAllProperties();
@@ -71,7 +71,7 @@ namespace Xbim.Geometry.NetCore.Tests
             dirMoq.SetupGet(v => v.Z).Returns(dir.DirectionRatios[2]);
             return dir;
         }
-        public static IIfcCartesianPoint IfcCartesianPoint2dMock(double x = 10, double y = 20)
+        public static IIfcCartesianPoint IfcCartesianPoint2dMock(double x = 0, double y = 0)
         {
             var cpMoq = new Mock<IIfcCartesianPoint>() { DefaultValue = DefaultValue.Mock, DefaultValueProvider = new MoqDefaultBehaviourProvider() }
             .SetupAllProperties();
@@ -82,7 +82,7 @@ namespace Xbim.Geometry.NetCore.Tests
             cpMoq.SetupGet(v => v.Y).Returns(cp.Coordinates[1]);
             return cp;
         }
-        public static IIfcCartesianPoint IfcCartesianPoint3dMock(double x = 10, double y = 20, double z = 30)
+        public static IIfcCartesianPoint IfcCartesianPoint3dMock(double x = 0, double y = 0, double z = 0)
         {
             var cpMoq = new Mock<IIfcCartesianPoint>()
             { DefaultValue = DefaultValue.Mock, DefaultValueProvider = new MoqDefaultBehaviourProvider() }
@@ -175,28 +175,28 @@ namespace Xbim.Geometry.NetCore.Tests
         #endregion
 
         #region Ellipse Mocks
-        public static IIfcEllipse IfcEllipse3dMock(double major = 100, double minor = 50)
+        public static IIfcEllipse IfcEllipse3dMock(double semi1 = 100, double semi2 = 50)
         {
             var ellipseMoq = new Mock<IIfcEllipse>()
             { DefaultValue = DefaultValue.Mock, DefaultValueProvider = new MoqDefaultBehaviourProvider() }
             .SetupAllProperties();
             ellipseMoq.SetupGet(v => v.Dim).Returns(new IfcDimensionCount(3));
             var ellipse = ellipseMoq.Object;
-            ellipse.SemiAxis1 = major;
-            ellipse.SemiAxis2 = minor;
+            ellipse.SemiAxis1 = semi1;
+            ellipse.SemiAxis2 = semi2;
             ellipse.Position = IfcIfcAxis2Placement3DMock();
             ellipseMoq.SetupGet(v => v.ExpressType).Returns(metaData.ExpressType(typeof(IfcEllipse)));
             return ellipse;
         }
-        public static IIfcEllipse IfcEllipse2dMock(double major = 100, double minor = 50)
+        public static IIfcEllipse IfcEllipse2dMock(double semi1 = 100, double semi2 = 50)
         {
             var ellipseMoq = new Mock<IIfcEllipse>()
             { DefaultValue = DefaultValue.Mock, DefaultValueProvider = new MoqDefaultBehaviourProvider() }
             .SetupAllProperties();
             ellipseMoq.SetupGet(v => v.Dim).Returns(new IfcDimensionCount(2));
             var ellipse = ellipseMoq.Object;
-            ellipse.SemiAxis1 = major;
-            ellipse.SemiAxis2 = minor;
+            ellipse.SemiAxis1 = semi1;
+            ellipse.SemiAxis2 = semi2;
             ellipse.Position = IfcIfcAxis2Placement2DMock();
             ellipseMoq.SetupGet(v => v.ExpressType).Returns(metaData.ExpressType(typeof(IfcEllipse)));
             return ellipse;

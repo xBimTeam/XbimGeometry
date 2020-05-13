@@ -25,7 +25,7 @@ public:
 	gp_Pnt2d GetPoint(const Standard_Real U) const
 	{
 		gp_Pnt2d P;
-		Geom2d_Line::D0(U, P);
+		D0(U, P);
 		return P;
 	};
 

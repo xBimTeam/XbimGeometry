@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Xbim.Geometry.NetCore.Tests": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

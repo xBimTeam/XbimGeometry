@@ -23,7 +23,7 @@ public:
 	gp_Pnt GetPoint(const Standard_Real U) const
 	{
 		gp_Pnt P;
-		Geom_Line::D0(U, P);
+		D0(U, P);
 		return P;
 	};
 

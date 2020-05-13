@@ -78,6 +78,7 @@ namespace Xbim.Geometry.NetCore.Tests
         [DataRow(1)]
         [DataRow(10)]
         [DataRow(-10)]
+        [DataRow(0.1)]
         public void Can_convert_ifc_line_3d(double parametricLength)
         {
             var ifcLine = IfcMoq.IfcLine3dMock(magnitude: parametricLength);
@@ -110,6 +111,7 @@ namespace Xbim.Geometry.NetCore.Tests
         [DataRow(1)]
         [DataRow(10)]
         [DataRow(-10)]
+        [DataRow(0.1)]
         public void Can_convert_ifc_line_2d(double parametricLength)
         {
 
@@ -125,7 +127,7 @@ namespace Xbim.Geometry.NetCore.Tests
                 Assert.AreEqual(ifcLine.Dir.Orientation.Y, line.Direction.Y);
 
                 var p1 = line.GetPoint(500);
-                Assert.AreEqual((500 * ifcLine.Dir.Magnitude) + ifcLine.Pnt.Y, p1.Y); //The parametric unit (magnitude) is parametricLength, so 500 * parametricLength is the distance
+                Assert.AreEqual((500 * ifcLine.Dir.Magnitude) + ifcLine.Pnt.X, p1.X); //The parametric unit (magnitude) is parametricLength, so 500 * parametricLength is the distance
                 var p2 = line.GetFirstDerivative(500, out IXVector normal);
                 Assert.AreEqual(p1.X, p2.X);
                 Assert.AreEqual(p1.Y, p2.Y);
@@ -195,7 +197,7 @@ namespace Xbim.Geometry.NetCore.Tests
         [DataRow(-1, 1, true)]
         public void Can_convert_ifc_ellipse_3d(double major, double minor, bool checkException = false)
         {
-            var ifcEllipse = IfcMoq.IfcEllipse3dMock(major: major, minor: minor);
+            var ifcEllipse = IfcMoq.IfcEllipse3dMock(semi1: major, semi2: minor);
             using (var factory = new CurveFactory(LoggingService, IfcMoq.IfcModelMock()))
             {
                 if (checkException)
@@ -218,7 +220,7 @@ namespace Xbim.Geometry.NetCore.Tests
         [DataRow(-1, 1, true)]
         public void Can_convert_ifc_ellipse_2d(double semi1, double semi2, bool checkException = false)
         {
-            var ifcEllipse = IfcMoq.IfcEllipse2dMock(major: semi1, minor: semi2);
+            var ifcEllipse = IfcMoq.IfcEllipse2dMock(semi1: semi1, semi2: semi2);
             using (var scope = Logger.BeginScope($"Entity #5={ifcEllipse.ExpressType.ExpressNameUpper}"))
             {
                 using (var factory = new CurveFactory(LoggingService, IfcMoq.IfcModelMock()))
@@ -313,28 +315,56 @@ namespace Xbim.Geometry.NetCore.Tests
             }
         }
 
-        [TestMethod]
-        public void Can_convert_ifc_trimmed_ellipse_3d()
+        [DataTestMethod]
+        [DataRow(10, 5)]
+        [DataRow(5, 10)]
+        public void Can_convert_ifc_trimmed_ellipse_3d(double semi1 = 10, double semi2 = 5)
         {
-            var ifcTrimmedCurve = IfcMoq.IfcTrimmedCurve3dMock(IfcMoq.IfcEllipse3dMock());
-            using (var factory = new CurveFactory(LoggingService, IfcMoq.IfcModelMock()))
+            var ifcTrimmedCurve = IfcMoq.IfcTrimmedCurve3dMock(
+                trimParam1: 0,
+                trimParam2: Math.PI / 2.0,
+                basisCurve: IfcMoq.IfcEllipse3dMock(semi1: semi1, semi2:semi2));
+            var model = IfcMoq.IfcModelMock();
+            using (var factory = new CurveFactory(LoggingService, model))
             {
                 var tc = factory.Build(ifcTrimmedCurve) as IXTrimmedCurve; //initialise the factory with the curve
                 Assert.AreEqual(XCurveType.IfcTrimmedCurve, tc.CurveType);
                 Assert.AreEqual(XCurveType.IfcEllipse, tc.BasisCurve.CurveType);
+                var basisCurve = tc.BasisCurve as IXEllipse;
+                Assert.IsNotNull(basisCurve);
+                var origin = basisCurve.Position as IXAxis2Placement3d;
+                Assert.IsNotNull(origin);
                 Assert.IsTrue(tc.Is3d);
+                Assert.AreEqual(tc.StartPoint.X, origin.Axis.Location.X + semi1, model.ModelFactors.Precision);
+                Assert.AreEqual(tc.StartPoint.Y, origin.Axis.Location.Y, model.ModelFactors.Precision);
+                Assert.AreEqual(tc.EndPoint.X, origin.Axis.Location.X, model.ModelFactors.Precision );
+                Assert.AreEqual(tc.EndPoint.Y, origin.Axis.Location.Y + semi2, model.ModelFactors.Precision);
             }
         }
-        [TestMethod]
-        public void Can_convert_ifc_trimmed_ellipse_2d()
+        [DataTestMethod]
+        [DataRow(10, 5)]
+        [DataRow(5, 10)]
+        public void Can_convert_ifc_trimmed_ellipse_2d(double semi1 = 10, double semi2 = 5)
         {
-            var ifcTrimmedCurve = IfcMoq.IfcTrimmedCurve2dMock(IfcMoq.IfcEllipse2dMock());
+            var ifcTrimmedCurve = IfcMoq.IfcTrimmedCurve2dMock(
+                trimParam1: 0,
+                trimParam2: Math.PI / 2.0,
+                basisCurve: IfcMoq.IfcEllipse2dMock(semi1: semi1, semi2: semi2));
+            var model = IfcMoq.IfcModelMock();
             using (var factory = new CurveFactory(LoggingService, IfcMoq.IfcModelMock()))
             {
                 var tc = factory.Build(ifcTrimmedCurve) as IXTrimmedCurve; //initialise the factory with the curve
                 Assert.AreEqual(XCurveType.IfcTrimmedCurve, tc.CurveType);
                 Assert.AreEqual(XCurveType.IfcEllipse, tc.BasisCurve.CurveType);
+                var basisCurve = tc.BasisCurve as IXEllipse;
+                Assert.IsNotNull(basisCurve);
+                var origin = basisCurve.Position as IXAxis2Placement2d;
+                Assert.IsNotNull(origin);
                 Assert.IsFalse(tc.Is3d);
+                Assert.AreEqual(tc.StartPoint.X, origin.Location.X + semi1, model.ModelFactors.Precision);
+                Assert.AreEqual(tc.StartPoint.Y, origin.Location.Y, model.ModelFactors.Precision);
+                Assert.AreEqual(tc.EndPoint.X, origin.Location.X, model.ModelFactors.Precision);
+                Assert.AreEqual(tc.EndPoint.Y, origin.Location.Y + semi2, model.ModelFactors.Precision);
             }
         }
         #endregion
