@@ -11,6 +11,7 @@ struct DefDeleter
 #define OccHandle() (*(this->Ptr()))
 
 
+
 template <typename T, typename D = DefDeleter<T>>
 public ref class XbimHandle : SH
 {

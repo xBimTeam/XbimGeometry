@@ -165,21 +165,35 @@
     <ClInclude Include="BRep\XbimAxisPlacement2d.h" />
     <ClInclude Include="BRep\XbimCircle.h" />
     <ClInclude Include="BRep\XbimCircle2d.h" />
+    <ClInclude Include="BRep\XbimConicalSurface.h" />
+    <ClInclude Include="BRep\XbimCylindricalSurface.h" />
     <ClInclude Include="BRep\XbimDirection.h" />
     <ClInclude Include="BRep\XbimEdge.h" />
     <ClInclude Include="BRep\XbimEllipse.h" />
     <ClInclude Include="BRep\XbimEllipse2d.h" />
+    <ClInclude Include="BRep\XbimFace.h" />
+    <ClInclude Include="BRep\XbimPlane.h" />
+    <ClInclude Include="BRep\XbimShell.h" />
+    <ClInclude Include="BRep\XbimSolid.h" />
+    <ClInclude Include="BRep\XbimSphericalSurface.h" />
     <ClInclude Include="BRep\XbimTrimmedCurve.h" />
     <ClInclude Include="BRep\XbimTrimmedCurve2d.h" />
     <ClInclude Include="BRep\XbimVector.h" />
+    <ClInclude Include="BRep\XbimWire.h" />
+    <ClInclude Include="Exceptions\XbimGeometryDefinitionException.h" />
     <ClInclude Include="Exceptions\XbimGeometryFactoryException.h" />
-    <ClInclude Include="Factories\EdgeFactory.h" />
+    <ClInclude Include="Factories\FaceFactory.h" />
     <ClInclude Include="Factories\GeomProcFactory.h" />
+    <ClInclude Include="Factories\ShellFactory.h" />
+    <ClInclude Include="Factories\SolidFactory.h" />
     <ClInclude Include="Factories\Unmanaged\NCurveFactory.h" />
     <ClInclude Include="BRep\XbimAxis2Placement3d.h" />
     <ClInclude Include="BRep\XbimAxis2Placement2d.h" />
     <ClInclude Include="BRep\OccExtensions\Geom2d_EllipseWithSemiAxes.h" />
     <ClInclude Include="Factories\Unmanaged\NEdgeFactory.h" />
+    <ClInclude Include="Factories\Unmanaged\NFaceFactory.h" />
+    <ClInclude Include="Factories\Unmanaged\NShellFactory.h" />
+    <ClInclude Include="Factories\Unmanaged\NSolidFactory.h" />
     <ClInclude Include="Factories\Unmanaged\NWireFactory.h" />
     <ClInclude Include="Factories\WireFactory.h" />
     <ClInclude Include="Services\Unmanaged\NLoggingService.h" />
@@ -199,15 +213,31 @@
     <ClCompile Include="AssemblyInfo.cpp" />
     <ClCompile Include="BRep\XbimEdge.cpp" />
     <ClCompile Include="BRep\XbimEllipse.cpp" />
+    <ClCompile Include="BRep\XbimFace.cpp" />
     <ClCompile Include="BRep\XbimLine2d.cpp" />
+    <ClCompile Include="BRep\XbimPlane.cpp" />
+    <ClCompile Include="BRep\XbimShell.cpp" />
+    <ClCompile Include="BRep\XbimSolid.cpp" />
     <ClCompile Include="BRep\XbimTrimmedCurve2d.cpp" />
-    <ClCompile Include="Factories\EdgeFactory.cpp" />
+    <ClCompile Include="BRep\XbimWire.cpp" />
+    <ClCompile Include="Factories\FaceFactory.cpp" />
     <ClCompile Include="Factories\GeomProcFactory.cpp" />
     <ClCompile Include="Factories\CurveFactory.cpp" />
+    <ClCompile Include="Factories\ShellFactory.cpp" />
+    <ClCompile Include="Factories\SolidFactory.cpp" />
     <ClCompile Include="Factories\Unmanaged\NCurveFactory.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="Factories\Unmanaged\NEdgeFactory.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
+    </ClCompile>
+    <ClCompile Include="Factories\Unmanaged\NFaceFactory.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
+    </ClCompile>
+    <ClCompile Include="Factories\Unmanaged\NShellFactory.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
+    </ClCompile>
+    <ClCompile Include="Factories\Unmanaged\NSolidFactory.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="Factories\Unmanaged\NWireFactory.cpp">

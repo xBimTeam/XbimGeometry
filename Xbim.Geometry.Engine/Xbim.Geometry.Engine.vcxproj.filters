@@ -123,9 +123,6 @@
     <ClInclude Include="Services\Unmanaged\NLoggingService.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Factories\EdgeFactory.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Factories\Unmanaged\NEdgeFactory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -133,6 +130,51 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Factories\WireFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Factories\FaceFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Factories\ShellFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Factories\Unmanaged\NFaceFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Factories\Unmanaged\NShellFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Factories\Unmanaged\NSolidFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BRep\XbimSolid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Factories\SolidFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BRep\XbimShell.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BRep\XbimFace.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BRep\XbimWire.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BRep\XbimPlane.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BRep\XbimConicalSurface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Exceptions\XbimGeometryDefinitionException.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BRep\XbimCylindricalSurface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BRep\XbimSphericalSurface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -182,9 +224,6 @@
     <ClCompile Include="Services\Unmanaged\NLoggingService.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Factories\EdgeFactory.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Factories\Unmanaged\NEdgeFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -192,6 +231,39 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Factories\WireFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Factories\FaceFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Factories\ShellFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Factories\Unmanaged\NFaceFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Factories\Unmanaged\NShellFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Factories\Unmanaged\NSolidFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BRep\XbimSolid.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Factories\SolidFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BRep\XbimShell.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BRep\XbimFace.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BRep\XbimWire.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BRep\XbimPlane.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

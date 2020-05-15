@@ -35,7 +35,7 @@ namespace Xbim
 
 			IXCurve^ CurveFactory::Build(IIfcCurve^ curve)
 			{
-				IDisposable^ scope = Logger->BeginScope(String::Format("Building #{0}={1}", curve->EntityLabel, curve->GetType()->Name));
+				//IDisposable^ scope = Logger->BeginScope(String::Format("Building #{0}={1}", curve->EntityLabel, curve->GetType()->Name));
 				int dim = (int)curve->Dim;
 				
 				XCurveType curveType;
@@ -89,10 +89,9 @@ namespace Xbim
 					case Xbim::Geometry::Abstractions::XCurveType::SurfaceCurve:
 						return Build2d(dynamic_cast<IIfcSurfaceCurve^>(curve));*/
 				case Xbim::Geometry::Abstractions::XCurveType::IfcTrimmedCurve:
-					return BuildGeom2d(dynamic_cast<IIfcTrimmedCurve^>(curve));
-					break;
+					return BuildGeom2d(dynamic_cast<IIfcTrimmedCurve^>(curve));					
 				default:
-					throw gcnew XbimGeometryFactoryException("Unsupported 2d curve type");
+					break;
 				}
 				throw gcnew XbimGeometryFactoryException("Unsupported 2d curve type");
 			}
@@ -136,11 +135,11 @@ namespace Xbim
 						return Build3d(dynamic_cast<IIfcSurfaceCurve^>(curve));*/
 				case Xbim::Geometry::Abstractions::XCurveType::IfcTrimmedCurve:
 					return BuildGeom3d(dynamic_cast<IIfcTrimmedCurve^>(curve));
-					break;
+					
 				default:
-					throw gcnew XbimGeometryFactoryException("Unsupported curve type");
+					break;
 				}
-				throw gcnew XbimGeometryFactoryException("Unsupported curve type");
+				throw gcnew XbimGeometryFactoryException("Not implemented. Curve type: " + curveType.ToString());
 			}
 
 			IXCurve^ CurveFactory::BuildXCurve(Handle(Geom_Curve) curve, XCurveType curveType)

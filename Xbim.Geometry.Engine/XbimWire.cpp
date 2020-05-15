@@ -1,4 +1,4 @@
-#include "XbimWire.h"
+edge#include "XbimWire.h"
 #include "XbimEdge.h"
 #include "XbimFace.h"
 #include "XbimGeometryCreator.h"

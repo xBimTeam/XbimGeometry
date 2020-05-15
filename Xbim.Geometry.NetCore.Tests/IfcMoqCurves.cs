@@ -12,7 +12,7 @@ using Xbim.Ifc4.MeasureResource;
 
 namespace Xbim.Geometry.NetCore.Tests
 {
-    public class IfcMoq
+    public static partial class IfcMoq
     {
         private static ExpressMetaData metaData = ExpressMetaData.GetMetadata(new EntityFactoryIfc4().GetType().GetTypeInfo().Module);
         #region Geometric processor Mocks
@@ -120,6 +120,7 @@ namespace Xbim.Geometry.NetCore.Tests
         }
 
         #endregion
+
         #region Line Mocks
         public static IIfcLine IfcLine2dMock(IIfcCartesianPoint origin = null, double magnitude = 1, IIfcDirection direction = null)
         {
