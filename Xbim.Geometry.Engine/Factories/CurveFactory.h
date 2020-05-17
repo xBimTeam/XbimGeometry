@@ -29,29 +29,23 @@ namespace Xbim
 	{
 		namespace Factories
 		{
-			public ref class CurveFactory : XbimHandle<NCurveFactory>
+			public ref class CurveFactory : XbimHandle<NCurveFactory>, IXCurveService
 			{
 			private:
 				GeomProcFactory^ GpFactory;
-				LoggingService^ LoggerService;
-				ILogger^ Logger;
-				IModel^ ifcModel;
-				//The distance between two points at which they are determined to be equal points
-				double _modelTolerance;
-				//the multiplier to convert model angular units to radians, for a radian uni this = 1 and for a degree unit = PI/180;
-				double _radiansFactor;
-				//The distance between a point and a curve at which it is determined to be a point on the curve
-				double _pointOnCurveTolerance;
+				IXLoggingService^ LoggerService;				
+				IXModelService^ ModelService;
+				
 				
 			public:
-				CurveFactory(LoggingService^ loggingService, IModel^ ifcModel) : XbimHandle(new NCurveFactory(loggingService))
+				CurveFactory(IXLoggingService^ loggingService, IXModelService^ modelService) : XbimHandle(new NCurveFactory())
 				{
 					GpFactory = gcnew GeomProcFactory();
 					LoggerService = loggingService;
-					Logger = LoggerService->Logger;
-					_modelTolerance = ifcModel->ModelFactors->Precision;
-					_radiansFactor = ifcModel->ModelFactors->AngleToRadiansConversionFactor;
-					_pointOnCurveTolerance = _modelTolerance * 10;
+					ModelService = modelService;
+					NLoggingService* logService = new NLoggingService();
+					logService->SetLogger(static_cast<WriteLog>(loggingService->LogDelegatePtr.ToPointer()));
+					Ptr()->SetLogger(logService);
 				}
 				
 				//Top level abstraction for building any curve
@@ -59,7 +53,7 @@ namespace Xbim
 				IXCurve^ BuildXCurve(Handle(Geom_Curve) curve, XCurveType curveType);
 				IXCurve^ BuildXCurve(Handle(Geom2d_Curve) curve, XCurveType curveType);
 				//Geometry builders
-				IXCurve^ Build(IIfcCurve^ curve);
+				virtual IXCurve^ Build(IIfcCurve^ curve);
 				Handle(Geom_Curve) BuildGeom3d(IIfcCurve^ curve, XCurveType %curveType);
 				Handle(Geom2d_Curve) BuildGeom2d(IIfcCurve^ curve, XCurveType %curveType);
 

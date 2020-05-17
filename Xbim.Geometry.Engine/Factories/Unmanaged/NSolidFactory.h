@@ -14,6 +14,12 @@ public:
 	{		
 		TopoDS_Builder builder;
 		builder.MakeSolid(_emptySolid); //make an empty solid for failing operations
+		pLoggingService = nullptr;
+	};
+	~NSolidFactory()
+	{
+		if (pLoggingService != nullptr) delete pLoggingService;
+		pLoggingService = nullptr;
 	};
 	void SetLogger(NLoggingService* loggingService) { pLoggingService = loggingService; };
 	TopoDS_Solid EmptySolid() { return _emptySolid; }

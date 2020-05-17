@@ -20,23 +20,22 @@ namespace Xbim
 			public ref class ProfileFactory : XbimHandle<NProfileFactory>
 			{
 			private:
-				LoggingService^ LoggerService;
-				ILogger^ Logger;
-				IModel^ _ifcModel;
-				//The distance between two points at which they are determined to be equal points
-				double _modelTolerance;
+				IXLoggingService^ LoggerService;
+				
+				IXModelService^ _ifcModel;				
 				GeomProcFactory^ _gpFactory;
 				CurveFactory^ _curveFactory;
 				WireFactory^ _wireFactory;
 			public:
-				ProfileFactory(LoggingService^ loggingService, IModel^ ifcModel) : XbimHandle(new NProfileFactory(loggingService))
+				ProfileFactory(IXLoggingService^ loggingService, IXModelService^ ifcModel) : XbimHandle(new NProfileFactory())
 				{
-					LoggerService = loggingService;
-					Logger = LoggerService->Logger;
-					_modelTolerance = ifcModel->ModelFactors->Precision;
+					LoggerService = loggingService;									
 					_ifcModel = ifcModel;
 					_gpFactory = gcnew GeomProcFactory();
 					_wireFactory = gcnew WireFactory(loggingService, ifcModel);
+					NLoggingService* logService = new NLoggingService();
+					logService->SetLogger(static_cast<WriteLog>(loggingService->LogDelegatePtr.ToPointer()));
+					Ptr()->SetLogger(logService);
 				}
 
 				//Returns a compound where the CURVE profiles that have more than one wire, a wire for profiles that are defined as CURVES with one wire or a face for AREA types

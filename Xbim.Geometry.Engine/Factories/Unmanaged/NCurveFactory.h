@@ -25,15 +25,19 @@ private:
 public:
 
 	
-	NCurveFactory(NLoggingService* loggingService)
+	NCurveFactory()
 	{
-		pLoggingService = loggingService;
+		pLoggingService = nullptr;
 	};
-
+	~NCurveFactory()
+	{
+		if (pLoggingService != nullptr) delete pLoggingService;
+		pLoggingService = nullptr;
+	};
 #pragma region Geometric methods
 
 
-
+	void SetLogger(NLoggingService* loggingService) { pLoggingService = loggingService; };
 	Handle(Geom2d_LineWithMagnitude) BuildLine2d(gp_Pnt2d pnt, gp_Dir2d dir, double magnitude);
 	Handle(Geom_LineWithMagnitude) BuildLine3d(gp_Pnt pnt, gp_Dir dir, double magnitude);
 

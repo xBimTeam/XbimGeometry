@@ -10,11 +10,16 @@ private:
 	NLoggingService* pLoggingService;
 public:
 
-	NEdgeFactory(NLoggingService* loggingService)
+	NEdgeFactory()
 	{
-		pLoggingService = loggingService;
+		pLoggingService = nullptr;
 	};
-
+	~NEdgeFactory()
+	{
+		if(pLoggingService!=nullptr) delete pLoggingService;
+		pLoggingService = nullptr;
+	};
+	void SetLogger(NLoggingService* loggingService) { pLoggingService = loggingService; };
 	TopoDS_Edge BuildEdge(Handle(Geom_Curve) hCurve);
 	TopoDS_Edge BuildEdge(Handle(Geom2d_Curve) hCurve);
 };

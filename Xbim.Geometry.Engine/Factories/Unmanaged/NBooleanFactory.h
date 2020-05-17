@@ -15,6 +15,11 @@ public:
 		TopoDS_Builder builder;
 		builder.MakeSolid(_emptySolid); //make an empty solid for failing operations
 	};
+	~NBooleanFactory()
+	{
+		if (pLoggingService != nullptr) delete pLoggingService;
+		pLoggingService = nullptr;
+	};
 	void SetLogger(NLoggingService* loggingService) { pLoggingService = loggingService; };
 	void SetFuzzyTolerance(double fuzzyTolerance) { _fuzzyTolerance = fuzzyTolerance; };
 	double GetFuzzyTolerance() { return _fuzzyTolerance; };

@@ -10,11 +10,16 @@ class NProfileFactory
 	TopoDS_Face _emptyFace;
 public:
 
-	NProfileFactory(NLoggingService* loggingService)
+	NProfileFactory()
 	{
-		pLoggingService = loggingService;
+		pLoggingService = nullptr;
 		builder.MakeFace(_emptyFace);
 	};
+	~NProfileFactory()
+	{
+		delete pLoggingService;
+	};
+	void SetLogger(NLoggingService* loggingService) { pLoggingService = loggingService; };
 	TopoDS_Compound MakeCompound(const TopoDS_Shape& shape1, const TopoDS_Shape& shape2);
 	TopoDS_Face MakeFace(const TopoDS_Wire& wire, Handle(Geom_Surface) surface);
 };

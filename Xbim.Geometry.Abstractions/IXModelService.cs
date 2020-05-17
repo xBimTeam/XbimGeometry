@@ -16,5 +16,9 @@
         /// Mostly only relevant to Boolean operations
         /// </summary>
         double MinimumGap { get; set; }
+        /// <summary>
+        /// The factor to convert model angles to radians, for a radian unit this = 1 and for a degree unit = PI/180;
+        /// </summary>
+        double RadianFactor { get; }
     }
 }

@@ -334,9 +334,9 @@ namespace Xbim
 						(cp1 != nullptr && cp2 != nullptr &&
 							(double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)))) //we want cartesian and we have both or we don't have both parameters but have cartesians
 					{
-						if (!GeomLib_Tool::Parameter(basisCurve, p1, _pointOnCurveTolerance, u1))
+						if (!GeomLib_Tool::Parameter(basisCurve, p1, ModelService->MinimumGap, u1))
 							throw gcnew XbimGeometryFactoryException("Trim Point1 is not on the basis curve");
-						if (!GeomLib_Tool::Parameter(basisCurve, p2, _pointOnCurveTolerance, u2))
+						if (!GeomLib_Tool::Parameter(basisCurve, p2, ModelService->MinimumGap, u2))
 							throw gcnew XbimGeometryFactoryException("Trim Point2 is not on the basis curve");
 					}
 					else if (double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)) //non-compliant
@@ -345,8 +345,8 @@ namespace Xbim
 					{
 						if (isConic)
 						{
-							u1 *= _radiansFactor; //correct to radians
-							u2 *= _radiansFactor; //correct to radians
+							u1 *= ModelService->RadianFactor; //correct to radians
+							u2 *= ModelService->RadianFactor; //correct to radians
 						}
 					}
 					if (double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)) //sanity check in case the logic has missed a situtation
@@ -398,9 +398,9 @@ namespace Xbim
 						(cp1 != nullptr && cp2 != nullptr &&
 							(double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)))) //we want cartesian and we have both or we don't have both parameters but have cartesians
 					{
-						if (!GeomLib_Tool::Parameter(basisCurve, p1, _pointOnCurveTolerance, u1))
+						if (!GeomLib_Tool::Parameter(basisCurve, p1, ModelService->MinimumGap, u1))
 							throw gcnew XbimGeometryFactoryException("Trim Point1 is not on the basis curve");
-						if (!GeomLib_Tool::Parameter(basisCurve, p2, _pointOnCurveTolerance, u2))
+						if (!GeomLib_Tool::Parameter(basisCurve, p2, ModelService->MinimumGap, u2))
 							throw gcnew XbimGeometryFactoryException("Trim Point2 is not on the basis curve");
 					}
 					else if (double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)) //non-compliant
@@ -409,8 +409,8 @@ namespace Xbim
 					{
 						if (isConic)
 						{
-							u1 *= _radiansFactor; //correct to radians
-							u2 *= _radiansFactor; //correct to radians
+							u1 *= ModelService->RadianFactor; //correct to radians
+							u2 *= ModelService->RadianFactor; //correct to radians
 						}
 					}
 					if (double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)) //sanity check in case the logic has missed a situtation

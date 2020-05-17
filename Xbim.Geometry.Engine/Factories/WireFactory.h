@@ -20,11 +20,11 @@ namespace Xbim
 			public ref class WireFactory : XbimHandle<NWireFactory>
 			{
 			private:
-				LoggingService^ LoggerService;
-				ILogger^ Logger;
-				IModel^ _ifcModel;
+				IXLoggingService^ LoggerService;
+				
+				IXModelService^ ModelService;
 				//The distance between two points at which they are determined to be equal points
-				double _modelTolerance;
+				
 				GeomProcFactory^ _gpFactory;
 				CurveFactory^ _curveFactory;
 				TopoDS_Wire Build2d(IIfcCurve^ ifcCurve, Handle(Geom_Surface)& surface);
@@ -32,13 +32,14 @@ namespace Xbim
 				TopoDS_Wire Build2dCircle(IIfcCircle^ ifcCircle, Handle(Geom_Surface)& surface);
 				
 			public:
-				WireFactory(LoggingService^ loggingService, IModel^ ifcModel) : XbimHandle(new NWireFactory(loggingService))
+				WireFactory(IXLoggingService^ loggingService, IXModelService^ ifcModel) : XbimHandle(new NWireFactory())
 				{
-					LoggerService = loggingService;
-					Logger = LoggerService->Logger;
-					_modelTolerance = ifcModel->ModelFactors->Precision;
+					LoggerService = loggingService;										
 					_gpFactory = gcnew GeomProcFactory();
 					_curveFactory = gcnew CurveFactory(loggingService,ifcModel);
+					NLoggingService* logService = new NLoggingService();
+					logService->SetLogger(static_cast<WriteLog>(loggingService->LogDelegatePtr.ToPointer()));
+					Ptr()->SetLogger(logService);
 				}
 				//Builds an IfcCurve as a TopoDS_Wire
 				TopoDS_Wire Build(IIfcCurve^ ifcCurve, Handle(Geom_Surface)& surface);
