@@ -24,6 +24,7 @@ namespace Xbim.Geometry.NetCore.Tests
     [TestClass]
     public class CurveFactoryTests
     {
+        #region Class Setup
         static IHost serviceHost;
         static IModel model;
 
@@ -40,7 +41,9 @@ namespace Xbim.Geometry.NetCore.Tests
         Host.CreateDefaultBuilder()
             .ConfigureServices((hostContext, services) =>
             {
-                services.AddHostedService<LoggingService>();
+                services.AddHostedService<GeometryServicesHost>()
+                .AddSingleton<IXLoggingService, LoggingService>()
+                .AddSingleton<IXShapeService, ShapeService>(); ;
             })
         .ConfigureLogging((hostContext, loggingBuilder) =>
         {
@@ -60,18 +63,10 @@ namespace Xbim.Geometry.NetCore.Tests
         {
             model = null;
             await serviceHost.StopAsync();
-        }
+        } 
+        #endregion
 
-        [TestMethod]
-        public void Can_raise_exception_with_bad_direction()
-        {
-
-            //using (var lineFactory = new LineFactory(LoggingService))
-            //{
-            //    //illegal vector
-            //    Assert.ThrowsException<XbimGeometryFactoryException>(() => lineFactory.Direction = new XbimVector3D(0, 0, 0));
-            //}
-        }
+        
         #region Line Tests
 
         [DataTestMethod]

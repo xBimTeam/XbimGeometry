@@ -4,7 +4,15 @@ Master | [![Build Status](https://dev.azure.com/xBIMTeam/xBIMToolkit/_apis/build
 Develop | [![Build Status](https://dev.azure.com/xBIMTeam/xBIMToolkit/_apis/build/status/xBimTeam.XbimGeometry?branchName=develop)](https://dev.azure.com/xBIMTeam/xBIMToolkit/_build/latest?definitionId=3&branchName=develop) | ![](https://img.shields.io/myget/xbim-develop/vpre/Xbim.Geometry.svg) | -
 
 # Version 6
-The key goal for version 6 of the geometry engine are to support net core 3
+The key goal for version 6 of the geometry engine are 
+
+To support net core 3
+To resolve the issues of booleans and model precision
+To provide more transparency of the geometry results (Curves and loss of data)
+To provide clear divison between managed code and unmanaged code
+To improve performance by reducing nativ to managed transitions
+To support asyn operation
+To implement a service/factory pattern with dependency injection
 
 The first pass will make a clear divide between the native code and the managed code.
 A factory pattern will be implemented for building each of the topological and geometric types these will include

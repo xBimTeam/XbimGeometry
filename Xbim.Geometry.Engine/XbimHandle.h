@@ -15,13 +15,15 @@ struct DefDeleter
 template <typename T, typename D = DefDeleter<T>>
 public ref class XbimHandle : SH
 {
+internal:
+	T* Ptr() { return static_cast<T*>(handle.ToPointer()); }
 protected:
 	XbimHandle(T* p) : SH(PtrType::Zero, true)
 	{
 		handle = PtrType(p);
 	}
 
-	T* Ptr() { return static_cast<T*>(handle.ToPointer()); }
+	
 
 	bool ReleaseHandle() override
 	{
@@ -42,6 +44,7 @@ public:
 			return (handle == PtrType::Zero);
 		}
 	}
+	
 };
 
 

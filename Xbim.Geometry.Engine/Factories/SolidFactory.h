@@ -15,27 +15,30 @@ namespace Xbim
 	{
 		namespace Factories
 		{
-			public ref class SolidFactory : XbimHandle<NSolidFactory>
+			public ref class SolidFactory : XbimHandle<NSolidFactory>, IXSolidService
 			{
-				LoggingService^ LoggerService;
-				ILogger^ Logger;
-				IModel^ _ifcModel;
+				IXLoggingService^ LoggerService;			
+				IXModelService^ ModelService;
+
 				//The distance between two points at which they are determined to be equal points
-				double _modelTolerance;
+				
 				GeomProcFactory^ _gpFactory;
+				virtual property double ModelTolerance  {double get() sealed { return ModelService->Precision; } };
 			public:
-				SolidFactory(LoggingService^ loggingService, IModel^ ifcModel) : XbimHandle(new NSolidFactory(loggingService))
+				SolidFactory(IXLoggingService^ loggingService, IXModelService^ modelService) : XbimHandle(new NSolidFactory())
 				{
-					LoggerService = loggingService;
-					Logger = LoggerService->Logger;
-					_modelTolerance = ifcModel->ModelFactors->Precision;
-					_ifcModel = ifcModel;
+					LoggerService = loggingService;					
 					_gpFactory = gcnew GeomProcFactory();
+					NLoggingService* logService = new NLoggingService();
+					logService->SetLogger(static_cast<WriteLog>(loggingService->LogDelegatePtr.ToPointer()));
+					Ptr()->SetLogger(logService);
 				}
 				//Builds all IfcSolidModels
 				//throws XbimGeometryFactoryException if the solid cannot be built
-				IXSolid^ Build(IIfcSolidModel^ ifcSolid);
-				IXSolid^ Build(IIfcCsgPrimitive3D^ ifcCsgPrimitive);
+				
+				virtual IXSolid^ Build(IIfcSolidModel^ ifcSolid);
+				virtual IXSolid^ Build(IIfcCsgPrimitive3D^ ifcCsgPrimitive);
+				virtual IXSolid^ Build(IIfcBooleanOperand^ boolOperand);
 				TopoDS_Solid BuildSolidModel(IIfcSolidModel^ ifcSolid);
 #pragma region CSG solids
 				TopoDS_Solid BuildCsgSolid(IIfcCsgSolid^ ifcCsgSolid);

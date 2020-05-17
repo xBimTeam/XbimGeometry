@@ -19,6 +19,7 @@ namespace Xbim
 					shells->Add(gcnew XbimShell(TopoDS::Shell(shellEx.Current())));
 				return shells;
 			}
+
 			String^ XbimSolid::BRepDefinition()
 			{
 				std::ostringstream oss;

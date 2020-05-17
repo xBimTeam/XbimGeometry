@@ -9,7 +9,7 @@ using namespace System::Runtime::InteropServices;
 using namespace System::Threading::Tasks;
 using namespace System::Threading;
 using namespace System;
-
+using namespace Xbim::Geometry::Abstractions;
 namespace Xbim
 {
 	namespace Geometry
@@ -19,7 +19,7 @@ namespace Xbim
 
 			public delegate void LogDelegate(int logLevel, String^ str);
 
-			public ref class LoggingService : XbimHandle<NLoggingService>, public IHostedService
+			public ref class LoggingService : XbimHandle<NLoggingService>, public IXLoggingService
 			{
 			private:
 				ILogger^ _logger;
@@ -28,40 +28,28 @@ namespace Xbim
 				GCHandle gchLogWriter;
 
 			public:
-				LoggingService(ILogger<LoggingService^>^ logger, IHostApplicationLifetime^ appLifetime) : XbimHandle(new NLoggingService())
+				LoggingService(ILogger<LoggingService^>^ logger) : XbimHandle(new NLoggingService())
 				{
-					_logger = logger;
-					_appLifetime = appLifetime;
-				};
-				
-				virtual property ILogger^ Logger {ILogger^  get() { return _logger; }};
-				void LogCritical(String^ logMsg);
-
-				void LogError(String^ logMsg);
-
-				void LogWarning(String^ logMsg);
-
-				void LogInformation(String^ logMsg);
-
-				void LogDebug(String^ logMsg);
-				virtual operator NLoggingService* ()  { return this->Ptr(); }
-
-				virtual Task^ StartAsync(System::Threading::CancellationToken cancellationToken)
-				{
-
+					_logger = logger;					
 					LogWriter = gcnew LogDelegate(this, &LoggingService::Log);
 					gchLogWriter = GCHandle::Alloc(LogWriter);
 					IntPtr ip = Marshal::GetFunctionPointerForDelegate(LogWriter);
-					this->Ptr()->SetLogger(static_cast<WriteLog>(ip.ToPointer()));
-					return Task::CompletedTask;
+					this->Ptr()->SetLogger(static_cast<WriteLog>(ip.ToPointer()));				
 				};
-
-				virtual Task^ StopAsync(System::Threading::CancellationToken cancellationToken)
+				bool ReleaseHandle() override
 				{
-					LogWriter = nullptr;
 					gchLogWriter.Free();
-					return Task::CompletedTask;
-				};
+					return XbimHandle::ReleaseHandle();
+				}
+				virtual property ILogger^ Logger {ILogger^  get() { return _logger; }};
+				virtual void LogCritical(String^ logMsg);
+				virtual void LogError(String^ logMsg);
+				virtual void LogWarning(String^ logMsg);
+				virtual void LogInformation(String^ logMsg);
+				virtual void LogDebug(String^ logMsg);
+				virtual operator NLoggingService* ()  { return this->Ptr(); }
+				virtual property IntPtr LogDelegatePtr {IntPtr get() { return Marshal::GetFunctionPointerForDelegate(LogWriter); }};
+				
 
 				void Log(int logLevel, String^ msg)
 				{

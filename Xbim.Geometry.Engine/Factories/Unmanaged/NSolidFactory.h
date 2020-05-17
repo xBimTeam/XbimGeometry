@@ -1,5 +1,5 @@
 #pragma once
-#include "../../Services//Unmanaged/NLoggingService.h"
+#include "../../Services/Unmanaged/NLoggingService.h"
 #include <TopoDS_Solid.hxx>
 #include <TopoDS_Builder.hxx>
 class NSolidFactory
@@ -10,12 +10,13 @@ private:
 	TopoDS_Solid _emptySolid;
 public:
 
-	NSolidFactory(NLoggingService* loggingService)
-	{
-		pLoggingService = loggingService;
+	NSolidFactory()
+	{		
 		TopoDS_Builder builder;
 		builder.MakeSolid(_emptySolid); //make an empty solid for failing operations
 	};
+	void SetLogger(NLoggingService* loggingService) { pLoggingService = loggingService; };
+	TopoDS_Solid EmptySolid() { return _emptySolid; }
 	TopoDS_Solid BuildBlock(gp_Ax2 ax2, double xLength, double yLength, double zLength);
 	TopoDS_Solid BuildRectangularPyramid(gp_Ax2 ax2, double xLength, double yLength, double height);
 	TopoDS_Solid BuildRightCircularCone(gp_Ax2 ax2, double radius, double height);

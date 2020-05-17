@@ -14,4 +14,8 @@
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Xbim.Ifc4" Version="5.1.297" />
+  </ItemGroup>
+
 </Project>

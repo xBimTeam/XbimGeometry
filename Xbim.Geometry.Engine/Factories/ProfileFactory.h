@@ -1,11 +1,11 @@
 #include "../XbimHandle.h"
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Compound.hxx>
-#include "./Unmanaged/NWireFactory.h"
+#include "./Unmanaged/NProfileFactory.h"
 #include "../Services/LoggingService.h"
 #include "GeomProcFactory.h"
 #include "CurveFactory.h"
-#include <BRep_Builder.hxx>
+#include "WireFactory.h"
 using namespace Xbim::Geometry::Services;
 using namespace Xbim::Common;
 using namespace Xbim::Ifc4::Interfaces;
@@ -17,7 +17,7 @@ namespace Xbim
 	{
 		namespace Factories
 		{
-			public ref class WireFactory : XbimHandle<NWireFactory>
+			public ref class ProfileFactory : XbimHandle<NProfileFactory>
 			{
 			private:
 				LoggingService^ LoggerService;
@@ -27,24 +27,22 @@ namespace Xbim
 				double _modelTolerance;
 				GeomProcFactory^ _gpFactory;
 				CurveFactory^ _curveFactory;
-				TopoDS_Wire Build2d(IIfcCurve^ ifcCurve, Handle(Geom_Surface)& surface);
-				TopoDS_Wire Build3d(IIfcCurve^ ifcCurve, Handle(Geom_Surface)& surface);
-				TopoDS_Wire Build2dCircle(IIfcCircle^ ifcCircle, Handle(Geom_Surface)& surface);
-				
+				WireFactory^ _wireFactory;
 			public:
-				WireFactory(LoggingService^ loggingService, IModel^ ifcModel) : XbimHandle(new NWireFactory(loggingService))
+				ProfileFactory(LoggingService^ loggingService, IModel^ ifcModel) : XbimHandle(new NProfileFactory(loggingService))
 				{
 					LoggerService = loggingService;
 					Logger = LoggerService->Logger;
 					_modelTolerance = ifcModel->ModelFactors->Precision;
+					_ifcModel = ifcModel;
 					_gpFactory = gcnew GeomProcFactory();
-					_curveFactory = gcnew CurveFactory(loggingService,ifcModel);
+					_wireFactory = gcnew WireFactory(loggingService, ifcModel);
 				}
-				//Builds an IfcCurve as a TopoDS_Wire
-				TopoDS_Wire Build(IIfcCurve^ ifcCurve, Handle(Geom_Surface)& surface);
-				
-			};
 
+				//Returns a compound where the CURVE profiles that have more than one wire, a wire for profiles that are defined as CURVES with one wire or a face for AREA types
+				TopoDS_Shape Build(IIfcProfileDef^ profileDef);
+				TopoDS_Shape Build(IIfcArbitraryClosedProfileDef^ arbitraryClosedProfile);
+			};
 		}
 	}
 }

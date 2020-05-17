@@ -7,13 +7,7 @@ namespace Xbim.Geometry.NetCore.Tests
 {
     public static partial class IfcMoq
     {
-        private static Mock<T> MakeMoq<T>() where T : class
-        {
-            return new Mock<T>()
-            { DefaultValue = DefaultValue.Mock, DefaultValueProvider = new MoqDefaultBehaviourProvider() }
-                       .SetupAllProperties();
-        }
-
+        
         public static IIfcBlock IfcBlockMoq(IIfcAxis2Placement3D position = null, double xLen = 10, double yLen = 10, double zLen = 10)
         {
             var blockMoq = MakeMoq<IIfcBlock>();

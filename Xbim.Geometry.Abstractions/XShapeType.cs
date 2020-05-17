@@ -7,6 +7,7 @@
         Wire,
         Face,
         Shell,
-        Solid
+        Solid,
+        Compound
     }
 }

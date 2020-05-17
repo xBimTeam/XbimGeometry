@@ -23,6 +23,28 @@ namespace Xbim
                 return gcnew XbimSolid(topoSolid);
             }
 
+            IXSolid^ SolidFactory::Build(IIfcBooleanOperand^ boolOperand)
+            {
+                XBooleanOperandType boolOpType;
+                if (!Enum::TryParse<XBooleanOperandType>(boolOperand->ExpressType->ExpressName, boolOpType))
+                    throw gcnew XbimGeometryFactoryException("Unsupported BooleanOperand type: " + boolOperand->ExpressType->ExpressName);
+               
+                switch (boolOpType)
+                {
+                case XBooleanOperandType::IfcSolidModel:
+                    break;
+                case XBooleanOperandType::IfcHalfSpaceSolid:
+                    break;
+                case XBooleanOperandType::IfcCsgPrimitive3D:
+                    return Build(static_cast<IIfcCsgPrimitive3D^>(boolOperand));
+                case XBooleanOperandType::IfcTessellatedFaceSet:
+                    break;
+                default:
+                    break;
+                }
+                throw gcnew XbimGeometryFactoryException("Not implemented. BooleanOperand type: " + boolOpType.ToString());
+            }
+
             ///this method builds all solid models and is the main entry point
             //all methods called will throw an excpetion if they cannot build their part of a solid
             TopoDS_Solid SolidFactory::BuildSolidModel(IIfcSolidModel^ ifcSolid)
