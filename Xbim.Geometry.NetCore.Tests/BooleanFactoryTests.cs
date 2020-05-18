@@ -183,5 +183,32 @@ namespace Xbim.Geometry.NetCore.Tests
 
 
         }
+        [DataTestMethod]
+        [DataRow(10, 5, true)] //should result in a block of length x = 5
+        [DataRow(10, -5, true)] //should result in a block of length x = 5
+        [DataRow(10, 9.5, false)] //techncially a failure to intesect as  within tolerance  of 1mm
+        [DataRow(10, -10.5, false)] //techncially a failure to intesect as  within tolerance  of 1mm
+        public void Can_intersect_two_blocks(double lenX, double dispX, bool intersects)
+        {
+            //by default these blocks are all lenX =10, lenY = 20, lenZ = 30
+            var booleanResult = IfcMoq.IfcBooleanResultMoq(
+                boolOp: Ifc4.Interfaces.IfcBooleanOperator.INTERSECTION,
+                lenX: lenX,
+                displacementX: dispX);
+            var booleanFactory = _modelScope.ServiceProvider.GetRequiredService<IXBooleanService>();
+            if (!intersects) //will always return an empty shape
+                Assert.ThrowsException<XbimGeometryFactoryException>(() => booleanFactory.Build(booleanResult));
+            else
+            {
+                var shape = booleanFactory.Build(booleanResult);
+                Assert.IsTrue(shape.ShapeType == XShapeType.Compound);
+                var compound = shape as IXCompound;
+                var def = compound.BRepDefinition();
+                Assert.IsTrue(compound.IsSolidsOnly && compound.Solids.Count() == 1); //will only be one
+                var solid = compound.Solids.First();
+                var box = solid.Bounds();
+                 Assert.AreEqual(box.LenX, lenX - Math.Abs(dispX), 1e-5);                
+            }
+        }
     }
 }

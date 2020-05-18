@@ -52,7 +52,7 @@ namespace Xbim
 				case IfcBooleanOperator::DIFFERENCE:
 					return _shapeService->UnifyDomain(Ptr()->Cut(firstSolid, secondSolid));
 				case IfcBooleanOperator::INTERSECTION:
-					//break;
+					return _shapeService->UnifyDomain(Ptr()->Intersect(firstSolid, secondSolid));
 				default:
 					throw gcnew XbimGeometryFactoryException("Not implemented. BooleanOperation type: " + boolResult->Operator.ToString());
 					//break;

@@ -103,3 +103,45 @@ TopoDS_Shape NBooleanFactory::Cut(const TopoDS_Solid& left, const TopoDS_Solid& 
 	pLoggingService->LogWarning("Failed to cut solids");
 	return _emptySolid; //return empty so we fire a managed exception
 }
+
+TopoDS_Shape NBooleanFactory::Intersect(const TopoDS_Solid& left, const TopoDS_Solid& right)
+{
+	//Intersection of two solids can  return one or no solids if left or right are empty shapes
+	//then there can be no intersection
+	if (left.IsNull() || right.IsNull())
+	{
+		pLoggingService->LogWarning("Attempt to Intersect one or more empty solids. Result is an empty solid");
+		return _emptySolid;
+	}
+	//try and intersect
+	try
+	{
+		BRepAlgoAPI_BooleanOperation bop;
+		TopTools_ListOfShape arguments;
+		TopTools_ListOfShape tools;
+		arguments.Append(left);
+		tools.Append(right);
+		bop.SetArguments(arguments);
+		bop.SetTools(tools);
+		bop.SetOperation(BOPAlgo_Operation::BOPAlgo_COMMON);
+		bop.SetRunParallel(false);
+		//aBOP.SetCheckInverted(true);
+		bop.SetNonDestructive(true);
+		bop.SetFuzzyValue(_fuzzyTolerance);
+
+		bop.Build();
+		if (bop.IsDone()) //work out what to do in this situation
+		{
+			return bop.Shape();
+		}
+		/*Handle(XbimProgressIndicator) pi = new XbimProgressIndicator(timeout);
+		aBOP.SetProgressIndicator(pi);*/
+
+	}
+	catch (Standard_Failure e)
+	{
+		pLoggingService->LogWarning(e.GetMessageString());
+	}
+	pLoggingService->LogWarning("Failed to intersect solids");
+	return _emptySolid; //return empty so we fire a managed exception
+}

@@ -27,5 +27,7 @@ public:
 	TopoDS_Shape Union(const TopoDS_Solid& left, const TopoDS_Solid& right);
 	//Difference between two solids
 	TopoDS_Shape Cut(const TopoDS_Solid& left, const TopoDS_Solid& right);
+	//Intersection of two shapes
+	TopoDS_Shape Intersect(const TopoDS_Solid& left, const TopoDS_Solid& right);
 };
 
