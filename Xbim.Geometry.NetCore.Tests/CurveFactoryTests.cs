@@ -4,20 +4,13 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Diagnostics;
 
 using Xbim.Geometry.Services;
-using Xbim.Common.Geometry;
 using Xbim.Geometry.Exceptions;
-using Xbim.Ifc4;
-using Xbim.IO.Memory;
-using Xbim.Common;
-using Xbim.Ifc2x3.GeometryResource;
-using Xbim.Ifc4.Interfaces;
 using Xbim.Geometry.Factories;
 using Xbim.Geometry.Abstractions;
-using Moq;
-using Xbim.Ifc4.MeasureResource;
+using Extensions.Logging.ListOfString;
+using System.Collections.Generic;
 
 namespace Xbim.Geometry.NetCore.Tests
 {
@@ -49,7 +42,7 @@ namespace Xbim.Geometry.NetCore.Tests
             })
         .ConfigureLogging((hostContext, loggingBuilder) =>
         {
-            loggingBuilder.AddConsole((config) => config.IncludeScopes = true).AddDebug();
+            loggingBuilder.AddProvider(new StringListLoggerProvider(new StringListLogger(new List<string>(), name: "LoggingService")));
         });
 
 

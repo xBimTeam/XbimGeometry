@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Extensions.Logging.ListOfString;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -43,7 +44,7 @@ namespace Xbim.Geometry.NetCore.Tests
                 })
             .ConfigureLogging((hostContext, loggingBuilder) =>
             {
-                loggingBuilder.AddConsole((config) => config.IncludeScopes = true).AddDebug();
+                loggingBuilder.AddProvider(new StringListLoggerProvider(new StringListLogger(new List<string>(), name: "LoggingService")));
             });
 
         private IXLoggingService LoggingService

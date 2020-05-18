@@ -5,9 +5,7 @@ namespace Xbim
 	{
 		namespace Factories
 		{
-
-
-			TopoDS_Shape Xbim::Geometry::Factories::ProfileFactory::Build(IIfcProfileDef^ profileDef)
+			TopoDS_Shape ProfileFactory::Build(IIfcProfileDef^ profileDef)
 			{
 				XProfileDefType profileType;
 				if (!Enum::TryParse<XProfileDefType>(profileDef->ExpressType->ExpressName, profileType))

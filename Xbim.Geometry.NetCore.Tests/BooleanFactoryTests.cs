@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Extensions.Logging.ListOfString;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -45,7 +46,7 @@ namespace Xbim.Geometry.NetCore.Tests
             })
         .ConfigureLogging((hostContext, loggingBuilder) =>
         {
-            loggingBuilder.AddConsole((config) => config.IncludeScopes = true).AddDebug();
+            loggingBuilder.AddProvider(new StringListLoggerProvider(new StringListLogger(new List<string>(), name: "LoggingService")));
         });
 
 
@@ -75,7 +76,7 @@ namespace Xbim.Geometry.NetCore.Tests
             }
             Assert.AreEqual(1, solid.Shells.Count()); //one shell
             Assert.AreEqual(6, solid.Shells.First().Faces.Count()); //6 faces
-            var def = solid.BRepDefinition();
+            //var def = solid.BRepDefinition();
 
         }
         /// <summary>
@@ -112,7 +113,7 @@ namespace Xbim.Geometry.NetCore.Tests
                 var solid = shape as IXSolid;
                 if (compound != null)
                 {
-                    var def = compound.BRepDefinition();
+                    //var def = compound.BRepDefinition();
                     Assert.IsTrue(compound.IsSolidsOnly && compound.Solids.Count() == 1);
                     solid = compound.Solids.First();
 
@@ -125,7 +126,7 @@ namespace Xbim.Geometry.NetCore.Tests
 
                 Assert.IsTrue(shape.ShapeType == XShapeType.Compound);
                 var compound = shape as IXCompound;
-                var def = compound.BRepDefinition();
+                //var def = compound.BRepDefinition();
                 Assert.IsTrue(compound.IsSolidsOnly);
                 Assert.AreEqual(2, compound.Solids.Count());
             }

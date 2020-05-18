@@ -33,12 +33,20 @@ namespace Xbim
 					_logger = logger;					
 					LogWriter = gcnew LogDelegate(this, &LoggingService::Log);
 					gchLogWriter = GCHandle::Alloc(LogWriter);
+					LogInformation("Native Logger handle obtained");
 					IntPtr ip = Marshal::GetFunctionPointerForDelegate(LogWriter);
-					this->Ptr()->SetLogger(static_cast<WriteLog>(ip.ToPointer()));				
+					this->Ptr()->SetLogger(static_cast<WriteLog>(ip.ToPointer()));
+					
 				};
 				bool ReleaseHandle() override
 				{
-					gchLogWriter.Free();
+					if (gchLogWriter.IsAllocated)
+					{
+						gchLogWriter.Free();
+						LogInformation("Native Logger handle released");
+					}
+					else
+						LogInformation("Duplicate call to release Native Logger");
 					return XbimHandle::ReleaseHandle();
 				}
 				virtual property ILogger^ Logger {ILogger^  get() { return _logger; }};

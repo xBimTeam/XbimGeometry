@@ -5,8 +5,7 @@ WriteLog LoggerFunc;
 void NLoggingService::SetLogger(WriteLog lFunc)
 {
 	LoggerFunc = lFunc;
-	LoggerFunc(2, "Loading Native Logging Function");
-	LogInformation("Native Logging Initialised");
+	LogInformation("Native Logger attached");
 }
 
 void NLoggingService::LogCritical(const char* logMsg) 
