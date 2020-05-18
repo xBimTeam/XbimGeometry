@@ -1,5 +1,5 @@
 #pragma once
-#include "../XbimHandle.h"
+#include "XbimShape.h"
 #include <TopoDS_Face.hxx>
 
 
@@ -12,11 +12,11 @@ namespace Xbim
 	{
 		namespace BRep
 		{
-			public ref class XbimFace : XbimHandle<TopoDS_Face>, IXFace
+			public ref class XbimFace : public XbimShape<TopoDS_Face>, IXFace
 			{
 			public:
-				XbimFace(const TopoDS_Face& hFace) :XbimHandle(new TopoDS_Face(hFace)) { };
-				virtual property XShapeType ShapeType { XShapeType get() { return XShapeType::Face; } };
+				XbimFace(const TopoDS_Face& hFace) :XbimShape(new TopoDS_Face(hFace)) { };
+				virtual property XShapeType ShapeType { XShapeType get() override { return XShapeType::Face; } };
 				virtual property double Tolerance { double get(); };
 				virtual property IXWire^ OuterBound {IXWire^ get(); };
 				virtual property IEnumerable<IXWire^>^ InnerBounds {IEnumerable<IXWire^>^ get(); };

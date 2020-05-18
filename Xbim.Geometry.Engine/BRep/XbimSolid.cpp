@@ -1,8 +1,11 @@
 #include "XbimSolid.h"
 #include "XbimShell.h"
+#include "XbimAxisAlignedBox.h"
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
-#include <BRepTools.hxx>
+#include <Bnd_Box.hxx>
+#include <BRepBndLib.hxx>
+
 using namespace System::Linq;
 namespace Xbim
 {
@@ -20,13 +23,7 @@ namespace Xbim
 				return shells;
 			}
 
-			String^ XbimSolid::BRepDefinition()
-			{
-				std::ostringstream oss;
-				oss << "DBRep_DrawableShape" << std::endl;
-				BRepTools::Write(OccHandle(), oss);
-				return gcnew String(oss.str().c_str());
-			}
+			
 		}
 	}
 }

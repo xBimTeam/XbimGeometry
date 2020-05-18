@@ -4,7 +4,7 @@ namespace Xbim.Geometry.Abstractions
 {
     public interface IXSolid : IXShape
     {
-        public string BRepDefinition();
-        IEnumerable<IXShell> Shells { get; }
+      
+        IEnumerable<IXShell> Shells { get; }       
     }
 }

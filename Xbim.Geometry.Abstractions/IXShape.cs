@@ -3,6 +3,8 @@
     public interface IXShape
     {
         XShapeType ShapeType { get; }
-      // string OccString { get; }
+        //calculates the bounding box of the shape
+        IXAxisAlignedBoundingBox Bounds();
+       string Brep { get; }
     }
 }

@@ -16,7 +16,7 @@ namespace Xbim
 			IXShape^ BooleanFactory::Build(IIfcBooleanResult^ boolResult)
 			{
 				TopoDS_Shape result = BuildBooleanResult(boolResult);
-				if (result.IsNull())
+				if (result.IsNull() || result.NbChildren()==0)
 					throw gcnew XbimGeometryFactoryException("Solid result is an empty shape");
 				//find the actual type and return appropriately
 				switch (result.ShapeType())
@@ -50,7 +50,7 @@ namespace Xbim
 				case IfcBooleanOperator::UNION:
 					return _shapeService->UnifyDomain(Ptr()->Union(firstSolid, secondSolid));					
 				case IfcBooleanOperator::DIFFERENCE:
-					//break;				
+					return _shapeService->UnifyDomain(Ptr()->Cut(firstSolid, secondSolid));
 				case IfcBooleanOperator::INTERSECTION:
 					//break;
 				default:

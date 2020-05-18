@@ -158,6 +158,8 @@
     <ClInclude Include="BRep\OccExtensions\Geom2d_LineWithMagnitude.h" />
     <ClInclude Include="BRep\OccExtensions\Geom_EllipseWithSemiAxes.h" />
     <ClInclude Include="BRep\OccExtensions\Geom_LineWithMagnitude.h" />
+    <ClInclude Include="BRep\XbimAxisAlignedBox.h" />
+    <ClInclude Include="BRep\XbimShape.h" />
     <ClInclude Include="Exceptions\XbimGeometryServiceException.h" />
     <ClInclude Include="Factories\ProfileFactory.h" />
     <ClInclude Include="BRep\Xbim2dDirection.h" />
@@ -221,6 +223,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
+    <ClCompile Include="BRep\XbimAxisAlignedBox.cpp" />
+    <ClCompile Include="BRep\XbimShape.cpp" />
     <ClCompile Include="Factories\ProfileFactory.cpp" />
     <ClCompile Include="BRep\XbimCompound.cpp" />
     <ClCompile Include="BRep\XbimEdge.cpp" />

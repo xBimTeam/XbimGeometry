@@ -1,5 +1,5 @@
 #pragma once
-#include "../XbimHandle.h"
+#include "XbimShape.h"
 #include <TopoDS_Wire.hxx>
 
 
@@ -12,11 +12,11 @@ namespace Xbim
 	{
 		namespace BRep
 		{
-			public ref class XbimWire : XbimHandle<TopoDS_Wire>, IXWire
+			public ref class XbimWire : public XbimShape<TopoDS_Wire>, IXWire
 			{
 			public:
-				XbimWire(const TopoDS_Wire& hWire) : XbimHandle(new TopoDS_Wire(hWire)) {};
-				virtual property XShapeType ShapeType { XShapeType get() { return XShapeType::Wire; } };
+				XbimWire(const TopoDS_Wire& hWire) : XbimShape(new TopoDS_Wire(hWire)) {};
+				virtual property XShapeType ShapeType { XShapeType get() override { return XShapeType::Wire; } };
 				virtual property IEnumerable<IXEdge^>^ EdgeLoop {IEnumerable<IXEdge^>^ get(); };
 			};
 		}

@@ -1,5 +1,5 @@
 #pragma once
-#include "../XbimHandle.h"
+#include "XbimShape.h"
 #include <TopoDS_Shell.hxx>
 
 using namespace Xbim::Geometry::Abstractions;
@@ -10,11 +10,11 @@ namespace Xbim
 	{
 		namespace BRep
 		{
-			public ref class XbimShell : XbimHandle<TopoDS_Shell>, IXShell
+			public ref class XbimShell : public XbimShape<TopoDS_Shell>, IXShell
 			{
 			public:
-				XbimShell(const TopoDS_Shell& hShell) : XbimHandle(new TopoDS_Shell(hShell)) {  };
-				virtual property XShapeType ShapeType { XShapeType get() { return XShapeType::Shell; } };
+				XbimShell(const TopoDS_Shell& hShell) : XbimShape(new TopoDS_Shell(hShell)) {  };
+				virtual property XShapeType ShapeType { XShapeType get() override { return XShapeType::Shell; } };
 				virtual property IEnumerable<IXFace^>^ Faces {IEnumerable<IXFace^>^ get(); };
 			};
 		};

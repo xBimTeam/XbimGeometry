@@ -1,5 +1,5 @@
 #pragma once
-#include "../XbimHandle.h"
+#include "XbimShape.h"
 #include <TopoDS_Compound.hxx>
 
 using namespace System;
@@ -12,11 +12,11 @@ namespace Xbim
 	{
 		namespace BRep
 		{
-			public ref class XbimCompound : XbimHandle<TopoDS_Compound>, IXCompound
+			public ref class XbimCompound : public XbimShape<TopoDS_Compound>, IXCompound
 			{
 			public:
-				XbimCompound(const TopoDS_Compound& hCompound) : XbimHandle(new TopoDS_Compound(hCompound)) { };
-				virtual property XShapeType ShapeType { XShapeType get() { return XShapeType::Compound; } };
+				XbimCompound(const TopoDS_Compound& hCompound) : XbimShape(new TopoDS_Compound(hCompound)) { };
+				virtual property XShapeType ShapeType { XShapeType get() override { return XShapeType::Compound; } };
 				virtual String^ BRepDefinition();
 				virtual property bool IsSolidsOnly {bool get(); };
 				virtual property bool IsShellsOnly {bool get(); };

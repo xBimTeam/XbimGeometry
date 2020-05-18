@@ -207,6 +207,12 @@
     <ClInclude Include="Services\ModelService.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BRep\XbimAxisAlignedBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BRep\XbimShape.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Stdafx.cpp">
@@ -321,6 +327,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Services\ModelService.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BRep\XbimAxisAlignedBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BRep\XbimShape.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
