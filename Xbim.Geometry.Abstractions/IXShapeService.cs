@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Xbim.Geometry.Abstractions
+﻿namespace Xbim.Geometry.Abstractions
 {
     public interface IXShapeService
     {

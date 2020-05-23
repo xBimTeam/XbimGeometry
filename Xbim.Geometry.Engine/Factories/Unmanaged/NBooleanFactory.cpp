@@ -1,20 +1,76 @@
 #include "NBooleanFactory.h"
 #include <BRepAlgoAPI_BooleanOperation.hxx>
 #include <TopoDS.hxx>
-TopoDS_Shape NBooleanFactory::Union(const TopoDS_Solid& left, const TopoDS_Solid& right)
+
+bool NBooleanFactory::IsEmpty(const TopoDS_Shape& shape)
+{
+	return shape.IsNull() || shape.NbChildren() == 0;
+}
+//
+//Operation NBooleanFactory::NextAction(const BOPAlgo_Operation& op,  const TopoDS_Shape& left, const TopoDS_Shape& right)
+//{
+//	TopAbs_ShapeEnum leftType = left.ShapeType();
+//	TopAbs_ShapeEnum rightType = right.ShapeType();
+//	switch (leftType)
+//	{
+//	case TopAbs_COMPOUND:
+//		break;
+//	case TopAbs_COMPSOLID:
+//		break;
+//	case TopAbs_SOLID:
+//		break;
+//	case TopAbs_SHELL:
+//		break;
+//	case TopAbs_FACE:
+//		break;
+//	case TopAbs_WIRE:
+//		break;
+//	case TopAbs_EDGE:
+//		break;
+//	case TopAbs_VERTEX:
+//		switch (rightType)
+//		{
+//		case TopAbs_COMPOUND:
+//			break;
+//		case TopAbs_COMPSOLID:
+//			break;
+//		case TopAbs_SOLID:
+//			break;
+//		case TopAbs_SHELL:
+//			break;
+//		case TopAbs_FACE:
+//			if (op == BOPAlgo_COMMON) return Operation::PerformBoolean;
+//			if (op == BOPAlgo_CUT) return Operation::ReturnEmpty;
+//			break; //Fuse and Cut21 return undefined
+//		case TopAbs_EDGE:
+//			if (op == BOPAlgo_COMMON ) return Operation::PerformBoolean; 
+//			if(op== BOPAlgo_CUT) return Operation::ReturnEmpty;
+//			break; //Fuse and Cut21 return undefined
+//		case TopAbs_VERTEX:
+//			if (op == BOPAlgo_COMMON || op == BOPAlgo_FUSE) return Operation::PerformBoolean; else return Operation::ReturnEmpty;
+//		default:
+//			break;
+//		}	
+//		return Operation::Undefined;
+//	default:
+//		break;
+//	}
+//}
+
+TopoDS_Shape NBooleanFactory::Union(const TopoDS_Shape& left, const TopoDS_Shape& right)
 {
 	//Unioning two solids must return one or more solids unless left and right are both empty shapes
-	if (left.IsNull() && right.IsNull())
+	if (IsEmpty(left) && IsEmpty(right))
 	{
 		pLoggingService->LogWarning("Attempt to Union two empty solids. Result is an empty solid");
 		return _emptySolid;
 	}
-	if (right.IsNull())
+	if (IsEmpty(right))
 	{
 		pLoggingService->LogWarning("Attempt to Union two solids, the right one is empty. Result is the left solid");
 		return left;
 	}
-	if (left.IsNull())
+	if (IsEmpty(left))
 	{
 		pLoggingService->LogWarning("Attempt to Union two solids, the left one is empty. Result is the right solid");
 		return right;
@@ -52,21 +108,21 @@ TopoDS_Shape NBooleanFactory::Union(const TopoDS_Solid& left, const TopoDS_Solid
 	return _emptySolid; //return empty so we fire a managed exception
 }
 
-TopoDS_Shape NBooleanFactory::Cut(const TopoDS_Solid& left, const TopoDS_Solid& right)
+TopoDS_Shape NBooleanFactory::Cut(const TopoDS_Shape& left, const TopoDS_Shape& right)
 {
 	//Cutting two solids must return one or more solids unless left and right are both empty shapes
 	//or the cut removes all content
-	if (left.IsNull() && right.IsNull())
+	if (IsEmpty(left) && IsEmpty(right))
 	{
 		pLoggingService->LogWarning("Attempt to Cut two empty solids. Result is an empty solid");
 		return _emptySolid;
 	}
-	if (right.IsNull())
+	if (IsEmpty(right))
 	{
 		pLoggingService->LogWarning("Attempt to Cut two solids, the right one is empty. Result is the left solid");
 		return left;
 	}
-	if (left.IsNull())
+	if (IsEmpty(left))
 	{
 		pLoggingService->LogWarning("Attempt to Cut two solids, the left one is empty. Result is an empty solid");
 		return _emptySolid;
@@ -104,11 +160,11 @@ TopoDS_Shape NBooleanFactory::Cut(const TopoDS_Solid& left, const TopoDS_Solid& 
 	return _emptySolid; //return empty so we fire a managed exception
 }
 
-TopoDS_Shape NBooleanFactory::Intersect(const TopoDS_Solid& left, const TopoDS_Solid& right)
+TopoDS_Shape NBooleanFactory::Intersect(const TopoDS_Shape& left, const TopoDS_Shape& right)
 {
 	//Intersection of two solids can  return one or no solids if left or right are empty shapes
 	//then there can be no intersection
-	if (left.IsNull() || right.IsNull())
+	if (IsEmpty(left) || IsEmpty(right))
 	{
 		pLoggingService->LogWarning("Attempt to Intersect one or more empty solids. Result is an empty solid");
 		return _emptySolid;

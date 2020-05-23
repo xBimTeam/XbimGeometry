@@ -158,6 +158,7 @@
     <ClInclude Include="BRep\OccExtensions\Geom2d_LineWithMagnitude.h" />
     <ClInclude Include="BRep\OccExtensions\Geom_EllipseWithSemiAxes.h" />
     <ClInclude Include="BRep\OccExtensions\Geom_LineWithMagnitude.h" />
+    <ClInclude Include="BRep\OccExtensions\KeyedPnt2d.h" />
     <ClInclude Include="BRep\XbimAxisAlignedBox.h" />
     <ClInclude Include="BRep\XbimShape.h" />
     <ClInclude Include="Exceptions\XbimGeometryServiceException.h" />
@@ -199,6 +200,7 @@
     <ClInclude Include="BRep\OccExtensions\Geom2d_EllipseWithSemiAxes.h" />
     <ClInclude Include="Factories\Unmanaged\NEdgeFactory.h" />
     <ClInclude Include="Factories\Unmanaged\NFaceFactory.h" />
+    <ClInclude Include="Factories\Unmanaged\NGeomProcFactory.h" />
     <ClInclude Include="Factories\Unmanaged\NProfileFactory.h" />
     <ClInclude Include="Factories\Unmanaged\NShellFactory.h" />
     <ClInclude Include="Factories\Unmanaged\NSolidFactory.h" />
@@ -252,7 +254,12 @@
     <ClCompile Include="Factories\Unmanaged\NFaceFactory.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
     </ClCompile>
-    <ClCompile Include="Factories\Unmanaged\NProfileFactory.cpp" />
+    <ClCompile Include="Factories\Unmanaged\NGeomProcFactory.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
+    </ClCompile>
+    <ClCompile Include="Factories\Unmanaged\NProfileFactory.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
+    </ClCompile>
     <ClCompile Include="Factories\Unmanaged\NShellFactory.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
     </ClCompile>

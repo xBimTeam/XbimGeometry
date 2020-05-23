@@ -210,5 +210,14 @@ namespace Xbim.Geometry.NetCore.Tests
                  Assert.AreEqual(box.LenX, lenX - Math.Abs(dispX), 1e-5);                
             }
         }
+
+        [DataTestMethod]
+        [DataRow(10)]
+        public void Can_build_nested_boolean_results(int depth)
+        {
+            var booleanResult = IfcMoq.IfcDeepBooleanResultMoq(depth: depth, displacement: 10);
+            var booleanFactory = _modelScope.ServiceProvider.GetRequiredService<IXBooleanService>();
+            var shape = booleanFactory.Build(booleanResult);
+        }
     }
 }

@@ -42,8 +42,8 @@ namespace Xbim
 
 			TopoDS_Shape BooleanFactory::BuildBooleanResult(IIfcBooleanResult^ boolResult)
 			{
-				TopoDS_Solid firstSolid = BuildOperand(boolResult->FirstOperand);
-				TopoDS_Solid secondSolid = BuildOperand(boolResult->SecondOperand);
+				TopoDS_Shape firstSolid = BuildOperand(boolResult->FirstOperand);
+				TopoDS_Shape secondSolid = BuildOperand(boolResult->SecondOperand);
 				
 				switch (boolResult->Operator)
 				{
@@ -59,7 +59,7 @@ namespace Xbim
 				}
 			}
 
-			TopoDS_Solid BooleanFactory::BuildOperand(IIfcBooleanOperand^ boolOp)
+			TopoDS_Shape BooleanFactory::BuildOperand(IIfcBooleanOperand^ boolOp)
 			{
 			
 				IIfcSolidModel^ solidModel = dynamic_cast<IIfcSolidModel^>(boolOp);
@@ -68,7 +68,9 @@ namespace Xbim
 				if (halfSpace != nullptr) return BuildHalfSpace(halfSpace); //not really a solid, do it in this factory
 				IIfcCsgPrimitive3D^ csgPrim = dynamic_cast<IIfcCsgPrimitive3D^>(boolOp);
 				if (csgPrim != nullptr) return _solidFactory->BuildCsgPrimitive3D(csgPrim);
-				//case XBooleanOperandType::IfcBooleanResult:			
+				IIfcBooleanResult^ boolRes = dynamic_cast<IIfcBooleanResult^>(boolOp);
+				if (boolRes != nullptr) return BuildBooleanResult(boolRes);
+			
 				//case XBooleanOperandType::IfcTessellatedFaceSet:					
 				throw gcnew XbimGeometryFactoryException("Not implemented. BooleanOperand type: " + boolOp->GetType()->Name);
 			}

@@ -6,12 +6,14 @@ namespace Xbim
 		namespace Services
 		{
 			ModelService::ModelService(IModel^ iModel, double minGapSize) 
-				: minimumGap(minGapSize), model(iModel)
+				: minimumGap(minGapSize), 
+				precisionSquared(model->ModelFactors->Precision * model->ModelFactors->Precision), 
+				model(iModel)
 			{
 			
 			}
 			ModelService::ModelService(IModel^ iModel) 
-				: minimumGap(model->ModelFactors->OneMilliMeter), model(iModel)
+				: ModelService(iModel, model->ModelFactors->OneMilliMeter)
 			{
 			
 			}

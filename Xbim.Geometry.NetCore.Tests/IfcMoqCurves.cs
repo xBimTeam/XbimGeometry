@@ -81,7 +81,7 @@ namespace Xbim.Geometry.NetCore.Tests
             dirMoq.SetupGet(v => v.Z).Returns(dir.DirectionRatios[2]);
             return dir;
         }
-        public static IIfcCartesianPoint IfcCartesianPoint2dMock(double x = 0, double y = 0)
+        public static IIfcCartesianPoint IfcCartesianPoint2dMock(double x = 0, double y = 0, int ifcLabel = 1)
         {
             var cpMoq = MakeMoq<IIfcCartesianPoint>();
             cpMoq.SetupGet(v => v.Dim).Returns(new IfcDimensionCount(2));
@@ -89,6 +89,7 @@ namespace Xbim.Geometry.NetCore.Tests
             cp.Coordinates.AddRange(new IfcLengthMeasure[] { x, y });
             cpMoq.SetupGet(v => v.X).Returns(cp.Coordinates[0]);
             cpMoq.SetupGet(v => v.Y).Returns(cp.Coordinates[1]);
+            cpMoq.SetupGet(v => v.EntityLabel).Returns(ifcLabel);
             return cp;
         }
         public static IIfcCartesianPoint IfcCartesianPoint3dMock(double x = 0, double y = 0, double z = 0)
@@ -229,5 +230,7 @@ namespace Xbim.Geometry.NetCore.Tests
             return trim;
         }
         #endregion
+
+        
     }
 }

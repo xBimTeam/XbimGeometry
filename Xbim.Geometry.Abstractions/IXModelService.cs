@@ -7,6 +7,10 @@
         /// </summary>
         double Precision { get; }
         /// <summary>
+        /// Precision * Precision
+        /// </summary>
+        double PrecisionSquared { get; }
+        /// <summary>
         /// Model units that make up one meter
         /// </summary>
         double OneMeter { get; }

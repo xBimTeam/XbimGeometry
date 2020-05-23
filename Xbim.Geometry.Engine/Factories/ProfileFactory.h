@@ -17,30 +17,30 @@ namespace Xbim
 	{
 		namespace Factories
 		{
-			public ref class ProfileFactory : XbimHandle<NProfileFactory>
+			public ref class ProfileFactory : XbimHandle<NProfileFactory>, IXProfileService
 			{
 			private:
-				IXLoggingService^ LoggerService;
-				
+				IXLoggingService^ LoggerService;				
 				IXModelService^ _ifcModel;				
-				GeomProcFactory^ _gpFactory;
+				GeomProcFactory^ GPFactory;
 				CurveFactory^ _curveFactory;
 				WireFactory^ _wireFactory;
 			public:
-				ProfileFactory(IXLoggingService^ loggingService, IXModelService^ ifcModel) : XbimHandle(new NProfileFactory())
+				ProfileFactory(IXLoggingService^ loggingService, IXModelService^ modelService) : XbimHandle(new NProfileFactory())
 				{
 					LoggerService = loggingService;									
-					_ifcModel = ifcModel;
-					_gpFactory = gcnew GeomProcFactory();
-					_wireFactory = gcnew WireFactory(loggingService, ifcModel);
+					_ifcModel = modelService;
+					GPFactory = gcnew GeomProcFactory(loggingService, modelService);
+					_wireFactory = gcnew WireFactory(loggingService, modelService);
 					NLoggingService* logService = new NLoggingService();
 					logService->SetLogger(static_cast<WriteLog>(loggingService->LogDelegatePtr.ToPointer()));
 					Ptr()->SetLogger(logService);
 				}
+				virtual IXShape^ Build(IIfcProfileDef^ profileDef);
 
 				//Returns a compound where the CURVE profiles that have more than one wire, a wire for profiles that are defined as CURVES with one wire or a face for AREA types
-				TopoDS_Shape Build(IIfcProfileDef^ profileDef);
-				TopoDS_Shape Build(IIfcArbitraryClosedProfileDef^ arbitraryClosedProfile);
+				TopoDS_Shape BuildShape(IIfcProfileDef^ profileDef);
+				TopoDS_Shape BuildShape(IIfcArbitraryClosedProfileDef^ arbitraryClosedProfile);
 			};
 		}
 	}

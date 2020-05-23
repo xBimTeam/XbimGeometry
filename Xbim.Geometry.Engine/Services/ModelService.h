@@ -13,10 +13,12 @@ namespace Xbim
 			private:
 				IModel^ model;
 				double minimumGap = 1; //1 mmm
+				double precisionSquared;
 			public:
 				ModelService(IModel^ model, double minGapSize);
 				ModelService(IModel^ model);
 				virtual property double Precision {double get() { return model->ModelFactors->Precision; }};
+				virtual property double PrecisionSquared {double get() { return precisionSquared; }};
 				virtual property double OneMeter {double get() { return model->ModelFactors->OneMeter; }};
 				virtual property double MinimumGap {double get() { return minimumGap; } void set(double distance) { minimumGap = distance; }};
 				virtual property double RadianFactor {double get() {

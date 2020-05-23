@@ -28,7 +28,7 @@ namespace Xbim
 				SolidFactory(IXLoggingService^ loggingService, IXModelService^ modelService) : XbimHandle(new NSolidFactory())
 				{
 					LoggerService = loggingService;					
-					_gpFactory = gcnew GeomProcFactory();
+					_gpFactory = gcnew GeomProcFactory(loggingService, modelService);
 					NLoggingService* logService = new NLoggingService();
 					logService->SetLogger(static_cast<WriteLog>(loggingService->LogDelegatePtr.ToPointer()));
 					Ptr()->SetLogger(logService);

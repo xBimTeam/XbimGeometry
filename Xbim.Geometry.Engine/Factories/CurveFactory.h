@@ -40,7 +40,7 @@ namespace Xbim
 			public:
 				CurveFactory(IXLoggingService^ loggingService, IXModelService^ modelService) : XbimHandle(new NCurveFactory())
 				{
-					GpFactory = gcnew GeomProcFactory();
+					GpFactory = gcnew GeomProcFactory(loggingService, modelService);
 					LoggerService = loggingService;
 					ModelService = modelService;
 					NLoggingService* logService = new NLoggingService();

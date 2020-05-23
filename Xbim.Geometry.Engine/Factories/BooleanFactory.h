@@ -43,7 +43,7 @@ namespace Xbim
 				double GetFuzzyTolerance() { return Ptr()->GetFuzzyTolerance(); };
 				virtual IXShape^ Build(IIfcBooleanResult^ boolResult);
 				TopoDS_Shape BuildBooleanResult(IIfcBooleanResult^ boolResult);
-				TopoDS_Solid BuildOperand(IIfcBooleanOperand^ boolOp);
+				TopoDS_Shape BuildOperand(IIfcBooleanOperand^ boolOp);
 				TopoDS_Solid BuildHalfSpace(IIfcHalfSpaceSolid^ halfSpace);
 			};
 		}

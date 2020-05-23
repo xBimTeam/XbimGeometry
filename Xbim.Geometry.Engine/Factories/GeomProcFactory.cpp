@@ -1,5 +1,6 @@
 #include "GeomProcFactory.h"
 #include <gp_Ax2.hxx>
+#include <TColgp_SequenceOfPnt2d.hxx>
 
 namespace Xbim
 {
@@ -92,6 +93,7 @@ namespace Xbim
 					BuildDirection2d(axis2d->RefDirection)
 				);
 			}
+			
 		}
 	}
 }

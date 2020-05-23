@@ -2,6 +2,12 @@
 #include <TopoDS_Wire.hxx>
 #include <TopoDS_Builder.hxx>
 #include "../../Services/Unmanaged/NLoggingService.h"
+#include <NCollection_Vector.hxx>
+
+#include <gp_XYZ.hxx>
+#include "../../BRep/OccExtensions/KeyedPnt2d.h"
+#include <TopTools_DataMapOfIntegerShape.hxx>
+
 class NWireFactory
 {
 private:
@@ -20,5 +26,9 @@ public:
 		pLoggingService = nullptr;
 	};
 	void SetLogger(NLoggingService* loggingService) { pLoggingService = loggingService; };
+	//Builds a polyline in the context of 0  or more existing vertices, if buildRaw is true no geometrical or topological corrections are made
+	TopoDS_Wire BuildPolyline(
+		const NCollection_Vector<KeyedPnt2d>& pointSeq,		
+		double tolerance,bool buildRaw = false);
 };
 
