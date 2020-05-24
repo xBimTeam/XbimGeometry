@@ -1,9 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <AssemblyName>Xbim.Geometry.Services</AssemblyName>
-    <RootNamespace>ervicesXbim.Geometry.AsyncExtensions</RootNamespace>
+    <RootNamespace>Xbim.Geometry.Services</RootNamespace>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -11,6 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\TestConsole\Xbim.Geometry.Packages.csproj" />
     <ProjectReference Include="..\Xbim.Geometry.Abstractions\Xbim.Geometry.Abstractions.csproj" />
     <ProjectReference Include="..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj" />
   </ItemGroup>

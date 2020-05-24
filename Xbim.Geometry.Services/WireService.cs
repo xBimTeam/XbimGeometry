@@ -15,7 +15,7 @@ namespace Xbim.Geometry.Services
         public WireService(IXLoggingService loggingService, IXModelService modelService)         
         {
             factory = new WireFactory(loggingService, modelService);
-        }
+        } 
 
         public IXWire Build(IIfcCurve curve)
         {

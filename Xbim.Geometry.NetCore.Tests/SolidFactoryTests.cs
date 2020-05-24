@@ -3,15 +3,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Xbim.Common;
 using Xbim.Geometry.Abstractions;
-using Xbim.Geometry.Factories;
 using Xbim.Geometry.Services;
-using Xbim.IO.Memory;
 
 namespace Xbim.Geometry.NetCore.Tests
 {
@@ -38,7 +33,7 @@ namespace Xbim.Geometry.NetCore.Tests
                     services.AddHostedService<GeometryServicesHost>()
                     .AddSingleton<IXLoggingService, LoggingService>()
                     .AddSingleton<IXShapeService, ShapeService>()
-                    .AddScoped<IXSolidService, SolidFactory>()
+                    .AddScoped<IXSolidService, SolidService>()
                     .AddScoped<IXModelService, ModelService>(sp => 
                         new ModelService(IfcMoq.IfcModelMock(millimetre: 1, precision: 1e-5, radianFactor: 1),minGapSize: 1.0));
                 })

@@ -15,7 +15,7 @@ namespace Xbim
 	{
 		namespace Factories
 		{
-			public ref class SolidFactory : XbimHandle<NSolidFactory>, IXSolidService
+			public ref class SolidFactory : XbimHandle<NSolidFactory>
 			{
 				IXLoggingService^ LoggerService;			
 				IXModelService^ ModelService;
