@@ -5,8 +5,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Xbim.Common;
 using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Exceptions;
@@ -41,7 +43,7 @@ namespace Xbim.Geometry.NetCore.Tests
                 services.AddHostedService<GeometryServicesHost>()
                 .AddSingleton<IXLoggingService, LoggingService>()
                 .AddSingleton<IXShapeService, ShapeService>()
-                .AddScoped<IXBooleanService, BooleanFactory>()
+                .AddScoped<IXBooleanService, BooleanService>()
                 .AddScoped<IXModelService, ModelService>(sp =>
                     new ModelService(IfcMoq.IfcModelMock(millimetre: 1, precision: 1e-5, radianFactor: 1), minGapSize: 1.0));
             })
@@ -218,6 +220,32 @@ namespace Xbim.Geometry.NetCore.Tests
             var booleanResult = IfcMoq.IfcDeepBooleanResultMoq(depth: depth, displacement: 10);
             var booleanFactory = _modelScope.ServiceProvider.GetRequiredService<IXBooleanService>();
             var shape = booleanFactory.Build(booleanResult);
+        }
+        [DataTestMethod]
+        [DataRow(5)]
+        public async Task Can_build_boolean_results_faster_with_Async(int depth)
+        {
+            var booleanResult = IfcMoq.IfcDeepBooleanResultMoq(depth: depth, displacement: 10);
+            var booleanService = _modelScope.ServiceProvider.GetRequiredService<IXBooleanService>();
+            var sw = new Stopwatch();
+            sw.Start();
+            var taskResults = new List<Task<IXShape>>(10);
+            for (int i = 0; i < 10; i++)
+            {
+                taskResults.Add(booleanService.BuildAsync(booleanResult));
+            }
+            await Task.WhenAll(taskResults);
+            var asyncTime = sw.ElapsedMilliseconds;
+            sw.Restart();
+            var results = new List<IXShape>(10);
+            for (int i = 0; i < 10; i++)
+            {
+                results.Add( booleanService.Build(booleanResult));
+            }
+            sw.Stop();
+            var noneAsyncTime = sw.ElapsedMilliseconds;
+            Assert.IsTrue(asyncTime < noneAsyncTime);
+            Console.WriteLine($"Async time = {asyncTime}, Sync time = {noneAsyncTime}");
         }
     }
 }

@@ -17,7 +17,7 @@ namespace Xbim
 	{
 		namespace Factories
 		{
-			public ref class BooleanFactory : XbimHandle<NBooleanFactory>, IXBooleanService
+			public ref class BooleanFactory : XbimHandle<NBooleanFactory>
 			{
 			private:
 				//GeomProcFactory^ GpFactory;
