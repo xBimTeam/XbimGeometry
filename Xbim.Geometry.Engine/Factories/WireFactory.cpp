@@ -6,7 +6,7 @@
 #include <BRepBuilderAPI_MakePolygon.hxx>
 #include <map>
 #include <TopTools_DataMapOfIntegerShape.hxx>
-
+using namespace System;
 using namespace System::Linq;
 namespace Xbim
 {
@@ -14,6 +14,7 @@ namespace Xbim
 	{
 		namespace Factories
 		{
+			
 			IXWire^ WireFactory::Build(IIfcCurve^ ifcCurve)
 			{
 				Handle(Geom_Surface) surface;
@@ -171,7 +172,7 @@ namespace Xbim
 				{
 					pointSeq.Append(KeyedPnt2d(gp_XY(cp->X, cp->Y), cp->EntityLabel));
 				}
-				
+
 				return Ptr()->BuildPolyline(pointSeq, ModelService->Precision);
 
 				//if (closed && pointSeq.size() < 4)

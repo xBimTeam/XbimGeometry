@@ -30,6 +30,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Xbim.Geometry.Abstractions\Xbim.Geometry.Abstractions.csproj" />
     <ProjectReference Include="..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj" />
+    <ProjectReference Include="..\Xbim.Geometry.Services\Xbim.Geometry.Services.csproj" />
   </ItemGroup>
 
 </Project>

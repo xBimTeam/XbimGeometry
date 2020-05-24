@@ -10,6 +10,8 @@ using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Factories;
 using Xbim.Geometry.Services;
 using System.Linq;
+using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace Xbim.Geometry.NetCore.Tests
 {
@@ -34,7 +36,7 @@ namespace Xbim.Geometry.NetCore.Tests
             {
                 services.AddHostedService<GeometryServicesHost>()
                 .AddSingleton<IXLoggingService, LoggingService>()
-                .AddScoped<IXWireService, WireFactory>()
+                .AddScoped<IXWireService, WireService>()
                 .AddScoped<IXModelService, ModelService>(sp =>
                         new ModelService(IfcMoq.IfcModelMock(millimetre: 1, precision: 1e-5, radianFactor: 1), minGapSize: 1.0));
             })
@@ -89,9 +91,54 @@ namespace Xbim.Geometry.NetCore.Tests
                 polyline.Points.Add(IfcMoq.IfcCartesianPoint2dMock(point.X, point.Y, ifcLabel++));
             }
             //get the profile service
-            var wireFactory = _modelScope.ServiceProvider.GetRequiredService<IXWireService>();
-            var wire = wireFactory.Build(polyline);
+            var wireService = _modelScope.ServiceProvider.GetRequiredService<IXWireService>();
+            var wire =  wireService.Build(polyline);
             Assert.AreEqual(edgeCount, wire.EdgeLoop.Count());
+        }
+
+        [DataTestMethod]
+        [DynamicData(nameof(Polyline2dDataSource), DynamicDataSourceType.Property)]
+        public async Task Can_build_polyline2dAsync(string dataSetName, int edgeCount, (double X, double Y)[] points)
+        {
+            //do 10 at a time
+            var polyline = IfcMoq.IfcPolyline2dMock();
+            int ifcLabel = 100;
+            foreach (var point in points)
+            {
+                polyline.Points.Add(IfcMoq.IfcCartesianPoint2dMock(point.X, point.Y, ifcLabel++));
+            }
+            //get the profile service
+            
+            var wireService = _modelScope.ServiceProvider.GetRequiredService<IXWireService>();
+
+            var sw = new Stopwatch();
+            sw.Start();
+            var result = new List<IXWire>(10);
+            //do it normally
+            for (int i = 0; i < 10; i++)
+            {
+                result.Add(wireService.Build(polyline));
+            }
+
+            sw.Stop();
+            var nonAsyncTime = sw.ElapsedMilliseconds;
+            sw.Restart();
+
+            var taskResults = new List<Task<IXWire>>(10);
+            for (int i = 0; i < 10; i++)
+            {
+                taskResults.Add(wireService.BuildAsync(polyline));
+            }
+            await Task.WhenAll(taskResults);
+
+            sw.Stop();
+            var asyncTime = sw.ElapsedMilliseconds;
+            Assert.IsTrue(asyncTime < nonAsyncTime);
+            foreach (var taskResult in taskResults)
+            {
+                Assert.IsTrue(taskResult.IsCompletedSuccessfully);
+                Assert.AreEqual(edgeCount, taskResult.Result.EdgeLoop.Count());
+            }
         }
     }
 }
