@@ -1,6 +1,7 @@
 ﻿using Moq;
 using Xbim.Common;
 using Xbim.Ifc4.GeometricModelResource;
+using Xbim.Ifc4.GeometryResource;
 using Xbim.Ifc4.Interfaces;
 
 namespace Xbim.Geometry.NetCore.Tests
@@ -62,6 +63,19 @@ namespace Xbim.Geometry.NetCore.Tests
             sphere.Position = position ?? IfcIfcAxis2Placement3DMock();
             sphereMoq.SetupGet(x => x.ExpressType).Returns(metaData.ExpressType(typeof(IfcSphere)));
             return sphere;
+        }
+        public static IIfcSweptDiskSolid IfcSweptDiskSolidMoq(IIfcCurve directrix = null, double radius = 20, double innerRadius = 10, double? startParam = null, double? endParam = null)
+        {
+            var sweptMoq = MakeMoq<IIfcSweptDiskSolid>();
+            sweptMoq.SetupGet(v => v.Dim).Returns(new IfcDimensionCount(3));
+            var swept = sweptMoq.Object;
+            swept.Radius = radius;
+            swept.InnerRadius = innerRadius;
+            swept.Directrix = directrix ?? IfcMoq.IfcLine3dMock();
+            swept.StartParam = startParam;
+            swept.EndParam = endParam;
+            sweptMoq.SetupGet(x => x.ExpressType).Returns(metaData.ExpressType(typeof(IfcSweptDiskSolid)));
+            return swept;
         }
 
     }

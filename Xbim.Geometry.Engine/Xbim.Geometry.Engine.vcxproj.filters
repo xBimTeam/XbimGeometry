@@ -219,6 +219,9 @@
     <ClInclude Include="BRep\OccExtensions\KeyedPnt2d.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BRep\OccExtensions\KeyedPnt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Stdafx.cpp">

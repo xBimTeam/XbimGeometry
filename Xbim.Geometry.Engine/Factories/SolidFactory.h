@@ -4,6 +4,8 @@
 #include "./Unmanaged/NSolidFactory.h"
 #include "../Services/LoggingService.h"
 #include "GeomProcFactory.h"
+#include "CurveFactory.h"
+#include "WireFactory.h"
 using namespace Xbim::Geometry::Services;
 using namespace Xbim::Common;
 using namespace Xbim::Ifc4::Interfaces;
@@ -19,7 +21,8 @@ namespace Xbim
 			{
 				IXLoggingService^ LoggerService;			
 				IXModelService^ ModelService;
-
+				CurveFactory^ _curveFactory;
+				WireFactory^ _wireFactory;
 				//The distance between two points at which they are determined to be equal points
 				
 				GeomProcFactory^ _gpFactory;
@@ -29,6 +32,8 @@ namespace Xbim
 				{
 					LoggerService = loggingService;					
 					_gpFactory = gcnew GeomProcFactory(loggingService, modelService);
+					_curveFactory = gcnew CurveFactory(loggingService, modelService);
+					_wireFactory = gcnew WireFactory(loggingService, modelService);
 					NLoggingService* logService = new NLoggingService();
 					logService->SetLogger(static_cast<WriteLog>(loggingService->LogDelegatePtr.ToPointer()));
 					Ptr()->SetLogger(logService);
@@ -49,7 +54,9 @@ namespace Xbim
 				TopoDS_Solid BuildRightCircularCone(IIfcRightCircularCone^ ifcRightCircularCone);
 				TopoDS_Solid BuildRightCircularCylinder(IIfcRightCircularCylinder ^ (ifcRightCircularCylinder));
 				TopoDS_Solid BuildSphere(IIfcSphere^ ifcSphere);
+				
 #pragma endregion
+				TopoDS_Solid BuildSweptDiskSolid(IIfcSweptDiskSolid^ ifcSolid);
 			};
 		}
 	}

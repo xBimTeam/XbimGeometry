@@ -158,6 +158,7 @@
     <ClInclude Include="BRep\OccExtensions\Geom2d_LineWithMagnitude.h" />
     <ClInclude Include="BRep\OccExtensions\Geom_EllipseWithSemiAxes.h" />
     <ClInclude Include="BRep\OccExtensions\Geom_LineWithMagnitude.h" />
+    <ClInclude Include="BRep\OccExtensions\KeyedPnt.h" />
     <ClInclude Include="BRep\OccExtensions\KeyedPnt2d.h" />
     <ClInclude Include="BRep\XbimAxisAlignedBox.h" />
     <ClInclude Include="BRep\XbimShape.h" />

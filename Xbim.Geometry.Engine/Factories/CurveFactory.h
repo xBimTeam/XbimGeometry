@@ -68,6 +68,9 @@ namespace Xbim
 
 				Handle(Geom_TrimmedCurve) BuildGeom3d(IIfcTrimmedCurve^ ifcTrimmedCurve);
 				Handle(Geom2d_TrimmedCurve) BuildGeom2d(IIfcTrimmedCurve^ ifcTrimmedCurve);
+
+
+				bool IsBoundedCurve(IIfcCurve^ curve);
 			};
 
 		}

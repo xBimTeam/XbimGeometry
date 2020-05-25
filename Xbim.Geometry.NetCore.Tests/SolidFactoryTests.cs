@@ -34,8 +34,8 @@ namespace Xbim.Geometry.NetCore.Tests
                     .AddSingleton<IXLoggingService, LoggingService>()
                     .AddSingleton<IXShapeService, ShapeService>()
                     .AddScoped<IXSolidService, SolidService>()
-                    .AddScoped<IXModelService, ModelService>(sp => 
-                        new ModelService(IfcMoq.IfcModelMock(millimetre: 1, precision: 1e-5, radianFactor: 1),minGapSize: 1.0));
+                    .AddScoped<IXModelService, ModelService>(sp =>
+                        new ModelService(IfcMoq.IfcModelMock(millimetre: 1, precision: 1e-5, radianFactor: 1), minGapSize: 1.0));
                 })
             .ConfigureLogging((hostContext, loggingBuilder) =>
             {
@@ -57,6 +57,7 @@ namespace Xbim.Geometry.NetCore.Tests
         }
         #endregion
 
+        #region CSG test
         [TestMethod]
         public void Can_create_csg_block()
         {
@@ -246,5 +247,21 @@ namespace Xbim.Geometry.NetCore.Tests
 
 
         }
+        #endregion
+
+        #region Extrude Areas
+        [TestMethod]
+        public void Can_create_swept_disk_solid()
+        {
+            var solidService = _modelScope.ServiceProvider.GetRequiredService<IXSolidService>();
+            var ifcSweptDisk = IfcMoq.IfcSweptDiskSolidMoq();
+          //  solidService.Build(ifcSweptDisk);
+            
+        }
+
+
+        #endregion
+
+
     }
 }

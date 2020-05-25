@@ -8,15 +8,15 @@ namespace Xbim.Geometry.NetCore.Tests
 {
     public static partial class IfcMoq
     {
-        public static IIfcPolyline IfcPolyline2dMock(double semi1 = 100, double semi2 = 50)
+        public static IIfcPolyline IfcPolylineMock(int dim = 2)
         {
             var polylineMoq = MakeMoq<IIfcPolyline>();
-            polylineMoq.SetupGet(v => v.Dim).Returns(new IfcDimensionCount(2));
+            polylineMoq.SetupGet(v => v.Dim).Returns(new IfcDimensionCount(dim));
             var polyline = polylineMoq.Object;
-
-
             polylineMoq.SetupGet(v => v.ExpressType).Returns(metaData.ExpressType(typeof(IfcPolyline)));
             return polyline;
         }
+
+      
     }
 }

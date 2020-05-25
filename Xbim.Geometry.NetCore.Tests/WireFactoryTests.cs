@@ -84,7 +84,7 @@ namespace Xbim.Geometry.NetCore.Tests
         [DynamicData(nameof(Polyline2dDataSource), DynamicDataSourceType.Property)]
         public void Can_build_polyline2d(string dataSetName, int edgeCount, (double X, double Y)[] points)
         {
-            var polyline = IfcMoq.IfcPolyline2dMock();
+            var polyline = IfcMoq.IfcPolylineMock(dim: 2);
             int ifcLabel = 100;
             foreach (var point in points)
             {
@@ -92,7 +92,7 @@ namespace Xbim.Geometry.NetCore.Tests
             }
             //get the profile service
             var wireService = _modelScope.ServiceProvider.GetRequiredService<IXWireService>();
-            var wire =  wireService.Build(polyline);
+            var wire = wireService.Build(polyline);
             Assert.AreEqual(edgeCount, wire.EdgeLoop.Count());
         }
 
@@ -101,14 +101,14 @@ namespace Xbim.Geometry.NetCore.Tests
         public async Task Can_build_polyline2dAsync(string dataSetName, int edgeCount, (double X, double Y)[] points)
         {
             //do 10 at a time
-            var polyline = IfcMoq.IfcPolyline2dMock();
+            var polyline = IfcMoq.IfcPolylineMock(dim: 2);
             int ifcLabel = 100;
             foreach (var point in points)
             {
                 polyline.Points.Add(IfcMoq.IfcCartesianPoint2dMock(point.X, point.Y, ifcLabel++));
             }
             //get the profile service
-            
+
             var wireService = _modelScope.ServiceProvider.GetRequiredService<IXWireService>();
 
             var sw = new Stopwatch();
@@ -139,6 +139,23 @@ namespace Xbim.Geometry.NetCore.Tests
                 Assert.IsTrue(taskResult.IsCompletedSuccessfully);
                 Assert.AreEqual(edgeCount, taskResult.Result.EdgeLoop.Count());
             }
+        }
+
+        [DataTestMethod]
+        [DynamicData(nameof(Polyline2dDataSource), DynamicDataSourceType.Property)]
+        public void Can_build_polyline(string dataSetName, int edgeCount, (double X, double Y)[] points)
+        {
+            if (dataSetName == "SelfInterectingLine" || dataSetName == "IntersectingLines") return; //skip this test as it cannot be validated
+            var polyline = IfcMoq.IfcPolylineMock(dim: 3);
+            int ifcLabel = 100;
+            foreach (var point in points)
+            {
+                polyline.Points.Add(IfcMoq.IfcCartesianPoint3dMock(point.X, point.Y, 0, ifcLabel++));
+            }
+            //get the profile service
+            var wireService = _modelScope.ServiceProvider.GetRequiredService<IXWireService>();
+            var wire = wireService.Build(polyline);
+            Assert.AreEqual(edgeCount, wire.EdgeLoop.Count());
         }
     }
 }

@@ -75,3 +75,10 @@ TopoDS_Solid NSolidFactory::BuildSphere(gp_Ax2 ax2, double radius)
 	pLoggingService->LogWarning("Could not build CsgSphere");
 	return _emptySolid;
 }
+
+//if inner radius is not required it has a value of -1, same for the param values
+TopoDS_Solid NSolidFactory::BuildSweptDiskSolid(const TopoDS_Wire& directrix, double startParam, double endParam, double radius, double innerRadius)
+{
+	return TopoDS_Solid();
+}
+

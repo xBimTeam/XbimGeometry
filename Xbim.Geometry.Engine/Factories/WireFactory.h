@@ -27,22 +27,32 @@ namespace Xbim
 				IXLoggingService^ LoggerService;
 				IXModelService^ ModelService;
 				//The distance between two points at which they are determined to be equal points
-				
+
 				GeomProcFactory^ GPFactory;
 				CurveFactory^ _curveFactory;
-				
-				
 
 				TopoDS_Wire Build3d(IIfcCurve^ ifcCurve, Handle(Geom_Surface)& surface);
 				TopoDS_Wire Build2d(IIfcCurve^ ifcCurve, Handle(Geom_Surface)& surface);
 				TopoDS_Wire Build2dCircle(IIfcCircle^ ifcCircle, Handle(Geom_Surface)& surface);
 				TopoDS_Wire Build2dTrimmedCurve(IIfcTrimmedCurve^ ifcTrimmedCurve, Handle(Geom_Surface)& surface);
 				TopoDS_Wire Build2dPolyline(IIfcPolyline^ ifcPolyline, Handle(Geom_Surface)& surface);
-				
+				//builds a trimmed 3d polyline param values of -1 are taken as no trim
+				TopoDS_Wire BuildPolyline(IIfcPolyline^ ifcPolyline, double startParam, double endParam);
+
+				TopoDS_Wire MakeWire(Handle(Geom_Curve) curve);
+			internal:
+				TopoDS_Wire BuildDirectrix(IIfcCurve^ curve, double startParam, double endParam);
+				TopoDS_Wire BuildDirectrix(IIfcLine^ curve, double startParam, double endParam);
+				TopoDS_Wire BuildDirectrix(IIfcCircle^ curve, double startParam, double endParam);
+				TopoDS_Wire BuildDirectrix(IIfcEllipse^ curve, double startParam, double endParam);
+				TopoDS_Wire BuildDirectrix(IIfcTrimmedCurve^ curve, double startParam, double endParam);
+				TopoDS_Wire BuildDirectrix(IIfcPolyline^ curve, double startParam, double endParam);
+				//Builds an IfcCurve as a TopoDS_Wire
+				TopoDS_Wire BuildWire(IIfcCurve^ ifcCurve, Handle(Geom_Surface)& surface);
 			public:
 				WireFactory(IXLoggingService^ loggingService, IXModelService^ modelService) : XbimHandle(new NWireFactory())
 				{
-					LoggerService = loggingService;		
+					LoggerService = loggingService;
 					ModelService = modelService;
 					GPFactory = gcnew GeomProcFactory(loggingService, modelService);
 					_curveFactory = gcnew CurveFactory(loggingService, modelService);
@@ -50,12 +60,12 @@ namespace Xbim
 					logService->SetLogger(static_cast<WriteLog>(loggingService->LogDelegatePtr.ToPointer()));
 					Ptr()->SetLogger(logService);
 				}
-				
+
 
 				virtual IXWire^ Build(IIfcCurve^ ifcCurve);
-				//Builds an IfcCurve as a TopoDS_Wire
-				TopoDS_Wire BuildWire(IIfcCurve^ ifcCurve, Handle(Geom_Surface)& surface);
-				
+
+
+
 			};
 
 		}

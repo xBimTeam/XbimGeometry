@@ -63,33 +63,33 @@ namespace Xbim
 				switch (curveType)
 				{
 					/*case Xbim::Geometry::Abstractions::XCurveType::BoundaryCurve:
-						return  Build2d(dynamic_cast<IIfcBoundedCurve^>(curve));
+						return  Build2d(static_cast<IIfcBoundedCurve^>(curve));
 					case Xbim::Geometry::Abstractions::XCurveType::BSplineCurveWithKnots:
-						return Build2d(dynamic_cast<IIfcBSplineCurveWithKnots^>(curve));*/
+						return Build2d(static_cast<IIfcBSplineCurveWithKnots^>(curve));*/
 					case Xbim::Geometry::Abstractions::XCurveType::IfcCircle:
-						return BuildGeom2d(dynamic_cast<IIfcCircle^>(curve));
+						return BuildGeom2d(static_cast<IIfcCircle^>(curve));
 				/*	case Xbim::Geometry::Abstractions::XCurveType::CompositeCurve:
-						return Build2d(dynamic_cast<IIfcCompositeCurve^>(curve)));
+						return Build2d(static_cast<IIfcCompositeCurve^>(curve)));
 					case Xbim::Geometry::Abstractions::XCurveType::CompositeCurveOnSurface:
-						return Build2d(dynamic_cast<IIfcCompositeCurveOnSurface^>(curve)));*/
+						return Build2d(static_cast<IIfcCompositeCurveOnSurface^>(curve)));*/
 					case Xbim::Geometry::Abstractions::XCurveType::IfcEllipse:
-						return BuildGeom2d(dynamic_cast<IIfcEllipse^>(curve));
+						return BuildGeom2d(static_cast<IIfcEllipse^>(curve));
 					/*case Xbim::Geometry::Abstractions::XCurveType::IndexedPolyCurve:
-						return Build2d(dynamic_cast<IIfcIndexedPolyCurve^>(curve)));*/
+						return Build2d(static_cast<IIfcIndexedPolyCurve^>(curve)));*/
 				case Xbim::Geometry::Abstractions::XCurveType::IfcLine:
-					return BuildGeom2d(dynamic_cast<IIfcLine^>(curve));
+					return BuildGeom2d(static_cast<IIfcLine^>(curve));
 					/*case Xbim::Geometry::Abstractions::XCurveType::OffsetCurve2D:
-						return Build2d(dynamic_cast<IIfcOffsetCurve2D^>(curve));
+						return Build2d(static_cast<IIfcOffsetCurve2D^>(curve));
 					case Xbim::Geometry::Abstractions::XCurveType::Pcurve:
-						return Build2d(dynamic_cast<IIfcPcurve^>(curve)) ;
+						return Build2d(static_cast<IIfcPcurve^>(curve)) ;
 					case Xbim::Geometry::Abstractions::XCurveType::Polyline:
-						return Build2d(dynamic_cast<IIfcPolyline^>(curve));
+						return Build2d(static_cast<IIfcPolyline^>(curve));
 					case Xbim::Geometry::Abstractions::XCurveType::RationalBSplineCurveWithKnots:
-						return Build2d(dynamic_cast<IIfcRationalBSplineCurveWithKnots^>(curve));
+						return Build2d(static_cast<IIfcRationalBSplineCurveWithKnots^>(curve));
 					case Xbim::Geometry::Abstractions::XCurveType::SurfaceCurve:
-						return Build2d(dynamic_cast<IIfcSurfaceCurve^>(curve));*/
+						return Build2d(static_cast<IIfcSurfaceCurve^>(curve));*/
 				case Xbim::Geometry::Abstractions::XCurveType::IfcTrimmedCurve:
-					return BuildGeom2d(dynamic_cast<IIfcTrimmedCurve^>(curve));					
+					return BuildGeom2d(static_cast<IIfcTrimmedCurve^>(curve));
 				default:
 					break;
 				}
@@ -107,34 +107,34 @@ namespace Xbim
 				switch (curveType)
 				{
 					/*case Xbim::Geometry::Abstractions::XCurveType::BoundaryCurve:
-						return Build3d(dynamic_cast<IIfcBoundedCurve^>(curve));
+						return Build3d(static_cast<IIfcBoundedCurve^>(curve));
 					case Xbim::Geometry::Abstractions::XCurveType::BSplineCurveWithKnots:
-						return Build3d(dynamic_cast<IIfcBSplineCurveWithKnots^>(curve));*/
+						return Build3d(static_cast<IIfcBSplineCurveWithKnots^>(curve));*/
 					case Xbim::Geometry::Abstractions::XCurveType::IfcCircle:
-						return BuildGeom3d(dynamic_cast<IIfcCircle^>(curve));
+						return BuildGeom3d(static_cast<IIfcCircle^>(curve));
 					/*case Xbim::Geometry::Abstractions::XCurveType::CompositeCurve:
-						return Build3d(dynamic_cast<IIfcCompositeCurve^>(curve));
+						return Build3d(static_cast<IIfcCompositeCurve^>(curve));
 					case Xbim::Geometry::Abstractions::XCurveType::CompositeCurveOnSurface:
-						return Build3d(dynamic_cast<IIfcCompositeCurveOnSurface^>(curve));*/
+						return Build3d(static_cast<IIfcCompositeCurveOnSurface^>(curve));*/
 					case Xbim::Geometry::Abstractions::XCurveType::IfcEllipse:
-						return BuildGeom3d(dynamic_cast<IIfcEllipse^>(curve));
+						return BuildGeom3d(static_cast<IIfcEllipse^>(curve));
 				/*	case Xbim::Geometry::Abstractions::XCurveType::IndexedPolyCurve:
-						return Build3d(dynamic_cast<IIfcIndexedPolyCurve^>(curve));*/
+						return Build3d(static_cast<IIfcIndexedPolyCurve^>(curve));*/
 				case Xbim::Geometry::Abstractions::XCurveType::IfcLine:
-					return BuildGeom3d(dynamic_cast<IIfcLine^>(curve));
+					return BuildGeom3d(static_cast<IIfcLine^>(curve));
 					/*
 					case Xbim::Geometry::Abstractions::XCurveType::OffsetCurve3D:
-						return Build2d(dynamic_cast<IIfcOffsetCurve3D^>(curve));
+						return Build2d(static_cast<IIfcOffsetCurve3D^>(curve));
 					case Xbim::Geometry::Abstractions::XCurveType::Pcurve:
-						return Build3d(dynamic_cast<IIfcPcurve^>(curve));
+						return Build3d(static_cast<IIfcPcurve^>(curve));
 					case Xbim::Geometry::Abstractions::XCurveType::Polyline:
-						return Build3d(dynamic_cast<IIfcPolyline^>(curve));
+						return Build3d(static_cast<IIfcPolyline^>(curve));
 					case Xbim::Geometry::Abstractions::XCurveType::RationalBSplineCurveWithKnots:
-						return Build3d(dynamic_cast<IIfcRationalBSplineCurveWithKnots^>(curve));
+						return Build3d(static_cast<IIfcRationalBSplineCurveWithKnots^>(curve));
 					case Xbim::Geometry::Abstractions::XCurveType::SurfaceCurve:
-						return Build3d(dynamic_cast<IIfcSurfaceCurve^>(curve));*/
+						return Build3d(static_cast<IIfcSurfaceCurve^>(curve));*/
 				case Xbim::Geometry::Abstractions::XCurveType::IfcTrimmedCurve:
-					return BuildGeom3d(dynamic_cast<IIfcTrimmedCurve^>(curve));
+					return BuildGeom3d(static_cast<IIfcTrimmedCurve^>(curve));
 					
 				default:
 					break;
@@ -423,6 +423,16 @@ namespace Xbim
 				else
 					throw gcnew XbimGeometryFactoryException("Failed to build Trimmed Basis Curve");
 
+			}
+
+			bool CurveFactory::IsBoundedCurve(IIfcCurve^ curve)
+			{
+				if (dynamic_cast<IIfcLine^>(curve)) return false;
+				if (dynamic_cast<IIfcOffsetCurve3D^>(curve)) return IsBoundedCurve((static_cast<IIfcOffsetCurve3D^>(curve))->BasisCurve);
+				if (dynamic_cast<IIfcOffsetCurve2D^>(curve)) return IsBoundedCurve((static_cast<IIfcOffsetCurve2D^>(curve))->BasisCurve);
+				if (dynamic_cast<IIfcPcurve^>(curve)) return false;
+				if (dynamic_cast<IIfcSurfaceCurve^>(curve)) return false;
+				return true;
 			}
 		}
 	}
