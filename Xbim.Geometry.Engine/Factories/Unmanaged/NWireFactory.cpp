@@ -208,17 +208,18 @@ TopoDS_Wire NWireFactory::BuildPolyline(
 				}
 				continue;
 			}
-			edgeVec.Normalize();
+			
 			if (startParam >= 0) //we want to clip, adjust the vertices if necessary
 			{
 				if (startParam >= offset && startParam < offset + segLength) //trim this edge its the first one, will only enter the first time
 				{
+					edgeVec.Normalize();
 					startPoint.Translate(edgeVec * (startParam - offset)); //move the start point	
 					TopoDS_Vertex startVertex;
 					builder.MakeVertex(startVertex, startPoint, Precision::Confusion());
 					vertices.Append(startVertex);
 					//check if it is also the last one
-					if (endParam <= offset + segLength)
+					if (endParam > 0 && endParam <= offset + segLength)
 					{
 						//trim this edge to start and end and give in
 						endPoint = startPoint.Translated(edgeVec * (endParam - offset));
@@ -228,7 +229,9 @@ TopoDS_Wire NWireFactory::BuildPolyline(
 						break; //all done
 					}
 					startParam = -1; //don't look for anymore start edges
-
+					TopoDS_Vertex endVertex;
+					builder.MakeVertex(endVertex, endPoint, Precision::Confusion());
+					vertices.Append(endVertex);
 				}
 			}
 			else  //(startParam < 0) we want this
@@ -241,6 +244,7 @@ TopoDS_Wire NWireFactory::BuildPolyline(
 				}
 				if (endParam > offset && endParam < (offset + segLength)) //need to trim its the last seg
 				{
+					edgeVec.Normalize();
 					endPoint = startPoint.Translated(edgeVec * (endParam - offset));
 					TopoDS_Vertex endVertex;
 					builder.MakeVertex(endVertex, endPoint, Precision::Confusion());
