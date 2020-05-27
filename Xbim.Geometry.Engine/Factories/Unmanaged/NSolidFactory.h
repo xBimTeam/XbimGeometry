@@ -3,6 +3,8 @@
 
 #include <TopoDS_Solid.hxx>
 #include <TopoDS_Builder.hxx>
+#include <BRepBuilderAPI_TransitionMode.hxx>
+
 class NSolidFactory
 {
 private:
