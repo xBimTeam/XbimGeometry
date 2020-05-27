@@ -6,5 +6,7 @@
         //calculates the bounding box of the shape
         IXAxisAlignedBoundingBox Bounds();
        string Brep { get; }
+        bool IsValidShape();
+        bool IsEmptyShape();
     }
 }

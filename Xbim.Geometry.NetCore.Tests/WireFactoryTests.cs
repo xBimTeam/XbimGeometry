@@ -53,14 +53,14 @@ namespace Xbim.Geometry.NetCore.Tests
             await serviceHost.StopAsync();
         }
         #endregion
-        struct PolyData
+        public struct PolyData
         {
             public string Name;
             public int EdgeCount;
             public (double X, double Y)[] Points;
         }
 
-        static List<PolyData> Polyline2dData = new List<PolyData>()
+        public static List<PolyData> Polyline2dData = new List<PolyData>()
         {
           new PolyData{Name="NoDuplicatePoints" ,EdgeCount=4, Points=new (double X, double Y) [] { (X: 0, Y: 0), (X: 10, Y: 0), (X: 10, Y: 15), (X: 0, Y: 15), (X: 0, Y: 0) }},
           new PolyData{Name="OneDuplicatePointsInTolerance",EdgeCount=4, Points= new (double X, double Y) [] { (X: 0, Y: 0), (X: 10, Y: 0), (X: 10.00001, Y: 0), (X: 10, Y: 15), (X: 0, Y: 15), (X: 0, Y: 0) } },

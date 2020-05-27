@@ -1,13 +1,15 @@
 #pragma once
 #include "../../Services/Unmanaged/NLoggingService.h"
+
 #include <TopoDS_Solid.hxx>
 #include <TopoDS_Builder.hxx>
 class NSolidFactory
 {
 private:
 
-	NLoggingService* pLoggingService;
+	NLoggingService* pLoggingService;	
 	TopoDS_Solid _emptySolid;
+
 public:
 
 	NSolidFactory()
@@ -28,7 +30,7 @@ public:
 	TopoDS_Solid BuildRightCircularCone(gp_Ax2 ax2, double radius, double height);
 	TopoDS_Solid BuildRightCylinder(gp_Ax2 ax2, double radius, double height);
 	TopoDS_Solid BuildSphere(gp_Ax2 ax2, double radius);
-	TopoDS_Solid BuildSweptDiskSolid(const TopoDS_Wire& directrix, double startParam, double endParam, double radius, double innerRadius);
+	TopoDS_Solid BuildSweptDiskSolid(const TopoDS_Wire& directrix, double radius, double innerRadius, BRepBuilderAPI_TransitionMode transitionMode);
 
 
 };

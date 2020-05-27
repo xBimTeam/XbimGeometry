@@ -6,6 +6,8 @@
 
 #include "XbimAxisAlignedBox.h"
 #include <BRepBndLib.hxx>
+#include <BRepCheck_Analyzer.hxx>
+
 using namespace System;
 using namespace System::Collections::Generic;
 using namespace Xbim::Geometry::Abstractions;
@@ -45,8 +47,28 @@ namespace Xbim
 
 					return gcnew XbimAxisAlignedBox(pBox);
 				};
+				virtual bool IsEmptyShape()
+				{
+					return OccHandle().NbChildren() == 0;
+				}
 
+				virtual bool IsValidShape()
+				{
+					bool ok;
+					try
+					{
+						BRepCheck_Analyzer analyser(OccHandle(), Standard_True);
+						ok = analyser.IsValid();
+					}
+					catch (Standard_Failure e)
+					{
+					}
+					return ok;
+
+				};
 			};
+
+
 		}
 	}
 }

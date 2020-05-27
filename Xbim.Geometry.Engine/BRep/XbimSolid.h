@@ -18,7 +18,7 @@ namespace Xbim
 				virtual property XShapeType ShapeType { XShapeType get() override  { return XShapeType::Solid; }};
 				
 				virtual property IEnumerable<IXShell^>^ Shells {IEnumerable<IXShell^>^ get(); };
-				
+				virtual double Volume();
 			};
 		}
 	}

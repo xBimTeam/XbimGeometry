@@ -5,7 +5,8 @@
 #include <TopoDS.hxx>
 #include <Bnd_Box.hxx>
 #include <BRepBndLib.hxx>
-
+#include <GProp_GProps.hxx>
+#include <BRepGProp.hxx>
 using namespace System::Linq;
 namespace Xbim
 {
@@ -24,6 +25,13 @@ namespace Xbim
 			}
 
 			
+			double XbimSolid::Volume()
+			{
+				GProp_GProps gProps;
+				BRepGProp::VolumeProperties(OccHandle(), gProps);
+				return gProps.Mass();				
+			}
+
 		}
 	}
 }

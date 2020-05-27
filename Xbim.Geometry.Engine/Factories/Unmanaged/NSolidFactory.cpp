@@ -5,6 +5,15 @@
 #include <BRepPrimAPI_MakeCone.hxx>
 #include <BRepPrimAPI_MakeCylinder.hxx>
 #include <BRepPrimAPI_MakeSphere.hxx>
+#include <BRepOffsetAPI_MakePipeShell.hxx>
+#include <Geom_Circle.hxx>
+#include <BRepAdaptor_CompCurve.hxx>
+#include <gp_Ax2.hxx>
+#include <BRepBuilderAPI_MakeFace.hxx>
+#include <BRepBuilderAPI_MakeWire.hxx>
+#include <BRepBuilderAPI_MakeEdge.hxx>
+#include <TopoDS.hxx>
+#include <TopExp_Explorer.hxx>
 
 TopoDS_Solid NSolidFactory::BuildBlock(gp_Ax2 ax2, double xLength, double yLength, double zLength)
 {
@@ -38,7 +47,7 @@ TopoDS_Solid NSolidFactory::BuildRightCircularCone(gp_Ax2 ax2, double radius, do
 {
 	try
 	{
-		BRepPrimAPI_MakeCone coneMaker(ax2, radius, 0.0,  height);
+		BRepPrimAPI_MakeCone coneMaker(ax2, radius, 0.0, height);
 		return coneMaker.Solid(); //this builds the solid
 	}
 	catch (Standard_Failure e) //pretty much only throws Standard_DomainError, we should have got most of these earlier
@@ -76,9 +85,91 @@ TopoDS_Solid NSolidFactory::BuildSphere(gp_Ax2 ax2, double radius)
 	return _emptySolid;
 }
 
-//if inner radius is not required it has a value of -1, same for the param values
-TopoDS_Solid NSolidFactory::BuildSweptDiskSolid(const TopoDS_Wire& directrix, double startParam, double endParam, double radius, double innerRadius)
+//if inner radius is not required it has a value of -1
+TopoDS_Solid NSolidFactory::BuildSweptDiskSolid(const TopoDS_Wire& directrix, double radius, double innerRadius, BRepBuilderAPI_TransitionMode transitionMode)
 {
-	return TopoDS_Solid();
+	//the standard say
+	
+	//If the transitions between consecutive segments of the Directrix are not tangent continuous, the resulting solid is created by a miter at half angle between the two segments.
+	//this will be the case for a polyline as each segment is not tangent continuous
+	//composite urves will be tangent continuous
+	try
+	{
+		//form the shape to sweep, the centre of the circles must be at the start of the directrix
+		BRepAdaptor_CompCurve cc(directrix, Standard_True);
+
+		//get the normal at the start point
+		gp_Vec dirAtStart;
+		gp_Pnt startPoint;
+		cc.D1(0, startPoint, dirAtStart);
+		gp_Ax2 axis(startPoint, dirAtStart);
+		dirAtStart.Reverse(); //vector points in direction of directrix, need reversing for correct face orientation
+		Handle(Geom_Circle) outer = new Geom_Circle(axis, radius);
+		BRepBuilderAPI_MakeEdge edgeMaker(outer);
+		BRepBuilderAPI_MakeWire wireMaker(edgeMaker.Edge());
+		BRepOffsetAPI_MakePipeShell oSweepMaker(directrix);
+		oSweepMaker.SetTransitionMode(transitionMode);
+		oSweepMaker.Add(wireMaker.Wire());
+		oSweepMaker.Build();
+		if (oSweepMaker.IsDone())
+		{
+			//do we need an inner shell
+			if (innerRadius > 0)
+			{
+
+				Handle(Geom_Circle) inner = new Geom_Circle(axis, innerRadius);
+				BRepBuilderAPI_MakeEdge iEdgeMaker(inner);
+				BRepBuilderAPI_MakeWire iWireMaker(iEdgeMaker.Edge());
+				BRepOffsetAPI_MakePipeShell iSweepMaker(directrix);
+				iSweepMaker.SetTransitionMode(transitionMode);
+				TopoDS_Shape holeWire = iWireMaker.Wire().Reversed();
+				iSweepMaker.Add(holeWire);
+				iSweepMaker.Build();
+				if (iSweepMaker.IsDone())
+				{
+					BRep_Builder builder;
+					TopoDS_Solid solid;
+					TopoDS_Shell shell;
+					builder.MakeSolid(solid);
+					builder.MakeShell(shell);
+					TopExp_Explorer faceEx(oSweepMaker.Shape(), TopAbs_FACE);
+					for (; faceEx.More(); faceEx.Next())
+						builder.Add(shell, TopoDS::Face(faceEx.Current()));
+					faceEx.Init(iSweepMaker.Shape(), TopAbs_FACE);
+					for (; faceEx.More(); faceEx.Next())
+						builder.Add(shell, TopoDS::Face(faceEx.Current()));
+					//cap the faces
+					TopoDS_Face startFace = BRepLib_MakeFace(TopoDS::Wire(oSweepMaker.FirstShape().Reversed()), Standard_True);
+					builder.Add(startFace, iSweepMaker.FirstShape().Reversed());
+					TopoDS_Face endFace = BRepLib_MakeFace (TopoDS::Wire(oSweepMaker.LastShape().Reversed()), Standard_True);
+					builder.Add(endFace, iSweepMaker.LastShape().Reversed());
+					builder.Add(shell, startFace);
+					builder.Add(shell, endFace.Reversed());
+					builder.Add(solid, shell);
+					return solid;
+				}
+				else
+				{
+					pLoggingService->LogWarning("Could not build Inner radius of SweptDiskSolid");
+					bool ok = oSweepMaker.MakeSolid();
+					if (ok) return TopoDS::Solid(oSweepMaker.Shape());
+				}
+
+			}
+			else
+			{
+				bool ok = oSweepMaker.MakeSolid();
+				if (ok) return TopoDS::Solid(oSweepMaker.Shape());
+			}
+		}
+
+	}
+	catch (Standard_Failure e)
+	{
+		pLoggingService->LogError(e.GetMessageString());
+	}
+	pLoggingService->LogError("Could not build SweptDiskSolid");
+	return _emptySolid;
 }
+
 

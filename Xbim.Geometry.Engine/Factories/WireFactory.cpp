@@ -299,6 +299,7 @@ namespace Xbim
 					throw gcnew XbimGeometryFactoryException("Directrix is invalid");
 				return wire;
 			}
+
 			TopoDS_Wire WireFactory::MakeWire(Handle(Geom_Curve) curve)
 			{
 				BRepBuilderAPI_MakeEdge edgeMaker(curve);

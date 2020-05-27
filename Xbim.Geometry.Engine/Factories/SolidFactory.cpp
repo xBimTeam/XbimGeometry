@@ -1,6 +1,7 @@
 #include "SolidFactory.h"
 #include <gp_Ax2.hxx>
 #include "../BRep/XbimSolid.h"
+#include <BRepBuilderAPI_TransitionMode.hxx>
 using namespace Xbim::Geometry::BRep;
 namespace Xbim
 {
@@ -90,20 +91,18 @@ namespace Xbim
 				if(ifcSolid->Radius <= 0)
 					throw gcnew XbimGeometryFactoryException("Radius must be greater than 0");
 				if (ifcSolid->InnerRadius.HasValue && ifcSolid->InnerRadius.Value >= ifcSolid->Radius)
-					throw gcnew XbimGeometryFactoryException("Inner radius is greater than outer radius");
-				
+					throw gcnew XbimGeometryFactoryException("Inner radius is greater than outer radius");				
 
 				TopoDS_Wire directrix = _wireFactory->BuildDirectrix(ifcSolid->Directrix,
 					ifcSolid->StartParam.HasValue ? (double)ifcSolid->StartParam.Value : -1,
 					ifcSolid->EndParam.HasValue ? (double)ifcSolid->EndParam.Value : -1);
-				//Handle(Geom_Surface) wireSurface;
-				//TopoDS_Wire directrix = _wireFactory->BuildWire(ifcSolid->Directrix, wireSurface);
 				if(directrix.IsNull()|| directrix.NbChildren()==0)
 					throw gcnew XbimGeometryFactoryException("Could not build directrix");
-				double startParam = ifcSolid->StartParam.HasValue ? (double)ifcSolid->StartParam.Value : -1;
-				double endParam = ifcSolid->EndParam.HasValue ? (double)ifcSolid->EndParam.Value : -1;
 				double innerRadius = ifcSolid->InnerRadius.HasValue ? (double)ifcSolid->InnerRadius.Value : -1;
-				TopoDS_Solid solid = Ptr()->BuildSweptDiskSolid(directrix, startParam, endParam, ifcSolid->Radius, innerRadius);
+				BRepBuilderAPI_TransitionMode transitionMode = BRepBuilderAPI_TransitionMode::BRepBuilderAPI_RoundCorner;
+				//With Polyline the consecutive segments of the Directrix are not tangent continuous, the resulting solid is created by a miter at half angle between the two segments.
+				if(dynamic_cast<IIfcPolyline^>(ifcSolid->Directrix)) transitionMode = BRepBuilderAPI_TransitionMode::BRepBuilderAPI_RightCorner;
+				TopoDS_Solid solid = Ptr()->BuildSweptDiskSolid(directrix, ifcSolid->Radius, innerRadius, transitionMode);
 				return solid;
 
 			}

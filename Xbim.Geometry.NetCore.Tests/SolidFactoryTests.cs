@@ -1,4 +1,5 @@
 ﻿using Extensions.Logging.ListOfString;
+using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -7,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Services;
+using Xbim.Ifc4.GeometryResource;
 
 namespace Xbim.Geometry.NetCore.Tests
 {
@@ -249,16 +251,35 @@ namespace Xbim.Geometry.NetCore.Tests
         }
         #endregion
 
-        #region Extrude Areas
+        #region Swept Areas
         [TestMethod]
-        public void Can_create_swept_disk_solid()
+        public void Can_create_swept_disk_solid_with_line_directrix()
         {
             var solidService = _modelScope.ServiceProvider.GetRequiredService<IXSolidService>();
-            var ifcSweptDisk = IfcMoq.IfcSweptDiskSolidMoq();
-          //  solidService.Build(ifcSweptDisk);
-            
+            var ifcSweptDisk = IfcMoq.IfcSweptDiskSolidMoq(startParam:0, endParam: 100, radius:30, innerRadius: 15);
+            var solid = solidService.Build(ifcSweptDisk);
+            Assert.IsFalse(solid.IsEmptyShape());
+            Assert.IsTrue(solid.IsValidShape());
+            double volume = solid.Volume();
+            volume.Should().BeGreaterThan(0);
         }
-
+        [TestMethod]
+        public void Can_create_swept_disk_solid_with_polyline_directrix()
+        {
+            var solidService = _modelScope.ServiceProvider.GetRequiredService<IXSolidService>();
+            var points = new (double X, double Y, double Z)[] { (X: 0, Y: 0, Z:0), (X: 100, Y: 0, Z: 0), (X: 100, Y: 150, Z: 0), (X: 0, Y: 150, Z: 0) };
+            var pline = IfcMoq.IfcPolylineMock(dim: 3);
+            foreach (var p in points)
+            {
+                pline.Points.Add(IfcMoq.IfcCartesianPoint3dMock(p.X, p.Y, p.Z));
+            }
+            var ifcSweptDisk = IfcMoq.IfcSweptDiskSolidMoq(directrix: pline,  startParam: 0, endParam: -1, radius: 30, innerRadius: 15);
+            var solid = solidService.Build(ifcSweptDisk);
+            Assert.IsFalse(solid.IsEmptyShape());
+            Assert.IsTrue(solid.IsValidShape());
+            double volume = solid.Volume();
+            volume.Should().BeGreaterThan(0);
+        }
 
         #endregion
 
