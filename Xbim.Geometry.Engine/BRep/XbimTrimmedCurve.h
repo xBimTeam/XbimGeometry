@@ -1,6 +1,9 @@
 #pragma once
 #include <Geom_TrimmedCurve.hxx>
+#include <GCPnts_AbscissaPoint.hxx>
+#include <GeomAdaptor_Curve.hxx>
 #include "../XbimHandle.h"
+
 using namespace Xbim::Common::Geometry;
 using namespace Xbim::Geometry::Abstractions;
 using namespace System::Runtime::InteropServices;
@@ -21,7 +24,7 @@ namespace Xbim
 				virtual property IXPoint^ EndPoint {IXPoint^ get(); };
 				virtual  IXPoint^ GetPoint(double uParam);
 				virtual  IXPoint^ GetFirstDerivative(double uParam, [Out] IXVector^% normal);
-
+				virtual property double Length{ double get() { return GCPnts_AbscissaPoint::Length(GeomAdaptor_Curve(OccHandle())); } }
 			};
 		}
 	}

@@ -6,5 +6,6 @@ namespace Xbim.Geometry.Abstractions
     {
         XCurveType CurveType { get; }
         bool Is3d { get; }
+        double Length { get; }
     }
 }

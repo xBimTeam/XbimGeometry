@@ -284,13 +284,27 @@ namespace Xbim.Geometry.NetCore.Tests
         }
 
         [DataTestMethod]
-        [DataRow(10, 5)]
-        [DataRow(5, 10)]
-        public void Can_convert_ifc_trimmed_ellipse_3d(double semi1 = 10, double semi2 = 5)
+
+        [DataRow(true, true, false)]
+        [DataRow(true, true, true)]
+        [DataRow(true, false, true)]
+        [DataRow(true, false, false)]
+
+        [DataRow(false, true, false)]
+        [DataRow(false, true, true)]
+        [DataRow(false, false, true)]
+        [DataRow(false, false, false)]
+
+        // [DataRow(5, 10, true)]
+        public void Can_convert_ifc_trimmed_ellipse_3d(bool reverseAxis, bool sameSense = true, bool reverseParams = false)
         {
+            double semi1 = reverseAxis ? 5 : 10;
+            double semi2 = reverseAxis ? 10 : 5;
+            double quadrantLength = 12.110560271815889;
             var ifcTrimmedCurve = IfcMoq.IfcTrimmedCurve3dMock(
-                trimParam1: 0,
-                trimParam2: Math.PI / 2.0,
+                trimParam1: reverseParams ? Math.PI : Math.PI / 2.0,
+                trimParam2: reverseParams ? Math.PI / 2.0 : Math.PI,
+                sense: sameSense,
                 basisCurve: IfcMoq.IfcEllipse3dMock(semi1: semi1, semi2: semi2));
             var model = IfcMoq.IfcModelMock();
             var curveFactory = _modelScope.ServiceProvider.GetRequiredService<IXCurveService>();
@@ -302,11 +316,42 @@ namespace Xbim.Geometry.NetCore.Tests
             var origin = basisCurve.Position as IXAxis2Placement3d;
             Assert.IsNotNull(origin);
             Assert.IsTrue(tc.Is3d);
-            Assert.AreEqual(tc.StartPoint.X, origin.Axis.Location.X + semi1, model.ModelFactors.Precision);
-            Assert.AreEqual(tc.StartPoint.Y, origin.Axis.Location.Y, model.ModelFactors.Precision);
-            Assert.AreEqual(tc.EndPoint.X, origin.Axis.Location.X, model.ModelFactors.Precision);
-            Assert.AreEqual(tc.EndPoint.Y, origin.Axis.Location.Y + semi2, model.ModelFactors.Precision);
+            var sp = tc.StartPoint;
+            var ep = tc.EndPoint;
+            if (sameSense)
+            {
+                if (reverseParams)
+                {
+                    Assert.AreEqual(3 * quadrantLength, tc.Length, 1e-2);
+                    Assert.AreEqual(tc.StartPoint.X, origin.Axis.Location.X- semi1, model.ModelFactors.Precision);
+                    Assert.AreEqual(tc.EndPoint.Y, origin.Axis.Location.Y + semi2, model.ModelFactors.Precision);
+                }
+                else
+                {
+                    Assert.AreEqual(quadrantLength, tc.Length, 1e-2);
+                    Assert.AreEqual(tc.StartPoint.Y, origin.Axis.Location.Y + semi2, model.ModelFactors.Precision);
+                    Assert.AreEqual(tc.EndPoint.X, origin.Axis.Location.X - semi1, model.ModelFactors.Precision);
+                }
+            }
+            else
+            {
+                if (reverseParams)
+                {
+                    Assert.AreEqual(3 * quadrantLength, tc.Length, 1e-2);
+                    Assert.AreEqual(tc.StartPoint.X, origin.Axis.Location.X - semi1, model.ModelFactors.Precision);
+                    Assert.AreEqual(tc.EndPoint.Y, origin.Axis.Location.Y + semi2, model.ModelFactors.Precision);
+                }
+                else
+                {
+                    Assert.AreEqual(quadrantLength, tc.Length, 1e-2);
+                    Assert.AreEqual(tc.StartPoint.Y, origin.Axis.Location.Y + semi2, model.ModelFactors.Precision);
+                    Assert.AreEqual(tc.EndPoint.X, origin.Axis.Location.X - semi1, model.ModelFactors.Precision);
+                }
+            }
 
+            //Assert.AreEqual(tc.EndPoint.X, origin.Axis.Location.X, model.ModelFactors.Precision);
+            //Assert.AreEqual(tc.EndPoint.Y, origin.Axis.Location.Y + semi2, model.ModelFactors.Precision);
+            //Assert.AreEqual(tc.StartPoint.Y, origin.Axis.Location.Y, model.ModelFactors.Precision);
         }
         [DataTestMethod]
         [DataRow(10, 5)]

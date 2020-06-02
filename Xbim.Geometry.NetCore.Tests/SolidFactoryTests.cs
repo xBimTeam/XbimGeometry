@@ -1,9 +1,11 @@
 ﻿using Extensions.Logging.ListOfString;
 using FluentAssertions;
+using FluentAssertions.Common;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Xbim.Geometry.Abstractions;
@@ -280,7 +282,32 @@ namespace Xbim.Geometry.NetCore.Tests
             double volume = solid.Volume();
             volume.Should().BeGreaterThan(0);
         }
+        [TestMethod]
+        public void Can_create_swept_disk_solid_with_trimmed_circle_directrix()
+        {
+            var solidService = _modelScope.ServiceProvider.GetRequiredService<IXSolidService>();
+            var circle = IfcMoq.IfcCircle3dMock(radius: 100);
+            var ifcSweptDisk = IfcMoq.IfcSweptDiskSolidMoq(directrix: circle, startParam: Math.PI, endParam: 0 , radius: 30, innerRadius: 15);
+            var solid = solidService.Build(ifcSweptDisk);
+            Assert.IsFalse(solid.IsEmptyShape());
+            Assert.IsTrue(solid.IsValidShape());
+            double volume = solid.Volume();
+            volume.Should().BeGreaterThan(0);
+        }
 
+        [TestMethod]
+        public void Can_create_swept_disk_solid_with_trimmed_elipse_directrix()
+        {
+            var solidService = _modelScope.ServiceProvider.GetRequiredService<IXSolidService>();
+            var ellipse = IfcMoq.IfcEllipse3dMock(semi1: 200, semi2:300);
+            var ifcSweptDisk = IfcMoq.IfcSweptDiskSolidMoq(directrix: ellipse, startParam: Math.PI/2, endParam: 0, radius: 30, innerRadius: 15);
+            var solid = solidService.Build(ifcSweptDisk);
+            Assert.IsFalse(solid.IsEmptyShape());
+            Assert.IsTrue(solid.IsValidShape());
+            double volume = solid.Volume();
+            volume.IsSameOrEqualTo(2523289.1559284292);
+            
+        }
         #endregion
 
 

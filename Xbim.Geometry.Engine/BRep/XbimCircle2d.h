@@ -23,7 +23,7 @@ namespace Xbim
 				{ 
 					return gcnew XbimAxisPlacement2d(new Geom2d_AxisPlacement(OccHandle()->Position().Location(), OccHandle()->Position().XDirection())); 
 				}};
-
+				virtual property double Length { double get() { return GCPnts_AbscissaPoint::Length(Geom2dAdaptor_Curve(OccHandle())); } }
 			};
 		}
 	}

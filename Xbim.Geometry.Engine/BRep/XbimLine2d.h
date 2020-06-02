@@ -1,6 +1,8 @@
 #pragma once
 #include "../BRep/OccExtensions/Geom2d_LineWithMagnitude.h"	
 #include "../XbimHandle.h"
+#include <Geom2dAdaptor_Curve.hxx>
+#include <GCPnts_AbscissaPoint.hxx>
 using namespace Xbim::Common::Geometry;
 using namespace Xbim::Geometry::Abstractions;
 using namespace System::Runtime::InteropServices;
@@ -25,6 +27,7 @@ namespace Xbim
 				//Get a Point at the parameter length from the origin
 				virtual IXPoint^ GetPoint(double uParam);
 				virtual IXPoint^ GetFirstDerivative(double uParam, [Out] IXVector^% normal);
+				virtual property double Length { double get() { return GCPnts_AbscissaPoint::Length(Geom2dAdaptor_Curve(OccHandle())); } }
 			};
 		}
 	}

@@ -92,7 +92,18 @@ Handle(Geom_TrimmedCurve) NCurveFactory::BuildTrimmedCurve3d(Handle(Geom_Curve) 
 {
 	try
 	{
-		return new Geom_TrimmedCurve(basisCurve, u1, u2, sense);
+		if (!sense)
+		{
+			Handle(Geom_Conic) conic = Handle(Geom_Conic)::DownCast(basisCurve);
+			if (!conic.IsNull()) //otherwise fall through to end
+			{
+				basisCurve->Reverse();
+				Handle(Geom_TrimmedCurve) tc = new Geom_TrimmedCurve(basisCurve, u1, u2, true, true);
+				tc->BasisCurve()->Reverse();
+				return tc;
+			}
+		}
+		return new Geom_TrimmedCurve(basisCurve, u1, u2, sense,true);
 	}
 	catch (Standard_Failure e)
 	{

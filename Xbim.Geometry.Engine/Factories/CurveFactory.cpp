@@ -309,7 +309,7 @@ namespace Xbim
 					bool isConic = (dynamic_cast<IIfcConic^>(ifcTrimmedCurve->BasisCurve) != nullptr);
 					bool isLine = (dynamic_cast<IIfcLine^>(ifcTrimmedCurve->BasisCurve) != nullptr);
 					bool isEllipse = (dynamic_cast<IIfcEllipse^>(ifcTrimmedCurve->BasisCurve) != nullptr);
-
+					bool sense = ifcTrimmedCurve->SenseAgreement;
 					//get the parametric values
 					IfcTrimmingPreference trimPref = ifcTrimmedCurve->MasterRepresentation;
 
@@ -347,14 +347,20 @@ namespace Xbim
 						{
 							u1 *= ModelService->RadianFactor; //correct to radians
 							u2 *= ModelService->RadianFactor; //correct to radians
+							
 						}
 					}
+
 					if (double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)) //sanity check in case the logic has missed a situtation
 						throw gcnew XbimGeometryFactoryException("Error converting Ifc Trim Points");
-					if (u1 == u2) //if the parameters are the same trimming will fail
+					
+					if (Math::Abs(u1- u2) < ModelService->Precision) //if the parameters are the same trimming will fail if not a conic curve
+					{
+						if (isConic) return Ptr()->BuildTrimmedCurve3d(basisCurve, 0, Math::PI*2, true); //return a full circle
 						throw gcnew XbimGeometryFactoryException("Parametric Trim Points are equal and will result in an empty curve");
-
-					return Ptr()->BuildTrimmedCurve3d(basisCurve, u1, u2, ifcTrimmedCurve->SenseAgreement);
+					}									
+					else 
+						return Ptr()->BuildTrimmedCurve3d(basisCurve, u1, u2, sense);
 				}
 				else
 					throw gcnew XbimGeometryFactoryException("Failed to build Trimmed Basis Curve");

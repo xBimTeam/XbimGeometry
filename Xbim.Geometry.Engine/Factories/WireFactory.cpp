@@ -17,7 +17,7 @@ namespace Xbim
 	{
 		namespace Factories
 		{
-			
+
 			IXWire^ WireFactory::Build(IIfcCurve^ ifcCurve)
 			{
 				Handle(Geom_Surface) surface;
@@ -36,7 +36,7 @@ namespace Xbim
 					return Build3d(ifcCurve, surface);
 			}
 
-			
+
 
 			TopoDS_Wire WireFactory::Build2d(IIfcCurve^ ifcCurve, Handle(Geom_Surface)& surface)
 			{
@@ -144,7 +144,7 @@ namespace Xbim
 				Handle(Geom2d_Circle) circ = Handle(Geom2d_Circle)::DownCast(hCurve);
 				gp_Pnt2d centre = circ->Location();
 				surface = new Geom_Plane(gp_Pnt(centre.X(), centre.Y(), 0.0), gp::DZ());
-				
+
 				return wire;
 			}
 
@@ -178,7 +178,7 @@ namespace Xbim
 				{
 					pointSeq.Append(KeyedPnt2d(gp_XY(cp->X, cp->Y), cp->EntityLabel));
 				}
-				TopoDS_Wire wire =  Ptr()->BuildPolyline2d(pointSeq, ModelService->Precision);				
+				TopoDS_Wire wire = Ptr()->BuildPolyline2d(pointSeq, ModelService->Precision);
 				return wire;
 			}
 
@@ -200,7 +200,7 @@ namespace Xbim
 			TopoDS_Wire WireFactory::BuildDirectrix(IIfcCurve^ curve, double startParam, double endParam)
 			{
 				double sameParams = Math::Abs(endParam - startParam) < ModelService->Precision;
-				if (sameParams || ((startParam==-1 || endParam==-1) && !_curveFactory->IsBoundedCurve(curve)))
+				if (sameParams || ((startParam == -1 || endParam == -1) && !_curveFactory->IsBoundedCurve(curve)))
 					throw gcnew XbimGeometryFactoryException("DirectrixBounded: If the values for StartParam or EndParam are omited, then the Directrix has to be a bounded or closed curve.");
 				if (3 != (int)curve->Dim)
 					throw gcnew XbimGeometryFactoryException("DirectrixDim: The Directrix shall be a curve in three dimensional space.");
@@ -225,14 +225,14 @@ namespace Xbim
 					/*case Xbim::Geometry::Abstractions::XCurveType::CompositeCurve:
 						return Build3d(static_cast<IIfcCompositeCurve^>(curve));
 					case Xbim::Geometry::Abstractions::XCurveType::CompositeCurveOnSurface:
-						return Build3d(static_cast<IIfcCompositeCurveOnSurface^>(curve));				
+						return Build3d(static_cast<IIfcCompositeCurveOnSurface^>(curve));
 					case Xbim::Geometry::Abstractions::XCurveType::IndexedPolyCurve:
-						return Build3d(static_cast<IIfcIndexedPolyCurve^>(curve));								
+						return Build3d(static_cast<IIfcIndexedPolyCurve^>(curve));
 					case Xbim::Geometry::Abstractions::XCurveType::OffsetCurve3D:
 						return Build2d(static_cast<IIfcOffsetCurve3D^>(curve));
 					case Xbim::Geometry::Abstractions::XCurveType::Pcurve:
 						return Build3d(static_cast<IIfcPcurve^>(curve));
-					
+
 					case Xbim::Geometry::Abstractions::XCurveType::RationalBSplineCurveWithKnots:
 						return Build3d(static_cast<IIfcRationalBSplineCurveWithKnots^>(curve));
 					case Xbim::Geometry::Abstractions::XCurveType::SurfaceCurve:
@@ -243,11 +243,11 @@ namespace Xbim
 				default:
 					throw gcnew XbimGeometryFactoryException("Not implemented. Curve type: " + curveType.ToString());
 				}
-	
+
 			}
 			//this will never be called with an invalid start and end parameter as an ifcline is not a bounded curve and cannot be built as a directrix
 			TopoDS_Wire WireFactory::BuildDirectrix(IIfcLine^ curve, double startParam, double endParam)
-			{				
+			{
 				Handle(Geom_LineWithMagnitude) line = _curveFactory->BuildGeom3d(curve);
 				if (line.IsNull())
 					throw gcnew XbimGeometryFactoryException("Directrix is invalid");
@@ -263,9 +263,11 @@ namespace Xbim
 				Handle(Geom_Circle) circle = _curveFactory->BuildGeom3d(curve);
 				if (circle.IsNull())
 					throw gcnew XbimGeometryFactoryException("Directrix is invalid");
-				Handle(Geom_TrimmedCurve) trimmedLine = _curveFactory->Ptr()->BuildTrimmedCurve3d(circle, startParam, endParam, (endParam > startParam));
+				if(Math::Abs(startParam-endParam)< ModelService->Precision) return MakeWire(circle);
+				bool sameSense = (startParam < endParam);
+				Handle(Geom_TrimmedCurve) trimmedLine = _curveFactory->Ptr()->BuildTrimmedCurve3d(circle, sameSense ? startParam : endParam, sameSense ? endParam : startParam, sameSense);
 				if (trimmedLine.IsNull())
-					throw gcnew XbimGeometryFactoryException("Directrix could not be trimmed");				
+					throw gcnew XbimGeometryFactoryException("Directrix could not be trimmed");
 				return MakeWire(trimmedLine);
 			}
 
@@ -275,7 +277,9 @@ namespace Xbim
 				Handle(Geom_Ellipse) elipse = _curveFactory->BuildGeom3d(curve);
 				if (elipse.IsNull())
 					throw gcnew XbimGeometryFactoryException("Directrix is invalid");
-				Handle(Geom_TrimmedCurve) trimmedLine = _curveFactory->Ptr()->BuildTrimmedCurve3d(elipse, startParam, endParam, (endParam > startParam));
+				if (Math::Abs(startParam - endParam) < ModelService->Precision) return MakeWire(elipse);
+				bool sameSense = (startParam < endParam);
+				Handle(Geom_TrimmedCurve) trimmedLine = _curveFactory->Ptr()->BuildTrimmedCurve3d(elipse, startParam , endParam , sameSense);
 				if (trimmedLine.IsNull())
 					throw gcnew XbimGeometryFactoryException("Directrix could not be trimmed");
 				return MakeWire(trimmedLine);
@@ -295,7 +299,7 @@ namespace Xbim
 			TopoDS_Wire WireFactory::BuildDirectrix(IIfcPolyline^ curve, double startParam, double endParam)
 			{
 				TopoDS_Wire wire = BuildPolyline(curve, startParam, endParam);
-				if (wire.IsNull() || wire.NbChildren()==0)
+				if (wire.IsNull() || wire.NbChildren() == 0)
 					throw gcnew XbimGeometryFactoryException("Directrix is invalid");
 				return wire;
 			}

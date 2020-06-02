@@ -19,7 +19,7 @@ namespace Xbim
 				virtual property bool Is3d {bool get() { return true; }};
 				virtual property double Radius {double get() { return OccHandle()->Radius(); }};
 				virtual property IXAxisPlacement^ Position {IXAxisPlacement^ get() { return gcnew XbimAxis2Placement3d(new Geom_Axis2Placement(OccHandle()->Position())); }};
-
+				virtual property double Length { double get() { return GCPnts_AbscissaPoint::Length(GeomAdaptor_Curve(OccHandle())); } }
 
 				////Get a Point at the parameter length from the origin
 				//virtual IXPoint^ GetPoint(double uParam);
