@@ -138,16 +138,17 @@ Handle(Geom_BSplineCurve) NCurveFactory::BuildCompositeCurve(const TColGeom_Sequ
 {
 	try
 	{
-		GeomConvert_CompCurveToBSplineCurve compositeConverter(Convert_ParameterisationType::Convert_RationalC1);
+		GeomConvert_CompCurveToBSplineCurve compositeConverter(Convert_ParameterisationType::Convert_RationalC1); //provides exact parameterisation
 
 		//all the segments will be bounded curves or offset curves base on a bounded curve
+		//we don use the WithRatio option as IFC does not parameterise composite curves this way
 		for (auto it = segments.cbegin(); it != segments.cend(); ++it)
 		{
 			Handle(Geom_Curve) curve = *it;
 			Handle(Geom_BoundedCurve) boundedCurve = Handle(Geom_BoundedCurve)::DownCast(curve);
 			if (boundedCurve.IsNull())
 				throw Standard_Failure("Compound curve segments must be bounded curves");
-			if (!compositeConverter.Add(boundedCurve, tolerance))
+			if (!compositeConverter.Add(boundedCurve, tolerance,false, false))
 				throw Standard_Failure("Compound curve segment is not continuous");
 		}
 		return compositeConverter.BSplineCurve();

@@ -11,6 +11,7 @@ using Xbim.Geometry.Factories;
 using Xbim.Geometry.Abstractions;
 using Extensions.Logging.ListOfString;
 using System.Collections.Generic;
+using System.Transactions;
 
 namespace Xbim.Geometry.NetCore.Tests
 {
@@ -371,7 +372,7 @@ namespace Xbim.Geometry.NetCore.Tests
             var ep = tc.EndPoint;
             if (sameSense)
             {
-                if (trim1>trim2)
+                if (trim1 > trim2)
                 {
                     Assert.AreEqual(3 * quadrantLength, tc.Length, 1e-2);
                     Assert.AreEqual(tc.StartPoint.X, origin.Axis.Location.X - semi1, model.Precision);
@@ -471,6 +472,56 @@ namespace Xbim.Geometry.NetCore.Tests
             var cc = curveFactory.Build(ifcCompCurve) as IXCompositeCurve; //initialise the factory with the curve
             Assert.IsNotNull(cc);
             Assert.AreEqual(XCurveType.IfcCompositeCurve, cc.CurveType);
+            Assert.AreEqual(totalParametricLength, cc.LastParameter - cc.FirstParameter, model.Precision); //parametric length of this curve is 90 degrees
+
+        }
+        [TestMethod]
+        public void Can_convert_ifc_composite_curve_three_arcs_two_lines()
+        {
+            var curveFactory = _modelScope.ServiceProvider.GetRequiredService<IXCurveService>();
+            var model = _modelScope.ServiceProvider.GetRequiredService<IXModelService>();
+            var lineLen1 = 10;
+            var lineLen2 = 20;
+            var circ1 = IfcMoq.IfcCircle3dMock(radius: 20);
+            var circ2 = IfcMoq.IfcCircle3dMock(radius: 20, IfcMoq.IfcIfcAxis2Placement3DMock(refDir: IfcMoq.IfcDirection3dMock(-1, 0, 0), loc: IfcMoq.IfcCartesianPoint3dMock(0, 40, 0)));
+            var circ3 = IfcMoq.IfcCircle3dMock(radius: 20, IfcMoq.IfcIfcAxis2Placement3DMock(loc: IfcMoq.IfcCartesianPoint3dMock(-40, 60, 0)));
+
+            var line1 = IfcMoq.IfcLine3dMock(origin: IfcMoq.IfcCartesianPoint3dMock(x: 20, y: -lineLen1, z: 0), direction: IfcMoq.IfcDirection3dMock(x: 0, y: 1, z: 0));
+            var lineSeg1 = IfcMoq.IfcTrimmedCurve3dMock(line1, trimParam1: 0, trimParam2: lineLen1);
+
+            var line2 = IfcMoq.IfcLine3dMock(origin: IfcMoq.IfcCartesianPoint3dMock(x: -20, y: 40, z: 0), direction: IfcMoq.IfcDirection3dMock(x: 0, y: 1, z: 0));
+            var lineSeg2 = IfcMoq.IfcTrimmedCurve3dMock(line2, trimParam1: 0, trimParam2: lineLen2);
+
+            var arc1 = IfcMoq.IfcTrimmedCurve3dMock(circ1, trimParam2: Math.PI / 2);
+            var arc2 = IfcMoq.IfcTrimmedCurve3dMock(circ2, trimParam1: Math.PI / 2, trimParam2: 0, sense: true);
+            var arc3 = IfcMoq.IfcTrimmedCurve3dMock(circ3, trimParam2: Math.PI / 2);
+
+            var x1 = curveFactory.Build(lineSeg1) as IXTrimmedCurve;
+            var x2 = curveFactory.Build(arc1) as IXTrimmedCurve;
+            var x3 = curveFactory.Build(arc2) as IXTrimmedCurve;
+            var x4 = curveFactory.Build(lineSeg2) as IXTrimmedCurve;
+            var x5 = curveFactory.Build(arc3) as IXTrimmedCurve;
+
+            var paramLength1 = x1.LastParameter - x1.FirstParameter;
+            var paramLength2 = x2.LastParameter - x2.FirstParameter;
+            var paramLength3 = x3.LastParameter - x3.FirstParameter;
+            var paramLength4 = x4.LastParameter - x4.FirstParameter;
+            var paramLength5 = x5.LastParameter - x5.FirstParameter;
+
+            var totalParametricLength = paramLength1 + paramLength2 + paramLength3 + paramLength4 + paramLength5;
+            var totalLength = x1.Length+x2.Length+x3.Length + x4.Length + x5.Length;
+            var seg1 = IfcMoq.IfcCompositeCurveSegment3dMock(lineSeg1, entityLabel: 1);
+            var seg2 = IfcMoq.IfcCompositeCurveSegment3dMock(arc1, entityLabel: 2);
+            var seg3 = IfcMoq.IfcCompositeCurveSegment3dMock(arc2, entityLabel: 3);
+            var seg4 = IfcMoq.IfcCompositeCurveSegment3dMock(lineSeg2, entityLabel: 4);
+            var seg5 = IfcMoq.IfcCompositeCurveSegment3dMock(arc3, entityLabel: 5);
+
+            var ifcCompCurve = IfcMoq.IfcCompositeCurve3dMock(new[] { seg1, seg2, seg3, seg4, seg5 });
+
+            var cc = curveFactory.Build(ifcCompCurve) as IXCompositeCurve; //initialise the factory with the curve
+            Assert.IsNotNull(cc);
+            Assert.AreEqual(XCurveType.IfcCompositeCurve, cc.CurveType);
+            Assert.AreEqual(totalLength, cc.Length, model.MinimumGap);
             Assert.AreEqual(totalParametricLength, cc.LastParameter - cc.FirstParameter, model.Precision); //parametric length of this curve is 90 degrees
 
         }
