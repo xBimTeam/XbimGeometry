@@ -8,7 +8,7 @@
 #include "../../BRep/OccExtensions/KeyedPnt2d.h"
 #include <TopTools_DataMapOfIntegerShape.hxx>
 #include "../../BRep/OccExtensions/KeyedPnt.h"
-
+#include <TColGeom_SequenceOfCurve.hxx>
 class NWireFactory
 {
 private:
@@ -34,6 +34,8 @@ public:
 	TopoDS_Wire BuildPolyline(
 		const NCollection_Vector<KeyedPnt>& pointSeq, double startParam, double endParam,
 		double tolerance);
+
+	TopoDS_Wire BuildCompositeCurve(const TColGeom_SequenceOfCurve& segments);
 	
 };
 

@@ -4,7 +4,7 @@
 #include<Geom_Circle.hxx>
 #include <Geom_Axis2Placement.hxx>
 using namespace Xbim::Geometry::Abstractions;
-using namespace System::Runtime::InteropServices;
+
 namespace Xbim
 {
 	namespace Geometry
@@ -17,6 +17,15 @@ namespace Xbim
 				XbimCircle(Handle(Geom_Circle) hCircle) : XbimHandle(new Handle(Geom_Circle)(hCircle)) { };
 				virtual property XCurveType CurveType {XCurveType get() { return XCurveType::IfcCircle; }; };
 				virtual property bool Is3d {bool get() { return true; }};
+				virtual property double FirstParameter {double get()
+				{
+					return OccHandle()->FirstParameter();
+				}};
+
+				virtual property double LastParameter {double get()
+				{
+					return OccHandle()->LastParameter();
+				}};
 				virtual property double Radius {double get() { return OccHandle()->Radius(); }};
 				virtual property IXAxisPlacement^ Position {IXAxisPlacement^ get() { return gcnew XbimAxis2Placement3d(new Geom_Axis2Placement(OccHandle()->Position())); }};
 				virtual property double Length { double get() { return GCPnts_AbscissaPoint::Length(GeomAdaptor_Curve(OccHandle())); } }

@@ -23,6 +23,7 @@ namespace Xbim
 			{
 			protected:
 				XbimShape(TShape* pShape) : XbimHandle(pShape) {};
+				
 			public:
 				virtual property XShapeType ShapeType {XShapeType get() abstract; };
 				virtual property String^ Json {String^ get()
@@ -40,6 +41,7 @@ namespace Xbim
 					return gcnew String(oss.str().c_str());
 				}};
 
+				
 				virtual IXAxisAlignedBoundingBox^ Bounds()
 				{
 					Bnd_Box* pBox = new Bnd_Box();
@@ -66,8 +68,15 @@ namespace Xbim
 					return ok;
 
 				};
+				virtual property int MaterialId {int get() {
+					return OccHandle().MaterialId();
+				}
+				void set(int value)
+				{
+					OccHandle().SetMaterialId(value);
+				}
+				};
 			};
-
 
 		}
 	}

@@ -120,19 +120,20 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>.\OCC\inc</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies />
+      <AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;comdlg32.lib;wsock32.lib;Psapi.lib;TKBO.lib;TKBOOL.lib;TKBRep.lib;TKernel.lib;TKFillet.lib;TKG2d.lib;TKG3d.lib;TKGeomAlgo.lib;TKGeomBase.lib;TKMath.lib;TKMesh.lib;TKOffset.lib;TKPrim.lib;TKShHealing.lib;TKTopAlgo.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>.\OCC\win64\vc14\bind\</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -144,7 +145,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -161,6 +162,7 @@
     <ClInclude Include="BRep\OccExtensions\KeyedPnt.h" />
     <ClInclude Include="BRep\OccExtensions\KeyedPnt2d.h" />
     <ClInclude Include="BRep\XbimAxisAlignedBox.h" />
+    <ClInclude Include="BRep\XbimCompositeCurve.h" />
     <ClInclude Include="BRep\XbimShape.h" />
     <ClInclude Include="Exceptions\XbimGeometryServiceException.h" />
     <ClInclude Include="Factories\ProfileFactory.h" />
@@ -247,28 +249,28 @@
     <ClCompile Include="Factories\SolidFactory.cpp" />
     <ClCompile Include="Factories\Unmanaged\NBooleanFactory.cpp" />
     <ClCompile Include="Factories\Unmanaged\NCurveFactory.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
+      <CompileAsManaged>false</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="Factories\Unmanaged\NEdgeFactory.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
+      <CompileAsManaged>false</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="Factories\Unmanaged\NFaceFactory.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
+      <CompileAsManaged>false</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="Factories\Unmanaged\NGeomProcFactory.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
+      <CompileAsManaged>false</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="Factories\Unmanaged\NProfileFactory.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
+      <CompileAsManaged>false</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="Factories\Unmanaged\NShellFactory.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
+      <CompileAsManaged>false</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="Factories\Unmanaged\NSolidFactory.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
+      <CompileAsManaged>false</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="Factories\Unmanaged\NWireFactory.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
+      <CompileAsManaged>false</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="Factories\WireFactory.cpp" />
     <ClCompile Include="Services\GeometryServicesHost.cpp" />
@@ -280,15 +282,14 @@
     <ClCompile Include="Services\Unmanaged\NShapeService.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='x86Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='x86Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="BRep\Properties\VertexProperties.cpp" />
     <ClCompile Include="BRep\XbimLine.cpp" />
     <ClCompile Include="BRep\XbimTrimmedCurve.cpp" />
+    <ClCompile Include="BRep\XbimCompositeCurve.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="app.rc" />

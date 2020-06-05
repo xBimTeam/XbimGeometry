@@ -259,19 +259,19 @@ namespace Xbim.Geometry.NetCore.Tests
 
 
         }
+        //
+        //  [TestMethod]
+        //public void Can_convert_ifc_trimmed_circle_3d()
+        //{
+        //    var ifcTrimmedCurve = IfcMoq.IfcTrimmedCurve3dMock(IfcMoq.IfcCircle3dMock(), trimParam2: Math.PI / 2.0);
+        //    var curveFactory = _modelScope.ServiceProvider.GetRequiredService<IXCurveService>();
+        //    var tc = curveFactory.Build(ifcTrimmedCurve) as IXTrimmedCurve; //initialise the factory with the curve
+        //    Assert.AreEqual(XCurveType.IfcTrimmedCurve, tc.CurveType);
+        //    Assert.AreEqual(XCurveType.IfcCircle, tc.BasisCurve.CurveType);
+        //    Assert.IsTrue(tc.Is3d);
 
-        [TestMethod]
-        public void Can_convert_ifc_trimmed_circle_3d()
-        {
-            var ifcTrimmedCurve = IfcMoq.IfcTrimmedCurve3dMock(IfcMoq.IfcCircle3dMock(), trimParam2: Math.PI / 2.0);
-            var curveFactory = _modelScope.ServiceProvider.GetRequiredService<IXCurveService>();
-            var tc = curveFactory.Build(ifcTrimmedCurve) as IXTrimmedCurve; //initialise the factory with the curve
-            Assert.AreEqual(XCurveType.IfcTrimmedCurve, tc.CurveType);
-            Assert.AreEqual(XCurveType.IfcCircle, tc.BasisCurve.CurveType);
-            Assert.IsTrue(tc.Is3d);
 
-
-        }
+        //}
         [TestMethod]
         public void Can_convert_ifc_trimmed_circle_2d()
         {
@@ -283,30 +283,81 @@ namespace Xbim.Geometry.NetCore.Tests
             Assert.IsFalse(tc.Is3d);
         }
 
+        [DataTestMethod] //see the IFC definition https://standards.buildingsmart.org/IFC/RELEASE/IFC4/ADD2/HTML/link/ifctrimmedcurve.htm
+        [DataRow(90, 180, true, 1)] //Ifc Case 1
+        [DataRow(180, 90, true, 2)] //Ifc Case 2
+        [DataRow(180, 90, false, 3)]//Ifc Case 3
+        [DataRow(90, 180, false, 4)]//Ifc Case 4
+        public void Can_convert_ifc_trimmed_circle_3d(double trim1, double trim2, bool sameSense, int ifcCase)
+        {
+            double radius = 10;
+            var ifcTrimmedCurve = IfcMoq.IfcTrimmedCurve3dMock(
+                trimParam1: Math.PI / 180 * trim1,
+                trimParam2: Math.PI / 180 * trim2,
+                sense: sameSense,
+                basisCurve: IfcMoq.IfcCircle3dMock(radius: radius));
+            var model = _modelScope.ServiceProvider.GetRequiredService<IXModelService>();
+            var curveFactory = _modelScope.ServiceProvider.GetRequiredService<IXCurveService>();
+            var tc = curveFactory.Build(ifcTrimmedCurve) as IXTrimmedCurve; //initialise the factory with the curve
+            Assert.AreEqual(XCurveType.IfcTrimmedCurve, tc.CurveType);
+            Assert.AreEqual(XCurveType.IfcCircle, tc.BasisCurve.CurveType);
+            var basisCurve = tc.BasisCurve as IXCircle;
+            Assert.IsNotNull(basisCurve);
+            var origin = basisCurve.Position as IXAxis2Placement3d;
+            Assert.IsNotNull(origin);
+            Assert.IsTrue(tc.Is3d);
+
+            switch (ifcCase)
+            {
+                case 1:
+                    Assert.AreEqual(radius * Math.PI / 2, tc.Length, model.Precision);
+                    Assert.AreEqual(tc.StartPoint.Y, radius, model.Precision);
+                    Assert.AreEqual(tc.EndPoint.X, -radius, model.Precision);
+                    break;
+                case 2:
+                    Assert.AreEqual(3 * radius * Math.PI / 2, tc.Length, model.Precision);
+                    Assert.AreEqual(tc.EndPoint.Y, radius, model.Precision);
+                    Assert.AreEqual(tc.StartPoint.X, -radius, model.Precision);
+                    break;
+                case 3:
+                    Assert.AreEqual(radius * Math.PI / 2, tc.Length, model.Precision);
+                    Assert.AreEqual(tc.EndPoint.Y, radius, model.Precision);
+                    Assert.AreEqual(tc.StartPoint.X, -radius, model.Precision);
+                    break;
+                case 4:
+                    Assert.AreEqual(3 * radius * Math.PI / 2, tc.Length, model.Precision);
+                    Assert.AreEqual(tc.StartPoint.Y, radius, model.Precision);
+                    Assert.AreEqual(tc.EndPoint.X, -radius, model.Precision);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+
         [DataTestMethod]
 
-        [DataRow(true, true, false)]
-        [DataRow(true, true, true)]
-        [DataRow(true, false, true)]
-        [DataRow(true, false, false)]
-
-        [DataRow(false, true, false)]
-        [DataRow(false, true, true)]
-        [DataRow(false, false, true)]
-        [DataRow(false, false, false)]
+        [DataRow(90, 180, true, true)]
+        [DataRow(180, 90, true, true)]
+        [DataRow(180, 90, true, false)]
+        [DataRow(90, 180, true, false)]
+        [DataRow(90, 180, false, true)]
+        [DataRow(180, 90, false, true)]
+        [DataRow(180, 90, false, false)]
+        [DataRow(90, 180, false, false)]
 
         // [DataRow(5, 10, true)]
-        public void Can_convert_ifc_trimmed_ellipse_3d(bool reverseAxis, bool sameSense = true, bool reverseParams = false)
+        public void Can_convert_ifc_trimmed_ellipse_3d(double trim1, double trim2, bool reverseAxis, bool sameSense = true)
         {
             double semi1 = reverseAxis ? 5 : 10;
             double semi2 = reverseAxis ? 10 : 5;
             double quadrantLength = 12.110560271815889;
             var ifcTrimmedCurve = IfcMoq.IfcTrimmedCurve3dMock(
-                trimParam1: reverseParams ? Math.PI : Math.PI / 2.0,
-                trimParam2: reverseParams ? Math.PI / 2.0 : Math.PI,
+                trimParam1: Math.PI / 180 * trim1,
+                trimParam2: Math.PI / 180 * trim2,
                 sense: sameSense,
                 basisCurve: IfcMoq.IfcEllipse3dMock(semi1: semi1, semi2: semi2));
-            var model = IfcMoq.IfcModelMock();
+            var model = _modelScope.ServiceProvider.GetRequiredService<IXModelService>();
             var curveFactory = _modelScope.ServiceProvider.GetRequiredService<IXCurveService>();
             var tc = curveFactory.Build(ifcTrimmedCurve) as IXTrimmedCurve; //initialise the factory with the curve
             Assert.AreEqual(XCurveType.IfcTrimmedCurve, tc.CurveType);
@@ -320,38 +371,35 @@ namespace Xbim.Geometry.NetCore.Tests
             var ep = tc.EndPoint;
             if (sameSense)
             {
-                if (reverseParams)
+                if (trim1>trim2)
                 {
                     Assert.AreEqual(3 * quadrantLength, tc.Length, 1e-2);
-                    Assert.AreEqual(tc.StartPoint.X, origin.Axis.Location.X- semi1, model.ModelFactors.Precision);
-                    Assert.AreEqual(tc.EndPoint.Y, origin.Axis.Location.Y + semi2, model.ModelFactors.Precision);
+                    Assert.AreEqual(tc.StartPoint.X, origin.Axis.Location.X - semi1, model.Precision);
+                    Assert.AreEqual(tc.EndPoint.Y, origin.Axis.Location.Y + semi2, model.Precision);
                 }
                 else
                 {
                     Assert.AreEqual(quadrantLength, tc.Length, 1e-2);
-                    Assert.AreEqual(tc.StartPoint.Y, origin.Axis.Location.Y + semi2, model.ModelFactors.Precision);
-                    Assert.AreEqual(tc.EndPoint.X, origin.Axis.Location.X - semi1, model.ModelFactors.Precision);
+                    Assert.AreEqual(tc.StartPoint.Y, origin.Axis.Location.Y + semi2, model.Precision);
+                    Assert.AreEqual(tc.EndPoint.X, origin.Axis.Location.X - semi1, model.Precision);
                 }
             }
             else
             {
-                if (reverseParams)
+                if (trim1 > trim2)
                 {
                     Assert.AreEqual(3 * quadrantLength, tc.Length, 1e-2);
-                    Assert.AreEqual(tc.StartPoint.X, origin.Axis.Location.X - semi1, model.ModelFactors.Precision);
-                    Assert.AreEqual(tc.EndPoint.Y, origin.Axis.Location.Y + semi2, model.ModelFactors.Precision);
+                    Assert.AreEqual(tc.StartPoint.X, origin.Axis.Location.X - semi1, model.Precision);
+                    Assert.AreEqual(tc.EndPoint.Y, origin.Axis.Location.Y + semi2, model.Precision);
                 }
                 else
                 {
                     Assert.AreEqual(quadrantLength, tc.Length, 1e-2);
-                    Assert.AreEqual(tc.StartPoint.Y, origin.Axis.Location.Y + semi2, model.ModelFactors.Precision);
-                    Assert.AreEqual(tc.EndPoint.X, origin.Axis.Location.X - semi1, model.ModelFactors.Precision);
+                    Assert.AreEqual(tc.StartPoint.Y, origin.Axis.Location.Y + semi2, model.Precision);
+                    Assert.AreEqual(tc.EndPoint.X, origin.Axis.Location.X - semi1, model.Precision);
                 }
             }
 
-            //Assert.AreEqual(tc.EndPoint.X, origin.Axis.Location.X, model.ModelFactors.Precision);
-            //Assert.AreEqual(tc.EndPoint.Y, origin.Axis.Location.Y + semi2, model.ModelFactors.Precision);
-            //Assert.AreEqual(tc.StartPoint.Y, origin.Axis.Location.Y, model.ModelFactors.Precision);
         }
         [DataTestMethod]
         [DataRow(10, 5)]
@@ -362,9 +410,11 @@ namespace Xbim.Geometry.NetCore.Tests
                 trimParam1: 0,
                 trimParam2: Math.PI / 2.0,
                 basisCurve: IfcMoq.IfcEllipse2dMock(semi1: semi1, semi2: semi2));
-            var model = IfcMoq.IfcModelMock();
+
             var curveFactory = _modelScope.ServiceProvider.GetRequiredService<IXCurveService>();
+            var model = _modelScope.ServiceProvider.GetRequiredService<IXModelService>();
             var tc = curveFactory.Build(ifcTrimmedCurve) as IXTrimmedCurve; //initialise the factory with the curve
+            Assert.IsNotNull(tc);
             Assert.AreEqual(XCurveType.IfcTrimmedCurve, tc.CurveType);
             Assert.AreEqual(XCurveType.IfcEllipse, tc.BasisCurve.CurveType);
             var basisCurve = tc.BasisCurve as IXEllipse;
@@ -372,14 +422,59 @@ namespace Xbim.Geometry.NetCore.Tests
             var origin = basisCurve.Position as IXAxis2Placement2d;
             Assert.IsNotNull(origin);
             Assert.IsFalse(tc.Is3d);
-            Assert.AreEqual(tc.StartPoint.X, origin.Location.X + semi1, model.ModelFactors.Precision);
-            Assert.AreEqual(tc.StartPoint.Y, origin.Location.Y, model.ModelFactors.Precision);
-            Assert.AreEqual(tc.EndPoint.X, origin.Location.X, model.ModelFactors.Precision);
-            Assert.AreEqual(tc.EndPoint.Y, origin.Location.Y + semi2, model.ModelFactors.Precision);
+            Assert.AreEqual(tc.StartPoint.X, origin.Location.X + semi1, model.Precision);
+            Assert.AreEqual(tc.StartPoint.Y, origin.Location.Y, model.Precision);
+            Assert.AreEqual(tc.EndPoint.X, origin.Location.X, model.Precision);
+            Assert.AreEqual(tc.EndPoint.Y, origin.Location.Y + semi2, model.Precision);
 
         }
         #endregion
 
+        #region Composite Curves
+        [TestMethod]
+        public void Can_convert_ifc_composite_curve_simple_arc()
+        {
+            var ifcCompCurve = IfcMoq.IfcCompositeCurve3dMock();
+            var curveFactory = _modelScope.ServiceProvider.GetRequiredService<IXCurveService>();
+            var cc = curveFactory.Build(ifcCompCurve) as IXCompositeCurve; //initialise the factory with the curve
+            Assert.IsNotNull(cc);
+            Assert.AreEqual(XCurveType.IfcCompositeCurve, cc.CurveType);
+            Assert.AreEqual(Math.PI / 2, cc.LastParameter - cc.FirstParameter); //parametric length of this curve is 90 degrees
+        }
+        [TestMethod]
+        public void Can_convert_ifc_composite_curve_three_arcs()
+        {
+            var curveFactory = _modelScope.ServiceProvider.GetRequiredService<IXCurveService>();
+            var model = _modelScope.ServiceProvider.GetRequiredService<IXModelService>();
+            var circ1 = IfcMoq.IfcCircle3dMock(radius: 20);
+            var circ2 = IfcMoq.IfcCircle3dMock(radius: 20, IfcMoq.IfcIfcAxis2Placement3DMock(refDir: IfcMoq.IfcDirection3dMock(-1, 0, 0), loc: IfcMoq.IfcCartesianPoint3dMock(0, 40, 0)));
+            var circ3 = IfcMoq.IfcCircle3dMock(radius: 20, IfcMoq.IfcIfcAxis2Placement3DMock(loc: IfcMoq.IfcCartesianPoint3dMock(-40, 40, 0)));
 
+
+            var arc1 = IfcMoq.IfcTrimmedCurve3dMock(circ1, trimParam2: Math.PI / 2);
+            var arc2 = IfcMoq.IfcTrimmedCurve3dMock(circ2, trimParam1: Math.PI / 2, trimParam2: 0, sense: true);
+            var arc3 = IfcMoq.IfcTrimmedCurve3dMock(circ3, trimParam2: Math.PI / 2);
+
+            var x1 = curveFactory.Build(arc1) as IXTrimmedCurve;
+            var x2 = curveFactory.Build(arc2) as IXTrimmedCurve;
+            var x3 = curveFactory.Build(arc3) as IXTrimmedCurve;
+            var paramLength1 = x1.LastParameter - x1.FirstParameter;
+            var paramLength2 = x2.LastParameter - x2.FirstParameter;
+            var paramLength3 = x3.LastParameter - x3.FirstParameter;
+            var totalParametricLength = paramLength1 + paramLength2 + paramLength3;
+            var seg1 = IfcMoq.IfcCompositeCurveSegment3dMock(arc1, entityLabel: 1);
+            var seg2 = IfcMoq.IfcCompositeCurveSegment3dMock(arc2, entityLabel: 2);
+            var seg3 = IfcMoq.IfcCompositeCurveSegment3dMock(arc3, entityLabel: 3);
+
+            var ifcCompCurve = IfcMoq.IfcCompositeCurve3dMock(new[] { seg1, seg2, seg3 });
+
+            var cc = curveFactory.Build(ifcCompCurve) as IXCompositeCurve; //initialise the factory with the curve
+            Assert.IsNotNull(cc);
+            Assert.AreEqual(XCurveType.IfcCompositeCurve, cc.CurveType);
+            Assert.AreEqual(totalParametricLength, cc.LastParameter - cc.FirstParameter, model.Precision); //parametric length of this curve is 90 degrees
+
+        }
+
+        #endregion
     }
 }

@@ -8,5 +8,6 @@
        string Brep { get; }
         bool IsValidShape();
         bool IsEmptyShape();
+        int MaterialId { get; set; }
     }
 }

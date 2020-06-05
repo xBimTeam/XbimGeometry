@@ -5,10 +5,15 @@
     <AssemblyName>Xbim.Geometry.Services</AssemblyName>
     <RootNamespace>Xbim.Geometry.Services</RootNamespace>
     <SignAssembly>false</SignAssembly>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
   <ItemGroup>

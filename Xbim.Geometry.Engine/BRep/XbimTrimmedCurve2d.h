@@ -18,6 +18,15 @@ namespace Xbim
 				XbimTrimmedCurve2d(Handle(Geom2d_TrimmedCurve) hTrimmedCurve) : XbimHandle(new Handle(Geom2d_TrimmedCurve)(hTrimmedCurve)) {};
 				virtual property XCurveType CurveType {XCurveType get() { return XCurveType::IfcTrimmedCurve; }; };
 				virtual property bool Is3d {bool get() { return false; }};
+				virtual property double FirstParameter {double get()
+				{
+					return OccHandle()->FirstParameter();
+				}};
+
+				virtual property double LastParameter {double get()
+				{
+					return OccHandle()->LastParameter();
+				}};
 				virtual property IXCurve^ BasisCurve {IXCurve^ get(); };
 				virtual property IXPoint^ StartPoint {IXPoint^ get(); };
 				virtual property IXPoint^ EndPoint {IXPoint^ get(); };

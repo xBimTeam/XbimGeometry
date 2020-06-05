@@ -57,6 +57,9 @@ namespace Xbim
 				
 #pragma endregion
 				TopoDS_Solid BuildSweptDiskSolid(IIfcSweptDiskSolid^ ifcSolid);
+
+
+
 			};
 		}
 	}

@@ -21,6 +21,8 @@
 #include <BRepAdaptor_CompCurve.hxx>
 #include <BRepBuilderAPI_VertexInspector.hxx>
 #include <BRepBuilderAPI_CellFilter.hxx>
+#include <GeomConvert_CompCurveToBSplineCurve.hxx>
+
 
 TopoDS_Wire NWireFactory::BuildPolyline2d(
 	const NCollection_Vector<KeyedPnt2d>& pointSeq,
@@ -94,8 +96,8 @@ TopoDS_Wire NWireFactory::BuildPolyline2d(
 
 		}
 		//The inspector now has our final vertex list
-		size_t desiredPointCount = closed ? pointSeq.Length() - 1 : pointSeq.Length();
-		size_t actualPointCount = vertices.Size();
+		int desiredPointCount = closed ? pointSeq.Length() - 1 : pointSeq.Length();
+		int actualPointCount = vertices.Size();
 		if (actualPointCount < desiredPointCount) //we have removed duplicate points
 			pLoggingService->LogInformation("Duplicate points removed from polyline");
 		if (actualPointCount < 2)
@@ -112,7 +114,7 @@ TopoDS_Wire NWireFactory::BuildPolyline2d(
 
 		TopoDS_Wire wire;
 		builder.MakeWire(wire);
-		for (size_t i = 2; i <= actualPointCount; i++)
+		for (int i = 2; i <= actualPointCount; i++)
 		{
 			BRepBuilderAPI_MakeEdge edgeMaker(TopoDS::Vertex(vertices.Value(i - 1)), TopoDS::Vertex(vertices.Value(i)));
 			builder.Add(wire, edgeMaker.Edge());
@@ -174,14 +176,14 @@ TopoDS_Wire NWireFactory::BuildPolyline(
 		double offset = 0;
 		TopTools_SequenceOfShape vertices;
 
-		for (size_t i = 1; i < pointSeq.Length(); i++)
+		for (int i = 1; i < pointSeq.Length(); i++)
 		{
 			const KeyedPnt& startKP = pointSeq.Value(i - 1);
 			const KeyedPnt& endKP = pointSeq.Value(i);
 			int vCount = vertices.Length();
 
 			gp_Pnt startPoint = vCount == 0 ? startKP.myPnt : BRep_Tool::Pnt(TopoDS::Vertex(vertices.Last()));
-			double pointTolerance = tolerance + (vCount == 0 ?Precision::Confusion() : BRep_Tool::Tolerance(TopoDS::Vertex(vertices.Last())));
+			double pointTolerance = tolerance + (vCount == 0 ? Precision::Confusion() : BRep_Tool::Tolerance(TopoDS::Vertex(vertices.Last())));
 			gp_Pnt endPoint = endKP.myPnt;
 			gp_Vec edgeVec(startPoint, endPoint);
 			double segLength = edgeVec.Magnitude();
@@ -208,7 +210,7 @@ TopoDS_Wire NWireFactory::BuildPolyline(
 				}
 				continue;
 			}
-			
+
 			if (startParam >= 0) //we want to clip, adjust the vertices if necessary
 			{
 				if (startParam >= offset && startParam < offset + segLength) //trim this edge its the first one, will only enter the first time
@@ -262,7 +264,7 @@ TopoDS_Wire NWireFactory::BuildPolyline(
 			offset += segLength;
 		}
 
-		for (size_t i = 2; i <= vertices.Length(); i++)
+		for (int i = 2; i <= vertices.Length(); i++)
 		{
 			BRepBuilderAPI_MakeEdge edgeMaker(TopoDS::Vertex(vertices.Value(i - 1)), TopoDS::Vertex(vertices.Value(i)));
 			builder.Add(wire, edgeMaker.Edge());
@@ -279,3 +281,75 @@ TopoDS_Wire NWireFactory::BuildPolyline(
 	return _emptyWire;
 
 }
+
+TopoDS_Wire NWireFactory::BuildCompositeCurve(const TColGeom_SequenceOfCurve& segments)
+{
+	try
+	{
+		GeomConvert_CompCurveToBSplineCurve compositeConverter;
+		//all the segments will be bounded curves or offset curves base on a bounded curve
+		for (auto it = segments.cbegin(); it != segments.cend(); ++it)
+		{
+
+		}
+	}
+	catch (Standard_Failure e)
+	{
+		pLoggingService->LogWarning(e.GetMessageString());
+	}
+	pLoggingService->LogWarning("Could not build composite curve");
+	return _emptyWire;
+}
+
+//This is going to be added to to the selected vertex and the tolerances will be adjusted. the duplicate points will be removed
+//void NWireFactory::ModifyWireAddEdge(TopoDS_Wire& resultWire, const TopoDS_Edge& edgeToAdd, const TopoDS_Vertex& edgeVertexToJoin, gp_Pnt edgePointToJoin, const TopoDS_Vertex&
+//	nextEdgeVertex, const TopoDS_Vertex& wireVertexToJoin, gp_Pnt wirePointToJoin, double distance)
+//{
+//
+//	TopoDS_Shape emptyEdge = edgeToAdd.EmptyCopied();
+//	TopoDS_Edge myEdge = TopoDS::Edge(emptyEdge);
+//	BRep_Builder B;
+//
+//	Standard_Real tolE, tolW;
+//	tolW = BRep_Tool::Tolerance(wireVertexToJoin);
+//	tolE = BRep_Tool::Tolerance(edgeVertexToJoin);
+//
+//
+//	Standard_Real maxtol = .5 * (tolW + tolE + distance), cW = 1, cE = 0;
+//	bool adjust = false;
+//	if (maxtol > tolW && maxtol > tolE)
+//	{
+//		cW = (maxtol - tolE) / distance;
+//		cE = 1. - cW;
+//		adjust = true;
+//	}
+//	else if (maxtol > tolW)
+//	{
+//		maxtol = tolE;
+//		cW = 0.;
+//		cE = 1.;
+//		adjust = true;
+//	}
+//	/*else we don't need to do this case as the wore tolerance and position is not changing
+//	{
+//		maxtol = tolW;
+//		cW = 1.;
+//		cE = 0.;
+//		adjust = false;
+//	}*/
+//	if (adjust)
+//	{
+//		gp_Pnt PC(cW * wirePointToJoin.X() + cE * edgePointToJoin.X(), cW * wirePointToJoin.Y() + cE * edgePointToJoin.Y(), cW * wirePointToJoin.Z() + cE * edgePointToJoin.Z());
+//		B.UpdateVertex(wireVertexToJoin, PC, maxtol);
+//	}
+//
+//	TopoDS_Vertex firstEdgeVertex = wireVertexToJoin;
+//	firstEdgeVertex.Orientation(TopAbs_FORWARD);
+//	B.Add(myEdge, firstEdgeVertex);
+//	TopoDS_Vertex nextEdgeVertexCopy = nextEdgeVertex;
+//	nextEdgeVertexCopy.Orientation(TopAbs_REVERSED);
+//	B.Add(myEdge, nextEdgeVertexCopy);
+//	B.Transfert(edgeToAdd, myEdge, edgeVertexToJoin, firstEdgeVertex);
+//	B.Add(resultWire, myEdge);
+//
+//}

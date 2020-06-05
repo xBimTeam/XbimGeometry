@@ -6,7 +6,7 @@
 #include <Geom2d_Circle.hxx>
 #include <Geom_Ellipse.hxx>
 #include <Geom2d_Ellipse.hxx>
-
+#include <Geom_BSplineCurve.hxx>
 #include <Geom_TrimmedCurve.hxx>
 #include <Geom2d_TrimmedCurve.hxx>
 
@@ -16,6 +16,7 @@
 #include "../../BRep/OccExtensions/Geom2d_EllipseWithSemiAxes.h"
 
 #include <TopoDS_Edge.hxx>
+#include <TColGeom_SequenceOfCurve.hxx>
 
 
 class NCurveFactory
@@ -50,6 +51,7 @@ public:
 	Handle(Geom2d_TrimmedCurve) BuildTrimmedCurve2d(Handle(Geom2d_Curve) basisCurve, double u1, double u2, bool sense);
 	Handle(Geom_TrimmedCurve) BuildTrimmedCurve3d(Handle(Geom_Curve) basisCurve, double u1, double u2, bool sense);
 
+	Handle(Geom_BSplineCurve) BuildCompositeCurve(const TColGeom_SequenceOfCurve& segments, double tolerance);
 #pragma endregion
 
 

@@ -24,6 +24,15 @@ namespace Xbim
 				virtual property IXVector^ Direction {IXVector^ get(); };
 				virtual property double ParametricUnit {double get() { return OccHandle()->Magnitude(); }; };
 				virtual property bool Is3d {bool get() { return false; }};
+				virtual property double FirstParameter {double get()
+				{
+					return OccHandle()->FirstParameter();
+				}};
+
+				virtual property double LastParameter {double get()
+				{
+					return OccHandle()->LastParameter();
+				}};
 				//Get a Point at the parameter length from the origin
 				virtual IXPoint^ GetPoint(double uParam);
 				virtual IXPoint^ GetFirstDerivative(double uParam, [Out] IXVector^% normal);

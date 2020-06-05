@@ -13,6 +13,7 @@
 #include <Geom2d_Circle.hxx>
 #include <Geom_Ellipse.hxx>
 #include <Geom2d_Ellipse.hxx>
+#include <Geom_BSplineCurve.hxx>
 
 #include <Geom_TrimmedCurve.hxx>
 #include <Geom2d_TrimmedCurve.hxx>
@@ -56,6 +57,12 @@ namespace Xbim
 				virtual IXCurve^ Build(IIfcCurve^ curve);
 				Handle(Geom_Curve) BuildGeom3d(IIfcCurve^ curve, XCurveType %curveType);
 				Handle(Geom2d_Curve) BuildGeom2d(IIfcCurve^ curve, XCurveType %curveType);
+				/*Handle(Geom_TrimmedCurve) BuildGeom3d(IIfcBoundaryCurve^ ifcBoundaryCurve);
+				Handle(Geom2d_TrimmedCurve) BuildGeom2d(IIfcBoundaryCurve^ ifcBoundaryCurve);*/
+
+
+				/*Handle(Geom_TrimmedCurve) BuildGeom3d(IIfcBoundaryCurve^ ifcBoundaryCurve);
+				Handle(Geom2d_TrimmedCurve) BuildGeom2d(IIfcBoundaryCurve^ ifcBoundaryCurve);*/
 
 				Handle(Geom_LineWithMagnitude) BuildGeom3d(IIfcLine^ ifcLine);
 				Handle(Geom2d_LineWithMagnitude) BuildGeom2d(IIfcLine^ ifcLine);
@@ -69,6 +76,8 @@ namespace Xbim
 				Handle(Geom_TrimmedCurve) BuildGeom3d(IIfcTrimmedCurve^ ifcTrimmedCurve);
 				Handle(Geom2d_TrimmedCurve) BuildGeom2d(IIfcTrimmedCurve^ ifcTrimmedCurve);
 
+
+				Handle(Geom_BSplineCurve) BuildGeom3d(IIfcCompositeCurve^ ifcCompositeCurve);
 
 				bool IsBoundedCurve(IIfcCurve^ curve);
 			};

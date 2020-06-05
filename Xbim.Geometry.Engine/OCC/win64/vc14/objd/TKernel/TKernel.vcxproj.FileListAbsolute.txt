@@ -1,0 +1,2 @@
+C:\Users\Steve\Source\Repos\xBimTeam\XbimGeometry\Xbim.Geometry.Engine\OCC\win64\vc14\bind\TKernel.pdb
+C:\Users\Steve\Source\Repos\xBimTeam\XbimGeometry\Xbim.Geometry.Engine\OCC\win64\vc14\objd\TKernel\TKernel.pdb

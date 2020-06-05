@@ -7,5 +7,6 @@ namespace Xbim.Geometry.Abstractions
       
         IEnumerable<IXShell> Shells { get; }
         double Volume();
+        
     }
 }

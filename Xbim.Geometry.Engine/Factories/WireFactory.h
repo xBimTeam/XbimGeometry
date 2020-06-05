@@ -47,6 +47,7 @@ namespace Xbim
 				TopoDS_Wire BuildDirectrix(IIfcEllipse^ curve, double startParam, double endParam);
 				TopoDS_Wire BuildDirectrix(IIfcTrimmedCurve^ curve, double startParam, double endParam);
 				TopoDS_Wire BuildDirectrix(IIfcPolyline^ curve, double startParam, double endParam);
+				TopoDS_Wire BuildDirectrix(IIfcCompositeCurve^ curve, double startParam, double endParam);
 				//Builds an IfcCurve as a TopoDS_Wire
 				TopoDS_Wire BuildWire(IIfcCurve^ ifcCurve, Handle(Geom_Surface)& surface);
 			public:

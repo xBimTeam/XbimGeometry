@@ -2,6 +2,7 @@
 #include <gp_Ax2.hxx>
 #include "../BRep/XbimSolid.h"
 #include <BRepBuilderAPI_TransitionMode.hxx>
+
 using namespace Xbim::Geometry::BRep;
 namespace Xbim
 {
@@ -10,9 +11,13 @@ namespace Xbim
 		namespace Factories
 		{
 			IXSolid^ SolidFactory::Build(IIfcSolidModel^ ifcSolid)
-			{
+			{	
+				
+				
 				TopoDS_Solid topoSolid = BuildSolidModel(ifcSolid);
 				if (topoSolid.IsNull()) throw gcnew XbimGeometryFactoryException("Failure building IfcSolidModel");
+				topoSolid.SetMaterialId(100);
+
 				return gcnew XbimSolid(topoSolid);
 			}
 

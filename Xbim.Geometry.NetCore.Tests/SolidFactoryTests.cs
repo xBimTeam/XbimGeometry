@@ -10,7 +10,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Services;
-using Xbim.Ifc4.GeometryResource;
 
 namespace Xbim.Geometry.NetCore.Tests
 {

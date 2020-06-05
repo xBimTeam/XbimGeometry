@@ -222,7 +222,7 @@
     <ClInclude Include="BRep\OccExtensions\KeyedPnt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BRep\XbimCurveProperties.h">
+    <ClInclude Include="BRep\XbimCompositeCurve.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -348,6 +348,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Factories\Unmanaged\NGeomProcFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BRep\XbimCompositeCurve.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

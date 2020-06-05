@@ -109,7 +109,7 @@ namespace Xbim.Geometry.NetCore.Tests
         {
             var axis3dMoq = MakeMoq<IIfcAxis2Placement3D>();
             var axis3d = axis3dMoq.Object;
-            axis3d.Axis = axis;
+            axis3d.Axis = axis??IfcDirection3dMock();
             axis3d.RefDirection = refDir;
             axis3d.Location = loc ?? IfcCartesianPoint3dMock();
             return axis3d;
@@ -197,7 +197,7 @@ namespace Xbim.Geometry.NetCore.Tests
         }
         #endregion
 
-        #region trimmed curve mocks
+        #region Trimmed curve mocks
         public static IIfcTrimmedCurve IfcTrimmedCurve3dMock(IIfcCurve basisCurve = null, double trimParam1 = 0, double trimParam2 = 1, bool sense = true)
         {
 
@@ -232,6 +232,37 @@ namespace Xbim.Geometry.NetCore.Tests
         }
         #endregion
 
-        
+        #region Composite Curve Mocks
+        /// <summary>
+        /// Default is a trimmed circle quadrant
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <returns></returns>
+        public static IIfcCompositeCurveSegment IfcCompositeCurveSegment3dMock(IIfcCurve parent = null, bool sameSense = true, int entityLabel = 0)
+        {
+            var cCurveSegMoq = MakeMoq<IIfcCompositeCurveSegment>();
+            cCurveSegMoq.SetupGet(v => v.Dim).Returns(new IfcDimensionCount(3));
+            cCurveSegMoq.SetupGet(x => x.ExpressType).Returns(metaData.ExpressType(typeof(IfcCompositeCurveSegment)));
+            cCurveSegMoq.SetupGet(v => v.EntityLabel).Returns(entityLabel);
+            var cCurveSeg = cCurveSegMoq.Object;
+            cCurveSeg.ParentCurve = parent ?? IfcTrimmedCurve3dMock(IfcMoq.IfcCircle3dMock(), trimParam2: Math.PI / 2.0);
+            cCurveSeg.SameSense = sameSense;
+            return cCurveSeg;
+
+        }
+        public static IIfcCompositeCurve IfcCompositeCurve3dMock(IEnumerable<IIfcCompositeCurveSegment> segments = null)
+        {
+            var cCurveMoq = MakeMoq<IIfcCompositeCurve>();
+            cCurveMoq.SetupGet(v => v.Dim).Returns(new IfcDimensionCount(3));
+            cCurveMoq.SetupGet(x => x.ExpressType).Returns(metaData.ExpressType(typeof(IfcCompositeCurve)));
+            var cCurve = cCurveMoq.Object;
+            if (segments == null)
+                cCurve.Segments.Add(IfcCompositeCurveSegment3dMock());
+            else
+                cCurve.Segments.AddRange(segments);
+            cCurveMoq.SetupGet(v => v.NSegments).Returns(new IfcInteger(cCurve.Segments.Count));
+            return cCurve;
+        }
+        #endregion
     }
 }

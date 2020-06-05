@@ -9,6 +9,7 @@
 #include <TopTools_DataMapOfIntegerShape.hxx>
 #include <Geom_Ellipse.hxx>
 #include "../BRep/OccExtensions/KeyedPnt.h"
+#include <TColGeom_SequenceOfCurve.hxx>
 using namespace System;
 using namespace System::Linq;
 namespace Xbim
@@ -263,7 +264,7 @@ namespace Xbim
 				Handle(Geom_Circle) circle = _curveFactory->BuildGeom3d(curve);
 				if (circle.IsNull())
 					throw gcnew XbimGeometryFactoryException("Directrix is invalid");
-				if(Math::Abs(startParam-endParam)< ModelService->Precision) return MakeWire(circle);
+				if (Math::Abs(startParam - endParam) < ModelService->Precision) return MakeWire(circle);
 				bool sameSense = (startParam < endParam);
 				Handle(Geom_TrimmedCurve) trimmedLine = _curveFactory->Ptr()->BuildTrimmedCurve3d(circle, sameSense ? startParam : endParam, sameSense ? endParam : startParam, sameSense);
 				if (trimmedLine.IsNull())
@@ -279,7 +280,7 @@ namespace Xbim
 					throw gcnew XbimGeometryFactoryException("Directrix is invalid");
 				if (Math::Abs(startParam - endParam) < ModelService->Precision) return MakeWire(elipse);
 				bool sameSense = (startParam < endParam);
-				Handle(Geom_TrimmedCurve) trimmedLine = _curveFactory->Ptr()->BuildTrimmedCurve3d(elipse, startParam , endParam , sameSense);
+				Handle(Geom_TrimmedCurve) trimmedLine = _curveFactory->Ptr()->BuildTrimmedCurve3d(elipse, startParam, endParam, sameSense);
 				if (trimmedLine.IsNull())
 					throw gcnew XbimGeometryFactoryException("Directrix could not be trimmed");
 				return MakeWire(trimmedLine);
@@ -303,7 +304,28 @@ namespace Xbim
 					throw gcnew XbimGeometryFactoryException("Directrix is invalid");
 				return wire;
 			}
+			TopoDS_Wire WireFactory::BuildDirectrix(IIfcCompositeCurve^ curve, double startParam, double endParam)
+			{
+				if (curve->NSegments < 1)
+					throw gcnew XbimGeometryFactoryException("Directrix is invalid, no segments are defined");
+				//build all the segments
+				XCurveType curveType;
+				TColGeom_SequenceOfCurve segments;
 
+				for each (IIfcCompositeCurveSegment ^ segment in curve->Segments)
+				{
+					if (!_curveFactory->IsBoundedCurve(segment->ParentCurve))
+						throw gcnew XbimGeometryFactoryException("Directrix is invalid, only curve segments that are bounded curves are permitted");
+					Handle(Geom_Curve) hSegment = _curveFactory->BuildGeom3d(segment->ParentCurve, curveType);
+					if (hSegment.IsNull())
+						throw gcnew XbimGeometryFactoryException(String::Format("Directrix is invalid, curve segment #{0} is null", segment->EntityLabel));
+					segments.Append(hSegment);
+				}
+				TopoDS_Wire wire = Ptr()->BuildCompositeCurve(segments);
+				if (wire.IsNull() || wire.NbChildren() == 0)
+					throw gcnew XbimGeometryFactoryException("Directrix is invalid, could not build wire");
+				return wire;
+			}
 			TopoDS_Wire WireFactory::MakeWire(Handle(Geom_Curve) curve)
 			{
 				BRepBuilderAPI_MakeEdge edgeMaker(curve);

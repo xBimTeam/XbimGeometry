@@ -17,6 +17,15 @@ namespace Xbim
 				XbimEllipse2d(Handle(Geom2d_Ellipse) hEllipse) : XbimHandle(new Handle(Geom2d_Ellipse)(hEllipse)) { };
 				virtual property XCurveType CurveType {XCurveType get() { return XCurveType::IfcEllipse; }; };
 				virtual property bool Is3d {bool get() { return false; }};
+				virtual property double FirstParameter {double get()
+				{
+					return OccHandle()->FirstParameter();
+				}};
+
+				virtual property double LastParameter {double get()
+				{
+					return OccHandle()->LastParameter();
+				}};
 				virtual property double MajorRadius {double get() { return OccHandle()->MajorRadius(); }};
 				virtual property double MinorRadius {double get() { return OccHandle()->MinorRadius(); }};
 				virtual property IXAxisPlacement^ Position {IXAxisPlacement^ get()

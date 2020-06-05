@@ -10,7 +10,9 @@ To support net core 3
 To resolve the issues of booleans and model precision
 To provide more transparency of the geometry results (Curves and loss of data)
 To provide clear divison between managed code and unmanaged code
-To improve performance by reducing nativ to managed transitions
+To improve performance by reducing native to managed transitions
+To handle all native exceptions
+To handle face, shell and solid specific material assingment
 To support asyn operation
 To implement a service/factory pattern with dependency injection
 
