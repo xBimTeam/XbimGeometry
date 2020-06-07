@@ -1,6 +1,7 @@
 #include "GeomProcFactory.h"
 #include <gp_Ax2.hxx>
 #include <TColgp_SequenceOfPnt2d.hxx>
+#include <TColgp_Array1OfPnt.hxx>
 
 namespace Xbim
 {
@@ -94,6 +95,16 @@ namespace Xbim
 				);
 			}
 			
+			void GeomProcFactory::GetPolylinePoints(IIfcPolyline^ ifcPolyline, TColgp_Array1OfPnt& points)
+			{
+				int i = 1;
+				for each (IIfcCartesianPoint ^ ifcPoint in ifcPolyline->Points)
+				{
+					gp_Pnt pnt = BuildPoint(ifcPoint);
+					points.SetValue(i, pnt);
+					i++;
+				}
+			}
 		}
 	}
 }

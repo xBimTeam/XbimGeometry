@@ -52,6 +52,11 @@ public:
 	Handle(Geom_TrimmedCurve) BuildTrimmedCurve3d(Handle(Geom_Curve) basisCurve, double u1, double u2, bool sense);
 
 	Handle(Geom_BSplineCurve) BuildCompositeCurve(const TColGeom_SequenceOfCurve& segments, double tolerance);
+
+	Handle(Geom_BSplineCurve) BuildPolyline(const TColgp_Array1OfPnt& points, double tolerance);
+	Handle(Geom_TrimmedCurve)  BuildBoundedLine3d(const gp_Pnt& start, const gp_Pnt& end);
+
+	Handle(Geom_Curve) TrimDirectrix(Handle(Geom_Curve) basisCurve, double u1, double u2, double precision);
 #pragma endregion
 
 

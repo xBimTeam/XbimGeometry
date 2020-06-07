@@ -8,7 +8,11 @@
 #include "../../BRep/OccExtensions/KeyedPnt2d.h"
 #include <TopTools_DataMapOfIntegerShape.hxx>
 #include "../../BRep/OccExtensions/KeyedPnt.h"
+#include <Geom_BSplineCurve.hxx>
 #include <TColGeom_SequenceOfCurve.hxx>
+
+
+
 class NWireFactory
 {
 private:
@@ -35,7 +39,9 @@ public:
 		const NCollection_Vector<KeyedPnt>& pointSeq, double startParam, double endParam,
 		double tolerance);
 
-	TopoDS_Wire BuildCompositeCurve(const TColGeom_SequenceOfCurve& segments);
+	void GetPolylineSegments(const TColgp_Array1OfPnt& points, TColGeom_SequenceOfCurve& curves, double tolerance);
+
+	TopoDS_Wire BuildDirectrix(TColGeom_SequenceOfCurve& segments, double trimStart, double trimEnd, double tolerance);
 	
 };
 

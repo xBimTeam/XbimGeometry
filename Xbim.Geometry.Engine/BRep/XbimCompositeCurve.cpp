@@ -1,1 +1,0 @@
-#include "XbimCompositeCurve.h"

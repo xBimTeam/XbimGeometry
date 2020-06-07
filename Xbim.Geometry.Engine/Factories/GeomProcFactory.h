@@ -9,7 +9,7 @@
 
 #include "../Exceptions/XbimGeometryFactoryException.h"
 #include <TColgp_SequenceOfPnt2d.hxx>
-
+#include <TColgp_Array1OfPnt.hxx>
 using namespace Xbim::Ifc4::Interfaces;
 using namespace Xbim::Geometry::Exceptions;
 using namespace Xbim::Geometry::Abstractions;
@@ -56,6 +56,8 @@ namespace Xbim
 
 				gp_Ax2 BuildAxis2Placement(IIfcAxis2Placement3D^ axis2);
 				gp_Ax2d BuildAxis2Placement2d(IIfcAxis2Placement2D^ axis);
+
+				void GetPolylinePoints(IIfcPolyline^ ifcPolyline, TColgp_Array1OfPnt& points);
 
 				
 			};

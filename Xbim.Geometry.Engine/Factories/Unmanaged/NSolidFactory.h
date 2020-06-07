@@ -4,7 +4,7 @@
 #include <TopoDS_Solid.hxx>
 #include <TopoDS_Builder.hxx>
 #include <BRepBuilderAPI_TransitionMode.hxx>
-
+#include <Geom_Curve.hxx>
 class NSolidFactory
 {
 private:

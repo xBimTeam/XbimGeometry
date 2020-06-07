@@ -162,7 +162,7 @@
     <ClInclude Include="BRep\OccExtensions\KeyedPnt.h" />
     <ClInclude Include="BRep\OccExtensions\KeyedPnt2d.h" />
     <ClInclude Include="BRep\XbimAxisAlignedBox.h" />
-    <ClInclude Include="BRep\XbimCompositeCurve.h" />
+    <ClInclude Include="BRep\XbimBSplineCurve.h" />
     <ClInclude Include="BRep\XbimShape.h" />
     <ClInclude Include="Exceptions\XbimGeometryServiceException.h" />
     <ClInclude Include="Factories\ProfileFactory.h" />
@@ -289,7 +289,6 @@
     <ClCompile Include="BRep\Properties\VertexProperties.cpp" />
     <ClCompile Include="BRep\XbimLine.cpp" />
     <ClCompile Include="BRep\XbimTrimmedCurve.cpp" />
-    <ClCompile Include="BRep\XbimCompositeCurve.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="app.rc" />

@@ -37,6 +37,7 @@ namespace Xbim.Geometry.NetCore.Tests
                 services.AddHostedService<GeometryServicesHost>()
                 .AddSingleton<IXLoggingService, LoggingService>()
                 .AddScoped<IXWireService, WireService>()
+                .AddScoped<IXCurveService, CurveService>()
                 .AddScoped<IXModelService, ModelService>(sp =>
                         new ModelService(IfcMoq.IfcModelMock(millimetre: 1, precision: 1e-5, radianFactor: 1), minGapSize: 1.0));
             })
@@ -157,5 +158,18 @@ namespace Xbim.Geometry.NetCore.Tests
             var wire = wireService.Build(polyline);
             Assert.AreEqual(edgeCount, wire.EdgeLoop.Count());
         }
+
+        [TestMethod]
+        public void Can_build_composite_curve_wire()
+        {
+            var wireService = _modelScope.ServiceProvider.GetRequiredService<IXWireService>();
+            var curveService = _modelScope.ServiceProvider.GetRequiredService<IXCurveService>();
+            double totalParametricLength, totalLength;
+            var ifcCompCurve = IfcMoq.TypicalCompositeCurveMock(curveService, out totalParametricLength, out totalLength);
+            var wire = wireService.Build(ifcCompCurve);
+
+
+        }
+
     }
 }

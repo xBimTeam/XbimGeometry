@@ -8,5 +8,6 @@ namespace Xbim.Geometry.Abstractions
     public interface IXCurveService
     {
         IXCurve Build(IIfcCurve curve);
+        IXCurve BuildDirectrix(IIfcCurve curve, double? startParam, double? endParam);
     }
 }

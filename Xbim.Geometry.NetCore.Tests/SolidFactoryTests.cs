@@ -37,6 +37,7 @@ namespace Xbim.Geometry.NetCore.Tests
                     .AddSingleton<IXLoggingService, LoggingService>()
                     .AddSingleton<IXShapeService, ShapeService>()
                     .AddScoped<IXSolidService, SolidService>()
+                    .AddScoped<IXCurveService, CurveService>()
                     .AddScoped<IXModelService, ModelService>(sp =>
                         new ModelService(IfcMoq.IfcModelMock(millimetre: 1, precision: 1e-5, radianFactor: 1), minGapSize: 1.0));
                 })
@@ -268,13 +269,28 @@ namespace Xbim.Geometry.NetCore.Tests
         public void Can_create_swept_disk_solid_with_polyline_directrix()
         {
             var solidService = _modelScope.ServiceProvider.GetRequiredService<IXSolidService>();
-            var points = new (double X, double Y, double Z)[] { (X: 0, Y: 0, Z:0), (X: 100, Y: 0, Z: 0), (X: 100, Y: 150, Z: 0), (X: 0, Y: 150, Z: 0) };
+            var points = new (double X, double Y, double Z)[] { (X: 0, Y: 0, Z:0), (X: 1000, Y: 0, Z: 0), (X: 1000, Y: 1500, Z: 0), (X: 0, Y: 1500, Z: 0) };
             var pline = IfcMoq.IfcPolylineMock(dim: 3);
             foreach (var p in points)
             {
                 pline.Points.Add(IfcMoq.IfcCartesianPoint3dMock(p.X, p.Y, p.Z));
             }
             var ifcSweptDisk = IfcMoq.IfcSweptDiskSolidMoq(directrix: pline,  startParam: 0, endParam: -1, radius: 30, innerRadius: 15);
+            var solid = solidService.Build(ifcSweptDisk);
+            Assert.IsFalse(solid.IsEmptyShape());
+            Assert.IsTrue(solid.IsValidShape());
+            double volume = solid.Volume();
+            volume.Should().BeGreaterThan(0);
+        }
+        [TestMethod]
+        public void Can_create_swept_disk_solid_with_composite_curve_directrix()
+        {
+            var solidService = _modelScope.ServiceProvider.GetRequiredService<IXSolidService>();
+            var curveService = _modelScope.ServiceProvider.GetRequiredService<IXCurveService>();
+            double totalLength, totalParametricLength;
+            var directrix = IfcMoq.TypicalCompositeCurveMock(curveService,out totalParametricLength, out totalLength);
+
+            var ifcSweptDisk = IfcMoq.IfcSweptDiskSolidMoq(directrix: directrix, radius: 30, innerRadius: 15);
             var solid = solidService.Build(ifcSweptDisk);
             Assert.IsFalse(solid.IsEmptyShape());
             Assert.IsTrue(solid.IsValidShape());

@@ -97,17 +97,21 @@ namespace Xbim
 					throw gcnew XbimGeometryFactoryException("Radius must be greater than 0");
 				if (ifcSolid->InnerRadius.HasValue && ifcSolid->InnerRadius.Value >= ifcSolid->Radius)
 					throw gcnew XbimGeometryFactoryException("Inner radius is greater than outer radius");				
-
-				TopoDS_Wire directrix = _wireFactory->BuildDirectrix(ifcSolid->Directrix,
+				/*XCurveType directrixCurveType;
+				Handle(Geom_Curve) directrix = _curveFactory->BuildDirectrix(ifcSolid->Directrix, 
 					ifcSolid->StartParam.HasValue ? (double)ifcSolid->StartParam.Value : -1,
-					ifcSolid->EndParam.HasValue ? (double)ifcSolid->EndParam.Value : -1);
-				if(directrix.IsNull()|| directrix.NbChildren()==0)
+					ifcSolid->EndParam.HasValue ? (double)ifcSolid->EndParam.Value : -1,
+					directrixCurveType);*/
+				TopoDS_Wire directrix = _wireFactory->BuildDirectrix(ifcSolid->Directrix,
+					ifcSolid->StartParam,
+					ifcSolid->EndParam);
+				if(directrix.IsNull())
 					throw gcnew XbimGeometryFactoryException("Could not build directrix");
 				double innerRadius = ifcSolid->InnerRadius.HasValue ? (double)ifcSolid->InnerRadius.Value : -1;
-				BRepBuilderAPI_TransitionMode transitionMode = BRepBuilderAPI_TransitionMode::BRepBuilderAPI_RoundCorner;
+				BRepBuilderAPI_TransitionMode transitionMode = BRepBuilderAPI_TransitionMode::BRepBuilderAPI_Transformed;
 				//With Polyline the consecutive segments of the Directrix are not tangent continuous, the resulting solid is created by a miter at half angle between the two segments.
-				if(dynamic_cast<IIfcPolyline^>(ifcSolid->Directrix)) transitionMode = BRepBuilderAPI_TransitionMode::BRepBuilderAPI_RightCorner;
-				
+				if(dynamic_cast<IIfcPolyline^>(ifcSolid->Directrix)) 
+					transitionMode = BRepBuilderAPI_TransitionMode::BRepBuilderAPI_RightCorner;
 				
 				TopoDS_Solid solid = Ptr()->BuildSweptDiskSolid(directrix, ifcSolid->Radius, innerRadius, transitionMode);
 				return solid;

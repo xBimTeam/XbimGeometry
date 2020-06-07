@@ -4,6 +4,7 @@
 #include "XbimCircle.h"
 #include "XbimEllipse.h"
 #include "XbimTrimmedCurve.h"
+#include "XbimBSplineCurve.h"
 #include <BRep_Tool.hxx>
 #include <TopExp.hxx>
 #include <TopoDS_Vertex.hxx>
@@ -61,7 +62,7 @@ namespace Xbim
 					curveTypeName = gcnew String("GeomAbs_BezierCurve");
 					break;
 				case GeomAbs_BSplineCurve:
-					curveTypeName = gcnew String("GeomAbs_BSplineCurve");
+					return gcnew XbimBSplineCurve(Handle(Geom_BSplineCurve)::DownCast(curve));
 					break;
 				case GeomAbs_OffsetCurve:
 					curveTypeName = gcnew String("GeomAbs_OffsetCurve");

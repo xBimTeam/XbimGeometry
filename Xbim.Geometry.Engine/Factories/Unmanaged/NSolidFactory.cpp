@@ -86,7 +86,7 @@ TopoDS_Solid NSolidFactory::BuildSphere(gp_Ax2 ax2, double radius)
 }
 
 //if inner radius is not required it has a value of -1
-TopoDS_Solid NSolidFactory::BuildSweptDiskSolid(const TopoDS_Wire& directrix, double radius, double innerRadius, BRepBuilderAPI_TransitionMode transitionMode)
+TopoDS_Solid NSolidFactory::BuildSweptDiskSolid(const TopoDS_Wire& directrixWire, double radius, double innerRadius, BRepBuilderAPI_TransitionMode transitionMode)
 {
 	//the standard say
 	
@@ -96,20 +96,25 @@ TopoDS_Solid NSolidFactory::BuildSweptDiskSolid(const TopoDS_Wire& directrix, do
 	try
 	{
 		//form the shape to sweep, the centre of the circles must be at the start of the directrix
-		BRepAdaptor_CompCurve cc(directrix, Standard_True);
-
+		BRepBuilderAPI_MakeEdge edgeMaker;
+		BRep_Builder builder;
 		//get the normal at the start point
 		gp_Vec dirAtStart;
 		gp_Pnt startPoint;
-		cc.D1(0, startPoint, dirAtStart);
+		BRepAdaptor_CompCurve directrix(directrixWire, Standard_True);
+		directrix.D1(0, startPoint, dirAtStart);
 		gp_Ax2 axis(startPoint, dirAtStart);
 		dirAtStart.Reverse(); //vector points in direction of directrix, need reversing for correct face orientation
 		Handle(Geom_Circle) outer = new Geom_Circle(axis, radius);
-		BRepBuilderAPI_MakeEdge edgeMaker(outer);
-		BRepBuilderAPI_MakeWire wireMaker(edgeMaker.Edge());
-		BRepOffsetAPI_MakePipeShell oSweepMaker(directrix);
+		edgeMaker.Init(outer);
+		TopoDS_Wire outerWire;
+		builder.MakeWire(outerWire);
+		builder.Add(outerWire, edgeMaker.Edge());
+
+		BRepOffsetAPI_MakePipeShell oSweepMaker(directrixWire);
 		oSweepMaker.SetTransitionMode(transitionMode);
-		oSweepMaker.Add(wireMaker.Wire());
+		oSweepMaker.Add(outerWire);
+	
 		oSweepMaker.Build();
 		if (oSweepMaker.IsDone())
 		{
@@ -118,9 +123,9 @@ TopoDS_Solid NSolidFactory::BuildSweptDiskSolid(const TopoDS_Wire& directrix, do
 			{
 
 				Handle(Geom_Circle) inner = new Geom_Circle(axis, innerRadius);
-				BRepBuilderAPI_MakeEdge iEdgeMaker(inner);
-				BRepBuilderAPI_MakeWire iWireMaker(iEdgeMaker.Edge());
-				BRepOffsetAPI_MakePipeShell iSweepMaker(directrix);
+				edgeMaker.Init(inner);
+				BRepBuilderAPI_MakeWire iWireMaker(edgeMaker.Edge());
+				BRepOffsetAPI_MakePipeShell iSweepMaker(directrixWire);
 				iSweepMaker.SetTransitionMode(transitionMode);
 				TopoDS_Shape holeWire = iWireMaker.Wire().Reversed();
 				iSweepMaker.Add(holeWire);

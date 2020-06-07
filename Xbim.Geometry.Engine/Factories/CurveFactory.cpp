@@ -11,7 +11,7 @@
 #include "../BRep/XbimEllipse2d.h"
 #include "../BRep/XbimTrimmedCurve.h"
 #include "../BRep/XbimTrimmedCurve2d.h"
-#include "../BRep/XbimCompositeCurve.h"
+#include "../BRep/XbimBSplineCurve.h"
 /*
 The approach of the curve factory is to build all curves as IXCurve using the build method.
 This will ensure correct dimensionality of the curves is maintained
@@ -19,14 +19,16 @@ Most curve types can have a 2D or a 3D variant, Ifc hides this in the Dim method
 Any 3D shape can be built from a 2D definition with the Z coordinate set to Zero
 It is nor permitted to create 2D shapes from 3D definitions and an exception is thrown.
 Managed code is used to navigate the definitions and provide the framework for the unmanaged code to build the native curves
-All operations where an OCC excpetion will be thrown are implemented in unmanaged code. (NCurveFactory)
-These exceptions are caunght and logged in the managed code
+All validation is done is managed code
+All operations where an OCC exception will be thrown are implemented in unmanaged code. (NCurveFactory)
+These exceptions are caught and logged in the managed code
 Unmanaged build methods reurn a null handle to the specified geometry type when a critical or error exception has been thrown
 */
 using namespace Xbim::Geometry::Exceptions;
 using namespace Xbim::Ifc4::MeasureResource;
 using namespace Xbim::Geometry::BRep;
 using namespace Xbim::Common::Metadata;
+using namespace System::Linq;
 namespace Xbim
 {
 	namespace Geometry
@@ -57,39 +59,47 @@ namespace Xbim
 				}
 			}
 
+			IXCurve^ CurveFactory::BuildDirectrix(IIfcCurve^ curve, Nullable<double> startParam, Nullable<double> endParam)
+			{
+				if (!startParam.HasValue) startParam = -1;
+				if (!endParam.HasValue) endParam = -1;
+				return BuildXDirectrix(curve, startParam.Value, endParam.Value);
+			}
+			
+
 			Handle(Geom2d_Curve) CurveFactory::BuildGeom2d(IIfcCurve^ curve, XCurveType% curveType)
 			{
 				if (!Enum::TryParse<XCurveType>(curve->ExpressType->ExpressName, curveType))
 					throw gcnew XbimGeometryFactoryException("Unsupported curve type: " + curve->ExpressType->ExpressName);
 				switch (curveType)
 				{
-					/*case Xbim::Geometry::Abstractions::XCurveType::BoundaryCurve:
+					/*case XCurveType::BoundaryCurve:
 						return  Build2d(static_cast<IIfcBoundedCurve^>(curve));
-					case Xbim::Geometry::Abstractions::XCurveType::BSplineCurveWithKnots:
+					case XCurveType::BSplineCurveWithKnots:
 						return Build2d(static_cast<IIfcBSplineCurveWithKnots^>(curve));*/
-				case Xbim::Geometry::Abstractions::XCurveType::IfcCircle:
+				case XCurveType::IfcCircle:
 					return BuildGeom2d(static_cast<IIfcCircle^>(curve));
-					/*	case Xbim::Geometry::Abstractions::XCurveType::CompositeCurve:
+					/*	case XCurveType::CompositeCurve:
 							return Build2d(static_cast<IIfcCompositeCurve^>(curve)));
-						case Xbim::Geometry::Abstractions::XCurveType::CompositeCurveOnSurface:
+						case XCurveType::CompositeCurveOnSurface:
 							return Build2d(static_cast<IIfcCompositeCurveOnSurface^>(curve)));*/
-				case Xbim::Geometry::Abstractions::XCurveType::IfcEllipse:
+				case XCurveType::IfcEllipse:
 					return BuildGeom2d(static_cast<IIfcEllipse^>(curve));
-					/*case Xbim::Geometry::Abstractions::XCurveType::IndexedPolyCurve:
+					/*case XCurveType::IndexedPolyCurve:
 						return Build2d(static_cast<IIfcIndexedPolyCurve^>(curve)));*/
-				case Xbim::Geometry::Abstractions::XCurveType::IfcLine:
+				case XCurveType::IfcLine:
 					return BuildGeom2d(static_cast<IIfcLine^>(curve));
-					/*case Xbim::Geometry::Abstractions::XCurveType::OffsetCurve2D:
+					/*case XCurveType::OffsetCurve2D:
 						return Build2d(static_cast<IIfcOffsetCurve2D^>(curve));
-					case Xbim::Geometry::Abstractions::XCurveType::Pcurve:
+					case XCurveType::Pcurve:
 						return Build2d(static_cast<IIfcPcurve^>(curve)) ;
-					case Xbim::Geometry::Abstractions::XCurveType::Polyline:
+					case XCurveType::Polyline:
 						return Build2d(static_cast<IIfcPolyline^>(curve));
-					case Xbim::Geometry::Abstractions::XCurveType::RationalBSplineCurveWithKnots:
+					case XCurveType::RationalBSplineCurveWithKnots:
 						return Build2d(static_cast<IIfcRationalBSplineCurveWithKnots^>(curve));
-					case Xbim::Geometry::Abstractions::XCurveType::SurfaceCurve:
+					case XCurveType::SurfaceCurve:
 						return Build2d(static_cast<IIfcSurfaceCurve^>(curve));*/
-				case Xbim::Geometry::Abstractions::XCurveType::IfcTrimmedCurve:
+				case XCurveType::IfcTrimmedCurve:
 					return BuildGeom2d(static_cast<IIfcTrimmedCurve^>(curve));
 				default:
 					break;
@@ -97,44 +107,68 @@ namespace Xbim
 				throw gcnew XbimGeometryFactoryException("Unsupported 2d curve type");
 			}
 
+			Handle(Geom_Curve) CurveFactory::BuildDirectrix(IIfcCurve^ curve, double startParam, double endParam, XCurveType% curveType)
+			{
+				double sameParams = Math::Abs(endParam - startParam) < ModelService->Precision;
+				if (sameParams || ((startParam == -1 || endParam == -1) && !IsBoundedCurve(curve)))
+					throw gcnew XbimGeometryFactoryException("DirectrixBounded: If the values for StartParam or EndParam are omited, then the Directrix has to be a bounded or closed curve.");
+				if (3 != (int)curve->Dim)
+					throw gcnew XbimGeometryFactoryException("DirectrixDim: The Directrix shall be a curve in three dimensional space.");
+
+				Handle(Geom_Curve) geomCurve = BuildGeom3d(curve, curveType);
+				
+				if(geomCurve.IsNull())
+					throw gcnew XbimGeometryFactoryException("Directrix is invalid");
+				//trimming
+				if (startParam != -1 || endParam != -1)
+				{
+					if (startParam == -1) startParam = geomCurve->FirstParameter();
+					if (endParam == -1) endParam = geomCurve->LastParameter();
+					Handle(Geom_Curve)  geomCurveTrimmed = Ptr()->TrimDirectrix(geomCurve, startParam, endParam, ModelService->Precision);
+					if(geomCurve.IsNull())
+						throw gcnew XbimGeometryFactoryException("Directrix could not be trimmed");
+					return geomCurveTrimmed;
+				}
+				return geomCurve;
+			
+			}
+
 
 			Handle(Geom_Curve) CurveFactory::BuildGeom3d(IIfcCurve^ curve, XCurveType% curveType)
 			{
-
-
 				if (!Enum::TryParse<XCurveType>(curve->ExpressType->ExpressName, curveType))
 					throw gcnew XbimGeometryFactoryException("Unsupported curve type: " + curve->ExpressType->ExpressName);
 
 				switch (curveType)
 				{
-					/*case Xbim::Geometry::Abstractions::XCurveType::IfcBoundaryCurve:
+					/*case XCurveType::IfcBoundaryCurve:
 						return Build3d(static_cast<IIfcBoundaryCurve^>(curve));
-					case Xbim::Geometry::Abstractions::XCurveType::BSplineCurveWithKnots:
+					case XCurveType::BSplineCurveWithKnots:
 						return Build3d(static_cast<IIfcBSplineCurveWithKnots^>(curve));*/
-				case Xbim::Geometry::Abstractions::XCurveType::IfcCircle:
+				case XCurveType::IfcCircle:
 					return BuildGeom3d(static_cast<IIfcCircle^>(curve));
-				case Xbim::Geometry::Abstractions::XCurveType::IfcCompositeCurve:
+				case XCurveType::IfcCompositeCurve:
 					return BuildGeom3d(static_cast<IIfcCompositeCurve^>(curve));
-					/*	case Xbim::Geometry::Abstractions::XCurveType::CompositeCurveOnSurface:
+					/*	case XCurveType::CompositeCurveOnSurface:
 							return Build3d(static_cast<IIfcCompositeCurveOnSurface^>(curve));*/
-				case Xbim::Geometry::Abstractions::XCurveType::IfcEllipse:
+				case XCurveType::IfcEllipse:
 					return BuildGeom3d(static_cast<IIfcEllipse^>(curve));
-					/*	case Xbim::Geometry::Abstractions::XCurveType::IndexedPolyCurve:
+					/*	case XCurveType::IndexedPolyCurve:
 							return Build3d(static_cast<IIfcIndexedPolyCurve^>(curve));*/
-				case Xbim::Geometry::Abstractions::XCurveType::IfcLine:
+				case XCurveType::IfcLine:
 					return BuildGeom3d(static_cast<IIfcLine^>(curve));
 					/*
-					case Xbim::Geometry::Abstractions::XCurveType::OffsetCurve3D:
+					case XCurveType::OffsetCurve3D:
 						return Build2d(static_cast<IIfcOffsetCurve3D^>(curve));
-					case Xbim::Geometry::Abstractions::XCurveType::Pcurve:
-						return Build3d(static_cast<IIfcPcurve^>(curve));
-					case Xbim::Geometry::Abstractions::XCurveType::Polyline:
-						return Build3d(static_cast<IIfcPolyline^>(curve));
-					case Xbim::Geometry::Abstractions::XCurveType::RationalBSplineCurveWithKnots:
+					case XCurveType::Pcurve:
+						return Build3d(static_cast<IIfcPcurve^>(curve));*/
+					case XCurveType::IfcPolyline:
+						return BuildGeom3d(static_cast<IIfcPolyline^>(curve));
+					/*case XCurveType::RationalBSplineCurveWithKnots:
 						return Build3d(static_cast<IIfcRationalBSplineCurveWithKnots^>(curve));
-					case Xbim::Geometry::Abstractions::XCurveType::SurfaceCurve:
+					case XCurveType::SurfaceCurve:
 						return Build3d(static_cast<IIfcSurfaceCurve^>(curve));*/
-				case Xbim::Geometry::Abstractions::XCurveType::IfcTrimmedCurve:
+				case XCurveType::IfcTrimmedCurve:
 					return BuildGeom3d(static_cast<IIfcTrimmedCurve^>(curve));
 
 				default:
@@ -147,34 +181,34 @@ namespace Xbim
 			{
 				switch (curveType)
 				{
-					/*case Xbim::Geometry::Abstractions::XCurveType::BoundaryCurve:
+					/*case XCurveType::BoundaryCurve:
 						return Build3d(dynamic_cast<IIfcBoundedCurve^>(curve));
-					case Xbim::Geometry::Abstractions::XCurveType::BSplineCurveWithKnots:
+					case XCurveType::BSplineCurveWithKnots:
 						return Build3d(dynamic_cast<IIfcBSplineCurveWithKnots^>(curve));*/
-				case Xbim::Geometry::Abstractions::XCurveType::IfcCircle:
+				case XCurveType::IfcCircle:
 					return gcnew XbimCircle(Handle(Geom_Circle)::DownCast(curve));
-					case Xbim::Geometry::Abstractions::XCurveType::IfcCompositeCurve:
-						return gcnew XbimCompositeCurve(Handle(Geom_BSplineCurve)::DownCast(curve));
-					/*case Xbim::Geometry::Abstractions::XCurveType::CompositeCurveOnSurface:
+					case XCurveType::IfcCompositeCurve:
+						return gcnew XbimBSplineCurve(Handle(Geom_BSplineCurve)::DownCast(curve));
+					/*case XCurveType::CompositeCurveOnSurface:
 						return Build3d(dynamic_cast<IIfcCompositeCurveOnSurface^>(curve));*/
-				case Xbim::Geometry::Abstractions::XCurveType::IfcEllipse:
+				case XCurveType::IfcEllipse:
 					return gcnew XbimEllipse(Handle(Geom_Ellipse)::DownCast(curve));
-					/*	case Xbim::Geometry::Abstractions::XCurveType::IndexedPolyCurve:
+					/*	case XCurveType::IndexedPolyCurve:
 							return Build3d(dynamic_cast<IIfcIndexedPolyCurve^>(curve));*/
-				case Xbim::Geometry::Abstractions::XCurveType::IfcLine:
+				case XCurveType::IfcLine:
 					return gcnew Xbim::Geometry::BRep::XbimLine(Handle(Geom_LineWithMagnitude)::DownCast(curve));
 					/*
-					case Xbim::Geometry::Abstractions::XCurveType::OffsetCurve3D:
+					case XCurveType::OffsetCurve3D:
 						return Build2d(dynamic_cast<IIfcOffsetCurve3D^>(curve));
-					case Xbim::Geometry::Abstractions::XCurveType::Pcurve:
+					case XCurveType::Pcurve:
 						return Build3d(dynamic_cast<IIfcPcurve^>(curve));
-					case Xbim::Geometry::Abstractions::XCurveType::Polyline:
+					case XCurveType::Polyline:
 						return Build3d(dynamic_cast<IIfcPolyline^>(curve));
-					case Xbim::Geometry::Abstractions::XCurveType::RationalBSplineCurveWithKnots:
+					case XCurveType::RationalBSplineCurveWithKnots:
 						return Build3d(dynamic_cast<IIfcRationalBSplineCurveWithKnots^>(curve));
-					case Xbim::Geometry::Abstractions::XCurveType::SurfaceCurve:
+					case XCurveType::SurfaceCurve:
 						return Build3d(dynamic_cast<IIfcSurfaceCurve^>(curve));*/
-				case Xbim::Geometry::Abstractions::XCurveType::IfcTrimmedCurve:
+				case XCurveType::IfcTrimmedCurve:
 					return gcnew XbimTrimmedCurve(Handle(Geom_TrimmedCurve)::DownCast(curve));
 					break;
 				default:
@@ -187,33 +221,33 @@ namespace Xbim
 			{
 				switch (curveType)
 				{
-					/*case Xbim::Geometry::Abstractions::XCurveType::BoundaryCurve:
+					/*case XCurveType::BoundaryCurve:
 						return  Build2d(dynamic_cast<IIfcBoundedCurve^>(curve));
-					case Xbim::Geometry::Abstractions::XCurveType::BSplineCurveWithKnots:
+					case XCurveType::BSplineCurveWithKnots:
 						return Build2d(dynamic_cast<IIfcBSplineCurveWithKnots^>(curve));*/
-				case Xbim::Geometry::Abstractions::XCurveType::IfcCircle:
+				case XCurveType::IfcCircle:
 					return gcnew XbimCircle2d(Handle(Geom2d_Circle)::DownCast(curve));
-					/*	case Xbim::Geometry::Abstractions::XCurveType::CompositeCurve:
+					/*	case XCurveType::CompositeCurve:
 							return Build2d(dynamic_cast<IIfcCompositeCurve^>(curve)));
-						case Xbim::Geometry::Abstractions::XCurveType::CompositeCurveOnSurface:
+						case XCurveType::CompositeCurveOnSurface:
 							return Build2d(dynamic_cast<IIfcCompositeCurveOnSurface^>(curve)));*/
-				case Xbim::Geometry::Abstractions::XCurveType::IfcEllipse:
+				case XCurveType::IfcEllipse:
 					return gcnew XbimEllipse2d(Handle(Geom2d_Ellipse)::DownCast(curve));
-					/*	case Xbim::Geometry::Abstractions::XCurveType::IndexedPolyCurve:
+					/*	case XCurveType::IndexedPolyCurve:
 							return Build2d(dynamic_cast<IIfcIndexedPolyCurve^>(curve)));*/
-				case Xbim::Geometry::Abstractions::XCurveType::IfcLine:
+				case XCurveType::IfcLine:
 					return gcnew XbimLine2d(Handle(Geom2d_LineWithMagnitude)::DownCast(curve));
-					/*case Xbim::Geometry::Abstractions::XCurveType::OffsetCurve2D:
+					/*case XCurveType::OffsetCurve2D:
 						return Build2d(dynamic_cast<IIfcOffsetCurve2D^>(curve));
-					case Xbim::Geometry::Abstractions::XCurveType::Pcurve:
+					case XCurveType::Pcurve:
 						return Build2d(dynamic_cast<IIfcPcurve^>(curve)) ;
-					case Xbim::Geometry::Abstractions::XCurveType::Polyline:
+					case XCurveType::Polyline:
 						return Build2d(dynamic_cast<IIfcPolyline^>(curve));
-					case Xbim::Geometry::Abstractions::XCurveType::RationalBSplineCurveWithKnots:
+					case XCurveType::RationalBSplineCurveWithKnots:
 						return Build2d(dynamic_cast<IIfcRationalBSplineCurveWithKnots^>(curve));
-					case Xbim::Geometry::Abstractions::XCurveType::SurfaceCurve:
+					case XCurveType::SurfaceCurve:
 						return Build2d(dynamic_cast<IIfcSurfaceCurve^>(curve));*/
-				case Xbim::Geometry::Abstractions::XCurveType::IfcTrimmedCurve:
+				case XCurveType::IfcTrimmedCurve:
 					return gcnew XbimTrimmedCurve2d(Handle(Geom2d_TrimmedCurve)::DownCast(curve));
 					break;
 				default:
@@ -222,7 +256,47 @@ namespace Xbim
 				throw gcnew XbimGeometryFactoryException("Unsupported 2d curve type");
 			}
 
-
+			IXCurve^ CurveFactory::BuildXDirectrix(IIfcCurve^ curve, double startParam, double endParam)
+			{
+				XCurveType curveType;
+				Handle(Geom_Curve) directix = BuildDirectrix(curve, startParam, endParam, curveType);
+				switch (curveType)
+				{
+					/*case XCurveType::BoundaryCurve:
+						return Build3d(dynamic_cast<IIfcBoundedCurve^>(curve));
+					case XCurveType::BSplineCurveWithKnots:
+						return Build3d(dynamic_cast<IIfcBSplineCurveWithKnots^>(curve));*/
+				case XCurveType::IfcCircle:
+					return gcnew XbimCircle(Handle(Geom_Circle)::DownCast(directix));
+				case XCurveType::IfcCompositeCurve:
+					return gcnew XbimBSplineCurve(Handle(Geom_BSplineCurve)::DownCast(directix));
+					/*case XCurveType::CompositeCurveOnSurface:
+						return Build3d(dynamic_cast<IIfcCompositeCurveOnSurface^>(curve));*/
+				case XCurveType::IfcEllipse:
+					return gcnew XbimEllipse(Handle(Geom_Ellipse)::DownCast(directix));
+					/*	case XCurveType::IndexedPolyCurve:
+							return Build3d(dynamic_cast<IIfcIndexedPolyCurve^>(directix));*/
+				case XCurveType::IfcLine:
+					return gcnew Xbim::Geometry::BRep::XbimLine(Handle(Geom_LineWithMagnitude)::DownCast(directix));
+					/*
+					case XCurveType::OffsetCurve3D:
+						return Build2d(dynamic_cast<IIfcOffsetCurve3D^>(directix));
+					case XCurveType::Pcurve:
+						return Build3d(dynamic_cast<IIfcPcurve^>(directix));
+					case XCurveType::Polyline:
+						return Build3d(dynamic_cast<IIfcPolyline^>(directix));
+					case XCurveType::RationalBSplineCurveWithKnots:
+						return Build3d(dynamic_cast<IIfcRationalBSplineCurveWithKnots^>(directix));
+					case XCurveType::SurfaceCurve:
+						return Build3d(dynamic_cast<IIfcSurfaceCurve^>(directix));*/
+				case XCurveType::IfcTrimmedCurve:
+					return gcnew XbimTrimmedCurve(Handle(Geom_TrimmedCurve)::DownCast(directix));
+					break;
+				default:
+					throw gcnew XbimGeometryFactoryException("Unsupported curve type");
+				}
+				throw gcnew XbimGeometryFactoryException("Unsupported curve type");
+			}
 
 			Handle(Geom_LineWithMagnitude) CurveFactory::BuildGeom3d(IIfcLine^ ifcLine)
 			{
@@ -412,6 +486,39 @@ namespace Xbim
 					throw gcnew XbimGeometryFactoryException("Failed to build Trimmed Basis Curve");
 
 			}
+
+			Handle(Geom_Curve) CurveFactory::BuildGeom3d(IIfcPolyline^ ifcPolyline)
+			{
+				//validate
+				int pointCount = ifcPolyline->Points->Count;
+				if (pointCount < 2)
+					throw gcnew XbimGeometryFactoryException("IfcPolyline has less than 2 points. It cannot be built");
+				if (pointCount == 2) //just build a line
+				{
+					gp_Pnt start = GpFactory->BuildPoint(ifcPolyline->Points[0]);
+					gp_Pnt end = GpFactory->BuildPoint(ifcPolyline->Points[1]);
+					if(start.IsEqual(end, ModelService->Precision))
+						throw gcnew XbimGeometryFactoryException(String::Format("IfcPolyline has only 2 identical points( #{0} and #{1}. It cannot be built", ifcPolyline->Points[0]->EntityLabel, ifcPolyline->Points[1]->EntityLabel));
+					Handle(Geom_TrimmedCurve) lineSeg = Ptr()->BuildBoundedLine3d(start, end);
+					if (lineSeg.IsNull())
+						throw gcnew XbimGeometryFactoryException("Invalid IfcPolyline definition");
+					return lineSeg;
+				}
+				else
+				{
+					TColgp_Array1OfPnt points(1, pointCount);
+					GpFactory->GetPolylinePoints(ifcPolyline, points);
+					Handle(Geom_BSplineCurve) polyline = Ptr()->BuildPolyline(points, ModelService->Precision);
+					if(polyline.IsNull())
+						throw gcnew XbimGeometryFactoryException("Failed to build IfcPolyline");
+					return polyline;
+				}
+				
+			}
+
+			
+
+
 
 			Handle(Geom_BSplineCurve) CurveFactory::BuildGeom3d(IIfcCompositeCurve^ ifcCompositeCurve)
 			{
