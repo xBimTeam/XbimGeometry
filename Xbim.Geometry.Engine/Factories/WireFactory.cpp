@@ -259,7 +259,8 @@ namespace Xbim
 						break;
 					}
 					case XCurveType::IfcCompositeCurve:
-						return BuildSegments(static_cast<IIfcCompositeCurve^>(segment->ParentCurve), segments, segment->SameSense);
+						BuildSegments(static_cast<IIfcCompositeCurve^>(segment->ParentCurve), segments, segment->SameSense);
+						break;
 						/*case XCurveType::CompositeCurveOnSurface:
 							return Build3d(static_cast<IIfcCompositeCurveOnSurface^>(curve));
 						case XCurveType::IndexedPolyCurve:
@@ -279,17 +280,17 @@ namespace Xbim
 					default:
 						throw gcnew XbimGeometryFactoryException("Not implemented. Curve type: " + curveType.ToString());
 					}
-					//if this is a nested composite curve ensure sense is applied
-					for (auto it = segments.cbegin(); it != segments.cend(); ++it)
+				}
+				//if this is a nested composite curve ensure sense is applied
+				for (auto it = segments.cbegin(); it != segments.cend(); ++it)
+				{
+					if (sameSense)
+						resultSegments.Append(*it);
+					else
 					{
-						if (sameSense)
-							resultSegments.Append(*it);
-						else
-						{
-							Handle(Geom_Curve) seg = *it;
-							seg->Reverse();
-							resultSegments.Append(seg);
-						}
+						Handle(Geom_Curve) seg = *it;
+						seg->Reverse();
+						resultSegments.Append(seg);
 					}
 				}
 			}

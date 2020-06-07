@@ -337,13 +337,14 @@ void NWireFactory::GetPolylineSegments(const TColgp_Array1OfPnt& points, TColGeo
 //Builds a wire a collection of segments and trims it
 TopoDS_Wire NWireFactory::BuildDirectrix(TColGeom_SequenceOfCurve& segments, double trimStart, double trimEnd, double tolerance)
 {
-	BRep_Builder builder;
-	TopoDS_Wire wire;
-	builder.MakeWire(wire);
+
+
 	TopTools_SequenceOfShape edges;
 	try
 	{
+		BRep_Builder builder;
 		double parametricLength = 0;
+		TopoDS_Wire wire;
 		for (auto it = segments.cbegin(); it != segments.cend(); ++it)
 		{
 			Handle(Geom_Curve) segment = *it;
@@ -383,26 +384,57 @@ TopoDS_Wire NWireFactory::BuildDirectrix(TColGeom_SequenceOfCurve& segments, dou
 					}
 				}
 				//make the segment an edge
-				BRepBuilderAPI_MakeEdge edgeMaker(segment);
-				if (edges.Length() == 0) //kust add the first one
+
+				if (edges.Length() == 0) //just add the first one
 				{
 					BRepBuilderAPI_MakeEdge edgeMaker(segment);
-					edges.Append(edgeMaker.Edge());
+					TopoDS_Edge edgeToAdd = edgeMaker.Edge();
+					edges.Append(edgeToAdd);
 				}
 				else //we need to add this segment ot the start of end of the edges
 				{
+
 					TopoDS_Edge lastEdge = TopoDS::Edge(edges.Last());
 					TopoDS_Vertex vLast = TopExp::LastVertex(lastEdge); //get the vertex at the end of the wire
-					gp_Pnt pointLast = BRep_Tool::Pnt(vLast); //the last point
-					double gap = pointLast.Distance(segment->Value(segment->LastParameter()));
-					if (gap <= tolerance) //we can just add it on
+					gp_Pnt lastPoint = BRep_Tool::Pnt(vLast); //the last point
+					TopoDS_Edge firstEdge = TopoDS::Edge(edges.First());
+					TopoDS_Vertex vFirst = TopExp::FirstVertex(firstEdge); //get the vertex at the end of the wire
+					gp_Pnt firstPoint = BRep_Tool::Pnt(vFirst); //the last point
+					gp_Pnt segStartPoint = segment->Value(segment->FirstParameter());
+					gp_Pnt segEndPoint = segment->Value(segment->LastParameter());
+					double lastGap = lastPoint.Distance(segStartPoint);
+					double firstGap = firstPoint.Distance(segEndPoint);
+					if (lastGap < firstGap) //we can just add it on the end
 					{
-
+						if (lastGap > tolerance)
+							throw Standard_Failure("Segments are not contiguous");
+						AdjustVertexTolerance(vLast, lastPoint, segStartPoint, lastGap);
+						TopoDS_Vertex segEndVertex;
+						builder.MakeVertex(segEndVertex, segEndPoint,Precision::Confusion());
+						BRepBuilderAPI_MakeEdge edgeMaker(segment, vLast, segEndVertex);
+						edges.Append(edgeMaker.Edge());
+					}
+					else //we neeed to add it on the start
+					{
+						if (firstGap > tolerance)
+							throw Standard_Failure("Segments are not contiguous");
+						AdjustVertexTolerance(vFirst, firstPoint, segEndPoint, lastGap);
+						TopoDS_Vertex segStartVertex;
+						builder.MakeVertex(segStartVertex, segStartPoint, Precision::Confusion());
+						BRepBuilderAPI_MakeEdge edgeMaker(segment, segStartVertex, vFirst);
+						edges.Append(edgeMaker.Edge());
 					}
 				}
-				//add the segment to the wire
-				builder.Add(wire, edgeMaker.Edge());
+				//add the edges to the wire
+
+
 			}
+
+		}
+		builder.MakeWire(wire);
+		for (auto it = edges.cbegin(); it != edges.cend(); ++it)
+		{
+			builder.Add(wire, *it);
 		}
 		return wire;
 	}
@@ -410,7 +442,27 @@ TopoDS_Wire NWireFactory::BuildDirectrix(TColGeom_SequenceOfCurve& segments, dou
 	{
 		pLoggingService->LogWarning(e.GetMessageString());
 	}
-
 	pLoggingService->LogWarning("Could not build directrix");
 	return _emptyWire;
+}
+
+void NWireFactory::AdjustVertexTolerance(TopoDS_Vertex& vertexToJoinTo, gp_Pnt pointToJoinTo, gp_Pnt pointToJoin, double gap)
+{
+
+	double tolE = BRep_Tool::Tolerance(vertexToJoinTo);
+	double maxtol = .5 * (tolE + gap), cW = 1, cE = 0;
+	BRep_Builder b;
+	if (maxtol > tolE)
+	{
+		cW = (maxtol - tolE) / gap;
+		cE = 1. - cW;
+		gp_Pnt PC(cW * pointToJoinTo.X() + cE * pointToJoin.X(), cW * pointToJoinTo.Y() + cE * pointToJoin.Y(), cW * pointToJoinTo.Z() + cE * pointToJoin.Z());
+
+		b.UpdateVertex(vertexToJoinTo, PC, maxtol);
+	}
+	else //just set the tolerance to the larger of the distance or the exisiting tolerance
+	{
+		if (gap > tolE)
+			b.UpdateVertex(vertexToJoinTo, pointToJoinTo, gap);
+	}
 }
