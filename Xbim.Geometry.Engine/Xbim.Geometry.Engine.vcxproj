@@ -140,7 +140,8 @@
       <AdditionalIncludeDirectories>.\OCC\inc</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies />
+      <AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;comdlg32.lib;wsock32.lib;Psapi.lib;TKBO.lib;TKBOOL.lib;TKBRep.lib;TKernel.lib;TKFillet.lib;TKG2d.lib;TKG3d.lib;TKGeomAlgo.lib;TKGeomBase.lib;TKMath.lib;TKMesh.lib;TKOffset.lib;TKPrim.lib;TKShHealing.lib;TKTopAlgo.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>.\OCC\win32\vc14\bin\</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -152,7 +153,8 @@
       <AdditionalIncludeDirectories>.\OCC\inc</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies />
+      <AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;comdlg32.lib;wsock32.lib;Psapi.lib;TKBO.lib;TKBOOL.lib;TKBRep.lib;TKernel.lib;TKFillet.lib;TKG2d.lib;TKG3d.lib;TKGeomAlgo.lib;TKGeomBase.lib;TKMath.lib;TKMesh.lib;TKOffset.lib;TKPrim.lib;TKShHealing.lib;TKTopAlgo.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>.\OCC\win64\vc14\bin\</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
