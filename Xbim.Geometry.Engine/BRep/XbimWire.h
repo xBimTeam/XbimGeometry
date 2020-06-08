@@ -18,6 +18,7 @@ namespace Xbim
 				XbimWire(const TopoDS_Wire& hWire) : XbimShape(new TopoDS_Wire(hWire)) {};
 				virtual property XShapeType ShapeType { XShapeType get() override { return XShapeType::Wire; } };
 				virtual property IEnumerable<IXEdge^>^ EdgeLoop {IEnumerable<IXEdge^>^ get(); };
+				virtual  double Length();
 			};
 		}
 	}

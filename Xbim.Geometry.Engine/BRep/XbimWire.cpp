@@ -1,6 +1,7 @@
 #include "XbimWire.h"
 #include "XbimEdge.h"
 #include <BRepTools_WireExplorer.hxx>
+#include <BRepAdaptor_CompCurve.hxx>
 using namespace System::Linq;
 
 namespace Xbim
@@ -17,6 +18,12 @@ namespace Xbim
 				for (; wireEx.More(); wireEx.Next())
 					edges->Add(gcnew XbimEdge(wireEx.Current()));
 				return edges;
+			}
+
+			double XbimWire::Length()
+			{
+				BRepAdaptor_CompCurve cc(OccHandle(), Standard_True);
+				return cc.LastParameter() - cc.FirstParameter();
 			}
 		}
 	}

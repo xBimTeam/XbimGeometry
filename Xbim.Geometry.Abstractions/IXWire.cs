@@ -5,5 +5,6 @@ namespace Xbim.Geometry.Abstractions
     public interface IXWire: IXShape
     {
         IEnumerable<IXEdge> EdgeLoop { get; }
+        double Length();
     }
 }

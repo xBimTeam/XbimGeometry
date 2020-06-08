@@ -12,6 +12,8 @@ using Xbim.Geometry.Services;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using FluentAssertions.Common;
+using FluentAssertions;
 
 namespace Xbim.Geometry.NetCore.Tests
 {
@@ -130,11 +132,12 @@ namespace Xbim.Geometry.NetCore.Tests
             {
                 taskResults.Add(wireService.BuildAsync(polyline));
             }
-            await Task.WhenAll(taskResults);
+            await Task.WhenAll(taskResults).ConfigureAwait(false);
 
             sw.Stop();
             var asyncTime = sw.ElapsedMilliseconds;
-            Assert.IsTrue(asyncTime < nonAsyncTime);
+            nonAsyncTime.Should().BeGreaterThan(asyncTime);
+           
             foreach (var taskResult in taskResults)
             {
                 Assert.IsTrue(taskResult.IsCompletedSuccessfully);
@@ -164,10 +167,12 @@ namespace Xbim.Geometry.NetCore.Tests
         {
             var wireService = _modelScope.ServiceProvider.GetRequiredService<IXWireService>();
             var curveService = _modelScope.ServiceProvider.GetRequiredService<IXCurveService>();
+            var modelService = _modelScope.ServiceProvider.GetRequiredService<IXModelService>();
             double totalParametricLength, totalLength;
             var ifcCompCurve = IfcMoq.TypicalCompositeCurveMock(curveService, out totalParametricLength, out totalLength);
             var wire = wireService.Build(ifcCompCurve);
-
+            Assert.AreEqual(XShapeType.Wire, wire.ShapeType);
+            wire.Length().Should().BeApproximately(totalLength, modelService.Precision);
 
         }
 

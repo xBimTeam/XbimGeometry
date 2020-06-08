@@ -287,15 +287,16 @@ namespace Xbim.Geometry.NetCore.Tests
         {
             var solidService = _modelScope.ServiceProvider.GetRequiredService<IXSolidService>();
             var curveService = _modelScope.ServiceProvider.GetRequiredService<IXCurveService>();
+            var modelService = _modelScope.ServiceProvider.GetRequiredService<IXModelService>();
             double totalLength, totalParametricLength;
             var directrix = IfcMoq.TypicalCompositeCurveMock(curveService,out totalParametricLength, out totalLength);
 
-            var ifcSweptDisk = IfcMoq.IfcSweptDiskSolidMoq(directrix: directrix, radius: 30, innerRadius: 15);
+            var ifcSweptDisk = IfcMoq.IfcSweptDiskSolidMoq(directrix: directrix, radius: 10, innerRadius: 8);
             var solid = solidService.Build(ifcSweptDisk);
             Assert.IsFalse(solid.IsEmptyShape());
             Assert.IsTrue(solid.IsValidShape());
             double volume = solid.Volume();
-            volume.Should().BeGreaterThan(0);
+            volume.Should().BeApproximately(14052.09281905348, modelService.Precision);
         }
         [TestMethod]
         public void Can_create_swept_disk_solid_with_trimmed_circle_directrix()

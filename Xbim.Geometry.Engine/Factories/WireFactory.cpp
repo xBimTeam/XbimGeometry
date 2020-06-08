@@ -202,7 +202,7 @@ namespace Xbim
 			Handle(Geom_Curve) WireFactory::BuildCompositeCurveSegment(IfcType ifcCurve, bool sameSense, bool isTrimmedCurve)
 			{
 				Handle(Geom_Curve) curve = _curveFactory->BuildGeom3d(ifcCurve);
-				if (isTrimmedCurve) //special handle for IFC rules on trimmed segments
+				if (isTrimmedCurve) //special handle for IFC rules on trimmed segments, composite curve segment sense overrides the sense of the trim
 				{
 					IIfcTrimmedCurve^ tc = dynamic_cast<IIfcTrimmedCurve^>(ifcCurve);
 					if (!sameSense)
@@ -303,7 +303,7 @@ namespace Xbim
 				double startParam = 0;
 				double endParam = double::PositiveInfinity;
 				if (startTrim.HasValue) startParam = startTrim.Value;
-				if (endTrim.HasValue) startParam = endTrim.Value;
+				if (endTrim.HasValue) endParam = endTrim.Value;
 				double sameParams = Math::Abs(endParam - startParam) < ModelService->Precision;
 				if (sameParams)
 					throw  gcnew XbimGeometryFactoryException("Start and End Trim Parameters are the same. Null directrix is invalid");

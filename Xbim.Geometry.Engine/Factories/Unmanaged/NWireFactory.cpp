@@ -24,7 +24,7 @@
 #include <GeomConvert_CompCurveToBSplineCurve.hxx>
 #include <Geom_Line.hxx>
 #include <Geom_TrimmedCurve.hxx>
-
+#include <BRep_Tool.hxx>
 
 TopoDS_Wire NWireFactory::BuildPolyline2d(
 	const NCollection_Vector<KeyedPnt2d>& pointSeq,
@@ -217,11 +217,14 @@ TopoDS_Wire NWireFactory::BuildPolyline(
 			{
 				if (startParam >= offset && startParam < offset + segLength) //trim this edge its the first one, will only enter the first time
 				{
-					edgeVec.Normalize();
-					startPoint.Translate(edgeVec * (startParam - offset)); //move the start point	
-					TopoDS_Vertex startVertex;
-					builder.MakeVertex(startVertex, startPoint, Precision::Confusion());
-					vertices.Append(startVertex);
+					if (vertices.Length() == 0) //only add the start in once, if the length is > 0 then we have a small first segment and a point waiting to use
+					{
+						edgeVec.Normalize();
+						startPoint.Translate(edgeVec * (startParam - offset)); //move the start point	
+						TopoDS_Vertex startVertex;
+						builder.MakeVertex(startVertex, startPoint, Precision::Confusion());
+						vertices.Append(startVertex);
+					}
 					//check if it is also the last one
 					if (endParam > 0 && endParam <= offset + segLength)
 					{
@@ -268,7 +271,11 @@ TopoDS_Wire NWireFactory::BuildPolyline(
 
 		for (int i = 2; i <= vertices.Length(); i++)
 		{
-			BRepBuilderAPI_MakeEdge edgeMaker(TopoDS::Vertex(vertices.Value(i - 1)), TopoDS::Vertex(vertices.Value(i)));
+			const TopoDS_Vertex& startVertex = TopoDS::Vertex(vertices.Value(i - 1));
+			const TopoDS_Vertex& endVertex = TopoDS::Vertex(vertices.Value(i));
+			gp_Pnt startPoint = BRep_Tool::Pnt(startVertex);
+			gp_Pnt endPoint = BRep_Tool::Pnt(endVertex);
+			BRepBuilderAPI_MakeEdge edgeMaker(startVertex, endVertex);
 			builder.Add(wire, edgeMaker.Edge());
 		}
 
@@ -397,13 +404,17 @@ TopoDS_Wire NWireFactory::BuildDirectrix(TColGeom_SequenceOfCurve& segments, dou
 					TopoDS_Edge lastEdge = TopoDS::Edge(edges.Last());
 					TopoDS_Vertex vLast = TopExp::LastVertex(lastEdge); //get the vertex at the end of the wire
 					gp_Pnt lastPoint = BRep_Tool::Pnt(vLast); //the last point
+
 					TopoDS_Edge firstEdge = TopoDS::Edge(edges.First());
-					TopoDS_Vertex vFirst = TopExp::FirstVertex(firstEdge); //get the vertex at the end of the wire
-					gp_Pnt firstPoint = BRep_Tool::Pnt(vFirst); //the last point
-					gp_Pnt segStartPoint = segment->Value(segment->FirstParameter());
+					TopoDS_Vertex vFirst = TopExp::FirstVertex(firstEdge); //get the vertex at the start of the wire
+					gp_Pnt firstPoint = BRep_Tool::Pnt(vFirst); //the first point
+
+					gp_Pnt segStartPoint = segment->Value(segment->FirstParameter()); //start and end of segment to add
 					gp_Pnt segEndPoint = segment->Value(segment->LastParameter());
+
 					double lastGap = lastPoint.Distance(segStartPoint);
 					double firstGap = firstPoint.Distance(segEndPoint);
+
 					if (lastGap < firstGap) //we can just add it on the end
 					{
 						if (lastGap > tolerance)
@@ -418,7 +429,7 @@ TopoDS_Wire NWireFactory::BuildDirectrix(TColGeom_SequenceOfCurve& segments, dou
 					{
 						if (firstGap > tolerance)
 							throw Standard_Failure("Segments are not contiguous");
-						AdjustVertexTolerance(vFirst, firstPoint, segEndPoint, lastGap);
+						AdjustVertexTolerance(vFirst, firstPoint, segEndPoint, firstGap);
 						TopoDS_Vertex segStartVertex;
 						builder.MakeVertex(segStartVertex, segStartPoint, Precision::Confusion());
 						BRepBuilderAPI_MakeEdge edgeMaker(segment, segStartVertex, vFirst);

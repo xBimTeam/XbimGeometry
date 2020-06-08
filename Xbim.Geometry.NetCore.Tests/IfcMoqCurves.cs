@@ -280,7 +280,7 @@ namespace Xbim.Geometry.NetCore.Tests
             var lineSeg2 = IfcMoq.IfcTrimmedCurve3dMock(line2, trimParam1: 0, trimParam2: lineLen2);
 
             var arc1 = IfcMoq.IfcTrimmedCurve3dMock(circ1, trimParam2: Math.PI / 2);
-            var arc2 = IfcMoq.IfcTrimmedCurve3dMock(circ2, trimParam1: Math.PI / 2, trimParam2: 0, sense: false);
+            var arc2 = IfcMoq.IfcTrimmedCurve3dMock(circ2, trimParam2: Math.PI / 2, trimParam1: 0, sense: true);
             var arc3 = IfcMoq.IfcTrimmedCurve3dMock(circ3, trimParam2: Math.PI / 2);
 
             var x1 = curveFactory.Build(lineSeg1) as IXTrimmedCurve;
@@ -299,7 +299,7 @@ namespace Xbim.Geometry.NetCore.Tests
             totalLength = x1.Length + x2.Length + x3.Length + x4.Length + x5.Length;
             var seg1 = IfcMoq.IfcCompositeCurveSegment3dMock(lineSeg1, entityLabel: 1);
             var seg2 = IfcMoq.IfcCompositeCurveSegment3dMock(arc1, entityLabel: 2);
-            var seg3 = IfcMoq.IfcCompositeCurveSegment3dMock(arc2, entityLabel: 3);
+            var seg3 = IfcMoq.IfcCompositeCurveSegment3dMock(arc2, entityLabel: 3,sameSense: false);
             var seg4 = IfcMoq.IfcCompositeCurveSegment3dMock(lineSeg2, entityLabel: 4);
             var seg5 = IfcMoq.IfcCompositeCurveSegment3dMock(arc3, entityLabel: 5);
 
