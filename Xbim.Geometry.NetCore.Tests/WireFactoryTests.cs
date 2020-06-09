@@ -98,7 +98,7 @@ namespace Xbim.Geometry.NetCore.Tests
             var wire = wireService.Build(polyline);
             Assert.AreEqual(edgeCount, wire.EdgeLoop.Count());
         }
-        [Ignore] //this test fails on async operations taking too long, it need to be looked at
+        [Ignore] //this test fails on async operations taking too long, it needs to be looked at
         [DataTestMethod]
         [DynamicData(nameof(Polyline2dDataSource), DynamicDataSourceType.Property)]
         public async Task Can_build_polyline2dAsync(string dataSetName, int edgeCount, (double X, double Y)[] points)

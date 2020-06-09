@@ -21,5 +21,16 @@ namespace Xbim.Geometry.NetCore.Tests
             rectangleProfileDef.Position = position ?? IfcMoq.IfcIfcAxis2Placement2DMock();
             return rectangleProfileDef;
         }
+
+        public static IIfcCircleProfileDef IfcCircleProfileDefMock(double radius = 100, IfcProfileTypeEnum profileType = IfcProfileTypeEnum.AREA, IIfcAxis2Placement2D position = null)
+        {
+            var rectangleProfileDefMoq = MakeMoq<IIfcCircleProfileDef>();
+            var rectangleProfileDef = rectangleProfileDefMoq.Object;
+            rectangleProfileDefMoq.SetupGet(v => v.ExpressType).Returns(metaData.ExpressType(typeof(IfcCircleProfileDef)));
+            rectangleProfileDef.ProfileType = profileType;
+            rectangleProfileDef.Radius = radius;           
+            rectangleProfileDef.Position = position ?? IfcMoq.IfcIfcAxis2Placement2DMock();
+            return rectangleProfileDef;
+        }
     }
 }

@@ -45,5 +45,6 @@ public:
 
 	void AdjustVertexTolerance(TopoDS_Vertex& vertexToJoinTo, gp_Pnt pointToJoinTo, gp_Pnt pointToJoin, double gap);
 	TopoDS_Wire BuildRectangleProfileDef(double xDim, double yDim);
+	TopoDS_Wire BuildCircleProfileDef(double radius, const gp_Ax2d& position);
 };
 

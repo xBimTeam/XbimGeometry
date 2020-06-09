@@ -1,6 +1,8 @@
 #include "NWireFactory.h"
 #include <TopoDS.hxx>
 #include <gp_Lin2d.hxx>
+#include <gp_Ax2d.hxx>
+#include <gp_Ax2.hxx>
 #include <Bnd_Box.hxx>
 #include <NCollection_CellFilter.hxx>
 #include <BRepBuilderAPI_MakePolygon.hxx>
@@ -27,6 +29,9 @@
 #include <BRep_Tool.hxx>
 #include <GC_MakeSegment.hxx>
 #include <BRepBuilderAPI_MakeWire.hxx>
+#include <gp_Circ.hxx>
+#include <GCE2d_MakeCircle.hxx>
+#include <gp_Circ2d.hxx>
 
 TopoDS_Wire NWireFactory::BuildPolyline2d(
 	const NCollection_Vector<KeyedPnt2d>& pointSeq,
@@ -505,5 +510,28 @@ TopoDS_Wire NWireFactory::BuildRectangleProfileDef(double xDim, double yDim)
 		pLoggingService->LogWarning(e.GetMessageString());
 	}
 	pLoggingService->LogWarning("Could not build rectangle profile def");
+	return _emptyWire;
+}
+
+TopoDS_Wire NWireFactory::BuildCircleProfileDef(double radius, const gp_Ax2d& position)
+{
+	try
+	{
+		
+		gp_Circ2d gc(position, radius);
+		Handle(Geom2d_Circle) hCirc = GCE2d_MakeCircle(gc);
+		hCirc->Reverse();
+		TopoDS_Edge edge = BRepBuilderAPI_MakeEdge2d(hCirc);
+		BRep_Builder b;
+		TopoDS_Wire wire;
+		b.MakeWire(wire);
+		b.Add(wire, edge);
+		return wire;
+	}
+	catch (Standard_Failure e)
+	{
+		pLoggingService->LogWarning(e.GetMessageString());
+	}
+	pLoggingService->LogWarning("Could not build circle profile def");
 	return _emptyWire;
 }

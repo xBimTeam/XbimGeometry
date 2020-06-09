@@ -450,7 +450,7 @@ namespace Xbim
 				case XProfileDefType::IfcCShapeProfileDef:
 					break;
 				case XProfileDefType::IfcCircleProfileDef:
-					break;
+					return BuildProfileDef(static_cast<IIfcCircleProfileDef^>(profileDef));
 				case XProfileDefType::IfcCircleHollowProfileDef:
 					break;
 				case XProfileDefType::IfcEllipseProfileDef:
@@ -462,7 +462,7 @@ namespace Xbim
 				case XProfileDefType::IfcRectangleProfileDef:
 					return BuildProfileDef(static_cast<IIfcRectangleProfileDef^>(profileDef));
 				case XProfileDefType::IfcRectangleHollowProfileDef:
-					
+
 					break;
 				case XProfileDefType::IfcRoundedRectangleProfileDef:
 					break;
@@ -489,11 +489,25 @@ namespace Xbim
 					throw gcnew XbimGeometryFactoryException("Failure to build Rectangle Profile Def");
 				//apply the position transformation
 				if (rectProfile->Position != nullptr)
-				{
 					wire.Move(GPFactory->ToLocation(rectProfile->Position));
-				}
 				return wire;
 			}
+
+			TopoDS_Wire WireFactory::BuildProfileDef(IIfcCircleProfileDef^ circleProfile)
+			{
+				if (circleProfile->Radius <= 0 )
+					throw gcnew XbimGeometryFactoryException("Circle profile definition has an invalid dimension radius <= 0");
+				gp_Ax2d position = GPFactory->BuildAxis2Placement2d(circleProfile->Position);
+				
+				TopoDS_Wire wire = Ptr()->BuildCircleProfileDef(circleProfile->Radius, position);
+				if (wire.IsNull() || wire.NbChildren() == 0)
+					throw gcnew XbimGeometryFactoryException("Failure to build Rectangle Profile Def");
+				//apply the position transformation
+				if (circleProfile->Position != nullptr)
+					wire.Move(GPFactory->ToLocation(circleProfile->Position));
+				return wire;
+			}
+
 
 			TopoDS_Wire WireFactory::MakeWire(Handle(Geom_Curve) curve)
 			{

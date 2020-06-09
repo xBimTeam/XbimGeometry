@@ -59,6 +59,8 @@ namespace Xbim
 
 				TopoDS_Wire BuildProfileDef(IIfcRectangleProfileDef^ profile);
 
+				TopoDS_Wire BuildProfileDef(IIfcCircleProfileDef^ circleProfile);
+
 			internal:
 				TopoDS_Wire BuildDirectrix(IIfcCurve^ curve, Nullable<IfcParameterValue> startParam, Nullable<IfcParameterValue> endParam);
 				TopoDS_Wire BuildProfile(IIfcProfileDef^ profileDef);

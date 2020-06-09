@@ -336,6 +336,17 @@ namespace Xbim.Geometry.NetCore.Tests
             var extrusion = solidService.Build(extrudedArea);
             extrusion.Volume().Should().Be(200*400*300);
         }
+
+        [TestMethod]
+        public void Can_create_swept_area_solid_with_circle_profile_def()
+        {
+            var solidService = _modelScope.ServiceProvider.GetRequiredService<IXSolidService>();
+            var circleProfileDef = IfcMoq.IfcCircleProfileDefMock(radius: 200);
+            var extrudedArea = IfcMoq.IfcSweptAreaSolidMoq(sweptArea: circleProfileDef, depth: 900);
+            var extrusion = solidService.Build(extrudedArea);
+            extrusion.Volume().Should().Be((Math.PI  * 200 * 200) * 900);
+        }
+
         #endregion
 
     }
