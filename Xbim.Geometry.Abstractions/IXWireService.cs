@@ -9,5 +9,9 @@ namespace Xbim.Geometry.Abstractions
         IXWire Build(IIfcCurve curve);
         Task<IXWire> BuildAsync(IIfcCurve curve, CancellationToken cancellationToken);
         Task<IXWire> BuildAsync(IIfcCurve curve);
+
+        IXWire Build(IIfcProfileDef def);
+        Task<IXWire> BuildAsync(IIfcProfileDef def, CancellationToken cancellationToken);
+        Task<IXWire> BuildAsync(IIfcProfileDef def);
     }
 }

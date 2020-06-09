@@ -176,5 +176,29 @@ namespace Xbim.Geometry.NetCore.Tests
 
         }
 
+        #region Profiles
+
+        [TestMethod]
+        public void Can_build_rectangle_profile_def()
+        {
+            //construct a rectangle at origin 10,20 with the xAxis point in the Y direction (rotated 90), width 200, height 400
+            var wireService = _modelScope.ServiceProvider.GetRequiredService<IXWireService>();
+            var location = IfcMoq.IfcCartesianPoint2dMock(10, 20);
+            var xDir = IfcMoq.IfcDirection2dMock(0, 1);
+            var position = IfcMoq.IfcIfcAxis2Placement2DMock(loc: location, refDir: xDir);          
+            var rectProfileDef = IfcMoq.IfcRectangleProfileDefMock(x: 200, y:400,position: position);
+            var wire = wireService.Build(rectProfileDef);
+            wire.Should().NotBeNull();
+            wire.IsValidShape().Should().BeTrue();
+            wire.Length().Should().Be(2 * 200 + 2 * 400);
+            var edgeLoop = wire.EdgeLoop.ToList();
+            edgeLoop.Count().Should().Be(4);
+            edgeLoop[0].EdgeStartPoint().X.Should().Be(200 + 10);
+            edgeLoop[0].EdgeStartPoint().Y.Should().Be(-100 + 20);
+            edgeLoop[2].EdgeStartPoint().X.Should().Be(-200 + 10);
+            edgeLoop[2].EdgeStartPoint().Y.Should().Be(100 + 20);
+        }
+        #endregion
+
     }
 }

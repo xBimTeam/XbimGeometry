@@ -25,6 +25,8 @@
 #include <Geom_Line.hxx>
 #include <Geom_TrimmedCurve.hxx>
 #include <BRep_Tool.hxx>
+#include <GC_MakeSegment.hxx>
+#include <BRepBuilderAPI_MakeWire.hxx>
 
 TopoDS_Wire NWireFactory::BuildPolyline2d(
 	const NCollection_Vector<KeyedPnt2d>& pointSeq,
@@ -421,7 +423,7 @@ TopoDS_Wire NWireFactory::BuildDirectrix(TColGeom_SequenceOfCurve& segments, dou
 							throw Standard_Failure("Segments are not contiguous");
 						AdjustVertexTolerance(vLast, lastPoint, segStartPoint, lastGap);
 						TopoDS_Vertex segEndVertex;
-						builder.MakeVertex(segEndVertex, segEndPoint,Precision::Confusion());
+						builder.MakeVertex(segEndVertex, segEndPoint, Precision::Confusion());
 						BRepBuilderAPI_MakeEdge edgeMaker(segment, vLast, segEndVertex);
 						edges.Append(edgeMaker.Edge());
 					}
@@ -476,4 +478,32 @@ void NWireFactory::AdjustVertexTolerance(TopoDS_Vertex& vertexToJoinTo, gp_Pnt p
 		if (gap > tolE)
 			b.UpdateVertex(vertexToJoinTo, pointToJoinTo, gap);
 	}
+}
+
+TopoDS_Wire NWireFactory::BuildRectangleProfileDef(double xDim, double yDim)
+{
+	try
+	{
+		double xOff = xDim / 2;
+		double yOff = yDim / 2;
+		gp_Pnt bl(-xOff, -yOff, 0);
+		gp_Pnt br(xOff, -yOff, 0);
+		gp_Pnt tr(xOff, yOff, 0);
+		gp_Pnt tl(-xOff, yOff, 0);
+		Handle(Geom_TrimmedCurve) aSeg1 = GC_MakeSegment(bl, br);
+		Handle(Geom_TrimmedCurve) aSeg2 = GC_MakeSegment(br, tr);
+		Handle(Geom_TrimmedCurve) aSeg3 = GC_MakeSegment(tr, tl);
+		Handle(Geom_TrimmedCurve) aSeg4 = GC_MakeSegment(tl, bl);
+		TopoDS_Edge e1 = BRepBuilderAPI_MakeEdge(aSeg1);
+		TopoDS_Edge e2 = BRepBuilderAPI_MakeEdge(aSeg2);
+		TopoDS_Edge e3 = BRepBuilderAPI_MakeEdge(aSeg3);
+		TopoDS_Edge e4 = BRepBuilderAPI_MakeEdge(aSeg4);
+		return BRepBuilderAPI_MakeWire(e1, e2, e3, e4);
+	}
+	catch (Standard_Failure e)
+	{
+		pLoggingService->LogWarning(e.GetMessageString());
+	}
+	pLoggingService->LogWarning("Could not build rectangle profile def");
+	return _emptyWire;
 }

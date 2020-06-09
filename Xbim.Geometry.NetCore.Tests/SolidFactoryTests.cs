@@ -253,7 +253,7 @@ namespace Xbim.Geometry.NetCore.Tests
         }
         #endregion
 
-        #region Swept Areas
+        #region Swept Disks
         [TestMethod]
         public void Can_create_swept_disk_solid_with_line_directrix()
         {
@@ -326,6 +326,17 @@ namespace Xbim.Geometry.NetCore.Tests
         }
         #endregion
 
+        #region Swept Areas
+        [TestMethod]
+        public void Can_create_swept_area_solid_with_rectangle_profile_def()
+        {
+            var solidService = _modelScope.ServiceProvider.GetRequiredService<IXSolidService>();
+            var rectProfileDef = IfcMoq.IfcRectangleProfileDefMock(x: 200, y: 400);
+            var extrudedArea = IfcMoq.IfcSweptAreaSolidMoq(sweptArea: rectProfileDef, depth:300);
+            var extrusion = solidService.Build(extrudedArea);
+            extrusion.Volume().Should().Be(200*400*300);
+        }
+        #endregion
 
     }
 }

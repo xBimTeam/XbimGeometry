@@ -34,5 +34,23 @@ namespace Xbim.Geometry.Services
         {
             return BuildAsync(curve, CancellationToken.None);
         }
+
+        public IXWire Build(IIfcProfileDef def)
+        {
+            return factory.Build(def);
+        }
+
+        public Task<IXWire> BuildAsync(IIfcProfileDef def, CancellationToken cancellationToken)
+        {
+            return Task.Run(() =>
+            {
+                return factory.Build(def);
+            }, cancellationToken);
+        }
+
+        public Task<IXWire> BuildAsync(IIfcProfileDef def)
+        {
+            return BuildAsync(def, CancellationToken.None);
+        }
     }
 }

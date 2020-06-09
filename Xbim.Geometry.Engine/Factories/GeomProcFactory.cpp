@@ -2,7 +2,7 @@
 #include <gp_Ax2.hxx>
 #include <TColgp_SequenceOfPnt2d.hxx>
 #include <TColgp_Array1OfPnt.hxx>
-
+#include <TopLoc_Datum3D.hxx>
 namespace Xbim
 {
 	namespace Geometry
@@ -86,15 +86,15 @@ namespace Xbim
 
 			gp_Ax2d GeomProcFactory::BuildAxis2Placement2d(IIfcAxis2Placement2D^ axis2d)
 			{
-				if (axis2d->RefDirection == nullptr)  
-					return gp_Ax2d( BuildPoint2d(axis2d->Location), gp::DX2d());
+				if (axis2d->RefDirection == nullptr)
+					return gp_Ax2d(BuildPoint2d(axis2d->Location), gp::DX2d());
 				else
 					return gp_Ax2d(
-					BuildPoint2d(axis2d->Location),
-					BuildDirection2d(axis2d->RefDirection)
-				);
+						BuildPoint2d(axis2d->Location),
+						BuildDirection2d(axis2d->RefDirection)
+					);
 			}
-			
+
 			void GeomProcFactory::GetPolylinePoints(IIfcPolyline^ ifcPolyline, TColgp_Array1OfPnt& points)
 			{
 				int i = 1;
@@ -104,6 +104,14 @@ namespace Xbim
 					points.SetValue(i, pnt);
 					i++;
 				}
+			}
+			TopLoc_Location GeomProcFactory::ToLocation(IIfcAxis2Placement2D^ axis2D)
+			{
+				gp_Pnt2d loc = BuildPoint2d(axis2D->Location);
+				gp_XY xDir(1,0);
+				if (axis2D->RefDirection != nullptr)
+					xDir = gp_XY(axis2D->RefDirection->DirectionRatios[0], axis2D->RefDirection->DirectionRatios[1]);
+				return Ptr()->ToLocation(loc, xDir);				
 			}
 		}
 	}

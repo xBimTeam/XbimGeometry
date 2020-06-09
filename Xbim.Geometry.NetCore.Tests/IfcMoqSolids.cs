@@ -77,6 +77,17 @@ namespace Xbim.Geometry.NetCore.Tests
             sweptMoq.SetupGet(x => x.ExpressType).Returns(metaData.ExpressType(typeof(IfcSweptDiskSolid)));
             return swept;
         }
-
+        public static IIfcExtrudedAreaSolid IfcSweptAreaSolidMoq( IIfcProfileDef sweptArea = null, double depth = 500, IIfcDirection extrudeDirection=null, IfcAxis2Placement3D position = null)
+        {
+            var sweptMoq = MakeMoq<IIfcExtrudedAreaSolid>();
+            sweptMoq.SetupGet(v => v.Dim).Returns(new IfcDimensionCount(3));
+            var swept = sweptMoq.Object;
+            swept.SweptArea = sweptArea ?? IfcMoq.IfcRectangleProfileDefMock();
+            swept.Position = position ?? IfcMoq.IfcIfcAxis2Placement3DMock();
+            swept.Depth = depth;
+            swept.ExtrudedDirection = null ?? IfcDirection3dMock();
+            sweptMoq.SetupGet(x => x.ExpressType).Returns(metaData.ExpressType(typeof(IfcExtrudedAreaSolid)));
+            return swept;
+        }
     }
 }

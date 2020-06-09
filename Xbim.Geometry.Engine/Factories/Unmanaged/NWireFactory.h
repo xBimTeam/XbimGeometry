@@ -44,6 +44,6 @@ public:
 	TopoDS_Wire BuildDirectrix(TColGeom_SequenceOfCurve& segments, double trimStart, double trimEnd, double tolerance);
 
 	void AdjustVertexTolerance(TopoDS_Vertex& vertexToJoinTo, gp_Pnt pointToJoinTo, gp_Pnt pointToJoin, double gap);
-	
+	TopoDS_Wire BuildRectangleProfileDef(double xDim, double yDim);
 };
 

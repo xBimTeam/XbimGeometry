@@ -11,9 +11,7 @@ namespace Xbim
 		namespace Factories
 		{
 			IXSolid^ SolidFactory::Build(IIfcSolidModel^ ifcSolid)
-			{	
-				
-				
+			{					
 				TopoDS_Solid topoSolid = BuildSolidModel(ifcSolid);
 				if (topoSolid.IsNull()) throw gcnew XbimGeometryFactoryException("Failure building IfcSolidModel");
 				topoSolid.SetMaterialId(100);
@@ -38,7 +36,7 @@ namespace Xbim
 				switch (boolOpType)
 				{
 				case XBooleanOperandType::IfcSolidModel:
-					break;
+					return Build(static_cast<IIfcSolidModel^>(boolOperand));
 				case XBooleanOperandType::IfcHalfSpaceSolid:
 					break;
 				case XBooleanOperandType::IfcCsgPrimitive3D:
@@ -74,7 +72,7 @@ namespace Xbim
 				case XSolidModelType::IfcFacetedBrepWithVoids:
 					break;
 				case XSolidModelType::IfcExtrudedAreaSolid:
-					break;
+					return BuildExtrudedAreaSolid(static_cast<IIfcExtrudedAreaSolid^>(ifcSolid));
 				case XSolidModelType::IfcExtrudedAreaSolidTapered:
 					break;
 				case XSolidModelType::IfcFixedReferenceSweptAreaSolid:
@@ -118,7 +116,17 @@ namespace Xbim
 
 			}
 			
-
+			TopoDS_Solid SolidFactory::BuildExtrudedAreaSolid(IIfcExtrudedAreaSolid^ extrudedSolid)
+			{
+				if (extrudedSolid->Depth <= 0)
+					throw gcnew XbimGeometryFactoryException("Extruded Solid depth must be greater than 0");
+				TopoDS_Face sweptArea = _faceFactory->BuildProfileDef(extrudedSolid->SweptArea); //if this fails it will throw an exception
+				gp_Dir extrudeDirection = _gpFactory->BuildDirection(extrudedSolid->ExtrudedDirection);
+				TopoDS_Solid solid = Ptr()->BuildExtrudedAreaSolid(sweptArea, extrudeDirection, extrudedSolid->Depth);
+				if(solid.IsNull() || solid.NbChildren()==0)
+					throw gcnew XbimGeometryFactoryException("Extruded Solid could not be built");
+				return solid;
+			}
 			TopoDS_Solid SolidFactory::BuildCsgSolid(IIfcCsgSolid^ ifcCsgSolid)
 			{
 				//at the root of a csg solid is either a boolean result or a csg solid primitive

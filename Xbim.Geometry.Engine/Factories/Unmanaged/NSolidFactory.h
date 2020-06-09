@@ -3,6 +3,7 @@
 
 #include <TopoDS_Solid.hxx>
 #include <TopoDS_Builder.hxx>
+#include <TopoDS_Face.hxx>
 #include <BRepBuilderAPI_TransitionMode.hxx>
 #include <Geom_Curve.hxx>
 class NSolidFactory
@@ -33,7 +34,7 @@ public:
 	TopoDS_Solid BuildRightCylinder(gp_Ax2 ax2, double radius, double height);
 	TopoDS_Solid BuildSphere(gp_Ax2 ax2, double radius);
 	TopoDS_Solid BuildSweptDiskSolid(const TopoDS_Wire& directrix, double radius, double innerRadius, BRepBuilderAPI_TransitionMode transitionMode);
-
+	TopoDS_Solid BuildExtrudedAreaSolid(const TopoDS_Face& face, gp_Dir extrudeDirection, double depth);
 
 };
 

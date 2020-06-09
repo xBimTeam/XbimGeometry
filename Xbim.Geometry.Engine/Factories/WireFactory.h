@@ -1,8 +1,9 @@
+#pragma once
 #include "../XbimHandle.h"
 #include "../BRep/XbimWire.h"
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Compound.hxx>
-#include "../Factories/GeomProcFactory.h"
+#include "GeomProcFactory.h"
 #include "./Unmanaged/NWireFactory.h"
 #include "../Services/LoggingService.h"
 #include "GeomProcFactory.h"
@@ -15,6 +16,7 @@ using namespace Xbim::Geometry::Services;
 using namespace Xbim::Common;
 using namespace Xbim::Ifc4::Interfaces;
 using namespace Xbim::Ifc4::MeasureResource;
+using namespace Xbim::Ifc4::ProfileResource;
 using namespace Xbim::Geometry::Abstractions;
 using namespace System::Threading::Tasks;
 namespace Xbim
@@ -53,9 +55,13 @@ namespace Xbim
 				TopoDS_Wire BuildDirectrix(IIfcTrimmedCurve^ curve, double startParam, double endParam);
 				TopoDS_Wire BuildDirectrix(IIfcPolyline^ curve, double startParam, double endParam);
 				TopoDS_Wire BuildDirectrix(IIfcCompositeCurve^ curve, double startParam, double endParam);
+
+
+				TopoDS_Wire BuildProfileDef(IIfcRectangleProfileDef^ profile);
+
 			internal:
 				TopoDS_Wire BuildDirectrix(IIfcCurve^ curve, Nullable<IfcParameterValue> startParam, Nullable<IfcParameterValue> endParam);
-				
+				TopoDS_Wire BuildProfile(IIfcProfileDef^ profileDef);
 				//Builds an IfcCurve as a TopoDS_Wire
 				TopoDS_Wire BuildWire(IIfcCurve^ ifcCurve, Handle(Geom_Surface)& surface);
 
@@ -78,10 +84,7 @@ namespace Xbim
 
 
 				virtual IXWire^ Build(IIfcCurve^ ifcCurve);
-
-
-
-
+				virtual IXWire^ Build(IIfcProfileDef^ ifcProfileDef);
 
 			};
 

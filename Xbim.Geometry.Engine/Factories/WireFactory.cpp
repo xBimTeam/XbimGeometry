@@ -28,6 +28,14 @@ namespace Xbim
 				return gcnew XbimWire(wire);
 			}
 
+			IXWire^ WireFactory::Build(IIfcProfileDef^ ifcProfileDef)
+			{
+				TopoDS_Wire wire = BuildProfile(ifcProfileDef);
+				if (wire.IsNull() || wire.NbChildren() == 0)
+					throw gcnew XbimGeometryFactoryException("Resulting profile wire is empty");
+				return gcnew XbimWire(wire);
+			}
+
 			TopoDS_Wire WireFactory::BuildWire(IIfcCurve^ ifcCurve, Handle(Geom_Surface)& surface)
 			{
 
@@ -36,8 +44,6 @@ namespace Xbim
 				else
 					return Build3d(ifcCurve, surface);
 			}
-
-
 
 			TopoDS_Wire WireFactory::Build2d(IIfcCurve^ ifcCurve, Handle(Geom_Surface)& surface)
 			{
@@ -129,8 +135,6 @@ namespace Xbim
 				}
 				throw gcnew XbimGeometryFactoryException("Not implemented. Curve type: " + curveType.ToString());
 			}
-
-
 
 			TopoDS_Wire WireFactory::Build2dCircle(IIfcCircle^ ifcCircle, Handle(Geom_Surface)& surface)
 			{
@@ -420,103 +424,76 @@ namespace Xbim
 				return wire;
 			}
 
-			//TopoDS_Wire CurveFactory::BuildGeom3d(IIfcCompositeCurve^ ifcCompositeCurve)
-			//{
-			//	XCurveType curveType;
-			//	TColGeom_SequenceOfCurve segments;
+			TopoDS_Wire WireFactory::BuildProfile(IIfcProfileDef^ profileDef)
+			{
+				XProfileDefType profileDefType;
+				if (!Enum::TryParse<XProfileDefType>(profileDef->ExpressType->ExpressName, profileDefType))
+					throw gcnew XbimGeometryFactoryException("Unsupported curve type: " + profileDef->ExpressType->ExpressName);
+				switch (profileDefType)
+				{
+				case XProfileDefType::IfcArbitraryClosedProfileDef:
+					break;
+				case XProfileDefType::IfcArbitraryProfileDefWithVoids:
+					break;
+				case XProfileDefType::IfcArbitraryOpenProfileDef:
+					break;
+				case XProfileDefType::IfcCenterLineProfileDef:
+					break;
+				case XProfileDefType::IfcCompositeProfileDef:
+					break;
+				case XProfileDefType::IfcDerivedProfileDef:
+					break;
+				case XProfileDefType::IfcMirroredProfileDef:
+					break;
+				case XProfileDefType::IfcAsymmetricIShapeProfileDef:
+					break;
+				case XProfileDefType::IfcCShapeProfileDef:
+					break;
+				case XProfileDefType::IfcCircleProfileDef:
+					break;
+				case XProfileDefType::IfcCircleHollowProfileDef:
+					break;
+				case XProfileDefType::IfcEllipseProfileDef:
+					break;
+				case XProfileDefType::IfcIShapeProfileDef:
+					break;
+				case XProfileDefType::IfcLShapeProfileDef:
+					break;
+				case XProfileDefType::IfcRectangleProfileDef:
+					return BuildProfileDef(static_cast<IIfcRectangleProfileDef^>(profileDef));
+				case XProfileDefType::IfcRectangleHollowProfileDef:
+					
+					break;
+				case XProfileDefType::IfcRoundedRectangleProfileDef:
+					break;
+				case XProfileDefType::IfcTShapeProfileDef:
+					break;
+				case XProfileDefType::IfcTrapeziumProfileDef:
+					break;
+				case XProfileDefType::IfcUShapeProfileDef:
+					break;
+				case XProfileDefType::IfcZShapeProfileDef:
+					break;
+				default:
+					break;
+				}
+				throw gcnew XbimGeometryFactoryException("Not implemented. Profile Definition Type type: " + profileDefType.ToString());
+			}
 
-			//	for each (IIfcCompositeCurveSegment ^ segment in ifcCompositeCurve->Segments)
-			//	{
-			//		if (!IsBoundedCurve(segment->ParentCurve))
-			//			throw gcnew XbimGeometryFactoryException("Composite curve is invalid, only curve segments that are bounded curves are permitted");
-			//		Handle(Geom_Curve) hSegment = BuildGeom3d(segment->ParentCurve, curveType);
-			//		Handle(Geom_BoundedCurve) boundedCurve = Handle(Geom_BoundedCurve)::DownCast(hSegment);
-			//		if (boundedCurve.IsNull())
-			//			gcnew XbimGeometryFactoryException(String::Format("Compound curve segments must be bounded curves #{0}", segment->EntityLabel));
-			//		if (hSegment.IsNull())
-			//			throw gcnew XbimGeometryFactoryException(String::Format("Composite curve is invalid, curve segment #{0} is null", segment->EntityLabel));
-			//		segments.Append(boundedCurve);
-			//	}
-			//	Handle(Geom_BSplineCurve) bSpline = Ptr()->BuildCompositeCurve(segments, ModelService->MinimumGap); //use minimum gap for tolerance to avoid issues with cirves and line tolerance errors
-			//	if (bSpline.IsNull())
-			//		throw gcnew XbimGeometryFactoryException(String::Format("Composite curve #{0} could not be built", ifcCompositeCurve->EntityLabel));
-			//	else
-			//		return bSpline;
-			//}
-			//void WireFactory::GetCurves(IIfcPolyline^ ifcPolyline, TColGeom_SequenceOfCurve& curves)
-			//{
-			//	//validate
-			//	int pointCount = ifcPolyline->Points->Count;
-			//	if (pointCount < 2)
-			//	{
-			//		LoggerService->LogWarning("IfcPolyline has less than 2 points. It has been skipped");
-			//		return;
-			//	}
-			//	if (pointCount == 2) //just build a line
-			//	{
-			//		gp_Pnt start = GPFactory->BuildPoint(ifcPolyline->Points[0]);
-			//		gp_Pnt end = GPFactory->BuildPoint(ifcPolyline->Points[1]);
-			//		if (start.IsEqual(end, ModelService->Precision))
-			//		{
-			//			LoggerService->LogWarning(String::Format("IfcPolyline has only 2 identical points( #{0} and #{1}. It has been skippedt", ifcPolyline->Points[0]->EntityLabel, ifcPolyline->Points[1]->EntityLabel));
-			//			return;
-			//		}
-			//		Handle(Geom_TrimmedCurve) lineSeg = _curveFactory->Ptr()->BuildBoundedLine3d(start, end);
-			//		if (lineSeg.IsNull())
-			//			throw gcnew XbimGeometryFactoryException("Invalid IfcPolyline definition");
-			//		curves.Append(lineSeg);
-			//		return;
-			//	}
-			//	else
-			//	{
-			//		TColgp_Array1OfPnt points(1, pointCount);
-			//		int i = 1;
-			//		for each (IIfcCartesianPoint ^ ifcPoint in ifcPolyline->Points)
-			//		{
-			//			gp_Pnt pnt = GPFactory->BuildPoint(ifcPoint);
-			//			points.SetValue(i, pnt);
-			//			i++;
-			//		}
-
-			//		Ptr()->GetCurves(points, curves, ModelService->Precision);
-			//		if (polyline.IsNull())
-			//			throw gcnew XbimGeometryFactoryException("Failed to build IfcPolyline");
-			//		return polyline;
-			//	}
-			//}
-			//void WireFactory::GetCurves(IIfcCompositeCurve^ compCurve, TColGeom_SequenceOfCurve& curves)
-			//{
-
-			//}
-			//void WireFactory::GetCurves(IIfcCompositeCurveOnSurface^ compCurve, TColGeom_SequenceOfCurve& curves)
-			//{
-			//	throw gcnew NotImplementedException();
-			//}
-			//void WireFactory::GetCurves(IIfcIndexedPolyCurve^ compCurve, TColGeom_SequenceOfCurve& curves)
-			//{
-			//	throw gcnew NotImplementedException();
-			//}
-			//void WireFactory::GetCurves(IIfcCurve^ curve, TColGeom_SequenceOfCurve& curves)
-			//{
-			//	XCurveType curveType;
-			//	if (!Enum::TryParse<XCurveType>(curve->ExpressType->ExpressName, curveType))
-			//		throw gcnew XbimGeometryFactoryException("Unsupported curve type: " + curve->ExpressType->ExpressName);
-			//	switch (curveType)
-			//	{
-			//	case XCurveType::IfcCompositeCurve:
-			//		return GetCurves(static_cast<IIfcCompositeCurve^>(curve), curves);
-			//	case XCurveType::IfcCompositeCurveOnSurface:
-			//		return GetCurves(static_cast<IIfcCompositeCurveOnSurface^>(curve), curves);
-			//	case XCurveType::IfcIndexedPolyCurve:
-			//		return GetCurves(static_cast<IIfcIndexedPolyCurve^>(curve), curves);
-			//	case XCurveType::IfcPolyline:
-			//		return GetCurves(static_cast<IIfcPolyline^>(curve), curves);
-			//	default:
-			//		curves.Append(_curveFactory->BuildGeom3d(curve, curveType)); //just build the curve it is a single curve
-			//		break;
-			//	}
-			//}
-
+			TopoDS_Wire WireFactory::BuildProfileDef(IIfcRectangleProfileDef^ rectProfile)
+			{
+				if (rectProfile->XDim <= 0 || rectProfile->YDim <= 0)
+					throw gcnew XbimGeometryFactoryException("Rectangle profile has an invalid dimension <= 0");
+				TopoDS_Wire wire = Ptr()->BuildRectangleProfileDef(rectProfile->XDim, rectProfile->YDim);
+				if (wire.IsNull() || wire.NbChildren() == 0)
+					throw gcnew XbimGeometryFactoryException("Failure to build Rectangle Profile Def");
+				//apply the position transformation
+				if (rectProfile->Position != nullptr)
+				{
+					wire.Move(GPFactory->ToLocation(rectProfile->Position));
+				}
+				return wire;
+			}
 
 			TopoDS_Wire WireFactory::MakeWire(Handle(Geom_Curve) curve)
 			{

@@ -12,6 +12,7 @@
 #include <BRepBuilderAPI_MakeFace.hxx>
 #include <BRepBuilderAPI_MakeWire.hxx>
 #include <BRepBuilderAPI_MakeEdge.hxx>
+#include <BRepPrimAPI_MakePrism.hxx>
 #include <TopoDS.hxx>
 #include <TopExp_Explorer.hxx>
 
@@ -89,7 +90,7 @@ TopoDS_Solid NSolidFactory::BuildSphere(gp_Ax2 ax2, double radius)
 TopoDS_Solid NSolidFactory::BuildSweptDiskSolid(const TopoDS_Wire& directrixWire, double radius, double innerRadius, BRepBuilderAPI_TransitionMode transitionMode)
 {
 	//the standard say
-	
+
 	//If the transitions between consecutive segments of the Directrix are not tangent continuous, the resulting solid is created by a miter at half angle between the two segments.
 	//this will be the case for a polyline as each segment is not tangent continuous
 	//composite urves will be tangent continuous
@@ -114,7 +115,7 @@ TopoDS_Solid NSolidFactory::BuildSweptDiskSolid(const TopoDS_Wire& directrixWire
 		BRepOffsetAPI_MakePipeShell oSweepMaker(directrixWire);
 		oSweepMaker.SetTransitionMode(transitionMode);
 		oSweepMaker.Add(outerWire);
-	
+
 		oSweepMaker.Build();
 		if (oSweepMaker.IsDone())
 		{
@@ -146,7 +147,7 @@ TopoDS_Solid NSolidFactory::BuildSweptDiskSolid(const TopoDS_Wire& directrixWire
 					//cap the faces
 					TopoDS_Face startFace = BRepLib_MakeFace(TopoDS::Wire(oSweepMaker.FirstShape().Reversed()), Standard_True);
 					builder.Add(startFace, iSweepMaker.FirstShape().Reversed());
-					TopoDS_Face endFace = BRepLib_MakeFace (TopoDS::Wire(oSweepMaker.LastShape().Reversed()), Standard_True);
+					TopoDS_Face endFace = BRepLib_MakeFace(TopoDS::Wire(oSweepMaker.LastShape().Reversed()), Standard_True);
 					builder.Add(endFace, iSweepMaker.LastShape().Reversed());
 					builder.Add(shell, startFace);
 					builder.Add(shell, endFace.Reversed());
@@ -174,6 +175,23 @@ TopoDS_Solid NSolidFactory::BuildSweptDiskSolid(const TopoDS_Wire& directrixWire
 		pLoggingService->LogError(e.GetMessageString());
 	}
 	pLoggingService->LogError("Could not build SweptDiskSolid");
+	return _emptySolid;
+}
+
+TopoDS_Solid NSolidFactory::BuildExtrudedAreaSolid(const TopoDS_Face& face, gp_Dir extrudeDirection, double depth)
+{
+	try
+	{
+		gp_Vec extrusionVec(extrudeDirection);
+		extrusionVec.Multiply(depth);
+		BRepPrimAPI_MakePrism prismMaker(face, extrusionVec);
+		return TopoDS::Solid(prismMaker.Shape());
+	}
+	catch (Standard_Failure e)
+	{
+		pLoggingService->LogError(e.GetMessageString());
+	}
+	pLoggingService->LogError("Could not build ExtrudedAreaSolid");
 	return _emptySolid;
 }
 

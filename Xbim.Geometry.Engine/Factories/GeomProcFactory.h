@@ -10,6 +10,8 @@
 #include "../Exceptions/XbimGeometryFactoryException.h"
 #include <TColgp_SequenceOfPnt2d.hxx>
 #include <TColgp_Array1OfPnt.hxx>
+#include <TopLoc_Location.hxx>
+
 using namespace Xbim::Ifc4::Interfaces;
 using namespace Xbim::Geometry::Exceptions;
 using namespace Xbim::Geometry::Abstractions;
@@ -59,6 +61,7 @@ namespace Xbim
 
 				void GetPolylinePoints(IIfcPolyline^ ifcPolyline, TColgp_Array1OfPnt& points);
 
+				TopLoc_Location ToLocation(IIfcAxis2Placement2D^ axis2D);
 				
 			};
 		}
