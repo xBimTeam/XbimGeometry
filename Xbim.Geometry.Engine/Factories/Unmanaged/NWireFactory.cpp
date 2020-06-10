@@ -32,6 +32,7 @@
 #include <gp_Circ.hxx>
 #include <GCE2d_MakeCircle.hxx>
 #include <gp_Circ2d.hxx>
+#include <GC_MakeCircle.hxx>
 
 TopoDS_Wire NWireFactory::BuildPolyline2d(
 	const NCollection_Vector<KeyedPnt2d>& pointSeq,
@@ -513,20 +514,16 @@ TopoDS_Wire NWireFactory::BuildRectangleProfileDef(double xDim, double yDim)
 	return _emptyWire;
 }
 
-TopoDS_Wire NWireFactory::BuildCircleProfileDef(double radius, const gp_Ax2d& position)
+TopoDS_Wire NWireFactory::BuildCircleProfileDef(double radius, const gp_Ax22d& position)
 {
 	try
 	{
 		
-		gp_Circ2d gc(position, radius);
-		Handle(Geom2d_Circle) hCirc = GCE2d_MakeCircle(gc);
-		hCirc->Reverse();
-		TopoDS_Edge edge = BRepBuilderAPI_MakeEdge2d(hCirc);
-		BRep_Builder b;
-		TopoDS_Wire wire;
-		b.MakeWire(wire);
-		b.Add(wire, edge);
-		return wire;
+		gp_Ax2 ax2(gp_Pnt(position.Location().X(), position.Location().Y(),0),gp::DZ(), gp_Dir(position.XDirection().X(), position.XDirection().Y(),0));
+		Handle(Geom_Circle) hCirc = GC_MakeCircle(ax2,radius);
+		
+		TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(hCirc);
+		return BRepBuilderAPI_MakeWire(edge);		
 	}
 	catch (Standard_Failure e)
 	{

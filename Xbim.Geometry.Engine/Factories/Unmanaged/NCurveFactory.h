@@ -43,7 +43,7 @@ public:
 	Handle(Geom_LineWithMagnitude) BuildLine3d(gp_Pnt pnt, gp_Dir dir, double magnitude);
 
 	Handle(Geom_Circle) BuildCircle3d(gp_Ax2 axis, double radius);
-	Handle(Geom2d_Circle) BuildCircle2d(gp_Ax2d axis, double radius);
+	Handle(Geom2d_Circle) BuildCircle2d(gp_Ax22d axis, double radius);
 
 	Handle(Geom_EllipseWithSemiAxes) BuildEllipse3d(gp_Ax2 axis, double major, double minor);
 	Handle(Geom2d_EllipseWithSemiAxes) BuildEllipse2d(gp_Ax22d axis, double major, double minor);

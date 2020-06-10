@@ -330,7 +330,7 @@ namespace Xbim
 				if (2 != (int)ifcCircle->Dim) throw gcnew XbimGeometryFactoryException("Cannot build a 2D curve from a 3D curve");
 				IIfcAxis2Placement2D^ axis2d = dynamic_cast<IIfcAxis2Placement2D^>(ifcCircle->Position);
 				if (axis2d == nullptr) throw gcnew XbimGeometryFactoryException("Cannot build a 2D curve with 3D placement");
-				gp_Ax2d pos = GpFactory->BuildAxis2Placement2d(axis2d);
+				gp_Ax22d pos = GpFactory->BuildAxis2Placement2d(axis2d);
 				return Ptr()->BuildCircle2d(pos, ifcCircle->Radius);
 			}
 

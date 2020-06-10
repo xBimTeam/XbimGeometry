@@ -5,6 +5,7 @@
 #include <NCollection_Vector.hxx>
 
 #include <gp_XYZ.hxx>
+#include <gp_Ax22d.hxx>
 #include "../../BRep/OccExtensions/KeyedPnt2d.h"
 #include <TopTools_DataMapOfIntegerShape.hxx>
 #include "../../BRep/OccExtensions/KeyedPnt.h"
@@ -45,6 +46,6 @@ public:
 
 	void AdjustVertexTolerance(TopoDS_Vertex& vertexToJoinTo, gp_Pnt pointToJoinTo, gp_Pnt pointToJoin, double gap);
 	TopoDS_Wire BuildRectangleProfileDef(double xDim, double yDim);
-	TopoDS_Wire BuildCircleProfileDef(double radius, const gp_Ax2d& position);
+	TopoDS_Wire BuildCircleProfileDef(double radius, const gp_Ax22d& position);
 };
 

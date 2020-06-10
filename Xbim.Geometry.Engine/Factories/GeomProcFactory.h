@@ -6,7 +6,7 @@
 #include <gp_Pnt2d.hxx>
 #include <gp_Dir.hxx>
 #include <gp_Dir2d.hxx>
-
+#include <gp_Ax22d.hxx>
 #include "../Exceptions/XbimGeometryFactoryException.h"
 #include <TColgp_SequenceOfPnt2d.hxx>
 #include <TColgp_Array1OfPnt.hxx>
@@ -57,7 +57,7 @@ namespace Xbim
 				gp_Vec2d BuildVector2d(IIfcVector^ ifcVec);
 
 				gp_Ax2 BuildAxis2Placement(IIfcAxis2Placement3D^ axis2);
-				gp_Ax2d BuildAxis2Placement2d(IIfcAxis2Placement2D^ axis);
+				gp_Ax22d BuildAxis2Placement2d(IIfcAxis2Placement2D^ axis);
 
 				void GetPolylinePoints(IIfcPolyline^ ifcPolyline, TColgp_Array1OfPnt& points);
 

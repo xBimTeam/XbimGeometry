@@ -36,7 +36,7 @@ Handle(Geom_Circle) NCurveFactory::BuildCircle3d(gp_Ax2 axis, double radius)
 	}
 }
 
-Handle(Geom2d_Circle) NCurveFactory::BuildCircle2d(gp_Ax2d axis, double radius)
+Handle(Geom2d_Circle) NCurveFactory::BuildCircle2d(gp_Ax22d axis, double radius)
 {
 	try
 	{

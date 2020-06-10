@@ -84,12 +84,12 @@ namespace Xbim
 				);
 			}
 
-			gp_Ax2d GeomProcFactory::BuildAxis2Placement2d(IIfcAxis2Placement2D^ axis2d)
+			gp_Ax22d GeomProcFactory::BuildAxis2Placement2d(IIfcAxis2Placement2D^ axis2d)
 			{
 				if (axis2d->RefDirection == nullptr)
-					return gp_Ax2d(BuildPoint2d(axis2d->Location), gp::DX2d());
+					return gp_Ax22d(BuildPoint2d(axis2d->Location), gp::DX2d());
 				else
-					return gp_Ax2d(
+					return gp_Ax22d(
 						BuildPoint2d(axis2d->Location),
 						BuildDirection2d(axis2d->RefDirection)
 					);

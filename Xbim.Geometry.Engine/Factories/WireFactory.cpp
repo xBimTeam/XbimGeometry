@@ -423,7 +423,7 @@ namespace Xbim
 					throw gcnew XbimGeometryFactoryException("Directrix is an empty curve");
 				return wire;
 			}
-
+			
 			TopoDS_Wire WireFactory::BuildProfile(IIfcProfileDef^ profileDef)
 			{
 				XProfileDefType profileDefType;
@@ -497,7 +497,7 @@ namespace Xbim
 			{
 				if (circleProfile->Radius <= 0 )
 					throw gcnew XbimGeometryFactoryException("Circle profile definition has an invalid dimension radius <= 0");
-				gp_Ax2d position = GPFactory->BuildAxis2Placement2d(circleProfile->Position);
+				gp_Ax22d position = GPFactory->BuildAxis2Placement2d(circleProfile->Position);
 				
 				TopoDS_Wire wire = Ptr()->BuildCircleProfileDef(circleProfile->Radius, position);
 				if (wire.IsNull() || wire.NbChildren() == 0)
