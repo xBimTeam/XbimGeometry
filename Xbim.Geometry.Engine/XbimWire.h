@@ -8,6 +8,7 @@
 #include <vector>
 #include <NCollection_Vector.hxx>
 #include "XbimConstraints.h"
+#include <BRepBuilderAPI_MakeWire.hxx>
 
 using namespace System;
 using namespace System::Collections::Generic;
@@ -32,6 +33,12 @@ namespace Xbim
 				void set(TopoDS_Wire* val)sealed { ptrContainer = IntPtr(val); }
 			}
 			void InstanceCleanup();
+			void ModifyWireAddEdge(TopoDS_Wire& resultWire,
+				const TopoDS_Edge& EE,
+				const TopoDS_Vertex& edgeVertexToJoin, gp_Pnt edgePointToJoin, 
+				const TopoDS_Vertex& nextEdgeVertex, 
+				const TopoDS_Vertex& wireVertexToJoin, gp_Pnt wirePointToJoin, 
+				double distance);
 #pragma region initialisation functions
 
 			void Init(double precision);
