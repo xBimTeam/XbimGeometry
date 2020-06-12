@@ -40,11 +40,11 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 Assert.IsTrue(er.Entity != null, "No IIfcAdvancedBrep found");
                 var solid = geomEngine.CreateSolid(er.Entity, logger);
-                 Assert.IsTrue(solid.Faces.Count == 14, "This solid should have 14 faces");
+                Assert.IsTrue(solid.Faces.Count == 14, "This solid should have 14 faces");
             }
 
         }
-        
+
         [TestMethod]
         public void Incorrectly_defined_edge_curve()
         {
@@ -55,7 +55,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var solids = geomEngine.CreateSolidSet(brep, logger);
                 Assert.IsTrue(solids.Count == 1, "This set should have 2 solids");
 
-               Assert.IsTrue(solids.First().Faces.Count == 62, "This solid should have 62 faces");
+                Assert.IsTrue(solids.First().Faces.Count == 62, "This solid should have 62 faces");
             }
 
         }
@@ -63,7 +63,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void Incorrectly_defined_edge_curve_with_identical_points()
         {
-            
+
             using (var model = MemoryModel.OpenRead(@"TestFiles\incorrectly_defined_edge_curve_with_identical_points.ifc"))
             {
                 //this model needs workarounds to be applied
@@ -105,10 +105,33 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.IsNotNull(brep, "No IIfcAdvancedBrep found");
                 var solids = geomEngine.CreateSolidSet(brep, logger);
                 var shapeGeom = geomEngine.CreateShapeGeometry(solids,
-                    model.ModelFactors.Precision, model.ModelFactors.DeflectionTolerance, 
+                    model.ModelFactors.Precision, model.ModelFactors.DeflectionTolerance,
                     model.ModelFactors.DeflectionAngle, XbimGeometryType.PolyhedronBinary, logger);
                 Assert.IsTrue(solids.Count == 2, "This set should have 2 solids");
                 Assert.IsTrue(solids.First().Faces.Count == 37, "Solid 0 should have 37 faces");
+            }
+
+        }
+        //This is a fauly Brep conversion case that needs t be firther examined
+        [TestMethod]
+        public void Advanced_brep_1()
+        {
+
+            using (var model = MemoryModel.OpenRead(@"TestFiles\advanced_brep_1.ifc"))
+            {
+                //this model needs workarounds to be applied
+                var brep = model.Instances.OfType<IIfcAdvancedBrep>().FirstOrDefault();
+                Assert.IsNotNull(brep, "No IIfcAdvancedBrep found");
+
+               var solid = geomEngine.CreateSolidSet(brep, logger);
+                //var shapeGeom = geomEngine.CreateShapeGeometry(solids,
+                //    model.ModelFactors.Precision, model.ModelFactors.DeflectionTolerance,
+                //    model.ModelFactors.DeflectionAngle, XbimGeometryType.PolyhedronBinary, logger);
+                //Assert.IsTrue(solids.IsValid);
+
+               // Assert.IsTrue(solids.Count == 1);
+                //Assert.IsTrue(solids.First.Volume >  0);
+               
             }
 
         }

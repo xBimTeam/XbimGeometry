@@ -568,7 +568,7 @@ namespace Xbim
 
 		void XbimCompound::Init(IIfcClosedShell^ closedShell, ILogger^ logger)
 		{
-			
+
 			BRep_Builder b;
 			Init((IIfcConnectedFaceSet^)closedShell, logger);
 			if (IsValid) //make it a closed solid if we can
@@ -577,16 +577,16 @@ namespace Xbim
 				BRepBuilderAPI_MakeSolid solidmaker;
 				//we have some shells that are a bunch of solids and we have some that are a single solid but a bunch of shells
 
-				
+
 				TopTools_IndexedMapOfShape solidMap;
-				
+
 				TopExp::MapShapes(*pCompound, TopAbs_SOLID, solidMap);
 
-				TopExp_Explorer expShell(*pCompound,TopAbs_SHELL,TopAbs_SOLID);
-				for(; expShell.More(); expShell.Next())
+				TopExp_Explorer expShell(*pCompound, TopAbs_SHELL, TopAbs_SOLID);
+				for (; expShell.More(); expShell.Next())
 				{
-					TopoDS_Shell shell = TopoDS::Shell(expShell.Current());		
-					
+					TopoDS_Shell shell = TopoDS::Shell(expShell.Current());
+
 					ShapeAnalysis_Shell sa;
 					sa.LoadShells(shell);
 					if (sa.HasBadEdges())
@@ -618,17 +618,17 @@ namespace Xbim
 							}
 							if (failed)
 							{
-								
-								BRepTools::Write(s,"c:/tmp/1");
+
+								BRepTools::Write(s, "c:/tmp/1");
 								BRepTools::Write(shell, "c:/tmp/2");
 							}
-							
+
 							continue;
 						}
 					}
 					solidmaker.Add(shell); //stick it into the one which will make a solid from a bunch of shells
 					hasMultiShellSolid = true;
-					
+
 				}
 				if (hasMultiShellSolid && solidmaker.IsDone())
 				{
@@ -655,13 +655,13 @@ namespace Xbim
 							Handle(XbimProgressIndicator) pi = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);
 							if (fixer.Perform(pi))
 							{
-								solidMap.Add(fixer.Solid());								
+								solidMap.Add(fixer.Solid());
 							}
 							else
 								XbimGeometryCreator::LogWarning(logger, closedShell, "Failed to create a valid solid from an IfcClosedShell");
 						}
 						else
-						{							
+						{
 							solidMap.Add(solid);
 						}
 
@@ -669,10 +669,10 @@ namespace Xbim
 				}
 				if (solidMap.Size() > 0)
 				{
-					
+
 					pCompound->Nullify();
 					b.MakeCompound(*pCompound);
-					
+
 					for (int isolid = 1; isolid <= solidMap.Extent(); ++isolid)
 					{
 						TopoDS_Shape solid = solidMap.FindKey(isolid);
@@ -683,7 +683,7 @@ namespace Xbim
 							BRepGProp::VolumeProperties(solid, gProps);
 							double volume = gProps.Mass();
 							if (volume < 0) solid.Reverse();*/
-							b.Add(*pCompound, solid);
+						b.Add(*pCompound, solid);
 						/*}
 						catch (...)
 						{
@@ -773,7 +773,7 @@ namespace Xbim
 				IModel^ model = aFace->Model;
 				ShapeFix_ShapeTolerance FTol;
 				_sewingTolerance = model->ModelFactors->Precision;
-				double maxTolerance = Math::Max(model->ModelFactors->OneMilliMetre * 2, model->ModelFactors->Precision * 100);
+				double maxTolerance = Math::Max(model->ModelFactors->OneMilliMetre*1.5, model->ModelFactors->Precision * 100);
 				//collect all the geometry components
 				Dictionary<int, XbimEdge^>^ orientedEdges = gcnew Dictionary<int, XbimEdge^>();
 				Dictionary<int, XbimVertex^>^ vertices = gcnew Dictionary<int, XbimVertex^>();
@@ -785,8 +785,10 @@ namespace Xbim
 					List<XbimWire^>^ innerLoops = gcnew List<XbimWire^>();
 					for each (IIfcFaceBound ^ ifcBound in advancedFace->Bounds) //build all the loops
 					{
-
-						BRepBuilderAPI_MakeWire wireMaker;
+						XbimWire^ w ;
+//						BRepBuilderAPI_MakeWire wireMaker;
+						TopoDS_Wire faceLoop;
+						builder.MakeWire(faceLoop);
 						bool isOuter = dynamic_cast<IIfcFaceOuterBound^>(ifcBound) != nullptr;
 						IIfcEdgeLoop^ edgeLoop = dynamic_cast<IIfcEdgeLoop^>(ifcBound->Bound);
 
@@ -840,7 +842,7 @@ namespace Xbim
 										//sometimes these are invalif edges and the code throws an xbimgeometry exception
 										xBimOrientedEdge = gcnew XbimEdge(xBimOrientedEdge, edgeStart, edgeEnd, maxTolerance); //adjust start and end	
 									}
-									catch (Exception ^ edgeException)
+									catch (Exception^ edgeException)
 									{
 										XbimGeometryCreator::LogWarning(logger, edgeCurve, "Incorrectly defined edge: {0}, it has been ignored", edgeException->Message);
 										//nothing else can be done
@@ -857,68 +859,80 @@ namespace Xbim
 								{
 									gp_Pnt start(xBimOrientedEdge->EdgeStartPoint.X, xBimOrientedEdge->EdgeStartPoint.Y, xBimOrientedEdge->EdgeStartPoint.Z);
 									gp_Pnt end(xBimOrientedEdge->EdgeEndPoint.X, xBimOrientedEdge->EdgeEndPoint.Y, xBimOrientedEdge->EdgeEndPoint.Z);
-									double distFirstToLast = start.Distance(orientedEdgeLast);
-									double distLastToLast = end.Distance(orientedEdgeLast);
-									if (distFirstToLast <= maxTolerance)
+									if (start.Distance(end) > _sewingTolerance) //its not a closed segment
 									{
-										FTol.LimitTolerance((XbimVertex^)xBimOrientedEdge->EdgeStart, distFirstToLast + _sewingTolerance);
-									}
-									else if (distLastToLast <= maxTolerance)
-									{
-										FTol.LimitTolerance((XbimVertex^)xBimOrientedEdge->EdgeEnd, distLastToLast + _sewingTolerance);
-									}
-									else // it will not join
-									{
-										double distLastToFirst = end.Distance(orientedEdgeFirst);
-										double distFirstToFirst = start.Distance(orientedEdgeFirst);
-										if (distFirstToFirst <= maxTolerance || distLastToFirst <= maxTolerance)
+										double distFirstToLast = start.Distance(orientedEdgeLast);
+										double distLastToLast = end.Distance(orientedEdgeLast);
+										if (distFirstToLast <= maxTolerance)
 										{
-											xBimOrientedEdge->Reverse(); //just reverse it and add it, it was topologically incorrect
+											FTol.LimitTolerance((XbimVertex^)xBimOrientedEdge->EdgeStart, distFirstToLast + _sewingTolerance);
 										}
-										else
+										else if (distLastToLast <= maxTolerance)
 										{
-											XbimGeometryCreator::LogWarning(logger, edgeLoop, "Incorrectly defined EdgeLoop #{0}, it has been ignored", edgeLoop->EntityLabel);
-											//nothing else to do
-											break;
+											FTol.LimitTolerance((XbimVertex^)xBimOrientedEdge->EdgeEnd, distLastToLast + _sewingTolerance);
 										}
+										else // it will not join
+										{
+											double distLastToFirst = end.Distance(orientedEdgeFirst);
+											double distFirstToFirst = start.Distance(orientedEdgeFirst);
+											if (distFirstToFirst <= maxTolerance || distLastToFirst <= maxTolerance)
+											{
+												xBimOrientedEdge->Reverse(); //just reverse it and add it, it was topologically incorrect
+											}
+											else
+											{
+												XbimGeometryCreator::LogWarning(logger, edgeLoop, "Incorrectly defined EdgeLoop #{0}, it has been ignored", edgeLoop->EntityLabel);
+												//nothing else to do
+												break;
+											}
+										}
+									}
+									else
+									{
+										int r = 5;
 									}
 								}
 								firstSeg = false;
-								bool ok = false;
+								bool ok = true;
+								char errorMsg[512];
+								
 								try
 								{
-									wireMaker.Add(xBimOrientedEdge);
-									ok = wireMaker.IsDone();
-									if (ok)
-									{
-										BRepAdaptor_CompCurve cc(wireMaker.Wire(), Standard_True);
-										orientedEdgeLast = cc.Value(cc.LastParameter());
-										orientedEdgeFirst = cc.Value(cc.FirstParameter());
-									}
+									TopoDS_Edge edge = xBimOrientedEdge;
+									builder.AddWireEdge(faceLoop, edge, true);
+									//wireMaker.Add(xBimOrientedEdge);
+									/*if (!wireMaker.IsDone())
+										throw Standard_Failure("Failed to join edge to loop");*/
+									BRepAdaptor_CompCurve cc(faceLoop, Standard_True);
+									orientedEdgeLast = cc.Value(cc.LastParameter());
+									orientedEdgeFirst = cc.Value(cc.FirstParameter());
+
 								}
-								catch (const std::exception&)
+								catch (Standard_Failure sf)
 								{
 									ok = false;
+									strncpy(errorMsg, sf.GetMessageString(),512);
 								}
+								 w = gcnew XbimWire(faceLoop);
 								if (!ok)
 								{
-									XbimGeometryCreator::LogWarning(logger, edgeLoop, "Incorrectly defined EdgeLoop #{0}, it has been ignored", edgeLoop->EntityLabel);
+									XbimGeometryCreator::LogWarning(logger, edgeLoop, "Incorrectly defined EdgeLoop #{0}, error {1}. It has been ignored", edgeLoop->EntityLabel, gcnew String(errorMsg));
 									//nothing else to do
 									break;
 								}
 
 							}
 						} // we have a wire		
-						if (!wireMaker.IsDone())
-						{
-							XbimGeometryCreator::LogWarning(logger, advancedFace, "Incorrectly defined Face #{0}, it has been ignored", advancedFace->EntityLabel);
-							//nothing else to do
-							continue;
-						}
-						TopoDS_Wire loopWire = wireMaker.Wire();
-						loopWire.Closed(Standard_True);
-						if (!ifcBound->Orientation) loopWire.Reverse();
-						XbimWire^ xbimLoop = gcnew XbimWire(loopWire);
+						//if (!wireMaker.IsDone())
+						//{
+						//	XbimGeometryCreator::LogWarning(logger, advancedFace, "Incorrectly defined Face #{0}, it has been ignored", advancedFace->EntityLabel);
+						//	//nothing else to do
+						//	continue;
+						//}
+					//	TopoDS_Wire loopWire = wireMaker.Wire();
+						faceLoop.Closed(Standard_True);
+						if (!ifcBound->Orientation) faceLoop.Reverse();
+						XbimWire^ xbimLoop = gcnew XbimWire(faceLoop);
 						if (isOuter && outerLoop == nullptr) //only choose one outer loop
 							outerLoop = xbimLoop;
 						else
@@ -981,7 +995,7 @@ namespace Xbim
 					return gcnew XbimShell(shell);*/
 
 			}
-			catch (const std::exception & exc)
+			catch (const std::exception& exc)
 			{
 				String^ err = gcnew String(exc.what());
 				throw gcnew Exception("General failure in advanced face building: " + err);
@@ -1000,7 +1014,7 @@ namespace Xbim
 			List<XbimVertex^>^ vertices = gcnew List<XbimVertex^>(Enumerable::Count(faceSet->Coordinates->CoordList));
 			Dictionary<long long, XbimEdge^>^ edgeMap = gcnew Dictionary<long long, XbimEdge^>();
 
-			for each (IEnumerable<Ifc4::MeasureResource::IfcLengthMeasure>^ cp in faceSet->Coordinates->CoordList)
+			for each (IEnumerable<Ifc4::MeasureResource::IfcLengthMeasure> ^ cp in faceSet->Coordinates->CoordList)
 			{
 				XbimTriplet<Ifc4::MeasureResource::IfcLengthMeasure> tpl = IEnumerableExtensions::AsTriplet<Ifc4::MeasureResource::IfcLengthMeasure>(cp);
 				XbimVertex^ v = gcnew XbimVertex(tpl.A, tpl.B, tpl.C, _sewingTolerance);
@@ -1009,7 +1023,7 @@ namespace Xbim
 
 
 			//make the triangles
-			for each (IEnumerable<Ifc4::MeasureResource::IfcPositiveInteger>^ indices in faceSet->CoordIndex)
+			for each (IEnumerable<Ifc4::MeasureResource::IfcPositiveInteger> ^ indices in faceSet->CoordIndex)
 			{
 				try
 				{
@@ -1131,7 +1145,7 @@ namespace Xbim
 					}
 				}
 
-				catch (const std::exception & exc)
+				catch (const std::exception& exc)
 				{
 					String^ err = gcnew String(exc.what());
 					XbimGeometryCreator::LogWarning(logger, faceSet, "Error build triangle in mesh. " + err);
@@ -1263,7 +1277,7 @@ namespace Xbim
 			for (int i = 1; i < wires->Count; i++) face->Add(wires[i]->Item1);
 			IXbimWire^ outerBound = face->OuterBound;
 			XbimVector3D faceNormal;// = outerBound->Normal;
-			for each (Tuple<XbimWire^, IIfcPolyLoop^, bool>^ wire in wires)
+			for each (Tuple<XbimWire^, IIfcPolyLoop^, bool> ^ wire in wires)
 			{
 				if (wire->Item1->Equals(outerBound))
 				{
@@ -1410,7 +1424,7 @@ namespace Xbim
 				if (solidToCheck != nullptr)
 				{
 					XbimRect3D bbToCheck = solidToCheck->BoundingBox;
-					for each (KeyValuePair<XbimSolid^, HashSet<XbimSolid^>^>^ cluster in clusters)
+					for each (KeyValuePair<XbimSolid^, HashSet<XbimSolid^>^> ^ cluster in clusters)
 					{
 						if (solidToCheck != cluster->Key && bbToCheck.Intersects(cluster->Key->BoundingBox))
 							cluster->Value->Add(solidToCheck);
@@ -1419,7 +1433,7 @@ namespace Xbim
 			}
 			List<XbimSolid^>^ toMergeReduced = gcnew List<XbimSolid^>();
 			Dictionary<XbimSolid^, HashSet<XbimSolid^>^>^ clustersSparse = gcnew Dictionary<XbimSolid^, HashSet<XbimSolid^>^>();
-			for each (KeyValuePair<XbimSolid^, HashSet<XbimSolid^>^>^ cluster in clusters)
+			for each (KeyValuePair<XbimSolid^, HashSet<XbimSolid^>^> ^ cluster in clusters)
 			{
 				if (cluster->Value->Count > 0)
 					clustersSparse->Add(cluster->Key, cluster->Value);
@@ -1456,7 +1470,7 @@ namespace Xbim
 							else
 								XbimGeometryCreator::LogWarning(logger, toConnect, "Boolean Union operation failed.");
 						}
-						catch (const std::exception & exc)
+						catch (const std::exception& exc)
 						{
 							String^ err = gcnew String(exc.what());
 							XbimGeometryCreator::LogWarning(logger, toConnect, "Boolean Union operation failed. " + err);
@@ -1526,7 +1540,7 @@ namespace Xbim
 		{
 			if (connected->Add(clusterAround))
 			{
-				for each (KeyValuePair<XbimSolid^, HashSet<XbimSolid^>^>^ polysets in clusters)
+				for each (KeyValuePair<XbimSolid^, HashSet<XbimSolid^>^> ^ polysets in clusters)
 				{
 					if (!connected->Contains(polysets->Key) && !(polysets->Key == clusterAround) && polysets->Value->Contains(clusterAround))  //don't do the same one twice
 					{
@@ -1563,7 +1577,7 @@ namespace Xbim
 						return result;
 				}
 			}
-			catch (const std::exception & exc)
+			catch (const std::exception& exc)
 			{
 				err = gcnew String(exc.what());
 			}
@@ -1586,7 +1600,7 @@ namespace Xbim
 				if (boolOp.HasErrors() == Standard_False)
 					return gcnew XbimCompound(TopoDS::Compound(boolOp.Shape()), true, tolerance);
 			}
-			catch (const std::exception & exc)
+			catch (const std::exception& exc)
 			{
 				err = gcnew String(exc.what());
 			}
@@ -1610,7 +1624,7 @@ namespace Xbim
 				if (boolOp.HasErrors() == Standard_False)
 					return gcnew XbimCompound(TopoDS::Compound(boolOp.Shape()), true, tolerance);
 			}
-			catch (const std::exception & exc)
+			catch (const std::exception& exc)
 			{
 				err = gcnew String(exc.what());
 			}
