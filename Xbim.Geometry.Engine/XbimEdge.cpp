@@ -54,7 +54,7 @@
 #include <ShapeFix_Edge.hxx>
 #include <Geom2d_BSplineCurve.hxx>
 #include <BRepBuilderAPI_MakeEdge2d.hxx>
-
+#include <GeomLib_Tool.hxx>
 using namespace Xbim::Common;
 using namespace System::Linq;
 namespace Xbim
@@ -173,16 +173,20 @@ namespace Xbim
 			}
 
 		}
-		XbimEdge::XbimEdge(XbimEdge^ edgeCurve, XbimVertex^ start, XbimVertex^ end, double maxTolerance)
+		XbimEdge::XbimEdge(XbimEdge^ edgeCurve, XbimVertex^ start, XbimVertex^ end, double /*maxTolerance*/)
 		{
-			double tolerance = Math::Min(start->Tolerance, end->Tolerance);
-			double currentTolerance = tolerance;
+			double tolerance =Math::Max(start->Tolerance, end->Tolerance);
+			double edgeTol = BRep_Tool::Tolerance(edgeCurve);
+			tolerance = Math::Max(tolerance, edgeTol);
+			//double currentTolerance = tolerance;
 			ShapeFix_ShapeTolerance FTol;
-			if (start->Equals(end))
+			gp_Pnt startPnt = BRep_Tool::Pnt(start);
+			gp_Pnt endPnt = BRep_Tool::Pnt(end);
+
+			if (startPnt.Distance(endPnt)< tolerance)
 			{
-				//must be a closed loop or nothing
-
-
+				//must be a closed loop, remove redundant point as we don't build 0 length edges
+				
 				pEdge = new TopoDS_Edge();
 				*pEdge = edgeCurve;
 			}
@@ -190,37 +194,41 @@ namespace Xbim
 			{
 				Standard_Real p1, p2;
 				Handle(Geom_Curve) curve = BRep_Tool::Curve(edgeCurve, p1, p2);
-				
-			TryMakeEdge:
-				BRepBuilderAPI_MakeEdge edgeMaker(curve, start, end);
-				BRepBuilderAPI_EdgeError edgeErr = edgeMaker.Error();
-				if (edgeErr != BRepBuilderAPI_EdgeDone)
-				{
-					currentTolerance *= 10;
-					if (currentTolerance <= maxTolerance)
-					{
-						FTol.LimitTolerance(start, currentTolerance);
-						FTol.LimitTolerance(end, currentTolerance);
-						goto TryMakeEdge;
-					}
-				}
-
-
-				if (edgeErr == BRepBuilderAPI_EdgeDone)
+				gp_Pnt curveStartPnt = curve->Value(p1);
+				gp_Pnt curveEndPnt = curve->Value(p2);
+				double trim1, trim2;
+				bool found1 = GeomLib_Tool::Parameter(curve, startPnt, tolerance, trim1);
+				bool found2 = GeomLib_Tool::Parameter(curve, endPnt, tolerance, trim2);
+				if (!found1) 
+					trim1 = p1;
+				if (!found2) 
+					trim2 = p2;
+				//most trims are just the same edge start and end points, esp in revit advanced bresp
+				if (Math::Abs(trim1 - p1) < Precision::Confusion() && Math::Abs(trim2 - p2) < Precision::Confusion()) //no trim required
 				{
 					pEdge = new TopoDS_Edge();
-					*pEdge = edgeMaker.Edge();
-				}
-				else if (edgeErr == BRepBuilderAPI_DifferentPointsOnClosedCurve)//this is normally start and end same as the single point of a closed edge
-				{
-					pEdge = new TopoDS_Edge();
-					*pEdge = edgeCurve;
+					*pEdge = edgeCurve;					
 				}
 				else
 				{
-					String^ errMsg = XbimEdge::GetBuildEdgeErrorMessage(edgeErr);
-					throw gcnew XbimException("WW013: Invalid edge found." + errMsg);
+					BRepBuilderAPI_MakeEdge edgeMaker(curve, trim1, trim2);
+					BRepBuilderAPI_EdgeError edgeErr = edgeMaker.Error();
 
+					if (edgeErr == BRepBuilderAPI_EdgeDone)
+					{
+						pEdge = new TopoDS_Edge();
+						*pEdge = edgeMaker.Edge();
+					}
+					else if (edgeErr == BRepBuilderAPI_DifferentPointsOnClosedCurve)//this is normally start and end same as the single point of a closed edge
+					{
+						pEdge = new TopoDS_Edge();
+						*pEdge = edgeCurve;
+					}
+					else
+					{
+						String^ errMsg = XbimEdge::GetBuildEdgeErrorMessage(edgeErr);
+						throw gcnew XbimException("WW013: Invalid edge found." + errMsg);
+					}
 				}
 			}
 			FTol.LimitTolerance(*pEdge, tolerance);
@@ -1077,6 +1085,14 @@ namespace Xbim
 		}
 
 		XbimEdge::XbimEdge(XbimCurve^ curve3D)
+		{
+
+			BRepBuilderAPI_MakeEdge edgeMaker(curve3D);
+			pEdge = new TopoDS_Edge();
+			*pEdge = edgeMaker.Edge();
+
+		}
+		XbimEdge::XbimEdge(Handle(Geom_Curve) curve3D)
 		{
 
 			BRepBuilderAPI_MakeEdge edgeMaker(curve3D);

@@ -23,6 +23,8 @@
 #include <ShapeFix_ShapeTolerance.hxx>
 #include <GeomConvert_CompCurveToBSplineCurve.hxx>
 #include <GCPnts_AbscissaPoint.hxx>
+#include <GC_MakeArcOfCircle.hxx>
+#include <gp_Circ.hxx>
 
 using namespace System;
 using namespace System::Linq;
@@ -541,6 +543,7 @@ namespace Xbim
 
 		void XbimCurve::Init(IIfcTrimmedCurve^ curve, ILogger^ logger)
 		{
+			int id = curve->EntityLabel;
 			Init(curve->BasisCurve, logger);
 			if (IsValid)
 			{
@@ -634,7 +637,23 @@ namespace Xbim
 				}
 				//now just go with
 				bool sameSense = curve->SenseAgreement;
-				*pCurve = new Geom_TrimmedCurve(*pCurve, sameSense ? u1 : u2, sameSense ? u2 : u1);
+				Handle(Geom_Circle) circle = Handle(Geom_Circle)::DownCast(*pCurve);
+				if (!circle.IsNull())
+				{
+					double radius = circle->Radius();
+					if (!sameSense)
+					{
+						double u = u1;
+						u1 = u2;
+						u2 = u;
+					}
+					GC_MakeArcOfCircle arcMaker(circle->Circ(), u1, u2, sameSense);
+					//if (!arcMaker.IsDone()) throw Standard_Failure("Could not build arc segment from circle");
+					*pCurve = arcMaker.Value();
+				}
+				else
+
+					*pCurve = new Geom_TrimmedCurve(*pCurve, u1, u2, sameSense, true);
 			}
 		}
 
@@ -781,10 +800,58 @@ namespace Xbim
 			(*pCurve)->D0((*pCurve)->LastParameter(), p);
 			return p;
 		}
+
+		bool XbimCurve::LocatePointOnCurve(const Handle(Geom_Curve)& C, const TopoDS_Vertex& V, double tolerance, double& p, double& distance)
+		{
+			Standard_Real Eps2 = tolerance * tolerance;
+
+			gp_Pnt P = BRep_Tool::Pnt(V);
+			GeomAdaptor_Curve GAC(C);
+
+			// Afin de faire les extremas, on verifie les distances en bout
+			Standard_Real D1, D2;
+			gp_Pnt P1, P2;
+			P1 = GAC.Value(GAC.FirstParameter());
+			P2 = GAC.Value(GAC.LastParameter());
+			D1 = P1.SquareDistance(P);
+			D2 = P2.SquareDistance(P);
+			if ((D1 < D2) && (D1 <= Eps2)) {
+				p = GAC.FirstParameter();
+				distance = sqrt(D1);
+				return Standard_True;
+			}
+			else if ((D2 < D1) && (D2 <= Eps2)) {
+				p = GAC.LastParameter();
+				distance = sqrt(D2);
+				return Standard_True;
+			}
+
+			Extrema_ExtPC extrema(P, GAC);
+			if (extrema.IsDone()) {
+				Standard_Integer i, index = 0, n = extrema.NbExt();
+				Standard_Real Dist2 = RealLast(), dist2min;
+
+				for (i = 1; i <= n; i++) {
+					dist2min = extrema.SquareDistance(i);
+					if (dist2min < Dist2) {
+						index = i;
+						Dist2 = dist2min;
+					}
+				}
+
+				if (index != 0) {
+					if (Dist2 <= Eps2) {
+						p = (extrema.Point(index)).Parameter();
+						distance = sqrt(Dist2);
+						return Standard_True;
+					}
+				}
+			}
+			return Standard_False;
+		}
 	}
 
 
 #pragma endregion
 }
-
 

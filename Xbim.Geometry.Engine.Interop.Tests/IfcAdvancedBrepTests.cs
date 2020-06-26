@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Xbim.Common.Geometry;
 using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Memory;
-
+using FluentAssertions;
 namespace Xbim.Geometry.Engine.Interop.Tests
 {
     [TestClass]
@@ -112,26 +112,45 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             }
 
         }
-        //This is a fauly Brep conversion case that needs t be firther examined
-        [TestMethod]
-        public void Advanced_brep_1()
+
+
+        [DataTestMethod]
+        //[DataRow("ShapeGeometry_5")]
+       // [DataRow("ShapeGeometry_6")]
+        [DataRow("ShapeGeometry_18")]
+        [DataRow("ShapeGeometry_20")]
+        public void Advanced_brep_shapes(string fileName)
+        {
+            using (var model = MemoryModel.OpenRead($@"C:\Users\Steve\Documents\testModel\{fileName}.ifc"))
+            {
+                foreach (var advBrep in model.Instances.OfType<IIfcAdvancedBrep>())
+                {
+                    var solids = geomEngine.CreateSolidSet(advBrep, logger);
+                    Assert.IsTrue(solids.Count ==1);
+                }
+            }
+        }
+
+
+        //This is a fauly Brep conversion case that needs t be firther examinedal
+        [DataTestMethod]
+        [DataRow("advanced_brep_1", false, DisplayName = "Self Intersection unorientable shape")]
+        [DataRow("advanced_brep_2",DisplayName ="Curved edges with varying orientation")]
+        [DataRow("advanced_brep_3", false, DisplayName = "Badly formed wire orders and missing faces and holes")]
+        public void Advanced_brep_tests(string brepFileName, bool isValidSolid=true, int solidCount=1)
         {
 
-            using (var model = MemoryModel.OpenRead(@"TestFiles\advanced_brep_1.ifc"))
+            using (var model = MemoryModel.OpenRead($@"TestFiles\{brepFileName}.ifc"))
             {
+                //bool wa = model.ModelFactors.ApplyWorkAround("#SurfaceOfLinearExtrusion");
                 //this model needs workarounds to be applied
                 var brep = model.Instances.OfType<IIfcAdvancedBrep>().FirstOrDefault();
-                Assert.IsNotNull(brep, "No IIfcAdvancedBrep found");
-
-               var solid = geomEngine.CreateSolidSet(brep, logger);
-                //var shapeGeom = geomEngine.CreateShapeGeometry(solids,
-                //    model.ModelFactors.Precision, model.ModelFactors.DeflectionTolerance,
-                //    model.ModelFactors.DeflectionAngle, XbimGeometryType.PolyhedronBinary, logger);
-                //Assert.IsTrue(solids.IsValid);
-
-               // Assert.IsTrue(solids.Count == 1);
-                //Assert.IsTrue(solids.First.Volume >  0);
-               
+                brep.Should().NotBeNull();
+                var solids = geomEngine.CreateSolidSet(brep, logger);                
+                solids.IsValid.Should().BeTrue();
+                solids.Should().HaveCount(solidCount);
+                solids.First.Volume.Should().BeGreaterThan(0);
+                
             }
 
         }

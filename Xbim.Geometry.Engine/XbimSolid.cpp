@@ -1998,9 +1998,8 @@ namespace Xbim
 		//returns true if the solid is a closed manifold typically with one shell, if there are more shells they are voids and should also be closed
 		bool XbimSolid::IsClosed::get()
 		{
-			for each (XbimShell ^ shell in Shells)
-				if (!shell->IsClosed) return false;
-			return true;
+			if (!IsValid) return false;
+			return pSolid->Closed();
 		}
 
 		bool XbimSolid::IsEmpty::get()
