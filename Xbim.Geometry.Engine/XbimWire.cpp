@@ -236,22 +236,31 @@ namespace Xbim
 				{
 
 					// todo: this code is not quite robust, it did not manage to close fairly simple polylines.
-					//
-					double oneMilli = profile->Model->ModelFactors->OneMilliMeter;
-					XbimFace^ face = gcnew XbimFace(loop, true, oneMilli, profile->OuterCurve->EntityLabel, logger);
-					ShapeFix_Wire wireFixer(loop, face, profile->Model->ModelFactors->Precision);
-					wireFixer.ClosedWireMode() = Standard_True;
-					wireFixer.FixGaps2dMode() = Standard_True;
-					wireFixer.FixGaps3dMode() = Standard_True;
-					wireFixer.ModifyGeometryMode() = Standard_True;
-					wireFixer.SetMinTolerance(profile->Model->ModelFactors->Precision);
-					wireFixer.SetPrecision(oneMilli);
-					wireFixer.SetMaxTolerance(oneMilli * 10);
-					Standard_Boolean closed = wireFixer.Perform();
-					if (closed)
-						*pWire = wireFixer.Wire();
-					else
-						*pWire = loop;
+					try
+					{
+
+
+						double oneMilli = profile->Model->ModelFactors->OneMilliMeter;
+						TopoDS_Face face = gcnew XbimFace(loop, true, oneMilli, profile->OuterCurve->EntityLabel, logger);
+						ShapeFix_Wire wireFixer(loop, face, profile->Model->ModelFactors->Precision);
+						wireFixer.ClosedWireMode() = Standard_True;
+						wireFixer.FixGaps2dMode() = Standard_True;
+						wireFixer.FixGaps3dMode() = Standard_True;
+						wireFixer.ModifyGeometryMode() = Standard_True;
+						wireFixer.SetMinTolerance(profile->Model->ModelFactors->Precision);
+						wireFixer.SetPrecision(oneMilli);
+						wireFixer.SetMaxTolerance(oneMilli * 10);
+						Standard_Boolean closed = wireFixer.Perform();
+						if (closed)
+							*pWire = wireFixer.Wire();
+						else
+							*pWire = loop;
+					}
+					catch (Standard_Failure sf)
+					{
+						String^ err = gcnew String(sf.GetMessageString());
+						XbimGeometryCreator::LogWarning(logger, profile, "Invalid bound. Wire discarded: {0}", err);
+					}
 				}
 				else
 					*pWire = loop;
@@ -1195,8 +1204,17 @@ namespace Xbim
 		{
 			if (!IsValid)
 				return XbimVector3D();
-			gp_Dir dir = NormalDir(*pWire);
-			return  XbimVector3D(dir.X(), dir.Y(), dir.Z());
+			try
+			{
+				gp_Dir dir = NormalDir(*pWire);
+				return  XbimVector3D(dir.X(), dir.Y(), dir.Z());
+			}
+			catch (Standard_Failure sf)
+			{
+				String^ err = gcnew String(sf.GetMessageString());
+				throw gcnew Exception("Invalid normal: " + err);
+			}
+
 		}
 
 		gp_Dir XbimWire::NormalDir(const TopoDS_Wire& wire)

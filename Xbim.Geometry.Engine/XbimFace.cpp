@@ -1225,31 +1225,38 @@ namespace Xbim
 					}
 					if (innerWire->IsClosed) //if the loop is not closed it is not a bound
 					{
-						XbimVector3D n = innerWire->Normal;
-						bool needInvert = n.DotProduct(tn) > 0;
-						if (needInvert) //inner wire should be reverse of outer wire
-							innerWire->Reverse();
-						double currentloopTolerance = tolerance;
-					TryBuildLoop:
-						faceMaker.Add(innerWire);
-						//check the face is ok
-						if (BRepCheck_Analyzer(faceMaker.Face(), Standard_True).IsValid() == Standard_False)
+						try //it is possible the inner loop is just a closed wire with zero area when a normal is calculated, this will throw an excpetion and the void is invalid
 						{
-							XbimGeometryCreator::LogWarning(logger, profile, "Invalid void. Inner bound ignored", curve->EntityLabel);
-							continue;
-						}
-						BRepBuilderAPI_FaceError loopErr = faceMaker.Error();
-						if (loopErr != BRepBuilderAPI_FaceDone)
-						{
-							currentloopTolerance *= 10; //try courser tolerance
-							if (currentloopTolerance <= toleranceMax)
+							XbimVector3D n = innerWire->Normal;
+							bool needInvert = n.DotProduct(tn) > 0;
+							if (needInvert) //inner wire should be reverse of outer wire
+								innerWire->Reverse();
+							double currentloopTolerance = tolerance;
+						TryBuildLoop:
+							faceMaker.Add(innerWire);
+							//check the face is ok
+							if (BRepCheck_Analyzer(faceMaker.Face(), Standard_True).IsValid() == Standard_False)
 							{
-								FTol.SetTolerance(innerWire, currentloopTolerance, TopAbs_WIRE);
-								goto TryBuildLoop;
+								XbimGeometryCreator::LogWarning(logger, profile, "Invalid void. Inner bound ignored", curve->EntityLabel);
+								continue;
 							}
+							BRepBuilderAPI_FaceError loopErr = faceMaker.Error();
+							if (loopErr != BRepBuilderAPI_FaceDone)
+							{
+								currentloopTolerance *= 10; //try courser tolerance
+								if (currentloopTolerance <= toleranceMax)
+								{
+									FTol.SetTolerance(innerWire, currentloopTolerance, TopAbs_WIRE);
+									goto TryBuildLoop;
+								}
 
-							String^ errMsg = XbimFace::GetBuildFaceErrorMessage(loopErr);
-							XbimGeometryCreator::LogWarning(logger, profile, "Invalid void, {0}. IfcCurve #{1} could not be added. Inner bound ignored", errMsg, curve->EntityLabel);
+								String^ errMsg = XbimFace::GetBuildFaceErrorMessage(loopErr);
+								XbimGeometryCreator::LogWarning(logger, profile, "Invalid void, {0}. IfcCurve #{1} could not be added. Inner bound ignored", errMsg, curve->EntityLabel);
+							}
+						}
+						catch (Exception^ e)
+						{
+							XbimGeometryCreator::LogWarning(logger, profile, "Invalid profile void, {0}. IfcCurve #{1} could not be added. Inner bound ignored", e->Message, curve->EntityLabel);
 						}
 						*pFace = faceMaker.Face();
 					}
@@ -1731,33 +1738,44 @@ namespace Xbim
 				XbimGeometryCreator::LogWarning(logger, sLin, "Only profiles of type curve are valid in a surface of linearExtrusion {0}. Face discarded", sLin->SweptCurve->EntityLabel);
 				return;
 			}
+			IModelFactors^ mf = sLin->Model->ModelFactors;
 			TopoDS_Edge basisEdge1 = gcnew XbimEdge(sLin->SweptCurve, logger);
 			TopoDS_Edge basisEdge2 = gcnew XbimEdge(sLin->SweptCurve, logger);
-
-			XbimEdge^ e1 = gcnew XbimEdge(basisEdge1);
-			XbimEdge^ e2 = gcnew XbimEdge(basisEdge2);
+			bool doRevitWorkAround = mf->ApplyWorkAround("#SurfaceOfLinearExtrusion");
+			
 			try
 			{
 				double start, end;
-				double tolerance = sLin->Model->ModelFactors->Precision;				
+				double tolerance = sLin->Model->ModelFactors->Precision;
 				gp_Vec extrude = XbimConvert::GetDir3d(sLin->ExtrudedDirection); //we are going to ignore magnitude as the surface should be infinite
-				extrude *= sLin->Depth * 304.8;
-				
+
+				extrude *= sLin->Depth;
+				if (doRevitWorkAround)
+				{
+					//older revit models this is incorrectly in feet					
+					extrude *= mf->OneFoot; 		
+				}				
 				gp_Ax3 ax3;
+				//the location is applied twice so ignore
 				ax3.SetLocation(ax3.Location().Translated(extrude));
 				gp_Trsf trsf;
 				trsf.SetTransformation(ax3, gp_Ax3(gp_Pnt(), gp_Dir(0, 0, 1), gp_Dir(1, 0, 0)));
 				TopLoc_Location loc(trsf);
 				basisEdge2.Move(loc);
+
 				ReParamCurve(basisEdge1);
-				ReParamCurve(basisEdge2);
-				e2 = gcnew XbimEdge(basisEdge2);
+				ReParamCurve(basisEdge2);				
 				basisEdge1 = ReParamEdge(basisEdge1);
 				basisEdge2 = ReParamEdge(basisEdge2);
-				
+
 				TopoDS_Face res = BRepFill::Face(basisEdge1, basisEdge2);
 				pFace = new TopoDS_Face();
 				*pFace = res;
+				if (!(sLin->Position == nullptr || doRevitWorkAround)) //revit does not respect the local placement correctly
+				{
+					TopLoc_Location newLoc = XbimConvert::ToLocation(sLin->Position);
+					pFace->Move(newLoc);
+				}
 			}
 			catch (Standard_Failure f)
 			{

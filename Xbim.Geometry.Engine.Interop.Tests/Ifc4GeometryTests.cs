@@ -7,6 +7,7 @@ using Xbim.Ifc4.Interfaces;
 using Microsoft.Extensions.Logging;
 using Xbim.IO.Memory;
 using Xbim.Common;
+using FluentAssertions;
 
 namespace Xbim.Geometry.Engine.Interop.Tests
 {
@@ -55,12 +56,11 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 MemoryModel.SetWorkArounds(model.Header, model.ModelFactors as XbimModelFactors);
                 var pfs = model.Instances.OfType<IIfcAdvancedBrep>().FirstOrDefault();
+                var positionWorkAround = model.AddWorkAroundSurfaceofLinearExtrusionForRevit();
                 Assert.IsTrue(pfs != null, "No IIfcAdvancedBrep found");
                 var solid = geomEngine.CreateSolid(pfs, logger);
-
-                Assert.AreEqual(102264692, solid.Volume, 0.99);
-                Assert.AreEqual(14, solid.Faces.Count);
-
+                solid.Volume.Should().BeApproximately(102258269.24499437, 1e-7);
+                solid.Faces.Count.Should().Be(14);              
             }
         }
         [TestMethod]
@@ -307,9 +307,10 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var model = MemoryModel.OpenRead(@"TestFiles\Ifc4TestFiles\cube-advanced-brep.ifc"))
             {
                 var shape = model.Instances.OfType<IfcAdvancedBrep>().FirstOrDefault();
-                Assert.IsNotNull(shape);
+                shape.Should().NotBeNull();
                 var geom = geomEngine.CreateSolid(shape);
-                Assert.IsTrue(Math.Abs(geom.Volume - 0.83333333) < 1e-5);
+                geom.Volume.Should().BeApproximately(0.83333333333333282, 1e-7);
+                
             }
         }
 
@@ -332,8 +333,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 var advancedBrep = model.Instances.OfType<IfcAdvancedBrep>().FirstOrDefault();
                 Assert.IsNotNull(advancedBrep);
-                var basin = geomEngine.CreateSolid(advancedBrep);
-                Assert.IsTrue((int)basin.Volume == 2045022);
+                
+                var basinSolids = geomEngine.CreateSolidSet(advancedBrep);
+                basinSolids.Sum(s=>s.Volume).Should().BeApproximately(2045022.3839364732, 1e-7);
             }
         }
         [TestMethod]
@@ -343,11 +345,14 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 var advancedBrep = model.Instances.OfType<IfcAdvancedBrep>().FirstOrDefault(i => i.EntityLabel == 27743);
                 bool wa = model.ModelFactors.ApplyWorkAround("#SurfaceOfLinearExtrusion");
-                Assert.IsNotNull(advancedBrep);
+                //units are not correctly set in the ifc file
+                model.ModelFactors.Initialise(1, 1e-3, 1e-2);
+                advancedBrep.Should().NotBeNull();
                 var basin = geomEngine.CreateSolidSet(advancedBrep);
                 Assert.AreEqual(2, basin.Count());
-                Assert.AreEqual(44472872, basin.First().Volume, 1);
-                Assert.AreEqual(446943, basin.Last().Volume, 1);
+                basin.First().Volume.Should().BeApproximately(44487928.3489847, 1e-7);
+                basin.Last().Volume.Should().BeApproximately(446943.50786726037, 1e-7);
+
             }
         }
 
@@ -739,6 +744,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             }
         }
 
+        /// <summary>
+        /// This test has a void with has zero area, it is a 2 segment self intersection polyline
+        /// </summary>
         [TestMethod]
         public void CloseProfileWithVoidsTest()
         {
@@ -746,9 +754,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
 
                 var eas = model.Instances[23512] as IIfcExtrudedAreaSolid;
-                Assert.IsNotNull(eas);
+                eas.Should().NotBeNull();
                 var geom = geomEngine.CreateSolid(eas);
-                Assert.IsTrue((geom.Volume > 0));
+                geom.Volume.Should().BeApproximately(2278352481546.0332,1e-7);
 
 
             }

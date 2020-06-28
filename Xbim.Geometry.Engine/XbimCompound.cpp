@@ -63,6 +63,8 @@
 #include <TColStd_DataMapOfIntegerListOfInteger.hxx>
 #include <ShapeAnalysis_WireOrder.hxx>
 #include <BRepCheck_Shell.hxx>
+#include <BRepCheck_Face.hxx>
+#include <BRepCheck_Wire.hxx>
 // #include <ShapeBuild_ReShape.hxx> // this was suggeste in PR79 - but it does not seem to make the difference with OCC72
 
 using namespace System;
@@ -436,22 +438,22 @@ namespace Xbim
 			IIfcAdvancedBrepWithVoids^ advancedBrepWithVoids = dynamic_cast<IIfcAdvancedBrepWithVoids^>(solid);
 			if (advancedBrepWithVoids != nullptr) return Init(advancedBrepWithVoids, logger);
 			BRep_Builder b;
-			TopoDS_Shell occOuterShell = InitAdvancedFaces(solid->Outer->CfsFaces, logger);
+			TopoDS_Shape occOuterShell = InitAdvancedFaces(solid->Outer->CfsFaces, logger);
 			if (occOuterShell.IsNull()) return;
 
 			pCompound = new TopoDS_Compound();
 			b.MakeCompound(*pCompound);
-			if (occOuterShell.Closed())
+			if (occOuterShell.ShapeType() == TopAbs_SHELL && occOuterShell.Closed())
 			{
 				BRepBuilderAPI_MakeSolid solidmaker;
-				solidmaker.Add(occOuterShell);
+				solidmaker.Add(TopoDS::Shell(occOuterShell));
 				solidmaker.Build();
 				if (solidmaker.IsDone())
 				{
-					TopoDS_Solid solid = solidmaker.Solid();
-					solid.Closed(true);
-					solid.Checked(true);
-					b.Add(*pCompound, solid);
+					TopoDS_Solid s = solidmaker.Solid();
+					s.Closed(true);
+					s.Checked(true);
+					b.Add(*pCompound, s);
 				}
 				pCompound->Closed(true);
 				pCompound->Checked(true);
@@ -461,11 +463,9 @@ namespace Xbim
 			//advanced breps are always solids, so to make sure we have highest form, sometime we get multiple solids
 			try
 			{
-				ShapeFix_Shell shellFixer(occOuterShell);
-				shellFixer.Perform();
 
 				TopTools_IndexedMapOfShape shellMap;
-				TopExp::MapShapes(shellFixer.Shape(), TopAbs_SHELL, shellMap);
+				TopExp::MapShapes(occOuterShell, TopAbs_SHELL, shellMap);
 				for (int ishell = 1; ishell <= shellMap.Extent(); ++ishell)
 				{
 					// Build solid
@@ -475,7 +475,11 @@ namespace Xbim
 					solidmaker.Build();
 					if (solidmaker.IsDone())
 					{
-						b.Add(*pCompound, solidmaker.Solid());
+						TopoDS_Solid s = solidmaker.Solid();
+						BRepClass3d_SolidClassifier class3d(s);
+						class3d.PerformInfinitePoint(Precision::Confusion());
+						if (class3d.State() == TopAbs_IN) s.Reverse();
+						b.Add(*pCompound, s);
 					}
 				}
 			}
@@ -503,12 +507,12 @@ namespace Xbim
 		void XbimCompound::Init(IIfcAdvancedBrepWithVoids^ brepWithVoids, ILogger^ logger)
 		{
 			BRep_Builder b;
-			TopoDS_Shell outerShell = InitAdvancedFaces(brepWithVoids->Outer->CfsFaces, logger);
+			TopoDS_Shape outerShell = InitAdvancedFaces(brepWithVoids->Outer->CfsFaces, logger);
 			XbimSolid^ theSolid;
-			if (outerShell.Closed()) //if it is a closed shell make a solid
+			if (outerShell.ShapeType() == TopAbs_SHELL && outerShell.Closed()) //if it is a closed shell make a solid
 			{
 				BRepBuilderAPI_MakeSolid solidmaker;
-				solidmaker.Add(outerShell);
+				solidmaker.Add(TopoDS::Shell(outerShell));
 				theSolid = gcnew XbimSolid(solidmaker.Solid());
 			}
 			else
@@ -753,7 +757,7 @@ namespace Xbim
 				return 0;
 		}
 		//This method copes with faces that may be advanced as well as ordinary
-		TopoDS_Shell XbimCompound::InitAdvancedFaces(IEnumerable<IIfcFace^>^ faces, ILogger^ logger)
+		TopoDS_Shape XbimCompound::InitAdvancedFaces(IEnumerable<IIfcFace^>^ faces, ILogger^ logger)
 		{
 			try
 			{
@@ -842,66 +846,82 @@ namespace Xbim
 									else
 										endVertex = TopoDS::Vertex(vertexGeometries.Find(edgeCurve->EdgeEnd->EntityLabel));
 
-									Handle(Geom_Curve) sharedEdgeGeom = gcnew XbimCurve(edgeCurve->EdgeGeometry, logger);
+									XbimCurve^ curve = gcnew XbimCurve(edgeCurve->EdgeGeometry, logger);
+									if (!curve->IsValid)
+									{
+										XbimGeometryCreator::LogWarning(logger, edgeCurve, "Failed to create edge #{0} with zero length. It has been ignored", edgeCurve->EntityLabel);
+										continue;
+									}
+									Handle(Geom_Curve) sharedEdgeGeom = curve;
 									if (!edgeCurve->SameSense)
 										sharedEdgeGeom->Reverse(); //reverse the geometry if the parameterisation is in a different direction to the edge start and end vertices
 
-									double trim1Tolerance, trim2Tolerance, trimParam1, trimParam2;
-									bool foundP1 = XbimCurve::LocatePointOnCurve(sharedEdgeGeom, startVertex, _sewingTolerance * 20, trimParam1, trim1Tolerance);
-									bool foundP2 = XbimCurve::LocatePointOnCurve(sharedEdgeGeom, endVertex, _sewingTolerance * 20, trimParam2, trim2Tolerance);
-
-									if (!foundP1) //assume before the start of the curve
+									if (sharedEdgeGeom->IsClosed() && startVertex.IsSame(endVertex)) // we have a closed shape and we want the whole loop
 									{
-										XbimGeometryCreator::LogWarning(logger, edgeCurve, "Failed to project vertex to edge geometry: #{0}, start point assumed", edgeCurve->EdgeGeometry->EntityLabel);
-										trimParam1 = sharedEdgeGeom->FirstParameter();
-										trim1Tolerance = _sewingTolerance;
+										int f = sharedEdgeGeom->FirstParameter();
+										int l = sharedEdgeGeom->LastParameter();										
+										topoEdgeCurve = BRepBuilderAPI_MakeEdge(sharedEdgeGeom, startVertex,endVertex,f, l);
 									}
-									if (!foundP2) //assume before the start of the curve
+									else
 									{
-										XbimGeometryCreator::LogWarning(logger, edgeCurve, "Failed to project vertex to edge geometry: #{0}, start point assumed", edgeCurve->EdgeGeometry->EntityLabel);
-										trimParam2 = sharedEdgeGeom->LastParameter();
-										trim2Tolerance = _sewingTolerance;
-									}
-									//update the vertices tolerance if necessary
-									double startVertexTolerance = BRep_Tool::Tolerance(startVertex);
-									double endVertexTolerance = BRep_Tool::Tolerance(endVertex);
-									if (trim1Tolerance > startVertexTolerance)
-										builder.UpdateVertex(startVertex, trim1Tolerance);
-									if (trim2Tolerance > endVertexTolerance)
-										builder.UpdateVertex(endVertex, trim2Tolerance);
+										double trim1Tolerance, trim2Tolerance, trimParam1, trimParam2;
+										bool foundP1 = XbimCurve::LocatePointOnCurve(sharedEdgeGeom, startVertex, _sewingTolerance * 20, trimParam1, trim1Tolerance);
+										bool foundP2 = XbimCurve::LocatePointOnCurve(sharedEdgeGeom, endVertex, _sewingTolerance * 20, trimParam2, trim2Tolerance);
 
-									BRepBuilderAPI_MakeEdge edgeMaker(sharedEdgeGeom, startVertex, endVertex, trimParam1, trimParam2);
-									if (!edgeMaker.IsDone())
-									{
-										BRepBuilderAPI_EdgeError err = edgeMaker.Error();
-										switch (err)
+										if (!foundP1) //assume before the start of the curve
 										{
-
-										case BRepBuilderAPI_PointProjectionFailed:
-											XbimGeometryCreator::LogWarning(logger, edgeCurve, "Failed to create edge #{0}: BRepBuilderAPI_PointProjectionFailed", edgeCurve->EntityLabel);
-											break;
-										case BRepBuilderAPI_ParameterOutOfRange:
-											XbimGeometryCreator::LogWarning(logger, edgeCurve, "Failed to create edge #{0}: BRepBuilderAPI_ParameterOutOfRange", edgeCurve->EntityLabel);
-											break;
-										case BRepBuilderAPI_DifferentPointsOnClosedCurve:
-											XbimGeometryCreator::LogWarning(logger, edgeCurve, "Failed to create edge #{0}: BRepBuilderAPI_DifferentPointsOnClosedCurve", edgeCurve->EntityLabel);
-											break;
-										case BRepBuilderAPI_PointWithInfiniteParameter:
-											XbimGeometryCreator::LogWarning(logger, edgeCurve, "Failed to create edge #{0}: BRepBuilderAPI_PointWithInfiniteParameter", edgeCurve->EntityLabel);
-											break;
-										case BRepBuilderAPI_DifferentsPointAndParameter:
-											XbimGeometryCreator::LogWarning(logger, edgeCurve, "Failed to create edge #{0}: BRepBuilderAPI_DifferentsPointAndParameter", edgeCurve->EntityLabel);
-											break;
-										case BRepBuilderAPI_LineThroughIdenticPoints:
-											XbimGeometryCreator::LogWarning(logger, edgeCurve, "Failed to create edge #{0}: BRepBuilderAPI_LineThroughIdenticPoints", edgeCurve->EntityLabel);
-											break;
-										default:
-											XbimGeometryCreator::LogWarning(logger, edgeCurve, "Failed to create edge #{0}: Unknown error", edgeCurve->EntityLabel);
-											break;
+											XbimGeometryCreator::LogWarning(logger, edgeCurve, "Failed to project vertex to edge geometry: #{0}, start point assumed", edgeCurve->EdgeGeometry->EntityLabel);
+											trimParam1 = sharedEdgeGeom->FirstParameter();
+											trim1Tolerance = _sewingTolerance;
 										}
-										continue; //carry on and try and ignore, no sensible fall back at this point
+										if (!foundP2) //assume before the start of the curve
+										{
+											XbimGeometryCreator::LogWarning(logger, edgeCurve, "Failed to project vertex to edge geometry: #{0}, start point assumed", edgeCurve->EdgeGeometry->EntityLabel);
+											trimParam2 = sharedEdgeGeom->LastParameter();
+											trim2Tolerance = _sewingTolerance;
+										}
+										//update the vertices tolerance if necessary
+										double startVertexTolerance = BRep_Tool::Tolerance(startVertex);
+										double endVertexTolerance = BRep_Tool::Tolerance(endVertex);
+										if (trim1Tolerance > startVertexTolerance)
+											builder.UpdateVertex(startVertex, trim1Tolerance);
+										if (trim2Tolerance > endVertexTolerance)
+											builder.UpdateVertex(endVertex, trim2Tolerance);
+
+										BRepBuilderAPI_MakeEdge edgeMaker(sharedEdgeGeom, startVertex, endVertex, trimParam1, trimParam2);
+										if (!edgeMaker.IsDone())
+										{
+											BRepBuilderAPI_EdgeError err = edgeMaker.Error();
+											switch (err)
+											{
+
+											case BRepBuilderAPI_PointProjectionFailed:
+												XbimGeometryCreator::LogWarning(logger, edgeCurve, "Failed to create edge #{0}: BRepBuilderAPI_PointProjectionFailed", edgeCurve->EntityLabel);
+												break;
+											case BRepBuilderAPI_ParameterOutOfRange:
+												XbimGeometryCreator::LogWarning(logger, edgeCurve, "Failed to create edge #{0}: BRepBuilderAPI_ParameterOutOfRange", edgeCurve->EntityLabel);
+												break;
+											case BRepBuilderAPI_DifferentPointsOnClosedCurve:
+												XbimGeometryCreator::LogWarning(logger, edgeCurve, "Failed to create edge #{0}: BRepBuilderAPI_DifferentPointsOnClosedCurve", edgeCurve->EntityLabel);
+												break;
+											case BRepBuilderAPI_PointWithInfiniteParameter:
+												XbimGeometryCreator::LogWarning(logger, edgeCurve, "Failed to create edge #{0}: BRepBuilderAPI_PointWithInfiniteParameter", edgeCurve->EntityLabel);
+												break;
+											case BRepBuilderAPI_DifferentsPointAndParameter:
+												XbimGeometryCreator::LogWarning(logger, edgeCurve, "Failed to create edge #{0}: BRepBuilderAPI_DifferentsPointAndParameter", edgeCurve->EntityLabel);
+												break;
+											case BRepBuilderAPI_LineThroughIdenticPoints:
+												XbimGeometryCreator::LogWarning(logger, edgeCurve, "Failed to create edge #{0}: BRepBuilderAPI_LineThroughIdenticPoints", edgeCurve->EntityLabel);
+												break;
+											default:
+												XbimGeometryCreator::LogWarning(logger, edgeCurve, "Failed to create edge #{0}: Unknown error", edgeCurve->EntityLabel);
+												break;
+											}
+											continue; //carry on and try and ignore, no sensible fall back at this point
+										}
+										topoEdgeCurve = edgeMaker.Edge();
 									}
-									topoEdgeCurve = edgeMaker.Edge();
+
 
 									edgeCurves.Bind(edgeCurve->EntityLabel, topoEdgeCurve);
 
@@ -923,13 +943,13 @@ namespace Xbim
 
 								if (ifcBound->Orientation)
 								{
-									bool addedPCurve = edgeFixer.FixAddPCurve(topoEdgeCurve, geomSurface, loc, false, _sewingTolerance); //add pcurves
+									bool ok = edgeFixer.FixAddPCurve(topoEdgeCurve, geomSurface, loc, false, _sewingTolerance); //add pcurves
 									loopEdges.Append(topoEdgeCurve);
 								}
 								else
 								{
 									TopoDS_Edge revTopoEdgeCurve = TopoDS::Edge(topoEdgeCurve.Reversed());
-									bool addedPCurve = edgeFixer.FixAddPCurve(revTopoEdgeCurve, geomSurface, loc, false, _sewingTolerance); //add pcurves	
+									bool ok = edgeFixer.FixAddPCurve(revTopoEdgeCurve, geomSurface, loc, false, _sewingTolerance); //add pcurves	
 									loopEdges.Append(revTopoEdgeCurve);
 								}
 
@@ -980,20 +1000,20 @@ namespace Xbim
 					}
 
 					faceMaker.Add(topoOuterLoop);
+					
 					if (topoInnerLoops.Size() > 0) //add any inner bounds
 					{
 						try
 						{
 							for (auto it = topoInnerLoops.cbegin(); it != topoInnerLoops.cend(); ++it)
 							{
-
 								TopoDS_Wire innerWire = TopoDS::Wire(*it);
 								faceMaker.Add(innerWire);
 								if (!faceMaker.IsDone())
 									XbimGeometryCreator::LogWarning(logger, advancedFace, "Could not apply inner bound to face #{0}, it has been ignored", advancedFace->EntityLabel);
 							}
-							ShapeFix_Face fixFaceWire(topoAdvancedFace);
 
+							ShapeFix_Face fixFaceWire(topoAdvancedFace);
 							fixFaceWire.FixOrientation();
 							topoAdvancedFace = fixFaceWire.Face();
 						}
@@ -1003,30 +1023,56 @@ namespace Xbim
 							XbimGeometryCreator::LogWarning(logger, advancedFace, "Could not apply  bound to face #{0}, it has been ignored", advancedFace->EntityLabel);
 						}
 					}
-					else topoAdvancedFace = faceMaker.Face();
+					else 
+						topoAdvancedFace = faceMaker.Face();
+
 					ShapeFix_Face fixFace(topoAdvancedFace);
 					fixFace.Perform();
 					topoAdvancedFace = fixFace.Face();
 					builder.Add(shell, topoAdvancedFace);
 				}
 				//check it is solid or not
-				bool isSolid = true;
+				/*bool isSolid = true;
 				for (auto it = topoFaces.cbegin(); it != topoFaces.cend(); ++it)
 				{
 					int refCount = it->Size();
 					if (refCount != 2)isSolid = false;
-				}
+				}*/
 
 				BRepCheck_Shell checker(shell);
-				BRepCheck_Status status = checker.Closed();
-				if(status== BRepCheck_Status::BRepCheck_NoError)
+				BRepCheck_Status st = checker.Orientation();
+				if (st != BRepCheck_Status::BRepCheck_NoError)
 				{
-					if (!isSolid)
-						XbimGeometryCreator::LogInfo(logger, aFace, "Internal issue. Ifc definition and OCC implementation seem at odds", aFace->EntityLabel);
+					ShapeFix_Shell shapeFixer(shell);
+					if (shapeFixer.Perform())
+					{
+						shell = shapeFixer.Shell();
+						checker.Init(shell);
+					}
+					if (checker.Closed() == BRepCheck_Status::BRepCheck_NoError)
+					{
+						shell.Closed(true);
+						shell.Checked(true);
+						return shell;
+					}
+					else
+					{
+						ShapeFix_Shape shapeFixer(shell);
+						if (shapeFixer.Perform())
+							return shapeFixer.Shape();
+						else
+							return shell;
+					}
+				}
+				else //it is oriented correctly and closed
+				{
 					shell.Closed(true);
 					shell.Checked(true);
+					return shell;
 				}
-				return shell;
+
+
+
 			}
 			catch (Standard_Failure exc)
 			{

@@ -637,23 +637,7 @@ namespace Xbim
 				}
 				//now just go with
 				bool sameSense = curve->SenseAgreement;
-				Handle(Geom_Circle) circle = Handle(Geom_Circle)::DownCast(*pCurve);
-				if (!circle.IsNull())
-				{
-					double radius = circle->Radius();
-					if (!sameSense)
-					{
-						double u = u1;
-						u1 = u2;
-						u2 = u;
-					}
-					GC_MakeArcOfCircle arcMaker(circle->Circ(), u1, u2, sameSense);
-					//if (!arcMaker.IsDone()) throw Standard_Failure("Could not build arc segment from circle");
-					*pCurve = arcMaker.Value();
-				}
-				else
-
-					*pCurve = new Geom_TrimmedCurve(*pCurve, u1, u2, sameSense, true);
+				*pCurve = new Geom_TrimmedCurve(*pCurve, sameSense ? u1 : u2, sameSense ? u2 : u1);
 			}
 		}
 
