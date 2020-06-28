@@ -1769,12 +1769,27 @@ namespace Xbim
 				basisEdge2 = ReParamEdge(basisEdge2);
 
 				TopoDS_Face res = BRepFill::Face(basisEdge1, basisEdge2);
+				Handle(Geom_Surface) surface = BRep_Tool::Surface(res);
+				BRepBuilderAPI_MakeFace faceMaker;
+				faceMaker.Init(surface, false, tolerance);
 				pFace = new TopoDS_Face();
-				*pFace = res;
-				if (!(sLin->Position == nullptr || doRevitWorkAround)) //revit does not respect the local placement correctly
+
+				*pFace = faceMaker.Face();
+				if (sLin->Position != nullptr) //revit does not respect the local placement correctly
 				{
-					TopLoc_Location newLoc = XbimConvert::ToLocation(sLin->Position);
-					pFace->Move(newLoc);
+					if (doRevitWorkAround)
+					{
+						gp_Ax3 ax3 = XbimConvert::ToAx3NoTranslation(sLin->Position);
+						gp_Trsf trsf;
+						trsf.SetTransformation(ax3, gp_Ax3());
+						TopLoc_Location newLoc(trsf);
+						pFace->Move(newLoc);
+					}
+					else
+					{
+						TopLoc_Location newLoc = XbimConvert::ToLocation(sLin->Position);
+						pFace->Move(newLoc);
+					}
 				}
 			}
 			catch (Standard_Failure f)

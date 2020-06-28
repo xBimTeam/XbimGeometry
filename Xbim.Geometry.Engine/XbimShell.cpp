@@ -457,12 +457,9 @@ namespace Xbim
 		{
 			if (IsValid)
 			{
-
 				BRepBuilderAPI_MakeSolid solidMaker(this);
 				if (solidMaker.IsDone())
 				{
-					char errorMsg[512];
-					bool failed = false;
 					TopoDS_Solid solid = solidMaker.Solid();
 					try
 					{
@@ -473,12 +470,10 @@ namespace Xbim
 					}
 					catch (Standard_Failure sf)
 					{
-						strncpy(errorMsg, sf.GetMessageString(), 512);
-						failed = true;
+						String^ err = gcnew String(sf.GetMessageString());	
+						//XbimGeometryCreator::LogWarning(logger, this, "Could not build a correct solid from the shell: " + err);
 					}
-					if (failed)
-						throw gcnew Exception(String::Format("Failure making solid from shell: {0}", gcnew String(errorMsg)));;
-					return gcnew XbimSolid(solid);;
+					return gcnew XbimSolid(solid);
 				}
 			}
 			return gcnew XbimSolid(); //return an invalid solid if the shell is not valid

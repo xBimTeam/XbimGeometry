@@ -59,7 +59,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var positionWorkAround = model.AddWorkAroundSurfaceofLinearExtrusionForRevit();
                 Assert.IsTrue(pfs != null, "No IIfcAdvancedBrep found");
                 var solid = geomEngine.CreateSolid(pfs, logger);
-                solid.Volume.Should().BeApproximately(102258269.24499437, 1e-7);
+                solid.Volume.Should().BeApproximately(102258269.244692, 1e-7);
                 solid.Faces.Count.Should().Be(14);              
             }
         }

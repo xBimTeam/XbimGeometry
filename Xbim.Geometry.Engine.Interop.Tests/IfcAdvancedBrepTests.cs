@@ -9,6 +9,8 @@ using Xbim.Common.Geometry;
 using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Memory;
 using FluentAssertions;
+using Xbim.Common;
+
 namespace Xbim.Geometry.Engine.Interop.Tests
 {
     [TestClass]
@@ -135,15 +137,16 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         //This is a fauly Brep conversion case that needs t be firther examinedal
         [DataTestMethod]
         [DataRow("advanced_brep_1", false, DisplayName = "Self Intersection unorientable shape")]
-        [DataRow("advanced_brep_2",DisplayName ="Curved edges with varying orientation")]
+        [DataRow("advanced_brep_2", DisplayName = "Curved edges with varying orientation")]
         [DataRow("advanced_brep_3", false, DisplayName = "Badly formed wire orders and missing faces and holes")]
         [DataRow("advanced_brep_4", true, 2, DisplayName = "Two solids from one advanced brep, errors in holes")]
+        [DataRow("advanced_brep_5", true, 1, DisplayName = "Incorrectly located surfaces of linear extrusion - not fixed")]
         public void Advanced_brep_tests(string brepFileName, bool isValidSolid=true, int solidCount=1)
         {
 
             using (var model = MemoryModel.OpenRead($@"TestFiles\{brepFileName}.ifc"))
             {
-                //bool wa = model.ModelFactors.ApplyWorkAround("#SurfaceOfLinearExtrusion");
+                ((XbimModelFactors)model.ModelFactors).AddWorkAround("#SurfaceOfLinearExtrusion");
                 //this model needs workarounds to be applied
                 var brep = model.Instances.OfType<IIfcAdvancedBrep>().FirstOrDefault();
                 brep.Should().NotBeNull();

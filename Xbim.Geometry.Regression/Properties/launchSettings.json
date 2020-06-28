@@ -2,7 +2,7 @@
   "profiles": {
     "XbimRegression": {
       "commandName": "Project",
-      "commandLineArgs": "C:\\Users\\Steve\\Documents\\testmodel",
+      "commandLineArgs": "\"C:\\Users\\Steve\\XBIM\\Models - Documents\\0400 Under NDA\\IFS\\DUB12\\Flex\"",
       "nativeDebugging": true
     }
   }
