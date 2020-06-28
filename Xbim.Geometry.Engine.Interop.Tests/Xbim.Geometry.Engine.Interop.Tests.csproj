@@ -223,7 +223,7 @@
     <None Update="TestFiles\VerySmallBooleanCutTest.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestFiles\UnorderdedCompositeCurveTest.ifc">
+    <None Update="TestFiles\UnorderedCompositeCurveTest.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="TestFiles\ExtrudedSolidWithNullPositionTest.ifc">

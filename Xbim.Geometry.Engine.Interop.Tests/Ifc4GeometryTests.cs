@@ -86,8 +86,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var pfs = model.Instances.OfType<IIfcPolygonalFaceSet>().FirstOrDefault();
                 Assert.IsTrue(pfs != null, "No IIfcPolygonalFaceSet found");
                 var faceModel = geomEngine.CreateSurfaceModel(pfs, logger).OfType<IXbimShell>().FirstOrDefault();
-                Assert.IsNotNull(faceModel);
-                Assert.AreEqual(11, faceModel.Faces.Count);
+                faceModel.Should().NotBeNull();
+                faceModel.Faces.Count.Should().Be(11);
 
             }
         }
@@ -100,8 +100,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var pfs = model.Instances.OfType<IIfcPolygonalFaceSet>().FirstOrDefault();
                 Assert.IsTrue(pfs != null, "No IIfcPolygonalFaceSet found");
                 var solidModel = geomEngine.CreateSolidSet(pfs, logger).FirstOrDefault();
-                Assert.IsNotNull(solidModel);
-                Assert.AreEqual(11, solidModel.Faces.Count);
+                solidModel.Should().NotBeNull();
+                solidModel.Faces.Count.Should().Be(11);
+                solidModel.Volume.Should().BeApproximately(6500000000000.001, 1e-5);
 
             }
         }
@@ -264,9 +265,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var model = MemoryModel.OpenRead(@"TestFiles\Ifc4TestFiles\brep-model.ifc"))
             {
                 var shape = model.Instances.OfType<IfcFacetedBrep>().FirstOrDefault();
-                Assert.IsNotNull(shape);
+                shape.Should().NotBeNull();
                 var geom = geomEngine.CreateSolidSet(shape).FirstOrDefault();
-                Assert.IsTrue(Math.Abs(geom.Volume - geom.BoundingBox.Volume) < 1e-5);
+                geom.Volume.Should().BeApproximately(geom.BoundingBox.Volume, 1e-5);
             }
         }
 

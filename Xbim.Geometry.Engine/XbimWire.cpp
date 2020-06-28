@@ -1348,7 +1348,6 @@ namespace Xbim
 		TopoDS_Vertex XbimWire::StartVertex::get()
 		{
 			if (!IsValid) return TopoDS_Vertex();
-			BRepAdaptor_CompCurve cc(*pWire, Standard_True);
 			TopoDS_Vertex v1, v2;
 			TopExp::Vertices(*pWire, v1, v2);
 			return v1;
@@ -1372,8 +1371,7 @@ namespace Xbim
 
 		TopoDS_Vertex XbimWire::EndVertex::get()
 		{
-			if (!IsValid) return TopoDS_Vertex();
-			BRepAdaptor_CompCurve cc(*pWire, Standard_True);
+			if (!IsValid) return TopoDS_Vertex();			
 			TopoDS_Vertex v1, v2;
 			TopExp::Vertices(*pWire, v1, v2);
 			return v2;
