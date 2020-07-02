@@ -1739,12 +1739,16 @@ namespace Xbim
 				return;
 			}
 			IModelFactors^ mf = sLin->Model->ModelFactors;
-			TopoDS_Edge basisEdge1 = gcnew XbimEdge(sLin->SweptCurve, logger);
-			TopoDS_Edge basisEdge2 = gcnew XbimEdge(sLin->SweptCurve, logger);
+
 			bool doRevitWorkAround = mf->ApplyWorkAround("#SurfaceOfLinearExtrusion");
-			
+			XbimEdge^  xbasisEdge1 = gcnew XbimEdge(sLin->SweptCurve, logger);
+			if (!xbasisEdge1->IsValid) return;
 			try
 			{
+				TopoDS_Edge basisEdge1 = gcnew XbimEdge(sLin->SweptCurve, logger);
+				TopoDS_Edge basisEdge2 = gcnew XbimEdge(sLin->SweptCurve, logger);
+				
+
 				double start, end;
 				double tolerance = sLin->Model->ModelFactors->Precision;
 				gp_Vec extrude = XbimConvert::GetDir3d(sLin->ExtrudedDirection); //we are going to ignore magnitude as the surface should be infinite
@@ -1753,8 +1757,8 @@ namespace Xbim
 				if (doRevitWorkAround)
 				{
 					//older revit models this is incorrectly in feet					
-					extrude *= mf->OneFoot; 		
-				}				
+					extrude *= mf->OneFoot;
+				}
 				gp_Ax3 ax3;
 				//the location is applied twice so ignore
 				ax3.SetLocation(ax3.Location().Translated(extrude));
@@ -1764,7 +1768,7 @@ namespace Xbim
 				basisEdge2.Move(loc);
 
 				ReParamCurve(basisEdge1);
-				ReParamCurve(basisEdge2);				
+				ReParamCurve(basisEdge2);
 				basisEdge1 = ReParamEdge(basisEdge1);
 				basisEdge2 = ReParamEdge(basisEdge2);
 

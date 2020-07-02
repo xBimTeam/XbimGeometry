@@ -715,15 +715,15 @@ namespace Xbim
 					int numberOfBounds = advancedFace->Bounds->Count;
 
 					//build the face surface
-					TopoDS_Face topoAdvancedFace = gcnew XbimFace(advancedFace->FaceSurface, logger);
+					XbimFace^ xAdvancedFace = gcnew XbimFace(advancedFace->FaceSurface, logger);
 
-					if (topoAdvancedFace.IsNull())
+					if (!xAdvancedFace->IsValid)
 					{
 						XbimGeometryCreator::LogWarning(logger, advancedFace->FaceSurface, "Failed to create face surface #{0}", advancedFace->FaceSurface->EntityLabel);
 						continue;
 					}
 					//get the face oroented correctly
-
+					TopoDS_Face topoAdvancedFace = xAdvancedFace;
 
 					TopLoc_Location loc;
 					Handle(Geom_Surface) geomSurface = BRep_Tool::Surface(topoAdvancedFace, loc);

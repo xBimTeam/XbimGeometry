@@ -141,6 +141,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [DataRow("advanced_brep_3", false, DisplayName = "Badly formed wire orders and missing faces and holes")]
         [DataRow("advanced_brep_4", true, 2, DisplayName = "Two solids from one advanced brep, errors in holes")]
         [DataRow("advanced_brep_5", true, 1, DisplayName = "Incorrectly located surfaces of linear extrusion - not fixed")]
+        [DataRow("advanced_brep_6", true, 1, DisplayName = "The trimming points either result in a zero length curve or do not intersect the curve")]
         public void Advanced_brep_tests(string brepFileName, bool isValidSolid=true, int solidCount=1)
         {
 
