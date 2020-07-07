@@ -54,7 +54,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 var brep = model.Instances.OfType<IIfcAdvancedBrep>().FirstOrDefault();
                 brep.Should().NotBeNull();
-               
+
                 var solids = geomEngine.CreateSolidSet(brep, logger);
                 solids.Count.Should().Be(3); //this should really be one but the model is incorrect
                 solids.First().Faces.Count.Should().Be(60);
@@ -79,18 +79,27 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
         }
 
-        [TestMethod]
-        public void Swept_curve_with_bad_trims()
+        [DataTestMethod]
+        [DataRow("SurfaceCurveSweptAreaSolid_1", 29.444264292193111, DisplayName = "Handles Self Intersection unorientable shape")]
+        [DataRow("SurfaceCurveSweptAreaSolid_2", 0.00025657473102144062, DisplayName = "Handles Planar reference surface, parallel to sweep")]
+        [DataRow("SurfaceCurveSweptAreaSolid_3", 0.26111117805532907, false, DisplayName = "Reference Model from IFC documentation")]
+        [DataRow("SurfaceCurveSweptAreaSolid_4", 19.276830224679465, DisplayName = "Handles Trimmed directrix is periodic")]
+        [DataRow("SurfaceCurveSweptAreaSolid_5", 12.603349469526613, false, true, DisplayName = "Handles Polylines Incorrectly Trimmed as 0 to 1")]
+        public void SurfaceCurveSweptAreaSolid_Tests(string filename, double requiredVolume, bool addLinearExtrusionWorkAround = true, bool addPolyTrimWorkAround = false)
         {
-            using (var model = MemoryModel.OpenRead(@"TestFiles\swept_curve_with_bad_trims.ifc"))
+            using (var model = MemoryModel.OpenRead($@"TestFiles\{filename}.ifc"))
             {
-                var sweptSolid = model.Instances.OfType<IIfcSurfaceCurveSweptAreaSolid>().FirstOrDefault();
-                bool wa = model.ModelFactors.ApplyWorkAround("#SurfaceOfLinearExtrusion");
-                Assert.IsNotNull(sweptSolid);
-                var solid = geomEngine.CreateSolid(sweptSolid);
-                //this projected directrix is invalid but we default to using the none projected directrix
-                Assert.AreEqual(0.00025657473102144062, solid.Volume, 1e-5);
-
+                if (addLinearExtrusionWorkAround)
+                    ((XbimModelFactors)model.ModelFactors).AddWorkAround("#SurfaceOfLinearExtrusion");
+                if(addPolyTrimWorkAround)
+                    model.AddWorkAroundTrimForPolylinesIncorrectlySetToOneForEntireCurve();
+                var surfaceSweep = model.Instances.OfType<IIfcSurfaceCurveSweptAreaSolid>().FirstOrDefault();
+                surfaceSweep.Should().NotBeNull();
+                var sweptSolid = geomEngine.CreateSolid(surfaceSweep);
+                sweptSolid.Volume.Should().BeApproximately(requiredVolume, 1e-7);
+                //var shapeGeom = geomEngine.CreateShapeGeometry(sweptSolid,
+                //    model.ModelFactors.Precision, model.ModelFactors.DeflectionTolerance,
+                //    model.ModelFactors.DeflectionAngle, XbimGeometryType.PolyhedronBinary, logger);
 
             }
         }
@@ -142,7 +151,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [DataRow("advanced_brep_4", true, 2, DisplayName = "Two solids from one advanced brep, errors in holes")]
         [DataRow("advanced_brep_5", true, 1, DisplayName = "Incorrectly located surfaces of linear extrusion - not fixed")]
         [DataRow("advanced_brep_6", true, 1, DisplayName = "The trimming points either result in a zero length curve or do not intersect the curve")]
-        public void Advanced_brep_tests(string brepFileName, bool isValidSolid=true, int solidCount=1)
+
+        public void Advanced_brep_tests(string brepFileName, bool isValidSolid = true, int solidCount = 1)
         {
 
             using (var model = MemoryModel.OpenRead($@"TestFiles\{brepFileName}.ifc"))
@@ -151,14 +161,14 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 //this model needs workarounds to be applied
                 var brep = model.Instances.OfType<IIfcAdvancedBrep>().FirstOrDefault();
                 brep.Should().NotBeNull();
-                var solids = geomEngine.CreateSolidSet(brep, logger);                
+                var solids = geomEngine.CreateSolidSet(brep, logger);
                 solids.IsValid.Should().BeTrue();
                 solids.Should().HaveCount(solidCount);
                 foreach (var solid in solids)
                 {
                     solid.Volume.Should().BeGreaterThan(0);
                 }
-    
+
             }
 
         }

@@ -2462,11 +2462,25 @@ namespace Xbim
 				cc.Edge(last, edge, uoe);
 				Standard_Real l, f; // the parameter range is returned in f and l
 				Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, f, l);
-				Standard_Real a = Math::Max(f, first);
-				Standard_Real b = Math::Min(l, last);
-				if (Math::Abs(a - b) > Precision::Confusion())
+				Handle(Geom_TrimmedCurve) trimmedCurve = Handle(Geom_TrimmedCurve)::DownCast(curve);
+				while (!trimmedCurve.IsNull()) //remove trims
 				{
-					Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(curve, a, b);
+					curve = trimmedCurve->BasisCurve();
+					trimmedCurve = Handle(Geom_TrimmedCurve)::DownCast(curve);				
+				}
+				if (curve->IsPeriodic()) //stay in bounds for splines etc, keep orientation for periodics, 
+				{
+					l = f + last;
+					f = f + first;					
+				}
+				else
+				{
+					f = Math::Max(f, first);
+					l = Math::Min(l, last);
+				}
+				if (Math::Abs(f - l) > Precision::Confusion())
+				{
+					Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(curve, f, l);
 					BRepBuilderAPI_MakeWire wm;
 					wm.Add(BRepBuilderAPI_MakeEdge(trimmed));
 					TopoDS_Wire trimmedWire = wm.Wire();

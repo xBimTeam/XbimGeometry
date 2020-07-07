@@ -79,17 +79,6 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             }
         }
 
-        [TestMethod]
-        public void can_trim_composite_curve()
-        {
-            using (var er = new EntityRepository<IIfcSurfaceCurveSweptAreaSolid>("failing_swept_area_curve", inRadians: true))
-            {
-                Assert.IsTrue(er.Entity != null, "No IfcSurfaceCurveSweptAreaSolid found");
-                var workAroundTag = er.Entity.Model.AddWorkAroundTrimForPolylinesIncorrectlySetToOneForEntireCurve();
-                var solid = geomEngine.CreateSolidSet(er.Entity, logger);
-                Assert.AreEqual(1, solid.Count);
-                Assert.AreEqual(1.325, solid.First().Volume,  0.001);
-            }
-        }
+       
     }
 }

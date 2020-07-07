@@ -86,6 +86,15 @@
 #include <BRepOffsetAPI_NormalProjection.hxx>
 #include <TopTools_Array1OfShape.hxx>
 #include <ShapeAnalysis.hxx>
+#include <ShapeFix_Edge.hxx>
+#include <Geom_Ellipse.hxx>
+#include <gp_Ax1.hxx>
+#include <Geom_BSplineSurface.hxx>
+#include <BRepAdaptor_HSurface.hxx>
+#include <CSLib_NormalStatus.hxx>
+#include <CSLib.hxx>
+
+
 using namespace System::Linq;
 using namespace Xbim::Common;
 
@@ -410,7 +419,7 @@ namespace Xbim
 				return;
 			}
 			TopoDS_Face faceStartOcc = faceStart;
-			
+
 			XbimWire^ sweep = CreateDirectrix(repItem->Directrix, repItem->StartParam, repItem->EndParam, logger);
 
 			if (!sweep->IsValid || std::abs(sweep->Length) < Precision::Confusion())
@@ -425,12 +434,12 @@ namespace Xbim
 
 			int retflag;
 			TopoDS_Solid solidResult;
-				
-			BuildIfcSurfaceCurveSweptAreaSolid(sweepOcc, refSurface, faceStartOcc, repItem->Model->ModelFactors->Precision,solidResult, retflag);
-		
-			if (retflag > 0 )
+
+			BuildIfcSurfaceCurveSweptAreaSolid(sweepOcc, refSurface, faceStartOcc, repItem->Model->ModelFactors->Precision, solidResult, retflag);
+
+			if (retflag > 0)
 			{
-				if(retflag == 2)
+				if (retflag == 2)
 					XbimGeometryCreator::LogWarning(logger, repItem, "Projected Directrix is zero length or invalid, using none projected directrix instead");
 				pSolid = new TopoDS_Solid();
 				*pSolid = solidResult;
@@ -455,7 +464,7 @@ namespace Xbim
 					XbimGeometryCreator::LogWarning(logger, repItem, "Could not project edge onto surface");
 					break;
 				case 0:
-				case -5:		
+				case -5:
 				default:
 					XbimGeometryCreator::LogWarning(logger, repItem, "Failed to create  IfcSurfaceCurveSweptAreaSolid solid");
 					break;
@@ -466,11 +475,29 @@ namespace Xbim
 		void BuildIfcSurfaceCurveSweptAreaSolid(TopoDS_Wire& sweepOcc, TopoDS_Face& refSurface, TopoDS_Face& faceStartOcc, double precision, TopoDS_Solid& result, int& retflag)
 		{
 			retflag = 1;
-			
+			BRepTools::Write(sweepOcc, "c://tmp//sweepOcc.");
+			BRepTools::Write(refSurface, "c://tmp//refSurface.");
+			BRepTools::Write(faceStartOcc, "c://tmp//faceStartOcc.");
 			try
 			{
+
+				//get the origin of the surface that contains the outer wire of the sweep, it should be planar
+				Handle(Geom_Surface) faceSurface = BRep_Tool::Surface(faceStartOcc);
+				//this surface shoulkd be planar
+				Handle(Geom_Plane) facePlane = Handle(Geom_Plane)::DownCast(faceSurface);
+				if (facePlane.IsNull())
+				{
+					retflag = -1;
+					return;
+				}
+				gp_Dir faceStartZDir = facePlane->Axis().Direction();
+				gp_Vec faceStartXDir = facePlane->Position().XDirection();
+
 				//check the directrix is valid, it must be a bounded or closed curve
 				BRepAdaptor_CompCurve cc(sweepOcc, Standard_True);
+				GeomAbs_Shape continuity = cc.Continuity();
+				BRepBuilderAPI_TransitionMode transitionMode = continuity == GeomAbs_Shape::GeomAbs_C0 ? BRepBuilderAPI_RightCorner : BRepBuilderAPI_Transformed;
+
 				if (!cc.IsPeriodic())
 				{
 					double len = std::abs(cc.LastParameter() - cc.FirstParameter());
@@ -480,63 +507,95 @@ namespace Xbim
 						return;
 					}
 				}
+
 				BRepPrim_Builder b;
 				TopoDS_Shell shell;
 				b.MakeShell(shell);
-				
-				gp_Pnt startPoint = cc.Value(cc.FirstParameter());				
-				GeomAPI_ProjectPointOnSurf projector(startPoint, BRep_Tool::Surface(refSurface));
-				projector.Perform(startPoint);
+
+				gp_Pnt startPoint = cc.Value(cc.FirstParameter());
+
+				//need to create the wire on the reference surface as an edge
+
+				ShapeFix_Edge edgeFixer;
+
+				Handle(Geom_Surface) surface = BRep_Tool::Surface(refSurface);	
+				GeomAPI_ProjectPointOnSurf projector(startPoint, surface, precision * 10);
 				if (!projector.IsDone())
-				{					
+				{
 					retflag = -4;
 					return;
 				}
-
 				Standard_Real u;
 				Standard_Real v;
 				projector.Parameters(1, u, v);
+				gp_Vec norm;
 				BRepGProp_Face prop(refSurface);
 				gp_Pnt pos;
-				gp_Vec norm;			
 				prop.Normal(u, v, pos, norm);
-				
 				norm.Normalize();
-
-				//move the wire to the start point
+				Handle(BRepAdaptor_HSurface) adaptedSurface = new BRepAdaptor_HSurface(refSurface);
+				GeomAbs_Shape cont = (adaptedSurface->UContinuity() < adaptedSurface->VContinuity()) ?
+					adaptedSurface->UContinuity() : adaptedSurface->VContinuity();
+				gp_Vec d1U, d1V;				
+				adaptedSurface->D1(0, 0, pos, d1U, d1V);
+				Standard_Real MagTol = 0.000000001;
+				CSLib_NormalStatus NStatus;
+				gp_Dir normal;
+				CSLib::Normal(d1U, d1V, MagTol, NStatus, normal);
+				
+				bool ignoreRefSurface = false;
+				if (NStatus != CSLib_Defined) //this avoids cases where the swept surface is incompatible with OCC (i.e. in the same plane as the sweep and Status is singular)
+				{
+					if (cont == GeomAbs_C0 ||
+						cont == GeomAbs_C1) 
+					{
+						ignoreRefSurface = true; //if this occurs projection onto the sweep will fails
+					}
+				}
+				
 				TopoDS_Edge edge;
 				Standard_Real uoe;
-				
 				cc.Edge(0, edge, uoe);
+				edgeFixer.FixAddPCurve(edge, refSurface, false, precision); //add pcurves
+				BRepTools::Write(edge, "c://tmp//edge.");
+
+				//move the wire to the start point
+
 				Standard_Real l, f;
-				Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, f, l);
+				TopLoc_Location loc;
+				Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, loc, f, l);
 				gp_Pnt p1;
 				gp_Vec tangent;
-				gp_Vec xDir;
+
 				curve->D1(f, p1, tangent);
-				gp_Ax3 toAx3(p1, tangent, norm);	//rotate so normal of profile is tangental and X axis 
+				tangent.Normalize();
+				gp_Ax3 toAx3(p1, tangent, norm); //Zdir pointing tangentally to sweep, XDir perpendicular to the ref surfac
+				gp_Ax3 fromAx3(gp::Origin(), faceStartZDir, faceStartXDir);
 				gp_Trsf trsf;
-				trsf.SetTransformation(toAx3, gp_Ax3());
+				trsf.SetTransformation(toAx3, fromAx3);
 				TopLoc_Location topLoc(trsf);
 				faceStartOcc.Move(topLoc);
+				BRepTools::Write(faceStartOcc, "c://tmp//facePositioned.");
 				TopoDS_Wire outerBound = ShapeAnalysis::OuterWire(faceStartOcc);
 
 				BRepOffsetAPI_MakePipeShell pipeMaker1(sweepOcc);
-				pipeMaker1.SetMode(refSurface); //project normal to ref surface
-				pipeMaker1.SetTransitionMode(BRepBuilderAPI_Transformed);
-				pipeMaker1.Add(outerBound, Standard_False, Standard_False);
+				if(!ignoreRefSurface) //no pint in adding a planar ref surface normal dir will be constant
+					pipeMaker1.SetMode(refSurface); //project normal to ref surface
+				pipeMaker1.SetTransitionMode(transitionMode);
+				pipeMaker1.Add(outerBound, TopExp::FirstVertex(edge), Standard_False, Standard_False);
 				try
 				{
 					pipeMaker1.Build();
 				}
 				catch (Standard_Failure sf)
-				{					
+				{
+					
 					retflag = -5;
 					return;
 				}
 				catch (...)
 				{
-					
+
 					retflag = -5;
 					return;
 				}
@@ -548,7 +607,7 @@ namespace Xbim
 					BRepBuilderAPI_MakeFace firstMaker(firstOuter);
 					BRepBuilderAPI_MakeFace lastMaker(lastOuter);
 
-					
+
 					TopTools_ListOfShape innerWires;
 					for (TopExp_Explorer wireEx(faceStartOcc, TopAbs_WIRE); wireEx.More(); wireEx.Next())
 					{
@@ -556,12 +615,12 @@ namespace Xbim
 							innerWires.Append(TopoDS::Wire(wireEx.Current()));
 					}
 					TopTools_ListIteratorOfListOfShape itl;
-					for (itl.Initialize(innerWires); itl.More(); itl.Next()) 
+					for (itl.Initialize(innerWires); itl.More(); itl.Next())
 					{
 						//it is a hollow section so we need to build the inside
 						BRepOffsetAPI_MakePipeShell pipeMaker2(sweepOcc);
 						TopoDS_Wire innerBoundStart = TopoDS::Wire(itl.Value());
-						pipeMaker2.SetTransitionMode(BRepBuilderAPI_Transformed);
+						pipeMaker2.SetTransitionMode(transitionMode);
 						pipeMaker1.SetMode(refSurface);
 						pipeMaker2.Add(innerBoundStart);
 						pipeMaker2.Build();
@@ -593,7 +652,7 @@ namespace Xbim
 						shell.Reverse();
 						bs.Add(solid, shell);
 					}
-					
+
 					if (BRepCheck_Analyzer(solid, Standard_False).IsValid() == Standard_False)
 					{
 						ShapeFix_Shape shapeFixer(solid);
@@ -621,16 +680,17 @@ namespace Xbim
 						result = solid;
 
 					result.Closed(Standard_True);
-					
+
 					ShapeFix_ShapeTolerance fTol;
-					fTol.LimitTolerance(result, precision);					
+					fTol.LimitTolerance(result, precision);
+					BRepTools::Write(result, "c://tmp//result.");
 					return;
 				}
 			}
 			catch (Standard_Failure sf)
 			{
 				retflag = 0;
-			}		
+			}
 			catch (...)
 			{
 				retflag = 0;
@@ -1195,12 +1255,12 @@ namespace Xbim
 				{
 					TopoDS_Face occFace = face;
 					BRepPrimAPI_MakePrism prism(occFace, vec);
-					
+
 					if (prism.IsDone())
 					{
 						pSolid = new TopoDS_Solid();
 						*pSolid = TopoDS::Solid(prism.Shape());
-						
+
 						if (repItem->Position != nullptr) //In Ifc4 this is now optional
 							pSolid->Move(XbimConvert::ToLocation(repItem->Position));
 						ShapeFix_ShapeTolerance tolFixer;
@@ -1427,7 +1487,7 @@ namespace Xbim
 					}
 					return ret;
 				}
-				catch (Exception ^ e) {
+				catch (Exception^ e) {
 					XbimGeometryCreator::LogWarning(logger, segment, "Could not compute segment parametric length. Returned 1." + e->Message);
 					return 1;
 				}
@@ -1612,18 +1672,25 @@ namespace Xbim
 			//
 		XbimWire^ XbimSolid::CreateDirectrix(IIfcCurve^ directrix, Nullable<IfcParameterValue> startParam, Nullable<IfcParameterValue> endParam, Microsoft::Extensions::Logging::ILogger^ logger)
 		{
-			XbimWire^ untrimmedWire = gcnew XbimWire(directrix, logger, XbimConstraints::None);
+			XbimWire^ wire = gcnew XbimWire(directrix, logger, XbimConstraints::None);
+
 			if (!startParam.HasValue && !endParam.HasValue) //no trim required
 			{
-				return untrimmedWire;
+				return wire;
 			}
+			BRepAdaptor_CompCurve cc(wire, Standard_True);
 
+			//if we have a trimmed curve we need to get the basis curve for correct parameterisation
+
+			IIfcCurve^ basisCurve = directrix;
+			while (dynamic_cast<IIfcTrimmedCurve^>(basisCurve))
+				basisCurve = ((IIfcTrimmedCurve^)basisCurve)->BasisCurve;
 			double startPar = 0;
 			double endPar = double::PositiveInfinity;
 
-			if (dynamic_cast<IIfcLine^>(directrix)) //params are different
+			if (dynamic_cast<IIfcLine^>(basisCurve)) //params are different need to consider magnitude
 			{
-				IIfcLine^ line = (IIfcLine^)(directrix);
+				IIfcLine^ line = (IIfcLine^)(basisCurve);
 				double mag = line->Dir->Magnitude;
 				if (startParam.HasValue && endParam.HasValue)
 				{
@@ -1633,15 +1700,15 @@ namespace Xbim
 				else if (startParam.HasValue && !endParam.HasValue)
 				{
 					startPar = startParam.Value * mag;
-					endPar = untrimmedWire->Length;
+					endPar = cc.LastParameter();
 				}
 				else if (!startParam.HasValue && endParam.HasValue)
 				{
-					startPar = 0;
+					startPar = cc.FirstParameter();
 					endPar = endParam.Value * mag;
 				}
 			}
-			else if (dynamic_cast<IIfcCompositeCurve^>(directrix)) //params are different
+			else if (dynamic_cast<IIfcCompositeCurve^>(basisCurve)) //params are different
 			{
 
 				if (startParam.HasValue)
@@ -1654,11 +1721,11 @@ namespace Xbim
 
 				// for each segment we encounter, we will see if the threshold falls within its length
 				//
-				IIfcCompositeCurve^ curve = (IIfcCompositeCurve^)(directrix);
+				IIfcCompositeCurve^ curve = (IIfcCompositeCurve^)(basisCurve);
 				for each (IIfcCompositeCurveSegment ^ segment in curve->Segments)
 				{
 					XbimWire^ segWire = gcnew XbimWire(segment, logger, XbimConstraints::None);
-					double wireLen = segWire->Length;       // this is the lenght to add to the OCC command if we use all of the segment
+					double wireLen = segWire->Length;       // this is the length to add to the OCC command if we use all of the segment
 					double segValue = SegLength(segment, logger);   // this is the IFC size of the segment
 					totCurveLen += wireLen;
 
@@ -1682,43 +1749,46 @@ namespace Xbim
 				if ((occStart > 0 && Math::Abs(occStart - 0.0) > precision) || (occEnd < totCurveLen && Math::Abs(occEnd - totCurveLen) > precision))
 				{
 
-					return (XbimWire^)untrimmedWire->Trim(occStart, occEnd, directrix->Model->ModelFactors->Precision, logger);
+					return (XbimWire^)wire->Trim(occStart, occEnd, directrix->Model->ModelFactors->Precision, logger);
 				}
 				else
-					return untrimmedWire;
+					return wire;
 			}
-			else if (dynamic_cast<IIfcPolyline^>(directrix) &&
+			else if (dynamic_cast<IIfcPolyline^>(basisCurve) &&
 				(double)startParam.Value == 0. &&
 				(double)endParam.Value == 1. &&
 				directrix->Model->ModelFactors->ApplyWorkAround(XbimGeometryCreator::PolylineTrimLengthOneForEntireLine)) //consider work around for incorrectly set trims
 			{
 				startPar = startParam.Value;
-				endPar = untrimmedWire->Length;
+				endPar = cc.LastParameter();
 				XbimGeometryCreator::LogInfo(logger, directrix, "Polyline trim (0:1) does not comply with schema. {0}", directrix->Model->Header->FileName->OriginatingSystem);
 			}
 			else
 			{
+				bool isConic = (dynamic_cast<IIfcConic^>(basisCurve) != nullptr);
+				double parameterFactor = isConic ? directrix->Model->ModelFactors->AngleToRadiansConversionFactor : 1;
+
 				if (startParam.HasValue && endParam.HasValue)
 				{
-					startPar = startParam.Value;
-					endPar = endParam.Value;
+					startPar = startParam.Value * parameterFactor;
+					endPar = endParam.Value * parameterFactor;
 				}
 				else if (startParam.HasValue && !endParam.HasValue)
 				{
 
-					startPar = startParam.Value;
-					endPar = untrimmedWire->Length;
+					startPar = startParam.Value * parameterFactor;
+					endPar = cc.LastParameter();
 				}
 				else if (!startParam.HasValue && endParam.HasValue)
 				{
-					startPar = 0;
-					endPar = endParam.Value;
+					startPar = cc.FirstParameter();
+					endPar = endParam.Value * parameterFactor;
 				}
 
 			}
 
 			//need to trim the wore
-			return (XbimWire^)untrimmedWire->Trim(startPar, endPar, directrix->Model->ModelFactors->Precision, logger);
+			return (XbimWire^)wire->Trim(startPar, endPar, directrix->Model->ModelFactors->Precision, logger);
 
 		}
 
@@ -2129,7 +2199,7 @@ namespace Xbim
 				if (boolOp.HasErrors() == Standard_False)
 					return gcnew XbimSolidSet(boolOp.Shape());
 			}
-			catch (const std::exception & exc)
+			catch (const std::exception& exc)
 			{
 				err = gcnew String(exc.what());
 			}
@@ -2168,7 +2238,7 @@ namespace Xbim
 				if (boolOp.HasErrors() == Standard_False)
 					return gcnew XbimSolidSet(boolOp.Shape());
 			}
-			catch (const std::exception & exc)
+			catch (const std::exception& exc)
 			{
 				err = gcnew String(exc.what());
 			}

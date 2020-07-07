@@ -85,7 +85,7 @@
     <None Update="TestFiles\cut_planes_within_fuzzy_tolerance.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestFiles\failing_swept_area_curve.ifc">
+    <None Update="TestFiles\SurfaceCurveSweptAreaSolid_5.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="TestFiles\grid_with_polylines.ifc">
@@ -208,10 +208,13 @@
     <None Update="TestFiles\Primitives\poor_face_planar_fidelity.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestFiles\swept_curve_with_bad_trims.ifc">
+    <None Update="TestFiles\SurfaceCurveSweptAreaSolid_1.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestFiles\swept_curve_with_trim_params.ifc">
+    <None Update="TestFiles\SurfaceCurveSweptAreaSolid_2.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestFiles\SurfaceCurveSweptAreaSolid_4.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="TestFiles\swept_disk_solid_with_trim_params.ifc">
@@ -358,7 +361,7 @@
     <None Update="TestFiles\Ifc4TestFiles\slab-tessellated-unique-vertices.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestFiles\Ifc4TestFiles\surface-curve-swept-area.ifc">
+    <None Update="TestFiles\SurfaceCurveSweptAreaSolid_3.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="TestFiles\Ifc4TestFiles\surface-model.ifc">

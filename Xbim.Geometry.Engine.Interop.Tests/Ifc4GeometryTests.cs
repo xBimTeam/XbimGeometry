@@ -33,22 +33,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             geomEngine = null;
             logger = null;
         }
-
-        [TestMethod]
-        public void Can_build_swept_curve_with_trim_params()
-        {
-            using (var model = MemoryModel.OpenRead(@"TestFiles\swept_curve_with_trim_params.ifc"))
-            {
-                var pfs = model.Instances.OfType<IIfcSurfaceCurveSweptAreaSolid>().FirstOrDefault();
-                var positionWorkAround = model.AddWorkAroundSurfaceofLinearExtrusionForRevit();
-                Assert.IsTrue(pfs != null, "No IIfcSurfaceCurveSweptAreaSolid found");
-                var solid = geomEngine.CreateSolid(pfs, logger);
-
-                Assert.AreEqual(19.276571095877653, solid.Volume, 0.000001);
-                Assert.AreEqual(3, solid.Faces.Count);
-
-            }
-        }
+        
         [TestMethod]
         public void Can_build_ifcadvancedbrep_with_faulty_surface_orientation()
         {
@@ -56,7 +41,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 MemoryModel.SetWorkArounds(model.Header, model.ModelFactors as XbimModelFactors);
                 var pfs = model.Instances.OfType<IIfcAdvancedBrep>().FirstOrDefault();
-                var positionWorkAround = model.AddWorkAroundSurfaceofLinearExtrusionForRevit();
+                ((XbimModelFactors)model.ModelFactors).AddWorkAround("#SurfaceOfLinearExtrusion");
                 Assert.IsTrue(pfs != null, "No IIfcAdvancedBrep found");
                 var solid = geomEngine.CreateSolid(pfs, logger);
                 solid.Volume.Should().BeApproximately(102258269.244692, 1e-7);
@@ -345,7 +330,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var model = MemoryModel.OpenRead(@"TestFiles\Ifc4TestFiles\Axis2PlacementError.ifc"))
             {
                 var advancedBrep = model.Instances.OfType<IfcAdvancedBrep>().FirstOrDefault(i => i.EntityLabel == 27743);
-                bool wa = model.ModelFactors.ApplyWorkAround("#SurfaceOfLinearExtrusion");
+                ((XbimModelFactors)model.ModelFactors).AddWorkAround("#SurfaceOfLinearExtrusion");
                 //units are not correctly set in the ifc file
                 model.ModelFactors.Initialise(1, 1e-3, 1e-2);
                 advancedBrep.Should().NotBeNull();
@@ -576,20 +561,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             }
         }
 
-        [TestMethod]
-        public void SurfaceCurveSweptAreaSolidTest()
-        {
-            using (var model = MemoryModel.OpenRead(@"TestFiles\Ifc4TestFiles\surface-curve-swept-area.ifc"))
-            {
-                var surfaceSweep = model.Instances.OfType<IfcSurfaceCurveSweptAreaSolid>().FirstOrDefault();
-                Assert.IsNotNull(surfaceSweep);
-                IIfcSurfaceOfLinearExtrusion le = (IIfcSurfaceOfLinearExtrusion)surfaceSweep.ReferenceSurface;
-                XbimVector3D v = le.ExtrusionAxis;
-
-                var bar = geomEngine.CreateSolid(surfaceSweep);
-                Assert.AreEqual(0.26112592541014312, bar.Volume, 1e-9);
-            }
-        }
+        
 
         #endregion
 

@@ -543,7 +543,7 @@ namespace Xbim
 
 		void XbimCurve::Init(IIfcTrimmedCurve^ curve, ILogger^ logger)
 		{
-			int id = curve->EntityLabel;
+			//int id = curve->EntityLabel;
 			Init(curve->BasisCurve, logger);
 			if (IsValid)
 			{
@@ -593,8 +593,7 @@ namespace Xbim
 						u2Found = true;
 					}
 				}
-
-
+				
 
 				if (trim_cartesian) //if we prefer cartesian and we have the points override the parameters
 				{
