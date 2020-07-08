@@ -1748,8 +1748,6 @@ namespace Xbim
 				TopoDS_Edge basisEdge1 = gcnew XbimEdge(sLin->SweptCurve, logger);
 				TopoDS_Edge basisEdge2 = gcnew XbimEdge(sLin->SweptCurve, logger);
 				
-
-				double start, end;
 				double tolerance = sLin->Model->ModelFactors->Precision;
 				gp_Vec extrude = XbimConvert::GetDir3d(sLin->ExtrudedDirection); //we are going to ignore magnitude as the surface should be infinite
 
@@ -1783,8 +1781,7 @@ namespace Xbim
 				{
 					if (doRevitWorkAround)
 					{
-						gp_Ax3 ax3 = XbimConvert::ToAx3NoTranslation(sLin->Position);
-						gp_Trsf trsf;
+						ax3 = XbimConvert::ToAx3NoTranslation(sLin->Position);						
 						trsf.SetTransformation(ax3, gp_Ax3());
 						TopLoc_Location newLoc(trsf);
 						pFace->Move(newLoc);

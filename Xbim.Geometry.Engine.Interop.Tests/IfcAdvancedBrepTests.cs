@@ -85,9 +85,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [DataRow("SurfaceCurveSweptAreaSolid_3", 0.26111117805532907, false, DisplayName = "Reference Model from IFC documentation")]
         [DataRow("SurfaceCurveSweptAreaSolid_4", 19.276830224679465, DisplayName = "Handles Trimmed directrix is periodic")]
         [DataRow("SurfaceCurveSweptAreaSolid_5", 12.603349469526613, false, true, DisplayName = "Handles Polylines Incorrectly Trimmed as 0 to 1")]
-        public void SurfaceCurveSweptAreaSolid_Tests(string filename, double requiredVolume, bool addLinearExtrusionWorkAround = true, bool addPolyTrimWorkAround = false)
+        public void SurfaceCurveSweptAreaSolid_Tests(string fileName, double requiredVolume, bool addLinearExtrusionWorkAround = true, bool addPolyTrimWorkAround = false)
         {
-            using (var model = MemoryModel.OpenRead($@"TestFiles\{filename}.ifc"))
+            using (var model = MemoryModel.OpenRead($@"TestFiles\{fileName}.ifc"))
             {
                 if (addLinearExtrusionWorkAround)
                     ((XbimModelFactors)model.ModelFactors).AddWorkAround("#SurfaceOfLinearExtrusion");

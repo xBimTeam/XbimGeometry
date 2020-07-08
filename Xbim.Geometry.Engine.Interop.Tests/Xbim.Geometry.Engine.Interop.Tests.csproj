@@ -139,7 +139,7 @@
     <None Update="TestFiles\Regression\FailingGeom.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestFiles\Solid_swept_disk_pipe.ifc">
+    <None Update="TestFiles\SweptDiskSolid_3.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="TestFiles\BooleanResultTimoutTest.ifc">
@@ -217,7 +217,7 @@
     <None Update="TestFiles\SurfaceCurveSweptAreaSolid_4.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestFiles\swept_disk_solid_with_trim_params.ifc">
+    <None Update="TestFiles\SweptDiskSolid_2.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="TestFiles\triangulation_error.brep">
@@ -352,7 +352,7 @@
     <None Update="TestFiles\Ifc4TestFiles\long-running-boolean.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestFiles\Ifc4TestFiles\ReinforcingBar.ifc">
+    <None Update="TestFiles\SweptDiskSolid_4.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="TestFiles\Ifc4TestFiles\sectioned-spine.ifc">
@@ -367,7 +367,7 @@
     <None Update="TestFiles\Ifc4TestFiles\surface-model.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestFiles\Ifc4TestFiles\swept-disk-solid-polygonal.ifc">
+    <None Update="TestFiles\SweptDiskSolidPolygonal_1.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="TestFiles\Ifc4TestFiles\TrimmedEllipseTest.ifc">
@@ -385,7 +385,7 @@
     <None Update="TestFiles\IfcExtrudedAreaSolidTest.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestFiles\IfcSweptDiskSolidWithPolylineTest.ifc">
+    <None Update="TestFiles\SweptDiskSolid_1.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="TestFiles\IndexedPolyCurveTest.ifc">

@@ -1502,165 +1502,134 @@ namespace Xbim
 
 			XbimWire^ sweep = CreateDirectrix(repItem->Directrix, repItem->StartParam, repItem->EndParam, logger);
 			if (!sweep->IsValid) return;
-
+			BRepBuilderAPI_TransitionMode transitionMode = BRepBuilderAPI_TransitionMode::BRepBuilderAPI_Transformed;
 			IIfcSweptDiskSolidPolygonal^ polygonal = dynamic_cast<IIfcSweptDiskSolidPolygonal^>(repItem);
-			if (polygonal != nullptr && polygonal->FilletRadius.HasValue)
+			if (polygonal != nullptr && polygonal->FilletRadius.HasValue) //transition model stays as transformed
 			{
 				if (!sweep->FilletAll((double)polygonal->FilletRadius.Value))
-					XbimGeometryCreator::LogWarning(logger, repItem, "Sweep Could not be corectly filleted");
+				{
+					XbimGeometryCreator::LogWarning(logger, repItem, "Sweep could not be corectly filleted");
+					transitionMode = BRepBuilderAPI_TransitionMode::BRepBuilderAPI_RightCorner; //revert to non continuous mode
+				}
 			}
+			else if (dynamic_cast<IIfcPolyline^>(repItem->Directrix)) //need right corner mode
+				transitionMode = BRepBuilderAPI_TransitionMode::BRepBuilderAPI_RightCorner;
 
-			//make the outer wire
-			XbimPoint3D s = sweep->Start;
-			gp_Pnt startPnt(s.X, s.Y, s.Z);
+			String^ err =BuildSweptDiskSolid(sweep, repItem->Radius, repItem->InnerRadius.HasValue ? (double)repItem->InnerRadius.Value : -1., transitionMode);
+			if (err != nullptr)
+			{
+				if(pSolid==nullptr || pSolid->IsNull()) //nothing done at all
+					XbimGeometryCreator::LogError(logger, repItem, "Could not construct IfcSweptDiskSolid: " + err);
+				else //partial build, most likely failed to build inner hole
+					XbimGeometryCreator::LogWarning(logger, repItem, "Could not fully construct IfcSweptDiskSolid: " + err);
+			}
+			
+		}
 
-			TopoDS_Edge edge;
-			Standard_Real uoe;
-			BRepAdaptor_CompCurve cc(sweep);
-			cc.Edge(0, edge, uoe);
-			Standard_Real lp, fp;
-			Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, fp, lp);
-			gp_Pnt p1;
-			gp_Vec tangent;
-			curve->D1(0, p1, tangent);
+		//if inner radius is not required it has a value of -1
+		String^ XbimSolid::BuildSweptDiskSolid(const TopoDS_Wire& directrixWire, double radius, double innerRadius, BRepBuilderAPI_TransitionMode transitionMode)
+		{
+			//the standard say
 
-			gp_Ax2 axCircle(startPnt, tangent);
-			gp_Circ outer(axCircle, repItem->Radius);
-			Handle(Geom_Circle) hOuter = GC_MakeCircle(outer);
-			TopoDS_Edge outerEdge = BRepBuilderAPI_MakeEdge(hOuter);
-
-			TopoDS_Wire outerWire = BRepBuilderAPI_MakeWire(outerEdge);
-
-
-
-			BRepOffsetAPI_MakePipeShell pipeMaker1(sweep);
-			pipeMaker1.Add(outerWire, Standard_False, Standard_True);
-			pipeMaker1.SetTransitionMode(BRepBuilderAPI_Transformed);
+			//If the transitions between consecutive segments of the Directrix are not tangent continuous, the resulting solid is created by a miter at half angle between the two segments.
+			//this will be the case for a polyline as each segment is not tangent continuous
+			//composite urves will be tangent continuous
 			try
 			{
-				pipeMaker1.Build();
-			}
-			catch (...) //if transformed mode fails try 
-			{
-				XbimGeometryCreator::LogWarning(logger, repItem, "Could not construct IfcSweptDiskSolid");
-				return;
-			}
+				//form the shape to sweep, the centre of the circles must be at the start of the directrix
+				BRepBuilderAPI_MakeEdge edgeMaker;
+				BRep_Builder builder;
+				//get the normal at the start point
+				gp_Vec dirAtStart;
+				gp_Pnt startPoint;
+				BRepAdaptor_CompCurve directrix(directrixWire, Standard_True);
+				directrix.D1(0, startPoint, dirAtStart);
+				gp_Ax2 axis(startPoint, dirAtStart);
+				dirAtStart.Reverse(); //vector points in direction of directrix, need reversing for correct face orientation
+				Handle(Geom_Circle) outer = new Geom_Circle(axis, radius);
+				edgeMaker.Init(outer);
+				TopoDS_Wire outerWire;
+				builder.MakeWire(outerWire);
+				builder.Add(outerWire, edgeMaker.Edge());
 
+				BRepOffsetAPI_MakePipeShell oSweepMaker(directrixWire);
+				oSweepMaker.SetTransitionMode(transitionMode);
+				oSweepMaker.Add(outerWire);
 
-			if (pipeMaker1.IsDone())
-			{
-
-				if (!pipeMaker1.MakeSolid()) //we cannot make a solid or it is already a solid
+				oSweepMaker.Build();
+				if (oSweepMaker.IsDone())
 				{
-					XbimGeometryCreator::LogWarning(logger, repItem, "Could not construct IfcSweptDiskSolidPolygonal");
-					return;
-				}
-
-				TopoDS_Solid pipe = TopoDS::Solid(pipeMaker1.Shape());
-
-				if (!sweep->IsClosed && repItem->InnerRadius.HasValue && repItem->InnerRadius.Value > 0 && repItem->InnerRadius.Value < repItem->Radius)
-				{
-					bool isClosed = pipeMaker1.FirstShape().ShapeType() == TopAbs_WIRE; //if the first is stil a wire the shape is closed, it should be a face to make a valid solid that is open
-
-					//now add inner wire if it is defined
-					gp_Circ inner(axCircle, repItem->InnerRadius.Value);
-					Handle(Geom_Circle) hInner = GC_MakeCircle(inner);
-					TopoDS_Edge innerEdge = BRepBuilderAPI_MakeEdge(hInner);
-					BRepBuilderAPI_MakeWire innerWire;
-					innerWire.Add(innerEdge);
-					BRepOffsetAPI_MakePipeShell pipeMaker2(sweep);
-					pipeMaker2.SetTransitionMode(BRepBuilderAPI_RightCorner);
-					pipeMaker2.Add(innerWire.Wire(), Standard_False, Standard_True);
-					pipeMaker2.Build();
-					if (pipeMaker2.IsDone() && !isClosed) //no pint in adding a void to a pipe solid that is closed
+					//do we need an inner shell
+					if (innerRadius > 0)
 					{
-						if (!pipeMaker2.MakeSolid()) //we cannot make a solid
+
+						Handle(Geom_Circle) inner = new Geom_Circle(axis, innerRadius);
+						edgeMaker.Init(inner);
+						BRepBuilderAPI_MakeWire iWireMaker(edgeMaker.Edge());
+						BRepOffsetAPI_MakePipeShell iSweepMaker(directrixWire);
+						iSweepMaker.SetTransitionMode(transitionMode);
+						TopoDS_Shape holeWire = iWireMaker.Wire().Reversed();
+						iSweepMaker.Add(holeWire);
+						iSweepMaker.Build();
+						if (iSweepMaker.IsDone())
 						{
-							XbimGeometryCreator::LogWarning(logger, repItem, "Could not construct inner sweep of IfcSweptDiskSolidPolygonal");
+							BRep_Builder builder;
+							TopoDS_Solid solid;
+							TopoDS_Shell shell;
+							builder.MakeSolid(solid);
+							builder.MakeShell(shell);
+							TopExp_Explorer faceEx(oSweepMaker.Shape(), TopAbs_FACE);
+							for (; faceEx.More(); faceEx.Next())
+								builder.Add(shell, TopoDS::Face(faceEx.Current()));
+							faceEx.Init(iSweepMaker.Shape(), TopAbs_FACE);
+							for (; faceEx.More(); faceEx.Next())
+								builder.Add(shell, TopoDS::Face(faceEx.Current()));
+							//cap the faces
+							TopoDS_Face startFace = BRepLib_MakeFace(TopoDS::Wire(oSweepMaker.FirstShape().Reversed()), Standard_True);
+							builder.Add(startFace, iSweepMaker.FirstShape().Reversed());
+							TopoDS_Face endFace = BRepLib_MakeFace(TopoDS::Wire(oSweepMaker.LastShape().Reversed()), Standard_True);
+							builder.Add(endFace, iSweepMaker.LastShape().Reversed());
+							builder.Add(shell, startFace);
+							builder.Add(shell, endFace.Reversed());
+							builder.Add(solid, shell);
+							pSolid = new TopoDS_Solid();
+							*pSolid = solid;
+							return nullptr;
 						}
 						else
-						{
-							TopoDS_Solid pipeInner = TopoDS::Solid(pipeMaker2.Shape());
-							BRep_Builder bs;
-							TopoDS_Shell shell;
-							bs.MakeShell(shell);
-							TopTools_IndexedMapOfShape pipeMap;
-							TopExp::MapShapes(pipe, TopAbs_FACE, pipeMap);
-							TopoDS_Face firstFace;
-							TopoDS_Face lastFace;
-							for (int i = 1; i <= pipeMap.Extent(); i++)
+						{							
+							bool ok = oSweepMaker.MakeSolid();
+							if (ok)
 							{
-								const TopoDS_Face& f = TopoDS::Face(pipeMap(i));
-								if (f.IsSame(pipeMaker1.FirstShape()))
-									firstFace = f;
-								else if (f.IsSame(pipeMaker1.LastShape()))
-									lastFace = f;
-								else
-									bs.Add(shell, f);
+								pSolid = new TopoDS_Solid();
+								*pSolid = TopoDS::Solid(oSweepMaker.Shape());
+								return nullptr;
 							}
-							TopTools_IndexedMapOfShape innerPipeMap;
-							TopExp::MapShapes(pipeInner, TopAbs_FACE, innerPipeMap);
-							for (int i = 1; i <= innerPipeMap.Extent(); i++)
-							{
-								const TopoDS_Face& f = TopoDS::Face(innerPipeMap(i));
-
-								if (f.IsEqual(pipeMaker2.FirstShape()))
-								{
-									BRepBuilderAPI_MakeFace firstMaker(firstFace);
-									TopoDS_Wire w = BRepTools::OuterWire(f);
-									w.Reverse();
-									firstMaker.Add(w);
-									firstFace = firstMaker.Face();
-								}
-								else if (f.IsEqual(pipeMaker2.LastShape()))
-								{
-									BRepBuilderAPI_MakeFace lastMaker(lastFace);
-									TopoDS_Wire w = BRepTools::OuterWire(f);
-									w.Reverse();
-									lastMaker.Add(w);
-									lastFace = lastMaker.Face();
-								}
-								else
-									bs.Add(shell, f.Reversed());
-
-							}
-							TopoDS_Solid solid;
-							bs.MakeSolid(solid);
-
-							bs.Add(shell, firstFace);
-							bs.Add(shell, lastFace);
-							bs.Add(solid, shell);
-
-							BRepClass3d_SolidClassifier SC(solid);
-							SC.PerformInfinitePoint(Precision::Confusion());
-							if (SC.State() == TopAbs_IN) {
-								bs.MakeSolid(solid);
-								shell.Reverse();
-								bs.Add(solid, shell);
-							}
-							solid.Closed(Standard_True);
-							pipe = solid;
-
+							throw Standard_Failure("Could not build Inner radius of SweptDiskSolid");
 						}
+
 					}
 					else
 					{
-						XbimGeometryCreator::LogWarning(logger, repItem, "Inner loop could not be constructed");
+						bool ok = oSweepMaker.MakeSolid();
+						if (ok)
+						{
+							pSolid = new TopoDS_Solid();
+							*pSolid = TopoDS::Solid(oSweepMaker.Shape());
+							return nullptr;
+						}
 					}
 				}
-				pSolid = new TopoDS_Solid();
-				*pSolid = pipe;
-				pSolid->Closed(Standard_True);
-				ShapeFix_ShapeTolerance tolFixer;
-				tolFixer.LimitTolerance(*pSolid, repItem->Model->ModelFactors->Precision);
-				return;
 
 			}
-			else
+			catch (Standard_Failure e)
 			{
-				XbimGeometryCreator::LogWarning(logger, repItem, "Could not be constructed");
+				return gcnew String(e.GetMessageString());
 			}
+			return gcnew String("Could not build SweptDiskSolid");
+			
 		}
+
 
 		// comments on the interpretation of the params are found here:
 			// https://sourceforge.net/p/ifcexporter/discussion/general/thread/7cc44b69/?limit=25

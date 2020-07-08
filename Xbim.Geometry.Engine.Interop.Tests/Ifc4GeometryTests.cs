@@ -48,20 +48,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 solid.Faces.Count.Should().Be(14);              
             }
         }
-        [TestMethod]
-        public void Can_build_solid_swept_disk_pipe()
-        {
-            using (var model = MemoryModel.OpenRead(@"TestFiles\Solid_swept_disk_pipe.ifc"))
-            {
-                var pfs = model.Instances.OfType<IIfcSweptDiskSolid>().FirstOrDefault();
-                Assert.IsTrue(pfs != null, "No IIfcPolygonalFaceSet found");
-                var pipe = geomEngine.CreateSolid(pfs, logger);
-
-                Assert.AreEqual(129879, pipe.Volume, 0.99);
-                Assert.AreEqual(15, pipe.Faces.Count);
-
-            }
-        }
+       
 
         [TestMethod]
         public void Can_build_polygonal_face_tessellation()
@@ -356,18 +343,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             }
         }
 
-        [TestMethod]
-        public void AdvancedSweptSolidTest()
-        {
-            using (var model = MemoryModel.OpenRead(@"TestFiles\Ifc4TestFiles\ReinforcingBar.ifc"))
-            {
-                var advancedSweep = model.Instances.OfType<IfcSweptDiskSolid>().FirstOrDefault();
-                Assert.IsNotNull(advancedSweep);
-                var bar = geomEngine.CreateSolid(advancedSweep);
-                Assert.IsTrue((int)bar.Volume == 129879);
-            }
-        }
-
+        
 
         #endregion
 
@@ -505,17 +481,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
 
 
-        [TestMethod]
-        public void SweptDiskSolidPolygonalTest()
-        {
-            using (var model = MemoryModel.OpenRead(@"TestFiles\Ifc4TestFiles\swept-disk-solid-polygonal.ifc"))
-            {
-                var sweptPolygonalSolid = model.Instances.OfType<IfcSweptDiskSolidPolygonal>().FirstOrDefault();
-                Assert.IsNotNull(sweptPolygonalSolid);
-                var bar = geomEngine.CreateSolid(sweptPolygonalSolid);
-                Assert.IsTrue(bar.Volume > 0);
-            }
-        }
+
         [TestMethod]
         public void WireInitFromIfcIndexedPolyCurveTest()
         {
@@ -823,5 +789,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.IsTrue(((IXbimFace)face).IsValid, "Invalid face returned");
             }
         }
+
+       
     }
 }
