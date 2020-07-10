@@ -1573,7 +1573,7 @@ namespace Xbim
 						iSweepMaker.Build();
 						if (iSweepMaker.IsDone())
 						{
-							BRep_Builder builder;
+							
 							TopoDS_Solid solid;
 							TopoDS_Shell shell;
 							builder.MakeSolid(solid);
