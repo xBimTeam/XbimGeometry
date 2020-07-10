@@ -470,7 +470,7 @@ namespace Xbim
 					}
 					catch (Standard_Failure sf)
 					{
-						String^ err = gcnew String(sf.GetMessageString());	
+						//String^ err = gcnew String(sf.GetMessageString());	
 						//XbimGeometryCreator::LogWarning(logger, this, "Could not build a correct solid from the shell: " + err);
 					}
 					return gcnew XbimSolid(solid);

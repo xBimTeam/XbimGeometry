@@ -32,6 +32,7 @@
 #include <Geom2d_Line.hxx>
 #include <IntAna2d_AnaIntersection.hxx>
 #include <GeomLib.hxx>
+#include "XbimMesh.h"
 using System::Runtime::InteropServices::Marshal;
 
 using namespace  System::Threading;
@@ -294,6 +295,13 @@ namespace Xbim
 			return XbimGeometryObjectSet::Empty;
 		}
 
+		/*XbimMesh^ XbimGeometryCreator::CreateMeshGeometry(IXbimGeometryObject^ geometryObject, double precision, double deflection, double angle)
+		{
+			XbimShapeGeometry^ shapeGeom = CreateShapeGeometry(geometryObject, precision, deflection,angle, XbimGeometryType::PolyhedronBinary, nullptr);
+			XbimMesh^ mesh = gcnew XbimMesh((((IXbimShapeGeometryData^)shapeGeom)->ShapeData));
+			return mesh;
+		}*/
+		
 		XbimShapeGeometry^ XbimGeometryCreator::CreateShapeGeometry(IXbimGeometryObject^ geometryObject, double precision, double deflection, double angle, XbimGeometryType storageType, ILogger^ /*logger*/)
 		{
 			XbimShapeGeometry^ shapeGeom = gcnew XbimShapeGeometry();
@@ -364,6 +372,7 @@ namespace Xbim
 					delete tw;
 				}
 				memStream->Flush();
+				
 				((IXbimShapeGeometryData^)shapeGeom)->ShapeData = memStream->ToArray();
 				delete memStream;
 				if (shapeGeom->ShapeData->Length > 0)
@@ -373,6 +382,7 @@ namespace Xbim
 						((XbimShapeGeometry^)shapeGeom)->Format = storageType;
 				}
 			}
+			
 			return shapeGeom;
 
 		}

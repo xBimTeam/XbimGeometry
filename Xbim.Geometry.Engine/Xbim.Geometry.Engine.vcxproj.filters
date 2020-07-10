@@ -9426,6 +9426,9 @@
     <ClInclude Include="Factories\WireFactory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="XbimMesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Stdafx.cpp">
@@ -15321,6 +15324,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Factories\WireFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="XbimMesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
