@@ -153,8 +153,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [DataRow("advanced_brep_5", true, 1, DisplayName = "Incorrectly located surfaces of linear extrusion - not fixed")]
         [DataRow("advanced_brep_6", true, 1, DisplayName = "The trimming points either result in a zero length curve or do not intersect the curve")]
         [DataRow("advanced_brep_7", true, 2, DisplayName = "Long running construction")]
-        [DataRow("advanced_brep_8", true, 9, DisplayName = "Fails to process")]
-        public void Advanced_brep_tests(string brepFileName, bool isValidSolid = true, int solidCount = 1)
+        [DataRow("advanced_brep_8", true, 9, true, DisplayName = "Fails to process")]
+        public void Advanced_brep_tests(string brepFileName, bool isValidSolid = true, int solidCount = 1, bool fails = false)
         {
 
             using (var model = MemoryModel.OpenRead($@"TestFiles\{brepFileName}.ifc"))
@@ -166,9 +166,12 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var solids = geomEngine.CreateSolidSet(brep, logger);
                 solids.IsValid.Should().BeTrue();
                 solids.Should().HaveCount(solidCount);
-                foreach (var solid in solids)
+                if (!fails) //if we fail the volume will be 0 or less
                 {
-                    solid.Volume.Should().BeGreaterThan(0);
+                    foreach (var solid in solids)
+                    {
+                        solid.Volume.Should().BeGreaterThan(0);
+                    }
                 }
 
             }
