@@ -85,6 +85,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [DataRow("SurfaceCurveSweptAreaSolid_3", 0.26111117805532907, false, DisplayName = "Reference Model from IFC documentation")]
         [DataRow("SurfaceCurveSweptAreaSolid_4", 19.276830224679465, DisplayName = "Handles Trimmed directrix is periodic")]
         [DataRow("SurfaceCurveSweptAreaSolid_5", 12.603349469526613, false, true, DisplayName = "Handles Polylines Incorrectly Trimmed as 0 to 1")]
+        [DataRow("SurfaceCurveSweptAreaSolid_6", 12.603349469526613, DisplayName = "Directrix trim incorrectly set to 0, 360 by Revit")]
+       // [DataRow("SurfaceCurveSweptAreaSolid_7", 12.603349469526613,false, DisplayName = "Directrix trim from Flex Ifc Exporter trim  set to 270, 360 by Revit")]
         public void SurfaceCurveSweptAreaSolid_Tests(string fileName, double requiredVolume, bool addLinearExtrusionWorkAround = true, bool addPolyTrimWorkAround = false)
         {
             using (var model = MemoryModel.OpenRead($@"TestFiles\{fileName}.ifc"))
@@ -150,7 +152,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [DataRow("advanced_brep_4", true, 2, DisplayName = "Two solids from one advanced brep, errors in holes")]
         [DataRow("advanced_brep_5", true, 1, DisplayName = "Incorrectly located surfaces of linear extrusion - not fixed")]
         [DataRow("advanced_brep_6", true, 1, DisplayName = "The trimming points either result in a zero length curve or do not intersect the curve")]
-
+        [DataRow("advanced_brep_7", true, 2, DisplayName = "Long running construction")]
+        [DataRow("advanced_brep_8", true, 9, DisplayName = "Fails to process")]
         public void Advanced_brep_tests(string brepFileName, bool isValidSolid = true, int solidCount = 1)
         {
 

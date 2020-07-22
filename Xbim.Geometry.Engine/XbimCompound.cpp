@@ -487,7 +487,16 @@ namespace Xbim
 					{
 						TopoDS_Solid s = solidmaker.Solid();
 						BRepClass3d_SolidClassifier class3d(s);
-						class3d.PerformInfinitePoint(Precision::Confusion());
+						try
+						{
+							class3d.PerformInfinitePoint(Precision::Confusion());
+						}
+						catch (Standard_Failure sf)
+						{
+							String^ err = gcnew String(sf.GetMessageString());
+							XbimGeometryCreator::LogWarning(logger, solid, "Failed to determine orientation of shell in IfcAdvancedBrep: " + err);
+						}
+						
 						if (class3d.State() == TopAbs_IN) s.Reverse();
 						b.Add(*pCompound, s);
 					}
