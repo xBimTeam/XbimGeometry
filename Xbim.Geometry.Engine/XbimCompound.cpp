@@ -469,7 +469,8 @@ namespace Xbim
 				pCompound->Checked(true);
 				return;
 			}
-
+			b.Add(*pCompound, occOuterShell); //just add what we have
+			return;
 			//advanced breps are always solids, so to make sure we have highest form, sometime we get multiple solids
 			try
 			{
