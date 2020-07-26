@@ -156,141 +156,141 @@ namespace Xbim
 				LogError(logger, geomRep, "Argument error: XbimGeometryCreator::Create,  Geometry Representation Item cannot be null");
 				return nullptr;
 			}
-			//try
-			//{
-			IIfcSweptAreaSolid^ sweptAreaSolid = dynamic_cast<IIfcSweptAreaSolid^>(geomRep);
-			if (sweptAreaSolid != nullptr)
+			try
 			{
-				if (dynamic_cast<IIfcCompositeProfileDef^>(sweptAreaSolid->SweptArea)) //handle these as composite solids
+				IIfcSweptAreaSolid^ sweptAreaSolid = dynamic_cast<IIfcSweptAreaSolid^>(geomRep);
+				if (sweptAreaSolid != nullptr)
 				{
-					XbimSolidSet^ solidset = (XbimSolidSet^)CreateSolidSet(sweptAreaSolid, logger);
-					if (objectLocation != nullptr) solidset->Move(objectLocation);
-					return Trim(solidset);
+					if (dynamic_cast<IIfcCompositeProfileDef^>(sweptAreaSolid->SweptArea)) //handle these as composite solids
+					{
+						XbimSolidSet^ solidset = (XbimSolidSet^)CreateSolidSet(sweptAreaSolid, logger);
+						if (objectLocation != nullptr) solidset->Move(objectLocation);
+						return Trim(solidset);
+					}
+					else
+					{
+						XbimSolid^ solid = (XbimSolid^)CreateSolid((IIfcSweptAreaSolid^)geomRep, logger);
+						if (objectLocation != nullptr) solid->Move(objectLocation);
+						return solid;
+					}
 				}
-				else
+				else if (dynamic_cast<IIfcManifoldSolidBrep^>(geomRep))
 				{
-					XbimSolid^ solid = (XbimSolid^)CreateSolid((IIfcSweptAreaSolid^)geomRep, logger);
-					if (objectLocation != nullptr) solid->Move(objectLocation);
-					return solid;
-				}
-			}
-			else if (dynamic_cast<IIfcManifoldSolidBrep^>(geomRep))
-			{
-				XbimCompound^ comp = gcnew XbimCompound((IIfcManifoldSolidBrep^)geomRep, logger);
-				if (objectLocation != nullptr) comp->Move(objectLocation);
-				return comp;
-			}
-			else if (dynamic_cast<IIfcSweptDiskSolid^>(geomRep))
-			{
-				XbimSolid^ solid = (XbimSolid^)CreateSolid((IIfcSweptDiskSolid^)geomRep, logger);
-				if (objectLocation != nullptr) solid->Move(objectLocation);
-				return solid;
-			}
-			else if (dynamic_cast<IIfcBooleanResult^>(geomRep))
-			{
-				XbimSolidSet^ solidSet = gcnew XbimSolidSet((IIfcBooleanResult^)geomRep, logger);
-				if (objectLocation != nullptr) solidSet->Move(objectLocation);
-				return Trim(solidSet);
-			}
-			else if (dynamic_cast<IIfcFaceBasedSurfaceModel^>(geomRep))
-			{
-				XbimCompound^ comp = (XbimCompound^)CreateSurfaceModel((IIfcFaceBasedSurfaceModel^)geomRep, logger);
-				if (objectLocation != nullptr) comp->Move(objectLocation);
-				return comp;
-			}
-			else if (dynamic_cast<IIfcShellBasedSurfaceModel^>(geomRep))
-			{
-				XbimCompound^ comp = (XbimCompound^)CreateSurfaceModel((IIfcShellBasedSurfaceModel^)geomRep, logger);
-				if (objectLocation != nullptr) comp->Move(objectLocation);
-				return comp;
-			}
-			else if (dynamic_cast<IIfcTriangulatedFaceSet^>(geomRep))
-			{
-				XbimCompound^ comp = (XbimCompound^)CreateSurfaceModel((IIfcTriangulatedFaceSet^)geomRep, logger);
-				if (objectLocation != nullptr) comp->Move(objectLocation);
-				return comp;
-			}
-			else if (dynamic_cast<IIfcPolygonalFaceSet^>(geomRep))
-			{
-				IIfcPolygonalFaceSet^ polySet = (IIfcPolygonalFaceSet^)geomRep;
-				if (polySet->Closed.HasValue && polySet->Closed.Value)
-				{
-					XbimSolidSet^ ss = (XbimSolidSet^)CreateSolidSet(polySet, logger);
-					if (objectLocation != nullptr) ss->Move(objectLocation);
-					return ss;
-				}
-				else
-				{
-					XbimCompound^ comp = (XbimCompound^)CreateSurfaceModel((IIfcPolygonalFaceSet^)geomRep, logger);
+					XbimCompound^ comp = gcnew XbimCompound((IIfcManifoldSolidBrep^)geomRep, logger);
 					if (objectLocation != nullptr) comp->Move(objectLocation);
 					return comp;
 				}
+				else if (dynamic_cast<IIfcSweptDiskSolid^>(geomRep))
+				{
+					XbimSolid^ solid = (XbimSolid^)CreateSolid((IIfcSweptDiskSolid^)geomRep, logger);
+					if (objectLocation != nullptr) solid->Move(objectLocation);
+					return solid;
+				}
+				else if (dynamic_cast<IIfcBooleanResult^>(geomRep))
+				{
+					XbimSolidSet^ solidSet = gcnew XbimSolidSet((IIfcBooleanResult^)geomRep, logger);
+					if (objectLocation != nullptr) solidSet->Move(objectLocation);
+					return Trim(solidSet);
+				}
+				else if (dynamic_cast<IIfcFaceBasedSurfaceModel^>(geomRep))
+				{
+					XbimCompound^ comp = (XbimCompound^)CreateSurfaceModel((IIfcFaceBasedSurfaceModel^)geomRep, logger);
+					if (objectLocation != nullptr) comp->Move(objectLocation);
+					return comp;
+				}
+				else if (dynamic_cast<IIfcShellBasedSurfaceModel^>(geomRep))
+				{
+					XbimCompound^ comp = (XbimCompound^)CreateSurfaceModel((IIfcShellBasedSurfaceModel^)geomRep, logger);
+					if (objectLocation != nullptr) comp->Move(objectLocation);
+					return comp;
+				}
+				else if (dynamic_cast<IIfcTriangulatedFaceSet^>(geomRep))
+				{
+					XbimCompound^ comp = (XbimCompound^)CreateSurfaceModel((IIfcTriangulatedFaceSet^)geomRep, logger);
+					if (objectLocation != nullptr) comp->Move(objectLocation);
+					return comp;
+				}
+				else if (dynamic_cast<IIfcPolygonalFaceSet^>(geomRep))
+				{
+					IIfcPolygonalFaceSet^ polySet = (IIfcPolygonalFaceSet^)geomRep;
+					if (polySet->Closed.HasValue && polySet->Closed.Value)
+					{
+						XbimSolidSet^ ss = (XbimSolidSet^)CreateSolidSet(polySet, logger);
+						if (objectLocation != nullptr) ss->Move(objectLocation);
+						return ss;
+					}
+					else
+					{
+						XbimCompound^ comp = (XbimCompound^)CreateSurfaceModel((IIfcPolygonalFaceSet^)geomRep, logger);
+						if (objectLocation != nullptr) comp->Move(objectLocation);
+						return comp;
+					}
+				}
+				else if (dynamic_cast<IIfcSectionedSpine^>(geomRep))
+				{
+					XbimSolid^ solid = (XbimSolid^)CreateSolid((IIfcSectionedSpine^)geomRep, logger);
+					if (objectLocation != nullptr) solid->Move(objectLocation);
+					return solid;
+				}
+				else if (dynamic_cast<IIfcHalfSpaceSolid^>(geomRep))
+				{
+					XbimSolid^ solid = (XbimSolid^)CreateSolid((IIfcHalfSpaceSolid^)geomRep, logger);
+					if (objectLocation != nullptr) solid->Move(objectLocation);
+					return solid;
+				}
+				else if (dynamic_cast<IIfcCurve^>(geomRep))
+				{
+					XbimWire^ wire = (XbimWire^)CreateWire((IIfcCurve^)geomRep, logger);
+					if (objectLocation != nullptr) wire->Move(objectLocation);
+					return wire;
+				}
+				else if (dynamic_cast<IIfcCompositeCurveSegment^>(geomRep))
+				{
+					XbimWire^ wire = (XbimWire^)CreateWire((IIfcCompositeCurveSegment^)geomRep, logger);
+					if (objectLocation != nullptr) wire->Move(objectLocation);
+					return wire;
+				}
+				else if (dynamic_cast<IIfcBoundingBox^>(geomRep))
+				{
+					XbimSolid^ solid = (XbimSolid^)CreateSolid((IIfcBoundingBox^)geomRep, logger);
+					if (objectLocation != nullptr) solid->Move(objectLocation);
+					return solid;
+				}
+				else if (dynamic_cast<IIfcSurface^>(geomRep))
+				{
+					XbimFace^ face = (XbimFace^)CreateFace((IIfcSurface^)geomRep, logger);
+					if (objectLocation != nullptr) face->Move(objectLocation);
+					return face;
+				}
+				else if (dynamic_cast<IIfcCsgSolid^>(geomRep))
+				{
+					XbimSolidSet^ solidSet = (XbimSolidSet^)CreateSolidSet((IIfcCsgSolid^)geomRep, logger);
+					if (objectLocation != nullptr) solidSet->Move(objectLocation);
+					return Trim(solidSet);
+				}
+				else if (dynamic_cast<IIfcSphere^>(geomRep))
+				{
+					XbimSolid^ solid = (XbimSolid^)CreateSolid((IIfcSphere^)geomRep, logger);
+					if (objectLocation != nullptr) solid->Move(objectLocation);
+					return solid;
+				}
+				else if (dynamic_cast<IIfcGeometricSet^>(geomRep))
+				{
+					if (objectLocation != nullptr) LogError(logger, geomRep, "Move is not implemented for IIfcGeometricSet");
+					return CreateGeometricSet((IIfcGeometricSet^)geomRep, logger);
+				}
 			}
-			else if (dynamic_cast<IIfcSectionedSpine^>(geomRep))
-			{
-				XbimSolid^ solid = (XbimSolid^)CreateSolid((IIfcSectionedSpine^)geomRep, logger);
-				if (objectLocation != nullptr) solid->Move(objectLocation);
-				return solid;
-			}
-			else if (dynamic_cast<IIfcHalfSpaceSolid^>(geomRep))
-			{
-				XbimSolid^ solid = (XbimSolid^)CreateSolid((IIfcHalfSpaceSolid^)geomRep, logger);
-				if (objectLocation != nullptr) solid->Move(objectLocation);
-				return solid;
-			}
-			else if (dynamic_cast<IIfcCurve^>(geomRep))
-			{
-				XbimWire^ wire = (XbimWire^)CreateWire((IIfcCurve^)geomRep, logger);
-				if (objectLocation != nullptr) wire->Move(objectLocation);
-				return wire;
-			}
-			else if (dynamic_cast<IIfcCompositeCurveSegment^>(geomRep))
-			{
-				XbimWire^ wire = (XbimWire^)CreateWire((IIfcCompositeCurveSegment^)geomRep, logger);
-				if (objectLocation != nullptr) wire->Move(objectLocation);
-				return wire;
-			}
-			else if (dynamic_cast<IIfcBoundingBox^>(geomRep))
-			{
-				XbimSolid^ solid = (XbimSolid^)CreateSolid((IIfcBoundingBox^)geomRep, logger);
-				if (objectLocation != nullptr) solid->Move(objectLocation);
-				return solid;
-			}
-			else if (dynamic_cast<IIfcSurface^>(geomRep))
-			{
-				XbimFace^ face = (XbimFace^)CreateFace((IIfcSurface^)geomRep, logger);
-				if (objectLocation != nullptr) face->Move(objectLocation);
-				return face;
-			}
-			else if (dynamic_cast<IIfcCsgSolid^>(geomRep))
-			{
-				XbimSolidSet^ solidSet = (XbimSolidSet^)CreateSolidSet((IIfcCsgSolid^)geomRep, logger);
-				if (objectLocation != nullptr) solidSet->Move(objectLocation);
-				return Trim(solidSet);
-			}
-			else if (dynamic_cast<IIfcSphere^>(geomRep))
-			{
-				XbimSolid^ solid = (XbimSolid^)CreateSolid((IIfcSphere^)geomRep, logger);
-				if (objectLocation != nullptr) solid->Move(objectLocation);
-				return solid;
-			}
-			else if (dynamic_cast<IIfcGeometricSet^>(geomRep))
-			{
-				if (objectLocation != nullptr) LogError(logger, geomRep, "Move is not implemented for IIfcGeometricSet");
-				return CreateGeometricSet((IIfcGeometricSet^)geomRep, logger);
-			}
-			/*}
 			catch (const std::exception &exc)
 			{
 				String^ err = gcnew String(exc.what());
 				LogError(logger, geomRep, "Error creating geometry #{2} representation of type {0}, {1}", geomRep->GetType()->Name, err, geomRep->EntityLabel);
 				return XbimGeometryObjectSet::Empty;
 			}
-			catch ()
+			//catch ()
 			catch (...)
 			{
 				throw gcnew Exception(String::Format("General Error Creating {0}, #{1}", geomRep->GetType()->Name, geomRep->EntityLabel));
-			}*/
+			}
 			LogError(logger, geomRep, "Geometry Representation of Type {0} is not implemented", geomRep->GetType()->Name);
 			return XbimGeometryObjectSet::Empty;
 		}
