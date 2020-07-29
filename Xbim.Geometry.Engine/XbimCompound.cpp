@@ -1020,7 +1020,8 @@ namespace Xbim
 					{
 						XbimGeometryCreator::LogInfo(logger, nullptr, "Really trying to fix shell");
 						ShapeFix_Shape shapeFixer(shell);
-						if (shapeFixer.Perform())
+						Handle(XbimProgressIndicator) pi = new XbimProgressIndicator(10);
+						if (shapeFixer.Perform(pi))
 							return shapeFixer.Shape();
 						else
 							return shell;
