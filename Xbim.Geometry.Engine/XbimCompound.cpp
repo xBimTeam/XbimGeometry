@@ -707,7 +707,7 @@ namespace Xbim
 			{
 				ShapeFix_Edge edgeFixer;
 
-				
+
 
 				IIfcFace^ aFace = Enumerable::FirstOrDefault(faces);
 				if (aFace == nullptr) return shell;
@@ -994,11 +994,21 @@ namespace Xbim
 				{
 					XbimGeometryCreator::LogInfo(logger, nullptr, "Fixing shell");
 					ShapeFix_Shell shellFixer(shell);
-					if (shellFixer.Perform())
+					try
 					{
-						shell = shellFixer.Shell();
-						checker.Init(shell);
+						Handle(XbimProgressIndicator) pi = new XbimProgressIndicator(10);
+						if (shellFixer.Perform(pi))
+						{
+							shell = shellFixer.Shell();
+							checker.Init(shell);
+						}
 					}
+					catch (Standard_Failure sf)
+					{
+						String^ err = gcnew String(sf.GetMessageString());
+						XbimGeometryCreator::LogWarning(logger, nullptr, "Failed to fix shell in advaced brep: " + err);
+					}
+
 					XbimGeometryCreator::LogInfo(logger, nullptr, "Closing shell");
 					if (checker.Closed() == BRepCheck_Status::BRepCheck_NoError)
 					{
