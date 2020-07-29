@@ -449,6 +449,8 @@ namespace Xbim
 			if (advancedBrepWithVoids != nullptr) return Init(advancedBrepWithVoids, logger);
 			BRep_Builder b;
 			TopoDS_Shape occOuterShell = InitAdvancedFaces(solid->Outer->CfsFaces, logger);
+			XbimGeometryCreator::LogInfo(logger, solid, "InitAdvancedFaces for IfcAdvancedBrep completed");
+
 			if (occOuterShell.IsNull()) return;
 
 			pCompound = new TopoDS_Compound();
@@ -497,7 +499,7 @@ namespace Xbim
 							String^ err = gcnew String(sf.GetMessageString());
 							XbimGeometryCreator::LogWarning(logger, solid, "Failed to determine orientation of shell in IfcAdvancedBrep: " + err);
 						}
-						
+
 						if (class3d.State() == TopAbs_IN) s.Reverse();
 						b.Add(*pCompound, s);
 					}
@@ -698,13 +700,15 @@ namespace Xbim
 		//This method copes with faces that may be advanced as well as ordinary
 		TopoDS_Shape XbimCompound::InitAdvancedFaces(IEnumerable<IIfcFace^>^ faces, ILogger^ logger)
 		{
+			BRep_Builder builder;
+			TopoDS_Shell shell;
+			builder.MakeShell(shell);
 			try
 			{
 				ShapeFix_Edge edgeFixer;
 
-				BRep_Builder builder;
-				TopoDS_Shell shell;
-				builder.MakeShell(shell);
+				
+
 				IIfcFace^ aFace = Enumerable::FirstOrDefault(faces);
 				if (aFace == nullptr) return shell;
 				IModel^ model = aFace->Model;
@@ -716,6 +720,8 @@ namespace Xbim
 				TColStd_DataMapOfIntegerListOfInteger topoFaces;
 				TopTools_DataMapOfIntegerShape edgeCurves;
 				TopTools_DataMapOfIntegerShape vertexGeometries;
+				XbimGeometryCreator::LogInfo(logger, aFace, "Enumerating {0} faces for IfcAdvancedBrep completed", Enumerable::Count(faces));
+				int fc = 0;
 				for each (IIfcFace ^ unloadedFace in  faces)
 				{
 					IIfcAdvancedFace^ advancedFace = dynamic_cast<IIfcAdvancedFace^>(model->Instances[unloadedFace->EntityLabel]); //improves performance and reduces memory load								
@@ -966,11 +972,13 @@ namespace Xbim
 					}
 					else
 						topoAdvancedFace = faceMaker.Face();
-
+					XbimGeometryCreator::LogInfo(logger, unloadedFace, "Fixing Face #{0} completed", ++fc);
 					ShapeFix_Face fixFace(topoAdvancedFace);
 					fixFace.Perform();
 					topoAdvancedFace = fixFace.Face();
 					builder.Add(shell, topoAdvancedFace);
+					XbimGeometryCreator::LogInfo(logger, unloadedFace, "Face #{0} completed", fc);
+
 				}
 				//check it is solid or not
 				/*bool isSolid = true;
@@ -979,17 +987,19 @@ namespace Xbim
 					int refCount = it->Size();
 					if (refCount != 2)isSolid = false;
 				}*/
-
+				XbimGeometryCreator::LogInfo(logger, nullptr, "Checking shell");
 				BRepCheck_Shell checker(shell);
 				BRepCheck_Status st = checker.Orientation();
 				if (st != BRepCheck_Status::BRepCheck_NoError)
 				{
+					XbimGeometryCreator::LogInfo(logger, nullptr, "Fixing shell");
 					ShapeFix_Shell shellFixer(shell);
 					if (shellFixer.Perform())
 					{
 						shell = shellFixer.Shell();
 						checker.Init(shell);
 					}
+					XbimGeometryCreator::LogInfo(logger, nullptr, "Closing shell");
 					if (checker.Closed() == BRepCheck_Status::BRepCheck_NoError)
 					{
 						shell.Closed(true);
@@ -998,6 +1008,7 @@ namespace Xbim
 					}
 					else
 					{
+						XbimGeometryCreator::LogInfo(logger, nullptr, "Really trying to fix shell");
 						ShapeFix_Shape shapeFixer(shell);
 						if (shapeFixer.Perform())
 							return shapeFixer.Shape();
@@ -1007,18 +1018,18 @@ namespace Xbim
 				}
 				else //it is oriented correctly and closed
 				{
+					XbimGeometryCreator::LogInfo(logger, nullptr, "Closing solid");
 					shell.Closed(true);
 					shell.Checked(true);
 					return shell;
 				}
 
-
-
 			}
 			catch (Standard_Failure exc)
 			{
 				String^ err = gcnew String(exc.GetMessageString());
-				throw gcnew Exception("General failure in advanced face building: " + err);
+				XbimGeometryCreator::LogInfo(logger, nullptr, "General failure in advanced face building: " + err);
+				return shell;
 			}
 
 		}
