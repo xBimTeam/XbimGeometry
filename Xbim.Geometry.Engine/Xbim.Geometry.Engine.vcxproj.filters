@@ -9429,6 +9429,12 @@
     <ClInclude Include="XbimMesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="XbimNativeApi.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="XbimProgressMonitor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Stdafx.cpp">
@@ -15327,6 +15333,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="XbimMesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="XbimNativeApi.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="XbimProgressMonitor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

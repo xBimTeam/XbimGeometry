@@ -67,6 +67,7 @@
 #include <BRepCheck_Wire.hxx>
 #include <BRepBuilderAPI_FindPlane.hxx>
 #include <Geom_Plane.hxx>
+#include "XbimNativeApi.h"
 
 // #include <ShapeBuild_ReShape.hxx> // this was suggeste in PR79 - but it does not seem to make the difference with OCC72
 
@@ -652,6 +653,11 @@ namespace Xbim
 		}
 		bool XbimCompound::Sew()
 		{
+			return Sew(nullptr);
+		}
+
+		bool XbimCompound::Sew(ILogger^ logger)
+		{
 
 			if (!IsValid || IsSewn)
 				return true;
@@ -668,12 +674,14 @@ namespace Xbim
 			builder.MakeCompound(newCompound);
 			for (TopExp_Explorer expl(*pCompound, TopAbs_SHELL); expl.More(); expl.Next())
 			{
-				BRepBuilderAPI_Sewing seamstress(_sewingTolerance);
-				seamstress.Add(expl.Current());
-				Handle(XbimProgressIndicator) pi = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);
-				seamstress.Perform(pi);
-				TopoDS_Shape result = seamstress.SewedShape();
-				builder.Add(newCompound, result);
+				TopoDS_Shape shape = expl.Current();
+				std::string errMsg;
+				if (!XbimNativeApi::SewShape(shape, _sewingTolerance, XbimGeometryCreator::BooleanTimeOut, errMsg) && logger != nullptr)
+				{
+					String^ err = gcnew String(errMsg.c_str());
+					XbimGeometryCreator::LogWarning(logger, nullptr, "Failed to sew shape: " + err);
+				}
+				builder.Add(newCompound, shape);
 			}
 
 			*pCompound = newCompound;
@@ -720,8 +728,8 @@ namespace Xbim
 				TColStd_DataMapOfIntegerListOfInteger topoFaces;
 				TopTools_DataMapOfIntegerShape edgeCurves;
 				TopTools_DataMapOfIntegerShape vertexGeometries;
-				XbimGeometryCreator::LogInfo(logger, aFace, "Enumerating {0} faces for IfcAdvancedBrep completed", Enumerable::Count(faces));
-				int fc = 0;
+				XbimGeometryCreator::LogDebug(logger, aFace, "Enumerating {0} faces for IfcAdvancedBrep completed", Enumerable::Count(faces));
+				
 				for each (IIfcFace ^ unloadedFace in  faces)
 				{
 					IIfcAdvancedFace^ advancedFace = dynamic_cast<IIfcAdvancedFace^>(model->Instances[unloadedFace->EntityLabel]); //improves performance and reduces memory load								
@@ -972,12 +980,12 @@ namespace Xbim
 					}
 					else
 						topoAdvancedFace = faceMaker.Face();
-					XbimGeometryCreator::LogInfo(logger, unloadedFace, "Fixing Face #{0} completed", ++fc);
+					//XbimGeometryCreator::LogInfo(logger, unloadedFace, "Fixing Face #{0} completed", ++fc);
 					ShapeFix_Face fixFace(topoAdvancedFace);
 					fixFace.Perform();
 					topoAdvancedFace = fixFace.Face();
 					builder.Add(shell, topoAdvancedFace);
-					XbimGeometryCreator::LogInfo(logger, unloadedFace, "Face #{0} completed", fc);
+					//XbimGeometryCreator::LogInfo(logger, unloadedFace, "Face #{0} completed", fc);
 
 				}
 				//check it is solid or not
@@ -987,51 +995,47 @@ namespace Xbim
 					int refCount = it->Size();
 					if (refCount != 2)isSolid = false;
 				}*/
-				XbimGeometryCreator::LogInfo(logger, nullptr, "Checking shell");
+				XbimGeometryCreator::LogDebug(logger, aFace, "Enumerating all faces for IfcAdvancedBrep completed");
 				BRepCheck_Shell checker(shell);
 				BRepCheck_Status st = checker.Orientation();
 				if (st != BRepCheck_Status::BRepCheck_NoError)
 				{
-					XbimGeometryCreator::LogInfo(logger, nullptr, "Fixing shell");
-					ShapeFix_Shell shellFixer(shell);
-					try
+					XbimGeometryCreator::LogDebug(logger, nullptr, "Fixing shell");
+					std::string errMsg;
+					if (!XbimNativeApi::FixShell(shell, 10, errMsg))
 					{
-						Handle(XbimProgressIndicator) pi = new XbimProgressIndicator(10);
-						if (shellFixer.Perform(pi))
-						{
-							shell = shellFixer.Shell();
-							checker.Init(shell);
-						}
+						String^ err = gcnew String(errMsg.c_str());
+						XbimGeometryCreator::LogWarning(logger, nullptr, "Failed to fix shell in advanced brep: " + err);
 					}
-					catch (Standard_Failure sf)
-					{
-						String^ err = gcnew String(sf.GetMessageString());
-						XbimGeometryCreator::LogWarning(logger, nullptr, "Failed to fix shell in advaced brep: " + err);
-					}
+					else
+						checker.Init(shell);
 
-					XbimGeometryCreator::LogInfo(logger, nullptr, "Closing shell");
+					XbimGeometryCreator::LogDebug(logger, nullptr, "InitAdvancedFaces: Closing shell");
 					if (checker.Closed() == BRepCheck_Status::BRepCheck_NoError)
 					{
 						shell.Closed(true);
 						shell.Checked(true);
+						XbimGeometryCreator::LogDebug(logger, nullptr, "InitAdvancedFaces: Closed shell successfully");
 						return shell;
 					}
 					else
 					{
-						XbimGeometryCreator::LogInfo(logger, nullptr, "Really trying to fix shell");
-						ShapeFix_Shape shapeFixer(shell);
-						Handle(XbimProgressIndicator) pi = new XbimProgressIndicator(10);
-						if (shapeFixer.Perform(pi))
-							return shapeFixer.Shape();
-						else
-							return shell;
+						XbimGeometryCreator::LogDebug(logger, nullptr, "InitAdvancedFaces: Fixing shape");
+						TopoDS_Shape shape = shell;
+						if (!XbimNativeApi::FixShape(shape, 10, errMsg))
+						{
+							String^ err = gcnew String(errMsg.c_str());
+							XbimGeometryCreator::LogWarning(logger, nullptr, "InitAdvancedFaces: Failed to fix shape: " + err);
+						}
+						return shape;
 					}
 				}
 				else //it is oriented correctly and closed
 				{
-					XbimGeometryCreator::LogInfo(logger, nullptr, "Closing solid");
+					XbimGeometryCreator::LogDebug(logger, nullptr, "InitAdvancedFaces: Closing solid");
 					shell.Closed(true);
 					shell.Checked(true);
+					XbimGeometryCreator::LogDebug(logger, nullptr, "InitAdvancedFaces: Solid closed");
 					return shell;
 				}
 
@@ -1039,7 +1043,7 @@ namespace Xbim
 			catch (Standard_Failure exc)
 			{
 				String^ err = gcnew String(exc.GetMessageString());
-				XbimGeometryCreator::LogInfo(logger, nullptr, "General failure in advanced face building: " + err);
+				XbimGeometryCreator::LogWarning(logger, nullptr, "General failure in advanced face building: " + err);
 				return shell;
 			}
 
@@ -1778,7 +1782,7 @@ namespace Xbim
 		///SRL Need to look at this and consider using DoBoolean framework
 		XbimCompound^ XbimCompound::Cut(XbimCompound^ solids, double tolerance, ILogger^ logger)
 		{
-			if (!IsSewn) Sew();
+			if (!IsSewn) Sew(logger);
 			/*ShapeFix_ShapeTolerance fixTol;
 			fixTol.SetTolerance(solids, tolerance);
 			fixTol.SetTolerance(this, tolerance);*/
@@ -1808,7 +1812,7 @@ namespace Xbim
 
 		XbimCompound^ XbimCompound::Union(XbimCompound^ solids, double tolerance, ILogger^ logger)
 		{
-			if (!IsSewn) Sew();
+			if (!IsSewn) Sew(logger);
 			/*ShapeFix_ShapeTolerance fixTol;
 			fixTol.SetTolerance(solids, tolerance);
 			fixTol.SetTolerance(this, tolerance);*/
@@ -1832,7 +1836,7 @@ namespace Xbim
 
 		XbimCompound^ XbimCompound::Intersection(XbimCompound^ solids, double tolerance, ILogger^ logger)
 		{
-			if (!IsSewn) Sew();
+			if (!IsSewn) Sew(logger);
 			/*ShapeFix_ShapeTolerance fixTol;
 			fixTol.SetTolerance(solids, tolerance);
 			fixTol.SetTolerance(this, tolerance);*/

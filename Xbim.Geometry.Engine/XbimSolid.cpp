@@ -385,7 +385,7 @@ namespace Xbim
 					*pSolid = (XbimSolid^)comp->Solids->First;
 					return;
 				}
-				comp->Sew();
+				comp->Sew(logger);
 				XbimShell^ shell = (XbimShell^)comp->MakeShell();
 				pSolid = new TopoDS_Solid();
 				*pSolid = (XbimSolid^)(shell->CreateSolid());
@@ -475,9 +475,9 @@ namespace Xbim
 		void BuildIfcSurfaceCurveSweptAreaSolid(TopoDS_Wire& sweepOcc, TopoDS_Face& refSurface, TopoDS_Face& faceStartOcc, double precision, TopoDS_Solid& result, int& retflag)
 		{
 			retflag = 1;
-			/*BRepTools::Write(sweepOcc, "c://tmp//sweepOcc.");
+			BRepTools::Write(sweepOcc, "c://tmp//sweepOcc.");
 			BRepTools::Write(refSurface, "c://tmp//refSurface.");
-			BRepTools::Write(faceStartOcc, "c://tmp//faceStartOcc.");*/
+			BRepTools::Write(faceStartOcc, "c://tmp//faceStartOcc.");
 			try
 			{
 
@@ -518,7 +518,7 @@ namespace Xbim
 
 				ShapeFix_Edge edgeFixer;
 
-				Handle(Geom_Surface) surface = BRep_Tool::Surface(refSurface);	
+				Handle(Geom_Surface) surface = BRep_Tool::Surface(refSurface);
 				GeomAPI_ProjectPointOnSurf projector(startPoint, surface, precision * 10);
 				if (!projector.IsDone())
 				{
@@ -536,28 +536,28 @@ namespace Xbim
 				Handle(BRepAdaptor_HSurface) adaptedSurface = new BRepAdaptor_HSurface(refSurface);
 				GeomAbs_Shape cont = (adaptedSurface->UContinuity() < adaptedSurface->VContinuity()) ?
 					adaptedSurface->UContinuity() : adaptedSurface->VContinuity();
-				gp_Vec d1U, d1V;				
+				gp_Vec d1U, d1V;
 				adaptedSurface->D1(0, 0, pos, d1U, d1V);
 				Standard_Real MagTol = 0.000000001;
 				CSLib_NormalStatus NStatus;
 				gp_Dir normal;
 				CSLib::Normal(d1U, d1V, MagTol, NStatus, normal);
-				
+
 				bool ignoreRefSurface = false;
 				if (NStatus != CSLib_Defined) //this avoids cases where the swept surface is incompatible with OCC (i.e. in the same plane as the sweep and Status is singular)
 				{
 					if (cont == GeomAbs_C0 ||
-						cont == GeomAbs_C1) 
+						cont == GeomAbs_C1)
 					{
 						ignoreRefSurface = true; //if this occurs projection onto the sweep will fails
 					}
 				}
-				
+
 				TopoDS_Edge edge;
 				Standard_Real uoe;
 				cc.Edge(0, edge, uoe);
 				edgeFixer.FixAddPCurve(edge, refSurface, false, precision); //add pcurves
-				//BRepTools::Write(edge, "c://tmp//edge.");
+				BRepTools::Write(edge, "c://tmp//edge.");
 
 				//move the wire to the start point
 
@@ -566,20 +566,21 @@ namespace Xbim
 				Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, loc, f, l);
 				gp_Pnt p1;
 				gp_Vec tangent;
-
+				
 				curve->D1(f, p1, tangent);
 				tangent.Normalize();
+				//tangent.Reverse();
 				gp_Ax3 toAx3(p1, tangent, norm); //Zdir pointing tangentally to sweep, XDir perpendicular to the ref surfac
 				gp_Ax3 fromAx3(gp::Origin(), faceStartZDir, faceStartXDir);
 				gp_Trsf trsf;
 				trsf.SetTransformation(toAx3, fromAx3);
 				TopLoc_Location topLoc(trsf);
 				faceStartOcc.Move(topLoc);
-				//BRepTools::Write(faceStartOcc, "c://tmp//facePositioned.");
+				BRepTools::Write(faceStartOcc, "c://tmp//facePositioned.");
 				TopoDS_Wire outerBound = ShapeAnalysis::OuterWire(faceStartOcc);
 
 				BRepOffsetAPI_MakePipeShell pipeMaker1(sweepOcc);
-				if(!ignoreRefSurface) //no pint in adding a planar ref surface normal dir will be constant
+				if (!ignoreRefSurface) //no pint in adding a planar ref surface normal dir will be constant
 					pipeMaker1.SetMode(refSurface); //project normal to ref surface
 				pipeMaker1.SetTransitionMode(transitionMode);
 				pipeMaker1.Add(outerBound, TopExp::FirstVertex(edge), Standard_False, Standard_False);
@@ -589,7 +590,7 @@ namespace Xbim
 				}
 				catch (Standard_Failure sf)
 				{
-					
+
 					retflag = -5;
 					return;
 				}
@@ -683,7 +684,7 @@ namespace Xbim
 
 					ShapeFix_ShapeTolerance fTol;
 					fTol.LimitTolerance(result, precision);
-					//BRepTools::Write(result, "c://tmp//result.");
+					BRepTools::Write(result, "c://tmp//result.");
 					return;
 				}
 			}
@@ -1515,15 +1516,15 @@ namespace Xbim
 			else if (dynamic_cast<IIfcPolyline^>(repItem->Directrix)) //need right corner mode
 				transitionMode = BRepBuilderAPI_TransitionMode::BRepBuilderAPI_RightCorner;
 
-			String^ err =BuildSweptDiskSolid(sweep, repItem->Radius, repItem->InnerRadius.HasValue ? (double)repItem->InnerRadius.Value : -1., transitionMode);
+			String^ err = BuildSweptDiskSolid(sweep, repItem->Radius, repItem->InnerRadius.HasValue ? (double)repItem->InnerRadius.Value : -1., transitionMode);
 			if (err != nullptr)
 			{
-				if(pSolid==nullptr || pSolid->IsNull()) //nothing done at all
+				if (pSolid == nullptr || pSolid->IsNull()) //nothing done at all
 					XbimGeometryCreator::LogError(logger, repItem, "Could not construct IfcSweptDiskSolid: " + err);
 				else //partial build, most likely failed to build inner hole
 					XbimGeometryCreator::LogWarning(logger, repItem, "Could not fully construct IfcSweptDiskSolid: " + err);
 			}
-			
+
 		}
 
 		//if inner radius is not required it has a value of -1
@@ -1573,7 +1574,7 @@ namespace Xbim
 						iSweepMaker.Build();
 						if (iSweepMaker.IsDone())
 						{
-							
+
 							TopoDS_Solid solid;
 							TopoDS_Shell shell;
 							builder.MakeSolid(solid);
@@ -1597,7 +1598,7 @@ namespace Xbim
 							return nullptr;
 						}
 						else
-						{							
+						{
 							bool ok = oSweepMaker.MakeSolid();
 							if (ok)
 							{
@@ -1627,7 +1628,7 @@ namespace Xbim
 				return gcnew String(e.GetMessageString());
 			}
 			return gcnew String("Could not build SweptDiskSolid");
-			
+
 		}
 
 
@@ -1736,28 +1737,36 @@ namespace Xbim
 			{
 				bool isConic = (dynamic_cast<IIfcConic^>(basisCurve) != nullptr);
 				double parameterFactor = isConic ? directrix->Model->ModelFactors->AngleToRadiansConversionFactor : 1;
-
-				if (startParam.HasValue && endParam.HasValue)
+				if (isConic && directrix->Model->ModelFactors->ApplyWorkAround(XbimGeometryCreator::SurfaceOfLinearExtrusion)) //part of a family of revit issues with Ifc4
 				{
-					startPar = startParam.Value * parameterFactor;
-					endPar = endParam.Value * parameterFactor;
+					XbimGeometryCreator::LogInfo(logger, directrix, "Workaround for Revit conic trim export applied, trims ignored");
+					//do nothing
+					return wire;
 				}
-				else if (startParam.HasValue && !endParam.HasValue)
+				else
 				{
+					if (startParam.HasValue && endParam.HasValue)
+					{
+						startPar = startParam.Value * parameterFactor;
+						endPar = endParam.Value * parameterFactor;
+					}
+					else if (startParam.HasValue && !endParam.HasValue)
+					{
 
-					startPar = startParam.Value * parameterFactor;
-					endPar = cc.LastParameter();
-				}
-				else if (!startParam.HasValue && endParam.HasValue)
-				{
-					startPar = cc.FirstParameter();
-					endPar = endParam.Value * parameterFactor;
+						startPar = startParam.Value * parameterFactor;
+						endPar = cc.LastParameter();
+					}
+					else if (!startParam.HasValue && endParam.HasValue)
+					{
+						startPar = cc.FirstParameter();
+						endPar = endParam.Value * parameterFactor;
+					}
 				}
 
 			}
-
-			//need to trim the wore
+			//need to trim the wire
 			return (XbimWire^)wire->Trim(startPar, endPar, directrix->Model->ModelFactors->Precision, logger);
+
 
 		}
 
@@ -1928,7 +1937,7 @@ namespace Xbim
 					*pSolid = (XbimSolid^)comp->Solids->First;
 					return;
 				}
-				comp->Sew();
+				comp->Sew(logger);
 				XbimShell^ shell = (XbimShell^)comp->MakeShell();
 				pSolid = new TopoDS_Solid();
 				*pSolid = (XbimSolid^)(shell->CreateSolid());
@@ -1948,7 +1957,7 @@ namespace Xbim
 					*pSolid = (XbimSolid^)comp->Solids->First;
 					return;
 				}
-				comp->Sew();
+				comp->Sew(logger);
 				XbimShell^ shell = (XbimShell^)comp->MakeShell();
 				pSolid = new TopoDS_Solid();
 				*pSolid = (XbimSolid^)(shell->CreateSolid());
@@ -1968,7 +1977,7 @@ namespace Xbim
 					*pSolid = (XbimSolid^)comp->Solids->First;
 					return;
 				}
-				comp->Sew();
+				comp->Sew(logger);
 				XbimShell^ shell = (XbimShell^)comp->MakeShell();
 				pSolid = new TopoDS_Solid();
 				*pSolid = (XbimSolid^)(shell->CreateSolid());

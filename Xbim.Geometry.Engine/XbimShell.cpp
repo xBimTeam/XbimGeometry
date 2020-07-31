@@ -48,6 +48,7 @@
 #include <BRepBuilderAPI_Sewing.hxx>
 #include <GeomLib_IsPlanarSurface.hxx>
 #include <Standard_CString.hxx>
+#include "XbimNativeApi.h"
 using namespace System;
 using namespace Xbim::Common::Exceptions;
 namespace Xbim
@@ -102,7 +103,7 @@ namespace Xbim
 		void XbimShell::Init(IIfcOpenShell^ openShell, ILogger^ logger)
 		{
 			XbimCompound^ shapes = gcnew XbimCompound(openShell, logger);
-			shapes->Sew();
+			shapes->Sew(logger);
 			pShell = new TopoDS_Shell();
 			*pShell = (XbimShell^)shapes->MakeShell();
 			ShapeFix_ShapeTolerance tolFixer;
@@ -112,7 +113,7 @@ namespace Xbim
 		void XbimShell::Init(IIfcConnectedFaceSet^ connectedFaceSet, ILogger^ logger)
 		{
 			XbimCompound^ shapes = gcnew XbimCompound(connectedFaceSet, logger);
-			shapes->Sew();
+			shapes->Sew(logger);
 			pShell = new TopoDS_Shell();
 			*pShell = (XbimShell^)shapes->MakeShell();
 			ShapeFix_ShapeTolerance tolFixer;
@@ -403,12 +404,10 @@ namespace Xbim
 
 		void XbimShell::FixTopology()
 		{
-			ShapeFix_Shell fixer(this);
-			Handle(XbimProgressIndicator) pi = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);
-			fixer.Perform(pi);
-			const TopoDS_Shape& fixed = fixer.Shape();
-			if (fixed.ShapeType() == TopAbs_SHELL)
-				*pShell = TopoDS::Shell(fixed);
+			TopoDS_Shell shell = this;
+			std::string errMsg;
+			XbimNativeApi::FixShell(shell, 10, errMsg);
+			*pShell = shell;
 		}
 
 		XbimGeometryObject^ XbimShell::Transformed(IIfcCartesianTransformationOperator^ transformation)

@@ -22,7 +22,7 @@
 #include <BRepCheck_Analyzer.hxx>
 #include <ShapeUpgrade_UnifySameDomain.hxx>
 #include <TopTools_ListIteratorOfListOfShape.hxx>
-
+#include "XbimNativeApi.h"
 using namespace System;
 using namespace System::ComponentModel;
 namespace Xbim
@@ -392,12 +392,14 @@ namespace Xbim
 			{
 				hasContent = true;
 				//sew the bits we are going to cut
-				Handle(XbimProgressIndicator) pi = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);
-				BRepBuilderAPI_Sewing seamstress(tolerance);
 
-				seamstress.Add(shellBeingBuilt);
-				seamstress.Perform(pi);
-				TopoDS_Shape shape = seamstress.SewedShape();
+				TopoDS_Shape shape = shellBeingBuilt;
+				std::string errMsg;
+				if (!XbimNativeApi::SewShape(shape, tolerance, XbimGeometryCreator::BooleanTimeOut, errMsg))
+				{
+					/*String^ err = gcnew String(errMsg.c_str());
+					XbimGeometryCreator::LogWarning(logger, nullptr, "Failed to sew shape: " + err);*/
+				}				
 				FTol.LimitTolerance(shape, tolerance);
 				toBeProcessed.Append(shape);
 			}

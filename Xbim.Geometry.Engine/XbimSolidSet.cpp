@@ -3,6 +3,7 @@
 #include "XbimCompound.h"
 #include "XbimGeometryCreator.h"
 #include "XbimOccWriter.h"
+#include "XbimProgressMonitor.h"
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <TopExp.hxx>
 #include <BRepTools.hxx>
@@ -20,6 +21,7 @@
 #include "BOPAlgo_BOP.hxx"
 #include <OSD_OpenFile.hxx>
 #include <algorithm>
+
 using namespace std;
 
 using namespace System::Linq;
@@ -489,7 +491,7 @@ namespace Xbim
 				aBOP.SetNonDestructive(true);
 				aBOP.SetFuzzyValue(fuzzyTol);
 				
-				Handle(XbimProgressIndicator) pi = new XbimProgressIndicator(timeout);
+				Handle(XbimProgressMonitor) pi = new XbimProgressMonitor(timeout);
 				aBOP.SetProgressIndicator(pi);
 				TopoDS_Shape aR;
 
@@ -559,7 +561,7 @@ namespace Xbim
 					fixer.SetPrecision(tolerance);
 					try
 					{
-						Handle(XbimProgressIndicator) pi2 = new XbimProgressIndicator(timeout);
+						Handle(XbimProgressMonitor) pi2 = new XbimProgressMonitor(timeout);
 						if (fixer.Perform(pi2))
 						{
 							result = fixer.Shape();
