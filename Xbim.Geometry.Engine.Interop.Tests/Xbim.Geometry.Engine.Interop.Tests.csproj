@@ -14,6 +14,10 @@
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Include="..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\Xbim.Geometry.Engine32.dll" Link="Xbim.Geometry.Engine32.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

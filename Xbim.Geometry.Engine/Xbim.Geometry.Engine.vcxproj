@@ -136,6 +136,9 @@
     <ResourceCompile>
       <Culture>0x0809</Culture>
     </ResourceCompile>
+    <ClCompile>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+    </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Link>
@@ -180,7 +183,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Factories\WireFactory.cpp" />
     <ClCompile Include="XbimMesh.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</CompileAsManaged>
@@ -197,7 +199,6 @@
     <Image Include="app.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Factories\WireFactory.h" />
     <ClInclude Include="XbimConstraints.h" />
     <ClInclude Include="XbimMesh.h" />
     <ClInclude Include="XbimNativeApi.h" />
