@@ -57,7 +57,6 @@
 #include <TopoDS_CompSolid.hxx>
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Face.hxx>
-#include <TopoDS_Iterator.hxx>
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Shell.hxx>
 #include <TopoDS_Solid.hxx>
@@ -66,25 +65,6 @@
 #include <TopTools_SequenceOfShape.hxx>
 #include <GeomLib_CheckCurveOnSurface.hxx>
 #include <errno.h>
-
-
-//=======================================================================
-//function : IsPCurveUiso
-//purpose  : 
-//=======================================================================
-
-static Standard_Boolean IsPCurveUiso(const Handle(Geom2d_Curve)& thePCurve,
-                                     Standard_Real theFirstPar,
-                                     Standard_Real theLastPar)
-{
-  gp_Pnt2d FirstP2d = thePCurve->Value(theFirstPar);
-  gp_Pnt2d LastP2d  = thePCurve->Value(theLastPar);
-
-  Standard_Real DeltaU = Abs(FirstP2d.X() - LastP2d.X());
-  Standard_Real DeltaV = Abs(FirstP2d.Y() - LastP2d.Y());
-
-  return (DeltaU < DeltaV);
-}
 
 
 //=======================================================================
@@ -704,7 +684,7 @@ void  BRepTools::Write(const TopoDS_Shape& Sh, Standard_OStream& S,
 //=======================================================================
 
 void  BRepTools::Read(TopoDS_Shape& Sh, 
-                      istream& S, 
+                      std::istream& S, 
                       const BRep_Builder& B,
                       const Handle(Message_ProgressIndicator)& PR)
 {
@@ -723,8 +703,8 @@ Standard_Boolean  BRepTools::Write(const TopoDS_Shape& Sh,
                                    const Standard_CString File,
                                    const Handle(Message_ProgressIndicator)& PR)
 {
-  ofstream os;
-  OSD_OpenStream(os, File, ios::out);
+  std::ofstream os;
+  OSD_OpenStream(os, File, std::ios::out);
   if (!os.is_open() || !os.good())
     return Standard_False;
 
@@ -761,9 +741,9 @@ Standard_Boolean BRepTools::Read(TopoDS_Shape& Sh,
                                  const BRep_Builder& B,
                                  const Handle(Message_ProgressIndicator)& PR)
 {
-  filebuf fic;
-  istream in(&fic);
-  OSD_OpenStream (fic, File, ios::in);
+  std::filebuf fic;
+  std::istream in(&fic);
+  OSD_OpenStream (fic, File, std::ios::in);
   if(!fic.is_open()) return Standard_False;
   
   BRepTools_ShapeSet SS(B);
@@ -827,6 +807,43 @@ void BRepTools::Clean(const TopoDS_Shape& theShape)
     aBuilder.UpdateEdge (aEdge, aNullPoly3d);  
   }
 }
+//=======================================================================
+//function : CleanGeometry
+//purpose  : 
+//=======================================================================
+
+void BRepTools::CleanGeometry(const TopoDS_Shape& theShape)
+{
+  if (theShape.IsNull())
+    return;
+
+  BRep_Builder aBuilder;
+
+  for (TopExp_Explorer aFaceIt(theShape, TopAbs_FACE); aFaceIt.More(); aFaceIt.Next())
+  {
+    TopLoc_Location aLocation;
+    const TopoDS_Face& aFace = TopoDS::Face(aFaceIt.Current());
+    const Handle(Geom_Surface)& aSurface = BRep_Tool::Surface(aFace, aLocation);
+
+    for (TopExp_Explorer aEdgeIt(aFace, TopAbs_EDGE); aEdgeIt.More(); aEdgeIt.Next())
+    {
+      const TopoDS_Edge& anEdge = TopoDS::Edge(aEdgeIt.Current());
+      aBuilder.UpdateEdge(anEdge, Handle(Geom2d_Curve)(), aSurface,
+        aLocation, BRep_Tool::Tolerance(anEdge));
+    }
+
+    aBuilder.UpdateFace(aFace, Handle(Geom_Surface)(), aFace.Location(), BRep_Tool::Tolerance(aFace));
+  }
+
+  for (TopExp_Explorer aEdgeIt2(theShape, TopAbs_EDGE); aEdgeIt2.More(); aEdgeIt2.Next())
+  {
+    const TopoDS_Edge& anEdge = TopoDS::Edge(aEdgeIt2.Current());
+
+    aBuilder.UpdateEdge(anEdge, Handle(Geom_Curve)(),
+      TopLoc_Location(), BRep_Tool::Tolerance(anEdge));
+  }
+}
+
 
 //=======================================================================
 //function : RemoveUnusedPCurves
@@ -941,28 +958,24 @@ void BRepTools::DetectClosedness(const TopoDS_Face& theFace,
 {
   theUclosed = theVclosed = Standard_False;
   
-  BRepAdaptor_Surface BAsurf(theFace, Standard_False);
-  Standard_Boolean IsSurfUclosed = BAsurf.IsUClosed();
-  Standard_Boolean IsSurfVclosed = BAsurf.IsVClosed();
-  if (!IsSurfUclosed && !IsSurfVclosed)
-    return;
-  
   TopExp_Explorer Explo(theFace, TopAbs_EDGE);
   for (; Explo.More(); Explo.Next())
   {
     const TopoDS_Edge& anEdge = TopoDS::Edge(Explo.Current());
-    if (BRepTools::IsReallyClosed(anEdge, theFace))
+    if (BRep_Tool::IsClosed(anEdge, theFace) &&
+        BRepTools::IsReallyClosed(anEdge, theFace))
     {
       Standard_Real fpar, lpar;
-      Handle(Geom2d_Curve) aPCurve = BRep_Tool::CurveOnSurface(anEdge, theFace, fpar, lpar);
-      Standard_Boolean IsUiso = IsPCurveUiso(aPCurve, fpar, lpar);
-      if (IsSurfUclosed && IsUiso)
+      Handle(Geom2d_Curve) PCurve1 = BRep_Tool::CurveOnSurface(anEdge, theFace, fpar, lpar);
+      Handle(Geom2d_Curve) PCurve2 = BRep_Tool::CurveOnSurface(TopoDS::Edge(anEdge.Reversed()),
+                                                               theFace, fpar, lpar);
+      gp_Pnt2d Point1 = PCurve1->Value(fpar);
+      gp_Pnt2d Point2 = PCurve2->Value(fpar);
+      Standard_Boolean IsUiso = (Abs(Point1.X() - Point2.X()) > Abs(Point1.Y() - Point2.Y()));
+      if (IsUiso)
         theUclosed = Standard_True;
-      if (IsSurfVclosed && !IsUiso)
+      else
         theVclosed = Standard_True;
-      
-      if (theUclosed && theVclosed)
-        break;
     }
   }
 }

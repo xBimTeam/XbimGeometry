@@ -135,7 +135,9 @@ void GCPnts_TangentialDeflection::Initialize (
 
 {
   
-  Standard_ConstructionError_Raise_if (CurvatureDeflection <= Precision::Confusion () || AngularDeflection   <= Precision::Angular (), "GCPnts_TangentialDeflection::Initialize - Zero Deflection")
+  Standard_ConstructionError_Raise_if (CurvatureDeflection < Precision::Confusion () ||
+                                       AngularDeflection < Precision::Angular (),
+                                       "GCPnts_TangentialDeflection::Initialize - Zero Deflection")
 
  parameters.Clear ();
  points    .Clear ();
@@ -223,7 +225,7 @@ void GCPnts_TangentialDeflection::PerformCircular (const TheCurve& C)
     
   const Standard_Real aDiff = lastu - firstu;
   // Round up number of points to satisfy curvatureDeflection more precisely
-  Standard_Integer NbPoints = (Standard_Integer)Ceiling(aDiff / Du);
+  Standard_Integer NbPoints = (Standard_Integer)Min(Ceiling(aDiff / Du), 1.0e+6);
   NbPoints = Max(NbPoints, minNbPnts - 1);
   Du       = aDiff / NbPoints;
 
@@ -591,6 +593,12 @@ void GCPnts_TangentialDeflection::PerformCurve (const TheCurve& C)
   {
     U1 = parameters(i);
     U2 = parameters(i + 1);
+
+    if (U2 - U1 <= uTol)
+    {
+      continue;
+    }
+
     // Check maximal deflection on interval;
     Standard_Real dmax = 0.;
     Standard_Real umax = 0.;

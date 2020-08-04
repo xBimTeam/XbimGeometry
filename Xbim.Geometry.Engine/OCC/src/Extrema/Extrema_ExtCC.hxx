@@ -29,9 +29,7 @@
 #include <Standard_Address.hxx>
 #include <Standard_Real.hxx>
 #include <gp_Pnt.hxx>
-class StdFail_InfiniteSolutions;
-class StdFail_NotDone;
-class Standard_OutOfRange;
+
 class Adaptor3d_Curve;
 class Extrema_POnCurv;
 class gp_Pnt;
@@ -96,13 +94,35 @@ public:
 
 protected:
 
+  //! Prepares the extrema result(s) for analytical cases (line, circle, ellipsis etc.)
+  Standard_EXPORT void PrepareResults (const Extrema_ExtElC& AlgExt,
+                                       const Standard_Boolean theIsInverse,
+                                       const Standard_Real Ut11,
+                                       const Standard_Real Ut12,
+                                       const Standard_Real Ut21,
+                                       const Standard_Real Ut22);
   
-  Standard_EXPORT void Results (const Extrema_ExtElC& AlgExt, const Standard_Real Ut11, const Standard_Real Ut12, const Standard_Real Ut21, const Standard_Real Ut22);
-  
-  Standard_EXPORT void Results (const Extrema_ECC& AlgExt, const Standard_Real Ut11, const Standard_Real Ut12, const Standard_Real Ut21, const Standard_Real Ut22);
+  //! Prepares the extrema result(s) for general cases (e.g. with B-spline curves).
+  Standard_EXPORT void PrepareResults (const Extrema_ECC& AlgExt,
+                                       const Standard_Real Ut11,
+                                       const Standard_Real Ut12,
+                                       const Standard_Real Ut21,
+                                       const Standard_Real Ut22);
 
+  //! Prepares the extrema result(s) in case when the given curves are parallel.
+  Standard_EXPORT void PrepareParallelResult(const Standard_Real theUt11,
+                                             const Standard_Real theUt12,
+                                             const Standard_Real theUt21,
+                                             const Standard_Real theUt22,
+                                             const Standard_Real theSqDist);
 
-
+  // Clears all found extremas.
+  // This method does not change any flags (e.g. Done or IsParallel)
+  void ClearSolutions()
+  {
+    mySqDist.Clear();
+    mypoints.Clear();
+  }
 
 private:
 
@@ -113,8 +133,6 @@ private:
   Standard_Boolean myIsPar;
   Extrema_SequenceOfPOnCurv mypoints;
   TColStd_SequenceOfReal mySqDist;
-  Standard_Integer mynbext;
-  Standard_Boolean inverse;
   Standard_Address myC[2];
   Standard_Real myInf[2];
   Standard_Real mySup[2];

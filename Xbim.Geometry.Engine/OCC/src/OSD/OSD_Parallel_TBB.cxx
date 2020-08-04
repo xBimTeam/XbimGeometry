@@ -18,28 +18,36 @@
 #ifdef HAVE_TBB
 
 #include <OSD_Parallel.hxx>
+#include <OSD_ThreadPool.hxx>
 #include <Standard_ProgramError.hxx>
 
 #include <tbb/parallel_for.h>
 #include <tbb/parallel_for_each.h>
 #include <tbb/blocked_range.h>
+#include <tbb/task_scheduler_init.h>
 
 //=======================================================================
-//function : forEach
+//function : forEachExternal
 //purpose  : 
 //=======================================================================
 
-void OSD_Parallel::forEach (UniversalIterator& theBegin,
-                            UniversalIterator& theEnd,
-                            const FunctorInterface& theFunctor)
+void OSD_Parallel::forEachExternal (UniversalIterator& theBegin,
+                                    UniversalIterator& theEnd,
+                                    const FunctorInterface& theFunctor,
+                                    Standard_Integer theNbItems)
 {
   try
   {
-    tbb::parallel_for_each(theBegin, theEnd, theFunctor);
+    const Handle(OSD_ThreadPool)& aThreadPool = OSD_ThreadPool::DefaultPool();
+    const Standard_Integer aNbThreads = theNbItems > 0 ?
+      aThreadPool->NbDefaultThreadsToLaunch() : -1;
+
+    tbb::task_scheduler_init aScheduler (aNbThreads);
+    tbb::parallel_for_each (theBegin, theEnd, theFunctor);
   }
   catch (tbb::captured_exception& anException)
   {
-    throw Standard_ProgramError(anException.what());
+    throw Standard_ProgramError (anException.what());
   }
 }
 

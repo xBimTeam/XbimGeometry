@@ -19,6 +19,7 @@
 #include <Bnd_Box2d.hxx>
 #include <Geom2dConvert_CompCurveToBSplineCurve.hxx>
 #include <ShapeConstruct_ProjectCurveOnSurface.hxx>
+#include <Precision.hxx>
 
 using namespace System::Linq;
 namespace Xbim
@@ -227,7 +228,7 @@ namespace Xbim
 						List<Ifc4::MeasureResource::IfcPositiveInteger>^ indices = (List<Ifc4::MeasureResource::IfcPositiveInteger>^)arcIndex->Value;
 						if (indices->Count != 3)
 						{
-							XbimGeometryCreator::LogError(logger, segment, "There should be three indices in an arc segment");
+							XbimGeometryCreator::LogWarning(logger, segment, "There should be three indices in an arc segment");
 							return;
 						}
 						gp_Pnt2d start = poles.Value((int)indices[0]);
@@ -243,7 +244,7 @@ namespace Xbim
 							Handle(Geom2d_TrimmedCurve) trimmed = new Geom2d_TrimmedCurve(curve, u1, u2);
 							if (!converter.Add(trimmed, tolerance))
 							{
-								XbimGeometryCreator::LogError(logger, segment, "Could not add arc segment to IfcIndexedPolyCurve");
+								XbimGeometryCreator::LogWarning(logger, segment, "Could not add arc segment to IfcIndexedPolyCurve");
 								return;
 							}
 						}
@@ -259,7 +260,7 @@ namespace Xbim
 								Handle(Geom2d_TrimmedCurve) trimmed = new Geom2d_TrimmedCurve(line, u1, u2);
 								if (!converter.Add(trimmed, tolerance))
 								{
-									XbimGeometryCreator::LogError(logger, segment, "Could not add arc segment as polyline to IfcIndexedPolyCurve");
+									XbimGeometryCreator::LogWarning(logger, segment, "Could not add arc segment as polyline to IfcIndexedPolyCurve");
 									return;
 								}
 							}
@@ -275,7 +276,7 @@ namespace Xbim
 						List<Ifc4::MeasureResource::IfcPositiveInteger>^ indices = (List<Ifc4::MeasureResource::IfcPositiveInteger>^)lineIndex->Value;
 						if (indices->Count < 2)
 						{
-							XbimGeometryCreator::LogError(logger, segment, "There should be at least two indices in an line index segment");
+							XbimGeometryCreator::LogWarning(logger, segment, "There should be at least two indices in an line index segment");
 							return;
 						}
 						int linePointCount = indices->Count;
@@ -296,7 +297,7 @@ namespace Xbim
 
 						if (!converter.Add(spline, tolerance))
 						{
-							XbimGeometryCreator::LogError(logger, segment, "Could not add line index segment as polyline to IfcIndexedPolyCurve");
+							XbimGeometryCreator::LogWarning(logger, segment, "Could not add line index segment as polyline to IfcIndexedPolyCurve");
 							return;
 						}
 					}
@@ -344,8 +345,34 @@ namespace Xbim
 			int pointCount = pline->Points->Count;
 			if (pointCount < 2)
 			{
-				XbimGeometryCreator::LogError(logger, pline, "Polyline with less than 2 points is not a line. It has been ignored");
+				XbimGeometryCreator::LogWarning(logger, pline, "Polyline with less than 2 points is not a line. It has been ignored");
 				return;
+			}
+			if (pointCount == 2) //just trim a line
+			{
+				IIfcCartesianPoint^ cp1 = pline->Points[0];
+				IIfcCartesianPoint^ cp2 = pline->Points[1];
+				gp_Pnt2d pnt1(cp1->X, cp1->Y);
+				gp_Pnt2d pnt2(cp2->X, cp2->Y);
+				double len = pnt1.Distance(pnt2);
+				if (std::abs(len) < Precision::Confusion())
+				{
+					XbimGeometryCreator::LogWarning(logger, pline, "Polyline segment has zero length. It has been ignored");
+					return;
+				}
+				GCE2d_MakeLine maker(pnt1, pnt2);
+				if (!maker.IsDone())
+				{
+					XbimGeometryCreator::LogWarning(logger, pline, "Polyline does not define a valid line segment. It has been ignored");
+					return;
+					
+				}
+				else
+				{
+					pCurve2D = new Handle(Geom2d_Curve);
+					*pCurve2D = new Geom2d_TrimmedCurve(maker.Value(), 0,len);
+					return;
+				}
 			}
 			TColgp_Array1OfPnt2d poles(1, pointCount);
 			TColStd_Array1OfReal knots(1, pointCount);
@@ -405,12 +432,12 @@ namespace Xbim
 			
 			if (semiAx1 <= 0)
 			{
-				XbimGeometryCreator::LogError(logger, ellipse,"WC002: Illegal Ellipse Semi Axis 1, must be greater than 0, in entity #{0}", ellipse->EntityLabel);
+				XbimGeometryCreator::LogWarning(logger, ellipse,"WC002: Illegal Ellipse Semi Axis 1, must be greater than 0, in entity #{0}", ellipse->EntityLabel);
 				return;
 			}
 			if (semiAx2 <= 0)
 			{
-				XbimGeometryCreator::LogError(logger, ellipse, "WE005: Illegal Ellipse Semi Axis 2, must be greater than 0, in entity #{0}", ellipse->EntityLabel);
+				XbimGeometryCreator::LogWarning(logger, ellipse, "WE005: Illegal Ellipse Semi Axis 2, must be greater than 0, in entity #{0}", ellipse->EntityLabel);
 				return;
 			}
 			bool rotateElipse = false;

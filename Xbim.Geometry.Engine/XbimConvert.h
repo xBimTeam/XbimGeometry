@@ -33,6 +33,7 @@ namespace Xbim
 			static TopLoc_Location ToLocation(IIfcAxis2Placement3D^ axis3D);
 			// Converts an Axis2Placement3D into a gp_Ax3
 			static gp_Ax3 ToAx3(IIfcAxis2Placement3D^ axis3D);
+			static gp_Ax3 ToAx3NoTranslation(IIfcAxis2Placement3D^ axis3D);
 			// Converts an Axis2Placement2D into a TopLoc_Location
 			static TopLoc_Location ToLocation(IIfcAxis2Placement2D^ axis2D);
 			// Converts an CartesianTransformationOperator into a gp_GTrsf

@@ -4,6 +4,7 @@
 #include "XbimFace.h"
 #include "XbimFaceSet.h"
 #include <TopoDS_Solid.hxx>
+#include <BRepBuilderAPI_TransitionMode.hxx>
 
 using namespace System::Collections::Generic;
 using namespace System::IO;
@@ -14,7 +15,7 @@ namespace Xbim
 {
 	namespace Geometry
 	{
-
+		static void BuildIfcSurfaceCurveSweptAreaSolid(TopoDS_Wire& sweepOcc, TopoDS_Face& refSurface, TopoDS_Face& faceStartOcc, double precision, TopoDS_Solid & result,  int& retflag);
 		ref class XbimSolid :IXbimSolid, XbimOccShape
 		{
 		private:
@@ -38,6 +39,7 @@ namespace Xbim
 			void Init(IIfcSweptAreaSolid^ solid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger);
 			void Init(IIfcExtrudedAreaSolid^ solid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger);
 			void Init(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger);
+			
 			void Init(IIfcRevolvedAreaSolid^ solid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger);
 
 			void Init(IIfcExtrudedAreaSolidTapered^ solid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger);
@@ -46,6 +48,7 @@ namespace Xbim
 
 
 			void Init(IIfcSweptDiskSolid^ solid, ILogger^ logger);
+			String^ BuildSweptDiskSolid(const TopoDS_Wire& directrixWire, double radius, double innerRadius, BRepBuilderAPI_TransitionMode transitionMode);
 			XbimWire^ CreateDirectrix(IIfcCurve^ directrix, Nullable<IfcParameterValue> startParam, Nullable<IfcParameterValue> endParam, ILogger^ logger);
 			// this is case handled by IIfcSweptDiskSolid 
 			// void Init(IIfcSweptDiskSolidPolygonal^ solid, ILogger^ logger);

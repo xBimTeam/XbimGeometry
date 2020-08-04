@@ -20,30 +20,41 @@ namespace Xbim.Geometry.Engine.Interop
         /// <returns>The lookup tag in ModelFactors.WorkArounds for the workaround or null if not required due to a later version of the exporter</returns>
         public static string AddWorkAroundSurfaceofLinearExtrusionForRevit(this IModel model)
         {
-            
+            //it looks like all revit exports up to the 2020 release do not consider the local placement, so broadening the previous catch
             var header = model.Header;
-            var modelFactors = model.ModelFactors as XbimModelFactors;
-            string revitPattern = @"- Exporter\s(\d*.\d*.\d*.\d*)";
+            string revitPattern = @"- Exporter\s(\d*.\d*.\d*.\d*) - Alternate UI";
             if (header.FileName == null || string.IsNullOrWhiteSpace(header.FileName.OriginatingSystem))
                 return null; //nothing to do
             var matches = Regex.Matches(header.FileName.OriginatingSystem, revitPattern, RegexOptions.IgnoreCase);
             if (matches.Count > 0) //looks like Revit
             {
-                if (matches[0].Groups.Count == 2) //we have the build versions
-                {
-                    if (Version.TryParse(matches[0].Groups[1].Value, out Version modelVersion))
-                    {
-                        //SurfaceOfLinearExtrusion bug found in version 17.4.0 and earlier
-                        var surfaceOfLinearExtrusionVersion = new Version(17, 4, 0, 0);
-                        if (modelVersion <= surfaceOfLinearExtrusionVersion)
-                        {
-                            modelFactors.AddWorkAround(SurfaceOfLinearExtrusion);
-                            return SurfaceOfLinearExtrusion;
-                        }
-                    }
-
-                }
+                var modelFactors = model.ModelFactors as XbimModelFactors;
+                modelFactors.AddWorkAround(SurfaceOfLinearExtrusion);
+                return SurfaceOfLinearExtrusion;
             }
+            //var header = model.Header;
+            //var modelFactors = model.ModelFactors as XbimModelFactors;
+            //string revitPattern = @"- Exporter\s(\d*.\d*.\d*.\d*)";
+            //if (header.FileName == null || string.IsNullOrWhiteSpace(header.FileName.OriginatingSystem))
+            //    return null; //nothing to do
+            //var matches = Regex.Matches(header.FileName.OriginatingSystem, revitPattern, RegexOptions.IgnoreCase);
+            //if (matches.Count > 0) //looks like Revit
+            //{
+            //    if (matches[0].Groups.Count == 2) //we have the build versions
+            //    {
+            //        if (Version.TryParse(matches[0].Groups[1].Value, out Version modelVersion))
+            //        {
+            //            //SurfaceOfLinearExtrusion bug found in version 17.4.0 and earlier
+            //            var surfaceOfLinearExtrusionVersion = new Version(17, 4, 0, 0);
+            //            if (modelVersion <= surfaceOfLinearExtrusionVersion)
+            //            {
+            //                modelFactors.AddWorkAround(SurfaceOfLinearExtrusion);
+            //                return SurfaceOfLinearExtrusion;
+            //            }
+            //        }
+
+            //    }
+            //}
             return null;
         }
         /// <summary>

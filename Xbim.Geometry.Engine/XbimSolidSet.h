@@ -12,8 +12,15 @@ namespace Xbim
 {
 	namespace Geometry
 	{
+		const int BOOLEAN_PARTIALSUCCESSBADTOPOLOGY = 4; //we have managed to create a shape but it fails topo analysis
+		const int BOOLEAN_PARTIALSUCCESSSINGLECUT = 3; //had to do each tool separately but one or more ops failed but we have something
+		const int BOOLEAN_SUCCESSSINGLECUT = 2;//had to do each tool separately total sucess		
+		const int BOOLEAN_SUCCESS = 1; //first attempt with all  tools worked
+		const int BOOLEAN_FAIL = 0;
+		const int BOOLEAN_TIMEDOUT = -1;
 		
-		static bool DoBoolean(const TopoDS_Shape& body, const TopTools_ListOfShape& tools, BOPAlgo_Operation op, double tolerance, TopoDS_Shape& result, int timeout);
+	
+	    int DoBoolean(const TopoDS_Shape& body, const TopTools_ListOfShape& tools, BOPAlgo_Operation op, double tolerance, double fuzzTolerance, TopoDS_Shape& result, int timeout);
 
 		private ref class VolumeComparer : IComparer<Tuple<double, XbimSolid^>^>
 		{

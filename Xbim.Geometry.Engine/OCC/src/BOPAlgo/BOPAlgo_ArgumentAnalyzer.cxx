@@ -39,7 +39,6 @@
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Edge.hxx>
-#include <TopoDS_Iterator.hxx>
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Shell.hxx>
 #include <TopoDS_Solid.hxx>
@@ -233,7 +232,7 @@ void BOPAlgo_ArgumentAnalyzer::Perform()
         TestCurveOnSurface();
     }
   }
-  catch(Standard_Failure) {
+  catch(Standard_Failure const&) {
     BOPAlgo_CheckResult aResult;
     aResult.SetCheckStatus(BOPAlgo_CheckUnknown);
     myResult.Append(aResult);

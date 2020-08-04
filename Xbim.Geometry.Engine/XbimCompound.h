@@ -34,8 +34,8 @@ namespace Xbim
 			void InstanceCleanup();
 			//Initialisers
 			void Init(IIfcConnectedFaceSet^ faceSet,  ILogger^ logger);
-			void Init(IEnumerable<IIfcFace^>^ faces,IIfcRepresentationItem^ theItem, ILogger^ logger);
-			XbimShell^ InitAdvancedFaces(IEnumerable<IIfcFace^>^ faces, ILogger^ logger);
+			TopoDS_Shape InitFaces(IEnumerable<IIfcFace^>^ faces,IIfcRepresentationItem^ theItem, ILogger^ logger);
+			TopoDS_Shape InitAdvancedFaces(IEnumerable<IIfcFace^>^ faces, ILogger^ logger);
 			void Init(IIfcShellBasedSurfaceModel^ sbsm, ILogger^ logger);
 			void Init(IIfcFaceBasedSurfaceModel^ fbsm, ILogger^ logger);
 			void Init(IIfcManifoldSolidBrep^ solid, ILogger^ logger);

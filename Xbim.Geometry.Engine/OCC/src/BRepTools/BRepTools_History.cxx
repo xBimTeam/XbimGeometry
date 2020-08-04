@@ -112,17 +112,11 @@ void BRepTools_History::Remove(const TopoDS_Shape& theRemoved)
   // Apply the limitations.
   Standard_ASSERT_RETURN(IsSupportedType(theRemoved), myMsgUnsupportedType,);
 
-  if (myShapeToGenerated.UnBind(theRemoved))
-  {
-    Standard_ASSERT_INVOKE_(, myMsgGeneratedAndRemoved);
-  }
-
   if (myShapeToModified.UnBind(theRemoved))
   {
     Standard_ASSERT_INVOKE_(, myMsgModifiedAndRemoved);
   }
 
-  //
   myRemoved.Add(theRemoved);
 }
 
@@ -215,7 +209,8 @@ Standard_Boolean BRepTools_History::IsRemoved(
 //==============================================================================
 void BRepTools_History::Merge(const Handle(BRepTools_History)& theHistory23)
 {
-  Merge(*theHistory23.get());
+  if (!theHistory23.IsNull())
+    Merge(*theHistory23.get());
 }
 //==============================================================================
 //function : Merge
@@ -223,6 +218,12 @@ void BRepTools_History::Merge(const Handle(BRepTools_History)& theHistory23)
 //==============================================================================
 void BRepTools_History::Merge(const BRepTools_History& theHistory23)
 {
+  if (!(theHistory23.HasModified() ||
+        theHistory23.HasGenerated() ||
+        theHistory23.HasRemoved()))
+    // nothing to merge
+    return;
+
   // Propagate R23 directly and M23 and G23 fully to M12 and G12.
   // Remember the propagated shapes.
   TopTools_DataMapOfShapeListOfShape* aS1ToGAndM[] =
@@ -348,11 +349,6 @@ Standard_Boolean BRepTools_History::prepareGenerated(
 {
   Standard_ASSERT_RETURN(theInitial.IsNull() ||
     IsSupportedType(theInitial), myMsgUnsupportedType, Standard_False);
-
-  if (myRemoved.Remove(theInitial))
-  {
-    Standard_ASSERT_INVOKE_(, myMsgGeneratedAndRemoved);
-  }
 
   if (myShapeToModified.IsBound(theInitial) &&
     myShapeToModified(theInitial).Remove(theGenerated))

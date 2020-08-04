@@ -238,19 +238,27 @@ static Standard_Boolean KPartCircle
   BRepFill_IndexedDataMapOfOrientedShapeListOfShape& myMap,
   Standard_Boolean&    myIsDone)
 {
-  TopExp_Explorer exp(mySpine,TopAbs_EDGE);
-  Standard_Integer NbEdges = 0;
-  TopoDS_Edge      E;
-
-  for (; exp.More(); exp.Next()) {
-    NbEdges++;
-    E = TopoDS::Edge(exp.Current());
-    if (NbEdges > 1) return Standard_False;
+  TopoDS_Edge E;
+  for (TopExp_Explorer anEdgeIter (mySpine, TopAbs_EDGE); anEdgeIter.More(); anEdgeIter.Next())
+  {
+    if (!E.IsNull())
+    {
+      return Standard_False;
+    }
+    E = TopoDS::Edge (anEdgeIter.Current());
+  }
+  if (E.IsNull())
+  {
+    return Standard_False;
   }
 
   Standard_Real      f,l;
   TopLoc_Location    L;
   Handle(Geom_Curve) C =  BRep_Tool::Curve(E,L,f,l);
+  if (C.IsNull())
+  {
+    return Standard_False;
+  }
 
   if (C->IsKind(STANDARD_TYPE(Geom_TrimmedCurve))) {
     Handle(Geom_TrimmedCurve) Ct = Handle(Geom_TrimmedCurve)::DownCast(C);
@@ -513,7 +521,7 @@ void BRepFill_OffsetWire::Perform (const Standard_Real Offset,
     if(!BadEdges.IsEmpty())
     {
       // Modification of myWorkSpine;
-      //cout << "Modification of myWorkSpine : " << BadEdges.Extent() << endl;
+      //std::cout << "Modification of myWorkSpine : " << BadEdges.Extent() << std::endl;
       BRepTools_Substitution aSubst;
       TopTools_ListIteratorOfListOfShape it(BadEdges);
       TopTools_ListOfShape aL;
@@ -540,7 +548,7 @@ void BRepFill_OffsetWire::Perform (const Standard_Real Offset,
         Standard_Integer NPnts = Points.Length();
         if(NPnts > 2)
         {
-          //cout << NPnts << " points " << endl;
+          //std::cout << NPnts << " points " << std::endl;
           TopoDS_Vertex FV = Vf;
           TopoDS_Vertex LV;
           TopoDS_Edge newE;
@@ -558,7 +566,7 @@ void BRepFill_OffsetWire::Perform (const Standard_Real Offset,
         }
         else
         {
-          //cout << " 2 points " << endl;
+          //std::cout << " 2 points " << std::endl;
           TopoDS_Edge newE = BRepLib_MakeEdge(Vf, Vl);
           aL.Append(newE);
         }
@@ -634,9 +642,9 @@ void BRepFill_OffsetWire::Perform (const Standard_Real Offset,
   }
   catch (Standard_Failure const& anException) {
 #ifdef OCCT_DEBUG
-    cout<<"An exception was caught in BRepFill_OffsetWire::Perform : ";
-    anException.Print(cout);
-    cout<<endl;
+    std::cout<<"An exception was caught in BRepFill_OffsetWire::Perform : ";
+    anException.Print(std::cout);
+    std::cout<<std::endl;
 #endif
     (void)anException;
     myShape.Nullify();
@@ -741,7 +749,6 @@ void BRepFill_OffsetWire::PerformWithBiLo
     return;
 
   BRep_Builder myBuilder;
-  myBuilder.MakeCompound(TopoDS::Compound(myShape));
 
   //---------------------------------------------------------------------
   // MapNodeVertex : associate to each node of the map (key1) and to
@@ -785,6 +792,11 @@ void BRepFill_OffsetWire::PerformWithBiLo
     TopExp::Vertices(theWire, Ends[0], Ends[1]);
   }
 
+  if (Locus.NumberOfContours() == 0)
+  {
+    return;
+  }
+
   for (Standard_Integer ic = 1; ic <= Locus.NumberOfContours(); ic++) {
     TopoDS_Shape PEE = Link.GeneratingShape(Locus.BasicElt(ic,Locus.NumberOfElts(ic)));
     TopoDS_Shape& PE = PEE ;      
@@ -819,7 +831,7 @@ void BRepFill_OffsetWire::PerformWithBiLo
 #ifdef OCCT_DEBUG
 #ifdef DRAW
   if (AffichEdge) {
-    cout << " End Construction of geometric primitives "<<endl;
+    std::cout << " End Construction of geometric primitives "<<std::endl;
   }
 #endif
 #endif
@@ -1007,7 +1019,7 @@ void BRepFill_OffsetWire::PerformWithBiLo
 #ifdef OCCT_DEBUG
 #ifdef DRAW
   if (AffichEdge) {
-    cout << " End Construction of vertices on offsets"<<endl;
+    std::cout << " End Construction of vertices on offsets"<<std::endl;
   }
 #endif
 #endif
@@ -1457,7 +1469,7 @@ void BRepFill_OffsetWire::MakeWires()
 
       if (!End) {
         if (MVE.FindFromKey(CV).Extent() > 2) {
-          //cout <<"vertex on more that 2 edges in a face."<<endl;
+          //std::cout <<"vertex on more that 2 edges in a face."<<std::endl;
         }
         for ( itl.Initialize(MVE.FindFromKey(CV)); itl.More(); itl.Next()) {
           if (itl.Value().IsSame(CE)) {
@@ -2509,7 +2521,7 @@ static void CheckBadEdges(const TopoDS_Face& Spine, const Standard_Real Offset,
 
 
         if (aMap.Contains(SE)) {
-          //cout << "Edge is treated second time" << endl;
+          //std::cout << "Edge is treated second time" << std::endl;
           continue;
         }
 

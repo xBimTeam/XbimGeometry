@@ -23,6 +23,8 @@
 #include <ShapeFix_ShapeTolerance.hxx>
 #include <GeomConvert_CompCurveToBSplineCurve.hxx>
 #include <GCPnts_AbscissaPoint.hxx>
+#include <GC_MakeArcOfCircle.hxx>
+#include <gp_Circ.hxx>
 
 using namespace System;
 using namespace System::Linq;
@@ -146,7 +148,7 @@ namespace Xbim
 			else if (dynamic_cast<IIfcIndexedPolyCurve^>(curve)) Init((IIfcIndexedPolyCurve^)curve, logger);
 			else if (dynamic_cast<IIfcPcurve^>(curve)) Init((IIfcPcurve^)curve, logger);
 			else if (dynamic_cast<IIfcSurfaceCurve^>(curve)) Init((IIfcSurfaceCurve^)curve, logger);
-			else if(curve == nullptr)
+			else if (curve == nullptr)
 				XbimGeometryCreator::LogWarning(logger, curve, "Curve is null");
 			else
 				throw gcnew Exception(String::Format("Unsupported Curve Type {0}", curve->GetType()->Name));
@@ -158,7 +160,7 @@ namespace Xbim
 		{
 			TColgp_Array1OfPnt poles(1, Enumerable::Count(bspline->ControlPointsList));
 			int i = 1;
-			for each (IIfcCartesianPoint^ cp in bspline->ControlPointsList)
+			for each (IIfcCartesianPoint ^ cp in bspline->ControlPointsList)
 			{
 				poles.SetValue(i, gp_Pnt(cp->X, cp->Y, XbimConvert::GetZValueOrZero(cp)));
 				i++;
@@ -185,7 +187,7 @@ namespace Xbim
 		{
 			TColgp_Array1OfPnt poles(1, Enumerable::Count(bspline->ControlPointsList));
 			int i = 1;
-			for each (IIfcCartesianPoint^ cp in bspline->ControlPointsList)
+			for each (IIfcCartesianPoint ^ cp in bspline->ControlPointsList)
 			{
 				poles.SetValue(i, gp_Pnt(cp->X, cp->Y, XbimConvert::GetZValueOrZero(cp)));
 				i++;
@@ -231,13 +233,13 @@ namespace Xbim
 			int segIdx = 1;
 			XbimPoint3D startPnt;
 
-			for each(IIfcCompositeCurveSegment^ seg in cCurve->Segments) //every segment shall be a bounded curve
+			for each (IIfcCompositeCurveSegment ^ seg in cCurve->Segments) //every segment shall be a bounded curve
 			{
 				bool lastSeg = (segIdx == segCount);
 
 				if (!dynamic_cast<IIfcBoundedCurve^>(seg->ParentCurve))
 				{
-					XbimGeometryCreator::LogError(logger, seg, "Composite curve contains a segment whih is not a bounded curve. It has been ignored");
+					XbimGeometryCreator::LogWarning(logger, seg, "Composite curve contains a segment whih is not a bounded curve. It has been ignored");
 					return;
 				}
 				XbimCurve^ curve = gcnew XbimCurve(seg->ParentCurve, logger);
@@ -288,7 +290,7 @@ namespace Xbim
 							double fiveMilli = 5 * cCurve->Model->ModelFactors->OneMilliMeter; //we are going to accept that a gap of 5mm is not a gap
 							if (actualGap > fiveMilli)
 							{
-								XbimGeometryCreator::LogError(logger, seg, "Failed to join composite curve segment. It has been ignored");
+								XbimGeometryCreator::LogWarning(logger, seg, "Failed to join composite curve segment. It has been ignored");
 								return;
 							}
 							actualTolerance = actualGap + tolerance;
@@ -306,7 +308,7 @@ namespace Xbim
 					}
 					if (!ok)
 					{
-						XbimGeometryCreator::LogError(logger, seg, "Failed to join composite curve segment. It has been ignored");
+						XbimGeometryCreator::LogWarning(logger, seg, "Failed to join composite curve segment. It has been ignored");
 						return;
 					}
 					lastVertex = curve->EndPoint();
@@ -322,7 +324,7 @@ namespace Xbim
 			*pCurve = bspline;
 		}
 
-		void  XbimCurve::Init(IIfcIndexedPolyCurve ^ polyCurve, ILogger ^ logger)
+		void  XbimCurve::Init(IIfcIndexedPolyCurve^ polyCurve, ILogger^ logger)
 		{
 			double tolerance = polyCurve->Model->ModelFactors->Precision;
 
@@ -373,7 +375,7 @@ namespace Xbim
 			if (Enumerable::Any(polyCurve->Segments))
 			{
 				GeomConvert_CompCurveToBSplineCurve converter;
-				for each (IIfcSegmentIndexSelect^ segment in  polyCurve->Segments)
+				for each (IIfcSegmentIndexSelect ^ segment in  polyCurve->Segments)
 				{
 					Ifc4::GeometryResource::IfcArcIndex^ arcIndex = dynamic_cast<Ifc4::GeometryResource::IfcArcIndex^>(segment);
 					Ifc4::GeometryResource::IfcLineIndex^ lineIndex = dynamic_cast<Ifc4::GeometryResource::IfcLineIndex^>(segment);
@@ -383,7 +385,7 @@ namespace Xbim
 						List<Ifc4::MeasureResource::IfcPositiveInteger>^ indices = (List<Ifc4::MeasureResource::IfcPositiveInteger>^)arcIndex->Value;
 						if (indices->Count != 3)
 						{
-							XbimGeometryCreator::LogError(logger, segment, "There should be three indices in an arc segment");
+							XbimGeometryCreator::LogWarning(logger, segment, "There should be three indices in an arc segment");
 							return;
 						}
 						gp_Pnt start = poles.Value((int)indices[0]);
@@ -399,7 +401,7 @@ namespace Xbim
 							Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(curve, u1, u2);
 							if (!converter.Add(trimmed, tolerance))
 							{
-								XbimGeometryCreator::LogError(logger, segment, "Could not add arc segment to IfcIndexedPolyCurve");
+								XbimGeometryCreator::LogWarning(logger, segment, "Could not add arc segment to IfcIndexedPolyCurve");
 								return;
 							}
 						}
@@ -415,7 +417,7 @@ namespace Xbim
 								Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(line, u1, u2);
 								if (!converter.Add(trimmed, tolerance))
 								{
-									XbimGeometryCreator::LogError(logger, segment, "Could not add arc segment as polyline to IfcIndexedPolyCurve");
+									XbimGeometryCreator::LogWarning(logger, segment, "Could not add arc segment as polyline to IfcIndexedPolyCurve");
 									return;
 								}
 							}
@@ -431,7 +433,7 @@ namespace Xbim
 						List<Ifc4::MeasureResource::IfcPositiveInteger>^ indices = (List<Ifc4::MeasureResource::IfcPositiveInteger>^)lineIndex->Value;
 						if (indices->Count < 2)
 						{
-							XbimGeometryCreator::LogError(logger, segment, "There should be at least two indices in an line index segment");
+							XbimGeometryCreator::LogWarning(logger, segment, "There should be at least two indices in an line index segment");
 							return;
 						}
 						int linePointCount = indices->Count;
@@ -452,7 +454,7 @@ namespace Xbim
 
 						if (!converter.Add(spline, tolerance))
 						{
-							XbimGeometryCreator::LogError(logger, segment, "Could not add line index segment as polyline to IfcIndexedPolyCurve");
+							XbimGeometryCreator::LogWarning(logger, segment, "Could not add line index segment as polyline to IfcIndexedPolyCurve");
 							return;
 						}
 					}
@@ -495,6 +497,31 @@ namespace Xbim
 				XbimGeometryCreator::LogError(logger, pline, "Polyline with less than 2 points is not a line. It has been ignored");
 				return;
 			}
+			//optimisation for singl segment polyline
+			if (pointCount == 2) //just trim a line
+			{
+				gp_Pnt pnt1 = XbimConvert::GetPoint3d(pline->Points[0]);
+				gp_Pnt pnt2 = XbimConvert::GetPoint3d(pline->Points[1]);
+				double len = pnt1.Distance(pnt2);
+				if (std::abs(len) < Precision::Confusion())
+				{
+					XbimGeometryCreator::LogWarning(logger, pline, "Polyline segment has zero length. It has been ignored");
+					return;
+				}
+				GC_MakeLine maker(pnt1, pnt2);
+				if (!maker.IsDone())
+				{
+					XbimGeometryCreator::LogWarning(logger, pline, "Polyline does not define a valid line segment. It has been ignored");
+					return;
+
+				}
+				else
+				{
+					pCurve = new Handle(Geom_Curve);
+					*pCurve = new Geom_TrimmedCurve(maker.Value(), 0, len);
+					return;
+				}
+			}
 			TColgp_Array1OfPnt poles(1, pointCount);
 			TColStd_Array1OfReal knots(1, pointCount);
 			TColStd_Array1OfInteger mults(1, pointCount);
@@ -516,6 +543,7 @@ namespace Xbim
 
 		void XbimCurve::Init(IIfcTrimmedCurve^ curve, ILogger^ logger)
 		{
+			//int id = curve->EntityLabel;
 			Init(curve->BasisCurve, logger);
 			if (IsValid)
 			{
@@ -535,7 +563,7 @@ namespace Xbim
 				bool u1Found, u2Found, p1Found, p2Found;
 				double u2;
 				gp_Pnt p2;
-				for each (IIfcTrimmingSelect^ trim in curve->Trim1)
+				for each (IIfcTrimmingSelect ^ trim in curve->Trim1)
 				{
 					if (dynamic_cast<IIfcCartesianPoint^>(trim))
 					{
@@ -550,7 +578,7 @@ namespace Xbim
 						u1Found = true;
 					}
 				}
-				for each (IIfcTrimmingSelect^ trim in curve->Trim2)
+				for each (IIfcTrimmingSelect ^ trim in curve->Trim2)
 				{
 					if (dynamic_cast<IIfcCartesianPoint^>(trim))
 					{
@@ -565,11 +593,16 @@ namespace Xbim
 						u2Found = true;
 					}
 				}
-
-
+				
 
 				if (trim_cartesian) //if we prefer cartesian and we have the points override the parameters
 				{
+					if (isLine && !p1.IsEqual(p2, precision)) //just make a line of the two points
+					{
+						GC_MakeLine maker(p1, p2);
+						delete pCurve;
+						pCurve = new Handle(Geom_Curve)(maker.Value());
+					}
 
 					double u;
 					if (p1Found)
@@ -585,10 +618,11 @@ namespace Xbim
 					if (!u1Found)  GeomLib_Tool::Parameter(*pCurve, p1, precision * 10, u1);
 					if (!u2Found)  GeomLib_Tool::Parameter(*pCurve, p2, precision * 10, u2);
 				}
-				if (u1 == u2)
+				if (Math::Abs(u1 - u2) < Precision::Confusion())
 				{
 					pCurve->Nullify();
 					pCurve = nullptr;
+					XbimGeometryCreator::LogWarning(logger, curve, "The trimming points either result in a zero length curve or do not intersect the curve");
 					return;// zero length curve;
 				}
 				if (isEllipse)
@@ -630,7 +664,7 @@ namespace Xbim
 			}
 			else
 			{
-				Type ^ type = circle->Position->GetType();
+				Type^ type = circle->Position->GetType();
 				XbimGeometryCreator::LogError(logger, circle, "Placement of type {0} is not implemented", type->Name);
 				return;
 			}
@@ -643,12 +677,12 @@ namespace Xbim
 			double semiAx2 = ellipse->SemiAxis2;
 			if (semiAx1 <= 0)
 			{
-				XbimGeometryCreator::LogError(logger, ellipse, "Illegal Ellipse Semi Axis 1, must be greater than 0");
+				XbimGeometryCreator::LogWarning(logger, ellipse, "Illegal Ellipse Semi Axis 1, must be greater than 0");
 				return;
 			}
 			if (semiAx2 <= 0)
 			{
-				XbimGeometryCreator::LogError(logger, ellipse, "Illegal Ellipse Semi Axis 2, must be greater than 0");
+				XbimGeometryCreator::LogWarning(logger, ellipse, "Illegal Ellipse Semi Axis 2, must be greater than 0");
 				return;
 			}
 			gp_Ax3 ax3 = XbimConvert::ToAx3(ellipse->Position);
@@ -728,7 +762,7 @@ namespace Xbim
 			}
 		}
 
-		void XbimCurve::Init(IIfcSurfaceCurve ^ /*curve*/, ILogger ^ /*logger*/)
+		void XbimCurve::Init(IIfcSurfaceCurve^ /*curve*/, ILogger^ /*logger*/)
 		{
 			throw gcnew NotImplementedException("IIfcSurfaceCurve is not yet implemented");
 		}
@@ -749,10 +783,58 @@ namespace Xbim
 			(*pCurve)->D0((*pCurve)->LastParameter(), p);
 			return p;
 		}
+
+		bool XbimCurve::LocatePointOnCurve(const Handle(Geom_Curve)& C, const TopoDS_Vertex& V, double tolerance, double& p, double& distance)
+		{
+			Standard_Real Eps2 = tolerance * tolerance;
+
+			gp_Pnt P = BRep_Tool::Pnt(V);
+			GeomAdaptor_Curve GAC(C);
+
+			// Afin de faire les extremas, on verifie les distances en bout
+			Standard_Real D1, D2;
+			gp_Pnt P1, P2;
+			P1 = GAC.Value(GAC.FirstParameter());
+			P2 = GAC.Value(GAC.LastParameter());
+			D1 = P1.SquareDistance(P);
+			D2 = P2.SquareDistance(P);
+			if ((D1 < D2) && (D1 <= Eps2)) {
+				p = GAC.FirstParameter();
+				distance = sqrt(D1);
+				return Standard_True;
+			}
+			else if ((D2 < D1) && (D2 <= Eps2)) {
+				p = GAC.LastParameter();
+				distance = sqrt(D2);
+				return Standard_True;
+			}
+
+			Extrema_ExtPC extrema(P, GAC);
+			if (extrema.IsDone()) {
+				Standard_Integer i, index = 0, n = extrema.NbExt();
+				Standard_Real Dist2 = RealLast(), dist2min;
+
+				for (i = 1; i <= n; i++) {
+					dist2min = extrema.SquareDistance(i);
+					if (dist2min < Dist2) {
+						index = i;
+						Dist2 = dist2min;
+					}
+				}
+
+				if (index != 0) {
+					if (Dist2 <= Eps2) {
+						p = (extrema.Point(index)).Parameter();
+						distance = sqrt(Dist2);
+						return Standard_True;
+					}
+				}
+			}
+			return Standard_False;
+		}
 	}
 
 
 #pragma endregion
 }
-
 

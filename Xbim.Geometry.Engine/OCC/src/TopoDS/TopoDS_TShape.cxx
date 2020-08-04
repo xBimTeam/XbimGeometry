@@ -14,11 +14,19 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-
-#include <Standard_ConstructionError.hxx>
-#include <Standard_Type.hxx>
-#include <TopoDS_Builder.hxx>
-#include <TopoDS_Iterator.hxx>
 #include <TopoDS_TShape.hxx>
+#include <TopoDS_Shape.hxx>
+
+#include <Standard_Dump.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(TopoDS_TShape,Standard_Transient)
+
+//=======================================================================
+//function : DumpJson
+//purpose  : 
+//=======================================================================
+void TopoDS_TShape::DumpJson (Standard_OStream& theOStream, const Standard_Integer) const
+{
+  OCCT_DUMP_CLASS_BEGIN (theOStream, TopoDS_TShape);
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myFlags);
+}

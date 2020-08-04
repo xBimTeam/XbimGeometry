@@ -1,5 +1,6 @@
 #pragma once
 #include "XbimGeometryObject.h"
+#include <TopoDS_Vertex.hxx>
 #include <Geom_Curve.hxx>
 #include <Geom_BoundedCurve.hxx>
 using namespace Xbim::Ifc4::Interfaces;
@@ -92,7 +93,7 @@ namespace Xbim
 			gp_Pnt EndPoint();
 			Handle(Geom_BoundedCurve)& AsBoundedCurve() { return *((Handle(Geom_BoundedCurve)*)pCurve); }
 #pragma endregion
-
+			static bool LocatePointOnCurve(const Handle(Geom_Curve)& C, const TopoDS_Vertex& V, double tolerance, double& p, double& distance);
 		};
 	}
 }

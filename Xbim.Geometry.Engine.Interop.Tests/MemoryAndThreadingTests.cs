@@ -33,98 +33,98 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
        
 
-        [TestMethod]
-        public void simple_thread_time_out_operation_test()
-        {
-            var runCount = 20;
-            var res = new ConcurrentDictionary<int, long>();
-            ParallelOptions po = new ParallelOptions();
-            //po.MaxDegreeOfParallelism = 4;
-            var totalTime = new Stopwatch();
-            totalTime.Start();
-            //get a benchmark
-            for (int i = 0; i < runCount; i++)
-            {
+        //[TestMethod]
+        //public void simple_thread_time_out_operation_test()
+        //{
+        //    var runCount = 20;
+        //    var res = new ConcurrentDictionary<int, long>();
+        //    ParallelOptions po = new ParallelOptions();
+        //    //po.MaxDegreeOfParallelism = 4;
+        //    var totalTime = new Stopwatch();
+        //    totalTime.Start();
+        //    //get a benchmark
+        //    for (int i = 0; i < runCount; i++)
+        //    {
 
-                var sw = new Stopwatch();
-                sw.Start();
-                try
-                {
-                    Sleep();
-                    //var t = new Task(()=>Sleep(), tokenSource.Token);
-                    //t.Wait(tokenSource.Token);
-                    // t.RunSynchronously();
-                    sw.Stop();
-                    res.TryAdd(i, sw.ElapsedMilliseconds);
-                }               
-                catch (TimeoutException)
-                {
-                    sw.Stop();
-                    res.TryAdd(-i, sw.ElapsedMilliseconds);
-                }
+        //        var sw = new Stopwatch();
+        //        sw.Start();
+        //        try
+        //        {
+        //            Sleep();
+        //            //var t = new Task(()=>Sleep(), tokenSource.Token);
+        //            //t.Wait(tokenSource.Token);
+        //            // t.RunSynchronously();
+        //            sw.Stop();
+        //            res.TryAdd(i, sw.ElapsedMilliseconds);
+        //        }               
+        //        catch (TimeoutException)
+        //        {
+        //            sw.Stop();
+        //            res.TryAdd(-i, sw.ElapsedMilliseconds);
+        //        }
 
-            }
+        //    }
 
-            int avTime = (int)res.Average(r => r.Value);
-            res.Clear();
-            var firstRunTime = totalTime.ElapsedMilliseconds;
-            totalTime.Restart();
-            Parallel.For(0, runCount, ( i) =>
-             {
+        //    int avTime = (int)res.Average(r => r.Value);
+        //    res.Clear();
+        //    var firstRunTime = totalTime.ElapsedMilliseconds;
+        //    totalTime.Restart();
+        //    Parallel.For(0, runCount, ( i) =>
+        //     {
                  
 
-                 var sw = new Stopwatch();
-                 sw.Start();
-                 try
-                 {
-                     var time = CallWithTimeout(Sleep, SleepTime * 3);
+        //         var sw = new Stopwatch();
+        //         sw.Start();
+        //         try
+        //         {
+        //             var time = CallWithTimeout(Sleep, SleepTime * 3);
 
-                     //var t = new Task(()=>Sleep(), tokenSource.Token);
-                     //t.Wait(tokenSource.Token);
-                     // t.RunSynchronously();
-                     sw.Stop();
-                     res.TryAdd(i, sw.ElapsedMilliseconds);
-                 }                 
-                 catch (TimeoutException)
-                 {
-                     sw.Stop();
-                     res.TryAdd(-i, sw.ElapsedMilliseconds);
-                 }
+        //             //var t = new Task(()=>Sleep(), tokenSource.Token);
+        //             //t.Wait(tokenSource.Token);
+        //             // t.RunSynchronously();
+        //             sw.Stop();
+        //             res.TryAdd(i, sw.ElapsedMilliseconds);
+        //         }                 
+        //         catch (TimeoutException)
+        //         {
+        //             sw.Stop();
+        //             res.TryAdd(-i, sw.ElapsedMilliseconds);
+        //         }
   
-             });
-            totalTime.Stop();
-            var secondRunTime = totalTime.ElapsedMilliseconds;
-            Assert.IsTrue(res.Where(kv => kv.Key < 0).Any(),"Some executions should have timed out");
-            Console.WriteLine($"Single thread simple execution time {firstRunTime}, av unit {avTime}ms");
-            Console.WriteLine($"Multi thread with time out run time {secondRunTime}, av unit {(int)res.Average(r => r.Value)}ms, number of time outs {res.Count(kv=> kv.Key<0)} out of {runCount}");
-        }
+        //     });
+        //    totalTime.Stop();
+        //    var secondRunTime = totalTime.ElapsedMilliseconds;
+        //    Assert.IsTrue(res.Where(kv => kv.Key < 0).Any(),"Some executions should have timed out");
+        //    Console.WriteLine($"Single thread simple execution time {firstRunTime}, av unit {avTime}ms");
+        //    Console.WriteLine($"Multi thread with time out run time {secondRunTime}, av unit {(int)res.Average(r => r.Value)}ms, number of time outs {res.Count(kv=> kv.Key<0)} out of {runCount}");
+        //}
 
-        static T CallWithTimeout<T>(Func<T> action, int timeoutMilliseconds)
-        {
-            //Thread threadToKill = null;
-            Func<T> wrappedAction = () =>
-            {
-               return action();          
-            };
+        //static T CallWithTimeout<T>(Func<T> action, int timeoutMilliseconds)
+        //{
+        //    //Thread threadToKill = null;
+        //    Func<T> wrappedAction = () =>
+        //    {
+        //       return action();          
+        //    };
 
-            IAsyncResult result = wrappedAction.BeginInvoke(null, null);
-            if (result.AsyncWaitHandle.WaitOne(timeoutMilliseconds))
-            {
-                return wrappedAction.EndInvoke(result);
-            }
-            else
-            {
-               // threadToKill.Abort();
-                throw new TimeoutException();
-            }
+        //    IAsyncResult result = wrappedAction.BeginInvoke(null, null);
+        //    if (result.AsyncWaitHandle.WaitOne(timeoutMilliseconds))
+        //    {
+        //        return wrappedAction.EndInvoke(result);
+        //    }
+        //    else
+        //    {
+        //       // threadToKill.Abort();
+        //        throw new TimeoutException();
+        //    }
             
-        }
-        const int SleepTime = 50;
-        static int Sleep()
-        {
-            Thread.Sleep(SleepTime);
-            return SleepTime;
-        }
+        //}
+        //const int SleepTime = 50;
+        //static int Sleep()
+        //{
+        //    Thread.Sleep(SleepTime);
+        //    return SleepTime;
+        //}
 
         [TestMethod]
         public void simple_vertex_is_constructed_and_disposed()

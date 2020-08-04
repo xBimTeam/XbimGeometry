@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -63,7 +64,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var shape = model.Instances.OfType<IIfcClosedShell>().FirstOrDefault();
                 Assert.IsNotNull(shape);
                 var geom = geomEngine.CreateSolidSet(shape).FirstOrDefault();
-                Assert.IsTrue(geom.Volume > 1e-5);
+                geom.Volume.Should().BeApproximately(-136033.82966702414,1e-5);
             }
         }
         [TestMethod]
@@ -74,21 +75,10 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var shape = model.Instances.OfType<IIfcClosedShell>().FirstOrDefault();
                 Assert.IsNotNull(shape);
                 var geom = geomEngine.CreateSolidSet(shape).FirstOrDefault();
-                Assert.IsNull(geom, "This should fail");
+                Assert.IsNotNull(geom, "This should not fail");
             }
         }
 
-        [TestMethod]
-        public void can_trim_composite_curve()
-        {
-            using (var er = new EntityRepository<IIfcSurfaceCurveSweptAreaSolid>("failing_swept_area_curve", inRadians: true))
-            {
-                Assert.IsTrue(er.Entity != null, "No IfcSurfaceCurveSweptAreaSolid found");
-                var workAroundTag = er.Entity.Model.AddWorkAroundTrimForPolylinesIncorrectlySetToOneForEntireCurve();
-                var solid = geomEngine.CreateSolidSet(er.Entity, logger);
-                Assert.AreEqual(1, solid.Count);
-                Assert.AreEqual(12.6, solid.First().Volume.Value,  0.1);
-            }
-        }
+       
     }
 }

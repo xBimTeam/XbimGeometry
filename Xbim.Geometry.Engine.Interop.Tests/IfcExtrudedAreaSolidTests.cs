@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -6,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xbim.Ifc4.Interfaces;
+using Xbim.IO.Memory;
 
 namespace Xbim.Geometry.Engine.Interop.Tests.TestFiles
 {
@@ -32,6 +34,19 @@ namespace Xbim.Geometry.Engine.Interop.Tests.TestFiles
             logger = null;
         }
         [TestMethod]
+        public void arbritary_closed_profile_with_intersecting_voids_test()
+        {
+            using (var er = new EntityRepository<IIfcBooleanClippingResult>(nameof(arbritary_closed_profile_with_intersecting_voids_test)))
+            {
+                Assert.IsTrue(er.Entity != null, "No IIfcBooleanClippingResult found");
+                var solidSet = geomEngine.CreateSolidSet(er.Entity, logger);
+                Assert.IsTrue(solidSet.Count == 1, "This solid set should have 1 solid");
+                Assert.IsTrue(solidSet.First().Faces.Count == 28, "This solid should have 28 faces");
+            }
+
+        }
+
+        [TestMethod]
         public void IfcExtrudedAreaSolidInvalidPlacementTest()
         {
             using (var er = new EntityRepository<IIfcExtrudedAreaSolid>(nameof(IfcExtrudedAreaSolidInvalidPlacementTest)))
@@ -43,16 +58,36 @@ namespace Xbim.Geometry.Engine.Interop.Tests.TestFiles
 
         }
 
-        [TestMethod]
-        public void IfcSweptDiskSolidWithPolylineTest()
+        [DataTestMethod]
+        [DataRow("SweptDiskSolid_1", 15902.721708130202, DisplayName = "Directrix is polyline")]
+        [DataRow("SweptDiskSolid_2", 5720688.107912736, DisplayName = "Directrix is trimmed")]
+        [DataRow("SweptDiskSolid_3", 129879.77474359272, DisplayName = "Directrix is indexed polyline")]
+        [DataRow("SweptDiskSolid_4", 129879.77474359272, DisplayName = "Ifc reference test")]
+        public void SweptDiskSolidTest(string fileName, double requiredVolume)
         {
-            using (var er = new EntityRepository<IIfcSweptDiskSolid>(nameof(IfcSweptDiskSolidWithPolylineTest)))
+            using (var model = MemoryModel.OpenRead($@"TestFiles\{fileName}.ifc"))
             {
-                Assert.IsTrue(er.Entity != null, "No IIfcSweptDiskSolid found");
-                
-                var solid = geomEngine.CreateSolid(er.Entity, logger);
-                Assert.AreEqual(39, solid.Faces.Count , "This solid has the wrong number of faces");
+                var sweptDisk = model.Instances.OfType<IIfcSweptDiskSolid>().FirstOrDefault();
+                sweptDisk.Should().NotBeNull();
+                var solid = geomEngine.CreateSolid(sweptDisk, logger);
+                solid.Should().NotBeNull();
+                solid.Volume.Should().BeApproximately(requiredVolume, 1e-7);
             }
         }
+
+        [DataTestMethod]
+        [DataRow("SweptDiskSolidPolygonal_1", 84336.694898618269, DisplayName = "IFC SweptDiskSolidPolygonal reference test")]
+        public void SweptDiskSolidPolygonalTest(string fileName, double requiredVolume)
+        {
+            using (var model = MemoryModel.OpenRead($@"TestFiles\{fileName}.ifc"))
+            {
+                var sweptSolid = model.Instances.OfType<IIfcSweptDiskSolid>().FirstOrDefault();
+                sweptSolid.Should().NotBeNull();
+                var sweptDiskSolid = geomEngine.CreateSolid(sweptSolid);
+                sweptDiskSolid.Should().NotBeNull();
+                sweptDiskSolid.Volume.Should().BeApproximately(requiredVolume, 1e-7);
+            }
+        }
+
     }
 }

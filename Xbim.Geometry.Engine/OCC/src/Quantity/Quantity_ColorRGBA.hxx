@@ -91,6 +91,51 @@ public:
   //! Two colors are considered to be equal if their distance is no greater than Epsilon().
   bool operator== (const Quantity_ColorRGBA& theOther) const { return IsEqual (theOther); }
 
+  //! Finds color from predefined names.
+  //! For example, the name of the color which
+  //! corresponds to "BLACK" is Quantity_NOC_BLACK.
+  //! Returns false if name is unknown.
+  //! An alpha component is set to 1.0.
+  //! @param theColorNameString the color name
+  //! @param theColor a found color
+  //! @return false if the color name is unknown, or true if the search by color name was successful
+  static Standard_Boolean ColorFromName (const Standard_CString theColorNameString, Quantity_ColorRGBA& theColor)
+  {
+    Quantity_ColorRGBA aColor;
+    if (!Quantity_Color::ColorFromName (theColorNameString, aColor.ChangeRGB()))
+    {
+      return false;
+    }
+    theColor = aColor;
+    return true;
+  }
+
+  //! Parses the string as a hex color (like "#FF0" for short RGB color, "#FF0F" for short RGBA color,
+  //! "#FFFF00" for RGB color, or "#FFFF00FF" for RGBA color)
+  //! @param theHexColorString the string to be parsed
+  //! @param theColor a color that is a result of parsing
+  //! @param theAlphaComponentIsOff the flag that indicates if a color alpha component is presented
+  //! in the input string (false) or not (true)
+  //! @return true if parsing was successful, or false otherwise
+  Standard_EXPORT static bool ColorFromHex (const char* const   theHexColorString,
+                                            Quantity_ColorRGBA& theColor,
+                                            const bool          theAlphaComponentIsOff = false);
+
+  //! Returns hex sRGBA string in format "#RRGGBBAA".
+  static TCollection_AsciiString ColorToHex (const Quantity_ColorRGBA& theColor,
+                                             const bool theToPrefixHash = true)
+  {
+    NCollection_Vec4<Standard_ShortReal> anSRgb = (NCollection_Vec4<Standard_ShortReal> )theColor;
+    NCollection_Vec4<Standard_Integer> anSRgbInt (anSRgb * 255.0f + NCollection_Vec4<Standard_ShortReal> (0.5f));
+    char aBuff[12];
+    Sprintf (aBuff, theToPrefixHash ? "#%02X%02X%02X%02X" : "%02X%02X%02X%02X",
+             anSRgbInt.r(), anSRgbInt.g(), anSRgbInt.b(), anSRgbInt.a());
+    return aBuff;
+  }
+
+  //! Dumps the content of me into the stream
+  Standard_EXPORT void DumpJson (Standard_OStream& theOStream, const Standard_Integer theDepth = -1) const;
+
 private:
 
   static void myTestSize3() { Standard_STATIC_ASSERT (sizeof(float) * 3 == sizeof(Quantity_Color)); }

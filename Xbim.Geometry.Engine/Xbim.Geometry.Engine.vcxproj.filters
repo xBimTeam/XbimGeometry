@@ -24,9 +24,6 @@
     <ClInclude Include="OCC\src\Adaptor2d\Adaptor2d_Curve2d.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="OCC\src\Adaptor2d\Adaptor2d_Curve2dPtr.hxx">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="OCC\src\Adaptor2d\Adaptor2d_HCurve2d.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1083,9 +1080,6 @@
     <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_BooleanOperation.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_BooleanOperations.hxx">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_CheckStatus.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1093,24 +1087,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_Cut.hxx">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_DataMapIteratorOfDataMapOfShapeBoolean.hxx">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_DataMapIteratorOfDataMapOfShapeInterference.hxx">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_DataMapOfShapeBoolean.hxx">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_DataMapOfShapeInterference.hxx">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_DSAccess.hxx">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_EdgeConnector.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_FaceRestrictor.hxx">
@@ -1129,9 +1105,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_Section.hxx">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_SequenceOfSequenceOfInteger.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="OCC\src\BRepAlgo\BRepAlgo_Tool.hxx">
@@ -1872,9 +1845,6 @@
     <ClInclude Include="OCC\src\BRepMAT2d\BRepMAT2d_LinkTopoBilo.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="OCC\src\BRepMesh\BRepMesh.hxx">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_Circle.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1911,25 +1881,13 @@
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_EdgeTessellationExtractor.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_EdgeTessellator.hxx">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_FaceAttribute.hxx">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_FactoryError.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_FastDiscret.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_FastDiscretFace.hxx">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_GeomTool.hxx">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_IEdgeTool.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_IncrementalMesh.hxx">
@@ -1939,9 +1897,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_PairOfIndex.hxx">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_PairOfPolygon.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_PluginEntryType.hxx">
@@ -1956,9 +1911,6 @@
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_ShapeTool.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_Status.hxx">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_Triangle.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1969,12 +1921,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="OCC\src\BRepMesh\BRepMesh_VertexTool.hxx">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_WireChecker.hxx">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_WireInterferenceChecker.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="OCC\src\BRepOffsetAPI\BRepOffsetAPI_DraftAngle.hxx">
@@ -9195,6 +9141,294 @@
     <ClInclude Include="OCC\src\TopoDS\TopoDS_AlertWithShape.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="XbimConstraints.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BlendFunc\BlendFunc_ConstThroat.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BlendFunc\BlendFunc_ConstThroatInv.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BlendFunc\BlendFunc_ConstThroatWithPenetration.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BlendFunc\BlendFunc_ConstThroatWithPenetrationInv.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BlendFunc\BlendFunc_GenChamfer.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BlendFunc\BlendFunc_GenChamfInv.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\Bnd\Bnd_Tools.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_MakerConnected.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BOPAlgo\BOPAlgo_MakerPeriodic.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepAlgoAPI\BRepAlgoAPI_Defeaturing.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepAlgoAPI\BRepAlgoAPI_Splitter.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepBlend\BRepBlend_ConstThroat.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepBlend\BRepBlend_ConstThroatInv.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepBlend\BRepBlend_ConstThroatWithPenetration.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepBlend\BRepBlend_ConstThroatWithPenetrationInv.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepFill\BRepFill_AdvancedEvolved.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepGProp\BRepGProp_MeshCinert.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepGProp\BRepGProp_MeshProps.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_BaseMeshAlgo.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_BoundaryParamsRangeSplitter.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_ConeRangeSplitter.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_ConstrainedBaseMeshAlgo.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_Context.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_CurveTessellator.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_CustomBaseMeshAlgo.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_CustomDelaunayBaseMeshAlgo.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_CylinderRangeSplitter.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_DefaultRangeSplitter.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_Deflection.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_DelaunayBaseMeshAlgo.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_DelaunayDeflectionControlMeshAlgo.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_DelaunayNodeInsertionMeshAlgo.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_EdgeDiscret.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_FaceChecker.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_FaceDiscret.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_MeshAlgoFactory.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_MeshTool.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_ModelBuilder.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_ModelHealer.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_ModelPostProcessor.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_ModelPreProcessor.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_NodeInsertionMeshAlgo.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_NURBSRangeSplitter.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_ShapeVisitor.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_SphereRangeSplitter.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_TorusRangeSplitter.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMesh_UVParamRangeSplitter.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMeshData\BRepMeshData_Curve.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMeshData\BRepMeshData_Edge.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMeshData\BRepMeshData_Face.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMeshData\BRepMeshData_Model.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMeshData_PCurve.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BRepMesh\BRepMeshData_Wire.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BSplCLib\BSplCLib_CacheParams.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BVH\BVH_BoxSet.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BVH\BVH_Constants.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BVH\BVH_Distance.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BVH\BVH_IndexedBoxSet.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BVH\BVH_PairDistance.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BVH\BVH_PrimitiveSet3d.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BVH\BVH_Tools.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BVH\BVH_Traverse.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\FSD\FSD_Base64Decoder.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\Graphic3d\Graphic3d_Vec4.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_Curve.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_Edge.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_Face.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_Model.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_ParametersList.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_ParametersListArrayAdaptor.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_PCurve.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_Shape.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_Status.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_StatusOwner.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_TessellatedShape.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_Types.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshData\IMeshData_Wire.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshTools\IMeshTools_Context.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshTools\IMeshTools_CurveTessellator.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshTools\IMeshTools_MeshAlgo.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshTools\IMeshTools_MeshAlgoFactory.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshTools\IMeshTools_MeshBuilder.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshTools\IMeshTools_ModelAlgo.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshTools\IMeshTools_ModelBuilder.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshTools\IMeshTools_Parameters.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshTools\IMeshTools_ShapeExplorer.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\IMeshTools\IMeshTools_ShapeVisitor.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\OSD\OSD_SignalMode.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\OSD\OSD_ThreadPool.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\Standard\Standard_Condition.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\Standard\Standard_Dump.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\Standard\Standard_ReadBuffer.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\Standard\Standard_ReadLineBuffer.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Factories\WireFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="XbimMesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Stdafx.cpp">
@@ -9602,19 +9836,10 @@
     <ClCompile Include="OCC\src\BRepAlgo\BRepAlgo_BooleanOperation.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="OCC\src\BRepAlgo\BRepAlgo_BooleanOperations.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="OCC\src\BRepAlgo\BRepAlgo_Common.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="OCC\src\BRepAlgo\BRepAlgo_Cut.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\BRepAlgo\BRepAlgo_DSAccess.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\BRepAlgo\BRepAlgo_EdgeConnector.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="OCC\src\BRepAlgo\BRepAlgo_FaceRestrictor.cxx">
@@ -10034,22 +10259,7 @@
     <ClCompile Include="OCC\src\BRepMAT2d\BRepMAT2d_LinkTopoBilo.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_EdgeParameterProvider.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="OCC\src\BRepMesh\BRepMesh_EdgeTessellationExtractor.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_EdgeTessellator.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_IEdgeTool.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_WireChecker.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_WireInterferenceChecker.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="OCC\src\BRepOffsetAPI\BRepOffsetAPI_DraftAngle.cxx">
@@ -14666,15 +14876,6 @@
     <ClCompile Include=".\OCC\src\BRepMesh\BRepMesh_DiscretRoot.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include=".\OCC\src\BRepMesh\BRepMesh_FaceAttribute.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include=".\OCC\src\BRepMesh\BRepMesh_FastDiscret.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include=".\OCC\src\BRepMesh\BRepMesh_FastDiscretFace.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include=".\OCC\src\BRepMesh\BRepMesh_GeomTool.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -14751,9 +14952,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include=".\OCC\src\BOPAlgo\BOPAlgo_BuilderFace.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include=".\OCC\src\BOPAlgo\BOPAlgo_BuilderShape.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include=".\OCC\src\BOPAlgo\BOPAlgo_BuilderSolid.cxx">
@@ -14982,6 +15180,153 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include=".\OCC\src\BRepLib\BRepLib_1.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BlendFunc\BlendFunc_ConstThroat.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BlendFunc\BlendFunc_ConstThroatInv.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BlendFunc\BlendFunc_ConstThroatWithPenetration.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BlendFunc\BlendFunc_ConstThroatWithPenetrationInv.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BlendFunc\BlendFunc_GenChamfer.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BlendFunc\BlendFunc_GenChamfInv.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_MakeConnected.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BOPAlgo\BOPAlgo_MakePeriodic.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepFill\BRepFill_AdvancedEvolved.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepGProp\BRepGProp_MeshCinert.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepGProp\BRepGProp_MeshProps.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_BaseMeshAlgo.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_ConeRangeSplitter.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_Context.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_CurveTessellator.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_CylinderRangeSplitter.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_DefaultRangeSplitter.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_Deflection.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_DelaunayBaseMeshAlgo.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_EdgeDiscret.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_FaceChecker.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_FaceDiscret.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_MeshAlgoFactory.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_MeshTool.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_ModelBuilder.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_ModelHealer.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_ModelPostProcessor.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_ModelPreProcessor.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_NURBSRangeSplitter.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_ShapeVisitor.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_SphereRangeSplitter.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepMesh\BRepMesh_TorusRangeSplitter.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepMeshData\BRepMeshData_Curve.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepMeshData\BRepMeshData_Edge.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepMeshData\BRepMeshData_Face.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepMeshData\BRepMeshData_Model.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepMeshData\BRepMeshData_PCurve.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\BRepMeshData\BRepMeshData_Wire.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\OSD\OSD_ThreadPool.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\Quantity\Quantity_ColorRGBA.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\Standard\Standard_Condition.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCC\src\Standard\Standard_Dump.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include=".\OCC\src\FSD\FSD_Base64Decoder.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include=".\OCC\src\BRepAlgoAPI\BRepAlgoAPI_Defeaturing.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include=".\OCC\src\BRepAlgoAPI\BRepAlgoAPI_Splitter.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include=".\OCC\src\IMeshTools\IMeshTools_MeshBuilder.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include=".\OCC\src\IMeshTools\\IMeshTools_ShapeExplorer.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Factories\WireFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="XbimMesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -15565,7 +15910,6 @@
     <None Include="OCC\src\TopLoc\TopLoc_Datum3D.lxx" />
     <None Include="OCC\src\TopLoc\TopLoc_Location.lxx" />
     <None Include="OCC\src\TopLoc\TopLoc_SListNodeOfItemLocation.lxx" />
-    <None Include="OCC\src\TopLoc\TopLoc_SListOfItemLocation.lxx" />
     <None Include="OCC\src\TopoDS\TopoDS.lxx" />
     <None Include="OCC\src\TopoDS\TopoDS_Builder.lxx" />
     <None Include="OCC\src\TopoDS\TopoDS_Compound.lxx" />
@@ -15574,14 +15918,12 @@
     <None Include="OCC\src\TopoDS\TopoDS_Face.lxx" />
     <None Include="OCC\src\TopoDS\TopoDS_HShape.lxx" />
     <None Include="OCC\src\TopoDS\TopoDS_Iterator.lxx" />
-    <None Include="OCC\src\TopoDS\TopoDS_Shape.lxx" />
     <None Include="OCC\src\TopoDS\TopoDS_Shell.lxx" />
     <None Include="OCC\src\TopoDS\TopoDS_Solid.lxx" />
     <None Include="OCC\src\TopoDS\TopoDS_TCompound.lxx" />
     <None Include="OCC\src\TopoDS\TopoDS_TCompSolid.lxx" />
     <None Include="OCC\src\TopoDS\TopoDS_TEdge.lxx" />
     <None Include="OCC\src\TopoDS\TopoDS_TFace.lxx" />
-    <None Include="OCC\src\TopoDS\TopoDS_TShape.lxx" />
     <None Include="OCC\src\TopoDS\TopoDS_TShell.lxx" />
     <None Include="OCC\src\TopoDS\TopoDS_TSolid.lxx" />
     <None Include="OCC\src\TopoDS\TopoDS_TVertex.lxx" />

@@ -15,7 +15,7 @@ namespace Xbim
 	namespace Geometry
 	{
 
-		static bool PerformBoolean(BRepAlgoAPI_BooleanOperation& boolOp);
+		//static bool PerformBoolean(BRepAlgoAPI_BooleanOperation& boolOp);
 		ref class XbimGeometryObjectSet : XbimSetObject, IXbimGeometryObjectSet
 		{
 			
