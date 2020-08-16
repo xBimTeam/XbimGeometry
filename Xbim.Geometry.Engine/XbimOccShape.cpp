@@ -68,7 +68,7 @@ namespace Xbim
 			//First write out all the vertices
 			int faceIndex = 0;
 			int triangleCount = 0;
-			for each (XbimFace^ face in faces)
+			for each (XbimFace ^ face in faces)
 			{
 				TopLoc_Location loc;
 				const Handle(Poly_Triangulation)& mesh = BRep_Tool::Triangulation(face, loc);
@@ -76,7 +76,7 @@ namespace Xbim
 					continue;
 				gp_Trsf transform = loc.Transformation();
 				gp_Quaternion quaternion = transform.GetRotation();
-				const TColgp_Array1OfPnt & nodes = mesh->Nodes();
+				const TColgp_Array1OfPnt& nodes = mesh->Nodes();
 				triangleCount += mesh->NbTriangles();
 				bool faceReversed = face->IsReversed;
 				bool isPolygonal = face->IsPolygonal;
@@ -145,7 +145,7 @@ namespace Xbim
 
 			//now write out the faces
 			faceIndex = 0;
-			for each (XbimFace^ face in writtenFaces)
+			for each (XbimFace ^ face in writtenFaces)
 			{
 				bool isPlanar = face->IsPlanar;
 				List<size_t>^ norms = normalLookup[faceIndex];
@@ -174,7 +174,7 @@ namespace Xbim
 				}
 				faceIndex++;
 				textWriter->WriteLine();
-			}			
+			}
 			textWriter->Flush();
 			GC::KeepAlive(this);
 		}
@@ -199,25 +199,25 @@ namespace Xbim
 			TopoDS_Shape shape = this; //hold on to it
 			TopExp::MapShapes(shape, TopAbs_FACE, faceMap);
 			int faceCount = faceMap.Extent();
-			if (faceCount == 0) return;		
+			if (faceCount == 0) return;
 			array<bool>^ hasSeams = gcnew array<bool>(faceCount);
 			for (int f = 0; f < faceMap.Extent(); f++)
 			{
 				TopTools_IndexedMapOfShape edgeMap;
-				TopExp::MapShapes(faceMap(f+1), TopAbs_EDGE, edgeMap);
+				TopExp::MapShapes(faceMap(f + 1), TopAbs_EDGE, edgeMap);
 				hasSeams[f] = false;
 				//deal with seams
 				for (Standard_Integer i = 1; i <= edgeMap.Extent(); i++)
-				{				
+				{
 					//find any seams					
 					hasSeams[f] = (BRep_Tool::IsClosed(edgeMap(i)) == Standard_True); //just check a seam once
 					if (hasSeams[f]) break; //this face has a seam no need to do more
 				}
 			}
-			
+
 			BRepMesh_IncrementalMesh incrementalMesh(this, deflection, Standard_False, angle); //triangulate the first time		
 
-			
+
 			for (int f = 1; f <= faceMap.Extent(); f++)
 			{
 				const TopoDS_Face& face = TopoDS::Face(faceMap(f));
@@ -232,7 +232,7 @@ namespace Xbim
 				bool hasSeam = hasSeams[f - 1];
 				gp_Trsf transform = loc.Transformation();
 				gp_Quaternion quaternion = transform.GetRotation();
-				const TColgp_Array1OfPnt & nodes = mesh->Nodes();				
+				const TColgp_Array1OfPnt& nodes = mesh->Nodes();
 				Poly::ComputeNormals(mesh); //we need the normals					
 
 				if (hasSeam)
@@ -312,12 +312,12 @@ namespace Xbim
 				}
 			}
 			GC::KeepAlive(this);
-			
+
 		}
 
 
 
-	
+
 
 
 		void XbimOccShape::WriteIndex(BinaryWriter^ bw, UInt32 index, UInt32 maxInt)
@@ -344,7 +344,6 @@ namespace Xbim
 			List<List<int>^>^ pointLookup = gcnew List<List<int>^>(faceCount);
 			List<XbimPoint3D>^ points = gcnew List<XbimPoint3D>(faceCount * 3);;
 
-			/*Dictionary<int, int>^ normalMap = gcnew Dictionary<int, int>();*/
 			List<List<XbimPackedNormal>^>^ normalLookup = gcnew List<List<XbimPackedNormal>^>(faceCount);
 
 			//First write out all the vertices
@@ -353,40 +352,59 @@ namespace Xbim
 			List<List<int>^>^ tessellations = gcnew List<List<int>^>(faceCount);
 			bool isPolyhedron = true;
 			array<bool>^ hasSeams = gcnew array<bool>(faceCount);
+			//we check if the shape is a faceted poltgon, i.e. all faces are planar and all edges are linear, if so then we do not need to use OCC meshing which is general purpose and a little slower than LibMesh
 			for (int f = 1; f <= faceMap.Extent(); f++)
 			{
-				TopTools_IndexedMapOfShape edgeMap;
-				TopExp::MapShapes(faceMap(f), TopAbs_EDGE, edgeMap);
+				const TopoDS_Face& face = TopoDS::Face(faceMap(f));
+				Handle(Geom_Plane) plane = Handle(Geom_Plane)::DownCast(BRep_Tool::Surface(face));
+				bool isPlane = !plane.IsNull();
+				//set the seam value to false for default, seams cannot be on planar surfaces
 				hasSeams[f - 1] = false;
-				for (Standard_Integer i = 1; i <= edgeMap.Extent(); i++)
+				if (isPolyhedron && isPlane) //if the shape is still potentially a polyhedron then check that this planar face has no curves
 				{
-					Standard_Real start, end;
-					//find any seams					
-					if (!hasSeams[f - 1]) hasSeams[f - 1] = (BRep_Tool::IsClosed(edgeMap(i)) == Standard_True); //just check a seam once
-					Handle(Geom_Curve) c3d = BRep_Tool::Curve(TopoDS::Edge(edgeMap(i)), start, end);
-					if (!c3d.IsNull())
+					for (TopExp_Explorer edgeExplorer(face, TopAbs_EDGE); edgeExplorer.More(); edgeExplorer.Next())					
 					{
-						Handle(Standard_Type) cType = c3d->DynamicType();
-						if (cType != STANDARD_TYPE(Geom_Line))
+						Standard_Real start, end;
+						Handle(Geom_Curve) c3d = BRep_Tool::Curve(TopoDS::Edge(edgeExplorer.Current()), start, end);
+						if (!c3d.IsNull())
+						{							
+							if (c3d->DynamicType() == STANDARD_TYPE(Geom_Line)) //if it is a line all is well skip to next edge
+								continue;
+
+							if (c3d->DynamicType() == STANDARD_TYPE(Geom_TrimmedCurve)) //if it is a trimmed curve determine if basis curve is a line
+							{
+								//it must be a trimmed curve
+								Handle(Geom_TrimmedCurve) tc = Handle(Geom_TrimmedCurve)::DownCast(c3d);
+								//flatten any trimeed curve nesting
+								while (tc->BasisCurve()->DynamicType() == STANDARD_TYPE(Geom_TrimmedCurve))
+									tc = Handle(Geom_TrimmedCurve)::DownCast(tc->BasisCurve());
+								//get the type of the basis curve
+								Handle(Standard_Type) tcType = tc->BasisCurve()->DynamicType();
+								//if its a line all is well skip to next edge
+								if (tcType == STANDARD_TYPE(Geom_Line))
+									continue;
+							}
+							//if here then the shape has curves and we need to use OCC meshing
+							isPolyhedron = false;
+							break;
+						}
+					}
+				}
+				if (!isPlane) //curved surface check for any seams that will need smoothing
+				{							
+					for (TopExp_Explorer edgeExplorer(face,TopAbs_EDGE); edgeExplorer.More(); edgeExplorer.Next())
+					{					
+						//find any seams					
+						bool isSeam = (BRep_Tool::IsClosed(edgeExplorer.Current()) == Standard_True);
+						if (isSeam)
 						{
-							if (cType != STANDARD_TYPE(Geom_TrimmedCurve))
-							{
-								isPolyhedron = false;
-								//	isCurveFace[f - 1] = true;
-								continue;
-							}
-							Handle(Geom_TrimmedCurve) tc = Handle(Geom_TrimmedCurve)::DownCast(c3d);
-							Handle(Standard_Type) tcType = tc->DynamicType();
-							if (tcType != STANDARD_TYPE(Geom_Line))
-							{
-								isPolyhedron = false;
-								//isCurveFace[f - 1] = true;
-								continue;
-							}
+							hasSeams[f - 1] = true; //just check a seam once	
+							break;
 						}
 					}
 				}
 			}
+
 			if (!isPolyhedron)
 				BRepMesh_IncrementalMesh incrementalMesh(this, deflection, Standard_False, angle); //triangulate the first time							
 			for (int f = 1; f <= faceMap.Extent(); f++)
@@ -429,9 +447,8 @@ namespace Xbim
 					else //just need one normal
 					{
 						norms = gcnew List<XbimPackedNormal>(1);
-						gp_Dir dir = plane->Axis().Direction();
-						XbimVector3D fn(dir.X(), dir.Y(), dir.Z());
-						XbimPackedNormal packedNormal = XbimPackedNormal(fn);
+						gp_Dir faceNormal = faceReversed ? plane->Axis().Direction().Reversed() : plane->Axis().Direction();
+						XbimPackedNormal packedNormal = XbimPackedNormal(faceNormal.X(), faceNormal.Y(), faceNormal.Z());
 						norms->Add(packedNormal);
 						normalLookup->Add(norms);
 					}
@@ -488,72 +505,90 @@ namespace Xbim
 				}
 				else //it is planar we can use LibMeshDotNet
 				{
+					//need to consider whoch side is front annd back
+					gp_Dir faceNormal = faceReversed ? plane->Axis().Direction().Reversed() : plane->Axis().Direction();
+					XbimPackedNormal packedNormal = XbimPackedNormal(faceNormal.X(), faceNormal.Y(), faceNormal.Z());
 					norms = gcnew List<XbimPackedNormal>(1);
-					//IXbimWireSet^ bounds = gcnew XbimWireSet(face);
 					TopTools_IndexedMapOfShape wireMap;
 					TopExp::MapShapes(face, TopAbs_WIRE, wireMap);
-					List<array<ContourVertex>^>^ contours = gcnew List<array<ContourVertex>^>(wireMap.Extent());
-					for (int i = 1; i <= wireMap.Extent(); i++)
+					if (wireMap.Extent() == 1) //just one loop, it is the outer
 					{
-						TopoDS_Wire ccWire = TopoDS::Wire(wireMap(i));
-						int t = 0;
-						BRepTools_WireExplorer exp(ccWire);
-						for (; exp.More(); exp.Next()) t++;
-						if (t <= 2) continue;
-
-						array<ContourVertex>^ contour = gcnew array<ContourVertex>(t);
-						int j = 0;
-						for (exp.Init(ccWire); exp.More(); exp.Next())
+						TopoDS_Wire outerWire = TopoDS::Wire(wireMap(1));
+						int numberEdges = outerWire.NbChildren();
+						if (numberEdges > 2)
 						{
-							gp_Pnt p = BRep_Tool::Pnt(exp.CurrentVertex());
-							contour[j].Position.X = p.X();
-							contour[j].Position.Y = p.Y();
-							contour[j].Position.Z = p.Z();
-							j++;
+							array<ContourVertex>^ outerContour = gcnew array<ContourVertex>(numberEdges);
+							BRepTools_WireExplorer exp(outerWire, face);
+							for (int j = 0; exp.More(); exp.Next())
+							{
+								gp_Pnt p = BRep_Tool::Pnt(exp.CurrentVertex());
+								outerContour[j].Position.X = p.X();
+								outerContour[j].Position.Y = p.Y();
+								outerContour[j].Position.Z = p.Z();
+								j++;
+							}
+							tess->AddContour(outerContour); //the original winding is correct as we have oriented the wire to the face in BRepTools_WireExplorer
 						}
-						if (contour->Length > 0)
-							contours->Add(contour);
-					}
 
-					if (contours->Count > 0)
+					}
+					else
 					{
-						tess->AddContours(contours, true);
-						tess->Tessellate(Xbim::Tessellator::WindingRule::EvenOdd, Xbim::Tessellator::ElementType::Polygons, 3);
+						for (int i = 1; i <= wireMap.Extent(); i++)
+						{
+							TopoDS_Wire ccWire = TopoDS::Wire(wireMap(i));
+
+							int numberOfEdges = ccWire.NbChildren();
+							if (numberOfEdges > 2)
+							{
+								array<ContourVertex>^ contour = gcnew array<ContourVertex>(numberOfEdges);
+								BRepTools_WireExplorer exp(ccWire, face);
+								for (int j = 0; exp.More(); exp.Next())
+								{
+									gp_Pnt p = BRep_Tool::Pnt(exp.CurrentVertex());
+									contour[j].Position.X = p.X();
+									contour[j].Position.Y = p.Y();
+									contour[j].Position.Z = p.Z();
+									j++;
+								}
+								tess->AddContour(contour); //the original winding is correct as we have oriented the wire to the face in BRepTools_WireExplorer
+							}
+						}
+					}
+					tess->Tessellate(Xbim::Tessellator::WindingRule::EvenOdd, Xbim::Tessellator::ElementType::Polygons, 3);
+					if (tess->ElementCount > 0) //we have some triangles
+					{
 						int numTriangles = tess->ElementCount;
 						triangleCount += numTriangles;
-
 						array<ContourVertex>^ contourVerts = tess->Vertices;
 						array<int>^ elements = tess->Elements;
-						if (numTriangles > 0)
+						pointLookup->Add(gcnew List<int>(tess->VertexCount));
+						/*System::Diagnostics::Debug::Assert(Math::Abs(nor[0] - faceNormal.X()) < 1e-3);
+						System::Diagnostics::Debug::Assert(Math::Abs(nor[1] - faceNormal.Y()) < 1e-3);
+						System::Diagnostics::Debug::Assert(Math::Abs(nor[2] - faceNormal.Z()) < 1e-3);*/
+						norms->Add(packedNormal);
+						normalLookup->Add(norms);
+						for (int i = 0; i < tess->VertexCount; i++) //visit each node for vertices
 						{
-							pointLookup->Add(gcnew List<int>(tess->VertexCount));
-							XbimVector3D fn(tess->Normal[0], tess->Normal[1], tess->Normal[2]);
-							XbimPackedNormal packedNormal = XbimPackedNormal(fn);
-							norms->Add(packedNormal);
-							normalLookup->Add(norms);
-							for (int i = 0; i < tess->VertexCount; i++) //visit each node for vertices
+							Vec3 p = contourVerts[i].Position;
+							int index;
+							XbimPoint3DWithTolerance^ pt = gcnew XbimPoint3DWithTolerance(p.X, p.Y, p.Z, tolerance);
+							if (!pointMap->TryGetValue(pt, index))
 							{
-								Vec3 p = contourVerts[i].Position;
-								int index;
-								XbimPoint3DWithTolerance^ pt = gcnew XbimPoint3DWithTolerance(p.X, p.Y, p.Z, tolerance);
-								if (!pointMap->TryGetValue(pt, index))
-								{
-									index = points->Count;
-									pointMap->Add(pt, index);
-									points->Add(pt->VertexGeometry);
-								}
-								pointLookup[faceIndex]->Add(index);
+								index = points->Count;
+								pointMap->Add(pt, index);
+								points->Add(pt->VertexGeometry);
 							}
-							List<int>^ elems = gcnew List<int>(numTriangles * 3);
-							for (int j = 0; j < numTriangles; j++)
-							{
-								elems->Add(elements[j * 3]);
-								elems->Add(elements[j * 3 + 1]);
-								elems->Add(elements[j * 3 + 2]);
-							}
-							tessellations->Add(elems);
-							faceIndex++;
+							pointLookup[faceIndex]->Add(index);
 						}
+						List<int>^ elems = gcnew List<int>(numTriangles * 3);
+						for (int j = 0; j < numTriangles; j++)
+						{
+							elems->Add(elements[j * 3]);
+							elems->Add(elements[j * 3 + 1]);
+							elems->Add(elements[j * 3 + 2]);
+						}
+						tessellations->Add(elems);
+						faceIndex++;
 					}
 				}
 			}
