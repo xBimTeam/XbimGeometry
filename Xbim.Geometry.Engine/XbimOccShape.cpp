@@ -334,6 +334,7 @@ namespace Xbim
 		{
 
 			if (!IsValid) return;
+			
 			TopTools_IndexedMapOfShape faceMap;
 			TopoDS_Shape shape = this; //hold on to it
 			TopExp::MapShapes(shape, TopAbs_FACE, faceMap);
@@ -360,6 +361,7 @@ namespace Xbim
 				bool isPlane = !plane.IsNull();
 				//set the seam value to false for default, seams cannot be on planar surfaces
 				hasSeams[f - 1] = false;
+				if (!isPlane) isPolyhedron = false; //must be a plane to be a polyhedron
 				if (isPolyhedron && isPlane) //if the shape is still potentially a polyhedron then check that this planar face has no curves
 				{
 					for (TopExp_Explorer edgeExplorer(face, TopAbs_EDGE); edgeExplorer.More(); edgeExplorer.Next())					
