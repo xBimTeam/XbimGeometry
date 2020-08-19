@@ -103,7 +103,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                         ax3D.Location.Y = 100;
                         var solidA = geomEngine.Moved(solid, ax3D) as IXbimSolid;
                         Assert.IsNotNull(solidA, "Should be the same type as the master");
-                        Assert.IsTrue(Math.Abs(solidA.Volume - solid.Volume) < 1e-9, "Volume has changed");
+                        Assert.IsTrue(Math.Abs((solidA.Volume - solid.Volume) ?? double.NaN) < 1e-9, "Volume has changed");
                         var displacement = solidA.BoundingBox.Centroid() - solid.BoundingBox.Centroid();
                         Assert.IsTrue(displacement == new XbimVector3D(0, 100, 0));
                         var bbA = solidA.BoundingBox;
@@ -228,7 +228,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     transform.OffsetY += 200;
                     transform.OffsetZ += 300;
                     solid2 = (IXbimSolid)solid.Transform(transform);
-                    Assert.IsTrue(Math.Abs(solid.Volume - solid2.Volume) < 0.001, "Volume differs");
+                    Assert.IsTrue(Math.Abs((solid.Volume - solid2.Volume) ?? double.NaN) < 0.001, "Volume differs");
                     transform.Invert();
                     solid2 = (IXbimSolid)solid2.Transform(transform);
                     s1Verts = solid.Vertices.ToList();

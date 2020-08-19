@@ -72,6 +72,7 @@ namespace Xbim
 			virtual IXbimGeometryObjectSet^ Intersection(IXbimSolidSet^ solids, double tolerance, ILogger^ logger);
 			virtual IXbimGeometryObjectSet^ Intersection(IXbimSolid^ solid, double tolerance, ILogger^ logger);
 			virtual bool Sew();
+			virtual property double VolumeValid { double get(); }
 #pragma endregion
 			virtual void Add(IXbimGeometryObject^ geomObj){ geometryObjects->Add(geomObj); }
 

@@ -71,6 +71,8 @@ namespace Xbim
 			virtual property int Count {int get() abstract; }
 			virtual IXbimGeometryObject^ Trim() abstract; 
 			virtual void Mesh(IXbimMeshReceiver^ mesh, double precision, double deflection, double angle) abstract;
+			// Predefined null volume, overridden by inhertance
+			virtual property Nullable<double> Volume {Nullable<double> get() { return Nullable<double>(); }}
 		};
 
 		ref class XbimGeometryObject abstract: IXbimGeometryObject 
@@ -85,16 +87,18 @@ namespace Xbim
 			!XbimGeometryObject() {};
 
 #pragma endregion
-			virtual property  bool IsValid{bool  get() abstract; }
+			virtual property bool IsValid{bool  get() abstract; }
 			virtual property bool IsSet{bool get() abstract; }
-			virtual property  XbimGeometryObjectType GeometryType{XbimGeometryObjectType  get() abstract;}
+			virtual property XbimGeometryObjectType GeometryType{XbimGeometryObjectType  get() abstract;}
 			virtual bool Equals(IXbimGeometryObject^ , double ){ throw gcnew NotImplementedException("Function not implemented"); }
 			virtual bool Intersects(IXbimGeometryObject^ , double ){ throw gcnew NotImplementedException("Function not implemented"); }
 			virtual property XbimRect3D BoundingBox {XbimRect3D get() abstract; };
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) abstract;
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D) abstract;
-			virtual property String^  ToBRep{String^ get(); }
-			virtual property Object^  Tag {Object^ get() { return tag; }; void set(Object^ value) { tag = value; }; }
+			// Predefined null volume, overridden by inhertance
+			virtual property Nullable<double> Volume {Nullable<double> get() { return Nullable<double>(); }}
+			virtual property String^ ToBRep{String^ get(); }
+			virtual property Object^ Tag {Object^ get() { return tag; }; void set(Object^ value) { tag = value; }; }
 		};
 	}
 }

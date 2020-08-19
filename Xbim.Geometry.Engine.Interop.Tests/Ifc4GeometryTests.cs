@@ -202,7 +202,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 Assert.IsTrue(er.Entity != null, "No IfcCsgSolid found");
                 var solid = geomEngine.CreateSolidSet(er.Entity, logger).FirstOrDefault();
-                Assert.IsTrue(Math.Abs(solid.Volume - solid.BoundingBox.Volume) < 1e-5);
+                Assert.IsTrue(Math.Abs((solid.Volume - solid.BoundingBox.Volume) ?? double.NaN) < 1e-5);
 
             }
         }
@@ -215,7 +215,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var eas = model.Instances.OfType<IfcExtrudedAreaSolid>().FirstOrDefault();
                 Assert.IsNotNull(eas);
                 var solid = geomEngine.CreateSolid(eas);
-                Assert.IsTrue(Math.Abs(solid.Volume - solid.BoundingBox.Volume) < 1e-5);
+                Assert.IsTrue(Math.Abs((solid.Volume - solid.BoundingBox.Volume) ?? double.NaN) < 1e-5);
             }
         }
         [TestMethod]
@@ -270,7 +270,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var shape = model.Instances.OfType<IfcAdvancedBrep>().FirstOrDefault();
                 Assert.IsNotNull(shape);
                 var geom = geomEngine.CreateSolid(shape);
-                Assert.IsTrue(Math.Abs(geom.Volume - 72767) < 1);
+                Assert.IsTrue(Math.Abs(geom.Volume.Value - 72767) < 1);
             }
         }
 

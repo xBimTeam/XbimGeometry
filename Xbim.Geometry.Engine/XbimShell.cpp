@@ -276,6 +276,20 @@ namespace Xbim
 
 		}
 
+		Nullable<double> XbimShell::Volume::get()
+		{
+			if (IsValid)
+			{
+				GProp_GProps gProps;
+				BRepGProp::VolumeProperties(*pShell, gProps, Standard_True);
+				GC::KeepAlive(this);
+				double mass = gProps.Mass();
+				if (0 != mass)
+					return Nullable<double>(mass);
+			}
+			return Nullable<double>();
+		}
+
 		IXbimGeometryObject^ XbimShell::Transform(XbimMatrix3D matrix3D)
 		{
 			if (!IsValid) return nullptr;

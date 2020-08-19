@@ -2065,17 +2065,19 @@ namespace Xbim
 			return true;
 		}
 
-		double XbimSolid::Volume::get()
+		Nullable<double> XbimSolid::Volume::get()
 		{
 			if (IsValid)
 			{
 				GProp_GProps gProps;
 				BRepGProp::VolumeProperties(*pSolid, gProps);
 				GC::KeepAlive(this);
-				return gProps.Mass();
+				double mass = gProps.Mass();
+				if (0 != mass)
+					return Nullable<double>(mass);
 			}
-			else
-				return 0;
+
+			return Nullable<double>();
 		}
 
 		bool XbimSolid::IsPolyhedron::get()

@@ -586,7 +586,6 @@ namespace Xbim
 			return PerformBoolean(BOPAlgo_CUT, (IEnumerable<IXbimGeometryObject^>^)this, gcnew XbimSolidSet(solid), tolerance, logger);
 		}
 
-
 		IXbimGeometryObjectSet^ XbimGeometryObjectSet::Union(IXbimSolidSet^ solids, double tolerance, ILogger^ logger)
 		{
 			return PerformBoolean(BOPAlgo_FUSE, (IEnumerable<IXbimGeometryObject^>^)this, solids, tolerance, logger);
@@ -607,6 +606,22 @@ namespace Xbim
 		{
 			if (Count == 0) return XbimGeometryObjectSet::Empty;
 			return PerformBoolean(BOPAlgo_COMMON, (IEnumerable<IXbimGeometryObject^>^)this, gcnew XbimSolidSet(solid), tolerance, logger);
+		}
+
+		double XbimGeometryObjectSet::VolumeValid::get()
+		{
+			if (IsValid)
+			{
+				double total = 0;
+				for each (IXbimGeometryObject ^ obj in geometryObjects)
+				{
+					Nullable<double> vol = obj->Volume;
+					if (vol.HasValue)
+						total += vol.Value;
+				}
+				return total;
+			}
+			return 0;
 		}
 	}
 }

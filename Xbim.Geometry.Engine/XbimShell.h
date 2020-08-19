@@ -57,9 +57,10 @@ namespace Xbim
 			virtual property IXbimEdgeSet^ Edges{ IXbimEdgeSet^ get(); }
 			virtual property IXbimVertexSet^ Vertices{IXbimVertexSet^ get(); }
 			virtual property XbimRect3D BoundingBox{XbimRect3D get() override; }
-			virtual property bool IsClosed{bool get(); }
+			virtual property bool IsClosed { bool get(); }
 			virtual property double SurfaceArea { double get(); }
 			virtual property bool IsPolyhedron { bool get(); }
+			virtual property Nullable<double> Volume { Nullable<double> get() override; }
 			virtual IXbimGeometryObjectSet^ Cut(IXbimSolidSet^ solids, double tolerance, ILogger^ logger);
 			virtual IXbimGeometryObjectSet^ Cut(IXbimSolid^ solid, double tolerance, ILogger^ logger);
 			virtual IXbimGeometryObjectSet^ Union(IXbimSolidSet^ solids, double tolerance, ILogger^ logger);
