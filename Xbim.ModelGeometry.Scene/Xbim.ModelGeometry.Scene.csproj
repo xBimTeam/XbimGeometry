@@ -5,7 +5,7 @@
     <Title>Xbim ModelGeometry Scene</Title>
     <IsPackable>true</IsPackable>
     <Description>Provides support for the Geometry Scene creation.</Description>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
   </PropertyGroup>
 
@@ -14,8 +14,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Xbim.Ifc" Version="5.1.309-develop" />
-    <PackageReference Include="Xbim.Tessellator" Version="5.1.309-develop" />
+    <PackageReference Include="Xbim.Ifc" Version="5.1.310-develop" />
+    <PackageReference Include="Xbim.Tessellator" Version="5.1.310-develop" />
   </ItemGroup>
 
   <ItemGroup>
