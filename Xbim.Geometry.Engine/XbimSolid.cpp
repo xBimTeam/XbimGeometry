@@ -475,9 +475,9 @@ namespace Xbim
 		void BuildIfcSurfaceCurveSweptAreaSolid(TopoDS_Wire& sweepOcc, TopoDS_Face& refSurface, TopoDS_Face& faceStartOcc, double precision, TopoDS_Solid& result, int& retflag)
 		{
 			retflag = 1;
-			BRepTools::Write(sweepOcc, "c://tmp//sweepOcc.");
-			BRepTools::Write(refSurface, "c://tmp//refSurface.");
-			BRepTools::Write(faceStartOcc, "c://tmp//faceStartOcc.");
+			//BRepTools::Write(sweepOcc, "c://tmp//sweepOcc.");
+			//BRepTools::Write(refSurface, "c://tmp//refSurface.");
+			//BRepTools::Write(faceStartOcc, "c://tmp//faceStartOcc.");
 			try
 			{
 
@@ -557,7 +557,7 @@ namespace Xbim
 				Standard_Real uoe;
 				cc.Edge(0, edge, uoe);
 				edgeFixer.FixAddPCurve(edge, refSurface, false, precision); //add pcurves
-				BRepTools::Write(edge, "c://tmp//edge.");
+				//BRepTools::Write(edge, "c://tmp//edge.");
 
 				//move the wire to the start point
 
@@ -576,7 +576,7 @@ namespace Xbim
 				trsf.SetTransformation(toAx3, fromAx3);
 				TopLoc_Location topLoc(trsf);
 				faceStartOcc.Move(topLoc);
-				BRepTools::Write(faceStartOcc, "c://tmp//facePositioned.");
+				//BRepTools::Write(faceStartOcc, "c://tmp//facePositioned.");
 				TopoDS_Wire outerBound = ShapeAnalysis::OuterWire(faceStartOcc);
 
 				BRepOffsetAPI_MakePipeShell pipeMaker1(sweepOcc);
@@ -684,7 +684,7 @@ namespace Xbim
 
 					ShapeFix_ShapeTolerance fTol;
 					fTol.LimitTolerance(result, precision);
-					BRepTools::Write(result, "c://tmp//result.");
+					//BRepTools::Write(result, "c://tmp//result.");
 					return;
 				}
 			}
