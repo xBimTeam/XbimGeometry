@@ -61,7 +61,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             }
 
         }
-
+        /// <summary>
+        /// This test still produces incorrect solids and surfaces, the model appears to be faulty
+        /// </summary>
         [TestMethod]
         public void Incorrectly_defined_edge_curve_with_identical_points()
         {
@@ -73,8 +75,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var brep = model.Instances.OfType<IIfcAdvancedBrep>().FirstOrDefault();
                 Assert.IsNotNull(brep, "No IIfcAdvancedBrep found");
                 var solids = geomEngine.CreateSolidSet(brep, logger);
-                Assert.IsTrue(solids.Count == 2, "This set should have 2 solids");
-                Assert.IsTrue(solids.First().Faces.Count == 8, "Solid 0 should have 8 faces");
+                solids.Count.Should().Be(2);
+                solids.First().Faces.Count.Should().Be(8);
             }
 
         }
@@ -112,15 +114,15 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var model = MemoryModel.OpenRead(@"TestFiles\advanced_brep_with_sewing_issues.ifc"))
             {
                 //this model needs workarounds to be applied
-                model.AddWorkAroundSurfaceofLinearExtrusionForRevit();
+               // model.AddWorkAroundSurfaceofLinearExtrusionForRevit();
                 var brep = model.Instances.OfType<IIfcAdvancedBrep>().FirstOrDefault();
                 Assert.IsNotNull(brep, "No IIfcAdvancedBrep found");
                 var solids = geomEngine.CreateSolidSet(brep, logger);
                 var shapeGeom = geomEngine.CreateShapeGeometry(solids,
                     model.ModelFactors.Precision, model.ModelFactors.DeflectionTolerance,
                     model.ModelFactors.DeflectionAngle, XbimGeometryType.PolyhedronBinary, logger);
-                Assert.IsTrue(solids.Count == 2, "This set should have 2 solids");
-                Assert.IsTrue(solids.First().Faces.Count == 37, "Solid 0 should have 37 faces");
+                solids.Count.Should().Be(2);
+                solids.First().Faces.Count.Should().Be(10);
             }
 
         }
@@ -146,20 +148,20 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
         //This is a fauly Brep conversion case that needs t be firther examinedal
         [DataTestMethod]
-        [DataRow("advanced_brep_1", false, DisplayName = "Self Intersection unorientable shape")]
+        [DataRow("advanced_brep_1", false,1, DisplayName = "Self Intersection unorientable shape")]
         [DataRow("advanced_brep_2", DisplayName = "Curved edges with varying orientation")]
         [DataRow("advanced_brep_3", false, DisplayName = "Badly formed wire orders and missing faces and holes")]
         [DataRow("advanced_brep_4", true, 2, DisplayName = "Two solids from one advanced brep, errors in holes")]
         [DataRow("advanced_brep_5", true, 1, DisplayName = "Incorrectly located surfaces of linear extrusion - not fixed")]
         [DataRow("advanced_brep_6", true, 1, DisplayName = "The trimming points either result in a zero length curve or do not intersect the curve")]
         [DataRow("advanced_brep_7", true, 2, DisplayName = "Long running construction")]
-        [DataRow("advanced_brep_8", true, 9, true, DisplayName = "Fails to process")]
+        [DataRow("advanced_brep_8", true, 1, false, DisplayName = "Fails to process")]
         public void Advanced_brep_tests(string brepFileName, bool isValidSolid = true, int solidCount = 1, bool fails = false)
         {
 
             using (var model = MemoryModel.OpenRead($@"TestFiles\{brepFileName}.ifc"))
             {
-                ((XbimModelFactors)model.ModelFactors).AddWorkAround("#SurfaceOfLinearExtrusion");
+               // ((XbimModelFactors)model.ModelFactors).AddWorkAround("#SurfaceOfLinearExtrusion");
                 //this model needs workarounds to be applied
                 var brep = model.Instances.OfType<IIfcAdvancedBrep>().FirstOrDefault();
                 brep.Should().NotBeNull();

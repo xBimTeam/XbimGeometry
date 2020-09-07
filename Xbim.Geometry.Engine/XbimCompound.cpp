@@ -68,7 +68,7 @@
 #include <BRepBuilderAPI_FindPlane.hxx>
 #include <Geom_Plane.hxx>
 #include "XbimNativeApi.h"
-
+#include <BRepFill_Filling.hxx>
 // #include <ShapeBuild_ReShape.hxx> // this was suggeste in PR79 - but it does not seem to make the difference with OCC72
 
 using namespace System;
@@ -444,77 +444,63 @@ namespace Xbim
 
 		//Many of the Brep defintions are not good, often they have faces missing and holes missing, so we cannot guarantee to build a valid OCC solid
 		//we make the best attempt to be a shell that is as near as possible to the solid
-		void XbimCompound::Init(IIfcAdvancedBrep^ solid, ILogger^ logger)
+		void XbimCompound::Init(IIfcAdvancedBrep^ bRepSolid, ILogger^ logger)
 		{
-			IIfcAdvancedBrepWithVoids^ advancedBrepWithVoids = dynamic_cast<IIfcAdvancedBrepWithVoids^>(solid);
+			IIfcAdvancedBrepWithVoids^ advancedBrepWithVoids = dynamic_cast<IIfcAdvancedBrepWithVoids^>(bRepSolid);
 			if (advancedBrepWithVoids != nullptr) return Init(advancedBrepWithVoids, logger);
 			BRep_Builder b;
-			TopoDS_Shape occOuterShell = InitAdvancedFaces(solid->Outer->CfsFaces, logger);
+			TopoDS_Shape shape = InitAdvancedFaces(bRepSolid->Outer->CfsFaces, logger);
 			//XbimGeometryCreator::LogDebug(logger, solid, "InitAdvancedFaces completed");
 
-			if (occOuterShell.IsNull()) return;
+			if (shape.IsNull()) return;
 
 			pCompound = new TopoDS_Compound();
 			b.MakeCompound(*pCompound);
-			if (occOuterShell.ShapeType() == TopAbs_SHELL && occOuterShell.Closed())
+			if (shape.Closed() && shape.ShapeType() == TopAbs_SHELL)
 			{
-				BRepBuilderAPI_MakeSolid solidmaker;
-				solidmaker.Add(TopoDS::Shell(occOuterShell));
-				solidmaker.Build();
-				if (solidmaker.IsDone())
-				{
-					TopoDS_Solid s = solidmaker.Solid();
-					s.Closed(true);
-					s.Checked(true);
-					b.Add(*pCompound, s);
-				}
-				pCompound->Closed(true);
-				pCompound->Checked(true);
-				return;
+				TopoDS_Solid solid;
+				b.MakeSolid(solid);
+				b.Add(solid, TopoDS::Shell(shape));
+				b.Add(*pCompound, solid);
 			}
 			else
 			{
-				b.Add(*pCompound, occOuterShell); //just add what we have
-				return;
+				TopTools_IndexedMapOfShape shellMap;
+				if (shape.ShapeType() == TopAbs_SHELL)
+					shellMap.Add(TopoDS::Shell(shape));
+				else
+					TopExp::MapShapes(shape, TopAbs_SHELL, shellMap);
+				//add all the shells in as solids, they may or may not be close i.e. finite manifold
+				for (int ishell = 1; ishell <= shellMap.Extent(); ++ishell)
+				{
+					TopoDS_Shell shell = TopoDS::Shell(shellMap(ishell));
+					if (shell.NbChildren() > 0)
+					{
+						TopoDS_Solid solid;
+						b.MakeSolid(solid);
+						b.Add(solid, shell);
+						if (BRep_Tool::IsClosed(shell))
+						{
+							BRepClass3d_SolidClassifier class3d(solid);
+							class3d.PerformInfinitePoint(Precision::Confusion());
+							if (class3d.State() == TopAbs_IN) solid.Reverse();
+						}
+
+						b.Add(*pCompound, solid);
+					}
+				}
+				//we might have some faces here, add them as solids to maintain visual integrity, it shouldn't really happen but some authroign tools do it
+				for (TopExp_Explorer exp(shape, TopAbs_FACE, TopAbs_SHELL); exp.More(); exp.Next())
+				{
+					TopoDS_Shell shell;
+					b.MakeShell(shell);
+					TopoDS_Solid solid;
+					b.MakeSolid(solid);
+					b.Add(shell, TopoDS::Face(exp.Current()));
+					b.Add(solid, shell);
+					b.Add(*pCompound, solid);
+				}
 			}
-			//advanced breps are always solids, so to make sure we have highest form, sometime we get multiple solids
-			//try
-			//{
-
-			//	TopTools_IndexedMapOfShape shellMap;
-			//	TopExp::MapShapes(occOuterShell, TopAbs_SHELL, shellMap);
-			//	for (int ishell = 1; ishell <= shellMap.Extent(); ++ishell)
-			//	{
-			//		// Build solid
-			//		BRepBuilderAPI_MakeSolid solidmaker;
-			//		const TopoDS_Shell& shell = TopoDS::Shell(shellMap(ishell));
-			//		solidmaker.Add(shell);
-			//		solidmaker.Build();
-			//		if (solidmaker.IsDone())
-			//		{
-			//			TopoDS_Solid s = solidmaker.Solid();
-			//			BRepClass3d_SolidClassifier class3d(s);
-			//			try
-			//			{
-			//				class3d.PerformInfinitePoint(Precision::Confusion());
-			//			}
-			//			catch (Standard_Failure sf)
-			//			{
-			//				String^ err = gcnew String(sf.GetMessageString());
-			//				XbimGeometryCreator::LogWarning(logger, solid, "Failed to determine orientation of shell in IfcAdvancedBrep: " + err);
-			//			}
-
-			//			if (class3d.State() == TopAbs_IN) s.Reverse();
-			//			b.Add(*pCompound, s);
-			//		}
-			//	}
-			//}
-			//catch (Standard_Failure sf)
-			//{
-			//	String^ err = gcnew String(sf.GetMessageString());
-			//	XbimGeometryCreator::LogWarning(logger, solid, "Failed to create  IfcAdvancedBrep: " + err);
-			//	b.Add(*pCompound, occOuterShell); //just add what we have
-			//}
 		}
 
 		void XbimCompound::Init(IIfcFacetedBrep^ solid, ILogger^ logger)
@@ -717,7 +703,7 @@ namespace Xbim
 			builder.MakeShell(shell);
 			try
 			{
-				
+
 
 				IIfcFace^ aFace = Enumerable::FirstOrDefault(faces);
 				if (aFace == nullptr) return shell;
@@ -727,7 +713,7 @@ namespace Xbim
 				_sewingTolerance = model->ModelFactors->Precision;
 
 				//collect all the geometry components				
-				
+
 				TopTools_DataMapOfIntegerShape edgeCurves;
 				TopTools_DataMapOfIntegerShape vertexGeometries;
 
@@ -738,45 +724,39 @@ namespace Xbim
 					IIfcAdvancedFace^ advancedFace = dynamic_cast<IIfcAdvancedFace^>(model->Instances[unloadedFace->EntityLabel]); //improves performance and reduces memory load								
 					TopoDS_Wire topoOuterLoop;
 					TopTools_SequenceOfShape  topoInnerLoops;
-
+					TopoDS_Face topoAdvancedFace;
 					int numberOfBounds = advancedFace->Bounds->Count;
+					//workaround for badly defined linear extrusions in old Revit files
+					IIfcSurfaceOfLinearExtrusion^ solExtrusion = dynamic_cast<IIfcSurfaceOfLinearExtrusion^>(advancedFace->FaceSurface);
 
-					//build the face surface
+					bool buildRuledSurface = (solExtrusion != nullptr);
+					BRepBuilderAPI_MakeFace faceMaker;
+
 					XbimFace^ xAdvancedFace = gcnew XbimFace(advancedFace->FaceSurface, logger);
-					//XbimGeometryCreator::LogDebug(logger, xAdvancedFace, "Face built");
 					if (!xAdvancedFace->IsValid)
 					{
 						XbimGeometryCreator::LogWarning(logger, advancedFace->FaceSurface, "Failed to create face surface #{0}", advancedFace->FaceSurface->EntityLabel);
 						continue;
 					}
-					//get the face oriented correctly
-					TopoDS_Face topoAdvancedFace = xAdvancedFace;
-
-					TopLoc_Location surfaceLocation;
-						Handle(Geom_Surface) geomSurface = BRep_Tool::Surface(topoAdvancedFace, surfaceLocation);
-
-					BRepBuilderAPI_MakeFace faceMaker;
-					//get the surface to remove any bounds that may have been applied
-					faceMaker.Init(geomSurface,false,_sewingTolerance);
-					topoAdvancedFace = faceMaker.Face();
-					topoAdvancedFace.Move(surfaceLocation);
+					topoAdvancedFace = xAdvancedFace;
+					if (!advancedFace->SameSense)
+						topoAdvancedFace.Reverse();
 					faceMaker.Init(topoAdvancedFace);
-					//XbimGeometryCreator::LogDebug(logger, xAdvancedFace, "TopoDS Face built");
-					
+
 					for each (IIfcFaceBound ^ ifcBound in advancedFace->Bounds) //build all the loops
 					{
 						TopTools_SequenceOfShape loopEdges;
 						bool isOuter = (numberOfBounds == 1) || (dynamic_cast<IIfcFaceOuterBound^>(ifcBound) != nullptr);
 						IIfcEdgeLoop^ edgeLoop = dynamic_cast<IIfcEdgeLoop^>(ifcBound->Bound);
-						
+
 						if (edgeLoop != nullptr) //they always should be
 						{
 
 							for each (IIfcOrientedEdge ^ orientedEdge in edgeLoop->EdgeList)
 							{
-								//XbimGeometryCreator::LogDebug(logger, orientedEdge, "Got an edge");
+								
 								IIfcEdgeCurve^ edgeCurve = dynamic_cast<IIfcEdgeCurve^>(orientedEdge->EdgeElement);
-								TopoDS_Edge topoEdgeCurve;								
+								TopoDS_Edge topoEdgeCurve;
 								if (!edgeCurves.IsBound(orientedEdge->EdgeElement->EntityLabel)) //need to create the raw edge curve
 								{
 									//find the topological vertexes
@@ -881,10 +861,10 @@ namespace Xbim
 										topoEdgeCurve = edgeMaker.Edge();
 										//make sure the verices fit, this can be a problem with BSplines as the 
 										edgeFixer.FixVertexTolerance(topoEdgeCurve);
-										
+
 									}
 
-									
+
 									edgeCurves.Bind(edgeCurve->EntityLabel, topoEdgeCurve);
 									//take an  copy that is ready for parameterising to this surface
 									if (!orientedEdge->Orientation)
@@ -901,12 +881,11 @@ namespace Xbim
 										topoEdgeCurve = TopoDS::Edge(edgeCurves.Find(edgeCurve->EntityLabel));
 
 								}
-
-
-								edgeFixer.FixAddPCurve(topoEdgeCurve, topoAdvancedFace, false); //add pcurves
-
-								//reverse if necessary
-								loopEdges.Append(topoEdgeCurve);																				
+								
+								if (!buildRuledSurface)
+									edgeFixer.FixAddPCurve(topoEdgeCurve, topoAdvancedFace, false); //add pcurves								
+								
+								loopEdges.Append(topoEdgeCurve);
 
 							}
 
@@ -918,16 +897,11 @@ namespace Xbim
 							{
 								builder.Add(loopWire, *it);
 							}
+
 							ShapeFix_Wire wireFixer(loopWire, topoAdvancedFace, _sewingTolerance);
 							if (wireFixer.FixReorder())
 								loopWire = wireFixer.Wire();
 							loopWire.Closed(true);
-							
-							if (!ifcBound->Orientation)
-							{
-								loopWire.Reverse();
-							}
-							
 							BRepCheck_Analyzer analyser(loopWire, Standard_True);
 
 							if (!analyser.IsValid())
@@ -941,7 +915,12 @@ namespace Xbim
 							}
 							else
 								loopWire.Checked(true);
-							
+
+							if (!ifcBound->Orientation)
+							{
+								loopWire.Reverse();
+							}
+
 							if (isOuter)
 								topoOuterLoop = loopWire;
 							else
@@ -976,9 +955,44 @@ namespace Xbim
 						//no bounded face
 						continue;
 					}
+					if (buildRuledSurface)
+					{
+						//some models badly define the surface for linear extrusion, is we cannot build the face properly use the filler to create a surface that fits the wire
+						//the facemaker is currently intialised for the surface defined in the schema
+						//add the loop and check if it fits
+						
+						faceMaker.Add(topoOuterLoop);
+						BRepCheck_Analyzer analyser(faceMaker.Face(), Standard_True);
+						if (!analyser.IsValid())
+						{
+							//if its not ok then use the filler
+							BRepFill_Filling filler;
+							
+							for (TopExp_Explorer exp(topoOuterLoop, TopAbs_EDGE); exp.More(); exp.Next())
+							{
+								TopoDS_Edge e = TopoDS::Edge(exp.Current());
+								filler.Add(e, GeomAbs_C0);
+							}
+							filler.Build();
+							if (filler.IsDone())
+							{
+								TopoDS_Face ruledFace = TopoDS::Face(filler.Face().EmptyCopied()); //build with no edges in the resulting face		
+								if (!advancedFace->SameSense)
+									ruledFace.Reverse();
+								faceMaker.Init(ruledFace);
+								faceMaker.Add(topoOuterLoop);
 
-					faceMaker.Add(topoOuterLoop);
-					
+							}
+						}
+						for (TopExp_Explorer exp(topoOuterLoop, TopAbs_EDGE); exp.More(); exp.Next())
+						{
+							edgeFixer.FixAddPCurve(TopoDS::Edge(exp.Current()), faceMaker.Face(), false); //add pcurves	
+						}
+					}
+					else
+						faceMaker.Add(topoOuterLoop);
+
+					topoAdvancedFace = faceMaker.Face();
 					if (topoInnerLoops.Size() > 0) //add any inner bounds
 					{
 						try
@@ -993,7 +1007,7 @@ namespace Xbim
 
 							ShapeFix_Face fixFaceWire(faceMaker.Face());
 							fixFaceWire.FixOrientation();
-							topoAdvancedFace = fixFaceWire.Face();							
+							topoAdvancedFace = fixFaceWire.Face();
 						}
 						catch (Standard_Failure sf)
 						{
@@ -1001,22 +1015,19 @@ namespace Xbim
 							XbimGeometryCreator::LogWarning(logger, advancedFace, "Could not apply  bound to face #{0}: {1}, it has been ignored", advancedFace->EntityLabel, err);
 						}
 					}
-					else
-						topoAdvancedFace = faceMaker.Face();
-					//XbimGeometryCreator::LogDebug(logger, unloadedFace, "Fixing Face");
+
 					try
 					{
 
-						BRepCheck_Analyzer analyser(topoAdvancedFace, Standard_True);
+						BRepCheck_Analyzer analyser(topoAdvancedFace, Standard_False);
 						if (!analyser.IsValid())
 						{
-							ShapeFix_Face sfs(faceMaker.Face());
+							ShapeFix_Shape sfs(topoAdvancedFace);
 							if (sfs.Perform())
 							{
-								topoAdvancedFace = sfs.Face();
+								topoAdvancedFace = TopoDS::Face(sfs.Shape());
 								topoAdvancedFace.Checked(true);
 							}
-
 						}
 						else
 							topoAdvancedFace.Checked(true);
@@ -1025,16 +1036,16 @@ namespace Xbim
 					{
 						XbimGeometryCreator::LogDebug(logger, unloadedFace, "Fixing Face Failed");
 					}
-					if (!advancedFace->SameSense)
-						topoAdvancedFace.Reverse();
+
+
 					builder.Add(shell, topoAdvancedFace);
 				}
-				
+
 				BRepCheck_Shell checker(shell);
 				BRepCheck_Status st = checker.Orientation();
 				if (st != BRepCheck_Status::BRepCheck_NoError)
 				{
-					
+
 					std::string errMsg;
 					if (!XbimNativeApi::FixShell(shell, 10, errMsg))
 					{
@@ -1044,35 +1055,30 @@ namespace Xbim
 					else
 						checker.Init(shell);
 
-					
-					if (checker.Closed() == BRepCheck_Status::BRepCheck_NoError)
+
+					if (checker.Orientation() == BRepCheck_Status::BRepCheck_NoError) //we have succededed
 					{
 						shell.Closed(true);
 						shell.Checked(true);
-						//XbimGeometryCreator::LogDebug(logger, nullptr, "InitAdvancedFaces: Closed shell successfully");
-						//XbimShell^ xs = gcnew XbimShell(shell);
 						return shell;
 					}
 					else
 					{
-						//XbimGeometryCreator::LogDebug(logger, nullptr, "InitAdvancedFaces: Fixing shape");
+						//we need to fix the shape and return a compound or a shell
 						TopoDS_Shape shape = shell;
 						if (!XbimNativeApi::FixShape(shape, 10, errMsg))
 						{
 							String^ err = gcnew String(errMsg.c_str());
 							XbimGeometryCreator::LogWarning(logger, nullptr, "InitAdvancedFaces: Failed to fix shape: " + err);
 						}
-
-						//XbimShell^ xs = gcnew XbimShell(shell);
 						return shape;
 					}
 				}
 				else //it is oriented correctly and closed
 				{
-					
+
 					shell.Closed(true);
 					shell.Checked(true);
-					//XbimShell^ xs = gcnew XbimShell(shell);
 					return shell;
 				}
 

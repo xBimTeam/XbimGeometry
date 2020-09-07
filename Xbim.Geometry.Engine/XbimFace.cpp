@@ -221,10 +221,14 @@ namespace Xbim
 		{
 			Init(cylinder, logger);
 		}
-
 		XbimFace::XbimFace(IIfcSurfaceOfLinearExtrusion^ sLin, ILogger^ logger)
 		{
-			Init(sLin, logger);
+			Init(sLin, true, logger);
+		}
+
+		XbimFace::XbimFace(IIfcSurfaceOfLinearExtrusion^ sLin, bool useWorkArounds, ILogger^ logger)
+		{
+			Init(sLin, useWorkArounds, logger);
 		}
 
 		XbimFace::XbimFace(IIfcSurfaceOfRevolution^ sRev, ILogger^ logger)
@@ -1495,6 +1499,8 @@ namespace Xbim
 			builder.Init(gcs, Standard_False, surface->Model->ModelFactors->Precision);
 			pFace = new TopoDS_Face();
 			*pFace = builder.Face();
+			
+			pFace->EmptyCopy();
 		}
 
 
@@ -1565,6 +1571,7 @@ namespace Xbim
 			BRepBuilderAPI_MakeFace faceMaker(hSurface, 0.1/*surface->Model->ModelFactors->Precision*/);
 			pFace = new TopoDS_Face();
 			*pFace = faceMaker.Face();
+			pFace->EmptyCopy();
 			/*ShapeFix_ShapeTolerance FTol;
 			FTol.SetTolerance(*pFace, bspline->Model->ModelFactors->Precision, TopAbs_VERTEX);*/
 		}
@@ -1634,6 +1641,7 @@ namespace Xbim
 			BRepBuilderAPI_MakeFace faceMaker(hSurface, surface->Model->ModelFactors->Precision);
 			pFace = new TopoDS_Face();
 			*pFace = faceMaker.Face();
+			pFace->EmptyCopy(); //remove any edges as we only want a surface
 		}
 
 		//Builds a face from a Plane
@@ -1673,8 +1681,7 @@ namespace Xbim
 			{
 				pFace = new TopoDS_Face();
 				*pFace = TopoDS::Face(revolutor.Shape());
-				ShapeFix_ShapeTolerance fTol;
-				fTol.LimitTolerance(*pFace, sRev->Model->ModelFactors->Precision);
+				pFace->EmptyCopy();
 			}
 			else
 			{
@@ -1696,8 +1703,7 @@ namespace Xbim
 				{
 					pFace = new TopoDS_Face();
 					*pFace = faceMaker.Face();
-					ShapeFix_ShapeTolerance fTol;
-					fTol.LimitTolerance(*pFace, def->Model->ModelFactors->Precision);
+					pFace->EmptyCopy();
 				}
 				else
 					XbimGeometryCreator::LogWarning(logger, def, "Invalid trimed surface = #{0} in rectangular trimmed surface. Face discarded", def->BasisSurface->EntityLabel);
@@ -1730,8 +1736,18 @@ namespace Xbim
 					XbimGeometryCreator::LogWarning(logger, def, "Invalid outer bound = #{0} found in curve bounded plane. Face discarded", def->OuterBoundary->EntityLabel);
 			}
 		}
-
 		void XbimFace::Init(IIfcSurfaceOfLinearExtrusion^ sLin, ILogger^ logger)
+		{
+			return Init(sLin, true, logger);
+		}
+		/// <summary>
+		/// There are several older versions of the Revit Ifc Export that write the first ruled surface edge at the final geometric position, then apply a transformation that displaces it by twice as much
+		/// Also they write the extrusion out in TRevit base units (feet) not model units
+		/// </summary>
+		/// <param name="sLin"></param>
+		/// <param name="useWorkArounds"></param>
+		/// <param name="logger"></param>
+		void XbimFace::Init(IIfcSurfaceOfLinearExtrusion^ sLin, bool useWorkArounds, ILogger^ logger)
 		{
 			if (sLin->SweptCurve->ProfileType != IfcProfileTypeEnum::CURVE)
 			{
@@ -1740,23 +1756,19 @@ namespace Xbim
 			}
 			IModelFactors^ mf = sLin->Model->ModelFactors;
 
-			bool doRevitWorkAround = mf->ApplyWorkAround("#SurfaceOfLinearExtrusion");
-			XbimEdge^  xbasisEdge1 = gcnew XbimEdge(sLin->SweptCurve, logger);
+			bool doRevitWorkAround = useWorkArounds && mf->ApplyWorkAround("#SurfaceOfLinearExtrusion");
+			XbimEdge^ xbasisEdge1 = gcnew XbimEdge(sLin->SweptCurve, logger);
 			if (!xbasisEdge1->IsValid) return;
 			try
 			{
 				TopoDS_Edge basisEdge1 = gcnew XbimEdge(sLin->SweptCurve, logger);
 				TopoDS_Edge basisEdge2 = gcnew XbimEdge(sLin->SweptCurve, logger);
-				
+
 				double tolerance = sLin->Model->ModelFactors->Precision;
 				gp_Vec extrude = XbimConvert::GetDir3d(sLin->ExtrudedDirection); //we are going to ignore magnitude as the surface should be infinite
 
-				extrude *= sLin->Depth;
-				if (doRevitWorkAround)
-				{
-					//older revit models this is incorrectly in feet					
-					extrude *= mf->OneFoot;
-				}
+				extrude *= sLin->Depth * 1000;
+
 				gp_Ax3 ax3;
 				//the location is applied twice so ignore
 				ax3.SetLocation(ax3.Location().Translated(extrude));
@@ -1770,112 +1782,20 @@ namespace Xbim
 				basisEdge1 = ReParamEdge(basisEdge1);
 				basisEdge2 = ReParamEdge(basisEdge2);
 
-				TopoDS_Face res = BRepFill::Face(basisEdge1, basisEdge2);
-				Handle(Geom_Surface) surface = BRep_Tool::Surface(res);
-				BRepBuilderAPI_MakeFace faceMaker;
-				faceMaker.Init(surface, false, tolerance);
 				pFace = new TopoDS_Face();
-
-				*pFace = faceMaker.Face();
+				*pFace = BRepFill::Face(basisEdge1, basisEdge2);
 				if (sLin->Position != nullptr) //revit does not respect the local placement correctly
 				{
-					if (doRevitWorkAround)
-					{
-						ax3 = XbimConvert::ToAx3NoTranslation(sLin->Position);						
-						trsf.SetTransformation(ax3, gp_Ax3());
-						TopLoc_Location newLoc(trsf);
-						pFace->Move(newLoc);
-					}
-					else
-					{
-						TopLoc_Location newLoc = XbimConvert::ToLocation(sLin->Position);
-						pFace->Move(newLoc);
-					}
+					TopLoc_Location newLoc = XbimConvert::ToLocation(sLin->Position);
+					pFace->Move(newLoc);
 				}
+				pFace->EmptyCopy(); //remove the ruled edges
 			}
 			catch (Standard_Failure f)
 			{
 				String^ err = gcnew String(f.GetMessageString());
 				throw gcnew Exception("General failure in advanced face building: " + err);
-			}
-			//	Handle(Geom_Surface) surf = BRep_Tool::Surface(TopoDS::Face(res));
-				//gp_Vec zDir = gp::DZ();
-				//gp_Pnt originalStartPnt = BRep_Tool::Pnt(TopExp::FirstVertex(basisEdge1));
-				//if (sLin->Position != nullptr)
-				//{
-				//	//Revit seem to write out the origin of the new position as the same as the start of the basis curve, this causes the transaltion component to be added twice
-				//	// we assume that if the start point of the curve is denticsl to the position.location then tthis is incorrect, remove the displacement
-				//	gp_Ax3 ax3 = XbimConvert::ToAx3(sLin->Position);
-				//	zDir = ax3.Direction();
-				//	if (ax3.Location().Distance(originalStartPnt) < Precision::Confusion())
-				//		ax3.SetLocation(gp_Pnt(0, 0, ax3.Location().Z()));
-				//	gp_Trsf trsf;
-				//	trsf.SetTransformation(ax3, gp_Ax3(gp_Pnt(), gp_Dir(0, 0, 1), gp_Dir(1, 0, 0)));
-				//	c3d->Transform(trsf);
-				//}
-
-
-
-				////make sure the profile is 2d,Revit seems to send a 3d profile sometimes, e need to project this onto a 2d plane
-				//BRepBuilderAPI_FindPlane planeFinder(basisCurve);
-				//if (!planeFinder.Found())
-				//{
-				//	XbimGeometryCreator::LogWarning(logger, sLin->SweptCurve, "Invalid swept curve for surface of linear extrusion. Face discarded");
-				//	return;
-				//}
-				//Handle(Geom_Plane) plane = planeFinder.Plane();
-				//Handle(Geom_Plane) refPlane = new Geom_Plane(gp_Ax3(gp::Origin(), plane->Axis().Direction(), gp::DX()));
-
-				//Handle(Geom_Curve) c3d = BRep_Tool::Curve(basisCurve, start, end);
-				//gp_Pnt originalStartPnt = c3d->Value(start);
-				//Handle(Geom2d_Curve) c2d = GeomProjLib::Curve2d(c3d, refPlane);
-
-				//gp_Pnt2d sp = c2d->Value(start - end);
-
-				////make it 3d again
-				//gp_Vec zDir = gp::DZ();
-				//c3d = GeomAPI::To3d(c2d, gp_Pln(gp_Pnt(refPlane->Location().X(), refPlane->Location().Y(), 0), zDir));
-				//gp_Pnt c3d1 = c3d->Value(0); gp_Pnt c3d2 = c3d->Value(1);
-
-				//
-
-				//if (sLin->Position != nullptr)
-				//{
-				//	//Revit seem to write out the orrigin of the new position as the same as the start of the basis curve, this causes the transaltion component to be added twice
-				//	// we assume that if the start point of the curve is denticsl to the position.location then tthis is incorrect, remove the displacement
-				//	gp_Ax3 ax3 = XbimConvert::ToAx3(sLin->Position);
-				//	zDir = ax3.Direction();
-				//	if (ax3.Location().Distance(originalStartPnt) < Precision::Confusion())
-				//		ax3.SetLocation(gp_Pnt(0, 0, ax3.Location().Z()));
-				//	gp_Trsf trsf;
-				//	trsf.SetTransformation(ax3, gp_Ax3(gp_Pnt(), gp_Dir(0, 0, 1), gp_Dir(1, 0, 0)));
-				//	c3d->Transform(trsf);
-				//}
-
-				////if (zDir.Angle(extrude) > M_PI_2) //need to reverse the edge
-				////	c3d->Reverse();
-
-				//Handle(Geom_TrimmedCurve) tc = new Geom_TrimmedCurve(c3d, start, end);
-				//gp_Pnt p1 = tc->Value(0); gp_Pnt p2 = tc->Value(1);
-
-				//TopoDS_Face face = res = BRepFill::Face(TopoDS::Edge(c3d), TopoDS::Edge(shape2));
-				//Handle(Geom_Surface) surf = BRep_Tool::Surface(TopoDS::Face(res));
-
-
-				////this will create the surface with the basis at the centre of the extrusion
-				//Handle(Geom_SurfaceOfLinearExtrusion) surface = new Geom_SurfaceOfLinearExtrusion(tc, extrude);
-				//p1 = surface->Value(0, 1); p2 = surface->Value(1, 1);
-				//BRepBuilderAPI_MakeFace faceMaker(surface, tolerance);
-				//if (faceMaker.IsDone())
-				//{
-				//	pFace = new TopoDS_Face();
-				//	*pFace = faceMaker.Face();
-
-				//	ShapeFix_ShapeTolerance fTol;
-				//	fTol.LimitTolerance(*pFace, sLin->Model->ModelFactors->Precision);
-				//}
-
-
+			}			
 		}
 		void XbimFace::ReParamCurve(TopoDS_Edge& basisEdge)
 		{
