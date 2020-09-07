@@ -662,7 +662,7 @@ namespace Xbim
 			TopoDS_Compound newCompound;
 			builder.MakeCompound(newCompound);
 			for (TopExp_Explorer expl(*pCompound, TopAbs_SHELL); expl.More(); expl.Next())
-			{
+			{ 
 				TopoDS_Shape shape = expl.Current();
 				std::string errMsg;
 				if (!XbimNativeApi::SewShape(shape, _sewingTolerance, XbimGeometryCreator::BooleanTimeOut, errMsg) && logger != nullptr)

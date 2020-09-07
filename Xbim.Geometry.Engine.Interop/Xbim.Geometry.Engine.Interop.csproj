@@ -11,7 +11,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -63,18 +63,18 @@
   
   <ItemGroup>
     <Content Include="bin\$(Configuration)\net47\Xbim.Geometry.Engine32.dll">
-      <Pack>true</Pack>
+      <Pack>false</Pack>
       <PackagePath>build\net47;</PackagePath>
     </Content>
     <Content Include="bin\$(Configuration)\net47\Xbim.Geometry.Engine64.dll">
-      <Pack>true</Pack>
+      <Pack>false</Pack>
       <PackagePath>build\net47;</PackagePath>
     </Content>
     <Content Include="..\Xbim.Geometry.Engine.Interop.targets">
       <Link>Xbim.Geometry.Interop.targets</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <PackagePath>build\net47;</PackagePath>
-      <Pack>true</Pack>
+      <Pack>false</Pack>
     </Content>
 
   </ItemGroup>

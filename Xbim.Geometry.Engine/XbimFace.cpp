@@ -1747,16 +1747,14 @@ namespace Xbim
 		/// <param name="sLin"></param>
 		/// <param name="useWorkArounds"></param>
 		/// <param name="logger"></param>
-		void XbimFace::Init(IIfcSurfaceOfLinearExtrusion^ sLin, bool useWorkArounds, ILogger^ logger)
+		void XbimFace::Init(IIfcSurfaceOfLinearExtrusion^ sLin, bool /*useWorkArounds*/, ILogger^ logger)
 		{
 			if (sLin->SweptCurve->ProfileType != IfcProfileTypeEnum::CURVE)
 			{
 				XbimGeometryCreator::LogWarning(logger, sLin, "Only profiles of type curve are valid in a surface of linearExtrusion {0}. Face discarded", sLin->SweptCurve->EntityLabel);
 				return;
 			}
-			IModelFactors^ mf = sLin->Model->ModelFactors;
-
-			bool doRevitWorkAround = useWorkArounds && mf->ApplyWorkAround("#SurfaceOfLinearExtrusion");
+			
 			XbimEdge^ xbasisEdge1 = gcnew XbimEdge(sLin->SweptCurve, logger);
 			if (!xbasisEdge1->IsValid) return;
 			try
@@ -1764,10 +1762,10 @@ namespace Xbim
 				TopoDS_Edge basisEdge1 = gcnew XbimEdge(sLin->SweptCurve, logger);
 				TopoDS_Edge basisEdge2 = gcnew XbimEdge(sLin->SweptCurve, logger);
 
-				double tolerance = sLin->Model->ModelFactors->Precision;
+				
 				gp_Vec extrude = XbimConvert::GetDir3d(sLin->ExtrudedDirection); //we are going to ignore magnitude as the surface should be infinite
 
-				extrude *= sLin->Depth * 1000;
+				extrude *= sLin->Depth;
 
 				gp_Ax3 ax3;
 				//the location is applied twice so ignore
