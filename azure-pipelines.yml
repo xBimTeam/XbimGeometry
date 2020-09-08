@@ -115,7 +115,7 @@ jobs:
 
   # Pack ModelGeometry.Scene
   #- script: dotnet pack Xbim.ModelGeometry.Scene/Xbim.ModelGeometry.Scene.csproj -c $(BuildConfiguration) -o Xbim.ModelGeometry.Scene/bin/$(BuildConfiguration) /p:PackageVersion=$(packageversion)
- - script: nuget pack Xbim.ModelGeometry.Scene/Xbim.ModelGeometry.Scene.csproj -OutputDirectory Xbim.ModelGeometry.Scene/bin/$(BuildConfiguration) -Properties PackageVersion=$(packageversion) -Properties Configuration=Release
+  - script: nuget pack Xbim.ModelGeometry.Scene/Xbim.ModelGeometry.Scene.csproj -OutputDirectory Xbim.ModelGeometry.Scene/bin/$(BuildConfiguration) -Properties PackageVersion=$(packageversion) -Properties Configuration=Release
     name: 'ModelScene_Pack'
   
     
