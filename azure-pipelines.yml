@@ -75,7 +75,7 @@ jobs:
       # Required arguments
       Path: $(Build.SourcesDirectory)
       VersionNumber: $(packageversion)
-      VersionRegex: \d+\.\d+\.\d+\.\d+
+      VersionRegex: \d+\.\d+\.\d+.*
       FilenamePattern: directory.build.props
       Field: Version
       OutputVersion: OutputedVersion
