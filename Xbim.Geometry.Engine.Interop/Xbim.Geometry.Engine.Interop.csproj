@@ -24,12 +24,7 @@
     <PackageReference Include="Xbim.Ifc" Version="5.1.310-develop" />
     <PackageReference Include="Xbim.Tessellator" Version="5.1.310-develop" />
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="..\Xbim.Geometry.Engine.Interop.targets">
-      <Link>Xbim.Geometry.Interop.targets</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
+
   <ItemGroup>
     <NativeGeometryEngine Include="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj">
       <AdditionalProperties>
@@ -75,7 +70,6 @@
       <PackagePath>build\net47;</PackagePath>
       <Pack>false</Pack>
     </Content>
-
   </ItemGroup>
  
 </Project>
