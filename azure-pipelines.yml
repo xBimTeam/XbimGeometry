@@ -69,6 +69,16 @@ jobs:
       FilenamePattern: .csproj
       Field: fileversion
       OutputVersion: OutputedVersion
+  - task: VersionDotNetCoreAssemblies@2
+    displayName: 'Update global Versions'
+    inputs: 
+      # Required arguments
+      Path: $(Build.SourcesDirectory)
+      VersionNumber: $(packageversion)
+      VersionRegex: \d+\.\d+\.\d+\.\d+
+      FilenamePattern: directory.build.props
+      Field: Version
+      OutputVersion: OutputedVersion
   
   # Version Native C++
   - powershell: |
@@ -110,12 +120,12 @@ jobs:
   
   # Pack GeometryEngine.Interop
   #- script: dotnet pack Xbim.Geometry.Engine.Interop/Xbim.Geometry.Engine.Interop.csproj -c $(BuildConfiguration) -o Xbim.Geometry.Engine.Interop/bin/$(BuildConfiguration) /p:PackageVersion=$(packageversion)
-  - script: nuget pack Xbim.Geometry.Engine.Interop/Xbim.Geometry.Engine.Interop.csproj -OutputDirectory Xbim.Geometry.Engine.Interop/bin/$(BuildConfiguration) -Properties PackageVersion=$(packageversion) -Properties Configuration=Release -Properties NoWarn=NU5100,NU5128
+  - script: nuget pack Xbim.Geometry.Engine.Interop/Xbim.Geometry.Engine.Interop.csproj -OutputDirectory Xbim.Geometry.Engine.Interop/bin/$(BuildConfiguration) -Properties Configuration=Release -Properties NoWarn=NU5100,NU5128
     name: 'Geometry_Interop_Pack'
 
   # Pack ModelGeometry.Scene
   #- script: dotnet pack Xbim.ModelGeometry.Scene/Xbim.ModelGeometry.Scene.csproj -c $(BuildConfiguration) -o Xbim.ModelGeometry.Scene/bin/$(BuildConfiguration) /p:PackageVersion=$(packageversion)
-  - script: nuget pack Xbim.ModelGeometry.Scene/Xbim.ModelGeometry.Scene.csproj -OutputDirectory Xbim.ModelGeometry.Scene/bin/$(BuildConfiguration) -Properties PackageVersion=$(packageversion) -Properties Configuration=Release -Properties NoWarn=NU5128
+  - script: nuget pack Xbim.ModelGeometry.Scene/Xbim.ModelGeometry.Scene.csproj -OutputDirectory Xbim.ModelGeometry.Scene/bin/$(BuildConfiguration) -Properties Configuration=Release -Properties NoWarn=NU5128
     name: 'ModelScene_Pack'
   
     
