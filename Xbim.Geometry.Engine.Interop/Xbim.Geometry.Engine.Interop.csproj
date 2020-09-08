@@ -7,6 +7,7 @@
     <Description>Provides support for the Ifc4 and Ifc2x3 Geometry conversion.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>Xbim.Geometry.Engine.Interop</PackageId>
+    <PackageIcon>logo.png</PackageIcon>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -76,6 +77,17 @@
       <PackagePath>build\net47;</PackagePath>
       <Pack>true</Pack>
     </Content>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="images\" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Include="images\logo.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
  
 </Project>
