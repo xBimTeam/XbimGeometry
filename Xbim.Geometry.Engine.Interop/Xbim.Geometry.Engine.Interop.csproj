@@ -4,10 +4,9 @@
     <TargetFramework>net47</TargetFramework>
     <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
     <Title>Xbim Geometry Engine</Title>
-    <Description>Provides support for the  Ifc4 and Ifc2x3 Geometry conversion.</Description>
+    <Description>Provides support for the Ifc4 and Ifc2x3 Geometry conversion.</Description>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <PackageId>Xbim.Geometry.Engine.Interop</PackageId>
-    <Version>5.1.0.0</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

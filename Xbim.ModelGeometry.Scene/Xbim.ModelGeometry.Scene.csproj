@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net47</TargetFrameworks>
+    <TargetFramework>net47</TargetFramework>
     <Title>Xbim ModelGeometry Scene</Title>
     <IsPackable>true</IsPackable>
     <Description>Provides support for the Geometry Scene creation.</Description>
