@@ -5,7 +5,7 @@
     <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
     <Title>Xbim Geometry Engine</Title>
     <Description>Provides support for the Ifc4 and Ifc2x3 Geometry conversion.</Description>
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>Xbim.Geometry.Engine.Interop</PackageId>
   </PropertyGroup>
 
@@ -16,7 +16,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
-  
+
+	<ItemGroup>
+		<Content Include="..\Xbim.Geometry.Engine.Interop.targets">
+			<Link>Xbim.Geometry.Interop.targets</Link>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
@@ -57,18 +63,18 @@
   
   <ItemGroup>
     <Content Include="bin\$(Configuration)\net47\Xbim.Geometry.Engine32.dll">
-      <Pack>false</Pack>
+      <Pack>true</Pack>
       <PackagePath>build\net47;</PackagePath>
     </Content>
     <Content Include="bin\$(Configuration)\net47\Xbim.Geometry.Engine64.dll">
-      <Pack>false</Pack>
+      <Pack>true</Pack>
       <PackagePath>build\net47;</PackagePath>
     </Content>
     <Content Include="..\Xbim.Geometry.Engine.Interop.targets">
       <Link>Xbim.Geometry.Interop.targets</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <PackagePath>build\net47;</PackagePath>
-      <Pack>false</Pack>
+      <Pack>true</Pack>
     </Content>
   </ItemGroup>
  
