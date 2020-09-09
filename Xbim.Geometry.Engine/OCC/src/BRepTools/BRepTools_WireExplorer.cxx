@@ -751,6 +751,10 @@ Standard_Real GetNextParamOnPC(const Handle(Geom2d_Curve)& aPC,
 {
   Standard_Real result = ( reverse ) ? fP : lP;
   Standard_Real dP = Abs( lP - fP ) / 1000.; // was / 16.;
+  // Ensure incrememt is large enough to effect startPar
+  Standard_Real resolution = Abs(fP / Pow(2, 52));
+  dP = Max(dP, resolution);
+	
   if( reverse )
     {
       Standard_Real startPar = fP;
