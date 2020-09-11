@@ -8,6 +8,9 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>Xbim.Geometry.Engine.Interop</PackageId>
     <PackageIcon>logo.png</PackageIcon>
+    <AssemblyVersion>5.1.0.1</AssemblyVersion>
+    <FileVersion>5.1.0.1</FileVersion>
+    <Version>5.1.0.0-Dev</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
