@@ -71,7 +71,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var model = MemoryModel.OpenRead(@"TestFiles\incorrectly_defined_edge_curve_with_identical_points.ifc"))
             {
                 //this model needs workarounds to be applied
-                model.AddWorkAroundSurfaceofLinearExtrusionForRevit();
+                model.AddRevitWorkArounds();
                 var brep = model.Instances.OfType<IIfcAdvancedBrep>().FirstOrDefault();
                 Assert.IsNotNull(brep, "No IIfcAdvancedBrep found");
                 var solids = geomEngine.CreateSolidSet(brep, logger);
@@ -148,20 +148,20 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
         //This is a fauly Brep conversion case that needs t be firther examinedal
         [DataTestMethod]
-        [DataRow("advanced_brep_1", false,1, DisplayName = "Self Intersection unorientable shape")]
+        [DataRow("advanced_brep_1", false, 1, DisplayName = "Self Intersection unorientable shape")]
         [DataRow("advanced_brep_2", DisplayName = "Curved edges with varying orientation")]
         [DataRow("advanced_brep_3", false, DisplayName = "Badly formed wire orders and missing faces and holes")]
         [DataRow("advanced_brep_4", true, 2, DisplayName = "Two solids from one advanced brep, errors in holes")]
-        [DataRow("advanced_brep_5", true, 1, DisplayName = "Incorrectly located surfaces of linear extrusion - not fixed")]
+        [DataRow("advanced_brep_5", true, 1, DisplayName = "Example of arc and circle having centre displaced twice RevitIncorrectArcCentreSweptCurve")]
         [DataRow("advanced_brep_6", true, 1, DisplayName = "The trimming points either result in a zero length curve or do not intersect the curve")]
         [DataRow("advanced_brep_7", true, 2, DisplayName = "Long running construction")]
-        [DataRow("advanced_brep_8", true, 1, false, DisplayName = "Fails to process")]
+        [DataRow("advanced_brep_8", true, 2, DisplayName = "BSpline with displacement applied twice, example of RevitIncorrectBsplineSweptCurve")]
         public void Advanced_brep_tests(string brepFileName, bool isValidSolid = true, int solidCount = 1, bool fails = false)
         {
 
             using (var model = MemoryModel.OpenRead($@"TestFiles\{brepFileName}.ifc"))
             {
-               // ((XbimModelFactors)model.ModelFactors).AddWorkAround("#SurfaceOfLinearExtrusion");
+                model.AddRevitWorkArounds();
                 //this model needs workarounds to be applied
                 var brep = model.Instances.OfType<IIfcAdvancedBrep>().FirstOrDefault();
                 brep.Should().NotBeNull();

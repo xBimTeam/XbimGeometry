@@ -39,12 +39,13 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         {
             using (var model = MemoryModel.OpenRead(@"TestFiles\ifcadvancedbrep_with_faulty_surface_orientation.ifc"))
             {
-                MemoryModel.SetWorkArounds(model.Header, model.ModelFactors as XbimModelFactors);
+                //MemoryModel.SetWorkArounds(model.Header, model.ModelFactors as XbimModelFactors);
                 var pfs = model.Instances.OfType<IIfcAdvancedBrep>().FirstOrDefault();
-                //((XbimModelFactors)model.ModelFactors).AddWorkAround("#SurfaceOfLinearExtrusion");
+                model.AddRevitWorkArounds();
                 Assert.IsTrue(pfs != null, "No IIfcAdvancedBrep found");
-                var solid = geomEngine.CreateSolid(pfs, logger); 
-                solid.Volume.Should().BeApproximately(100566982.37487862, 1e-7);
+                var solid = geomEngine.CreateSolid(pfs, logger);
+                
+                solid.Volume.Should().BeApproximately(102264692.69692135, 1e-7);
                 solid.Faces.Count.Should().Be(14);              
             }
         }
@@ -317,13 +318,13 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var model = MemoryModel.OpenRead(@"TestFiles\Ifc4TestFiles\Axis2PlacementError.ifc"))
             {
                 var advancedBrep = model.Instances.OfType<IfcAdvancedBrep>().FirstOrDefault(i => i.EntityLabel == 27743);
-                ((XbimModelFactors)model.ModelFactors).AddWorkAround("#SurfaceOfLinearExtrusion");
+                model.AddRevitWorkArounds();
                 //units are not correctly set in the ifc file
                 model.ModelFactors.Initialise(1, 1e-3, 1e-2);
                 advancedBrep.Should().NotBeNull();
                 var basin = geomEngine.CreateSolidSet(advancedBrep);
                 Assert.AreEqual(2, basin.Count()); 
-                basin.Sum(s=>s.Volume).Should().BeApproximately(44937302.3203062, 1e-7);               
+                basin.Sum(s=>s.Volume).Should().BeApproximately(44861498.858031876, 1e-7);               
 
             }
         }

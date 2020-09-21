@@ -10,7 +10,12 @@ namespace Xbim.Geometry.Engine.Interop
 {
     public static class ModelWorkArounds
     {
-        public const string SurfaceOfLinearExtrusion = "#SurfaceOfLinearExtrusion";
+        //this bug exists in ifc files exported by Revit up to releases 20.1 
+        public const string RevitIncorrectBsplineSweptCurve = "#RevitIncorrectBsplineSweptCurve";
+        //this bug exists in all current Revit exported Ifc files
+        public const string RevitIncorrectArcCentreSweptCurve = "#RevitIncorrectArcCentreSweptCurve";
+        //this bug exists in all current Revit exported Ifc files
+        public const string RevitSweptSurfaceExtrusionInFeet = "#RevitSweptSurfaceExtrusionInFeet";
         public const string PolylineTrimLengthOneForEntireLine = "#PolylineTrimLengthOneForEntireLine";
         /// <summary>
         /// Adds a work around for versions of the Revit exporter prior to and inclusing Version(17, 4, 0, 0);
@@ -18,44 +23,49 @@ namespace Xbim.Geometry.Engine.Interop
         /// </summary>
         /// <param name="model"></param>
         /// <returns>The lookup tag in ModelFactors.WorkArounds for the workaround or null if not required due to a later version of the exporter</returns>
-        public static string AddWorkAroundSurfaceofLinearExtrusionForRevit(this IModel model)
+        public static void AddRevitWorkArounds(this IModel model)
         {
             //it looks like all revit exports up to the 2020 release do not consider the local placement, so broadening the previous catch
-            var header = model.Header;
-            string revitPattern = @"- Exporter\s(\d*.\d*.\d*.\d*) - Alternate UI";
+            var header = model.Header;           
+            var modelFactors = model.ModelFactors as XbimModelFactors;
+            //typical pattern for the revit exporter
+            string revitPattern = @"- Exporter (\d*.\d*.\d*.\d*)";
+            string revitAltUIPattern = @"- Exporter- Alternate UI (\d*.\d*.\d*.\d*)";
             if (header.FileName == null || string.IsNullOrWhiteSpace(header.FileName.OriginatingSystem))
-                return null; //nothing to do
+                return ; //nothing to do
             var matches = Regex.Matches(header.FileName.OriginatingSystem, revitPattern, RegexOptions.IgnoreCase);
-            if (matches.Count > 0) //looks like Revit
+            var matchesAltUI = Regex.Matches(header.FileName.OriginatingSystem, revitAltUIPattern, RegexOptions.IgnoreCase);
+            string version=null;
+            if (matches.Count > 0 && matches[0].Groups.Count == 2)
+                version = matches[0].Groups[1].Value;
+            else if(matchesAltUI.Count > 0 && matchesAltUI[0].Groups.Count == 2)
+                version = matchesAltUI[0].Groups[1].Value;
+            if (matches.Count > 0 || matchesAltUI.Count > 0) //looks like Revit
             {
-                var modelFactors = model.ModelFactors as XbimModelFactors;
-                modelFactors.AddWorkAround(SurfaceOfLinearExtrusion);
-                return SurfaceOfLinearExtrusion;
-            }
-            //var header = model.Header;
-            //var modelFactors = model.ModelFactors as XbimModelFactors;
-            //string revitPattern = @"- Exporter\s(\d*.\d*.\d*.\d*)";
-            //if (header.FileName == null || string.IsNullOrWhiteSpace(header.FileName.OriginatingSystem))
-            //    return null; //nothing to do
-            //var matches = Regex.Matches(header.FileName.OriginatingSystem, revitPattern, RegexOptions.IgnoreCase);
-            //if (matches.Count > 0) //looks like Revit
-            //{
-            //    if (matches[0].Groups.Count == 2) //we have the build versions
-            //    {
-            //        if (Version.TryParse(matches[0].Groups[1].Value, out Version modelVersion))
-            //        {
-            //            //SurfaceOfLinearExtrusion bug found in version 17.4.0 and earlier
-            //            var surfaceOfLinearExtrusionVersion = new Version(17, 4, 0, 0);
-            //            if (modelVersion <= surfaceOfLinearExtrusionVersion)
-            //            {
-            //                modelFactors.AddWorkAround(SurfaceOfLinearExtrusion);
-            //                return SurfaceOfLinearExtrusion;
-            //            }
-            //        }
+                //SurfaceOfLinearExtrusion bug found in all current versions, comment this code out when it is fixed               
+                modelFactors.AddWorkAround(RevitIncorrectArcCentreSweptCurve);       
+                modelFactors.AddWorkAround(RevitSweptSurfaceExtrusionInFeet);              
+                if (!string.IsNullOrEmpty(version)) //we have the build versions
+                {
+                    if (Version.TryParse(version, out Version modelVersion))
+                    {
+                        //uncomment this code when it is fixed in the exporter
+                        ////SurfaceOfLinearExtrusion bug found in version 20.1.0 and earlier
+                        //var revitIncorrectArcCentreSweptCurveVersion = new Version(20, 1, 0, 0);
+                        //if (modelVersion <= revitIncorrectArcCentreSweptCurveVersion)
+                        //{
+                        //    modelFactors.AddWorkAround(RevitIncorrectArcCentreSweptCurve);
+                        //}
+                        //SurfaceOfLinearExtrusion bug found in version 20.0.0 and earlier
+                        var revitIncorrectBsplineSweptCurveVersion = new Version(20, 0, 0, 500);
+                        if (modelVersion <= revitIncorrectBsplineSweptCurveVersion)
+                        {
+                            modelFactors.AddWorkAround(RevitIncorrectBsplineSweptCurve);
+                        }
+                    }
 
-            //    }
-            //}
-            return null;
+                }
+            }         
         }
         /// <summary>
         /// In some processors the directrix of a sweep has a trimmed polyline, where the upper trim parameter has been set to 1

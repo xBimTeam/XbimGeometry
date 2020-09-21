@@ -634,6 +634,11 @@ namespace Xbim
 						u2 -= Math::PI / 2;
 					}
 				}
+				if (isConic)
+				{
+					if (abs(u2 - 0) <= Precision::Confusion()) //the end parameter is zero, make it 360 to ensure correct direction
+						u2 = 2 * Math::PI;
+				}
 				//now just go with
 				bool sameSense = curve->SenseAgreement;
 				*pCurve = new Geom_TrimmedCurve(*pCurve, sameSense ? u1 : u2, sameSense ? u2 : u1);

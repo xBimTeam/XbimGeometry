@@ -69,6 +69,9 @@
 #include <Geom_Plane.hxx>
 #include "XbimNativeApi.h"
 #include <BRepFill_Filling.hxx>
+#include <BRepTools_WireExplorer.hxx>
+#include <BRepExtrema_DistShapeShape.hxx>
+#include <BRepFill.hxx>
 // #include <ShapeBuild_ReShape.hxx> // this was suggeste in PR79 - but it does not seem to make the difference with OCC72
 
 using namespace System;
@@ -662,7 +665,7 @@ namespace Xbim
 			TopoDS_Compound newCompound;
 			builder.MakeCompound(newCompound);
 			for (TopExp_Explorer expl(*pCompound, TopAbs_SHELL); expl.More(); expl.Next())
-			{ 
+			{
 				TopoDS_Shape shape = expl.Current();
 				std::string errMsg;
 				if (!XbimNativeApi::SewShape(shape, _sewingTolerance, XbimGeometryCreator::BooleanTimeOut, errMsg) && logger != nullptr)
@@ -754,7 +757,7 @@ namespace Xbim
 
 							for each (IIfcOrientedEdge ^ orientedEdge in edgeLoop->EdgeList)
 							{
-								
+
 								IIfcEdgeCurve^ edgeCurve = dynamic_cast<IIfcEdgeCurve^>(orientedEdge->EdgeElement);
 								TopoDS_Edge topoEdgeCurve;
 								if (!edgeCurves.IsBound(orientedEdge->EdgeElement->EntityLabel)) //need to create the raw edge curve
@@ -881,10 +884,10 @@ namespace Xbim
 										topoEdgeCurve = TopoDS::Edge(edgeCurves.Find(edgeCurve->EntityLabel));
 
 								}
-								
+
 								if (!buildRuledSurface)
 									edgeFixer.FixAddPCurve(topoEdgeCurve, topoAdvancedFace, false); //add pcurves								
-								
+
 								loopEdges.Append(topoEdgeCurve);
 
 							}
@@ -960,33 +963,95 @@ namespace Xbim
 						//some models badly define the surface for linear extrusion, is we cannot build the face properly use the filler to create a surface that fits the wire
 						//the facemaker is currently intialised for the surface defined in the schema
 						//add the loop and check if it fits
-						
-						faceMaker.Add(topoOuterLoop);
-						BRepCheck_Analyzer analyser(faceMaker.Face(), Standard_True);
-						if (!analyser.IsValid())
+						//first see if the surface is within tolerance of the wire loop
+						bool buildFromLoop = true;
+						if (WithinTolerance(topoOuterLoop, topoAdvancedFace, _sewingTolerance))
 						{
-							//if its not ok then use the filler
-							BRepFill_Filling filler;
-							
-							for (TopExp_Explorer exp(topoOuterLoop, TopAbs_EDGE); exp.More(); exp.Next())
+							ShapeFix_Wire wf(topoOuterLoop, faceMaker.Face(), _sewingTolerance);
+							if (wf.FixEdgeCurves())
 							{
-								TopoDS_Edge e = TopoDS::Edge(exp.Current());
-								filler.Add(e, GeomAbs_C0);
+								topoOuterLoop = wf.Wire();
 							}
-							filler.Build();
-							if (filler.IsDone())
+							faceMaker.Add(topoOuterLoop);
+							BRepCheck_Analyzer analyser(faceMaker.Face(), Standard_True);
+							buildFromLoop = !analyser.IsValid();
+						}
+						if (buildFromLoop)
+						{
+							int edgeCount=0;
+							for (BRepTools_WireExplorer exp(topoOuterLoop); exp.More(); exp.Next()) edgeCount++;
+							if (edgeCount == 4) //would indicate a normal ruled surface
 							{
-								TopoDS_Face ruledFace = TopoDS::Face(filler.Face().EmptyCopied()); //build with no edges in the resulting face		
-								if (!advancedFace->SameSense)
-									ruledFace.Reverse();
-								faceMaker.Init(ruledFace);
-								faceMaker.Add(topoOuterLoop);
+								
+								TopTools_ListOfShape curves;
+
+								//get the two curves
+								for (BRepTools_WireExplorer exp(topoOuterLoop); exp.More(); exp.Next())
+								{
+									double first, last;
+									Handle(Geom_Curve) curve = BRep_Tool::Curve(exp.Current(), first, last);
+									Handle(Geom_Line) line = Handle(Geom_Line)::DownCast(curve);
+									if (line.IsNull()) //its a curve
+									{
+										if(curves.Size() == 1)
+										{
+											curves.Append(exp.Current().Reversed());
+											break;//we only want two curves, the other two should be lines
+										}
+										else
+											curves.Append(exp.Current());
+									}									
+								}
+								if (curves.Size() == 2)
+								{
+									TopoDS_Face ruledFace = BRepFill::Face(TopoDS::Edge(curves.First()), TopoDS::Edge(curves.Last()));
+									if (!ruledFace.IsNull())
+									{
+										ruledFace = TopoDS::Face(ruledFace.EmptyCopied());
+										/*if (!advancedFace->SameSense)
+											ruledFace.Reverse();*/
+										faceMaker.Init(ruledFace);
+										
+										ShapeFix_Wire wf2(topoOuterLoop, faceMaker.Face(), _sewingTolerance);
+										if (wf2.Perform())
+										{
+											topoOuterLoop = wf2.Wire();
+										}
+										faceMaker.Add(topoOuterLoop);
+										
+										buildFromLoop = false; //success
+									}
+								}
 
 							}
-						}
-						for (TopExp_Explorer exp(topoOuterLoop, TopAbs_EDGE); exp.More(); exp.Next())
-						{
-							edgeFixer.FixAddPCurve(TopoDS::Edge(exp.Current()), faceMaker.Face(), false); //add pcurves	
+							if(buildFromLoop)
+							{
+								//if its not ok then use the filler
+								BRepFill_Filling filler;
+								
+								for (BRepTools_WireExplorer exp(topoOuterLoop); exp.More(); exp.Next())
+								{
+									TopoDS_Edge e = TopoDS::Edge(exp.Current());
+									
+									filler.Add(e, GeomAbs_C0);
+								}
+								filler.Build();
+								if (filler.IsDone())
+								{
+									TopoDS_Face ruledFace = TopoDS::Face(filler.Face().EmptyCopied()); //build with no edges in the resulting face		
+									/*if (!advancedFace->SameSense)
+										ruledFace.Reverse();*/
+									faceMaker.Init(ruledFace);
+								}
+								
+								ShapeFix_Wire wf2(topoOuterLoop, faceMaker.Face(), _sewingTolerance);
+								if (wf2.Perform())
+								{
+									topoOuterLoop = wf2.Wire();
+								}
+								faceMaker.Add(topoOuterLoop);
+								
+							}
 						}
 					}
 					else
@@ -1091,7 +1156,25 @@ namespace Xbim
 			}
 
 		}
-
+		//calculates if the loop is within tolerance of the face, considers each edges ability to fit on the surface
+		bool XbimCompound::WithinTolerance(const  TopoDS_Wire& topoOuterLoop, const TopoDS_Face& topoAdvancedFace, double tolerance)
+		{
+			BRepExtrema_DistShapeShape measure;
+			measure.LoadS1(topoAdvancedFace);
+			for (TopExp_Explorer exp(topoOuterLoop,TopAbs_EDGE);exp.More();exp.Next())
+			{
+				measure.LoadS2(exp.Current());
+				bool performed = measure.Perform();
+				bool done = measure.IsDone();
+				
+				
+				if (!performed || !done || measure.Value() > (tolerance * 10))
+				{
+					return false;
+				}
+			}
+			return true;
+		}
 		//srl need to review this to use the normals provided in the ifc file
 		void  XbimCompound::Init(IIfcTriangulatedFaceSet^ faceSet, ILogger^ logger)
 		{

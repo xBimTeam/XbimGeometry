@@ -1499,7 +1499,7 @@ namespace Xbim
 			builder.Init(gcs, Standard_False, surface->Model->ModelFactors->Precision);
 			pFace = new TopoDS_Face();
 			*pFace = builder.Face();
-			
+
 			pFace->EmptyCopy();
 		}
 
@@ -1754,46 +1754,108 @@ namespace Xbim
 				XbimGeometryCreator::LogWarning(logger, sLin, "Only profiles of type curve are valid in a surface of linearExtrusion {0}. Face discarded", sLin->SweptCurve->EntityLabel);
 				return;
 			}
-			
-			XbimEdge^ xbasisEdge1 = gcnew XbimEdge(sLin->SweptCurve, logger);
+			IModelFactors^ mf = sLin->Model->ModelFactors;
+			XbimEdge^ xbasisEdge1 = nullptr;
+			double tolerance = mf->Precision;
+			bool isFixed = false;
+			IIfcArbitraryOpenProfileDef^ pDef = dynamic_cast<IIfcArbitraryOpenProfileDef^>(sLin->SweptCurve);
+
+			IIfcTrimmedCurve^ tc = nullptr;
+			IIfcCircle^ circle = nullptr;
+			IIfcBSplineCurveWithKnots^ bspline = nullptr;
+			if (pDef != nullptr)
+			{
+				tc = dynamic_cast<IIfcTrimmedCurve^>(pDef->Curve);
+				if (tc != nullptr)
+				{
+					circle = dynamic_cast<IIfcCircle^>(tc->BasisCurve);
+					bspline = dynamic_cast<IIfcBSplineCurveWithKnots^>(tc->BasisCurve);
+				}
+			}
+			if (mf->ApplyWorkAround("#RevitIncorrectArcCentreSweptCurve") && sLin->Position != nullptr)
+			{
+				if (circle != nullptr)
+				{
+					//the centre has been transformed twice, recalculate the centre
+					//trim 1 and trim 2 will be cartesian points
+					IIfcCartesianPoint^ trim1 = dynamic_cast<IIfcCartesianPoint^>(Enumerable::FirstOrDefault(tc->Trim1));
+					IIfcCartesianPoint^ trim2 = dynamic_cast<IIfcCartesianPoint^>(Enumerable::FirstOrDefault(tc->Trim2));
+					gp_Pnt p1 = XbimConvert::GetPoint3d(trim1);
+					gp_Pnt p2 = XbimConvert::GetPoint3d(trim2);
+					//there are two solutions A, B
+					//calc solution A
+					double radsq = circle->Radius * circle->Radius;
+					double qX = Math::Sqrt(((p2.X() - p1.X()) * (p2.X() - p1.X())) + ((p2.Y() - p1.Y()) * (p2.Y() - p1.Y())));
+					double x3 = (p1.X() + p2.X()) / 2;
+					double centreX = x3 - Math::Sqrt(radsq - ((qX / 2) * (qX / 2))) * ((p1.Y() - p2.Y()) / qX);
+
+					double qY = Math::Sqrt(((p2.X() - p1.X()) * (p2.X() - p1.X())) + ((p2.Y() - p1.Y()) * (p2.Y() - p1.Y())));
+
+					double y3 = (p1.Y() + p2.Y()) / 2;
+
+					double centreY = y3 - Math::Sqrt(radsq - ((qY / 2) * (qY / 2))) * ((p2.X() - p1.X()) / qY);
+
+
+
+					ITransaction^ txn = sLin->Model->BeginTransaction("Fix Centre");
+
+
+					IIfcPlacement^ p = dynamic_cast<IIfcPlacement^>(circle->Position);
+
+					p->Location->Coordinates[0] = centreX;
+					p->Location->Coordinates[1] = centreY;
+					p->Location->Coordinates[2] = 0;
+
+					xbasisEdge1 = gcnew XbimEdge(sLin->SweptCurve, logger);
+					txn->RollBack();
+					isFixed = true;
+				}
+
+
+			}
+			if (!isFixed) //just build it
+				xbasisEdge1 = gcnew XbimEdge(sLin->SweptCurve, logger);
 			if (!xbasisEdge1->IsValid) return;
 			try
 			{
-				TopoDS_Edge basisEdge1 = gcnew XbimEdge(sLin->SweptCurve, logger);
-				TopoDS_Edge basisEdge2 = gcnew XbimEdge(sLin->SweptCurve, logger);
 
-				
+
 				gp_Vec extrude = XbimConvert::GetDir3d(sLin->ExtrudedDirection); //we are going to ignore magnitude as the surface should be infinite
-
 				extrude *= sLin->Depth;
+				if (mf->ApplyWorkAround("#RevitSweptSurfaceExtrusionInFeet"))
+					extrude *= mf->OneFoot;
 
-				gp_Ax3 ax3;
-				//the location is applied twice so ignore
-				ax3.SetLocation(ax3.Location().Translated(extrude));
-				gp_Trsf trsf;
-				trsf.SetTransformation(ax3, gp_Ax3(gp_Pnt(), gp_Dir(0, 0, 1), gp_Dir(1, 0, 0)));
-				TopLoc_Location loc(trsf);
-				basisEdge2.Move(loc);
 
-				ReParamCurve(basisEdge1);
-				ReParamCurve(basisEdge2);
-				basisEdge1 = ReParamEdge(basisEdge1);
-				basisEdge2 = ReParamEdge(basisEdge2);
+				TopLoc_Location loc;
+				double start, end;
+				TopoDS_Edge edge = xbasisEdge1;
+				Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, loc, start, end);
 
-				pFace = new TopoDS_Face();
-				*pFace = BRepFill::Face(basisEdge1, basisEdge2);
-				if (sLin->Position != nullptr) //revit does not respect the local placement correctly
+				Handle(Geom_SurfaceOfLinearExtrusion) surface = new Geom_SurfaceOfLinearExtrusion(curve, extrude);
+				BRepBuilderAPI_MakeFace faceBlder(surface, tolerance);
+				if (faceBlder.IsDone())
 				{
-					TopLoc_Location newLoc = XbimConvert::ToLocation(sLin->Position);
-					pFace->Move(newLoc);
+					pFace = new TopoDS_Face();
+					*pFace = faceBlder.Face();
+					if (sLin->Position != nullptr)
+					{
+						if (!(bspline != nullptr && mf->ApplyWorkAround("#RevitIncorrectBsplineSweptCurve"))) //revit does not respect the local placement correctly
+						{
+							TopLoc_Location newLoc = XbimConvert::ToLocation(sLin->Position);
+							pFace->Move(newLoc);
+						}
+					}
+					pFace->EmptyCopy(); //remove the ruled edges
 				}
-				pFace->EmptyCopy(); //remove the ruled edges
+
+
+
 			}
 			catch (Standard_Failure f)
 			{
 				String^ err = gcnew String(f.GetMessageString());
 				throw gcnew Exception("General failure in advanced face building: " + err);
-			}			
+			}
 		}
 		void XbimFace::ReParamCurve(TopoDS_Edge& basisEdge)
 		{

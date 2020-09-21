@@ -32,6 +32,7 @@ namespace Xbim
 			bool _isSewn;
 			double _sewingTolerance;
 			void InstanceCleanup();
+			bool WithinTolerance(const  TopoDS_Wire& topoOuterLoop, const TopoDS_Face& topoAdvancedFace, double _sewingTolerance);
 			//Initialisers
 			void Init(IIfcConnectedFaceSet^ faceSet,  ILogger^ logger);
 			TopoDS_Shape InitFaces(IEnumerable<IIfcFace^>^ faces,IIfcRepresentationItem^ theItem, ILogger^ logger);
