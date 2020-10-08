@@ -254,8 +254,11 @@ TopoDS_Wire ShapeAnalysis::OuterWire(const TopoDS_Face& face)
   TopoDS_Wire W;
   TopoDS_Iterator exp (F, Standard_False);
   while ( exp.More() ) {
-    if(exp.Value().ShapeType() != TopAbs_WIRE)
-      continue;
+	if (exp.Value().ShapeType() != TopAbs_WIRE)
+	{
+      exp.Next();
+	  continue;
+	}
     W = TopoDS::Wire ( exp.Value() );
     exp.Next();
     if ( ! exp.More() ) return W;

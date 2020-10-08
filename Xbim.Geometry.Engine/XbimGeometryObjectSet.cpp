@@ -465,7 +465,7 @@ namespace Xbim
 						sprintf(buff, "c:\\tmp\\O%d", i);
 						BRepTools::Write(solid, buff);*/
 						
-						System::Diagnostics::Debug::WriteLine(solid->Volume);
+						// System::Diagnostics::Debug::WriteLine(solid->Volume);
 						
 						Bnd_Box box;
 						BRepBndLib::Add(solid, box);

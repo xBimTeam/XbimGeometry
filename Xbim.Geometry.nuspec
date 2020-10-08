@@ -2,13 +2,14 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
   <metadata>
     <id>Xbim.Geometry</id>
-    <version>4.0.17-V003</version>
+    <!-- Legacy versions bugfixes will have master numbering to ensure diffusion -->
+    <version>4.0.18</version>
     <title>xBIM Geometry</title>
     <authors>xBIM Team</authors>
     <owners>Steve Lockley, Claudio Benghi</owners>
     <license type="expression">CDDL-1.0</license>
     <projectUrl>https://github.com/xBimTeam/</projectUrl>
-    <iconUrl>https://avatars1.githubusercontent.com/u/2284875?v=3&amp;s=240</iconUrl>
+    <icon>xbim.jpg</icon>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <description>
       xBIM Geometry is the Geometry processing component of the Xbim libraries.
@@ -29,10 +30,13 @@
     <language>en-GB</language>
     <tags>BIM, IFC, IfcXml, IfcZip, Ifc4, COBie, .Net, C#, BuildingSmart, Geometry, Brep</tags>
     <dependencies>
-      <dependency id="Xbim.Essentials" version="4.0.30-V058" />
+      <group targetFramework="net40">
+        <dependency id="Xbim.Essentials" version="4.0.31" />
+      </group>
     </dependencies>
   </metadata>
   <files>
+    <file src="xbim.jpg" target="" />
     <file src="Output\Release\Xbim.Geometry.Engine.Interop.dll" target="lib\net40\Xbim.Geometry.Engine.Interop.dll" />
     <file src="Output\Release\Xbim.Geometry.Engine.Interop.xml" target="lib\net40\Xbim.Geometry.Engine.Interop.xml" />
     <file src="Output\Release\Xbim.ModelGeometry.Scene.dll" target="lib\net40\Xbim.ModelGeometry.Scene.dll" />

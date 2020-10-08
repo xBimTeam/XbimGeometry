@@ -1312,6 +1312,9 @@ namespace Xbim.ModelGeometry.Scene
                     }
                 }
             }
+#if DEBUG
+            Debug.WriteLine($"Shape#: {contextHelper.ProductShapeIds.Count()}");
+#endif
             Parallel.ForEach(contextHelper.ProductShapeIds, contextHelper.ParallelOptions, shapeId =>
             {
 #if DEBUG
@@ -1436,6 +1439,12 @@ namespace Xbim.ModelGeometry.Scene
                         progDelegate(localPercentageParsed, "Creating Geometry");
                     }
                 }
+#if DEBUG
+                if (s.ElapsedMilliseconds > 2000)
+                {
+                    Debug.WriteLine($"-\t{s.ElapsedMilliseconds,5}\tms {shape.GetType()}: #{shape.EntityLabel}");
+                }
+#endif
             }
             );
 
