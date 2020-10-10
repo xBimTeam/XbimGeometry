@@ -2080,6 +2080,8 @@ namespace Xbim
 				boolOp.SetNonDestructive(Standard_True);
 				Handle(XbimProgressIndicator) aPI = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);
 				boolOp.SetProgressIndicator(aPI);
+				if (XbimGeometryCreator::OccFuzzyValue != -1)
+					boolOp.SetFuzzyValue(XbimGeometryCreator::OccFuzzyValue * tolerance);
 				boolOp.Build();
 				aPI->StopTimer();
 

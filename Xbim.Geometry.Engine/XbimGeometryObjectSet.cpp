@@ -455,7 +455,7 @@ namespace Xbim
 				default:
 					break;
 				}
-
+				
 
 				for each (XbimSolid^ solid in solids)
 				{
@@ -494,7 +494,9 @@ namespace Xbim
 				pBuilder->SetArguments(toBeProcessed);
 				pBuilder->SetTools(cuttingObjects);		
 				// System::Diagnostics::Debug::WriteLine(cuttingObjects);
-				pBuilder->SetNonDestructive(Standard_True);				
+				pBuilder->SetNonDestructive(Standard_True);			
+				if (XbimGeometryCreator::OccFuzzyValue != -1)
+					pBuilder->SetFuzzyValue(XbimGeometryCreator::OccFuzzyValue * tolerance);
 				Handle(XbimProgressIndicator) aPI = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);				
 				pBuilder->SetProgressIndicator(aPI);
 				pBuilder->Build();

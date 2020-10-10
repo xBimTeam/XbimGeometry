@@ -391,7 +391,8 @@ namespace Xbim
 				boolOp.SetArguments(shapeObjects);
 				boolOp.SetTools(shapeTools);	
 				boolOp.SetNonDestructive(Standard_True);
-				//boolOp.SetFuzzyValue(tolerance);
+				if (XbimGeometryCreator::OccFuzzyValue!= -1)
+					boolOp.SetFuzzyValue(XbimGeometryCreator::OccFuzzyValue * tolerance);
 				Handle(XbimProgressIndicator) aPI = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);
 				boolOp.SetProgressIndicator(aPI);
 				boolOp.Build();

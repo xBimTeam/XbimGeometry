@@ -33,6 +33,11 @@ namespace Xbim
 				String^ timeOut = ConfigurationManager::AppSettings["BooleanTimeOut"];
 				if (!double::TryParse(timeOut, BooleanTimeOut))
 					BooleanTimeOut = 60;
+
+				String^ fuzzyValue = ConfigurationManager::AppSettings["OccFuzzyValue"];
+				if (!double::TryParse(fuzzyValue, OccFuzzyValue))
+					OccFuzzyValue = 10;
+
 			}
 			//Central point for logging all errors
 			static void LogInfo(Object^ entity, String^ format, ... array<Object^>^ arg);
@@ -41,6 +46,8 @@ namespace Xbim
 			static void LogDebug(Object^ entity, String^ format, ... array<Object^>^ arg);
 
 			static double BooleanTimeOut;
+			static double OccFuzzyValue;
+			
 			virtual property ILogger^ Logger {ILogger^ get() { return XbimGeometryCreator::logger; }};
 			virtual XbimShapeGeometry^ CreateShapeGeometry(IXbimGeometryObject^ geometryObject, double precision, double deflection, double angle, XbimGeometryType storageType);
 			virtual XbimShapeGeometry^ CreateShapeGeometry(IXbimGeometryObject^ geometryObject, double precision, double deflection/*, double angle = 0.5, XbimGeometryType storageType = XbimGeometryType::Polyhedron*/)
