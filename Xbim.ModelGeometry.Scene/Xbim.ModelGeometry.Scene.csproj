@@ -11,7 +11,7 @@
     <Version>5.1.0.0-Dev</Version>
     <AssemblyVersion>5.1.0.1</AssemblyVersion>
     <FileVersion>5.1.0.1</FileVersion>
-    <Platforms>AnyCPU;x64;x86</Platforms>
+    <Platforms>x64;x86</Platforms>
     <SignAssembly>false</SignAssembly>
   </PropertyGroup>
 
