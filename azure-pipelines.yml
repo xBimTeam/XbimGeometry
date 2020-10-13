@@ -174,14 +174,14 @@ jobs:
       versioningScheme: byEnvVar
       versionEnvVar: packageversion
 
-- task: NuGetCommand@2
-  name: 'MyGetPublishing_NetCore'
-  condition: eq(variables['Build.SourceBranch'], 'refs/heads/netcoreapp31')
-  inputs:
-    command: push
-    packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
-    nuGetFeedType: 'external'
-    publishFeedCredentials: 'MyGetNetCore'
-    versioningScheme: byEnvVar
+  - task: NuGetCommand@2
+    name: 'MyGetPublishing_NetCore'
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/netcoreapp31')
+    inputs:
+      command: push
+      packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
+      nuGetFeedType: 'external'
+      publishFeedCredentials: 'MyGetNetCore'
+      versioningScheme: byEnvVar
       versionEnvVar: packageversion
 
