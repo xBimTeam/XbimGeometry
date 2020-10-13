@@ -2,12 +2,11 @@
 #include "XbimVertex.h"
 #include "XbimVertex.h"
 #include "XbimEdge.h"
-using namespace System;
+
 using namespace System::IO;
 using namespace Xbim::Common;
 using namespace Xbim::Common::Geometry;
 
-using namespace System::Configuration;
 using namespace Xbim::Ifc4::Interfaces;
 using namespace Xbim::Ifc4;
 
@@ -24,7 +23,7 @@ namespace Xbim
 		public ref class XbimGeometryCreator : IXbimGeometryEngine
 		{
 			
-			static Assembly^  ResolveHandler(Object^ /*Sender*/, ResolveEventArgs^ /*args*/)
+			static Assembly^  ResolveHandler(Object^ /*Sender*/, System::ResolveEventArgs^ /*args*/)
 			{
 				
 				// Warning: this should check the args for the assembly name!
@@ -34,8 +33,8 @@ namespace Xbim
 			
 		public:
 
-			static String^ SurfaceOfLinearExtrusion = "#SurfaceOfLinearExtrusion";
-			static String^ PolylineTrimLengthOneForEntireLine = "#PolylineTrimLengthOneForEntireLine";
+			static System::String^ SurfaceOfLinearExtrusion = "#SurfaceOfLinearExtrusion";
+			static System::String^ PolylineTrimLengthOneForEntireLine = "#PolylineTrimLengthOneForEntireLine";
 
 		private:
 			
@@ -47,22 +46,22 @@ namespace Xbim
 				Assembly::Load("Xbim.Common");
 				Assembly::Load("Xbim.Tessellator");*/
 				
-				String^ timeOut = ConfigurationManager::AppSettings["BooleanTimeOut"];
+				System::String^ timeOut = System::Environment::GetEnvironmentVariable("BooleanTimeOut");
 				if (!int::TryParse(timeOut, BooleanTimeOut))
 					BooleanTimeOut = 60;
-				String^ fuzzyString = ConfigurationManager::AppSettings["FuzzyFactor"];
+				System::String^ fuzzyString = System::Environment::GetEnvironmentVariable("FuzzyFactor");
 				if (!double::TryParse(fuzzyString, FuzzyFactor))
 					FuzzyFactor = 10;
 
-				String^ linearDeflection = ConfigurationManager::AppSettings["LinearDeflectionInMM"];
+				System::String^ linearDeflection = System::Environment::GetEnvironmentVariable("LinearDeflectionInMM");
 				if (!double::TryParse(linearDeflection, LinearDeflectionInMM))
 					LinearDeflectionInMM = 50; //max chord diff
 
-				String^ angularDeflection = ConfigurationManager::AppSettings["AngularDeflectionInRadians"];
+				System::String^ angularDeflection = System::Environment::GetEnvironmentVariable("AngularDeflectionInRadians");
 				if (!double::TryParse(angularDeflection, AngularDeflectionInRadians))
 					AngularDeflectionInRadians = 0.5;// deflection of 28 degrees
 
-				String^ ignoreIfcSweptDiskSolidParamsString = ConfigurationManager::AppSettings["IgnoreIfcSweptDiskSolidParams"];
+				System::String^ ignoreIfcSweptDiskSolidParamsString = System::Environment::GetEnvironmentVariable("IgnoreIfcSweptDiskSolidParams");
 				if(!bool::TryParse(ignoreIfcSweptDiskSolidParamsString,IgnoreIfcSweptDiskSolidParams))
 					IgnoreIfcSweptDiskSolidParams = false;
 				
@@ -76,10 +75,10 @@ namespace Xbim
 
 			
 			//Central point for logging all errors
-			static void LogInfo(ILogger^ logger, Object^ entity, String^ format, ... array<Object^>^ arg);
-			static void LogWarning(ILogger^ logger, Object^ entity, String^ format, ... array<Object^>^ arg);
-			static void LogError(ILogger^ logger, Object^ entity, String^ format, ... array<Object^>^ arg);
-			static void LogDebug(ILogger^ logger, Object^ entity, String^ format, ... array<Object^>^ arg);
+			static void LogInfo(ILogger^ logger, Object^ entity, System::String^ format, ... array<Object^>^ arg);
+			static void LogWarning(ILogger^ logger, Object^ entity, System::String^ format, ... array<Object^>^ arg);
+			static void LogError(ILogger^ logger, Object^ entity, System::String^ format, ... array<Object^>^ arg);
+			static void LogDebug(ILogger^ logger, Object^ entity, System::String^ format, ... array<Object^>^ arg);
 
 			static int BooleanTimeOut;
 			static double FuzzyFactor;
@@ -248,8 +247,8 @@ namespace Xbim
 				return Moved(geometryObject, (IIfcPlacement ^)placement);
 			};
 			virtual IXbimGeometryObject ^ Moved(IXbimGeometryObject ^geometryObject, IIfcObjectPlacement ^objectPlacement, ILogger^ logger);
-			virtual IXbimGeometryObject^ FromBrep(String^ brepStr);
-			virtual String^ ToBrep(IXbimGeometryObject^ geometryObject);
+			virtual IXbimGeometryObject^ FromBrep(System::String^ brepStr);
+			virtual System::String^ ToBrep(IXbimGeometryObject^ geometryObject);
 		};
 	}
 }

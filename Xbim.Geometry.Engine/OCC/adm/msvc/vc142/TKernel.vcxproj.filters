@@ -1,0 +1,2280 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source files">
+      <UniqueIdentifier>{D8E2B8B0-153D-096E-1491-F4B8E39655A0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files">
+      <UniqueIdentifier>{CFA43222-0C12-07CD-0EB9-8A4ACF357FB3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\FSD">
+      <UniqueIdentifier>{52FF7390-0B5E-0984-1503-7E712B37D97D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\OSD">
+      <UniqueIdentifier>{A79DA7A5-192F-155B-164B-D09638367816}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\Plugin">
+      <UniqueIdentifier>{06191575-0C39-0311-048A-6D231319DDA5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\Quantity">
+      <UniqueIdentifier>{2692C4F6-1639-18FE-04C3-B1BDB11CB4F3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\Resource">
+      <UniqueIdentifier>{ABCB6CFB-0299-0B1D-1693-26071C9CFCE4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\Standard">
+      <UniqueIdentifier>{9EE126FC-0C21-137F-1290-3A87869793F9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\Storage">
+      <UniqueIdentifier>{73D1A9CC-073D-06B2-07D9-9E996C6A8870}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\TColStd">
+      <UniqueIdentifier>{23854780-14E1-038E-01B8-AB61B59BF30B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\TCollection">
+      <UniqueIdentifier>{716A7740-1394-001F-01DE-4B5F5A611CBC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\Units">
+      <UniqueIdentifier>{A59B2606-1715-06E6-0F7A-9F2E0B87D47E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\UnitsAPI">
+      <UniqueIdentifier>{8FC686A3-0895-04B1-188D-177059D121AE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\NCollection">
+      <UniqueIdentifier>{FA333C93-00E3-0788-1477-938F86B3D041}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\Message">
+      <UniqueIdentifier>{2D735B3F-0266-1054-0CDA-91E297B339BF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\FSD">
+      <UniqueIdentifier>{944AC1DB-101F-1745-0686-66536BEECAD5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\MMgt">
+      <UniqueIdentifier>{469ED8F6-13C7-0420-0336-9005945E4C5A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\OSD">
+      <UniqueIdentifier>{E6AC7D74-0370-0195-0FC3-69500705156C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\Plugin">
+      <UniqueIdentifier>{C175E052-028A-168E-0FFA-C18807C99C0F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\Quantity">
+      <UniqueIdentifier>{24C324F8-1905-079F-10AA-20CD227BB14E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\Resource">
+      <UniqueIdentifier>{B5A54447-0F1A-0892-100B-D2BCC26681B3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\Standard">
+      <UniqueIdentifier>{CD18B851-108C-0908-095B-F9382ED75EC3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\StdFail">
+      <UniqueIdentifier>{8E90A61B-10F3-11BF-0574-538296A254E4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\Storage">
+      <UniqueIdentifier>{7370A82E-085A-0252-09BB-3492AC896C42}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\TColStd">
+      <UniqueIdentifier>{228A5CDA-068E-05B0-1231-BB275713E401}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\TCollection">
+      <UniqueIdentifier>{DE2C5DE3-0EEA-0AFF-147D-AA35438ED1F2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\TShort">
+      <UniqueIdentifier>{7997E13E-080E-0527-154D-F475032E383F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\Units">
+      <UniqueIdentifier>{6EC22458-0EF9-16ED-0C3F-2F95D21518DB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\UnitsAPI">
+      <UniqueIdentifier>{1306BC31-0097-1304-081E-5A0BB6B6E9CE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\NCollection">
+      <UniqueIdentifier>{AFFCC83F-09BB-1043-0B85-806A9DD79DFD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\Message">
+      <UniqueIdentifier>{C58B0622-0218-0222-060A-6082DE2FFE27}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\FSD\FSD_Base64Decoder.cxx">
+      <Filter>Source files\FSD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\FSD\FSD_BinaryFile.cxx">
+      <Filter>Source files\FSD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\FSD\FSD_CmpFile.cxx">
+      <Filter>Source files\FSD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\FSD\FSD_File.cxx">
+      <Filter>Source files\FSD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\OSD\OSD.cxx">
+      <Filter>Source files\OSD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\OSD\OSD_Chronometer.cxx">
+      <Filter>Source files\OSD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\OSD\OSD_Directory.cxx">
+      <Filter>Source files\OSD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\OSD\OSD_DirectoryIterator.cxx">
+      <Filter>Source files\OSD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\OSD\OSD_Disk.cxx">
+      <Filter>Source files\OSD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\OSD\OSD_Environment.cxx">
+      <Filter>Source files\OSD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\OSD\OSD_Error.cxx">
+      <Filter>Source files\OSD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\OSD\OSD_File.cxx">
+      <Filter>Source files\OSD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\OSD\OSD_FileIterator.cxx">
+      <Filter>Source files\OSD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\OSD\OSD_FileNode.cxx">
+      <Filter>Source files\OSD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\OSD\OSD_Host.cxx">
+      <Filter>Source files\OSD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\OSD\OSD_MAllocHook.cxx">
+      <Filter>Source files\OSD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\OSD\OSD_MemInfo.cxx">
+      <Filter>Source files\OSD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\OSD\OSD_OpenFile.cxx">
+      <Filter>Source files\OSD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\OSD\OSD_Parallel.cxx">
+      <Filter>Source files\OSD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\OSD\OSD_Parallel_TBB.cxx">
+      <Filter>Source files\OSD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\OSD\OSD_Parallel_Threads.cxx">
+      <Filter>Source files\OSD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\OSD\OSD_Path.cxx">
+      <Filter>Source files\OSD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\OSD\OSD_PerfMeter.cxx">
+      <Filter>Source files\OSD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\OSD\OSD_Process.cxx">
+      <Filter>Source files\OSD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\OSD\OSD_Protection.cxx">
+      <Filter>Source files\OSD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\OSD\OSD_SharedLibrary.cxx">
+      <Filter>Source files\OSD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\OSD\OSD_Thread.cxx">
+      <Filter>Source files\OSD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\OSD\OSD_ThreadPool.cxx">
+      <Filter>Source files\OSD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\OSD\OSD_Timer.cxx">
+      <Filter>Source files\OSD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\OSD\OSD_WNT.cxx">
+      <Filter>Source files\OSD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\OSD\OSD_signal.cxx">
+      <Filter>Source files\OSD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Plugin\Plugin.cxx">
+      <Filter>Source files\Plugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Quantity\Quantity_Color.cxx">
+      <Filter>Source files\Quantity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Quantity\Quantity_ColorRGBA.cxx">
+      <Filter>Source files\Quantity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Quantity\Quantity_Date.cxx">
+      <Filter>Source files\Quantity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Quantity\Quantity_Period.cxx">
+      <Filter>Source files\Quantity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Resource\Resource_ConvertUnicode.c">
+      <Filter>Source files\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Resource\Resource_LexicalCompare.cxx">
+      <Filter>Source files\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Resource\Resource_Manager.cxx">
+      <Filter>Source files\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Resource\Resource_Unicode.cxx">
+      <Filter>Source files\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Standard\Standard.cxx">
+      <Filter>Source files\Standard</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Standard\Standard_ArrayStreamBuffer.cxx">
+      <Filter>Source files\Standard</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Standard\Standard_CLocaleSentry.cxx">
+      <Filter>Source files\Standard</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Standard\Standard_CString.cxx">
+      <Filter>Source files\Standard</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Standard\Standard_Condition.cxx">
+      <Filter>Source files\Standard</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Standard\Standard_Dump.cxx">
+      <Filter>Source files\Standard</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Standard\Standard_ErrorHandler.cxx">
+      <Filter>Source files\Standard</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Standard\Standard_ExtString.cxx">
+      <Filter>Source files\Standard</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Standard\Standard_Failure.cxx">
+      <Filter>Source files\Standard</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Standard\Standard_GUID.cxx">
+      <Filter>Source files\Standard</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Standard\Standard_MMgrOpt.cxx">
+      <Filter>Source files\Standard</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Standard\Standard_MMgrRaw.cxx">
+      <Filter>Source files\Standard</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Standard\Standard_MMgrRoot.cxx">
+      <Filter>Source files\Standard</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Standard\Standard_MMgrTBBalloc.cxx">
+      <Filter>Source files\Standard</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Standard\Standard_Mutex.cxx">
+      <Filter>Source files\Standard</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Standard\Standard_OutOfMemory.cxx">
+      <Filter>Source files\Standard</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Standard\Standard_Persistent.cxx">
+      <Filter>Source files\Standard</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Standard\Standard_Real.cxx">
+      <Filter>Source files\Standard</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Standard\Standard_ShortReal.cxx">
+      <Filter>Source files\Standard</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Standard\Standard_Strtod.cxx">
+      <Filter>Source files\Standard</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Standard\Standard_Transient.cxx">
+      <Filter>Source files\Standard</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Standard\Standard_Type.cxx">
+      <Filter>Source files\Standard</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Standard\Standard_math.cxx">
+      <Filter>Source files\Standard</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Storage\Storage.cxx">
+      <Filter>Source files\Storage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Storage\Storage_BaseDriver.cxx">
+      <Filter>Source files\Storage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Storage\Storage_CallBack.cxx">
+      <Filter>Source files\Storage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Storage\Storage_Data.cxx">
+      <Filter>Source files\Storage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Storage\Storage_DefaultCallBack.cxx">
+      <Filter>Source files\Storage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Storage\Storage_HeaderData.cxx">
+      <Filter>Source files\Storage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Storage\Storage_InternalData.cxx">
+      <Filter>Source files\Storage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Storage\Storage_Root.cxx">
+      <Filter>Source files\Storage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Storage\Storage_RootData.cxx">
+      <Filter>Source files\Storage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Storage\Storage_Schema.cxx">
+      <Filter>Source files\Storage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Storage\Storage_TypeData.cxx">
+      <Filter>Source files\Storage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Storage\Storage_TypedCallBack.cxx">
+      <Filter>Source files\Storage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\TColStd\TColStd_HPackedMapOfInteger.cxx">
+      <Filter>Source files\TColStd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\TColStd\TColStd_PackedMapOfInteger.cxx">
+      <Filter>Source files\TColStd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\TCollection\TCollection.cxx">
+      <Filter>Source files\TCollection</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\TCollection\TCollection_AsciiString.cxx">
+      <Filter>Source files\TCollection</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\TCollection\TCollection_BaseSequence.cxx">
+      <Filter>Source files\TCollection</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\TCollection\TCollection_BasicMap.cxx">
+      <Filter>Source files\TCollection</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\TCollection\TCollection_BasicMapIterator.cxx">
+      <Filter>Source files\TCollection</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\TCollection\TCollection_ExtendedString.cxx">
+      <Filter>Source files\TCollection</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\TCollection\TCollection_HAsciiString.cxx">
+      <Filter>Source files\TCollection</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\TCollection\TCollection_HExtendedString.cxx">
+      <Filter>Source files\TCollection</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\TCollection\TCollection_MapNode.cxx">
+      <Filter>Source files\TCollection</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\TCollection\TCollection_SeqNode.cxx">
+      <Filter>Source files\TCollection</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Units\Units.cxx">
+      <Filter>Source files\Units</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Units\Units_Dimensions.cxx">
+      <Filter>Source files\Units</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Units\Units_Explorer.cxx">
+      <Filter>Source files\Units</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Units\Units_Lexicon.cxx">
+      <Filter>Source files\Units</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Units\Units_MathSentence.cxx">
+      <Filter>Source files\Units</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Units\Units_Measurement.cxx">
+      <Filter>Source files\Units</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Units\Units_Quantity.cxx">
+      <Filter>Source files\Units</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Units\Units_Sentence.cxx">
+      <Filter>Source files\Units</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Units\Units_ShiftedToken.cxx">
+      <Filter>Source files\Units</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Units\Units_ShiftedUnit.cxx">
+      <Filter>Source files\Units</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Units\Units_Token.cxx">
+      <Filter>Source files\Units</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Units\Units_Unit.cxx">
+      <Filter>Source files\Units</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Units\Units_UnitSentence.cxx">
+      <Filter>Source files\Units</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Units\Units_UnitsDictionary.cxx">
+      <Filter>Source files\Units</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Units\Units_UnitsLexicon.cxx">
+      <Filter>Source files\Units</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Units\Units_UnitsSystem.cxx">
+      <Filter>Source files\Units</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\UnitsAPI\UnitsAPI.cxx">
+      <Filter>Source files\UnitsAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\NCollection\NCollection_AccAllocator.cxx">
+      <Filter>Source files\NCollection</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\NCollection\NCollection_AlignedAllocator.cxx">
+      <Filter>Source files\NCollection</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\NCollection\NCollection_BaseAllocator.cxx">
+      <Filter>Source files\NCollection</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\NCollection\NCollection_BaseList.cxx">
+      <Filter>Source files\NCollection</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\NCollection\NCollection_BaseMap.cxx">
+      <Filter>Source files\NCollection</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\NCollection\NCollection_BaseSequence.cxx">
+      <Filter>Source files\NCollection</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\NCollection\NCollection_BaseVector.cxx">
+      <Filter>Source files\NCollection</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\NCollection\NCollection_HeapAllocator.cxx">
+      <Filter>Source files\NCollection</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\NCollection\NCollection_IncAllocator.cxx">
+      <Filter>Source files\NCollection</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\NCollection\NCollection_SparseArrayBase.cxx">
+      <Filter>Source files\NCollection</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\NCollection\NCollection_UtfString.cxx">
+      <Filter>Source files\NCollection</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\NCollection\NCollection_WinHeapAllocator.cxx">
+      <Filter>Source files\NCollection</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Message\Message.cxx">
+      <Filter>Source files\Message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Message\Message_Alert.cxx">
+      <Filter>Source files\Message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Message\Message_Algorithm.cxx">
+      <Filter>Source files\Message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Message\Message_Messenger.cxx">
+      <Filter>Source files\Message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Message\Message_Msg.cxx">
+      <Filter>Source files\Message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Message\Message_MsgFile.cxx">
+      <Filter>Source files\Message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Message\Message_Printer.cxx">
+      <Filter>Source files\Message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Message\Message_PrinterOStream.cxx">
+      <Filter>Source files\Message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Message\Message_ProgressIndicator.cxx">
+      <Filter>Source files\Message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Message\Message_ProgressScale.cxx">
+      <Filter>Source files\Message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Message\Message_ProgressSentry.cxx">
+      <Filter>Source files\Message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Message\Message_Report.cxx">
+      <Filter>Source files\Message</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\FSD\FSD_BStream.hxx">
+      <Filter>Header files\FSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\FSD\FSD_Base64Decoder.hxx">
+      <Filter>Header files\FSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\FSD\FSD_BinaryFile.hxx">
+      <Filter>Header files\FSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\FSD\FSD_CmpFile.hxx">
+      <Filter>Header files\FSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\FSD\FSD_FStream.hxx">
+      <Filter>Header files\FSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\FSD\FSD_File.hxx">
+      <Filter>Header files\FSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\FSD\FSD_FileHeader.hxx">
+      <Filter>Header files\FSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\MMgt\MMgt_TShared.hxx">
+      <Filter>Header files\MMgt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_Chronometer.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_Directory.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_DirectoryIterator.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_Disk.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_Environment.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_Error.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_ErrorList.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception_ACCESS_VIOLATION.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception_ARRAY_BOUNDS_EXCEEDED.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception_CTRL_BREAK.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception_FLT_DENORMAL_OPERAND.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception_FLT_DIVIDE_BY_ZERO.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception_FLT_INEXACT_RESULT.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception_FLT_INVALID_OPERATION.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception_FLT_OVERFLOW.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception_FLT_STACK_CHECK.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception_FLT_UNDERFLOW.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception_ILLEGAL_INSTRUCTION.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception_INT_DIVIDE_BY_ZERO.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception_INT_OVERFLOW.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception_INVALID_DISPOSITION.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception_IN_PAGE_ERROR.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception_NONCONTINUABLE_EXCEPTION.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception_PRIV_INSTRUCTION.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception_STACK_OVERFLOW.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception_STATUS_NO_MEMORY.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_File.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_FileIterator.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_FileNode.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_FromWhere.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_Function.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_Host.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_KindFile.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_LoadMode.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_LockType.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_MAllocHook.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_MemInfo.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_OEMType.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_OSDError.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_OpenFile.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_OpenMode.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_PThread.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_Parallel.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_Path.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_PerfMeter.h">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_PerfMeter.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_Process.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_Protection.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_SIGBUS.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_SIGHUP.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_SIGILL.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_SIGINT.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_SIGKILL.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_SIGQUIT.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_SIGSEGV.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_SIGSYS.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_SharedLibrary.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_Signal.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_SignalMode.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_SingleProtection.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_SysType.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_Thread.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_ThreadFunction.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_ThreadPool.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_Timer.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_WNT.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\OSD\OSD_WhoAmI.hxx">
+      <Filter>Header files\OSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Plugin\Plugin.hxx">
+      <Filter>Header files\Plugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Plugin\Plugin_DataMapIteratorOfMapOfFunctions.hxx">
+      <Filter>Header files\Plugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Plugin\Plugin_Failure.hxx">
+      <Filter>Header files\Plugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Plugin\Plugin_Macro.hxx">
+      <Filter>Header files\Plugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Plugin\Plugin_MapOfFunctions.hxx">
+      <Filter>Header files\Plugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_AbsorbedDose.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Acceleration.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_AcousticIntensity.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Activity.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Admittance.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_AmountOfSubstance.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_AngularVelocity.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Area.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Array1OfColor.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Array2OfColor.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Capacitance.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Coefficient.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_CoefficientOfExpansion.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Color.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_ColorDefinitionError.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_ColorHasher.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_ColorRGBA.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_ColorRGBAHasher.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Concentration.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Conductivity.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Constant.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Consumption.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Content.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Date.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_DateDefinitionError.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Density.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_DoseEquivalent.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_ElectricCapacitance.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_ElectricCharge.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_ElectricCurrent.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_ElectricFieldStrength.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_ElectricPotential.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Energy.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Enthalpy.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Entropy.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Factor.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Force.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Frequency.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_HArray1OfColor.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Illuminance.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Impedance.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Index.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Inductance.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_KinematicViscosity.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_KineticMoment.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Length.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Luminance.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_LuminousEfficacity.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_LuminousExposition.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_LuminousFlux.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_LuminousIntensity.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_MagneticFieldStrength.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_MagneticFlux.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_MagneticFluxDensity.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Mass.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_MassFlow.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_MolarConcentration.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_MolarMass.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_MolarVolume.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Molarity.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_MomentOfAForce.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_MomentOfInertia.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Momentum.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_NameOfColor.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Normality.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Parameter.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Period.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_PeriodDefinitionError.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_PhysicalQuantity.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_PlaneAngle.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Power.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Pressure.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Quotient.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Rate.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Ratio.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Reluctance.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Resistance.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Resistivity.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Scalaire.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_SolidAngle.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_SoundIntensity.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_SpecificHeatCapacity.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Speed.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_SurfaceTension.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Temperature.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_ThermalConductivity.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Torque.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_TypeOfColor.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Velocity.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Viscosity.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Volume.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_VolumeFlow.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Weight.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Work.hxx">
+      <Filter>Header files\Quantity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Resource\Resource_Big5.h">
+      <Filter>Header files\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Resource\Resource_ConvertUnicode.hxx">
+      <Filter>Header files\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Resource\Resource_DataMapIteratorOfDataMapOfAsciiStringAsciiString.hxx">
+      <Filter>Header files\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Resource\Resource_DataMapIteratorOfDataMapOfAsciiStringExtendedString.hxx">
+      <Filter>Header files\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Resource\Resource_DataMapOfAsciiStringAsciiString.hxx">
+      <Filter>Header files\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Resource\Resource_DataMapOfAsciiStringExtendedString.hxx">
+      <Filter>Header files\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Resource\Resource_FormatType.hxx">
+      <Filter>Header files\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Resource\Resource_GB2312.h">
+      <Filter>Header files\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Resource\Resource_GBK.h">
+      <Filter>Header files\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Resource\Resource_LexicalCompare.hxx">
+      <Filter>Header files\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Resource\Resource_Manager.hxx">
+      <Filter>Header files\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Resource\Resource_NoSuchResource.hxx">
+      <Filter>Header files\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Resource\Resource_Shiftjis.h">
+      <Filter>Header files\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Resource\Resource_Unicode.hxx">
+      <Filter>Header files\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_AbortiveTransaction.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_Address.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_ArrayStreamBuffer.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_Assert.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_Atomic.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_Boolean.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_Byte.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_CLocaleSentry.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_CString.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_Character.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_Condition.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_ConstructionError.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_DefineAlloc.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_DefineException.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_DefineHandle.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_DimensionError.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_DimensionMismatch.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_DivideByZero.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_DomainError.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_Dump.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_ErrorHandler.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_ExtCharacter.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_ExtString.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_Failure.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_GUID.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_Handle.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_HandlerStatus.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_IStream.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_ImmutableObject.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_Integer.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_JmpBuf.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_LicenseError.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_LicenseNotFound.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_MMgrOpt.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_MMgrRaw.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_MMgrRoot.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_MMgrTBBalloc.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_Macro.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_MultiplyDefined.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_Mutex.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_NegativeValue.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_NoMoreObject.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_NoSuchObject.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_NotImplemented.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_NullObject.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_NullValue.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_NumericError.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_OStream.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_OutOfMemory.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_OutOfRange.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_Overflow.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_PByte.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_PCharacter.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_PErrorHandler.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_PExtCharacter.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_Persistent.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_PrimitiveTypes.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_ProgramError.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_RangeError.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_ReadBuffer.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_ReadLineBuffer.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_Real.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_SStream.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_ShortReal.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_Size.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_Std.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_Stream.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_ThreadId.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_Time.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_TooManyUsers.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_Transient.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_Type.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_TypeDef.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_TypeMismatch.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_UUID.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_Underflow.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_Version.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_WarningsDisable.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_WarningsRestore.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_math.hxx">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Standard\Standard_values.h">
+      <Filter>Header files\Standard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\StdFail\StdFail_InfiniteSolutions.hxx">
+      <Filter>Header files\StdFail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\StdFail\StdFail_NotDone.hxx">
+      <Filter>Header files\StdFail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\StdFail\StdFail_Undefined.hxx">
+      <Filter>Header files\StdFail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\StdFail\StdFail_UndefinedDerivative.hxx">
+      <Filter>Header files\StdFail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\StdFail\StdFail_UndefinedValue.hxx">
+      <Filter>Header files\StdFail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage.hxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_ArrayOfCallBack.hxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_ArrayOfSchema.hxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_BaseDriver.hxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_BaseDriver.lxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_BucketOfPersistent.hxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_CallBack.hxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_Data.hxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_DataMapIteratorOfMapOfCallBack.hxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_DataMapIteratorOfMapOfPers.hxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_DefaultCallBack.hxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_Error.hxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_HArrayOfCallBack.hxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_HArrayOfSchema.hxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_HPArray.hxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_HSeqOfRoot.hxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_HeaderData.hxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_InternalData.hxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_Macros.hxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_MapOfCallBack.hxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_MapOfPers.hxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_OpenMode.hxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_PArray.hxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_PType.hxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_Position.hxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_Root.hxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_RootData.hxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_Schema.hxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_Schema.lxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_SeqOfRoot.hxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_SolveMode.hxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_StreamExtCharParityError.hxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_StreamFormatError.hxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_StreamModeError.hxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_StreamReadError.hxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_StreamTypeMismatchError.hxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_StreamUnknownTypeError.hxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_StreamWriteError.hxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_TypeData.hxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Storage\Storage_TypedCallBack.hxx">
+      <Filter>Header files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_Array1OfAsciiString.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_Array1OfBoolean.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_Array1OfByte.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_Array1OfCharacter.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_Array1OfExtendedString.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_Array1OfInteger.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_Array1OfListOfInteger.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_Array1OfReal.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_Array1OfTransient.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_Array2OfBoolean.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_Array2OfCharacter.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_Array2OfInteger.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_Array2OfReal.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_Array2OfTransient.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_DataMapIteratorOfDataMapOfAsciiStringInteger.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_DataMapIteratorOfDataMapOfIntegerInteger.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_DataMapIteratorOfDataMapOfIntegerListOfInteger.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_DataMapIteratorOfDataMapOfIntegerReal.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_DataMapIteratorOfDataMapOfIntegerTransient.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_DataMapIteratorOfDataMapOfStringInteger.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_DataMapIteratorOfDataMapOfTransientTransient.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_DataMapOfAsciiStringInteger.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_DataMapOfIntegerInteger.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_DataMapOfIntegerListOfInteger.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_DataMapOfIntegerReal.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_DataMapOfIntegerTransient.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_DataMapOfStringInteger.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_DataMapOfTransientTransient.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HArray1OfAsciiString.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HArray1OfBoolean.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HArray1OfByte.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HArray1OfCharacter.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HArray1OfExtendedString.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HArray1OfInteger.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HArray1OfListOfInteger.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HArray1OfReal.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HArray1OfTransient.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HArray2OfBoolean.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HArray2OfCharacter.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HArray2OfInteger.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HArray2OfReal.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HArray2OfTransient.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HPackedMapOfInteger.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HPackedMapOfInteger.lxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HSequenceOfAsciiString.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HSequenceOfExtendedString.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HSequenceOfHAsciiString.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HSequenceOfHExtendedString.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HSequenceOfInteger.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HSequenceOfReal.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HSequenceOfTransient.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_IndexedDataMapOfStringString.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_IndexedDataMapOfTransientTransient.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_IndexedMapOfInteger.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_IndexedMapOfReal.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_IndexedMapOfTransient.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_ListIteratorOfListOfAsciiString.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_ListIteratorOfListOfInteger.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_ListIteratorOfListOfReal.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_ListIteratorOfListOfTransient.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_ListOfAsciiString.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_ListOfInteger.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_ListOfReal.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_ListOfTransient.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_MapIntegerHasher.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_MapIteratorOfMapOfAsciiString.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_MapIteratorOfMapOfInteger.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_MapIteratorOfMapOfReal.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_MapIteratorOfMapOfTransient.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_MapIteratorOfPackedMapOfInteger.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_MapOfAsciiString.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_MapOfInteger.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_MapOfReal.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_MapOfTransient.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_MapRealHasher.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_MapTransientHasher.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_PackedMapOfInteger.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_SequenceOfAddress.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_SequenceOfAsciiString.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_SequenceOfBoolean.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_SequenceOfExtendedString.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_SequenceOfHAsciiString.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_SequenceOfHExtendedString.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_SequenceOfInteger.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_SequenceOfReal.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_SequenceOfTransient.hxx">
+      <Filter>Header files\TColStd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection.hxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_Array1.gxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_Array1.lxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_Array2.gxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_Array2.lxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_AsciiString.hxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_AsciiString.lxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_BaseSequence.hxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_BaseSequence.lxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_BasicMap.hxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_BasicMap.lxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_BasicMapIterator.hxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_BasicMapIterator.lxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_DataMap.gxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_DataMapIterator.gxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_DataMapNode.gxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_DataMapNode.lxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_DoubleMap.gxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_DoubleMapIterator.gxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_DoubleMapNode.gxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_DoubleMapNode.lxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_ExtendedString.hxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_HArray1.gxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_HArray1.lxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_HArray2.gxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_HArray2.lxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_HAsciiString.hxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_HAsciiString.lxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_HExtendedString.hxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_HSequence.gxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_HSequence.lxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_IndexedDataMap.gxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_IndexedDataMapNode.gxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_IndexedDataMapNode.lxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_IndexedMap.gxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_IndexedMapNode.gxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_IndexedMapNode.lxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_List.gxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_List.lxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_ListIterator.gxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_ListIterator.lxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_ListNode.gxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_ListNode.lxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_Map.gxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_MapHasher.gxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_MapIterator.gxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_MapNode.hxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_MapNode.lxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_MapNodePtr.hxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_SeqNode.hxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_SeqNode.lxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_SeqNodePtr.hxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_Sequence.gxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_Sequence.lxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_SequenceNode.gxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_SequenceNode.lxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_Side.hxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_StdMapNode.gxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_StdMapNode.lxx">
+      <Filter>Header files\TCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TShort\TShort_Array1OfShortReal.hxx">
+      <Filter>Header files\TShort</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TShort\TShort_Array2OfShortReal.hxx">
+      <Filter>Header files\TShort</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TShort\TShort_HArray1OfShortReal.hxx">
+      <Filter>Header files\TShort</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TShort\TShort_HArray2OfShortReal.hxx">
+      <Filter>Header files\TShort</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TShort\TShort_HSequenceOfShortReal.hxx">
+      <Filter>Header files\TShort</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\TShort\TShort_SequenceOfShortReal.hxx">
+      <Filter>Header files\TShort</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Units\Units.hxx">
+      <Filter>Header files\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Units\Units_Dimensions.hxx">
+      <Filter>Header files\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Units\Units_Dimensions.lxx">
+      <Filter>Header files\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Units\Units_Explorer.hxx">
+      <Filter>Header files\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Units\Units_Lexicon.hxx">
+      <Filter>Header files\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Units\Units_Lexicon.lxx">
+      <Filter>Header files\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Units\Units_MathSentence.hxx">
+      <Filter>Header files\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Units\Units_Measurement.hxx">
+      <Filter>Header files\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Units\Units_NoSuchType.hxx">
+      <Filter>Header files\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Units\Units_NoSuchUnit.hxx">
+      <Filter>Header files\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Units\Units_Operators.hxx">
+      <Filter>Header files\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Units\Units_QtsSequence.hxx">
+      <Filter>Header files\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Units\Units_QuantitiesSequence.hxx">
+      <Filter>Header files\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Units\Units_Quantity.hxx">
+      <Filter>Header files\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Units\Units_Quantity.lxx">
+      <Filter>Header files\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Units\Units_Sentence.hxx">
+      <Filter>Header files\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Units\Units_Sentence.lxx">
+      <Filter>Header files\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Units\Units_ShiftedToken.hxx">
+      <Filter>Header files\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Units\Units_ShiftedUnit.hxx">
+      <Filter>Header files\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Units\Units_TksSequence.hxx">
+      <Filter>Header files\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Units\Units_Token.hxx">
+      <Filter>Header files\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Units\Units_Token.lxx">
+      <Filter>Header files\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Units\Units_TokensSequence.hxx">
+      <Filter>Header files\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Units\Units_Unit.hxx">
+      <Filter>Header files\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Units\Units_Unit.lxx">
+      <Filter>Header files\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Units\Units_UnitSentence.hxx">
+      <Filter>Header files\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Units\Units_UnitsDictionary.hxx">
+      <Filter>Header files\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Units\Units_UnitsDictionary.lxx">
+      <Filter>Header files\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Units\Units_UnitsLexicon.hxx">
+      <Filter>Header files\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Units\Units_UnitsLexicon.lxx">
+      <Filter>Header files\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Units\Units_UnitsSequence.hxx">
+      <Filter>Header files\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Units\Units_UnitsSystem.hxx">
+      <Filter>Header files\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Units\Units_UtsSequence.hxx">
+      <Filter>Header files\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\UnitsAPI\UnitsAPI.hxx">
+      <Filter>Header files\UnitsAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\UnitsAPI\UnitsAPI_SystemUnits.hxx">
+      <Filter>Header files\UnitsAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\UnitsAPI\UnitsAPI_Units_dat.pxx">
+      <Filter>Header files\UnitsAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_AccAllocator.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_AlignedAllocator.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_Array1.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_Array2.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_BaseAllocator.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_BaseList.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_BaseMap.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_BaseSequence.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_BaseVector.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_Buffer.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_CellFilter.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_Comparator.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_DataMap.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_DefaultHasher.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_DefineAlloc.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_DefineArray1.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_DefineArray2.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_DefineDataMap.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_DefineDoubleMap.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_DefineHArray1.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_DefineHArray2.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_DefineHSequence.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_DefineIndexedDataMap.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_DefineIndexedMap.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_DefineList.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_DefineMap.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_DefineSequence.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_DefineVector.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_DoubleMap.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_EBTree.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_HArray1.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_HArray2.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_HSequence.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_Haft.h">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_Handle.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_HeapAllocator.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_IncAllocator.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_IndexedDataMap.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_IndexedMap.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_Lerp.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_List.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_ListNode.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_LocalArray.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_Map.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_Mat4.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_Sequence.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_Shared.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_SparseArray.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_SparseArrayBase.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_StdAllocator.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_StlIterator.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_String.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_TListIterator.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_TListNode.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_TypeDef.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_UBTree.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_UBTreeFiller.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_UtfIterator.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_UtfIterator.lxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_UtfString.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_UtfString.lxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_Vec2.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_Vec3.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_Vec4.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_Vector.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_WinHeapAllocator.hxx">
+      <Filter>Header files\NCollection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Message\Message.hxx">
+      <Filter>Header files\Message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Message\Message_Alert.hxx">
+      <Filter>Header files\Message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Message\Message_Algorithm.hxx">
+      <Filter>Header files\Message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Message\Message_Algorithm.lxx">
+      <Filter>Header files\Message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Message\Message_ExecStatus.hxx">
+      <Filter>Header files\Message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Message\Message_Gravity.hxx">
+      <Filter>Header files\Message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Message\Message_HArrayOfMsg.hxx">
+      <Filter>Header files\Message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Message\Message_ListIteratorOfListOfMsg.hxx">
+      <Filter>Header files\Message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Message\Message_ListOfAlert.hxx">
+      <Filter>Header files\Message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Message\Message_ListOfMsg.hxx">
+      <Filter>Header files\Message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Message\Message_Messenger.hxx">
+      <Filter>Header files\Message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Message\Message_Msg.hxx">
+      <Filter>Header files\Message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Message\Message_Msg.lxx">
+      <Filter>Header files\Message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Message\Message_MsgFile.hxx">
+      <Filter>Header files\Message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Message\Message_Printer.hxx">
+      <Filter>Header files\Message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Message\Message_PrinterOStream.hxx">
+      <Filter>Header files\Message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Message\Message_ProgressIndicator.hxx">
+      <Filter>Header files\Message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Message\Message_ProgressIndicator.lxx">
+      <Filter>Header files\Message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Message\Message_ProgressScale.hxx">
+      <Filter>Header files\Message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Message\Message_ProgressScale.lxx">
+      <Filter>Header files\Message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Message\Message_ProgressSentry.hxx">
+      <Filter>Header files\Message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Message\Message_ProgressSentry.lxx">
+      <Filter>Header files\Message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Message\Message_Report.hxx">
+      <Filter>Header files\Message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Message\Message_SequenceOfPrinters.hxx">
+      <Filter>Header files\Message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Message\Message_SequenceOfProgressScale.hxx">
+      <Filter>Header files\Message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Message\Message_Status.hxx">
+      <Filter>Header files\Message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Message\Message_StatusType.hxx">
+      <Filter>Header files\Message</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="TKernel.rc" />
+  </ItemGroup>
+</Project>

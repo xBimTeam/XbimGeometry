@@ -1,0 +1,876 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source files">
+      <UniqueIdentifier>{0E18CBB7-0236-0DE6-0F4D-611CEEB26926}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files">
+      <UniqueIdentifier>{154F129F-0CD9-0D51-1946-3156A52F9F90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\ShapeBuild">
+      <UniqueIdentifier>{94D42B3F-03B7-0E16-1432-C46C5EA69140}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\ShapeExtend">
+      <UniqueIdentifier>{8A2C2B05-0C9E-0563-1389-DAF2445789C8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\ShapeConstruct">
+      <UniqueIdentifier>{16BFB308-0C91-02B0-081B-E56C933B2CFF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\ShapeCustom">
+      <UniqueIdentifier>{071B0147-030A-0F21-1308-3B6B5B05532E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\ShapeAnalysis">
+      <UniqueIdentifier>{98265C6F-1681-0022-09E8-D8E42D6C7700}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\ShapeFix">
+      <UniqueIdentifier>{F8DB2D0F-0F41-0A15-0EAB-E8C4FBDC6A64}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\ShapeUpgrade">
+      <UniqueIdentifier>{CCE6DC34-0CC3-0E2E-14E5-EF5FCA79E814}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\ShapeAlgo">
+      <UniqueIdentifier>{738B3E3B-0953-076C-0DA1-1AE8BEA62A1B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\ShapeProcess">
+      <UniqueIdentifier>{165AA3C9-06C5-0CD3-1922-BB12D7D1F8B5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\ShapeProcessAPI">
+      <UniqueIdentifier>{1F5E9447-0E52-1912-064C-A4E8A1A4C53C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\ShapeBuild">
+      <UniqueIdentifier>{90F9F610-0708-0AD1-12CF-8D4BCB6B196E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\ShapeExtend">
+      <UniqueIdentifier>{52A7D9A8-0515-1766-01CC-E2A176D6768A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\ShapeConstruct">
+      <UniqueIdentifier>{007B2D19-00C2-09B8-08A9-2C14F11315CC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\ShapeCustom">
+      <UniqueIdentifier>{FC42B0F7-16BD-099E-091E-FB75B1EBBE1F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\ShapeAnalysis">
+      <UniqueIdentifier>{0F0EBA48-163B-0FD9-10FD-84D52BC72C94}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\ShapeFix">
+      <UniqueIdentifier>{3FE9928F-0986-0E24-167C-CB3767A28C39}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\ShapeUpgrade">
+      <UniqueIdentifier>{A41B077E-175F-01B1-0304-2BE8F0CA01E2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\ShapeAlgo">
+      <UniqueIdentifier>{41D6CB07-00D2-0552-14A5-A234EF415BA6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\ShapeProcess">
+      <UniqueIdentifier>{E825C9D0-17B4-0310-0236-42F26A39157D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\ShapeProcessAPI">
+      <UniqueIdentifier>{B1CF818A-1327-060F-13DC-C92D90CE5315}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\ShapeBuild\ShapeBuild.cxx">
+      <Filter>Source files\ShapeBuild</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeBuild\ShapeBuild_Edge.cxx">
+      <Filter>Source files\ShapeBuild</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeBuild\ShapeBuild_ReShape.cxx">
+      <Filter>Source files\ShapeBuild</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeBuild\ShapeBuild_Vertex.cxx">
+      <Filter>Source files\ShapeBuild</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeExtend\ShapeExtend.cxx">
+      <Filter>Source files\ShapeExtend</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeExtend\ShapeExtend_BasicMsgRegistrator.cxx">
+      <Filter>Source files\ShapeExtend</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeExtend\ShapeExtend_ComplexCurve.cxx">
+      <Filter>Source files\ShapeExtend</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeExtend\ShapeExtend_CompositeSurface.cxx">
+      <Filter>Source files\ShapeExtend</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeExtend\ShapeExtend_Explorer.cxx">
+      <Filter>Source files\ShapeExtend</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeExtend\ShapeExtend_MsgRegistrator.cxx">
+      <Filter>Source files\ShapeExtend</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeExtend\ShapeExtend_WireData.cxx">
+      <Filter>Source files\ShapeExtend</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeConstruct\ShapeConstruct.cxx">
+      <Filter>Source files\ShapeConstruct</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeConstruct\ShapeConstruct_Curve.cxx">
+      <Filter>Source files\ShapeConstruct</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeConstruct\ShapeConstruct_MakeTriangulation.cxx">
+      <Filter>Source files\ShapeConstruct</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeConstruct\ShapeConstruct_ProjectCurveOnSurface.cxx">
+      <Filter>Source files\ShapeConstruct</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeCustom\ShapeCustom.cxx">
+      <Filter>Source files\ShapeCustom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeCustom\ShapeCustom_BSplineRestriction.cxx">
+      <Filter>Source files\ShapeCustom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeCustom\ShapeCustom_ConvertToBSpline.cxx">
+      <Filter>Source files\ShapeCustom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeCustom\ShapeCustom_ConvertToRevolution.cxx">
+      <Filter>Source files\ShapeCustom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeCustom\ShapeCustom_Curve.cxx">
+      <Filter>Source files\ShapeCustom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeCustom\ShapeCustom_Curve2d.cxx">
+      <Filter>Source files\ShapeCustom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeCustom\ShapeCustom_DirectModification.cxx">
+      <Filter>Source files\ShapeCustom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeCustom\ShapeCustom_Modification.cxx">
+      <Filter>Source files\ShapeCustom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeCustom\ShapeCustom_RestrictionParameters.cxx">
+      <Filter>Source files\ShapeCustom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeCustom\ShapeCustom_Surface.cxx">
+      <Filter>Source files\ShapeCustom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeCustom\ShapeCustom_SweptToElementary.cxx">
+      <Filter>Source files\ShapeCustom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeCustom\ShapeCustom_TrsfModification.cxx">
+      <Filter>Source files\ShapeCustom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis.cxx">
+      <Filter>Source files\ShapeAnalysis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_BoxBndTree.cxx">
+      <Filter>Source files\ShapeAnalysis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_CheckSmallFace.cxx">
+      <Filter>Source files\ShapeAnalysis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_Curve.cxx">
+      <Filter>Source files\ShapeAnalysis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_Edge.cxx">
+      <Filter>Source files\ShapeAnalysis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_FreeBoundData.cxx">
+      <Filter>Source files\ShapeAnalysis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_FreeBounds.cxx">
+      <Filter>Source files\ShapeAnalysis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_FreeBoundsProperties.cxx">
+      <Filter>Source files\ShapeAnalysis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_Geom.cxx">
+      <Filter>Source files\ShapeAnalysis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_ShapeContents.cxx">
+      <Filter>Source files\ShapeAnalysis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_ShapeTolerance.cxx">
+      <Filter>Source files\ShapeAnalysis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_Shell.cxx">
+      <Filter>Source files\ShapeAnalysis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_Surface.cxx">
+      <Filter>Source files\ShapeAnalysis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_TransferParameters.cxx">
+      <Filter>Source files\ShapeAnalysis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_TransferParametersProj.cxx">
+      <Filter>Source files\ShapeAnalysis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_Wire.cxx">
+      <Filter>Source files\ShapeAnalysis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_WireOrder.cxx">
+      <Filter>Source files\ShapeAnalysis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_WireVertex.cxx">
+      <Filter>Source files\ShapeAnalysis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix.cxx">
+      <Filter>Source files\ShapeFix</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_ComposeShell.cxx">
+      <Filter>Source files\ShapeFix</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_Edge.cxx">
+      <Filter>Source files\ShapeFix</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_EdgeConnect.cxx">
+      <Filter>Source files\ShapeFix</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_EdgeProjAux.cxx">
+      <Filter>Source files\ShapeFix</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_Face.cxx">
+      <Filter>Source files\ShapeFix</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_FaceConnect.cxx">
+      <Filter>Source files\ShapeFix</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_FixSmallFace.cxx">
+      <Filter>Source files\ShapeFix</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_FixSmallSolid.cxx">
+      <Filter>Source files\ShapeFix</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_FreeBounds.cxx">
+      <Filter>Source files\ShapeFix</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_IntersectionTool.cxx">
+      <Filter>Source files\ShapeFix</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_Root.cxx">
+      <Filter>Source files\ShapeFix</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_Shape.cxx">
+      <Filter>Source files\ShapeFix</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_ShapeTolerance.cxx">
+      <Filter>Source files\ShapeFix</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_Shell.cxx">
+      <Filter>Source files\ShapeFix</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_Solid.cxx">
+      <Filter>Source files\ShapeFix</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_SplitCommonVertex.cxx">
+      <Filter>Source files\ShapeFix</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_SplitTool.cxx">
+      <Filter>Source files\ShapeFix</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_Wire.cxx">
+      <Filter>Source files\ShapeFix</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_WireSegment.cxx">
+      <Filter>Source files\ShapeFix</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_WireVertex.cxx">
+      <Filter>Source files\ShapeFix</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_Wire_1.cxx">
+      <Filter>Source files\ShapeFix</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeFix\ShapeFix_Wireframe.cxx">
+      <Filter>Source files\ShapeFix</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade.cxx">
+      <Filter>Source files\ShapeUpgrade</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ClosedEdgeDivide.cxx">
+      <Filter>Source files\ShapeUpgrade</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ClosedFaceDivide.cxx">
+      <Filter>Source files\ShapeUpgrade</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ConvertCurve2dToBezier.cxx">
+      <Filter>Source files\ShapeUpgrade</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ConvertCurve3dToBezier.cxx">
+      <Filter>Source files\ShapeUpgrade</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ConvertSurfaceToBezierBasis.cxx">
+      <Filter>Source files\ShapeUpgrade</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_EdgeDivide.cxx">
+      <Filter>Source files\ShapeUpgrade</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_FaceDivide.cxx">
+      <Filter>Source files\ShapeUpgrade</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_FaceDivideArea.cxx">
+      <Filter>Source files\ShapeUpgrade</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_FixSmallBezierCurves.cxx">
+      <Filter>Source files\ShapeUpgrade</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_FixSmallCurves.cxx">
+      <Filter>Source files\ShapeUpgrade</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_RemoveInternalWires.cxx">
+      <Filter>Source files\ShapeUpgrade</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_RemoveLocations.cxx">
+      <Filter>Source files\ShapeUpgrade</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ShapeConvertToBezier.cxx">
+      <Filter>Source files\ShapeUpgrade</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ShapeDivide.cxx">
+      <Filter>Source files\ShapeUpgrade</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ShapeDivideAngle.cxx">
+      <Filter>Source files\ShapeUpgrade</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ShapeDivideArea.cxx">
+      <Filter>Source files\ShapeUpgrade</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ShapeDivideClosed.cxx">
+      <Filter>Source files\ShapeUpgrade</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ShapeDivideClosedEdges.cxx">
+      <Filter>Source files\ShapeUpgrade</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ShapeDivideContinuity.cxx">
+      <Filter>Source files\ShapeUpgrade</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ShellSewing.cxx">
+      <Filter>Source files\ShapeUpgrade</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_SplitCurve.cxx">
+      <Filter>Source files\ShapeUpgrade</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_SplitCurve2d.cxx">
+      <Filter>Source files\ShapeUpgrade</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_SplitCurve2dContinuity.cxx">
+      <Filter>Source files\ShapeUpgrade</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_SplitCurve3d.cxx">
+      <Filter>Source files\ShapeUpgrade</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_SplitCurve3dContinuity.cxx">
+      <Filter>Source files\ShapeUpgrade</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_SplitSurface.cxx">
+      <Filter>Source files\ShapeUpgrade</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_SplitSurfaceAngle.cxx">
+      <Filter>Source files\ShapeUpgrade</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_SplitSurfaceArea.cxx">
+      <Filter>Source files\ShapeUpgrade</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_SplitSurfaceContinuity.cxx">
+      <Filter>Source files\ShapeUpgrade</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_Tool.cxx">
+      <Filter>Source files\ShapeUpgrade</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_UnifySameDomain.cxx">
+      <Filter>Source files\ShapeUpgrade</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_WireDivide.cxx">
+      <Filter>Source files\ShapeUpgrade</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeAlgo\ShapeAlgo.cxx">
+      <Filter>Source files\ShapeAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeAlgo\ShapeAlgo_AlgoContainer.cxx">
+      <Filter>Source files\ShapeAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeAlgo\ShapeAlgo_ToolContainer.cxx">
+      <Filter>Source files\ShapeAlgo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeProcess\ShapeProcess.cxx">
+      <Filter>Source files\ShapeProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeProcess\ShapeProcess_Context.cxx">
+      <Filter>Source files\ShapeProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeProcess\ShapeProcess_OperLibrary.cxx">
+      <Filter>Source files\ShapeProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeProcess\ShapeProcess_Operator.cxx">
+      <Filter>Source files\ShapeProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeProcess\ShapeProcess_ShapeContext.cxx">
+      <Filter>Source files\ShapeProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeProcess\ShapeProcess_UOperator.cxx">
+      <Filter>Source files\ShapeProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\ShapeProcessAPI\ShapeProcessAPI_ApplySequence.cxx">
+      <Filter>Source files\ShapeProcessAPI</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\ShapeBuild\ShapeBuild.hxx">
+      <Filter>Header files\ShapeBuild</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeBuild\ShapeBuild_Edge.hxx">
+      <Filter>Header files\ShapeBuild</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeBuild\ShapeBuild_ReShape.hxx">
+      <Filter>Header files\ShapeBuild</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeBuild\ShapeBuild_Vertex.hxx">
+      <Filter>Header files\ShapeBuild</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeExtend\ShapeExtend.hxx">
+      <Filter>Header files\ShapeExtend</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeExtend\ShapeExtend_BasicMsgRegistrator.hxx">
+      <Filter>Header files\ShapeExtend</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeExtend\ShapeExtend_ComplexCurve.hxx">
+      <Filter>Header files\ShapeExtend</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeExtend\ShapeExtend_ComplexCurve.lxx">
+      <Filter>Header files\ShapeExtend</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeExtend\ShapeExtend_CompositeSurface.hxx">
+      <Filter>Header files\ShapeExtend</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeExtend\ShapeExtend_DataMapIteratorOfDataMapOfShapeListOfMsg.hxx">
+      <Filter>Header files\ShapeExtend</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeExtend\ShapeExtend_DataMapIteratorOfDataMapOfTransientListOfMsg.hxx">
+      <Filter>Header files\ShapeExtend</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeExtend\ShapeExtend_DataMapOfShapeListOfMsg.hxx">
+      <Filter>Header files\ShapeExtend</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeExtend\ShapeExtend_DataMapOfTransientListOfMsg.hxx">
+      <Filter>Header files\ShapeExtend</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeExtend\ShapeExtend_Explorer.hxx">
+      <Filter>Header files\ShapeExtend</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeExtend\ShapeExtend_MsgRegistrator.hxx">
+      <Filter>Header files\ShapeExtend</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeExtend\ShapeExtend_MsgRegistrator.lxx">
+      <Filter>Header files\ShapeExtend</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeExtend\ShapeExtend_Parametrisation.hxx">
+      <Filter>Header files\ShapeExtend</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeExtend\ShapeExtend_Status.hxx">
+      <Filter>Header files\ShapeExtend</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeExtend\ShapeExtend_WireData.hxx">
+      <Filter>Header files\ShapeExtend</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeConstruct\ShapeConstruct.hxx">
+      <Filter>Header files\ShapeConstruct</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeConstruct\ShapeConstruct_Curve.hxx">
+      <Filter>Header files\ShapeConstruct</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeConstruct\ShapeConstruct_MakeTriangulation.hxx">
+      <Filter>Header files\ShapeConstruct</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeConstruct\ShapeConstruct_ProjectCurveOnSurface.hxx">
+      <Filter>Header files\ShapeConstruct</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeCustom\ShapeCustom.hxx">
+      <Filter>Header files\ShapeCustom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeCustom\ShapeCustom_BSplineRestriction.hxx">
+      <Filter>Header files\ShapeCustom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeCustom\ShapeCustom_BSplineRestriction.lxx">
+      <Filter>Header files\ShapeCustom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeCustom\ShapeCustom_ConvertToBSpline.hxx">
+      <Filter>Header files\ShapeCustom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeCustom\ShapeCustom_ConvertToRevolution.hxx">
+      <Filter>Header files\ShapeCustom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeCustom\ShapeCustom_Curve.hxx">
+      <Filter>Header files\ShapeCustom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeCustom\ShapeCustom_Curve2d.hxx">
+      <Filter>Header files\ShapeCustom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeCustom\ShapeCustom_DirectModification.hxx">
+      <Filter>Header files\ShapeCustom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeCustom\ShapeCustom_Modification.hxx">
+      <Filter>Header files\ShapeCustom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeCustom\ShapeCustom_RestrictionParameters.hxx">
+      <Filter>Header files\ShapeCustom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeCustom\ShapeCustom_RestrictionParameters.lxx">
+      <Filter>Header files\ShapeCustom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeCustom\ShapeCustom_Surface.hxx">
+      <Filter>Header files\ShapeCustom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeCustom\ShapeCustom_Surface.lxx">
+      <Filter>Header files\ShapeCustom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeCustom\ShapeCustom_SweptToElementary.hxx">
+      <Filter>Header files\ShapeCustom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeCustom\ShapeCustom_TrsfModification.hxx">
+      <Filter>Header files\ShapeCustom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis.hxx">
+      <Filter>Header files\ShapeAnalysis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_BoxBndTree.hxx">
+      <Filter>Header files\ShapeAnalysis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_CheckSmallFace.hxx">
+      <Filter>Header files\ShapeAnalysis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_CheckSmallFace.lxx">
+      <Filter>Header files\ShapeAnalysis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_Curve.hxx">
+      <Filter>Header files\ShapeAnalysis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_DataMapIteratorOfDataMapOfShapeListOfReal.hxx">
+      <Filter>Header files\ShapeAnalysis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_DataMapOfShapeListOfReal.hxx">
+      <Filter>Header files\ShapeAnalysis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_Edge.hxx">
+      <Filter>Header files\ShapeAnalysis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_FreeBoundData.hxx">
+      <Filter>Header files\ShapeAnalysis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_FreeBoundData.lxx">
+      <Filter>Header files\ShapeAnalysis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_FreeBounds.hxx">
+      <Filter>Header files\ShapeAnalysis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_FreeBounds.lxx">
+      <Filter>Header files\ShapeAnalysis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_FreeBoundsProperties.hxx">
+      <Filter>Header files\ShapeAnalysis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_FreeBoundsProperties.lxx">
+      <Filter>Header files\ShapeAnalysis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_Geom.hxx">
+      <Filter>Header files\ShapeAnalysis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_HSequenceOfFreeBounds.hxx">
+      <Filter>Header files\ShapeAnalysis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_SequenceOfFreeBounds.hxx">
+      <Filter>Header files\ShapeAnalysis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_ShapeContents.hxx">
+      <Filter>Header files\ShapeAnalysis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_ShapeContents.lxx">
+      <Filter>Header files\ShapeAnalysis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_ShapeTolerance.hxx">
+      <Filter>Header files\ShapeAnalysis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_Shell.hxx">
+      <Filter>Header files\ShapeAnalysis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_Surface.hxx">
+      <Filter>Header files\ShapeAnalysis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_Surface.lxx">
+      <Filter>Header files\ShapeAnalysis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_TransferParameters.hxx">
+      <Filter>Header files\ShapeAnalysis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_TransferParametersProj.hxx">
+      <Filter>Header files\ShapeAnalysis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_Wire.hxx">
+      <Filter>Header files\ShapeAnalysis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_Wire.lxx">
+      <Filter>Header files\ShapeAnalysis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_WireOrder.hxx">
+      <Filter>Header files\ShapeAnalysis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeAnalysis\ShapeAnalysis_WireVertex.hxx">
+      <Filter>Header files\ShapeAnalysis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix.hxx">
+      <Filter>Header files\ShapeFix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_ComposeShell.hxx">
+      <Filter>Header files\ShapeFix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_DataMapIteratorOfDataMapOfShapeBox2d.hxx">
+      <Filter>Header files\ShapeFix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_DataMapOfShapeBox2d.hxx">
+      <Filter>Header files\ShapeFix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_Edge.hxx">
+      <Filter>Header files\ShapeFix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_EdgeConnect.hxx">
+      <Filter>Header files\ShapeFix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_EdgeProjAux.hxx">
+      <Filter>Header files\ShapeFix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_Face.hxx">
+      <Filter>Header files\ShapeFix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_Face.lxx">
+      <Filter>Header files\ShapeFix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_FaceConnect.hxx">
+      <Filter>Header files\ShapeFix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_FixSmallFace.hxx">
+      <Filter>Header files\ShapeFix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_FixSmallSolid.hxx">
+      <Filter>Header files\ShapeFix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_FreeBounds.hxx">
+      <Filter>Header files\ShapeFix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_FreeBounds.lxx">
+      <Filter>Header files\ShapeFix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_IntersectionTool.hxx">
+      <Filter>Header files\ShapeFix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_IntersectionTool.lxx">
+      <Filter>Header files\ShapeFix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_Root.hxx">
+      <Filter>Header files\ShapeFix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_Root.lxx">
+      <Filter>Header files\ShapeFix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_SequenceOfWireSegment.hxx">
+      <Filter>Header files\ShapeFix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_Shape.hxx">
+      <Filter>Header files\ShapeFix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_Shape.lxx">
+      <Filter>Header files\ShapeFix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_ShapeTolerance.hxx">
+      <Filter>Header files\ShapeFix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_Shell.hxx">
+      <Filter>Header files\ShapeFix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_Shell.lxx">
+      <Filter>Header files\ShapeFix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_Solid.hxx">
+      <Filter>Header files\ShapeFix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_SplitCommonVertex.hxx">
+      <Filter>Header files\ShapeFix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_SplitTool.hxx">
+      <Filter>Header files\ShapeFix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_Wire.hxx">
+      <Filter>Header files\ShapeFix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_Wire.lxx">
+      <Filter>Header files\ShapeFix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_WireSegment.hxx">
+      <Filter>Header files\ShapeFix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_WireVertex.hxx">
+      <Filter>Header files\ShapeFix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_Wireframe.hxx">
+      <Filter>Header files\ShapeFix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeFix\ShapeFix_Wireframe.lxx">
+      <Filter>Header files\ShapeFix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade.hxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ClosedEdgeDivide.hxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ClosedFaceDivide.hxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ConvertCurve2dToBezier.hxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ConvertCurve3dToBezier.hxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ConvertCurve3dToBezier.lxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ConvertSurfaceToBezierBasis.hxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ConvertSurfaceToBezierBasis.lxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_EdgeDivide.hxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_EdgeDivide.lxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_FaceDivide.hxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_FaceDivideArea.hxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_FaceDivideArea.lxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_FixSmallBezierCurves.hxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_FixSmallCurves.hxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_RemoveInternalWires.hxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_RemoveInternalWires.lxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_RemoveLocations.hxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_RemoveLocations.lxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ShapeConvertToBezier.hxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ShapeConvertToBezier.lxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ShapeDivide.hxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ShapeDivideAngle.hxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ShapeDivideArea.hxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ShapeDivideArea.lxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ShapeDivideClosed.hxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ShapeDivideClosedEdges.hxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ShapeDivideContinuity.hxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_ShellSewing.hxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_SplitCurve.hxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_SplitCurve2d.hxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_SplitCurve2dContinuity.hxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_SplitCurve3d.hxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_SplitCurve3dContinuity.hxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_SplitSurface.hxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_SplitSurfaceAngle.hxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_SplitSurfaceArea.hxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_SplitSurfaceArea.lxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_SplitSurfaceContinuity.hxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_Tool.hxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_Tool.lxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_UnifySameDomain.hxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeUpgrade\ShapeUpgrade_WireDivide.hxx">
+      <Filter>Header files\ShapeUpgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeAlgo\ShapeAlgo.hxx">
+      <Filter>Header files\ShapeAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeAlgo\ShapeAlgo_AlgoContainer.hxx">
+      <Filter>Header files\ShapeAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeAlgo\ShapeAlgo_AlgoContainer.lxx">
+      <Filter>Header files\ShapeAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeAlgo\ShapeAlgo_ToolContainer.hxx">
+      <Filter>Header files\ShapeAlgo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeProcess\ShapeProcess.hxx">
+      <Filter>Header files\ShapeProcess</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeProcess\ShapeProcess_Context.hxx">
+      <Filter>Header files\ShapeProcess</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeProcess\ShapeProcess_OperFunc.hxx">
+      <Filter>Header files\ShapeProcess</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeProcess\ShapeProcess_OperLibrary.hxx">
+      <Filter>Header files\ShapeProcess</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeProcess\ShapeProcess_Operator.hxx">
+      <Filter>Header files\ShapeProcess</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeProcess\ShapeProcess_ShapeContext.hxx">
+      <Filter>Header files\ShapeProcess</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeProcess\ShapeProcess_UOperator.hxx">
+      <Filter>Header files\ShapeProcess</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\ShapeProcessAPI\ShapeProcessAPI_ApplySequence.hxx">
+      <Filter>Header files\ShapeProcessAPI</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="TKShHealing.rc" />
+  </ItemGroup>
+</Project>

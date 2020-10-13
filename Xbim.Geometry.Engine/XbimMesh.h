@@ -1,6 +1,6 @@
 #pragma once
 
-using namespace System;
+
 using namespace System::Collections::Generic;
 namespace Xbim
 {
@@ -9,41 +9,41 @@ namespace Xbim
 		ref struct Vector3
 		{
 		public:
-			Vector3::Vector3(Single x, Single y, Single z)
+			Vector3::Vector3(System::Single x, System::Single y, System::Single z)
 			{
 				X = x;
 				Y = y;
 				Z = z;
 			};
-			Single X;
-			Single Y;
-			Single Z;
+			System::Single X;
+			System::Single Y;
+			System::Single Z;
 		};
 
 		ref class XbimMesh
 		{
 
 		private:
-			array<Byte>^ _array = nullptr;
+			array<System::Byte>^ _array = nullptr;
 		public:
 			const int VersionPos = 0;
-			const int VertexCountPos = VersionPos + sizeof(Byte);
+			const int VertexCountPos = VersionPos + sizeof(System::Byte);
 			const int TriangleCountPos = VertexCountPos + sizeof(int);
 			const int VertexPos = TriangleCountPos + sizeof(int);
-			XbimMesh::XbimMesh(array<Byte>^ meshData) { _array = meshData; }
-			virtual property Byte Version { Byte get() { return (_array != nullptr && _array->Length > 0) ? _array[VersionPos] : (Byte)0; } };
+			XbimMesh::XbimMesh(array<System::Byte>^ meshData) { _array = meshData; }
+			virtual property System::Byte Version { System::Byte get() { return (_array != nullptr && _array->Length > 0) ? _array[VersionPos] : (System::Byte)0; } };
 			virtual property int VertexCount {int get() {
-				return (_array != nullptr && _array->Length > 0) ? BitConverter::ToInt32(_array, VertexCountPos) : 0;
+				return (_array != nullptr && _array->Length > 0) ? System::BitConverter::ToInt32(_array, VertexCountPos) : 0;
 			}};
-			virtual property int TriangleCount { int get() { return (_array != nullptr && _array->Length > 0) ? BitConverter::ToInt32(_array, TriangleCountPos) : 0; }}
+			virtual property int TriangleCount { int get() { return (_array != nullptr && _array->Length > 0) ? System::BitConverter::ToInt32(_array, TriangleCountPos) : 0; }}
 			virtual property int FaceCount {int get() {
 				int faceCountPos = VertexPos + (VertexCount * 3 * sizeof(float));
-				return (_array != nullptr && _array->Length > 0) ? BitConverter::ToInt32(_array, faceCountPos) : 0;
+				return (_array != nullptr && _array->Length > 0) ? System::BitConverter::ToInt32(_array, faceCountPos) : 0;
 			}}
 			virtual property  int Length {int get() {
 				return (_array != nullptr && _array->Length > 0) ? _array->Length : 0;
 			}}
-			virtual property  array<Byte>^ ToByteArray { array<Byte>^ get() { return _array; }}
+			virtual property  array<System::Byte>^ ToByteArray { array<System::Byte>^ get() { return _array; }}
 
 
 			List<Vector3^>^ Vertices()
@@ -54,7 +54,7 @@ namespace Xbim
 				for (int i = 0; i < VertexCount; i++)
 				{
 					int p = VertexPos + (i * 3 * sizeof(float));
-					vertices->Add(gcnew Vector3(BitConverter::ToSingle(_array, p), BitConverter::ToSingle(_array, p + offsetY), BitConverter::ToSingle(_array, p + offsetZ)));
+					vertices->Add(gcnew Vector3(System::BitConverter::ToSingle(_array, p), System::BitConverter::ToSingle(_array, p + offsetY), System::BitConverter::ToSingle(_array, p + offsetZ)));
 				}
 				return vertices;
 			}

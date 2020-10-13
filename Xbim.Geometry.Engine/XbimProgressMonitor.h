@@ -15,7 +15,7 @@ class XbimProgressMonitor : public Message_ProgressIndicator
 private:
 	OSD_Timer aTimer;
 	Standard_Real maxRunDuration;
-	bool timedOut;
+	bool timedOut = false;
 public:
 	XbimProgressMonitor(Standard_Real maxDurationSeconds, bool startTimer = true);
 	virtual Standard_Boolean Show(const Standard_Boolean) { return true; }

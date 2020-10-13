@@ -1,8 +1,10 @@
 #pragma once
-#include "XbimWire.h"
+
 #include <TopExp_Explorer.hxx>
 #include <TopTools_ListOfShape.hxx>
 #include <TopoDS.hxx>
+
+#include "XbimWire.h"
 using namespace System::Collections::Generic;
 namespace Xbim
 {

@@ -1,8 +1,8 @@
 #pragma once
-#include "XbimShell.h"
+
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
-
+#include "XbimShell.h"
 using namespace System::Collections::Generic;
 using namespace Xbim::Common::Geometry;
 namespace Xbim

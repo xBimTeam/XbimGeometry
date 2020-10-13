@@ -1,8 +1,8 @@
 #pragma once
-#include "XbimVertex.h"
+
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
-
+#include "XbimVertex.h"
 using namespace System::Collections::Generic;
 namespace Xbim
 {

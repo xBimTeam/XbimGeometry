@@ -1,7 +1,7 @@
 ﻿<Project DefaultTargets="Build" Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net47</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
     <Title>Xbim Geometry Engine</Title>
     <Description>Provides support for the Ifc4 and Ifc2x3 Geometry conversion.</Description>
@@ -11,14 +11,25 @@
     <AssemblyVersion>5.1.0.1</AssemblyVersion>
     <FileVersion>5.1.0.1</FileVersion>
     <Version>5.1.0.0-Dev</Version>
+    <Platforms>x86;x64</Platforms>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+  
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
 
 	<ItemGroup>
@@ -28,14 +39,14 @@
 		</Content>
 	</ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.1" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.8" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.8" />
     <PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
     <PackageReference Include="Xbim.Ifc" Version="5.1.310-develop" />
     <PackageReference Include="Xbim.Tessellator" Version="5.1.310-develop" />
   </ItemGroup>
 
-  <ItemGroup>
+  <!--<ItemGroup>
     <NativeGeometryEngine Include="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj">
       <AdditionalProperties>
         Platform=Win32
@@ -48,38 +59,38 @@
     </NativeGeometryEngine>
   </ItemGroup>
   
-  <!--We need to execute this after a build to ensure the nuget packages are in the correct place for the c++ binding-->
+  --><!--We need to execute this after a build to ensure the nuget packages are in the correct place for the c++ binding--><!--
   <Target Name="BuildNativeCodeEngine" AfterTargets="Build">
     <Message Text="Building Xbim.Geometry.Engine x32 and x64 Native Dlls" Importance="High" />
-    <MSBuild Projects="@(NativeGeometryEngine)" Properties="Configuration=$(Configuration) ; OutDir=..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\" Targets="Build"> 
+    <MSBuild Projects="@(NativeGeometryEngine)" Properties="Configuration=$(Configuration) ; OutDir=..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\netcoreapp3.1\" Targets="Build"> 
       <Output TaskParameter="TargetOutputs" ItemName="AssembliesBuiltByChildProjects" />    
      </MSBuild>
-  </Target>
+  </Target
 
   <Target Name=" CleanNativeCodeEngine" BeforeTargets="Clean">
     <Message Text="Cleaning Xbim.Geometry.Engine x32 Native Dlls" Importance="High" />
-    <MSBuild Projects="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj" Properties="Configuration=$(Configuration);Platform=Win32;OutDir=..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\" Targets="Clean">      
+    <MSBuild Projects="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj" Properties="Configuration=$(Configuration);Platform=Win32;OutDir=..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\netcoreapp3.1\" Targets="Clean">      
     </MSBuild>
     <Message Text="Cleaning Xbim.Geometry.Engine x64 Native Dlls" Importance="High" />
-    <MSBuild Projects="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj" Properties="Configuration=$(Configuration);Platform=x64;OutDir=..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\" Targets="Clean">      
+    <MSBuild Projects="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj" Properties="Configuration=$(Configuration);Platform=x64;OutDir=..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\netcoreapp3.1\" Targets="Clean">      
     </MSBuild>
-  </Target>
+  </Target>-->
   
   <ItemGroup>
-    <Content Include="bin\$(Configuration)\net47\Xbim.Geometry.Engine32.dll">
+    <Content Include="..\Output\$(Platform)\$(Configuration)\netcoreapp3.1\Xbim.Geometry.Engine.dll">
       <Pack>true</Pack>
-      <PackagePath>build\net47;</PackagePath>
+      <PackagePath>build\netcoreapp3.1;</PackagePath>
     </Content>
-    <Content Include="bin\$(Configuration)\net47\Xbim.Geometry.Engine64.dll">
+    <!--<Content Include="bin\$(Configuration)\netcoreapp3.1\Xbim.Geometry.Engine64.dll">
       <Pack>true</Pack>
-      <PackagePath>build\net47;</PackagePath>
-    </Content>
-    <Content Include="..\Xbim.Geometry.Engine.Interop.targets">
+      <PackagePath>build\netcoreapp3.1;</PackagePath>
+    </Content>-->
+    <!--<Content Include="..\Xbim.Geometry.Engine.Interop.targets">
       <Link>Xbim.Geometry.Interop.targets</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <PackagePath>build\net47;</PackagePath>
+      <PackagePath>build\netcoreapp3.1;</PackagePath>
       <Pack>true</Pack>
-    </Content>
+    </Content>-->
   </ItemGroup>
   
   <ItemGroup>
@@ -92,5 +103,16 @@
       <PackagePath></PackagePath>
     </None>
   </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj">
+      <Private>true</Private>
+    </ProjectReference>
+  </ItemGroup>
+  
+  <!--<ItemGroup>
+    <ProjectReference Include="..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj" />
+    <ProjectReference Include="..\Xbim.Geometry.Packages\Xbim.Geometry.Packages.csproj" />
+  </ItemGroup>-->
  
 </Project>

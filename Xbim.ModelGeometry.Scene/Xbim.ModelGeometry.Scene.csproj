@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net47</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <Title>Xbim ModelGeometry Scene</Title>
     <IsPackable>true</IsPackable>
     <Description>Provides support for the Geometry Scene creation.</Description>
@@ -11,23 +11,31 @@
     <Version>5.1.0.0-Dev</Version>
     <AssemblyVersion>5.1.0.1</AssemblyVersion>
     <FileVersion>5.1.0.1</FileVersion>
+    <Platforms>AnyCPU;x64;x86</Platforms>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+  </PropertyGroup>
+
   <ItemGroup>
+    <PackageReference Include="Microsoft.Win32.Registry" Version="4.7.0" />
+    <PackageReference Include="System.Drawing.Common" Version="4.7.0" />
     <PackageReference Include="Xbim.Ifc" Version="5.1.310-develop" />
     <PackageReference Include="Xbim.Tessellator" Version="5.1.310-develop" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Xbim.Geometry.Engine.Interop\Xbim.Geometry.Engine.Interop.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="System.Configuration" />
   </ItemGroup>
 
   <ItemGroup>

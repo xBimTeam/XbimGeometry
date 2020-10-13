@@ -1,14 +1,14 @@
 #pragma once
-#include "XbimOccShape.h"
-#include "XbimCurve.h"
-#include "XbimCurve2D.h"
-#include "XbimVertex.h"
+
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Wire.hxx>
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include "XbimPoint3DWithTolerance.h"
+#include "XbimOccShape.h"
+#include "XbimCurve.h"
+#include "XbimCurve2D.h"
+#include "XbimVertex.h"
 
-using namespace System;
 using namespace Xbim::Ifc4::Interfaces;
 namespace Xbim
 {
@@ -18,11 +18,11 @@ namespace Xbim
 		{
 		private:
 			
-			IntPtr ptrContainer;
+			System::IntPtr ptrContainer;
 			virtual property TopoDS_Edge* pEdge
 			{
 				TopoDS_Edge* get() sealed { return (TopoDS_Edge*)ptrContainer.ToPointer(); }
-				void set(TopoDS_Edge* val)sealed { ptrContainer = IntPtr(val); }
+				void set(TopoDS_Edge* val)sealed { ptrContainer = System::IntPtr(val); }
 			}
 			void InstanceCleanup();
 #pragma region Initialisation
@@ -39,7 +39,7 @@ namespace Xbim
 			XbimEdge(){};
 		public:
 			//error messages
-			static String^ GetBuildEdgeErrorMessage(BRepBuilderAPI_EdgeError edgeErr);
+			static System::String^ GetBuildEdgeErrorMessage(BRepBuilderAPI_EdgeError edgeErr);
 			//Constructors and destructors
 			~XbimEdge(){ InstanceCleanup(); }
 			!XbimEdge(){ InstanceCleanup(); }
@@ -129,7 +129,7 @@ namespace Xbim
 				vertexB = vB;
 				int hashA = pointA->GetHashCode();
 				int hashB = pointB->GetHashCode();
-				hashCode = Math::Max(hashA, hashB) ^ Math::Min(hashA, hashB);
+				hashCode = System::Math::Max(hashA, hashB) ^ System::Math::Min(hashA, hashB);
 				if (hashA == hashB && pA == pB)
 					refCount = -1;
 				else

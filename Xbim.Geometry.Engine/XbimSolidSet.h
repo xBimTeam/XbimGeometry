@@ -1,10 +1,12 @@
 #pragma once
+
+#include <TopExp_Explorer.hxx>
+#include <TopoDS.hxx>
+
 #include "XbimSolid.h"
 #include "XbimCompound.h"
 #include "XbimGeometryObjectSet.h"
-#include <TopExp_Explorer.hxx>
-#include <TopoDS.hxx>
-using namespace System;
+
 using namespace Xbim::Common;
 using namespace System::Collections::Generic;
 
@@ -22,10 +24,10 @@ namespace Xbim
 	
 	    int DoBoolean(const TopoDS_Shape& body, const TopTools_ListOfShape& tools, BOPAlgo_Operation op, double tolerance, double fuzzTolerance, TopoDS_Shape& result, int timeout);
 
-		private ref class VolumeComparer : IComparer<Tuple<double, XbimSolid^>^>
+		private ref class VolumeComparer : IComparer<System::Tuple<double, XbimSolid^>^>
 		{
 		public:
-			virtual int Compare(Tuple<double, XbimSolid^>^ x, Tuple<double, XbimSolid^>^ y)
+			virtual int Compare(System::Tuple<double, XbimSolid^>^ x, System::Tuple<double, XbimSolid^>^ y)
 			{
 				// Compare y and x in reverse order. 
 				return y->Item1.CompareTo(x->Item1); 
@@ -129,7 +131,7 @@ namespace Xbim
 			virtual IXbimSolidSet^ Union(IXbimSolid^ solid, double tolerance, ILogger^ logger);
 			virtual IXbimSolidSet^ Intersection(IXbimSolidSet^ solids, double tolerance, ILogger^ logger);
 			virtual IXbimSolidSet^ Intersection(IXbimSolid^ solid, double tolerance, ILogger^ logger);
-			virtual property String^  ToBRep{String^ get(); }
+			virtual property System::String^  ToBRep{System::String^ get(); }
 			virtual property bool IsPolyhedron{ bool get(); }
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) ;
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D);

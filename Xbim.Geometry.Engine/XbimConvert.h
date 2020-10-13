@@ -1,16 +1,18 @@
 #pragma once
-#include "XbimGeometryObject.h"
+
 #include <TopLoc_Location.hxx>
 #include <gp_GTrsf.hxx> 
 #include <gp_Trsf.hxx> 
 #include <gp_Pln.hxx> 
 #include <TColgp_Array1OfPnt.hxx>
+
+#include "XbimGeometryObject.h"
 using namespace Xbim::Ifc4::Interfaces;
 using namespace Xbim::Common::Exceptions;
 using namespace Xbim::Common::Geometry;
 using namespace Xbim::Ifc4::MeasureResource;
-
- 
+using namespace Xbim::Ifc4::GeometryResource;
+using namespace Microsoft::Extensions::Logging;
 namespace Xbim
 {
 	namespace Geometry
@@ -20,7 +22,7 @@ namespace Xbim
 	    public ref class XbimConvert
 		{
 		private:
-			static Ifc4::GeometryResource::IfcDimensionCount dimensions3D = Ifc4::GeometryResource::IfcDimensionCount(3);
+			static IfcDimensionCount dimensions3D = IfcDimensionCount(3);
 		public:
 			XbimConvert(void);
 			// Converts a Local Placement into a TopLoc_Location

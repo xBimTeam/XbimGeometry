@@ -1,9 +1,9 @@
 #pragma once
-#include "XbimFace.h"
+
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
 #include <TopTools_ListOfShape.hxx>
-
+#include "XbimFace.h"
 using namespace System::Collections::Generic;
 namespace Xbim
 {

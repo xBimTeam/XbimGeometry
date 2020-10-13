@@ -1,8 +1,8 @@
+
+#include <cmath>
 #include "XbimPoint3DWithTolerance.h"
 #include "XbimWire.h"
 #include "XbimFace.h"
-#include <cmath>
-using namespace System;
 namespace Xbim
 {
 	namespace Geometry
@@ -57,9 +57,9 @@ namespace Xbim
 			CalculateHashCode();
 		}
 
-		String^ XbimPoint3DWithTolerance::ToBRep::get()
+		System::String^ XbimPoint3DWithTolerance::ToBRep::get()
 		{
-			return String::Empty;
+			return System::String::Empty;
 		}
 
 #pragma region Equality Overrides
@@ -111,7 +111,7 @@ namespace Xbim
 			dd = x1; dd -= x2; dd *= dd; d += dd;
 			dd = y1; dd -= y2; dd *= dd; d += dd;
 			dd = z1; dd -= z2; dd *= dd; d += dd;
-			double mt = Math::Max(left->Tolerance, right->Tolerance);
+			double mt = System::Math::Max(left->Tolerance, right->Tolerance);
 			return d <= mt*mt;
 
 		}

@@ -1,0 +1,4 @@
+C:\OpenCASCADE-7.4.0-vc14-64\opencascade-7.4.0\win32\vc14\bind\TKernel.pdb
+C:\OpenCASCADE-7.4.0-vc14-64\opencascade-7.4.0\win32\vc14\objd\TKernel\TKernel.pdb
+C:\Users\Steve\Source\Repos\xBimTeam\XbimGeometry\Xbim.Geometry.Engine\OCC\win32\vc14\bind\TKernel.pdb
+C:\Users\Steve\Source\Repos\xBimTeam\XbimGeometry\Xbim.Geometry.Engine\OCC\win32\vc14\objd\TKernel\TKernel.pdb

@@ -1,8 +1,4 @@
-#include "XbimCurve2D.h"
-#include "XbimCurve.h"
-#include "XbimConvert.h"
-#include "XbimFace.h"
-#include "XbimGeometryCreator.h"
+
 #include <gp_Pnt2d.hxx>
 #include <gp_Ax2.hxx>
 #include <GeomLib_Tool.hxx>
@@ -20,7 +16,11 @@
 #include <Geom2dConvert_CompCurveToBSplineCurve.hxx>
 #include <ShapeConstruct_ProjectCurveOnSurface.hxx>
 #include <Precision.hxx>
-
+#include "XbimCurve2D.h"
+#include "XbimCurve.h"
+#include "XbimConvert.h"
+#include "XbimFace.h"
+#include "XbimGeometryCreator.h"
 using namespace System::Linq;
 namespace Xbim
 {
@@ -29,8 +29,8 @@ namespace Xbim
 		/*Ensures native pointers are deleted and garbage collected*/
 		void XbimCurve2D::InstanceCleanup()
 		{
-			IntPtr temp = System::Threading::Interlocked::Exchange(ptrContainer, IntPtr::Zero);
-			if (temp != IntPtr::Zero)
+			System::IntPtr temp = System::Threading::Interlocked::Exchange(ptrContainer, System::IntPtr::Zero);
+			if (temp != System::IntPtr::Zero)
 				delete (Handle(Geom2d_Curve)*)(temp.ToPointer());
 			System::GC::SuppressFinalize(this);
 		}
@@ -119,12 +119,12 @@ namespace Xbim
 
 		IXbimGeometryObject^ XbimCurve2D::Transform(XbimMatrix3D /*matrix3D*/)
 		{
-			throw gcnew Exception("Tranformation of curves is not currently supported");
+			throw gcnew System::Exception("Tranformation of curves is not currently supported");
 		}
 
 		IXbimGeometryObject^ XbimCurve2D::TransformShallow(XbimMatrix3D /*matrix3D*/)
 		{
-			throw gcnew Exception("TransformShallow of curves is not currently supported");
+			throw gcnew System::Exception("TransformShallow of curves is not currently supported");
 		}
 
 		IEnumerable<XbimPoint3D>^ XbimCurve2D::Intersections(IXbimCurve^ intersector, double tolerance, ILogger^ /*logger*/)
@@ -157,7 +157,7 @@ namespace Xbim
 			else if (dynamic_cast<IIfcOffsetCurve2D^>(curve)) Init((IIfcOffsetCurve2D^)curve, logger);
 			else if (dynamic_cast<IIfcIndexedPolyCurve^>(curve)) Init((IIfcIndexedPolyCurve^)curve, logger);
 			else if (dynamic_cast<IIfcPcurve^>(curve)) Init((IIfcPcurve^)curve, logger);
-			else throw gcnew Exception(String::Format("Unsupported Curve Type {0}", curve->GetType()->Name));
+			else throw gcnew System::Exception(System::String::Format("Unsupported Curve Type {0}", curve->GetType()->Name));
 		}
 
 		void XbimCurve2D::Init(IIfcPcurve^ curve, ILogger^ logger)
@@ -418,8 +418,8 @@ namespace Xbim
 			else
 			{
 				
-				Type ^ type = circle->Position->GetType();
-				throw gcnew Exception(String::Format("WC001: Circle #{0} with Placement of type {1} is not implemented", circle->EntityLabel, type->Name));
+				System::Type ^ type = circle->Position->GetType();
+				throw gcnew System::Exception(System::String::Format("WC001: Circle #{0} with Placement of type {1} is not implemented", circle->EntityLabel, type->Name));
 				return;
 			}
 

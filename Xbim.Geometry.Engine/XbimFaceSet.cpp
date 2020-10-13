@@ -1,9 +1,9 @@
-#include "XbimFaceSet.h"
-#include "XbimConvert.h"
+
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <TopExp.hxx>
-
+#include "XbimFaceSet.h"
+#include "XbimConvert.h"
 namespace Xbim
 {
 	namespace Geometry

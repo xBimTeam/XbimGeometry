@@ -1,8 +1,10 @@
 #pragma once
-#include "XbimGeometryObject.h"
+
 #include <Geom2d_Curve.hxx>
+#include "XbimGeometryObject.h"
 using namespace Xbim::Ifc4::Interfaces;
 using namespace Xbim::Common::Geometry;
+using namespace Microsoft::Extensions::Logging;
 namespace Xbim
 {
 	namespace Geometry
@@ -10,11 +12,11 @@ namespace Xbim
 		ref class XbimCurve2D : IXbimCurve, XbimGeometryObject
 		{
 		private:
-			IntPtr ptrContainer;
+			System::IntPtr ptrContainer;
 			virtual property Handle(Geom2d_Curve)* pCurve2D
 			{
 				Handle(Geom2d_Curve)* get() sealed { return (Handle(Geom2d_Curve)*)ptrContainer.ToPointer(); }
-				void set(Handle(Geom2d_Curve)* val)sealed { ptrContainer = IntPtr(val); }
+				void set(Handle(Geom2d_Curve)* val)sealed { ptrContainer = System::IntPtr(val); }
 			}
 			void InstanceCleanup();
 			void Init(IIfcGridAxis^ axis, ILogger^ logger);

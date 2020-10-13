@@ -1,10 +1,10 @@
-#include "XbimVertex.h"
-#include "XbimConvert.h"
+
 #include <BRep_Builder.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
 #include <BRepBuilderAPI_GTransform.hxx>
 #include <TopoDS.hxx>
-using namespace System;
+#include "XbimVertex.h"
+#include "XbimConvert.h"
 namespace Xbim
 {
 	namespace Geometry
@@ -13,8 +13,8 @@ namespace Xbim
 		/*Ensures native pointers are deleted and garbage collected*/
 		void XbimVertex::InstanceCleanup()
 		{
-			IntPtr temp = System::Threading::Interlocked::Exchange(ptrContainer, IntPtr::Zero);
-			if (temp != IntPtr::Zero)
+			System::IntPtr temp = System::Threading::Interlocked::Exchange(ptrContainer, System::IntPtr::Zero);
+			if (temp != System::IntPtr::Zero)
 				delete (TopoDS_Vertex*)(temp.ToPointer());
 			System::GC::SuppressFinalize(this);
 		}
@@ -96,7 +96,7 @@ namespace Xbim
 		IXbimGeometryObject^ XbimVertex::TransformShallow(XbimMatrix3D matrix3D)
 		{
 			TopoDS_Vertex vertex = TopoDS::Vertex(pVertex->Moved(XbimConvert::ToTransform(matrix3D)));
-			GC::KeepAlive(this);			
+			System::GC::KeepAlive(this);
 			return gcnew XbimVertex(vertex);
 		}
 
@@ -141,7 +141,7 @@ namespace Xbim
 
 		void XbimVertex::Mesh(IXbimMeshReceiver ^ /*mesh*/, double /*precision*/ , double /*deflection*/ , double /*angle*/  )
 		{
-			throw gcnew NotImplementedException("XbimVertex::Mesh");
+			throw gcnew System::NotImplementedException("XbimVertex::Mesh");
 		}
 
 #pragma endregion
@@ -209,7 +209,7 @@ namespace Xbim
 		{
 			if (!IsValid) return XbimPoint3D();
 			gp_Pnt p = BRep_Tool::Pnt(*pVertex);
-			GC::KeepAlive(this);
+			System::GC::KeepAlive(this);
 			return XbimPoint3D(p.X(), p.Y(), p.Z());
 		}
 	}

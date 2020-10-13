@@ -4,7 +4,7 @@
 // Copyright (c) 1999-2014 OPEN CASCADE SAS
 //
 // This file is part of Open CASCADE Technology software library.
-// 
+//
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License version 2.1 as published
 // by the Free Software Foundation, with special exception defined in the file
@@ -133,7 +133,7 @@ void BRepExtrema_DistShapeShape::DistanceMapMap (const TopTools_IndexedMapOfShap
     }
   }
 
-  std::stable_sort(aPairList.begin(), aPairList.end(), BRepExtrema_CheckPair_Comparator);
+  std::sort(aPairList.begin(), aPairList.end(), BRepExtrema_CheckPair_Comparator);
 
   for (NCollection_Vector<BRepExtrema_CheckPair>::Iterator aPairIter (aPairList);
        aPairIter.More(); aPairIter.Next())

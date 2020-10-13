@@ -1,12 +1,12 @@
 #pragma once
+
+#include <TopoDS_Shell.hxx>
+#include <TopTools_DataMapOfShapeListOfShape.hxx>
+#include <TopTools_DataMapOfIntegerShape.hxx>
 #include "XbimOccShape.h"
 #include "XbimWire.h"
 #include "XbimFace.h"
 #include "XbimEdge.h"
-#include <TopoDS_Shell.hxx>
-#include <TopTools_DataMapOfShapeListOfShape.hxx>
-#include <TopTools_DataMapOfIntegerShape.hxx>
-
 using namespace System::Collections::Generic;
 using namespace Xbim::Common::Geometry;
 
@@ -19,11 +19,11 @@ namespace Xbim
 		{
 		private:
 			
-			IntPtr ptrContainer;
+			System::IntPtr ptrContainer;
 			virtual property TopoDS_Shell* pShell
 			{
 				TopoDS_Shell* get() sealed { return (TopoDS_Shell*)ptrContainer.ToPointer(); }
-				void set(TopoDS_Shell* val)sealed { ptrContainer = IntPtr(val); }
+				void set(TopoDS_Shell* val)sealed { ptrContainer = System::IntPtr(val); }
 			}
 			void InstanceCleanup();
 			void Init(IIfcOpenShell^ openShell, ILogger^ logger);
@@ -74,7 +74,7 @@ namespace Xbim
 			virtual property bool HasValidTopology{bool get(); }
 			virtual bool CanCreateSolid(){ return IsClosed; };
 			virtual IXbimSolid^ CreateSolid(){ return MakeSolid(); };
-			virtual void SaveAsBrep(String^ fileName);
+			virtual void SaveAsBrep(System::String^ fileName);
 #pragma endregion
 			
 #pragma region operators

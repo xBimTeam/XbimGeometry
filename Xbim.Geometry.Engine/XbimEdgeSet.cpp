@@ -1,9 +1,9 @@
-#include "XbimEdgeSet.h"
-#include "XbimConvert.h"
+
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <BRepTools_WireExplorer.hxx>
 #include <TopExp.hxx>
-using namespace System;
+#include "XbimEdgeSet.h"
+#include "XbimConvert.h"
 namespace Xbim
 { 
 	namespace Geometry
@@ -20,7 +20,7 @@ namespace Xbim
 			{
 				edges->Add(gcnew XbimEdge(wireEx.Current()));
 			}
-			GC::KeepAlive(wire);
+			System::GC::KeepAlive(wire);
 		}
 
 		XbimEdgeSet::XbimEdgeSet(const TopoDS_Shape& shape)

@@ -1,5 +1,5 @@
 #pragma once
-#include "XbimGeometryObject.h"
+
 #include <TopoDS_Compound.hxx>
 #include <TopoDS_Shell.hxx>
 #include <Bnd_Box.hxx>
@@ -8,6 +8,8 @@
 #include <TopTools_ListOfShape.hxx>
 #include <BOPAlgo_Operation.hxx>
 #include <BRepAlgoAPI_BooleanOperation.hxx>
+
+#include "XbimGeometryObject.h"
 using namespace System::Collections::Generic;
 using namespace Xbim::Common::Geometry;
 namespace Xbim
@@ -68,7 +70,7 @@ namespace Xbim
 			virtual IXbimGeometryObjectSet^ Cut(IXbimSolid^ solid, double tolerance, ILogger^ logger);
 			virtual IXbimGeometryObjectSet^ Union(IXbimSolidSet^ solids, double tolerance, ILogger^ logger);
 			virtual IXbimGeometryObjectSet^ Union(IXbimSolid^ solid, double tolerance, ILogger^ logger);
-			virtual property String^  ToBRep{String^ get(); }
+			virtual property System::String^  ToBRep{System::String^ get(); }
 			virtual IXbimGeometryObjectSet^ Intersection(IXbimSolidSet^ solids, double tolerance, ILogger^ logger);
 			virtual IXbimGeometryObjectSet^ Intersection(IXbimSolid^ solid, double tolerance, ILogger^ logger);
 			virtual bool Sew();

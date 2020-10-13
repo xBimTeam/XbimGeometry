@@ -1,9 +1,9 @@
-#include "XbimWireSet.h"
-#include "XbimConvert.h"
+
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <TopExp.hxx>
-
+#include "XbimWireSet.h"
+#include "XbimConvert.h"
 namespace Xbim
 {
 	namespace Geometry
@@ -94,7 +94,7 @@ namespace Xbim
 
 		void XbimWireSet::Mesh(IXbimMeshReceiver ^ /*mesh*/, double /*precision*/, double /*deflection*/, double /*angle*/)
 		{
-			throw gcnew NotImplementedException("XbimWireSet::Mesh");
+			throw gcnew System::NotImplementedException("XbimWireSet::Mesh");
 		}
 
 		XbimRect3D XbimWireSet::BoundingBox::get()

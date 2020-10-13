@@ -1,10 +1,4 @@
-#include "XbimOccShape.h"
-#include "XbimFaceSet.h"
-#include "XbimShell.h"
-#include "XbimSolid.h"
-#include "XbimCompound.h"
-#include "XbimPoint3DWithTolerance.h"
-#include "XbimConvert.h"
+
 #include <BRepCheck_Analyzer.hxx>
 #include <BRepMesh_IncrementalMesh.hxx>
 #include <Poly_Triangulation.hxx>
@@ -16,7 +10,6 @@
 #include <Bnd_Box.hxx>
 #include <BRepBndLib.hxx>
 #include <gp_Quaternion.hxx>
-#include "XbimWire.h"
 #include <TopExp.hxx>
 #include <Geom_TrimmedCurve.hxx>
 #include <Geom_Line.hxx>
@@ -25,6 +18,14 @@
 #include <BRepBuilderAPI_Transform.hxx>
 #include <Geom_Plane.hxx>
 
+#include "XbimOccShape.h"
+#include "XbimFaceSet.h"
+#include "XbimShell.h"
+#include "XbimSolid.h"
+#include "XbimCompound.h"
+#include "XbimPoint3DWithTolerance.h"
+#include "XbimConvert.h"
+#include "XbimWire.h"
 using namespace System::Threading;
 using namespace System::Collections::Generic;
 
@@ -134,13 +135,13 @@ namespace Xbim
 				faceIndex++;
 			}
 			// Write out header
-			textWriter->WriteLine(String::Format("P {0} {1} {2} {3} {4}", 1, points->Count, faces->Count, triangleCount, normals->Count));
+			textWriter->WriteLine(System::String::Format("P {0} {1} {2} {3} {4}", 1, points->Count, faces->Count, triangleCount, normals->Count));
 			//write out vertices and normals  
 			textWriter->Write("V");
-			for each (XbimPoint3D p in points) textWriter->Write(String::Format(" {0},{1},{2}", p.X, p.Y, p.Z));
+			for each (XbimPoint3D p in points) textWriter->Write(System::String::Format(" {0},{1},{2}", p.X, p.Y, p.Z));
 			textWriter->WriteLine();
 			textWriter->Write("N");
-			for each (XbimVector3D n in normals) textWriter->Write(String::Format(" {0},{1},{2}", n.X, n.Y, n.Z));
+			for each (XbimVector3D n in normals) textWriter->Write(System::String::Format(" {0},{1},{2}", n.X, n.Y, n.Z));
 			textWriter->WriteLine();
 
 			//now write out the faces
@@ -166,17 +167,17 @@ namespace Xbim
 						triangles(i).Get(t[0], t[1], t[2]);
 					if (isPlanar)
 						if (i == 1)
-							textWriter->Write(String::Format(" {0}/{3},{1},{2}", nodeLookup[t[0] - 1], nodeLookup[t[1] - 1], nodeLookup[t[2] - 1], norms[0]));
+							textWriter->Write(System::String::Format(" {0}/{3},{1},{2}", nodeLookup[t[0] - 1], nodeLookup[t[1] - 1], nodeLookup[t[2] - 1], norms[0]));
 						else
-							textWriter->Write(String::Format(" {0},{1},{2}", nodeLookup[t[0] - 1], nodeLookup[t[1] - 1], nodeLookup[t[2] - 1]));
+							textWriter->Write(System::String::Format(" {0},{1},{2}", nodeLookup[t[0] - 1], nodeLookup[t[1] - 1], nodeLookup[t[2] - 1]));
 					else //need to write every one
-						textWriter->Write(String::Format(" {0}/{3},{1}/{4},{2}/{5}", nodeLookup[t[0] - 1], nodeLookup[t[1] - 1], nodeLookup[t[2] - 1], norms[t[0] - 1], norms[t[1] - 1], norms[t[2] - 1]));
+						textWriter->Write(System::String::Format(" {0}/{3},{1}/{4},{2}/{5}", nodeLookup[t[0] - 1], nodeLookup[t[1] - 1], nodeLookup[t[2] - 1], norms[t[0] - 1], norms[t[1] - 1], norms[t[2] - 1]));
 				}
 				faceIndex++;
 				textWriter->WriteLine();
 			}
 			textWriter->Flush();
-			GC::KeepAlive(this);
+			System::GC::KeepAlive(this);
 		}
 
 		void XbimOccShape::WriteTriangulation(IXbimMeshReceiver^ meshReceiver, double tolerance, double deflection, double angle)
@@ -311,7 +312,7 @@ namespace Xbim
 					meshReceiver->AddTriangle(faceId, t[0] - 1, t[1] - 1, t[2] - 1);
 				}
 			}
-			GC::KeepAlive(this);
+			System::GC::KeepAlive(this);
 
 		}
 
@@ -320,12 +321,12 @@ namespace Xbim
 
 
 
-		void XbimOccShape::WriteIndex(BinaryWriter^ bw, UInt32 index, UInt32 maxInt)
+		void XbimOccShape::WriteIndex(BinaryWriter^ bw, System::UInt32 index, System::UInt32 maxInt)
 		{
 			if (maxInt <= 0xFF)
 				bw->Write((unsigned char)index);
 			else if (maxInt <= 0xFFFF)
-				bw->Write((UInt16)index);
+				bw->Write((System::UInt16)index);
 			else
 				bw->Write(index);
 		}
@@ -597,8 +598,8 @@ namespace Xbim
 			// Write out header
 			binaryWriter->Write((unsigned char)1); //stream format version
 			int numVertices = points->Count;
-			binaryWriter->Write((UInt32)numVertices); //number of vertices
-			binaryWriter->Write((UInt32)triangleCount); //number of triangles
+			binaryWriter->Write((System::UInt32)numVertices); //number of vertices
+			binaryWriter->Write((System::UInt32)triangleCount); //number of triangles
 			//write out vertices 
 			for each (XbimPoint3D p in points)
 			{
@@ -609,7 +610,7 @@ namespace Xbim
 
 			//now write out the faces
 			faceIndex = 0;
-			binaryWriter->Write((Int32)tessellations->Count);
+			binaryWriter->Write((System::Int32)tessellations->Count);
 			for each (List<int> ^ tess in tessellations)
 			{
 				List<XbimPackedNormal>^ norms = normalLookup[faceIndex];
@@ -617,11 +618,11 @@ namespace Xbim
 				List<int>^ nodeLookup = pointLookup[faceIndex];
 				if (isPlanar)
 				{
-					binaryWriter->Write((Int32)tess->Count / 3);
+					binaryWriter->Write((System::Int32)tess->Count / 3);
 					norms[0].Write(binaryWriter); //write the normal for the face
 				}
 				else
-					binaryWriter->Write((Int32)(-tess->Count / 3)); //use negative count to indicate that every index has a normal			
+					binaryWriter->Write((System::Int32)(-tess->Count / 3)); //use negative count to indicate that every index has a normal			
 				for (int i = 0; i < tess->Count; i++)
 				{
 					if (isPlanar)
@@ -636,7 +637,7 @@ namespace Xbim
 				}
 				faceIndex++;
 			}
-			GC::KeepAlive(this);
+			System::GC::KeepAlive(this);
 			binaryWriter->Flush();
 		}
 	}

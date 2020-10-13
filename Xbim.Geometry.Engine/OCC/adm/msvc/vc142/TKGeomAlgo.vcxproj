@@ -1,0 +1,1228 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{F04AE95C-12D6-13C7-1511-94521899DAC8}</ProjectGuid>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\..\..\..\win32\vc14\bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\..\..\..\win32\vc14\obj\TKGeomAlgo\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\..\..\..\win32\vc14\bind\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\..\..\..\win32\vc14\objd\TKGeomAlgo\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\..\..\..\win64\vc14\bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\..\..\..\win64\vc14\obj\TKGeomAlgo\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\..\..\..\win64\vc14\bind\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\..\..\..\win64\vc14\objd\TKGeomAlgo\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\..\..\..\win32\vc14\bin\TKGeomAlgo.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>OCCT_STATIC_BUILD;HAVE_NO_DLL;NDEBUG;No_Exception;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <AssemblerListingLocation>.\..\..\..\win32\vc14\obj\TKGeomAlgo/</AssemblerListingLocation>
+      <ObjectFileName>.\..\..\..\win32\vc14\obj\TKGeomAlgo/</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\..\..\win32\vc14\obj\TKGeomAlgo/</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;No_Exception;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>TKernel.lib;TKMath.lib;TKG3d.lib;TKG2d.lib;TKGeomBase.lib;TKBRep.lib</AdditionalDependencies>
+      <OutputFile>.\..\..\..\win32\vc14\bin\TKGeomAlgo.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\win32\vc14\lib;$(CSF_OPT_LIB32);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>no</GenerateDebugInformation>
+      <ProgramDatabaseFile>.\..\..\..\win32\vc14\bin\TKGeomAlgo.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <ImportLibrary>..\..\..\win32\vc14\lib\TKGeomAlgo.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\..\..\..\win32\vc14\bind\TKGeomAlgo.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>Disabled</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>OCCT_STATIC_BUILD;HAVE_NO_DLL;_DEBUG;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <AssemblerListingLocation>.\..\..\..\win32\vc14\objd\TKGeomAlgo/</AssemblerListingLocation>
+      <ObjectFileName>.\..\..\..\win32\vc14\objd\TKGeomAlgo/</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\..\..\win32\vc14\objd\TKGeomAlgo/</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>TKernel.lib;TKMath.lib;TKG3d.lib;TKG2d.lib;TKGeomBase.lib;TKBRep.lib</AdditionalDependencies>
+      <OutputFile>.\..\..\..\win32\vc14\bind\TKGeomAlgo.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\win32\vc14\libd;$(CSF_OPT_LIB32D);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>..\..\..\win32\vc14\bind\TKGeomAlgo.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <ImportLibrary>..\..\..\win32\vc14\libd\TKGeomAlgo.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>x64</TargetEnvironment>
+      <TypeLibraryName>.\..\..\..\win64\vc14\bin\TKGeomAlgo.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>NDEBUG;No_Exception;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <AssemblerListingLocation>.\..\..\..\win64\vc14\obj\TKGeomAlgo/</AssemblerListingLocation>
+      <ObjectFileName>.\..\..\..\win64\vc14\obj\TKGeomAlgo/</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\..\..\win64\vc14\obj\TKGeomAlgo/</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;No_Exception;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>TKernel.lib;TKMath.lib;TKG3d.lib;TKG2d.lib;TKGeomBase.lib;TKBRep.lib</AdditionalDependencies>
+      <OutputFile>.\..\..\..\win64\vc14\bin\TKGeomAlgo.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\win64\vc14\lib;$(CSF_OPT_LIB64);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>no</GenerateDebugInformation>
+      <ProgramDatabaseFile>.\..\..\..\win64\vc14\bin\TKGeomAlgo.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <ImportLibrary>..\..\..\win64\vc14\lib\TKGeomAlgo.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>x64</TargetEnvironment>
+      <TypeLibraryName>.\..\..\..\win64\vc14\bind\TKGeomAlgo.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>Disabled</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>_DEBUG;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <AssemblerListingLocation>.\..\..\..\win64\vc14\objd\TKGeomAlgo/</AssemblerListingLocation>
+      <ObjectFileName>.\..\..\..\win64\vc14\objd\TKGeomAlgo/</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\..\..\win64\vc14\objd\TKGeomAlgo/</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>TKernel.lib;TKMath.lib;TKG3d.lib;TKG2d.lib;TKGeomBase.lib;TKBRep.lib</AdditionalDependencies>
+      <OutputFile>.\..\..\..\win64\vc14\bind\TKGeomAlgo.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\win64\vc14\libd;$(CSF_OPT_LIB64D);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>..\..\..\win64\vc14\bind\TKGeomAlgo.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <ImportLibrary>..\..\..\win64\vc14\libd\TKGeomAlgo.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\Hatch\Hatch_Hatcher.cxx" />
+    <ClCompile Include="..\..\..\src\Hatch\Hatch_Line.cxx" />
+    <ClCompile Include="..\..\..\src\Hatch\Hatch_Parameter.cxx" />
+    <ClInclude Include="..\..\..\src\Hatch\Hatch_Hatcher.hxx" />
+    <ClInclude Include="..\..\..\src\Hatch\Hatch_Hatcher.lxx" />
+    <ClInclude Include="..\..\..\src\Hatch\Hatch_Line.hxx" />
+    <ClInclude Include="..\..\..\src\Hatch\Hatch_LineForm.hxx" />
+    <ClInclude Include="..\..\..\src\Hatch\Hatch_Parameter.hxx" />
+    <ClInclude Include="..\..\..\src\Hatch\Hatch_SequenceOfLine.hxx" />
+    <ClInclude Include="..\..\..\src\Hatch\Hatch_SequenceOfParameter.hxx" />
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt.cxx" />
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_BSpGradient_BFGSOfMyBSplGradientOfTheComputeLineOfWLApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_BSpParFunctionOfMyBSplGradientOfTheComputeLineOfWLApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_BSpParLeastSquareOfMyBSplGradientOfTheComputeLineOfWLApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_Gradient_BFGSOfMyGradientOfTheComputeLineBezierOfWLApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_Gradient_BFGSOfMyGradientbisOfTheComputeLineOfWLApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_IntSS.cxx" />
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_IntSS_1.cxx" />
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_LineConstructor.cxx" />
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_LineTool.cxx" />
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_MyBSplGradientOfTheComputeLineOfWLApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_MyGradientOfTheComputeLineBezierOfWLApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_MyGradientbisOfTheComputeLineOfWLApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_ParFunctionOfMyGradientOfTheComputeLineBezierOfWLApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_ParFunctionOfMyGradientbisOfTheComputeLineOfWLApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_ParLeastSquareOfMyGradientOfTheComputeLineBezierOfWLApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_ParLeastSquareOfMyGradientbisOfTheComputeLineOfWLApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_ParameterAndOrientation.cxx" />
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_ResConstraintOfMyGradientOfTheComputeLineBezierOfWLApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_ResConstraintOfMyGradientbisOfTheComputeLineOfWLApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_TheComputeLineBezierOfWLApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_TheComputeLineOfWLApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_TheFunctionOfTheInt2SOfThePrmPrmSvSurfacesOfWLApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_TheImpPrmSvSurfacesOfWLApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_TheInt2SOfThePrmPrmSvSurfacesOfWLApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_TheMultiLineOfWLApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_ThePrmPrmSvSurfacesOfWLApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_TheZerImpFuncOfTheImpPrmSvSurfacesOfWLApprox_0.cxx" />
+    <ClCompile Include="..\..\..\src\GeomInt\GeomInt_WLApprox_0.cxx" />
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt.hxx" />
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_BSpGradient_BFGSOfMyBSplGradientOfTheComputeLineOfWLApprox.hxx" />
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_BSpParFunctionOfMyBSplGradientOfTheComputeLineOfWLApprox.hxx" />
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_BSpParLeastSquareOfMyBSplGradientOfTheComputeLineOfWLApprox.hxx" />
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_Gradient_BFGSOfMyGradientOfTheComputeLineBezierOfWLApprox.hxx" />
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_Gradient_BFGSOfMyGradientbisOfTheComputeLineOfWLApprox.hxx" />
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_IntSS.hxx" />
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_IntSS.lxx" />
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_LineConstructor.hxx" />
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_LineConstructor.lxx" />
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_LineTool.hxx" />
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_MyBSplGradientOfTheComputeLineOfWLApprox.hxx" />
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_MyGradientOfTheComputeLineBezierOfWLApprox.hxx" />
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_MyGradientbisOfTheComputeLineOfWLApprox.hxx" />
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_ParFunctionOfMyGradientOfTheComputeLineBezierOfWLApprox.hxx" />
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_ParFunctionOfMyGradientbisOfTheComputeLineOfWLApprox.hxx" />
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_ParLeastSquareOfMyGradientOfTheComputeLineBezierOfWLApprox.hxx" />
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_ParLeastSquareOfMyGradientbisOfTheComputeLineOfWLApprox.hxx" />
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_ParameterAndOrientation.hxx" />
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_ResConstraintOfMyGradientOfTheComputeLineBezierOfWLApprox.hxx" />
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_ResConstraintOfMyGradientbisOfTheComputeLineOfWLApprox.hxx" />
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_SequenceOfParameterAndOrientation.hxx" />
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_TheComputeLineBezierOfWLApprox.hxx" />
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_TheComputeLineOfWLApprox.hxx" />
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_TheFunctionOfTheInt2SOfThePrmPrmSvSurfacesOfWLApprox.hxx" />
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_TheImpPrmSvSurfacesOfWLApprox.hxx" />
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_TheInt2SOfThePrmPrmSvSurfacesOfWLApprox.hxx" />
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_TheMultiLineOfWLApprox.hxx" />
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_TheMultiLineToolOfWLApprox.hxx" />
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_ThePrmPrmSvSurfacesOfWLApprox.hxx" />
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_TheZerImpFuncOfTheImpPrmSvSurfacesOfWLApprox.hxx" />
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_VectorOfReal.hxx" />
+    <ClInclude Include="..\..\..\src\GeomInt\GeomInt_WLApprox.hxx" />
+    <ClCompile Include="..\..\..\src\IntStart\IntStart_SITopolTool.cxx" />
+    <ClInclude Include="..\..\..\src\IntStart\IntStart_PathPoint.gxx" />
+    <ClInclude Include="..\..\..\src\IntStart\IntStart_PathPoint.lxx" />
+    <ClInclude Include="..\..\..\src\IntStart\IntStart_SITopolTool.hxx" />
+    <ClInclude Include="..\..\..\src\IntStart\IntStart_SearchInside.gxx" />
+    <ClInclude Include="..\..\..\src\IntStart\IntStart_SearchInside.lxx" />
+    <ClInclude Include="..\..\..\src\IntStart\IntStart_SearchOnBoundaries.gxx" />
+    <ClInclude Include="..\..\..\src\IntStart\IntStart_SearchOnBoundaries.lxx" />
+    <ClInclude Include="..\..\..\src\IntStart\IntStart_Segment.gxx" />
+    <ClInclude Include="..\..\..\src\IntStart\IntStart_Segment.lxx" />
+    <ClCompile Include="..\..\..\src\IntWalk\IntWalk_PWalking.cxx" />
+    <ClCompile Include="..\..\..\src\IntWalk\IntWalk_TheFunctionOfTheInt2S_0.cxx" />
+    <ClCompile Include="..\..\..\src\IntWalk\IntWalk_TheInt2S_0.cxx" />
+    <ClInclude Include="..\..\..\src\IntWalk\IntWalk_IWLine.gxx" />
+    <ClInclude Include="..\..\..\src\IntWalk\IntWalk_IWLine.lxx" />
+    <ClInclude Include="..\..\..\src\IntWalk\IntWalk_IWalking.gxx" />
+    <ClInclude Include="..\..\..\src\IntWalk\IntWalk_IWalking.lxx" />
+    <ClInclude Include="..\..\..\src\IntWalk\IntWalk_IWalking_1.gxx" />
+    <ClInclude Include="..\..\..\src\IntWalk\IntWalk_IWalking_2.gxx" />
+    <ClInclude Include="..\..\..\src\IntWalk\IntWalk_IWalking_3.gxx" />
+    <ClInclude Include="..\..\..\src\IntWalk\IntWalk_IWalking_4.gxx" />
+    <ClInclude Include="..\..\..\src\IntWalk\IntWalk_IWalking_5.gxx" />
+    <ClInclude Include="..\..\..\src\IntWalk\IntWalk_IWalking_6.gxx" />
+    <ClInclude Include="..\..\..\src\IntWalk\IntWalk_PWalking.hxx" />
+    <ClInclude Include="..\..\..\src\IntWalk\IntWalk_PWalking.lxx" />
+    <ClInclude Include="..\..\..\src\IntWalk\IntWalk_StatusDeflection.hxx" />
+    <ClInclude Include="..\..\..\src\IntWalk\IntWalk_TheFunctionOfTheInt2S.hxx" />
+    <ClInclude Include="..\..\..\src\IntWalk\IntWalk_TheInt2S.hxx" />
+    <ClInclude Include="..\..\..\src\IntWalk\IntWalk_VectorOfInteger.hxx" />
+    <ClInclude Include="..\..\..\src\IntWalk\IntWalk_VectorOfWalkingData.hxx" />
+    <ClCompile Include="..\..\..\src\IntImp\IntImp_ComputeTangence.cxx" />
+    <ClInclude Include="..\..\..\src\IntImp\IntImp_ComputeTangence.hxx" />
+    <ClInclude Include="..\..\..\src\IntImp\IntImp_ConstIsoparametric.hxx" />
+    <ClInclude Include="..\..\..\src\IntImp\IntImp_Int2S.gxx" />
+    <ClInclude Include="..\..\..\src\IntImp\IntImp_Int2S.lxx" />
+    <ClInclude Include="..\..\..\src\IntImp\IntImp_IntCS.gxx" />
+    <ClInclude Include="..\..\..\src\IntImp\IntImp_ZerCSParFunc.gxx" />
+    <ClInclude Include="..\..\..\src\IntImp\IntImp_ZerImpFunc.gxx" />
+    <ClInclude Include="..\..\..\src\IntImp\IntImp_ZerImpFunc.lxx" />
+    <ClInclude Include="..\..\..\src\IntImp\IntImp_ZerParFunc.gxx" />
+    <ClInclude Include="..\..\..\src\IntImp\IntImp_ZerParFunc.lxx" />
+    <ClCompile Include="..\..\..\src\IntCurveSurface\IntCurveSurface_HInter_0.cxx" />
+    <ClCompile Include="..\..\..\src\IntCurveSurface\IntCurveSurface_Intersection.cxx" />
+    <ClCompile Include="..\..\..\src\IntCurveSurface\IntCurveSurface_IntersectionPoint.cxx" />
+    <ClCompile Include="..\..\..\src\IntCurveSurface\IntCurveSurface_IntersectionSegment.cxx" />
+    <ClCompile Include="..\..\..\src\IntCurveSurface\IntCurveSurface_TheCSFunctionOfHInter_0.cxx" />
+    <ClCompile Include="..\..\..\src\IntCurveSurface\IntCurveSurface_TheExactHInter_0.cxx" />
+    <ClCompile Include="..\..\..\src\IntCurveSurface\IntCurveSurface_TheHCurveTool_0.cxx" />
+    <ClCompile Include="..\..\..\src\IntCurveSurface\IntCurveSurface_TheInterferenceOfHInter_0.cxx" />
+    <ClCompile Include="..\..\..\src\IntCurveSurface\IntCurveSurface_ThePolygonOfHInter_0.cxx" />
+    <ClCompile Include="..\..\..\src\IntCurveSurface\IntCurveSurface_ThePolygonToolOfHInter_0.cxx" />
+    <ClCompile Include="..\..\..\src\IntCurveSurface\IntCurveSurface_ThePolyhedronOfHInter_0.cxx" />
+    <ClCompile Include="..\..\..\src\IntCurveSurface\IntCurveSurface_ThePolyhedronToolOfHInter_0.cxx" />
+    <ClCompile Include="..\..\..\src\IntCurveSurface\IntCurveSurface_TheQuadCurvExactHInter_0.cxx" />
+    <ClCompile Include="..\..\..\src\IntCurveSurface\IntCurveSurface_TheQuadCurvFuncOfTheQuadCurvExactHInter_0.cxx" />
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_HCurveTool.gxx" />
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_HCurveTool.lxx" />
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_HInter.hxx" />
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_Inter.gxx" />
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_Intersection.hxx" />
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_IntersectionPoint.hxx" />
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_IntersectionPoint.lxx" />
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_IntersectionSegment.hxx" />
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_Polygon.gxx" />
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_Polygon.lxx" />
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_PolygonTool.gxx" />
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_PolygonTool.lxx" />
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_Polyhedron.gxx" />
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_Polyhedron.lxx" />
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_PolyhedronTool.gxx" />
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_PolyhedronTool.lxx" />
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_QuadricCurveExactInter.gxx" />
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_QuadricCurveFunc.gxx" />
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_SequenceOfPnt.hxx" />
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_SequenceOfSeg.hxx" />
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_TheCSFunctionOfHInter.hxx" />
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_TheExactHInter.hxx" />
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_TheHCurveTool.hxx" />
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_TheInterferenceOfHInter.hxx" />
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_ThePolygonOfHInter.hxx" />
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_ThePolygonToolOfHInter.hxx" />
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_ThePolyhedronOfHInter.hxx" />
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_ThePolyhedronToolOfHInter.hxx" />
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_TheQuadCurvExactHInter.hxx" />
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_TheQuadCurvFuncOfTheQuadCurvExactHInter.hxx" />
+    <ClInclude Include="..\..\..\src\IntCurveSurface\IntCurveSurface_TransitionOnCurve.hxx" />
+    <ClCompile Include="..\..\..\src\IntSurf\IntSurf.cxx" />
+    <ClCompile Include="..\..\..\src\IntSurf\IntSurf_InteriorPoint.cxx" />
+    <ClCompile Include="..\..\..\src\IntSurf\IntSurf_LineOn2S.cxx" />
+    <ClCompile Include="..\..\..\src\IntSurf\IntSurf_PathPoint.cxx" />
+    <ClCompile Include="..\..\..\src\IntSurf\IntSurf_PntOn2S.cxx" />
+    <ClCompile Include="..\..\..\src\IntSurf\IntSurf_Quadric.cxx" />
+    <ClCompile Include="..\..\..\src\IntSurf\IntSurf_QuadricTool.cxx" />
+    <ClCompile Include="..\..\..\src\IntSurf\IntSurf_Transition.cxx" />
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf.hxx" />
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_Allocator.hxx" />
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_Couple.hxx" />
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_Couple.lxx" />
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_InteriorPoint.hxx" />
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_InteriorPoint.lxx" />
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_InteriorPointTool.hxx" />
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_InteriorPointTool.lxx" />
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_LineOn2S.hxx" />
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_LineOn2S.lxx" />
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_ListIteratorOfListOfPntOn2S.hxx" />
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_ListOfPntOn2S.hxx" />
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_PathPoint.hxx" />
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_PathPoint.lxx" />
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_PathPointTool.hxx" />
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_PathPointTool.lxx" />
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_PntOn2S.hxx" />
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_PntOn2S.lxx" />
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_Quadric.hxx" />
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_Quadric.lxx" />
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_QuadricTool.hxx" />
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_QuadricTool.lxx" />
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_SequenceOfCouple.hxx" />
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_SequenceOfInteriorPoint.hxx" />
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_SequenceOfPathPoint.hxx" />
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_SequenceOfPntOn2S.hxx" />
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_Situation.hxx" />
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_Transition.hxx" />
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_Transition.lxx" />
+    <ClInclude Include="..\..\..\src\IntSurf\IntSurf_TypeTrans.hxx" />
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_ALine.cxx" />
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_ALineToWLine.cxx" />
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_ArcFunction.cxx" />
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_CSFunction.cxx" />
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_CurvIntSurf_0.cxx" />
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_GLine.cxx" />
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_HCurve2dTool.cxx" />
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_HInterTool.cxx" />
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_ImpImpIntersection.cxx" />
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_ImpPrmIntersection.cxx" />
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_InterferencePolyhedron.cxx" />
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_Intersection.cxx" />
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_Line.cxx" />
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_LineConstructor.cxx" />
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_Point.cxx" />
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_PointLine.cxx" />
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_PolyArc.cxx" />
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_PolyLine.cxx" />
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_Polygo.cxx" />
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_Polyhedron.cxx" />
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_PrmPrmIntersection.cxx" />
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_PrmPrmIntersection_T3Bits.cxx" />
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_RLine.cxx" />
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_RstInt.cxx" />
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_SpecialPoints.cxx" />
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_TheIWLineOfTheIWalking_0.cxx" />
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_TheIWalking_0.cxx" />
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_ThePathPointOfTheSOnBounds_0.cxx" />
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_TheSOnBounds_0.cxx" />
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_TheSearchInside_0.cxx" />
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_TheSegmentOfTheSOnBounds_0.cxx" />
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_TheSurfFunction_0.cxx" />
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_WLine.cxx" />
+    <ClCompile Include="..\..\..\src\IntPatch\IntPatch_WLineTool.cxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_ALine.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_ALine.lxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_ALineToWLine.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_ArcFunction.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_ArcFunction.lxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_CSFunction.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_CurvIntSurf.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_GLine.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_GLine.lxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_HCurve2dTool.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_HCurve2dTool.lxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_HInterTool.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_HInterTool.lxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_IType.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_ImpImpIntersection.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_ImpImpIntersection.lxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_ImpImpIntersection_0.gxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_ImpImpIntersection_1.gxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_ImpImpIntersection_2.gxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_ImpImpIntersection_3.gxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_ImpImpIntersection_4.gxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_ImpImpIntersection_5.gxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_ImpImpIntersection_6.gxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_ImpPrmIntersection.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_ImpPrmIntersection.lxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_InterferencePolyhedron.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_Intersection.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_Intersection.lxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_Line.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_Line.lxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_LineConstructor.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_Point.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_Point.lxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_PointLine.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_PolyArc.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_PolyLine.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_Polygo.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_Polygo.lxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_Polyhedron.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_PolyhedronTool.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_PolyhedronTool.lxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_PrmPrmIntersection.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_PrmPrmIntersection.lxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_PrmPrmIntersection_T3Bits.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_PrmPrmIntersection_T3Bits.lxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_RLine.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_RLine.lxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_RstInt.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_SearchPnt.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_SequenceOfIWLineOfTheIWalking.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_SequenceOfLine.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_SequenceOfPathPointOfTheSOnBounds.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_SequenceOfPoint.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_SequenceOfSegmentOfTheSOnBounds.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_SpecPntType.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_SpecialPoints.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_TheIWLineOfTheIWalking.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_TheIWalking.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_ThePathPointOfTheSOnBounds.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_TheSOnBounds.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_TheSearchInside.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_TheSegmentOfTheSOnBounds.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_TheSurfFunction.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_WLine.hxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_WLine.lxx" />
+    <ClInclude Include="..\..\..\src\IntPatch\IntPatch_WLineTool.hxx" />
+    <ClCompile Include="..\..\..\src\Geom2dInt\Geom2dInt_ExactIntersectionPointOfTheIntPCurvePCurveOfGInter_0.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dInt\Geom2dInt_GInter_0.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dInt\Geom2dInt_Geom2dCurveTool.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dInt\Geom2dInt_IntConicCurveOfGInter_0.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dInt\Geom2dInt_MyImpParToolOfTheIntersectorOfTheIntConicCurveOfGInter_0.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dInt\Geom2dInt_PCLocFOfTheLocateExtPCOfTheProjPCurOfGInter_0.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dInt\Geom2dInt_TheCurveLocatorOfTheProjPCurOfGInter_0.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dInt\Geom2dInt_TheDistBetweenPCurvesOfTheIntPCurvePCurveOfGInter_0.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dInt\Geom2dInt_TheIntConicCurveOfGInter_0.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dInt\Geom2dInt_TheIntPCurvePCurveOfGInter_0.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dInt\Geom2dInt_TheIntersectorOfTheIntConicCurveOfGInter_0.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dInt\Geom2dInt_TheLocateExtPCOfTheProjPCurOfGInter_0.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dInt\Geom2dInt_ThePolygon2dOfTheIntPCurvePCurveOfGInter_0.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dInt\Geom2dInt_TheProjPCurOfGInter_0.cxx" />
+    <ClInclude Include="..\..\..\src\Geom2dInt\Geom2dInt_ExactIntersectionPointOfTheIntPCurvePCurveOfGInter.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dInt\Geom2dInt_GInter.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dInt\Geom2dInt_Geom2dCurveTool.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dInt\Geom2dInt_Geom2dCurveTool.lxx" />
+    <ClInclude Include="..\..\..\src\Geom2dInt\Geom2dInt_IntConicCurveOfGInter.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dInt\Geom2dInt_MyImpParToolOfTheIntersectorOfTheIntConicCurveOfGInter.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dInt\Geom2dInt_PCLocFOfTheLocateExtPCOfTheProjPCurOfGInter.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dInt\Geom2dInt_TheCurveLocatorOfTheProjPCurOfGInter.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dInt\Geom2dInt_TheDistBetweenPCurvesOfTheIntPCurvePCurveOfGInter.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dInt\Geom2dInt_TheIntConicCurveOfGInter.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dInt\Geom2dInt_TheIntPCurvePCurveOfGInter.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dInt\Geom2dInt_TheIntersectorOfTheIntConicCurveOfGInter.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dInt\Geom2dInt_TheLocateExtPCOfTheProjPCurOfGInter.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dInt\Geom2dInt_ThePolygon2dOfTheIntPCurvePCurveOfGInter.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dInt\Geom2dInt_TheProjPCurOfGInter.hxx" />
+    <ClCompile Include="..\..\..\src\IntImpParGen\IntImpParGen.cxx" />
+    <ClCompile Include="..\..\..\src\IntImpParGen\IntImpParGen_Tool.cxx" />
+    <ClInclude Include="..\..\..\src\IntImpParGen\IntImpParGen.hxx" />
+    <ClInclude Include="..\..\..\src\IntImpParGen\IntImpParGen_ImpParTool.gxx" />
+    <ClInclude Include="..\..\..\src\IntImpParGen\IntImpParGen_ImpTool.hxx" />
+    <ClInclude Include="..\..\..\src\IntImpParGen\IntImpParGen_Intersector.gxx" />
+    <ClInclude Include="..\..\..\src\IntImpParGen\IntImpParGen_Tool.hxx" />
+    <ClCompile Include="..\..\..\src\IntRes2d\IntRes2d_Domain.cxx" />
+    <ClCompile Include="..\..\..\src\IntRes2d\IntRes2d_Intersection.cxx" />
+    <ClCompile Include="..\..\..\src\IntRes2d\IntRes2d_IntersectionPoint.cxx" />
+    <ClCompile Include="..\..\..\src\IntRes2d\IntRes2d_IntersectionSegment.cxx" />
+    <ClCompile Include="..\..\..\src\IntRes2d\IntRes2d_Transition.cxx" />
+    <ClInclude Include="..\..\..\src\IntRes2d\IntRes2d_Domain.hxx" />
+    <ClInclude Include="..\..\..\src\IntRes2d\IntRes2d_Domain.lxx" />
+    <ClInclude Include="..\..\..\src\IntRes2d\IntRes2d_Intersection.hxx" />
+    <ClInclude Include="..\..\..\src\IntRes2d\IntRes2d_Intersection.lxx" />
+    <ClInclude Include="..\..\..\src\IntRes2d\IntRes2d_IntersectionPoint.hxx" />
+    <ClInclude Include="..\..\..\src\IntRes2d\IntRes2d_IntersectionPoint.lxx" />
+    <ClInclude Include="..\..\..\src\IntRes2d\IntRes2d_IntersectionSegment.hxx" />
+    <ClInclude Include="..\..\..\src\IntRes2d\IntRes2d_IntersectionSegment.lxx" />
+    <ClInclude Include="..\..\..\src\IntRes2d\IntRes2d_Position.hxx" />
+    <ClInclude Include="..\..\..\src\IntRes2d\IntRes2d_SequenceOfIntersectionPoint.hxx" />
+    <ClInclude Include="..\..\..\src\IntRes2d\IntRes2d_SequenceOfIntersectionSegment.hxx" />
+    <ClInclude Include="..\..\..\src\IntRes2d\IntRes2d_Situation.hxx" />
+    <ClInclude Include="..\..\..\src\IntRes2d\IntRes2d_Transition.hxx" />
+    <ClInclude Include="..\..\..\src\IntRes2d\IntRes2d_Transition.lxx" />
+    <ClInclude Include="..\..\..\src\IntRes2d\IntRes2d_TypeTrans.hxx" />
+    <ClCompile Include="..\..\..\src\IntCurve\IntCurve_IConicTool.cxx" />
+    <ClCompile Include="..\..\..\src\IntCurve\IntCurve_IntConicConic.cxx" />
+    <ClCompile Include="..\..\..\src\IntCurve\IntCurve_IntConicConic_1.cxx" />
+    <ClCompile Include="..\..\..\src\IntCurve\IntCurve_IntConicConic_Tool.cxx" />
+    <ClCompile Include="..\..\..\src\IntCurve\IntCurve_IntImpConicParConic_0.cxx" />
+    <ClCompile Include="..\..\..\src\IntCurve\IntCurve_MyImpParToolOfIntImpConicParConic_0.cxx" />
+    <ClCompile Include="..\..\..\src\IntCurve\IntCurve_PConic.cxx" />
+    <ClCompile Include="..\..\..\src\IntCurve\IntCurve_PConicTool.cxx" />
+    <ClCompile Include="..\..\..\src\IntCurve\IntCurve_ProjectOnPConicTool.cxx" />
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_DistBetweenPCurvesGen.gxx" />
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_ExactIntersectionPoint.gxx" />
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_IConicTool.hxx" />
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_IntConicConic.hxx" />
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_IntConicConic.lxx" />
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_IntConicConic_Tool.hxx" />
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_IntConicCurveGen.gxx" />
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_IntConicCurveGen.lxx" />
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_IntCurveCurveGen.gxx" />
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_IntCurveCurveGen.lxx" />
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_IntImpConicParConic.hxx" />
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_IntPolyPolyGen.gxx" />
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_MyImpParToolOfIntImpConicParConic.hxx" />
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_PConic.hxx" />
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_PConic.lxx" />
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_PConicTool.hxx" />
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_Polygon2dGen.gxx" />
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_Polygon2dGen.lxx" />
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_ProjPCurGen.gxx" />
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_ProjectOnPConicTool.hxx" />
+    <ClInclude Include="..\..\..\src\IntCurve\IntCurve_UserIntConicCurveGen.gxx" />
+    <ClCompile Include="..\..\..\src\TopTrans\TopTrans_CurveTransition.cxx" />
+    <ClCompile Include="..\..\..\src\TopTrans\TopTrans_SurfaceTransition.cxx" />
+    <ClInclude Include="..\..\..\src\TopTrans\TopTrans_Array2OfOrientation.hxx" />
+    <ClInclude Include="..\..\..\src\TopTrans\TopTrans_CurveTransition.hxx" />
+    <ClInclude Include="..\..\..\src\TopTrans\TopTrans_SurfaceTransition.hxx" />
+    <ClCompile Include="..\..\..\src\Intf\Intf.cxx" />
+    <ClCompile Include="..\..\..\src\Intf\Intf_Interference.cxx" />
+    <ClCompile Include="..\..\..\src\Intf\Intf_InterferencePolygon2d.cxx" />
+    <ClCompile Include="..\..\..\src\Intf\Intf_Polygon2d.cxx" />
+    <ClCompile Include="..\..\..\src\Intf\Intf_SectionLine.cxx" />
+    <ClCompile Include="..\..\..\src\Intf\Intf_SectionPoint.cxx" />
+    <ClCompile Include="..\..\..\src\Intf\Intf_TangentZone.cxx" />
+    <ClCompile Include="..\..\..\src\Intf\Intf_Tool.cxx" />
+    <ClInclude Include="..\..\..\src\Intf\Intf.hxx" />
+    <ClInclude Include="..\..\..\src\Intf\Intf_Array1OfLin.hxx" />
+    <ClInclude Include="..\..\..\src\Intf\Intf_Interference.hxx" />
+    <ClInclude Include="..\..\..\src\Intf\Intf_Interference.lxx" />
+    <ClInclude Include="..\..\..\src\Intf\Intf_InterferencePolygon2d.hxx" />
+    <ClInclude Include="..\..\..\src\Intf\Intf_InterferencePolygonPolyhedron.gxx" />
+    <ClInclude Include="..\..\..\src\Intf\Intf_PIType.hxx" />
+    <ClInclude Include="..\..\..\src\Intf\Intf_Polygon2d.hxx" />
+    <ClInclude Include="..\..\..\src\Intf\Intf_Polygon2d.lxx" />
+    <ClInclude Include="..\..\..\src\Intf\Intf_SectionLine.hxx" />
+    <ClInclude Include="..\..\..\src\Intf\Intf_SectionLine.lxx" />
+    <ClInclude Include="..\..\..\src\Intf\Intf_SectionPoint.hxx" />
+    <ClInclude Include="..\..\..\src\Intf\Intf_SectionPoint.lxx" />
+    <ClInclude Include="..\..\..\src\Intf\Intf_SeqOfSectionLine.hxx" />
+    <ClInclude Include="..\..\..\src\Intf\Intf_SeqOfSectionPoint.hxx" />
+    <ClInclude Include="..\..\..\src\Intf\Intf_SeqOfTangentZone.hxx" />
+    <ClInclude Include="..\..\..\src\Intf\Intf_TangentZone.hxx" />
+    <ClInclude Include="..\..\..\src\Intf\Intf_TangentZone.lxx" />
+    <ClInclude Include="..\..\..\src\Intf\Intf_Tool.hxx" />
+    <ClCompile Include="..\..\..\src\ApproxInt\ApproxInt_KnotTools.cxx" />
+    <ClCompile Include="..\..\..\src\ApproxInt\ApproxInt_SvSurfaces.cxx" />
+    <ClInclude Include="..\..\..\src\ApproxInt\ApproxInt_Approx.gxx" />
+    <ClInclude Include="..\..\..\src\ApproxInt\ApproxInt_ImpPrmSvSurfaces.gxx" />
+    <ClInclude Include="..\..\..\src\ApproxInt\ApproxInt_KnotTools.hxx" />
+    <ClInclude Include="..\..\..\src\ApproxInt\ApproxInt_MultiLine.gxx" />
+    <ClInclude Include="..\..\..\src\ApproxInt\ApproxInt_MultiLineTool.lxx" />
+    <ClInclude Include="..\..\..\src\ApproxInt\ApproxInt_PrmPrmSvSurfaces.gxx" />
+    <ClInclude Include="..\..\..\src\ApproxInt\ApproxInt_SvSurfaces.hxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d2TanOn.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d2TanOn_1.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d2TanOn_10.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d2TanOn_11.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d2TanOn_2.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d2TanOn_3.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d2TanOn_4.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d2TanOn_5.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d2TanOn_6.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d2TanOn_7.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d2TanOn_8.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d2TanOn_9.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d2TanRad.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d2TanRad_1.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d2TanRad_2.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d2TanRad_3.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d2TanRad_4.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d2TanRad_5.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d3Tan.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d3Tan_1.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d3Tan_2.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d3Tan_3.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d3Tan_4.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d3Tan_5.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d3Tan_6.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d3Tan_7.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d3Tan_8.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2d3Tan_9.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2dBisec.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2dTanCen.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2dTanOnRad.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2dTanOnRad_1.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2dTanOnRad_2.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2dTanOnRad_3.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2dTanOnRad_4.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Circ2dTanOnRad_5.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_CircLin2dBisec.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_CircPnt2dBisec.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Lin2d2Tan.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Lin2dBisec.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Lin2dTanObl.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Lin2dTanPar.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Lin2dTanPer.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_LinPnt2dBisec.cxx" />
+    <ClCompile Include="..\..\..\src\GccAna\GccAna_Pnt2dBisec.cxx" />
+    <ClInclude Include="..\..\..\src\GccAna\GccAna_Circ2d2TanOn.hxx" />
+    <ClInclude Include="..\..\..\src\GccAna\GccAna_Circ2d2TanRad.hxx" />
+    <ClInclude Include="..\..\..\src\GccAna\GccAna_Circ2d3Tan.hxx" />
+    <ClInclude Include="..\..\..\src\GccAna\GccAna_Circ2dBisec.hxx" />
+    <ClInclude Include="..\..\..\src\GccAna\GccAna_Circ2dTanCen.hxx" />
+    <ClInclude Include="..\..\..\src\GccAna\GccAna_Circ2dTanOnRad.hxx" />
+    <ClInclude Include="..\..\..\src\GccAna\GccAna_CircLin2dBisec.hxx" />
+    <ClInclude Include="..\..\..\src\GccAna\GccAna_CircPnt2dBisec.hxx" />
+    <ClInclude Include="..\..\..\src\GccAna\GccAna_Lin2d2Tan.hxx" />
+    <ClInclude Include="..\..\..\src\GccAna\GccAna_Lin2dBisec.hxx" />
+    <ClInclude Include="..\..\..\src\GccAna\GccAna_Lin2dTanObl.hxx" />
+    <ClInclude Include="..\..\..\src\GccAna\GccAna_Lin2dTanPar.hxx" />
+    <ClInclude Include="..\..\..\src\GccAna\GccAna_Lin2dTanPer.hxx" />
+    <ClInclude Include="..\..\..\src\GccAna\GccAna_LinPnt2dBisec.hxx" />
+    <ClInclude Include="..\..\..\src\GccAna\GccAna_NoSolution.hxx" />
+    <ClInclude Include="..\..\..\src\GccAna\GccAna_Pnt2dBisec.hxx" />
+    <ClCompile Include="..\..\..\src\GccEnt\GccEnt.cxx" />
+    <ClCompile Include="..\..\..\src\GccEnt\GccEnt_QualifiedCirc.cxx" />
+    <ClCompile Include="..\..\..\src\GccEnt\GccEnt_QualifiedLin.cxx" />
+    <ClInclude Include="..\..\..\src\GccEnt\GccEnt.hxx" />
+    <ClInclude Include="..\..\..\src\GccEnt\GccEnt_Array1OfPosition.hxx" />
+    <ClInclude Include="..\..\..\src\GccEnt\GccEnt_BadQualifier.hxx" />
+    <ClInclude Include="..\..\..\src\GccEnt\GccEnt_Position.hxx" />
+    <ClInclude Include="..\..\..\src\GccEnt\GccEnt_QualifiedCirc.hxx" />
+    <ClInclude Include="..\..\..\src\GccEnt\GccEnt_QualifiedLin.hxx" />
+    <ClCompile Include="..\..\..\src\GccInt\GccInt_BCirc.cxx" />
+    <ClCompile Include="..\..\..\src\GccInt\GccInt_BElips.cxx" />
+    <ClCompile Include="..\..\..\src\GccInt\GccInt_BHyper.cxx" />
+    <ClCompile Include="..\..\..\src\GccInt\GccInt_BLine.cxx" />
+    <ClCompile Include="..\..\..\src\GccInt\GccInt_BParab.cxx" />
+    <ClCompile Include="..\..\..\src\GccInt\GccInt_BPoint.cxx" />
+    <ClCompile Include="..\..\..\src\GccInt\GccInt_Bisec.cxx" />
+    <ClInclude Include="..\..\..\src\GccInt\GccInt_BCirc.hxx" />
+    <ClInclude Include="..\..\..\src\GccInt\GccInt_BElips.hxx" />
+    <ClInclude Include="..\..\..\src\GccInt\GccInt_BHyper.hxx" />
+    <ClInclude Include="..\..\..\src\GccInt\GccInt_BLine.hxx" />
+    <ClInclude Include="..\..\..\src\GccInt\GccInt_BParab.hxx" />
+    <ClInclude Include="..\..\..\src\GccInt\GccInt_BPoint.hxx" />
+    <ClInclude Include="..\..\..\src\GccInt\GccInt_Bisec.hxx" />
+    <ClInclude Include="..\..\..\src\GccInt\GccInt_IType.hxx" />
+    <ClCompile Include="..\..\..\src\HatchGen\HatchGen_Domain.cxx" />
+    <ClCompile Include="..\..\..\src\HatchGen\HatchGen_IntersectionPoint.cxx" />
+    <ClCompile Include="..\..\..\src\HatchGen\HatchGen_PointOnElement.cxx" />
+    <ClCompile Include="..\..\..\src\HatchGen\HatchGen_PointOnHatching.cxx" />
+    <ClInclude Include="..\..\..\src\HatchGen\HatchGen_Domain.hxx" />
+    <ClInclude Include="..\..\..\src\HatchGen\HatchGen_Domain.lxx" />
+    <ClInclude Include="..\..\..\src\HatchGen\HatchGen_Domains.hxx" />
+    <ClInclude Include="..\..\..\src\HatchGen\HatchGen_ErrorStatus.hxx" />
+    <ClInclude Include="..\..\..\src\HatchGen\HatchGen_IntersectionPoint.hxx" />
+    <ClInclude Include="..\..\..\src\HatchGen\HatchGen_IntersectionType.hxx" />
+    <ClInclude Include="..\..\..\src\HatchGen\HatchGen_PointOnElement.hxx" />
+    <ClInclude Include="..\..\..\src\HatchGen\HatchGen_PointOnElement.lxx" />
+    <ClInclude Include="..\..\..\src\HatchGen\HatchGen_PointOnHatching.hxx" />
+    <ClInclude Include="..\..\..\src\HatchGen\HatchGen_PointsOnElement.hxx" />
+    <ClInclude Include="..\..\..\src\HatchGen\HatchGen_PointsOnHatching.hxx" />
+    <ClCompile Include="..\..\..\src\Geom2dHatch\Geom2dHatch_Classifier_0.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dHatch\Geom2dHatch_Element.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dHatch\Geom2dHatch_Elements.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dHatch\Geom2dHatch_FClass2dOfClassifier_0.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dHatch\Geom2dHatch_Hatcher.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dHatch\Geom2dHatch_Hatching.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dHatch\Geom2dHatch_Intersector.cxx" />
+    <ClInclude Include="..\..\..\src\Geom2dHatch\Geom2dHatch_Classifier.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dHatch\Geom2dHatch_DataMapIteratorOfHatchings.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dHatch\Geom2dHatch_DataMapIteratorOfMapOfElements.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dHatch\Geom2dHatch_Element.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dHatch\Geom2dHatch_Elements.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dHatch\Geom2dHatch_FClass2dOfClassifier.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dHatch\Geom2dHatch_Hatcher.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dHatch\Geom2dHatch_Hatcher.lxx" />
+    <ClInclude Include="..\..\..\src\Geom2dHatch\Geom2dHatch_Hatching.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dHatch\Geom2dHatch_Hatchings.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dHatch\Geom2dHatch_Intersector.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dHatch\Geom2dHatch_Intersector.lxx" />
+    <ClInclude Include="..\..\..\src\Geom2dHatch\Geom2dHatch_MapOfElements.hxx" />
+    <ClCompile Include="..\..\..\src\Law\Law.cxx" />
+    <ClCompile Include="..\..\..\src\Law\Law_BSpFunc.cxx" />
+    <ClCompile Include="..\..\..\src\Law\Law_BSpline.cxx" />
+    <ClCompile Include="..\..\..\src\Law\Law_BSplineKnotSplitting.cxx" />
+    <ClCompile Include="..\..\..\src\Law\Law_Composite.cxx" />
+    <ClCompile Include="..\..\..\src\Law\Law_Constant.cxx" />
+    <ClCompile Include="..\..\..\src\Law\Law_Function.cxx" />
+    <ClCompile Include="..\..\..\src\Law\Law_Interpol.cxx" />
+    <ClCompile Include="..\..\..\src\Law\Law_Interpolate.cxx" />
+    <ClCompile Include="..\..\..\src\Law\Law_Linear.cxx" />
+    <ClCompile Include="..\..\..\src\Law\Law_S.cxx" />
+    <ClInclude Include="..\..\..\src\Law\Law.hxx" />
+    <ClInclude Include="..\..\..\src\Law\Law_BSpFunc.hxx" />
+    <ClInclude Include="..\..\..\src\Law\Law_BSpline.hxx" />
+    <ClInclude Include="..\..\..\src\Law\Law_BSplineKnotSplitting.hxx" />
+    <ClInclude Include="..\..\..\src\Law\Law_Composite.hxx" />
+    <ClInclude Include="..\..\..\src\Law\Law_Constant.hxx" />
+    <ClInclude Include="..\..\..\src\Law\Law_Function.hxx" />
+    <ClInclude Include="..\..\..\src\Law\Law_Interpol.hxx" />
+    <ClInclude Include="..\..\..\src\Law\Law_Interpolate.hxx" />
+    <ClInclude Include="..\..\..\src\Law\Law_Laws.hxx" />
+    <ClInclude Include="..\..\..\src\Law\Law_Linear.hxx" />
+    <ClInclude Include="..\..\..\src\Law\Law_ListIteratorOfLaws.hxx" />
+    <ClInclude Include="..\..\..\src\Law\Law_S.hxx" />
+    <ClCompile Include="..\..\..\src\AppBlend\AppBlend_Approx.cxx" />
+    <ClCompile Include="..\..\..\src\AppBlend\AppBlend_Debug.cxx" />
+    <ClInclude Include="..\..\..\src\AppBlend\AppBlend_AppSurf.gxx" />
+    <ClInclude Include="..\..\..\src\AppBlend\AppBlend_AppSurf.lxx" />
+    <ClInclude Include="..\..\..\src\AppBlend\AppBlend_Approx.hxx" />
+    <ClCompile Include="..\..\..\src\Plate\Plate_D1.cxx" />
+    <ClCompile Include="..\..\..\src\Plate\Plate_D2.cxx" />
+    <ClCompile Include="..\..\..\src\Plate\Plate_D3.cxx" />
+    <ClCompile Include="..\..\..\src\Plate\Plate_FreeGtoCConstraint.cxx" />
+    <ClCompile Include="..\..\..\src\Plate\Plate_GlobalTranslationConstraint.cxx" />
+    <ClCompile Include="..\..\..\src\Plate\Plate_GtoCConstraint.cxx" />
+    <ClCompile Include="..\..\..\src\Plate\Plate_LineConstraint.cxx" />
+    <ClCompile Include="..\..\..\src\Plate\Plate_LinearScalarConstraint.cxx" />
+    <ClCompile Include="..\..\..\src\Plate\Plate_LinearXYZConstraint.cxx" />
+    <ClCompile Include="..\..\..\src\Plate\Plate_PinpointConstraint.cxx" />
+    <ClCompile Include="..\..\..\src\Plate\Plate_PlaneConstraint.cxx" />
+    <ClCompile Include="..\..\..\src\Plate\Plate_Plate.cxx" />
+    <ClCompile Include="..\..\..\src\Plate\Plate_SampledCurveConstraint.cxx" />
+    <ClInclude Include="..\..\..\src\Plate\Plate_Array1OfPinpointConstraint.hxx" />
+    <ClInclude Include="..\..\..\src\Plate\Plate_D1.hxx" />
+    <ClInclude Include="..\..\..\src\Plate\Plate_D1.lxx" />
+    <ClInclude Include="..\..\..\src\Plate\Plate_D2.hxx" />
+    <ClInclude Include="..\..\..\src\Plate\Plate_D3.hxx" />
+    <ClInclude Include="..\..\..\src\Plate\Plate_FreeGtoCConstraint.hxx" />
+    <ClInclude Include="..\..\..\src\Plate\Plate_FreeGtoCConstraint.lxx" />
+    <ClInclude Include="..\..\..\src\Plate\Plate_GlobalTranslationConstraint.hxx" />
+    <ClInclude Include="..\..\..\src\Plate\Plate_GlobalTranslationConstraint.lxx" />
+    <ClInclude Include="..\..\..\src\Plate\Plate_GtoCConstraint.hxx" />
+    <ClInclude Include="..\..\..\src\Plate\Plate_GtoCConstraint.lxx" />
+    <ClInclude Include="..\..\..\src\Plate\Plate_HArray1OfPinpointConstraint.hxx" />
+    <ClInclude Include="..\..\..\src\Plate\Plate_LineConstraint.hxx" />
+    <ClInclude Include="..\..\..\src\Plate\Plate_LineConstraint.lxx" />
+    <ClInclude Include="..\..\..\src\Plate\Plate_LinearScalarConstraint.hxx" />
+    <ClInclude Include="..\..\..\src\Plate\Plate_LinearScalarConstraint.lxx" />
+    <ClInclude Include="..\..\..\src\Plate\Plate_LinearXYZConstraint.hxx" />
+    <ClInclude Include="..\..\..\src\Plate\Plate_LinearXYZConstraint.lxx" />
+    <ClInclude Include="..\..\..\src\Plate\Plate_PinpointConstraint.hxx" />
+    <ClInclude Include="..\..\..\src\Plate\Plate_PinpointConstraint.lxx" />
+    <ClInclude Include="..\..\..\src\Plate\Plate_PlaneConstraint.hxx" />
+    <ClInclude Include="..\..\..\src\Plate\Plate_PlaneConstraint.lxx" />
+    <ClInclude Include="..\..\..\src\Plate\Plate_Plate.hxx" />
+    <ClInclude Include="..\..\..\src\Plate\Plate_Plate.lxx" />
+    <ClInclude Include="..\..\..\src\Plate\Plate_SampledCurveConstraint.hxx" />
+    <ClInclude Include="..\..\..\src\Plate\Plate_SampledCurveConstraint.lxx" />
+    <ClInclude Include="..\..\..\src\Plate\Plate_SequenceOfLinearScalarConstraint.hxx" />
+    <ClInclude Include="..\..\..\src\Plate\Plate_SequenceOfLinearXYZConstraint.hxx" />
+    <ClInclude Include="..\..\..\src\Plate\Plate_SequenceOfPinpointConstraint.hxx" />
+    <ClCompile Include="..\..\..\src\GeomPlate\GeomPlate_Aij.cxx" />
+    <ClCompile Include="..\..\..\src\GeomPlate\GeomPlate_BuildAveragePlane.cxx" />
+    <ClCompile Include="..\..\..\src\GeomPlate\GeomPlate_BuildPlateSurface.cxx" />
+    <ClCompile Include="..\..\..\src\GeomPlate\GeomPlate_CurveConstraint.cxx" />
+    <ClCompile Include="..\..\..\src\GeomPlate\GeomPlate_MakeApprox.cxx" />
+    <ClCompile Include="..\..\..\src\GeomPlate\GeomPlate_PlateG0Criterion.cxx" />
+    <ClCompile Include="..\..\..\src\GeomPlate\GeomPlate_PlateG1Criterion.cxx" />
+    <ClCompile Include="..\..\..\src\GeomPlate\GeomPlate_PointConstraint.cxx" />
+    <ClCompile Include="..\..\..\src\GeomPlate\GeomPlate_Surface.cxx" />
+    <ClInclude Include="..\..\..\src\GeomPlate\GeomPlate_Aij.hxx" />
+    <ClInclude Include="..\..\..\src\GeomPlate\GeomPlate_Array1OfHCurve.hxx" />
+    <ClInclude Include="..\..\..\src\GeomPlate\GeomPlate_Array1OfSequenceOfReal.hxx" />
+    <ClInclude Include="..\..\..\src\GeomPlate\GeomPlate_BuildAveragePlane.hxx" />
+    <ClInclude Include="..\..\..\src\GeomPlate\GeomPlate_BuildPlateSurface.hxx" />
+    <ClInclude Include="..\..\..\src\GeomPlate\GeomPlate_CurveConstraint.hxx" />
+    <ClInclude Include="..\..\..\src\GeomPlate\GeomPlate_HArray1OfHCurve.hxx" />
+    <ClInclude Include="..\..\..\src\GeomPlate\GeomPlate_HArray1OfSequenceOfReal.hxx" />
+    <ClInclude Include="..\..\..\src\GeomPlate\GeomPlate_HSequenceOfCurveConstraint.hxx" />
+    <ClInclude Include="..\..\..\src\GeomPlate\GeomPlate_HSequenceOfPointConstraint.hxx" />
+    <ClInclude Include="..\..\..\src\GeomPlate\GeomPlate_MakeApprox.hxx" />
+    <ClInclude Include="..\..\..\src\GeomPlate\GeomPlate_PlateG0Criterion.hxx" />
+    <ClInclude Include="..\..\..\src\GeomPlate\GeomPlate_PlateG1Criterion.hxx" />
+    <ClInclude Include="..\..\..\src\GeomPlate\GeomPlate_PointConstraint.hxx" />
+    <ClInclude Include="..\..\..\src\GeomPlate\GeomPlate_SequenceOfAij.hxx" />
+    <ClInclude Include="..\..\..\src\GeomPlate\GeomPlate_SequenceOfCurveConstraint.hxx" />
+    <ClInclude Include="..\..\..\src\GeomPlate\GeomPlate_SequenceOfPointConstraint.hxx" />
+    <ClInclude Include="..\..\..\src\GeomPlate\GeomPlate_Surface.hxx" />
+    <ClCompile Include="..\..\..\src\LocalAnalysis\LocalAnalysis.cxx" />
+    <ClCompile Include="..\..\..\src\LocalAnalysis\LocalAnalysis_CurveContinuity.cxx" />
+    <ClCompile Include="..\..\..\src\LocalAnalysis\LocalAnalysis_SurfaceContinuity.cxx" />
+    <ClInclude Include="..\..\..\src\LocalAnalysis\LocalAnalysis.hxx" />
+    <ClInclude Include="..\..\..\src\LocalAnalysis\LocalAnalysis_CurveContinuity.hxx" />
+    <ClInclude Include="..\..\..\src\LocalAnalysis\LocalAnalysis_StatusErrorType.hxx" />
+    <ClInclude Include="..\..\..\src\LocalAnalysis\LocalAnalysis_SurfaceContinuity.hxx" />
+    <ClCompile Include="..\..\..\src\GeomAPI\GeomAPI.cxx" />
+    <ClCompile Include="..\..\..\src\GeomAPI\GeomAPI_ExtremaCurveCurve.cxx" />
+    <ClCompile Include="..\..\..\src\GeomAPI\GeomAPI_ExtremaCurveSurface.cxx" />
+    <ClCompile Include="..\..\..\src\GeomAPI\GeomAPI_ExtremaSurfaceSurface.cxx" />
+    <ClCompile Include="..\..\..\src\GeomAPI\GeomAPI_IntCS.cxx" />
+    <ClCompile Include="..\..\..\src\GeomAPI\GeomAPI_Interpolate.cxx" />
+    <ClCompile Include="..\..\..\src\GeomAPI\GeomAPI_PointsToBSpline.cxx" />
+    <ClCompile Include="..\..\..\src\GeomAPI\GeomAPI_PointsToBSplineSurface.cxx" />
+    <ClCompile Include="..\..\..\src\GeomAPI\GeomAPI_ProjectPointOnCurve.cxx" />
+    <ClCompile Include="..\..\..\src\GeomAPI\GeomAPI_ProjectPointOnSurf.cxx" />
+    <ClInclude Include="..\..\..\src\GeomAPI\GeomAPI.hxx" />
+    <ClInclude Include="..\..\..\src\GeomAPI\GeomAPI_ExtremaCurveCurve.hxx" />
+    <ClInclude Include="..\..\..\src\GeomAPI\GeomAPI_ExtremaCurveCurve.lxx" />
+    <ClInclude Include="..\..\..\src\GeomAPI\GeomAPI_ExtremaCurveSurface.hxx" />
+    <ClInclude Include="..\..\..\src\GeomAPI\GeomAPI_ExtremaCurveSurface.lxx" />
+    <ClInclude Include="..\..\..\src\GeomAPI\GeomAPI_ExtremaSurfaceSurface.hxx" />
+    <ClInclude Include="..\..\..\src\GeomAPI\GeomAPI_ExtremaSurfaceSurface.lxx" />
+    <ClInclude Include="..\..\..\src\GeomAPI\GeomAPI_IntCS.hxx" />
+    <ClInclude Include="..\..\..\src\GeomAPI\GeomAPI_IntSS.hxx" />
+    <ClInclude Include="..\..\..\src\GeomAPI\GeomAPI_IntSS.lxx" />
+    <ClInclude Include="..\..\..\src\GeomAPI\GeomAPI_Interpolate.hxx" />
+    <ClInclude Include="..\..\..\src\GeomAPI\GeomAPI_PointsToBSpline.hxx" />
+    <ClInclude Include="..\..\..\src\GeomAPI\GeomAPI_PointsToBSplineSurface.hxx" />
+    <ClInclude Include="..\..\..\src\GeomAPI\GeomAPI_ProjectPointOnCurve.hxx" />
+    <ClInclude Include="..\..\..\src\GeomAPI\GeomAPI_ProjectPointOnCurve.lxx" />
+    <ClInclude Include="..\..\..\src\GeomAPI\GeomAPI_ProjectPointOnSurf.hxx" />
+    <ClInclude Include="..\..\..\src\GeomAPI\GeomAPI_ProjectPointOnSurf.lxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_AppSurf_0.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_AppSweep_0.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_BSplineCurves.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_BezierCurves.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_BoundWithSurf.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_Boundary.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_CircularBlendFunc.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_ConstantBiNormal.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_ConstrainedFilling.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_Coons.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_CoonsAlgPatch.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_CornerState.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_CorrectedFrenet.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_CurveAndTrihedron.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_Curved.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_Darboux.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_DegeneratedBound.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_DiscreteTrihedron.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_DraftTrihedron.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_EvolvedSection.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_Filling.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_Fixed.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_Frenet.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_FunctionDraft.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_FunctionGuide.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_Generator.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_GuideTrihedronAC.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_GuideTrihedronPlan.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_Line.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_LocFunction.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_LocationDraft.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_LocationGuide.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_LocationLaw.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_NSections.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_Pipe.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_PlanFunc.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_PolynomialConvertor.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_Profiler.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_QuasiAngularConvertor.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_SectionGenerator.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_SectionLaw.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_SectionPlacement.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_SimpleBound.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_SnglrFunc.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_Stretch.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_Sweep.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_SweepFunction.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_SweepSectionGenerator.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_Tensor.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_TgtField.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_TgtOnCoons.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_TrihedronLaw.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_TrihedronWithGuide.cxx" />
+    <ClCompile Include="..\..\..\src\GeomFill\GeomFill_UniformSection.cxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_AppSurf.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_AppSweep.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_ApproxStyle.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Array1OfLocationLaw.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Array1OfSectionLaw.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_BSplineCurves.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_BSplineCurves.lxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_BezierCurves.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_BezierCurves.lxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_BoundWithSurf.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Boundary.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_CircularBlendFunc.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_ConstantBiNormal.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_ConstrainedFilling.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Coons.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_CoonsAlgPatch.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_CornerState.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_CorrectedFrenet.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_CurveAndTrihedron.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Curved.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Darboux.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_DegeneratedBound.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_DiscreteTrihedron.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_DraftTrihedron.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_EvolvedSection.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Filling.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_FillingStyle.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Fixed.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Frenet.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_FunctionDraft.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_FunctionGuide.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Generator.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Generator.lxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_GuideTrihedronAC.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_GuideTrihedronPlan.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_HArray1OfLocationLaw.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_HArray1OfSectionLaw.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_HSequenceOfAx2.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Line.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Line.lxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_LocFunction.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_LocationDraft.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_LocationGuide.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_LocationLaw.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_NSections.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Pipe.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Pipe.lxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_PipeError.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_PlanFunc.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_PolynomialConvertor.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Profiler.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Profiler.lxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_QuasiAngularConvertor.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_SectionGenerator.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_SectionLaw.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_SectionPlacement.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_SequenceOfAx2.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_SequenceOfTrsf.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_SimpleBound.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_SnglrFunc.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Stretch.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Sweep.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_SweepFunction.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_SweepSectionGenerator.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_SweepSectionGenerator.lxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Tensor.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Tensor.lxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_TgtField.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_TgtOnCoons.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_Trihedron.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_TrihedronLaw.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_TrihedronWithGuide.hxx" />
+    <ClInclude Include="..\..\..\src\GeomFill\GeomFill_UniformSection.hxx" />
+    <ClCompile Include="..\..\..\src\Geom2dAPI\Geom2dAPI_ExtremaCurveCurve.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dAPI\Geom2dAPI_InterCurveCurve.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dAPI\Geom2dAPI_Interpolate.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dAPI\Geom2dAPI_PointsToBSpline.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dAPI\Geom2dAPI_ProjectPointOnCurve.cxx" />
+    <ClInclude Include="..\..\..\src\Geom2dAPI\Geom2dAPI_ExtremaCurveCurve.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dAPI\Geom2dAPI_ExtremaCurveCurve.lxx" />
+    <ClInclude Include="..\..\..\src\Geom2dAPI\Geom2dAPI_InterCurveCurve.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dAPI\Geom2dAPI_InterCurveCurve.lxx" />
+    <ClInclude Include="..\..\..\src\Geom2dAPI\Geom2dAPI_Interpolate.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dAPI\Geom2dAPI_PointsToBSpline.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dAPI\Geom2dAPI_ProjectPointOnCurve.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dAPI\Geom2dAPI_ProjectPointOnCurve.lxx" />
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2d2TanOn.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2d2TanOnGeo.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2d2TanOnIter.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2d2TanRad.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2d2TanRadGeo.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2d3Tan.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2d3TanIter.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2dTanCen.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2dTanCenGeo.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2dTanOnRad.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2dTanOnRadGeo.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_CurveTool.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_FunctionTanCirCu.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_FunctionTanCuCu.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_FunctionTanCuCuCu.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_FunctionTanCuCuOnCu.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_FunctionTanCuPnt.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_FunctionTanObl.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Lin2d2Tan.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Lin2d2TanIter.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Lin2dTanObl.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Lin2dTanOblIter.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_QCurve.cxx" />
+    <ClCompile Include="..\..\..\src\Geom2dGcc\Geom2dGcc_QualifiedCurve.cxx" />
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2d2TanOn.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2d2TanOnGeo.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2d2TanOnIter.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2d2TanRad.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2d2TanRadGeo.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2d3Tan.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2d3TanIter.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2dTanCen.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2dTanCenGeo.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2dTanOnRad.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Circ2dTanOnRadGeo.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_CurveTool.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_FunctionTanCirCu.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_FunctionTanCuCu.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_FunctionTanCuCuCu.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_FunctionTanCuCuOnCu.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_FunctionTanCuPnt.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_FunctionTanObl.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_IsParallel.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Lin2d2Tan.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Lin2d2TanIter.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Lin2dTanObl.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Lin2dTanOblIter.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_QCurve.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_QualifiedCurve.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Type1.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Type2.hxx" />
+    <ClInclude Include="..\..\..\src\Geom2dGcc\Geom2dGcc_Type3.hxx" />
+    <ClCompile Include="..\..\..\src\FairCurve\FairCurve_Batten.cxx" />
+    <ClCompile Include="..\..\..\src\FairCurve\FairCurve_BattenLaw.cxx" />
+    <ClCompile Include="..\..\..\src\FairCurve\FairCurve_DistributionOfEnergy.cxx" />
+    <ClCompile Include="..\..\..\src\FairCurve\FairCurve_DistributionOfJerk.cxx" />
+    <ClCompile Include="..\..\..\src\FairCurve\FairCurve_DistributionOfSagging.cxx" />
+    <ClCompile Include="..\..\..\src\FairCurve\FairCurve_DistributionOfTension.cxx" />
+    <ClCompile Include="..\..\..\src\FairCurve\FairCurve_Energy.cxx" />
+    <ClCompile Include="..\..\..\src\FairCurve\FairCurve_EnergyOfBatten.cxx" />
+    <ClCompile Include="..\..\..\src\FairCurve\FairCurve_EnergyOfMVC.cxx" />
+    <ClCompile Include="..\..\..\src\FairCurve\FairCurve_MinimalVariation.cxx" />
+    <ClCompile Include="..\..\..\src\FairCurve\FairCurve_Newton.cxx" />
+    <ClInclude Include="..\..\..\src\FairCurve\FairCurve_AnalysisCode.hxx" />
+    <ClInclude Include="..\..\..\src\FairCurve\FairCurve_Batten.hxx" />
+    <ClInclude Include="..\..\..\src\FairCurve\FairCurve_Batten.lxx" />
+    <ClInclude Include="..\..\..\src\FairCurve\FairCurve_BattenLaw.hxx" />
+    <ClInclude Include="..\..\..\src\FairCurve\FairCurve_BattenLaw.lxx" />
+    <ClInclude Include="..\..\..\src\FairCurve\FairCurve_DistributionOfEnergy.hxx" />
+    <ClInclude Include="..\..\..\src\FairCurve\FairCurve_DistributionOfJerk.hxx" />
+    <ClInclude Include="..\..\..\src\FairCurve\FairCurve_DistributionOfSagging.hxx" />
+    <ClInclude Include="..\..\..\src\FairCurve\FairCurve_DistributionOfTension.hxx" />
+    <ClInclude Include="..\..\..\src\FairCurve\FairCurve_DistributionOfTension.lxx" />
+    <ClInclude Include="..\..\..\src\FairCurve\FairCurve_Energy.hxx" />
+    <ClInclude Include="..\..\..\src\FairCurve\FairCurve_Energy.lxx" />
+    <ClInclude Include="..\..\..\src\FairCurve\FairCurve_EnergyOfBatten.hxx" />
+    <ClInclude Include="..\..\..\src\FairCurve\FairCurve_EnergyOfBatten.lxx" />
+    <ClInclude Include="..\..\..\src\FairCurve\FairCurve_EnergyOfMVC.hxx" />
+    <ClInclude Include="..\..\..\src\FairCurve\FairCurve_EnergyOfMVC.lxx" />
+    <ClInclude Include="..\..\..\src\FairCurve\FairCurve_MinimalVariation.hxx" />
+    <ClInclude Include="..\..\..\src\FairCurve\FairCurve_MinimalVariation.lxx" />
+    <ClInclude Include="..\..\..\src\FairCurve\FairCurve_Newton.hxx" />
+    <ClCompile Include="..\..\..\src\NLPlate\NLPlate_HGPPConstraint.cxx" />
+    <ClCompile Include="..\..\..\src\NLPlate\NLPlate_HPG0Constraint.cxx" />
+    <ClCompile Include="..\..\..\src\NLPlate\NLPlate_HPG0G1Constraint.cxx" />
+    <ClCompile Include="..\..\..\src\NLPlate\NLPlate_HPG0G2Constraint.cxx" />
+    <ClCompile Include="..\..\..\src\NLPlate\NLPlate_HPG0G3Constraint.cxx" />
+    <ClCompile Include="..\..\..\src\NLPlate\NLPlate_HPG1Constraint.cxx" />
+    <ClCompile Include="..\..\..\src\NLPlate\NLPlate_HPG2Constraint.cxx" />
+    <ClCompile Include="..\..\..\src\NLPlate\NLPlate_HPG3Constraint.cxx" />
+    <ClCompile Include="..\..\..\src\NLPlate\NLPlate_NLPlate.cxx" />
+    <ClInclude Include="..\..\..\src\NLPlate\NLPlate_HGPPConstraint.hxx" />
+    <ClInclude Include="..\..\..\src\NLPlate\NLPlate_HPG0Constraint.hxx" />
+    <ClInclude Include="..\..\..\src\NLPlate\NLPlate_HPG0G1Constraint.hxx" />
+    <ClInclude Include="..\..\..\src\NLPlate\NLPlate_HPG0G2Constraint.hxx" />
+    <ClInclude Include="..\..\..\src\NLPlate\NLPlate_HPG0G3Constraint.hxx" />
+    <ClInclude Include="..\..\..\src\NLPlate\NLPlate_HPG1Constraint.hxx" />
+    <ClInclude Include="..\..\..\src\NLPlate\NLPlate_HPG2Constraint.hxx" />
+    <ClInclude Include="..\..\..\src\NLPlate\NLPlate_HPG3Constraint.hxx" />
+    <ClInclude Include="..\..\..\src\NLPlate\NLPlate_ListIteratorOfStackOfPlate.hxx" />
+    <ClInclude Include="..\..\..\src\NLPlate\NLPlate_NLPlate.hxx" />
+    <ClInclude Include="..\..\..\src\NLPlate\NLPlate_SequenceOfHGPPConstraint.hxx" />
+    <ClInclude Include="..\..\..\src\NLPlate\NLPlate_StackOfPlate.hxx" />
+    <ClCompile Include="..\..\..\src\IntPolyh\IntPolyh_Couple.cxx" />
+    <ClCompile Include="..\..\..\src\IntPolyh\IntPolyh_Edge.cxx" />
+    <ClCompile Include="..\..\..\src\IntPolyh\IntPolyh_Intersection.cxx" />
+    <ClCompile Include="..\..\..\src\IntPolyh\IntPolyh_MaillageAffinage.cxx" />
+    <ClCompile Include="..\..\..\src\IntPolyh\IntPolyh_Point.cxx" />
+    <ClCompile Include="..\..\..\src\IntPolyh\IntPolyh_SectionLine.cxx" />
+    <ClCompile Include="..\..\..\src\IntPolyh\IntPolyh_StartPoint.cxx" />
+    <ClCompile Include="..\..\..\src\IntPolyh\IntPolyh_Tools.cxx" />
+    <ClCompile Include="..\..\..\src\IntPolyh\IntPolyh_Triangle.cxx" />
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_Array.hxx" />
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_ArrayOfEdges.hxx" />
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_ArrayOfPointNormal.hxx" />
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_ArrayOfPoints.hxx" />
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_ArrayOfSectionLines.hxx" />
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_ArrayOfTangentZones.hxx" />
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_ArrayOfTriangles.hxx" />
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_Couple.hxx" />
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_CoupleMapHasher.hxx" />
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_Edge.hxx" />
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_Intersection.hxx" />
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_ListOfCouples.hxx" />
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_MaillageAffinage.hxx" />
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_PMaillageAffinage.hxx" />
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_Point.hxx" />
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_SectionLine.hxx" />
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_SeqOfStartPoints.hxx" />
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_StartPoint.hxx" />
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_Tools.hxx" />
+    <ClInclude Include="..\..\..\src\IntPolyh\IntPolyh_Triangle.hxx" />
+    <ClCompile Include="..\..\..\src\TopClass\TopClass.cxx" />
+    <ClCompile Include="..\..\..\src\TopClass\TopClass_SolidExplorer.cxx" />
+    <ClInclude Include="..\..\..\src\TopClass\TopClass_Classifier2d.gxx" />
+    <ClInclude Include="..\..\..\src\TopClass\TopClass_Classifier2d.lxx" />
+    <ClInclude Include="..\..\..\src\TopClass\TopClass_Classifier3d.gxx" />
+    <ClInclude Include="..\..\..\src\TopClass\TopClass_Classifier3d.lxx" />
+    <ClInclude Include="..\..\..\src\TopClass\TopClass_FaceClassifier.gxx" />
+    <ClInclude Include="..\..\..\src\TopClass\TopClass_FaceClassifier.lxx" />
+    <ClInclude Include="..\..\..\src\TopClass\TopClass_SolidClassifier.gxx" />
+    <ClInclude Include="..\..\..\src\TopClass\TopClass_SolidExplorer.hxx" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="TKGeomAlgo.rc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

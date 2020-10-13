@@ -1,17 +1,20 @@
 #pragma once
-#include "XbimSolid.h"
-#include "XbimShell.h"
-#include "XbimFace.h"
+
 
 #include <TopoDS.hxx>
 #include <TopoDS_Compound.hxx>
 #include <TopExp_Explorer.hxx>
 #include <Precision.hxx>
 
-using namespace System::Collections::Generic;
+#include "XbimSolid.h"
+#include "XbimShell.h"
+#include "XbimFace.h"
+
+
+using namespace Microsoft::Extensions::Logging;
 using namespace Xbim::Ifc4;
 using namespace Xbim::Common::Geometry;
-
+using namespace Xbim::Ifc4::Interfaces;
 namespace Xbim
 {
 	namespace Geometry
@@ -21,11 +24,11 @@ namespace Xbim
 		{
 		private:
 			
-			IntPtr ptrContainer;
+			System::IntPtr ptrContainer;
 			virtual property TopoDS_Compound* pCompound
 			{
 				TopoDS_Compound* get() sealed { return (TopoDS_Compound*)ptrContainer.ToPointer(); }
-				void set(TopoDS_Compound* val)sealed { ptrContainer = IntPtr(val); }
+				void set(TopoDS_Compound* val)sealed { ptrContainer = System::IntPtr(val); }
 			}
 			XbimCompound(){};
 			static XbimCompound^ empty = gcnew XbimCompound();
@@ -49,7 +52,7 @@ namespace Xbim
 			void Init(IIfcTriangulatedFaceSet^ faceSet, ILogger^ logger);
 			
 			//Helpers
-			XbimFace^ BuildFace(List<Tuple<XbimWire^, IIfcPolyLoop^, bool>^>^ wires, IIfcFace^ face, ILogger^ logger);
+			XbimFace^ BuildFace(List<System::Tuple<XbimWire^, IIfcPolyLoop^, bool>^>^ wires, IIfcFace^ face, ILogger^ logger);
 			static void  GetConnected(HashSet<XbimSolid^>^ connected, Dictionary<XbimSolid^, HashSet<XbimSolid^>^>^ clusters, XbimSolid^ clusterAround);
 			
 			
@@ -72,7 +75,7 @@ namespace Xbim
 			XbimCompound(IIfcPolygonalFaceSet^ faceSet, ILogger^ logger);
 			static property XbimCompound^ Empty{XbimCompound^ get(){ return empty; }};
 #pragma region IXbimCompound Interface
-			virtual property bool IsValid {bool get() override { return ptrContainer != IntPtr::Zero && Count > 0; }; }
+			virtual property bool IsValid {bool get() override { return ptrContainer != System::IntPtr::Zero && Count > 0; }; }
 			virtual property bool IsSet{bool get() override { return true; }; }
 			virtual property  XbimGeometryObjectType GeometryType  {XbimGeometryObjectType  get()override { return XbimGeometryObjectType::XbimCompoundType; }}
 			virtual property int Count{int get(); }

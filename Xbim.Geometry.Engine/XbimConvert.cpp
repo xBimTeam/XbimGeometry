@@ -1,6 +1,4 @@
-#include "XbimConvert.h"
-#include "XbimCurve.h"
-#include "XbimCurve2d.h"
+
 #include <gp_Dir2d.hxx>
 #include <gp_Dir.hxx>
 #include <gp_Dir2d.hxx>
@@ -14,8 +12,10 @@
 #include <gp_Ax2d.hxx>
 #include <gp_Ax3.hxx>
 #include <gp_Mat2d.hxx>
+#include "XbimConvert.h"
+#include "XbimCurve.h"
+#include "XbimCurve2d.h"
 
-using namespace System;
 using namespace System::Linq;
 using namespace Xbim::Common::Geometry;
 using namespace Xbim::Ifc4::Interfaces;
@@ -147,7 +147,7 @@ namespace Xbim
 			}
 			else
 			{
-				throw(gcnew NotImplementedException("XbimConvert. Unsupported Placement type, need to implement Grid Placement"));
+				throw(gcnew System::NotImplementedException("XbimConvert. Unsupported Placement type, need to implement Grid Placement"));
 			}
 		}
 
@@ -169,7 +169,7 @@ namespace Xbim
 				return TopLoc_Location();
 			else
 			{
-				throw(gcnew NotImplementedException("XbimConvert. Unsupported Placement type, need to implement Grid Placement"));
+				throw(gcnew System::NotImplementedException("XbimConvert. Unsupported Placement type, need to implement Grid Placement"));
 			}
 
 		}
@@ -189,7 +189,7 @@ namespace Xbim
 			else if (dynamic_cast<IIfcAxis2Placement2D^>(placement))
 				return XbimConvert::ToAx3((IIfcAxis2Placement2D^)placement);	
 			else
-				throw(gcnew NotImplementedException("XbimConvert. Unsupported Placement type, need to be Axis2 or Axis3"));
+				throw(gcnew System::NotImplementedException("XbimConvert. Unsupported Placement type, need to be Axis2 or Axis3"));
 		}
 
 		gp_Ax3 XbimConvert::ToAx3(IIfcAxis2Placement2D^ axis2D)
@@ -298,7 +298,7 @@ namespace Xbim
 			else if (tForm == nullptr)
 				return gp_Trsf();
 			else
-				throw(gcnew ArgumentOutOfRangeException("XbimConvert. Unsupported CartesianTransformationOperator type"));
+				throw(gcnew System::ArgumentOutOfRangeException("XbimConvert. Unsupported CartesianTransformationOperator type"));
 		}
 
 		gp_Trsf XbimConvert::ToTransform(IIfcCartesianTransformationOperator3D^ ct3D)
@@ -716,7 +716,7 @@ namespace Xbim
 			}
 			else
 			{
-				throw(gcnew NotImplementedException("XbimConvert. Unsupported Placement type, must axis 2D or 3D"));
+				throw(gcnew System::NotImplementedException("XbimConvert. Unsupported Placement type, must axis 2D or 3D"));
 			}
 		}
 
@@ -734,7 +734,7 @@ namespace Xbim
 			}
 			else
 			{
-				throw(gcnew NotImplementedException("XbimConvert. Unsupported Placement type, must axis 2D or 3D"));
+				throw(gcnew System::NotImplementedException("XbimConvert. Unsupported Placement type, must axis 2D or 3D"));
 			}
 		}
 		gp_Vec XbimConvert::GetAxisDir3d(IIfcAxis2Placement^ /*placement*/)

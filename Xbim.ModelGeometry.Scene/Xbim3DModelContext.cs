@@ -500,7 +500,7 @@ namespace Xbim.ModelGeometry.Scene
         }
         static Xbim3DModelContext()
         {
-            var timeOut = System.Configuration.ConfigurationManager.AppSettings["BooleanTimeOut"];
+            var timeOut = Environment.GetEnvironmentVariable("BooleanTimeOut");
             if (!int.TryParse(timeOut, out int BooleanTimeOutSeconds))
                 BooleanTimeOutSeconds = 60;
             BooleanTimeOutMilliSeconds = BooleanTimeOutSeconds * 1000;

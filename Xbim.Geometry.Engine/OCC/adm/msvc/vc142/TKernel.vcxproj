@@ -1,0 +1,992 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{8DD8EAF9-148D-030E-0C02-C58C5E827B83}</ProjectGuid>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\..\..\..\win32\vc14\bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\..\..\..\win32\vc14\obj\TKernel\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\..\..\..\win32\vc14\bind\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\..\..\..\win32\vc14\objd\TKernel\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\..\..\..\win64\vc14\bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\..\..\..\win64\vc14\obj\TKernel\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\..\..\..\win64\vc14\bind\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\..\..\..\win64\vc14\objd\TKernel\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\..\..\..\win32\vc14\bin\TKernel.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>OCCT_STATIC_BUILD;HAVE_NO_DLL;NDEBUG;No_Exception;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <AssemblerListingLocation>.\..\..\..\win32\vc14\obj\TKernel/</AssemblerListingLocation>
+      <ObjectFileName>.\..\..\..\win32\vc14\obj\TKernel/</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\..\..\win32\vc14\obj\TKernel/</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;No_Exception;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;comdlg32.lib;wsock32.lib;Psapi.lib</AdditionalDependencies>
+      <OutputFile>.\..\..\..\win32\vc14\bin\TKernel.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\win32\vc14\lib;$(CSF_OPT_LIB32);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>no</GenerateDebugInformation>
+      <ProgramDatabaseFile>.\..\..\..\win32\vc14\bin\TKernel.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <ImportLibrary>..\..\..\win32\vc14\lib\TKernel.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\..\..\..\win32\vc14\bind\TKernel.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>Disabled</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>DHAVE_NO_DLL;OCCT_STATIC_BUILD;HAVE_NO_DLL;_DEBUG;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <AssemblerListingLocation>.\..\..\..\win32\vc14\objd\TKernel/</AssemblerListingLocation>
+      <ObjectFileName>.\..\..\..\win32\vc14\objd\TKernel/</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\..\..\win32\vc14\objd\TKernel/</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;comdlg32.lib;wsock32.lib;Psapi.lib</AdditionalDependencies>
+      <OutputFile>.\..\..\..\win32\vc14\bind\TKernel.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\win32\vc14\libd;$(CSF_OPT_LIB32D);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>..\..\..\win32\vc14\bind\TKernel.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <ImportLibrary>..\..\..\win32\vc14\libd\TKernel.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>x64</TargetEnvironment>
+      <TypeLibraryName>.\..\..\..\win64\vc14\bin\TKernel.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>NDEBUG;No_Exception;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <AssemblerListingLocation>.\..\..\..\win64\vc14\obj\TKernel/</AssemblerListingLocation>
+      <ObjectFileName>.\..\..\..\win64\vc14\obj\TKernel/</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\..\..\win64\vc14\obj\TKernel/</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;No_Exception;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;comdlg32.lib;wsock32.lib;Psapi.lib</AdditionalDependencies>
+      <OutputFile>.\..\..\..\win64\vc14\bin\TKernel.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\win64\vc14\lib;$(CSF_OPT_LIB64);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>no</GenerateDebugInformation>
+      <ProgramDatabaseFile>.\..\..\..\win64\vc14\bin\TKernel.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <ImportLibrary>..\..\..\win64\vc14\lib\TKernel.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>x64</TargetEnvironment>
+      <TypeLibraryName>.\..\..\..\win64\vc14\bind\TKernel.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>Disabled</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>_DEBUG;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <AssemblerListingLocation>.\..\..\..\win64\vc14\objd\TKernel/</AssemblerListingLocation>
+      <ObjectFileName>.\..\..\..\win64\vc14\objd\TKernel/</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\..\..\win64\vc14\objd\TKernel/</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\inc;$(CSF_OPT_INC);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;$(CSF_DEFINES);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;comdlg32.lib;wsock32.lib;Psapi.lib</AdditionalDependencies>
+      <OutputFile>.\..\..\..\win64\vc14\bind\TKernel.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\win64\vc14\libd;$(CSF_OPT_LIB64D);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>..\..\..\win64\vc14\bind\TKernel.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <ImportLibrary>..\..\..\win64\vc14\libd\TKernel.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\FSD\FSD_Base64Decoder.cxx" />
+    <ClCompile Include="..\..\..\src\FSD\FSD_BinaryFile.cxx" />
+    <ClCompile Include="..\..\..\src\FSD\FSD_CmpFile.cxx" />
+    <ClCompile Include="..\..\..\src\FSD\FSD_File.cxx" />
+    <ClInclude Include="..\..\..\src\FSD\FSD_BStream.hxx" />
+    <ClInclude Include="..\..\..\src\FSD\FSD_Base64Decoder.hxx" />
+    <ClInclude Include="..\..\..\src\FSD\FSD_BinaryFile.hxx" />
+    <ClInclude Include="..\..\..\src\FSD\FSD_CmpFile.hxx" />
+    <ClInclude Include="..\..\..\src\FSD\FSD_FStream.hxx" />
+    <ClInclude Include="..\..\..\src\FSD\FSD_File.hxx" />
+    <ClInclude Include="..\..\..\src\FSD\FSD_FileHeader.hxx" />
+    <ClInclude Include="..\..\..\src\MMgt\MMgt_TShared.hxx" />
+    <ClCompile Include="..\..\..\src\OSD\OSD.cxx" />
+    <ClCompile Include="..\..\..\src\OSD\OSD_Chronometer.cxx" />
+    <ClCompile Include="..\..\..\src\OSD\OSD_Directory.cxx" />
+    <ClCompile Include="..\..\..\src\OSD\OSD_DirectoryIterator.cxx" />
+    <ClCompile Include="..\..\..\src\OSD\OSD_Disk.cxx" />
+    <ClCompile Include="..\..\..\src\OSD\OSD_Environment.cxx" />
+    <ClCompile Include="..\..\..\src\OSD\OSD_Error.cxx" />
+    <ClCompile Include="..\..\..\src\OSD\OSD_File.cxx" />
+    <ClCompile Include="..\..\..\src\OSD\OSD_FileIterator.cxx" />
+    <ClCompile Include="..\..\..\src\OSD\OSD_FileNode.cxx" />
+    <ClCompile Include="..\..\..\src\OSD\OSD_Host.cxx" />
+    <ClCompile Include="..\..\..\src\OSD\OSD_MAllocHook.cxx" />
+    <ClCompile Include="..\..\..\src\OSD\OSD_MemInfo.cxx" />
+    <ClCompile Include="..\..\..\src\OSD\OSD_OpenFile.cxx" />
+    <ClCompile Include="..\..\..\src\OSD\OSD_Parallel.cxx" />
+    <ClCompile Include="..\..\..\src\OSD\OSD_Parallel_TBB.cxx" />
+    <ClCompile Include="..\..\..\src\OSD\OSD_Parallel_Threads.cxx" />
+    <ClCompile Include="..\..\..\src\OSD\OSD_Path.cxx" />
+    <ClCompile Include="..\..\..\src\OSD\OSD_PerfMeter.cxx" />
+    <ClCompile Include="..\..\..\src\OSD\OSD_Process.cxx" />
+    <ClCompile Include="..\..\..\src\OSD\OSD_Protection.cxx" />
+    <ClCompile Include="..\..\..\src\OSD\OSD_SharedLibrary.cxx" />
+    <ClCompile Include="..\..\..\src\OSD\OSD_Thread.cxx" />
+    <ClCompile Include="..\..\..\src\OSD\OSD_ThreadPool.cxx" />
+    <ClCompile Include="..\..\..\src\OSD\OSD_Timer.cxx" />
+    <ClCompile Include="..\..\..\src\OSD\OSD_WNT.cxx" />
+    <ClCompile Include="..\..\..\src\OSD\OSD_signal.cxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_Chronometer.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_Directory.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_DirectoryIterator.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_Disk.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_Environment.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_Error.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_ErrorList.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception_ACCESS_VIOLATION.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception_ARRAY_BOUNDS_EXCEEDED.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception_CTRL_BREAK.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception_FLT_DENORMAL_OPERAND.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception_FLT_DIVIDE_BY_ZERO.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception_FLT_INEXACT_RESULT.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception_FLT_INVALID_OPERATION.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception_FLT_OVERFLOW.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception_FLT_STACK_CHECK.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception_FLT_UNDERFLOW.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception_ILLEGAL_INSTRUCTION.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception_INT_DIVIDE_BY_ZERO.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception_INT_OVERFLOW.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception_INVALID_DISPOSITION.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception_IN_PAGE_ERROR.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception_NONCONTINUABLE_EXCEPTION.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception_PRIV_INSTRUCTION.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception_STACK_OVERFLOW.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_Exception_STATUS_NO_MEMORY.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_File.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_FileIterator.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_FileNode.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_FromWhere.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_Function.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_Host.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_KindFile.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_LoadMode.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_LockType.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_MAllocHook.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_MemInfo.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_OEMType.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_OSDError.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_OpenFile.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_OpenMode.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_PThread.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_Parallel.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_Path.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_PerfMeter.h" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_PerfMeter.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_Process.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_Protection.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_SIGBUS.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_SIGHUP.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_SIGILL.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_SIGINT.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_SIGKILL.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_SIGQUIT.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_SIGSEGV.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_SIGSYS.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_SharedLibrary.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_Signal.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_SignalMode.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_SingleProtection.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_SysType.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_Thread.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_ThreadFunction.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_ThreadPool.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_Timer.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_WNT.hxx" />
+    <ClInclude Include="..\..\..\src\OSD\OSD_WhoAmI.hxx" />
+    <ClCompile Include="..\..\..\src\Plugin\Plugin.cxx" />
+    <ClInclude Include="..\..\..\src\Plugin\Plugin.hxx" />
+    <ClInclude Include="..\..\..\src\Plugin\Plugin_DataMapIteratorOfMapOfFunctions.hxx" />
+    <ClInclude Include="..\..\..\src\Plugin\Plugin_Failure.hxx" />
+    <ClInclude Include="..\..\..\src\Plugin\Plugin_Macro.hxx" />
+    <ClInclude Include="..\..\..\src\Plugin\Plugin_MapOfFunctions.hxx" />
+    <ClCompile Include="..\..\..\src\Quantity\Quantity_Color.cxx" />
+    <ClCompile Include="..\..\..\src\Quantity\Quantity_ColorRGBA.cxx" />
+    <ClCompile Include="..\..\..\src\Quantity\Quantity_Date.cxx" />
+    <ClCompile Include="..\..\..\src\Quantity\Quantity_Period.cxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_AbsorbedDose.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Acceleration.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_AcousticIntensity.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Activity.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Admittance.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_AmountOfSubstance.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_AngularVelocity.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Area.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Array1OfColor.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Array2OfColor.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Capacitance.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Coefficient.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_CoefficientOfExpansion.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Color.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_ColorDefinitionError.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_ColorHasher.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_ColorRGBA.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_ColorRGBAHasher.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Concentration.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Conductivity.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Constant.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Consumption.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Content.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Date.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_DateDefinitionError.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Density.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_DoseEquivalent.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_ElectricCapacitance.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_ElectricCharge.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_ElectricCurrent.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_ElectricFieldStrength.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_ElectricPotential.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Energy.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Enthalpy.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Entropy.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Factor.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Force.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Frequency.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_HArray1OfColor.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Illuminance.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Impedance.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Index.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Inductance.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_KinematicViscosity.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_KineticMoment.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Length.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Luminance.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_LuminousEfficacity.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_LuminousExposition.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_LuminousFlux.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_LuminousIntensity.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_MagneticFieldStrength.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_MagneticFlux.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_MagneticFluxDensity.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Mass.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_MassFlow.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_MolarConcentration.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_MolarMass.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_MolarVolume.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Molarity.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_MomentOfAForce.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_MomentOfInertia.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Momentum.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_NameOfColor.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Normality.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Parameter.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Period.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_PeriodDefinitionError.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_PhysicalQuantity.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_PlaneAngle.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Power.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Pressure.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Quotient.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Rate.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Ratio.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Reluctance.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Resistance.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Resistivity.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Scalaire.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_SolidAngle.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_SoundIntensity.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_SpecificHeatCapacity.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Speed.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_SurfaceTension.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Temperature.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_ThermalConductivity.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Torque.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_TypeOfColor.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Velocity.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Viscosity.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Volume.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_VolumeFlow.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Weight.hxx" />
+    <ClInclude Include="..\..\..\src\Quantity\Quantity_Work.hxx" />
+    <ClCompile Include="..\..\..\src\Resource\Resource_ConvertUnicode.c" />
+    <ClCompile Include="..\..\..\src\Resource\Resource_LexicalCompare.cxx" />
+    <ClCompile Include="..\..\..\src\Resource\Resource_Manager.cxx" />
+    <ClCompile Include="..\..\..\src\Resource\Resource_Unicode.cxx" />
+    <ClInclude Include="..\..\..\src\Resource\Resource_Big5.h" />
+    <ClInclude Include="..\..\..\src\Resource\Resource_ConvertUnicode.hxx" />
+    <ClInclude Include="..\..\..\src\Resource\Resource_DataMapIteratorOfDataMapOfAsciiStringAsciiString.hxx" />
+    <ClInclude Include="..\..\..\src\Resource\Resource_DataMapIteratorOfDataMapOfAsciiStringExtendedString.hxx" />
+    <ClInclude Include="..\..\..\src\Resource\Resource_DataMapOfAsciiStringAsciiString.hxx" />
+    <ClInclude Include="..\..\..\src\Resource\Resource_DataMapOfAsciiStringExtendedString.hxx" />
+    <ClInclude Include="..\..\..\src\Resource\Resource_FormatType.hxx" />
+    <ClInclude Include="..\..\..\src\Resource\Resource_GB2312.h" />
+    <ClInclude Include="..\..\..\src\Resource\Resource_GBK.h" />
+    <ClInclude Include="..\..\..\src\Resource\Resource_LexicalCompare.hxx" />
+    <ClInclude Include="..\..\..\src\Resource\Resource_Manager.hxx" />
+    <ClInclude Include="..\..\..\src\Resource\Resource_NoSuchResource.hxx" />
+    <ClInclude Include="..\..\..\src\Resource\Resource_Shiftjis.h" />
+    <ClInclude Include="..\..\..\src\Resource\Resource_Unicode.hxx" />
+    <ClCompile Include="..\..\..\src\Standard\Standard.cxx" />
+    <ClCompile Include="..\..\..\src\Standard\Standard_ArrayStreamBuffer.cxx" />
+    <ClCompile Include="..\..\..\src\Standard\Standard_CLocaleSentry.cxx" />
+    <ClCompile Include="..\..\..\src\Standard\Standard_CString.cxx" />
+    <ClCompile Include="..\..\..\src\Standard\Standard_Condition.cxx" />
+    <ClCompile Include="..\..\..\src\Standard\Standard_Dump.cxx" />
+    <ClCompile Include="..\..\..\src\Standard\Standard_ErrorHandler.cxx" />
+    <ClCompile Include="..\..\..\src\Standard\Standard_ExtString.cxx" />
+    <ClCompile Include="..\..\..\src\Standard\Standard_Failure.cxx" />
+    <ClCompile Include="..\..\..\src\Standard\Standard_GUID.cxx" />
+    <ClCompile Include="..\..\..\src\Standard\Standard_MMgrOpt.cxx" />
+    <ClCompile Include="..\..\..\src\Standard\Standard_MMgrRaw.cxx" />
+    <ClCompile Include="..\..\..\src\Standard\Standard_MMgrRoot.cxx" />
+    <ClCompile Include="..\..\..\src\Standard\Standard_MMgrTBBalloc.cxx" />
+    <ClCompile Include="..\..\..\src\Standard\Standard_Mutex.cxx" />
+    <ClCompile Include="..\..\..\src\Standard\Standard_OutOfMemory.cxx" />
+    <ClCompile Include="..\..\..\src\Standard\Standard_Persistent.cxx" />
+    <ClCompile Include="..\..\..\src\Standard\Standard_Real.cxx" />
+    <ClCompile Include="..\..\..\src\Standard\Standard_ShortReal.cxx" />
+    <ClCompile Include="..\..\..\src\Standard\Standard_Strtod.cxx" />
+    <ClCompile Include="..\..\..\src\Standard\Standard_Transient.cxx" />
+    <ClCompile Include="..\..\..\src\Standard\Standard_Type.cxx" />
+    <ClCompile Include="..\..\..\src\Standard\Standard_math.cxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_AbortiveTransaction.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_Address.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_ArrayStreamBuffer.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_Assert.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_Atomic.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_Boolean.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_Byte.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_CLocaleSentry.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_CString.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_Character.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_Condition.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_ConstructionError.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_DefineAlloc.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_DefineException.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_DefineHandle.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_DimensionError.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_DimensionMismatch.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_DivideByZero.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_DomainError.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_Dump.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_ErrorHandler.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_ExtCharacter.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_ExtString.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_Failure.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_GUID.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_Handle.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_HandlerStatus.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_IStream.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_ImmutableObject.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_Integer.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_JmpBuf.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_LicenseError.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_LicenseNotFound.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_MMgrOpt.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_MMgrRaw.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_MMgrRoot.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_MMgrTBBalloc.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_Macro.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_MultiplyDefined.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_Mutex.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_NegativeValue.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_NoMoreObject.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_NoSuchObject.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_NotImplemented.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_NullObject.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_NullValue.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_NumericError.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_OStream.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_OutOfMemory.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_OutOfRange.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_Overflow.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_PByte.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_PCharacter.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_PErrorHandler.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_PExtCharacter.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_Persistent.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_PrimitiveTypes.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_ProgramError.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_RangeError.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_ReadBuffer.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_ReadLineBuffer.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_Real.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_SStream.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_ShortReal.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_Size.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_Std.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_Stream.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_ThreadId.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_Time.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_TooManyUsers.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_Transient.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_Type.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_TypeDef.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_TypeMismatch.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_UUID.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_Underflow.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_Version.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_WarningsDisable.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_WarningsRestore.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_math.hxx" />
+    <ClInclude Include="..\..\..\src\Standard\Standard_values.h" />
+    <ClInclude Include="..\..\..\src\StdFail\StdFail_InfiniteSolutions.hxx" />
+    <ClInclude Include="..\..\..\src\StdFail\StdFail_NotDone.hxx" />
+    <ClInclude Include="..\..\..\src\StdFail\StdFail_Undefined.hxx" />
+    <ClInclude Include="..\..\..\src\StdFail\StdFail_UndefinedDerivative.hxx" />
+    <ClInclude Include="..\..\..\src\StdFail\StdFail_UndefinedValue.hxx" />
+    <ClCompile Include="..\..\..\src\Storage\Storage.cxx" />
+    <ClCompile Include="..\..\..\src\Storage\Storage_BaseDriver.cxx" />
+    <ClCompile Include="..\..\..\src\Storage\Storage_CallBack.cxx" />
+    <ClCompile Include="..\..\..\src\Storage\Storage_Data.cxx" />
+    <ClCompile Include="..\..\..\src\Storage\Storage_DefaultCallBack.cxx" />
+    <ClCompile Include="..\..\..\src\Storage\Storage_HeaderData.cxx" />
+    <ClCompile Include="..\..\..\src\Storage\Storage_InternalData.cxx" />
+    <ClCompile Include="..\..\..\src\Storage\Storage_Root.cxx" />
+    <ClCompile Include="..\..\..\src\Storage\Storage_RootData.cxx" />
+    <ClCompile Include="..\..\..\src\Storage\Storage_Schema.cxx" />
+    <ClCompile Include="..\..\..\src\Storage\Storage_TypeData.cxx" />
+    <ClCompile Include="..\..\..\src\Storage\Storage_TypedCallBack.cxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage.hxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_ArrayOfCallBack.hxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_ArrayOfSchema.hxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_BaseDriver.hxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_BaseDriver.lxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_BucketOfPersistent.hxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_CallBack.hxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_Data.hxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_DataMapIteratorOfMapOfCallBack.hxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_DataMapIteratorOfMapOfPers.hxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_DefaultCallBack.hxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_Error.hxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_HArrayOfCallBack.hxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_HArrayOfSchema.hxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_HPArray.hxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_HSeqOfRoot.hxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_HeaderData.hxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_InternalData.hxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_Macros.hxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_MapOfCallBack.hxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_MapOfPers.hxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_OpenMode.hxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_PArray.hxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_PType.hxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_Position.hxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_Root.hxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_RootData.hxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_Schema.hxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_Schema.lxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_SeqOfRoot.hxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_SolveMode.hxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_StreamExtCharParityError.hxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_StreamFormatError.hxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_StreamModeError.hxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_StreamReadError.hxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_StreamTypeMismatchError.hxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_StreamUnknownTypeError.hxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_StreamWriteError.hxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_TypeData.hxx" />
+    <ClInclude Include="..\..\..\src\Storage\Storage_TypedCallBack.hxx" />
+    <ClCompile Include="..\..\..\src\TColStd\TColStd_HPackedMapOfInteger.cxx" />
+    <ClCompile Include="..\..\..\src\TColStd\TColStd_PackedMapOfInteger.cxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_Array1OfAsciiString.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_Array1OfBoolean.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_Array1OfByte.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_Array1OfCharacter.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_Array1OfExtendedString.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_Array1OfInteger.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_Array1OfListOfInteger.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_Array1OfReal.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_Array1OfTransient.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_Array2OfBoolean.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_Array2OfCharacter.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_Array2OfInteger.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_Array2OfReal.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_Array2OfTransient.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_DataMapIteratorOfDataMapOfAsciiStringInteger.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_DataMapIteratorOfDataMapOfIntegerInteger.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_DataMapIteratorOfDataMapOfIntegerListOfInteger.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_DataMapIteratorOfDataMapOfIntegerReal.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_DataMapIteratorOfDataMapOfIntegerTransient.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_DataMapIteratorOfDataMapOfStringInteger.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_DataMapIteratorOfDataMapOfTransientTransient.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_DataMapOfAsciiStringInteger.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_DataMapOfIntegerInteger.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_DataMapOfIntegerListOfInteger.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_DataMapOfIntegerReal.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_DataMapOfIntegerTransient.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_DataMapOfStringInteger.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_DataMapOfTransientTransient.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HArray1OfAsciiString.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HArray1OfBoolean.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HArray1OfByte.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HArray1OfCharacter.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HArray1OfExtendedString.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HArray1OfInteger.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HArray1OfListOfInteger.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HArray1OfReal.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HArray1OfTransient.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HArray2OfBoolean.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HArray2OfCharacter.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HArray2OfInteger.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HArray2OfReal.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HArray2OfTransient.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HPackedMapOfInteger.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HPackedMapOfInteger.lxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HSequenceOfAsciiString.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HSequenceOfExtendedString.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HSequenceOfHAsciiString.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HSequenceOfHExtendedString.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HSequenceOfInteger.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HSequenceOfReal.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_HSequenceOfTransient.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_IndexedDataMapOfStringString.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_IndexedDataMapOfTransientTransient.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_IndexedMapOfInteger.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_IndexedMapOfReal.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_IndexedMapOfTransient.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_ListIteratorOfListOfAsciiString.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_ListIteratorOfListOfInteger.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_ListIteratorOfListOfReal.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_ListIteratorOfListOfTransient.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_ListOfAsciiString.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_ListOfInteger.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_ListOfReal.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_ListOfTransient.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_MapIntegerHasher.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_MapIteratorOfMapOfAsciiString.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_MapIteratorOfMapOfInteger.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_MapIteratorOfMapOfReal.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_MapIteratorOfMapOfTransient.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_MapIteratorOfPackedMapOfInteger.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_MapOfAsciiString.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_MapOfInteger.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_MapOfReal.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_MapOfTransient.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_MapRealHasher.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_MapTransientHasher.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_PackedMapOfInteger.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_SequenceOfAddress.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_SequenceOfAsciiString.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_SequenceOfBoolean.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_SequenceOfExtendedString.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_SequenceOfHAsciiString.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_SequenceOfHExtendedString.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_SequenceOfInteger.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_SequenceOfReal.hxx" />
+    <ClInclude Include="..\..\..\src\TColStd\TColStd_SequenceOfTransient.hxx" />
+    <ClCompile Include="..\..\..\src\TCollection\TCollection.cxx" />
+    <ClCompile Include="..\..\..\src\TCollection\TCollection_AsciiString.cxx" />
+    <ClCompile Include="..\..\..\src\TCollection\TCollection_BaseSequence.cxx" />
+    <ClCompile Include="..\..\..\src\TCollection\TCollection_BasicMap.cxx" />
+    <ClCompile Include="..\..\..\src\TCollection\TCollection_BasicMapIterator.cxx" />
+    <ClCompile Include="..\..\..\src\TCollection\TCollection_ExtendedString.cxx" />
+    <ClCompile Include="..\..\..\src\TCollection\TCollection_HAsciiString.cxx" />
+    <ClCompile Include="..\..\..\src\TCollection\TCollection_HExtendedString.cxx" />
+    <ClCompile Include="..\..\..\src\TCollection\TCollection_MapNode.cxx" />
+    <ClCompile Include="..\..\..\src\TCollection\TCollection_SeqNode.cxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection.hxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_Array1.gxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_Array1.lxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_Array2.gxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_Array2.lxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_AsciiString.hxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_AsciiString.lxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_BaseSequence.hxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_BaseSequence.lxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_BasicMap.hxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_BasicMap.lxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_BasicMapIterator.hxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_BasicMapIterator.lxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_DataMap.gxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_DataMapIterator.gxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_DataMapNode.gxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_DataMapNode.lxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_DoubleMap.gxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_DoubleMapIterator.gxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_DoubleMapNode.gxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_DoubleMapNode.lxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_ExtendedString.hxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_HArray1.gxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_HArray1.lxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_HArray2.gxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_HArray2.lxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_HAsciiString.hxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_HAsciiString.lxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_HExtendedString.hxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_HSequence.gxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_HSequence.lxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_IndexedDataMap.gxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_IndexedDataMapNode.gxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_IndexedDataMapNode.lxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_IndexedMap.gxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_IndexedMapNode.gxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_IndexedMapNode.lxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_List.gxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_List.lxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_ListIterator.gxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_ListIterator.lxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_ListNode.gxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_ListNode.lxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_Map.gxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_MapHasher.gxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_MapIterator.gxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_MapNode.hxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_MapNode.lxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_MapNodePtr.hxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_SeqNode.hxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_SeqNode.lxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_SeqNodePtr.hxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_Sequence.gxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_Sequence.lxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_SequenceNode.gxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_SequenceNode.lxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_Side.hxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_StdMapNode.gxx" />
+    <ClInclude Include="..\..\..\src\TCollection\TCollection_StdMapNode.lxx" />
+    <ClInclude Include="..\..\..\src\TShort\TShort_Array1OfShortReal.hxx" />
+    <ClInclude Include="..\..\..\src\TShort\TShort_Array2OfShortReal.hxx" />
+    <ClInclude Include="..\..\..\src\TShort\TShort_HArray1OfShortReal.hxx" />
+    <ClInclude Include="..\..\..\src\TShort\TShort_HArray2OfShortReal.hxx" />
+    <ClInclude Include="..\..\..\src\TShort\TShort_HSequenceOfShortReal.hxx" />
+    <ClInclude Include="..\..\..\src\TShort\TShort_SequenceOfShortReal.hxx" />
+    <ClCompile Include="..\..\..\src\Units\Units.cxx" />
+    <ClCompile Include="..\..\..\src\Units\Units_Dimensions.cxx" />
+    <ClCompile Include="..\..\..\src\Units\Units_Explorer.cxx" />
+    <ClCompile Include="..\..\..\src\Units\Units_Lexicon.cxx" />
+    <ClCompile Include="..\..\..\src\Units\Units_MathSentence.cxx" />
+    <ClCompile Include="..\..\..\src\Units\Units_Measurement.cxx" />
+    <ClCompile Include="..\..\..\src\Units\Units_Quantity.cxx" />
+    <ClCompile Include="..\..\..\src\Units\Units_Sentence.cxx" />
+    <ClCompile Include="..\..\..\src\Units\Units_ShiftedToken.cxx" />
+    <ClCompile Include="..\..\..\src\Units\Units_ShiftedUnit.cxx" />
+    <ClCompile Include="..\..\..\src\Units\Units_Token.cxx" />
+    <ClCompile Include="..\..\..\src\Units\Units_Unit.cxx" />
+    <ClCompile Include="..\..\..\src\Units\Units_UnitSentence.cxx" />
+    <ClCompile Include="..\..\..\src\Units\Units_UnitsDictionary.cxx" />
+    <ClCompile Include="..\..\..\src\Units\Units_UnitsLexicon.cxx" />
+    <ClCompile Include="..\..\..\src\Units\Units_UnitsSystem.cxx" />
+    <ClInclude Include="..\..\..\src\Units\Units.hxx" />
+    <ClInclude Include="..\..\..\src\Units\Units_Dimensions.hxx" />
+    <ClInclude Include="..\..\..\src\Units\Units_Dimensions.lxx" />
+    <ClInclude Include="..\..\..\src\Units\Units_Explorer.hxx" />
+    <ClInclude Include="..\..\..\src\Units\Units_Lexicon.hxx" />
+    <ClInclude Include="..\..\..\src\Units\Units_Lexicon.lxx" />
+    <ClInclude Include="..\..\..\src\Units\Units_MathSentence.hxx" />
+    <ClInclude Include="..\..\..\src\Units\Units_Measurement.hxx" />
+    <ClInclude Include="..\..\..\src\Units\Units_NoSuchType.hxx" />
+    <ClInclude Include="..\..\..\src\Units\Units_NoSuchUnit.hxx" />
+    <ClInclude Include="..\..\..\src\Units\Units_Operators.hxx" />
+    <ClInclude Include="..\..\..\src\Units\Units_QtsSequence.hxx" />
+    <ClInclude Include="..\..\..\src\Units\Units_QuantitiesSequence.hxx" />
+    <ClInclude Include="..\..\..\src\Units\Units_Quantity.hxx" />
+    <ClInclude Include="..\..\..\src\Units\Units_Quantity.lxx" />
+    <ClInclude Include="..\..\..\src\Units\Units_Sentence.hxx" />
+    <ClInclude Include="..\..\..\src\Units\Units_Sentence.lxx" />
+    <ClInclude Include="..\..\..\src\Units\Units_ShiftedToken.hxx" />
+    <ClInclude Include="..\..\..\src\Units\Units_ShiftedUnit.hxx" />
+    <ClInclude Include="..\..\..\src\Units\Units_TksSequence.hxx" />
+    <ClInclude Include="..\..\..\src\Units\Units_Token.hxx" />
+    <ClInclude Include="..\..\..\src\Units\Units_Token.lxx" />
+    <ClInclude Include="..\..\..\src\Units\Units_TokensSequence.hxx" />
+    <ClInclude Include="..\..\..\src\Units\Units_Unit.hxx" />
+    <ClInclude Include="..\..\..\src\Units\Units_Unit.lxx" />
+    <ClInclude Include="..\..\..\src\Units\Units_UnitSentence.hxx" />
+    <ClInclude Include="..\..\..\src\Units\Units_UnitsDictionary.hxx" />
+    <ClInclude Include="..\..\..\src\Units\Units_UnitsDictionary.lxx" />
+    <ClInclude Include="..\..\..\src\Units\Units_UnitsLexicon.hxx" />
+    <ClInclude Include="..\..\..\src\Units\Units_UnitsLexicon.lxx" />
+    <ClInclude Include="..\..\..\src\Units\Units_UnitsSequence.hxx" />
+    <ClInclude Include="..\..\..\src\Units\Units_UnitsSystem.hxx" />
+    <ClInclude Include="..\..\..\src\Units\Units_UtsSequence.hxx" />
+    <ClCompile Include="..\..\..\src\UnitsAPI\UnitsAPI.cxx" />
+    <ClInclude Include="..\..\..\src\UnitsAPI\UnitsAPI.hxx" />
+    <ClInclude Include="..\..\..\src\UnitsAPI\UnitsAPI_SystemUnits.hxx" />
+    <ClInclude Include="..\..\..\src\UnitsAPI\UnitsAPI_Units_dat.pxx" />
+    <ClCompile Include="..\..\..\src\NCollection\NCollection_AccAllocator.cxx" />
+    <ClCompile Include="..\..\..\src\NCollection\NCollection_AlignedAllocator.cxx" />
+    <ClCompile Include="..\..\..\src\NCollection\NCollection_BaseAllocator.cxx" />
+    <ClCompile Include="..\..\..\src\NCollection\NCollection_BaseList.cxx" />
+    <ClCompile Include="..\..\..\src\NCollection\NCollection_BaseMap.cxx" />
+    <ClCompile Include="..\..\..\src\NCollection\NCollection_BaseSequence.cxx" />
+    <ClCompile Include="..\..\..\src\NCollection\NCollection_BaseVector.cxx" />
+    <ClCompile Include="..\..\..\src\NCollection\NCollection_HeapAllocator.cxx" />
+    <ClCompile Include="..\..\..\src\NCollection\NCollection_IncAllocator.cxx" />
+    <ClCompile Include="..\..\..\src\NCollection\NCollection_SparseArrayBase.cxx" />
+    <ClCompile Include="..\..\..\src\NCollection\NCollection_UtfString.cxx" />
+    <ClCompile Include="..\..\..\src\NCollection\NCollection_WinHeapAllocator.cxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_AccAllocator.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_AlignedAllocator.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_Array1.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_Array2.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_BaseAllocator.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_BaseList.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_BaseMap.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_BaseSequence.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_BaseVector.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_Buffer.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_CellFilter.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_Comparator.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_DataMap.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_DefaultHasher.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_DefineAlloc.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_DefineArray1.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_DefineArray2.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_DefineDataMap.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_DefineDoubleMap.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_DefineHArray1.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_DefineHArray2.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_DefineHSequence.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_DefineIndexedDataMap.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_DefineIndexedMap.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_DefineList.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_DefineMap.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_DefineSequence.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_DefineVector.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_DoubleMap.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_EBTree.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_HArray1.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_HArray2.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_HSequence.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_Haft.h" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_Handle.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_HeapAllocator.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_IncAllocator.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_IndexedDataMap.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_IndexedMap.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_Lerp.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_List.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_ListNode.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_LocalArray.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_Map.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_Mat4.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_Sequence.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_Shared.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_SparseArray.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_SparseArrayBase.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_StdAllocator.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_StlIterator.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_String.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_TListIterator.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_TListNode.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_TypeDef.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_UBTree.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_UBTreeFiller.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_UtfIterator.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_UtfIterator.lxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_UtfString.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_UtfString.lxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_Vec2.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_Vec3.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_Vec4.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_Vector.hxx" />
+    <ClInclude Include="..\..\..\src\NCollection\NCollection_WinHeapAllocator.hxx" />
+    <ClCompile Include="..\..\..\src\Message\Message.cxx" />
+    <ClCompile Include="..\..\..\src\Message\Message_Alert.cxx" />
+    <ClCompile Include="..\..\..\src\Message\Message_Algorithm.cxx" />
+    <ClCompile Include="..\..\..\src\Message\Message_Messenger.cxx" />
+    <ClCompile Include="..\..\..\src\Message\Message_Msg.cxx" />
+    <ClCompile Include="..\..\..\src\Message\Message_MsgFile.cxx" />
+    <ClCompile Include="..\..\..\src\Message\Message_Printer.cxx" />
+    <ClCompile Include="..\..\..\src\Message\Message_PrinterOStream.cxx" />
+    <ClCompile Include="..\..\..\src\Message\Message_ProgressIndicator.cxx" />
+    <ClCompile Include="..\..\..\src\Message\Message_ProgressScale.cxx" />
+    <ClCompile Include="..\..\..\src\Message\Message_ProgressSentry.cxx" />
+    <ClCompile Include="..\..\..\src\Message\Message_Report.cxx" />
+    <ClInclude Include="..\..\..\src\Message\Message.hxx" />
+    <ClInclude Include="..\..\..\src\Message\Message_Alert.hxx" />
+    <ClInclude Include="..\..\..\src\Message\Message_Algorithm.hxx" />
+    <ClInclude Include="..\..\..\src\Message\Message_Algorithm.lxx" />
+    <ClInclude Include="..\..\..\src\Message\Message_ExecStatus.hxx" />
+    <ClInclude Include="..\..\..\src\Message\Message_Gravity.hxx" />
+    <ClInclude Include="..\..\..\src\Message\Message_HArrayOfMsg.hxx" />
+    <ClInclude Include="..\..\..\src\Message\Message_ListIteratorOfListOfMsg.hxx" />
+    <ClInclude Include="..\..\..\src\Message\Message_ListOfAlert.hxx" />
+    <ClInclude Include="..\..\..\src\Message\Message_ListOfMsg.hxx" />
+    <ClInclude Include="..\..\..\src\Message\Message_Messenger.hxx" />
+    <ClInclude Include="..\..\..\src\Message\Message_Msg.hxx" />
+    <ClInclude Include="..\..\..\src\Message\Message_Msg.lxx" />
+    <ClInclude Include="..\..\..\src\Message\Message_MsgFile.hxx" />
+    <ClInclude Include="..\..\..\src\Message\Message_Printer.hxx" />
+    <ClInclude Include="..\..\..\src\Message\Message_PrinterOStream.hxx" />
+    <ClInclude Include="..\..\..\src\Message\Message_ProgressIndicator.hxx" />
+    <ClInclude Include="..\..\..\src\Message\Message_ProgressIndicator.lxx" />
+    <ClInclude Include="..\..\..\src\Message\Message_ProgressScale.hxx" />
+    <ClInclude Include="..\..\..\src\Message\Message_ProgressScale.lxx" />
+    <ClInclude Include="..\..\..\src\Message\Message_ProgressSentry.hxx" />
+    <ClInclude Include="..\..\..\src\Message\Message_ProgressSentry.lxx" />
+    <ClInclude Include="..\..\..\src\Message\Message_Report.hxx" />
+    <ClInclude Include="..\..\..\src\Message\Message_SequenceOfPrinters.hxx" />
+    <ClInclude Include="..\..\..\src\Message\Message_SequenceOfProgressScale.hxx" />
+    <ClInclude Include="..\..\..\src\Message\Message_Status.hxx" />
+    <ClInclude Include="..\..\..\src\Message\Message_StatusType.hxx" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="TKernel.rc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
