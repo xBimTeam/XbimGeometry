@@ -3,9 +3,9 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <OutputPath>..\Output\$(Platform)\$(Configuration)</OutputPath>
+    <OutputPath></OutputPath>
     <Configurations>Debug;Release</Configurations>
-    <Platforms>x86;x64</Platforms>
+    <Platforms>x86;x64;AnyCPU</Platforms>
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
 

@@ -90,22 +90,22 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)Output\x86\$(Configuration)\$(TargetFramework)\</OutDir>
     <IntDir>obj\x86\$(Configuration)\$(TargetFramework)\</IntDir>
-    <TargetName>$(ProjectName)</TargetName>
+    <TargetName>$(ProjectName)32</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)Output\x64\$(Configuration)\$(TargetFramework)\</OutDir>
     <IntDir>obj\x64\$(Configuration)\$(TargetFramework)\</IntDir>
-    <TargetName>$(ProjectName)</TargetName>
+    <TargetName>$(ProjectName)64</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)Output\x86\$(Configuration)\$(TargetFramework)\</OutDir>
     <IntDir>obj\x86\$(Configuration)\$(TargetFramework)\</IntDir>
-    <TargetName>$(ProjectName)</TargetName>
+    <TargetName>$(ProjectName)32</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)Output\x64\$(Configuration)\$(TargetFramework)\</OutDir>
     <IntDir>obj\x64\$(Configuration)\$(TargetFramework)\</IntDir>
-    <TargetName>$(ProjectName)</TargetName>
+    <TargetName>$(ProjectName)64</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -227,26 +227,74 @@
   <ItemGroup>
     <Image Include="app.ico" />
   </ItemGroup>
-  <ItemGroup>
-    <Reference Include="Microsoft.Extensions.Logging.Abstractions">
-      <HintPath>..\Output\$(ManagedPlatform)\$(Configuration)\$(TargetFramework)\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Extensions.Logging">
-      <HintPath>..\Output\$(ManagedPlatform)\$(Configuration)\$(TargetFramework)\Microsoft.Extensions.Logging.dll</HintPath>
-    </Reference>
-    <Reference Include="Xbim.Ifc4">
-      <HintPath>..\Output\$(ManagedPlatform)\$(Configuration)\$(TargetFramework)\Xbim.Ifc4.dll</HintPath>
-    </Reference>
-    <Reference Include="Xbim.Ifc2x3">
-      <HintPath>..\Output\$(ManagedPlatform)\$(Configuration)\$(TargetFramework)\Xbim.Ifc2x3.dll</HintPath>
-    </Reference>
-    <Reference Include="Xbim.Tessellator">
-      <HintPath>..\Output\$(ManagedPlatform)\$(Configuration)\$(TargetFramework)\Xbim.Tessellator.dll</HintPath>
-    </Reference>
-    <Reference Include="Xbim.Common">
-      <HintPath>..\Output\$(ManagedPlatform)\$(Configuration)\$(TargetFramework)\Xbim.Common.dll</HintPath>
-    </Reference>
-  </ItemGroup>
+  <Choose>
+    <When Condition="'$(Platform)'=='Win32'">
+      <ItemGroup>
+        <Reference Include="Microsoft.Extensions.Logging.Abstractions">
+          <HintPath>..\Xbim.Geometry.Packages\bin\x86\$(Configuration)\$(TargetFramework)\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
+        </Reference>
+        <Reference Include="Microsoft.Extensions.Logging">
+          <HintPath>..\Xbim.Geometry.Packages\bin\x86\$(Configuration)\$(TargetFramework)\Microsoft.Extensions.Logging.dll</HintPath>
+        </Reference>
+        <Reference Include="Xbim.Ifc4">
+          <HintPath>..\Xbim.Geometry.Packages\bin\x86\$(Configuration)\$(TargetFramework)\Xbim.Ifc4.dll</HintPath>
+        </Reference>
+        <Reference Include="Xbim.Ifc2x3">
+          <HintPath>..\Xbim.Geometry.Packages\bin\x86\$(Configuration)\$(TargetFramework)\Xbim.Ifc2x3.dll</HintPath>
+        </Reference>
+        <Reference Include="Xbim.Tessellator">
+          <HintPath>..\Xbim.Geometry.Packages\bin\x86\$(Configuration)\$(TargetFramework)\Xbim.Tessellator.dll</HintPath>
+        </Reference>
+        <Reference Include="Xbim.Common">
+          <HintPath>..\Xbim.Geometry.Packages\bin\x86\$(Configuration)\$(TargetFramework)\Xbim.Common.dll</HintPath>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="'$(Platform)'=='x64'">
+      <ItemGroup>
+        <Reference Include="Microsoft.Extensions.Logging.Abstractions">
+          <HintPath>..\Xbim.Geometry.Packages\bin\x64\$(Configuration)\$(TargetFramework)\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
+        </Reference>
+        <Reference Include="Microsoft.Extensions.Logging">
+          <HintPath>..\Xbim.Geometry.Packages\bin\x64\$(Configuration)\$(TargetFramework)\Microsoft.Extensions.Logging.dll</HintPath>
+        </Reference>
+        <Reference Include="Xbim.Ifc4">
+          <HintPath>..\Xbim.Geometry.Packages\bin\x64\$(Configuration)\$(TargetFramework)\Xbim.Ifc4.dll</HintPath>
+        </Reference>
+        <Reference Include="Xbim.Ifc2x3">
+          <HintPath>..\Xbim.Geometry.Packages\bin\x64\$(Configuration)\$(TargetFramework)\Xbim.Ifc2x3.dll</HintPath>
+        </Reference>
+        <Reference Include="Xbim.Tessellator">
+          <HintPath>..\Xbim.Geometry.Packages\bin\x64\$(Configuration)\$(TargetFramework)\Xbim.Tessellator.dll</HintPath>
+        </Reference>
+        <Reference Include="Xbim.Common">
+          <HintPath>..\Xbim.Geometry.Packages\bin\x64\$(Configuration)\$(TargetFramework)\Xbim.Common.dll</HintPath>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <Otherwise>
+      <ItemGroup>
+        <Reference Include="Microsoft.Extensions.Logging.Abstractions">
+          <HintPath>..\Xbim.Geometry.Packages\bin\$(Configuration)\$(TargetFramework)\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
+        </Reference>
+        <Reference Include="Microsoft.Extensions.Logging">
+          <HintPath>..\Xbim.Geometry.Packages\$(Configuration)\$(TargetFramework)\Microsoft.Extensions.Logging.dll</HintPath>
+        </Reference>
+        <Reference Include="Xbim.Ifc4">
+          <HintPath>..\Xbim.Geometry.Packages\$(Configuration)\$(TargetFramework)\Xbim.Ifc4.dll</HintPath>
+        </Reference>
+        <Reference Include="Xbim.Ifc2x3">
+          <HintPath>..\Xbim.Geometry.Packages\$(Configuration)\$(TargetFramework)\Xbim.Ifc2x3.dll</HintPath>
+        </Reference>
+        <Reference Include="Xbim.Tessellator">
+          <HintPath>..\Xbim.Geometry.Packages\$(Configuration)\$(TargetFramework)\Xbim.Tessellator.dll</HintPath>
+        </Reference>
+        <Reference Include="Xbim.Common">
+          <HintPath>..\Xbim.Geometry.Packages\$(Configuration)\$(TargetFramework)\Xbim.Common.dll</HintPath>
+        </Reference>
+      </ItemGroup>
+    </Otherwise>
+  </Choose>
   <ItemGroup>
     <None Include="cpp.hint" />
   </ItemGroup>

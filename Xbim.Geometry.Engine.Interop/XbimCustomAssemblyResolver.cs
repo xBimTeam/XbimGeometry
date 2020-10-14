@@ -65,7 +65,7 @@ namespace Xbim.Geometry.Engine.Interop
                 //dropping the use of a suffix
                 var filename = $"{conventions.ModuleName}{conventions.Suffix}.dll";
                 // Look in relevant Architecture subfolder off the main application deployment
-                libraryPath = Path.Combine(appDir, filename);
+                libraryPath = Path.Combine(appDir, $"x{conventions.Suffix}", filename);
 
                 _logger.LogDebug("Probing for GeometryEngine in {path}", libraryPath);
 

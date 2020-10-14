@@ -11,7 +11,7 @@
     <Version>5.1.0.0-Dev</Version>
     <AssemblyVersion>5.1.0.1</AssemblyVersion>
     <FileVersion>5.1.0.1</FileVersion>
-    <Platforms>x64;x86</Platforms>
+    <Platforms>x64;x86;AnyCPU</Platforms>
     <SignAssembly>false</SignAssembly>
   </PropertyGroup>
 
@@ -20,6 +20,10 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
 
@@ -33,6 +37,39 @@
     <PackageReference Include="Xbim.Ifc" Version="5.1.310-develop" />
     <PackageReference Include="Xbim.Tessellator" Version="5.1.310-develop" />
   </ItemGroup>
+
+  <Choose>
+    <When Condition="'$(Platform)'=='AnyCPU'">
+      <ItemGroup>
+        <None Include="..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\$(TargetFramework)\x32\Xbim.Geometry.Engine32.dll" Link="x32\Xbim.Geometry.Engine32.dll">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Include="..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\$(TargetFramework)\x32\Ijwhost.dll" Link="x32\Ijwhost.dll">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Include="..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\$(TargetFramework)\x64\Xbim.Geometry.Engine64.dll" Link="x64\Xbim.Geometry.Engine64.dll">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Include="..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\$(TargetFramework)\x64\Ijwhost.dll" Link="x64\Ijwhost.dll">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+      </ItemGroup>
+    </When>
+    <When Condition="'$(Platform)'=='x86'">
+      <ItemGroup>
+        <None Include="..\Xbim.Geometry.Engine.Interop\bin\$(Platform)\$(Configuration)\$(TargetFramework)\Xbim.Geometry.Engine32.dll" Link="Xbim.Geometry.Engine32.dll">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+      </ItemGroup>
+    </When>
+    <When Condition="'$(Platform)'=='x64'">
+      <ItemGroup>
+        <None Include="..\Xbim.Geometry.Engine.Interop\bin\$(Platform)\$(Configuration)\$(TargetFramework)\Xbim.Geometry.Engine64.dll" Link="Xbim.Geometry.Engine64.dll">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+      </ItemGroup>
+    </When>
+  </Choose>
 
   <ItemGroup>
     <ProjectReference Include="..\Xbim.Geometry.Engine.Interop\Xbim.Geometry.Engine.Interop.csproj" />
