@@ -256,7 +256,7 @@ TopoDS_Wire ShapeAnalysis::OuterWire(const TopoDS_Face& face)
   while ( exp.More() ) {
       if (exp.Value().ShapeType() != TopAbs_WIRE)
       {
-          exp.Next();
+          exp.Next();//SRL move on or we are in an infinite loop
           continue;
       }
     W = TopoDS::Wire ( exp.Value() );

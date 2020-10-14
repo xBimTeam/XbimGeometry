@@ -1,7 +1,37 @@
+C:\Users\Steve\Source\Repos\opencascade-7.4.0\src\BRepTopAdaptor\BRepTopAdaptor_FClass2d.cxx
+break if the difference is zero
+
+
+		  do
+		    {
+		      
+		      gp_Pnt P3db=C3d.Value(u);
+		      // 		      if(P3da.SquareDistance(P3db)) { degenerated=Standard_False; break; }
+		      if(P3da.SquareDistance(P3db) > Precision::Confusion()) { degenerated=Standard_False; break; }
+			  if (u + du == u) break; //SRL if adding the difference has no impact we will just go around in a loop
+		      u+=du;
+		    }
+		  while(u<plbid);
+		}
+		
+		
+C:\Users\Steve\Source\Repos\opencascade-7.4.0\src\ShapeAnalysis\ShapeAnalysis.cxx
+call exp.Next to avoid infinite loop
+
+
+  while ( exp.More() ) {
+      if (exp.Value().ShapeType() != TopAbs_WIRE)
+      {
+          exp.Next(); //SRL move on or we are in an infinite loop
+          continue;
+      }
+    W = TopoDS::Wire ( exp.Value() );
+	
 C:\Users\Steve\Source\Repos\opencascade-7.4.0\src\NCollection\NCollection_StlIterator.hxx
+add declspec
 
   __declspec(noinline) typename NCollection_StlIterator::difference_type operator- (const NCollection_StlIterator& theOther) const
   {
     Standard_STATIC_ASSERT((opencascade::std::is_same<std::random_access_iterator_tag,Category>::value));
     return myIterator.Differ (theOther.myIterator);
-  }
+  }	
