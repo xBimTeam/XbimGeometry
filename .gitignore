@@ -19,7 +19,9 @@ build/
 bld/
 [Bb]in/
 [Oo]bj/
-
+[Oo]bjd/
+win32
+win64
 # Roslyn cache directories
 *.ide/
 
