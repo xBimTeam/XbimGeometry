@@ -1,3 +1,6 @@
+If using kdiff the anti-pattern for comparison is 
+*.orig;*.o;*.obj;*.rej;*.bak;FILES;*.fr;*.us;*.pxx
+
 C:\Users\Steve\Source\Repos\opencascade-7.4.0\src\BRepTopAdaptor\BRepTopAdaptor_FClass2d.cxx
 break if the difference is zero
 
