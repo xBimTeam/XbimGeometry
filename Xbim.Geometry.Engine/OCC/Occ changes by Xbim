@@ -1,0 +1,7 @@
+C:\Users\Steve\Source\Repos\opencascade-7.4.0\src\NCollection\NCollection_StlIterator.hxx
+
+  __declspec(noinline) typename NCollection_StlIterator::difference_type operator- (const NCollection_StlIterator& theOther) const
+  {
+    Standard_STATIC_ASSERT((opencascade::std::is_same<std::random_access_iterator_tag,Category>::value));
+    return myIterator.Differ (theOther.myIterator);
+  }

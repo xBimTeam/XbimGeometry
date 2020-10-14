@@ -133,7 +133,7 @@ void BRepExtrema_DistShapeShape::DistanceMapMap (const TopTools_IndexedMapOfShap
     }
   }
 
-  std::sort(aPairList.begin(), aPairList.end(), BRepExtrema_CheckPair_Comparator);
+  std::stable_sort(aPairList.begin(), aPairList.end(), BRepExtrema_CheckPair_Comparator);
 
   for (NCollection_Vector<BRepExtrema_CheckPair>::Iterator aPairIter (aPairList);
        aPairIter.More(); aPairIter.Next())

@@ -209,7 +209,7 @@ void BOPDS_Iterator::Initialize(const TopAbs_ShapeEnum aType1,
     BOPDS_VectorOfPair& aPairs = (myUseExt && iX < BOPDS_Iterator::NbExtInterfs()) ?
       myExtLists(iX) : myLists(iX);
     // sort interfering pairs for constant order of intersection
-    std::sort(aPairs.begin(), aPairs.end());
+    std::stable_sort(aPairs.begin(), aPairs.end());
     // initialize iterator to access the pairs
     myIterator.Init(aPairs);
     myLength = aPairs.Length();
