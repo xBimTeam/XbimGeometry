@@ -11,9 +11,9 @@ trigger:
 
 variables:
   BuildConfiguration: 'Release'
-  BuildPlatform: 'Any CPU'
+  BuildPlatform: 'x86'
   major: 5
-  minor: 1
+  minor: 2
   # creates a counter called versioncounter and seeds it at 100 and then assigns the value to a variable named buildNo.
   buildNo: $[counter('geomversioncounter', 100)]
   
@@ -173,3 +173,15 @@ jobs:
       publishFeedCredentials: 'MyGetDev'
       versioningScheme: byEnvVar
       versionEnvVar: packageversion
+
+  - task: NuGetCommand@2
+    name: 'MyGetPublishing_NetCore'
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/netcoreapp31')
+    inputs:
+      command: push
+      packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
+      nuGetFeedType: 'external'
+      publishFeedCredentials: 'MyGetNetCore'
+      versioningScheme: byEnvVar
+      versionEnvVar: packageversion
+
