@@ -672,19 +672,17 @@ namespace Xbim
 				std::string errMsg;
 				if (!XbimNativeApi::SewShape(shape, _sewingTolerance, XbimGeometryCreator::BooleanTimeOut, errMsg) )
 				{
-					if (logger != nullptr)
+					//SRL need to resolve why this causes warnings
+					/*if (logger != nullptr)
 					{
 						System::String^ err = gcnew System::String(errMsg.c_str());
 						XbimGeometryCreator::LogWarning(logger, nullptr, "Failed to sew shape: " + err);
-					}
+					}*/
 				}
 				builder.Add(newCompound, shape);
 			}
 
 			*pCompound = newCompound;
-
-
-
 			_isSewn = true;
 			System::GC::KeepAlive(this);
 			return true;
