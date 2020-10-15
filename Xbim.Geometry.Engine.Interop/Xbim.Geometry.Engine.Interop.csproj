@@ -1,7 +1,7 @@
 ﻿<Project DefaultTargets="Build" Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net47</TargetFramework>
+    <TargetFrameworks>net472</TargetFrameworks>
     <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
     <Title>Xbim Geometry Engine</Title>
     <Description>Provides support for the  Ifc4 and Ifc2x3 Geometry conversion.</Description>
