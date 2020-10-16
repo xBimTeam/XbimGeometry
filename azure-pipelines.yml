@@ -12,7 +12,7 @@ trigger:
 
 variables:
   BuildConfiguration: 'Release'
-  BuildPlatform: 'x86'
+  BuildPlatform: 'AnyCPU'
   major: 5
   minor: 2
   # creates a counter called versioncounter and seeds it at 100 and then assigns the value to a variable named buildNo.
