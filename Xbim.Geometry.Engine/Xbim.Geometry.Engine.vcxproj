@@ -155,22 +155,22 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Extensions.Logging.Abstractions">
-      <HintPath>..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
+      <HintPath>..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net472\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
     </Reference>
     <Reference Include="Xbim.Common">
-      <HintPath>..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\Xbim.Common.dll</HintPath>
+      <HintPath>..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net472\Xbim.Common.dll</HintPath>
     </Reference>
     <Reference Include="Xbim.Ifc4">
-      <HintPath>..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\Xbim.Ifc4.dll</HintPath>
+      <HintPath>..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net472\Xbim.Ifc4.dll</HintPath>
     </Reference>
     <Reference Include="Xbim.Ifc2x3">
-      <HintPath>..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\Xbim.Ifc2x3.dll</HintPath>
+      <HintPath>..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net472\Xbim.Ifc2x3.dll</HintPath>
     </Reference>
     <Reference Include="Xbim.Tessellator">
-      <HintPath>..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\Xbim.Tessellator.dll</HintPath>
+      <HintPath>..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net472\Xbim.Tessellator.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime">
-      <HintPath>..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net47\System.Runtime.dll</HintPath>
+      <HintPath>..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net472\System.Runtime.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
