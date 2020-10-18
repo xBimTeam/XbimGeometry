@@ -176,9 +176,3 @@ jobs:
       publishFeedCredentials: 'MyGetDev'
       versioningScheme: byEnvVar
       versionEnvVar: packageversion
-
-  # Add tag to mark source
-  - script: |
-     git tag $(packageversion)
-     git push origin $(packageversion)
-    workingDirectory: $(Build.SourcesDirectory)
