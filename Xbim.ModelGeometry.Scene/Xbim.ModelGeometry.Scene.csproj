@@ -25,4 +25,7 @@
   <ItemGroup>
     <Reference Include="System.Configuration" />
   </ItemGroup>
+	<ItemGroup>
+		<None Include="..\xbim-toolkit-icon.png" Pack="True" PackagePath="\" />
+	</ItemGroup>
 </Project>
