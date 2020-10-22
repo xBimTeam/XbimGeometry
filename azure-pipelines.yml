@@ -108,13 +108,27 @@ jobs:
       Contents: '**\bin\$(BuildConfiguration)\**\*.nupkg'
 
   - task: VSBuild@1
+    displayName: 'Build x86 Xbim.Geometry.Engine.sln'
+    inputs:
+      solution: 'Xbim.Geometry.Engine.sln'
+      msbuildArgs: '/t:build'
+      platform: '$(BuildPlatform)'
+      configuration: 'x86'
+
+  - task: VSBuild@1
+    displayName: 'Build x64 Xbim.Geometry.Engine.sln'
+    inputs:
+      solution: 'Xbim.Geometry.Engine.sln'
+      msbuildArgs: '/t:build'
+      platform: '$(BuildPlatform)'
+      configuration: 'x64'
+  - task: VSBuild@1
     displayName: 'Build and pack solution Xbim.Geometry.Engine.sln'
     inputs:
       solution: 'Xbim.Geometry.Engine.sln'
       msbuildArgs: '/t:build'
       platform: '$(BuildPlatform)'
       configuration: '$(BuildConfiguration)'
-      clean: true
 
   # Xbim.Geometry meta package
   - powershell: |
