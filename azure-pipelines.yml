@@ -114,6 +114,7 @@ jobs:
       msbuildArgs: '/t:build'
       platform: '$(BuildPlatform)'
       configuration: '$(BuildConfiguration)'
+      clean: true
 
   # Xbim.Geometry meta package
   - powershell: |
