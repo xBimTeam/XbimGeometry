@@ -108,6 +108,21 @@ jobs:
       Contents: '**\bin\$(BuildConfiguration)\**\*.nupkg'
 
   - task: VSBuild@1
+    displayName: 'Build x86 OCC'
+    inputs:
+      solution: 'Xbim.Geometry.Engine.sln'
+      msbuildArgs: '/t:build'
+      platform: 'x86'
+      configuration: '$(BuildConfiguration)'
+
+  - task: VSBuild@1
+    displayName: 'Build x64 OCC'
+    inputs:
+      solution: 'Xbim.Geometry.Engine.sln'
+      msbuildArgs: '/t:build'
+      platform: 'x64'
+      configuration: '$(BuildConfiguration)'
+  - task: VSBuild@1
     displayName: 'Build and pack solution Xbim.Geometry.Engine.sln'
     inputs:
       solution: 'Xbim.Geometry.Engine.sln'
