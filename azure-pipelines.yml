@@ -112,16 +112,16 @@ jobs:
     inputs:
       solution: 'Xbim.Geometry.Engine.sln'
       msbuildArgs: '/t:build'
-      platform: '$(BuildPlatform)'
-      configuration: 'x86'
+      platform: 'win32'
+      configuration: '$(BuildConfiguration)'
 
   - task: VSBuild@1
     displayName: 'Build x64 Xbim.Geometry.Engine.sln'
     inputs:
       solution: 'Xbim.Geometry.Engine.sln'
       msbuildArgs: '/t:build'
-      platform: '$(BuildPlatform)'
-      configuration: 'x64'
+      platform: 'x64'
+      configuration: '$(BuildConfiguration)'
   - task: VSBuild@1
     displayName: 'Build and pack solution Xbim.Geometry.Engine.sln'
     inputs:
