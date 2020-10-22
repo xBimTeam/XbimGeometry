@@ -228,7 +228,7 @@
     <Image Include="app.ico" />
   </ItemGroup>
   <Choose>
-    <When Condition="'$(Platform)'=='Win32'">
+    <When Condition="'$(ManagedPlatform)'=='x86'">
       <ItemGroup>
         <Reference Include="Microsoft.Extensions.Logging.Abstractions">
           <HintPath>..\Xbim.Geometry.Packages\bin\x86\$(Configuration)\$(TargetFramework)\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
@@ -250,7 +250,7 @@
         </Reference>
       </ItemGroup>
     </When>
-    <When Condition="'$(Platform)'=='x64'">
+    <When Condition="'$(ManagedPlatform)'=='x64'">
       <ItemGroup>
         <Reference Include="Microsoft.Extensions.Logging.Abstractions">
           <HintPath>..\Xbim.Geometry.Packages\bin\x64\$(Configuration)\$(TargetFramework)\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
@@ -278,19 +278,19 @@
           <HintPath>..\Xbim.Geometry.Packages\bin\$(Configuration)\$(TargetFramework)\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
         </Reference>
         <Reference Include="Microsoft.Extensions.Logging">
-          <HintPath>..\Xbim.Geometry.Packages\$(Configuration)\$(TargetFramework)\Microsoft.Extensions.Logging.dll</HintPath>
+          <HintPath>..\Xbim.Geometry.Packages\bin\$(Configuration)\$(TargetFramework)\Microsoft.Extensions.Logging.dll</HintPath>
         </Reference>
         <Reference Include="Xbim.Ifc4">
-          <HintPath>..\Xbim.Geometry.Packages\$(Configuration)\$(TargetFramework)\Xbim.Ifc4.dll</HintPath>
+          <HintPath>..\Xbim.Geometry.Packages\bin\$(Configuration)\$(TargetFramework)\Xbim.Ifc4.dll</HintPath>
         </Reference>
         <Reference Include="Xbim.Ifc2x3">
-          <HintPath>..\Xbim.Geometry.Packages\$(Configuration)\$(TargetFramework)\Xbim.Ifc2x3.dll</HintPath>
+          <HintPath>..\Xbim.Geometry.Packages\bin\$(Configuration)\$(TargetFramework)\Xbim.Ifc2x3.dll</HintPath>
         </Reference>
         <Reference Include="Xbim.Tessellator">
-          <HintPath>..\Xbim.Geometry.Packages\$(Configuration)\$(TargetFramework)\Xbim.Tessellator.dll</HintPath>
+          <HintPath>..\Xbim.Geometry.Packages\bin\$(Configuration)\$(TargetFramework)\Xbim.Tessellator.dll</HintPath>
         </Reference>
         <Reference Include="Xbim.Common">
-          <HintPath>..\Xbim.Geometry.Packages\$(Configuration)\$(TargetFramework)\Xbim.Common.dll</HintPath>
+          <HintPath>..\Xbim.Geometry.Packages\bin\$(Configuration)\$(TargetFramework)\Xbim.Common.dll</HintPath>
         </Reference>
       </ItemGroup>
     </Otherwise>

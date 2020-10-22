@@ -9,9 +9,9 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>Xbim.Geometry.Engine.Interop</PackageId>
     <PackageIcon>logo.png</PackageIcon>
-    <AssemblyVersion>5.3.0.1</AssemblyVersion>
-    <FileVersion>5.3.0.1</FileVersion>
-    <Version>5.3.0.0-Dev</Version>
+    <AssemblyVersion>5.4.0.1</AssemblyVersion>
+    <FileVersion>5.4.0.1</FileVersion>
+    <Version>5.7.0.0-Dev</Version>
     <Platforms>x86;x64;AnyCPU</Platforms>
     <SignAssembly>false</SignAssembly>
     <PackageReleaseNotes>Version 5.2 NetCoreApp3.1 support See https://github.com/xBimTeam/XbimGeometry/blob/master/CHANGELOG.md
