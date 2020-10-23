@@ -823,7 +823,11 @@ namespace Xbim.Geometry.Engine.Interop
             }
         }
 
-        
+        // TODO: Stubbed until we merge https://github.com/xBimTeam/XbimGeometry/commit/86bc1e83eeed0fd84b33bf64045cb6afeac3807b#diff-569f41af2079f5a015416a3c37bb6a5a1b81c5f97b33a341d506634abbfbe52b
+        public XbimShapeGeometry CreateShapeGeometry(double oneMillimetre, IXbimGeometryObject geometryObject, double precision, ILogger logger = null)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public static class LogHelper
