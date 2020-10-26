@@ -229,6 +229,9 @@ namespace Xbim
 			virtual IXbimGeometryObject ^ Moved(IXbimGeometryObject ^geometryObject, IIfcObjectPlacement ^objectPlacement, ILogger^ logger);
 			virtual IXbimGeometryObject^ FromBrep(String^ brepStr);
 			virtual String^ ToBrep(IXbimGeometryObject^ geometryObject);
-		};
+
+			
+			virtual Xbim::Common::Geometry::XbimShapeGeometry^ CreateShapeGeometry(double oneMillimetre, Xbim::Common::Geometry::IXbimGeometryObject^ geometryObject, double precision, Microsoft::Extensions::Logging::ILogger^ logger);
+};
 	}
 }

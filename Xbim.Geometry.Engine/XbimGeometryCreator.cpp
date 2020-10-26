@@ -1338,6 +1338,12 @@ namespace Xbim
 				return nullptr;
 		}
 
+		Xbim::Common::Geometry::XbimShapeGeometry^ XbimGeometryCreator::CreateShapeGeometry(double oneMillimetre, Xbim::Common::Geometry::IXbimGeometryObject^ geometryObject, double precision, Microsoft::Extensions::Logging::ILogger^ logger)
+		{
+			throw gcnew System::NotImplementedException();
+			// TODO: This is stubbed out until we merge the implementation from develop. temp fix for broken build
+		}
+
 		IXbimGeometryObject^ XbimGeometryCreator::Trim(XbimSetObject^ geometryObject)
 		{
 			return geometryObject->Trim();
