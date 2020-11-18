@@ -28,8 +28,8 @@
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
     <PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
-    <PackageReference Include="Xbim.Ifc" Version="5.1.312-develop" />
-    <PackageReference Include="Xbim.Tessellator" Version="5.1.312-develop" />
+    <PackageReference Include="Xbim.Ifc" Version="5.1.322-develop" />
+    <PackageReference Include="Xbim.Tessellator" Version="5.1.322-develop" />
   </ItemGroup>
 
   <ItemGroup>
