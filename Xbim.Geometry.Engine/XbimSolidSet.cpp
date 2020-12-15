@@ -3,6 +3,7 @@
 #include "XbimCompound.h"
 #include "XbimGeometryCreator.h"
 #include "XbimOccWriter.h"
+#include "XbimProgressMonitor.h"
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <TopExp.hxx>
 #include <BRepTools.hxx>
@@ -20,6 +21,7 @@
 #include "BOPAlgo_BOP.hxx"
 #include <OSD_OpenFile.hxx>
 #include <algorithm>
+
 using namespace std;
 
 using namespace System::Linq;
@@ -229,18 +231,18 @@ namespace Xbim
 			IXbimGeometryObjectSet^ geomSet = dynamic_cast<IXbimGeometryObjectSet^>(shape);
 			if (geomSet != nullptr)
 			{
-				//make sure any sewing has been performed if the set is a compound object
-				XbimCompound^ compound = dynamic_cast<XbimCompound^>(geomSet);
-
-				if (compound != nullptr)
-					if (!compound->Sew())
-					{
-						_isSimplified = true; //set flag true to say the solid set has been simplified and the user should be warned
-#ifndef OCC_6_9_SUPPORTED		
-
-						return; //don't add it we cannot really make it into a solid and will cause boolean operation errors,
-#endif
-					}
+//				//make sure any sewing has been performed if the set is a compound object
+//				XbimCompound^ compound = dynamic_cast<XbimCompound^>(geomSet);
+//
+//				if (compound != nullptr)
+//					if (!compound->Sew())
+//					{
+//						_isSimplified = true; //set flag true to say the solid set has been simplified and the user should be warned
+//#ifndef OCC_6_9_SUPPORTED		
+//
+//						return; //don't add it we cannot really make it into a solid and will cause boolean operation errors,
+//#endif
+//					}
 
 				for each (IXbimGeometryObject ^ geom in geomSet)
 				{
@@ -489,7 +491,7 @@ namespace Xbim
 				aBOP.SetNonDestructive(true);
 				aBOP.SetFuzzyValue(fuzzyTol);
 				
-				Handle(XbimProgressIndicator) pi = new XbimProgressIndicator(timeout);
+				Handle(XbimProgressMonitor) pi = new XbimProgressMonitor(timeout);
 				aBOP.SetProgressIndicator(pi);
 				TopoDS_Shape aR;
 
@@ -559,7 +561,7 @@ namespace Xbim
 					fixer.SetPrecision(tolerance);
 					try
 					{
-						Handle(XbimProgressIndicator) pi2 = new XbimProgressIndicator(timeout);
+						Handle(XbimProgressMonitor) pi2 = new XbimProgressMonitor(timeout);
 						if (fixer.Perform(pi2))
 						{
 							result = fixer.Shape();

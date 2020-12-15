@@ -98,7 +98,21 @@ namespace Xbim.Geometry.Engine.Interop
                 return _engine.CreateShapeGeometry(geometryObject, precision, deflection, 0.5, XbimGeometryType.Polyhedron, logger);
             }
         }
-
+        /// <summary>
+        /// Values for deflection read from config files
+        /// </summary>
+        /// <param name="oneMillimetre"></param>
+        /// <param name="geometryObject"></param>
+        /// <param name="precision"></param>
+        /// <param name="logger"></param>
+        /// <returns></returns>
+        public XbimShapeGeometry CreateShapeGeometry(double oneMillimetre,IXbimGeometryObject geometryObject, double precision,  ILogger logger )
+        {
+            using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, geometryObject))
+            {
+                return _engine.CreateShapeGeometry(oneMillimetre, geometryObject, precision,  logger);
+            }
+        }
         public IXbimSolid CreateSolid(IIfcSweptAreaSolid ifcSolid, ILogger logger)
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcSolid))

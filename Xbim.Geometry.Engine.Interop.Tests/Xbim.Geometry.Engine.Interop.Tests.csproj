@@ -1,17 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net47</TargetFramework>
+    <TargetFrameworks>net472</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\XbimOpenSourceKeyFile.snk</AssemblyOriginatorKeyFile>
-    
-    
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,6 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="FluentAssertions" Version="5.10.3" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.1.1" />
@@ -39,6 +42,30 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="TestFiles\advanced_brep_1.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestFiles\advanced_brep_2.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestFiles\advanced_brep_3.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestFiles\advanced_brep_4.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestFiles\advanced_brep_5.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestFiles\advanced_brep_6.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestFiles\advanced_brep_7.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestFiles\advanced_brep_8.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="TestFiles\advanced_brep_with_sewing_issues.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -66,7 +93,7 @@
     <None Update="TestFiles\cut_planes_within_fuzzy_tolerance.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestFiles\failing_swept_area_curve.ifc">
+    <None Update="TestFiles\SurfaceCurveSweptAreaSolid_5.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="TestFiles\grid_with_polylines.ifc">
@@ -114,10 +141,19 @@
     <None Update="TestFiles\polygonally_bounded_half_space_clip.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="TestFiles\polyline.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="TestFiles\Regression\FailingGeom.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestFiles\Solid_swept_disk_pipe.ifc">
+    <None Update="TestFiles\SurfaceCurveSweptAreaSolid_6.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestFiles\SurfaceCurveSweptAreaSolid_7.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestFiles\SweptDiskSolid_3.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="TestFiles\BooleanResultTimoutTest.ifc">
@@ -186,13 +222,16 @@
     <None Update="TestFiles\Primitives\poor_face_planar_fidelity.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestFiles\swept_curve_with_bad_trims.ifc">
+    <None Update="TestFiles\SurfaceCurveSweptAreaSolid_1.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestFiles\swept_curve_with_trim_params.ifc">
+    <None Update="TestFiles\SurfaceCurveSweptAreaSolid_2.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestFiles\swept_disk_solid_with_trim_params.ifc">
+    <None Update="TestFiles\SurfaceCurveSweptAreaSolid_4.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestFiles\SweptDiskSolid_2.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="TestFiles\triangulation_error.brep">
@@ -210,7 +249,7 @@
     <None Update="TestFiles\VerySmallBooleanCutTest.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestFiles\UnorderdedCompositeCurveTest.ifc">
+    <None Update="TestFiles\UnorderedCompositeCurveTest.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="TestFiles\ExtrudedSolidWithNullPositionTest.ifc">
@@ -327,7 +366,7 @@
     <None Update="TestFiles\Ifc4TestFiles\long-running-boolean.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestFiles\Ifc4TestFiles\ReinforcingBar.ifc">
+    <None Update="TestFiles\SweptDiskSolid_4.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="TestFiles\Ifc4TestFiles\sectioned-spine.ifc">
@@ -336,13 +375,13 @@
     <None Update="TestFiles\Ifc4TestFiles\slab-tessellated-unique-vertices.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestFiles\Ifc4TestFiles\surface-curve-swept-area.ifc">
+    <None Update="TestFiles\SurfaceCurveSweptAreaSolid_3.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="TestFiles\Ifc4TestFiles\surface-model.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestFiles\Ifc4TestFiles\swept-disk-solid-polygonal.ifc">
+    <None Update="TestFiles\SweptDiskSolidPolygonal_1.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="TestFiles\Ifc4TestFiles\TrimmedEllipseTest.ifc">
@@ -360,7 +399,7 @@
     <None Update="TestFiles\IfcExtrudedAreaSolidTest.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestFiles\IfcSweptDiskSolidWithPolylineTest.ifc">
+    <None Update="TestFiles\SweptDiskSolid_1.ifc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="TestFiles\IndexedPolyCurveTest.ifc">

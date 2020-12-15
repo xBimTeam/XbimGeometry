@@ -406,9 +406,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         }
 
         [TestMethod]
-        public void UnorderdedCompositeCurveTest()
+        public void UnorderedCompositeCurveTest()
         {
-            using (var er = new EntityRepository<IIfcCompositeCurve>(nameof(UnorderdedCompositeCurveTest), true))
+            using (var er = new EntityRepository<IIfcCompositeCurve>(nameof(UnorderedCompositeCurveTest), true))
             {
                 Assert.IsTrue(er.Entity != null, "No IIfcCompositeCurve found");
 

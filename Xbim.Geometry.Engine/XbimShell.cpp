@@ -47,6 +47,8 @@
 #include <BRepTools.hxx>
 #include <BRepBuilderAPI_Sewing.hxx>
 #include <GeomLib_IsPlanarSurface.hxx>
+#include <Standard_CString.hxx>
+#include "XbimNativeApi.h"
 using namespace System;
 using namespace Xbim::Common::Exceptions;
 namespace Xbim
@@ -91,7 +93,7 @@ namespace Xbim
 
 		XbimShell::XbimShell(IIfcSurfaceOfLinearExtrusion^ linExt, ILogger^ logger)
 		{
-			Init(linExt,logger);
+			Init(linExt, logger);
 		}
 
 
@@ -101,7 +103,7 @@ namespace Xbim
 		void XbimShell::Init(IIfcOpenShell^ openShell, ILogger^ logger)
 		{
 			XbimCompound^ shapes = gcnew XbimCompound(openShell, logger);
-			shapes->Sew();
+			shapes->Sew(logger);
 			pShell = new TopoDS_Shell();
 			*pShell = (XbimShell^)shapes->MakeShell();
 			ShapeFix_ShapeTolerance tolFixer;
@@ -111,14 +113,14 @@ namespace Xbim
 		void XbimShell::Init(IIfcConnectedFaceSet^ connectedFaceSet, ILogger^ logger)
 		{
 			XbimCompound^ shapes = gcnew XbimCompound(connectedFaceSet, logger);
-			shapes->Sew();
+			shapes->Sew(logger);
 			pShell = new TopoDS_Shell();
 			*pShell = (XbimShell^)shapes->MakeShell();
 			ShapeFix_ShapeTolerance tolFixer;
 			tolFixer.LimitTolerance(*pShell, connectedFaceSet->Model->ModelFactors->Precision);
 		}
 
-		void XbimShell::Init(IIfcSurfaceOfLinearExtrusion ^ linExt, ILogger^ logger)
+		void XbimShell::Init(IIfcSurfaceOfLinearExtrusion^ linExt, ILogger^ logger)
 		{
 			XbimWire^ prof = gcnew XbimWire(linExt->SweptCurve, logger, XbimConstraints::None);
 			if (prof->IsValid && linExt->Depth > 0) //we have a valid wire and extrusion
@@ -132,7 +134,7 @@ namespace Xbim
 				{
 					pShell = new TopoDS_Shell();
 					*pShell = TopoDS::Shell(shellMaker.Shape());
-					if (linExt->Position!=nullptr)
+					if (linExt->Position != nullptr)
 						pShell->Move(XbimConvert::ToLocation(linExt->Position));
 					ShapeFix_ShapeTolerance tolFixer;
 					tolFixer.LimitTolerance(*pShell, linExt->Model->ModelFactors->Precision);
@@ -142,16 +144,16 @@ namespace Xbim
 			}
 			else if (linExt->Depth <= 0)
 			{
-				XbimGeometryCreator::LogWarning(logger,linExt, "Invalid shell surface, Extrusion Depth must be >0");
+				XbimGeometryCreator::LogWarning(logger, linExt, "Invalid shell surface, Extrusion Depth must be >0");
 			}
-			
+
 		}
 
 #pragma region Equality Overrides
 
 		bool XbimShell::Equals(Object^ obj)
 		{
-			XbimShell^ s = dynamic_cast< XbimShell^>(obj);
+			XbimShell^ s = dynamic_cast<XbimShell^>(obj);
 			// Check for null
 			if (s == nullptr) return false;
 			return this == s;
@@ -244,14 +246,14 @@ namespace Xbim
 			GC::KeepAlive(this);
 			return XbimRect3D(srXmin, srYmin, srZmin, (srXmax - srXmin), (srYmax - srYmin), (srZmax - srZmin));
 		}
-	
+
 		double XbimShell::SurfaceArea::get()
 		{
 			if (!IsValid) return 0;
 			GProp_GProps gProps;
 			BRepGProp::SurfaceProperties(*pShell, gProps);
 			GC::KeepAlive(this);
-			return gProps.Mass();	
+			return gProps.Mass();
 		}
 
 		bool XbimShell::IsEmpty::get()
@@ -268,10 +270,10 @@ namespace Xbim
 		{
 			if (!IsValid) return false;
 			BRepCheck_Shell checker(*pShell);
-			BRepCheck_Status result = checker.Closed();	
+			BRepCheck_Status result = checker.Closed();
 			GC::KeepAlive(this);
 			return result == BRepCheck_NoError;
-			
+
 		}
 
 		IXbimGeometryObject^ XbimShell::Transform(XbimMatrix3D matrix3D)
@@ -301,32 +303,32 @@ namespace Xbim
 
 		IXbimGeometryObjectSet^ XbimShell::Cut(IXbimSolid^ solid, double tolerance, ILogger^ logger)
 		{
-			
-			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_CUT,this, gcnew XbimSolidSet(solid), tolerance, logger);
+
+			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_CUT, this, gcnew XbimSolidSet(solid), tolerance, logger);
 		}
 
 		IXbimGeometryObjectSet^ XbimShell::Union(IXbimSolidSet^ solids, double tolerance, ILogger^ logger)
 		{
 
-			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_FUSE,this, solids, tolerance, logger);
+			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_FUSE, this, solids, tolerance, logger);
 		}
 
 		IXbimGeometryObjectSet^ XbimShell::Union(IXbimSolid^ solid, double tolerance, ILogger^ logger)
 		{
-			
+
 			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_FUSE, this, gcnew XbimSolidSet(solid), tolerance, logger);
 		}
 
 		IXbimGeometryObjectSet^ XbimShell::Intersection(IXbimSolidSet^ solids, double tolerance, ILogger^ logger)
 		{
 
-			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_COMMON,this, solids, tolerance, logger);
+			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_COMMON, this, solids, tolerance, logger);
 		}
 
 
 		IXbimGeometryObjectSet^ XbimShell::Intersection(IXbimSolid^ solid, double tolerance, ILogger^ logger)
 		{
-		
+
 			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_COMMON, this, gcnew XbimSolidSet(solid), tolerance, logger);
 		}
 
@@ -402,15 +404,13 @@ namespace Xbim
 
 		void XbimShell::FixTopology()
 		{
-			ShapeFix_Shell fixer(this);
-			Handle(XbimProgressIndicator) pi = new XbimProgressIndicator(XbimGeometryCreator::BooleanTimeOut);
-			fixer.Perform(pi);
-			const TopoDS_Shape& fixed = fixer.Shape();
-			if (fixed.ShapeType() == TopAbs_SHELL)
-				*pShell = TopoDS::Shell(fixed);			
+			TopoDS_Shell shell = this;
+			std::string errMsg;
+			XbimNativeApi::FixShell(shell, 10, errMsg);
+			*pShell = shell;
 		}
 
-		XbimGeometryObject ^ XbimShell::Transformed(IIfcCartesianTransformationOperator ^ transformation)
+		XbimGeometryObject^ XbimShell::Transformed(IIfcCartesianTransformationOperator^ transformation)
 		{
 			IIfcCartesianTransformationOperator3DnonUniform^ nonUniform = dynamic_cast<IIfcCartesianTransformationOperator3DnonUniform^>(transformation);
 			if (nonUniform != nullptr)
@@ -433,7 +433,7 @@ namespace Xbim
 		{
 			if (IsValid) pShell->Move(loc);
 		}
-		XbimGeometryObject ^ XbimShell::Moved(IIfcPlacement ^ placement)
+		XbimGeometryObject^ XbimShell::Moved(IIfcPlacement^ placement)
 		{
 			if (!IsValid) return this;
 			XbimShell^ copy = gcnew XbimShell(this, Tag); //take a copy of the shape
@@ -442,11 +442,11 @@ namespace Xbim
 			return copy;
 		}
 
-		XbimGeometryObject ^ XbimShell::Moved(IIfcObjectPlacement ^ objectPlacement, ILogger^ logger)
+		XbimGeometryObject^ XbimShell::Moved(IIfcObjectPlacement^ objectPlacement, ILogger^ logger)
 		{
 			if (!IsValid) return this;
 			XbimShell^ copy = gcnew XbimShell(this, Tag); //take a copy of the shape
-			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement,logger);
+			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement, logger);
 			copy->Move(loc);
 			return copy;
 		}
@@ -456,16 +456,23 @@ namespace Xbim
 		{
 			if (IsValid)
 			{
-				
 				BRepBuilderAPI_MakeSolid solidMaker(this);
 				if (solidMaker.IsDone())
 				{
-					XbimSolid^ solid = gcnew XbimSolid(solidMaker.Solid());
-					BRepClass3d_SolidClassifier class3d(solid);
-					class3d.PerformInfinitePoint(Precision::Confusion());
-					if (class3d.State() == TopAbs_IN)
-						solid->Reverse();					
-					return solid;
+					TopoDS_Solid solid = solidMaker.Solid();
+					try
+					{
+						BRepClass3d_SolidClassifier class3d(solid);
+						class3d.PerformInfinitePoint(Precision::Confusion());
+						if (class3d.State() == TopAbs_IN)
+							solid.Reverse();
+					}
+					catch (Standard_Failure sf)
+					{
+						//String^ err = gcnew String(sf.GetMessageString());	
+						//XbimGeometryCreator::LogWarning(logger, this, "Could not build a correct solid from the shell: " + err);
+					}
+					return gcnew XbimSolid(solid);
 				}
 			}
 			return gcnew XbimSolid(); //return an invalid solid if the shell is not valid

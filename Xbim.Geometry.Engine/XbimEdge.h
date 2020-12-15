@@ -55,6 +55,7 @@ namespace Xbim
 			XbimEdge(IIfcCurve^ edgeCurve, XbimVertex^ start, XbimVertex^ end, ILogger^ logger);
 			XbimEdge(XbimVertex^ start, XbimVertex^ midPoint, XbimVertex^ end);
 			XbimEdge(XbimCurve^ curve3D);
+			XbimEdge(Handle(Geom_Curve) curve3D);
 			XbimEdge(XbimCurve2D^ curve2D, ILogger^ logger);
 			
 #pragma endregion

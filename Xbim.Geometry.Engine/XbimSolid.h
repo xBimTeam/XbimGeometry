@@ -4,6 +4,7 @@
 #include "XbimFace.h"
 #include "XbimFaceSet.h"
 #include <TopoDS_Solid.hxx>
+#include <BRepBuilderAPI_TransitionMode.hxx>
 
 using namespace System::Collections::Generic;
 using namespace System::IO;
@@ -47,6 +48,7 @@ namespace Xbim
 
 
 			void Init(IIfcSweptDiskSolid^ solid, ILogger^ logger);
+			String^ BuildSweptDiskSolid(const TopoDS_Wire& directrixWire, double radius, double innerRadius, BRepBuilderAPI_TransitionMode transitionMode);
 			XbimWire^ CreateDirectrix(IIfcCurve^ directrix, Nullable<IfcParameterValue> startParam, Nullable<IfcParameterValue> endParam, ILogger^ logger);
 			// this is case handled by IIfcSweptDiskSolid 
 			// void Init(IIfcSweptDiskSolidPolygonal^ solid, ILogger^ logger);

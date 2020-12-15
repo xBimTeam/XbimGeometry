@@ -53,6 +53,15 @@ namespace Xbim
 				String^ fuzzyString = ConfigurationManager::AppSettings["FuzzyFactor"];
 				if (!double::TryParse(fuzzyString, FuzzyFactor))
 					FuzzyFactor = 10;
+
+				String^ linearDeflection = ConfigurationManager::AppSettings["LinearDeflectionInMM"];
+				if (!double::TryParse(linearDeflection, LinearDeflectionInMM))
+					LinearDeflectionInMM = 50; //max chord diff
+
+				String^ angularDeflection = ConfigurationManager::AppSettings["AngularDeflectionInRadians"];
+				if (!double::TryParse(angularDeflection, AngularDeflectionInRadians))
+					AngularDeflectionInRadians = 0.5;// deflection of 28 degrees
+
 				String^ ignoreIfcSweptDiskSolidParamsString = ConfigurationManager::AppSettings["IgnoreIfcSweptDiskSolidParams"];
 				if(!bool::TryParse(ignoreIfcSweptDiskSolidParamsString,IgnoreIfcSweptDiskSolidParams))
 					IgnoreIfcSweptDiskSolidParams = false;
@@ -74,14 +83,26 @@ namespace Xbim
 
 			static int BooleanTimeOut;
 			static double FuzzyFactor;
+			static double LinearDeflectionInMM;
+			static double AngularDeflectionInRadians;
 			static bool IgnoreIfcSweptDiskSolidParams;
+			
 			virtual XbimShapeGeometry^ CreateShapeGeometry(IXbimGeometryObject^ geometryObject, double precision, double deflection, double angle, XbimGeometryType storageType, ILogger^ logger);
+			
 			virtual XbimShapeGeometry^ CreateShapeGeometry(IXbimGeometryObject^ geometryObject, double precision, double deflection, ILogger^ logger/*, double angle = 0.5, XbimGeometryType storageType = XbimGeometryType::Polyhedron*/)
 			{
-				return CreateShapeGeometry(geometryObject, precision, deflection, 0.5, XbimGeometryType::Polyhedron,logger);
+				return CreateShapeGeometry(geometryObject, precision, deflection, 0.5, XbimGeometryType::PolyhedronBinary,logger);
+			};
+
+			virtual XbimShapeGeometry^ CreateShapeGeometry(double oneMillimetre, IXbimGeometryObject^ geometryObject, double precision, ILogger^ logger)
+			{
+				double linearDeflection = oneMillimetre * LinearDeflectionInMM;				
+				return CreateShapeGeometry(geometryObject, precision, linearDeflection, AngularDeflectionInRadians, XbimGeometryType::PolyhedronBinary, logger);
 			};
 
 			virtual IXbimGeometryObject^ Create(IIfcGeometricRepresentationItem^ geomRep, IIfcAxis2Placement3D^ objectLocation, ILogger^ logger);
+
+			//XbimMesh^ CreateMeshGeometry(IXbimGeometryObject^ geometryObject, double precision, double deflection, double angle);
 
 			virtual void Mesh(IXbimMeshReceiver^ mesh, IXbimGeometryObject^ geometry, double precision, double deflection, double angle);
 			virtual void Mesh(IXbimMeshReceiver^ mesh, IXbimGeometryObject^ geometry, double precision, double deflection/*, double angle = 0.5*/)

@@ -54,7 +54,7 @@ jobs:
   - task: NuGetToolInstaller@0
     displayName: 'Use a new NuGet'
     inputs:
-      versionSpec: '4.6.2'
+      versionSpec: '5.6.0'
   
   # Version .NET Core project files
   # Description - Applies a version to a .NET Core assembly via the .csproj files based on the build number. 
@@ -68,6 +68,16 @@ jobs:
       VersionRegex: \d+\.\d+\.\d+\.\d+
       FilenamePattern: .csproj
       Field: fileversion
+      OutputVersion: OutputedVersion
+  - task: VersionDotNetCoreAssemblies@2
+    displayName: 'Update global Versions'
+    inputs: 
+      # Required arguments
+      Path: $(Build.SourcesDirectory)
+      VersionNumber: $(packageversion)
+      VersionRegex: \d+\.\d+\.\d+.*
+      FilenamePattern: directory.build.props
+      Field: Version
       OutputVersion: OutputedVersion
   
   # Version Native C++
@@ -90,33 +100,20 @@ jobs:
       feedsToUse: config
       nugetConfigPath: nuget.config
   
-  
-  - task: VSBuild@1
-    displayName: 'Build solution Xbim.Geometry.Engine.sln'
-    inputs:
-      solution: 'Xbim.Geometry.Engine.sln'
-      msbuildArgs: '/t:build'
-      platform: '$(BuildPlatform)'
-      configuration: '$(BuildConfiguration)'
-  
-  # Delete all Package(s) including newly built - we're going to regenerate with the current build version
-  # We need to msbuild pack to complete however before we can run 'dotnet pack' on Geometry Engine
   - task: DeleteFiles@1
     displayName: 'Delete old *.nupkg files from $(build.sourcesdirectory)'
     inputs:
       SourceFolder: '$(build.sourcesdirectory)'
       Contents: '**\bin\$(BuildConfiguration)\**\*.nupkg'
-  
-  
-  # Pack GeometryEngine.Interop
-  - script: dotnet pack Xbim.Geometry.Engine.Interop/Xbim.Geometry.Engine.Interop.csproj -c $(BuildConfiguration) -o Xbim.Geometry.Engine.Interop/bin/$(BuildConfiguration) /p:PackageVersion=$(packageversion)
-    name: 'Geometry_Interop_Pack'
-  
-  # Pack ModelGeometry.Scene
-  - script: dotnet pack Xbim.ModelGeometry.Scene/Xbim.ModelGeometry.Scene.csproj -c $(BuildConfiguration) -o Xbim.ModelGeometry.Scene/bin/$(BuildConfiguration) /p:PackageVersion=$(packageversion)
-    name: 'ModelScene_Pack'
-  
-    
+
+  - task: VSBuild@1
+    displayName: 'Build and pack solution Xbim.Geometry.Engine.sln'
+    inputs:
+      solution: 'Xbim.Geometry.Engine.sln'
+      msbuildArgs: '/t:build'
+      platform: '$(BuildPlatform)'
+      configuration: '$(BuildConfiguration)'
+
   # Xbim.Geometry meta package
   - powershell: |
       ((Get-Content -path Xbim.Geometry\Xbim.Geometry.tmpl -Raw) -replace '{{version}}','$(packageversion)') | Set-Content -Path Xbim.Geometry\Xbim.Geometry.nuspec

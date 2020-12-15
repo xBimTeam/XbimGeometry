@@ -578,7 +578,7 @@ namespace Xbim.ModelGeometry.Scene
         {
             _model = model;
             _logger = logger ?? XbimLogging.CreateLogger<Xbim3DModelContext>();
-            var wr1 = model.AddWorkAroundSurfaceofLinearExtrusionForRevit();
+            model.AddRevitWorkArounds();
             var wr2 = model.AddWorkAroundTrimForPolylinesIncorrectlySetToOneForEntireCurve();
             // Get the required context
 

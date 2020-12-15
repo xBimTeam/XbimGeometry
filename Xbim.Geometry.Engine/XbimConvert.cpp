@@ -219,8 +219,25 @@ namespace Xbim
 				return gp_Ax3(loc, zDir, xDir);
 			}
 		}
-
-
+		//special case for a revit workaround
+		gp_Ax3 XbimConvert::ToAx3NoTranslation(IIfcAxis2Placement3D^ axis3D)
+		{
+			gp_XYZ loc; //use the 0,0,0 origin to avoid translation
+			if (axis3D->Axis != nullptr && axis3D->RefDirection != nullptr) //if one or other is null then use default axis (Ifc Rule)
+			{
+				gp_Vec zDir(axis3D->Axis->X, axis3D->Axis->Y, XbimConvert::GetZValueOrZero(axis3D->Axis));
+				zDir.Normalize();
+				gp_Vec xDir(axis3D->RefDirection->X, axis3D->RefDirection->Y, XbimConvert::GetZValueOrZero(axis3D->RefDirection));
+				xDir.Normalize();
+				return gp_Ax3(loc, zDir, xDir);
+			}
+			else
+			{
+				gp_Dir zDir(0, 0, 1);
+				gp_Dir xDir(1, 0, 0);
+				return gp_Ax3(loc, zDir, xDir);
+			}
+		}
 
 		TopLoc_Location XbimConvert::ToLocation(IIfcAxis2Placement2D^ axis2D)
 		{

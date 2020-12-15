@@ -174,7 +174,7 @@ public: //! @name methods related to random access STL iterator
   }
 
   //! Difference
-  typename NCollection_StlIterator::difference_type operator- (const NCollection_StlIterator& theOther) const
+  __declspec(noinline) typename NCollection_StlIterator::difference_type operator- (const NCollection_StlIterator& theOther) const
   {
     Standard_STATIC_ASSERT((opencascade::std::is_same<std::random_access_iterator_tag,Category>::value));
     return myIterator.Differ (theOther.myIterator);

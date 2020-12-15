@@ -236,22 +236,31 @@ namespace Xbim
 				{
 
 					// todo: this code is not quite robust, it did not manage to close fairly simple polylines.
-					//
-					double oneMilli = profile->Model->ModelFactors->OneMilliMeter;
-					XbimFace^ face = gcnew XbimFace(loop, true, oneMilli, profile->OuterCurve->EntityLabel, logger);
-					ShapeFix_Wire wireFixer(loop, face, profile->Model->ModelFactors->Precision);
-					wireFixer.ClosedWireMode() = Standard_True;
-					wireFixer.FixGaps2dMode() = Standard_True;
-					wireFixer.FixGaps3dMode() = Standard_True;
-					wireFixer.ModifyGeometryMode() = Standard_True;
-					wireFixer.SetMinTolerance(profile->Model->ModelFactors->Precision);
-					wireFixer.SetPrecision(oneMilli);
-					wireFixer.SetMaxTolerance(oneMilli * 10);
-					Standard_Boolean closed = wireFixer.Perform();
-					if (closed)
-						*pWire = wireFixer.Wire();
-					else
-						*pWire = loop;
+					try
+					{
+
+
+						double oneMilli = profile->Model->ModelFactors->OneMilliMeter;
+						TopoDS_Face face = gcnew XbimFace(loop, true, oneMilli, profile->OuterCurve->EntityLabel, logger);
+						ShapeFix_Wire wireFixer(loop, face, profile->Model->ModelFactors->Precision);
+						wireFixer.ClosedWireMode() = Standard_True;
+						wireFixer.FixGaps2dMode() = Standard_True;
+						wireFixer.FixGaps3dMode() = Standard_True;
+						wireFixer.ModifyGeometryMode() = Standard_True;
+						wireFixer.SetMinTolerance(profile->Model->ModelFactors->Precision);
+						wireFixer.SetPrecision(oneMilli);
+						wireFixer.SetMaxTolerance(oneMilli * 10);
+						Standard_Boolean closed = wireFixer.Perform();
+						if (closed)
+							*pWire = wireFixer.Wire();
+						else
+							*pWire = loop;
+					}
+					catch (Standard_Failure sf)
+					{
+						String^ err = gcnew String(sf.GetMessageString());
+						XbimGeometryCreator::LogWarning(logger, profile, "Invalid bound. Wire discarded: {0}", err);
+					}
 				}
 				else
 					*pWire = loop;
@@ -854,131 +863,131 @@ namespace Xbim
 			BRep_Builder builder;
 			TopoDS_Wire resultWire;
 			builder.MakeWire(resultWire);
-			
-				for each (IIfcCompositeCurveSegment ^ seg in cCurve->Segments) //every segment shall be a bounded curve
+
+			for each (IIfcCompositeCurveSegment ^ seg in cCurve->Segments) //every segment shall be a bounded curve
+			{
+				bool lastSeg = (segIdx == segCount);
+
+				if (!dynamic_cast<IIfcBoundedCurve^>(seg->ParentCurve))
 				{
-					bool lastSeg = (segIdx == segCount);
+					XbimGeometryCreator::LogWarning(logger, seg, "Composite curve contains a segment with is not a bounded curve. It has been ignored");
+					continue;
+				}
 
-					if (!dynamic_cast<IIfcBoundedCurve^>(seg->ParentCurve))
+
+				if (lastSeg && seg->Transition == IfcTransitionCode::DISCONTINUOUS) isContinuous = false;
+
+				XbimWire^ xbimWire = gcnew XbimWire(seg, logger, constraints);
+				if (xbimWire->IsValid)
+				{
+					TopoDS_Wire segWire = xbimWire;
+					for (BRepTools_WireExplorer wireEx(segWire); wireEx.More(); wireEx.Next())
 					{
-						XbimGeometryCreator::LogWarning(logger, seg, "Composite curve contains a segment with is not a bounded curve. It has been ignored");
-						continue;
-					}
-
-
-					if (lastSeg && seg->Transition == IfcTransitionCode::DISCONTINUOUS) isContinuous = false;
-
-					XbimWire^ xbimWire = gcnew XbimWire(seg, logger, constraints);
-					if (xbimWire->IsValid )
-					{
-						TopoDS_Wire segWire = xbimWire;
-						for (BRepTools_WireExplorer wireEx(segWire); wireEx.More(); wireEx.Next())
+						if (firstPass)
 						{
-							if (firstPass)
+							builder.Add(resultWire, TopoDS::Edge(wireEx.Current()));
+							firstPass = false;
+							continue;
+						}
+						else
+						{
+							TopoDS_Vertex resultWireFirstVertex;
+							TopoDS_Vertex resultWireLastVertex;
+							gp_Pnt resultWireFirstPoint;
+							gp_Pnt resultWireLastPoint;
+							TopExp::Vertices(resultWire, resultWireFirstVertex, resultWireLastVertex);
+							if (resultWireFirstVertex.IsNull() || resultWireLastVertex.IsNull()) //this should never happen
 							{
-								builder.Add(resultWire, TopoDS::Edge(wireEx.Current()));
-								firstPass = false;
-								continue;
+
+								XbimGeometryCreator::LogWarning(logger, cCurve, "Failed to build composite curve. It has been ignored");
+								return;
 							}
+							if (resultWireFirstVertex.IsEqual(resultWireLastVertex))
+							{
+								XbimGeometryCreator::LogWarning(logger, cCurve, "Composite curve is closed. Further segments cannot be added and are ignored");
+								pWire = new TopoDS_Wire();
+								*pWire = resultWire;
+								pWire->Closed(true);
+								fTol.LimitTolerance(*pWire, tolerance);
+								return;
+							}
+							resultWireFirstPoint = BRep_Tool::Pnt(resultWireFirstVertex);
+							resultWireLastPoint = BRep_Tool::Pnt(resultWireLastVertex);
+
+							TopoDS_Edge anEdge = TopoDS::Edge(wireEx.Current());
+							TopoDS_Vertex edgeFirstVertex = wireEx.CurrentVertex();
+							TopoDS_Vertex edgeLastVertex = TopExp::LastVertex(anEdge, Standard_True);
+							if (edgeFirstVertex.IsEqual(edgeLastVertex)) //get the next vertex
+								edgeLastVertex = TopExp::FirstVertex(anEdge, Standard_True);
+							gp_Pnt edgeFirstPoint = BRep_Tool::Pnt(edgeFirstVertex);
+							gp_Pnt edgeLastPoint = BRep_Tool::Pnt(edgeLastVertex);
+							//simple clockwise end of last wire to start of first
+							double distFirstToLast = edgeFirstPoint.Distance(resultWireLastPoint);
+							double distLastToLast = edgeLastPoint.Distance(resultWireLastPoint);
+							if (distFirstToLast <= tolerance)
+								ModifyWireAddEdge(resultWire, anEdge, edgeFirstVertex, edgeFirstPoint, edgeLastVertex, resultWireLastVertex, resultWireLastPoint, distFirstToLast);
+							else if (distLastToLast <= tolerance)
+								ModifyWireAddEdge(resultWire, anEdge, edgeLastVertex, edgeLastPoint, edgeFirstVertex, resultWireLastVertex, resultWireLastPoint, distLastToLast);
 							else
 							{
-								TopoDS_Vertex resultWireFirstVertex;
-								TopoDS_Vertex resultWireLastVertex;
-								gp_Pnt resultWireFirstPoint;
-								gp_Pnt resultWireLastPoint;
-								TopExp::Vertices(resultWire, resultWireFirstVertex, resultWireLastVertex);
-								if (resultWireFirstVertex.IsNull() || resultWireLastVertex.IsNull()) //this should never happen
-								{
-									
-									XbimGeometryCreator::LogWarning(logger, cCurve, "Failed to build composite curve. It has been ignored");
-									return;
-								}
-								if (resultWireFirstVertex.IsEqual(resultWireLastVertex))
-								{
-									XbimGeometryCreator::LogWarning(logger, cCurve, "Composite curve is closed. Further segments cannot be added and are ignored");
-									pWire = new TopoDS_Wire();
-									*pWire = resultWire;
-									pWire->Closed(true);
-									fTol.LimitTolerance(*pWire, tolerance);
-									return;
-								}
-								resultWireFirstPoint = BRep_Tool::Pnt(resultWireFirstVertex);
-								resultWireLastPoint = BRep_Tool::Pnt(resultWireLastVertex);
-
-								TopoDS_Edge anEdge = TopoDS::Edge(wireEx.Current());
-								TopoDS_Vertex edgeFirstVertex = wireEx.CurrentVertex();
-								TopoDS_Vertex edgeLastVertex = TopExp::LastVertex(anEdge, Standard_True);
-								if (edgeFirstVertex.IsEqual(edgeLastVertex)) //get the next vertex
-									edgeLastVertex = TopExp::FirstVertex(anEdge, Standard_True);
-								gp_Pnt edgeFirstPoint = BRep_Tool::Pnt(edgeFirstVertex);
-								gp_Pnt edgeLastPoint = BRep_Tool::Pnt(edgeLastVertex);
-								//simple clockwise end of last wire to start of first
-								double distFirstToLast = edgeFirstPoint.Distance(resultWireLastPoint);
-								double distLastToLast = edgeLastPoint.Distance(resultWireLastPoint);
-								if (distFirstToLast <= tolerance)
+								//see if the nearest is within 5mm
+								if (distFirstToLast <= fiveMilli) //its going to join to the first
 									ModifyWireAddEdge(resultWire, anEdge, edgeFirstVertex, edgeFirstPoint, edgeLastVertex, resultWireLastVertex, resultWireLastPoint, distFirstToLast);
-								else if (distLastToLast <= tolerance)
+								else if (distLastToLast <= fiveMilli)
 									ModifyWireAddEdge(resultWire, anEdge, edgeLastVertex, edgeLastPoint, edgeFirstVertex, resultWireLastVertex, resultWireLastPoint, distLastToLast);
-								else
+								else // it will not join
 								{
-									//see if the nearest is within 5mm
-									if (distFirstToLast <= fiveMilli) //its going to join to the first
-										ModifyWireAddEdge(resultWire, anEdge, edgeFirstVertex, edgeFirstPoint, edgeLastVertex, resultWireLastVertex, resultWireLastPoint, distFirstToLast);																		
-									else if (distLastToLast <= fiveMilli)
-										ModifyWireAddEdge(resultWire, anEdge, edgeLastVertex, edgeLastPoint, edgeFirstVertex, resultWireLastVertex, resultWireLastPoint, distLastToLast);																		
-									else // it will not join
+									//see if we can reverse the segment to fit
+									double distLastToFirst = edgeLastPoint.Distance(resultWireFirstPoint);
+									double distFirstToFirst = edgeFirstPoint.Distance(resultWireFirstPoint);
+									if (distLastToFirst <= tolerance)
+										ModifyWireAddEdge(resultWire, anEdge, edgeLastVertex, edgeLastPoint, edgeFirstVertex, resultWireFirstVertex, resultWireFirstPoint, distLastToFirst);
+									else if (distFirstToFirst <= tolerance)
+										ModifyWireAddEdge(resultWire, anEdge, edgeFirstVertex, edgeFirstPoint, edgeLastVertex, resultWireFirstVertex, resultWireFirstPoint, distFirstToFirst);
+									else
 									{
-										//see if we can reverse the segment to fit
-										double distLastToFirst = edgeLastPoint.Distance(resultWireFirstPoint);
-										double distFirstToFirst = edgeFirstPoint.Distance(resultWireFirstPoint);
-										if (distLastToFirst <= tolerance)
-											ModifyWireAddEdge(resultWire, anEdge, edgeLastVertex, edgeLastPoint, edgeFirstVertex, resultWireFirstVertex, resultWireFirstPoint, distLastToFirst);
-										else if (distFirstToFirst <= tolerance)
+										if (distFirstToFirst <= fiveMilli)
+										{
+											anEdge.Reverse();
 											ModifyWireAddEdge(resultWire, anEdge, edgeFirstVertex, edgeFirstPoint, edgeLastVertex, resultWireFirstVertex, resultWireFirstPoint, distFirstToFirst);
+										}
+										else if (distLastToFirst <= fiveMilli)
+										{
+											anEdge.Reverse();
+											ModifyWireAddEdge(resultWire, anEdge, edgeLastVertex, edgeLastPoint, edgeFirstVertex, resultWireFirstVertex, resultWireFirstPoint, distLastToFirst);
+										}
 										else
 										{
-											if (distFirstToFirst <= fiveMilli)
-											{												
-												anEdge.Reverse();
-												ModifyWireAddEdge(resultWire, anEdge, edgeFirstVertex, edgeFirstPoint, edgeLastVertex, resultWireFirstVertex, resultWireFirstPoint, distFirstToFirst);
-											}
-											else if (distLastToFirst <= fiveMilli)
-											{												
-												anEdge.Reverse();
-												ModifyWireAddEdge(resultWire, anEdge, edgeLastVertex, edgeLastPoint, edgeFirstVertex, resultWireFirstVertex, resultWireFirstPoint, distLastToFirst);
-											}
-											else
-											{
 #ifdef _DEBUG
-												//XbimWire^ currentWire = gcnew XbimWire(resultWire);
-												//String^ rep = currentWire->ToBRep;
+											//XbimWire^ currentWire = gcnew XbimWire(resultWire);
+											//String^ rep = currentWire->ToBRep;
 #endif // _DEBUG
-												XbimGeometryCreator::LogWarning(logger, seg, "Unconnected composite curve segment. Curve is incomplete");
-												continue;
-											}
+											XbimGeometryCreator::LogWarning(logger, seg, "Unconnected composite curve segment. Curve is incomplete");
+											continue;
 										}
 									}
 								}
 							}
 						}
-						firstPass = false;
 					}
-					else
-					{
-						XbimGeometryCreator::LogWarning(logger, seg, "Invalid edge of a composite curve found. It could not be created");
-					}
-					segIdx++;
+					firstPass = false;
 				}
-				pWire = new TopoDS_Wire();
-				*pWire = resultWire;
-				fTol.LimitTolerance(*pWire, tolerance);
-			
+				else
+				{
+					XbimGeometryCreator::LogWarning(logger, seg, "Invalid edge of a composite curve found. It could not be created");
+				}
+				segIdx++;
+			}
+			pWire = new TopoDS_Wire();
+			*pWire = resultWire;
+			fTol.LimitTolerance(*pWire, tolerance);
+
 		}
 		//This is going to be added to to the selected vertex and the tolerances will be adjusted. the duplicate points will be removed
 		void XbimWire::ModifyWireAddEdge(TopoDS_Wire& resultWire, const TopoDS_Edge& edgeToAdd, const TopoDS_Vertex& edgeVertexToJoin, gp_Pnt edgePointToJoin, const TopoDS_Vertex&
 			nextEdgeVertex, const TopoDS_Vertex& wireVertexToJoin, gp_Pnt wirePointToJoin, double distance)
 		{
-			
+
 			TopoDS_Shape emptyEdge = edgeToAdd.EmptyCopied();
 			TopoDS_Edge myEdge = TopoDS::Edge(emptyEdge);
 			BRep_Builder B;
@@ -988,7 +997,7 @@ namespace Xbim
 			tolE = BRep_Tool::Tolerance(edgeVertexToJoin);
 
 
-			Standard_Real maxtol = .5 * (tolW + tolE + distance), cW =1, cE=0;
+			Standard_Real maxtol = .5 * (tolW + tolE + distance), cW = 1, cE = 0;
 			bool adjust = false;
 			if (maxtol > tolW && maxtol > tolE)
 			{
@@ -1024,7 +1033,7 @@ namespace Xbim
 			B.Add(myEdge, nextEdgeVertexCopy);
 			B.Transfert(edgeToAdd, myEdge, edgeVertexToJoin, firstEdgeVertex);
 			B.Add(resultWire, myEdge);
-			
+
 		}
 
 		void XbimWire::Init(IIfcPolyLoop^ polyloop, ILogger^ logger, XbimConstraints /*constraints*/)
@@ -1195,13 +1204,29 @@ namespace Xbim
 		{
 			if (!IsValid)
 				return XbimVector3D();
+			try
+			{
+				gp_Dir dir = NormalDir(*pWire);
+				return  XbimVector3D(dir.X(), dir.Y(), dir.Z());
+			}
+			catch (Standard_Failure sf)
+			{
+				String^ err = gcnew String(sf.GetMessageString());
+				throw gcnew Exception("Invalid normal: " + err);
+			}
+
+		}
+
+		gp_Dir XbimWire::NormalDir(const TopoDS_Wire& wire)
+		{
+
 			double x = 0, y = 0, z = 0;
 			gp_Pnt currentStart, previousEnd, first;
 			int count = 0;
 			TopLoc_Location loc;
 			Standard_Real start, end;
 
-			for (BRepTools_WireExplorer wEx(*pWire); wEx.More(); wEx.Next())
+			for (BRepTools_WireExplorer wEx(wire); wEx.More(); wEx.Next())
 			{
 				const TopoDS_Vertex& v = wEx.CurrentVertex();
 				currentStart = BRep_Tool::Pnt(v);
@@ -1224,8 +1249,8 @@ namespace Xbim
 						(cType == STANDARD_TYPE(Geom_Hyperbola)))) //it is a conic
 					{
 						Handle(Geom_Conic) conic = Handle(Geom_Conic)::DownCast(c3dptr);
-						gp_Dir dir = conic->Axis().Direction();
-						return XbimVector3D(dir.X(), dir.Y(), dir.Z());
+						return conic->Axis().Direction();
+
 					}
 					else if ((cType == STANDARD_TYPE(Geom_Circle)) ||
 						(cType == STANDARD_TYPE(Geom_Ellipse)) ||
@@ -1285,28 +1310,15 @@ namespace Xbim
 					}
 					else //throw AN EXCEPTION
 					{
-
-						throw gcnew XbimGeometryException("Unsupported Edge type");
+						throw Standard_Failure("Unsupported Edge type");
 					}
 				}
 				count++;
 			}
 			//do the last one
 			AddNewellPoint(previousEnd, first, x, y, z);
-			XbimVector3D vec(x, y, z);
-			/*
-			// this can be used to look at the wire points in autocad for debugging
-			Debug::WriteLine("_.CIRCLE");
-			Debug::WriteLine("{0},{1},{2}", previousEnd.X(), previousEnd.Y(), previousEnd.Z());
-			Debug::WriteLine("7");
-			Debug::WriteLine("_.CIRCLE");
-			Debug::WriteLine("{0},{1},{2}", first.X(), first.Y(), first.Z());
-			Debug::WriteLine("15");
-			*/
-
-			GC::KeepAlive(this);
-			// XbimVector3D
-			return vec.Normalized();
+			gp_Dir dir(x, y, z);
+			return dir;
 		}
 
 		bool XbimWire::IsPlanar::get()
@@ -1336,7 +1348,6 @@ namespace Xbim
 		TopoDS_Vertex XbimWire::StartVertex::get()
 		{
 			if (!IsValid) return TopoDS_Vertex();
-			BRepAdaptor_CompCurve cc(*pWire, Standard_True);
 			TopoDS_Vertex v1, v2;
 			TopExp::Vertices(*pWire, v1, v2);
 			return v1;
@@ -1360,8 +1371,7 @@ namespace Xbim
 
 		TopoDS_Vertex XbimWire::EndVertex::get()
 		{
-			if (!IsValid) return TopoDS_Vertex();
-			BRepAdaptor_CompCurve cc(*pWire, Standard_True);
+			if (!IsValid) return TopoDS_Vertex();			
 			TopoDS_Vertex v1, v2;
 			TopExp::Vertices(*pWire, v1, v2);
 			return v2;
@@ -2452,11 +2462,25 @@ namespace Xbim
 				cc.Edge(last, edge, uoe);
 				Standard_Real l, f; // the parameter range is returned in f and l
 				Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, f, l);
-				Standard_Real a = Math::Max(f, first);
-				Standard_Real b = Math::Min(l, last);
-				if (Math::Abs(a - b) > Precision::Confusion())
+				Handle(Geom_TrimmedCurve) trimmedCurve = Handle(Geom_TrimmedCurve)::DownCast(curve);
+				while (!trimmedCurve.IsNull()) //remove trims
 				{
-					Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(curve, a, b);
+					curve = trimmedCurve->BasisCurve();
+					trimmedCurve = Handle(Geom_TrimmedCurve)::DownCast(curve);				
+				}
+				if (curve->IsPeriodic()) //stay in bounds for splines etc, keep orientation for periodics, 
+				{
+					l = f + last;
+					f = f + first;					
+				}
+				else
+				{
+					f = Math::Max(f, first);
+					l = Math::Min(l, last);
+				}
+				if (Math::Abs(f - l) > Precision::Confusion())
+				{
+					Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(curve, f, l);
 					BRepBuilderAPI_MakeWire wm;
 					wm.Add(BRepBuilderAPI_MakeEdge(trimmed));
 					TopoDS_Wire trimmedWire = wm.Wire();

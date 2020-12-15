@@ -1,26 +1,37 @@
 ﻿<Project DefaultTargets="Build" Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net47</TargetFramework>
+    <TargetFrameworks>net472</TargetFrameworks>
     <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
     <Title>Xbim Geometry Engine</Title>
-    <Description>Provides support for the  Ifc4 and Ifc2x3 Geometry conversion.</Description>
+    <Description>Provides support for the Ifc4 and Ifc2x3 Geometry conversion.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>Xbim.Geometry.Engine.Interop</PackageId>
+    <PackageIcon>logo.png</PackageIcon>
   </PropertyGroup>
-  
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<Content Include="..\Xbim.Geometry.Engine.Interop.targets">
+			<Link>Xbim.Geometry.Interop.targets</Link>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
     <PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
-    <PackageReference Include="Xbim.Tessellator" Version="5.1.297" />
+    <PackageReference Include="Xbim.Ifc" Version="5.1.322-develop" />
+    <PackageReference Include="Xbim.Tessellator" Version="5.1.322-develop" />
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="..\Xbim.Geometry.Engine.Interop.targets">
-      <Link>Xbim.Geometry.Interop.targets</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
+
   <ItemGroup>
     <NativeGeometryEngine Include="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj">
       <AdditionalProperties>
@@ -66,7 +77,17 @@
       <PackagePath>build\net47;</PackagePath>
       <Pack>true</Pack>
     </Content>
-
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="images\" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Include="images\logo.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
  
 </Project>

@@ -36,7 +36,11 @@ namespace Xbim
 			void Init(IIfcRectangleHollowProfileDef^ rectProfile, ILogger^ logger);
 			void Init(IIfcSurface^ surface, ILogger^ logger);
 			void Init(IIfcPlane^ plane, ILogger^ logger);
-			void Init(IIfcSurfaceOfLinearExtrusion^ sLin, ILogger^ logger);
+			void Init(IIfcSurfaceOfLinearExtrusion^ sLin,  ILogger^ logger);
+			void Init(IIfcSurfaceOfLinearExtrusion^ sLin, bool useWorkArounds,  ILogger^ logger);
+			void ReParamCurve(TopoDS_Edge& basisEdge);
+			void ReparamBSpline(Handle(Geom_Curve)& curve, const Standard_Real First, const Standard_Real Last);
+			TopoDS_Edge ReParamEdge(TopoDS_Edge& basisEdge);
 			void Init(IIfcSurfaceOfRevolution^ sRev, ILogger^ logger);
 			void Init(IIfcRectangularTrimmedSurface^ def, ILogger^ logger);
 			void Init(IIfcCurveBoundedPlane^ def, ILogger^ logger);
@@ -112,7 +116,8 @@ namespace Xbim
 
 			//Builds a face from a Plane
 			XbimFace(IIfcPlane ^ plane, ILogger^ logger);
-			XbimFace(IIfcSurfaceOfLinearExtrusion ^ sLin, ILogger^ logger);
+			XbimFace(IIfcSurfaceOfLinearExtrusion ^ sLin, bool useWorkArounds, ILogger^ logger);
+			XbimFace(IIfcSurfaceOfLinearExtrusion^ sLin,  ILogger^ logger);
 			XbimFace(IIfcSurfaceOfRevolution ^ sRev, ILogger^ logger);
 			XbimFace(IIfcCurveBoundedPlane ^ def, ILogger^ logger);
 			XbimFace(IIfcRectangularTrimmedSurface ^ def, ILogger^ logger);
@@ -122,6 +127,7 @@ namespace Xbim
 			XbimFace(IXbimWire^ wire, bool isPlanar, double precision, int entityLabel,  ILogger^ logger);
 			XbimFace(IXbimWire^ wire, XbimPoint3D pointOnface,  XbimVector3D faceNormal, ILogger^ logger);
 			XbimFace(IIfcSurface^ surface, XbimWire^ outerBound, IEnumerable<XbimWire^>^ innerBounds, ILogger^ logger);
+			static void PutEdgeOnFace(const TopoDS_Edge& Edg, const TopoDS_Face& Fac);
 			XbimFace(IIfcFaceSurface^ surface, XbimWire^ outerBound, IEnumerable<XbimWire^>^ innerBounds, double tolerance, ILogger^ logger);
 			bool CheckInside();
 			XbimFace(IIfcCylindricalSurface ^ surface, ILogger^ logger);
