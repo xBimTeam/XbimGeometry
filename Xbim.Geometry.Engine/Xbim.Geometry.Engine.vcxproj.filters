@@ -9447,6 +9447,21 @@
     <ClInclude Include="OCC\src\BOPDS\BOPDS_VectorOfVectorOfPair.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="OCC\src\BOPDS\BOPDS_MapOfPair.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BOPDS\BOPDS_Pair.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BOPDS\BOPDS_PairMapHasher.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BOPDS\BOPDS_VectorOfPair.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OCC\src\BOPDS\BOPDS_VectorOfVectorOfPair.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Stdafx.cpp">

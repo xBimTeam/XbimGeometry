@@ -9,21 +9,19 @@
     <PackageId>Xbim.Geometry.Engine.Interop</PackageId>
     <PackageIcon>logo.png</PackageIcon>
   </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-  </PropertyGroup>
-
-	<ItemGroup>
-		<Content Include="..\Xbim.Geometry.Engine.Interop.targets">
-			<Link>Xbim.Geometry.Interop.targets</Link>
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-	</ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
+    <PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
+    <PackageReference Include="Xbim.Tessellator" Version="5.1.314" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\Xbim.Geometry.Engine.Interop.targets">
+      <Link>Xbim.Geometry.Interop.targets</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
@@ -89,5 +87,8 @@
       <PackagePath></PackagePath>
     </None>
   </ItemGroup>
+	<ItemGroup>
+		<None Include="..\xbim-toolkit-icon.png" Pack="True" PackagePath="\" />
+	</ItemGroup>
  
 </Project>

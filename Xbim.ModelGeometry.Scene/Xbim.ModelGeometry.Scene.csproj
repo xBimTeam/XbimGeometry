@@ -18,8 +18,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Xbim.Ifc" Version="5.1.322-develop" />
-    <PackageReference Include="Xbim.Tessellator" Version="5.1.322-develop" />
+    <PackageReference Include="Xbim.Ifc" Version="5.1.314" />
+    <PackageReference Include="Xbim.Tessellator" Version="5.1.314" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,15 +29,7 @@
   <ItemGroup>
     <Reference Include="System.Configuration" />
   </ItemGroup>
-
-  <ItemGroup>
-    <None Include="images\logo.png">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="images\" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="..\xbim-toolkit-icon.png" Pack="True" PackagePath="\" />
+	</ItemGroup>
 </Project>
