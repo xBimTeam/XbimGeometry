@@ -7,7 +7,7 @@
     <Description>Provides support for the Geometry Scene creation.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
-    <PackageIcon>logo.png</PackageIcon>
+    <PackageIcon>xbim-toolkit-icon.png</PackageIcon>
     <Version>5.1.0.0-Dev</Version>
     <AssemblyVersion>5.1.0.1</AssemblyVersion>
     <FileVersion>5.1.0.1</FileVersion>
@@ -18,18 +18,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Xbim.Ifc" Version="5.1.314" />
-    <PackageReference Include="Xbim.Tessellator" Version="5.1.314" />
+    <PackageReference Include="Xbim.Ifc" Version="5.1.323" />
+    <PackageReference Include="Xbim.Tessellator" Version="5.1.323" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Xbim.Geometry.Engine.Interop\Xbim.Geometry.Engine.Interop.csproj" />
   </ItemGroup>
-
+  <ItemGroup>
+    <None Include="..\xbim-toolkit-icon.png" Pack="True" PackagePath="\" />
+  </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Configuration" />
   </ItemGroup>
-	<ItemGroup>
-		<None Include="..\xbim-toolkit-icon.png" Pack="True" PackagePath="\" />
-	</ItemGroup>
 </Project>
