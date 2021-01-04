@@ -13,7 +13,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.8" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.8" />
-    <PackageReference Include="Xbim.Essentials" Version="5.1.313-develop" />
+    <PackageReference Include="Xbim.Essentials" Version="$(XBimEssentialsVersion)" />
   </ItemGroup>
 
 </Project>

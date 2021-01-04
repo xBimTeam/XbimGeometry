@@ -29,4 +29,8 @@
     <DelaySign>false</DelaySign>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <XBimEssentialsVersion>5.1.323</XBimEssentialsVersion>
+  </PropertyGroup>
+
 </Project>
