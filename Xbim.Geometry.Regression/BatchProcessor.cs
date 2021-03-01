@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Xbim.Common.Logging;
+using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc;
 using Xbim.Ifc4.Interfaces;
 using Xbim.ModelGeometry.Scene;
@@ -121,8 +122,76 @@ namespace XbimRegression
                                 Application = ohs == null ? "Unknown" : ohs.OwningApplication.ToString(),
                             };
                         }
-                        var xbim = Path.ChangeExtension(ifcFile, "xbim");
-                        model.SaveAs(xbim);
+						bool doit = true;
+						doit = true;
+						doit = true;
+						if (_params.WriteBreps)
+						{
+							var path =
+								   Path.Combine(
+									   Path.GetDirectoryName(ifcFile),
+									   Path.GetFileName(ifcFile) + ".brep.xbim4"
+									   );
+							IXbimGeometryEngine engine = new XbimGeometryEngine();
+							if (!Directory.Exists(path))
+								Directory.CreateDirectory(path);
+							IfcStore s = model as IfcStore;
+							if (s != null)
+							{
+								var types = new[]
+								{
+									// IIfcGeometricRepresentationItem
+									"IfcCsgSolid",
+									"IfcExtrudedAreaSolid",
+									"IfcExtrudedAreaSolidTapered",
+									"IfcFixedReferenceSweptAreaSolid",
+									"IfcRevolvedAreaSolid",
+									"IfcRevolvedAreaSolidTapered",
+									"IfcSurfaceCurveSweptAreaSolid",
+									"IfcSectionedSolidHorizontal",
+									"IfcSweptDiskSolid",
+									"IfcSweptDiskSolidPolygonal",
+									"IfcBooleanResult",
+									"IfcBooleanClippingResult",
+									// composing objects
+									"IfcConnectedFaceSet"
+								};
+								foreach (var type in types)
+								{
+									foreach (var ent in s.Instances.OfType(type, false))
+									{
+										try
+										{
+											Xbim.Common.Geometry.IXbimGeometryObject created = null;
+											if (ent is IIfcGeometricRepresentationItem)
+												created = engine.Create((IIfcGeometricRepresentationItem)ent);
+											if (ent is IIfcConnectedFaceSet)
+												created = engine.CreateShell((IIfcConnectedFaceSet)ent);
+											// IIfcConnectedFaceSet
+											if (created != null)
+											{
+												var brep = engine.ToBrep(created);
+												var brepFileName = Path.Combine(path, $"{ent.EntityLabel}.{type}.brep");
+												using (var tw = File.CreateText(brepFileName))
+												{
+													tw.WriteLine("DBRep_DrawableShape");
+													tw.WriteLine(brep);
+												}
+											}
+										}
+										catch (Exception ex)
+										{
+											Console.WriteLine($"Error writing brep {ent.EntityLabel}: {ex.Message}");
+										}
+									}
+								}
+							}
+						}
+						if (_params.Caching)
+						{
+							var xbim = Path.ChangeExtension(ifcFile, "xbim");
+							model.SaveAs(xbim);
+						}
                         model.Close();
                     }
                 }

@@ -2055,7 +2055,8 @@ namespace Xbim
 
 		IXbimSolidSet^ XbimSolid::Cut(IXbimSolid^ toCut, double tolerance)
 		{			
-			if (!IsValid || !toCut->IsValid) return XbimSolidSet::Empty;
+			if (!IsValid || !toCut->IsValid) 
+				return XbimSolidSet::Empty;
 			XbimSolid^ solidCut = dynamic_cast<XbimSolid^>(toCut);
 			if (solidCut == nullptr || !solidCut->IsValid)
 			{

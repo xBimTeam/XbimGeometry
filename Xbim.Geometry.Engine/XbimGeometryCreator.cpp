@@ -99,7 +99,8 @@ namespace Xbim
 
 		IXbimGeometryObject^ XbimGeometryCreator::Create(IIfcGeometricRepresentationItem^ geomRep)
 		{
-			return Create(geomRep, nullptr);
+			IXbimGeometryObject^ ret = Create(geomRep, nullptr);
+			return ret;
 		}
 
 		bool XbimGeometryCreator::Is3D(IIfcCurve^ rep)

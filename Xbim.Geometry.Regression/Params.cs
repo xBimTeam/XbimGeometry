@@ -16,10 +16,9 @@ namespace XbimRegression
 
         private const int DefaultTimeout = 1000 * 60 * 20; // 20 mins
         public bool Caching;
+		public bool WriteBreps = false;
         public bool GeometryV1;
-
-       
-
+		
         public Params(string[] args)
         {
             if (args.Length < 1)
@@ -60,7 +59,10 @@ namespace XbimRegression
                             case "/caching":
                                 Caching = true;
                                 break;
-                            case "/geometryv1":
+							case "/writebreps":
+								WriteBreps = true;
+								break;
+							case "/geometryv1":
                                 GeometryV1 = true;
                                 break;
                             default:
