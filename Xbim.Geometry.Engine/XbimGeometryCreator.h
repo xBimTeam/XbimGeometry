@@ -81,6 +81,9 @@ namespace Xbim
 			static void LogError(ILogger^ logger, Object^ entity, String^ format, ... array<Object^>^ arg);
 			static void LogDebug(ILogger^ logger, Object^ entity, String^ format, ... array<Object^>^ arg);
 
+			virtual void WriteBrep(String^ filename, IXbimGeometryObject^ geomObj);
+			virtual IXbimGeometryObject^ ReadBrep(String^ filename);
+
 			static int BooleanTimeOut;
 			static double FuzzyFactor;
 			static double LinearDeflectionInMM;

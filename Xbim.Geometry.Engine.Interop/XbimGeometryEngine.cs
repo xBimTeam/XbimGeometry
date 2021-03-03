@@ -837,8 +837,18 @@ namespace Xbim.Geometry.Engine.Interop
             }
         }
 
-       
-    }
+		public void WriteBrep(string filename, IXbimGeometryObject geomObj)
+		{
+            // no logger is provided so no tracing is started for this function
+            _engine.WriteBrep(filename, geomObj);
+		}
+
+		public IXbimGeometryObject ReadBrep(string filename)
+		{
+            // no logger is provided so no tracing is started for this function
+            return _engine.ReadBrep(filename);
+		}
+	}
 
     public static class LogHelper
     {
