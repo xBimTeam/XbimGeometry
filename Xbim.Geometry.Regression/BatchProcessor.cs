@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Xbim.Common;
+using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc;
 using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Memory;
@@ -121,7 +122,6 @@ namespace XbimRegression
                 var watch = new Stopwatch();
                 try
                 {
-
                     watch.Start();
                     using (var model = ParseModelFile(ifcFile, Params.Caching, logger))
                     {
@@ -169,11 +169,86 @@ namespace XbimRegression
                             };
 
                         }
+
+                        // Option to save breps of encountered classes by type or entityLabel for debugging purposes
+
+                        if (_params.WriteBreps)
+                        {
+                            var path = Path.Combine(
+                                    Path.GetDirectoryName(ifcFile),
+                                    Path.GetFileName(ifcFile) + ".brep.unclassified");
+                            IXbimGeometryEngine engine = new XbimGeometryEngine();
+                            if (!Directory.Exists(path))
+                                Directory.CreateDirectory(path);
+                            IfcStore s = model as IfcStore;
+                            if (s != null)
+                            {
+                                var ents = new List<IPersistEntity>();
+
+                                var exportBrepByType = new string[]
+                                {
+                                    "IfcFacetedBrep",
+								    // IIfcGeometricRepresentationItem
+								    "IfcCsgSolid",
+                                    "IfcExtrudedAreaSolid",
+                                    "IfcExtrudedAreaSolidTapered",
+                                    "IfcFixedReferenceSweptAreaSolid",
+                                    "IfcRevolvedAreaSolid",
+                                    "IfcRevolvedAreaSolidTapered",
+                                    "IfcSurfaceCurveSweptAreaSolid",
+                                    "IfcSectionedSolidHorizontal",
+                                    "IfcSweptDiskSolid",
+                                    "IfcSweptDiskSolidPolygonal",
+                                    "IfcBooleanResult",
+                                    "IfcBooleanClippingResult",
+								    // composing objects
+								    "IfcConnectedFaceSet"
+                                };
+
+                                // ADD Individual entities to extract brep here
+                                // ents.Add(s.Instances[69512]);
+
+                                foreach (var type in exportBrepByType)
+                                {
+                                    ents.AddRange(s.Instances.OfType(type, false));
+                                }
+                                foreach (var ent in ents)
+                                {
+                                    try
+                                    {
+                                        Xbim.Common.Geometry.IXbimGeometryObject created = null;
+                                        if (ent is IIfcGeometricRepresentationItem igri)
+                                            created = engine.Create(igri);
+                                        if (ent is IIfcConnectedFaceSet icfs)
+                                            created = engine.CreateShell(icfs);
+                                        // IIfcConnectedFaceSet
+                                        if (created != null)
+                                        {
+                                            var brep = engine.ToBrep(created);
+                                            var brepFileName = Path.Combine(path, $"{ent.EntityLabel}.{ent.GetType().Name}.brep");
+                                            using (var tw = File.CreateText(brepFileName))
+                                            {
+                                                tw.WriteLine("DBRep_DrawableShape");
+                                                tw.WriteLine(brep);
+                                            }
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Console.WriteLine($"Error writing brep {ent.EntityLabel}: {ex.Message}");
+                                    }
+                                }
+                            }
+                        }
+
                         if (_params.Caching)
                         {
                             IfcStore s = ((IfcStore)model);
-                            s.SaveAs(xbimFilename, Xbim.IO.StorageType.Xbim);
-                            s.Close();
+                            if (s != null)
+                            {
+                                s.SaveAs(xbimFilename, Xbim.IO.StorageType.Xbim);
+                                s.Close();
+                            }
                         }
                     }
                 }
