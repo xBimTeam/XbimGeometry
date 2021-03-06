@@ -113,6 +113,13 @@ namespace XbimRegression
             Console.ReadLine();
         }
 
+        private void report(int percentProgress, object userState)
+        {
+            if (percentProgress < 0 || percentProgress > 100)
+                return;
+            Console.WriteLine($"{userState}: {percentProgress}%");
+        }
+
         private ProcessResult ProcessFile(string ifcFile, StreamWriter writer, ILogger<BatchProcessor> logger)
         {
             RemoveFiles(ifcFile);
@@ -122,8 +129,11 @@ namespace XbimRegression
                 var watch = new Stopwatch();
                 try
                 {
+                    ReportProgressDelegate progress = null;
+                    if (_params.ReportProgress)
+                        progress = report;
                     watch.Start();
-                    using (var model = ParseModelFile(ifcFile, Params.Caching, logger))
+                    using (var model = ParseModelFile(ifcFile, Params.Caching, logger, progress))
                     {
                         var parseTime = watch.ElapsedMilliseconds;
                         var xbimFilename = BuildFileName(ifcFile, ".xbim");
@@ -131,7 +141,7 @@ namespace XbimRegression
                         if (_params.MaxThreads > 0)
                             context.MaxThreads = _params.MaxThreads;
                         // context.CustomMeshingBehaviour = CustomMeshingBehaviour;
-                        context.CreateContext();
+                        context.CreateContext(progress);
                         //}
                         var geomTime = watch.ElapsedMilliseconds - parseTime;
                         //XbimSceneBuilder sb = new XbimSceneBuilder();
@@ -274,7 +284,7 @@ namespace XbimRegression
             return Xbim3DModelContext.MeshingBehaviourResult.Default;
         }
 
-        private IModel ParseModelFile(string ifcFileName, bool caching, ILogger<BatchProcessor> logger)
+        private IModel ParseModelFile(string ifcFileName, bool caching, ILogger<BatchProcessor> logger, ReportProgressDelegate progress)
         {
             IModel ret = null;
             if (string.IsNullOrWhiteSpace(ifcFileName))
@@ -286,9 +296,9 @@ namespace XbimRegression
                 case ".ifczip":
                 case ".ifcxml":
                     if (caching)
-                        ret = IfcStore.Open(ifcFileName, null, 0);
+                        ret = IfcStore.Open(ifcFileName, null, 0, progress);
                     else
-                        ret = MemoryModel.OpenRead(ifcFileName, logger);
+                        ret = MemoryModel.OpenRead(ifcFileName, logger, progress);
                     return ret;
                 default:
                     throw new NotImplementedException(

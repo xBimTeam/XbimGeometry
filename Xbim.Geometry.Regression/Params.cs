@@ -14,7 +14,8 @@ namespace XbimRegression
         public int MaxThreads;
 
         private const int DefaultTimeout = 1000 * 60 * 20; // 20 mins
-        public bool Caching;
+        public bool Caching = false;
+        public bool ReportProgress = false;
         public bool WriteBreps = false;
         public bool GeometryV1;
 
@@ -48,6 +49,9 @@ namespace XbimRegression
                             case "/singlethread":
                                 MaxThreads = 1;
                                 break;
+                            case "/lowthreadscount":
+                                MaxThreads = Environment.ProcessorCount / 2;
+                                break;
                             case "/writebreps":
                                 WriteBreps = true;
                                 break;
@@ -59,6 +63,9 @@ namespace XbimRegression
                                 break;
                             case "/caching":
                                 Caching = true;
+                                break;
+                            case "/progress":
+                                ReportProgress = true;
                                 break;
                             case "/geometryv1":
                                 GeometryV1 = true;
