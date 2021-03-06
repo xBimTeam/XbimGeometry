@@ -70,7 +70,7 @@ namespace Xbim
 #pragma endregion
 
 		public:
-			
+			bool Timeout = false;
 			static List<XbimPoint3D>^ GetDiscretisedDirectrix(IIfcSweptDiskSolid^ saSolid, int numberOfPoints);
 			
 			static XbimSolid^ BuildClippingList(IIfcBooleanClippingResult^ solid, List<IIfcBooleanOperand^>^ clipList);

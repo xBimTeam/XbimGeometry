@@ -1317,10 +1317,10 @@ namespace Xbim.ModelGeometry.Scene
 #endif
             Parallel.ForEach(contextHelper.ProductShapeIds, contextHelper.ParallelOptions, shapeId =>
             {
-#if DEBUG
+
                 Stopwatch s = new Stopwatch();
                 s.Start();
-#endif
+
                 Interlocked.Increment(ref localTally);
                 IIfcGeometricRepresentationItem shape;
                 try
@@ -1439,12 +1439,12 @@ namespace Xbim.ModelGeometry.Scene
                         progDelegate(localPercentageParsed, "Creating Geometry");
                     }
                 }
-#if DEBUG
-                if (s.ElapsedMilliseconds > 2000)
+
+                if (s.ElapsedMilliseconds > 20000)
                 {
-                    Debug.WriteLine($"-\t{s.ElapsedMilliseconds,5}\tms {shape.GetType()}: #{shape.EntityLabel}");
+					LogWarning(shape, "Long meshing time of shape geometry: {0} ms.", s.ElapsedMilliseconds);
+					Debug.WriteLine($"-\t{s.ElapsedMilliseconds,5}\tms {shape.GetType()}: #{shape.EntityLabel}");
                 }
-#endif
             }
             );
 

@@ -793,20 +793,27 @@ namespace Xbim
 					break;
 				case IfcBooleanOperator::DIFFERENCE:
 					result = left->Cut(right, mf->Precision);
-					vRes = VolumeOf(result);
-					if (vRes != -1)
+					if (left->Timeout)
 					{
-						vL = left->Volume;
-						vR = right->Volume;
-						// the minimum is if we take away all of the right; 
-						// but then reduce a bit to compensate for tolerances.
-						vMin = (vL - vR) * .98; 
-						if (vRes < vMin )
-						{ 
-							// the boolean had a problem
-							XbimGeometryCreator::LogError(boolOp, "Boolean operation silent failure, the operation has been ignored");
-							solids->Add(left);
-							return;
+						XbimGeometryCreator::LogError(boolOp, "Boolean operation timeout, the operation has been ignored");
+					}
+					else
+					{
+						vRes = VolumeOf(result);
+						if (vRes != -1)
+						{
+							vL = left->Volume;
+							vR = right->Volume;
+							// the minimum is if we take away all of the right; 
+							// but then reduce a bit to compensate for tolerances.
+							vMin = (vL - vR) * .98;
+							if (vRes < vMin)
+							{
+								// the boolean had a problem
+								XbimGeometryCreator::LogError(boolOp, "Boolean operation silent failure, the operation has been ignored");
+								solids->Add(left);
+								return;
+							}
 						}
 					}
 					break;

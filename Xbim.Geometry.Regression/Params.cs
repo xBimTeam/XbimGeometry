@@ -18,6 +18,7 @@ namespace XbimRegression
         public bool Caching;
 		public bool WriteBreps = false;
         public bool GeometryV1;
+        public bool Progress = false;
 		
         public Params(string[] args)
         {
@@ -57,6 +58,7 @@ namespace XbimRegression
                                 paramType = CompoundParameter.MaxThreads;
                                 break;
                             case "/caching":
+								Console.WriteLine("Caching on.");
                                 Caching = true;
                                 break;
 							case "/writebreps":
@@ -65,7 +67,11 @@ namespace XbimRegression
 							case "/geometryv1":
                                 GeometryV1 = true;
                                 break;
-                            default:
+							case "/progress":
+								Console.WriteLine("Progress reporting on.");
+								Progress = true;
+								break;
+							default:
                                 Console.WriteLine("Skipping un-expected argument '{0}'", arg);
                                 break;
                         }

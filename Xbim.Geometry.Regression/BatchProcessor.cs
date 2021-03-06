@@ -77,17 +77,23 @@ namespace XbimRegression
                 {
                     var watch = new Stopwatch();
                     watch.Start();
-                    using (var model = ParseModelFile(ifcFile, Params.Caching))
+					Xbim.Common.ReportProgressDelegate del = null;
+					if (_params.Progress)
+						del = report;
+					using (var model = ParseModelFile(ifcFile, Params.Caching, del))
                     {
                         var parseTime = watch.ElapsedMilliseconds;
                         var xbimFilename = BuildFileName(ifcFile, ".xbim");
                         var context = new Xbim3DModelContext(model);
                         if (_params.MaxThreads > 0)
                             context.MaxThreads = _params.MaxThreads;
-                        // context.CustomMeshingBehaviour = CustomMeshingBehaviour;
-                        context.CreateContext();
-                        //}
-                        var geomTime = watch.ElapsedMilliseconds - parseTime;
+                        
+						if (_params.Progress)
+							context.CreateContext(report);
+						else
+							context.CreateContext();
+						
+						var geomTime = watch.ElapsedMilliseconds - parseTime;
                         //XbimSceneBuilder sb = new XbimSceneBuilder();
                         //string xbimSceneName = BuildFileName(ifcFile, ".xbimScene");
                         //sb.BuildGlobalScene(model, xbimSceneName);
@@ -122,9 +128,7 @@ namespace XbimRegression
                                 Application = ohs == null ? "Unknown" : ohs.OwningApplication.ToString(),
                             };
                         }
-						bool doit = true;
-						doit = true;
-						doit = true;
+
 						if (_params.WriteBreps)
 						{
 							var path =
@@ -189,11 +193,19 @@ namespace XbimRegression
 						}
 						if (_params.Caching)
 						{
+							if (_params.Progress)
+								Console.Write("Starting saving cache...");
 							var xbim = Path.ChangeExtension(ifcFile, "xbim");
 							model.SaveAs(xbim);
+							if (_params.Progress)
+								Console.WriteLine(" Complete.");
 						}
-                        model.Close();
-                    }
+						if (_params.Progress)
+							Console.Write("Closing...");
+						model.Close();
+						if (_params.Progress)
+							Console.WriteLine(" Complete.");
+					}
                 }
 
                 catch (Exception ex)
@@ -220,8 +232,15 @@ namespace XbimRegression
                 return result;
             }
         }
-        
-        private Xbim3DModelContext.MeshingBehaviourResult CustomMeshingBehaviour(int elementId, int typeId, ref double linearDeflection, ref double angularDeflection)
+
+		private void report(int percentProgress, object userState)
+		{
+			if (percentProgress < 0 || percentProgress > 100)
+				return;
+			Console.WriteLine($"{userState}: {percentProgress}%");
+		}
+
+		private Xbim3DModelContext.MeshingBehaviourResult CustomMeshingBehaviour(int elementId, int typeId, ref double linearDeflection, ref double angularDeflection)
         {
             if (typeId == 571) // = reinforcingbar
             {
@@ -233,7 +252,7 @@ namespace XbimRegression
 
         // todo: is caching going to come back?
         // ReSharper disable once UnusedParameter.Local
-        private static IfcStore ParseModelFile(string ifcFileName, bool caching)
+        private static IfcStore ParseModelFile(string ifcFileName, bool caching, Xbim.Common.ReportProgressDelegate prog)
         {
             if (string.IsNullOrWhiteSpace(ifcFileName))
                 return null;
@@ -243,7 +262,7 @@ namespace XbimRegression
                 case ".ifc":
                 case ".ifczip":
                 case ".ifcxml":
-                    return IfcStore.Open(ifcFileName, null, 0);
+                    return IfcStore.Open(ifcFileName, null, 0, prog);
                 default:
                     throw new NotImplementedException(
                         string.Format("XbimRegression does not support {0} file formats currently",

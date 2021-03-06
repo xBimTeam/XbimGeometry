@@ -1715,6 +1715,10 @@ namespace Xbim
 					break;
 				case IfcBooleanOperator::DIFFERENCE:
 					result = left->Cut(right, mf->Precision);
+					if (left->Timeout)
+					{
+						XbimGeometryCreator::LogError(solid, "Timeout performing boolean operation, used empty shape instead of boolean.");
+					}
 					break;
 				}
 			}
@@ -1725,7 +1729,7 @@ namespace Xbim
 				*pSolid = left; //return the left operand
 				return;
 			}
-
+			
 			XbimSolidSet^ xbimSolidSet = dynamic_cast<XbimSolidSet^>(result);
 
 			if (xbimSolidSet != nullptr && xbimSolidSet->First != nullptr)
@@ -2053,8 +2057,9 @@ namespace Xbim
 		}
 
 
+
 		IXbimSolidSet^ XbimSolid::Cut(IXbimSolid^ toCut, double tolerance)
-		{			
+		{
 			if (!IsValid || !toCut->IsValid) 
 				return XbimSolidSet::Empty;
 			XbimSolid^ solidCut = dynamic_cast<XbimSolid^>(toCut);
@@ -2088,6 +2093,7 @@ namespace Xbim
 
 				if (aPI->TimedOut())
 				{
+					Timeout = true;
 					XbimGeometryCreator::LogError(this, "Boolean operation timed out after {0} seconds. Operation failed", (int)aPI->ElapsedTime());
 					return XbimSolidSet::Empty;
 				}
