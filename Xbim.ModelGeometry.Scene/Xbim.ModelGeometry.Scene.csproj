@@ -34,7 +34,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Win32.Registry" Version="4.7.0" />
     <PackageReference Include="System.Drawing.Common" Version="4.7.0" />
-    <PackageReference Include="Xbim.Essentials" Version="5.1.313-develop" />
+    <PackageReference Include="Xbim.Essentials" Version="5.1.328" />
   </ItemGroup>
 
   <Choose>

@@ -99,7 +99,21 @@ namespace Xbim
 						LoggerExtensions::LogDebug(logger, "GeomEngine: {0} [{1}]", entity->GetType()->Name, msg);
 			}
 		}
+		
+		void XbimGeometryCreator::WriteBrep(System::String^ filename, IXbimGeometryObject^ geomObj)
+		{
+			throw gcnew System::NotImplementedException();
+			// TODO: This is stubbed out until we merge the implementation from unpushed code.
+			// temp fix for broken build
+		}
 
+		IXbimGeometryObject^ XbimGeometryCreator::ReadBrep(System::String^ filename)
+		{
+			throw gcnew System::NotImplementedException();
+			// TODO: This is stubbed out until we merge the implementation from unpushed code.
+			// temp fix for broken build
+		}
+		
 		void XbimGeometryCreator::LogError(ILogger^ logger, Object^ entity, System::String^ format, ...array<Object^>^ arg)
 		{
 			System::String^ msg = System::String::Format(format, arg);
