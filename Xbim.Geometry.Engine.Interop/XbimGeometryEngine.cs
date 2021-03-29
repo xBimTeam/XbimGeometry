@@ -34,9 +34,6 @@ namespace Xbim.Geometry.Engine.Interop
         {
             _logger = logger ?? XbimLogging.CreateLogger<XbimGeometryEngine>();
 
-            //  Warn if runtime for Engine is not present, this is not necessary any more as we are net47
-            //XbimPrerequisitesValidator.Validate();
-
 #if DELAY_LOAD
 
             var conventions = new XbimArchitectureConventions();    // understands the process we run under

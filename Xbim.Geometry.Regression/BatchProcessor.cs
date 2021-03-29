@@ -188,8 +188,8 @@ namespace XbimRegression
                                 var exportBrepByType = new string[]
                                 {
                                     "IfcFacetedBrep",
-								    // IIfcGeometricRepresentationItem
-								    "IfcCsgSolid",
+                                    // IIfcGeometricRepresentationItem
+                                    "IfcCsgSolid",
                                     "IfcExtrudedAreaSolid",
                                     "IfcExtrudedAreaSolidTapered",
                                     "IfcFixedReferenceSweptAreaSolid",
@@ -201,13 +201,10 @@ namespace XbimRegression
                                     "IfcSweptDiskSolidPolygonal",
                                     "IfcBooleanResult",
                                     "IfcBooleanClippingResult",
-								    // composing objects
-								    "IfcConnectedFaceSet"
+                                    // composing objects
+                                    "IfcConnectedFaceSet"
                                 };
-
-                                // ADD Individual entities to extract brep here
-                                // ents.Add(s.Instances[69512]);
-
+                                
                                 foreach (var type in exportBrepByType)
                                 {
                                     ents.AddRange(s.Instances.OfType(type, false));
