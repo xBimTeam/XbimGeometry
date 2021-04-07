@@ -315,10 +315,12 @@ static void RelocatePCurvesToNewUorigin(const TopTools_SequenceOfShape& theEdges
     for (;;) //collect pcurves of a contour
     {
       RemoveEdgeFromMap(CurEdge, theVEmap);
-      theUsedEdges.Add(CurEdge);
+      Standard_Boolean notUsed = theUsedEdges.Add(CurEdge);
+      if (!notUsed)
+          break;
       TopoDS_Vertex CurVertex = (anOr == TopAbs_FORWARD)?
         TopExp::LastVertex(CurEdge, Standard_True) : TopExp::FirstVertex(CurEdge, Standard_True);
-      
+    	
       const TopTools_ListOfShape& Elist = theVEmap.FindFromKey(CurVertex);
       if (Elist.IsEmpty())
         break; //end of contour in 3d
