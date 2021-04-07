@@ -301,6 +301,11 @@ namespace Xbim
 				LogError(logger, geomRep, "Error creating geometry #{2} representation of type {0}, {1}", geomRep->GetType()->Name, err, geomRep->EntityLabel);
 				return XbimGeometryObjectSet::Empty;
 			}
+			catch (System::Exception^ exc)
+			{
+				LogError(logger, geomRep, "Error creating geometry #{2} representation of type {0}, {1}", geomRep->GetType()->Name, exc, geomRep->EntityLabel);
+				return XbimGeometryObjectSet::Empty;
+			}
 			//catch ()
 			catch (...)
 			{

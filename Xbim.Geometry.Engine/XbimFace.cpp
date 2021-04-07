@@ -1780,38 +1780,33 @@ namespace Xbim
 					//trim 1 and trim 2 will be cartesian points
 					IIfcCartesianPoint^ trim1 = dynamic_cast<IIfcCartesianPoint^>(Enumerable::FirstOrDefault(tc->Trim1));
 					IIfcCartesianPoint^ trim2 = dynamic_cast<IIfcCartesianPoint^>(Enumerable::FirstOrDefault(tc->Trim2));
-					gp_Pnt p1 = XbimConvert::GetPoint3d(trim1);
-					gp_Pnt p2 = XbimConvert::GetPoint3d(trim2);
-					//there are two solutions A, B
-					//calc solution A
-					double radsq = circle->Radius * circle->Radius;
-					double qX = System::Math::Sqrt(((p2.X() - p1.X()) * (p2.X() - p1.X())) + ((p2.Y() - p1.Y()) * (p2.Y() - p1.Y())));
-					double x3 = (p1.X() + p2.X()) / 2;
-					double centreX = x3 - System::Math::Sqrt(radsq - ((qX / 2) * (qX / 2))) * ((p1.Y() - p2.Y()) / qX);
+					if (trim1 != nullptr && trim2 != nullptr)
+					{
+						gp_Pnt p1 = XbimConvert::GetPoint3d(trim1);
+						gp_Pnt p2 = XbimConvert::GetPoint3d(trim2);
+						//there are two solutions A, B
+						//calc solution A
+						double radsq = circle->Radius * circle->Radius;
+						double qX = System::Math::Sqrt(((p2.X() - p1.X()) * (p2.X() - p1.X())) + ((p2.Y() - p1.Y()) * (p2.Y() - p1.Y())));
+						double x3 = (p1.X() + p2.X()) / 2;
+						double centreX = x3 - System::Math::Sqrt(radsq - ((qX / 2) * (qX / 2))) * ((p1.Y() - p2.Y()) / qX);
 
-					double qY = System::Math::Sqrt(((p2.X() - p1.X()) * (p2.X() - p1.X())) + ((p2.Y() - p1.Y()) * (p2.Y() - p1.Y())));
+						double qY = System::Math::Sqrt(((p2.X() - p1.X()) * (p2.X() - p1.X())) + ((p2.Y() - p1.Y()) * (p2.Y() - p1.Y())));
+						double y3 = (p1.Y() + p2.Y()) / 2;
+						double centreY = y3 - System::Math::Sqrt(radsq - ((qY / 2) * (qY / 2))) * ((p2.X() - p1.X()) / qY);
 
-					double y3 = (p1.Y() + p2.Y()) / 2;
+						ITransaction^ txn = sLin->Model->BeginTransaction("Fix Centre");
+						
+						IIfcPlacement^ p = dynamic_cast<IIfcPlacement^>(circle->Position);
+						p->Location->Coordinates[0] = centreX;
+						p->Location->Coordinates[1] = centreY;
+						p->Location->Coordinates[2] = 0;
 
-					double centreY = y3 - System::Math::Sqrt(radsq - ((qY / 2) * (qY / 2))) * ((p2.X() - p1.X()) / qY);
-
-
-
-					ITransaction^ txn = sLin->Model->BeginTransaction("Fix Centre");
-
-
-					IIfcPlacement^ p = dynamic_cast<IIfcPlacement^>(circle->Position);
-
-					p->Location->Coordinates[0] = centreX;
-					p->Location->Coordinates[1] = centreY;
-					p->Location->Coordinates[2] = 0;
-
-					xbasisEdge1 = gcnew XbimEdge(sLin->SweptCurve, logger);
-					txn->RollBack();
-					isFixed = true;
+						xbasisEdge1 = gcnew XbimEdge(sLin->SweptCurve, logger);
+						txn->RollBack();
+						isFixed = true;
+					}
 				}
-
-
 			}
 			if (!isFixed) //just build it
 				xbasisEdge1 = gcnew XbimEdge(sLin->SweptCurve, logger);

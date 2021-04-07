@@ -1307,9 +1307,9 @@ namespace Xbim
 				{
 					//BRepTools::Write(revol.Shape(), "d:\\tmp\\rev");
 					pSolid = new TopoDS_Solid();
+					*pSolid = TopoDS::Solid(revol.Shape());
 					if (repItem->Position != nullptr)
-						*pSolid = TopoDS::Solid(revol.Shape());
-					pSolid->Move(XbimConvert::ToLocation(repItem->Position));
+						pSolid->Move(XbimConvert::ToLocation(repItem->Position));
 					ShapeFix_ShapeTolerance tolFixer;
 					tolFixer.LimitTolerance(*pSolid, repItem->Model->ModelFactors->Precision);
 				}

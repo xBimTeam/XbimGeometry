@@ -236,27 +236,28 @@ namespace Xbim
 				pWire = new TopoDS_Wire();
 				if (profile->ProfileType == IfcProfileTypeEnum::AREA && !loop->IsClosed) //need to make sure it is not self intersecting and it is closed area
 				{
-
 					// todo: this code is not quite robust, it did not manage to close fairly simple polylines.
 					try
 					{
-
-
 						double oneMilli = profile->Model->ModelFactors->OneMilliMeter;
-						TopoDS_Face face = gcnew XbimFace(loop, true, oneMilli, profile->OuterCurve->EntityLabel, logger);
-						ShapeFix_Wire wireFixer(loop, face, profile->Model->ModelFactors->Precision);
-						wireFixer.ClosedWireMode() = Standard_True;
-						wireFixer.FixGaps2dMode() = Standard_True;
-						wireFixer.FixGaps3dMode() = Standard_True;
-						wireFixer.ModifyGeometryMode() = Standard_True;
-						wireFixer.SetMinTolerance(profile->Model->ModelFactors->Precision);
-						wireFixer.SetPrecision(oneMilli);
-						wireFixer.SetMaxTolerance(oneMilli * 10);
-						Standard_Boolean closed = wireFixer.Perform();
-						if (closed)
-							*pWire = wireFixer.Wire();
-						else
-							*pWire = loop;
+						XbimFace^ xbimFace = gcnew XbimFace(loop, true, oneMilli, profile->OuterCurve->EntityLabel, logger);
+						if (xbimFace->IsValid)
+						{
+							TopoDS_Face face = xbimFace;
+							ShapeFix_Wire wireFixer(loop, face, profile->Model->ModelFactors->Precision);
+							wireFixer.ClosedWireMode() = Standard_True;
+							wireFixer.FixGaps2dMode() = Standard_True;
+							wireFixer.FixGaps3dMode() = Standard_True;
+							wireFixer.ModifyGeometryMode() = Standard_True;
+							wireFixer.SetMinTolerance(profile->Model->ModelFactors->Precision);
+							wireFixer.SetPrecision(oneMilli);
+							wireFixer.SetMaxTolerance(oneMilli * 10);
+							Standard_Boolean closed = wireFixer.Perform();
+							if (closed)
+								*pWire = wireFixer.Wire();
+							else
+								*pWire = loop;
+						}
 					}
 					catch (Standard_Failure sf)
 					{
