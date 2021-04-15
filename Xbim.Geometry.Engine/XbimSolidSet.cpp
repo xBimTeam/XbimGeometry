@@ -1055,7 +1055,9 @@ namespace Xbim
 						if (dynamic_cast<IIfcHalfSpaceSolid^>(bOp) && bOp->GetType()->Name->Contains("IfcHalfSpaceSolid") ||
 							dynamic_cast<IIfcPolygonalBoundedHalfSpace^>(bOp) && bOp->GetType()->Name->Contains("IfcPolygonalBoundedHalfSpace"))
 						{
-							bodySet = (XbimSolidSet^)bodySet->Cut(s, mf->Precision, logger);
+							XbimSolidSet^ bodySetCut = (XbimSolidSet^)bodySet->Cut(s, mf->Precision, logger);
+							if (bodySetCut->IsValid)
+								bodySet = bodySetCut;
 						}
 						else
 							solidSet->Add(s);
