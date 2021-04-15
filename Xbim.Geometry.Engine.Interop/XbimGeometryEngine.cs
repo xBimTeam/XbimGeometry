@@ -34,8 +34,6 @@ namespace Xbim.Geometry.Engine.Interop
         {
             _logger = logger ?? XbimLogging.CreateLogger<XbimGeometryEngine>();
 
-            //  Warn if runtime for Engine is not present, this is not necessary any more as we are net47
-
 #if DELAY_LOAD
 
             var conventions = new XbimArchitectureConventions();    // understands the process we run under
@@ -816,6 +814,18 @@ namespace Xbim.Geometry.Engine.Interop
             {
                 return _engine.ToBrep(geometryObject);
             }
+        }
+
+        public void WriteBrep(string filename, IXbimGeometryObject geomObj)
+        {
+            // no logger is provided so no tracing is started for this function
+            _engine.WriteBrep(filename, geomObj);
+        }
+
+        public IXbimGeometryObject ReadBrep(string filename)
+        {
+            // no logger is provided so no tracing is started for this function
+            return _engine.ReadBrep(filename);
         }
 
         public IXbimSolidSet CreateSolidSet(IIfcSweptAreaSolid ifcSolid, ILogger logger = null)

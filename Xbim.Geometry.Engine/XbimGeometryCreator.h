@@ -23,7 +23,7 @@ namespace Xbim
 		public ref class XbimGeometryCreator : IXbimGeometryEngine
 		{
 			
-			static Assembly^  ResolveHandler(Object^ /*Sender*/, System::ResolveEventArgs^ /*args*/)
+			static Assembly^ ResolveHandler(Object^ /*Sender*/, System::ResolveEventArgs^ /*args*/)
 			{
 				
 				// Warning: this should check the args for the assembly name!
@@ -80,6 +80,9 @@ namespace Xbim
 			static void LogError(ILogger^ logger, Object^ entity, System::String^ format, ... array<Object^>^ arg);
 			static void LogDebug(ILogger^ logger, Object^ entity, System::String^ format, ... array<Object^>^ arg);
 
+			virtual void WriteBrep(System::String^ filename, IXbimGeometryObject^ geomObj);
+			virtual IXbimGeometryObject^ ReadBrep(System::String^ filename);
+			
 			static int BooleanTimeOut;
 			static double FuzzyFactor;
 			static double LinearDeflectionInMM;
@@ -90,7 +93,7 @@ namespace Xbim
 			
 			virtual XbimShapeGeometry^ CreateShapeGeometry(IXbimGeometryObject^ geometryObject, double precision, double deflection, ILogger^ logger/*, double angle = 0.5, XbimGeometryType storageType = XbimGeometryType::Polyhedron*/)
 			{
-				return CreateShapeGeometry(geometryObject, precision, deflection, 0.5, XbimGeometryType::PolyhedronBinary,logger);
+				return CreateShapeGeometry(geometryObject, precision, deflection, 0.5, XbimGeometryType::PolyhedronBinary, logger);
 			};
 
 			virtual XbimShapeGeometry^ CreateShapeGeometry(double oneMillimetre, IXbimGeometryObject^ geometryObject, double precision, ILogger^ logger)
@@ -242,9 +245,9 @@ namespace Xbim
 			{
 				return Moved(geometryObject, (IIfcPlacement ^)placement);
 			};
-			virtual IXbimGeometryObject ^ Moved(IXbimGeometryObject ^geometryObject, IIfcAxis2Placement2D ^placement)
+			virtual IXbimGeometryObject^ Moved(IXbimGeometryObject^ geometryObject, IIfcAxis2Placement2D^ placement)
 			{
-				return Moved(geometryObject, (IIfcPlacement ^)placement);
+				return Moved(geometryObject, (IIfcPlacement^)placement);
 			};
 			virtual IXbimGeometryObject ^ Moved(IXbimGeometryObject ^geometryObject, IIfcObjectPlacement ^objectPlacement, ILogger^ logger);
 			virtual IXbimGeometryObject^ FromBrep(System::String^ brepStr);
