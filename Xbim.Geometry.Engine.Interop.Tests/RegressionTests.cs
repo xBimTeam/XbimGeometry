@@ -27,6 +27,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             geomEngine = new XbimGeometryEngine();
             logger = loggerFactory.CreateLogger<Ifc4GeometryTests>();
         }
+
         [ClassCleanup]
         static public void Cleanup()
         {
