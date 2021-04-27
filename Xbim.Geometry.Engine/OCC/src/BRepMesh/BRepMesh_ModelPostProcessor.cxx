@@ -20,6 +20,8 @@
 #include <IMeshData_PCurve.hxx>
 #include <OSD_Parallel.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(BRepMesh_ModelPostProcessor, IMeshTools_ModelAlgo)
+
 namespace
 {
   //! Commits 3D polygons and polygons on triangulations for corresponding edges.
@@ -179,8 +181,10 @@ BRepMesh_ModelPostProcessor::~BRepMesh_ModelPostProcessor()
 //=======================================================================
 Standard_Boolean BRepMesh_ModelPostProcessor::performInternal(
   const Handle(IMeshData_Model)& theModel,
-  const IMeshTools_Parameters&   /*theParameters*/)
+  const IMeshTools_Parameters&   /*theParameters*/,
+  const Message_ProgressRange&   theRange)
 {
+  (void )theRange;
   if (theModel.IsNull())
   {
     return Standard_False;

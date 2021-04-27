@@ -110,7 +110,7 @@ public:
   //! - the end point of the initial curve becomes the start
   //! point of the reversed curve.
   //! - Reversed creates a new curve.
-  Standard_EXPORT Standard_NODISCARD Handle(Geom2d_Curve) Reversed() const;
+  Standard_NODISCARD Standard_EXPORT Handle(Geom2d_Curve) Reversed() const;
   
   //! Returns the value of the first parameter.
   //! Warnings :
@@ -223,6 +223,9 @@ public:
   //! derivative on the basis curve and the offset direction
   //! are parallel.
   Standard_EXPORT gp_Pnt2d Value (const Standard_Real U) const;
+
+  //! Dumps the content of me into the stream
+  Standard_EXPORT virtual void DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth = -1) const Standard_OVERRIDE;
 
 
 

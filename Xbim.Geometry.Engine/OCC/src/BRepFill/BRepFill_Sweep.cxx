@@ -330,8 +330,9 @@ static Standard_Boolean SameParameter(TopoDS_Edge&    E,
   if (!HasPCurves(E))
     {
       Handle(Geom2dAdaptor_HCurve) HC2d = new Geom2dAdaptor_HCurve( Pcurv );
-      Approx_CurveOnSurface AppCurve(HC2d, S, HC2d->FirstParameter(), HC2d->LastParameter(),
-				     Precision::Confusion(), GeomAbs_C1, 10, 10, Standard_True);
+      Approx_CurveOnSurface AppCurve(HC2d, S, HC2d->FirstParameter(), HC2d->LastParameter(), 
+                                     Precision::Confusion());
+      AppCurve.Perform(10, 10, GeomAbs_C1, Standard_True);
       if (AppCurve.IsDone() && AppCurve.HasResult())
 	{
 	  C3d = AppCurve.Curve3d();
@@ -1618,7 +1619,7 @@ static void UpdateEdge(TopoDS_Edge& E,
 
   // Control direction & Range
   Standard_Real R, First, Last, Tol=1.e-4;
-  Standard_Boolean reverse = Standard_False;;
+  Standard_Boolean reverse = Standard_False;
   
 
 // Class BRep_Tool without fields and without Constructor :
@@ -2922,50 +2923,70 @@ void BRepFill_Sweep::Build(TopTools_MapOfShape& ReversedEdges,
       Standard_Real Extend = 0.0;
       if (NbTrous==1)  Extend = EvalExtrapol(1, Transition);
       isDone = BuildShell(Transition, 
-			  1, NbPath+1,
+                          1, NbPath+1,
                           ReversedEdges,
                           Tapes, Rails,
-			  Extend, Extend);
+                          Extend, Extend);
     }
     else { //  This is done piece by piece
       Standard_Integer IFirst = 1, ILast;
       for (ii=1, isDone=Standard_True; 
-	   ii<=NbPart && isDone; ii++) {
-	if (ii > NbTrous) ILast =  NbPath+1;
-	else ILast = Trous->Value(ii);
-	isDone = BuildShell(Transition, 
-			    IFirst, ILast,
+           ii<=NbPart && isDone; ii++) {
+        if (ii > NbTrous) ILast =  NbPath+1;
+        else ILast = Trous->Value(ii);
+        isDone = BuildShell(Transition, 
+                            IFirst, ILast,
                             ReversedEdges,
                             Tapes, Rails,
-			    EvalExtrapol(IFirst, Transition),
-			    EvalExtrapol(ILast,  Transition));
-	if (IFirst>1) {
-	  Translate(myVEdges, IFirst, Bounds, 2);
-	  PerformCorner(IFirst, 
-			Transition, Bounds);
-	}
-	IFirst = ILast;
-	Translate(myVEdges, IFirst, Bounds, 1);
+                            EvalExtrapol(IFirst, Transition),
+                            EvalExtrapol(ILast,  Transition));
+        if (IFirst>1) {
+          Translate(myVEdges, IFirst, Bounds, 2);
+          if (!PerformCorner(IFirst,
+            Transition, Bounds))
+          {
+            isDone = Standard_False;
+            return;
+          }
+        }
+        IFirst = ILast;
+        Translate(myVEdges, IFirst, Bounds, 1);
       }
     }
     // Management of looping ends
     if ( (NbTrous>0) && (myLoc->IsClosed()) &&
-	 (Trous->Value(NbTrous) == NbPath+1) ) {
+         (Trous->Value(NbTrous) == NbPath+1) ) {
       Translate(myVEdges, NbPath+1, Bounds, 1);
       Translate(myVEdges, 1, Bounds, 2);
-      PerformCorner(1, Transition, Bounds); 
+      if (!PerformCorner(1, Transition, Bounds))
+      {
+        isDone = Standard_False;
+        return;
+      }
       Translate(myVEdges, 1, myVEdges, NbPath+1);
     }
 
     // Construction of the shell
     TopoDS_Shell shell;
     B.MakeShell(shell);
+    Standard_Integer aNbFaces = 0;
     for (ipath=1; ipath<=NbPath; ipath++) 
-      for (isec=1; isec <=NbLaw; isec++) {
-      const TopoDS_Shape& face = myFaces->Value(isec, ipath);
+      for (isec=1; isec <=NbLaw; isec++)
+      {
+        const TopoDS_Shape& face = myFaces->Value(isec, ipath);
 	if (!face.IsNull() && 
-	    (face.ShapeType() == TopAbs_FACE) ) B.Add(shell, face);
+	    (face.ShapeType() == TopAbs_FACE) )
+        {
+          B.Add(shell, face);
+          aNbFaces++;
+        }
       }
+
+    if (aNbFaces == 0)
+    {
+      isDone = Standard_False;
+      return;
+    }
 
     TopTools_ListIteratorOfListOfShape It(myAuxShape);
     for (; It.More(); It.Next()) {
@@ -3174,12 +3195,14 @@ TopoDS_Shape BRepFill_Sweep::Tape(const Standard_Integer Index) const
 //function : PerformCorner
 //purpose  : Trim and/or loop a corner
 //======================================================================
- void  BRepFill_Sweep::PerformCorner(const Standard_Integer Index,
-				     const BRepFill_TransitionStyle Transition,
-				     const Handle(TopTools_HArray2OfShape)& Bounds)
+ Standard_Boolean BRepFill_Sweep::PerformCorner(const Standard_Integer Index,
+                                                const BRepFill_TransitionStyle Transition,
+                                                const Handle(TopTools_HArray2OfShape)& Bounds)
 {
 
-  if (Transition == BRepFill_Modified) return; // Do nothing.
+  if (Transition == BRepFill_Modified) return Standard_True; // Do nothing.
+
+  const Standard_Real anAngularTol = 0.025;
 
   BRepFill_TransitionStyle TheTransition = Transition;
   Standard_Boolean isTangent=Standard_False;
@@ -3225,11 +3248,15 @@ TopoDS_Shape BRepFill_Sweep::Tape(const Standard_Integer Index) const
 #ifdef OCCT_DEBUG
       std::cout << "BRepFill_Sweep::PerformCorner : This is not a corner !" << std::endl;
 #endif
-      return;
+      return Standard_True;
     }
     Sortant = t2 - t1;
   }
 
+  if (T1.Angle(T2) >= M_PI - anAngularTol)
+  {
+    return Standard_False;
+  }
   if ((TheTransition == BRepFill_Right) 
       && (T1.Angle(T2) >  myAngMax) ) {
     TheTransition =  BRepFill_Round;
@@ -3335,7 +3362,7 @@ TopoDS_Shape BRepFill_Sweep::Tape(const Standard_Integer Index) const
 #ifdef OCCT_DEBUG
     std::cout << "Fail of TrimCorner" << std::endl;
 #endif
-    return; // Nothing is touched
+    return Standard_True; // Nothing is touched
   }
 
   if (mySec->IsUClosed())
@@ -3415,7 +3442,7 @@ TopoDS_Shape BRepFill_Sweep::Tape(const Standard_Integer Index) const
 #endif
     }
   }
-
+  return Standard_True;
 /*  
 #if DRAW
   if (Affich) {

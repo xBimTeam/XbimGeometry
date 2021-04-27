@@ -66,7 +66,7 @@
 #include <TColgp_SequenceOfVec.hxx>
 #include <TColStd_HArray1OfReal.hxx>
 #include <TColStd_SequenceOfInteger.hxx>
-#include <Message_ProgressIndicator.hxx>
+#include <Message_ProgressScope.hxx>
 
 #include <stdio.h>
 
@@ -300,10 +300,9 @@ Handle(Geom2d_Curve)  GeomPlate_BuildPlateSurface::ProjectCurve(const Handle(Ada
    Projector.Bounds(1, Udeb, Ufin);
    
    MaxSeg = 20 + HProjector->NbIntervals(GeomAbs_C3);
-   Approx_CurveOnSurface appr(HProjector, hsur, Udeb, Ufin, myTol3d,
-			      Continuity, MaxDegree, MaxSeg, 
-			      Standard_False, Standard_True);
-   
+   Approx_CurveOnSurface appr(HProjector, hsur, Udeb, Ufin, myTol3d);
+   appr.Perform(MaxSeg, MaxDegree, Continuity, Standard_False, Standard_True);
+
    Curve2d = appr.Curve2d();
  }
 #if DRAW
@@ -449,7 +448,7 @@ void GeomPlate_BuildPlateSurface::
 // Function : Perform
 // Calculates the surface filled with loaded constraints
 //---------------------------------------------------------
-void GeomPlate_BuildPlateSurface::Perform(const Handle(Message_ProgressIndicator) & aProgress)
+void GeomPlate_BuildPlateSurface::Perform(const Message_ProgressRange& theProgress)
 { 
 #ifdef OCCT_DEBUG
   // Timing
@@ -480,8 +479,13 @@ void GeomPlate_BuildPlateSurface::Perform(const Handle(Message_ProgressIndicator
   //======================================================================   
   // Initial Surface 
   //======================================================================
+  Message_ProgressScope aPS(theProgress, NULL, 100, Standard_True);
   if (!mySurfInitIsGive)
-    ComputeSurfInit(aProgress);
+  {
+    ComputeSurfInit (aPS.Next(10));
+    if (aPS.UserBreak())
+      return;
+  }
 
   else {
    if (NTLinCont>=2)
@@ -652,9 +656,9 @@ void GeomPlate_BuildPlateSurface::Perform(const Handle(Message_ProgressIndicator
 	  // Construction of the surface
 	  //====================================================================
 
-	  myPlate.SolveTI(myDegree, ComputeAnisotropie(), aProgress);
+	  myPlate.SolveTI(myDegree, ComputeAnisotropie(), aPS.Next(90));
 
-	  if (!aProgress.IsNull() && aProgress->UserBreak())
+	  if (aPS.UserBreak())
 	  {
 	    return;
 	  }
@@ -691,9 +695,9 @@ void GeomPlate_BuildPlateSurface::Perform(const Handle(Message_ProgressIndicator
 	  //====================================================================
 	  //Construction of the surface
 	  //====================================================================
-	  myPlate.SolveTI(myDegree, ComputeAnisotropie(), aProgress);
+	  myPlate.SolveTI(myDegree, ComputeAnisotropie(), aPS.Next(90));
 
-	  if (!aProgress.IsNull() && aProgress->UserBreak())
+	  if (aPS.UserBreak())
 	  {
 	    return;
 	  }
@@ -1014,7 +1018,7 @@ Disc3dContour (const Standard_Integer /*nbp*/,
   for(i=1; i<=NTCurve; i++) 
     if (myLinCont->Value(i)->Order()!=-1) 
       
-      { Standard_Integer NbPt=myParCont->Value(i).Length();;
+      { Standard_Integer NbPt=myParCont->Value(i).Length();
 	// first constraint point (j=0)
 	// Standard_Integer NbPt=myParCont->Length();
 	if (iordre==0) {
@@ -1359,7 +1363,7 @@ Standard_Boolean GeomPlate_BuildPlateSurface::
 // there are point constraints.
 //-------------------------------------------------------------------------
 
-void GeomPlate_BuildPlateSurface::ComputeSurfInit(const Handle(Message_ProgressIndicator) & aProgress)
+void GeomPlate_BuildPlateSurface::ComputeSurfInit(const Message_ProgressRange& theProgress)
 {
   Standard_Integer nopt=2, popt=2, Np=1;
   Standard_Boolean isHalfSpace = Standard_True;
@@ -1724,8 +1728,8 @@ void GeomPlate_BuildPlateSurface::ComputeSurfInit(const Handle(Message_ProgressI
       //====================================================================
       // Construction of the surface
       //====================================================================
-      myPlate.SolveTI(2, ComputeAnisotropie(), aProgress);
-      if (!aProgress.IsNull() && aProgress->UserBreak())
+      myPlate.SolveTI(2, ComputeAnisotropie(), theProgress);
+      if (theProgress.UserBreak())
       {
           return;
       }

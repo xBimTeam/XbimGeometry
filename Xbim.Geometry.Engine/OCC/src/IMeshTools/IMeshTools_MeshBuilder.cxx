@@ -17,6 +17,8 @@
 #include <IMeshData_Face.hxx>
 #include <OSD_Parallel.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(IMeshTools_MeshBuilder, Message_Algorithm)
+
 //=======================================================================
 // Function: Constructor
 // Purpose : 
@@ -47,7 +49,7 @@ IMeshTools_MeshBuilder::~IMeshTools_MeshBuilder ()
 // Function: Perform
 // Purpose : 
 //=======================================================================
-void IMeshTools_MeshBuilder::Perform ()
+void IMeshTools_MeshBuilder::Perform (const Message_ProgressRange& theRange)
 {
   ClearStatus ();
 
@@ -58,6 +60,8 @@ void IMeshTools_MeshBuilder::Perform ()
     return;
   }
 
+  Message_ProgressScope aPS(theRange, "Mesh Perform", 10);
+
   if (aContext->BuildModel ())
   {
     if (aContext->DiscretizeEdges ())
@@ -66,7 +70,7 @@ void IMeshTools_MeshBuilder::Perform ()
       {
         if (aContext->PreProcessModel())
         {
-          if (aContext->DiscretizeFaces())
+          if (aContext->DiscretizeFaces(aPS.Next(9)))
           {
             if (aContext->PostProcessModel())
             {
@@ -79,6 +83,12 @@ void IMeshTools_MeshBuilder::Perform ()
           }
           else
           {
+            if (!aPS.More())
+            {
+              SetStatus(Message_Fail8);
+              aContext->Clean();
+              return;
+            }
             SetStatus(Message_Fail6);
           }
         }
@@ -113,6 +123,6 @@ void IMeshTools_MeshBuilder::Perform ()
         Message_Warn1 : Message_Fail2);
     }
   }
-
+  aPS.Next(1);
   aContext->Clean ();
 }

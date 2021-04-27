@@ -29,6 +29,200 @@
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Edge.hxx>
+#include <BRepTools.hxx>
+#include <IntTools_Tools.hxx>
+#include <BRepAdaptor_HSurface.hxx>
+#include <BRepTopAdaptor_TopolTool.hxx>
+#include <LocalAnalysis_SurfaceContinuity.hxx>
+#include <TopOpeBRepTool_TOOL.hxx>
+
+
+static void Correct2dPoint(const TopoDS_Face& theF, gp_Pnt2d& theP2d);
+//
+
+//=======================================================================
+//function : DefineConnectType
+//purpose  : 
+//=======================================================================
+ChFiDS_TypeOfConcavity ChFi3d::DefineConnectType(const TopoDS_Edge&     E,
+                                                 const TopoDS_Face&     F1,
+                                                 const TopoDS_Face&     F2,
+                                                 const Standard_Real    SinTol,
+                                                 const Standard_Boolean CorrectPoint)
+{
+  const Handle(Geom_Surface)& S1 = BRep_Tool::Surface(F1);
+  const Handle(Geom_Surface)& S2 = BRep_Tool::Surface(F2);
+  //
+  Standard_Real   f,l;
+  Handle (Geom2d_Curve) C1 = BRep_Tool::CurveOnSurface(E,F1,f,l);
+  //For the case of seam edge
+  TopoDS_Edge EE = E;
+  if (F1.IsSame(F2))
+    EE.Reverse();
+  Handle (Geom2d_Curve) C2 = BRep_Tool::CurveOnSurface(EE,F2,f,l);
+  if (C1.IsNull() || C2.IsNull())
+    return ChFiDS_Other;
+
+  BRepAdaptor_Curve C(E);
+  f = C.FirstParameter();
+  l = C.LastParameter();
+//
+  Standard_Real ParOnC = 0.5*(f+l);
+  gp_Vec T1 = C.DN(ParOnC,1);
+  if (T1.SquareMagnitude() <= gp::Resolution())
+  {
+    ParOnC = IntTools_Tools::IntermediatePoint(f,l);
+    T1 = C.DN(ParOnC,1);
+  }
+  if (T1.SquareMagnitude() > gp::Resolution()) {
+    T1.Normalize();
+  }
+  
+  if (BRepTools::OriEdgeInFace(E,F1) == TopAbs_REVERSED) {
+    T1.Reverse();
+  }
+  if (F1.Orientation() == TopAbs_REVERSED) T1.Reverse();
+
+  gp_Pnt2d P  = C1->Value(ParOnC);
+  gp_Pnt   P3;
+  gp_Vec   D1U,D1V;
+  
+  if(CorrectPoint) 
+    Correct2dPoint(F1, P);
+  //
+  S1->D1(P.X(),P.Y(),P3,D1U,D1V);
+  gp_Vec DN1(D1U^D1V);
+  if (F1.Orientation() == TopAbs_REVERSED) DN1.Reverse();
+  
+  P = C2->Value(ParOnC);
+  if(CorrectPoint) 
+    Correct2dPoint(F2, P);
+  S2->D1(P.X(),P.Y(),P3,D1U,D1V);
+  gp_Vec DN2(D1U^D1V);
+  if (F2.Orientation() == TopAbs_REVERSED) DN2.Reverse();
+
+  DN1.Normalize();
+  DN2.Normalize();
+
+  gp_Vec        ProVec     = DN1^DN2;
+  Standard_Real NormProVec = ProVec.Magnitude(); 
+  if (NormProVec < SinTol) {
+    // plane
+    if (DN1.Dot(DN2) > 0) {   
+      //Tangent
+      return ChFiDS_Tangential;
+    }
+    else  {                   
+      //Mixed not finished!
+#ifdef OCCT_DEBUG
+      std::cout <<" faces locally mixed"<<std::endl;
+#endif
+      return ChFiDS_Convex;
+    }
+  }
+  else {  
+    if (NormProVec > gp::Resolution())
+      ProVec /= NormProVec;
+    Standard_Real Prod  = T1.Dot(ProVec);
+    if (Prod > 0.) {       
+      //
+      return ChFiDS_Convex;
+    }
+    else {                       
+      //reenters
+      return ChFiDS_Concave;
+    }
+  }
+}
+
+//=======================================================================
+//function : IsTangentFaces
+//purpose  : 
+//=======================================================================
+Standard_Boolean ChFi3d::IsTangentFaces(const TopoDS_Edge& theEdge,
+                                        const TopoDS_Face& theFace1,
+                                        const TopoDS_Face& theFace2,
+                                        const GeomAbs_Shape Order)
+{
+  if (Order == GeomAbs_G1 && BRep_Tool::Continuity(theEdge, theFace1, theFace2) != GeomAbs_C0)
+    return Standard_True;
+
+  Standard_Real TolC0 = Max(0.001, 1.5*BRep_Tool::Tolerance(theEdge));
+
+  Standard_Real aFirst;
+  Standard_Real aLast;
+
+  // Obtaining of pcurves of edge on two faces.
+  const Handle(Geom2d_Curve) aC2d1 = BRep_Tool::CurveOnSurface
+    (theEdge, theFace1, aFirst, aLast);
+  //For the case of seam edge
+  TopoDS_Edge EE = theEdge;
+  if (theFace1.IsSame(theFace2))
+    EE.Reverse();
+  const Handle(Geom2d_Curve) aC2d2 = BRep_Tool::CurveOnSurface
+    (EE, theFace2, aFirst, aLast);
+  if (aC2d1.IsNull() || aC2d2.IsNull())
+    return Standard_False;
+
+  // Obtaining of two surfaces from adjacent faces.
+  Handle(Geom_Surface) aSurf1 = BRep_Tool::Surface(theFace1);
+  Handle(Geom_Surface) aSurf2 = BRep_Tool::Surface(theFace2);
+
+  if (aSurf1.IsNull() || aSurf2.IsNull())
+    return Standard_False;
+
+  // Computation of the number of samples on the edge.
+  BRepAdaptor_Surface              aBAS1(theFace1);
+  BRepAdaptor_Surface              aBAS2(theFace2);
+  Handle(BRepAdaptor_HSurface)     aBAHS1 = new BRepAdaptor_HSurface(aBAS1);
+  Handle(BRepAdaptor_HSurface)     aBAHS2 = new BRepAdaptor_HSurface(aBAS2);
+  Handle(BRepTopAdaptor_TopolTool) aTool1 = new BRepTopAdaptor_TopolTool(aBAHS1);
+  Handle(BRepTopAdaptor_TopolTool) aTool2 = new BRepTopAdaptor_TopolTool(aBAHS2);
+  Standard_Integer                 aNbSamples1 = aTool1->NbSamples();
+  Standard_Integer                 aNbSamples2 = aTool2->NbSamples();
+  Standard_Integer                 aNbSamples = Max(aNbSamples1, aNbSamples2);
+
+  // Computation of the continuity.
+  Standard_Real    aPar;
+  Standard_Real    aDelta = (aLast - aFirst) / (aNbSamples - 1);
+  Standard_Integer i, nbNotDone = 0;
+
+  for (i = 1, aPar = aFirst; i <= aNbSamples; i++, aPar += aDelta) {
+    if (i == aNbSamples) aPar = aLast;
+
+    LocalAnalysis_SurfaceContinuity aCont(aC2d1, aC2d2, aPar,
+      aSurf1, aSurf2, Order,
+      0.001, TolC0, 0.1, 0.1, 0.1);
+    if (!aCont.IsDone())
+    {
+      nbNotDone++;
+      continue;
+    }
+
+    if (Order == GeomAbs_G1)
+    {
+      if (!aCont.IsG1())
+        return Standard_False;
+    }
+    else if (!aCont.IsG2())
+      return Standard_False;
+  }
+
+  if (nbNotDone == aNbSamples)
+    return Standard_False;
+
+  //Compare normals of tangent faces in the middle point
+  Standard_Real MidPar = (aFirst + aLast) / 2.;
+  gp_Pnt2d uv1 = aC2d1->Value(MidPar);
+  gp_Pnt2d uv2 = aC2d2->Value(MidPar);
+  gp_Dir normal1, normal2;
+  TopOpeBRepTool_TOOL::Nt(uv1, theFace1, normal1);
+  TopOpeBRepTool_TOOL::Nt(uv2, theFace2, normal2);
+  Standard_Real dot = normal1.Dot(normal2);
+  if (dot < 0.)
+    return Standard_False;
+  return Standard_True;
+}
 
 //=======================================================================
 //function : ConcaveSide
@@ -289,4 +483,50 @@ Standard_Boolean  ChFi3d::SameSide(const TopAbs_Orientation Or,
     o2 = TopAbs::Reverse(OrSave2);
   }
   return (o1 == o2);
+}
+
+//=======================================================================
+//function : Correct2dPoint
+//purpose  : 
+//=======================================================================
+void Correct2dPoint(const TopoDS_Face& theF, gp_Pnt2d& theP2d)
+{
+  BRepAdaptor_Surface aBAS(theF, Standard_False);
+  if (aBAS.GetType() < GeomAbs_BezierSurface) {
+    return;
+  }
+  //
+  const Standard_Real coeff = 0.01;
+  Standard_Real eps;
+  Standard_Real u1, u2, v1, v2;
+  //
+  aBAS.Initialize(theF, Standard_True);
+  u1 = aBAS.FirstUParameter();
+  u2 = aBAS.LastUParameter();
+  v1 = aBAS.FirstVParameter();
+  v2 = aBAS.LastVParameter();
+  if (!(Precision::IsInfinite(u1) || Precision::IsInfinite(u2)))
+  {
+    eps = Max(coeff*(u2 - u1), Precision::PConfusion());
+    if (Abs(theP2d.X() - u1) < eps)
+    {
+      theP2d.SetX(u1 + eps);
+    }
+    if (Abs(theP2d.X() - u2) < eps)
+    {
+      theP2d.SetX(u2 - eps);
+    }
+  }
+  if (!(Precision::IsInfinite(v1) || Precision::IsInfinite(v2)))
+  {
+    eps = Max(coeff*(v2 - v1), Precision::PConfusion());
+    if (Abs(theP2d.Y() - v1) < eps)
+    {
+      theP2d.SetY(v1 + eps);
+    }
+    if (Abs(theP2d.Y() - v2) < eps)
+    {
+      theP2d.SetY(v2 - eps);
+    }
+  }
 }

@@ -403,6 +403,13 @@ public:
     return NCollection_Vec3 (Element_t(0), Element_t(0), Element_t(1));
   }
 
+  //! Dumps the content of me into the stream
+  void DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth = -1) const
+  {
+    (void)theDepth;
+    OCCT_DUMP_FIELD_VALUES_NUMERICAL (theOStream, "Vec3", 3, v[0], v[1], v[2])
+  }
+
 private:
 
   Element_t v[3]; //!< define the vector as array to avoid structure alignment issues

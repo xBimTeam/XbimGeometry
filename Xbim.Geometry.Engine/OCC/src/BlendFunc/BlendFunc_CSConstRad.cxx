@@ -44,9 +44,14 @@ BlendFunc_CSConstRad::BlendFunc_CSConstRad(const Handle(Adaptor3d_HSurface)& S,
                                            const Handle(Adaptor3d_HCurve)& C,
                                            const Handle(Adaptor3d_HCurve)& CG) :
 
-       surf(S),curv(C),guide(CG),istangent(Standard_True),
-       maxang(RealFirst()), minang(RealLast()),mySShape(BlendFunc_Rational)
-{}
+       surf(S),curv(C),guide(CG), prmc(0.0), 
+       istangent(Standard_True), ray(0.0),
+       choix(0), normtg(0.0), theD(0.0),
+       maxang(RealFirst()), minang(RealLast()),
+       mySShape(BlendFunc_Rational)
+{
+  myTConv = Convert_TgtThetaOver2;
+}
 
 
 //=======================================================================
@@ -875,7 +880,7 @@ Standard_Boolean BlendFunc_CSConstRad::Section
 
   gp_Vec d1u1,d1v1,d2u1,d2v1,d2uv1,d1;
   gp_Vec ns,ns2,dnplan,dnw,dn2w; //,np2,dnp2;
-  gp_Vec ncrossns;;
+  gp_Vec ncrossns;
   gp_Vec resulu,resulv,temp,tgct,resul;
 
   gp_Pnt Center;

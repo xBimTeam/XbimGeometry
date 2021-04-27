@@ -19,6 +19,8 @@
 #include <OSD_Parallel.hxx>
 #include <BRepMesh_GeomTool.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(BRepMesh_FaceChecker, Standard_Transient)
+
 namespace
 {
   const Standard_Real MaxTangentAngle = 5. * M_PI / 180.;
@@ -103,6 +105,7 @@ namespace
     BndBox2dTreeSelector(const Standard_Real theTolerance)
       : myMaxLoopSize(M_PI * theTolerance * theTolerance),
         mySelfSegmentIndex(-1),
+        mySegment(0),
         myIndices(256, new NCollection_IncAllocator(IMeshData::MEMORY_BLOCK_SIZE_HUGE))
     {
     }

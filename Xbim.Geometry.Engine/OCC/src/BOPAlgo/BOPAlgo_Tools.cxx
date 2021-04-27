@@ -1104,29 +1104,6 @@ void BOPAlgo_Tools::IntersectVertices(const TopTools_IndexedDataMapOfShapeReal& 
 }
 
 //=======================================================================
-//function : TreatCompound
-//purpose  : 
-//=======================================================================
-void BOPAlgo_Tools::TreatCompound(const TopoDS_Shape& theS,
-                                  TopTools_MapOfShape& aMFence,
-                                  TopTools_ListOfShape& theLS)
-{
-  TopAbs_ShapeEnum aType = theS.ShapeType();
-  if (aType != TopAbs_COMPOUND)
-  {
-    if (aMFence.Add(theS))
-      theLS.Append(theS);
-    return;
-  }
-  TopoDS_Iterator aIt(theS);
-  for (; aIt.More(); aIt.Next())
-  {
-    const TopoDS_Shape& aS = aIt.Value();
-    TreatCompound(aS, aMFence, theLS);
-  }
-}
-
-//=======================================================================
 // Classification of the faces relatively solids
 //=======================================================================
 
@@ -1755,4 +1732,31 @@ void BOPAlgo_Tools::FillInternals(const TopTools_ListOfShape& theSolids,
       BRep_Builder().Add(aSd, aShell);
     }
   }
+}
+
+//=======================================================================
+//function : TrsfToPoint
+//purpose  :
+//=======================================================================
+Standard_Boolean BOPAlgo_Tools::TrsfToPoint (const Bnd_Box& theBox1,
+                                             const Bnd_Box& theBox2,
+                                             gp_Trsf&       theTrsf,
+                                             const gp_Pnt&  thePoint,
+                                             const Standard_Real theCriteria)
+{
+  // Unify two boxes
+  Bnd_Box aBox = theBox1;
+  aBox.Add (theBox2);
+
+  gp_XYZ aBCenter = (aBox.CornerMin().XYZ() + aBox.CornerMax().XYZ()) / 2.;
+  Standard_Real aPBDist = (thePoint.XYZ() - aBCenter).Modulus();
+  if (aPBDist < theCriteria)
+    return Standard_False;
+  
+  Standard_Real aBSize = Sqrt (aBox.SquareExtent());
+  if ((aBSize / aPBDist) > (1. / theCriteria))
+    return Standard_False;
+
+  theTrsf.SetTranslation (gp_Vec (aBox.CornerMin(), thePoint));
+  return Standard_True;
 }

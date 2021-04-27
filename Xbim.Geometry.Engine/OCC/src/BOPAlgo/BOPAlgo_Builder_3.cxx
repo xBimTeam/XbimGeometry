@@ -432,7 +432,10 @@ void BOPAlgo_Builder::BuildSplitSolids(TopTools_DataMapOfShapeShape& theDraftSol
     aBS.SetSolid(aSolid);
     aBS.SetShapes(aSFS);
     aBS.SetRunParallel(myRunParallel);
-    aBS.SetProgressIndicator(myProgressIndicator);
+    if (myProgressScope != NULL)
+    {
+      aBS.SetProgressIndicator(*myProgressScope);
+    }
   }//for (i=0; i<aNbS; ++i) {
   //
   Standard_Integer k, aNbBS;
@@ -550,7 +553,7 @@ void BOPAlgo_Builder::FillInternalShapes()
   aIt.Initialize(aArguments);
   for (; aIt.More(); aIt.Next()) {
     const TopoDS_Shape& aS=aIt.Value();
-    BOPAlgo_Tools::TreatCompound(aS, aMFence, aLSC);
+    BOPTools_AlgoTools::TreatCompound(aS, aLSC, &aMFence);
   }
   aIt.Initialize(aLSC);
   for (; aIt.More(); aIt.Next()) {

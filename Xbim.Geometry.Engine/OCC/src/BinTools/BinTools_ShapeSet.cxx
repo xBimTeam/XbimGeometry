@@ -51,6 +51,7 @@
 #include <TopoDS_Iterator.hxx>
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Vertex.hxx>
+#include <Message_ProgressRange.hxx>
 
 #include <string.h>
 //#define MDTV_DEB 1
@@ -294,14 +295,26 @@ void BinTools_ShapeSet::AddGeometry(const TopoDS_Shape& S)
 //purpose  : 
 //=======================================================================
 
-void  BinTools_ShapeSet::WriteGeometry(Standard_OStream& OS)const 
+void  BinTools_ShapeSet::WriteGeometry (Standard_OStream& OS,
+                                        const Message_ProgressRange& theRange)const
 {
-  myCurves2d.Write(OS); 
-  myCurves.Write(OS);
-  WritePolygon3D(OS);
-  WritePolygonOnTriangulation(OS);
-  mySurfaces.Write(OS);
-  WriteTriangulation(OS);
+  Message_ProgressScope aPS(theRange, "Writing geometry", 6);
+  myCurves2d.Write(OS, aPS.Next());
+  if (!aPS.More())
+    return;
+  myCurves.Write(OS, aPS.Next());
+  if (!aPS.More())
+    return;
+  WritePolygon3D(OS, aPS.Next());
+  if (!aPS.More())
+    return;
+  WritePolygonOnTriangulation(OS, aPS.Next());
+  if (!aPS.More())
+    return;
+  mySurfaces.Write(OS, aPS.Next());
+  if (!aPS.More())
+    return;
+  WriteTriangulation(OS, aPS.Next());
 }
 
 //=======================================================================
@@ -309,7 +322,8 @@ void  BinTools_ShapeSet::WriteGeometry(Standard_OStream& OS)const
 //purpose  : 
 //=======================================================================
 
-void  BinTools_ShapeSet::Write(Standard_OStream& OS)const 
+void  BinTools_ShapeSet::Write (Standard_OStream& OS,
+                                const Message_ProgressRange& theRange)const
 {
 
   // write the copyright
@@ -330,18 +344,22 @@ void  BinTools_ShapeSet::Write(Standard_OStream& OS)const
   // write the geometry
   //-----------------------------------------
 
-  WriteGeometry(OS);
+  Message_ProgressScope aPS(theRange, "Writing geometry", 2);
+
+  WriteGeometry(OS, aPS.Next());
+  if (!aPS.More())
+    return;
 
   //-----------------------------------------
   // write the shapes
   //-----------------------------------------
 
   Standard_Integer i, nbShapes = myShapes.Extent();
-  
+  Message_ProgressScope aPSinner(aPS.Next(), "Writing shapes", nbShapes);
   OS << "\nTShapes " << nbShapes << "\n";
   
   // subshapes are written first
-  for (i = 1; i <= nbShapes; i++) {
+  for (i = 1; i <= nbShapes && aPSinner.More(); i++, aPSinner.Next()) {
 
     const TopoDS_Shape& S = myShapes(i);
     
@@ -369,7 +387,6 @@ void  BinTools_ShapeSet::Write(Standard_OStream& OS)const
     }
     Write(TopoDS_Shape(),OS); // Null shape to end the list
   }
-  
 }
 
 //=======================================================================
@@ -377,7 +394,8 @@ void  BinTools_ShapeSet::Write(Standard_OStream& OS)const
 //purpose  : 
 //=======================================================================
 
-void  BinTools_ShapeSet::Read(Standard_IStream& IS)
+void  BinTools_ShapeSet::Read (Standard_IStream& IS,
+                               const Message_ProgressRange& theRange)
 {
 
   Clear();
@@ -413,9 +431,10 @@ void  BinTools_ShapeSet::Read(Standard_IStream& IS)
   //-----------------------------------------
   // read the geometry
   //-----------------------------------------
-
-  ReadGeometry(IS);
-
+  Message_ProgressScope aPSouter(theRange, "Reading", 2);
+  ReadGeometry(IS, aPSouter.Next());
+  if (!aPSouter.More())
+    return;
   //-----------------------------------------
   // read the shapes
   //-----------------------------------------
@@ -428,12 +447,11 @@ void  BinTools_ShapeSet::Read(Standard_IStream& IS)
     throw Standard_Failure(aMsg.str().c_str());
     return;
   }
-
   Standard_Integer nbShapes = 0;
   IS >> nbShapes;
   IS.get();//remove lf 
-
-  for (int i = 1; i <= nbShapes; i++) {
+  Message_ProgressScope aPSinner(aPSouter.Next(), "Reading Shapes", nbShapes);
+  for (int i = 1; i <= nbShapes && aPSinner.More(); i++, aPSinner.Next()) {
 
     TopoDS_Shape S;
     
@@ -487,7 +505,8 @@ void  BinTools_ShapeSet::Read(Standard_IStream& IS)
 //purpose  : 
 //=======================================================================
 
-void  BinTools_ShapeSet::Write(const TopoDS_Shape& S, Standard_OStream& OS)const 
+void  BinTools_ShapeSet::Write (const TopoDS_Shape& S, 
+                                Standard_OStream& OS)const
 {
   if (S.IsNull()) 
 
@@ -505,8 +524,8 @@ void  BinTools_ShapeSet::Write(const TopoDS_Shape& S, Standard_OStream& OS)const
 //purpose  : 
 //=======================================================================
 
-void  BinTools_ShapeSet::Read(TopoDS_Shape& S, Standard_IStream& IS,
-                              const Standard_Integer nbshapes)const 
+void  BinTools_ShapeSet::Read (TopoDS_Shape& S, Standard_IStream& IS,
+                               const Standard_Integer nbshapes)const 
 {
   Standard_Character aChar = '\0';
   IS >> aChar;
@@ -531,14 +550,26 @@ void  BinTools_ShapeSet::Read(TopoDS_Shape& S, Standard_IStream& IS,
 //purpose  : 
 //=======================================================================
 
-void  BinTools_ShapeSet::ReadGeometry(Standard_IStream& IS)
+void  BinTools_ShapeSet::ReadGeometry (Standard_IStream& IS,
+                                       const Message_ProgressRange& theRange)
 {
-  myCurves2d.Read(IS);
-  myCurves.Read(IS);
-  ReadPolygon3D(IS);
-  ReadPolygonOnTriangulation(IS);
-  mySurfaces.Read(IS);
-  ReadTriangulation(IS);
+  Message_ProgressScope aPS(theRange, "Reading geomentry", 6);
+  myCurves2d.Read(IS, aPS.Next());
+  if (!aPS.More())
+    return;
+  myCurves.Read(IS, aPS.Next());
+  if (!aPS.More())
+    return;
+  ReadPolygon3D(IS, aPS.Next());
+  if (!aPS.More())
+    return;
+  ReadPolygonOnTriangulation(IS, aPS.Next());
+  if (!aPS.More())
+    return;
+  mySurfaces.Read(IS, aPS.Next());
+  if (!aPS.More())
+    return;
+  ReadTriangulation(IS, aPS.Next());
 }
 
 //=======================================================================
@@ -546,7 +577,7 @@ void  BinTools_ShapeSet::ReadGeometry(Standard_IStream& IS)
 //purpose  : 
 //=======================================================================
 
-void  BinTools_ShapeSet::WriteGeometry(const TopoDS_Shape& S, 
+void  BinTools_ShapeSet::WriteGeometry (const TopoDS_Shape& S, 
                                         Standard_OStream&   OS)const 
 {
 // Write the geometry
@@ -725,7 +756,7 @@ void  BinTools_ShapeSet::WriteGeometry(const TopoDS_Shape& S,
       const TopoDS_Face& F = TopoDS::Face(S);
 
       // Write the surface geometry
-      Standard_Boolean aNatRes = (BRep_Tool::NaturalRestriction(F)) ? Standard_True : Standard_False;
+      Standard_Boolean aNatRes = BRep_Tool::NaturalRestriction(F);
       BinTools::PutBool (OS, aNatRes);
       BinTools::PutReal (OS, TF->Tolerance());
       BinTools::PutInteger (OS, !TF->Surface().IsNull()
@@ -797,7 +828,7 @@ void  BinTools_ShapeSet::ReadGeometry(const TopAbs_ShapeEnum T,
 
 	BRep_ListOfPointRepresentation& lpr = TV->ChangePoints();
 	TopLoc_Location L;
-	Standard_Boolean aNewF = (myFormatNb > 2) ? Standard_True : Standard_False;
+	Standard_Boolean aNewF = (myFormatNb > 2);
 	do {
 	  if(aNewF) {
 	    val = (Standard_Integer)IS.get();//case {0|1|2|3}
@@ -1034,8 +1065,8 @@ void  BinTools_ShapeSet::ReadGeometry(const TopAbs_ShapeEnum T,
           case 5 : // -5- Polygon3D                     
 	    BinTools::GetInteger(IS, c);
 	    BinTools::GetInteger(IS, l);
-//??? Bug?  myBuilder.UpdateEdge(E,Handle(Poly_Polygon3D)::DownCast(myPolygons3D(c)));
-	    myBuilder.UpdateEdge(E,Handle(Poly_Polygon3D)::DownCast(myPolygons3D(c)), Locations().Location(l));
+//??? Bug?  myBuilder.UpdateEdge(E,myPolygons3D(c));
+	    myBuilder.UpdateEdge(E, myPolygons3D(c), Locations().Location(l));
             break;
 
           case 6 : // -6- Polygon on triangulation
@@ -1047,18 +1078,13 @@ void  BinTools_ShapeSet::ReadGeometry(const TopAbs_ShapeEnum T,
 
 	    BinTools::GetInteger(IS, t);
 	    BinTools::GetInteger(IS, l);
-            if (closed) {
-              myBuilder.UpdateEdge
-                (E, Handle(Poly_PolygonOnTriangulation)::DownCast(myNodes(pt)),
-                 Handle(Poly_PolygonOnTriangulation)::DownCast(myNodes(pt2)),
-                 Handle(Poly_Triangulation)::DownCast(myTriangulations(t)),
-                 Locations().Location(l));
+            if (closed)
+            {
+              myBuilder.UpdateEdge (E, myNodes(pt), myNodes(pt2), myTriangulations(t), Locations().Location(l));
             }
-            else {
-              myBuilder.UpdateEdge
-                (E,Handle(Poly_PolygonOnTriangulation)::DownCast(myNodes(pt)),
-                 Handle(Poly_Triangulation)::DownCast(myTriangulations(t)),
-                 Locations().Location(l));
+            else
+            {
+              myBuilder.UpdateEdge (E, myNodes(pt), myTriangulations(t), Locations().Location(l));
             }
             // range            
             break;
@@ -1107,8 +1133,7 @@ void  BinTools_ShapeSet::ReadGeometry(const TopAbs_ShapeEnum T,
       // cas triangulation
 	if(aByte == 2) {
 	  BinTools::GetInteger(IS, s);
-	  myBuilder.UpdateFace(TopoDS::Face(S),
-			       Handle(Poly_Triangulation)::DownCast(myTriangulations(s)));
+	  myBuilder.UpdateFace(TopoDS::Face(S), myTriangulations(s));
 	}
       }
       break;
@@ -1182,197 +1207,223 @@ void  BinTools_ShapeSet::AddShapes(TopoDS_Shape&       S1,
 
 //=======================================================================
 //function : WritePolygonOnTriangulation
-//purpose  : 
+//purpose  :
 //=======================================================================
-
-void BinTools_ShapeSet::WritePolygonOnTriangulation(Standard_OStream& OS) const
+void BinTools_ShapeSet::WritePolygonOnTriangulation
+  (Standard_OStream& OS,
+   const Message_ProgressRange& theRange) const
 {
-  Standard_Integer i, j, nbpOntri = myNodes.Extent();
-
-  OS << "PolygonOnTriangulations " << nbpOntri << "\n";
-  Handle(Poly_PolygonOnTriangulation) Poly;
-  Handle(TColStd_HArray1OfReal) Param;
-  try {
+  const Standard_Integer aNbPol = myNodes.Extent();
+  OS << "PolygonOnTriangulations " << aNbPol << "\n";
+  try
+  {
     OCC_CATCH_SIGNALS
-    for (i=1; i<=nbpOntri; i++) {
-      Poly = Handle(Poly_PolygonOnTriangulation)::DownCast(myNodes(i));
-      const TColStd_Array1OfInteger& Nodes = Poly->Nodes();
-      BinTools::PutInteger(OS, Nodes.Length());
-      for (j=1; j <= Nodes.Length(); j++) 
-	BinTools::PutInteger(OS,  Nodes.Value(j));
-
-    // writing parameters:
-      Param = Poly->Parameters();
-
-    // write the deflection
-      BinTools::PutReal(OS, Poly->Deflection());
-      if (!Param.IsNull()) {
-	BinTools::PutBool(OS, Standard_True);
-	for (j=1; j <= Param->Length(); j++) 
-	  BinTools::PutReal(OS, Param->Value(j)); 
+    Message_ProgressScope aPS(theRange, "Writing polygons on triangulation", aNbPol);
+    for (Standard_Integer aPolIter = 1; aPolIter <= aNbPol && aPS.More(); ++aPolIter, aPS.Next())
+    {
+      const Handle(Poly_PolygonOnTriangulation)& aPoly = myNodes.FindKey (aPolIter);
+      const TColStd_Array1OfInteger& aNodes = aPoly->Nodes();
+      BinTools::PutInteger(OS, aNodes.Length());
+      for (Standard_Integer aNodeIter = 1; aNodeIter <= aNodes.Length(); ++aNodeIter)
+      {
+        BinTools::PutInteger(OS, aNodes.Value (aNodeIter));
       }
-      else 
-	BinTools::PutBool(OS, Standard_False);
+
+      // write the deflection
+      BinTools::PutReal(OS, aPoly->Deflection());
+
+      // writing parameters
+      if (const Handle(TColStd_HArray1OfReal)& aParam = aPoly->Parameters())
+      {
+        BinTools::PutBool(OS, Standard_True);
+        for (Standard_Integer aNodeIter = 1; aNodeIter <= aParam->Length(); ++aNodeIter)
+        {
+          BinTools::PutReal(OS, aParam->Value (aNodeIter));
+        }
+      }
+      else
+      {
+        BinTools::PutBool(OS, Standard_False);
+      }
     }
   }
-  catch(Standard_Failure const& anException) {
+  catch (Standard_Failure const& anException)
+  {
     Standard_SStream aMsg;
-    aMsg << "EXCEPTION in BinTools_ShapeSet::WritePolygonOnTriangulation(..)" << std::endl;
-    aMsg << anException << std::endl;
+    aMsg << "EXCEPTION in BinTools_ShapeSet::WritePolygonOnTriangulation(..)\n" << anException << "\n";
     throw Standard_Failure(aMsg.str().c_str());
   }
 }
 
 //=======================================================================
 //function : ReadPolygonOnTriangulation
-//purpose  : 
+//purpose  :
 //=======================================================================
-
-void BinTools_ShapeSet::ReadPolygonOnTriangulation(Standard_IStream& IS)
+void BinTools_ShapeSet::ReadPolygonOnTriangulation
+  (Standard_IStream& IS,
+   const Message_ProgressRange& theRange)
 {
-  char buffer[255];
-  IS >> buffer;
-  if (IS.fail() || (strstr(buffer,"PolygonOnTriangulations") == NULL)) {
+  char aHeader[255];
+  IS >> aHeader;
+  if (IS.fail() || (strstr(aHeader,"PolygonOnTriangulations") == NULL))
+  {
     throw Standard_Failure("BinTools_ShapeSet::ReadPolygonOnTriangulation: Not a PolygonOnTriangulation section");
   }
-  Standard_Integer i, j, val, nbpol = 0, nbnodes =0;
-  Standard_Boolean hasparameters;
-  Standard_Real par;
-  Handle(TColStd_HArray1OfReal) Param;
-  Handle(Poly_PolygonOnTriangulation) Poly;
-  IS >> nbpol;
-  IS.get();//remove LF 
-  try {
-    OCC_CATCH_SIGNALS
-    for (i=1; i<=nbpol; i++) {
-      BinTools::GetInteger(IS, nbnodes);
 
-      TColStd_Array1OfInteger Nodes(1, nbnodes);
-      for (j = 1; j <= nbnodes; j++) {
-	BinTools::GetInteger(IS, val);
-	Nodes(j) = val;
+  Standard_Integer aNbPol = 0;
+  IS >> aNbPol;
+  IS.get();//remove LF
+  try
+  {
+    OCC_CATCH_SIGNALS
+    Message_ProgressScope aPS(theRange, "Reading Polygones on triangulation", aNbPol);
+    for (Standard_Integer aPolIter = 1; aPolIter <= aNbPol && aPS.More(); ++aPolIter, aPS.Next())
+    {
+      Standard_Integer aNbNodes = 0;
+      BinTools::GetInteger(IS, aNbNodes);
+      Handle(Poly_PolygonOnTriangulation) aPoly = new Poly_PolygonOnTriangulation (aNbNodes, Standard_False);
+      TColStd_Array1OfInteger& aNodes = aPoly->ChangeNodes();
+      for (Standard_Integer aNodeIter = 1; aNodeIter <= aNbNodes; ++aNodeIter)
+      {
+        BinTools::GetInteger(IS, aNodes.ChangeValue (aNodeIter));
       }
-      Standard_Real def;
-      BinTools::GetReal(IS, def);
-      BinTools::GetBool(IS, hasparameters);
-      if (hasparameters) {
-	TColStd_Array1OfReal Param1(1, nbnodes);
-	for (j = 1; j <= nbnodes; j++) {
-	  BinTools::GetReal(IS, par);
-	  Param1(j) = par;
-	}
-	Poly = new Poly_PolygonOnTriangulation(Nodes, Param1);
+
+      Standard_Real aDefl = 0.0;
+      BinTools::GetReal(IS, aDefl);
+      aPoly->Deflection (aDefl);
+
+      Standard_Boolean hasParameters = Standard_False;
+      BinTools::GetBool(IS, hasParameters);
+      if (hasParameters)
+      {
+        Handle(TColStd_HArray1OfReal) aParams = new TColStd_HArray1OfReal (1, aNbNodes);
+        for (Standard_Integer aNodeIter = 1; aNodeIter <= aNbNodes; ++aNodeIter)
+        {
+          BinTools::GetReal(IS, aParams->ChangeValue (aNodeIter));
+        }
+        aPoly->SetParameters (aParams);
       }
-      else Poly = new Poly_PolygonOnTriangulation(Nodes);
-      Poly->Deflection(def);
-      myNodes.Add(Poly);
+      myNodes.Add (aPoly);
     }
   }
-  catch(Standard_Failure const& anException) {
+  catch (Standard_Failure const& anException)
+  {
     Standard_SStream aMsg;
-    aMsg << "EXCEPTION in BinTools_ShapeSet::ReadPolygonOnTriangulation(..)" << std::endl;
-    aMsg << anException << std::endl;
+    aMsg << "EXCEPTION in BinTools_ShapeSet::ReadPolygonOnTriangulation(..)\n" << anException << "\n";
     throw Standard_Failure(aMsg.str().c_str());
   }
 }
 
-
-
 //=======================================================================
 //function : WritePolygon3D
-//purpose  : 
+//purpose  :
 //=======================================================================
-
-void BinTools_ShapeSet::WritePolygon3D(Standard_OStream& OS)const
+void BinTools_ShapeSet::WritePolygon3D (Standard_OStream& OS,
+                                        const Message_ProgressRange& theRange)const
 {
-  Standard_Integer i, j, nbpol = myPolygons3D.Extent();
-  OS << "Polygon3D " << nbpol << "\n";
-  Handle(Poly_Polygon3D) P;
-  try {
+  const Standard_Integer aNbPol = myPolygons3D.Extent();
+  OS << "Polygon3D " << aNbPol << "\n";
+  try
+  {
     OCC_CATCH_SIGNALS
-    for (i = 1; i <= nbpol; i++) {
-      P = Handle(Poly_Polygon3D)::DownCast(myPolygons3D(i));
-      BinTools::PutInteger(OS, P->NbNodes());
-      BinTools::PutBool(OS, P->HasParameters()? 1:0);
+    Message_ProgressScope aPS(theRange, "Writing polygons 3D", aNbPol);
+    for (Standard_Integer aPolIter = 1; aPolIter <= aNbPol && aPS.More(); ++aPolIter, aPS.Next())
+    {
+      const Handle(Poly_Polygon3D)& aPoly = myPolygons3D.FindKey (aPolIter);
+      BinTools::PutInteger(OS, aPoly->NbNodes());
+      BinTools::PutBool(OS, aPoly->HasParameters());
 
-    // write the deflection
-      BinTools::PutReal(OS, P->Deflection());
+      // write the deflection
+      BinTools::PutReal(OS, aPoly->Deflection());
 
-    // write the nodes
-      Standard_Integer i1, nbNodes = P->NbNodes();
-      const TColgp_Array1OfPnt& Nodes = P->Nodes();
-      for (j = 1; j <= nbNodes; j++) {
-	BinTools::PutReal(OS, Nodes(j).X());
-	BinTools::PutReal(OS, Nodes(j).Y());
-	BinTools::PutReal(OS, Nodes(j).Z());
+      // write the nodes
+      const Standard_Integer  aNbNodes = aPoly->NbNodes();
+      const TColgp_Array1OfPnt& aNodes = aPoly->Nodes();
+      for (Standard_Integer aNodeIter = 1; aNodeIter <= aNbNodes; ++aNodeIter)
+      {
+        const gp_Pnt& aPnt = aNodes.Value (aNodeIter);
+        BinTools::PutReal(OS, aPnt.X());
+        BinTools::PutReal(OS, aPnt.Y());
+        BinTools::PutReal(OS, aPnt.Z());
       }
-      if (P->HasParameters()) {
-	const TColStd_Array1OfReal& Param = P->Parameters();
-	for ( i1 = 1; i1 <= nbNodes; i1++ ) {
-	  BinTools::PutReal(OS, Param(i1));
-	}
+      if (aPoly->HasParameters())
+      {
+        const TColStd_Array1OfReal& aParam = aPoly->Parameters();
+        for (Standard_Integer aNodeIter = 1; aNodeIter <= aNbNodes; ++aNodeIter)
+        {
+          BinTools::PutReal(OS, aParam.Value (aNodeIter));
+        }
       }
     }
   }
-  catch(Standard_Failure const& anException) {
+  catch (Standard_Failure const& anException)
+  {
     Standard_SStream aMsg;
-    aMsg << "EXCEPTION in BinTools_ShapeSet::WritePolygon3D(..)" << std::endl;
-    aMsg << anException << std::endl;
+    aMsg << "EXCEPTION in BinTools_ShapeSet::WritePolygon3D(..)\n" << anException << "\n";
     throw Standard_Failure(aMsg.str().c_str());
   }
 }
 //=======================================================================
 //function : ReadPolygon3D
-//purpose  : 
+//purpose  :
 //=======================================================================
-
-void BinTools_ShapeSet::ReadPolygon3D(Standard_IStream& IS)
+void BinTools_ShapeSet::ReadPolygon3D (Standard_IStream& IS,
+                                       const Message_ProgressRange& theRange)
 {
-  char buffer[255];
-  Standard_Integer i, j, p, nbpol=0, nbnodes =0;
-  Standard_Boolean hasparameters = Standard_False;
-  Standard_Real d, x, y, z;
-  IS >> buffer;
+  char aHeader[255];
+  IS >> aHeader;
 
-  if (IS.fail() || strstr(buffer,"Polygon3D") == NULL) {
+  if (IS.fail() || strstr(aHeader,"Polygon3D") == NULL)
+  {
 #ifdef OCCT_DEBUG
-    std::cout <<"Buffer: " << buffer << std::endl;
+    std::cout <<"Buffer: " << aHeader << std::endl;
 #endif
     throw Standard_Failure("BinTools_ShapeSet::ReadPolygon3D: Not a Polygon3D section");
   }
-  Handle(Poly_Polygon3D) P;
-  IS >> nbpol;
-  IS.get();//remove LF 
 
-  try {
+  Standard_Integer aNbPol = 0;
+  IS >> aNbPol;
+  IS.get();//remove LF
+  try
+  {
     OCC_CATCH_SIGNALS
-    for (i=1; i<=nbpol; i++) {
-      BinTools::GetInteger(IS, nbnodes);
-      BinTools::GetBool(IS, hasparameters);
-      TColgp_Array1OfPnt Nodes(1, nbnodes);
-      BinTools::GetReal(IS, d);
-      for (j = 1; j <= nbnodes; j++) {
-	BinTools::GetReal(IS, x);
-	BinTools::GetReal(IS, y);
-	BinTools::GetReal(IS, z);
-	Nodes(j).SetCoord(x,y,z);
-      }
-      if (hasparameters) {
-	TColStd_Array1OfReal Param(1,nbnodes);
-	for (p = 1; p <= nbnodes; p++) 
-	  BinTools::GetReal(IS, Param(p));
+    Message_ProgressScope aPS(theRange, "Reading polygones 3D", aNbPol);
+    for (Standard_Integer aPolIter = 1; aPolIter <= aNbPol && aPS.More(); ++aPolIter, aPS.Next())
+    {
+      Standard_Integer aNbNodes = 0;
+      Standard_Boolean hasParameters = Standard_False;
+      Standard_Real aDefl = 0.0;
+      BinTools::GetInteger(IS, aNbNodes);
+      BinTools::GetBool(IS, hasParameters);
+      BinTools::GetReal(IS, aDefl);
 
-	P = new Poly_Polygon3D(Nodes, Param);
+      Handle(Poly_Polygon3D) aPoly = new Poly_Polygon3D (aNbNodes, hasParameters);
+      aPoly->Deflection (aDefl);
+
+      TColgp_Array1OfPnt& aNodes = aPoly->ChangeNodes();
+      for (Standard_Integer aNodeIter = 1; aNodeIter <= aNbNodes; ++aNodeIter)
+      {
+        gp_XYZ& aPnt = aNodes.ChangeValue (aNodeIter).ChangeCoord();
+        BinTools::GetReal(IS, aPnt.ChangeCoord (1));
+        BinTools::GetReal(IS, aPnt.ChangeCoord (2));
+        BinTools::GetReal(IS, aPnt.ChangeCoord (3));
       }
-      else P = new Poly_Polygon3D(Nodes);
-      P->Deflection(d);
-      myPolygons3D.Add(P);
+      if (hasParameters)
+      {
+        TColStd_Array1OfReal& aParam = aPoly->ChangeParameters();
+        for (Standard_Integer aNodeIter = 1; aNodeIter <= aNbNodes; ++aNodeIter)
+        {
+          BinTools::GetReal(IS, aParam.ChangeValue (aNodeIter));
+        }
+      }
+
+      myPolygons3D.Add (aPoly);
     }
   }
-  catch(Standard_Failure const& anException) {
+  catch (Standard_Failure const& anException)
+  {
     Standard_SStream aMsg;
-    aMsg << "EXCEPTION in BinTools_ShapeSet::ReadPolygon3D(..)" << std::endl;
-    aMsg << anException << std::endl;
+    aMsg << "EXCEPTION in BinTools_ShapeSet::ReadPolygon3D(..)\n" << anException << "\n";
     throw Standard_Failure(aMsg.str().c_str());
   }
 }
@@ -1380,125 +1431,138 @@ void BinTools_ShapeSet::ReadPolygon3D(Standard_IStream& IS)
 
 //=======================================================================
 //function : WriteTriangulation
-//purpose  : 
+//purpose  :
 //=======================================================================
-
-void BinTools_ShapeSet::WriteTriangulation(Standard_OStream& OS) const
+void BinTools_ShapeSet::WriteTriangulation (Standard_OStream& OS,
+                                            const Message_ProgressRange& theRange) const
 {
-  Standard_Integer i, j, nbNodes, nbtri = myTriangulations.Extent();
-  Standard_Integer nbTriangles = 0, n1, n2, n3;
-    OS << "Triangulations " << nbtri << "\n";
-  Handle(Poly_Triangulation) T;
-  try {
-    OCC_CATCH_SIGNALS
-    for (i = 1; i <= nbtri; i++) {
-      T = Handle(Poly_Triangulation)::DownCast(myTriangulations(i));
-      BinTools::PutInteger(OS, T->NbNodes());
-      BinTools::PutInteger(OS, T->NbTriangles());
-      BinTools::PutBool(OS, T->HasUVNodes()? 1:0);
-    // write the deflection
-      BinTools::PutReal(OS, T->Deflection());
+  const Standard_Integer aNbTriangulations = myTriangulations.Extent();
+  OS << "Triangulations " << aNbTriangulations << "\n";
 
-    // write the 3d nodes
-      nbNodes = T->NbNodes();
-      const TColgp_Array1OfPnt& Nodes = T->Nodes();
-      for (j = 1; j <= nbNodes; j++) {
-	BinTools::PutReal(OS, Nodes(j).X());
-	BinTools::PutReal(OS, Nodes(j).Y());
-	BinTools::PutReal(OS, Nodes(j).Z());
+  try
+  {
+    OCC_CATCH_SIGNALS
+    Message_ProgressScope aPS(theRange, "Writing triangulation", aNbTriangulations);
+    for (Standard_Integer aTriangulationIter = 1; aTriangulationIter <= aNbTriangulations && aPS.More(); ++aTriangulationIter, aPS.Next())
+    {
+      const Handle(Poly_Triangulation)& aTriangulation = myTriangulations.FindKey (aTriangulationIter);
+      const Standard_Integer aNbNodes     = aTriangulation->NbNodes();
+      const Standard_Integer aNbTriangles = aTriangulation->NbTriangles();
+      BinTools::PutInteger(OS, aNbNodes);
+      BinTools::PutInteger(OS, aNbTriangles);
+      BinTools::PutBool(OS, aTriangulation->HasUVNodes() ? 1 : 0);
+      BinTools::PutReal(OS, aTriangulation->Deflection());
+
+      // write the 3d nodes
+      const TColgp_Array1OfPnt& aNodes = aTriangulation->Nodes();
+      for (Standard_Integer aNodeIter = 1; aNodeIter <= aNbNodes; ++aNodeIter)
+      {
+        const gp_Pnt& aPnt = aNodes.Value (aNodeIter);
+        BinTools::PutReal(OS, aPnt.X());
+        BinTools::PutReal(OS, aPnt.Y());
+        BinTools::PutReal(OS, aPnt.Z());
       }
-    
-      if (T->HasUVNodes()) {
-	const TColgp_Array1OfPnt2d& UVNodes = T->UVNodes();
-	for (j = 1; j <= nbNodes; j++) {
-	  BinTools::PutReal(OS, UVNodes(j).X());
-	  BinTools::PutReal(OS, UVNodes(j).Y());
-	}
+
+      if (aTriangulation->HasUVNodes())
+      {
+        const TColgp_Array1OfPnt2d& aUVNodes = aTriangulation->UVNodes();
+        for (Standard_Integer aNodeIter = 1; aNodeIter <= aNbNodes; ++aNodeIter)
+        {
+          const gp_Pnt2d aUV = aUVNodes.Value (aNodeIter);
+          BinTools::PutReal(OS, aUV.X());
+          BinTools::PutReal(OS, aUV.Y());
+        }
       }
-      nbTriangles = T->NbTriangles();
-      const Poly_Array1OfTriangle& Triangles = T->Triangles();
-      for (j = 1; j <= nbTriangles; j++) {
-	Triangles(j).Get(n1, n2, n3);
-	BinTools::PutInteger(OS, n1);
-	BinTools::PutInteger(OS, n2);
-	BinTools::PutInteger(OS, n3);
+
+      const Poly_Array1OfTriangle& aTriangles = aTriangulation->Triangles();
+      for (Standard_Integer aTriIter = 1; aTriIter <= aNbTriangles; ++aTriIter)
+      {
+        const Poly_Triangle& aTri = aTriangles.Value (aTriIter);
+        BinTools::PutInteger(OS, aTri.Value (1));
+        BinTools::PutInteger(OS, aTri.Value (2));
+        BinTools::PutInteger(OS, aTri.Value (3));
       }
     }
   }
-  catch(Standard_Failure const& anException) {
+  catch (Standard_Failure const& anException)
+  {
     Standard_SStream aMsg;
-    aMsg << "EXCEPTION in BinTools_ShapeSet::WriteTriangulation(..)" << std::endl;
-    aMsg << anException << std::endl;
+    aMsg << "EXCEPTION in BinTools_ShapeSet::WriteTriangulation(..)\n" << anException << "\n";
     throw Standard_Failure(aMsg.str().c_str());
   }
 }
 
 //=======================================================================
 //function : ReadTriangulation
-//purpose  : 
+//purpose  :
 //=======================================================================
-
-void BinTools_ShapeSet::ReadTriangulation(Standard_IStream& IS)
+void BinTools_ShapeSet::ReadTriangulation (Standard_IStream& IS,
+                                           const Message_ProgressRange& theRange)
 {
-  char buffer[255];
-  Standard_Integer i, j, nbtri =0;
-  Standard_Real d, x, y, z;
-  Standard_Integer nbNodes =0, nbTriangles=0;
-  Standard_Boolean hasUV = Standard_False;
-
-  Handle(Poly_Triangulation) T;
-  IS >> buffer;
-
-  if (IS.fail() || (strstr(buffer,"Triangulations") == NULL)) {
+  char aHeader[255];
+  IS >> aHeader;
+  if (IS.fail() || (strstr(aHeader, "Triangulations") == NULL))
+  {
     throw Standard_Failure("BinTools_ShapeSet::Triangulation: Not a Triangulation section");
   }
-  IS >> nbtri;
+
+  Standard_Integer aNbTriangulations = 0;
+  IS >> aNbTriangulations;
   IS.get();// remove LF 
 
-  try {
+  try
+  {
     OCC_CATCH_SIGNALS
-    for (i=1; i<=nbtri; i++) {
-      BinTools::GetInteger(IS, nbNodes);
-      BinTools::GetInteger(IS, nbTriangles);
-      TColgp_Array1OfPnt Nodes(1, nbNodes);
+    Message_ProgressScope aPS(theRange, "Reading triangulation", aNbTriangulations);
+    for (Standard_Integer aTriangulationIter = 1; aTriangulationIter <= aNbTriangulations && aPS.More(); ++aTriangulationIter, aPS.Next())
+    {
+      Standard_Integer aNbNodes = 0, aNbTriangles = 0;
+      Standard_Boolean hasUV = Standard_False;
+      Standard_Real aDefl = 0.0;
+      BinTools::GetInteger(IS, aNbNodes);
+      BinTools::GetInteger(IS, aNbTriangles);
       BinTools::GetBool(IS, hasUV);
-      TColgp_Array1OfPnt2d UVNodes(1, nbNodes);
-      BinTools::GetReal(IS, d); //deflection
-      for (j = 1; j <= nbNodes; j++) {
-	BinTools::GetReal(IS, x);
-	BinTools::GetReal(IS, y);
-	BinTools::GetReal(IS, z);
-	Nodes(j).SetCoord(x,y,z);
+      BinTools::GetReal(IS, aDefl); //deflection
+      Handle(Poly_Triangulation) aTriangulation = new Poly_Triangulation (aNbNodes, aNbTriangles, hasUV);
+      aTriangulation->Deflection (aDefl);
+
+      TColgp_Array1OfPnt& aNodes = aTriangulation->ChangeNodes();
+      for (Standard_Integer aNodeIter = 1; aNodeIter <= aNbNodes; ++aNodeIter)
+      {
+        Standard_Real* anXYZ = aNodes.ChangeValue (aNodeIter).ChangeCoord().ChangeData();
+        BinTools::GetReal(IS, anXYZ[0]);
+        BinTools::GetReal(IS, anXYZ[1]);
+        BinTools::GetReal(IS, anXYZ[2]);
       }
-      
-      if (hasUV) {
-	for (j = 1; j <= nbNodes; j++) {
-	  BinTools::GetReal(IS, x);
-	  BinTools::GetReal(IS, y);
-	  UVNodes(j).SetCoord(x,y);
-	}
+
+      if (hasUV)
+      {
+        TColgp_Array1OfPnt2d& aUVNodes = aTriangulation->ChangeUVNodes();
+        for (Standard_Integer aNodeIter = 1; aNodeIter <= aNbNodes; ++aNodeIter)
+        {
+          gp_XY& anUV = aUVNodes.ChangeValue (aNodeIter).ChangeCoord();
+          BinTools::GetReal(IS, anUV.ChangeCoord (1));
+          BinTools::GetReal(IS, anUV.ChangeCoord (2));
+        }
       }
-      
+
       // read the triangles
-      Standard_Integer n1,n2,n3;
-      Poly_Array1OfTriangle Triangles(1, nbTriangles);
-      for (j = 1; j <= nbTriangles; j++) {
-	BinTools::GetInteger(IS, n1);
-	BinTools::GetInteger(IS, n2);
-	BinTools::GetInteger(IS, n3);
-	Triangles(j).Set(n1,n2,n3);
+      Poly_Array1OfTriangle& aTriangles = aTriangulation->ChangeTriangles();
+      for (Standard_Integer aTriIter = 1; aTriIter <= aNbTriangles; ++aTriIter)
+      {
+        Poly_Triangle& aTri = aTriangles.ChangeValue (aTriIter);
+        BinTools::GetInteger(IS, aTri.ChangeValue (1));
+        BinTools::GetInteger(IS, aTri.ChangeValue (2));
+        BinTools::GetInteger(IS, aTri.ChangeValue (3));
       }
-      
-      if (hasUV) T =  new Poly_Triangulation(Nodes,UVNodes,Triangles);
-      else T = new Poly_Triangulation(Nodes,Triangles);      
-      T->Deflection(d);      
-      myTriangulations.Add(T);
+
+      myTriangulations.Add (aTriangulation);
     }
   }
-  catch(Standard_Failure const& anException) {
+  catch (Standard_Failure const& anException)
+  {
     Standard_SStream aMsg;
-    aMsg << "EXCEPTION in BinTools_ShapeSet::ReadTriangulation(..)" << std::endl;
-    aMsg << anException << std::endl;
+    aMsg << "EXCEPTION in BinTools_ShapeSet::ReadTriangulation(..)\n" << anException << "\n";
     throw Standard_Failure(aMsg.str().c_str());
   }
 }

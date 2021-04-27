@@ -105,17 +105,49 @@ class BOPAlgo_EdgeFace :
     IntTools_EdgeFace::SetFuzzyValue(theFuzz);
   }
   //
+  void SetBoxes (const Bnd_Box& theBox1,
+                 const Bnd_Box& theBox2)
+  {
+    myBox1 = theBox1;
+    myBox2 = theBox2;
+  }
+  //
   virtual void Perform() {
     BOPAlgo_Algo::UserBreak();
+    TopoDS_Face aFace = myFace;
+    TopoDS_Edge anEdge = myEdge;
+    Standard_Boolean hasTrsf = false;
     try
     {
       OCC_CATCH_SIGNALS
+
+      gp_Trsf aTrsf;
+      if (BOPAlgo_Tools::TrsfToPoint (myBox1, myBox2, aTrsf))
+      {
+        // Shapes are located far from origin, move the shapes to the origin,
+        // to increase the accuracy of intersection.
+        TopLoc_Location aLoc (aTrsf);
+        myEdge.Move (aLoc);
+        myFace.Move (aLoc);
+        hasTrsf = Standard_True;
+      }
 
       IntTools_EdgeFace::Perform();
     }
     catch (Standard_Failure const&)
     {
       AddError(new BOPAlgo_AlertIntersectionFailed);
+    }
+    myFace = aFace;
+    myEdge = anEdge;
+
+    if (hasTrsf)
+    {
+      for (Standard_Integer i = 1; i <= mySeqOfCommonPrts.Length(); ++i)
+      {
+        IntTools_CommonPrt& aCPart = mySeqOfCommonPrts (i);
+        aCPart.SetEdge1 (myEdge);
+      }
     }
   }
   //
@@ -124,6 +156,8 @@ class BOPAlgo_EdgeFace :
   Standard_Integer myIF;
   IntTools_Range myNewSR;
   Handle(BOPDS_PaveBlock) myPB;
+  Bnd_Box myBox1;
+  Bnd_Box myBox2;
 };
 //
 //=======================================================================
@@ -231,6 +265,7 @@ void BOPAlgo_PaveFiller::PerformEF()
       //
       aEdgeFace.SetEdge (aE);
       aEdgeFace.SetFace (aF);
+      aEdgeFace.SetBoxes (myDS->ShapeInfo(nE).Box(), myDS->ShapeInfo (nF).Box());
       aEdgeFace.SetFuzzyValue(myFuzzyValue);
       aEdgeFace.UseQuickCoincidenceCheck(bExpressCompute);
       //
@@ -243,7 +278,10 @@ void BOPAlgo_PaveFiller::PerformEF()
       aSR = aPBRange;
       BOPTools_AlgoTools::CorrectRange(aE, aF, aSR, aPBRange);
       aEdgeFace.SetRange (aPBRange);
-      aEdgeFace.SetProgressIndicator(myProgressIndicator);
+      if (myProgressScope != NULL)
+      {
+        aEdgeFace.SetProgressIndicator(*myProgressScope);
+      }
       // Save the pair to avoid their forced intersection
       BOPDS_MapOfPaveBlock* pMPB = myFPBDone.ChangeSeek(nF);
       if (!pMPB)
@@ -265,12 +303,6 @@ void BOPAlgo_PaveFiller::PerformEF()
       continue;
     }
     //
-    const IntTools_SequenceOfCommonPrts& aCPrts=aEdgeFace.CommonParts();
-    aNbCPrts = aCPrts.Length();
-    if (!aNbCPrts) {
-      continue;
-    }
-    //
     aEdgeFace.Indices(nE, nF);
     //
     const TopoDS_Edge& aE=aEdgeFace.Edge();
@@ -278,6 +310,23 @@ void BOPAlgo_PaveFiller::PerformEF()
     //
     aTolE=BRep_Tool::Tolerance(aE);
     aTolF=BRep_Tool::Tolerance(aF);
+    //
+    const IntTools_SequenceOfCommonPrts& aCPrts=aEdgeFace.CommonParts();
+    aNbCPrts = aCPrts.Length();
+    if (!aNbCPrts) {
+      if (aEdgeFace.MinimalDistance() < RealLast() &&
+          aEdgeFace.MinimalDistance() > aTolE + aTolF)
+      {
+        const Handle(BOPDS_PaveBlock)& aPB=aEdgeFace.PaveBlock();
+        aPB->Range(aT1, aT2);
+        NCollection_List<EdgeRangeDistance>* pList = myDistances.ChangeSeek (BOPDS_Pair (nE, nF));
+        if (!pList)
+          pList = myDistances.Bound (BOPDS_Pair (nE, nF), NCollection_List<EdgeRangeDistance>());
+        pList->Append (EdgeRangeDistance (aT1, aT2, aEdgeFace.MinimalDistance()));
+      }
+      continue;
+    }
+    //
     const IntTools_Range& anewSR=aEdgeFace.NewSR();
     Handle(BOPDS_PaveBlock)& aPB=aEdgeFace.PaveBlock();
     //
@@ -389,8 +438,17 @@ void BOPAlgo_PaveFiller::PerformEF()
                 const TopoDS_Vertex& aV = TopoDS::Vertex(myDS->Shape(nV[j]));
                 const gp_Pnt aP = BRep_Tool::Pnt(aV);
                 Standard_Real aDistPP = aP.Distance(aPnew);
-                UpdateVertex(nV[j], aDistPP);
-                myVertsToAvoidExtension.Add(nV[j]);
+                Standard_Real aTol = BRep_Tool::Tolerance(aV);
+                Standard_Real aMaxDist = 1.e4 * aTol;
+                if (aTol < .01)
+                {
+                  aMaxDist = Min(aMaxDist, 0.1);
+                }
+                if (aDistPP < aMaxDist)
+                {
+                  UpdateVertex(nV[j], aDistPP);
+                  myVertsToAvoidExtension.Add(nV[j]);
+                }
               }
             }
             continue;
@@ -756,6 +814,8 @@ void BOPAlgo_PaveFiller::ForceInterfEF(const BOPDS_IndexedMapOfPaveBlock& theMPB
   // Shake the tree
   aBBTree.Build();
 
+  const Standard_Boolean bSICheckMode = (myArguments.Extent() == 1);
+
   // Find pairs of Face/PaveBlock containing the same vertices
   // and prepare those pairs for intersection.
   BOPAlgo_VectorOfEdgeFace aVEdgeFace;
@@ -810,6 +870,7 @@ void BOPAlgo_PaveFiller::ForceInterfEF(const BOPDS_IndexedMapOfPaveBlock& theMPB
 
     // Projection tool
     GeomAPI_ProjectPointOnSurf& aProjPS = myContext->ProjPS(aF);
+    BRepAdaptor_Surface& aSurfAdaptor = myContext->SurfaceAdaptor (aF);
 
     // Iterate on pave blocks and combine pairs containing
     // the same vertices
@@ -849,7 +910,7 @@ void BOPAlgo_PaveFiller::ForceInterfEF(const BOPDS_IndexedMapOfPaveBlock& theMPB
       // Check directions coincidence at middle point on the edge
       // and projection of that point on the face.
       // If the angle between tangent vector to the curve and normal
-      // of the face is not in the range of 80 - 100 degrees, do not use the additional
+      // of the face is not in the range of 65 - 115 degrees, do not use the additional
       // tolerance, as it may lead to undesired unification of edge with the face.
       Standard_Boolean bUseAddTol = Standard_True;
 
@@ -874,8 +935,12 @@ void BOPAlgo_PaveFiller::ForceInterfEF(const BOPDS_IndexedMapOfPaveBlock& theMPB
       // tolerance as the criteria.
       const TopoDS_Vertex& aV1 = TopoDS::Vertex(myDS->Shape(nV1));
       const TopoDS_Vertex& aV2 = TopoDS::Vertex(myDS->Shape(nV2));
-      Standard_Real aTolCheck = 2 * Max(BRep_Tool::Tolerance(aV1),
-                                        BRep_Tool::Tolerance(aV2));
+
+      // In the Self-Interference check mode we are interested in real
+      // intersections only, so use only the real tolerance of edges,
+      // no need to use the extended tolerance.
+      Standard_Real aTolCheck = (bSICheckMode ? myFuzzyValue :
+        2 * Max(BRep_Tool::Tolerance(aV1), BRep_Tool::Tolerance(aV2)));
 
       if (aProjPS.LowerDistance() > aTolCheck + myFuzzyValue)
         continue;
@@ -885,15 +950,19 @@ void BOPAlgo_PaveFiller::ForceInterfEF(const BOPDS_IndexedMapOfPaveBlock& theMPB
       if (!myContext->IsPointInFace(aF, gp_Pnt2d(U, V)))
         continue;
 
-      gp_Pnt aPOnS = aProjPS.NearestPoint();
-      gp_Vec aVFNorm(aPOnS, aPOnE);
-      if (aVFNorm.SquareMagnitude() > gp::Resolution())
+      if (aSurfAdaptor.GetType() != GeomAbs_Plane ||
+          aBAC.GetType() != GeomAbs_Line)
       {
-        // Angle between vectors should be close to 90 degrees.
-        // We allow deviation of 10 degrees.
-        Standard_Real aCos = aVFNorm.Dot(aVETgt);
-        if (Abs(aCos) > 0.174)
-          bUseAddTol = Standard_False;
+        gp_Pnt aPOnS = aProjPS.NearestPoint();
+        gp_Vec aVFNorm(aPOnS, aPOnE);
+        if (aVFNorm.SquareMagnitude() > gp::Resolution())
+        {
+          // Angle between vectors should be close to 90 degrees.
+          // We allow deviation of 25 degrees.
+          Standard_Real aCos = aVFNorm.Normalized().Dot (aVETgt.Normalized());
+          if (Abs(aCos) > 0.4226)
+            bUseAddTol = Standard_False;
+        }
       }
 
       // Compute an addition to Fuzzy value
@@ -940,10 +1009,14 @@ void BOPAlgo_PaveFiller::ForceInterfEF(const BOPDS_IndexedMapOfPaveBlock& theMPB
         aEdgeFace.SetPaveBlock(aPB);
         aEdgeFace.SetEdge(aE);
         aEdgeFace.SetFace(aF);
+        aEdgeFace.SetBoxes (myDS->ShapeInfo(nE).Box(), myDS->ShapeInfo (nF).Box());
         aEdgeFace.SetFuzzyValue(myFuzzyValue + aTolAdd);
         aEdgeFace.UseQuickCoincidenceCheck(Standard_True);
         aEdgeFace.SetRange(IntTools_Range(aPB->Pave1().Parameter(), aPB->Pave2().Parameter()));
-        aEdgeFace.SetProgressIndicator(myProgressIndicator);
+        if (myProgressScope != NULL)
+        {
+          aEdgeFace.SetProgressIndicator(*myProgressScope);
+        }
       }
     }
   }

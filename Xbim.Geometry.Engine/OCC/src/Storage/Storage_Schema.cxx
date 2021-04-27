@@ -205,6 +205,9 @@ void Storage_BucketOfPersistent::Append(const Handle(Standard_Persistent)& sp)
 
 Storage_BucketIterator::Storage_BucketIterator
                          (Storage_BucketOfPersistent* aBucketManager)
+: myBucket(0), myCurrentBucket(0),
+  myCurrentBucketIndex(0), myCurrentIndex(0),
+  myBucketNumber(0), myMoreObject(Standard_False)
 {
   if (aBucketManager) {
     myBucket             = aBucketManager;
@@ -214,7 +217,6 @@ Storage_BucketIterator::Storage_BucketIterator
     myCurrentIndex       = 0;
     myMoreObject         = Standard_True;
   }
-  else myMoreObject         = Standard_False;
 }
 
 //=======================================================================
@@ -338,9 +340,8 @@ TCollection_AsciiString Storage_Schema::Name() const
 //           VSReadWrite
 //=======================================================================
 
-void Storage_Schema::Write
-                         (Storage_BaseDriver& f,
-                          const Handle(Storage_Data)& aData) const
+void Storage_Schema::Write (const Handle(Storage_BaseDriver)& theDriver,
+                            const Handle(Storage_Data)& aData) const
 {
  if (aData.IsNull()) return;
 
@@ -382,42 +383,42 @@ void Storage_Schema::Write
  aData->HeaderData()->SetSchemaName(myName);
  aData->HeaderData()->SetSchemaVersion(myVersion);
 
-  if ((f.OpenMode() == Storage_VSWrite) || (f.OpenMode() == Storage_VSReadWrite)) {
+  if ((theDriver->OpenMode() == Storage_VSWrite) || (theDriver->OpenMode() == Storage_VSReadWrite)) {
     try {
       OCC_CATCH_SIGNALS
       errorContext = "BeginWriteInfoSection";
-      f.BeginWriteInfoSection();
+      theDriver->BeginWriteInfoSection();
       errorContext = "WriteInfo";
-      f.WriteInfo(aData->NumberOfObjects(),
-                  aData->StorageVersion(),
-                  aData->CreationDate(),
-                  aData->SchemaName(),
-                  aData->SchemaVersion(),
-                  aData->ApplicationName(),
-                  aData->ApplicationVersion(),
-                  aData->DataType(),
-                  aData->UserInfo());
+      theDriver->WriteInfo(aData->NumberOfObjects(),
+                           aData->StorageVersion(),
+                           aData->CreationDate(),
+                           aData->SchemaName(),
+                           aData->SchemaVersion(),
+                           aData->ApplicationName(),
+                           aData->ApplicationVersion(),
+                           aData->DataType(),
+                           aData->UserInfo());
       errorContext = "EndWriteInfoSection";
-      f.EndWriteInfoSection();
+      theDriver->EndWriteInfoSection();
 
       errorContext = "BeginWriteCommentSection";
-      f.BeginWriteCommentSection();
+      theDriver->BeginWriteCommentSection();
       errorContext = "WriteComment";
-      f.WriteComment(aData->Comments());
+      theDriver->WriteComment(aData->Comments());
       errorContext = "EndWriteCommentSection";
-      f.EndWriteCommentSection();
+      theDriver->EndWriteCommentSection();
 
       Handle(TColStd_HSequenceOfAsciiString) tlist;
 
       tlist = aData->Types();
 
       errorContext = "BeginWriteTypeSection";
-      f.BeginWriteTypeSection();
+      theDriver->BeginWriteTypeSection();
       len = aData->NumberOfTypes();
 
       Handle(Storage_HArrayOfCallBack) WFunc = new Storage_HArrayOfCallBack(1,len);
 
-      f.SetTypeSectionSize(len);
+      theDriver->SetTypeSectionSize(len);
 
       Storage_DataMapIteratorOfMapOfCallBack cbit(iData->myTypeBinding);
       Handle(Storage_TypedCallBack) atcallBack;
@@ -429,42 +430,42 @@ void Storage_Schema::Write
 
       errorContext = "WriteTypeInformations";
       for (i = 1; i <= len; i++) {
-        f.WriteTypeInformations(i,tlist->Value(i).ToCString());
+        theDriver->WriteTypeInformations(i,tlist->Value(i).ToCString());
       }
 
       errorContext = "EndWriteTypeSection";
-      f.EndWriteTypeSection();
+      theDriver->EndWriteTypeSection();
 
       errorContext = "BeginWriteRootSection";
-      f.BeginWriteRootSection();
-      f.SetRootSectionSize(plist->Length());
+      theDriver->BeginWriteRootSection();
+      theDriver->SetRootSectionSize(plist->Length());
 
       errorContext = "WriteRoot";
       for (i = 1; i <= plist->Length(); i++) {
-        f.WriteRoot(plist->Value(i)->Name(),i,"PDocStd_Document");
+        theDriver->WriteRoot(plist->Value(i)->Name(),i,"PDocStd_Document");
       }
 
       errorContext = "EndWriteRootSection";
-      f.EndWriteRootSection();
+      theDriver->EndWriteRootSection();
 
       errorContext = "BeginWriteRefSection";
-      f.BeginWriteRefSection();
-      f.SetRefSectionSize(iData->myObjId - 1);
+      theDriver->BeginWriteRefSection();
+      theDriver->SetRefSectionSize(iData->myObjId - 1);
       errorContext = "WriteReferenceType";
 
       Storage_BucketIterator bit(&iData->myPtoA);
 
       while(bit.More()) {
         p = bit.Value();
-        if (!p.IsNull()) f.WriteReferenceType(p->_refnum,p->_typenum);
+        if (!p.IsNull()) theDriver->WriteReferenceType(p->_refnum,p->_typenum);
         bit.Next();
       }
 
       errorContext = "EndWriteRefSection";
-      f.EndWriteRefSection();
+      theDriver->EndWriteRefSection();
 
       errorContext = "BeginWriteDataSection";
-      f.BeginWriteDataSection();
+      theDriver->BeginWriteDataSection();
 
       Handle(Storage_Schema) me = this;
 
@@ -475,14 +476,14 @@ void Storage_Schema::Write
       while(bit.More()) {
         p = bit.Value();
         if (!p.IsNull()) {
-          WFunc->Value(p->_typenum)->Write(p,f,me);
+          WFunc->Value(p->_typenum)->Write(p, theDriver, me);
           p->_typenum = 0;
         }
         bit.Next();
       }
 
       errorContext = "EndWriteDataSection";
-      f.EndWriteDataSection();
+      theDriver->EndWriteDataSection();
     }
     catch(Storage_StreamWriteError const&) {
       aData->SetErrorStatus(Storage_VSWriteError);
@@ -772,17 +773,26 @@ Standard_Boolean Storage_Schema::CheckTypeMigration(
       }
       else
       {
-        // hard-code migration table for known types
-        aDMap.Bind("TDataStd_Shape",          "TDataXtd_Shape");
-        aDMap.Bind("TDataStd_Constraint",     "TDataXtd_Constraint");
+        // hard-code migration table for known types	
+	aDMap.Bind("TDataStd_Shape",          "TDataXtd_Shape");
+	aDMap.Bind("TDataStd_Constraint",     "TDataXtd_Constraint");
         aDMap.Bind("TDataStd_Geometry",       "TDataXtd_Geometry");
-        aDMap.Bind("TDataStd_Axis",           "TDataXtd_Axis");
-        aDMap.Bind("TDataStd_Point",          "TDataXtd_Point");
-        aDMap.Bind("TDataStd_Plane",          "TDataXtd_Plane");
-        aDMap.Bind("TDataStd_Position",       "TDataXtd_Position");
-        aDMap.Bind("TDataStd_Placement",      "TDataXtd_Placement");
-        aDMap.Bind("TDataStd_PatternStd",     "TDataXtd_PatternStd");
-        aDMap.Bind("TPrsStd_AISPresentation", "TDataXtd_Presentation");
+	aDMap.Bind("TDataStd_Axis",           "TDataXtd_Axis");
+	aDMap.Bind("TDataStd_Point",          "TDataXtd_Point");
+	aDMap.Bind("TDataStd_Plane",          "TDataXtd_Plane");
+	aDMap.Bind("TDataStd_Position",       "TDataXtd_Position");
+	aDMap.Bind("TDataStd_Placement",      "TDataXtd_Placement");
+	aDMap.Bind("TDataStd_PatternStd",     "TDataXtd_PatternStd");
+	aDMap.Bind("TPrsStd_AISPresentation", "TDataXtd_Presentation");
+        aDMap.Bind("PDataStd_Shape",          "PDataXtd_Shape");
+        aDMap.Bind("PDataStd_Constraint",     "PDataXtd_Constraint");
+        aDMap.Bind("PDataStd_Geometry",       "PDataXtd_Geometry");
+        aDMap.Bind("PDataStd_Axis",           "PDataXtd_Axis");
+        aDMap.Bind("PDataStd_Point",          "PDataXtd_Point");
+        aDMap.Bind("PDataStd_Plane",          "PDataXtd_Plane");
+        aDMap.Bind("PDataStd_Position",       "PDataXtd_Position");
+        aDMap.Bind("PDataStd_Placement",      "PDataXtd_Placement");
+        aDMap.Bind("PDataStd_PatternStd",     "PDataXtd_PatternStd");
       }
 #ifdef OCCT_DEBUG
       std::cout << "Storage_Sheme:: aDataMap.Size = " << aDMap.Extent() << std::endl;

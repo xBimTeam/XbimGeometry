@@ -1461,7 +1461,7 @@ void  ChFi3d_FilBuilder::PerformSurf(ChFiDS_SequenceOfSurfData&          SeqData
 				     const Standard_Boolean              RecRst,
 				     const math_Vector&                  Soldep)
 {
-  Handle(ChFiDS_SurfData) Data = SeqData(1);;
+  Handle(ChFiDS_SurfData) Data = SeqData(1);
   Handle(ChFiDS_FilSpine) fsp = Handle(ChFiDS_FilSpine)::DownCast(Spine);
   if(fsp.IsNull()) throw Standard_ConstructionError("PerformSurf : this is not the spine of a fillet");
   Handle(BRepBlend_Line) lin;
@@ -1577,7 +1577,7 @@ void  ChFi3d_FilBuilder::PerformSurf(ChFiDS_SequenceOfSurfData&          SeqData
 				     const Standard_Boolean              RecRst2,
 				     const math_Vector&                  Soldep)
 {
-  Handle(ChFiDS_SurfData) Data = SeqData(1);;
+  Handle(ChFiDS_SurfData) Data = SeqData(1);
   Handle(ChFiDS_FilSpine) fsp = Handle(ChFiDS_FilSpine)::DownCast(Spine);
   if(fsp.IsNull()) throw Standard_ConstructionError("PerformSurf : this is not the spine of a fillet");
   Handle(BRepBlend_Line) lin;
@@ -1942,13 +1942,21 @@ void ChFi3d_FilBuilder::ExtentThreeCorner(const TopoDS_Vertex& V,
     Handle(ChFiDS_Spine) Spine = Stripe->Spine();
     if (Spine->IsTangencyExtremity((Sens == 1))) return; //No extension on queue
     Standard_Real dU = Spine->LastParameter(Spine->NbEdges());
-    if (Sens == 1){ 
-      Spine->SetFirstParameter(-dU*Coeff);
-      Spine->SetFirstTgt(0.);
+    if (Sens == 1){
+      if (!(Spine->GetTypeOfConcavity() == ChFiDS_Convex &&
+            Spine->FirstStatus() == ChFiDS_OnSame))
+      {
+        Spine->SetFirstParameter(-dU*Coeff);
+        Spine->SetFirstTgt(0.);
+      }
     }
     else{
-      Spine->SetLastParameter(dU*(1.+Coeff));
-      Spine->SetLastTgt(dU);
+      if (!(Spine->GetTypeOfConcavity() == ChFiDS_Convex &&
+            Spine->LastStatus() == ChFiDS_OnSame))
+      {
+        Spine->SetLastParameter(dU*(1.+Coeff));
+        Spine->SetLastTgt(dU);
+      }
     }
     check.Append(Stripe);
   }

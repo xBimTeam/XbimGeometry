@@ -76,8 +76,7 @@ typedef gp_Pnt Pnt;
 //purpose  : 
 //=======================================================================
 
-Handle(Geom_BSplineSurface) BSplineSurfaceBuilder 
-  (const Convert_ElementarySurfaceToBSplineSurface& Convert) 
+static Handle(Geom_BSplineSurface) BSplineSurfaceBuilder (const Convert_ElementarySurfaceToBSplineSurface& Convert) 
 {
   Handle(Geom_BSplineSurface) TheSurface;
   Standard_Integer UDegree  = Convert.UDegree ();
@@ -329,6 +328,7 @@ Handle(Geom_BSplineSurface) GeomConvert::SplitBSplineSurface
 Handle(Geom_BSplineSurface) GeomConvert::SurfaceToBSplineSurface
   (const Handle(Geom_Surface)& Sr) 
 {
+ 
   Standard_Real U1, U2, V1, V2;
   Sr->Bounds (U1, U2, V1, V2);
   Standard_Real UFirst = Min (U1, U2);
@@ -380,7 +380,10 @@ Handle(Geom_BSplineSurface) GeomConvert::SurfaceToBSplineSurface
         VFirst, VLast);
       return SurfaceToBSplineSurface(aStrim);
     }
-
+    //
+    //For cylinders, cones, spheres, toruses
+    const Standard_Boolean isUClosed = Abs((ULast - UFirst) - 2. * M_PI) <= Precision::PConfusion();
+    //
     if (Surf->IsKind(STANDARD_TYPE(Geom_Plane))) {
       TColgp_Array2OfPnt Poles (1, 2, 1, 2);
       Poles (1, 1) = Strim->Value (U1, V1);
@@ -409,7 +412,7 @@ Handle(Geom_BSplineSurface) GeomConvert::SurfaceToBSplineSurface
         Handle(Geom_CylindricalSurface)::DownCast(Surf);
 
       gp_Cylinder Cyl = TheElSurf->Cylinder();
-      if (Strim->IsUClosed()) {
+      if (isUClosed) {
         Convert_CylinderToBSplineSurface Convert (Cyl, VFirst, VLast);
         TheSurface = BSplineSurfaceBuilder (Convert);
       }
@@ -425,7 +428,7 @@ Handle(Geom_BSplineSurface) GeomConvert::SurfaceToBSplineSurface
       Handle(Geom_ConicalSurface) TheElSurf = 
         Handle(Geom_ConicalSurface)::DownCast(Surf);
       gp_Cone Co = TheElSurf->Cone();
-      if (Strim->IsUClosed()) {
+      if (isUClosed) {
         Convert_ConeToBSplineSurface Convert (Co, VFirst, VLast);
         TheSurface = BSplineSurfaceBuilder (Convert);
       }
@@ -442,7 +445,7 @@ Handle(Geom_BSplineSurface) GeomConvert::SurfaceToBSplineSurface
         Handle(Geom_SphericalSurface)::DownCast(Surf);
       gp_Sphere Sph = TheElSurf->Sphere();
       //OCC217
-      if (Strim->IsUClosed()) {
+      if (isUClosed) {
         //if (Strim->IsVClosed()) {
         //Convert_SphereToBSplineSurface Convert (Sph, UFirst, ULast);
         Convert_SphereToBSplineSurface Convert (Sph, VFirst, VLast, Standard_False);
@@ -461,7 +464,7 @@ Handle(Geom_BSplineSurface) GeomConvert::SurfaceToBSplineSurface
         Handle(Geom_ToroidalSurface)::DownCast(Surf);
 
       gp_Torus Tr = TheElSurf->Torus();
-      if (Strim->IsUClosed()) { 
+      if (isUClosed) {
         Convert_TorusToBSplineSurface Convert (Tr, VFirst, VLast, 
           Standard_False);
         TheSurface = BSplineSurfaceBuilder (Convert);

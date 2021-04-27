@@ -23,6 +23,7 @@
 
 #include <Standard_Real.hxx>
 #include <TopoDS_Shape.hxx>
+#include <TopoDS_Compound.hxx>
 #include <BRepOffset_Mode.hxx>
 #include <Standard_Boolean.hxx>
 #include <GeomAbs_JoinType.hxx>
@@ -50,7 +51,6 @@ public:
 
   DEFINE_STANDARD_ALLOC
 
-  
   Standard_EXPORT BRepOffset_MakeOffset();
   
   Standard_EXPORT BRepOffset_MakeOffset(const TopoDS_Shape& S,
@@ -75,6 +75,9 @@ public:
   
   Standard_EXPORT void Clear();
   
+  //! Changes the flag allowing the linearization
+  Standard_EXPORT void AllowLinearization (const Standard_Boolean theIsAllowed);
+  
   //! Add Closing Faces,  <F>  has to be  in  the initial
   //! shape S.
   Standard_EXPORT void AddFace (const TopoDS_Face& F);
@@ -92,6 +95,11 @@ public:
   
   Standard_EXPORT const TopoDS_Shape& Shape() const;
   
+  const TopoDS_Shape& InitShape() const
+  {
+    return myInitialShape;
+  }
+
   //! returns information about offset state.
   Standard_EXPORT BRepOffset_Error Error() const;
   
@@ -121,12 +129,36 @@ public:
   //! Return bad shape, which obtained in CheckInputData.
   Standard_EXPORT const TopoDS_Shape& GetBadShape() const;
 
+public: //! @name History methods
+
+  //! Returns the  list of shapes generated from the shape <S>.
+  Standard_EXPORT const TopTools_ListOfShape& Generated (const TopoDS_Shape& theS);
+  
+  //! Returns the list of shapes modified from the shape <S>.
+  Standard_EXPORT const TopTools_ListOfShape& Modified (const TopoDS_Shape& theS);
+  
+  //! Returns true if the shape S has been deleted.
+  Standard_EXPORT Standard_Boolean IsDeleted (const TopoDS_Shape& S);
+
 
 protected:
 
 
 private:
 
+  //! Check if shape consists of only planar faces
+  //! If <myIsLinearizationAllowed> is TRUE, try to approximate images of faces
+  //! by planar faces
+  Standard_EXPORT Standard_Boolean IsPlanar();
+  
+  //! Set the faces that are to be removed
+  Standard_EXPORT void SetFaces();
+  
+  //! Set the faces with special value of offset
+  Standard_EXPORT void SetFacesWithOffset();
+  
+  Standard_EXPORT void BuildFaceComp();
+  
   Standard_EXPORT void BuildOffsetByArc();
   
   Standard_EXPORT void BuildOffsetByInter();
@@ -152,6 +184,9 @@ private:
   
   Standard_EXPORT void EncodeRegularity();
   
+  //! Replace roots in history maps
+  Standard_EXPORT void ReplaceRoots();
+
   Standard_EXPORT void MakeSolid();
   
   Standard_EXPORT void ToContext (BRepOffset_DataMapOfShapeOffset& MapSF);
@@ -169,7 +204,7 @@ private:
   Standard_EXPORT void RemoveInternalEdges();
 
   //! Intersects edges
-  Standard_EXPORT void IntersectEdges (const TopoDS_Shape& theShape,
+  Standard_EXPORT void IntersectEdges (const TopTools_ListOfShape& theFaces,
                                        BRepOffset_DataMapOfShapeOffset& theMapSF,
                                        TopTools_DataMapOfShapeShape& theMES,
                                        TopTools_DataMapOfShapeShape& theBuild,
@@ -181,6 +216,7 @@ private:
   //! for BRepOffset_MakeLoops::Build method.
   //! Currently the Complete intersection mode is limited to work only on planar cases.
   Standard_EXPORT void BuildSplitsOfExtendedFaces(const TopTools_ListOfShape& theLF,
+                                                  const BRepOffset_Analyse& theAnalyse,
                                                   Handle(BRepAlgo_AsDes)& theAsDes,
                                                   TopTools_DataMapOfShapeListOfShape& theEdgesOrigins,
                                                   TopTools_DataMapOfShapeShape& theFacesOrigins,
@@ -195,8 +231,11 @@ private:
 
   Standard_Real myOffset;
   Standard_Real myTol;
+  TopoDS_Shape myInitialShape;
   TopoDS_Shape myShape;
+  TopoDS_Compound myFaceComp;
   BRepOffset_Mode myMode;
+  Standard_Boolean myIsLinearizationAllowed;
   Standard_Boolean myInter;
   Standard_Boolean mySelfInter;
   GeomAbs_JoinType myJoin;
@@ -204,20 +243,25 @@ private:
   Standard_Boolean myRemoveIntEdges;
   TopTools_DataMapOfShapeReal myFaceOffset;
   TopTools_IndexedMapOfShape myFaces;
+  TopTools_IndexedMapOfShape myOriginalFaces;
   BRepOffset_Analyse myAnalyse;
   TopoDS_Shape myOffsetShape;
   BRepAlgo_Image myInitOffsetFace;
   BRepAlgo_Image myInitOffsetEdge;
   BRepAlgo_Image myImageOffset;
+  BRepAlgo_Image myImageVV;
   TopTools_ListOfShape myWalls;
   Handle(BRepAlgo_AsDes) myAsDes;
+  TopTools_DataMapOfShapeListOfShape myEdgeIntEdges;
   Standard_Boolean myDone;
   BRepOffset_Error myError;
   BRepOffset_MakeLoops myMakeLoops;
   Standard_Boolean myIsPerformSewing; // Handle bad walls in thicksolid mode.
   Standard_Boolean myIsPlanar;
   TopoDS_Shape myBadShape;
-
+  TopTools_DataMapOfShapeShape myFacePlanfaceMap;
+  TopTools_ListOfShape myGenerated;
+  TopTools_MapOfShape myResMap;
 };
 
 #endif // _BRepOffset_MakeOffset_HeaderFile

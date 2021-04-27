@@ -33,6 +33,8 @@
 #include <TopoDS_Compound.hxx>
 #endif
 
+IMPLEMENT_STANDARD_RTTIEXT(BRepMesh_ModelHealer, IMeshTools_ModelAlgo)
+
 namespace
 {
   //! Decreases deflection of the given edge and tries to update discretization.
@@ -73,7 +75,7 @@ namespace
   };
 
   //! Returns True if some of two vertcies is same with reference one.
-  inline Standard_Boolean isSameWithSomeOf(
+  Standard_Boolean isSameWithSomeOf(
     const TopoDS_Vertex& theRefVertex,
     const TopoDS_Vertex& theVertex1,
     const TopoDS_Vertex& theVertex2)
@@ -83,7 +85,7 @@ namespace
   }
 
   //! Returns True if some of two vertcies is within tolerance of reference one.
-  inline Standard_Boolean isInToleranceWithSomeOf(
+  Standard_Boolean isInToleranceWithSomeOf(
     const gp_Pnt& theRefPoint,
     const gp_Pnt& thePoint1,
     const gp_Pnt& thePoint2,
@@ -117,8 +119,10 @@ BRepMesh_ModelHealer::~BRepMesh_ModelHealer()
 //=======================================================================
 Standard_Boolean BRepMesh_ModelHealer::performInternal(
   const Handle(IMeshData_Model)& theModel,
-  const IMeshTools_Parameters&   theParameters)
+  const IMeshTools_Parameters&   theParameters,
+  const Message_ProgressRange&   theRange)
 {
+  (void )theRange;
   myModel      = theModel;
   myParameters = theParameters;
   if (myModel.IsNull())

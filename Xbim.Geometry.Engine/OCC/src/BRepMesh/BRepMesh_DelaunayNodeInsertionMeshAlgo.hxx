@@ -42,7 +42,7 @@ public:
   }
 
   //! Returns PreProcessSurfaceNodes flag. 
-  inline Standard_Boolean IsPreProcessSurfaceNodes () const
+  Standard_Boolean IsPreProcessSurfaceNodes () const
   {
     return myIsPreProcessSurfaceNodes;
   }
@@ -50,7 +50,7 @@ public:
   //! Sets PreProcessSurfaceNodes flag.
   //! If TRUE, registers surface nodes before generation of base mesh.
   //! If FALSE, inserts surface nodes after generation of base mesh. 
-  inline void SetPreProcessSurfaceNodes (const Standard_Boolean isPreProcessSurfaceNodes)
+  void SetPreProcessSurfaceNodes (const Standard_Boolean isPreProcessSurfaceNodes)
   {
     myIsPreProcessSurfaceNodes = isPreProcessSurfaceNodes;
   }
@@ -84,24 +84,30 @@ protected:
                                           &this->getRangeSplitter());
   }
 
-  //! Perfroms processing of generated mesh. Generates surface nodes and inserts them into structure.
-  virtual void postProcessMesh(BRepMesh_Delaun& theMesher) Standard_OVERRIDE
+  //! Performs processing of generated mesh. Generates surface nodes and inserts them into structure.
+  virtual void postProcessMesh (BRepMesh_Delaun& theMesher,
+                                const Message_ProgressRange& theRange) Standard_OVERRIDE
   {
-    InsertionBaseClass::postProcessMesh(theMesher);
+    if (!theRange.More())
+    {
+      return;
+    }
+    InsertionBaseClass::postProcessMesh (theMesher, Message_ProgressRange()); // shouldn't be range passed here?
 
     if (!myIsPreProcessSurfaceNodes)
     {
       const Handle(IMeshData::ListOfPnt2d) aSurfaceNodes =
         this->getRangeSplitter().GenerateSurfaceNodes(this->getParameters());
 
-      insertNodes(aSurfaceNodes, theMesher);
+      insertNodes(aSurfaceNodes, theMesher, theRange);
     }
   }
 
   //! Inserts nodes into mesh.
   Standard_Boolean insertNodes(
     const Handle(IMeshData::ListOfPnt2d)& theNodes,
-    BRepMesh_Delaun&                      theMesher)
+    BRepMesh_Delaun&                      theMesher,
+    const Message_ProgressRange&          theRange)
   {
     if (theNodes.IsNull() || theNodes->IsEmpty())
     {
@@ -120,7 +126,11 @@ protected:
       }
     }
 
-    theMesher.AddVertices(aVertexIndexes);
+    theMesher.AddVertices (aVertexIndexes, theRange);
+    if (!theRange.More())
+    {
+      return Standard_False;
+    }
     return !aVertexIndexes.IsEmpty();
   }
 

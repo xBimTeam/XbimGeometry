@@ -114,14 +114,14 @@ public:
 
   //! Performs the symmetrical transformation of a point
   //! with respect to an axis placement which is the axis
-  Standard_EXPORT Standard_NODISCARD gp_Pnt2d Mirrored (const gp_Pnt2d& P) const;
+  Standard_NODISCARD Standard_EXPORT gp_Pnt2d Mirrored (const gp_Pnt2d& P) const;
   
   Standard_EXPORT void Mirror (const gp_Ax2d& A);
   
 
   //! Rotates a point. A1 is the axis of the rotation.
   //! Ang is the angular value of the rotation in radians.
-  Standard_EXPORT Standard_NODISCARD gp_Pnt2d Mirrored (const gp_Ax2d& A) const;
+  Standard_NODISCARD Standard_EXPORT gp_Pnt2d Mirrored (const gp_Ax2d& A) const;
   
     void Rotate (const gp_Pnt2d& P, const Standard_Real Ang);
   
@@ -150,6 +150,9 @@ public:
   
     Standard_NODISCARD gp_Pnt2d Translated (const gp_Pnt2d& P1, const gp_Pnt2d& P2) const;
 
+
+  //! Dumps the content of me into the stream
+  Standard_EXPORT void DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth = -1) const;
 
 
 

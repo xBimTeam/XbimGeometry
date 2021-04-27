@@ -29,7 +29,13 @@
 BlendFunc_ConstThroatInv::BlendFunc_ConstThroatInv(const Handle(Adaptor3d_HSurface)& S1,
                                                    const Handle(Adaptor3d_HSurface)& S2,
                                                    const Handle(Adaptor3d_HCurve)&   C)
-  : BlendFunc_GenChamfInv(S1,S2,C)
+: BlendFunc_GenChamfInv(S1,S2,C),
+  Throat(0.0),
+  param(0.0),
+  sign1(0.0),
+  sign2(0.0),
+  normtg(0.0),
+  theD(0.0)
 {
 }
 
@@ -99,7 +105,7 @@ Standard_Boolean BlendFunc_ConstThroatInv::IsSolution(const math_Vector& Sol, co
       Abs(valsol(4)) <= Tol*Tol)
     return Standard_True;
 
-  return Standard_False;;
+  return Standard_False;
 }
 
 //=======================================================================

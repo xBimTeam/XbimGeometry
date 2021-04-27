@@ -37,7 +37,8 @@ IMPLEMENT_STANDARD_RTTIEXT(Geom_OsculatingSurface,Standard_Transient)
 //purpose  : 
 //=======================================================================
 Geom_OsculatingSurface::Geom_OsculatingSurface()
-  : myAlong(1,4)
+: myTol(0.0),
+  myAlong(1,4)    
 {
   myAlong.Init(Standard_False);
 }
@@ -446,7 +447,6 @@ Standard_Boolean  Geom_OsculatingSurface::BuildOsculatingSurface
   const Handle(Geom_BSplineSurface)& BS,
   Handle(Geom_BSplineSurface)& BSpl) const
 {
-  Standard_Integer i, j;
   Standard_Boolean OsculSurf=Standard_True;
 #ifdef OCCT_DEBUG
   std::cout<<"t = "<<Param<<std::endl;
@@ -492,7 +492,7 @@ Standard_Boolean  Geom_OsculatingSurface::BuildOsculatingSurface
     MaxUDegree = (Standard_Integer ) udeg;
     MaxVDegree = (Standard_Integer ) vdeg;
 
-    for (i=1;i<=2;i++) 
+    for (Standard_Integer i = 1; i <= 2; i++) 
     {
       PolynomialUIntervals->ChangeValue(i) = i-1;
       PolynomialVIntervals->ChangeValue(i) = i-1;
@@ -560,8 +560,6 @@ Standard_Boolean  Geom_OsculatingSurface::BuildOsculatingSurface
 
     VLocalIndex = 0;
     ULocalIndex = 0;
-    for(j = 1; j <= SVKnot; j++) VLocalIndex += BS->VMultiplicity(j);
-    for(i = 1; i <= SUKnot; i++) ULocalIndex += BS->UMultiplicity(i);
     ucacheparameter = BS->UKnot(SUKnot);
     vcacheparameter = BS->VKnot(SVKnot);
     vspanlength = BS->VKnot(SVKnot + 1) - BS->VKnot(SVKnot);
@@ -799,5 +797,23 @@ void Geom_OsculatingSurface::ClearOsculFlags()
 
 }
 
+//=======================================================================
+//function : DumpJson
+//purpose  : 
+//=======================================================================
+void Geom_OsculatingSurface::DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth) const
+{
+  OCCT_DUMP_TRANSIENT_CLASS_BEGIN (theOStream)
 
+  OCCT_DUMP_FIELD_VALUES_DUMPED (theOStream, theDepth, myBasisSurf.get())
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myTol)
 
+  if (!myOsculSurf1.IsNull())
+    OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myOsculSurf1->Size())
+  if (!myOsculSurf2.IsNull())
+    OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myOsculSurf2->Size())
+  if (!myKdeg.IsNull())
+    OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myKdeg->Size())
+
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myAlong.Size())
+}

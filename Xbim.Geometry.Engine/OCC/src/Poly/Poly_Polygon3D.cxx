@@ -14,13 +14,24 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-
-#include <gp_Pnt.hxx>
 #include <Poly_Polygon3D.hxx>
-#include <Standard_NullObject.hxx>
-#include <Standard_Type.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(Poly_Polygon3D,Standard_Transient)
+
+//=======================================================================
+//function : Poly_Polygon3D
+//purpose  :
+//=======================================================================
+Poly_Polygon3D::Poly_Polygon3D (const Standard_Integer theNbNodes,
+                                const Standard_Boolean theHasParams)
+: myDeflection (0.0),
+  myNodes (1, theNbNodes)
+{
+  if (theHasParams)
+  {
+    myParameters = new TColStd_HArray1OfReal (1, theNbNodes);
+  }
+}
 
 //=======================================================================
 //function : Poly_Polygon3D
@@ -71,66 +82,16 @@ Handle(Poly_Polygon3D) Poly_Polygon3D::Copy() const
   return aCopy;
 }
 
-
 //=======================================================================
-//function : Deflection
+//function : DumpJson
 //purpose  : 
 //=======================================================================
-
-Standard_Real Poly_Polygon3D::Deflection() const 
+void Poly_Polygon3D::DumpJson (Standard_OStream& theOStream, Standard_Integer) const
 {
-  return myDeflection;
+  OCCT_DUMP_TRANSIENT_CLASS_BEGIN (theOStream)
+
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myDeflection)
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myNodes.Size())
+  if (!myParameters.IsNull())
+    OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myParameters->Size())
 }
-
-//=======================================================================
-//function : Deflection
-//purpose  : 
-//=======================================================================
-
-void Poly_Polygon3D::Deflection(const Standard_Real D)
-{
-  myDeflection = D;
-}
-
-//=======================================================================
-//function : Nodes
-//purpose  : 
-//=======================================================================
-
-const TColgp_Array1OfPnt& Poly_Polygon3D::Nodes() const 
-{
-  return myNodes;
-}
-
-//=======================================================================
-//function : HasParameters
-//purpose  : 
-//=======================================================================
-
-Standard_Boolean Poly_Polygon3D::HasParameters() const 
-{
-  return !myParameters.IsNull();
-}
-
-
-//=======================================================================
-//function : Parameters
-//purpose  : 
-//=======================================================================
-
-const TColStd_Array1OfReal& Poly_Polygon3D::Parameters() const 
-{
-  return myParameters->Array1();
-}
-
-//=======================================================================
-//function : ChangeParameters
-//purpose  : 
-//=======================================================================
-
-TColStd_Array1OfReal& Poly_Polygon3D::ChangeParameters() const 
-{
-  return myParameters->ChangeArray1();
-}
-
-

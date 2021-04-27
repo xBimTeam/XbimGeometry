@@ -20,7 +20,6 @@
 #include <Geom_Curve.hxx>
 #include <Geom_Geometry.hxx>
 #include <Geom_ToroidalSurface.hxx>
-#include <GeomAbs_UVSense.hxx>
 #include <gp.hxx>
 #include <gp_Ax3.hxx>
 #include <gp_Circ.hxx>
@@ -396,4 +395,18 @@ void Geom_ToroidalSurface::Transform (const Trsf& T) {
    majorRadius = majorRadius * Abs(T.ScaleFactor());
    minorRadius = minorRadius * Abs(T.ScaleFactor());
    pos.Transform (T);
+}
+
+//=======================================================================
+//function : DumpJson
+//purpose  : 
+//=======================================================================
+void Geom_ToroidalSurface::DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth) const
+{
+  OCCT_DUMP_TRANSIENT_CLASS_BEGIN (theOStream)
+
+  OCCT_DUMP_BASE_CLASS (theOStream, theDepth, Geom_ElementarySurface)
+
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, majorRadius)
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, minorRadius)
 }

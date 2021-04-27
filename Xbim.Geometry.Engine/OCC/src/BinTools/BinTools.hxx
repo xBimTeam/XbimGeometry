@@ -26,6 +26,7 @@
 #include <Standard_ExtCharacter.hxx>
 #include <Standard_OStream.hxx>
 #include <Standard_IStream.hxx>
+#include <Message_ProgressRange.hxx>
 
 class TopoDS_Shape;
 class BinTools_ShapeSet;
@@ -42,9 +43,10 @@ public:
 
   DEFINE_STANDARD_ALLOC
 
-  
-  Standard_EXPORT static Standard_OStream& PutReal (Standard_OStream& OS, const Standard_Real theValue);
-  
+  Standard_EXPORT static Standard_OStream& PutReal (Standard_OStream& OS, const Standard_Real& theValue);
+
+  Standard_EXPORT static Standard_OStream& PutShortReal (Standard_OStream& OS, const Standard_ShortReal& theValue);
+
   Standard_EXPORT static Standard_OStream& PutInteger (Standard_OStream& OS, const Standard_Integer theValue);
   
   Standard_EXPORT static Standard_OStream& PutBool (Standard_OStream& OS, const Standard_Boolean theValue);
@@ -52,7 +54,9 @@ public:
   Standard_EXPORT static Standard_OStream& PutExtChar (Standard_OStream& OS, const Standard_ExtCharacter theValue);
   
   Standard_EXPORT static Standard_IStream& GetReal (Standard_IStream& IS, Standard_Real& theValue);
-  
+
+  Standard_EXPORT static Standard_IStream& GetShortReal (Standard_IStream& IS, Standard_ShortReal& theValue);
+
   Standard_EXPORT static Standard_IStream& GetInteger (Standard_IStream& IS, Standard_Integer& theValue);
   
   Standard_EXPORT static Standard_IStream& GetBool (Standard_IStream& IS, Standard_Boolean& theValue);
@@ -60,16 +64,22 @@ public:
   Standard_EXPORT static Standard_IStream& GetExtChar (Standard_IStream& IS, Standard_ExtCharacter& theValue);
   
   //! Writes <theShape> on <theStream> in binary format.
-  Standard_EXPORT static void Write (const TopoDS_Shape& theShape, Standard_OStream& theStream);
+  Standard_EXPORT static void Write (const TopoDS_Shape& theShape, Standard_OStream& theStream,
+                                     const Message_ProgressRange& theRange = Message_ProgressRange());
   
   //! Reads a shape from <theStream> and returns it in <theShape>.
-  Standard_EXPORT static void Read (TopoDS_Shape& theShape, Standard_IStream& theStream);
+  Standard_EXPORT static void Read (TopoDS_Shape& theShape, Standard_IStream& theStream,
+                                    const Message_ProgressRange& theRange = Message_ProgressRange());
   
   //! Writes <theShape> in <theFile>.
-  Standard_EXPORT static Standard_Boolean Write (const TopoDS_Shape& theShape, const Standard_CString theFile);
+  Standard_EXPORT static Standard_Boolean Write
+    (const TopoDS_Shape& theShape, const Standard_CString theFile,
+     const Message_ProgressRange& theRange = Message_ProgressRange());
   
   //! Reads a shape from <theFile> and returns it in <theShape>.
-  Standard_EXPORT static Standard_Boolean Read (TopoDS_Shape& theShape, const Standard_CString theFile);
+  Standard_EXPORT static Standard_Boolean Read
+    (TopoDS_Shape& theShape, const Standard_CString theFile,
+     const Message_ProgressRange& theRange = Message_ProgressRange());
 
 protected:
 

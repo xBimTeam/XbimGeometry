@@ -44,7 +44,10 @@ namespace
         myParamsForbiddenToRemove(theParamsForbiddenToRemove),
         myControlParamsForbiddenToRemove(theControlParamsForbiddenToRemove),
         myAllocator(new NCollection_IncAllocator(IMeshData::MEMORY_BLOCK_SIZE_HUGE)),
-        myControlParamsToRemove(new IMeshData::MapOfReal(1, myAllocator))
+        myControlParamsToRemove(new IMeshData::MapOfReal(1, myAllocator)),
+        myCurrParam(0.0),
+        myCurrControlParam(0.0),
+        myPrevControlParam(0.0)
     {
     }
 
@@ -214,7 +217,7 @@ namespace
   };
 
   //! Adds param to map if it fits specified range.
-  inline Standard_Boolean addParam(
+  Standard_Boolean addParam(
     const Standard_Real&                           theParam,
     const std::pair<Standard_Real, Standard_Real>& theRange,
     IMeshData::IMapOfReal&                         theParams)
@@ -230,7 +233,7 @@ namespace
   }
 
   //! Initializes parameters map using CN intervals.
-  inline Standard_Boolean initParamsFromIntervals(
+  Standard_Boolean initParamsFromIntervals(
     const TColStd_Array1OfReal&                    theIntervals,
     const std::pair<Standard_Real, Standard_Real>& theRange,
     const Standard_Boolean                         isSplitIntervals,
@@ -269,11 +272,17 @@ namespace
     for (; aIntervalU <= theIntervals[0].Upper (); ++aIntervalU)
     {
       const Standard_Real aParamU = theIntervals[0].Value(aIntervalU);
+      if (Precision::IsInfinite (aParamU))
+        continue;
+
       Standard_Integer aIntervalV = theIntervals[1].Lower ();
       for (; aIntervalV <= theIntervals[1].Upper (); ++aIntervalV)
       {
         gp_Dir aNorm;
         const Standard_Real aParamV = theIntervals[1].Value(aIntervalV);
+        if (Precision::IsInfinite (aParamV))
+          continue;
+
         if (GeomLib::NormEstim (theSurf, gp_Pnt2d (aParamU, aParamV), Precision::Confusion (), aNorm) != 0)
         {
           return Standard_True;

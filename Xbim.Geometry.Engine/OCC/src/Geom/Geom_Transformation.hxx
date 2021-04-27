@@ -160,12 +160,12 @@ public:
   //! Raised if the the transformation is singular. This means that
   //! the ScaleFactor is lower or equal to Resolution from
   //! package gp.
-  Standard_EXPORT Standard_NODISCARD Handle(Geom_Transformation) Inverted() const;
+  Standard_NODISCARD Standard_EXPORT Handle(Geom_Transformation) Inverted() const;
 
   //! Computes the transformation composed with Other and <me>.
   //! <me> * Other.
   //! Returns a new transformation
-  Standard_EXPORT Standard_NODISCARD Handle(Geom_Transformation) Multiplied (const Handle(Geom_Transformation)& Other) const;
+  Standard_NODISCARD Standard_EXPORT Handle(Geom_Transformation) Multiplied (const Handle(Geom_Transformation)& Other) const;
 
   //! Computes the transformation composed with Other and <me> .
   //! <me> = <me> * Other.
@@ -191,6 +191,9 @@ public:
   
   //! Creates a new object which is a copy of this transformation.
   Standard_EXPORT Handle(Geom_Transformation) Copy() const;
+
+  //! Dumps the content of me into the stream
+  Standard_EXPORT virtual void DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth = -1) const;
 
 private:
 

@@ -60,6 +60,7 @@
 #include <BOPTools_AlgoTools3D.hxx>
 #include <BOPTools_AlgoTools.hxx>
 #include <BOPTools_AlgoTools2D.hxx>
+#include <BOPTools_Set.hxx>
 
 #include <IntTools_Context.hxx>
 #include <IntTools_ShrunkRange.hxx>
@@ -70,6 +71,8 @@
 
 typedef NCollection_DataMap
   <TopoDS_Shape, TopTools_MapOfShape, TopTools_ShapeMapHasher> BRepOffset_DataMapOfShapeMapOfShape;
+typedef NCollection_DataMap
+  <TopoDS_Shape, TopTools_IndexedMapOfShape, TopTools_ShapeMapHasher> BRepOffset_DataMapOfShapeIndexedMapOfShape;
 
 static
   void IntersectTrimmedEdges(const TopTools_ListOfShape& theLF,
@@ -103,10 +106,21 @@ static
                          TopTools_DataMapOfShapeShape& theOrigins,
                          TopTools_ListOfShape& theLFImages);
 
+//! Auxiliary structure to contain intersection information
+struct BRepOffset_MakeOffset_InterResults
+{
+  TopTools_DataMapOfShapeListOfShape SSInterfs; //!< Intersection information, used to add pair for intersection
+  NCollection_DataMap <TopoDS_Shape,
+                       BRepOffset_DataMapOfShapeMapOfShape,
+                       TopTools_ShapeMapHasher> InterPairs; //!< All possible intersection pairs, used to avoid
+                                                            //!  some of the intersection
+};
+
 static
   void BuildSplitsOfFaces(const TopTools_ListOfShape& theLF,
                           const TopTools_MapOfShape& theModifiedEdges,
                           const TopTools_DataMapOfShapeListOfShape& theEdgesOrigins,
+                          const BRepOffset_Analyse* theAnalyse,
                           Handle(BRepAlgo_AsDes)& theAsDes,
                           TopTools_DataMapOfShapeShape& theFacesOrigins,
                           TopTools_DataMapOfShapeListOfShape& theOEImages,
@@ -122,11 +136,12 @@ static
                           TopTools_IndexedDataMapOfShapeListOfShape& theFImages,
                           TopTools_DataMapOfShapeListOfShape& theDMFNewHoles,
                           TopoDS_Shape& theSolids,
-                          TopTools_DataMapOfShapeListOfShape& theSSInterfs);
+                          BRepOffset_MakeOffset_InterResults& theIntRes);
 
 static 
   void BuildSplitsOfInvFaces(const TopTools_IndexedDataMapOfShapeListOfShape& theFToRebuild, 
                              const TopTools_MapOfShape& theModifiedEdges,
+                             const BRepOffset_Analyse* theAnalyse,
                              TopTools_IndexedDataMapOfShapeListOfShape& theFImages,
                              TopTools_DataMapOfShapeListOfShape& theDMFNewHoles,
                              TopTools_DataMapOfShapeListOfShape& theEdgesOrigins,
@@ -155,28 +170,41 @@ static
                         const TopTools_ListOfShape& theLFImages,
                         const TopTools_DataMapOfShapeListOfShape& theEdgesOrigins,
                         const TopTools_DataMapOfShapeShape& theFacesOrigins,
+                        const BRepOffset_Analyse* theAnalyse,
                         const TopTools_DataMapOfShapeListOfShape& theOEImages,
                         const TopTools_DataMapOfShapeListOfShape& theOEOrigins,
                         TopTools_IndexedMapOfShape& theInvEdges,
                         TopTools_IndexedMapOfShape& theValidEdges,
-                        TopTools_DataMapOfShapeListOfShape& theDMFLVE,
-                        TopTools_DataMapOfShapeListOfShape& theDMFLNE,
-                        TopTools_DataMapOfShapeListOfShape& theDMFLIE,
-                        TopTools_DataMapOfShapeListOfShape& theDMFLVIE,
+                        BRepOffset_DataMapOfShapeMapOfShape& theDMFMVE,
+                        BRepOffset_DataMapOfShapeMapOfShape& theDMFMNE,
+                        BRepOffset_DataMapOfShapeIndexedMapOfShape& theDMFMIE,
+                        BRepOffset_DataMapOfShapeMapOfShape& theDMFMVIE,
                         TopTools_DataMapOfShapeListOfShape& theDMEOrLEIm,
                         TopTools_MapOfShape& theMEInverted,
-                        TopTools_MapOfShape& theEdgesInvalidByVertex);
+                        TopTools_MapOfShape& theEdgesInvalidByVertex,
+                        TopTools_MapOfShape& theEdgesValidByVertex);
+
+static
+  void FindInvalidEdges (const TopTools_ListOfShape& theLFOffset,
+                         const TopTools_IndexedDataMapOfShapeListOfShape& theFImages,
+                         const TopTools_DataMapOfShapeShape& theFacesOrigins,
+                         const BRepOffset_Analyse* theAnalyse,
+                         const TopTools_IndexedMapOfShape& theInvEdges,
+                         const TopTools_IndexedMapOfShape& theValidEdges,
+                         BRepOffset_DataMapOfShapeIndexedMapOfShape& theLocInvEdges,
+                         BRepOffset_DataMapOfShapeMapOfShape& theLocValidEdges,
+                         BRepOffset_DataMapOfShapeMapOfShape& theNeutralEdges);
 
 static
   void FindInvalidFaces(TopTools_ListOfShape& theLFImages,
                         const TopTools_IndexedMapOfShape& theInvEdges,
                         const TopTools_IndexedMapOfShape& theValidEdges,
-                        const TopTools_DataMapOfShapeListOfShape& theDMFLVE,
-                        const TopTools_DataMapOfShapeListOfShape& theDMFLIE,
-                        const TopTools_ListOfShape& theLENeutral,
-                        const TopTools_ListOfShape& theLEValInverted,
+                        const BRepOffset_DataMapOfShapeMapOfShape& theDMFMVE,
+                        const BRepOffset_DataMapOfShapeIndexedMapOfShape& theDMFMIE,
+                        const TopTools_MapOfShape& theLENeutral,
                         const TopTools_MapOfShape& theMEInverted,
                         const TopTools_MapOfShape& theEdgesInvalidByVertex,
+                        const TopTools_MapOfShape& theEdgesValidByVertex,
                         const TopTools_MapOfShape& theMFHoles,
                         TopTools_IndexedMapOfShape& theMFInvInHole,
                         TopTools_ListOfShape& theInvFaces,
@@ -232,6 +260,7 @@ static
   void RemoveInvalidSplitsFromValid(const TopTools_IndexedDataMapOfShapeListOfShape& theInvFaces,
                                     const TopTools_DataMapOfShapeShape& theArtInvFaces,
                                     const TopTools_MapOfShape& theMEInverted,
+                                    const BRepOffset_DataMapOfShapeMapOfShape& theDMFMVIE,
                                     TopTools_IndexedDataMapOfShapeListOfShape& theFImages);
 
 static
@@ -244,7 +273,7 @@ static
                          const TopTools_IndexedMapOfShape& theMFToCheckInt,
                          const TopTools_IndexedMapOfShape& theMFInvInHole,
                          const TopoDS_Shape& theFHoles,
-                         TopTools_DataMapOfShapeListOfShape& theSSInterfs,
+                         BRepOffset_MakeOffset_InterResults& theIntRes,
                          TopTools_IndexedMapOfShape& theMERemoved,
                          TopTools_IndexedMapOfShape& theMEInside,
                          TopoDS_Shape& theSolids);
@@ -284,8 +313,9 @@ static
                          TopTools_DataMapOfShapeListOfShape& theOEOrigins);
 
 static
-  void FilterInvalidFaces(const TopTools_IndexedDataMapOfShapeListOfShape& theFImages,
+  void FilterInvalidFaces(TopTools_IndexedDataMapOfShapeListOfShape& theFImages,
                           const TopTools_IndexedDataMapOfShapeListOfShape& theDMEF,
+                          const TopTools_IndexedMapOfShape& theInvEdges,
                           const TopTools_IndexedMapOfShape& theMERemoved,
                           TopTools_IndexedDataMapOfShapeListOfShape& theInvFaces,
                           TopTools_DataMapOfShapeShape& theArtInvFaces);
@@ -293,9 +323,16 @@ static
 static
   void FilterInvalidEdges(const TopTools_IndexedDataMapOfShapeListOfShape& theInvFaces,
                           const TopTools_DataMapOfShapeShape& theArtInvFaces,
-                          const TopTools_DataMapOfShapeListOfShape& theDMFLIE,
+                          const BRepOffset_DataMapOfShapeIndexedMapOfShape& theDMFMIE,
                           const TopTools_IndexedMapOfShape& theMERemoved,
                           TopTools_IndexedMapOfShape& theInvEdges);
+
+static
+  void CheckEdgesCreatedByVertex (const TopTools_IndexedDataMapOfShapeListOfShape& theInvFaces,
+                                  const TopTools_DataMapOfShapeShape& theArtInvFaces,
+                                  const TopTools_DataMapOfShapeListOfShape& theEdgesOrigins,
+                                  const TopTools_IndexedMapOfShape& theValidEdges,
+                                  TopTools_IndexedMapOfShape& theInvEdges);
 
 static 
   void FindFacesToRebuild(const TopTools_IndexedDataMapOfShapeListOfShape&  theLFImages,
@@ -309,7 +346,8 @@ static
   void RebuildFaces(const TopTools_IndexedDataMapOfShapeListOfShape& theFToRebuild,
                     const TopTools_MapOfShape& theFSelfRebAvoid,
                     const TopoDS_Shape& theSolids,
-                    const TopTools_DataMapOfShapeListOfShape& theSSInterfs,
+                    const BRepOffset_MakeOffset_InterResults& theIntRes,
+                    const BRepOffset_Analyse* theAnalyse,
                     TopTools_IndexedDataMapOfShapeListOfShape& theFImages,
                     TopTools_DataMapOfShapeListOfShape& theDMFNewHoles,
                     TopTools_DataMapOfShapeListOfShape& theEdgesOrigins,
@@ -332,7 +370,7 @@ static
   void IntersectFaces(const TopTools_IndexedDataMapOfShapeListOfShape& theFToRebuild,
                       const TopTools_MapOfShape& theFSelfRebAvoid,
                       const TopoDS_Shape& theSolids,
-                      const TopTools_DataMapOfShapeListOfShape& theSSInterfs,
+                      const BRepOffset_MakeOffset_InterResults& theIntRes,
                       TopTools_IndexedDataMapOfShapeListOfShape& theFImages,
                       TopTools_DataMapOfShapeListOfShape& theEdgesOrigins,
                       TopTools_DataMapOfShapeListOfShape& theOEImages,
@@ -594,6 +632,7 @@ static
 static
   Standard_Boolean FindShape(const TopoDS_Shape& theSWhat,
                              const TopoDS_Shape& theSWhere,
+                             const BRepOffset_Analyse* theAnalyse,
                              TopoDS_Shape& theRes);
 
 static
@@ -667,6 +706,7 @@ void BRepOffset_MakeOffset::BuildSplitsOfTrimmedFaces(const TopTools_ListOfShape
 //           these invalidities will be rebuilt.
 //=======================================================================
 void BRepOffset_MakeOffset::BuildSplitsOfExtendedFaces(const TopTools_ListOfShape& theLF,
+                                                       const BRepOffset_Analyse& theAnalyse,
                                                        Handle(BRepAlgo_AsDes)& theAsDes,
                                                        TopTools_DataMapOfShapeListOfShape& theEdgesOrigins,
                                                        TopTools_DataMapOfShapeShape& theFacesOrigins,
@@ -693,7 +733,7 @@ void BRepOffset_MakeOffset::BuildSplitsOfExtendedFaces(const TopTools_ListOfShap
   // but may be filled on the following rebuilding steps
   TopTools_DataMapOfShapeShape anArtInvFaces;
   // shapes connections for using in rebuilding
-  TopTools_DataMapOfShapeListOfShape aSSInterfs;
+  BRepOffset_MakeOffset_InterResults aIntRes;
   // edges to avoid on second steps
   TopTools_MapOfShape aLastInvEdges;
   // keep information of already invalid faces to avoid
@@ -704,21 +744,21 @@ void BRepOffset_MakeOffset::BuildSplitsOfExtendedFaces(const TopTools_ListOfShap
   // solid build from the new splits
   TopoDS_Shape aSolids;
   // now we can split the faces
-  BuildSplitsOfFaces(theLF, aNewEdges, theEdgesOrigins, theAsDes, theFacesOrigins,
+  BuildSplitsOfFaces(theLF, aNewEdges, theEdgesOrigins, &theAnalyse, theAsDes, theFacesOrigins,
                      anOEImages, anOEOrigins, aLastInvEdges, anEdgesToAvoid, anInvEdges, aValidEdges,
                      anInvertedEdges, anAlreadyInvFaces, anInvFaces, anArtInvFaces, aFImages,
-                     aDMFNewHoles, aSolids, aSSInterfs);
+                     aDMFNewHoles, aSolids, aIntRes);
   //
   // Find faces to rebuild
   if (anInvFaces.Extent()) {
     TopTools_IndexedDataMapOfShapeListOfShape aFToRebuild;
     TopTools_MapOfShape aFSelfRebAvoid;
-    FindFacesToRebuild(aFImages, anInvEdges, anInvFaces, aSSInterfs, aFToRebuild, aFSelfRebAvoid);
+    FindFacesToRebuild(aFImages, anInvEdges, anInvFaces, aIntRes.SSInterfs, aFToRebuild, aFSelfRebAvoid);
     //
     if (aFToRebuild.Extent()) {
       // vertices to avoid
       TopTools_MapOfShape aVAEmpty;
-      RebuildFaces(aFToRebuild, aFSelfRebAvoid, aSolids, aSSInterfs, aFImages, aDMFNewHoles,
+      RebuildFaces(aFToRebuild, aFSelfRebAvoid, aSolids, aIntRes, &theAnalyse, aFImages, aDMFNewHoles,
                    theEdgesOrigins, theFacesOrigins, anOEImages, anOEOrigins, aLastInvEdges,
                    anEdgesToAvoid, anInvEdges, aValidEdges, anInvertedEdges, anAlreadyInvFaces,
                    anInvFaces, anArtInvFaces, aVAEmpty, theETrimEInf, theAsDes);
@@ -739,6 +779,7 @@ void BRepOffset_MakeOffset::BuildSplitsOfExtendedFaces(const TopTools_ListOfShap
 //=======================================================================
 void BuildSplitsOfInvFaces(const TopTools_IndexedDataMapOfShapeListOfShape& theFToRebuild, 
                            const TopTools_MapOfShape& theModifiedEdges,
+                           const BRepOffset_Analyse* theAnalyse,
                            TopTools_IndexedDataMapOfShapeListOfShape& theFImages,
                            TopTools_DataMapOfShapeListOfShape& theDMFNewHoles,
                            TopTools_DataMapOfShapeListOfShape& theEdgesOrigins,
@@ -774,22 +815,22 @@ void BuildSplitsOfInvFaces(const TopTools_IndexedDataMapOfShapeListOfShape& theF
   // inverted edges
   TopTools_MapOfShape anInvertedEdges;
   // shapes connection for using in rebuilding process
-  TopTools_DataMapOfShapeListOfShape aSSInterfs;
+  BRepOffset_MakeOffset_InterResults aIntRes;
   //
   TopoDS_Shape aSolids;
   //
-  BuildSplitsOfFaces(aLF, theModifiedEdges, theEdgesOrigins, theAsDes, theFacesOrigins, 
+  BuildSplitsOfFaces(aLF, theModifiedEdges, theEdgesOrigins, theAnalyse, theAsDes, theFacesOrigins, 
                      theOEImages, theOEOrigins, theLastInvEdges, theEdgesToAvoid, anInvEdges, theValidEdges, 
                      anInvertedEdges, theAlreadyInvFaces, anInvFaces, anArtInvFaces, theFImages,
-                     theDMFNewHoles, aSolids, aSSInterfs);
+                     theDMFNewHoles, aSolids, aIntRes);
   //
   if (anInvFaces.Extent()) {
     TopTools_IndexedDataMapOfShapeListOfShape aFToRebuild;
     TopTools_MapOfShape aFSelfRebAvoid;
-    FindFacesToRebuild(theFImages, anInvEdges, anInvFaces, aSSInterfs, aFToRebuild, aFSelfRebAvoid);
+    FindFacesToRebuild(theFImages, anInvEdges, anInvFaces, aIntRes.SSInterfs, aFToRebuild, aFSelfRebAvoid);
     //
     if (aFToRebuild.Extent()) {
-      RebuildFaces(aFToRebuild, aFSelfRebAvoid, aSolids, aSSInterfs, theFImages, theDMFNewHoles,
+      RebuildFaces(aFToRebuild, aFSelfRebAvoid, aSolids, aIntRes, theAnalyse, theFImages, theDMFNewHoles,
                    theEdgesOrigins, theFacesOrigins, theOEImages, theOEOrigins, theLastInvEdges,
                    theEdgesToAvoid, anInvEdges, theValidEdges, anInvertedEdges, theAlreadyInvFaces,
                    anInvFaces, anArtInvFaces, theVertsToAvoid, theETrimEInf, theAsDes);
@@ -805,6 +846,7 @@ void BuildSplitsOfInvFaces(const TopTools_IndexedDataMapOfShapeListOfShape& theF
 void BuildSplitsOfFaces(const TopTools_ListOfShape& theLF,
                         const TopTools_MapOfShape& theModifiedEdges,
                         const TopTools_DataMapOfShapeListOfShape& theEdgesOrigins,
+                        const BRepOffset_Analyse* theAnalyse,
                         Handle(BRepAlgo_AsDes)& theAsDes,
                         TopTools_DataMapOfShapeShape& theFacesOrigins,
                         TopTools_DataMapOfShapeListOfShape& theOEImages,
@@ -820,7 +862,7 @@ void BuildSplitsOfFaces(const TopTools_ListOfShape& theLF,
                         TopTools_IndexedDataMapOfShapeListOfShape& theFImages,
                         TopTools_DataMapOfShapeListOfShape& theDMFNewHoles,
                         TopoDS_Shape& theSolids,
-                        TopTools_DataMapOfShapeListOfShape& theSSInterfs)
+                        BRepOffset_MakeOffset_InterResults& theIntRes)
 {
   if (theLF.IsEmpty()) {
     return;
@@ -831,18 +873,20 @@ void BuildSplitsOfFaces(const TopTools_ListOfShape& theLF,
   //
   // processed faces
   TopTools_ListOfShape aLFDone;
-  // extended face - list of neutral edges, i.e. in one splits - valid and in others - invalid
-  TopTools_DataMapOfShapeListOfShape aDMFLNE;
-  // list of valid edges for each face
-  TopTools_DataMapOfShapeListOfShape aDMFLVE;
-  // list of invalid edges for each face
-  TopTools_DataMapOfShapeListOfShape aDMFLIE;
+  // extended face - map of neutral edges, i.e. in one split - valid and in other - invalid
+  BRepOffset_DataMapOfShapeMapOfShape aDMFMNE;
+  // map of valid edges for each face
+  BRepOffset_DataMapOfShapeMapOfShape aDMFMVE;
+  // map of invalid edges for each face
+  BRepOffset_DataMapOfShapeIndexedMapOfShape aDMFMIE;
   // map of valid inverted edges for the face
-  TopTools_DataMapOfShapeListOfShape aDMFLVIE;
+  BRepOffset_DataMapOfShapeMapOfShape aDMFMVIE;
   // map of splits to check for internals
   TopTools_IndexedMapOfShape aMFToCheckInt;
   // map of edges created from vertex and marked as invalid
   TopTools_MapOfShape aMEdgeInvalidByVertex;
+  // map of edges created from vertex and marked as valid
+  TopTools_MapOfShape aMEdgeValidByVertex;
   // connection map from old edges to new ones
   TopTools_DataMapOfShapeListOfShape aDMEOrLEIm;
   //
@@ -932,7 +976,7 @@ void BuildSplitsOfFaces(const TopTools_ListOfShape& theLF,
       }
       //
       if (bArtificialCase) {
-        TopTools_ListOfShape aLEInv;
+        TopTools_IndexedMapOfShape aMEInv;
         // make the face invalid
         theArtInvFaces.Bind(aF, aCE);
         //
@@ -945,7 +989,7 @@ void BuildSplitsOfFaces(const TopTools_ListOfShape& theLF,
             const TopoDS_Shape& aE = aExpE.Current();
             if (aMapEInv.Contains(aE)) {
               theInvEdges.Add(aE);
-              AppendToList(aLEInv, aE);
+              aMEInv.Add (aE);
             }
             else {
               theValidEdges.Add(aE);
@@ -953,7 +997,7 @@ void BuildSplitsOfFaces(const TopTools_ListOfShape& theLF,
           }
         }
         //
-        aDMFLIE.Bind(aF, aLEInv);
+        aDMFMIE.Bind(aF, aMEInv);
         aLFDone.Append(aF);
         //
         continue;
@@ -961,9 +1005,9 @@ void BuildSplitsOfFaces(const TopTools_ListOfShape& theLF,
     }
     //
     // find invalid edges
-    FindInvalidEdges(aF, aLFImages, theEdgesOrigins, theFacesOrigins, theOEImages,
-                     theOEOrigins, theInvEdges, theValidEdges, aDMFLVE, aDMFLNE, aDMFLIE,
-                     aDMFLVIE, aDMEOrLEIm, theInvertedEdges, aMEdgeInvalidByVertex);
+    FindInvalidEdges(aF, aLFImages, theEdgesOrigins, theFacesOrigins, theAnalyse, theOEImages,
+                     theOEOrigins, theInvEdges, theValidEdges, aDMFMVE, aDMFMNE, aDMFMIE,
+                     aDMFMVIE, aDMEOrLEIm, theInvertedEdges, aMEdgeInvalidByVertex, aMEdgeValidByVertex);
     //
     // save the new splits
     if (!pLFIm) {
@@ -977,10 +1021,15 @@ void BuildSplitsOfFaces(const TopTools_ListOfShape& theLF,
     aLFDone.Append(aF);
   }
   //
-  if (theInvEdges.IsEmpty() && theArtInvFaces.IsEmpty()) {
+  if (theInvEdges.IsEmpty() && theArtInvFaces.IsEmpty() && aDMFMIE.IsEmpty()) {
     return;
   }
-  //
+
+  // Additional step to find invalid edges by checking unclassified edges
+  // in the splits of SD faces
+  FindInvalidEdges (aLFDone, theFImages, theFacesOrigins, theAnalyse,
+                    theInvEdges, theValidEdges, aDMFMIE, aDMFMVE, aDMFMNE);
+
 #ifdef OFFSET_DEBUG
   // show invalid edges
   TopoDS_Compound aCEInv1;
@@ -1030,7 +1079,7 @@ void BuildSplitsOfFaces(const TopTools_ListOfShape& theLF,
     }
   }
 
-  TopTools_ListOfShape anEmptyList;
+  TopTools_MapOfShape anEmptyMap;
   // invalid faces inside the holes
   TopTools_IndexedMapOfShape aMFInvInHole;
   // all hole faces
@@ -1050,18 +1099,13 @@ void BuildSplitsOfFaces(const TopTools_ListOfShape& theLF,
     if (bArtificialCase) {
       aLFInv = aLFImages;
     }
-    else {
+    else
+    {
       // neutral edges
-      TopTools_ListOfShape* pLNE = aDMFLNE.ChangeSeek(aF);
-      if (!pLNE) {
-        pLNE = &anEmptyList;
+      const TopTools_MapOfShape* pMNE = aDMFMNE.ChangeSeek(aF);
+      if (!pMNE) {
+        pMNE = &anEmptyMap;
       }
-      // valid inverted edges
-      TopTools_ListOfShape* pLIVE = aDMFLVIE.ChangeSeek(aF);
-      if (!pLIVE) {
-        pLIVE = &anEmptyList;
-      }
-      //
       // find faces inside holes wires
       TopTools_MapOfShape aMFHoles;
       const TopoDS_Face& aFOr = TopoDS::Face(theFacesOrigins.Find(aF));
@@ -1074,8 +1118,8 @@ void BuildSplitsOfFaces(const TopTools_ListOfShape& theLF,
       }
       //
       // find invalid faces
-      FindInvalidFaces(aLFImages, theInvEdges, theValidEdges, aDMFLVE, aDMFLIE,
-                       *pLNE, *pLIVE, theInvertedEdges, aMEdgeInvalidByVertex,
+      FindInvalidFaces(aLFImages, theInvEdges, theValidEdges, aDMFMVE, aDMFMIE,
+                       *pMNE, theInvertedEdges, aMEdgeInvalidByVertex, aMEdgeValidByVertex,
                        aMFHoles, aMFInvInHole, aLFInv, anInvertedFaces);
     }
     //
@@ -1123,12 +1167,13 @@ void BuildSplitsOfFaces(const TopTools_ListOfShape& theLF,
   }
   //
   // remove invalid splits from valid splits
-  RemoveInvalidSplitsFromValid(theInvFaces, theArtInvFaces, theInvertedEdges, theFImages);
+  RemoveInvalidSplitsFromValid (theInvFaces, theArtInvFaces, theInvertedEdges,
+                                aDMFMVIE, theFImages);
   //
   // remove inside faces
   TopTools_IndexedMapOfShape aMEInside;
   RemoveInsideFaces(theFImages, theInvFaces, theArtInvFaces, theInvEdges, theInvertedEdges,
-                    anInvertedFaces, aMFToCheckInt, aMFInvInHole, aFHoles, theSSInterfs,
+                    anInvertedFaces, aMFToCheckInt, aMFInvInHole, aFHoles, theIntRes,
                     aMERemoved, aMEInside, theSolids);
   //
   // make compound of valid splits
@@ -1152,7 +1197,7 @@ void BuildSplitsOfFaces(const TopTools_ListOfShape& theLF,
   FilterEdgesImages(aCFIm, theOEImages, theOEOrigins);
   //
   // filter invalid faces
-  FilterInvalidFaces(theFImages, aDMEF, aMEInside, theInvFaces, theArtInvFaces);
+  FilterInvalidFaces(theFImages, aDMEF, theInvEdges, aMEInside, theInvFaces, theArtInvFaces);
   aNb = theInvFaces.Extent();
   if (!aNb) {
     theInvEdges.Clear();
@@ -1175,8 +1220,12 @@ void BuildSplitsOfFaces(const TopTools_ListOfShape& theLF,
 #endif
   //
   // filter invalid edges
-  FilterInvalidEdges(theInvFaces, theArtInvFaces, aDMFLIE, aMERemoved, theInvEdges);
+  FilterInvalidEdges(theInvFaces, theArtInvFaces, aDMFMIE, aMERemoved, theInvEdges);
   //
+  // Check additionally validity of edges originated from vertices.
+  CheckEdgesCreatedByVertex (theInvFaces, theArtInvFaces, theEdgesOrigins,
+                             theValidEdges, theEdgesToAvoid);
+
 #ifdef OFFSET_DEBUG
   // show invalid edges
   TopoDS_Compound aCEInv;
@@ -1552,17 +1601,19 @@ void FindInvalidEdges(const TopoDS_Face& theF,
                       const TopTools_ListOfShape& theLFImages,
                       const TopTools_DataMapOfShapeListOfShape& theEdgesOrigins,
                       const TopTools_DataMapOfShapeShape& theFacesOrigins,
+                      const BRepOffset_Analyse* theAnalyse,
                       const TopTools_DataMapOfShapeListOfShape& theOEImages,
                       const TopTools_DataMapOfShapeListOfShape& theOEOrigins,
                       TopTools_IndexedMapOfShape& theInvEdges,
                       TopTools_IndexedMapOfShape& theValidEdges,
-                      TopTools_DataMapOfShapeListOfShape& theDMFLVE,
-                      TopTools_DataMapOfShapeListOfShape& theDMFLNE,
-                      TopTools_DataMapOfShapeListOfShape& theDMFLIE,
-                      TopTools_DataMapOfShapeListOfShape& theDMFLVIE,
+                      BRepOffset_DataMapOfShapeMapOfShape& theDMFMVE,
+                      BRepOffset_DataMapOfShapeMapOfShape& theDMFMNE,
+                      BRepOffset_DataMapOfShapeIndexedMapOfShape& theDMFMIE,
+                      BRepOffset_DataMapOfShapeMapOfShape& theDMFMVIE,
                       TopTools_DataMapOfShapeListOfShape& theDMEOrLEIm,
                       TopTools_MapOfShape& theMEInverted,
-                      TopTools_MapOfShape& theEdgesInvalidByVertex)
+                      TopTools_MapOfShape& theEdgesInvalidByVertex,
+                      TopTools_MapOfShape& theEdgesValidByVertex)
 {
   // Edge is considered as invalid in the following cases:
   // 1. Its orientation on the face has changed comparing to the originals edge and face;
@@ -1584,6 +1635,8 @@ void FindInvalidEdges(const TopoDS_Face& theF,
   // maps for checking the inverted edges
   TopTools_IndexedDataMapOfShapeListOfShape aDMVE, aDMEF;
   TopTools_IndexedMapOfShape aMEdges;
+  // back map from the original shapes to their offset images
+  TopTools_DataMapOfShapeListOfShape anImages;
   //
   TopTools_ListIteratorOfListOfShape aItLF(theLFImages);
   for (; aItLF.More(); aItLF.Next()) {
@@ -1613,6 +1666,22 @@ void FindInvalidEdges(const TopoDS_Face& theF,
         }
         AppendToList(*pLE, aE);
       }
+
+      // back map from original edges to their offset images
+      const TopTools_ListOfShape* pLOr = theEdgesOrigins.Seek (aE);
+      if (!pLOr)
+        continue;
+      for (TopTools_ListOfShape::Iterator itOr (*pLOr); itOr.More(); itOr.Next())
+      {
+        const TopoDS_Shape& aSOr = itOr.Value();
+        TopoDS_Shape aSInF;
+        if (!FindShape (aSOr, aFOr, theAnalyse, aSInF))
+          continue;
+        TopTools_ListOfShape* pImages = anImages.ChangeSeek (aSInF);
+        if (!pImages)
+          pImages = anImages.Bound (aSInF, TopTools_ListOfShape());
+        AppendToList (*pImages, aE);
+      }
     }
   }
   //
@@ -1625,9 +1694,9 @@ void FindInvalidEdges(const TopoDS_Face& theF,
     const TopoDS_Face& aFIm = *(TopoDS_Face*)&aItLF.Value();
     //
     // valid edges for this split
-    TopTools_ListOfShape aLVE;
+    TopTools_MapOfShape aMVE;
     // invalid edges for this split
-    TopTools_ListOfShape aLIE;
+    TopTools_IndexedMapOfShape aMIE;
     //
     TopExp_Explorer aExp(aFIm, TopAbs_EDGE);
     for (; aExp.More(); aExp.Next()) {
@@ -1654,10 +1723,12 @@ void FindInvalidEdges(const TopoDS_Face& theF,
           ++aNbVOr;
         }
       }
+      if (aNbVOr > 1 && (aLEOr.Extent() - aNbVOr) > 1)
+        continue;
       //
-      TopTools_MapOfShape aME, aMV;
+      TopTools_MapOfShape aME, aMV, aMF;
       Standard_Boolean bInvalid = Standard_False, bChecked = Standard_False;
-      Standard_Integer aNbP = NbPoints(aEIm);
+      Standard_Integer aNbP = NbPoints(aEIm), aNbInv = 0;
       Standard_Boolean bUseVertex = !aNbVOr ? Standard_False :
         (aNbVOr == 1 &&
          aDMEF.FindFromKey(aEIm).Extent() == 1 &&
@@ -1684,16 +1755,26 @@ void FindInvalidEdges(const TopoDS_Face& theF,
           if (pLEFOr) {
             TopoDS_Compound aCEOr;
             BRep_Builder().MakeCompound(aCEOr);
+            // Avoid classification of edges originated from vertices
+            // located between tangent edges
+            Standard_Boolean bAllTgt = Standard_True;
             TopTools_ListIteratorOfListOfShape aItLEFOr(*pLEFOr);
-            for (; aItLEFOr.More(); aItLEFOr.Next()) {
+            gp_Vec aVRef = GetAverageTangent (aItLEFOr.Value(), aNbP);
+            for (; aItLEFOr.More(); aItLEFOr.Next())
+            {
               const TopoDS_Shape& aEOr = aItLEFOr.Value();
               BRep_Builder().Add(aCEOr, aEOr);
+
+              gp_Vec aVCur = GetAverageTangent (aEOr, aNbP);
+              if (!aVRef.IsParallel (aVCur, Precision::Angular()))
+                bAllTgt = Standard_False;
             }
-            aEOrF = aCEOr;
+            if (!bAllTgt)
+              aEOrF = aCEOr;
           }
         }
         else {
-          FindShape(aSOr, aFOr, aEOrF);
+          FindShape(aSOr, aFOr, theAnalyse, aEOrF);
           //
           TopTools_ListOfShape *pLEIm = theDMEOrLEIm.ChangeSeek(aSOr);
           if (!pLEIm) {
@@ -1706,22 +1787,56 @@ void FindInvalidEdges(const TopoDS_Face& theF,
           // the edge has not been found
           continue;
         }
-        //
-        // Check orientations of the image edge and original edge.
-        // In case the 3d curves are having the same direction the orientations 
-        // must be the same. Otherwise the orientations should also be different.
-        //
-        // get average tangent vector for each curve taking into account
-        // the orientations of the edges, i.e. the edge is reversed
-        // the vector is reversed as well
-        gp_Vec aVSum1 = GetAverageTangent(aEIm, aNbP);
-        gp_Vec aVSum2 = GetAverageTangent(aEOrF, aNbP);
-        //
-        aVSum1.Normalize();
-        aVSum2.Normalize();
-        //
-        Standard_Real aCos = aVSum1.Dot(aVSum2);
-        if (!bVertex) {
+
+        if (bVertex)
+        {
+          TopTools_MapOfShape aMVTotal;
+          Standard_Integer aNbChecked = 0;
+          // Just check if the original edges sharing the vertex do not share it any more.
+          for (TopoDS_Iterator it (aEOrF); it.More(); it.Next())
+          {
+            const TopoDS_Shape& aEOr = it.Value();
+            const TopTools_ListOfShape* aLIm = anImages.Seek (aEOr);
+            if (!aLIm)
+              continue;
+            ++aNbChecked;
+            TopTools_IndexedDataMapOfShapeListOfShape aMVLoc;
+            for (TopTools_ListOfShape::Iterator itLIM (*aLIm); itLIM.More(); itLIM.Next())
+              TopExp::MapShapesAndAncestors (itLIM.Value(), TopAbs_VERTEX, TopAbs_EDGE, aMVLoc);
+            for (Standard_Integer i = 1; i <= aMVLoc.Extent(); ++i)
+            {
+              if (aMVLoc(i).Extent() > 1 && !aMVTotal.Add (aMVLoc.FindKey (i)))
+              {
+                bInvalid = Standard_True;
+                theEdgesInvalidByVertex.Add(aEIm);
+                break;
+              }
+            }
+            if (bInvalid)
+              break;
+          }
+          if (!bInvalid && aNbChecked < 2)
+            continue;
+          else
+            theEdgesValidByVertex.Add (aEIm);
+        }
+        else
+        {
+          //
+          // Check orientations of the image edge and original edge.
+          // In case the 3d curves are having the same direction the orientations 
+          // must be the same. Otherwise the orientations should also be different.
+          //
+          // get average tangent vector for each curve taking into account
+          // the orientations of the edges, i.e. the edge is reversed
+          // the vector is reversed as well
+          gp_Vec aVSum1 = GetAverageTangent(aEIm, aNbP);
+          gp_Vec aVSum2 = GetAverageTangent(aEOrF, aNbP);
+          //
+          aVSum1.Normalize();
+          aVSum2.Normalize();
+          //
+          Standard_Real aCos = aVSum1.Dot(aVSum2);
           if (Abs(aCos) < 0.9999) {
             continue;
           }
@@ -1732,12 +1847,16 @@ void FindInvalidEdges(const TopoDS_Face& theF,
             const TopoDS_Shape& aV = aExpE.Current();
             aMV.Add(aV);
           }
-        }
-        //
-        if (aCos < Precision::Confusion()) {
-          bInvalid = Standard_True;
-          if (bVertex) {
-            theEdgesInvalidByVertex.Add(aEIm);
+          if (theAnalyse)
+          {
+            for (TopTools_ListOfShape::Iterator itFA (theAnalyse->Ancestors (aEOrF));
+                 itFA.More(); itFA.Next())
+              aMF.Add (itFA.Value());
+          }
+          //
+          if (aCos < Precision::Confusion()) {
+            bInvalid = Standard_True;
+            aNbInv++;
           }
         }
         bChecked = Standard_True;
@@ -1747,46 +1866,78 @@ void FindInvalidEdges(const TopoDS_Face& theF,
         continue;
       }
       //
+      Standard_Boolean bLocalOnly = (aNbVOr > 1 && (aLEOr.Extent() - aNbVOr) > 1);
       Standard_Integer aNbE = aME.Extent(), aNbV = aMV.Extent();
-      if ((aNbE > 1) && (aNbV == 2*aNbE)) {
-        continue;
+      if (aNbE > 1 && aNbV == 2*aNbE)
+      {
+        Standard_Boolean bSkip = Standard_True;
+
+        // Allow the edge to be analyzed if it is:
+        // * originated from more than two faces
+        // * unanimously considered valid or invalid
+        // * not a boundary edge in the splits
+        if (aMF.Extent () > 2 && (aNbInv == 0 || aNbInv == aNbE))
+        {
+          if (theLFImages.Extent() > 2)
+          {
+            TopoDS_Iterator itV (aEIm);
+            for (; itV.More(); itV.Next())
+            {
+              TopTools_ListOfShape::Iterator itE (aDMVE.FindFromKey (itV.Value()));
+              for (; itE.More(); itE.Next())
+                if (aDMEF.FindFromKey (itE.Value()).Extent() < 2)
+                  break;
+              if (itE.More())
+                break;
+            }
+            bSkip = itV.More();
+          }
+        }
+        if (bSkip)
+          continue;
+        else
+          bLocalOnly = Standard_True;
       }
       //
       if (bInvalid) {
-        theInvEdges.Add(aEIm);
-        aLIE.Append(aEIm);
+        if (!bLocalOnly)
+          theInvEdges.Add(aEIm);
+        aMIE.Add (aEIm);
         aMEInv.Add(aEIm);
         continue;
       }
       //
       // check if the edge has been inverted
-      Standard_Boolean bInverted = !aNbE ? Standard_False :
+      Standard_Boolean bInverted = !aNbE || bLocalOnly ? Standard_False :
         CheckInverted(aEIm, aFOr, theOEImages, theOEOrigins,
           theEdgesOrigins, aDMVE, aMEdges, theMEInverted);
       //
       if (!bInverted || !aNbVOr) {
-        theValidEdges.Add(aEIm);
-        aLVE.Append(aEIm);
+        if (!bLocalOnly)
+          theValidEdges.Add(aEIm);
+        aMVE.Add (aEIm);
         aMEVal.Add(aEIm);
       }
     }
     //
     // valid edges
-    if (aLVE.Extent()) {
-      theDMFLVE.Bind(aFIm, aLVE);
+    if (aMVE.Extent())
+    {
+      theDMFMVE.Bind (aFIm, aMVE);
     }
     //
     // invalid edges
-    if (aLIE.Extent()) {
-      theDMFLIE.Bind(aFIm, aLIE);
+    if (aMIE.Extent())
+    {
+      theDMFMIE.Bind (aFIm, aMIE);
     }
   }
   //
   // process invalid edges:
   // check for the inverted edges
-  TopTools_ListOfShape aLVIE;
+  TopTools_MapOfShape aMVIE;
   // fill neutral edges
-  TopTools_ListOfShape aLNE;
+  TopTools_MapOfShape aMNE;
   //
   Standard_Integer i, aNbEInv = aMEInv.Extent();
   for (i = 1; i <= aNbEInv; ++i) {
@@ -1794,8 +1945,9 @@ void FindInvalidEdges(const TopoDS_Face& theF,
     //
     // neutral edges - on the splits of the same offset face
     // it is valid for one split and invalid for other
-    if (aMEVal.Contains(aEIm)) {
-      aLNE.Append(aEIm);
+    if (aMEVal.Contains(aEIm))
+    {
+      aMNE.Add (aEIm);
       continue;
     }
     //
@@ -1821,18 +1973,210 @@ void FindInvalidEdges(const TopoDS_Face& theF,
             !aMEInv.Contains(aEIm1) && !aMEInt.Contains(aEIm1) &&
             theMEInverted.Contains(aEIm1)) {
           theInvEdges.Add(aEIm1);
-          aLVIE.Append(aEIm1);
+          aMVIE.Add (aEIm1);
         }
       }
     }
   }
   //
-  if (aLNE.Extent()) {
-    theDMFLNE.Bind(theF, aLNE);
+  if (aMNE.Extent())
+  {
+    theDMFMNE.Bind (theF, aMNE);
   }
   //
-  if (aLVIE.Extent()) {
-    theDMFLVIE.Bind(theF, aLVIE);
+  if (aMVIE.Extent())
+  {
+    theDMFMVIE.Bind (theF, aMVIE);
+  }
+}
+
+namespace 
+{
+  static void addAsNeutral (const TopoDS_Shape& theE,
+                            const TopoDS_Shape& theFInv,
+                            const TopoDS_Shape& theFVal,
+                            BRepOffset_DataMapOfShapeIndexedMapOfShape& theLocInvEdges,
+                            BRepOffset_DataMapOfShapeMapOfShape& theLocValidEdges)
+  {
+    TopTools_IndexedMapOfShape* pMEInv = theLocInvEdges.ChangeSeek (theFInv);
+    if (!pMEInv)
+      pMEInv = theLocInvEdges.Bound (theFInv, TopTools_IndexedMapOfShape());
+    pMEInv->Add (theE);
+
+    TopTools_MapOfShape* pMEVal = theLocValidEdges.ChangeSeek (theFVal);
+    if (!pMEVal)
+      pMEVal = theLocValidEdges.Bound (theFVal, TopTools_MapOfShape());
+    pMEVal->Add (theE);
+  }
+
+}
+//=======================================================================
+//function : FindInvalidEdges
+//purpose  : Additional method to look for invalid faces
+//=======================================================================
+void FindInvalidEdges (const TopTools_ListOfShape& theLFOffset,
+                       const TopTools_IndexedDataMapOfShapeListOfShape& theFImages,
+                       const TopTools_DataMapOfShapeShape& theFacesOrigins,
+                       const BRepOffset_Analyse* theAnalyse,
+                       const TopTools_IndexedMapOfShape& theInvEdges,
+                       const TopTools_IndexedMapOfShape& theValidEdges,
+                       BRepOffset_DataMapOfShapeIndexedMapOfShape& theLocInvEdges,
+                       BRepOffset_DataMapOfShapeMapOfShape& theLocValidEdges,
+                       BRepOffset_DataMapOfShapeMapOfShape& theNeutralEdges)
+{
+  // 1. Find edges unclassified in faces
+  // 2. Find SD faces in which the same edge is classified
+  // 3. Check if the edge is neutral in face in which it wasn't classified
+
+  NCollection_IndexedDataMap<TopoDS_Shape, TopTools_MapOfShape, TopTools_ShapeMapHasher> aMEUnclassified;
+  TopTools_DataMapOfShapeShape aFSplitFOffset;
+
+  // Avoid artificial faces
+  TopTools_MapOfShape aNewFaces;
+  if (theAnalyse)
+  {
+    TopTools_MapOfShape aMapNewTmp;
+    for (TopTools_ListOfShape::Iterator it (theAnalyse->NewFaces()); it.More(); it.Next())
+      aMapNewTmp.Add (it.Value());
+
+    for (TopTools_ListOfShape::Iterator it (theLFOffset); it.More(); it.Next())
+    {
+      const TopoDS_Shape& aFOffset = it.Value();
+      const TopoDS_Shape& aFOrigin = theFacesOrigins.Find (aFOffset);
+      if (aMapNewTmp.Contains (aFOrigin))
+        aNewFaces.Add (aFOffset);
+    }
+  }
+
+  TopTools_IndexedDataMapOfShapeListOfShape anEFMap;
+  for (TopTools_ListOfShape::Iterator itLFO (theLFOffset); itLFO.More(); itLFO.Next())
+  {
+    const TopoDS_Shape& aF = itLFO.Value();
+    if (aNewFaces.Contains (aF))
+      continue;
+
+    const TopTools_ListOfShape& aLFImages = theFImages.FindFromKey (aF);
+    for (TopTools_ListOfShape::Iterator itLF (aLFImages); itLF.More(); itLF.Next())
+    {
+      const TopoDS_Shape& aFIm = itLF.Value();
+
+      TopExp::MapShapesAndAncestors (aFIm, TopAbs_EDGE, TopAbs_FACE, anEFMap);
+
+      const TopTools_IndexedMapOfShape* pMEInvalid = theLocInvEdges.Seek (aFIm);
+      const TopTools_MapOfShape* pMEValid = theLocValidEdges.Seek (aFIm);
+
+      for (TopExp_Explorer expE (aFIm, TopAbs_EDGE); expE.More(); expE.Next())
+      {
+        const TopoDS_Shape& aE = expE.Current();
+        if (theInvEdges.Contains (aE) != theValidEdges.Contains (aE))
+        {
+          // edge is classified in some face
+
+          if ((!pMEInvalid || !pMEInvalid->Contains (aE)) && 
+              (!pMEValid   || !pMEValid->Contains (aE)))
+          {
+            // but not in the current one
+            TopTools_MapOfShape *pMap = aMEUnclassified.ChangeSeek (aE);
+            if (!pMap)
+              pMap = &aMEUnclassified (aMEUnclassified.Add (aE, TopTools_MapOfShape()));
+            pMap->Add (aFIm);
+
+            aFSplitFOffset.Bind (aFIm, aF);
+          }
+        }
+      }
+    }
+  }
+
+  if (aMEUnclassified.IsEmpty())
+    return;
+
+  // Analyze unclassified edges
+  const Standard_Integer aNbE = aMEUnclassified.Extent();
+  for (Standard_Integer iE = 1; iE <= aNbE; ++iE)
+  {
+    const TopoDS_Shape& aE = aMEUnclassified.FindKey (iE);
+    const TopTools_MapOfShape& aMFUnclassified = aMEUnclassified (iE);
+
+    const TopTools_ListOfShape& aLF = anEFMap.FindFromKey (aE);
+
+    for (TopTools_ListOfShape::Iterator itLF (aLF); itLF.More(); itLF.Next())
+    {
+      const TopoDS_Shape& aFClassified = itLF.Value();
+      if (aMFUnclassified.Contains (aFClassified))
+        continue;
+
+      BOPTools_Set anEdgeSetClass;
+      anEdgeSetClass.Add (aFClassified, TopAbs_EDGE);
+
+      TopoDS_Shape aEClassified;
+      FindShape (aE, aFClassified, NULL, aEClassified);
+      TopAbs_Orientation anOriClass = aEClassified.Orientation();
+
+      gp_Dir aDNClass;
+      BOPTools_AlgoTools3D::GetNormalToFaceOnEdge (TopoDS::Edge (aEClassified), TopoDS::Face (aFClassified), aDNClass);
+
+      const TopTools_IndexedMapOfShape* pMEInvalid = theLocInvEdges.Seek (aFClassified);
+      Standard_Boolean isInvalid = pMEInvalid && pMEInvalid->Contains (aE);
+
+      for (TopTools_MapOfShape::Iterator itM (aMFUnclassified); itM.More(); itM.Next())
+      {
+        const TopoDS_Shape& aFUnclassified = itM.Value();
+
+        BOPTools_Set anEdgeSetUnclass;
+        anEdgeSetUnclass.Add (aFUnclassified, TopAbs_EDGE);
+
+        if (anEdgeSetClass.IsEqual (anEdgeSetUnclass))
+        {
+          gp_Dir aDNUnclass;
+          BOPTools_AlgoTools3D::GetNormalToFaceOnEdge (TopoDS::Edge (aE), TopoDS::Face (aFUnclassified), aDNUnclass);
+
+          Standard_Boolean isSameOri = aDNClass.IsEqual (aDNUnclass, Precision::Angular());
+
+          // Among other splits of the same face find those where the edge is contained with different
+          // orientation
+          const TopoDS_Shape& aFOffset = aFSplitFOffset.Find (aFUnclassified);
+          const TopTools_ListOfShape& aLFSplits = theFImages.FindFromKey (aFOffset);
+          TopTools_ListOfShape::Iterator itLFSp (aLFSplits);
+          for (; itLFSp.More(); itLFSp.Next())
+          {
+            const TopoDS_Shape& aFSp = itLFSp.Value();
+
+            if (!aFSp.IsSame (aFUnclassified) && aMFUnclassified.Contains (aFSp))
+            {
+              TopoDS_Shape aEUnclassified;
+              FindShape (aE, aFSp, NULL, aEUnclassified);
+
+              TopAbs_Orientation anOriUnclass = aEUnclassified.Orientation();
+              if (!isSameOri)
+                anOriUnclass = TopAbs::Reverse (anOriUnclass);
+
+              if (anOriClass != anOriUnclass)
+              {
+                // make the edge neutral for the face
+                TopTools_MapOfShape* pMENeutral = theNeutralEdges.ChangeSeek (aFOffset);
+                if (!pMENeutral)
+                  pMENeutral = theNeutralEdges.Bound (aFOffset, TopTools_MapOfShape());
+                pMENeutral->Add (aE);
+
+                if (isInvalid && isSameOri)
+                {
+                  // make edge invalid in aFUnclassified and valid in aFSp
+                  addAsNeutral (aE, aFClassified, aFSp, theLocInvEdges, theLocValidEdges);
+                }
+                else
+                {
+                  // make edge invalid in aFSp and valid in aFUnclassified
+                  addAsNeutral (aE, aFSp, aFClassified, theLocInvEdges, theLocValidEdges);
+                }
+              }
+            }
+          }
+          if (itLFSp.More())
+            break;
+        }
+      }
+    }
   }
 }
 
@@ -1843,12 +2187,12 @@ void FindInvalidEdges(const TopoDS_Face& theF,
 void FindInvalidFaces(TopTools_ListOfShape& theLFImages,
                       const TopTools_IndexedMapOfShape& theInvEdges,
                       const TopTools_IndexedMapOfShape& theValidEdges,
-                      const TopTools_DataMapOfShapeListOfShape& theDMFLVE,
-                      const TopTools_DataMapOfShapeListOfShape& theDMFLIE,
-                      const TopTools_ListOfShape& theLENeutral,
-                      const TopTools_ListOfShape& theLEValInverted,
+                      const BRepOffset_DataMapOfShapeMapOfShape& theDMFMVE,
+                      const BRepOffset_DataMapOfShapeIndexedMapOfShape& theDMFMIE,
+                      const TopTools_MapOfShape& theMENeutral,
                       const TopTools_MapOfShape& theMEInverted,
                       const TopTools_MapOfShape& theEdgesInvalidByVertex,
+                      const TopTools_MapOfShape& theEdgesValidByVertex,
                       const TopTools_MapOfShape& theMFHoles,
                       TopTools_IndexedMapOfShape& theMFInvInHole,
                       TopTools_ListOfShape& theInvFaces,
@@ -1867,21 +2211,7 @@ void FindInvalidFaces(TopTools_ListOfShape& theLFImages,
   Standard_Boolean bHasValid, bAllValid, bAllInvalid, bHasReallyInvalid, bAllInvNeutral;
   Standard_Boolean bValid, bValidLoc, bInvalid, bInvalidLoc, bNeutral, bInverted;
   Standard_Boolean bIsInvalidByInverted;
-  Standard_Integer i, aNbChecked;
-  //
-  // neutral edges
-  TopTools_MapOfShape aMEN;
-  for (TopTools_ListIteratorOfListOfShape aItLE(theLENeutral); aItLE.More(); aItLE.Next())
-  {
-    aMEN.Add(aItLE.Value());
-  }
-  //
-  // valid inverted edges
-  TopTools_MapOfShape aMEValInverted;
-  for (TopTools_ListIteratorOfListOfShape aItLE(theLEValInverted); aItLE.More(); aItLE.Next())
-  {
-    aMEValInverted.Add(aItLE.Value());
-  }
+  Standard_Integer aNbChecked;
   //
   Standard_Boolean bTreatInvertedAsInvalid = (theLFImages.Extent() == 1);
   //
@@ -1891,26 +2221,22 @@ void FindInvalidFaces(TopTools_ListOfShape& theLFImages,
   // faces for post treat
   TopTools_ListOfShape aLFPT;
   //
+  TopTools_IndexedDataMapOfShapeListOfShape aDMEF;
   TopTools_ListIteratorOfListOfShape aItLF(theLFImages);
+  for (; aItLF.More(); aItLF.Next())
+  {
+    const TopoDS_Face& aFIm = *(TopoDS_Face*)&aItLF.Value();
+    TopExp::MapShapesAndAncestors (aFIm, TopAbs_EDGE, TopAbs_FACE, aDMEF);
+  }
+
+  aItLF.Initialize (theLFImages);
   for (; aItLF.More(); ) {
     const TopoDS_Face& aFIm = *(TopoDS_Face*)&aItLF.Value();
     //
     // valid edges for this split
-    TopTools_MapOfShape aMVE;
+    const TopTools_MapOfShape* pMVE = theDMFMVE.Seek (aFIm);
     // invalid edges for this split
-    TopTools_MapOfShape aMIE;
-    //
-    for (i = 0; i < 2; ++i) {
-      TopTools_MapOfShape& aME = !i ? aMVE : aMIE;
-      const TopTools_ListOfShape* pLE = !i ? theDMFLVE.Seek(aFIm) : theDMFLIE.Seek(aFIm);
-      if (pLE) {
-        TopTools_ListIteratorOfListOfShape aItLE(*pLE);
-        for (; aItLE.More(); aItLE.Next()) {
-          const TopoDS_Shape& aE = aItLE.Value();
-          aME.Add(aE);
-        }
-      }
-    }
+    const TopTools_IndexedMapOfShape* pMIE = theDMFMIE.Seek (aFIm);
     //
     bHasValid = Standard_False;
     bAllValid = Standard_True;
@@ -1927,34 +2253,39 @@ void FindInvalidFaces(TopTools_ListOfShape& theLFImages,
       //
       bValid = theValidEdges.Contains(aEIm);
       bInvalid = theInvEdges.Contains(aEIm);
+      bNeutral = theMENeutral.Contains(aEIm);
       //
-      if (!bValid && !bInvalid) {
+      if (!bValid && !bInvalid && !bNeutral) {
         // edge has not been checked for some reason
         continue;
       }
-      //
+
+      // skip not-boundary edges originated from vertex
+      if ((theEdgesInvalidByVertex.Contains (aEIm) ||
+           theEdgesValidByVertex.Contains (aEIm)) &&
+           aDMEF.FindFromKey (aEIm).Extent() != 1)
+        continue;
+
       ++aNbChecked;
       //
-      bInvalidLoc = aMIE.Contains(aEIm);
-      bHasReallyInvalid = bInvalidLoc && !bValid && !theEdgesInvalidByVertex.Contains(aEIm);
+      bInvalidLoc = pMIE && pMIE->Contains (aEIm);
+      bHasReallyInvalid = bInvalid && bInvalidLoc && !bValid && !theEdgesInvalidByVertex.Contains(aEIm);
       if (bHasReallyInvalid) {
         break;
       }
       //
-      bNeutral = aMEN.Contains(aEIm);
-      bValidLoc = aMVE.Contains(aEIm);
-      //
+      bValidLoc = pMVE && pMVE->Contains(aEIm);
       bInverted = theMEInverted.Contains(aEIm);
-      if (!bInvalid && bTreatInvertedAsInvalid) {
+      if (!bInvalid && !bInvalidLoc && bTreatInvertedAsInvalid) {
         bInvalid = bInverted;
       }
       //
-      if (bValidLoc && (bNeutral || aMEValInverted.Contains(aEIm))) {
+      if (bValidLoc && bNeutral) {
         bHasValid = Standard_True;
       }
       //
       bAllValid &= bValidLoc;
-      bAllInvalid &= bInvalid;
+      bAllInvalid &= (bInvalid || bInvalidLoc);
       bAllInvNeutral &= (bAllInvalid && bNeutral);
       bIsInvalidByInverted &= (bInvalidLoc || bInverted);
     }
@@ -2010,27 +2341,14 @@ void FindInvalidFaces(TopTools_ListOfShape& theLFImages,
   if (aLFPT.IsEmpty() || aMENRem.IsEmpty()) {
     return;
   }
-  //
-  Standard_Integer aNb = aMENRem.Extent();
-  for (i = 1; i <= aNb; ++i) {
-    aMEN.Remove(aMENRem(i));
-  }
-  //
+
   // check the splits once more
   aItLF.Initialize(aLFPT);
   for (; aItLF.More(); aItLF.Next()) {
     const TopoDS_Face& aFIm = *(TopoDS_Face*)&aItLF.Value();
     //
     // valid edges for this split
-    TopTools_MapOfShape aMVE;
-    const TopTools_ListOfShape* pLVE = theDMFLVE.Seek(aFIm);
-    if (pLVE) {
-      TopTools_ListIteratorOfListOfShape aItLE(*pLVE);
-      for (; aItLE.More(); aItLE.Next()) {
-        const TopoDS_Shape& aE = aItLE.Value();
-        aMVE.Add(aE);
-      }
-    }
+    const TopTools_MapOfShape* pMVE = theDMFMVE.Seek(aFIm);
     //
     bHasValid = Standard_False;
     bAllValid = Standard_True;
@@ -2043,14 +2361,14 @@ void FindInvalidFaces(TopTools_ListOfShape& theLFImages,
       //
       bValid = theValidEdges.Contains(aEIm);
       bInvalid = theInvEdges.Contains(aEIm);
-      bNeutral = aMEN.Contains(aEIm);
-      bValidLoc = aMVE.Contains(aEIm);
+      bNeutral = theMENeutral.Contains(aEIm) && !aMENRem.Contains (aEIm);
+      bValidLoc = pMVE && pMVE->Contains(aEIm);
       //
       if (!bInvalid && bTreatInvertedAsInvalid) {
         bInvalid = theMEInverted.Contains(aEIm);
       }
       //
-      if (bValidLoc && (bNeutral || aMEValInverted.Contains(aEIm))) {
+      if (bValidLoc && bNeutral) {
         bHasValid = Standard_True;
       }
       //
@@ -2399,7 +2717,7 @@ Standard_Boolean CheckInverted(const TopoDS_Edge& theEIm,
           const TopoDS_Shape& aEO = aItLOE.Value();
           if (aEO.ShapeType() == TopAbs_EDGE && aMFence.Add(aEO)) {
             TopoDS_Shape aEOin;
-            if (FindShape(aEO, theFOr, aEOin)) {
+            if (FindShape(aEO, theFOr, NULL, aEOin)) {
               AppendToList(aLOE, aEO);
             }
           }
@@ -2793,6 +3111,7 @@ void RemoveInvalidSplitsByInvertedEdges(const TopTools_MapOfShape& theMEInverted
 void RemoveInvalidSplitsFromValid(const TopTools_IndexedDataMapOfShapeListOfShape& theInvFaces,
                                   const TopTools_DataMapOfShapeShape& theArtInvFaces,
                                   const TopTools_MapOfShape& theMEInverted,
+                                  const BRepOffset_DataMapOfShapeMapOfShape& theDMFMVIE,
                                   TopTools_IndexedDataMapOfShapeListOfShape& theFImages)
 {
   // Decide whether to remove the found invalid faces or not.
@@ -2868,22 +3187,49 @@ void RemoveInvalidSplitsFromValid(const TopTools_IndexedDataMapOfShapeListOfShap
     TopTools_IndexedDataMapOfShapeListOfShape aDMEF;
     TopExp::MapShapesAndAncestors(aCB, TopAbs_EDGE, TopAbs_FACE, aDMEF);
     //
+    TopTools_DataMapOfShapeListOfShape aDMFF;
     aExp.Init(aCB, TopAbs_FACE);
     for (; aExp.More(); aExp.Next()) {
       const TopoDS_Shape& aFCB = aExp.Current();
-      //
-      TopExp_Explorer aExpE(aFCB, TopAbs_EDGE);
-      for (; aExpE.More(); aExpE.Next()) {
-        const TopoDS_Shape& aECB = aExpE.Current();
-        if (aDMEF.FindFromKey(aECB).Extent() > 1) {
-          if (!theMEInverted.Contains(aECB)) {
+      const TopoDS_Shape& aF = aDMIFOF.Find (aFCB);
+      TopTools_ListOfShape* pList = aDMFF.ChangeSeek (aF);
+      if (!pList)
+        pList = aDMFF.Bound (aF, TopTools_ListOfShape());
+      pList->Append (aFCB);
+    }
+
+    for (TopTools_DataMapOfShapeListOfShape::Iterator itM (aDMFF); itM.More(); itM.Next())
+    {
+      const TopoDS_Shape& aF = itM.Key();
+      const TopTools_MapOfShape* pValidInverted = theDMFMVIE.Seek (aF);
+
+      // either remove all of these faces or none.
+      const TopTools_ListOfShape& aLFCB = itM.Value();
+      TopTools_ListOfShape::Iterator itL (aLFCB);
+      for (; itL.More(); itL.Next())
+      {
+        const TopoDS_Shape& aFCB = itL.Value();
+        TopExp_Explorer aExpE(aFCB, TopAbs_EDGE);
+        for (; aExpE.More(); aExpE.Next()) {
+          const TopoDS_Shape& aECB = aExpE.Current();
+          if (pValidInverted && pValidInverted->Contains (aECB))
             break;
+          if (aDMEF.FindFromKey(aECB).Extent() > 1)
+          {
+            if (!theMEInverted.Contains(aECB))
+              break;
           }
         }
+        if (!aExpE.More())
+          // if one removed - remove all
+          break;
       }
-      //
-      if (!aExpE.More()) {
-        aMFToRem.Add(aFCB);
+      if (itL.More())
+      {
+        for (itL.Initialize (aLFCB); itL.More(); itL.Next())
+        {
+          aMFToRem.Add (itL.Value());
+        }
       }
     }
   }
@@ -2908,6 +3254,186 @@ void RemoveInvalidSplitsFromValid(const TopTools_IndexedDataMapOfShapeListOfShap
   }
 }
 
+namespace
+{
+//=======================================================================
+//function : buildPairs
+//purpose  : builds pairs of shapes
+//=======================================================================
+static void buildPairs (const TopTools_IndexedMapOfShape& theSMap,
+                        BRepOffset_DataMapOfShapeMapOfShape& theIntPairs)
+{
+  const Standard_Integer aNbS = theSMap.Extent();
+  if (aNbS < 2)
+    return;
+  for (Standard_Integer it1 = 1; it1 <= aNbS; ++it1)
+  {
+    const TopoDS_Shape& aS = theSMap (it1);
+    if (!theIntPairs.IsBound (aS))
+      theIntPairs.Bind (aS, TopTools_MapOfShape());
+  }
+
+  for (Standard_Integer it1 = 1; it1 <= aNbS; ++it1)
+  {
+    const TopoDS_Shape& aS1 = theSMap (it1);
+    TopTools_MapOfShape& aMap1 = theIntPairs (aS1);
+    for (Standard_Integer it2 = it1 + 1; it2 <= aNbS; ++it2)
+    {
+      const TopoDS_Shape& aS2 = theSMap (it2);
+      aMap1.Add (aS2);
+      theIntPairs (aS2).Add (aS1);
+    }
+  }
+}
+
+//=======================================================================
+//function : buildIntersectionPairs
+//purpose  : builds intersection pairs
+//=======================================================================
+static void buildIntersectionPairs (const TopTools_IndexedDataMapOfShapeListOfShape& theFImages,
+                                    const TopTools_IndexedDataMapOfShapeListOfShape& theInvFaces,
+                                    const BOPAlgo_Builder& theBuilder,
+                                    const TopTools_MapOfShape& theMFRemoved,
+                                    const TopTools_DataMapOfShapeShape& theFOrigins,
+                                    NCollection_DataMap<TopoDS_Shape,
+                                                        BRepOffset_DataMapOfShapeMapOfShape,
+                                                        TopTools_ShapeMapHasher>& theIntPairs)
+{
+  TopAbs_ShapeEnum aCType = TopAbs_VERTEX;
+  // Build connection map from vertices to faces
+  TopTools_IndexedDataMapOfShapeListOfShape aDMVF;
+  TopExp::MapShapesAndAncestors (theBuilder.Shape(), aCType, TopAbs_FACE, aDMVF);
+
+  const TopTools_DataMapOfShapeListOfShape& anImages = theBuilder.Images();
+  const TopTools_DataMapOfShapeListOfShape& anOrigins = theBuilder.Origins();
+
+  // Find all faces connected to the not removed faces and build intersection pairs among them.
+  // For removed faces intersect only those connected to each other.
+
+  for (Standard_Integer iF = 1; iF <= theInvFaces.Extent(); ++iF)
+  {
+    const TopoDS_Shape& aFInv = theInvFaces.FindKey (iF);
+
+    TopoDS_Compound aCF, aCFRem;
+    BRep_Builder().MakeCompound (aCF);
+    BRep_Builder().MakeCompound (aCFRem);
+
+    for (Standard_Integer iC = 0; iC < 2; ++iC)
+    {
+      const TopTools_ListOfShape& aLF = !iC ? theInvFaces (iF) : theFImages.FindFromKey (aFInv);
+
+      for (TopTools_ListOfShape::Iterator it (aLF); it.More(); it.Next())
+      {
+        TopTools_ListOfShape aLFIm;
+        TakeModified (it.Value(), anImages, aLFIm);
+
+        for (TopTools_ListOfShape::Iterator itIm (aLFIm); itIm.More(); itIm.Next())
+        {
+          const TopoDS_Shape& aFIm = itIm.Value();
+
+          if (theMFRemoved.Contains (aFIm))
+            BRep_Builder().Add (aCFRem, aFIm);
+          else
+            BRep_Builder().Add (aCF, aFIm);
+        }
+      }
+    }
+
+    TopTools_ListOfShape aLCB;
+    BOPTools_AlgoTools::MakeConnexityBlocks (aCF, TopAbs_EDGE, TopAbs_FACE, aLCB);
+
+    if (aLCB.IsEmpty())
+      continue;
+
+    BRepOffset_DataMapOfShapeMapOfShape* pFInterMap =
+      theIntPairs.Bound (aFInv, BRepOffset_DataMapOfShapeMapOfShape());
+
+    // build pairs for not removed faces
+    for (TopTools_ListOfShape::Iterator itCB (aLCB); itCB.More(); itCB.Next())
+    {
+      const TopoDS_Shape& aCB = itCB.Value();
+
+      TopTools_IndexedMapOfShape aMFInter;
+      for (TopExp_Explorer exp (aCB, aCType); exp.More(); exp.Next())
+      {
+        const TopoDS_Shape& aCS = exp.Current();
+        const TopTools_ListOfShape* pLFV = aDMVF.Seek (aCS);
+        if (!pLFV)
+          continue;
+
+        for (TopTools_ListOfShape::Iterator itFV (*pLFV); itFV.More(); itFV.Next())
+        {
+          const TopoDS_Shape& aFConnected = itFV.Value();
+
+          TopTools_ListOfShape aLFOr;
+          TakeModified (aFConnected, anOrigins, aLFOr);
+          for (TopTools_ListOfShape::Iterator itOr (aLFOr); itOr.More(); itOr.Next())
+          {
+            const TopoDS_Shape* pFOr = theFOrigins.Seek (itOr.Value());
+            if (pFOr)
+              aMFInter.Add (*pFOr);
+          }
+        }
+      }
+
+      // build intersection pairs
+      buildPairs (aMFInter, *pFInterMap);
+    }
+
+    aLCB.Clear();
+    BOPTools_AlgoTools::MakeConnexityBlocks (aCFRem, TopAbs_EDGE, TopAbs_FACE, aLCB);
+
+    if (aLCB.IsEmpty())
+      continue;
+
+    for (TopTools_ListOfShape::Iterator itCB (aLCB); itCB.More(); itCB.Next())
+    {
+      const TopoDS_Shape& aCB = itCB.Value();
+
+      TopTools_IndexedDataMapOfShapeListOfShape aDMEF;
+      for (TopExp_Explorer exp (aCB, aCType); exp.More(); exp.Next())
+      {
+        const TopoDS_Shape& aCS = exp.Current();
+        const TopTools_ListOfShape* pLFV = aDMVF.Seek (aCS);
+        if (!pLFV)
+          continue;
+
+        for (TopTools_ListOfShape::Iterator itFV (*pLFV); itFV.More(); itFV.Next())
+        {
+          const TopoDS_Shape& aFConnected = itFV.Value();
+          TopExp::MapShapesAndAncestors (aFConnected, TopAbs_EDGE, TopAbs_FACE, aDMEF);
+        }
+      }
+
+      for (Standard_Integer iE = 1; iE <= aDMEF.Extent(); ++iE)
+      {
+        const TopTools_ListOfShape& aLFConnected = aDMEF (iE);
+        if (aLFConnected.Extent() < 2)
+          continue;
+
+        TopTools_IndexedMapOfShape aMFInter;
+        for (TopTools_ListOfShape::Iterator itLF (aLFConnected); itLF.More(); itLF.Next())
+        {
+          const TopoDS_Shape& aFConnected = itLF.Value();
+
+          TopTools_ListOfShape aLFOr;
+          TakeModified (aFConnected, anOrigins, aLFOr);
+          for (TopTools_ListOfShape::Iterator itOr (aLFOr); itOr.More(); itOr.Next())
+          {
+            const TopoDS_Shape* pFOr = theFOrigins.Seek (itOr.Value());
+            if (pFOr)
+              aMFInter.Add (*pFOr);
+          }
+        }
+
+        buildPairs (aMFInter, *pFInterMap);
+      }
+    }
+  }
+}
+
+}
+
 //=======================================================================
 //function : RemoveInsideFaces
 //purpose  : Looking for the inside faces that can be safely removed
@@ -2921,7 +3447,7 @@ void RemoveInsideFaces(TopTools_IndexedDataMapOfShapeListOfShape& theFImages,
                        const TopTools_IndexedMapOfShape& theMFToCheckInt,
                        const TopTools_IndexedMapOfShape& theMFInvInHole,
                        const TopoDS_Shape& theFHoles,
-                       TopTools_DataMapOfShapeListOfShape& theSSInterfs,
+                       BRepOffset_MakeOffset_InterResults& theIntRes,
                        TopTools_IndexedMapOfShape& theMERemoved,
                        TopTools_IndexedMapOfShape& theMEInside,
                        TopoDS_Shape& theSolids)
@@ -2983,7 +3509,7 @@ void RemoveInsideFaces(TopTools_IndexedDataMapOfShapeListOfShape& theFImages,
   //
   // get shapes connection for using in the rebuilding process
   // for the cases in which some of the intersection left undetected
-  ShapesConnections(theInvFaces, theInvEdges, aDMFImF, aMV, theSSInterfs);
+  ShapesConnections(theInvFaces, theInvEdges, aDMFImF, aMV, theIntRes.SSInterfs);
   //
   // find faces to remove
   const TopoDS_Shape& aSols = aMV.Shape();
@@ -3105,7 +3631,7 @@ void RemoveInsideFaces(TopTools_IndexedDataMapOfShapeListOfShape& theFImages,
       const TopoDS_Shape& aFSol = pLSols->First();
       //
       TopoDS_Shape aFx;
-      if (!FindShape(aFInvIm, aFSol, aFx)) {
+      if (!FindShape(aFInvIm, aFSol, NULL, aFx)) {
         continue;
       }
       //
@@ -3184,6 +3710,11 @@ void RemoveInsideFaces(TopTools_IndexedDataMapOfShapeListOfShape& theFImages,
       theMEInside.Add(aE);
     }
   }
+
+  // build all possible intersection pairs basing on the intersection results
+  // taking into account removed faces.
+  if (aMFToRem.Extent())
+    buildIntersectionPairs (theFImages, theInvFaces, aMV, aMFToRem, aDMFImF, theIntRes.InterPairs);
 }
 
 //=======================================================================
@@ -3709,8 +4240,9 @@ void FilterEdgesImages(const TopoDS_Shape& theS,
 //function : FilterInvalidFaces
 //purpose  : Filtering of the invalid faces
 //=======================================================================
-void FilterInvalidFaces(const TopTools_IndexedDataMapOfShapeListOfShape& theFImages,
+void FilterInvalidFaces(TopTools_IndexedDataMapOfShapeListOfShape& theFImages,
                         const TopTools_IndexedDataMapOfShapeListOfShape& theDMEF,
+                        const TopTools_IndexedMapOfShape& theInvEdges,
                         const TopTools_IndexedMapOfShape& theMERemoved,
                         TopTools_IndexedDataMapOfShapeListOfShape& theInvFaces,
                         TopTools_DataMapOfShapeShape& theArtInvFaces)
@@ -3721,10 +4253,12 @@ void FilterInvalidFaces(const TopTools_IndexedDataMapOfShapeListOfShape& theFIma
   // do not remove invalid faces if it creates free edges
   //
   TopTools_IndexedDataMapOfShapeListOfShape aReallyInvFaces;
+  // Edge-Face connexity map of all splits, both invalid and valid
+  TopTools_IndexedDataMapOfShapeListOfShape aDMEFAll;
   TopTools_ListIteratorOfListOfShape aItLF;
   //
-  Standard_Integer i, aNb = theInvFaces.Extent();
-  for (i = 1; i <= aNb; ++i) {
+  const Standard_Integer aNb = theInvFaces.Extent();
+  for (Standard_Integer i = 1; i <= aNb; ++i) {
     const TopoDS_Shape& aF = theInvFaces.FindKey(i);
     const TopTools_ListOfShape& aLFInv = theInvFaces(i);
     //
@@ -3742,7 +4276,7 @@ void FilterInvalidFaces(const TopTools_IndexedDataMapOfShapeListOfShape& theFIma
       continue;
     }
     //
-    const TopTools_ListOfShape& aLFIm = theFImages.FindFromKey(aF);
+    TopTools_ListOfShape& aLFIm = theFImages.ChangeFromKey(aF);
     Standard_Boolean bInvalid = aLFIm.IsEmpty();
     //
     if (!bInvalid) {
@@ -3794,6 +4328,55 @@ void FilterInvalidFaces(const TopTools_IndexedDataMapOfShapeListOfShape& theFIma
         bInvalid = aItLF.More();
       }
     }
+    if (bInvalid)
+    {
+      if (aDMEFAll.IsEmpty())
+      {
+        aDMEFAll = theDMEF;
+        for (Standard_Integer iF = 1; iF <= aNb; ++iF)
+          for (TopTools_ListOfShape::Iterator itLFInv (theInvFaces(iF)); itLFInv.More(); itLFInv.Next())
+            TopExp::MapShapesAndAncestors (itLFInv.Value(), TopAbs_EDGE, TopAbs_FACE, aDMEFAll);
+      }
+
+      TopTools_MapOfShape aLocalSplits;
+      for (Standard_Integer j = 0; j < 2; ++j)
+        for (aItLF.Initialize((!j ? aLFIm : aLFInv)); aItLF.More(); aItLF.Next())
+          aLocalSplits.Add (aItLF.Value());
+
+      // Check if all invalid edges are located inside the split and do not touch
+      // any other faces both invalid and valid
+      aItLF.Initialize(aLFInv);
+      for (; aItLF.More(); aItLF.Next())
+      {
+        const TopoDS_Shape& aFIm = aItLF.Value();
+        TopExp_Explorer aExp(aFIm, TopAbs_EDGE);
+        for (; aExp.More(); aExp.Next())
+        {
+          const TopoDS_Shape& aE = aExp.Current();
+          if (theInvEdges.Contains (aE) && !theMERemoved.Contains (aE))
+          {
+            const TopTools_ListOfShape& aLF = aDMEFAll.FindFromKey (aE);
+            TopTools_ListOfShape::Iterator itLF (aLF);
+            for (; itLF.More(); itLF.Next())
+            {
+              if (!aLocalSplits.Contains (itLF.Value()))
+                break;
+            }
+            if (itLF.More())
+              break;
+          }
+        }
+        if (aExp.More())
+          break;
+      }
+      bInvalid = aItLF.More();
+      if (!bInvalid)
+      {
+        aItLF.Initialize(aLFInv);
+        for (; aItLF.More(); aItLF.Next())
+          AppendToList (aLFIm, aItLF.Value());
+      }
+    }
     //
     if (bInvalid) {
       aReallyInvFaces.Add(aF, aLFInv);
@@ -3804,12 +4387,62 @@ void FilterInvalidFaces(const TopTools_IndexedDataMapOfShapeListOfShape& theFIma
 }
 
 //=======================================================================
+//function : CheckEdgesCreatedByVertex
+//purpose  : Checks additionally the unchecked edges originated from vertices
+//=======================================================================
+void CheckEdgesCreatedByVertex (const TopTools_IndexedDataMapOfShapeListOfShape& theInvFaces,
+                                const TopTools_DataMapOfShapeShape& theArtInvFaces,
+                                const TopTools_DataMapOfShapeListOfShape& theEdgesOrigins,
+                                const TopTools_IndexedMapOfShape& theValidEdges,
+                                TopTools_IndexedMapOfShape& theInvEdges)
+{
+  // Mark the unchecked edges contained in invalid faces as invalid
+  const Standard_Integer aNbF = theInvFaces.Extent();
+  for (Standard_Integer i = 1; i <= aNbF; ++i)
+  {
+    const TopoDS_Shape& aF = theInvFaces.FindKey (i);
+    if (theArtInvFaces.IsBound (aF))
+      continue;
+
+    const TopTools_ListOfShape& aLFIm = theInvFaces (i);
+    for (TopTools_ListOfShape::Iterator it (aLFIm); it.More(); it.Next())
+    {
+      const TopoDS_Shape& aFIm = it.Value();
+      for (TopExp_Explorer expE (aFIm, TopAbs_EDGE); expE.More(); expE.Next())
+      {
+        const TopoDS_Shape& aE = expE.Current();
+        if (theInvEdges.Contains (aE)
+         || theValidEdges.Contains (aE))
+        {
+          continue;
+        }
+
+        // check if this edges is created by vertex
+        const TopTools_ListOfShape* pLEOr = theEdgesOrigins.Seek (aE);
+        if (!pLEOr)
+          continue;
+        TopTools_ListOfShape::Iterator itLEO (*pLEOr);
+        for (; itLEO.More(); itLEO.Next())
+        {
+          if (itLEO.Value().ShapeType() != TopAbs_VERTEX)
+            break;
+        }
+        if (!itLEO.More())
+        {
+          theInvEdges.Add (aE);
+        }
+      }
+    }
+  }
+}
+
+//=======================================================================
 //function : FilterInvalidEdges
 //purpose  : Filtering the invalid edges according to currently invalid faces
 //=======================================================================
 void FilterInvalidEdges(const TopTools_IndexedDataMapOfShapeListOfShape& theInvFaces,
                         const TopTools_DataMapOfShapeShape& theArtInvFaces,
-                        const TopTools_DataMapOfShapeListOfShape& theDMFLIE,
+                        const BRepOffset_DataMapOfShapeIndexedMapOfShape& theDMFMIE,
                         const TopTools_IndexedMapOfShape& theMERemoved,
                         TopTools_IndexedMapOfShape& theInvEdges)
 {
@@ -3864,10 +4497,11 @@ void FilterInvalidEdges(const TopTools_IndexedDataMapOfShapeListOfShape& theInvF
   for (i = 1; i <= aNb; ++i) {
     const TopoDS_Shape& aF = theInvFaces.FindKey(i);
     if (theArtInvFaces.IsBound(aF)) {
-      const TopTools_ListOfShape& aLEInv = theDMFLIE.Find(aF);
-      aItLF.Initialize(aLEInv);
-      for (; aItLF.More(); aItLF.Next()) {
-        const TopoDS_Shape& aE = aItLF.Value();
+      const TopTools_IndexedMapOfShape& aMIE = theDMFMIE.Find(aF);
+      const Standard_Integer aNbIE = aMIE.Extent();
+      for (Standard_Integer iE = 1; iE <= aNbIE; ++iE)
+      {
+        const TopoDS_Shape& aE = aMIE (iE);
         if (aMEInv.Contains(aE) && !aMEInvToAvoid.Contains(aE)) {
           aReallyInvEdges.Add(aE);
         }
@@ -4026,7 +4660,8 @@ void FindFacesToRebuild(const TopTools_IndexedDataMapOfShapeListOfShape&  theLFI
 void RebuildFaces(const TopTools_IndexedDataMapOfShapeListOfShape& theFToRebuild,
                   const TopTools_MapOfShape& theFSelfRebAvoid,
                   const TopoDS_Shape& theSolids,
-                  const TopTools_DataMapOfShapeListOfShape& theSSInterfs,
+                  const BRepOffset_MakeOffset_InterResults& theIntRes,
+                  const BRepOffset_Analyse* theAnalyse,
                   TopTools_IndexedDataMapOfShapeListOfShape& theFImages,
                   TopTools_DataMapOfShapeListOfShape& theDMFNewHoles,
                   TopTools_DataMapOfShapeListOfShape& theEdgesOrigins,
@@ -4048,12 +4683,12 @@ void RebuildFaces(const TopTools_IndexedDataMapOfShapeListOfShape& theFToRebuild
   TopTools_MapOfShape aModifiedEdges;
   //
   // 1. Intersect faces
-  IntersectFaces(theFToRebuild, theFSelfRebAvoid, theSolids, theSSInterfs, theFImages, theEdgesOrigins, theOEImages, 
+  IntersectFaces(theFToRebuild, theFSelfRebAvoid, theSolids, theIntRes, theFImages, theEdgesOrigins, theOEImages, 
                  theOEOrigins, theInvEdges, theValidEdges, theInvertedEdges, theEdgesToAvoid,
                  theInvFaces, theArtInvFaces, theVertsToAvoid, theETrimEInf, aModifiedEdges, theAsDes);
   //
   // 2. Repeat steps to build the correct faces
-  BuildSplitsOfInvFaces(theFToRebuild, aModifiedEdges, theFImages, theDMFNewHoles, theEdgesOrigins,
+  BuildSplitsOfInvFaces(theFToRebuild, aModifiedEdges, theAnalyse, theFImages, theDMFNewHoles, theEdgesOrigins,
                         theFacesOrigins, theOEImages, theOEOrigins, theLastInvEdges,
                         theEdgesToAvoid, theVertsToAvoid, theAlreadyInvFaces, theValidEdges, 
                         theETrimEInf, theAsDes);
@@ -4067,7 +4702,7 @@ void RebuildFaces(const TopTools_IndexedDataMapOfShapeListOfShape& theFToRebuild
 void IntersectFaces(const TopTools_IndexedDataMapOfShapeListOfShape& theFToRebuild,
                     const TopTools_MapOfShape& theFSelfRebAvoid,
                     const TopoDS_Shape& theSolids,
-                    const TopTools_DataMapOfShapeListOfShape& theSSInterfs,
+                    const BRepOffset_MakeOffset_InterResults& theIntRes,
                     TopTools_IndexedDataMapOfShapeListOfShape& theFImages,
                     TopTools_DataMapOfShapeListOfShape& theEdgesOrigins,
                     TopTools_DataMapOfShapeListOfShape& theOEImages,
@@ -4378,12 +5013,13 @@ void IntersectFaces(const TopTools_IndexedDataMapOfShapeListOfShape& theFToRebui
         TopTools_IndexedMapOfShape aMFAvoid;
         //
         FindFacesForIntersection(aFInv, aME, theFImages, aDMSF, aMVInvAll,
-          theArtInvFaces, bArtificial, theSSInterfs, aMFAvoid, aMFInt, aMFIntExt, aLFInt);
+          theArtInvFaces, bArtificial, theIntRes.SSInterfs, aMFAvoid, aMFInt, aMFIntExt, aLFInt);
         if (aMFInt.Extent() < 3) {
           // nothing to intersect
           continue;
         }
         //
+        const BRepOffset_DataMapOfShapeMapOfShape* pMFInter = theIntRes.InterPairs.Seek (aFInv);
         // intersect the faces, but do not intersect the invalid ones
         // among each other (except for the artificially invalid faces)
         TopTools_IndexedMapOfShape aMEToInt;
@@ -4400,12 +5036,19 @@ void IntersectFaces(const TopTools_IndexedDataMapOfShapeListOfShape& theFToRebui
           //
           TopTools_ListOfShape& aLFDone = aMDone.ChangeFind(aFi);
           //
+          const TopTools_MapOfShape* pInterFi = !pMFInter ? 0 : pMFInter->Seek (aFi);
+          if (pMFInter && !pInterFi)
+            continue;
+
           for (j = i + 1; j <= aNb; ++j) {
             const TopoDS_Face& aFj = TopoDS::Face(aMFInt(j));
             if (bSelfRebAvoid && aFj.IsSame(aFInv)) {
               continue;
             }
             //
+            if (pInterFi && !pInterFi->Contains (aFj))
+              continue;
+
             const TopTools_ListOfShape& aLFImj = theFImages.FindFromKey(aFj);
             //
             TopTools_ListOfShape& aLFEj = aFLE.ChangeFromKey(aFj);
@@ -5035,7 +5678,9 @@ void IntersectFaces(const TopoDS_Shape& theFInv,
   TopAbs_State aSide = TopAbs_OUT;
   TopTools_ListOfShape aLInt1, aLInt2;
   TopoDS_Edge aNullEdge;
-  BRepOffset_Tool::Inter3D(TopoDS::Face(theFi), TopoDS::Face(theFj), aLInt1, aLInt2, aSide, aNullEdge);
+  TopoDS_Face aNullFace;
+  BRepOffset_Tool::Inter3D(TopoDS::Face(theFi), TopoDS::Face(theFj), aLInt1, aLInt2, aSide,
+                           aNullEdge, aNullFace, aNullFace);
   //
   if (aLInt1.IsEmpty()) {
     return;
@@ -7118,6 +7763,7 @@ Standard_Integer NbPoints(const TopoDS_Edge& theEdge)
 //=======================================================================
 Standard_Boolean FindShape(const TopoDS_Shape& theSWhat,
                            const TopoDS_Shape& theSWhere,
+                           const BRepOffset_Analyse* theAnalyse,
                            TopoDS_Shape& theRes)
 {
   Standard_Boolean bFound = Standard_False;
@@ -7131,6 +7777,25 @@ Standard_Boolean FindShape(const TopoDS_Shape& theSWhat,
       break;
     }
   }
+
+  if (!bFound && theAnalyse)
+  {
+    const TopTools_ListOfShape *pLD = theAnalyse->Descendants (theSWhere);
+    if (pLD)
+    {
+      for (TopTools_ListOfShape::Iterator it (*pLD); it.More(); it.Next())
+      {
+        const TopoDS_Shape& aS = it.Value();
+        if (aS.IsSame (theSWhat))
+        {
+          theRes = aS;
+          bFound = Standard_True;
+          break;
+        }
+      }
+    }
+  }
+
   return bFound;
 }
 

@@ -60,8 +60,17 @@ static void GetConeApexParam(const gp_Cone& C, Standard_Real& U, Standard_Real& 
 }
 
 
-Adaptor3d_TopolTool::Adaptor3d_TopolTool () : myNbSamplesU(-1),nbRestr(0),idRestr(0)
-                                              
+Adaptor3d_TopolTool::Adaptor3d_TopolTool ()
+: myNbSamplesU(-1),
+  myNbSamplesV(-1),
+  nbRestr(0),
+  idRestr(0),
+  Uinf(0.0),
+  Usup(0.0),
+  Vinf(0.0),
+  Vsup(0.0),
+  nbVtx(0),
+  idVtx(0)
 {
 }
 
@@ -540,7 +549,7 @@ Standard_Boolean  Adaptor3d_TopolTool::IsThePointOn(const gp_Pnt2d& P,
     if (surumin || survmin || surumax || survmax) {
       return(Standard_True);
     }
-    return(Standard_False);;
+    return Standard_False;
   }
 }
 
@@ -654,7 +663,10 @@ static void Analyse(const TColgp_Array2OfPnt& array2,
 }  
 
 
-void Adaptor3d_TopolTool::ComputeSamplePoints() { 
+void Adaptor3d_TopolTool::ComputeSamplePoints() 
+{ 
+  const Standard_Integer aMaxNbSample = 50;
+
   Standard_Real uinf,usup,vinf,vsup;
   uinf = myS->FirstUParameter();  usup = myS->LastUParameter();
   vinf = myS->FirstVParameter();  vsup = myS->LastVParameter();
@@ -692,30 +704,48 @@ void Adaptor3d_TopolTool::ComputeSamplePoints() {
   //-- 
   
   if(nbsu<6) nbsu=6;
-  if(nbsv<6) nbsv=6;
-  
-  myNbSamplesU = nbsu;
-  myNbSamplesV = nbsv;
+  if(nbsv<6) nbsv=6; 
 
-  if(nbsu>8 || nbsv>8) {
-    if(typS == GeomAbs_BSplineSurface) { 
+  if (typS == GeomAbs_BSplineSurface) {
+    if (nbsu > 8 || nbsv>8) {
       const Handle(Geom_BSplineSurface)& Bspl = myS->BSpline();
       Standard_Integer nbup = Bspl->NbUPoles();
       Standard_Integer nbvp = Bspl->NbVPoles();
-      TColgp_Array2OfPnt array2(1,nbup,1,nbvp);
+      TColgp_Array2OfPnt array2(1, nbup, 1, nbvp);
       Bspl->Poles(array2);
-      Analyse(array2,nbup,nbvp,myNbSamplesU,myNbSamplesV);
+      Analyse(array2, nbup, nbvp, nbsu, nbsv);
     }
-    else if(typS == GeomAbs_BezierSurface) { 
+    // Check anisotropy
+    Standard_Real anULen = (usup - uinf) / myS->UResolution(1.);
+    Standard_Real anVLen = (vsup - vinf) / myS->VResolution(1.);
+    Standard_Real aRatio = anULen / anVLen;
+    if (aRatio >= 10.)
+    {
+      nbsu *= 2;
+      nbsu = Min(nbsu, aMaxNbSample);
+    }
+    else if (aRatio <= 0.1)
+    {
+      nbsv *= 2;
+      nbsv = Min(nbsv, aMaxNbSample);
+    }
+  }
+  else if (typS == GeomAbs_BezierSurface) {
+    if (nbsu > 8 || nbsv > 8) {
       const Handle(Geom_BezierSurface)& Bez = myS->Bezier();
       Standard_Integer nbup = Bez->NbUPoles();
       Standard_Integer nbvp = Bez->NbVPoles();
-      TColgp_Array2OfPnt array2(1,nbup,1,nbvp);
+      TColgp_Array2OfPnt array2(1, nbup, 1, nbvp);
       Bez->Poles(array2);
-      Analyse(array2,nbup,nbvp,myNbSamplesU,myNbSamplesV);
+      Analyse(array2, nbup, nbvp, nbsu, nbsv);
     }
   }
+
+  myNbSamplesU = nbsu;
+  myNbSamplesV = nbsv;
+
 }
+
 
 Standard_Integer Adaptor3d_TopolTool::NbSamplesU()
 { 
@@ -933,6 +963,7 @@ void Adaptor3d_TopolTool::BSplSamplePnts(const Standard_Real theDefl,
 					 const Standard_Integer theNUmin,
 					 const Standard_Integer theNVmin)
 { 
+  const Standard_Integer aMaxPnts = 1001;
   const Handle(Geom_BSplineSurface)& aBS = myS->BSpline();
   Standard_Real uinf,usup,vinf,vsup;
   uinf = myS->FirstUParameter();  usup = myS->LastUParameter();
@@ -999,9 +1030,18 @@ void Adaptor3d_TopolTool::BSplSamplePnts(const Standard_Real theDefl,
     nbsu = theNUmin;
     bUuniform = Standard_True;
   }
-
+  else if (nbsu > aMaxPnts)
+  {
+    nbsu = aMaxPnts;
+    bUuniform = Standard_True;
+  }
   if(nbsv < theNVmin) {
     nbsv = theNVmin;
+    bVuniform = Standard_True;
+  }
+  else if (nbsv > aMaxPnts)
+  {
+    nbsv = aMaxPnts;
     bVuniform = Standard_True;
   }
 

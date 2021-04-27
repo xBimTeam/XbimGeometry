@@ -135,8 +135,12 @@ private:
   {
   public:
     BRepLib_BndBoxVertexSelector(const TopTools_IndexedMapOfShape& theMapOfShape)
-      : BRepLib_BndBoxVertexSelector::Selector(), myMapOfShape (theMapOfShape)
-    {}
+    : BRepLib_BndBoxVertexSelector::Selector(),
+      myMapOfShape (theMapOfShape),
+      myTolP(0.0),
+      myVInd(0)
+    {
+    }
 
     Standard_Boolean Reject (const Bnd_Box& theBox) const
     {
@@ -165,7 +169,7 @@ private:
 
     const TopTools_IndexedMapOfShape& myMapOfShape; //vertices
     gp_Pnt myP;
-    Standard_Real mySTol;
+    Standard_Real myTolP;
     Standard_Integer myVInd;
     Bnd_Box myVBox;
     NCollection_List<Standard_Integer> myResultInd; 

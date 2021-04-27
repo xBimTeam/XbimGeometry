@@ -14,6 +14,7 @@
 // commercial license or contractual agreement.
 
 #include <BRepMesh_ModelPreProcessor.hxx>
+#include <BRepMesh_Deflection.hxx>
 #include <BRepMesh_ShapeTool.hxx>
 #include <BRep_Tool.hxx>
 #include <IMeshData_Model.hxx>
@@ -23,6 +24,8 @@
 #include <OSD_Parallel.hxx>
 #include <BRepMesh_ConeRangeSplitter.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(BRepMesh_ModelPreProcessor, IMeshTools_ModelAlgo)
+
 namespace
 {
   //! Checks consistency of triangulation stored in topological face.
@@ -30,8 +33,10 @@ namespace
   {
   public:
     //! Constructor
-    TriangulationConsistency(const Handle(IMeshData_Model)& theModel)
+    TriangulationConsistency(const Handle(IMeshData_Model)& theModel,
+                             const Standard_Boolean theAllowQualityDecrease)
       : myModel (theModel)
+      , myAllowQualityDecrease (theAllowQualityDecrease)
     {
     }
 
@@ -51,7 +56,9 @@ namespace
       if (!aTriangulation.IsNull())
       {
         Standard_Boolean isTriangulationConsistent = 
-          aTriangulation->Deflection() < 1.1 * aDFace->GetDeflection();
+          BRepMesh_Deflection::IsConsistent (aTriangulation->Deflection(),
+                                             aDFace->GetDeflection(),
+                                             myAllowQualityDecrease);
 
         if (isTriangulationConsistent)
         {
@@ -88,6 +95,7 @@ namespace
   private:
 
     Handle(IMeshData_Model) myModel;
+    Standard_Boolean myAllowQualityDecrease; //!< Flag used for consistency check
   };
 
   //! Adds additional points to seam edges on specific surfaces.
@@ -244,15 +252,19 @@ BRepMesh_ModelPreProcessor::~BRepMesh_ModelPreProcessor()
 //=======================================================================
 Standard_Boolean BRepMesh_ModelPreProcessor::performInternal(
   const Handle(IMeshData_Model)& theModel,
-  const IMeshTools_Parameters&   theParameters)
+  const IMeshTools_Parameters&   theParameters,
+  const Message_ProgressRange&   theRange)
 {
+  (void )theRange;
   if (theModel.IsNull())
   {
     return Standard_False;
   }
 
-  OSD_Parallel::For(0, theModel->FacesNb(), SeamEdgeAmplifier(theModel, theParameters), !theParameters.InParallel);
-  OSD_Parallel::For(0, theModel->FacesNb(), TriangulationConsistency(theModel),         !theParameters.InParallel);
+  const Standard_Integer aFacesNb    = theModel->FacesNb();
+  const Standard_Boolean isOneThread = !theParameters.InParallel;
+  OSD_Parallel::For(0, aFacesNb, SeamEdgeAmplifier        (theModel, theParameters),                      isOneThread);
+  OSD_Parallel::For(0, aFacesNb, TriangulationConsistency (theModel, theParameters.AllowQualityDecrease), isOneThread);
 
   // Clean edges and faces from outdated polygons.
   Handle(NCollection_IncAllocator) aTmpAlloc(new NCollection_IncAllocator(IMeshData::MEMORY_BLOCK_SIZE_HUGE));

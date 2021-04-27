@@ -17,23 +17,12 @@
 #ifndef _Geom_Surface_HeaderFile
 #define _Geom_Surface_HeaderFile
 
-#include <Standard.hxx>
-#include <Standard_Type.hxx>
-
 #include <Geom_Curve.hxx>
-#include <Standard_Real.hxx>
-#include <Standard_Boolean.hxx>
-#include <GeomAbs_Shape.hxx>
-#include <Standard_Integer.hxx>
-class Standard_RangeError;
-class Standard_NoSuchObject;
-class Geom_UndefinedDerivative;
-class Geom_UndefinedValue;
+
 class gp_Trsf;
 class gp_GTrsf2d;
 class gp_Pnt;
 class gp_Vec;
-
 
 class Geom_Surface;
 DEFINE_STANDARD_HANDLE(Geom_Surface, Geom_Geometry)
@@ -79,7 +68,7 @@ public:
   //! Reverses the U direction of parametrization of <me>.
   //! The bounds of the surface are not modified.
   //! A copy of <me> is returned.
-  Standard_EXPORT Standard_NODISCARD Handle(Geom_Surface) UReversed() const;
+  Standard_NODISCARD Standard_EXPORT Handle(Geom_Surface) UReversed() const;
   
   //! Returns the  parameter on the  Ureversed surface for
   //! the point of parameter U on <me>.
@@ -100,7 +89,7 @@ public:
   //! Reverses the V direction of parametrization of <me>.
   //! The bounds of the surface are not modified.
   //! A copy of <me> is returned.
-  Standard_EXPORT Standard_NODISCARD Handle(Geom_Surface) VReversed() const;
+  Standard_NODISCARD Standard_EXPORT Handle(Geom_Surface) VReversed() const;
   
   //! Returns the  parameter on the  Vreversed surface for
   //! the point of parameter V on <me>.
@@ -275,6 +264,9 @@ public:
   //! Raised only for an "OffsetSurface" if it is not possible to
   //! compute the current point.
   Standard_EXPORT gp_Pnt Value (const Standard_Real U, const Standard_Real V) const;
+
+  //! Dumps the content of me into the stream
+  Standard_EXPORT virtual void DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth = -1) const Standard_OVERRIDE;
 
 
 

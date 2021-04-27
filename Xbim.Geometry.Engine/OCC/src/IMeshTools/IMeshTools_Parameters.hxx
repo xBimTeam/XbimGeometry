@@ -16,6 +16,7 @@
 #ifndef _IMeshTools_Parameters_HeaderFile
 #define _IMeshTools_Parameters_HeaderFile
 
+#include <IMeshTools_MeshAlgoType.hxx>
 #include <Precision.hxx>
 
 //! Structure storing meshing parameters
@@ -24,6 +25,7 @@ struct IMeshTools_Parameters {
   //! Default constructor
   IMeshTools_Parameters ()
     :
+    MeshAlgo (IMeshTools_MeshAlgoType_DEFAULT),
     Angle(0.5),
     Deflection(0.001),
     AngleInterior(-1.0),
@@ -34,7 +36,9 @@ struct IMeshTools_Parameters {
     InternalVerticesMode (Standard_True),
     ControlSurfaceDeflection (Standard_True),
     CleanModel (Standard_True),
-    AdjustMinSize (Standard_False)
+    AdjustMinSize (Standard_False),
+    ForceFaceDeflection (Standard_False),
+    AllowQualityDecrease (Standard_False)
   {
   }
 
@@ -44,6 +48,9 @@ struct IMeshTools_Parameters {
   {
     return 0.1;
   }
+
+  //! 2D Delaunay triangulation algorithm factory to use
+  IMeshTools_MeshAlgoType                          MeshAlgo;
 
   //! Angular deflection used to tessellate the boundary edges
   Standard_Real                                    Angle;
@@ -57,7 +64,8 @@ struct IMeshTools_Parameters {
   //! Linear deflection used to tessellate the face interior
   Standard_Real                                    DeflectionInterior;
   
-  //! Minimal allowed size of mesh element
+  //! Minimum size parameter limiting size of triangle's edges to prevent 
+  //! sinking into amplification in case of distorted curves and surfaces.
   Standard_Real                                    MinSize;
 
   //! Switches on/off multi-thread computation
@@ -83,6 +91,14 @@ struct IMeshTools_Parameters {
   //! Enables/disables local adjustment of min size depending on edge size.
   //! Disabled by default.
   Standard_Boolean                                 AdjustMinSize;
+
+  //! Enables/disables usage of shape tolerances for computing face deflection.
+  //! Disabled by default.
+  Standard_Boolean                                 ForceFaceDeflection;
+
+  //! Allows/forbids the decrease of the quality of the generated mesh
+  //! over the existing one.
+  Standard_Boolean                                 AllowQualityDecrease;
 };
 
 #endif

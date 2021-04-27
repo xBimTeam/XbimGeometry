@@ -89,16 +89,36 @@ class BOPAlgo_EdgeEdge :
   Handle(BOPDS_PaveBlock)& PaveBlock2() {
     return myPB2;
   }
-  // 
+  //
+  void SetBoxes (const Bnd_Box& theBox1,
+                 const Bnd_Box& theBox2)
+  {
+    myBox1 = theBox1;
+    myBox2 = theBox2;
+  }
+  //
   void SetFuzzyValue(const Standard_Real theFuzz) {
     IntTools_EdgeEdge::SetFuzzyValue(theFuzz);
   }
   //
   virtual void Perform() {
     BOPAlgo_Algo::UserBreak();
+    TopoDS_Edge anE1 = myEdge1, anE2 = myEdge2;
+    Standard_Boolean hasTrsf = false;
     try
     {
       OCC_CATCH_SIGNALS
+
+      gp_Trsf aTrsf;
+      if (BOPAlgo_Tools::TrsfToPoint (myBox1, myBox2, aTrsf))
+      {
+        // Shapes are located far from origin, move the shapes to the origin,
+        // to increase the accuracy of intersection.
+        TopLoc_Location aLoc (aTrsf);
+        myEdge1.Move (aLoc);
+        myEdge2.Move (aLoc);
+        hasTrsf = Standard_True;
+      }
 
       IntTools_EdgeEdge::Perform();
     }
@@ -106,11 +126,26 @@ class BOPAlgo_EdgeEdge :
     {
       AddError(new BOPAlgo_AlertIntersectionFailed);
     }
+
+    myEdge1 = anE1;
+    myEdge2 = anE2;
+    if (hasTrsf)
+    {
+      for (Standard_Integer i = 1; i <= myCommonParts.Length(); ++i)
+      {
+        IntTools_CommonPrt& aCPart = myCommonParts (i);
+        aCPart.SetEdge1 (myEdge1);
+        aCPart.SetEdge2 (myEdge2);
+      }
+    }
+
   }
   //
  protected:
   Handle(BOPDS_PaveBlock) myPB1;
   Handle(BOPDS_PaveBlock) myPB2;
+  Bnd_Box myBox1;
+  Bnd_Box myBox2;
 };
 //
 //=======================================================================
@@ -216,8 +251,12 @@ void BOPAlgo_PaveFiller::PerformEE()
         //
         anEdgeEdge.SetEdge1(aE1, aT11, aT12);
         anEdgeEdge.SetEdge2(aE2, aT21, aT22);
+        anEdgeEdge.SetBoxes (aBB1, aBB2);
         anEdgeEdge.SetFuzzyValue(myFuzzyValue);
-        anEdgeEdge.SetProgressIndicator(myProgressIndicator);
+        if (myProgressScope != NULL)
+        {
+          anEdgeEdge.SetProgressIndicator(*myProgressScope);
+        }
       }//for (; aIt2.More(); aIt2.Next()) {
     }//for (; aIt1.More(); aIt1.Next()) {
   }//for (; myIterator->More(); myIterator->Next()) {
@@ -616,6 +655,12 @@ void BOPAlgo_PaveFiller::FillShrunkData(Handle(BOPDS_PaveBlock)& thePB)
   // Vertices
   Standard_Integer nV1, nV2;
   thePB->Indices(nV1, nV2);
+
+  if (nV1 < 0 || nV2 < 0)
+  {
+    return;
+  }
+
   const TopoDS_Vertex& aV1=(*(TopoDS_Vertex *)(&myDS->Shape(nV1))); 
   const TopoDS_Vertex& aV2=(*(TopoDS_Vertex *)(&myDS->Shape(nV2))); 
   // Get the edge
@@ -924,6 +969,8 @@ void BOPAlgo_PaveFiller::ForceInterfEE()
   if (!aNbPB)
     return;
 
+  const Standard_Boolean bSICheckMode = (myArguments.Extent() == 1);
+
   // Prepare pave blocks with the same vertices for intersection.
   BOPAlgo_VectorOfEdgeEdge aVEdgeEdge;
 
@@ -940,10 +987,12 @@ void BOPAlgo_PaveFiller::ForceInterfEE()
     const TopoDS_Vertex& aV1 = TopoDS::Vertex(myDS->Shape(nV1));
     const TopoDS_Vertex& aV2 = TopoDS::Vertex(myDS->Shape(nV2));
 
-    // Use the max tolerance of vertices as Fuzzy value for intersection
-    // of edges
-    Standard_Real aTolAdd = 2 * Max(BRep_Tool::Tolerance(aV1),
-                                    BRep_Tool::Tolerance(aV2));
+    // Use the max tolerance of vertices as Fuzzy value for intersection of edges.
+    // In the Self-Interference check mode we are interested in real
+    // intersections only, so use only the real tolerance of edges,
+    // no need to use the extended tolerance.
+    Standard_Real aTolAdd = (bSICheckMode ? myFuzzyValue :
+      2 * Max(BRep_Tool::Tolerance(aV1), BRep_Tool::Tolerance(aV2)));
 
     // All possible pairs combined from the list <aLPB> should be checked
     BOPDS_ListIteratorOfListOfPaveBlock aItLPB1(aLPB);
@@ -962,6 +1011,7 @@ void BOPAlgo_PaveFiller::ForceInterfEE()
       aBAC1.D1((aT11 + aT12) * 0.5, aPm, aVTgt1);
       if (aVTgt1.SquareMagnitude() < gp::Resolution())
         continue;
+      aVTgt1.Normalize();
 
       BOPDS_ListIteratorOfListOfPaveBlock aItLPB2 = aItLPB1;
       for (aItLPB2.Next(); aItLPB2.More(); aItLPB2.Next())
@@ -994,25 +1044,30 @@ void BOPAlgo_PaveFiller::ForceInterfEE()
         aPB2->Range(aT21, aT22);
 
         // Check the angle between edges in the middle point.
-        // If the angle is more than 10 degrees, do not use the additional
+        // If the angle is more than 25 degrees, do not use the additional
         // tolerance, as it may lead to undesired unification of edges
         Standard_Boolean bUseAddTol = Standard_True;
         {
-          GeomAPI_ProjectPointOnCurve& aProjPC = myContext->ProjPC(aE2);
-          aProjPC.Perform(aPm);
-          if (!aProjPC.NbPoints())
-            continue;
-
           BRepAdaptor_Curve aBAC2(aE2);
-          gp_Pnt aPm2;
-          gp_Vec aVTgt2;
-          aBAC2.D1(aProjPC.LowerDistanceParameter(), aPm2, aVTgt2);
-          if (aVTgt2.SquareMagnitude() < gp::Resolution())
-            continue;
-          // The angle should be close to zero
-          Standard_Real aCos = aVTgt1.Dot(aVTgt2);
-          if (Abs(aCos) < 0.984)
-            bUseAddTol = Standard_False;
+          if (aBAC1.GetType() != GeomAbs_Line ||
+              aBAC2.GetType() != GeomAbs_Line)
+          {
+            GeomAPI_ProjectPointOnCurve& aProjPC = myContext->ProjPC(aE2);
+            aProjPC.Perform(aPm);
+            if (!aProjPC.NbPoints())
+              continue;
+
+            gp_Pnt aPm2;
+            gp_Vec aVTgt2;
+            aBAC2.D1(aProjPC.LowerDistanceParameter(), aPm2, aVTgt2);
+            if (aVTgt2.SquareMagnitude() < gp::Resolution())
+              continue;
+
+            // The angle should be close to zero
+            Standard_Real aCos = aVTgt1.Dot (aVTgt2.Normalized());
+            if (Abs(aCos) < 0.9063)
+              bUseAddTol = Standard_False;
+          }
         }
 
         // Add pair for intersection
@@ -1022,11 +1077,19 @@ void BOPAlgo_PaveFiller::ForceInterfEE()
         anEdgeEdge.SetPaveBlock2(aPB2);
         anEdgeEdge.SetEdge1(aE1, aT11, aT12);
         anEdgeEdge.SetEdge2(aE2, aT21, aT22);
+        anEdgeEdge.SetBoxes (myDS->ShapeInfo(nE1).Box(), myDS->ShapeInfo (nE2).Box());
         if (bUseAddTol)
+        {
           anEdgeEdge.SetFuzzyValue(myFuzzyValue + aTolAdd);
+        }
         else
+        {
           anEdgeEdge.SetFuzzyValue(myFuzzyValue);
-        anEdgeEdge.SetProgressIndicator(myProgressIndicator);
+        }
+        if (myProgressScope != NULL)
+        {
+          anEdgeEdge.SetProgressIndicator(*myProgressScope);
+        }
       }
     }
   }

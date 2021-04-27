@@ -89,7 +89,8 @@ static void ReorderFaces(TopoDS_Face&         theF1,
                          TopoDS_Face&         theF2,
                          const TopoDS_Face&   theFirstFace,
                          const TopoDS_Edge&   thePrevEdge,
-                         const TopoDS_Vertex& theCommonVertex)
+                         const TopoDS_Vertex& theCommonVertex,
+                         const ChFiDS_Map&    theEFmap)
 {
   if (theF1.IsSame(theFirstFace))
     return;
@@ -99,25 +100,42 @@ static void ReorderFaces(TopoDS_Face&         theF1,
     return;
   }
 
-  TopTools_IndexedDataMapOfShapeListOfShape VEmapFirst, VEmap;
-  TopExp::MapShapesAndAncestors(theFirstFace, TopAbs_VERTEX, TopAbs_EDGE, VEmapFirst);
-  TopExp::MapShapesAndAncestors(theF1, TopAbs_VERTEX, TopAbs_EDGE, VEmap);
-
-  const TopTools_ListOfShape& ElistFirst = VEmapFirst.FindFromKey(theCommonVertex);
-  const TopTools_ListOfShape& Elist      = VEmap.FindFromKey(theCommonVertex);
-  TopTools_ListIteratorOfListOfShape itlfirst(ElistFirst);
-  for (; itlfirst.More(); itlfirst.Next())
+  //Loop until find <theF1> or <theF2>
+  Standard_Boolean ToExchange = Standard_False;
+  TopoDS_Edge PrevEdge = thePrevEdge, CurEdge;
+  TopoDS_Face PrevFace = theFirstFace, CurFace;
+  for (;;)
   {
-    const TopoDS_Shape& anEdge = itlfirst.Value();
-    if (anEdge.IsSame(thePrevEdge))
-      continue;
-    TopTools_ListIteratorOfListOfShape itl(Elist);
-    for(; itl.More(); itl.Next())
-      if (anEdge.IsSame(itl.Value()))
-        return;
+    TopTools_IndexedDataMapOfShapeListOfShape VEmap;
+    TopExp::MapShapesAndAncestors(PrevFace, TopAbs_VERTEX, TopAbs_EDGE, VEmap);
+    const TopTools_ListOfShape& Elist = VEmap.FindFromKey(theCommonVertex);
+    if (PrevEdge.IsSame(Elist.First()))
+      CurEdge = TopoDS::Edge(Elist.Last());
+    else
+      CurEdge = TopoDS::Edge(Elist.First());
+
+    const TopTools_ListOfShape& Flist = theEFmap.FindFromKey(CurEdge);
+    if (PrevFace.IsSame(Flist.First()))
+      CurFace = TopoDS::Face(Flist.Last());
+    else
+      CurFace = TopoDS::Face(Flist.First());
+
+    if (CurFace.IsSame(theF1))
+      break;
+    else if (CurFace.IsSame(theF2))
+    {
+      ToExchange = Standard_True;
+      break;
+    }
+
+    PrevEdge = CurEdge;
+    PrevFace = CurFace;
   }
 
-  TopoDS_Face TmpFace = theF1; theF1 = theF2; theF2 = TmpFace;
+  if (ToExchange)
+  {
+    TopoDS_Face TmpFace = theF1; theF1 = theF2; theF2 = TmpFace;
+  }
 }
 
 static void ConcatCurves(TColGeom_SequenceOfCurve& theCurves,
@@ -573,7 +591,7 @@ Standard_Boolean ChFi3d_Builder::FaceTangency(const TopoDS_Edge& E0,
   if(Nbf < 2) return Standard_False;
 //  Modified by Sergey KHROMOV - Fri Dec 21 17:44:19 2001 Begin
 //if (BRep_Tool::Continuity(E1,F[0],F[1]) != GeomAbs_C0) {
-  if (ChFi3d_isTangentFaces(E1,F[0],F[1])) {
+  if (ChFi3d::IsTangentFaces(E1,F[0],F[1])) {
 //  Modified by Sergey KHROMOV - Fri Dec 21 17:44:21 2001 End
     return Standard_False;
   }
@@ -592,7 +610,7 @@ Standard_Boolean ChFi3d_Builder::FaceTangency(const TopoDS_Edge& E0,
       if(Nbf < 2) return Standard_False;
 //  Modified by Sergey KHROMOV - Tue Dec 18 18:10:40 2001 Begin
 //    if (BRep_Tool::Continuity(Ec,F[0],F[1]) < GeomAbs_G1) {
-      if (!ChFi3d_isTangentFaces(Ec,F[0],F[1])) {
+      if (!ChFi3d::IsTangentFaces(Ec,F[0],F[1])) {
 //  Modified by Sergey KHROMOV - Tue Dec 18 18:10:41 2001 End
 	return Standard_False;
       }
@@ -680,7 +698,7 @@ void ChFi3d_Builder::PerformExtremity (const Handle(ChFiDS_Spine)& Spine)
   Standard_Integer NbG1Connections = 0;
   
   for(Standard_Integer ii = 1; ii <= 2; ii++){
-    TopoDS_Edge E[3],Ec;
+    TopoDS_Edge E[3];
     TopoDS_Vertex V;
     ChFiDS_State sst;
     Standard_Integer iedge;
@@ -705,44 +723,61 @@ void ChFi3d_Builder::PerformExtremity (const Handle(ChFiDS_Spine)& Spine)
 
     if(sst == ChFiDS_BreakPoint){
       TopTools_ListIteratorOfListOfShape It;//,Jt;
-      Standard_Integer i = 0;
       Standard_Boolean sommetpourri = Standard_False;
-      TopTools_IndexedMapOfShape EdgesOfV;
-      //to avoid repeating of edges
+      TopTools_IndexedMapOfOrientedShape EdgesOfV;
+      TopTools_MapOfShape Edges;
+      Edges.Add(E[0]);
+      EdgesOfV.Add(E[0]);
+      Standard_Integer IndOfE = 0;
       for (It.Initialize(myVEMap(V)); It.More(); It.Next())
-        EdgesOfV.Add(It.Value());
-      for (Standard_Integer ind = 1; ind <= EdgesOfV.Extent(); ind++) {
-	Ec = TopoDS::Edge(EdgesOfV(ind));
-	Standard_Boolean bonedge = !BRep_Tool::Degenerated(Ec);
-        if (bonedge)
+      {
+        TopoDS_Edge anEdge = TopoDS::Edge(It.Value());
+        if (BRep_Tool::Degenerated(anEdge))
+          continue;
+        TopoDS_Face F1, F2;
+        ChFi3d_conexfaces(anEdge, F1, F2, myEFMap);
+        if (!F2.IsNull() && ChFi3d::IsTangentFaces(anEdge, F1, F2, GeomAbs_G2)) //smooth edge
         {
-          TopoDS_Face F1, F2;
-          ChFi3d_conexfaces(Ec, F1, F2, myEFMap);
-          if (!F2.IsNull() && ChFi3d_isTangentFaces(Ec, F1, F2, GeomAbs_G2))
+          if (!F1.IsSame(F2))
+            NbG1Connections++;
+          continue;
+        }
+        
+        if (Edges.Add(anEdge))
+        {
+          EdgesOfV.Add(anEdge);
+          if (IndOfE < 2)
           {
-            bonedge = Standard_False;
-            if (!F1.IsSame(F2))
-              NbG1Connections++;
+            IndOfE++;
+            E[IndOfE] = anEdge;
           }
         }
-	if(bonedge){
-          if (!Ec.IsSame(E[0]))
+        else
+        {
+          TopoDS_Vertex V1, V2;
+          TopExp::Vertices(anEdge, V1, V2);
+          if (V1.IsSame(V2)) //edge is closed - two ends of the edge in the vertex
           {
-            if( i < 2 ){
-              i++;
-              E[i] = Ec;
-            }
-            else{
-#ifdef OCCT_DEBUG
-	    std::cout<<"top has more than 3 edges"<<std::endl;
-#endif
-              sommetpourri = Standard_True;
-              break;
+            Standard_Integer anInd = EdgesOfV.FindIndex(anEdge);
+            if (anInd == 0)
+              anInd = EdgesOfV.FindIndex(anEdge.Reversed());
+            anEdge = TopoDS::Edge(EdgesOfV(anInd));
+            anEdge.Reverse();
+            if (EdgesOfV.Add(anEdge))
+            {
+              if (IndOfE < 2)
+              {
+                IndOfE++;
+                E[IndOfE] = anEdge;
+              }
             }
           }
-	}
+        }
       }
-      if(i != 2) sommetpourri = Standard_True;
+      
+      if (EdgesOfV.Extent() != 3)
+        sommetpourri = Standard_True;
+      
       if(!sommetpourri){
 	sst = ChFi3d_EdgeState(E,myEFMap);
       }
@@ -818,7 +853,7 @@ Standard_Boolean ChFi3d_Builder::PerformElement(const Handle(ChFiDS_Spine)& Spin
   if(ff1.IsNull() || ff2.IsNull()) return 0;
 //  Modified by Sergey KHROMOV - Fri Dec 21 17:46:22 2001 End
 //if(BRep_Tool::Continuity(Ec,ff1,ff2) != GeomAbs_C0) return 0;
-  if (ChFi3d_isTangentFaces(Ec,ff1,ff2)) return 0;
+  if (ChFi3d::IsTangentFaces(Ec,ff1,ff2)) return 0;
 //  Modified by Sergey KHROMOV - Fri Dec 21 17:46:24 2001 Begin
 
   TopoDS_Face FirstFace = ff1;
@@ -828,6 +863,12 @@ Standard_Boolean ChFi3d_Builder::PerformElement(const Handle(ChFiDS_Spine)& Spin
     ff2 = ff1; ff1 = FirstFace;
   }
   myEdgeFirstFace.Bind(Ec, FirstFace);
+
+  //Define concavity
+  ChFiDS_TypeOfConcavity TypeOfConcavity = ChFi3d::DefineConnectType(Ec, ff1, ff2,
+                                                                     1.e-5, Standard_True);
+  Spine->SetTypeOfConcavity(TypeOfConcavity);
+  
   Standard_Boolean ToRestrict = (Offset > 0)? Standard_True : Standard_False;
   BRepAdaptor_Surface Sb1(ff1, ToRestrict);
   BRepAdaptor_Surface Sb2(ff2, ToRestrict);
@@ -852,8 +893,11 @@ Standard_Boolean ChFi3d_Builder::PerformElement(const Handle(ChFiDS_Spine)& Spin
     CEc.D1(Wl,P2,V1);
     Wl = BRep_Tool::Parameter(LVEc,Ec);
     CEc.D1(Wl,P2,V2);
-    if (V1.IsParallel(V2,ta)) {
-      if (FaceTangency(Ec,Ec,VStart)) {
+    Standard_Boolean IsFaceTangency = FaceTangency(Ec,Ec,VStart);
+    if (V1.IsParallel(V2,ta) ||
+        IsFaceTangency)
+    {
+      if (IsFaceTangency) {
 	CurSt = ChFiDS_Closed; 
       }
       else {
@@ -918,7 +962,7 @@ Standard_Boolean ChFi3d_Builder::PerformElement(const Handle(ChFiDS_Spine)& Spin
 	    Spine->SetEdges(Ec);
             TopoDS_Face CurF1, CurF2;
             ChFi3d_conexfaces(Ec,CurF1,CurF2,myEFMap);
-            ReorderFaces(CurF1, CurF2, FirstFace, PrevEdge, CommonVertex);
+            ReorderFaces(CurF1, CurF2, FirstFace, PrevEdge, CommonVertex, myEFMap);
             myEdgeFirstFace.Bind(Ec, CurF1);
             if (Offset > 0)
             {
@@ -1004,7 +1048,7 @@ Standard_Boolean ChFi3d_Builder::PerformElement(const Handle(ChFiDS_Spine)& Spin
 	      Spine->PutInFirst(Ec);
               TopoDS_Face CurF1, CurF2;
               ChFi3d_conexfaces(Ec,CurF1,CurF2,myEFMap);
-              ReorderFaces(CurF1, CurF2, FirstFace, PrevEdge, CommonVertex);
+              ReorderFaces(CurF1, CurF2, FirstFace, PrevEdge, CommonVertex, myEFMap);
               myEdgeFirstFace.Bind(Ec, CurF1);
               if (Offset > 0)
               {

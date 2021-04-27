@@ -55,7 +55,8 @@
 Extrema_ExtCC::Extrema_ExtCC (const Standard_Real TolC1,
                               const Standard_Real TolC2)
 : myIsFindSingleSolution(Standard_False),
-  myDone (Standard_False)
+  myDone (Standard_False),
+  myIsPar(Standard_False)
 {
   myC[0] = 0; myC[1] = 0;
   myInf[0] = myInf[1] = -Precision::Infinite();
@@ -553,7 +554,7 @@ void Extrema_ExtCC::PrepareParallelResult(const Standard_Real theUt11,
       if ((aRange.Delta() > Precision::Angular()) &&
           ((aPar2 - aPar1) < Precision::Angular()))
       {
-        aPar1 -= aPeriod;
+        aPar2 += aPeriod;
       }
     }
 
@@ -562,11 +563,13 @@ void Extrema_ExtCC::PrepareParallelResult(const Standard_Real theUt11,
 
     Standard_Real aMinSquareDist = RealLast();
 
-    aProjRng1.Add(aPar1 - M_PI);
-    aProjRng1.Add(aPar2 - M_PI);
-    for (Standard_Integer i = 0; i < 2; i++)
+    aProjRng1.Add(aPar1 - aPeriod);
+    aProjRng1.Add(aPar2 - aPeriod);
+    for (Standard_Integer i = 0; i < 3; i++)
     {
-      // Repeat computation twice
+      // Repeat computation three times, shifting the range to PI on each step,
+      // to be able to find if the concentric arcs ranges are intersected in just one parameter
+      // (lower or upper boundary).
 
       Bnd_Range aRng = aProjRng1;
       aRng.Common(aRange);

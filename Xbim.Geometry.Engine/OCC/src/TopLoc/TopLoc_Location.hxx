@@ -91,30 +91,30 @@ Standard_EXPORT operator gp_Trsf() const;
   //! Returns the inverse of <me>.
   //!
   //! <me> * Inverted() is an Identity.
-  Standard_EXPORT Standard_NODISCARD TopLoc_Location Inverted() const;
+  Standard_NODISCARD Standard_EXPORT TopLoc_Location Inverted() const;
   
   //! Returns <me> * <Other>, the  elementary datums are
   //! concatenated.
-  Standard_EXPORT Standard_NODISCARD TopLoc_Location Multiplied (const TopLoc_Location& Other) const;
+  Standard_NODISCARD Standard_EXPORT TopLoc_Location Multiplied (const TopLoc_Location& Other) const;
 Standard_NODISCARD TopLoc_Location operator* (const TopLoc_Location& Other) const
 {
   return Multiplied(Other);
 }
   
   //! Returns  <me> / <Other>.
-  Standard_EXPORT Standard_NODISCARD TopLoc_Location Divided (const TopLoc_Location& Other) const;
+  Standard_NODISCARD Standard_EXPORT TopLoc_Location Divided (const TopLoc_Location& Other) const;
 Standard_NODISCARD TopLoc_Location operator/ (const TopLoc_Location& Other) const
 {
   return Divided(Other);
 }
   
   //! Returns <Other>.Inverted() * <me>.
-  Standard_EXPORT Standard_NODISCARD TopLoc_Location Predivided (const TopLoc_Location& Other) const;
+  Standard_NODISCARD Standard_EXPORT TopLoc_Location Predivided (const TopLoc_Location& Other) const;
   
   //! Returns me at the power <pwr>.   If <pwr>  is zero
   //! returns  Identity.  <pwr> can  be lower  than zero
   //! (usual meaning for powers).
-  Standard_EXPORT Standard_NODISCARD TopLoc_Location Powered (const Standard_Integer pwr) const;
+  Standard_NODISCARD Standard_EXPORT TopLoc_Location Powered (const Standard_Integer pwr) const;
 
   //! Returns a hashed value for this local coordinate system. This value is used, with map tables, to store and
   //! retrieve the object easily, and is in the range [1, theUpperBound].
@@ -143,7 +143,7 @@ Standard_Boolean operator != (const TopLoc_Location& Other) const
 }
   
   //! Dumps the content of me into the stream
-  Standard_EXPORT void DumpJson (Standard_OStream& theOStream, const Standard_Integer theDepth = -1) const;
+  Standard_EXPORT void DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth = -1) const;
 
   //! Prints the contents of <me> on the stream <s>.
   Standard_EXPORT void ShallowDump (Standard_OStream& S) const;

@@ -27,8 +27,7 @@
 #include <Standard_OStream.hxx>
 #include <Standard_IStream.hxx>
 #include <Standard_CString.hxx>
-
-#include <Message_ProgressIndicator.hxx>
+#include <Message_ProgressRange.hxx>
 
 class TopoDS_Face;
 class TopoDS_Wire;
@@ -40,7 +39,6 @@ class TopoDS_Solid;
 class TopoDS_CompSolid;
 class TopoDS_Compound;
 class TopoDS_Shape;
-class Message_ProgressIndicator;
 class BRep_Builder;
 class BRepTools_WireExplorer;
 class BRepTools_Modification;
@@ -150,9 +148,11 @@ public:
   //! edge on the face.
   Standard_EXPORT static void UpdateFaceUVPoints (const TopoDS_Face& theF);
   
-  //! Removes all the triangulations of the faces of <S>
-  //! and removes all polygons on triangulations of the
-  //! edges.
+  //! Removes all cashed polygonal representation of the shape,
+  //! i.e. the triangulations of the faces of <S> and polygons on
+  //! triangulations and polygons 3d of the edges.
+  //! In case polygonal representation is the only available representation
+  //! for the shape (shape does not have geometry) it is not removed.
   Standard_EXPORT static void Clean (const TopoDS_Shape& S);
   
   //! Removes geometry (curves and surfaces) from all edges and faces of the shape
@@ -162,10 +162,18 @@ public:
   //! refer to surfaces not belonging to any face of <S>
   Standard_EXPORT static void RemoveUnusedPCurves (const TopoDS_Shape& S);
   
-  //! verifies that each face from the shape <S> has got
-  //! a triangulation  with a  deflection <= deflec  and
-  //! the edges a discretisation on  this triangulation.
-  Standard_EXPORT static Standard_Boolean Triangulation (const TopoDS_Shape& S, const Standard_Real deflec);
+  //! Verifies that each Face from the shape has got a triangulation with a deflection smaller or equal to specified one
+  //! and the Edges a discretization on this triangulation.
+  //! @param theShape   [in] shape to verify
+  //! @param theLinDefl [in] maximum allowed linear deflection
+  //! @param theToCheckFreeEdges [in] if TRUE, then free Edges are required to have 3D polygon
+  //! @return FALSE if input Shape contains Faces without triangulation,
+  //!               or that triangulation has worse (greater) deflection than specified one,
+  //!               or Edges in Shape lack polygons on triangulation
+  //!               or free Edges in Shape lack 3D polygons
+  Standard_EXPORT static Standard_Boolean Triangulation (const TopoDS_Shape& theShape,
+                                                         const Standard_Real theLinDefl,
+                                                         const Standard_Boolean theToCheckFreeEdges = Standard_False);
   
   //! Returns  True if  the    distance between the  two
   //! vertices is lower than their tolerance.
@@ -197,18 +205,23 @@ public:
   Standard_EXPORT static void Dump (const TopoDS_Shape& Sh, Standard_OStream& S);
   
   //! Writes <Sh> on <S> in an ASCII format.
-  Standard_EXPORT static void Write (const TopoDS_Shape& Sh, Standard_OStream& S, const Handle(Message_ProgressIndicator)& PR = NULL);
+  Standard_EXPORT static void Write (const TopoDS_Shape& Sh, Standard_OStream& S,
+                                     const Message_ProgressRange& theProgress = Message_ProgressRange());
   
   //! Reads a Shape  from <S> in  returns it in  <Sh>.
   //! <B> is used to build the shape.
-  Standard_EXPORT static void Read (TopoDS_Shape& Sh, Standard_IStream& S, const BRep_Builder& B, const Handle(Message_ProgressIndicator)& PR = NULL);
+  Standard_EXPORT static void Read (TopoDS_Shape& Sh, Standard_IStream& S, const BRep_Builder& B,
+                                    const Message_ProgressRange& theProgress = Message_ProgressRange());
   
   //! Writes <Sh> in <File>.
-  Standard_EXPORT static Standard_Boolean Write (const TopoDS_Shape& Sh, const Standard_CString File, const Handle(Message_ProgressIndicator)& PR = NULL);
+  Standard_EXPORT static Standard_Boolean Write (const TopoDS_Shape& Sh, const Standard_CString File,
+                                                 const Message_ProgressRange& theProgress = Message_ProgressRange());
   
   //! Reads a Shape  from <File>,  returns it in  <Sh>.
   //! <B> is used to build the shape.
-  Standard_EXPORT static Standard_Boolean Read (TopoDS_Shape& Sh, const Standard_CString File, const BRep_Builder& B, const Handle(Message_ProgressIndicator)& PR = NULL);
+  Standard_EXPORT static Standard_Boolean Read (TopoDS_Shape& Sh, const Standard_CString File,
+                                                const BRep_Builder& B,
+                                                const Message_ProgressRange& theProgress = Message_ProgressRange());
 
   //! Evals real tolerance of edge  <theE>.
   //! <theC3d>, <theC2d>, <theS>, <theF>, <theL> are
@@ -223,6 +236,20 @@ public:
                                                         const Standard_Real theF,
                                                         const Standard_Real theL);
 
+  //! returns the cumul  of the orientation  of <Edge>
+  //! and thc containing wire in <Face>
+  Standard_EXPORT static TopAbs_Orientation OriEdgeInFace(const TopoDS_Edge& theEdge, 
+                                                          const TopoDS_Face& theFace);
+
+  //! Removes internal sub-shapes from the shape.
+  //! The check on internal status is based on orientation of sub-shapes,
+  //! classification is not performed.
+  //! Before removal of internal sub-shapes the algorithm checks if such
+  //! removal is not going to break topological connectivity between sub-shapes.
+  //! The flag <theForce> if set to true disables the connectivity check and clears
+  //! the given shape from all sub-shapes with internal orientation.
+  Standard_EXPORT static void RemoveInternals (TopoDS_Shape& theS,
+                                               const Standard_Boolean theForce = Standard_False);
 
 
 protected:
@@ -248,11 +275,5 @@ friend class BRepTools_ShapeSet;
 friend class BRepTools_ReShape;
 
 };
-
-
-
-
-
-
 
 #endif // _BRepTools_HeaderFile

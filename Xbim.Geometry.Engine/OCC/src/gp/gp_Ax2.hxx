@@ -202,7 +202,7 @@ public:
   //! product "X Direction" ^ "Y   Direction".
   //! This maintains the right-handed property of the
   //! coordinate system.
-  Standard_EXPORT Standard_NODISCARD gp_Ax2 Mirrored (const gp_Pnt& P) const;
+  Standard_NODISCARD Standard_EXPORT gp_Ax2 Mirrored (const gp_Pnt& P) const;
   
 
   //! Performs a symmetrical transformation of this coordinate
@@ -238,7 +238,7 @@ public:
   //! product "X Direction" ^ "Y   Direction".
   //! This maintains the right-handed property of the
   //! coordinate system.
-  Standard_EXPORT Standard_NODISCARD gp_Ax2 Mirrored (const gp_Ax1& A1) const;
+  Standard_NODISCARD Standard_EXPORT gp_Ax2 Mirrored (const gp_Ax1& A1) const;
   
 
   //! Performs a symmetrical transformation of this coordinate
@@ -276,7 +276,7 @@ public:
   //! product "X Direction" ^ "Y   Direction".
   //! This maintains the right-handed property of the
   //! coordinate system.
-  Standard_EXPORT Standard_NODISCARD gp_Ax2 Mirrored (const gp_Ax2& A2) const;
+  Standard_NODISCARD Standard_EXPORT gp_Ax2 Mirrored (const gp_Ax2& A2) const;
   
     void Rotate (const gp_Ax1& A1, const Standard_Real Ang);
   
@@ -322,6 +322,12 @@ public:
   //! point <P2>.
     Standard_NODISCARD gp_Ax2 Translated (const gp_Pnt& P1, const gp_Pnt& P2) const;
 
+
+  //! Dumps the content of me into the stream
+  Standard_EXPORT void DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth = -1) const;
+
+  //! Inits the content of me from the stream
+  Standard_EXPORT Standard_Boolean InitFromJson (const Standard_SStream& theSStream, Standard_Integer& theStreamPos);
 
 
 

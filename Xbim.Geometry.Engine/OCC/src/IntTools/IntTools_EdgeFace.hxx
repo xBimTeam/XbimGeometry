@@ -177,6 +177,11 @@ public: //! @name Obtaining results
     return mySeqOfCommonPrts;
   }
 
+  //! Returns the minimal distance found between edge and face
+  Standard_Real MinimalDistance() const
+  {
+    return myMinDistance;
+  }
 
 protected: //! @name Protected methods performing the intersection
 
@@ -196,7 +201,7 @@ protected: //! @name Protected methods performing the intersection
   //! Checks if the edge is in the face really.
   Standard_EXPORT Standard_Boolean IsCoincident();
 
-private:
+protected:
 
   TopoDS_Edge myEdge;
   TopoDS_Face myFace;
@@ -210,6 +215,7 @@ private:
   IntTools_SequenceOfCommonPrts mySeqOfCommonPrts;
   IntTools_Range myRange;
   Standard_Boolean myQuickCoincidenceCheck;
+  Standard_Real myMinDistance; //!< Minimal distance found
 };
 
 #endif // _IntTools_EdgeFace_HeaderFile

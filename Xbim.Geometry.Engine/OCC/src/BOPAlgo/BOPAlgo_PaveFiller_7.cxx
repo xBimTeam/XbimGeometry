@@ -484,7 +484,10 @@ void BOPAlgo_PaveFiller::MakeSplitEdges()
         aBSE.SetCommonBlock(aCB);
       }
       aBSE.SetDS(myDS);
-      aBSE.SetProgressIndicator(myProgressIndicator);
+      if (myProgressScope != NULL)
+      {
+        aBSE.SetProgressIndicator(*myProgressScope);
+      }
     } // for (; aItPB.More(); aItPB.Next()) {
   }  // for (i=0; i<aNbPBP; ++i) {      
   //
@@ -596,7 +599,10 @@ void BOPAlgo_PaveFiller::MakePCurves()
       BOPAlgo_MPC& aMPC=aVMPC.Appended();
       aMPC.SetEdge(aE);
       aMPC.SetFace(aF1F);
-      aMPC.SetProgressIndicator(myProgressIndicator);
+      if (myProgressScope != NULL)
+      {
+        aMPC.SetProgressIndicator(*myProgressScope);
+      }
     }
     //
     // On
@@ -660,7 +666,10 @@ void BOPAlgo_PaveFiller::MakePCurves()
 
       aMPC.SetEdge(aE);
       aMPC.SetFace(aF1F);
-      aMPC.SetProgressIndicator(myProgressIndicator);
+      if (myProgressScope != NULL)
+      {
+        aMPC.SetProgressIndicator(*myProgressScope);
+      }
     }
   }// for (i=0; i<aNbFI; ++i) {
   //
@@ -710,7 +719,10 @@ void BOPAlgo_PaveFiller::MakePCurves()
               aMPC.SetEdge(aE);
               aMPC.SetFace(aFf[m]);
               aMPC.SetFlag(Standard_True);
-              aMPC.SetProgressIndicator(myProgressIndicator);
+              if (myProgressScope != NULL)
+              {
+                aMPC.SetProgressIndicator(*myProgressScope);
+              }
             }
           }
         }
@@ -784,7 +796,7 @@ void UpdateVertices(const TopoDS_Edge& aE,
     aD2=aP3D.SquareDistance(aP3Dx);
     if (aD2>aTolV2) {
       aD=sqrt(aD2);
-      aBB.UpdateVertex(aV[j], aD);
+      aBB.UpdateVertex(aV[j], aD + BOPTools_AlgoTools::DTolerance());
     }
   }
 }

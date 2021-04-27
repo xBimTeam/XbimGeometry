@@ -18,6 +18,8 @@
 #include <Standard_Overflow.hxx>
 #include <Standard_Assert.hxx>
 
+#include <Standard_WarningDisableFunctionCast.hxx>
+
 static OSD_SignalMode OSD_WasSetSignal = OSD_SignalMode_AsIs;
 
 //=======================================================================
@@ -241,7 +243,7 @@ static LONG CallHandler (DWORD dwExceptionCode,
     OSD::SetFloatingSignal (Standard_True);
   }
 
-#if !defined(OCCT_UWP) && !defined(__MINGW32__) && !defined(__CYGWIN32__)
+#if ! defined(OCCT_UWP) && !defined(__MINGW32__) && !defined(__CYGWIN32__)
  // provide message to the user with possibility to stop
   size_t idx;
   StringCchLengthW (buffer, _countof(buffer),&idx);
@@ -703,7 +705,7 @@ typedef void (* SIG_PFV) (int);
 
 #include <signal.h>
 
-#if !defined(__ANDROID__) && !defined(__QNX__)
+#if !defined(__ANDROID__) && !defined(__QNX__) && !defined(__EMSCRIPTEN__)
   #include <sys/signal.h>
 #endif
 
@@ -1025,7 +1027,9 @@ void OSD::SetSignal (OSD_SignalMode theSignalMode,
     }
     if (theSignalMode == OSD_SignalMode_SetUnhandled && retcode == 0 && anActOld.sa_handler != SIG_DFL)
     {
-      retcode = sigaction (aSignalTypes[i], &anActOld, &anActOld);
+      struct sigaction anActOld2;
+      sigemptyset(&anActOld2.sa_mask);
+      retcode = sigaction (aSignalTypes[i], &anActOld, &anActOld2);
     }
     Standard_ASSERT(retcode == 0, "sigaction() failed", std::cout << "OSD::SetSignal(): sigaction() failed for " << aSignalTypes[i] << std::endl);
   }

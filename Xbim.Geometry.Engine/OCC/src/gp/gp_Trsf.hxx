@@ -25,6 +25,7 @@
 #include <Standard_Integer.hxx>
 #include <Standard_Handle.hxx>
 #include <Standard_OStream.hxx>
+#include <Standard_SStream.hxx>
 #include <Standard_Real.hxx>
 
 class Standard_ConstructionError;
@@ -110,13 +111,14 @@ public:
   //! A1 is the rotation axis and Ang is the angular value of the
   //! rotation in radians.
   Standard_EXPORT void SetRotation (const gp_Ax1& A1, const Standard_Real Ang);
-  
 
   //! Changes the transformation into a rotation defined by quaternion.
   //! Note that rotation is performed around origin, i.e.
   //! no translation is involved.
   Standard_EXPORT void SetRotation (const gp_Quaternion& R);
-  
+
+  //! Replaces the rotation part with specified quaternion.
+  Standard_EXPORT void SetRotationPart (const gp_Quaternion& R);
 
   //! Changes the transformation into a scale.
   //! P is the center of the scale and S is the scaling value.
@@ -351,7 +353,10 @@ void operator *= (const gp_Trsf& T)
   }
 
   //! Dumps the content of me into the stream
-  Standard_EXPORT void DumpJson (Standard_OStream& theOStream, const Standard_Integer theDepth = -1) const;
+  Standard_EXPORT void DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth = -1) const;
+
+  //! Inits the content of me from the stream
+  Standard_EXPORT Standard_Boolean InitFromJson (const Standard_SStream& theSStream, Standard_Integer& theStreamPos);
 
 friend class gp_GTrsf;
 

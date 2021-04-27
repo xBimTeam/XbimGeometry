@@ -34,6 +34,7 @@
 #include <NCollection_Vector.hxx>
 
 #include <algorithm>
+#include <stack>
 
 const Standard_Real AngDeviation1Deg  = M_PI/180.;
 const Standard_Real AngDeviation90Deg = 90 * AngDeviation1Deg;
@@ -70,7 +71,7 @@ namespace {
     Handle(BRepMesh_DataStructureOfDelaun) myStructure;
   };
 
-  inline void UpdateBndBox(const gp_XY& thePnt1, const gp_XY& thePnt2, Bnd_B2d& theBox)
+  void UpdateBndBox(const gp_XY& thePnt1, const gp_XY& thePnt2, Bnd_B2d& theBox)
   {
     theBox.Add( thePnt1 );
     theBox.Add( thePnt2 );
@@ -89,7 +90,9 @@ BRepMesh_Delaun::BRepMesh_Delaun (
   const Standard_Boolean                        isFillCircles)
 : myMeshData ( theOldMesh ),
   myCircles (new NCollection_IncAllocator(
-             IMeshData::MEMORY_BLOCK_SIZE_HUGE))
+             IMeshData::MEMORY_BLOCK_SIZE_HUGE)),
+  mySupVert (3),
+  myInitCircles (Standard_False)
 {
   if (isFillCircles)
   {
@@ -103,7 +106,9 @@ BRepMesh_Delaun::BRepMesh_Delaun (
 //=======================================================================
 BRepMesh_Delaun::BRepMesh_Delaun(IMeshData::Array1OfVertexOfDelaun& theVertices)
 : myCircles (theVertices.Length(), new NCollection_IncAllocator(
-             IMeshData::MEMORY_BLOCK_SIZE_HUGE))
+             IMeshData::MEMORY_BLOCK_SIZE_HUGE)),
+  mySupVert (3),
+  myInitCircles (Standard_False)
 {
   if ( theVertices.Length() > 2 )
   {
@@ -123,7 +128,9 @@ BRepMesh_Delaun::BRepMesh_Delaun(
   IMeshData::Array1OfVertexOfDelaun&            theVertices)
 : myMeshData( theOldMesh ),
   myCircles ( theVertices.Length(), new NCollection_IncAllocator(
-             IMeshData::MEMORY_BLOCK_SIZE_HUGE))
+             IMeshData::MEMORY_BLOCK_SIZE_HUGE)),
+  mySupVert (3),
+  myInitCircles (Standard_False)
 {
   if ( theVertices.Length() > 2 )
   {
@@ -140,7 +147,9 @@ BRepMesh_Delaun::BRepMesh_Delaun(
   IMeshData::VectorOfInteger&                   theVertexIndices)
 : myMeshData( theOldMesh ),
   myCircles ( theVertexIndices.Length(), new NCollection_IncAllocator(
-             IMeshData::MEMORY_BLOCK_SIZE_HUGE))
+             IMeshData::MEMORY_BLOCK_SIZE_HUGE)),
+  mySupVert (3),
+  myInitCircles (Standard_False)
 {
   perform(theVertexIndices);
 }
@@ -155,7 +164,9 @@ BRepMesh_Delaun::BRepMesh_Delaun (const Handle (BRepMesh_DataStructureOfDelaun)&
                                   const Standard_Integer                         theCellsCountV)
 : myMeshData (theOldMesh),
   myCircles (theVertexIndices.Length (), new NCollection_IncAllocator(
-             IMeshData::MEMORY_BLOCK_SIZE_HUGE))
+             IMeshData::MEMORY_BLOCK_SIZE_HUGE)),
+  mySupVert (3),
+  myInitCircles (Standard_False)
 {
   perform (theVertexIndices, theCellsCountU, theCellsCountV);
 }
@@ -234,6 +245,8 @@ void BRepMesh_Delaun::initCirclesTool (const Bnd_Box2d&       theBox,
   myCircles.SetMinMaxSize( gp_XY( aMinX, aMinY ), gp_XY( aMaxX, aMaxY ) );
   myCircles.SetCellSize  ( aDeltaX / Max (theCellsCountU, aScaler),
                            aDeltaY / Max (theCellsCountV, aScaler));
+
+  myInitCircles = Standard_True;
 }
 
 //=======================================================================
@@ -284,14 +297,14 @@ void BRepMesh_Delaun::superMesh(const Bnd_Box2d& theBox)
   Standard_Real aDeltaMax = Max( aDeltaX, aDeltaY );
   Standard_Real aDelta    = aDeltaX + aDeltaY;
 
-  mySupVert[0] = myMeshData->AddNode(
-    BRepMesh_Vertex( ( aMinX + aMaxX ) / 2, aMaxY + aDeltaMax, BRepMesh_Free ) );
+  mySupVert.Append (myMeshData->AddNode(
+    BRepMesh_Vertex( ( aMinX + aMaxX ) / 2, aMaxY + aDeltaMax, BRepMesh_Free ) ) );
 
-  mySupVert[1] = myMeshData->AddNode(
-    BRepMesh_Vertex( aMinX - aDelta, aMinY - aDeltaMin, BRepMesh_Free ) );
+  mySupVert.Append (myMeshData->AddNode(
+    BRepMesh_Vertex( aMinX - aDelta, aMinY - aDeltaMin, BRepMesh_Free ) ) );
 
-  mySupVert[2] = myMeshData->AddNode(
-    BRepMesh_Vertex( aMaxX + aDelta, aMinY - aDeltaMin, BRepMesh_Free ) );
+  mySupVert.Append (myMeshData->AddNode(
+    BRepMesh_Vertex( aMaxX + aDelta, aMinY - aDeltaMin, BRepMesh_Free ) ) );
 
   Standard_Integer e[3];
   Standard_Boolean o[3];
@@ -318,7 +331,7 @@ void BRepMesh_Delaun::superMesh(const Bnd_Box2d& theBox)
 void BRepMesh_Delaun::deleteTriangle(const Standard_Integer          theIndex, 
                                      IMeshData::MapOfIntegerInteger& theLoopEdges )
 {
-  if (!myCircles.IsEmpty())
+  if (myInitCircles)
   {
     myCircles.Delete (theIndex);
   }
@@ -364,15 +377,28 @@ void BRepMesh_Delaun::compute(IMeshData::VectorOfInteger& theVertexIndexes)
     createTriangles( theVertexIndexes( anVertexIdx ), aLoopEdges );
 
     // Add other nodes to the mesh
-    createTrianglesOnNewVertices( theVertexIndexes );
+    createTrianglesOnNewVertices (theVertexIndexes, Message_ProgressRange());
   }
 
+  RemoveAuxElements ();
+}
+
+//=======================================================================
+//function : RemoveAuxElements
+//purpose  :
+//=======================================================================
+void BRepMesh_Delaun::RemoveAuxElements ()
+{
+  Handle (NCollection_IncAllocator) aAllocator = new NCollection_IncAllocator (
+    IMeshData::MEMORY_BLOCK_SIZE_HUGE);
+
+  IMeshData::MapOfIntegerInteger aLoopEdges (10, aAllocator);
+
   // Destruction of triangles containing a top of the super triangle
-  BRepMesh_SelectorOfDataStructureOfDelaun aSelector( myMeshData );
-  for (Standard_Integer aSupVertId = 0; aSupVertId < 3; ++aSupVertId)
+  BRepMesh_SelectorOfDataStructureOfDelaun aSelector (myMeshData);
+  for (Standard_Integer aSupVertId = 0; aSupVertId < mySupVert.Size(); ++aSupVertId)
     aSelector.NeighboursOfNode( mySupVert[aSupVertId] );
-  
-  aLoopEdges.Clear();
+
   IMeshData::IteratorOfMapOfInteger aFreeTriangles( aSelector.Elements() );
   for ( ; aFreeTriangles.More(); aFreeTriangles.Next() )
     deleteTriangle( aFreeTriangles.Key(), aLoopEdges );
@@ -387,7 +413,7 @@ void BRepMesh_Delaun::compute(IMeshData::VectorOfInteger& theVertexIndexes)
   }
 
   // The tops of the super triangle are destroyed
-  for (Standard_Integer aSupVertId = 0; aSupVertId < 3; ++aSupVertId)
+  for (Standard_Integer aSupVertId = 0; aSupVertId < mySupVert.Size (); ++aSupVertId)
     myMeshData->RemoveNode( mySupVert[aSupVertId] );
 }
 
@@ -517,7 +543,8 @@ void BRepMesh_Delaun::createTriangles(const Standard_Integer          theVertexI
 //purpose  : Creation of triangles from the new nodes
 //=======================================================================
 void BRepMesh_Delaun::createTrianglesOnNewVertices(
-  IMeshData::VectorOfInteger& theVertexIndexes)
+  IMeshData::VectorOfInteger&   theVertexIndexes,
+  const Message_ProgressRange& theRange)
 {
   Handle(NCollection_IncAllocator) aAllocator =
     new NCollection_IncAllocator(IMeshData::MEMORY_BLOCK_SIZE_HUGE);
@@ -531,8 +558,13 @@ void BRepMesh_Delaun::createTrianglesOnNewVertices(
   
   Standard_Integer anIndex = theVertexIndexes.Lower();
   Standard_Integer anUpper = theVertexIndexes.Upper();
-  for( ; anIndex <= anUpper; ++anIndex ) 
+  Message_ProgressScope aPS(theRange, "Create triangles on new vertices", anUpper);
+  for (; anIndex <= anUpper; ++anIndex, aPS.Next())
   {
+    if (!aPS.More())
+    {
+      return;
+    }
     aAllocator->Reset(Standard_False);
     IMeshData::MapOfIntegerInteger aLoopEdges(10, aAllocator);
     
@@ -610,7 +642,7 @@ void BRepMesh_Delaun::createTrianglesOnNewVertices(
 //=======================================================================
 void BRepMesh_Delaun::insertInternalEdges()
 {
-  Handle(IMeshData::MapOfInteger) anInternalEdges = InternalEdges();;
+  Handle(IMeshData::MapOfInteger) anInternalEdges = InternalEdges();
 
   // Destruction of triancles intersecting internal edges 
   // and their replacement by makeshift triangles
@@ -652,53 +684,56 @@ void BRepMesh_Delaun::insertInternalEdges()
 
 //=======================================================================
 //function : isBoundToFrontier
-//purpose  : Goes through the neighbour triangles around the given node 
-//           started from the given link, returns TRUE if some triangle 
-//           has a bounding frontier edge or FALSE elsewhere.
-//           Stop link is used to prevent cycles.
-//           Previous element Id is used to identify next neighbor element.
+//purpose  : 
 //=======================================================================
 Standard_Boolean BRepMesh_Delaun::isBoundToFrontier(
   const Standard_Integer theRefNodeId,
-  const Standard_Integer theRefLinkId,
-  const Standard_Integer theStopLinkId,
-  const Standard_Integer thePrevElementId)
+  const Standard_Integer theRefLinkId)
 {
-  const BRepMesh_PairOfIndex& aPair = 
-    myMeshData->ElementsConnectedTo( theRefLinkId );
-  if ( aPair.IsEmpty() )
-    return Standard_False;
+  std::stack<Standard_Integer> aLinkStack;
+  TColStd_PackedMapOfInteger   aVisitedLinks;
 
-  Standard_Integer aNbElements = aPair.Extent();
-  for ( Standard_Integer anElemIt = 1; anElemIt <= aNbElements; ++anElemIt )
+  aLinkStack.push (theRefLinkId);
+  while (!aLinkStack.empty ())
   {
-    const Standard_Integer aTriId = aPair.Index(anElemIt);
-    if ( aTriId < 0 || aTriId == thePrevElementId )
-      continue;
+    const Standard_Integer aCurrentLinkId = aLinkStack.top ();
+    aLinkStack.pop ();
 
-    const BRepMesh_Triangle& aElement = GetTriangle(aTriId);
-    const Standard_Integer(&anEdges)[3] = aElement.myEdges;
+    const BRepMesh_PairOfIndex& aPair = myMeshData->ElementsConnectedTo (aCurrentLinkId);
+    if (aPair.IsEmpty ())
+      return Standard_False;
 
-    for ( Standard_Integer anEdgeIt = 0; anEdgeIt < 3; ++anEdgeIt )
+    const Standard_Integer aNbElements = aPair.Extent ();
+    for (Standard_Integer anElemIt = 1; anElemIt <= aNbElements; ++anElemIt)
     {
-      const Standard_Integer anEdgeId = anEdges[anEdgeIt];
-      if ( anEdgeId == theRefLinkId )
+      const Standard_Integer aTriId = aPair.Index (anElemIt);
+      if (aTriId < 0)
         continue;
 
-      if ( anEdgeId == theStopLinkId )
-        return Standard_False;
+      const BRepMesh_Triangle& aElement = GetTriangle (aTriId);
+      const Standard_Integer (&anEdges)[3] = aElement.myEdges;
 
-      const BRepMesh_Edge& anEdge = GetEdge( anEdgeId );
-      if ( anEdge.FirstNode() != theRefNodeId &&
-           anEdge.LastNode()  != theRefNodeId )
+      for (Standard_Integer anEdgeIt = 0; anEdgeIt < 3; ++anEdgeIt)
       {
-        continue;
+        const Standard_Integer anEdgeId = anEdges[anEdgeIt];
+        if (anEdgeId == aCurrentLinkId)
+          continue;
+
+        const BRepMesh_Edge& anEdge = GetEdge (anEdgeId);
+        if (anEdge.FirstNode () != theRefNodeId &&
+            anEdge.LastNode  () != theRefNodeId)
+        {
+          continue;
+        }
+
+        if (anEdge.Movability () != BRepMesh_Free)
+          return Standard_True;
+
+        if (aVisitedLinks.Add (anEdgeId))
+        {
+          aLinkStack.push (anEdgeId);
+        }
       }
-
-      if ( anEdge.Movability() != BRepMesh_Free )
-        return Standard_True;
-
-      return isBoundToFrontier( theRefNodeId, anEdgeId, theStopLinkId, aTriId );
     }
   }
 
@@ -771,9 +806,7 @@ void BRepMesh_Delaun::cleanupMesh()
               myMeshData->ElementNodes (aCurTriangle, v);
               for (int aNodeIdx = 0; aNodeIdx < 3 && isCanNotBeRemoved; ++aNodeIdx)
               {
-                if (v[aNodeIdx] == mySupVert[0] ||
-                    v[aNodeIdx] == mySupVert[1] ||
-                    v[aNodeIdx] == mySupVert[2])
+                if (isSupVertex (v[aNodeIdx]))
                 {
                   isCanNotBeRemoved = Standard_False;
                 }
@@ -792,8 +825,7 @@ void BRepMesh_Delaun::cleanupMesh()
       for ( Standard_Integer aLinkNodeIt = 0; aLinkNodeIt < 2; ++aLinkNodeIt )
       {
         isConnected[aLinkNodeIt] = isBoundToFrontier( ( aLinkNodeIt == 0 ) ? 
-          anEdge.FirstNode() : anEdge.LastNode(), 
-          aFreeEdgeId, aFreeEdgeId, -1);
+          anEdge.FirstNode() : anEdge.LastNode(), aFreeEdgeId);
       }
 
       if ( !isConnected[0] || !isConnected[1] )
@@ -1224,19 +1256,23 @@ Standard_Boolean BRepMesh_Delaun::checkIntersection(
 //function : addTriangle
 //purpose  : Add a triangle based on the given oriented edges into mesh
 //=======================================================================
-inline void BRepMesh_Delaun::addTriangle( const Standard_Integer (&theEdgesId)[3],
-                                          const Standard_Boolean (&theEdgesOri)[3],
-                                          const Standard_Integer (&theNodesId)[3] )
+void BRepMesh_Delaun::addTriangle( const Standard_Integer (&theEdgesId)[3],
+                                   const Standard_Boolean (&theEdgesOri)[3],
+                                   const Standard_Integer (&theNodesId)[3] )
 {
   Standard_Integer aNewTriangleId = 
     myMeshData->AddElement(BRepMesh_Triangle(theEdgesId, 
       theEdgesOri, BRepMesh_Free));
 
-  Standard_Boolean isAdded = myCircles.Bind( 
-    aNewTriangleId,
-    GetVertex( theNodesId[0] ).Coord(), 
-    GetVertex( theNodesId[1] ).Coord(),
-    GetVertex( theNodesId[2] ).Coord() );
+  Standard_Boolean isAdded = Standard_True;
+  if (myInitCircles)
+  {
+    isAdded = myCircles.Bind( 
+      aNewTriangleId,
+      GetVertex( theNodesId[0] ).Coord(), 
+      GetVertex( theNodesId[1] ).Coord(),
+      GetVertex( theNodesId[2] ).Coord() );
+  }
     
   if ( !isAdded )
     myMeshData->RemoveElement( aNewTriangleId );
@@ -1890,7 +1926,7 @@ void BRepMesh_Delaun::meshPolygon(IMeshData::SequenceOfInteger&   thePolygon,
 //function : meshElementaryPolygon
 //purpose  : Triangulation of closed polygon containing only three edges.
 //=======================================================================
-inline Standard_Boolean BRepMesh_Delaun::meshElementaryPolygon( 
+Standard_Boolean BRepMesh_Delaun::meshElementaryPolygon(
   const IMeshData::SequenceOfInteger& thePolygon)
 {
   Standard_Integer aPolyLen = thePolygon.Length();
@@ -2199,13 +2235,14 @@ void BRepMesh_Delaun::RemoveVertex( const BRepMesh_Vertex& theVertex )
 //function : AddVertices
 //purpose  : Adds some vertices in the triangulation.
 //=======================================================================
-void BRepMesh_Delaun::AddVertices(IMeshData::VectorOfInteger& theVertices)
+void BRepMesh_Delaun::AddVertices(IMeshData::VectorOfInteger&  theVertices,
+                                  const Message_ProgressRange& theRange)
 {
   ComparatorOfIndexedVertexOfDelaun aCmp(myMeshData);
   std::make_heap(theVertices.begin(), theVertices.end(), aCmp);
   std::sort_heap(theVertices.begin(), theVertices.end(), aCmp);
 
-  createTrianglesOnNewVertices(theVertices);
+  createTrianglesOnNewVertices(theVertices, theRange);
 }
 
 //=======================================================================

@@ -223,7 +223,7 @@ public:
   //! Performs the symmetrical transformation of a direction
   //! with respect to the direction V which is the center of
   //! the  symmetry.
-  Standard_EXPORT Standard_NODISCARD gp_Dir2d Mirrored (const gp_Dir2d& V) const;
+  Standard_NODISCARD Standard_EXPORT gp_Dir2d Mirrored (const gp_Dir2d& V) const;
   
   Standard_EXPORT void Mirror (const gp_Ax2d& A);
   
@@ -231,7 +231,7 @@ public:
   //! Performs the symmetrical transformation of a direction
   //! with respect to an axis placement which is the axis
   //! of the symmetry.
-  Standard_EXPORT Standard_NODISCARD gp_Dir2d Mirrored (const gp_Ax2d& A) const;
+  Standard_NODISCARD Standard_EXPORT gp_Dir2d Mirrored (const gp_Ax2d& A) const;
   
     void Rotate (const Standard_Real Ang);
   
@@ -248,6 +248,9 @@ public:
   //! If the scale factor of the "Trsf" T is negative then the
   //! direction <me> is reversed.
   Standard_NODISCARD gp_Dir2d Transformed (const gp_Trsf2d& T) const;
+
+  //! Dumps the content of me into the stream
+  Standard_EXPORT void DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth = -1) const;
 
 
 

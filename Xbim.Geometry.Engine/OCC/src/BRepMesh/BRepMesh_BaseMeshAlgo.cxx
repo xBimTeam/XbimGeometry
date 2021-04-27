@@ -24,6 +24,8 @@
 #include <BRepMesh_ShapeTool.hxx>
 #include <Standard_ErrorHandler.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(BRepMesh_BaseMeshAlgo, IMeshTools_MeshAlgo)
+
 //=======================================================================
 // Function: Constructor
 // Purpose : 
@@ -46,7 +48,8 @@ BRepMesh_BaseMeshAlgo::~BRepMesh_BaseMeshAlgo()
 //=======================================================================
 void BRepMesh_BaseMeshAlgo::Perform(
   const IMeshData::IFaceHandle& theDFace,
-  const IMeshTools_Parameters&  theParameters)
+  const IMeshTools_Parameters&  theParameters,
+  const Message_ProgressRange&  theRange)
 {
   try
   {
@@ -61,7 +64,11 @@ void BRepMesh_BaseMeshAlgo::Perform(
 
     if (initDataStructure())
     {
-      generateMesh();
+      if (!theRange.More())
+      {
+        return;
+      }
+      generateMesh(theRange);
       commitSurfaceTriangulation();
     }
   }

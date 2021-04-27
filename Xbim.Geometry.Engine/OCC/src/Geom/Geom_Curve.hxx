@@ -117,7 +117,7 @@ public:
   Standard_EXPORT virtual Standard_Real ParametricTransformation (const gp_Trsf& T) const;
   
   //! Returns a copy of <me> reversed.
-  Standard_EXPORT Standard_NODISCARD Handle(Geom_Curve) Reversed() const;
+  Standard_NODISCARD Standard_EXPORT Handle(Geom_Curve) Reversed() const;
   
   //! Returns the value of the first parameter.
   //! Warnings :
@@ -224,6 +224,9 @@ public:
   //! compute the current point. For example when the first
   //! derivative on the basis curve and the offset direction are parallel.
   Standard_EXPORT gp_Pnt Value (const Standard_Real U) const;
+
+  //! Dumps the content of me into the stream
+  Standard_EXPORT virtual void DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth = -1) const Standard_OVERRIDE;
 
 
 

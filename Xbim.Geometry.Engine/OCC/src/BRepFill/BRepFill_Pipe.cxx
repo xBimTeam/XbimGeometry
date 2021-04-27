@@ -434,7 +434,7 @@ TopoDS_Face BRepFill_Pipe::Face(const TopoDS_Edge& ESpine,
 TopoDS_Edge BRepFill_Pipe::Edge(const TopoDS_Edge&   ESpine,
 				const TopoDS_Vertex& VProfile)
 {
-  Standard_Integer ii, ispin = 0, iprof = 0, count = 0;;
+  Standard_Integer ii, ispin = 0, iprof = 0, count = 0;
 
   // *************************************************
   // Search if VProfile is a Vertex of myProfile
@@ -760,8 +760,11 @@ TopoDS_Shape BRepFill_Pipe::MakeShape(const TopoDS_Shape& S,
     TopoDS_Face F;
     for (ii=InitialLength+1; ii<=myFaces->ColLength(); ii++) {
       for (jj=1; jj<=myFaces->RowLength(); jj++) {
-	F = TopoDS::Face(myFaces->Value(ii, jj));
-	if (!F.IsNull()) B.Add(result, F);
+        if (myFaces->Value(ii, jj).ShapeType() == TopAbs_FACE)
+        {
+          F = TopoDS::Face(myFaces->Value(ii, jj));
+          if (!F.IsNull()) B.Add(result, F);
+        }
       }
     }
 

@@ -86,7 +86,10 @@ void BOPAlgo_MakerVolume::Perform()
   }
   //
   pPF->SetRunParallel(myRunParallel);
-  pPF->SetProgressIndicator(myProgressIndicator);
+  if (myProgressScope != NULL)
+  {
+    pPF->SetProgressIndicator(*myProgressScope);
+  }
   pPF->SetFuzzyValue(myFuzzyValue);
   pPF->SetNonDestructive(myNonDestructive);
   pPF->SetGlue(myGlue);
@@ -342,7 +345,7 @@ void BOPAlgo_MakerVolume::FillInternalShapes(const TopTools_ListOfShape& theLSR)
 
   TopTools_ListOfShape::Iterator itLA(myDS->Arguments());
   for (; itLA.More(); itLA.Next())
-    BOPAlgo_Tools::TreatCompound(itLA.Value(), aMFence, aLSC);
+    BOPTools_AlgoTools::TreatCompound(itLA.Value(), aLSC, &aMFence);
 
   // Get only edges and vertices from arguments
   TopTools_ListOfShape aLVE;

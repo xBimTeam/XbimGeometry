@@ -36,7 +36,6 @@
 #include <Geom_Surface.hxx>
 #include <gp_Lin2d.hxx>
 #include <gp_Vec2d.hxx>
-#include <Message_ProgressIndicator.hxx>
 #include <OSD_OpenFile.hxx>
 #include <Poly_PolygonOnTriangulation.hxx>
 #include <Poly_Triangulation.hxx>
@@ -668,12 +667,11 @@ void  BRepTools::Dump(const TopoDS_Shape& Sh, Standard_OStream& S)
 //=======================================================================
 
 void  BRepTools::Write(const TopoDS_Shape& Sh, Standard_OStream& S,
-                       const Handle(Message_ProgressIndicator)& PR)
+                       const Message_ProgressRange& theProgress)
 {
   BRepTools_ShapeSet SS;
-  SS.SetProgress(PR);
   SS.Add(Sh);
-  SS.Write(S);
+  SS.Write(S, theProgress);
   SS.Write(Sh,S);
 }
 
@@ -686,11 +684,10 @@ void  BRepTools::Write(const TopoDS_Shape& Sh, Standard_OStream& S,
 void  BRepTools::Read(TopoDS_Shape& Sh, 
                       std::istream& S, 
                       const BRep_Builder& B,
-                      const Handle(Message_ProgressIndicator)& PR)
+                      const Message_ProgressRange& theProgress)
 {
   BRepTools_ShapeSet SS(B);
-  SS.SetProgress(PR);
-  SS.Read(S);
+  SS.Read(S, theProgress);
   SS.Read(Sh,S);
 }
 
@@ -701,7 +698,7 @@ void  BRepTools::Read(TopoDS_Shape& Sh,
 
 Standard_Boolean  BRepTools::Write(const TopoDS_Shape& Sh, 
                                    const Standard_CString File,
-                                   const Handle(Message_ProgressIndicator)& PR)
+                                   const Message_ProgressRange& theProgress)
 {
   std::ofstream os;
   OSD_OpenStream(os, File, std::ios::out);
@@ -713,11 +710,10 @@ Standard_Boolean  BRepTools::Write(const TopoDS_Shape& Sh,
     return isGood;
   
   BRepTools_ShapeSet SS;
-  SS.SetProgress(PR);
   SS.Add(Sh);
   
   os << "DBRep_DrawableShape\n";  // for easy Draw read
-  SS.Write(os);
+  SS.Write(os, theProgress);
   isGood = os.good();
   if(isGood )
     SS.Write(Sh,os);
@@ -739,7 +735,7 @@ Standard_Boolean  BRepTools::Write(const TopoDS_Shape& Sh,
 Standard_Boolean BRepTools::Read(TopoDS_Shape& Sh, 
                                  const Standard_CString File,
                                  const BRep_Builder& B,
-                                 const Handle(Message_ProgressIndicator)& PR)
+                                 const Message_ProgressRange& theProgress)
 {
   std::filebuf fic;
   std::istream in(&fic);
@@ -747,8 +743,7 @@ Standard_Boolean BRepTools::Read(TopoDS_Shape& Sh,
   if(!fic.is_open()) return Standard_False;
   
   BRepTools_ShapeSet SS(B);
-  SS.SetProgress(PR);
-  SS.Read(in);
+  SS.Read(in, theProgress);
   if(!SS.NbShapes()) return Standard_False;
   SS.Read(Sh,in);
   return Standard_True;
@@ -760,19 +755,36 @@ Standard_Boolean BRepTools::Read(TopoDS_Shape& Sh,
 //purpose  : 
 //=======================================================================
 
-void BRepTools::Clean(const TopoDS_Shape& theShape)
+void BRepTools::Clean (const TopoDS_Shape& theShape)
 {
+  if (theShape.IsNull())
+    return;
+
   BRep_Builder aBuilder;
   Handle(Poly_Triangulation) aNullTriangulation;
   Handle(Poly_PolygonOnTriangulation) aNullPoly;
 
-  if (theShape.IsNull())
-    return;
+  TopTools_MapOfShape aShapeMap;
+  const TopLoc_Location anEmptyLoc;
 
   TopExp_Explorer aFaceIt(theShape, TopAbs_FACE);
   for (; aFaceIt.More(); aFaceIt.Next())
   {
-    const TopoDS_Face& aFace = TopoDS::Face(aFaceIt.Current());
+    TopoDS_Shape aFaceNoLoc = aFaceIt.Value();
+    aFaceNoLoc.Location (anEmptyLoc);
+    if (!aShapeMap.Add (aFaceNoLoc))
+    {
+      // the face has already been processed
+      continue;
+    }
+
+    const TopoDS_Face& aFace = TopoDS::Face (aFaceIt.Current());
+    if (!BRep_Tool::IsGeometric (aFace))
+    {
+      // Do not remove triangulation as there is no surface to recompute it.
+      continue;
+    }
+
 
     TopLoc_Location aLoc;
     const Handle(Poly_Triangulation)& aTriangulation =
@@ -782,6 +794,10 @@ void BRepTools::Clean(const TopoDS_Shape& theShape)
       continue;
 
     // Nullify edges
+    // Theoretically, the edges on the face (with surface) may have no geometry
+    // (no curve 3d or 2d or both). Such faces should be considered as invalid and
+    // are not supported by current implementation. So, both triangulation of the face
+    // and polygon on triangulation of the edges are removed unconditionally.
     TopExp_Explorer aEdgeIt(aFace, TopAbs_EDGE);
     for (; aEdgeIt.More(); aEdgeIt.Next())
     {
@@ -797,14 +813,27 @@ void BRepTools::Clean(const TopoDS_Shape& theShape)
   TopExp_Explorer aEdgeIt (theShape, TopAbs_EDGE);
   for (; aEdgeIt.More (); aEdgeIt.Next ())
   {
-    const TopoDS_Edge& aEdge = TopoDS::Edge (aEdgeIt.Current ());
+    TopoDS_Edge anEdgeNoLoc = TopoDS::Edge (aEdgeIt.Value());
+    anEdgeNoLoc.Location (anEmptyLoc);
+
+    if (!aShapeMap.Add (anEdgeNoLoc))
+    {
+      // the edge has already been processed
+      continue;
+    }
+
+    if (!BRep_Tool::IsGeometric (TopoDS::Edge (anEdgeNoLoc)))
+    {
+      // Do not remove polygon 3d as there is no curve to recompute it.
+      continue;
+    }
 
     TopLoc_Location aLoc;
-    Handle (Poly_Polygon3D) aPoly3d = BRep_Tool::Polygon3D (aEdge, aLoc);
-    if (aPoly3d.IsNull ())
+    Handle (Poly_Polygon3D) aPoly3d = BRep_Tool::Polygon3D (anEdgeNoLoc, aLoc);
+    if (aPoly3d.IsNull())
       continue;
 
-    aBuilder.UpdateEdge (aEdge, aNullPoly3d);  
+    aBuilder.UpdateEdge (anEdgeNoLoc, aNullPoly3d);
   }
 }
 //=======================================================================
@@ -903,25 +932,61 @@ void BRepTools::RemoveUnusedPCurves(const TopoDS_Shape& S)
 //purpose  : 
 //=======================================================================
 
-Standard_Boolean  BRepTools::Triangulation(const TopoDS_Shape&    S,
-                                           const Standard_Real    deflec)
+Standard_Boolean  BRepTools::Triangulation(const TopoDS_Shape& theShape,
+                                           const Standard_Real theLinDefl,
+                                           const Standard_Boolean theToCheckFreeEdges)
 {
-  TopExp_Explorer exf, exe;
-  TopLoc_Location l;
-  Handle(Poly_Triangulation) T;
-  Handle(Poly_PolygonOnTriangulation) Poly;
-
-  for (exf.Init(S, TopAbs_FACE); exf.More(); exf.Next()) {
-    const TopoDS_Face& F = TopoDS::Face(exf.Current());
-    T = BRep_Tool::Triangulation(F, l);
-    if (T.IsNull() || (T->Deflection() > deflec))
+  TopExp_Explorer anEdgeIter;
+  TopLoc_Location aDummyLoc;
+  for (TopExp_Explorer aFaceIter (theShape, TopAbs_FACE); aFaceIter.More(); aFaceIter.Next())
+  {
+    const TopoDS_Face& aFace = TopoDS::Face (aFaceIter.Current());
+    const Handle(Poly_Triangulation)& aTri = BRep_Tool::Triangulation (aFace, aDummyLoc);
+    if (aTri.IsNull()
+     || aTri->Deflection() > theLinDefl)
+    {
       return Standard_False;
-    for (exe.Init(F, TopAbs_EDGE); exe.More(); exe.Next()) {
-      const TopoDS_Edge& E = TopoDS::Edge(exe.Current());
-      Poly = BRep_Tool::PolygonOnTriangulation(E, T, l);
-      if (Poly.IsNull()) return Standard_False;
+    }
+
+    for (anEdgeIter.Init (aFace, TopAbs_EDGE); anEdgeIter.More(); anEdgeIter.Next())
+    {
+      const TopoDS_Edge& anEdge = TopoDS::Edge (anEdgeIter.Current());
+      const Handle(Poly_PolygonOnTriangulation)& aPoly = BRep_Tool::PolygonOnTriangulation (anEdge, aTri, aDummyLoc);
+      if (aPoly.IsNull())
+      {
+        return Standard_False;
+      }
     }
   }
+  if (!theToCheckFreeEdges)
+  {
+    return Standard_True;
+  }
+
+  Handle(Poly_Triangulation) anEdgeTri;
+  for (anEdgeIter.Init (theShape, TopAbs_EDGE, TopAbs_FACE); anEdgeIter.More(); anEdgeIter.Next())
+  {
+    const TopoDS_Edge& anEdge = TopoDS::Edge (anEdgeIter.Current());
+    const Handle(Poly_Polygon3D)& aPolygon = BRep_Tool::Polygon3D (anEdge, aDummyLoc);
+    if (!aPolygon.IsNull())
+    {
+      if (aPolygon->Deflection() > theLinDefl)
+      {
+        return Standard_False;
+      }
+    }
+    else
+    {
+      const Handle(Poly_PolygonOnTriangulation)& aPoly = BRep_Tool::PolygonOnTriangulation (anEdge, anEdgeTri, aDummyLoc);
+      if (aPoly.IsNull()
+       || anEdgeTri.IsNull()
+       || anEdgeTri->Deflection() > theLinDefl)
+      {
+        return Standard_False;
+      }
+    }
+  }
+
   return Standard_True;
 }
 
@@ -1068,4 +1133,130 @@ Standard_Real BRepTools::EvalAndUpdateTol(const TopoDS_Edge& theE,
 
 }
 
+//=======================================================================
+//function : OriEdgeInFace
+//purpose  : 
+//=======================================================================
 
+TopAbs_Orientation BRepTools::OriEdgeInFace (const TopoDS_Edge& E,
+                                             const TopoDS_Face& F )
+
+{
+  TopExp_Explorer Exp(F.Oriented(TopAbs_FORWARD),TopAbs_EDGE);
+
+  for (; Exp.More() ;Exp.Next()) {
+    if (Exp.Current().IsSame(E)) {
+      return Exp.Current().Orientation();
+    }
+  }
+  throw Standard_ConstructionError("BRepTools::OriEdgeInFace");
+}
+
+
+namespace
+{
+  //=======================================================================
+  //function : findInternalsToKeep
+  //purpose  : Looks for internal sub-shapes which has to be kept to preserve
+  //           topological connectivity.
+  //=======================================================================
+  static void findInternalsToKeep (const TopoDS_Shape& theS,
+                                   TopTools_MapOfShape& theAllNonInternals,
+                                   TopTools_MapOfShape& theAllInternals,
+                                   TopTools_MapOfShape& theShapesToKeep)
+  {
+    for (TopoDS_Iterator it (theS, Standard_True); it.More(); it.Next())
+    {
+      const TopoDS_Shape& aSS = it.Value();
+      findInternalsToKeep (aSS, theAllNonInternals, theAllInternals, theShapesToKeep);
+
+      if (aSS.Orientation() == TopAbs_INTERNAL)
+        theAllInternals.Add (aSS);
+      else
+        theAllNonInternals.Add (aSS);
+
+      if (theAllNonInternals.Contains(aSS) && theAllInternals.Contains (aSS))
+        theShapesToKeep.Add (aSS);
+    }
+  }
+
+  //=======================================================================
+  //function : removeShapes
+  //purpose  : Removes sub-shapes from the shape
+  //=======================================================================
+  static void removeShapes (TopoDS_Shape& theS,
+                            const TopTools_ListOfShape& theLS)
+  {
+    BRep_Builder aBB;
+    Standard_Boolean isFree = theS.Free();
+    theS.Free (Standard_True);
+
+    for (TopTools_ListOfShape::Iterator it (theLS); it.More(); it.Next())
+    {
+      aBB.Remove (theS, it.Value());
+    }
+    theS.Free (isFree);
+  }
+
+  //=======================================================================
+  //function : removeInternals
+  //purpose  : Removes recursively all internal sub-shapes from the given shape.
+  //           Returns true if all sub-shapes have been removed from the shape.
+  //=======================================================================
+  static Standard_Boolean removeInternals (TopoDS_Shape& theS,
+                                           const TopTools_MapOfShape* theShapesToKeep)
+  {
+    TopTools_ListOfShape aLRemove;
+    for (TopoDS_Iterator it (theS, Standard_True); it.More(); it.Next())
+    {
+      const TopoDS_Shape& aSS = it.Value();
+      if (aSS.Orientation() == TopAbs_INTERNAL)
+      {
+        if (!theShapesToKeep || !theShapesToKeep->Contains (aSS))
+          aLRemove.Append (aSS);
+      }
+      else
+      {
+        if (removeInternals (*(TopoDS_Shape*)&aSS, theShapesToKeep))
+          aLRemove.Append (aSS);
+      }
+    }
+
+    Standard_Integer aNbSToRemove = aLRemove.Extent();
+    if (aNbSToRemove)
+    {
+      removeShapes (theS, aLRemove);
+      return (theS.NbChildren() == 0);
+    }
+    return Standard_False;
+  }
+
+}
+
+//=======================================================================
+//function : RemoveInternals
+//purpose  : 
+//=======================================================================
+void BRepTools::RemoveInternals (TopoDS_Shape& theS,
+                                 const Standard_Boolean theForce)
+{
+  TopTools_MapOfShape *pMKeep = NULL, aMKeep;
+  if (!theForce)
+  {
+    // Find all internal sub-shapes which has to be kept to preserve topological connectivity.
+    // Note that if the multi-connected shape is not directly contained in some shape,
+    // but as a part of bigger sub-shape which will be removed, the multi-connected
+    // shape is going to be removed also, breaking topological connectivity.
+    // For instance, <theS> is a compound of the face and edge, which does not
+    // belong to the face. The face contains internal wire and the edge shares
+    // the vertex with one of the vertices of that wire. The vertex is not directly
+    // contained in the face, thus will be removed as part of internal wire, and topological
+    // connectivity between edge and face will be lost.
+    TopTools_MapOfShape anAllNonInternals, anAllInternals;
+    findInternalsToKeep (theS, anAllNonInternals, anAllInternals, aMKeep);
+    if (aMKeep.Extent())
+      pMKeep = &aMKeep;
+  }
+
+  removeInternals (theS, pMKeep);
+}

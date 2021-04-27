@@ -17,6 +17,7 @@
 
 
 #include <BOPAlgo_Builder.hxx>
+#include <BOPAlgo_Alerts.hxx>
 #include <BOPAlgo_BuilderFace.hxx>
 #include <BOPAlgo_PaveFiller.hxx>
 #include <BOPAlgo_Tools.hxx>
@@ -383,7 +384,18 @@ void BOPAlgo_Builder::BuildSplitFaces()
         if (bIsClosed) {
           if (aMFence.Add(aSp)) {
             if (!BRep_Tool::IsClosed(aSp, aF)){
-              BOPTools_AlgoTools3D::DoSplitSEAMOnFace(aSp, aF);
+              if (!BOPTools_AlgoTools3D::DoSplitSEAMOnFace(aSp, aF))
+              {
+                // try different approach
+                if (!BOPTools_AlgoTools3D::DoSplitSEAMOnFace(aE, aSp, aF))
+                {
+                  TopoDS_Compound aWS;
+                  BRep_Builder().MakeCompound (aWS);
+                  BRep_Builder().Add (aWS, aF);
+                  BRep_Builder().Add (aWS, aSp);
+                  AddWarning (new BOPAlgo_AlertUnableToMakeClosedEdgeOnFace (aWS));
+                }
+              }
             }
             //
             aSp.Orientation(TopAbs_FORWARD);
@@ -438,7 +450,10 @@ void BOPAlgo_Builder::BuildSplitFaces()
     aBF.SetFace(aF);
     aBF.SetShapes(aLE);
     aBF.SetRunParallel(myRunParallel);
-    aBF.SetProgressIndicator(myProgressIndicator);
+    if (myProgressScope != NULL)
+    {
+      aBF.SetProgressIndicator(*myProgressScope);
+    }
     //
   }// for (i=0; i<aNbS; ++i) {
   //
@@ -625,7 +640,10 @@ void BOPAlgo_Builder::FillSameDomainFaces()
         aPSB.Shape1() = aF1;
         aPSB.Shape2() = aF2;
         aPSB.SetFuzzyValue(myFuzzyValue);
-        aPSB.SetProgressIndicator(myProgressIndicator);
+        if (myProgressScope != NULL)
+        {
+          aPSB.SetProgressIndicator(*myProgressScope);
+        }
       }
     }
   }
@@ -778,7 +796,10 @@ void BOPAlgo_Builder::FillInternalVertices()
         aVFI.SetVertex(aV);
         aVFI.SetFace(aFIm);
         aVFI.SetFuzzyValue(myFuzzyValue);
-        aVFI.SetProgressIndicator(myProgressIndicator);
+        if (myProgressScope != NULL)
+        {
+          aVFI.SetProgressIndicator(*myProgressScope);
+        }
       }
     }
   }

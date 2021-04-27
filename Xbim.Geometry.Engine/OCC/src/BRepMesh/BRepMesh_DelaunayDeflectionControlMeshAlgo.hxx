@@ -34,7 +34,8 @@ public:
   //! Constructor.
   BRepMesh_DelaunayDeflectionControlMeshAlgo()
     : myMaxSqDeflection(-1.),
-      myIsAllDegenerated(Standard_False)
+      myIsAllDegenerated(Standard_False),
+      myCircles(NULL)
   {
   }
 
@@ -45,22 +46,33 @@ public:
 
 protected:
 
-  //! Perfroms processing of generated mesh. Generates surface nodes and inserts them into structure.
-  virtual void postProcessMesh(BRepMesh_Delaun& theMesher) Standard_OVERRIDE
+  //! Performs processing of generated mesh. Generates surface nodes and inserts them into structure.
+  virtual void postProcessMesh (BRepMesh_Delaun& theMesher,
+                                const Message_ProgressRange& theRange) Standard_OVERRIDE
   {
+    Message_ProgressScope aPS(theRange, "Post process mesh", 2);
     // Insert surface nodes.
-    DelaunayInsertionBaseClass::postProcessMesh(theMesher);
+    DelaunayInsertionBaseClass::postProcessMesh (theMesher, aPS.Next());
+    if (!aPS.More())
+    {
+      return;
+    }
 
     if (this->getParameters().ControlSurfaceDeflection &&
         this->getStructure()->ElementsOfDomain().Extent() > 0)
     {
-      optimizeMesh(theMesher);
+      optimizeMesh(theMesher, aPS.Next());
+    }
+    else
+    {
+      aPS.Next();
     }
   }
 
   //! Checks deviation of a mesh from geometrical surface.
   //! Inserts additional nodes in case of huge deviation.
-  virtual void optimizeMesh(BRepMesh_Delaun& theMesher)
+  virtual void optimizeMesh (BRepMesh_Delaun& theMesher,
+                             const Message_ProgressRange& theRange)
   {
     Handle(NCollection_IncAllocator) aTmpAlloc =
       new NCollection_IncAllocator(IMeshData::MEMORY_BLOCK_SIZE_HUGE);
@@ -71,8 +83,13 @@ protected:
 
     const Standard_Integer aIterationsNb = 11;
     Standard_Boolean isInserted = Standard_True;
+    Message_ProgressScope aPS(theRange, "Iteration", aIterationsNb);
     for (Standard_Integer aPass = 1; aPass <= aIterationsNb && isInserted && !myIsAllDegenerated; ++aPass)
     {
+      if (!aPS.More())
+      {
+        return;
+      }
       // Reset stop condition
       myMaxSqDeflection = -1.;
       myIsAllDegenerated = Standard_True;
@@ -82,7 +99,6 @@ protected:
       {
         break;
       }
-
       // Iterate on current triangles
       IMeshData::IteratorOfMapOfInteger aTriangleIt(this->getStructure()->ElementsOfDomain());
       for (; aTriangleIt.More(); aTriangleIt.Next())
@@ -91,7 +107,7 @@ protected:
         splitTriangleGeometry(aTriangle);
       }
 
-      isInserted = this->insertNodes(myControlNodes, theMesher);
+      isInserted = this->insertNodes(myControlNodes, theMesher, aPS.Next());
     }
 
     myCouplesMap.Nullify();
@@ -107,6 +123,11 @@ private:
   //! Contains geometrical data related to node of triangle.
   struct TriangleNodeInfo
   {
+    TriangleNodeInfo()
+    : isFrontierLink(Standard_False)
+    {
+    }
+
     gp_XY            Point2d;
     gp_XYZ           Point;
     Standard_Boolean isFrontierLink;
@@ -172,7 +193,7 @@ private:
   };
 
   //! Returns nodes info of the given triangle.
-  inline void getTriangleInfo(
+  void getTriangleInfo(
     const BRepMesh_Triangle& theTriangle,
     const Standard_Integer (&theNodesIndices)[3],
     TriangleNodeInfo       (&theInfo)[3]) const
@@ -216,7 +237,7 @@ private:
 
   //! Updates array of links vectors.
   //! @return False on degenerative triangle.
-  inline Standard_Boolean computeTriangleGeometry(
+  Standard_Boolean computeTriangleGeometry(
     const TriangleNodeInfo(&theNodesInfo)[3],
     gp_Vec                (&theLinks)[3],
     gp_Vec                 &theNormal)
@@ -237,7 +258,7 @@ private:
 
   //! Updates array of links vectors.
   //! @return False on degenerative triangle.
-  inline Standard_Boolean checkTriangleForDegenerativityAndGetLinks(
+  Standard_Boolean checkTriangleForDegenerativityAndGetLinks(
     const TriangleNodeInfo (&theNodesInfo)[3],
     gp_Vec                 (&theLinks)[3])
   {
@@ -256,7 +277,7 @@ private:
 
   //! Checks area of triangle in parametric space for degenerativity.
   //! @return False on degenerative triangle.
-  inline Standard_Boolean checkTriangleArea2d(
+  Standard_Boolean checkTriangleArea2d(
     const TriangleNodeInfo (&theNodesInfo)[3])
   {
     const gp_Vec2d aLink2d1(theNodesInfo[0].Point2d, theNodesInfo[1].Point2d);
@@ -268,9 +289,9 @@ private:
 
   //! Computes normal using two link vectors.
   //! @return True on success, False in case of normal of null magnitude.
-  inline Standard_Boolean computeNormal(const gp_Vec& theLink1,
-                                        const gp_Vec& theLink2,
-                                        gp_Vec&       theNormal)
+  Standard_Boolean computeNormal(const gp_Vec& theLink1,
+                                 const gp_Vec& theLink2,
+                                 gp_Vec&       theNormal)
   {
     const gp_Vec aNormal(theLink1 ^ theLink2);
     if (aNormal.SquareMagnitude() > gp::Resolution())
@@ -284,7 +305,7 @@ private:
 
   //! Computes deflection of midpoints of triangles links.
   //! @return True if point fits specified deflection.
-  inline void splitLinks(
+  void splitLinks(
     const TriangleNodeInfo (&theNodesInfo)[3],
     const Standard_Integer (&theNodesIndices)[3])
   {
@@ -364,7 +385,7 @@ private:
   //! insertion in case if it overflows deflection.
   //! @return True if point has been cached for insertion.
   template<class DeflectionFunctor>
-  inline Standard_Boolean usePoint(
+  Standard_Boolean usePoint(
     const gp_XY&             thePnt2d,
     const DeflectionFunctor& theDeflectionFunctor)
   {

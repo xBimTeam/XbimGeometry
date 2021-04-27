@@ -26,6 +26,8 @@
 #include <Precision.hxx>
 #include <Bnd_Box.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(BRepMesh_ShapeTool, Standard_Transient)
+
 namespace
 {
   //! Auxilary struct to take a tolerance of edge.
@@ -72,7 +74,7 @@ Standard_Real BRepMesh_ShapeTool::MaxFaceTolerance(const TopoDS_Face& theFace)
   Standard_Real aMaxTolerance = BRep_Tool::Tolerance(theFace);
 
   Standard_Real aTolerance = Max(
-    MaxTolerance<TopAbs_EDGE, EdgeTolerance  >(theFace),
+    MaxTolerance<TopAbs_EDGE,   EdgeTolerance  >(theFace),
     MaxTolerance<TopAbs_VERTEX, VertexTolerance>(theFace));
 
   return Max(aMaxTolerance, aTolerance);

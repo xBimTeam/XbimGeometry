@@ -24,6 +24,8 @@
 #include <TopExp.hxx>
 #include <TopoDS_Vertex.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(BRepMesh_Deflection, Standard_Transient)
+
 //=======================================================================
 //function : RelativeEdgeDeflection
 //purpose  : 
@@ -145,18 +147,39 @@ void BRepMesh_Deflection::ComputeDeflection (
   }
 
   Standard_Real aFaceDeflection = 0.0;
-  if (theDFace->WiresNb () > 0)
+  if (!theParameters.ForceFaceDeflection)
   {
-    for (Standard_Integer aWireIt = 0; aWireIt < theDFace->WiresNb(); ++aWireIt)
+    if (theDFace->WiresNb () > 0)
     {
-      aFaceDeflection += theDFace->GetWire(aWireIt)->GetDeflection();
+      for (Standard_Integer aWireIt = 0; aWireIt < theDFace->WiresNb (); ++aWireIt)
+      {
+        aFaceDeflection += theDFace->GetWire (aWireIt)->GetDeflection ();
+      }
+
+      aFaceDeflection /= theDFace->WiresNb ();
     }
 
-    aFaceDeflection /= theDFace->WiresNb ();
+    aFaceDeflection = Max (2. * BRepMesh_ShapeTool::MaxFaceTolerance (
+      theDFace->GetFace ()), aFaceDeflection);
   }
+  aFaceDeflection = Max (aDeflection, aFaceDeflection);
 
-  aFaceDeflection = Max(aDeflection, aFaceDeflection);
+  theDFace->SetDeflection (aFaceDeflection);
+}
 
-  theDFace->SetDeflection (Max(2.* BRepMesh_ShapeTool::MaxFaceTolerance(
-    theDFace->GetFace()), aFaceDeflection));
+//=======================================================================
+// Function: IsConsistent
+// Purpose : 
+//=======================================================================
+Standard_Boolean BRepMesh_Deflection::IsConsistent (
+  const Standard_Real theCurrent,
+  const Standard_Real theRequired,
+  const Standard_Boolean theAllowDecrease,
+  const Standard_Real theRatio)
+{
+  // Check if the deflection of existing polygonal representation
+  // fits the required deflection.
+  Standard_Boolean isConsistent = theCurrent < (1. + theRatio) * theRequired
+         && (!theAllowDecrease || theCurrent > (1. - theRatio) * theRequired);
+  return isConsistent;
 }

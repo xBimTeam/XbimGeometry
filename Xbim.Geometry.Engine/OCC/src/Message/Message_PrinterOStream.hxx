@@ -16,6 +16,7 @@
 #ifndef _Message_PrinterOStream_HeaderFile
 #define _Message_PrinterOStream_HeaderFile
 
+#include <Message_ConsoleColor.hxx>
 #include <Message_Printer.hxx>
 #include <Standard_Address.hxx>
 #include <Standard_OStream.hxx>
@@ -29,6 +30,21 @@ DEFINE_STANDARD_HANDLE(Message_PrinterOStream, Message_Printer)
 class Message_PrinterOStream : public Message_Printer
 {
   DEFINE_STANDARD_RTTIEXT(Message_PrinterOStream, Message_Printer)
+public:
+
+  //! Setup console text color.
+  //!
+  //! On Windows, this would affect active terminal color output.
+  //! On other systems, this would put special terminal codes;
+  //! the terminal should support these codes or them will appear in text otherwise.
+  //! The same will happen when stream is redirected into text file.
+  //!
+  //! Beware that within multi-threaded environment inducing console colors
+  //! might lead to colored text mixture due to concurrency.
+  Standard_EXPORT static void SetConsoleTextColor (Standard_OStream* theOStream,
+                                                   Message_ConsoleColor theTextColor,
+                                                   bool theIsIntenseText = false);
+
 public:
   
   //! Empty constructor, defaulting to cout
@@ -49,37 +65,27 @@ public:
   Close();
 }
 
-  //! Returns option to convert non-Ascii symbols to UTF8 encoding
-  Standard_Boolean GetUseUtf8() const { return myUseUtf8; }
-  
-  //! Sets option to convert non-Ascii symbols to UTF8 encoding
-  void SetUseUtf8 (const Standard_Boolean useUtf8) { myUseUtf8 = useUtf8; }
-
   //! Returns reference to the output stream
   Standard_OStream& GetStream() const { return *(Standard_OStream*)myStream; }
-  
+
+  //! Returns TRUE if text output into console should be colorized depending on message gravity; TRUE by default.
+  Standard_Boolean ToColorize() const { return myToColorize; }
+
+  //! Set if text output into console should be colorized depending on message gravity.
+  void SetToColorize (Standard_Boolean theToColorize) { myToColorize = theToColorize; }
+
+protected:
+
   //! Puts a message to the current stream
   //! if its gravity is equal or greater
   //! to the trace level set by SetTraceLevel()
-  Standard_EXPORT virtual void Send (const Standard_CString theString, const Message_Gravity theGravity, const Standard_Boolean putEndl = Standard_True) const Standard_OVERRIDE;
-  
-  //! Puts a message to the current stream
-  //! if its gravity is equal or greater
-  //! to the trace level set by SetTraceLevel()
-  Standard_EXPORT virtual void Send (const TCollection_AsciiString& theString, const Message_Gravity theGravity, const Standard_Boolean putEndl = Standard_True) const Standard_OVERRIDE;
-  
-  //! Puts a message to the current stream
-  //! if its gravity is equal or greater
-  //! to the trace level set by SetTraceLevel()
-  //! Non-Ascii symbols are converted to UTF-8 if UseUtf8
-  //! option is set, else replaced by symbols '?'
-  Standard_EXPORT virtual void Send (const TCollection_ExtendedString& theString, const Message_Gravity theGravity, const Standard_Boolean putEndl = Standard_True) const Standard_OVERRIDE;
+  Standard_EXPORT virtual void send (const TCollection_AsciiString& theString, const Message_Gravity theGravity) const Standard_OVERRIDE;
 
 private:
 
   Standard_Address myStream;
   Standard_Boolean myIsFile;
-  Standard_Boolean myUseUtf8;
+  Standard_Boolean myToColorize;
 
 };
 
