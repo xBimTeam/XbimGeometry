@@ -1219,7 +1219,6 @@ namespace Xbim
 
 		gp_Dir XbimWire::NormalDir(const TopoDS_Wire& wire)
 		{
-
 			double x = 0, y = 0, z = 0;
 			gp_Pnt currentStart, previousEnd, first;
 			int count = 0;
