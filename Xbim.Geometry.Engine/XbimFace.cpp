@@ -1049,11 +1049,10 @@ namespace Xbim
 				if (wire->IsValid)
 				{
 					double tolerance = profile->Model->ModelFactors->Precision;
-
 					XbimVector3D n = wire->Normal;
 					if (n.IsInvalid()) //it is not an area
 					{
-						XbimGeometryCreator::LogWarning(logger, profile, "Face cannot be built with a profile that has no area.");
+						XbimGeometryCreator::LogWarning(logger, profile, "Face cannot be built with a profile that has no area (invalid normal).");
 						return;
 					}
 					else
@@ -1232,6 +1231,11 @@ namespace Xbim
 						try //it is possible the inner loop is just a closed wire with zero area when a normal is calculated, this will throw an excpetion and the void is invalid
 						{
 							XbimVector3D n = innerWire->Normal;
+							if (n.IsInvalid())
+							{
+								XbimGeometryCreator::LogWarning(logger, profile, "Invalid void. Inner bound ignored", curve->EntityLabel);
+								continue;
+							}
 							bool needInvert = n.DotProduct(tn) > 0;
 							if (needInvert) //inner wire should be reverse of outer wire
 								innerWire->Reverse();

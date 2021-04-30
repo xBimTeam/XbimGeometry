@@ -143,7 +143,7 @@ namespace Xbim
 			virtual property IXbimEdgeSet^ Edges {IXbimEdgeSet^ get(); }
 			virtual property IXbimVertexSet^ Vertices {IXbimVertexSet^ get(); }
 			virtual property IEnumerable<XbimPoint3D>^ Points {IEnumerable<XbimPoint3D>^ get(); }
-			//returns the normal of the loop using the Newell's normal algorithm
+			//returns the normal of the loop using the Newell's normal algorithm. WARNING: Always check success via the IsInvalid() method of returned instance.
 			virtual property XbimVector3D Normal {XbimVector3D get(); }
 			virtual property bool IsClosed {bool get() { return IsValid && pWire->Closed() == Standard_True; }; }
 			virtual property bool IsPlanar {bool get(); }

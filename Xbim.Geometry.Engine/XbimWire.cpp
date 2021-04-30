@@ -1211,8 +1211,9 @@ namespace Xbim
 			}
 			catch (Standard_Failure sf)
 			{
-				String^ err = gcnew String(sf.GetMessageString());
-				throw gcnew Exception("Invalid normal: " + err);
+				// this returns a vector that can be checked for IsInvalid, 
+				// this seems better than throwing another exception.
+				return XbimVector3D();
 			}
 
 		}
@@ -1242,16 +1243,17 @@ namespace Xbim
 							first = currentStart;
 						previousEnd = currentStart;
 					}
-					else if (wEx.Current().Closed() && ((cType == STANDARD_TYPE(Geom_Circle)) ||
+					else if (wEx.Current().Closed() && (
+						(cType == STANDARD_TYPE(Geom_Circle)) ||
 						(cType == STANDARD_TYPE(Geom_Ellipse)) ||
 						(cType == STANDARD_TYPE(Geom_Parabola)) ||
 						(cType == STANDARD_TYPE(Geom_Hyperbola)))) //it is a conic
 					{
 						Handle(Geom_Conic) conic = Handle(Geom_Conic)::DownCast(c3dptr);
 						return conic->Axis().Direction();
-
 					}
-					else if ((cType == STANDARD_TYPE(Geom_Circle)) ||
+					else if (
+						(cType == STANDARD_TYPE(Geom_Circle)) ||
 						(cType == STANDARD_TYPE(Geom_Ellipse)) ||
 						(cType == STANDARD_TYPE(Geom_Parabola)) ||
 						(cType == STANDARD_TYPE(Geom_Hyperbola)) ||
@@ -2938,7 +2940,7 @@ namespace Xbim
 
 #pragma region Helper functions
 
-		void XbimWire::AddNewellPoint(const gp_Pnt& previous, const gp_Pnt& current, double& x, double& y, double& z)
+		void XbimWire::AddNewellPoint(const gp_Pnt& previous, const gp_Pnt& current, double& normalX, double& normalY, double& normalZ)
 		{
 			const double& xn = previous.X();
 			const double& yn = previous.Y();
@@ -2946,16 +2948,18 @@ namespace Xbim
 			const double& xn1 = current.X();
 			const double& yn1 = current.Y();
 			const double& zn1 = current.Z();
-			/*
-			Debug::WriteLine("_.LINE");
-			Debug::WriteLine("{0},{1},{2}", xn, yn, zn);
-			Debug::WriteLine("{0},{1},{2}", xn1, yn1, zn1);
-			Debug::WriteLine("");
-			*/
+			
+			// Debug::WriteLine("_.LINE");
+			// System::Diagnostics::Debug::WriteLine("from {0},{1},{2} ", xn, yn, zn);
+			// System::Diagnostics::Debug::WriteLine("to {0},{1},{2}", xn1, yn1, zn1);
+			//Debug::WriteLine("");
+			
+			// this has been checked, the factors are passed in a different order than the 
+			// canonical pseudocode at kronos, but the results are identical
+			normalX += (yn - yn1) * (zn + zn1);
+			normalY += (xn + xn1) * (zn - zn1);
+			normalZ += (xn - xn1) * (yn + yn1);
 
-			x += (yn - yn1) * (zn + zn1);
-			y += (xn + xn1) * (zn - zn1);
-			z += (xn - xn1) * (yn + yn1);
 			/*
 			Debug::WriteLine("-HYPERLINK I O l  {0},{1},{2}", x, y, z);
 			Debug::WriteLine("");
