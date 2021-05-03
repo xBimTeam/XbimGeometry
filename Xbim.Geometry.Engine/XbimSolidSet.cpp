@@ -1124,17 +1124,20 @@ namespace Xbim
 			else if (hs != nullptr)
 			{
 				XbimSolid^ s = gcnew XbimSolid(hs, logger);
-				if (s->IsValid) solids->Add(s);
+				if (s->IsValid)
+					solids->Add(s);
 			}
 			else if (csgPrim != nullptr)
 			{
 				XbimSolid^ s = gcnew XbimSolid(csgPrim, logger);
-				if (s->IsValid)solids->Add(s);
+				if (s->IsValid)
+					solids->Add(s);
 			}
 			else if (sm != nullptr)
 			{
 				XbimSolid^ s = gcnew XbimSolid(sm, logger);
-				if (s->IsValid)solids->Add(s); // otherwise create a  solid model
+				if (s->IsValid)
+					solids->Add(s); // otherwise create a  solid model
 			}
 			else
 			{

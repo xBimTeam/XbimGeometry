@@ -17747,181 +17747,172 @@
     <ClCompile Include="OCC\src\BiTgte\BiTgte_HCurveOnVertex_0.cxx">
       <Filter>Source files\TKOffset\BiTgte</Filter>
     </ClCompile>
-  </ItemGroup> 
+    <ClCompile Include="XbimCompound.cpp">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClCompile>
+    <ClCompile Include="XbimConvert.cpp">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClCompile>
+    <ClCompile Include="XbimCurve.cpp">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClCompile>
+    <ClCompile Include="XbimCurve2D.cpp">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClCompile>
+    <ClCompile Include="XbimEdge.cpp">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClCompile>
+    <ClCompile Include="XbimEdgeSet.cpp">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClCompile>
+    <ClCompile Include="XbimFace.cpp">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClCompile>
+    <ClCompile Include="XbimFaceSet.cpp">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClCompile>
+    <ClCompile Include="XbimGeometryCreator.cpp">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClCompile>
+    <ClCompile Include="XbimGeometryObject.cpp">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClCompile>
+    <ClCompile Include="XbimGeometryObjectSet.cpp">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClCompile>
+    <ClCompile Include="XbimMesh.cpp">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClCompile>
+    <ClCompile Include="XbimNativeApi.cpp">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClCompile>
+    <ClCompile Include="XbimOccShape.cpp">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClCompile>
+    <ClCompile Include="XbimOccWriter.cpp">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClCompile>
+    <ClCompile Include="XbimPoint3DWithTolerance.cpp">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClCompile>
+    <ClCompile Include="XbimProgressMonitor.cpp">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClCompile>
+    <ClCompile Include="XbimShell.cpp">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClCompile>
+    <ClCompile Include="XbimShellSet.cpp">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClCompile>
+    <ClCompile Include="XbimSolid.cpp">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClCompile>
+    <ClCompile Include="XbimSolidSet.cpp">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClCompile>
+    <ClCompile Include="XbimVertex.cpp">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClCompile>
+    <ClCompile Include="XbimVertexSet.cpp">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClCompile>
+    <ClCompile Include="XbimWire.cpp">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClCompile>
+    <ClCompile Include="XbimWireSet.cpp">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClCompile>
+  </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+    <ClInclude Include="resource.h" />
     <ClInclude Include="XbimCompound.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="XbimCurve.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="XbimCurve2D.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="XbimEdge.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="XbimEdgeSet.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="XbimFace.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="XbimFaceSet.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="XbimGeometryCreator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="XbimGeometryObject.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="XbimGeometryObjectSet.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="XbimConvert.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="XbimOccShape.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="XbimOccWriter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="XbimPoint3DWithTolerance.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="XbimShell.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="XbimShellSet.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="XbimSolid.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="XbimSolidSet.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="XbimVertex.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="XbimVertexSet.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="XbimWire.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="XbimWireSet.h">
-      <Filter>Header Files</Filter>
+      <Filter>Source files\XbimGeometry</Filter>
     </ClInclude>
     <ClInclude Include="XbimConstraints.h">
-      <Filter>Header Files</Filter>
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClInclude>
+    <ClInclude Include="XbimConvert.h">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClInclude>
+    <ClInclude Include="XbimCurve.h">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClInclude>
+    <ClInclude Include="XbimCurve2D.h">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClInclude>
+    <ClInclude Include="XbimEdge.h">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClInclude>
+    <ClInclude Include="XbimEdgeSet.h">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClInclude>
+    <ClInclude Include="XbimFace.h">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClInclude>
+    <ClInclude Include="XbimFaceSet.h">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClInclude>
+    <ClInclude Include="XbimGeometryCreator.h">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClInclude>
+    <ClInclude Include="XbimGeometryObject.h">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClInclude>
+    <ClInclude Include="XbimGeometryObjectSet.h">
+      <Filter>Source files\XbimGeometry</Filter>
     </ClInclude>
     <ClInclude Include="XbimMesh.h">
-      <Filter>Header Files</Filter>
+      <Filter>Source files\XbimGeometry</Filter>
     </ClInclude>
     <ClInclude Include="XbimNativeApi.h">
-      <Filter>Header Files</Filter>
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClInclude>
+    <ClInclude Include="XbimOccShape.h">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClInclude>
+    <ClInclude Include="XbimOccWriter.h">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClInclude>
+    <ClInclude Include="XbimPoint3DWithTolerance.h">
+      <Filter>Source files\XbimGeometry</Filter>
     </ClInclude>
     <ClInclude Include="XbimProgressMonitor.h">
-      <Filter>Header Files</Filter>
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClInclude>
+    <ClInclude Include="XbimShell.h">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClInclude>
+    <ClInclude Include="XbimShellSet.h">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClInclude>
+    <ClInclude Include="XbimSolid.h">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClInclude>
+    <ClInclude Include="XbimSolidSet.h">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClInclude>
+    <ClInclude Include="XbimVertex.h">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClInclude>
+    <ClInclude Include="XbimVertexSet.h">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClInclude>
+    <ClInclude Include="XbimWire.h">
+      <Filter>Source files\XbimGeometry</Filter>
+    </ClInclude>
+    <ClInclude Include="XbimWireSet.h">
+      <Filter>Source files\XbimGeometry</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="XbimCompound.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="XbimCurve.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="XbimCurve2D.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="XbimEdge.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="XbimEdgeSet.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="XbimFace.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="XbimFaceSet.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="XbimGeometryCreator.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="XbimGeometryObject.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="XbimGeometryObjectSet.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="XbimConvert.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="XbimOccShape.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="XbimOccWriter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="XbimPoint3DWithTolerance.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="XbimShell.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="XbimShellSet.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="XbimSolid.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="XbimSolidSet.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="XbimVertex.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="XbimVertexSet.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="XbimWire.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="XbimWireSet.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="XbimMesh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="XbimNativeApi.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="XbimProgressMonitor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="app.rc">
-      <Filter>Resource Files</Filter>
-    </ResourceCompile>
+    <ResourceCompile Include="app.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="app.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="OCC\OCCDirList.txt" />
+    <Image Include="app.ico" />
   </ItemGroup>
 </Project>

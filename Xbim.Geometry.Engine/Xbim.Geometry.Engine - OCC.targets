@@ -228,15 +228,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup Label="TKGeomBase">
-
-  </ItemGroup>
- 
-  <ItemGroup>
-
-
-    <None Include="OCC\UpdateOCCSource.bat" />
-  </ItemGroup>
-  <ItemGroup Label="ShapeBuild">
+ </ItemGroup>
+   <ItemGroup Label="ShapeBuild">
     <ClCompile Include="OCC\src\ShapeBuild\ShapeBuild.cxx" />
     <ClInclude Include="OCC\src\ShapeBuild\ShapeBuild.hxx" />
     <ClCompile Include="OCC\src\ShapeBuild\ShapeBuild_Edge.cxx" />
@@ -6308,9 +6301,6 @@
     <ClCompile Include="OCC\src\BiTgte\BiTgte_HCurveOnVertex_0.cxx" />
   </ItemGroup>
   <!-- occSource -->
-  <ItemGroup>
-    <Text Include="OCC\OCCDirList.txt" />
-  </ItemGroup>
   <!--Override the target GenerateTargetFrameworkMonikerAttribute so that we ClCompile as clr, default is not so-->
   <Target Name="GenerateTargetFrameworkMonikerAttribute" BeforeTargets="ClCompile" DependsOnTargets="PrepareForBuild;GetReferenceAssemblyPaths" Inputs="$(VCTargetsPath)\Microsoft.BuildSteps.targets" Outputs="$(TargetFrameworkMonikerAssemblyAttributesPath)" Condition="'$(GenerateTargetFrameworkAttribute)' == 'true'">
     <PropertyGroup>
