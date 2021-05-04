@@ -1517,13 +1517,19 @@ namespace Xbim
 				{
 					//no bounded face
 					// Debug::WriteLine("Face " + ifcFace->EntityLabel.ToString() + " skipped.");
-					XbimGeometryCreator::LogDebug(logger, ifcFace, "No outer loop built,  face ignored");
+					XbimGeometryCreator::LogDebug(logger, ifcFace, "No outer loop built, face ignored");
 					continue; // move to next face
 				}
 
 				try
 				{
-					gp_Dir outerNormal = XbimWire::NormalDir(outerLoop); //this can throw an exception if the wire is nonsense (line) and should just be dropped
+					gp_Dir outerNormal = XbimWire::NormalDir(outerLoop); 
+					if (XbimConvert::IsInvalid(outerNormal, tolerance))
+					{
+						// if the direction is smaller than the tolerance it's ivalid
+						XbimGeometryCreator::LogDebug(logger, ifcFace, "Invalid outer loop normal, face ignored");
+						continue;
+					}
 					TopoDS_Vertex v1, v2;
 					TopExp::Vertices(outerLoop, v1, v2);
 					gp_Pln thePlane(BRep_Tool::Pnt(v1), outerNormal);
@@ -1539,6 +1545,11 @@ namespace Xbim
 								{
 									TopoDS_Wire innerWire = TopoDS::Wire(*it);
 									gp_Vec innerNormal = XbimWire::NormalDir(innerWire);
+									if (XbimConvert::IsInvalid(innerNormal, tolerance))
+									{
+										XbimGeometryCreator::LogDebug(logger, ifcFace, "Inner wire has invalid normal, wire ignored");
+										continue;
+									}
 									if (!outerNormal.IsOpposite(innerNormal, Precision::Angular()))
 										innerWire.Reverse();
 									faceMaker.Add(innerWire);

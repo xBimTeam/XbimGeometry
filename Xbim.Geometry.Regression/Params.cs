@@ -56,6 +56,8 @@ namespace XbimRegression
                                 MaxThreads = Environment.ProcessorCount / 2;
                                 break;
                             case "/writebreps":
+                            case "/breps":
+                            case "/brep":
                                 WriteBreps = WriteBreps ?? new List<int>();
                                 paramType = CompoundParameter.Breps;
                                 break;
@@ -114,7 +116,7 @@ namespace XbimRegression
 
         private static void WriteSyntax()
         {
-            Console.WriteLine("Syntax: XbimRegression <modelfolder> [/timeout <seconds>] [/maxthreads <number>] [/singlethread] /writebreps");
+            Console.WriteLine("Syntax: XbimRegression <modelfolder> [/timeout <seconds>] [/maxthreads <number>] [/singlethread] /writebreps [labels]");
         }
 
         /// <summary>

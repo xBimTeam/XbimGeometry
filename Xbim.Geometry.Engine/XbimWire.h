@@ -78,6 +78,8 @@ namespace Xbim
 			
 			
 		public:
+			// this can throw an exception in debug, if the wire is nonsense (e.g. line) and should just be dropped
+			// in release it might return an invalid normal with Nan components that needs to be checked, using XbimConvert::IsInvalid
 			static gp_Dir NormalDir(const TopoDS_Wire& wire);
 #pragma region destructors
 

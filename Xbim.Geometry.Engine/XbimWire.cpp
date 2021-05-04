@@ -1207,7 +1207,9 @@ namespace Xbim
 			try
 			{
 				gp_Dir dir = NormalDir(*pWire);
-				return  XbimVector3D(dir.X(), dir.Y(), dir.Z());
+				if (XbimConvert::IsInvalid(dir, 0)) // even with tolerance 0 checks for NaN
+					return XbimVector3D();
+				return XbimVector3D(dir.X(), dir.Y(), dir.Z());
 			}
 			catch (Standard_Failure sf)
 			{

@@ -60,6 +60,7 @@ namespace Xbim
 			static bool Is3D(IIfcPolyline^ pline);
 			static bool Is3D(IIfcPolyLoop^ pLoop);
 			static bool IsPolygon(IIfcPolyLoop^ pLoop);
+			static bool IsInvalid(const gp_Dir& dir, double tolerance);
 			static double GetZValueOrZero(IIfcCartesianPoint^ point);
 			static double GetZValueOrZero(IIfcDirection^ dir);
 			static double GetZValueOrZero(IIfcVector^ vec);
