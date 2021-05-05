@@ -128,7 +128,7 @@ jobs:
       testAssemblyVer2: '**\bin\$(BuildConfiguration)\**\Xbim.Geometry.Engine.Interop.Tests.dll'
       searchFolder: '$(System.DefaultWorkingDirectory)'
       runSettingsFile: 'test.runsettings'
-      codeCoverageEnabled: true
+      codeCoverageEnabled: false
       platform: '$(BuildPlatform)'
       configuration: '$(BuildConfiguration)'
   
