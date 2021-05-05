@@ -446,11 +446,68 @@ namespace Xbim
 
 
 				BRepBuilderAPI_MakePolygon polyMaker;
-				for (int i = 1; i <= pointSeq.Length(); ++i)
+				if (2 == pointSeq.Length())
 				{
-					polyMaker.Add(pointSeq.Value(i));
-
+					polyMaker.Add(pointSeq.Value(1));
+					polyMaker.Add(pointSeq.Value(2));
 				}
+				else if(3 == pointSeq.Length())
+				{
+					//if three points are collinear, only add first and last points
+					if (IsCollinear(pointSeq.Value(1), pointSeq.Value(2), pointSeq.Value(3)))
+					{
+						polyMaker.Add(pointSeq.Value(1));
+						polyMaker.Add(pointSeq.Value(3));
+					}
+					else
+					{
+						polyMaker.Add(pointSeq.Value(1));
+						polyMaker.Add(pointSeq.Value(2));
+						polyMaker.Add(pointSeq.Value(3));
+					}
+				}
+				else
+				{
+					for (int i = 1; i <= pointSeq.Length(); ++i)
+					{
+						gp_Pnt curPoint = pointSeq.Value(i);
+						gp_Pnt prePoint;
+						gp_Pnt nextPoint;
+						bool checkCollinear = true;
+
+						if (i == 1)
+						{
+							//if is closed, don't check
+							if (isClosed)
+							{
+								checkCollinear = false;
+							}
+							prePoint = pointSeq.Value(pointSeq.Length());
+							nextPoint = pointSeq.Value(i + 1);
+						}
+						else if (i == pointSeq.Length())
+						{
+							if (isClosed)
+							{
+								checkCollinear = false;
+							}
+							prePoint = pointSeq.Value(i - 1);
+							nextPoint = pointSeq.Value(1);
+						}
+						else
+						{
+							prePoint = pointSeq.Value(i - 1);
+							nextPoint = pointSeq.Value(i + 1);
+						}
+						if (checkCollinear && IsCollinear(prePoint, curPoint, nextPoint))
+						{
+							continue;
+						}
+						polyMaker.Add(pointSeq.Value(i));
+
+					}
+				}
+				
 				if (isClosed)
 					polyMaker.Close();
 
@@ -3022,6 +3079,17 @@ namespace Xbim
 			XbimPoint3DWithTolerance^ startLookupPnt = gcnew XbimPoint3DWithTolerance(startLookup->X, startLookup->Y, startLookup->Z, pline->Model->ModelFactors->Precision);
 			XbimPoint3DWithTolerance^ startOriginalPnt = gcnew XbimPoint3DWithTolerance(startOriginal->X, startOriginal->Y, startOriginal->Z, pline->Model->ModelFactors->Precision);
 			return startLookupPnt == startOriginalPnt;
+		}
+
+		bool XbimWire::IsCollinear(const gp_Pnt& prePoint, const gp_Pnt& currentPoint, const gp_Pnt& nextPoint)
+		{
+			gp_Dir dir1 = gp_Dir(currentPoint.X() - prePoint.X(), currentPoint.Y() - prePoint.Y(), currentPoint.Z() - prePoint.Z());
+			gp_Dir dir2 = gp_Dir(nextPoint.X() - currentPoint.X(), nextPoint.Y() - currentPoint.Y(), nextPoint.Z() - currentPoint.Z());
+			if (dir1.IsParallel(dir2, Precision::Angular()))
+			{
+				return true;
+			}
+			return false;
 		}
 #pragma warning( push )
 #pragma warning( disable : 4701)
