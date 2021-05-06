@@ -56,7 +56,7 @@ namespace Xbim
 			void Init(IIfcCylindricalSurface ^ surface, ILogger^ logger);
 			void Init(double x, double y, double tolerance, ILogger^ logger); 
 			void Init(IIfcFace^ face, ILogger^ logger, bool userVertexMap,  TopTools_DataMapOfIntegerShape& vertexMap);
-			
+			static bool AreCollinear(const gp_Pnt& prePoint, const gp_Pnt& midPoint, const gp_Pnt& nextPoint);
 		public:
 			
 			//destructors
@@ -132,6 +132,7 @@ namespace Xbim
 			bool CheckInside();
 			XbimFace(IIfcCylindricalSurface ^ surface, ILogger^ logger);
 			XbimFace(double x, double y, double tolerance, ILogger^ logger);
+			// todo: 2021: never used in the internal code... I think it could be obsoleted
 			XbimFace(IIfcFace ^ face, ILogger^ logger, bool useVertexMap, TopTools_DataMapOfIntegerShape & vertexMap);
 			
 #pragma endregion
@@ -153,8 +154,8 @@ namespace Xbim
 			Handle(Geom_Surface) GetSurface();
 			XbimVector3D NormalAt(double u, double v);
 			void SetLocation(TopLoc_Location loc);
-			static bool RemoveDuplicatePoints(TColgp_SequenceOfPnt& polygon, std::vector<int> handles, bool closed, double tol);
-			static bool RemoveDuplicatePoints(TColgp_SequenceOfPnt& polygon,  bool closed, double tol);
+			static bool RemoveDuplicatePoints(TColgp_SequenceOfPnt& polygon, std::vector<int> handles, bool assumeClosed, double tol);
+			static bool RemoveDuplicatePoints(TColgp_SequenceOfPnt& polygon, bool assumeClosed, double tol);
 #pragma endregion
 
 

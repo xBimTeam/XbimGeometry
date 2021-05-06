@@ -405,7 +405,8 @@ namespace Xbim
 				*pWire = segWire;
 			}
 		}
-		///Special case to allow polylines to be create as compound edges not as a single bpline
+
+		///Special case to allow polylines to be created as compound edges not as a single bpline
 		// In this case the pline may or ma not be closed it may or may not lie on a surface, it may be self intersecting
 		void XbimWire::Init(IIfcPolyline^ pline, ILogger^ logger, XbimConstraints constraints)
 		{
@@ -423,11 +424,8 @@ namespace Xbim
 			bool tryAgain = true;
 			while (!done)
 			{
-
-
 				TColgp_SequenceOfPnt pointSeq;
 				BRepBuilderAPI_MakeWire wireMaker;
-
 
 				for (int i = 0; i < originalCount; i++)
 				{
@@ -437,13 +435,11 @@ namespace Xbim
 				bool notSelfIntersecting = (constraints & XbimConstraints::NotSelfIntersecting) == XbimConstraints::NotSelfIntersecting;
 				bool isClosed = XbimFace::RemoveDuplicatePoints(pointSeq, close, tolerance);
 
-
 				if (pointSeq.Length() < 2)
 				{
 					XbimGeometryCreator::LogWarning(logger, pline, "Polyline with less than 2 points is an empty line. It has been ignored");
 					return;
 				}
-
 
 				BRepBuilderAPI_MakePolygon polyMaker;
 				for (int i = 1; i <= pointSeq.Length(); ++i)
@@ -457,7 +453,8 @@ namespace Xbim
 				if (polyMaker.IsDone())
 				{
 					if (notSelfIntersecting)
-					{//check for no self intersection
+					{
+						//check for no self intersection
 						TopoDS_Wire wire = polyMaker.Wire(); //get a handle to the wire to avoid garbage collection
 
 						//double tolerance = profile->Model->ModelFactors->Precision;
@@ -486,10 +483,7 @@ namespace Xbim
 							bool fixed = wireFixer.Perform();
 							if (!fixed) // we have a self intersection but the tools cannot fix it, normally means two points are too near
 							{
-
-
 								tolerance = pline->Model->ModelFactors->OneMilliMeter / 10; //use a normal modelling precision
-
 								if (tryAgain)
 								{
 									tryAgain = false; //only do this once
