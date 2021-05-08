@@ -37,7 +37,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void Can_build_ifcadvancedbrep_with_faulty_surface_orientation()
         {
-            Assert.Inconclusive("Not implemented in master");
+            Assert.Inconclusive("File missing");
             using (var model = MemoryModel.OpenRead(@"ifcadvancedbrep_with_faulty_surface_orientation.ifc"))
             {
                 //MemoryModel.SetWorkArounds(model.Header, model.ModelFactors as XbimModelFactors);
