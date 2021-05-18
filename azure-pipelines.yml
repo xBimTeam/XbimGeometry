@@ -127,16 +127,17 @@ jobs:
   - script: nuget pack Xbim.Geometry\Xbim.Geometry.nuspec -OutputDirectory Xbim.Geometry/bin/$(BuildConfiguration)
     name: Geometry_metapackage_Pack
   
-  - task: VSTest@1
+  - task: VSTest@2
     displayName: 'VsTest - testAssemblies'
     inputs:
-      testAssembly: '**\bin\$(BuildConfiguration)\**\Xbim.Geometry.Engine.Interop.Tests.dll'
+      testSelector: 'testAssemblies'
+      testAssemblyVer2: '**\bin\$(BuildConfiguration)\**\Xbim.Geometry.Engine.Interop.Tests.dll'
+      searchFolder: '$(System.DefaultWorkingDirectory)'
       runSettingsFile: 'test.runsettings'
+      vsTestVersion: 'toolsInstaller'
       codeCoverageEnabled: false
-      vsTestVersion: 'latest'
       platform: '$(BuildPlatform)'
       configuration: '$(BuildConfiguration)'
-    continueOnError: false  
   
   - task: PublishSymbols@1
     displayName: 'Publish symbols path: '
@@ -162,7 +163,7 @@ jobs:
   # Publish to master or develop MyGet feed based on the source branch
   - task: NuGetCommand@2
     name: 'MyGetPublishing_Master'
-    condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
     inputs:
       command: push
       nuGetFeedType: external
@@ -172,7 +173,7 @@ jobs:
   
   - task: NuGetCommand@2
     name: 'MyGetPublishing_Develop'
-    condition: eq(variables['Build.SourceBranch'], 'refs/heads/develop')
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
     inputs:
       command: push
       nuGetFeedType: external
