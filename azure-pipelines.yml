@@ -59,7 +59,8 @@ jobs:
   - task: VisualStudioTestPlatformInstaller@1
     displayName: 'Visual Studio Test Platform Installer'
     inputs:
-      versionSelector: latestStable
+      packageFeedSelector: 'nugetOrg'
+      versionSelector: 'latestPreRelease'
   
   # Version .NET Core project files
   # Description - Applies a version to a .NET Core assembly via the .csproj files based on the build number. 
