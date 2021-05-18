@@ -55,6 +55,11 @@ jobs:
     displayName: 'Use a new NuGet'
     inputs:
       versionSpec: '5.6.0'
+
+  - task: VisualStudioTestPlatformInstaller@1
+    displayName: 'Visual Studio Test Platform Installer'
+    inputs:
+      versionSelector: latestStable
   
   # Version .NET Core project files
   # Description - Applies a version to a .NET Core assembly via the .csproj files based on the build number. 
