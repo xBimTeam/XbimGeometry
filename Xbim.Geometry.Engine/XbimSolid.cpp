@@ -2116,7 +2116,7 @@ namespace Xbim
 						if (shapeFixer.Perform())
 						{
 							ShapeUpgrade_UnifySameDomain unifier(shapeFixer.Shape());
-							unifier.SetAngularTolerance(0.00174533); //1 tenth of a degree
+							unifier.SetAngularTolerance(0.00349066); //1 tenth of a degree
 							unifier.SetLinearTolerance(tolerance);
 							try
 							{

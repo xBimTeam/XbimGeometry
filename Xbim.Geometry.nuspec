@@ -3,7 +3,7 @@
   <metadata>
     <id>Xbim.Geometry</id>
     <!-- Legacy versions bugfixes will have master numbering to ensure diffusion -->
-    <version>4.0.19</version>
+    <version>4.0.20</version>
     <title>xBIM Geometry</title>
     <authors>xBIM Team</authors>
     <owners>Steve Lockley, Claudio Benghi</owners>

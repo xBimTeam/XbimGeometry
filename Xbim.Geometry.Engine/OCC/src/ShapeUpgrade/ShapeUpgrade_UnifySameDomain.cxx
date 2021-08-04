@@ -314,7 +314,10 @@ static void RelocatePCurvesToNewUorigin(const TopTools_SequenceOfShape& theEdges
     gp_Pnt2d CurPoint = CurPCurve->Value(CurParam);
     for (;;) //collect pcurves of a contour
     {
+		int mapsize = theVEmap.Size();
       RemoveEdgeFromMap(CurEdge, theVEmap);
+	  if (theVEmap.Size() == mapsize)
+		  return; // there was an error in removing the map, not sure what to do.
       theUsedEdges.Add(CurEdge);
       TopoDS_Vertex CurVertex = (anOr == TopAbs_FORWARD)?
         TopExp::LastVertex(CurEdge, Standard_True) : TopExp::FirstVertex(CurEdge, Standard_True);
