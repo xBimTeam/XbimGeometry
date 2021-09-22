@@ -7,7 +7,7 @@
     <Description>Provides support for the Geometry Scene creation.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
-    <PackageIcon>logo.png</PackageIcon>
+    <PackageIcon>xbim-toolkit-icon.png</PackageIcon>
     <Version>5.1.0.0-Dev</Version>
     <AssemblyVersion>5.1.0.1</AssemblyVersion>
     <FileVersion>5.1.0.1</FileVersion>
@@ -75,13 +75,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="images\logo.png">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="images\" />
+	<None Include="..\xbim-toolkit-icon.png" Pack="True" PackagePath="\" />
   </ItemGroup>
 </Project>

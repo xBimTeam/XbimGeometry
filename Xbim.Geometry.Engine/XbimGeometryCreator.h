@@ -23,22 +23,22 @@ namespace Xbim
 		public ref class XbimGeometryCreator : IXbimGeometryEngine
 		{
 			
-			static Assembly^  ResolveHandler(Object^ /*Sender*/, System::ResolveEventArgs^ /*args*/)
+			static Assembly^ ResolveHandler(Object^ /*Sender*/, System::ResolveEventArgs^ /*args*/)
 			{
-				
+
 				// Warning: this should check the args for the assembly name!
 				return nullptr;
 			}
 			bool Is3D(IIfcCurve^ rep);
-			
+
 		public:
 
 			static System::String^ SurfaceOfLinearExtrusion = "#SurfaceOfLinearExtrusion";
 			static System::String^ PolylineTrimLengthOneForEntireLine = "#PolylineTrimLengthOneForEntireLine";
 
 		private:
-			
-			IXbimGeometryObject ^ Trim(XbimSetObject ^geometryObject);
+
+			IXbimGeometryObject^ Trim(XbimSetObject^ geometryObject);
 			static XbimGeometryCreator()
 			{
 				//AppDomain::CurrentDomain->AssemblyResolve += gcnew ResolveEventHandler(ResolveHandler);
@@ -62,40 +62,43 @@ namespace Xbim
 					AngularDeflectionInRadians = 0.5;// deflection of 28 degrees
 
 				System::String^ ignoreIfcSweptDiskSolidParamsString = System::Environment::GetEnvironmentVariable("IgnoreIfcSweptDiskSolidParams");
-				if(!bool::TryParse(ignoreIfcSweptDiskSolidParamsString,IgnoreIfcSweptDiskSolidParams))
+				if (!bool::TryParse(ignoreIfcSweptDiskSolidParamsString, IgnoreIfcSweptDiskSolidParams))
 					IgnoreIfcSweptDiskSolidParams = false;
-				
+
 			}
 		protected:
 			~XbimGeometryCreator()
 			{
 			}
-				
+
 		public:
 
-			
+
 			//Central point for logging all errors
 			static void LogInfo(ILogger^ logger, Object^ entity, System::String^ format, ... array<Object^>^ arg);
 			static void LogWarning(ILogger^ logger, Object^ entity, System::String^ format, ... array<Object^>^ arg);
 			static void LogError(ILogger^ logger, Object^ entity, System::String^ format, ... array<Object^>^ arg);
 			static void LogDebug(ILogger^ logger, Object^ entity, System::String^ format, ... array<Object^>^ arg);
 
+			virtual void WriteBrep(String^ filename, IXbimGeometryObject^ geomObj);
+			virtual IXbimGeometryObject^ ReadBrep(String^ filename);
+
 			static int BooleanTimeOut;
 			static double FuzzyFactor;
 			static double LinearDeflectionInMM;
 			static double AngularDeflectionInRadians;
 			static bool IgnoreIfcSweptDiskSolidParams;
-			
+
 			virtual XbimShapeGeometry^ CreateShapeGeometry(IXbimGeometryObject^ geometryObject, double precision, double deflection, double angle, XbimGeometryType storageType, ILogger^ logger);
-			
+
 			virtual XbimShapeGeometry^ CreateShapeGeometry(IXbimGeometryObject^ geometryObject, double precision, double deflection, ILogger^ logger/*, double angle = 0.5, XbimGeometryType storageType = XbimGeometryType::Polyhedron*/)
 			{
-				return CreateShapeGeometry(geometryObject, precision, deflection, 0.5, XbimGeometryType::PolyhedronBinary,logger);
+				return CreateShapeGeometry(geometryObject, precision, deflection, 0.5, XbimGeometryType::PolyhedronBinary, logger);
 			};
 
 			virtual XbimShapeGeometry^ CreateShapeGeometry(double oneMillimetre, IXbimGeometryObject^ geometryObject, double precision, ILogger^ logger)
 			{
-				double linearDeflection = oneMillimetre * LinearDeflectionInMM;				
+				double linearDeflection = oneMillimetre * LinearDeflectionInMM;
 				return CreateShapeGeometry(geometryObject, precision, linearDeflection, AngularDeflectionInRadians, XbimGeometryType::PolyhedronBinary, logger);
 			};
 
@@ -130,16 +133,16 @@ namespace Xbim
 
 			//Create Wire
 			virtual IXbimWire^ CreateWire(IIfcCurve^ curve, ILogger^ logger);
-			
+
 			virtual IXbimWire^ CreateWire(IIfcCompositeCurveSegment^ compCurveSeg, ILogger^ logger);
 			//Face creation 
-			virtual IXbimFace^ CreateFace(IIfcProfileDef ^ profile, ILogger^ logger);
-			virtual IXbimFace^ CreateFace(IIfcCompositeCurve ^ cCurve, ILogger^ logger);
-			virtual IXbimFace^ CreateFace(IIfcPolyline ^ pline, ILogger^ logger);
-			virtual IXbimFace^ CreateFace(IIfcPolyLoop ^ loop, ILogger^ logger);
-			virtual IXbimFace^ CreateFace(IIfcSurface ^ surface, ILogger^ logger);
-			virtual IXbimFace^ CreateFace(IIfcPlane ^ plane, ILogger^ logger);
-			virtual IXbimFace^ CreateFace(IXbimWire ^ wire, ILogger^ logger);
+			virtual IXbimFace^ CreateFace(IIfcProfileDef^ profile, ILogger^ logger);
+			virtual IXbimFace^ CreateFace(IIfcCompositeCurve^ cCurve, ILogger^ logger);
+			virtual IXbimFace^ CreateFace(IIfcPolyline^ pline, ILogger^ logger);
+			virtual IXbimFace^ CreateFace(IIfcPolyLoop^ loop, ILogger^ logger);
+			virtual IXbimFace^ CreateFace(IIfcSurface^ surface, ILogger^ logger);
+			virtual IXbimFace^ CreateFace(IIfcPlane^ plane, ILogger^ logger);
+			virtual IXbimFace^ CreateFace(IXbimWire^ wire, ILogger^ logger);
 
 			//Shells creation
 			virtual IXbimShell^ CreateShell(IIfcOpenShell^ shell, ILogger^ logger);
@@ -163,7 +166,7 @@ namespace Xbim
 
 			virtual IXbimSolid^ CreateSolid(IIfcBooleanResult^ ifcSolid, ILogger^ logger);
 			virtual IXbimSolid^ CreateSolid(IIfcBooleanClippingResult^ ifcSolid, ILogger^ logger);
-			
+
 			virtual IXbimSolid^ CreateSolid(IIfcHalfSpaceSolid^ ifcSolid, ILogger^ logger);
 			virtual IXbimSolid^ CreateSolid(IIfcPolygonalBoundedHalfSpace^ ifcSolid, ILogger^ logger);
 			virtual IXbimSolid^ CreateSolid(IIfcBoxedHalfSpace^ ifcSolid, ILogger^ logger);
@@ -187,7 +190,7 @@ namespace Xbim
 			virtual IXbimSolid^ CreateSolid(IIfcFaceBasedSurfaceModel^ ifcSurface, ILogger^ logger);
 
 			virtual IXbimSolid^ CreateSolid(IIfcCsgPrimitive3D^ ifcSolid, ILogger^ logger);
-			
+
 			virtual IXbimSolid^ CreateSolid(IIfcSphere^ ifcSolid, ILogger^ logger);
 			virtual IXbimSolid^ CreateSolid(IIfcBlock^ ifcSolid, ILogger^ logger);
 			virtual IXbimSolid^ CreateSolid(IIfcRightCircularCylinder^ ifcSolid, ILogger^ logger);
@@ -232,21 +235,21 @@ namespace Xbim
 			virtual IXbimCurve^ CreateCurve(IIfcBSplineCurveWithKnots^ curve, ILogger^ logger);
 			virtual IXbimCurve^ CreateCurve(IIfcOffsetCurve3D^ curve, ILogger^ logger);
 			virtual IXbimCurve^ CreateCurve(IIfcOffsetCurve2D^ curve, ILogger^ logger);
-			virtual XbimMatrix3D ToMatrix3D(IIfcObjectPlacement ^ objPlacement, ILogger^ logger);
+			virtual XbimMatrix3D ToMatrix3D(IIfcObjectPlacement^ objPlacement, ILogger^ logger);
 			virtual IXbimSolidSet^ CreateGrid(IIfcGrid^ grid, ILogger^ logger);
 
 			// Inherited via IXbimGeometryEngine
-			virtual IXbimGeometryObject ^ Transformed(IXbimGeometryObject ^geometryObject, IIfcCartesianTransformationOperator ^transformation);
-			virtual IXbimGeometryObject ^ Moved(IXbimGeometryObject ^geometryObject, IIfcPlacement ^placement);
-			virtual IXbimGeometryObject ^ Moved(IXbimGeometryObject ^geometryObject, IIfcAxis2Placement3D ^placement) 
+			virtual IXbimGeometryObject^ Transformed(IXbimGeometryObject^ geometryObject, IIfcCartesianTransformationOperator^ transformation);
+			virtual IXbimGeometryObject^ Moved(IXbimGeometryObject^ geometryObject, IIfcPlacement^ placement);
+			virtual IXbimGeometryObject^ Moved(IXbimGeometryObject^ geometryObject, IIfcAxis2Placement3D^ placement)
 			{
-				return Moved(geometryObject, (IIfcPlacement ^)placement);
+				return Moved(geometryObject, (IIfcPlacement^)placement);
 			};
-			virtual IXbimGeometryObject ^ Moved(IXbimGeometryObject ^geometryObject, IIfcAxis2Placement2D ^placement)
+			virtual IXbimGeometryObject^ Moved(IXbimGeometryObject^ geometryObject, IIfcAxis2Placement2D^ placement)
 			{
-				return Moved(geometryObject, (IIfcPlacement ^)placement);
+				return Moved(geometryObject, (IIfcPlacement^)placement);
 			};
-			virtual IXbimGeometryObject ^ Moved(IXbimGeometryObject ^geometryObject, IIfcObjectPlacement ^objectPlacement, ILogger^ logger);
+			virtual IXbimGeometryObject^ Moved(IXbimGeometryObject^ geometryObject, IIfcObjectPlacement^ objectPlacement, ILogger^ logger);
 			virtual IXbimGeometryObject^ FromBrep(System::String^ brepStr);
 			virtual System::String^ ToBrep(IXbimGeometryObject^ geometryObject);
 		};

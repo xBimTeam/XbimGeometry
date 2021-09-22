@@ -8,10 +8,7 @@
     <Description>Provides support for the Ifc4 and Ifc2x3 Geometry conversion.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>Xbim.Geometry.Engine.Interop</PackageId>
-    <PackageIcon>logo.png</PackageIcon>
-    <AssemblyVersion>5.4.0.1</AssemblyVersion>
-    <FileVersion>5.4.0.1</FileVersion>
-    <Version>5.7.0.0-Dev</Version>
+    <PackageIcon>xbim-toolkit-icon.png</PackageIcon>
     <Platforms>x86;x64;AnyCPU</Platforms>
     <SignAssembly>false</SignAssembly>
     <PackageReleaseNotes>Version 5.2 NetCoreApp3.1 support See https://github.com/xBimTeam/XbimGeometry/blob/master/CHANGELOG.md
@@ -144,13 +141,12 @@
   <ItemGroup>   
     <Folder Include="images\" />
   </ItemGroup>
-  
-  <ItemGroup>
-    <None Include="images\logo.png">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
-  </ItemGroup>
+
+
+	<ItemGroup>
+		<None Include="..\xbim-toolkit-icon.png" Pack="True" PackagePath="\" />
+	</ItemGroup>
+	
   <!--<Target Name="CopyPackage" AfterTargets="Pack">
     <Copy
       SourceFiles="$(OutputPath)..\$(PackageId).$(PackageVersion).nupkg"

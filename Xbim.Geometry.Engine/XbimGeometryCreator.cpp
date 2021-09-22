@@ -100,6 +100,20 @@ namespace Xbim
 			}
 		}
 
+		void XbimGeometryCreator::WriteBrep(String^ filename, IXbimGeometryObject^ geomObj)
+		{
+			throw gcnew System::NotImplementedException();
+			// TODO: This is stubbed out until we merge the implementation from unpushed code.
+			// temp fix for broken build
+		}
+
+		IXbimGeometryObject^ XbimGeometryCreator::ReadBrep(String^ filename)
+		{
+			throw gcnew System::NotImplementedException();
+			// TODO: This is stubbed out until we merge the implementation from unpushed code.
+			// temp fix for broken build
+		}
+
 		void XbimGeometryCreator::LogError(ILogger^ logger, Object^ entity, System::String^ format, ...array<Object^>^ arg)
 		{
 			System::String^ msg = System::String::Format(format, arg);
@@ -1350,6 +1364,8 @@ namespace Xbim
 			else
 				return nullptr;
 		}
+
+		
 
 		IXbimGeometryObject^ XbimGeometryCreator::Trim(XbimSetObject^ geometryObject)
 		{
