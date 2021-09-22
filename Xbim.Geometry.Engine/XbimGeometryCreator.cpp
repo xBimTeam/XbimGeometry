@@ -100,14 +100,14 @@ namespace Xbim
 			}
 		}
 
-		void XbimGeometryCreator::WriteBrep(String^ filename, IXbimGeometryObject^ geomObj)
+		void XbimGeometryCreator::WriteBrep(System::String^ filename, IXbimGeometryObject^ geomObj)
 		{
 			throw gcnew System::NotImplementedException();
 			// TODO: This is stubbed out until we merge the implementation from unpushed code.
 			// temp fix for broken build
 		}
 
-		IXbimGeometryObject^ XbimGeometryCreator::ReadBrep(String^ filename)
+		IXbimGeometryObject^ XbimGeometryCreator::ReadBrep(System::String^ filename)
 		{
 			throw gcnew System::NotImplementedException();
 			// TODO: This is stubbed out until we merge the implementation from unpushed code.

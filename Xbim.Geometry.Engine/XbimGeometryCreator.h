@@ -80,8 +80,8 @@ namespace Xbim
 			static void LogError(ILogger^ logger, Object^ entity, System::String^ format, ... array<Object^>^ arg);
 			static void LogDebug(ILogger^ logger, Object^ entity, System::String^ format, ... array<Object^>^ arg);
 
-			virtual void WriteBrep(String^ filename, IXbimGeometryObject^ geomObj);
-			virtual IXbimGeometryObject^ ReadBrep(String^ filename);
+			virtual void WriteBrep(System::String^ filename, IXbimGeometryObject^ geomObj);
+			virtual IXbimGeometryObject^ ReadBrep(System::String^ filename);
 
 			static int BooleanTimeOut;
 			static double FuzzyFactor;
