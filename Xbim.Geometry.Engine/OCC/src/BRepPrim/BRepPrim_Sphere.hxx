@@ -23,7 +23,6 @@
 
 #include <Standard_Real.hxx>
 #include <BRepPrim_Revolution.hxx>
-class Standard_DomainError;
 class gp_Pnt;
 class gp_Ax2;
 class TopoDS_Face;
@@ -42,9 +41,9 @@ public:
   //! raised if the radius is < Resolution.
   Standard_EXPORT BRepPrim_Sphere(const Standard_Real Radius);
   
-  //! Creates a Sphere with Center and Radius.  Axes are
-  //! the   referrence    axes.   This    is the    STEP
-  //! constructor.
+  //! Creates a Sphere with Center and Radius.
+  //! Axes are the reference axes.
+  //! This is the STEP constructor.
   Standard_EXPORT BRepPrim_Sphere(const gp_Pnt& Center, const Standard_Real Radius);
   
   //! Creates a sphere with given axes system.

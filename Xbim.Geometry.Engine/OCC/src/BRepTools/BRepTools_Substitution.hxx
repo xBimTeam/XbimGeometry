@@ -24,7 +24,6 @@
 #include <TopTools_DataMapOfShapeListOfShape.hxx>
 #include <TopTools_ListOfShape.hxx>
 #include <Standard_Boolean.hxx>
-class Standard_NoSuchObject;
 class TopoDS_Shape;
 
 
@@ -69,7 +68,7 @@ public:
   //! Returns   True if <S> has   been  replaced .
   Standard_EXPORT Standard_Boolean IsCopied (const TopoDS_Shape& S) const;
   
-  //! Returns the set of shapes  substitued to <S> .
+  //! Returns the set of shapes substituted to <S>.
   Standard_EXPORT const TopTools_ListOfShape& Copy (const TopoDS_Shape& S) const;
 
 

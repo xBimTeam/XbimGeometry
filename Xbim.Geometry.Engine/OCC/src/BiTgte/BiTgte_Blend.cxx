@@ -234,7 +234,7 @@ static void KPartCurve3d(TopoDS_Edge           Edge,
   TopLoc_Location Loc;
   Standard_Real Tol = Precision::Confusion();
 
-  // Seach only isos on analytical surfaces.
+  // Search only isos on analytical surfaces.
   Geom2dAdaptor_Curve C(Curve);
   GeomAdaptor_Surface S(Surf);
   GeomAbs_CurveType   CTy = C.GetType();
@@ -1059,7 +1059,7 @@ void BiTgte_Blend::Perform(const Standard_Boolean BuildShape)
   ChFi3d_ResultChron(ch, t_shape);
 #endif 
 
-  // Finally construct curves 3d from edges to be transfered
+  // Finally construct curves 3d from edges to be transferred
   // since the partition is provided ( A Priori);
   BRepLib::BuildCurves3d(myResult, Precision::Confusion());
 
@@ -1781,12 +1781,8 @@ void BiTgte_Blend::ComputeCenters()
 	}
       }
       TopTools_DataMapOfShapeListOfShape anEmptyMap;
-      BRepOffset_Inter2d::Compute(myAsDes,
-				  CurOF,
-				  myEdges,
-				  myTol,
-                                  anEmptyMap,
-				  aDMVV);
+      BRepOffset_Inter2d::Compute(myAsDes, CurOF, myEdges, myTol,
+                                  anEmptyMap, aDMVV, Message_ProgressRange());
     }
   }
 
@@ -1816,12 +1812,8 @@ void BiTgte_Blend::ComputeCenters()
     }
 
     TopTools_DataMapOfShapeListOfShape anEmptyMap;
-    BRepOffset_Inter2d::Compute(myAsDes,
-				CurOF,
-				myEdges,
-				myTol,
-                                anEmptyMap,
-				aDMVV);
+    BRepOffset_Inter2d::Compute(myAsDes, CurOF, myEdges, myTol,
+                                anEmptyMap, aDMVV, Message_ProgressRange());
   }
   //
   // fuse vertices on edges stored in AsDes
@@ -1831,7 +1823,7 @@ void BiTgte_Blend::ComputeCenters()
   // unwinding 
   // ------------
   BRepOffset_MakeLoops MakeLoops;
-  MakeLoops.Build (LOF, myAsDes, myImageOffset, anEmptyImage);
+  MakeLoops.Build (LOF, myAsDes, myImageOffset, anEmptyImage, Message_ProgressRange());
 
   // ------------------------------------------------------------
   // It is possible to unwind edges at least one ancestor which of 
@@ -2310,7 +2302,7 @@ void BiTgte_Blend::ComputeShape()
   // Find in the initial Shapel:
   //  - untouched Faces
   //  - generated tubes
-  //  - the faces neighbors of tubes that sould be reconstucted preserving sharing.
+  //  - the faces neighbors of tubes that should be reconstructed preserving sharing.
 
   // For Debug : Visualize edges of the initial shape that should be reconstructed.
 #ifdef DRAW

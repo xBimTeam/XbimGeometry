@@ -23,11 +23,8 @@
 #include <Standard_Boolean.hxx>
 #include <Standard_Real.hxx>
 #include <Extrema_POnSurf.hxx>
-class Standard_DomainError;
-class StdFail_NotDone;
 class gp_Pnt;
 class Adaptor3d_Surface;
-class Extrema_POnSurf;
 
 
 //! With a close point, it calculates the distance
@@ -62,6 +59,11 @@ public:
   
   //! Returns the point of the extremum distance.
   Standard_EXPORT const Extrema_POnSurf& Point() const;
+
+  //! Returns True if UV point theU0, theV0 is point of local minimum of square distance between
+  //! point theP and points theS(U, V), U, V are in small area around theU0, theV0
+  Standard_EXPORT static Standard_Boolean IsMinDist(const gp_Pnt& theP, const Adaptor3d_Surface& theS,
+    const Standard_Real theU0, const Standard_Real theV0);
 
 private:
 

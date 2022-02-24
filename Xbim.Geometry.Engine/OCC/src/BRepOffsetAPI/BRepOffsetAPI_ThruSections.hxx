@@ -33,7 +33,6 @@
 #include <Standard_Integer.hxx>
 #include <BRepBuilderAPI_MakeShape.hxx>
 #include <TopTools_Array1OfShape.hxx>
-class Standard_DomainError;
 class TopoDS_Wire;
 class TopoDS_Vertex;
 class TopoDS_Shape;
@@ -130,7 +129,7 @@ public:
   //! the  optimization.
   Standard_EXPORT void CriteriumWeight (Standard_Real& W1, Standard_Real& W2, Standard_Real& W3) const;
   
-  Standard_EXPORT virtual void Build() Standard_OVERRIDE;
+  Standard_EXPORT virtual void Build(const Message_ProgressRange& theRange = Message_ProgressRange()) Standard_OVERRIDE;
   
   //! Returns the TopoDS Shape of the bottom of the loft if solid
   Standard_EXPORT const TopoDS_Shape& FirstShape() const;

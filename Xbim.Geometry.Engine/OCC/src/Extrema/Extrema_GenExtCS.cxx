@@ -17,9 +17,7 @@
 
 #include <Extrema_GenExtCS.hxx>
 #include <Adaptor3d_Curve.hxx>
-#include <Adaptor3d_HCurve.hxx>
 #include <Adaptor3d_Surface.hxx>
-#include <Adaptor3d_HSurface.hxx>
 #include <Geom_OffsetCurve.hxx>
 #include <Extrema_GlobOptFuncCS.hxx>
 #include <Extrema_GlobOptFuncConicS.hxx>
@@ -92,15 +90,15 @@ static void GetSurfMaxParamVals (const Adaptor3d_Surface& theS,
 
   if (theS.GetType() == GeomAbs_SurfaceOfExtrusion)
   {
-    theUmax = GetCurvMaxParamVal (theS.BasisCurve()->Curve());
+    theUmax = GetCurvMaxParamVal (*theS.BasisCurve());
   }
   else if (theS.GetType() == GeomAbs_SurfaceOfRevolution)
   {
-    theVmax = GetCurvMaxParamVal (theS.BasisCurve()->Curve());
+    theVmax = GetCurvMaxParamVal (*theS.BasisCurve());
   }
   else if (theS.GetType() == GeomAbs_OffsetSurface)
   {
-    GetSurfMaxParamVals (theS.BasisSurface()->Surface(), theUmax, theVmax);
+    GetSurfMaxParamVals (*theS.BasisSurface(), theUmax, theVmax);
   }
 }
 
@@ -193,7 +191,7 @@ void Extrema_GenExtCS::Initialize (const Adaptor3d_Surface& S,
                                    const Standard_Real Vsup,
                                    const Standard_Real Tol2)
 {
-  myS = (Adaptor3d_SurfacePtr)&S;
+  myS = &S;
   myusample = NbU;
   myvsample = NbV;
   myumin = Umin;
@@ -843,22 +841,3 @@ const Extrema_POnSurf& Extrema_GenExtCS::PointOnSurface(const Standard_Integer N
 
   return myF.PointOnSurface(N);
 }
-
-//=======================================================================
-//function : BidonSurface
-//purpose  : 
-//=======================================================================
-Adaptor3d_SurfacePtr Extrema_GenExtCS::BidonSurface() const 
-{
-  return (Adaptor3d_SurfacePtr)0L;
-}
-
-//=======================================================================
-//function : BidonCurve
-//purpose  : 
-//=======================================================================
-Adaptor3d_CurvePtr Extrema_GenExtCS::BidonCurve() const 
-{
-  return (Adaptor3d_CurvePtr)0L;
-}
-

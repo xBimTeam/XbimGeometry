@@ -36,19 +36,6 @@ class Geom_Plane;
 class TopoDS_Shape;
 class TopoDS_Solid;
 class TopoDS_Face;
-class BRepLib_Command;
-class BRepLib_MakeShape;
-class BRepLib_MakeVertex;
-class BRepLib_MakeEdge;
-class BRepLib_MakeEdge2d;
-class BRepLib_MakePolygon;
-class BRepLib_MakeFace;
-class BRepLib_MakeWire;
-class BRepLib_MakeShell;
-class BRepLib_MakeSolid;
-class BRepLib_FindSurface;
-class BRepLib_FuseEdges;
-class BRepLib_CheckCurveOnSurface;
 class BRepTools_ReShape;
 
 
@@ -137,9 +124,9 @@ public:
   //! -- -- MaxToleranceToCheck  if  so it will compute  the
   //! radius    of  -- the   cylindrical  pipe  surface that
   //! MinToleranceRequest is the minimum tolerance before it
-  //! is usefull to start testing. Usually it should be arround
-  //! 10e-5
-  //! contains all  --  the curve represenation of  the edge
+  //! is useful to start testing.
+  //! Usually it should be around 10e-5
+  //! contains all -- the curve representation of the edge
   //! returns True if the Edge tolerance had to be updated
   Standard_EXPORT static Standard_Boolean UpdateEdgeTol (const TopoDS_Edge& E, const Standard_Real MinToleranceRequest, const Standard_Real MaxToleranceToCheck);
   
@@ -147,8 +134,8 @@ public:
   //! Tolerance  is  smaller than  MaxToleranceToCheck --
   //! Returns True if at  least  one edge was updated --
   //! MinToleranceRequest is the minimum tolerance before
-  //! --  it -- is  usefull to start  testing. Usually it
-  //! should be arround -- 10e-5--
+  //! --  it -- is  useful to start  testing.
+  //! Usually it should be around -- 10e-5--
   //!
   //! Warning :The  method is  very  slow  as it  checks all.
   //! Use  only  in interfaces or  processing assimilate batch
@@ -228,7 +215,7 @@ public:
   //! is done.
   Standard_EXPORT static void EncodeRegularity(const TopoDS_Shape& S, const TopTools_ListOfShape& LE, const Standard_Real TolAng = 1.0e-10);
   
-  //! Encodes the Regularity beetween <F1> and <F2> by <E>
+  //! Encodes the Regularity between <F1> and <F2> by <E>
   //! Warning: <TolAng> is an angular tolerance, expressed in Rad.
   //! Warning: If the edge's regularity is coded before, nothing
   //! is done.
@@ -249,6 +236,10 @@ public:
   //! edges have the same value on both adjacent triangulations.
   //! Returns TRUE if any correction is done.
   Standard_EXPORT static Standard_Boolean EnsureNormalConsistency (const TopoDS_Shape& S, const Standard_Real theAngTol = 0.001, const Standard_Boolean ForceComputeNormals = Standard_False);
+
+  //! Updates value of deflection in Poly_Triangulation of faces
+  //! by the maximum deviation measured on existing triangulation.
+  Standard_EXPORT static void UpdateDeflection (const TopoDS_Shape& S);
 
   //! Calculates the bounding sphere around the set of vertexes from the theLV list.
   //! Returns the center (theNewCenter) and the radius (theNewTol) of this sphere.

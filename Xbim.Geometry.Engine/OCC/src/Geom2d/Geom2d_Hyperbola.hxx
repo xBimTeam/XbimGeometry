@@ -24,9 +24,6 @@
 #include <Geom2d_Conic.hxx>
 #include <Standard_Boolean.hxx>
 #include <Standard_Integer.hxx>
-class Standard_ConstructionError;
-class Standard_DomainError;
-class Standard_RangeError;
 class gp_Hypr2d;
 class gp_Ax2d;
 class gp_Ax22d;
@@ -197,7 +194,7 @@ public:
   Standard_EXPORT gp_Ax2d Directrix2() const;
   
 
-  //! Returns the excentricity of the hyperbola (e > 1).
+  //! Returns the eccentricity of the hyperbola (e > 1).
   //! If f is the distance between the location of the hyperbola
   //! and the Focus1 then the eccentricity e = f / MajorRadius.
   //! raised if MajorRadius = 0.0

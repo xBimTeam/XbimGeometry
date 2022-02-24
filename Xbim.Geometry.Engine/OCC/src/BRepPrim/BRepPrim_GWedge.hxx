@@ -31,17 +31,8 @@
 #include <TopoDS_Wire.hxx>
 #include <TopoDS_Face.hxx>
 #include <BRepPrim_Direction.hxx>
-class Standard_DomainError;
-class Standard_OutOfRange;
-class BRepPrim_Builder;
-class gp_Ax2;
-class TopoDS_Shell;
-class TopoDS_Face;
 class gp_Pln;
-class TopoDS_Wire;
-class TopoDS_Edge;
 class gp_Lin;
-class TopoDS_Vertex;
 class gp_Pnt;
 
 
@@ -193,7 +184,7 @@ public:
   //! <d1><d2><d3> direction.
   Standard_EXPORT gp_Pnt Point (const BRepPrim_Direction d1, const BRepPrim_Direction d2, const BRepPrim_Direction d3);
 
-  //! Checkes a shape on degeneracy
+  //! Checks a shape on degeneracy
   //! @return TRUE if a shape is degenerated
   Standard_EXPORT Standard_Boolean IsDegeneratedShape();
 

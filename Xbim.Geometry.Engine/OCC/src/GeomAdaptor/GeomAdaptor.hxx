@@ -25,16 +25,9 @@ class Geom_Curve;
 class Adaptor3d_Curve;
 class Geom_Surface;
 class Adaptor3d_Surface;
-class GeomAdaptor_Curve;
-class GeomAdaptor_Surface;
-class GeomAdaptor_GHSurface;
-class GeomAdaptor_HSurface;
-class GeomAdaptor_GHCurve;
-class GeomAdaptor_HCurve;
-
 
 //! this package contains the  geometric definition of
-//! curve and surface necessary to use algorithmes.
+//! curve and surface necessary to use algorithms.
 class GeomAdaptor 
 {
 public:
@@ -44,43 +37,16 @@ public:
   
   //! Inherited  from    GHCurve.   Provides a  curve
   //! handled by reference.
-  //! Build a Geom_Curve using the informations from the
+  //! Build a Geom_Curve using the information from the
   //! Curve from Adaptor3d
   Standard_EXPORT static Handle(Geom_Curve) MakeCurve (const Adaptor3d_Curve& C);
   
-  //! Build a Geom_Surface using the informations from the Surface from Adaptor3d
+  //! Build a Geom_Surface using the information from the Surface from Adaptor3d
   //! @param theS - Surface adaptor to convert.
   //! @param theTrimFlag - True if perform trim surface values by adaptor and false otherwise.
   Standard_EXPORT static Handle(Geom_Surface) MakeSurface (const Adaptor3d_Surface& theS,
                                                            const Standard_Boolean theTrimFlag = Standard_True);
 
-
-
-
-protected:
-
-
-
-
-
-private:
-
-
-
-
-friend class GeomAdaptor_Curve;
-friend class GeomAdaptor_Surface;
-friend class GeomAdaptor_GHSurface;
-friend class GeomAdaptor_HSurface;
-friend class GeomAdaptor_GHCurve;
-friend class GeomAdaptor_HCurve;
-
 };
-
-
-
-
-
-
 
 #endif // _GeomAdaptor_HeaderFile

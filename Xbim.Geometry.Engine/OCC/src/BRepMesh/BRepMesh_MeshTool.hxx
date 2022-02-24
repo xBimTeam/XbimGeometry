@@ -127,7 +127,7 @@ public:
   }
 
   //! Adds new link to mesh.
-  //! Updates link index and link orientaion parameters.
+  //! Updates link index and link orientation parameters.
   void AddLink(const Standard_Integer theFirstNode,
                const Standard_Integer theLastNode,
                Standard_Integer&      theLinkIndex,
@@ -151,7 +151,7 @@ public:
   Standard_EXPORT void CleanFrontierLinks();
 
   //! Erases the given set of triangles.
-  //! Fills map of loop edges forming the countour surrounding the erased triangles.
+  //! Fills map of loop edges forming the contour surrounding the erased triangles.
   void EraseTriangles(const IMeshData::MapOfInteger&  theTriangles,
                       IMeshData::MapOfIntegerInteger& theLoopEdges);
 

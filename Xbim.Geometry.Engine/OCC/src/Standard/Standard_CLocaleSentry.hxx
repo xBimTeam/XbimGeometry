@@ -13,8 +13,8 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef _Standard_CLocaleSentry_H__
-#define _Standard_CLocaleSentry_H__
+#ifndef Standard_CLocaleSentry_HeaderFile
+#define Standard_CLocaleSentry_HeaderFile
 
 #include <Standard_Macro.hxx>
 
@@ -48,7 +48,7 @@
 //! Thus following calls to sprintf, atoi and other functions will use "C" locale.
 //! Destructor of this class will return original locale.
 //!
-//! Notice that this functionality is platfrom dependent and intended only to workaround alien code
+//! Notice that this functionality is platform dependent and intended only to workaround alien code
 //! that doesn't setup locale correctly.
 //!
 //! Internally you should prefer more portable C++ locale interfaces

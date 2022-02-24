@@ -24,12 +24,8 @@
 #include <BRepPrim_Wedge.hxx>
 #include <BRepBuilderAPI_MakeShape.hxx>
 #include <Standard_Real.hxx>
-class Standard_DomainError;
-class Standard_OutOfRange;
-class StdFail_NotDone;
 class gp_Pnt;
 class gp_Ax2;
-class BRepPrim_Wedge;
 class TopoDS_Shell;
 class TopoDS_Solid;
 class TopoDS_Face;
@@ -98,7 +94,7 @@ public:
   Standard_EXPORT BRepPrim_Wedge& Wedge();
   
   //! Stores the solid in myShape.
-  Standard_EXPORT virtual void Build() Standard_OVERRIDE;
+  Standard_EXPORT virtual void Build(const Message_ProgressRange& theRange = Message_ProgressRange()) Standard_OVERRIDE;
   
   //! Returns the constructed box as a shell.
   Standard_EXPORT const TopoDS_Shell& Shell();

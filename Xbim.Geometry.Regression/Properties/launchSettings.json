@@ -2,7 +2,7 @@
   "profiles": {
     "XbimRegression": {
       "commandName": "Project",
-      "commandLineArgs": "\"C:\\Data\\Ifc\\2021 04 27 - Geomtry Issue 281\" /caching /progress /lowthreadscount",
+      "commandLineArgs": "\"C:\\Data\\Ifc\\NDA\\2022 02 23 - Geometry crash TS\" /caching /singlethread",
       "nativeDebugging": true
     }
   }

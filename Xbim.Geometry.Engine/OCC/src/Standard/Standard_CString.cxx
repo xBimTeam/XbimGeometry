@@ -23,7 +23,6 @@
 #include <Standard_CLocaleSentry.hxx>
 #include <Standard_CString.hxx>
 #include <Standard_Type.hxx>
-#include <Standard_OStream.hxx>
 #include <string.h>
 #include <stdarg.h>
 
@@ -63,7 +62,7 @@ Standard_Integer HashCodes (const Standard_CString theString, const Standard_Int
 //======================================================================
 
 #ifdef __APPLE__
-  // There are a lot of *_l functions availalbe on Mac OS X - we use them
+  // There are a lot of *_l functions available on Mac OS X - we use them
   #define SAVE_TL()
 #elif defined(_MSC_VER)
   // MSVCRT has equivalents with slightly different syntax

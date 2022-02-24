@@ -25,11 +25,9 @@
 #include <Standard_Boolean.hxx>
 #include <BRepSweep_Trsf.hxx>
 #include <TopAbs_Orientation.hxx>
-class Standard_ConstructionError;
 class TopoDS_Shape;
 class Sweep_NumShape;
 class TopLoc_Location;
-class gp_Vec;
 
 
 //! Provides   an  algorithm   to   build  object   by
@@ -113,7 +111,7 @@ public:
   Standard_EXPORT Standard_Boolean GDDShapeIsToAdd (const TopoDS_Shape& aNewShape, const TopoDS_Shape& aNewSubShape, const TopoDS_Shape& aGenS, const Sweep_NumShape& aDirS, const Sweep_NumShape& aSubDirS) const;
   
   //! In  some  particular  cases  the   topology  of  a
-  //! generated  face must be  composed  of  independant
+  //! generated  face must be  composed  of  independent
   //! closed wires,  in this case  this function returns
   //! true.
   //! Here it always returns false.

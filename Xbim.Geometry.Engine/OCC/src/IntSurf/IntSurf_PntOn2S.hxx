@@ -24,11 +24,10 @@
 #include <gp_Pnt.hxx>
 #include <Standard_Real.hxx>
 #include <Standard_Boolean.hxx>
-class gp_Pnt;
 class gp_Pnt2d;
 
 
-//! This class defines the geometric informations
+//! This class defines the geometric information
 //! for an intersection point between 2 surfaces :
 //! The coordinates ( Pnt from gp ), and two
 //! parametric coordinates.

@@ -17,10 +17,7 @@
 #ifndef _BRepAdaptor_Curve_HeaderFile
 #define _BRepAdaptor_Curve_HeaderFile
 
-#include <Standard.hxx>
-#include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
-
+#include <Adaptor3d_CurveOnSurface.hxx>
 #include <gp_Trsf.hxx>
 #include <GeomAdaptor_Curve.hxx>
 #include <TopoDS_Edge.hxx>
@@ -31,17 +28,9 @@
 #include <Standard_Integer.hxx>
 #include <TColStd_Array1OfReal.hxx>
 #include <GeomAbs_CurveType.hxx>
-class Adaptor3d_HCurveOnSurface;
-class Standard_NullObject;
-class Standard_DomainError;
-class Standard_OutOfRange;
-class Standard_NoSuchObject;
-class TopoDS_Edge;
+
 class TopoDS_Face;
-class gp_Trsf;
-class GeomAdaptor_Curve;
 class Adaptor3d_CurveOnSurface;
-class Adaptor3d_HCurve;
 class gp_Pnt;
 class gp_Vec;
 class gp_Lin;
@@ -53,6 +42,7 @@ class Geom_BezierCurve;
 class Geom_BSplineCurve;
 class Geom_OffsetCurve;
 
+DEFINE_STANDARD_HANDLE(BRepAdaptor_Curve, Adaptor3d_Curve)
 
 //! The Curve from BRepAdaptor  allows to use  an Edge
 //! of the BRep topology like a 3D curve.
@@ -68,33 +58,34 @@ class Geom_OffsetCurve;
 //! an Edge and a Face.
 class BRepAdaptor_Curve  : public Adaptor3d_Curve
 {
+  DEFINE_STANDARD_RTTIEXT(BRepAdaptor_Curve, Adaptor3d_Curve)
 public:
 
-  DEFINE_STANDARD_ALLOC
-
-  
   //! Creates an undefined Curve with no Edge loaded.
   Standard_EXPORT BRepAdaptor_Curve();
   
-  //! Creates a Curve  to  acces to the geometry of edge
+  //! Creates a Curve  to  access the geometry of edge
   //! <E>.
   Standard_EXPORT BRepAdaptor_Curve(const TopoDS_Edge& E);
   
-  //! Creates a Curve to acces to  the geometry  of edge
+  //! Creates a Curve to access  the geometry  of edge
   //! <E>.   The geometry  will   be  computed using the
   //! parametric curve of <E> on the face  <F>. An Error
   //! is  raised if  the edge does  not have a pcurve on
   //! the face.
   Standard_EXPORT BRepAdaptor_Curve(const TopoDS_Edge& E, const TopoDS_Face& F);
 
+  //! Shallow copy of adaptor
+  Standard_EXPORT virtual Handle(Adaptor3d_Curve) ShallowCopy() const Standard_OVERRIDE;
+
   //! Reset currently loaded curve (undone Load()).
   Standard_EXPORT void Reset();
 
-  //! Sets  the Curve <me>  to acces to the  geometry of
+  //! Sets  the Curve <me>  to access the  geometry of
   //! edge <E>.
   Standard_EXPORT void Initialize (const TopoDS_Edge& E);
   
-  //! Sets the Curve <me>  to acces to  the  geometry of
+  //! Sets the Curve <me>  to access  the  geometry of
   //! edge <E>.  The geometry will be computed using the
   //! parametric curve of <E>  on the face <F>. An Error
   //! is raised if the edge  does not  have a pcurve  on
@@ -137,7 +128,7 @@ public:
   //! Stores in <T> the  parameters bounding the intervals
   //! of continuity <S>.
   //!
-  //! The array must provide  enough room to  accomodate
+  //! The array must provide  enough room to  accommodate
   //! for the parameters. i.e. T.Length() > NbIntervals()
   Standard_EXPORT void Intervals (TColStd_Array1OfReal& T, const GeomAbs_Shape S) const Standard_OVERRIDE;
   
@@ -145,7 +136,7 @@ public:
   //! parameters <First>  and <Last>. <Tol>  is used  to
   //! test for 3d points confusion.
   //! If <First> >= <Last>
-  Standard_EXPORT Handle(Adaptor3d_HCurve) Trim (const Standard_Real First, const Standard_Real Last, const Standard_Real Tol) const Standard_OVERRIDE;
+  Standard_EXPORT Handle(Adaptor3d_Curve) Trim (const Standard_Real First, const Standard_Real Last, const Standard_Real Tol) const Standard_OVERRIDE;
   
   Standard_EXPORT Standard_Boolean IsClosed() const Standard_OVERRIDE;
   
@@ -211,45 +202,26 @@ public:
   Standard_EXPORT Standard_Integer NbKnots() const Standard_OVERRIDE;
   
 
-  //! Warning :
-  //! This  will    make a copy of the Bezier Curve
-  //! since it applies to it myTsrf . Be carefull when
-  //! using this method
+  //! Warning:
+  //! This will make a copy of the Bezier Curve since it applies to it myTsrf.
+  //! Be careful when using this method.
   Standard_EXPORT Handle(Geom_BezierCurve) Bezier() const Standard_OVERRIDE;
   
 
-  //! Warning :
-  //! This will   make a copy of the BSpline Curve
-  //! since it applies to it myTsrf . Be carefull when
-  //! using this method
+  //! Warning:
+  //! This will make a copy of the BSpline Curve since it applies to it myTsrf.
+  //! Be careful when using this method.
   Standard_EXPORT Handle(Geom_BSplineCurve) BSpline() const Standard_OVERRIDE;
 
   Standard_EXPORT Handle(Geom_OffsetCurve) OffsetCurve() const Standard_OVERRIDE;
 
-
-
-protected:
-
-
-
-
-
 private:
-
-
 
   gp_Trsf myTrsf;
   GeomAdaptor_Curve myCurve;
-  Handle(Adaptor3d_HCurveOnSurface) myConSurf;
+  Handle(Adaptor3d_CurveOnSurface) myConSurf;
   TopoDS_Edge myEdge;
 
-
 };
-
-
-
-
-
-
 
 #endif // _BRepAdaptor_Curve_HeaderFile

@@ -14,6 +14,7 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
+#include <BRepOffset_Tool.hxx>
 
 #include <Bnd_Box2d.hxx>
 #include <BndLib_Add3dCurve.hxx>
@@ -28,12 +29,9 @@
 #include <BRep_Builder.hxx>
 #include <BRepAdaptor_Curve.hxx>
 #include <BRepAdaptor_Curve2d.hxx>
-#include <BRepAdaptor_HCurve.hxx>
-#include <BRepAdaptor_HSurface.hxx>
 #include <BRepAdaptor_Surface.hxx>
 #include <BRepAlgo_AsDes.hxx>
 #include <BRepAlgo_Image.hxx>
-#include <BRepAlgo_Tool.hxx>
 #include <BRepBndLib.hxx>
 #include <BRepLib.hxx>
 #include <BRepLib_MakeEdge.hxx>
@@ -43,7 +41,6 @@
 #include <BRepOffset_Analyse.hxx>
 #include <BRepOffset_Interval.hxx>
 #include <BRepOffset_ListOfInterval.hxx>
-#include <BRepOffset_Tool.hxx>
 #include <BRepTools.hxx>
 #include <BRepTools_Modifier.hxx>
 #include <BRepTools_TrsfModification.hxx>
@@ -424,8 +421,8 @@ static void BuildPCurves (const TopoDS_Edge&  E,
 	}
     } // if (typS == ...
 
-  Handle(BRepAdaptor_HSurface) HS = new BRepAdaptor_HSurface(AS);
-  Handle(BRepAdaptor_HCurve)   HC = new BRepAdaptor_HCurve(AC);
+  Handle(BRepAdaptor_Surface) HS = new BRepAdaptor_Surface(AS);
+  Handle(BRepAdaptor_Curve)   HC = new BRepAdaptor_Curve(AC);
 
   ProjLib_ProjectedCurve Proj(HS,HC,Tolerance);
   
@@ -782,7 +779,7 @@ void BRepOffset_Tool::PipeInter(const TopoDS_Face& F1,
 
 //=======================================================================
 //function : IsAutonomVertex
-//purpose  : Checks wether a vertex is "autonom" or not
+//purpose  : Checks whether a vertex is "autonom" or not
 //=======================================================================
 
 static Standard_Boolean IsAutonomVertex(const TopoDS_Shape& theVertex,
@@ -808,7 +805,7 @@ static Standard_Boolean IsAutonomVertex(const TopoDS_Shape& theVertex,
 
 //=======================================================================
 //function : IsAutonomVertex
-//purpose  : Checks wether a vertex is "autonom" or not
+//purpose  : Checks whether a vertex is "autonom" or not
 //=======================================================================
 
 static Standard_Boolean IsAutonomVertex(const TopoDS_Shape& aVertex,
@@ -3549,8 +3546,8 @@ void BRepOffset_Tool::ExtentFace (const TopoDS_Face&            F,
         EnLargeFace(TopoDS::Face(ToBuild(E)),StopFace,Standard_False);
         TopoDS_Face NullFace;
         BRepOffset_Tool::Inter3D (EF,StopFace,LInt1,LInt2,Side,E,NullFace,NullFace);
-        // No intersection, it may happen for example for a chosen (non-offseted) planar face and 
-        // its neighbour offseted cylindrical face, if the offset is directed so that 
+        // No intersection, it may happen for example for a chosen (non-offsetted) planar face and
+        // its neighbour offseted cylindrical face, if the offset is directed so that
         // the radius of the cylinder becomes smaller.
         if (LInt1.IsEmpty())
           continue;  
@@ -3903,11 +3900,73 @@ void BRepOffset_Tool::ExtentFace (const TopoDS_Face&            F,
 //function : Deboucle3D
 //purpose  : 
 //=======================================================================
-
 TopoDS_Shape BRepOffset_Tool::Deboucle3D(const TopoDS_Shape& S,
-					 const TopTools_MapOfShape& Boundary)
+                                         const TopTools_MapOfShape& Boundary)
 {
-  return BRepAlgo_Tool::Deboucle3D(S,Boundary);
+  TopoDS_Shape SS;
+  switch (S.ShapeType())
+  {
+    case TopAbs_SHELL: 
+    {
+      // if the shell contains free borders that do not belong to the 
+      // free borders of caps ( Boundary) it is removed.
+      TopTools_IndexedDataMapOfShapeListOfShape Map;
+      TopExp::MapShapesAndAncestors(S, TopAbs_EDGE, TopAbs_FACE, Map);
+
+      Standard_Boolean JeGarde = Standard_True;
+      for (Standard_Integer i = 1; i <= Map.Extent() && JeGarde; i++) {
+        const TopTools_ListOfShape& aLF = Map(i);
+        if (aLF.Extent() < 2) {
+          const TopoDS_Edge& anEdge = TopoDS::Edge(Map.FindKey(i));
+          if (anEdge.Orientation() == TopAbs_INTERNAL) {
+            const TopoDS_Face& aFace = TopoDS::Face(aLF.First());
+            if (aFace.Orientation() != TopAbs_INTERNAL) {
+              continue;
+            }
+          }
+          if (!Boundary.Contains(anEdge) &&
+              !BRep_Tool::Degenerated(anEdge))
+            JeGarde = Standard_False;
+        }
+      }
+      if (JeGarde) SS = S;
+    }
+    break;
+
+    case TopAbs_COMPOUND:  
+    case TopAbs_SOLID:
+    {
+      // iterate on sub-shapes and add non-empty.
+      TopoDS_Iterator it(S);
+      TopoDS_Shape SubShape;
+      Standard_Integer NbSub = 0;
+      BRep_Builder B;
+      if (S.ShapeType() == TopAbs_COMPOUND) {
+        B.MakeCompound(TopoDS::Compound(SS));
+      }
+      else {
+        B.MakeSolid(TopoDS::Solid(SS));
+      }
+      for (; it.More(); it.Next()) {
+        const TopoDS_Shape& CurS = it.Value();
+        SubShape = Deboucle3D(CurS, Boundary);
+        if (!SubShape.IsNull()) {
+          B.Add(SS, SubShape);
+          NbSub++;
+        }
+      }
+      if (NbSub == 0)
+      {
+        SS = TopoDS_Shape();
+      }
+    }
+    break;
+
+    default:
+      break;
+  }
+
+  return SS;
 }
 
 //=======================================================================

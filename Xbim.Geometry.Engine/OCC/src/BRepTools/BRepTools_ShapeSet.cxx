@@ -14,7 +14,7 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-// Modifed:     Portage NT 7-5-97 DPF (strcasecmp)
+// Modified:     Portage NT 7-5-97 DPF (strcasecmp)
 
 #include <BRep_Builder.hxx>
 #include <BRep_CurveOnClosedSurface.hxx>
@@ -77,30 +77,41 @@
 //                Workaround is following: Now we don`t use tellg for get position in stream.
 //                Now able to read file (when reading TopAbs_FACE) without tellg. 
 //                We simple check the next string if there are value that equal 2 
-//               (It means a parametr for triangulation).
+//               (It means a parameter for triangulation).
 
 
 //=======================================================================
 //function : BRepTools_ShapeSet
-//purpose  : 
+//purpose  :
 //=======================================================================
-
-BRepTools_ShapeSet::BRepTools_ShapeSet(const Standard_Boolean isWithTriangles)
-     :myWithTriangles(isWithTriangles)
+BRepTools_ShapeSet::BRepTools_ShapeSet (const Standard_Boolean theWithTriangles,
+                                        const Standard_Boolean theWithNormals)
+: myWithTriangles (theWithTriangles),
+  myWithNormals (theWithNormals)
 {
 }
 
 //=======================================================================
 //function : BRepTools_ShapeSet
-//purpose  : 
+//purpose  :
 //=======================================================================
-
-BRepTools_ShapeSet::BRepTools_ShapeSet (const BRep_Builder& B,
-                                        const Standard_Boolean isWithTriangles) :
-       myBuilder(B), myWithTriangles(isWithTriangles)
+BRepTools_ShapeSet::BRepTools_ShapeSet (const BRep_Builder& theBuilder,
+                                        const Standard_Boolean theWithTriangles,
+                                        const Standard_Boolean theWithNormals)
+: myBuilder (theBuilder),
+  myWithTriangles (theWithTriangles),
+  myWithNormals(theWithNormals)
 {
 }
 
+//=======================================================================
+//function : ~BRepTools_ShapeSet
+//purpose  :
+//=======================================================================
+BRepTools_ShapeSet::~BRepTools_ShapeSet()
+{
+  //
+}
 
 //=======================================================================
 //function : Clear
@@ -190,7 +201,11 @@ void BRepTools_ShapeSet::AddGeometry(const TopoDS_Shape& S)
           }
         }
         else if (CR->IsPolygonOnTriangulation()) {
-          myTriangulations.Add(CR->Triangulation());
+          // NCollection_IndexedDataMap::Add() function use is correct because
+          // Bin(Brep)Tools_ShapeSet::AddGeometry() is called from Bin(Brep)Tools_ShapeSet::Add()
+          // that processes shapes recursively from complex to elementary ones.
+          // As a result, the TopAbs_FACE's will be processed earlier than the TopAbs_EDGE's.
+          myTriangulations.Add(CR->Triangulation(), Standard_False); // edge triangulation does not need normals
           myNodes.Add(CR->PolygonOnTriangulation());
           ChangeLocations().Add(CR->Location());
           if (CR->IsPolygonOnClosedTriangulation())
@@ -211,12 +226,19 @@ void BRepTools_ShapeSet::AddGeometry(const TopoDS_Shape& S)
   else if (S.ShapeType() == TopAbs_FACE) {
 
     // Add the surface geometry
+    Standard_Boolean needNormals(myWithNormals);
     Handle(BRep_TFace) TF = Handle(BRep_TFace)::DownCast(S.TShape());
-    if (!TF->Surface().IsNull())  mySurfaces.Add(TF->Surface());
-
+    if (!TF->Surface().IsNull())
+    {
+      mySurfaces.Add(TF->Surface());
+    }
+    else
+    {
+      needNormals = Standard_True;
+    }
     if (myWithTriangles || TF->Surface().IsNull()) { // for XML Persistence
       Handle(Poly_Triangulation) Tr = TF->Triangulation();
-      if (!Tr.IsNull()) myTriangulations.Add(Tr);
+      if (!Tr.IsNull()) myTriangulations.Add(Tr, needNormals);
     }
 
     ChangeLocations().Add(TF->Location());
@@ -592,7 +614,7 @@ void  BRepTools_ShapeSet::WriteGeometry (const TopoDS_Shape& S, Standard_OStream
         OS << "\n";
 
         // Write UV Points // for XML Persistence higher performance
-        if (FormatNb() == 2)
+        if (FormatNb() == TopTools_FormatVersion_VERSION_2)
         {
           gp_Pnt2d Pf,Pl;
           if (CR->IsCurveOnClosedSurface()) {
@@ -902,7 +924,7 @@ void  BRepTools_ShapeSet::ReadGeometry (const TopAbs_ShapeEnum T,
             GeomTools::GetReal(IS, last);
 
             // read UV Points // for XML Persistence higher performance
-            if (FormatNb() == 2)
+            if (FormatNb() == TopTools_FormatVersion_VERSION_2)
             {
               GeomTools::GetReal(IS, PfX);
               GeomTools::GetReal(IS, PfY);
@@ -920,7 +942,7 @@ void  BRepTools_ShapeSet::ReadGeometry (const TopAbs_ShapeEnum T,
 //  Modified by Sergey KHROMOV - Wed Apr 24 12:11:17 2002 End
 
             if (closed) {
-              if (FormatNb() == 2)
+              if (FormatNb() == TopTools_FormatVersion_VERSION_2)
                 myBuilder.UpdateEdge(E,myCurves2d.Curve2d(pc),
                                      myCurves2d.Curve2d(pc2),
                                      mySurfaces.Surface(s),
@@ -941,7 +963,7 @@ void  BRepTools_ShapeSet::ReadGeometry (const TopAbs_ShapeEnum T,
             }
             else
             {
-              if (FormatNb() == 2)
+              if (FormatNb() == TopTools_FormatVersion_VERSION_2)
                 myBuilder.UpdateEdge(E,myCurves2d.Curve2d(pc),
                                      mySurfaces.Surface(s),
                                      Locations().Location(l),tol,
@@ -995,7 +1017,7 @@ void  BRepTools_ShapeSet::ReadGeometry (const TopAbs_ShapeEnum T,
                 myBuilder.UpdateEdge
                   (E, Handle(Poly_PolygonOnTriangulation)::DownCast(myNodes(pt)),
                    Handle(Poly_PolygonOnTriangulation)::DownCast(myNodes(pt2)),
-                   Handle(Poly_Triangulation)::DownCast(myTriangulations(t)),
+                   myTriangulations.FindKey(t),
                    Locations().Location(l));
             }
             else {
@@ -1003,7 +1025,7 @@ void  BRepTools_ShapeSet::ReadGeometry (const TopAbs_ShapeEnum T,
 				  pt > 0 && pt <= myNodes.Extent())
                 myBuilder.UpdateEdge
                   (E,Handle(Poly_PolygonOnTriangulation)::DownCast(myNodes(pt)),
-                   Handle(Poly_Triangulation)::DownCast(myTriangulations(t)),
+                   myTriangulations.FindKey(t),
                    Locations().Location(l));
             }
             // range
@@ -1055,7 +1077,7 @@ void  BRepTools_ShapeSet::ReadGeometry (const TopAbs_ShapeEnum T,
       //only triangulation
       IS >> s;
       myBuilder.UpdateFace(TopoDS::Face(S),
-                           Handle(Poly_Triangulation)::DownCast(myTriangulations(s)));
+                           myTriangulations.FindKey(s));
     }
 //    else pos = IS.tellg();
     
@@ -1072,7 +1094,7 @@ void  BRepTools_ShapeSet::ReadGeometry (const TopAbs_ShapeEnum T,
       s = atoi ( &string[2] );
 	  if (s > 0 && s <= myTriangulations.Extent())
         myBuilder.UpdateFace(TopoDS::Face(S),
-                             Handle(Poly_Triangulation)::DownCast(myTriangulations(s)));
+                             myTriangulations.FindKey(s));
     }
 //    else IS.seekg(pos);
     }
@@ -1415,16 +1437,24 @@ void BRepTools_ShapeSet::WriteTriangulation(Standard_OStream&      OS,
   Handle(Poly_Triangulation) T;
   for (i = 1; i <= nbtri && aPS.More(); i++, aPS.Next()) {
 
-    T = Handle(Poly_Triangulation)::DownCast(myTriangulations(i));
+    T = myTriangulations.FindKey(i);
+    const Standard_Boolean toWriteNormals = myTriangulations(i);
     if (Compact) {
       OS << T->NbNodes() << " " << T->NbTriangles() << " ";
       OS << ((T->HasUVNodes()) ? "1" : "0") << " ";
+      if (FormatNb() >= TopTools_FormatVersion_VERSION_3)
+      {
+        OS << ((T->HasNormals() && toWriteNormals) ? "1" : "0") << " ";
+      }
     }
     else {
       OS << "  "<< i << " : Triangulation with " << T->NbNodes() << " Nodes and "
          << T->NbTriangles() <<" Triangles\n";
       OS << "      "<<((T->HasUVNodes()) ? "with" : "without") << " UV nodes\n";
-
+      if (FormatNb() >= TopTools_FormatVersion_VERSION_3)
+      {
+        OS << "      " << ((T->HasNormals() && toWriteNormals) ? "with" : "without") << " normals\n";
+      }
     }
     
     // write the deflection
@@ -1437,28 +1467,31 @@ void BRepTools_ShapeSet::WriteTriangulation(Standard_OStream&      OS,
     if (!Compact) OS << "\n3D Nodes :\n";
     
     nbNodes = T->NbNodes();
-    const TColgp_Array1OfPnt& Nodes = T->Nodes();
-    for (j = 1; j <= nbNodes; j++) {
+    for (j = 1; j <= nbNodes; j++)
+    {
+      const gp_Pnt aNode = T->Node (j);
       if (!Compact) OS << std::setw(10) << j << " : ";
       if (!Compact) OS << std::setw(17);
-      OS << Nodes(j).X() << " ";
+      OS << aNode.X() << " ";
       if (!Compact) OS << std::setw(17);
-      OS << Nodes(j).Y() << " ";
+      OS << aNode.Y() << " ";
       if (!Compact) OS << std::setw(17);
-      OS << Nodes(j).Z();
+      OS << aNode.Z();
       if (!Compact) OS << "\n";
       else OS << " ";
     }
     
-    if (T->HasUVNodes()) {
+    if (T->HasUVNodes())
+    {
       if (!Compact) OS << "\nUV Nodes :\n";
-      const TColgp_Array1OfPnt2d& UVNodes = T->UVNodes();
-      for (j = 1; j <= nbNodes; j++) {
+      for (j = 1; j <= nbNodes; j++)
+      {
+        const gp_Pnt2d aNode2d = T->UVNode (j);
         if (!Compact) OS << std::setw(10) << j << " : ";
         if (!Compact) OS << std::setw(17);
-        OS << UVNodes(j).X() << " ";
+        OS << aNode2d.X() << " ";
         if (!Compact) OS << std::setw(17);
-        OS << UVNodes(j).Y();
+        OS << aNode2d.Y();
         if (!Compact) OS << "\n";
         else OS << " ";
       }
@@ -1466,10 +1499,9 @@ void BRepTools_ShapeSet::WriteTriangulation(Standard_OStream&      OS,
     
     if (!Compact) OS << "\nTriangles :\n";
     nbTriangles = T->NbTriangles();
-    const Poly_Array1OfTriangle& Triangles = T->Triangles();
     for (j = 1; j <= nbTriangles; j++) {
       if (!Compact) OS << std::setw(10) << j << " : ";
-      Triangles(j).Get(n1, n2, n3);
+      T->Triangle (j).Get (n1, n2, n3);
       if (!Compact) OS << std::setw(10);
       OS << n1 << " ";
       if (!Compact) OS << std::setw(10);
@@ -1478,6 +1510,29 @@ void BRepTools_ShapeSet::WriteTriangulation(Standard_OStream&      OS,
       OS << n3;
       if (!Compact) OS << "\n";
       else OS << " ";
+    }
+
+    if (FormatNb() >= TopTools_FormatVersion_VERSION_3)
+    {
+      if (T->HasNormals() && toWriteNormals)
+      {
+        if (!Compact) OS << "\nNormals :\n";
+        for (j = 1; j <= nbNodes; j++)
+        {
+          if (!Compact)
+          {
+            OS << std::setw(10) << j << " : ";
+            OS << std::setw(17);
+          }
+          gp_Vec3f aNorm;
+          for (Standard_Integer k = 0; k < 3; ++k)
+          {
+            T->Normal (j, aNorm);
+            OS << aNorm[k];
+            OS << (!Compact ? "\n" : " ");
+          }
+        }
+      }
     }
     OS << "\n";
   }
@@ -1502,11 +1557,11 @@ void BRepTools_ShapeSet::DumpTriangulation(Standard_OStream& OS)const
 void BRepTools_ShapeSet::ReadTriangulation(Standard_IStream& IS, const Message_ProgressRange& theProgress)
 {
   char buffer[255];
-  //  Standard_Integer i, j, val, nbtri;
   Standard_Integer i, j, nbtri =0;
   Standard_Real d, x, y, z;
   Standard_Integer nbNodes =0, nbTriangles=0;
   Standard_Boolean hasUV= Standard_False;
+  Standard_Boolean hasNormals= Standard_False;
 
   Handle(Poly_Triangulation) T;
 
@@ -1519,39 +1574,49 @@ void BRepTools_ShapeSet::ReadTriangulation(Standard_IStream& IS, const Message_P
   for (i=1; i<=nbtri && aPS.More();i++, aPS.Next()) {
 
     IS >> nbNodes >> nbTriangles >> hasUV;
+    if (FormatNb() >= TopTools_FormatVersion_VERSION_3)
+    {
+      IS >> hasNormals;
+    }
     GeomTools::GetReal(IS, d);
 
-    TColgp_Array1OfPnt Nodes(1, nbNodes);
-    TColgp_Array1OfPnt2d UVNodes(1, nbNodes);
+    T = new Poly_Triangulation (nbNodes, nbTriangles, hasUV, hasNormals);
 
     for (j = 1; j <= nbNodes; j++) {
       GeomTools::GetReal(IS, x);
       GeomTools::GetReal(IS, y);
       GeomTools::GetReal(IS, z);
-      Nodes(j).SetCoord(x,y,z);
+      T->SetNode (j, gp_Pnt (x, y, z));
     }
 
     if (hasUV) {
       for (j = 1; j <= nbNodes; j++) {
         GeomTools::GetReal(IS, x);
         GeomTools::GetReal(IS, y);
-        UVNodes(j).SetCoord(x,y);
+        T->SetUVNode (j, gp_Pnt2d (x,y));
       }
     }
       
     // read the triangles
     Standard_Integer n1,n2,n3;
-    Poly_Array1OfTriangle Triangles(1, nbTriangles);
     for (j = 1; j <= nbTriangles; j++) {
       IS >> n1 >> n2 >> n3;
-      Triangles(j).Set(n1,n2,n3);
+      T->SetTriangle (j, Poly_Triangle (n1, n2, n3));
     }
-      
-    if (hasUV) T =  new Poly_Triangulation(Nodes,UVNodes,Triangles);
-    else T = new Poly_Triangulation(Nodes,Triangles);
-      
+
+    if (hasNormals)
+    {
+      NCollection_Vec3<Standard_Real> aNorm;
+      for (j = 1; j <= nbNodes; j++)
+      {
+        GeomTools::GetReal (IS, aNorm.x());
+        GeomTools::GetReal (IS, aNorm.y());
+        GeomTools::GetReal (IS, aNorm.z());
+        T->SetNormal (j, gp_Vec3f (aNorm));
+      }
+    }
+
     T->Deflection(d);
-      
-    myTriangulations.Add(T);
+    myTriangulations.Add(T, hasNormals);
   }
 }

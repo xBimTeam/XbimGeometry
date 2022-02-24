@@ -24,11 +24,8 @@
 #include <Standard_Boolean.hxx>
 #include <Standard_Integer.hxx>
 #include <Extrema_ExtSS.hxx>
-class Standard_OutOfRange;
-class StdFail_NotDone;
 class Geom_Surface;
 class gp_Pnt;
-class Extrema_ExtSS;
 
 
 //! Describes functions for computing all the extrema
@@ -128,6 +125,12 @@ Standard_EXPORT operator Standard_Integer() const;
   //! 1,NbExtrema ], where NbExtrema is the
   //! number of extrema computed by this algorithm.
   Standard_EXPORT Standard_Real Distance (const Standard_Integer Index) const;
+
+  //! Returns True if the surfaces are parallel
+  Standard_Boolean IsParallel() const
+  {
+    return myExtSS.IsParallel();
+  }
   
   //! Returns the points P1 on the first surface and P2 on
   //! the second surface, which are the ends of the

@@ -39,14 +39,9 @@
 class Law_Function;
 class BRepFill_LocationLaw;
 class BRepFill_SectionLaw;
-class Standard_DomainError;
-class StdFail_NotDone;
-class TopoDS_Wire;
 class gp_Ax2;
 class gp_Dir;
-class TopoDS_Shape;
 class TopoDS_Vertex;
-class BRepFill_Section;
 class gp_Trsf;
 class BRepFill_Sweep;
 
@@ -64,7 +59,7 @@ public:
 
   
   //! Set an sweep's mode
-  //! If no mode are setted, the mode use in MakePipe is used
+  //! If no mode are set, the mode used in MakePipe is used
   Standard_EXPORT BRepFill_PipeShell(const TopoDS_Wire& Spine);
   
   //! Set an Frenet or an CorrectedFrenet trihedron
@@ -86,7 +81,7 @@ public:
   //! Set support to the spine to define the BiNormal
   //! at   the spine, like    the  normal the surfaces.
   //! Warning: To  be  effective,  Each  edge  of  the  <spine>  must
-  //! have an  representaion  on   one   face  of<SpineSupport>
+  //! have an  representation  on   one   face  of<SpineSupport>
   Standard_EXPORT Standard_Boolean Set (const TopoDS_Shape& SpineSupport);
   
   //! Set  an  auxiliary  spine  to  define  the Normal
@@ -125,18 +120,14 @@ public:
   //! Possibilities are :
   //! - Give one or sevral profile
   //! - Give one profile and an homotetic law.
-  //! - Automatic compute of correspondance beetween profile, and section
-  //! on the sweeped shape
-  //! - correspondance beetween profile, and section on the sweeped shape
-  //! defined by a vertex of the spine
+  //! - Automatic compute of correspondence between profile, and section on the sweeped shape
+  //! - correspondence between profile, and section on the sweeped shape defined by a vertex of the spine
   Standard_EXPORT void SetForceApproxC1 (const Standard_Boolean ForceApproxC1);
-  
-  //! Set an section. The corespondance with the spine, will
-  //! be automaticaly performed.
+
+  //! Set an section. The correspondence with the spine, will be automatically performed.
   Standard_EXPORT void Add (const TopoDS_Shape& Profile, const Standard_Boolean WithContact = Standard_False, const Standard_Boolean WithCorrection = Standard_False);
-  
-  //! Set an section.   The corespondance with the spine, is
-  //! given by  <Location>
+
+  //! Set an section. The correspondence with the spine, is given by Location.
   Standard_EXPORT void Add (const TopoDS_Shape& Profile, const TopoDS_Vertex& Location, const Standard_Boolean WithContact = Standard_False, const Standard_Boolean WithCorrection = Standard_False);
   
   //! Set  an    section  and  an   homotetic    law.

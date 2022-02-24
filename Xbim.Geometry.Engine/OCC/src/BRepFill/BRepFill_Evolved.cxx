@@ -1084,7 +1084,7 @@ void BRepFill_Evolved::ElementaryPerform (const TopoDS_Face&              Sp,
         // Find if one of two faces connected to the edge
         // belongs to volevo. The edges on this face serve
         // to eliminate certain vertices that can appear twice
-        // on the parallel edge. These Vertices corespond to the
+        // on the parallel edge. These Vertices correspond to the
         // nodes of the map.
         //---------------------------------------------------------
         TopoDS_Shape     FaceControle;
@@ -1618,7 +1618,7 @@ void BRepFill_Evolved::PrepareProfile(TopTools_ListOfShape&         WorkProf,
     }
 
     if (YaModif) {
-      //Status = 0 for the begining
+      //Status = 0 for the beginning
       //         3 vertical
       //         2 horizontal
       //         1 other
@@ -2824,7 +2824,7 @@ void ComputeIntervals (const TopTools_SequenceOfShape& VOnF,
   while ( IOnF <= VOnF.Length() || IOnL <= VOnL.Length()) {
     //---------------------------------------------------------
     // Return the smallest parameter on the bissectrice
-    // correponding to the current positions IOnF,IOnL.
+    // corresponding to the current positions IOnF,IOnL.
     //---------------------------------------------------------
     if ( IOnL > VOnL.Length() ||
       (IOnF <= VOnF.Length() &&

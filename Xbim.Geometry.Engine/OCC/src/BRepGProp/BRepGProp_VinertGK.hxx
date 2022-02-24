@@ -25,7 +25,6 @@
 #include <Standard_Boolean.hxx>
 #include <Standard_Address.hxx>
 class BRepGProp_Face;
-class gp_Pnt;
 class BRepGProp_Domain;
 class gp_Pln;
 
@@ -147,21 +146,17 @@ public:
   //! Returns the absolut reached computation error.
     Standard_Real GetAbsolutError() const;
 
-
-
-
-protected:
-
-
-
-
-
 private:
 
-  
   //! Main method for computation of the global properties that
   //! is invoked by each Perform method.
-  Standard_EXPORT Standard_Real PrivatePerform (BRepGProp_Face& theSurface, const Standard_Address thePtrDomain, const Standard_Boolean IsByPoint, const Standard_Address theCoeffs, const Standard_Real theTolerance, const Standard_Boolean theCGFlag, const Standard_Boolean theIFlag);
+  Standard_EXPORT Standard_Real PrivatePerform (BRepGProp_Face& theSurface,
+                                                const Standard_Address thePtrDomain,
+                                                const Standard_Boolean IsByPoint,
+                                                const Standard_Real* theCoeffs,
+                                                const Standard_Real theTolerance,
+                                                const Standard_Boolean theCGFlag,
+                                                const Standard_Boolean theIFlag);
 
 
   Standard_Real myErrorReached;

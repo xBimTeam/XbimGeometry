@@ -17,22 +17,18 @@
 #ifndef _BRepOffset_Inter2d_HeaderFile
 #define _BRepOffset_Inter2d_HeaderFile
 
-#include <Standard.hxx>
-#include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
-
 #include <TopTools_IndexedMapOfShape.hxx>
-#include <Standard_Real.hxx>
 #include <TopTools_DataMapOfShapeShape.hxx>
 #include <TopTools_DataMapOfShapeListOfShape.hxx>
 #include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
+#include <Message_ProgressRange.hxx>
+
 class BRepAlgo_AsDes;
 class BRepAlgo_Image;
 class BRepOffset_Analyse;
 class BRepOffset_Offset;
 class TopoDS_Edge;
 class TopoDS_Face;
-
 
 //! Computes the intersections between edges on a face
 //! stores result is SD as AsDes from BRepOffset.
@@ -54,7 +50,8 @@ public:
                                        const TopTools_IndexedMapOfShape& NewEdges, 
                                        const Standard_Real Tol,
                                        const TopTools_DataMapOfShapeListOfShape& theEdgeIntEdges,
-                                       TopTools_IndexedDataMapOfShapeListOfShape& theDMVV);
+                                       TopTools_IndexedDataMapOfShapeListOfShape& theDMVV,
+                                       const Message_ProgressRange& theRange);
 
   //! Computes the intersection between the offset edges of the <FI>.
   //! All intersection vertices will be stored in AsDes2d.
@@ -73,7 +70,8 @@ public:
                                                           TopTools_IndexedMapOfShape& FacesWithVerts,
                                                           BRepAlgo_Image& theImageVV,
                                                           TopTools_DataMapOfShapeListOfShape& theEdgeIntEdges,
-                                                          TopTools_IndexedDataMapOfShapeListOfShape& theDMVV);
+                                                          TopTools_IndexedDataMapOfShapeListOfShape& theDMVV,
+                                                          const Message_ProgressRange& theRange);
 
   //! Computes the intersection between the offset edges generated
   //! from vertices and stored into AsDes as descendants of the <FI>.
@@ -89,7 +87,8 @@ public:
                                                     const Handle(BRepAlgo_AsDes)& AsDes2d,
                                                     const Standard_Real Tol,
                                                     const BRepOffset_Analyse& Analyse,
-                                                    TopTools_IndexedDataMapOfShapeListOfShape& theDMVV);
+                                                    TopTools_IndexedDataMapOfShapeListOfShape& theDMVV,
+                                                    const Message_ProgressRange& theRange);
 
   //! Fuses the chains of vertices in the theDMVV
   //! and updates AsDes by replacing the old vertices
@@ -102,10 +101,6 @@ public:
   Standard_EXPORT static Standard_Boolean ExtentEdge (const TopoDS_Edge& E,
                                                       TopoDS_Edge& NE,
                                                       const Standard_Real theOffset);
-
-protected:
-
-private:
 
 };
 

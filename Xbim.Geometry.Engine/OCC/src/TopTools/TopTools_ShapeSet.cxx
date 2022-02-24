@@ -19,7 +19,7 @@
 //              On Unix platforms:
 //              ------------------
 //                In method Read(Standard_IStream &IS), during the version 
-//                authentification we cut last '\r' in the line (which will
+//                authentication we cut last '\r' in the line (which will
 //                be present if file is in DOS coding)
 
 #include <Message_ProgressScope.hxx>
@@ -28,18 +28,27 @@
 #include <TopoDS_Shape.hxx>
 #include <TopTools_LocationSet.hxx>
 #include <TopTools_ShapeSet.hxx>
+#include <Standard_Assert.hxx>
+
+#include <BRep_TFace.hxx>
 
 #include <locale.h>
 #include <string.h>
-static const char* Version  = "CASCADE Topology V1, (c) Matra-Datavision";
-static const char* Version2 = "CASCADE Topology V2, (c) Matra-Datavision";
+
+const Standard_CString TopTools_ShapeSet::THE_ASCII_VERSIONS[TopTools_FormatVersion_UPPER + 1] =
+{
+  "",
+  "CASCADE Topology V1, (c) Matra-Datavision",
+  "CASCADE Topology V2, (c) Matra-Datavision",
+  "CASCADE Topology V3, (c) Open Cascade"
+};
 
 //=======================================================================
 //function : TopTools_ShapeSet
 //purpose  : 
 //=======================================================================
-
-TopTools_ShapeSet::TopTools_ShapeSet() : myFormatNb(1)
+TopTools_ShapeSet::TopTools_ShapeSet()
+: myFormatNb (TopTools_FormatVersion_CURRENT)
 {
 }
 
@@ -52,6 +61,10 @@ TopTools_ShapeSet::~TopTools_ShapeSet()
 //=======================================================================
 void TopTools_ShapeSet::SetFormatNb(const Standard_Integer theFormatNb)
 {
+  Standard_ASSERT_RETURN(theFormatNb >= TopTools_FormatVersion_LOWER &&
+                         theFormatNb <= TopTools_FormatVersion_UPPER,
+    "Error: unsupported TopTools version.", );
+
   myFormatNb = theFormatNb;
 }
 
@@ -451,10 +464,7 @@ void  TopTools_ShapeSet::Write(Standard_OStream& OS, const Message_ProgressRange
   std::streamsize prec = OS.precision(15);
 
   // write the copyright
-  if (myFormatNb == 2)
-    OS << "\n" << Version2 << "\n";
-  else
-    OS << "\n" << Version << "\n";
+  OS << "\n" << THE_ASCII_VERSIONS[myFormatNb] << "\n";
 
   //-----------------------------------------
   // write the locations
@@ -592,6 +602,7 @@ void  TopTools_ShapeSet::Read(Standard_IStream& IS, const Message_ProgressRange&
 
   // Check the version
   char vers[101];
+  Standard_Boolean anIsSetFormat = Standard_False;
   do {
     IS.getline(vers,100,'\n');
     // BUC60769 PTV 18.10.2000: remove possible '\r' at the end of the line
@@ -605,15 +616,27 @@ void  TopTools_ShapeSet::Read(Standard_IStream& IS, const Message_ProgressRange&
       for (lv--; lv > 0 && (vers[lv] == '\r' || vers[lv] == '\n') ;lv--) 
         vers[lv] = '\0';
     }
+    for (Standard_Integer i = TopTools_FormatVersion_LOWER;
+         i <= TopTools_FormatVersion_UPPER; ++i)
+    {
+      if (!strcmp(vers, THE_ASCII_VERSIONS[i]))
+      {
+        SetFormatNb(i);
+        anIsSetFormat = Standard_True;
+        break;
+      }
+    }
+    if (anIsSetFormat)
+    {
+      break;
+    }
     
-  } while ( ! IS.fail() && strcmp(vers,Version) && strcmp(vers,Version2) );
+  } while (!IS.fail());
   if (IS.fail()) {
     std::cout << "File was not written with this version of the topology"<<std::endl;
     IS.imbue (anOldLocale);
     return;
   }
-  if (strcmp(vers,Version2) == 0) SetFormatNb(2);
-  else SetFormatNb(1);
 
   //-----------------------------------------
   // read the locations
@@ -681,10 +704,9 @@ void  TopTools_ShapeSet::Read(Standard_IStream& IS, const Message_ProgressRange&
     S.Free      (buffer[0] == '1');
     S.Modified  (buffer[1] == '1');
 
-    if (myFormatNb == 2)
-      S.Checked   (buffer[2] == '1');
-    else
-      S.Checked   (Standard_False);     // force check at reading.. 
+    const bool isChecked = myFormatNb == TopTools_FormatVersion_VERSION_2
+                        && buffer[2] == '1';
+    S.Checked (isChecked);
 
     S.Orientable(buffer[3] == '1');
     S.Closed    (buffer[4] == '1');
@@ -693,7 +715,7 @@ void  TopTools_ShapeSet::Read(Standard_IStream& IS, const Message_ProgressRange&
 
     // check
 
-    if (myFormatNb == 1)
+    if (myFormatNb == TopTools_FormatVersion_VERSION_1)
       Check(T,S);
 
     myShapes.Add(S);
@@ -792,7 +814,7 @@ void  TopTools_ShapeSet::Read(TopoDS_Shape& S,
 
     Standard_Integer l;
     IS >> l;
-    S.Location(myLocations.Location(l));
+    S.Location(myLocations.Location(l), Standard_False);
   }
 }
 

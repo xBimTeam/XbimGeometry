@@ -123,11 +123,11 @@ public:
   Standard_EXPORT static void RejectLines (const IntTools_SequenceOfCurves& aSIn, IntTools_SequenceOfCurves& aSOut);
   
 
-  //! Returns True if D1 and D2 coinside
+  //! Returns True if D1 and D2 coincide
   Standard_EXPORT static Standard_Boolean IsDirsCoinside (const gp_Dir& D1, const gp_Dir& D2);
   
 
-  //! Returns True if D1 and D2 coinside with given tolerance
+  //! Returns True if D1 and D2 coincide with given tolerance
   Standard_EXPORT static Standard_Boolean IsDirsCoinside (const gp_Dir& D1, const gp_Dir& D2, const Standard_Real aTol);
   
 
@@ -172,8 +172,8 @@ public:
                                       const Standard_Real theLast,
                                       Standard_Real& theMaxDist,
                                       Standard_Real& theMaxPar,
-                                      const Standard_Real theTolRange =
-                                                                  Precision::PConfusion());
+                                      const Standard_Real theTolRange = Precision::PConfusion(),
+                                      const Standard_Boolean theToRunParallel = Standard_False);
 
 
   //! Computes the correct Intersection range for 

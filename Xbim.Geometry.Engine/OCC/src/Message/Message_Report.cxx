@@ -185,6 +185,8 @@ void Message_Report::UpdateActiveInMessenger (const Handle(Message_Messenger)& t
 //=======================================================================
 void Message_Report::AddLevel (Message_Level* theLevel, const TCollection_AsciiString& theName)
 {
+  Standard_Mutex::Sentry aSentry (myMutex);
+
   myAlertLevels.Append (theLevel);
 
   Handle(Message_AlertExtended) aLevelRootAlert = new Message_AlertExtended();
@@ -220,13 +222,12 @@ void Message_Report::AddLevel (Message_Level* theLevel, const TCollection_AsciiS
 
 void Message_Report::RemoveLevel (Message_Level* theLevel)
 {
+  Standard_Mutex::Sentry aSentry (myMutex);
+
   for (int aLevelIndex = myAlertLevels.Size(); aLevelIndex >= 1; aLevelIndex--)
   {
     Message_Level* aLevel = myAlertLevels.Value (aLevelIndex);
-    if (myAlertLevels.Size() == 1) // the last level, the root item should be stopped
-    {
-      Message_AttributeMeter::StopAlert (aLevel->RootAlert());
-    }
+    Message_AttributeMeter::StopAlert (aLevel->RootAlert());
 
     myAlertLevels.Remove (aLevelIndex);
     if (aLevel == theLevel)
@@ -247,6 +248,8 @@ void Message_Report::Clear()
     return;
   }
 
+  Standard_Mutex::Sentry aSentry (myMutex);
+
   compositeAlerts()->Clear();
   myAlertLevels.Clear();
 }
@@ -262,6 +265,8 @@ void Message_Report::Clear (Message_Gravity theGravity)
     return;
   }
 
+  Standard_Mutex::Sentry aSentry (myMutex);
+
   compositeAlerts()->Clear (theGravity);
   myAlertLevels.Clear();
 }
@@ -276,6 +281,8 @@ void Message_Report::Clear (const Handle(Standard_Type)& theType)
   {
     return;
   }
+
+  Standard_Mutex::Sentry aSentry (myMutex);
 
   compositeAlerts()->Clear (theType);
   myAlertLevels.Clear();
@@ -479,10 +486,11 @@ void Message_Report::DumpJson (Standard_OStream& theOStream, Standard_Integer th
   Standard_Integer anAlertLevels = myAlertLevels.Size();
   OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, anAlertLevels)
 
+  Standard_Integer anInc = 1;
   for (NCollection_IndexedMap<Message_MetricType>::Iterator anIterator (myActiveMetrics); anIterator.More(); anIterator.Next())
   {
     Message_MetricType anActiveMetric = anIterator.Value();
-    OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, anActiveMetric)
+    OCCT_DUMP_FIELD_VALUE_NUMERICAL_INC (theOStream, anActiveMetric, anInc++)
   }
 
   OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myLimit)

@@ -51,7 +51,6 @@
 #include <Geom2d_OffsetCurve.hxx>
 #include <Geom2d_TrimmedCurve.hxx>
 #include <Geom2dAdaptor_Curve.hxx>
-#include <Geom2dAdaptor_HCurve.hxx>
 #include <Geom2dConvert_CompCurveToBSplineCurve.hxx>
 #include <Geom2dLProp_CLProps2d.hxx>
 #include <Geom_Circle.hxx>
@@ -271,7 +270,7 @@ static Standard_Boolean KPartCircle
     Standard_Real anOffset = myOffset;
     
     Handle(Geom2d_Curve) aPCurve = BRep_Tool::CurveOnSurface(E, mySpine, f, l);
-    Handle(Geom2dAdaptor_HCurve) AHC = new Geom2dAdaptor_HCurve(aPCurve, f, l);
+    Handle(Geom2dAdaptor_Curve) AHC = new Geom2dAdaptor_Curve(aPCurve, f, l);
     Handle(Geom2d_Curve) OC;
     if (AHC->GetType() == GeomAbs_Line)
     {
@@ -284,6 +283,10 @@ static Standard_Boolean KPartCircle
     {
       if (E.Orientation() == TopAbs_FORWARD)
         anOffset *= -1;
+      if (!BRep_Tool::IsClosed(E))
+      {
+        anOffset *= -1;
+      }
       gp_Circ2d theCirc = AHC->Circle();
       if (anOffset > 0. || Abs(anOffset) < theCirc.Radius())
         OC = new Geom2d_Circle (theCirc.Position(), theCirc.Radius() + anOffset);
@@ -373,34 +376,25 @@ void BRepFill_OffsetWire::Init(const TopoDS_Face&     Spine,
   
   myMap.Clear();
   myMapSpine.Clear();
+
   //------------------------------------------------------------------
   // cut the spine for bissectors.
   //------------------------------------------------------------------
-  //  Modified by Sergey KHROMOV - Tue Nov 26 17:39:03 2002 Begin
-  static BRepMAT2d_Explorer Exp;
-
+  BRepMAT2d_Explorer Exp;
   Exp.Perform(mySpine);
-
-  //  TopoDS_Face anOldSpine = mySpine;
-
   mySpine = TopoDS::Face(Exp.ModifiedShape(mySpine));
   PrepareSpine  ();
 
-  //  Modified by Sergey KHROMOV - Tue Nov 26 17:39:03 2002 End
   TopoDS_Shape aShape;
   BRepFill_IndexedDataMapOfOrientedShapeListOfShape aMap;
   Standard_Boolean Done;
   if (KPartCircle(myWorkSpine,1.,myIsOpenResult,0.,aShape,aMap,Done)) return;
-
 
   //-----------------------------------------------------
   // Calculate the map of bissectors to the left.  
   // and Links Topology -> base elements of the map.
   //-----------------------------------------------------
   
-  //  Modified by Sergey KHROMOV - Tue Nov 26 17:39:03 2002 Begin
-  //   static BRepMAT2d_Explorer Exp;
-  //  Modified by Sergey KHROMOV - Tue Nov 26 17:39:03 2002 End
   Exp.Perform(myWorkSpine);
   myBilo.Compute(Exp, 1 ,MAT_Left, myJoinType, myIsOpenResult);
   myLink.Perform(Exp,myBilo);
@@ -2064,8 +2058,8 @@ void MakeOffset (const TopoDS_Edge&        E,
 
     if (anOffset*Signe < AC.Circle().Radius() - Precision::Confusion()) {
 
-      Handle(Geom2dAdaptor_HCurve) AHC = 
-        new Geom2dAdaptor_HCurve(G2d);
+      Handle(Geom2dAdaptor_Curve) AHC = 
+        new Geom2dAdaptor_Curve(G2d);
       Adaptor2d_OffsetCurve   Off(AHC, anOffset);
       Handle(Geom2d_Circle) CC = new Geom2d_Circle(Off.Circle());
 
@@ -2099,8 +2093,8 @@ void MakeOffset (const TopoDS_Edge&        E,
     }
   }
   else if (AC.GetType() == GeomAbs_Line) {
-    Handle(Geom2dAdaptor_HCurve) AHC = 
-      new Geom2dAdaptor_HCurve(G2d);
+    Handle(Geom2dAdaptor_Curve) AHC = 
+      new Geom2dAdaptor_Curve(G2d);
     Adaptor2d_OffsetCurve Off(AHC, anOffset);
     Handle(Geom2d_Line)       CC = new Geom2d_Line(Off.Line());
     Standard_Real Delta = (l - f);

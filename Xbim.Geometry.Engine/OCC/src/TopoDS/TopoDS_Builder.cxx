@@ -105,7 +105,7 @@ void TopoDS_Builder::Add (TopoDS_Shape& aShape,
       // and the Relative Location
       const TopLoc_Location& aLoc=aShape.Location();
       if (!aLoc.IsIdentity())
-        S.Move(aLoc.Inverted());
+        S.Move(aLoc.Inverted(), Standard_False);
       //
       // Set the TShape as modified.
       aShape.TShape()->Modified(Standard_True);
@@ -115,7 +115,7 @@ void TopoDS_Builder::Add (TopoDS_Shape& aShape,
     }
   }
   else {
-    throw TopoDS_FrozenShape("TopoDS_Buider::Add");
+    throw TopoDS_FrozenShape("TopoDS_Builder::Add");
   }
 }
 
@@ -135,7 +135,7 @@ void TopoDS_Builder::Remove (TopoDS_Shape& aShape,
   TopoDS_Shape S = aComponent;
   if (aShape.Orientation() == TopAbs_REVERSED)
     S.Reverse();
-  S.Location(S.Location().Predivided(aShape.Location()));
+  S.Location(S.Location().Predivided(aShape.Location()), Standard_False);
 
   TopoDS_ListOfShape& L = aShape.TShape()->myShapes;
   TopoDS_ListIteratorOfListOfShape It(L);

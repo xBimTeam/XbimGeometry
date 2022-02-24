@@ -17,25 +17,13 @@
 #ifndef _IntCurveSurface_ThePolyhedronOfHInter_HeaderFile
 #define _IntCurveSurface_ThePolyhedronOfHInter_HeaderFile
 
-#include <Standard.hxx>
-#include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
-
-#include <Standard_Integer.hxx>
+#include <Adaptor3d_Surface.hxx>
 #include <Bnd_Box.hxx>
 #include <Bnd_HArray1OfBox.hxx>
-#include <Standard_Real.hxx>
-#include <Standard_Address.hxx>
-#include <Standard_Boolean.hxx>
 #include <TColStd_Array1OfReal.hxx>
-class Standard_OutOfRange;
-class Adaptor3d_HSurface;
+
 class Adaptor3d_HSurfaceTool;
-class gp_Pnt;
 class Bnd_Box;
-class gp_XYZ;
-
-
 
 class IntCurveSurface_ThePolyhedronOfHInter 
 {
@@ -44,9 +32,9 @@ public:
   DEFINE_STANDARD_ALLOC
 
   
-  Standard_EXPORT IntCurveSurface_ThePolyhedronOfHInter(const Handle(Adaptor3d_HSurface)& Surface, const Standard_Integer nbdU, const Standard_Integer nbdV, const Standard_Real U1, const Standard_Real V1, const Standard_Real U2, const Standard_Real V2);
+  Standard_EXPORT IntCurveSurface_ThePolyhedronOfHInter(const Handle(Adaptor3d_Surface)& Surface, const Standard_Integer nbdU, const Standard_Integer nbdV, const Standard_Real U1, const Standard_Real V1, const Standard_Real U2, const Standard_Real V2);
   
-  Standard_EXPORT IntCurveSurface_ThePolyhedronOfHInter(const Handle(Adaptor3d_HSurface)& Surface, const TColStd_Array1OfReal& Upars, const TColStd_Array1OfReal& Vpars);
+  Standard_EXPORT IntCurveSurface_ThePolyhedronOfHInter(const Handle(Adaptor3d_Surface)& Surface, const TColStd_Array1OfReal& Upars, const TColStd_Array1OfReal& Vpars);
   
   Standard_EXPORT void Destroy();
 ~IntCurveSurface_ThePolyhedronOfHInter()
@@ -56,7 +44,7 @@ public:
   
   Standard_EXPORT void DeflectionOverEstimation (const Standard_Real flec);
   
-  Standard_EXPORT Standard_Real DeflectionOnTriangle (const Handle(Adaptor3d_HSurface)& Surface, const Standard_Integer Index) const;
+  Standard_EXPORT Standard_Real DeflectionOnTriangle (const Handle(Adaptor3d_Surface)& Surface, const Standard_Integer Index) const;
   
   Standard_EXPORT void UMinSingularity (const Standard_Boolean Sing);
   
@@ -72,11 +60,11 @@ public:
   //! Give the number of triangles in this double array of
   Standard_EXPORT Standard_Integer NbTriangles() const;
   
-  //! Give the 3 points of the triangle of addresse Index in
+  //! Give the 3 points of the triangle of address Index in
   //! the double array of triangles.
   Standard_EXPORT void Triangle (const Standard_Integer Index, Standard_Integer& P1, Standard_Integer& P2, Standard_Integer& P3) const;
   
-  //! Give the addresse Tricon of the triangle connexe to the
+  //! Give the address Tricon of the triangle connexe to the
   //! triangle of address Triang by the edge Pivot Pedge and
   //! the third point of this connexe triangle. When we are
   //! on a free edge TriCon==0 but the function return the
@@ -122,10 +110,10 @@ public:
   
   Standard_EXPORT Standard_Boolean HasVMaxSingularity() const;
   
-  //! Give the plane equation of the triangle of addresse Triang.
+  //! Give the plane equation of the triangle of address Triang.
   Standard_EXPORT void PlaneEquation (const Standard_Integer Triang, gp_XYZ& NormalVector, Standard_Real& PolarDistance) const;
   
-  //! Give the plane equation of the triangle of addresse Triang.
+  //! Give the plane equation of the triangle of address Triang.
   Standard_EXPORT Standard_Boolean Contain (const Standard_Integer Triang, const gp_Pnt& ThePnt) const;
   
   Standard_EXPORT void Parameters (const Standard_Integer Index, Standard_Real& U, Standard_Real& V) const;
@@ -147,9 +135,9 @@ public:
 protected:
 
   
-  Standard_EXPORT void Init (const Handle(Adaptor3d_HSurface)& Surface, const Standard_Real U1, const Standard_Real V1, const Standard_Real U2, const Standard_Real V2);
+  Standard_EXPORT void Init (const Handle(Adaptor3d_Surface)& Surface, const Standard_Real U1, const Standard_Real V1, const Standard_Real U2, const Standard_Real V2);
   
-  Standard_EXPORT void Init (const Handle(Adaptor3d_HSurface)& Surface, const TColStd_Array1OfReal& Upars, const TColStd_Array1OfReal& Vpars);
+  Standard_EXPORT void Init (const Handle(Adaptor3d_Surface)& Surface, const TColStd_Array1OfReal& Upars, const TColStd_Array1OfReal& Vpars);
 
 
 
@@ -159,7 +147,7 @@ private:
   
   //! This method computes and returns a deflection of isoline
   //! of given parameter on Surface.
-  Standard_EXPORT Standard_Real ComputeBorderDeflection (const Handle(Adaptor3d_HSurface)& Surface, const Standard_Real Parameter, const Standard_Real PMin, const Standard_Real PMax, const Standard_Boolean isUIso) const;
+  Standard_EXPORT Standard_Real ComputeBorderDeflection (const Handle(Adaptor3d_Surface)& Surface, const Standard_Real Parameter, const Standard_Real PMin, const Standard_Real PMax, const Standard_Boolean isUIso) const;
 
 
   Standard_Integer nbdeltaU;
@@ -180,8 +168,8 @@ private:
 
 };
 
-#define ThePSurface Handle(Adaptor3d_HSurface)
-#define ThePSurface_hxx <Adaptor3d_HSurface.hxx>
+#define ThePSurface Handle(Adaptor3d_Surface)
+#define ThePSurface_hxx <Adaptor3d_Surface.hxx>
 #define ThePSurfaceTool Adaptor3d_HSurfaceTool
 #define ThePSurfaceTool_hxx <Adaptor3d_HSurfaceTool.hxx>
 #define IntCurveSurface_Polyhedron IntCurveSurface_ThePolyhedronOfHInter

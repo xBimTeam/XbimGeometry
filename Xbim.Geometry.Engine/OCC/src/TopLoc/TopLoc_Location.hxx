@@ -25,11 +25,11 @@
 #include <Standard_Boolean.hxx>
 #include <Standard_Integer.hxx>
 #include <Standard_OStream.hxx>
+
 class Standard_NoSuchObject;
 class Standard_ConstructionError;
 class gp_Trsf;
 class TopLoc_Datum3D;
-
 
 //! A Location is a composite transition. It comprises a
 //! series of elementary reference coordinates, i.e.
@@ -148,8 +148,17 @@ Standard_Boolean operator != (const TopLoc_Location& Other) const
   //! Prints the contents of <me> on the stream <s>.
   Standard_EXPORT void ShallowDump (Standard_OStream& S) const;
 
+  //! Clear myItems
+  void Clear()
+  {
+    myItems.Clear();
+  }
 
 
+  static Standard_Real ScalePrec()
+  {
+    return  1.e-14;
+  }
 
 protected:
 

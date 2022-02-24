@@ -12,7 +12,7 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-// Modifed:     Portage NT 7-5-97 DPF (return)
+// Modified:     Portage NT 7-5-97 DPF (return)
 
 #include <ChFi3d_FilletShape.hxx>
 #include <FilletSurf_Builder.hxx>
@@ -242,7 +242,7 @@ Standard_Real FilletSurf_Builder::LastParameter() const
 //                                on the edge of  the corresponding support face.  
 //            OneExtremityOnEdge: only one  of  the extremities of  start section  of the  Fillet 
 //                                is on the  edge of the corresponding support face.  
-//            NoExtremityOnEdge:  any extremity of  the start section  ofthe fillet is  on  
+//            NoExtremityOnEdge:  any extremity of  the start section  of the fillet is  on  
 //                                the edge  of   the  corresponding support face.
 //=======================================================================
 FilletSurf_StatusType  FilletSurf_Builder::StartSectionStatus() const 

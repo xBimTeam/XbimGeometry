@@ -13,6 +13,7 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
+#include <IntTools_EdgeFace.hxx>
 
 #include <Bnd_Box.hxx>
 #include <BndLib_AddSurface.hxx>
@@ -24,8 +25,6 @@
 #include <Geom_Curve.hxx>
 #include <Geom_Surface.hxx>
 #include <GeomAdaptor_Curve.hxx>
-#include <GeomAdaptor_HCurve.hxx>
-#include <GeomAdaptor_HSurface.hxx>
 #include <GeomAdaptor_Surface.hxx>
 #include <GeomAPI_ProjectPointOnSurf.hxx>
 #include <gp_Ax1.hxx>
@@ -40,10 +39,8 @@
 #include <IntCurveSurface_IntersectionPoint.hxx>
 #include <IntTools.hxx>
 #include <IntTools_BeanFaceIntersector.hxx>
-#include <IntTools_CArray1OfInteger.hxx>
 #include <IntTools_CommonPrt.hxx>
 #include <IntTools_Context.hxx>
-#include <IntTools_EdgeFace.hxx>
 #include <IntTools_FClass2d.hxx>
 #include <IntTools_Range.hxx>
 #include <IntTools_Root.hxx>
@@ -137,7 +134,7 @@ Standard_Boolean IntTools_EdgeFace::IsCoincident()
     //be classified. Therefore, points with indexes in 
     //[aTreshIdxF, aTreshIdxL] range are made available 
     //for classification.
-    //isClassified == TRUE if MIDDLE point has been choosen and
+    //isClassified == TRUE if MIDDLE point has been chosen and
     //classified correctly.
 
     if(((0 < i) && (i < aTreshIdxF)) || ((aTreshIdxL < i ) && (i < aNbSeg)))
@@ -418,8 +415,8 @@ Standard_Boolean IntTools_EdgeFace::CheckTouch
  // modified by NIZHNY-MKK  Thu Jul 21 11:35:32 2005.BEGIN
  IntCurveSurface_HInter anExactIntersector;
   
- Handle(GeomAdaptor_HCurve) aCurve     = new GeomAdaptor_HCurve(TheCurve);
- Handle(GeomAdaptor_HSurface) aSurface = new GeomAdaptor_HSurface(TheSurface);
+ Handle(GeomAdaptor_Curve) aCurve     = new GeomAdaptor_Curve(TheCurve);
+ Handle(GeomAdaptor_Surface) aSurface = new GeomAdaptor_Surface(TheSurface);
  
  anExactIntersector.Perform(aCurve, aSurface);
 
@@ -577,7 +574,7 @@ void IntTools_EdgeFace::Perform()
     MakeType (aCP); 
   }
   {
-    // Line\Cylinder's Common Parts treatement
+    // Line\Cylinder's Common Parts treatment
     GeomAbs_CurveType   aCType;
     GeomAbs_SurfaceType aSType;
     TopAbs_ShapeEnum aType;
@@ -609,7 +606,7 @@ void IntTools_EdgeFace::Perform()
       }
     }
     
-    // Circle\Plane's Common Parts treatement
+    // Circle\Plane's Common Parts treatment
     
     if (aCType==GeomAbs_Circle && aSType==GeomAbs_Plane) {
       Standard_Boolean bIsCoplanar, bIsRadius;

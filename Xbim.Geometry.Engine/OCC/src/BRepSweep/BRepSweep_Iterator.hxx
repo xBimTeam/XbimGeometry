@@ -24,8 +24,6 @@
 #include <TopoDS_Iterator.hxx>
 #include <Standard_Boolean.hxx>
 #include <TopAbs_Orientation.hxx>
-class Standard_NoMoreObject;
-class Standard_NoSuchObject;
 class TopoDS_Shape;
 
 
@@ -42,7 +40,7 @@ public:
   
   Standard_EXPORT BRepSweep_Iterator();
   
-  //! Resest the Iterator on sub-shapes of <aShape>.
+  //! Reset the Iterator on sub-shapes of <aShape>.
   Standard_EXPORT void Init (const TopoDS_Shape& aShape);
   
   //! Returns True if there is a current sub-shape.

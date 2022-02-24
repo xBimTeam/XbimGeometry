@@ -25,7 +25,6 @@
 #include <TopoDS_Face.hxx>
 #include <TopTools_ListOfShape.hxx>
 #include <TopTools_DataMapOfShapeListOfShape.hxx>
-class TopoDS_Face;
 class TopoDS_Wire;
 
 
@@ -44,7 +43,7 @@ public:
   
   Standard_EXPORT BRepAlgo_FaceRestrictor();
   
-  //! the surface of <F> will be the the surface of each new
+  //! the surface of <F> will be the surface of each new
   //! faces built.
   //! <Proj> is used to update pcurves on edges if necessary.
   //! See Add().

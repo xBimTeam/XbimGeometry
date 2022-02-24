@@ -14,8 +14,17 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
+#include <ProjLib.hxx>
 
+#include <Adaptor3d_Surface.hxx>
 #include <ElSLib.hxx>
+#include <Geom2d_Line.hxx>
+#include <Geom2d_Circle.hxx>
+#include <Geom2d_Ellipse.hxx>
+#include <Geom2d_Parabola.hxx>
+#include <Geom2d_Hyperbola.hxx>
+#include <Geom2d_BSplineCurve.hxx>
+#include <Geom2d_BezierCurve.hxx>
 #include <gp_Circ.hxx>
 #include <gp_Circ2d.hxx>
 #include <gp_Cone.hxx>
@@ -33,22 +42,13 @@
 #include <gp_Pnt2d.hxx>
 #include <gp_Sphere.hxx>
 #include <gp_Torus.hxx>
-#include <ProjLib.hxx>
 #include <ProjLib_Cone.hxx>
 #include <ProjLib_Cylinder.hxx>
 #include <ProjLib_Plane.hxx>
 #include <ProjLib_Sphere.hxx>
 #include <ProjLib_Torus.hxx>
 #include <ProjLib_ProjectedCurve.hxx>
-#include <Geom2d_Line.hxx>
-#include <Geom2d_Circle.hxx>
-#include <Geom2d_Ellipse.hxx>
-#include <Geom2d_Parabola.hxx>
-#include <Geom2d_Hyperbola.hxx>
-#include <Geom2d_BSplineCurve.hxx>
-#include <Geom2d_BezierCurve.hxx>
 #include <Standard_NotImplemented.hxx>
-#include <Adaptor3d_HSurface.hxx>
 
 //=======================================================================
 //function : Project
@@ -287,7 +287,7 @@ void  ProjLib::MakePCurveOfType
 //purpose  : 
 //=======================================================================
 Standard_Boolean  ProjLib::IsAnaSurf
-  (const Handle(Adaptor3d_HSurface)& theAS) 
+  (const Handle(Adaptor3d_Surface)& theAS) 
 { 
   switch (theAS->GetType()) 
   {

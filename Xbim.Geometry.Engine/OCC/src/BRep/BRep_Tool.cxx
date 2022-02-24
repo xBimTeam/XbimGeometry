@@ -41,8 +41,8 @@
 #include <Geom_RectangularTrimmedSurface.hxx>
 #include <Geom_Surface.hxx>
 #include <Geom_TrimmedCurve.hxx>
-#include <GeomAdaptor_HCurve.hxx>
-#include <GeomAdaptor_HSurface.hxx>
+#include <GeomAdaptor_Curve.hxx>
+#include <GeomAdaptor_Surface.hxx>
 #include <GeomProjLib.hxx>
 #include <gp_Pnt.hxx>
 #include <gp_Pnt2d.hxx>
@@ -113,16 +113,27 @@ Handle(Geom_Surface) BRep_Tool::Surface(const TopoDS_Face& F)
 
 //=======================================================================
 //function : Triangulation
-//purpose  : Returns  the Triangulation of  the  face. It  is a
-//           null handle if there is no triangulation.
+//purpose  :
 //=======================================================================
-
-const Handle(Poly_Triangulation)& BRep_Tool::Triangulation(const TopoDS_Face& F,
-                                                           TopLoc_Location&   L)
+const Handle(Poly_Triangulation)& BRep_Tool::Triangulation (const TopoDS_Face& theFace,
+                                                            TopLoc_Location&   theLocation,
+                                                            const Poly_MeshPurpose theMeshPurpose)
 {
-  L = F.Location();
-  const BRep_TFace* TF = static_cast<const BRep_TFace*>(F.TShape().get());
-  return TF->Triangulation();
+  theLocation = theFace.Location();
+  const BRep_TFace* aTFace = static_cast<const BRep_TFace*>(theFace.TShape().get());
+  return aTFace->Triangulation (theMeshPurpose);
+}
+
+//=======================================================================
+//function : Triangulations
+//purpose  :
+//=======================================================================
+const Poly_ListOfTriangulation& BRep_Tool::Triangulations (const TopoDS_Face& theFace,
+                                                           TopLoc_Location&   theLocation)
+{
+  theLocation = theFace.Location();
+  const BRep_TFace* aTFace = static_cast<const BRep_TFace*>(theFace.TShape().get());
+  return aTFace->Triangulations();
 }
 
 //=======================================================================
@@ -391,8 +402,8 @@ Handle(Geom2d_Curve) BRep_Tool::CurveOnPlane(const TopoDS_Edge& E,
                                 GP->Position().Direction(),
                                 Standard_True);
 
-  Handle(GeomAdaptor_HSurface) HS = new GeomAdaptor_HSurface(GP);
-  Handle(GeomAdaptor_HCurve)   HC = new GeomAdaptor_HCurve(ProjOnPlane);
+  Handle(GeomAdaptor_Surface) HS = new GeomAdaptor_Surface(GP);
+  Handle(GeomAdaptor_Curve)   HC = new GeomAdaptor_Curve(ProjOnPlane);
 
   ProjLib_ProjectedCurve Proj(HS, HC);
   Handle(Geom2d_Curve) pc = Geom2dAdaptor::MakeCurve(Proj);
@@ -981,8 +992,8 @@ void  BRep_Tool::UVPoints(const TopoDS_Edge& E,
     TopExp::Vertices(E,Vf,Vl);
 
     TopLoc_Location Linverted = L.Inverted();
-    Vf.Move(Linverted);
-    Vl.Move(Linverted);
+    Vf.Move(Linverted, Standard_False);
+    Vl.Move(Linverted, Standard_False);
     Standard_Real u,v;
     gp_Pln pln = GP->Pln();
 

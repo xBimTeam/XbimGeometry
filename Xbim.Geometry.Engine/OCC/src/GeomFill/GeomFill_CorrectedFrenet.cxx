@@ -14,15 +14,15 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
+#include <GeomFill_CorrectedFrenet.hxx>
 
-#include <Adaptor3d_HCurve.hxx>
+#include <Adaptor3d_Curve.hxx>
 #include <Bnd_Box.hxx>
 #include <BndLib_Add3dCurve.hxx>
 #include <Geom_BezierCurve.hxx>
 #include <Geom_BSplineCurve.hxx>
 #include <Geom_Plane.hxx>
 #include <GeomAbs_CurveType.hxx>
-#include <GeomFill_CorrectedFrenet.hxx>
 #include <GeomFill_Frenet.hxx>
 #include <GeomFill_SnglrFunc.hxx>
 #include <GeomFill_TrihedronLaw.hxx>
@@ -96,7 +96,7 @@ static void draw(const Handle(Law_Function)& law)
 
 
 static Standard_Real ComputeTorsion(const Standard_Real Param,
-                                    const Handle(Adaptor3d_HCurve)& aCurve)
+                                    const Handle(Adaptor3d_Curve)& aCurve)
 {
   Standard_Real Torsion;
   
@@ -200,7 +200,7 @@ static void smoothlaw(Handle(Law_BSpline)& Law,
 // Function : FindPlane
 // Purpose : 
 //===============================================================
-static Standard_Boolean FindPlane ( const Handle(Adaptor3d_HCurve)& theC,
+static Standard_Boolean FindPlane ( const Handle(Adaptor3d_Curve)& theC,
 				    Handle( Geom_Plane )& theP )
 {
   Standard_Boolean found = Standard_True;
@@ -337,7 +337,7 @@ Handle(GeomFill_TrihedronLaw) GeomFill_CorrectedFrenet::Copy() const
   return copy;
 }
 
- void GeomFill_CorrectedFrenet::SetCurve(const Handle(Adaptor3d_HCurve)& C) 
+ void GeomFill_CorrectedFrenet::SetCurve(const Handle(Adaptor3d_Curve)& C) 
 {
  
   GeomFill_TrihedronLaw::SetCurve(C);
@@ -359,7 +359,7 @@ Handle(GeomFill_TrihedronLaw) GeomFill_CorrectedFrenet::Copy() const
       }
      default :
        { 
-	 // We have to search singulaties
+	 // We have to search singularities
 	 isFrenet = Standard_True;
 	 Init(); 
        }
@@ -389,7 +389,7 @@ Handle(GeomFill_TrihedronLaw) GeomFill_CorrectedFrenet::Copy() const
 //  Standard_Real StartAng = 0, AvStep, Step, t;
   Standard_Real StartAng = 0, AvStep, Step;
 
-#if DRAW
+#ifdef DRAW
   Standard_Real t;
 
   if (Affich) { // Display the curve C'^C''(t)
@@ -449,7 +449,7 @@ Handle(GeomFill_TrihedronLaw) GeomFill_CorrectedFrenet::Copy() const
     HArrNormal->ChangeValue(i) = SeqNormal(i); 
   };
   
-#if DRAW
+#ifdef DRAW
   if (Affich) {
     draw(EvolAroundT);
   }
@@ -653,7 +653,7 @@ Standard_Real GeomFill_CorrectedFrenet::GetAngleAT(const Standard_Real Param) co
     };
     if(HArrPoles->Value(iC) == Param || Param == HArrPoles->Value(iC+1)) return TLaw->Value(Param);
   };
-  //  Calculate differenciation between apporoximated and local values of AngleAT
+  //  Calculate differentiation between approximated and local values of AngleAT
   Standard_Real AngP = TLaw->Value(Param), AngPo = HArrAngle->Value(iC), dAng = AngP - AngPo;
   gp_Vec Tangent, Normal, BN;
   frenet->D0(Param, Tangent, Normal, BN);
@@ -882,7 +882,7 @@ Standard_Real GeomFill_CorrectedFrenet::GetAngleAT(const Standard_Real Param) co
 
   frenet->Intervals(FrenetInt, S);
   EvolAroundT->Intervals(LawInt, S);
-  GeomLib::FuseIntervals(FrenetInt, LawInt, Fusion);
+  GeomLib::FuseIntervals(FrenetInt, LawInt, Fusion, Precision::PConfusion(), Standard_True);
 
   return Fusion.Length()-1;
 }
@@ -913,7 +913,7 @@ Standard_Real GeomFill_CorrectedFrenet::GetAngleAT(const Standard_Real Param) co
   
   frenet->Intervals(FrenetInt, S);
   EvolAroundT->Intervals(LawInt, S);
-  GeomLib::FuseIntervals(FrenetInt, LawInt, Fusion);
+  GeomLib::FuseIntervals(FrenetInt, LawInt, Fusion, Precision::PConfusion(), Standard_True);
 
   for(Standard_Integer i = 1; i <= Fusion.Length(); i++)
     T.ChangeValue(i) = Fusion.Value(i);

@@ -243,7 +243,7 @@ void ApproxInt_KnotTools::ComputeKnotInds(const NCollection_LocalArray<Standard_
   }
   while(i < theInds.Length());
 
-  //IV: Cheking feature points.
+  //IV: Checking feature points.
   j = 2;
   for(i = 1; i <= aFeatureInds.Length(); ++i)
   {
@@ -349,7 +349,7 @@ void ApproxInt_KnotTools::FilterKnots(NCollection_Sequence<Standard_Integer>& th
     }
   }
 
-  // II: Filter poins with too small amount of points per knot interval.
+  // II: Filter points with too small amount of points per knot interval.
   i = 1;
   theLKnots.Append(theInds(i));
   Standard_Integer anIndsPrev = theInds(i);

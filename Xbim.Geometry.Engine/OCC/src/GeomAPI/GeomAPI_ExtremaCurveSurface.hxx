@@ -24,12 +24,9 @@
 #include <Standard_Boolean.hxx>
 #include <Standard_Integer.hxx>
 #include <Extrema_ExtCS.hxx>
-class Standard_OutOfRange;
-class StdFail_NotDone;
 class Geom_Curve;
 class Geom_Surface;
 class gp_Pnt;
-class Extrema_ExtCS;
 
 
 //! Describes functions for computing all the extrema
@@ -127,6 +124,12 @@ Standard_EXPORT operator Standard_Integer() const;
   //! 1,NbExtrema ], where NbExtrema is the
   //! number of extrema computed by this algorithm.
   Standard_EXPORT Standard_Real Distance (const Standard_Integer Index) const;
+
+  //! Returns True if the curve is on a parallel surface.
+  Standard_Boolean IsParallel() const
+  {
+    return myExtCS.IsParallel();
+  }
   
   //! Returns the points PC on the curve and PS on the
   //! surface, which are the ends of the shortest extremum computed by this algorithm.

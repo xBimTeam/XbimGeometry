@@ -24,9 +24,6 @@
 #include <gp_Pnt.hxx>
 #include <Standard_Real.hxx>
 #include <gp_Mat.hxx>
-class Standard_DomainError;
-class gp_Pnt;
-class gp_Mat;
 class gp_Ax1;
 class GProp_PrincipalProps;
 
@@ -114,7 +111,7 @@ public:
   Standard_EXPORT GProp_GProps();
   
 
-  //! The point SystemLocation is used to compute the gobal properties
+  //! The point SystemLocation is used to compute the global properties
   //! of the system. For more accuracy it is better to define this
   //! point closed to the location of the system. For example it could
   //! be a point around the centre of mass of the system.
