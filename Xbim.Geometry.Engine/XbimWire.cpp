@@ -29,7 +29,6 @@
 #include <TopTools_Array1OfShape.hxx>
 #include <Geom_Curve.hxx>
 #include <BRepAdaptor_Curve.hxx>
-#include <Adaptor3d_HCurve.hxx>
 #include <Geom_BSplineCurve.hxx>
 #include <Geom_BezierCurve.hxx>
 #include <Geom_Parabola.hxx>
@@ -43,7 +42,6 @@
 #include <Geom_Circle.hxx>
 #include <Geom_Ellipse.hxx>
 #include <BRepAdaptor_CompCurve.hxx>
-#include <BRepAdaptor_HCompCurve.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <TColStd_Array1OfReal.hxx>
 #include <BRepBuilderAPI_MakePolygon.hxx>
@@ -70,8 +68,6 @@
 #include <ShapeFix_Edge.hxx>
 #include <BOPAlgo_Tools.hxx>
 #include <Geom_OffsetCurve.hxx>
-#include <Adaptor3d_HCurve.hxx>
-#include <BRepAdaptor_HCurve.hxx>
 #include <ShapeAnalysis_WireOrder.hxx>
 using namespace Xbim::Common;
 using namespace System::Linq;
