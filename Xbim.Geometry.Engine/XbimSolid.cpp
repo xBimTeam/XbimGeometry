@@ -835,7 +835,7 @@ namespace Xbim
 				}
 				GC::KeepAlive(faceStart);
 				GC::KeepAlive(faceEnd);
-
+				GC::KeepAlive(sweep);
 			}
 		}
 
@@ -1041,7 +1041,7 @@ namespace Xbim
 					return;
 				}
 				GC::KeepAlive(faceStart);
-
+				GC::KeepAlive(sweep);
 			}
 			XbimGeometryCreator::LogInfo(logger, repItem, "Invalid extrusion, depth must be >0 and faces must be correctly defined");
 			//if it has failed we will have a null solid
@@ -1206,6 +1206,7 @@ namespace Xbim
 					*pSolid = outerShell;
 					pSolid->Closed(Standard_True);
 					GC::KeepAlive(crossSections);
+					GC::KeepAlive(sweep);
 					ShapeFix_ShapeTolerance tolFixer;
 					tolFixer.LimitTolerance(*pSolid, repItem->Model->ModelFactors->Precision);
 					return;
@@ -1350,6 +1351,8 @@ namespace Xbim
 				//half space solids are only used in booleans, set the face tolerance the millimeter precision we require
 				ShapeFix_ShapeTolerance tolFixer;
 				tolFixer.LimitTolerance(*pSolid, hs->Model->ModelFactors->Precision * XbimGeometryCreator::FuzzyFactor);
+
+				GC::KeepAlive(face);
 			}
 		}
 
@@ -1396,7 +1399,7 @@ namespace Xbim
 			gp_Ax3 ax3 = XbimConvert::ToAx3(surface->Position);
 			gp_Pln pln(ax3);
 
-			//build the substraction body
+			//build the subtraction body
 			gp_Dir dir(pbhs->Position->P[2].X, pbhs->Position->P[2].Y, pbhs->Position->P[2].Z);
 			XbimWire^ polyBoundary = gcnew XbimWire(pbhs->PolygonalBoundary, logger, XbimConstraints::Closed | XbimConstraints::NotSelfIntersecting);
 
@@ -1417,6 +1420,8 @@ namespace Xbim
 			tolFixer.LimitTolerance(polyBoundary, pbhs->Model->ModelFactors->Precision);
 			// we have to use 1e8 as the max extrusion as the common boolean op times out on values greater than this, probably an extrema issue in booleans
 			TopoDS_Shape substractionBody = BRepPrimAPI_MakePrism(BRepBuilderAPI_MakeFace(polyBoundary), gp_Vec(0, 0, 1e8));
+			GC::KeepAlive(polyBoundary);
+
 			//find point inside the material
 			gp_Pnt pnt = pln.Location().Translated(pbhs->AgreementFlag ? -pln.Axis().Direction() : pln.Axis().Direction());
 
@@ -1509,7 +1514,7 @@ namespace Xbim
 			{
 				if (!sweep->FilletAll((double)polygonal->FilletRadius.Value))
 				{
-					XbimGeometryCreator::LogWarning(logger, repItem, "Sweep could not be corectly filleted");
+					XbimGeometryCreator::LogWarning(logger, repItem, "Sweep could not be correctly filleted");
 					transitionMode = BRepBuilderAPI_TransitionMode::BRepBuilderAPI_RightCorner; //revert to non continuous mode
 				}
 			}
@@ -1525,6 +1530,7 @@ namespace Xbim
 					XbimGeometryCreator::LogWarning(logger, repItem, "Could not fully construct IfcSweptDiskSolid: " + err);
 			}
 
+			GC::KeepAlive(sweep);
 		}
 
 		//if inner radius is not required it has a value of -1
@@ -1534,7 +1540,7 @@ namespace Xbim
 
 			//If the transitions between consecutive segments of the Directrix are not tangent continuous, the resulting solid is created by a miter at half angle between the two segments.
 			//this will be the case for a polyline as each segment is not tangent continuous
-			//composite urves will be tangent continuous
+			//composite curves will be tangent continuous
 			try
 			{
 				//form the shape to sweep, the centre of the circles must be at the start of the directrix
@@ -1635,7 +1641,7 @@ namespace Xbim
 		// comments on the interpretation of the params are found here:
 			// https://sourceforge.net/p/ifcexporter/discussion/general/thread/7cc44b69/?limit=25
 			// if the directix is:
-			// - a line, just use the lenght
+			// - a line, just use the length
 			// - a IFCCOMPOSITECURVE then the parameter 
 			//   for each line add 0 to 1
 			//   for each arc add the angle
@@ -1650,7 +1656,7 @@ namespace Xbim
 			}
 			BRepAdaptor_CompCurve cc(wire, Standard_True);
 
-			//if we have a trimmed curve we need to get the basis curve for correct parameterisation
+			//if we have a trimmed curve we need to get the basis curve for correct parameterization
 
 			IIfcCurve^ basisCurve = directrix;
 			while (dynamic_cast<IIfcTrimmedCurve^>(basisCurve))
@@ -1704,14 +1710,14 @@ namespace Xbim
 					{
 						double ratio = Math::Min(startPar / segValue, 1.0);
 						startPar -= ratio * segValue; // reduce the outstanding amount (since it's been accounted for in the segment just processed)
-						occStart += ratio * wireLen; // progress the occ amount by the ratio of the lenght
+						occStart += ratio * wireLen; // progress the occ amount by the ratio of the length
 					}
 
 					if (endPar > 0)
 					{
 						double ratio = Math::Min(endPar / segValue, 1.0);
 						endPar -= ratio * segValue; // reduce the outstanding amount (since it's been accounted for in the segment just processed)
-						occEnd += ratio * wireLen; // progress the occ amount by the ratio of the lenght
+						occEnd += ratio * wireLen; // progress the occ amount by the ratio of the length
 					}
 				}
 				double precision = directrix->Model->ModelFactors->Precision;
