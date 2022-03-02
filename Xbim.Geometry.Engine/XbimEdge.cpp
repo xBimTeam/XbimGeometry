@@ -999,6 +999,8 @@ namespace Xbim
 				ShapeFix_ShapeTolerance FTol;
 				FTol.LimitTolerance(*pEdge, curve->Model->ModelFactors->Precision);
 			}
+
+			GC::KeepAlive(xbimCurve);
 		}
 
 		void XbimEdge::Init(IIfcProfileDef^ profile, ILogger^ logger)

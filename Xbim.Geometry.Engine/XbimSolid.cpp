@@ -1525,6 +1525,7 @@ namespace Xbim
 					XbimGeometryCreator::LogWarning(logger, repItem, "Could not fully construct IfcSweptDiskSolid: " + err);
 			}
 
+			GC::KeepAlive(sweep);
 		}
 
 		//if inner radius is not required it has a value of -1
