@@ -1399,7 +1399,7 @@ namespace Xbim
 			gp_Ax3 ax3 = XbimConvert::ToAx3(surface->Position);
 			gp_Pln pln(ax3);
 
-			//build the substraction body
+			//build the subtraction body
 			gp_Dir dir(pbhs->Position->P[2].X, pbhs->Position->P[2].Y, pbhs->Position->P[2].Z);
 			XbimWire^ polyBoundary = gcnew XbimWire(pbhs->PolygonalBoundary, logger, XbimConstraints::Closed | XbimConstraints::NotSelfIntersecting);
 
@@ -1514,7 +1514,7 @@ namespace Xbim
 			{
 				if (!sweep->FilletAll((double)polygonal->FilletRadius.Value))
 				{
-					XbimGeometryCreator::LogWarning(logger, repItem, "Sweep could not be corectly filleted");
+					XbimGeometryCreator::LogWarning(logger, repItem, "Sweep could not be correctly filleted");
 					transitionMode = BRepBuilderAPI_TransitionMode::BRepBuilderAPI_RightCorner; //revert to non continuous mode
 				}
 			}
@@ -1540,7 +1540,7 @@ namespace Xbim
 
 			//If the transitions between consecutive segments of the Directrix are not tangent continuous, the resulting solid is created by a miter at half angle between the two segments.
 			//this will be the case for a polyline as each segment is not tangent continuous
-			//composite urves will be tangent continuous
+			//composite curves will be tangent continuous
 			try
 			{
 				//form the shape to sweep, the centre of the circles must be at the start of the directrix
@@ -1641,7 +1641,7 @@ namespace Xbim
 		// comments on the interpretation of the params are found here:
 			// https://sourceforge.net/p/ifcexporter/discussion/general/thread/7cc44b69/?limit=25
 			// if the directix is:
-			// - a line, just use the lenght
+			// - a line, just use the length
 			// - a IFCCOMPOSITECURVE then the parameter 
 			//   for each line add 0 to 1
 			//   for each arc add the angle
@@ -1656,7 +1656,7 @@ namespace Xbim
 			}
 			BRepAdaptor_CompCurve cc(wire, Standard_True);
 
-			//if we have a trimmed curve we need to get the basis curve for correct parameterisation
+			//if we have a trimmed curve we need to get the basis curve for correct parameterization
 
 			IIfcCurve^ basisCurve = directrix;
 			while (dynamic_cast<IIfcTrimmedCurve^>(basisCurve))
@@ -1710,14 +1710,14 @@ namespace Xbim
 					{
 						double ratio = Math::Min(startPar / segValue, 1.0);
 						startPar -= ratio * segValue; // reduce the outstanding amount (since it's been accounted for in the segment just processed)
-						occStart += ratio * wireLen; // progress the occ amount by the ratio of the lenght
+						occStart += ratio * wireLen; // progress the occ amount by the ratio of the length
 					}
 
 					if (endPar > 0)
 					{
 						double ratio = Math::Min(endPar / segValue, 1.0);
 						endPar -= ratio * segValue; // reduce the outstanding amount (since it's been accounted for in the segment just processed)
-						occEnd += ratio * wireLen; // progress the occ amount by the ratio of the lenght
+						occEnd += ratio * wireLen; // progress the occ amount by the ratio of the length
 					}
 				}
 				double precision = directrix->Model->ModelFactors->Precision;
