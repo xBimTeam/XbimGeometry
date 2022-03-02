@@ -34,90 +34,96 @@ namespace XbimRegression
 
         public void Run()
         {
-            var resultsFile = Path.Combine(Params.TestFileRoot, string.Format("XbimRegression_{0:yyyyMMdd-hhmmss}.csv", DateTime.Now));
-
-            var di = new DirectoryInfo(Params.TestFileRoot);
-
-            using (var writer = new StreamWriter(resultsFile))
+            using var writer = new StreamWriter(Params.ResultsFile);
+            writer.WriteLine(ProcessResult.CsvHeader);
+            // ParallelOptions opts = new ParallelOptions() { MaxDegreeOfParallelism = 12 };
+            
+            // Parallel.ForEach<FileInfo>(toProcess, opts, file =>
+            foreach (var file in Params.FilesToProcess)
             {
-                writer.WriteLine(ProcessResult.CsvHeader);
-                // ParallelOptions opts = new ParallelOptions() { MaxDegreeOfParallelism = 12 };
-                var toProcess = di.GetFiles("*.IFC", SearchOption.AllDirectories);
-                // Parallel.ForEach<FileInfo>(toProcess, opts, file =>
-                foreach (var file in toProcess)
+                //set up a  log file for this file run                 
+                var logFile = Path.ChangeExtension(file.FullName, "log");
+                ProcessResult result;
+                using (var loggerFactory = new LoggerFactory())
                 {
-                    //set up a  log file for this file run                 
-                    var logFile = Path.ChangeExtension(file.FullName, "log");
-                    ProcessResult result;
-                    using (var loggerFactory = new LoggerFactory())
+                    XbimLogging.LoggerFactory = loggerFactory;
+                    loggerFactory.AddConsole(LogLevel.Error);
+                    loggerFactory.AddProvider(new NReco.Logging.File.FileLoggerProvider(logFile, false)
                     {
-                        XbimLogging.LoggerFactory = loggerFactory;
-                        loggerFactory.AddConsole(LogLevel.Error);
-                        loggerFactory.AddProvider(new NReco.Logging.File.FileLoggerProvider(logFile, false)
+                        FormatLogEntry = (msg) =>
                         {
-                            FormatLogEntry = (msg) =>
-                            {
-                                var sb = new System.Text.StringBuilder();
-                                StringWriter sw = new StringWriter(sb);
-                                var jsonWriter = new Newtonsoft.Json.JsonTextWriter(sw);
-                                jsonWriter.WriteStartArray();
-                                jsonWriter.WriteValue(DateTime.Now.ToString("o"));
-                                jsonWriter.WriteValue(msg.LogLevel.ToString());
-                                jsonWriter.WriteValue(msg.EventId.Id);
-                                jsonWriter.WriteValue(msg.Message);
-                                jsonWriter.WriteValue(msg.Exception?.ToString());
-                                jsonWriter.WriteEndArray();
-                                return sb.ToString();
-                            }
-                        });
-                        var logger = loggerFactory.CreateLogger<BatchProcessor>();
-                        Console.WriteLine($"Processing {file}");
-                        result = ProcessFile(file.FullName, writer, logger);
+                            var sb = new System.Text.StringBuilder();
+                            StringWriter sw = new StringWriter(sb);
+                            var jsonWriter = new Newtonsoft.Json.JsonTextWriter(sw);
+                            jsonWriter.WriteStartArray();
+                            jsonWriter.WriteValue(DateTime.Now.ToString("o"));
+                            jsonWriter.WriteValue(msg.LogLevel.ToString());
+                            jsonWriter.WriteValue(msg.EventId.Id);
+                            jsonWriter.WriteValue(msg.Message);
+                            jsonWriter.WriteValue(msg.Exception?.ToString());
+                            jsonWriter.WriteEndArray();
+                            return sb.ToString();
+                        }
+                    });
+                    var logger = loggerFactory.CreateLogger<BatchProcessor>();
+                    Console.WriteLine($"Processing {file}");
+                    result = ProcessFile(file.FullName, writer, logger);
 
-                    }
-                    XbimLogging.LoggerFactory = null; // uses a default loggerFactory
-
-                    var txt = File.ReadAllText(logFile);
-                    if (string.IsNullOrEmpty(txt))
-                    {
-                        File.Delete(logFile);
-                        result.Errors = 0;
-                        result.Warnings = 0;
-                        result.Information = 0;
-                    }
-                    else
-                    {
-
-                        var tokens = txt.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                        result.Errors = tokens.Count(t => t == "\"Error\"");
-                        result.Warnings = tokens.Count(t => t == "\"Warning\"");
-                        result.Information = Math.Max(0, tokens.Count(t => t == "\"Information\"") - 2); //we always get 2
-                    }
-                    if (result != null && !result.Failed)
-                    {
-                        Console.WriteLine($"Processed {file} : {result.Errors} Errors, {result.Warnings} Warnings, {result.Information} Informational in {result.TotalTime}ms. {result.Entities} IFC Elements & {result.GeometryEntries} Geometry Nodes.");
-                    }
-                    else
-                    {
-                        Console.WriteLine("Processing failed for {0} after {1}ms.", file, result.TotalTime);
-                    }
-                    result.FileName = file.Name;
-                    writer.WriteLine(result.ToCsv());
-                    writer.Flush();
                 }
+                XbimLogging.LoggerFactory = null; // uses a default loggerFactory
 
-                writer.Close();
+                var txt = File.ReadAllText(logFile);
+                if (string.IsNullOrEmpty(txt))
+                {
+                    File.Delete(logFile);
+                    result.Errors = 0;
+                    result.Warnings = 0;
+                    result.Information = 0;
+                }
+                else
+                {
+
+                    var tokens = txt.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                    result.Errors = tokens.Count(t => t == "\"Error\"");
+                    result.Warnings = tokens.Count(t => t == "\"Warning\"");
+                    result.Information = Math.Max(0, tokens.Count(t => t == "\"Information\"") - 2); //we always get 2
+                }
+                if (result != null && !result.Failed)
+                {
+                    Console.WriteLine($"Processed {file} : {result.Errors} Errors, {result.Warnings} Warnings, {result.Information} Informational in {result.TotalTime}ms. {result.Entities} IFC Elements & {result.GeometryEntries} Geometry Nodes.");
+                }
+                else
+                {
+                    Console.WriteLine("Processing failed for {0} after {1}ms.", file, result.TotalTime);
+                }
+                result.FileName = file.Name;
+                writer.WriteLine(result.ToCsv());
+                writer.Flush();
             }
+
+            writer.Close();
+            
             Console.WriteLine("Finished. Press Enter to continue...");
 
             Console.ReadLine();
         }
 
-        private void report(int percentProgress, object userState)
+        string lastState = "";
+        int lastPerc = -1;
+        
+        private void progressReport(int percentProgress, object userState)
         {
+            if (userState.ToString() != lastState)
+            {
+                lastState = userState.ToString();
+                Console.Write ($"\r\n{lastState}");
+            }
             if (percentProgress < 0 || percentProgress > 100)
                 return;
-            Console.WriteLine($"{userState}: {percentProgress}%");
+            if (lastPerc == percentProgress)
+                return;
+            lastPerc = percentProgress;
+            Console.Write($" {percentProgress}%");
         }
 
         private ProcessResult ProcessFile(string ifcFile, StreamWriter writer, ILogger<BatchProcessor> logger)
@@ -131,7 +137,9 @@ namespace XbimRegression
                 {
                     ReportProgressDelegate progress = null;
                     if (_params.ReportProgress)
-                        progress = report;
+                    {
+                        progress = progressReport;
+                    }
                     watch.Start();
                     using (var model = ParseModelFile(ifcFile, Params.Caching, logger, progress))
                     {

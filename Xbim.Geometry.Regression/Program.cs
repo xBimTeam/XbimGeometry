@@ -1,11 +1,9 @@
-﻿using System.Security.Permissions;
-using Xbim.Ifc;
+﻿using Xbim.Ifc;
 
 namespace XbimRegression
 {
     class Program
     {
-        [SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.ControlAppDomain)]
         private static void Main(string[] args)
         {
             // ContextTesting is a class that has been temporarily created to test multiple files

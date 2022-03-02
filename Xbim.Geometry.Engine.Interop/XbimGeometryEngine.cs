@@ -64,7 +64,6 @@ namespace Xbim.Geometry.Engine.Interop
                 _logger.LogError(0, e, "Failed to construct XbimGeometryEngine");
                 throw new FileLoadException($"Failed to load Xbim.Geometry.Engine{conventions.Suffix}.dll", e);
             }
-
         }
 
         public IXbimGeometryObject Create(IIfcGeometricRepresentationItem ifcRepresentation, ILogger logger)

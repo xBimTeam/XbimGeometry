@@ -31,7 +31,35 @@ namespace XbimRegression
 
             TestFileRoot = args[0];
 
-            if (!Directory.Exists(TestFileRoot))
+            // work out what are the files to process and the report file
+            //
+            if (Directory.Exists(TestFileRoot))
+            {
+                var di = new DirectoryInfo(TestFileRoot);
+                FilesToProcess = di.GetFiles("*.IFC", SearchOption.AllDirectories);
+                ResultsFile = Path.Combine(TestFileRoot, string.Format("XbimRegression_{0:yyyyMMdd-hhmmss}.csv", DateTime.Now));
+            }
+            else if (File.Exists(TestFileRoot))
+            {
+                var ext = Path.GetExtension(TestFileRoot).ToLowerInvariant();
+                if (ext == ".ifc")
+                {
+                    FilesToProcess = new[] { new FileInfo(TestFileRoot) };
+                    ResultsFile = Path.ChangeExtension(TestFileRoot, "regression.csv");
+                }
+                else if (ext == ".txt")
+                {
+                    var lines = File.ReadAllLines(TestFileRoot).Select(x => new FileInfo(x));
+                    FilesToProcess = lines.Where(x => x.Exists).ToArray();
+                    ResultsFile = string.Format("XbimRegression_{0:yyyyMMdd-hhmmss}.csv", DateTime.Now);
+                }
+                else
+                {
+                    Console.WriteLine("Invalid source file {0}", TestFileRoot);
+                    return;
+                }
+            }
+            else
             {
                 Console.WriteLine("Invalid model folder {0}", TestFileRoot);
                 return;
@@ -133,7 +161,8 @@ namespace XbimRegression
         /// Flag indicating if the parameters are valid
         /// </summary>
         public bool IsValid { get; set; }
-
+        public IEnumerable<FileInfo> FilesToProcess { get; private set; } = Enumerable.Empty<FileInfo>();
+        public string ResultsFile { get; }
 
         private enum CompoundParameter
         {
