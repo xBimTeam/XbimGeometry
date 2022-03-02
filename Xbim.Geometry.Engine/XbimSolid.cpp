@@ -835,7 +835,7 @@ namespace Xbim
 				}
 				GC::KeepAlive(faceStart);
 				GC::KeepAlive(faceEnd);
-
+				GC::KeepAlive(sweep);
 			}
 		}
 
@@ -1041,7 +1041,7 @@ namespace Xbim
 					return;
 				}
 				GC::KeepAlive(faceStart);
-
+				GC::KeepAlive(sweep);
 			}
 			XbimGeometryCreator::LogInfo(logger, repItem, "Invalid extrusion, depth must be >0 and faces must be correctly defined");
 			//if it has failed we will have a null solid
@@ -1206,6 +1206,7 @@ namespace Xbim
 					*pSolid = outerShell;
 					pSolid->Closed(Standard_True);
 					GC::KeepAlive(crossSections);
+					GC::KeepAlive(sweep);
 					ShapeFix_ShapeTolerance tolFixer;
 					tolFixer.LimitTolerance(*pSolid, repItem->Model->ModelFactors->Precision);
 					return;
@@ -1350,6 +1351,8 @@ namespace Xbim
 				//half space solids are only used in booleans, set the face tolerance the millimeter precision we require
 				ShapeFix_ShapeTolerance tolFixer;
 				tolFixer.LimitTolerance(*pSolid, hs->Model->ModelFactors->Precision * XbimGeometryCreator::FuzzyFactor);
+
+				GC::KeepAlive(face);
 			}
 		}
 
@@ -1417,6 +1420,8 @@ namespace Xbim
 			tolFixer.LimitTolerance(polyBoundary, pbhs->Model->ModelFactors->Precision);
 			// we have to use 1e8 as the max extrusion as the common boolean op times out on values greater than this, probably an extrema issue in booleans
 			TopoDS_Shape substractionBody = BRepPrimAPI_MakePrism(BRepBuilderAPI_MakeFace(polyBoundary), gp_Vec(0, 0, 1e8));
+			GC::KeepAlive(polyBoundary);
+
 			//find point inside the material
 			gp_Pnt pnt = pln.Location().Translated(pbhs->AgreementFlag ? -pln.Axis().Direction() : pln.Axis().Direction());
 
