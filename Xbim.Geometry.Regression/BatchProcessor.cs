@@ -34,6 +34,9 @@ namespace XbimRegression
 
         public void Run()
         {
+            FileInfo f = new FileInfo(Params.ResultsFile);
+            Console.WriteLine($"Reporting to \"{f.FullName}\"");
+
             using var writer = new StreamWriter(Params.ResultsFile);
             writer.WriteLine(ProcessResult.CsvHeader);
             // ParallelOptions opts = new ParallelOptions() { MaxDegreeOfParallelism = 12 };
@@ -110,13 +113,30 @@ namespace XbimRegression
 
         string lastState = "";
         int lastPerc = -1;
-        
+        bool stateIsComplete = false;
+
+        private void InitProgress()
+        {
+            lastState = "";
+            lastPerc = -1;
+            stateIsComplete = true;
+        }
+
+
         private void progressReport(int percentProgress, object userState)
         {
+            if (percentProgress > 100)
+            {
+                stateIsComplete = true;
+                Console.WriteLine("");
+            }
             if (userState.ToString() != lastState)
             {
                 lastState = userState.ToString();
-                Console.Write ($"\r\n{lastState}");
+                if (!stateIsComplete)
+                    Console.WriteLine("");
+                Console.Write($"{lastState}");
+                stateIsComplete = false;
             }
             if (percentProgress < 0 || percentProgress > 100)
                 return;
@@ -124,6 +144,7 @@ namespace XbimRegression
                 return;
             lastPerc = percentProgress;
             Console.Write($" {percentProgress}%");
+            stateIsComplete = false;
         }
 
         private ProcessResult ProcessFile(string ifcFile, StreamWriter writer, ILogger<BatchProcessor> logger)
@@ -138,6 +159,7 @@ namespace XbimRegression
                     ReportProgressDelegate progress = null;
                     if (_params.ReportProgress)
                     {
+                        InitProgress();
                         progress = progressReport;
                     }
                     watch.Start();
@@ -273,6 +295,8 @@ namespace XbimRegression
 
                         if (_params.Caching)
                         {
+                            if (_params.ReportProgress)
+                                Console.WriteLine($"Writing cache file '{xbimFilename}'");
                             IfcStore s = ((IfcStore)model);
                             if (s != null)
                             {
@@ -293,6 +317,8 @@ namespace XbimRegression
                 return result;
             }
         }
+
+        
 
         private Xbim3DModelContext.MeshingBehaviourResult CustomMeshingBehaviour(int elementId, int typeId, ref double linearDeflection, ref double angularDeflection)
         {

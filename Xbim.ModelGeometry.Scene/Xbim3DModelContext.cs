@@ -795,6 +795,15 @@ namespace Xbim.ModelGeometry.Scene
             var openingAndProjectionOps = new ConcurrentBag<XbimProductBooleanInfo>(); // prepares the information to perform the openings and projections
             // srl this was a workaround to resolve some isues with OCC booleans that are now fixed in 7.3
             // var precision = Math.Max(_model.ModelFactors.OneMilliMeter / 50, _model.ModelFactors.Precision); //set the precision to 100th mm but never less than precision
+            var p = Model.Instances.OfType<IIfcProject>().FirstOrDefault();
+            //if (
+            //    p != null
+            //    && p.OwnerHistory.OwningApplication.ApplicationFullName.Value.ToString().Contains("Archicad")
+            //    && p.OwnerHistory.OwningApplication.Version.ToString().Contains("19")
+            //    )
+            //{
+            //    _model.ModelFactors.Precision = _model.ModelFactors.Precision / 10;
+            //}
             var precision = _model.ModelFactors.Precision;
             // make sure all the geometries we have cached are sewn
             // contextHelper.SewGeometries(Engine);

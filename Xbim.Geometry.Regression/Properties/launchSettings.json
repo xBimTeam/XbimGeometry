@@ -2,7 +2,7 @@
   "profiles": {
     "XbimRegression": {
       "commandName": "Project",
-      "commandLineArgs": "\"C:\\Data\\Ifc\\NDA\\2022 02 23 - Geometry crash TS\" /caching /singlethread",
+      "commandLineArgs": "\"C:\\Data\\Ifc\\archicad.txt\" /progress /caching",
       "nativeDebugging": true
     }
   }

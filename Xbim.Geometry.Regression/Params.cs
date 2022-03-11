@@ -36,7 +36,7 @@ namespace XbimRegression
             if (Directory.Exists(TestFileRoot))
             {
                 var di = new DirectoryInfo(TestFileRoot);
-                FilesToProcess = di.GetFiles("*.IFC", SearchOption.AllDirectories);
+                FilesToProcess = di.GetFiles("*.IFC", SearchOption.AllDirectories).Where(y=>y.Extension.ToLowerInvariant() == ".ifc");
                 ResultsFile = Path.Combine(TestFileRoot, string.Format("XbimRegression_{0:yyyyMMdd-hhmmss}.csv", DateTime.Now));
             }
             else if (File.Exists(TestFileRoot))
@@ -49,8 +49,8 @@ namespace XbimRegression
                 }
                 else if (ext == ".txt")
                 {
-                    var lines = File.ReadAllLines(TestFileRoot).Select(x => new FileInfo(x));
-                    FilesToProcess = lines.Where(x => x.Exists).ToArray();
+                    var justLines = File.ReadAllLines(TestFileRoot).Where(x => !x.StartsWith("#"));
+                    FilesToProcess = justLines.Where(name => File.Exists(name)).Select(x => new FileInfo(x)).ToArray();
                     ResultsFile = string.Format("XbimRegression_{0:yyyyMMdd-hhmmss}.csv", DateTime.Now);
                 }
                 else
