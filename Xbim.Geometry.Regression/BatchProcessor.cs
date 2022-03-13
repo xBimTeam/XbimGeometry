@@ -34,17 +34,15 @@ namespace XbimRegression
 
         public void Run()
         {
-            var resultsFile = Path.Combine(Params.TestFileRoot, string.Format("XbimRegression_{0:yyyyMMdd-hhmmss}.csv", DateTime.Now));
+            FileInfo f = new FileInfo(Params.ResultsFile);
+            Console.WriteLine($"Reporting to \"{f.FullName}\"");
 
-            var di = new DirectoryInfo(Params.TestFileRoot);
-
-            using (var writer = new StreamWriter(resultsFile))
-            {
+            using var writer = new StreamWriter(Params.ResultsFile);
                 writer.WriteLine(ProcessResult.CsvHeader);
                 // ParallelOptions opts = new ParallelOptions() { MaxDegreeOfParallelism = 12 };
-                var toProcess = di.GetFiles("*.IFC", SearchOption.AllDirectories);
+
                 // Parallel.ForEach<FileInfo>(toProcess, opts, file =>
-                foreach (var file in toProcess)
+            foreach (var file in Params.FilesToProcess)
                 {
                     //set up a  log file for this file run                 
                     var logFile = Path.ChangeExtension(file.FullName, "log");
@@ -107,17 +105,46 @@ namespace XbimRegression
                 }
 
                 writer.Close();
-            }
+            
             Console.WriteLine("Finished. Press Enter to continue...");
 
             Console.ReadLine();
         }
 
-        private void report(int percentProgress, object userState)
+        string lastState = "";
+        int lastPerc = -1;
+        bool stateIsComplete = false;
+
+        private void InitProgress()
         {
+            lastState = "";
+            lastPerc = -1;
+            stateIsComplete = true;
+        }
+
+
+        private void progressReport(int percentProgress, object userState)
+        {
+            if (percentProgress > 100)
+            {
+                stateIsComplete = true;
+                Console.WriteLine("");
+            }
+            if (userState.ToString() != lastState)
+        {
+                lastState = userState.ToString();
+                if (!stateIsComplete)
+                    Console.WriteLine("");
+                Console.Write($"{lastState}");
+                stateIsComplete = false;
+            }
             if (percentProgress < 0 || percentProgress > 100)
                 return;
-            Console.WriteLine($"{userState}: {percentProgress}%");
+            if (lastPerc == percentProgress)
+                return;
+            lastPerc = percentProgress;
+            Console.Write($" {percentProgress}%");
+            stateIsComplete = false;
         }
 
         private ProcessResult ProcessFile(string ifcFile, StreamWriter writer, ILogger<BatchProcessor> logger)
@@ -131,7 +158,10 @@ namespace XbimRegression
                 {
                     ReportProgressDelegate progress = null;
                     if (_params.ReportProgress)
-                        progress = report;
+                    {
+                        InitProgress();
+                        progress = progressReport;
+                    }
                     watch.Start();
                     using (var model = ParseModelFile(ifcFile, Params.Caching, logger, progress))
                     {
@@ -265,6 +295,8 @@ namespace XbimRegression
 
                         if (_params.Caching)
                         {
+                            if (_params.ReportProgress)
+                                Console.WriteLine($"Writing cache file '{xbimFilename}'");
                             IfcStore s = ((IfcStore)model);
                             if (s != null)
                             {
@@ -285,6 +317,8 @@ namespace XbimRegression
                 return result;
             }
         }
+
+        
 
         private Xbim3DModelContext.MeshingBehaviourResult CustomMeshingBehaviour(int elementId, int typeId, ref double linearDeflection, ref double angularDeflection)
         {
