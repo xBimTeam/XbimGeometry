@@ -187,6 +187,8 @@ namespace XbimRegression
                     watch.Start();
                     using (var model = ParseModelFile(ifcFile, Params.Caching, _logger, progress))
                     {
+                        if (model == null)
+                            return null;
                         var parseTime = watch.ElapsedMilliseconds;
                         var xbimFilename = BuildFileName(ifcFile, ".xbim");
                         var context = new Xbim3DModelContext(model, loggerFactory: loggerFactory, XGeometryEngineVersion.V6);
@@ -363,8 +365,8 @@ namespace XbimRegression
                 return null;
             }
             // create a callback for progress
-
-            switch (Path.GetExtension(ifcFileName).ToLowerInvariant())
+            var ext = Path.GetExtension(ifcFileName).ToLowerInvariant();
+            switch (ext)
             {
                 case ".ifc":
                 case ".ifczip":
@@ -377,10 +379,8 @@ namespace XbimRegression
                     logger.LogInformation($"Parsing ended.");
                     return ret;
                 default:
-                    throw new NotImplementedException(
-                        string.Format("XbimRegression does not support {0} file formats currently",
-                            Path.GetExtension(ifcFileName))
-                            );
+                    logger?.LogError("XbimRegression does not support {0} file format.", ext);
+                    return null;
             }
         }
 
