@@ -921,11 +921,13 @@ void AppDef_Variational::Dump(Standard_OStream& o) const
     o << " NbSegments           "  << myKnots->Length()-1 << std::endl;
   }
   else
-  { if (myIsOverConstr) o << "The probleme is overconstraint " << std::endl;
-  else o << " Erreur dans l''approximation" << std::endl;
-  }   
+  {
+    o << (myIsOverConstr
+       ? " The problem is overconstraint"
+       : " Error in approximation") << std::endl;
+  }
 }
-//
+
 //=======================================================================
 //function : SetConstraints
 //purpose  : Define the constraints to approximate
@@ -1327,7 +1329,7 @@ void AppDef_Variational::TheMotor(
 
     while(ToOptim) {
       Iter++;
-      //     (2.1) Save curent results
+      //     (2.1) Save current results
       VOCRI[0] = VALCRI[0];
       VOCRI[1] = VALCRI[1];
       VOCRI[2] = VALCRI[2];

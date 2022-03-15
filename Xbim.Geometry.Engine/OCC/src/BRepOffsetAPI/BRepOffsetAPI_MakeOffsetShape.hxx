@@ -30,7 +30,6 @@
 #include <GeomAbs_JoinType.hxx>
 #include <TopTools_ListOfShape.hxx>
 class TopoDS_Shape;
-class BRepOffset_MakeOffset;
 
 
 //! Describes functions to build a shell out of a shape. The
@@ -47,17 +46,6 @@ public:
 
   //! Constructor does nothing.
   Standard_EXPORT BRepOffsetAPI_MakeOffsetShape();
-
-  //! Deprecated constructor. Please avoid usage of this constructor.
-  Standard_DEPRECATED("Deprecated constructor. Please use constructor without parameters and one of perform methods.")
-  Standard_EXPORT BRepOffsetAPI_MakeOffsetShape(const TopoDS_Shape& S, 
-                                                const Standard_Real Offset, 
-                                                const Standard_Real Tol, 
-                                                const BRepOffset_Mode Mode = BRepOffset_Skin, 
-                                                const Standard_Boolean Intersection = Standard_False, 
-                                                const Standard_Boolean SelfInter = Standard_False, 
-                                                const GeomAbs_JoinType Join = GeomAbs_Arc,
-                                                const Standard_Boolean RemoveIntEdges = Standard_False);
 
   //! Constructs offset shape for the given one using simple algorithm without intersections computation.
   Standard_EXPORT void PerformBySimple(const TopoDS_Shape& theS,
@@ -125,13 +113,14 @@ public:
                                      const Standard_Boolean Intersection = Standard_False,
                                      const Standard_Boolean SelfInter = Standard_False,
                                      const GeomAbs_JoinType Join = GeomAbs_Arc,
-                                     const Standard_Boolean RemoveIntEdges = Standard_False);
+                                     const Standard_Boolean RemoveIntEdges = Standard_False,
+                                     const Message_ProgressRange& theRange = Message_ProgressRange());
 
   //! Returns instance of the unrelying intersection / arc algorithm.
   Standard_EXPORT virtual const BRepOffset_MakeOffset& MakeOffset() const;
 
   //! Does nothing.
-  Standard_EXPORT virtual void Build() Standard_OVERRIDE;
+  Standard_EXPORT virtual void Build(const Message_ProgressRange& theRange = Message_ProgressRange()) Standard_OVERRIDE;
   
   //! Returns the list of shapes generated from the shape <S>.
   Standard_EXPORT virtual const TopTools_ListOfShape& Generated (const TopoDS_Shape& S) Standard_OVERRIDE;

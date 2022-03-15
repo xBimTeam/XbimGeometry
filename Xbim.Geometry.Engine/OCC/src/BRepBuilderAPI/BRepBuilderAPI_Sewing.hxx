@@ -44,9 +44,6 @@
 #include <Message_ProgressRange.hxx>
 
 class BRepTools_ReShape;
-class Standard_OutOfRange;
-class Standard_NoSuchObject;
-class TopoDS_Shape;
 class TopoDS_Edge;
 class TopoDS_Face;
 class Geom_Surface;
@@ -60,10 +57,10 @@ DEFINE_STANDARD_HANDLE(BRepBuilderAPI_Sewing, Standard_Transient)
 
 //! Provides methods to
 //!
-//! - identify possible contigous boundaries (for control
+//! - identify possible contiguous boundaries (for control
 //! afterwards (of continuity: C0, C1, ...))
 //!
-//! - assemble contigous shapes into one shape.
+//! - assemble contiguous shapes into one shape.
 //! Only manifold shapes will be found. Sewing will not
 //! be done in case of multiple edges.
 //!
@@ -131,13 +128,13 @@ public:
   //! Gives each multiple edge
   Standard_EXPORT const TopoDS_Edge& MultipleEdge (const Standard_Integer index) const;
   
-  //! Gives the number of contigous edges (edge shared by two faces)
+  //! Gives the number of contiguous edges (edge shared by two faces)
   Standard_EXPORT Standard_Integer NbContigousEdges() const;
   
-  //! Gives each contigous edge
+  //! Gives each contiguous edge
   Standard_EXPORT const TopoDS_Edge& ContigousEdge (const Standard_Integer index) const;
   
-  //! Gives the sections (edge) belonging to a contigous edge
+  //! Gives the sections (edge) belonging to a contiguous edge
   Standard_EXPORT const TopTools_ListOfShape& ContigousEdgeCouple (const Standard_Integer index) const;
   
   //! Indicates if a section is bound (before use SectionToBoundary)
@@ -171,7 +168,7 @@ public:
   //! Gives a modifieded subshape
   Standard_EXPORT TopoDS_Shape ModifiedSubShape (const TopoDS_Shape& shape) const;
   
-  //! print the informations
+  //! print the information
   Standard_EXPORT void Dump() const;
   
   //! Gives the number of deleted faces (faces smallest than tolerance)
@@ -235,7 +232,7 @@ public:
   
   //! Gets mode for non-manifold sewing.
   //!
-  //! INTERNAL FUCTIONS ---
+  //! INTERNAL FUNCTIONS ---
     Standard_Boolean NonManifoldMode() const;
 
 

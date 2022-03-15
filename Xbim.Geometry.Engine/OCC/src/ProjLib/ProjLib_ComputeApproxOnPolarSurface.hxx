@@ -17,19 +17,13 @@
 #ifndef _ProjLib_ComputeApproxOnPolarSurface_HeaderFile
 #define _ProjLib_ComputeApproxOnPolarSurface_HeaderFile
 
-#include <Standard.hxx>
-#include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
-
-#include <Standard_Boolean.hxx>
-#include <Standard_Real.hxx>
+#include <Adaptor2d_Curve2d.hxx>
+#include <Adaptor3d_Curve.hxx>
+#include <Adaptor3d_Surface.hxx>
 #include <AppParCurves_Constraint.hxx>
+
 class Geom2d_BSplineCurve;
 class Geom2d_Curve;
-class Adaptor3d_HCurve;
-class Adaptor3d_HSurface;
-class Adaptor2d_HCurve2d;
-
 
 //! Approximate the  projection  of a  3d curve  on an
 //! polar  surface  and  stores the result  in  Approx.
@@ -41,7 +35,7 @@ class Adaptor2d_HCurve2d;
 //! Tolerance is maximal possible value of 3d deviation of 3d projection of projected curve from
 //! "exact" 3d projection. Since algorithm searches 2d curve on surface, required 2d tolerance is computed
 //! from 3d tolerance with help of U,V resolutions of surface.
-//! 3d and 2d tolerances have sence only for curves on surface, it defines precision of projecting and approximation
+//! 3d and 2d tolerances have sense only for curves on surface, it defines precision of projecting and approximation
 //! and have nothing to do with distance between the projected curve and the surface.
 class ProjLib_ComputeApproxOnPolarSurface 
 {
@@ -53,18 +47,18 @@ public:
   Standard_EXPORT ProjLib_ComputeApproxOnPolarSurface();
 
   //! Constructor, which performs projecting.
-  Standard_EXPORT ProjLib_ComputeApproxOnPolarSurface(const Handle(Adaptor3d_HCurve)& C, const Handle(Adaptor3d_HSurface)& S, const Standard_Real Tol = 1.0e-4);
+  Standard_EXPORT ProjLib_ComputeApproxOnPolarSurface(const Handle(Adaptor3d_Curve)& C, const Handle(Adaptor3d_Surface)& S, const Standard_Real Tol = 1.0e-4);
 
 
   //! Constructor, which performs projecting, using initial curve 2d InitCurve2d, which is any rough approximation of result curve. 
   //! Parameter Tol is 3d tolerance of approximation.
-  Standard_EXPORT ProjLib_ComputeApproxOnPolarSurface(const Handle(Adaptor2d_HCurve2d)& InitCurve2d, const Handle(Adaptor3d_HCurve)& C, const Handle(Adaptor3d_HSurface)& S, const Standard_Real Tol);
+  Standard_EXPORT ProjLib_ComputeApproxOnPolarSurface(const Handle(Adaptor2d_Curve2d)& InitCurve2d, const Handle(Adaptor3d_Curve)& C, const Handle(Adaptor3d_Surface)& S, const Standard_Real Tol);
  
   //! Constructor, which performs projecting, using two initial curves 2d: InitCurve2d and InitCurve2dBis that are any rough approximations of result curves.
   //! This constructor is used to get two pcurves for seem edge.
   //! Parameter Tol is 3d tolerance of approximation.
-  Standard_EXPORT ProjLib_ComputeApproxOnPolarSurface(const Handle(Adaptor2d_HCurve2d)& InitCurve2d, const Handle(Adaptor2d_HCurve2d)& InitCurve2dBis, const Handle(Adaptor3d_HCurve)& C, 
-                                                      const Handle(Adaptor3d_HSurface)& S, const Standard_Real Tol);
+  Standard_EXPORT ProjLib_ComputeApproxOnPolarSurface(const Handle(Adaptor2d_Curve2d)& InitCurve2d, const Handle(Adaptor2d_Curve2d)& InitCurve2dBis, const Handle(Adaptor3d_Curve)& C, 
+                                                      const Handle(Adaptor3d_Surface)& S, const Standard_Real Tol);
 
   
   //! Set min and max possible degree of result BSpline curve2d, which is got by approximation.
@@ -83,7 +77,7 @@ public:
 
   //! Set the parameter, which defines maximal possible distance between projected curve and surface.
   //! It is used only for projecting on not analytical surfaces.
-  //! If theMaxDist < 0, algoritm uses default value 100.*Tolerance. 
+  //! If theMaxDist < 0, algorithm uses default value 100.*Tolerance.
   //! If real distance between curve and surface more then theMaxDist, algorithm stops working.
   Standard_EXPORT void SetMaxDist(const Standard_Real theMaxDist);
 
@@ -94,21 +88,21 @@ public:
 
   //! Method, which performs projecting, using default values of parameters or
   //! they must be set by corresponding methods before using.
-  Standard_EXPORT void Perform (const Handle(Adaptor3d_HCurve)& C, const Handle(Adaptor3d_HSurface)& S);
+  Standard_EXPORT void Perform (const Handle(Adaptor3d_Curve)& C, const Handle(Adaptor3d_Surface)& S);
 
   //! Method, which performs projecting, using default values of parameters or
   //! they must be set by corresponding methods before using.
   //! Parameter InitCurve2d is any rough estimation of 2d result curve.
-  Standard_EXPORT Handle(Geom2d_BSplineCurve) Perform (const Handle(Adaptor2d_HCurve2d)& InitCurve2d, const Handle(Adaptor3d_HCurve)& C, const Handle(Adaptor3d_HSurface)& S);
+  Standard_EXPORT Handle(Geom2d_BSplineCurve) Perform (const Handle(Adaptor2d_Curve2d)& InitCurve2d, const Handle(Adaptor3d_Curve)& C, const Handle(Adaptor3d_Surface)& S);
 
-  //! Builds initial 2d curve as BSpline with degree = 1 using Extrema algoritm.
+  //! Builds initial 2d curve as BSpline with degree = 1 using Extrema algorithm.
   //! Method is used in method Perform(...).
-  Standard_EXPORT Handle(Adaptor2d_HCurve2d) BuildInitialCurve2d (const Handle(Adaptor3d_HCurve)& Curve, const Handle(Adaptor3d_HSurface)& S);
+  Standard_EXPORT Handle(Adaptor2d_Curve2d) BuildInitialCurve2d (const Handle(Adaptor3d_Curve)& Curve, const Handle(Adaptor3d_Surface)& S);
 
 
   //! Method, which performs projecting.
   //! Method is used in method Perform(...).
-  Standard_EXPORT Handle(Geom2d_BSplineCurve) ProjectUsingInitialCurve2d (const Handle(Adaptor3d_HCurve)& Curve, const Handle(Adaptor3d_HSurface)& S, const Handle(Adaptor2d_HCurve2d)& InitCurve2d);
+  Standard_EXPORT Handle(Geom2d_BSplineCurve) ProjectUsingInitialCurve2d (const Handle(Adaptor3d_Curve)& Curve, const Handle(Adaptor3d_Surface)& S, const Handle(Adaptor2d_Curve2d)& InitCurve2d);
 
   //! Returns result curve 2d.
   Standard_EXPORT Handle(Geom2d_BSplineCurve) BSpline() const;

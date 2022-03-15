@@ -28,9 +28,6 @@
 #include <Standard_Integer.hxx>
 #include <Standard_Boolean.hxx>
 #include <TopTools_ListOfShape.hxx>
-class Standard_ConstructionError;
-class Standard_NoSuchObject;
-class StdFail_NotDone;
 class TopoDS_Shape;
 class TopoDS_Edge;
 
@@ -68,7 +65,7 @@ public:
   Standard_EXPORT void Add (const TopoDS_Shape& ToProj);
   
   //! Sets the parameters  used  for computation
-  //! Tol3 is the requiered  tolerance between the  3d projected
+  //! Tol3 is the required  tolerance between the  3d projected
   //! curve  and     its    2d    representation
   //! InternalContinuity  is the order of constraints
   //! used for  approximation
@@ -91,7 +88,7 @@ public:
   
   //! Builds the result of the projection as a compound of
   //! wires. Tries to build oriented wires.
-  Standard_EXPORT virtual void Build() Standard_OVERRIDE;
+  Standard_EXPORT virtual void Build(const Message_ProgressRange& theRange = Message_ProgressRange()) Standard_OVERRIDE;
   
   //! Returns true if the object was correctly built by the shape
   //! construction algorithm.
@@ -111,7 +108,7 @@ public:
   //! Returns the initial face corresponding to the projected edge E.
   //! Exceptions
   //! StdFail_NotDone if no face was found.
-  //! Standard_NoSuchObject if if a face corresponding to
+  //! Standard_NoSuchObject if a face corresponding to
   //! E has already been found.
   Standard_EXPORT const TopoDS_Shape& Couple (const TopoDS_Edge& E) const;
   

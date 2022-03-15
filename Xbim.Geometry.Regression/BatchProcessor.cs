@@ -38,73 +38,73 @@ namespace XbimRegression
             Console.WriteLine($"Reporting to \"{f.FullName}\"");
 
             using var writer = new StreamWriter(Params.ResultsFile);
-                writer.WriteLine(ProcessResult.CsvHeader);
-                // ParallelOptions opts = new ParallelOptions() { MaxDegreeOfParallelism = 12 };
+            writer.WriteLine(ProcessResult.CsvHeader);
+            // ParallelOptions opts = new ParallelOptions() { MaxDegreeOfParallelism = 12 };
 
-                // Parallel.ForEach<FileInfo>(toProcess, opts, file =>
+            // Parallel.ForEach<FileInfo>(toProcess, opts, file =>
             foreach (var file in Params.FilesToProcess)
+            {
+                //set up a  log file for this file run                 
+                var logFile = Path.ChangeExtension(file.FullName, "log");
+                ProcessResult result;
+                using (var loggerFactory = new LoggerFactory())
                 {
-                    //set up a  log file for this file run                 
-                    var logFile = Path.ChangeExtension(file.FullName, "log");
-                    ProcessResult result;
-                    using (var loggerFactory = new LoggerFactory())
+                    XbimLogging.LoggerFactory = loggerFactory;
+                    loggerFactory.AddConsole(LogLevel.Error);
+                    loggerFactory.AddProvider(new NReco.Logging.File.FileLoggerProvider(logFile, false)
                     {
-                        XbimLogging.LoggerFactory = loggerFactory;
-                        loggerFactory.AddConsole(LogLevel.Error);
-                        loggerFactory.AddProvider(new NReco.Logging.File.FileLoggerProvider(logFile, false)
+                        FormatLogEntry = (msg) =>
                         {
-                            FormatLogEntry = (msg) =>
-                            {
-                                var sb = new System.Text.StringBuilder();
-                                StringWriter sw = new StringWriter(sb);
-                                var jsonWriter = new Newtonsoft.Json.JsonTextWriter(sw);
-                                jsonWriter.WriteStartArray();
-                                jsonWriter.WriteValue(DateTime.Now.ToString("o"));
-                                jsonWriter.WriteValue(msg.LogLevel.ToString());
-                                jsonWriter.WriteValue(msg.EventId.Id);
-                                jsonWriter.WriteValue(msg.Message);
-                                jsonWriter.WriteValue(msg.Exception?.ToString());
-                                jsonWriter.WriteEndArray();
-                                return sb.ToString();
-                            }
-                        });
-                        var logger = loggerFactory.CreateLogger<BatchProcessor>();
-                        Console.WriteLine($"Processing {file}");
-                        result = ProcessFile(file.FullName, writer, logger);
+                            var sb = new System.Text.StringBuilder();
+                            StringWriter sw = new StringWriter(sb);
+                            var jsonWriter = new Newtonsoft.Json.JsonTextWriter(sw);
+                            jsonWriter.WriteStartArray();
+                            jsonWriter.WriteValue(DateTime.Now.ToString("o"));
+                            jsonWriter.WriteValue(msg.LogLevel.ToString());
+                            jsonWriter.WriteValue(msg.EventId.Id);
+                            jsonWriter.WriteValue(msg.Message);
+                            jsonWriter.WriteValue(msg.Exception?.ToString());
+                            jsonWriter.WriteEndArray();
+                            return sb.ToString();
+                        }
+                    });
+                    var logger = loggerFactory.CreateLogger<BatchProcessor>();
+                    Console.WriteLine($"Processing {file}");
+                    result = ProcessFile(file.FullName, writer, logger);
 
-                    }
-                    XbimLogging.LoggerFactory = null; // uses a default loggerFactory
-
-                    var txt = File.ReadAllText(logFile);
-                    if (string.IsNullOrEmpty(txt))
-                    {
-                        File.Delete(logFile);
-                        result.Errors = 0;
-                        result.Warnings = 0;
-                        result.Information = 0;
-                    }
-                    else
-                    {
-
-                        var tokens = txt.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                        result.Errors = tokens.Count(t => t == "\"Error\"");
-                        result.Warnings = tokens.Count(t => t == "\"Warning\"");
-                        result.Information = Math.Max(0, tokens.Count(t => t == "\"Information\"") - 2); //we always get 2
-                    }
-                    if (result != null && !result.Failed)
-                    {
-                        Console.WriteLine($"Processed {file} : {result.Errors} Errors, {result.Warnings} Warnings, {result.Information} Informational in {result.TotalTime}ms. {result.Entities} IFC Elements & {result.GeometryEntries} Geometry Nodes.");
-                    }
-                    else
-                    {
-                        Console.WriteLine("Processing failed for {0} after {1}ms.", file, result.TotalTime);
-                    }
-                    result.FileName = file.Name;
-                    writer.WriteLine(result.ToCsv());
-                    writer.Flush();
                 }
+                XbimLogging.LoggerFactory = null; // uses a default loggerFactory
 
-                writer.Close();
+                var txt = File.ReadAllText(logFile);
+                if (string.IsNullOrEmpty(txt))
+                {
+                    File.Delete(logFile);
+                    result.Errors = 0;
+                    result.Warnings = 0;
+                    result.Information = 0;
+                }
+                else
+                {
+
+                    var tokens = txt.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                    result.Errors = tokens.Count(t => t == "\"Error\"");
+                    result.Warnings = tokens.Count(t => t == "\"Warning\"");
+                    result.Information = Math.Max(0, tokens.Count(t => t == "\"Information\"") - 2); //we always get 2
+                }
+                if (result != null && !result.Failed)
+                {
+                    Console.WriteLine($"Processed {file} : {result.Errors} Errors, {result.Warnings} Warnings, {result.Information} Informational in {result.TotalTime}ms. {result.Entities} IFC Elements & {result.GeometryEntries} Geometry Nodes.");
+                }
+                else
+                {
+                    Console.WriteLine("Processing failed for {0} after {1}ms.", file, result.TotalTime);
+                }
+                result.FileName = file.Name;
+                writer.WriteLine(result.ToCsv());
+                writer.Flush();
+            }
+
+            writer.Close();
             
             Console.WriteLine("Finished. Press Enter to continue...");
 

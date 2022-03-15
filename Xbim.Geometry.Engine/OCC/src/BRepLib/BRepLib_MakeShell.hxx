@@ -25,12 +25,11 @@
 #include <BRepLib_MakeShape.hxx>
 #include <Standard_Boolean.hxx>
 #include <Standard_Real.hxx>
-class StdFail_NotDone;
 class Geom_Surface;
 class TopoDS_Shell;
 
 
-//! Provides methos to build shells.
+//! Provides methods to build shells.
 //!
 //! Build a shell from a set of faces.
 //! Build untied shell from a non C2 surface

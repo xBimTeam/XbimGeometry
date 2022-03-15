@@ -660,34 +660,15 @@ void Geom2d_BSplineCurve::Segment(const Standard_Real aU1,
   Standard_Integer i, k, index;
   //
   //f
-  // Checking the input bounds aUj (j=1,2). 
-  // For the case when aUj==knot(i), 
-  // in order to prevent the insertion of a new knot that will be too closed 
-  // to the existing knot,  
-  // we assign Uj=knot(i)
-  Standard_Integer n1, n2;
-  Standard_Real U1, U2;
+  Standard_Real U1 = aU1, U2 = aU2;
   //
-  U1=aU1;
-  U2=aU2;
-  n1=knots->Lower();
-  n2=knots->Upper();
-  for (i=n1; i<=n2; ++i) {
-    U=knots->Value(i);
-    if (Abs(U-aU1)<=Eps) {
-      U1=U;
-    }
-    else if (Abs(U-aU2)<=Eps) {
-      U2=U;
-    }
-  }
   // Henceforward we use U1, U2 as bounds of the segment
   //t
   // 
   TColStd_Array1OfReal    Knots(1,2);
   TColStd_Array1OfInteger Mults(1,2);
   //
-  // define param ditance to keep (eap, Apr 18 2002, occ311)
+  // define param distance to keep (eap, Apr 18 2002, occ311)
   if (periodic) {
     Standard_Real Period = LastParameter() - FirstParameter();
     DU = U2 - U1;
@@ -730,10 +711,13 @@ void Geom2d_BSplineCurve::Segment(const Standard_Real aU1,
   Standard_Integer ToU2   = knots->Upper();
   BSplCLib::LocateParameter(deg,knots->Array1(),mults->Array1(),
 			    NewU1,periodic,FromU1,ToU2,index1,U);
+  if (Abs(knots->Value(index1 + 1) - U) <= Eps){
+    index1++;
+  }
   BSplCLib::LocateParameter(deg,knots->Array1(),mults->Array1(),
 			    NewU2,periodic,FromU1,ToU2,index2,U);
   // Eps = Epsilon(knots->Value(index2+1));
-  if ( Abs(knots->Value(index2+1)-U) <= Eps){
+  if ( Abs(knots->Value(index2+1)-U) <= Eps || index2 == index1){
     index2++;
   }
   

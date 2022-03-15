@@ -28,7 +28,6 @@
 #include <Standard_Integer.hxx>
 #include <Standard_Boolean.hxx>
 #include <Standard_Real.hxx>
-class Standard_OutOfRange;
 class gp_Pnt;
 
 
@@ -50,7 +49,7 @@ class gp_Pnt;
 //! framework for storing and consulting this computed data.
 //! This data may then be used to construct a
 //! Geom_BSplineSurface surface, for example.
-//! All those classes define algorithmes to convert an
+//! All those classes define algorithms to convert an
 //! ElementarySurface into a B-spline surface.
 //! This abstract class implements the methods to get
 //! the geometric representation of the B-spline surface.

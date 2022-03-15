@@ -23,9 +23,8 @@
 #include <TopoDS.hxx>
 #include <IMeshData_Status.hxx>
 #include <IMeshData_Types.hxx>
-#include <BRepAdaptor_HSurface.hxx>
+#include <BRepAdaptor_Surface.hxx>
 
-class IMeshData_Wire;
 class TopoDS_Wire;
 
 //! Interface class representing discrete model of a face.
@@ -53,7 +52,7 @@ public:
     const Standard_Integer theIndex) const = 0;
 
   //! Returns face's surface.
-  const Handle(BRepAdaptor_HSurface)& GetSurface() const
+  const Handle(BRepAdaptor_Surface)& GetSurface() const
   {
     return mySurface;
   }
@@ -82,12 +81,12 @@ protected:
     : IMeshData_TessellatedShape(theFace)
   {
     BRepAdaptor_Surface aSurfAdaptor(GetFace(), Standard_False);
-    mySurface = new BRepAdaptor_HSurface(aSurfAdaptor);
+    mySurface = new BRepAdaptor_Surface(aSurfAdaptor);
   }
 
 private:
 
-  mutable Handle(BRepAdaptor_HSurface)  mySurface;
+  mutable Handle(BRepAdaptor_Surface)  mySurface;
 };
 
 #endif

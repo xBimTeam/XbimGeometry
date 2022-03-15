@@ -29,7 +29,6 @@
 #include <Standard_Boolean.hxx>
 #include <TopTools_ListOfShape.hxx>
 #include <ChFiDS_SecHArray1.hxx>
-class StdFail_NotDone;
 class TopoDS_Shape;
 class TopoDS_Edge;
 class TopoDS_Face;
@@ -136,7 +135,7 @@ public:
   //! Sets the mode of chamfer
   Standard_EXPORT void SetMode (const ChFiDS_ChamfMode theMode);
   
-  //! return True if chamfer symetric false else.
+  //! return True if chamfer symmetric false else.
   Standard_EXPORT Standard_Boolean IsSymetric (const Standard_Integer IC) const;
   
   //! return True if chamfer is made with two distances false else.
@@ -250,7 +249,7 @@ public:
   //! intersection of 4 or more edges of the shape, or
   //! -   the intersection of the chamfer with a face which
   //! limits the contour is not fully contained in this face.
-  Standard_EXPORT virtual void Build() Standard_OVERRIDE;
+  Standard_EXPORT virtual void Build(const Message_ProgressRange& theRange = Message_ProgressRange()) Standard_OVERRIDE;
   
   //! Reinitializes this algorithm, thus canceling the effects of the Build function.
   //! This function allows modifications to be made to the

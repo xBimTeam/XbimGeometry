@@ -44,9 +44,6 @@
 #include <TColgp_Array1OfPnt2d.hxx>
 #include <Standard_OStream.hxx>
 class Approx_SweepFunction;
-class StdFail_NotDone;
-class Standard_DomainError;
-class Standard_OutOfRange;
 class AdvApprox_Cutting;
 
 
@@ -72,15 +69,15 @@ public:
   //! [First, Last] : Approx_SweepApproximation.cdl
   //! Tol3d : Tolerance to surface approximation
   //! Tol2d : Tolerance used to perform curve approximation
-  //! Normaly the 2d curve are approximated with a
+  //! Normally the 2d curve are approximated with a
   //! tolerance given by the resolution on support surfaces,
   //! but if this tolerance is too large Tol2d is used.
   //! TolAngular : Tolerance (in radian) to control the angle
-  //! beetween tangents on the section law and
-  //! tangent of iso-v on approximed surface
+  //! between tangents on the section law and
+  //! tangent of iso-v on approximated surface
   //! Continuity : The continuity in v waiting on the surface
-  //! Degmax     : The maximum degree in v requiered on the surface
-  //! Segmax     : The maximum number of span in v requiered on
+  //! Degmax     : The maximum degree in v required on the surface
+  //! Segmax     : The maximum number of span in v required on
   //! the surface
   //! Warning : The continuity ci can be obtained only if Ft is Ci
   Standard_EXPORT void Perform (const Standard_Real First, const Standard_Real Last, const Standard_Real Tol3d, const Standard_Real BoundTol, const Standard_Real Tol2d, const Standard_Real TolAngular, const GeomAbs_Shape Continuity = GeomAbs_C0, const Standard_Integer Degmax = 11, const Standard_Integer Segmax = 50);
@@ -111,10 +108,10 @@ public:
   
     const TColStd_Array1OfInteger& SurfVMults() const;
   
-  //! returns the maximum error in the suface approximation.
+  //! returns the maximum error in the surface approximation.
   Standard_EXPORT Standard_Real MaxErrorOnSurf() const;
   
-  //! returns the average error in the suface approximation.
+  //! returns the average error in the surface approximation.
   Standard_EXPORT Standard_Real AverageErrorOnSurf() const;
   
     Standard_Integer NbCurves2d() const;

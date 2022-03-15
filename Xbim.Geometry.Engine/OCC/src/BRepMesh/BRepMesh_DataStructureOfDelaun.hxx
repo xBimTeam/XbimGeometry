@@ -21,7 +21,6 @@
 #include <IMeshData_Types.hxx>
 #include <BRepMesh_VertexTool.hxx>
 
-class BRepMesh_Vertex;
 class BRepMesh_Edge;
 
 //! Describes the data structure necessary for the mesh algorithms in 
@@ -162,9 +161,9 @@ public: //! @name API for accessing mesh links.
   Standard_EXPORT void RemoveLink(const Standard_Integer theIndex,
                                   const Standard_Boolean isForce = Standard_False);
 
-  //! Returns indices of elements conected to the link with the given index.
+  //! Returns indices of elements connected to the link with the given index.
   //! @param theLinkIndex index of link whose data should be retrieved.
-  //! @return indices of elements conected to the link.
+  //! @return indices of elements connected to the link.
   const BRepMesh_PairOfIndex& ElementsConnectedTo(
     const Standard_Integer theLinkIndex) const
   {
@@ -222,7 +221,7 @@ public: //! @name API for accessing mesh elements.
 
 
 
-public: //! @name Auxilary API
+public: //! @name Auxiliary API
 
   //! Dumps information about this structure.
   //! @param theStream stream to be used for dump.

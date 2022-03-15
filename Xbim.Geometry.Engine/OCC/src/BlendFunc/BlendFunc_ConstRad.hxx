@@ -17,16 +17,10 @@
 #ifndef _BlendFunc_ConstRad_HeaderFile
 #define _BlendFunc_ConstRad_HeaderFile
 
-#include <Standard.hxx>
-#include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
-
+#include <Adaptor3d_Surface.hxx>
 #include <gp_Pnt.hxx>
-#include <Standard_Boolean.hxx>
 #include <gp_Vec.hxx>
 #include <gp_Vec2d.hxx>
-#include <Standard_Real.hxx>
-#include <Standard_Integer.hxx>
 #include <math_Vector.hxx>
 #include <math_Matrix.hxx>
 #include <BlendFunc_Tensor.hxx>
@@ -40,17 +34,10 @@
 #include <TColgp_Array1OfVec.hxx>
 #include <TColgp_Array1OfPnt2d.hxx>
 #include <TColgp_Array1OfVec2d.hxx>
-class Adaptor3d_HSurface;
-class Adaptor3d_HCurve;
-class math_Matrix;
-class gp_Pnt;
-class gp_Vec;
-class gp_Vec2d;
+
 class gp_Circ;
 class Blend_Point;
 class gp_Ax1;
-
-
 
 class BlendFunc_ConstRad  : public Blend_Function
 {
@@ -59,7 +46,7 @@ public:
   DEFINE_STANDARD_ALLOC
 
   
-  Standard_EXPORT BlendFunc_ConstRad(const Handle(Adaptor3d_HSurface)& S1, const Handle(Adaptor3d_HSurface)& S2, const Handle(Adaptor3d_HCurve)& C);
+  Standard_EXPORT BlendFunc_ConstRad(const Handle(Adaptor3d_Surface)& S1, const Handle(Adaptor3d_Surface)& S2, const Handle(Adaptor3d_Curve)& C);
   
   //! returns the number of equations of the function.
   Standard_EXPORT Standard_Integer NbEquations() const Standard_OVERRIDE;
@@ -92,8 +79,8 @@ public:
   
   Standard_EXPORT Standard_Boolean IsSolution (const math_Vector& Sol, const Standard_Real Tol) Standard_OVERRIDE;
   
-  //! Returns   the    minimal  Distance  beetween   two
-  //! extremitys of calculed sections.
+  //! Returns   the    minimal  Distance  between   two
+  //! extremities of calculated sections.
   Standard_EXPORT Standard_Real GetMinimalDistance() const Standard_OVERRIDE;
   
   Standard_EXPORT const gp_Pnt& PointOnS1() const Standard_OVERRIDE;
@@ -147,7 +134,7 @@ public:
   //! Stores in <T> the  parameters bounding the intervals
   //! of continuity <S>.
   //!
-  //! The array must provide  enough room to  accomodate
+  //! The array must provide  enough room to  accommodate
   //! for the parameters. i.e. T.Length() > NbIntervals()
   Standard_EXPORT void Intervals (TColStd_Array1OfReal& T, const GeomAbs_Shape S) const Standard_OVERRIDE;
   
@@ -191,10 +178,10 @@ private:
   Standard_EXPORT Standard_Boolean ComputeValues (const math_Vector& X, const Standard_Integer Order, const Standard_Boolean ByParam = Standard_False, const Standard_Real Param = 0);
 
 
-  Handle(Adaptor3d_HSurface) surf1;
-  Handle(Adaptor3d_HSurface) surf2;
-  Handle(Adaptor3d_HCurve) curv;
-  Handle(Adaptor3d_HCurve) tcurv;
+  Handle(Adaptor3d_Surface) surf1;
+  Handle(Adaptor3d_Surface) surf2;
+  Handle(Adaptor3d_Curve) curv;
+  Handle(Adaptor3d_Curve) tcurv;
   gp_Pnt pts1;
   gp_Pnt pts2;
   Standard_Boolean istangent;

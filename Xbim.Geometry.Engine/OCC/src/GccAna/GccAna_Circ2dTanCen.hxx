@@ -30,10 +30,6 @@
 #include <TColStd_Array1OfReal.hxx>
 #include <Standard_Real.hxx>
 #include <GccEnt_Position.hxx>
-class Standard_NegativeValue;
-class Standard_OutOfRange;
-class StdFail_NotDone;
-class GccEnt_BadQualifier;
 class GccEnt_QualifiedCirc;
 class gp_Pnt2d;
 class gp_Lin2d;
@@ -53,7 +49,7 @@ class gp_Circ2d;
 //! We want to create a circle tangent to an EnclosedCirc C1
 //! with a tolerance Tolerance.
 //! If we did not used Tolerance it is impossible to
-//! find a solution in the the following case : Pcenter is
+//! find a solution in the following case : Pcenter is
 //! outside C1.
 //! With Tolerance we will give a solution if the distance
 //! between C1 and Pcenter is lower than or equal Tolerance.
@@ -75,7 +71,7 @@ public:
   Standard_EXPORT GccAna_Circ2dTanCen(const gp_Lin2d& Linetan, const gp_Pnt2d& Pcenter);
   
   //! This method implements the algorithms used to
-  //! create 2d circles passing thrue a point and
+  //! create 2d circles passing through a point and
   //! centered on a point.
   //! Tolerance is a tolerance criterion used by the algorithm
   //! to find a solution when, mathematically, the problem
@@ -104,8 +100,8 @@ public:
   
   //! Returns the circle, representing the solution number Index and raises OutOfRange
   //! exception if Index is greater than the number of solutions.
-  //! Be carefull: the Index is only a way to get all the
-  //! solutions, but is not associated to theses outside the
+  //! Be careful: the Index is only a way to get all the
+  //! solutions, but is not associated to these outside the
   //! context of the algorithm-object.
   //! Raises NotDone if the construction algorithm didn't succeed.
   //! It raises OutOfRange if Index is greater than the
@@ -122,7 +118,7 @@ public:
   //! and the qualifiers computedin case of unqualified).
   Standard_EXPORT void WhichQualifier (const Standard_Integer Index, GccEnt_Position& Qualif1) const;
   
-  //! Returns informations about the tangency point between the
+  //! Returns information about the tangency point between the
   //! result number Index and the first argument.
   //! ParSol is the intrinsic parameter of the point PntSol
   //! on the solution curv.

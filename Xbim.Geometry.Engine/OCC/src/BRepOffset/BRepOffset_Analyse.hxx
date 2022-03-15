@@ -33,7 +33,9 @@
 #include <TopTools_DataMapOfShapeShape.hxx>
 #include <TopTools_ListOfShape.hxx>
 #include <TopTools_MapOfShape.hxx>
-class TopoDS_Shape;
+
+#include <Message_ProgressRange.hxx>
+
 class TopoDS_Edge;
 class TopoDS_Vertex;
 class TopoDS_Face;
@@ -59,7 +61,8 @@ public: //! @name Performing analysis
 
   //! Performs the analysis
   Standard_EXPORT void Perform (const TopoDS_Shape& theS,
-                                const Standard_Real theAngle);
+                                const Standard_Real theAngle,
+                                const Message_ProgressRange& theRange = Message_ProgressRange());
 
 public: //! @name Results
 
@@ -171,7 +174,7 @@ private: //! @name Treatment of tangential cases
 
   //! Treatment of the tangential cases.
   //! @param theEdges List of edges connecting tangent faces
-  Standard_EXPORT void TreatTangentFaces (const TopTools_ListOfShape& theEdges);
+  Standard_EXPORT void TreatTangentFaces (const TopTools_ListOfShape& theEdges, const Message_ProgressRange& theRange);
 
 private: //! @name Fields
 

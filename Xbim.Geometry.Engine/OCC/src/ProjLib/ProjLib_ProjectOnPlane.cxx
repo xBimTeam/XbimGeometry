@@ -34,8 +34,8 @@
 #include <Precision.hxx>
 #include <ElCLib.hxx>
 #include <Adaptor3d_Curve.hxx>
-#include <Adaptor3d_HCurve.hxx>
-#include <GeomAdaptor_HCurve.hxx>
+#include <Adaptor3d_Curve.hxx>
+#include <GeomAdaptor_Curve.hxx>
 #include <Geom_Line.hxx>
 #include <GeomConvert.hxx>
 #include <BSplCLib.hxx>
@@ -56,7 +56,7 @@
 //=======================================================================
 
 static gp_Pnt OnPlane_Value(const Standard_Real U,
-			    const Handle(Adaptor3d_HCurve)& aCurvePtr,
+			    const Handle(Adaptor3d_Curve)& aCurvePtr,
 			    const gp_Ax3& Pl,
 			    const gp_Dir& D)
 {
@@ -82,7 +82,7 @@ static gp_Pnt OnPlane_Value(const Standard_Real U,
 
 static gp_Vec OnPlane_DN(const Standard_Real U,
 			 const Standard_Integer DerivativeRequest,
-			 const Handle(Adaptor3d_HCurve)& aCurvePtr,
+			 const Handle(Adaptor3d_Curve)& aCurvePtr,
 			 const gp_Ax3& Pl,
 			 const gp_Dir& D)
 {
@@ -110,7 +110,7 @@ static gp_Vec OnPlane_DN(const Standard_Real U,
 static Standard_Boolean OnPlane_D1(const Standard_Real U,
 				         gp_Pnt& P,
 				         gp_Vec& V,
-				   const Handle(Adaptor3d_HCurve)& aCurvePtr,
+				   const Handle(Adaptor3d_Curve)& aCurvePtr,
 				   const gp_Ax3& Pl,
 				   const gp_Dir& D)
 {
@@ -152,7 +152,7 @@ static Standard_Boolean OnPlane_D2(const Standard_Real U,
 				         gp_Pnt& P,
 				         gp_Vec& V1,
 				         gp_Vec& V2,
-				   const Handle(Adaptor3d_HCurve) & aCurvePtr,
+				   const Handle(Adaptor3d_Curve) & aCurvePtr,
 				   const gp_Ax3& Pl,
 				   const gp_Dir& D)
 {
@@ -200,7 +200,7 @@ static Standard_Boolean OnPlane_D3(const Standard_Real U,
 				         gp_Vec& V1,
 				         gp_Vec& V2,
 				         gp_Vec& V3,
-				   const Handle(Adaptor3d_HCurve)& aCurvePtr,
+				   const Handle(Adaptor3d_Curve)& aCurvePtr,
 				   const gp_Ax3& Pl,
 				   const gp_Dir& D)
 {
@@ -251,13 +251,13 @@ static Standard_Boolean OnPlane_D3(const Standard_Real U,
 class ProjLib_OnPlane : public AppCont_Function
 
 {
-  Handle(Adaptor3d_HCurve) myCurve;
+  Handle(Adaptor3d_Curve) myCurve;
   gp_Ax3 myPlane;
   gp_Dir myDirection;
 
 public :
 
-  ProjLib_OnPlane(const Handle(Adaptor3d_HCurve)& C, 
+  ProjLib_OnPlane(const Handle(Adaptor3d_Curve)& C, 
                   const gp_Ax3& Pl, 
                   const gp_Dir& D) 
 : myCurve(C),
@@ -309,7 +309,7 @@ public :
 //purpose  : 
 //=======================================================================
 
-static void  PerformApprox (const Handle(Adaptor3d_HCurve)& C,
+static void  PerformApprox (const Handle(Adaptor3d_Curve)& C,
 			    const gp_Ax3& Pl,
 			    const gp_Dir& D,
 			    Handle(Geom_BSplineCurve) &BSplineCurvePtr) 
@@ -447,6 +447,35 @@ myIsApprox  (Standard_False)
 }
 
 //=======================================================================
+//function : ShallowCopy
+//purpose  : 
+//=======================================================================
+
+Handle(Adaptor3d_Curve) ProjLib_ProjectOnPlane::ShallowCopy() const
+{
+  Handle(ProjLib_ProjectOnPlane) aCopy = new ProjLib_ProjectOnPlane();
+
+  if (!myCurve.IsNull())
+  {
+    aCopy->myCurve = myCurve->ShallowCopy();
+  }
+  aCopy->myPlane = myPlane;
+  aCopy->myDirection = myDirection;
+  aCopy->myKeepParam = myKeepParam;
+  aCopy->myFirstPar = myFirstPar;
+  aCopy->myLastPar = myLastPar;
+  aCopy->myTolerance = myTolerance;
+  aCopy->myType = myType;
+  if (!myResult.IsNull())
+  {
+    aCopy->myResult = Handle(GeomAdaptor_Curve)::DownCast(myResult->ShallowCopy());
+  }
+  aCopy->myIsApprox = myIsApprox;
+
+  return aCopy;
+}
+
+//=======================================================================
 //function : Project
 //purpose  : Returns the projection of a point <Point> on a plane 
 //           <ThePlane>  along a direction <TheDir>.
@@ -491,7 +520,7 @@ static gp_Vec ProjectVec(const gp_Ax3& ThePlane,
 //purpose  : 
 //=======================================================================
 
-void ProjLib_ProjectOnPlane::Load(const Handle(Adaptor3d_HCurve)&    C,
+void ProjLib_ProjectOnPlane::Load(const Handle(Adaptor3d_Curve)&    C,
 				  const Standard_Real Tolerance,
 				  const Standard_Boolean KeepParametrization) 
 				  
@@ -502,7 +531,7 @@ void ProjLib_ProjectOnPlane::Load(const Handle(Adaptor3d_HCurve)&    C,
   myTolerance  = Tolerance ;
 
   Handle(Geom_BSplineCurve)  ApproxCurve;
-  Handle(GeomAdaptor_HCurve) aGAHCurve;
+  Handle(GeomAdaptor_Curve) aGAHCurve;
 
   Handle(Geom_Line)      GeomLinePtr;
   Handle(Geom_Circle)    GeomCirclePtr ;
@@ -544,7 +573,7 @@ void ProjLib_ProjectOnPlane::Load(const Handle(Adaptor3d_HCurve)&    C,
 
 //  Modified by Sergey KHROMOV - Tue Jan 29 16:57:29 2002 Begin
 	GeomAdaptor_Curve aGACurve(BSP);
-	myResult = new GeomAdaptor_HCurve(aGACurve);
+	myResult = new GeomAdaptor_Curve(aGACurve);
 //  Modified by Sergey KHROMOV - Tue Jan 29 16:57:30 2002 End
       }
       else if ( Abs( Xc.Magnitude() - 1.) < Precision::Confusion()) {
@@ -559,7 +588,7 @@ void ProjLib_ProjectOnPlane::Load(const Handle(Adaptor3d_HCurve)&    C,
 	GeomAdaptor_Curve aGACurve(GeomLinePtr,
 				   myCurve->FirstParameter(),
 				   myCurve->LastParameter() );
-	myResult = new GeomAdaptor_HCurve(aGACurve);
+	myResult = new GeomAdaptor_Curve(aGACurve);
 //  Modified by Sergey KHROMOV - Tue Jan 29 16:57:30 2002 End
       }
       else {
@@ -583,7 +612,7 @@ void ProjLib_ProjectOnPlane::Load(const Handle(Adaptor3d_HCurve)&    C,
 	  GeomAdaptor_Curve aGACurve(GeomLinePtr,
 				     myFirstPar,
 				     myLastPar) ;
-	  myResult = new GeomAdaptor_HCurve(aGACurve);
+	  myResult = new GeomAdaptor_Curve(aGACurve);
 //  Modified by Sergey KHROMOV - Tue Jan 29 16:57:30 2002 End
 	}
 	else {
@@ -610,7 +639,7 @@ void ProjLib_ProjectOnPlane::Load(const Handle(Adaptor3d_HCurve)&    C,
 	  NewCurvePtr->SetKnots(BsplineKnots) ;
 //  Modified by Sergey KHROMOV - Tue Jan 29 16:57:29 2002 Begin
 	  GeomAdaptor_Curve aGACurve(NewCurvePtr);
-	  myResult = new GeomAdaptor_HCurve(aGACurve);
+	  myResult = new GeomAdaptor_Curve(aGACurve);
 //  Modified by Sergey KHROMOV - Tue Jan 29 16:57:30 2002 End
 	}
       }
@@ -729,7 +758,7 @@ void ProjLib_ProjectOnPlane::Load(const Handle(Adaptor3d_HCurve)&    C,
             GeomCirclePtr  = new Geom_Circle(Circ);
 //  Modified by Sergey KHROMOV - Tue Jan 29 16:57:29 2002 Begin
             GeomAdaptor_Curve aGACurve(GeomCirclePtr);
-            myResult = new GeomAdaptor_HCurve(aGACurve);
+            myResult = new GeomAdaptor_Curve(aGACurve);
 //  Modified by Sergey KHROMOV - Tue Jan 29 16:57:30 2002 End
           }
           else if ( Major > Minor) {
@@ -739,7 +768,7 @@ void ProjLib_ProjectOnPlane::Load(const Handle(Adaptor3d_HCurve)&    C,
             GeomEllipsePtr = new Geom_Ellipse(Elips);
 //  Modified by Sergey KHROMOV - Tue Jan 29 16:57:29 2002 Begin
             GeomAdaptor_Curve aGACurve(GeomEllipsePtr);
-            myResult = new GeomAdaptor_HCurve(aGACurve);
+            myResult = new GeomAdaptor_Curve(aGACurve);
 //  Modified by Sergey KHROMOV - Tue Jan 29 16:57:30 2002 End
           }
           else {
@@ -755,7 +784,7 @@ void ProjLib_ProjectOnPlane::Load(const Handle(Adaptor3d_HCurve)&    C,
         PerformApprox(myCurve,myPlane,myDirection,ApproxCurve);
 //  Modified by Sergey KHROMOV - Tue Jan 29 16:57:29 2002 Begin
 	GeomAdaptor_Curve aGACurve(ApproxCurve);
-	myResult = new GeomAdaptor_HCurve(aGACurve);
+	myResult = new GeomAdaptor_Curve(aGACurve);
 //  Modified by Sergey KHROMOV - Tue Jan 29 16:57:30 2002 End
       }
       else if (GeomCirclePtr || GeomEllipsePtr)
@@ -799,7 +828,7 @@ void ProjLib_ProjectOnPlane::Load(const Handle(Adaptor3d_HCurve)&    C,
           GeomLinePtr    = new Geom_Line(aLine) ;
 //  Modified by Sergey KHROMOV - Tue Jan 29 16:57:29 2002 Begin
 	  GeomAdaptor_Curve aGACurve(GeomLinePtr);
-	  myResult = new GeomAdaptor_HCurve(aGACurve);
+	  myResult = new GeomAdaptor_Curve(aGACurve);
 //  Modified by Sergey KHROMOV - Tue Jan 29 16:57:30 2002 End
           alocalIsDone = Standard_True;
 	}
@@ -811,7 +840,7 @@ void ProjLib_ProjectOnPlane::Load(const Handle(Adaptor3d_HCurve)&    C,
 	    new Geom_Parabola(aParab) ;
 //  Modified by Sergey KHROMOV - Tue Jan 29 16:57:29 2002 Begin
 	  GeomAdaptor_Curve aGACurve(GeomParabolaPtr);
-	  myResult = new GeomAdaptor_HCurve(aGACurve);
+	  myResult = new GeomAdaptor_Curve(aGACurve);
 //  Modified by Sergey KHROMOV - Tue Jan 29 16:57:30 2002 End
           alocalIsDone = Standard_True;
 	}
@@ -822,7 +851,7 @@ void ProjLib_ProjectOnPlane::Load(const Handle(Adaptor3d_HCurve)&    C,
         PerformApprox(myCurve,myPlane,myDirection,ApproxCurve);
 //  Modified by Sergey KHROMOV - Tue Jan 29 16:57:29 2002 Begin
 	GeomAdaptor_Curve aGACurve(ApproxCurve);
-	myResult = new GeomAdaptor_HCurve(aGACurve);
+	myResult = new GeomAdaptor_Curve(aGACurve);
 //  Modified by Sergey KHROMOV - Tue Jan 29 16:57:30 2002 End
       }
     }
@@ -851,7 +880,7 @@ void ProjLib_ProjectOnPlane::Load(const Handle(Adaptor3d_HCurve)&    C,
 	  new Geom_Hyperbola(Hypr) ;
 //  Modified by Sergey KHROMOV - Tue Jan 29 16:57:29 2002 Begin
 	GeomAdaptor_Curve aGACurve(GeomHyperbolaPtr);
-	myResult = new GeomAdaptor_HCurve(aGACurve);
+	myResult = new GeomAdaptor_Curve(aGACurve);
 //  Modified by Sergey KHROMOV - Tue Jan 29 16:57:30 2002 End
       }
       else if ( Yc.Magnitude() < Precision::Confusion()) {
@@ -862,7 +891,7 @@ void ProjLib_ProjectOnPlane::Load(const Handle(Adaptor3d_HCurve)&    C,
 	  new Geom_Hyperbola(Hypr) ;
 //  Modified by Sergey KHROMOV - Tue Jan 29 16:57:29 2002 Begin
 	GeomAdaptor_Curve aGACurve(GeomHyperbolaPtr);
-	myResult = new GeomAdaptor_HCurve(aGACurve);
+	myResult = new GeomAdaptor_Curve(aGACurve);
 //  Modified by Sergey KHROMOV - Tue Jan 29 16:57:30 2002 End
       }
       else if ( Xc.IsNormal(Yc,Precision::Angular())) {
@@ -873,7 +902,7 @@ void ProjLib_ProjectOnPlane::Load(const Handle(Adaptor3d_HCurve)&    C,
 	  new Geom_Hyperbola(Hypr) ;
 //  Modified by Sergey KHROMOV - Tue Jan 29 16:57:29 2002 Begin
 	GeomAdaptor_Curve aGACurve(GeomHyperbolaPtr);
-	myResult = new GeomAdaptor_HCurve(aGACurve);
+	myResult = new GeomAdaptor_Curve(aGACurve);
 //  Modified by Sergey KHROMOV - Tue Jan 29 16:57:30 2002 End
       }
       else {
@@ -882,7 +911,7 @@ void ProjLib_ProjectOnPlane::Load(const Handle(Adaptor3d_HCurve)&    C,
         PerformApprox(myCurve,myPlane,myDirection,ApproxCurve);
 //  Modified by Sergey KHROMOV - Tue Jan 29 16:57:29 2002 Begin
 	GeomAdaptor_Curve aGACurve(ApproxCurve);
-	myResult = new GeomAdaptor_HCurve(aGACurve);
+	myResult = new GeomAdaptor_Curve(aGACurve);
 //  Modified by Sergey KHROMOV - Tue Jan 29 16:57:30 2002 End
       }
     }
@@ -907,7 +936,7 @@ void ProjLib_ProjectOnPlane::Load(const Handle(Adaptor3d_HCurve)&    C,
       
 //  Modified by Sergey KHROMOV - Tue Jan 29 16:57:29 2002 Begin
       GeomAdaptor_Curve aGACurve(ProjCu);
-      myResult = new GeomAdaptor_HCurve(aGACurve);
+      myResult = new GeomAdaptor_Curve(aGACurve);
 //  Modified by Sergey KHROMOV - Tue Jan 29 16:57:30 2002 End
     }
     break ;
@@ -931,7 +960,7 @@ void ProjLib_ProjectOnPlane::Load(const Handle(Adaptor3d_HCurve)&    C,
       
 //  Modified by Sergey KHROMOV - Tue Jan 29 16:57:29 2002 Begin
       GeomAdaptor_Curve aGACurve(ProjectedBSplinePtr);
-      myResult = new GeomAdaptor_HCurve(aGACurve);
+      myResult = new GeomAdaptor_Curve(aGACurve);
 //  Modified by Sergey KHROMOV - Tue Jan 29 16:57:30 2002 End
     }
     break;
@@ -943,7 +972,7 @@ void ProjLib_ProjectOnPlane::Load(const Handle(Adaptor3d_HCurve)&    C,
       PerformApprox(myCurve,myPlane,myDirection,ApproxCurve);
 //  Modified by Sergey KHROMOV - Tue Jan 29 16:57:29 2002 Begin
       GeomAdaptor_Curve aGACurve(ApproxCurve);
-      myResult = new GeomAdaptor_HCurve(aGACurve);
+      myResult = new GeomAdaptor_Curve(aGACurve);
 //  Modified by Sergey KHROMOV - Tue Jan 29 16:57:30 2002 End
     }
     break;
@@ -975,7 +1004,7 @@ const gp_Dir& ProjLib_ProjectOnPlane::GetDirection() const
 //purpose  : 
 //=======================================================================
 
-const Handle(Adaptor3d_HCurve)& ProjLib_ProjectOnPlane::GetCurve() const
+const Handle(Adaptor3d_Curve)& ProjLib_ProjectOnPlane::GetCurve() const
 {
   return myCurve;
 }
@@ -985,7 +1014,7 @@ const Handle(Adaptor3d_HCurve)& ProjLib_ProjectOnPlane::GetCurve() const
 //purpose  : 
 //=======================================================================
 
-const Handle(GeomAdaptor_HCurve)& ProjLib_ProjectOnPlane::GetResult() const
+const Handle(GeomAdaptor_Curve)& ProjLib_ProjectOnPlane::GetResult() const
 {
   return myResult;
 }
@@ -1057,7 +1086,7 @@ void ProjLib_ProjectOnPlane::Intervals(TColStd_Array1OfReal& T,
 //purpose  : 
 //=======================================================================
 
-Handle(Adaptor3d_HCurve)  
+Handle(Adaptor3d_Curve)  
 ProjLib_ProjectOnPlane::Trim(const Standard_Real First,
 			     const Standard_Real Last,
 			     const Standard_Real Tolerance) const 

@@ -1063,7 +1063,7 @@ void BRepBuilderAPI_Sewing::EvaluateAngulars(TopTools_SequenceOfShape& sequenceS
 //=======================================================================
 // function : EvaluateDistances
 // purpose  : internal use
-// Evaluate distance beetween edges with indice indRef and the following edges in the list
+// Evaluate distance between edges with indice indRef and the following edges in the list
 // Remarks (lengSec - indRef) must be >= 1 
 //=======================================================================
 void BRepBuilderAPI_Sewing::EvaluateDistances(TopTools_SequenceOfShape& sequenceSec,
@@ -1397,7 +1397,7 @@ void BRepBuilderAPI_Sewing::AnalysisNearestEdges(const TopTools_SequenceOfShape&
         isRemove = Standard_True;
       }
     }
-    if(!isRemove) i++;  
+    if(!isRemove) i++;
   }
   if(seqIndCandidate.Length() == 0 || seqNotCandidate.Length() == 1) return;
   if(!evalDist) return;
@@ -1405,8 +1405,8 @@ void BRepBuilderAPI_Sewing::AnalysisNearestEdges(const TopTools_SequenceOfShape&
   TColStd_MapOfInteger MapIndex;
   TColStd_SequenceOfInteger seqForward;
 
-  // Definition and removing edges wich are not candidate for work edge 
-  // ( they have other nearest edges belonging to the work face) 
+  // Definition and removing edges which are not candidate for work edge
+  // (they have other nearest edges belonging to the work face)
   for(Standard_Integer k = 1; k<= seqNotCandidate.Length(); k++) {
     Standard_Integer index1 = seqNotCandidate.Value(k);
     TopoDS_Shape edge = sequenceSec.Value(index1);
@@ -1932,7 +1932,7 @@ void BRepBuilderAPI_Sewing::Perform(const Message_ProgressRange& theProgress)
 #endif
     }
 
-    // create edge informations for output
+    // create edge information for output
     CreateOutputInformations();
     if (!aPS.More())
     {
@@ -2201,7 +2201,7 @@ void BRepBuilderAPI_Sewing::Dump() const
     }
   }
   std::cout << " " << std::endl;
-  std::cout << "                        Informations                        " << std::endl;
+  std::cout << "                        Information                         " << std::endl;
   std::cout << " ===========================================================" << std::endl;
   std::cout << " " << std::endl;
   std::cout << " Number of input shapes      : " << myOldShapes.Extent() << std::endl;
@@ -3195,7 +3195,7 @@ void BRepBuilderAPI_Sewing::Merging(const Standard_Boolean /* firstTime */,
                                          MergedWithBound.Contains(iedge));
           if (!isRejected) {
             if (myBoundSections.IsBound(iedge)) {
-              // Edge is splitted - check sections
+              // Edge is split - check sections
               TopTools_ListIteratorOfListOfShape lit(myBoundSections(iedge));
               for (; lit.More() && !isRejected; lit.Next()) {
                 const TopoDS_Shape& sec = lit.Value();
@@ -3289,7 +3289,7 @@ void BRepBuilderAPI_Sewing::Merging(const Standard_Boolean /* firstTime */,
                                            MergedWithSections.Contains(iedge));
             if (!isRejected) {
               if (myBoundSections.IsBound(iedge)) {
-                // Edge is splitted - check sections
+                // Edge is split - check sections
                 TopTools_ListIteratorOfListOfShape lit(myBoundSections(iedge));
                 for (; lit.More() && !isRejected; lit.Next()) {
                   const TopoDS_Shape& sec = lit.Value();
@@ -3370,7 +3370,7 @@ void BRepBuilderAPI_Sewing::Merging(const Standard_Boolean /* firstTime */,
     if (!isMerged && !isMergedSplit) {
       // Nothing was merged in this iteration
       if (isPrevSplit) {
-        // Replace previously splitted bound
+        // Replace previously split bound
         myReShape->Replace(myReShape->Apply(bound),myReShape->Apply(BoundWire));
       }
       //      else if (hasCuttingSections) {
@@ -3518,7 +3518,7 @@ Standard_Boolean BRepBuilderAPI_Sewing::MergedNearestEdges(const TopoDS_Shape& e
     }
   }
 
-  // Find all possible contigous edges
+  // Find all possible contiguous edges
   TopTools_SequenceOfShape seqEdges;
   seqEdges.Append(edge);
   TopTools_MapOfShape mapEdges;
@@ -3726,7 +3726,7 @@ void BRepBuilderAPI_Sewing::Cutting(const Message_ProgressRange& theProgress)
         // Store bound for section
         mySectionBound.Bind(section,bound);
       }
-      // Store splitted bound
+      // Store split bound
       myBoundSections.Bind(bound,listSections);
     }
   }
@@ -3977,7 +3977,7 @@ static TopoDS_Edge DegeneratedSection(const TopoDS_Shape& section, const TopoDS_
 //           . if multiple edge
 //              - length < 100.*myTolerance -> several free edge
 //           . if no multiple edge
-//              - make the contigous edges sameparameter
+//              - make the contiguous edges sameparameter
 //=======================================================================
 
 void BRepBuilderAPI_Sewing::EdgeProcessing(const Message_ProgressRange& theProgress)

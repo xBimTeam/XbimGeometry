@@ -24,9 +24,6 @@
 #include <Standard_Real.hxx>
 class Adaptor3d_Surface;
 class Bnd_Box;
-class gp_Cylinder;
-class gp_Cone;
-class gp_Sphere;
 
 //! computes the box from a surface
 //! Functions to add a surface to a bounding box.
@@ -102,7 +99,7 @@ public:
   Standard_EXPORT static void Add (const Adaptor3d_Surface& S, const Standard_Real UMin, const Standard_Real UMax, const Standard_Real VMin, const Standard_Real VMax, const Standard_Real Tol, Bnd_Box& B);
 
   //! Adds the surface S to the bounding box B.
-  //! This algorith builds precise bounding box
+  //! This algorithm builds precise bounding box
 
   Standard_EXPORT static void AddOptimal (const Adaptor3d_Surface& S, const Standard_Real Tol, Bnd_Box& B);
 

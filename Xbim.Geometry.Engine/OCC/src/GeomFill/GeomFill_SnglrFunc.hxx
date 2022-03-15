@@ -28,9 +28,7 @@
 #include <TColStd_Array1OfReal.hxx>
 #include <Standard_Boolean.hxx>
 #include <GeomAbs_CurveType.hxx>
-class Adaptor3d_HCurve;
-class Standard_OutOfRange;
-class Standard_DomainError;
+
 class gp_Pnt;
 class gp_Vec;
 
@@ -43,7 +41,10 @@ public:
   DEFINE_STANDARD_ALLOC
 
   
-  Standard_EXPORT GeomFill_SnglrFunc(const Handle(Adaptor3d_HCurve)& HC);
+  Standard_EXPORT GeomFill_SnglrFunc(const Handle(Adaptor3d_Curve)& HC);
+
+  //! Shallow copy of adaptor
+  Standard_EXPORT virtual Handle(Adaptor3d_Curve) ShallowCopy() const Standard_OVERRIDE;
   
   Standard_EXPORT void SetRatio (const Standard_Real Ratio);
   
@@ -58,7 +59,7 @@ public:
   //! Stores in <T> the  parameters bounding the intervals
   //! of continuity <S>.
   //!
-  //! The array must provide  enough room to  accomodate
+  //! The array must provide  enough room to  accommodate
   //! for the parameters. i.e. T.Length() > NbIntervals()
   Standard_EXPORT void Intervals (TColStd_Array1OfReal& T, const GeomAbs_Shape S) const Standard_OVERRIDE;
   
@@ -120,7 +121,7 @@ private:
 
 
 
-  Handle(Adaptor3d_HCurve) myHCurve;
+  Handle(Adaptor3d_Curve) myHCurve;
   Standard_Real ratio;
 
 

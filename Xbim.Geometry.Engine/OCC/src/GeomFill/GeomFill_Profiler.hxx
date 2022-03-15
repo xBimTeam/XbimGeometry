@@ -28,8 +28,6 @@
 #include <TColgp_Array1OfPnt.hxx>
 #include <TColStd_Array1OfReal.hxx>
 #include <TColStd_Array1OfInteger.hxx>
-class StdFail_NotDone;
-class Standard_DomainError;
 class Geom_Curve;
 
 
@@ -82,7 +80,7 @@ public:
   Standard_EXPORT Standard_Integer NbKnots() const;
   
   //! Raises if not yet perform
-  //! Raises if  the lengthes of <Knots> and <Mults> are
+  //! Raises if  the lengths of <Knots> and <Mults> are
   //! not equal to NbKnots().
   Standard_EXPORT void KnotsAndMults (TColStd_Array1OfReal& Knots, TColStd_Array1OfInteger& Mults) const;
   

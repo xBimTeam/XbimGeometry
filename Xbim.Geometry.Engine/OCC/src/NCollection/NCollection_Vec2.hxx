@@ -12,8 +12,8 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef _NCollection_Vec2_H__
-#define _NCollection_Vec2_H__
+#ifndef NCollection_Vec2_HeaderFile
+#define NCollection_Vec2_HeaderFile
 
 #include <cmath> // std::sqrt()
 
@@ -102,11 +102,9 @@ public:
   }
 
   //! Check this vector with another vector for equality (without tolerance!).
-  bool operator== (const NCollection_Vec2& theOther)       { return IsEqual (theOther); }
   bool operator== (const NCollection_Vec2& theOther) const { return IsEqual (theOther); }
 
   //! Check this vector with another vector for non-equality (without tolerance!).
-  bool operator!= (const NCollection_Vec2& theOther)       { return !IsEqual (theOther); }
   bool operator!= (const NCollection_Vec2& theOther) const { return !IsEqual (theOther); }
 
   //! Raw access to the data (for OpenGL exchange).
@@ -279,13 +277,13 @@ public:
     return x() * x() + y() * y();
   }
 
-  //! Constuct DX unit vector.
+  //! Construct DX unit vector.
   static NCollection_Vec2 DX()
   {
     return NCollection_Vec2 (Element_t(1), Element_t(0));
   }
 
-  //! Constuct DY unit vector.
+  //! Construct DY unit vector.
   static NCollection_Vec2 DY()
   {
     return NCollection_Vec2 (Element_t(0), Element_t(1));

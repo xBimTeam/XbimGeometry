@@ -48,7 +48,7 @@ void Resource_Unicode::ConvertSJISToUnicode(const Standard_CString fromstr,TColl
     if (issjis1(*currentstr)) {
       
       ph = ((unsigned int) *currentstr);
-      // Be Carefull with first and second !!
+      // Be Careful with first and second !!
 
       currentstr++;
 
@@ -80,7 +80,7 @@ void Resource_Unicode::ConvertEUCToUnicode(const Standard_CString fromstr,TColle
     if (iseuc(*currentstr)) {
       
       ph = ((unsigned int) *currentstr);
-      // Be Carefull with first and second !!
+      // Be Careful with first and second !!
 
       currentstr++;
 
@@ -111,7 +111,7 @@ void Resource_Unicode::ConvertGBToUnicode(const Standard_CString fromstr,TCollec
     if (isshift(*currentstr)) {
       
       ph = ((unsigned int) *currentstr);
-      // Be Carefull with first and second !!
+      // Be Careful with first and second !!
 
       currentstr++;
 
@@ -634,6 +634,7 @@ void Resource_Unicode::ConvertFormatToUnicode (const Resource_FormatType theForm
     case Resource_FormatType_iso8859_7:
     case Resource_FormatType_iso8859_8:
     case Resource_FormatType_iso8859_9:
+    case Resource_FormatType_CP850:
     {
       const int aCodePageIndex = (int)theFormat - (int)Resource_FormatType_CP1250;
       const Standard_ExtString aCodePage = THE_CODEPAGES_ANSI[aCodePageIndex];
@@ -718,6 +719,7 @@ Standard_Boolean Resource_Unicode::ConvertUnicodeToFormat(const Resource_FormatT
     case Resource_FormatType_iso8859_7:
     case Resource_FormatType_iso8859_8:
     case Resource_FormatType_iso8859_9:
+    case Resource_FormatType_CP850:
     {
       if (theMaxSize < theFromStr.Length())
       {

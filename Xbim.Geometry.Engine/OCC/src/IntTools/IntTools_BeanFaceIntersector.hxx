@@ -35,8 +35,6 @@ class Geom_Surface;
 class IntTools_Context;
 class TopoDS_Edge;
 class TopoDS_Face;
-class BRepAdaptor_Curve;
-class BRepAdaptor_Surface;
 class IntTools_CurveRangeSample;
 class Bnd_Box;
 class IntTools_SurfaceRangeSample;
@@ -101,11 +99,11 @@ public:
   Standard_EXPORT void Init (const BRepAdaptor_Curve& theCurve, const BRepAdaptor_Surface& theSurface, const Standard_Real theFirstParOnCurve, const Standard_Real theLastParOnCurve, const Standard_Real theUMinParameter, const Standard_Real theUMaxParameter, const Standard_Real theVMinParameter, const Standard_Real theVMaxParameter, const Standard_Real theBeanTolerance, const Standard_Real theFaceTolerance);
   
 
-  //! Sets the intersecton context
+  //! Sets the intersection context
   Standard_EXPORT void SetContext (const Handle(IntTools_Context)& theContext);
   
 
-  //! Gets the intersecton context
+  //! Gets the intersection context
   Standard_EXPORT const Handle(IntTools_Context)& Context() const;
   
 
@@ -182,7 +180,6 @@ private:
   Standard_Real myFaceTolerance;
   Standard_Real myCurveResolution;
   Standard_Real myCriteria;
-  Extrema_ExtCS myExtrema;
   GeomAPI_ProjectPointOnSurf myProjector;
   IntTools_MarkedRangeSet myRangeManager;
   Handle(IntTools_Context) myContext;

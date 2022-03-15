@@ -25,12 +25,8 @@
 #include <Standard_Real.hxx>
 #include <Extrema_POnCurv.hxx>
 #include <Extrema_POnSurf.hxx>
-class Standard_DomainError;
-class StdFail_NotDone;
 class Adaptor3d_Curve;
 class Adaptor3d_Surface;
-class Extrema_POnCurv;
-class Extrema_POnSurf;
 
 
 //! With two close points it calculates the distance
@@ -49,7 +45,7 @@ public:
   //! The close points are defined by the parameter values
   //! T for C and (U,V) for S.
   //! The function F(t,u,v)=distance(C(t),S(u,v))
-  //! has an extremun when gradient(F)=0. The algorithm searchs
+  //! has an extremun when gradient(F)=0. The algorithm searches
   //! a zero near the close points.
   Standard_EXPORT Extrema_GenLocateExtCS(const Adaptor3d_Curve& C, const Adaptor3d_Surface& S, const Standard_Real T, const Standard_Real U, const Standard_Real V, const Standard_Real Tol1, const Standard_Real Tol2);
   

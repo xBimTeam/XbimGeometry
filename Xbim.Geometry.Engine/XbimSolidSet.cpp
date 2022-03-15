@@ -493,21 +493,14 @@ namespace Xbim
 				
 				
 				//// todo: multiple boolean timeout has been disabled
-				//// what's the relatinoship between scope and monitor?
 				Handle(XbimProgressMonitor) pi = new XbimProgressMonitor(timeout);
-				Message_ProgressScope scope(pi->Start(), "MultipleOperations", shapeTools.Size());
-				aBOP.SetProgressIndicator(scope);
-				
 				TopoDS_Shape aR;
-
-
-				aBOP.Perform();
+				aBOP.Perform(pi->Start());
 				aR = aBOP.Shape();
 
 				if (pi->TimedOut())
 				{
 					return BOOLEAN_TIMEDOUT;
-
 				}
 				bool bopErr = aBOP.HasErrors();
 #ifdef _DEBUG
@@ -523,7 +516,6 @@ namespace Xbim
 #endif // DEBUG
 				if (bopErr) // a sign of failure do them individually
 				{
-
 					//check if the shape is empty
 
 					if (tools.Size() > 1)//do them one at a time if we are not already doing or have done that

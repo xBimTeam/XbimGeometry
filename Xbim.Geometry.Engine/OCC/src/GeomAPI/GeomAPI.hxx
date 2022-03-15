@@ -25,16 +25,6 @@
 #include <Geom_Curve.hxx>
 
 class gp_Pln;
-class GeomAPI_ProjectPointOnCurve;
-class GeomAPI_ProjectPointOnSurf;
-class GeomAPI_ExtremaCurveCurve;
-class GeomAPI_ExtremaCurveSurface;
-class GeomAPI_ExtremaSurfaceSurface;
-class GeomAPI_PointsToBSpline;
-class GeomAPI_PointsToBSplineSurface;
-class GeomAPI_Interpolate;
-class GeomAPI_IntSS;
-class GeomAPI_IntCS;
 
 
 //! The   GeomAPI   package  provides  an  Application
@@ -49,14 +39,14 @@ class GeomAPI_IntCS;
 //! *    Keeping   an   access  on    the    low-level
 //! implementation of high-level calls.
 //!
-//! The API  provides classes to  call the algorithmes
+//! The API  provides classes to  call the algorithms
 //! of the Geometry
 //!
 //! * The  constructors  of the classes  provides  the
 //! different constructions methods.
 //!
 //! * The  class keeps as fields the   different tools
-//! used by the algorithmes
+//! used by the algorithms
 //!
 //! *   The class  provides  a  casting  method to get
 //! automatically the  result  with  a   function-like

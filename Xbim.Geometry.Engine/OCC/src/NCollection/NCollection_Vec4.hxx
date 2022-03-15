@@ -12,8 +12,8 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef _NCollection_Vec4_H__
-#define _NCollection_Vec4_H__
+#ifndef NCollection_Vec4_HeaderFile
+#define NCollection_Vec4_HeaderFile
 
 #include <NCollection_Vec3.hxx>
 
@@ -183,11 +183,9 @@ public:
   }
 
   //! Check this vector with another vector for equality (without tolerance!).
-  bool operator== (const NCollection_Vec4& theOther)       { return IsEqual (theOther); }
   bool operator== (const NCollection_Vec4& theOther) const { return IsEqual (theOther); }
 
   //! Check this vector with another vector for non-equality (without tolerance!).
-  bool operator!= (const NCollection_Vec4& theOther)       { return !IsEqual (theOther); }
   bool operator!= (const NCollection_Vec4& theOther) const { return !IsEqual (theOther); }
 
   //! Raw access to the data (for OpenGL exchange).

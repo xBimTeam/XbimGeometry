@@ -13,9 +13,8 @@
 // commercial license or contractual agreement.
 
 //============================================================================
-//==== Titre: Standard_ExtCharacter.hxx
-//==== Role : The headr file of primitve type "ExtCharacter" from package 
-//====        "Standard"
+//==== Title: Standard_ExtCharacter.hxx
+//==== Role : The headr file of primitive type "ExtCharacter" from package "Standard"
 //==== 
 //==== Implementation:  This is a primitive type implemented with typedef
 //====                  Excepting "Unicod encoding"
@@ -25,7 +24,6 @@
 #define _Standard_ExtCharacter_HeaderFile
 
 #include <Standard_TypeDef.hxx>
-#include <Standard_OStream.hxx>
 
 #include <string.h>
 

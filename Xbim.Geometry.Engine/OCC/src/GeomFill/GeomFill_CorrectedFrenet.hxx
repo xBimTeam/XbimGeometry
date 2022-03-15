@@ -34,12 +34,6 @@
 #include <GeomFill_Trihedron.hxx>
 class GeomFill_Frenet;
 class Law_Function;
-class Standard_OutOfRange;
-class Standard_ConstructionError;
-class GeomFill_TrihedronLaw;
-class gp_Vec;
-class Adaptor3d_HCurve;
-
 
 class GeomFill_CorrectedFrenet;
 DEFINE_STANDARD_HANDLE(GeomFill_CorrectedFrenet, GeomFill_TrihedronLaw)
@@ -58,7 +52,7 @@ public:
   
   Standard_EXPORT virtual Handle(GeomFill_TrihedronLaw) Copy() const Standard_OVERRIDE;
   
-  Standard_EXPORT virtual void SetCurve (const Handle(Adaptor3d_HCurve)& C) Standard_OVERRIDE;
+  Standard_EXPORT virtual void SetCurve (const Handle(Adaptor3d_Curve)& C) Standard_OVERRIDE;
   
   Standard_EXPORT virtual void SetInterval (const Standard_Real First, const Standard_Real Last) Standard_OVERRIDE;
   
@@ -67,12 +61,12 @@ public:
   
   //! compute Triedrhon and  derivative Trihedron  on curve
   //! at parameter <Param>
-  //! Warning : It used only for C1 or C2 aproximation
+  //! Warning : It used only for C1 or C2 approximation
   Standard_EXPORT virtual Standard_Boolean D1 (const Standard_Real Param, gp_Vec& Tangent, gp_Vec& DTangent, gp_Vec& Normal, gp_Vec& DNormal, gp_Vec& BiNormal, gp_Vec& DBiNormal) Standard_OVERRIDE;
   
   //! compute  Trihedron on curve
   //! first and seconde  derivatives.
-  //! Warning : It used only for C2 aproximation
+  //! Warning : It used only for C2 approximation
   Standard_EXPORT virtual Standard_Boolean D2 (const Standard_Real Param, gp_Vec& Tangent, gp_Vec& DTangent, gp_Vec& D2Tangent, gp_Vec& Normal, gp_Vec& DNormal, gp_Vec& D2Normal, gp_Vec& BiNormal, gp_Vec& DBiNormal, gp_Vec& D2BiNormal) Standard_OVERRIDE;
   
   //! Returns  the number  of  intervals for  continuity
@@ -83,7 +77,7 @@ public:
   //! Stores in <T> the  parameters bounding the intervals
   //! of continuity <S>.
   //!
-  //! The array must provide  enough room to  accomodate
+  //! The array must provide  enough room to  accommodate
   //! for the parameters. i.e. T.Length() > NbIntervals()
   Standard_EXPORT virtual void Intervals (TColStd_Array1OfReal& T, const GeomAbs_Shape S) const Standard_OVERRIDE;
   

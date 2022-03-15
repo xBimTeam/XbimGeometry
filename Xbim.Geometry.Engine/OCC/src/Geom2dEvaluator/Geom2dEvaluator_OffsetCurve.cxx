@@ -14,7 +14,7 @@
 
 #include <Geom2dEvaluator_OffsetCurve.hxx>
 #include <Geom2dEvaluator.hxx>
-#include <Geom2dAdaptor_HCurve.hxx>
+#include <Geom2dAdaptor_Curve.hxx>
 #include <Standard_NullValue.hxx>
 
 
@@ -30,7 +30,7 @@ Geom2dEvaluator_OffsetCurve::Geom2dEvaluator_OffsetCurve(
 }
 
 Geom2dEvaluator_OffsetCurve::Geom2dEvaluator_OffsetCurve(
-        const Handle(Geom2dAdaptor_HCurve)& theBase,
+        const Handle(Geom2dAdaptor_Curve)& theBase,
         const Standard_Real theOffset)
   : Geom2dEvaluator_Curve(),
     myBaseAdaptor(theBase),
@@ -111,6 +111,22 @@ gp_Vec2d Geom2dEvaluator_OffsetCurve::DN(const Standard_Real theU,
     aDN = BaseDN(theU, theDeriv);
   }
   return aDN;
+}
+
+Handle(Geom2dEvaluator_Curve) Geom2dEvaluator_OffsetCurve::ShallowCopy() const
+{
+  Handle(Geom2dEvaluator_OffsetCurve) aCopy;
+  if (!myBaseAdaptor.IsNull())
+  {
+    aCopy = new Geom2dEvaluator_OffsetCurve(Handle(Geom2dAdaptor_Curve)::DownCast(myBaseAdaptor->ShallowCopy()),
+                                            myOffset);
+  }
+  else
+  {
+    aCopy = new Geom2dEvaluator_OffsetCurve(myBaseCurve, myOffset);
+  }
+
+  return aCopy;
 }
 
 

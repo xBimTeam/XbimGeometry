@@ -419,7 +419,7 @@ void BRepMesh_Delaun::RemoveAuxElements ()
 
 //=======================================================================
 //function : createTriangles
-//purpose  : Creates the triangles beetween the node and the polyline.
+//purpose  : Creates the triangles between the node and the polyline.
 //=======================================================================
 void BRepMesh_Delaun::createTriangles(const Standard_Integer          theVertexIndex,  
                                       IMeshData::MapOfIntegerInteger& thePoly)
@@ -644,7 +644,7 @@ void BRepMesh_Delaun::insertInternalEdges()
 {
   Handle(IMeshData::MapOfInteger) anInternalEdges = InternalEdges();
 
-  // Destruction of triancles intersecting internal edges 
+  // Destruction of triangles intersecting internal edges
   // and their replacement by makeshift triangles
   IMeshData::IteratorOfMapOfInteger anInernalEdgesIt( *anInternalEdges );
   for ( ; anInernalEdgesIt.More(); anInernalEdgesIt.Next() )
@@ -936,7 +936,7 @@ void BRepMesh_Delaun::frontierAdjust()
   cleanupMesh();
 
   // When the mesh has been cleaned up, try to process frontier edges 
-  // once again to fill the possible gaps that might be occured in case of "saw" -
+  // once again to fill the possible gaps that might be occurred in case of "saw" -
   // situation when frontier edge has a triangle at a right side, but its free 
   // links cross another frontieres  and meshLeftPolygonOf itself can't collect 
   // a closed polygon.
@@ -953,7 +953,7 @@ void BRepMesh_Delaun::frontierAdjust()
 
 //=======================================================================
 //function : fillBndBox
-//purpose  : Add boundig box for edge defined by start & end point to
+//purpose  : Add bounding box for edge defined by start & end point to
 //           the given vector of bounding boxes for triangulation edges
 //=======================================================================
 void BRepMesh_Delaun::fillBndBox(IMeshData::SequenceOfBndB2d& theBoxes,
@@ -994,7 +994,6 @@ Standard_Boolean BRepMesh_Delaun::meshLeftPolygonOf(
     aPivotNode = aRefEdge.FirstNode();
   }
 
-
   const BRepMesh_Vertex& aStartEdgeVertexS = GetVertex( aStartNode );
   BRepMesh_Vertex        aPivotVertex      = GetVertex( aPivotNode );
 
@@ -1004,7 +1003,7 @@ Standard_Boolean BRepMesh_Delaun::meshLeftPolygonOf(
   if ( aRefLinkDir.SquareMagnitude() < Precision2 )
     return Standard_True;
 
-  // Auxilary structures.
+  // Auxiliary structures.
   // Bounding boxes of polygon links to be used for preliminary
   // analysis of intersections
   IMeshData::SequenceOfBndB2d aBoxes;
@@ -1096,7 +1095,7 @@ Standard_Boolean BRepMesh_Delaun::meshLeftPolygonOf(
 //           angle respect the given reference link.
 //           Each time the next link is found other neighbor links at the 
 //           pivot node are marked as leprous and will be excluded from 
-//           consideration next time until a hanging end is occured.
+//           consideration next time until a hanging end is occurred.
 //=======================================================================
 Standard_Integer BRepMesh_Delaun::findNextPolygonLink(
   const Standard_Integer&               theFirstNode,
@@ -1204,7 +1203,7 @@ Standard_Integer BRepMesh_Delaun::findNextPolygonLink(
 //=======================================================================
 //function : checkIntersection
 //purpose  : Check is the given link intersects the polygon boundaries.
-//           Returns bounding box for the given link trough the 
+//           Returns bounding box for the given link through the
 //           <theLinkBndBox> parameter.
 //=======================================================================
 Standard_Boolean BRepMesh_Delaun::checkIntersection( 
@@ -1454,7 +1453,7 @@ void BRepMesh_Delaun::killTrianglesAroundVertex(
       }
     }
 
-    // Add link to the survivers to avoid cycling
+    // Add link to the survivors to avoid cycling
     theSurvivedLinks.Add( aNeighborLinkId );
     killLinkTriangles( aNeighborLinkId, theLoopEdges );
   }
@@ -1760,7 +1759,7 @@ void BRepMesh_Delaun::meshPolygon(IMeshData::SequenceOfInteger&   thePolygon,
 
         // In this context only intersections between frontier edges
         // are possible. If intersection between edges of different
-        // types occured - treat this case as invalid (i.e. result 
+        // types occurred - treat this case as invalid (i.e. result 
         // might not reflect the expectations).
         if ( !theSkipped.IsNull() )
         {
@@ -1771,7 +1770,7 @@ void BRepMesh_Delaun::meshPolygon(IMeshData::SequenceOfInteger&   thePolygon,
       }
       else if ( aIntFlag == BRepMesh_GeomTool::PointOnSegment )
       {
-        // Indentify chopping link 
+        // Identify chopping link 
         Standard_Boolean isFirstChopping = Standard_False;
         Standard_Integer aCheckPointIt = 0;
         for ( ; aCheckPointIt < 2; ++aCheckPointIt )
@@ -1914,7 +1913,7 @@ void BRepMesh_Delaun::meshPolygon(IMeshData::SequenceOfInteger&   thePolygon,
       }
 
       if (aPolyStack.IsEmpty())
-        return;
+        break;
 
       aPolygon1   = &(*aPolyStack.ChangeFirst());
       aPolyBoxes1 = &(*aPolyBoxStack.ChangeFirst());
@@ -2019,6 +2018,10 @@ void BRepMesh_Delaun::decomposeSimplePolygon(
       aNextEdge.FirstNode() : 
       aNextEdge.LastNode();
 
+    // We have end points touch case in the polygon - ignore it
+    if (aPivotNode == aNodes[1])
+      continue;
+
     gp_Pnt2d aPivotVertex = GetVertex( aPivotNode ).Coord();
     gp_Vec2d aDistanceDir( aRefVertices[1], aPivotVertex );
 
@@ -2034,7 +2037,7 @@ void BRepMesh_Delaun::decomposeSimplePolygon(
       continue;
     }
 
-    // Check is the test link crosses the polygon boudaries
+    // Check is the test link crosses the polygon boundaries
     Standard_Boolean isIntersect = Standard_False;
     for ( Standard_Integer aRefLinkNodeIt = 0; aRefLinkNodeIt < 2; ++aRefLinkNodeIt )
     {
@@ -2105,7 +2108,6 @@ void BRepMesh_Delaun::decomposeSimplePolygon(
     myMeshData->AddLink( aNewEdges[0] ),
     myMeshData->AddLink( aNewEdges[1] ) };
 
-
   Standard_Integer anEdges[3];
   Standard_Boolean anEdgesOri[3];
   for ( Standard_Integer aTriEdgeIt = 0; aTriEdgeIt < 3; ++aTriEdgeIt )
@@ -2116,27 +2118,38 @@ void BRepMesh_Delaun::decomposeSimplePolygon(
   }
   addTriangle( anEdges, anEdgesOri, aNodes );
 
-  // Create triangle and split the source polygon on two 
-  // parts (if possible) and mesh each part as independent
-  // polygon.
-  if ( aUsedLinkId < aPolyLen )
+  if (aUsedLinkId == 3)
   {
-    thePolygon.Split(aUsedLinkId, thePolygonCut);
-    thePolygonCut.Prepend( -aNewEdgesInfo[2] );
-    thePolyBoxes.Split(aUsedLinkId, thePolyBoxesCut);
+    thePolygon.Remove  ( 1 );
+    thePolyBoxes.Remove( 1 );
+
+    thePolygon.SetValue( 1, -aNewEdgesInfo[2] );
 
     Bnd_B2d aBox;
     UpdateBndBox(aRefVertices[0].Coord(), aRefVertices[2].Coord(), aBox);
-    thePolyBoxesCut.Prepend( aBox );
+    thePolyBoxes.SetValue( 1, aBox );
   }
   else
   {
-    thePolygon.Remove  ( aPolyLen );
-    thePolyBoxes.Remove( aPolyLen );
-  }
+    // Create triangle and split the source polygon on two 
+    // parts (if possible) and mesh each part as independent
+    // polygon.
+    if ( aUsedLinkId < aPolyLen )
+    {
+      thePolygon.Split(aUsedLinkId, thePolygonCut);
+      thePolygonCut.Prepend( -aNewEdgesInfo[2] );
+      thePolyBoxes.Split(aUsedLinkId, thePolyBoxesCut);
 
-  if ( aUsedLinkId > 3 )
-  {
+      Bnd_B2d aBox;
+      UpdateBndBox(aRefVertices[0].Coord(), aRefVertices[2].Coord(), aBox);
+      thePolyBoxesCut.Prepend( aBox );
+    }
+    else
+    {
+      thePolygon.Remove  ( aPolyLen );
+      thePolyBoxes.Remove( aPolyLen );
+    }
+
     thePolygon.SetValue( 1, -aNewEdgesInfo[1] );
 
     Bnd_B2d aBox;

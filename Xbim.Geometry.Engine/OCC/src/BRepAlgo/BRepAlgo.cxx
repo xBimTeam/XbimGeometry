@@ -111,7 +111,7 @@ TopoDS_Wire  BRepAlgo::ConcatenateWire(const TopoDS_Wire& W,
 
       if(index==0){                                           //storage of the first edge features
         First0=First;
-        if(edge.Orientation()==TopAbs_REVERSED){             //(usefull for the closed wire) 
+        if(edge.Orientation()==TopAbs_REVERSED){             //(useful for the closed wire)
           Vfirst=TopExp::LastVertex(edge);
           tab(index)->Reverse();
         }
@@ -145,7 +145,7 @@ TopoDS_Wire  BRepAlgo::ConcatenateWire(const TopoDS_Wire& W,
       closed_flag = Standard_True ;
     }                                                        //with the toler value
     Handle(TColGeom_HArray1OfBSplineCurve)  concatcurve;     //array of the concatenated curves
-    Handle(TColStd_HArray1OfInteger)        ArrayOfIndices;  //array of the remining Vertex
+    Handle(TColStd_HArray1OfInteger)        ArrayOfIndices;  //array of the remaining Vertex
     if (Option==GeomAbs_G1)
       GeomConvert::ConcatG1(tab,
       tabtolvertex,
@@ -482,7 +482,7 @@ TopoDS_Edge  BRepAlgo::ConcatenateWireC0(const TopoDS_Wire& aWire)
     }
 
     Handle(TColGeom_HArray1OfBSplineCurve)  concatcurve;     //array of the concatenated curves
-    Handle(TColStd_HArray1OfInteger)        ArrayOfIndices;  //array of the remining Vertex
+    Handle(TColStd_HArray1OfInteger)        ArrayOfIndices;  //array of the remaining Vertex
     GeomConvert::ConcatC1(tab,
       tabtolvertex,
       ArrayOfIndices,
