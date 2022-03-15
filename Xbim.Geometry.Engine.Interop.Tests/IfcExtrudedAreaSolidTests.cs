@@ -11,7 +11,7 @@ using Xbim.IO.Memory;
 
 namespace Xbim.Geometry.Engine.Interop.Tests.TestFiles
 {
-    [TestClass ]
+    [TestClass]
     // [DeploymentItem("TestFiles")]
     public class IfcExtrudedAreaSolidTests
     {
@@ -22,7 +22,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests.TestFiles
         [ClassInitialize]
         static public void Initialise(TestContext context)
         {
-            loggerFactory = new LoggerFactory().AddConsole(LogLevel.Trace);
+            loggerFactory = LoggerFactory.Create(builder => builder.AddConsole().SetMinimumLevel(LogLevel.Trace));
             geomEngine = new XbimGeometryEngine();
             logger = loggerFactory.CreateLogger<IfcAdvancedBrepTests>();
         }
