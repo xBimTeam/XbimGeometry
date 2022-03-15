@@ -1302,20 +1302,7 @@ namespace Xbim.ModelGeometry.Scene
         /// </summary>
         public int MaxThreads { get; set; }
 
-        static ConcurrentDictionary<int, DateTime> ProcessingShapes = new ConcurrentDictionary<int, DateTime>();
-
-        [HandleProcessCorruptedStateExceptions]
-        static void UnhandledExceptionHandler(object sender, UnhandledExceptionEventArgs args)
-        {
-            var e = args.ExceptionObject as Exception;
-            var msg1 = "Shapes being processed at exception time:" + string.Join(" ", ProcessingShapes.Keys.ToArray());
-            var msg2 = $"Runtime terminating: {args.IsTerminating}"; 
-            LogError(msg1, e);
-            LogError(msg2, new Exception("Caught by UnhandledExceptionHandler"));
-            Console.WriteLine(msg1);
-            Console.WriteLine(msg2);
-        }
-
+        
         private void WriteShapeGeometries(XbimCreateContextHelper contextHelper, ReportProgressDelegate progDelegate, IGeometryStoreInitialiser geometryStore, XbimGeometryType geomStorageType)
         {
             var localPercentageParsed = contextHelper.PercentageParsed;
@@ -1356,8 +1343,6 @@ namespace Xbim.ModelGeometry.Scene
             // var geomCache = new ConcurrentDictionary<int, IXbimGeometryObject>();
             // Model.Tag = geomCache;
             ConcurrentDictionary<int, byte> processed = new ConcurrentDictionary<int, byte>();
-            AppDomain currentDomain = AppDomain.CurrentDomain;
-            currentDomain.UnhandledException += new UnhandledExceptionEventHandler(UnhandledExceptionHandler);
             try
             {
                 
@@ -1373,8 +1358,6 @@ namespace Xbim.ModelGeometry.Scene
                     if (processed.TryGetValue(shapeId, out byte b)) 
                         return; //skip it
 
-                    ProcessingShapes.TryAdd(shapeId, DateTime.Now);
-
                     processed.TryAdd(shapeId, 0); //we are only going to try once
                     Interlocked.Increment(ref localTally);
                     IIfcGeometricRepresentationItem shape;
@@ -1386,14 +1369,12 @@ namespace Xbim.ModelGeometry.Scene
                     {
                         var errmsg = string.Format("Error getting IIfcGeometricRepresentationItem for EntityLabel #{0}. Geometry Ignored.", shapeId);
                         LogError(errmsg, ex);
-                        ProcessingShapes.TryRemove(shapeId, out var _);
                         return;
                     }
                     if (shape == null)
                     {
                         var errmsg = string.Format("IIfcGeometricRepresentationItem for EntityLabel #{0} not found. Geometry Ignored.", shapeId);
                         LogError(errmsg);
-                        ProcessingShapes.TryRemove(shapeId, out var _);
                         return;
                     }
                     var isFeatureElementShape = contextHelper.FeatureElementShapeIds.Contains(shapeId);
@@ -1487,7 +1468,6 @@ namespace Xbim.ModelGeometry.Scene
                         LogWarning(shape, "Long meshing time of shape geometry: {0} ms.", productMeshingTime.ElapsedMilliseconds);
                         Debug.WriteLine($"-\t{productMeshingTime.ElapsedMilliseconds,5}\tms {shape.GetType()}: #{shape.EntityLabel}");
                     }
-                    ProcessingShapes.TryRemove(shapeId, out var _);
                     //  Interlocked.Decrement(ref c);
                     //  Console.WriteLine($"->{c} - {shapeId}");
                 }
@@ -1500,11 +1480,8 @@ namespace Xbim.ModelGeometry.Scene
                 {
                     LogError("Processing failure", item);
                 }
-                currentDomain.UnhandledException -= new UnhandledExceptionEventHandler(UnhandledExceptionHandler);
                 throw new XbimException("Processing halted due to model error", e);
             }
-            currentDomain.UnhandledException -= new UnhandledExceptionEventHandler(UnhandledExceptionHandler);
-
             contextHelper.PercentageParsed = localPercentageParsed;
             contextHelper.Tally = localTally;
             Debug.Assert(contextHelper.ProductShapeIds.Count == processed.Count);
