@@ -56,6 +56,8 @@ BRepAlgoAPI_Common::BRepAlgoAPI_Common(const TopoDS_Shape& S1,
                                        const Message_ProgressRange& theRange)
 : BRepAlgoAPI_BooleanOperation(S1, S2, BOPAlgo_COMMON)
 {
+  SetNonDestructive(Standard_True); // this is added to preserve the parameters from being modified by Build,
+                                    // but it's only a solution to test the issue rather than a valid fix.
   Build(theRange);
 }
 //=======================================================================
