@@ -15,6 +15,11 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
     <PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
     <PackageReference Include="Xbim.Tessellator" Version="5.1.314" />
+	<PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.1" />
+	<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
+	<PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
+	<PackageReference Include="Xbim.Ifc" Version="5.1.341" />
+	<PackageReference Include="Xbim.Tessellator" Version="5.1.341" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\Xbim.Geometry.Engine.Interop.targets">
@@ -22,14 +27,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.1" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
-    <PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
-    <PackageReference Include="Xbim.Ifc" Version="5.1.324" />
-    <PackageReference Include="Xbim.Tessellator" Version="5.1.324" />
-  </ItemGroup>
-
   <ItemGroup>
     <NativeGeometryEngine Include="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj">
       <AdditionalProperties>
@@ -79,11 +76,7 @@
   
   <ItemGroup>
     <Folder Include="images\" />
+    <None Include="..\xbim-toolkit-icon.png" Pack="True" PackagePath="\" />
   </ItemGroup>
-  
-  
-	<ItemGroup>
-		<None Include="..\xbim-toolkit-icon.png" Pack="True" PackagePath="\" />
-	</ItemGroup>
  
 </Project>
