@@ -26,9 +26,10 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [ClassInitialize]
         static public void Initialise(TestContext context)
         {
-            loggerFactory = LoggerFactory.Create(builder => builder.AddConsole().SetMinimumLevel(LogLevel.Trace).AddDebug());
+            loggerFactory = new LoggerFactory().AddDebug(LogLevel.Trace);
             geomEngine = new XbimGeometryEngine();
             logger = loggerFactory.CreateLogger<IfcBooleanTests>();
+            loggerFactory.AddConsole(LogLevel.Trace);
         }
         [ClassCleanup]
         static public void Cleanup()
