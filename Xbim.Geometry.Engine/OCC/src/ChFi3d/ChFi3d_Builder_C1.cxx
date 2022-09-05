@@ -1684,6 +1684,13 @@ void ChFi3d_Builder::PerformIntersectionAtEnd(const Standard_Integer Index)
       }
       if (compoint1 && compoint2) {
 	SeqFil.Remove(num);
+	num = ChFi3d_IndexOfSurfData(Vtx,stripe,sens);
+	if (isfirst) {
+	  num1=num+1;
+	}
+	else {
+	  num1=num-1;
+	}
         reg1=Standard_False; reg2=Standard_False;
       }
     }
@@ -2036,6 +2043,7 @@ void ChFi3d_Builder::PerformIntersectionAtEnd(const Standard_Integer Index)
       if ((possible1 && possible2) || (!possible1 && !possible2) || (nbarete > 4)) {
 	while (!trouve) {
 	  nb++;
+	  if (nb>=nn) throw Standard_Failure("IntersectionAtEnd : the max number of faces reached");
 	  if (nb!=1) F3=Face[nb-2];
 	  Face[nb-1]=F3;
 	  if (CV1.Arc().IsSame(edgelibre1))
@@ -2153,6 +2161,9 @@ void ChFi3d_Builder::PerformIntersectionAtEnd(const Standard_Integer Index)
       F=Face[nb-1];
       if (!prolface[nb-1]) faceprol[nb-1]=F;
     }
+
+    if (F.IsNull()) throw Standard_NullObject("IntersectionAtEnd : Trying to intersect with NULL face");
+
     Sfacemoins1=BRep_Tool::Surface(F);
     Handle(Geom_Curve) cint;
     Handle(Geom2d_Curve) C2dint1, C2dint2,cface,cfacemoins1;

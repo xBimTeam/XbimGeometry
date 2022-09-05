@@ -23,6 +23,7 @@
 #include <BRepTopAdaptor_TopolTool.hxx>
 #include <GC_MakeCircle.hxx>
 #include <Geom2d_Line.hxx>
+#include <Geom2d_Circle.hxx>
 #include <GCE2d_MakeLine.hxx>
 #include <Geom2d_TrimmedCurve.hxx>
 #include <Geom2dConvert.hxx>
@@ -46,6 +47,7 @@
 #include <Geom_TrimmedCurve.hxx>
 #include <GeomAdaptor_Surface.hxx>
 #include <GeomConvert.hxx>
+#include <GeomConvert_ApproxSurface.hxx>
 #include <GeomConvert_CompCurveToBSplineCurve.hxx>
 #include <GeomLib_IsPlanarSurface.hxx>
 #include <gp_Cylinder.hxx>
@@ -101,6 +103,19 @@
 #include <GeomProjLib.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(ShapeUpgrade_UnifySameDomain,Standard_Transient)
+
+static Standard_Boolean IsOnSingularity(const TopTools_ListOfShape& theEdgeList)
+{
+  TopTools_ListIteratorOfListOfShape anItl (theEdgeList);
+  for (; anItl.More(); anItl.Next())
+  {
+    const TopoDS_Edge& anEdge = TopoDS::Edge (anItl.Value());
+    if (BRep_Tool::Degenerated (anEdge))
+      return Standard_True;
+  }
+
+  return Standard_False;
+}
 
 static void SplitWire (const TopoDS_Wire&                theWire,
                        const TopoDS_Face&                theFace,
@@ -174,12 +189,11 @@ static Standard_Boolean TryMakeLine(const Handle(Geom2d_Curve)& thePCurve,
   return Standard_True;
 }
 
-static bool RemoveEdgeFromMap(const TopoDS_Edge& theEdge,
+static void RemoveEdgeFromMap(const TopoDS_Edge& theEdge,
                               TopTools_IndexedDataMapOfShapeListOfShape& theVEmap)
 {
   TopoDS_Vertex VV [2];
   TopExp::Vertices(theEdge, VV[0], VV[1]);
-  bool removed = false;
   for (Standard_Integer i = 0; i < 2; i++)
   {
     TopTools_ListOfShape& Elist = theVEmap.ChangeFromKey(VV[i]);
@@ -188,15 +202,11 @@ static bool RemoveEdgeFromMap(const TopoDS_Edge& theEdge,
     {
       const TopoDS_Shape& anEdge = itl.Value();
       if (anEdge.IsSame(theEdge))
-      {
-          Elist.Remove(itl);
-          removed = true;
-      }
+        Elist.Remove(itl);
       else
         itl.Next();
     }
   }
-  return removed;
 }
 
 static Standard_Real ComputeMinEdgeSize(const TopTools_SequenceOfShape& theEdges,
@@ -365,10 +375,7 @@ static void RelocatePCurvesToNewUorigin(const TopTools_SequenceOfShape& theEdges
     gp_Pnt2d CurPoint = CurPCurve->Value(CurParam);
     for (;;) //collect pcurves of a contour
     {
-      bool removed = RemoveEdgeFromMap(CurEdge, theVEmap);
-      if (!removed)
-          break;
-      
+      RemoveEdgeFromMap(CurEdge, theVEmap);
       theUsedEdges.Add(CurEdge);
       TopoDS_Vertex CurVertex = (anOr == TopAbs_FORWARD)?
         TopExp::LastVertex(CurEdge, Standard_True) : TopExp::FirstVertex(CurEdge, Standard_True);
@@ -1220,7 +1227,31 @@ static Standard_Boolean GetNormalToSurface(const TopoDS_Face& theFace,
 {
   Standard_Real f, l;
   // get 2d curve to get point in 2d
-  const Handle(Geom2d_Curve)& aC2d = BRep_Tool::CurveOnSurface(theEdge, theFace, f, l);
+  Handle(Geom2d_Curve) aC2d;
+  if (BRep_Tool::IsClosed(theEdge, theFace))
+  {
+    //Find the edge in the face: it will have correct orientation
+    TopoDS_Edge anEdgeInFace;
+    TopoDS_Face aFace = theFace;
+    aFace.Orientation (TopAbs_FORWARD);
+    TopExp_Explorer anExplo (aFace, TopAbs_EDGE);
+    for (; anExplo.More(); anExplo.Next())
+    {
+      const TopoDS_Edge& anEdge = TopoDS::Edge (anExplo.Current());
+      if (anEdge.IsSame (theEdge))
+      {
+        anEdgeInFace = anEdge;
+        break;
+      }
+    }
+    if (anEdgeInFace.IsNull())
+      return Standard_False;
+
+    aC2d = BRep_Tool::CurveOnSurface (anEdgeInFace, aFace, f, l);
+  }
+  else
+    aC2d = BRep_Tool::CurveOnSurface(theEdge, theFace, f, l);
+  
   if (aC2d.IsNull()) {
     return Standard_False;
   }
@@ -1584,9 +1615,6 @@ void ShapeUpgrade_UnifySameDomain::UnionPCurves(const TopTools_SequenceOfShape& 
     if (isFound)
       continue;
     
-    Standard_Real aFirst, aLast;
-    Handle(Geom2d_Curve) aPCurve = BRep_Tool::CurveOnSurface (aFirstEdge, aFace, aFirst, aLast);
-
     aFaceSeq.Append (aFace);
   }
   
@@ -1631,6 +1659,9 @@ void ShapeUpgrade_UnifySameDomain::UnionPCurves(const TopTools_SequenceOfShape& 
 
       if (aPCurveSeq.IsEmpty()) {
         Handle(Geom2d_Curve) aCopyPCurve = Handle(Geom2d_Curve)::DownCast(aPCurve->Copy());
+        if (aCopyPCurve->IsKind(STANDARD_TYPE(Geom2d_TrimmedCurve)))
+          aCopyPCurve = (Handle(Geom2d_TrimmedCurve)::DownCast(aCopyPCurve))->BasisCurve();
+        
         aPCurveSeq.Append(aCopyPCurve);
         aFirstsSeq.Append(aFirst);
         aLastsSeq.Append(aLast);
@@ -1705,6 +1736,9 @@ void ShapeUpgrade_UnifySameDomain::UnionPCurves(const TopTools_SequenceOfShape& 
       else
       {
         Handle(Geom2d_Curve) aCopyPCurve = Handle(Geom2d_Curve)::DownCast(aPCurve->Copy());
+        if (aCopyPCurve->IsKind(STANDARD_TYPE(Geom2d_TrimmedCurve)))
+          aCopyPCurve = (Handle(Geom2d_TrimmedCurve)::DownCast(aCopyPCurve))->BasisCurve();
+        
         aPCurveSeq.Append(aCopyPCurve);
         aFirstsSeq.Append(aFirst);
         aLastsSeq.Append(aLast);
@@ -1825,57 +1859,53 @@ void ShapeUpgrade_UnifySameDomain::UnionPCurves(const TopTools_SequenceOfShape& 
     }
   }
 
-  //Reparametrize 3d curve if needed
+  //Reparametrize pcurves if needed
   if (!ResPCurves.IsEmpty())
   {
-    if (Abs (aFirst3d - ResFirsts(1)) > aMaxTol ||
-        Abs (aLast3d  - ResLasts(1))  > aMaxTol)
+    for (Standard_Integer ii = 1; ii <= ResPCurves.Length(); ii++)
     {
-      GeomAdaptor_Curve aGAcurve (aCurve);
-      GeomAbs_CurveType aType = aGAcurve.GetType();
-      if (aType == GeomAbs_Line)
+      if (Abs (aFirst3d - ResFirsts(ii)) > aMaxTol ||
+          Abs (aLast3d  - ResLasts(ii))  > aMaxTol)
       {
-        gp_Lin aLin = aGAcurve.Line();
-        gp_Dir aDir = aLin.Direction();
-        gp_Pnt aPnt = aGAcurve.Value (aFirst3d);
-        gp_Vec anOffset = -aDir;
-        anOffset *= ResFirsts(1);
-        aPnt.Translate (anOffset);
-        Handle(Geom_Line) aLine = new Geom_Line (aPnt, aDir);
-        aBuilder.UpdateEdge (theEdge, aLine, aTolEdge);
-        aBuilder.Range(theEdge, ResFirsts(1), ResLasts(1));
-      }
-      else if (aType == GeomAbs_Circle)
-      {
-        gp_Circ aCirc = aGAcurve.Circle();
-        Standard_Real aRadius = aCirc.Radius();
-        gp_Ax2 aPosition = aCirc.Position();
-        gp_Ax1 anAxis = aPosition.Axis();
-        Standard_Real anOffset = aFirst3d - ResFirsts(1);
-        aPosition.Rotate (anAxis, anOffset);
-        Handle(Geom_Circle) aCircle = new Geom_Circle (aPosition, aRadius);
-        aBuilder.UpdateEdge (theEdge, aCircle, aTolEdge);
-        aBuilder.Range(theEdge, ResFirsts(1), ResLasts(1));
-      }
-      else //general case
-      {
-        for (Standard_Integer ii = 1; ii <= ResPCurves.Length(); ii++)
+        Geom2dAdaptor_Curve aGAcurve (ResPCurves(ii));
+        GeomAbs_CurveType aType = aGAcurve.GetType();
+        if (aType == GeomAbs_Line)
         {
-          if (Abs (aFirst3d - ResFirsts(ii)) > Precision::Confusion() ||
-              Abs (aLast3d  - ResLasts(ii))  > Precision::Confusion())
-          {
-            Handle(Geom2d_TrimmedCurve) aTrPCurve =
-              new Geom2d_TrimmedCurve (ResPCurves(ii), ResFirsts(ii),  ResLasts(ii));
-            Handle(Geom2d_BSplineCurve) aBSplinePCurve = Geom2dConvert::CurveToBSplineCurve(aTrPCurve);
-            TColStd_Array1OfReal aKnots (1, aBSplinePCurve->NbKnots());
-            aBSplinePCurve->Knots (aKnots);
-            BSplCLib::Reparametrize (aFirst3d, aLast3d, aKnots);
-            aBSplinePCurve->SetKnots (aKnots);
-            ResPCurves(ii) = aBSplinePCurve;
-          }
+          gp_Lin2d aLin2d = aGAcurve.Line();
+          gp_Dir2d aDir2d = aLin2d.Direction();
+          gp_Pnt2d aPnt2d = aGAcurve.Value(ResFirsts(ii));
+          gp_Vec2d anOffset = -aDir2d;
+          anOffset *= aFirst3d;
+          aPnt2d.Translate (anOffset);
+          Handle(Geom2d_Line) aNewLine2d = new Geom2d_Line (aPnt2d, aDir2d);
+          ResPCurves(ii) = aNewLine2d;
         }
-      }
-    }
+        else if (aType == GeomAbs_Circle)
+        {
+          gp_Circ2d aCirc2d = aGAcurve.Circle();
+          Standard_Real aRadius = aCirc2d.Radius();
+          gp_Ax22d aPosition = aCirc2d.Position();
+          gp_Pnt2d aLocation = aCirc2d.Location();
+          Standard_Real anOffset = ResFirsts(ii) - aFirst3d;
+          aPosition.Rotate (aLocation, anOffset);
+          Handle(Geom2d_Circle) aNewCircle2d = new Geom2d_Circle (aPosition, aRadius);
+          ResPCurves(ii) = aNewCircle2d;
+        }
+        else //general case
+        {
+          Handle(Geom2d_TrimmedCurve) aTrPCurve =
+            new Geom2d_TrimmedCurve (ResPCurves(ii), ResFirsts(ii),  ResLasts(ii));
+          Handle(Geom2d_BSplineCurve) aBSplinePCurve = Geom2dConvert::CurveToBSplineCurve(aTrPCurve);
+          TColStd_Array1OfReal aKnots (1, aBSplinePCurve->NbKnots());
+          aBSplinePCurve->Knots (aKnots);
+          BSplCLib::Reparametrize (aFirst3d, aLast3d, aKnots);
+          aBSplinePCurve->SetKnots (aKnots);
+          ResPCurves(ii) = aBSplinePCurve;
+        }
+        ResFirsts(ii)  = aFirst3d;
+        ResLasts(ii)   = aLast3d;
+      } //if ranges > aMaxTol
+    } //for (Standard_Integer ii = 1; ii <= ResPCurves.Length(); ii++)
   }
 
   for (Standard_Integer j = 1; j <= ResPCurves.Length(); j++)
@@ -2040,8 +2070,22 @@ Standard_Boolean ShapeUpgrade_UnifySameDomain::MergeSubSeq(const TopTools_Sequen
     TopoDS_Vertex V[2];
     V[0] = sae.FirstVertex(FE);
     V[1] = sae.LastVertex(TopoDS::Edge(theChain.Last()));
+    Standard_Boolean isClosed = V[0].IsSame(V[1]);
+    if (!isClosed)
+    {
+      // additionally check the points for equality to make a final decision about closedness of the result curve
+      gp_Pnt aP0 = BRep_Tool::Pnt(V[0]);
+      gp_Pnt aP1 = BRep_Tool::Pnt(V[1]);
+      Standard_Real aTol = Max(BRep_Tool::Tolerance(V[0]), BRep_Tool::Tolerance(V[1]));
+      if (aP0.SquareDistance(aP1) < aTol * aTol)
+      {
+        isClosed = Standard_True;
+        V[1] = V[0];
+        V[1].Reverse();
+      }
+    }
     TopoDS_Edge E;
-    if (V[0].IsSame(V[1])) {
+    if (isClosed) {
       // closed chain
       BRepAdaptor_Curve adef(FE);
       Handle(Geom_Circle) Cir1;
@@ -2973,29 +3017,107 @@ void ShapeUpgrade_UnifySameDomain::IntUnifyFaces(const TopoDS_Shape& theInpShape
       TopTools_IndexedDataMapOfShapeListOfShape VEmap;
       for (Standard_Integer ind = 1; ind <= edges.Length(); ind++)
         TopExp::MapShapesAndUniqueAncestors(edges(ind), TopAbs_VERTEX, TopAbs_EDGE, VEmap);
+
+      //Try to find seam edge and an edge that is not seam but has 2 pcurves on the surface
+      Standard_Boolean SeamFound = Standard_False;
+      TopoDS_Edge EdgeWith2pcurves;
+      for (Standard_Integer ii = 1; ii <= faces.Length(); ii++)
+      {
+        const TopoDS_Face& face_ii = TopoDS::Face(faces(ii));
+        TopoDS_Wire anOuterWire = BRepTools::OuterWire(face_ii);
+        TopoDS_Iterator itw(anOuterWire);
+        for (; itw.More(); itw.Next())
+        {
+          const TopoDS_Edge& anEdge = TopoDS::Edge(itw.Value());
+          if (BRep_Tool::IsClosed (anEdge, face_ii))
+          {
+            if (BRepTools::IsReallyClosed(anEdge, face_ii))
+              SeamFound = Standard_True;
+            else
+              EdgeWith2pcurves = anEdge;
+          }
+        }
+      }
+
+      Standard_Boolean aIsEdgeWith2pcurvesSmooth = Standard_False;
+      if (myConcatBSplines && !EdgeWith2pcurves.IsNull() && !SeamFound)
+      {
+        const TopTools_ListOfShape& aFaceList = theGMapEdgeFaces.FindFromKey (EdgeWith2pcurves);
+        const TopoDS_Face& aFace1 = TopoDS::Face (aFaceList.First());
+        const TopoDS_Face& aFace2 = TopoDS::Face (aFaceList.Last());
+        GeomAbs_Shape anOrderOfCont = BRepLib::ContinuityOfFaces (EdgeWith2pcurves,
+                                                                  aFace1, aFace2,
+                                                                  myAngTol);
+        aIsEdgeWith2pcurvesSmooth = (anOrderOfCont >= GeomAbs_G1);
+      }
+
+      if (aIsEdgeWith2pcurvesSmooth)
+      {
+        Handle(Geom2d_Curve) aPC1, aPC2;
+        Standard_Real aFirst, aLast;
+        aPC1 = BRep_Tool::CurveOnSurface (EdgeWith2pcurves, F_RefFace, aFirst, aLast);
+        EdgeWith2pcurves.Reverse();
+        aPC2 = BRep_Tool::CurveOnSurface (EdgeWith2pcurves, F_RefFace, aFirst, aLast);
+        gp_Pnt2d aPnt1 = aPC1->Value (aFirst);
+        gp_Pnt2d aPnt2 = aPC2->Value (aFirst);
+        Standard_Boolean anIsUclosed = (Abs(aPnt1.X() - aPnt2.X()) > Abs(aPnt1.Y() - aPnt2.Y()));
+        Standard_Boolean aToMakeUPeriodic = Standard_False, aToMakeVPeriodic = Standard_False;
+        if (anIsUclosed && Uperiod == 0.)
+          aToMakeUPeriodic = Standard_True;
+        if (!anIsUclosed && Vperiod == 0.)
+          aToMakeVPeriodic = Standard_True;
+
+        if (aToMakeUPeriodic || aToMakeVPeriodic)
+        {
+          Handle(Geom_BSplineSurface) aBSplineSurface = Handle(Geom_BSplineSurface)::DownCast(aBaseSurface);
+          if (aBSplineSurface.IsNull())
+          {
+            Standard_Real aTol = 1.e-4;
+            GeomAbs_Shape aUCont = GeomAbs_C1, aVCont = GeomAbs_C1;
+            Standard_Integer degU = 14, degV = 14;
+            Standard_Integer nmax = 16;
+            Standard_Integer aPrec = 1;  
+            GeomConvert_ApproxSurface Approximator(aBaseSurface,aTol,aUCont,aVCont,degU,degV,nmax,aPrec);
+            aBSplineSurface = Approximator.Surface();
+          }
+          
+          if (aToMakeUPeriodic)
+          {
+            aBSplineSurface->SetUPeriodic();
+            Uperiod = aBSplineSurface->UPeriod();
+          }
+          if (aToMakeVPeriodic)
+          {
+            aBSplineSurface->SetVPeriodic();
+            Vperiod = aBSplineSurface->VPeriod();
+          }
+
+          //Update ref face and pcurves if the surface changed
+          if (aBSplineSurface != aBaseSurface)
+          {
+            TopoDS_Face OldRefFace = RefFace;
+            Handle(Geom2d_Curve) NullPCurve;
+            RefFace.Nullify();
+            BB.MakeFace(RefFace, aBSplineSurface, aBaseLocation, 0.);
+            for (Standard_Integer ii = 1; ii <= edges.Length(); ii++)
+            {
+              TopoDS_Edge anEdge = TopoDS::Edge(edges(ii));
+              Handle(Geom2d_Curve) aPCurve = BRep_Tool::CurveOnSurface (anEdge, OldRefFace, aFirst, aLast);
+              if (MapEdgesWithTemporaryPCurves.Contains(anEdge))
+                BB.UpdateEdge(anEdge, NullPCurve, OldRefFace, 0.);
+              BB.UpdateEdge(anEdge, aPCurve, RefFace, 0.);
+            }
+            F_RefFace = RefFace;
+            F_RefFace.Orientation(TopAbs_FORWARD);
+          }
+        }
+      } //if (myConcatBSplines && !EdgeWith2pcurves.IsNull() && !SeamFound)
       
       //Perform relocating to new U-origin
       //Define boundaries in 2d space of RefFace
       if (Uperiod != 0.)
       {
-        //try to find a real seam edge - if it exists, do nothing
-        Standard_Boolean SeamFound = Standard_False;
-        for (Standard_Integer ii = 1; ii <= faces.Length(); ii++)
-        {
-          const TopoDS_Face& face_ii = TopoDS::Face(faces(ii));
-          TopoDS_Wire anOuterWire = BRepTools::OuterWire(face_ii);
-          TopoDS_Iterator itw(anOuterWire);
-          for (; itw.More(); itw.Next())
-          {
-            const TopoDS_Edge& anEdge = TopoDS::Edge(itw.Value());
-            if (BRepTools::IsReallyClosed(anEdge, face_ii))
-            {
-              SeamFound = Standard_True;
-              break;
-            }
-          }
-        }
-        
+        //if seam edge exists, do nothing
         if (!SeamFound)
         {
           //try to find the origin of U in 2d space
@@ -3197,6 +3319,10 @@ void ShapeUpgrade_UnifySameDomain::IntUnifyFaces(const TopoDS_Shape& theInpShape
           if (NextEdge.IsNull())
           {
             Standard_Boolean EndOfWire = Standard_False;
+
+            Standard_Boolean anIsOnSingularity = IsOnSingularity (Elist);
+            if (!anIsOnSingularity && Elist.Extent() > 1)
+              SplittingVertices.Add (CurVertex);
             
             TopTools_ListOfShape TmpElist, TrueElist;
             //<TrueElist> will be the list of candidates to become <NextEdge>
@@ -3216,7 +3342,6 @@ void ShapeUpgrade_UnifySameDomain::IntUnifyFaces(const TopoDS_Shape& theInpShape
             else
             {
               //we must choose the closest direction - the biggest angle
-              SplittingVertices.Add (CurVertex);
               Standard_Real MaxAngle = RealFirst();
               TopoDS_Edge TrueEdge;
               Handle(Geom2d_Curve) CurPCurve = BRep_Tool::CurveOnSurface(CurEdge, F_RefFace, fpar, lpar);

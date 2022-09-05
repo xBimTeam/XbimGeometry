@@ -70,7 +70,7 @@ namespace XbimRegression
                     });
                     var logger = loggerFactory.CreateLogger<BatchProcessor>();
                     Console.WriteLine($"Processing {file}");
-                    result = ProcessFile(file.FullName, writer, logger);
+                    result = ProcessFile(file.FullName, writer, Params.AdjustWcs, logger);
 
                 }
                 XbimLogging.LoggerFactory = null; // uses a default loggerFactory
@@ -147,7 +147,7 @@ namespace XbimRegression
             stateIsComplete = false;
         }
 
-        private ProcessResult ProcessFile(string ifcFile, StreamWriter writer, ILogger<BatchProcessor> logger)
+        private ProcessResult ProcessFile(string ifcFile, StreamWriter writer, bool adjustWCS, ILogger<BatchProcessor> logger)
         {
             RemoveFiles(ifcFile);
             // using (var eventTrace = LoggerFactory.CreateEventTrace())
@@ -173,7 +173,7 @@ namespace XbimRegression
                         // context.CustomMeshingBehaviour = CustomMeshingBehaviour;
                         if (_params.WriteBreps == null)
                         {
-                            context.CreateContext(progress);
+                            context.CreateContext(progress, adjustWCS);
                             //}
                             var geomTime = watch.ElapsedMilliseconds - parseTime;
                             //XbimSceneBuilder sb = new XbimSceneBuilder();

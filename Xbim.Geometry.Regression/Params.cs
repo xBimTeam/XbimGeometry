@@ -16,6 +16,7 @@ namespace XbimRegression
 
         private const int DefaultTimeout = 1000 * 60 * 20; // 20 mins
         public bool Caching = false;
+        public bool AdjustWcs = true;
         public bool ReportProgress = false;
         public List<int> WriteBreps = null;
         public bool GeometryV1;
@@ -61,7 +62,9 @@ namespace XbimRegression
             }
             else
             {
-                Console.WriteLine("Invalid model folder {0}", TestFileRoot);
+                Console.WriteLine("Invalid source folder {0}", TestFileRoot);
+                Console.WriteLine("- Is directory: {0}", Directory.Exists(TestFileRoot));
+                Console.WriteLine("- Is file: {0}", File.Exists(TestFileRoot));
                 return;
             }
 
@@ -82,6 +85,9 @@ namespace XbimRegression
                                 break;
                             case "/lowthreadscount":
                                 MaxThreads = Environment.ProcessorCount / 2;
+                                break;
+                            case "/nowcsadjust":
+                                AdjustWcs = false;
                                 break;
                             case "/writebreps":
                             case "/breps":
