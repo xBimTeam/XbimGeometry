@@ -157,7 +157,8 @@ namespace Xbim
 
 		IXbimGeometryObject^ XbimCompound::TransformShallow(XbimMatrix3D matrix3D)
 		{
-			TopoDS_Compound shallowCopy = TopoDS::Compound(pCompound->Moved(XbimConvert::ToTransform(matrix3D)));
+			gp_Trsf trsf = XbimConvert::ToTransform(matrix3D); 
+			TopoDS_Compound shallowCopy = TopoDS::Compound(pCompound->Moved(trsf, Standard_False)); // exception is thrown if move has scale
 			GC::KeepAlive(this);
 			return gcnew XbimCompound(shallowCopy, IsSewn, _sewingTolerance);
 		}

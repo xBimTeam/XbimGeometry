@@ -51,6 +51,11 @@ namespace XbimRegression
                 else if (ext == ".txt")
                 {
                     var justLines = File.ReadAllLines(TestFileRoot).Where(x => !x.StartsWith("#"));
+                    foreach (var oneLine in justLines)
+                    {
+                        if (!File.Exists(oneLine))
+                            Console.WriteLine($"File '{oneLine}' not found.");
+                    }
                     FilesToProcess = justLines.Where(name => File.Exists(name)).Select(x => new FileInfo(x)).ToArray();
                     ResultsFile = string.Format("XbimRegression_{0:yyyyMMdd-hhmmss}.csv", DateTime.Now);
                 }

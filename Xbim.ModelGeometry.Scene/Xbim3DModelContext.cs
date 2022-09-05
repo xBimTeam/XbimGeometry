@@ -71,7 +71,8 @@ namespace Xbim.ModelGeometry.Scene
                 foreach (var argument in productShapes)
                 {
                     // makes copy if used more than once
-                    var geom = contextHelper.GetGeometryFromCache(argument, shapeIdsUsedMoreThanOnce.TryGetValue(argument.ShapeGeometryLabel, out placebo));
+                    var copyIfMultuipleUsed = shapeIdsUsedMoreThanOnce.TryGetValue(argument.ShapeGeometryLabel, out placebo);
+                    var geom = contextHelper.GetGeometryFromCache(argument, copyIfMultuipleUsed);
                     if (geom != null)
                         _productGeometries.Add(geom);
                     else
@@ -814,6 +815,7 @@ namespace Xbim.ModelGeometry.Scene
                 int context = 0;
                 int styleId = 0; //take the style of any part of the main shape
                 var element = elementToFeatureGroup.Key;
+                _logger.LogTrace("Processing features for {0}", element.EntityLabel);
 
                 // here is where the feature's geometry are calculated
                 //

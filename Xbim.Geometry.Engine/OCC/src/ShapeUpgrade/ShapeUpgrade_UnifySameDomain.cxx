@@ -1015,6 +1015,8 @@ static void TransformPCurves(const TopoDS_Face& theRefFace,
     Handle(Geom2d_Curve) PCurveOnRef = BRep_Tool::CurveOnSurface(anEdge, theRefFace, fpar, lpar);
     if (!PCurveOnRef.IsNull() && !(ToModify || ToProject))
       continue;
+    if (fpar == lpar)
+        continue;
 
     Handle(Geom2d_Curve) PCurves [2], NewPCurves [2];
     anEdge.Orientation (TopAbs_FORWARD);

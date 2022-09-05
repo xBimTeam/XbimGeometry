@@ -50,24 +50,25 @@ namespace XbimRegression
                 using (var loggerFactory = new LoggerFactory())
                 {
                     XbimLogging.LoggerFactory = loggerFactory;
-                    loggerFactory.AddConsole(LogLevel.Error);
-                    loggerFactory.AddProvider(new NReco.Logging.File.FileLoggerProvider(logFile, false)
-                    {
-                        FormatLogEntry = (msg) =>
-                        {
-                            var sb = new System.Text.StringBuilder();
-                            StringWriter sw = new StringWriter(sb);
-                            var jsonWriter = new Newtonsoft.Json.JsonTextWriter(sw);
-                            jsonWriter.WriteStartArray();
-                            jsonWriter.WriteValue(DateTime.Now.ToString("o"));
-                            jsonWriter.WriteValue(msg.LogLevel.ToString());
-                            jsonWriter.WriteValue(msg.EventId.Id);
-                            jsonWriter.WriteValue(msg.Message);
-                            jsonWriter.WriteValue(msg.Exception?.ToString());
-                            jsonWriter.WriteEndArray();
-                            return sb.ToString();
-                        }
-                    });
+                    loggerFactory.AddConsole(LogLevel.Error)
+                        .AddProvider(new NReco.Logging.File.FileLoggerProvider(logFile, false)
+                            {
+                                FormatLogEntry = (msg) =>
+                                {
+                                    var sb = new System.Text.StringBuilder();
+                                    StringWriter sw = new StringWriter(sb);
+                                    var jsonWriter = new Newtonsoft.Json.JsonTextWriter(sw);
+                                    jsonWriter.WriteStartArray();
+                                    jsonWriter.WriteValue(DateTime.Now.ToString("o"));
+                                    jsonWriter.WriteValue(msg.LogLevel.ToString());
+                                    jsonWriter.WriteValue(msg.EventId.Id);
+                                    jsonWriter.WriteValue(msg.Message);
+                                    jsonWriter.WriteValue(msg.Exception?.ToString());
+                                    jsonWriter.WriteEndArray();
+                                    return sb.ToString();
+                                },
+                                MinLevel = Params.MaxThreads == 1 ? LogLevel.Trace : LogLevel.Information // if doing one at a time, we want to trace progress.
+                            });
                     var logger = loggerFactory.CreateLogger<BatchProcessor>();
                     Console.WriteLine($"Processing {file}");
                     result = ProcessFile(file.FullName, writer, Params.AdjustWcs, logger);
@@ -85,7 +86,6 @@ namespace XbimRegression
                 }
                 else
                 {
-
                     var tokens = txt.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                     result.Errors = tokens.Count(t => t == "\"Error\"");
                     result.Warnings = tokens.Count(t => t == "\"Warning\"");
@@ -147,7 +147,7 @@ namespace XbimRegression
             stateIsComplete = false;
         }
 
-        private ProcessResult ProcessFile(string ifcFile, StreamWriter writer, bool adjustWCS, ILogger<BatchProcessor> logger)
+        private ProcessResult ProcessFile(string ifcFile, StreamWriter writer, bool adjustWCS, ILogger logger)
         {
             RemoveFiles(ifcFile);
             // using (var eventTrace = LoggerFactory.CreateEventTrace())
@@ -330,21 +330,27 @@ namespace XbimRegression
             return Xbim3DModelContext.MeshingBehaviourResult.Default;
         }
 
-        private IModel ParseModelFile(string ifcFileName, bool caching, ILogger<BatchProcessor> logger, ReportProgressDelegate progress)
+        private IModel ParseModelFile(string ifcFileName, bool caching, ILogger logger, ReportProgressDelegate progress)
         {
             IModel ret = null;
             if (string.IsNullOrWhiteSpace(ifcFileName))
+            {
+                logger.LogError("Missing file to parse: '{0}'", ifcFileName);
                 return null;
+            }
             // create a callback for progress
+
             switch (Path.GetExtension(ifcFileName).ToLowerInvariant())
             {
                 case ".ifc":
                 case ".ifczip":
                 case ".ifcxml":
+                    logger.LogInformation($"Parsing started.");
                     if (caching)
                         ret = IfcStore.Open(ifcFileName, null, 0, progress);
                     else
                         ret = MemoryModel.OpenRead(ifcFileName, logger, progress);
+                    logger.LogInformation($"Parsing ended.");
                     return ret;
                 default:
                     throw new NotImplementedException(
