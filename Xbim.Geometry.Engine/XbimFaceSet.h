@@ -50,14 +50,14 @@ namespace Xbim
 					faces[index] = value;
 				}
 			}
-			property XbimFaceV5^ Face[int]
+			property XbimFace^ Face[int]
 			{
-				XbimFaceV5^ get(int index)
+				XbimFace^ get(int index)
 				{
-					return (XbimFaceV5^)faces[index];
+					return (XbimFace^)faces[index];
 				}
 
-				void set(int index, XbimFaceV5^ value)
+				void set(int index, XbimFace^ value)
 				{
 					faces[index] = value;
 				}

@@ -23,7 +23,7 @@ namespace Xbim
 			TopExp::MapShapes(shape, TopAbs_SHELL, map);
 			shells = gcnew  List<IXbimShell^>(map.Extent());
 			for (int i = 1; i <= map.Extent(); i++)
-				shells->Add(gcnew XbimShellV5(TopoDS::Shell(map(i))));
+				shells->Add(gcnew XbimShell(TopoDS::Shell(map(i))));
 		}
 
 		XbimShellSet::XbimShellSet(List<IXbimShell^>^ shells)
@@ -58,7 +58,7 @@ namespace Xbim
 			List<IXbimShell^>^ result = gcnew List<IXbimShell^>(shells->Count);
 			for each (IXbimGeometryObject^ shell in shells)
 			{
-				result->Add((IXbimShell^)((XbimShellV5^)shell)->TransformShallow(matrix3D));
+				result->Add((IXbimShell^)((XbimShell^)shell)->TransformShallow(matrix3D));
 			}
 			return gcnew XbimShellSet(result);
 		}
@@ -131,8 +131,8 @@ namespace Xbim
 		{
 			if (!IsValid) return this;
 			XbimShellSet^ result = gcnew XbimShellSet();
-			for each (XbimShellV5^ shell in shells)
-				result->Add((XbimShellV5^)shell->Transformed(transformation));
+			for each (XbimShell^ shell in shells)
+				result->Add((XbimShell^)shell->Transformed(transformation));
 			return result;
 		}
 
@@ -143,7 +143,7 @@ namespace Xbim
 			TopLoc_Location loc = XbimConvert::ToLocation(placement);
 			for each (IXbimShell^ shell in shells)
 			{
-				XbimShellV5^ copy = gcnew XbimShellV5((XbimShellV5^)shell, Tag);
+				XbimShell^ copy = gcnew XbimShell((XbimShell^)shell, Tag);
 				copy->Move(loc);
 				result->Add(copy);
 			}
@@ -157,7 +157,7 @@ namespace Xbim
 			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement,logger);
 			for each (IXbimShell^ shell in shells)
 			{
-				XbimShellV5^ copy = gcnew XbimShellV5((XbimShellV5^)shell, Tag);
+				XbimShell^ copy = gcnew XbimShell((XbimShell^)shell, Tag);
 				copy->Move(loc);
 				result->Add(copy);
 			}
@@ -168,7 +168,7 @@ namespace Xbim
 		{
 			for each (IXbimShell^ shell  in shells)
 			{
-				((XbimShellV5^)shell)->Mesh(mesh, precision, deflection, angle);
+				((XbimShell^)shell)->Mesh(mesh, precision, deflection, angle);
 			}
 		}
 
@@ -179,7 +179,7 @@ namespace Xbim
 			builder.MakeCompound(bodyCompound);
 			for each (IXbimShell ^ shell in shells)
 			{
-				builder.Add(bodyCompound, (XbimShellV5^)shell);
+				builder.Add(bodyCompound, (XbimShell^)shell);
 			}
 			return bodyCompound;
 		}

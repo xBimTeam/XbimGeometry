@@ -17,14 +17,14 @@ namespace Xbim
 			TopExp::MapShapes(shape, TopAbs_FACE, map);
 			faces = gcnew  List<IXbimFace^>(map.Extent());
 			for (int i = 1; i <= map.Extent(); i++)
-				faces->Add(gcnew XbimFaceV5(TopoDS::Face(map(i))));
+				faces->Add(gcnew XbimFace(TopoDS::Face(map(i))));
 		}
 
 		XbimFaceSet::XbimFaceSet(const TopTools_ListOfShape & shapes)
 		{
 			faces = gcnew  List<IXbimFace^>(shapes.Extent());
 			for (TopTools_ListIteratorOfListOfShape faceIter(shapes); faceIter.More(); faceIter.Next())
-				faces->Add(gcnew XbimFaceV5(TopoDS::Face(faceIter.Value())));
+				faces->Add(gcnew XbimFace(TopoDS::Face(faceIter.Value())));
 		}
 
 		XbimFaceSet::XbimFaceSet(List<IXbimFace^>^ faces) 
@@ -38,7 +38,7 @@ namespace Xbim
 			builder.MakeCompound(bodyCompound);
 			for each (IXbimFace ^ face in faces)
 			{
-				builder.Add(bodyCompound, (XbimFaceV5^)face);
+				builder.Add(bodyCompound, (XbimFace^)face);
 			}
 			return bodyCompound;
 		}
@@ -71,7 +71,7 @@ namespace Xbim
 			List<IXbimFace^>^ result = gcnew List<IXbimFace^>(faces->Count);
 			for each (IXbimGeometryObject^ face in faces)
 			{
-				result->Add((IXbimFace^)((XbimFaceV5^)face)->TransformShallow(matrix3D));
+				result->Add((IXbimFace^)((XbimFace^)face)->TransformShallow(matrix3D));
 			}
 			return gcnew XbimFaceSet(result);
 		}
@@ -80,8 +80,8 @@ namespace Xbim
 		{
 			if (!IsValid) return this;
 			XbimFaceSet^ result = gcnew XbimFaceSet();
-			for each (XbimFaceV5^ face in faces)
-				result->Add((XbimFaceV5^)face->Transformed(transformation));
+			for each (XbimFace^ face in faces)
+				result->Add((XbimFace^)face->Transformed(transformation));
 			return result;
 		}
 
@@ -92,7 +92,7 @@ namespace Xbim
 			TopLoc_Location loc = XbimConvert::ToLocation(placement);
 			for each (IXbimFace^ face in faces)
 			{
-				XbimFaceV5^ copy = gcnew XbimFaceV5((const TopoDS_Face&)((XbimFaceV5^)face), Tag);
+				XbimFace^ copy = gcnew XbimFace((const TopoDS_Face&)((XbimFace^)face), Tag);
 				copy->Move(loc);
 				result->Add(copy);
 			}
@@ -106,7 +106,7 @@ namespace Xbim
 			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement,logger);
 			for each (IXbimFace^ face in faces)
 			{
-				XbimFaceV5^ copy = gcnew XbimFaceV5((const TopoDS_Face&)((XbimFaceV5^)face), Tag);
+				XbimFace^ copy = gcnew XbimFace((const TopoDS_Face&)((XbimFace^)face), Tag);
 				copy->Move(loc);
 				result->Add(copy);
 			}
@@ -117,7 +117,7 @@ namespace Xbim
 		{
 			for each (IXbimFace^ face  in faces)
 			{
-				((XbimFaceV5^)face)->Mesh(mesh, precision, deflection, angle);
+				((XbimFace^)face)->Mesh(mesh, precision, deflection, angle);
 			}
 		}
 

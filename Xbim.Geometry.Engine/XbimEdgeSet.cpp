@@ -16,7 +16,7 @@ namespace Xbim
 			builder.MakeCompound(bodyCompound);
 			for each (IXbimEdge ^ edge in edges)
 			{
-				builder.Add(bodyCompound, (XbimEdgeV5^)edge);
+				builder.Add(bodyCompound, (XbimEdge^)edge);
 			}
 			return bodyCompound;
 		}
@@ -25,12 +25,12 @@ namespace Xbim
 			this->edges = gcnew List<IXbimEdge^>(edges);
 		}
 
-		XbimEdgeSet::XbimEdgeSet(XbimWireV5^ wire)
+		XbimEdgeSet::XbimEdgeSet(XbimWire^ wire)
 		{
 			edges = gcnew  List<IXbimEdge^>();
 			for (BRepTools_WireExplorer wireEx((const TopoDS_Wire&)wire); wireEx.More(); wireEx.Next())
 			{
-				edges->Add(gcnew XbimEdgeV5(wireEx.Current()));
+				edges->Add(gcnew XbimEdge(wireEx.Current()));
 			}
 			System::GC::KeepAlive(wire);
 		}
@@ -46,7 +46,7 @@ namespace Xbim
 					//if (reversed)
 					//	edges->Add(gcnew XbimEdge(TopoDS::Edge(wireEx.Current().Reversed())));
 					//else
-						edges->Add(gcnew XbimEdgeV5(wireEx.Current()));
+						edges->Add(gcnew XbimEdge(wireEx.Current()));
 				}
 			}
 			else
@@ -55,7 +55,7 @@ namespace Xbim
 				TopExp::MapShapes(shape, TopAbs_EDGE, map);
 				edges = gcnew  List<IXbimEdge^>(map.Extent());
 				for (int i = 1; i <= map.Extent(); i++)
-					edges->Add(gcnew XbimEdgeV5(TopoDS::Edge(map(i))));
+					edges->Add(gcnew XbimEdge(TopoDS::Edge(map(i))));
 			}
 
 		}
@@ -99,7 +99,7 @@ namespace Xbim
 			List<IXbimEdge^>^ result = gcnew List<IXbimEdge^>(edges->Count);
 			for each (IXbimGeometryObject^ edge in edges)
 			{
-				result->Add((IXbimEdge^)((XbimEdgeV5^)edge)->TransformShallow(matrix3D));
+				result->Add((IXbimEdge^)((XbimEdge^)edge)->TransformShallow(matrix3D));
 			}
 			return gcnew XbimEdgeSet(result);
 		}
@@ -109,8 +109,8 @@ namespace Xbim
 			if (!IsValid) return this;
 			XbimEdgeSet^ result = gcnew XbimEdgeSet();
 			
-			for each (XbimEdgeV5^ edge in edges)
-				result->Add((XbimEdgeV5^)edge->Transformed(transformation));
+			for each (XbimEdge^ edge in edges)
+				result->Add((XbimEdge^)edge->Transformed(transformation));
 			return result;
 		}
 
@@ -121,7 +121,7 @@ namespace Xbim
 			TopLoc_Location loc = XbimConvert::ToLocation(placement);
 			for each (IXbimEdge^ edge in edges)
 			{
-				XbimEdgeV5^ copy = gcnew XbimEdgeV5((XbimEdgeV5^)edge, Tag);
+				XbimEdge^ copy = gcnew XbimEdge((XbimEdge^)edge, Tag);
 				copy->Move(loc);
 				result->Add(copy);
 			}
@@ -135,7 +135,7 @@ namespace Xbim
 			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement,logger);
 			for each (IXbimEdge^ edge in edges)
 			{
-				XbimEdgeV5^ copy = gcnew XbimEdgeV5((XbimEdgeV5^)edge, Tag);
+				XbimEdge^ copy = gcnew XbimEdge((XbimEdge^)edge, Tag);
 				copy->Move(loc);
 				result->Add(copy);
 			}

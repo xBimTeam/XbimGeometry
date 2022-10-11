@@ -11,7 +11,7 @@ namespace Xbim
 {
 	namespace Geometry
 	{
-		ref class XbimVertexV5 : IXbimVertex, XbimOccShape
+		ref class XbimVertex : IXbimVertex, XbimOccShape
 		{
 		protected:
 			System::IntPtr ptrContainer;
@@ -26,8 +26,8 @@ namespace Xbim
 #pragma region Equality Overrides
 			virtual bool Equals(Object^ v) override;
 			virtual int GetHashCode() override;
-			static bool operator ==(XbimVertexV5^ left, XbimVertexV5^ right);
-			static bool operator !=(XbimVertexV5^ left, XbimVertexV5^ right);
+			static bool operator ==(XbimVertex^ left, XbimVertex^ right);
+			static bool operator !=(XbimVertex^ left, XbimVertex^ right);
 			virtual bool Equals(IXbimVertex^ v);
 #pragma endregion
 
@@ -46,14 +46,14 @@ namespace Xbim
 			
 #pragma region Constructors
 			///Constructs vertex with no geometric location
-			XbimVertexV5();
-			XbimVertexV5(XbimPoint3D point3D, double precision);
-			XbimVertexV5(XbimPoint3DWithTolerance^ point3D);
-			XbimVertexV5(const TopoDS_Vertex& occVertex);
-			XbimVertexV5(const TopoDS_Vertex& occVertex, Object^ tag);
-			XbimVertexV5(IXbimVertex^ vertex, double precision);
-			XbimVertexV5(IIfcCartesianPoint^ vertex);
-			XbimVertexV5(double x, double y, double z, double precision);
+			XbimVertex();
+			XbimVertex(XbimPoint3D point3D, double precision);
+			XbimVertex(XbimPoint3DWithTolerance^ point3D);
+			XbimVertex(const TopoDS_Vertex& occVertex);
+			XbimVertex(const TopoDS_Vertex& occVertex, Object^ tag);
+			XbimVertex(IXbimVertex^ vertex, double precision);
+			XbimVertex(IIfcCartesianPoint^ vertex);
+			XbimVertex(double x, double y, double z, double precision);
 #ifdef USE_CARVE_CSG
 			XbimVertex(vertex_t* v, double precision);
 #endif // USE_CARVE_CSG
@@ -62,8 +62,8 @@ namespace Xbim
 
 #pragma region Destructors
 
-			~XbimVertexV5(){ InstanceCleanup(); }
-			!XbimVertexV5(){ InstanceCleanup(); }
+			~XbimVertex(){ InstanceCleanup(); }
+			!XbimVertex(){ InstanceCleanup(); }
 
 #pragma endregion
 

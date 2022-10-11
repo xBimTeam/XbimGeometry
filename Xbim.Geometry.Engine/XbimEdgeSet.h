@@ -27,7 +27,7 @@ namespace Xbim
 			XbimEdgeSet(const TopoDS_Shape& shape);
 			operator  TopoDS_Shape () override;
 			XbimEdgeSet(IEnumerable<IXbimEdge^>^ edges);
-			XbimEdgeSet(XbimWireV5^ wire);
+			XbimEdgeSet(XbimWire^ wire);
 			
 #pragma endregion
 

@@ -24,10 +24,10 @@ namespace Xbim
 
 		int DoBoolean(const TopoDS_Shape& body, const TopTools_ListOfShape& tools, BOPAlgo_Operation op, double tolerance, double fuzzTolerance, TopoDS_Shape& result, int timeout);
 
-		private ref class VolumeComparer : IComparer<System::Tuple<double, XbimSolidV5^>^>
+		private ref class VolumeComparer : IComparer<System::Tuple<double, XbimSolid^>^>
 		{
 		public:
-			virtual int Compare(System::Tuple<double, XbimSolidV5^>^ x, System::Tuple<double, XbimSolidV5^>^ y)
+			virtual int Compare(System::Tuple<double, XbimSolid^>^ x, System::Tuple<double, XbimSolid^>^ y)
 			{
 				// Compare y and x in reverse order. 
 				return y->Item1.CompareTo(x->Item1);
@@ -45,7 +45,7 @@ namespace Xbim
 			void Init(IIfcBooleanOperand^ boolOp, ILogger^ logger);
 			void Init(IIfcBooleanResult^ boolOp, ILogger^ logger);
 			void Init(IIfcBooleanClippingResult^ solid, ILogger^ logger);
-			void Init(XbimCompoundV5^ comp, IPersistEntity^ ent, ILogger^ logger);
+			void Init(XbimCompound^ comp, IPersistEntity^ ent, ILogger^ logger);
 			void Init(IIfcSweptAreaSolid^ solid, ILogger^ logger);
 			void Init(IIfcExtrudedAreaSolid^ solid, ILogger^ logger);
 			void Init(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid, ILogger^ logger);
@@ -80,7 +80,7 @@ namespace Xbim
 			static XbimSolidSet^ BuildBooleanResult(IIfcBooleanResult^ solid, IfcBooleanOperator operatorType, XbimSolidSet^ ops, ILogger^ logger);
 			XbimSolidSet(IXModelService^ modelService);
 			XbimSolidSet(const TopoDS_Shape& shape);
-			XbimSolidSet(XbimCompoundV5^ shape);
+			XbimSolidSet(XbimCompound^ shape);
 			XbimSolidSet(IXbimSolid^ solid);
 			XbimSolidSet(IEnumerable<IXbimSolid^>^ solids);
 			XbimSolidSet(IIfcBooleanResult^ boolOp, IXModelService^ modelService, ILogger^ logger);
@@ -161,7 +161,7 @@ namespace Xbim
 		ref class XbimSolidSetBoolOpParams
 		{
 		private:
-			XbimSolidV5^ _body;
+			XbimSolid^ _body;
 			XbimSolidSet^ _ops;
 			double _tolerance;
 			ILogger^ _logger;
@@ -173,12 +173,12 @@ namespace Xbim
 			virtual property BOPAlgo_Operation Operation {BOPAlgo_Operation get() { return _operation; } void set(BOPAlgo_Operation val) { _operation = val; } }
 			virtual property bool Success {bool get() { return _success; } void set(bool val) { _success = val; } }
 			virtual property bool UseBody {bool get() { return _useBody; } void set(bool val) { _useBody = val; } }
-			virtual property XbimSolidV5^ Body {XbimSolidV5^ get() { return _body; }}
+			virtual property XbimSolid^ Body {XbimSolid^ get() { return _body; }}
 			virtual property XbimSolidSet^ Ops {XbimSolidSet^ get() { return _ops; }}
 			virtual property double Tolerance {double get() { return _tolerance; }}
 			virtual property ILogger^ Logger {ILogger^ get() { return _logger; }}
 			virtual property XbimSolidSet^ Result {XbimSolidSet^ get() { return _result; } void set(XbimSolidSet^ value) { _result = value; }}
-			XbimSolidSetBoolOpParams(XbimSolidV5^ body, XbimSolidSet^ ops, double tolerance, ILogger^ logger)
+			XbimSolidSetBoolOpParams(XbimSolid^ body, XbimSolidSet^ ops, double tolerance, ILogger^ logger)
 			{
 				_body = body;
 				_ops = ops;

@@ -33,7 +33,7 @@ namespace Xbim
 	namespace Geometry
 	{
 		/*Ensures native pointers are deleted and garbage collected*/
-		void XbimCurveV5::InstanceCleanup()
+		void XbimCurve::InstanceCleanup()
 		{
 			System::IntPtr temp = System::Threading::Interlocked::Exchange(ptrContainer, System::IntPtr::Zero);
 			if (temp != System::IntPtr::Zero)
@@ -41,13 +41,13 @@ namespace Xbim
 			System::GC::SuppressFinalize(this);
 		}
 
-		XbimCurveV5::XbimCurveV5(const Handle(Geom_Curve)& curve)
+		XbimCurve::XbimCurve(const Handle(Geom_Curve)& curve)
 		{
 			this->pCurve = new Handle(Geom_Curve);
 			*pCurve = curve;
 		}
 
-		XbimRect3D XbimCurveV5::BoundingBox::get()
+		XbimRect3D XbimCurve::BoundingBox::get()
 		{
 			if (!IsValid) return XbimRect3D::Empty;
 			Bnd_Box b1;
@@ -60,32 +60,32 @@ namespace Xbim
 			return XbimRect3D(srXmin, srYmin, srZmin, (srXmax - srXmin), (srYmax - srYmin), (srZmax - srZmin));
 		}
 
-		XbimPoint3D XbimCurveV5::Start::get()
+		XbimPoint3D XbimCurve::Start::get()
 		{
 			if (!IsValid) return XbimPoint3D();
 			Standard_Real fp = (*pCurve)->FirstParameter();
 			return GetPoint(fp);
 		}
 
-		XbimPoint3D XbimCurveV5::End::get()
+		XbimPoint3D XbimCurve::End::get()
 		{
 			if (!IsValid) return XbimPoint3D();
 			Standard_Real lp = (*pCurve)->LastParameter();
 			return GetPoint(lp);
 		}
 
-		double XbimCurveV5::Length::get()
+		double XbimCurve::Length::get()
 		{
 			return  GCPnts_AbscissaPoint::Length(GeomAdaptor_Curve(*pCurve));
 		}
-		bool XbimCurveV5::IsClosed::get()
+		bool XbimCurve::IsClosed::get()
 		{
 			if (!IsValid) return false;
 			return (*pCurve)->IsClosed() == Standard_True;
 		}
 
 
-		double XbimCurveV5::GetParameter(XbimPoint3D point, double tolerance)
+		double XbimCurve::GetParameter(XbimPoint3D point, double tolerance)
 		{
 			if (!IsValid) return 0;
 			double u1;
@@ -94,7 +94,7 @@ namespace Xbim
 			return u1;
 		}
 
-		XbimPoint3D XbimCurveV5::GetPoint(double parameter)
+		XbimPoint3D XbimCurve::GetPoint(double parameter)
 		{
 			if (!IsValid) return XbimPoint3D();
 			gp_Pnt pt = (*pCurve)->Value(parameter);
@@ -103,23 +103,23 @@ namespace Xbim
 
 
 
-		IXbimGeometryObject^ XbimCurveV5::Transform(XbimMatrix3D /*matrix3D*/)
+		IXbimGeometryObject^ XbimCurve::Transform(XbimMatrix3D /*matrix3D*/)
 		{
 			throw gcnew System::Exception("Tranformation of curves is not currently supported");
 		}
 
-		IXbimGeometryObject^ XbimCurveV5::TransformShallow(XbimMatrix3D /*matrix3D*/)
+		IXbimGeometryObject^ XbimCurve::TransformShallow(XbimMatrix3D /*matrix3D*/)
 		{
 			throw gcnew System::Exception("TransformShallow of curves is not currently supported");
 		}
 
-		IEnumerable<XbimPoint3D>^ XbimCurveV5::Intersections(IXbimCurve^ intersector, double tolerance, ILogger^ /*logger*/)
+		IEnumerable<XbimPoint3D>^ XbimCurve::Intersections(IXbimCurve^ intersector, double tolerance, ILogger^ /*logger*/)
 		{
 			List<XbimPoint3D>^ intersects = gcnew List<XbimPoint3D>();
-			if (!intersector->Is3D) intersector = ((XbimCurve2DV5^)intersector)->ToCurve3D();
+			if (!intersector->Is3D) intersector = ((XbimCurve2D^)intersector)->ToCurve3D();
 			if (IsValid && intersector->IsValid)
 			{
-				GeomAPI_ExtremaCurveCurve extrema(*pCurve, *((XbimCurveV5^)intersector)->pCurve);
+				GeomAPI_ExtremaCurveCurve extrema(*pCurve, *((XbimCurve^)intersector)->pCurve);
 				for (Standard_Integer i = 0; i < extrema.NbExtrema(); i++)
 				{
 					gp_Pnt p1;
@@ -133,7 +133,7 @@ namespace Xbim
 		}
 #pragma region IfcCurve Initialisers
 
-		void XbimCurveV5::Init(IIfcCurve^ curve, ILogger^ logger)
+		void XbimCurve::Init(IIfcCurve^ curve, ILogger^ logger)
 		{
 			if (dynamic_cast<IIfcPolyline^>(curve)) Init((IIfcPolyline^)curve, logger);
 			else if (dynamic_cast<IIfcCompositeCurve^>(curve)) Init((IIfcCompositeCurve^)curve, logger);
@@ -156,7 +156,7 @@ namespace Xbim
 
 #pragma region IfcBoundedCurve
 
-		void XbimCurveV5::Init(IIfcBSplineCurveWithKnots^ bspline, ILogger^ /*logger*/)
+		void XbimCurve::Init(IIfcBSplineCurveWithKnots^ bspline, ILogger^ /*logger*/)
 		{
 			TColgp_Array1OfPnt poles(1, Enumerable::Count(bspline->ControlPointsList));
 			int i = 1;
@@ -183,7 +183,7 @@ namespace Xbim
 			*pCurve = new Geom_BSplineCurve(poles, knots, knotMultiplicities, (Standard_Integer)bspline->Degree);
 		}
 
-		void XbimCurveV5::Init(IIfcRationalBSplineCurveWithKnots^ bspline, ILogger^ /*logger*/)
+		void XbimCurve::Init(IIfcRationalBSplineCurveWithKnots^ bspline, ILogger^ /*logger*/)
 		{
 			TColgp_Array1OfPnt poles(1, Enumerable::Count(bspline->ControlPointsList));
 			int i = 1;
@@ -219,7 +219,7 @@ namespace Xbim
 
 		}
 
-		void XbimCurveV5::Init(IIfcCompositeCurve^ cCurve, ILogger^ logger)
+		void XbimCurve::Init(IIfcCompositeCurve^ cCurve, ILogger^ logger)
 		{
 
 			double tolerance = XbimConvert::ModelService(cCurve)->MinimumGap;
@@ -242,7 +242,7 @@ namespace Xbim
 					XbimGeometryCreator::LogWarning(logger, seg, "Composite curve contains a segment whih is not a bounded curve. It has been ignored");
 					return;
 				}
-				XbimCurveV5^ curve = gcnew XbimCurveV5(seg->ParentCurve, logger);
+				XbimCurve^ curve = gcnew XbimCurve(seg->ParentCurve, logger);
 				if (dynamic_cast<IIfcTrimmedCurve^>(seg->ParentCurve)) //we have to treat sense agreement differently
 				{
 					IIfcTrimmedCurve^ tc = ((IIfcTrimmedCurve^)seg->ParentCurve);
@@ -324,7 +324,7 @@ namespace Xbim
 			*pCurve = bspline;
 		}
 
-		void  XbimCurveV5::Init(IIfcIndexedPolyCurve^ polyCurve, ILogger^ logger)
+		void  XbimCurve::Init(IIfcIndexedPolyCurve^ polyCurve, ILogger^ logger)
 		{
 			double tolerance = XbimConvert::ModelService(polyCurve)->MinimumGap;
 
@@ -488,7 +488,7 @@ namespace Xbim
 
 		}
 
-		void XbimCurveV5::Init(IIfcPolyline^ pline, ILogger^ logger)
+		void XbimCurve::Init(IIfcPolyline^ pline, ILogger^ logger)
 		{
 
 			int pointCount = pline->Points->Count;
@@ -541,7 +541,7 @@ namespace Xbim
 
 		}
 
-		void XbimCurveV5::Init(IIfcTrimmedCurve^ curve, ILogger^ logger)
+		void XbimCurve::Init(IIfcTrimmedCurve^ curve, ILogger^ logger)
 		{
 			//int id = curve->EntityLabel;
 			Init(curve->BasisCurve, logger);
@@ -649,7 +649,7 @@ namespace Xbim
 
 #pragma region IfcConic
 
-		void XbimCurveV5::Init(IIfcCircle^ circle, ILogger^ logger)
+		void XbimCurve::Init(IIfcCircle^ circle, ILogger^ logger)
 		{
 			double radius = circle->Radius;
 
@@ -676,7 +676,7 @@ namespace Xbim
 
 		}
 
-		void XbimCurveV5::Init(IIfcEllipse^ ellipse, ILogger^ logger)
+		void XbimCurve::Init(IIfcEllipse^ ellipse, ILogger^ logger)
 		{
 			double semiAx1 = ellipse->SemiAxis1;
 			double semiAx2 = ellipse->SemiAxis2;
@@ -716,7 +716,7 @@ namespace Xbim
 
 #pragma endregion
 
-		void XbimCurveV5::Init(IIfcLine^ line, ILogger^ /*logger*/)
+		void XbimCurve::Init(IIfcLine^ line, ILogger^ /*logger*/)
 		{
 			IIfcCartesianPoint^ cp = line->Pnt;
 			IIfcVector^ ifcVec = line->Dir;
@@ -727,7 +727,7 @@ namespace Xbim
 			pCurve = new Handle(Geom_Curve)(maker.Value());
 		}
 
-		void XbimCurveV5::Init(IIfcOffsetCurve3D^ offset, ILogger^ logger)
+		void XbimCurve::Init(IIfcOffsetCurve3D^ offset, ILogger^ logger)
 		{
 			Init(offset->BasisCurve, logger);
 			if (IsValid)
@@ -737,24 +737,24 @@ namespace Xbim
 			}
 		}
 
-		void XbimCurveV5::Init(IIfcOffsetCurve2D^ offset, ILogger^ logger)
+		void XbimCurve::Init(IIfcOffsetCurve2D^ offset, ILogger^ logger)
 		{
-			XbimCurve2DV5^ c2d = gcnew XbimCurve2DV5(offset, logger);
+			XbimCurve2D^ c2d = gcnew XbimCurve2D(offset, logger);
 			if (c2d->IsValid)
 			{
 				pCurve = new Handle(Geom_Curve)();
-				*pCurve = (XbimCurveV5^)(c2d->ToCurve3D());
+				*pCurve = (XbimCurve^)(c2d->ToCurve3D());
 			}
 		}
 
-		void XbimCurveV5::Init(IIfcPcurve^ curve, ILogger^ logger)
+		void XbimCurve::Init(IIfcPcurve^ curve, ILogger^ logger)
 		{
-			XbimFaceV5^ face = gcnew XbimFaceV5(curve->BasisSurface, logger);
+			XbimFace^ face = gcnew XbimFace(curve->BasisSurface, logger);
 			if (face->IsValid)
 			{
 				ShapeConstruct_ProjectCurveOnSurface projector;
 				projector.Init(face->GetSurface(), XbimConvert::ModelService(curve)->MinimumGap);
-				XbimCurveV5^ baseCurve = gcnew XbimCurveV5(curve->ReferenceCurve, logger);
+				XbimCurve^ baseCurve = gcnew XbimCurve(curve->ReferenceCurve, logger);
 				Standard_Real first = baseCurve->FirstParameter;
 				Standard_Real last = baseCurve->LastParameter;
 				Handle(Geom2d_Curve) c2d;
@@ -767,29 +767,29 @@ namespace Xbim
 			}
 		}
 
-		void XbimCurveV5::Init(IIfcSurfaceCurve^ /*curve*/, ILogger^ /*logger*/)
+		void XbimCurve::Init(IIfcSurfaceCurve^ /*curve*/, ILogger^ /*logger*/)
 		{
 			throw gcnew System::NotImplementedException("IIfcSurfaceCurve is not yet implemented");
 		}
 
-		void XbimCurveV5::Reverse()
+		void XbimCurve::Reverse()
 		{
 			(*pCurve)->Reverse();
 		}
-		gp_Pnt XbimCurveV5::StartPoint()
+		gp_Pnt XbimCurve::StartPoint()
 		{
 			gp_Pnt p;
 			(*pCurve)->D0((*pCurve)->FirstParameter(), p);
 			return p;
 		}
-		gp_Pnt XbimCurveV5::EndPoint()
+		gp_Pnt XbimCurve::EndPoint()
 		{
 			gp_Pnt p;
 			(*pCurve)->D0((*pCurve)->LastParameter(), p);
 			return p;
 		}
 
-		bool XbimCurveV5::LocatePointOnCurve(const Handle(Geom_Curve)& C, const TopoDS_Vertex& V, double tolerance, double& p, double& distance)
+		bool XbimCurve::LocatePointOnCurve(const Handle(Geom_Curve)& C, const TopoDS_Vertex& V, double tolerance, double& p, double& distance)
 		{
 			Standard_Real Eps2 = tolerance * tolerance;
 

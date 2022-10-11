@@ -49,14 +49,14 @@ namespace Xbim
 					wires[index] = value;
 				}
 			}
-			property XbimWireV5^ Wire[int]
+			property XbimWire^ Wire[int]
 			{
-				XbimWireV5^ get(int index)
+				XbimWire^ get(int index)
 				{
-					return (XbimWireV5^)wires[index];
+					return (XbimWire^)wires[index];
 				}
 
-				void set(int index, XbimWireV5^ value)
+				void set(int index, XbimWire^ value)
 				{
 					wires[index] = value;
 				}

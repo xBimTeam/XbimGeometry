@@ -9,7 +9,7 @@ namespace Xbim
 {
 	namespace Geometry
 	{
-		ref class XbimCurve2DV5 : IXbimCurve, XbimGeometryObject
+		ref class XbimCurve2D : IXbimCurve, XbimGeometryObject
 		{
 		private:
 			System::IntPtr ptrContainer;
@@ -32,23 +32,23 @@ namespace Xbim
 			void Init(IIfcOffsetCurve2D^ offset, ILogger^ logger);
 			void Init(IIfcPcurve^ curve, ILogger^ logger);
 		public:
-			XbimCurve2DV5(const Handle(Geom2d_Curve)& curve2d);
-			XbimCurve2DV5(const Handle(Geom2d_Curve)& curve2d, double p1, double p2);
+			XbimCurve2D(const Handle(Geom2d_Curve)& curve2d);
+			XbimCurve2D(const Handle(Geom2d_Curve)& curve2d, double p1, double p2);
 			
 			//destructors
-			~XbimCurve2DV5(){ InstanceCleanup(); }
-			!XbimCurve2DV5(){ InstanceCleanup(); }
+			~XbimCurve2D(){ InstanceCleanup(); }
+			!XbimCurve2D(){ InstanceCleanup(); }
 
-		    XbimCurve2DV5(IIfcGridAxis^ axis, ILogger^ logger) { Init(axis,logger); }
-			XbimCurve2DV5(IIfcCurve^ curve, ILogger^ logger) { Init(curve, logger); }
-			XbimCurve2DV5(IIfcPolyline^ curv, ILogger^ logger) { Init(curv, logger); }
-			XbimCurve2DV5(IIfcCircle^ curve, ILogger^ logger) { Init(curve, logger); }
-			XbimCurve2DV5(IIfcEllipse^ curve, ILogger^ logger) { Init(curve, logger); }
-			XbimCurve2DV5(IIfcLine^ curve, ILogger^ logger) { Init(curve, logger); }
-			XbimCurve2DV5(IIfcTrimmedCurve^ curve, ILogger^ logger) { Init(curve, logger); }
-			XbimCurve2DV5(IIfcBSplineCurve^ curve, ILogger^ logger) { Init(curve, logger); }
-			XbimCurve2DV5(IIfcBSplineCurveWithKnots^ curve, ILogger^ logger) { Init(curve, logger); }
-			XbimCurve2DV5(IIfcOffsetCurve2D^ curve, ILogger^ logger){ Init(curve, logger); }
+		    XbimCurve2D(IIfcGridAxis^ axis, ILogger^ logger) { Init(axis,logger); }
+			XbimCurve2D(IIfcCurve^ curve, ILogger^ logger) { Init(curve, logger); }
+			XbimCurve2D(IIfcPolyline^ curv, ILogger^ logger) { Init(curv, logger); }
+			XbimCurve2D(IIfcCircle^ curve, ILogger^ logger) { Init(curve, logger); }
+			XbimCurve2D(IIfcEllipse^ curve, ILogger^ logger) { Init(curve, logger); }
+			XbimCurve2D(IIfcLine^ curve, ILogger^ logger) { Init(curve, logger); }
+			XbimCurve2D(IIfcTrimmedCurve^ curve, ILogger^ logger) { Init(curve, logger); }
+			XbimCurve2D(IIfcBSplineCurve^ curve, ILogger^ logger) { Init(curve, logger); }
+			XbimCurve2D(IIfcBSplineCurveWithKnots^ curve, ILogger^ logger) { Init(curve, logger); }
+			XbimCurve2D(IIfcOffsetCurve2D^ curve, ILogger^ logger){ Init(curve, logger); }
 
 #pragma region operators
 			operator const Handle(Geom2d_Curve)& () { return *pCurve2D; }

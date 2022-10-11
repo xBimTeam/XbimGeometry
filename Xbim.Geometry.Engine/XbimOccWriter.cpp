@@ -50,7 +50,7 @@ namespace Xbim
 			b.MakeCompound(c);
 			for each (IXbimSolid^ var in solidSet)
 			{
-				XbimSolidV5^ xShape = dynamic_cast<XbimSolidV5^>(var);
+				XbimSolid^ xShape = dynamic_cast<XbimSolid^>(var);
 				if (xShape == nullptr)
 					throw gcnew System::Exception("Only objects from Xbim.OCC namespace can be written using the Xbim OCC writer");
 				b.Add(c, xShape);
@@ -60,34 +60,34 @@ namespace Xbim
 
 		bool XbimOccWriter::Write(IXbimSolid^ solid, System::String^ filename)
 		{
-			XbimSolidV5^ xSolid = dynamic_cast<XbimSolidV5^>(solid);
+			XbimSolid^ xSolid = dynamic_cast<XbimSolid^>(solid);
 			if (xSolid == nullptr) throw gcnew System::Exception("Only objects from Xbim.OCC namespace can be written using the Xbim OCC writer");
 			return Write((const TopoDS_Solid&)xSolid,filename);
 		}
 
 		bool XbimOccWriter::Write(IXbimFace^ face, System::String^ filename)
 		{
-			XbimFaceV5^ xFace = dynamic_cast<XbimFaceV5^>(face);
+			XbimFace^ xFace = dynamic_cast<XbimFace^>(face);
 			if (xFace == nullptr) throw gcnew System::Exception("Only objects from Xbim.OCC namespace can be written using the Xbim OCC writer");
 			return Write((const TopoDS_Face&)xFace, filename);
 		}
 
 		bool XbimOccWriter::Write(IXbimWire^ wire, System::String^ filename)
 		{
-			XbimWireV5^ xWire = dynamic_cast<XbimWireV5^>(wire);
+			XbimWire^ xWire = dynamic_cast<XbimWire^>(wire);
 			if (xWire == nullptr) throw gcnew System::Exception("Only objects from Xbim.OCC namespace can be written using the Xbim OCC writer");
 			return Write((const TopoDS_Wire&)xWire, filename);
 		}
 		bool XbimOccWriter::Write(IXbimShell^ shell, System::String^ filename)
 		{
-			XbimShellV5^ xShell = dynamic_cast<XbimShellV5^>(shell);
+			XbimShell^ xShell = dynamic_cast<XbimShell^>(shell);
 			if (xShell == nullptr) throw gcnew System::Exception("Only objects from Xbim.OCC namespace can be written using the Xbim OCC writer");
 			return Write((const TopoDS_Shell&)xShell, filename);
 		}
 		
 		bool XbimOccWriter::Write(IXbimGeometryObjectSet^ objects, System::String^ filename)
 		{
-			XbimCompoundV5^ xCompound = dynamic_cast<XbimCompoundV5^>(objects);
+			XbimCompound^ xCompound = dynamic_cast<XbimCompound^>(objects);
 			if (xCompound != nullptr) return Write((const TopoDS_Compound&)xCompound, filename);
 			throw gcnew System::Exception("Only objects from Xbim.OCC namespace can be written using the Xbim OCC writer");
 			

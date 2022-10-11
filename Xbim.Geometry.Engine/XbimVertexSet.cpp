@@ -16,7 +16,7 @@ namespace Xbim
 			builder.MakeCompound(bodyCompound);
 			for each (IXbimVertex ^ vertex in vertices)
 			{
-				builder.Add(bodyCompound, (XbimVertexV5^) vertex);
+				builder.Add(bodyCompound, (XbimVertex^) vertex);
 			}
 			return bodyCompound;
 		}
@@ -30,7 +30,7 @@ namespace Xbim
 			TopExp::MapShapes(shape, TopAbs_VERTEX, map);
 			vertices = gcnew  List<IXbimVertex^>(map.Extent());
 			for (int i = 1; i <= map.Extent(); i++)
-				vertices->Add(gcnew XbimVertexV5(TopoDS::Vertex(map(i))));
+				vertices->Add(gcnew XbimVertex(TopoDS::Vertex(map(i))));
 		}
 
 		XbimVertexSet::XbimVertexSet(IEnumerable<IXbimVertex^>^ vertices)
@@ -67,7 +67,7 @@ namespace Xbim
 			List<IXbimVertex^>^ result = gcnew List<IXbimVertex^>(vertices->Count);
 			for each (IXbimGeometryObject^ vertex in vertices)
 			{
-				result->Add((IXbimVertex^)((XbimVertexV5^)vertex)->TransformShallow(matrix3D));
+				result->Add((IXbimVertex^)((XbimVertex^)vertex)->TransformShallow(matrix3D));
 			}
 			return gcnew XbimVertexSet(result);
 		}
@@ -76,8 +76,8 @@ namespace Xbim
 		{
 			if (!IsValid) return this;
 			XbimVertexSet^ result = gcnew XbimVertexSet();
-			for each (XbimVertexV5^ vertex in vertices)
-				result->Add((XbimVertexV5^)vertex->Transformed(transformation));
+			for each (XbimVertex^ vertex in vertices)
+				result->Add((XbimVertex^)vertex->Transformed(transformation));
 			return result;
 		}
 
@@ -88,7 +88,7 @@ namespace Xbim
 			TopLoc_Location loc = XbimConvert::ToLocation(placement);
 			for each (IXbimVertex^ vertex in vertices)
 			{
-				XbimVertexV5^ copy = gcnew XbimVertexV5((XbimVertexV5^)vertex, Tag);
+				XbimVertex^ copy = gcnew XbimVertex((XbimVertex^)vertex, Tag);
 				copy->Move(loc);
 				result->Add(copy);
 			}
@@ -102,7 +102,7 @@ namespace Xbim
 			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement, logger);
 			for each (IXbimVertex^ vertex in vertices)
 			{
-				XbimVertexV5^ copy = gcnew XbimVertexV5((XbimVertexV5^)vertex, Tag);
+				XbimVertex^ copy = gcnew XbimVertex((XbimVertex^)vertex, Tag);
 				copy->Move(loc);
 				result->Add(copy);
 			}

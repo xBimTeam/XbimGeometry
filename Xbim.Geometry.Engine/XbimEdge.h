@@ -14,7 +14,7 @@ namespace Xbim
 {
 	namespace Geometry
 	{
-		ref class XbimEdgeV5 : IXbimEdge, XbimOccShape
+		ref class XbimEdge : IXbimEdge, XbimOccShape
 		{
 		private:
 			
@@ -36,27 +36,27 @@ namespace Xbim
 			
 #pragma endregion
 
-			XbimEdgeV5(){};
+			XbimEdge(){};
 		public:
 			//error messages
 			static System::String^ GetBuildEdgeErrorMessage(BRepBuilderAPI_EdgeError edgeErr);
 			//Constructors and destructors
-			~XbimEdgeV5(){ InstanceCleanup(); }
-			!XbimEdgeV5(){ InstanceCleanup(); }
+			~XbimEdge(){ InstanceCleanup(); }
+			!XbimEdge(){ InstanceCleanup(); }
 
 #pragma region Constructors
-			XbimEdgeV5(IXbimVertex^ edgeStart, IXbimVertex^ edgeEnd);
-			XbimEdgeV5(const TopoDS_Edge& edge);
-			XbimEdgeV5(const TopoDS_Edge& edge, Object^ tag);
-			XbimEdgeV5(IIfcCurve^ edge, ILogger^ logger);
-			XbimEdgeV5(IIfcProfileDef^ profile, ILogger^ logger);
-			XbimEdgeV5(XbimEdgeV5^ edgeCurve, XbimVertexV5^ start, XbimVertexV5^ end, double maxTolerance);
-			XbimEdgeV5(const TopoDS_Wire& wire, double tolerance, double angleTolerance, ILogger^ logger);
-			XbimEdgeV5(IIfcCurve^ edgeCurve, XbimVertexV5^ start, XbimVertexV5^ end, ILogger^ logger);
-			XbimEdgeV5(XbimVertexV5^ start, XbimVertexV5^ midPoint, XbimVertexV5^ end);
-			XbimEdgeV5(XbimCurveV5^ curve3D);
-			XbimEdgeV5(Handle(Geom_Curve) curve3D);
-			XbimEdgeV5(XbimCurve2DV5^ curve2D, ILogger^ logger);
+			XbimEdge(IXbimVertex^ edgeStart, IXbimVertex^ edgeEnd);
+			XbimEdge(const TopoDS_Edge& edge);
+			XbimEdge(const TopoDS_Edge& edge, Object^ tag);
+			XbimEdge(IIfcCurve^ edge, ILogger^ logger);
+			XbimEdge(IIfcProfileDef^ profile, ILogger^ logger);
+			XbimEdge(XbimEdge^ edgeCurve, XbimVertex^ start, XbimVertex^ end, double maxTolerance);
+			XbimEdge(const TopoDS_Wire& wire, double tolerance, double angleTolerance, ILogger^ logger);
+			XbimEdge(IIfcCurve^ edgeCurve, XbimVertex^ start, XbimVertex^ end, ILogger^ logger);
+			XbimEdge(XbimVertex^ start, XbimVertex^ midPoint, XbimVertex^ end);
+			XbimEdge(XbimCurve^ curve3D);
+			XbimEdge(Handle(Geom_Curve) curve3D);
+			XbimEdge(XbimCurve2D^ curve2D, ILogger^ logger);
 			
 #pragma endregion
 
@@ -70,8 +70,8 @@ namespace Xbim
 #pragma region Equality Overrides
 			virtual bool Equals(Object^ v) override;
 			virtual int GetHashCode() override;
-			static bool operator ==(XbimEdgeV5^ left, XbimEdgeV5^ right);
-			static bool operator !=(XbimEdgeV5^ left, XbimEdgeV5^ right);
+			static bool operator ==(XbimEdge^ left, XbimEdge^ right);
+			static bool operator !=(XbimEdge^ left, XbimEdge^ right);
 			virtual bool Equals(IXbimEdge^ e);
 
 #pragma endregion
@@ -96,7 +96,7 @@ namespace Xbim
 			property bool IsReversed{bool get(){ return IsValid && pEdge->Orientation() == TopAbs_REVERSED; }; }
 #pragma endregion
 			void Reverse();
-			XbimEdgeV5^ Reversed();
+			XbimEdge^ Reversed();
 
 			// Inherited via XbimOccShape
 			virtual XbimGeometryObject ^ Transformed(IIfcCartesianTransformationOperator ^ transformation) override;
@@ -113,15 +113,15 @@ namespace Xbim
 		ref class XbimBiPolarLinearEdge
 		{
 			XbimPoint3DWithTolerance^ pointA;
-			XbimVertexV5^ vertexA;
+			XbimVertex^ vertexA;
 			XbimPoint3DWithTolerance^ pointB;
-			XbimVertexV5^ vertexB;
-			XbimEdgeV5^ edgeAB;
+			XbimVertex^ vertexB;
+			XbimEdge^ edgeAB;
 			
 			int refCount=0;
 			int hashCode;
 		public:
-			XbimBiPolarLinearEdge(XbimPoint3DWithTolerance^ pA, XbimVertexV5^ vA, XbimPoint3DWithTolerance^ pB, XbimVertexV5^ vB)
+			XbimBiPolarLinearEdge(XbimPoint3DWithTolerance^ pA, XbimVertex^ vA, XbimPoint3DWithTolerance^ pB, XbimVertex^ vB)
 			{
 				pointA = pA;
 				vertexA = vA;
@@ -133,7 +133,7 @@ namespace Xbim
 				if (hashA == hashB && pA == pB)
 					refCount = -1;
 				else
-					edgeAB = gcnew XbimEdgeV5(vertexA, vertexB);
+					edgeAB = gcnew XbimEdge(vertexA, vertexB);
 				
 			}
 			
@@ -143,7 +143,7 @@ namespace Xbim
 			{
 				if (refCount > 0)refCount--;
 			}
-			XbimEdgeV5^ TakeEdge(XbimPoint3DWithTolerance^ pA)
+			XbimEdge^ TakeEdge(XbimPoint3DWithTolerance^ pA)
 			{
 				if (IsEmptyLine) 
 					return nullptr;

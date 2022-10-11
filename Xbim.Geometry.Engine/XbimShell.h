@@ -15,7 +15,7 @@ namespace Xbim
 	namespace Geometry
 	{
 
-		ref class XbimShellV5 : IXbimShell, XbimOccShape
+		ref class XbimShell : IXbimShell, XbimOccShape
 		{
 		private:
 			
@@ -31,21 +31,21 @@ namespace Xbim
 			void Init(IIfcSurfaceOfLinearExtrusion^ linExt, ILogger^ logger);
 		public:
 			//Constructors
-			XbimShellV5();
-			XbimShellV5(const TopoDS_Shell& shell);
-			XbimShellV5(const TopoDS_Shell& shell, Object^ tag);
-			XbimShellV5(IIfcOpenShell^ openShell, ILogger^ logger);
-			XbimShellV5(IIfcConnectedFaceSet^ faceset, ILogger^ logger);
-			XbimShellV5(IIfcSurfaceOfLinearExtrusion^ linExt, ILogger^ logger);
+			XbimShell();
+			XbimShell(const TopoDS_Shell& shell);
+			XbimShell(const TopoDS_Shell& shell, Object^ tag);
+			XbimShell(IIfcOpenShell^ openShell, ILogger^ logger);
+			XbimShell(IIfcConnectedFaceSet^ faceset, ILogger^ logger);
+			XbimShell(IIfcSurfaceOfLinearExtrusion^ linExt, ILogger^ logger);
 			//destructors
-			~XbimShellV5(){ InstanceCleanup(); }
-			!XbimShellV5(){ InstanceCleanup(); }
+			~XbimShell(){ InstanceCleanup(); }
+			!XbimShell(){ InstanceCleanup(); }
 
 #pragma region Equality Overrides
 			virtual bool Equals(Object^ v) override;
 			virtual int GetHashCode() override;
-			static bool operator ==(XbimShellV5^ left, XbimShellV5^ right);
-			static bool operator !=(XbimShellV5^ left, XbimShellV5^ right);
+			static bool operator ==(XbimShell^ left, XbimShell^ right);
+			static bool operator !=(XbimShell^ left, XbimShell^ right);
 			virtual bool Equals(IXbimShell^ s);
 #pragma endregion
 

@@ -65,11 +65,11 @@ namespace Xbim
 			Dictionary<XbimPoint3DWithTolerance^, size_t>^ normalMap = gcnew Dictionary<XbimPoint3DWithTolerance^, size_t>();
 			List<List<size_t>^>^ normalLookup = gcnew List<List<size_t>^>(faces->Count);
 			List<XbimVector3D>^ normals = gcnew List<XbimVector3D>(faces->Count * 4);
-			List<XbimFaceV5^>^ writtenFaces = gcnew List<XbimFaceV5^>(faces->Count);
+			List<XbimFace^>^ writtenFaces = gcnew List<XbimFace^>(faces->Count);
 			//First write out all the vertices
 			int faceIndex = 0;
 			int triangleCount = 0;
-			for each (XbimFaceV5 ^ face in faces)
+			for each (XbimFace ^ face in faces)
 			{
 				TopLoc_Location loc;
 				const Handle(Poly_Triangulation)& mesh = BRep_Tool::Triangulation(face, loc);
@@ -147,7 +147,7 @@ namespace Xbim
 
 			//now write out the faces
 			faceIndex = 0;
-			for each (XbimFaceV5 ^ face in writtenFaces)
+			for each (XbimFace ^ face in writtenFaces)
 			{
 				bool isPlanar = face->IsPlanar;
 				List<size_t>^ norms = normalLookup[faceIndex];

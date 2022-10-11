@@ -127,11 +127,11 @@ namespace Xbim
 			virtual IXbimPoint^ CreatePoint(IIfcPointOnSurface^ p, ILogger^ logger);
 
 			//Vertex Creation
-			virtual IXbimVertex^ CreateVertex() { return gcnew XbimVertexV5(); }
-			virtual IXbimVertex^ CreateVertexPoint(XbimPoint3D point, double precision) { return gcnew XbimVertexV5(point, precision); }
+			virtual IXbimVertex^ CreateVertex() { return gcnew XbimVertex(); }
+			virtual IXbimVertex^ CreateVertexPoint(XbimPoint3D point, double precision) { return gcnew XbimVertex(point, precision); }
 
 			//Edge Creation
-			virtual IXbimEdge^ CreateEdge(IXbimVertex^ edgeStart, IXbimVertex^ edgeEnd) { return gcnew XbimEdgeV5(edgeStart, edgeEnd); }
+			virtual IXbimEdge^ CreateEdge(IXbimVertex^ edgeStart, IXbimVertex^ edgeEnd) { return gcnew XbimEdge(edgeStart, edgeEnd); }
 
 			//Create Wire
 			virtual IXbimWire^ CreateWire(IIfcCurve^ curve, ILogger^ logger);

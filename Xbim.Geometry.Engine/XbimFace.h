@@ -16,7 +16,7 @@ namespace Xbim
 {
 	namespace Geometry
 	{
-		ref class XbimFaceV5 : IXbimFace, XbimOccShape
+		ref class XbimFace : IXbimFace, XbimOccShape
 		{
 		private:
 			
@@ -61,8 +61,8 @@ namespace Xbim
 		public:
 			
 			//destructors
-			~XbimFaceV5(){ InstanceCleanup(); }
-			!XbimFaceV5(){ InstanceCleanup(); }
+			~XbimFace(){ InstanceCleanup(); }
+			!XbimFace(){ InstanceCleanup(); }
 
 			//error logging
 			static System::String^ GetBuildFaceErrorMessage(BRepBuilderAPI_FaceError err);
@@ -77,8 +77,8 @@ namespace Xbim
 #pragma region Equality Overrides
 			virtual bool Equals(Object^ v) override;
 			virtual int GetHashCode() override;
-			static bool operator ==(XbimFaceV5^ left, XbimFaceV5^ right);
-			static bool operator !=(XbimFaceV5^ left, XbimFaceV5^ right);
+			static bool operator ==(XbimFace^ left, XbimFace^ right);
+			static bool operator !=(XbimFace^ left, XbimFace^ right);
 			virtual bool Equals(IXbimFace^ f);
 #pragma endregion
 
@@ -106,41 +106,41 @@ namespace Xbim
 			property bool IsReversed{bool get(){ return IsValid && pFace->Orientation() == TopAbs_REVERSED; }; }
 			
 #pragma region constructors
-			XbimFaceV5(const TopoDS_Face& face);
-			XbimFaceV5(const TopoDS_Face& face, Object^ tag);
-			XbimFaceV5(){}; //an invalid empty face
-			XbimFaceV5(XbimVector3D normal, ILogger^ logger);
-			XbimFaceV5(XbimPoint3D location, XbimVector3D normal, ILogger^ logger);
-			XbimFaceV5(IIfcProfileDef^ profile, ILogger^ logger);
+			XbimFace(const TopoDS_Face& face);
+			XbimFace(const TopoDS_Face& face, Object^ tag);
+			XbimFace(){}; //an invalid empty face
+			XbimFace(XbimVector3D normal, ILogger^ logger);
+			XbimFace(XbimPoint3D location, XbimVector3D normal, ILogger^ logger);
+			XbimFace(IIfcProfileDef^ profile, ILogger^ logger);
 			//Builds a face from a Surface
-			XbimFaceV5(IIfcSurface^ surface, ILogger^ logger);
+			XbimFace(IIfcSurface^ surface, ILogger^ logger);
 
 			//Builds a face from a Plane
-			XbimFaceV5(IIfcPlane ^ plane, ILogger^ logger);
-			XbimFaceV5(IIfcSurfaceOfLinearExtrusion ^ sLin, bool useWorkArounds, ILogger^ logger);
-			XbimFaceV5(IIfcSurfaceOfLinearExtrusion^ sLin,  ILogger^ logger);
-			XbimFaceV5(IIfcSurfaceOfRevolution ^ sRev, ILogger^ logger);
-			XbimFaceV5(IIfcCurveBoundedPlane ^ def, ILogger^ logger);
-			XbimFaceV5(IIfcRectangularTrimmedSurface ^ def, ILogger^ logger);
-			XbimFaceV5(IIfcCompositeCurve ^ cCurve, ILogger^ logger);
-			XbimFaceV5(IIfcPolyline ^ pline,  ILogger^ logger);
-			XbimFaceV5(IIfcPolyLoop ^ loop, ILogger^ logger);
-			XbimFaceV5(IXbimWire^ wire, bool isPlanar, double precision, int entityLabel,  ILogger^ logger);
-			XbimFaceV5(IXbimWire^ wire, XbimPoint3D pointOnface,  XbimVector3D faceNormal, ILogger^ logger);
-			XbimFaceV5(IIfcSurface^ surface, XbimWireV5^ outerBound, IEnumerable<XbimWireV5^>^ innerBounds, ILogger^ logger);
+			XbimFace(IIfcPlane ^ plane, ILogger^ logger);
+			XbimFace(IIfcSurfaceOfLinearExtrusion ^ sLin, bool useWorkArounds, ILogger^ logger);
+			XbimFace(IIfcSurfaceOfLinearExtrusion^ sLin,  ILogger^ logger);
+			XbimFace(IIfcSurfaceOfRevolution ^ sRev, ILogger^ logger);
+			XbimFace(IIfcCurveBoundedPlane ^ def, ILogger^ logger);
+			XbimFace(IIfcRectangularTrimmedSurface ^ def, ILogger^ logger);
+			XbimFace(IIfcCompositeCurve ^ cCurve, ILogger^ logger);
+			XbimFace(IIfcPolyline ^ pline,  ILogger^ logger);
+			XbimFace(IIfcPolyLoop ^ loop, ILogger^ logger);
+			XbimFace(IXbimWire^ wire, bool isPlanar, double precision, int entityLabel,  ILogger^ logger);
+			XbimFace(IXbimWire^ wire, XbimPoint3D pointOnface,  XbimVector3D faceNormal, ILogger^ logger);
+			XbimFace(IIfcSurface^ surface, XbimWire^ outerBound, IEnumerable<XbimWire^>^ innerBounds, ILogger^ logger);
 			static void PutEdgeOnFace(const TopoDS_Edge& Edg, const TopoDS_Face& Fac);
-			XbimFaceV5(IIfcFaceSurface^ surface, XbimWireV5^ outerBound, IEnumerable<XbimWireV5^>^ innerBounds, double tolerance, ILogger^ logger);
+			XbimFace(IIfcFaceSurface^ surface, XbimWire^ outerBound, IEnumerable<XbimWire^>^ innerBounds, double tolerance, ILogger^ logger);
 			bool CheckInside();
-			XbimFaceV5(IIfcCylindricalSurface ^ surface, ILogger^ logger);
-			XbimFaceV5(double x, double y, double tolerance, ILogger^ logger);
-			XbimFaceV5(IIfcFace ^ face, ILogger^ logger, bool useVertexMap, TopTools_DataMapOfIntegerShape & vertexMap);
+			XbimFace(IIfcCylindricalSurface ^ surface, ILogger^ logger);
+			XbimFace(double x, double y, double tolerance, ILogger^ logger);
+			XbimFace(IIfcFace ^ face, ILogger^ logger, bool useVertexMap, TopTools_DataMapOfIntegerShape & vertexMap);
 			
 #pragma endregion
 
 #pragma region Internal Properties
 			property XbimWireSet^  Wires{XbimWireSet^ get(); }
 			property XbimWireSet^  InnerWires{XbimWireSet^ get(); }
-			property XbimWireV5^  OuterWire{XbimWireV5^ get(); }
+			property XbimWire^  OuterWire{XbimWire^ get(); }
 #pragma endregion	
 
 #pragma region Methods

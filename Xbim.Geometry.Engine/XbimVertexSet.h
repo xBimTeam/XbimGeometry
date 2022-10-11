@@ -47,14 +47,14 @@ namespace Xbim
 					vertices[index] = value;
 				}
 			}
-			property XbimVertexV5^ Vertex[int]
+			property XbimVertex^ Vertex[int]
 			{
-				XbimVertexV5^ get(int index)
+				XbimVertex^ get(int index)
 				{
-					return (XbimVertexV5^)vertices[index];
+					return (XbimVertex^)vertices[index];
 				}
 
-				void set(int index, XbimVertexV5^ value)
+				void set(int index, XbimVertex^ value)
 				{
 					vertices[index] = value;
 				}

@@ -83,7 +83,7 @@ namespace Xbim
 			bool sewn = false;
 			for each (IXbimGeometryObject ^ geom in geometryObjects)
 			{
-				XbimCompoundV5^ comp = dynamic_cast<XbimCompoundV5^>(geom);
+				XbimCompound^ comp = dynamic_cast<XbimCompound^>(geom);
 				if (comp != nullptr)
 					if (comp->Sew()) sewn = true;
 			}
@@ -206,11 +206,11 @@ namespace Xbim
 					TopTools_IndexedMapOfShape map;
 					TopExp::MapShapes(occ, TopAbs_SOLID, map);
 					for (int i = 1; i <= map.Extent(); i++)
-						solids->Add(gcnew XbimSolidV5(TopoDS::Solid(map(i))));
+						solids->Add(gcnew XbimSolid(TopoDS::Solid(map(i))));
 				}
 				else if (ss != nullptr)
 				{
-					for each (XbimSolidV5 ^ solid in ss)
+					for each (XbimSolid ^ solid in ss)
 					{
 						solids->Add(solid);
 					}
@@ -232,11 +232,11 @@ namespace Xbim
 					TopTools_IndexedMapOfShape map;
 					TopExp::MapShapes(occ, TopAbs_SHELL, map);
 					for (int i = 1; i <= map.Extent(); i++)
-						shells->Add(gcnew XbimShellV5(TopoDS::Shell(map(i))));
+						shells->Add(gcnew XbimShell(TopoDS::Shell(map(i))));
 				}
 				else if (ss != nullptr)
 				{
-					for each (XbimShellV5 ^ shell in ss)
+					for each (XbimShell ^ shell in ss)
 					{
 						shells->Add(shell);
 					}
@@ -258,11 +258,11 @@ namespace Xbim
 					TopTools_IndexedMapOfShape map;
 					TopExp::MapShapes(occ, TopAbs_FACE, map);
 					for (int i = 1; i <= map.Extent(); i++)
-						faces->Add(gcnew XbimFaceV5(TopoDS::Face(map(i))));
+						faces->Add(gcnew XbimFace(TopoDS::Face(map(i))));
 				}
 				else if (fs != nullptr)
 				{
-					for each (XbimFaceV5 ^ face in fs)
+					for each (XbimFace ^ face in fs)
 					{
 						faces->Add(face);
 					}
@@ -283,11 +283,11 @@ namespace Xbim
 					TopTools_IndexedMapOfShape map;
 					TopExp::MapShapes(occ, TopAbs_EDGE, map);
 					for (int i = 1; i <= map.Extent(); i++)
-						edges->Add(gcnew XbimEdgeV5(TopoDS::Edge(map(i))));
+						edges->Add(gcnew XbimEdge(TopoDS::Edge(map(i))));
 				}
 				else if (es != nullptr)
 				{
-					for each (XbimEdgeV5 ^ edge in es)
+					for each (XbimEdge ^ edge in es)
 					{
 						edges->Add(edge);
 					}
@@ -308,11 +308,11 @@ namespace Xbim
 					TopTools_IndexedMapOfShape map;
 					TopExp::MapShapes(occ, TopAbs_VERTEX, map);
 					for (int i = 1; i <= map.Extent(); i++)
-						vertices->Add(gcnew XbimVertexV5(TopoDS::Vertex(map(i))));
+						vertices->Add(gcnew XbimVertex(TopoDS::Vertex(map(i))));
 				}
 				else if (vs != nullptr)
 				{
-					for each (XbimVertexV5 ^ vertex in vs)
+					for each (XbimVertex ^ vertex in vs)
 					{
 						vertices->Add(vertex);
 					}
@@ -334,10 +334,10 @@ namespace Xbim
 			for each (IXbimGeometryObject ^ iGeom in geomObjects)
 			{
 				// four types of geometry are found in the geomObjects
-				XbimShellV5^ shell = dynamic_cast<XbimShellV5^>(iGeom);
-				XbimSolidV5^ solid = dynamic_cast<XbimSolidV5^>(iGeom);
+				XbimShell^ shell = dynamic_cast<XbimShell^>(iGeom);
+				XbimSolid^ solid = dynamic_cast<XbimSolid^>(iGeom);
 				IEnumerable<IXbimGeometryObject^>^ geomSet = dynamic_cast<IEnumerable<IXbimGeometryObject^>^>(iGeom);
-				XbimFaceV5^ face = dynamic_cast<XbimFaceV5^>(iGeom);
+				XbimFace^ face = dynamic_cast<XbimFace^>(iGeom);
 
 				// type 1
 				if (solid != nullptr)
@@ -473,7 +473,7 @@ namespace Xbim
 				int i = 1;
 
 				
-				for each (XbimSolidV5 ^ solid in solids)
+				for each (XbimSolid ^ solid in solids)
 				{
 					if (solid != nullptr && solid->IsValid)
 					{
@@ -551,14 +551,14 @@ namespace Xbim
 
 
 				
-				XbimCompoundV5^ compound = gcnew XbimCompoundV5(occCompound, false, tolerance);
+				XbimCompound^ compound = gcnew XbimCompound(occCompound, false, tolerance);
 
 				if (bop != BOPAlgo_COMMON) //do not need to add these as they by definition do not intersect
 				{
 					TopExp_Explorer expl(toBePassedThrough, TopAbs_FACE);
 
 					if (expl.More()) //only add if there are faces to consider
-						compound->Add(gcnew XbimShellV5(toBePassedThrough));
+						compound->Add(gcnew XbimShell(toBePassedThrough));
 				}
 
 				XbimGeometryObjectSet^ geomObjs = gcnew XbimGeometryObjectSet();

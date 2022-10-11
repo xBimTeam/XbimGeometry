@@ -44,7 +44,7 @@ namespace Xbim
 
 		XbimPoint3DWithTolerance::XbimPoint3DWithTolerance(IIfcPointOnCurve^ point, ILogger^ logger)
 		{
-			XbimWireV5^ w = gcnew XbimWireV5(point->BasisCurve, logger, XbimConstraints::None);
+			XbimWire^ w = gcnew XbimWire(point->BasisCurve, logger, XbimConstraints::None);
 			this->point = w->PointAtParameter(point->PointParameter);
 			this->tolerance = XbimConvert::ModelService(point)->MinimumGap;
 			CalculateHashCode();
@@ -52,7 +52,7 @@ namespace Xbim
 
 		XbimPoint3DWithTolerance::XbimPoint3DWithTolerance(IIfcPointOnSurface^ point, ILogger^ logger)
 		{
-			XbimFaceV5^ f = gcnew XbimFaceV5(point->BasisSurface, logger);
+			XbimFace^ f = gcnew XbimFace(point->BasisSurface, logger);
 			this->point = f->PointAtParameters(point->PointParameterU, point->PointParameterV);
 			this->tolerance = XbimConvert::ModelService(point)->MinimumGap;
 			CalculateHashCode();

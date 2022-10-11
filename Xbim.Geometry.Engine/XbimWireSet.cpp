@@ -15,14 +15,14 @@ namespace Xbim
 			TopExp::MapShapes(shape, TopAbs_WIRE, map);
 			wires = gcnew  List<IXbimWire^>(map.Extent());
 			for (int i = 1; i <= map.Extent(); i++)
-				wires->Add(gcnew XbimWireV5(TopoDS::Wire(map(i))));
+				wires->Add(gcnew XbimWire(TopoDS::Wire(map(i))));
 		}
 
 		XbimWireSet::XbimWireSet(const TopTools_ListOfShape& wireList)
 		{
 			wires = gcnew  List<IXbimWire^>(wireList.Extent());
 			for (TopTools_ListIteratorOfListOfShape wireIter(wireList); wireIter.More(); wireIter.Next())
-				wires->Add(gcnew XbimWireV5(TopoDS::Wire(wireIter.Value())));
+				wires->Add(gcnew XbimWire(TopoDS::Wire(wireIter.Value())));
 		}
 
 		XbimWireSet::operator TopoDS_Shape ()
@@ -30,7 +30,7 @@ namespace Xbim
 			BRep_Builder builder;
 			TopoDS_Compound bodyCompound;
 			builder.MakeCompound(bodyCompound);
-			for each (XbimWireV5^ wire in wires)
+			for each (XbimWire^ wire in wires)
 			{				
 				builder.Add(bodyCompound, wire);	
 			}
@@ -63,7 +63,7 @@ namespace Xbim
 			List<IXbimWire^>^ result = gcnew List<IXbimWire^>(wires->Count);
 			for each (IXbimGeometryObject^ wire in wires)
 			{
-				result->Add((IXbimWire^)((XbimWireV5^)wire)->TransformShallow(matrix3D));
+				result->Add((IXbimWire^)((XbimWire^)wire)->TransformShallow(matrix3D));
 			}
 			return gcnew XbimWireSet(result);
 		}
@@ -72,8 +72,8 @@ namespace Xbim
 		{
 			if (!IsValid) return this;
 			XbimWireSet^ result = gcnew XbimWireSet();
-			for each (XbimWireV5^ wire in wires)
-				result->Add((XbimWireV5^)wire->Transformed(transformation));
+			for each (XbimWire^ wire in wires)
+				result->Add((XbimWire^)wire->Transformed(transformation));
 			return result;
 		}
 
@@ -84,7 +84,7 @@ namespace Xbim
 			TopLoc_Location loc = XbimConvert::ToLocation(placement);
 			for each (IXbimFace^ wire in wires)
 			{
-				XbimWireV5^ copy = gcnew XbimWireV5((XbimWireV5^)wire, Tag);
+				XbimWire^ copy = gcnew XbimWire((XbimWire^)wire, Tag);
 				copy->Move(loc);
 				result->Add(copy);
 			}
@@ -98,7 +98,7 @@ namespace Xbim
 			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement,logger);
 			for each (IXbimFace^ wire in wires)
 			{
-				XbimWireV5^ copy = gcnew XbimWireV5((XbimWireV5^)wire, Tag);
+				XbimWire^ copy = gcnew XbimWire((XbimWire^)wire, Tag);
 				copy->Move(loc);
 				result->Add(copy);
 			}
