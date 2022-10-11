@@ -1,9 +1,9 @@
 #pragma once
-#include "XbimFace.h"
+
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
 #include <TopTools_ListOfShape.hxx>
-
+#include "XbimFace.h"
 using namespace System::Collections::Generic;
 namespace Xbim
 {
@@ -37,7 +37,7 @@ namespace Xbim
 
 
 #pragma region operators
-
+			operator TopoDS_Shape () override;
 			virtual property IXbimFace^ default[int]
 			{
 				IXbimFace^ get(int index)
@@ -50,14 +50,14 @@ namespace Xbim
 					faces[index] = value;
 				}
 			}
-			property XbimFace^ Face[int]
+			property XbimFaceV5^ Face[int]
 			{
-				XbimFace^ get(int index)
+				XbimFaceV5^ get(int index)
 				{
-					return (XbimFace^)faces[index];
+					return (XbimFaceV5^)faces[index];
 				}
 
-				void set(int index, XbimFace^ value)
+				void set(int index, XbimFaceV5^ value)
 				{
 					faces[index] = value;
 				}

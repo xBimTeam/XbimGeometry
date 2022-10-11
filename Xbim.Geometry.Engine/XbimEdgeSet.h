@@ -1,8 +1,9 @@
 #pragma once
-#include "XbimEdge.h"
-#include "XbimWire.h"
+
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
+#include "XbimEdge.h"
+#include "XbimWire.h"
 using namespace System::Collections::Generic;
 namespace Xbim
 {
@@ -24,8 +25,9 @@ namespace Xbim
 #pragma region Constructors
 
 			XbimEdgeSet(const TopoDS_Shape& shape);
+			operator  TopoDS_Shape () override;
 			XbimEdgeSet(IEnumerable<IXbimEdge^>^ edges);
-			XbimEdgeSet(XbimWire^ wire);
+			XbimEdgeSet(XbimWireV5^ wire);
 			
 #pragma endregion
 

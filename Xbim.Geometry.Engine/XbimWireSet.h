@@ -1,8 +1,10 @@
 #pragma once
-#include "XbimWire.h"
+
 #include <TopExp_Explorer.hxx>
 #include <TopTools_ListOfShape.hxx>
 #include <TopoDS.hxx>
+
+#include "XbimWire.h"
 using namespace System::Collections::Generic;
 namespace Xbim
 {
@@ -34,6 +36,7 @@ namespace Xbim
 #pragma endregion
 
 #pragma region operators
+			virtual operator  TopoDS_Shape () override;
 			virtual property IXbimWire^ default[int]
 			{
 				IXbimWire^ get(int index)
@@ -46,14 +49,14 @@ namespace Xbim
 					wires[index] = value;
 				}
 			}
-			property XbimWire^ Wire[int]
+			property XbimWireV5^ Wire[int]
 			{
-				XbimWire^ get(int index)
+				XbimWireV5^ get(int index)
 				{
-					return (XbimWire^)wires[index];
+					return (XbimWireV5^)wires[index];
 				}
 
-				void set(int index, XbimWire^ value)
+				void set(int index, XbimWireV5^ value)
 				{
 					wires[index] = value;
 				}

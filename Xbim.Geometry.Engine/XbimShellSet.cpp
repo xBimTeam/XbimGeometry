@@ -1,9 +1,4 @@
-#include "XbimShellSet.h"
-#include "XbimSolid.h"
-#include "XbimSolidSet.h"
-#include "XbimGeometryCreator.h"
-#include "XbimGeometryObjectSet.h"
-#include "XbimConvert.h"
+
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <TopExp.hxx>
 #include <BRepAlgoAPI_Cut.hxx>
@@ -12,7 +7,12 @@
 #include <BRepBndLib.hxx>
 #include <Bnd_Array1OfBox.hxx>
 #include <BRepBuilderAPI_Sewing.hxx>
-using namespace System;
+#include "XbimShellSet.h"
+#include "XbimSolid.h"
+#include "XbimSolidSet.h"
+#include "XbimGeometryCreator.h"
+#include "XbimGeometryObjectSet.h"
+#include "XbimConvert.h"
 namespace Xbim
 {
 	namespace Geometry
@@ -23,7 +23,7 @@ namespace Xbim
 			TopExp::MapShapes(shape, TopAbs_SHELL, map);
 			shells = gcnew  List<IXbimShell^>(map.Extent());
 			for (int i = 1; i <= map.Extent(); i++)
-				shells->Add(gcnew XbimShell(TopoDS::Shell(map(i))));
+				shells->Add(gcnew XbimShellV5(TopoDS::Shell(map(i))));
 		}
 
 		XbimShellSet::XbimShellSet(List<IXbimShell^>^ shells)
@@ -58,7 +58,7 @@ namespace Xbim
 			List<IXbimShell^>^ result = gcnew List<IXbimShell^>(shells->Count);
 			for each (IXbimGeometryObject^ shell in shells)
 			{
-				result->Add((IXbimShell^)((XbimShell^)shell)->TransformShallow(matrix3D));
+				result->Add((IXbimShell^)((XbimShellV5^)shell)->TransformShallow(matrix3D));
 			}
 			return gcnew XbimShellSet(result);
 		}
@@ -124,15 +124,15 @@ namespace Xbim
 
 		void XbimShellSet::Union(double /*tolerance*/)
 		{
-			throw gcnew NotImplementedException("XbimShellSet::Union");
+			throw gcnew System::NotImplementedException("XbimShellSet::Union");
 		}
 
 		IXbimGeometryObject ^ XbimShellSet::Transformed(IIfcCartesianTransformationOperator ^ transformation)
 		{
 			if (!IsValid) return this;
 			XbimShellSet^ result = gcnew XbimShellSet();
-			for each (XbimShell^ shell in shells)
-				result->Add((XbimShell^)shell->Transformed(transformation));
+			for each (XbimShellV5^ shell in shells)
+				result->Add((XbimShellV5^)shell->Transformed(transformation));
 			return result;
 		}
 
@@ -143,7 +143,7 @@ namespace Xbim
 			TopLoc_Location loc = XbimConvert::ToLocation(placement);
 			for each (IXbimShell^ shell in shells)
 			{
-				XbimShell^ copy = gcnew XbimShell((XbimShell^)shell, Tag);
+				XbimShellV5^ copy = gcnew XbimShellV5((XbimShellV5^)shell, Tag);
 				copy->Move(loc);
 				result->Add(copy);
 			}
@@ -157,7 +157,7 @@ namespace Xbim
 			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement,logger);
 			for each (IXbimShell^ shell in shells)
 			{
-				XbimShell^ copy = gcnew XbimShell((XbimShell^)shell, Tag);
+				XbimShellV5^ copy = gcnew XbimShellV5((XbimShellV5^)shell, Tag);
 				copy->Move(loc);
 				result->Add(copy);
 			}
@@ -168,8 +168,20 @@ namespace Xbim
 		{
 			for each (IXbimShell^ shell  in shells)
 			{
-				((XbimShell^)shell)->Mesh(mesh, precision, deflection, angle);
+				((XbimShellV5^)shell)->Mesh(mesh, precision, deflection, angle);
 			}
+		}
+
+		XbimShellSet::operator TopoDS_Shape()
+		{
+			BRep_Builder builder;
+			TopoDS_Compound bodyCompound;
+			builder.MakeCompound(bodyCompound);
+			for each (IXbimShell ^ shell in shells)
+			{
+				builder.Add(bodyCompound, (XbimShellV5^)shell);
+			}
+			return bodyCompound;
 		}
 
 		IXbimGeometryObjectSet^ XbimShellSet::Union(IXbimSolid^ solid, double tolerance, ILogger^ logger)

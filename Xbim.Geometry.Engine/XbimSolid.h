@@ -1,10 +1,10 @@
 #pragma once
+#include <TopoDS_Solid.hxx>
+#include <BRepBuilderAPI_TransitionMode.hxx>
 #include "XbimOccShape.h"
 #include "XbimWire.h"
 #include "XbimFace.h"
 #include "XbimFaceSet.h"
-#include <TopoDS_Solid.hxx>
-#include <BRepBuilderAPI_TransitionMode.hxx>
 
 using namespace System::Collections::Generic;
 using namespace System::IO;
@@ -16,15 +16,15 @@ namespace Xbim
 	namespace Geometry
 	{
 		static void BuildIfcSurfaceCurveSweptAreaSolid(TopoDS_Wire& sweepOcc, TopoDS_Face& refSurface, TopoDS_Face& faceStartOcc, double precision, TopoDS_Solid & result,  int& retflag);
-		ref class XbimSolid :IXbimSolid, XbimOccShape
+		ref class XbimSolidV5 :IXbimSolid, XbimOccShape
 		{
 		private:
 
-			IntPtr ptrContainer;
+			System::IntPtr ptrContainer;
 			virtual property TopoDS_Solid* pSolid
 			{
 				TopoDS_Solid* get() sealed { return (TopoDS_Solid*)ptrContainer.ToPointer(); }
-				void set(TopoDS_Solid* val)sealed { ptrContainer = IntPtr(val); }
+				void set(TopoDS_Solid* val)sealed { ptrContainer = System::IntPtr(val); }
 			}
 			void InstanceCleanup();
 
@@ -48,8 +48,8 @@ namespace Xbim
 
 
 			void Init(IIfcSweptDiskSolid^ solid, ILogger^ logger);
-			String^ BuildSweptDiskSolid(const TopoDS_Wire& directrixWire, double radius, double innerRadius, BRepBuilderAPI_TransitionMode transitionMode);
-			XbimWire^ CreateDirectrix(IIfcCurve^ directrix, Nullable<IfcParameterValue> startParam, Nullable<IfcParameterValue> endParam, ILogger^ logger);
+			System::String^ BuildSweptDiskSolid(const TopoDS_Wire& directrixWire, double radius, double innerRadius, BRepBuilderAPI_TransitionMode transitionMode);
+			XbimWireV5^ CreateDirectrix(IIfcCurve^ directrix, System::Nullable<IfcParameterValue> startParam, System::Nullable<IfcParameterValue> endParam, ILogger^ logger);
 			// this is case handled by IIfcSweptDiskSolid 
 			// void Init(IIfcSweptDiskSolidPolygonal^ solid, ILogger^ logger);
 			void Init(IIfcBoundingBox^ solid, ILogger^ logger);
@@ -79,8 +79,8 @@ namespace Xbim
 #pragma region Equality Overrides
 			virtual bool Equals(Object^ v) override;
 			virtual int GetHashCode() override;
-			static bool operator ==(XbimSolid^ left, XbimSolid^ right);
-			static bool operator !=(XbimSolid^ left, XbimSolid^ right);
+			static bool operator ==(XbimSolidV5^ left, XbimSolidV5^ right);
+			static bool operator !=(XbimSolidV5^ left, XbimSolidV5^ right);
 			virtual bool Equals(IXbimSolid^ s);
 #pragma endregion
 
@@ -107,57 +107,57 @@ namespace Xbim
 			virtual IXbimFaceSet^ Section(IXbimFace^ face, double tolerance, ILogger^ logger);
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) override;
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D)override;
-			virtual void SaveAsBrep(String^ fileName);
+			virtual void SaveAsBrep(System::String^ fileName);
 #pragma endregion
 
 #pragma region destructors
 
-			~XbimSolid() { InstanceCleanup(); }
-			!XbimSolid() { InstanceCleanup(); }
+			~XbimSolidV5() { InstanceCleanup(); }
+			!XbimSolidV5() { InstanceCleanup(); }
 
 #pragma endregion
 
 #pragma region constructors
-			XbimSolid() {};
-			XbimSolid(const TopoDS_Solid& solid);
-			XbimSolid(const TopoDS_Solid& solid, Object^ tag);
-			XbimSolid(IIfcSolidModel^ solid, ILogger^ logger);
-			XbimSolid(IIfcManifoldSolidBrep^ solid, ILogger^ logger);
-			XbimSolid(IIfcSweptAreaSolid^ solid, ILogger^ logger);
-			XbimSolid(IIfcSweptAreaSolid^ solid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger);
-			XbimSolid(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger); //support for composite profiles
-			XbimSolid(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid, ILogger^ logger);
+			XbimSolidV5() {};
+			XbimSolidV5(const TopoDS_Solid& solid);
+			XbimSolidV5(const TopoDS_Solid& solid, Object^ tag);
+			XbimSolidV5(IIfcSolidModel^ solid, ILogger^ logger);
+			XbimSolidV5(IIfcManifoldSolidBrep^ solid, ILogger^ logger);
+			XbimSolidV5(IIfcSweptAreaSolid^ solid, ILogger^ logger);
+			XbimSolidV5(IIfcSweptAreaSolid^ solid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger);
+			XbimSolidV5(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger); //support for composite profiles
+			XbimSolidV5(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid, ILogger^ logger);
 
-			XbimSolid(IIfcHalfSpaceSolid^ solid, ILogger^ logger);
-			XbimSolid(IIfcBoxedHalfSpace^ solid, ILogger^ logger);
-			XbimSolid(IIfcPolygonalBoundedHalfSpace^ solid, ILogger^ logger);
-			XbimSolid(IIfcExtrudedAreaSolid^ solid, ILogger^ logger);
-			XbimSolid(IIfcExtrudedAreaSolid^ IIfcSolid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger); //support for composite profiles
-			XbimSolid(IIfcExtrudedAreaSolidTapered^ solid, ILogger^ logger);
-			XbimSolid(IIfcExtrudedAreaSolidTapered^ IIfcSolid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger); //support for composite profiles
-			XbimSolid(IIfcRevolvedAreaSolidTapered^ solid, ILogger^ logger);
-			XbimSolid(IIfcRevolvedAreaSolidTapered^ IIfcSolid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger); //support for composite profiles
-			XbimSolid(IIfcRevolvedAreaSolid^ solid, ILogger^ logger);
-			XbimSolid(IIfcRevolvedAreaSolid^ IIfcSolid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger); //support for composite profiles
-			XbimSolid(IIfcSweptDiskSolid^ solid, ILogger^ logger);
+			XbimSolidV5(IIfcHalfSpaceSolid^ solid, ILogger^ logger);
+			XbimSolidV5(IIfcBoxedHalfSpace^ solid, ILogger^ logger);
+			XbimSolidV5(IIfcPolygonalBoundedHalfSpace^ solid, ILogger^ logger);
+			XbimSolidV5(IIfcExtrudedAreaSolid^ solid, ILogger^ logger);
+			XbimSolidV5(IIfcExtrudedAreaSolid^ IIfcSolid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger); //support for composite profiles
+			XbimSolidV5(IIfcExtrudedAreaSolidTapered^ solid, ILogger^ logger);
+			XbimSolidV5(IIfcExtrudedAreaSolidTapered^ IIfcSolid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger); //support for composite profiles
+			XbimSolidV5(IIfcRevolvedAreaSolidTapered^ solid, ILogger^ logger);
+			XbimSolidV5(IIfcRevolvedAreaSolidTapered^ IIfcSolid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger); //support for composite profiles
+			XbimSolidV5(IIfcRevolvedAreaSolid^ solid, ILogger^ logger);
+			XbimSolidV5(IIfcRevolvedAreaSolid^ IIfcSolid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger); //support for composite profiles
+			XbimSolidV5(IIfcSweptDiskSolid^ solid, ILogger^ logger);
 			// XbimSolid(IIfcSweptDiskSolidPolygonal^ solid, ILogger^ logger);
-			XbimSolid(IIfcSectionedSpine^ solid, ILogger^ logger);
-			XbimSolid(IIfcBoundingBox^ solid, ILogger^ logger);
+			XbimSolidV5(IIfcSectionedSpine^ solid, ILogger^ logger);
+			XbimSolidV5(IIfcBoundingBox^ solid, ILogger^ logger);
 
 
-			XbimSolid(IIfcFixedReferenceSweptAreaSolid^ solid, ILogger^ logger);
-			XbimSolid(IIfcFixedReferenceSweptAreaSolid^ IIfcSolid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger); //support for composite profiles
-			XbimSolid(IIfcCsgPrimitive3D^ IIfcSolid, ILogger^ logger);
+			XbimSolidV5(IIfcFixedReferenceSweptAreaSolid^ solid, ILogger^ logger);
+			XbimSolidV5(IIfcFixedReferenceSweptAreaSolid^ IIfcSolid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger); //support for composite profiles
+			XbimSolidV5(IIfcCsgPrimitive3D^ IIfcSolid, ILogger^ logger);
 
-			XbimSolid(IIfcSphere^ IIfcSolid, ILogger^ logger);
-			XbimSolid(IIfcBlock^ IIfcSolid, ILogger^ logger);
-			XbimSolid(IIfcRightCircularCylinder^ IIfcSolid, ILogger^ logger);
-			XbimSolid(IIfcRightCircularCone^ IIfcSolid, ILogger^ logger);
-			XbimSolid(IIfcRectangularPyramid^ IIfcSolid, ILogger^ logger);
-			XbimSolid(XbimRect3D rect3D, double tolerance, ILogger^ logger);
-			XbimSolid(IIfcTriangulatedFaceSet^ IIfcSolid, ILogger^ logger);
-			XbimSolid(IIfcFaceBasedSurfaceModel^ solid, ILogger^ logger);
-			XbimSolid(IIfcShellBasedSurfaceModel^ solid, ILogger^ logger);
+			XbimSolidV5(IIfcSphere^ IIfcSolid, ILogger^ logger);
+			XbimSolidV5(IIfcBlock^ IIfcSolid, ILogger^ logger);
+			XbimSolidV5(IIfcRightCircularCylinder^ IIfcSolid, ILogger^ logger);
+			XbimSolidV5(IIfcRightCircularCone^ IIfcSolid, ILogger^ logger);
+			XbimSolidV5(IIfcRectangularPyramid^ IIfcSolid, ILogger^ logger);
+			XbimSolidV5(XbimRect3D rect3D, double tolerance, ILogger^ logger);
+			XbimSolidV5(IIfcTriangulatedFaceSet^ IIfcSolid, ILogger^ logger);
+			XbimSolidV5(IIfcFaceBasedSurfaceModel^ solid, ILogger^ logger);
+			XbimSolidV5(IIfcShellBasedSurfaceModel^ solid, ILogger^ logger);
 #pragma endregion
 
 

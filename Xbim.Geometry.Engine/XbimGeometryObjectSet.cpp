@@ -1,10 +1,4 @@
-#include "XbimGeometryObjectSet.h"
-#include "XbimSolidSet.h"
-#include "XbimShellSet.h"
-#include "XbimFaceSet.h"
-#include "XbimEdgeSet.h"
-#include "XbimVertexSet.h"
-#include "XbimGeometryCreator.h"
+
 
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <TopExp.hxx>
@@ -23,7 +17,13 @@
 #include <ShapeUpgrade_UnifySameDomain.hxx>
 #include <TopTools_ListIteratorOfListOfShape.hxx>
 #include "XbimNativeApi.h"
-using namespace System;
+#include "XbimGeometryObjectSet.h"
+#include "XbimSolidSet.h"
+#include "XbimShellSet.h"
+#include "XbimFaceSet.h"
+#include "XbimEdgeSet.h"
+#include "XbimVertexSet.h"
+#include "XbimGeometryCreator.h"
 using namespace System::ComponentModel;
 namespace Xbim
 {
@@ -83,7 +83,7 @@ namespace Xbim
 			bool sewn = false;
 			for each (IXbimGeometryObject ^ geom in geometryObjects)
 			{
-				XbimCompound^ comp = dynamic_cast<XbimCompound^>(geom);
+				XbimCompoundV5^ comp = dynamic_cast<XbimCompoundV5^>(geom);
 				if (comp != nullptr)
 					if (comp->Sew()) sewn = true;
 			}
@@ -141,6 +141,11 @@ namespace Xbim
 			return result;
 		}
 
+		XbimGeometryObjectSet::operator  TopoDS_Shape ()
+		{
+			return CreateCompound(geometryObjects);
+		}
+
 		void XbimGeometryObjectSet::Mesh(IXbimMeshReceiver^ mesh, double precision, double deflection, double angle)
 		{
 			for each (IXbimGeometryObject ^ geometryObject  in geometryObjects)
@@ -152,7 +157,7 @@ namespace Xbim
 				else if (occObject != nullptr)
 					occObject->Mesh(mesh, precision, deflection, angle);
 				else
-					throw gcnew Exception("Unsupported geometry type cannot be meshed");
+					throw gcnew System::Exception("Unsupported geometry type cannot be meshed");
 			}
 		}
 
@@ -191,7 +196,7 @@ namespace Xbim
 
 		IXbimSolidSet^ XbimGeometryObjectSet::Solids::get()
 		{
-			XbimSolidSet^ solids = gcnew XbimSolidSet();
+			XbimSolidSet^ solids = gcnew XbimSolidSet((IXModelService^)nullptr); //we need to avoid this by passing the model service through
 			for each (IXbimGeometryObject ^ geomObj in geometryObjects)
 			{
 				XbimOccShape^ occ = dynamic_cast<XbimOccShape^>(geomObj);
@@ -201,11 +206,11 @@ namespace Xbim
 					TopTools_IndexedMapOfShape map;
 					TopExp::MapShapes(occ, TopAbs_SOLID, map);
 					for (int i = 1; i <= map.Extent(); i++)
-						solids->Add(gcnew XbimSolid(TopoDS::Solid(map(i))));
+						solids->Add(gcnew XbimSolidV5(TopoDS::Solid(map(i))));
 				}
 				else if (ss != nullptr)
 				{
-					for each (XbimSolid ^ solid in ss)
+					for each (XbimSolidV5 ^ solid in ss)
 					{
 						solids->Add(solid);
 					}
@@ -227,11 +232,11 @@ namespace Xbim
 					TopTools_IndexedMapOfShape map;
 					TopExp::MapShapes(occ, TopAbs_SHELL, map);
 					for (int i = 1; i <= map.Extent(); i++)
-						shells->Add(gcnew XbimShell(TopoDS::Shell(map(i))));
+						shells->Add(gcnew XbimShellV5(TopoDS::Shell(map(i))));
 				}
 				else if (ss != nullptr)
 				{
-					for each (XbimShell ^ shell in ss)
+					for each (XbimShellV5 ^ shell in ss)
 					{
 						shells->Add(shell);
 					}
@@ -253,11 +258,11 @@ namespace Xbim
 					TopTools_IndexedMapOfShape map;
 					TopExp::MapShapes(occ, TopAbs_FACE, map);
 					for (int i = 1; i <= map.Extent(); i++)
-						faces->Add(gcnew XbimFace(TopoDS::Face(map(i))));
+						faces->Add(gcnew XbimFaceV5(TopoDS::Face(map(i))));
 				}
 				else if (fs != nullptr)
 				{
-					for each (XbimFace ^ face in fs)
+					for each (XbimFaceV5 ^ face in fs)
 					{
 						faces->Add(face);
 					}
@@ -278,11 +283,11 @@ namespace Xbim
 					TopTools_IndexedMapOfShape map;
 					TopExp::MapShapes(occ, TopAbs_EDGE, map);
 					for (int i = 1; i <= map.Extent(); i++)
-						edges->Add(gcnew XbimEdge(TopoDS::Edge(map(i))));
+						edges->Add(gcnew XbimEdgeV5(TopoDS::Edge(map(i))));
 				}
 				else if (es != nullptr)
 				{
-					for each (XbimEdge ^ edge in es)
+					for each (XbimEdgeV5 ^ edge in es)
 					{
 						edges->Add(edge);
 					}
@@ -303,11 +308,11 @@ namespace Xbim
 					TopTools_IndexedMapOfShape map;
 					TopExp::MapShapes(occ, TopAbs_VERTEX, map);
 					for (int i = 1; i <= map.Extent(); i++)
-						vertices->Add(gcnew XbimVertex(TopoDS::Vertex(map(i))));
+						vertices->Add(gcnew XbimVertexV5(TopoDS::Vertex(map(i))));
 				}
 				else if (vs != nullptr)
 				{
-					for each (XbimVertex ^ vertex in vs)
+					for each (XbimVertexV5 ^ vertex in vs)
 					{
 						vertices->Add(vertex);
 					}
@@ -329,10 +334,10 @@ namespace Xbim
 			for each (IXbimGeometryObject ^ iGeom in geomObjects)
 			{
 				// four types of geometry are found in the geomObjects
-				XbimShell^ shell = dynamic_cast<XbimShell^>(iGeom);
-				XbimSolid^ solid = dynamic_cast<XbimSolid^>(iGeom);
+				XbimShellV5^ shell = dynamic_cast<XbimShellV5^>(iGeom);
+				XbimSolidV5^ solid = dynamic_cast<XbimSolidV5^>(iGeom);
 				IEnumerable<IXbimGeometryObject^>^ geomSet = dynamic_cast<IEnumerable<IXbimGeometryObject^>^>(iGeom);
-				XbimFace^ face = dynamic_cast<XbimFace^>(iGeom);
+				XbimFaceV5^ face = dynamic_cast<XbimFaceV5^>(iGeom);
 
 				// type 1
 				if (solid != nullptr)
@@ -414,12 +419,12 @@ namespace Xbim
 			return PerformBoolean(bop, geomObjects, solids, tolerance, logger);
 		}
 
-		String^ XbimGeometryObjectSet::ToBRep::get()
+		System::String^ XbimGeometryObjectSet::ToBRep::get()
 		{
 			std::ostringstream oss;
 			TopoDS_Compound comp = CreateCompound(geometryObjects);
 			BRepTools::Write(comp, oss);
-			return gcnew String(oss.str().c_str());
+			return gcnew System::String(oss.str().c_str());
 		}
 
 		TopoDS_Compound XbimGeometryObjectSet::CreateCompound(IEnumerable<IXbimGeometryObject^>^ geomObjects)
@@ -444,7 +449,7 @@ namespace Xbim
 
 		IXbimGeometryObjectSet^ XbimGeometryObjectSet::PerformBoolean(BOPAlgo_Operation bop, IEnumerable<IXbimGeometryObject^>^ geomObjects, IXbimSolidSet^ solids, double tolerance, ILogger^ logger)
 		{
-			String^ err = "";
+			System::String^ err = "";
 
 			//BRepAlgoAPI_BooleanOperation* pBuilder = nullptr;
 			try
@@ -468,7 +473,7 @@ namespace Xbim
 				int i = 1;
 
 				
-				for each (XbimSolid ^ solid in solids)
+				for each (XbimSolidV5 ^ solid in solids)
 				{
 					if (solid != nullptr && solid->IsValid)
 					{
@@ -520,7 +525,7 @@ namespace Xbim
 					{
 						success = BOOLEAN_FAIL;
 					}
-					String^ msg = "";
+					System::String^ msg = "";
 					switch (success)
 					{
 					case BOOLEAN_PARTIALSUCCESSBADTOPOLOGY:
@@ -538,7 +543,7 @@ namespace Xbim
 					default:
 						break;
 					}
-					if (!String::IsNullOrWhiteSpace(msg))
+					if (!System::String::IsNullOrWhiteSpace(msg))
 						XbimGeometryCreator::LogWarning(logger, nullptr, msg);
 
 				}
@@ -546,14 +551,14 @@ namespace Xbim
 
 
 				
-				XbimCompound^ compound = gcnew XbimCompound(occCompound, false, tolerance);
+				XbimCompoundV5^ compound = gcnew XbimCompoundV5(occCompound, false, tolerance);
 
 				if (bop != BOPAlgo_COMMON) //do not need to add these as they by definition do not intersect
 				{
 					TopExp_Explorer expl(toBePassedThrough, TopAbs_FACE);
 
 					if (expl.More()) //only add if there are faces to consider
-						compound->Add(gcnew XbimShell(toBePassedThrough));
+						compound->Add(gcnew XbimShellV5(toBePassedThrough));
 				}
 
 				XbimGeometryObjectSet^ geomObjs = gcnew XbimGeometryObjectSet();
@@ -562,7 +567,7 @@ namespace Xbim
 				return geomObjs;
 
 			}
-			catch (Standard_Failure e)
+			catch (const Standard_Failure& /*e*/)
 			{
 				err = "Standard Failure in Xbim.Geometry.Engine::PerformBoolean";
 			}

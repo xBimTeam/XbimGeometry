@@ -1,25 +1,28 @@
 #pragma once
-#include "XbimGeometryObject.h"
+
 #include <TopoDS_Vertex.hxx>
 #include <Geom_Curve.hxx>
 #include <Geom_BoundedCurve.hxx>
+
+#include "XbimGeometryObject.h"
 using namespace Xbim::Ifc4::Interfaces;
 using namespace Xbim::Common::Geometry;
+using namespace Microsoft::Extensions::Logging;
 namespace Xbim
 {
 	namespace Geometry
-	{
-		ref class XbimCurve : IXbimCurve, XbimGeometryObject
+	{ 
+		ref class XbimCurveV5 : IXbimCurve, XbimGeometryObject
 		{
 		private:
-			IntPtr ptrContainer;
+			System::IntPtr ptrContainer;
 			virtual property Handle(Geom_Curve)* pCurve
 			{
 				Handle(Geom_Curve)* get() sealed {
 					return (Handle(Geom_Curve)*)ptrContainer.ToPointer();
 
 				}
-				void set(Handle(Geom_Curve)* val)sealed { ptrContainer = IntPtr(val); }
+				void set(Handle(Geom_Curve)* val)sealed { ptrContainer = System::IntPtr(val); }
 			}
 
 			void InstanceCleanup();
@@ -46,20 +49,20 @@ namespace Xbim
 
 		public:
 			//destructors
-			~XbimCurve() { InstanceCleanup(); }
-			!XbimCurve() { InstanceCleanup(); }
+			~XbimCurveV5() { InstanceCleanup(); }
+			!XbimCurveV5() { InstanceCleanup(); }
 			//constructors
-			XbimCurve(const Handle(Geom_Curve)& curve);
-			XbimCurve(IIfcCurve^ curve, ILogger^ logger) { Init(curve, logger); }
+			XbimCurveV5(const Handle(Geom_Curve)& curve);
+			XbimCurveV5(IIfcCurve^ curve, ILogger^ logger) { Init(curve, logger); }
 
-			XbimCurve(IIfcCircle^ curve, ILogger^ logger) { Init(curve, logger); }
-			XbimCurve(IIfcEllipse^ curve, ILogger^ logger) { Init(curve, logger); }
-			XbimCurve(IIfcLine^ curve, ILogger^ logger) { Init(curve, logger); }
-			XbimCurve(IIfcTrimmedCurve^ trimmedCurve, ILogger^ logger) { Init(trimmedCurve, logger); }
-			XbimCurve(IIfcBSplineCurve^ curve, ILogger^ logger) { Init(curve, logger); }
-			XbimCurve(IIfcBSplineCurveWithKnots^ curve, ILogger^ logger) { Init(curve, logger); }
-			XbimCurve(IIfcOffsetCurve3D^ curve, ILogger^ logger) { Init(curve, logger); }
-			XbimCurve(IIfcPcurve^ curve, ILogger^ logger) { Init(curve, logger); }
+			XbimCurveV5(IIfcCircle^ curve, ILogger^ logger) { Init(curve, logger); }
+			XbimCurveV5(IIfcEllipse^ curve, ILogger^ logger) { Init(curve, logger); }
+			XbimCurveV5(IIfcLine^ curve, ILogger^ logger) { Init(curve, logger); }
+			XbimCurveV5(IIfcTrimmedCurve^ trimmedCurve, ILogger^ logger) { Init(trimmedCurve, logger); }
+			XbimCurveV5(IIfcBSplineCurve^ curve, ILogger^ logger) { Init(curve, logger); }
+			XbimCurveV5(IIfcBSplineCurveWithKnots^ curve, ILogger^ logger) { Init(curve, logger); }
+			XbimCurveV5(IIfcOffsetCurve3D^ curve, ILogger^ logger) { Init(curve, logger); }
+			XbimCurveV5(IIfcPcurve^ curve, ILogger^ logger) { Init(curve, logger); }
 
 #pragma region operators
 			operator const Handle(Geom_Curve)& () { return *pCurve; }

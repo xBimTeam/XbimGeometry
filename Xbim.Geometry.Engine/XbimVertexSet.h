@@ -1,8 +1,8 @@
 #pragma once
-#include "XbimVertex.h"
+
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
-
+#include "XbimVertex.h"
 using namespace System::Collections::Generic;
 namespace Xbim
 {
@@ -20,7 +20,7 @@ namespace Xbim
 			};
 		public:
 			static property XbimVertexSet^ Empty{XbimVertexSet^ get(){ return empty; }};
-
+			virtual operator  TopoDS_Shape () override;
 #pragma region Constructors
 			XbimVertexSet(const TopoDS_Shape& shape);
 			XbimVertexSet(IEnumerable<IXbimVertex^>^ vertices);
@@ -47,14 +47,14 @@ namespace Xbim
 					vertices[index] = value;
 				}
 			}
-			property XbimVertex^ Vertex[int]
+			property XbimVertexV5^ Vertex[int]
 			{
-				XbimVertex^ get(int index)
+				XbimVertexV5^ get(int index)
 				{
-					return (XbimVertex^)vertices[index];
+					return (XbimVertexV5^)vertices[index];
 				}
 
-				void set(int index, XbimVertex^ value)
+				void set(int index, XbimVertexV5^ value)
 				{
 					vertices[index] = value;
 				}

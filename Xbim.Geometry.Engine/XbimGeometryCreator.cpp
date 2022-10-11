@@ -1,16 +1,6 @@
 // This is the main DLL file.
 
-#include "XbimGeometryCreator.h"
 
-#include "XbimFace.h"
-#include "XbimSolid.h"
-#include "XbimCompound.h"
-#include "XbimSolidSet.h"
-#include "XbimGeometryObjectSet.h"
-#include "XbimCurve.h"
-#include "XbimCurve2D.h"
-#include "XbimConvert.h"
-#include "XbimPoint3DWithTolerance.h"
 #include <BRepMesh_IncrementalMesh.hxx>
 #include <Poly_PolygonOnTriangulation.hxx>
 #include <Poly_Triangulation.hxx>
@@ -33,16 +23,24 @@
 #include <IntAna2d_AnaIntersection.hxx>
 #include <GeomLib.hxx>
 #include "XbimMesh.h"
+#include "XbimGeometryCreator.h"
+
+#include "XbimFace.h"
+#include "XbimSolid.h"
+#include "XbimCompound.h"
+#include "XbimSolidSet.h"
+#include "XbimGeometryObjectSet.h"
+#include "XbimCurve.h"
+#include "XbimCurve2D.h"
+#include "XbimConvert.h"
+#include "XbimPoint3DWithTolerance.h"
+#include "XbimOccWriter.h"
 using System::Runtime::InteropServices::Marshal;
 
 using namespace  System::Threading;
 using namespace  System::Linq;
+using namespace  System::IO;
 
-double __cdecl Load(void)
-{
-	Xbim::Geometry::XbimGeometryCreator^ gc = gcnew Xbim::Geometry::XbimGeometryCreator();
-	return gc->BooleanTimeOut;
-};
 namespace Xbim
 {
 	namespace Geometry
@@ -50,9 +48,53 @@ namespace Xbim
 #pragma warning( push )
 #pragma warning( disable : 4691)
 
-		void XbimGeometryCreator::LogInfo(ILogger^ logger, Object^ entity, String^ format, ...array<Object^>^ arg)
+		void XbimGeometryCreator::WriteBrep(System::String^ fileName, IXbimGeometryObject^ geometryObject)
 		{
-			String^ msg = String::Format(format, arg);
+			XbimOccWriter::Write(geometryObject, fileName);
+		}
+
+	    IXbimGeometryObject^ XbimGeometryCreator::ReadBrep(System::String^ filename)
+		{
+			Standard_CString fName = (const char*)(Marshal::StringToHGlobalAnsi(filename)).ToPointer();
+			try
+			{
+				BRep_Builder builder;
+				TopoDS_Shape result;
+				BRepTools::Read(result, fName,builder);
+				switch (result.ShapeType())
+				{
+				case TopAbs_VERTEX:
+					return gcnew XbimVertexV5(TopoDS::Vertex(result));
+				case TopAbs_EDGE:
+					return gcnew XbimEdgeV5(TopoDS::Edge(result));
+				case TopAbs_WIRE:
+					return gcnew XbimWireV5(TopoDS::Wire(result));
+				case TopAbs_FACE:
+					return gcnew XbimFaceV5(TopoDS::Face(result));
+				case TopAbs_SHELL:
+					return gcnew XbimShellV5(TopoDS::Shell(result));
+				case TopAbs_SOLID:
+					return gcnew XbimSolidV5(TopoDS::Solid(result));
+				case TopAbs_COMPOUND:
+					return gcnew XbimCompoundV5(TopoDS::Compound(result), true, 1e-5);
+				default:
+					return nullptr;
+				}
+
+			}
+			catch (...)
+			{
+				return nullptr;
+			}
+			finally
+			{
+				Marshal::FreeHGlobal(System::IntPtr((void*)fName));
+			}
+		}
+
+		void XbimGeometryCreator::LogInfo(ILogger^ logger, Object^ entity, System::String^ format, ...array<Object^>^ arg)
+		{
+			System::String^ msg = System::String::Format(format, arg);
 			IPersistEntity^ ifcEntity = dynamic_cast<IPersistEntity^>(entity);
 			if (logger != nullptr)
 			{
@@ -67,9 +109,9 @@ namespace Xbim
 			}
 		}
 
-		void XbimGeometryCreator::LogWarning(ILogger^ logger, Object^ entity, String^ format, ...array<Object^>^ arg)
+		void XbimGeometryCreator::LogWarning(ILogger^ logger, Object^ entity, System::String^ format, ...array<Object^>^ arg)
 		{
-			String^ msg = String::Format(format, arg);
+			System::String^ msg = System::String::Format(format, arg);
 			IPersistEntity^ ifcEntity = dynamic_cast<IPersistEntity^>(entity);
 			if (logger != nullptr)
 			{
@@ -83,9 +125,9 @@ namespace Xbim
 			}
 		}
 
-		void XbimGeometryCreator::LogDebug(ILogger^ logger, Object^ entity, String^ format, ...array<Object^>^ arg)
+		void XbimGeometryCreator::LogDebug(ILogger^ logger, Object^ entity, System::String^ format, ...array<Object^>^ arg)
 		{
-			String^ msg = String::Format(format, arg);
+			System::String^ msg = System::String::Format(format, arg);
 			IPersistEntity^ ifcEntity = dynamic_cast<IPersistEntity^>(entity);
 			if (logger != nullptr)
 			{
@@ -99,23 +141,9 @@ namespace Xbim
 			}
 		}
 
-		void XbimGeometryCreator::WriteBrep(String^ filename, IXbimGeometryObject^ geomObj)
+		void XbimGeometryCreator::LogError(ILogger^ logger, Object^ entity, System::String^ format, ...array<Object^>^ arg)
 		{
-			throw gcnew System::NotImplementedException();
-			// TODO: This is stubbed out until we merge the implementation from unpushed code.
-			// temp fix for broken build
-		}
-
-		IXbimGeometryObject^ XbimGeometryCreator::ReadBrep(String^ filename)
-		{
-			throw gcnew System::NotImplementedException();
-			// TODO: This is stubbed out until we merge the implementation from unpushed code.
-			// temp fix for broken build
-		}
-
-		void XbimGeometryCreator::LogError(ILogger^ logger, Object^ entity, String^ format, ...array<Object^>^ arg)
-		{
-			String^ msg = String::Format(format, arg);
+			System::String^ msg = System::String::Format(format, arg);
 			IPersistEntity^ ifcEntity = dynamic_cast<IPersistEntity^>(entity);
 			if (logger != nullptr)
 			{
@@ -141,7 +169,7 @@ namespace Xbim
 			else if (occObject != nullptr)
 				occObject->Mesh(mesh, precision, deflection, angle);
 			else
-				throw gcnew Exception("Unsupported geometry type cannot be meshed");
+				throw gcnew System::Exception("Unsupported geometry type cannot be meshed");
 		}
 
 
@@ -156,7 +184,7 @@ namespace Xbim
 			{
 				return (rep->Dim == Xbim::Ifc4::GeometryResource::IfcDimensionCount(3));
 			}
-			catch (Exception^)
+			catch (System::Exception^)
 			{
 				return false; //in case the object has no points at all
 			}
@@ -183,44 +211,50 @@ namespace Xbim
 					}
 					else
 					{
-						XbimSolid^ solid = (XbimSolid^)CreateSolid((IIfcSweptAreaSolid^)geomRep, logger);
+						XbimSolidV5^ solid = (XbimSolidV5^)CreateSolid((IIfcSweptAreaSolid^)geomRep, logger);
 						if (objectLocation != nullptr) solid->Move(objectLocation);
 						return solid;
 					}
 				}
 				else if (dynamic_cast<IIfcManifoldSolidBrep^>(geomRep))
 				{
-					XbimCompound^ comp = gcnew XbimCompound((IIfcManifoldSolidBrep^)geomRep, logger);
+					XbimCompoundV5^ comp = gcnew XbimCompoundV5((IIfcManifoldSolidBrep^)geomRep, logger);
 					if (objectLocation != nullptr) comp->Move(objectLocation);
 					return comp;
 				}
 				else if (dynamic_cast<IIfcSweptDiskSolid^>(geomRep))
 				{
-					XbimSolid^ solid = (XbimSolid^)CreateSolid((IIfcSweptDiskSolid^)geomRep, logger);
+					XbimSolidV5^ solid = (XbimSolidV5^)CreateSolid((IIfcSweptDiskSolid^)geomRep, logger);
 					if (objectLocation != nullptr) solid->Move(objectLocation);
 					return solid;
 				}
+				else if (dynamic_cast<IIfcBooleanClippingResult^>(geomRep))
+				{
+					XbimSolidSet^ solidSet = gcnew XbimSolidSet((IIfcBooleanClippingResult^)geomRep, _modelService, logger);
+					if (objectLocation != nullptr) solidSet->Move(objectLocation);
+					return Trim(solidSet);
+				}
 				else if (dynamic_cast<IIfcBooleanResult^>(geomRep))
 				{
-					XbimSolidSet^ solidSet = gcnew XbimSolidSet((IIfcBooleanResult^)geomRep, logger);
+					XbimSolidSet^ solidSet = gcnew XbimSolidSet((IIfcBooleanResult^)geomRep, _modelService,  logger);
 					if (objectLocation != nullptr) solidSet->Move(objectLocation);
 					return Trim(solidSet);
 				}
 				else if (dynamic_cast<IIfcFaceBasedSurfaceModel^>(geomRep))
 				{
-					XbimCompound^ comp = (XbimCompound^)CreateSurfaceModel((IIfcFaceBasedSurfaceModel^)geomRep, logger);
+					XbimCompoundV5^ comp = (XbimCompoundV5^)CreateSurfaceModel((IIfcFaceBasedSurfaceModel^)geomRep, logger);
 					if (objectLocation != nullptr) comp->Move(objectLocation);
 					return comp;
 				}
 				else if (dynamic_cast<IIfcShellBasedSurfaceModel^>(geomRep))
 				{
-					XbimCompound^ comp = (XbimCompound^)CreateSurfaceModel((IIfcShellBasedSurfaceModel^)geomRep, logger);
+					XbimCompoundV5^ comp = (XbimCompoundV5^)CreateSurfaceModel((IIfcShellBasedSurfaceModel^)geomRep, logger);
 					if (objectLocation != nullptr) comp->Move(objectLocation);
 					return comp;
 				}
 				else if (dynamic_cast<IIfcTriangulatedFaceSet^>(geomRep))
 				{
-					XbimCompound^ comp = (XbimCompound^)CreateSurfaceModel((IIfcTriangulatedFaceSet^)geomRep, logger);
+					XbimCompoundV5^ comp = (XbimCompoundV5^)CreateSurfaceModel((IIfcTriangulatedFaceSet^)geomRep, logger);
 					if (objectLocation != nullptr) comp->Move(objectLocation);
 					return comp;
 				}
@@ -235,44 +269,44 @@ namespace Xbim
 					}
 					else
 					{
-						XbimCompound^ comp = (XbimCompound^)CreateSurfaceModel((IIfcPolygonalFaceSet^)geomRep, logger);
+						XbimCompoundV5^ comp = (XbimCompoundV5^)CreateSurfaceModel((IIfcPolygonalFaceSet^)geomRep, logger);
 						if (objectLocation != nullptr) comp->Move(objectLocation);
 						return comp;
 					}
 				}
 				else if (dynamic_cast<IIfcSectionedSpine^>(geomRep))
 				{
-					XbimSolid^ solid = (XbimSolid^)CreateSolid((IIfcSectionedSpine^)geomRep, logger);
+					XbimSolidV5^ solid = (XbimSolidV5^)CreateSolid((IIfcSectionedSpine^)geomRep, logger);
 					if (objectLocation != nullptr) solid->Move(objectLocation);
 					return solid;
 				}
 				else if (dynamic_cast<IIfcHalfSpaceSolid^>(geomRep))
 				{
-					XbimSolid^ solid = (XbimSolid^)CreateSolid((IIfcHalfSpaceSolid^)geomRep, logger);
+					XbimSolidV5^ solid = (XbimSolidV5^)CreateSolid((IIfcHalfSpaceSolid^)geomRep, logger);
 					if (objectLocation != nullptr) solid->Move(objectLocation);
 					return solid;
 				}
 				else if (dynamic_cast<IIfcCurve^>(geomRep))
 				{
-					XbimWire^ wire = (XbimWire^)CreateWire((IIfcCurve^)geomRep, logger);
+					XbimWireV5^ wire = (XbimWireV5^)CreateWire((IIfcCurve^)geomRep, logger);
 					if (objectLocation != nullptr) wire->Move(objectLocation);
 					return wire;
 				}
 				else if (dynamic_cast<IIfcCompositeCurveSegment^>(geomRep))
 				{
-					XbimWire^ wire = (XbimWire^)CreateWire((IIfcCompositeCurveSegment^)geomRep, logger);
+					XbimWireV5^ wire = (XbimWireV5^)CreateWire((IIfcCompositeCurveSegment^)geomRep, logger);
 					if (objectLocation != nullptr) wire->Move(objectLocation);
 					return wire;
 				}
 				else if (dynamic_cast<IIfcBoundingBox^>(geomRep))
 				{
-					XbimSolid^ solid = (XbimSolid^)CreateSolid((IIfcBoundingBox^)geomRep, logger);
+					XbimSolidV5^ solid = (XbimSolidV5^)CreateSolid((IIfcBoundingBox^)geomRep, logger);
 					if (objectLocation != nullptr) solid->Move(objectLocation);
 					return solid;
 				}
 				else if (dynamic_cast<IIfcSurface^>(geomRep))
 				{
-					XbimFace^ face = (XbimFace^)CreateFace((IIfcSurface^)geomRep, logger);
+					XbimFaceV5^ face = (XbimFaceV5^)CreateFace((IIfcSurface^)geomRep, logger);
 					if (objectLocation != nullptr) face->Move(objectLocation);
 					return face;
 				}
@@ -284,7 +318,7 @@ namespace Xbim
 				}
 				else if (dynamic_cast<IIfcSphere^>(geomRep))
 				{
-					XbimSolid^ solid = (XbimSolid^)CreateSolid((IIfcSphere^)geomRep, logger);
+					XbimSolidV5^ solid = (XbimSolidV5^)CreateSolid((IIfcSphere^)geomRep, logger);
 					if (objectLocation != nullptr) solid->Move(objectLocation);
 					return solid;
 				}
@@ -294,21 +328,16 @@ namespace Xbim
 					return CreateGeometricSet((IIfcGeometricSet^)geomRep, logger);
 				}
 			}
-			catch (System::Exception^ Sexc)
+			catch (const Standard_Failure &exc)
 			{
-				LogError(logger, geomRep, "Error creating geometry #{2} representation of type {0}, {1}", geomRep->GetType()->Name, Sexc->Message, geomRep->EntityLabel);
-				return XbimGeometryObjectSet::Empty;
-			}
-			catch (const std::exception &exc)
-			{
-				String^ err = gcnew String(exc.what());
+				System::String^ err = gcnew System::String(exc.GetMessageString());
 				LogError(logger, geomRep, "Error creating geometry #{2} representation of type {0}, {1}", geomRep->GetType()->Name, err, geomRep->EntityLabel);
 				return XbimGeometryObjectSet::Empty;
 			}
 			//catch ()
 			catch (...)
 			{
-				throw gcnew Exception(String::Format("General Error Creating {0}, #{1}", geomRep->GetType()->Name, geomRep->EntityLabel));
+				throw gcnew System::Exception(System::String::Format("General Error Creating {0}, #{1}", geomRep->GetType()->Name, geomRep->EntityLabel));
 			}
 			LogError(logger, geomRep, "Geometry Representation of Type {0} is not implemented", geomRep->GetType()->Name);
 			return XbimGeometryObjectSet::Empty;
@@ -345,20 +374,21 @@ namespace Xbim
 								builder.Add(occCompound, xShape);
 							}
 						}
-						XbimCompound^ compound = gcnew XbimCompound(occCompound, false, precision);
+						XbimCompoundV5^ compound = gcnew XbimCompoundV5(occCompound, false, precision);
 						WriteTriangulation(bw, compound, precision, deflection, angle);
 						bw->Close();
 						delete bw;
 					}
 					else //default to text
 					{
-						TextWriter^ tw = gcnew StreamWriter(memStream);
+						throw gcnew System::Exception("Text format no longer supported");
+						/*StreamWriter^ tw = gcnew StreamWriter(memStream);
 						for each (IXbimGeometryObject ^ geom in set)
 						{
 							WriteTriangulation(tw, geom, precision, deflection, angle);
 						}
 						tw->Close();
-						delete tw;
+						delete tw;*/
 					}
 					memStream->Flush();
 					((IXbimShapeGeometryData^)shapeGeom)->ShapeData = memStream->ToArray();
@@ -385,10 +415,11 @@ namespace Xbim
 				}
 				else //default to text
 				{
-					TextWriter^ tw = gcnew StreamWriter(memStream);
+					throw gcnew System::Exception("Text format no longer supported");
+					/*TextWriter^ tw = gcnew StreamWriter(memStream);
 					WriteTriangulation(tw, geometryObject, precision, deflection, angle);
 					tw->Close();
-					delete tw;
+					delete tw;*/
 				}
 				memStream->Flush();
 				
@@ -448,7 +479,7 @@ namespace Xbim
 			if (dynamic_cast<IIfcCartesianPoint^>(pt)) return CreatePoint((IIfcCartesianPoint^)pt);
 			else if (dynamic_cast<IIfcPointOnCurve^>(pt)) return CreatePoint((IIfcPointOnCurve^)pt);
 			else if (dynamic_cast<IIfcPointOnSurface^>(pt)) return CreatePoint((IIfcPointOnSurface^)pt);
-			else throw gcnew NotImplementedException(String::Format("Geometry Representation of Type {0} in entity #{1} is not implemented", pt->GetType()->Name, pt->EntityLabel));
+			else throw gcnew System::NotImplementedException(System::String::Format("Geometry Representation of Type {0} in entity #{1} is not implemented", pt->GetType()->Name, pt->EntityLabel));
 
 		}
 
@@ -461,18 +492,18 @@ namespace Xbim
 			IIfcCompositeCurve^ composite = dynamic_cast<IIfcCompositeCurve^>(curve);
 			IIfcIndexedPolyCurve^ poly = dynamic_cast<IIfcIndexedPolyCurve^>(curve);
 			if (composite != nullptr)
-				return gcnew XbimWire(composite, logger, XbimConstraints::None);
+				return gcnew XbimWireV5(composite, logger, XbimConstraints::None);
 			else if (poly != nullptr)
-				return gcnew XbimWire(poly, logger, XbimConstraints::None);
+				return gcnew XbimWireV5(poly, logger, XbimConstraints::None);
 			else if (pline != nullptr)
-				return gcnew XbimWire(pline, logger, XbimConstraints::None);
+				return gcnew XbimWireV5(pline, logger, XbimConstraints::None);
 			else
-				return gcnew XbimWire(curve, logger, XbimConstraints::None);
+				return gcnew XbimWireV5(curve, logger, XbimConstraints::None);
 		}
 
 		IXbimWire^ XbimGeometryCreator::CreateWire(IIfcCompositeCurveSegment^ compCurveSeg, ILogger^ logger)
 		{
-			return gcnew XbimWire(compCurveSeg, logger, XbimConstraints::None);
+			return gcnew XbimWireV5(compCurveSeg, logger, XbimConstraints::None);
 		}
 #pragma endregion
 
@@ -481,38 +512,38 @@ namespace Xbim
 #pragma region Face creation
 		IXbimFace^ XbimGeometryCreator::CreateFace(IXbimWire^ wire, ILogger^ logger)
 		{
-			XbimWire^ w = (XbimWire^)wire;
-			return gcnew XbimFace(wire, wire->IsPlanar, w->MaxTolerance, 0, logger);
+			XbimWireV5^ w = (XbimWireV5^)wire;
+			return gcnew XbimFaceV5(wire, wire->IsPlanar, w->MaxTolerance, 0, logger);
 		};
 
 		IXbimFace^ XbimGeometryCreator::CreateFace(IIfcProfileDef^ profile, ILogger^ logger)
 		{
-			return gcnew XbimFace(profile, logger);
+			return gcnew XbimFaceV5(profile, logger);
 		};
 
 		IXbimFace^ XbimGeometryCreator::CreateFace(IIfcCompositeCurve^ cCurve, ILogger^ logger)
 		{
-			return gcnew XbimFace(cCurve, logger);
+			return gcnew XbimFaceV5(cCurve, logger);
 		};
 
 		IXbimFace^ XbimGeometryCreator::CreateFace(IIfcPolyline^ pline, ILogger^ logger)
 		{
-			return gcnew XbimFace(pline,  logger);
+			return gcnew XbimFaceV5(pline,  logger);
 		};
 
 		IXbimFace^ XbimGeometryCreator::CreateFace(IIfcPolyLoop^ loop, ILogger^ logger)
 		{
-			return gcnew XbimFace(loop, logger);
+			return gcnew XbimFaceV5(loop, logger);
 		};
 
 		IXbimFace^ XbimGeometryCreator::CreateFace(IIfcSurface^ surface, ILogger^ logger)
 		{
-			return gcnew XbimFace(surface, logger);
+			return gcnew XbimFaceV5(surface, logger);
 		};
 
 		IXbimFace^ XbimGeometryCreator::CreateFace(IIfcPlane^ plane, ILogger^ logger)
 		{
-			return gcnew XbimFace(plane, logger);
+			return gcnew XbimFaceV5(plane, logger);
 		};
 
 
@@ -551,7 +582,7 @@ namespace Xbim
 			if (ras != nullptr) return CreateSolid(ras, logger);
 			IIfcSurfaceCurveSweptAreaSolid^ scas = dynamic_cast<IIfcSurfaceCurveSweptAreaSolid^>(IIfcSolid);
 			if (scas != nullptr) return CreateSolid(scas, logger);
-			throw gcnew NotImplementedException(String::Format("Swept Solid of Type {0} in entity #{1} is not implemented", IIfcSolid->GetType()->Name, IIfcSolid->EntityLabel));
+			throw gcnew System::NotImplementedException(System::String::Format("Swept Solid of Type {0} in entity #{1} is not implemented", IIfcSolid->GetType()->Name, IIfcSolid->EntityLabel));
 
 		};
 
@@ -563,7 +594,7 @@ namespace Xbim
 			if (ras != nullptr) return CreateSolidSet(ras, logger);
 			IIfcSurfaceCurveSweptAreaSolid^ scas = dynamic_cast<IIfcSurfaceCurveSweptAreaSolid^>(IIfcSolid);
 			if (scas != nullptr) return CreateSolidSet(scas, logger);
-			throw gcnew NotImplementedException(String::Format("Swept Solid of Type {0} in entity #{1} is not implemented", IIfcSolid->GetType()->Name, IIfcSolid->EntityLabel));
+			throw gcnew System::NotImplementedException(System::String::Format("Swept Solid of Type {0} in entity #{1} is not implemented", IIfcSolid->GetType()->Name, IIfcSolid->EntityLabel));
 
 		};
 		IXbimSolidSet^ XbimGeometryCreator::CreateSolidSet(IIfcExtrudedAreaSolid^ IIfcSolid, ILogger^ logger)
@@ -599,40 +630,40 @@ namespace Xbim
 		}
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcTriangulatedFaceSet^ shell, ILogger^ logger)
 		{
-			return gcnew XbimSolid(shell, logger);
+			return gcnew XbimSolidV5(shell, logger);
 		}
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcShellBasedSurfaceModel^ ifcSurface, ILogger^ logger)
 		{
-			return gcnew XbimSolid(ifcSurface, logger);
+			return gcnew XbimSolidV5(ifcSurface, logger);
 		}
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcFaceBasedSurfaceModel^ ifcSurface, ILogger^ logger)
 		{
-			return gcnew XbimSolid(ifcSurface, logger);
+			return gcnew XbimSolidV5(ifcSurface, logger);
 		}
 
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcExtrudedAreaSolid^ IIfcSolid, ILogger^ logger)
 		{
-			return gcnew XbimSolid(IIfcSolid, logger);
+			return gcnew XbimSolidV5(IIfcSolid, logger);
 		};
 
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcRevolvedAreaSolid^ IIfcSolid, ILogger^ logger)
 		{
-			return gcnew XbimSolid(IIfcSolid, logger);
+			return gcnew XbimSolidV5(IIfcSolid, logger);
 		};
 
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcSweptDiskSolid^ IIfcSolid, ILogger^ logger)
 		{
-			return gcnew XbimSolid(IIfcSolid, logger);
+			return gcnew XbimSolidV5(IIfcSolid, logger);
 		};
 
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcBoundingBox^ IIfcSolid, ILogger^ logger)
 		{
-			return gcnew XbimSolid(IIfcSolid, logger);
+			return gcnew XbimSolidV5(IIfcSolid, logger);
 		};
 
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid, ILogger^ logger)
 		{
-			return gcnew XbimSolid(IIfcSolid, logger);
+			return gcnew XbimSolidV5(IIfcSolid, logger);
 		};
 
 		[[deprecated("Please use CreateSolidSet")]]
@@ -652,16 +683,16 @@ namespace Xbim
 			else if (dynamic_cast<IIfcCsgSolid^>(IIfcSolid))
 				return gcnew XbimSolidSet((IIfcCsgSolid^)IIfcSolid, logger);
 			else if (dynamic_cast<IIfcManifoldSolidBrep^>(IIfcSolid)) //these must be single volume solid
-				return gcnew XbimSolidSet(gcnew XbimSolid((IIfcManifoldSolidBrep^)IIfcSolid, logger));
+				return gcnew XbimSolidSet(gcnew XbimSolidV5((IIfcManifoldSolidBrep^)IIfcSolid, logger));
 			else if (dynamic_cast<IIfcSweptAreaSolid^>(IIfcSolid)) //these must be single volume solid
-				return gcnew XbimSolidSet(gcnew XbimSolid((IIfcSweptAreaSolid^)IIfcSolid, logger));
+				return gcnew XbimSolidSet(gcnew XbimSolidV5((IIfcSweptAreaSolid^)IIfcSolid, logger));
 			else if (dynamic_cast<IIfcSweptDiskSolid^>(IIfcSolid))
-				return gcnew XbimSolidSet(gcnew XbimSolid((IIfcSweptDiskSolid^)IIfcSolid, logger));
+				return gcnew XbimSolidSet(gcnew XbimSolidV5((IIfcSweptDiskSolid^)IIfcSolid, logger));
 			else if (dynamic_cast<IIfcHalfSpaceSolid^>(IIfcSolid))
-				return gcnew  XbimSolidSet(gcnew XbimSolid((IIfcHalfSpaceSolid^)IIfcSolid, logger));
+				return gcnew  XbimSolidSet(gcnew XbimSolidV5((IIfcHalfSpaceSolid^)IIfcSolid, logger));
 			else if (dynamic_cast<IIfcCsgPrimitive3D^>(IIfcSolid))
-				return gcnew XbimSolidSet(gcnew XbimSolid((IIfcCsgPrimitive3D^)IIfcSolid, logger));
-			throw gcnew Exception(String::Format("Boolean Operand with Type {0} is not implemented", IIfcSolid->GetType()->Name));
+				return gcnew XbimSolidSet(gcnew XbimSolidV5((IIfcCsgPrimitive3D^)IIfcSolid, logger));
+			throw gcnew System::Exception(System::String::Format("Boolean Operand with Type {0} is not implemented", IIfcSolid->GetType()->Name));
 		};
 
 		[[deprecated("Please use CreateSolidSet")]]
@@ -678,18 +709,18 @@ namespace Xbim
 
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcHalfSpaceSolid^ IIfcSolid, ILogger^ logger)
 		{
-			return gcnew XbimSolid(IIfcSolid, logger);
+			return gcnew XbimSolidV5(IIfcSolid, logger);
 		};
 
 
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcBoxedHalfSpace^ IIfcSolid, ILogger^ logger)
 		{
-			return gcnew XbimSolid(IIfcSolid, logger);
+			return gcnew XbimSolidV5(IIfcSolid, logger);
 		};
 
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcPolygonalBoundedHalfSpace^ IIfcSolid, ILogger^ logger)
 		{
-			return gcnew XbimSolid(IIfcSolid, logger);
+			return gcnew XbimSolidV5(IIfcSolid, logger);
 		};
 
 		IXbimSolidSet^ XbimGeometryCreator::CreateSolidSet(IIfcManifoldSolidBrep^ IIfcSolid, ILogger^ logger)
@@ -714,7 +745,7 @@ namespace Xbim
 
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcCsgPrimitive3D^ IIfcSolid, ILogger^ logger)
 		{
-			return gcnew XbimSolid(IIfcSolid, logger);
+			return gcnew XbimSolidV5(IIfcSolid, logger);
 		};
 
 		IXbimSolidSet^ XbimGeometryCreator::CreateSolidSet(IIfcCsgSolid^ IIfcSolid, ILogger^ logger)
@@ -724,27 +755,27 @@ namespace Xbim
 
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcSphere^ IIfcSolid, ILogger^ logger)
 		{
-			return gcnew XbimSolid(IIfcSolid, logger);
+			return gcnew XbimSolidV5(IIfcSolid, logger);
 		};
 
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcBlock^ IIfcSolid, ILogger^ logger)
 		{
-			return gcnew XbimSolid(IIfcSolid, logger);
+			return gcnew XbimSolidV5(IIfcSolid, logger);
 		};
 
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcRightCircularCylinder^ IIfcSolid, ILogger^ logger)
 		{
-			return gcnew XbimSolid(IIfcSolid, logger);
+			return gcnew XbimSolidV5(IIfcSolid, logger);
 		};
 
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcRightCircularCone^ IIfcSolid, ILogger^ logger)
 		{
-			return gcnew XbimSolid(IIfcSolid, logger);
+			return gcnew XbimSolidV5(IIfcSolid, logger);
 		};
 
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcRectangularPyramid^ IIfcSolid, ILogger^ logger)
 		{
-			return gcnew XbimSolid(IIfcSolid, logger);
+			return gcnew XbimSolidV5(IIfcSolid, logger);
 		};
 
 
@@ -753,27 +784,27 @@ namespace Xbim
 		//Surface Models containing one or more shells or solids
 		IXbimGeometryObjectSet^ XbimGeometryCreator::CreateSurfaceModel(IIfcShellBasedSurfaceModel^ IIfcSurface, ILogger^ logger)
 		{
-			return gcnew XbimCompound(IIfcSurface, logger);
+			return gcnew XbimCompoundV5(IIfcSurface, logger);
 		};
 
 		IXbimGeometryObjectSet^ XbimGeometryCreator::CreateSurfaceModel(IIfcFaceBasedSurfaceModel^ IIfcSurface, ILogger^ logger)
 		{
-			return gcnew XbimCompound(IIfcSurface, logger);
+			return gcnew XbimCompoundV5(IIfcSurface, logger);
 		};
 
 		IXbimShell^ XbimGeometryCreator::CreateShell(IIfcOpenShell^ shell, ILogger^ logger)
 		{
-			return gcnew XbimShell(shell, logger);
+			return gcnew XbimShellV5(shell, logger);
 		}
 
 		IXbimShell^ XbimGeometryCreator::CreateShell(IIfcConnectedFaceSet^ shell, ILogger^ logger)
 		{
-			return gcnew XbimShell(shell, logger);
+			return gcnew XbimShellV5(shell, logger);
 		};
 
 		IXbimShell^ XbimGeometryCreator::CreateShell(IIfcSurfaceOfLinearExtrusion^ linExt, ILogger^ logger)
 		{
-			return gcnew XbimShell(linExt, logger);
+			return gcnew XbimShellV5(linExt, logger);
 		}
 
 		IXbimSolidSet^ XbimGeometryCreator::CreateSolidSet(IIfcBooleanResult^ boolOp, ILogger^ logger)
@@ -919,7 +950,7 @@ namespace Xbim
 
 
 		IXbimSolidSet^ XbimGeometryCreator::CreateSolidSet() {
-			return gcnew XbimSolidSet();
+			return gcnew XbimSolidSet(_modelService);
 		};
 
 		IXbimGeometryObjectSet^ XbimGeometryCreator::CreateGeometryObjectSet() {
@@ -969,116 +1000,116 @@ namespace Xbim
 		IXbimCurve^ XbimGeometryCreator::CreateCurve(IIfcCurve^ curve, ILogger^ logger)
 		{
 			//if (Is3D(curve))
-			return gcnew XbimCurve(curve, logger);
+			return gcnew XbimCurveV5(curve, logger);
 			//else
 			//	return gcnew XbimCurve2D(curve, logger);
 		}
 		IXbimCurve^ XbimGeometryCreator::CreateCurve(IIfcPolyline^ curve, ILogger^ logger)
 		{
 			if (Is3D(curve))
-				return gcnew XbimCurve(curve, logger);
+				return gcnew XbimCurveV5(curve, logger);
 			else
-				return gcnew XbimCurve2D(curve, logger);
+				return gcnew XbimCurve2DV5(curve, logger);
 		}
 		IXbimCurve^ XbimGeometryCreator::CreateCurve(IIfcCircle^ curve, ILogger^ logger)
 		{
 			if (Is3D(curve))
-				return gcnew XbimCurve(curve, logger);
+				return gcnew XbimCurveV5(curve, logger);
 			else
-				return gcnew XbimCurve2D(curve, logger);
+				return gcnew XbimCurve2DV5(curve, logger);
 		}
 		IXbimCurve^ XbimGeometryCreator::CreateCurve(IIfcEllipse^ curve, ILogger^ logger)
 		{
 			if (Is3D(curve))
-				return gcnew XbimCurve(curve, logger);
+				return gcnew XbimCurveV5(curve, logger);
 			else
-				return gcnew XbimCurve2D(curve, logger);
+				return gcnew XbimCurve2DV5(curve, logger);
 		}
 		IXbimCurve^ XbimGeometryCreator::CreateCurve(IIfcLine^ curve, ILogger^ logger)
 		{
 			if (Is3D(curve))
-				return gcnew XbimCurve(curve, logger);
+				return gcnew XbimCurveV5(curve, logger);
 			else
-				return gcnew XbimCurve2D(curve, logger);
+				return gcnew XbimCurve2DV5(curve, logger);
 		}
 		IXbimCurve^ XbimGeometryCreator::CreateCurve(IIfcTrimmedCurve^ curve, ILogger^ logger)
 		{
 			if (Is3D(curve))
-				return gcnew XbimCurve(curve, logger);
+				return gcnew XbimCurveV5(curve, logger);
 			else
-				return gcnew XbimCurve2D(curve, logger);
+				return gcnew XbimCurve2DV5(curve, logger);
 		}
 		IXbimCurve^ XbimGeometryCreator::CreateCurve(IIfcRationalBSplineCurveWithKnots^ curve, ILogger^ logger)
 		{
 			if (Is3D(curve))
-				return gcnew XbimCurve(curve, logger);
+				return gcnew XbimCurveV5(curve, logger);
 			else
-				return gcnew XbimCurve2D(curve, logger);
+				return gcnew XbimCurve2DV5(curve, logger);
 		}
 		IXbimCurve^ XbimGeometryCreator::CreateCurve(IIfcBSplineCurveWithKnots^ curve, ILogger^ logger)
 		{
 			if (Is3D(curve))
-				return gcnew XbimCurve(curve, logger);
+				return gcnew XbimCurveV5(curve, logger);
 			else
-				return gcnew XbimCurve2D(curve, logger);
+				return gcnew XbimCurve2DV5(curve, logger);
 		}
 
 		IXbimCurve^ XbimGeometryCreator::CreateCurve(IIfcOffsetCurve3D^ curve, ILogger^ logger)
 		{
-			return gcnew XbimCurve(curve, logger);
+			return gcnew XbimCurveV5(curve, logger);
 		}
 
 		IXbimCurve^ XbimGeometryCreator::CreateCurve(IIfcOffsetCurve2D^ curve, ILogger^ logger)
 		{
-			return gcnew XbimCurve2D(curve, logger);
+			return gcnew XbimCurve2DV5(curve, logger);
 		}
 #pragma endregion
 
 		//Ifc4 interfaces
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcSweptDiskSolidPolygonal^ ifcSolid, ILogger^ logger)
 		{
-			return gcnew XbimSolid(ifcSolid, logger);
+			return gcnew XbimSolidV5(ifcSolid, logger);
 		}
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcRevolvedAreaSolidTapered^ ifcSolid, ILogger^ logger)
 		{
-			return gcnew XbimSolid(ifcSolid, logger);
+			return gcnew XbimSolidV5(ifcSolid, logger);
 		}
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcFixedReferenceSweptAreaSolid^ ifcSolid, ILogger^ logger)
 		{
-			return gcnew XbimSolid(ifcSolid, logger);
+			return gcnew XbimSolidV5(ifcSolid, logger);
 		}
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcAdvancedBrep^ ifcSolid, ILogger^ logger)
 		{
-			XbimCompound^ comp = gcnew XbimCompound((IIfcAdvancedBrep^)ifcSolid, logger);
+			XbimCompoundV5^ comp = gcnew XbimCompoundV5((IIfcAdvancedBrep^)ifcSolid, logger);
 			if (comp->Solids->Count > 0)
 				return comp->Solids->First;
 			else
-				return gcnew XbimSolid();
+				return gcnew XbimSolidV5();
 		}
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcAdvancedBrepWithVoids^ ifcSolid, ILogger^ logger)
 		{
-			XbimCompound^ comp = gcnew XbimCompound((IIfcAdvancedBrepWithVoids^)ifcSolid, logger);
+			XbimCompoundV5^ comp = gcnew XbimCompoundV5((IIfcAdvancedBrepWithVoids^)ifcSolid, logger);
 			if (comp->Solids->Count > 0)
 				return comp->Solids->First;
 			else
-				return gcnew XbimSolid();
+				return gcnew XbimSolidV5();
 		}
 		IXbimSolid^ XbimGeometryCreator::CreateSolid(IIfcSectionedSpine^ ifcSolid, ILogger^ logger)
 		{
-			return gcnew XbimSolid(ifcSolid, logger);
+			return gcnew XbimSolidV5(ifcSolid, logger);
 		}
 
 		IXbimGeometryObjectSet^ XbimGeometryCreator::CreateSurfaceModel(IIfcTessellatedFaceSet^ faceSet, ILogger^ logger)
 		{
 			IIfcTriangulatedFaceSet^ tfs = dynamic_cast<IIfcTriangulatedFaceSet^>(faceSet);
-			if (tfs != nullptr)  return gcnew XbimCompound(tfs, logger);
+			if (tfs != nullptr)  return gcnew XbimCompoundV5(tfs, logger);
 			IIfcPolygonalFaceSet^ pfs = dynamic_cast<IIfcPolygonalFaceSet^>(faceSet);
 			if (pfs != nullptr)
 			{
 
-				return gcnew XbimCompound(pfs, logger);
+				return gcnew XbimCompoundV5(pfs, logger);
 			}
-			throw gcnew Exception(String::Format("IIfcTessellatedFaceSet of Type {0} is not implemented", faceSet->GetType()->Name));
+			throw gcnew System::Exception(System::String::Format("IIfcTessellatedFaceSet of Type {0} is not implemented", faceSet->GetType()->Name));
 		}
 
 
@@ -1090,47 +1121,47 @@ namespace Xbim
 
 		IXbimSolidSet^ XbimGeometryCreator::CreateGrid(IIfcGrid^ grid, ILogger^ logger)
 		{
-			double mm = Math::Max(grid->Model->ModelFactors->OneMilliMeter, grid->Model->ModelFactors->Precision * 10);
+			double mm = System::Math::Max(grid->Model->ModelFactors->OneMilliMeter, grid->Model->ModelFactors->Precision * 10);
 			double precision = grid->Model->ModelFactors->Precision;
 
 
 			gp_Vec normal;
-			List<Tuple<int, XbimCurve2D^>^>^ UCurves = gcnew List<Tuple<int, XbimCurve2D^>^>();
-			List<Tuple<int, XbimCurve2D^>^>^ VCurves = gcnew List<Tuple<int, XbimCurve2D^>^>();
-			List<Tuple<int, XbimCurve2D^>^>^ WCurves = gcnew List<Tuple<int, XbimCurve2D^>^>();
+			List<System::Tuple<int, XbimCurve2DV5^>^>^ UCurves = gcnew List<System::Tuple<int, XbimCurve2DV5^>^>();
+			List<System::Tuple<int, XbimCurve2DV5^>^>^ VCurves = gcnew List<System::Tuple<int, XbimCurve2DV5^>^>();
+			List<System::Tuple<int, XbimCurve2DV5^>^>^ WCurves = gcnew List<System::Tuple<int, XbimCurve2DV5^>^>();
 			List<XbimPoint3D>^ intersections = gcnew List<XbimPoint3D>();
 
 			for each (IIfcGridAxis ^ axis in grid->UAxes)
 			{
-				XbimCurve2D^ c = gcnew XbimCurve2D(axis->AxisCurve, logger);
+				XbimCurve2DV5^ c = gcnew XbimCurve2DV5(axis->AxisCurve, logger);
 				if (c->IsValid)
 				{
-					Tuple<int, XbimCurve2D^>^ curveWithTag = Tuple::Create<int, XbimCurve2D^>(axis->EntityLabel, c);
+					System::Tuple<int, XbimCurve2DV5^>^ curveWithTag = System::Tuple::Create<int, XbimCurve2DV5^>(axis->EntityLabel, c);
 					UCurves->Add(curveWithTag);
 				}
 			}
 			for each (IIfcGridAxis ^ axis in grid->VAxes)
 			{
-				XbimCurve2D^ c = gcnew XbimCurve2D(axis->AxisCurve, logger);
+				XbimCurve2DV5^ c = gcnew XbimCurve2DV5(axis->AxisCurve, logger);
 				if (c->IsValid)
 				{
-					Tuple<int, XbimCurve2D^>^ curveWithTag = Tuple::Create<int, XbimCurve2D^>(axis->EntityLabel, c);
+					System::Tuple<int, XbimCurve2DV5^>^ curveWithTag = System::Tuple::Create<int, XbimCurve2DV5^>(axis->EntityLabel, c);
 					VCurves->Add(curveWithTag);
-					for each (Tuple<int, XbimCurve2D^>^ u in UCurves)
+					for each (System::Tuple<int, XbimCurve2DV5^>^ u in UCurves)
 						intersections->AddRange(u->Item2->Intersections(c, precision, logger));
 				}
 			}
 
 			for each (IIfcGridAxis ^ axis in grid->WAxes)
 			{
-				XbimCurve2D^ c = gcnew XbimCurve2D(axis->AxisCurve, logger);
+				XbimCurve2DV5^ c = gcnew XbimCurve2DV5(axis->AxisCurve, logger);
 				if (c->IsValid)
 				{
-					Tuple<int, XbimCurve2D^>^ curveWithTag = Tuple::Create<int, XbimCurve2D^>(axis->EntityLabel, c);
+					System::Tuple<int, XbimCurve2DV5^>^ curveWithTag = System::Tuple::Create<int, XbimCurve2DV5^>(axis->EntityLabel, c);
 					WCurves->Add(curveWithTag);
-					for each (Tuple<int, XbimCurve2D^>^ u in UCurves)
+					for each (System::Tuple<int, XbimCurve2DV5^>^ u in UCurves)
 						intersections->AddRange(u->Item2->Intersections(c, precision, logger));
-					for each (Tuple<int, XbimCurve2D^>^ v in VCurves)
+					for each (System::Tuple<int, XbimCurve2DV5^>^ v in VCurves)
 						intersections->AddRange(v->Item2->Intersections(c, precision, logger));
 				}
 			}
@@ -1162,14 +1193,14 @@ namespace Xbim
 			gp_Lin2d right(gp_Pnt2d(bb.X + bb.SizeX, bb.Y), gp_Dir2d(0, 1));
 
 			bool failedGridLines = false;
-			IEnumerable<Tuple<int, XbimCurve2D^>^>^ curves = Enumerable::Concat(Enumerable::Concat(UCurves, VCurves), WCurves);
+			IEnumerable<System::Tuple<int, XbimCurve2DV5^>^>^ curves = Enumerable::Concat(Enumerable::Concat(UCurves, VCurves), WCurves);
 			BRep_Builder b;
 			TopoDS_Compound solidResults;
 			b.MakeCompound(solidResults);
 
-			TopoDS_Wire rect75mm = gcnew XbimWire(75 * mm, mm, precision, true);
+			TopoDS_Wire rect75mm = gcnew XbimWireV5(75 * mm, mm, precision, true);
 			Handle(Geom_Plane) gridPlane = new Geom_Plane(gp_Pln());
-			for each (Tuple<int, XbimCurve2D^>^ curveWithTag in curves)
+			for each (System::Tuple<int, XbimCurve2DV5^>^ curveWithTag in curves)
 			{
 				Handle(Geom2d_Curve) hcurve = curveWithTag->Item2;
 				IntAna2d_AnaIntersection its;
@@ -1197,7 +1228,7 @@ namespace Xbim
 						continue; //give up
 					if (isnan(params[0]) || isnan(params[1]))
 						continue; //give up
-					hcurve = new Geom2d_TrimmedCurve(hcurve, Math::Min(params[0], params[1]), Math::Max(params[0], params[1]));
+					hcurve = new Geom2d_TrimmedCurve(hcurve, System::Math::Min(params[0], params[1]), System::Math::Max(params[0], params[1]));
 				}
 
 				
@@ -1263,17 +1294,17 @@ namespace Xbim
 					}
 
 				}
-				catch (Standard_Failure sf)
+				catch (const Standard_Failure& sf)
 				{
-					String^ err = gcnew String(sf.GetMessageString());
+					System::String^ err = gcnew System::String(sf.GetMessageString());
 					
 					failedGridLines = true;
-					LogWarning(logger, grid, "Grid axis #{0} caused exception. Status={1}, {2}", curveWithTag->Item1.ToString(), gcnew Int32(pipeMakerStatus), err);
+					LogWarning(logger, grid, "Grid axis #{0} caused exception. Status={1}, {2}", curveWithTag->Item1.ToString(), gcnew System::Int32(pipeMakerStatus), err);
 					failedGridLines = true;
 				}
 				catch (...)
 				{
-					LogWarning(logger, grid, "Grid axis #{0} caused internal exception. Status={1}", curveWithTag->Item1.ToString(), gcnew Int32(pipeMakerStatus));
+					LogWarning(logger, grid, "Grid axis #{0} caused internal exception. Status={1}", curveWithTag->Item1.ToString(), gcnew System::Int32(pipeMakerStatus));
 					failedGridLines = true;
 				}
 
@@ -1317,7 +1348,7 @@ namespace Xbim
 			return geometryObject;
 		}
 
-		IXbimGeometryObject^ XbimGeometryCreator::FromBrep(String^ brepStr)
+		IXbimGeometryObject^ XbimGeometryCreator::FromBrep(System::String^ brepStr)
 		{
 			TopoDS_Shape result;
 			BRep_Builder builder;
@@ -1329,19 +1360,19 @@ namespace Xbim
 				switch (result.ShapeType())
 				{
 				case TopAbs_VERTEX:
-					return gcnew XbimVertex(TopoDS::Vertex(result));
+					return gcnew XbimVertexV5(TopoDS::Vertex(result));
 				case TopAbs_EDGE:
-					return gcnew XbimEdge(TopoDS::Edge(result));
+					return gcnew XbimEdgeV5(TopoDS::Edge(result));
 				case TopAbs_WIRE:
-					return gcnew XbimWire(TopoDS::Wire(result));
+					return gcnew XbimWireV5(TopoDS::Wire(result));
 				case TopAbs_FACE:
-					return gcnew XbimFace(TopoDS::Face(result));
+					return gcnew XbimFaceV5(TopoDS::Face(result));
 				case TopAbs_SHELL:
-					return gcnew XbimShell(TopoDS::Shell(result));
+					return gcnew XbimShellV5(TopoDS::Shell(result));
 				case TopAbs_SOLID:
-					return gcnew XbimSolid(TopoDS::Solid(result));
+					return gcnew XbimSolidV5(TopoDS::Solid(result));
 				case TopAbs_COMPOUND:
-					return gcnew XbimCompound(TopoDS::Compound(result), true, 1e-5);
+					return gcnew XbimCompoundV5(TopoDS::Compound(result), true, 1e-5);
 				default:
 					return nullptr;
 				}
@@ -1352,13 +1383,13 @@ namespace Xbim
 			}
 			finally
 			{
-				Marshal::FreeHGlobal(IntPtr((void*)cStr));
+				Marshal::FreeHGlobal(System::IntPtr((void*)cStr));
 			}
 		}
 
 
 
-		String^ XbimGeometryCreator::ToBrep(IXbimGeometryObject^ geometryObject)
+		System::String^ XbimGeometryCreator::ToBrep(IXbimGeometryObject^ geometryObject)
 		{
 			XbimGeometryObject^ geom = dynamic_cast<XbimGeometryObject^>(geometryObject);
 			if (geom != nullptr)
@@ -1366,8 +1397,6 @@ namespace Xbim
 			else
 				return nullptr;
 		}
-
-		
 
 		IXbimGeometryObject^ XbimGeometryCreator::Trim(XbimSetObject^ geometryObject)
 		{

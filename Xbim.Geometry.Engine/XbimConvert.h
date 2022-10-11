@@ -1,16 +1,19 @@
 #pragma once
-#include "XbimGeometryObject.h"
+
 #include <TopLoc_Location.hxx>
 #include <gp_GTrsf.hxx> 
 #include <gp_Trsf.hxx> 
 #include <gp_Pln.hxx> 
 #include <TColgp_Array1OfPnt.hxx>
+#include "Services/ModelService.h"
+#include "XbimGeometryObject.h"
 using namespace Xbim::Ifc4::Interfaces;
 using namespace Xbim::Common::Exceptions;
 using namespace Xbim::Common::Geometry;
 using namespace Xbim::Ifc4::MeasureResource;
+using namespace Xbim::Ifc4::GeometryResource;
+using namespace Microsoft::Extensions::Logging;
 
- 
 namespace Xbim
 {
 	namespace Geometry
@@ -20,11 +23,16 @@ namespace Xbim
 	    public ref class XbimConvert
 		{
 		private:
-			static Ifc4::GeometryResource::IfcDimensionCount dimensions3D = Ifc4::GeometryResource::IfcDimensionCount(3);
+			static IfcDimensionCount dimensions3D = IfcDimensionCount(3);
 		public:
 			XbimConvert(void);
+			//this is a work around to get the Model Service reliably through all the legacy code
+			//this service deals with ifc exporter different precisions and tolerances
+			//it is essential to set the Tag property of the IModel before making any calls to the geometry creator
+			static IXModelService^ ModelService(IPersistEntity^ ifcEntity);
 			// Converts a Local Placement into a TopLoc_Location
 			static TopLoc_Location ToLocation(IIfcObjectPlacement^ placement, ILogger^ logger);
+			static gp_Trsf ToTransform(IIfcObjectPlacement^ objPlacement, ILogger^ logger);
 			// Converts a Placement into a TopLoc_Location
 			static TopLoc_Location ToLocation(IIfcPlacement^ placement);
 			// Converts a IfcAxis2Placement into a TopLoc_Location
@@ -60,7 +68,6 @@ namespace Xbim
 			static bool Is3D(IIfcPolyline^ pline);
 			static bool Is3D(IIfcPolyLoop^ pLoop);
 			static bool IsPolygon(IIfcPolyLoop^ pLoop);
-			static bool IsInvalid(const gp_Dir& dir, double tolerance);
 			static double GetZValueOrZero(IIfcCartesianPoint^ point);
 			static double GetZValueOrZero(IIfcDirection^ dir);
 			static double GetZValueOrZero(IIfcVector^ vec);

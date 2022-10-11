@@ -1,11 +1,4 @@
-#include "XbimWire.h"
-#include "XbimEdge.h"
-#include "XbimFace.h"
-#include "XbimGeometryCreator.h"
-#include "XbimConvert.h"
-#include "XbimEdgeSet.h"
-#include "XbimVertexSet.h"
-#include "XbimCompound.h"
+
 #include <BRepBuilderAPI_Transform.hxx>
 #include <BRepBuilderAPI_GTransform.hxx>
 #include <TopExp_Explorer.hxx>
@@ -29,6 +22,7 @@
 #include <TopTools_Array1OfShape.hxx>
 #include <Geom_Curve.hxx>
 #include <BRepAdaptor_Curve.hxx>
+
 #include <Geom_BSplineCurve.hxx>
 #include <Geom_BezierCurve.hxx>
 #include <Geom_Parabola.hxx>
@@ -42,6 +36,7 @@
 #include <Geom_Circle.hxx>
 #include <Geom_Ellipse.hxx>
 #include <BRepAdaptor_CompCurve.hxx>
+
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <TColStd_Array1OfReal.hxx>
 #include <BRepBuilderAPI_MakePolygon.hxx>
@@ -68,7 +63,17 @@
 #include <ShapeFix_Edge.hxx>
 #include <BOPAlgo_Tools.hxx>
 #include <Geom_OffsetCurve.hxx>
+
 #include <ShapeAnalysis_WireOrder.hxx>
+
+#include "XbimWire.h"
+#include "XbimEdge.h"
+#include "XbimFace.h"
+#include "XbimGeometryCreator.h"
+#include "XbimConvert.h"
+#include "XbimEdgeSet.h"
+#include "XbimVertexSet.h"
+#include "XbimCompound.h"
 using namespace Xbim::Common;
 using namespace System::Linq;
 // using namespace System::Diagnostics;
@@ -81,10 +86,10 @@ namespace Xbim
 #pragma region Destructors and cleanup 
 
 		/*Ensures native pointers are deleted and garbage collected*/
-		void XbimWire::InstanceCleanup()
+		void XbimWireV5::InstanceCleanup()
 		{
-			IntPtr temp = System::Threading::Interlocked::Exchange(ptrContainer, IntPtr::Zero);
-			if (temp != IntPtr::Zero)
+			System::IntPtr temp = System::Threading::Interlocked::Exchange(ptrContainer, System::IntPtr::Zero);
+			if (temp != System::IntPtr::Zero)
 				delete (TopoDS_Wire*)(temp.ToPointer());
 			System::GC::SuppressFinalize(this);
 		}
@@ -93,24 +98,24 @@ namespace Xbim
 #pragma region Constructors
 
 
-		XbimWire::XbimWire(XbimEdge^ edge)
+		XbimWireV5::XbimWireV5(XbimEdgeV5^ edge)
 		{
 			pWire = new TopoDS_Wire();
 			BRepBuilderAPI_MakeWire wireMaker(edge);
 			*pWire = wireMaker.Wire();
 		}
-		XbimWire::XbimWire(const TopoDS_Wire& wire)
+		XbimWireV5::XbimWireV5(const TopoDS_Wire& wire)
 		{
 			pWire = new TopoDS_Wire();
 			*pWire = wire;
 		}
 
-		XbimWire::XbimWire(const TopoDS_Wire& wire, Object^ tag) :XbimWire(wire)
+		XbimWireV5::XbimWireV5(const TopoDS_Wire& wire, Object^ tag) :XbimWireV5(wire)
 		{
 			Tag = tag;
 		}
 
-		XbimWire::XbimWire(const std::vector<gp_Pnt>& points, double tolerance)
+		XbimWireV5::XbimWireV5(const std::vector<gp_Pnt>& points, double tolerance)
 		{
 			BRepBuilderAPI_MakePolygon polyMaker;
 			for (size_t i = 0; i < points.size(); i++)
@@ -123,62 +128,62 @@ namespace Xbim
 			ShapeFix_ShapeTolerance fixer;
 			fixer.LimitTolerance(*pWire, tolerance);
 		}
-		XbimWire::XbimWire(double precision) { Init(precision); }
-		XbimWire::XbimWire(IIfcCurve^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
+		XbimWireV5::XbimWireV5(double precision) { Init(precision); }
+		XbimWireV5::XbimWireV5(IIfcCurve^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
 
-		XbimWire::XbimWire(IIfcCompositeCurve^ compCurve, ILogger^ logger, XbimConstraints constraints) { Init(compCurve, logger, constraints); }
-		XbimWire::XbimWire(IIfcCompositeCurveSegment^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); };
-		XbimWire::XbimWire(IIfcPolyline^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
+		XbimWireV5::XbimWireV5(IIfcCompositeCurve^ compCurve, ILogger^ logger, XbimConstraints constraints) { Init(compCurve, logger, constraints); }
+		XbimWireV5::XbimWireV5(IIfcCompositeCurveSegment^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); };
+		XbimWireV5::XbimWireV5(IIfcPolyline^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
 
-		XbimWire::XbimWire(IIfcIndexedPolyCurve^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
+		XbimWireV5::XbimWireV5(IIfcIndexedPolyCurve^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
 
-		XbimWire::XbimWire(IIfcPolyLoop^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
-		XbimWire::XbimWire(IIfcArbitraryClosedProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
-		XbimWire::XbimWire(IIfcArbitraryOpenProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
-		XbimWire::XbimWire(IIfcCenterLineProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
+		XbimWireV5::XbimWireV5(IIfcPolyLoop^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
+		XbimWireV5::XbimWireV5(IIfcArbitraryClosedProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
+		XbimWireV5::XbimWireV5(IIfcArbitraryOpenProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
+		XbimWireV5::XbimWireV5(IIfcCenterLineProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
 		//parametrised profiles
-		XbimWire::XbimWire(IIfcProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
-		XbimWire::XbimWire(IIfcDerivedProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
-		XbimWire::XbimWire(IIfcParameterizedProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
-		XbimWire::XbimWire(IIfcCircleProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
-		XbimWire::XbimWire(IIfcRectangleProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
-		XbimWire::XbimWire(IIfcRoundedRectangleProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
-		XbimWire::XbimWire(IIfcLShapeProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
-		XbimWire::XbimWire(IIfcUShapeProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
-		XbimWire::XbimWire(IIfcEllipseProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
-		XbimWire::XbimWire(IIfcIShapeProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
-		XbimWire::XbimWire(IIfcZShapeProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
-		XbimWire::XbimWire(IIfcCShapeProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
-		XbimWire::XbimWire(IIfcTShapeProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
-		XbimWire::XbimWire(double x, double y, double tolerance, bool centre) { Init(x, y, tolerance, centre); }
+		XbimWireV5::XbimWireV5(IIfcProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
+		XbimWireV5::XbimWireV5(IIfcDerivedProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
+		XbimWireV5::XbimWireV5(IIfcParameterizedProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
+		XbimWireV5::XbimWireV5(IIfcCircleProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
+		XbimWireV5::XbimWireV5(IIfcRectangleProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
+		XbimWireV5::XbimWireV5(IIfcRoundedRectangleProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
+		XbimWireV5::XbimWireV5(IIfcLShapeProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
+		XbimWireV5::XbimWireV5(IIfcUShapeProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
+		XbimWireV5::XbimWireV5(IIfcEllipseProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
+		XbimWireV5::XbimWireV5(IIfcIShapeProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
+		XbimWireV5::XbimWireV5(IIfcZShapeProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
+		XbimWireV5::XbimWireV5(IIfcCShapeProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
+		XbimWireV5::XbimWireV5(IIfcTShapeProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
+		XbimWireV5::XbimWireV5(double x, double y, double tolerance, bool centre) { Init(x, y, tolerance, centre); }
 #pragma endregion
 
 
 #pragma region Equality Overrides
 
-		bool XbimWire::Equals(Object^ obj)
+		bool XbimWireV5::Equals(Object^ obj)
 		{
-			XbimWire^ w = dynamic_cast<XbimWire^>(obj);
+			XbimWireV5^ w = dynamic_cast<XbimWireV5^>(obj);
 			// Check for null
 			if (w == nullptr) return false;
 			return this == w;
 		}
 
-		bool XbimWire::Equals(IXbimWire^ obj)
+		bool XbimWireV5::Equals(IXbimWire^ obj)
 		{
 			// Check for null
-			XbimWire^ w = dynamic_cast<XbimWire^>(obj);
+			XbimWireV5^ w = dynamic_cast<XbimWireV5^>(obj);
 			if (w == nullptr) return false;
 			return this == w;
 		}
 
-		int XbimWire::GetHashCode()
+		int XbimWireV5::GetHashCode()
 		{
 			if (!IsValid) return 0;
-			return pWire->HashCode(Int32::MaxValue);
+			return pWire->HashCode(System::Int32::MaxValue);
 		}
 
-		bool XbimWire::operator ==(XbimWire^ left, XbimWire^ right)
+		bool XbimWireV5::operator ==(XbimWireV5^ left, XbimWireV5^ right)
 		{
 			// If both are null, or both are same instance, return true.
 			if (System::Object::ReferenceEquals(left, right))
@@ -189,7 +194,7 @@ namespace Xbim
 			return  ((const TopoDS_Wire&)left).IsSame(right) == Standard_True;
 		}
 
-		bool XbimWire::operator !=(XbimWire^ left, XbimWire^ right)
+		bool XbimWireV5::operator !=(XbimWireV5^ left, XbimWireV5^ right)
 		{
 			return !(left == right);
 		}
@@ -200,7 +205,7 @@ namespace Xbim
 
 #pragma region Non-Parameterised profiles
 
-		void XbimWire::Init(IIfcArbitraryClosedProfileDef^ profile, ILogger^ logger, XbimConstraints /*constraints*/)
+		void XbimWireV5::Init(IIfcArbitraryClosedProfileDef^ profile, ILogger^ logger, XbimConstraints /*constraints*/)
 		{
 
 			if (profile->OuterCurve == nullptr)
@@ -215,11 +220,11 @@ namespace Xbim
 			}
 			if (dynamic_cast<IIfcArbitraryProfileDefWithVoids^>(profile))
 			{
-				throw gcnew Exception("IfcArbitraryProfileDefWithVoids cannot be created as a wire, call the XbimFace method");
+				throw gcnew System::Exception("IfcArbitraryProfileDefWithVoids cannot be created as a wire, call the XbimFace method");
 			}
 			else
 			{
-				XbimWire^ loop = gcnew XbimWire(profile->OuterCurve, logger, XbimConstraints::Closed | XbimConstraints::NotSelfIntersecting);
+				XbimWireV5^ loop = gcnew XbimWireV5(profile->OuterCurve, logger, XbimConstraints::Closed | XbimConstraints::NotSelfIntersecting);
 
 				if (!loop->IsValid)
 				{
@@ -237,13 +242,13 @@ namespace Xbim
 
 
 						double oneMilli = profile->Model->ModelFactors->OneMilliMeter;
-						TopoDS_Face face = gcnew XbimFace(loop, true, oneMilli, profile->OuterCurve->EntityLabel, logger);
-						ShapeFix_Wire wireFixer(loop, face, profile->Model->ModelFactors->Precision);
+						TopoDS_Face face = gcnew XbimFaceV5(loop, true, oneMilli, profile->OuterCurve->EntityLabel, logger);
+						ShapeFix_Wire wireFixer(loop, face, XbimConvert::ModelService(profile)->MinimumGap);
 						wireFixer.ClosedWireMode() = Standard_True;
 						wireFixer.FixGaps2dMode() = Standard_True;
 						wireFixer.FixGaps3dMode() = Standard_True;
 						wireFixer.ModifyGeometryMode() = Standard_True;
-						wireFixer.SetMinTolerance(profile->Model->ModelFactors->Precision);
+						wireFixer.SetMinTolerance(XbimConvert::ModelService(profile)->MinimumGap);
 						wireFixer.SetPrecision(oneMilli);
 						wireFixer.SetMaxTolerance(oneMilli * 10);
 						Standard_Boolean closed = wireFixer.Perform();
@@ -252,9 +257,9 @@ namespace Xbim
 						else
 							*pWire = loop;
 					}
-					catch (Standard_Failure sf)
+					catch (const Standard_Failure& sf)
 					{
-						String^ err = gcnew String(sf.GetMessageString());
+						System::String^ err = gcnew System::String(sf.GetMessageString());
 						XbimGeometryCreator::LogWarning(logger, profile, "Invalid bound. Wire discarded: {0}", err);
 					}
 				}
@@ -263,7 +268,7 @@ namespace Xbim
 			}
 		}
 
-		void XbimWire::Init(IIfcArbitraryOpenProfileDef^ profile, ILogger^ logger, XbimConstraints constraints)
+		void XbimWireV5::Init(IIfcArbitraryOpenProfileDef^ profile, ILogger^ logger, XbimConstraints constraints)
 		{
 			if (dynamic_cast<IIfcCenterLineProfileDef^>(profile))
 			{
@@ -272,7 +277,7 @@ namespace Xbim
 			else
 			{
 
-				XbimWire^ loop = gcnew XbimWire(profile->Curve, logger, constraints);
+				XbimWireV5^ loop = gcnew XbimWireV5(profile->Curve, logger, constraints);
 				if (!loop->IsValid)
 				{
 					XbimGeometryCreator::LogWarning(logger, profile, "Invalid curve. Wire discarded");
@@ -283,14 +288,14 @@ namespace Xbim
 			}
 		}
 
-		void XbimWire::Init(IIfcCenterLineProfileDef^ profile, ILogger^ logger, XbimConstraints constraints)
+		void XbimWireV5::Init(IIfcCenterLineProfileDef^ profile, ILogger^ logger, XbimConstraints constraints)
 		{
 
 			double precision = profile->Model->ModelFactors->Precision;
-			XbimWire^ centreWire = gcnew XbimWire(profile->Curve, logger, constraints);
+			XbimWireV5^ centreWire = gcnew XbimWireV5(profile->Curve, logger, constraints);
 			TopoDS_Wire spine = centreWire;
 			//nb the curve must be 2d so place it on the Z plane so that the offseter can get the correct normal
-			XbimFace^ xFace = gcnew XbimFace(XbimVector3D(0, 0, 1), logger);
+			XbimFaceV5^ xFace = gcnew XbimFaceV5(XbimVector3D(0, 0, 1), logger);
 			xFace->Add(centreWire);
 			TopoDS_Face spineFace = xFace;
 			if (!centreWire->IsValid)
@@ -337,11 +342,11 @@ namespace Xbim
 						if (cType == STANDARD_TYPE(Geom_Circle))
 						{
 							Handle(Geom_Circle) circ = Handle(Geom_Circle)::DownCast(c3dptr);
-							if (Math::Abs(circ->Radius() - offset) <= precision) //it could be the end
+							if (System::Math::Abs(circ->Radius() - offset) <= precision) //it could be the end
 							{
 								//make sure we are at a start or end point
-								if (Math::Abs(circ->Axis().Location().Distance(wStart) <= precision) ||
-									Math::Abs(circ->Axis().Location().Distance(wEnd) <= precision))
+								if (System::Math::Abs(circ->Axis().Location().Distance(wStart) <= precision) ||
+									System::Math::Abs(circ->Axis().Location().Distance(wEnd) <= precision))
 								{
 									gp_Pnt s, pe;
 									c3d->D0(start, s);
@@ -368,11 +373,11 @@ namespace Xbim
 
 		///We need to create a composite curve segment that is a wire representation of a bounded curve
 
-		void XbimWire::Init(IIfcCompositeCurveSegment^ seg, ILogger^ logger, XbimConstraints constraints)
+		void XbimWireV5::Init(IIfcCompositeCurveSegment^ seg, ILogger^ logger, XbimConstraints constraints)
 		{
 
 			IIfcTrimmedCurve^ tc = dynamic_cast<IIfcTrimmedCurve^>(seg->ParentCurve);
-			XbimWire^ segWire = gcnew XbimWire(seg->ParentCurve, logger, constraints);
+			XbimWireV5^ segWire = gcnew XbimWireV5(seg->ParentCurve, logger, constraints);
 			if (segWire->IsValid)
 			{
 				if (tc != nullptr)
@@ -401,10 +406,9 @@ namespace Xbim
 				*pWire = segWire;
 			}
 		}
-
-		///Special case to allow polylines to be created as compound edges not as a single bpline
+		///Special case to allow polylines to be create as compound edges not as a single bpline
 		// In this case the pline may or ma not be closed it may or may not lie on a surface, it may be self intersecting
-		void XbimWire::Init(IIfcPolyline^ pline, ILogger^ logger, XbimConstraints constraints)
+		void XbimWireV5::Init(IIfcPolyline^ pline, ILogger^ logger, XbimConstraints constraints)
 		{
 			List<IIfcCartesianPoint^>^ polygon = Enumerable::ToList(pline->Points);
 			int originalCount = polygon->Count;
@@ -420,8 +424,11 @@ namespace Xbim
 			bool tryAgain = true;
 			while (!done)
 			{
+
+
 				TColgp_SequenceOfPnt pointSeq;
 				BRepBuilderAPI_MakeWire wireMaker;
+
 
 				for (int i = 0; i < originalCount; i++)
 				{
@@ -429,13 +436,15 @@ namespace Xbim
 				}
 				bool close = (constraints & XbimConstraints::Closed) == XbimConstraints::Closed;
 				bool notSelfIntersecting = (constraints & XbimConstraints::NotSelfIntersecting) == XbimConstraints::NotSelfIntersecting;
-				bool isClosed = XbimFace::RemoveDuplicatePoints(pointSeq, close, tolerance);
+				bool isClosed = XbimFaceV5::RemoveDuplicatePoints(pointSeq, close, tolerance);
+
 
 				if (pointSeq.Length() < 2)
 				{
 					XbimGeometryCreator::LogWarning(logger, pline, "Polyline with less than 2 points is an empty line. It has been ignored");
 					return;
 				}
+
 
 				BRepBuilderAPI_MakePolygon polyMaker;
 				for (int i = 1; i <= pointSeq.Length(); ++i)
@@ -449,8 +458,7 @@ namespace Xbim
 				if (polyMaker.IsDone())
 				{
 					if (notSelfIntersecting)
-					{
-						//check for no self intersection
+					{//check for no self intersection
 						TopoDS_Wire wire = polyMaker.Wire(); //get a handle to the wire to avoid garbage collection
 
 						//double tolerance = profile->Model->ModelFactors->Precision;
@@ -479,7 +487,10 @@ namespace Xbim
 							bool fixed = wireFixer.Perform();
 							if (!fixed) // we have a self intersection but the tools cannot fix it, normally means two points are too near
 							{
+
+
 								tolerance = pline->Model->ModelFactors->OneMilliMeter / 10; //use a normal modelling precision
+
 								if (tryAgain)
 								{
 									tryAgain = false; //only do this once
@@ -510,7 +521,7 @@ namespace Xbim
 
 		}
 
-		void XbimWire::Init(IIfcIndexedPolyCurve^ polyCurve, ILogger^ logger, XbimConstraints /*constraints*/)
+		void XbimWireV5::Init(IIfcIndexedPolyCurve^ polyCurve, ILogger^ logger, XbimConstraints /*constraints*/)
 		{
 			double tolerance = polyCurve->Model->ModelFactors->Precision;
 			ShapeFix_ShapeTolerance tFixer;
@@ -677,7 +688,7 @@ namespace Xbim
 						}
 
 
-						bool isClosed = XbimFace::RemoveDuplicatePoints(pointSeq, false, tolerance); //don't assume it is closed
+						bool isClosed = XbimFaceV5::RemoveDuplicatePoints(pointSeq, false, tolerance); //don't assume it is closed
 
 						if (pointSeq.Length() != originalCount)
 						{
@@ -764,7 +775,7 @@ namespace Xbim
 				}
 
 
-				bool isClosed = XbimFace::RemoveDuplicatePoints(pointSeq, false, tolerance); //don't assume it is closed
+				bool isClosed = XbimFaceV5::RemoveDuplicatePoints(pointSeq, false, tolerance); //don't assume it is closed
 
 				if (pointSeq.Length() != originalCount)
 				{
@@ -807,7 +818,7 @@ namespace Xbim
 		}
 
 
-		void XbimWire::Init(IIfcCurve^ curve, ILogger^ logger, XbimConstraints constraints)
+		void XbimWireV5::Init(IIfcCurve^ curve, ILogger^ logger, XbimConstraints constraints)
 		{
 			//this method defaults for create compund edges for the curves below, they could be created as single curves but it creates problems with booleans
 			IIfcPolyline^ pline = dynamic_cast<IIfcPolyline^>(curve);
@@ -821,7 +832,7 @@ namespace Xbim
 				Init(polyCurve, logger, constraints);
 			else
 			{
-				XbimEdge^ edge = gcnew XbimEdge(curve, logger);
+				XbimEdgeV5^ edge = gcnew XbimEdgeV5(curve, logger);
 				if (!edge->IsValid) return; //errors handled below in curve
 				BRepLib_MakeWire wireMaker(edge);
 				if (wireMaker.IsDone())
@@ -838,7 +849,7 @@ namespace Xbim
 			}
 		}
 
-		void XbimWire::Init(IIfcCompositeCurve^ cCurve, ILogger^ logger, XbimConstraints constraints)
+		void XbimWireV5::Init(IIfcCompositeCurve^ cCurve, ILogger^ logger, XbimConstraints constraints)
 		{
 			double tolerance = cCurve->Model->ModelFactors->Precision;
 			//BRepBuilderAPI_MakeWire converter;
@@ -867,7 +878,7 @@ namespace Xbim
 
 				if (lastSeg && seg->Transition == IfcTransitionCode::DISCONTINUOUS) isContinuous = false;
 
-				XbimWire^ xbimWire = gcnew XbimWire(seg, logger, constraints);
+				XbimWireV5^ xbimWire = gcnew XbimWireV5(seg, logger, constraints);
 				if (xbimWire->IsValid)
 				{
 					TopoDS_Wire segWire = xbimWire;
@@ -974,7 +985,7 @@ namespace Xbim
 
 		}
 		//This is going to be added to to the selected vertex and the tolerances will be adjusted. the duplicate points will be removed
-		void XbimWire::ModifyWireAddEdge(TopoDS_Wire& resultWire, const TopoDS_Edge& edgeToAdd, const TopoDS_Vertex& edgeVertexToJoin, gp_Pnt edgePointToJoin, const TopoDS_Vertex&
+		void XbimWireV5::ModifyWireAddEdge(TopoDS_Wire& resultWire, const TopoDS_Edge& edgeToAdd, const TopoDS_Vertex& edgeVertexToJoin, gp_Pnt edgePointToJoin, const TopoDS_Vertex&
 			nextEdgeVertex, const TopoDS_Vertex& wireVertexToJoin, gp_Pnt wirePointToJoin, double distance)
 		{
 
@@ -1026,7 +1037,7 @@ namespace Xbim
 
 		}
 
-		void XbimWire::Init(IIfcPolyLoop^ polyloop, ILogger^ logger, XbimConstraints /*constraints*/)
+		void XbimWireV5::Init(IIfcPolyLoop^ polyloop, ILogger^ logger, XbimConstraints /*constraints*/)
 		{
 			List<IIfcCartesianPoint^>^ polygon = Enumerable::ToList(polyloop->Polygon);
 			int originalCount = polygon->Count;
@@ -1044,7 +1055,7 @@ namespace Xbim
 				pointSeq.Append(XbimConvert::GetPoint3d(polygon[i]));
 			}
 
-			XbimFace::RemoveDuplicatePoints(pointSeq, true, tolerance); //must be closed
+			XbimFaceV5::RemoveDuplicatePoints(pointSeq, true, tolerance); //must be closed
 
 			if (pointSeq.Length() != originalCount)
 			{
@@ -1146,22 +1157,22 @@ namespace Xbim
 
 #pragma region IXbimWire Interface
 
-		IXbimGeometryObject^ XbimWire::Transform(XbimMatrix3D matrix3D)
+		IXbimGeometryObject^ XbimWireV5::Transform(XbimMatrix3D matrix3D)
 		{
 			BRepBuilderAPI_Copy copier(this);
 			BRepBuilderAPI_Transform gTran(copier.Shape(), XbimConvert::ToTransform(matrix3D));
 			TopoDS_Wire temp = TopoDS::Wire(gTran.Shape());
-			return gcnew XbimWire(temp);
+			return gcnew XbimWireV5(temp);
 		}
 
-		IXbimGeometryObject^ XbimWire::TransformShallow(XbimMatrix3D matrix3D)
+		IXbimGeometryObject^ XbimWireV5::TransformShallow(XbimMatrix3D matrix3D)
 		{
 			TopoDS_Wire wire = TopoDS::Wire(pWire->Moved(XbimConvert::ToTransform(matrix3D)));
-			GC::KeepAlive(this);
-			return gcnew XbimWire(wire);
+			System::GC::KeepAlive(this);
+			return gcnew XbimWireV5(wire);
 		}
 
-		XbimRect3D XbimWire::BoundingBox::get()
+		XbimRect3D XbimWireV5::BoundingBox::get()
 		{
 			if (pWire == nullptr)return XbimRect3D::Empty;
 			Bnd_Box pBox;
@@ -1169,49 +1180,47 @@ namespace Xbim
 			Standard_Real srXmin, srYmin, srZmin, srXmax, srYmax, srZmax;
 			if (pBox.IsVoid()) return XbimRect3D::Empty;
 			pBox.Get(srXmin, srYmin, srZmin, srXmax, srYmax, srZmax);
-			GC::KeepAlive(this);
+			System::GC::KeepAlive(this);
 			return XbimRect3D(srXmin, srYmin, srZmin, (srXmax - srXmin), (srYmax - srYmin), (srZmax - srZmin));
 		}
 
-		IXbimEdgeSet^ XbimWire::Edges::get()
+		IXbimEdgeSet^ XbimWireV5::Edges::get()
 		{
 			if (!IsValid) return XbimEdgeSet::Empty;
 			return gcnew XbimEdgeSet(this);
 		}
 
-		IEnumerable<XbimPoint3D>^ XbimWire::Points::get()
+		IEnumerable<XbimPoint3D>^ XbimWireV5::Points::get()
 		{
 			return IntervalPoints;
 		}
 
-		IXbimVertexSet^ XbimWire::Vertices::get()
+		IXbimVertexSet^ XbimWireV5::Vertices::get()
 		{
 			if (!IsValid) return XbimVertexSet::Empty;
 			return gcnew XbimVertexSet(*pWire);
 		}
 
-		XbimVector3D XbimWire::Normal::get()
+		XbimVector3D XbimWireV5::Normal::get()
 		{
 			if (!IsValid)
 				return XbimVector3D();
 			try
 			{
 				gp_Dir dir = NormalDir(*pWire);
-				if (XbimConvert::IsInvalid(dir, 0)) // even with tolerance 0 checks for NaN
-					return XbimVector3D();
-				return XbimVector3D(dir.X(), dir.Y(), dir.Z());
+				return  XbimVector3D(dir.X(), dir.Y(), dir.Z());
 			}
-			catch (Standard_Failure sf)
+			catch (const Standard_Failure& sf)
 			{
-				// this returns a vector that can be checked for IsInvalid, 
-				// this seems better than throwing another exception.
-				return XbimVector3D();
+				System::String^ err = gcnew System::String(sf.GetMessageString());
+				throw gcnew System::Exception("Invalid normal: " + err);
 			}
 
 		}
 
-		gp_Dir XbimWire::NormalDir(const TopoDS_Wire& wire)
+		gp_Dir XbimWireV5::NormalDir(const TopoDS_Wire& wire)
 		{
+
 			double x = 0, y = 0, z = 0;
 			gp_Pnt currentStart, previousEnd, first;
 			int count = 0;
@@ -1235,17 +1244,16 @@ namespace Xbim
 							first = currentStart;
 						previousEnd = currentStart;
 					}
-					else if (wEx.Current().Closed() && (
-						(cType == STANDARD_TYPE(Geom_Circle)) ||
+					else if (wEx.Current().Closed() && ((cType == STANDARD_TYPE(Geom_Circle)) ||
 						(cType == STANDARD_TYPE(Geom_Ellipse)) ||
 						(cType == STANDARD_TYPE(Geom_Parabola)) ||
 						(cType == STANDARD_TYPE(Geom_Hyperbola)))) //it is a conic
 					{
 						Handle(Geom_Conic) conic = Handle(Geom_Conic)::DownCast(c3dptr);
 						return conic->Axis().Direction();
+
 					}
-					else if (
-						(cType == STANDARD_TYPE(Geom_Circle)) ||
+					else if ((cType == STANDARD_TYPE(Geom_Circle)) ||
 						(cType == STANDARD_TYPE(Geom_Ellipse)) ||
 						(cType == STANDARD_TYPE(Geom_Parabola)) ||
 						(cType == STANDARD_TYPE(Geom_Hyperbola)) ||
@@ -1303,34 +1311,42 @@ namespace Xbim
 					}
 					else //throw AN EXCEPTION
 					{
-						throw Standard_Failure("Unsupported Edge type");
+						Standard_Failure::Raise("Unsupported Edge type");
 					}
 				}
 				count++;
 			}
 			//do the last one
 			AddNewellPoint(previousEnd, first, x, y, z);
-			gp_Dir dir(x, y, z);
-			return dir;
+			try
+			{
+				gp_Dir dir(x, y, z);
+				return dir;
+			}
+			catch (const Standard_Failure& )
+			{
+				return gp::DZ(); //it has no normal, so default to Z
+			}
+
 		}
 
-		bool XbimWire::IsPlanar::get()
+		bool XbimWireV5::IsPlanar::get()
 		{
 			if (!IsValid) return false;
 			BRepBuilderAPI_FindPlane finder(*pWire);
-			GC::KeepAlive(this);
+			System::GC::KeepAlive(this);
 			return (finder.Found() == Standard_True);
 		}
 
-		XbimPoint3D XbimWire::Start::get()
+		XbimPoint3D XbimWireV5::Start::get()
 		{
 			if (!IsValid) return XbimPoint3D();
 			BRepAdaptor_CompCurve cc(*pWire, Standard_True);
 			gp_Pnt p = cc.Value(cc.FirstParameter());
-			GC::KeepAlive(this);
+			System::GC::KeepAlive(this);
 			return XbimPoint3D(p.X(), p.Y(), p.Z());
 		}
-		gp_Pnt XbimWire::StartPoint::get()
+		gp_Pnt XbimWireV5::StartPoint::get()
 		{
 			if (!IsValid) return gp_Pnt();
 			BRepAdaptor_CompCurve cc(*pWire, Standard_True);
@@ -1338,7 +1354,7 @@ namespace Xbim
 			return p;
 		}
 
-		TopoDS_Vertex XbimWire::StartVertex::get()
+		TopoDS_Vertex XbimWireV5::StartVertex::get()
 		{
 			if (!IsValid) return TopoDS_Vertex();
 			TopoDS_Vertex v1, v2;
@@ -1347,14 +1363,14 @@ namespace Xbim
 		}
 
 
-		XbimPoint3D XbimWire::End::get()
+		XbimPoint3D XbimWireV5::End::get()
 		{
 			if (!IsValid) return XbimPoint3D();
 			BRepAdaptor_CompCurve cc(*pWire, Standard_True);
 			gp_Pnt p = cc.Value(cc.LastParameter());
 			return XbimPoint3D(p.X(), p.Y(), p.Z());
 		}
-		gp_Pnt XbimWire::EndPoint::get()
+		gp_Pnt XbimWireV5::EndPoint::get()
 		{
 			if (!IsValid) return gp_Pnt();
 			BRepAdaptor_CompCurve cc(*pWire, Standard_True);
@@ -1362,19 +1378,19 @@ namespace Xbim
 			return p;
 		}
 
-		TopoDS_Vertex XbimWire::EndVertex::get()
+		TopoDS_Vertex XbimWireV5::EndVertex::get()
 		{
-			if (!IsValid) return TopoDS_Vertex();			
+			if (!IsValid) return TopoDS_Vertex();
 			TopoDS_Vertex v1, v2;
 			TopExp::Vertices(*pWire, v1, v2);
 			return v2;
 		}
 
-		double XbimWire::Area::get()
+		double XbimWireV5::Area::get()
 		{
 			return ShapeAnalysis::ContourArea(this);
 		}
-		XbimPoint3D XbimWire::BaryCentre::get()
+		XbimPoint3D XbimWireV5::BaryCentre::get()
 		{
 			if (!IsValid) return XbimPoint3D();
 			TopTools_IndexedMapOfShape map;
@@ -1389,15 +1405,15 @@ namespace Xbim
 			return XbimPoint3D(centre.X(), centre.Y(), centre.Z());
 		}
 
-		double XbimWire::Length::get()
+		double XbimWireV5::Length::get()
 		{
 			if (!IsValid) return 0.;
 			BRepAdaptor_CompCurve cc(*pWire, Standard_True);
-			GC::KeepAlive(this);
+			System::GC::KeepAlive(this);
 			return cc.LastParameter() - cc.FirstParameter();
 		}
 
-		List<double>^ XbimWire::IntervalParameters::get()
+		List<double>^ XbimWireV5::IntervalParameters::get()
 		{
 			if (!IsValid) return gcnew List<double>(0);
 			BRepAdaptor_CompCurve cc(*pWire, Standard_True);
@@ -1412,7 +1428,7 @@ namespace Xbim
 			return intervals;
 		}
 
-		array<ContourVertex>^ XbimWire::Contour()
+		array<ContourVertex>^ XbimWireV5::Contour()
 		{
 			if (!IsValid) return gcnew array<ContourVertex>(0);
 			TopoDS_Wire ccWire = *pWire;
@@ -1433,7 +1449,7 @@ namespace Xbim
 		}
 
 
-		List<XbimPoint3D>^ XbimWire::IntervalPoints::get()
+		List<XbimPoint3D>^ XbimWireV5::IntervalPoints::get()
 		{
 			if (!IsValid) return gcnew List<XbimPoint3D>(1);
 			BRepAdaptor_CompCurve cc(*pWire, Standard_True);
@@ -1460,7 +1476,7 @@ namespace Xbim
 
 #pragma region Parameterised profiles
 
-		void XbimWire::Init(IIfcProfileDef^ profile, ILogger^ logger, XbimConstraints constraints)
+		void XbimWireV5::Init(IIfcProfileDef^ profile, ILogger^ logger, XbimConstraints constraints)
 		{
 			if (dynamic_cast<IIfcArbitraryClosedProfileDef^>(profile))
 				return Init((IIfcArbitraryClosedProfileDef^)profile, logger, constraints);
@@ -1475,7 +1491,7 @@ namespace Xbim
 
 		}
 
-		void XbimWire::Init(IIfcDerivedProfileDef^ profile, ILogger^ logger, XbimConstraints constraints)
+		void XbimWireV5::Init(IIfcDerivedProfileDef^ profile, ILogger^ logger, XbimConstraints constraints)
 		{
 			Init(profile->ParentProfile, logger, constraints);
 			if (IsValid && !dynamic_cast<IIfcMirroredProfileDef^>(profile))
@@ -1497,7 +1513,7 @@ namespace Xbim
 			}
 		}
 
-		void XbimWire::Init(IIfcParameterizedProfileDef^ profile, ILogger^ logger, XbimConstraints constraints)
+		void XbimWireV5::Init(IIfcParameterizedProfileDef^ profile, ILogger^ logger, XbimConstraints constraints)
 		{
 			if (dynamic_cast<IIfcRectangleHollowProfileDef^>(profile))
 				return Init((IIfcRectangleProfileDef^)profile, logger, constraints);
@@ -1530,7 +1546,7 @@ namespace Xbim
 		}
 
 		//Builds a wire from a CircleProfileDef
-		void XbimWire::Init(IIfcCircleProfileDef^ circProfile, ILogger^ logger, XbimConstraints /*constraints*/)
+		void XbimWireV5::Init(IIfcCircleProfileDef^ circProfile, ILogger^ logger, XbimConstraints /*constraints*/)
 		{
 			if (dynamic_cast<IIfcCircleHollowProfileDef^>(circProfile))
 			{
@@ -1559,7 +1575,7 @@ namespace Xbim
 			*pWire = wire;
 		}
 
-		void XbimWire::Init(IIfcRoundedRectangleProfileDef^ rectProfile, ILogger^ /*logger*/, XbimConstraints /*constraints*/)
+		void XbimWireV5::Init(IIfcRoundedRectangleProfileDef^ rectProfile, ILogger^ /*logger*/, XbimConstraints /*constraints*/)
 		{
 			//make the basic shapes
 			double xOff = rectProfile->XDim / 2;
@@ -1612,7 +1628,7 @@ namespace Xbim
 		}
 
 
-		void XbimWire::Init(IIfcRectangleProfileDef^ rectProfile, ILogger^ logger, XbimConstraints constraints)
+		void XbimWireV5::Init(IIfcRectangleProfileDef^ rectProfile, ILogger^ logger, XbimConstraints constraints)
 		{
 			if (rectProfile->XDim <= 0 || rectProfile->YDim <= 0)
 			{
@@ -1660,7 +1676,7 @@ namespace Xbim
 		}
 
 		//Creates a rectangle approx to the max bounds / 2
-		void XbimWire::Init(double precision)
+		void XbimWireV5::Init(double precision)
 		{
 			double xOff = 2e10;
 			double yOff = 2e10;
@@ -1689,7 +1705,7 @@ namespace Xbim
 			*pWire = wire;
 		}
 
-		void XbimWire::Init(IIfcLShapeProfileDef^ profile, ILogger^ /*logger*/, XbimConstraints /*constraints*/)
+		void XbimWireV5::Init(IIfcLShapeProfileDef^ profile, ILogger^ /*logger*/, XbimConstraints /*constraints*/)
 		{
 			bool detailed = profile->Model->ModelFactors->ProfileDefLevelOfDetail == 1;
 			double dY = profile->Depth / 2;
@@ -1705,8 +1721,8 @@ namespace Xbim
 			if (detailed && profile->LegSlope.HasValue)
 			{
 				double radConv = profile->Model->ModelFactors->AngleToRadiansConversionFactor;
-				p3.SetX(p3.X() + (((dY * 2) - tF) * Math::Tan(profile->LegSlope.Value * radConv)));
-				p3.SetY(p3.Y() + (((dX * 2) - tF) * Math::Tan(profile->LegSlope.Value * radConv)));
+				p3.SetX(p3.X() + (((dY * 2) - tF) * System::Math::Tan(profile->LegSlope.Value * radConv)));
+				p3.SetY(p3.Y() + (((dX * 2) - tF) * System::Math::Tan(profile->LegSlope.Value * radConv)));
 			}
 			gp_Pnt p4(dX, -dY + tF, 0);
 			gp_Pnt p5(dX, -dY, 0);
@@ -1767,7 +1783,7 @@ namespace Xbim
 		}
 
 
-		void XbimWire::Init(IIfcUShapeProfileDef^ profile, ILogger^ /*logger*/, XbimConstraints /*constraints*/)
+		void XbimWireV5::Init(IIfcUShapeProfileDef^ profile, ILogger^ /*logger*/, XbimConstraints /*constraints*/)
 		{
 			bool detailed = profile->Model->ModelFactors->ProfileDefLevelOfDetail == 1;
 			double dX = profile->FlangeWidth / 2;
@@ -1788,8 +1804,8 @@ namespace Xbim
 			if (detailed && profile->FlangeSlope.HasValue)
 			{
 				double radConv = profile->Model->ModelFactors->AngleToRadiansConversionFactor;
-				p4.SetY(p4.Y() - (((dX * 2) - tW) * Math::Tan(profile->FlangeSlope.Value * radConv)));
-				p5.SetY(p5.Y() + (((dX * 2) - tW) * Math::Tan(profile->FlangeSlope.Value * radConv)));
+				p4.SetY(p4.Y() - (((dX * 2) - tW) * System::Math::Tan(profile->FlangeSlope.Value * radConv)));
+				p5.SetY(p5.Y() + (((dX * 2) - tW) * System::Math::Tan(profile->FlangeSlope.Value * radConv)));
 			}
 
 			BRepBuilderAPI_MakeWire wireMaker;
@@ -1954,7 +1970,7 @@ namespace Xbim
 		//TODO: SRL: Support for fillet radii needs to be added, nb set the hascurves=true when added
 		// and note too that this will decrease performance due to use of OCC for triangulation
 		//NB. This is untested as we haven't enountered one yet
-		void XbimWire::Init(IIfcEllipseProfileDef^ profile, ILogger^ /*logger*/, XbimConstraints /*constraints*/)
+		void XbimWireV5::Init(IIfcEllipseProfileDef^ profile, ILogger^ /*logger*/, XbimConstraints /*constraints*/)
 		{
 			gp_Ax2 gpax2;
 			if (profile->Position != nullptr)
@@ -1994,7 +2010,7 @@ namespace Xbim
 
 		//TODO: SRL: Support for fillet radii needs to be added, nb set the hascurves=true when added
 		// and note too that this will decrease performance due to use of OCC for triangulation
-		void XbimWire::Init(IIfcIShapeProfileDef^ profile, ILogger^ /*logger*/, XbimConstraints /*constraints*/)
+		void XbimWireV5::Init(IIfcIShapeProfileDef^ profile, ILogger^ /*logger*/, XbimConstraints /*constraints*/)
 		{
 			bool detailed = profile->Model->ModelFactors->ProfileDefLevelOfDetail == 1;
 			double dX = profile->OverallWidth / 2;
@@ -2079,7 +2095,7 @@ namespace Xbim
 		}
 
 
-		void XbimWire::Init(IIfcZShapeProfileDef^ profile, ILogger^ /*logger*/, XbimConstraints /*constraints*/)
+		void XbimWireV5::Init(IIfcZShapeProfileDef^ profile, ILogger^ /*logger*/, XbimConstraints /*constraints*/)
 		{
 			bool detailed = profile->Model->ModelFactors->ProfileDefLevelOfDetail == 1;
 			double dX = profile->FlangeWidth;
@@ -2146,7 +2162,7 @@ namespace Xbim
 		// SRL: Builds a wire from a composite IfcCShapeProfileDef
 		//TODO: SRL: Support for fillet radii needs to be added, nb set the hascurves=true when added
 		// and note too that this will decrease performance due to use of OCC for triangulation
-		void XbimWire::Init(IIfcCShapeProfileDef^ profile, ILogger^ logger, XbimConstraints /*constraints*/)
+		void XbimWireV5::Init(IIfcCShapeProfileDef^ profile, ILogger^ logger, XbimConstraints /*constraints*/)
 		{
 			bool detailed = profile->Model->ModelFactors->ProfileDefLevelOfDetail == 1;
 			double dX = profile->Width / 2;
@@ -2258,7 +2274,7 @@ namespace Xbim
 		// SRL: Builds a wire from a composite IfcTShapeProfileDef
 		//TODO: SRL: Support for fillet radii needs to be added, nb set the hascurves=true when added
 		// and note too that this will decrease performance due to use of OCC for triangulation
-		void XbimWire::Init(IIfcTShapeProfileDef^ profile, ILogger^ /*logger*/, XbimConstraints /*constraints*/)
+		void XbimWireV5::Init(IIfcTShapeProfileDef^ profile, ILogger^ /*logger*/, XbimConstraints /*constraints*/)
 		{
 			bool detailed = profile->Model->ModelFactors->ProfileDefLevelOfDetail == 1;
 			double dX = profile->FlangeWidth / 2;
@@ -2283,12 +2299,12 @@ namespace Xbim
 				if (profile->WebSlope.HasValue) wSlope = profile->WebSlope.Value;
 				double bDiv4 = profile->FlangeWidth / 4;
 
-				p3.SetY(p3.Y() + (bDiv4 * Math::Tan(fSlope * radConv)));
-				p8.SetY(p8.Y() + (bDiv4 * Math::Tan(fSlope * radConv)));
+				p3.SetY(p3.Y() + (bDiv4 * System::Math::Tan(fSlope * radConv)));
+				p8.SetY(p8.Y() + (bDiv4 * System::Math::Tan(fSlope * radConv)));
 
 
-				gp_Lin2d flangeLine(gp_Pnt2d(bDiv4, dY - tF), gp_Dir2d(1, Math::Tan(fSlope * radConv)));
-				gp_Lin2d webLine(gp_Pnt2d(tW / 2.0, 0), gp_Dir2d(Math::Tan(wSlope * radConv), 1));
+				gp_Lin2d flangeLine(gp_Pnt2d(bDiv4, dY - tF), gp_Dir2d(1, System::Math::Tan(fSlope * radConv)));
+				gp_Lin2d webLine(gp_Pnt2d(tW / 2.0, 0), gp_Dir2d(System::Math::Tan(wSlope * radConv), 1));
 				IntAna2d_AnaIntersection intersector(flangeLine, webLine);
 				const IntAna2d_IntPoint& intersectPoint = intersector.Point(1);
 				gp_Pnt2d p2d = intersectPoint.Value();
@@ -2298,8 +2314,8 @@ namespace Xbim
 				p7.SetX(-p2d.X());
 				p7.SetY(p2d.Y());
 
-				p5.SetX(p5.X() - (dY * Math::Tan(wSlope * radConv)));
-				p6.SetX(p6.X() + (dY * Math::Tan(wSlope * radConv)));
+				p5.SetX(p5.X() - (dY * System::Math::Tan(wSlope * radConv)));
+				p6.SetX(p6.X() + (dY * System::Math::Tan(wSlope * radConv)));
 			}
 
 			BRepBuilderAPI_MakeWire wireMaker;
@@ -2355,7 +2371,7 @@ namespace Xbim
 			*pWire = wire;
 		}
 
-		void XbimWire::Init(double x, double y, double tolerance, bool centre)
+		void XbimWireV5::Init(double x, double y, double tolerance, bool centre)
 		{
 			TopoDS_Vertex vbl, vbr, vtr, vtl;
 			//make the vertices
@@ -2398,7 +2414,7 @@ namespace Xbim
 #pragma endregion
 #pragma region Methods
 
-		XbimPoint3D XbimWire::PointAtParameter(double param)
+		XbimPoint3D XbimWireV5::PointAtParameter(double param)
 		{
 			if (!IsValid) return XbimPoint3D();
 			BRepAdaptor_CompCurve cc(*pWire, Standard_True);
@@ -2407,7 +2423,7 @@ namespace Xbim
 			return XbimPoint3D(p.X(), p.Y(), p.Z());
 		}
 
-		double XbimWire::ParameterAtPoint(XbimPoint3D point, double tolerance)
+		double XbimWireV5::ParameterAtPoint(XbimPoint3D point, double tolerance)
 		{
 			if (!IsValid) return 0;
 			//find the edge that contains the point
@@ -2432,14 +2448,14 @@ namespace Xbim
 			return 0;
 		}
 
-		XbimWire^ XbimWire::Trim(XbimVertex^ first, XbimVertex^ last, double tolerance, ILogger^ logger)
+		XbimWireV5^ XbimWireV5::Trim(XbimVertexV5^ first, XbimVertexV5^ last, double tolerance, ILogger^ logger)
 		{
 			double startParam = ParameterAtPoint(first->VertexGeometry, tolerance);
 			double endParam = ParameterAtPoint(last->VertexGeometry, tolerance);
-			return (XbimWire^)Trim(startParam, endParam, tolerance, logger);
+			return (XbimWireV5^)Trim(startParam, endParam, tolerance, logger);
 		}
 
-		IXbimWire^ XbimWire::Trim(double first, double last, double /*tolerance*/, ILogger^ logger)
+		IXbimWire^ XbimWireV5::Trim(double first, double last, double /*tolerance*/, ILogger^ logger)
 		{
 			if (!IsValid)
 				return this;
@@ -2459,29 +2475,29 @@ namespace Xbim
 				while (!trimmedCurve.IsNull()) //remove trims
 				{
 					curve = trimmedCurve->BasisCurve();
-					trimmedCurve = Handle(Geom_TrimmedCurve)::DownCast(curve);				
+					trimmedCurve = Handle(Geom_TrimmedCurve)::DownCast(curve);
 				}
 				if (curve->IsPeriodic()) //stay in bounds for splines etc, keep orientation for periodics, 
 				{
 					l = f + last;
-					f = f + first;					
+					f = f + first;
 				}
 				else
 				{
-					f = Math::Max(f, first);
-					l = Math::Min(l, last);
+					f = System::Math::Max(f, first);
+					l = System::Math::Min(l, last);
 				}
-				if (Math::Abs(f - l) > Precision::Confusion())
+				if (System::Math::Abs(f - l) > Precision::Confusion())
 				{
 					Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(curve, f, l);
 					BRepBuilderAPI_MakeWire wm;
 					wm.Add(BRepBuilderAPI_MakeEdge(trimmed));
 					TopoDS_Wire trimmedWire = wm.Wire();
 					fTol.LimitTolerance(trimmedWire, this->MaxTolerance);
-					return gcnew XbimWire(trimmedWire);
+					return gcnew XbimWireV5(trimmedWire);
 				}
 				else
-					return gcnew XbimWire(); //empty wire
+					return gcnew XbimWireV5(); //empty wire
 			}
 			else
 			{
@@ -2517,7 +2533,7 @@ namespace Xbim
 						double maxTolerance = BRep_Tool::MaxTolerance(edge, TopAbs_VERTEX);
 						GeomLib_Tool::Parameter(curve, pFirst, maxTolerance, uOnEdgeFirst);
 						GeomLib_Tool::Parameter(curve, pLast, maxTolerance, uOnEdgeLast);
-						if (Math::Abs(uOnEdgeFirst - uOnEdgeLast) > Precision::Confusion())
+						if (System::Math::Abs(uOnEdgeFirst - uOnEdgeLast) > Precision::Confusion())
 						{
 							Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(curve, uOnEdgeFirst, uOnEdgeLast);
 							wm.Add(BRepBuilderAPI_MakeEdge(trimmed));
@@ -2530,7 +2546,7 @@ namespace Xbim
 						double uOnEdgeFirst;
 						double maxTolerance = BRep_Tool::MaxTolerance(edge, TopAbs_VERTEX);
 						GeomLib_Tool::Parameter(curve, pFirst, maxTolerance, uOnEdgeFirst);
-						if (Math::Abs(uOnEdgeFirst - lEdge) > Precision::Confusion())
+						if (System::Math::Abs(uOnEdgeFirst - lEdge) > Precision::Confusion())
 						{
 							Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(curve, uOnEdgeFirst, lEdge);
 							wm.Add(BRepBuilderAPI_MakeEdge(trimmed));
@@ -2546,7 +2562,7 @@ namespace Xbim
 						double uOnEdgeLast;
 						double maxTolerance = BRep_Tool::MaxTolerance(edge, TopAbs_VERTEX);
 						GeomLib_Tool::Parameter(curve, pLast, maxTolerance, uOnEdgeLast);
-						if (Math::Abs(uOnEdgeLast - fEdge) > Precision::Confusion())
+						if (System::Math::Abs(uOnEdgeLast - fEdge) > Precision::Confusion())
 						{
 							Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(curve, fEdge, uOnEdgeLast);
 							wm.Add(BRepBuilderAPI_MakeEdge(trimmed));
@@ -2570,28 +2586,28 @@ namespace Xbim
 				TopoDS_Wire trimmedWire = wm.Wire();
 
 				fTol.LimitTolerance(trimmedWire, this->MaxTolerance);
-				return gcnew XbimWire(trimmedWire);
+				return gcnew XbimWireV5(trimmedWire);
 			}
 		}
 
-		void XbimWire::Move(TopLoc_Location loc)
+		void XbimWireV5::Move(TopLoc_Location loc)
 		{
 			if (IsValid) pWire->Move(loc);
 		}
 
-		void XbimWire::Mesh(IXbimMeshReceiver^ /*mesh*/, double /*precision*/, double /*deflection*/, double /*angle*/)
+		void XbimWireV5::Mesh(IXbimMeshReceiver^ /*mesh*/, double /*precision*/, double /*deflection*/, double /*angle*/)
 		{
-			throw gcnew NotImplementedException("XbimWire::Mesh");
+			throw gcnew System::NotImplementedException("XbimWire::Mesh");
 		}
 
-		void XbimWire::Move(IIfcAxis2Placement3D^ position)
+		void XbimWireV5::Move(IIfcAxis2Placement3D^ position)
 		{
 			if (!IsValid) return;
 			gp_Trsf toPos = XbimConvert::ToTransform(position);
 			pWire->Move(toPos);
 		}
 
-		void XbimWire::Translate(XbimVector3D translation)
+		void XbimWireV5::Translate(XbimVector3D translation)
 		{
 			if (!IsValid) return;
 			gp_Vec v(translation.X, translation.Y, translation.Z);
@@ -2600,9 +2616,9 @@ namespace Xbim
 			pWire->Move(t);
 		}
 
-		XbimWire^ XbimWire::Reversed()
+		XbimWireV5^ XbimWireV5::Reversed()
 		{
-			XbimWire^ copy = gcnew XbimWire(this);
+			XbimWireV5^ copy = gcnew XbimWireV5(this);
 			copy->Reverse();
 			return copy;
 			//if (!IsValid) return this;
@@ -2617,13 +2633,13 @@ namespace Xbim
 			//return gcnew XbimWire(TopoDS::Wire(copy));
 		}
 
-		void XbimWire::Reverse()
+		void XbimWireV5::Reverse()
 		{
 			if (!IsValid) return;
 			pWire->Reverse();
 		}
 
-		void  XbimWire::FuseColinearSegments(double tolerance, double angleTolerance, ILogger^ logger)
+		void  XbimWireV5::FuseColinearSegments(double tolerance, double angleTolerance, ILogger^ logger)
 		{
 			if (!IsValid) return;
 			// Tolerances			
@@ -2675,12 +2691,12 @@ namespace Xbim
 							B.Add(aCurrWire, TopoDS::Edge(aValue));
 						}
 						// make edge from the wire
-						XbimEdge^ xanEdge = gcnew XbimEdge(aCurrWire, tolerance, angleTolerance, logger);
+						XbimEdgeV5^ xanEdge = gcnew XbimEdgeV5(aCurrWire, tolerance, angleTolerance, logger);
 						if (!xanEdge->IsValid) //probably could not get C1 continuity just add all edges
 						{
 							for (itEdges.Initialize(currChain); itEdges.More(); itEdges.Next()) {
 								TopoDS_Shape aValue = itEdges.Value();
-								finalList.Append(gcnew XbimEdge(TopoDS::Edge(aValue)));
+								finalList.Append(gcnew XbimEdgeV5(TopoDS::Edge(aValue)));
 							}
 						}
 						else
@@ -2711,13 +2727,13 @@ namespace Xbim
 				}
 
 				// make edge from the wire
-				XbimEdge^ anEdge = gcnew XbimEdge(aCurrWire, tolerance, angleTolerance, logger);
+				XbimEdgeV5^ anEdge = gcnew XbimEdgeV5(aCurrWire, tolerance, angleTolerance, logger);
 				if (!anEdge->IsValid) //probably could not get C1 continuity just add all edges
 				{
 					itEdges.Initialize(currChain);
 					for (; itEdges.More(); itEdges.Next()) {
 						TopoDS_Shape aValue = itEdges.Value();
-						anEdge = gcnew XbimEdge(TopoDS::Edge(aValue));
+						anEdge = gcnew XbimEdgeV5(TopoDS::Edge(aValue));
 						finalList.Append(anEdge);
 					}
 				}
@@ -2737,7 +2753,7 @@ namespace Xbim
 			*pWire = aFinalWire;
 		}
 
-		bool XbimWire::AreEdgesC1(const TopoDS_Edge& E1, const TopoDS_Edge& E2, double precision, double angularTolerance)
+		bool XbimWireV5::AreEdgesC1(const TopoDS_Edge& E1, const TopoDS_Edge& E2, double precision, double angularTolerance)
 		{
 			BRepAdaptor_Curve aCurve1(E1);
 			BRepAdaptor_Curve aCurve2(E2);
@@ -2808,7 +2824,7 @@ namespace Xbim
 			return Standard_False;
 		}
 		//Fillets all points on a spine, not intended for closed shapes mostly for spines
-		bool XbimWire::FilletAll(double radius)
+		bool XbimWireV5::FilletAll(double radius)
 		{
 			if (!IsValid) return false;
 			TopoDS_Wire thisWire = *pWire;
@@ -2891,36 +2907,36 @@ namespace Xbim
 			return false;
 		}
 
-		XbimGeometryObject^ XbimWire::Transformed(IIfcCartesianTransformationOperator^ transformation)
+		XbimGeometryObject^ XbimWireV5::Transformed(IIfcCartesianTransformationOperator^ transformation)
 		{
 			IIfcCartesianTransformationOperator3DnonUniform^ nonUniform = dynamic_cast<IIfcCartesianTransformationOperator3DnonUniform^>(transformation);
 			if (nonUniform != nullptr)
 			{
 				gp_GTrsf trans = XbimConvert::ToTransform(nonUniform);
 				BRepBuilderAPI_GTransform tr(this, trans, Standard_True); //make a copy of underlying shape
-				return gcnew XbimWire(TopoDS::Wire(tr.Shape()), Tag);
+				return gcnew XbimWireV5(TopoDS::Wire(tr.Shape()), Tag);
 			}
 			else
 			{
 				gp_Trsf trans = XbimConvert::ToTransform(transformation);
 				BRepBuilderAPI_Transform tr(this, trans, Standard_False); //do not make a copy of underlying shape
-				return gcnew XbimWire(TopoDS::Wire(tr.Shape()), Tag);
+				return gcnew XbimWireV5(TopoDS::Wire(tr.Shape()), Tag);
 			}
 		}
 
-		XbimGeometryObject^ XbimWire::Moved(IIfcPlacement^ placement)
+		XbimGeometryObject^ XbimWireV5::Moved(IIfcPlacement^ placement)
 		{
 			if (!IsValid) return this;
-			XbimWire^ copy = gcnew XbimWire(this, Tag); //take a copy of the shape
+			XbimWireV5^ copy = gcnew XbimWireV5(this, Tag); //take a copy of the shape
 			TopLoc_Location loc = XbimConvert::ToLocation(placement);
 			copy->Move(loc);
 			return copy;
 		}
 
-		XbimGeometryObject^ XbimWire::Moved(IIfcObjectPlacement^ objectPlacement, ILogger^ logger)
+		XbimGeometryObject^ XbimWireV5::Moved(IIfcObjectPlacement^ objectPlacement, ILogger^ logger)
 		{
 			if (!IsValid) return this;
-			XbimWire^ copy = gcnew XbimWire(this, Tag); //take a copy of the shape
+			XbimWireV5^ copy = gcnew XbimWireV5(this, Tag); //take a copy of the shape
 			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement, logger);
 			copy->Move(loc);
 			return copy;
@@ -2932,7 +2948,7 @@ namespace Xbim
 
 #pragma region Helper functions
 
-		void XbimWire::AddNewellPoint(const gp_Pnt& previous, const gp_Pnt& current, double& normalX, double& normalY, double& normalZ)
+		void XbimWireV5::AddNewellPoint(const gp_Pnt& previous, const gp_Pnt& current, double& x, double& y, double& z)
 		{
 			const double& xn = previous.X();
 			const double& yn = previous.Y();
@@ -2940,18 +2956,16 @@ namespace Xbim
 			const double& xn1 = current.X();
 			const double& yn1 = current.Y();
 			const double& zn1 = current.Z();
-			
-			// Debug::WriteLine("_.LINE");
-			// System::Diagnostics::Debug::WriteLine("from {0},{1},{2} ", xn, yn, zn);
-			// System::Diagnostics::Debug::WriteLine("to {0},{1},{2}", xn1, yn1, zn1);
-			//Debug::WriteLine("");
-			
-			// this has been checked, the factors are passed in a different order than the 
-			// canonical pseudocode at kronos, but the results are identical
-			normalX += (yn - yn1) * (zn + zn1);
-			normalY += (xn + xn1) * (zn - zn1);
-			normalZ += (xn - xn1) * (yn + yn1);
+			/*
+			Debug::WriteLine("_.LINE");
+			Debug::WriteLine("{0},{1},{2}", xn, yn, zn);
+			Debug::WriteLine("{0},{1},{2}", xn1, yn1, zn1);
+			Debug::WriteLine("");
+			*/
 
+			x += (yn - yn1) * (zn + zn1);
+			y += (xn + xn1) * (zn - zn1);
+			z += (xn - xn1) * (yn + yn1);
 			/*
 			Debug::WriteLine("-HYPERLINK I O l  {0},{1},{2}", x, y, z);
 			Debug::WriteLine("");
@@ -3020,7 +3034,7 @@ namespace Xbim
 		}
 #pragma warning( push )
 #pragma warning( disable : 4701)
-		bool XbimWire::SortEdgesForWire(const NCollection_Vector<TopoDS_Edge>& oldedges, NCollection_Vector<TopoDS_Edge>& newedges, NCollection_Vector<TopoDS_Edge>& notTaken, double tol, bool* pClosed, double* pMaxGap)
+		bool XbimWireV5::SortEdgesForWire(const NCollection_Vector<TopoDS_Edge>& oldedges, NCollection_Vector<TopoDS_Edge>& newedges, NCollection_Vector<TopoDS_Edge>& notTaken, double tol, bool* pClosed, double* pMaxGap)
 		{
 			int i, n, minID, id, id2;
 			NCollection_Vector<int> bTaken;
@@ -3158,7 +3172,7 @@ namespace Xbim
 #pragma warning( pop )
 
 
-		int XbimWire::GetMatchTwoPntsPair(const gp_Pnt& b1, const gp_Pnt& e1, const gp_Pnt& b2, const gp_Pnt& e2,
+		int XbimWireV5::GetMatchTwoPntsPair(const gp_Pnt& b1, const gp_Pnt& e1, const gp_Pnt& b2, const gp_Pnt& e2,
 			double& minDis, double& otherDis)
 		{
 			double distance[4];

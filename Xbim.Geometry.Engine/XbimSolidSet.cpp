@@ -1,9 +1,4 @@
-#include "XbimSolidSet.h"
-#include "XbimShellSet.h"
-#include "XbimCompound.h"
-#include "XbimGeometryCreator.h"
-#include "XbimOccWriter.h"
-#include "XbimProgressMonitor.h"
+
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <TopExp.hxx>
 #include <BRepTools.hxx>
@@ -12,16 +7,22 @@
 #include <BRepAlgoAPI_Cut.hxx>
 #include <ShapeFix_ShapeTolerance.hxx>
 #include <BRepPrimAPI_MakePrism.hxx>
-#include "XbimConvert.h"
-#include "BRepCheck_Analyzer.hxx"
-#include "ShapeFix_Shape.hxx"
-#include "ShapeUpgrade_UnifySameDomain.hxx"
-#include "BRepBuilderAPI_MakeSolid.hxx"
-#include "BOPAlgo_PaveFiller.hxx"
-#include "BOPAlgo_BOP.hxx"
+#include <BRepCheck_Analyzer.hxx>
+#include <ShapeFix_Shape.hxx>
+#include <ShapeUpgrade_UnifySameDomain.hxx>
+
+#include <BRepBuilderAPI_MakeSolid.hxx>
+#include <BOPAlgo_PaveFiller.hxx>
+#include <BOPAlgo_BOP.hxx>
 #include <OSD_OpenFile.hxx>
 #include <algorithm>
-
+#include "XbimConvert.h"
+#include "XbimSolidSet.h"
+#include "XbimShellSet.h"
+#include "XbimCompound.h"
+#include "XbimGeometryCreator.h"
+#include "XbimOccWriter.h"
+#include "XbimProgressMonitor.h"
 using namespace std;
 
 using namespace System::Linq;
@@ -32,9 +33,9 @@ namespace Xbim
 	{
 
 
-		String^ XbimSolidSet::ToBRep::get()
+		System::String^ XbimSolidSet::ToBRep::get()
 		{
-			if (!IsValid) return String::Empty;
+			if (!IsValid) return System::String::Empty;
 			std::ostringstream oss;
 			BRep_Builder b;
 			TopoDS_Compound comp;
@@ -42,13 +43,13 @@ namespace Xbim
 
 			for each (IXbimSolid ^ solid in solids)
 			{
-				if (dynamic_cast<XbimSolid^>(solid))
+				if (dynamic_cast<XbimSolidV5^>(solid))
 				{
-					b.Add(comp, (XbimSolid^)solid);
+					b.Add(comp, (XbimSolidV5^)solid);
 				}
 			}
 			BRepTools::Write(comp, oss);
-			return gcnew String(oss.str().c_str());
+			return gcnew System::String(oss.str().c_str());
 		}
 
 		XbimSolidSet::XbimSolidSet(const TopoDS_Shape& shape)
@@ -58,7 +59,7 @@ namespace Xbim
 			solids = gcnew  List<IXbimSolid^>(map.Extent());
 			//int e = map.Extent();
 			for (int i = 1; i <= map.Extent(); i++)
-				solids->Add(gcnew XbimSolid(TopoDS::Solid(map(i))));
+				solids->Add(gcnew XbimSolidV5(TopoDS::Solid(map(i))));
 			/*XbimOccWriter::Write(shape, "c:/tmp/dump.txt");
 			TopExp_Explorer te(shape, TopAbs_SHELL, TopAbs_SOLID);
 			while (te.More())
@@ -70,7 +71,7 @@ namespace Xbim
 			}*/
 		}
 
-		XbimSolidSet::XbimSolidSet(XbimCompound^ shape)
+		XbimSolidSet::XbimSolidSet(XbimCompoundV5^ shape)
 		{
 
 			if (shape->IsValid)
@@ -80,7 +81,7 @@ namespace Xbim
 				TopExp::MapShapes(shape, TopAbs_SOLID, solidMap);
 				solids = gcnew  List<IXbimSolid^>(solidMap.Extent());
 				for (int i = 1; i <= solidMap.Extent(); i++)
-					solids->Add(gcnew XbimSolid(TopoDS::Solid(solidMap(i))));
+					solids->Add(gcnew XbimSolidV5(TopoDS::Solid(solidMap(i))));
 				//srl let shells through to improve final content as some geometries are badly formed and don't make a solid, even though they are supposed to
 				/*TopExp_Explorer te(shape, TopAbs_SHELL, TopAbs_SOLID);
 				while (te.More())
@@ -91,11 +92,12 @@ namespace Xbim
 					solids->Add(gcnew XbimSolid(s));
 				}*/
 			}
-			GC::KeepAlive(shape);
+			System::GC::KeepAlive(shape);
 		}
 
-		XbimSolidSet::XbimSolidSet()
+		XbimSolidSet::XbimSolidSet(IXModelService^ modelService)
 		{
+			_modelService = modelService;
 			solids = gcnew  List<IXbimSolid^>();
 		}
 		XbimSolidSet::XbimSolidSet(IIfcCsgSolid^ repItem, ILogger^ logger)
@@ -108,13 +110,15 @@ namespace Xbim
 			solids = gcnew  List<IXbimSolid^>(1);
 			solids->Add(solid);
 		}
-		XbimSolidSet::XbimSolidSet(IIfcBooleanClippingResult^ solid, ILogger^ logger)
+		XbimSolidSet::XbimSolidSet(IIfcBooleanClippingResult^ solid,IXModelService^ modelService,  ILogger^ logger)
 		{
+			_modelService = modelService;
 			Init(solid, logger);
 		}
 
-		XbimSolidSet::XbimSolidSet(IIfcBooleanResult^ boolOp, ILogger^ logger)
+		XbimSolidSet::XbimSolidSet(IIfcBooleanResult^ boolOp, IXModelService^ modelService, ILogger^ logger)
 		{
+			_modelService = modelService;
 			Init(boolOp, logger);
 		}
 
@@ -125,25 +129,25 @@ namespace Xbim
 
 		XbimSolidSet::XbimSolidSet(IIfcManifoldSolidBrep^ solid, ILogger^ logger)
 		{
-			XbimCompound^ comp = gcnew XbimCompound(solid, logger);
+			XbimCompoundV5^ comp = gcnew XbimCompoundV5(solid, logger);
 			Init(comp, solid, logger);
 
 		}
 		XbimSolidSet::XbimSolidSet(IIfcFacetedBrep^ solid, ILogger^ logger)
 		{
-			XbimCompound^ comp = gcnew XbimCompound(solid, logger);
+			XbimCompoundV5^ comp = gcnew XbimCompoundV5(solid, logger);
 			Init(comp, solid, logger);
 		}
 
 		XbimSolidSet::XbimSolidSet(IIfcFacetedBrepWithVoids^ solid, ILogger^ logger)
 		{
-			XbimCompound^ comp = gcnew XbimCompound(solid, logger);
+			XbimCompoundV5^ comp = gcnew XbimCompoundV5(solid, logger);
 			Init(comp, solid, logger);
 		}
 
 		XbimSolidSet::XbimSolidSet(IIfcClosedShell^ solid, ILogger^ logger)
 		{
-			XbimCompound^ comp = gcnew XbimCompound(solid, logger);
+			XbimCompoundV5^ comp = gcnew XbimCompoundV5(solid, logger);
 			Init(comp, solid, logger);
 		}
 
@@ -247,9 +251,9 @@ namespace Xbim
 				for each (IXbimGeometryObject ^ geom in geomSet)
 				{
 
-					XbimSolid^ nestedSolid = dynamic_cast<XbimSolid^>(geom);
-					XbimCompound^ nestedCompound = dynamic_cast<XbimCompound^>(geom);
-					XbimShell^ shell = dynamic_cast<XbimShell^>(geom);
+					XbimSolidV5^ nestedSolid = dynamic_cast<XbimSolidV5^>(geom);
+					XbimCompoundV5^ nestedCompound = dynamic_cast<XbimCompoundV5^>(geom);
+					XbimShellV5^ shell = dynamic_cast<XbimShellV5^>(geom);
 					if (nestedSolid != nullptr && !nestedSolid->IsEmpty)
 						solids->Add(nestedSolid);
 					else if (nestedCompound != nullptr)
@@ -257,8 +261,8 @@ namespace Xbim
 						nestedCompound->Sew();
 						for each (IXbimGeometryObject ^ nestedGeom in nestedCompound)
 						{
-							XbimSolid^ subSolid = dynamic_cast<XbimSolid^>(nestedGeom);
-							XbimShell^ subShell = dynamic_cast<XbimShell^>(nestedGeom);
+							XbimSolidV5^ subSolid = dynamic_cast<XbimSolidV5^>(nestedGeom);
+							XbimShellV5^ subShell = dynamic_cast<XbimShellV5^>(nestedGeom);
 							if (subSolid != nullptr && !subSolid->IsEmpty)
 								solids->Add(subSolid);
 							else if (subShell != nullptr && subShell->IsValid)
@@ -267,7 +271,7 @@ namespace Xbim
 					}
 					else if (shell != nullptr && shell->IsValid)
 					{
-						XbimSolid^ s = (XbimSolid^)shell->MakeSolid();
+						XbimSolidV5^ s = (XbimSolidV5^)shell->MakeSolid();
 						solids->Add(s);
 					}
 
@@ -275,7 +279,7 @@ namespace Xbim
 
 				return;
 			}
-			XbimShell^ shell = dynamic_cast<XbimShell^>(shape);
+			XbimShellV5^ shell = dynamic_cast<XbimShellV5^>(shape);
 			if (shell != nullptr && shell->IsValid/* && shell->IsClosed*/)
 				return solids->Add(shell->MakeSolid());
 
@@ -283,8 +287,8 @@ namespace Xbim
 
 		IXbimSolidSet^ XbimSolidSet::Range(int start, int count)
 		{
-			XbimSolidSet^ ss = gcnew XbimSolidSet();
-			for (int i = start; i < Math::Min(solids->Count, count); i++)
+			XbimSolidSet^ ss = gcnew XbimSolidSet(_modelService);
+			for (int i = start; i < System::Math::Min(solids->Count, count); i++)
 			{
 				ss->Add(solids[i]);
 			}
@@ -308,7 +312,7 @@ namespace Xbim
 			double vol = 0;
 			if (IsValid)
 			{
-				for each (XbimSolid ^ solid in solids)
+				for each (XbimSolidV5 ^ solid in solids)
 				{
 					vol += solid->Volume;
 				}
@@ -318,7 +322,7 @@ namespace Xbim
 
 		IXbimGeometryObject^ XbimSolidSet::Transform(XbimMatrix3D matrix3D)
 		{
-			if (!IsValid) return gcnew XbimSolidSet();
+			if (!IsValid) return gcnew XbimSolidSet(_modelService);
 			List<IXbimSolid^>^ result = gcnew List<IXbimSolid^>(solids->Count);
 			for each (IXbimGeometryObject ^ solid in solids)
 			{
@@ -329,11 +333,11 @@ namespace Xbim
 
 		IXbimGeometryObject^ XbimSolidSet::TransformShallow(XbimMatrix3D matrix3D)
 		{
-			if (!IsValid) return gcnew XbimSolidSet();
+			if (!IsValid) return gcnew XbimSolidSet(_modelService);
 			List<IXbimSolid^>^ result = gcnew List<IXbimSolid^>(solids->Count);
 			for each (IXbimGeometryObject ^ solid in solids)
 			{
-				result->Add((IXbimSolid^)((XbimSolid^)solid)->TransformShallow(matrix3D));
+				result->Add((IXbimSolid^)((XbimSolidV5^)solid)->TransformShallow(matrix3D));
 			}
 			return gcnew XbimSolidSet(result);
 		}
@@ -344,15 +348,15 @@ namespace Xbim
 			if (!IsValid) return;
 			for each (IXbimSolid ^ solid in solids)
 			{
-				((XbimSolid^)solid)->Move(position);
+				((XbimSolidV5^)solid)->Move(position);
 			}
 		}
 
 		IXbimGeometryObject^ XbimSolidSet::Transformed(IIfcCartesianTransformationOperator^ transformation)
 		{
 			if (!IsValid) return this;
-			XbimSolidSet^ result = gcnew XbimSolidSet();
-			for each (XbimSolid ^ solid in solids)
+			XbimSolidSet^ result = gcnew XbimSolidSet(_modelService);
+			for each (XbimSolidV5 ^ solid in solids)
 				result->Add(solid->Transformed(transformation));
 			return result;
 		}
@@ -360,11 +364,11 @@ namespace Xbim
 		IXbimGeometryObject^ XbimSolidSet::Moved(IIfcPlacement^ placement)
 		{
 			if (!IsValid) return this;
-			XbimSolidSet^ result = gcnew XbimSolidSet();
+			XbimSolidSet^ result = gcnew XbimSolidSet(_modelService);
 			TopLoc_Location loc = XbimConvert::ToLocation(placement);
 			for each (IXbimSolid ^ solid in solids)
 			{
-				XbimSolid^ copy = gcnew XbimSolid((XbimSolid^)solid, Tag);
+				XbimSolidV5^ copy = gcnew XbimSolidV5((XbimSolidV5^)solid, Tag);
 				copy->Move(loc);
 				result->Add(copy);
 			}
@@ -374,11 +378,11 @@ namespace Xbim
 		IXbimGeometryObject^ XbimSolidSet::Moved(IIfcObjectPlacement^ objectPlacement, ILogger^ logger)
 		{
 			if (!IsValid) return this;
-			XbimSolidSet^ result = gcnew XbimSolidSet();
+			XbimSolidSet^ result = gcnew XbimSolidSet(_modelService);
 			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement, logger);
 			for each (IXbimSolid ^ solid in solids)
 			{
-				XbimSolid^ copy = gcnew XbimSolid((XbimSolid^)solid, Tag);
+				XbimSolidV5^ copy = gcnew XbimSolidV5((XbimSolidV5^)solid, Tag);
 				copy->Move(loc);
 				result->Add(copy);
 			}
@@ -389,8 +393,20 @@ namespace Xbim
 		{
 			for each (IXbimSolid ^ solid  in solids)
 			{
-				((XbimSolid^)solid)->Mesh(mesh, precision, deflection, angle);
+				((XbimSolidV5^)solid)->Mesh(mesh, precision, deflection, angle);
 			}
+		}
+
+		XbimSolidSet::operator TopoDS_Shape()
+		{
+			BRep_Builder builder;
+			TopoDS_Compound bodyCompound;
+			builder.MakeCompound(bodyCompound);
+			for each (IXbimSolid ^ solid in solids)
+			{
+				builder.Add(bodyCompound, (XbimSolidV5^)solid);
+			}
+			return bodyCompound;
 		}
 
 
@@ -446,7 +462,7 @@ namespace Xbim
 				Bnd_Box tsBodyBox;
 				BRepBndLib::Add(body, tsBodyBox);
 				
-				double fuzzyTol =  fuzzyFactor * tolerance;
+				
 				int argCount = 0;
 				TopTools_ListIteratorOfListOfShape it(tools);
 				for (; it.More(); it.Next())
@@ -480,6 +496,7 @@ namespace Xbim
 
 
 				//double fuzzyTol = std::max(maxTol - tolerance, 10 * tolerance);//this seems about right				
+				
 				BOPAlgo_BOP aBOP;
 
 
@@ -489,18 +506,20 @@ namespace Xbim
 				aBOP.SetRunParallel(false);
 				//aBOP.SetCheckInverted(true);
 				aBOP.SetNonDestructive(true);
-				aBOP.SetFuzzyValue(fuzzyTol);
+				aBOP.SetFuzzyValue(fuzzyFactor);
 				
+				Message_ProgressRange pi;
 				
-				//// todo: multiple boolean timeout has been disabled
-				Handle(XbimProgressMonitor) pi = new XbimProgressMonitor(timeout);
 				TopoDS_Shape aR;
-				aBOP.Perform(pi->Start());
+
+
+				aBOP.Perform(pi);
 				aR = aBOP.Shape();
 
-				if (pi->TimedOut())
+				if (pi.UserBreak())
 				{
 					return BOOLEAN_TIMEDOUT;
+
 				}
 				bool bopErr = aBOP.HasErrors();
 #ifdef _DEBUG
@@ -516,6 +535,7 @@ namespace Xbim
 #endif // DEBUG
 				if (bopErr) // a sign of failure do them individually
 				{
+
 					//check if the shape is empty
 
 					if (tools.Size() > 1)//do them one at a time if we are not already doing or have done that
@@ -558,8 +578,8 @@ namespace Xbim
 					fixer.SetPrecision(tolerance);
 					try
 					{
-						Handle(XbimProgressMonitor) pi2 = new XbimProgressMonitor(timeout);
-						if (fixer.Perform(pi2->Start()))
+						
+						if (fixer.Perform())
 						{
 							result = fixer.Shape();
 							retVal = BOOLEAN_SUCCESS;
@@ -604,7 +624,7 @@ namespace Xbim
 			{
 				return BOOLEAN_TIMEDOUT;
 			}
-			catch (Standard_Failure sf)
+			catch (const Standard_Failure& /*sf*/)
 			{
 				return BOOLEAN_FAIL;
 			}
@@ -621,20 +641,21 @@ namespace Xbim
 			if (!IsValid) return this;
 
 
-			XbimSolidSet^ solidResults = gcnew XbimSolidSet();
+			XbimSolidSet^ solidResults = gcnew XbimSolidSet(_modelService);
+			
 			for (int i = 0; i < this->Count; i++)
 			{
 				TopTools_ListOfShape tools;
 				if (!solids[i]->IsValid) continue;
 				for each (IXbimSolid ^ tool in arguments)
 				{
-					tools.Append((XbimSolid^)tool);
+					tools.Append((XbimSolidV5^)tool);
 				}
 				TopoDS_Shape result;
 				int success = BOOLEAN_FAIL;
 				try
 				{
-					success = Xbim::Geometry::DoBoolean((XbimSolid^)solids[i], tools, operation, tolerance, XbimGeometryCreator::FuzzyFactor, result, XbimGeometryCreator::BooleanTimeOut);
+					success = Xbim::Geometry::DoBoolean((XbimSolidV5^)solids[i], tools, operation, tolerance, tolerance, result, XbimGeometryCreator::BooleanTimeOut);
 				}
 				catch (...)
 				{
@@ -647,7 +668,7 @@ namespace Xbim
 					solidResults->Add(resultSolids);
 				}
 
-				String^ msg = "";
+				System::String^ msg = "";
 				switch (success)
 				{
 				case BOOLEAN_PARTIALSUCCESSBADTOPOLOGY:
@@ -665,7 +686,7 @@ namespace Xbim
 				default:
 					break;
 				}
-				if (!String::IsNullOrWhiteSpace(msg))
+				if (!System::String::IsNullOrWhiteSpace(msg))
 					XbimGeometryCreator::LogWarning(logger, nullptr, msg);
 				if (success <= 0)
 					throw gcnew XbimGeometryException(msg);
@@ -694,10 +715,10 @@ namespace Xbim
 			IXbimSolidSet^ toIntersectSolidSet = solidSet; //just to sort out carve exclusion, they must be all OCC solids if no carve
 			IXbimSolidSet^ thisSolidSet = this;
 
-			XbimCompound^ thisSolid = XbimCompound::Merge(thisSolidSet, tolerance, logger);
-			XbimCompound^ toIntersectSolid = XbimCompound::Merge(toIntersectSolidSet, tolerance, logger);
+			XbimCompoundV5^ thisSolid = XbimCompoundV5::Merge(thisSolidSet, tolerance, logger);
+			XbimCompoundV5^ toIntersectSolid = XbimCompoundV5::Merge(toIntersectSolidSet, tolerance, logger);
 			if (thisSolid == nullptr || toIntersectSolid == nullptr) return XbimSolidSet::Empty;
-			XbimCompound^ result = thisSolid->Intersection(toIntersectSolid, tolerance, logger);
+			XbimCompoundV5^ result = thisSolid->Intersection(toIntersectSolid, tolerance, logger);
 			return gcnew XbimSolidSet(result);
 		}
 
@@ -727,7 +748,7 @@ namespace Xbim
 			return Intersection(gcnew XbimSolidSet(solid), tolerance, logger);
 		}
 
-		void XbimSolidSet::Init(XbimCompound^ comp, IPersistEntity^ entity, ILogger^ logger)
+		void XbimSolidSet::Init(XbimCompoundV5^ comp, IPersistEntity^ entity, ILogger^ logger)
 		{
 			solids = gcnew  List<IXbimSolid^>();
 			if (!comp->IsValid)
@@ -755,7 +776,7 @@ namespace Xbim
 				if (profileCount == 1)
 				{
 					XbimGeometryCreator::LogInfo(logger, compProfile, "Invalid number of profiles. It must be 2 or more. A single Profile has been used");
-					XbimSolid^ s = gcnew XbimSolid(repItem, logger);
+					XbimSolidV5^ s = gcnew XbimSolidV5(repItem, logger);
 					if (s->IsValid)
 					{
 						solids = gcnew List<IXbimSolid^>();
@@ -766,14 +787,14 @@ namespace Xbim
 				solids = gcnew List<IXbimSolid^>();
 				for each (IIfcProfileDef ^ profile in compProfile->Profiles)
 				{
-					XbimSolid^ aSolid = gcnew XbimSolid(repItem, profile, logger);
+					XbimSolidV5^ aSolid = gcnew XbimSolidV5(repItem, profile, logger);
 					if (aSolid->IsValid)
 						solids->Add(aSolid);
 				}
 			}
 			else
 			{
-				XbimSolid^ s = gcnew XbimSolid(repItem, logger);
+				XbimSolidV5^ s = gcnew XbimSolidV5(repItem, logger);
 				if (s->IsValid)
 				{
 					solids = gcnew List<IXbimSolid^>();
@@ -796,7 +817,7 @@ namespace Xbim
 				if (profileCount == 1)
 				{
 					XbimGeometryCreator::LogInfo(logger, compProfile, "Invalid number of profiles. It must be 2 or more. A single Profile has been used");
-					XbimSolid^ s = gcnew XbimSolid(repItem, logger);
+					XbimSolidV5^ s = gcnew XbimSolidV5(repItem, logger);
 					if (s->IsValid)
 					{
 						solids = gcnew List<IXbimSolid^>();
@@ -807,14 +828,14 @@ namespace Xbim
 				solids = gcnew List<IXbimSolid^>();
 				for each (IIfcProfileDef ^ profile in compProfile->Profiles)
 				{
-					XbimSolid^ aSolid = gcnew XbimSolid(repItem, profile, logger);
+					XbimSolidV5^ aSolid = gcnew XbimSolidV5(repItem, profile, logger);
 					if (aSolid->IsValid)
 						solids->Add(aSolid);
 				}
 			}
 			else
 			{
-				XbimSolid^ s = gcnew XbimSolid(repItem, logger);
+				XbimSolidV5^ s = gcnew XbimSolidV5(repItem, logger);
 				if (s->IsValid)
 				{
 					solids = gcnew List<IXbimSolid^>();
@@ -825,7 +846,7 @@ namespace Xbim
 
 		void XbimSolidSet::Init(IIfcTriangulatedFaceSet^ IIfcSolid, ILogger^ logger)
 		{
-			XbimCompound^ comp = gcnew XbimCompound(IIfcSolid, logger);
+			XbimCompoundV5^ comp = gcnew XbimCompoundV5(IIfcSolid, logger);
 			solids = gcnew List<IXbimSolid^>();
 			for each (IXbimSolid ^ xbimSolid in comp->Solids)
 			{
@@ -835,7 +856,7 @@ namespace Xbim
 		}
 		void XbimSolidSet::Init(IIfcPolygonalFaceSet^ IIfcSolid, ILogger^ logger)
 		{
-			XbimCompound^ comp = gcnew XbimCompound(IIfcSolid, logger);
+			XbimCompoundV5^ comp = gcnew XbimCompoundV5(IIfcSolid, logger);
 			solids = gcnew List<IXbimSolid^>();
 			for each (IXbimSolid ^ xbimSolid in comp->Solids)
 			{
@@ -852,7 +873,7 @@ namespace Xbim
 					BRepBuilderAPI_MakeSolid solidMaker(shell);
 					if (solidMaker.IsDone())
 					{
-						solids->Add(gcnew XbimSolid(solidMaker.Solid()));
+						solids->Add(gcnew XbimSolidV5(solidMaker.Solid()));
 					}
 				}
 				te.Next();
@@ -862,7 +883,7 @@ namespace Xbim
 
 		void XbimSolidSet::Init(IIfcFaceBasedSurfaceModel^ solid, ILogger^ logger)
 		{
-			XbimCompound^ comp = gcnew XbimCompound(solid, logger);
+			XbimCompoundV5^ comp = gcnew XbimCompoundV5(solid, logger);
 			solids = gcnew List<IXbimSolid^>();
 			for each (IXbimSolid ^ xbimSolid in comp->Solids)
 			{
@@ -879,7 +900,7 @@ namespace Xbim
 					BRepBuilderAPI_MakeSolid solidMaker(shell);
 					if (solidMaker.IsDone())
 					{
-						solids->Add(gcnew XbimSolid(solidMaker.Solid()));
+						solids->Add(gcnew XbimSolidV5(solidMaker.Solid()));
 					}
 				}
 				te.Next();
@@ -889,7 +910,7 @@ namespace Xbim
 
 		void XbimSolidSet::Init(IIfcShellBasedSurfaceModel^ solid, ILogger^ logger)
 		{
-			XbimCompound^ comp = gcnew XbimCompound(solid, logger);
+			XbimCompoundV5^ comp = gcnew XbimCompoundV5(solid, logger);
 			solids = gcnew List<IXbimSolid^>();
 			for each (IXbimSolid ^ xbimSolid in comp->Solids)
 			{
@@ -906,7 +927,7 @@ namespace Xbim
 					BRepBuilderAPI_MakeSolid solidMaker(shell);
 					if (solidMaker.IsDone())
 					{
-						solids->Add(gcnew XbimSolid(solidMaker.Solid()));
+						solids->Add(gcnew XbimSolidV5(solidMaker.Solid()));
 					}
 				}
 				te.Next();
@@ -928,7 +949,7 @@ namespace Xbim
 				if (profileCount == 1)
 				{
 					XbimGeometryCreator::LogInfo(logger, repItem, "Invalid number of profiles in IIfcCompositeProfileDef #{0}. It must be 2 or more. A single Profile has been used");
-					XbimSolid^ s = gcnew XbimSolid(repItem, logger);
+					XbimSolidV5^ s = gcnew XbimSolidV5(repItem, logger);
 					if (s->IsValid)
 					{
 						solids = gcnew List<IXbimSolid^>();
@@ -939,14 +960,14 @@ namespace Xbim
 				solids = gcnew List<IXbimSolid^>();
 				for each (IIfcProfileDef ^ profile in compProfile->Profiles)
 				{
-					XbimSolid^ aSolid = gcnew XbimSolid(repItem, profile, logger);
+					XbimSolidV5^ aSolid = gcnew XbimSolidV5(repItem, profile, logger);
 					if (aSolid->IsValid)
 						solids->Add(aSolid);
 				}
 			}
 			else
 			{
-				XbimSolid^ s = gcnew XbimSolid(repItem, logger);
+				XbimSolidV5^ s = gcnew XbimSolidV5(repItem, logger);
 				if (s->IsValid)
 				{
 					solids = gcnew List<IXbimSolid^>();
@@ -970,7 +991,7 @@ namespace Xbim
 				if (profileCount == 1)
 				{
 					XbimGeometryCreator::LogInfo(logger, compProfile, "Invalid number of profiles. It must be 2 or more. A single Profile has been used");
-					XbimSolid^ s = gcnew XbimSolid(repItem, logger);
+					XbimSolidV5^ s = gcnew XbimSolidV5(repItem, logger);
 					if (s->IsValid)
 					{
 						solids = gcnew List<IXbimSolid^>();
@@ -981,14 +1002,14 @@ namespace Xbim
 				solids = gcnew List<IXbimSolid^>();
 				for each (IIfcProfileDef ^ profile in compProfile->Profiles)
 				{
-					XbimSolid^ aSolid = gcnew XbimSolid(repItem, profile, logger);
+					XbimSolidV5^ aSolid = gcnew XbimSolidV5(repItem, profile, logger);
 					if (aSolid->IsValid)
 						solids->Add(aSolid);
 				}
 			}
 			else
 			{
-				XbimSolid^ s = gcnew XbimSolid(repItem, logger);
+				XbimSolidV5^ s = gcnew XbimSolidV5(repItem, logger);
 				if (s->IsValid)
 				{
 					solids = gcnew List<IXbimSolid^>();
@@ -1013,13 +1034,13 @@ namespace Xbim
 			IIfcCsgPrimitive3D^ csgPrim = dynamic_cast<IIfcCsgPrimitive3D^>(IIfcSolid->TreeRootExpression);
 			if (csgPrim != nullptr)
 			{
-				solids->Add(gcnew XbimSolid(csgPrim, logger));
+				solids->Add(gcnew XbimSolidV5(csgPrim, logger));
 			}
 			else
 			{
 				IIfcBooleanResult^ booleanResult = dynamic_cast<IIfcBooleanResult^>(IIfcSolid->TreeRootExpression);
 				if (booleanResult != nullptr) return Init(booleanResult, logger);
-				throw gcnew NotImplementedException(String::Format("IIfcCsgSolid of Type {0} in entity #{1} is not implemented", IIfcSolid->GetType()->Name, IIfcSolid->EntityLabel));
+				throw gcnew System::NotImplementedException(System::String::Format("IIfcCsgSolid of Type {0} in entity #{1} is not implemented", IIfcSolid->GetType()->Name, IIfcSolid->EntityLabel));
 
 			}
 		}
@@ -1029,12 +1050,13 @@ namespace Xbim
 		void XbimSolidSet::Init(IIfcBooleanClippingResult^ solid, ILogger^ logger)
 		{
 			solids = gcnew List<IXbimSolid^>();
-			IModelFactors^ mf = solid->Model->ModelFactors;
+			IXModelService^ mf = XbimConvert::ModelService(solid);
 
 			List<IIfcBooleanOperand^>^ clips = gcnew List<IIfcBooleanOperand^>();
-			XbimSolidSet^ solidSet = gcnew XbimSolidSet();
+			XbimSolidSet^ solidSet = gcnew XbimSolidSet(_modelService);
 			solidSet->IfcEntityLabel = solid->EntityLabel;
 			XbimSolidSet^ bodySet = XbimSolidSet::BuildClippingList(solid, clips, logger);
+			bodySet->SetModelService(_modelService);
 			bodySet->IfcEntityLabel = solid->EntityLabel;
 
 			//SRL it appears that release 7.3 of OCC does correctly cut multiple half space solids
@@ -1051,13 +1073,14 @@ namespace Xbim
 						if (dynamic_cast<IIfcHalfSpaceSolid^>(bOp) && bOp->GetType()->Name->Contains("IfcHalfSpaceSolid") ||
 							dynamic_cast<IIfcPolygonalBoundedHalfSpace^>(bOp) && bOp->GetType()->Name->Contains("IfcPolygonalBoundedHalfSpace"))
 						{
-							bodySet = (XbimSolidSet^)bodySet->Cut(s, mf->Precision, logger);
+							bodySet = (XbimSolidSet^)bodySet->Cut(s, mf->MinimumGap, logger);
+							
 						}
 						else
 							solidSet->Add(s);
 					}
 				}
-				catch (Exception ^ e)
+				catch (System::Exception ^ e)
 				{
 					XbimGeometryCreator::LogError(logger, solid, "Failed to clip #{0} with #{1}. {2}", solid->EntityLabel, bOp->EntityLabel, e->Message);
 				}
@@ -1067,13 +1090,13 @@ namespace Xbim
 			{
 				try
 				{
-					IXbimSolidSet^ xbimSolidSet = bodySet->Cut(solidSet, mf->Precision, logger);
+					IXbimSolidSet^ xbimSolidSet = bodySet->Cut(solidSet, mf->MinimumGap, logger);
 					if (xbimSolidSet != nullptr && xbimSolidSet->IsValid)
 					{
 						solids->AddRange(xbimSolidSet);
 					}
 				}
-				catch (Exception ^ e)
+				catch (System::Exception ^ e)
 				{
 					XbimGeometryCreator::LogWarning(logger, solid, "Failed to clip #{0} with #{1}. {2}", solid->FirstOperand->EntityLabel, solid->SecondOperand->EntityLabel, e->Message);
 				}
@@ -1110,26 +1133,23 @@ namespace Xbim
 			}
 			else if (ms != nullptr)
 			{
-				XbimCompound^ comp = gcnew XbimCompound(ms, logger);
+				XbimCompoundV5^ comp = gcnew XbimCompoundV5(ms, logger);
 				Init(comp, ms, logger);
 			}
 			else if (hs != nullptr)
 			{
-				XbimSolid^ s = gcnew XbimSolid(hs, logger);
-				if (s->IsValid)
-					solids->Add(s);
+				XbimSolidV5^ s = gcnew XbimSolidV5(hs, logger);
+				if (s->IsValid) solids->Add(s);
 			}
 			else if (csgPrim != nullptr)
 			{
-				XbimSolid^ s = gcnew XbimSolid(csgPrim, logger);
-				if (s->IsValid)
-					solids->Add(s);
+				XbimSolidV5^ s = gcnew XbimSolidV5(csgPrim, logger);
+				if (s->IsValid)solids->Add(s);
 			}
 			else if (sm != nullptr)
 			{
-				XbimSolid^ s = gcnew XbimSolid(sm, logger);
-				if (s->IsValid)
-					solids->Add(s); // otherwise create a  solid model
+				XbimSolidV5^ s = gcnew XbimSolidV5(sm, logger);
+				if (s->IsValid)solids->Add(s); // otherwise create a  solid model
 			}
 			else
 			{
@@ -1182,7 +1202,7 @@ namespace Xbim
 			////XbimSolidSet^ left = BuildBooleanResult(boolOp, boolOp->Operator, right, logger);
 			//XbimSolidSet^ left = gcnew XbimSolidSet(boolOp->FirstOperand, logger);
 			//left->IfcEntityLabel = boolOp->FirstOperand->EntityLabel;
-			XbimSolidSet^ right = gcnew XbimSolidSet();
+			XbimSolidSet^ right = gcnew XbimSolidSet(_modelService);
 			right->IfcEntityLabel = boolOp->SecondOperand->EntityLabel;
 			XbimSolidSet^ left = BuildBooleanResult(boolOp, boolOp->Operator, right, logger);
 
@@ -1202,7 +1222,7 @@ namespace Xbim
 				return;
 			}
 
-			IModelFactors^ mf = boolOp->Model->ModelFactors;
+			IXModelService^ mf = XbimConvert::ModelService(boolOp);
 
 			IXbimSolidSet^ result;
 			try
@@ -1211,18 +1231,18 @@ namespace Xbim
 				switch (boolOp->Operator)
 				{
 				case IfcBooleanOperator::UNION:
-					result = left->Union(right, mf->Precision, logger);
+					result = left->Union(right, mf->MinimumGap, logger);
 					break;
 				case IfcBooleanOperator::INTERSECTION:
-					result = left->Intersection(right, mf->Precision, logger);
+					result = left->Intersection(right, mf->MinimumGap, logger);
 					break;
 				case IfcBooleanOperator::DIFFERENCE:
-					result = left->Cut(right, mf->Precision, logger);
+					result = left->Cut(right, mf->MinimumGap, logger);
 					break;
 				}
 				//XbimOccWriter::Write(result, "c:/tmp/bop" + boolOp->ToString()->Replace(";","") +".txt");
 			}
-			catch (Exception ^ e)
+			catch (System::Exception ^ e)
 			{
 				XbimGeometryCreator::LogError(logger, boolOp, "Failed to perform boolean result from #{0} with #{1}. {2}", boolOp->FirstOperand->EntityLabel, boolOp->SecondOperand->EntityLabel, e->Message);
 				solids->AddRange(left);; //return the left operand

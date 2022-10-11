@@ -1,34 +1,37 @@
 #pragma once
-#include "XbimSolid.h"
-#include "XbimShell.h"
-#include "XbimFace.h"
+
 
 #include <TopoDS.hxx>
 #include <TopoDS_Compound.hxx>
 #include <TopExp_Explorer.hxx>
 #include <Precision.hxx>
 
-using namespace System::Collections::Generic;
+#include "XbimSolid.h"
+#include "XbimShell.h"
+#include "XbimFace.h"
+
+
+using namespace Microsoft::Extensions::Logging;
 using namespace Xbim::Ifc4;
 using namespace Xbim::Common::Geometry;
-
+using namespace Xbim::Ifc4::Interfaces;
 namespace Xbim
 {
 	namespace Geometry
 	{
 		//a set of Xbim Geometry Objects
-		ref class XbimCompound : XbimOccShape, IXbimGeometryObjectSet
+		ref class XbimCompoundV5 : XbimOccShape, IXbimGeometryObjectSet
 		{
 		private:
 			
-			IntPtr ptrContainer;
+			System::IntPtr ptrContainer;
 			virtual property TopoDS_Compound* pCompound
 			{
 				TopoDS_Compound* get() sealed { return (TopoDS_Compound*)ptrContainer.ToPointer(); }
-				void set(TopoDS_Compound* val)sealed { ptrContainer = IntPtr(val); }
+				void set(TopoDS_Compound* val)sealed { ptrContainer = System::IntPtr(val); }
 			}
-			XbimCompound(){};
-			static XbimCompound^ empty = gcnew XbimCompound();
+			XbimCompoundV5(){};
+			static XbimCompoundV5^ empty = gcnew XbimCompoundV5();
 			bool _isSewn;
 			double _sewingTolerance;
 			void InstanceCleanup();
@@ -49,37 +52,37 @@ namespace Xbim
 			void Init(IIfcTriangulatedFaceSet^ faceSet, ILogger^ logger);
 			
 			//Helpers
-			XbimFace^ BuildFace(List<Tuple<XbimWire^, IIfcPolyLoop^, bool>^>^ wires, IIfcFace^ face, ILogger^ logger);
-			static void  GetConnected(HashSet<XbimSolid^>^ connected, Dictionary<XbimSolid^, HashSet<XbimSolid^>^>^ clusters, XbimSolid^ clusterAround);
+			XbimFaceV5^ BuildFace(List<System::Tuple<XbimWireV5^, IIfcPolyLoop^, bool>^>^ wires, IIfcFace^ face, ILogger^ logger);
+			static void  GetConnected(HashSet<XbimSolidV5^>^ connected, Dictionary<XbimSolidV5^, HashSet<XbimSolidV5^>^>^ clusters, XbimSolidV5^ clusterAround);
 			
 			
 		public:
-			~XbimCompound(){ InstanceCleanup(); }
-			!XbimCompound(){ InstanceCleanup(); }
-			XbimCompound(double sewingTolerance);
-			XbimCompound(const TopoDS_Compound& compound, bool sewn, double tolerance);
-			XbimCompound(const TopoDS_Compound& compound, bool sewn, double tolerance, Object^ tag);
-			XbimCompound(IIfcConnectedFaceSet^ faceSet, ILogger^ logger);
-			XbimCompound(IIfcShellBasedSurfaceModel^ sbsm, ILogger^ logger);
-			XbimCompound(IIfcFaceBasedSurfaceModel^ fbsm, ILogger^ logger);
-			XbimCompound(IIfcManifoldSolidBrep^ solid, ILogger^ logger);
-			XbimCompound(IIfcFacetedBrep^ solid, ILogger^ logger);
-			XbimCompound(IIfcFacetedBrepWithVoids^ solid, ILogger^ logger);
-			XbimCompound(IIfcAdvancedBrep^ solid, ILogger^ logger);
-			XbimCompound(IIfcAdvancedBrepWithVoids^ solid, ILogger^ logger);
-			XbimCompound(IIfcClosedShell^ solid, ILogger^ logger);
-			XbimCompound(IIfcTriangulatedFaceSet^ faceSet, ILogger^ logger);
-			XbimCompound(IIfcPolygonalFaceSet^ faceSet, ILogger^ logger);
-			static property XbimCompound^ Empty{XbimCompound^ get(){ return empty; }};
+			~XbimCompoundV5(){ InstanceCleanup(); }
+			!XbimCompoundV5(){ InstanceCleanup(); }
+			XbimCompoundV5(double sewingTolerance);
+			XbimCompoundV5(const TopoDS_Compound& compound, bool sewn, double tolerance);
+			XbimCompoundV5(const TopoDS_Compound& compound, bool sewn, double tolerance, Object^ tag);
+			XbimCompoundV5(IIfcConnectedFaceSet^ faceSet, ILogger^ logger);
+			XbimCompoundV5(IIfcShellBasedSurfaceModel^ sbsm, ILogger^ logger);
+			XbimCompoundV5(IIfcFaceBasedSurfaceModel^ fbsm, ILogger^ logger);
+			XbimCompoundV5(IIfcManifoldSolidBrep^ solid, ILogger^ logger);
+			XbimCompoundV5(IIfcFacetedBrep^ solid, ILogger^ logger);
+			XbimCompoundV5(IIfcFacetedBrepWithVoids^ solid, ILogger^ logger);
+			XbimCompoundV5(IIfcAdvancedBrep^ solid, ILogger^ logger);
+			XbimCompoundV5(IIfcAdvancedBrepWithVoids^ solid, ILogger^ logger);
+			XbimCompoundV5(IIfcClosedShell^ solid, ILogger^ logger);
+			XbimCompoundV5(IIfcTriangulatedFaceSet^ faceSet, ILogger^ logger);
+			XbimCompoundV5(IIfcPolygonalFaceSet^ faceSet, ILogger^ logger);
+			static property XbimCompoundV5^ Empty{XbimCompoundV5^ get(){ return empty; }};
 #pragma region IXbimCompound Interface
-			virtual property bool IsValid {bool get() override { return ptrContainer != IntPtr::Zero && Count > 0; }; }
+			virtual property bool IsValid {bool get() override { return ptrContainer != System::IntPtr::Zero && Count > 0; }; }
 			virtual property bool IsSet{bool get() override { return true; }; }
 			virtual property  XbimGeometryObjectType GeometryType  {XbimGeometryObjectType  get()override { return XbimGeometryObjectType::XbimCompoundType; }}
 			virtual property int Count{int get(); }
 			virtual property IXbimGeometryObject^ First{IXbimGeometryObject^ get(); }
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) override;
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D) override;
-			static List<XbimSolid^>^  GetDiscrete(List<XbimSolid^>^%);
+			static List<XbimSolidV5^>^  GetDiscrete(List<XbimSolidV5^>^%);
 			virtual property IXbimSolidSet^ Solids {IXbimSolidSet^ get(); }
 			virtual property IXbimShellSet^ Shells{IXbimShellSet^ get(); }
 			virtual property IXbimFaceSet^ Faces{IXbimFaceSet^ get(); }
@@ -109,10 +112,10 @@ namespace Xbim
 			//Upgrades the result to the highest level and simplest object without loss of representation
 			IXbimGeometryObject^ Upgrade();
 			IXbimShell^ MakeShell();
-			static XbimCompound^ Merge(IXbimSolidSet^ solids, double tolerance, ILogger^ logger);
-			XbimCompound^ Cut(XbimCompound^ solids, double tolerance, ILogger^ logger);
-			XbimCompound^ Union(XbimCompound^ solids, double tolerance, ILogger^ logger);
-			XbimCompound^ Intersection(XbimCompound^ solids, double tolerance, ILogger^ logger);
+			static XbimCompoundV5^ Merge(IXbimSolidSet^ solids, double tolerance, ILogger^ logger);
+			XbimCompoundV5^ Cut(XbimCompoundV5^ solids, double tolerance, ILogger^ logger);
+			XbimCompoundV5^ Union(XbimCompoundV5^ solids, double tolerance, ILogger^ logger);
+			XbimCompoundV5^ Intersection(XbimCompoundV5^ solids, double tolerance, ILogger^ logger);
 			virtual property XbimRect3D BoundingBox {XbimRect3D get()override ; }
 			virtual property double Volume{double get(); }
 			virtual property double SewingTolerance {double get() {return _sewingTolerance;}}

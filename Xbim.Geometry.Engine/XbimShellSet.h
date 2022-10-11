@@ -1,8 +1,8 @@
 #pragma once
-#include "XbimShell.h"
+
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
-
+#include "XbimShell.h"
 using namespace System::Collections::Generic;
 using namespace Xbim::Common::Geometry;
 namespace Xbim
@@ -71,7 +71,7 @@ namespace Xbim
 
 			// Inherited via XbimSetObject
 			virtual void Mesh(IXbimMeshReceiver ^ mesh, double precision, double deflection, double angle) override;
-
+			operator TopoDS_Shape () override;
 		};
 
 	}

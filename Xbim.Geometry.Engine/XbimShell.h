@@ -1,12 +1,12 @@
 #pragma once
+
+#include <TopoDS_Shell.hxx>
+#include <TopTools_DataMapOfShapeListOfShape.hxx>
+#include <TopTools_DataMapOfIntegerShape.hxx>
 #include "XbimOccShape.h"
 #include "XbimWire.h"
 #include "XbimFace.h"
 #include "XbimEdge.h"
-#include <TopoDS_Shell.hxx>
-#include <TopTools_DataMapOfShapeListOfShape.hxx>
-#include <TopTools_DataMapOfIntegerShape.hxx>
-
 using namespace System::Collections::Generic;
 using namespace Xbim::Common::Geometry;
 
@@ -15,15 +15,15 @@ namespace Xbim
 	namespace Geometry
 	{
 
-		ref class XbimShell : IXbimShell, XbimOccShape
+		ref class XbimShellV5 : IXbimShell, XbimOccShape
 		{
 		private:
 			
-			IntPtr ptrContainer;
+			System::IntPtr ptrContainer;
 			virtual property TopoDS_Shell* pShell
 			{
 				TopoDS_Shell* get() sealed { return (TopoDS_Shell*)ptrContainer.ToPointer(); }
-				void set(TopoDS_Shell* val)sealed { ptrContainer = IntPtr(val); }
+				void set(TopoDS_Shell* val)sealed { ptrContainer = System::IntPtr(val); }
 			}
 			void InstanceCleanup();
 			void Init(IIfcOpenShell^ openShell, ILogger^ logger);
@@ -31,21 +31,21 @@ namespace Xbim
 			void Init(IIfcSurfaceOfLinearExtrusion^ linExt, ILogger^ logger);
 		public:
 			//Constructors
-			XbimShell();
-			XbimShell(const TopoDS_Shell& shell);
-			XbimShell(const TopoDS_Shell& shell, Object^ tag);
-			XbimShell(IIfcOpenShell^ openShell, ILogger^ logger);
-			XbimShell(IIfcConnectedFaceSet^ faceset, ILogger^ logger);
-			XbimShell(IIfcSurfaceOfLinearExtrusion^ linExt, ILogger^ logger);
+			XbimShellV5();
+			XbimShellV5(const TopoDS_Shell& shell);
+			XbimShellV5(const TopoDS_Shell& shell, Object^ tag);
+			XbimShellV5(IIfcOpenShell^ openShell, ILogger^ logger);
+			XbimShellV5(IIfcConnectedFaceSet^ faceset, ILogger^ logger);
+			XbimShellV5(IIfcSurfaceOfLinearExtrusion^ linExt, ILogger^ logger);
 			//destructors
-			~XbimShell(){ InstanceCleanup(); }
-			!XbimShell(){ InstanceCleanup(); }
+			~XbimShellV5(){ InstanceCleanup(); }
+			!XbimShellV5(){ InstanceCleanup(); }
 
 #pragma region Equality Overrides
 			virtual bool Equals(Object^ v) override;
 			virtual int GetHashCode() override;
-			static bool operator ==(XbimShell^ left, XbimShell^ right);
-			static bool operator !=(XbimShell^ left, XbimShell^ right);
+			static bool operator ==(XbimShellV5^ left, XbimShellV5^ right);
+			static bool operator !=(XbimShellV5^ left, XbimShellV5^ right);
 			virtual bool Equals(IXbimShell^ s);
 #pragma endregion
 
@@ -74,7 +74,7 @@ namespace Xbim
 			virtual property bool HasValidTopology{bool get(); }
 			virtual bool CanCreateSolid(){ return IsClosed; };
 			virtual IXbimSolid^ CreateSolid(){ return MakeSolid(); };
-			virtual void SaveAsBrep(String^ fileName);
+			virtual void SaveAsBrep(System::String^ fileName);
 #pragma endregion
 			
 #pragma region operators

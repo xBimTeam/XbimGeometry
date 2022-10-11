@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Target Name="Build">
-    <Message Text="Building configuration $(Configuration) with output path $(OutputPath)" Importance="High" />
-  </Target>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -22,41 +19,60 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <VCProjectVersion>15.0</VCProjectVersion>
+    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
+    <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{DEFB2CD3-B35F-450A-A829-D3FE50CFC19A}</ProjectGuid>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <Keyword>ManagedCProj</Keyword>
-    <RootNamespace>Xbim.Geometry.Engine</RootNamespace>
+    <Keyword>NetCoreCProj</Keyword>
+    <RootNamespace>Xbim::Geometry</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <OutputFolder>netcoreapp3.1</OutputFolder>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
-    <CLRSupport>true</CLRSupport>
-    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+    <CLRSupport>NetCore</CLRSupport>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
-    <CLRSupport>true</CLRSupport>
-    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+    <CLRSupport>NetCore</CLRSupport>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
-    <CLRSupport>true</CLRSupport>
-    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+    <CLRSupport>NetCore</CLRSupport>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
-    <CLRSupport>true</CLRSupport>
-    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+    <CLRSupport>NetCore</CLRSupport>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Platform)'=='AnyCPU'">
+    <PlatformTarget>Win32</PlatformTarget>
+    <OutDir>$(SolutionDir)Output\$(Configuration)\$(Platform)\$(OutputFolder)\win10-x86\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(Configuration)\x86\$(OutputFolder)\win10-x86\</IntDir>
+    <PackagesDir>$(SolutionDir)Output\$(Configuration)\x86\$(OutputFolder)\win10-x86\</PackagesDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Platform)'=='Win32'">
+    <OutDir>$(SolutionDir)Output\$(Configuration)\AnyCPU\$(OutputFolder)\win10-x86\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(Configuration)\AnyCPU\$(OutputFolder)\win10-x86\</IntDir>
+    <PackagesDir>$(SolutionDir)Output\$(Configuration)\AnyCPU\$(OutputFolder)\win10-x86\</PackagesDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Platform)'=='x64'">
+    <OutDir>$(SolutionDir)Output\$(Configuration)\AnyCPU\$(OutputFolder)\win10-x64\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(Configuration)\AnyCPU\$($(OutputFolder)\win10-x64\</IntDir>
+    <PackagesDir>$(SolutionDir)Output\$(Configuration)\AnyCPU\$(OutputFolder)\win10-x64\</PackagesDir>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -76,121 +92,202 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+  <PropertyGroup>
     <LinkIncremental>false</LinkIncremental>
-    <LinkKeyFile>$(ProjectDir)..\XbimOpenSourceKeyFile.snk</LinkKeyFile>
-    <TargetName>$(ProjectName)32</TargetName>
-    <EnableManagedIncrementalBuild>false</EnableManagedIncrementalBuild>
+    <TargetName>$(ProjectName)$(ManagedPlatform)</TargetName>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LinkIncremental>false</LinkIncremental>
-    <LinkKeyFile>$(ProjectDir)..\XbimOpenSourceKeyFile.snk</LinkKeyFile>
-    <TargetName>$(ProjectName)64</TargetName>
-    <EnableManagedIncrementalBuild>false</EnableManagedIncrementalBuild>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LinkIncremental>false</LinkIncremental>
-    <LinkKeyFile>$(ProjectDir)..\XbimOpenSourceKeyFile.snk</LinkKeyFile>
-    <TargetName>$(ProjectName)32</TargetName>
-    <EnableManagedIncrementalBuild>false</EnableManagedIncrementalBuild>
+    <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+    <GenerateManifest>false</GenerateManifest>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LinkIncremental>false</LinkIncremental>
-    <LinkKeyFile>$(ProjectDir)..\XbimOpenSourceKeyFile.snk</LinkKeyFile>
-    <TargetName>$(ProjectName)64</TargetName>
-    <EnableManagedIncrementalBuild>false</EnableManagedIncrementalBuild>
+    <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+    <GenerateManifest>false</GenerateManifest>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <Link>
-      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
-    </Link>
     <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PreprocessorDefinitions>HAVE_RAPIDJSON;OCCT_NO_PLUGINS;WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.\OCC\inc</AdditionalIncludeDirectories>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;comdlg32.lib;wsock32.lib;Psapi.lib;TKBO.lib;TKBOOL.lib;TKBRep.lib;TKernel.lib;TKFillet.lib;TKG2d.lib;TKG3d.lib;TKGeomAlgo.lib;TKGeomBase.lib;TKMath.lib;TKMesh.lib;TKOffset.lib;TKPrim.lib;TKShHealing.lib;TKTopAlgo.lib;TKCAF.lib;TKCDF.lib;TKHLR.lib;TKLCAF.lib;TKV3d.lib;TKVCAF.lib;TKXCAF.lib;TKService.lib;TKXDESTEP.lib;TKSTEPBase.Lib;TKSTEP.lib;TKXSBase.lib;TKSTEPAttr.lib;TKSTEP209.lib;TKRWMesh.lib;TKBin.lib;TKBinL.lib;TKBinXCAF.lib;TKFeat.lib</AdditionalDependencies>
+      <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
+      <AdditionalLibraryDirectories>.\OCC\win32\vc14\bind\</AdditionalLibraryDirectories>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+      <AdditionalOptions>/IGNORE:4099,4098 %(AdditionalOptions)</AdditionalOptions>
+    </Link>
     <ResourceCompile>
       <Culture>0x0809</Culture>
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <Link>
-      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
-    </Link>
     <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PreprocessorDefinitions>HAVE_RAPIDJSON;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.\OCC\inc</AdditionalIncludeDirectories>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;comdlg32.lib;wsock32.lib;Psapi.lib;TKBO.lib;TKBOOL.lib;TKBRep.lib;TKernel.lib;TKFillet.lib;TKG2d.lib;TKG3d.lib;TKGeomAlgo.lib;TKGeomBase.lib;TKMath.lib;TKMesh.lib;TKOffset.lib;TKPrim.lib;TKShHealing.lib;TKTopAlgo.lib;TKCAF.lib;TKCDF.lib;TKHLR.lib;TKLCAF.lib;TKV3d.lib;TKVCAF.lib;TKXCAF.lib;TKService.lib;TKXDESTEP.lib;TKSTEPBase.Lib;TKSTEP.lib;TKXSBase.lib;TKSTEPAttr.lib;TKSTEP209.lib;TKRWMesh.lib;TKBin.lib;TKBinL.lib;TKBinXCAF.lib;TKFeat.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>.\OCC\win64\vc14\bind\</AdditionalLibraryDirectories>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+      <AdditionalOptions>/IGNORE:4099,4098 %(AdditionalOptions)</AdditionalOptions>
+    </Link>
     <ResourceCompile>
       <Culture>0x0809</Culture>
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>HAVE_RAPIDJSON;WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.\OCC\inc</AdditionalIncludeDirectories>
+      <EnablePREfast>false</EnablePREfast>
+    </ClCompile>
     <Link>
-      <FullProgramDatabaseFile>
-      </FullProgramDatabaseFile>
+      <AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;comdlg32.lib;wsock32.lib;Psapi.lib;TKBO.lib;TKBOOL.lib;TKBRep.lib;TKernel.lib;TKFillet.lib;TKG2d.lib;TKG3d.lib;TKGeomAlgo.lib;TKGeomBase.lib;TKMath.lib;TKMesh.lib;TKOffset.lib;TKPrim.lib;TKShHealing.lib;TKTopAlgo.lib;TKCAF.lib;TKCDF.lib;TKHLR.lib;TKLCAF.lib;TKV3d.lib;TKVCAF.lib;TKXCAF.lib;TKService.lib;TKXDESTEP.lib;TKSTEPBase.Lib;TKSTEP.lib;TKXSBase.lib;TKSTEPAttr.lib;TKSTEP209.lib;TKRWMesh.lib;TKBin.lib;TKBinL.lib;TKBinXCAF.lib;TKFeat.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>.\OCC\win32\vc14\bin\</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <AdditionalOptions>/IGNORE:4099,4098 %(AdditionalOptions)</AdditionalOptions>
+      <Profile>true</Profile>
     </Link>
     <ResourceCompile>
       <Culture>0x0809</Culture>
     </ResourceCompile>
-    <ClCompile>
-      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
-    </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>HAVE_RAPIDJSON;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.\OCC\inc</AdditionalIncludeDirectories>
+      <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
+    </ClCompile>
     <Link>
-      <FullProgramDatabaseFile>
-      </FullProgramDatabaseFile>
+      <AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;comdlg32.lib;wsock32.lib;Psapi.lib;TKBO.lib;TKBOOL.lib;TKBRep.lib;TKernel.lib;TKFillet.lib;TKG2d.lib;TKG3d.lib;TKGeomAlgo.lib;TKGeomBase.lib;TKMath.lib;TKMesh.lib;TKOffset.lib;TKPrim.lib;TKShHealing.lib;TKTopAlgo.lib;TKCAF.lib;TKCDF.lib;TKHLR.lib;TKLCAF.lib;TKV3d.lib;TKVCAF.lib;TKXCAF.lib;TKService.lib;TKXDESTEP.lib;TKSTEPBase.Lib;TKSTEP.lib;TKXSBase.lib;TKSTEPAttr.lib;TKSTEP209.lib;TKRWMesh.lib;TKBin.lib;TKBinL.lib;TKBinXCAF.lib;TKFeat.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>.\OCC\win64\vc14\bin\</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <AdditionalOptions>/IGNORE:4099,4098 %(AdditionalOptions)</AdditionalOptions>
+      <Profile>true</Profile>
     </Link>
     <ResourceCompile>
       <Culture>0x0809</Culture>
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Configuration" />
+    <ClInclude Include="Services\MeshFactors.h" />
+    <ClInclude Include="Services\ModelService.h" />
+    <ClInclude Include="XbimCompound.h" />
+    <ClInclude Include="XbimConstraints.h" />
+    <ClInclude Include="XbimConvert.h" />
+    <ClInclude Include="XbimCurve.h" />
+    <ClInclude Include="XbimCurve2D.h" />
+    <ClInclude Include="XbimEdge.h" />
+    <ClInclude Include="XbimEdgeSet.h" />
+    <ClInclude Include="XbimFace.h" />
+    <ClInclude Include="XbimFaceSet.h" />
+    <ClInclude Include="XbimGeometryCreator.h" />
+    <ClInclude Include="XbimGeometryObject.h" />
+    <ClInclude Include="XbimGeometryObjectSet.h" />
+    <ClInclude Include="XbimMesh.h" />
+    <ClInclude Include="XbimNativeApi.h" />
+    <ClInclude Include="XbimOccShape.h" />
+    <ClInclude Include="XbimOccWriter.h" />
+    <ClInclude Include="XbimPoint3DWithTolerance.h" />
+    <ClInclude Include="XbimProgressMonitor.h" />
+    <ClInclude Include="XbimShell.h" />
+    <ClInclude Include="XbimShellSet.h" />
+    <ClInclude Include="XbimSolid.h" />
+    <ClInclude Include="XbimSolidSet.h" />
+    <ClInclude Include="XbimVertex.h" />
+    <ClInclude Include="XbimVertexSet.h" />
+    <ClInclude Include="XbimWire.h" />
+    <ClInclude Include="XbimWireSet.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="Resource.h" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.Extensions.Logging.Abstractions">
-      <HintPath>..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net472\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
-    </Reference>
-    <Reference Include="Xbim.Common">
-      <HintPath>..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net472\Xbim.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="Xbim.Ifc4">
-      <HintPath>..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net472\Xbim.Ifc4.dll</HintPath>
-    </Reference>
-    <Reference Include="Xbim.Ifc2x3">
-      <HintPath>..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net472\Xbim.Ifc2x3.dll</HintPath>
-    </Reference>
-    <Reference Include="Xbim.Tessellator">
-      <HintPath>..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net472\Xbim.Tessellator.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Runtime">
-      <HintPath>..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net472\System.Runtime.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="Stdafx.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    <ClCompile Include="AssemblyInfo.cpp" />
+    <ClCompile Include="Services\MeshFactors.cpp" />
+    <ClCompile Include="Services\ModelService.cpp" />
+    <ClCompile Include="XbimCompound.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="XbimMesh.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</CompileAsManaged>
+    <ClCompile Include="XbimConvert.cpp" />
+    <ClCompile Include="XbimCurve.cpp" />
+    <ClCompile Include="XbimCurve2D.cpp" />
+    <ClCompile Include="XbimEdge.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="XbimEdgeSet.cpp" />
+    <ClCompile Include="XbimFace.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="XbimFaceSet.cpp" />
+    <ClCompile Include="XbimGeometryCreator.cpp" />
+    <ClCompile Include="XbimGeometryObject.cpp" />
+    <ClCompile Include="XbimGeometryObjectSet.cpp" />
+    <ClCompile Include="XbimMesh.cpp" />
     <ClCompile Include="XbimNativeApi.cpp" />
+    <ClCompile Include="XbimOccShape.cpp" />
+    <ClCompile Include="XbimOccWriter.cpp" />
+    <ClCompile Include="XbimPoint3DWithTolerance.cpp" />
     <ClCompile Include="XbimProgressMonitor.cpp" />
+    <ClCompile Include="XbimShell.cpp" />
+    <ClCompile Include="XbimShellSet.cpp" />
+    <ClCompile Include="XbimSolid.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="XbimSolidSet.cpp" />
+    <ClCompile Include="XbimVertex.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="XbimVertexSet.cpp" />
+    <ClCompile Include="XbimWire.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="XbimWireSet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="app.rc" />
@@ -199,13 +296,44 @@
     <Image Include="app.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="XbimConstraints.h" />
-    <ClInclude Include="XbimMesh.h" />
-    <ClInclude Include="XbimNativeApi.h" />
-    <ClInclude Include="XbimProgressMonitor.h" />
+    <Reference Include="Microsoft.Extensions.Logging.Abstractions">
+      <HintPath>$(PackagesDir)Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Logging">
+      <HintPath>$(PackagesDir)Microsoft.Extensions.Logging.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions">
+      <HintPath>$(PackagesDir)Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.DependencyInjection">
+      <HintPath>$(PackagesDir)Microsoft.Extensions.DependencyInjection.dll</HintPath>
+    </Reference>
+    <Reference Include="Xbim.Ifc4">
+      <HintPath>$(PackagesDir)Xbim.Ifc4.dll</HintPath>
+    </Reference>
+    <Reference Include="Xbim.Ifc2x3">
+      <HintPath>$(PackagesDir)Xbim.Ifc2x3.dll</HintPath>
+    </Reference>
+    <Reference Include="Xbim.IO.MemoryModel">
+      <HintPath>$(PackagesDir)Xbim.IO.MemoryModel.dll</HintPath>
+    </Reference>
+    <Reference Include="Xbim.Tessellator">
+      <HintPath>$(PackagesDir)Xbim.Tessellator.dll</HintPath>
+    </Reference>
+    <Reference Include="Xbim.Common">
+      <HintPath>$(PackagesDir)Xbim.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Xbim.Geometry.Abstractions">
+      <HintPath>$(PackagesDir)Xbim.Geometry.Abstractions.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets">
-  </ImportGroup>
-  <Import Project="Xbim.Geometry.Engine - OCC.targets" />
+  <Target Name="AfterBuild" Condition="'$(Platform)'=='Win32'">
+    <Message Text="------ Build started: Project: $(MSBuildProjectFile), Configuration: $(Configuration) x64" Importance="High" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Properties="Platform=x64;  Configuration=$(Configuration);" RunEachTargetSeparately="true" />
+  </Target>
 </Project>

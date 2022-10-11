@@ -1,28 +1,28 @@
 #pragma once
-#include "XbimOccShape.h"
-#include "XbimCurve.h"
-#include "XbimCurve2D.h"
-#include "XbimVertex.h"
+
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Wire.hxx>
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include "XbimPoint3DWithTolerance.h"
+#include "XbimOccShape.h"
+#include "XbimCurve.h"
+#include "XbimCurve2D.h"
+#include "XbimVertex.h"
 
-using namespace System;
 using namespace Xbim::Ifc4::Interfaces;
 namespace Xbim
 {
 	namespace Geometry
 	{
-		ref class XbimEdge : IXbimEdge, XbimOccShape
+		ref class XbimEdgeV5 : IXbimEdge, XbimOccShape
 		{
 		private:
 			
-			IntPtr ptrContainer;
+			System::IntPtr ptrContainer;
 			virtual property TopoDS_Edge* pEdge
 			{
 				TopoDS_Edge* get() sealed { return (TopoDS_Edge*)ptrContainer.ToPointer(); }
-				void set(TopoDS_Edge* val)sealed { ptrContainer = IntPtr(val); }
+				void set(TopoDS_Edge* val)sealed { ptrContainer = System::IntPtr(val); }
 			}
 			void InstanceCleanup();
 #pragma region Initialisation
@@ -36,27 +36,27 @@ namespace Xbim
 			
 #pragma endregion
 
-			XbimEdge(){};
+			XbimEdgeV5(){};
 		public:
 			//error messages
-			static String^ GetBuildEdgeErrorMessage(BRepBuilderAPI_EdgeError edgeErr);
+			static System::String^ GetBuildEdgeErrorMessage(BRepBuilderAPI_EdgeError edgeErr);
 			//Constructors and destructors
-			~XbimEdge(){ InstanceCleanup(); }
-			!XbimEdge(){ InstanceCleanup(); }
+			~XbimEdgeV5(){ InstanceCleanup(); }
+			!XbimEdgeV5(){ InstanceCleanup(); }
 
 #pragma region Constructors
-			XbimEdge(IXbimVertex^ edgeStart, IXbimVertex^ edgeEnd);
-			XbimEdge(const TopoDS_Edge& edge);
-			XbimEdge(const TopoDS_Edge& edge, Object^ tag);
-			XbimEdge(IIfcCurve^ edge, ILogger^ logger);
-			XbimEdge(IIfcProfileDef^ profile, ILogger^ logger);
-			XbimEdge(XbimEdge^ edgeCurve, XbimVertex^ start, XbimVertex^ end, double maxTolerance);
-			XbimEdge(const TopoDS_Wire& wire, double tolerance, double angleTolerance, ILogger^ logger);
-			XbimEdge(IIfcCurve^ edgeCurve, XbimVertex^ start, XbimVertex^ end, ILogger^ logger);
-			XbimEdge(XbimVertex^ start, XbimVertex^ midPoint, XbimVertex^ end);
-			XbimEdge(XbimCurve^ curve3D);
-			XbimEdge(Handle(Geom_Curve) curve3D);
-			XbimEdge(XbimCurve2D^ curve2D, ILogger^ logger);
+			XbimEdgeV5(IXbimVertex^ edgeStart, IXbimVertex^ edgeEnd);
+			XbimEdgeV5(const TopoDS_Edge& edge);
+			XbimEdgeV5(const TopoDS_Edge& edge, Object^ tag);
+			XbimEdgeV5(IIfcCurve^ edge, ILogger^ logger);
+			XbimEdgeV5(IIfcProfileDef^ profile, ILogger^ logger);
+			XbimEdgeV5(XbimEdgeV5^ edgeCurve, XbimVertexV5^ start, XbimVertexV5^ end, double maxTolerance);
+			XbimEdgeV5(const TopoDS_Wire& wire, double tolerance, double angleTolerance, ILogger^ logger);
+			XbimEdgeV5(IIfcCurve^ edgeCurve, XbimVertexV5^ start, XbimVertexV5^ end, ILogger^ logger);
+			XbimEdgeV5(XbimVertexV5^ start, XbimVertexV5^ midPoint, XbimVertexV5^ end);
+			XbimEdgeV5(XbimCurveV5^ curve3D);
+			XbimEdgeV5(Handle(Geom_Curve) curve3D);
+			XbimEdgeV5(XbimCurve2DV5^ curve2D, ILogger^ logger);
 			
 #pragma endregion
 
@@ -70,8 +70,8 @@ namespace Xbim
 #pragma region Equality Overrides
 			virtual bool Equals(Object^ v) override;
 			virtual int GetHashCode() override;
-			static bool operator ==(XbimEdge^ left, XbimEdge^ right);
-			static bool operator !=(XbimEdge^ left, XbimEdge^ right);
+			static bool operator ==(XbimEdgeV5^ left, XbimEdgeV5^ right);
+			static bool operator !=(XbimEdgeV5^ left, XbimEdgeV5^ right);
 			virtual bool Equals(IXbimEdge^ e);
 
 #pragma endregion
@@ -96,7 +96,7 @@ namespace Xbim
 			property bool IsReversed{bool get(){ return IsValid && pEdge->Orientation() == TopAbs_REVERSED; }; }
 #pragma endregion
 			void Reverse();
-			XbimEdge^ Reversed();
+			XbimEdgeV5^ Reversed();
 
 			// Inherited via XbimOccShape
 			virtual XbimGeometryObject ^ Transformed(IIfcCartesianTransformationOperator ^ transformation) override;
@@ -113,15 +113,15 @@ namespace Xbim
 		ref class XbimBiPolarLinearEdge
 		{
 			XbimPoint3DWithTolerance^ pointA;
-			XbimVertex^ vertexA;
+			XbimVertexV5^ vertexA;
 			XbimPoint3DWithTolerance^ pointB;
-			XbimVertex^ vertexB;
-			XbimEdge^ edgeAB;
+			XbimVertexV5^ vertexB;
+			XbimEdgeV5^ edgeAB;
 			
 			int refCount=0;
 			int hashCode;
 		public:
-			XbimBiPolarLinearEdge(XbimPoint3DWithTolerance^ pA, XbimVertex^ vA, XbimPoint3DWithTolerance^ pB, XbimVertex^ vB)
+			XbimBiPolarLinearEdge(XbimPoint3DWithTolerance^ pA, XbimVertexV5^ vA, XbimPoint3DWithTolerance^ pB, XbimVertexV5^ vB)
 			{
 				pointA = pA;
 				vertexA = vA;
@@ -129,11 +129,11 @@ namespace Xbim
 				vertexB = vB;
 				int hashA = pointA->GetHashCode();
 				int hashB = pointB->GetHashCode();
-				hashCode = Math::Max(hashA, hashB) ^ Math::Min(hashA, hashB);
+				hashCode = System::Math::Max(hashA, hashB) ^ System::Math::Min(hashA, hashB);
 				if (hashA == hashB && pA == pB)
 					refCount = -1;
 				else
-					edgeAB = gcnew XbimEdge(vertexA, vertexB);
+					edgeAB = gcnew XbimEdgeV5(vertexA, vertexB);
 				
 			}
 			
@@ -143,7 +143,7 @@ namespace Xbim
 			{
 				if (refCount > 0)refCount--;
 			}
-			XbimEdge^ TakeEdge(XbimPoint3DWithTolerance^ pA)
+			XbimEdgeV5^ TakeEdge(XbimPoint3DWithTolerance^ pA)
 			{
 				if (IsEmptyLine) 
 					return nullptr;

@@ -1,12 +1,4 @@
-#include "XbimEdge.h"
-#include "XbimGeometryCreator.h"
-#include "XbimVertex.h"
-#include "XbimConvert.h"
-#include "XbimCurve.h"
-#include "XbimCurve2D.h"
-#include "XbimConvert.h"
-#include "XbimWire.h"
-#include "XbimFace.h"
+
 #include <BRepBuilderAPI_Transform.hxx> 
 #include <BRepBuilderAPI_GTransform.hxx>
 #include <TopExp_Explorer.hxx>
@@ -55,6 +47,16 @@
 #include <Geom2d_BSplineCurve.hxx>
 #include <BRepBuilderAPI_MakeEdge2d.hxx>
 #include <GeomLib_Tool.hxx>
+
+#include "XbimEdge.h"
+#include "XbimGeometryCreator.h"
+#include "XbimVertex.h"
+#include "XbimConvert.h"
+#include "XbimCurve.h"
+#include "XbimCurve2D.h"
+#include "XbimConvert.h"
+#include "XbimWire.h"
+#include "XbimFace.h"
 using namespace Xbim::Common;
 using namespace System::Linq;
 namespace Xbim
@@ -66,23 +68,23 @@ namespace Xbim
 
 
 #pragma region IXbimEdge Interface
-		XbimEdge::XbimEdge(const TopoDS_Edge& edge)
+		XbimEdgeV5::XbimEdgeV5(const TopoDS_Edge& edge)
 		{
 			pEdge = new TopoDS_Edge();
 			*pEdge = edge;
 		}
-		XbimEdge::XbimEdge(const TopoDS_Edge& edge, Object^ tag) : XbimEdge(edge) { Tag = tag; }
+		XbimEdgeV5::XbimEdgeV5(const TopoDS_Edge& edge, Object^ tag) : XbimEdgeV5(edge) { Tag = tag; }
 
-		IXbimCurve^ XbimEdge::EdgeGeometry::get()
+		IXbimCurve^ XbimEdgeV5::EdgeGeometry::get()
 		{
 			if (!IsValid) return nullptr;
 			Standard_Real p1, p2;
 			Handle(Geom_Curve) curve = BRep_Tool::Curve(*pEdge, p1, p2);
-			GC::KeepAlive(this);
-			return gcnew XbimCurve(curve);
+			System::GC::KeepAlive(this);
+			return gcnew XbimCurveV5(curve);
 		}
 
-		double XbimEdge::Length::get()
+		double XbimEdgeV5::Length::get()
 		{
 			if (IsValid)
 			{
@@ -95,21 +97,21 @@ namespace Xbim
 			else
 				return 0;
 		}
-		XbimEdge::XbimEdge(IXbimVertex^ edgeStart, IXbimVertex^ edgeEnd)
+		XbimEdgeV5::XbimEdgeV5(IXbimVertex^ edgeStart, IXbimVertex^ edgeEnd)
 		{
 
-			if (!dynamic_cast<XbimVertex^>(edgeStart))
-				throw gcnew ArgumentException("Edge start vertex not created by XbimOCC", "edgeEnd");
-			if (!dynamic_cast<XbimVertex^>(edgeEnd))
-				throw gcnew ArgumentException("Edge end vertex not created by XbimOCC", "edgeStart");
+			if (!dynamic_cast<XbimVertexV5^>(edgeStart))
+				throw gcnew System::ArgumentException("Edge start vertex not created by XbimOCC", "edgeEnd");
+			if (!dynamic_cast<XbimVertexV5^>(edgeEnd))
+				throw gcnew System::ArgumentException("Edge end vertex not created by XbimOCC", "edgeStart");
 
-			BRepBuilderAPI_MakeEdge edgeMaker((XbimVertex^)edgeStart, (XbimVertex^)edgeEnd);
+			BRepBuilderAPI_MakeEdge edgeMaker((XbimVertexV5^)edgeStart, (XbimVertexV5^)edgeEnd);
 			pEdge = new TopoDS_Edge();
 			BRepBuilderAPI_EdgeError edgeErr = edgeMaker.Error();
 			if (edgeErr != BRepBuilderAPI_EdgeDone)
 			{
-				String^ errMsg = XbimEdge::GetBuildEdgeErrorMessage(edgeErr);
-				throw gcnew Exception(String::Format("Invalid edge vertices. {0}", errMsg));
+				System::String^ errMsg = XbimEdgeV5::GetBuildEdgeErrorMessage(edgeErr);
+				throw gcnew System::Exception(System::String::Format("Invalid edge vertices. {0}", errMsg));
 			}
 			else
 				*pEdge = edgeMaker.Edge();
@@ -120,18 +122,18 @@ namespace Xbim
 #pragma region Constructors
 
 
-		XbimEdge::XbimEdge(IIfcCurve^ edge, ILogger^ logger)
+		XbimEdgeV5::XbimEdgeV5(IIfcCurve^ edge, ILogger^ logger)
 		{
 			Init(edge, logger);
 		}
 
-		XbimEdge::XbimEdge(IIfcProfileDef^ profile, ILogger^ logger)
+		XbimEdgeV5::XbimEdgeV5(IIfcProfileDef^ profile, ILogger^ logger)
 		{
 			Init(profile, logger);
 		}
 
 
-		XbimEdge::XbimEdge(XbimVertex^ start, XbimVertex^ midPoint, XbimVertex^ end)
+		XbimEdgeV5::XbimEdgeV5(XbimVertexV5^ start, XbimVertexV5^ midPoint, XbimVertexV5^ end)
 		{
 
 			gp_Pnt p1 = BRep_Tool::Pnt(start);
@@ -145,7 +147,7 @@ namespace Xbim
 				BRepBuilderAPI_EdgeError edgeErr = edgeMaker.Error();
 				if (edgeErr != BRepBuilderAPI_EdgeDone)
 				{
-					String^ errMsg = XbimEdge::GetBuildEdgeErrorMessage(edgeErr);
+					System::String^ errMsg = XbimEdgeV5::GetBuildEdgeErrorMessage(edgeErr);
 					throw gcnew XbimException("WW013: Invalid edge found." + errMsg);
 				}
 				else
@@ -162,7 +164,7 @@ namespace Xbim
 				BRepBuilderAPI_EdgeError edgeErr = edgeMaker.Error();
 				if (edgeErr != BRepBuilderAPI_EdgeDone)
 				{
-					String^ errMsg = XbimEdge::GetBuildEdgeErrorMessage(edgeErr);
+					System::String^ errMsg = XbimEdgeV5::GetBuildEdgeErrorMessage(edgeErr);
 					throw gcnew XbimException("WW013: Invalid edge found." + errMsg);
 				}
 				else
@@ -173,11 +175,11 @@ namespace Xbim
 			}
 
 		}
-		XbimEdge::XbimEdge(XbimEdge^ edgeCurve, XbimVertex^ start, XbimVertex^ end, double /*maxTolerance*/)
+		XbimEdgeV5::XbimEdgeV5(XbimEdgeV5^ edgeCurve, XbimVertexV5^ start, XbimVertexV5^ end, double /*maxTolerance*/)
 		{
-			double tolerance =Math::Max(start->Tolerance, end->Tolerance);
+			double tolerance = System::Math::Max(start->Tolerance, end->Tolerance);
 			double edgeTol = BRep_Tool::Tolerance(edgeCurve);
-			tolerance = Math::Max(tolerance, edgeTol);
+			tolerance = System::Math::Max(tolerance, edgeTol);
 			//double currentTolerance = tolerance;
 			ShapeFix_ShapeTolerance FTol;
 			gp_Pnt startPnt = BRep_Tool::Pnt(start);
@@ -204,7 +206,7 @@ namespace Xbim
 				if (!found2) 
 					trim2 = p2;
 				//most trims are just the same edge start and end points, esp in revit advanced bresp
-				if (Math::Abs(trim1 - p1) < Precision::Confusion() && Math::Abs(trim2 - p2) < Precision::Confusion()) //no trim required
+				if (System::Math::Abs(trim1 - p1) < Precision::Confusion() && System::Math::Abs(trim2 - p2) < Precision::Confusion()) //no trim required
 				{
 					pEdge = new TopoDS_Edge();
 					*pEdge = edgeCurve;					
@@ -226,7 +228,7 @@ namespace Xbim
 					}
 					else
 					{
-						String^ errMsg = XbimEdge::GetBuildEdgeErrorMessage(edgeErr);
+						System::String^ errMsg = XbimEdgeV5::GetBuildEdgeErrorMessage(edgeErr);
 						throw gcnew XbimException("WW013: Invalid edge found." + errMsg);
 					}
 				}
@@ -234,10 +236,10 @@ namespace Xbim
 			FTol.LimitTolerance(*pEdge, tolerance);
 		}
 
-		XbimEdge::XbimEdge(IIfcCurve^ edgeCurve, XbimVertex^ start, XbimVertex^ end, ILogger^ logger)
+		XbimEdgeV5::XbimEdgeV5(IIfcCurve^ edgeCurve, XbimVertexV5^ start, XbimVertexV5^ end, ILogger^ logger)
 		{
 			Init(edgeCurve, logger);
-			double tolerance = edgeCurve->Model->ModelFactors->Precision;
+			double tolerance = XbimConvert::ModelService(edgeCurve)->MinimumGap;
 			double toleranceMax = edgeCurve->Model->ModelFactors->PrecisionMax;
 			double currentTolerance = tolerance;
 			if (IsValid && !start->Equals(end))//must be a closed loop or nothing, no need to trim			
@@ -265,7 +267,7 @@ namespace Xbim
 
 				if (edgeErr != BRepBuilderAPI_EdgeDone)
 				{
-					String^ errMsg = XbimEdge::GetBuildEdgeErrorMessage(edgeErr);
+					System::String^ errMsg = XbimEdgeV5::GetBuildEdgeErrorMessage(edgeErr);
 					throw gcnew XbimException("WW013: Invalid edge found." + errMsg);
 				}
 				else
@@ -278,7 +280,7 @@ namespace Xbim
 
 #pragma warning( push )
 #pragma warning( disable : 4701)
-		XbimEdge::XbimEdge(const TopoDS_Wire& aWire, double tolerance, double angleTolerance, ILogger^ logger)
+		XbimEdgeV5::XbimEdgeV5(const TopoDS_Wire& aWire, double tolerance, double angleTolerance, ILogger^ logger)
 		{
 
 			TopoDS_Edge ResEdge;
@@ -649,7 +651,7 @@ namespace Xbim
 					}
 
 					Handle(TColGeom_HArray1OfBSplineCurve)  concatcurve;     //array of the concatenated curves
-					Handle(TColStd_HArray1OfInteger)        ArrayOfIndices;  //array of the remaining Vertex
+					Handle(TColStd_HArray1OfInteger)        ArrayOfIndices;  //array of the remining Vertex
 					GeomConvert::ConcatC1(tab,
 						tabtolvertex,
 						ArrayOfIndices,
@@ -699,7 +701,7 @@ namespace Xbim
 								const Standard_Real aTol = BRep_Tool::Tolerance(aVtx);
 
 								if (aPFirst.IsEqual(aPnt, aTol)) {
-									// The coincident vertex is found.
+									// The coinsident vertex is found.
 									FirstVertex = aVtx;
 									LastVertex = aVtx;
 									FirstVertex.Orientation(TopAbs_FORWARD);
@@ -767,10 +769,10 @@ namespace Xbim
 
 
 		/*Ensures native pointers are deleted and garbage collected*/
-		void XbimEdge::InstanceCleanup()
+		void XbimEdgeV5::InstanceCleanup()
 		{
-			IntPtr temp = System::Threading::Interlocked::Exchange(ptrContainer, IntPtr::Zero);
-			if (temp != IntPtr::Zero)
+			System::IntPtr temp = System::Threading::Interlocked::Exchange(ptrContainer, System::IntPtr::Zero);
+			if (temp != System::IntPtr::Zero)
 				delete (TopoDS_Edge*)(temp.ToPointer());
 			System::GC::SuppressFinalize(this);
 		}
@@ -778,29 +780,29 @@ namespace Xbim
 
 #pragma region Equality Overrides
 
-		bool XbimEdge::Equals(Object^ obj)
+		bool XbimEdgeV5::Equals(Object^ obj)
 		{
-			XbimEdge^ e = dynamic_cast<XbimEdge^>(obj);
+			XbimEdgeV5^ e = dynamic_cast<XbimEdgeV5^>(obj);
 			// Check for null
 			if (e == nullptr) return false;
 			return this == e;
 		}
 
-		bool XbimEdge::Equals(IXbimEdge^ obj)
+		bool XbimEdgeV5::Equals(IXbimEdge^ obj)
 		{
-			XbimEdge^ e = dynamic_cast<XbimEdge^>(obj);
+			XbimEdgeV5^ e = dynamic_cast<XbimEdgeV5^>(obj);
 			// Check for null
 			if (e == nullptr) return false;
 			return this == e;
 		}
 
-		int XbimEdge::GetHashCode()
+		int XbimEdgeV5::GetHashCode()
 		{
 			if (!IsValid) return 0;
-			return pEdge->HashCode(Int32::MaxValue);
+			return pEdge->HashCode(System::Int32::MaxValue);
 		}
 
-		bool XbimEdge::operator ==(XbimEdge^ left, XbimEdge^ right)
+		bool XbimEdgeV5::operator ==(XbimEdgeV5^ left, XbimEdgeV5^ right)
 		{
 			// If both are null, or both are same instance, return true.
 			if (System::Object::ReferenceEquals(left, right))
@@ -809,68 +811,68 @@ namespace Xbim
 			// If one is null, but not both, return false.
 			if (((Object^)left == nullptr) || ((Object^)right == nullptr))
 				return false;
-			//this edge comparer does not consider orientation
+			//this edge comparer does not conseider orientation
 			return  ((const TopoDS_Edge&)left).IsSame(right) == Standard_True;
 
 		}
 
-		bool XbimEdge::operator !=(XbimEdge^ left, XbimEdge^ right)
+		bool XbimEdgeV5::operator !=(XbimEdgeV5^ left, XbimEdgeV5^ right)
 		{
 			return !(left == right);
 		}
 
-		void XbimEdge::Reverse()
+		void XbimEdgeV5::Reverse()
 		{
 			if (!IsValid) return;
 			pEdge->Reverse();
 		}
 
-		XbimEdge^ XbimEdge::Reversed()
+		XbimEdgeV5^ XbimEdgeV5::Reversed()
 		{
-			XbimEdge^ revEdge = gcnew XbimEdge(this);
+			XbimEdgeV5^ revEdge = gcnew XbimEdgeV5(this);
 			revEdge->Reverse();
 			return revEdge;
 		}
 
-		XbimGeometryObject ^ XbimEdge::Transformed(IIfcCartesianTransformationOperator ^ transformation)
+		XbimGeometryObject ^ XbimEdgeV5::Transformed(IIfcCartesianTransformationOperator ^ transformation)
 		{
 			IIfcCartesianTransformationOperator3DnonUniform^ nonUniform = dynamic_cast<IIfcCartesianTransformationOperator3DnonUniform^>(transformation);
 			if (nonUniform != nullptr)
 			{
 				gp_GTrsf trans = XbimConvert::ToTransform(nonUniform);
 				BRepBuilderAPI_GTransform tr(this, trans, Standard_True); //make a copy of underlying shape
-				return gcnew XbimEdge(TopoDS::Edge(tr.Shape()), Tag);
+				return gcnew XbimEdgeV5(TopoDS::Edge(tr.Shape()), Tag);
 			}
 			else
 			{
 				gp_Trsf trans = XbimConvert::ToTransform(transformation);
 				BRepBuilderAPI_Transform tr(this, trans, Standard_False); //do not make a copy of underlying shape
-				return gcnew XbimEdge(TopoDS::Edge(tr.Shape()), Tag);
+				return gcnew XbimEdgeV5(TopoDS::Edge(tr.Shape()), Tag);
 			}
 		}
 
-		XbimGeometryObject ^ XbimEdge::Moved(IIfcPlacement ^ placement)
+		XbimGeometryObject ^ XbimEdgeV5::Moved(IIfcPlacement ^ placement)
 		{
 			if (!IsValid) return this;
-			XbimEdge^ copy = gcnew XbimEdge(this, Tag); //take a copy of the shape
+			XbimEdgeV5^ copy = gcnew XbimEdgeV5(this, Tag); //take a copy of the shape
 			TopLoc_Location loc = XbimConvert::ToLocation(placement);
 			copy->Move(loc);
 			return copy;
 		}
 
-		XbimGeometryObject ^ XbimEdge::Moved(IIfcObjectPlacement ^ objectPlacement, ILogger^ logger)
+		XbimGeometryObject ^ XbimEdgeV5::Moved(IIfcObjectPlacement ^ objectPlacement, ILogger^ logger)
 		{
 			if (!IsValid) return this;
-			XbimEdge^ copy = gcnew XbimEdge(this, Tag); //take a copy of the shape
+			XbimEdgeV5^ copy = gcnew XbimEdgeV5(this, Tag); //take a copy of the shape
 			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement, logger);
 			copy->Move(loc);
 			return copy;
 		}
-		void XbimEdge::Move(TopLoc_Location loc)
+		void XbimEdgeV5::Move(TopLoc_Location loc)
 		{
 			if (IsValid) pEdge->Move(loc);
 		}
-		void XbimEdge::Mesh(IXbimMeshReceiver ^ /*mesh*/, double /*precision*/, double /*deflection*/, double /*angle*/)
+		void XbimEdgeV5::Mesh(IXbimMeshReceiver ^ /*mesh*/, double /*precision*/, double /*deflection*/, double /*angle*/)
 		{
 			return;//maybe add an implementation for this
 		}
@@ -879,27 +881,27 @@ namespace Xbim
 
 #pragma region Properties
 
-		IXbimVertex^ XbimEdge::EdgeStart::get()
+		IXbimVertex^ XbimEdgeV5::EdgeStart::get()
 		{
 			if (!IsValid) return nullptr;
 			TopoDS_Vertex sv = TopExp::FirstVertex(*pEdge, Standard_True);
 			if (!sv.IsNull())
-				return gcnew XbimVertex(sv);
+				return gcnew XbimVertexV5(sv);
 			else
 				return nullptr;
 		}
 
-		IXbimVertex^ XbimEdge::EdgeEnd::get()
+		IXbimVertex^ XbimEdgeV5::EdgeEnd::get()
 		{
 			if (!IsValid) return nullptr;
 			TopoDS_Edge edge = *pEdge;
 			TopoDS_Vertex ev = TopExp::LastVertex(edge, Standard_True);
 			if (!ev.IsNull())
-				return gcnew XbimVertex(ev);
+				return gcnew XbimVertexV5(ev);
 			else
 				return nullptr;
 		}
-		XbimPoint3D XbimEdge::EdgeStartPoint::get()
+		XbimPoint3D XbimEdgeV5::EdgeStartPoint::get()
 		{
 			if (!IsValid) return XbimPoint3D();
 			TopoDS_Edge edge = *pEdge;
@@ -914,7 +916,7 @@ namespace Xbim
 
 		}
 
-		XbimPoint3D XbimEdge::EdgeEndPoint::get()
+		XbimPoint3D XbimEdgeV5::EdgeEndPoint::get()
 		{
 			if (!IsValid) return XbimPoint3D();
 			TopoDS_Vertex ev = TopExp::LastVertex(*pEdge, Standard_True);
@@ -928,22 +930,22 @@ namespace Xbim
 		}
 
 
-		IXbimGeometryObject^ XbimEdge::Transform(XbimMatrix3D matrix3D)
+		IXbimGeometryObject^ XbimEdgeV5::Transform(XbimMatrix3D matrix3D)
 		{
 			BRepBuilderAPI_Copy copier(this);
 			BRepBuilderAPI_Transform gTran(copier.Shape(), XbimConvert::ToTransform(matrix3D));
 			TopoDS_Edge temp = TopoDS::Edge(gTran.Shape());
-			return gcnew XbimEdge(temp);
+			return gcnew XbimEdgeV5(temp);
 		}
 
-		IXbimGeometryObject^ XbimEdge::TransformShallow(XbimMatrix3D matrix3D)
+		IXbimGeometryObject^ XbimEdgeV5::TransformShallow(XbimMatrix3D matrix3D)
 		{
 			TopoDS_Edge edge = TopoDS::Edge(pEdge->Moved(XbimConvert::ToTransform(matrix3D)));
-			GC::KeepAlive(this);
-			return gcnew XbimEdge(edge);
+			System::GC::KeepAlive(this);
+			return gcnew XbimEdgeV5(edge);
 		}
 
-		XbimRect3D XbimEdge::BoundingBox::get()
+		XbimRect3D XbimEdgeV5::BoundingBox::get()
 		{
 			if (pEdge == nullptr)return XbimRect3D::Empty;
 			Bnd_Box pBox;
@@ -951,13 +953,13 @@ namespace Xbim
 			Standard_Real srXmin, srYmin, srZmin, srXmax, srYmax, srZmax;
 			if (pBox.IsVoid()) return XbimRect3D::Empty;
 			pBox.Get(srXmin, srYmin, srZmin, srXmax, srYmax, srZmax);
-			GC::KeepAlive(this);
+			System::GC::KeepAlive(this);
 			return XbimRect3D(srXmin, srYmin, srZmin, (srXmax - srXmin), (srYmax - srYmin), (srZmax - srZmin));
 		}
 
 #pragma endregion
 
-		String^ XbimEdge::GetBuildEdgeErrorMessage(BRepBuilderAPI_EdgeError edgeErr)
+		System::String^ XbimEdgeV5::GetBuildEdgeErrorMessage(BRepBuilderAPI_EdgeError edgeErr)
 		{
 			switch (edgeErr)
 			{
@@ -981,29 +983,27 @@ namespace Xbim
 
 #pragma region Initialisers
 
-		void XbimEdge::Init(IIfcCurve^ curve, ILogger^ logger)
+		void XbimEdgeV5::Init(IIfcCurve^ curve, ILogger^ logger)
 		{
-			XbimCurve^ xbimCurve = gcnew XbimCurve(curve, logger); //if this fails it will record the error
+			XbimCurveV5^ xbimCurve = gcnew XbimCurveV5(curve, logger); //if this fails it will record the error
 			if (xbimCurve->IsValid)
 			{
 				BRepBuilderAPI_MakeEdge edgeMaker(xbimCurve);
 				BRepBuilderAPI_EdgeError edgeErr = edgeMaker.Error();
 				if (edgeErr != BRepBuilderAPI_EdgeDone)
 				{
-					String^ errMsg = GetBuildEdgeErrorMessage(edgeErr);
+					System::String^ errMsg = GetBuildEdgeErrorMessage(edgeErr);
 					XbimGeometryCreator::LogWarning(logger, curve, "Could not build edge from curve, {0} .It has been ignored", errMsg);
 					return;
 				}
 				pEdge = new TopoDS_Edge();
 				*pEdge = edgeMaker.Edge();
 				ShapeFix_ShapeTolerance FTol;
-				FTol.LimitTolerance(*pEdge, curve->Model->ModelFactors->Precision);
+				FTol.LimitTolerance(*pEdge, XbimConvert::ModelService(curve)->Precision);
 			}
-
-			GC::KeepAlive(xbimCurve);
 		}
 
-		void XbimEdge::Init(IIfcProfileDef^ profile, ILogger^ logger)
+		void XbimEdgeV5::Init(IIfcProfileDef^ profile, ILogger^ logger)
 		{
 			if (dynamic_cast<IIfcArbitraryClosedProfileDef^>(profile))
 				return Init((IIfcArbitraryClosedProfileDef^)profile, logger);
@@ -1017,7 +1017,7 @@ namespace Xbim
 				XbimGeometryCreator::LogError(logger, profile, "Profile definition {0} is not implemented", profile->GetType()->Name);
 		}
 
-		void XbimEdge::Init(IIfcArbitraryClosedProfileDef^ profile, ILogger^ logger)
+		void XbimEdgeV5::Init(IIfcArbitraryClosedProfileDef^ profile, ILogger^ logger)
 		{
 			if (profile->OuterCurve == nullptr)
 			{
@@ -1026,13 +1026,13 @@ namespace Xbim
 			}
 			if (dynamic_cast<IIfcArbitraryProfileDefWithVoids^>(profile))
 			{
-				throw gcnew Exception("IfcArbitraryProfileDefWithVoids cannot be created as an edge, call the XbimFace method");
+				throw gcnew System::Exception("IfcArbitraryProfileDefWithVoids cannot be created as an edge, call the XbimFace method");
 			}
 			
 			Init(profile->OuterCurve, logger);
 		}
 
-		void XbimEdge::Init(IIfcArbitraryOpenProfileDef^ profile, ILogger^ logger)
+		void XbimEdgeV5::Init(IIfcArbitraryOpenProfileDef^ profile, ILogger^ logger)
 		{
 			if (dynamic_cast<IIfcCenterLineProfileDef^>(profile))
 			{
@@ -1044,12 +1044,12 @@ namespace Xbim
 			}
 		}
 
-		void XbimEdge::Init(IIfcParameterizedProfileDef^ , ILogger^ )
+		void XbimEdgeV5::Init(IIfcParameterizedProfileDef^ , ILogger^ )
 		{
-			throw gcnew Exception("IIfcParameterizedProfileDef is not currently supported as an edge description, call the XbimWire method");
+			throw gcnew System::Exception("IIfcParameterizedProfileDef is not currently supported as an edge description, call the XbimWire method");
 		}
 
-		void XbimEdge::Init(IIfcDerivedProfileDef^ profile, ILogger^ logger)
+		void XbimEdgeV5::Init(IIfcDerivedProfileDef^ profile, ILogger^ logger)
 		{
 			Init(profile->ParentProfile, logger);
 			if (IsValid && !dynamic_cast<IIfcMirroredProfileDef^>(profile))
@@ -1071,22 +1071,22 @@ namespace Xbim
 			}
 		}
 
-		void XbimEdge::Init(IIfcCenterLineProfileDef^ , ILogger^ )
+		void XbimEdgeV5::Init(IIfcCenterLineProfileDef^ , ILogger^ )
 		{
-			throw gcnew Exception("IIfcCenterLineProfileDef is not currently supported as an edge description, call the XbimWire method");
+			throw gcnew System::Exception("IIfcCenterLineProfileDef is not currently supported as an edge description, call the XbimWire method");
 		}
 
 
 #pragma endregion
-		XbimEdge::XbimEdge(XbimCurve2D^ curve2D, ILogger^ /*logger*/)
+		XbimEdgeV5::XbimEdgeV5(XbimCurve2DV5^ curve2D, ILogger^ /*logger*/)
 		{
-			XbimCurve^ curve = (XbimCurve^)curve2D->ToCurve3D();
+			XbimCurveV5^ curve = (XbimCurveV5^)curve2D->ToCurve3D();
 			BRepBuilderAPI_MakeEdge edgeMaker(curve);
 			pEdge = new TopoDS_Edge();
 			*pEdge = edgeMaker.Edge();
 		}
 
-		XbimEdge::XbimEdge(XbimCurve^ curve3D)
+		XbimEdgeV5::XbimEdgeV5(XbimCurveV5^ curve3D)
 		{
 
 			BRepBuilderAPI_MakeEdge edgeMaker(curve3D);
@@ -1094,7 +1094,7 @@ namespace Xbim
 			*pEdge = edgeMaker.Edge();
 
 		}
-		XbimEdge::XbimEdge(Handle(Geom_Curve) curve3D)
+		XbimEdgeV5::XbimEdgeV5(Handle(Geom_Curve) curve3D)
 		{
 
 			BRepBuilderAPI_MakeEdge edgeMaker(curve3D);
