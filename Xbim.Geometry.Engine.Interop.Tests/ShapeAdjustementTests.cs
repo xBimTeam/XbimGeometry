@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -18,23 +19,21 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 	[TestClass]
 	public class ShapeAdjustementTests
 	{
-        static private IXbimGeometryEngine geomEngine;
-        static private ILoggerFactory loggerFactory;
+        
         static private ILogger logger;
 
         [ClassInitialize]
         static public void Initialise(TestContext context)
         {
-            loggerFactory = new LoggerFactory().AddConsole(LogLevel.Trace);
-            geomEngine = new XbimGeometryEngine();
-            logger = loggerFactory.CreateLogger<Ifc4GeometryTests>();
+             logger = new NullLogger<IfcAdvancedBrepTests>();
+           
         }
 
         [ClassCleanup]
         static public void Cleanup()
         {
-            loggerFactory = null;
-            geomEngine = null;
+           
+          
             logger = null;
         }
 
@@ -61,7 +60,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             Assert.IsFalse(returnedbrep.Contains(".000001"), "because it removed the wrong point");
         }
 
-        [TestMethod]
+        [TestMethod, Ignore("This is a bad concept, we should not remove line segments that are colinear(aligned) when building a face. It is perfectly vaid for two faces to abut two colinear segments of another face")]
 		public void PolygonAlignedCleanup()
 		{
             /*
@@ -81,7 +80,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             List<XbimPoint3D> ps = new List<XbimPoint3D>();
             ps.Add(new XbimPoint3D(3062.13203435597,-150,0));
             ps.Add(new XbimPoint3D(3362.13203435597,150,0));
-            ps.Add(new XbimPoint3D(2937.86796564404,150,0)); // this point is aligned with the surrounding one, could be removed
+            ps.Add(new XbimPoint3D(2937.86796564404,150,0)); // this point is aligned with the surrounding ones, should be removed
             ps.Add(new XbimPoint3D(0,150,0));
             ps.Add(new XbimPoint3D(0,-150,0));
             Check(ps, 4);
@@ -125,6 +124,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 }
                 var area = m.Instances.New<IfcArbitraryClosedProfileDef>();
                 area.OuterCurve = poly;
+                var geomEngine = new XbimGeometryEngine(m, logger);
                 var solid = geomEngine.CreateFace(area, logger);
                 var pline = geomEngine.CreateCurve(poly, logger);
                 var t = solid.ToBRep;

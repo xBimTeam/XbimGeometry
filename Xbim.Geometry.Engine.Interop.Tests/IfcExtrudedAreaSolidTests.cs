@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -15,22 +16,21 @@ namespace Xbim.Geometry.Engine.Interop.Tests.TestFiles
     // [DeploymentItem("TestFiles")]
     public class IfcExtrudedAreaSolidTests
     {
-        static private IXbimGeometryEngine geomEngine;
-        static private ILoggerFactory loggerFactory;
+        
         static private ILogger logger;
 
         [ClassInitialize]
         static public void Initialise(TestContext context)
         {
-            loggerFactory = new LoggerFactory().AddConsole(LogLevel.Trace);
-            geomEngine = new XbimGeometryEngine();
-            logger = loggerFactory.CreateLogger<IfcAdvancedBrepTests>();
+            logger = new NullLogger<IfcAdvancedBrepTests>();
+           
+            
         }
         [ClassCleanup]
         static public void Cleanup()
         {
-            loggerFactory = null;
-            geomEngine = null;
+            
+           
             logger = null;
         }
         [TestMethod]
@@ -39,6 +39,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests.TestFiles
             using (var er = new EntityRepository<IIfcBooleanClippingResult>(nameof(arbritary_closed_profile_with_intersecting_voids_test)))
             {
                 Assert.IsTrue(er.Entity != null, "No IIfcBooleanClippingResult found");
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 var solidSet = geomEngine.CreateSolidSet(er.Entity, logger);
                 Assert.IsTrue(solidSet.Count == 1, "This solid set should have 1 solid");
                 Assert.IsTrue(solidSet.First().Faces.Count == 28, "This solid should have 28 faces");
@@ -51,6 +52,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests.TestFiles
         {
             using (var er = new EntityRepository<IIfcExtrudedAreaSolid>(nameof(IfcExtrudedAreaSolidInvalidPlacementTest)))
             {
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 Assert.IsTrue(er.Entity != null, "No IIfcExtrudedAreaSolid found");
                 var solid = geomEngine.CreateSolid(er.Entity, logger);
                 Assert.IsTrue(solid.Faces.Count == 6, "This solid should have 6 faces");
@@ -69,6 +71,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests.TestFiles
             {
                 var sweptDisk = model.Instances.OfType<IIfcSweptDiskSolid>().FirstOrDefault();
                 sweptDisk.Should().NotBeNull();
+                var geomEngine = new XbimGeometryEngine(model, logger);
                 var solid = geomEngine.CreateSolid(sweptDisk, logger);
                 solid.Should().NotBeNull();
                 solid.Volume.Should().BeApproximately(requiredVolume, 1e-7);
@@ -81,9 +84,10 @@ namespace Xbim.Geometry.Engine.Interop.Tests.TestFiles
         {
             using (var model = MemoryModel.OpenRead($@"TestFiles\{fileName}.ifc"))
             {
+                var geomEngine = new XbimGeometryEngine(model, logger);
                 var sweptSolid = model.Instances.OfType<IIfcSweptDiskSolid>().FirstOrDefault();
                 sweptSolid.Should().NotBeNull();
-                var sweptDiskSolid = geomEngine.CreateSolid(sweptSolid);
+                var sweptDiskSolid = geomEngine.CreateSolid(sweptSolid, logger);
                 sweptDiskSolid.Should().NotBeNull();
                 sweptDiskSolid.Volume.Should().BeApproximately(requiredVolume, 1e-7);
             }

@@ -33,13 +33,7 @@ namespace Xbim
 				SetModel(iModel);
 			}
 			
-			ModelService::ModelService(ILogger^ logger)
-			{
-				_logger = logger;
-				IEntityFactory^ factory = gcnew EntityFactoryIfc4x1();
-				IModel^ model = gcnew MemoryModel(factory, logger,1);
-				SetModel(model);
-			}
+			
 
 
 			void ModelService::SetModel(IModel^ iModel)

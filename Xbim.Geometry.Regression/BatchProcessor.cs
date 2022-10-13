@@ -1,9 +1,11 @@
 ﻿using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
+using NReco.Logging.File;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using Xbim.Common;
 using Xbim.Geometry.Engine.Interop;
@@ -39,6 +41,9 @@ namespace XbimRegression
 
             using var writer = new StreamWriter(Params.ResultsFile);
             writer.WriteLine(ProcessResult.CsvHeader);
+
+
+
             // ParallelOptions opts = new ParallelOptions() { MaxDegreeOfParallelism = 12 };
 
             // Parallel.ForEach<FileInfo>(toProcess, opts, file =>
@@ -49,33 +54,32 @@ namespace XbimRegression
                 ProcessResult result;
                 using (var loggerFactory = new LoggerFactory())
                 {
+                    var logProvider = new FileLoggerProvider(logFile, false);
+                    logProvider.FormatLogEntry = (msg) =>
+                    {
+                        var sb = new System.Text.StringBuilder();
+                        StringWriter sw = new StringWriter(sb);
+                        var jsonWriter = new Newtonsoft.Json.JsonTextWriter(sw);
+                        jsonWriter.WriteStartArray();
+                        jsonWriter.WriteValue(DateTime.Now.ToString("o"));
+                        jsonWriter.WriteValue(msg.LogLevel.ToString());
+                        jsonWriter.WriteValue(msg.EventId.Id);
+                        jsonWriter.WriteValue(msg.Message);
+                        jsonWriter.WriteValue(msg.Exception?.ToString());
+                        jsonWriter.WriteEndArray();
+                        return sb.ToString();
+                    };
+                    logProvider.MinLevel = LogLevel.Trace;//Params.MaxThreads == 1 ? LogLevel.Trace : LogLevel.Debug;// if doing one at a time, we want to trace progress.
+                    loggerFactory.AddProvider(logProvider);
+
                     XbimLogging.LoggerFactory = loggerFactory;
-                    loggerFactory.AddConsole(LogLevel.Error)
-                        .AddProvider(new NReco.Logging.File.FileLoggerProvider(logFile, false)
-                            {
-                                FormatLogEntry = (msg) =>
-                                {
-                                    var sb = new System.Text.StringBuilder();
-                                    StringWriter sw = new StringWriter(sb);
-                                    var jsonWriter = new Newtonsoft.Json.JsonTextWriter(sw);
-                                    jsonWriter.WriteStartArray();
-                                    jsonWriter.WriteValue(DateTime.Now.ToString("o"));
-                                    jsonWriter.WriteValue(msg.LogLevel.ToString());
-                                    jsonWriter.WriteValue(msg.EventId.Id);
-                                    jsonWriter.WriteValue(msg.Message);
-                                    jsonWriter.WriteValue(msg.Exception?.ToString());
-                                    jsonWriter.WriteEndArray();
-                                    return sb.ToString();
-                                },
-                                MinLevel = Params.MaxThreads == 1 ? LogLevel.Trace : LogLevel.Information // if doing one at a time, we want to trace progress.
-                            });
-                    var logger = loggerFactory.CreateLogger<BatchProcessor>();
+                    ILogger logger = loggerFactory.CreateLogger<BatchProcessor>();
                     Console.WriteLine($"Processing {file}");
                     result = ProcessFile(file.FullName, writer, Params.AdjustWcs, logger);
+                    XbimLogging.LoggerFactory = null; // uses a default loggerFactory
+                };
 
-                }
-                XbimLogging.LoggerFactory = null; // uses a default loggerFactory
-
+             
                 var txt = File.ReadAllText(logFile);
                 if (string.IsNullOrEmpty(txt))
                 {
@@ -105,7 +109,7 @@ namespace XbimRegression
             }
 
             writer.Close();
-            
+
             Console.WriteLine("Finished. Press Enter to continue...");
 
             Console.ReadLine();
@@ -131,7 +135,7 @@ namespace XbimRegression
                 Console.WriteLine("");
             }
             if (userState.ToString() != lastState)
-        {
+            {
                 lastState = userState.ToString();
                 if (!stateIsComplete)
                     Console.WriteLine("");
@@ -219,7 +223,7 @@ namespace XbimRegression
                             var path = Path.Combine(
                                     Path.GetDirectoryName(ifcFile),
                                     Path.GetFileName(ifcFile) + ".brep.unclassified");
-                            IXbimGeometryEngine engine = new XbimGeometryEngine();
+                            var engine = new XbimGeometryEngine(model, logger);
                             if (!Directory.Exists(path))
                                 Directory.CreateDirectory(path);
                             IfcStore s = model as IfcStore;
@@ -270,9 +274,9 @@ namespace XbimRegression
                                     {
                                         Xbim.Common.Geometry.IXbimGeometryObject created = null;
                                         if (ent is IIfcGeometricRepresentationItem igri)
-                                            created = engine.Create(igri);
+                                            created = engine.Create(igri, logger);
                                         if (ent is IIfcConnectedFaceSet icfs)
-                                            created = engine.CreateShell(icfs);
+                                            created = engine.CreateShell(icfs, logger);
                                         // IIfcConnectedFaceSet
                                         if (created != null)
                                         {
@@ -318,7 +322,7 @@ namespace XbimRegression
             }
         }
 
-        
+
 
         private Xbim3DModelContext.MeshingBehaviourResult CustomMeshingBehaviour(int elementId, int typeId, ref double linearDeflection, ref double angularDeflection)
         {

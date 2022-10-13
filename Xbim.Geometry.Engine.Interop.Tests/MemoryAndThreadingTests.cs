@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -9,25 +10,25 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xbim.Common.Geometry;
 using Xbim.Ifc4.Interfaces;
+using Xbim.IO.Memory;
 
 namespace Xbim.Geometry.Engine.Interop.Tests
 {
     [TestClass]
     public class MemoryAndThreadingTests
     {
-        static private IXbimGeometryEngine geomEngine;
-
+       
 
         [ClassInitialize]
         static public void Initialise(TestContext context)
         {
-            geomEngine = new XbimGeometryEngine();
+           
         }
         [ClassCleanup]
         static public void Cleanup()
         {
 
-            geomEngine = null;
+           
 
         }
 
@@ -141,6 +142,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 //}
                 //Assert.IsFalse(vertex.IsValid);
                 var vertices = new List<IXbimVertex>(10000);
+                var geomEngine = new XbimGeometryEngine(new MemoryModel(new Ifc2x3.EntityFactoryIfc2x3()), new NullLogger<MemoryAndThreadingTests>());
                 for (int i = 0; i < 1000000; i++)
                 {
                     vertices.Add(geomEngine.CreateVertexPoint(aPoint, 0.005));

@@ -440,6 +440,7 @@ namespace Xbim
 			trsf.SetValues( m3D.M11, m3D.M21, m3D.M31, m3D.OffsetX,
 							m3D.M12, m3D.M22, m3D.M32, m3D.OffsetY,
 							m3D.M13, m3D.M23, m3D.M33, m3D.OffsetZ);
+			trsf.SetScaleFactor(m3D.M44);
 			//trsf.SetTranslationPart(gp_Vec(m3D.OffsetX, m3D.OffsetY, m3D.OffsetZ));
 			return trsf;
 		}

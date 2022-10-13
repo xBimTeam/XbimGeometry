@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.IO;
@@ -16,22 +17,22 @@ namespace Xbim.Geometry.Engine.Interop.Tests
     [TestClass]
     public class LocationAndPlacementTests
     {
-        static private IXbimGeometryEngine geomEngine;
-        static private ILoggerFactory loggerFactory;
+        
+        
         static private ILogger logger;
 
         [ClassInitialize]
         static public void Initialise(TestContext context)
         {
-            loggerFactory = new LoggerFactory().AddConsole(LogLevel.Trace);
-            geomEngine = new XbimGeometryEngine();
-            logger = loggerFactory.CreateLogger<Ifc4GeometryTests>();
+            logger = new NullLogger<IfcAdvancedBrepTests>();
+           
+            
         }
         [ClassCleanup]
         static public void Cleanup()
         {
-            loggerFactory = null;
-            geomEngine = null;
+            
+           
             logger = null;
         }
 
@@ -98,7 +99,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 {
                     {
                         var block = IfcModelBuilder.MakeBlock(m, 10, 10, 10);
-                        var solid = geomEngine.CreateSolid(block);
+                        var geomEngine = new XbimGeometryEngine(m, logger);
+                        var solid = geomEngine.CreateSolid(block, logger);
                         var ax3D = IfcModelBuilder.MakeAxis2Placement3D(m);
                         ax3D.Location.Y = 100;
                         var solidA = geomEngine.Moved(solid, ax3D) as IXbimSolid;
@@ -124,7 +126,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 using (var txn = m.BeginTransaction("Test"))
                 {
                     var block = IfcModelBuilder.MakeBlock(m, 10, 10, 10);
-                    var solid = geomEngine.CreateSolid(block);
+                    var geomEngine = new XbimGeometryEngine(m, logger);
+                    var solid = geomEngine.CreateSolid(block, logger);
                     var transform = IfcModelBuilder.MakeCartesianTransformationOperator3D(m);
                     transform.Scale = 2;
                     var solidA = geomEngine.Transformed(solid, transform);
@@ -151,11 +154,12 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 using (var txn = m.BeginTransaction("Test"))
                 {
                     var block = IfcModelBuilder.MakeBlock(m, 50, 10, 10);
-                    var solid = geomEngine.CreateSolid(block);
+                    var geomEngine = new XbimGeometryEngine(m, logger);
+                    var solid = geomEngine.CreateSolid(block, logger);
                     var placement = IfcModelBuilder.MakeLocalPlacement(m);
                     ((IfcAxis2Placement3D)placement.RelativePlacement).Location.X = 100;
                     var bb = solid.BoundingBox;
-                    var solidA = geomEngine.Moved(solid, placement) as IXbimSolid;
+                    var solidA = geomEngine.Moved(solid, placement, logger) as IXbimSolid;
                     Assert.IsNotNull(solidA, "Should be the same type as the master");
                     var displacement = solidA.BoundingBox.Centroid() - solid.BoundingBox.Centroid();
                     Assert.IsTrue(displacement == new XbimVector3D(100, 0, 0));
@@ -166,7 +170,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     var yDir = m.Instances.New<IfcDirection>(d => d.SetXYZ(0, 1, 0));
                     ((IfcAxis2Placement3D)placementRelTo.RelativePlacement).RefDirection = yDir; //point in Y
                     ((IfcAxis2Placement3D)placementRelTo.RelativePlacement).Location.X = 2000;
-                    var solidB = geomEngine.Moved(solid, placement) as IXbimSolid;
+                    var solidB = geomEngine.Moved(solid, placement, logger) as IXbimSolid;
                     displacement = solidB.BoundingBox.Centroid() - solid.BoundingBox.Centroid();
                     var meshbuilder = new MeshHelper();
                     geomEngine.Mesh(meshbuilder, solidB, m.ModelFactors.Precision, m.ModelFactors.DeflectionTolerance);
@@ -187,14 +191,15 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 using (var txn = m.BeginTransaction("Test"))
                 {
+                    var geomEngine = new XbimGeometryEngine(m, logger);
                     var block = IfcModelBuilder.MakeBlock(m, 10, 10, 10);
-                    var solid = geomEngine.CreateSolid(block);
+                    var solid = geomEngine.CreateSolid(block, logger);
                     var grid = IfcModelBuilder.MakeGrid(m, 3, 100);
                     var gridPlacement = m.Instances.New<IfcGridPlacement>();
                     gridPlacement.PlacementLocation = m.Instances.New<IfcVirtualGridIntersection>();
                     gridPlacement.PlacementLocation.IntersectingAxes.Add(grid.UAxes.Last());
                     gridPlacement.PlacementLocation.IntersectingAxes.Add(grid.VAxes.Last());
-                    var solidA = geomEngine.Moved(solid, gridPlacement) as IXbimSolid;
+                    var solidA = geomEngine.Moved(solid, gridPlacement,logger) as IXbimSolid;
                     Assert.IsNotNull(solidA, "Should be the same type as the master");
                     var displacement = solidA.BoundingBox.Centroid() - solid.BoundingBox.Centroid();
                     Assert.IsTrue(displacement == new XbimVector3D(200, 200, 0));
@@ -211,7 +216,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
                     var profile = IfcModelBuilder.MakeRectangleHollowProfileDef(m, 20, 10, 1);
                     var extrude = IfcModelBuilder.MakeExtrudedAreaSolid(m, profile, 40);
-                    var solid = geomEngine.CreateSolid(extrude);
+                    var geomEngine = new XbimGeometryEngine(m, logger);
+                    var solid = geomEngine.CreateSolid(extrude, logger);
                     var transform = new XbimMatrix3D(); //test first with identity
                     var solid2 = (IXbimSolid)solid.Transform(transform);
                     var s1Verts = solid.Vertices.ToList();

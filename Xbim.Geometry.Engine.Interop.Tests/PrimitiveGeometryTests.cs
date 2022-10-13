@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -15,22 +16,23 @@ namespace Xbim.Geometry.Engine.Interop.Tests
     // [DeploymentItem("TestFiles")]
     public class PrimitiveGeometryTests
     {
-        static private IXbimGeometryEngine geomEngine;
-        static private ILoggerFactory loggerFactory;
+        
+        
         static private ILogger logger;
 
         [ClassInitialize]
         static public void Initialise(TestContext context)
         {
-            loggerFactory = new LoggerFactory().AddConsole(LogLevel.Trace);
-            geomEngine = new XbimGeometryEngine();
-            logger = loggerFactory.CreateLogger<Ifc4GeometryTests>();
+            logger = new NullLogger<IfcAdvancedBrepTests>();
+
+            
+            
         }
         [ClassCleanup]
         static public void Cleanup()
         {
-            loggerFactory = null;
-            geomEngine = null;
+           
+           
             logger = null;
         }
 
@@ -52,7 +54,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 var shape = model.Instances.OfType<IIfcFacetedBrep>().FirstOrDefault();
                 Assert.IsNotNull(shape);
-                var geom = geomEngine.CreateSolidSet(shape).FirstOrDefault();
+                var geomEngine = new XbimGeometryEngine(model, logger);
+                var geom = geomEngine.CreateSolidSet(shape, logger).FirstOrDefault();
                 Assert.IsTrue(geom.Volume > 1e-5);
             }
         }
@@ -63,7 +66,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 var shape = model.Instances.OfType<IIfcClosedShell>().FirstOrDefault();
                 Assert.IsNotNull(shape);
-                var geom = geomEngine.CreateSolidSet(shape).FirstOrDefault();
+                var geomEngine = new XbimGeometryEngine(model, logger);
+                var geom = geomEngine.CreateSolidSet(shape, logger).FirstOrDefault();
                 geom.Volume.Should().BeApproximately(-136033.82966702414,1e-5);
             }
         }
@@ -74,7 +78,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 var shape = model.Instances.OfType<IIfcClosedShell>().FirstOrDefault();
                 Assert.IsNotNull(shape);
-                var geom = geomEngine.CreateSolidSet(shape).FirstOrDefault();
+                var geomEngine = new XbimGeometryEngine(model, logger);
+                var geom = geomEngine.CreateSolidSet(shape, logger).FirstOrDefault();
                 Assert.IsNotNull(geom, "This should not fail");
             }
         }

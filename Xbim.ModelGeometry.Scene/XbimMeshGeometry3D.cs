@@ -16,7 +16,7 @@ namespace Xbim.ModelGeometry.Scene
     /// </summary>
     public class XbimMeshGeometry3D : IXbimMeshGeometry3D
     {
-        object meshLock = new object();
+        readonly object meshLock = new object();
         const int DefaultSize = 0x4000;
         public List<XbimPoint3D> Positions;
         public List<XbimVector3D> Normals;
@@ -187,8 +187,7 @@ namespace Xbim.ModelGeometry.Scene
                                             }
                                             if (trans.HasValue)
                                             {
-                                                XbimVector3D v;
-                                                XbimQuaternion.Transform(ref currentNormal, ref q, out v);
+                                                XbimQuaternion.Transform(ref currentNormal, ref q, out XbimVector3D v);
                                                 currentNormal = v;
 
                                             }
@@ -197,14 +196,13 @@ namespace Xbim.ModelGeometry.Scene
                                         //now add the index
                                         var index = int.Parse(indexNormalPair[0]);
 
-                                        int alreadyWrittenAt; 
-                                        if (!writtenVertices.TryGetValue(index, out alreadyWrittenAt)) //if we haven't  written it in this mesh pass, add it again unless it is the first one which we know has been written
+                                        if (!writtenVertices.TryGetValue(index, out int alreadyWrittenAt)) //if we haven't  written it in this mesh pass, add it again unless it is the first one which we know has been written
                                         {
                                             //all vertices will be unique and have only one normal
                                             writtenVertices.Add(index, PositionCount);
                                             TriangleIndices.Add(PositionCount);
                                             Positions.Add(vertexList[index]);
-                                            Normals.Add(currentNormal); 
+                                            Normals.Add(currentNormal);
                                         }
                                         else //just add the index reference
                                         {

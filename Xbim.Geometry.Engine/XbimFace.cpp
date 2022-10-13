@@ -1827,7 +1827,7 @@ namespace Xbim
 
 
 				TopLoc_Location loc;
-				double start, end;
+				double start=0, end = 0;
 				TopoDS_Edge edge = xbasisEdge1;
 				Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, loc, start, end);
 

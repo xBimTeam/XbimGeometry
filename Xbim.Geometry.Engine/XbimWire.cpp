@@ -333,7 +333,7 @@ namespace Xbim
 				{
 					TopoDS_Edge e = exp.Current();
 					TopLoc_Location loc;
-					Standard_Real start, end;
+					Standard_Real start = 0, end = 0;
 					Handle(Geom_Curve) c3d = BRep_Tool::Curve(e, loc, start, end);
 					if (!c3d.IsNull())
 					{
@@ -1225,7 +1225,7 @@ namespace Xbim
 			gp_Pnt currentStart, previousEnd, first;
 			int count = 0;
 			TopLoc_Location loc;
-			Standard_Real start, end;
+			Standard_Real start = 0, end = 0;
 
 			for (BRepTools_WireExplorer wEx(wire); wEx.More(); wEx.Next())
 			{
@@ -1323,7 +1323,7 @@ namespace Xbim
 				gp_Dir dir(x, y, z);
 				return dir;
 			}
-			catch (const Standard_Failure& )
+			catch (const Standard_Failure&)
 			{
 				return gp::DZ(); //it has no normal, so default to Z
 			}
@@ -2432,8 +2432,8 @@ namespace Xbim
 			double paramOffset = 0;
 			for (BRepTools_WireExplorer exp(thisWire); exp.More(); exp.Next())
 			{
-				Standard_Real u;
-				Standard_Real fpar, lpar;
+				Standard_Real u = 0;
+				Standard_Real fpar = 0, lpar = 0;
 				TopLoc_Location aLoc;
 				const TopoDS_Edge& edge = TopoDS::Edge(exp.Current());
 				Handle(Geom_Curve) aCurve = BRep_Tool::Curve(edge, aLoc, fpar, lpar);

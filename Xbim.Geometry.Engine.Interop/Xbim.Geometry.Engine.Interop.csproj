@@ -1,18 +1,17 @@
 ﻿<Project DefaultTargets="Build" Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>netcoreapp3.1</TargetFramework>		
+		<TargetFrameworks>netcoreapp3.1;net6.0</TargetFrameworks>		
 		<DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
 		<Title>Xbim Geometry Engine</Title>
 		<Description>Provides support for the Ifc4 and Ifc2x3 Geometry conversion.</Description>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageId>Xbim.Geometry.Engine.Interop</PackageId>
 		<PackageIcon>xbim-toolkit-icon.png</PackageIcon>
-		<RuntimeIdentifiers>win10-x86;win10-x64</RuntimeIdentifiers>
+		<BaseOutputPath>..\Output</BaseOutputPath>
+		<Version>5.1.0.0-dev</Version>
+		
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(Platform)'=='AnyCPU'">
-		<RuntimeIdentifier>win10-x86</RuntimeIdentifier>
-		<PlatformTarget>x86</PlatformTarget>
-	</PropertyGroup>
+	
 	<ItemGroup>
 		<Content Include="..\Xbim.Geometry.Engine.Interop.targets">
 			<Link>Xbim.Geometry.Interop.targets</Link>
@@ -20,53 +19,35 @@
 		</Content>
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.3" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.3" />
-		<PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
+		<PackageReference Include="Xbim.Geometry.Abstractions" Version="6.1.302-alpha" />
 		<PackageReference Include="Xbim.Ifc" Version="5.1.350" />
 		<PackageReference Include="Xbim.Tessellator" Version="5.1.350" />
 	</ItemGroup>
 
 	
-	<ItemGroup>
-		<NativeGeometryEngine Include="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj">
-			<AdditionalProperties>
-				Platform=Win32
-			</AdditionalProperties>
-		</NativeGeometryEngine>
-		<NativeGeometryEngine Include="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj">
-			<AdditionalProperties>
-				Platform=x64
-			</AdditionalProperties>
-		</NativeGeometryEngine>
-	</ItemGroup>
-
-	<!--We need to execute this after a build to ensure the nuget packages are in the correct place for the c++ binding-->
-	<!--<Target Name="BuildNativeCodeEngine" BeforeTargets="Build">
-		<Message Text="Building Xbim.Geometry.Engine x32 and x64 Native Dlls" Importance="High" />
-		<MSBuild Projects="@(NativeGeometryEngine)" Properties="Configuration=$(Configuration) ; OutDir=..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\$(TargetFramework)\" Targets="Build">
-			<Output TaskParameter="TargetOutputs" ItemName="AssembliesBuiltByChildProjects" />
-		</MSBuild>
-	</Target>
-
-	<Target Name=" CleanNativeCodeEngine" BeforeTargets="Clean">
-		<Message Text="Cleaning Xbim.Geometry.Engine x32 Native Dlls" Importance="High" />
-		<MSBuild Projects="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj" Properties="Configuration=$(Configuration);Platform=Win32;OutDir=..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\$(TargetFramework)\" Targets="Clean">
-		</MSBuild>
-		<Message Text="Cleaning Xbim.Geometry.Engine x64 Native Dlls" Importance="High" />
-		<MSBuild Projects="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj" Properties="Configuration=$(Configuration);Platform=x64;OutDir=..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\$(TargetFramework)\" Targets="Clean">
-		</MSBuild>
-	</Target>-->
-
-	<ItemGroup>
-		<Content Include="bin\$(Configuration)\$(TargetFramework)\Xbim.Geometry.Engine32.dll">
+	<ItemGroup Condition="$(TargetFramework) != ''">
+		<Content Include="$(BaseOutputPath)\$(Configuration)\$(Platform)\$(TargetFramework)\win10-x86\Xbim.Geometry.Engine.dll">
 			<Pack>true</Pack>
-			<PackagePath>build\$(TargetFramework);</PackagePath>
+			<PackagePath>runtimes\win10-x86\native\;</PackagePath>
 		</Content>
-		<Content Include="bin\$(Configuration)\$(TargetFramework)\Xbim.Geometry.Engine64.dll">
+		<Content Include="$(BaseOutputPath)\$(Configuration)\$(Platform)\$(TargetFramework)\win10-x86\Ijwhost.dll">
 			<Pack>true</Pack>
-			<PackagePath>build\$(TargetFramework);</PackagePath>
+			<PackagePath>runtimes\win10-x86\native\</PackagePath>
 		</Content>
+		
+		
+		<Content Include="$(BaseOutputPath)\$(Configuration)\$(Platform)\$(TargetFramework)\win10-x64\Xbim.Geometry.Engine.dll">
+			<Pack>true</Pack>
+			<PackagePath>runtimes\win10-x64\native\</PackagePath>
+		</Content>
+
+		<Content Include="$(BaseOutputPath)\$(Configuration)\$(Platform)\$(TargetFramework)\win10-x64\Ijwhost.dll">
+			<Pack>true</Pack>
+			<PackagePath>runtimes\win10-x64\native\</PackagePath>
+		</Content>
+
 		<Content Include="..\Xbim.Geometry.Engine.Interop.targets">
 			<Link>Xbim.Geometry.Interop.targets</Link>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -80,8 +61,5 @@
 		<None Include="..\xbim-toolkit-icon.png" Pack="True" PackagePath="\" />
 	</ItemGroup>
 
-	<Target Name="Buildx64" BeforeTargets="AfterBuild" Condition="'$(PlatformTarget)' == 'x86'">
-		<Message Importance="high" Text="Building x64 Platform: $(Platform)" />
-		<MSBuild Projects="$(MSBuildProjectFile)" Properties="Platform = x64;PlatformTarget=x64;Configuration=$(Configuration);RunTimeIdentifier=win10-x64" RunEachTargetSeparately="true" />
-	</Target>
+	
 </Project>

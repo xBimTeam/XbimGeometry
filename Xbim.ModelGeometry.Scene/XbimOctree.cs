@@ -33,23 +33,23 @@ namespace Xbim.ModelGeometry.Scene
         /// <summary>
         /// The octree's looseness value.
         /// </summary> 
-        private double looseness = 0;
+        private readonly double looseness = 0;
 
         /// <summary>
         /// The octree's depth.
         /// </summary> 
-        private int depth = 0;
+        private readonly int depth = 0;
 
         /// <summary> 
         /// The octree's centre coordinates.
         /// </summary> 
-        private XbimPoint3D centre = XbimPoint3D.Zero;
+        private readonly XbimPoint3D centre = XbimPoint3D.Zero;
 
 
         /// <summary>
         /// The octree's length.
         /// </summary>
-        private double length = 0f;
+        private readonly double length = 0f;
 
         ///  <summary>
         /// The bounding box that represents the octree.
@@ -60,7 +60,7 @@ namespace Xbim.ModelGeometry.Scene
         /// The objects in the octree.
         /// </summary> 
 
-        private List<T> objects = new List<T>();
+        private readonly List<T> objects = new List<T>();
 
         /// <summary>
         /// The octree's child nodes.
@@ -80,8 +80,8 @@ namespace Xbim.ModelGeometry.Scene
         ///  <summary>
         /// The octree's world size.
         /// </summary> 
-        private double worldSize = 0f;
-        private double targetCanvasSize = 100000.0;
+        private readonly double worldSize = 0f;
+        private readonly double targetCanvasSize = 100000.0;
 
         private XbimRect3D contentBounds = XbimRect3D.Empty;
         
@@ -586,7 +586,7 @@ namespace Xbim.ModelGeometry.Scene
 
     internal class OctAddress
     {
-        private int[] _address;
+        private readonly int[] _address;
 
         public OctAddress(int x, int y, int z)
         {

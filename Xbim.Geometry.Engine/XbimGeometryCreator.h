@@ -2,7 +2,7 @@
 #include "XbimVertex.h"
 #include "XbimVertex.h"
 #include "XbimEdge.h"
-
+#include "Services//ModelService.h"
 using namespace System::IO;
 using namespace Xbim::Common;
 using namespace Xbim::Common::Geometry;
@@ -30,10 +30,7 @@ namespace Xbim
 
 			static System::String^ SurfaceOfLinearExtrusion = "#SurfaceOfLinearExtrusion";
 			static System::String^ PolylineTrimLengthOneForEntireLine = "#PolylineTrimLengthOneForEntireLine";
-			XbimGeometryCreator(IXModelService^ modelService)
-			{
 			
-			}
 		private:
 			
 			IXbimGeometryObject ^ Trim(XbimSetObject ^geometryObject);
@@ -65,7 +62,7 @@ namespace Xbim
 					IgnoreIfcSweptDiskSolidParams = false;
 				
 			}
-			IXLoggingService^ _loggingService;
+			ILogger^ _logger;
 			IXModelService^ _modelService;
 		protected:
 			~XbimGeometryCreator()
@@ -73,11 +70,11 @@ namespace Xbim
 			}
 				
 		public:
-
-			XbimGeometryCreator(IXLoggingService^ loggingService, IXModelService^ modelService )
+			
+			XbimGeometryCreator(ILogger^ logger, IXModelService^ modelService )
 			{
 				_modelService = modelService;
-				_loggingService = loggingService;
+				_logger = logger;
 			}
 			//Central point for logging all errors
 			static void LogInfo(ILogger^ logger, Object^ entity, System::String^ format, ... array<Object^>^ arg);
@@ -90,6 +87,7 @@ namespace Xbim
 			static double LinearDeflectionInMM;
 			static double AngularDeflectionInRadians;
 			static bool IgnoreIfcSweptDiskSolidParams;
+			virtual IXModelService^ CreateModelService(IModel^ model) { return gcnew Services::ModelService(model);}
 			
 			virtual XbimShapeGeometry^ CreateShapeGeometry(IXbimGeometryObject^ geometryObject, double precision, double deflection, double angle, XbimGeometryType storageType, ILogger^ logger);
 			

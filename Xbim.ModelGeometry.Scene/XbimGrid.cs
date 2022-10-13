@@ -44,10 +44,8 @@ namespace Xbim.ModelGeometry.Scene
             var ax1 = intersect.IntersectingAxes[0];
             var ax2 = intersect.IntersectingAxes[1];
 
-            IXbimCurve curve1;
-            IXbimCurve curve2;
             var tolerance = intersect.Model.ModelFactors.Precision;
-            if (!_axis.TryGetValue(ax1, out curve1) || !_axis.TryGetValue(ax2, out curve2)) 
+            if (!_axis.TryGetValue(ax1, out IXbimCurve curve1) || !_axis.TryGetValue(ax2, out IXbimCurve curve2)) 
                 return null;
             var hits = curve1.Intersections(curve2, tolerance);
             var xbimPoint3Ds = hits as XbimPoint3D[] ?? hits.ToArray();

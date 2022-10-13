@@ -41,7 +41,11 @@ namespace Xbim.Geometry.Engine.Interop
                 _logger.LogDebug("Getting probing path from executing assembly");
                 Assembly assembly = Assembly.GetExecutingAssembly(); // The Xbim.Geometry.Engine.Interop assembly
                                                                      // code base always points to the deployed DLL, which may be different to the executing Location because of Shadow Copying in the AppDomain (e.g. ASP.NET)
+#if NETFRAMEWORK
                 var codepath = new Uri(assembly.CodeBase);
+#else
+                var codepath = new Uri(assembly.Location);
+#endif
                 // Unlike Assembly.Location, CodeBase is a URI [file:\\c:\wwwroot\etc\WebApp\bin\Xbim.Geometry.Engine.Interop.dll]
                 appDir = Path.GetDirectoryName(codepath.LocalPath);
             }
@@ -63,7 +67,11 @@ namespace Xbim.Geometry.Engine.Interop
                 // Append the relevant suffix
                 // var filename = String.Format("{0}{1}.dll", conventions.ModuleName, conventions.Suffix);
                 //dropping the use of a suffix
+#if NETFRAMEWORK
                 var filename = $"{conventions.ModuleName}{conventions.Suffix}.dll";
+#else
+                var filename = $"{conventions.Runtime}\\{conventions.ModuleName}.dll";
+#endif
                 // Look in relevant Architecture subfolder off the main application deployment
                 libraryPath = Path.Combine(appDir, filename);
 

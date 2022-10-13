@@ -5,8 +5,11 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using Xbim.Common;
 using Xbim.Common.Geometry;
+using Xbim.Geometry.Abstractions;
+using Xbim.Ifc;
 using Xbim.Ifc4;
 using Xbim.Ifc4.Interfaces;
+
 
 namespace Xbim.Geometry.Engine.Interop
 {
@@ -14,27 +17,23 @@ namespace Xbim.Geometry.Engine.Interop
     {
         private readonly IXbimGeometryEngine _engine;
 
-        private readonly ILogger<XbimGeometryEngine> _logger;
+        private readonly ILogger _logger;
+        private IXModelService _modelService;
 
         static XbimGeometryEngine()
         {
-             
+
             // We need to wire in a custom assembly resolver since Xbim.Geometry.Engine is 
             // not located using standard probing rules (due to way we deploy processor specific binaries)
             AppDomain.CurrentDomain.AssemblyResolve += XbimCustomAssemblyResolver.ResolverHandler;
         }
 
-        public XbimGeometryEngine() : this(null)
-        { }
 
-        public XbimGeometryEngine(ILogger<XbimGeometryEngine> logger)
+        public XbimGeometryEngine(IModel model, ILogger logger)
         {
 
-            // Warn if runtime for Engine is not present, this is not necessary any more as we are net472
-            //XbimPrerequisitesValidator.Validate();
 
-
-            _logger = logger ?? XbimLogging.CreateLogger<XbimGeometryEngine>();
+            _logger = logger ?? (ILogger)XbimLogging.CreateLogger<XbimGeometryEngine>();
 
             var conventions = new XbimArchitectureConventions();    // understands the process we run under
             string assemblyName = $"{conventions.ModuleName}.dll";// + conventions.Suffix; dropping the use of a suffix
@@ -42,21 +41,26 @@ namespace Xbim.Geometry.Engine.Interop
             try
             {
                 var ass = Assembly.Load(assemblyName);
+#if NETFRAMEWORK
                 _logger.LogTrace("Loaded {fullName} from {codebase}", ass.GetName().FullName, ass.CodeBase);
-                var t = ass.GetType("Xbim.Geometry.XbimGeometryCreator");
-                var obj = Activator.CreateInstance(t);
-                _logger.LogTrace("Created Instance of {fullName}", obj.GetType().FullName);
-                if (obj == null)
+#else
+                _logger.LogTrace("Loaded {fullName} from {codebase}", ass.GetName().FullName, ass.Location);
+#endif
+                var modelServiceType = ass.GetType("Xbim.Geometry.Services.ModelService");
+                _modelService = Activator.CreateInstance(modelServiceType, model) as IXModelService;
+                var creatorType = ass.GetType("Xbim.Geometry.XbimGeometryCreator");
+                _engine = Activator.CreateInstance(creatorType, _logger, _modelService) as IXbimGeometryEngine;
+
+                _logger.LogTrace("Created Instance of {fullName}", _engine.GetType().FullName);
+                if (_engine == null)
                 {
                     throw new Exception("Failed to create Geometry Engine");
                 }
-
-                _engine = obj as IXbimGeometryEngine;
-                if (_engine == null)
+                if (model is IfcStore ifcStore) //special case for stores which wrap the internal model
                 {
-                    throw new Exception("Failed to cast Geometry Engine to IXbimGeometryEngine");
+                    ifcStore.Model.Tag = _modelService;
                 }
-
+                model.Tag = _modelService;
                 _logger.LogDebug("XbimGeometryEngine constructed successfully");
             }
             catch (Exception e)
@@ -64,6 +68,7 @@ namespace Xbim.Geometry.Engine.Interop
                 _logger.LogError(0, e, "Failed to construct XbimGeometryEngine");
                 throw new FileLoadException($"Failed to load Xbim.Geometry.Engine{conventions.Suffix}.dll", e);
             }
+
         }
 
         public IXbimGeometryObject Create(IIfcGeometricRepresentationItem ifcRepresentation, ILogger logger)
@@ -105,11 +110,11 @@ namespace Xbim.Geometry.Engine.Interop
         /// <param name="precision"></param>
         /// <param name="logger"></param>
         /// <returns></returns>
-        public XbimShapeGeometry CreateShapeGeometry(double oneMillimetre,IXbimGeometryObject geometryObject, double precision,  ILogger logger )
+        public XbimShapeGeometry CreateShapeGeometry(double oneMillimetre, IXbimGeometryObject geometryObject, double precision, ILogger logger)
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, geometryObject))
             {
-                return _engine.CreateShapeGeometry(oneMillimetre, geometryObject, precision,  logger);
+                return _engine.CreateShapeGeometry(oneMillimetre, geometryObject, precision, logger);
             }
         }
         public IXbimSolid CreateSolid(IIfcSweptAreaSolid ifcSolid, ILogger logger)
@@ -836,18 +841,18 @@ namespace Xbim.Geometry.Engine.Interop
             }
         }
 
-		public void WriteBrep(string filename, IXbimGeometryObject geomObj)
-		{
+        public void WriteBrep(string filename, IXbimGeometryObject geomObj)
+        {
             // no logger is provided so no tracing is started for this function
             _engine.WriteBrep(filename, geomObj);
-		}
+        }
 
-		public IXbimGeometryObject ReadBrep(string filename)
-		{
+        public IXbimGeometryObject ReadBrep(string filename)
+        {
             // no logger is provided so no tracing is started for this function
             return _engine.ReadBrep(filename);
-		}
-	}
+        }
+    }
 
     public static class LogHelper
     {

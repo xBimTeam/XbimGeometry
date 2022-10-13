@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.VisualStudio.TestTools.UnitTesting.Logging;
 using System;
 using System.IO;
 using System.Reflection;
@@ -14,44 +16,26 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void SimpleLoad()
         {
-            var ge = new XbimGeometryEngine();
+            var mm = new MemoryModel(new Ifc2x3.EntityFactoryIfc2x3());
+            var logger = new NullLogger<LoadGeometryEngine>();
+            var ge = new XbimGeometryEngine(mm,logger);
             Assert.IsNotNull(ge);
 
         }
 
-        //[TestMethod]
-        //public void LoadFromPath()
-        //{
-        //    AppDomain dom = AppDomain.CreateDomain("geom");
-        //    var tmpDllPath = Path.Combine(Environment.CurrentDirectory, "TestGeom");
-        //    var dll32 = Path.Combine(Environment.CurrentDirectory, "Xbim.Geometry.Engine32.dll", Path.Combine(tmpDllPath, "Xbim.Geometry.Engine32.dll"));
-        //    var dll64 = Path.Combine(Environment.CurrentDirectory, "Xbim.Geometry.Engine64.dll", Path.Combine(tmpDllPath, "Xbim.Geometry.Engine64.dll"));
-        //    Directory.CreateDirectory(tmpDllPath);
-        //    if (!File.Exists(dll32))
-        //        File.Copy(Path.Combine(Environment.CurrentDirectory, dll32), Path.Combine(tmpDllPath, dll32));
-        //    if (!File.Exists(dll64))
-        //        File.Copy(Path.Combine(Environment.CurrentDirectory, dll64), Path.Combine(tmpDllPath, dll64));
-        //    Environment.SetEnvironmentVariable("GeometryEngineLocation", tmpDllPath);
-        //    AssemblyName assemblyName = new AssemblyName();
-        //    assemblyName.CodeBase = Path.Combine(Environment.CurrentDirectory, "Xbim.Geometry.Engine.Interop.dll");
-        //    dom.Load(assemblyName);
-        //    var ge = new XbimGeometryEngine();
-        //    var anyObject = ge.CreateSolidSet();
-        //    Assert.IsTrue(anyObject.GetType().Module.FullyQualifiedName.StartsWith(tmpDllPath));
-        //    AppDomain.Unload(dom);
-        //}
-
+       
 
         [TestMethod]
         public void TestLogging()
         {
 
+
+            var logger = new NullLogger<IfcAdvancedBrepTests>();
+
            
-            var loggerFactory = new LoggerFactory().AddConsole(LogLevel.Trace);
-            var logger = loggerFactory.CreateLogger<LoadGeometryEngine>();
-            var ge = new XbimGeometryEngine();
             using (var m = new MemoryModel(new Ifc4.EntityFactoryIfc4()))
             {
+                var ge = new XbimGeometryEngine(m,logger);
                 using (var txn = m.BeginTransaction("new"))
                 {
                     var pline = m.Instances.New<IfcPolyline>();

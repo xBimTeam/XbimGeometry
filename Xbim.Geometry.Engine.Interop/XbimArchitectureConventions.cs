@@ -12,13 +12,14 @@ namespace Xbim.Geometry.Engine.Interop
             if (Is64BitProcess())
             {
                 Suffix = "64";
-             
-                
+                Runtime = "win10-x64";
+
+
             } 
             else
             {
                 Suffix = "32";
-               
+                Runtime = "win10-x86";
             }
         }
 
@@ -35,6 +36,7 @@ namespace Xbim.Geometry.Engine.Interop
         /// The suffix we apply to platform-specific assemblys in the current process architecture
         /// </summary>
         public string Suffix { get; private set; }
+        public string Runtime { get; private set; }
         ///// <summary>
         ///// The default subfolder to look for platform-specific assemblys in the current process architecture
         ///// </summary>

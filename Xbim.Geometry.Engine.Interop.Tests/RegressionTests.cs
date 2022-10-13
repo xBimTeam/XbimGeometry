@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -16,23 +17,19 @@ namespace Xbim.Geometry.Engine.Interop.Tests
     public class RegressionTests
     {
         
-        static private XbimGeometryEngine geomEngine;
-        static private ILoggerFactory loggerFactory;
+        
+ 
         static private ILogger logger;
 
         [ClassInitialize]
         static public void Initialise(TestContext context)
         {
-            loggerFactory = new LoggerFactory().AddConsole(LogLevel.Trace);
-            geomEngine = new XbimGeometryEngine();
-            logger = loggerFactory.CreateLogger<Ifc4GeometryTests>();
+            logger = new NullLogger<IfcAdvancedBrepTests>();
         }
 
         [ClassCleanup]
         static public void Cleanup()
         {
-            loggerFactory = null;
-            geomEngine = null;
             logger = null;
         }
 
@@ -43,8 +40,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         {
             using (var m = IfcStore.Open("TestFiles\\Regression\\FailingGeom.ifc"))
             {
+                var geomEngine = new XbimGeometryEngine(m, logger);
                 var extSolid = m.Instances.OfType<IIfcExtrudedAreaSolid>().FirstOrDefault(hs => hs.EntityLabel == 185025);
-                var solid = geomEngine.CreateSolid(extSolid, null);
+                var solid = geomEngine.CreateSolid(extSolid, logger);
                 IfcCsgTests.GeneralTest(solid);
 
                 var mlist = m.Instances.OfType<IIfcBooleanClippingResult>();

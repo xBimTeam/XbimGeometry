@@ -26,7 +26,7 @@ namespace Xbim.ModelGeometry.Scene
 
         private event NotifyCollectionChangedEventHandler _collectionChanged;
         public event PropertyChangedEventHandler PropertyChanged;
-        private static PropertyChangedEventArgs countPropChangedEventArgs = new PropertyChangedEventArgs("Count");
+        private static readonly PropertyChangedEventArgs countPropChangedEventArgs = new PropertyChangedEventArgs("Count");
 
         public event NotifyCollectionChangedEventHandler CollectionChanged
         {
@@ -57,11 +57,7 @@ namespace Xbim.ModelGeometry.Scene
 
         void SubLayersChanged(object sender, NotifyCollectionChangedEventArgs e) //throw sublayer messages upwards
         {
-            NotifyCollectionChangedEventHandler collChanged = _collectionChanged;
-            if (collChanged != null)
-            {
-                collChanged(this, e);
-            }
+            _collectionChanged?.Invoke(this, e);
         }
 
         protected override void RemoveItem(int index)
@@ -69,10 +65,8 @@ namespace Xbim.ModelGeometry.Scene
 
             int oldCount = Count;
             XbimMeshLayer<TVISIBLE, TMATERIAL> removed = this[index];
-            base.RemoveItem(index); 
-            NotifyCollectionChangedEventHandler collChanged = _collectionChanged;
-            if (collChanged != null)
-                collChanged(this,
+            base.RemoveItem(index);
+            _collectionChanged?.Invoke(this,
                             new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, removed, index));
             NotifyCountChanged(oldCount);
         }
@@ -81,9 +75,7 @@ namespace Xbim.ModelGeometry.Scene
         {
             int oldCount = Count;
             base.ClearItems();
-            NotifyCollectionChangedEventHandler collChanged = _collectionChanged;
-            if (collChanged != null)
-                collChanged(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+            _collectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
             NotifyCountChanged(oldCount);
         }
 
@@ -93,9 +85,7 @@ namespace Xbim.ModelGeometry.Scene
             if (index < Count)
                 removed = this[index];
             base.SetItem(index, item);
-            NotifyCollectionChangedEventHandler collChanged = _collectionChanged;
-            if (collChanged != null)
-                collChanged(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, removed, index));
+            _collectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, removed, index));
         }
 
         

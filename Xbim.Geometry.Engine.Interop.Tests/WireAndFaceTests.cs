@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -14,22 +15,20 @@ namespace Xbim.Geometry.Engine.Interop.Tests
     // [DeploymentItem("TestFiles")]
     public class WireAndFaceTests
     {
-        static private IXbimGeometryEngine geomEngine;
-        static private ILoggerFactory loggerFactory;
+       
         static private ILogger logger;
 
         [ClassInitialize]
         static public void Initialise(TestContext context)
         {
-            loggerFactory = new LoggerFactory().AddConsole(LogLevel.Trace);
-            geomEngine = new XbimGeometryEngine();
-            logger = loggerFactory.CreateLogger<IfcAdvancedBrepTests>();
+            logger = new NullLogger<IfcAdvancedBrepTests>();
+           
         }
         [ClassCleanup]
         static public void Cleanup()
         {
-            loggerFactory = null;
-            geomEngine = null;
+           
+            
             logger = null;
         }
 
@@ -39,6 +38,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var model = MemoryModel.OpenRead(@"TestFiles\Polyline.ifc"))
             {
                 var poly = model.Instances.OfType<IIfcPolyline>().FirstOrDefault();
+                var geomEngine = new XbimGeometryEngine(model, logger);
                 var wire = geomEngine.CreateWire(poly, logger);
             }
         }
@@ -48,6 +48,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var model = MemoryModel.OpenRead(@"TestFiles\Composite_curve_issue_261.ifc"))
             {
                 var composite_curve = model.Instances.OfType<IIfcCompositeCurve>().FirstOrDefault();
+                var geomEngine = new XbimGeometryEngine(model, logger);
                 var wire = geomEngine.CreateWire(composite_curve, logger);
             }
         }
@@ -59,6 +60,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 var polyloop = model.Instances.OfType<IIfcPolyLoop>().FirstOrDefault();
                 Assert.IsNotNull(polyloop);
+                var geomEngine = new XbimGeometryEngine(model, logger);
                 var face = geomEngine.CreateFace(polyloop, logger);
                 Assert.IsNotNull(face.OuterBound);
             }

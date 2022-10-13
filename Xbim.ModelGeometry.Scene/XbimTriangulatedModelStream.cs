@@ -269,7 +269,7 @@ namespace Xbim.ModelGeometry.Scene
 		/// </summary>
 		private class IndexReader
 		{
-			private byte _IndexReaderByteSize = 0;
+			private readonly byte _IndexReaderByteSize = 0;
 			protected BinaryReader _br;
 
 			public int Size
@@ -317,8 +317,8 @@ namespace Xbim.ModelGeometry.Scene
 
 		private class IndexConverter : IndexReader
 		{
-			private BinaryWriter _bw;
-			private byte _IndexWriterByteSize = 0;
+			private readonly BinaryWriter _bw;
+			private readonly byte _IndexWriterByteSize = 0;
 			public uint Offset { get; set; }
 
 			public IndexConverter(uint MaxSizeReader, BinaryReader br, uint MaxSizeWriter, BinaryWriter bw)

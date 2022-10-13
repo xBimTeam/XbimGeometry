@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.IO;
 using Xbim.Ifc.Extensions;
 using Xbim.Common.Exceptions;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Xbim.Geometry.Engine.Interop.Tests
 {
@@ -19,23 +20,21 @@ namespace Xbim.Geometry.Engine.Interop.Tests
     // [DeploymentItem("TestFiles")]
     public class IfcBooleanTests
     {
-        static private IXbimGeometryEngine geomEngine;
-        static private ILoggerFactory loggerFactory;
+        
+        
         static private ILogger logger;
 
         [ClassInitialize]
         static public void Initialise(TestContext context)
         {
-            loggerFactory = new LoggerFactory().AddDebug(LogLevel.Trace);
-            geomEngine = new XbimGeometryEngine();
-            logger = loggerFactory.CreateLogger<IfcBooleanTests>();
-            loggerFactory.AddConsole(LogLevel.Trace);
+            logger = new NullLogger<IfcAdvancedBrepTests>();
+           
         }
         [ClassCleanup]
         static public void Cleanup()
         {
-            loggerFactory = null;
-            geomEngine = null;
+            
+            
             logger = null;
         }
 
@@ -51,8 +50,10 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var body = op.Key;
                 var openings = op.Select(v => v.RelatedOpeningElement).Cast<IIfcOpeningElement>().ToList();
 
-                var bodyRep = body.Representation.Representations.SelectMany(r => r.Items.OfType<IIfcBooleanClippingResult>()).FirstOrDefault(); //it is a IIfcBooleanClippingResult               
-                var bodyGeom = geomEngine.CreateSolidSet(bodyRep);
+                var bodyRep = body.Representation.Representations.SelectMany(r => r.Items.OfType<IIfcBooleanClippingResult>()).FirstOrDefault(); //it is a IIfcBooleanClippingResult
+                                                                                                                                                 
+                var geomEngine = new XbimGeometryEngine(model, logger);
+                var bodyGeom = geomEngine.CreateSolidSet(bodyRep,logger);
                 // var faultWires = bodyGeom.First().Faces.Where(f => f.OuterBound.Edges.Count > 4).ToList();
 
 
@@ -60,7 +61,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 foreach (var opening in openings)
                 {
                     var openingRep = opening.Representation.Representations.SelectMany(r => r.Items.OfType<IIfcExtrudedAreaSolid>()).FirstOrDefault();
-                    var openingGeom = geomEngine.CreateSolid(openingRep);
+                    var openingGeom = geomEngine.CreateSolid(openingRep, logger);
                     cutSolids.Add(openingGeom);
                 }
                 ////try in a oner
@@ -70,7 +71,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 foreach (var opening in openings)
                 {
                     var openingRep = opening.Representation.Representations.SelectMany(r => r.Items.OfType<IIfcExtrudedAreaSolid>()).FirstOrDefault();
-                    var openingGeom = geomEngine.CreateSolid(openingRep);
+                    var openingGeom = geomEngine.CreateSolid(openingRep, logger);
                     try
                     {
                         var nextGeom = cutSingularCut.Cut(openingGeom, 1e-5);
@@ -96,7 +97,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var er = new EntityRepository<IIfcBooleanClippingResult>(nameof(very_slow_boolean_clipping), true)) //model is in radians
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanClippingResult found");
-
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 var s = geomEngine.CreateSolidSet(er.Entity, logger);
                 HelperFunctions.IsValidSolid(s.FirstOrDefault());
 
@@ -109,7 +110,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var er = new EntityRepository<IIfcBooleanResult>(nameof(memory_hungry_boolean), true)) //model is in radians
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
-
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 var s = geomEngine.CreateSolidSet(er.Entity, logger);
                 HelperFunctions.IsValidSolid(s.FirstOrDefault());
 
@@ -121,7 +122,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var er = new EntityRepository<IIfcBooleanResult>(nameof(memory_hungry_boolean2), true)) //model is in radians
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
-
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 var s = geomEngine.CreateSolidSet(er.Entity, logger);
                 HelperFunctions.IsValidSolid(s.FirstOrDefault());
 
@@ -136,6 +137,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
                 Debug.WriteLine($"Evaluating {er.Entity}");
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 var s = geomEngine.CreateSolidSet(er.Entity, logger);
                 Assert.AreEqual(1, s.Count);
             }
@@ -149,7 +151,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var er = new EntityRepository<IIfcBooleanResult>(nameof(memory_hungry_boolean4), true)) //model is in radians
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
-                
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 var s = geomEngine.CreateSolidSet(er.Entity, logger);
                 Assert.AreEqual(0,s.Count);
             }
@@ -162,6 +164,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var er = new EntityRepository<IIfcGrid>(nameof(grid_with_polylines), true)) //model is in radians
             {
                 Assert.IsTrue(er.Entity != null, "No IfcGrid found");
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 var s = geomEngine.CreateGrid(er.Entity, logger);
                 Assert.AreEqual(10, s.Count);
 
@@ -177,6 +180,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var er = new EntityRepository<IIfcBooleanResult>(nameof(cut_planes_within_fuzzy_tolerance), true)) //model is in radians
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 var s = geomEngine.CreateSolidSet(er.Entity, logger).FirstOrDefault();
                 HelperFunctions.IsValidSolid(s);
             }
@@ -189,6 +193,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var er = new EntityRepository<IIfcBooleanResult>(nameof(boolean_cut_failure), true)) //model is in radians
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 var ss = geomEngine.CreateSolidSet(er.Entity, logger);
                 foreach (var s in ss)
                 {
@@ -210,7 +215,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var openingExtrudeArea = model.Instances[286479] as IIfcExtrudedAreaSolid;
                 var openingPlacement = model.Instances[286487] as IIfcLocalPlacement;
                 var openingTransform = openingPlacement.ToMatrix3D();
-
+                var geomEngine = new XbimGeometryEngine(model, logger);
                 var wallSolid = geomEngine.CreateSolidSet(wallBrep, logger).FirstOrDefault();
                 var transformedWall = wallSolid.Transform(wallTransform) as IXbimSolid;
 
@@ -240,8 +245,10 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     var archRepItem = erArch.Entity.Representation.Representations.FirstOrDefault()?.Items.FirstOrDefault() as IIfcExtrudedAreaSolid;
                     var elecRepItem = erElec.Entity.Representation.Representations.FirstOrDefault()?.Items.FirstOrDefault() as IIfcExtrudedAreaSolid;
                     Assert.IsNotNull(archRepItem); Assert.IsNotNull(elecRepItem);
-                    var archGeom = geomEngine.CreateSolid(archRepItem).Transform(archMatrix);
-                    var elecGeom = geomEngine.CreateSolid(elecRepItem).Transform(elecMatrix);
+                    var geomEngineArch = new XbimGeometryEngine(erArch.Entity.Model, logger);
+                    var geomEngineElec = new XbimGeometryEngine(erElec.Entity.Model, logger);
+                    var archGeom = geomEngineArch.CreateSolid(archRepItem, logger).Transform(archMatrix);
+                    var elecGeom = geomEngineElec.CreateSolid(elecRepItem, logger).Transform(elecMatrix);
                     var archBB = archGeom.BoundingBox;
                     var elecBB = elecGeom.BoundingBox;
                     var diff = archBB.Centroid() - elecBB.Centroid();
@@ -296,6 +303,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var er = new EntityRepository<IIfcBooleanResult>(nameof(CompoundBooleanUnionTest)))
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 var solids = geomEngine.CreateSolidSet(er.Entity, logger);
                 Assert.IsTrue(solids.Count == 1);
 
@@ -311,6 +319,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var er = new EntityRepository<IIfcBooleanResult>(nameof(BooleanResultCompleteVoidCutTest)))
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 var solids = geomEngine.CreateSolidSet(er.Entity, logger);
                 Assert.IsTrue(solids.Count == 0);
 
@@ -323,6 +332,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var er = new EntityRepository<IIfcBooleanResult>(nameof(CsgBooleanResultTest)))
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 var solids = geomEngine.CreateSolidSet(er.Entity, logger);
                 Assert.IsTrue(solids.Count == 2, "This should produce two solids");
 
@@ -338,6 +348,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var er = new EntityRepository<IIfcBooleanResult>(nameof(BooleanSilentFailTest)))
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 var solids = geomEngine.CreateSolidSet(er.Entity, logger);
                 HelperFunctions.IsValidSolid(solids.FirstOrDefault());
 
@@ -351,7 +362,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var er = new EntityRepository<IIfcBooleanClippingResult>(nameof(polygonally_bounded_half_space_clip)))
             {
                 Assert.IsTrue(er.Entity != null, "No IIfcBooleanClippingResult found");
-
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 var solids = geomEngine.CreateSolidSet(er.Entity, logger);
                 HelperFunctions.IsValidSolid(solids.FirstOrDefault());
 
@@ -365,7 +376,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var er = new EntityRepository<IIfcBooleanClippingResult>(nameof(unstable_boolean_clipping_result)))
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanClippingResult found");
-
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 var solids = geomEngine.CreateSolidSet(er.Entity, logger);
                 HelperFunctions.IsValidSolid(solids.FirstOrDefault());
 
@@ -382,7 +393,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var er = new EntityRepository<IIfcBooleanResult>(nameof(BadlyOrientedBrepFacesTest)))
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
-
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 var solids = geomEngine.CreateSolidSet(er.Entity, logger);
                 HelperFunctions.IsValidSolid(solids.FirstOrDefault());
 
@@ -398,7 +409,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var er = new EntityRepository<IIfcBooleanResult>(nameof(FaceWithBoundsOutsideDeclaredPrecisionTest)))
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
-
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 var solids = geomEngine.CreateSolidSet(er.Entity, logger);
                 HelperFunctions.IsValidSolid(solids.FirstOrDefault());
 
@@ -412,7 +423,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var er = new EntityRepository<IIfcCompositeCurve>(nameof(UnorderedCompositeCurveTest), true))
             {
                 Assert.IsTrue(er.Entity != null, "No IIfcCompositeCurve found");
-
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 var wire = geomEngine.CreateWire(er.Entity, logger);
                 Assert.IsNotNull(wire);
                 Assert.IsTrue(wire.IsValid);
@@ -427,7 +438,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var er = new EntityRepository<IIfcBooleanResult>(nameof(BooleanResultTimoutTest), true))
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
-
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 var solids = geomEngine.CreateSolidSet(er.Entity, logger);
                 HelperFunctions.IsValidSolid(solids.FirstOrDefault());
 
@@ -440,7 +451,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var er = new EntityRepository<IIfcBooleanResult>("boolean_result_timing_out2", true))
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
-
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 var solids = geomEngine.CreateSolidSet(er.Entity, logger);
                 HelperFunctions.IsValidSolid(solids.FirstOrDefault());
 
@@ -453,7 +464,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var er = new EntityRepository<IIfcBooleanResult>(nameof(ComplexNestedBooleanResult), true))
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
-
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 var solids = geomEngine.CreateSolidSet(er.Entity, logger);
                 HelperFunctions.IsValidSolid(solids.FirstOrDefault());
 
@@ -466,7 +477,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var er = new EntityRepository<IIfcBooleanResult>(nameof(VerySmallBooleanCutTest), true))
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
-
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 var solids = geomEngine.CreateSolidSet(er.Entity, logger);
                 HelperFunctions.IsValidSolid(solids.FirstOrDefault());
 
@@ -479,7 +490,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var er = new EntityRepository<IIfcBooleanResult>(nameof(FailingBooleanBrepWithZeroVolumeTest), true))
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
-
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 var solids = geomEngine.CreateSolidSet(er.Entity, logger);
                 HelperFunctions.IsValidSolid(solids.FirstOrDefault());
 
@@ -495,6 +506,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var er = new EntityRepository<IIfcBooleanResult>(nameof(EmptyBooleanResultTest)))
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 var solids = geomEngine.CreateSolidSet(er.Entity, logger);
                 Assert.IsTrue(solids.Count == 0, "No solids should be produced");
             }
@@ -509,6 +521,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var er = new EntityRepository<IIfcBooleanClippingResult>(nameof(SimpleBooleanClipResultTest)))
             {
                 Assert.IsTrue(er.Entity != null, "No IIfcBooleanClippingResult found");
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 var solid = geomEngine.CreateSolidSet(er.Entity, logger).FirstOrDefault();
                 Assert.IsTrue(solid.Faces.Count == 6, "This solid should have 6 faces");
             }
@@ -530,7 +543,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
                     var cylinderInner = IfcModelBuilder.MakeRightCircularCylinder(m, 10, 20);
                     var cylinderOuter = IfcModelBuilder.MakeRightCircularCylinder(m, 20, 20);
-                    var logger = loggerFactory.CreateLogger<IfcBooleanTests>();
+                    var logger = new NullLogger<IfcAdvancedBrepTests>();
+                    var geomEngine = new XbimGeometryEngine(m, logger);
                     var outer = geomEngine.CreateSolid(cylinderOuter, logger);
                     var inner = geomEngine.CreateSolid(cylinderInner, logger);
                     var solidSet = outer.Cut(inner, m.ModelFactors.PrecisionBoolean);
@@ -554,7 +568,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 {
                     var cylinder = IfcModelBuilder.MakeRightCircularCylinder(m, 10, 20);
                     var sphere = IfcModelBuilder.MakeSphere(m, 15);
-
+                    var geomEngine = new XbimGeometryEngine(m, logger);
                     var a = geomEngine.CreateSolid(sphere, logger);
                     var b = geomEngine.CreateSolid(cylinder, logger);
                     var solidSet = a.Union(b, m.ModelFactors.PrecisionBoolean);
@@ -576,6 +590,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 {
                     var cylinder = IfcModelBuilder.MakeRightCircularCylinder(m, 10, 20);
                     var sphere = IfcModelBuilder.MakeSphere(m, 15);
+                    var geomEngine = new XbimGeometryEngine(m, logger);
                     var a = geomEngine.CreateSolid(sphere, logger);
                     var b = geomEngine.CreateSolid(cylinder, logger);
                     var solidSet = a.Intersection(b, m.ModelFactors.PrecisionBoolean);
@@ -594,6 +609,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 using (var txn = m.BeginTransaction(""))
                 {
                     var cylinder = IfcModelBuilder.MakeRightCircularCylinder(m, 20, 20);
+                    var geomEngine = new XbimGeometryEngine(m, logger);
                     var solid = geomEngine.CreateSolid(cylinder, logger);
                     var plane = IfcModelBuilder.MakePlane(m, new XbimPoint3D(cylinder.Position.Location.X + 1, cylinder.Position.Location.Y, cylinder.Position.Location.Z), new XbimVector3D(0, -1, 0), new XbimVector3D(1, 0, 0));
                     var cutPlane = geomEngine.CreateFace(plane, logger);
@@ -628,7 +644,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     bresult.SecondOperand = cylinderInner;
                     bresult.Operator = IfcBooleanOperator.DIFFERENCE;
                     csgTree.TreeRootExpression = bresult;
-
+                    var geomEngine = new XbimGeometryEngine(m, logger);
                     var solid = geomEngine.CreateSolidSet(csgTree, logger).FirstOrDefault();
                     var plane = IfcModelBuilder.MakePlane(m, new XbimPoint3D(cylinderInner.Position.Location.X + 1, cylinderInner.Position.Location.Y, cylinderInner.Position.Location.Z), new XbimVector3D(0, 0, 1), new XbimVector3D(0, 1, 0));
                     var cutPlane = geomEngine.CreateFace(plane, logger);
@@ -649,6 +665,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 using (var txn = m.BeginTransaction(""))
                 {
                     var block = IfcModelBuilder.MakeBlock(m, 10, 15, 20);
+                    var geomEngine = new XbimGeometryEngine(m, logger);
                     var solid = geomEngine.CreateSolid(block, logger);
                     var plane = IfcModelBuilder.MakePlane(m, new XbimPoint3D(block.Position.Location.X + 5, block.Position.Location.Y, block.Position.Location.Z), new XbimVector3D(-1, 0, 0), new XbimVector3D(0, 1, 0));
                     var cutPlane = geomEngine.CreateFace(plane, logger);
@@ -681,7 +698,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     bresult.SecondOperand = cylinderInner;
                     bresult.Operator = IfcBooleanOperator.DIFFERENCE;
                     csgTree.TreeRootExpression = bresult;
-
+                    var geomEngine = new XbimGeometryEngine(m, logger);
                     var solid = geomEngine.CreateSolidSet(csgTree, logger).FirstOrDefault();
                     Assert.IsTrue(solid.Faces.Count == 4, "4 faces are required of this csg solid");
                     Assert.IsTrue(solid.Vertices.Count == 4, "4 vertices are required of this csg solid");
@@ -695,6 +712,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var er = new EntityRepository<IIfcBooleanResult>(nameof(CSG_with_self_intersecting_wire_test)))
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 var solids = geomEngine.CreateSolidSet(er.Entity, logger);
                 Assert.IsTrue(solids.Count == 1, "One solid should be produced");
             }
@@ -717,7 +735,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     bresult.SecondOperand = sphere;
                     bresult.Operator = IfcBooleanOperator.INTERSECTION;
                     csgTree.TreeRootExpression = bresult;
-
+                    var geomEngine = new XbimGeometryEngine(m, logger);
                     var solid = geomEngine.CreateSolidSet(csgTree, logger).FirstOrDefault();
                     Assert.IsTrue(solid.Faces.Count == 3, "3 faces are required of this csg solid");
                     Assert.IsTrue(solid.Vertices.Count == 3, "3 vertices are required of this csg solid");
@@ -745,6 +763,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     //make an extrusion
                     var profile = IfcModelBuilder.MakeRectangleHollowProfileDef(m, 20, 10, 1);
                     var extrude = IfcModelBuilder.MakeExtrudedAreaSolid(m, profile, 40);
+                    var geomEngine = new XbimGeometryEngine(m, logger);
                     var solid = geomEngine.CreateSolid(extrude, logger);
                     var halfSpaceSolid = geomEngine.CreateSolid(halfSpace, logger);
                     var cut = solid.Cut(halfSpaceSolid, 1e-5);
@@ -794,6 +813,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     //make an extrusion
                     var profile = IfcModelBuilder.MakeRectangleProfileDef(m, 20, 10);
                     var extrude = IfcModelBuilder.MakeExtrudedAreaSolid(m, profile, 40);
+                    var geomEngine = new XbimGeometryEngine(m, logger);
                     var solid = geomEngine.CreateSolid(extrude, logger);
                     var halfSpaceSolid = geomEngine.CreateSolid(polygonalBoundedHalfspace, logger);
                     var cut = solid.Cut(halfSpaceSolid, 1e-5);
@@ -847,6 +867,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         {
             using (var er = new EntityRepository<IIfcBooleanClippingResult>(nameof(IfcHalfspaceCutFromIfcExtrudedAreaSolidTest)))
             {
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 var solid = geomEngine.CreateSolidSet(er.Entity, logger).FirstOrDefault();
                 IsSolidTest(solid);
                 Assert.IsTrue(solid.Faces.Count() == 6, "Rectangular profiles should have six faces");
@@ -859,6 +880,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         {
             using (var er = new EntityRepository<IIfcBooleanClippingResult>(nameof(IfcPolygonalBoundedHalfspaceCutFromIfcExtrudedAreaSolidTest)))
             {
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 var solid = geomEngine.CreateSolidSet(er.Entity, logger).FirstOrDefault();
                 IsSolidTest(solid);
                 Assert.IsTrue(solid.Faces.Count() == 6, "Rectangular profiles should have six faces");
@@ -870,6 +892,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         {
             using (var er = new EntityRepository<IIfcBooleanClippingResult>(nameof(NestedBooleansTest)))
             {
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 var solid = geomEngine.CreateSolidSet(er.Entity, logger).FirstOrDefault();
                 IsSolidTest(solid);
                 Assert.IsTrue(solid.Faces.Count() == 6, "Rectangular profiles should have six faces");
@@ -881,6 +904,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         {
             using (var er = new EntityRepository<IIfcBooleanClippingResult>(nameof(NestedBooleanClippingResultsTest)))
             {
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 var solid = geomEngine.CreateSolidSet(er.Entity, logger).FirstOrDefault();
                 IsSolidTest(solid);
                 Assert.IsTrue(solid.Faces.Count() == 7, "This solid should have 7 faces");
@@ -896,23 +920,27 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             // this is a simple cuboid / beam
             using (var er = new EntityRepository<IIfcExtrudedAreaSolid>("SmallBooleanClippingResultsTestBodyShape"))
             {
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 solidBody = geomEngine.CreateSolid(er.Entity, logger);
                 Assert.IsTrue(solidBody.Faces.Count == 6, "This solid should have 6 faces");
             }
             //this is a triangular fillet (prism) to cut off the sort side face
             using (var er = new EntityRepository<IIfcFacetedBrep>("SmallBooleanClippingResultsTestCutShape1"))
             {
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 solidCut1 = geomEngine.CreateSolidSet(er.Entity, logger).FirstOrDefault();
                 Assert.IsTrue(solidCut1.Faces.Count == 5, "This solid should have 5 faces");
             }
             // this shape is a faulty solid
             using (var er = new EntityRepository<IIfcFacetedBrep>("SmallBooleanClippingResultsTestCutShape2"))
             {
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 solidCut2 = geomEngine.CreateSolidSet(er.Entity, logger).FirstOrDefault();
                 Assert.IsTrue(solidCut2.Faces.Count == 10, "This solid should have 10 faces");
             }
             using (var er = new EntityRepository<IIfcBooleanResult>(nameof(SmallBooleanClippingResultsTest)))
             {
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 solidResult = geomEngine.CreateSolidSet(er.Entity, logger).FirstOrDefault();
                 var actualVolume = solidResult.Volume;
                 Assert.IsTrue(solidBody.Volume > actualVolume, "This cut solid should have less volume than the body shape");
@@ -924,6 +952,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         {
             using (var er = new EntityRepository<IIfcBooleanClippingResult>(nameof(EmptyBooleanClippingResultTest)))
             {
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 var solidSet = geomEngine.CreateSolidSet(er.Entity, logger);
                 Assert.IsTrue(solidSet.Count == 0, "This solid should be empty");
             }
@@ -934,6 +963,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         {
             using (var model = MemoryModel.OpenRead(@".\TestFiles\IfcWallWithIfcBooleanClippingResult1.ifc"))
             {
+                var geomEngine = new XbimGeometryEngine(model, logger);
                 var wallBCR = model.Instances[34] as IIfcBooleanClippingResult;
                 var solidSet = geomEngine.CreateSolidSet(wallBCR, null);
                 Assert.IsTrue(solidSet.Sum(s => s.Faces.Count) == 14);
@@ -941,6 +971,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
             using (var model = MemoryModel.OpenRead(@".\TestFiles\IfcWallWithIfcBooleanClippingResult2.ifc"))
             {
+                var geomEngine = new XbimGeometryEngine(model, logger);
                 var wallBCR = model.Instances[40] as IIfcBooleanClippingResult;
                 var solidSet = geomEngine.CreateSolidSet(wallBCR, null);
                 Assert.IsTrue(solidSet.Sum(s => s.Faces.Count) == 8);
@@ -959,7 +990,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var wall = relVoids.RelatingBuildingElement;
                 var wallPlacement = wall.ObjectPlacement as IIfcLocalPlacement;
                 var wallTransform = wallPlacement.ToMatrix3D();
-                var wallTransform2 = geomEngine.ToMatrix3D(wallPlacement);
+                var geomEngine = new XbimGeometryEngine(repos.Entity.Model, logger);
+                var wallTransform2 = geomEngine.ToMatrix3D(wallPlacement,logger);
                 Assert.AreEqual(wallTransform, wallTransform2);
                 var wallGeom = wall.Representation.Representations.FirstOrDefault().Items.FirstOrDefault() as IIfcExtrudedAreaSolid;
                 var opening = relVoids.RelatedOpeningElement;
@@ -970,9 +1002,10 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var wallBrepPlaced = wallBrep.Transform(wallTransform) as IXbimSolidSet;
 
                 var openingBReps = geomEngine.CreateSolidSet();
+                
                 foreach (var og in openingGeoms)
                 {
-                    var brep = geomEngine.CreateSolid(og);
+                    var brep = geomEngine.CreateSolid(og, logger);
                     openingBReps.Add(brep.Transform(openingTransform) as IXbimSolid);
                 }
                 int uncut = 0;
@@ -1004,8 +1037,10 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 using (var holeEntity = new EntityRepository<IIfcExtrudedAreaSolid>("CuttingOpeningInIfcFaceBasedSurfaceModelVoidTest"))
                 {
+                    var geomEngine = new XbimGeometryEngine(bodyEntity.Entity.Model, logger);
                     var body = geomEngine.CreateSolidSet(bodyEntity.Entity, logger);
                     Assert.IsTrue(body.Count == 8, "Eight solids should be returned");
+                    geomEngine = new XbimGeometryEngine(holeEntity.Entity.Model, logger);
                     var hole = geomEngine.CreateSolid(holeEntity.Entity, logger);
                     var result = body.Cut(hole, bodyEntity.Entity.Model.ModelFactors.Precision);
 
@@ -1069,9 +1104,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     block2.Position.Location.X += 10;
                     block2.Position.Location.Y += 10;
                     block2.Position.Location.Z += 10;
-
-                    var b1 = geomEngine.CreateSolid(block1);
-                    var b2 = geomEngine.CreateSolid(block2);
+                    var geomEngine = new XbimGeometryEngine(m, logger);
+                    var b1 = geomEngine.CreateSolid(block1, logger);
+                    var b2 = geomEngine.CreateSolid(block2, logger);
                     var result = b1.Cut(b2, m.ModelFactors.PrecisionBoolean);
                     Assert.IsTrue(result.Count == 1, "Cutting of these two solids should return two  solids");
                     foreach (var solid in result)
@@ -1091,9 +1126,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
                     var block1 = IfcModelBuilder.MakeSphere(m, 20);
                     var block2 = IfcModelBuilder.MakeSphere(m, 5);
-
-                    var b1 = geomEngine.CreateSolid(block1);
-                    var b2 = geomEngine.CreateSolid(block2);
+                    var geomEngine = new XbimGeometryEngine(m, logger);
+                    var b1 = geomEngine.CreateSolid(block1,logger);
+                    var b2 = geomEngine.CreateSolid(block2,logger);
                     var result = b1.Cut(b2, m.ModelFactors.PrecisionBoolean);
                     Assert.IsTrue(result.Count == 1, "Cutting of these two solids should return two  solids");
                     const double vOuter = (4.0 / 3.0) * Math.PI * 20.0 * 20.0 * 20.0;

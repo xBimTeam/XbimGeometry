@@ -430,7 +430,7 @@ namespace Xbim
 					{
 						Poly::ComputeNormals(mesh); //we need the normals
 						norms = gcnew List<XbimPackedNormal>(mesh->NbNodes());
-						for (Standard_Integer i = 1; i <= mesh->NbNodes() * 3; i += 3) //visit each node
+						for (Standard_Integer i = 1; i <= mesh->NbNodes() ; i ++) //visit each node
 						{
 							gp_Dir dir = mesh->Normal(i);
 							if (faceReversed) dir.Reverse();

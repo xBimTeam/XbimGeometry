@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Xbim.Common.Geometry;
 using Xbim.Common.Step21;
@@ -18,22 +19,20 @@ namespace Xbim.Geometry.Engine.Interop.Tests
     
     public class IfcCsgTests
     {
-        static private IXbimGeometryEngine geomEngine;
-        static private ILoggerFactory loggerFactory;
+        
         static private ILogger logger;
 
         [ClassInitialize]
         static public void Initialise(TestContext context)
         {
-            loggerFactory = new LoggerFactory().AddConsole(LogLevel.Trace);
-            geomEngine = new XbimGeometryEngine();
-            logger = loggerFactory.CreateLogger<IfcCsgTests>();
+            logger = new NullLogger<IfcAdvancedBrepTests>();
+            
         }
         [ClassCleanup]
         static public void Cleanup()
         {
-            loggerFactory = null;
-            geomEngine = null;
+           
+            
             logger = null;
         }
         [TestMethod]
@@ -51,8 +50,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     pyramid.Height = 20;
                     pyramid.XLength = 10;
                     pyramid.YLength = 15;
-                    
-                    var solid = geomEngine.CreateSolid(pyramid);
+                    var geomEngine = new XbimGeometryEngine(m, logger);
+                    var solid = geomEngine.CreateSolid(pyramid, logger);
                
                     Assert.IsTrue(solid.Faces.Count == 5, "5 faces are required of a pyramid");
                     Assert.IsTrue(solid.Vertices.Count == 5, "5 vertices are required of a pyramid");
@@ -74,8 +73,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 {
                     const double h = 2; const double r = 0.5;             
                     var cylinder = IfcModelBuilder.MakeRightCircularCylinder(m, r, h);
-                    
-                    var solid = geomEngine.CreateSolid(cylinder);
+                    var geomEngine = new XbimGeometryEngine(m, logger);
+                    var solid = geomEngine.CreateSolid(cylinder, logger);
                    
                     Assert.IsTrue(solid.Faces.Count == 3, "3 faces are required of a cylinder");
                     Assert.IsTrue(solid.Vertices.Count == 2, "2 vertices are required of a cylinder");
@@ -104,8 +103,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     cylinder.Position = p;
                     cylinder.BottomRadius = 0.5;
                     cylinder.Height = 2;
-                    
-                    var solid = geomEngine.CreateSolid(cylinder);
+                    var geomEngine = new XbimGeometryEngine(m, logger);
+                    var solid = geomEngine.CreateSolid(cylinder, logger);
                     
                     Assert.IsTrue(solid.Faces.Count == 2, "2 faces are required of a cone");
                     Assert.IsTrue(solid.Vertices.Count == 2, "2 vertices are required of a cone");
@@ -127,8 +126,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 {
 
                     var block = IfcModelBuilder.MakeBlock(m, 10, 15, 20);
-                    
-                    var solid = geomEngine.CreateSolid(block);
+                    var geomEngine = new XbimGeometryEngine(m, logger);
+                    var solid = geomEngine.CreateSolid(block, logger);
                     
                     Assert.IsTrue(solid.Faces.Count == 6, "6 faces are required of a block");
                     Assert.IsTrue(solid.Vertices.Count == 8, "8 vertices are required of a block");
@@ -155,8 +154,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     const double r = 0.5;
                     
                     var sphere = IfcModelBuilder.MakeSphere(m, r);
-                    
-                    var solid = geomEngine.CreateSolid(sphere);
+                    var geomEngine = new XbimGeometryEngine(m, logger);
+                    var solid = geomEngine.CreateSolid(sphere, logger);
                     Assert.IsTrue(solid.Faces.Count == 1, "1 face is required of a sphere");
                     Assert.IsTrue(solid.Vertices.Count == 2, "2 vertices are required of a sphere");
                     var meshRec = new MeshHelper();

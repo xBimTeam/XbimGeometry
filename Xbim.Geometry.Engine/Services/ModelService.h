@@ -30,11 +30,7 @@ namespace Xbim
 			public:
 				ModelService(IModel^ model, double minGapSize);
 				ModelService(IModel^ model);
-				ModelService(ILogger<ModelService^>^ logger) :ModelService((ILogger^)logger) 
-				{
-					
-				}
-				ModelService(ILogger^ logger);
+				
 				virtual property bool UpgradeFaceSets {bool get() { return _upgradeFaceSets; } void set(bool upgrade) { _upgradeFaceSets = upgrade; }};
 				virtual property double Precision {double get() { return model->ModelFactors->Precision; }};
 				virtual property double PrecisionSquared {double get() { return precisionSquared; }};

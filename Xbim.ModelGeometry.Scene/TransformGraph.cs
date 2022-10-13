@@ -25,7 +25,7 @@ namespace Xbim.ModelGeometry.Scene
     [Serializable]
     public class TransformGraph
     {
-        private TransformNode _root;
+        private readonly TransformNode _root;
         private Dictionary<long, TransformNode> _productNodes = new Dictionary<long, TransformNode>(); 
         private readonly Dictionary<IIfcObjectPlacement, TransformNode> _placementNodes =
             new Dictionary<IIfcObjectPlacement, TransformNode>();
@@ -63,9 +63,8 @@ namespace Xbim.ModelGeometry.Scene
                 var pl = product.ObjectPlacement;
                 if (pl == null) 
                     return null;
-                TransformNode node;
-                return _placementNodes.TryGetValue(pl, out node) 
-                    ? node 
+                return _placementNodes.TryGetValue(pl, out TransformNode node)
+                    ? node
                     : null;
             }
         }
@@ -107,13 +106,12 @@ namespace Xbim.ModelGeometry.Scene
                 throw new NotImplementedException("GridPlacement is not implemented");
             if (lp == null) 
                 return null;
-            TransformNode node;
-            if (!_placementNodes.TryGetValue(placement, out node))
-            {                 
+            if (!_placementNodes.TryGetValue(placement, out TransformNode node))
+            {
                 node = new TransformNode(product);
                 if (product != null) _productNodes.Add(product.EntityLabel, node);
                 var ax3 = lp.RelativePlacement as IIfcAxis2Placement3D;
-                if (ax3 != null) 
+                if (ax3 != null)
                     node.LocalMatrix = ax3.ToMatrix3D();
                 else
                 {
@@ -124,9 +122,8 @@ namespace Xbim.ModelGeometry.Scene
                 _placementNodes.Add(placement, node);
                 if (lp.PlacementRelTo != null)
                 {
-                    TransformNode parent;
-                    if (_placementNodes.TryGetValue(lp.PlacementRelTo, out parent))
-                        //we have already processed parent
+                    if (_placementNodes.TryGetValue(lp.PlacementRelTo, out TransformNode parent))
+                    //we have already processed parent
                     {
                         parent.AddChild(node);
                         node.Parent = parent;
