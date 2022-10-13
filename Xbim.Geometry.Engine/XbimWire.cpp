@@ -1207,7 +1207,9 @@ namespace Xbim
 				return XbimVector3D();
 			try
 			{
-				gp_Dir dir = NormalDir(*pWire);
+				bool isValidNormal;
+				gp_Dir dir = NormalDir(*pWire, isValidNormal);
+				if(!isValidNormal) Standard_Failure::Raise("Wire has no normal");
 				return  XbimVector3D(dir.X(), dir.Y(), dir.Z());
 			}
 			catch (const Standard_Failure& sf)
@@ -1218,7 +1220,7 @@ namespace Xbim
 
 		}
 
-		gp_Dir XbimWire::NormalDir(const TopoDS_Wire& wire)
+		gp_Dir XbimWire::NormalDir(const TopoDS_Wire& wire, bool& isValid)
 		{
 
 			double x = 0, y = 0, z = 0;
@@ -1250,6 +1252,7 @@ namespace Xbim
 						(cType == STANDARD_TYPE(Geom_Hyperbola)))) //it is a conic
 					{
 						Handle(Geom_Conic) conic = Handle(Geom_Conic)::DownCast(c3dptr);
+						isValid = true;
 						return conic->Axis().Direction();
 
 					}
@@ -1321,10 +1324,12 @@ namespace Xbim
 			try
 			{
 				gp_Dir dir(x, y, z);
+				isValid = true;
 				return dir;
 			}
 			catch (const Standard_Failure&)
 			{
+				isValid = false;
 				return gp::DZ(); //it has no normal, so default to Z
 			}
 

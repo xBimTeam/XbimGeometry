@@ -1525,7 +1525,9 @@ namespace Xbim
 
 				try
 				{
-					gp_Dir outerNormal = XbimWire::NormalDir(outerLoop); //this can throw an exception if the wire is nonsense (line) and should just be dropped
+					bool isValidNormal;
+					gp_Dir outerNormal = XbimWire::NormalDir(outerLoop, isValidNormal); //this can throw an exception if the wire is nonsense (line) and should just be dropped
+					if(!isValidNormal) Standard_Failure::Raise("Outer bound has invalid normal");
 					TopoDS_Vertex v1, v2;
 					TopExp::Vertices(outerLoop, v1, v2);
 					gp_Pln thePlane(BRep_Tool::Pnt(v1), outerNormal);
@@ -1540,14 +1542,15 @@ namespace Xbim
 								try
 								{
 									TopoDS_Wire innerWire = TopoDS::Wire(*it);
-									gp_Vec innerNormal = XbimWire::NormalDir(innerWire);
-									if (!outerNormal.IsOpposite(innerNormal, Precision::Angular()))
+									gp_Vec innerNormal = XbimWire::NormalDir(innerWire, isValidNormal);
+									if (!isValidNormal) Standard_Failure::Raise("Inner bound has invalid normal");
+									if (!outerNormal.IsOpposite(innerNormal, 0.1))
 										innerWire.Reverse();
 									faceMaker.Add(innerWire);
 								}
 								catch (const Standard_Failure& /*sf*/)
 								{
-									XbimGeometryCreator::LogDebug(logger, ifcFace, "Inner wire has invalid normal,  wire ignored");
+									XbimGeometryCreator::LogDebug(logger, ifcFace, "Inner wire has invalid normal,  bound ignored");
 									continue;
 								}
 							}

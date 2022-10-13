@@ -1200,7 +1200,7 @@ namespace Xbim
 				}
 				pFace = new TopoDS_Face();
 				*pFace = faceMaker.Face();
-				XbimVector3D tn = Normal;
+				gp_Dir tn = NormalDir();
 				//some models incorrectly output overlapping / intersecting wires, don't process them
 				for each (IIfcCurve ^ curve in profile->InnerCurves)
 				{
@@ -1229,15 +1229,18 @@ namespace Xbim
 					}
 					if (innerWire->IsClosed) //if the loop is not closed it is not a bound
 					{
-						try //it is possible the inner loop is just a closed wire with zero area when a normal is calculated, this will throw an excpetion and the void is invalid
+						try 
 						{
-							XbimVector3D n = innerWire->Normal;
-							bool needInvert = n.DotProduct(tn) > 0;
+							bool isValidNormal;
+							gp_Dir n = XbimWire::NormalDir(innerWire, isValidNormal);
+							if (!isValidNormal) Standard_Failure::Raise("Inner bound has invalid normal");; //it is possible the inner loop is just a closed wire with zero area when a normal is calculated, this will throw an excpetion and the void is invalid
+							bool needInvert = !n.IsOpposite(tn, 0.1);
 							if (needInvert) //inner wire should be reverse of outer wire
 								innerWire->Reverse();
 							double currentloopTolerance = tolerance;
 						TryBuildLoop:
 							faceMaker.Add(innerWire);
+							XbimFace^ f = gcnew XbimFace(faceMaker.Face());
 							//check the face is ok
 							if (BRepCheck_Analyzer(faceMaker.Face(), Standard_True).IsValid() == Standard_False)
 							{
@@ -1256,13 +1259,15 @@ namespace Xbim
 
 								System::String^ errMsg = XbimFace::GetBuildFaceErrorMessage(loopErr);
 								XbimGeometryCreator::LogWarning(logger, profile, "Invalid void, {0}. IfcCurve #{1} could not be added. Inner bound ignored", errMsg, curve->EntityLabel);
+								continue;
 							}
+							*pFace = faceMaker.Face(); //now we can accept the update
 						}
 						catch (System::Exception^ e)
 						{
 							XbimGeometryCreator::LogWarning(logger, profile, "Invalid profile void, {0}. IfcCurve #{1} could not be added. Inner bound ignored", e->Message, curve->EntityLabel);
 						}
-						*pFace = faceMaker.Face();
+						
 					}
 					else
 					{
@@ -2049,23 +2054,28 @@ namespace Xbim
 
 		XbimVector3D XbimFace::Normal::get()
 		{
-			if (!IsValid) return XbimVector3D();
-			TopoDS_Face face = this;
-			BRepGProp_Face prop(face);
+			gp_Dir normal = NormalDir();
+			return XbimVector3D(normal.X(), normal.Y(), normal.Z());
+		}
+
+		gp_Dir XbimFace::NormalDir()
+		{
+			if (!IsValid) return gp_Dir();
+			TopoDS_Face lockedFace = *pFace;
+			BRepGProp_Face prop(lockedFace);
 			gp_Pnt centre;
 			gp_Vec normalDir;
 			double u1, u2, v1, v2;
 			prop.Bounds(u1, u2, v1, v2);
 			prop.Normal((u1 + u2) / 2.0, (v1 + v2) / 2.0, centre, normalDir);
-			XbimVector3D vec(normalDir.X(), normalDir.Y(), normalDir.Z());
-			System::GC::KeepAlive(this);
-			return vec.Normalized();
+			normalDir.Normalize();		
+			return normalDir;
 		}
 
 		XbimVector3D XbimFace::NormalAt(double u, double v)
 		{
 			if (!IsValid) return XbimVector3D();
-			TopoDS_Face face = this;
+			TopoDS_Face face = *pFace;
 			BRepGProp_Face prop(face);
 			gp_Pnt pos;
 			gp_Vec normalDir;

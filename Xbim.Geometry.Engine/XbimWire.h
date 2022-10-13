@@ -78,7 +78,7 @@ namespace Xbim
 			
 			
 		public:
-			static gp_Dir NormalDir(const TopoDS_Wire& wire);
+			static gp_Dir NormalDir(const TopoDS_Wire& wire, bool& isValid);
 #pragma region destructors
 
 			~XbimWire() { InstanceCleanup(); }

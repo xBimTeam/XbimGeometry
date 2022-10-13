@@ -104,7 +104,8 @@ namespace Xbim
 #pragma endregion
 
 			property bool IsReversed{bool get(){ return IsValid && pFace->Orientation() == TopAbs_REVERSED; }; }
-			
+			gp_Dir NormalDir();
+
 #pragma region constructors
 			XbimFace(const TopoDS_Face& face);
 			XbimFace(const TopoDS_Face& face, Object^ tag);
