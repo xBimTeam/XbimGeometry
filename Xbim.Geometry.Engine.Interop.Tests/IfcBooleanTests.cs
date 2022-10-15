@@ -13,7 +13,6 @@ using System.IO;
 using Xbim.Ifc.Extensions;
 using Xbim.Common.Exceptions;
 using Microsoft.Extensions.Logging.Abstractions;
-using FluentAssertions;
 
 namespace Xbim.Geometry.Engine.Interop.Tests
 {
@@ -335,9 +334,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
                 var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 var solids = geomEngine.CreateSolidSet(er.Entity, logger);
-                solids.Count.Should().Be(1);
-                solids.First().Volume.Should().BeApproximately(2643081676.7200427, 1e-5);
-             
+                Assert.IsTrue(solids.Count == 2, "This should produce two solids");
+
             }
 
         }
