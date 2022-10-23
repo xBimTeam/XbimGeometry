@@ -13,6 +13,7 @@ using System.IO;
 using Xbim.Ifc.Extensions;
 using Xbim.Common.Exceptions;
 using Microsoft.Extensions.Logging.Abstractions;
+using FluentAssertions;
 
 namespace Xbim.Geometry.Engine.Interop.Tests
 {
@@ -54,9 +55,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                                                                                                                                                  
                 var geomEngine = new XbimGeometryEngine(model, logger);
                 var bodyGeom = geomEngine.CreateSolidSet(bodyRep,logger);
-                // var faultWires = bodyGeom.First().Faces.Where(f => f.OuterBound.Edges.Count > 4).ToList();
-
-
+               
                 var cutSolids = geomEngine.CreateSolidSet();
                 foreach (var opening in openings)
                 {
@@ -84,7 +83,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
 
                 }
-                
+
                 Assert.IsTrue(resultSetCut.Count == cutSingularCut.Count);
                 //when done in one go the fuzzy tolerance kicks in and removes very thin solids
                 Assert.AreEqual(resultSetCut.First.Volume, cutSingularCut.First.Volume, 500);
@@ -94,7 +93,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void very_slow_boolean_clipping()
         {
-            using (var er = new EntityRepository<IIfcBooleanClippingResult>(nameof(very_slow_boolean_clipping), true)) //model is in radians
+            using (var er = new EntityRepository<IIfcBooleanClippingResult>(nameof(very_slow_boolean_clipping))) //model is in radians
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanClippingResult found");
                 var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
@@ -107,7 +106,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void memory_hungry_boolean()
         {
-            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(memory_hungry_boolean), true)) //model is in radians
+            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(memory_hungry_boolean))) 
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
                 var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
@@ -119,7 +118,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void memory_hungry_boolean2()
         {
-            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(memory_hungry_boolean2), true)) //model is in radians
+            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(memory_hungry_boolean2))) 
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
                 var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
@@ -133,7 +132,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [Ignore("The test was formally passing, but returning the wrong geometry in the previous release, it needs to be investigated, but it's not a regression.")]
         public void memory_hungry_boolean3()
         {
-            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(memory_hungry_boolean3), true)) //model is in radians
+            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(memory_hungry_boolean3))) 
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
                 Debug.WriteLine($"Evaluating {er.Entity}");
@@ -148,7 +147,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void memory_hungry_boolean4()
         {
-            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(memory_hungry_boolean4), true)) //model is in radians
+            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(memory_hungry_boolean4))) 
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
                 var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
@@ -161,7 +160,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void grid_with_polylines()
         {
-            using (var er = new EntityRepository<IIfcGrid>(nameof(grid_with_polylines), true)) //model is in radians
+            using (var er = new EntityRepository<IIfcGrid>(nameof(grid_with_polylines))) 
             {
                 Assert.IsTrue(er.Entity != null, "No IfcGrid found");
                 var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
@@ -177,7 +176,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void cut_planes_within_fuzzy_tolerance()
         {
-            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(cut_planes_within_fuzzy_tolerance), true)) //model is in radians
+            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(cut_planes_within_fuzzy_tolerance))) 
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
                 var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
@@ -190,7 +189,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void boolean_cut_failure()
         {
-            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(boolean_cut_failure), true)) //model is in radians
+            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(boolean_cut_failure))) 
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
                 var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
@@ -420,7 +419,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void UnorderedCompositeCurveTest()
         {
-            using (var er = new EntityRepository<IIfcCompositeCurve>(nameof(UnorderedCompositeCurveTest), true))
+            using (var er = new EntityRepository<IIfcCompositeCurve>(nameof(UnorderedCompositeCurveTest), 1,1e-5,true))
             {
                 Assert.IsTrue(er.Entity != null, "No IIfcCompositeCurve found");
                 var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
@@ -435,7 +434,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void BooleanResultTimoutTest()
         {
-            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(BooleanResultTimoutTest), true))
+            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(BooleanResultTimoutTest), 1,1e-5,false))
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
                 var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
@@ -448,7 +447,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void BooleanResultTimout2Test()
         {
-            using (var er = new EntityRepository<IIfcBooleanResult>("boolean_result_timing_out2", true))
+            using (var er = new EntityRepository<IIfcBooleanResult>("boolean_result_timing_out2"))
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
                 var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
@@ -461,7 +460,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void ComplexNestedBooleanResult()
         {
-            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(ComplexNestedBooleanResult), true))
+            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(ComplexNestedBooleanResult),1,1e-5,true))
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
                 var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
@@ -474,7 +473,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void VerySmallBooleanCutTest()
         {
-            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(VerySmallBooleanCutTest), true))
+            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(VerySmallBooleanCutTest), 1, 1e-5, false))
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
                 var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
@@ -487,7 +486,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void FailingBooleanBrepWithZeroVolumeTest()
         {
-            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(FailingBooleanBrepWithZeroVolumeTest), true))
+            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(FailingBooleanBrepWithZeroVolumeTest)))
             {
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
                 var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
@@ -1039,7 +1038,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 {
                     var geomEngine = new XbimGeometryEngine(bodyEntity.Entity.Model, logger);
                     var body = geomEngine.CreateSolidSet(bodyEntity.Entity, logger);
-                    Assert.IsTrue(body.Count == 8, "Eight solids should be returned");
+                    body.Count.Should().Be(8);
                     geomEngine = new XbimGeometryEngine(holeEntity.Entity.Model, logger);
                     var hole = geomEngine.CreateSolid(holeEntity.Entity, logger);
                     var result = body.Cut(hole, bodyEntity.Entity.Model.ModelFactors.Precision);

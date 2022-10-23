@@ -313,6 +313,7 @@ namespace XbimRegression
 
                 catch (Exception ex)
                 {
+                    Console.WriteLine(ex.Message);
                     logger.LogError(string.Format("Problem converting file: {0}", ifcFile), ex);
                     result.Failed = true;
                     result.GeometryDuration = watch.ElapsedMilliseconds;

@@ -28,7 +28,7 @@ namespace Xbim
 				ILogger^ _logger;
 				
 			public:
-				ModelService(IModel^ model, double minGapSize);
+				
 				ModelService(IModel^ model);
 				
 				virtual property bool UpgradeFaceSets {bool get() { return _upgradeFaceSets; } void set(bool upgrade) { _upgradeFaceSets = upgrade; }};
@@ -47,8 +47,7 @@ namespace Xbim
 				
 				virtual property IXMeshFactors^ MeshFactors {IXMeshFactors^ get() { return gcnew Xbim::Geometry::Services::MeshFactors(model->ModelFactors->OneMeter, model->ModelFactors->Precision); }; }
 				virtual property IModel^ Model {IModel^ get() { return model; };  }
-				virtual void SetModel(IModel^ model);
-				virtual void SetModel(IModel^ model, double minGapSize);
+				virtual void SetModel(IModel^ model);				
 				virtual ISet<IIfcGeometricRepresentationContext^>^ GetTypical3dContexts();
 
 				virtual IXLocation^ Create(IIfcObjectPlacement^ placement);

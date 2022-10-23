@@ -2,7 +2,7 @@
 
 namespace Xbim.Geometry.Engine.Interop
 {
-    /// <summary>
+    /// <summary> 
     /// A class representing the conventions we use for processor specific Geometry Engine library
     /// </summary> 
     internal class XbimArchitectureConventions

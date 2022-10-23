@@ -447,8 +447,9 @@ namespace Xbim
 
 		int DoBoolean(const TopoDS_Shape& body, const TopTools_ListOfShape& tools, BOPAlgo_Operation op, double tolerance, double fuzzyFactor, TopoDS_Shape& result, int timeout)
 		{
-			
+			double maxTol = tolerance;
 			int  retVal = BOOLEAN_FAIL;
+			bool singleCut = tools.Size() == 1;
 			try
 			{
 				ShapeAnalysis_Wire tolFixer;
@@ -476,14 +477,14 @@ namespace Xbim
 						BRepBndLib::Add(tsArg, tsCutBox);
 						if (!tsBodyBox.IsOut(tsCutBox))
 						{
-							//maxTol = std::max(BRep_Tool::MaxTolerance(tsArg, TopAbs_EDGE), maxTol);
+							maxTol = std::max(BRep_Tool::MaxTolerance(tsArg, TopAbs_EDGE), maxTol);
 							shapeTools.Append(tsArg);
 							argCount++;
 						}
 					}
 					else
 					{
-						//maxTol = std::max(BRep_Tool::MaxTolerance(tsArg, TopAbs_EDGE), maxTol);
+						maxTol = std::max(BRep_Tool::MaxTolerance(tsArg, TopAbs_EDGE), maxTol);
 						shapeTools.Append(tsArg);
 						argCount++;
 					}
@@ -604,20 +605,20 @@ namespace Xbim
 				//unify the shape
 
 				
-				ShapeUpgrade_UnifySameDomain unifier(result);
+				//ShapeUpgrade_UnifySameDomain unifier(result);
 				//unifier.SetAngularTolerance(0.00174533); //1 tenth of a degree
-				unifier.SetLinearTolerance(tolerance);
-				
-				try
-				{
-					//sometimes unifier crashes
-					unifier.Build();
-					result =unifier.Shape();
-				}
-				catch (...) //any failure
-				{
-					//default to what we had					
-				}
+				//unifier.SetLinearTolerance(tolerance);
+				//
+				//try
+				//{
+				//	//sometimes unifier crashes
+				//	unifier.Build();
+				//	result =unifier.Shape();
+				//}
+				//catch (...) //any failure
+				//{
+				//	//default to what we had					
+				//}
 				return retVal;
 			}
 			catch (Standard_NotImplemented) //User break most likely called

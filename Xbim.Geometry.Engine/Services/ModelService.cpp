@@ -24,26 +24,16 @@ namespace Xbim
 		
 			/// MinArea is 25 sq millimetres
 			
-			ModelService::ModelService(IModel^ iModel, double minGapSize)
-			{
-				SetModel(iModel, minGapSize);
-			}
+			
 			ModelService::ModelService(IModel^ iModel)
 			{
 				SetModel(iModel);
 			}
 			
 			
-
-
 			void ModelService::SetModel(IModel^ iModel)
 			{
-				SetModel(iModel, iModel->ModelFactors->Precision);
-			}
-			void ModelService::SetModel(IModel^ iModel, double minGapSize)
-			{
 				model = iModel;
-				minimumGap = minGapSize;
 				precisionSquared = model->ModelFactors->Precision * model->ModelFactors->Precision;			
 				model->Tag = this; //support for legacy engine lookup
 				
@@ -51,12 +41,13 @@ namespace Xbim
 
 				//here we can consider specific authoring tools
 				//Revit has a minimum length of a line = 1 inch / 32 = 0.79375mm
-				//therefore for certain operations we need to set the minim gap 
+				//therefore for certain operations we need to set the minimum gap 
 				IIfcApplication^ anApp = Enumerable::FirstOrDefault(iModel->Instances->OfType<IIfcApplication^>());
 
 				if (anApp != nullptr && anApp->ApplicationIdentifier.ToString() == "Revit")
-					minimumGap = (iModel->ModelFactors->OneMilliMeter * 25.4) / 32;
-				;
+					minimumGap = (iModel->ModelFactors->OneMilliMeter * 25.4) / 32; //1/32nd of an inch, revits min gap
+				else
+					minimumGap = iModel->ModelFactors->OneMilliMeter / 10; //1/10 of a millimeter, ok for most metric models
 			}
 
 			/// <summary>

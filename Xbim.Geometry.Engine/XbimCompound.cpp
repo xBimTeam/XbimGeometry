@@ -1,5 +1,4 @@
-
-#include <BRep_Builder.hxx>
+#include <BRep_Builder.hxx> 
 #include <BRepBuilderAPI_Sewing.hxx>
 #include <BRepBuilderAPI_FastSewing.hxx>
 #include <TopTools_ListIteratorOfListOfShape.hxx>
@@ -12,7 +11,7 @@
 #include <BRepAlgoAPI_Cut.hxx>
 #include <BRepAlgoAPI_Fuse.hxx>
 #include <BRepAlgoAPI_Common.hxx>
-#include <BRepBuilderAPI_MakeSolid.hxx>
+#include <BRepBuilderAPI_MakeSolid.hxx> 
 #include <Bnd_Box.hxx>
 #include <BRepBndLib.hxx>
 #include <BRepTools.hxx>

@@ -10,6 +10,10 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Link>win10-x64/IjwHost.dll</Link>
 		</Content>
+		<Content Include="$(MSBuildThisFileDirectory)..\runtimes\win10-x64\native\TK*.dll">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<Link>win10-x64/</Link>
+		</Content>
 	</ItemGroup>
 
 	<ItemGroup Condition=" '$(Platform)' == 'x86' OR '$(Platform)' == 'AnyCPU' ">
@@ -20,6 +24,10 @@
 		<Content Include="$(MSBuildThisFileDirectory)..\runtimes\win10-x86\native\IjwHost.dll">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Link>win10-x86/IjwHost.dll</Link>
+		</Content>
+		<Content Include="$(MSBuildThisFileDirectory)..\runtimes\win10-x86\native\TK*.dll">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<Link>win10-x86/</Link>
 		</Content>
 	</ItemGroup>
 
@@ -32,6 +40,10 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Link>win10-x86/IjwHost.dll</Link>
 		</Content>
+		<Content Include="$(MSBuildThisFileDirectory)..\runtimes\win10-x86\native\TK*.dll">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<Link>win10-x86/</Link>
+		</Content>
 		<Content Include="$(MSBuildThisFileDirectory)..\runtimes\win10-x64\native\Xbim.Geometry.Engine.dll">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Link>win10-x64/Xbim.Geometry.Engine.dll</Link>
@@ -39,6 +51,10 @@
 		<Content Include="$(MSBuildThisFileDirectory)..\runtimes\win10-x64\native\IjwHost.dll">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Link>win10-x64/IjwHost.dll</Link>
+		</Content>
+		<Content Include="$(MSBuildThisFileDirectory)..\runtimes\win10-x64\native\TK*.dll">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<Link>win10-x64/</Link>
 		</Content>
 	</ItemGroup>
 </Project>

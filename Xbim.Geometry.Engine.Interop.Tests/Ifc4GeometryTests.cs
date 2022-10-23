@@ -112,7 +112,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void TrimmedCurveWithLargeRadianValueTest()
         {
-            using (var er = new EntityRepository<IIfcExtrudedAreaSolid>(nameof(TrimmedCurveWithLargeRadianValueTest), true))
+            using (var er = new EntityRepository<IIfcExtrudedAreaSolid>(nameof(TrimmedCurveWithLargeRadianValueTest)))
             {
                 Assert.IsTrue(er.Entity != null, "No IIfcExtrudedAreaSolid found");
                 var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);

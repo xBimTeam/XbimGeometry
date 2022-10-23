@@ -66,7 +66,11 @@ namespace Xbim.Geometry.Engine.Interop
             catch (Exception e)
             {
                 _logger.LogError(0, e, "Failed to construct XbimGeometryEngine");
+#if NETFRAMEWORK
                 throw new FileLoadException($"Failed to load Xbim.Geometry.Engine{conventions.Suffix}.dll", e);
+#else
+                throw new FileLoadException($"Failed to load {conventions.Runtime}\\Xbim.Geometry.Engine.dll", e);
+#endif
             }
 
         }
@@ -907,7 +911,7 @@ namespace Xbim.Geometry.Engine.Interop
             logger.LogTrace("Entering GeometryEngine {function} with point {x},{y},{z}", methodName, point.X, point.Y, point.Z);
         }
 
-        #region IDisposable Support
+#region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
 
         protected virtual void Dispose(bool disposing)
@@ -936,7 +940,7 @@ namespace Xbim.Geometry.Engine.Interop
             Dispose(true);
             GC.SuppressFinalize(this);  // To avoid excessive GC
         }
-        #endregion
+#endregion
 
 
 
