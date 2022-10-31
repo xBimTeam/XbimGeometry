@@ -33,6 +33,10 @@ namespace Xbim.Geometry.Engine.Interop.Tests.TestFiles
            
             logger = null;
         }
+
+        /// <summary>
+        /// This is a precast concrete plank with holes through it, but all the holes are on top of each other
+        /// </summary>
         [TestMethod]
         public void arbritary_closed_profile_with_intersecting_voids_test()
         {
@@ -42,7 +46,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests.TestFiles
                 var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 var solidSet = geomEngine.CreateSolidSet(er.Entity, logger);
                 Assert.IsTrue(solidSet.Count == 1, "This solid set should have 1 solid");
-                Assert.IsTrue(solidSet.First().Faces.Count == 28, "This solid should have 28 faces");
+                solidSet.First().Faces.Count.Should().Be(28);
             }
 
         }

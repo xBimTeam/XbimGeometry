@@ -44,8 +44,11 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void multi_boolean_opening_operations_test()
         {
+            
             using (var model = MemoryModel.OpenRead(@"TestFiles\complex.ifc"))
             {
+                
+                
                 var voidRels = model.Instances.OfType<IIfcRelVoidsElement>();
                 var op = voidRels.GroupBy(rv => rv.RelatingBuildingElement).FirstOrDefault();//just try the first one
                 var body = op.Key;
@@ -54,6 +57,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var bodyRep = body.Representation.Representations.SelectMany(r => r.Items.OfType<IIfcBooleanClippingResult>()).FirstOrDefault(); //it is a IIfcBooleanClippingResult
                                                                                                                                                  
                 var geomEngine = new XbimGeometryEngine(model, logger);
+                
                 var bodyGeom = geomEngine.CreateSolidSet(bodyRep,logger);
                
                 var cutSolids = geomEngine.CreateSolidSet();
@@ -64,7 +68,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     cutSolids.Add(openingGeom);
                 }
                 ////try in a oner
-                var resultSetCut = bodyGeom.Cut(cutSolids, 1e-5);
+                var resultSetCut = bodyGeom.Cut(cutSolids, precision);
                 var cutSingularCut = bodyGeom;
                 //get the openings, nb all placements are the same so we do not need to adjust
                 foreach (var opening in openings)
@@ -73,7 +77,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     var openingGeom = geomEngine.CreateSolid(openingRep, logger);
                     try
                     {
-                        var nextGeom = cutSingularCut.Cut(openingGeom, 1e-5);
+                        var nextGeom = cutSingularCut.Cut(openingGeom, precision);
                         cutSingularCut = nextGeom;
                     }
                     catch (XbimGeometryException ge)
@@ -84,9 +88,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
                 }
 
-                Assert.IsTrue(resultSetCut.Count == cutSingularCut.Count);
+                resultSetCut.Count.Should().Be(cutSingularCut.Count);
                 //when done in one go the fuzzy tolerance kicks in and removes very thin solids
-                Assert.AreEqual(resultSetCut.First.Volume, cutSingularCut.First.Volume, 500);
+                resultSetCut.First.Volume.Should().BeApproximately(cutSingularCut.First.Volume, 500);
             }
         }
 
@@ -142,7 +146,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             }
         }
         /// <summary>
-        /// This test does a lot of booleans with bad data and finally clips everything
+        /// This test does a lot of booleans with bad data and finally clips everything,
+        /// the first wire is self intersecting and creates an invalid solid. The test really is to ensure the system does not fail critically
         /// </summary>
         [TestMethod]
         public void memory_hungry_boolean4()
@@ -152,7 +157,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
                 var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 var s = geomEngine.CreateSolidSet(er.Entity, logger);
-                Assert.AreEqual(0,s.Count);
+                Assert.AreEqual(1,s.Count);
             }
         }
 
@@ -333,7 +338,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
                 var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 var solids = geomEngine.CreateSolidSet(er.Entity, logger);
-                Assert.IsTrue(solids.Count == 2, "This should produce two solids");
+                solids.Count.Should().Be(2);
 
             }
 
@@ -985,7 +990,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
                 var relVoids = repos.Entity;
                 var oneMilli = relVoids.Model.ModelFactors.OneMilliMetre;
-                var precision = relVoids.Model.ModelFactors.Precision + (oneMilli * 2e-6);
+                var precision = oneMilli / 10; 
                 var wall = relVoids.RelatingBuildingElement;
                 var wallPlacement = wall.ObjectPlacement as IIfcLocalPlacement;
                 var wallTransform = wallPlacement.ToMatrix3D();
@@ -1013,10 +1018,10 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 foreach (var uncutItem in wallBrepPlaced)
                 {
                     var result = uncutItem.Cut(openingBReps, precision);
-                    Assert.IsTrue(result.Count == 1);
+                    result.Count.Should().Be(1);
                     var cutSolid = result.First as IXbimSolid;
-                    Assert.IsNotNull(cutSolid);
-                    Assert.IsTrue(cutSolid.IsValid);
+                    cutSolid.Should().NotBeNull();
+                    cutSolid.IsValid.Should().BeTrue();
                     if (uncutItem.Volume <= cutSolid.Volume) uncut++;
                     Assert.IsTrue(uncut <= 3, "More than two solids are uncut, there should only be two");
                     vol += cutSolid.Volume;

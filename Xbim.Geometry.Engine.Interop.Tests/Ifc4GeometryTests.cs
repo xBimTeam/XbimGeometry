@@ -348,7 +348,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var geomEngine = new XbimGeometryEngine(model, logger);
                 var basin = geomEngine.CreateSolidSet(advancedBrep, logger);
                 Assert.AreEqual(2, basin.Count());
-                basin.Sum(s => s.Volume).Should().BeApproximately(44861498.858031876, 1e-7);
+                basin.Sum(s => s.Volume).Should().BeApproximately(44869362.59648641, 1e-7);
 
             }
         }
@@ -658,7 +658,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void CompositeCurveBadPrecisionTest()
         {
-            using (var er = new EntityRepository<IIfcCompositeCurve>(nameof(CompositeCurveBadPrecisionTest)))
+            using (var er = new EntityRepository<IIfcCompositeCurve>(nameof(CompositeCurveBadPrecisionTest),1.0,1e-5,false))
             {
                 Assert.IsTrue(er.Entity != null, "No IIfcCompositeProfileDef found");
                 var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);

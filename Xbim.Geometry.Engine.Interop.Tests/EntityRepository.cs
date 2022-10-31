@@ -24,9 +24,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         public EntityRepository(string name, double millimeter, double precision, bool inRadians) : this(name)
         {
             if (inRadians)
-                model.ModelFactors.Initialise(1, millimeter, precision);
+                model.ModelFactors.Initialise(1, millimeter/1000, precision);
             else
-                model.ModelFactors.Initialise(Math.PI / 180, millimeter, precision);
+                model.ModelFactors.Initialise(Math.PI / 180, millimeter/1000, precision);
         }
 
         public void Dispose()
