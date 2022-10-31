@@ -58,7 +58,7 @@
 #include <GeomProjLib.hxx>
 #include <GeomAPI.hxx>
 #include <GeomConvert.hxx>
-
+#include <BRepCheck_Result.hxx>
 #include "XbimFace.h"
 #include "XbimOccWriter.h"
 #include "XbimCurve.h"
@@ -542,11 +542,11 @@ namespace Xbim
 
 			if (!analyser.IsValid())
 			{
-				analyser.IsValid();
+
+				ShapeFix_Face faceFixer(*pFace);
+				if (faceFixer.Perform())
+					*pFace = faceFixer.Face();
 			}
-			ShapeFix_Face faceFixer(*pFace);
-			if (faceFixer.Perform())
-				*pFace = faceFixer.Face();
 		}
 
 		//Ensure the wire bounds a space inside
@@ -1048,7 +1048,7 @@ namespace Xbim
 
 				if (wire->IsValid)
 				{
-					double tolerance = XbimConvert::ModelService(profile)->MinimumGap;
+					double tolerance = XbimConvert::ModelService(profile)->Precision;
 
 					XbimVector3D n = wire->Normal;
 					if (n.IsInvalid()) //it is not an area
@@ -1060,9 +1060,9 @@ namespace Xbim
 					{
 						XbimPoint3D centre = wire->BaryCentre;
 						gp_Pln thePlane(gp_Pnt(centre.X, centre.Y, centre.Z), gp_Vec(n.X, n.Y, n.Z));
-
+						
 						pFace = new TopoDS_Face();
-						*pFace = BRepBuilderAPI_MakeFace(thePlane, wire, true);
+						*pFace = BRepBuilderAPI_MakeFace( wire, true);
 						Handle(Geom_Plane) planeSurface = new Geom_Plane(thePlane);
 						ShapeAnalysis_Wire wireChecker;
 						wireChecker.SetSurface(planeSurface);
@@ -1109,7 +1109,7 @@ namespace Xbim
 						}
 
 						//need to check for self intersecting edges to comply with Ifc rules
-						TopTools_IndexedMapOfShape map;
+						/*TopTools_IndexedMapOfShape map;
 						TopExp::MapShapes(*pFace, TopAbs_EDGE, map);
 						ShapeFix_Edge ef;
 
@@ -1119,7 +1119,7 @@ namespace Xbim
 							ef.FixVertexTolerance(edge, *pFace);
 						}
 						ShapeFix_ShapeTolerance fTol;
-						fTol.LimitTolerance(*pFace, tolerance);
+						fTol.LimitTolerance(*pFace, tolerance);*/
 					}
 				}
 
@@ -1158,7 +1158,7 @@ namespace Xbim
 				XbimGeometryCreator::LogWarning(logger, profile, "Invalid bound. It should be 2D");
 			}
 			//Z must be up
-			double tolerance = XbimConvert::ModelService(profile)->MinimumGap;
+			double tolerance = XbimConvert::ModelService(profile)->Precision;
 			double toleranceMax = profile->Model->ModelFactors->PrecisionMax;
 			ShapeFix_ShapeTolerance FTol;
 			TopoDS_Face face;
@@ -1214,8 +1214,8 @@ namespace Xbim
 					if (!innerWire->IsClosed) //we need to close it if we have more thn one edge
 					{
 						double oneMilli = profile->Model->ModelFactors->OneMilliMeter;
-						XbimFace^ xface = gcnew XbimFace(innerWire, true, oneMilli, curve->EntityLabel, logger);
-						ShapeFix_Wire wireFixer(innerWire, xface, XbimConvert::ModelService(curve)->MinimumGap);
+						//XbimFace^ xface = gcnew XbimFace(innerWire, true, oneMilli, curve->EntityLabel, logger);
+						ShapeFix_Wire wireFixer(innerWire, *pFace, XbimConvert::ModelService(curve)->MinimumGap);
 						wireFixer.ClosedWireMode() = Standard_True;
 						wireFixer.FixGaps2dMode() = Standard_True;
 						wireFixer.FixGaps3dMode() = Standard_True;
@@ -1240,8 +1240,8 @@ namespace Xbim
 							double currentloopTolerance = tolerance;
 						TryBuildLoop:
 							faceMaker.Add(innerWire);
-							XbimFace^ f = gcnew XbimFace(faceMaker.Face());
-							//check the face is ok
+
+							////check the face is ok
 							if (BRepCheck_Analyzer(faceMaker.Face(), Standard_True).IsValid() == Standard_False)
 							{
 								XbimGeometryCreator::LogWarning(logger, profile, "Invalid void. Inner bound ignored", curve->EntityLabel);

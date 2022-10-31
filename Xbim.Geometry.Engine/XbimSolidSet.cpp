@@ -605,20 +605,20 @@ namespace Xbim
 				//unify the shape
 
 				
-				//ShapeUpgrade_UnifySameDomain unifier(result);
-				//unifier.SetAngularTolerance(0.00174533); //1 tenth of a degree
-				//unifier.SetLinearTolerance(tolerance);
-				//
-				//try
-				//{
-				//	//sometimes unifier crashes
-				//	unifier.Build();
-				//	result =unifier.Shape();
-				//}
-				//catch (...) //any failure
-				//{
-				//	//default to what we had					
-				//}
+				ShapeUpgrade_UnifySameDomain unifier(result);
+				unifier.SetAngularTolerance(0.00174533); //1 tenth of a degree
+				unifier.SetLinearTolerance(tolerance);
+				
+				try
+				{
+					//sometimes unifier crashes
+					unifier.Build();
+					result =unifier.Shape();
+				}
+				catch (...) //any failure
+				{
+					//default to what we had					
+				}
 				return retVal;
 			}
 			catch (Standard_NotImplemented) //User break most likely called

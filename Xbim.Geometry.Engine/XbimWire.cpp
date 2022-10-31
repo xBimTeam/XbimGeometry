@@ -74,6 +74,8 @@
 #include "XbimEdgeSet.h"
 #include "XbimVertexSet.h"
 #include "XbimCompound.h"
+#include "BRep/OccExtensions/KeyedPnt2d.h"
+#include "Factories/Unmanaged/NWireFactory.h"
 using namespace Xbim::Common;
 using namespace System::Linq;
 // using namespace System::Diagnostics;
@@ -410,115 +412,41 @@ namespace Xbim
 		// In this case the pline may or ma not be closed it may or may not lie on a surface, it may be self intersecting
 		void XbimWire::Init(IIfcPolyline^ pline, ILogger^ logger, XbimConstraints constraints)
 		{
-			List<IIfcCartesianPoint^>^ polygon = Enumerable::ToList(pline->Points);
-			int originalCount = polygon->Count;
-			double tolerance = pline->Model->ModelFactors->Precision;
-			if (originalCount < 2)
+			//validate
+			if (!Enumerable::Any(pline->Points))
+				throw gcnew XbimGeometryException("IfcPolyline has zero points");
+			NWireFactory wireFactory;
+			if (2 == (int)pline->Dim)
 			{
-				XbimGeometryCreator::LogWarning(logger, pline, "Polyline with less than 2 points is an empty line. It has been ignored");
-				return;
+				//we don't treat a polyline as a curve when we are building a wire from a polyline 
+				//as generally it needs to be a compound of edges and vertices, only as a brep edge do we use the curve methodology
+				//std::map<int, gp_Pnt2d> mapOfPoints; //the key is the ifc entity label
+				//get a list of points but remove duplicates by using the tolerance
+				NCollection_Vector<KeyedPnt2d> pointSeq(pline->Points->Count);
+				for each (IIfcCartesianPoint ^ cp  in pline->Points) //these should be 2d points
+				{
+					pointSeq.Append(KeyedPnt2d(gp_XY(cp->X, cp->Y), cp->EntityLabel));
+				}
+				
+				TopoDS_Wire wire = wireFactory.BuildPolyline2d(pointSeq, XbimConvert::ModelService(pline)->MinimumGap);
+				pWire = new TopoDS_Wire();
+				*pWire = wire;
 			}
-
-
-			bool done = false;
-			bool tryAgain = true;
-			while (!done)
+			else if(3 == (int)pline->Dim)
 			{
-
-
-				TColgp_SequenceOfPnt pointSeq;
-				BRepBuilderAPI_MakeWire wireMaker;
-
-
-				for (int i = 0; i < originalCount; i++)
+				//validate
+				if (!Enumerable::Any(pline->Points))
+					throw gcnew XbimGeometryException("IfcPolyline has zero points");
+				NCollection_Vector<KeyedPnt> pointSeq(pline->Points->Count);
+				for each (IIfcCartesianPoint ^ cp  in pline->Points) //these should be 3d points
 				{
-					pointSeq.Append(XbimConvert::GetPoint3d(polygon[i]));
+					pointSeq.Append(KeyedPnt(gp_XYZ(cp->X, cp->Y, cp->Z), cp->EntityLabel));
 				}
-				bool close = (constraints & XbimConstraints::Closed) == XbimConstraints::Closed;
-				bool notSelfIntersecting = (constraints & XbimConstraints::NotSelfIntersecting) == XbimConstraints::NotSelfIntersecting;
-				bool isClosed = XbimFace::RemoveDuplicatePoints(pointSeq, close, tolerance);
-
-
-				if (pointSeq.Length() < 2)
-				{
-					XbimGeometryCreator::LogWarning(logger, pline, "Polyline with less than 2 points is an empty line. It has been ignored");
-					return;
-				}
-
-
-				BRepBuilderAPI_MakePolygon polyMaker;
-				for (int i = 1; i <= pointSeq.Length(); ++i)
-				{
-					polyMaker.Add(pointSeq.Value(i));
-
-				}
-				if (isClosed)
-					polyMaker.Close();
-
-				if (polyMaker.IsDone())
-				{
-					if (notSelfIntersecting)
-					{//check for no self intersection
-						TopoDS_Wire wire = polyMaker.Wire(); //get a handle to the wire to avoid garbage collection
-
-						//double tolerance = profile->Model->ModelFactors->Precision;
-						Handle(Geom_Plane) planeSurface = new Geom_Plane(gp_Pnt(0, 0, 0), gp_Vec(0, 0, 1));
-						ShapeAnalysis_Wire wireChecker;
-						wireChecker.SetSurface(planeSurface);
-						wireChecker.Load(wire);
-						wireChecker.SetPrecision(tolerance);
-
-						if (wireChecker.CheckSelfIntersection())
-						{
-							ShapeFix_Wire wireFixer;
-							wireFixer.SetSurface(planeSurface);
-							wireFixer.Load(wire);
-							wireFixer.SetPrecision(tolerance);
-
-							wireFixer.ModifyRemoveLoopMode() = true;
-							wireFixer.FixSelfIntersectionMode() = true;
-							wireFixer.FixSelfIntersectingEdgeMode() = true;
-							wireFixer.FixReorderMode() = true;
-							wireFixer.FixSmallMode() = true;
-							wireFixer.FixIntersectingEdgesMode() = true;
-							wireFixer.FixNonAdjacentIntersectingEdgesMode() = true;
-							wireFixer.ModifyTopologyMode() = true;
-
-							bool fixed = wireFixer.Perform();
-							if (!fixed) // we have a self intersection but the tools cannot fix it, normally means two points are too near
-							{
-
-
-								tolerance = pline->Model->ModelFactors->OneMilliMeter / 10; //use a normal modelling precision
-
-								if (tryAgain)
-								{
-									tryAgain = false; //only do this once
-									continue;
-								}
-								else
-								{
-									XbimGeometryCreator::LogWarning(logger, pline, "Could not fix Self Intersecting Polyline. It has been ignored");
-									//return;
-								}
-							}
-						}
-					}
-
-					pWire = new TopoDS_Wire();
-					*pWire = polyMaker.Wire();
-					done = true;
-				}
-				else
-				{
-					XbimGeometryCreator::LogWarning(logger, pline, "Polyline could not be built. It has been ignored");
-					return; //didn't work;
-				}
+				TopoDS_Wire wire = wireFactory.BuildPolyline(pointSeq, -1, -1, XbimConvert::ModelService(pline)->MinimumGap);
+				pWire = new TopoDS_Wire();
+				*pWire = wire;
 			}
-
-			ShapeFix_ShapeTolerance tFixer;
-			tFixer.LimitTolerance(*pWire, tolerance);
-
+			
 		}
 
 		void XbimWire::Init(IIfcIndexedPolyCurve^ polyCurve, ILogger^ logger, XbimConstraints /*constraints*/)
@@ -1209,7 +1137,7 @@ namespace Xbim
 			{
 				bool isValidNormal;
 				gp_Dir dir = NormalDir(*pWire, isValidNormal);
-				if(!isValidNormal) Standard_Failure::Raise("Wire has no normal");
+				if (!isValidNormal) Standard_Failure::Raise("Wire has no normal");
 				return  XbimVector3D(dir.X(), dir.Y(), dir.Z());
 			}
 			catch (const Standard_Failure& sf)

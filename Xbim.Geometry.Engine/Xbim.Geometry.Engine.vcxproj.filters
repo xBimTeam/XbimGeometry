@@ -108,6 +108,18 @@
     <ClInclude Include="Services\MeshFactors.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Factories\Unmanaged\NWireFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BRep\OccExtensions\KeyedPnt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BRep\OccExtensions\KeyedPnt2d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Services\Unmanaged\NLoggingService.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp">
@@ -192,6 +204,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="XbimShell.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Factories\Unmanaged\NWireFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Services\Unmanaged\NLoggingService.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

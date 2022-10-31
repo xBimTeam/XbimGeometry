@@ -1271,8 +1271,8 @@ namespace Xbim
 
 						if (repItem->Position != nullptr) //In Ifc4 this is now optional
 							pSolid->Move(XbimConvert::ToLocation(repItem->Position));
-						ShapeFix_ShapeTolerance tolFixer;
-						tolFixer.LimitTolerance(*pSolid, XbimConvert::ModelService(repItem)->MinimumGap);
+						/*ShapeFix_ShapeTolerance tolFixer;
+						tolFixer.LimitTolerance(*pSolid, XbimConvert::ModelService(repItem)->MinimumGap);*/
 						return;
 					}
 				}
