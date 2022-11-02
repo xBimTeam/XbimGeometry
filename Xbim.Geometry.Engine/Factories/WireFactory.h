@@ -35,11 +35,12 @@ namespace Xbim
 				GeometryProcedures^ GPFactory;
 				CurveFactory^ _curveFactory;
 
-				TopoDS_Wire Build3d(IIfcCurve^ ifcCurve, Handle(Geom_Surface)& surface);
-				TopoDS_Wire Build2d(IIfcCurve^ ifcCurve, Handle(Geom_Surface)& surface);
-				TopoDS_Wire Build2dCircle(IIfcCircle^ ifcCircle, Handle(Geom_Surface)& surface);
-				TopoDS_Wire Build2dTrimmedCurve(IIfcTrimmedCurve^ ifcTrimmedCurve, Handle(Geom_Surface)& surface);
-				TopoDS_Wire Build2dPolyline(IIfcPolyline^ ifcPolyline, Handle(Geom_Surface)& surface);
+				TopoDS_Wire Build3d(IIfcCurve^ ifcCurve);
+				TopoDS_Wire Build2d(IIfcCurve^ ifcCurve);
+				TopoDS_Wire Build2dCircle(IIfcCircle^ ifcCircle);
+				TopoDS_Wire Build2dTrimmedCurve(IIfcTrimmedCurve^ ifcTrimmedCurve);
+
+				TopoDS_Wire Build2dPolyline(IIfcPolyline^ ifcPolyline);
 				//builds a trimmed 3d polyline param values of -1 are taken as no trim
 				TopoDS_Wire Build3D(IIfcPolyline^ ifcPolyline, double startParam, double endParam);
 				void BuildSegments(IIfcCompositeCurve^ ifcCurve, TColGeom_SequenceOfCurve& segments, bool sameSense);
@@ -67,7 +68,7 @@ namespace Xbim
 				TopoDS_Wire BuildDirectrix(IIfcCurve^ curve, System::Nullable<IfcParameterValue> startParam, System::Nullable<IfcParameterValue> endParam);
 				TopoDS_Wire BuildProfile(IIfcProfileDef^ profileDef);
 				//Builds an IfcCurve as a TopoDS_Wire
-				TopoDS_Wire BuildWire(IIfcCurve^ ifcCurve, Handle(Geom_Surface)& surface);
+				TopoDS_Wire BuildWire(IIfcCurve^ ifcCurve);
 
 				/*void GetCurves(IIfcPolyline^ polyline, TColGeom_SequenceOfCurve& curves);
 				void GetCurves(IIfcCompositeCurve^ compCurve, TColGeom_SequenceOfCurve& curves);

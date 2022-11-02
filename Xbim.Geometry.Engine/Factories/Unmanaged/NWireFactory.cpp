@@ -55,7 +55,7 @@ TopoDS_Wire NWireFactory::BuildPolyline2d(
 		bool closed = d <= tolerance; //check if the polyline is specified as closed (end repeats the start point)
 
 		int myLastId = -1;
-		bool warnedOfSelfIntersection = true;
+		bool warnedOfSelfIntersection = false;
 		BRepMesh_VertexInspector anInspector(new NCollection_IncAllocator);
 		anInspector.SetTolerance(tolerance);
 
@@ -98,20 +98,22 @@ TopoDS_Wire NWireFactory::BuildPolyline2d(
 					pLoggingService->LogInformation(message);
 					continue;
 				}
-				else if (aResID != 1) //we are adding a point we alread have connnected unless it is the first point it will make an illegal topological wire
+				else if (pCount!=0) //we are adding a point we already have connnected and we are not on the last point
 				{
 					if (!warnedOfSelfIntersection)
 					{
 						pLoggingService->LogInformation("Self intersecting polyline");
 						warnedOfSelfIntersection = true; //just do it once
 					}
-					vertices.Append(kv);
+					
 				}
+				vertices.Append(kv);
+				myLastId = aResID;
 			}
 
 		}
 		//The inspector now has our final vertex list
-		int desiredPointCount = closed ? pointSeq.Length() - 1 : pointSeq.Length();
+		int desiredPointCount =  pointSeq.Length();
 		int actualPointCount = vertices.Size();
 		if (actualPointCount < desiredPointCount) //we have removed duplicate points
 			pLoggingService->LogInformation("Duplicate points removed from polyline");
@@ -120,13 +122,8 @@ TopoDS_Wire NWireFactory::BuildPolyline2d(
 			pLoggingService->LogInformation("Polyline must have at least 2 vertices");
 			return _emptyWire;
 		}
-		if (closed && actualPointCount < 3)
-		{
-			pLoggingService->LogInformation("Cannot close a polyline with less than 3 vertices");
-			
-		}
+		
 		//make the polygon
-
 		TopoDS_Wire wire;
 		builder.MakeWire(wire);
 		for (int i = 2; i <= actualPointCount; i++)
@@ -134,12 +131,8 @@ TopoDS_Wire NWireFactory::BuildPolyline2d(
 			BRepBuilderAPI_MakeEdge edgeMaker(TopoDS::Vertex(vertices.Value(i - 1)), TopoDS::Vertex(vertices.Value(i)));
 			builder.Add(wire, edgeMaker.Edge());
 		}
-		if (closed)
-		{
-			BRepBuilderAPI_MakeEdge edgeMaker(TopoDS::Vertex(vertices.Value(actualPointCount)), TopoDS::Vertex(vertices.Value(1)));
-			builder.Add(wire, edgeMaker.Edge());
-			wire.Closed(true);
-		}
+		wire.Closed(closed);
+		
 		return wire;
 
 	}

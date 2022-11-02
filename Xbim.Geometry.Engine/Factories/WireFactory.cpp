@@ -48,8 +48,8 @@ namespace Xbim
 			}
 			IXWire^ WireFactory::Build(IIfcCurve^ ifcCurve)
 			{
-				Handle(Geom_Surface) surface;
-				TopoDS_Wire wire = BuildWire(ifcCurve, surface);
+				
+				TopoDS_Wire wire = BuildWire(ifcCurve);
 				if (wire.IsNull() || wire.NbChildren() == 0)
 					throw gcnew XbimGeometryFactoryException("Resulting wire is empty");
 				return gcnew XWire(wire);
@@ -63,13 +63,13 @@ namespace Xbim
 				return gcnew XWire(wire);
 			}
 
-			TopoDS_Wire WireFactory::BuildWire(IIfcCurve^ ifcCurve, Handle(Geom_Surface)& surface)
+			TopoDS_Wire WireFactory::BuildWire(IIfcCurve^ ifcCurve)
 			{
 
 				if ((int)ifcCurve->Dim == 2)
-					return Build2d(ifcCurve, surface);
+					return Build2d(ifcCurve);
 				else
-					return Build3d(ifcCurve, surface);
+					return Build3d(ifcCurve);
 			}
 
 			double WireFactory::GetDeterminant(double x1, double y1, double x2, double y2)
@@ -93,7 +93,7 @@ namespace Xbim
 				return (area / 2);
 			}
 
-			TopoDS_Wire WireFactory::Build2d(IIfcCurve^ ifcCurve, Handle(Geom_Surface)& surface)
+			TopoDS_Wire WireFactory::Build2d(IIfcCurve^ ifcCurve)
 			{
 				//validate
 				if ((int)ifcCurve->Dim != 2)
@@ -110,7 +110,7 @@ namespace Xbim
 				case XCurveType::IfcBSplineCurveWithKnots:
 					break;
 				case XCurveType::IfcCircle:
-					return Build2dCircle(static_cast<IIfcCircle^>(ifcCurve), surface);
+					return Build2dCircle(static_cast<IIfcCircle^>(ifcCurve));
 				case XCurveType::IfcCompositeCurve:
 					break;
 				case XCurveType::IfcCompositeCurveOnSurface:
@@ -126,13 +126,13 @@ namespace Xbim
 				case XCurveType::IfcPcurve:
 					break;
 				case XCurveType::IfcPolyline:
-					return Build2dPolyline(static_cast<IIfcPolyline^>(ifcCurve), surface);
+					return Build2dPolyline(static_cast<IIfcPolyline^>(ifcCurve));
 				case XCurveType::IfcRationalBSplineCurveWithKnots:
 					break;
 				case XCurveType::IfcSurfaceCurve:
 					break;
 				case XCurveType::IfcTrimmedCurve:
-					return Build2dTrimmedCurve(static_cast<IIfcTrimmedCurve^>(ifcCurve), surface);
+					return Build2dTrimmedCurve(static_cast<IIfcTrimmedCurve^>(ifcCurve));
 				case XCurveType::IfcLine:
 				default:
 					throw gcnew XbimGeometryFactoryException("A wire cannot be built from a " + curveType.ToString());
@@ -141,7 +141,7 @@ namespace Xbim
 				throw gcnew XbimGeometryFactoryException("Not implemented. Curve type: " + curveType.ToString());
 			}
 
-			TopoDS_Wire WireFactory::Build3d(IIfcCurve^ ifcCurve, Handle(Geom_Surface)& surface)
+			TopoDS_Wire WireFactory::Build3d(IIfcCurve^ ifcCurve)
 			{
 				XCurveType curveType;
 				if (!Enum::TryParse<XCurveType>(ifcCurve->ExpressType->ExpressName, curveType))
@@ -184,7 +184,7 @@ namespace Xbim
 				throw gcnew XbimGeometryFactoryException("Not implemented. Curve type: " + curveType.ToString());
 			}
 
-			TopoDS_Wire WireFactory::Build2dCircle(IIfcCircle^ ifcCircle, Handle(Geom_Surface)& surface)
+			TopoDS_Wire WireFactory::Build2dCircle(IIfcCircle^ ifcCircle)
 			{
 				Handle(Geom2d_Curve) hCurve = _curveFactory->BuildGeom2d(ifcCircle);
 				BRepBuilderAPI_MakeEdge2d edgeMaker(hCurve);
@@ -196,12 +196,11 @@ namespace Xbim
 				//must be a planar surface
 				Handle(Geom2d_Circle) circ = Handle(Geom2d_Circle)::DownCast(hCurve);
 				gp_Pnt2d centre = circ->Location();
-				surface = new Geom_Plane(gp_Pnt(centre.X(), centre.Y(), 0.0), gp::DZ());
-
+				
 				return wire;
 			}
 
-			TopoDS_Wire WireFactory::Build2dTrimmedCurve(IIfcTrimmedCurve^ ifcTrimmedCurve, Handle(Geom_Surface)& surface)
+			TopoDS_Wire WireFactory::Build2dTrimmedCurve(IIfcTrimmedCurve^ ifcTrimmedCurve)
 			{
 				Handle(Geom2d_Curve) hCurve = _curveFactory->BuildGeom2d(ifcTrimmedCurve);
 				BRepBuilderAPI_MakeEdge2d edgeMaker(hCurve);
@@ -213,11 +212,11 @@ namespace Xbim
 				//must be a planar surface
 				Handle(Geom2d_TrimmedCurve) trim = Handle(Geom2d_TrimmedCurve)::DownCast(hCurve);
 				gp_Pnt2d start = trim->StartPoint();
-				surface = new Geom_Plane(gp_Pnt(start.X(), start.Y(), 0.0), gp::DZ());
+				
 				return wire;
 			}
 
-			TopoDS_Wire WireFactory::Build2dPolyline(IIfcPolyline^ ifcPolyline, Handle(Geom_Surface)& surface)
+			TopoDS_Wire WireFactory::Build2dPolyline(IIfcPolyline^ ifcPolyline)
 			{
 				//validate
 				if (!Enumerable::Any(ifcPolyline->Points))

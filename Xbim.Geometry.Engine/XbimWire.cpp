@@ -226,6 +226,7 @@ namespace Xbim
 			}
 			else
 			{
+
 				XbimWire^ loop = gcnew XbimWire(profile->OuterCurve, logger);
 
 				if (!loop->IsValid)
@@ -234,14 +235,13 @@ namespace Xbim
 					return;
 				}
 
-				pWire = new TopoDS_Wire();
+				
 				if (profile->ProfileType == IfcProfileTypeEnum::AREA && !loop->IsClosed) //need to make sure it is not self intersecting and it is closed area
 				{
 
 					// todo: this code is not quite robust, it did not manage to close fairly simple polylines.
 					try
 					{
-
 
 						double oneMilli = profile->Model->ModelFactors->OneMilliMeter;
 						TopoDS_Face face = gcnew XbimFace(loop, true, oneMilli, profile->OuterCurve->EntityLabel, logger);
@@ -255,9 +255,15 @@ namespace Xbim
 						wireFixer.SetMaxTolerance(oneMilli * 10);
 						Standard_Boolean closed = wireFixer.Perform();
 						if (closed)
+						{
+							pWire = new TopoDS_Wire();
 							*pWire = wireFixer.Wire();
+						}
 						else
+						{
+							pWire = new TopoDS_Wire();
 							*pWire = loop;
+						}
 					}
 					catch (const Standard_Failure& sf)
 					{
@@ -266,7 +272,10 @@ namespace Xbim
 					}
 				}
 				else
+				{
+					pWire = new TopoDS_Wire();
 					*pWire = loop;
+				}
 			}
 		}
 
@@ -431,8 +440,11 @@ namespace Xbim
 				//we have a wire and it will be planar as it was defined in 2d
 				//However, it may not comply with any other topological rules, these need to be checked at an appropriate level
 				//For example if the wire is to be used as an outer bound to a face it should be closed and contiguous
-				pWire = new TopoDS_Wire();
-				*pWire = wire;
+				if (!wire.IsNull())
+				{
+					pWire = new TopoDS_Wire();
+					*pWire = wire;
+				}
 			}
 			else if(3 == (int)pline->Dim)
 			{
@@ -445,8 +457,11 @@ namespace Xbim
 					pointSeq.Append(KeyedPnt(gp_XYZ(cp->X, cp->Y, cp->Z), cp->EntityLabel));
 				}
 				TopoDS_Wire wire = wireFactory.BuildPolyline(pointSeq, -1, -1, XbimConvert::ModelService(pline)->MinimumGap);
-				pWire = new TopoDS_Wire();
-				*pWire = wire;
+				if (!wire.IsNull())
+				{
+					pWire = new TopoDS_Wire();
+					*pWire = wire;
+				}
 			}
 			
 		}

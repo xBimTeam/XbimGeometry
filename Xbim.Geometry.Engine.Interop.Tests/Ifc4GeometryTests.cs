@@ -38,8 +38,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void Can_build_ifcadvancedbrep_with_faulty_surface_orientation()
         {
-            Assert.Inconclusive("File missing");
-            using (var model = MemoryModel.OpenRead(@"ifcadvancedbrep_with_faulty_surface_orientation.ifc"))
+            
+            using (var model = MemoryModel.OpenRead(@"testfiles/ifcadvancedbrep_with_faulty_surface_orientation.ifc"))
             {
                 //MemoryModel.SetWorkArounds(model.Header, model.ModelFactors as XbimModelFactors);
                 var pfs = model.Instances.OfType<IIfcAdvancedBrep>().FirstOrDefault();
@@ -48,7 +48,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var geomEngine = new XbimGeometryEngine(model, logger);
                 var solid = geomEngine.CreateSolid(pfs, logger);
 
-                solid.Volume.Should().BeApproximately(102264692.69692135, 1e-7);
+                solid.Volume.Should().BeApproximately(102264692.69692135, 1e-5);
                 solid.Faces.Count.Should().Be(14);
             }
         }

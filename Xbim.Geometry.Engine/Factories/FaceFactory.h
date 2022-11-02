@@ -33,6 +33,7 @@ namespace Xbim
 					Ptr()->SetLogger(logService);
 				}
 				TopoDS_Face BuildPlanarFace(IXPlane^ planeDef);
+				
 				virtual IXFace^ BuildFace(IXSurface^ surface, array<IXWire^>^ wires);
 				virtual property IXModelService^ ModelService {IXModelService^ get() { return _modelService; }};
 				virtual property IXLoggingService^ LoggingService {IXLoggingService^ get() { return _loggerService; }};

@@ -60,7 +60,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             Assert.IsFalse(returnedbrep.Contains(".000001"), "because it removed the wrong point");
         }
 
-        [TestMethod, Ignore("This is a bad concept, we should not remove line segments that are colinear(aligned) when building a face. It is perfectly vaid for two faces to abut two colinear segments of another face")]
+        [TestMethod, Ignore("This is a bad concept, we should not remove line segments that are colinear(aligned) when building a face. It is perfectly valid for two faces to abut two colinear segments of another face")]
 		public void PolygonAlignedCleanup()
 		{
             /*

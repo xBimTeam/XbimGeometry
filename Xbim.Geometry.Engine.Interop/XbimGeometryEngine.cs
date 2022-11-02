@@ -47,7 +47,7 @@ namespace Xbim.Geometry.Engine.Interop
                 _logger.LogTrace("Loaded {fullName} from {codebase}", ass.GetName().FullName, ass.Location);
 #endif
                 var modelServiceType = ass.GetType("Xbim.Geometry.Services.ModelService");
-                _modelService = Activator.CreateInstance(modelServiceType, model) as IXModelService;
+                _modelService = Activator.CreateInstance(modelServiceType, model, _logger) as IXModelService;
                 var creatorType = ass.GetType("Xbim.Geometry.XbimGeometryCreator");
                 _engine = Activator.CreateInstance(creatorType, _logger, _modelService) as IXbimGeometryEngine;
 
