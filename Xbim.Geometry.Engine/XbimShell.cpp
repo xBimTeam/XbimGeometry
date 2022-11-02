@@ -122,7 +122,7 @@ namespace Xbim
 
 		void XbimShell::Init(IIfcSurfaceOfLinearExtrusion^ linExt, ILogger^ logger)
 		{
-			XbimWire^ prof = gcnew XbimWire(linExt->SweptCurve, logger, XbimConstraints::None);
+			XbimWire^ prof = gcnew XbimWire(linExt->SweptCurve, logger);
 			if (prof->IsValid && linExt->Depth > 0) //we have a valid wire and extrusion
 			{
 				IIfcDirection^ dir = linExt->ExtrudedDirection;

@@ -921,7 +921,7 @@ namespace Xbim
 			}
 
 			IModelFactors^ mf = repItem->Model->ModelFactors;
-			XbimWire^ sweep = gcnew XbimWire(repItem->Directrix, logger, XbimConstraints::None);
+			XbimWire^ sweep = gcnew XbimWire(repItem->Directrix, logger);
 
 			if (dynamic_cast<IIfcLine^>(repItem->Directrix)) //params are different
 			{
@@ -1066,7 +1066,7 @@ namespace Xbim
 			{
 
 				//build the spine
-				XbimWire^ sweep = gcnew XbimWire(repItem->SpineCurve, logger, XbimConstraints::None);
+				XbimWire^ sweep = gcnew XbimWire(repItem->SpineCurve, logger);
 				BRepOffsetAPI_MakePipeShell pipeMaker1(sweep);
 				pipeMaker1.SetTransitionMode(BRepBuilderAPI_Transformed);
 				//move the sections to the right position
@@ -1405,7 +1405,7 @@ namespace Xbim
 
 			//build the substraction body
 			gp_Dir dir(pbhs->Position->P[2].X, pbhs->Position->P[2].Y, pbhs->Position->P[2].Z);
-			XbimWire^ polyBoundary = gcnew XbimWire(pbhs->PolygonalBoundary, logger, XbimConstraints::Closed | XbimConstraints::NotSelfIntersecting);
+			XbimWire^ polyBoundary = gcnew XbimWire(pbhs->PolygonalBoundary, logger);
 
 			if (!polyBoundary->IsValid)
 			{
@@ -1649,7 +1649,7 @@ namespace Xbim
 			//
 		XbimWire^ XbimSolid::CreateDirectrix(IIfcCurve^ directrix, System::Nullable<IfcParameterValue> startParam, System::Nullable<IfcParameterValue> endParam, ILogger^ logger)
 		{
-			XbimWire^ wire = gcnew XbimWire(directrix, logger, XbimConstraints::None);
+			XbimWire^ wire = gcnew XbimWire(directrix, logger);
 
 			if (!startParam.HasValue && !endParam.HasValue) //no trim required
 			{
@@ -1701,7 +1701,7 @@ namespace Xbim
 				IIfcCompositeCurve^ curve = (IIfcCompositeCurve^)(basisCurve);
 				for each (IIfcCompositeCurveSegment ^ segment in curve->Segments)
 				{
-					XbimWire^ segWire = gcnew XbimWire(segment, logger, XbimConstraints::None);
+					XbimWire^ segWire = gcnew XbimWire(segment, logger);
 					double wireLen = segWire->Length;       // this is the length to add to the OCC command if we use all of the segment
 					double segValue = SegLength(segment, logger);   // this is the IFC size of the segment
 					totCurveLen += wireLen;

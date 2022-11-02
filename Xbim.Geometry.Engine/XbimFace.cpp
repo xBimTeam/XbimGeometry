@@ -61,7 +61,9 @@
 #include <BRepCheck_Result.hxx>
 #include "XbimFace.h"
 #include "XbimOccWriter.h"
-#include "XbimCurve.h"
+
+#include <ShapeBuild_ReShape.hxx>
+
 using namespace System::Linq;
 
 namespace Xbim
@@ -574,7 +576,7 @@ namespace Xbim
 
 		void XbimFace::Init(IIfcCompositeCurve^ cCurve, ILogger^ logger)
 		{
-			XbimWire^ wire = gcnew XbimWire(cCurve, logger, XbimConstraints::Closed | XbimConstraints::NotSelfIntersecting);
+			XbimWire^ wire = gcnew XbimWire(cCurve, logger);
 			if (wire->IsValid)
 			{
 				BRepBuilderAPI_MakeFace faceMaker(wire);
@@ -586,7 +588,7 @@ namespace Xbim
 		void XbimFace::Init(IIfcPolyline^ pline, ILogger^ logger)
 		{
 
-			XbimWire^ wire = gcnew XbimWire(pline, logger, XbimConstraints::Closed | XbimConstraints::NotSelfIntersecting);
+			XbimWire^ wire = gcnew XbimWire(pline, logger);
 			if (wire->IsValid)
 			{
 				BRepBuilderAPI_MakeFace faceMaker(wire);
@@ -1042,7 +1044,7 @@ namespace Xbim
 				XbimGeometryCreator::LogWarning(logger, profile, "Faces cannot be built with IIfcArbitraryOpenProfileDef, a face requires a closed loop");
 			else //it is a standard profile that can be built as a single wire
 			{
-				XbimWire^ wire = gcnew XbimWire(profile, logger, XbimConstraints::Closed | XbimConstraints::NotSelfIntersecting);
+				XbimWire^ wire = gcnew XbimWire(profile, logger);
 				//need to make sure the wire is ok
 
 
@@ -1060,9 +1062,9 @@ namespace Xbim
 					{
 						XbimPoint3D centre = wire->BaryCentre;
 						gp_Pln thePlane(gp_Pnt(centre.X, centre.Y, centre.Z), gp_Vec(n.X, n.Y, n.Z));
-						
+
 						pFace = new TopoDS_Face();
-						*pFace = BRepBuilderAPI_MakeFace( wire, true);
+						*pFace = BRepBuilderAPI_MakeFace(wire, true);
 						Handle(Geom_Plane) planeSurface = new Geom_Plane(thePlane);
 						ShapeAnalysis_Wire wireChecker;
 						wireChecker.SetSurface(planeSurface);
@@ -1156,126 +1158,112 @@ namespace Xbim
 			if (2 != (int)profile->OuterCurve->Dim)
 			{
 				XbimGeometryCreator::LogWarning(logger, profile, "Invalid bound. It should be 2D");
-			}
-			//Z must be up
-			double tolerance = XbimConvert::ModelService(profile)->Precision;
-			double toleranceMax = profile->Model->ModelFactors->PrecisionMax;
-			ShapeFix_ShapeTolerance FTol;
-			TopoDS_Face face;
-			XbimWire^ loop = gcnew XbimWire(profile->OuterCurve, logger, XbimConstraints::Closed | XbimConstraints::NotSelfIntersecting);
-			if (loop->IsValid)
+				return;
+			}		
+			XbimWire^ loop = gcnew XbimWire(profile->OuterCurve, logger);
+			if (!loop->IsValid)
 			{
-				if (!loop->IsClosed) //we need to close it i
-				{
-					double oneMilli = profile->Model->ModelFactors->OneMilliMeter;
-					XbimFace^ xface = gcnew XbimFace(loop, true, oneMilli, profile->OuterCurve->EntityLabel, logger);
-					ShapeFix_Wire wireFixer(loop, xface, XbimConvert::ModelService(profile)->MinimumGap);
-					wireFixer.ClosedWireMode() = Standard_True;
-					wireFixer.FixGaps2dMode() = Standard_True;
-					wireFixer.FixGaps3dMode() = Standard_True;
-					wireFixer.ModifyGeometryMode() = Standard_True;
-					wireFixer.SetMinTolerance(XbimConvert::ModelService(profile)->MinimumGap);
-					wireFixer.SetPrecision(oneMilli);
-					wireFixer.SetMaxTolerance(oneMilli * 10);
-					Standard_Boolean closed = wireFixer.Perform();
-					if (closed)
-						loop = gcnew XbimWire(wireFixer.Wire());
-				}
-				double currentFaceTolerance = tolerance;
-			TryBuildFace:
-				BRepBuilderAPI_MakeFace faceMaker(loop, true);
+				XbimGeometryCreator::LogWarning(logger, profile->OuterCurve, "Invalid bound. It should could not be built");
+				return;
+			}
 
-				BRepBuilderAPI_FaceError err = faceMaker.Error();
-				if (err == BRepBuilderAPI_NotPlanar)
+			
+			BRepBuilderAPI_MakeFace faceMaker(loop, true);
+			
+			ShapeFix_Face faceFixer;
+			faceFixer.FixSmallAreaWireMode() = Standard_True;
+			faceFixer.FixWireTool()->ModifyTopologyMode() = Standard_True;
+			faceFixer.FixWireTool()->FixVertexToleranceMode() = Standard_True;
+			if (BRepCheck_Analyzer(faceMaker.Face(), Standard_True).IsValid() == Standard_False)
+			{
+				//have a go at making a fix
+				faceFixer.Init(faceMaker.Face());
+				faceFixer.SetContext(new ShapeBuild_ReShape());
+				faceFixer.Context()->ModeConsiderLocation() = Standard_True;
+				if (faceFixer.Perform())
 				{
-					currentFaceTolerance *= 10;
-					if (currentFaceTolerance <= toleranceMax)
+					if (BRepCheck_Analyzer(faceFixer.Face(), Standard_True).IsValid() == Standard_False)
 					{
-						FTol.SetTolerance(loop, currentFaceTolerance, TopAbs_WIRE);
-						goto TryBuildFace;
-					}
-					System::String^ errMsg = XbimFace::GetBuildFaceErrorMessage(err);
-					XbimGeometryCreator::LogWarning(logger, profile, "Invalid bound, {0}. Face discarded", errMsg);
-					return;
-				}
-				pFace = new TopoDS_Face();
-				*pFace = faceMaker.Face();
-				gp_Dir tn = NormalDir();
-				//some models incorrectly output overlapping / intersecting wires, don't process them
-				for each (IIfcCurve ^ curve in profile->InnerCurves)
-				{
-					faceMaker.Init(*pFace); //reset the faceMaker
-					XbimWire^ innerWire = gcnew XbimWire(curve, logger, XbimConstraints::Closed | XbimConstraints::NotSelfIntersecting);
-					if (!innerWire->IsValid)
-					{
-						XbimGeometryCreator::LogWarning(logger, profile, "Invalid innerWire. Inner bound ignored", curve->EntityLabel);
-						continue;
-					}
-					if (!innerWire->IsClosed) //we need to close it if we have more thn one edge
-					{
-						double oneMilli = profile->Model->ModelFactors->OneMilliMeter;
-						//XbimFace^ xface = gcnew XbimFace(innerWire, true, oneMilli, curve->EntityLabel, logger);
-						ShapeFix_Wire wireFixer(innerWire, *pFace, XbimConvert::ModelService(curve)->MinimumGap);
-						wireFixer.ClosedWireMode() = Standard_True;
-						wireFixer.FixGaps2dMode() = Standard_True;
-						wireFixer.FixGaps3dMode() = Standard_True;
-						wireFixer.ModifyGeometryMode() = Standard_True;
-						wireFixer.SetMinTolerance(XbimConvert::ModelService(profile)->MinimumGap);
-						wireFixer.SetPrecision(oneMilli);
-						wireFixer.SetMaxTolerance(oneMilli * 10);
-						Standard_Boolean closed = wireFixer.Perform();
-						if (closed)
-							innerWire = gcnew XbimWire(wireFixer.Wire());
-					}
-					if (innerWire->IsClosed) //if the loop is not closed it is not a bound
-					{
-						try 
-						{
-							bool isValidNormal;
-							gp_Dir n = XbimWire::NormalDir(innerWire, isValidNormal);
-							if (!isValidNormal) Standard_Failure::Raise("Inner bound has invalid normal");; //it is possible the inner loop is just a closed wire with zero area when a normal is calculated, this will throw an excpetion and the void is invalid
-							bool needInvert = !n.IsOpposite(tn, 0.1);
-							if (needInvert) //inner wire should be reverse of outer wire
-								innerWire->Reverse();
-							double currentloopTolerance = tolerance;
-						TryBuildLoop:
-							faceMaker.Add(innerWire);
-
-							////check the face is ok
-							if (BRepCheck_Analyzer(faceMaker.Face(), Standard_True).IsValid() == Standard_False)
-							{
-								XbimGeometryCreator::LogWarning(logger, profile, "Invalid void. Inner bound ignored", curve->EntityLabel);
-								continue;
-							}
-							BRepBuilderAPI_FaceError loopErr = faceMaker.Error();
-							if (loopErr != BRepBuilderAPI_FaceDone)
-							{
-								currentloopTolerance *= 10; //try courser tolerance
-								if (currentloopTolerance <= toleranceMax)
-								{
-									FTol.SetTolerance(innerWire, currentloopTolerance, TopAbs_WIRE);
-									goto TryBuildLoop;
-								}
-
-								System::String^ errMsg = XbimFace::GetBuildFaceErrorMessage(loopErr);
-								XbimGeometryCreator::LogWarning(logger, profile, "Invalid void, {0}. IfcCurve #{1} could not be added. Inner bound ignored", errMsg, curve->EntityLabel);
-								continue;
-							}
-							*pFace = faceMaker.Face(); //now we can accept the update
-						}
-						catch (System::Exception^ e)
-						{
-							XbimGeometryCreator::LogWarning(logger, profile, "Invalid profile void, {0}. IfcCurve #{1} could not be added. Inner bound ignored", e->Message, curve->EntityLabel);
-						}
-						
+						XbimGeometryCreator::LogWarning(logger, profile->OuterCurve, "Invalid Outer bound. It could not be built correctly");
+						return;
 					}
 					else
 					{
-						XbimGeometryCreator::LogWarning(logger, profile, "Invalid void. IfcCurve #{0} is not closed. Inner bound ignored", curve->EntityLabel);
+						pFace = new TopoDS_Face();
+						*pFace = faceFixer.Face();
 					}
+				}
+				else
+				{
+					XbimGeometryCreator::LogWarning(logger, profile->OuterCurve, "Invalid Outer bound. It could not be built correctly");
+					return;
+				}
+			}
+			else
+			{ //we have a valid face
+				pFace = new TopoDS_Face();
+				*pFace = faceMaker.Face();
+			}
+			gp_Dir faceNormal = NormalDir();
+			//some models incorrectly output overlapping / intersecting wires, don't process them
+			for each (IIfcCurve ^ curve in profile->InnerCurves)
+			{
+				faceMaker.Init(*pFace); //reset the faceMaker
+
+				XbimWire^ innerWire = gcnew XbimWire(curve, logger);
+
+				if (!innerWire->IsValid)
+				{
+					//allow building to procede, this may be a hole with no area for example
+					XbimGeometryCreator::LogWarning(logger, profile, "Invalid inner bound #{0}. Inner bound ignored", curve->EntityLabel);
+					continue;
+				}
+				//check if the wire has a valid normal, this indicates if it is a valid void
+				bool validNormal;
+				gp_Dir voidNormal = XbimWire::NormalDir(innerWire, validNormal);
+				if (!validNormal)
+				{
+					//allow building to procede, this may be a hole with no area for example
+					XbimGeometryCreator::LogWarning(logger, profile, "Invalid inner bound #{0}. Inner bound ignored", curve->EntityLabel);
+					continue;
+				}
+				if (!voidNormal.IsOpposite(faceNormal, 0.1)) //tolerance for opposite +-5 degrees, since we are dealing with 2d here there should be no problems
+					innerWire->Reverse();
+
+				faceMaker.Add(innerWire);
+				if (BRepCheck_Analyzer(faceMaker.Face(), Standard_True).IsValid() == Standard_False)
+				{
+					//have a go at making a fix					
+					faceFixer.Init(faceMaker.Face());
+					faceFixer.SetContext(new ShapeBuild_ReShape());
+					faceFixer.Context()->ModeConsiderLocation() = Standard_True;
+					if (faceFixer.Perform())
+					{
+						if (BRepCheck_Analyzer(faceMaker.Face(), Standard_True).IsValid() == Standard_False)
+						{
+							XbimGeometryCreator::LogWarning(logger, profile, "Invalid inner bound #{0}. It has been ignored", curve->EntityLabel);
+							continue;
+						}
+						else
+						{							
+							*pFace = faceFixer.Face();
+						}
+
+					}
+					else
+					{
+						XbimGeometryCreator::LogWarning(logger, profile, "Invalid inner bound #{0}. It has been ignored", curve->EntityLabel);
+						return;
+					}
+				}
+				else //we have a valid face 
+				{ 
+					*pFace = faceMaker.Face();
 				}
 			}
 		}
+
+
 		void XbimFace::Init(IIfcCompositeProfileDef^ compProfile, ILogger^ logger)
 		{
 			int profileCount = Enumerable::Count(compProfile->Profiles);
@@ -1720,12 +1708,12 @@ namespace Xbim
 			Init(def->BasisSurface, logger); //initialise the plane
 			if (IsValid)
 			{
-				XbimWire^ outerBound = gcnew XbimWire(def->OuterBoundary, logger, XbimConstraints::Closed | XbimConstraints::NotSelfIntersecting);
+				XbimWire^ outerBound = gcnew XbimWire(def->OuterBoundary, logger);
 				BRepBuilderAPI_MakeFace  builder(this);
 				builder.Add(outerBound);
 				for each (IIfcCurve ^ innerCurve in def->InnerBoundaries)
 				{
-					XbimWire^ innerBound = gcnew XbimWire(innerCurve, logger, XbimConstraints::Closed | XbimConstraints::NotSelfIntersecting);
+					XbimWire^ innerBound = gcnew XbimWire(innerCurve, logger);
 					if (innerBound->IsValid)
 						builder.Add(innerBound);
 					else
@@ -1832,7 +1820,7 @@ namespace Xbim
 
 
 				TopLoc_Location loc;
-				double start=0, end = 0;
+				double start = 0, end = 0;
 				TopoDS_Edge edge = xbasisEdge1;
 				Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, loc, start, end);
 
@@ -2068,7 +2056,7 @@ namespace Xbim
 			double u1, u2, v1, v2;
 			prop.Bounds(u1, u2, v1, v2);
 			prop.Normal((u1 + u2) / 2.0, (v1 + v2) / 2.0, centre, normalDir);
-			normalDir.Normalize();		
+			normalDir.Normalize();
 			return normalDir;
 		}
 

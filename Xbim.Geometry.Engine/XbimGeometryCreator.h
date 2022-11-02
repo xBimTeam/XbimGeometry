@@ -87,7 +87,7 @@ namespace Xbim
 			static double LinearDeflectionInMM;
 			static double AngularDeflectionInRadians;
 			static bool IgnoreIfcSweptDiskSolidParams;
-			virtual IXModelService^ CreateModelService(IModel^ model) { return gcnew Services::ModelService(model);}
+			virtual IXModelService^ CreateModelService(IModel^ model) { return gcnew Services::ModelService(model, _logger);}
 			
 			virtual XbimShapeGeometry^ CreateShapeGeometry(IXbimGeometryObject^ geometryObject, double precision, double deflection, double angle, XbimGeometryType storageType, ILogger^ logger);
 			

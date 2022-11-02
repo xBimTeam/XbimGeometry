@@ -1,6 +1,9 @@
 #pragma once
 #pragma warning( disable : 4691 )
 #include "MeshFactors.h"
+#include "LoggingService.h"
+#include "../Factories/WireFactory.h"
+#include "../Factories/CurveFactory.h"
 
 using namespace Xbim::Common;
 using namespace Xbim::Geometry::Abstractions;
@@ -25,11 +28,14 @@ namespace Xbim
 
 				double _timeout;
 				bool _upgradeFaceSets = true;
-				ILogger^ _logger;
+				
+				IXLoggingService^ _loggingService;
+				IXWireFactory^ _wireFactory;
+				IXCurveFactory^ _curveFactory;
 				
 			public:
 				
-				ModelService(IModel^ model);
+				ModelService(IModel^ model, ILogger^ logger) ;
 				
 				virtual property bool UpgradeFaceSets {bool get() { return _upgradeFaceSets; } void set(bool upgrade) { _upgradeFaceSets = upgrade; }};
 				virtual property double Precision {double get() { return model->ModelFactors->Precision; }};
@@ -52,7 +58,10 @@ namespace Xbim
 
 				virtual IXLocation^ Create(IIfcObjectPlacement^ placement);
 				virtual IXLocation^ CreateMappingTransform(IIfcMappedItem^ mappedItem);
-				
+
+				//Factories
+				virtual property IXWireFactory^ WireFactory {IXWireFactory^ get(); }
+				virtual property IXCurveFactory^ CurveFactory {IXCurveFactory^ get(); }
 			};
 		}
 	}

@@ -36,6 +36,7 @@
 #include <BRepTools_WireExplorer.hxx>
 #include <ShapeAnalysis.hxx>
 
+
 TopoDS_Wire NWireFactory::BuildPolyline2d(
 	const NCollection_Vector<KeyedPnt2d>& pointSeq,
 	double tolerance, bool buildRaw)
@@ -139,41 +140,7 @@ TopoDS_Wire NWireFactory::BuildPolyline2d(
 			builder.Add(wire, edgeMaker.Edge());
 			wire.Closed(true);
 		}
-
-		TopoDS_Face face = BRepBuilderAPI_MakeFace(gp_Pln(gp::Origin(), gp::DZ()));
-
-
-		builder.Add(face, wire);
-		//ShapeAnalysis_Wire wireAnalyser(wire, face, tolerance);
-
-		//bool fixSelfIntersection = wireAnalyser.CheckSelfIntersection(); //this finds self intersection even if the edges are not adjacent, the fixer only fixes adjacent
-
-		//if (fixSelfIntersection || warnedOfSelfIntersection)
-		//{
-		//	ShapeFix_Wire wireFixer(wire, face, tolerance);
-		//	Handle(ShapeBuild_ReShape) rebuildShape = new ShapeBuild_ReShape(); //need these to ensure changes happen
-		//	wireFixer.SetContext(rebuildShape);
-		//	if (fixSelfIntersection) 
-		//		if (!wireFixer.FixSelfIntersection())
-		//		{
-		//			pLoggingService->LogWarning("Cound not fix Self-Intersecting polyline");
-		//			return _emptyWire;
-		//		}
-		//		else //sometimes this
-		//		{
-		//			ShapeAnalysis_Wire wireAnalyser(wireFixer.Wire(), face, tolerance);
-		//			if (wireAnalyser.CheckSelfIntersection())
-		//			{
-		//				pLoggingService->LogWarning("Cound not fix Self-Intersecting polyline");
-		//				return _emptyWire;
-		//			}
-		//		}
-		//	if (warnedOfSelfIntersection) wireFixer.FixNotchedEdges(); //this will fix lines that are colinear with the next one
-		//	pLoggingService->LogInformation("Self-Intersecting polyline fixed");
-		//	return wireFixer.Wire();
-		//}
-		//else
-			return wire;
+		return wire;
 
 	}
 	catch (const Standard_Failure& e)

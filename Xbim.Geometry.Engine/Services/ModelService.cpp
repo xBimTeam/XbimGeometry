@@ -4,7 +4,7 @@
 #include <IMeshTools_Parameters.hxx>
 
 #include "../XbimConvert.h"
-//#include "../BRep/XbimLocation.h"
+
 
 using namespace System::Collections::Generic;
 using namespace System::Linq;
@@ -14,6 +14,8 @@ using namespace Xbim::Ifc4;
 
 using namespace System;
 using namespace Xbim::IO::Memory;
+using namespace Xbim::Geometry::Factories;
+using namespace Xbim::Geometry::Services;
 namespace Xbim
 {
 	namespace Geometry
@@ -22,12 +24,11 @@ namespace Xbim
 		{
 
 		
-			/// MinArea is 25 sq millimetres
-			
-			
-			ModelService::ModelService(IModel^ iModel)
+			ModelService::ModelService(IModel^ iModel, ILogger^ logger) 
 			{
+				_loggingService = gcnew LoggingService(logger);
 				SetModel(iModel);
+				
 			}
 			
 			
@@ -92,6 +93,17 @@ namespace Xbim
 				auto sourceTransform = XbimConvert::ToLocation(mappedItem->MappingSource->MappingOrigin);
 				auto mapLocation = sourceTransform * targetTransform;
 				return gcnew XbimLocation(mapLocation);*/
+			}
+
+			IXWireFactory^ ModelService::WireFactory::get()
+			{
+				if (_wireFactory == nullptr) _wireFactory = gcnew Xbim::Geometry::Factories::WireFactory(_loggingService,this, CurveFactory);
+				return _wireFactory;
+			}
+			IXCurveFactory^ ModelService::CurveFactory::get()
+			{
+				if (_curveFactory == nullptr) _curveFactory = gcnew Xbim::Geometry::Factories::CurveFactory(_loggingService,this);
+				return _curveFactory;
 			}
 		}
 

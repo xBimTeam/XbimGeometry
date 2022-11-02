@@ -75,6 +75,7 @@ namespace Xbim.Geometry.Engine.Interop
 
         }
 
+        public IXModelService ModelService => _modelService;
         public IXbimGeometryObject Create(IIfcGeometricRepresentationItem ifcRepresentation, ILogger logger)
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcRepresentation))

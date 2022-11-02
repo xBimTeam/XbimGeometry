@@ -131,32 +131,32 @@ namespace Xbim
 			fixer.LimitTolerance(*pWire, tolerance);
 		}
 		XbimWire::XbimWire(double precision) { Init(precision); }
-		XbimWire::XbimWire(IIfcCurve^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
+		XbimWire::XbimWire(IIfcCurve^ profile, ILogger^ logger) { Init(profile, logger); }
 
-		XbimWire::XbimWire(IIfcCompositeCurve^ compCurve, ILogger^ logger, XbimConstraints constraints) { Init(compCurve, logger, constraints); }
-		XbimWire::XbimWire(IIfcCompositeCurveSegment^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); };
-		XbimWire::XbimWire(IIfcPolyline^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
+		XbimWire::XbimWire(IIfcCompositeCurve^ compCurve, ILogger^ logger) { Init(compCurve, logger); }
+		XbimWire::XbimWire(IIfcCompositeCurveSegment^ profile, ILogger^ logger) { Init(profile, logger); };
+		XbimWire::XbimWire(IIfcPolyline^ profile, ILogger^ logger) { Init(profile, logger); }
 
-		XbimWire::XbimWire(IIfcIndexedPolyCurve^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
+		XbimWire::XbimWire(IIfcIndexedPolyCurve^ profile, ILogger^ logger) { Init(profile, logger); }
 
-		XbimWire::XbimWire(IIfcPolyLoop^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
-		XbimWire::XbimWire(IIfcArbitraryClosedProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
-		XbimWire::XbimWire(IIfcArbitraryOpenProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
-		XbimWire::XbimWire(IIfcCenterLineProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
+		XbimWire::XbimWire(IIfcPolyLoop^ profile, ILogger^ logger) { Init(profile, logger); }
+		XbimWire::XbimWire(IIfcArbitraryClosedProfileDef^ profile, ILogger^ logger) { Init(profile, logger); }
+		XbimWire::XbimWire(IIfcArbitraryOpenProfileDef^ profile, ILogger^ logger) { Init(profile, logger); }
+		XbimWire::XbimWire(IIfcCenterLineProfileDef^ profile, ILogger^ logger) { Init(profile, logger); }
 		//parametrised profiles
-		XbimWire::XbimWire(IIfcProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
-		XbimWire::XbimWire(IIfcDerivedProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
-		XbimWire::XbimWire(IIfcParameterizedProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
-		XbimWire::XbimWire(IIfcCircleProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
-		XbimWire::XbimWire(IIfcRectangleProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
-		XbimWire::XbimWire(IIfcRoundedRectangleProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
-		XbimWire::XbimWire(IIfcLShapeProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
-		XbimWire::XbimWire(IIfcUShapeProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
-		XbimWire::XbimWire(IIfcEllipseProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
-		XbimWire::XbimWire(IIfcIShapeProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
-		XbimWire::XbimWire(IIfcZShapeProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
-		XbimWire::XbimWire(IIfcCShapeProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
-		XbimWire::XbimWire(IIfcTShapeProfileDef^ profile, ILogger^ logger, XbimConstraints constraints) { Init(profile, logger, constraints); }
+		XbimWire::XbimWire(IIfcProfileDef^ profile, ILogger^ logger) { Init(profile, logger); }
+		XbimWire::XbimWire(IIfcDerivedProfileDef^ profile, ILogger^ logger) { Init(profile, logger); }
+		XbimWire::XbimWire(IIfcParameterizedProfileDef^ profile, ILogger^ logger) { Init(profile, logger); }
+		XbimWire::XbimWire(IIfcCircleProfileDef^ profile, ILogger^ logger) { Init(profile, logger); }
+		XbimWire::XbimWire(IIfcRectangleProfileDef^ profile, ILogger^ logger) { Init(profile, logger); }
+		XbimWire::XbimWire(IIfcRoundedRectangleProfileDef^ profile, ILogger^ logger) { Init(profile, logger); }
+		XbimWire::XbimWire(IIfcLShapeProfileDef^ profile, ILogger^ logger) { Init(profile, logger); }
+		XbimWire::XbimWire(IIfcUShapeProfileDef^ profile, ILogger^ logger) { Init(profile, logger); }
+		XbimWire::XbimWire(IIfcEllipseProfileDef^ profile, ILogger^ logger) { Init(profile, logger); }
+		XbimWire::XbimWire(IIfcIShapeProfileDef^ profile, ILogger^ logger) { Init(profile, logger); }
+		XbimWire::XbimWire(IIfcZShapeProfileDef^ profile, ILogger^ logger) { Init(profile, logger); }
+		XbimWire::XbimWire(IIfcCShapeProfileDef^ profile, ILogger^ logger) { Init(profile, logger); }
+		XbimWire::XbimWire(IIfcTShapeProfileDef^ profile, ILogger^ logger) { Init(profile, logger); }
 		XbimWire::XbimWire(double x, double y, double tolerance, bool centre) { Init(x, y, tolerance, centre); }
 #pragma endregion
 
@@ -207,7 +207,7 @@ namespace Xbim
 
 #pragma region Non-Parameterised profiles
 
-		void XbimWire::Init(IIfcArbitraryClosedProfileDef^ profile, ILogger^ logger, XbimConstraints /*constraints*/)
+		void XbimWire::Init(IIfcArbitraryClosedProfileDef^ profile, ILogger^ logger)
 		{
 
 			if (profile->OuterCurve == nullptr)
@@ -226,7 +226,7 @@ namespace Xbim
 			}
 			else
 			{
-				XbimWire^ loop = gcnew XbimWire(profile->OuterCurve, logger, XbimConstraints::Closed | XbimConstraints::NotSelfIntersecting);
+				XbimWire^ loop = gcnew XbimWire(profile->OuterCurve, logger);
 
 				if (!loop->IsValid)
 				{
@@ -270,16 +270,16 @@ namespace Xbim
 			}
 		}
 
-		void XbimWire::Init(IIfcArbitraryOpenProfileDef^ profile, ILogger^ logger, XbimConstraints constraints)
+		void XbimWire::Init(IIfcArbitraryOpenProfileDef^ profile, ILogger^ logger)
 		{
 			if (dynamic_cast<IIfcCenterLineProfileDef^>(profile))
 			{
-				return Init((IIfcCenterLineProfileDef^)profile, logger, constraints);
+				return Init((IIfcCenterLineProfileDef^)profile, logger);
 			}
 			else
 			{
 
-				XbimWire^ loop = gcnew XbimWire(profile->Curve, logger, constraints);
+				XbimWire^ loop = gcnew XbimWire(profile->Curve, logger);
 				if (!loop->IsValid)
 				{
 					XbimGeometryCreator::LogWarning(logger, profile, "Invalid curve. Wire discarded");
@@ -290,11 +290,11 @@ namespace Xbim
 			}
 		}
 
-		void XbimWire::Init(IIfcCenterLineProfileDef^ profile, ILogger^ logger, XbimConstraints constraints)
+		void XbimWire::Init(IIfcCenterLineProfileDef^ profile, ILogger^ logger)
 		{
 
 			double precision = profile->Model->ModelFactors->Precision;
-			XbimWire^ centreWire = gcnew XbimWire(profile->Curve, logger, constraints);
+			XbimWire^ centreWire = gcnew XbimWire(profile->Curve, logger);
 			TopoDS_Wire spine = centreWire;
 			//nb the curve must be 2d so place it on the Z plane so that the offseter can get the correct normal
 			XbimFace^ xFace = gcnew XbimFace(XbimVector3D(0, 0, 1), logger);
@@ -375,11 +375,11 @@ namespace Xbim
 
 		///We need to create a composite curve segment that is a wire representation of a bounded curve
 
-		void XbimWire::Init(IIfcCompositeCurveSegment^ seg, ILogger^ logger, XbimConstraints constraints)
+		void XbimWire::Init(IIfcCompositeCurveSegment^ seg, ILogger^ logger)
 		{
 
 			IIfcTrimmedCurve^ tc = dynamic_cast<IIfcTrimmedCurve^>(seg->ParentCurve);
-			XbimWire^ segWire = gcnew XbimWire(seg->ParentCurve, logger, constraints);
+			XbimWire^ segWire = gcnew XbimWire(seg->ParentCurve, logger);
 			if (segWire->IsValid)
 			{
 				if (tc != nullptr)
@@ -408,9 +408,8 @@ namespace Xbim
 				*pWire = segWire;
 			}
 		}
-		///Special case to allow polylines to be create as compound edges not as a single bpline
-		// In this case the pline may or ma not be closed it may or may not lie on a surface, it may be self intersecting
-		void XbimWire::Init(IIfcPolyline^ pline, ILogger^ logger, XbimConstraints constraints)
+
+		void XbimWire::Init(IIfcPolyline^ pline, ILogger^ logger)
 		{
 			//validate
 			if (!Enumerable::Any(pline->Points))
@@ -429,6 +428,9 @@ namespace Xbim
 				}
 				
 				TopoDS_Wire wire = wireFactory.BuildPolyline2d(pointSeq, XbimConvert::ModelService(pline)->MinimumGap);
+				//we have a wire and it will be planar as it was defined in 2d
+				//However, it may not comply with any other topological rules, these need to be checked at an appropriate level
+				//For example if the wire is to be used as an outer bound to a face it should be closed and contiguous
 				pWire = new TopoDS_Wire();
 				*pWire = wire;
 			}
@@ -449,7 +451,7 @@ namespace Xbim
 			
 		}
 
-		void XbimWire::Init(IIfcIndexedPolyCurve^ polyCurve, ILogger^ logger, XbimConstraints /*constraints*/)
+		void XbimWire::Init(IIfcIndexedPolyCurve^ polyCurve, ILogger^ logger)
 		{
 			double tolerance = polyCurve->Model->ModelFactors->Precision;
 			ShapeFix_ShapeTolerance tFixer;
@@ -746,18 +748,18 @@ namespace Xbim
 		}
 
 
-		void XbimWire::Init(IIfcCurve^ curve, ILogger^ logger, XbimConstraints constraints)
+		void XbimWire::Init(IIfcCurve^ curve, ILogger^ logger)
 		{
 			//this method defaults for create compund edges for the curves below, they could be created as single curves but it creates problems with booleans
 			IIfcPolyline^ pline = dynamic_cast<IIfcPolyline^>(curve);
 			IIfcCompositeCurve^ compCurve = dynamic_cast<IIfcCompositeCurve^>(curve);
 			IIfcIndexedPolyCurve^ polyCurve = dynamic_cast<IIfcIndexedPolyCurve^>(curve);
 			if (pline != nullptr)
-				Init(pline, logger, constraints);
+				Init(pline, logger);
 			else if (compCurve != nullptr)
-				Init(compCurve, logger, constraints);
+				Init(compCurve, logger);
 			else if (polyCurve != nullptr)
-				Init(polyCurve, logger, constraints);
+				Init(polyCurve, logger);
 			else
 			{
 				XbimEdge^ edge = gcnew XbimEdge(curve, logger);
@@ -777,7 +779,7 @@ namespace Xbim
 			}
 		}
 
-		void XbimWire::Init(IIfcCompositeCurve^ cCurve, ILogger^ logger, XbimConstraints constraints)
+		void XbimWire::Init(IIfcCompositeCurve^ cCurve, ILogger^ logger)
 		{
 			double tolerance = cCurve->Model->ModelFactors->Precision;
 			//BRepBuilderAPI_MakeWire converter;
@@ -806,7 +808,7 @@ namespace Xbim
 
 				if (lastSeg && seg->Transition == IfcTransitionCode::DISCONTINUOUS) isContinuous = false;
 
-				XbimWire^ xbimWire = gcnew XbimWire(seg, logger, constraints);
+				XbimWire^ xbimWire = gcnew XbimWire(seg, logger);
 				if (xbimWire->IsValid)
 				{
 					TopoDS_Wire segWire = xbimWire;
@@ -965,7 +967,7 @@ namespace Xbim
 
 		}
 
-		void XbimWire::Init(IIfcPolyLoop^ polyloop, ILogger^ logger, XbimConstraints /*constraints*/)
+		void XbimWire::Init(IIfcPolyLoop^ polyloop, ILogger^ logger)
 		{
 			List<IIfcCartesianPoint^>^ polygon = Enumerable::ToList(polyloop->Polygon);
 			int originalCount = polygon->Count;
@@ -1409,24 +1411,24 @@ namespace Xbim
 
 #pragma region Parameterised profiles
 
-		void XbimWire::Init(IIfcProfileDef^ profile, ILogger^ logger, XbimConstraints constraints)
+		void XbimWire::Init(IIfcProfileDef^ profile, ILogger^ logger)
 		{
 			if (dynamic_cast<IIfcArbitraryClosedProfileDef^>(profile))
-				return Init((IIfcArbitraryClosedProfileDef^)profile, logger, constraints);
+				return Init((IIfcArbitraryClosedProfileDef^)profile, logger);
 			else if (dynamic_cast<IIfcParameterizedProfileDef^>(profile))
-				return Init((IIfcParameterizedProfileDef^)profile, logger, constraints);
+				return Init((IIfcParameterizedProfileDef^)profile, logger);
 			else if (dynamic_cast<IIfcDerivedProfileDef^>(profile))
-				return Init((IIfcDerivedProfileDef^)profile, logger, constraints);
+				return Init((IIfcDerivedProfileDef^)profile, logger);
 			else if (dynamic_cast<IIfcArbitraryOpenProfileDef^>(profile))
-				return Init((IIfcArbitraryOpenProfileDef^)profile, logger, constraints);
+				return Init((IIfcArbitraryOpenProfileDef^)profile, logger);
 			else
 				XbimGeometryCreator::LogError(logger, profile, "Profile definition {0} is not implemented", profile->GetType()->Name);
 
 		}
 
-		void XbimWire::Init(IIfcDerivedProfileDef^ profile, ILogger^ logger, XbimConstraints constraints)
+		void XbimWire::Init(IIfcDerivedProfileDef^ profile, ILogger^ logger)
 		{
-			Init(profile->ParentProfile, logger, constraints);
+			Init(profile->ParentProfile, logger);
 			if (IsValid && !dynamic_cast<IIfcMirroredProfileDef^>(profile))
 			{
 				gp_Trsf trsf = XbimConvert::ToTransform(profile->Operator);
@@ -1446,40 +1448,40 @@ namespace Xbim
 			}
 		}
 
-		void XbimWire::Init(IIfcParameterizedProfileDef^ profile, ILogger^ logger, XbimConstraints constraints)
+		void XbimWire::Init(IIfcParameterizedProfileDef^ profile, ILogger^ logger)
 		{
 			if (dynamic_cast<IIfcRectangleHollowProfileDef^>(profile))
-				return Init((IIfcRectangleProfileDef^)profile, logger, constraints);
+				return Init((IIfcRectangleProfileDef^)profile, logger);
 			else if (dynamic_cast<IIfcRectangleProfileDef^>(profile))
-				return Init((IIfcRectangleProfileDef^)profile, logger, constraints);
+				return Init((IIfcRectangleProfileDef^)profile, logger);
 			else if (dynamic_cast<IIfcCircleHollowProfileDef^>(profile))
-				return Init((IIfcCircleHollowProfileDef^)profile, logger, constraints);
+				return Init((IIfcCircleHollowProfileDef^)profile, logger);
 			else if (dynamic_cast<IIfcCircleProfileDef^>(profile))
-				return Init((IIfcCircleProfileDef^)profile, logger, constraints);
+				return Init((IIfcCircleProfileDef^)profile, logger);
 			else if (dynamic_cast<IIfcLShapeProfileDef^>(profile))
-				return Init((IIfcLShapeProfileDef^)profile, logger, constraints);
+				return Init((IIfcLShapeProfileDef^)profile, logger);
 			else if (dynamic_cast<IIfcUShapeProfileDef^>(profile))
-				return Init((IIfcUShapeProfileDef^)profile, logger, constraints);
+				return Init((IIfcUShapeProfileDef^)profile, logger);
 			else if (dynamic_cast<IIfcIShapeProfileDef^>(profile))
-				return Init((IIfcIShapeProfileDef^)profile, logger, constraints);
+				return Init((IIfcIShapeProfileDef^)profile, logger);
 			else if (dynamic_cast<IIfcCShapeProfileDef^>(profile))
-				return Init((IIfcCShapeProfileDef^)profile, logger, constraints);
+				return Init((IIfcCShapeProfileDef^)profile, logger);
 			else if (dynamic_cast<IIfcTShapeProfileDef^>(profile))
-				return Init((IIfcTShapeProfileDef^)profile, logger, constraints);
+				return Init((IIfcTShapeProfileDef^)profile, logger);
 			else if (dynamic_cast<IIfcZShapeProfileDef^>(profile))
-				return Init((IIfcZShapeProfileDef^)profile, logger, constraints);
+				return Init((IIfcZShapeProfileDef^)profile, logger);
 			/*else if (dynamic_cast<IIfcCraneRailFShapeProfileDef^>(profile))
 				return Init((IIfcCraneRailFShapeProfileDef^)profile);
 			else if (dynamic_cast<IIfcCraneRailAShapeProfileDef^>(profile))
 				return Init((IIfcCraneRailAShapeProfileDef^)profile);*/
 			else if (dynamic_cast<IIfcEllipseProfileDef^>(profile))
-				return Init((IIfcEllipseProfileDef^)profile, logger, constraints);
+				return Init((IIfcEllipseProfileDef^)profile, logger);
 			else
 				XbimGeometryCreator::LogError(logger, profile, "Profile type {0} is not implemented", profile->GetType()->Name);
 		}
 
 		//Builds a wire from a CircleProfileDef
-		void XbimWire::Init(IIfcCircleProfileDef^ circProfile, ILogger^ logger, XbimConstraints /*constraints*/)
+		void XbimWire::Init(IIfcCircleProfileDef^ circProfile, ILogger^ logger)
 		{
 			if (dynamic_cast<IIfcCircleHollowProfileDef^>(circProfile))
 			{
@@ -1508,7 +1510,7 @@ namespace Xbim
 			*pWire = wire;
 		}
 
-		void XbimWire::Init(IIfcRoundedRectangleProfileDef^ rectProfile, ILogger^ /*logger*/, XbimConstraints /*constraints*/)
+		void XbimWire::Init(IIfcRoundedRectangleProfileDef^ rectProfile, ILogger^ /*logger*/)
 		{
 			//make the basic shapes
 			double xOff = rectProfile->XDim / 2;
@@ -1561,7 +1563,7 @@ namespace Xbim
 		}
 
 
-		void XbimWire::Init(IIfcRectangleProfileDef^ rectProfile, ILogger^ logger, XbimConstraints constraints)
+		void XbimWire::Init(IIfcRectangleProfileDef^ rectProfile, ILogger^ logger)
 		{
 			if (rectProfile->XDim <= 0 || rectProfile->YDim <= 0)
 			{
@@ -1576,7 +1578,7 @@ namespace Xbim
 				}
 				else if (dynamic_cast<IIfcRoundedRectangleProfileDef^>(rectProfile))
 				{
-					Init((IIfcRoundedRectangleProfileDef^)rectProfile, logger, constraints);
+					Init((IIfcRoundedRectangleProfileDef^)rectProfile, logger);
 				}
 				else
 				{
@@ -1638,7 +1640,7 @@ namespace Xbim
 			*pWire = wire;
 		}
 
-		void XbimWire::Init(IIfcLShapeProfileDef^ profile, ILogger^ /*logger*/, XbimConstraints /*constraints*/)
+		void XbimWire::Init(IIfcLShapeProfileDef^ profile, ILogger^ /*logger*/)
 		{
 			bool detailed = profile->Model->ModelFactors->ProfileDefLevelOfDetail == 1;
 			double dY = profile->Depth / 2;
@@ -1716,7 +1718,7 @@ namespace Xbim
 		}
 
 
-		void XbimWire::Init(IIfcUShapeProfileDef^ profile, ILogger^ /*logger*/, XbimConstraints /*constraints*/)
+		void XbimWire::Init(IIfcUShapeProfileDef^ profile, ILogger^ /*logger*/)
 		{
 			bool detailed = profile->Model->ModelFactors->ProfileDefLevelOfDetail == 1;
 			double dX = profile->FlangeWidth / 2;
@@ -1903,7 +1905,7 @@ namespace Xbim
 		//TODO: SRL: Support for fillet radii needs to be added, nb set the hascurves=true when added
 		// and note too that this will decrease performance due to use of OCC for triangulation
 		//NB. This is untested as we haven't enountered one yet
-		void XbimWire::Init(IIfcEllipseProfileDef^ profile, ILogger^ /*logger*/, XbimConstraints /*constraints*/)
+		void XbimWire::Init(IIfcEllipseProfileDef^ profile, ILogger^ /*logger*/)
 		{
 			gp_Ax2 gpax2;
 			if (profile->Position != nullptr)
@@ -1943,7 +1945,7 @@ namespace Xbim
 
 		//TODO: SRL: Support for fillet radii needs to be added, nb set the hascurves=true when added
 		// and note too that this will decrease performance due to use of OCC for triangulation
-		void XbimWire::Init(IIfcIShapeProfileDef^ profile, ILogger^ /*logger*/, XbimConstraints /*constraints*/)
+		void XbimWire::Init(IIfcIShapeProfileDef^ profile, ILogger^ /*logger*/)
 		{
 			bool detailed = profile->Model->ModelFactors->ProfileDefLevelOfDetail == 1;
 			double dX = profile->OverallWidth / 2;
@@ -2028,7 +2030,7 @@ namespace Xbim
 		}
 
 
-		void XbimWire::Init(IIfcZShapeProfileDef^ profile, ILogger^ /*logger*/, XbimConstraints /*constraints*/)
+		void XbimWire::Init(IIfcZShapeProfileDef^ profile, ILogger^ /*logger*/)
 		{
 			bool detailed = profile->Model->ModelFactors->ProfileDefLevelOfDetail == 1;
 			double dX = profile->FlangeWidth;
@@ -2095,7 +2097,7 @@ namespace Xbim
 		// SRL: Builds a wire from a composite IfcCShapeProfileDef
 		//TODO: SRL: Support for fillet radii needs to be added, nb set the hascurves=true when added
 		// and note too that this will decrease performance due to use of OCC for triangulation
-		void XbimWire::Init(IIfcCShapeProfileDef^ profile, ILogger^ logger, XbimConstraints /*constraints*/)
+		void XbimWire::Init(IIfcCShapeProfileDef^ profile, ILogger^ logger)
 		{
 			bool detailed = profile->Model->ModelFactors->ProfileDefLevelOfDetail == 1;
 			double dX = profile->Width / 2;
@@ -2207,7 +2209,7 @@ namespace Xbim
 		// SRL: Builds a wire from a composite IfcTShapeProfileDef
 		//TODO: SRL: Support for fillet radii needs to be added, nb set the hascurves=true when added
 		// and note too that this will decrease performance due to use of OCC for triangulation
-		void XbimWire::Init(IIfcTShapeProfileDef^ profile, ILogger^ /*logger*/, XbimConstraints /*constraints*/)
+		void XbimWire::Init(IIfcTShapeProfileDef^ profile, ILogger^ /*logger*/)
 		{
 			bool detailed = profile->Model->ModelFactors->ProfileDefLevelOfDetail == 1;
 			double dX = profile->FlangeWidth / 2;
