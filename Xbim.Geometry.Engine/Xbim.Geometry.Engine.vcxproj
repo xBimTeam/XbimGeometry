@@ -227,6 +227,9 @@
     <ClInclude Include="Services\ModelService.h" />
     <ClInclude Include="Services\Unmanaged\NLoggingService.h" />
     <ClInclude Include="Services\Unmanaged\NProgressMonitor.h" />
+    <ClInclude Include="Visual\ColourRGB.h" />
+    <ClInclude Include="Visual\VisualMaterial.h" />
+    <ClInclude Include="Visual\XbimShapeColour.h" />
     <ClInclude Include="XbimCompound.h" />
     <ClInclude Include="XbimConstraints.h" />
     <ClInclude Include="XbimConvert.h" />
@@ -290,6 +293,9 @@
     <ClCompile Include="Services\ModelService.cpp" />
     <ClCompile Include="Services\Unmanaged\NLoggingService.cpp" />
     <ClCompile Include="Services\Unmanaged\NProgressMonitor.cpp" />
+    <ClCompile Include="Visual\ColourRGB.cpp" />
+    <ClCompile Include="Visual\VisualMaterial.cpp" />
+    <ClCompile Include="Visual\XbimShapeColour.cpp" />
     <ClCompile Include="XbimCompound.cpp">
       <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)</ObjectFileName>
       <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)</ObjectFileName>

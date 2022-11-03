@@ -23,15 +23,15 @@
 #include "../BRep/XVertex.h"
 #include "../BRep/XWire.h"
 #include "../BRep/XDirection.h"
-//#include "../Storage//VisualMaterial.h"
-//#include "../Storage//XbimShapeColour.h"
+#include "../visual//VisualMaterial.h"
+#include "../visual//XbimShapeColour.h"
 
 #include "../BRep/XAxisPlacement2d.h"
 #include "../BRep/XPlane.h"
 #include <ShapeAnalysis_Surface.hxx>
 #include <GeomLProp_SLProps.hxx>
 using namespace Xbim::Geometry::BRep;
-
+using namespace Xbim::Geometry::Visual;
 namespace Xbim
 {
 	namespace Geometry
@@ -215,22 +215,22 @@ namespace Xbim
 				gp_Dir normal = props.Normal();
 				return gcnew Xbim::Geometry::BRep::XDirection(normal);
 			}
-			/*Xbim::Geometry::Abstractions::IXVisualMaterial^ GeometryProcedures::BuildVisualMaterial(System::String^ name, Xbim::Ifc4::Interfaces::IIfcSurfaceStyleElementSelect^ styling)
+			Xbim::Geometry::Abstractions::IXVisualMaterial^ GeometryProcedures::BuildVisualMaterial(System::String^ name, Xbim::Ifc4::Interfaces::IIfcSurfaceStyleElementSelect^ styling)
 			{
-				return gcnew Xbim::Geometry::Storage::VisualMaterial(name, styling);
+				return gcnew VisualMaterial(name, styling);
 			}
 			Xbim::Geometry::Abstractions::IXVisualMaterial^ GeometryProcedures::BuildVisualMaterial(System::String^ name)
 			{
-				return gcnew Xbim::Geometry::Storage::VisualMaterial(name);
+				return gcnew VisualMaterial(name);
 			}
 			Xbim::Geometry::Abstractions::IXColourRGB^ GeometryProcedures::BuildColourRGB(double red, double green, double blue)
 			{
-				return gcnew Xbim::Geometry::Storage::ColourRGB(red, green, blue);
+				return gcnew ColourRGB(red, green, blue);
 			}
 			Xbim::Geometry::Abstractions::IXShapeColour^ GeometryProcedures::BuildShapeColour(System::String^ name, IIfcSurfaceStyleElementSelect^ surfaceStyle)
 			{
 				return gcnew XbimShapeColour(name,surfaceStyle);
-			}*/
+			}
 			Xbim::Geometry::Abstractions::IXLocation^ GeometryProcedures::BuildLocation(double tx, double ty, double tz, double sc, double qw, double qx, double qy, double qz)
 			{
 				return gcnew Xbim::Geometry::BRep::XLocation(tx, ty, tz, sc, qw, qx, qy, qz);

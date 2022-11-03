@@ -80,12 +80,12 @@ namespace Xbim
 				virtual property IXLoggingService^ LoggingService {IXLoggingService^ get() { return _loggingService; }};
 
 				// Inherited via IXGeometryProcedures
-				//virtual Xbim::Geometry::Abstractions::IXVisualMaterial^ BuildVisualMaterial(System::String^ name, Xbim::Ifc4::Interfaces::IIfcSurfaceStyleElementSelect^ styling);
+				virtual Xbim::Geometry::Abstractions::IXVisualMaterial^ BuildVisualMaterial(System::String^ name, Xbim::Ifc4::Interfaces::IIfcSurfaceStyleElementSelect^ styling);
 
-				//virtual Xbim::Geometry::Abstractions::IXVisualMaterial^ BuildVisualMaterial(System::String^ name);
-				//// Inherited via IXGeometryProcedures
-				//virtual Xbim::Geometry::Abstractions::IXColourRGB^ BuildColourRGB(double red, double green, double blue);
-				//virtual Xbim::Geometry::Abstractions::IXShapeColour^ BuildShapeColour(System::String^ name, IIfcSurfaceStyleElementSelect^ surfaceStyle);
+				virtual Xbim::Geometry::Abstractions::IXVisualMaterial^ BuildVisualMaterial(System::String^ name);
+				// Inherited via IXGeometryProcedures
+				virtual Xbim::Geometry::Abstractions::IXColourRGB^ BuildColourRGB(double red, double green, double blue);
+				virtual Xbim::Geometry::Abstractions::IXShapeColour^ BuildShapeColour(System::String^ name, IIfcSurfaceStyleElementSelect^ surfaceStyle);
 				virtual Xbim::Geometry::Abstractions::IXLocation^ BuildLocation(double tx, double ty, double tz, double sc, double qw, double qx, double qy, double qz);
 			};
 		}

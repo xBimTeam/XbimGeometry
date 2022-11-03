@@ -228,6 +228,15 @@
     <ClInclude Include="Factories\Unmanaged\NGeometryProcedures.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Visual\ColourRGB.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Visual\VisualMaterial.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Visual\XbimShapeColour.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp">
@@ -399,6 +408,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Factories\Unmanaged\NGeometryProcedures.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Visual\ColourRGB.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Visual\VisualMaterial.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Visual\XbimShapeColour.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
