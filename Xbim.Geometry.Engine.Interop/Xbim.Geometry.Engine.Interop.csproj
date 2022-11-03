@@ -21,9 +21,7 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
-		<PackageReference Include="Xbim.Geometry.Abstractions" Version="6.1.303-develop" />
-		<PackageReference Include="Xbim.Ifc" Version="5.1.350" />
-		<PackageReference Include="Xbim.Tessellator" Version="5.1.350" />
+		<PackageReference Include="Xbim.Geometry.Abstractions" Version="6.0.117" />
 	</ItemGroup>
 
 	
