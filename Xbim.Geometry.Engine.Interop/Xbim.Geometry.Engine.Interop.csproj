@@ -9,6 +9,7 @@
 		<PackageIcon>xbim-toolkit-icon.png</PackageIcon>
 		<BaseOutputPath>..\Output</BaseOutputPath>
 		<Version>5.1.0.0-dev</Version>
+		<SignAssembly>False</SignAssembly>
 		
 	</PropertyGroup>
 	
