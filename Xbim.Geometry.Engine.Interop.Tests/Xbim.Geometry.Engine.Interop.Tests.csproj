@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>netcoreapp3.1;net6.0</TargetFrameworks>
+		<TargetFrameworks>netcoreapp3.1</TargetFrameworks>
 		<XbimGeometryPlatform>netcoreapp3.1</XbimGeometryPlatform>
 		<IsPackable>false</IsPackable>
 		<EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
@@ -17,29 +17,14 @@
 		<PlatformTarget>x86</PlatformTarget>
 	</PropertyGroup>
 
-	<ItemGroup Condition="$(TargetFramework)!=''">
-		<None Include="..\Output\$(Configuration)\$(Platform)\$(XbimGeometryPlatform)\win10-x86\Xbim.Geometry.Engine.dll" Link="win10-x86\Xbim.Geometry.Engine.dll">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Include="..\Output\$(Configuration)\$(Platform)\$(XbimGeometryPlatform)\win10-x64\Xbim.Geometry.Engine.dll" Link="win10-x64\Xbim.Geometry.Engine.dll">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
+	
 
-		<None Include="..\Output\$(Configuration)\$(Platform)\$(XbimGeometryPlatform)\win10-x86\Ijwhost.dll" Link="win10-x86\Ijwhost.dll">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Include="..\Output\$(Configuration)\$(Platform)\$(XbimGeometryPlatform)\win10-x64\Ijwhost.dll" Link="win10-x64\Ijwhost.dll">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<Occ86Dlls Include="..\Output\$(Configuration)\$(Platform)\$(XbimGeometryPlatform)\win10-x86\TK*.dll" />
-		<Occ64Dlls Include="..\Output\$(Configuration)\$(Platform)\$(XbimGeometryPlatform)\win10-x64\TK*.dll" />
-	</ItemGroup>
-
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+	<!--<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 		<Copy SourceFiles="@(Occ86Dlls)" DestinationFiles="@(Occ86Dlls->'$(OutputPath)win10-x86\%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
 		<Copy SourceFiles="@(Occ64Dlls)" DestinationFiles="@(Occ64Dlls->'$(OutputPath)win10-x64\%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
-	</Target>
+	</Target>-->
 
+	
 	<ItemGroup>
 		<PackageReference Include="FluentAssertions" Version="5.10.3" />
 		<PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
@@ -49,10 +34,10 @@
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.3.0" />
 		<PackageReference Include="MSTest.TestAdapter" Version="2.0.0" />
 		<PackageReference Include="MSTest.TestFramework" Version="2.0.0" />
+		<PackageReference Include="Xbim.Geometry.Engine.Interop" Version="6.1.0.2-dev" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Xbim.Geometry.Engine.Interop\Xbim.Geometry.Engine.Interop.csproj" />
 		<ProjectReference Include="..\Xbim.ModelGeometry.Scene\Xbim.ModelGeometry.Scene.csproj" />
 	</ItemGroup>
 

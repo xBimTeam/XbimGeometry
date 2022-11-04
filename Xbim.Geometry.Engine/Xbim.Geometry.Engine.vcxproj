@@ -58,21 +58,16 @@
     <CLRSupport>NetCore</CLRSupport>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Platform)'=='AnyCPU'">
-    <PlatformTarget>Win32</PlatformTarget>
-    <OutDir>$(SolutionDir)Output\$(Configuration)\$(Platform)\$(OutputFolder)\win10-x86\</OutDir>
-    <IntDir>$(SolutionDir)obj\$(Configuration)\x86\$(OutputFolder)\win10-x86\</IntDir>
-    <PackagesDir>$(SolutionDir)Output\$(Configuration)\x86\$(OutputFolder)\win10-x86\</PackagesDir>
-  </PropertyGroup>
+ 
   <PropertyGroup Condition="'$(Platform)'=='Win32'">
-    <OutDir>$(SolutionDir)Output\$(Configuration)\AnyCPU\$(OutputFolder)\win10-x86\</OutDir>
-    <IntDir>$(SolutionDir)obj\$(Configuration)\AnyCPU\$(OutputFolder)\win10-x86\</IntDir>
-    <PackagesDir>$(SolutionDir)Output\$(Configuration)\AnyCPU\$(OutputFolder)\win10-x86\</PackagesDir>
+    <OutDir>$(ProjectDir)bin\$(Configuration)\$(TargetFramework)\win10-x86\</OutDir>
+    <IntDir>$(ProjectDir)obj\$(Configuration)\$(TargetFramework)\win10-x86\</IntDir>
+    <PackagesDir>$(SolutionDir)Xbim.Geometry.Dependencies\bin\$(Configuration)\$(TargetFramework)\win10-x86\</PackagesDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Platform)'=='x64'">
-    <OutDir>$(SolutionDir)Output\$(Configuration)\AnyCPU\$(OutputFolder)\win10-x64\</OutDir>
-    <IntDir>$(SolutionDir)obj\$(Configuration)\AnyCPU\$($(OutputFolder)\win10-x64\</IntDir>
-    <PackagesDir>$(SolutionDir)Output\$(Configuration)\AnyCPU\$(OutputFolder)\win10-x64\</PackagesDir>
+	  <OutDir>$(ProjectDir)bin\$(Configuration)\$(TargetFramework)\win10-x64\</OutDir>
+	  <IntDir>$(ProjectDir)obj\$(Configuration)\$(TargetFramework)\win10-x64\</IntDir>
+	  <PackagesDir>$(SolutionDir)Xbim.Geometry.Dependencies\bin\$(Configuration)\$(TargetFramework)\win10-x64\</PackagesDir>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -394,12 +389,13 @@
     <None Include="cpp.hint" />
     <None Include="packages.config" />
   </ItemGroup>
+ 
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="OcctLibraries">
     <Import Project="..\packages\Xbim.Geometry.Occt.7.7.0-beta\build\Xbim.Geometry.Occt.targets" Condition="Exists('..\packages\Xbim.Geometry.Occt.7.7.0-beta\build\Xbim.Geometry.Occt.targets')" />
   </ImportGroup>
   <Target Name="AfterBuild" Condition="'$(Platform)'=='Win32'">
-    <Message Text="------ Build started: Project: $(MSBuildProjectFile), Configuration: $(Configuration) x64" Importance="High" />
+    <Message Text="------ Build started: Project: $(MSBuildProjectFile), Configuration: $(Configuration) x64 ------" Importance="High" />
     <MSBuild Projects="$(MSBuildProjectFile)" Properties="Platform=x64;  Configuration=$(Configuration);" RunEachTargetSeparately="true" />
   </Target>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

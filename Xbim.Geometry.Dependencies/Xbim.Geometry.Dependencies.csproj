@@ -3,14 +3,13 @@
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
 		<TargetFramework>netcoreapp3.1</TargetFramework>
-		<OutputPath>..\Output\$(Configuration)\AnyCPU\</OutputPath>
 		<Configurations>Debug;Release</Configurations>
 		<Platforms>x64;x86;AnyCPU</Platforms>
 		<RestoreProjectStyle>PackageReference</RestoreProjectStyle>
-		<PackageIcon>xbim-toolkit-icon.png</PackageIcon>
 		<Version>5.1.100-develop</Version>
-		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<RuntimeIdentifiers>win10-x86;win10-x64</RuntimeIdentifiers>
+		<PackageIcon>xbim-toolkit-icon.png</PackageIcon>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Platform)'=='AnyCPU'">
@@ -32,13 +31,20 @@
 	<ItemGroup Condition="'$(TargetFrameWork)'=='netcoreapp3.1'">
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.3" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="..\xbim-toolkit-icon.png">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	</ItemGroup>
 	<ItemGroup>
     <PackageReference Include="Xbim.Geometry.Abstractions" Version="6.2.124" />
 	</ItemGroup>
 	
 	<Target Name="Buildx64" BeforeTargets="AfterBuild" Condition="'$(PlatformTarget)' == 'x86'">
 		<Message Importance="high" Text="Building x64 Platform: $(Platform)" />
-		<MSBuild Projects="$(MSBuildProjectFile)" Properties="Platform = x64;PlatformTarget=x64;Configuration=$(Configuration);RunTimeIdentifier=win10-x64" RunEachTargetSeparately="true" />
+		<MSBuild Projects="$(MSBuildProjectFile)" Properties="Platform = AnyCPU;PlatformTarget=x64;Configuration=$(Configuration);RunTimeIdentifier=win10-x64" RunEachTargetSeparately="true" />
 	</Target>
 
 </Project>

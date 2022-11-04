@@ -1,70 +1,39 @@
 ﻿<Project DefaultTargets="Build" Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFrameworks>netcoreapp3.1;net6.0</TargetFrameworks>		
-		<DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+		<TargetFramework>netcoreapp3.1</TargetFramework>
 		<Title>Xbim Geometry Engine</Title>
 		<Description>Provides support for the Ifc4 and Ifc2x3 Geometry conversion.</Description>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageId>Xbim.Geometry.Engine.Interop</PackageId>
 		<PackageIcon>xbim-toolkit-icon.png</PackageIcon>
-		<BaseOutputPath>..\Output</BaseOutputPath>
-		<Version>5.1.0.0-dev</Version>
+		<Version>6.1.0.2-dev</Version>
 		<SignAssembly>False</SignAssembly>
-		
 	</PropertyGroup>
+ 
 	
-	<ItemGroup>
-		<Content Include="..\Xbim.Geometry.Engine.Interop.targets">
-			<Link>Xbim.Geometry.Engine.Interop.targets</Link>
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
 		<PackageReference Include="Xbim.Geometry.Abstractions" Version="6.2.124" />
 	</ItemGroup>
 
-	
-	<ItemGroup Condition="$(TargetFramework) != ''">
-		<Content Include="$(BaseOutputPath)\$(Configuration)\$(Platform)\$(TargetFramework)\win10-x86\Xbim.Geometry.Engine.dll">
-			<Pack>true</Pack>
-			<PackagePath>runtimes\win10-x86\native\;</PackagePath>
-		</Content>
-		<Content Include="$(BaseOutputPath)\$(Configuration)\$(Platform)\$(TargetFramework)\win10-x86\Ijwhost.dll">
-			<Pack>true</Pack>
-			<PackagePath>runtimes\win10-x86\native\</PackagePath>
-		</Content>
-		<None Include="$(BaseOutputPath)\$(Configuration)\$(Platform)\$(TargetFramework)\win10-x86\TK*.dll">
-			<Pack>true</Pack>
-			<PackagePath>runtimes\win10-x86\native\</PackagePath>
-		</None>
-		
-		<Content Include="$(BaseOutputPath)\$(Configuration)\$(Platform)\$(TargetFramework)\win10-x64\Xbim.Geometry.Engine.dll">
-			<Pack>true</Pack>
-			<PackagePath>runtimes\win10-x64\native\</PackagePath>
-		</Content>
-
-		<Content Include="$(BaseOutputPath)\$(Configuration)\$(Platform)\$(TargetFramework)\win10-x64\Ijwhost.dll">
-			<Pack>true</Pack>
-			<PackagePath>runtimes\win10-x64\native\</PackagePath>
-		</Content>
-		<None Include="$(BaseOutputPath)\$(Configuration)\$(Platform)\$(TargetFramework)\win10-x64\TK*.dll">
-			<Pack>true</Pack>
-			<PackagePath>runtimes\win10-x64\native\</PackagePath>
-		</None>
-		<Content Include="..\Xbim.Geometry.Engine.Interop.targets">
-			<Link>Xbim.Geometry.Interop.targets</Link>
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<PackagePath>build\$(TargetFramework);</PackagePath>
-			<Pack>true</Pack>
-		</Content>
+	<PropertyGroup>
+		<GeometryEnginePath>../Xbim.Geometry.Engine/bin/$(Configuration)/$(TargetFramework)/</GeometryEnginePath>
+	</PropertyGroup>
+	<ItemGroup>
+		<None Include="..\Xbim.Geometry.Engine.Interop.targets" PackagePath="build" Pack="True" Visible="true"/>
+		<None Include="$(GeometryEnginePath)win10-x64\TK*.dll" PackagePath="lib/$(TargetFramework)/win10-x64" Pack="True" Visible="false" />
+		<None Include="$(GeometryEnginePath)win10-x86\TK*.dll" PackagePath="lib/$(TargetFramework)/win10-x86" Pack="True" Visible="false" />
+		<None Include="$(GeometryEnginePath)win10-x86\Ijwhost.dll" PackagePath="lib/$(TargetFramework)/win10-x64" Pack="True" Visible="false" />
+		<None Include="$(GeometryEnginePath)win10-x86\Ijwhost.dll" PackagePath="lib/$(TargetFramework)/win10-x86" Pack="True" Visible="false" />
+		<None Include="$(GeometryEnginePath)win10-x86\Xbim.Geometry.Engine.dll" PackagePath="lib/$(TargetFramework)/win10-x64" Pack="True" Visible="false" />
+		<None Include="$(GeometryEnginePath)win10-x86\Xbim.Geometry.Engine.dll" PackagePath="lib/$(TargetFramework)/win10-x86" Pack="True" Visible="false" />
 	</ItemGroup>
 
+
 	<ItemGroup>
-		<Folder Include="images\" />
 		<None Include="..\xbim-toolkit-icon.png" Pack="True" PackagePath="\" />
 	</ItemGroup>
 
-	
+
 </Project>
