@@ -35,7 +35,10 @@
 			<Pack>true</Pack>
 			<PackagePath>runtimes\win10-x86\native\</PackagePath>
 		</Content>
-		
+		<None Include="$(BaseOutputPath)\$(Configuration)\$(Platform)\$(TargetFramework)\win10-x86\TK*.dll">
+			<Pack>true</Pack>
+			<PackagePath>runtimes\win10-x86\native\</PackagePath>
+		</None>
 		
 		<Content Include="$(BaseOutputPath)\$(Configuration)\$(Platform)\$(TargetFramework)\win10-x64\Xbim.Geometry.Engine.dll">
 			<Pack>true</Pack>
@@ -46,7 +49,10 @@
 			<Pack>true</Pack>
 			<PackagePath>runtimes\win10-x64\native\</PackagePath>
 		</Content>
-
+		<None Include="$(BaseOutputPath)\$(Configuration)\$(Platform)\$(TargetFramework)\win10-x64\TK*.dll">
+			<Pack>true</Pack>
+			<PackagePath>runtimes\win10-x64\native\</PackagePath>
+		</None>
 		<Content Include="..\Xbim.Geometry.Engine.Interop.targets">
 			<Link>Xbim.Geometry.Interop.targets</Link>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

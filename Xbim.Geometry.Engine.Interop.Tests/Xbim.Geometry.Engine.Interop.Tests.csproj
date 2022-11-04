@@ -5,7 +5,7 @@
 		<XbimGeometryPlatform>netcoreapp3.1</XbimGeometryPlatform>
 		<IsPackable>false</IsPackable>
 		<EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
-		<SignAssembly>true</SignAssembly>
+		<SignAssembly>False</SignAssembly>
 		<AssemblyOriginatorKeyFile>..\XbimOpenSourceKeyFile.snk</AssemblyOriginatorKeyFile>
 	</PropertyGroup>
 
@@ -31,13 +31,13 @@
 		<None Include="..\Output\$(Configuration)\$(Platform)\$(XbimGeometryPlatform)\win10-x64\Ijwhost.dll" Link="win10-x64\Ijwhost.dll">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<Occ86Dlls Include="..\Output\$(Configuration)\$(Platform)\$(XbimGeometryPlatform)\win10-x86\TK*.dll"/>
-		<Occ64Dlls Include="..\Output\$(Configuration)\$(Platform)\$(XbimGeometryPlatform)\win10-x64\TK*.dll"/>
+		<Occ86Dlls Include="..\Output\$(Configuration)\$(Platform)\$(XbimGeometryPlatform)\win10-x86\TK*.dll" />
+		<Occ64Dlls Include="..\Output\$(Configuration)\$(Platform)\$(XbimGeometryPlatform)\win10-x64\TK*.dll" />
 	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Copy SourceFiles="@(Occ86Dlls)" DestinationFiles ="@(Occ86Dlls->'$(OutputPath)win10-x86\%(Filename)%(Extension)')" SkipUnchangedFiles="true"/>
-		<Copy SourceFiles="@(Occ64Dlls)" DestinationFiles ="@(Occ64Dlls->'$(OutputPath)win10-x64\%(Filename)%(Extension)')" SkipUnchangedFiles="true"/>
+		<Copy SourceFiles="@(Occ86Dlls)" DestinationFiles="@(Occ86Dlls->'$(OutputPath)win10-x86\%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+		<Copy SourceFiles="@(Occ64Dlls)" DestinationFiles="@(Occ64Dlls->'$(OutputPath)win10-x64\%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
 	</Target>
 
 	<ItemGroup>

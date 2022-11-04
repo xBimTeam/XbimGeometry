@@ -11,6 +11,7 @@
 		<Version>5.1.0.0-Dev</Version>
 		<AssemblyVersion>5.1.0.1</AssemblyVersion>
 		<FileVersion>5.1.0.1</FileVersion>
+		<SignAssembly>False</SignAssembly>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
