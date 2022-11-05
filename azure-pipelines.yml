@@ -113,7 +113,7 @@ jobs:
       restoreSolution: 'Xbim.Geometry.Engine\packages.config'
       feedsToUse: 'config'
       nugetConfigPath: 'nuget.config'
-      restoreDirectory: 'packages'
+      restoreDirectory: '$(build.sourcesdirectory)\packages'
   
   - task: DeleteFiles@1
     displayName: 'Delete old *.nupkg files from $(build.sourcesdirectory)'
