@@ -14,12 +14,6 @@
 		<SignAssembly>False</SignAssembly>
 	</PropertyGroup>
 
-
-	<ItemGroup Condition="$(TargetFramework)=='net472'">
-		<PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
-		<PackageReference Include="System.Drawing.Common" Version="6.0.0" />
-	</ItemGroup>
-
 	
 	<ItemGroup>
 		<None Include="..\xbim-toolkit-icon.png" Pack="True" PackagePath="\" />
