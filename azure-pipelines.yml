@@ -168,7 +168,7 @@ jobs:
     displayName: 'Copy Dlls to: $(build.artifactstagingdirectory)'
     inputs:
       SourceFolder: '$(build.sourcesdirectory)'
-      Contents: '**\bin\$(BuildConfiguration)\*.dll'
+      Contents: '**\bin\**\*.dll'
       TargetFolder: '$(build.artifactstagingdirectory)'
     condition: succeededOrFailed()
   
