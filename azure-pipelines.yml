@@ -116,10 +116,10 @@ jobs:
       restoreDirectory: '$(build.sourcesdirectory)\packages'
   
   - task: DeleteFiles@1
-    displayName: 'Delete old *.nupkg files from $(build.sourcesdirectory)'
+    displayName: 'Delete old bin files from $(build.sourcesdirectory)'
     inputs:
       SourceFolder: '$(build.sourcesdirectory)'
-      Contents: '**\bin\$(BuildConfiguration)\**\*.nupkg'
+      Contents: '**\bin\**\*.*'
 
   - task: VSBuild@1
     displayName: 'Build and pack solution Xbim.Geometry.Engine.sln'
@@ -141,7 +141,7 @@ jobs:
     displayName: 'VsTest - testAssemblies'
     inputs:
       testSelector: 'testAssemblies'
-      testAssemblyVer2: '**\bin\$(BuildConfiguration)\**\Xbim.Geometry.Engine.Interop.Tests.dll'
+      testAssemblyVer2: '**\bin\**\$(BuildConfiguration)\**\Xbim.Geometry.Engine.Interop.Tests.dll'
       searchFolder: '$(System.DefaultWorkingDirectory)'
       # runSettingsFile: 'test.runsettings'
       vsTestVersion: 'toolsInstaller'
@@ -161,14 +161,6 @@ jobs:
     inputs:
       SourceFolder: '$(build.sourcesdirectory)'
       Contents: '**\bin\$(BuildConfiguration)\*.nupkg'
-      TargetFolder: '$(build.artifactstagingdirectory)'
-    condition: succeededOrFailed()
-
-  - task: CopyFiles@2
-    displayName: 'Copy Dlls to: $(build.artifactstagingdirectory)'
-    inputs:
-      SourceFolder: '$(build.sourcesdirectory)'
-      Contents: '**\bin\**\*.dll'
       TargetFolder: '$(build.artifactstagingdirectory)'
     condition: succeededOrFailed()
   
