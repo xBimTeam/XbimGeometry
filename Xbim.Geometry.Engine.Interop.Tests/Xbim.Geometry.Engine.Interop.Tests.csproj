@@ -1,25 +1,33 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFrameworks>netcoreapp3.1</TargetFrameworks>
-		<XbimGeometryPlatform>netcoreapp3.1</XbimGeometryPlatform>
-		<IsPackable>false</IsPackable>
-		<EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
-		<SignAssembly>False</SignAssembly>
-		<AssemblyOriginatorKeyFile>..\XbimOpenSourceKeyFile.snk</AssemblyOriginatorKeyFile>
-	</PropertyGroup>
+  <PropertyGroup>
+    <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
+    <XbimGeometryPlatform>netcoreapp3.1</XbimGeometryPlatform>
+    <IsPackable>false</IsPackable>
+    <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
+    <SignAssembly>False</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\XbimOpenSourceKeyFile.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<AllowUnsafeBlocks>false</AllowUnsafeBlocks>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-		<PlatformTarget>x86</PlatformTarget>
+		<PlatformTarget>x86</PlatformTarget><!-- TODO check why -->
 	</PropertyGroup>
 
-	
+  <PropertyGroup Condition="'$(Platform)'=='AnyCPU' OR '$(Platform)'=='x64'">
+    <RunSettingsFilePath>$(MSBuildProjectDirectory)\..\test.x64.runsettings</RunSettingsFilePath>
+  </PropertyGroup>
 
-	<!--<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+  <PropertyGroup Condition="'$(Platform)'=='x86' OR '$(PlatformTarget)'=='x86'">
+    <RunSettingsFilePath>$(MSBuildProjectDirectory)\..\test.x86.runsettings</RunSettingsFilePath>
+  </PropertyGroup>
+
+
+
+    <!--<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 		<Copy SourceFiles="@(Occ86Dlls)" DestinationFiles="@(Occ86Dlls->'$(OutputPath)win10-x86\%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
 		<Copy SourceFiles="@(Occ64Dlls)" DestinationFiles="@(Occ64Dlls->'$(OutputPath)win10-x64\%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
 	</Target>-->
@@ -34,10 +42,10 @@
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.3.0" />
 		<PackageReference Include="MSTest.TestAdapter" Version="2.0.0" />
 		<PackageReference Include="MSTest.TestFramework" Version="2.0.0" />
-		<PackageReference Include="Xbim.Geometry.Engine.Interop" Version="6.1.0.2-dev" />
 	</ItemGroup>
 
 	<ItemGroup>
+    <ProjectReference Include="..\Xbim.Geometry.Engine.Interop\Xbim.Geometry.Engine.Interop.csproj" />
 		<ProjectReference Include="..\Xbim.ModelGeometry.Scene\Xbim.ModelGeometry.Scene.csproj" />
 	</ItemGroup>
 

@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+Ensure native assemblies are copied when referenced transitively, using Nuget 5.0's buildTransitive mechanism
+Should be Automatically generated / wild-carded.-->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Condition=" '$(RuntimeIdentifier)' == '' AND '$(OS)' == 'Windows_NT' ">
+    <Content Include="$(MSBuildThisFileDirectory)..\..\lib\netcoreapp3.1\win10-x86\TKBin.dll">
+      <Link>win10-x86\TKBin.dlll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Pack>false</Pack>
+    </Content>
+    <Content Include="$(MSBuildThisFileDirectory)..\..\lib\netcoreapp3.1\win10-x64\TKBin.dll">
+      <Link>win10-x64\TKBin.dlll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Pack>false</Pack>
+    </Content>
+    <!-- TODO: ARM-->
+    <!-- TODO : all bins, and all platforms -->
+  </ItemGroup>
+ 
+</Project>
