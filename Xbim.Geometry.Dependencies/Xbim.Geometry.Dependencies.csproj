@@ -7,7 +7,7 @@
 		<Platforms>x64;x86;AnyCPU</Platforms>
 		<RestoreProjectStyle>PackageReference</RestoreProjectStyle>
 		<Version>5.1.100-develop</Version>
-		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
 		<RuntimeIdentifiers>win10-x86;win10-x64</RuntimeIdentifiers>
 		<PackageIcon>xbim-toolkit-icon.png</PackageIcon>
 	</PropertyGroup>

@@ -7,14 +7,33 @@
     <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
     <SignAssembly>False</SignAssembly>
     <AssemblyOriginatorKeyFile>..\XbimOpenSourceKeyFile.snk</AssemblyOriginatorKeyFile>
+    <Platforms>AnyCPU;x64;x86</Platforms>
   </PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<AllowUnsafeBlocks>false</AllowUnsafeBlocks>
 	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+	  <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+	  <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+	</PropertyGroup>
+
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
 		<PlatformTarget>x86</PlatformTarget><!-- TODO check why -->
+	</PropertyGroup>
+
+
+  
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+	  <PlatformTarget>x86</PlatformTarget>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+	  <PlatformTarget>x64</PlatformTarget>
 	</PropertyGroup>
 
   <PropertyGroup Condition="'$(Platform)'=='AnyCPU' OR '$(Platform)'=='x64'">
