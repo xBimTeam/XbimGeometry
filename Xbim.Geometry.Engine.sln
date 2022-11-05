@@ -24,8 +24,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		LICENCE.md = LICENCE.md
 		nuget.config = nuget.config
 		README.md = README.md
-		test.x86.runsettings = test.x86.runsettings
 		test.x64.runsettings = test.x64.runsettings
+		test.x86.runsettings = test.x86.runsettings
 		Xbim.Geometry.Engine.Interop.build.targets = Xbim.Geometry.Engine.Interop.build.targets
 		Xbim.Geometry.Engine.Interop.targets = Xbim.Geometry.Engine.Interop.targets
 		Xbim.Geometry\Xbim.Geometry.tmpl = Xbim.Geometry\Xbim.Geometry.tmpl
@@ -42,6 +42,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XbimRegression", "Xbim.Geometry.Regression\XbimRegression.csproj", "{592094B6-DA55-40BC-8030-0E9B6EFE36CC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xbim.Geometry.Dependencies", "Xbim.Geometry.Dependencies\Xbim.Geometry.Dependencies.csproj", "{E847C989-FCE5-4DBD-AD7D-575007DF2164}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xbim.Geometry", "Xbim.Geometry\Xbim.Geometry.csproj", "{C2E7030F-2C3D-4C3B-9820-3AC8E2EA201D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -120,6 +122,18 @@ Global
 		{E847C989-FCE5-4DBD-AD7D-575007DF2164}.Release|x64.ActiveCfg = Release|Any CPU
 		{E847C989-FCE5-4DBD-AD7D-575007DF2164}.Release|x64.Build.0 = Release|Any CPU
 		{E847C989-FCE5-4DBD-AD7D-575007DF2164}.Release|x86.ActiveCfg = Release|Any CPU
+		{C2E7030F-2C3D-4C3B-9820-3AC8E2EA201D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2E7030F-2C3D-4C3B-9820-3AC8E2EA201D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C2E7030F-2C3D-4C3B-9820-3AC8E2EA201D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C2E7030F-2C3D-4C3B-9820-3AC8E2EA201D}.Debug|x64.Build.0 = Debug|Any CPU
+		{C2E7030F-2C3D-4C3B-9820-3AC8E2EA201D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C2E7030F-2C3D-4C3B-9820-3AC8E2EA201D}.Debug|x86.Build.0 = Debug|Any CPU
+		{C2E7030F-2C3D-4C3B-9820-3AC8E2EA201D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C2E7030F-2C3D-4C3B-9820-3AC8E2EA201D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C2E7030F-2C3D-4C3B-9820-3AC8E2EA201D}.Release|x64.ActiveCfg = Release|Any CPU
+		{C2E7030F-2C3D-4C3B-9820-3AC8E2EA201D}.Release|x64.Build.0 = Release|Any CPU
+		{C2E7030F-2C3D-4C3B-9820-3AC8E2EA201D}.Release|x86.ActiveCfg = Release|Any CPU
+		{C2E7030F-2C3D-4C3B-9820-3AC8E2EA201D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

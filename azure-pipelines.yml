@@ -130,24 +130,24 @@ jobs:
       configuration: '$(BuildConfiguration)'
 
   # Xbim.Geometry meta package
-  - powershell: |
-      ((Get-Content -path Xbim.Geometry\Xbim.Geometry.tmpl -Raw) -replace '{{version}}','$(packageversion)') | Set-Content -Path Xbim.Geometry\Xbim.Geometry.nuspec
-    name: Geometry_metapackage_Update
-  - script: nuget pack Xbim.Geometry\Xbim.Geometry.nuspec -OutputDirectory Xbim.Geometry/bin/$(BuildConfiguration)
-    name: Geometry_metapackage_Pack
+  #- powershell: |
+  #    ((Get-Content -path Xbim.Geometry\Xbim.Geometry.tmpl -Raw) -replace '{{version}}','$(packageversion)') | Set-Content -Path Xbim.Geometry\Xbim.Geometry.nuspec
+  #  name: Geometry_metapackage_Update
+  #- script: nuget pack Xbim.Geometry\Xbim.Geometry.nuspec -OutputDirectory Xbim.Geometry/bin/$(BuildConfiguration)
+  #  name: Geometry_metapackage_Pack
   
-  # Disabled until we fix the build server environment
-  # - task: VSTest@2
-  #   displayName: 'VsTest - testAssemblies'
-  #   inputs:
-  #     testSelector: 'testAssemblies'
-  #     testAssemblyVer2: '**\bin\$(BuildConfiguration)\**\Xbim.Geometry.Engine.Interop.Tests.dll'
-  #     searchFolder: '$(System.DefaultWorkingDirectory)'
-  #     runSettingsFile: 'test.runsettings'
-  #     vsTestVersion: 'toolsInstaller'
-  #     codeCoverageEnabled: false
-  #     platform: '$(BuildPlatform)'
-  #     configuration: '$(BuildConfiguration)'
+  
+  - task: VSTest@2
+    displayName: 'VsTest - testAssemblies'
+    inputs:
+      testSelector: 'testAssemblies'
+      testAssemblyVer2: '**\bin\$(BuildConfiguration)\**\Xbim.Geometry.Engine.Interop.Tests.dll'
+      searchFolder: '$(System.DefaultWorkingDirectory)'
+      # runSettingsFile: 'test.runsettings'
+      vsTestVersion: 'toolsInstaller'
+      codeCoverageEnabled: false
+      platform: '$(BuildPlatform)'
+      configuration: '$(BuildConfiguration)'
   
   - task: PublishSymbols@1
     displayName: 'Publish symbols path: '
@@ -171,22 +171,23 @@ jobs:
     condition: succeededOrFailed()
   
   # Publish to master or develop MyGet feed based on the source branch
-  - task: NuGetCommand@2
-    name: 'MyGetPublishing_Master'
-    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
-    inputs:
-      command: push
-      nuGetFeedType: external
-      publishFeedCredentials: 'MyGetMaster'
-      versioningScheme: byEnvVar
-      versionEnvVar: packageversion
+  # Disable publishing
+  #- task: NuGetCommand@2
+  #  name: 'MyGetPublishing_Master'
+  #  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+  #  inputs:
+  #    command: push
+  #    nuGetFeedType: external
+  #    publishFeedCredentials: 'MyGetMaster'
+  #    versioningScheme: byEnvVar
+  #    versionEnvVar: packageversion
   
-  - task: NuGetCommand@2
-    name: 'MyGetPublishing_Develop'
-    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
-    inputs:
-      command: push
-      nuGetFeedType: external
-      publishFeedCredentials: 'MyGetDev'
-      versioningScheme: byEnvVar
-      versionEnvVar: packageversion
+  #- task: NuGetCommand@2
+  #  name: 'MyGetPublishing_Develop'
+  #  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
+  #  inputs:
+  #    command: push
+  #    nuGetFeedType: external
+  #    publishFeedCredentials: 'MyGetDev'
+  #    versioningScheme: byEnvVar
+  #    versionEnvVar: packageversion
