@@ -13,8 +13,8 @@ trigger:
 variables:
   BuildConfiguration: 'Release'
   BuildPlatform: 'Any CPU'
-  major: 5
-  minor: 1
+  major: 6
+  minor: 0
   # creates a counter called versioncounter and seeds it at 100 and then assigns the value to a variable named buildNo.
   buildNo: $[counter('geomversioncounter', 100)]
   
@@ -172,24 +172,23 @@ jobs:
 
 
   
-  # Publish to master or develop MyGet feed based on the source branch
-  # Disable publishing
-  #- task: NuGetCommand@2
-  #  name: 'MyGetPublishing_Master'
-  #  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
-  #  inputs:
-  #    command: push
-  #    nuGetFeedType: external
-  #    publishFeedCredentials: 'MyGetMaster'
-  #    versioningScheme: byEnvVar
-  #    versionEnvVar: packageversion
+   # Publish to master or develop MyGet feed based on the source branch 
+  - task: NuGetCommand@2
+    name: 'MyGetPublishing_Master'
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+    inputs:
+      command: push
+      nuGetFeedType: external
+      publishFeedCredentials: 'MyGetMaster'
+      versioningScheme: byEnvVar
+      versionEnvVar: packageversion
   
-  #- task: NuGetCommand@2
-  #  name: 'MyGetPublishing_Develop'
-  #  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
-  #  inputs:
-  #    command: push
-  #    nuGetFeedType: external
-  #    publishFeedCredentials: 'MyGetDev'
-  #    versioningScheme: byEnvVar
-  #    versionEnvVar: packageversion
+  - task: NuGetCommand@2
+    name: 'MyGetPublishing_Develop'
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
+    inputs:
+      command: push
+      nuGetFeedType: external
+      publishFeedCredentials: 'MyGetDev'
+      versioningScheme: byEnvVar
+      versionEnvVar: packageversion
