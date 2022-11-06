@@ -14,19 +14,15 @@
 		<SignAssembly>False</SignAssembly>
 	</PropertyGroup>
 
-
-	<ItemGroup Condition="$(TargetFramework)=='net472'">
-		<PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
-		<PackageReference Include="System.Drawing.Common" Version="6.0.0" />
-	</ItemGroup>
-
 	
 	<ItemGroup>
 		<None Include="..\xbim-toolkit-icon.png" Pack="True" PackagePath="\" />
 	</ItemGroup>
 	<ItemGroup>
 	  <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
-	  <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="6.1.0.2-dev" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\Xbim.Geometry.Engine.Interop\Xbim.Geometry.Engine.Interop.csproj" />
 	</ItemGroup>
 
 </Project>

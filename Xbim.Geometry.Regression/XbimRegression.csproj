@@ -18,11 +18,11 @@
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="6.0.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 		<PackageReference Include="NReco.Logging.File" Version="1.1.5" />
-		<PackageReference Include="Xbim.Geometry.Engine.Interop" Version="6.1.0.2-dev" />
 		<PackageReference Include="Xbim.Ifc" Version="5.1.361-develop" />
 		<PackageReference Include="Xbim.IO.Esent" Version="5.1.361-develop" />
 	</ItemGroup>
 	<ItemGroup>
+		<ProjectReference Include="..\Xbim.Geometry.Engine.Interop\Xbim.Geometry.Engine.Interop.csproj" />
 		<ProjectReference Include="..\Xbim.ModelGeometry.Scene\Xbim.ModelGeometry.Scene.csproj" />
 	</ItemGroup>
 

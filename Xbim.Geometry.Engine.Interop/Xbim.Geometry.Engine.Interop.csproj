@@ -21,15 +21,36 @@
 		<GeometryEnginePath>../Xbim.Geometry.Engine/bin/$(Configuration)/$(TargetFramework)/</GeometryEnginePath>
 	</PropertyGroup>
 	<ItemGroup>
-		<None Include="..\Xbim.Geometry.Engine.Interop.targets" PackagePath="build" Pack="True" Visible="true"/>
-		<None Include="$(GeometryEnginePath)win10-x64\TK*.dll" PackagePath="lib/$(TargetFramework)/win10-x64" Pack="True" Visible="false" />
-		<None Include="$(GeometryEnginePath)win10-x86\TK*.dll" PackagePath="lib/$(TargetFramework)/win10-x86" Pack="True" Visible="false" />
-		<None Include="$(GeometryEnginePath)win10-x86\Ijwhost.dll" PackagePath="lib/$(TargetFramework)/win10-x64" Pack="True" Visible="false" />
-		<None Include="$(GeometryEnginePath)win10-x86\Ijwhost.dll" PackagePath="lib/$(TargetFramework)/win10-x86" Pack="True" Visible="false" />
-		<None Include="$(GeometryEnginePath)win10-x86\Xbim.Geometry.Engine.dll" PackagePath="lib/$(TargetFramework)/win10-x64" Pack="True" Visible="false" />
-		<None Include="$(GeometryEnginePath)win10-x86\Xbim.Geometry.Engine.dll" PackagePath="lib/$(TargetFramework)/win10-x86" Pack="True" Visible="false" />
-	</ItemGroup>
+		<None Include="..\Xbim.Geometry.Engine.Interop.targets" PackagePath="build" Pack="True" Visible="true" />
+    <None Include="buildTransitive\netcoreapp3.1\Xbim.Geometry.Engine.Interop.targets" PackagePath="buildTransitive/netcoreapp3.1" Pack="True" Visible="true" />
+  </ItemGroup>
 
+  <ItemGroup>
+    <None Include="$(GeometryEnginePath)win10-x64\TK*.dll" PackagePath="lib/$(TargetFramework)/win10-x64" Pack="True" Visible="false">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>win10-x64\%(Filename)%(Extension)</Link>
+    </None>
+    <None Include="$(GeometryEnginePath)win10-x86\TK*.dll" PackagePath="lib/$(TargetFramework)/win10-x86" Pack="True" Visible="false">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>win10-x86\%(Filename)%(Extension)</Link>
+    </None>
+    <None Include="$(GeometryEnginePath)win10-x64\Ijwhost.dll" PackagePath="lib/$(TargetFramework)/win10-x64" Pack="True" Visible="false">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>win10-x64\%(Filename)%(Extension)</Link>
+    </None>
+    <None Include="$(GeometryEnginePath)win10-x86\Ijwhost.dll" PackagePath="lib/$(TargetFramework)/win10-x86" Pack="True" Visible="false">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>win10-x86\%(Filename)%(Extension)</Link>
+    </None>
+    <None Include="$(GeometryEnginePath)win10-x64\Xbim.Geometry.Engine.dll" PackagePath="lib/$(TargetFramework)/win10-x64" Pack="True" Visible="false">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>win10-x64\%(Filename)%(Extension)</Link>
+    </None>
+    <None Include="$(GeometryEnginePath)win10-x86\Xbim.Geometry.Engine.dll" PackagePath="lib/$(TargetFramework)/win10-x86" Pack="True" Visible="false">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>win10-x86\%(Filename)%(Extension)</Link>
+    </None>
+	</ItemGroup>
 
 	<ItemGroup>
 		<None Include="..\xbim-toolkit-icon.png" Pack="True" PackagePath="\" />

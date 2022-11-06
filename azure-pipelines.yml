@@ -13,8 +13,8 @@ trigger:
 variables:
   BuildConfiguration: 'Release'
   BuildPlatform: 'Any CPU'
-  major: 5
-  minor: 1
+  major: 6
+  minor: 0
   # creates a counter called versioncounter and seeds it at 100 and then assigns the value to a variable named buildNo.
   buildNo: $[counter('geomversioncounter', 100)]
   
@@ -106,12 +106,20 @@ jobs:
       restoreSolution: 'Xbim.Geometry.Engine.sln'
       feedsToUse: config
       nugetConfigPath: nuget.config
+  - task: NuGetCommand@2
+    displayName: 'NuGet restore packages.config'
+    inputs:
+      command: 'restore'
+      restoreSolution: 'Xbim.Geometry.Engine\packages.config'
+      feedsToUse: 'config'
+      nugetConfigPath: 'nuget.config'
+      restoreDirectory: '$(build.sourcesdirectory)\packages'
   
   - task: DeleteFiles@1
-    displayName: 'Delete old *.nupkg files from $(build.sourcesdirectory)'
+    displayName: 'Delete old bin files from $(build.sourcesdirectory)'
     inputs:
       SourceFolder: '$(build.sourcesdirectory)'
-      Contents: '**\bin\$(BuildConfiguration)\**\*.nupkg'
+      Contents: '**\bin\**\*.*'
 
   - task: VSBuild@1
     displayName: 'Build and pack solution Xbim.Geometry.Engine.sln'
@@ -122,24 +130,24 @@ jobs:
       configuration: '$(BuildConfiguration)'
 
   # Xbim.Geometry meta package
-  - powershell: |
-      ((Get-Content -path Xbim.Geometry\Xbim.Geometry.tmpl -Raw) -replace '{{version}}','$(packageversion)') | Set-Content -Path Xbim.Geometry\Xbim.Geometry.nuspec
-    name: Geometry_metapackage_Update
-  - script: nuget pack Xbim.Geometry\Xbim.Geometry.nuspec -OutputDirectory Xbim.Geometry/bin/$(BuildConfiguration)
-    name: Geometry_metapackage_Pack
+  #- powershell: |
+  #    ((Get-Content -path Xbim.Geometry\Xbim.Geometry.tmpl -Raw) -replace '{{version}}','$(packageversion)') | Set-Content -Path Xbim.Geometry\Xbim.Geometry.nuspec
+  #  name: Geometry_metapackage_Update
+  #- script: nuget pack Xbim.Geometry\Xbim.Geometry.nuspec -OutputDirectory Xbim.Geometry/bin/$(BuildConfiguration)
+  #  name: Geometry_metapackage_Pack
   
-  # Disabled until we fix the build server environment
-  # - task: VSTest@2
-  #   displayName: 'VsTest - testAssemblies'
-  #   inputs:
-  #     testSelector: 'testAssemblies'
-  #     testAssemblyVer2: '**\bin\$(BuildConfiguration)\**\Xbim.Geometry.Engine.Interop.Tests.dll'
-  #     searchFolder: '$(System.DefaultWorkingDirectory)'
-  #     runSettingsFile: 'test.runsettings'
-  #     vsTestVersion: 'toolsInstaller'
-  #     codeCoverageEnabled: false
-  #     platform: '$(BuildPlatform)'
-  #     configuration: '$(BuildConfiguration)'
+  
+  - task: VSTest@2
+    displayName: 'VsTest - testAssemblies'
+    inputs:
+      testSelector: 'testAssemblies'
+      testAssemblyVer2: '**\bin\**\$(BuildConfiguration)\**\Xbim.Geometry.Engine.Interop.Tests.dll'
+      searchFolder: '$(System.DefaultWorkingDirectory)'
+      # runSettingsFile: 'test.runsettings'
+      vsTestVersion: 'toolsInstaller'
+      codeCoverageEnabled: false
+      platform: '$(BuildPlatform)'
+      configuration: '$(BuildConfiguration)'
   
   - task: PublishSymbols@1
     displayName: 'Publish symbols path: '
@@ -149,7 +157,7 @@ jobs:
     continueOnError: true
   
   - task: CopyFiles@2
-    displayName: 'Copy Files to: $(build.artifactstagingdirectory)'
+    displayName: 'Copy Nuget packages to: $(build.artifactstagingdirectory)'
     inputs:
       SourceFolder: '$(build.sourcesdirectory)'
       Contents: '**\bin\$(BuildConfiguration)\*.nupkg'
@@ -161,8 +169,10 @@ jobs:
     inputs:
       PathtoPublish: '$(build.artifactstagingdirectory)'
     condition: succeededOrFailed()
+
+
   
-  # Publish to master or develop MyGet feed based on the source branch
+   # Publish to master or develop MyGet feed based on the source branch 
   - task: NuGetCommand@2
     name: 'MyGetPublishing_Master'
     condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
