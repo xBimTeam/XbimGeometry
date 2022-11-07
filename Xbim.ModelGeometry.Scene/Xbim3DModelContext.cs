@@ -1471,7 +1471,7 @@ namespace Xbim.ModelGeometry.Scene
                 {
                     LogError("Processing failure", item);
                 }
-                throw new XbimException("Processing halted due to model error", e);
+                throw new XbimException("Processing halted due to model error, see logs", e);
             }
             contextHelper.PercentageParsed = localPercentageParsed;
             contextHelper.Tally = localTally;

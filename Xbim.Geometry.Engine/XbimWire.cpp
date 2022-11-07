@@ -234,48 +234,17 @@ namespace Xbim
 					XbimGeometryCreator::LogWarning(logger, profile, "Invalid outer bound. Wire discarded");
 					return;
 				}
-
-				
-				if (profile->ProfileType == IfcProfileTypeEnum::AREA && !loop->IsClosed) //need to make sure it is not self intersecting and it is closed area
+				bool isValidNormal;
+				gp_Dir noraml = XbimWire::NormalDir(loop, isValidNormal);
+				if (!isValidNormal)
 				{
-
-					// todo: this code is not quite robust, it did not manage to close fairly simple polylines.
-					try
-					{
-
-						double oneMilli = profile->Model->ModelFactors->OneMilliMeter;
-						TopoDS_Face face = gcnew XbimFace(loop, true, oneMilli, profile->OuterCurve->EntityLabel, logger);
-						ShapeFix_Wire wireFixer(loop, face, XbimConvert::ModelService(profile)->MinimumGap);
-						wireFixer.ClosedWireMode() = Standard_True;
-						wireFixer.FixGaps2dMode() = Standard_True;
-						wireFixer.FixGaps3dMode() = Standard_True;
-						wireFixer.ModifyGeometryMode() = Standard_True;
-						wireFixer.SetMinTolerance(XbimConvert::ModelService(profile)->MinimumGap);
-						wireFixer.SetPrecision(oneMilli);
-						wireFixer.SetMaxTolerance(oneMilli * 10);
-						Standard_Boolean closed = wireFixer.Perform();
-						if (closed)
-						{
-							pWire = new TopoDS_Wire();
-							*pWire = wireFixer.Wire();
-						}
-						else
-						{
-							pWire = new TopoDS_Wire();
-							*pWire = loop;
-						}
-					}
-					catch (const Standard_Failure& sf)
-					{
-						System::String^ err = gcnew System::String(sf.GetMessageString());
-						XbimGeometryCreator::LogWarning(logger, profile, "Invalid bound. Wire discarded: {0}", err);
-					}
+					XbimGeometryCreator::LogWarning(logger, profile, "Invalid outer bound, has no normal. Wire discarded");
+					return;
 				}
-				else
-				{
-					pWire = new TopoDS_Wire();
-					*pWire = loop;
-				}
+
+				pWire = new TopoDS_Wire();
+				*pWire = loop;
+
 			}
 		}
 
@@ -435,7 +404,7 @@ namespace Xbim
 				{
 					pointSeq.Append(KeyedPnt2d(gp_XY(cp->X, cp->Y), cp->EntityLabel));
 				}
-				
+
 				TopoDS_Wire wire = wireFactory.BuildPolyline2d(pointSeq, XbimConvert::ModelService(pline)->MinimumGap);
 				//we have a wire and it will be planar as it was defined in 2d
 				//However, it may not comply with any other topological rules, these need to be checked at an appropriate level
@@ -446,7 +415,7 @@ namespace Xbim
 					*pWire = wire;
 				}
 			}
-			else if(3 == (int)pline->Dim)
+			else if (3 == (int)pline->Dim)
 			{
 				//validate
 				if (!Enumerable::Any(pline->Points))
@@ -463,7 +432,7 @@ namespace Xbim
 					*pWire = wire;
 				}
 			}
-			
+
 		}
 
 		void XbimWire::Init(IIfcIndexedPolyCurve^ polyCurve, ILogger^ logger)

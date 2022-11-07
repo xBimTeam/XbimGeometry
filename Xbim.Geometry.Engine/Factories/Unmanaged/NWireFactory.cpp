@@ -120,7 +120,7 @@ TopoDS_Wire NWireFactory::BuildPolyline2d(
 		if (actualPointCount < 2)
 		{
 			pLoggingService->LogInformation("Polyline must have at least 2 vertices");
-			return _emptyWire;
+			return TopoDS_Wire();
 		}
 		
 		//make the polygon
@@ -144,7 +144,7 @@ TopoDS_Wire NWireFactory::BuildPolyline2d(
 	}
 
 	pLoggingService->LogWarning("Could not build polyline");
-	return _emptyWire;
+	return TopoDS_Wire();
 
 }
 
@@ -288,7 +288,7 @@ TopoDS_Wire NWireFactory::BuildPolyline(
 	}
 
 	pLoggingService->LogWarning("Could not build polyline");
-	return _emptyWire;
+	return TopoDS_Wire();;
 
 }
 //turns the point list into a set of trimmed line segments, segments with a length less than tolerance are skipped
@@ -459,7 +459,7 @@ TopoDS_Wire NWireFactory::BuildDirectrix(TColGeom_SequenceOfCurve& segments, dou
 		pLoggingService->LogError(strm.str().c_str());
 	}
 	pLoggingService->LogWarning("Could not build directrix");
-	return _emptyWire;
+	return TopoDS_Wire();
 }
 
 void NWireFactory::AdjustVertexTolerance(TopoDS_Vertex& vertexToJoinTo, gp_Pnt pointToJoinTo, gp_Pnt pointToJoin, double gap)
@@ -510,7 +510,7 @@ TopoDS_Wire NWireFactory::BuildRectangleProfileDef(double xDim, double yDim)
 		pLoggingService->LogError(strm.str().c_str());
 	}
 	pLoggingService->LogWarning("Could not build rectangle profile def");
-	return _emptyWire;
+	return TopoDS_Wire();
 }
 
 TopoDS_Wire NWireFactory::BuildCircleProfileDef(double radius, const gp_Ax22d& position)
@@ -531,7 +531,7 @@ TopoDS_Wire NWireFactory::BuildCircleProfileDef(double radius, const gp_Ax22d& p
 		pLoggingService->LogError(strm.str().c_str());
 	}
 	pLoggingService->LogWarning("Could not build circle profile def");
-	return _emptyWire;
+	return TopoDS_Wire();
 }
 
 bool NWireFactory::GetNormal(const TopoDS_Wire& wire, gp_Vec& normal)

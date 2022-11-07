@@ -18,13 +18,12 @@ class NWireFactory
 {
 private:
 	NLoggingService* pLoggingService;
-	TopoDS_Wire _emptyWire;
+	
 public:
 	NWireFactory()
 	{
 		pLoggingService = new NLoggingService();
-		TopoDS_Builder builder;
-		builder.MakeWire(_emptyWire); //make an empty wire for failing operations
+		
 	};
 	~NWireFactory()
 	{
