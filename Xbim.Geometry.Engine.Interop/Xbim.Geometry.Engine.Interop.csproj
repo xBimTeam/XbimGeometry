@@ -1,6 +1,6 @@
 ﻿<Project DefaultTargets="Build" Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>netcoreapp3.1</TargetFramework>
+		<TargetFrameworks>net6.0</TargetFrameworks>
 		<Title>Xbim Geometry Engine</Title>
 		<Description>Provides support for the Ifc4 and Ifc2x3 Geometry conversion.</Description>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -12,7 +12,7 @@
 
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.31" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
 		<PackageReference Include="Xbim.Geometry.Abstractions" Version="6.2.235" />
 	</ItemGroup>
 
@@ -26,7 +26,7 @@
 	  <Optimize>False</Optimize>
 	</PropertyGroup>
 	<ItemGroup>
-		<None Include="buildTransitive\netcoreapp3.1\Xbim.Geometry.Engine.Interop.targets" PackagePath="buildTransitive/netcoreapp3.1" Pack="True" Visible="true">
+		<None Include="buildTransitive\net6.0\Xbim.Geometry.Engine.Interop.targets" PackagePath="buildTransitive/net6.0" Pack="True" Visible="true">
 		</None>
 	</ItemGroup>
 	<Target Name="TouchFiles" BeforeTargets="GenerateTargetFrameworkMonikerAttribute">
