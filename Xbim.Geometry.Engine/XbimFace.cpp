@@ -179,7 +179,7 @@ namespace Xbim
 			gp_Pln plane(gp_Pnt(0, 0, 0), gp_Dir(n.X, n.Y, n.Z));
 			BRepBuilderAPI_MakeFace faceMaker(plane);
 			pFace = new TopoDS_Face();
-			*pFace = faceMaker.Face();
+			*pFace = faceMaker.Face(); 
 		}
 
 		XbimFace::XbimFace(const TopoDS_Face& face)

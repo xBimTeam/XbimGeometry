@@ -10,6 +10,7 @@
 #include "../Exceptions/XbimGeometryFactoryException.h"
 #include <TColgp_SequenceOfPnt2d.hxx>
 #include <TColgp_Array1OfPnt.hxx>
+#include <TColgp_Array1OfPnt2d.hxx>
 #include <TopLoc_Location.hxx>
 
 using namespace Xbim::Ifc4::Interfaces;
@@ -63,7 +64,7 @@ namespace Xbim
 				virtual IXAxis2Placement2d^ GetAxis2Placement2d(IXPoint^ location, IXVector^ XaxisDirection);
 
 				void GetPolylinePoints(IIfcPolyline^ ifcPolyline, TColgp_Array1OfPnt& points);
-
+				void GetPolylinePoints2d(IIfcPolyline^ ifcPolyline, TColgp_Array1OfPnt2d& points);
 				TopLoc_Location ToLocation(IIfcAxis2Placement2D^ axis2D);
 				gp_Trsf ToTransform(XbimMatrix3D m3D);
 				virtual bool IsFacingAwayFrom(IXFace^ face, IXDirection^ direction);

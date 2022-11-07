@@ -11,7 +11,7 @@
 #include "../../BRep/OccExtensions/KeyedPnt.h"
 #include <Geom_BSplineCurve.hxx>
 #include <TColGeom_SequenceOfCurve.hxx>
-
+#include <TColGeom2d_SequenceOfCurve.hxx>
 
 
 class NWireFactory
@@ -32,7 +32,7 @@ public:
 	};
 	void SetLogger(NLoggingService* loggingService) { pLoggingService = loggingService; };
 	//Builds a polyline in the context of 0  or more existing vertices, if buildRaw is true no geometrical or topological corrections are made
-	TopoDS_Wire BuildPolyline2d(
+	TopoDS_Wire Build2dPolyline(
 		const NCollection_Vector<KeyedPnt2d>& pointSeq,		
 		double tolerance,bool buildRaw = false);
 	TopoDS_Wire BuildPolyline(
@@ -41,7 +41,10 @@ public:
 
 	void GetPolylineSegments(const TColgp_Array1OfPnt& points, TColGeom_SequenceOfCurve& curves, double tolerance);
 
+	void GetPolylineSegments2d(const TColgp_Array1OfPnt2d& points, TColGeom2d_SequenceOfCurve& curves, double tolerance);
+
 	TopoDS_Wire BuildDirectrix(TColGeom_SequenceOfCurve& segments, double trimStart, double trimEnd, double tolerance);
+	TopoDS_Wire Build2dDirectrix(TColGeom2d_SequenceOfCurve& segments, double trimStart, double trimEnd, double tolerance);
 
 	void AdjustVertexTolerance(TopoDS_Vertex& vertexToJoinTo, gp_Pnt pointToJoinTo, gp_Pnt pointToJoin, double gap);
 	TopoDS_Wire BuildRectangleProfileDef(double xDim, double yDim);

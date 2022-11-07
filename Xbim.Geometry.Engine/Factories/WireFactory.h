@@ -39,17 +39,27 @@ namespace Xbim
 				TopoDS_Wire Build2d(IIfcCurve^ ifcCurve);
 				TopoDS_Wire Build2dCircle(IIfcCircle^ ifcCircle);
 				TopoDS_Wire Build2dTrimmedCurve(IIfcTrimmedCurve^ ifcTrimmedCurve);
+				TopoDS_Wire Build2dCompositeCurve(IIfcCompositeCurve^ ifcCompositeCurve);
 
 				TopoDS_Wire Build2dPolyline(IIfcPolyline^ ifcPolyline);
 				//builds a trimmed 3d polyline param values of -1 are taken as no trim
 				TopoDS_Wire Build3D(IIfcPolyline^ ifcPolyline, double startParam, double endParam);
 				void BuildSegments(IIfcCompositeCurve^ ifcCurve, TColGeom_SequenceOfCurve& segments, bool sameSense);
 				void BuildSegments(IIfcCompositeCurve^ ifcCurve, TColGeom_SequenceOfCurve& segments) { BuildSegments(ifcCurve, segments, true); };
+				void Build2dSegments(IIfcCompositeCurve^ ifcCompositeCurve, TColGeom2d_SequenceOfCurve& resultSegments, bool sameSense);
+				void Build2dSegments(IIfcCompositeCurve^ ifcCurve, TColGeom2d_SequenceOfCurve& segments) { Build2dSegments(ifcCurve, segments, true); };
+
 				TopoDS_Wire MakeWire(Handle(Geom_Curve) curve);
 				template<typename IfcType>
 				Handle(Geom_Curve)  BuildCompositeCurveSegment(IfcType ifcCurve, bool sameSense, bool isTrimmedCurve);
 				template<typename IfcType>
 				Handle(Geom_Curve)  BuildCompositeCurveSegment(IfcType ifcCurve, bool sameSense) { return BuildCompositeCurveSegment(ifcCurve, sameSense, false); };
+
+				template<typename IfcType>
+				Handle(Geom2d_Curve)  Build2dCompositeCurveSegment(IfcType ifcCurve, bool sameSense, bool isTrimmedCurve);
+				template<typename IfcType>
+				Handle(Geom2d_Curve)  Build2dCompositeCurveSegment(IfcType ifcCurve, bool sameSense) { return Build2dCompositeCurveSegment(ifcCurve, sameSense, false); };
+
 				TopoDS_Wire BuildDirectrix(IIfcLine^ curve, double startParam, double endParam);
 				TopoDS_Wire BuildDirectrix(IIfcCircle^ curve, double startParam, double endParam);
 				TopoDS_Wire BuildDirectrix(IIfcEllipse^ curve, double startParam, double endParam);

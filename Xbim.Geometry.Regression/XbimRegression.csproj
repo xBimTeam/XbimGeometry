@@ -6,6 +6,7 @@
 		<SignAssembly>False</SignAssembly>
 		<AssemblyOriginatorKeyFile>..\XbimOpenSourceKeyFile.snk</AssemblyOriginatorKeyFile>
 		<LangVersion>8.0</LangVersion>
+		<GeometryInteropDirectory>../Xbim.Geometry.Engine.Interop/bin/$(Configuration)/$(Platform)</GeometryInteropDirectory>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<PlatformTarget>AnyCPU</PlatformTarget>
@@ -22,10 +23,19 @@
 		<PackageReference Include="Xbim.IO.Esent" Version="5.1.361-develop" />
 	</ItemGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\Xbim.Geometry.Engine.Interop\Xbim.Geometry.Engine.Interop.csproj" />
+		<ProjectReference Include="..\Xbim.Geometry.Engine.Interop\Xbim.Geometry.Engine.Interop.csproj">
+		  <Private>True</Private>
+		</ProjectReference>
 		<ProjectReference Include="..\Xbim.ModelGeometry.Scene\Xbim.ModelGeometry.Scene.csproj" />
 	</ItemGroup>
-
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+		<ItemGroup>
+			<Item  Name="Occ86Dlls" Include="$(GeometryInteropDirectory)/win10-x86/*.*"/>
+			<Item Name="Occ64Dlls" Include="$(GeometryInteropDirectory)/win10-x64/*.*"/>
+		</ItemGroup>
+		<Copy SourceFiles="@(Occ86Dlls)" DestinationFiles="@(Occ86Dlls->'$(OutputPath)win10-x86\%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+		<Copy SourceFiles="@(Occ64Dlls)" DestinationFiles="@(Occ64Dlls->'$(OutputPath)win10-x64\%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+	</Target>
 
 
 

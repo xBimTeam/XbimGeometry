@@ -21,7 +21,6 @@
 		<GeometryEnginePath>../Xbim.Geometry.Engine/bin/$(Configuration)/$(TargetFramework)/</GeometryEnginePath>
 	</PropertyGroup>
 	<ItemGroup>
-		<None Include="..\Xbim.Geometry.Engine.Interop.targets" PackagePath="build" Pack="True" Visible="true" />
 		<None Include="buildTransitive\netcoreapp3.1\Xbim.Geometry.Engine.Interop.targets" PackagePath="buildTransitive/netcoreapp3.1" Pack="True" Visible="true" />
 	</ItemGroup>
 
@@ -63,6 +62,7 @@
 	<ItemGroup>
 		<None Include="..\xbim-toolkit-icon.png" Pack="True" PackagePath="\" />
 	</ItemGroup>
+
 
 
 </Project>

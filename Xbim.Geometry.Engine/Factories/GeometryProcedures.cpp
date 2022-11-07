@@ -152,6 +152,17 @@ namespace Xbim
 					i++;
 				}
 			}
+			void GeometryProcedures::GetPolylinePoints2d(IIfcPolyline^ ifcPolyline, TColgp_Array1OfPnt2d& points)
+			{
+				int i = 1;
+				for each (IIfcCartesianPoint ^ ifcPoint in ifcPolyline->Points)
+				{
+					gp_Pnt2d pnt = BuildPoint2d(ifcPoint);
+					points.SetValue(i, pnt);
+					i++;
+				}
+			}
+
 			TopLoc_Location GeometryProcedures::ToLocation(IIfcAxis2Placement2D^ axis2D)
 			{
 				gp_Pnt2d loc = BuildPoint2d(axis2D->Location);
