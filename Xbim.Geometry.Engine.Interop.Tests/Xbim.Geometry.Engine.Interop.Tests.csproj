@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>netcoreapp3.1</TargetFrameworks>
+		<TargetFrameworks>net6.0</TargetFrameworks>
 		<IsPackable>false</IsPackable>
 		<EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
 		<SignAssembly>False</SignAssembly>
@@ -17,9 +17,7 @@
 	<ItemGroup>
 
 		<PackageReference Include="FluentAssertions" Version="6.8.0" />
-
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.31" />
-
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.1.31" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0" />
 		<PackageReference Include="Moq" Version="4.18.3" />

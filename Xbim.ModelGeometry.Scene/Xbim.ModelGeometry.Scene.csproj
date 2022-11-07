@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>netcoreapp3.1</TargetFrameworks>
+		<TargetFrameworks>net6.0</TargetFrameworks>
 		<Title>Xbim ModelGeometry Scene</Title>
 		<IsPackable>true</IsPackable>
 		<Description>Provides support for the Geometry Scene creation.</Description>
@@ -12,15 +12,10 @@
 		<AssemblyVersion>5.1.0.1</AssemblyVersion>
 		<FileVersion>5.1.0.1</FileVersion>
 		<SignAssembly>False</SignAssembly>
+
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netcoreapp3.1|AnyCPU'">
-	  <WarningLevel>4</WarningLevel>
-	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netcoreapp3.1|AnyCPU'">
-	  <WarningLevel>4</WarningLevel>
-	</PropertyGroup>
 
 	
 	<ItemGroup>
