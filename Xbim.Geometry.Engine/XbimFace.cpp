@@ -173,7 +173,7 @@ namespace Xbim
 			pFace = new TopoDS_Face();
 			*pFace = faceMaker.Face();
 		}
-
+		 
 		XbimFace::XbimFace(XbimVector3D n, ILogger^ /*logger*/)
 		{
 			gp_Pln plane(gp_Pnt(0, 0, 0), gp_Dir(n.X, n.Y, n.Z));
@@ -181,7 +181,7 @@ namespace Xbim
 			pFace = new TopoDS_Face();
 			*pFace = faceMaker.Face(); 
 		}
-
+		 
 		XbimFace::XbimFace(const TopoDS_Face& face)
 		{
 			pFace = new TopoDS_Face();

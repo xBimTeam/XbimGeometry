@@ -21,9 +21,17 @@
 		<GeometryEnginePath>../Xbim.Geometry.Engine/bin/$(Configuration)/$(TargetFramework)/</GeometryEnginePath>
 	</PropertyGroup>
 	<ItemGroup>
-		<None Include="buildTransitive\netcoreapp3.1\Xbim.Geometry.Engine.Interop.targets" PackagePath="buildTransitive/netcoreapp3.1" Pack="True" Visible="true" />
+		<None Include="buildTransitive\netcoreapp3.1\Xbim.Geometry.Engine.Interop.targets" PackagePath="buildTransitive/netcoreapp3.1" Pack="True" Visible="true">
+		</None>
 	</ItemGroup>
-
+	<Target Name="TouchFiles" BeforeTargets="GenerateTargetFrameworkMonikerAttribute">
+		<Touch
+            Files="XbimGeometryEngine.cs">
+			<Output
+                TaskParameter="TouchedFiles"
+                ItemName="FilesTouched"/>
+		</Touch>
+	</Target>
 	<ItemGroup>
 		<None Include="$(GeometryEnginePath)win10-x64\TK*.dll" PackagePath="lib/$(TargetFramework)/win10-x64" Pack="True" Visible="false">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -57,12 +65,12 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Link>win10-x86\%(Filename)%(Extension)</Link>
 		</None>
+
 	</ItemGroup>
 
 	<ItemGroup>
 		<None Include="..\xbim-toolkit-icon.png" Pack="True" PackagePath="\" />
 	</ItemGroup>
 
-
-
+	
 </Project>

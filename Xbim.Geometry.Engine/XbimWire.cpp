@@ -871,7 +871,7 @@ namespace Xbim
 //									else if (distFirstToFirst <= tolerance)
 //										ModifyWireAddEdge(resultWire, anEdge, edgeFirstVertex, edgeFirstPoint, edgeLastVertex, resultWireFirstVertex, resultWireFirstPoint, distFirstToFirst);
 //									else
-//									{
+//									{ 
 //										if (distFirstToFirst <= fiveMilli)
 //										{
 //											anEdge.Reverse();
@@ -907,7 +907,7 @@ namespace Xbim
 //			pWire = new TopoDS_Wire();
 //			*pWire = resultWire;
 //			fTol.LimitTolerance(*pWire, tolerance);
-
+  
 		}
 		//This is going to be added to to the selected vertex and the tolerances will be adjusted. the duplicate points will be removed
 		void XbimWire::ModifyWireAddEdge(TopoDS_Wire& resultWire, const TopoDS_Edge& edgeToAdd, const TopoDS_Vertex& edgeVertexToJoin, gp_Pnt edgePointToJoin, const TopoDS_Vertex&

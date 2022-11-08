@@ -46,6 +46,8 @@ public:
 	TopoDS_Wire BuildDirectrix(TColGeom_SequenceOfCurve& segments, double trimStart, double trimEnd, double tolerance);
 	TopoDS_Wire Build2dDirectrix(TColGeom2d_SequenceOfCurve& segments, double trimStart, double trimEnd, double tolerance);
 
+	TopoDS_Wire BuildWire(TColGeom2d_SequenceOfCurve& segments, double tolerance);
+
 	void AdjustVertexTolerance(TopoDS_Vertex& vertexToJoinTo, gp_Pnt pointToJoinTo, gp_Pnt pointToJoin, double gap);
 	TopoDS_Wire BuildRectangleProfileDef(double xDim, double yDim);
 	TopoDS_Wire BuildCircleProfileDef(double radius, const gp_Ax22d& position);

@@ -26,7 +26,7 @@ namespace Xbim
 		namespace Factories
 		{
 			IXWire^ WireFactory::BuildWire(array<IXPoint^>^ points)
-			{
+			{ 
 				//validate
 				if (points->Length == 0)
 					throw gcnew XbimGeometryFactoryException("Points has zero length");
@@ -49,7 +49,6 @@ namespace Xbim
 			}
 			IXWire^ WireFactory::Build(IIfcCurve^ ifcCurve)
 			{
-				
 				TopoDS_Wire wire = BuildWire(ifcCurve);
 				if (wire.IsNull() || wire.NbChildren() == 0)
 					throw gcnew XbimGeometryFactoryException("Resulting wire is empty");
@@ -197,7 +196,7 @@ namespace Xbim
 				//must be a planar surface
 				Handle(Geom2d_Circle) circ = Handle(Geom2d_Circle)::DownCast(hCurve);
 				gp_Pnt2d centre = circ->Location();
-				
+
 				return wire;
 			}
 
@@ -213,7 +212,7 @@ namespace Xbim
 				//must be a planar surface
 				Handle(Geom2d_TrimmedCurve) trim = Handle(Geom2d_TrimmedCurve)::DownCast(hCurve);
 				gp_Pnt2d start = trim->StartPoint();
-				
+
 				return wire;
 			}
 
@@ -221,8 +220,10 @@ namespace Xbim
 			{
 				TColGeom2d_SequenceOfCurve segments;
 				Build2dSegments(ifcCompositeCurve, segments);
-				return Ptr()->Build2dDirectrix(segments,-1,-1,_modelService->MinimumGap);
-				
+				if (segments.Size() > 0)
+					return Ptr()->BuildWire(segments, _modelService->MinimumGap);
+				else
+					return TopoDS_Wire();
 			}
 
 			TopoDS_Wire WireFactory::Build2dPolyline(IIfcPolyline^ ifcPolyline)
@@ -294,7 +295,10 @@ namespace Xbim
 				{
 
 					if (!Enum::TryParse<XCurveType>(segment->ParentCurve->ExpressType->ExpressName, curveType))
-						throw gcnew XbimGeometryFactoryException("Unsupported curve type: " + segment->ParentCurve->ExpressType->ExpressName);
+					{
+						_loggerService->LogInformation(String::Format("Unsupported curve type:{0} for #{1} " + segment->ParentCurve->ExpressType->ExpressName, segment->ParentCurve->EntityLabel));
+						return;
+					}
 					Handle(Geom_Curve) curve;
 					switch (curveType)
 					{
@@ -338,19 +342,22 @@ namespace Xbim
 						segments.Append(BuildCompositeCurveSegment(static_cast<IIfcTrimmedCurve^>(segment->ParentCurve), segment->SameSense, true));
 						break;
 					default:
-						throw gcnew XbimGeometryFactoryException("Not implemented. Curve type: " + curveType.ToString());
+						_loggerService->LogInformation(String::Format("Not implemented Curve #{0}. Type:  {1}", segment->ParentCurve->EntityLabel, curveType.ToString()));
 					}
 				}
 				//if this is a nested composite curve ensure sense is applied
 				for (auto it = segments.cbegin(); it != segments.cend(); ++it)
 				{
-					if (sameSense)
-						resultSegments.Append(*it);
-					else
+					if (!it->IsNull())
 					{
-						Handle(Geom_Curve) seg = *it;
-						seg->Reverse();
-						resultSegments.Append(seg);
+						if (sameSense)
+							resultSegments.Append(*it);
+						else
+						{
+							Handle(Geom_Curve) seg = *it;
+							seg->Reverse();
+							resultSegments.Append(seg);
+						}
 					}
 				}
 			}
@@ -362,7 +369,10 @@ namespace Xbim
 				{
 
 					if (!Enum::TryParse<XCurveType>(segment->ParentCurve->ExpressType->ExpressName, curveType))
-						throw gcnew XbimGeometryFactoryException("Unsupported curve type: " + segment->ParentCurve->ExpressType->ExpressName);
+					{
+						_loggerService->LogInformation(String::Format("Unsupported curve type:{0} for #{1} " + segment->ParentCurve->ExpressType->ExpressName, segment->ParentCurve->EntityLabel));
+						return;
+					}
 					Handle(Geom_Curve) curve;
 					switch (curveType)
 					{
@@ -406,19 +416,22 @@ namespace Xbim
 						segments.Append(Build2dCompositeCurveSegment(static_cast<IIfcTrimmedCurve^>(segment->ParentCurve), segment->SameSense, true));
 						break;
 					default:
-						throw gcnew XbimGeometryFactoryException("Not implemented. Curve type: " + curveType.ToString());
+						_loggerService->LogInformation(String::Format("Not implemented Curve #{0}. Type:  {1}", segment->ParentCurve->EntityLabel, curveType.ToString()));
 					}
 				}
 				//if this is a nested composite curve ensure sense is applied
 				for (auto it = segments.cbegin(); it != segments.cend(); ++it)
 				{
-					if (sameSense)
-						resultSegments.Append(*it);
-					else
+					if (!it->IsNull())
 					{
-						Handle(Geom2d_Curve) seg = *it;
-						seg->Reverse();
-						resultSegments.Append(seg);
+						if (sameSense)
+							resultSegments.Append(*it);
+						else
+						{
+							Handle(Geom2d_Curve) seg = *it;
+							seg->Reverse();
+							resultSegments.Append(seg);
+						}
 					}
 				}
 			}

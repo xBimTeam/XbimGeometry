@@ -45,17 +45,6 @@
     <RunSettingsFilePath>$(MSBuildProjectDirectory)\..\test.x86.runsettings</RunSettingsFilePath>
   </PropertyGroup>
 
-
-
-    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<ItemGroup>
-			<Item  Name="Occ86Dlls" Include="$(GeometryInteropDirectory)/win10-x86/*.*"/>
-			<Item Name="Occ64Dlls" Include="$(GeometryInteropDirectory)/win10-x64/*.*"/>
-		</ItemGroup>
-		<Copy SourceFiles="@(Occ86Dlls)" DestinationFiles="@(Occ86Dlls->'$(OutputPath)win10-x86\%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
-		<Copy SourceFiles="@(Occ64Dlls)" DestinationFiles="@(Occ64Dlls->'$(OutputPath)win10-x64\%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
-	</Target>
-
 	
 	<ItemGroup>
 		

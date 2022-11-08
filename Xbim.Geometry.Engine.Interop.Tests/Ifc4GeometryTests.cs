@@ -9,6 +9,7 @@ using Xbim.IO.Memory;
 using Xbim.Common;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Xbim.Geometry.Engine.Interop.Tests
 {
@@ -23,9 +24,11 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [ClassInitialize]
         static public void Initialise(TestContext context)
         {
-            logger = new NullLogger<IfcAdvancedBrepTests>();
-
-
+            var serviceProvider = new ServiceCollection()
+             .AddLogging()
+             .BuildServiceProvider();
+            var factory = serviceProvider.GetService<ILoggerFactory>();
+            logger = factory.CreateLogger<Ifc4GeometryTests>();
         }
         [ClassCleanup]
         static public void Cleanup()
@@ -38,7 +41,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void Can_build_ifcadvancedbrep_with_faulty_surface_orientation()
         {
-            
+
             using (var model = MemoryModel.OpenRead(@"testfiles/ifcadvancedbrep_with_faulty_surface_orientation.ifc"))
             {
                 //MemoryModel.SetWorkArounds(model.Header, model.ModelFactors as XbimModelFactors);
@@ -274,7 +277,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var geomEngine = new XbimGeometryEngine(model, logger);
                 foreach (var profile in profiles)
                 {
-                    var geom = geomEngine.CreateSolid(profile,logger);
+                    var geom = geomEngine.CreateSolid(profile, logger);
                     Assert.IsTrue(geom.Volume > 0);
                 }
             }
@@ -318,7 +321,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var cc = model.Instances.OfType<IIfcCompositeCurve>().FirstOrDefault();
                 Assert.IsNotNull(cc);
                 var geomEngine = new XbimGeometryEngine(model, logger);
-                var wire = geomEngine.CreateWire(cc,logger);
+                var wire = geomEngine.CreateWire(cc, logger);
                 Assert.IsNotNull(wire);
             }
         }
@@ -446,7 +449,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var geomEngine = new XbimGeometryEngine(model, logger);
                 foreach (var p in placements)
                 {
-                    XbimMatrix3D m = geomEngine.ToMatrix3D(p,logger);
+                    XbimMatrix3D m = geomEngine.ToMatrix3D(p, logger);
                     Assert.IsFalse(m.IsIdentity);
                 }
                 //make a graphic of the grid
@@ -470,7 +473,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var ifcGrid = model.Instances.OfType<IIfcGrid>().FirstOrDefault();
                 Assert.IsNotNull(ifcGrid);
                 var geomEngine = new XbimGeometryEngine(model, logger);
-                var geom = geomEngine.CreateGrid(ifcGrid,logger);
+                var geom = geomEngine.CreateGrid(ifcGrid, logger);
                 Assert.IsTrue(geom.Count > 0, "At least one solid must be returned");
                 foreach (var solid in geom)
                 {
@@ -505,7 +508,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var taperedSolid = model.Instances.OfType<IfcRevolvedAreaSolidTapered>().FirstOrDefault();
                 Assert.IsNotNull(taperedSolid);
                 var geomEngine = new XbimGeometryEngine(model, logger);
-                var bar = geomEngine.CreateSolid(taperedSolid,logger);
+                var bar = geomEngine.CreateSolid(taperedSolid, logger);
                 Assert.IsTrue(bar.Volume > 0);
             }
         }
@@ -522,7 +525,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
                 var shape = model.Instances[185] as IIfcGeometricRepresentationItem;
                 var geomEngine = new XbimGeometryEngine(model, logger);
-                IXbimGeometryObject geomObject = geomEngine.Create(shape,logger);
+                IXbimGeometryObject geomObject = geomEngine.Create(shape, logger);
                 Assert.IsTrue(geomObject.IsValid);
 
             }
@@ -576,8 +579,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.IsNotNull(derived);
                 Assert.IsNotNull(mirrored);
                 var geomEngine = new XbimGeometryEngine(model, logger);
-                var dFace = geomEngine.CreateFace(derived,logger);
-                var mFace = geomEngine.CreateFace(mirrored,logger);
+                var dFace = geomEngine.CreateFace(derived, logger);
+                var mFace = geomEngine.CreateFace(mirrored, logger);
                 var brepD = dFace.ToBRep;
                 var brepM = mFace.ToBRep;
                 var differ = new Diff();
@@ -658,7 +661,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void CompositeCurveBadPrecisionTest()
         {
-            using (var er = new EntityRepository<IIfcCompositeCurve>(nameof(CompositeCurveBadPrecisionTest),1.0,1e-5,false))
+            using (var er = new EntityRepository<IIfcCompositeCurve>(nameof(CompositeCurveBadPrecisionTest), 1.0, 1e-5, false))
             {
                 Assert.IsTrue(er.Entity != null, "No IIfcCompositeProfileDef found");
                 var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
@@ -678,7 +681,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var eas = model.Instances[3676127] as IIfcExtrudedAreaSolid;
                 Assert.IsNotNull(eas);
                 var geomEngine = new XbimGeometryEngine(model, logger);
-                var geom = geomEngine.CreateSolid(eas,logger);
+                var geom = geomEngine.CreateSolid(eas, logger);
                 Assert.IsTrue((geom.Volume > 0));
             }
         }
@@ -717,7 +720,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var geomOpening = geomEngine.Create(opening, (IIfcAxis2Placement3D)((IIfcLocalPlacement)(ifcOpening.ObjectPlacement)).RelativePlacement, logger) as IXbimSolid;
                 Assert.IsNotNull(geomOpening);
                 Assert.IsTrue((geomOpening.Volume > 0));
-                var geomWall = geomEngine.CreateSolid(wall,logger);
+                var geomWall = geomEngine.CreateSolid(wall, logger);
                 Assert.IsTrue((geomWall.Volume > 0));
                 var result = geomWall.Cut(geomOpening, model.ModelFactors.Precision);
                 Assert.IsTrue(result.Count == 0);
@@ -736,7 +739,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var eas = model.Instances[23512] as IIfcExtrudedAreaSolid;
                 eas.Should().NotBeNull();
                 var geomEngine = new XbimGeometryEngine(model, logger);
-                var geom = geomEngine.CreateSolid(eas,logger);
+                var geom = geomEngine.CreateSolid(eas, logger);
                 geom.Volume.Should().BeApproximately(2278352481546.0356, 1e-7);
             }
         }
@@ -750,7 +753,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var eas = model.Instances[272261] as IIfcExtrudedAreaSolid;
                 Assert.IsNotNull(eas);
                 var geomEngine = new XbimGeometryEngine(model, logger);
-                var geom = geomEngine.CreateSolid(eas,logger);
+                var geom = geomEngine.CreateSolid(eas, logger);
                 Assert.IsTrue((geom.Volume > 0));
 
             }
@@ -772,13 +775,13 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     Assert.IsNotNull(firstOrDefault);
                     {
                         var opening = firstOrDefault.Items.FirstOrDefault() as IIfcGeometricRepresentationItem;
-                        var geomOpening = geomEngine.Create(opening, (IIfcAxis2Placement3D)((IIfcLocalPlacement)(ifcOpening.ObjectPlacement)).RelativePlacement,logger) as IXbimSolid;
+                        var geomOpening = geomEngine.Create(opening, (IIfcAxis2Placement3D)((IIfcLocalPlacement)(ifcOpening.ObjectPlacement)).RelativePlacement, logger) as IXbimSolid;
                         Assert.IsNotNull(geomOpening);
                         solids.Add(geomOpening);
                     }
 
                 }
-                var wallGeom = geomEngine.CreateSolid(ifcWall,logger);
+                var wallGeom = geomEngine.CreateSolid(ifcWall, logger);
 
                 var result = wallGeom.Cut(solids, model.ModelFactors.Precision);
                 Assert.IsTrue(result.Count > 0);

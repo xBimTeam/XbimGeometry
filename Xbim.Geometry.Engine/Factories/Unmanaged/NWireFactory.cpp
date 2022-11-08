@@ -38,6 +38,9 @@
 
 #include <Geom2d_TrimmedCurve.hxx>
 #include <Geom2d_Line.hxx>
+#include <ShapeFix_Edge.hxx>
+#include <BRepLib.hxx>
+#include <Geom_Plane.hxx>
 TopoDS_Wire NWireFactory::Build2dPolyline(
 	const NCollection_Vector<KeyedPnt2d>& pointSeq,
 	double tolerance, bool buildRaw)
@@ -52,7 +55,7 @@ TopoDS_Wire NWireFactory::Build2dPolyline(
 		gp_Pnt2d start = pointSeq.cbegin()->myPnt2d;
 		gp_Pnt2d end = pointSeq.Last().myPnt2d;
 		double d = start.Distance(end);
-		
+
 		bool closed = d <= tolerance; //check if the polyline is specified as closed (end repeats the start point)
 
 		int myLastId = -1;
@@ -99,14 +102,14 @@ TopoDS_Wire NWireFactory::Build2dPolyline(
 					pLoggingService->LogInformation(message);
 					continue;
 				}
-				else if (pCount!=0) //we are adding a point we already have connnected and we are not on the last point
+				else if (pCount != 0) //we are adding a point we already have connnected and we are not on the last point
 				{
 					if (!warnedOfSelfIntersection)
 					{
 						pLoggingService->LogInformation("Self intersecting polyline");
 						warnedOfSelfIntersection = true; //just do it once
 					}
-					
+
 				}
 				vertices.Append(kv);
 				myLastId = aResID;
@@ -114,7 +117,7 @@ TopoDS_Wire NWireFactory::Build2dPolyline(
 
 		}
 		//The inspector now has our final vertex list
-		int desiredPointCount =  pointSeq.Length();
+		int desiredPointCount = pointSeq.Length();
 		int actualPointCount = vertices.Size();
 		if (actualPointCount < desiredPointCount) //we have removed duplicate points
 			pLoggingService->LogInformation("Duplicate points removed from polyline");
@@ -123,7 +126,7 @@ TopoDS_Wire NWireFactory::Build2dPolyline(
 			pLoggingService->LogInformation("Polyline must have at least 2 vertices");
 			return TopoDS_Wire();
 		}
-		
+
 		//make the polygon
 		TopoDS_Wire wire;
 		builder.MakeWire(wire);
@@ -133,7 +136,7 @@ TopoDS_Wire NWireFactory::Build2dPolyline(
 			builder.Add(wire, edgeMaker.Edge());
 		}
 		wire.Closed(closed);
-		
+
 		return wire;
 
 	}
@@ -608,7 +611,7 @@ TopoDS_Wire NWireFactory::Build2dDirectrix(TColGeom2d_SequenceOfCurve& segments,
 						edges.Append(edgeMaker.Edge());
 					}
 				}
-				
+
 
 
 			}
@@ -629,6 +632,95 @@ TopoDS_Wire NWireFactory::Build2dDirectrix(TColGeom2d_SequenceOfCurve& segments,
 		pLoggingService->LogError(strm.str().c_str());
 	}
 	pLoggingService->LogWarning("Could not build directrix");
+	return TopoDS_Wire();
+}
+
+TopoDS_Wire NWireFactory::BuildWire(TColGeom2d_SequenceOfCurve& segments, double tolerance)
+{
+	TopTools_SequenceOfShape edges;
+	try
+	{  
+		BRep_Builder builder;
+		TopoDS_Wire wire;
+		const Handle(Geom_Surface)& plane2d = BRepLib::Plane();
+		for (auto& it = segments.cbegin(); it != segments.cend(); ++it)
+		{
+			Handle(Geom2d_Curve) segment = *it;
+
+			if (edges.Length() == 0) //just add the first one
+			{
+				BRepBuilderAPI_MakeEdge2d edgeMaker(segment);
+				TopoDS_Edge edgeToAdd = edgeMaker.Edge();
+				edges.Append(edgeToAdd);
+			}
+			else //we need to add this segment to the start of end of the edges
+			{
+
+				TopoDS_Edge lastEdge = TopoDS::Edge(edges.Last());
+				TopoDS_Vertex vertexToAttachTo = TopExp::LastVertex(lastEdge); //get the vertex at the end of the wire
+				gp_Pnt lastPoint = BRep_Tool::Pnt(vertexToAttachTo); //the last point
+				TopoDS_Vertex vFirst = TopExp::FirstVertex(lastEdge); //get the vertex at the start of the wire
+				gp_Pnt firstPoint = BRep_Tool::Pnt(vFirst); //the first point
+				//TopoDS_Edge firstEdge = TopoDS::Edge(edges.First());
+
+				//gp_Pnt firstPoint = BRep_Tool::Pnt(vFirst); //the first point
+
+				gp_Pnt2d segStartPoint2d = segment->Value(segment->FirstParameter()); //start and end of segment to add
+				gp_Pnt2d segEndPoint2d = segment->Value(segment->LastParameter());
+				gp_Pnt segStartPoint(segStartPoint2d.X(), segStartPoint2d.Y(), 0);
+				gp_Pnt segEndPoint(segEndPoint2d.X(), segEndPoint2d.Y(), 0);
+				//double lastGap = lastPoint.Distance(segStartPoint);
+				//double firstGap = firstPoint.Distance(segEndPoint);
+				double gap = segStartPoint.Distance(lastPoint);
+				//if (lastGap < firstGap) //we can just add it on the end
+				//{
+				if (gap > tolerance)
+					Standard_Failure::Raise("Segments are not contiguous");
+				AdjustVertexTolerance(vertexToAttachTo, lastPoint, segStartPoint, gap);
+				TopoDS_Vertex segEndVertex;
+				builder.MakeVertex(segEndVertex, segEndPoint, Precision::Confusion());
+				BRepBuilderAPI_MakeEdge2d edgeMaker(segment, vertexToAttachTo, segEndVertex);
+				ShapeFix_Edge edgeFixer;
+
+				bool ok = edgeFixer.FixAddPCurve(edgeMaker.Edge(), plane2d, TopLoc_Location(), false);
+				if (ok)
+					edges.Append(edgeMaker.Edge());
+				else
+					pLoggingService->LogWarning("Could not create 3d PCurves in NWireFactory::BuildWire");
+
+
+				//}
+				//else //we neeed to add it on the start
+				//{
+				//	if (firstGap > tolerance)
+				//		Standard_Failure::Raise("Segments are not contiguous");
+				//	AdjustVertexTolerance(vFirst, firstPoint, segEndPoint, firstGap);
+				//	TopoDS_Vertex segStartVertex;
+				//	builder.MakeVertex(segStartVertex, segStartPoint, Precision::Confusion());
+				//	BRepBuilderAPI_MakeEdge2d edgeMaker(segment, segStartVertex, vFirst);
+				//	edges.Append(edgeMaker.Edge());
+				//}
+			}
+
+		}
+
+		//add the edges to the wire
+		builder.MakeWire(wire);
+		for (auto& it = edges.cbegin(); it != edges.cend(); ++it)
+		{
+			builder.Add(wire, *it);
+		}
+
+
+		return wire;
+	}
+	catch (const Standard_Failure& e)
+	{
+		std::stringstream strm;
+		e.Print(strm);
+		pLoggingService->LogError(strm.str().c_str());
+	}
+	pLoggingService->LogWarning("Could not build curve segments");
 	return TopoDS_Wire();
 }
 
