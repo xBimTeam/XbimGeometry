@@ -401,9 +401,8 @@ void NWireFactory::GetPolylineSegments2d(const TColgp_Array1OfPnt2d& points, TCo
 	return;
 }
 //Builds a wire a collection of segments and trims it
-TopoDS_Wire NWireFactory::BuildDirectrix(TColGeom_SequenceOfCurve& segments, double trimStart, double trimEnd, double tolerance)
+TopoDS_Wire NWireFactory::BuildDirectrix(TColGeom_SequenceOfCurve& segments, double trimStart, double trimEnd, double tolerance, double gapSize)
 {
-
 
 	TopTools_SequenceOfShape edges;
 	try
@@ -411,6 +410,18 @@ TopoDS_Wire NWireFactory::BuildDirectrix(TColGeom_SequenceOfCurve& segments, dou
 		BRep_Builder builder;
 		double parametricLength = 0;
 		TopoDS_Wire wire;
+		//std::ofstream myfile;
+		//myfile.open("segments.txt");
+		//for (auto& it = segments.cbegin(); it != segments.cend(); ++it)
+		//{
+		//	Handle(Geom_Curve) segment = *it;
+		//	gp_Pnt segStartPoint = segment->Value(segment->FirstParameter()); //start and end of segment to add
+		//	gp_Pnt segEndPoint = segment->Value(segment->LastParameter());
+
+		//	myfile << segStartPoint.X() << "," << segStartPoint.Y() << "," << segStartPoint.Z() << "-->" << segEndPoint.X() << "," << segEndPoint.Y() << "," << segEndPoint.Z() << "Len:"<< segStartPoint.Distance(segEndPoint) <<std::endl;
+		//}
+
+		//myfile.close();
 		for (auto& it = segments.cbegin(); it != segments.cend(); ++it)
 		{
 			Handle(Geom_Curve) segment = *it;
@@ -450,54 +461,51 @@ TopoDS_Wire NWireFactory::BuildDirectrix(TColGeom_SequenceOfCurve& segments, dou
 					}
 				}
 				//make the segment an edge
-
+				TopoDS_Edge anEdge;
 				if (edges.Length() == 0) //just add the first one
 				{
 					BRepBuilderAPI_MakeEdge edgeMaker(segment);
-					TopoDS_Edge edgeToAdd = edgeMaker.Edge();
-					edges.Append(edgeToAdd);
+					anEdge = edgeMaker.Edge();
 				}
-				else //we need to add this segment ot the start of end of the edges
+				else //we need to add this segment to the start of end of the edges
 				{
 
-					TopoDS_Edge lastEdge = TopoDS::Edge(edges.Last());
-					TopoDS_Vertex vLast = TopExp::LastVertex(lastEdge); //get the vertex at the end of the wire
-					gp_Pnt lastPoint = BRep_Tool::Pnt(vLast); //the last point
-
-					TopoDS_Edge firstEdge = TopoDS::Edge(edges.First());
-					TopoDS_Vertex vFirst = TopExp::FirstVertex(firstEdge); //get the vertex at the start of the wire
-					gp_Pnt firstPoint = BRep_Tool::Pnt(vFirst); //the first point
+					const TopoDS_Edge& lastEdge = TopoDS::Edge(edges.Last());
+					gp_Pnt lastEdgeEndPoint = BRep_Tool::Pnt(TopExp::LastVertex(lastEdge)); //the last point
 
 					gp_Pnt segStartPoint = segment->Value(segment->FirstParameter()); //start and end of segment to add
 					gp_Pnt segEndPoint = segment->Value(segment->LastParameter());
+					
+					double gap = segStartPoint.Distance(lastEdgeEndPoint);
 
-					double lastGap = lastPoint.Distance(segStartPoint);
-					double firstGap = firstPoint.Distance(segEndPoint);
-
-					if (lastGap < firstGap) //we can just add it on the end
+					if (gap > gapSize)
 					{
-						if (lastGap > tolerance)
-							Standard_Failure::Raise("Segments are not contiguous");
-						AdjustVertexTolerance(vLast, lastPoint, segStartPoint, lastGap);
+						//Standard_Failure::Raise("Segments are not contiguous");
+						//this segment is not connected to the previous one, make a new start vertex and create a discontinuous wire
 						TopoDS_Vertex segEndVertex;
-						builder.MakeVertex(segEndVertex, segEndPoint, Precision::Confusion());
-						BRepBuilderAPI_MakeEdge edgeMaker(segment, vLast, segEndVertex);
-						edges.Append(edgeMaker.Edge());
-					}
-					else //we neeed to add it on the start
-					{
-						if (firstGap > tolerance)
-							Standard_Failure::Raise("Segments are not contiguous");
-						AdjustVertexTolerance(vFirst, firstPoint, segEndPoint, firstGap);
+						builder.MakeVertex(segEndVertex, segEndPoint, tolerance);
 						TopoDS_Vertex segStartVertex;
-						builder.MakeVertex(segStartVertex, segStartPoint, Precision::Confusion());
-						BRepBuilderAPI_MakeEdge edgeMaker(segment, segStartVertex, vFirst);
-						edges.Append(edgeMaker.Edge());
+						builder.MakeVertex(segStartVertex, segStartPoint, tolerance);
+						BRepBuilderAPI_MakeEdge edgeMaker(segment, segStartVertex, segEndVertex);
+						anEdge = edgeMaker.Edge();
+					}
+					else //connect to previous segment it is in tolerance
+					{
+						AdjustVertexTolerance(TopExp::LastVertex(lastEdge), lastEdgeEndPoint, segStartPoint, gap);
+						TopoDS_Vertex segEndVertex;
+						builder.MakeVertex(segEndVertex, segEndPoint, tolerance);
+						BRepBuilderAPI_MakeEdge edgeMaker(segment, TopExp::LastVertex(lastEdge), segEndVertex);
+						if (!edgeMaker.IsDone())
+						{
+							std::stringstream msg;
+							msg << "Error building edge: Error Code: " << edgeMaker.Error();
+							Standard_Failure::Raise(msg);
+						}
+						anEdge = edgeMaker.Edge();
 					}
 				}
-				//add the edges to the wire
-
-
+				if (!anEdge.IsNull())
+					edges.Append(anEdge);
 			}
 
 		}
@@ -635,83 +643,84 @@ TopoDS_Wire NWireFactory::Build2dDirectrix(TColGeom2d_SequenceOfCurve& segments,
 	return TopoDS_Wire();
 }
 
-TopoDS_Wire NWireFactory::BuildWire(TColGeom2d_SequenceOfCurve& segments, double tolerance)
+TopoDS_Wire NWireFactory::BuildWire(TColGeom2d_SequenceOfCurve& segments, double tolerance, double gapSize)
 {
 	TopTools_SequenceOfShape edges;
 	try
 	{  
 		BRep_Builder builder;
 		TopoDS_Wire wire;
-		const Handle(Geom_Surface)& plane2d = BRepLib::Plane();
+		TopoDS_Edge anEdge;
+
+		//std::ofstream myfile;
+		//myfile.open("segments.txt");
+		//for (auto& it = segments.cbegin(); it != segments.cend(); ++it)
+		//{
+		//	Handle(Geom2d_Curve) segment = *it;
+		//	gp_Pnt2d segStartPoint2d = segment->Value(segment->FirstParameter()); //start and end of segment to add
+		//	gp_Pnt2d segEndPoint2d = segment->Value(segment->LastParameter());
+		//	
+		//	myfile << segStartPoint2d.X() << "," << segStartPoint2d.Y() << "-->" << segEndPoint2d.X() << "," << segEndPoint2d.Y() << std::endl;
+		//}
+		//
+		//myfile.close();
 		for (auto& it = segments.cbegin(); it != segments.cend(); ++it)
 		{
-			Handle(Geom2d_Curve) segment = *it;
+			Handle(Geom2d_Curve) segment = *it; 
 
 			if (edges.Length() == 0) //just add the first one
 			{
 				BRepBuilderAPI_MakeEdge2d edgeMaker(segment);
-				TopoDS_Edge edgeToAdd = edgeMaker.Edge();
-				edges.Append(edgeToAdd);
+				anEdge = edgeMaker.Edge();
 			}
 			else //we need to add this segment to the start of end of the edges
 			{
 
-				TopoDS_Edge lastEdge = TopoDS::Edge(edges.Last());
-				TopoDS_Vertex vertexToAttachTo = TopExp::LastVertex(lastEdge); //get the vertex at the end of the wire
-				gp_Pnt lastPoint = BRep_Tool::Pnt(vertexToAttachTo); //the last point
-				TopoDS_Vertex vFirst = TopExp::FirstVertex(lastEdge); //get the vertex at the start of the wire
-				gp_Pnt firstPoint = BRep_Tool::Pnt(vFirst); //the first point
-				//TopoDS_Edge firstEdge = TopoDS::Edge(edges.First());
-
-				//gp_Pnt firstPoint = BRep_Tool::Pnt(vFirst); //the first point
+				const TopoDS_Edge& lastEdge = TopoDS::Edge(edges.Last());				
+				gp_Pnt lastEdgeEndPoint = BRep_Tool::Pnt(TopExp::LastVertex(lastEdge)); //the last point
 
 				gp_Pnt2d segStartPoint2d = segment->Value(segment->FirstParameter()); //start and end of segment to add
 				gp_Pnt2d segEndPoint2d = segment->Value(segment->LastParameter());
 				gp_Pnt segStartPoint(segStartPoint2d.X(), segStartPoint2d.Y(), 0);
 				gp_Pnt segEndPoint(segEndPoint2d.X(), segEndPoint2d.Y(), 0);
-				//double lastGap = lastPoint.Distance(segStartPoint);
-				//double firstGap = firstPoint.Distance(segEndPoint);
-				double gap = segStartPoint.Distance(lastPoint);
-				//if (lastGap < firstGap) //we can just add it on the end
-				//{
-				if (gap > tolerance)
+				
+				double gap = segStartPoint.Distance(lastEdgeEndPoint);
+				
+				if (gap > gapSize)
 					Standard_Failure::Raise("Segments are not contiguous");
-				AdjustVertexTolerance(vertexToAttachTo, lastPoint, segStartPoint, gap);
+				AdjustVertexTolerance(TopExp::LastVertex(lastEdge), lastEdgeEndPoint, segStartPoint, gap);
 				TopoDS_Vertex segEndVertex;
-				builder.MakeVertex(segEndVertex, segEndPoint, Precision::Confusion());
-				BRepBuilderAPI_MakeEdge2d edgeMaker(segment, vertexToAttachTo, segEndVertex);
-				ShapeFix_Edge edgeFixer;
-
-				bool ok = edgeFixer.FixAddPCurve(edgeMaker.Edge(), plane2d, TopLoc_Location(), false);
-				if (ok)
-					edges.Append(edgeMaker.Edge());
-				else
-					pLoggingService->LogWarning("Could not create 3d PCurves in NWireFactory::BuildWire");
-
-
-				//}
-				//else //we neeed to add it on the start
-				//{
-				//	if (firstGap > tolerance)
-				//		Standard_Failure::Raise("Segments are not contiguous");
-				//	AdjustVertexTolerance(vFirst, firstPoint, segEndPoint, firstGap);
-				//	TopoDS_Vertex segStartVertex;
-				//	builder.MakeVertex(segStartVertex, segStartPoint, Precision::Confusion());
-				//	BRepBuilderAPI_MakeEdge2d edgeMaker(segment, segStartVertex, vFirst);
-				//	edges.Append(edgeMaker.Edge());
-				//}
+				builder.MakeVertex(segEndVertex, segEndPoint, tolerance);
+			
+				BRepBuilderAPI_MakeEdge2d edgeMaker(segment, TopExp::LastVertex(lastEdge), segEndVertex);
+				if (!edgeMaker.IsDone())
+				{
+					Standard_Real cf = segment->FirstParameter();
+					Standard_Real cl = segment->LastParameter();
+					gp_Pnt2d P1 = segment->Value(cf);
+					gp_Pnt2d P2 = segment->Value(cl);
+					double dist = P1.Distance(P2);
+					std::stringstream msg;
+					msg << "Error building edge: Error Code: " << edgeMaker.Error();
+					Standard_Failure::Raise(msg);
+				}
+				anEdge = edgeMaker.Edge();
 			}
-
+			bool ok = BRepLib::BuildCurve3d(anEdge, tolerance);
+			if (ok)
+				edges.Append(anEdge);
+			else
+				Standard_Failure::Raise("Could not create 3d PCurves in NWireFactory::BuildWire");
 		}
-
 		//add the edges to the wire
 		builder.MakeWire(wire);
 		for (auto& it = edges.cbegin(); it != edges.cend(); ++it)
 		{
 			builder.Add(wire, *it);
 		}
-
-
+		double closingGap = segments.First()->Value(segments.First()->FirstParameter()).Distance(segments.Last()->Value(segments.First()->LastParameter()));
+		if (closingGap < gapSize)
+			wire.Closed(true);
 		return wire;
 	}
 	catch (const Standard_Failure& e)

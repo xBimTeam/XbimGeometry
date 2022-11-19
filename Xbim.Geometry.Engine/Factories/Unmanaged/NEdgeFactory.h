@@ -10,15 +10,12 @@ class NEdgeFactory
 private:
 
 	NLoggingService* pLoggingService;
-	TopoDS_Edge _emptyEdge;
 	NCurveFactory _curveFactory;
 public:
 
 	NEdgeFactory()
 	{
-		pLoggingService = nullptr;
-		BRep_Builder builder;
-		builder.MakeEdge(_emptyEdge);
+		pLoggingService = nullptr;		
 	};
 	~NEdgeFactory()
 	{

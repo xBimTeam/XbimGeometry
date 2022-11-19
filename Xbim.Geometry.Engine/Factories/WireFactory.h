@@ -3,14 +3,15 @@
 #include "../BRep/XWire.h"
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Compound.hxx>
-#include "GeometryProcedures.h"
+#include <TColgp_SequenceOfPnt2d.hxx>
+#include "GeometryFactory.h"
 #include "./Unmanaged/NWireFactory.h"
 #include "../Services/LoggingService.h"
-#include "GeometryProcedures.h"
+
 #include "CurveFactory.h"
 #include <BRep_Builder.hxx>
 #include <Geom_Surface.hxx>
-#include <TColGeom_SequenceOfCurve.hxx>
+
 
 using namespace Xbim::Geometry::Services;
 using namespace Xbim::Common;
@@ -28,13 +29,10 @@ namespace Xbim
 			public ref class WireFactory : XbimHandle<NWireFactory>, IXWireFactory
 			{
 			private:
-				IXLoggingService^ _loggerService;
+				
 				IXModelService^ _modelService;
 				//The distance between two points at which they are determined to be equal points
-
-				GeometryProcedures^ GPFactory;
-				CurveFactory^ _curveFactory;
-
+	
 				TopoDS_Wire Build3d(IIfcCurve^ ifcCurve);
 				TopoDS_Wire Build2d(IIfcCurve^ ifcCurve);
 				TopoDS_Wire Build2dCircle(IIfcCircle^ ifcCircle);
@@ -74,6 +72,7 @@ namespace Xbim
 
 				bool GetNormal(const TopoDS_Wire& wire, gp_Vec& normal);
 				double Area(const TopoDS_Wire& wire);
+
 			internal:
 				TopoDS_Wire BuildDirectrix(IIfcCurve^ curve, System::Nullable<IfcParameterValue> startParam, System::Nullable<IfcParameterValue> endParam);
 				TopoDS_Wire BuildProfile(IIfcProfileDef^ profileDef);
@@ -90,14 +89,12 @@ namespace Xbim
 				static double GetDeterminant(double x1, double y1, double x2, double y2);
 				static double Area(const TColgp_SequenceOfPnt2d& points2d);
 			public:
-				WireFactory(IXLoggingService^ loggingService, IXModelService^ modelService, IXCurveFactory^ curveFactory) : XbimHandle(new NWireFactory())
+				WireFactory(IXModelService^ modelService) : XbimHandle(new NWireFactory())
 				{
-					_loggerService = loggingService;
-					_modelService = modelService;
-					GPFactory = gcnew GeometryProcedures(loggingService, modelService);
-					_curveFactory = dynamic_cast<CurveFactory^>(curveFactory);
+					
+					_modelService = modelService;				
 					NLoggingService* logService = new NLoggingService();
-					logService->SetLogger(static_cast<WriteLog>(loggingService->LogDelegatePtr.ToPointer()));
+					logService->SetLogger(static_cast<WriteLog>(_modelService->LoggingService->LogDelegatePtr.ToPointer()));
 					Ptr()->SetLogger(logService);
 				}
 
@@ -107,7 +104,7 @@ namespace Xbim
 				virtual IXWire^ Build(IIfcCurve^ ifcCurve);
 				virtual IXWire^ Build(IIfcProfileDef^ ifcProfileDef);
 				virtual property IXModelService^ ModelService {IXModelService^ get() { return _modelService; }};
-				virtual property IXLoggingService^ LoggingService {IXLoggingService^ get() { return _loggerService; }};
+				virtual property IXLoggingService^ LoggingService {IXLoggingService^ get() { return _modelService->LoggingService; }};
 			};
 
 		}

@@ -27,15 +27,11 @@ namespace Xbim
 				IXModelService^ _modelService;
 							
 			public:
-				BooleanFactory(IXLoggingService^ loggingService,  IXModelService^ modelService, IXSolidFactory^ solidFactory, IXShapeFactory^ shapeFactory) : XbimHandle(new NBooleanFactory())
-				{
-					//GpFactory = gcnew GeometryProcedures();
-					_solidFactory = dynamic_cast<SolidFactory^>(solidFactory);
-					_shapeFactory = dynamic_cast<ShapeFactory^>(shapeFactory);
-					_loggerService = loggingService;
+				BooleanFactory(ModelService^ modelService) : XbimHandle(new NBooleanFactory())
+				{					
 					_modelService = modelService;
 					NLoggingService* logService = new NLoggingService();
-					logService->SetLogger(static_cast<WriteLog>(loggingService->LogDelegatePtr.ToPointer()));
+					logService->SetLogger(static_cast<WriteLog>(_modelService->LoggingService->LogDelegatePtr.ToPointer()));
 					Ptr()->SetLogger(logService);
 					
 				}

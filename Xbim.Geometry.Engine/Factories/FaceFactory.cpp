@@ -11,7 +11,7 @@ using namespace Xbim::Geometry::Abstractions;
 using namespace System::Linq;
 TopoDS_Face Xbim::Geometry::Factories::FaceFactory::BuildProfileDef(IIfcProfileDef^ profileDef)
 {
-	TopoDS_Wire wire = _wireFactory->BuildProfile(profileDef); //this will throw an exception if it fails
+	TopoDS_Wire wire = _modelService->GetWireFactory()->BuildProfile(profileDef); //this will throw an exception if it fails
 	//all profile defs are 2D with Z = 0,0,1
 	gp_Pnt origin = gp::Origin();
 	gp_Dir zDir = gp::DZ();

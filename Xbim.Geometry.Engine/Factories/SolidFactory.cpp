@@ -7,7 +7,6 @@
 #include "../BRep/XShell.h"
 #include <BRepBuilderAPI_TransitionMode.hxx>
 #include <TopoDS.hxx>
-#include "../Version 5//XbimSolid.h"
 #include "../BRep/XShape.h"
 #include "../BRep/XVertex.h"
 #include "../BRep/XEdge.h"

@@ -102,9 +102,6 @@
     <ClInclude Include="XbimWireSet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Services\ModelService.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Services\MeshFactors.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -216,7 +213,7 @@
     <ClInclude Include="BRep\XLine2d.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Factories\GeometryProcedures.h">
+    <ClInclude Include="Factories\GeometryFactory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Factories\Unmanaged\NCurveFactory.h">
@@ -225,7 +222,7 @@
     <ClInclude Include="Factories\Unmanaged\NFaceFactory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Factories\Unmanaged\NGeometryProcedures.h">
+    <ClInclude Include="Factories\Unmanaged\NGeometryFactory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Visual\ColourRGB.h">
@@ -235,6 +232,51 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Visual\XbimShapeColour.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Factories\SurfaceFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Factories\EdgeFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Factories\Unmanaged\NEdgeFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Factories\SolidFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Factories\ShellFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Factories\ShapeFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Factories\BooleanFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Factories\CompoundFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Factories\Unmanaged\NSurfaceFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Factories\Unmanaged\NSolidFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Factories\Unmanaged\NShellFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Factories\Unmanaged\NCompoundFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Factories\FactoryBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Services\ModelService.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Factories\Unmanaged\NFactoryBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -312,9 +354,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="XbimWireSet.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Services\ModelService.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Services\MeshFactors.cpp">
@@ -398,7 +437,7 @@
     <ClCompile Include="BRep\XLine2d.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Factories\GeometryProcedures.cpp">
+    <ClCompile Include="Factories\GeometryFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Factories\Unmanaged\NCurveFactory.cpp">
@@ -407,7 +446,7 @@
     <ClCompile Include="Factories\Unmanaged\NFaceFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Factories\Unmanaged\NGeometryProcedures.cpp">
+    <ClCompile Include="Factories\Unmanaged\NGeometryFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Visual\ColourRGB.cpp">
@@ -417,6 +456,51 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Visual\XbimShapeColour.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Factories\SurfaceFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Factories\EdgeFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Factories\Unmanaged\NEdgeFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Factories\SolidFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Factories\ShellFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Factories\ShapeFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Factories\BooleanFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Factories\CompoundFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Factories\Unmanaged\NSurfaceFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Factories\Unmanaged\NSolidFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Factories\Unmanaged\NShellFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Factories\Unmanaged\NCompoundFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Factories\FactoryBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Services\ModelService.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Factories\Unmanaged\NFactoryBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

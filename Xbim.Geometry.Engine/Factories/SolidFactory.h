@@ -3,13 +3,12 @@
 #include <TopoDS_Solid.hxx>
 #include "./Unmanaged/NSolidFactory.h"
 #include "../Services/LoggingService.h"
-#include "GeometryProcedures.h"
+#include "GeometryFactory.h"
 #include "CurveFactory.h"
 #include "WireFactory.h"
 #include "FaceFactory.h"
 #include "ShellFactory.h"
 #include "ShapeFactory.h"
-#include "../Version 5/XbimGeometryCreator.h"
 #include "CompoundFactory.h"
 using namespace Xbim::Geometry::Services;
 using namespace Xbim::Common;
@@ -24,39 +23,16 @@ namespace Xbim
 		{
 			public ref class SolidFactory : IXSolidFactory, XbimHandle<NSolidFactory>
 			{
-				IXLoggingService^ loggerService;			
-				IXModelService^ _modelService;
-				CompoundFactory^ _compoundFactory;			
-				ShellFactory^ _shellFactory;
-				FaceFactory^ _faceFactory;
-				IXCurveFactory^ _curveFactory;
-				WireFactory^ _wireFactory;
-				
-				XbimGeometryCreator^ _v5GeometryEngine;
-				
-				GeometryProcedures^ _gpFactory;
+					
+				IXModelService^ _modelService;		
 				virtual property double ModelTolerance  {double get() sealed { return ModelService->Precision; } };
 			public:
-				SolidFactory(IXLoggingService^ loggingService, IXModelService^ modelService,
-					IXShellFactory^ shellFactory,
-					IXCurveFactory^ curveFactory,
-					IXWireFactory^ wireFactory,
-					IXFaceFactory^ faceFactory
-					
-					) : XbimHandle(new NSolidFactory())
+				SolidFactory(ModelService^ modelService) : XbimHandle(new NSolidFactory())
 				{
-					//one day this will be gone
-					_v5GeometryEngine = gcnew XbimGeometryCreator(loggingService, modelService);
-					loggerService = loggingService;			
-					_modelService = modelService;
-					_gpFactory = gcnew GeometryProcedures(loggingService, modelService);
-					_curveFactory = curveFactory;
-					_wireFactory = dynamic_cast<WireFactory^>(wireFactory);
-					_faceFactory = dynamic_cast<FaceFactory^>(faceFactory);
-					_shellFactory = gcnew ShellFactory(loggingService, modelService);					
-					_compoundFactory = gcnew CompoundFactory(loggingService, modelService);
+						
+					_modelService = modelService;					
 					NLoggingService* logService = new NLoggingService();
-					logService->SetLogger(static_cast<WriteLog>(loggingService->LogDelegatePtr.ToPointer()));
+					logService->SetLogger(static_cast<WriteLog>(_modelService->LoggingService->LogDelegatePtr.ToPointer()));
 					Ptr()->SetLogger(logService);
 				}
 				//Builds all IfcSolidModels
@@ -70,7 +46,7 @@ namespace Xbim
 				virtual IXSolid^ Build(IIfcCsgPrimitive3D^ ifcCsgPrimitive);
 				
 				virtual property IXModelService^ ModelService {IXModelService^ get() { return _modelService; }};
-				virtual property IXLoggingService^ LoggingService {IXLoggingService^ get() { return loggerService; }};
+				virtual property IXLoggingService^ LoggingService {IXLoggingService^ get() { return _modelService->LoggingService; }};
 
 				TopoDS_Shape BuildSolidModel(IIfcSolidModel^ ifcSolid);
 

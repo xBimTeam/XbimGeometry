@@ -407,7 +407,7 @@ namespace Xbim
 					pointSeq.Append(KeyedPnt2d(gp_XY(cp->X, cp->Y), cp->EntityLabel));
 				}
 
-				TopoDS_Wire wire = wireFactory.Build2dPolyline(pointSeq, XbimConvert::ModelService(pline)->MinimumGap);
+				TopoDS_Wire wire = wireFactory.Build2dPolyline(pointSeq, ActiveModelService(pline)->MinimumGap);
 				//we have a wire and it will be planar as it was defined in 2d
 				//However, it may not comply with any other topological rules, these need to be checked at an appropriate level
 				//For example if the wire is to be used as an outer bound to a face it should be closed and contiguous
@@ -427,7 +427,7 @@ namespace Xbim
 				{
 					pointSeq.Append(KeyedPnt(gp_XYZ(cp->X, cp->Y, cp->Z), cp->EntityLabel));
 				}
-				TopoDS_Wire wire = wireFactory.BuildPolyline(pointSeq, -1, -1, XbimConvert::ModelService(pline)->MinimumGap);
+				TopoDS_Wire wire = wireFactory.BuildPolyline(pointSeq, -1, -1, ActiveModelService(pline)->MinimumGap);
 				if (!wire.IsNull())
 				{
 					pWire = new TopoDS_Wire();
@@ -767,12 +767,8 @@ namespace Xbim
 
 		void XbimWire::Init(IIfcCompositeCurve^ cCurve, ILogger^ logger)
 		{
-			IXModelService^ modelService = XbimConvert::ModelService(cCurve);
-			IXLoggingService^ loggingService = gcnew LoggingService(logger);
-			IXCurveFactory^ curveFactory = gcnew CurveFactory(loggingService,modelService);
-			WireFactory^ wireFactory = gcnew WireFactory(loggingService, modelService, curveFactory);
-			//FaceFactory^ faceFactory = gcnew FaceFactory(loggingService, modelService, wireFactory);
-			TopoDS_Wire w = wireFactory->BuildWire(cCurve);
+			
+			TopoDS_Wire w = ActiveModelService(cCurve)->GetWireFactory()->BuildWire(cCurve);
 			pWire = new TopoDS_Wire();
 			*pWire = w;
 		

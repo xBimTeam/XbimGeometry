@@ -3,7 +3,7 @@
 #include <TopoDS_Solid.hxx>
 #include "./Unmanaged/NCompoundFactory.h"
 #include "../Services/LoggingService.h"
-#include "GeometryProcedures.h"
+#include "GeometryFactory.h"
 #include "CurveFactory.h"
 #include "WireFactory.h"
 #include "FaceFactory.h"
@@ -23,18 +23,16 @@ namespace Xbim
 		{
 			public ref class CompoundFactory : XbimHandle<NCompoundFactory>, IXCompoundFactory
 			{
-				IXLoggingService^ _loggerService;
 				IXModelService^ _modelService;
 			public:
-				CompoundFactory(IXLoggingService^ loggingService, IXModelService^ modelService) : XbimHandle(new NCompoundFactory())
-				{
-					_loggerService = loggingService;
+				CompoundFactory(ModelService^ modelService) : XbimHandle(new NCompoundFactory())
+				{					
 					_modelService = modelService;
 				}
 				virtual IXCompound^ CreateEmpty();
 				virtual IXCompound^ CreateFrom(IEnumerable<IXShape^>^shapes);
 				virtual property IXModelService^ ModelService {IXModelService^ get() { return _modelService; }};
-				virtual property IXLoggingService^ LoggingService {IXLoggingService^ get() { return _loggerService; }};
+				virtual property IXLoggingService^ LoggingService {IXLoggingService^ get() { return _modelService->LoggingService; }};
 			};
 		}
 	}

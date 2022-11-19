@@ -1,9 +1,9 @@
 #pragma once
 #include "../XbimHandle.h"
 #include "./Unmanaged/NFaceFactory.h"
-#include "../Services/LoggingService.h"
-#include "GeometryProcedures.h"
-#include "WireFactory.h"
+#include "../Services/ModelService.h"
+
+using namespace Xbim::Geometry::Services;
 
 namespace Xbim
 {
@@ -14,29 +14,26 @@ namespace Xbim
 			public ref class FaceFactory : XbimHandle<NFaceFactory>, IXFaceFactory
 			{
 			private:
-				IXLoggingService^ _loggerService;
-				IXModelService^ _modelService;
-				GeometryProcedures^ GPFactory;
-				WireFactory^ _wireFactory;
+				
+				ModelService^ _modelService;
+				
 			internal:
 				TopoDS_Face BuildProfileDef(IIfcProfileDef^ profileDef);
 				gp_Vec Normal(const TopoDS_Face& face);
 			public:
-				FaceFactory(IXLoggingService^ loggingService, IXModelService^ modelService, IXWireFactory^ wireFactory ) : XbimHandle(new NFaceFactory())
+				FaceFactory(ModelService^ modelService ) : XbimHandle(new NFaceFactory())
 				{
-					_loggerService = loggingService;
-					_modelService = modelService;
-					GPFactory = gcnew GeometryProcedures(loggingService, modelService);
-					_wireFactory = dynamic_cast<WireFactory^>(wireFactory);
+					
+					_modelService = modelService;;
 					NLoggingService* logService = new NLoggingService();
-					logService->SetLogger(static_cast<WriteLog>(loggingService->LogDelegatePtr.ToPointer()));
+					logService->SetLogger(static_cast<WriteLog>(_modelService->LoggingService->LogDelegatePtr.ToPointer()));
 					Ptr()->SetLogger(logService);
 				}
 				TopoDS_Face BuildPlanarFace(IXPlane^ planeDef);
 				
 				virtual IXFace^ BuildFace(IXSurface^ surface, array<IXWire^>^ wires);
 				virtual property IXModelService^ ModelService {IXModelService^ get() { return _modelService; }};
-				virtual property IXLoggingService^ LoggingService {IXLoggingService^ get() { return _loggerService; }};
+				virtual property IXLoggingService^ LoggingService {IXLoggingService^ get() { return _modelService->LoggingService; }};
 			};
 		}
 	}

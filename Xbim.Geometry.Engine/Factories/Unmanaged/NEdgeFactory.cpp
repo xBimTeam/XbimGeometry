@@ -42,7 +42,7 @@ TopoDS_Edge NEdgeFactory::BuildEdge(Handle(Geom_Curve)  hCurve)
 		sf.Print(strm);
 		pLoggingService->LogError(strm.str().c_str());
 	}
-	return _emptyEdge;
+	return TopoDS_Edge();
 }
 
 TopoDS_Edge NEdgeFactory::BuildEdge(const gp_Pnt& start, const gp_Pnt& end)

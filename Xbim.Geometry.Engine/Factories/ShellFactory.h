@@ -17,19 +17,19 @@ namespace Xbim
 		{
 			public ref class ShellFactory : XbimHandle<NShellFactory>, IXShellFactory
 			{
-				IXLoggingService^ loggerService;
+				
 				IXModelService^ _modelService;
 			public:
-				ShellFactory(IXLoggingService^ loggingService, IXModelService^ modelService) : XbimHandle(new NShellFactory())
+				ShellFactory(ModelService^ modelService) : XbimHandle(new NShellFactory())
 				{
-					loggerService = loggingService;		
+						
 					_modelService = modelService;
 					NLoggingService* logService = new NLoggingService();
-					logService->SetLogger(static_cast<WriteLog>(loggingService->LogDelegatePtr.ToPointer()));
+					logService->SetLogger(static_cast<WriteLog>(_modelService->LoggingService->LogDelegatePtr.ToPointer()));
 					Ptr()->SetLogger(logService);
 				}
 				virtual property IXModelService^ ModelService {IXModelService^ get() { return _modelService; }};
-				virtual property IXLoggingService^ LoggingService {IXLoggingService^ get() { return loggerService; }};
+				virtual property IXLoggingService^ LoggingService {IXLoggingService^ get() { return _modelService->LoggingService; }};
 				TopoDS_Shell BuildConnectedFaceSet(IIfcConnectedFaceSet^ faceSet);
 			};
 		}

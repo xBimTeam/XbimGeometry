@@ -77,7 +77,7 @@
 
 #include <CSLib_NormalStatus.hxx>
 #include <CSLib.hxx>
-
+#include <Geom_RectangularTrimmedSurface.hxx>
 #include "XbimSolid.h"
 #include "XbimShell.h"
 #include "XbimFace.h"
@@ -97,7 +97,7 @@
 
 using namespace System::Linq;
 using namespace Xbim::Common;
-
+using namespace Xbim::Geometry::Services;
 namespace Xbim
 {
 	namespace Geometry
@@ -1271,8 +1271,7 @@ namespace Xbim
 
 						if (repItem->Position != nullptr) //In Ifc4 this is now optional
 							pSolid->Move(XbimConvert::ToLocation(repItem->Position));
-						/*ShapeFix_ShapeTolerance tolFixer;
-						tolFixer.LimitTolerance(*pSolid, XbimConvert::ModelService(repItem)->MinimumGap);*/
+						
 						return;
 					}
 				}
@@ -1338,9 +1337,12 @@ namespace Xbim
 				Init((IIfcBoxedHalfSpace^)hs, logger);
 			else //it is a simple Half space
 			{
+	
+				Handle(Geom_Surface) geomSurface = ActiveModelService(hs)->GetSurfaceFactory()->BuildOccSurface(hs->BaseSurface);
+				//XbimFace^ face = gcnew XbimFace(surface, logger);
+				Handle(Geom_RectangularTrimmedSurface) geomTrim(new  Geom_RectangularTrimmedSurface(geomSurface, def->U1, def->U2, def->V1, def->V2));
 
-				IIfcSurface^ surface = (IIfcSurface^)hs->BaseSurface;
-				XbimFace^ face = gcnew XbimFace(surface, logger);
+				
 
 				BRepGProp_Face prop(face);
 				gp_Pnt c;
@@ -1350,11 +1352,14 @@ namespace Xbim
 				prop.Normal((u1 + u2) / 2.0, (v1 + v2) / 2.0, c, normalDir);
 				if (hs->AgreementFlag)
 					normalDir.Reverse();
+				
+
+
 				gp_Pnt pointInMaterial = c.Translated(normalDir);
 				BRepPrimAPI_MakeHalfSpace hsMaker(face, pointInMaterial);
 				pSolid = new TopoDS_Solid();
 				*pSolid = hsMaker.Solid();
-				//half space solids are only used in booleans, set the face tolerance the millimeter precision we require
+				//half space solids are only used in booleans, set the face tolerance the millimeter precision we require for a minimum gap
 				ShapeFix_ShapeTolerance tolFixer;
 				tolFixer.LimitTolerance(*pSolid, XbimConvert::ModelService(hs)->MinimumGap);
 			}

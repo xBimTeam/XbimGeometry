@@ -32,7 +32,7 @@ namespace Xbim
 								if (2 == (int)cp->Dim) loop.push_back(0); else loop.push_back(cp->Z);
 							}
 							if (loop.size() < 4) //its not a min of a closed triangle
-								loggerService->LogDebug("Bound #" + bound->EntityLabel.ToString() + " is not a valid boundary");
+								LoggingService->LogDebug("Bound #" + bound->EntityLabel.ToString() + " is not a valid boundary");
 							else
 								faceLoops.push_back(loop);
 						}

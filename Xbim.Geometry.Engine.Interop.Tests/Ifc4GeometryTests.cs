@@ -561,7 +561,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.IsNotNull(sectionedSpine);
                 var geomEngine = new XbimGeometryEngine(model, logger);
                 var bar = geomEngine.CreateSolid(sectionedSpine, logger);
-                Assert.IsTrue(bar.Volume > 0);
+                bar.Volume.Should().BeApproximately(2445.140455567097, 1e-5);
             }
         }
 
@@ -666,9 +666,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.IsTrue(er.Entity != null, "No IIfcCompositeProfileDef found");
                 var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
                 var wire = geomEngine.CreateWire(er.Entity, logger);
-                Assert.IsTrue(wire.Edges.Count == 12, "This wire should have 12 edges");
+                wire.Edges.Count.Should().Be(12);
                 var curve = geomEngine.CreateCurve(er.Entity, logger);
-                Assert.AreEqual(curve.Length, wire.Length, 0.999);
+                curve.Length.Should().BeApproximately(wire.Length, 0.999);
             }
 
         }
@@ -682,7 +682,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.IsNotNull(eas);
                 var geomEngine = new XbimGeometryEngine(model, logger);
                 var geom = geomEngine.CreateSolid(eas, logger);
-                Assert.IsTrue((geom.Volume > 0));
+                geom.Volume.Should().BeApproximately(11443062570.814053, 1e-5);
             }
         }
 
@@ -754,7 +754,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.IsNotNull(eas);
                 var geomEngine = new XbimGeometryEngine(model, logger);
                 var geom = geomEngine.CreateSolid(eas, logger);
-                Assert.IsTrue((geom.Volume > 0));
+                geom.Volume.Should().BeApproximately(18117345688.20311, 1e-5);
 
             }
         }

@@ -221,7 +221,7 @@ namespace Xbim
 				TColGeom2d_SequenceOfCurve segments;
 				Build2dSegments(ifcCompositeCurve, segments);
 				if (segments.Size() > 0)
-					return Ptr()->BuildWire(segments, _modelService->MinimumGap);
+					return Ptr()->BuildWire(segments, _modelService->Precision, _modelService->MinimumGap);
 				else
 					return TopoDS_Wire();
 			}
@@ -587,7 +587,7 @@ namespace Xbim
 
 				TColGeom_SequenceOfCurve segments;
 				BuildSegments(curve, segments);
-				TopoDS_Wire wire = Ptr()->BuildDirectrix(segments, startParam, endParam, ModelService->Precision);
+				TopoDS_Wire wire = Ptr()->BuildDirectrix(segments, startParam, endParam, ModelService->Precision, ModelService->MinimumGap);
 				if (wire.IsNull() || wire.NbChildren() == 0)
 					throw gcnew XbimGeometryFactoryException("Directrix is an empty curve");
 				return wire;

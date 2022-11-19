@@ -1,6 +1,6 @@
-#include "NGeometryProcedures.h"
+#include "NGeometryFactory.h"
 
-TopLoc_Location NGeometryProcedures::ToLocation(gp_Pnt2d location, gp_XY xDirection)
+TopLoc_Location NGeometryFactory::ToLocation(gp_Pnt2d location, gp_XY xDirection)
 {
 	try
 	{
@@ -17,11 +17,22 @@ TopLoc_Location NGeometryProcedures::ToLocation(gp_Pnt2d location, gp_XY xDirect
 	}
 	catch (const Standard_Failure& e)
 	{
-		std::stringstream strm;
-		e.Print(strm);
-		pLoggingService->LogError(strm.str().c_str());
+		LogStandardFailure(e);
 	}
-
-	pLoggingService->LogWarning("Could not axis placement");
 	return TopLoc_Location();
+}
+
+gp_Dir2d NGeometryFactory::BuildDirection2d(double x, double y, bool& isValid)
+{
+	try
+	{
+		isValid = true;
+		return gp_Dir2d(x,y);
+	}
+	catch (const Standard_Failure& e)
+	{
+		isValid = false;
+		LogStandardFailure(e);
+	}
+	return gp_Dir2d();
 }

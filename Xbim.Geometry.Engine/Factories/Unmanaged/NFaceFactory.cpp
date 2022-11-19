@@ -16,7 +16,7 @@ TopoDS_Face NFaceFactory::BuildProfileDef(gp_Pln plane, const TopoDS_Wire& wire)
 		pLoggingService->LogError(strm.str().c_str());
 	}
 	pLoggingService->LogWarning("Could not build face from profile def");
-	return _emptyFace;
+	return TopoDS_Face();
 }
 
 gp_Vec NFaceFactory::Normal(const TopoDS_Face& face)

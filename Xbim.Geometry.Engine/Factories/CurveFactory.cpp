@@ -1,6 +1,5 @@
 #include "CurveFactory.h"
-#include "../Exceptions/XbimGeometryFactoryException.h"
-
+#include "GeometryFactory.h"
 #include <GeomLib_Tool.hxx>
 
 #include "../BRep/XLine.h"
@@ -12,7 +11,7 @@
 #include "../BRep/XTrimmedCurve.h"
 #include "../BRep/XTrimmedCurve2d.h"
 #include "../BRep/XBSplineCurve.h"
-#include "../XbimConvert.h"
+
 /*
 The approach of the curve factory is to build all curves as IXCurve using the build method.
 This will ensure correct dimensionality of the curves is maintained
@@ -33,7 +32,6 @@ using namespace Xbim::Common::Metadata;
 using namespace System::Linq;
 
 
-
 namespace Xbim
 {
 	namespace Geometry
@@ -50,32 +48,25 @@ namespace Xbim
 
 				if (dim == 2)
 				{
-					Handle(Geom2d_Curve) hCurve2d = BuildGeom2d(curve, curveType);
-					if (hCurve2d.IsNull()) throw gcnew XbimGeometryFactoryException("Failed to build curve");
-
+					Handle(Geom2d_Curve) hCurve2d = BuildCurve2d(curve, curveType); //this will throw an exception if it fails				
 					return BuildXCurve(hCurve2d, curveType);
 				}
 				else
 				{
-					Handle(Geom_Curve) hCurve = BuildGeom3d(curve, curveType);
-					if (hCurve.IsNull())
-						throw gcnew XbimGeometryFactoryException("Failed to build curve");
+					Handle(Geom_Curve) hCurve = BuildCurve3d(curve, curveType);//this will throw an exception if it fails				
 					return BuildXCurve(hCurve, curveType);
 				}
 			}
 
-			IXCurve^ CurveFactory::BuildDirectrix(IIfcCurve^ curve, Nullable<double> startParam, Nullable<double> endParam)
-			{
-				if (!startParam.HasValue) startParam = -1;
-				if (!endParam.HasValue) endParam = -1;
-				return BuildXDirectrix(curve, startParam.Value, endParam.Value);
-			}
+#pragma region 2d Curve builders
 
 
-			Handle(Geom2d_Curve) CurveFactory::BuildGeom2d(IIfcCurve^ curve, XCurveType% curveType)
+
+			Handle(Geom2d_Curve) CurveFactory::BuildCurve2d(IIfcCurve^ curve, XCurveType% curveType)
 			{
 				if (!Enum::TryParse<XCurveType>(curve->ExpressType->ExpressName, curveType))
-					throw gcnew XbimGeometryFactoryException("Unsupported curve type: " + curve->ExpressType->ExpressName);
+					RaiseGeometryFactoryException("Unsupported curve type: " + curve->ExpressType->ExpressName, curve);
+
 				switch (curveType)
 				{
 					/*case XCurveType::BoundaryCurve:
@@ -83,17 +74,17 @@ namespace Xbim
 					case XCurveType::BSplineCurveWithKnots:
 						return Build2d(static_cast<IIfcBSplineCurveWithKnots^>(curve));*/
 				case XCurveType::IfcCircle:
-					return BuildGeom2d(static_cast<IIfcCircle^>(curve));
+					return BuildCurve2d(static_cast<IIfcCircle^>(curve));
 					/*	case XCurveType::CompositeCurve:
 							return Build2d(static_cast<IIfcCompositeCurve^>(curve)));
 						case XCurveType::CompositeCurveOnSurface:
 							return Build2d(static_cast<IIfcCompositeCurveOnSurface^>(curve)));*/
 				case XCurveType::IfcEllipse:
-					return BuildGeom2d(static_cast<IIfcEllipse^>(curve));
+					return BuildCurve2d(static_cast<IIfcEllipse^>(curve));
 					/*case XCurveType::IndexedPolyCurve:
 						return Build2d(static_cast<IIfcIndexedPolyCurve^>(curve)));*/
 				case XCurveType::IfcLine:
-					return BuildGeom2d(static_cast<IIfcLine^>(curve));
+					return BuildCurve2d(static_cast<IIfcLine^>(curve));
 					/*case XCurveType::OffsetCurve2D:
 						return Build2d(static_cast<IIfcOffsetCurve2D^>(curve));
 					case XCurveType::Pcurve:
@@ -105,44 +96,48 @@ namespace Xbim
 					case XCurveType::SurfaceCurve:
 						return Build2d(static_cast<IIfcSurfaceCurve^>(curve));*/
 				case XCurveType::IfcTrimmedCurve:
-					return BuildGeom2d(static_cast<IIfcTrimmedCurve^>(curve));
+					return BuildCurve2d(static_cast<IIfcTrimmedCurve^>(curve));
 				default:
-					break;
+					RaiseGeometryFactoryException("Unsupported 2d curve type");
 				}
-				throw gcnew XbimGeometryFactoryException("Unsupported 2d curve type");
+
 			}
 
-			Handle(Geom_Curve) CurveFactory::BuildDirectrix(IIfcCurve^ curve, double startParam, double endParam, XCurveType% curveType)
+			Handle(Geom2d_Circle) CurveFactory::BuildCurve2d(IIfcCircle^ ifcCircle)
 			{
-				double sameParams = Math::Abs(endParam - startParam) < ModelService->Precision;
-				if (sameParams || ((startParam == -1 || endParam == -1) && !IsBoundedCurve(curve)))
-					throw gcnew XbimGeometryFactoryException("DirectrixBounded: If the values for StartParam or EndParam are omited, then the Directrix has to be a bounded or closed curve.");
-				if (3 != (int)curve->Dim)
-					throw gcnew XbimGeometryFactoryException("DirectrixDim: The Directrix shall be a curve in three dimensional space.");
-
-				Handle(Geom_Curve) geomCurve = BuildGeom3d(curve, curveType);
-
-				if (geomCurve.IsNull())
-					throw gcnew XbimGeometryFactoryException("Directrix is invalid");
-				//trimming
-				if (startParam != -1 || endParam != -1)
-				{
-					if (startParam == -1) startParam = geomCurve->FirstParameter();
-					if (endParam == -1) endParam = geomCurve->LastParameter();
-					Handle(Geom_Curve)  geomCurveTrimmed = Ptr()->TrimDirectrix(geomCurve, startParam, endParam, ModelService->Precision);
-					if (geomCurve.IsNull())
-						throw gcnew XbimGeometryFactoryException("Directrix could not be trimmed");
-					return geomCurveTrimmed;
-				}
-				return geomCurve;
-
+				if (ifcCircle->Radius <= 0) 
+					RaiseGeometryFactoryException("Circle radius cannot be <= 0.", ifcCircle);
+				if (2 != (int)ifcCircle->Dim) 
+					RaiseGeometryFactoryException("Cannot build a 2D circle from a 3D circle", ifcCircle);
+				IIfcAxis2Placement2D^ axis2d = dynamic_cast<IIfcAxis2Placement2D^>(ifcCircle->Position);
+				if (axis2d == nullptr) 
+					RaiseGeometryFactoryException("Cannot build a 2D curve with 3D placement", ifcCircle->Position);
+				gp_Ax22d pos = GEOMETRY_FACTORY->BuildAxis2Placement2d(axis2d); //this will raise an exception if it fails
+				Handle(Geom2d_Circle) circle2d = EXEC_NATIVE->BuildCircle2d(pos, ifcCircle->Radius);
+				if (circle2d.IsNull())
+					RaiseGeometryFactoryException("Cannot build 2D circle, see logs", ifcCircle);
+				return circle2d;
 			}
 
+			Handle(Geom2d_LineWithMagnitude) CurveFactory::BuildCurve2d(IIfcLine^ ifcLine)
+			{
+				if (2 != (int)ifcLine->Dim)
+					RaiseGeometryFactoryException("Cannot build a 2D curve from a 3D curve", ifcLine);
+				gp_Pnt2d origin = GEOMETRY_FACTORY->BuildPoint2d(ifcLine->Pnt);
+				gp_Dir2d direction = GEOMETRY_FACTORY->BuildDirection2d(ifcLine->Dir->Orientation);
+				Handle(Geom2d_LineWithMagnitude) line = EXEC_NATIVE->BuildLine2d(origin, direction, ifcLine->Dir->Magnitude);
+				if (line.IsNull())
+					RaiseGeometryFactoryException("Cannot build 2D line, see logs", ifcLine);
+				return line;
+			}
 
-			Handle(Geom_Curve) CurveFactory::BuildGeom3d(IIfcCurve^ curve, XCurveType% curveType)
+#pragma endregion
+
+
+			Handle(Geom_Curve) CurveFactory::BuildCurve3d(IIfcCurve^ curve, XCurveType% curveType)
 			{
 				if (!Enum::TryParse<XCurveType>(curve->ExpressType->ExpressName, curveType))
-					throw gcnew XbimGeometryFactoryException("Unsupported curve type: " + curve->ExpressType->ExpressName);
+					throw gcnew XbimGEOMETRY_FACTORYException("Unsupported curve type: " + curve->ExpressType->ExpressName);
 
 				switch (curveType)
 				{
@@ -179,7 +174,42 @@ namespace Xbim
 				default:
 					break;
 				}
-				throw gcnew XbimGeometryFactoryException("Not implemented. Curve type: " + curveType.ToString());
+				throw gcnew XbimGEOMETRY_FACTORYException("Not implemented. Curve type: " + curveType.ToString());
+			}
+
+
+			Handle(Geom_Curve) CurveFactory::BuildDirectrix(IIfcCurve^ curve, double startParam, double endParam, XCurveType% curveType)
+			{
+				double sameParams = Math::Abs(endParam - startParam) < ModelService->Precision;
+				if (sameParams || ((startParam == -1 || endParam == -1) && !IsBoundedCurve(curve)))
+					throw gcnew XbimGEOMETRY_FACTORYException("DirectrixBounded: If the values for StartParam or EndParam are omited, then the Directrix has to be a bounded or closed curve.");
+				if (3 != (int)curve->Dim)
+					throw gcnew XbimGEOMETRY_FACTORYException("DirectrixDim: The Directrix shall be a curve in three dimensional space.");
+
+				Handle(Geom_Curve) geomCurve = BuildGeom3d(curve, curveType);
+
+				if (geomCurve.IsNull())
+					throw gcnew XbimGEOMETRY_FACTORYException("Directrix is invalid");
+				//trimming
+				if (startParam != -1 || endParam != -1)
+				{
+					if (startParam == -1) startParam = geomCurve->FirstParameter();
+					if (endParam == -1) endParam = geomCurve->LastParameter();
+					Handle(Geom_Curve)  geomCurveTrimmed = Ptr()->TrimDirectrix(geomCurve, startParam, endParam, ModelService->Precision);
+					if (geomCurve.IsNull())
+						throw gcnew XbimGEOMETRY_FACTORYException("Directrix could not be trimmed");
+					return geomCurveTrimmed;
+				}
+				return geomCurve;
+
+			}
+
+
+			IXCurve^ CurveFactory::BuildDirectrix(IIfcCurve^ curve, Nullable<double> startParam, Nullable<double> endParam)
+			{
+				if (!startParam.HasValue) startParam = -1;
+				if (!endParam.HasValue) endParam = -1;
+				return BuildXDirectrix(curve, startParam.Value, endParam.Value);
 			}
 
 			IXCurve^ CurveFactory::BuildXCurve(Handle(Geom_Curve) curve, XCurveType curveType)
@@ -217,9 +247,9 @@ namespace Xbim
 					return gcnew XTrimmedCurve(Handle(Geom_TrimmedCurve)::DownCast(curve));
 					break;
 				default:
-					throw gcnew XbimGeometryFactoryException("Unsupported curve type");
+					throw gcnew XbimGEOMETRY_FACTORYException("Unsupported curve type");
 				}
-				throw gcnew XbimGeometryFactoryException("Unsupported curve type");
+				throw gcnew XbimGEOMETRY_FACTORYException("Unsupported curve type");
 			}
 
 			IXCurve^ CurveFactory::BuildXCurve(Handle(Geom2d_Curve) curve, XCurveType curveType)
@@ -256,9 +286,9 @@ namespace Xbim
 					return gcnew XTrimmedCurve2d(Handle(Geom2d_TrimmedCurve)::DownCast(curve));
 					break;
 				default:
-					throw gcnew XbimGeometryFactoryException("Unsupported 2d curve type");
+					throw gcnew XbimGEOMETRY_FACTORYException("Unsupported 2d curve type");
 				}
-				throw gcnew XbimGeometryFactoryException("Unsupported 2d curve type");
+				throw gcnew XbimGEOMETRY_FACTORYException("Unsupported 2d curve type");
 			}
 
 			IXCurve^ CurveFactory::BuildXDirectrix(IIfcCurve^ curve, double startParam, double endParam)
@@ -298,154 +328,147 @@ namespace Xbim
 					return gcnew XTrimmedCurve(Handle(Geom_TrimmedCurve)::DownCast(directix));
 					break;
 				default:
-					throw gcnew XbimGeometryFactoryException("Unsupported curve type");
+					throw gcnew XbimGEOMETRY_FACTORYException("Unsupported curve type");
 				}
-				throw gcnew XbimGeometryFactoryException("Unsupported curve type");
+				throw gcnew XbimGEOMETRY_FACTORYException("Unsupported curve type");
 			}
 
 			Handle(Geom_LineWithMagnitude) CurveFactory::BuildGeom3d(IIfcLine^ ifcLine)
 			{
-				gp_Pnt origin = GpFactory->BuildPoint(ifcLine->Pnt);
-				gp_Dir direction = GpFactory->BuildDirection(ifcLine->Dir->Orientation);
+				gp_Pnt origin = GEOMETRY_FACTORY->BuildPoint(ifcLine->Pnt);
+				gp_Dir direction = GEOMETRY_FACTORY->BuildDirection(ifcLine->Dir->Orientation);
 				return Ptr()->BuildLine3d(origin, direction, ifcLine->Dir->Magnitude);
 
 			}
 
-			Handle(Geom2d_LineWithMagnitude) CurveFactory::BuildGeom2d(IIfcLine^ ifcLine)
-			{
-				if (2 != (int)ifcLine->Dim) throw gcnew XbimGeometryFactoryException("Cannot build a 2D curve from a 3D curve");
-				gp_Pnt2d origin = GpFactory->BuildPoint2d(ifcLine->Pnt);
-				gp_Dir2d direction = GpFactory->BuildDirection2d(ifcLine->Dir->Orientation);
-				return Ptr()->BuildLine2d(origin, direction, ifcLine->Dir->Magnitude);
-			}
+
 
 			Handle(Geom_Circle) CurveFactory::BuildGeom3d(IIfcCircle^ ifcCircle)
 			{
-				if (ifcCircle->Radius <= 0) throw gcnew XbimGeometryFactoryException("Circle radius cannot be <= 0.");
+				if (ifcCircle->Radius <= 0) throw gcnew XbimGEOMETRY_FACTORYException("Circle radius cannot be <= 0.");
 				IIfcAxis2Placement3D^ axis3d = dynamic_cast<IIfcAxis2Placement3D^>(ifcCircle->Position);
-				if (axis3d == nullptr) throw gcnew XbimGeometryFactoryException("Cannot build a 3D curve with 2D placement");
-				gp_Ax2 pos = GpFactory->BuildAxis2Placement(axis3d);
+				if (axis3d == nullptr) throw gcnew XbimGEOMETRY_FACTORYException("Cannot build a 3D curve with 2D placement");
+				gp_Ax2 pos = GEOMETRY_FACTORY->BuildAxis2Placement(axis3d);
 				return Ptr()->BuildCircle3d(pos, ifcCircle->Radius);
 
 			}
 
-			Handle(Geom2d_Circle) CurveFactory::BuildGeom2d(IIfcCircle^ ifcCircle)
-			{
-				if (ifcCircle->Radius <= 0) throw gcnew XbimGeometryFactoryException("Circle radius cannot be <= 0.");
-				if (2 != (int)ifcCircle->Dim) throw gcnew XbimGeometryFactoryException("Cannot build a 2D curve from a 3D curve");
-				IIfcAxis2Placement2D^ axis2d = dynamic_cast<IIfcAxis2Placement2D^>(ifcCircle->Position);
-				if (axis2d == nullptr) throw gcnew XbimGeometryFactoryException("Cannot build a 2D curve with 3D placement");
-				gp_Ax22d pos = GpFactory->BuildAxis2Placement2d(axis2d);
-				return Ptr()->BuildCircle2d(pos, ifcCircle->Radius);
-			}
+			
 
 			Handle(Geom_Ellipse) CurveFactory::BuildGeom3d(IIfcEllipse^ ifcEllipse)
 			{
 				IIfcAxis2Placement3D^ axis3d = dynamic_cast<IIfcAxis2Placement3D^>(ifcEllipse->Position);
-				if (axis3d == nullptr) throw gcnew XbimGeometryFactoryException("Cannot build a 3D curve with 2D placement");
+				if (axis3d == nullptr) throw gcnew XbimGEOMETRY_FACTORYException("Cannot build a 3D curve with 2D placement");
 
 				//SELF\IfcConic.Position.Position.P[1] is the direction of the SemiAxis1. 
-				gp_Ax2 pos = GpFactory->BuildAxis2Placement(axis3d);
+				gp_Ax2 pos = GEOMETRY_FACTORY->BuildAxis2Placement(axis3d);
 				return Ptr()->BuildEllipse3d(pos, ifcEllipse->SemiAxis1, ifcEllipse->SemiAxis2);
 			}
 
-			Handle(Geom2d_Ellipse) CurveFactory::BuildGeom2d(IIfcEllipse^ ifcEllipse)
+			Handle(Geom2d_Ellipse) CurveFactory::BuildCurve2d(IIfcEllipse^ ifcEllipse)
 			{
-				if (2 != (int)ifcEllipse->Dim) throw gcnew XbimGeometryFactoryException("Cannot build a 2D curve from a 3D curve");
+				if (2 != (int)ifcEllipse->Dim) throw gcnew XbimGEOMETRY_FACTORYException("Cannot build a 2D curve from a 3D curve");
 				IIfcAxis2Placement2D^ axis2d = dynamic_cast<IIfcAxis2Placement2D^>(ifcEllipse->Position);
-				if (axis2d == nullptr) throw gcnew XbimGeometryFactoryException("Cannot build a 2D curve with 3D placement");
-				gp_Ax22d pos = GpFactory->BuildAxis2Placement2d(axis2d);
+				if (axis2d == nullptr) throw gcnew XbimGEOMETRY_FACTORYException("Cannot build a 2D curve with 3D placement");
+				gp_Ax22d pos = GEOMETRY_FACTORY->BuildAxis2Placement2d(axis2d);
 				return Ptr()->BuildEllipse2d(pos, ifcEllipse->SemiAxis1, ifcEllipse->SemiAxis2);
 			}
 
 			Handle(Geom_TrimmedCurve) CurveFactory::BuildGeom3d(IIfcTrimmedCurve^ ifcTrimmedCurve)
 			{
-				//Validation
-				if (dynamic_cast<IIfcBoundedCurve^>(ifcTrimmedCurve->BasisCurve))
-					throw gcnew XbimGeometryFactoryException("Ifc Formal Proposition: NoTrimOfBoundedCurves. Already bounded curves shall not be trimmed.");
-				XCurveType curveType;
-				Handle(Geom_Curve) basisCurve = BuildGeom3d(ifcTrimmedCurve->BasisCurve, curveType);
-				if (!basisCurve.IsNull())
+				try
 				{
-					bool isConic = (dynamic_cast<IIfcConic^>(ifcTrimmedCurve->BasisCurve) != nullptr);
-					bool isLine = (dynamic_cast<IIfcLine^>(ifcTrimmedCurve->BasisCurve) != nullptr);
-					bool isEllipse = (dynamic_cast<IIfcEllipse^>(ifcTrimmedCurve->BasisCurve) != nullptr);
-					bool sense = ifcTrimmedCurve->SenseAgreement;
-					//get the parametric values
-					IfcTrimmingPreference trimPref = ifcTrimmedCurve->MasterRepresentation;
-
-					bool trim_cartesian = (ifcTrimmedCurve->MasterRepresentation == IfcTrimmingPreference::CARTESIAN);
-
-					double u1 = double::NegativeInfinity, u2 = double::PositiveInfinity;
-					IIfcCartesianPoint^ cp1 = nullptr;
-					IIfcCartesianPoint^ cp2 = nullptr;
-
-					for each (IIfcTrimmingSelect ^ trim in ifcTrimmedCurve->Trim1)
+					//Validation
+					if (dynamic_cast<IIfcBoundedCurve^>(ifcTrimmedCurve->BasisCurve))
+						throw gcnew XbimGEOMETRY_FACTORYException("Ifc Formal Proposition: NoTrimOfBoundedCurves. Already bounded curves shall not be trimmed.");
+					XCurveType curveType;
+					Handle(Geom_Curve) basisCurve = BuildGeom3d(ifcTrimmedCurve->BasisCurve, curveType);
+					if (!basisCurve.IsNull())
 					{
-						if (dynamic_cast<IIfcCartesianPoint^>(trim))cp1 = (IIfcCartesianPoint^)trim;
-						else u1 = (double)(IfcParameterValue)trim; //its parametric	
-					}
-					for each (IIfcTrimmingSelect ^ trim in ifcTrimmedCurve->Trim2)
-					{
-						if (dynamic_cast<IIfcCartesianPoint^>(trim))cp2 = (IIfcCartesianPoint^)trim;
-						else u2 = (double)(IfcParameterValue)trim; //its parametric	
-					}
+						bool isConic = (dynamic_cast<IIfcConic^>(ifcTrimmedCurve->BasisCurve) != nullptr);
+						bool isLine = (dynamic_cast<IIfcLine^>(ifcTrimmedCurve->BasisCurve) != nullptr);
+						bool isEllipse = (dynamic_cast<IIfcEllipse^>(ifcTrimmedCurve->BasisCurve) != nullptr);
+						bool sense = ifcTrimmedCurve->SenseAgreement;
+						//get the parametric values
+						IfcTrimmingPreference trimPref = ifcTrimmedCurve->MasterRepresentation;
 
-					if ((trim_cartesian && cp1 != nullptr && cp2 != nullptr) ||
-						(cp1 != nullptr && cp2 != nullptr &&
-							(double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)))) //we want cartesian and we have both or we don't have both parameters but have cartesians
-					{
-						gp_Pnt p1 = XbimConvert::GetPoint3d(cp1);
-						gp_Pnt p2 = XbimConvert::GetPoint3d(cp2);
-						if (!GeomLib_Tool::Parameter(basisCurve, p1, ModelService->MinimumGap, u1))
-							throw gcnew XbimGeometryFactoryException("Trim Point1 is not on the basis curve");
-						if (!GeomLib_Tool::Parameter(basisCurve, p2, ModelService->MinimumGap, u2))
-							throw gcnew XbimGeometryFactoryException("Trim Point2 is not on the basis curve");
-					}
-					else if (double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)) //non-compliant
-						throw gcnew XbimGeometryFactoryException("Ifc Formal Proposition: TrimValuesConsistent. Either a single value is specified for Trim, or the two trimming values are of different type (point and parameter)");
-					else //we prefer to use parameters but need to adjust
-					{
-						if (isConic)
+						bool trim_cartesian = (ifcTrimmedCurve->MasterRepresentation == IfcTrimmingPreference::CARTESIAN);
+
+						double u1 = double::NegativeInfinity, u2 = double::PositiveInfinity;
+						IIfcCartesianPoint^ cp1 = nullptr;
+						IIfcCartesianPoint^ cp2 = nullptr;
+
+						for each (IIfcTrimmingSelect ^ trim in ifcTrimmedCurve->Trim1)
 						{
-							u1 *= ModelService->RadianFactor; //correct to radians
-							u2 *= ModelService->RadianFactor; //correct to radians
-
+							if (dynamic_cast<IIfcCartesianPoint^>(trim))cp1 = (IIfcCartesianPoint^)trim;
+							else u1 = (double)(IfcParameterValue)trim; //its parametric	
 						}
-					}
+						for each (IIfcTrimmingSelect ^ trim in ifcTrimmedCurve->Trim2)
+						{
+							if (dynamic_cast<IIfcCartesianPoint^>(trim))cp2 = (IIfcCartesianPoint^)trim;
+							else u2 = (double)(IfcParameterValue)trim; //its parametric	
+						}
 
-					if (double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)) //sanity check in case the logic has missed a situtation
-						throw gcnew XbimGeometryFactoryException("Error converting Ifc Trim Points");
+						if ((trim_cartesian && cp1 != nullptr && cp2 != nullptr) ||
+							(cp1 != nullptr && cp2 != nullptr &&
+								(double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)))) //we want cartesian and we have both or we don't have both parameters but have cartesians
+						{
+							gp_Pnt p1 = XbimConvert::GetPoint3d(cp1);
+							gp_Pnt p2 = XbimConvert::GetPoint3d(cp2);
+							if (!GeomLib_Tool::Parameter(basisCurve, p1, ModelService->MinimumGap, u1))
+								throw gcnew XbimGEOMETRY_FACTORYException("Trim Point1 is not on the basis curve");
+							if (!GeomLib_Tool::Parameter(basisCurve, p2, ModelService->MinimumGap, u2))
+								throw gcnew XbimGEOMETRY_FACTORYException("Trim Point2 is not on the basis curve");
+						}
+						else if (double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)) //non-compliant
+							throw gcnew XbimGEOMETRY_FACTORYException("Ifc Formal Proposition: TrimValuesConsistent. Either a single value is specified for Trim, or the two trimming values are of different type (point and parameter)");
+						else //we prefer to use parameters but need to adjust
+						{
+							if (isConic)
+							{
+								u1 *= ModelService->RadianFactor; //correct to radians
+								u2 *= ModelService->RadianFactor; //correct to radians
 
-					if (Math::Abs(u1 - u2) < ModelService->Precision) //if the parameters are the same trimming will fail if not a conic curve
-					{
-						if (isConic) return Ptr()->BuildTrimmedCurve3d(basisCurve, 0, Math::PI * 2, true); //return a full circle
-						throw gcnew XbimGeometryFactoryException("Parametric Trim Points are equal and will result in an empty curve");
+							}
+						}
+
+						if (double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)) //sanity check in case the logic has missed a situtation
+							throw gcnew XbimGEOMETRY_FACTORYException("Error converting Ifc Trim Points");
+
+						if (Math::Abs(u1 - u2) < ModelService->Precision) //if the parameters are the same trimming will fail if not a conic curve
+						{
+							if (isConic) return Ptr()->BuildTrimmedCurve3d(basisCurve, 0, Math::PI * 2, true); //return a full circle
+							throw gcnew XbimGEOMETRY_FACTORYException("Parametric Trim Points are equal and will result in an empty curve");
+						}
+						else
+							return Ptr()->BuildTrimmedCurve3d(basisCurve, u1, u2, sense);
 					}
 					else
-						return Ptr()->BuildTrimmedCurve3d(basisCurve, u1, u2, sense);
+						throw gcnew XbimGEOMETRY_FACTORYException("Failed to build Trimmed Basis Curve");
 				}
-				else
-					throw gcnew XbimGeometryFactoryException("Failed to build Trimmed Basis Curve");
-
+				catch (Exception^ ex)
+				{
+					LoggerService->LogInformation(String::Format("Trimmed Curve #{0} failed: {1}", ifcTrimmedCurve->EntityLabel, ex->Message));
+					return nullptr;
+				}
 			}
 
-			Handle(Geom2d_TrimmedCurve) CurveFactory::BuildGeom2d(IIfcTrimmedCurve^ ifcTrimmedCurve)
+			Handle(Geom2d_TrimmedCurve) CurveFactory::BuildCurve2d(IIfcTrimmedCurve^ ifcTrimmedCurve)
 			{
 				try
 				{
 
 					//Validation
 					if (dynamic_cast<IIfcBoundedCurve^>(ifcTrimmedCurve->BasisCurve))
-						throw gcnew XbimGeometryFactoryException("Ifc Formal Proposition: NoTrimOfBoundedCurves. Already bounded curves shall not be trimmed.");
+						throw gcnew XbimGEOMETRY_FACTORYException("Ifc Formal Proposition: NoTrimOfBoundedCurves. Already bounded curves shall not be trimmed.");
 					XCurveType curveType;
-					Handle(Geom2d_Curve) basisCurve = BuildGeom2d(ifcTrimmedCurve->BasisCurve, curveType);
+					Handle(Geom2d_Curve) basisCurve = BuildCurve2d(ifcTrimmedCurve->BasisCurve, curveType);
 					if (!basisCurve.IsNull())
 					{
 						bool isConic = (dynamic_cast<IIfcConic^>(ifcTrimmedCurve->BasisCurve) != nullptr);
 						bool isLine = (dynamic_cast<IIfcLine^>(ifcTrimmedCurve->BasisCurve) != nullptr);
 						bool isEllipse = (dynamic_cast<IIfcEllipse^>(ifcTrimmedCurve->BasisCurve) != nullptr);
-
+						bool sense = ifcTrimmedCurve->SenseAgreement;
 						//get the parametric values
 						IfcTrimmingPreference trimPref = ifcTrimmedCurve->MasterRepresentation;
 
@@ -473,12 +496,12 @@ namespace Xbim
 							gp_Pnt2d p1 = XbimConvert::GetPoint2d(cp1);
 							gp_Pnt2d p2 = XbimConvert::GetPoint2d(cp2);
 							if (!GeomLib_Tool::Parameter(basisCurve, p1, ModelService->MinimumGap, u1))
-								throw gcnew XbimGeometryFactoryException("Trim Point1 is not on the basis curve");
+								throw gcnew XbimGEOMETRY_FACTORYException("Trim Point1 is not on the basis curve");
 							if (!GeomLib_Tool::Parameter(basisCurve, p2, ModelService->MinimumGap, u2))
-								throw gcnew XbimGeometryFactoryException("Trim Point2 is not on the basis curve");
+								throw gcnew XbimGEOMETRY_FACTORYException("Trim Point2 is not on the basis curve");
 						}
 						else if (double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)) //non-compliant
-							throw gcnew XbimGeometryFactoryException("Ifc Formal Proposition: TrimValuesConsistent. Either a single value is specified for Trim, or the two trimming values are of different type (point and parameter)");
+							throw gcnew XbimGEOMETRY_FACTORYException("Ifc Formal Proposition: TrimValuesConsistent. Either a single value is specified for Trim, or the two trimming values are of different type (point and parameter)");
 						else //we prefer to use parameters but need to adjust
 						{
 							if (isConic)
@@ -488,18 +511,21 @@ namespace Xbim
 							}
 						}
 						if (double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)) //sanity check in case the logic has missed a situtation
-							throw gcnew XbimGeometryFactoryException("Error converting Ifc Trim Points");
-						if (u1 == u2) //if the parameters are the same trimming will fail
-							throw gcnew XbimGeometryFactoryException("Parametric Trim Points are equal and will result in an empty curve");
-
-						return Ptr()->BuildTrimmedCurve2d(basisCurve, u1, u2, ifcTrimmedCurve->SenseAgreement);
+							throw gcnew XbimGEOMETRY_FACTORYException("Error converting Ifc Trim Points");
+						if (Math::Abs(u1 - u2) < ModelService->Precision) //if the parameters are the same trimming will fail if not a conic curve
+						{
+							if (isConic) return Ptr()->BuildTrimmedCurve2d(basisCurve, 0, Math::PI * 2, true); //return a full circle
+							throw gcnew XbimGEOMETRY_FACTORYException("Parametric Trim Points are equal and will result in an empty curve");
+						}
+						else
+							return Ptr()->BuildTrimmedCurve2d(basisCurve, u1, u2, sense);
 					}
 					else
-						throw gcnew XbimGeometryFactoryException("Failed to build Trimmed Basis Curve");
+						throw gcnew XbimGEOMETRY_FACTORYException("Failed to build Trimmed Basis Curve");
 				}
 				catch (Exception^ ex)
 				{
-					_loggerService->LogInformation(String::Format("Trimmed Curve #{0} failed: {1}",ifcTrimmedCurve->EntityLabel, ex->Message));
+					LoggerService->LogInformation(String::Format("Trimmed Curve #{0} failed: {1}", ifcTrimmedCurve->EntityLabel, ex->Message));
 					return nullptr;
 				}
 
@@ -510,25 +536,25 @@ namespace Xbim
 				//validate
 				int pointCount = ifcPolyline->Points->Count;
 				if (pointCount < 2)
-					throw gcnew XbimGeometryFactoryException("IfcPolyline has less than 2 points. It cannot be built");
+					throw gcnew XbimGEOMETRY_FACTORYException("IfcPolyline has less than 2 points. It cannot be built");
 				if (pointCount == 2) //just build a line
 				{
-					gp_Pnt start = GpFactory->BuildPoint(ifcPolyline->Points[0]);
-					gp_Pnt end = GpFactory->BuildPoint(ifcPolyline->Points[1]);
+					gp_Pnt start = GEOMETRY_FACTORY->BuildPoint(ifcPolyline->Points[0]);
+					gp_Pnt end = GEOMETRY_FACTORY->BuildPoint(ifcPolyline->Points[1]);
 					if (start.IsEqual(end, ModelService->Precision))
-						throw gcnew XbimGeometryFactoryException(String::Format("IfcPolyline has only 2 identical points( #{0} and #{1}. It cannot be built", ifcPolyline->Points[0]->EntityLabel, ifcPolyline->Points[1]->EntityLabel));
+						throw gcnew XbimGEOMETRY_FACTORYException(String::Format("IfcPolyline has only 2 identical points( #{0} and #{1}. It cannot be built", ifcPolyline->Points[0]->EntityLabel, ifcPolyline->Points[1]->EntityLabel));
 					Handle(Geom_TrimmedCurve) lineSeg = Ptr()->BuildBoundedLine3d(start, end);
 					if (lineSeg.IsNull())
-						throw gcnew XbimGeometryFactoryException("Invalid IfcPolyline definition");
+						throw gcnew XbimGEOMETRY_FACTORYException("Invalid IfcPolyline definition");
 					return lineSeg;
 				}
 				else
 				{
 					TColgp_Array1OfPnt points(1, pointCount);
-					GpFactory->GetPolylinePoints(ifcPolyline, points);
+					GEOMETRY_FACTORY->GetPolylinePoints(ifcPolyline, points);
 					Handle(Geom_BSplineCurve) polyline = Ptr()->BuildPolyline(points, ModelService->Precision);
 					if (polyline.IsNull())
-						throw gcnew XbimGeometryFactoryException("Failed to build IfcPolyline");
+						throw gcnew XbimGEOMETRY_FACTORYException("Failed to build IfcPolyline");
 					return polyline;
 				}
 
@@ -546,18 +572,18 @@ namespace Xbim
 				for each (IIfcCompositeCurveSegment ^ segment in ifcCompositeCurve->Segments)
 				{
 					if (!IsBoundedCurve(segment->ParentCurve))
-						throw gcnew XbimGeometryFactoryException("Composite curve is invalid, only curve segments that are bounded curves are permitted");
+						throw gcnew XbimGEOMETRY_FACTORYException("Composite curve is invalid, only curve segments that are bounded curves are permitted");
 					Handle(Geom_Curve) hSegment = BuildGeom3d(segment->ParentCurve, curveType);
 					Handle(Geom_BoundedCurve) boundedCurve = Handle(Geom_BoundedCurve)::DownCast(hSegment);
 					if (boundedCurve.IsNull())
-						gcnew XbimGeometryFactoryException(String::Format("Compound curve segments must be bounded curves #{0}", segment->EntityLabel));
+						gcnew XbimGEOMETRY_FACTORYException(String::Format("Compound curve segments must be bounded curves #{0}", segment->EntityLabel));
 					if (hSegment.IsNull())
-						throw gcnew XbimGeometryFactoryException(String::Format("Composite curve is invalid, curve segment #{0} is null", segment->EntityLabel));
+						throw gcnew XbimGEOMETRY_FACTORYException(String::Format("Composite curve is invalid, curve segment #{0} is null", segment->EntityLabel));
 					segments.Append(boundedCurve);
 				}
 				Handle(Geom_BSplineCurve) bSpline = Ptr()->BuildCompositeCurve(segments, ModelService->MinimumGap); //use minimum gap for tolerance to avoid issues with cirves and line tolerance errors
 				if (bSpline.IsNull())
-					throw gcnew XbimGeometryFactoryException(String::Format("Composite curve #{0} could not be built", ifcCompositeCurve->EntityLabel));
+					throw gcnew XbimGEOMETRY_FACTORYException(String::Format("Composite curve #{0} could not be built", ifcCompositeCurve->EntityLabel));
 				else
 					return bSpline;
 			}

@@ -2,7 +2,7 @@
 #pragma warning( disable : 4691 )
 #include "../XbimHandle.h"
 #include "../Services/Unmanaged/NLoggingService.h"
-//using namespace Microsoft::Extensions::Hosting;
+
 using namespace Microsoft::Extensions::Logging;
 using namespace Microsoft::Extensions::Logging::Abstractions;
 using namespace System::Runtime::InteropServices;
@@ -10,6 +10,7 @@ using namespace System::Threading::Tasks;
 using namespace System::Threading;
 
 using namespace Xbim::Geometry::Abstractions;
+
 namespace Xbim
 {
 	namespace Geometry

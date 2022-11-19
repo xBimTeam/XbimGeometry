@@ -1,24 +1,14 @@
 #pragma once
+#include "NFactoryBase.h"
 #include <Geom_Plane.hxx>
 
-#include "../../Services/Unmanaged/NLoggingService.h"
-class NSurfaceFactory
+class NSurfaceFactory : NFactoryBase
 {
-private:
-	NLoggingService* pLoggingService;
 
 public:
-	NSurfaceFactory()
-	{
-		pLoggingService = nullptr;
-	};
-	~NSurfaceFactory()
-	{
-		if (pLoggingService != nullptr) delete pLoggingService;
-		pLoggingService = nullptr;
-	};
-	void SetLogger(NLoggingService* loggingService) { pLoggingService = loggingService; };
+
 
 	Handle(Geom_Plane) BuildPlane(double originX, double originY, double originZ, double normalX, double normalY, double normalZ);
+	Handle(Geom_Plane) BuildPlane(gp_Pnt origin, gp_Dir normal);
 };
 

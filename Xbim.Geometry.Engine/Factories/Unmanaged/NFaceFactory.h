@@ -7,13 +7,12 @@ class NFaceFactory
 {
 private:
 	NLoggingService* pLoggingService;
-	TopoDS_Face _emptyFace;
+	
 public:
 	NFaceFactory()
 	{
 		pLoggingService = nullptr;
-		BRep_Builder builder;
-		builder.MakeFace(_emptyFace); //make an empty face for failing operations
+	
 	};
 	~NFaceFactory()
 	{

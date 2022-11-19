@@ -43,10 +43,10 @@ public:
 
 	void GetPolylineSegments2d(const TColgp_Array1OfPnt2d& points, TColGeom2d_SequenceOfCurve& curves, double tolerance);
 
-	TopoDS_Wire BuildDirectrix(TColGeom_SequenceOfCurve& segments, double trimStart, double trimEnd, double tolerance);
+	TopoDS_Wire BuildDirectrix(TColGeom_SequenceOfCurve& segments, double trimStart, double trimEnd, double tolerance, double gapSize);
 	TopoDS_Wire Build2dDirectrix(TColGeom2d_SequenceOfCurve& segments, double trimStart, double trimEnd, double tolerance);
 
-	TopoDS_Wire BuildWire(TColGeom2d_SequenceOfCurve& segments, double tolerance);
+	TopoDS_Wire BuildWire(TColGeom2d_SequenceOfCurve& segments, double tolerance, double gapSize);
 
 	void AdjustVertexTolerance(TopoDS_Vertex& vertexToJoinTo, gp_Pnt pointToJoinTo, gp_Pnt pointToJoin, double gap);
 	TopoDS_Wire BuildRectangleProfileDef(double xDim, double yDim);

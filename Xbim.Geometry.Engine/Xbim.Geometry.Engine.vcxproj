@@ -58,16 +58,15 @@
     <CLRSupport>NetCore</CLRSupport>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
- 
   <PropertyGroup Condition="'$(Platform)'=='Win32'">
     <OutDir>$(ProjectDir)bin\$(Configuration)\$(TargetFramework)\win10-x86\</OutDir>
     <IntDir>$(ProjectDir)obj\$(Configuration)\$(TargetFramework)\win10-x86\</IntDir>
     <PackagesDir>$(SolutionDir)Xbim.Geometry.Dependencies\bin\$(Configuration)\$(TargetFramework)\win10-x86\</PackagesDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Platform)'=='x64'">
-	  <OutDir>$(ProjectDir)bin\$(Configuration)\$(TargetFramework)\win10-x64\</OutDir>
-	  <IntDir>$(ProjectDir)obj\$(Configuration)\$(TargetFramework)\win10-x64\</IntDir>
-	  <PackagesDir>$(SolutionDir)Xbim.Geometry.Dependencies\bin\$(Configuration)\$(TargetFramework)\win10-x64\</PackagesDir>
+    <OutDir>$(ProjectDir)bin\$(Configuration)\$(TargetFramework)\win10-x64\</OutDir>
+    <IntDir>$(ProjectDir)obj\$(Configuration)\$(TargetFramework)\win10-x64\</IntDir>
+    <PackagesDir>$(SolutionDir)Xbim.Geometry.Dependencies\bin\$(Configuration)\$(TargetFramework)\win10-x64\</PackagesDir>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -208,15 +207,29 @@
     <ClInclude Include="Exceptions\XbimGeometryDefinitionException.h" />
     <ClInclude Include="Exceptions\XbimGeometryFactoryException.h" />
     <ClInclude Include="Exceptions\XbimGeometryServiceException.h" />
+    <ClInclude Include="Factories\BooleanFactory.h" />
+    <ClInclude Include="Factories\CompoundFactory.h" />
     <ClInclude Include="Factories\CurveFactory.h" />
+    <ClInclude Include="Factories\EdgeFactory.h" />
     <ClInclude Include="Factories\FaceFactory.h" />
-    <ClInclude Include="Factories\GeometryProcedures.h" />
+    <ClInclude Include="Factories\GeometryFactory.h" />
+    <ClInclude Include="Factories\ShapeFactory.h" />
+    <ClInclude Include="Factories\ShellFactory.h" />
+    <ClInclude Include="Factories\SolidFactory.h" />
+    <ClInclude Include="Factories\SurfaceFactory.h" />
+    <ClInclude Include="Factories\Unmanaged\NCompoundFactory.h" />
     <ClInclude Include="Factories\Unmanaged\NCurveFactory.h" />
+    <ClInclude Include="Factories\Unmanaged\NEdgeFactory.h" />
     <ClInclude Include="Factories\Unmanaged\NFaceFactory.h" />
-    <ClInclude Include="Factories\Unmanaged\NGeometryProcedures.h" />
+    <ClInclude Include="Factories\Unmanaged\NGeometryFactory.h" />
     <ClInclude Include="Factories\Unmanaged\NShapeFactory.h" />
+    <ClInclude Include="Factories\Unmanaged\NShellFactory.h" />
+    <ClInclude Include="Factories\Unmanaged\NSolidFactory.h" />
+    <ClInclude Include="Factories\Unmanaged\NSurfaceFactory.h" />
     <ClInclude Include="Factories\Unmanaged\NWireFactory.h" />
     <ClInclude Include="Factories\WireFactory.h" />
+    <ClInclude Include="Factories\FactoryBase.h" />
+    <ClInclude Include="Factories\Unmanaged\NFactoryBase.h" />
     <ClInclude Include="Services\LoggingService.h" />
     <ClInclude Include="Services\MeshFactors.h" />
     <ClInclude Include="Services\ModelService.h" />
@@ -274,15 +287,29 @@
     <ClCompile Include="BRep\XTrimmedCurve2d.cpp" />
     <ClCompile Include="BRep\XVertex.cpp" />
     <ClCompile Include="BRep\XWire.cpp" />
+    <ClCompile Include="Factories\BooleanFactory.cpp" />
+    <ClCompile Include="Factories\CompoundFactory.cpp" />
     <ClCompile Include="Factories\CurveFactory.cpp" />
+    <ClCompile Include="Factories\EdgeFactory.cpp" />
     <ClCompile Include="Factories\FaceFactory.cpp" />
-    <ClCompile Include="Factories\GeometryProcedures.cpp" />
+    <ClCompile Include="Factories\GeometryFactory.cpp" />
+    <ClCompile Include="Factories\ShapeFactory.cpp" />
+    <ClCompile Include="Factories\ShellFactory.cpp" />
+    <ClCompile Include="Factories\SolidFactory.cpp" />
+    <ClCompile Include="Factories\SurfaceFactory.cpp" />
+    <ClCompile Include="Factories\Unmanaged\NCompoundFactory.cpp" />
     <ClCompile Include="Factories\Unmanaged\NCurveFactory.cpp" />
+    <ClCompile Include="Factories\Unmanaged\NEdgeFactory.cpp" />
     <ClCompile Include="Factories\Unmanaged\NFaceFactory.cpp" />
-    <ClCompile Include="Factories\Unmanaged\NGeometryProcedures.cpp" />
+    <ClCompile Include="Factories\Unmanaged\NGeometryFactory.cpp" />
     <ClCompile Include="Factories\Unmanaged\NShapeFactory.cpp" />
+    <ClCompile Include="Factories\Unmanaged\NShellFactory.cpp" />
+    <ClCompile Include="Factories\Unmanaged\NSolidFactory.cpp" />
+    <ClCompile Include="Factories\Unmanaged\NSurfaceFactory.cpp" />
     <ClCompile Include="Factories\Unmanaged\NWireFactory.cpp" />
     <ClCompile Include="Factories\WireFactory.cpp" />
+    <ClCompile Include="Factories\FactoryBase.cpp" />
+    <ClCompile Include="Factories\Unmanaged\NFactoryBase.cpp" />
     <ClCompile Include="Services\LoggingService.cpp" />
     <ClCompile Include="Services\MeshFactors.cpp" />
     <ClCompile Include="Services\ModelService.cpp" />
@@ -389,7 +416,6 @@
     <None Include="cpp.hint" />
     <None Include="packages.config" />
   </ItemGroup>
- 
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="OcctLibraries">
     <Import Project="..\packages\Xbim.Geometry.Occt.7.7.0-beta\build\Xbim.Geometry.Occt.targets" Condition="Exists('..\packages\Xbim.Geometry.Occt.7.7.0-beta\build\Xbim.Geometry.Occt.targets')" />

@@ -2,8 +2,9 @@
 #pragma warning( disable : 4691 )
 #include "MeshFactors.h"
 #include "LoggingService.h"
-#include "../Factories/WireFactory.h"
-#include "../Factories/CurveFactory.h"
+
+#define ActiveModelService(ifcEntity) static_cast<ModelService^>(static_cast<IPersistEntity^>(ifcEntity)->Model->Tag)
+
 
 using namespace Xbim::Common;
 using namespace Xbim::Geometry::Abstractions;
@@ -16,8 +17,32 @@ namespace Xbim
 {
 	namespace Geometry
 	{
+		namespace Factories
+		{
+			//forward declare all factories
+			ref class GeometryFactory;
+			ref class CurveFactory;
+			ref class SurfaceFactory;
+			ref class EdgeFactory;
+			ref class WireFactory;
+			ref class FaceFactory;
+			ref class ShellFactory;
+			ref class SolidFactory;
+			ref class CompoundFactory;
+			ref class BooleanFactory;
+			ref class ShapeFactory;
+		}
+	}
+}
+
+namespace Xbim
+{
+	namespace Geometry
+	{
+		
 		namespace Services
 		{
+
 			public ref class ModelService : IXModelService
 			{
 			private:
@@ -28,15 +53,37 @@ namespace Xbim
 
 				double _timeout;
 				bool _upgradeFaceSets = true;
-				
-				IXLoggingService^ _loggingService;
-				IXWireFactory^ _wireFactory;
-				IXCurveFactory^ _curveFactory;
-				
+
+				LoggingService^ _loggingService;
+				Xbim::Geometry::Factories::GeometryFactory^ _geometryFactory;
+				Xbim::Geometry::Factories::CurveFactory^ _curveFactory;
+				Xbim::Geometry::Factories::SurfaceFactory^ _surfaceFactory;
+				Xbim::Geometry::Factories::EdgeFactory^ _edgeFactory;
+				Xbim::Geometry::Factories::WireFactory^ _wireFactory;
+				Xbim::Geometry::Factories::FaceFactory^ _faceFactory;
+				Xbim::Geometry::Factories::ShellFactory^ _shellFactory;
+				Xbim::Geometry::Factories::SolidFactory^ _solidFactory;
+				Xbim::Geometry::Factories::CompoundFactory^ _compoundFactory;
+				Xbim::Geometry::Factories::BooleanFactory^ _booleanFactory;
+				Xbim::Geometry::Factories::ShapeFactory^ _shapeFactory;
+			internal:
+				//Factories
+
+				Xbim::Geometry::Factories::GeometryFactory^ GetGeometryFactory();
+				Xbim::Geometry::Factories::CurveFactory^ GetCurveFactory();
+				Xbim::Geometry::Factories::SurfaceFactory^ GetSurfaceFactory();
+				Xbim::Geometry::Factories::EdgeFactory^ GetEdgeFactory();
+				Xbim::Geometry::Factories::WireFactory^ GetWireFactory();
+				Xbim::Geometry::Factories::FaceFactory^ GetFaceFactory();
+				Xbim::Geometry::Factories::ShellFactory^ GetShellFactory();
+				Xbim::Geometry::Factories::SolidFactory^ GetSolidFactory();
+				Xbim::Geometry::Factories::CompoundFactory^ GetCompoundFactory();
+				Xbim::Geometry::Factories::BooleanFactory^ GetBooleanFactory();
+				Xbim::Geometry::Factories::ShapeFactory^ GetShapeFactory();
 			public:
-				
-				ModelService(IModel^ model, ILogger^ logger) ;
-				
+
+				ModelService(IModel^ model, ILogger^ logger);
+
 				virtual property bool UpgradeFaceSets {bool get() { return _upgradeFaceSets; } void set(bool upgrade) { _upgradeFaceSets = upgrade; }};
 				virtual property double Precision {double get() { return model->ModelFactors->Precision; }};
 				virtual property double PrecisionSquared {double get() { return precisionSquared; }};
@@ -50,18 +97,28 @@ namespace Xbim
 					return rad;
 
 				}};
-				
+
 				virtual property IXMeshFactors^ MeshFactors {IXMeshFactors^ get() { return gcnew Xbim::Geometry::Services::MeshFactors(model->ModelFactors->OneMeter, model->ModelFactors->Precision); }; }
 				virtual property IModel^ Model {IModel^ get() { return model; };  }
-				virtual void SetModel(IModel^ model);				
+				virtual void SetModel(IModel^ model);
 				virtual ISet<IIfcGeometricRepresentationContext^>^ GetTypical3dContexts();
 
 				virtual IXLocation^ Create(IIfcObjectPlacement^ placement);
 				virtual IXLocation^ CreateMappingTransform(IIfcMappedItem^ mappedItem);
 
 				//Factories
-				virtual property IXWireFactory^ WireFactory {IXWireFactory^ get(); }
+				virtual property IXLoggingService^ LoggingService {IXLoggingService^ get(); }
+				virtual property IXGeometryFactory^ GeometryFactory {IXGeometryFactory^ get(); }
 				virtual property IXCurveFactory^ CurveFactory {IXCurveFactory^ get(); }
+				virtual property IXSurfaceFactory^ SurfaceFactory {IXSurfaceFactory^ get(); }
+				virtual property IXEdgeFactory^ EdgeFactory {IXEdgeFactory^ get(); }
+				virtual property IXWireFactory^ WireFactory {IXWireFactory^ get(); }
+				virtual property IXFaceFactory^ FaceFactory {IXFaceFactory^ get(); }
+				virtual property IXShellFactory^ ShellFactory {IXShellFactory^ get(); }
+				virtual property IXSolidFactory^ SolidFactory {IXSolidFactory^ get(); }
+				virtual property IXCompoundFactory^ CompoundFactory {IXCompoundFactory^ get(); }
+				virtual property IXBooleanFactory^ BooleanFactory {IXBooleanFactory^ get(); }
+				virtual property IXShapeFactory^ ShapeFactory {IXShapeFactory^ get(); }
 			};
 		}
 	}

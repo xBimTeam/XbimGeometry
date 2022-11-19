@@ -447,72 +447,30 @@ namespace Xbim
 
 		int DoBoolean(const TopoDS_Shape& body, const TopTools_ListOfShape& tools, BOPAlgo_Operation op, double tolerance, double fuzzyFactor, TopoDS_Shape& result, int timeout)
 		{
-			double maxTol = tolerance;
-			int  retVal = BOOLEAN_FAIL;
-			bool singleCut = tools.Size() == 1;
+			
+			int  retVal = BOOLEAN_FAIL;			
 			try
-			{
-				ShapeAnalysis_Wire tolFixer;
-
-				
-				TopTools_ListOfShape shapeObjects;
-				shapeObjects.Append(body);
-
-				TopTools_ListOfShape shapeTools;
-
-				Bnd_Box tsBodyBox;
-				BRepBndLib::Add(body, tsBodyBox);
-				
-				
-				int argCount = 0;
-				TopTools_ListIteratorOfListOfShape it(tools);
-				for (; it.More(); it.Next())
-				{
-					TopoDS_Shape tsArg = it.Value();
-					//screen out things that don't intersect when we are cutting
-					if (op == BOPAlgo_Operation::BOPAlgo_CUT || op == BOPAlgo_Operation::BOPAlgo_CUT21)
-					{
-
-						Bnd_Box tsCutBox;
-						BRepBndLib::Add(tsArg, tsCutBox);
-						if (!tsBodyBox.IsOut(tsCutBox))
-						{
-							maxTol = std::max(BRep_Tool::MaxTolerance(tsArg, TopAbs_EDGE), maxTol);
-							shapeTools.Append(tsArg);
-							argCount++;
-						}
-					}
-					else
-					{
-						maxTol = std::max(BRep_Tool::MaxTolerance(tsArg, TopAbs_EDGE), maxTol);
-						shapeTools.Append(tsArg);
-						argCount++;
-					}
-				}
-				if (argCount == 0)
+			{			
+				if (tools.Size() == 0)
 				{
 					result = body;
 					return BOOLEAN_SUCCESS;
 				}
 
-
-				//double fuzzyTol = std::max(maxTol - tolerance, 10 * tolerance);//this seems about right				
-				
 				BOPAlgo_BOP aBOP;
 
 
 				aBOP.AddArgument(body);
-				aBOP.SetTools(shapeTools);
+				aBOP.SetTools(tools);
 				aBOP.SetOperation(op);
 				aBOP.SetRunParallel(false);
 				//aBOP.SetCheckInverted(true);
 				aBOP.SetNonDestructive(true);
 				aBOP.SetFuzzyValue(fuzzyFactor);
-				
+			
 				Message_ProgressRange pi;
 				
 				TopoDS_Shape aR;
-
 
 				aBOP.Perform(pi);
 				aR = aBOP.Shape();
@@ -525,14 +483,22 @@ namespace Xbim
 				bool bopErr = aBOP.HasErrors();
 #ifdef _DEBUG
 
-				/*if (aBOP.HasWarnings())
+				if (aBOP.HasWarnings())
 				{
 					ofstream os;
 					OSD_OpenStream(os, "c:/tmp/warnings.txt", ios::out);
 					aBOP.DumpWarnings(os);
 					os.flush();
 					os.close();
-				}*/
+				}
+				if (aBOP.HasErrors())
+				{
+					ofstream os;
+					OSD_OpenStream(os, "c:/tmp/errors.txt", ios::out);
+					aBOP.DumpErrors(os);
+					os.flush();
+					os.close();
+				}
 #endif // DEBUG
 				if (bopErr) // a sign of failure do them individually
 				{
@@ -1174,10 +1140,10 @@ namespace Xbim
 			//we cannot execute halfspace solid cuts in batch either as OCC blows
 			IIfcBooleanResult^ booleanResult = dynamic_cast<IIfcBooleanResult^>(boolRes->FirstOperand);
 			IIfcBooleanClippingResult^ clippingResult = dynamic_cast<IIfcBooleanClippingResult^>(boolRes->FirstOperand);
-			/*IIfcHalfSpaceSolid^ secondOpResult = nullptr;
-			if(booleanResult!=nullptr)
-				secondOpResult = dynamic_cast<IIfcHalfSpaceSolid^>(booleanResult->SecondOperand);*/
-			if (booleanResult!=nullptr && clippingResult==nullptr && booleanResult->Operator== operatorType /*&& secondOpResult==nullptr*/)
+			IIfcHalfSpaceSolid^ secondOpResult = nullptr;
+			if(booleanResult!=nullptr) 
+				secondOpResult = dynamic_cast<IIfcHalfSpaceSolid^>(booleanResult->SecondOperand);
+			if (booleanResult!=nullptr && clippingResult==nullptr && booleanResult->Operator== operatorType && secondOpResult==nullptr)
 			{
 				return BuildBooleanResult((IIfcBooleanResult^)(boolRes->FirstOperand), operatorType, ops, logger);
 			}

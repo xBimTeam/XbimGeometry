@@ -1,43 +1,32 @@
 //Geometric Processor Factory, builds  entities used for algebraic calculation etc from their Ifc counterparts
 #pragma once
-#include "../XbimHandle.h"
-#include "Unmanaged/NGeometryProcedures.h"
+#include "Unmanaged/NGeometryFactory.h"
+#include "FactoryBase.h"
+
+
 #include <gp_Pnt.hxx>
 #include <gp_Pnt2d.hxx>
 #include <gp_Dir.hxx>
 #include <gp_Dir2d.hxx>
 #include <gp_Ax22d.hxx>
-#include "../Exceptions/XbimGeometryFactoryException.h"
+
 #include <TColgp_SequenceOfPnt2d.hxx>
 #include <TColgp_Array1OfPnt.hxx>
 #include <TColgp_Array1OfPnt2d.hxx>
 #include <TopLoc_Location.hxx>
 
-using namespace Xbim::Ifc4::Interfaces;
-using namespace Xbim::Geometry::Exceptions;
-using namespace Xbim::Geometry::Abstractions;
-using namespace Xbim::Common::Geometry;
 namespace Xbim
 {
 	namespace Geometry
 	{
 		namespace Factories
 		{
-			public ref class GeometryProcedures : XbimHandle<NGeometryProcedures>, IXGeometryProcedures
+			public ref class GeometryFactory : FactoryBase<NGeometryFactory>, IXGeometryFactory
 			{
-			private:
-				IXLoggingService^ _loggingService;
-				IXModelService^ _modelService;
-
+			
 			public:
-				GeometryProcedures(IXLoggingService^ loggingService, IXModelService^ modelService) : XbimHandle(new NGeometryProcedures())
-				{
-					_loggingService = loggingService;
-					_modelService = modelService;
-					NLoggingService* logService = new NLoggingService();
-					logService->SetLogger(static_cast<WriteLog>(loggingService->LogDelegatePtr.ToPointer()));
-					Ptr()->SetLogger(logService);
-				}
+				GeometryFactory(Xbim::Geometry::Services::ModelService^ modelService) : FactoryBase(modelService, new NGeometryFactory()) {}
+				
 				//builds a 3d point, if the Ifc point is 2d the Z coordinate is 0
 				gp_Pnt BuildPoint(IIfcCartesianPoint^ ifcPoint);
 
@@ -66,7 +55,7 @@ namespace Xbim
 				void GetPolylinePoints(IIfcPolyline^ ifcPolyline, TColgp_Array1OfPnt& points);
 				void GetPolylinePoints2d(IIfcPolyline^ ifcPolyline, TColgp_Array1OfPnt2d& points);
 				TopLoc_Location ToLocation(IIfcAxis2Placement2D^ axis2D);
-				gp_Trsf ToTransform(XbimMatrix3D m3D);
+				gp_Trsf ToTransform(Xbim::Common::Geometry::XbimMatrix3D m3D);
 				virtual bool IsFacingAwayFrom(IXFace^ face, IXDirection^ direction);
 				virtual IXDirection^ BuildDirection(double x, double y, double z);
 				
@@ -77,9 +66,7 @@ namespace Xbim
 				virtual double Distance(IXPoint^ a, IXPoint^ b);
 				virtual double IsEqual(IXPoint^ a, IXPoint^ b, double tolerance);
 				virtual IXDirection^ NormalAt(IXFace^ face, IXPoint^ position, double tolerance);
-				virtual property IXModelService^ ModelService {IXModelService^ get() { return _modelService; }};
-				virtual property IXLoggingService^ LoggingService {IXLoggingService^ get() { return _loggingService; }};
-
+				
 				// Inherited via IXGeometryProcedures
 				virtual Xbim::Geometry::Abstractions::IXVisualMaterial^ BuildVisualMaterial(System::String^ name, Xbim::Ifc4::Interfaces::IIfcSurfaceStyleElementSelect^ styling);
 

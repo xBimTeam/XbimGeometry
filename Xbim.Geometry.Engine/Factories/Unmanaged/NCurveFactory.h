@@ -1,5 +1,5 @@
 #pragma once
-#include "../../Services//Unmanaged/NLoggingService.h"
+#include "NFactoryBase.h"
 #include <gp_Pnt.hxx>
 
 #include <Geom_Circle.hxx>
@@ -9,36 +9,19 @@
 #include <Geom_BSplineCurve.hxx>
 #include <Geom_TrimmedCurve.hxx>
 #include <Geom2d_TrimmedCurve.hxx>
-
+#include <TColGeom_SequenceOfCurve.hxx>
 #include "../../BRep/OccExtensions/Geom2d_LineWithMagnitude.h"
 #include "../../BRep/OccExtensions/Geom_LineWithMagnitude.h"
 #include "../../BRep/OccExtensions/Geom_EllipseWithSemiAxes.h"
 #include "../../BRep/OccExtensions/Geom2d_EllipseWithSemiAxes.h"
 
-#include <TopoDS_Edge.hxx>
-#include <TColGeom_SequenceOfCurve.hxx>
-
-
-class NCurveFactory
+class NCurveFactory : NFactoryBase
 {
-private:
-	NLoggingService* pLoggingService;
+
 public:
 
-	
-	NCurveFactory()
-	{
-		pLoggingService = nullptr;
-	};
-	~NCurveFactory()
-	{
-		if (pLoggingService != nullptr) delete pLoggingService;
-		pLoggingService = nullptr;
-	};
 #pragma region Geometric methods
 
-
-	void SetLogger(NLoggingService* loggingService) { pLoggingService = loggingService; };
 	Handle(Geom2d_LineWithMagnitude) BuildLine2d(gp_Pnt2d pnt, gp_Dir2d dir, double magnitude);
 	Handle(Geom_LineWithMagnitude) BuildLine3d(gp_Pnt pnt, gp_Dir dir, double magnitude);
 
@@ -58,8 +41,6 @@ public:
 
 	Handle(Geom_Curve) TrimDirectrix(Handle(Geom_Curve) basisCurve, double u1, double u2, double precision);
 #pragma endregion
-
-
 
 };
 			

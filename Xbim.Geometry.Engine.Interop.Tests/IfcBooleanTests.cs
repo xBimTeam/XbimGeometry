@@ -14,6 +14,7 @@ using Xbim.Ifc.Extensions;
 using Xbim.Common.Exceptions;
 using Microsoft.Extensions.Logging.Abstractions;
 using FluentAssertions;
+using FluentAssertions.Common;
 
 namespace Xbim.Geometry.Engine.Interop.Tests
 {
@@ -131,7 +132,92 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
             }
         }
+        [TestMethod]
+        //[Ignore("The test was formally passing, but returning the wrong geometry in the previous release, it needs to be investigated, but it's not a regression.")]
+        public void Batched_boolean_cuts_return_the_same_result_as_multiple_cuts_faster()
+        {
+            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(memory_hungry_boolean3)))
+            {
+                Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
+                Debug.WriteLine($"Evaluating {er.Entity}");
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
+                
+          
+                IXbimSolidSet single_cuts()
+                {
+                    var left = geomEngine.CreateSolid(er.Instance<IIfcExtrudedAreaSolid>(82), logger);
+                    var right = geomEngine.CreateSolid(er.Instance<IIfcExtrudedAreaSolid>(91), logger);
+                    var boolRes81 = left.Cut(right, geomEngine.ModelService.MinimumGap);
+                    var hs100 = geomEngine.CreateSolid(er.Instance<IIfcHalfSpaceSolid>(100), logger);
+                    var boolRes80 = boolRes81.Cut(hs100, geomEngine.ModelService.MinimumGap);
+                    var hs104 = geomEngine.CreateSolid(er.Instance<IIfcHalfSpaceSolid>(104), logger);
+                    var boolRes79 = boolRes80.Cut(hs104, geomEngine.ModelService.MinimumGap);
+                    return boolRes79;
+                };
+                IXbimSolidSet batched_cuts()
+                {
+                    return geomEngine.CreateSolidSet(er.Instance<IIfcBooleanResult>(79), logger);
+                }
 
+                    var sw = Stopwatch.StartNew();
+                var singleCutsResult = single_cuts();
+                var singleCutsTime = sw.Elapsed;
+                sw.Restart();
+                var batchedCutResult = batched_cuts();
+                var batchedCutTime = sw.Elapsed;
+
+                batchedCutTime.Should().BeLessThan(singleCutsTime);
+                singleCutsResult.FirstOrDefault().Volume.Should().Be(batchedCutResult.FirstOrDefault().Volume);
+            }
+        }
+
+        [TestMethod]
+        
+        public void can_handle_csg_trees_with_cut_and_union_operations()
+        {
+            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(memory_hungry_boolean3)))
+            {
+                Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
+                Debug.WriteLine($"Evaluating {er.Entity}");
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
+
+
+                IXbimSolidSet single_cuts()
+                {
+                    var left = geomEngine.CreateSolid(er.Instance<IIfcExtrudedAreaSolid>(82), logger);
+                    var right = geomEngine.CreateSolid(er.Instance<IIfcExtrudedAreaSolid>(91), logger);
+                    var boolRes81 = left.Cut(right, geomEngine.ModelService.MinimumGap);
+                    var hs100 = geomEngine.CreateSolid(er.Instance<IIfcHalfSpaceSolid>(100), logger);
+                    var boolRes80 = boolRes81.Cut(hs100, geomEngine.ModelService.MinimumGap);
+                    var hs104 = geomEngine.CreateSolid(er.Instance<IIfcHalfSpaceSolid>(104), logger);
+                    var boolRes79 = boolRes80.Cut(hs104, geomEngine.ModelService.MinimumGap);
+                    var solid11 = geomEngine.CreateSolid(er.Instance<IIfcExtrudedAreaSolid>(11), logger);
+                    var boolRes10 = solid11.Union(boolRes79, geomEngine.ModelService.MinimumGap);
+                    var solid110 = geomEngine.CreateSolid(er.Instance<IIfcExtrudedAreaSolid>(110), logger);
+                    var boolRes9 = boolRes10.Cut(solid110, geomEngine.ModelService.MinimumGap);
+
+                    var hs116 = geomEngine.CreateSolid(er.Instance<IIfcHalfSpaceSolid>(116), logger);
+                    var boolRes8 = boolRes9.Cut(hs116, geomEngine.ModelService.MinimumGap);
+
+
+                    return boolRes8;
+                };
+                IXbimSolidSet batched_cuts()
+                {
+                    return geomEngine.CreateSolidSet(er.Instance<IIfcBooleanResult>(8), logger);
+                }
+
+                var sw = Stopwatch.StartNew();
+                var singleCutsResult = single_cuts();
+                var singleCutsTime = sw.Elapsed;
+                sw.Restart();
+                var batchedCutResult = batched_cuts();
+                var batchedCutTime = sw.Elapsed;
+
+                batchedCutTime.Should().BeLessThan(singleCutsTime);
+                singleCutsResult.FirstOrDefault().Volume.Should().Be(batchedCutResult.FirstOrDefault().Volume);
+            }
+        }
         [TestMethod]
         //[Ignore("The test was formally passing, but returning the wrong geometry in the previous release, it needs to be investigated, but it's not a regression.")]
         public void memory_hungry_boolean3()
@@ -141,6 +227,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.IsTrue(er.Entity != null, "No IfcBooleanResult found");
                 Debug.WriteLine($"Evaluating {er.Entity}");
                 var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
+
                 var s = geomEngine.CreateSolidSet(er.Entity, logger);
                 Assert.AreEqual(1, s.Count);
             }

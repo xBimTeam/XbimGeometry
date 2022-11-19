@@ -1,12 +1,31 @@
 #include "NCurveFactory.h"
-#include <Standard_CString.hxx>
-#include <stdio.h>
+
 #include <GeomConvert_CompCurveToBSplineCurve.hxx>
 #include <GC_MakeArcOfCircle.hxx>
 #include <gp_Circ.hxx>
 #include <gp_Elips.hxx>
 #include <gp_Lin.hxx>
 #include <GC_MakeArcOfEllipse.hxx>
+#include <GCE2d_MakeArcOfCircle.hxx>
+#include <Geom2d_Circle.hxx>
+#include <gp_Circ2d.hxx>
+#include <gp_Elips2d.hxx>
+#include <Geom2d_Ellipse.hxx>
+#include <GCE2d_MakeArcOfEllipse.hxx>
+
+Handle(Geom2d_LineWithMagnitude) NCurveFactory::BuildLine2d(gp_Pnt2d pnt, gp_Dir2d dir, double magnitude)
+{
+	try
+	{
+		return new Geom2d_LineWithMagnitude(pnt, dir, magnitude);
+	}
+	catch (const Standard_Failure& e)
+	{
+		LogStandardFailure(e, "Invalid line specification"  ); 
+		return Handle(Geom2d_LineWithMagnitude)(); //return null handle for checking
+	}
+}
+
 
 Handle(Geom_LineWithMagnitude) NCurveFactory::BuildLine3d(gp_Pnt pnt, gp_Dir dir, double magnitude)
 {
@@ -14,11 +33,9 @@ Handle(Geom_LineWithMagnitude) NCurveFactory::BuildLine3d(gp_Pnt pnt, gp_Dir dir
 	{
 		return new Geom_LineWithMagnitude(pnt, dir, magnitude);
 	}
-	catch (Standard_Failure)
+	catch (const Standard_Failure& e)
 	{
-		char msg[256];
-		sprintf_s(msg, "Invalid line direction, (%f , %f, %f)", dir.X(), dir.Y(), dir.Z());
-		pLoggingService->LogError(msg);
+		LogStandardFailure(e, "Invalid line specification");
 		return Handle(Geom_LineWithMagnitude)(); //return null handle for checking
 	}
 }
@@ -29,9 +46,9 @@ Handle(Geom_Circle) NCurveFactory::BuildCircle3d(gp_Ax2 axis, double radius)
 	{
 		return new Geom_Circle(axis, radius);
 	}
-	catch (Standard_Failure)
+	catch (const Standard_Failure& e)
 	{
-		pLoggingService->LogError("Incorrectly defined circle");
+		LogStandardFailure(e, "Incorrectly defined circle");
 		return Handle(Geom_Circle)(); //return null handle for checking
 	}
 }
@@ -42,9 +59,9 @@ Handle(Geom2d_Circle) NCurveFactory::BuildCircle2d(gp_Ax22d axis, double radius)
 	{
 		return new Geom2d_Circle(axis, radius);
 	}
-	catch (Standard_Failure)
+	catch (const Standard_Failure& e)
 	{
-		pLoggingService->LogError("Incorrectly defined circle");
+		LogStandardFailure(e, "Incorrectly defined circle");
 		return Handle(Geom2d_Circle)(); //return null handle for checking
 	}
 }
@@ -53,14 +70,11 @@ Handle(Geom_EllipseWithSemiAxes) NCurveFactory::BuildEllipse3d(gp_Ax2 axis, doub
 {
 	try
 	{
-
 		return new Geom_EllipseWithSemiAxes(axis, semi1, semi2);
 	}
-	catch (Standard_Failure)
+	catch (const Standard_Failure& e)
 	{
-		char msg[256];
-		sprintf_s(msg, "Non-Compliant Semi Axis values, %f , %f", semi1, semi2);
-		pLoggingService->LogError(msg);
+		LogStandardFailure(e, "Incorrectly defined elipse");
 		return Handle(Geom_EllipseWithSemiAxes)(); //return null handle for checking
 	}
 }
@@ -71,29 +85,14 @@ Handle(Geom2d_EllipseWithSemiAxes) NCurveFactory::BuildEllipse2d(gp_Ax22d axis, 
 	{
 		return new Geom2d_EllipseWithSemiAxes(axis, semi1, semi2);
 	}
-	catch (Standard_Failure) //only happens with semi axis errors
+	catch (const Standard_Failure& e) //only happens with semi axis errors
 	{
-		char msg[256];
-		sprintf_s(msg, "Non-Compliant Semi Axis values, %f , %f", semi1, semi2);
-		pLoggingService->LogError(msg);
+		LogStandardFailure(e, "Incorrectly defined elipse");
 		return Handle(Geom2d_EllipseWithSemiAxes)(); //return null handle for checking
 	}
 }
 
-Handle(Geom2d_LineWithMagnitude) NCurveFactory::BuildLine2d(gp_Pnt2d pnt, gp_Dir2d dir, double magnitude)
-{
-	try
-	{
-		return new Geom2d_LineWithMagnitude(pnt, dir, magnitude);
-	}
-	catch (Standard_Failure)
-	{
-		char msg[256];
-		sprintf_s(msg, "Invalid line direction, (%f , %f)", dir.X(), dir.Y());
-		pLoggingService->LogError(msg);
-		return Handle(Geom2d_LineWithMagnitude)(); //return null handle for checking
-	}
-}
+
 Handle(Geom_TrimmedCurve) NCurveFactory::BuildTrimmedCurve3d(Handle(Geom_Curve) basisCurve, double u1, double u2, bool sense)
 {
 	try
@@ -109,29 +108,30 @@ Handle(Geom_TrimmedCurve) NCurveFactory::BuildTrimmedCurve3d(Handle(Geom_Curve) 
 			}
 			GC_MakeArcOfCircle arcMaker(circle->Circ(), u1, u2, sense);
 			if (!arcMaker.IsDone()) Standard_Failure::Raise("Could not build arc segment from circle");
+			if (!sense) arcMaker.Value()->Reverse(); //need to correct the reverse that has been done to the parameters to make OCC work correctly		
 			return arcMaker.Value();
 		}
-		Handle(Geom_Ellipse) elipse = Handle(Geom_Ellipse)::DownCast(basisCurve);
+		Handle(Geom_EllipseWithSemiAxes) elipse = Handle(Geom_EllipseWithSemiAxes)::DownCast(basisCurve);
 		if (!elipse.IsNull()) //otherwise fall through to end
 		{
-			if (!sense)
-			{
-
-				basisCurve->Reverse();
-				Handle(Geom_TrimmedCurve) tc = new Geom_TrimmedCurve(basisCurve, u1, u2, true, true);
-				tc->BasisCurve()->Reverse();
-				return tc;
-
-			}
+			u1 = elipse->ConvertIfcTrimParameter(u1);
+			u2 = elipse->ConvertIfcTrimParameter(u2);
+			GC_MakeArcOfEllipse arcMaker(elipse->Elips(), u1, u2, sense);
+			if (!arcMaker.IsDone()) Standard_Failure::Raise("Could not build arc segment from elipse");
+			if (!sense) arcMaker.Value()->Reverse(); //need to correct the reverse that has been done to the parameters to make OCC work correctly		
+			return arcMaker.Value();
 		}
-
+#ifdef _DEBUG
+		if (!Handle(Geom_Circle)::DownCast(basisCurve).IsNull() || !Handle(Geom_Ellipse)::DownCast(basisCurve).IsNull())
+		{
+			Standard_Failure::Raise("OCC Circle and Elipse definitions should not be used for trimming scenarios");
+		}
+#endif
 		return new Geom_TrimmedCurve(basisCurve, u1, u2, sense, true);
 	}
 	catch (const Standard_Failure& e)
 	{
-		std::stringstream strm;
-		e.Print(strm);
-		pLoggingService->LogError(strm.str().c_str());
+		LogStandardFailure(e, "Incorrectly defined trimmed curve");
 		return Handle(Geom_TrimmedCurve)(); //return null handle for checking
 	}
 }
@@ -150,18 +150,15 @@ Handle(Geom_BSplineCurve) NCurveFactory::BuildCompositeCurve(const TColGeom_Sequ
 			if (boundedCurve.IsNull())
 				Standard_Failure::Raise("Compound curve segments must be bounded curves");
 			if (!compositeConverter.Add(boundedCurve, tolerance, false, false))
-			    Standard_Failure::Raise("Compound curve segment is not continuous");
+				Standard_Failure::Raise("Compound curve segment is not continuous");
 		}
 		return compositeConverter.BSplineCurve();
 	}
 	catch (const Standard_Failure& e)
 	{
-		std::stringstream strm;
-		e.Print(strm);
-		pLoggingService->LogError(strm.str().c_str());
+		LogStandardFailure(e, "Incorrectly defined composite curve");
+		return Handle(Geom_BSplineCurve)(); //return null handle for checking
 	}
-	pLoggingService->LogWarning("Could not build composite curve");
-	return Handle(Geom_BSplineCurve)(); //return null handle for checking
 
 }
 
@@ -182,18 +179,16 @@ Handle(Geom_BSplineCurve) NCurveFactory::BuildPolyline(const TColgp_Array1OfPnt&
 				//move the lastIndex on
 				lastPointIdx++;
 				if (!compositeConverter.Add(lineSeg, tolerance, false, true)) //use withratio for better pergormance as we have no curves in the polyline
-					 Standard_Failure::Raise("Polyline segment is not continuous"); //this clearly should never happen
+					Standard_Failure::Raise("Polyline segment is not continuous"); //this clearly should never happen
 			} //else if we skip a segment because it is small lastPointIdx remains the same
 		}
 		if (lastPointIdx == 1) //we have failed to add anything
-			 Standard_Failure::Raise("The Polyline has no segments");
+			Standard_Failure::Raise("The Polyline has no segments");
 		return compositeConverter.BSplineCurve();
 	}
 	catch (const Standard_Failure& e)
 	{
-		std::stringstream strm;
-		e.Print(strm);
-		pLoggingService->LogError(strm.str().c_str());
+		LogStandardFailure(e, "Incorrectly defined polyline");
 		return Handle(Geom_BSplineCurve)(); //return null handle for checking
 	}
 }
@@ -209,9 +204,7 @@ Handle(Geom_TrimmedCurve)  NCurveFactory::BuildBoundedLine3d(const gp_Pnt& start
 	}
 	catch (const Standard_Failure& e)
 	{
-		std::stringstream strm;
-		e.Print(strm);
-		pLoggingService->LogError(strm.str().c_str());
+		LogStandardFailure(e, "Incorrectly defined bounded line");
 		return Handle(Geom_TrimmedCurve)(); //return null handle for checking
 	}
 }
@@ -220,13 +213,46 @@ Handle(Geom2d_TrimmedCurve) NCurveFactory::BuildTrimmedCurve2d(Handle(Geom2d_Cur
 {
 	try
 	{
-		return new Geom2d_TrimmedCurve(basisCurve, u1, u2, sense);
+		Handle(Geom2d_Circle) circle = Handle(Geom2d_Circle)::DownCast(basisCurve);
+		if (!circle.IsNull())
+		{
+			if (!sense)
+			{
+				double u = u1;
+				u1 = u2;
+				u2 = u;
+			}
+
+			GCE2d_MakeArcOfCircle arcMaker(circle->Circ2d(), u1, u2, sense);
+			if (!arcMaker.IsDone())
+				Standard_Failure::Raise("Could not build arc segment from circle");
+			if (!sense) arcMaker.Value()->Reverse(); //need to correct the reverse that has been done to the parameters to make OCC work correctly		
+			return arcMaker.Value();
+		}
+		Handle(Geom2d_EllipseWithSemiAxes) elipse = Handle(Geom2d_EllipseWithSemiAxes)::DownCast(basisCurve);
+		if (!elipse.IsNull()) //otherwise fall through to end
+		{
+			u1 = elipse->ConvertIfcTrimParameter(u1);
+			u2 = elipse->ConvertIfcTrimParameter(u2);
+			GCE2d_MakeArcOfEllipse arcMaker(elipse->Elips2d(), u1, u2, sense);
+			if (!arcMaker.IsDone())
+				Standard_Failure::Raise("Could not build arc segment from elipse");
+			if (!sense) arcMaker.Value()->Reverse(); //need to correct the reverse that has been done to the parameters to make OCC work correctly		
+			return arcMaker.Value();
+		}
+#ifdef _DEBUG
+		if (!Handle(Geom2d_Circle)::DownCast(basisCurve).IsNull() || !Handle(Geom2d_Ellipse)::DownCast(basisCurve).IsNull())
+		{
+			Standard_Failure::Raise("OCC Circle and Elipse definitions should not be used for trimming scenarios");
+		}
+#endif
+		Handle(Geom2d_TrimmedCurve) trimmedCurve = new Geom2d_TrimmedCurve(basisCurve, u1, u2, sense, true);
+		return trimmedCurve;
 	}
+
 	catch (const Standard_Failure& e)
 	{
-		std::stringstream strm;
-		e.Print(strm);
-		pLoggingService->LogError(strm.str().c_str());
+		LogStandardFailure(e, "Incorrectly defined trimmed curve");
 		return Handle(Geom2d_TrimmedCurve)(); //return null handle for checking
 	}
 }
@@ -250,13 +276,8 @@ Handle(Geom_Curve) NCurveFactory::TrimDirectrix(Handle(Geom_Curve) basisCurve, d
 	}
 	catch (const Standard_Failure& e)
 	{
-		std::stringstream strm;
-		e.Print(strm);
-		pLoggingService->LogError(strm.str().c_str());
-		char msg[256];
-		sprintf_s(msg, "Non-Compliant Trim parameters values, %f , %f", u1, u2);
-		pLoggingService->LogError(msg);
-		return basisCurve; //return original cirve
+		LogStandardFailure(e, "Incorrectly defined trimmed directrix");
+		return Handle(Geom_Curve)();
 	}
 }
 
